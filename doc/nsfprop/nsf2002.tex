@@ -1,0 +1,903 @@
+\documentclass[12pt]{article}
+\topmargin -.5in
+\textheight 9in
+\renewcommand{\baselinestretch}{.90}
+\begin{document}
+\pagenumbering{roman}
+\begin{center}
+
+\section{\bf  PROJECT SUMMARY} 
+
+\bigskip
+Computer Software for Solution of Extensive Form Games\\ 
+
+\bigskip
+Richard D. McKelvey \\
+Andrew McLennan \\
+Ted Turocy \\
+\end{center}
+
+Under this grant, we will update the Gambit software to include
+several improvements and enhancements that are necessary to update the
+software from the previous NSF support of the project.  We will
+change the existing quantal response equilibrium (QRE) algorithm to be
+based on a true homotopy algorithm, and introduce new homotopy based
+algorithms for computation of proper equilibrium and the tracing
+procedure.  We will add support for symmetric games, which will allow
+for solution of substantially larger games in gambit, and we will
+improve the graphics user interface and other graphics capabilities of
+gambit.
+
+\newpage
+\tableofcontents
+
+\newpage
+\pagenumbering{arabic}
+\begin{center}
+\section{{\bf  PROJECT DESCRIPTION}}
+\end{center}
+
+\subsection{Introduction}
+
+This grant proposes to update the Gambit software to include a number
+of improvements and enhancements that have been accumulating since the
+completion of the previous NSF support of the Gambit Project.  The
+Gambit Project is a project for development of public domain computer
+software for solution and analysis of extensive and normal form games.
+The Gambit Project was funded for about five years by NSF under grants
+\#SBR-9208863 and \#SBR-9617854 to the California Institute of
+Technology, and \#SBR-9308862 to the University of Minnesota. During
+this time, we extensively developed this software.  The software
+(source code, as well as executable versions of the code for a number
+of popular platforms), is available on the World Wide Web at the
+following URL:
+
+\bigskip
+\noindent
+\verb+        http://www.hss.caltech.edu/gambit+
+
+\bigskip
+\noindent
+Referees of this proposal are encouraged to download a copy of Gambit
+and try it out.  
+
+We are requesting one year of funding, during which time we hope to
+bring the project up to date, by improving some of the existing
+algorithms and adding some new features.
+
+\subsection{Results From Prior NSF Support} 
+
+We begin by describing our accomplishments under the prior grant, NSF
+Grant \#SBR-9617854, ``Computer Software for Solution of Extensive
+Form Games,'' Richard McKelvey in collaboration with Andrew McLennan.
+
+\bigskip
+Under this grant, which was a continuation of grants \#SBR-9208863,
+and \#SBR-9308862, we developed software for the solution of extensive
+and normal form games. Unlike most NSF grants, the main output of this
+project was computer software rather than publications. The software
+is referred to as the ``Gambit'' software and consists of two parts, a
+Graphics User Interface (GUI), and the Gambit Command Language
+(GCL). The GUI is an interactive graphics based program for building
+and solving finite extensive and normal form games. The GCL is a
+Mathematica style language which supports user written programs and is
+suitable for econometric and computationally intensive applications.
+
+The Gambit software is public domain, and the source code and executables
+are freely available at the Gambit web site\footnote{{\tt
+www.hss.caltech.edu/gambit}}. The Gambit software is widely
+used around the world and has become the standard game theory software used
+in teaching and research. The most recently released version of the software
+now implements the polynomial solver (developed by McLennan) for the
+computation of all Nash equilibria of (moderately sized) extensive and
+normal form games.
+
+As part of the gambit project, we have implemented algorithms for
+computation of the QRE correspondence for arbitrary extensive and normal
+form games. Also, the GCL supports user programming for doing econometric
+analysis of data gathered from experiments for those games. 
+
+\bigskip
+\centerline{ PUBLICATIONS AND WORKING PAPERS}
+\begin{description}
+\item[1] McKelvey, R. D., and Andrew McLennan, ``The maximal number of
+regular totally mixed equilibria,'' \textit{Journal of Economic
+Theory}, 72:411-425, 1997.
+
+\item[2] McKelvey, R. D., and Andrew McLennan, ``Computation of
+equilibria in finite games,'' in \textit{Handbook of Computational
+Economics}, Amman, H. M, D. A. Kendrick, and J. Rust, eds, (Amsterdam:
+Elevier, 1996)
+
+\item[3] McKelvey, R. D., ``A Liapunov function for computation of
+Nash equilibria'' \textit{Caltech Working paper \#} (1998).
+
+\item[4] McKelvey, R. D., A. McLennan, and T. Turocy, ``Gambit
+Command Language,'' version 0.96.3, \textit{postscript document}
+distributed with software at the Gambit web site$^*$, (1997-2000).
+
+\item[5] McKelvey, R. D., A. McLennan, and T. Turocy, ``Gambit
+Graphics User Interface,'' version 0.96.3, \textit{interactive online
+manual} distributed with software at the Gambit web site$^*$, (2000).
+
+\item[6] McLennan, A, ``The Expected Number of Nash Equilibria of a
+Normal Form Game,'' \textit{working paper}, University of Minnesota
+(March 1999)
+\end{description}
+
+
+\subsubsection{Current status of Gambit Project}
+
+The Gambit Project software consists of a library of computer
+programs, written in $C^{++}$, for performing basic operations on
+extensive and normal form games, together with two user interfaces to
+the underlying programs --- the Gambit Graphics User Interface (GUI),
+and the Gambit Control Language (GCL).
+
+\bigskip
+\noindent
+{\em The GUI}
+
+\smallskip
+\noindent
+The Gambit Graphics User Interface (GUI) is a menu driven program for
+interactive building and solution of extensive form games.  A manual
+as well as an executable version can be down-loaded from the Gambit
+Web site.
+
+The Gambit GUI displays on the computer screen a graphics representation
+of any extensive form game.  The user is able to navigate around the
+extensive form using commands from the keyboard.  A series of editing
+options allows one to alter the current game tree by adding, inserting,
+changing, or deleting portions of the extensive form.  After the extensive
+form has been built, the program can solve the game for various
+equilibria, and display them on the original graphical representation of
+the game.  
+
+\bigskip
+\noindent
+{\em The GCL}
+
+\smallskip
+\noindent
+The Gambit Control Language (GCL) is a high level computer language for
+building and solving games in extensive or normal form.   A manual as
+well as an executable version of the GCL can be down-loaded from the
+Gambit Web site.  
+
+The GCL is an implicitly typed language (meaning that data types are
+inferred from context), which has data types corresponding to various
+parts of extensive and normal form games.  One can define variables to
+refer to and change various parts of a game.  The language has flow
+control statements and user defined functions which can be used to
+perform repetitive or recursive operations on games.  In addition, it
+supports vector and list operations. The language is especially
+suitable for applications, such as econometric estimation on games, or
+investigation of the functional form of game theoretic solutions,
+where one must repetitively solve similar games.  It also provides a
+language which can be used to define and build multi-stage extensive
+form games.  The language is suitable for use either in an interactive
+or a batch mode.
+
+\subsection{Proposed Software Development}
+
+Since the completion of the previous NSF grant, we have received a
+number of suggestions from users of possible improvements to the
+software.  In addition, we have discovered bugs in the current code,
+and have a number of enhancements that we want to make to the code.
+Consequently, we plan to modify the existing code and add several new
+features to bring it up to date.  The particualr projects which we
+would like to complete follow:
+
+\subsubsection{Quantal Response Algorithms} 
+
+To get the code up and running, we took shortcuts in various places.
+Consequently, some of the algorithms that are currently used in our
+code are unsatisfactory for various reasons. One of the most glaring
+examples of this is in our code to compute the logistic quantal
+response equilibirum QRE corresponcence.
+
+The logistic QRE has become one of the most heavily used parts of the
+Gambit code, as it is used as an econometric method to analyse data
+from game theory experiments.  Unfortunately, the current
+implementation of the QRE algorithm has problems.  The QRE
+correspondence is generically a one dimensional manifold in the
+cartesian product of the space of behavior profiles with the real line
+(representing the precision, $\lambda$, of the error).  Starting from
+a point $(p_0, \lambda_0)$ on the manifold, we currently trace the
+correspondence by incrementing $\lambda_0$ to $\lambda_1$, and using
+the current profile, $p_0$ as the starting point for a standard
+minimization algorithm to find a new point $(p_1,\lambda_1)$ on the
+manifold.  This procedure is not the correct way to do this, and will
+fail if the QRE correspondence ``loops back''.  Our code contains
+tests for whether the computed equilibirum really is a valid QRE
+solution.  So the above does not result in incorrect solutions.
+However, it does result in the Gambit code not being able to compute
+solutions in cases where one exists.  
+
+A second problem with the QRE code is that it suffers from numerical
+instability for large values of $\lambda$.  This is because formulae
+for the logistic QRE involve taking exponents of expected utility
+differences weighted by $\lambda$.  So when $\lambda$ gets moderately
+high, this computation results in floating point overflow.  The values
+of $\lambda$ that lead to numerical problems are sometimes in the
+range of the values of $\lambda$ that would be estimated from
+experimental data.  So in this case, the logistic QRE algorithm is not
+able to correctly compute the QRE estimates for the required values of
+the parameters in the data.
+
+The correct way to fix the first problem above is to re-implement the
+path following using a true homotopy algorithm in the product space
+(of $\lambda$ and $p$).  This will allow the algorithm to turn
+corners, and backtrack in $\lambda$ space.  Recently Ted Turocy
+[2001]. has discovered a way to also avoid the second problem of
+numerical instability.  He has already experimented with the revised,
+homotopy based algorithm that incorporates both of the above changes,
+and found that it solves the problems of our current implementation,
+allowing for computation of the QRE correspondence to values in the
+millions, as opposed to values below one hundred (the current
+capability).  So we plan to implement both of these changes to the the
+computation of the logistic QRE correspondence.  We will implement
+similar changes for the extensive form (AQRE) version of the QRE.
+
+\subsubsection{Other Homotopy Based Algorithms}
+As part of the work to resolve the problems with the QRE algorithm, we
+need to perfect a homotopy algorithm.  There are several other
+problems that we will be able to solve once we have a good homotopy
+based algorithm.  
+
+\begin{itemize} 
+\item
+We currently have no means in Gambit of finding {\it proper
+equilibria}, as defined by Myerson [1975].  Yamomoto [1993] proposes a
+homotopy based algorithm for finding proper equilibria, and we plan to
+introduce code to implement this algorithm.
+\item
+Harasany and Selten propose the {\it tracing procedure} as a method
+for finding a unique selection from the set of Nash equilibria.  This
+procedure is based on following a homotopy.  We plan to implement an
+algorithm to compute the tracing procedure.
+\item
+Govindan and Wilson have proposed algorithms for finding multiple
+equilibria which offer very good performance in terms of speed.  These
+algorithms also require a homotopy to implement, and we plan to
+implement this algorithm as well.
+\item
+Finally, in the Gambit code developed by McLennan for finding all
+equilibria of $n$-person games, we have been investigating a homotopy
+based approach.  This method involves starting with a system where we
+can find the maximum number of solutions for a system of polynomial
+equations that is guaranteed by Bernstein's theorem.  We then
+transform it to the game of interest, following all of the solutions,
+but just keeping those that real and satisfy the required constraints.
+We have attempted implementation of such an algorithm, but have had
+problems in finding suitable homotopy code that will work within
+gambit.  Once we perfect our own homotopy code, we anticipate that we
+will be able to successfully implement this algorithm as well.
+\end{itemize}
+
+We do not currently have any means of finding either proper equilibria
+or the tracing procedure in Gambit.  So adding these features will add
+increased functionality to Gambit.  The second two items will
+hopefully lead to more efficient and hence faster algorithms for
+finding multiple equilibria of $n$-person games.
+
+\subsubsection{Symmetric and Anonymous Games}
+
+One class of games that is of particular interest in experimental work
+is the class of symmetric and anonymous games.  For example, much
+experimental literature on auctions, voting, and public goods
+provision deals with this class of games.
+
+Since a symmetric game is just a game with restrictions on the set of
+possible strategies or payoffs that can arise, symmetric and anonymous
+games can currently be represented and solved by Gambit.  However the
+computational complexity of solving such games grows exponentially
+with the number of players and strategies.  Since games of
+experimental interest frequently have either many players or many
+strategies, the strategy set is frequently much too large to be
+computationally feasible with our current algorithms.
+
+We plan to develop data structures and algorithms that will take
+explicit account of symmetries in the game to represent and solve them
+more efficiently.  There are two types of savings that are possible.
+First, the amount of space and time to retrieve the payoff functions
+can be improved substantially if the underlying data structures take
+explicit account of symmetries of the game.  Second, the algorithms
+can take advantage of symmetries in the game in that not all profiles
+need be investigated to determine if a profile is an equilibrium.
+Finally, if one is only concerned with finding symmetric solutions to
+a game, then the algorithms can take further account of the symmetries
+to drastically reduce the dimensionality of the problem.  For example,
+to determine if a profile is a symmetric Nash equilibrium for a
+symmetric game, one can start at a symmetric profile, and only
+investigate deviations by one player.  So if each of $n$ players each
+have $k$ strategies available, a problem that starts out being $n k$
+dimensional when one does not take account of the symmetry becomes
+$2k$ dimensional (note independence from $n$) when one takes account
+of the symmetry.  Some of the solution algorithms, in particular those
+based on function minimization (QRE and Liapunov) could be relatively
+easily modified to take advantage of the lower dimensionality.  Others
+(the linear complementarity based algorithms) would first require
+theoretical advances (which we plan to pursue) to take advantage of
+lower dimensionality.
+
+We anticipate that incorporating the above capabilities to deal with
+symmetric games will enable Gambit to solve games of the size that are
+encountered in experimental work, and hence make the code practical
+for use in such settings.  
+
+\subsubsection{Improved Graphics user Interface}
+
+We plan to make improvements to the graphics user interface in Gambit
+to make it more intuitive, and to provide better means for visualizing
+and displaying various aspects of solutions.  Towards these goals, we
+plan the following changes
+
+\begin{itemize}
+\item
+Integrate the PXI into Gambit. The {\it PXI} is an external plotting
+program that allows for viewing and plotting of output from certain
+algorithms in gambit.  It is currently most useful in conjunction with
+the QRE algorithm, as it allows for the plotting of the entire QRE
+correspondence, and also allows for the plotting of data from
+experiments on the same graph as that containing the QRE
+correspondence.  We plan to considerably enhance the capabilities of
+the PXI program and to integrate it into Gambit, so that it is more
+generally useful for to visualize solutions from any algorithm, and
+for viewing experimental data corresponding to the games.  We want to
+add the capability of ploting other items of game theoretic interest,
+such as best reply correspondences.
+\item
+We plan to add support for evolutionary games and adaptive learning
+models.  Here, we plan to allow the capability to view the gradient
+field corresponding to the replicator dynamics, or other learning
+dynamics, and to be able to view the orbits that are traced out by the
+dynamic, or to view an animation of the dynamics by viewing the
+motion, over time, of a grid of points in the simplotpe. This will
+require additional features in the PXI to enable these displays.
+\item
+We plan to improve profile viewing and editing capabilities, Rather
+than having the profile displayed as a vector, it will be displayed as
+a tree, which has the same form as the tree of information sets in the
+extensive form game.  Thus, it will be much more intuitive to see
+which branch is associated with which probability. This will make it
+easier to compare and edit profiles.
+\item
+Finally, we plan to modernize the graphics user interface to make it
+consistent with current standards.  This will involve having context
+dependent menus and help, intuitive drag and drop capabilities, and
+navigation of the extensive form through scroll bars and highlighting
+of the relevant element rather than via a cursor.
+\end{itemize}
+
+\subsection{Theoretical work}
+
+While the main thrust of our proposal is to complete the software
+enhancements to Gambit described above, in the course of our efforts
+theoretical issues arise.  For example, since one of our main goals
+under the previous grant was to develop algorithms to find {\it all}
+Nash equilibria, we were naturally led to the question of the
+computational complexity of this effort, and to the closely related
+question of how many Nash equilibria there might be.  We solved this
+problem in the papers (McKelvey, McLennan, 1995, and McLennan, 1999).
+There we find an exact formula for the maximal number of totally mixed
+equilibria, and for the average number of Nash equilibria for a game,
+and show that the number of such equilibria is exponential both in the
+number of players and the size of strategy sets.  Similarly, in
+investigating the problems with the numerical instability of the QRE
+algorithm, one of us (Turocy [2001]) has been led to discover numerically
+stable ways of computation of the correspondence, and to find other
+properties of the correspondence, linking it to the replicator
+dynamics.  We plan to continue to pursue theoretical questions such
+as these as they arise.
+
+\newpage
+\begin{center}
+\section{\bf  REFERENCES }
+\end{center}
+
+\begin{description}
+\item
+Govindan, S., and R. Wilson, ``A Global Newton Method to Compute Nash
+Equilibria,'' {\it mimeo}, Stanford University, 2000.  
+
+\item
+Govindan, S., and R. Wilson, ``Computing Nash Equilibria by Iterated
+Polymatrix Approximation,'' {\it mimeo}, Stanford University, 2000.
+
+\item
+Harsanyi, J. C., and R. Selten, {\it A General Theory of Equilibrium
+Selection in Games}, (MIT press: Cambridge, 1988).
+
+\item
+McKelvey, R. D., and A. McLennan, ``Computation of Equilibria in
+Finite Games,'' Chapter 2 in {\it Handbook of Computational
+Economics}, Edited by H. Amman, D. A. Kendrick and J. Rust,
+(Amsterdam: Elsevier, 1996).
+
+\item
+McKelvey, R. D., and A. McLennan, ``The Maximal Number of Regular
+Totally Mixed Nash Equilibria,'' {\it Journal of Economic Theory},
+forthcoming, 1996b.
+
+\item
+McKelvey, R. D., and T. R. Palfrey, ``Quantal Response Equilibria for
+Normal form Games,'' {\it Games and Economic Behavior}, 10 (1995):
+6-38.
+
+\item
+McKelvey, R. D., and T. R. Palfrey, ``Quantal Response Equilibria for
+Extensive form Games,'' {\it Experimental Economics}, 1 (1998): 9-41.
+
+\item 
+McLennan, A., ``The Maximal Generic Number of Pure Nash Equilibria,''
+{\it Journal of Economic Theory}, forthcoming, 1996.
+
+\item
+McLennan, A, ``The Expected Number of Nash Equilibria of a
+Normal Form Game,'' {\it working paper}, University of Minnesota
+(March 1999)
+
+\item
+Myerson, R. B., ``Refinements of the Nash equilibrium concept,'' {\it
+International Journal of Game Theory}, 7 (1978): 73-80.
+
+\item
+Turocy, T. L., ``Computing the Logistic Quantal Response Equilibrium
+Correspondence,'' {\it working paper}, Department of Economics, Texas
+A \& M University, 2001.
+
+\item
+Van Damme, E., {\it Refinements of the Nash Equilibrium Concept},
+(Springer Verlag, 1983).
+
+\item
+Yamomoto, Y., ``A Path-Following Procedure to Find a Proper
+Equilibrium of Finite Games'', {\it International Journal of Game
+Theory}, 22 (1993): 249-259.
+\end{description}
+
+\newpage
+\begin{center}
+\section{BIOGRAPHICAL SKETCHES}
+\end{center}
+\subsection{RICHARD D. McKELVEY}
+
+\noindent
+{\bf PERSONAL} 
+
+\ \\
+\begin{tabular}{ll}
+Date of birth:&April 27, 1944\\
+Marital Status:&Married, three children.\\
+Office address:&Division of the Humanities and Social Sciences \\
+&California Institute of Technology \\
+&Pasadena, California 91125 \\
+&(818) 356-4091 \\
+\end{tabular}
+
+\ \\
+\noindent
+{\bf EDUCATION}
+\begin{description}
+\item
+B.A., (Mathematics) Oberlin College, 1966.
+\item
+M.A., (Mathematics) Washington University in St. Louis, 1967.
+\item
+M.A., (Political Science) University of Rochester, 1970.
+\item
+Ph.D.,(Political Science) University of Rochester, 1971.
+\end{description}
+
+\noindent
+{\bf ACADEMIC APPOINTMENTS}
+\begin{description}
+\item
+Professor, California Institute of Technology; 1979-present 
+\item
+Sherman Fairchild Distinguished Scholar, California Institute of
+Technology; 1978-79 
+\item 
+Associate Professor, Carnegie-Mellon University; 1977-79
+\item
+Assistant Professor, Carnegie-Mellon University; 1974-77
+\item
+Assistant Professor, University of Rochester; 1972-74 
+\item
+Instructor, University of Rochester; 1970-72
+\end{description}
+
+\noindent
+{\bf RESEARCH GRANTS} Principal investigator on the following NSF Grants.
+\begin{description}
+\item
+(1973-1974) --- ``Mathematical Analyses of Voting 
+Procedures,'' with Richard Niemi
+\item
+(1974-1975) --- ``Non-equilibrium Allocations in 
+Spatial Models of Policy Formation''
+\item
+(1977-1978) --- ``Agenda Design in Formal Models of 
+Voting''
+\item
+(1977-1982) --- ``A Theoretical and Experimental 
+Analysis of Committee Coalition Processes,'' with Peter C. Ordeshook
+\item
+(1982-1985) --- ``Information in Elections:  
+Theory and Experiments''
+\item
+(1984-1989) --- ``Collaborative Research on
+Information and Political Processes,'' with Peter C. Ordeshook
+\item
+(1985-1988) --- ``Common Knowledge in Models of
+Information Aggregation and Learning,'' with R. Talbot Page
+\item
+(1990-1993) --- ``Strategic Learning in Games of
+Incomplete Information,'' with Thomas R. Palfrey.
+\item
+(1990-1993) --- ``Full Information Dynamic Models of Policy Formation
+in Legislative Systems,'' with Raymond Riezman.
+\end{description}
+
+\noindent
+{\bf PUBLICATIONS:} Over 60 publications in refereed journals or volumes
+in economics ({\it Econometrica, JET, JME, RES}), political science ({\it
+APSR, AJPS, JOP}),  social choice ({\it Social Choice and Welfare, Public
+Choice}), and applied math and game theory ({\it International Journal of
+Game Theory, JASA, SIAM, Math in Operations Research, Management Science}).
+
+\ \\
+\noindent
+{\bf Five publications most closely related to the project}
+\begin{description}
+
+\item
+``An Experimental Study of the Centipede Game,'' with Thomas R. Palfrey,
+{\it Econometrica}, 60, (1992): 803-836.
+\item
+``The Maximal Number of Regular Totally Mixed Equilibria,'' with
+A. McLennan, {\it Journal of Economic Theory}, 72:411-425, 1997.
+\item
+``Quantal Response Equilibria for Normal Form Games.''  {\em Games and
+Economic Behavior} 10, (1995):6-38.
+\item
+McKelvey, R. D., and A. McLennan, ``Computation of Equilibria in
+Finite Games,'' in {\it Handbook of Computational
+Economics}, Edited by H. Amman, D. A. Kendrick and J. Rust,
+(Amsterdam: Elsevier, 1996).
+\item
+``Quantal Response Equilibria for Extensive form Games,'' with
+T. Palfrey, {\it Experimental Economics}, 1 (1998): 9-41.
+\end{description}
+
+\noindent
+{\bf Five other significant publications}
+\begin{description}
+\item
+``General Conditions for Global Intransitivities in Formal Voting 
+Models.''  {\em Econometrica} 47 (1979):1085-1112.
+\item
+``Covering, Dominance, and Institution-Free Properties of Social 
+Choice.''  {\em American Journal of Political Science} 30 (1986):283-314.
+\item
+``Generalized Symmetry Conditions at a Core Point,'' with Norman 
+Schofield.  {\em Econometrica}, 55 (1987):923-934.
+\item
+``Elections with Limited Information:  A Fulfilled Expectations Model 
+using Contemporaneous Poll and Endorsement Data as Information 
+Sources,'' with Peter C. Ordeshook.  {\em Journal of Economic Theory} 
+36 (1985):55-85.
+\item
+``Common Knowledge, Consensus, and Aggregate Information,'' with
+Talbot R. Page, {\it Econometrica}, 54 (1986): 109-127.
+
+\end{description}
+
+
+
+\noindent
+{\bf Collaborators within the last 48 months:} Serena Guarnaschelli,
+Andrew McLennan, Thomas Palfrey, John Patty.
+
+\ \\
+\noindent
+{\bf Graduate Advisor:} Peter Ordeshook
+
+\ \\
+\noindent
+{\bf Postdoctoral Advisor:} none
+
+\newpage
+\subsection{ANDREW McLENNAN}
+
+\noindent
+{\bf PERSONAL} 
+
+\ \\
+\begin{tabular}{ll}
+Date of birth:&March 7, 1954\\
+Marital Status:&Married, one child.\\
+Office address:&Department of Economics \\
+&University of Minnesota \\
+&1035 Management and Economics \\
+&271 19th Avenue South \\
+&Minneapolis, MN 55455 \\
+&(612) 625-7504 \\
+\end{tabular}
+
+\ \\
+\noindent
+{\bf EDUCATION}
+\begin{description}
+\item
+B.A., (Mathematics) University of Chicago, 1976.
+\item
+Ph.D.,(Economics) Princeton University, 1982.
+\end{description}
+
+\noindent
+{\bf ACADEMIC APPOINTMENTS}
+\begin{description}
+\item
+Associate Professor, University of Minnesota; 1987 - present. 
+\item
+Postdoctoral Fellow, Mathematical Science Research Institute, January -
+June 1986.
+\item
+Assistant Professor, Cornell University, Department of
+Economics, 1985 - 1987.
+\item
+Visiting Assistant Professor, Cornell University,
+Department of Economics, 1984-85 academic year.
+\item
+Visiting Assistant Professor, University of Minnesota,
+Department of               Economics, 1981-82 academic year.
+\item
+Assistant Professor, University of Toronto, Department
+of Political Economy (later the Department of Economics), 
+1980 - 1985 (on leave 1981-82 and 1984-85 academic years).
+\item
+Research Assistant, Resources for the Future, 
+Washington, D.C., Summer of 1977.
+\end{description}
+
+\noindent
+{\bf RESEARCH GRANTS} 
+\begin{description}
+\item
+Social Sciences and Humanities Research Council of Canada
+Postdoctoral Fellowship, 1982 - 1983, renewed for 1983 - 1984.
+\item
+Postdoctoral Fellowship, Mathematical Sciences Research Institute,
+funded by NSF Grants MCS-8120790 and SES-8420114.
+\item
+Single Quarter Leave, Fall Quarter 1991.
+\end{description}
+
+
+\ \\
+\noindent
+{\bf Five publications most closely related to the project}
+\begin{description}
+
+\item
+``Justifiable Beliefs in Sequential Equilibrium,'' {\it
+Econometrica}, {\bf 53} (1985), 889-904.
+
+\item
+``The Space of Conditional Systems is a Ball'',
+{\it International Journal of Game Theory}, {\bf 18} (1989),
+125-139.
+
+\item
+``Consistent Conditional Systems in
+Non-cooperative Game Theory'', {\it International Journal of Game
+Theory}, {\bf 18} (1989), 141-174.
+
+\item
+``Sequential Bargaining as a Non-cooperative
+Foundation for Walrasian Equilibrium,'' \break {\it Econometrica},
+{\bf 59}, (1991), 1395--1424.  (Joint with Hugo Sonnenschein)
+
+\item
+``On the Generic Finiteness of Equilibrium Outcome
+distributions in Game Forms,'' in {\it Game Theory and Economic
+Applications}, ed. by B. Dutta {\it et al}, Springer-Verlag, 1992.
+
+
+\end{description}
+
+\noindent
+{\bf Five other significant publications}
+\begin{description}
+\item
+``Fixed Points of Contractible Valued
+Correspondences'', {\it International Journal of game Theory},
+{\bf 18} (1989), 175-184.
+
+\item
+``Stationary Markov Equilibria,'' {\it Econometrica}, {\bf 62},
+(1994), 745-781.  (Joint with D.~Duffie, J.~Geanakoplos, and
+A.~Mas-Colell)
+
+\item
+``Approximation of Contractible Valued
+Correspondences by Functions,'' {\it Journal of
+Mathematical Economics}, {\bf 20}, (1991), 591--598.
+
+\item
+``Randomized Preference Aggregation:  Additivity of Power and Strategy
+Proofness,'' {\it Journal of Economics Theory}, {\bf 22} (1980), 1-11.
+
+\item
+``Price Diversity and Incomplete Learning in the Long Run,'' {\it Journal
+of Economic Dynamics and Control}, {\bf 7} (1984), 331-347.
+
+
+\end{description}
+
+
+
+\noindent
+{\bf Collaborators within the last 48 months} 
+
+Srihari Govindan, Richard McKelvey, and In-Uck Park
+
+\ \\
+\noindent
+{\bf Graduate Advisor:} Hugo Sonnenschein
+
+\ \\
+\noindent
+{\bf Postdoctoral Advisor:} none
+
+\newpage
+\subsection{THEODORE TUROCY}
+
+\noindent
+{\bf PERSONAL} 
+
+\ \\
+\begin{tabular}{ll}
+Office address:&Department of Economics \\
+&Texas A \& M \\
+&College Station, TX 77843 \\
+\end{tabular}
+
+\ \\
+\noindent
+{\bf EDUCATION}
+\begin{description}
+\item
+B.S. with honors (Engeneering and Applied Science/Economics)
+California Institute of Technology, 1994.
+\item
+Ph.D.,(Economics) Northwestern University (MEDS), August 2001.
+\end{description}
+
+\noindent
+{\bf ACADEMIC APPOINTMENTS}
+\begin{description}
+\item
+Assistant Professor, Texas A \& M; 2001 - present. 
+\item
+Lecturer, Nortwestern University, Kellogg Graduate School of
+Management, Fall 1998-99, Fall 1999-2000, Winter 2000-01.
+\end{description}
+
+\ \\
+\noindent
+{\bf Five publications most closely related to the project}
+\begin{description}
+\item
+``Computing the Logistic Quantal Response Equilibrium
+Correspondence,'' in {\it working paper}, Department of Economics,
+Texas A \& M, College Station, TX (2001).
+\item
+``Game Theory,'' with Bernhard von Stengel, {\it Encyclopedia of
+Information Systems}, Academic Press, forthcoming.
+\item 
+``Gambit: A Computer System for Constructing and Analysing Finite
+Extensive and Normal Form Games,'' with R. D. McKelvey, A. McLennan
+{\it et. al.}  Available at {\tt www.hss.caltech.edu/gambit} 1997-2000.
+\item 
+``Gambit Command Language, version 0.96.3'', with R. D. McKelvey and
+A. McLennan {\it postscript document} distributed with software at the
+Gambit web site: {\tt www.hss.caltech.edu/gambit}, 2000.
+\item 
+``Gambit Graphics User Interface, version 0.96.3,'' with
+R. D. McKelvey and A. McLennan {\it interactive online manual}
+distributed with software at the Gambit web site: {\tt
+www.hss.caltech.edu/gambit}, 2000.
+\end{description}
+
+\noindent
+{\bf Five other significant publications}
+\begin{description}
+\item 
+``Intertemporal Speculation Under Uncertain Future Demand:
+Experimental Results,'' with Charles Plott, in {\it Understanding
+Strategic Interaction: Essays in Honor of Rienhard Selten}, Albers
+{\it et. al.,} editors (Berlin: Springewr Verlag, 1996)
+\item
+``Implications of Approximate Solution Concepts in Sealed-Bid
+Auctions,'' {\it working paper}, Northwestern University, 2001.  
+\item
+``Game Theory at the Ballpark: An Analysis of Attempting Stolen Bases
+in Baseball,'' {\it working paper,} Northwestern University, July
+2000.
+\item
+``Markets Online: Practical Experience and Directions for Research,''
+with U. Mukherjea {\it working paper,}  Northwestern University, 2000.
+\end{description}
+
+
+
+\noindent
+{\bf Collaborators within the last 48 months} 
+
+Richard McKelvey, Andrew McLennan, Urmi Mukherjea, Charles Plott,
+Bernhard von Stengel.
+
+\ \\
+\noindent
+{\bf Graduate Advisor:} Mark Satterthwaite
+
+\ \\
+\noindent
+{\bf Postdoctoral Advisor:} none
+
+\newpage
+\begin{center}
+\section{BUDGET}
+\end{center}
+\newpage
+\addtocounter{page}{3}
+\subsection{Budget Justification}
+
+To accomplish the above goals, we will require the following support. 
+
+\medskip
+\noindent 
+{\em At Caltech:}  
+
+We are requesting one month of summer support for the principal
+investigator (with a 25\% fringe rate).  We also request \$1,200.00
+for travel to conferences and for collaborative work at Minnesota and
+Texas A \& M, and \$600.00 for incidental expenses.  The indirect cost
+rate is 60\%.
+
+\medskip
+\noindent 
+{\em At Minnesota:}
+
+We are requesting one month of summer support for the principal
+investigator (with a 27.1\% fringe rate) \$1,200.00 for travel to
+conferences and collaborative work at Caltech and Texas A \& M,
+and \$600.00 for incidental expenses.  The indirect cost rate is 47\%.
+
+\medskip
+\noindent 
+{\em At Texas A \& M:}
+
+We are requesting two months of summer support for the principal
+investigator (with a 27.1\% fringe rate) \$1,200.00 for travel to
+conferences and collaborative work at Caltech and Minnesota, and
+\$600.00 for incidental expenses.  The indirect cost rate is 47\%.
+
+\bigskip
+We also request \$25,000.00 for a part time $C^{++}$ programmer to help
+with the programming.  This programmer will be directed by Ted Turocy.
+We are requesting \$5,000.00 for equipment.  This will be used to
+update our server, which is also used as a site for the distribution
+of the code over the World Wide Web.
+
+\newpage
+\begin{center}
+\section{CURRENT AND PENDING SUPPORT}
+\end{center}
+
+\end{document}
+
