@@ -33,22 +33,19 @@ private:
   int  well_formed, feasible, bounded, aborted, flag, nvars, neqns,nequals;
   T total_cost,eps1,eps2,eps3,tmin;
   BFS<T> opt_bfs,dual_bfs;
-  bool freshtab;
-  LPTableau<T> *tab;
+  LPTableau<T> tab;
   gArray<bool> *UB, *LB;
   gArray<T> *ub, *lb;
   gVector<T> *xx, *cost; 
   gVector<T> y, x, d;
   gStatus &status;
 
-  void Solve();
-  void DoPhase(int phase = 0);
+  void Solve(int phase = 0);
   int Enter(void);
   int Exit(int);
 public:
   LPSolve(const gMatrix<T> &A, const gVector<T> &B, const gVector<T> &C,
 	  int nequals = 0, gStatus &s = gstatus );   // nequals = number of equalies (last nequals rows)
-  LPSolve(LPTableau<T> &tab, gStatus &s = gstatus );  
 //  LPSolve(const gMatrix<T> &A, const gVector<T> &B, 
 //	  const gVector<T> &C,  const gVector<int> &sense, 
 //	  const gVector<int> &LB,  const gVector<T> &lb, 
