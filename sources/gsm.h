@@ -48,7 +48,6 @@ private:
   gGrowableStack< gGrowableStack< Portion* >* >* _StackStack;
   gGrowableStack< CallFuncObj* >*                _CallFuncStack;
   gGrowableStack< RefHashTable* >*               _RefTableStack;
-  RefCountHashTable< Portion * >*                _RefCountTable;
   FunctionHashTable*                             _FuncTable;
 
   Portion* _ResolveRef             ( Portion* p );

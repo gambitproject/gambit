@@ -125,9 +125,6 @@ TEMPLATE class HashTable< gList< Instruction* >*, int >;
 TEMPLATE class RefCountHashTable< gList< Instruction* >* >;
 
 
-TEMPLATE class HashTable< Portion*, int >;
-TEMPLATE class RefCountHashTable< Portion* >;
-
 
 TEMPLATE class HashTable< gString, Portion* >;
 TEMPLATE class HashTable< gString, FuncDescObj* >;

@@ -70,8 +70,6 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
   _RefTableStack = new gGrowableStack< RefHashTable* >( 1 );
   _RefTableStack->Push( new RefHashTable );
 
-  _RefCountTable = new RefCountHashTable< Portion* >;
-
   _FuncTable     = new FunctionHashTable;
   InitFunctions();  // This function is located in gsmfunc.cc
 
@@ -96,8 +94,6 @@ GSM::~GSM()
 
   Flush();
   delete _FuncTable;
-
-  delete _RefCountTable;
 
   assert( _RefTableStack->Depth() == 1 );
   delete _RefTableStack->Pop();
@@ -304,12 +300,7 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
   }
   else
   {
-    if( _VarIsDefined( var_name ) )
-    {
-      _RefCountTable->Remove( _VarValue( var_name ) );
-    }
     _RefTableStack->Peek()->Define( var_name, p );
-    _RefCountTable->Define( p, 1 );
   }
   return result;
 }
@@ -330,7 +321,6 @@ Portion* GSM::_VarValue( const gString& var_name ) const
   else
   {
     result = (*_RefTableStack->Peek())( var_name );
-    assert( _RefCountTable->IsDefined( result ) );
   }
 
   return result;
@@ -350,7 +340,6 @@ Portion* GSM::_VarRemove( const gString& var_name )
   }
   else
   {
-    _RefCountTable->Remove( _VarValue( var_name ) );
     result = _RefTableStack->Peek()->Remove( var_name );
   }
   return result;
@@ -578,17 +567,8 @@ Portion* GSM::_ResolveRef( Portion* p )
     }
     else
     {
-      if( _VarValue( ref )->Owner() != 0 && 
-	 !_RefCountTable->IsDefined( _VarValue( ref )->Owner() ) )
-      {
-        delete _VarRemove( ref );
-	result = p;
-      }
-      else
-      {
-	result = _VarValue( ref )->RefCopy();
-	delete p;
-      }
+      result = _VarValue( ref )->RefCopy();
+      delete p;
     }
   }
   else
