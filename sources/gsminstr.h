@@ -3,7 +3,7 @@
 //#                     instruction queue subsystem
 //#                     companion to GSM
 //#
-//# $Id$
+//# @(#)gsminstr.h	1.27 7/24/96
 //#
 
 
@@ -15,23 +15,20 @@
 #include "gstring.h"
 
 
-class GSM;
-class gOutput;
-
-
 //-------------------------------------------------------------------
 //                      Opcodes
 //-------------------------------------------------------------------
 
 typedef enum
 {
-  iERROR,
+  iUNDEFINED,
 
   iNOP,
 
   iQUIT, iIF_GOTO, iGOTO, iCLEAR,
 
-  iPUSH, iPUSHINPUT, iPUSHOUTPUT, 
+  iPUSH_BOOL, iPUSH_FLOAT, iPUSH_RATIONAL, iPUSH_INTEGER, iPUSH_TEXT,
+  iPUSHINPUT, iPUSHOUTPUT, 
   iPUSHLIST, iPUSHREF,
   iASSIGN, iUNASSIGN, iSUBSCRIPT, iCHILD, iREAD, iWRITE,
 
@@ -48,487 +45,47 @@ typedef enum
   iHELP
 } Opcode;
 
-//--------------------------------------------------------------------
-//                      Base Instructiong class
-//--------------------------------------------------------------------
 
-class Instruction
+//--------------------------------------------------------------------
+//                       NewInstr class
+//--------------------------------------------------------------------
+//   This is the new general purpose instruction class.
+//   The instructions are decoded and run by GSM::Execute().
+//   GSM::Execute() is located in gsm.h,cc
+//
+
+class NewInstr
 {
-private:
-  static int _NumInstructions;
+public:
+  Opcode Code;
+  union 
+  {
+    bool      BoolVal;
+    long      IntVal;
+    double    FloatVal;
+    gInput*   InputVal;
+    gOutput*  OutputVal;
+  };
+  gString TextVal;
+  long LineNumber;
   
-protected:
-  int _LineNumber;
- 
-public:
-  Instruction( void );
-  virtual ~Instruction();
-
-  int& LineNumber( void );
-
-  virtual Opcode Type( void ) const = 0;
-  virtual bool Execute( GSM& gsm ) const = 0;
-  virtual void Output( gOutput& s ) const = 0;
+  NewInstr(Opcode code, const bool& v = false)
+    : Code(code), BoolVal(v), LineNumber(0) {}
+  NewInstr(Opcode code, const long& v)
+    : Code(code), IntVal(v), LineNumber(0) {}
+  NewInstr(Opcode code, const double& v)
+    : Code(code), FloatVal(v), LineNumber(0) {}
+  NewInstr(Opcode code, const gString& v)
+    : Code(code), TextVal(v), LineNumber(0) {}
+  NewInstr(Opcode code, gInput* v)
+    : Code(code), InputVal(v), LineNumber(0) {}
+  NewInstr(Opcode code, gOutput* v)
+    : Code(code), OutputVal(v), LineNumber(0) {}
+  ~NewInstr() {}
 };
 
+class gOutput;
+gOutput& operator << ( gOutput& s, NewInstr* p );
 
-//--------------------------------------------------------------------
-//                      descendent Instruction classes
-//--------------------------------------------------------------------
-
-
-//-------------------------- null operation --------------------------
-
-class NOP : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-//----------------------- branch operators ---------------------------
-
-class Quit : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-/*
-class Clear : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-*/
-
-class IfGoto : public Instruction
-{
- private:
-  int _InstructionIndex;
- public:
-  IfGoto( int index );
-  int WhereTo( void ) const;
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Goto : public Instruction
-{
- private:
-  int _InstructionIndex;
- public:
-  Goto( int index );
-  int WhereTo( void ) const;
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-
-//------------------------- push opeerations ------------------------
-
-template <class T> class Push : public Instruction
-{
- private:
-  T _Value;
- public:
-  Push( const T& value );
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-class PushInput : public Instruction
-{
- private:
-  gInput* _Value;
- public:
-  PushInput( gInput& value );
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-class PushOutput : public Instruction
-{
- private:
-  gOutput* _Value;
- public:
-  PushOutput( gOutput& value );
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class PushList : public Instruction
-{
- private:
-  int _NumElements;
- public:
-  PushList( int num_elements );
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class PushRef : public Instruction
-{
- private:
-  gString _Ref;
- public:
-  PushRef( const gString& ref );
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Assign : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class UnAssign : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Subscript : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Child : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-class Read : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-class Write : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-//--------------------------- math operations ---------------------------
-
-class Add : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM &gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Sub : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM &gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Concat : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM &gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-class Mul : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM &gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-class Dot : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM &gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-class Div : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM &gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-class IntDiv : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM &gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Neg : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM &gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-class Power : public Instruction
-{
- public:
-  Opcode Type( void) const;
-  bool Execute( GSM &gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-//----------------------------- integer math operators -------------------
-
-
-class Mod : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM &gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-
-//----------------------------- relational operators ----------------------
-
-class Equ : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Neq : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Gtn : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Ltn : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Geq : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Leq : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-//----------------------------- logical operators ------------------------
-
-class AND : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class OR : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class NOT : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-//------------------------ function call operations -------------------
-
-class InitCallFunction : public Instruction
-{
- private:
-  gString _FuncName;
- public:
-  InitCallFunction( const gString& func_name );
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Bind : public Instruction
-{
- private:
-  gString _FuncName;
- public:
-  Bind( const gString& func_name = "" );
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class BindRef : public Instruction
-{
- private:
-  gString _FuncName;
- public:
-  BindRef( const gString& func_name = "" );
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class BindVal : public Instruction
-{
- private:
-  gString _FuncName;
- public:
-  BindVal( const gString& func_name = "" );
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class CallFunction : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-//------------------------- miscellaneous instructions --------------------
-
-
-class Pop : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Display : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Dump : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-
-class Flush : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-  void Output( gOutput& s ) const;
-};
-
-/*
-class Help : public Instruction
-{
-public:
-  Opcode Type(void) const;
-  bool Execute(GSM& gsm) const;
-  void Output(gOutput& s) const;
-};
-*/
-
-gOutput& operator << ( gOutput& s, Instruction* p );
 
 #endif // GSMINSTR_H

@@ -37,7 +37,7 @@ extern GSM& _gsm;  // defined at the end of gsm.cc
   double dval; \
   gString tval, formal, funcname, paramtype;  \
   Portion* por; \
-  gList<Instruction *> program, *function; \
+  gList<NewInstr*> program, *function; \
   gList<gString> formals, types; \
   gList<bool> refs; \
   gList<Portion*> portions; \
@@ -53,7 +53,7 @@ extern GSM& _gsm;  // defined at the end of gsm.cc
   char nextchar(void); \
   void ungetchar(char c); \
   \
-  void emit(Instruction *); \
+  void emit(NewInstr*); \
   bool DefineFunction(void); \
   void RecoverFromError(void); \
   int ProgLength(void); \
@@ -136,7 +136,8 @@ extern GSM& _gsm;  // defined at the end of gsm.cc
 
 program: 
               toplevel EOC 	
-              { if (!triv || !semi) emit(new Display); emit(new Pop); return 0; }
+              { if (!triv || !semi) emit(new NewInstr(iOUTPUT)); 
+              emit(new NewInstr(iPOP)); return 0; }
        |      error EOC   { RecoverFromError();  return 1; }
        |      error CRLF  { RecoverFromError();  return 1; }
 
@@ -149,14 +150,14 @@ statements:   statement
 
 sep:          SEMI    { semi = true; }
    |          CRLF    { semi = false; 
-                        if (!triv)  { emit(new Display); } }
+                        if (!triv)  { emit(new NewInstr(iOUTPUT)); } }
 
 
 funcdecl:     DEFFUNC LBRACK NAME
-              { funcname = tval; function = new gList<Instruction *>; 
+              { funcname = tval; function = new gList<NewInstr*>; 
                 statementcount = 0; }
               LBRACK formallist RBRACK COMMA statements
-              RBRACK   { if (!triv && !semi) emit(new Display);
+              RBRACK   { if (!triv && !semi) emit(new NewInstr(iOUTPUT));
 			 if (!DefineFunction())  YYERROR; } 
 		
 formallist:
@@ -187,7 +188,8 @@ statement:    { triv = true; statementcount++; }
          |    conditional { triv = false; }
          |    whileloop { triv = false; }
          |    forloop   { triv = false; }
-         |    QUIT     { triv = false; quit = true; emit(new Quit); }
+         |    QUIT     { triv = false; quit = true; 
+                         emit(new NewInstr(iQUIT)); }
 
 
 include:      INCLUDE LBRACK TEXT RBRACK
@@ -204,21 +206,25 @@ include:      INCLUDE LBRACK TEXT RBRACK
 	      }
 
 conditional:  IF LBRACK CRLFopt expression CRLFopt COMMA 
-              { emit(new NOT); emit(0);
+              { emit(new NewInstr(iNOT)); emit(0);
                 labels.Push(ProgLength()); } statements 
               { emit(0);
 		if (function)
-		  (*function)[labels.Pop()] = new IfGoto(ProgLength() + 1);
+		  (*function)[labels.Pop()] = 
+                    new NewInstr(iIF_GOTO, (long) ProgLength() + 1);
 		else
-		  program[labels.Pop()] = new IfGoto(ProgLength() + 1);
+		  program[labels.Pop()] = 
+                    new NewInstr(iIF_GOTO, (long) ProgLength() + 1);
 		labels.Push(ProgLength());
 	      }
               alternative RBRACK
-              { emit(new NOP);
+              { emit(new NewInstr(iNOP));
 		if (function)
-		  (*function)[labels.Pop()] = new Goto(ProgLength());
+		  (*function)[labels.Pop()] = 
+                    new NewInstr(iGOTO, (long) ProgLength());
 		else
-		  program[labels.Pop()] = new Goto(ProgLength());
+		  program[labels.Pop()] = 
+                    new NewInstr(iGOTO, (long) ProgLength());
               } 
 
 alternative:   
@@ -229,136 +235,145 @@ CRLFopt:    | CRLFs
 CRLFs:     CRLF | CRLFs CRLF
 
 whileloop:    WHILE LBRACK CRLFopt { labels.Push(ProgLength() + 1); }
-              expression { emit(new NOT); emit(0);
+              expression { emit(new NewInstr(iNOT)); emit(0);
 			   labels.Push(ProgLength()); }
               CRLFopt COMMA statements RBRACK 
-              { if (!triv && !semi)   emit(new Display);
+              { if (!triv && !semi)   emit(new NewInstr(iOUTPUT));
                 if (function)
-		  (*function)[labels.Pop()] = new IfGoto(ProgLength() + 2);
+		  (*function)[labels.Pop()] = 
+                    new NewInstr(iIF_GOTO, (long) ProgLength() + 2);
 		else
-		  program[labels.Pop()] = new IfGoto(ProgLength() + 2);
-		emit(new Goto(labels.Pop()));
-		emit(new NOP);
+		  program[labels.Pop()] = 
+                    new NewInstr(iIF_GOTO, (long) ProgLength() + 2);
+		emit(new NewInstr(iGOTO, (long) labels.Pop()));
+		emit(new NewInstr(iNOP));
 	      }
 
 forloop:      FOR LBRACK CRLFopt exprlist CRLFopt COMMA CRLFopt 
               { labels.Push(ProgLength() + 1); }
               expression CRLFopt COMMA CRLFopt
               {  index = labels.Pop();   // index is loc of begin of guard eval
-                 emit(new NOT);
+                 emit(new NewInstr(iNOT));
                  // slot for guard-false jump
                  emit(0); labels.Push(ProgLength());
                  // push location of increment 
                  labels.Push(ProgLength() + 2);
                  // slot for guard-true jump
-                 emit(0); labels.Push(ProgLength()); labels.Push(index);
+                 emit(0); 
+                 labels.Push(ProgLength()); labels.Push(index);
               }
               exprlist CRLFopt COMMA
               { // emit jump to beginning of guard eval
-                emit(new Goto(labels.Pop())); 
+                emit(new NewInstr(iGOTO, (long) labels.Pop())); 
                 // link guard-true jump
                 if (function)
-                  (*function)[labels.Pop()] = new Goto(ProgLength() + 1);
+                  (*function)[labels.Pop()] = 
+                    new NewInstr(iGOTO, (long) ProgLength() + 1);
 		else
-		  program[labels.Pop()] = new Goto(ProgLength() + 1);
+		  program[labels.Pop()] = 
+                    new NewInstr(iGOTO, (long) ProgLength() + 1);
                 semi = false;
               }
               statements RBRACK
               { 
-                if (!triv && !semi)  emit(new Display);
+                if (!triv && !semi)  emit(new NewInstr(iOUTPUT));
                 // emit jump to beginning of increment step
-                emit(new Goto(labels.Pop()));
+                emit(new NewInstr(iGOTO, (long) labels.Pop()));
 		// link guard-false branch to end of code
                 if (function)
-		  (*function)[labels.Pop()] = new IfGoto(ProgLength() + 1);
+		  (*function)[labels.Pop()] = 
+                    new NewInstr(iIF_GOTO, (long) ProgLength() + 1);
 		else
-		  program[labels.Pop()] = new IfGoto(ProgLength() + 1);
-		emit(new NOP);
+		  program[labels.Pop()] = 
+                    new NewInstr(iIF_GOTO, (long) ProgLength() + 1);
+		emit(new NewInstr(iNOP));
 	      }
 
-exprlist:     expression  { emit(new Pop); }
-        |     exprlist SEMI expression  { emit(new Pop); }
+exprlist:     expression  { emit(new NewInstr(iPOP)); }
+        |     exprlist SEMI expression  { emit(new NewInstr(iPOP)); }
 
 expression:   Ea
-          |   Ea ASSIGN expression { emit(new Assign()); }
-          |   Ea ASSIGN { emit(new UnAssign()); }
+          |   Ea ASSIGN expression { emit(new NewInstr(iASSIGN)); }
+          |   Ea ASSIGN { emit(new NewInstr(iUNASSIGN)); }
           ;
 
 Ea:           E0
-  |           Ea WRITE E0   { emit(new Write); }
-  |           Ea READ E0    { emit(new Read); }
+  |           Ea WRITE E0   { emit(new NewInstr(iWRITE)); }
+  |           Ea READ E0    { emit(new NewInstr(iREAD)); }
   ; 
 
 E0:           E1
-  |           E0 LOR E1  { emit(new OR); }
+  |           E0 LOR E1  { emit(new NewInstr(iOR)); }
   ;
 
 E1:           E2
-  |           E1 LAND E2  { emit(new AND); } 
+  |           E1 LAND E2  { emit(new NewInstr(iAND)); } 
   ;
 
 E2:           E3
-  |           LNOT E2     { emit(new NOT); }
+  |           LNOT E2     { emit(new NewInstr(iNOT)); }
   ;
 
 E3:           E4       
-  |           E3 EQU E4    { emit(new Equ); } 
-  |           E3 NEQ E4    { emit(new Neq); }
-  |           E3 LTN E4    { emit(new Ltn); }
-  |           E3 LEQ E4    { emit(new Leq); }
-  |           E3 GTN E4    { emit(new Gtn); } 
-  |           E3 GEQ E4    { emit(new Geq); }
+  |           E3 EQU E4    { emit(new NewInstr(iEQU)); } 
+  |           E3 NEQ E4    { emit(new NewInstr(iNEQ)); }
+  |           E3 LTN E4    { emit(new NewInstr(iLTN)); }
+  |           E3 LEQ E4    { emit(new NewInstr(iLEQ)); }
+  |           E3 GTN E4    { emit(new NewInstr(iGTN)); } 
+  |           E3 GEQ E4    { emit(new NewInstr(iGEQ)); }
   ;
 
 E4:           E5
-  |           E4 PLUS E5   { emit(new Add); }
-  |           E4 MINUS E5  { emit(new Sub); }
-  |           E4 AMPER E5  { emit(new Concat); }
+  |           E4 PLUS E5   { emit(new NewInstr(iADD)); }
+  |           E4 MINUS E5  { emit(new NewInstr(iSUB)); }
+  |           E4 AMPER E5  { emit(new NewInstr(iCONCAT)); }
   ;
 
 E5:           E6
-  |           E5 STAR E6    { emit(new Mul); }
-  |           E5 SLASH E6   { emit(new Div); }
-  |           E5 PERCENT E6 { emit(new Mod); }
-  |           E5 DIV E6     { emit(new IntDiv); }
-  |           E5 DOT E6     { emit(new Dot); }
-  |           E5 CARET E6   { emit(new Power); } 
+  |           E5 STAR E6    { emit(new NewInstr(iMUL)); }
+  |           E5 SLASH E6   { emit(new NewInstr(iDIV)); }
+  |           E5 PERCENT E6 { emit(new NewInstr(iMOD)); }
+  |           E5 DIV E6     { emit(new NewInstr(iINTDIV)); }
+  |           E5 DOT E6     { emit(new NewInstr(iDOT)); }
+  |           E5 CARET E6   { emit(new NewInstr(iPOWER)); } 
   ;
 
 E6:           PLUS E7
-  |           MINUS E7      { emit(new Neg); }
+  |           MINUS E7      { emit(new NewInstr(iNEG)); }
   |           E7
 
 E7:           E8
-  |           E7 HASH E8   { emit(new Child); }
+  |           E7 HASH E8   { emit(new NewInstr(iCHILD)); }
   |           E7 DBLLBRACK expression RBRACK RBRACK 
-                 { emit(new Subscript); }
+                 { emit(new NewInstr(iSUBSCRIPT)); }
   ;
 
 E8:           E9            { delete por; }
   |           LPAREN expression RPAREN
-  |           NAME          { emit(new PushRef(tval)); }
-  |           function      { emit(new CallFunction()); }
-  |           list          { emit(new PushList(listlen.Pop())); }
+  |           NAME          { emit(new NewInstr(iPUSHREF, tval)); }
+  |           function      { emit(new NewInstr(iCALL_FUNCTION)); }
+  |           list          { emit(new NewInstr(iPUSHLIST, 
+                                (long) listlen.Pop())); }
   ;
 
-E9:           BOOLEAN  { emit(new Push<bool>(bval));
+E9:           BOOLEAN  { emit(new NewInstr(iPUSH_BOOL, bval));
                          por = new BoolValPortion(bval); }
-  |           INTEGER  { emit(new Push<long>(ival.as_long()));
+  |           INTEGER  { emit(new NewInstr(iPUSH_INTEGER, ival.as_long()));
                          por = new IntValPortion(ival.as_long()); }
-  |           FLOAT    { emit(new Push<double>(dval));
+  |           FLOAT    { emit(new NewInstr(iPUSH_FLOAT, dval));
                          por = new FloatValPortion(dval); }
-  |           TEXT     { emit(new Push<gString>(tval));
+  |           TEXT     { emit(new NewInstr(iPUSH_TEXT, tval));
                          por = new TextValPortion(tval); }
-  |           STDIN    { emit(new PushInput(gin));
+  |           STDIN    { emit(new NewInstr(iPUSHINPUT, &gin));
                          por = new InputRefPortion(gin); }
-  |           STDOUT   { emit(new PushOutput(gout));
+  |           STDOUT   { emit(new NewInstr(iPUSHOUTPUT, &gout));
                          por = new OutputRefPortion(gout); }
-  |           gNULL    { emit(new PushOutput(gnull));
+  |           gNULL    { emit(new NewInstr(iPUSHOUTPUT, &gnull));
                          por = new OutputRefPortion(gnull); }
   ;
 
-function:     NAME LBRACK { emit(new InitCallFunction(tval)); } arglist RBRACK
+function:     NAME LBRACK { emit(new NewInstr(iINIT_CALL_FUNCTION, tval)); } 
+              arglist RBRACK
 
 arglist:
        |      unnamed_args
@@ -368,20 +383,20 @@ arglist:
 unnamed_args: unnamed_arg
             | unnamed_args COMMA unnamed_arg
 
-unnamed_arg:  expression  { emit(new Bind()); }
+unnamed_arg:  expression  { emit(new NewInstr(iBIND)); }
 
 named_args:   named_arg
           |   named_args COMMA named_arg
 
 named_arg:    NAME RARROW { formalstack.Push(tval); } expression
-                           { emit(new BindVal(formalstack.Pop())); }
+                           { emit(new NewInstr(iBINDVAL, formalstack.Pop())); }
          |    NAME DBLARROW  { formalstack.Push(tval); } name_or_io
-                           { emit(new BindRef(formalstack.Pop())); }
+                           { emit(new NewInstr(iBINDREF, formalstack.Pop())); }
 
-name_or_io:   NAME     { emit(new PushRef(tval)); }
-         |    STDIN    { emit(new PushInput(gin)); }
-         |    STDOUT   { emit(new PushOutput(gout)); }
-         |    gNULL    { emit(new PushOutput(gnull)); }
+name_or_io:   NAME     { emit(new NewInstr(iPUSHREF, tval)); }
+         |    STDIN    { emit(new NewInstr(iPUSHINPUT, &gin)); }
+         |    STDOUT   { emit(new NewInstr(iPUSHOUTPUT, &gout)); }
+         |    gNULL    { emit(new NewInstr(iPUSHOUTPUT, &gnull)); }
 
 list:         LBRACE CRLFopt  { listlen.Push(0); } listels CRLFopt RBRACE
     |         LBRACE CRLFopt  { listlen.Push(0); } RBRACE
@@ -714,10 +729,10 @@ int GCLCompiler::Parse(void)
 }
 
 
-void GCLCompiler::emit(Instruction *op)
+void GCLCompiler::emit(NewInstr* op)
 {
   // the encoding for the line number is decoded in GSM::ExecuteUserFunc()
-  if(op) op->LineNumber() = statementcount * 65536 + lines.Peek();
+  if(op) op->LineNumber = statementcount * 65536 + lines.Peek();
   if (function)
     function->Append(op);
   else

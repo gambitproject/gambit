@@ -43,7 +43,7 @@ class CallFuncObj;
 
 class gInteger;
 class GSM;
-class Instruction;
+class NewInstr;
 class Portion;
 class ListPortion;
 class ReferencePortion;
@@ -85,7 +85,7 @@ class FuncInfoType
 {
 public:
   Portion*             (*FuncPtr)(Portion **);
-  gList<Instruction*>* FuncInstr;
+  gList<NewInstr*>* FuncInstr;
   bool                 UserDefined;
   bool                 Listable;
   int                  NumParams;
@@ -98,7 +98,7 @@ class FuncDescObj
 {
 private:
 
-  static RefCountHashTable< gList< Instruction* >* > _RefCountTable;
+  static RefCountHashTable< gList< NewInstr* >* > _RefCountTable;
 
   void _SetFuncInfo
     ( 
@@ -139,7 +139,7 @@ public:
 
   void SetFuncInfo
     (
-     gList< Instruction* >* func_instr,
+     gList< NewInstr* >* func_instr,
      const int       num_params = 0, 
      const ParamInfoType param_info[] = 0,
      const bool listable = LISTABLE
@@ -157,7 +157,7 @@ public:
 
   void SetParamInfo
     ( 
-     gList< Instruction* >* func_instr,
+     gList< NewInstr* >* func_instr,
      const int         index, 
      const gString&    name,
      const PortionSpec spec,
@@ -173,7 +173,7 @@ public:
   
   void SetParamInfo
     (
-     gList< Instruction* >* func_instr,
+     gList< NewInstr* >* func_instr,
      const ParamInfoType param_info[]
      );
   

@@ -11,7 +11,10 @@
 #include "gstring.h"
 class Portion;
 class FuncDescObj;
-class Instruction;
+//class Instruction;
+class NewInstr;
+
+
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
@@ -33,8 +36,11 @@ TEMPLATE class gNode< Portion* >;
 TEMPLATE class gList< FuncDescObj* >;
 TEMPLATE class gNode< FuncDescObj* >;
 
-TEMPLATE class gList< gList< Instruction* >* >;
-TEMPLATE class gNode< gList< Instruction* >* >;
+//TEMPLATE class gList< gList< Instruction* >* >;
+//TEMPLATE class gNode< gList< Instruction* >* >;
+
+TEMPLATE class gList< gList< NewInstr* >* >;
+TEMPLATE class gNode< gList< NewInstr* >* >;
 
 /* 
 	 already instantiated in readefg.y
@@ -45,7 +51,8 @@ TEMPLATE class gNode< gList< Instruction* >* >;
 #include "hash.imp"
 
 
-TEMPLATE class HashTable< gList< Instruction* >*, int >;
+// TEMPLATE class HashTable< gList< Instruction* >*, int >;
+TEMPLATE class HashTable< gList< NewInstr* >*, int >;
 
 TEMPLATE class HashTable< gString, Portion* >;
 TEMPLATE class HashTable< gString, FuncDescObj* >;
@@ -53,7 +60,8 @@ TEMPLATE class HashTable< gString, FuncDescObj* >;
 #include "gsmhash.h"
 
 #ifdef __BORLANDC__
-TEMPLATE class RefCountHashTable< gList< Instruction* >* >;
+//TEMPLATE class RefCountHashTable< gList< Instruction* >* >;
+TEMPLATE class RefCountHashTable< gList< NewInstr* >* >;
 #endif
 
 #pragma option -Jgx
@@ -119,5 +127,5 @@ template <class T> RefCountHashTable<T>::RefCountHashTable()
 template <class T> RefCountHashTable<T>::~RefCountHashTable()
 { Flush(); }
 
-
-TEMPLATE class RefCountHashTable< gList< Instruction* >* >;
+//TEMPLATE class RefCountHashTable< gList< Instruction* >* >;
+TEMPLATE class RefCountHashTable< gList< NewInstr* >* >;

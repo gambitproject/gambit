@@ -1,7 +1,7 @@
 //#
 //# FILE: gsm.cc  implementation of GSM (Stack machine)
 //#
-//# $Id$
+//# @(#)gsm.cc	1.162 8/5/96
 //#
 
 
@@ -386,10 +386,13 @@ bool GSM::Assign( void )
 
   p2 = _ResolveRef(p2);
   p1 = _ResolveRef(p1);
+
+  PortionSpec p1Spec(p1->Spec());
+  PortionSpec p2Spec(p2->Spec());
   
-  if(p1->Spec().Type == porREFERENCE)
+  if(p1Spec.Type == porREFERENCE)
   {
-    if(p2->Spec().Type != porREFERENCE)
+    if(p2Spec.Type != porREFERENCE)
     {
       _VarDefine(((ReferencePortion*) p1)->Value(), p2);
       delete p1;
@@ -401,12 +404,12 @@ bool GSM::Assign( void )
       result = false;
     } 
   }
-  else if(p2->Spec().Type == porREFERENCE)
+  else if(p2Spec.Type == porREFERENCE)
   {
     _ErrorMessage(_StdErr, 63, 0, 0, ((ReferencePortion*) p2)->Value());
     result = false;
   }
-  else if(p1->Spec() == p2->Spec())
+  else if(p1Spec == p2Spec)
   {
     if(varname != "")
     {
@@ -424,11 +427,11 @@ bool GSM::Assign( void )
 	_Push(_VarValue(varname)->RefCopy());
       }
     }
-    else if(p1->Spec().ListDepth == 0)
+    else if(p1Spec.ListDepth == 0)
     {
-      if(!(p1->Spec().Type & (porINPUT|porOUTPUT))) 
+      if(!(p1Spec.Type & (porINPUT|porOUTPUT))) 
       {
-	switch(p1->Spec().Type)
+	switch(p1Spec.Type)
 	{
 	case porINTEGER:
 	  ((IntPortion*) p1)->Value() = ((IntPortion*) p2)->Value();
@@ -566,7 +569,7 @@ bool GSM::Assign( void )
 	    (*(Efg<gRational>*) ((EfgPortion*) p2)->Value()); 
 	  break;
 	default:
-	  _ErrorMessage(_StdErr, 67, 0, 0, PortionSpecToText(p1->Spec().Type));
+	  _ErrorMessage(_StdErr, 67, 0, 0, PortionSpecToText(p1Spec.Type));
 	  assert(0);	  
 	}
 	_Push(p1->RefCopy()); 
@@ -579,10 +582,10 @@ bool GSM::Assign( void )
       }
     }
     // both p1 and p2 are lists
-    else if((p1->Spec().Type == p2->Spec().Type) ||
-	    (p1->Spec().Type == porUNDEFINED) )
+    else if((p1Spec.Type == p2Spec.Type) ||
+	    (p1Spec.Type == porUNDEFINED) )
     {
-      if( !( p1->Spec().Type & (porINPUT|porOUTPUT) ) )
+      if( !( p1Spec.Type & (porINPUT|porOUTPUT) ) )
       {
 	((ListPortion*) p1)->AssignFrom(p2);
 	_Push(p1->RefCopy());
@@ -600,7 +603,7 @@ bool GSM::Assign( void )
       result = false;
     }
   }
-  else if(PortionSpecMatch(p1->Spec().Type, p2->Spec().Type))
+  else if(PortionSpecMatch(p1Spec.Type, p2Spec.Type))
   {
     _VarDefine(varname, p2);
     delete p1;
@@ -751,7 +754,7 @@ bool GSM::_BinaryOperation( const gString& funcname )
 {
   Portion*   p2;
   Portion*   p1;
-  gList< Instruction* > prog;
+  gList< NewInstr* > prog;
   int result;
 
 #ifndef NDEBUG
@@ -768,10 +771,10 @@ bool GSM::_BinaryOperation( const gString& funcname )
   _Push( p2 );
   _Push( p1 );
   
-  prog.Append( new /* class */ ::InitCallFunction( funcname ) );
-  prog.Append( new /* class */ ::Bind );
-  prog.Append( new /* class */ ::Bind );
-  prog.Append( new /* class */ ::CallFunction );
+  prog.Append(new NewInstr(iINIT_CALL_FUNCTION, funcname));
+  prog.Append(new NewInstr(iBIND));
+  prog.Append(new NewInstr(iBIND));
+  prog.Append(new NewInstr(iCALL_FUNCTION));
   result = Execute( prog );
 
   if( result == rcSUCCESS )
@@ -789,7 +792,7 @@ bool GSM::_BinaryOperation( const gString& funcname )
 
 bool GSM::_UnaryOperation( const gString& funcname )
 {
-  gList< Instruction* > prog;
+  gList< NewInstr* > prog;
   int result;
 
 #ifndef NDEBUG
@@ -800,9 +803,10 @@ bool GSM::_UnaryOperation( const gString& funcname )
   assert( _Depth() >= 1 );
 #endif // NDEBUG
 
-  prog.Append( new /*class*/ :: InitCallFunction( funcname ) );
-  prog.Append( new /*class*/ :: Bind );
-  prog.Append( new /*class*/ :: CallFunction );
+  prog.Append(new NewInstr(iINIT_CALL_FUNCTION, funcname));
+  prog.Append(new NewInstr(iBIND));
+  prog.Append(new NewInstr(iBIND));
+  prog.Append(new NewInstr(iCALL_FUNCTION));
   result = Execute( prog );
 
   if( result == rcSUCCESS )
@@ -854,6 +858,39 @@ bool GSM::Add ( void )
 	(*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
     else
       result = false;
+
+/*
+    switch(p->Spec().Type)
+    {
+    case porINTEGER:
+      ((IntPortion*) p)->Value() += ((IntPortion*) p2)->Value();
+      break;
+    case porFLOAT:
+      ((FloatPortion*) p)->Value() += ((FloatPortion*) p2)->Value();
+      break;
+    case porRATIONAL:
+      ((RationalPortion*) p)->Value() += ((RationalPortion*) p2)->Value();
+      break;
+    case porMIXED_FLOAT:
+      (*((MixedSolution<double>*) ((MixedPortion*) p)->Value())) += 
+	(*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
+      break;
+    case porMIXED_RATIONAL:
+      (*((MixedSolution<gRational>*) ((MixedPortion*) p)->Value())) += 
+	(*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value()));
+      break;
+    case porBEHAV_FLOAT:
+      (*((BehavSolution<double>*) ((BehavPortion*) p)->Value())) += 
+	(*((BehavSolution<double>*) ((BehavPortion*) p2)->Value()));
+      break;
+    case porBEHAV_RATIONAL:
+      (*((BehavSolution<gRational>*) ((BehavPortion*) p)->Value())) += 
+	(*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
+      break;
+    default:
+      result = false;
+    }
+*/
   }
 
   if(result)
@@ -1368,6 +1405,7 @@ bool GSM::Subscript ( void )
   p2 = _ResolveRef( p2 );
   p1 = _ResolveRef( p1 );
 
+  
   if(p1->Spec().ListDepth > 0 && p2->Spec().Type == porINTEGER)
   {
     _Push(((ListPortion*) p1)->Subscript(((IntPortion*) p2)->Value()));
@@ -1622,28 +1660,27 @@ bool GSM::CallFunction( void )
 //                       Execute function
 //----------------------------------------------------------------------------
 
-int GSM::Execute( gList< Instruction* >& prog, bool user_func )
+int GSM::Execute( gList< NewInstr* >& prog, bool user_func )
 {
   int             result          = rcSUCCESS;
   bool            instr_success;
   bool            done            = false;
   Portion*        p;
-  Instruction*    instruction;
+  NewInstr*       instr;
   int             program_counter = 1;
   int             program_length  = prog.Length();
   int             initial_num_of_funcs = _CallFuncStack->Depth();
   int             i;
   CallFuncObj*    funcobj;
-  gArray<Instruction*> program(prog.Length());
 
+  gArray<NewInstr*> program(prog.Length());
   for(i=1; i<=prog.Length(); i++)
     program[i] = prog[i];
-  
 
   while( ( program_counter <= program_length ) && ( !done ) )
   {
-    instruction = program[ program_counter ];
-    switch( instruction->Type() )
+    instr = program[ program_counter ];
+    switch( instr->Code )
     {
     case iQUIT:
       instr_success = true;
@@ -1657,7 +1694,7 @@ int GSM::Execute( gList< Instruction* >& prog, bool user_func )
       {
 	if( ( (BoolPortion*) p )->Value() )
 	{
-	  program_counter = ( (IfGoto*) instruction )->WhereTo();
+	  program_counter = instr->IntVal;
 	  assert( program_counter >= 1 && program_counter <= program_length );
 	}
 	else
@@ -1670,7 +1707,7 @@ int GSM::Execute( gList< Instruction* >& prog, bool user_func )
 #ifndef NDEBUG
       else
       {
-	gerr << "Instruction IfGoto called on a non-boolean data type\n";
+	gerr << "NewInstr IfGoto called on a non-boolean data type\n";
 	assert( p->Spec().Type == porBOOL );	
 	_Push( p );
 	program_counter++;
@@ -1680,19 +1717,214 @@ int GSM::Execute( gList< Instruction* >& prog, bool user_func )
       break;
 
     case iGOTO:
-      program_counter = ( (Goto*) instruction )->WhereTo();
+      program_counter = instr->IntVal;
       assert( program_counter >= 1 && program_counter <= program_length );
       instr_success = true;
       break;
 
     default:
-      instr_success = instruction->Execute( *this );
+      //instr_success = NewInstr->Execute( *this );
+      switch(instr->Code)
+      {
+	/*
+      case iUNDEFINED:
+	instr_success = true;
+	break;
+	*/
+
+      case iNOP:
+	instr_success = true;
+	break;
+	
+	/*
+      case iQUIT:
+	assert(0);
+	instr_success = true;
+	break;
+      case iIF_GOTO: 
+	assert(0);
+	instr_success = true;
+	break;
+      case iGOTO:
+	assert(0);
+	instr_success = true;
+	break;
+      case iCLEAR:
+	break;
+	*/
+
+      case iPUSHREF:
+	instr_success = PushRef(instr->TextVal);
+	break;
+
+      case iPUSH_BOOL:
+	// instr_success = Push(instr->BoolVal);
+	_Push(new BoolValPortion(instr->BoolVal));
+	instr_success = true;
+	break;
+      case iPUSH_INTEGER:
+	// instr_success = Push(instr->IntVal);
+	_Push(new IntValPortion(instr->IntVal));
+	break;
+      case iPUSH_FLOAT:
+	// instr_success = Push(instr->FloatVal);
+	_Push(new FloatValPortion(instr->FloatVal));
+	instr_success = true;
+	break;
+      /* There is no iPUSH_RATIONAL!
+      case iPUSH_RATIONAL:
+	instr_success = Push(instr->RationalVal);
+	break;
+      */
+      case iPUSH_TEXT:
+	// instr_success = Push(instr->TextVal);
+	_Push(new TextValPortion(instr->TextVal));
+	instr_success = true;
+	break;
+
+      case iPUSHINPUT:
+	// instr_success = Push(*(instr->InputVal));
+	_Push(new InputRefPortion(*(instr->InputVal)));
+	instr_success = true;
+	break;
+      case iPUSHOUTPUT:
+	// instr_success = Push(*(instr->OutputVal));
+	_Push(new OutputRefPortion(*(instr->OutputVal)));
+	instr_success = true;
+	break;
+      case iPUSHLIST:
+	instr_success = PushList(instr->IntVal);
+	break;
+
+      case iASSIGN:
+	instr_success = Assign();
+	break;
+      case iUNASSIGN:
+	instr_success = UnAssign();
+	break;
+      case iSUBSCRIPT:
+	instr_success = Subscript();
+	break;
+      case iCHILD:
+	instr_success = Child();
+	break;
+      case iREAD:
+	instr_success = Read();
+	break;
+      case iWRITE:
+	instr_success = Write();
+	break;
+
+      case iADD:
+	instr_success = Add();
+	break;
+      case iSUB:
+	instr_success = Subtract();
+	break;
+      case iCONCAT:
+	instr_success = Concat();
+	break;
+      case iMUL:
+	instr_success = Multiply();
+	break;
+      case iDOT:
+	instr_success = Dot();
+	break;
+      case iDIV:
+	instr_success = Divide();
+	break;
+      case iINTDIV:
+	instr_success = IntegerDivide();
+	break;
+      case iNEG:
+	instr_success = Negate();
+	break;
+      case iMOD:
+	instr_success = Modulus();
+	break;
+      case iPOWER:
+	instr_success = Power();
+	break;
+
+      case iEQU:
+	instr_success = EqualTo();
+	break;
+      case iNEQ:
+	instr_success = NotEqualTo();
+	break;
+      case iGTN:
+	instr_success = GreaterThan();
+	break;
+      case iLTN:
+	instr_success = LessThan();
+	break;
+      case iGEQ:
+	instr_success = GreaterThanOrEqualTo();
+	break;
+      case iLEQ:
+	instr_success = LessThanOrEqualTo();
+	break;
+
+      case iAND:
+	instr_success = AND();
+	break;
+      case iOR:
+	instr_success = OR();
+	break;
+      case iNOT:
+	instr_success = NOT();
+	break;
+
+      case iINIT_CALL_FUNCTION:
+	instr_success = 
+	  InitCallFunction(instr->TextVal);
+	break;
+      case iBIND:
+	instr_success = Bind(instr->TextVal);
+	break;
+      case iBINDREF:
+	instr_success = BindRef(instr->TextVal);
+	break;
+      case iBINDVAL:
+	instr_success = BindVal(instr->TextVal);
+	break;
+      case iCALL_FUNCTION:
+	instr_success = CallFunction();
+	break;
+
+      case iPOP:
+	assert( _Depth() >= 0 );	
+	if( _Depth() > 0 )
+	  delete _Pop();
+	instr_success = true;
+	break;
+      case iOUTPUT:
+	Output();
+	instr_success = true;
+	break;
+      case iDUMP:
+	Dump();
+	instr_success = true;
+	break;
+      case iFLUSH:
+	Flush();
+	instr_success = true;
+	break;
+	
+	/*
+      case iHELP:
+	instr_success = true;
+	break;
+	*/
+      default:
+	assert(0);
+      }
       program_counter++;
     }
 
     if( !instr_success )
     {
-      result = instruction->LineNumber();
+      result = instr->LineNumber;
       done = true;
       break;
     }
@@ -1723,7 +1955,7 @@ int GSM::Execute( gList< Instruction* >& prog, bool user_func )
 
 
 
-Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program, 
+Portion* GSM::ExecuteUserFunc( gList< NewInstr* >& program, 
 			      const FuncInfoType& func_info,
 			      Portion** param )
 {
@@ -2229,7 +2461,7 @@ TEMPLATE class gStack< RefHashTable* >;
 #include "garray.imp"
 #include "gslist.imp"
 
-TEMPLATE class gArray<Instruction*>;
+TEMPLATE class gArray<NewInstr*>;
 TEMPLATE class gSortList<FuncDescObj*>;
 TEMPLATE class gListSorter<FuncDescObj*>;
 TEMPLATE class gSortList<gString>;

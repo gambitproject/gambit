@@ -231,7 +231,7 @@ ParamInfoType& ParamInfoType::operator = ( const ParamInfoType& param_info )
 //                   Function descriptor objects
 //---------------------------------------------------------------------
 
-RefCountHashTable< gList< Instruction* >* > FuncDescObj::_RefCountTable;
+RefCountHashTable< gList< NewInstr* >* > FuncDescObj::_RefCountTable;
 
 
 FuncDescObj::FuncDescObj( FuncDescObj& func )
@@ -290,7 +290,7 @@ FuncDescObj::~FuncDescObj()
 {
   int index;
   int f_index;
-  Instruction* instruction;
+  NewInstr* NewInstr;
   
   for( f_index = 0; f_index < _NumFuncs; f_index++ )
   {
@@ -309,8 +309,8 @@ FuncDescObj::~FuncDescObj()
 	assert( _FuncInfo[ f_index ].FuncInstr != 0 );
 	while( _FuncInfo[ f_index ].FuncInstr->Length() > 0 )
 	{
-	  instruction = _FuncInfo[ f_index ].FuncInstr->Remove( 1 );
-	  delete instruction;
+	  NewInstr = _FuncInfo[ f_index ].FuncInstr->Remove( 1 );
+	  delete NewInstr;
 	}
 	delete _FuncInfo[ f_index ].FuncInstr;
       }
@@ -352,7 +352,7 @@ void FuncDescObj::SetFuncInfo
 
 void FuncDescObj::SetFuncInfo
 (
- gList< Instruction* >* func_instr,
+ gList< NewInstr* >* func_instr,
  const int num_params,
  const ParamInfoType param_info[],
  const bool listable
@@ -452,7 +452,7 @@ void FuncDescObj::SetParamInfo
 
 void FuncDescObj::SetParamInfo
 ( 
- gList< Instruction* >* func_instr,
+ gList< NewInstr* >* func_instr,
  const int              param_index,
  const gString&         param_name, 
  const PortionSpec      param_spec, 
@@ -588,7 +588,7 @@ void FuncDescObj::SetParamInfo
 
 void FuncDescObj::SetParamInfo
 ( 
- gList< Instruction* >* func_instr,
+ gList< NewInstr* >* func_instr,
  const ParamInfoType     param_info[]
  )
 {

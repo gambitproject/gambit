@@ -14,7 +14,8 @@
 //#include "gsmincl.h"
 //#include "gsmfunc.h"
 
-class Instruction;
+//class NewInstr;
+class NewInstr;
 class FuncDescObj;
 class CallFuncObj;
 class Portion;
@@ -150,9 +151,9 @@ public:
 		       bool auto_val_or_ref = false );
   bool CallFunction   ( void );
 
-  int Execute( gList<Instruction*>& program, 
+  int Execute( gList<NewInstr*>& program, 
 	      bool user_func = false );
-  Portion* ExecuteUserFunc( gList<Instruction*>& program, 
+  Portion* ExecuteUserFunc( gList<NewInstr*>& program, 
 			   const FuncInfoType& func_info,
 			   Portion** param );
   
