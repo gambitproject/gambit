@@ -814,10 +814,7 @@ void gbtNfgFrame::OnToolsQre(wxCommandEvent &)
     }
 
     if (solutions.Length() > 0) {
-      dialogQreFile fileDialog(this, solutions);
-      if (fileDialog.ShowModal() == wxID_OK) {
-	
-      }
+      dialogQreFile *fileDialog = new dialogQreFile(this, m_doc, solutions);
     }
   }
 }

@@ -29,6 +29,7 @@
 
 #include "wx/listctrl.h"
 #include "wx/notebook.h"
+#include "gamedoc.h"
 
 //
 // Keeping both types of solution here is more than a bit kludgy;
@@ -37,7 +38,7 @@
 // and selecting profiles, and the .pxifile exporting stuff should
 // be moved to a set of qretools
 //
-class dialogQreFile : public wxDialog {
+class dialogQreFile : public wxFrame, public gbtGameView {
 private:
   wxNotebook *m_notebook;
   wxListCtrl *m_qreList;
@@ -45,11 +46,17 @@ private:
   gbtList<BehavSolution> m_behavProfiles;
 
   // Event handlers
-  void OnPxiFile(wxCommandEvent &);
+  void OnFileExportPxi(wxCommandEvent &);
+  void OnToolsPlot(wxCommandEvent &);
+
+  // Overriding view members
+  bool IsEfgView(void) const { return m_behavProfiles.Length() > 0; }
+  bool IsNfgView(void) const { return m_mixedProfiles.Length() > 0; }
+  void OnUpdate(gbtGameView *);
 
 public:
-  dialogQreFile(wxWindow *, const gbtList<MixedSolution> &);
-  dialogQreFile(wxWindow *, const gbtList<BehavSolution> &);
+  dialogQreFile(wxWindow *, gbtGameDocument *, const gbtList<MixedSolution> &);
+  dialogQreFile(wxWindow *, gbtGameDocument *, const gbtList<BehavSolution> &);
 
   DECLARE_EVENT_TABLE()
 };

@@ -179,6 +179,7 @@ gbtCorPlotWindow::gbtCorPlotWindow(wxWindow *p_parent,
   : wxScrolledWindow(p_parent, -1, p_position, p_size),
     m_marginX(50), m_marginY(65)
 {
+  SetSizeHints(400, 300);
 }
 
 gbtCorPlotWindow::~gbtCorPlotWindow()
@@ -321,3 +322,27 @@ void gbtCorPlotWindow::SetCorrespondence(gbtCorBranch *p_cor)
 
 gbtCorBranch *gbtCorPlotWindow::GetCorrespondence(void) const
 { return m_cor; }
+
+
+//========================================================================
+//                 Implementation of gbtCorPlotFrame
+//========================================================================
+
+gbtCorPlotFrame::gbtCorPlotFrame(wxWindow *p_parent,
+				 const wxPoint &p_position,
+				 const wxSize &p_size)
+  : wxFrame(p_parent, -1, _("QRE Correspondence Plot"), p_position, p_size)
+{
+  SetAutoLayout(true);
+
+  m_plot = new gbtCorPlotWindow(this, wxDefaultPosition, p_size);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  topSizer->Add(m_plot, 1, wxEXPAND, 0);
+  
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+  Show(true);
+}

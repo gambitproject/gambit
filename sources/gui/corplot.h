@@ -198,4 +198,17 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
+class gbtCorPlotFrame : public wxFrame {
+private:
+  gbtCorPlotWindow *m_plot;
+
+public:
+  gbtCorPlotFrame(wxWindow *p_parent, const wxPoint &, const wxSize &);
+  
+  void SetCorrespondence(gbtCorBranch *p_branch)
+    { m_plot->SetCorrespondence(p_branch); }
+  gbtCorBranch *GetCorrespondence(void) const
+    { return m_plot->GetCorrespondence(); }
+};
+
 #endif  // CORPLOT_H
