@@ -362,11 +362,7 @@ static Portion *GSM_Qre_Start(Portion **param)
     NP.powLam = ((NumberPortion *) param[5])->Value();
     NP.fullGraph = ((BoolPortion *) param[6])->Value();
 
-    gNumber accuracy = ((NumberPortion *) param[7])->Value();
-    NP.maxitsN = 200;
-    NP.maxits1 = 200;
-    NP.tolN = accuracy * accuracy;
-    NP.tol1 = NP.tolN;
+    NP.SetFuncMinParams( ((NumberPortion *) param[7])->Value());
 
     NP.tracefile = &((OutputPortion *) param[11])->Value();
     NP.trace = ((NumberPortion *) param[12])->Value();
@@ -411,11 +407,7 @@ static Portion *GSM_Qre_Start(Portion **param)
     EP.powLam = ((NumberPortion *) param[5])->Value();
     EP.fullGraph = ((BoolPortion *) param[6])->Value();
     
-    gNumber accuracy = ((NumberPortion *) param[7])->Value();
-    EP.maxitsN = 200;
-    EP.maxits1 = 200;
-    EP.tolN = accuracy * accuracy;
-    EP.tol1 = EP.tolN;
+    EP.SetFuncMinParams( ((NumberPortion *) param[7])->Value());
 
     EP.tracefile = &((OutputPortion *) param[11])->Value();
     EP.trace = ((NumberPortion *) param[12])->Value();
@@ -468,11 +460,7 @@ static Portion *GSM_KQre_Start(Portion **param)
     NP.powLam = ((NumberPortion *) param[5])->Value();
     NP.fullGraph = ((BoolPortion *) param[6])->Value();
 
-    gNumber accuracy = ((NumberPortion *) param[7])->Value();
-    NP.maxitsN = 200;
-    NP.maxits1 = 200;
-    NP.tolN = accuracy * accuracy;
-    NP.tol1 = NP.tolN;
+    NP.SetFuncMinParams( ((NumberPortion *) param[7])->Value());
 
     NP.tracefile = &((OutputPortion *) param[11])->Value();
     NP.trace = ((NumberPortion *) param[12])->Value();
@@ -517,11 +505,7 @@ static Portion *GSM_KQre_Start(Portion **param)
     EP.powLam = ((NumberPortion *) param[5])->Value();
     EP.fullGraph = ((BoolPortion *) param[6])->Value();
     
-    gNumber accuracy = ((NumberPortion *) param[7])->Value();
-    NP.maxitsN = 200;
-    NP.maxits1 = 200;
-    NP.tolN = accuracy * accuracy;
-    NP.tol1 = NP.tolN;
+    EP.SetFuncMinParams( ((NumberPortion *) param[7])->Value());
 
     EP.tracefile = &((OutputPortion *) param[11])->Value();
     EP.trace = ((NumberPortion *) param[12])->Value();
@@ -710,11 +694,7 @@ static Portion *GSM_Liap_Behav(Portion **param)
     LP.stopAfter = ((NumberPortion *) param[2])->Value();
     LP.nTries = ((NumberPortion *) param[3])->Value();
 
-    gNumber accuracy = ((NumberPortion *) param[4])->Value();
-    LP.maxitsN = 200;
-    LP.maxits1 = 200;
-    LP.tolN = accuracy * accuracy;
-    LP.tol1 = LP.tolN;
+    LP.SetFuncMinParams( ((NumberPortion *) param[4])->Value());
 
     LP.tracefile = &((OutputPortion *) param[7])->Value();
     LP.trace = ((NumberPortion *) param[8])->Value();
@@ -745,11 +725,7 @@ static Portion *GSM_Liap_Behav(Portion **param)
     LP.stopAfter = ((NumberPortion *) param[2])->Value();
     LP.nTries = ((NumberPortion *) param[3])->Value();
 
-    gNumber accuracy = ((NumberPortion *) param[4])->Value();
-    LP.maxitsN = 200;
-    LP.maxits1 = 200;
-    LP.tolN = accuracy * accuracy;
-    LP.tol1 = LP.tolN;
+    LP.SetFuncMinParams( ((NumberPortion *) param[4])->Value());
 
     LP.tracefile = &((OutputPortion *) param[7])->Value();
     LP.trace = ((NumberPortion *) param[8])->Value();
@@ -784,11 +760,7 @@ static Portion *GSM_Liap_Mixed(Portion **param)
   params.stopAfter = ((NumberPortion *) param[1])->Value();
   params.nTries = ((NumberPortion *) param[2])->Value();
 
-  gNumber accuracy = ((NumberPortion *) param[3])->Value();
-  params.maxitsN = 200;
-  params.maxits1 = 200;
-  params.tolN = accuracy * accuracy;
-  params.tol1 = params.tolN;
+  params.SetFuncMinParams( ((NumberPortion *) param[3])->Value());
 
   params.tracefile = &((OutputPortion *) param[6])->Value();
   params.trace = ((NumberPortion *) param[7])->Value();
