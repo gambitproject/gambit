@@ -15,7 +15,6 @@ class ExtForm    {
     gString name;
     NodeSet nodes;
 
-    int CreateInfoset(int, int, int);
     Node DeleteSubtree(Node);
     Node DeleteTerminalNode(const Node &);
 
@@ -44,6 +43,8 @@ class ExtForm    {
     Node MergeInfoset(const Node &from, const Node &into);
     void LabelInfoset(const Node &n, const gString &label)
       { nodes.SetInfosetName(n[1], n[2], label); }
+    void LabelInfoset(int pl, int iset, const gString &label)
+      { nodes.SetInfosetName(pl, iset, label); }
 //#old code      { players.SetInfosetName(n[1], n[0], n[2], label); }
     gString GetInfosetName(const Node &n)
       { return nodes.GetInfosetName(n[1], n[2]); }
@@ -52,7 +53,10 @@ class ExtForm    {
       { nodes.AppendAction(pl, iset); }
     void InsertAction(const Node &n, int where, int number);
     Node DeleteAction(const Node &n, int which);
-    void LabelAction(const Node &n, int br, const gString &label)  { }
+    void LabelAction(const Node &n, int act, const gString &label)
+      { nodes.SetActionName(n[1], n[2], act, label); }
+    void LabelAction(int pl, int iset, int act, const gString &label)
+      { nodes.SetActionName(pl, iset, act, label); }
     gTuple<gNumber> GetActionProbs(const Node &n) const;
     gNumber GetActionProb(const Node &n, int br) const;
     void SetActionProbs(const Node &n, const gTuple<gNumber> &probs);
@@ -118,8 +122,11 @@ class ExtForm    {
       { return nodes.GetOutcome(n); }
 
     void AddPlayer(int);
+    int CreateInfoset(int, int, int);
 
 	//# FILE OPERATIONS
+    int InputFromFile(const gBlock<struct nodeinfo *> &b)
+      { return nodes.InputFromFile(b); }
     void WriteToFile(gOutput &f) const;
 };
 

@@ -5,6 +5,9 @@
 #include <ctype.h>
 #include <malloc.h>
 #include "gstring.h"
+#include "extform.h"
+#include "outcome.h"
+#define PROBLEM_C
 #include "problem.h"
 
 Problem *the_problem;
@@ -14,8 +17,11 @@ double last_double;
 
 /* Here are some scratch variables... */
 
-int playerNo, gameNo;
+int playerNo, gameNo, isetNo, actNo;
+Node node;
+struct nodeinfo info;
 gTuple<gNumber> *v;
+gBlock<struct nodeinfo *> *nodes;
 
 gInput *input_stream;
 
@@ -76,12 +82,12 @@ efgfile:    LBRACE NAME
 players:    LBRACE chance_name RBRACE
        |    LBRACE chance_name player_names RBRACE
 
-chance_name:  NAME   { the_problem->SetPlayerName(0, *last_name); }
+chance_name:  NAME   { SetPlayerName(0, *last_name); }
 
 player_names: player_name
             | player_names player_name
 
-player_name:  NAME   { the_problem->AppendPlayer(*last_name); }
+player_name:  NAME   { AppendPlayer(*last_name); }
 
 /* Parsing the outcome list */
            
@@ -91,11 +97,12 @@ outcomes:   LBRACE RBRACE
 outcome_list:  outcome
             |  outcome_list outcome
 
-outcome:    LBRACE INTEGER  { the_problem->CreateOutcome(last_int);
-            v = new gTuple<gNumber>(1, the_problem->NumPlayers());
+outcome:    LBRACE INTEGER  { CreateOutcome(last_int);
+            v = new gTuple<gNumber>(1, NumPlayers());
             playerNo = 1; }
-            outcome_vector { the_problem->SetOutcomeValues(last_int, *v); }
-            NAME  { the_problem->SetOutcomeName(last_int, *last_name); }
+            outcome_vector
+            { SetOutcomeValues(last_int, *v);  delete v; }
+            NAME  { SetOutcomeName(last_int, *last_name); }
             RBRACE
 
 outcome_vector:  LBRACE RBRACE
@@ -112,8 +119,8 @@ games:      game
      |      games game
 
 game:       LBRACE INTEGER  { gameNo = last_int;
-                              the_problem->CreateGame(gameNo); }
-            NAME  { the_problem->SetGameName(gameNo, *last_name); }
+                              CreateGame(gameNo, 1); }
+            NAME  { SetGameName(gameNo, *last_name); }
             infosets nodes
             RBRACE
 
@@ -123,40 +130,58 @@ players_isets:  player_isets
              |  players_isets player_isets
 
 
-player_isets:   LBRACE RBRACE   { playerNo++; }
-            |   LBRACE iset_list RBRACE   { playerNo++; }
+player_isets:   LBRACE { isetNo = 1; } RBRACE   { playerNo++; }
+            |   LBRACE { isetNo = 1; } iset_list RBRACE   { playerNo++; }
 
 iset_list:      infoset
          |      iset_list infoset
 
-infoset:        LBRACE NAME action_data RBRACE
+infoset:        LBRACE { games(gameNo)->CreateInfoset(playerNo, gameNo, 0); }
+                NAME { games(gameNo)->LabelInfoset(playerNo, isetNo, *last_name); } action_data RBRACE  { isetNo++; }
 
 action_data:    action_list prob_list
            |    action_list
 
-action_list:    LBRACE actions RBRACE
+action_list:    LBRACE { actNo = 1; } actions RBRACE
 
 actions:        action
        |        actions action
 
 action:         NAME
+             { the_problem->games(gameNo)->AppendAction(playerNo, isetNo);
+               the_problem->games(gameNo)->LabelAction(playerNo, isetNo, actNo++, *last_name); }
 
-prob_list:      LBRACE probs RBRACE
+prob_list:      LBRACE
+            { v = new gTuple<gNumber>(1, actNo - 1); actNo = 1; }
+                probs RBRACE
+            { the_problem->games(gameNo)->SetActionProbs(playerNo, isetNo, *v);
+              delete v;  }
 
 probs:          prob
      |          probs prob
 
-prob:           FLOAT
+prob:           FLOAT  { (*v)[actNo++] = last_double; }
 
 
-nodes:          LBRACE node_list RBRACE
+nodes:          LBRACE { nodes = new gBlock<struct nodeinfo *>; } node_list
+                RBRACE   { games(gameNo)->InputFromFile(*nodes);  
+        while (nodes->Length())  delete nodes->Remove(1);  delete nodes; }
 
 node_list:      node
          |      node_list node
 
-node:           node_ID COLON node_ID INTEGER INTEGER INTEGER NAME
+node:           node_ID   { info.my_ID = node; } COLON
+                node_ID   { info.parent_ID = node; }
+                INTEGER   { info.child_no = last_int; }
+                INTEGER   { info.nextgame = last_int; }
+                INTEGER   { info.outcome = last_int; }
+                NAME      { info.name = *last_name;
+                            nodes->Append(new struct nodeinfo(info)); }
 
-node_ID:        LPAREN INTEGER COMMA INTEGER COMMA INTEGER RPAREN
+node_ID:        LPAREN INTEGER { node[1] = last_int; } COMMA
+                INTEGER { node[2] = last_int; } COMMA 
+                INTEGER { node[3] = last_int; } RPAREN
+
 
 %%
 
