@@ -35,14 +35,14 @@
 
 class StrategyProfile;
 class Lexicon;
-class efgGame;
+class gbtEfgGame;
 
 struct gbt_nfg_game_rep;
 
-class Nfg  {
+class gbtNfgGame  {
 friend class Lexicon;
 friend class NfgFileReader;
-friend void SetEfg(Nfg *, efgGame *);
+friend void SetEfg(gbtNfgGame, gbtEfgGame);
 protected:
   gbt_nfg_game_rep *rep;
 
@@ -51,13 +51,18 @@ protected:
 
   void BreakLink(void);
 
-
 public:
   // CONSTRUCTORS, DESTRUCTORS, CONSTRUCTIVE OPERATORS
-  Nfg(const gArray<int> &dim);
-  Nfg(const Nfg &b);
-  ~Nfg();
+  gbtNfgGame(const gArray<int> &dim);
+  gbtNfgGame(const gbtNfgGame &);
+  gbtNfgGame(gbt_nfg_game_rep *);
+  ~gbtNfgGame();
     
+  gbtNfgGame &operator=(const gbtNfgGame &);
+
+  bool operator==(const gbtNfgGame &) const;
+  bool operator!=(const gbtNfgGame &) const;
+
   // GENERAL DATA ACCESS AND MANIPULATION  
   void SetTitle(const gText &s);
   const gText &GetTitle(void) const;
@@ -97,21 +102,25 @@ public:
   void InitPayoffs(void) const;
 
     // defined in nfgutils.cc
-  friend void RandomNfg(Nfg &);
-  friend bool IsConstSum(const Nfg &);
-  friend gNumber MinPayoff(const Nfg &, int pl = 0);
-  friend gNumber MaxPayoff(const Nfg &, int pl = 0);
+  friend void RandomNfg(gbtNfgGame);
+  friend bool IsConstSum(const gbtNfgGame &);
+  friend gNumber MinPayoff(const gbtNfgGame &, int pl = 0);
+  friend gNumber MaxPayoff(const gbtNfgGame &, int pl = 0);
 
-  const efgGame *AssociatedEfg(void) const;
+  gbtEfgGame AssociatedEfg(void) const;
+  bool HasAssociatedEfg(void) const;
 };
 
-Nfg *ReadNfgFile(gInput &);
-Nfg *ReadComLabSfg(gInput &);
-void WriteComLabSfg(gOutput &, Nfg *);
+// Exception thrown by ReadNfgFile if not valid .nfg file
+class gbtNfgParserError { };
+gbtNfgGame ReadNfgFile(gInput &);
+
+gbtNfgGame ReadComLabSfg(gInput &);
+void WriteComLabSfg(gOutput &, const gbtNfgGame &);
 
 #include "nfstrat.h"
 #include "mixed.h"
 
-extern Nfg *CompressNfg(const Nfg &nfg, const gbtNfgSupport &S);
+extern gbtNfgGame CompressNfg(const gbtNfgGame &nfg, const gbtNfgSupport &S);
 
 #endif    // NFG_H

@@ -154,14 +154,14 @@ void NfgSupportWindow::UpdateValues(void)
   m_strategyTree->DeleteAllItems();
 
   m_strategyTree->AddRoot((char *) m_parent->GetSupport()->GetName());
-  for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
-    gbtNfgPlayer player = m_parent->Game().GetPlayer(pl);
+  for (int pl = 1; pl <= m_parent->GetGame().NumPlayers(); pl++) {
+    gbtNfgPlayer player = m_parent->GetGame().GetPlayer(pl);
 
     wxTreeItemId id = m_strategyTree->AppendItem(m_strategyTree->GetRootItem(),
 					       (char *) player.GetLabel());
     
-    for (int st = 1; st <= m_parent->Game().NumStrats(pl); st++) {
-      gbtNfgStrategy strategy = m_parent->Game().GetPlayer(pl).GetStrategy(st);
+    for (int st = 1; st <= m_parent->GetGame().NumStrats(pl); st++) {
+      gbtNfgStrategy strategy = m_parent->GetGame().GetPlayer(pl).GetStrategy(st);
 
       wxTreeItemId stratID = m_strategyTree->AppendItem(id, 
 						       (char *) strategy.GetLabel());

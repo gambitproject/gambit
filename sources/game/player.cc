@@ -40,9 +40,9 @@
 //           struct gbt_efg_player_rep: Member functions
 //----------------------------------------------------------------------
 
-gbt_efg_player_rep::gbt_efg_player_rep(efgGame *p_efg, int p_id)
+gbt_efg_player_rep::gbt_efg_player_rep(gbt_efg_game_rep *p_efg, int p_id)
   : m_id(p_id), m_efg(p_efg), m_deleted(false), 
-    m_refCount(1)
+    m_refCount(0)
 { }
 
 
@@ -70,6 +70,7 @@ gbtEfgPlayer::gbtEfgPlayer(gbt_efg_player_rep *p_rep)
 {
   if (rep) {
     rep->m_refCount++;
+    rep->m_efg->m_refCount++;
   }
 }
 
@@ -78,14 +79,18 @@ gbtEfgPlayer::gbtEfgPlayer(const gbtEfgPlayer &p_outcome)
 {
   if (rep) {
     rep->m_refCount++;
+    rep->m_efg->m_refCount++;
   }
 }
 
 gbtEfgPlayer::~gbtEfgPlayer()
 {
   if (rep) {
-    if (--rep->m_refCount == 0) {
-      delete rep;
+    if (--rep->m_refCount == 0 && rep->m_deleted) {
+      // delete rep;
+    }
+    else if (--rep->m_efg->m_refCount == 0) {
+      // delete rep->m_efg;
     }
   }
 }
@@ -96,12 +101,18 @@ gbtEfgPlayer &gbtEfgPlayer::operator=(const gbtEfgPlayer &p_outcome)
     return *this;
   }
 
-  if (rep && --rep->m_refCount == 0) {
-    delete rep;
+  if (rep) {
+    if (--rep->m_refCount == 0 && rep->m_deleted) {
+      // delete rep;
+    }
+    else if (--rep->m_efg->m_refCount == 0) {
+      // delete rep->m_efg;
+    }
   }
 
   if ((rep = p_outcome.rep) != 0) {
     rep->m_refCount++;
+    rep->m_efg->m_refCount++;
   }
   return *this;
 }
@@ -121,7 +132,7 @@ bool gbtEfgPlayer::IsNull(void) const
   return (rep == 0);
 }
 
-efgGame *gbtEfgPlayer::GetGame(void) const
+gbtEfgGame gbtEfgPlayer::GetGame(void) const
 {
   return (rep) ? rep->m_efg : 0;
 }
@@ -184,7 +195,7 @@ gOutput &operator<<(gOutput &p_stream, const gbtEfgPlayer &)
 //           gbtEfgPlayerIterator: Member function definitions
 //----------------------------------------------------------------------
 
-gbtEfgPlayerIterator::gbtEfgPlayerIterator(efgGame &p_efg)
+gbtEfgPlayerIterator::gbtEfgPlayerIterator(const gbtEfgGame &p_efg)
   : m_index(1), m_efg(p_efg)
 { }
 

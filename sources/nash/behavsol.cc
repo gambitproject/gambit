@@ -43,11 +43,13 @@ private:
   BehavProfile<gNumber> start;
   gList<gbtEfgNode> oldroots;
   
-  void SolveSubgame(const efgGame &, const EFSupport &,
+  void SolveSubgame(const gbtEfgGame &, const EFSupport &,
 		    gList<BehavSolution> &, gStatus &);
   
 public:
-  SubgamePerfectChecker(const efgGame &, const BehavProfile<gNumber> &, const gNumber & epsilon);
+  SubgamePerfectChecker(const gbtEfgGame &,
+			const BehavProfile<gNumber> &,
+			const gNumber & epsilon);
   virtual ~SubgamePerfectChecker();
   gTriState IsSubgamePerfect(void) {return isSubgamePerfect;}
 };
@@ -539,33 +541,30 @@ void BehavSolution::Invalidate(void) const
 
 gPVector<gNumber> BehavSolution::GetRNFRegret(void) const 
 {
-  const efgGame &E = GetGame(); 
-  Lexicon L(E);  // we use the lexicon without allocating normal form.  
+  gbtEfgGame efg = GetGame();
+  Lexicon L(efg);  // we use the lexicon without allocating normal form.  
   
-  for (int i = 1; i <= E.NumPlayers(); i++) {
-    L.MakeReducedStrats(m_support, E.GetPlayer(i), E.RootNode(), NULL);
+  for (int i = 1; i <= efg.NumPlayers(); i++) {
+    L.MakeReducedStrats(m_support, efg.GetPlayer(i), efg.RootNode(), NULL);
   }
   
-  gArray<int> dim(E.NumPlayers());
-  for (int i = 1; i <= E.NumPlayers(); i++)
+  gArray<int> dim(efg.NumPlayers());
+  for (int i = 1; i <= efg.NumPlayers(); i++)
     dim[i] = (L.strategies[i].Length()) ? L.strategies[i].Length() : 1;
   
   gPVector<gNumber> regret(dim); 
   
-  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
+  for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
     gNumber pay = Payoff(pl);
     for (int st = 1; st <= (L.strategies[pl]).Length(); st++) {
       BehavProfile<gNumber> scratch(*m_profile);
-      //	gout << "\ninstalled 1:  " << scratch.IsInstalled() << " scratch: " << scratch;
       const gArray<int> *const actions = L.strategies[pl][st];
       for(int j = 1;j<=(*actions).Length();j++) {
 	int a = (*actions)[j];
-	//	  for (int k = 1;k<=m_support.NumActions(pl,j);k++)
 	for (int k = 1;k<=scratch.Support().NumActions(pl,j);k++)
 	  scratch(pl,j,k) = (gNumber)0;
 	if(a>0)scratch(pl,j,a) = (gNumber)1;
       }
-      //	gout << "\ninstalled 2:  " << scratch.IsInstalled() << " scratch: " << scratch;
       gNumber pay2 = scratch.Payoff(pl);
       // use pay - pay instead of zero to get correct precision
       regret(pl,st) = (pay2 < pay) ? pay - pay : pay2 - pay ;
@@ -627,20 +626,21 @@ gOutput &operator<<(gOutput &p_file, const BehavSolution &p_solution)
   return p_file;
 }
 
-SubgamePerfectChecker::SubgamePerfectChecker(const efgGame &E, const BehavProfile<gNumber> &s,
+SubgamePerfectChecker::SubgamePerfectChecker(const gbtEfgGame &p_efg,
+					     const BehavProfile<gNumber> &s,
 					     const gNumber & epsilon)
   : subgame_number(0), eps(epsilon),  
-    isSubgamePerfect(triTRUE), infoset_subgames(E.NumInfosets()), start(s)
+    isSubgamePerfect(triTRUE), infoset_subgames(p_efg.NumInfosets()), start(s)
 {
-  MarkedSubgameRoots(E, oldroots);
+  MarkedSubgameRoots(p_efg, oldroots);
   gList<gbtEfgNode> subroots;
-  LegalSubgameRoots(E,subroots);
+  LegalSubgameRoots(p_efg,subroots);
   for (int i = 1; i <= subroots.Length(); i++) {
     (start.GetGame()).MarkSubgame(subroots[i]);
   }
   
-  for (int pl = 1; pl <= E.NumPlayers(); pl++)   {
-    gbtEfgPlayer player = E.GetPlayer(pl);
+  for (int pl = 1; pl <= p_efg.NumPlayers(); pl++)   {
+    gbtEfgPlayer player = p_efg.GetPlayer(pl);
     for (int iset = 1; iset <= player.NumInfosets(); iset++)  {
       int index;
       
@@ -655,7 +655,7 @@ SubgamePerfectChecker::SubgamePerfectChecker(const efgGame &E, const BehavProfil
   }   
 }
 
-void SubgamePerfectChecker::SolveSubgame(const efgGame &E,
+void SubgamePerfectChecker::SolveSubgame(const gbtEfgGame &p_efg,
 					 const EFSupport &sup,
 					 gList<BehavSolution> &solns,
 					 gStatus &p_status)
@@ -666,7 +666,7 @@ void SubgamePerfectChecker::SolveSubgame(const efgGame &E,
   
   gArray<int> infosets(infoset_subgames.Lengths());
   
-  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
+  for (int pl = 1; pl <= p_efg.NumPlayers(); pl++)  {
     int niset = 1;
     for (int iset = 1; iset <= infosets[pl]; iset++)  {
       if (infoset_subgames(pl, iset) == subgame_number)  {

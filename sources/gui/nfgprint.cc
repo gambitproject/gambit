@@ -29,7 +29,8 @@
 #include "game/nfgciter.h"
 #include "nfgprint.h"
 
-wxString gbtBuildHtml(const Nfg &p_nfg, int p_rowPlayer, int p_colPlayer)
+wxString gbtBuildHtml(const gbtNfgGame &p_nfg,
+		      int p_rowPlayer, int p_colPlayer)
 {
   wxString theHtml;
   gbtNfgSupport support(p_nfg);
@@ -90,7 +91,7 @@ wxString gbtBuildHtml(const Nfg &p_nfg, int p_rowPlayer, int p_colPlayer)
   return theHtml;
 }
 
-NfgPrintout::NfgPrintout(const Nfg &p_nfg,
+NfgPrintout::NfgPrintout(const gbtNfgGame &p_nfg,
 			 int p_rowPlayer, int p_colPlayer,
 			 const wxString &p_title)
   : wxHtmlPrintout(p_title)

@@ -56,8 +56,8 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
   if (p_node.NumChildren() > 0) {
     m_infoset->Append("New information set");
     int selection = 0;
-    for (int pl = 1; pl <= p_node.GetGame()->NumPlayers(); pl++) {
-      for (gbtEfgInfosetIterator infoset(p_node.GetGame()->GetPlayer(pl));
+    for (int pl = 1; pl <= p_node.GetGame().NumPlayers(); pl++) {
+      for (gbtEfgInfosetIterator infoset(p_node.GetGame().GetPlayer(pl));
 	   !infoset.End(); infoset++) {
 	if (!(*infoset).IsChanceInfoset() &&
 	    (*infoset).NumActions() == p_node.NumChildren()) {
@@ -87,7 +87,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
 				       "This is the root node of the tree"),
 		      0, wxALL | wxCENTER, 5);
   }
-  else if (p_node.GetGame()->IsLegalSubgame(p_node)) {
+  else if (p_node.GetGame().IsLegalSubgame(p_node)) {
     subgameSizer->Add(new wxStaticText(this, wxID_STATIC,
 				       "This is the root of a proper subgame"),
 		      0, wxALL | wxCENTER, 5);
@@ -103,7 +103,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
   m_outcome = new wxChoice(this, -1);
   m_outcome->Append("(null)");
   m_outcome->SetSelection(0);
-  const efgGame &efg = *p_node.GetGame();
+  gbtEfgGame efg = p_node.GetGame();
   for (int outc = 1; outc <= efg.NumOutcomes(); outc++) {
     gbtEfgOutcome outcome = efg.GetOutcome(outc);
     gText item = ToText(outc) + ": " + outcome.GetLabel();

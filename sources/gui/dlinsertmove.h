@@ -31,7 +31,7 @@
 
 class dialogInsertMove : public wxDialog {
 private:
-  efgGame &m_efg;
+  gbtEfgGame &m_efg;
 
   wxListBox *m_playerItem, *m_infosetItem;
   wxSpinCtrl *m_actions;
@@ -41,7 +41,7 @@ private:
 
 public:
   // Constructor
-  dialogInsertMove(wxWindow *, efgGame &);
+  dialogInsertMove(wxWindow *, gbtEfgGame &);
 
   // Data access (only valid if ShowModal() returns wxID_OK.
   // If GetInfoset() returns null, user selected "new infoset"

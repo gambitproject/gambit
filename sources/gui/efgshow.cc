@@ -153,7 +153,7 @@ END_EVENT_TABLE()
 //               EfgShow: Constructor and destructor
 //---------------------------------------------------------------------
 
-EfgShow::EfgShow(efgGame &p_efg, wxWindow *p_parent)
+EfgShow::EfgShow(gbtEfgGame &p_efg, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
     m_efg(p_efg), m_treeWindow(0), 
     m_cursor(0), m_copyNode(0), m_cutNode(0),
@@ -243,7 +243,7 @@ EfgShow::EfgShow(efgGame &p_efg, wxWindow *p_parent)
 
 EfgShow::~EfgShow()
 {
-  wxGetApp().RemoveGame(&m_efg);
+  wxGetApp().RemoveGame(m_efg);
 }
 
 
@@ -308,7 +308,7 @@ void EfgShow::AddProfile(const BehavSolution &p_profile, bool p_map)
     m_profiles.Append(p_profile);
   }
 
-  if (m_efg.AssociatedNfg() && p_map) {
+  if (m_efg.HasAssociatedNfg() && p_map) {
     MixedSolution mixed(MixedProfile<gNumber>(*p_profile.Profile()),
 			p_profile.Creator());
     wxGetApp().GetWindow(m_efg.AssociatedNfg())->AddProfile(mixed, false);
@@ -834,30 +834,25 @@ void EfgShow::OnFileSave(wxCommandEvent &p_event)
     }
   }
 
-  efgGame *efg = 0;
   try {
     gFileOutput file(m_filename);
-    efg = CompressEfg(m_efg, *GetSupport());
-    efg->WriteEfgFile(file, 6);
+    gbtEfgGame efg = CompressEfg(m_efg, *GetSupport());
+    efg.WriteEfgFile(file, 6);
     m_efg.SetIsDirty(false);
-    delete efg;
   }
   catch (gFileOutput::OpenFailed &) {
     wxMessageBox(wxString::Format("Could not open %s for writing.",
 				  m_filename.c_str()),
 		 "Error", wxOK, this);
-    if (efg)  delete efg;
   }
   catch (gFileOutput::WriteFailed &) {
     wxMessageBox(wxString::Format("Write error occurred in saving %s.\n",
 				  m_filename.c_str()),
 		 "Error", wxOK, this);
-    if (efg)  delete efg;
   }
-  catch (efgGame::Exception &) {
+  catch (gbtEfgGame::Exception &) {
     wxMessageBox("Internal exception in extensive form", "Error",
 		 wxOK, this);
-    if (efg)  delete efg;
   }
 }
 
@@ -1665,22 +1660,12 @@ void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
     return;
   }
 
-  Nfg *nfg = 0;
   try {
-    nfg = MakeReducedNfg(*m_currentSupport);
-  }
-  catch (...) {
-    wxMessageDialog msgDialog(this,
-			      "An internal exception occurred while converting",
-			      "Gambit exception", wxOK);
-    msgDialog.ShowModal();
-    return;
-  }
+    gbtNfgGame nfg = MakeReducedNfg(*m_currentSupport);
 
-  if (nfg) {
-    NfgShow *nfgShow = new NfgShow(*nfg, m_parent);
+    NfgShow *nfgShow = new NfgShow(nfg, m_parent);
     nfgShow->SetFilename("");
-    wxGetApp().AddGame(&m_efg, nfg, nfgShow);
+    wxGetApp().AddGame(m_efg, nfg, nfgShow);
 
     for (int i = 1; i <= m_profiles.Length(); i++) {
       BehavProfile<gNumber> profile(*m_profiles[i].Profile());
@@ -1692,10 +1677,14 @@ void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
       nfgShow->ChangeProfile(m_currentProfile);
     }
   }
-  else {
-    wxMessageBox("Could not create normal form game.\n",
-		 "Reduced normal form", wxOK);
+  catch (...) {
+    wxMessageDialog msgDialog(this,
+			      "An internal exception occurred while converting",
+			      "Gambit exception", wxOK);
+    msgDialog.ShowModal();
+    return;
   }
+
 }
 
 void EfgShow::OnToolsNormalAgent(wxCommandEvent &)
@@ -1710,9 +1699,9 @@ void EfgShow::OnToolsNormalAgent(wxCommandEvent &)
     }
   }
 
-  Nfg *N = 0;
   try {
-    N = MakeAfg(m_efg);
+    gbtNfgGame nfg = MakeAfg(m_efg);
+    (void) new NfgShow(nfg, m_parent);
   }
   catch (...) {
     wxMessageDialog msgDialog(this,
@@ -1720,9 +1709,6 @@ void EfgShow::OnToolsNormalAgent(wxCommandEvent &)
 			      "Gambit exception", wxOK);
     msgDialog.ShowModal();
     return;
-  }
-  if (N) {
-    (void) new NfgShow(*N, m_parent);
   }
 }
 
@@ -1784,7 +1770,7 @@ void EfgShow::OnProfilesDuplicate(wxCommandEvent &)
 void EfgShow::OnProfilesDelete(wxCommandEvent &)
 {
   m_profiles.Remove(m_currentProfile);
-  if (m_efg.AssociatedNfg()) {
+  if (m_efg.HasAssociatedNfg()) {
     wxGetApp().GetWindow(m_efg.AssociatedNfg())->RemoveProfile(m_currentProfile);
   }
   m_currentProfile = (m_profiles.Length() > 0) ? 1 : 0;

@@ -126,7 +126,7 @@ END_EVENT_TABLE()
 //               NfgShow: Constructor and destructor
 //----------------------------------------------------------------------
 
-NfgShow::NfgShow(Nfg &p_nfg, wxWindow *p_parent)
+NfgShow::NfgShow(gbtNfgGame p_nfg, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(500, 500)),
     m_nfg(p_nfg),
     m_table(0), m_profileTable(0),
@@ -206,7 +206,7 @@ NfgShow::NfgShow(Nfg &p_nfg, wxWindow *p_parent)
 
 NfgShow::~NfgShow()
 {
-  wxGetApp().RemoveGame(&m_nfg);
+  wxGetApp().RemoveGame(m_nfg);
 }
 
 //----------------------------------------------------------------------
@@ -224,7 +224,7 @@ void NfgShow::AddProfile(const MixedSolution &p_profile, bool p_map)
     m_profiles.Append(p_profile);
   }
 
-  if (m_nfg.AssociatedEfg() && p_map) {
+  if (m_nfg.HasAssociatedEfg() && p_map) {
     wxGetApp().GetWindow(m_nfg.AssociatedEfg())->AddProfile(BehavProfile<gNumber>(*p_profile.Profile()), false);
   }
   m_profileTable->UpdateValues();
@@ -559,29 +559,24 @@ void NfgShow::OnFileSave(wxCommandEvent &p_event)
     }
   }
 
-  Nfg *nfg = 0;
   try {
     gFileOutput file(m_filename.c_str());
-    nfg = CompressNfg(m_nfg, *m_currentSupport);
-    nfg->WriteNfgFile(file, 6);
+    gbtNfgGame nfg = CompressNfg(m_nfg, *m_currentSupport);
+    nfg.WriteNfgFile(file, 6);
     m_nfg.SetIsDirty(false);
-    delete nfg;
   }
   catch (gFileOutput::OpenFailed &) {
     wxMessageBox(wxString::Format("Could not open %s for writing.",
 				  m_filename.c_str()),
 		 "Error", wxOK, this);
-    if (nfg)  delete nfg;
   }
   catch (gFileOutput::WriteFailed &) {
     wxMessageBox(wxString::Format("Write error occurred in saving %s.\n",
 				  m_filename.c_str()),
 		 "Error", wxOK, this);
-    if (nfg)  delete nfg;
   }
   catch (gException &) {
     wxMessageBox("Internal exception in Gambit", "Error", wxOK, this);
-    if (nfg)  delete nfg;
   }
 }
 
@@ -599,7 +594,7 @@ void NfgShow::OnFileExportComLab(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       gFileOutput file(dialog.GetPath().c_str());
-      WriteComLabSfg(file, &m_nfg);
+      WriteComLabSfg(file, m_nfg);
     }
     catch (gFileOutput::OpenFailed &) { 
       wxMessageBox(wxString::Format("Could not open %s for writing.",
@@ -1161,7 +1156,7 @@ void NfgShow::OnProfilesDuplicate(wxCommandEvent &)
 void NfgShow::OnProfilesDelete(wxCommandEvent &)
 {
   m_profiles.Remove(m_currentProfile);
-  if (m_nfg.AssociatedEfg()) {
+  if (m_nfg.HasAssociatedEfg()) {
     wxGetApp().GetWindow(m_nfg.AssociatedEfg())->RemoveProfile(m_currentProfile);
   }
   m_currentProfile = (m_profiles.Length() > 0) ? 1 : 0;

@@ -33,27 +33,27 @@
 // NfgIter:  Constructors, Destructors, Operators
 //--------------------------------------------------------------------------
 
-NfgIter::NfgIter(Nfg &nfg)
-  : support(nfg),
-    N(&nfg), current_strat(nfg.NumPlayers()), profile(nfg)
+NfgIter::NfgIter(gbtNfgGame p_nfg)
+  : support(p_nfg),
+    m_nfg(p_nfg), current_strat(p_nfg.NumPlayers()), profile(p_nfg)
 {
   First();
 }
 
 NfgIter::NfgIter(const gbtNfgSupport &s) 
-  : support(s), N((Nfg *) &s.Game()),
-    current_strat(N->NumPlayers()), profile(*N)
+  : support(s), m_nfg(s.GetGame()),
+    current_strat(m_nfg.NumPlayers()), profile(m_nfg)
 {
   First();
 }
 
 NfgIter::NfgIter(const NfgIter &it)
-  : support(it.support), N(it.N), current_strat(it.current_strat), 
+  : support(it.support), m_nfg(it.m_nfg), current_strat(it.current_strat), 
     profile(it.profile)
 { }
 
 NfgIter::NfgIter(const NfgContIter &it)
-  : support(it.support), N(it.N), current_strat(it.current_strat),
+  : support(it.support), m_nfg(it.m_nfg), current_strat(it.current_strat),
     profile(it.profile)
 { }
 
@@ -63,7 +63,7 @@ NfgIter::~NfgIter()
 NfgIter &NfgIter::operator=(const NfgIter &it)
 {
   if (this != &it)  {
-    N = it.N;
+    m_nfg = it.m_nfg;
     profile = it.profile;
     current_strat = it.current_strat;
     support = it.support;
@@ -77,7 +77,7 @@ NfgIter &NfgIter::operator=(const NfgIter &it)
 
 void NfgIter::First(void)
 {
-  for (int i = 1; i <= N->NumPlayers(); i++)  {
+  for (int i = 1; i <= m_nfg.NumPlayers(); i++)  {
     gbtNfgStrategy s = support.GetStrategy(i, 1);
     profile.Set(i, s);
     current_strat[i] = 1;
@@ -101,7 +101,7 @@ int NfgIter::Next(int p)
 
 int NfgIter::Set(int p, int s)
 {
-  if (p <= 0 || p > N->NumPlayers() ||
+  if (p <= 0 || p > m_nfg.NumPlayers() ||
       s <= 0 || s > support.NumStrats(p))
     return 0;
   
@@ -111,14 +111,14 @@ int NfgIter::Set(int p, int s)
 
 void NfgIter::Get(gArray<int> &t) const
 {
-  for (int i = 1; i <= N->NumPlayers(); i++) {
+  for (int i = 1; i <= m_nfg.NumPlayers(); i++) {
     t[i] = profile[i].GetId();
   }
 }
 
 void NfgIter::Set(const gArray<int> &t)
 {
-  for (int i = 1; i <= N->NumPlayers(); i++){
+  for (int i = 1; i <= m_nfg.NumPlayers(); i++){
     profile.Set(i, support.GetStrategy(i, t[i]));
     current_strat[i] = t[i];
   } 
@@ -131,12 +131,12 @@ long NfgIter::GetIndex(void) const
 
 gbtNfgOutcome NfgIter::GetOutcome(void) const
 {
-  return N->GetOutcome(profile);
+  return m_nfg.GetOutcome(profile);
 }
 
 void NfgIter::SetOutcome(gbtNfgOutcome outcome)
 {
-  N->SetOutcome(profile, outcome);
+  m_nfg.SetOutcome(profile, outcome);
 }
 
 
@@ -146,8 +146,8 @@ void NfgIter::SetOutcome(gbtNfgOutcome outcome)
 
 NfgContIter::NfgContIter(const gbtNfgSupport &s)
   : support(s), 
-    current_strat(s.Game().NumPlayers()),
-    N((Nfg *) &s.Game()), profile(*N), thawed(N->NumPlayers())
+    current_strat(s.GetGame().NumPlayers()),
+    m_nfg(s.GetGame()), profile(m_nfg), thawed(m_nfg.NumPlayers())
 {
   for (int i = 1; i <= thawed.Length(); i++)
     thawed[i] = i;
@@ -189,8 +189,8 @@ void NfgContIter::Set(gbtNfgStrategy s)
 void NfgContIter::Freeze(const gBlock<int> &freeze)
 {
   frozen = freeze;
-  thawed = gBlock<int>(N->NumPlayers() - freeze.Length());
-  for (int i = 1, j = 1; i <= N->NumPlayers(); i++)
+  thawed = gBlock<int>(m_nfg.NumPlayers() - freeze.Length());
+  for (int i = 1, j = 1; i <= m_nfg.NumPlayers(); i++)
     if (!frozen.Contains(i))   thawed[j++] = i;
   First();
 }
@@ -246,7 +246,7 @@ const StrategyProfile &NfgContIter::Profile(void) const
 
 gArray<int> NfgContIter::Get(void) const
 {
-  gArray<int> current(N->NumPlayers());
+  gArray<int> current(m_nfg.NumPlayers());
   for (int i = 1; i <= current.Length(); i++) {
     current[i] = profile[i].GetId();
   }
@@ -255,25 +255,25 @@ gArray<int> NfgContIter::Get(void) const
 
 void NfgContIter::Get(gArray<int> &t) const
 {
-  for (int i = 1; i <= N->NumPlayers(); i++) {
+  for (int i = 1; i <= m_nfg.NumPlayers(); i++) {
     t[i] = profile[i].GetId();
   }
 }
 
 gbtNfgOutcome NfgContIter::GetOutcome(void) const
 {
-  return N->GetOutcome(profile);
+  return m_nfg.GetOutcome(profile);
 }
 
 void NfgContIter::SetOutcome(gbtNfgOutcome outcome)
 {
-  N->SetOutcome(profile, outcome);
+  m_nfg.SetOutcome(profile, outcome);
 }
 
 void NfgContIter::Dump(gOutput &f) const
 {
   f << "{ ";
-  for (int i = 1; i <= N->NumPlayers(); i++) {
+  for (int i = 1; i <= m_nfg.NumPlayers(); i++) {
     f << profile[i].GetId() << ' ';
   }
   f << '}';

@@ -159,17 +159,13 @@ void EfSupport_ListPortion::SetValue(const gList<const EFSupport> &list)
 
 static Portion *GSM_AgentForm(GSM &, Portion **param)
 {
-  efgGame &E = *((EfgPortion*) param[0])->Value();
+  gbtEfgGame efg = AsEfg(param[0]);
   gWatch watch;
-
-  Nfg *N = MakeAfg(E);
+  gbtNfgGame afg = MakeAfg(efg);
   
   ((NumberPortion *) param[1])->SetValue(watch.Elapsed());
 
-  if (N)
-    return new NfgPortion(N);
-  else
-    throw gclRuntimeError("Conversion to agent form failed");
+  return new NfgPortion(afg);
 }
 
 //------------
@@ -402,7 +398,7 @@ static gbtNfgNashAlgorithm *GSM_Lcp_Nfg_Rational(int p_stopAfter)
 static Portion *GSM_Lcp_Nfg(GSM &gsm, Portion **param)
 {
   const gbtNfgSupport &support = AsNfgSupport(param[0]);
-  const Nfg &nfg = support.Game();
+  gbtNfgGame nfg = support.GetGame();
 
   if (nfg.NumPlayers() != 2) {
     throw gclRuntimeError("Only valid for two-person games");
@@ -452,7 +448,7 @@ static gbtEfgNashAlgorithm *GSM_Lcp_Efg_Rational(int p_stopAfter)
 static Portion *GSM_Lcp_Efg(GSM &gsm, Portion **param)
 {
   const EFSupport &support = AsEfgSupport(param[0]);
-  const efgGame &efg = support.GetGame();
+  gbtEfgGame efg = support.GetGame();
 
   if (efg.NumPlayers() != 2) {
     throw gclRuntimeError("Only valid for two-person games");
@@ -622,7 +618,7 @@ static gbtNfgNashAlgorithm *GSM_Lp_Nfg_Rational(void)
 static Portion *GSM_Lp_Nfg(GSM &gsm, Portion **param)
 {
   const gbtNfgSupport &support = AsNfgSupport(param[0]);
-  const Nfg &nfg = support.Game();
+  gbtNfgGame nfg = support.GetGame();
 
   if (nfg.NumPlayers() != 2 || !IsConstSum(nfg)) {
     throw gclRuntimeError("Only valid for two-person zero-sum games");
@@ -721,7 +717,7 @@ static gbtEfgNashAlgorithm *GSM_Lp_Efg_Rational(void)
 static Portion *GSM_Lp_Efg(GSM &gsm, Portion **param)
 {
   const EFSupport &support = AsEfgSupport(param[0]);
-  const efgGame &efg = support.GetGame();
+  gbtEfgGame efg = support.GetGame();
   
   if (efg.NumPlayers() != 2 || !efg.IsConstSum()) {
     throw gclRuntimeError("Only valid for two-person zero-sum games");
@@ -831,14 +827,9 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
 
 static Portion *GSM_Nfg(GSM &, Portion **param)
 {
-  const efgGame &efg = AsEfg(param[0]);
-  Nfg *nfg = MakeReducedNfg(EFSupport(efg));
-  if (nfg) {
-    return new NfgPortion(nfg);
-  }
-  else {
-    throw gclRuntimeError("Conversion to reduced nfg failed");
-  }
+  gbtEfgGame efg = AsEfg(param[0]);
+  gbtNfgGame nfg = MakeReducedNfg(EFSupport(efg));
+  return new NfgPortion(nfg);
 }
 
 
@@ -948,7 +939,7 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
   }
   else  {     // BEHAV
     const BehavSolution &start = AsBehav(param[0]);
-    efgGame &efg = start.GetGame();
+    gbtEfgGame efg = start.GetGame();
   
     if (!IsPerfectRecall(efg)) {
       gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";

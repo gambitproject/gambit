@@ -67,7 +67,7 @@ void NfgProfileList::UpdateValues(void)
   InsertColumn(4, "Liap Value");
   InsertColumn(5, "Qre Lambda");
   
-  const Nfg &nfg = m_parent->Game();
+  gbtNfgGame nfg = m_parent->GetGame();
   int maxColumn = 5;
 
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
@@ -125,7 +125,7 @@ wxString NfgProfileList::GetReport(void) const
 {
   wxString report;
   const gList<MixedSolution> &profiles = m_parent->Profiles();
-  const Nfg &nfg = m_parent->Game();
+  gbtNfgGame nfg = m_parent->GetGame();
 
   report += wxString::Format("Mixed strategy profiles on game '%s' [%s]\n\n",
 			     (const char *) nfg.GetTitle(),

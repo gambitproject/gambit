@@ -637,7 +637,7 @@ static void Parse(ParserState &p_state, TreeData &p_treeData)
 // the actual tree to be returned
 //
 
-static void BuildSubtree(efgGame *p_efg, gbtEfgNode p_node,
+static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
 			 TreeData &p_treeData, NodeData **p_nodeData)
 {
   p_node.SetLabel((*p_nodeData)->m_name);
@@ -647,13 +647,13 @@ static void BuildSubtree(efgGame *p_efg, gbtEfgNode p_node,
       p_node.SetOutcome(p_treeData.GetOutcome((*p_nodeData)->m_outcome));
     }
     else {
-      gbtEfgOutcome outcome = p_efg->NewOutcome();
+      gbtEfgOutcome outcome = p_efg.NewOutcome();
       outcome.SetLabel((*p_nodeData)->m_outcomeData->m_name);
       p_treeData.m_outcomes.Append(new DefinedOutcomeData((*p_nodeData)->m_outcome,
 							  outcome));
       p_node.SetOutcome(outcome);
-      for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
-	outcome.SetPayoff(p_efg->GetPlayer(pl),
+      for (int pl = 1; pl <= p_efg.NumPlayers(); pl++) {
+	outcome.SetPayoff(p_efg.GetPlayer(pl),
 			  (*p_nodeData)->m_outcomeData->m_payoffs[pl]);
       }
     }
@@ -665,12 +665,12 @@ static void BuildSubtree(efgGame *p_efg, gbtEfgNode p_node,
 
     if (!player->GetInfoset((*p_nodeData)->m_infoset).IsNull()) {
       gbtEfgInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
-      p_efg->AppendNode(p_node, infoset);
+      p_efg.AppendNode(p_node, infoset);
     }
     else {
       gbtEfgInfoset infoset =
-	p_efg->AppendNode(p_node, p_efg->GetPlayer((*p_nodeData)->m_player),
-			  (*p_nodeData)->m_infosetData->m_actions.Length());
+	p_efg.AppendNode(p_node, p_efg.GetPlayer((*p_nodeData)->m_player),
+			 (*p_nodeData)->m_infosetData->m_actions.Length());
 
       infoset.SetLabel((*p_nodeData)->m_infosetData->m_name);
       for (int act = 1; act <= infoset.NumActions(); act++) {
@@ -689,17 +689,17 @@ static void BuildSubtree(efgGame *p_efg, gbtEfgNode p_node,
 
     if (!player->GetInfoset((*p_nodeData)->m_infoset).IsNull()) {
       gbtEfgInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
-      p_efg->AppendNode(p_node, infoset);
+      p_efg.AppendNode(p_node, infoset);
     }
     else {
-      gbtEfgInfoset infoset = p_efg->AppendNode(p_node, p_efg->GetChance(),
-						(*p_nodeData)->m_infosetData->m_actions.Length());
+      gbtEfgInfoset infoset = p_efg.AppendNode(p_node, p_efg.GetChance(),
+					       (*p_nodeData)->m_infosetData->m_actions.Length());
 
       infoset.SetLabel((*p_nodeData)->m_infosetData->m_name);
       for (int act = 1; act <= infoset.NumActions(); act++) {
 	infoset.GetAction(act).SetLabel((*p_nodeData)->m_infosetData->m_actions[act]);
-	p_efg->SetChanceProb(infoset, act, 
-			     (*p_nodeData)->m_infosetData->m_probs[act]);
+	p_efg.SetChanceProb(infoset, act, 
+			    (*p_nodeData)->m_infosetData->m_probs[act]);
       }
     }
 
@@ -714,16 +714,16 @@ static void BuildSubtree(efgGame *p_efg, gbtEfgNode p_node,
   }
 }
 
-static void BuildEfg(efgGame *p_efg, TreeData &p_treeData)
+static void BuildEfg(gbtEfgGame p_efg, TreeData &p_treeData)
 {
-  p_efg->SetTitle(p_treeData.m_title);
-  p_efg->SetComment(p_treeData.m_comment);
+  p_efg.SetTitle(p_treeData.m_title);
+  p_efg.SetComment(p_treeData.m_comment);
   for (PlayerData *player = p_treeData.m_firstPlayer; player;
        player = player->m_next) {
-    p_efg->NewPlayer().SetLabel(player->m_name);
+    p_efg.NewPlayer().SetLabel(player->m_name);
   }
   NodeData *node = p_treeData.m_firstNode;
-  BuildSubtree(p_efg, p_efg->RootNode(), p_treeData, &node);
+  BuildSubtree(p_efg, p_efg.RootNode(), p_treeData, &node);
 }
 
 
@@ -731,12 +731,12 @@ static void BuildEfg(efgGame *p_efg, TreeData &p_treeData)
 // ReadEfgFile: Global visible function to read an extensive form savefile
 //=========================================================================
 
-efgGame *ReadEfgFile(gInput &p_file)
+gbtEfgGame ReadEfgFile(gInput &p_file)
 {
   ParserState parser(p_file);
   TreeData treeData;
 
-  efgGame *efg = new efgGame;
+  gbtEfgGame efg;
 
   try {
     Parse(parser, treeData);
@@ -744,11 +744,9 @@ efgGame *ReadEfgFile(gInput &p_file)
     return efg;
   }
   catch (ParserError &) {
-    delete efg;
     return 0;
   }
   catch (...) {
-    delete efg;
     return 0;
   }
 }

@@ -28,22 +28,22 @@
 #define LEXICON_H
 
 #include "base/base.h"
+#include "nfg.h"
 
 typedef gArray<int> lexCorrespondence;
-class Nfg;
 
 class Lexicon   {
   public:
-    Nfg *N;
+    gbtNfgGame m_nfg;
     gArray<gList<lexCorrespondence *> > strategies;
 
-    Lexicon(const efgGame &);
+    Lexicon(const gbtEfgGame &);
     ~Lexicon();
 
     void MakeStrategy(gbtEfgPlayer p);
     void MakeReducedStrats(const class EFSupport &, gbtEfgPlayer, 
 			   gbtEfgNode, gbtEfgNode);
-    void MakeLink(efgGame *, Nfg *);
+    void MakeLink(gbtEfgGame, gbtNfgGame);
 };
 
 

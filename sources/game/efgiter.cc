@@ -27,32 +27,32 @@
 #include "efgciter.h"
 #include "efgiter.h"
 
-EfgIter::EfgIter(efgGame &efg)
-  : _efg(&efg), _support(efg),
-    _profile(efg), _current(_efg->NumInfosets()),
-    _payoff(_efg->NumPlayers())
+EfgIter::EfgIter(gbtEfgGame p_efg)
+  : m_efg(p_efg), _support(p_efg),
+    _profile(p_efg), _current(m_efg.NumInfosets()),
+    _payoff(m_efg.NumPlayers())
 {
   First();
 }
 
 EfgIter::EfgIter(const EFSupport &s)
-  : _efg(&s.GetGame()), _support(s),
-    _profile(s.GetGame()), _current(_efg->NumInfosets()),
-    _payoff(_efg->NumPlayers())
+  : m_efg(s.GetGame()), _support(s),
+    _profile(s.GetGame()), _current(m_efg.NumInfosets()),
+    _payoff(m_efg.NumPlayers())
 {
   First();
 }
 
 EfgIter::EfgIter(const EfgIter &it)
-  : _efg(it._efg), _support(it._support),
+  : m_efg(it.m_efg), _support(it._support),
     _profile(it._profile), _current(it._current),
-    _payoff(_efg->NumPlayers())
+    _payoff(m_efg.NumPlayers())
 { }
 
 EfgIter::EfgIter(const EfgContIter &it)
-  : _efg(it._efg), _support(it._support),
+  : m_efg(it.m_efg), _support(it._support),
     _profile(it._profile), _current(it._current),
-    _payoff(_efg->NumPlayers())
+    _payoff(m_efg.NumPlayers())
 { }
   
 
@@ -62,7 +62,7 @@ EfgIter::~EfgIter()
 
 EfgIter &EfgIter::operator=(const EfgIter &it)
 {
-  if (this != &it && _efg == it._efg)  {
+  if (this != &it && m_efg == it.m_efg)  {
     _profile = it._profile;
     _current = it._current;
   }
@@ -74,8 +74,8 @@ void EfgIter::First(void)
 {
   _current = 1;
 
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= _efg->GetPlayer(pl).NumInfosets(); iset++) {
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++) {
       _profile.Set(_support.GetAction(pl, iset, 1));
     }
   }
@@ -96,8 +96,8 @@ int EfgIter::Next(int pl, int iset)
 
 int EfgIter::Set(int pl, int iset, int act)
 {
-  if (pl <= 0 || pl > _efg->NumPlayers() ||
-      iset <= 0 || iset > _efg->GetPlayer(pl).NumInfosets() ||
+  if (pl <= 0 || pl > m_efg.NumPlayers() ||
+      iset <= 0 || iset > m_efg.GetPlayer(pl).NumInfosets() ||
       act <= 0 || act > _support.NumActions(pl, iset))
     return 0;
 
@@ -115,7 +115,7 @@ gNumber EfgIter::Payoff(int pl) const
 void EfgIter::Payoff(gVector<gNumber> &payoff) const
 {
   _profile.Payoff(payoff);
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++)
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)
     payoff[pl] = _payoff[pl];
 }
 
@@ -126,17 +126,17 @@ void EfgIter::Dump(gOutput &f) const
 
 EfgContIter::EfgContIter(const EFSupport &s)
   : _frozen_pl(0), _frozen_iset(0),
-    _efg(&s.GetGame()), _support(s),
+    m_efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
     _is_active(),
-    _num_active_infosets(_efg->NumPlayers()),
-    _payoff(_efg->NumPlayers())
+    _num_active_infosets(m_efg.NumPlayers()),
+    _payoff(m_efg.NumPlayers())
 {
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     _num_active_infosets[pl] = 0;
-    gBlock<bool> active_for_pl(_efg->GetPlayer(pl).NumInfosets());
-    for (int iset = 1; iset <= _efg->GetPlayer(pl).NumInfosets(); iset++) {
-      active_for_pl[iset] = s.MayReach(_efg->GetPlayer(pl).GetInfoset(iset));
+    gBlock<bool> active_for_pl(m_efg.GetPlayer(pl).NumInfosets());
+    for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++) {
+      active_for_pl[iset] = s.MayReach(m_efg.GetPlayer(pl).GetInfoset(iset));
       _num_active_infosets[pl]++;
     }
     _is_active += active_for_pl;
@@ -147,17 +147,17 @@ EfgContIter::EfgContIter(const EFSupport &s)
 EfgContIter::EfgContIter(const EFSupport &s, 
 			 const gList<gbtEfgInfoset >&active)
   : _frozen_pl(0), _frozen_iset(0),
-    _efg(&s.GetGame()), _support(s),
+    m_efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
     _is_active(),
-    _num_active_infosets(_efg->NumPlayers()),
-    _payoff(_efg->NumPlayers())
+    _num_active_infosets(m_efg.NumPlayers()),
+    _payoff(m_efg.NumPlayers())
 {
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     _num_active_infosets[pl] = 0;
-    gBlock<bool> active_for_pl(_efg->GetPlayer(pl).NumInfosets());
-    for (int iset = 1; iset <= _efg->GetPlayer(pl).NumInfosets(); iset++) {
-      if ( active.Contains(_efg->GetPlayer(pl).GetInfoset(iset)) ) {
+    gBlock<bool> active_for_pl(m_efg.GetPlayer(pl).NumInfosets());
+    for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++) {
+      if ( active.Contains(m_efg.GetPlayer(pl).GetInfoset(iset)) ) {
 	active_for_pl[iset] = true;
 	_num_active_infosets[pl]++;
       }
@@ -175,8 +175,8 @@ EfgContIter::~EfgContIter()
 
 void EfgContIter::First(void)
 {
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= _efg->GetPlayer(pl).NumInfosets(); iset++)
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++)
       if (pl != _frozen_pl && iset != _frozen_iset)   {
 	_current(pl, iset) = 1;
 	if (_is_active[pl][iset])      
@@ -226,11 +226,11 @@ void EfgContIter::Freeze(int pl, int iset)
 
 int EfgContIter::NextContingency(void)
 {
-  int pl = _efg->NumPlayers();
+  int pl = m_efg.NumPlayers();
   while (pl > 0 && _num_active_infosets[pl] == 0)
     --pl;
   if (pl == 0)   return 0;
-  int iset = _efg->GetPlayer(pl).NumInfosets();
+  int iset = m_efg.GetPlayer(pl).NumInfosets();
     
   while (true) {
     if (_is_active[pl][iset] && (pl != _frozen_pl || iset != _frozen_iset))
@@ -251,7 +251,7 @@ int EfgContIter::NextContingency(void)
       }  while (pl > 0 && _num_active_infosets[pl] == 0);
       
       if (pl == 0)   return 0;
-      iset = _efg->GetPlayer(pl).NumInfosets();
+      iset = m_efg.GetPlayer(pl).NumInfosets();
     }
   }
 }
@@ -271,16 +271,16 @@ void EfgContIter::Dump(gOutput &f) const
 
 
 EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s)
-  : _efg(&s.GetGame()), _support(s),
+  : m_efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
     _is_active(),
-    _num_active_infosets(_efg->NumPlayers()),
-    _payoff(_efg->NumPlayers())
+    _num_active_infosets(m_efg.NumPlayers()),
+    _payoff(m_efg.NumPlayers())
 {
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     _num_active_infosets[pl] = 0;
-    gBlock<bool> active_for_pl(_efg->GetPlayer(pl).NumInfosets());
-    for (int iset = 1; iset <= _efg->GetPlayer(pl).NumInfosets(); iset++) {
+    gBlock<bool> active_for_pl(m_efg.GetPlayer(pl).NumInfosets());
+    for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++) {
       active_for_pl[iset] = true;
       _num_active_infosets[pl]++;
     }
@@ -291,17 +291,17 @@ EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s)
 
 EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s, 
 					       const gList<gbtEfgInfoset> &active)
-  : _efg(&s.GetGame()), _support(s),
+  : m_efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
     _is_active(),
-    _num_active_infosets(_efg->NumPlayers()),
-    _payoff(_efg->NumPlayers())
+    _num_active_infosets(m_efg.NumPlayers()),
+    _payoff(m_efg.NumPlayers())
 {
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     _num_active_infosets[pl] = 0;
-    gBlock<bool> active_for_pl(_efg->GetPlayer(pl).NumInfosets());
-    for (int iset = 1; iset <= _efg->GetPlayer(pl).NumInfosets(); iset++) {
-      if ( active.Contains(_efg->GetPlayer(pl).GetInfoset(iset)) ) {
+    gBlock<bool> active_for_pl(m_efg.GetPlayer(pl).NumInfosets());
+    for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++) {
+      if ( active.Contains(m_efg.GetPlayer(pl).GetInfoset(iset)) ) {
 	active_for_pl[iset] = true;
 	_num_active_infosets[pl]++;
       }
@@ -319,8 +319,8 @@ EfgConditionalContIter::~EfgConditionalContIter()
 
 void EfgConditionalContIter::First(void)
 {
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= _efg->GetPlayer(pl).NumInfosets(); iset++) {
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++) {
       _current(pl, iset) = 1;
       if (_is_active[pl][iset])
 	_profile.Set(_support.GetAction(pl, iset, 1));
@@ -354,11 +354,11 @@ int EfgConditionalContIter::Next(int pl, int iset)
 
 int EfgConditionalContIter::NextContingency(void)
 {
-  int pl = _efg->NumPlayers();
+  int pl = m_efg.NumPlayers();
   while (pl > 0 && _num_active_infosets[pl] == 0)
     --pl;
   if (pl == 0)   return 0;
-  int iset = _efg->GetPlayer(pl).NumInfosets();
+  int iset = m_efg.GetPlayer(pl).NumInfosets();
     
   while (true) {
 
@@ -380,7 +380,7 @@ int EfgConditionalContIter::NextContingency(void)
       }  while (pl > 0 && _num_active_infosets[pl] == 0);
       
       if (pl == 0)   return 0;
-      iset = _efg->GetPlayer(pl).NumInfosets();
+      iset = m_efg.GetPlayer(pl).NumInfosets();
     }
   }
 }

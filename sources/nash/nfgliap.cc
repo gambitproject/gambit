@@ -34,7 +34,7 @@
 class NFLiapFunc : public gC1Function<double>  {
 private:
   mutable long _nevals;
-  const Nfg &_nfg;
+  gbtNfgGame m_nfg;
   mutable MixedProfile<double> _p;
 
   double Value(const gVector<double> &) const;
@@ -44,15 +44,15 @@ private:
     
 
 public:
-  NFLiapFunc(const Nfg &, const MixedProfile<double> &);
+  NFLiapFunc(const gbtNfgGame &, const MixedProfile<double> &);
   virtual ~NFLiapFunc();
     
   long NumEvals(void) const  { return _nevals; }
 };
 
-NFLiapFunc::NFLiapFunc(const Nfg &N,
+NFLiapFunc::NFLiapFunc(const gbtNfgGame &p_nfg,
 		       const MixedProfile<double> &start)
-  : _nevals(0L), _nfg(N), _p(start)
+  : _nevals(0L), m_nfg(p_nfg), _p(start)
 { }
 
 NFLiapFunc::~NFLiapFunc()
@@ -65,7 +65,7 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
   double x, x1, psum;
   
   x = 0.0;
-  for (i = 1; i <= _nfg.NumPlayers(); i++)  {
+  for (i = 1; i <= m_nfg.NumPlayers(); i++)  {
     psum = 0.0;
     for (j = 1; j <= p.Support().NumStrats(i); j++)  {
       psum += p(i,j);
@@ -128,7 +128,7 @@ bool NFLiapFunc::Gradient(const gVector<double> &v, gVector<double> &d) const
   ((gVector<double> &) _p).operator=(v);
   int i1, j1, ii;
   
-  for (i1 = 1, ii = 1; i1 <= _nfg.NumPlayers(); i1++) {
+  for (i1 = 1, ii = 1; i1 <= m_nfg.NumPlayers(); i1++) {
     for (j1 = 1; j1 <= _p.Support().NumStrats(i1); j1++) {
       d[ii++] = LiapDerivValue(i1, j1, _p);
     }
@@ -154,7 +154,7 @@ double NFLiapFunc::Value(const gVector<double> &v) const
   double x, result = 0.0, avg, sum;
   payoff = 0.0;
   
-  for (int i = 1; i <= _nfg.NumPlayers(); i++)  {
+  for (int i = 1; i <= m_nfg.NumPlayers(); i++)  {
     tmp.CopyRow(i, payoff);
     avg = sum = 0.0;
 
@@ -190,7 +190,7 @@ static void PickRandomProfile(MixedProfile<double> &p)
 {
   double sum, tmp;
 
-  for (int pl = 1; pl <= p.Game().NumPlayers(); pl++)  {
+  for (int pl = 1; pl <= p.GetGame().NumPlayers(); pl++)  {
     sum = 0.0;
     int st;
     
@@ -219,7 +219,7 @@ gList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 {
   static const double ALPHA = .00000001;
   MixedProfile<double> p(p_support);
-  NFLiapFunc F(p.Game(), p);
+  NFLiapFunc F(p.GetGame(), p);
 
   // if starting vector not interior, perturb it towards centroid
   int kk;

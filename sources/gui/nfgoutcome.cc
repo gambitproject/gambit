@@ -51,8 +51,8 @@ NfgOutcomeWindow::NfgOutcomeWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
   : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
     m_parent(p_nfgShow)
 {
-  CreateGrid(p_nfgShow->Game().NumOutcomes(),
-	     p_nfgShow->Game().NumPlayers() + 1);
+  CreateGrid(p_nfgShow->GetGame().NumOutcomes(),
+	     p_nfgShow->GetGame().NumPlayers() + 1);
   for (int row = 0; row < GetRows(); row++) {
     for (int col = 1; col < GetCols(); col++) {
       SetCellEditor(row, col, new NumberEditor);
@@ -82,7 +82,7 @@ NfgOutcomeWindow::NfgOutcomeWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
 
 void NfgOutcomeWindow::UpdateValues(void)
 {
-  const Nfg &nfg = m_parent->Game();
+  gbtNfgGame nfg = m_parent->GetGame();
 
   if (GetRows() != nfg.NumOutcomes()) {
     DeleteRows(0, GetRows());
@@ -132,13 +132,13 @@ void NfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
       HideCellEditControl();
     }
     gText outcomeName = m_parent->UniqueOutcomeName();
-    gbtNfgOutcome outcome = m_parent->Game().NewOutcome();
+    gbtNfgOutcome outcome = m_parent->GetGame().NewOutcome();
     outcome.SetLabel(outcomeName);
-    for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
-      outcome.SetPayoff(m_parent->Game().GetPlayer(pl), gNumber(0));
+    for (int pl = 1; pl <= m_parent->GetGame().NumPlayers(); pl++) {
+      outcome.SetPayoff(m_parent->GetGame().GetPlayer(pl), gNumber(0));
     }
     AppendRows();
-    for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
+    for (int pl = 1; pl <= m_parent->GetGame().NumPlayers(); pl++) {
       SetCellEditor(GetRows() - 1, pl, new NumberEditor);
     }
     m_parent->OnOutcomesEdited();
@@ -155,14 +155,14 @@ void NfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
   int row = p_event.GetRow();
   int col = p_event.GetCol();
 
-  gbtNfgOutcome outcome = m_parent->Game().GetOutcomeId(row+1);
+  gbtNfgOutcome outcome = m_parent->GetGame().GetOutcomeId(row+1);
   if (col == 0) { 
     // Edited cell label
     outcome.SetLabel(GetCellValue(row, col).c_str());
   }
   else {
     // Edited payoff
-    outcome.SetPayoff(m_parent->Game().GetPlayer(col),
+    outcome.SetPayoff(m_parent->GetGame().GetPlayer(col),
 		      ToNumber(GetCellValue(row, col).c_str()));
   }
 
@@ -182,12 +182,12 @@ void NfgOutcomeWindow::OnLabelRightClick(wxGridEvent &p_event)
 void NfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
 {
   gText outcomeName = m_parent->UniqueOutcomeName();
-  gbtNfgOutcome outcome = m_parent->Game().NewOutcome();
+  gbtNfgOutcome outcome = m_parent->GetGame().NewOutcome();
   outcome.SetLabel(outcomeName);
   // Appending the row here keeps currently selected row selected
   AppendRows();
-  for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
-    outcome.SetPayoff(m_parent->Game().GetPlayer(pl), gNumber(0));
+  for (int pl = 1; pl <= m_parent->GetGame().NumPlayers(); pl++) {
+    outcome.SetPayoff(m_parent->GetGame().GetPlayer(pl), gNumber(0));
     SetCellEditor(GetRows() - 1, pl, new NumberEditor);
   }
   m_parent->OnOutcomesEdited();
@@ -197,7 +197,7 @@ void NfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
 void NfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
-    m_parent->Game().DeleteOutcome(m_parent->Game().GetOutcomeId(GetGridCursorRow() + 1));
+    m_parent->GetGame().DeleteOutcome(m_parent->GetGame().GetOutcomeId(GetGridCursorRow() + 1));
     m_parent->OnOutcomesEdited();
   }
   UpdateValues();
@@ -206,15 +206,15 @@ void NfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
 void NfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
-    m_parent->Game().SetOutcome(m_parent->GetContingency(),
-				m_parent->Game().GetOutcomeId(GetGridCursorRow() + 1));
+    m_parent->GetGame().SetOutcome(m_parent->GetContingency(),
+				   m_parent->GetGame().GetOutcomeId(GetGridCursorRow() + 1));
     m_parent->OnOutcomesEdited();
   }
 }
 
 void NfgOutcomeWindow::OnPopupOutcomeDetach(wxCommandEvent &)
 {
-  m_parent->Game().SetOutcome(m_parent->GetContingency(), 0);
+  m_parent->GetGame().SetOutcome(m_parent->GetContingency(), 0);
   m_parent->OnOutcomesEdited();
 }
 

@@ -44,17 +44,17 @@
 
 
 //----------------------------------------------------------------------
-//           struct gbt_efg_infoset_rep: Member functions
+//           struct gbt_efg_action_rep: Member functions
 //----------------------------------------------------------------------
 
 gbt_efg_action_rep::gbt_efg_action_rep(gbt_efg_infoset_rep *p_infoset,
 				       int p_id)
   : m_id(p_id), m_infoset(p_infoset), m_deleted(false), 
-    m_refCount(1)
+    m_refCount(0)
 { }
 
 //----------------------------------------------------------------------
-//              class gbtEfgInfoset: Member functions
+//              class gbtEfgAction: Member functions
 //----------------------------------------------------------------------
 
 gbtEfgAction::gbtEfgAction(void)
@@ -66,6 +66,7 @@ gbtEfgAction::gbtEfgAction(gbt_efg_action_rep *p_rep)
 {
   if (rep) {
     rep->m_refCount++;
+    rep->m_infoset->m_player->m_efg->m_refCount++;
   }
 }
 
@@ -74,14 +75,18 @@ gbtEfgAction::gbtEfgAction(const gbtEfgAction &p_action)
 {
   if (rep) {
     rep->m_refCount++;
+    rep->m_infoset->m_player->m_efg->m_refCount++;
   }
 }
 
 gbtEfgAction::~gbtEfgAction()
 {
   if (rep) {
-    if (--rep->m_refCount == 0) {
-      delete rep;
+    if (--rep->m_refCount == 0 && rep->m_deleted) {
+      // delete rep;
+    }
+    else if (--rep->m_infoset->m_player->m_efg->m_refCount == 0) {
+      // delete rep->m_infoset->m_player->m_efg;
     }
   }
 }
@@ -92,12 +97,18 @@ gbtEfgAction &gbtEfgAction::operator=(const gbtEfgAction &p_action)
     return *this;
   }
 
-  if (rep && --rep->m_refCount == 0) {
-    delete rep;
+  if (rep) {
+    if (--rep->m_refCount == 0 && rep->m_deleted) {
+      // delete rep;
+    }
+    else if (--rep->m_infoset->m_player->m_efg->m_refCount == 0) {
+      // delete rep->m_infoset->m_player->m_efg;
+    }
   }
 
   if ((rep = p_action.rep) != 0) {
     rep->m_refCount++;
+    rep->m_infoset->m_player->m_efg->m_refCount++;
   }
   return *this;
 }
@@ -165,7 +176,7 @@ bool gbtEfgAction::Precedes(gbtEfgNode n) const
     return false;
   }
 
-  while (n != n.GetGame()->RootNode() ) {
+  while (n != n.GetGame().RootNode() ) {
     if (n.GetAction().rep == rep) {
       return true;
     }
@@ -188,7 +199,7 @@ gOutput &operator<<(gOutput &p_stream, const gbtEfgAction &)
 gbt_efg_infoset_rep::gbt_efg_infoset_rep(gbt_efg_player_rep *p_player,
 					 int p_id, int p_br)
   : m_id(p_id), m_player(p_player), m_deleted(false), 
-    m_refCount(1), m_actions(p_br),
+    m_refCount(0), m_actions(p_br),
     m_chanceProbs((p_player->m_id == 0) ? p_br : 0),
     m_flag(0), m_whichbranch(0)
 {
@@ -226,6 +237,7 @@ gbtEfgInfoset::gbtEfgInfoset(gbt_efg_infoset_rep *p_rep)
 {
   if (rep) {
     rep->m_refCount++;
+    rep->m_player->m_efg->m_refCount++;
   }
 }
 
@@ -234,14 +246,18 @@ gbtEfgInfoset::gbtEfgInfoset(const gbtEfgInfoset &p_action)
 {
   if (rep) {
     rep->m_refCount++;
+    rep->m_player->m_efg->m_refCount++;
   }
 }
 
 gbtEfgInfoset::~gbtEfgInfoset()
 {
   if (rep) {
-    if (--rep->m_refCount == 0) {
-      delete rep;
+    if (--rep->m_refCount == 0 && rep->m_deleted) {
+      // delete rep;
+    }
+    else if (--rep->m_player->m_efg->m_refCount == 0) {
+      // delete rep->m_player->m_efg;
     }
   }
 }
@@ -252,12 +268,18 @@ gbtEfgInfoset &gbtEfgInfoset::operator=(const gbtEfgInfoset &p_infoset)
     return *this;
   }
 
-  if (rep && --rep->m_refCount == 0) {
-    delete rep;
+  if (rep) {
+    if (--rep->m_refCount == 0 && rep->m_deleted) {
+      // delete rep;
+    }
+    else if (--rep->m_player->m_efg->m_refCount == 0) {
+      // delete rep->m_player->m_efg;
+    }
   }
 
   if ((rep = p_infoset.rep) != 0) {
     rep->m_refCount++;
+    rep->m_player->m_efg->m_refCount++;
   }
   return *this;
 }
@@ -354,7 +376,7 @@ bool gbtEfgInfoset::IsChanceInfoset(void) const
   return (rep && rep->m_player->m_id == 0);
 }
 
-efgGame *gbtEfgInfoset::GetGame(void) const
+gbtEfgGame gbtEfgInfoset::GetGame(void) const
 {
   if (rep) {
     return rep->m_player->m_efg;
@@ -366,7 +388,7 @@ efgGame *gbtEfgInfoset::GetGame(void) const
 
 bool gbtEfgInfoset::Precedes(gbtEfgNode p_node) const
 {
-  while (p_node != p_node.GetGame()->RootNode()) {
+  while (p_node != p_node.GetGame().RootNode()) {
     if (p_node.GetInfoset() == *this) {
       return true;
     }

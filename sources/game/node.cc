@@ -35,9 +35,9 @@
 // a game tree.
 //
 
-gbt_efg_node_rep::gbt_efg_node_rep(efgGame *p_efg,
+gbt_efg_node_rep::gbt_efg_node_rep(gbt_efg_game_rep *p_efg,
 				   gbt_efg_node_rep *p_parent)
-  : m_id(0), m_efg(p_efg), m_deleted(false), m_refCount(1),
+  : m_id(0), m_efg(p_efg), m_deleted(false), m_refCount(0),
     m_mark(false), m_infoset(0), m_parent(p_parent), m_outcome(0),
     m_whichbranch(0), m_ptr(0),
     m_gameroot((p_parent) ? p_parent->m_gameroot : this)
@@ -45,7 +45,7 @@ gbt_efg_node_rep::gbt_efg_node_rep(efgGame *p_efg,
 
 gbt_efg_node_rep::~gbt_efg_node_rep()
 {
-  for (int i = m_children.Length(); i; delete m_children[i--]);
+  // for (int i = m_children.Length(); i; delete m_children[i--]);
 }
 
 void gbt_efg_node_rep::DeleteOutcome(gbt_efg_outcome_rep *p_outcome)
@@ -67,6 +67,7 @@ gbtEfgNode::gbtEfgNode(gbt_efg_node_rep *p_rep)
 {
   if (rep) {
     rep->m_refCount++;
+    rep->m_efg->m_refCount++;
   }
 }
 
@@ -75,30 +76,40 @@ gbtEfgNode::gbtEfgNode(const gbtEfgNode &p_action)
 {
   if (rep) {
     rep->m_refCount++;
+    rep->m_efg->m_refCount++;
   }
 }
 
 gbtEfgNode::~gbtEfgNode()
 {
   if (rep) {
-    if (--rep->m_refCount == 0) {
-      delete rep;
+    if (--rep->m_refCount == 0 && rep->m_deleted) {
+      // delete rep;
+    }
+    else if (--rep->m_efg->m_refCount == 0) {
+      // delete rep->m_efg;
     }
   }
 }
 
-gbtEfgNode &gbtEfgNode::operator=(const gbtEfgNode &p_action)
+gbtEfgNode &gbtEfgNode::operator=(const gbtEfgNode &p_node)
 {
-  if (this == &p_action) {
+  if (this == &p_node) {
     return *this;
   }
 
-  if (rep && --rep->m_refCount == 0) {
-    delete rep;
+  if (rep) {
+    if (--rep->m_refCount == 0 && rep->m_deleted) {
+      // delete rep;
+    }
+    else if (--rep->m_efg->m_refCount == 0) {
+      // delete rep->m_efg;
+    }
   }
 
-  if ((rep = p_action.rep) != 0) {
+  if ((rep = p_node.rep) != 0) {
     rep->m_refCount++;
+    rep->m_efg->m_refCount++;
   }
   return *this;
 }
@@ -150,7 +161,7 @@ gbtEfgInfoset gbtEfgNode::GetInfoset(void) const
   }
 }
 
-efgGame *gbtEfgNode::GetGame(void) const
+gbtEfgGame gbtEfgNode::GetGame(void) const
 {
   if (rep) {
     return rep->m_efg;
@@ -235,7 +246,7 @@ int gbtEfgNode::NumberInInfoset(void) const
     }
   }
   //  This could be sped up by adding a member to keep track of this
-  throw efgGame::Exception();
+  throw gbtEfgGame::Exception();
 }
 
 gbtEfgNode gbtEfgNode::NextSibling(void) const  
@@ -259,7 +270,7 @@ gbtEfgNode gbtEfgNode::PriorSibling(void) const
 
 gbtEfgAction gbtEfgNode::GetAction(void) const
 {
-  if (*this == GetGame()->RootNode()) {
+  if (*this == GetGame().RootNode()) {
     return gbtEfgAction();
   }
   

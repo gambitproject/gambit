@@ -35,7 +35,7 @@
 
 class Sfg  {
 private:
-  const efgGame &EF;
+  gbtEfgGame m_efg;
   const EFSupport &efsupp;
   gArray<SFSequenceSet *> *sequences;
   gNArray<gArray<gNumber> *> *SF;  // sequence form
@@ -57,7 +57,7 @@ public:
   inline gArray<int> NumSequences() const {return seq;}
   int TotalNumSequences() const;
   int NumPlayerInfosets() const;
-  inline int NumPlayers() const {return EF.NumPlayers();}
+  inline int NumPlayers() const { return m_efg.NumPlayers(); }
   
   inline gArray<gNumber> Payoffs(const gArray<int> & index) const {return *((*SF)[index]);}
   gNumber Payoff(const gArray<int> & index,int pl) const;
@@ -67,7 +67,7 @@ public:
   int ActionNumber(int pl, int sequence) const;
   gbtEfgInfoset GetInfoset(int pl, int sequence) const;
   gbtEfgAction GetAction(int pl, int sequence) const;
-  const efgGame &GetEfg(void) const {return EF;}
+  gbtEfgGame GetEfg(void) const { return m_efg; }
   BehavProfile<gNumber> ToBehav(const gPVector<double> &x) const;
   const Sequence* GetSequence(int pl, int seq) const {return ((*sequences)[pl])->Find(seq);}
   

@@ -32,7 +32,7 @@
 // StrategyProfile: Constructors, Destructors, Operators
 //--------------------------------------------------------
 
-StrategyProfile::StrategyProfile(const Nfg &N)
+StrategyProfile::StrategyProfile(const gbtNfgGame &N)
   : index(0L), profile(N.NumPlayers())
 {
   for (int pl = 1; pl <= N.NumPlayers(); pl++)   {
@@ -97,8 +97,8 @@ void StrategyProfile::Set(int p, gbtNfgStrategy s)
 //                   class gbtNfgSupport: Lifecycle
 //--------------------------------------------------------------------------
 
-gbtNfgSupport::gbtNfgSupport(const Nfg &p_nfg)
-  : m_nfg(&p_nfg), m_strategies(p_nfg.NumStrats())
+gbtNfgSupport::gbtNfgSupport(const gbtNfgGame &p_nfg)
+  : m_nfg(p_nfg), m_strategies(p_nfg.NumStrats())
 { 
   // Initially, all strategies are contained in the support
   m_strategies = 1;
@@ -137,7 +137,7 @@ int gbtNfgSupport::NumStrats(int pl) const
 
 gArray<int> gbtNfgSupport::NumStrats(void) const
 {
-  gArray<int> ret(m_nfg->NumPlayers());
+  gArray<int> ret(m_nfg.NumPlayers());
 
   for (int pl = 1; pl <= ret.Length(); pl++) {
     ret[pl] = NumStrats(pl);
@@ -157,10 +157,10 @@ int gbtNfgSupport::ProfileLength(void) const
 gbtNfgStrategy gbtNfgSupport::GetStrategy(int pl, int st) const
 {
   int index = 0;
-  for (int i = 1; i <= m_nfg->NumStrats(pl); i++) {
+  for (int i = 1; i <= m_nfg.NumStrats(pl); i++) {
     if (m_strategies(pl, i)) {
       if (++index == st) {
-	return m_nfg->GetPlayer(pl).GetStrategy(i);
+	return m_nfg.GetPlayer(pl).GetStrategy(i);
       }
     }
     
@@ -205,12 +205,12 @@ void gbtNfgSupport::RemoveStrategy(gbtNfgStrategy s)
 bool gbtNfgSupport::IsSubset(const gbtNfgSupport &s) const
 {
   if (m_nfg != s.m_nfg)  return false;
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
     if (NumStrats(pl) > s.NumStrats(pl)) {
       return false;
     }
 
-    for (int st = 1; st <= m_nfg->NumStrats(pl); st++) {
+    for (int st = 1; st <= m_nfg.NumStrats(pl); st++) {
       if (m_strategies(pl, st) && !s.m_strategies(pl, st)) {
 	return false;
       }
@@ -221,7 +221,7 @@ bool gbtNfgSupport::IsSubset(const gbtNfgSupport &s) const
 
 bool gbtNfgSupport::IsValid(void) const
 {
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
     if (NumStrats(pl) == 0) {
       return false;
     }
@@ -232,7 +232,7 @@ bool gbtNfgSupport::IsValid(void) const
 void gbtNfgSupport::Output(gOutput &p_output) const
 {
   p_output << '"' << m_name << "\" { ";
-  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
     p_output << "{ ";
     for (int st = 1; st <= NumStrats(pl); st++) {
       p_output << "\"" << GetStrategy(pl, st).GetLabel() << "\" ";

@@ -40,10 +40,11 @@
 //           struct gbt_efg_outcome_rep: Member functions
 //----------------------------------------------------------------------
 
-gbt_efg_outcome_rep::gbt_efg_outcome_rep(efgGame *p_efg, int p_id)
+gbt_efg_outcome_rep::gbt_efg_outcome_rep(gbt_efg_game_rep *p_efg, int p_id)
   : m_id(p_id), m_efg(p_efg), m_deleted(false), 
-    m_payoffs(p_efg->NumPlayers()), m_doublePayoffs(p_efg->NumPlayers()),
-    m_refCount(1)
+    m_payoffs(p_efg->players.Length()),
+    m_doublePayoffs(p_efg->players.Length()),
+    m_refCount(0)
 {
   for (int i = 1; i <= m_payoffs.Length(); i++) {
     m_payoffs[i] = 0;
@@ -64,6 +65,7 @@ gbtEfgOutcome::gbtEfgOutcome(gbt_efg_outcome_rep *p_rep)
 {
   if (rep) {
     rep->m_refCount++;
+    rep->m_efg->m_refCount++;
   }
 }
 
@@ -72,14 +74,18 @@ gbtEfgOutcome::gbtEfgOutcome(const gbtEfgOutcome &p_outcome)
 {
   if (rep) {
     rep->m_refCount++;
+    rep->m_efg->m_refCount++;
   }
 }
 
 gbtEfgOutcome::~gbtEfgOutcome()
 {
   if (rep) {
-    if (--rep->m_refCount == 0) {
-      delete rep;
+    if (--rep->m_refCount == 0 && rep->m_deleted) {
+      // delete rep;
+    }
+    else if (--rep->m_efg->m_refCount == 0) {
+      // delete rep->m_efg;
     }
   }
 }
@@ -90,12 +96,18 @@ gbtEfgOutcome &gbtEfgOutcome::operator=(const gbtEfgOutcome &p_outcome)
     return *this;
   }
 
-  if (rep && --rep->m_refCount == 0) {
-    delete rep;
+  if (rep) {
+    if (--rep->m_refCount == 0 && rep->m_deleted) {
+      // delete rep;
+    }
+    else if (--rep->m_efg->m_refCount == 0) {
+      // delete rep->m_efg;
+    }
   }
 
   if ((rep = p_outcome.rep) != 0) {
     rep->m_refCount++;
+    rep->m_efg->m_refCount++;
   }
   return *this;
 }
@@ -115,7 +127,7 @@ bool gbtEfgOutcome::IsNull(void) const
   return (rep == 0);
 }
 
-efgGame *gbtEfgOutcome::GetGame(void) const
+gbtEfgGame gbtEfgOutcome::GetGame(void) const
 {
   return (rep) ? rep->m_efg : 0;
 }

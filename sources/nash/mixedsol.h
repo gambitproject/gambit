@@ -74,7 +74,7 @@ public:
   MixedSolution &operator*=(const gNumber &);
 
   // GENERAL DATA ACCESS
-  Nfg &Game(void) const { return m_profile.Game(); }
+  gbtNfgGame GetGame(void) const { return m_profile.GetGame(); }
   gPrecision Precision(void) const { return m_precision; }
   const MixedProfile<gNumber> *Profile(void) const { return &m_profile; }
 
@@ -100,7 +100,7 @@ public:
   // Force the invalidation of cached quantities
   void Invalidate(void) const;
   void CheckIsValid(void) const {if(!IsValid()) Invalidate();}
-  bool IsValid(void) const {return (m_revision == Game().RevisionNumber());}
+  bool IsValid(void) const {return (m_revision == GetGame().RevisionNumber());}
   MixedSolution PolishEq() const;
 
   // FUNCTIONS FOR COMPATIBILITY WITH GUI

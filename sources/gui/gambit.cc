@@ -48,15 +48,37 @@
 
 class Game {
 public:
-  efgGame *m_efg;
+  gbtEfgGame *m_efg;
   EfgShow *m_efgShow;
-  Nfg *m_nfg;
+  gbtNfgGame *m_nfg;
   NfgShow *m_nfgShow;
   gText m_fileName;
 
-  Game(efgGame *p_efg) : m_efg(p_efg), m_efgShow(0), m_nfg(0), m_nfgShow(0) { }
-  Game(Nfg *p_nfg) : m_efg(0), m_efgShow(0), m_nfg(p_nfg), m_nfgShow(0) { }
+  Game(gbtEfgGame);
+  Game(gbtNfgGame);
+  ~Game();
 };
+
+Game::Game(gbtEfgGame p_efg)
+  : m_efg(new gbtEfgGame(p_efg)), m_efgShow(0),
+    m_nfg(0), m_nfgShow(0)
+{ }
+
+Game::Game(gbtNfgGame p_nfg)
+  : m_efg(0), m_efgShow(0),
+    m_nfg(new gbtNfgGame(p_nfg)), m_nfgShow(0)
+{ }
+
+Game::~Game()
+{
+  if (m_efg) {
+    delete m_efg;
+  }
+  if (m_nfg) {
+    delete m_nfg;
+  }
+}
+
 
 GambitApp::GambitApp(void)
   : m_fileHistory(5)
@@ -89,12 +111,12 @@ bool GambitApp::OnInit(void)
   }
 
   if (m_gameList.Length() == 0) {
-    efgGame *efg = new efgGame;
-    efg->NewPlayer().SetLabel("Player 1");
-    efg->NewPlayer().SetLabel("Player 2");
-    efg->SetTitle("Untitled Extensive Form Game");
+    gbtEfgGame efg;
+    efg.NewPlayer().SetLabel("Player 1");
+    efg.NewPlayer().SetLabel("Player 2");
+    efg.SetTitle("Untitled Extensive Form Game");
 
-    EfgShow *efgShow = new EfgShow(*efg, 0);
+    EfgShow *efgShow = new EfgShow(efg, 0);
     efgShow->SetFilename("");
     AddGame(efg, efgShow);
   }
@@ -127,36 +149,36 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
 
   if (dialog.ShowModal() == wxID_OK) {
     if (dialog.CreateEfg()) {
-      efgGame *efg = new efgGame;
-      efg->SetTitle("Untitled Extensive Form Game");
+      gbtEfgGame efg;
+      efg.SetTitle("Untitled Extensive Form Game");
       for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
-	efg->NewPlayer().SetLabel(gText("Player") + ToText(pl));
+	efg.NewPlayer().SetLabel(gText("Player") + ToText(pl));
       }
-      EfgShow *efgShow = new EfgShow(*efg, 0);
+      EfgShow *efgShow = new EfgShow(efg, 0);
       efgShow->SetFilename("");
       AddGame(efg, efgShow);
     }
     else {
-      Nfg *nfg = new Nfg(dialog.NumStrategies());
-      nfg->SetTitle("Untitled Normal Form Game");
-      for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-	nfg->GetPlayer(pl).SetLabel(gText("Player") + ToText(pl));
+      gbtNfgGame nfg(dialog.NumStrategies());
+      nfg.SetTitle("Untitled Normal Form Game");
+      for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
+	nfg.GetPlayer(pl).SetLabel(gText("Player") + ToText(pl));
       }
       if (dialog.CreateOutcomes()) {
-	gbtNfgSupport support(*nfg);
+	gbtNfgSupport support(nfg);
 	NfgContIter iter(support);
 	iter.First();
 	do {
-	  gbtNfgOutcome outcome = nfg->NewOutcome();
-	  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-	    outcome.SetPayoff(nfg->GetPlayer(pl), 0);
+	  gbtNfgOutcome outcome = nfg.NewOutcome();
+	  for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
+	    outcome.SetPayoff(nfg.GetPlayer(pl), 0);
 	    outcome.SetLabel(outcome.GetLabel() +
 			     ToText(iter.Profile()[pl].GetId()));
 	  }
-	  nfg->SetOutcome(iter.Profile(), outcome);
+	  nfg.SetOutcome(iter.Profile(), outcome);
 	} while (iter.NextContingency());
       }
-      NfgShow *nfgShow = new NfgShow(*nfg, 0);
+      NfgShow *nfgShow = new NfgShow(nfg, 0);
       nfgShow->SetFilename("");
       AddGame(nfg, nfgShow);
     }
@@ -193,13 +215,10 @@ void GambitApp::OnFileImportComLab(wxWindow *p_parent)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       gFileInput infile(dialog.GetPath().c_str());
-      Nfg *nfg = ReadComLabSfg(infile);
-
-      if (nfg) {
-	NfgShow *nfgShow = new NfgShow(*nfg, 0);
-	nfgShow->SetFilename(dialog.GetPath().c_str());
-	AddGame(nfg, nfgShow);
-      }
+      gbtNfgGame nfg = ReadComLabSfg(infile);
+      NfgShow *nfgShow = new NfgShow(nfg, 0);
+      nfgShow->SetFilename(dialog.GetPath().c_str());
+      AddGame(nfg, nfgShow);
     }
     catch (gFileInput::OpenFailed &) {
       wxMessageBox(wxString::Format("Could not open '%s' for reading",
@@ -230,16 +249,13 @@ void GambitApp::LoadFile(const wxString &p_filename)
 {    
   try {
     gFileInput infile(p_filename);
-    Nfg *nfg = ReadNfgFile(infile);
-
-    if (nfg) {
-      m_fileHistory.AddFileToHistory(p_filename);
-      NfgShow *nfgShow = new NfgShow(*nfg, 0);
-      nfgShow->SetFilename(p_filename);
-      AddGame(nfg, nfgShow);
-      SetFilename(nfgShow, p_filename);
-      return;
-    }
+    gbtNfgGame nfg = ReadNfgFile(infile);
+    m_fileHistory.AddFileToHistory(p_filename);
+    NfgShow *nfgShow = new NfgShow(nfg, 0);
+    nfgShow->SetFilename(p_filename);
+    AddGame(nfg, nfgShow);
+    SetFilename(nfgShow, p_filename);
+    return;
   }
   catch (gFileInput::OpenFailed &) {
     wxMessageBox(wxString::Format("Could not open '%s' for reading",
@@ -247,20 +263,15 @@ void GambitApp::LoadFile(const wxString &p_filename)
 		 "Error", wxOK, 0);
     return;
   }
+  catch (gbtNfgParserError &) {
+    // Not a valid normal form file; try extensive form next
+  }
 
   try {
     gFileInput infile(p_filename);
-    efgGame *efg = ReadEfgFile(infile);
-                
-    if (!efg) {
-      wxMessageBox(wxString::Format("'%s' is not in a recognized format.",
-				    p_filename.c_str()),
-		   "Error", wxOK, 0);
-      return;
-    }
-
+    gbtEfgGame efg = ReadEfgFile(infile);
     m_fileHistory.AddFileToHistory(p_filename);
-    EfgShow *efgShow = new EfgShow(*efg, 0);
+    EfgShow *efgShow = new EfgShow(efg, 0);
     efgShow->SetFilename(p_filename);
     AddGame(efg, efgShow);
     SetFilename(efgShow, p_filename);
@@ -271,12 +282,19 @@ void GambitApp::LoadFile(const wxString &p_filename)
 		 "Error", wxOK, 0);
     return;
   }
+  catch (...) {
+    wxMessageBox(wxString::Format("File '%s' not in a recognized format",
+				  p_filename.c_str()),
+		 "Error", wxOK, 0);
+    return;
+
+  }
 }
 
 
 IMPLEMENT_APP(GambitApp)
 
-void GambitApp::AddGame(efgGame *p_efg, EfgShow *p_efgShow)
+void GambitApp::AddGame(gbtEfgGame p_efg, EfgShow *p_efgShow)
 {
   Game *game = new Game(p_efg);
   game->m_efgShow = p_efgShow;
@@ -285,7 +303,7 @@ void GambitApp::AddGame(efgGame *p_efg, EfgShow *p_efgShow)
   m_fileHistory.AddFilesToMenu(p_efgShow->GetMenuBar()->GetMenu(0));
 }
 
-void GambitApp::AddGame(Nfg *p_nfg, NfgShow *p_nfgShow)
+void GambitApp::AddGame(gbtNfgGame p_nfg, NfgShow *p_nfgShow)
 {
   Game *game = new Game(p_nfg);
   game->m_nfgShow = p_nfgShow;
@@ -294,11 +312,11 @@ void GambitApp::AddGame(Nfg *p_nfg, NfgShow *p_nfgShow)
   m_fileHistory.AddFilesToMenu(p_nfgShow->GetMenuBar()->GetMenu(0));
 }
 
-void GambitApp::AddGame(efgGame *p_efg, Nfg *p_nfg, NfgShow *p_nfgShow)
+void GambitApp::AddGame(gbtEfgGame p_efg, gbtNfgGame p_nfg, NfgShow *p_nfgShow)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
-    if (m_gameList[i]->m_efg == p_efg) {
-      m_gameList[i]->m_nfg = p_nfg;
+    if (*m_gameList[i]->m_efg == p_efg) {
+      m_gameList[i]->m_nfg = new gbtNfgGame(p_nfg);
       m_gameList[i]->m_nfgShow = p_nfgShow;
       break;
     }
@@ -307,10 +325,10 @@ void GambitApp::AddGame(efgGame *p_efg, Nfg *p_nfg, NfgShow *p_nfgShow)
   m_fileHistory.AddFilesToMenu(p_nfgShow->GetMenuBar()->GetMenu(0));
 }
 
-void GambitApp::RemoveGame(efgGame *p_efg)
+void GambitApp::RemoveGame(gbtEfgGame p_efg)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
-    if (m_gameList[i]->m_efg == p_efg) {
+    if (*m_gameList[i]->m_efg == p_efg) {
       m_fileHistory.RemoveMenu(m_gameList[i]->m_efgShow->GetMenuBar()->GetMenu(0));
       if (m_gameList[i]->m_nfg) {
 	m_fileHistory.RemoveMenu(m_gameList[i]->m_nfgShow->GetMenuBar()->GetMenu(0));
@@ -318,16 +336,15 @@ void GambitApp::RemoveGame(efgGame *p_efg)
 	delete m_gameList[i]->m_nfg;
       }
       delete m_gameList.Remove(i);
-      delete p_efg;
       break;
     }
   }
 }
 
-void GambitApp::RemoveGame(Nfg *p_nfg)
+void GambitApp::RemoveGame(gbtNfgGame p_nfg)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
-    if (m_gameList[i]->m_nfg == p_nfg) {
+    if (*m_gameList[i]->m_nfg == p_nfg) {
       m_fileHistory.RemoveMenu(m_gameList[i]->m_nfgShow->GetMenuBar()->GetMenu(0));
       if (m_gameList[i]->m_efg == 0) {
 	delete m_gameList.Remove(i);
@@ -336,25 +353,24 @@ void GambitApp::RemoveGame(Nfg *p_nfg)
 	m_gameList[i]->m_nfg = 0;
 	m_gameList[i]->m_nfgShow = 0;
       }
-      delete p_nfg;
     }
   }
 }
 
-EfgShow *GambitApp::GetWindow(const efgGame *p_efg)
+EfgShow *GambitApp::GetWindow(gbtEfgGame p_efg)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
-    if (m_gameList[i]->m_efg == p_efg) {
+    if (*m_gameList[i]->m_efg == p_efg) {
       return m_gameList[i]->m_efgShow;
     }
   }
   return 0;
 }
 
-NfgShow *GambitApp::GetWindow(const Nfg *p_nfg)
+NfgShow *GambitApp::GetWindow(gbtNfgGame p_nfg)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
-    if (m_gameList[i]->m_nfg == p_nfg) {
+    if (*m_gameList[i]->m_nfg == p_nfg) {
       return m_gameList[i]->m_nfgShow;
     }
   }

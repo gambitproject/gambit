@@ -38,17 +38,17 @@
 
 class panelEfgGeneral : public wxPanel {
 private:
-  efgGame &m_efg;
+  gbtEfgGame m_efg;
   wxTextCtrl *m_title, *m_comment;
 
 public:
-  panelEfgGeneral(wxWindow *p_parent, efgGame &p_efg, const wxString &);
+  panelEfgGeneral(wxWindow *p_parent, gbtEfgGame &p_efg, const wxString &);
 
   wxString GetGameTitle(void) const { return m_title->GetValue(); }
   wxString GetComment(void) const { return m_comment->GetValue(); }
 };
 
-panelEfgGeneral::panelEfgGeneral(wxWindow *p_parent, efgGame &p_efg,
+panelEfgGeneral::panelEfgGeneral(wxWindow *p_parent, gbtEfgGame &p_efg,
 				 const wxString &p_filename)
   : wxPanel(p_parent, -1), m_efg(p_efg)
 {
@@ -106,7 +106,7 @@ const int idBUTTON_NEWPLAYER = 1001;
 
 class panelEfgPlayers : public wxPanel {
 private:
-  efgGame &m_efg;
+  gbtEfgGame m_efg;
   int m_lastSelection;
   wxListBox *m_playerList;
   wxTextCtrl *m_playerName;
@@ -115,7 +115,7 @@ private:
   void OnNewPlayer(wxCommandEvent &);
 
 public:
-  panelEfgPlayers(wxWindow *p_parent, efgGame &p_efg);
+  panelEfgPlayers(wxWindow *p_parent, gbtEfgGame &p_efg);
 
   virtual bool Validate(void);
 
@@ -131,7 +131,7 @@ BEGIN_EVENT_TABLE(panelEfgPlayers, wxPanel)
   EVT_BUTTON(idBUTTON_NEWPLAYER, panelEfgPlayers::OnNewPlayer)
 END_EVENT_TABLE()
 
-panelEfgPlayers::panelEfgPlayers(wxWindow *p_parent, efgGame &p_efg)
+panelEfgPlayers::panelEfgPlayers(wxWindow *p_parent, gbtEfgGame &p_efg)
   : wxPanel(p_parent, -1), m_efg(p_efg), m_lastSelection(0)
 {
   SetAutoLayout(true);
@@ -205,7 +205,7 @@ BEGIN_EVENT_TABLE(dialogEditEfg, wxDialog)
   EVT_BUTTON(wxID_OK, dialogEditEfg::OnOK)
 END_EVENT_TABLE()
 
-dialogEditEfg::dialogEditEfg(wxWindow *p_parent, efgGame &p_efg,
+dialogEditEfg::dialogEditEfg(wxWindow *p_parent, gbtEfgGame &p_efg,
 			     const wxString &p_filename)
   : wxDialog(p_parent, -1, "Extensive form properties"), m_efg(p_efg)
 {

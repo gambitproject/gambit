@@ -43,9 +43,9 @@ END_EVENT_TABLE()
 NfgNavigateWindow::NfgNavigateWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
   : wxPanel(p_parent, -1), 
     m_parent(p_nfgShow), m_rowPlayer(1), m_colPlayer(2),
-    m_support(p_nfgShow->Game())
+    m_support(p_nfgShow->GetGame())
 {
-  const Nfg &nfg = p_nfgShow->Game();
+  gbtNfgGame nfg = p_nfgShow->GetGame();
 
   wxStaticBoxSizer *playerViewSizer = 
     new wxStaticBoxSizer(new wxStaticBox(this, -1, "View players"),
@@ -134,7 +134,7 @@ void NfgNavigateWindow::SetProfile(const gArray<int> &p_profile)
 
 gArray<int> NfgNavigateWindow::GetProfile(void) const
 {
-  gArray<int> profile(m_support.Game().NumPlayers());
+  gArray<int> profile(m_support.GetGame().NumPlayers());
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = m_stratProfile[i-1]->GetSelection() + 1;
   }
@@ -158,9 +158,9 @@ void NfgNavigateWindow::SetSupport(const gbtNfgSupport &p_support)
 {
   m_support = p_support;
 
-  for (int pl = 1; pl <= m_support.Game().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_support.GetGame().NumPlayers(); pl++) {
     m_stratProfile[pl-1]->Clear();
-    gbtNfgPlayer player = m_support.Game().GetPlayer(pl);
+    gbtNfgPlayer player = m_support.GetGame().GetPlayer(pl);
     for (int st = 1; st <= player.NumStrategies(); st++) {
       if (m_support.Contains(player.GetStrategy(st))) {
 	m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
@@ -215,7 +215,7 @@ void NfgNavigateWindow::OnColPlayerChange(wxCommandEvent &)
 
 void NfgNavigateWindow::UpdateLabels(void)
 {
-  const Nfg &nfg = m_parent->Game();
+  gbtNfgGame nfg = m_parent->GetGame();
 
   int rowSelection = m_rowChoice->GetSelection();
   int colSelection = m_colChoice->GetSelection();

@@ -32,7 +32,7 @@
 // This creates a string containing a representation of the game
 // in HTML
 //
-wxString gbtBuildHtml(const Nfg &, int, int);
+wxString gbtBuildHtml(const gbtNfgGame &, int, int);
 
 //
 // For normal forms, we will print grids by creating corresponding HTML.
@@ -42,7 +42,7 @@ private:
   NfgTable *m_table;
 
 public:
-  NfgPrintout(const Nfg &, int, int, const wxString &);
+  NfgPrintout(const gbtNfgGame &, int, int, const wxString &);
   virtual ~NfgPrintout() { }
 };
 

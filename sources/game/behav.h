@@ -32,7 +32,7 @@
 #include "math/gmatrix.h"
 #include "efstrat.h"
 
-class Nfg;
+class gbtNfgGame;
 template <class T> class MixedProfile;
 template <class T> class gPVector;
 template <class T> class gRectArray;
@@ -50,7 +50,7 @@ template <class T> class gRectArray;
 
 template <class T> class BehavProfile : private gDPVector<T>  {
 protected:
-  const efgGame *m_efg;
+  gbtEfgGame m_efg;
   EFSupport m_support;
   mutable bool m_cached_data;
 
@@ -115,8 +115,8 @@ protected:
   void ComputeSolutionDataPass1(const gbtEfgNode &node);
   void ComputeSolutionData(void);
 
-  void BehaviorStrat(const efgGame &, int, const gbtEfgNode &);
-  void RealizationProbs(const MixedProfile<T> &, const efgGame &,
+  void BehaviorStrat(const gbtEfgGame &, int, const gbtEfgNode &);
+  void RealizationProbs(const MixedProfile<T> &, const gbtEfgGame &,
 			int pl, const gArray<int> *const, const gbtEfgNode &);
 
 public:
@@ -150,7 +150,7 @@ public:
 
   // GENERAL DATA ACCESS
 
-  efgGame &GetGame(void) const   { return const_cast<efgGame &>(*m_efg); }
+  gbtEfgGame GetGame(void) const   { return m_efg; }
   const EFSupport &Support(void) const   { return m_support; }
   
   const T &GetRealizProb(const gbtEfgNode &node);

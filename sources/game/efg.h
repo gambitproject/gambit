@@ -33,7 +33,7 @@
 
 class EFSupport;
 class Lexicon;
-class Nfg;
+class gbtNfgGame;
 template <class T> class BehavProfile;
 template <class T> class MixedProfile;
 template <class T> class PureBehavProfile;
@@ -45,15 +45,17 @@ template <class T> class PureBehavProfile;
 
 struct gbt_efg_game_rep;
 
-class efgGame {
+class gbtEfgGame {
 private:
   friend class EfgFileReader;
   friend class EfgFile;
-  friend class Nfg;
+  friend class gbtNfgGame;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
   friend class BehavProfile<gNumber>;
-  
+  friend class Lexicon;
+  friend void SetEfg(gbtNfgGame, gbtEfgGame);
+
 protected:
   struct gbt_efg_game_rep *rep;
   
@@ -97,9 +99,18 @@ public:
     gText Description(void) const    { return "Efg error"; }
   };
 
-  efgGame(void);
-  efgGame(const efgGame &, gbtEfgNode = gbtEfgNode(0));
-  virtual ~efgGame();
+  gbtEfgGame(void);
+  gbtEfgGame(const gbtEfgGame &);
+  gbtEfgGame(gbt_efg_game_rep *);
+  ~gbtEfgGame();
+
+  gbtEfgGame &operator=(const gbtEfgGame &);
+
+  bool operator==(const gbtEfgGame &) const;
+  bool operator!=(const gbtEfgGame &) const;
+
+  // Formerly the copy constructor
+  gbtEfgGame Copy(gbtEfgNode = gbtEfgNode(0)) const;
   
   // TITLE ACCESS AND MANIPULATION
   void SetTitle(const gText &s);
@@ -184,12 +195,13 @@ public:
 
   void InfosetProbs(const gPVector<int> &profile, gPVector<gNumber> &prob) const;
     
-  Nfg *AssociatedNfg(void) const;
-  Nfg *AssociatedAfg(void) const;
+  gbtNfgGame AssociatedNfg(void) const;
+  bool HasAssociatedNfg(void) const;
+  gbtNfgGame AssociatedAfg(void) const;
   Lexicon *GetLexicon(void) const;
 
-  friend Nfg *MakeReducedNfg(const EFSupport &);
-  friend Nfg *MakeAfg(const efgGame &);
+  friend gbtNfgGame MakeReducedNfg(const EFSupport &);
+  friend gbtNfgGame MakeAfg(const gbtEfgGame &);
 
   // These are auxiliary functions used by the .efg file reader code
   gbtEfgInfoset GetInfosetByIndex(gbtEfgPlayer, int index) const;
@@ -201,11 +213,11 @@ public:
 
 //#include "behav.h"
 
-efgGame *ReadEfgFile(gInput &);
+gbtEfgGame ReadEfgFile(gInput &);
 
 template <class T> class PureBehavProfile   {
   protected:
-    const efgGame *E;
+    gbtEfgGame m_efg;
     gArray<gArray<gbtEfgAction> *> profile;
 
     //    void IndPayoff(const Node *n, const int &pl, const T, T &) const;
@@ -215,7 +227,7 @@ template <class T> class PureBehavProfile   {
     void InfosetProbs(const gbtEfgNode &n, T, gPVector<T> &) const;
 
   public:
-    PureBehavProfile(const efgGame &);
+    PureBehavProfile(const gbtEfgGame &);
     PureBehavProfile(const PureBehavProfile<T> &);
     ~PureBehavProfile();
 
@@ -237,11 +249,48 @@ template <class T> class PureBehavProfile   {
   //    T    Payoff(const int &pl) const;
     void Payoff(gArray<T> &payoff) const;
     void InfosetProbs(gPVector<T> &prob) const;
-    efgGame &GetGame(void) const   { return const_cast<efgGame &>(*E); }
+    gbtEfgGame GetGame(void) const   { return m_efg; }
 };
 
 
 #include "efgutils.h"
+
+//
+// Stuff below here needs to have everything defined before we can
+// declare these.
+// Hopefully, once things are settled, these can be moved to more
+// logical locations.
+//
+class gbtEfgPlayerIterator {
+private:
+  int m_index;
+  gbtEfgGame m_efg;
+
+public:
+  gbtEfgPlayerIterator(const gbtEfgGame &p_efg);
+  
+  gbtEfgPlayer operator*(void) const;
+  gbtEfgPlayerIterator &operator++(int);
+
+  bool Begin(void);
+  bool End(void) const;
+};
+
+class gbtEfgInfosetIterator {
+private:
+  int m_index;
+  gbtEfgPlayer m_player;
+
+public:
+  gbtEfgInfosetIterator(const gbtEfgPlayer &p_player);
+  
+  gbtEfgInfoset operator*(void) const;
+  gbtEfgInfosetIterator &operator++(int);
+
+  bool Begin(void);
+  bool End(void) const;
+};
+
 
 #endif   // EFG_H
 

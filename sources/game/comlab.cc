@@ -89,7 +89,7 @@ static void EatWhitespace(const gText &p_string, unsigned int &p_index)
   }
 }
 
-static bool ParsePayoffs(Nfg *p_nfg, const gText &p_payoffs)
+static bool ParsePayoffs(gbtNfgGame p_nfg, const gText &p_payoffs)
 {
   unsigned int i = 0;
   while (isspace(p_payoffs[i])) {
@@ -101,17 +101,17 @@ static bool ParsePayoffs(Nfg *p_nfg, const gText &p_payoffs)
     return false;
   }
   EatWhitespace(p_payoffs, i);
-  gbtNfgSupport support(*p_nfg);
+  gbtNfgSupport support(p_nfg);
   NfgContIter iter(support);
   while (p_payoffs[i++] == '[') {
     gText pay;
-    iter.SetOutcome(p_nfg->NewOutcome());
+    iter.SetOutcome(p_nfg.NewOutcome());
     EatWhitespace(p_payoffs, i);
     while (isdigit(p_payoffs[i]) ||
 	   p_payoffs[i] == '.' || p_payoffs[i] == '-') {
       pay += p_payoffs[i++];
     }
-    iter.GetOutcome().SetPayoff(p_nfg->GetPlayer(1), ToNumber(pay));
+    iter.GetOutcome().SetPayoff(p_nfg.GetPlayer(1), ToNumber(pay));
     EatWhitespace(p_payoffs, i);
     if (p_payoffs[i++] != ',') {
       return false;
@@ -122,7 +122,7 @@ static bool ParsePayoffs(Nfg *p_nfg, const gText &p_payoffs)
 	   p_payoffs[i] == '.' || p_payoffs[i] == '-') {
       pay += p_payoffs[i++];
     }
-    iter.GetOutcome().SetPayoff(p_nfg->GetPlayer(2), ToNumber(pay));
+    iter.GetOutcome().SetPayoff(p_nfg.GetPlayer(2), ToNumber(pay));
     EatWhitespace(p_payoffs, i);
     if (p_payoffs[i++] != ']') {
       return false;
@@ -137,14 +137,13 @@ static bool ParsePayoffs(Nfg *p_nfg, const gText &p_payoffs)
   return true;
 }
 
-Nfg *ReadComLabSfg(gInput &p_input)
+gbtNfgGame ReadComLabSfg(gInput &p_input)
 {
-  Nfg *nfg = 0;
   gText title, description, rowPlayer, colPlayer;
   // As of this implementation, ComLabGames only has 2-player games
   gArray<int> dim(2);   
   dim[1] = dim[2] = -1;
-
+  
   while (!p_input.eof()) {
     gText line = GetLine(p_input), field, value;
     if (line[0u] == '#') {
@@ -171,19 +170,14 @@ Nfg *ReadComLabSfg(gInput &p_input)
       dim[2] = atoi((char *) value);
     }
     else if (field == "Payoffs") {
-      if (!nfg) {
-	return 0;
-      }
+      // FIXME: This won't work probably
+      gbtNfgGame nfg(dim);
       ParsePayoffs(nfg, value);
-    }
-
-    // Create the game as soon as possible
-    if (dim[1] > 0 && dim[2] > 0 && !nfg) {
-      nfg = new Nfg(dim);
+      return nfg;
     }
   }
 
-  return nfg;
+  return gbtNfgGame(dim);
 }
 
 
@@ -191,26 +185,26 @@ Nfg *ReadComLabSfg(gInput &p_input)
 //                Writing ComLabGames strategic form files
 //=========================================================================
 
-void WriteComLabSfg(gOutput &p_output, Nfg *p_nfg)
+void WriteComLabSfg(gOutput &p_output, const gbtNfgGame &p_nfg)
 {
   p_output << "\n# This is a ComLabGames game description file.\n";
   p_output << "ModuleClass =\tclg.sfg.SfgModule\n";
   p_output << "ModuleVersion =\t0.1\n";
 
   p_output << "\n# Game information\n";
-  p_output << "Title =\t\"" << p_nfg->GetTitle() << "\"\n";
+  p_output << "Title =\t\"" << p_nfg.GetTitle() << "\"\n";
   p_output << "Description =\t\n";
   p_output << "WindowWidth =\t600\n";
   p_output << "WindowHeight =\t519\n";
 
   p_output << "\n# Players\n";
-  p_output << "RowPlayer =\t\"" << p_nfg->GetPlayer(1).GetLabel() << "\"\n";
-  p_output << "ColPlayer =\t\"" << p_nfg->GetPlayer(2).GetLabel() << "\"\n";
+  p_output << "RowPlayer =\t\"" << p_nfg.GetPlayer(1).GetLabel() << "\"\n";
+  p_output << "ColPlayer =\t\"" << p_nfg.GetPlayer(2).GetLabel() << "\"\n";
 
   p_output << "\n# Table information\n";
   // There's an extra space after Width, apparently so file formats nicely
-  p_output << "Width = \t" << p_nfg->NumStrats(1) << "\n";
-  p_output << "Height =\t" << p_nfg->NumStrats(2) << "\n";
+  p_output << "Width = \t" << p_nfg.NumStrats(1) << "\n";
+  p_output << "Height =\t" << p_nfg.NumStrats(2) << "\n";
   p_output << "RowNames =\t[]\n";
   p_output << "ColNames =\t[]\n";
 

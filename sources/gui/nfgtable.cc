@@ -93,11 +93,11 @@ void NfgTableSettings::SaveSettings(void) const
 
 class NfgGridTable : public wxGridTableBase {
 private:
-  Nfg *m_nfg;
+  gbtNfgGame m_nfg;
   NfgTable *m_table;
 
 public:
-  NfgGridTable(NfgTable *p_table, Nfg *p_nfg);
+  NfgGridTable(NfgTable *p_table, gbtNfgGame p_nfg);
   virtual ~NfgGridTable() { }
 
   int GetNumberRows(void);
@@ -118,7 +118,7 @@ public:
   wxGridCellAttr *GetAttr(int row, int col);
 };
 
-NfgGridTable::NfgGridTable(NfgTable *p_table, Nfg *p_nfg)
+NfgGridTable::NfgGridTable(NfgTable *p_table, gbtNfgGame p_nfg)
   : m_nfg(p_nfg), m_table(p_table)
 { }
 
@@ -185,17 +185,17 @@ wxString NfgGridTable::GetValue(int row, int col)
     strategy[m_table->GetRowPlayer()] = row + 1;
     strategy[m_table->GetColPlayer()] = col + 1;
     
-    StrategyProfile profile(*m_nfg);
+    StrategyProfile profile(m_nfg);
     for (int pl = 1; pl <= strategy.Length(); pl++) {
       profile.Set(pl, support.GetStrategy(pl, strategy[pl]));
     }
 
-    gbtNfgOutcome outcome = m_nfg->GetOutcome(profile);
+    gbtNfgOutcome outcome = m_nfg.GetOutcome(profile);
     if (m_table->GetSettings().OutcomeValues()) {
       wxString ret = "(";
       for (int pl = 1; pl <= strategy.Length(); pl++) {
 	ret += wxString::Format("%s",
-				(char *) ToText(outcome.GetPayoff(m_nfg->GetPlayer(pl)),
+				(char *) ToText(outcome.GetPayoff(m_nfg.GetPlayer(pl)),
 						m_table->GetSettings().GetDecimals()));
 	if (pl < strategy.Length()) {
 	  ret += wxString(",");
@@ -471,7 +471,7 @@ BEGIN_EVENT_TABLE(NfgTable, wxPanel)
   EVT_GRID_LABEL_LEFT_CLICK(NfgTable::OnLabelLeftClick)
 END_EVENT_TABLE()
 
-NfgTable::NfgTable(Nfg &p_nfg, wxWindow *p_parent)
+NfgTable::NfgTable(gbtNfgGame p_nfg, wxWindow *p_parent)
   : wxPanel(p_parent, -1), m_nfg(p_nfg), m_parent(p_parent), 
     m_editable(true), m_cursorMoving(false), m_rowPlayer(1), m_colPlayer(2),
     m_support(m_nfg), m_profile(0),
@@ -480,7 +480,7 @@ NfgTable::NfgTable(Nfg &p_nfg, wxWindow *p_parent)
   SetAutoLayout(true);
 
   m_grid = new wxGrid(this, -1, wxDefaultPosition, wxDefaultSize);
-  m_grid->SetTable(new NfgGridTable(this, &m_nfg), true);
+  m_grid->SetTable(new NfgGridTable(this, m_nfg), true);
   m_grid->SetGridCursor(0, 0);
   m_grid->SetEditable(false);
   m_grid->SetDefaultCellFont(m_settings.GetDataFont());

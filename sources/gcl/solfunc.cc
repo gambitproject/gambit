@@ -32,6 +32,7 @@
 #include "game/nfg.h"
 #include "nash/behavsol.h"
 #include "nash/mixedsol.h"
+#include "game/efbasis.h"
 
 #include "game/efgutils.h"
 
@@ -123,24 +124,27 @@ static Portion *GSM_Belief(GSM &, Portion **param)
 
 static Portion* GSM_Game_Mixed(GSM &, Portion** param)
 {
-  return new NfgPortion(&((MixedPortion *) param[0])->Value()->Game());
+  return new NfgPortion(((MixedPortion *) param[0])->Value()->GetGame());
 }
 
 static Portion *GSM_Game_NfSupport(GSM &, Portion **param)
 {
-  Nfg *N = (Nfg *) &((NfSupportPortion *) param[0])->Value()->Game();
-
-  return new NfgPortion(N);
+  gbtNfgGame nfg = ((NfSupportPortion *) param[0])->Value()->GetGame();
+  return new NfgPortion(nfg);
 }
 
-static Portion* GSM_Game_EfgTypes(GSM &, Portion** param)
+static Portion *GSM_Game_EfgTypes(GSM &, Portion** param)
 {
-  if(param[0]->Game())  {
-    assert(param[0]->GameIsEfg());
-    return new EfgPortion((efgGame*) param[0]->Game());
+  switch (param[0]->Spec().Type) {
+  case porBEHAV:
+    return new EfgPortion(AsBehav(param[0]).GetGame());
+  case porEFBASIS:
+    return new EfgPortion(AsEfgBasis(param[0]).GetGame());
+  case porEFSUPPORT:
+    return new EfgPortion(AsEfgSupport(param[0]).GetGame());
+  default:
+    throw gclRuntimeError("Unknown type in call to Game[]");
   }
-  else
-    return 0;
 }
 
 //---------------
@@ -366,9 +370,9 @@ static Portion *GSM_Regret_Mixed(GSM &, Portion **param)
   MixedProfile<gNumber> P(*(*((MixedPortion*) param[0])->Value()).Profile());
   gbtNfgStrategy s = ((StrategyPortion*) param[1])->Value();
   gbtNfgPlayer player = s.GetPlayer();
-  Nfg &n = *player.GetGame();
+  gbtNfgGame nfg = player.GetGame();
 
-  gPVector<gNumber> v(n.NumStrats());
+  gPVector<gNumber> v(nfg.NumStrats());
   P.Regret(v);
 
   return new NumberPortion(v(player.GetId(), s.GetId()));
@@ -394,7 +398,7 @@ static Portion *GSM_Regrets_Mixed(GSM &, Portion **param)
 {
   MixedProfile<gNumber> profile(*(*((MixedPortion *) param[0])->Value()).Profile());
 
-  gPVector<gNumber> v(profile.Game().NumStrats());
+  gPVector<gNumber> v(profile.GetGame().NumStrats());
 
   profile.Regret(v);
 
@@ -461,12 +465,12 @@ static Portion *GSM_SetActionProbs(GSM &, Portion **param)
   int InfosetNum = 0;
   
   BehavSolution *P = new BehavSolution(*((BehavPortion*) param[0])->Value());
-  efgGame &E = P->GetGame();
+  gbtEfgGame efg = P->GetGame();
   
-  for (i = 1; i <= E.NumPlayers(); i++) {
-    for(j = 1; j <= E.GetPlayer(i).NumInfosets(); j++) {
+  for (i = 1; i <= efg.NumPlayers(); i++) {
+    for(j = 1; j <= efg.GetPlayer(i).NumInfosets(); j++) {
       if (((InfosetPortion*) param[1])->Value() ==
-	  E.GetPlayer(i).GetInfoset(j)) {
+	  efg.GetPlayer(i).GetInfoset(j)) {
 	PlayerNum = i;
 	InfosetNum = j;
 	break;
@@ -481,7 +485,7 @@ static Portion *GSM_SetActionProbs(GSM &, Portion **param)
   }  
 
   for (k = 1; 
-       k <= E.GetPlayer(PlayerNum).GetInfoset(InfosetNum).NumActions();
+       k <= efg.GetPlayer(PlayerNum).GetInfoset(InfosetNum).NumActions();
        k++) {
     p3 = ((ListPortion*) param[2])->SubscriptCopy(k);
     if(p3->Spec().ListDepth > 0)
@@ -492,7 +496,7 @@ static Portion *GSM_SetActionProbs(GSM &, Portion **param)
     }
 
     assert(p3->Spec().Type == porNUMBER);
-    P->Set((E.GetPlayer(PlayerNum).GetInfoset(InfosetNum).GetAction(k)),
+    P->Set((efg.GetPlayer(PlayerNum).GetInfoset(InfosetNum).GetAction(k)),
 	   ((NumberPortion*) p3)->Value());
 
     delete p3;
@@ -565,7 +569,7 @@ static Portion *GSM_StrategyProb(GSM &, Portion **param)
 static Portion *GSM_StrategyProbs(GSM &, Portion **param)
 {
   const MixedSolution *profile = ((MixedPortion *) param[0])->Value();
-  const Nfg &nfg = profile->Game();
+  gbtNfgGame nfg = profile->GetGame();
 
   ListPortion *por = new ListPortion;
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)  {

@@ -488,45 +488,6 @@ static Portion* GSM_List_Number(GSM &, Portion **param)
   return p;
 }
 
-static Portion* GSM_List_Nfg(GSM &, Portion **param)
-{
-  ListPortion* p;
-  int i;
-
-  if( ((NumberPortion*) param[1])->Value() < gNumber(0) )
-    throw gclRuntimeError( "Invalid list Length" );
-
-
-  p = new ListPortion();
-  p->SetDataType( param[0]->Spec().Type );
-
-  Nfg& nfg =
-      * (((NfgPortion *) param[0])->Value());
-    for( i = 1; i <= (double) ((NumberPortion*) param[1])->Value(); i++ )
-      p->Append(new NfgPortion(new Nfg(nfg)));
-  return p;
-}
-
-static Portion* GSM_List_Efg(GSM &, Portion **param)
-{
-  ListPortion* p;
-
-  if (((NumberPortion*) param[1])->Value() < gNumber(0)) {
-    throw gclRuntimeError( "Invalid list length" );
-  }
-
-  p = new ListPortion();
-  p->SetDataType( param[0]->Spec().Type );
-
-  efgGame &efg = *(((EfgPortion*) param[0])->Value());
-  for (int i = 1; i <= (double) ((NumberPortion*) param[1])->Value(); i++) {
-    p->Append(new EfgPortion(new efgGame(efg)));
-  }  
-
-  return p;
-}
-
-
 static Portion* GSM_Dot_Check( ListPortion* p1, ListPortion* p2 )
 {
   int i;
@@ -829,7 +790,7 @@ void Init_listfunc(GSM *gsm)
 
   //-------------------------- List -----------------------------
 
-  FuncObj = new gclFunction(*gsm, "List", 5);
+  FuncObj = new gclFunction(*gsm, "List", 3);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_List, PortionSpec(porANYTYPE, 1), 
 				       2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porANYTYPE & 
@@ -852,20 +813,6 @@ void Init_listfunc(GSM *gsm)
 					    new NumberPortion(1)));
   FuncObj->SetParamInfo(2, 2, gclParameter("delta", porNUMBER,
 					    new NumberPortion(0)));
-
-  FuncObj->SetFuncInfo(3, gclSignature(GSM_List_Nfg,
-				       PortionSpec(porNFG, 1), 
-				       2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(3, 0, gclParameter("x", porNFG));
-  FuncObj->SetParamInfo(3, 1, gclParameter("length", porNUMBER,
-					    new NumberPortion(1)));
-
-  FuncObj->SetFuncInfo(4, gclSignature(GSM_List_Efg,
-				       PortionSpec(porEFG, 1), 
-				       2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(4, 0, gclParameter("x", porEFG));
-  FuncObj->SetParamInfo(4, 1, gclParameter("length", porNUMBER,
-					    new NumberPortion(1)));
 
   gsm->AddFunction(FuncObj);
 

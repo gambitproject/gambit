@@ -20,9 +20,9 @@ extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
                                long p_style = wxOK | wxCENTRE);
 
 
-class efgGame;
+class gbtEfgGame;
 class EfgShow;
-class Nfg;
+class gbtNfgGame;
 class NfgShow;
 
 class Game;
@@ -43,16 +43,16 @@ public:
   const wxString &CurrentDir(void)  { return m_currentDir; }
   void SetCurrentDir(const wxString &p_dir)  { m_currentDir = p_dir; }
 
-  void AddGame(efgGame *, EfgShow *);
-  void AddGame(Nfg *, NfgShow *);
-  void AddGame(efgGame *, Nfg *, NfgShow *);
-  void RemoveGame(efgGame *);
-  void RemoveGame(Nfg *);
+  void AddGame(gbtEfgGame, EfgShow *);
+  void AddGame(gbtNfgGame, NfgShow *);
+  void AddGame(gbtEfgGame, gbtNfgGame, NfgShow *);
+  void RemoveGame(gbtEfgGame);
+  void RemoveGame(gbtNfgGame);
   void SetFilename(EfgShow *, const wxString &);
   void SetFilename(NfgShow *, const wxString &);
 
-  EfgShow *GetWindow(const efgGame *);
-  NfgShow *GetWindow(const Nfg *);
+  EfgShow *GetWindow(gbtEfgGame);
+  NfgShow *GetWindow(gbtNfgGame);
 
   void LoadFile(const wxString &);
 

@@ -151,7 +151,7 @@ static void QreJacobian(const EFSupport &p_support,
 			const gVector<double> &p_point,
 			gMatrix<double> &p_matrix)
 {
-  const efgGame &efg = p_support.GetGame();
+  gbtEfgGame efg = p_support.GetGame();
   BehavProfile<double> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = p_point[i];

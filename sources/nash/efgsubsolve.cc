@@ -36,7 +36,7 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
 				      gList<gbtEfgOutcome> &values)
 {
   int i;
-  efgGame &efg = p_support.GetGame();
+  gbtEfgGame efg = p_support.GetGame();
   
   gList<BehavProfile<gNumber> > thissolns;
   thissolns.Append(*solution);
@@ -87,7 +87,7 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
       subroots[i].SetOutcome(subrootvalues[soln][i]);
     }
     
-    efgGame foo(efg, n);
+    gbtEfgGame foo = efg.Copy(n);
     // this prevents double-counting of outcomes at roots of subgames
     // by convention, we will just put the payoffs in the parent subgame
     foo.RootNode().SetOutcome(0);
@@ -138,8 +138,8 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
 	sol = m_efgAlgorithm->Solve(subsupport, p_status);
       }
       else if (m_nfgAlgorithm) {
-	Nfg *nfg = MakeReducedNfg(subsupport);
-	gbtNfgSupport support(*nfg);
+	gbtNfgGame nfg = MakeReducedNfg(subsupport);
+	gbtNfgSupport support(nfg);
 
 	gList<MixedSolution> nfgSolutions;
 
@@ -147,7 +147,6 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
 	  nfgSolutions = m_nfgAlgorithm->Solve(support, p_status);
 	}
 	catch (gSignalBreak &) {
-	  delete nfg;
 	  throw;
 	}
 
@@ -155,8 +154,6 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
 	  MixedProfile<gNumber> profile(*nfgSolutions[soln].Profile());
 	  sol.Append(BehavProfile<gNumber>(profile));
 	}
-
-	delete nfg;
       }
     }
     catch (gSignalBreak &) {
@@ -266,7 +263,7 @@ gList<BehavSolution> gbtEfgNashSubgames::Solve(const EFSupport &p_support,
   solution = new BehavProfile<gNumber>(p_support);
   ((gVector<gNumber> &) *solution).operator=(gNumber(0));
 
-  efgGame efg((const efgGame &) p_support.GetGame());
+  gbtEfgGame efg = p_support.GetGame();
   infosets = gArray<gArray<gbtEfgInfoset> *>(efg.NumPlayers());
 
   for (int i = 1; i <= efg.NumPlayers(); i++) {

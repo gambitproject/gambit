@@ -34,10 +34,10 @@
 //
 
 struct gbt_nfg_player_rep;
-class Nfg;
+class gbtNfgGame;
 
 class gbtNfgPlayer {
-friend class Nfg;
+friend class gbtNfgGame;
 friend class gbtNfgOutcome;
 protected:
   struct gbt_nfg_player_rep *rep;
@@ -55,7 +55,7 @@ public:
 
   bool IsNull(void) const;
 
-  Nfg *GetGame(void) const;
+  gbtNfgGame GetGame(void) const;
   gText GetLabel(void) const;
   void SetLabel(const gText &);
   int GetId(void) const;

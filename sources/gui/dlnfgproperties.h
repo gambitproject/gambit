@@ -31,7 +31,7 @@
 
 class dialogNfgProperties : public wxDialog {
 private:
-  Nfg &m_nfg;
+  gbtNfgGame &m_nfg;
   wxNotebook *m_notebook;
 
   // Event handlers
@@ -39,7 +39,7 @@ private:
 
 public:
   // Lifecycle
-  dialogNfgProperties(wxWindow *p_parent, Nfg &p_nfg, const wxString &);
+  dialogNfgProperties(wxWindow *p_parent, gbtNfgGame &p_nfg, const wxString &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetGameTitle(void) const;

@@ -32,11 +32,11 @@
 #endif   // __GNUG__
 
 struct gbt_efg_player_rep;
-class efgGame;
+class gbtEfgGame;
 class gbtEfgInfoset;
 
 class gbtEfgPlayer {
-friend class efgGame;
+friend class gbtEfgGame;
 protected:
   struct gbt_efg_player_rep *rep;
 
@@ -53,7 +53,7 @@ public:
 
   bool IsNull(void) const;
 
-  efgGame *GetGame(void) const;
+  gbtEfgGame GetGame(void) const;
   gText GetLabel(void) const;
   void SetLabel(const gText &);
   int GetId(void) const;
@@ -61,36 +61,6 @@ public:
   bool IsChance(void) const;
   int NumInfosets(void) const;
   gbtEfgInfoset GetInfoset(int p_index) const;
-};
-
-class gbtEfgPlayerIterator {
-private:
-  int m_index;
-  efgGame &m_efg;
-
-public:
-  gbtEfgPlayerIterator(efgGame &p_efg);
-  
-  gbtEfgPlayer operator*(void) const;
-  gbtEfgPlayerIterator &operator++(int);
-
-  bool Begin(void);
-  bool End(void) const;
-};
-
-class gbtEfgInfosetIterator {
-private:
-  int m_index;
-  gbtEfgPlayer m_player;
-
-public:
-  gbtEfgInfosetIterator(const gbtEfgPlayer &p_player);
-  
-  gbtEfgInfoset operator*(void) const;
-  gbtEfgInfosetIterator &operator++(int);
-
-  bool Begin(void);
-  bool End(void) const;
 };
 
 #endif    // EFPLAYER_H

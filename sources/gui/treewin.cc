@@ -61,7 +61,7 @@ END_EVENT_TABLE()
 
 TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   : wxScrolledWindow(p_parent),
-    m_efg(*p_efgShow->Game()), m_parent(p_efgShow), m_layout(m_efg, this),
+    m_efg(p_efgShow->GetGame()), m_parent(p_efgShow), m_layout(m_efg, this),
     m_zoom(1.0), m_dragImage(0), m_dragSource(0)
 {
   // Make sure that Chance player has a name

@@ -1038,25 +1038,6 @@ static bool ListNestedCheck(Portion* p, const gclParameter& info)
 
 Portion *CallFuncObj::CallNormalFunction(GSM *gsm, Portion **param)
 {
-  // check to see that all parameters belong to the same game, if so specified
-
-  if (_FuncInfo[m_funcIndex].Flag & funcGAMEMATCH) {
-    void *game = NULL; 
-    for (int index = 0; index < _FuncInfo[m_funcIndex].NumParams; index++) {
-      if (param[index] != 0 && m_runTimeParamInfo[index].Defined) {
-	if (param[index]->Game()) {
-	  if (game == NULL)
-	    game = param[index]->Game();
-	  else if (game != param[index]->Game()) {
-	    throw gclRuntimeError("Function " + _FuncName +
-				  "[] parameters do not belong to same game\n" +
-				  "Error at parameter #" + ToText(index + 1));
-	  }
-	}
-      }
-    }   
-  }
-
   try {
     if (!_FuncInfo[m_funcIndex].UserDefined)
       return _FuncInfo[m_funcIndex].FuncPtr(*gsm, param);

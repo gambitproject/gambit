@@ -65,7 +65,7 @@ public:
 gList<MixedSolution> nfgOneNash::Solve(const gbtNfgSupport &p_support,
 				       gStatus &p_status)
 {
-  gArray<int> players(p_support.Game().NumPlayers());
+  gArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -76,8 +76,8 @@ gList<MixedSolution> nfgOneNash::Solve(const gbtNfgSupport &p_support,
     /* one round of elimination of weakly dominated strategies */
     gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
 
-    if (p_support.Game().NumPlayers() == 2) {
-      if (IsConstSum(p_support.Game())) {
+    if (p_support.GetGame().NumPlayers() == 2) {
+      if (IsConstSum(p_support.GetGame())) {
 	gbtNfgNashLp<double> algorithm;
 	return algorithm.Solve(support, p_status);
       }
@@ -152,7 +152,7 @@ public:
 gList<MixedSolution> nfgTwoNash::Solve(const gbtNfgSupport &p_support,
 				       gStatus &p_status)
 {
-  gArray<int> players(p_support.Game().NumPlayers());
+  gArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -174,7 +174,7 @@ gList<MixedSolution> nfgTwoNash::Solve(const gbtNfgSupport &p_support,
       }
     }
 
-    if (p_support.Game().NumPlayers() == 2) {
+    if (p_support.GetGame().NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> algorithm;
       algorithm.SetStopAfter(2);
       return algorithm.Solve(support, p_status);
@@ -245,7 +245,7 @@ public:
 gList<MixedSolution> nfgAllNash::Solve(const gbtNfgSupport &p_support,
 				       gStatus &p_status)
 {
-  gArray<int> players(p_support.Game().NumPlayers());
+  gArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -267,7 +267,7 @@ gList<MixedSolution> nfgAllNash::Solve(const gbtNfgSupport &p_support,
       }
     }
 
-    if (p_support.Game().NumPlayers() == 2) {
+    if (p_support.GetGame().NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> algorithm;
       algorithm.SetStopAfter(0);
       return algorithm.Solve(support, p_status);
@@ -337,7 +337,7 @@ public:
 gList<MixedSolution> nfgOnePerfect::Solve(const gbtNfgSupport &p_support,
 					  gStatus &p_status)
 {
-  gArray<int> players(p_support.Game().NumPlayers());
+  gArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -412,7 +412,7 @@ public:
 gList<MixedSolution> nfgTwoPerfect::Solve(const gbtNfgSupport &p_support,
 					  gStatus &p_status)
 {
-  gArray<int> players(p_support.Game().NumPlayers());
+  gArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -487,7 +487,7 @@ public:
 gList<MixedSolution> nfgAllPerfect::Solve(const gbtNfgSupport &p_support,
 					  gStatus &p_status)
 {
-  gArray<int> players(p_support.Game().NumPlayers());
+  gArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -1330,7 +1330,7 @@ dialogNfgNash::dialogNfgNash(wxWindow *p_parent, const gbtNfgSupport &p_support)
 				   wxDefaultPosition, wxSize(200, 400),
 				   wxTR_NO_BUTTONS | wxTR_HIDE_ROOT |
 				   wxTR_NO_LINES | wxTR_ROW_LINES);
-  wxTreeItemId init = LoadAlgorithms(p_support.Game());
+  wxTreeItemId init = LoadAlgorithms(p_support.GetGame());
   m_algPanelSizer->Add(m_algorithmTree, 1, wxALL, 5);
   m_currentPanel = m_algorithms(init);
   m_algPanelSizer->Add(m_currentPanel, 0, wxALL | wxCENTER, 5);
@@ -1353,7 +1353,7 @@ dialogNfgNash::dialogNfgNash(wxWindow *p_parent, const gbtNfgSupport &p_support)
   m_algorithmTree->SelectItem(init);
 }
 
-int dialogNfgNash::LoadAlgorithms(const Nfg &p_nfg)
+int dialogNfgNash::LoadAlgorithms(const gbtNfgGame &p_nfg)
 {
   wxTreeItemId id;
 

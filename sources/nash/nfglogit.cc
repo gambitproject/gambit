@@ -127,7 +127,7 @@ static void QreLHS(const gbtNfgSupport &p_support, const gVector<double> &p_poin
   p_lhs = 0.0;
   int rowno = 0;
 
-  for (int pl = 1; pl <= p_support.Game().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
     rowno++;
     for (int st = 1; st <= p_support.NumStrats(pl); st++) {
       p_lhs[rowno] += profile(pl, st);
@@ -148,7 +148,7 @@ static void QreJacobian(const gbtNfgSupport &p_support,
 			const gVector<double> &p_point,
 			gMatrix<double> &p_matrix)
 {
-  const Nfg &nfg = p_support.Game();
+  gbtNfgGame nfg = p_support.GetGame();
   MixedProfile<double> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = p_point[i];
@@ -360,7 +360,7 @@ static void TracePath(const MixedProfile<double> &p_start,
 	// to continue tracing
 	gbtNfgSupport newSupport(p_start.Support());
 	int index = 1;
-	for (int pl = 1; pl <= newSupport.Game().NumPlayers(); pl++) {
+	for (int pl = 1; pl <= newSupport.GetGame().NumPlayers(); pl++) {
 	  for (int st = 1; st <= newSupport.NumStrats(pl); st++) {
 	    if (index++ == i) {
 	      newSupport.RemoveStrategy(newSupport.GetStrategy(pl, st));

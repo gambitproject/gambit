@@ -40,27 +40,26 @@
 #include "nfgint.h"
 
 
-Lexicon::Lexicon(const efgGame &E)
-  : N(0), strategies(E.NumPlayers())
+Lexicon::Lexicon(const gbtEfgGame &p_efg)
+  : m_nfg(0), strategies(p_efg.NumPlayers())
 { }
 
 Lexicon::~Lexicon()
 {
   for (int i = 1; i <= strategies.Length(); i++)
     while (strategies[i].Length())  delete strategies[i].Remove(1);
-  if (N)
-    N->rep->m_efg = 0;
+  m_nfg.rep->m_efg = 0;
 }
 
-void SetEfg(Nfg *nfg, efgGame *efg)
+void SetEfg(gbtNfgGame nfg, gbtEfgGame efg)
 {
-  nfg->rep->m_efg = efg;
+  nfg.rep->m_efg = efg.rep;
 }
 
-void Lexicon::MakeLink(efgGame *efg, Nfg *nfg)
+void Lexicon::MakeLink(gbtEfgGame efg, gbtNfgGame nfg)
 {
-  nfg->rep->m_efg = efg;
-  N = nfg;
+  nfg.rep->m_efg = efg.rep;
+  m_nfg = nfg;
 }
 
 void Lexicon::MakeStrategy(gbtEfgPlayer p)
@@ -132,30 +131,24 @@ void Lexicon::MakeReducedStrats(const EFSupport &S,
     MakeStrategy(p);
 }
 
-//
-// The following two functions have been placed in the
-// efgGameNamespace namespace for now, to make the friend
-// declarations in class efgGame work correctly.
-//
-
-Nfg *MakeReducedNfg(const EFSupport &support)
+gbtNfgGame MakeReducedNfg(const EFSupport &support)
 {
   int i;
-  efgGame &E = support.GetGame();
-  Lexicon *L = new Lexicon(E);
-  for (i = 1; i <= E.NumPlayers(); i++) {
-    L->MakeReducedStrats(support, E.GetPlayer(i), E.RootNode(), NULL);
+  gbtEfgGame efg = support.GetGame();
+  Lexicon *L = new Lexicon(efg);
+  for (i = 1; i <= efg.NumPlayers(); i++) {
+    L->MakeReducedStrats(support, efg.GetPlayer(i), efg.RootNode(), NULL);
   }
 
-  gArray<int> dim(E.NumPlayers());
-  for (i = 1; i <= E.NumPlayers(); i++)
+  gArray<int> dim(efg.NumPlayers());
+  for (i = 1; i <= efg.NumPlayers(); i++)
     dim[i] = (L->strategies[i].Length()) ? L->strategies[i].Length() : 1;
 
-  L->MakeLink(&E, new Nfg(dim));
-  L->N->SetTitle(E.GetTitle());
+  L->MakeLink(efg, gbtNfgGame(dim));
+  L->m_nfg.SetTitle(efg.GetTitle());
 
-  for (i = 1; i <= E.NumPlayers(); i++)   {
-    L->N->GetPlayer(i).SetLabel(E.GetPlayer(i).GetLabel());
+  for (i = 1; i <= efg.NumPlayers(); i++)   {
+    L->m_nfg.GetPlayer(i).SetLabel(efg.GetPlayer(i).GetLabel());
     for (int j = 1; j <= L->strategies[i].Length(); j++)   {
       gText name;
       for (int k = 1; k <= L->strategies[i][j]->Length(); k++)
@@ -163,28 +156,28 @@ Nfg *MakeReducedNfg(const EFSupport &support)
 	  name += ToText((*L->strategies[i][j])[k]);
         else
 	  name += "*";
-      L->N->GetPlayer(i).GetStrategy(j).SetLabel(name);
+      L->m_nfg.GetPlayer(i).GetStrategy(j).SetLabel(name);
     }
   }
 
-  gbtNfgSupport S(*L->N);
+  gbtNfgSupport S(L->m_nfg);
   NfgContIter iter(S);
-  gArray<gArray<int> *> corr(E.NumPlayers());
-  gArray<int> corrs(E.NumPlayers());
-  for (i = 1; i <= E.NumPlayers(); i++)  {
+  gArray<gArray<int> *> corr(efg.NumPlayers());
+  gArray<int> corrs(efg.NumPlayers());
+  for (i = 1; i <= efg.NumPlayers(); i++)  {
     corrs[i] = 1;
     corr[i] = L->strategies[i][1];
   }
 
-  gArray<gNumber> value(E.NumPlayers());
+  gArray<gNumber> value(efg.NumPlayers());
 
-  int pl = E.NumPlayers();
+  int pl = efg.NumPlayers();
   while (1)  {
-    E.Payoff(corr, value);
+    efg.Payoff(corr, value);
 
-    iter.SetOutcome(L->N->NewOutcome());
-    for (int j = 1; j <= E.NumPlayers(); j++)
-      iter.GetOutcome().SetPayoff(L->N->GetPlayer(j), value[j]);
+    iter.SetOutcome(L->m_nfg.NewOutcome());
+    for (int j = 1; j <= efg.NumPlayers(); j++)
+      iter.GetOutcome().SetPayoff(L->m_nfg.GetPlayer(j), value[j]);
 
     iter.NextContingency();
     while (pl > 0)   {
@@ -199,54 +192,52 @@ Nfg *MakeReducedNfg(const EFSupport &support)
     }
 
     if (pl == 0)  break;
-    pl = E.NumPlayers();
+    pl = efg.NumPlayers();
   }
 
-  ((efgGame &) E).rep->lexicon = L;
-  SetEfg(((efgGame &) E).rep->lexicon->N, &E);
-  return ((efgGame &) E).rep->lexicon->N;
+  efg.rep->lexicon = L;
+  SetEfg(efg.rep->lexicon->m_nfg, efg);
+  return efg.rep->lexicon->m_nfg;
 }
 
-Nfg *MakeAfg(const efgGame &E)
+gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
 {
-  Nfg *afg = new Nfg(gArray<int>(E.NumActions()));
+  gbtNfgGame afg(gArray<int>(p_efg.NumActions()));
 
-  if (!afg)   return 0;
+  p_efg.rep->afg = afg;
+  afg.SetTitle(p_efg.GetTitle() + " (Agent Form)");
 
-  ((efgGame &) E).rep->afg = afg;
-  afg->SetTitle(E.GetTitle() + " (Agent Form)");
-
-  for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)   {
-    for (int iset = 1; iset <= E.GetPlayer(epl).NumInfosets(); iset++, npl++)  {
-      gbtEfgInfoset s = E.GetPlayer(epl).GetInfoset(iset);
+  for (int epl = 1, npl = 1; epl <= p_efg.NumPlayers(); epl++)   {
+    for (int iset = 1; iset <= p_efg.GetPlayer(epl).NumInfosets(); iset++, npl++)  {
+      gbtEfgInfoset s = p_efg.GetPlayer(epl).GetInfoset(iset);
       for (int act = 1; act <= s.NumActions(); act++)  {
-	afg->GetPlayer(npl).GetStrategy(act).SetLabel(ToText(act));
+	afg.GetPlayer(npl).GetStrategy(act).SetLabel(ToText(act));
       }
     }
   }
 
-  NfgIter iter(*afg);
-  int pl = afg->NumPlayers();
+  NfgIter iter(afg);
+  int pl = afg.NumPlayers();
 
-  gArray<int> dim(E.NumPlayers());
+  gArray<int> dim(p_efg.NumPlayers());
   for (int i = 1; i <= dim.Length(); i++) {
-    dim[i] = E.GetPlayer(i).NumInfosets();
+    dim[i] = p_efg.GetPlayer(i).NumInfosets();
   }
   gPVector<int> profile(dim);
   ((gVector<int> &) profile).operator=(1);
 
-  gVector<gNumber> payoff(E.NumPlayers());
+  gVector<gNumber> payoff(p_efg.NumPlayers());
   
   while (1)  {
-    E.Payoff(profile, payoff);
+    p_efg.Payoff(profile, payoff);
 
     if (iter.GetIndex() >= 0) {
-      iter.SetOutcome(afg->NewOutcome());
+      iter.SetOutcome(afg.NewOutcome());
     }
 
-    for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)
-      for (int iset = 1; iset <= E.GetPlayer(epl).NumInfosets(); iset++, npl++)
-	iter.GetOutcome().SetPayoff(afg->GetPlayer(npl), payoff[epl]);
+    for (int epl = 1, npl = 1; epl <= p_efg.NumPlayers(); epl++)
+      for (int iset = 1; iset <= p_efg.GetPlayer(epl).NumInfosets(); iset++, npl++)
+	iter.GetOutcome().SetPayoff(afg.GetPlayer(npl), payoff[epl]);
 
     
     while (pl > 0)  {
@@ -259,10 +250,10 @@ Nfg *MakeAfg(const efgGame &E)
     }
 
     if (pl == 0)  break;
-    pl = afg->NumPlayers();
+    pl = afg.NumPlayers();
   }
 
-  SetEfg(afg, (efgGame*) &E);
+  SetEfg(afg, p_efg);
 
   return afg;
 }

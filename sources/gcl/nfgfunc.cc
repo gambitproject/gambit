@@ -69,14 +69,13 @@ static Portion *GSM_Comment(GSM &, Portion **param)
 // CompressNfg
 //---------------
 
-Nfg *CompressNfg(const Nfg &, const gbtNfgSupport &);
+gbtNfgGame CompressNfg(const gbtNfgGame &, const gbtNfgSupport &);
 
 static Portion *GSM_CompressNfg(GSM &, Portion **param)
 {
   gbtNfgSupport &S = AsNfgSupport(param[0]);
-  Nfg *N = (Nfg *) &S.Game();
-
-  return new NfgPortion(CompressNfg(*N, S));
+  gbtNfgGame nfg = S.GetGame();
+  return new NfgPortion(CompressNfg(nfg, S));
 }
 
 
@@ -87,9 +86,7 @@ static Portion *GSM_CompressNfg(GSM &, Portion **param)
 static Portion *GSM_DeleteOutcome(GSM &gsm, Portion **param)
 {
   gbtNfgOutcome outc = AsNfgOutcome(param[0]);
-  gsm.InvalidateGameProfile(outc.GetGame(), false);
-  outc.GetGame()->DeleteOutcome(outc);
-
+  outc.GetGame().DeleteOutcome(outc);
   return new BoolPortion(true);
 }
 
@@ -177,14 +174,9 @@ static Portion *GSM_LoadNfg(GSM &, Portion **param)
 {
   gText file = AsText(param[0]);
 
-  Nfg *nfg = 0;
-
   try { 
     gFileInput f(file);
-    nfg = ReadNfgFile(f);
-    if (!nfg) {
-      throw gclRuntimeError(file + "is not a valid .nfg file");
-    }
+    gbtNfgGame nfg = ReadNfgFile(f);
     return new NfgPortion(nfg);
   }
   catch (gFileInput::OpenFailed &)  {
@@ -231,7 +223,7 @@ static Portion *GSM_NewNfg(GSM &, Portion **param)
   for (int i = 1; i <= dim->Length(); i++)
     d[i] = AsNumber((*dim)[i]);
 
-  return new NfgPortion(new Nfg(d));
+  return new NfgPortion(gbtNfgGame(d));
 }
 
 
@@ -252,8 +244,8 @@ static Portion* GSM_Outcome(GSM &, Portion** param)
 {
   int i;
 
-  Nfg &nfg = 
-    *((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value().GetPlayer().GetGame();
+  gbtNfgGame nfg = 
+    ((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value().GetPlayer().GetGame();
   
   if (nfg.NumPlayers() != ((ListPortion *) param[0])->Length())
     throw gclRuntimeError("Invalid profile");
@@ -282,11 +274,11 @@ static Portion* GSM_Outcome(GSM &, Portion** param)
 
 static Portion *GSM_Outcomes(GSM &, Portion **param)
 {
-  Nfg &N = AsNfg(param[0]);
+  gbtNfgGame nfg = AsNfg(param[0]);
   
   ListPortion *ret = new ListPortion;
-  for (int outc = 1; outc <= N.NumOutcomes(); outc++) {
-    ret->Append(new NfOutcomePortion(N.GetOutcomeId(outc)));
+  for (int outc = 1; outc <= nfg.NumOutcomes(); outc++) {
+    ret->Append(new NfOutcomePortion(nfg.GetOutcomeId(outc)));
   }
 
   return ret;
@@ -327,11 +319,11 @@ static Portion *GSM_Player(GSM &, Portion **param)
 
 static Portion *GSM_Players(GSM &, Portion **param)
 {
-  Nfg &N = AsNfg(param[0]);
+  gbtNfgGame nfg = AsNfg(param[0]);
 
   ListPortion *ret = new ListPortion;
-  for (int pl = 1; pl <= N.NumPlayers(); pl++) {
-    ret->Append(new NfPlayerPortion(N.GetPlayer(pl)));
+  for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
+    ret->Append(new NfPlayerPortion(nfg.GetPlayer(pl)));
   }
 
   return ret;
@@ -380,11 +372,11 @@ extern NumberPortion _WriteGameDecimals;
 
 static Portion *GSM_SaveNfg(GSM &, Portion **param)
 {
-  Nfg &N = AsNfg(param[0]);
+  gbtNfgGame nfg = AsNfg(param[0]);
   gText file = AsText(param[1]);
   try {
     gFileOutput f(file);
-    N.WriteNfgFile(f, _WriteGameDecimals.Value());
+    nfg.WriteNfgFile(f, _WriteGameDecimals.Value());
   }
   catch (gFileOutput::OpenFailed &)  {
     throw gclRuntimeError("Unable to open file " + file + " for output");
@@ -443,8 +435,8 @@ static Portion *GSM_SetName_NfSupport(GSM &, Portion **param)
 
 static Portion* GSM_SetOutcome(GSM &gsm, Portion** param)
 {
-  Nfg &nfg = 
-    *((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value().GetPlayer().GetGame();
+  gbtNfgGame nfg = 
+    ((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value().GetPlayer().GetGame();
   
   if (nfg.NumPlayers() != ((ListPortion *) param[0])->Length())
     throw gclRuntimeError("Invalid profile");
@@ -463,8 +455,6 @@ static Portion* GSM_SetOutcome(GSM &gsm, Portion** param)
 
   nfg.SetOutcome(profile, outcome);
 
-  gsm.InvalidateGameProfile((Nfg *) &nfg, false);
- 
   return param[1]->ValCopy();
 }
 
@@ -475,13 +465,11 @@ static Portion* GSM_SetOutcome(GSM &gsm, Portion** param)
 static Portion* GSM_SetPayoff(GSM &gsm, Portion** param)
 {
   gbtNfgOutcome outcome = AsNfgOutcome(param[0]);
-  Nfg *nfg = outcome.GetGame();
+  gbtNfgGame nfg = outcome.GetGame();
   gbtNfgPlayer player = AsNfgPlayer(param[1]);
   gNumber value = AsNumber(param[2]);
 
   outcome.SetPayoff(player, value);
-  gsm.InvalidateGameProfile((Nfg *) nfg, false);
- 
   return param[0]->ValCopy();
 }
 
@@ -523,7 +511,7 @@ static Portion *GSM_UnDominated(GSM &gsm, Portion **param)
   gPrecision prec = AsPrecision(param[3]);
 
   gWatch watch;
-  gBlock<int> players(S.Game().NumPlayers());
+  gBlock<int> players(S.GetGame().NumPlayers());
   for (int i = 1; i <= players.Length(); i++)   players[i] = i;
 
   gbtNfgSupport *T;

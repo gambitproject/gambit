@@ -304,8 +304,8 @@ bool EFActionSet::HasActiveActionAt(const int &iset) const
 // EFSupport: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-EFSupport::EFSupport(const efgGame &p_efg) 
-  : m_efg((efgGame *) &p_efg), m_players(p_efg.NumPlayers())
+EFSupport::EFSupport(const gbtEfgGame &p_efg) 
+  : m_efg(p_efg), m_players(p_efg.NumPlayers())
 {
   for (int pl = 1; pl <= m_players.Length(); pl++) {
     m_players[pl] = new EFActionSet(p_efg.GetPlayer(pl));
@@ -361,7 +361,7 @@ bool EFSupport::operator!=(const EFSupport &p_support) const
 int EFSupport::NumActions(int pl, int iset) const
 {
   if (pl == 0) {
-    return m_efg->GetChance().GetInfoset(iset).NumActions();
+    return m_efg.GetChance().GetInfoset(iset).NumActions();
   }
   else {
     return m_players[pl]->NumActions(iset);
@@ -409,7 +409,7 @@ bool EFSupport::Contains(int pl, int iset, int act) const
 gbtEfgAction EFSupport::GetAction(int pl, int iset, int act) const
 {
   if (pl == 0) {
-    return m_efg->GetChance().GetInfoset(iset).GetAction(act);
+    return m_efg.GetChance().GetInfoset(iset).GetAction(act);
   }
   else {
     return m_players[pl]->GetAction(iset, act);
@@ -448,7 +448,7 @@ int EFSupport::NumDegreesOfFreedom(void) const
 
 bool EFSupport::HasActiveActionsAtAllInfosets(void) const
 {
-  if (m_players.Length() != m_efg->NumPlayers())   return false;
+  if (m_players.Length() != m_efg.NumPlayers())   return false;
   for (int i = 1; i <= m_players.Length(); i++)
     if (!m_players[i]->HasActiveActionsAtAllInfosets())  return false;
 
@@ -457,13 +457,13 @@ bool EFSupport::HasActiveActionsAtAllInfosets(void) const
 
 gPVector<int> EFSupport::NumActions(void) const
 {
-  gArray<int> foo(m_efg->NumPlayers());
+  gArray<int> foo(m_efg.NumPlayers());
   int i;
-  for (i = 1; i <= m_efg->NumPlayers(); i++)
+  for (i = 1; i <= m_efg.NumPlayers(); i++)
     foo[i] = m_players[i]->GetPlayer().NumInfosets();
 
   gPVector<int> bar(foo);
-  for (i = 1; i <= m_efg->NumPlayers(); i++)
+  for (i = 1; i <= m_efg.NumPlayers(); i++)
     for (int j = 1; j <= m_players[i]->GetPlayer().NumInfosets(); j++)
       bar(i, j) = NumActions(i,j);
 
@@ -488,8 +488,8 @@ void EFSupport::AddAction(const gbtEfgAction &s)
 
 int EFSupport::NumSequences(int j) const
 {
-  if (j < 1 || j > m_efg->NumPlayers()) return 1;
-  gList<gbtEfgInfoset> isets = ReachableInfosets(m_efg->GetPlayer(j));
+  if (j < 1 || j > m_efg.NumPlayers()) return 1;
+  gList<gbtEfgInfoset> isets = ReachableInfosets(m_efg.GetPlayer(j));
   int num = 1;
   for(int i = 1; i <= isets.Length(); i++)
     num+=NumActions(isets[i]);
@@ -499,7 +499,7 @@ int EFSupport::NumSequences(int j) const
 int EFSupport::TotalNumSequences(void) const
 {
   int total = 0;
-  for (int i = 1 ; i <= m_efg->NumPlayers(); i++)
+  for (int i = 1 ; i <= m_efg.NumPlayers(); i++)
     total += NumSequences(i);
   return total;
 }
@@ -568,7 +568,7 @@ gList<gbtEfgInfoset> EFSupport::ReachableInfosets(const gbtEfgNode &n,
 
 bool EFSupport::AlwaysReaches(const gbtEfgInfoset &i) const
 {
-  return AlwaysReachesFrom(i, m_efg->RootNode());
+  return AlwaysReachesFrom(i, m_efg.RootNode());
 }
 
 bool EFSupport::AlwaysReachesFrom(const gbtEfgInfoset &i, 
@@ -600,7 +600,7 @@ bool EFSupport::MayReach(const gbtEfgInfoset &infoset) const
 
 bool EFSupport::MayReach(const gbtEfgNode &n) const
 {
-  if (n == m_efg->RootNode())
+  if (n == m_efg.RootNode())
     return true;
   else {
     if (!Contains(n.GetAction())) {
@@ -616,7 +616,7 @@ bool EFSupport::MayReach(const gbtEfgNode &n) const
 void EFSupport::Dump(gOutput &p_output) const
 {
   p_output << '"' << m_name << "\" { ";
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)  {
     gbtEfgPlayer player = m_players[pl]->GetPlayer();
     p_output << '"' << player.GetLabel() << "\" { ";
     for (int iset = 1; iset <= player.NumInfosets(); iset++)  {
@@ -798,10 +798,10 @@ void EFSupportWithActiveInfo::InitializeActiveLists()
 }
 
 // Constructors and Destructor
-EFSupportWithActiveInfo::EFSupportWithActiveInfo(const efgGame &E) 
-  : EFSupport(E), 
-    is_infoset_active(0,E.NumPlayers()), 
-    is_nonterminal_node_active(0,E.NumPlayers())
+EFSupportWithActiveInfo::EFSupportWithActiveInfo(const gbtEfgGame &p_efg)
+  : EFSupport(p_efg), 
+    is_infoset_active(0, p_efg.NumPlayers()), 
+    is_nonterminal_node_active(0, p_efg.NumPlayers())
 {
   InitializeActiveLists();
 }

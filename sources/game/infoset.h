@@ -42,7 +42,7 @@ class gbtEfgNode;
 struct gbt_efg_action_rep;
 
 class gbtEfgAction {
-friend class efgGame;
+friend class gbtEfgGame;
 protected:
   struct gbt_efg_action_rep *rep;
 
@@ -70,7 +70,7 @@ public:
 gOutput &operator<<(gOutput &, const gbtEfgAction &);
 
 class gbtEfgInfoset {
-friend class efgGame;
+friend class gbtEfgGame;
 protected:
   struct gbt_efg_infoset_rep *rep;
 
@@ -87,7 +87,7 @@ public:
 
   bool IsNull(void) const;
   int GetId(void) const;
-  efgGame *GetGame(void) const;
+  gbtEfgGame GetGame(void) const;
   gText GetLabel(void) const;
   void SetLabel(const gText &);
 

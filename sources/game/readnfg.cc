@@ -161,8 +161,6 @@ public:
   gText GetLastText(void) const { return m_lastText; }
 };  
 
-class gbtNfgParserError { };
-
 gbtNfgParserSymbol gbtNfgParserState::GetNextSymbol(void)
 {
   char c = ' '; 
@@ -389,14 +387,14 @@ static void ParseHeader(gbtNfgParserState &p_state, gbtNfgFileData &p_data)
   }
 }
 
-static void ReadOutcomeList(gbtNfgParserState &p_parser, Nfg *p_nfg)
+static void ReadOutcomeList(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
 {
   if (p_parser.GetNextSymbol() != symLBRACE) {
     throw gbtNfgParserError();
   }
 
   while (p_parser.GetCurrentSymbol() == symLBRACE) {
-    gArray<gNumber> payoffs(p_nfg->NumPlayers());
+    gArray<gNumber> payoffs(p_nfg.NumPlayers());
     int pl = 1;
 
     if (p_parser.GetNextSymbol() != symTEXT) {
@@ -408,7 +406,7 @@ static void ReadOutcomeList(gbtNfgParserState &p_parser, Nfg *p_nfg)
     while (p_parser.GetCurrentSymbol() == symINTEGER ||
 	   p_parser.GetCurrentSymbol() == symRATIONAL ||
 	   p_parser.GetCurrentSymbol() == symDOUBLE) {
-      if (pl > p_nfg->NumPlayers()) {
+      if (pl > p_nfg.NumPlayers()) {
 	throw gbtNfgParserError();
       }
 
@@ -426,7 +424,7 @@ static void ReadOutcomeList(gbtNfgParserState &p_parser, Nfg *p_nfg)
       }
     }
 
-    if (pl <= p_nfg->NumPlayers()) {
+    if (pl <= p_nfg.NumPlayers()) {
       throw gbtNfgParserError();
     }
 
@@ -434,10 +432,10 @@ static void ReadOutcomeList(gbtNfgParserState &p_parser, Nfg *p_nfg)
       throw gbtNfgParserError();
     }
 
-    gbtNfgOutcome outcome = p_nfg->NewOutcome();
+    gbtNfgOutcome outcome = p_nfg.NewOutcome();
     outcome.SetLabel(label);
-    for (pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
-      outcome.SetPayoff(p_nfg->GetPlayer(pl), payoffs[pl]);
+    for (pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
+      outcome.SetPayoff(p_nfg.GetPlayer(pl), payoffs[pl]);
     }
 
     p_parser.GetNextSymbol();
@@ -449,7 +447,7 @@ static void ReadOutcomeList(gbtNfgParserState &p_parser, Nfg *p_nfg)
   p_parser.GetNextSymbol();
 }
 
-static void ParseOutcomeBody(gbtNfgParserState &p_parser, Nfg *p_nfg)
+static void ParseOutcomeBody(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
 
@@ -460,21 +458,22 @@ static void ParseOutcomeBody(gbtNfgParserState &p_parser, Nfg *p_nfg)
       throw gbtNfgParserError();
     }
 
-    p_nfg->SetOutcomeIndex(cont++,
-			   p_nfg->GetOutcomeId(p_parser.GetLastInteger().as_long()));
+    p_nfg.SetOutcomeIndex(cont++,
+			  p_nfg.GetOutcomeId(p_parser.GetLastInteger().as_long()));
     p_parser.GetNextSymbol();
   }
 }
 
-static void SetPayoff(Nfg *p_nfg, int p_cont, int p_pl, const gNumber &p_value)
+static void SetPayoff(gbtNfgGame p_nfg,
+		      int p_cont, int p_pl, const gNumber &p_value)
 {
   if (p_pl == 1)  {
-    p_nfg->SetOutcomeIndex(p_cont, p_nfg->NewOutcome());
+    p_nfg.SetOutcomeIndex(p_cont, p_nfg.NewOutcome());
   }
-  p_nfg->GetOutcomeIndex(p_cont).SetPayoff(p_nfg->GetPlayer(p_pl), p_value);
+  p_nfg.GetOutcomeIndex(p_cont).SetPayoff(p_nfg.GetPlayer(p_pl), p_value);
 }
 
-static void ParsePayoffBody(gbtNfgParserState &p_parser, Nfg *p_nfg)
+static void ParsePayoffBody(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
 {
   int cont = 1, pl = 1;
 
@@ -492,7 +491,7 @@ static void ParsePayoffBody(gbtNfgParserState &p_parser, Nfg *p_nfg)
       throw gbtNfgParserError();
     }
 
-    if (++pl > p_nfg->NumPlayers()) {
+    if (++pl > p_nfg.NumPlayers()) {
       cont++;
       pl = 1;
     }
@@ -500,66 +499,48 @@ static void ParsePayoffBody(gbtNfgParserState &p_parser, Nfg *p_nfg)
   }
 }
 
-static Nfg *BuildNfg(gbtNfgParserState &p_parser, gbtNfgFileData &p_data)
+static gbtNfgGame BuildNfg(gbtNfgParserState &p_parser, gbtNfgFileData &p_data)
 {
-  Nfg *nfg = 0;
-
-  try {
-    gArray<int> dim(p_data.NumPlayers());
-    for (int pl = 1; pl <= dim.Length(); pl++) {
-      dim[pl] = p_data.NumStrategies(pl);
-    }
-    nfg = new Nfg(dim);
-    nfg->SetTitle(p_data.m_title);
-    nfg->SetComment(p_data.m_comment);
-
-    for (int pl = 1; pl <= dim.Length(); pl++) {
-      for (int st = 1; st <= dim[pl]; st++) {
-	nfg->GetPlayer(pl).GetStrategy(st).SetLabel(p_data.GetStrategy(pl,st));
-      }
-    }
-
-    if (p_parser.GetCurrentSymbol() == symLBRACE) {
-      ParseOutcomeBody(p_parser, nfg);
-    }
-    else if (p_parser.GetCurrentSymbol() == symDOUBLE ||
-	     p_parser.GetCurrentSymbol() == symINTEGER ||
-	     p_parser.GetCurrentSymbol() == symRATIONAL) {
-      ParsePayoffBody(p_parser, nfg);
-    }
-    else {
-      throw gbtNfgParserError();
-    }
-
-    return nfg;
+  gArray<int> dim(p_data.NumPlayers());
+  for (int pl = 1; pl <= dim.Length(); pl++) {
+    dim[pl] = p_data.NumStrategies(pl);
   }
-  catch (...) {
-    if (nfg) {
-      delete nfg;
+  gbtNfgGame nfg(dim);
+  nfg.SetTitle(p_data.m_title);
+  nfg.SetComment(p_data.m_comment);
+  
+  for (int pl = 1; pl <= dim.Length(); pl++) {
+    for (int st = 1; st <= dim[pl]; st++) {
+      nfg.GetPlayer(pl).GetStrategy(st).SetLabel(p_data.GetStrategy(pl,st));
     }
-    throw;
   }
+  
+  if (p_parser.GetCurrentSymbol() == symLBRACE) {
+    ParseOutcomeBody(p_parser, nfg);
+  }
+  else if (p_parser.GetCurrentSymbol() == symDOUBLE ||
+	   p_parser.GetCurrentSymbol() == symINTEGER ||
+	   p_parser.GetCurrentSymbol() == symRATIONAL) {
+    ParsePayoffBody(p_parser, nfg);
+  }
+  else {
+    throw gbtNfgParserError();
+  }
+
+  return nfg;
 }
 
 //=========================================================================
 //  ReadNfgFile: Global visible function to read a normal form savefile
 //=========================================================================
 
-Nfg *ReadNfgFile(gInput &p_file)
+gbtNfgGame ReadNfgFile(gInput &p_file)
 {
   gbtNfgParserState parser(p_file);
   gbtNfgFileData data;
 
-  try {
-    ParseHeader(parser, data);
-    return BuildNfg(parser, data);
-  }
-  catch (gbtNfgParserError &) {
-    return 0;
-  }
-  catch (...) {
-    return 0;
-  }
+  ParseHeader(parser, data);
+  return BuildNfg(parser, data);
 }
 
 

@@ -29,14 +29,14 @@
 #include "game/nfg.h"
 #include "nfglcp.h"
 
-template <class T> gMatrix<T> Make_A1(const Nfg &, const gbtNfgSupport &, 
-				      const T &);
-template <class T> gVector<T> Make_b1(const Nfg &, const gbtNfgSupport &, 
-				      const T &);
-template <class T> gMatrix<T> Make_A2(const Nfg &, const gbtNfgSupport &,
-				      const T &);
-template <class T> gVector<T> Make_b2(const Nfg &, const gbtNfgSupport &,
-				      const T &);
+template <class T> gMatrix<T> Make_A1(const gbtNfgGame &,
+				      const gbtNfgSupport &, const T &);
+template <class T> gVector<T> Make_b1(const gbtNfgGame &,
+				      const gbtNfgSupport &, const T &);
+template <class T> gMatrix<T> Make_A2(const gbtNfgGame &,
+				      const gbtNfgSupport &, const T &);
+template <class T> gVector<T> Make_b2(const gbtNfgGame &,
+				      const gbtNfgSupport &, const T &);
 
 
 //---------------------------------------------------------------------------
@@ -49,17 +49,17 @@ gList<MixedSolution> gbtNfgNashLcp<T>::Solve(const gbtNfgSupport &p_support,
 {
   BFS<T> cbfs((T) 0);
 
-  if (p_support.Game().NumPlayers() != 2) {
+  if (p_support.GetGame().NumPlayers() != 2) {
     return gList<MixedSolution>();
   }
 
   gList<BFS<T> > bfsList;
 
   try {
-    gMatrix<T> A1 = Make_A1(p_support.Game(), p_support, (T) 0);
-    gVector<T> b1 = Make_b1(p_support.Game(), p_support, (T) 0);
-    gMatrix<T> A2 = Make_A2(p_support.Game(), p_support, (T) 0);
-    gVector<T> b2 = Make_b2(p_support.Game(), p_support, (T) 0);
+    gMatrix<T> A1 = Make_A1(p_support.GetGame(), p_support, (T) 0);
+    gVector<T> b1 = Make_b1(p_support.GetGame(), p_support, (T) 0);
+    gMatrix<T> A2 = Make_A2(p_support.GetGame(), p_support, (T) 0);
+    gVector<T> b2 = Make_b2(p_support.GetGame(), p_support, (T) 0);
     LHTableau<T> B(A1,A2,b1,b2);
     if (m_stopAfter != 1) {
       AllLemke(p_support,0,B,bfsList,m_maxDepth, p_status);

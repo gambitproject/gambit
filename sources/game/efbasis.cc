@@ -272,10 +272,11 @@ bool EFNodeSet::IsValid(void) const
 // EFBasis: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-EFBasis::EFBasis(const efgGame &E) : EFSupport(E), nodes(E.NumPlayers())
+EFBasis::EFBasis(const gbtEfgGame &p_efg) 
+  : EFSupport(p_efg), nodes(p_efg.NumPlayers())
 {
   for (int i = 1; i <= nodes.Length(); i++) {
-    nodes[i] = new EFNodeSet(E.GetPlayer(i));
+    nodes[i] = new EFNodeSet(p_efg.GetPlayer(i));
   }
 }
 
@@ -350,7 +351,7 @@ int EFBasis::Find(const gbtEfgNode &n) const
 bool EFBasis::IsValid(void) const
 {
   if(!(*this).EFSupport::HasActiveActionsAtAllInfosets()) return false;
-  if (nodes.Length() != m_efg->NumPlayers())   return false;
+  if (nodes.Length() != m_efg.NumPlayers())   return false;
   for (int i = 1; i <= nodes.Length(); i++)
     if (!nodes[i]->IsValid())  return false;
 
@@ -359,13 +360,13 @@ bool EFBasis::IsValid(void) const
 
 gPVector<int> EFBasis::NumNodes(void) const
 {
-  gArray<int> foo(m_efg->NumPlayers());
+  gArray<int> foo(m_efg.NumPlayers());
   int i;
-  for (i = 1; i <= m_efg->NumPlayers(); i++)
+  for (i = 1; i <= m_efg.NumPlayers(); i++)
     foo[i] = nodes[i]->GetPlayer().NumInfosets();
 
   gPVector<int> bar(foo);
-  for (i = 1; i <= m_efg->NumPlayers(); i++)
+  for (i = 1; i <= m_efg.NumPlayers(); i++)
     for (int j = 1; j <= nodes[i]->GetPlayer().NumInfosets(); j++)
       bar(i, j) = NumNodes(i,j);
 
@@ -382,13 +383,13 @@ bool EFBasis::RemoveNode(const gbtEfgNode &n)
 
 bool EFBasis::IsReachable(gbtEfgNode n) const
 {
-  if (n == m_efg->RootNode()) {
+  if (n == m_efg.RootNode()) {
     return true;
   }
 
-  while (n != m_efg->RootNode()) {
+  while (n != m_efg.RootNode()) {
     if (!n.GetParent().GetInfoset().IsChanceInfoset()) {
-      if (!EFSupport::Contains(LastAction(*m_efg, n))) {
+      if (!EFSupport::Contains(LastAction(m_efg, n))) {
 	return false;
       }
     }
@@ -407,7 +408,7 @@ void EFBasis::AddNode(const gbtEfgNode &n)
 
 bool EFBasis::IsConsistent(void) const
 {
-  bigbasis = new EFBasis(*m_efg);
+  bigbasis = new EFBasis(m_efg);
   nodeIndex = new gDPVector<int>(bigbasis->NumNodes());
   actIndex = new gDPVector<int>(bigbasis->NumActions());
   MakeIndices();
@@ -464,8 +465,8 @@ void EFBasis::MakeIndices(void) const
   int i,j;
   int ind = 1;
 
-  for(i=1;i<=m_efg->NumPlayers();i++)
-    for(j=1;j<=(m_efg->NumInfosets())[i];j++) {
+  for(i=1;i<=m_efg.NumPlayers();i++)
+    for(j=1;j<=(m_efg.NumInfosets())[i];j++) {
       int k = 1;
       for (gbtActionIterator action(*bigbasis, i, j);
 	   !action.End(); action++, k++)  {
@@ -478,8 +479,8 @@ void EFBasis::MakeIndices(void) const
       }
     }
   num_act_vars=ind-1;
-  for(i=1;i<=m_efg->NumPlayers();i++)
-    for(j=1;j<=(m_efg->NumInfosets())[i];j++) 
+  for(i=1;i<=m_efg.NumPlayers();i++)
+    for(j=1;j<=(m_efg.NumInfosets())[i];j++) 
       for(int k=1;k<=bigbasis->NumNodes(i,j);k++) {
 	if(IsReachable(bigbasis->Nodes(i,j)[k]))
 	  (*nodeIndex)(i,j,k)=0;
@@ -496,8 +497,8 @@ void EFBasis::MakeRowIndices(void) const
 
   num_eqs = 0;
   num_ineqs = 0;
-  for(i=1;i<=m_efg->NumPlayers();i++)
-    for(j=1;j<=(m_efg->NumInfosets())[i];j++) {
+  for(i=1;i<=m_efg.NumPlayers();i++)
+    for(j=1;j<=(m_efg.NumInfosets())[i];j++) {
       for(k=1;k<=bigbasis->NumActions(i,j);k++)
 	if((*actIndex)(i,j,k))
 	  num_ineqs++;
@@ -525,8 +526,8 @@ void EFBasis::MakeAb(void) const
   int eq = num_ineqs+1;
   int ineq = 1;
 
-  for(i=1;i<=m_efg->NumPlayers();i++)
-    for(j=1;j<=(m_efg->NumInfosets())[i];j++) {
+  for(i=1;i<=m_efg.NumPlayers();i++)
+    for(j=1;j<=(m_efg.NumInfosets())[i];j++) {
       for (k=1;k<=bigbasis->NumActions(i,j);k++)
 	if((*actIndex)(i,j,k))
 	  AddEquation1(ineq++,bigbasis->GetAction(i,j,k));
@@ -576,13 +577,13 @@ void EFBasis::AddEquation2(int row, gbtEfgNode n) const
 {
   if(Col(n))
     (*A)(row,Col(n)) = 1.0;
-  if(n!=m_efg->RootNode()) {
-    gbtEfgAction act = LastAction(*m_efg,n);
+  if(n!=m_efg.RootNode()) {
+    gbtEfgAction act = LastAction(m_efg,n);
     if(Col(act))
       (*A)(row,Col(act)) = -1.0;
-    while(n.GetParent() != m_efg->RootNode()) {
+    while(n.GetParent() != m_efg.RootNode()) {
       n = n.GetParent();
-      act = LastAction(*m_efg,n);
+      act = LastAction(m_efg,n);
       if(Col(act))
 	(*A)(row,Col(act)) = -1.0;
     }
@@ -615,8 +616,8 @@ void EFBasis::GetConsistencySolution(const gVector<double> &x) const
   nodes = 0;
   acts = 0;
   int i,j,k;
-  for(i=1;i<=m_efg->NumPlayers();i++)
-    for(j=1;j<=(m_efg->NumInfosets())[i];j++) {
+  for(i=1;i<=m_efg.NumPlayers();i++)
+    for(j=1;j<=(m_efg.NumInfosets())[i];j++) {
       for(k=1;k<=bigbasis->NumActions(i,j);k++)
 	if((*actIndex)(i,j,k))
 	  acts(i,j,k) = (int)x[(*actIndex)(i,j,k)];
@@ -639,7 +640,7 @@ void EFBasis::Dump(gOutput& s) const
   (*this).EFSupport::Dump(s);
   s << "\nNodes:   ";
   s << "{ ";
-  numplayers = m_efg->NumPlayers();
+  numplayers = m_efg.NumPlayers();
   for (i = 1; i <= numplayers; i++)  {
     gbtEfgPlayer player = nodes[i]->GetPlayer();
     s << '"' << player.GetLabel() << "\" { ";

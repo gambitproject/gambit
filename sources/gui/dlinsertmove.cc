@@ -43,7 +43,7 @@ BEGIN_EVENT_TABLE(dialogInsertMove, wxDialog)
   EVT_LISTBOX(idMOVE_INFOSET_LISTBOX, dialogInsertMove::OnInfoset)
 END_EVENT_TABLE()
 
-dialogInsertMove::dialogInsertMove(wxWindow *p_parent, efgGame &p_efg)
+dialogInsertMove::dialogInsertMove(wxWindow *p_parent, gbtEfgGame &p_efg)
   : wxDialog(p_parent, -1, "Insert Move"), m_efg(p_efg)
 {
   m_playerItem = new wxListBox(this, idMOVE_PLAYER_LISTBOX);

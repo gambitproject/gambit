@@ -34,11 +34,11 @@
 //
 
 struct gbt_efg_outcome_rep;
-class efgGame;
+class gbtEfgGame;
 class gbtEfgPlayer;
 
 class gbtEfgOutcome {
-friend class efgGame;
+friend class gbtEfgGame;
 friend class gbtEfgNode;
 protected:
   struct gbt_efg_outcome_rep *rep;
@@ -56,7 +56,7 @@ public:
 
   bool IsNull(void) const;
   int GetId(void) const;
-  efgGame *GetGame(void) const;
+  gbtEfgGame GetGame(void) const;
   gText GetLabel(void) const;
   void SetLabel(const gText &);
 
@@ -70,11 +70,11 @@ gOutput &operator<<(gOutput &, const gbtEfgOutcome &);
 
 
 struct gbt_nfg_outcome_rep;
-class Nfg;
+class gbtNfgGame;
 class gbtNfgPlayer;
 
 class gbtNfgOutcome {
-friend class Nfg;
+friend class gbtNfgGame;
 protected:
   struct gbt_nfg_outcome_rep *rep;
 
@@ -91,7 +91,7 @@ public:
 
   bool IsNull(void) const;
   int GetId(void) const;
-  Nfg *GetGame(void) const;
+  gbtNfgGame GetGame(void) const;
   gText GetLabel(void) const;
   void SetLabel(const gText &);
   

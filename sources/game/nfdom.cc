@@ -93,8 +93,8 @@ bool gbtNfgSupport::Undominated(gbtNfgSupport &newS, int pl, bool strong,
 
   int min, dis;
   double d1,d2;
-  d1 = (double)(pl-1) / (double) Game().NumPlayers();
-  d2 = (double)pl / (double) Game().NumPlayers();
+  d1 = (double)(pl-1) / (double) GetGame().NumPlayers();
+  d2 = (double)pl / (double) GetGame().NumPlayers();
   for (min = 0, dis = NumStrats(pl) - 1; min <= dis; )  {
     status.Get();
     int pp;

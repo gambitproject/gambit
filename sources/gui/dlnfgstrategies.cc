@@ -46,7 +46,7 @@ BEGIN_EVENT_TABLE(dialogStrategies, wxDialog)
   EVT_BUTTON(wxID_OK, dialogStrategies::OnOK)
 END_EVENT_TABLE()
 
-dialogStrategies::dialogStrategies(wxWindow *p_parent, const Nfg &p_nfg)
+dialogStrategies::dialogStrategies(wxWindow *p_parent, const gbtNfgGame &p_nfg)
   : wxDialog(p_parent, -1, "Strategies"), 
     m_nfg(p_nfg), m_lastPlayer(0), m_lastStrategy(0)
 {

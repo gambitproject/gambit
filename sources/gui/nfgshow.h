@@ -53,7 +53,7 @@ class dialogNfgSupportInspect;
 
 class NfgShow : public wxFrame {
 private:
-  Nfg &m_nfg;
+  gbtNfgGame m_nfg;
 
   NfgTable *m_table;
   NfgProfileList *m_profileTable;
@@ -137,7 +137,7 @@ private:
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
-  NfgShow(Nfg &N, wxWindow *p_window);
+  NfgShow(gbtNfgGame, wxWindow *p_window);
   virtual ~NfgShow();
 
   // PROFILE ACCESS AND MANIPULATION
@@ -161,8 +161,7 @@ public:
   void SetFilename(const wxString &s);
   const wxString &Filename(void) const { return m_filename; }
 
-  const Nfg &Game(void) const { return m_nfg; }  
-  Nfg &Game(void) { return m_nfg; }
+  gbtNfgGame GetGame(void) const { return m_nfg; }
 
   bool GameIsDirty(void) const { return m_nfg.IsDirty(); }
 

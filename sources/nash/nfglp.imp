@@ -38,7 +38,8 @@ gList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
 {
   BFS<T> cbfs((T) 0);
   
-  if (p_support.Game().NumPlayers() != 2 || !IsConstSum(p_support.Game())) {
+  if (p_support.GetGame().NumPlayers() != 2 ||
+      !IsConstSum(p_support.GetGame())) {
     return gList<MixedSolution>();
   }
   
@@ -53,11 +54,11 @@ gList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
   gVector<T> c(1,m+1);
   NfgIter iter(p_support);
 
-  T minpay = MinPayoff(p_support.Game()) - gNumber(1);
+  T minpay = MinPayoff(p_support.GetGame()) - gNumber(1);
 
   for (i = 1; i <= k; i++)  {
     for (j = 1; j <= m; j++)  {
-      A(i, j) = gNumber(minpay) - iter.GetOutcome().GetPayoff(p_support.Game().GetPlayer(1));
+      A(i, j) = gNumber(minpay) - iter.GetOutcome().GetPayoff(p_support.GetGame().GetPlayer(1));
       iter.Next(1);
     }
     A(i,m+1) = (T)1;
@@ -93,8 +94,8 @@ template <class T> int gbtNfgNashLp<T>::Add_BFS(const gbtNfgSupport &p_support,
   // LPSolve<T>::GetAll() does not currently work correctly; for now,
   // LpSolve is restricted to returning only one equilibrium
   lp.OptBFS(cbfs);
-  cbfs.Remove(p_support.Game().NumStrats(1)+1);
-  cbfs.Remove(-p_support.Game().NumStrats(2)-1);
+  cbfs.Remove(p_support.GetGame().NumStrats(1)+1);
+  cbfs.Remove(-p_support.GetGame().NumStrats(2)-1);
   if (p_list.Contains(cbfs))  return 0;
   p_list.Append(cbfs);
   return 1;

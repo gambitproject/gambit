@@ -156,8 +156,8 @@ void EfgSupportWindow::UpdateValues(void)
   m_actionTree->DeleteAllItems();
 
   m_actionTree->AddRoot((char *) m_parent->GetSupport()->GetName());
-  for (int pl = 1; pl <= m_parent->Game()->NumPlayers(); pl++) {
-    gbtEfgPlayer player = m_parent->Game()->GetPlayer(pl);
+  for (int pl = 1; pl <= m_parent->GetGame().NumPlayers(); pl++) {
+    gbtEfgPlayer player = m_parent->GetGame().GetPlayer(pl);
 
     wxTreeItemId id = m_actionTree->AppendItem(m_actionTree->GetRootItem(),
 					       (char *) player.GetLabel());

@@ -28,11 +28,11 @@
 #define STRATEGY_H
 
 struct gbt_nfg_strategy_rep;
-class Nfg;
+class gbtNfgGame;
 class gbtNfgPlayer;
 
 class gbtNfgStrategy   {
-friend class Nfg;
+friend class gbtNfgGame;
 private:
   gbt_nfg_strategy_rep *rep;
 

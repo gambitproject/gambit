@@ -46,7 +46,7 @@ const int idEFG_SOLUTION_LIST = 900;
 
 class EfgShow : public wxFrame {
 private:
-  efgGame &m_efg;
+  gbtEfgGame &m_efg;
   TreeWindow *m_treeWindow;
   gbtEfgNode m_cursor, m_copyNode, m_cutNode;
 
@@ -149,7 +149,7 @@ private:
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
-  EfgShow(efgGame &p_efg, wxWindow *p_parent);
+  EfgShow(gbtEfgGame &p_efg, wxWindow *p_parent);
   virtual ~EfgShow();
 
   // PROFILE ACCESS AND MANIPULATION
@@ -178,7 +178,7 @@ public:
   gText GetActionProb(const gbtEfgNode &, int act) const;
   gNumber ActionProb(const gbtEfgNode &, int br) const;
 
-  efgGame *Game(void) { return &m_efg; }
+  gbtEfgGame GetGame(void) { return m_efg; }
 
   void UpdateMenus(void);
   int NumDecimals(void) const;

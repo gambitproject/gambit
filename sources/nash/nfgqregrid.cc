@@ -218,8 +218,8 @@ QreNfgGrid::QreNfgGrid(void)
 void QreNfgGrid::OutputHeader(const gbtNfgSupport &p_support, gOutput &out) const
 {
   out<< "Dimensionality:\n";
-  out<< p_support.Game().NumPlayers()<<' ';
-  for (int pl = 1; pl <= p_support.Game().NumPlayers(); pl++) {
+  out<< p_support.GetGame().NumPlayers()<<' ';
+  for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
     out << p_support.NumStrats(pl) << ' ';
   }
   out << '\n';
@@ -304,7 +304,7 @@ bool QreNfgGrid::CheckEqu(MixedProfile<double> &p_profile,
 		   UpdateFunc(p_profile, p_staticPlayer, p_lambda));
   
   MixedProfile<double> newProfile(p_profile);
-  for (int pl = 1; pl <= p_profile.Game().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
     if (pl != p_staticPlayer) {
       newProfile.SetRow(pl, UpdateFunc(p_profile, pl, p_lambda));
       if (Distance(newProfile.GetRow(pl), p_profile.GetRow(pl)) > p_tol) {
@@ -325,7 +325,7 @@ static void Jacobian(gVector<double> &p_vector,
 		     const MixedProfile<double> &p_profile, double p_lambda)
 {
   gPVector<double> logitterms(p_profile.Lengths());
-  for (int pl = 1; pl <= p_profile.Game().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
     for (int st = 1; st <= p_profile.Support().NumStrats(pl); st++) {
       logitterms(pl, st) = exp(p_lambda * p_profile.Payoff(pl, pl, st));
     }
@@ -333,7 +333,7 @@ static void Jacobian(gVector<double> &p_vector,
 
   int rowno = 0;
 
-  for (int pl1 = 1; pl1 <= p_profile.Game().NumPlayers(); pl1++) {
+  for (int pl1 = 1; pl1 <= p_profile.GetGame().NumPlayers(); pl1++) {
     double logitsum = 0.0;
     for (int st = 1; st <= p_profile.Support().NumStrats(pl1); st++) {
       logitsum += logitterms(pl1, st);
@@ -345,7 +345,7 @@ static void Jacobian(gVector<double> &p_vector,
       p_vector[rowno] = p_profile(pl1, st1) * logitsum - logitterms(pl1, st1);
 
       int colno = 0;
-      for (int pl2 = 1; pl2 <= p_profile.Game().NumPlayers(); pl2++) {
+      for (int pl2 = 1; pl2 <= p_profile.GetGame().NumPlayers(); pl2++) {
 	for (int st2 = 1; st2 <= p_profile.Support().NumStrats(pl2); st2++) {
 	  colno++;
 
@@ -427,7 +427,7 @@ void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gOutput &p_pxifile,
 
   // find the player w/ the most strategies and make it static
   int staticPlayer = 1;
-  for (int i = 2; i <= p_support.Game().NumPlayers(); i++) {
+  for (int i = 2; i <= p_support.GetGame().NumPlayers(); i++) {
     if (p_support.NumStrats(i) > p_support.NumStrats(staticPlayer))  {
       staticPlayer = i;
     }

@@ -39,7 +39,7 @@ class Lexicon;
 template <class T> class BehavAssessment;
 
 class gbtEfgNode {
-friend class efgGame;
+friend class gbtEfgGame;
 friend class Lexicon;
 protected:
   struct gbt_efg_node_rep *rep;
@@ -57,7 +57,7 @@ public:
 
   bool IsNull(void) const;
   int GetId(void) const;
-  efgGame *GetGame(void) const;
+  gbtEfgGame GetGame(void) const;
   gText GetLabel(void) const;
   void SetLabel(const gText &);
 

@@ -34,7 +34,7 @@
 gList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
 					       gStatus &p_status)
 {
-  const Nfg &nfg = p_support.Game();
+  gbtNfgGame nfg = p_support.GetGame();
   gList<MixedSolution> solutions;
   NfgContIter citer(p_support);
 
@@ -63,7 +63,7 @@ gList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
     }
     
     if (flag)  {
-      MixedProfile<gNumber> temp(p_support.Game());
+      MixedProfile<gNumber> temp(p_support.GetGame());
       ((gVector<gNumber> &) temp).operator=(gNumber(0));
       gArray<int> profile = citer.Get();
       for (int pl = 1; pl <= profile.Length(); pl++) {

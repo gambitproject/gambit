@@ -29,7 +29,7 @@
 
 class dialogStrategies : public wxDialog {
 private:
-  const Nfg &m_nfg;
+  const gbtNfgGame &m_nfg;
   wxChoice *m_player;
   wxListBox *m_strategyList;
   wxTextCtrl *m_strategyName;
@@ -43,7 +43,7 @@ private:
 
 public:
   // Lifecycle
-  dialogStrategies(wxWindow *, const Nfg &);
+  dialogStrategies(wxWindow *, const gbtNfgGame &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   const gText &GetStrategyName(int pl, int st) const

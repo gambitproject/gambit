@@ -37,7 +37,7 @@ template <class T> class BehavProfile;
 
 template <class T> class MixedProfile : public gPVector<T>  {
   private:
-    const Nfg *N;
+    gbtNfgGame m_nfg;
     gbtNfgSupport support;
 
     // Private Payoff functions
@@ -60,9 +60,7 @@ template <class T> class MixedProfile : public gPVector<T>  {
 
     MixedProfile<T> &operator=(const MixedProfile<T> &);
 
-    Nfg &Game(void) const  { return const_cast<Nfg &>(*N); }
-    // For temporary compatibility; Game() is deprecated
-    Nfg &GetGame(void) const  { return const_cast<Nfg &>(*N); }
+    gbtNfgGame GetGame(void) const  { return m_nfg; }
 
     T LiapValue(void) const;
     void Regret(gPVector<T> &value) const;

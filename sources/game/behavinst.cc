@@ -33,20 +33,20 @@ template<>
 gNumber BehavProfile<gNumber>::Payoff(const gbtEfgOutcome &p_outcome,
 				      int pl) const
 { 
-  return p_outcome.GetPayoff(m_efg->GetPlayer(pl));
+  return p_outcome.GetPayoff(m_efg.GetPlayer(pl));
 }
 
 template<>
 gRational BehavProfile<gRational>::Payoff(const gbtEfgOutcome &p_outcome,
 					  int pl) const
 { 
-  return p_outcome.GetPayoff(m_efg->GetPlayer(pl));
+  return p_outcome.GetPayoff(m_efg.GetPlayer(pl));
 }
 
 template<>
 double BehavProfile<double>::Payoff(const gbtEfgOutcome &p_outcome, int pl) const
 { 
-  return p_outcome.GetPayoff(m_efg->GetPlayer(pl));
+  return p_outcome.GetPayoff(m_efg.GetPlayer(pl));
 }
 
 template class BehavProfile<double>;

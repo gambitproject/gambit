@@ -41,7 +41,7 @@ template <class T>
 gList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
 					    gStatus &p_status)
 {
-  const Nfg &nfg = p_support.Game();
+  gbtNfgGame nfg = p_support.GetGame();
   gList<gVector<T> > key1, key2;  
   gList<int> node1, node2;   // IDs of each component of the extreme equilibria
 

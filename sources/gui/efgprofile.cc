@@ -70,7 +70,7 @@ void EfgProfileList::UpdateValues(void)
   InsertColumn(5, "Liap Value");
   InsertColumn(6, "Qre Lambda");
 
-  const efgGame &efg = *m_parent->Game();
+  gbtEfgGame efg = m_parent->GetGame();
   int maxColumn = 6;
 
   for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
@@ -135,7 +135,7 @@ wxString EfgProfileList::GetReport(void) const
 {
   wxString report;
   const gList<BehavSolution> &profiles = m_parent->Profiles();
-  const efgGame &efg = *m_parent->Game();
+  gbtEfgGame efg = m_parent->GetGame();
 
   report += wxString::Format("Behavior strategy profiles on game '%s' [%s]\n\n",
 			     (const char *) efg.GetTitle(),

@@ -63,7 +63,7 @@ bool gbtStrategyIterator::GoToNext(void)
     st++; 
     return true;
   }
-  else if (pl != m_support.Game().NumPlayers()) {
+  else if (pl != m_support.GetGame().NumPlayers()) {
     pl++; 
     st = 1; 
     return true;
@@ -84,12 +84,12 @@ gbtNfgStrategy gbtStrategyIterator::GetStrategy(void) const
 
 gbtNfgPlayer gbtStrategyIterator::GetPlayer(void) const
 {
-  return m_support.Game().GetPlayer(pl);
+  return m_support.GetGame().GetPlayer(pl);
 }
 
 bool gbtStrategyIterator::IsLast(void) const
 {
-  return (pl == m_support.Game().NumPlayers() &&
+  return (pl == m_support.GetGame().NumPlayers() &&
 	  st == m_support.NumStrats(pl)); 
 }
 

@@ -34,13 +34,13 @@
 #include "nfstrat.h"
 
 class StrategyProfile   {
-  friend class Nfg;
+friend class gbtNfgGame;
 private:
   long index;
   gArray<gbtNfgStrategy> profile;
   
 public:
-  StrategyProfile(const Nfg &);
+  StrategyProfile(const gbtNfgGame &);
   StrategyProfile(const StrategyProfile &p);
 
   ~StrategyProfile();
@@ -58,7 +58,7 @@ public:
 
 class gbtNfgSupport {
 protected:
-  const Nfg *m_nfg;
+  gbtNfgGame m_nfg;
   // This really could be a gPVector<bool> probably, but we'll keep
   // it this way for now to placate possibly older compilers.
   gPVector<int> m_strategies;
@@ -69,7 +69,7 @@ protected:
 
 public:
   // LIFECYCLE
-  gbtNfgSupport(const Nfg &);
+  gbtNfgSupport(const gbtNfgGame &);
   ~gbtNfgSupport() { }
   gbtNfgSupport &operator=(const gbtNfgSupport &);
 
@@ -79,7 +79,7 @@ public:
   { return !(*this == p_support); }
 
   // DATA ACCESS: GENERAL
-  const Nfg &Game(void) const   { return *m_nfg; }
+  gbtNfgGame GetGame(void) const { return m_nfg; }
 
   const gText &GetName(void) const { return m_name; }
   void SetName(const gText &p_name) { m_name = p_name; }

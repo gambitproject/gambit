@@ -81,7 +81,7 @@ bool IsMixedDominated(const MixedProfile<gNumber> &sol,
 		 bool strong, gPrecision precision, gOutput &tracefile)
 {
   bool ret = false;
-  int n = (sol.Game()).NumPlayers();
+  int n = (sol.GetGame()).NumPlayers();
   int i=1;
 
   while (i<=n && !ret) {

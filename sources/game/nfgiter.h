@@ -41,12 +41,12 @@ class NfgContIter;
 class NfgIter    {
 private:
   gbtNfgSupport support;
-  Nfg *N;
+  gbtNfgGame m_nfg;
   gArray<int> current_strat;
   StrategyProfile profile;
 
 public:
-  NfgIter(Nfg &);
+  NfgIter(gbtNfgGame);
   NfgIter(const gbtNfgSupport &s);
   NfgIter(const NfgIter &);
   NfgIter(const NfgContIter &);

@@ -30,37 +30,36 @@
 #include "nfgciter.h"
 
 
-Nfg *CompressNfg(const Nfg &nfg, const gbtNfgSupport &S)
+gbtNfgGame CompressNfg(const gbtNfgGame &nfg, const gbtNfgSupport &S)
 {
-  Nfg *N = new Nfg(S.NumStrats());
-  
-  N->SetTitle(nfg.GetTitle());
+  gbtNfgGame N(S.NumStrats());
+  N.SetTitle(nfg.GetTitle());
 
-  for (int pl = 1; pl <= N->NumPlayers(); pl++)  {
-    gbtNfgPlayer player = N->GetPlayer(pl);
+  for (int pl = 1; pl <= N.NumPlayers(); pl++)  {
+    gbtNfgPlayer player = N.GetPlayer(pl);
     player.SetLabel(nfg.GetPlayer(pl).GetLabel());
-    for (int st = 1; st <= N->NumStrats(pl); st++) {
+    for (int st = 1; st <= N.NumStrats(pl); st++) {
       player.GetStrategy(st).SetLabel(S.GetStrategy(pl, st).GetLabel());
     }
   }
 
   for (int outc = 1; outc <= nfg.NumOutcomes(); outc++)  {
-    gbtNfgOutcome outcome = N->NewOutcome();
+    gbtNfgOutcome outcome = N.NewOutcome();
 
     outcome.SetLabel(nfg.GetOutcomeId(outc).GetLabel());
 
-    for (int pl = 1; pl <= N->NumPlayers(); pl++) {
+    for (int pl = 1; pl <= N.NumPlayers(); pl++) {
       outcome.SetPayoff(nfg.GetOutcomeId(outc).GetPayoff());
     }
   }
 
   NfgContIter oiter(S);
-  gbtNfgSupport newS(*N);
+  gbtNfgSupport newS(N);
   NfgContIter niter(newS);
   
   do   {
     if (!oiter.GetOutcome().IsNull()) {
-      niter.SetOutcome(N->GetOutcomeId(oiter.GetOutcome().GetId()));
+      niter.SetOutcome(N.GetOutcomeId(oiter.GetOutcome().GetId()));
     }
     else {
       niter.SetOutcome(0);
@@ -72,7 +71,7 @@ Nfg *CompressNfg(const Nfg &nfg, const gbtNfgSupport &S)
   return N;
 }
 
-bool IsConstSum(const Nfg &nfg)
+bool IsConstSum(const gbtNfgGame &nfg)
 {
   int pl, index;
   gNumber cvalue = (gNumber) 0;
@@ -95,7 +94,7 @@ bool IsConstSum(const Nfg &nfg)
   return true;
 }
 
-gNumber MinPayoff(const Nfg &nfg, int player)
+gNumber MinPayoff(const gbtNfgGame &nfg, int player)
 {
   int index, p, p1, p2;
   gNumber minpay;
@@ -118,7 +117,7 @@ gNumber MinPayoff(const Nfg &nfg, int player)
   return minpay;
 }
 
-gNumber MaxPayoff(const Nfg &nfg, int player)
+gNumber MaxPayoff(const gbtNfgGame &nfg, int player)
 {
   int index, p, p1, p2;
   gNumber maxpay;
@@ -141,7 +140,7 @@ gNumber MaxPayoff(const Nfg &nfg, int player)
   return maxpay;
 }
 
-void RandomNfg(Nfg &nfg)
+void RandomNfg(gbtNfgGame nfg)
 {
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)
     for (int outc = 1; outc <= nfg.NumOutcomes(); outc++)

@@ -27,6 +27,8 @@
 #ifndef EFGINT_H
 #define EFGINT_H
 
+#include "nfg.h"
+
 //
 // These are the definitions of the internal representation structures
 // for extensive form games.  These are intended to be private to the
@@ -36,7 +38,7 @@
 //
 // Forward declarations
 //
-class efgGame;
+class gbtEfgGame;
 struct gbt_efg_outcome_rep;
 struct gbt_efg_action_rep;
 struct gbt_efg_infoset_rep;
@@ -46,25 +48,25 @@ struct gbt_efg_game_rep;
 
 struct gbt_efg_outcome_rep {
   int m_id;
-  efgGame *m_efg;
+  gbt_efg_game_rep *m_efg;
   bool m_deleted;
   gText m_label;
   gBlock<gNumber> m_payoffs;
   gBlock<double> m_doublePayoffs;
   int m_refCount;
 
-  gbt_efg_outcome_rep(efgGame *, int);
+  gbt_efg_outcome_rep(gbt_efg_game_rep *, int);
 };
 
 struct gbt_efg_player_rep {
   int m_id;
-  efgGame *m_efg;
+  gbt_efg_game_rep *m_efg;
   bool m_deleted;
   gText m_label;
   gBlock<gbt_efg_infoset_rep *> m_infosets;
   int m_refCount;
 
-  gbt_efg_player_rep(efgGame *, int);
+  gbt_efg_player_rep(gbt_efg_game_rep *, int);
   ~gbt_efg_player_rep();
 };
 
@@ -96,7 +98,7 @@ struct gbt_efg_infoset_rep {
 
 struct gbt_efg_node_rep {
   int m_id;
-  efgGame *m_efg;
+  gbt_efg_game_rep *m_efg;
   bool m_deleted;
   gText m_label;
   int m_refCount;
@@ -108,13 +110,15 @@ struct gbt_efg_node_rep {
   gBlock<gbt_efg_node_rep *> m_children;
   gbt_efg_node_rep *m_whichbranch, *m_ptr, *m_gameroot;
 
-  gbt_efg_node_rep(efgGame *, gbt_efg_node_rep *);
+  gbt_efg_node_rep(gbt_efg_game_rep *, gbt_efg_node_rep *);
   ~gbt_efg_node_rep();
 
   void DeleteOutcome(gbt_efg_outcome_rep *outc);
 };
 
 struct gbt_efg_game_rep {
+  int m_refCount;
+
   bool sortisets;
   mutable bool m_dirty;
   mutable long m_revision;
@@ -124,10 +128,10 @@ struct gbt_efg_game_rep {
   gBlock<gbt_efg_outcome_rep *> outcomes;
   gbt_efg_node_rep *root;
   gbt_efg_player_rep *chance;
-  mutable Nfg *afg;
+  gbtNfgGame afg;
   mutable Lexicon *lexicon;
 
-  gbt_efg_game_rep(efgGame *);
+  gbt_efg_game_rep(void);
   ~gbt_efg_game_rep();
 };
 

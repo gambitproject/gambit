@@ -61,14 +61,14 @@ dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
 
   wxBoxSizer *editSizer = new wxBoxSizer(wxHORIZONTAL);
   m_playerList = new wxListBox(this, idPLAYER_LIST);
-  for (int pl = 1; pl <= m_profile.Game().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_profile.GetGame().NumPlayers(); pl++) {
     m_playerList->Append((char *) (ToText(pl) + ": " +
-				   m_profile.Game().GetPlayer(pl).GetLabel()));
+				   m_profile.GetGame().GetPlayer(pl).GetLabel()));
   }
   m_playerList->SetSelection(0);
   editSizer->Add(m_playerList, 0, wxALL, 5);
 
-  gbtNfgPlayer firstPlayer = m_profile.Game().GetPlayer(1);
+  gbtNfgPlayer firstPlayer = m_profile.GetGame().GetPlayer(1);
   m_probGrid = new wxGrid(this, idPROB_GRID,
 			  wxDefaultPosition, wxDefaultSize);
   m_probGrid->CreateGrid(firstPlayer.NumStrategies(), 1);
@@ -112,14 +112,14 @@ void dialogEditMixed::OnSelChanged(wxCommandEvent &p_event)
     m_probGrid->HideCellEditControl();
   }
 
-  gbtNfgPlayer oldPlayer = m_profile.Game().GetPlayer(m_selection);
+  gbtNfgPlayer oldPlayer = m_profile.GetGame().GetPlayer(m_selection);
 
   for (int st = 1; st <= oldPlayer.NumStrategies(); st++) {
     m_profile.Set(oldPlayer.GetStrategy(st),
 		  ToNumber(m_probGrid->GetCellValue(st - 1, 0).c_str()));
   }
 
-  gbtNfgPlayer player = m_profile.Game().GetPlayer(p_event.GetSelection() + 1);
+  gbtNfgPlayer player = m_profile.GetGame().GetPlayer(p_event.GetSelection() + 1);
 
   if (oldPlayer.NumStrategies() > player.NumStrategies()) {
     m_probGrid->DeleteRows(0,
@@ -149,7 +149,7 @@ void dialogEditMixed::OnOK(wxCommandEvent &p_event)
     m_probGrid->HideCellEditControl();
   }
 
-  gbtNfgPlayer player = m_profile.Game().GetPlayer(m_selection);
+  gbtNfgPlayer player = m_profile.GetGame().GetPlayer(m_selection);
 
   for (int st = 1; st <= player.NumStrategies(); st++) {
     m_profile.Set(player.GetStrategy(st),

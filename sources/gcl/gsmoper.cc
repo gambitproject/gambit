@@ -1529,8 +1529,8 @@ static Portion *GSM_Write(GSM &, Portion** param)
 static Portion *GSM_Write_Nfg(GSM &, Portion** param)
 {
   gOutput &s = ((OutputPortion*) param[0])->Value();
-  Nfg *nfg = ((NfgPortion *) param[1])->Value();
-  nfg->WriteNfgFile(s, _WriteGameDecimals.Value());
+  gbtNfgGame nfg = AsNfg(param[1]);
+  nfg.WriteNfgFile(s, _WriteGameDecimals.Value());
   return param[0]->ValCopy();
 }
 
@@ -1538,8 +1538,8 @@ static Portion *GSM_Write_Nfg(GSM &, Portion** param)
 static Portion *GSM_Write_Efg(GSM &, Portion** param)
 {
   gOutput &s = ((OutputPortion*) param[0])->Value();
-  efgGame *efg = ((EfgPortion*) param[1])->Value();
-  efg->WriteEfgFile(s, _WriteGameDecimals.Value());
+  gbtEfgGame efg = AsEfg(param[1]);
+  efg.WriteEfgFile(s, _WriteGameDecimals.Value());
   return param[0]->ValCopy();
 }
 

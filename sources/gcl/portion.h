@@ -37,17 +37,12 @@
 // Portion
 //-------------
 
-class Nfg;
-
 class Portion
 {
 private:
   static int _NumObj;
 
   Portion* _Original;
-  void* _Game;
-  bool _GameIsEfg;
-
 
 protected:
   Portion(void);
@@ -62,9 +57,6 @@ protected:
   static gNumber _WriteListIndent;
   static gTriState _WriteSolutionInfo;
   static gTriState _WriteSolutionLabels;
-
-  void SetGame(const efgGame *game);
-  void SetGame(const Nfg *game);
 
 public:
   static void _SetWriteWidth(long);
@@ -91,9 +83,6 @@ public:
   virtual Portion* ValCopy(void) const = 0;
   virtual Portion* RefCopy(void) const = 0;
   virtual bool IsReference(void) const = 0;
-
-  void* Game(void) const;
-  bool GameIsEfg(void) const;
 };
 
 //---------
@@ -825,19 +814,19 @@ inline const BehavSolution &AsBehav(Portion *portion)
 
 class NfgPortion : public Portion   {
 protected:
-  Nfg ** _Value;
-  bool _ref;
+  gbtNfgGame *m_value;
+  bool m_ref;
 
   static gPool pool;
 
-  NfgPortion(Nfg *&, bool);
+  NfgPortion(gbtNfgGame *&, bool);
 
 public:
-  NfgPortion(Nfg *value);
+  NfgPortion(gbtNfgGame);
   virtual ~NfgPortion();
 
-  Nfg *Value(void) const;
-  void SetValue(Nfg *);
+  gbtNfgGame Value(void) const;
+  void SetValue(gbtNfgGame);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -852,8 +841,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
-inline Nfg &AsNfg(Portion *portion)
-{ return *(dynamic_cast<NfgPortion *>(portion))->Value(); }
+inline gbtNfgGame AsNfg(Portion *portion)
+{ return (dynamic_cast<NfgPortion *>(portion))->Value(); }
 
 //-------
 // Efg
@@ -862,19 +851,19 @@ inline Nfg &AsNfg(Portion *portion)
 
 class EfgPortion : public Portion   {
 protected:
-  efgGame ** _Value;
-  bool _ref;
+  gbtEfgGame *m_value;
+  bool m_ref;
 
   static gPool pool;
 
-  EfgPortion(efgGame *&, bool);
+  EfgPortion(gbtEfgGame *&, bool);
 
 public:
-  EfgPortion(efgGame *value);
+  EfgPortion(gbtEfgGame);
   virtual ~EfgPortion();
 
-  efgGame *Value(void) const;
-  void SetValue(efgGame *);
+  gbtEfgGame Value(void) const;
+  void SetValue(gbtEfgGame);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -889,8 +878,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
-inline efgGame &AsEfg(Portion *portion)
-{ return *(dynamic_cast<EfgPortion *>(portion))->Value(); }
+inline gbtEfgGame AsEfg(Portion *portion)
+{ return (dynamic_cast<EfgPortion *>(portion))->Value(); }
 
 
 //---------

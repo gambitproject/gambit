@@ -36,21 +36,21 @@
 //                        class panelNfgGeneral
 //========================================================================
 
-extern bool IsConstSum(const Nfg &);
+extern bool IsConstSum(const gbtNfgGame &);
 
 class panelNfgGeneral : public wxPanel {
 private:
-  Nfg &m_nfg;
+  gbtNfgGame &m_nfg;
   wxTextCtrl *m_title, *m_comment;
 
 public:
-  panelNfgGeneral(wxWindow *p_parent, Nfg &p_nfg, const wxString &);
+  panelNfgGeneral(wxWindow *p_parent, gbtNfgGame &p_nfg, const wxString &);
 
   wxString GetGameTitle(void) const { return m_title->GetValue(); }
   wxString GetComment(void) const { return m_comment->GetValue(); }
 };
 
-panelNfgGeneral::panelNfgGeneral(wxWindow *p_parent, Nfg &p_nfg,
+panelNfgGeneral::panelNfgGeneral(wxWindow *p_parent, gbtNfgGame &p_nfg,
 				 const wxString &p_filename)
   : wxPanel(p_parent, -1), m_nfg(p_nfg)
 {
@@ -102,7 +102,7 @@ const int idLIST_PLAYER = 1000;
 
 class panelNfgPlayers : public wxPanel {
 private:
-  Nfg &m_nfg;
+  gbtNfgGame &m_nfg;
   int m_lastSelection;
   wxListBox *m_playerList;
   wxTextCtrl *m_playerName;
@@ -110,7 +110,7 @@ private:
   void OnPlayerSelect(wxCommandEvent &);
 
 public:
-  panelNfgPlayers(wxWindow *p_parent, Nfg &p_nfg);
+  panelNfgPlayers(wxWindow *p_parent, gbtNfgGame &p_nfg);
 
   virtual bool Validate(void);
 
@@ -125,7 +125,7 @@ BEGIN_EVENT_TABLE(panelNfgPlayers, wxPanel)
   EVT_LISTBOX(idLIST_PLAYER, panelNfgPlayers::OnPlayerSelect)
 END_EVENT_TABLE()
 
-panelNfgPlayers::panelNfgPlayers(wxWindow *p_parent, Nfg &p_nfg)
+panelNfgPlayers::panelNfgPlayers(wxWindow *p_parent, gbtNfgGame &p_nfg)
   : wxPanel(p_parent, -1), m_nfg(p_nfg), m_lastSelection(0)
 {
   SetAutoLayout(true);
@@ -186,7 +186,7 @@ BEGIN_EVENT_TABLE(dialogNfgProperties, wxDialog)
   EVT_BUTTON(wxID_OK, dialogNfgProperties::OnOK)
 END_EVENT_TABLE()
 
-dialogNfgProperties::dialogNfgProperties(wxWindow *p_parent, Nfg &p_nfg,
+dialogNfgProperties::dialogNfgProperties(wxWindow *p_parent, gbtNfgGame &p_nfg,
 					 const wxString &p_filename)
   : wxDialog(p_parent, -1, "Normal form properties"), m_nfg(p_nfg)
 {

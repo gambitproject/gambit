@@ -114,13 +114,6 @@ public:
   Portion* Help(gText text, bool udf, bool bif, bool getdesc = false );
   Portion* HelpVars(gText text);
 
-  void InvalidateGameProfile( void* game, bool IsEfg );
-  void UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec );  
-
-  void UnAssignEfgOutcome(efgGame *game, const gbtEfgOutcome &outcome);
-  // Unassigns a SINGLE given element of an Efg
-  void UnAssignEfgElement(efgGame *game, PortionSpec spec, void* data );
-
   void GlobalVarDefine     ( const gText& var_name, Portion* p );
   bool GlobalVarIsDefined  ( const gText& var_name ) const;
   Portion* GlobalVarValue  ( const gText& var_name ) const;

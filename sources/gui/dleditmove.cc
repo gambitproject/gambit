@@ -78,10 +78,10 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset)
     m_player->SetSelection(0);
   }
   else {
-    for (int pl = 1; pl <= p_infoset.GetGame()->NumPlayers(); pl++) {
+    for (int pl = 1; pl <= p_infoset.GetGame().NumPlayers(); pl++) {
       m_player->Append(wxString::Format("%d: %s", pl,
 					(char *) 
-					p_infoset.GetGame()->GetPlayer(pl).GetLabel()));
+					p_infoset.GetGame().GetPlayer(pl).GetLabel()));
     } 
     m_player->SetSelection(p_infoset.GetPlayer().GetId() - 1);
   }

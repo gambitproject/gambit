@@ -31,45 +31,45 @@
 #include "node.h"
 
 // returns a glist of all nodes in the extensive form
-void Nodes (const efgGame &befg, gList<gbtEfgNode> &list);
+void Nodes(const gbtEfgGame &, gList<gbtEfgNode> &list);
 
-void Nodes (const efgGame &befg, const gbtEfgNode &n, gList<gbtEfgNode> &list);
+void Nodes(const gbtEfgGame &, const gbtEfgNode &n, gList<gbtEfgNode> &list);
 
 // returns the number of nodes in the extensive form
-int NumNodes (const efgGame &befg);
+int NumNodes(const gbtEfgGame &);
 
 // returns the number of nodes given a starting node
-int CountNodes (const efgGame &e, const gbtEfgNode &);
+int CountNodes(const gbtEfgGame &, const gbtEfgNode &);
 
 // Returns the terminal nodes in a subtree rooted at 'p_node'
 void TerminalNodes(const gbtEfgNode &, gList<gbtEfgNode> &);
 
 // returns the action leading up to the node
-gbtEfgAction LastAction(const efgGame &e, const gbtEfgNode &node);
+gbtEfgAction LastAction(const gbtEfgGame &, const gbtEfgNode &node);
 
 // returns the list of nodes which are marked as the roots of subgames
-void MarkedSubgameRoots(const efgGame &efg, gList<gbtEfgNode> &list);
+void MarkedSubgameRoots(const gbtEfgGame &, gList<gbtEfgNode> &list);
 
 // returns the list of nodes which are valid roots of subgames
-void LegalSubgameRoots(const efgGame &efg, gList<gbtEfgNode> &list);
-void LegalSubgameRoots(const efgGame &efg, const gbtEfgNode &,
+void LegalSubgameRoots(const gbtEfgGame &, gList<gbtEfgNode> &list);
+void LegalSubgameRoots(const gbtEfgGame &, const gbtEfgNode &,
 		       gList<gbtEfgNode> &);
-bool HasSubgames(const efgGame &efg);
-bool HasSubgames(const efgGame &, const gbtEfgNode &n);
+bool HasSubgames(const gbtEfgGame &);
+bool HasSubgames(const gbtEfgGame &, const gbtEfgNode &n);
 
-bool AllSubgamesMarked(const efgGame &efg);
+bool AllSubgamesMarked(const gbtEfgGame &efg);
 
 // returns the list of nodes which are roots of child subgames
-void ChildSubgames(const efgGame &, const gbtEfgNode &, 
+void ChildSubgames(const gbtEfgGame &, const gbtEfgNode &, 
 		   gList<gbtEfgNode> &);
 
 // determines if a game is perfect recall.  
 // if not, returns a pair of infosets violating the definition
-bool IsPerfectRecall(const efgGame &);
-bool IsPerfectRecall(const efgGame &, gbtEfgInfoset &, gbtEfgInfoset &);
+bool IsPerfectRecall(const gbtEfgGame &);
+bool IsPerfectRecall(const gbtEfgGame &, gbtEfgInfoset &, gbtEfgInfoset &);
 
-void RandomEfg(const efgGame &);
-efgGame *CompressEfg(const efgGame &, const EFSupport &);
+void RandomEfg(const gbtEfgGame &);
+gbtEfgGame CompressEfg(const gbtEfgGame &, const EFSupport &);
 
 #endif // EFGUTILS_H
 

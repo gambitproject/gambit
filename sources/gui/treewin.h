@@ -36,7 +36,7 @@ class TreeWindow : public wxScrolledWindow {
 friend class EfgPrintout;
 friend class EfgShow;
 private:
-  efgGame &m_efg;
+  gbtEfgGame m_efg;
   EfgShow *m_parent;
   efgTreeLayout m_layout;
   TreeDrawSettings m_drawSettings;

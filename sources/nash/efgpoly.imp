@@ -45,7 +45,7 @@ public:
 template <class T> class EfgPolEnumModule  {
 private:
   T eps;
-  const efgGame &EF;
+  gbtEfgGame m_efg;
   const EFSupport &support;
   EfgPolEnumParams params;
   gSpace *Space;
@@ -116,7 +116,7 @@ public:
 template <class T>
 EfgPolEnumModule<T>::EfgPolEnumModule(const EFSupport &S,
 				      const EfgPolEnumParams &p)
-  : EF(S.GetGame()), support(S), params(p), count(0), nevals(0), SF(S),
+  : m_efg(S.GetGame()), support(S), params(p), count(0), nevals(0), SF(S),
     is_singular(false), var(S.GetGame().NumPlayers())
 { 
 //  gEpsilon(eps,12);
@@ -129,7 +129,7 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const EFSupport &S,
   int kk=0;
   int tnv = 0;
 
-  for(int i=1;i<=EF.NumPlayers();i++) {
+  for(int i=1;i<=m_efg.NumPlayers();i++) {
     var[i] = new gArray<int>(SF.NumSequences(i));
     (*(var[i]))[1] = 0;
     for(int seq = 2;seq<=SF.NumSequences(i);seq++) {
@@ -148,7 +148,7 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const EFSupport &S,
 template <class T>
 EfgPolEnumModule<T>::~EfgPolEnumModule()
 { 
-  for(int i=1;i<=EF.NumPlayers();i++)
+  for(int i=1;i<=m_efg.NumPlayers();i++)
     delete var[i];
   delete Lex;
   delete Space;
@@ -205,7 +205,7 @@ EfgPolEnumModule<T>::Payoff(int pl) const
     if( pay !=(gNumber)0) {
       gPoly<T> term(Space,(T)pay,Lex);
       int k;
-      for(k=1;k<=EF.NumPlayers();k++) 
+      for(k=1;k<=m_efg.NumPlayers();k++) 
 	term*=ProbOfSequence(k,(index.CurrentIndices())[k]);
       equation+=term;
     }
@@ -336,7 +336,7 @@ EfgPolEnumModule<T>::SeqFormVectorFromSolFormVector(const gVector<gDouble> &v)
 {
   gPVector<double> x(SF.NumSequences());
 
-  for (int i = 1; i <= EF.NumPlayers(); i++) 
+  for (int i = 1; i <= m_efg.NumPlayers(); i++) 
     for (int j = 1; j <= SF.NumSequences()[i]; j++)
       x(i,j) = NumProbOfSequence(i,j,v);
   
@@ -454,7 +454,7 @@ EfgPolEnumModule<T>::SeqFormProbsFromSolVars(const gVector<gDouble> &v) const
 {
   gPVector<double> x(SF.NumSequences());
 
-  for(int pl=1;pl<=EF.NumPlayers();pl++) 
+  for(int pl=1;pl<=m_efg.NumPlayers();pl++) 
     for(int seq=1;seq<=SF.NumSequences()[pl];seq++)
       x(pl,seq) = NumProbOfSequence(pl,seq,v);
 
@@ -467,8 +467,8 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const BehavProfile<gNumber> &sol)
 {
   int numvars(0);
 
-  for (int pl = 1; pl <= EF.NumPlayers(); pl++) {
-    gbtEfgPlayer player = EF.GetPlayer(pl);
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+    gbtEfgPlayer player = m_efg.GetPlayer(pl);
     for (int iset = 1; iset <= player.NumInfosets(); iset++) {
       gbtEfgInfoset infoset = player.GetInfoset(iset);
       if ( support.MayReach(infoset) )
@@ -479,8 +479,8 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const BehavProfile<gNumber> &sol)
   gVector<gDouble> answer(numvars);
   int count(0);
 
-  for (int pl = 1; pl <= EF.NumPlayers(); pl++) {
-    gbtEfgPlayer player = EF.GetPlayer(pl);
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+    gbtEfgPlayer player = m_efg.GetPlayer(pl);
     for (int iset = 1; iset <= player.NumInfosets(); iset++) {
       gbtEfgInfoset infoset = player.GetInfoset(iset);
       if ( support.MayReach(infoset) ) {
@@ -502,7 +502,7 @@ EfgPolEnumModule<T>::SolVarsFromSeqFormProbs(const gPVector<double> &x) const
 
   // Old version that doesn't work 
   int numvars = 0;
-  for(int pl=1;pl<=EF.NumPlayers();pl++) 
+  for(int pl=1;pl<=m_efg.NumPlayers();pl++) 
     for(int seq=2;seq<=SF.NumSequences()[pl];seq++) {
       int act  = SF.ActionNumber(pl,seq);
       if(act<support.NumActions(SF.GetInfoset(pl,seq))) 
@@ -512,7 +512,7 @@ EfgPolEnumModule<T>::SolVarsFromSeqFormProbs(const gPVector<double> &x) const
   //  gVector<gDouble> v(SF.NumIndepVars());
 
   int count = 0;
-  for(int pl=1;pl<=EF.NumPlayers();pl++) 
+  for(int pl=1;pl<=m_efg.NumPlayers();pl++) 
     for(int seq=2;seq<=SF.NumSequences()[pl];seq++) {
       int act  = SF.ActionNumber(pl,seq);
       if(act<support.NumActions(SF.GetInfoset(pl,seq))) {
@@ -581,7 +581,7 @@ EfgPolEnumModule<T>::ReturnPolishedSolution(const gVector<gDouble> &root) const
 {
   gPVector<double> x(SF.NumSequences());
 
-  for(int i=1;i<=EF.NumPlayers();i++) 
+  for(int i=1;i<=m_efg.NumPlayers();i++) 
     for(int j=1;j<=SF.NumSequences()[i];j++) 
       x(i,j) = NumProbOfSequence(i,j,root);
 
