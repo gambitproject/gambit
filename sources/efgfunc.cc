@@ -342,11 +342,31 @@ Portion *GSM_SetNamePlayer(Portion **param)
   return param[0]->ValCopy();
 }
 
-/*
-Portion *GSM_SetOutcome(Portion **param)
+Portion *GSM_SetPayoffFloat(Portion **param)
 {
-  */
+  OutcomeVector<double> *c = 
+    (OutcomeVector<double> *) ((OutcomePortion *) param[0])->Value();
+  ListPortion *p = (ListPortion *) param[1];
 
+  if (c->Length() != p->Length())   return 0;
+
+  for (int i = 1; i <= c->Length(); i++)
+    (*c)[i] = ((FloatPortion *) p->Subscript(i))->Value();
+  return new OutcomeValPortion(c);
+}
+
+Portion *GSM_SetPayoffRational(Portion **param)
+{
+  OutcomeVector<gRational> *c = 
+    (OutcomeVector<gRational> *) ((OutcomePortion *) param[0])->Value();
+  ListPortion *p = (ListPortion *) param[1];
+
+  if (c->Length() != p->Length())   return 0;
+
+  for (int i = 1; i <= c->Length(); i++)
+    (*c)[i] = ((RationalPortion *) p->Subscript(i))->Value();
+  return new OutcomeValPortion(c);
+}
 
 //
 // Implementation of extensive form query functions, in alpha order
@@ -537,17 +557,18 @@ Portion *GSM_Parent(Portion **param)
     return 0;
 }
 
-Portion *GSM_Payoff(Portion **param)
+Portion *GSM_PayoffFloat(Portion **param)
 {
-  Outcome *c = ((OutcomePortion *) param[0])->Value();
-  switch (c->BelongsTo()->Type())   {
-    case DOUBLE:
-      return ArrayToList((gArray<double> &) (OutcomeVector<double> &) *c);
-    case RATIONAL:
-      return ArrayToList((gArray<gRational> &) (OutcomeVector<gRational> &) *c);
-    default:
-      return 0;
-  }
+  OutcomeVector<double> *c = 
+    (OutcomeVector<double> *) ((OutcomePortion *) param[0])->Value();
+  return ArrayToList((gArray<double> &) *c);
+}
+
+Portion *GSM_PayoffRational(Portion **param)
+{
+  OutcomeVector<gRational> *c = 
+    (OutcomeVector<gRational> *) ((OutcomePortion *) param[0])->Value();
+  return ArrayToList((gArray<gRational> &) *c);
 }
 
 Portion *GSM_PlayerInfoset(Portion **param)
@@ -775,6 +796,17 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_SetNamePlayer, 1, "name", porTEXT);
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("SetPayoff");
+  FuncObj->SetFuncInfo(GSM_SetPayoffFloat, 2);
+  FuncObj->SetParamInfo(GSM_SetPayoffFloat, 0, "outcome", porOUTCOME_FLOAT);
+  FuncObj->SetParamInfo(GSM_SetPayoffFloat, 1, "payoffs", porLIST | porFLOAT);
+
+  FuncObj->SetFuncInfo(GSM_SetPayoffRational, 2);
+  FuncObj->SetParamInfo(GSM_SetPayoffRational, 0, "outcome",
+			porOUTCOME_RATIONAL);
+  FuncObj->SetParamInfo(GSM_SetPayoffRational, 1, "payoffs",
+			porLIST | porRATIONAL);
+  gsm->AddFunction(FuncObj);
 
 //-----------------------------------------------------------
 
@@ -914,8 +946,11 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Payoff");
-  FuncObj->SetFuncInfo(GSM_Payoff, 1);
-  FuncObj->SetParamInfo(GSM_Payoff, 0, "outcome", porOUTCOME);
+  FuncObj->SetFuncInfo(GSM_PayoffFloat, 1);
+  FuncObj->SetParamInfo(GSM_PayoffFloat, 0, "outcome", porOUTCOME_FLOAT);
+
+  FuncObj->SetFuncInfo(GSM_PayoffRational, 1);
+  FuncObj->SetParamInfo(GSM_PayoffRational, 0, "outcome", porOUTCOME_RATIONAL);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Player");
