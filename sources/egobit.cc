@@ -77,14 +77,22 @@ EFGobitFunc<T>::EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &P)
 
 template <class T>
 EFGobitFunc<T>::EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &P,
-			    const BehavProfile<T> &s)
+			    const BehavProfile<T> &start)
   :gBFunctMin<T>(EF.ProfileLength(true)), niters(0), nevals(0), 
 		 probs(EF.Dimensionality().Lengths()),
 		 p(EF, true), pp(EF, true), cpay(EF),
 		 xi(p.Length(), p.Length()), E(EF)
 {
   Init();
-  pp = s;
+  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
+    EFPlayer *p = E.PlayerList()[pl];
+    for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
+      Infoset *s = p->InfosetList()[iset];
+      for (int act = 1; act < s->NumActions(); act++)  {
+	pp(pl, iset, act) = start(pl, iset, act);
+      }
+    }
+  }
 }
 
 template <class T> void EFGobitFunc<T>::Init(void)
@@ -241,7 +249,8 @@ const gList<BehavProfile<T> > &EFGobitModule<T>::GetSolutions(void) const
 template <class T> GobitFunc<T> *EFGobitModule<T>::CreateFunc(void)
 {
   if (start) {
-    BehavProfile<T> s(E, (gDPVector<T> &) *start);
+    BehavProfile<T> s(E);
+    ((gVector<T> &) s).operator=(*start);
     return new EFGobitFunc<T>(E, params, s); 
   }
   return new EFGobitFunc<T>(E, params);

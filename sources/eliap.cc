@@ -67,18 +67,24 @@ EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &P)
     xi(p.Length(), p.Length())
 {
   xi.MakeIdent();
-  E.Centroid(pp);
 }
 
 template <class T>
 EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &P,
-			  const BehavProfile<T> &s)
+			  const BehavProfile<T> &start)
   : gBFunctMin<T>(EF.ProfileLength()), niters(0), nevals(0), E(EF),
     p(EF, false), pp(EF,false), cpay(EF.Dimensionality()),
     xi(p.Length(),p.Length())
 {
   xi.MakeIdent();
-  pp = s;
+  for (int pl = 1; pl <= E.NumPlayers(); pl++)   {
+    EFPlayer *p = E.PlayerList()[pl];
+    for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
+      Infoset *s = p->InfosetList()[iset];
+      for (int act = 1; act < s->NumActions(); act++)
+	pp(pl, iset, act) = start(pl, iset, act);
+    }
+  }
 }
 
 template <class T> EFLiapFunc<T>::~EFLiapFunc()
