@@ -150,9 +150,37 @@ Action* LastAction( Node* node )
 }
 
 
+bool IsPerfectRecall(const BaseEfg &efg)
+{
+  for (int pl = 1; pl <= efg.NumPlayers(); pl++)   {
+    EFPlayer *player = efg.PlayerList()[pl];
+    
+    for (int i = 1; i <= player->NumInfosets(); i++)  {
+      Infoset *iset1 = player->InfosetList()[i];
+      for (int j = 1; j <= player->NumInfosets(); j++)   {
+	Infoset *iset2 = player->InfosetList()[j];
 
-#include "gmisc.h"
-#include "efg.h"
+	bool precedes = false;
+	
+	for (int m = 1; m <= iset2->NumMembers(); m++)  {
+	  int n;
+	  for (n = 1; n <= iset1->NumMembers(); n++)  {
+	    if (efg.IsPredecessor(iset1->GetMemberList()[n],
+				  iset2->GetMemberList()[m]))  {
+	      precedes = true;
+	      break;
+	    }
+	  }
+
+	  if (n > iset1->NumMembers() && precedes)
+	    return false;
+	}
+      }
+    }
+  }
+
+  return true;
+}
 
 
 #ifdef __GNUG__
