@@ -107,8 +107,8 @@ public:
   const gList<const Node *> ReachableNodesInInfoset(const Infoset *) const;
 
   // Action editing functions
-  void AddAction(Action *);
-  bool RemoveAction(Action *);
+  void AddAction(const Action *);
+  bool RemoveAction(const Action *);
 };
 
 

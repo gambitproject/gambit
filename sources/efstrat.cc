@@ -620,7 +620,7 @@ EFSupportWithActiveNodes::EFSupportWithActiveNodes(const Efg &E)
   const gArray<int> nos_infosets(E.NumInfosets());
   for (int pl = 1; pl <= E.NumPlayers(); pl++) {
     gBlock<gList<const Node *> > new_big_list;
-    for (int j = 1; nos_infosets[pl]; j++) {
+    for (int j = 1; j <= nos_infosets[pl]; j++) {
       gList<const Node *> new_list;
       new_big_list += new_list;
     }
@@ -717,7 +717,7 @@ EFSupportWithActiveNodes::ReachableNodesInInfoset(const Infoset * i) const
 }
 
 // Editing functions
-void EFSupportWithActiveNodes::AddAction(Action *s)
+void EFSupportWithActiveNodes::AddAction(const Action *s)
 {
   EFSupport::AddAction(s);
 
@@ -727,7 +727,7 @@ void EFSupportWithActiveNodes::AddAction(Action *s)
     generate_nonterminal_nodes(startlist[i]->GetChild(s));
 }
 
-bool EFSupportWithActiveNodes::RemoveAction(Action *s)
+bool EFSupportWithActiveNodes::RemoveAction(const Action *s)
 {
   Infoset *infoset = s->BelongsTo();
   gList<const Node *> startlist(ReachableNodesInInfoset(infoset));
