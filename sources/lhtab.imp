@@ -23,10 +23,13 @@ template <class T> gMatrix<T> Make_A1(const Nfg &N, const NFSupport &S,
   T min; 
 
   min = MinPayoff(N) - gNumber(1);
+  T max = MaxPayoff(N);
+  T fac = ((T)1)/(max - min);
 
   for (i = 1; i <= n1; i++)  {
     for (j = 1; j <= n2; j++)  {
       A1(i, n1 + j) = N.Payoff(iter.GetOutcome(), 1) - gNumber(min);
+      A1(i, n1 + j) *= fac;
       iter.Next(2);
     }
     iter.Next(1);
@@ -45,10 +48,13 @@ template <class T> gMatrix<T> Make_A2(const Nfg &N, const NFSupport &S,
   T min; 
 
   min = MinPayoff(N) - gNumber(1);
+  T max = MaxPayoff(N);
+  T fac = ((T)1)/(max - min);
 
   for (i = 1; i <= n1; i++)  {
     for (j = 1; j <= n2; j++)  {
       A2(n1 + j, i) = N.Payoff(iter.GetOutcome(), 2) - gNumber(min);
+      A2(n1 + j, i) *= fac;
       iter.Next(2);
     }
     iter.Next(1);

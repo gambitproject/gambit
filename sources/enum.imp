@@ -80,6 +80,8 @@ template <class T> int EnumModule<T>::DoubleEnum(void)
   gVector<T> b2(1,n2);
 
   min = MinPayoff(NF) - gNumber(1);
+  T max = MaxPayoff(NF);
+  T fac = ((T)1)/(max - min);
 
    // construct A1,A2,b1,b2  
 
@@ -87,6 +89,8 @@ template <class T> int EnumModule<T>::DoubleEnum(void)
     for (j=1; j<=n2; j++)  {
       A1(i, j) = NF.Payoff(iter.GetOutcome(), 1) - gNumber(min);
       A2(j, i) = NF.Payoff(iter.GetOutcome(), 2) - gNumber(min);
+      A1(i,j) *= fac;
+      A2(j,i) *= fac;
       iter.Next(2);
     }
     iter.Next(1);
@@ -184,6 +188,8 @@ template <class T> int EnumModule<T>::Enum(void)
   gVector<T> b2(1,n2);
 
   min = MinPayoff(NF) - gNumber(1);
+  T max = MaxPayoff(NF);
+  T fac = ((T)1)/(max - min);
 
    // construct A1,A2,b1,b2  
 
@@ -191,6 +197,8 @@ template <class T> int EnumModule<T>::Enum(void)
     for (j=1; j<=n2; j++)  {
       A1(i, j) = NF.Payoff(iter.GetOutcome(), 1) - gNumber(min);
       A2(j, i) = NF.Payoff(iter.GetOutcome(), 2) - gNumber(min);
+      A1(i, j) *= fac;
+      A2(j, i) *= fac;
       iter.Next(2);
     }
     iter.Next(1);
