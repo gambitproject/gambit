@@ -2,7 +2,7 @@
 // FILE: gsmoper.cc -- implementations for GSM operator functions
 //                     companion to GSM
 //
-// $Id$
+// @(#)gsmoper.cc	1.113 12/30/96
 //
 
 #include <stdlib.h>
@@ -2406,12 +2406,13 @@ Portion* GSM_Manual(Portion** param)
 
   for(i=1; i<=Prototypes->Length(); i++)
   {
-    assert(Prototypes->Spec().Type == porTEXT);
-    s << ((TextPortion*) (*Prototypes)[i])->Value() << '\n';
+	 assert(Prototypes->Spec().Type == porTEXT);
+	 s << ((TextPortion*) (*Prototypes)[i])->Value() << '\n';
   }
 
 
-  gString name = "gcl.man";
+//  gString name = "gcl.man";   This gives problems on BC (rdm)
+  char * name = "gcl.man";    // this change necessary for BC
   gFileInput* f = NULL;
 
 
@@ -2423,27 +2424,29 @@ Portion* GSM_Manual(Portion** param)
   // one function...
 
   extern char* _SourceDir;
-  const char* SOURCE = _SourceDir; 
+  const char* SOURCE = _SourceDir;
   assert( SOURCE );
 
 #ifdef __GNUG__
+  const char SLASH1= '/';
   const char SLASH = '/';
 #elif defined __BORLANDC__
+  const char SLASH1= '\\';
   const char * SLASH = "\\";
 #endif   // __GNUG__
 
   bool search = false;
   bool man_found = false;
-  if( strchr( name, SLASH ) == NULL )
-    search = true;
+  if( strchr( name, SLASH1 ) == NULL )
+	 search = true;
   gString ManFileName;
 
   ManFileName = (gString) name;
   f = new gFileInput( ManFileName );
   if (!f->IsValid())
   {
-    delete f;
-    f = NULL;
+	 delete f;
+	 f = NULL;
   }
   else
   {  
