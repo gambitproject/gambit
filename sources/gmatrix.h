@@ -333,7 +333,26 @@ template <class T> gMatrix<T> gMatrix<T>::Invert(void) const
 
 template <class T> T gMatrix<T>::Determinant() const
 {
-  T result;
+  assert(Height()==Width());
+  T result = 0;
+  if(Height()==2)
+    result = (*this)(1,1) * (*this)(2,2) - (*this)(1,2) * (*this)(2,1);
+  else if(Height()==1) result = (*this)(1,1);
+  else {
+    int l=1;
+    gSet<int> rows, cols;
+    for(int i=2;i<=Height();i++)
+      rows.Append(i);
+    for(i=1;i<=Width();i++) {
+      for(int j=1;j<=Width();j++)
+	if(j!=i) cols.Append(j);
+      gMatrix tmp = GetSubMatrix(rows,cols);
+      result += tmp.Determinant() * l * (*this)(1,i);
+      l *= -1;
+      cols.Flush();
+    }
+  }
+  return result;
 }
 
 //*****************************************************************************
