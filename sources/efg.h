@@ -62,7 +62,7 @@ public:
   virtual gArray<int> PathToNode(const Node *) const = 0;
   virtual const gArray<Node *> &Children(const Node *n) const = 0;
   virtual int  NumChildren(const Node *n) const = 0;
-  virtual gList<const Node*> TerminalNodes(void) const = 0;  
+  virtual gList<Node *> TerminalNodes(void) const = 0;  
 
   virtual bool IsLegalSubgame(Node *n) = 0;
   virtual void MarkSubgames(const gList<Node *> &list) = 0;
@@ -147,7 +147,7 @@ protected:
   void NonterminalDescendants(const Node *, const EFSupport&, 
 			      gList<const Node*> &) const;
   void TerminalDescendants(const Node *, const EFSupport&, 
-			   gList<const Node*> &) const;
+			   gList<Node *> &) const;
 
   void NotifyClients(bool, bool) const;
 
@@ -182,9 +182,9 @@ public:
   gList<const Node*> DescendantNodes(const Node&, const EFSupport&) const;
   gList<const Node*> NonterminalDescendants(const Node&, 
 					    const EFSupport&) const;
-  gList<const Node*> TerminalDescendants(const Node&, 
-					 const EFSupport&) const;
-  gList<const Node*> TerminalNodes(void) const;
+  gList<Node *> TerminalDescendants(const Node&, 
+				    const EFSupport&) const;
+  gList<Node *> TerminalNodes(void) const;
   gList<Infoset*> DescendantInfosets(const Node&, const EFSupport&) const;
   const gArray<Node *> &Children(const Node *n) const;
   int NumChildren(const Node *n) const;

@@ -791,11 +791,13 @@ void FullEfg::NonterminalDescendants(const Node* n,
 }
 
 void FullEfg::TerminalDescendants(const Node* n, 
-				       const EFSupport& supp,
-				       gList<const Node*>& current) const
+				  const EFSupport& supp,
+				  gList<Node *> &current) const
 {
-  if (n->IsTerminal()) 
-    current += n;
+  if (n->IsTerminal()) { 
+    // casting away const to silence compiler warning
+    current += (Node *) n;
+  }
   else {
     const gArray<Action *> actions = supp.Actions(n->GetInfoset());
     for (int i = 1; i <= actions.Length(); i++) {
@@ -821,15 +823,15 @@ FullEfg::NonterminalDescendants(const Node& n, const EFSupport& supp) const
   return answer;
 }
 
-gList<const Node*> 
+gList<Node *> 
 FullEfg::TerminalDescendants(const Node& n, const EFSupport& supp) const
 {
-  gList<const Node*> answer;
+  gList<Node *> answer;
   TerminalDescendants(&n,supp,answer);
   return answer;
 }
 
- gList<const Node *> FullEfg::TerminalNodes() const
+gList<Node *> FullEfg::TerminalNodes() const
 {
   return TerminalDescendants(*(RootNode()),EFSupport(*this));
 }

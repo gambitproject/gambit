@@ -699,7 +699,7 @@ BehavSolution::ANFExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
   CheckIsValid();
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
-  gList<const Node *> terminal_nodes = Game().TerminalNodes();
+  gList<Node *> terminal_nodes = Game().TerminalNodes();
 
   for (int pl = 1; pl <= Game().NumPlayers(); pl++)
     for (int i = 1; i <= Game().Players()[pl]->NumInfosets(); i++) {
@@ -1078,7 +1078,7 @@ BehavSolution::NashExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
   CheckIsValid();
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
-  gList<const Node *> terminal_nodes = Game().TerminalNodes();
+  gList<Node *> terminal_nodes = Game().TerminalNodes();
 
   const gArray<EFPlayer *> players = Game().Players();
   for (int pl = 1; pl <= players.Length(); pl++) {
