@@ -684,6 +684,12 @@ void GambitFrame::RemoveGame(Efg *p_efg)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
     if (m_gameList[i]->m_efg == p_efg) {
+      m_fileHistory.RemoveMenu(m_gameList[i]->m_efgShow->GetMenuBar()->GetMenu(0));
+      if (m_gameList[i]->m_nfg) {
+	m_fileHistory.RemoveMenu(m_gameList[i]->m_nfgShow->GetMenuBar()->GetMenu(0));
+	m_gameList[i]->m_nfgShow->Close();
+	delete m_gameList[i]->m_nfg;
+      }
       delete m_gameList.Remove(i);
       delete p_efg;
       break;
@@ -696,6 +702,7 @@ void GambitFrame::RemoveGame(Nfg *p_nfg)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
     if (m_gameList[i]->m_nfg == p_nfg) {
+      m_fileHistory.RemoveMenu(m_gameList[i]->m_nfgShow->GetMenuBar()->GetMenu(0));
       if (m_gameList[i]->m_efg == 0) {
 	delete m_gameList.Remove(i);
       }
