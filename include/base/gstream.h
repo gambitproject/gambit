@@ -79,6 +79,37 @@ class gFileInput : public gInput  {
     void setpos(long x) const;
 };
 
+class gStandardInput : public gInput  {
+private:
+  gStandardInput(const gStandardInput &);
+  gStandardInput &operator=(const gStandardInput &);
+
+public:
+  class ReadFailed : public gException   {
+  public:
+    virtual ~ReadFailed()   { }
+    gText Description(void) const;
+  };
+
+  gStandardInput(void);
+  virtual ~gStandardInput();
+
+  gInput &operator>>(int &x);
+  gInput &operator>>(unsigned int &x);
+  gInput &operator>>(long &x);
+  gInput &operator>>(char &x);
+  gInput &operator>>(double &x);
+  gInput &operator>>(float &x);
+  gInput &operator>>(char *x);
+
+  int get(char &c);
+  void unget(char c);
+  bool eof(void) const;
+  void seekp(long x) const;
+  long getpos(void) const;
+  void setpos(long x) const;
+};
+
 class gNullInput : public gInput  {
   private:
     gNullInput(const gNullInput &);
@@ -134,47 +165,47 @@ class gOutput  {
 };
 
 class gStandardOutput : public gOutput  {
-  private:
-    FILE *f;
-    int Width, Prec;
-    char Represent;
+private:
+  int Width, Prec;
+  char Represent;
 
-    gStandardOutput(const gStandardOutput &);
-    gStandardOutput &operator=(const gStandardOutput &);
+  gStandardOutput(const gStandardOutput &);
+  gStandardOutput &operator=(const gStandardOutput &);
+
+public:
+  class OpenFailed : public gException   {
   public:
-    class OpenFailed : public gException   {
-    public:
-      virtual ~OpenFailed()   { }
-      gText Description(void) const;
-    };
+    virtual ~OpenFailed()   { }
+    gText Description(void) const;
+  };
 
-    class WriteFailed : public gException   {
-    public:
-      virtual ~WriteFailed()   { }
-      gText Description(void) const;
-    };
+  class WriteFailed : public gException   {
+  public:
+    virtual ~WriteFailed()   { }
+    gText Description(void) const;
+  };
+  
+  gStandardOutput(void);
+  virtual ~gStandardOutput();
 
-    gStandardOutput(FILE *);
-    virtual ~gStandardOutput();
+  int GetWidth(void) const;
+  gOutput &SetWidth(int w);
+  int GetPrec(void) const;
+  gOutput &SetPrec(int p);
+  gOutput &SetExpMode(void);
+  gOutput &SetFloatMode(void);
+  char GetRepMode(void) const;
 
-    int GetWidth(void) const;
-    gOutput &SetWidth(int w);
-    int GetPrec(void) const;
-    gOutput &SetPrec(int p);
-    gOutput &SetExpMode(void);
-    gOutput &SetFloatMode(void);
-    char GetRepMode(void) const;
-
-    gOutput &operator<<(int x);
-    gOutput &operator<<(unsigned int x);
-    gOutput &operator<<(bool x);
-    gOutput &operator<<(long x);
-    gOutput &operator<<(char x);
-    gOutput &operator<<(double x);
-    gOutput &operator<<(long double x);
-    gOutput &operator<<(float x);
-    gOutput &operator<<(const char *x);
-    gOutput &operator<<(const void *x);
+  gOutput &operator<<(int x);
+  gOutput &operator<<(unsigned int x);
+  gOutput &operator<<(bool x);
+  gOutput &operator<<(long x);
+  gOutput &operator<<(char x);
+  gOutput &operator<<(double x);
+  gOutput &operator<<(long double x);
+  gOutput &operator<<(float x);
+  gOutput &operator<<(const char *x);
+  gOutput &operator<<(const void *x);
 };
 
 #include "base/gtext.h"

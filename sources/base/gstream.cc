@@ -122,6 +122,93 @@ void gFileInput::setpos(long x) const
 }
 
 //--------------------------------------------------------------------------
+//                   gStandardInput member functions
+//--------------------------------------------------------------------------
+
+gText gStandardInput::ReadFailed::Description(void) const
+{
+  return "Read failed in gStandardInput";
+}
+
+gStandardInput::gStandardInput(void)
+{ }
+
+gStandardInput::~gStandardInput()
+{ }
+
+gInput &gStandardInput::operator>>(int &x)
+{
+  if (scanf("%d", &x) != 1)   throw ReadFailed();
+  return *this;
+}
+
+gInput &gStandardInput::operator>>(unsigned int &x)
+{
+  if (scanf("%d", &x) != 1)   throw ReadFailed();
+  return *this;
+}
+
+gInput &gStandardInput::operator>>(long &x)
+{
+  if (scanf("%ld", &x) != 1)   throw ReadFailed();
+  return *this;
+}
+
+gInput &gStandardInput::operator>>(char &x)
+{
+  x = (char) fgetc(stdin);
+  return *this;
+}
+
+gInput &gStandardInput::operator>>(double &x)
+{
+  if (scanf("%lf", &x) != 1)   throw ReadFailed();
+  return *this;
+}
+
+gInput &gStandardInput::operator>>(float &x)
+{
+  if (scanf("%f", &x) != 1)   throw ReadFailed();
+  return *this;
+}
+
+gInput &gStandardInput::operator>>(char *x)
+{
+  if (scanf("%s", x) != 1)   throw ReadFailed();
+  return *this;
+}
+
+int gStandardInput::get(char &c)
+{
+  c = (char) fgetc(stdin);
+  return (!feof(stdin));
+}
+
+void gStandardInput::unget(char c)
+{
+  ::ungetc(c, stdin);
+}
+
+bool gStandardInput::eof(void) const
+{
+  return feof(stdin);
+}
+
+void gStandardInput::seekp(long pos) const
+{
+  fseek(stdin, pos, 0);
+}
+
+long gStandardInput::getpos(void) const
+{
+  return ftell(stdin);
+}
+
+void gStandardInput::setpos(long x) const
+{ }
+
+
+//--------------------------------------------------------------------------
 //                         gNullInput member functions
 //--------------------------------------------------------------------------
 
@@ -206,16 +293,12 @@ gText gStandardOutput::WriteFailed::Description(void) const
   return "Write failed in gStandardOutput";
 }
 
-gStandardOutput::gStandardOutput(FILE *out)
-  : f(out), Width(0), Prec(6), Represent('f')
-{
-  if (!f)   throw OpenFailed();
-}
+gStandardOutput::gStandardOutput(void)
+  : Width(0), Prec(6), Represent('f')
+{ }
 
 gStandardOutput::~gStandardOutput()
-{
-  if (f)   fclose(f);
-}
+{ }
 
 int gStandardOutput::GetWidth(void) const
 {
@@ -258,42 +341,42 @@ char gStandardOutput::GetRepMode(void) const
 
 gOutput &gStandardOutput::operator<<(int x)
 {
-  if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed();
+  if (printf("%*d", Width, x) < 0)   throw WriteFailed();
   return *this;
 }
 
 gOutput &gStandardOutput::operator<<(unsigned int x)
 {
-  if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed();
+  if (printf("%*d", Width, x) < 0)   throw WriteFailed();
   return *this;
 }
 
 gOutput &gStandardOutput::operator<<(bool x)
 {
-  if (fprintf(f, "%c", (x) ? 'T' : 'F') < 0)   throw WriteFailed();
+  if (printf("%c", (x) ? 'T' : 'F') < 0)   throw WriteFailed();
   return *this;
 }
 
 gOutput &gStandardOutput::operator<<(long x)
 {
-  if (fprintf(f, "%*ld", Width, x) < 0)   throw WriteFailed();
+  if (printf("%*ld", Width, x) < 0)   throw WriteFailed();
   return *this;
 }
 
 gOutput &gStandardOutput::operator<<(char x)
 {
-  if (fprintf(f, "%c", x) < 0)   throw WriteFailed();
+  if (printf("%c", x) < 0)   throw WriteFailed();
   return *this;
 }
 
 gOutput &gStandardOutput::operator<<(double x)
 {
   if (Represent == 'f')   {
-    if (fprintf(f, "%*.*f", Width, Prec, x) < 0)  
+    if (printf("%*.*f", Width, Prec, x) < 0)  
       throw WriteFailed();
   }
   else   {   // Represent == 'e'
-    if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
+    if (printf("%*.*e", Width, Prec, x) < 0) 
       throw WriteFailed();
   }
   return *this;
@@ -302,11 +385,11 @@ gOutput &gStandardOutput::operator<<(double x)
 gOutput &gStandardOutput::operator<<(long double x)
 {
   if (Represent == 'f')   {
-    if (fprintf(f, "%*.*Lf", Width, Prec, x) < 0)  
+    if (printf("%*.*Lf", Width, Prec, x) < 0)  
       throw WriteFailed();
   }
   else   {   // Represent == 'e'
-    if (fprintf(f, "%*.*Le", Width, Prec, x) < 0) 
+    if (printf("%*.*Le", Width, Prec, x) < 0) 
       throw WriteFailed();
   }
   return *this;
@@ -315,11 +398,11 @@ gOutput &gStandardOutput::operator<<(long double x)
 gOutput &gStandardOutput::operator<<(float x)
 {
   if (Represent == 'f')   {
-    if (fprintf(f, "%*.*f", Width, Prec, x) < 0) 
+    if (printf("%*.*f", Width, Prec, x) < 0) 
       throw WriteFailed();
   }
   else   {   // Represent == 'e'
-    if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
+    if (printf("%*.*e", Width, Prec, x) < 0) 
       throw WriteFailed();
   }
   return *this;
@@ -327,13 +410,13 @@ gOutput &gStandardOutput::operator<<(float x)
 
 gOutput &gStandardOutput::operator<<(const char *x)
 {
-  if (fprintf(f, "%s", x) < 0)   throw WriteFailed();
+  if (printf("%s", x) < 0)   throw WriteFailed();
   return *this;
 }
 
 gOutput &gStandardOutput::operator<<(const void *x)
 {
-  if (fprintf(f, "%p", x) < 0)   throw WriteFailed();
+  if (printf("%p", x) < 0)   throw WriteFailed();
   return *this;
 }
 
