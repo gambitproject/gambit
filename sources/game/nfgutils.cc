@@ -80,13 +80,13 @@ bool IsConstSum(const Nfg &nfg)
   if (nfg.NumOutcomes() == 0)  return true;
 
   for (pl = 1; pl <= nfg.NumPlayers(); pl++)
-    cvalue += nfg.Payoff(nfg.outcomes[1], pl);
+    cvalue += nfg.Payoff(nfg.GetOutcomeId(1), pl);
 
-  for (index = 2; index <= nfg.outcomes.Length(); index++)  {
+  for (index = 2; index <= nfg.NumOutcomes(); index++)  {
     gNumber thisvalue = (gNumber) 0;
 
     for (pl = 1; pl <= nfg.NumPlayers(); pl++)
-      thisvalue += nfg.Payoff(nfg.outcomes[index], pl);
+      thisvalue += nfg.Payoff(nfg.GetOutcomeId(index), pl);
 
     if (thisvalue > cvalue || thisvalue < cvalue)
       return false;
@@ -109,11 +109,11 @@ gNumber MinPayoff(const Nfg &nfg, int player)
     p2 = nfg.NumPlayers();
   }
 
-  minpay = nfg.Payoff(nfg.outcomes[1], p1);
-  for (index = 2; index <= nfg.outcomes.Length(); index++)  {
+  minpay = nfg.Payoff(nfg.GetOutcomeId(1), p1);
+  for (index = 2; index <= nfg.NumOutcomes(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (nfg.Payoff(nfg.outcomes[index], p) < minpay)
-	minpay = nfg.Payoff(nfg.outcomes[index], p);
+      if (nfg.Payoff(nfg.GetOutcomeId(index), p) < minpay)
+	minpay = nfg.Payoff(nfg.GetOutcomeId(index), p);
   }
   return minpay;
 }
@@ -132,11 +132,11 @@ gNumber MaxPayoff(const Nfg &nfg, int player)
     p2 = nfg.NumPlayers();
   }
 
-  maxpay = nfg.Payoff(nfg.outcomes[1], p1);
-  for (index = 2; index <= nfg.outcomes.Length(); index++)  {
+  maxpay = nfg.Payoff(nfg.GetOutcomeId(1), p1);
+  for (index = 2; index <= nfg.NumOutcomes(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (nfg.Payoff(nfg.outcomes[index], p) > maxpay)
-	maxpay = nfg.Payoff(nfg.outcomes[index], p);
+      if (nfg.Payoff(nfg.GetOutcomeId(index), p) > maxpay)
+	maxpay = nfg.Payoff(nfg.GetOutcomeId(index), p);
   }
   return maxpay;
 }
@@ -144,8 +144,8 @@ gNumber MaxPayoff(const Nfg &nfg, int player)
 void RandomNfg(Nfg &nfg)
 {
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)
-    for (int outc = 1; outc <= nfg.outcomes.Length(); outc++)
-      nfg.SetPayoff(nfg.outcomes[outc], pl, gNumber(Uniform()));
+    for (int outc = 1; outc <= nfg.NumOutcomes(); outc++)
+      nfg.SetPayoff(nfg.GetOutcomeId(outc), pl, gNumber(Uniform()));
 }  
 
 

@@ -35,7 +35,8 @@
 // a game tree.
 //
 
-gbt_efg_node_rep::gbt_efg_node_rep(efgGame *p_efg, gbt_efg_node_rep *p_parent)
+gbt_efg_node_rep::gbt_efg_node_rep(efgGame *p_efg,
+				   gbt_efg_node_rep *p_parent)
   : m_id(0), m_efg(p_efg), m_deleted(false), m_refCount(1),
     m_mark(false), m_infoset(0), m_parent(p_parent), m_outcome(0),
     m_whichbranch(0), m_ptr(0),

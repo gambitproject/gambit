@@ -43,6 +43,8 @@ template <class T> class PureBehavProfile;
 #include "efplayer.h"
 #include "node.h"
 
+struct gbt_efg_game_rep;
+
 class efgGame {
 private:
   friend class EfgFileReader;
@@ -53,17 +55,7 @@ private:
   friend class BehavProfile<gNumber>;
   
 protected:
-  bool sortisets;
-  mutable bool m_dirty;
-  mutable long m_revision;
-  mutable long m_outcome_revision;
-  gText title, comment;
-  gBlock<gbt_efg_player_rep *> players;
-  gBlock<gbt_efg_outcome_rep *> outcomes;
-  gbt_efg_node_rep *root;
-  gbt_efg_player_rep *chance;
-  mutable Nfg *afg;
-  mutable Lexicon *lexicon;
+  struct gbt_efg_game_rep *rep;
   
   // this is for use with the copy constructor
   void CopySubtree(gbt_efg_node_rep *, gbt_efg_node_rep *);
@@ -121,9 +113,9 @@ public:
 
   // DATA ACCESS -- GENERAL INFORMATION
   bool IsConstSum(void) const; 
-  long RevisionNumber(void) const { return m_revision; }
-  bool IsDirty(void) const { return m_dirty; }
-  void SetIsDirty(bool p_dirty) { m_dirty = p_dirty; }
+  long RevisionNumber(void) const;
+  bool IsDirty(void) const;
+  void SetIsDirty(bool p_dirty);
   gNumber MinPayoff(int pl = 0) const;
   gNumber MaxPayoff(int pl = 0) const;
   
@@ -199,7 +191,7 @@ public:
     
   Nfg *AssociatedNfg(void) const;
   Nfg *AssociatedAfg(void) const;
-  Lexicon *GetLexicon(void) const { return lexicon; }
+  Lexicon *GetLexicon(void) const;
 
   friend Nfg *MakeReducedNfg(const EFSupport &);
   friend Nfg *MakeAfg(const efgGame &);

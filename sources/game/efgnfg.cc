@@ -35,8 +35,9 @@
 
 #include "lexicon.h"
 
-// For access to gbt_efg_node_rep
+// For access to internals
 #include "efgint.h"
+#include "nfgint.h"
 
 
 Lexicon::Lexicon(const efgGame &E)
@@ -48,17 +49,17 @@ Lexicon::~Lexicon()
   for (int i = 1; i <= strategies.Length(); i++)
     while (strategies[i].Length())  delete strategies[i].Remove(1);
   if (N)
-    N->efg = 0;
+    N->rep->m_efg = 0;
 }
 
-void SetEfg(Nfg *nfg, const efgGame *efg)
+void SetEfg(Nfg *nfg, efgGame *efg)
 {
-  nfg->efg = efg;
+  nfg->rep->m_efg = efg;
 }
 
-void Lexicon::MakeLink(const efgGame *efg, Nfg *nfg)
+void Lexicon::MakeLink(efgGame *efg, Nfg *nfg)
 {
-  nfg->efg = efg;
+  nfg->rep->m_efg = efg;
   N = nfg;
 }
 
@@ -140,7 +141,7 @@ void Lexicon::MakeReducedStrats(const EFSupport &S,
 Nfg *MakeReducedNfg(const EFSupport &support)
 {
   int i;
-  const efgGame &E = support.GetGame();
+  efgGame &E = support.GetGame();
   Lexicon *L = new Lexicon(E);
   for (i = 1; i <= E.NumPlayers(); i++) {
     L->MakeReducedStrats(support, E.GetPlayer(i), E.RootNode(), NULL);
@@ -201,9 +202,9 @@ Nfg *MakeReducedNfg(const EFSupport &support)
     pl = E.NumPlayers();
   }
 
-  ((efgGame &) E).lexicon = L;
-  SetEfg(((efgGame &) E).lexicon->N, &E);
-  return ((efgGame &) E).lexicon->N;
+  ((efgGame &) E).rep->lexicon = L;
+  SetEfg(((efgGame &) E).rep->lexicon->N, &E);
+  return ((efgGame &) E).rep->lexicon->N;
 }
 
 Nfg *MakeAfg(const efgGame &E)
@@ -212,7 +213,7 @@ Nfg *MakeAfg(const efgGame &E)
 
   if (!afg)   return 0;
 
-  ((efgGame &) E).afg = afg;
+  ((efgGame &) E).rep->afg = afg;
   afg->SetTitle(E.GetTitle() + " (Agent Form)");
 
   for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)   {
@@ -261,7 +262,7 @@ Nfg *MakeAfg(const efgGame &E)
     pl = afg->NumPlayers();
   }
 
-  SetEfg(afg, &E);
+  SetEfg(afg, (efgGame*) &E);
 
   return afg;
 }

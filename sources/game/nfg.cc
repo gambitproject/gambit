@@ -28,22 +28,11 @@
 #include "nfg.h"
 #include "nfstrat.h"
 #include "player.h"
+#include "nfgint.h"
 
 //----------------------------------------------------------------------
 //                gbt_nfg_outcome_rep: Declaration
 //----------------------------------------------------------------------
-
-struct gbt_nfg_outcome_rep {
-  int m_id;
-  Nfg *m_nfg;
-  bool m_deleted;
-  gText m_label;
-  gBlock<gNumber> m_payoffs;
-  gBlock<double> m_doublePayoffs;
-  int m_refCount;
-
-  gbt_nfg_outcome_rep(Nfg *, int);
-};
 
 gbt_nfg_outcome_rep::gbt_nfg_outcome_rep(Nfg *p_nfg, int p_id)
   : m_id(p_id), m_nfg(p_nfg), m_deleted(false), 
@@ -153,17 +142,6 @@ gOutput &operator<<(gOutput &p_stream, const gbtNfgOutcome &)
 //----------------------------------------------------------------------
 
 struct gbt_nfg_player_rep;
-
-struct gbt_nfg_strategy_rep {
-  int m_id;
-  gbt_nfg_player_rep *m_player;
-  bool m_deleted;
-  gText m_label;
-  long m_index;
-  int m_refCount;
-
-  gbt_nfg_strategy_rep(gbt_nfg_player_rep *);
-};
 
 gbt_nfg_strategy_rep::gbt_nfg_strategy_rep(gbt_nfg_player_rep *p_player)
   : m_id(0), m_player(p_player), m_deleted(false), m_index(0L),
@@ -276,17 +254,6 @@ gOutput &operator<<(gOutput &p_stream, const gbtNfgStrategy &)
 //                 gbt_nfg_player_rep: Declaration
 //----------------------------------------------------------------------
 
-struct gbt_nfg_player_rep {
-  int m_id;
-  Nfg *m_nfg;
-  bool m_deleted;
-  gText m_label;
-  gArray<gbt_nfg_strategy_rep *> m_strategies;
-  int m_refCount;
-
-  gbt_nfg_player_rep(Nfg *, int, int);
-};
-
 gbt_nfg_player_rep::gbt_nfg_player_rep(Nfg *p_nfg, int p_id, int p_strats)
   : m_id(p_id), m_nfg(p_nfg), m_deleted(false), m_strategies(p_strats),
     m_refCount(1)
@@ -393,126 +360,116 @@ gbtNfgStrategy gbtNfgPlayer::GetStrategy(int st) const
   return (rep) ? rep->m_strategies[st] : 0;
 }
 
-#ifdef UNUSED
-//--------------------------------------
-// Strategy:  Constructors, Destructors
-//--------------------------------------
-
-Strategy::Strategy(gbt_nfg_player_rep *p) 
-  : m_number(0), m_player(p), m_index(0L)
-{ }
-
-Strategy::Strategy(const Strategy &s) : m_player(s.m_player), m_name(s.m_name)
-{ }
-
-Strategy &Strategy::operator=(const Strategy &s)
+static int Product(const gArray<int> &p_dim)
 {
-  m_player = s.m_player;
-  m_name = s.m_name;
-  return *this;
+  int accum = 1;
+  for (int i = 1; i <= p_dim.Length(); accum *= p_dim[i++]);
+  return accum;
 }
 
-Strategy::~Strategy()
+gbt_nfg_game_rep::gbt_nfg_game_rep(const gArray<int> &p_dim)
+  : m_dirty(false), m_revision(0), m_outcomeRevision(-1), 
+    m_title("UNTITLED"), m_dimensions(p_dim), m_players(p_dim.Length()),
+    m_results(Product(p_dim)), m_efg(0)
 { }
 
-gbtNfgPlayer Strategy::GetPlayer(void) const
-{ return m_player; }
-#endif  // UNUSED
+gbt_nfg_game_rep::~gbt_nfg_game_rep()
+{
+  for (int pl = 1; pl <= m_players.Length(); delete m_players[pl++]);
+  for (int outc = 1; outc <= m_outcomes.Length(); delete m_outcomes[outc++]);
+}
 
 //----------------------------------------------------
 // Nfg: Constructors, Destructors, Operators
 //----------------------------------------------------
 
-
-int Nfg::Product(const gArray<int> &dim)
-{
-  int accum = 1;
-  for (int i = 1; i <= dim.Length(); accum *= dim[i++]);
-  return accum;
-}
-  
 Nfg::Nfg(const gArray<int> &dim)
-  : m_dirty(false), m_revision(0),  m_outcome_revision(-1), 
-    title("UNTITLED"), dimensions(dim), players(dim.Length()),
-    results(Product(dim)), efg(0)
+  : rep(new gbt_nfg_game_rep(dim))
 {
-  for (int pl = 1; pl <= players.Length(); pl++)  {
-    players[pl] = new gbt_nfg_player_rep(this, pl, dim[pl]);
-    players[pl]->m_label = ToText(pl);
+  for (int pl = 1; pl <= rep->m_players.Length(); pl++)  {
+    rep->m_players[pl] = new gbt_nfg_player_rep(this, pl, dim[pl]);
+    rep->m_players[pl]->m_label = ToText(pl);
     for (int st = 1; st <= dim[pl]; st++) {
-      players[pl]->m_strategies[st]->m_label = ToText(st);
+      rep->m_players[pl]->m_strategies[st]->m_label = ToText(st);
     }
   }
   IndexStrategies();
 
-  for (int cont = 1; cont <= results.Length();
-       results[cont++] = (gbt_nfg_outcome_rep *) 0);
+  for (int cont = 1; cont <= rep->m_results.Length();
+       rep->m_results[cont++] = (gbt_nfg_outcome_rep *) 0);
 }
 
 Nfg::Nfg(const Nfg &b)
-  : m_dirty(false), m_revision(0),  m_outcome_revision(-1), 
-    title(b.title), comment(b.comment), 
-    dimensions(b.dimensions),
-    players(b.players.Length()), outcomes(b.outcomes.Length()),
-    results(b.results.Length()), efg(0)
+  : rep(new gbt_nfg_game_rep(b.rep->m_dimensions))
 {
-  for (int pl = 1; pl <= players.Length(); pl++)  {
-    players[pl] = new gbt_nfg_player_rep(this, pl, dimensions[pl]);
-    players[pl]->m_label = b.players[pl]->m_label;
-    for (int st = 1; st <= dimensions[pl]; st++)  {
-      *(players[pl]->m_strategies[st]) = *(b.players[pl]->m_strategies[st]);
-      players[pl]->m_strategies[st]->m_player = players[pl];
+  rep->m_title = b.rep->m_title;
+  rep->m_comment = b.rep->m_comment;
+  rep->m_outcomes = b.rep->m_outcomes.Length();
+
+  for (int pl = 1; pl <= rep->m_players.Length(); pl++)  {
+    rep->m_players[pl] = new gbt_nfg_player_rep(this, pl,
+						rep->m_dimensions[pl]);
+    rep->m_players[pl]->m_label = b.rep->m_players[pl]->m_label;
+    for (int st = 1; st <= rep->m_dimensions[pl]; st++)  {
+      *(rep->m_players[pl]->m_strategies[st]) = *(b.rep->m_players[pl]->m_strategies[st]);
+      rep->m_players[pl]->m_strategies[st]->m_player = rep->m_players[pl];
     }
   }
   IndexStrategies();
   
-  for (int outc = 1; outc <= outcomes.Length(); outc++)  {
-    outcomes[outc] = new gbt_nfg_outcome_rep(this, outc);
-    outcomes[outc]->m_label = b.outcomes[outc]->m_label;
-    outcomes[outc]->m_payoffs = b.outcomes[outc]->m_payoffs;
-    outcomes[outc]->m_doublePayoffs = b.outcomes[outc]->m_doublePayoffs;
+  for (int outc = 1; outc <= rep->m_outcomes.Length(); outc++)  {
+    rep->m_outcomes[outc] = new gbt_nfg_outcome_rep(this, outc);
+    rep->m_outcomes[outc]->m_label = b.rep->m_outcomes[outc]->m_label;
+    rep->m_outcomes[outc]->m_payoffs = b.rep->m_outcomes[outc]->m_payoffs;
+    rep->m_outcomes[outc]->m_doublePayoffs = b.rep->m_outcomes[outc]->m_doublePayoffs;
   }
 
-  for (int cont = 1; cont <= results.Length(); cont++)    
-    results[cont] = (b.results[cont]) ?
-                     outcomes[b.results[cont]->m_id] : (gbt_nfg_outcome_rep *) 0;
+  for (int cont = 1; cont <= rep->m_results.Length(); cont++)    
+    rep->m_results[cont] = ((b.rep->m_results[cont]) ?
+			    rep->m_outcomes[b.rep->m_results[cont]->m_id] :
+			    (gbt_nfg_outcome_rep *) 0);
 }
 
 #include "efg.h"
+#include "efgint.h"
 #include "lexicon.h"
 
 Nfg::~Nfg()
 {
-  for (int pl = 1; pl <= players.Length(); pl++)
-    delete players[pl];
-  for (int outc = 1; outc <= outcomes.Length(); outc++)
-    delete outcomes[outc];
-
-  if (efg)  {
-    const efgGame *tmp = (efgGame *) efg;
+  if (rep->m_efg)  {
+    const efgGame *tmp = (efgGame *) rep->m_efg;
     // note that Lexicon dtor unsets the efg member...
 
-    delete ((efgGame *) efg)->lexicon;
-    tmp->lexicon = 0;
+    delete ((efgGame *) rep->m_efg)->rep->lexicon;
+    tmp->rep->lexicon = 0;
   }
-  efg = 0;
+  delete rep;
 }
 
 void Nfg::BreakLink(void)
 {
-  if (efg)  {
-    const efgGame *tmp = (efgGame *) efg;
+  if (rep->m_efg)  {
+    const efgGame *tmp = (efgGame *) rep->m_efg;
     // note that Lexicon dtor unsets the efg member...
 
-    delete ((efgGame *) efg)->lexicon;
-    tmp->lexicon = 0;
+    delete ((efgGame *) rep->m_efg)->rep->lexicon;
+    tmp->rep->lexicon = 0;
   }
-  efg = 0;
+  rep->m_efg = 0;
 }
 
 //-------------------------------
 // Nfg: Member Functions
 //-------------------------------
+
+long Nfg::RevisionNumber(void) const
+{ return rep->m_revision; }
+
+void Nfg::SetIsDirty(bool p_dirty)
+{ rep->m_dirty = p_dirty; }
+
+bool Nfg::IsDirty(void) const
+{ return rep->m_dirty; }
 
 #include "nfgiter.h"
 
@@ -541,18 +498,18 @@ void Nfg::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
   
     p_file << "}\n";
 
-    p_file << "\"" << EscapeQuotes(comment) << "\"\n\n";
+    p_file << "\"" << EscapeQuotes(rep->m_comment) << "\"\n\n";
 
     int ncont = 1;
     for (int i = 1; i <= NumPlayers(); i++)
       ncont *= NumStrats(i);
 
     p_file << "{\n";
-    for (int outc = 1; outc <= outcomes.Length(); outc++)   {
-      p_file << "{ \"" << EscapeQuotes(outcomes[outc]->m_label) << "\" ";
-      for (int pl = 1; pl <= players.Length(); pl++)  {
-	p_file << outcomes[outc]->m_payoffs[pl];
-	if (pl < players.Length()) {
+    for (int outc = 1; outc <= rep->m_outcomes.Length(); outc++)   {
+      p_file << "{ \"" << EscapeQuotes(rep->m_outcomes[outc]->m_label) << "\" ";
+      for (int pl = 1; pl <= rep->m_players.Length(); pl++)  {
+	p_file << rep->m_outcomes[outc]->m_payoffs[pl];
+	if (pl < rep->m_players.Length()) {
 	  p_file << ", ";
 	}
 	else {
@@ -563,15 +520,15 @@ void Nfg::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
     p_file << "}\n";
   
     for (int cont = 1; cont <= ncont; cont++)  {
-      if (results[cont] != 0)
-	p_file << results[cont]->m_id << ' ';
+      if (rep->m_results[cont] != 0)
+	p_file << rep->m_results[cont]->m_id << ' ';
       else
 	p_file << "0 ";
     }
 
     p_file << '\n';
     p_file.SetPrec(oldDecimals);
-    m_dirty = false;
+    rep->m_dirty = false;
   }
   catch (...) {
     p_file.SetPrec(oldDecimals);
@@ -581,81 +538,96 @@ void Nfg::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
 
 gbtNfgOutcome Nfg::NewOutcome(void)
 {
-  m_dirty = true;
-  m_revision++;
+  rep->m_dirty = true;
+  rep->m_revision++;
   gbt_nfg_outcome_rep *outcome = new gbt_nfg_outcome_rep(this, 
-							 outcomes.Length()+1);
-  outcomes.Append(outcome);
+							 rep->m_outcomes.Length()+1);
+  rep->m_outcomes.Append(outcome);
   return outcome;
 }
 
 void Nfg::DeleteOutcome(gbtNfgOutcome p_outcome)
 {
-  m_dirty = true;
-  m_revision++;
+  rep->m_dirty = true;
+  rep->m_revision++;
 
   if (p_outcome.rep) {
-    for (int i = 1; i <= results.Length(); i++) {
-      if (results[i] == p_outcome.rep)
-	results[i] = 0;
+    for (int i = 1; i <= rep->m_results.Length(); i++) {
+      if (rep->m_results[i] == p_outcome.rep)
+	rep->m_results[i] = 0;
     }
 
-    delete outcomes.Remove(p_outcome.rep->m_id);
+    delete rep->m_outcomes.Remove(p_outcome.rep->m_id);
 
-    for (int outc = 1; outc <= outcomes.Length(); outc++) {
-      outcomes[outc]->m_id = outc;
+    for (int outc = 1; outc <= rep->m_outcomes.Length(); outc++) {
+      rep->m_outcomes[outc]->m_id = outc;
     }
   }
 }
 
 void Nfg::SetTitle(const gText &s) 
 {
-  title = s; 
-  m_dirty = true;
-  m_revision++;
+  rep->m_title = s; 
+  rep->m_dirty = true;
+  rep->m_revision++;
 }
 
 const gText &Nfg::GetTitle(void) const 
-{ return title; }
+{ return rep->m_title; }
 
 void Nfg::SetComment(const gText &s)
 {
-  comment = s; 
-  m_dirty = true;
-  m_revision++;
+  rep->m_comment = s; 
+  rep->m_dirty = true;
+  rep->m_revision++;
 }
 
 const gText &Nfg::GetComment(void) const
-{ return comment; }
+{ return rep->m_comment; }
 
 
 int Nfg::NumPlayers(void) const 
 { 
-  return (players.Length()); 
+  return (rep->m_players.Length()); 
 }
 
 gbtNfgPlayer Nfg::GetPlayer(int pl) const
 {
-  return players[pl];
+  return rep->m_players[pl];
 }
 
 int Nfg::NumStrats(int pl) const
 {
   return ((pl > 0 && pl <= NumPlayers()) ? 
-	  players[pl]->m_strategies.Length() : 0);
+	  rep->m_players[pl]->m_strategies.Length() : 0);
+}
+
+const gArray<int> &Nfg::NumStrats(void) const
+{
+  return rep->m_dimensions;
 }
 
 int Nfg::ProfileLength(void) const
 {
   int nprof = 0;
-  for (int i = 1; i <= players.Length(); i++)
-    nprof += players[i]->m_strategies.Length();
+  for (int i = 1; i <= rep->m_players.Length(); i++)
+    nprof += rep->m_players[i]->m_strategies.Length();
   return nprof;
+}
+
+int Nfg::NumOutcomes(void) const
+{
+  return rep->m_outcomes.Length(); 
 }
 
 gbtNfgOutcome Nfg::GetOutcomeId(int p_id) const
 {
-  return outcomes[p_id];
+  return rep->m_outcomes[p_id];
+}
+
+gbtNfgOutcome Nfg::GetOutcomeIndex(int p_index) const
+{
+  return rep->m_results[p_index];
 }
 
 void Nfg::SetOutcome(const gArray<int> &p_profile,
@@ -663,40 +635,40 @@ void Nfg::SetOutcome(const gArray<int> &p_profile,
 {
   int index = 1;
   for (int i = 1; i <= p_profile.Length(); i++) {
-    index += players[i]->m_strategies[p_profile[i]]->m_index;
+    index += rep->m_players[i]->m_strategies[p_profile[i]]->m_index;
   }
-  results[index] = p_outcome.rep;
-  m_dirty = true;
-  m_revision++;
+  rep->m_results[index] = p_outcome.rep;
+  rep->m_dirty = true;
+  rep->m_revision++;
   BreakLink();
 }
 
 
 void Nfg::SetOutcome(const StrategyProfile &p, const gbtNfgOutcome &outcome)
 {
-  results[p.index + 1] = outcome.rep;
-  m_dirty = true;
-  m_revision++;
+  rep->m_results[p.index + 1] = outcome.rep;
+  rep->m_dirty = true;
+  rep->m_revision++;
   BreakLink();
 }
 
 void Nfg::SetOutcomeIndex(int p_index, const gbtNfgOutcome &p_outcome)
 {
-  results[p_index] = p_outcome.rep;
+  rep->m_results[p_index] = p_outcome.rep;
 }
 
 gbtNfgOutcome Nfg::GetOutcome(const gArray<int> &profile) const 
 {
   int index = 1;
   for (int i = 1; i <= profile.Length(); i++) {
-    index += players[i]->m_strategies[profile[i]]->m_index;
+    index += rep->m_players[i]->m_strategies[profile[i]]->m_index;
   }
-  return results[index];
+  return rep->m_results[index];
 }
 
 gbtNfgOutcome Nfg::GetOutcome(const StrategyProfile &p) const
 {
-  return results[p.index + 1];
+  return rep->m_results[p.index + 1];
 }
 
 void Nfg::SetPayoff(gbtNfgOutcome outcome, int pl, const gNumber &value)
@@ -704,8 +676,8 @@ void Nfg::SetPayoff(gbtNfgOutcome outcome, int pl, const gNumber &value)
   if (outcome.rep) {
     outcome.rep->m_payoffs[pl] = value;
     outcome.rep->m_doublePayoffs[pl] = (double) value;
-    m_dirty = true;
-    m_revision++;
+    rep->m_dirty = true;
+    rep->m_revision++;
   }
 }
 
@@ -730,7 +702,7 @@ void Nfg::IndexStrategies(void)
   for (int i = 1; i <= NumPlayers(); i++)  {
     int j;
     for (j = 1; j <= NumStrats(i); j++)  {
-      gbt_nfg_strategy_rep *s = players[i]->m_strategies[j];
+      gbt_nfg_strategy_rep *s = rep->m_players[i]->m_strategies[j];
       s->m_id = j;
       s->m_index = (j - 1) * offset;
     }
@@ -740,16 +712,20 @@ void Nfg::IndexStrategies(void)
 
 void Nfg::InitPayoffs(void) const 
 {
-  if (m_outcome_revision == RevisionNumber()) {
+  if (rep->m_outcomeRevision == RevisionNumber()) {
     return;
   }
 
   for (int outc = 1; outc <= NumOutcomes(); outc++) {
     for (int pl = 1; pl <= NumPlayers(); pl++) {
-      outcomes[outc]->m_doublePayoffs[pl] = outcomes[outc]->m_payoffs[pl];
+      rep->m_outcomes[outc]->m_doublePayoffs[pl] = rep->m_outcomes[outc]->m_payoffs[pl];
     }
   }
 
-  m_outcome_revision = RevisionNumber();
+  rep->m_outcomeRevision = RevisionNumber();
 }
 
+const efgGame *Nfg::AssociatedEfg(void) const
+{
+  return rep->m_efg;
+}

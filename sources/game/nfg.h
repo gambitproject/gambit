@@ -37,27 +37,17 @@ class StrategyProfile;
 class Lexicon;
 class efgGame;
 
+struct gbt_nfg_game_rep;
+
 class Nfg  {
 friend class Lexicon;
 friend class NfgFileReader;
-friend void SetEfg(Nfg *, const efgGame *);
+friend void SetEfg(Nfg *, efgGame *);
 protected:
-  mutable bool m_dirty;
-  mutable long m_revision;
-  mutable long m_outcome_revision;
-  gText title, comment;
-  gArray<int> dimensions;
-
-  gArray<gbt_nfg_player_rep *> players;
-  gBlock<gbt_nfg_outcome_rep *> outcomes;
-
-  gArray<gbt_nfg_outcome_rep *> results;
-
-  const efgGame *efg;
+  gbt_nfg_game_rep *rep;
 
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
   void IndexStrategies(void);
-  int Product(const gArray<int> &);
 
   void BreakLink(void);
 
@@ -75,9 +65,9 @@ public:
   void SetComment(const gText &);
   const gText &GetComment(void) const;
 
-  long RevisionNumber(void) const { return m_revision; }
-  bool IsDirty(void) const { return m_dirty; }
-  void SetIsDirty(bool p_dirty) { m_dirty = p_dirty; }
+  long RevisionNumber(void) const;
+  bool IsDirty(void) const;
+  void SetIsDirty(bool p_dirty);
 
   void WriteNfgFile(gOutput &, int) const;
 
@@ -86,7 +76,7 @@ public:
   gbtNfgPlayer GetPlayer(int i) const;
 
   int NumStrats(int pl) const;
-  const gArray<int> &NumStrats(void) const  { return dimensions; }
+  const gArray<int> &NumStrats(void) const; 
   int ProfileLength(void) const;
 
   // OUTCOMES
@@ -94,7 +84,7 @@ public:
   void DeleteOutcome(gbtNfgOutcome);
 
   gbtNfgOutcome GetOutcomeId(int p_id) const;
-  int NumOutcomes(void) const   { return outcomes.Length(); }
+  int NumOutcomes(void) const;
 
   void SetOutcome(const gArray<int> &profile, const gbtNfgOutcome &outcome);
   gbtNfgOutcome GetOutcome(const gArray<int> &profile) const;
@@ -102,7 +92,7 @@ public:
   gbtNfgOutcome GetOutcome(const StrategyProfile &p) const;
 
   void SetOutcomeIndex(int index, const gbtNfgOutcome &outcome);
-  gbtNfgOutcome GetOutcomeIndex(int index) const   { return results[index]; }
+  gbtNfgOutcome GetOutcomeIndex(int index) const;
 
   void SetPayoff(gbtNfgOutcome, int pl, const gNumber &value);
   gNumber Payoff(gbtNfgOutcome, int pl) const;
@@ -117,7 +107,7 @@ public:
   friend gNumber MinPayoff(const Nfg &, int pl = 0);
   friend gNumber MaxPayoff(const Nfg &, int pl = 0);
 
-  const efgGame *AssociatedEfg(void) const   { return efg; }
+  const efgGame *AssociatedEfg(void) const;
 };
 
 Nfg *ReadNfgFile(gInput &);

@@ -43,7 +43,7 @@ class Lexicon   {
     void MakeStrategy(gbtEfgPlayer p);
     void MakeReducedStrats(const class EFSupport &, gbtEfgPlayer, 
 			   gbtEfgNode, gbtEfgNode);
-    void MakeLink(const efgGame *, Nfg *);
+    void MakeLink(efgGame *, Nfg *);
 };
 
 

@@ -42,6 +42,7 @@ struct gbt_efg_action_rep;
 struct gbt_efg_infoset_rep;
 struct gbt_efg_node_rep;
 struct gbt_efg_player_rep;
+struct gbt_efg_game_rep;
 
 struct gbt_efg_outcome_rep {
   int m_id;
@@ -113,4 +114,25 @@ struct gbt_efg_node_rep {
   void DeleteOutcome(gbt_efg_outcome_rep *outc);
 };
 
+struct gbt_efg_game_rep {
+  bool sortisets;
+  mutable bool m_dirty;
+  mutable long m_revision;
+  mutable long m_outcome_revision;
+  gText title, comment;
+  gBlock<gbt_efg_player_rep *> players;
+  gBlock<gbt_efg_outcome_rep *> outcomes;
+  gbt_efg_node_rep *root;
+  gbt_efg_player_rep *chance;
+  mutable Nfg *afg;
+  mutable Lexicon *lexicon;
+
+  gbt_efg_game_rep(efgGame *);
+  ~gbt_efg_game_rep();
+};
+
 #endif  // EFGINT_H
+
+
+
+
