@@ -873,9 +873,9 @@ gArray<int> FullEfg::PathToNode(const Node *p_node) const
 
 void FullEfg::DescendantNodes(const Node* n, 
 			      const EFSupport& supp,
-			      gList<const Node*>& current) const
+			      gList<Node *> &current) const
 {
-  current += n;
+  current += const_cast<Node *>(n);
   if (n->IsNonterminal()) {
     const gArray<Action *> actions = supp.Actions(n->GetInfoset());
     for (int i = 1; i <= actions.Length(); i++) {
@@ -916,11 +916,11 @@ void FullEfg::TerminalDescendants(const Node* n,
   }
 }
 
-gList<const Node*> 
-FullEfg::DescendantNodes(const Node& n, const EFSupport& supp) const
+gList<Node *>
+FullEfg::DescendantNodes(const Node &p_node, const EFSupport &p_support) const
 {
-  gList<const Node*> answer;
-  DescendantNodes(&n,supp,answer);
+  gList<Node *> answer;
+  DescendantNodes(&p_node, p_support, answer);
   return answer;
 }
 

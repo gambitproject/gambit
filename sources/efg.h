@@ -193,8 +193,8 @@ protected:
   void MarkSubgame(Node *, Node *);
 
   // Recursive calls
-  void DescendantNodes(const Node *, const EFSupport&, 
-		       gList<const Node*> &) const;
+  void DescendantNodes(const Node *, const EFSupport &, 
+		       gList<Node *> &) const;
   void NonterminalDescendants(const Node *, const EFSupport&, 
 			      gList<const Node*> &) const;
   void TerminalDescendants(const Node *, const EFSupport&, 
@@ -230,7 +230,7 @@ public:
   bool IsPredecessor(const Node *n, const Node *of) const;
   gArray<int> PathToNode(const Node *) const;
   //    const Node* Consequence(const Node&, Action&) const;
-  gList<const Node*> DescendantNodes(const Node&, const EFSupport&) const;
+  gList<Node *> DescendantNodes(const Node&, const EFSupport&) const;
   gList<const Node*> NonterminalDescendants(const Node&, 
 					    const EFSupport&) const;
   gList<Node *> TerminalDescendants(const Node&, 
