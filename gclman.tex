@@ -1361,12 +1361,12 @@ refer to the following, alphabetically organized, section.
 \subsection{General Functionality}
 
 \begin{verbatim}
-Assign[x<->T, y->T] =: T
+Assign[x->TEXT, v<->T] =: T
 Clear[]
 Include[file->TEXT]
 NewFunction[name[argument-list], body]
 Quit
-UnAssign[x<->T] =: T
+UnAssign[x->TEXT] =: T
 \end{verbatim}
 
 \subsection{Flow Control}
@@ -1487,10 +1487,6 @@ AddAction[support->EFSUPPORT, infoset->INFOSET,
 AppendAction[infoset->INFOSET] =: ACTION
 AppendNode[node->NODE, infoset->INFOSET] =: NODE
 AttachOutcome[node->NODE, outcome->OUTCOME] =: OUTCOME
-Behav[efg<->EFG | support->EFSUPPORT, 
-      {list->LIST(LIST(LIST(FLOAT)))}] =: BEHAV
-Behav[efg<->EFG | support->EFSUPPORT, 
-      {list->LIST(LIST(LIST(RATIONAL)))}] =: BEHAV
 CopyTree[from->NODE, to->NODE] =: NODE
 DeleteAction[infoset->INFOSET, action->ACTION] =: ACTION
 DeleteNode[node->NODE, keep->NODE] =: NODE
@@ -1514,15 +1510,12 @@ NewInfoset[player->EFPLAYER, actions->INTEGER,
            {name->TEXT}] =: INFOSET
 NewOutcome[efg<->EFG, {name->TEXT}] =: OUTCOME
 NewPlayer[efg<->EFG, {name->TEXT}] =: EFPLAYER 
-NewSupport[efg<->EFG] =: EFSUPPORT
 RandomEfg[efg<->EFG, {seed->INTEGER}] =: EFG
 RemoveAction[support->EFSUPPORT, infoset->INFOSET, 
              action->ACTION] =: EFSUPPORT
 Reveal[infoset->INFOSET, who->LIST(EFPLAYER))] =: INFOSET
 SetChanceProbs[infoset->INFOSET, probs->LIST(FLOAT)] =: INFOSET
 SetChanceProbs[infoset->INFOSET, probs->LIST(RATIONAL)] =: INFOSET
-SetComponent[mixed<->MIXED, player->PLAYER, list->LIST(T)] =: MIXED 
-SetComponent[behav<->BEHAV, infoset->INFOSET, list->LIST(T)] =: BEHAV 
 SetName[x->ACTION, name->TEXT] =: ACTION
 SetName[x<->EFG, name->TEXT] =: EFG
 SetName[x->INFOSET, name->TEXT] =: INFOSET
@@ -1532,6 +1525,7 @@ SetName[x->PLAYER, name->TEXT] =: PLAYER
 SetPayoff[outcome->OUTCOME, payoff->LIST(FLOAT)] =: OUTCOME
 SetPayoff[outcome->OUTCOME, payoff->LIST(RATIONAL)] =: OUTCOME
 SubgameRoots[efg<->EFG] =: LIST(NODE)
+Support[efg<->EFG] =: EFSUPPORT
 UnmarkSubgames[efg<->EFG] =: LIST(NODE)
 UnmarkSubgames[node->NODE] =: LIST(NODE)
 UnmarkThisSubgame[node->NODE] =: NODE
@@ -1541,30 +1535,62 @@ UnmarkThisSubgame[node->NODE] =: NODE
 
 \begin{verbatim}
 AddStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT
-Mixed[nfg<->NFG, list->LIST(LIST(FLOAT))] =: MIXED
-Mixed[nfg<->NFG, list->LIST(LIST(RATIONAL))] =: MIXED
-Mixed[support->NFSUPPORT, {list->LIST(LIST(FLOAT))}] =: MIXED
-Mixed[support->NFSUPPORT, {list->LIST(LIST(RATIONAL))}] =: MIXED
 NewNfg[dim->LIST(INTEGER), {rational->BOOL}] =: NFG
-NewSupport[nfg<->NFG] =: NFSUPPORT
 RandomNfg[nfg<->NFG, {seed->INTEGER}] =: NFG
 RemoveStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT
 SetName[x<->NFG, name->TEXT] =: NFG
 SetPayoff[list->LIST(INTEGER), payoffs->LIST(FLOAT)] =: LIST(INTEGER)
 SetPayoff[list->LIST(INTEGER), payoffs->LIST(RATIONAL)] =: LIST(INTEGER)
+Support[nfg<->NFG] =: NFSUPPORT
+\end{verbatim}
+
+\subsection{Mixed and Behavior Strategies}
+
+\begin{verbatim}
+Behav[efg<->EFG | support->EFSUPPORT, 
+      {list->LIST(LIST(LIST(FLOAT)))}] =: BEHAV
+Behav[efg<->EFG | support->EFSUPPORT, 
+      {list->LIST(LIST(LIST(RATIONAL)))}] =: BEHAV
+Behav[mixed->MIXED] =: BEHAV
+GobitLambda[x->BEHAV(T) | MIXED(T)] =: T
+GobitValue[x->BEHAV(T) | MIXED(T)] =: T
+Gripe[behav->BEHAV(T)] =: LIST(LIST(LIST(T)))
+Gripe[mixed->BEHAV(T)] =: LIST(LIST(T))
+IsNash[strategy->MIXED] =: BOOL
+IsNash[strategy->BEHAV] =: BOOL
+IsPerfect[strategy->MIXED] =: BOOL
+IsProper[strategy->MIXED] =: BOOL
+IsSequential[strategy->BEHAV] =: BOOL
+IsSubgamePerfect[strategy->BEHAV] =: BOOL
+IsntPerfect[strategy->MIXED] =: BOOL
+IsntProper[strategy->MIXED] =: BOOL
+IsntSequential[strategy->BEHAV] =: BOOL
+IsntSubgamePerfect[strategy->BEHAV] =: BOOL
+LiapValue[strategy->BEHAV(T) | MIXED(T)] =: T
+ListForm[behav->BEHAV] =: LIST(LIST(LIST(T)))
+ListForm[mixed->MIXED] =: LIST(LIST(T))
+Mixed[nfg<->NFG, list->LIST(LIST(FLOAT))] =: MIXED
+Mixed[nfg<->NFG, list->LIST(LIST(RATIONAL))] =: MIXED
+Mixed[support->NFSUPPORT, {list->LIST(LIST(FLOAT))}] =: MIXED
+Mixed[support->NFSUPPORT, {list->LIST(LIST(RATIONAL))}] =: MIXED
+SetComponent[mixed<->MIXED, player->PLAYER, list->LIST(T)] =: MIXED 
+SetComponent[behav<->BEHAV, infoset->INFOSET, list->LIST(T)] =: BEHAV 
 \end{verbatim}
 
 \subsection{Conversions}
 
 \begin{verbatim}
+Afg[efg<->EFG] =: NFG
+Float[nfg->NFG] =: NFG(FLOAT)
+Float[efg->EFG] =: EFG(FLOAT)
 Float[x->INTEGER] =: FLOAT
 Float[x->FLOAT] =: FLOAT
 Float[x->RATIONAL] =: FLOAT
 List[x<->T, {length->INTEGER},{delta->T}] =: LIST(T)
 List[x->T, {length->INTEGER},{delta->T}] =: LIST(T)
-ListForm[mixed->MIXED] =: LIST(LIST(T))
-ListForm[behav->BEHAV] =: LIST(LIST(LIST(T)))
 Nfg[efg<->EFG, {time<->FLOAT}] =: NFG
+Rational[nfg->NFG] =: NFG(RATIONAL)
+Rational[efg->EFG] =: EFG(RATIONAL)
 Rational[x->INTEGER] =: RATIONAL
 Rational[x->FLOAT] =: RATIONAL
 Rational[x->RATIONAL] =: RATIONAL
@@ -1577,7 +1603,6 @@ Text[x->TEXT] =: TEXT
 \subsection{Solving and analyzing games}
 
 \begin{verbatim}
-Behav[mixed->MIXED] =: BEHAV
 ElimDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
         {time<->FLOAT} =: NFSUPPORT
 ElimAllDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
@@ -1640,26 +1665,16 @@ Centroid[efg<->EFG | support->EFSUPPORT] =: BEHAV
 Centroid[nfg<->NFG | support->NFSUPPORT] =: MIXED
 Chance[efg<->EFG] =: EFPLAYER
 ChanceProbs[infoset->INFOSET] =: LIST(T)
-GobitLambda[strategy->BEHAV(T) | MIXED(T)] =: T
-GobitValue[strategy->BEHAV(T) | MIXED(T)] =: T
 HasOutcome[node->NODE] =: BOOL
+Help[x->TEXT] =: LIST(TEXT)
+HelpVars[x->TEXT] =: LIST(TEXT)
 Infoset[node->NODE] =: INFOSET
 Infosets[player->EFPLAYER] =: LIST(INFOSET)
-IsNash[strategy->MIXED] =: BOOL
-IsNash[strategy->BEHAV] =: BOOL
-IsntPerfect[strategy->MIXED] =: BOOL
-IsntProper[strategy->MIXED] =: BOOL
-IsntSequential[strategy->BEHAV] =: BOOL
-IsntSubgamePerfect[strategy->BEHAV] =: BOOL
-IsPerfect[strategy->MIXED] =: BOOL
 IsPredecessor[node->NODE, of->NODE] =: BOOL
-IsProper[strategy->MIXED] =: BOOL
-IsSequential[strategy->BEHAV] =: BOOL
-IsSubgamePerfect[strategy->BEHAV] =: BOOL
 IsRoot[node->NODE] =: BOOL
 IsSuccessor[node->NODE, from->NODE] =: BOOL
 LastAction[node->NODE] =: ACTION
-LiapValue[strategy->BEHAV(T) | MIXED(T)] =: T
+Manual[x->TEXT,{y->OUTPUT}] =: BOOL
 Members[infoset->INFOSET] =: LIST(NODE)
 Name[x->ACTION] =: TEXT
 Name[x<->EFG] =: TEXT
@@ -1699,6 +1714,7 @@ RootNode[efg<->EFG] =: NODE
 Support[strategy->MIXED] =: NFSUPPORT
 Support[strategy->BEHAV] =: EFSUPPORT
 TerminalNodes[efg<->EFG] =: LIST(NODE)
+Version[] =: FLOAT
 \end{verbatim}
 
 \subsection{Timing}
@@ -1709,7 +1725,6 @@ IsWatchRunning[] =: BOOL
 StartWatch[] =: FLOAT
 StopWatch[] =: FLOAT
 \end{verbatim}
-
 
 \section{Function Reference, Alphabetical}
 
@@ -1731,19 +1746,6 @@ parameters which are not necessary for the procedure to function.
 
 
 \item
-\protect \large \begin{verbatim} 
-Actions[infoset->INFOSET] =: LIST(ACTION)
-\end{verbatim}\normalsize
-
-\bd
-Returns the list of actions available at the information set
-\verb+infoset+.
-\item
-[See also:] {\tt AppendAction}, {\tt DeleteAction}, {\tt InsertAction},
-{\tt NumActions}.
-\ed
-
-\item
 \protect \large \begin{verbatim}
 ActionValues[strategy->BEHAV, 
              infoset->INFOSET] =: LIST(FLOAT)
@@ -1758,6 +1760,19 @@ all players obey the behavioral strategy profile \verb+strategy+.
 \item
 [See also:] {\tt Beliefs}, {\tt InfosetProbs}, {\tt NodeValues},
 {\tt RealizProbs}.
+\ed
+
+\item
+\protect \large \begin{verbatim} 
+Actions[infoset->INFOSET] =: LIST(ACTION)
+\end{verbatim}\normalsize
+
+\bd
+Returns the list of actions available at the information set
+\verb+infoset+.
+\item
+[See also:] {\tt AppendAction}, {\tt DeleteAction}, {\tt InsertAction},
+{\tt NumActions}.
 \ed
 
 \item
@@ -1853,14 +1868,15 @@ maximum value.
 
 \item 
 \protect \large \begin{verbatim}
-Assign[x<->T, y->T] =: T
+Assign[x->TEXT, v<->T] =: T
 \end{verbatim} \normalsize
 
-\bd
-Assigns the value \verb+y+ to the variable referred to by
-\verb+x+.  Returns the value assigned.
+\bd Creates a variable with name \verb+x+, and assigns it the value
+\verb+v+.  Returns the value assigned.  If \verb+x+ is already a
+defined variable, reassigns it the value \verb+v+ if \verb+T+ is the
+same data type as \verb+x+, and otherwise gives a run time error.
 \item
-[Short form:] \verb+x := y+
+[Short form:] \verb+x := v+
 \item
 [See also:] {\tt UnAssign}.
 \ed
@@ -1908,6 +1924,7 @@ behavioral profile on the associated extensive form game \verb+efg+.
 \item
 \protect \large \begin{verbatim}
 Beliefs[strategy<->BEHAV(T)] =: LIST(LIST(LIST((T)))
+                for T = FLOAT, RATIONAL
 \end{verbatim}\normalsize
 
 \bd 
@@ -2045,6 +2062,15 @@ the original subtree.  Returns the node \verb+to+.
 \ed
 
 %--D--
+
+\item
+\protect \large \begin{verbatim}
+Date[] =: Text
+\end{verbatim}\normalsize
+
+\bd
+Returns the current date and time. 
+\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -2309,9 +2335,23 @@ Float[x->RATIONAL] =: FLOAT
 \end{verbatim} \normalsize
 
 \bd
-Returns the value \verb+x+ as a value of type {\tt FLOAT}.
+Returns the value of \verb+x+ as type {\tt FLOAT}.
 In the case where \verb+x+ is {\tt RATIONAL}, this may result in a loss
 of precision.
+\item
+[See also:] {\tt Rational}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Float[nfg->NFG] =: NFG(FLOAT)
+Float[efg->EFG] =: EFG(FLOAT)
+\end{verbatim} \normalsize
+
+\bd
+Returns a copy of the game \verb+nfg+ or \verb+efg+ of data type 
+{\tt FLOAT}.  This can be used to convert a game from {\tt RATIONAL}
+to {\tt FLOAT}.  Note that this may result in a loss of precision.  
 \item
 [See also:] {\tt Rational}.
 \ed
@@ -2362,7 +2402,7 @@ is $0.02$.
 
 \item
 \protect \large \begin{verbatim}
-GobitLambda[strategy->BEHAV(T) | MIXED(T)] =: T
+GobitLambda[x->BEHAV(T) | MIXED(T)] =: T
 \end{verbatim}\normalsize
 
 \bd
@@ -2447,7 +2487,7 @@ subgames.
 
 \item
 \protect \large \begin{verbatim}
-GobitValue[strategy->BEHAV(T) | MIXED(T)] =: T
+GobitValue[x->BEHAV(T) | MIXED(T)] =: T
 \end{verbatim}\normalsize
 
 \bd
@@ -2516,6 +2556,25 @@ machine.
 [See also:] {\tt Greater}, {\tt Less}, {\tt LessEqual}.
 \ed
 
+\item
+\protect \large \begin{verbatim}
+Gripe[behav->BEHAV(T)] =: LIST(LIST(LIST(T)))
+Gripe[mixed->BEHAV(T)] =: LIST(LIST(T))
+\end{verbatim}\normalsize
+
+\bd 
+Returns a partitioned gripe vector which has the same
+dimensionality as a \verb+behav+ or \verb+mixed+.  When called with a
+\verb+mixed+, the \verb+(i,j)'th+ entry represents the gain from
+player \verb+i+ deviating to strategy \verb+j+ (zero if there is a
+loss).  When called with a \verb+behav+, the \verb+(i,j,k)'th+ entry
+represents the gain from player \verb+i+ at information set \verb+j+,
+deviating to strategy \verb+k+.  The strategy profile is a Nash
+equilibrium if and only if the gripe vector is identically zero.  
+\item
+[See also:] {\tt IsNash}, {\tt LiapValue}.  
+\ed
+
 %--H--
 
 
@@ -2529,6 +2588,36 @@ Returns whether the node \verb+node+ currently has an outcome associated
 with it.
 \item
 [See also:] {\tt AttachOutcome}, {\tt DetachOutcome}, {\tt Outcome}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Help[x->TEXT] =: LIST(TEXT)
+\end{verbatim}\normalsize
+
+\bd 
+Returns a list of all function names or function prototypes
+matching \verb+x+.  If \verb+x+ is an exact match to a function name,
+a list of corresponding function prototypes is returned.  \verb+x+ can
+also contain DOS style ``wildcards'' \verb+*+ and \verb+?+.  In this
+case, if there is not an exact match, a list of function names
+matching \verb+x+ is returned.
+\item
+[See also:] {\tt HelpVars}, {\tt Manual}.  
+\ed
+
+\item
+\protect \large \begin{verbatim}
+HelpVars[x->TEXT] =: LIST(TEXT)
+\end{verbatim}\normalsize
+
+\bd 
+Returns a list of all variables matching \verb+x+.  \verb+x+ can
+contain DOS style ``wildcards'' \verb+*+ and \verb+?+.  In this case,
+if there is not an exact match, a list of variables matching \verb+x+
+is returned.
+\item
+[See also:] {\tt Help}.  
 \ed
 
 %--I--
@@ -2677,60 +2766,25 @@ game \verb+nfg+ game, as appropriate, is constant sum.
 
 \item
 \protect \large \begin{verbatim}
+IsLegalSubgame[node->NODE] =: BOOL
+\end{verbatim}\normalsize
+
+\bd
+Returns whether \verb+node+ is the root of a subgame
+\item
+[See also:] {\tt MarkSubgames}, {\tt MarkThisSubgame}, 
+{\tt UnmarkSubgames}, {\tt UnmarkThisSubgames},
+\ed
+
+\item
+\protect \large \begin{verbatim}
 IsNash[strategy->MIXED] =: BOOL
 IsNash[strategy->BEHAV] =: BOOL
 \end{verbatim}\normalsize
 
-\bd Returns whether the mixed or behavior strategy profile
+\bd 
+Returns whether the mixed or behavior strategy profile
 \verb+strategy+ is a Nash equilibrium of the corresponding game.  
-\ed
-
-\item
-\protect \large \begin{verbatim}
-IsntPerfect[strategy->MIXED] =: BOOL
-\end{verbatim}\normalsize
-
-\bd Returns \verb+True+ if the mixed strategy profile \verb+strategy+
-is known by Gambit not to be a perfect Nash equilibrium, and \verb+False+
-otherwise.  
-\item
-[See also:] {\tt IsPerfect}.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-IsntProper[strategy->MIXED] =: BOOL
-\end{verbatim}\normalsize
-
-\bd Returns \verb+True+ if the mixed strategy profile \verb+strategy+
-is known by Gambit not to be a proper Nash equilibrium, and \verb+False+
-otherwise.  
-\item
-[See also:] {\tt IsProper}.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-IsntSequential[strategy->BEHAV] =: BOOL
-\end{verbatim}\normalsize
-
-\bd Returns \verb+True+ if the behavior strategy profile
-\verb+strategy+ is known by Gambit not to be a sequential Nash
-equilibrium, and \verb+False+ otherwise. 
-\item
-[See also:] {\tt IsSequential}.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-IsntSubgamePerfect[strategy->BEHAV] =: BOOL
-\end{verbatim}\normalsize
-
-\bd Returns \verb+True+ if the behavior strategy profile
-\verb+strategy+ is known by Gambit not to be a SubgamePerfect Nash
-equilibrium, and \verb+False+ otherwise. 
-\item
-[See also:] {\tt IsSubgamePerfect}.
 \ed
 
 \item
@@ -2738,7 +2792,8 @@ equilibrium, and \verb+False+ otherwise.
 IsPerfect[strategy->MIXED] =: BOOL
 \end{verbatim}\normalsize
 
-\bd Returns \verb+True+ if the mixed strategy profile \verb+strategy+
+\bd 
+Returns \verb+True+ if the mixed strategy profile \verb+strategy+
 is known by Gambit to be a perfect Nash equilibrium, and \verb+False+
 otherwise.  There is currently no definitive test in Gambit for
 whether an arbitrary profile is perfect, so it is possible for a
@@ -2793,7 +2848,8 @@ extensive form.
 IsSequential[strategy->BEHAV] =: BOOL
 \end{verbatim}\normalsize
 
-\bd Returns \verb+True+ if the behavior strategy profile
+\bd 
+Returns \verb+True+ if the behavior strategy profile
 \verb+strategy+ is known by Gambit to be an approximation to a
 Sequential Nash equilibrium, and \verb+False+ otherwise.  There is
 currently no definitive test in Gambit for whether an arbitrary
@@ -2842,6 +2898,54 @@ IsWatchRunning[] =: BOOL
 Returns whether the system stopwatch is currently running.
 \item
 [See also:] {\tt ElapsedTime}, {\tt StartWatch}, {\tt StopWatch}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsntPerfect[strategy->MIXED] =: BOOL
+\end{verbatim}\normalsize
+
+\bd Returns \verb+True+ if the mixed strategy profile \verb+strategy+
+is known by Gambit not to be a perfect Nash equilibrium, and \verb+False+
+otherwise.  
+\item
+[See also:] {\tt IsPerfect}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsntProper[strategy->MIXED] =: BOOL
+\end{verbatim}\normalsize
+
+\bd Returns \verb+True+ if the mixed strategy profile \verb+strategy+
+is known by Gambit not to be a proper Nash equilibrium, and \verb+False+
+otherwise.  
+\item
+[See also:] {\tt IsProper}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsntSequential[strategy->BEHAV] =: BOOL
+\end{verbatim}\normalsize
+
+\bd Returns \verb+True+ if the behavior strategy profile
+\verb+strategy+ is known by Gambit not to be a sequential Nash
+equilibrium, and \verb+False+ otherwise. 
+\item
+[See also:] {\tt IsSequential}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsntSubgamePerfect[strategy->BEHAV] =: BOOL
+\end{verbatim}\normalsize
+
+\bd Returns \verb+True+ if the behavior strategy profile
+\verb+strategy+ is known by Gambit not to be a SubgamePerfect Nash
+equilibrium, and \verb+False+ otherwise. 
+\item
+[See also:] {\tt IsSubgamePerfect}.
 \ed
 
 %--J--
@@ -3070,7 +3174,8 @@ LiapValue[strategy->MIXED(T) | BEHAV(T)] =: T
 
 \bd Returns the Liapunov function value for the mixed or behavior
 strategy profile \verb+strategy+.  This value is zero exactly when the
-profile is a Nash equilibrium of the normal form game.  \ed
+profile is a Nash equilibrium of the normal form game.  
+\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -3160,6 +3265,18 @@ reduced normal form for computation of equilibrium.
 \ed
 
 %--M--
+
+\item
+\protect \large \begin{verbatim}
+Manual[x->TEXT,{y->OUTPUT}] =: BOOL
+\end{verbatim} \normalsize
+
+\bd Writes the manual entry for \verb+x+ to the output stream
+\verb+y+.  Returns \verb+True+ is an entry is found; else returns
+\verb+False+.
+\item
+[See also:] {\tt Help}, {\tt HelpVars}.
+\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -3389,29 +3506,6 @@ Defines a new player in the extensive form game \verb+efg+.
 By default the player is named with the empty string; the optional parameter
 \verb+name+, if specified, gives the name of the new player.  Returns the
 newly created player.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-NewSupport[efg<->EFG] =: EFSUPPORT
-\end{verbatim}\normalsize
-
-\bd
-Creates and returns a new support on the extensive form
-game \verb+nfg+.  The support contains all actions at every
-information set for all players.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-NewSupport[nfg<->NFG] =: NFSUPPORT
-\end{verbatim}\normalsize
-
-\bd
-Creates and returns a new support on the normal form
-game \verb+nfg+.  The support contains all strategies for all players.
-\item
-[See also:] {\tt AddStrategy}, {\tt RemoveStrategy}.
 \ed
 
 \item
@@ -3938,6 +4032,20 @@ type {\tt RATIONAL}.
 
 \item
 \protect \large \begin{verbatim}
+Rational[nfg->NFG] =: NFG(RATIONAL)
+Rational[efg->EFG] =: EFG(RATIONAL)
+\end{verbatim} \normalsize
+
+\bd
+Returns a copy of the game \verb+nfg+ or \verb+efg+ of data type 
+{\tt RATIONAL}.  This can be used to convert a game from {\tt FLOAT}
+to {\tt RATIONAL}.  
+\item
+[See also:] {\tt Float}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
 Read[input->INPUT, x<->T] =: INPUT  
       for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,
               RATIONAL,TEXT,LIST(T)
@@ -4299,6 +4407,29 @@ all children of a node are listed before a node.
 
 \item
 \protect \large \begin{verbatim}
+Support[efg<->EFG] =: EFSUPPORT
+\end{verbatim}\normalsize
+
+\bd
+Returns the support of the extensive form
+game \verb+nfg+.  The support contains all actions at every
+information set for all players.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Support[nfg<->NFG] =: NFSUPPORT
+\end{verbatim}\normalsize
+
+\bd
+Returns the support of the normal form
+game \verb+nfg+.  The support contains all strategies for all players.
+\item
+[See also:] {\tt AddStrategy}, {\tt RemoveStrategy}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
 Support[strategy->MIXED] =: NFSUPPORT
 Support[strategy->BEHAV] =: EFSUPPORT
 \end{verbatim}\normalsize
@@ -4372,14 +4503,16 @@ Returns the transpose of a rectangular matrix. Fails if the
 
 \item
 \protect \large \begin{verbatim}
-UnAssign[x<->T] =: T
+UnAssign[x->TEXT] =: T
 \end{verbatim}\normalsize
 
 \bd
-Undefines the variable referenced by \verb+x+.  Returns the
+Undefines the variable with name \verb+x+.  Returns the
 last value of the variable.
 \item
 [See also:] {\tt Assign}.
+\item
+[Short form:] \verb+x :=+
 \ed
 
 \item
