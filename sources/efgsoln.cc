@@ -1091,7 +1091,7 @@ void EfgSolnShow::SortFilter(bool inter)
         if (cur_soln) 
             cur_solnp = &solns[cur_soln];
 
-        //BSolnSorterFilter SF(solns, sf_options);
+        BSolnSorterFilter SF(solns, sf_options); 
         int new_num_sol = solns.VisibleLength();    // new state
         int i, j;
         int new_soln = 0;                           // try to find the new pos of cur_soln
