@@ -116,8 +116,8 @@ template<class T> void gRectBlock<T>::RemoveColumn(int col)
 
 template <class T> void gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
 {
-  assert( v.First() == minrow && v.Last() == maxrow);
-  assert( minrow <= row && row <= maxrow);
+  assert(v.First() == mincol && v.Last() == maxcol);
+  assert(minrow <= row && row <= maxrow);
   maxrow++;
 
   T* p = new T[maxcol - mincol + 1];
