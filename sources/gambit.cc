@@ -189,8 +189,9 @@ if (!s)
 if (!s) return;
 s=copystring(s);
 if (strcmp(s,"")!=0)
-{
+{     
 	char *filename=copystring(FileNameFromPath(s));
+	filename=strlwr(filename); // ignore case
 #ifndef EFG_ONLY
 	if (strstr(filename,".nfg"))		// This must be a normal form
 		{NfgGUI(0,s,0,this);return;}
@@ -199,6 +200,7 @@ if (strcmp(s,"")!=0)
 	if (strstr(filename,".efg"))		// This must be an extensive form
 		{ExtensiveFormGUI(0,s,0,this);return;}
 #endif
+printf("Neither an efg or a nfg\n");
 	wxMessageBox("Unknown file type");	// If we got here, there is something wrong
 }
 delete [] s;

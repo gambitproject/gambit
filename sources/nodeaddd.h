@@ -22,7 +22,7 @@ private:
 	void OnBranch(void);
 public:
 	// Constructor
-	NodeAddDialog(BaseEfg &ef_,EFPlayer *player=0,Infoset *infoset=0,int branches=1,wxFrame *frame=0);
+	NodeAddDialog(BaseEfg &ef_,EFPlayer *player=0,Infoset *infoset=0,int branches=2,wxFrame *frame=0);
 	// Destructor
 	~NodeAddDialog(void);
 	// DataAccess
