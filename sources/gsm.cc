@@ -2586,6 +2586,28 @@ void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
 
 
 
+void GSM::UnAssignEfgInfoset( BaseEfg* game, Infoset* infoset )
+{
+  assert( game );
+  assert( infoset );
+  int i = 0;
+  for( i = 1; i <= infoset->NumActions(); i++ )
+    UnAssignEfgElement( game, porACTION, infoset->GetActionList()[ i ] );
+  UnAssignEfgElement( game, porINFOSET, infoset );  
+}
+
+
+void GSM::UnAssignEfgSubTree( BaseEfg* game, Node* node )
+{
+  assert( game );
+  assert( node );
+  int i = 0;
+  for( i = 0; i < node->NumChildren(); i++ )
+    UnAssignEfgSubTree( game, node->GetChild( i ) );
+  UnAssignEfgElement( game, porNODE, node );
+}
+
+
 
 
 

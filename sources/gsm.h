@@ -27,6 +27,8 @@ class FuncInfoType;
 class gString;
 class gRational;
 
+class Node;
+class Infoset;
 class BaseEfg;
 
 template <class T> class gList;
@@ -179,8 +181,15 @@ public:
 
   void InvalidateGameProfile( void* game, bool IsEfg );
   void UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec );  
+
+  // Unassigns a SINGLE given element of an Efg
   void UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data );
 
+  // This function will unassign an infoset and all associated actions
+  void UnAssignEfgInfoset( BaseEfg* game, Infoset* infoset );
+
+  // This function will unassign the subtree rooted by the given node
+  void UnAssignEfgSubTree( BaseEfg* game, Node* node ); 
 };
 
 
