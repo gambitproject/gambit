@@ -417,13 +417,26 @@ Portion *GSM_HasOutcome(Portion **param)
 // Infoset
 //-------------
 
-Portion *GSM_Infoset(Portion **param)
+Portion *GSM_Infoset_Node(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
 
   if (!n->GetInfoset())
     return new ErrorPortion("Terminal nodes have no information set");
   Portion* por = new InfosetValPortion(n->GetInfoset());
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
+
+Portion *GSM_Infoset_Action(Portion **param)
+{
+  Action *a = ((ActionPortion *) param[0])->Value();
+
+  if (!a->BelongsTo())
+    return new ErrorPortion("Terminal nodes have no information set");
+  Portion* por = new InfosetValPortion(a->BelongsTo());
   por->SetOwner( param[ 0 ]->Owner() );
   por->AddDependency();
   return por;
@@ -1679,9 +1692,12 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
   
   
-  FuncObj = new FuncDescObj("Infoset", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Infoset, porINFOSET, 1));
+  FuncObj = new FuncDescObj("Infoset", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Infoset_Node, porINFOSET, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Infoset_Action, porINFOSET, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("action", porACTION));
   gsm->AddFunction(FuncObj);
   
   
