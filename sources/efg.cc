@@ -205,7 +205,7 @@ void BaseEfg::SortInfosets(void)
   
     for (i = 1; i <= nodes.Length(); i++)  {
       Node *n = nodes[i];
-      if (n->GetPlayer()->number == pl && n->GetInfoset()->number == 0)  {
+      if (n->GetPlayer() == players[pl] && n->GetInfoset()->number == 0)  {
 	n->GetInfoset()->number = ++isets;
 	players[pl]->infosets[isets] = n->GetInfoset();
       }
