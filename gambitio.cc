@@ -132,6 +132,18 @@ void gFileInput::seekp(long pos) const
   fseek(f, pos, 0);
 }
 
+long gFileInput::getpos(void) const
+{
+  assert(f);
+  return ftell(f);
+}
+
+void gFileInput::setpos(long x) const
+{
+  assert(f);
+  fseek(f, x, 0);
+}
+
 bool gFileInput::IsValid(void) const
 {
   return valid;
@@ -194,6 +206,10 @@ void gNullInput::unget(char)  { }
 bool gNullInput::eof(void) const   { return true; }
 
 void gNullInput::seekp(long) const   { }
+
+long gNullInput::getpos(void) const { return 0; }
+
+void gNullInput::setpos(long) const { }
 
 bool gNullInput::IsValid(void) const   { return true; }
 

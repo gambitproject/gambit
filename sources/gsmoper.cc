@@ -1669,6 +1669,340 @@ Portion* GSM_Read_Parse_List( gString s )
 
 
 
+Portion* GSM_Read_Bool( Portion** param )
+{
+  gInput& input = ((InputPortion*) param[0])->Value();
+  long old_pos = input.getpos();
+  bool value;
+  bool error = false;
+  char c = ' ';
+
+  if( input.eof() )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "End of file reached" );
+  }
+  while( !input.eof() && isspace(c) )
+    input.get(c);
+  if( c == 'T' )
+  {
+    if( !input.eof() ) input.get(c); if( c != 'r' ) error = true;
+    if( !input.eof() ) input.get(c); if( c != 'u' ) error = true;
+    if( !input.eof() ) input.get(c); if( c != 'e' ) error = true;
+    value = true;
+  }
+  else if( c == 'F' )
+  {
+    if( !input.eof() ) input.get(c); if( c != 'a' ) error = true;
+    if( !input.eof() ) input.get(c); if( c != 'l' ) error = true;
+    if( !input.eof() ) input.get(c); if( c != 's' ) error = true;
+    if( !input.eof() ) input.get(c); if( c != 'e' ) error = true;
+    value = false;
+  }
+  else
+    error = true;
+
+  if( error )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "No boolean data found" );
+  }
+
+  ((BoolPortion*) param[1])->Value() = value;
+  return param[0]->RefCopy();
+}
+
+
+Portion* GSM_Read_Integer( Portion** param )
+{
+  gInput& input = ((InputPortion*) param[0])->Value();
+  long old_pos = input.getpos();
+  int value;
+  char c;
+
+  if( input.eof() )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "End of file reached" );
+  }
+  input >> value;
+  if( !input.IsValid() )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "File read error" );
+  }
+
+  input.get(c);
+  while( !input.eof() && isspace(c) ) 
+    input.get(c); 
+  if( c == '/' )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "Type mismatch: expected INTEGER, got RATIONAL" );
+  }
+  else
+    input.unget(c);
+
+  ((IntPortion*) param[1])->Value() = value;
+
+  return param[0]->RefCopy();
+}
+
+Portion* GSM_Read_Float( Portion** param )
+{
+  gInput& input = ((InputPortion*) param[0])->Value();
+  long old_pos = input.getpos();
+  double value;
+  char c;
+
+  if( input.eof() )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "End of file reached" );
+  }
+  input >> value;
+  if( !input.IsValid() ) 
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "File read error" );
+  }
+
+  input.get(c);
+  while( !input.eof() && isspace(c) ) 
+    input.get(c); 
+  if( c == '/' )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "Type mismatch: expected FLOAT, got RATIONAL" );
+  }
+  else
+    input.unget(c);
+
+  ((FloatPortion*) param[1])->Value() = value;
+
+  return param[0]->RefCopy();
+}
+
+Portion* GSM_Read_Rational( Portion** param )
+{
+  int numerator = 0;
+  int denominator = 0;
+  char c = ' ';
+  gInput& input = ((InputPortion*) param[0])->Value();
+  long old_pos = input.getpos();
+
+  if( input.eof() )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "End of file reached" );
+  }
+  input >> numerator;
+  if( !input.IsValid() )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "File read error" );
+  }
+
+  input.get(c);
+  while( !input.eof() && isspace(c) ) 
+    input.get(c); 
+  if( input.eof() || c != '/' )
+  {
+    input.unget(c);
+    return param[0]->RefCopy();
+  }
+
+  if( input.eof() )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "End of file reached" );
+  }
+  input >> denominator;
+  if( !input.IsValid() )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "File read error" );
+  }
+
+  if( denominator == 0 )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "Division by zero" );
+  }
+
+  ((RationalPortion*) param[1])->Value() = numerator;
+  ((RationalPortion*) param[1])->Value() /= denominator;
+ 
+  return param[0]->RefCopy();
+}
+
+Portion* GSM_Read_Text( Portion** param )
+{
+  char c = ' ';
+  gString s;
+  gString t;
+  gInput& input = ((InputPortion*) param[0])->Value();
+  long old_pos = input.getpos();
+
+  while( !input.eof() && isspace(c) )
+    input.get( c );
+  if( input.eof() )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "End of file reached" );
+  }
+  if( !input.eof() && c == '\"' )
+    input.get(c); 
+  else
+  {
+    input.unget(c);
+    input.setpos( old_pos );
+    return new ErrorPortion( "File read error: missing starting \"" );
+  }
+
+  while( !input.eof() && c != '\"' )
+  { t+=c; input.get(c); }
+  if( input.eof() )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "End of file reached" );  
+  }
+  
+  ((TextPortion*) param[1])->Value() = t;
+ 
+  return param[0]->RefCopy();
+}
+
+
+
+Portion* GSM_Read_List( Portion** param, PortionType type,
+		       Portion* (*func) ( Portion** ), bool ListFormat )
+{
+  Portion* p;
+  Portion** sub_param;
+  ListPortion* list;
+  int i;
+  char c = ' ';  
+  gInput& input = ((InputPortion*) param[0])->Value();
+  long old_pos = input.getpos();
+
+
+  while( !input.eof() && isspace(c) )
+    input.get( c );
+  if( input.eof() )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "End of file reached" );
+  }
+  if( !ListFormat )
+  {
+    if( c == '{' )
+      ListFormat = true;
+    else
+      input.unget(c);
+  }
+  else
+  {
+    if( c != '{' )
+    {
+      input.unget(c);
+      input.setpos( old_pos );
+      return new ErrorPortion( "\'{\' expected" );
+    }
+  }
+
+
+  sub_param = new Portion*[2];
+  list = ((ListPortion*) param[1]);
+
+
+  for( i=1; i <= list->Length(); i++ )
+  {
+    assert( (*list)[i]->Type()==type || (*list)[i]->Type()==porLIST );
+    sub_param[0] = param[0];
+    sub_param[1] = (*list)[i];
+
+    if( i > 1 ) 
+    {
+      c = ' ';
+      while( !input.eof() && isspace(c) )
+	input.get( c );
+      if( c == ',' )
+      {
+	if( !ListFormat )
+	  input.unget(c);
+      }
+      else
+	input.unget(c);      
+    }
+
+    if( (*list)[i]->Type() == type )
+      p = (*func)( sub_param );
+    else
+      p = GSM_Read_List( sub_param, type, func, ListFormat );
+
+    if( p->Type() == porERROR )
+    {
+      delete[] sub_param;
+      input.setpos(old_pos);
+      return p;
+    }
+    else
+      delete p;
+  }
+  delete[] sub_param;
+
+  if( ListFormat )
+  {
+    c = ' ';
+    while( !input.eof() && isspace(c) )
+      input.get(c);
+    if( c != '}' )
+    {
+      input.unget(c);
+      input.setpos(old_pos);
+      return new ErrorPortion( "Mismatched braces" );
+    }
+    if( input.eof() )
+    {
+      input.setpos( old_pos );
+      return new ErrorPortion( "End of file reached" );
+    }
+  }
+
+  return param[0]->RefCopy();
+}
+
+
+
+Portion* GSM_Read_List_Bool( Portion** param )
+{
+  return GSM_Read_List( param, porBOOL, GSM_Read_Bool, false );
+}
+
+Portion* GSM_Read_List_Integer( Portion** param )
+{
+  return GSM_Read_List( param, porINTEGER, GSM_Read_Integer, false );
+}
+
+Portion* GSM_Read_List_Float( Portion** param )
+{
+  return GSM_Read_List( param, porFLOAT, GSM_Read_Float, false );
+}
+
+Portion* GSM_Read_List_Rational( Portion** param )
+{
+  return GSM_Read_List( param, porRATIONAL, GSM_Read_Rational, false );
+}
+
+Portion* GSM_Read_List_Text( Portion** param )
+{
+  return GSM_Read_List( param, porTEXT, GSM_Read_Text, false );
+}
+
+
+
+
 
 void Init_gsmoper( GSM* gsm )
 {
@@ -2164,10 +2498,78 @@ void Init_gsmoper( GSM* gsm )
   gsm->AddFunction( FuncObj );
 
 
+
+  //-------------------- Read --------------------------
+
   FuncObj = new FuncDescObj( "Read" );
   FuncObj->SetFuncInfo( GSM_Read, 1 );
   FuncObj->SetParamInfo( GSM_Read, 0, "input", porINPUT );
+
+  FuncObj->SetFuncInfo( GSM_Read_Bool, 2, 
+		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
+  FuncObj->SetParamInfo( GSM_Read_Bool, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_Bool, 1, "x", porBOOL, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+
+  FuncObj->SetFuncInfo( GSM_Read_List_Bool, 2, 
+		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
+  FuncObj->SetParamInfo( GSM_Read_List_Bool, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_List_Bool, 1, "x", porBOOL | porLIST, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
+
+
+  FuncObj->SetFuncInfo( GSM_Read_Integer, 2, 
+		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
+  FuncObj->SetParamInfo( GSM_Read_Integer, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_Integer, 1, "x", porINTEGER, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+
+  FuncObj->SetFuncInfo( GSM_Read_List_Integer, 2, 
+		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
+  FuncObj->SetParamInfo( GSM_Read_List_Integer, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_List_Integer, 1, "x", porINTEGER | porLIST, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
+
+
+  FuncObj->SetFuncInfo( GSM_Read_Float, 2,
+		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
+  FuncObj->SetParamInfo( GSM_Read_Float, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_Float, 1, "x", porFLOAT,  
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+
+  FuncObj->SetFuncInfo( GSM_Read_List_Float, 2, 
+		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
+  FuncObj->SetParamInfo( GSM_Read_List_Float, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_List_Float, 1, "x", porFLOAT | porLIST, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
+
+
+  FuncObj->SetFuncInfo( GSM_Read_Rational, 2,
+		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
+  FuncObj->SetParamInfo( GSM_Read_Rational, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_Rational, 1, "x", porRATIONAL, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+
+  FuncObj->SetFuncInfo( GSM_Read_List_Rational, 2, 
+		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
+  FuncObj->SetParamInfo( GSM_Read_List_Rational, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_List_Rational, 1, "x", porRATIONAL|porLIST, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
+
+
+  FuncObj->SetFuncInfo( GSM_Read_Text, 2, 
+		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
+  FuncObj->SetParamInfo( GSM_Read_Text, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_Text, 1, "x", porTEXT, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   gsm->AddFunction( FuncObj );
+
+  FuncObj->SetFuncInfo( GSM_Read_List_Text, 2, 
+		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
+  FuncObj->SetParamInfo( GSM_Read_List_Text, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_List_Text, 1, "x", porTEXT | porLIST, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
+
 
 }
 

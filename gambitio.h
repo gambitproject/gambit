@@ -35,6 +35,8 @@ class gInput  {
     virtual void unget(char c) = 0;
     virtual bool eof(void) const = 0;
     virtual void seekp(long x) const = 0;
+    virtual long getpos(void) const = 0;
+    virtual void setpos(long x) const = 0;
 
     virtual bool IsValid(void) const = 0;
 };
@@ -68,6 +70,8 @@ class gFileInput : public gInput  {
     void unget(char c);
     bool eof(void) const;
     void seekp(long x) const;
+    long getpos(void) const;
+    void setpos(long x) const;
 
     bool IsValid(void) const;
 };
@@ -95,6 +99,8 @@ class gNullInput : public gInput  {
     void unget(char c);
     bool eof(void) const;
     void seekp(long x) const;
+    long getpos(void) const;
+    void setpos(long x) const;
 
     bool IsValid(void) const;
 };
