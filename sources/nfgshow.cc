@@ -86,6 +86,35 @@ void NfgShow::UpdateVals(void)
       spread->SetCell(i, j, pay_str);
       spread->HiLighted(i, j, 0, hilight);
     }
+
+    if (spread->HaveDom()) { 
+      int dom_pos = 1+spread->HaveProbs();
+      Strategy *strategy = cur_sup->Strategies(pl1)[i];
+      bool dominated = IsDominated(*cur_sup, strategy, false, gstatus);
+      if (dominated) { 
+	spread->SetCell(i, cols+dom_pos, "Y");
+      }
+      else {
+	spread->SetCell(i, cols+dom_pos, "N");
+      }
+    }
+
+  }
+
+  for (int j = 1; j <= cols; j++) {
+    nf_iter.Set(pl2, j);
+
+    if (spread->HaveDom()) { 
+      int dom_pos = 1+spread->HaveProbs();
+      Strategy *strategy = cur_sup->Strategies(pl2)[j];
+      bool dominated = IsDominated(*cur_sup, strategy, false, gstatus);
+      if (dominated) { 
+	spread->SetCell(rows+dom_pos, j, "Y");
+      }
+      else {
+	spread->SetCell(rows+dom_pos, j, "N");
+      }
+    }
   }
 
   nf_iter.Set(pl1, 1);
@@ -326,6 +355,7 @@ void NfgShow::ClearSolutions(void)
     spread->SetCell(rows+1, cols+1, "");
   }
 
+  /*
   if (spread->HaveDom()) {  // if there exist the dominance row/col
     int dom_pos = 1+spread->HaveProbs();
     for (int i = 1; i <= cols; i++)
@@ -334,6 +364,7 @@ void NfgShow::ClearSolutions(void)
     for (int i = 1; i <= rows; i++)
       spread->SetCell(i, cols+dom_pos, "");
   }
+  */
 
   if (spread->HaveVal()) {
     int val_pos = 1+spread->HaveProbs()+spread->HaveDom();
@@ -995,6 +1026,7 @@ int NfgShow::SolveElimDom(void)
     }
     else {
       spread->MakeDomDisp();
+      UpdateVals();
       spread->Redraw();
     }
 
@@ -1792,19 +1824,18 @@ void NormalSpread::RemoveProbDisp(void)
 // Dominance display
 void NormalSpread::MakeDomDisp(void)
 {
-    int row = dimensionality[pl1] + features.prob + 1;
-    int col = dimensionality[pl2] + features.prob + 1;
+  int row = dimensionality[pl1] + features.prob + 1;
+  int col = dimensionality[pl2] + features.prob + 1;
 
-    if (!features.dom)
-    {
-        AddRow(row);
-        AddCol(col);
-        DrawSettings()->SetColWidth(5, col);
-    }
+  if (!features.dom) {
+    AddRow(row);
+    AddCol(col);
+    DrawSettings()->SetColWidth(5, col);
+  }
 
-    SetLabelRow(row, "Domin");
-    SetLabelCol(col, "Domin");
-    features.dom = 1;
+  SetLabelRow(row, "Domin");
+  SetLabelCol(col, "Domin");
+  features.dom = 1;
 }
 
 
