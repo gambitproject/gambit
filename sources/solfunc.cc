@@ -224,7 +224,7 @@ static Portion* GSM_Game_EfgTypes(Portion** param)
 }
 
 //---------------
-// GobitLambda
+// QreLambda
 //---------------
 
 static Portion *GSM_GobitLambda_Behav(Portion** param)
@@ -244,7 +244,7 @@ static Portion *GSM_GobitLambda_Mixed(Portion** param)
 }
 
 //--------------
-// GobitValue
+// QreValue
 //--------------
 
 static Portion *GSM_GobitValue_Behav(Portion** param)
@@ -730,10 +730,10 @@ void Init_solfunc(GSM *gsm)
       { "Game[support->NFSUPPORT] =: NFG", GSM_Game_NfSupport },
       { "Game[support->EFSUPPORT] =: EFG", GSM_Game_EfgTypes },
       { "Game[basis->EFBASIS] =: EFG", GSM_Game_EfgTypes },
-      { "GobitLambda[profile->MIXED] =: NUMBER", GSM_GobitLambda_Mixed },
-      { "GobitLambda[profile->BEHAV] =: NUMBER", GSM_GobitLambda_Behav },
-      { "GobitValue[profile->MIXED] =: NUMBER", GSM_GobitValue_Mixed },
-      { "GobitValue[profile->BEHAV] =: NUMBER", GSM_GobitValue_Behav },
+      { "QreLambda[profile->MIXED] =: NUMBER", GSM_GobitLambda_Mixed },
+      { "QreLambda[profile->BEHAV] =: NUMBER", GSM_GobitLambda_Behav },
+      { "QreValue[profile->MIXED] =: NUMBER", GSM_GobitValue_Mixed },
+      { "QreValue[profile->BEHAV] =: NUMBER", GSM_GobitValue_Behav },
       { "InfosetProb[profile->BEHAV, infoset->INFOSET*] =: NUMBER",
 	GSM_InfosetProb },
       { "InfosetProbs[profile->BEHAV] =: LIST(LIST(NUMBER))", 

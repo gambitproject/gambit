@@ -420,22 +420,22 @@ NewFunction[EnumPureSolve[efg->EFG, {stopAfter->00},  {precision->Float},
   traceFile, traceLevel]
 ]
 
-NewFunction[GobitSolve[efg->EFG, {pxifile->""}, {minLam->.001}, 
+NewFunction[QreSolve[efg->EFG, {pxifile->""}, {minLam->.001}, 
   {maxLam->500.}, {delLam->.02}, {powLam->01}, {fullGraph->False}, 
   {maxitsN->20}, {tolN->.0000000001}, {maxits1->100}, {tol1->.0000000001}, 
   {time<->0.00}, {nEvals<->00}, {nIters<->00}, {traceFile<->NullOut}, 
   {traceLevel->00}] =: LIST(BEHAV),
-  GobitSolve[Centroid[Support[efg]],pxifile,minLam,maxLam,delLam,powLam, 
+  QreSolve[Centroid[Support[efg]],pxifile,minLam,maxLam,delLam,powLam, 
   fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
   traceLevel]
 ]
 
-NewFunction[GobitSolve[nfg->NFG, {pxifile->""}, {minLam->.001}, 
+NewFunction[QreSolve[nfg->NFG, {pxifile->""}, {minLam->.001}, 
   {maxLam->500.}, {delLam->.02}, {powLam->01}, {fullGraph->False}, 
   {maxitsN->20}, {tolN->.0000000001}, {maxits1->100}, {tol1->.0000000001}, 
   {time<->0.00}, {nEvals<->00}, {nIters<->00}, {traceFile<->NullOut}, 
   {traceLevel->00}] =: LIST(MIXED),
-  GobitSolve[Centroid[Support[nfg]],pxifile,minLam,maxLam,delLam,powLam,
+  QreSolve[Centroid[Support[nfg]],pxifile,minLam,maxLam,delLam,powLam,
   fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
   traceLevel]
 ]
@@ -658,7 +658,7 @@ NewFunction[AllSubgamePerfect[e->EFG,{stopAfter->0},{nTries->0},{precision->Floa
 
 NewFunction[OneSequential[e->EFG]=:LIST(BEHAV),
   ms:=MarkedSubgames[e];UnmarkSubgames[e];
-  b:=GobitSolve[e,fullGraph->False];
+  b:=QreSolve[e,fullGraph->False];
   If[!IsSequential[b_1],
     << " Warning: Algorithm did not converge, returning last value"
   ];
@@ -764,22 +764,22 @@ NewFunction[Randomize[x->NFG, {seed->0}]=:NFG,
   x;
 ];
   
-NewFunction[KGobitSolve[nfg->NFG, {pxifile->""}, {minK->.0001}, 
+NewFunction[KQreSolve[nfg->NFG, {pxifile->""}, {minK->.0001}, 
   {maxK->1000.}, {delK->-.2}, {powK->01}, {fullGraph->False}, 
   {maxitsN->20}, {tolN->.0000000001}, {maxits1->100}, {tol1->.0000000001}, 
   {time<->0.00}, {nEvals<->00}, {nIters<->00}, {traceFile<->NullOut}, 
   {traceLevel->00}] =: LIST(MIXED),
-  KGobitSolve[Centroid[Support[nfg]],pxifile,minK,maxK,delK,powK,
+  KQreSolve[Centroid[Support[nfg]],pxifile,minK,maxK,delK,powK,
   fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
   traceLevel]
 ]
 
-NewFunction[KGobitSolve[efg->EFG, {pxifile->""}, {minK->.0001}, 
+NewFunction[KQreSolve[efg->EFG, {pxifile->""}, {minK->.0001}, 
   {maxK->1000.}, {delK->-.2}, {powK->01}, {fullGraph->False}, 
   {maxitsN->20}, {tolN->.0000000001}, {maxits1->100}, {tol1->.0000000001}, 
   {time<->0.00}, {nEvals<->00}, {nIters<->00}, {traceFile<->NullOut}, 
   {traceLevel->00}] =: LIST(BEHAV),
-  KGobitSolve[Centroid[Support[efg]],pxifile,minK,maxK,delK,powK,
+  KQreSolve[Centroid[Support[efg]],pxifile,minK,maxK,delK,powK,
   fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
   traceLevel]
 ]

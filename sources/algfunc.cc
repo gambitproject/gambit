@@ -223,7 +223,7 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
 }
 
 //------------------
-// GobitGridSolve
+// QreGridSolve
 //------------------
 
 #include "grid.h"
@@ -271,7 +271,7 @@ static Portion *GSM_GobitGrid_Support(Portion **param)
 }
 
 //---------------
-// GobitSolve
+// QreSolve
 //---------------
 
 #include "ngobit.h"
@@ -373,7 +373,7 @@ static Portion *GSM_Gobit_Start(Portion **param)
 
 
 //---------------
-// KGobitSolve
+// KQreSolve
 //---------------
 
 static Portion *GSM_KGobit_Start(Portion **param)
@@ -1232,7 +1232,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("GobitGridSolve", 1);
+  FuncObj = new FuncDescObj("QreGridSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_GobitGrid_Support, 
 				       PortionSpec(porMIXED, 1), 14));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1267,7 +1267,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("GobitSolve", 1);
+  FuncObj = new FuncDescObj("QreSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Gobit_Start, 
 				       PortionSpec(porMIXED | porBEHAV, 1), 16));
   FuncObj->SetParamInfo(0, 0, gclParameter("start",
@@ -1307,7 +1307,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("KGobitSolve", 1);
+  FuncObj = new FuncDescObj("KQreSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_KGobit_Start, 
 				       PortionSpec(porMIXED | porBEHAV , 1), 16));
   FuncObj->SetParamInfo(0, 0, gclParameter("start",
