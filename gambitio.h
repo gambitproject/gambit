@@ -8,6 +8,7 @@
 #define GAMBITIO_H
 
 #include <stdio.h>
+#include "basic.h"
 
 #ifdef __GNUG__
 #pragma interface
@@ -19,8 +20,8 @@ class gInput  {
     gInput &operator=(const gInput &);
 
   public:
-    gInput(void)   { }
-    virtual ~gInput()  { }
+    gInput(void); 
+    virtual ~gInput();
 
     virtual gInput& operator>>(int &x) = 0;
     virtual gInput& operator>>(unsigned int &x) = 0;
@@ -32,16 +33,16 @@ class gInput  {
 
     virtual int get(char &c) = 0;
     virtual void unget(char c) = 0;
-    virtual int eof(void) const = 0;
+    virtual bool eof(void) const = 0;
     virtual void seekp(long x) const = 0;
 
-    virtual int IsValid(void) const = 0;
+    virtual bool IsValid(void) const = 0;
 };
 
 class gFileInput : public gInput  {
   private:
     FILE *f;
-    int valid;
+    bool valid;
 
     gFileInput(const gFileInput &);
     gFileInput &operator=(const gFileInput &);
@@ -65,14 +66,38 @@ class gFileInput : public gInput  {
 
     int get(char &c);
     void unget(char c);
-    int eof(void) const;
+    bool eof(void) const;
     void seekp(long x) const;
 
-    int IsValid(void) const;
+    bool IsValid(void) const;
 };
 
-extern gFileInput gin;
+//extern gFileInput gin;
 
+class gNullInput : public gInput  {
+  private:
+    gNullInput(const gNullInput &);
+    gNullInput &operator=(const gNullInput &);
+
+  public:
+    gNullInput(void);
+    virtual ~gNullInput();
+
+    gInput &operator>>(int &x);
+    gInput &operator>>(unsigned int &x);
+    gInput &operator>>(long &x);
+    gInput &operator>>(char &x);
+    gInput &operator>>(double &x);
+    gInput &operator>>(float &x);
+    gInput &operator>>(char *x);
+
+    int get(char &c);
+    void unget(char c);
+    bool eof(void) const;
+    void seekp(long x) const;
+
+    bool IsValid(void) const;
+};
 
 class gOutput  {
   private:
@@ -80,8 +105,8 @@ class gOutput  {
     gOutput &operator=(const gOutput &);
 
   public:
-    gOutput(void)   { }
-    virtual ~gOutput()   { }
+    gOutput(void);
+    virtual ~gOutput();
 
     virtual gOutput &operator<<(int x) = 0;
     virtual gOutput &operator<<(unsigned int x) = 0;
@@ -92,13 +117,13 @@ class gOutput  {
     virtual gOutput &operator<<(const char *x) = 0;
     virtual gOutput &operator<<(const void *x) = 0;
 
-    virtual int IsValid(void) const = 0;
+    virtual bool IsValid(void) const = 0;
 };
 
 class gFileOutput : public gOutput  {
   private:
     FILE *f;
-    int valid;
+    bool valid;
 
     gFileOutput(const gFileOutput &);
     gFileOutput &operator=(const gFileOutput &);
@@ -121,9 +146,34 @@ class gFileOutput : public gOutput  {
     gOutput &operator<<(const char *x);
     gOutput &operator<<(const void *x);
 
-    int IsValid(void) const;
+    bool IsValid(void) const;
 };
 
-extern gFileOutput gout, gerr;
+//extern gFileOutput gout, gerr;
+
+class gNullOutput : public gOutput  {
+  private:
+    gNullOutput(const gNullOutput &);
+    gNullOutput &operator=(const gNullOutput &);
+
+  public:
+    gNullOutput(void);
+    virtual ~gNullOutput();
+
+    gOutput &operator<<(int x);
+    gOutput &operator<<(unsigned int x);
+    gOutput &operator<<(long x);
+    gOutput &operator<<(char x);
+    gOutput &operator<<(double x);
+    gOutput &operator<<(float x);
+    gOutput &operator<<(const char *x);
+    gOutput &operator<<(const void *x);
+
+    bool IsValid(void) const;
+};
+
+
+extern gInput &gin, &gzero;
+extern gOutput &gout, &gerr, &gnull;
 
 #endif   // GAMBITIO_H

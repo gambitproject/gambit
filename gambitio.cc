@@ -11,6 +11,19 @@
 #include <assert.h>
 #include "gambitio.h"
 
+//--------------------------------------------------------------------------
+//                         gInput member functions
+//--------------------------------------------------------------------------
+
+gInput::gInput(void)   { }
+
+gInput::~gInput()   { }
+
+
+//--------------------------------------------------------------------------
+//                       gFileInput member functions
+//--------------------------------------------------------------------------
+
 gFileInput::gFileInput(void)
 {
   f = 0; valid=0;
@@ -108,7 +121,7 @@ void gFileInput::unget(char c)
   ::ungetc(c, f);
 }
 
-int gFileInput::eof(void) const
+bool gFileInput::eof(void) const
 {
   return feof(f);
 }
@@ -119,10 +132,84 @@ void gFileInput::seekp(long pos) const
   fseek(f, pos, 0);
 }
 
-int gFileInput::IsValid(void) const
+bool gFileInput::IsValid(void) const
 {
   return valid;
 }
+
+//--------------------------------------------------------------------------
+//                         gNullInput member functions
+//--------------------------------------------------------------------------
+
+gNullInput::gNullInput(void)    { }
+
+gNullInput::~gNullInput()    { }
+
+gInput &gNullInput::operator>>(int &x)
+{
+  x = 0;
+  return *this;
+}
+
+gInput &gNullInput::operator>>(unsigned int &x)
+{
+  x = 0;
+  return *this;
+}
+
+gInput &gNullInput::operator>>(long &x)
+{
+  x = 0L;
+  return *this;
+}
+
+gInput &gNullInput::operator>>(char &x)
+{
+  x = '\0';
+  return *this;
+}
+
+gInput &gNullInput::operator>>(double &x)
+{
+  x = 0.0;
+  return *this;
+}
+
+gInput &gNullInput::operator>>(float &x)
+{
+  x = 0.0;
+  return *this;
+}
+
+gInput &gNullInput::operator>>(char *x)
+{
+  if (x)   *x = '\0';
+  return *this;
+}
+
+int gNullInput::get(char &c)   { return 0; }
+
+void gNullInput::unget(char c)  { }
+
+bool gNullInput::eof(void) const   { return true; }
+
+void gNullInput::seekp(long x) const   { }
+
+bool gNullInput::IsValid(void) const   { return true; }
+
+
+//--------------------------------------------------------------------------
+//                          gOutput member functions
+//--------------------------------------------------------------------------
+
+gOutput::gOutput(void)   { }
+
+gOutput::~gOutput()   { }
+
+
+//--------------------------------------------------------------------------
+//                         gFileOutput member functions
+//--------------------------------------------------------------------------
 
 
 gFileOutput::gFileOutput(void)
@@ -215,16 +302,44 @@ gOutput &gFileOutput::operator<<(const void *x)
   return *this;
 }
 
-int gFileOutput::IsValid(void) const
+bool gFileOutput::IsValid(void) const
 {
   return valid;
 }
 
 
-gFileInput gin(stdin);
+//--------------------------------------------------------------------------
+//                         gNullOutput member functions
+//--------------------------------------------------------------------------
 
-gFileOutput gout(stdout);
-gFileOutput gerr(stderr);
+gNullOutput::gNullOutput(void)   { }
 
+gNullOutput::~gNullOutput()   { }
+
+gOutput &gNullOutput::operator<<(int)    { return *this; }
+
+gOutput &gNullOutput::operator<<(unsigned int)   { return *this; }
+
+gOutput &gNullOutput::operator<<(long)   { return *this; }
+
+gOutput &gNullOutput::operator<<(char)   { return *this; }
+
+gOutput &gNullOutput::operator<<(double)   { return *this; }
+
+gOutput &gNullOutput::operator<<(float)    { return *this; }
+
+gOutput &gNullOutput::operator<<(const char *)  { return *this; }
+
+gOutput &gNullOutput::operator<<(const void *)  { return *this; }
+
+bool gNullOutput::IsValid(void) const   { return true; }
+
+
+gInput &gin = gFileInput(stdin);
+gInput &gzero = gNullInput();
+
+gOutput &gout = gFileOutput(stdout);
+gOutput &gerr = gFileOutput(stderr);
+gOutput &gnull = gNullOutput();
 
 
