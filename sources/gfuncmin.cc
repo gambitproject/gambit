@@ -251,8 +251,9 @@ double LineMin(double tmin, double tmax,
   double a, b, c;
   
   if(tracelevel > 0) {
-    tracefile << "Searching from " << origin << "\n";
-    tracefile << "   Direction: " << direction << "\n";
+    tracefile.SetExpMode() << "\nSearching from " << origin;
+    tracefile << "\n    Direction: " << direction;
+    tracefile.SetFloatMode();
   }
 
   assert(tmin < tmax);
@@ -261,8 +262,9 @@ double LineMin(double tmin, double tmax,
     xmin = c;
 
     if(tracelevel > 0) {
-      tracefile << "   Bracketing failed.\n";
-      tracefile << "   step size = " << xmin << "\n\n";
+      tracefile << "\n   Bracketing failed.";
+      tracefile.SetExpMode() << "\n   step size = " << xmin;
+      tracefile.SetFloatMode();
     }
     return func.Value(origin + direction * c);
   }
@@ -270,9 +272,10 @@ double LineMin(double tmin, double tmax,
   double fret = Brent(a, b, c, func, origin, direction, xmin, maxitsBrent, tolBrent);
 
   
-  if(tracelevel > 0) 
-    tracefile << "   step size = " << xmin << "  value = " << fret << "\n\n";
-
+  if(tracelevel > 0) {
+    tracefile.SetExpMode() << "\n   step size = " << xmin << "  value = " << fret;
+    tracefile.SetFloatMode();
+  }
   return fret;
 }
 
@@ -496,8 +499,9 @@ bool Powell(gPVector<double> &p,
 
     if (iter == maxitsN)   {
       if (tracelevel > 0)  {
-	tracefile << "location = " << p << " value = " << fret << "\n\n";
-	tracefile << "Powell failed to converge in " << iter << " iterations\n\n";
+	tracefile << "\nlocation = " << p;
+	tracefile.SetExpMode() << " value = " << fret << "\n\n";
+	tracefile.SetFloatMode() << "Powell failed to converge in " << iter << " iterations\n\n";
       }
       return false;
     }
@@ -521,11 +525,11 @@ bool Powell(gPVector<double> &p,
     }
     
     if (tracelevel > 1)   {
-      tracefile << "Approximate Hessian:\n\n";
-//      tracefile << ((gRectArray<double> &)xi) << '\n';
-      tracefile << xi << '\n';
+      tracefile.SetExpMode() << "\nApproximate Hessian:\n";
+      tracefile << xi;
 
-      tracefile << "location = " << p << " value = " << fret << "\n\n";
+      tracefile << "\nlocation = " << p << " value = " << fret;
+      tracefile.SetFloatMode();
     }
   }
   return false;
@@ -567,7 +571,8 @@ bool OldPowell(gVector<double> &p,
       xi.GetRow(i, xit);
       fptt=fret;
       
-      RayMin(func, p, xit, fret, maxits1, tol1, tracefile);
+      RayMin(func, p, xit, fret, maxits1, tol1, tracefile, tracelevel-1,true);
+//      RayMin(func, p, xit, fret, maxits1, tol1, tracefile);
       
       if (fptt-fret > del) {
 	del=fptt-fret;
@@ -577,17 +582,19 @@ bool OldPowell(gVector<double> &p,
     
     if (tracelevel > 0) {
       tracefile << "\nPow iter: " << iter;
-      tracefile.SetExpMode() << " val = " << fret << " ";
-      tracefile.SetFloatMode();
+      int prec = tracefile.GetPrec();
+      tracefile.SetExpMode().SetPrec(15) << " val = " << fret << " ";
       tracefile << " p = " << p;
+      tracefile.SetFloatMode().SetPrec(prec);
     }
     if(status.Get()) return false;
     if (fret <= tolN) return true;
 
     if (iter == maxitsN) {
       if (tracelevel > 0)  {
-	tracefile << "location = " << p << " value = " << fret << "\n\n";
-	tracefile << "Powell failed to converge in " << iter << " iterations\n\n";
+	tracefile << "\nlocation = " << p;
+	tracefile.SetExpMode() << " value = " << fret;
+	tracefile.SetFloatMode() << "\n\nPowell failed to converge in " << iter << " iterations\n";
       }
       return false;
     }
@@ -601,16 +608,18 @@ bool OldPowell(gVector<double> &p,
     if (fptt < fp) {
       t=2.0*(fp-2.0*fret+fptt)*pow(fp-fret-del,2)-del*pow(fp-fptt,2);
       if (t < 0.0) {
-	RayMin(func, p, xit, fret, maxits1, tol1, tracefile);
+	RayMin(func, p, xit, fret, maxits1, tol1, tracefile, tracelevel-2,true);
+//	RayMin(func, p, xit, fret, maxits1, tol1, tracefile);
 	xi.SetRow(ibig, xit);
       }
     }
 
     if (tracelevel > 1)   {
-      tracefile << "Approximate Hessian:\n\n";
-      tracefile << xi << '\n';
+      tracefile.SetExpMode() << "\nApproximate Hessian:\n";
+      tracefile << xi;
       
-      tracefile << "location = " << p << " value = " << fret << "\n\n";
+      tracefile << "\nlocation = " << p << " value = " << fret;
+      tracefile.SetFloatMode();
     }
   }
   return false;
