@@ -21,9 +21,11 @@
 //
 // Implementations of these are provided as necessary in gsmutils.cc
 //
+Portion *ArrayToList(const gArray<int> &);
 Portion *ArrayToList(const gArray<NFPlayer *> &);
 Portion *ArrayToList(const gArray<Strategy *> &);
 
+extern GSM *_gsm;
 
 
 //---------------
@@ -509,7 +511,7 @@ Portion *GSM_SaveNfg(Portion **param)
 
   N->WriteNfgFile(f);
 
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }
 
 
@@ -539,6 +541,172 @@ Portion *GSM_SetName_Strategy(Portion **param)
   gString name = ((TextPortion *) param[1])->Value();
   s->name = name;
   return param[0]->ValCopy();
+}
+
+//------------
+// SetPayoff
+//------------
+
+Portion* GSM_SetPayoff_NfgFloat(Portion** param)
+{
+  int i;
+  Portion* p;
+  Nfg<double>* nfg = (Nfg<double>*) ((NfgPortion*) param[0])->Value();
+  gArray<int> Solution(((ListPortion*) param[1])->Length());
+  
+  if(((ListPortion*) param[1])->Length() != nfg->NumPlayers())
+    return new ErrorPortion("Invalid number of players specified in \"list\"");
+  if(((ListPortion*) param[2])->Length() != nfg->NumPlayers())
+    return new ErrorPortion("Invalid number of players specified in \"payoff\"");
+  
+  for(i = 1; i <= nfg->NumPlayers() ; i++)
+  {
+    p = ((ListPortion*) param[1])->SubscriptCopy(i);
+    assert(p->Spec().Type == porINTEGER);
+    Solution[i] = ((IntPortion*) p)->Value();
+    delete p;
+  }
+  for(i = 1; i <= nfg->NumPlayers(); i++)
+  {
+    p = ((ListPortion*) param[2])->SubscriptCopy(i);
+    assert(p->Spec().Type == porFLOAT);
+    nfg->SetPayoff(i, Solution, ((FloatPortion*) p)->Value());
+    delete p;
+  }
+
+  _gsm->InvalidateGameProfile((BaseNfg *) nfg, false);
+ 
+  return param[1]->ValCopy();
+}
+
+Portion* GSM_SetPayoff_NfgRational(Portion** param)
+{
+  int i;
+  Portion* p;
+  Nfg<gRational>* nfg = (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
+  gArray<int> Solution(((ListPortion*) param[1])->Length());
+  
+  if(((ListPortion*) param[1])->Length() != nfg->NumPlayers())
+    return new ErrorPortion("Invalid number of players specified in \"list\"");
+  if(((ListPortion*) param[2])->Length() != nfg->NumPlayers())
+    return new ErrorPortion("Invalid number of players specified in \"payoff\"");
+  
+  for(i = 1; i <= nfg->NumPlayers() ; i++)
+  {
+    p = ((ListPortion*) param[1])->SubscriptCopy(i);
+    assert(p->Spec().Type == porINTEGER);
+    Solution[i] = ((IntPortion*) p)->Value();
+    delete p;
+  }
+  for(i = 1; i <= nfg->NumPlayers(); i++)
+  {
+    p = ((ListPortion*) param[2])->SubscriptCopy(i);
+    assert(p->Spec().Type == porRATIONAL);
+    nfg->SetPayoff(i, Solution, ((RationalPortion*) p)->Value());
+    delete p;
+  }
+
+  _gsm->InvalidateGameProfile((BaseNfg *) nfg, false);
+
+  return param[1]->ValCopy();
+}
+
+
+
+Portion* GSM_SetPayoff_List(Portion** param, bool rational)
+{
+  BaseNfg* nfg = ((NfgPortion*) param[0])->Value();
+  int dim = param[1]->Spec().ListDepth - 1;
+  int players = 0;
+  gArray<int> dmax(dim);
+  Portion* list = param[1];
+
+  if(dim == 0)
+    return new ErrorPortion("Bad payoff dimensiontality");
+  while(dim > 0)
+  {
+    assert(list->Spec().ListDepth > 1);
+    dmax[dim] = ((ListPortion*) list)->Length();
+    list = (*((ListPortion*) list))[1];
+    dim--;
+  }
+  assert(list->Spec().ListDepth > 0);
+  players = dmax.Length();
+  // gout << "players: " << players << '\n';
+  // gout << "dmax: " << dmax << '\n';
+  
+  if(dmax != nfg->Dimensionality())
+    return new ErrorPortion("Bad payoff dimensionality");
+
+  // create new Nfg and call SetPayoff()
+
+  int length = dmax.Length();
+  gArray<int> d(length);
+  int ci;
+  int pl;
+
+  for(ci=1; ci<=length; ci++)
+    d[ci] = 1;
+  d[length] = 0;
+
+  while(d != dmax)
+  {
+    // increment indices
+    ci = length;
+    d[ci]++;
+    while(d[ci] > dmax[ci])
+    {
+      d[ci] = 1;
+      ci--;
+      if(ci == 0)
+	break;
+      d[ci]++;
+    }
+
+    // begin valid index region
+    // now extract the list with the payoffs at each position
+    list = param[1];
+    ci = length;
+    while(ci > 0)
+    {
+      assert(list->Spec().ListDepth > 1);
+      if(((ListPortion*) list)->Length() != dmax[ci])
+	return new ErrorPortion("Bad payoff dimensionality");
+      list = (*((ListPortion*) list))[d[ci]];
+      ci--;
+    }
+    assert(list->Spec().ListDepth == 1);
+    // gout << "SetPayoff[n, " << d << ", " << list << "]\n";
+
+    if(((ListPortion*) list)->Length() != players)
+      return new ErrorPortion("Bad payoff dimensionality");
+    
+    // now we have the list; call SetPayoff() for each player
+    for(pl=1; pl<=players; pl++)
+      if(!rational)
+	((Nfg<double>*) nfg)->SetPayoff(pl, d, ((FloatPortion*) 
+           (*((ListPortion*) list))[pl])->Value());
+      else
+	((Nfg<gRational>*) nfg)->SetPayoff(pl, d, ((RationalPortion*) 
+           (*((ListPortion*) list))[pl])->Value());
+
+    // end valid index region
+  }
+  
+  _gsm->InvalidateGameProfile((BaseNfg *) nfg, false);
+
+  return ArrayToList(dmax);
+}
+
+
+Portion* GSM_SetPayoff_List_Float(Portion** param)
+{
+  return GSM_SetPayoff_List(param, false);
+}
+
+Portion* GSM_SetPayoff_List_Rational(Portion** param)
+{
+  return GSM_SetPayoff_List(param, true);
 }
 
 //--------------
@@ -733,6 +901,42 @@ void Init_nfgfunc(GSM *gsm)
 				       porSTRATEGY, 2));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porSTRATEGY));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("name", porTEXT));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("SetPayoff", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetPayoff_NfgFloat, 
+				       PortionSpec(porINTEGER, 1), 3));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_FLOAT, 
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("list", 
+					    PortionSpec(porINTEGER,1)));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("payoff", 
+					    PortionSpec(porFLOAT,1)));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SetPayoff_NfgRational, 
+				       PortionSpec(porINTEGER, 1), 3));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG_RATIONAL, 
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("list", 
+					    PortionSpec(porINTEGER,1)));
+  FuncObj->SetParamInfo(1, 2, ParamInfoType("payoff", 
+					    PortionSpec(porRATIONAL,1)));
+
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_SetPayoff_List_Float, 
+				       PortionSpec(porINTEGER, 1), 2, 0,
+				       NON_LISTABLE));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("nfg", porNFG_FLOAT, 
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("payoff", 
+					    PortionSpec(porFLOAT,1)));
+
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_SetPayoff_List_Rational, 
+				       PortionSpec(porINTEGER, 1), 2, 0,
+				       NON_LISTABLE));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("nfg", porNFG_RATIONAL, 
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(3, 1, ParamInfoType("payoff", 
+					    PortionSpec(porRATIONAL,1)));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Strategies", 1);
