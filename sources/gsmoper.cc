@@ -1784,7 +1784,7 @@ Portion* GSM_LoadGlobalVar( Portion** param )
 Portion* GSM_SaveLocalVar( Portion** param )
 {
   gString varname =
-    _gsm->UserFuncName() + " " + ((TextPortion*) param[0])->Value();
+    _gsm->UserFuncName() + (char) 1 + ((TextPortion*) param[0])->Value();
   _gsm->GlobalVarDefine( varname, 
 			 param[1]->ValCopy() );
   return _gsm->GlobalVarValue( varname )->RefCopy();
@@ -1793,7 +1793,7 @@ Portion* GSM_SaveLocalVar( Portion** param )
 Portion* GSM_LoadLocalVar( Portion** param )
 {
   gString varname =
-    _gsm->UserFuncName() + " " + ((TextPortion*) param[0])->Value();
+    _gsm->UserFuncName() + (char) 1 + ((TextPortion*) param[0])->Value();
   if( _gsm->GlobalVarIsDefined( varname ) )
     return _gsm->GlobalVarValue( varname )->RefCopy();
   else

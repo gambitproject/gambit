@@ -152,11 +152,16 @@ void Portion::SetGame(const Nfg *game)
 {
   if (game != _Game)  {
     if (_Game)  { 
+      _gsm->GameRefCount(_Game)--;
 #ifdef MEMCHECK
-      gout<<"Game "<<_Game<<" ref count-: "<<(_gsm->GameRefCount(_Game)-1)<<'\n';
+      gout<<"Game "<<_Game<<" ref count-: "<< _gsm->GameRefCount(_Game) <<'\n';
 #endif
-      if (--_gsm->GameRefCount(_Game) == 0) 
-	delete (Nfg *) _Game;
+      /*
+	 gwu: this is commented out due to some problems with ref counting
+              need to be fixed somehow
+      if(_gsm->GameRefCount(_Game) == 0) 
+        delete (Nfg *) _Game;
+      */
     }    
      
     _Game = (void *) game;
@@ -176,14 +181,16 @@ void Portion::SetGame(const Efg *game)
 {
   if (game != _Game)  {
     if (_Game)  {
+      _gsm->GameRefCount(_Game)++;
 #ifdef MEMCHECK
-      gout<<"Game "<<_Game<<" ref count-: "<<(_gsm->GameRefCount(_Game)-1)<<'\n';
+      gout<<"Game "<<_Game<<" ref count-: "<< _gsm->GameRefCount(_Game) <<'\n';
 #endif
-      if (--_gsm->GameRefCount(_Game) == 0)   
-// Removed to temporarily solve a problem somewhere with reference counting
-// of efgs.  Of course, note that this causes a memory leak!  This needs
-// to be tracked down in the near future.
+      /*
+	 gwu: this is commented out due to some problems with ref counting
+              need to be fixed somehow
+      if (_gsm->GameRefCount(_Game) == 0)   
 	delete (Efg*) _Game;
+      */
     }
     
     _Game = (void *) game;
@@ -1377,7 +1384,10 @@ NfgPortion::NfgPortion(Nfg *&value, bool ref)
 
 NfgPortion::~NfgPortion()
 { 
-  if (!_ref)  delete _Value; 
+  if (!_ref)
+  {
+    delete _Value; 
+  }
 }
 
 Nfg *NfgPortion::Value(void) const
@@ -1385,7 +1395,8 @@ Nfg *NfgPortion::Value(void) const
 
 void NfgPortion::SetValue(Nfg *value)
 {
-  SetGame(value);
+  // gwu: this is wrong!  must be changed to fix ref-count problem
+  SetGame( value );
   *_Value = value;
 }
 
@@ -1441,7 +1452,10 @@ EfgPortion::EfgPortion(Efg *&value, bool ref)
 
 EfgPortion::~EfgPortion()
 { 
-  if (!_ref)  delete _Value; 
+  if (!_ref)
+  {
+    delete _Value; 
+  }
 }
 
 Efg *EfgPortion::Value(void) const
@@ -1449,8 +1463,9 @@ Efg *EfgPortion::Value(void) const
 
 void EfgPortion::SetValue(Efg *value)
 {
+  // gwu: this is wrong!  must be changed to fix ref-count problem
+  SetGame( value );
   *_Value = value;
-  SetGame(*_Value);
 }
 
 PortionSpec EfgPortion::Spec(void) const
@@ -2108,4 +2123,17 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
   }
   return b;
 }
+
+
+
+
+
+
+
+
+template class gArray< NfgPortion* >;
+template class gBlock< NfgPortion* >;
+
+template class gArray< EfgPortion* >;
+template class gBlock< EfgPortion* >;
 

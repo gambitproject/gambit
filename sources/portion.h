@@ -16,6 +16,7 @@
 
 
 
+#include "gblock.h"
 #include "glist.h"
 #include "gstring.h"
 #include "gnumber.h"
@@ -717,7 +718,6 @@ class NfgPortion : public Portion   {
 protected:
   Nfg ** _Value;
   bool _ref;
-
   NfgPortion(Nfg *&, bool);
 
 public:
@@ -747,7 +747,6 @@ class EfgPortion : public Portion   {
 protected:
   Efg** _Value;
   bool _ref;
-  
   EfgPortion(Efg *&, bool);
 
 public:

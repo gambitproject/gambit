@@ -639,10 +639,14 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
   result = Execute(&program, true);
 
   _ResolveRef( result );
-  result_copy = result->ValCopy();
-  delete result;
-  result = result_copy;
-  result_copy = 0;
+  if( result->IsReference() )
+  {
+    result_copy = result->ValCopy();
+    delete result;
+    result = result_copy;
+    result_copy = 0;
+  }
+
   if (result->Spec().Type == porERROR)  {
 //    gout << result << '\n'; 
 //      delete result;
