@@ -1272,36 +1272,90 @@ Portion *GSM_Mixed_NfgRational(Portion **param)
 }
 
 
+
 Portion* GSM_Mixed_NFSupport( Portion** param )
 {
-  Portion* old_param0 = param[ 0 ];
-  param[ 0 ] = param[ 0 ]->Owner();
-  Portion* result;
+  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  gArray<int> dim = S->SupportDimensions();
+  BaseMixedProfile *P;
+  Portion* por;
+  PortionType datatype;
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
 
-  switch( param[ 0 ]->Type() )
+  switch( param[ 0 ]->Owner()->Type() )
   {
   case porNFG_FLOAT:
-    if( ( (ListPortion*) param[ 1 ] )->DataType() != porFLOAT )
-    {
-      param[ 0 ] = old_param0;
-      return new ErrorPortion( "Normal form type and list type mismatch" );
-    }
-    result = GSM_Mixed_NfgFloat( param );
+    P = new MixedProfile<double>((Nfg<double> &) S->BelongsTo(), *S);
+    datatype = porFLOAT;
     break;
   case porNFG_RATIONAL:
-    if( ( (ListPortion*) param[ 1 ] )->DataType() != porRATIONAL )
-    {
-      param[ 0 ] = old_param0;
-      return new ErrorPortion( "Normal form type and list type mismatch" );
-    }
-    result = GSM_Mixed_NfgRational( param );
+    P = new MixedProfile<gRational>((Nfg<gRational> &) S->BelongsTo(), *S);
+    datatype = porRATIONAL;
     break;
   default:
     assert( 0 );
   }
 
-  param[ 0 ] = old_param0;
-  return result;
+
+  if( ( (ListPortion*) param[1] )->Length() != dim.Length() )
+  {
+    delete P;
+    return new ErrorPortion( "Mismatching number of players" );
+  }
+  
+  for( i = 1; i <= dim.Length(); i++ )
+  {
+    p1 = ( (ListPortion*) param[1] )->Subscript( i );
+    if( p1->Type() != porLIST )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching dimensionality" );
+    }
+    if( ( (ListPortion*) p1 )->Length() != dim[ i ] )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching number of strategies" );
+    }
+    
+    for( j = 1; j <= dim[ i ]; j++ )
+    {
+      p2 = ( (ListPortion*) p1 )->Subscript( j );
+      if( p2->Type() != datatype )
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion( "Mismatching dimensionality" );
+      }
+      
+      switch( datatype )
+      {
+      case porFLOAT:
+	( * (MixedProfile<double>*) P )( i, j ) = 
+	  ( (FloatPortion*) p2 )->Value();
+	break;
+      case porRATIONAL:
+	( * (MixedProfile<gRational>*) P )( i, j ) = 
+	  ( (RationalPortion*) p2 )->Value();
+	break;
+      default:
+	assert( 0 );
+      }
+      
+      delete p2;
+    }
+    delete p1;
+  }
+  
+  por = new MixedValPortion(P);
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
 }
 
 
