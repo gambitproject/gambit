@@ -248,7 +248,35 @@ Node ExtForm::DeleteTree(const Node &n)
 }
 
 
-void ExtForm::WriteToFile(FILE *f) const
+void ExtForm::WriteToFile(output &f) const
 {
+  f << "{ \"" << name << '"' << '\n';
+  f << "  {\n";
+  for (int i = 0; i <= players.NumPlayers(); i++)   {
+    f << "    {";
+    for (int j = 1; j <= players.NumInfosets(i, efg_no); j++)  {
+      f << ((j == 1) ? " " : "\n      ");
+      f << "{ \"" << players.GetInfosetName(i, efg_no, j) << "\" "
+        << nodes.NumNodes(i, j) << " {";
+      for (int k = 1; k <= players.NumBranches(i, efg_no, j); k++)
+	f << " \"" << players.GetBranchName(i, efg_no, j, k) << '"';
+      f << " }";
+      
+      if (i == 0)   { // chance player, print branch probs
+	f << " { ";
+	for (k = 1; k <= players.NumBranches(i, efg_no, j); k++)
+	  f << players.GetBranchProb(efg_no, j, k) << ' ';
+	f << '}';
+      }
+
+      f << " }";
+    }
+    f << " }\n";
+  }
+  f << "  }\n";  
+
   nodes.WriteToFile(f);
+  
+  f << "}\n";
 }
+

@@ -12,6 +12,7 @@
 #include "gmapset.h"
 
 #include "infoset.h"
+#include "node.h"
 
 class Player   {
   private:
@@ -114,10 +115,6 @@ class Player   {
 
 	// returns the player's name
     gString GetPlayerName(void) const    { return name; }
-
-
-	// FILE OPERATIONS
-    void WriteToFile(FILE *f, int plno) const;
 };
 
 
@@ -235,9 +232,6 @@ class PlayerSet   {
     void InsertBranch(int p, int game, int iset, int br)
       { players[p + 2]->InsertBranch(game, iset, br); }
 
-	// FILE OPERATIONS
-    void WriteToFile(FILE *f) const;
-    
 };
 #endif    // PLAYER_H
 

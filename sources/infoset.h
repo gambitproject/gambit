@@ -85,9 +85,6 @@ class Infoset   {
 	// add a branch to the infoset
     void InsertBranch(int br)
       { branches.Insert(new Branch, br); }
-
-	// FILE OPERATIONS
-    void WriteToFile(FILE *f) const;
 };
 
 

@@ -70,6 +70,9 @@ class ExtForm    {
     Node CopyTree(Node from, Node dest);
     Node DeleteTree(const Node &n);
 
+    void SetTreeName(const gString &s)   { name = s; }
+    gString GetTreeName(void) const   { return name; }
+
 	// OPERATIONS ON NODES
     Node RootNode(void) const
       { return nodes.RootNode(); }
@@ -102,8 +105,7 @@ class ExtForm    {
       { return nodes.GetOutcome(n); }
 
 	// FILE OPERATIONS
-    void WriteToFile(FILE *f) const;
-
+    void WriteToFile(output &f) const;
 };
 
 
