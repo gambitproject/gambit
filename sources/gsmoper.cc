@@ -1452,8 +1452,7 @@ Portion* GSM_Manual(Portion** param)
   gText line_out;
   bool found = false;
   bool valid = true;
-  while(valid && !f->eof() && !found)
-  {
+  while(valid && !f->eof() && !found) {
     try{
       line = GetLine(*f);
     }
@@ -1462,24 +1461,20 @@ Portion* GSM_Manual(Portion** param)
       if( line.Left(txt.Length() + 1).Dncase() == (txt + "[").Dncase() )
 	found = true;
   }
-  if(found)
-  {
+  if(found) {
     body = 0;
     bool valid = true;
-    while(valid && !f->eof())
-    {
+    while(valid && !f->eof()) {
       try{
 	line = GetLine(*f);
       }
       catch(gFileInput::ReadFailed &) {valid = false;}
-
+      
       if(line.Length()>=3 && line.Left(3) == "\\bd")
 	body++;
-      if(body > 0)
-      {
+      if(body > 0) {
 	line_out = line;
-	while(true)
-	{
+	while(true) {
 	  char* s;
 	  int idx;
 	  int numchars = 0;
@@ -1493,25 +1488,21 @@ Portion* GSM_Manual(Portion** param)
 	    numchars = 4;
 	  else if((s=strstr((char *) line_out, "\\em")) != 0)
 	    numchars = 4;
-	  else if((s=strstr((char *) line_out, "$")) != 0)
-	  {
+	  else if((s=strstr((char *) line_out, "$")) != 0) {
 	    idx = s - (char *) line_out;
 	    line_out[idx] = '\'';
 	    numchars = 0;
 	  }
-	  else if((s=strstr((char *) line_out, "\\verb")) != 0)
-	  {
+	  else if((s=strstr((char *) line_out, "\\verb")) != 0) {
 	    numchars = 5;
 	    idx = s - (char *) line_out;
 	    for(i=0; i<numchars; i++) 
 	      line_out.Remove(idx);
-	    if(line_out.Length()>idx)
-	    {
+	    if(line_out.Length()>idx) {
 	      char c;
 	      c = line_out[idx];
 	      line_out[idx] = '\"';
-	      while(line_out.Length()>idx)
-	      {
+	      while(line_out.Length()>idx) {
 		idx++;
 		if(line_out[idx]==c)
 		  break;
@@ -1523,17 +1514,18 @@ Portion* GSM_Manual(Portion** param)
 	  else
 	    break;
 	  idx = s - (char *) line_out;
-	  for(i=0; i<numchars; i++) 
-	    line_out.Remove(idx);
-	  if(line_out.Length()>idx && line_out[idx] == ' ')
-	    line_out.Remove(idx);
+	  if(idx>= 0) {    // this is necessary to prevent case where Remove() makes idx neg
+	    for(i=0; i<numchars; i++) 
+	      line_out.Remove(idx);
+	    if(line_out.Length()>idx && line_out[idx] == ' ')
+	      line_out.Remove(idx);
+	  }
 	}
 	for(i=0; i<body; i++)
 	  s << ' ';
 	s << line_out << '\n';
       }
-      if(line.Length()>=3 && line.Left(3) == "\\ed")
-      {
+      if(line.Length()>=3 && line.Left(3) == "\\ed") {
 	body--;
 	if(body <= 0)
 	  break;
