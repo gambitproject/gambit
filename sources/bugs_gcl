@@ -1,0 +1,132 @@
+GCL Bugs
+
+Bug C5: Incorrect solutions, and crashing with large integers:
+
+  46 mill:/home/mill/rdm/gambit/test newgcl
+  Include["gclini.gcl"]
+  Include["stdudfs.gcl"]
+  GCL1:= << p:={ { { 343519405, 57518365 }, { 905196150, 857537702 } },{ { 500889218, 1982990232 }, { 83903549, 1493083335 } } }
+  { { { 343519405, 57518365 }, { 905196150, 857537702 } },
+    { { 500889218, 1982990232 }, { 83903549, 1493083335 } } }
+  GCL2:= << n:=Nfg[p]
+  (Nfg) ""
+  GCL3:= << AllNash[n]
+  {  (MIXED) }
+  GCL4:= << LcpSolve[n]
+  gcl_mill: lemketab.cc:166: int LTableau<double>::ExitIndex(int): Assertion `c <= MaxRow()' failed.
+  A segmentation fault has occurred
+
+This looks like an algorithm bug.  I'll see if I can track it down (rdm).  
+
+Bug C8:  Bug in mixed dominance elimination.  
+
+  311 mill:/home/mill/rdm/gambit/test2 newgcl
+  Include["gclini.gcl"]
+  Include["stdudfs.gcl"]
+  GCL1:= << e:=LoadEfg["poker.efg"]
+  (Efg) "A simple Poker game"
+  GCL2:= << n := Nfg[e];
+  (Nfg) "A simple Poker game"
+  GCL3:= << s:=ElimAllDom[n,strong->True,mixed->True];
+  gcl_mill: tableau.imp:385: void LPTableau<gRational>::SetCost(const class gVector<gRational> &): Assertion `c.Last()==(cost.Last()+unitcost.Length())' failed.
+  A segmentation fault has occurred
+
+Bug C9a: The Include["x"] bug on billandal is fixed, but the other IO functions
+are still having the same problem there:
+
+  43 billandal:/home/mill/rdm/gambit/sources gcl_AIX
+  Include["gclini.gcl"]
+  Include["stdudfs.gcl"]
+  GCL1:= << LoadNfg["x"]
+  A segmentation fault has occurred
+
+Also, when you quit the gcl on billandal, it seg faults.  As before,
+none of these are a problem on mill or koo.  
+
+Bug C16a: Concat is not running listably any more. 
+
+  GCL1:= a:="a"
+  GCL2:= bc:={"b","c"}
+  GCL3:= << a&bc
+  ERROR: Concat[]: Type mismatch on parameter #2, "y"; expected TEXT, got LIST(TEXT)
+  GCL4:= << Help["concat",udf->False]
+  { Concat[x->TEXT, y->TEXT] =: TEXT,
+    Concat[x->NLIST(ANYTYPE), y->NLIST(ANYTYPE)] =: LIST(ANYTYPE) }
+
+Is this a side effect of the change you made to get rid of bug C16, now fixed, but reproduced here for reference:
+
+Bug C16  Ambiguous BIFS.  No way to concatenate lists of TEXT
+
+  111 mill:/home/mill/rdm/gambit/nfg newgcl
+  Include["gclini.gcl"]
+  GCL1:= << {"a"}&{"b"}
+  ERROR: Concat[] called with ambiguous parameter(s)
+  GCL2:= << Help["concat"]           
+  { Concat[x->TEXT, y->TEXT] =: TEXT,
+    Concat[x->NLIST(ANYTYPE), y->NLIST(ANYTYPE)] =: LIST(ANYTYPE) }
+
+8/27/98 The above bug is fixed. 
+
+
+Bug C17  Bad line numbers for parse errors.  
+
+  148 mill:/home/mill/rdm/gambit/test newgcl
+  Include["gclini.gcl"]
+  Include["stdudfs.gcl"]
+  GCL1:= << Include["bcp.gcl"]    
+  True
+  parse error at line 56 in file bcp.gcl: identifier size
+
+but line 56 is a comment.  
+
+Bug C18: Bug in LPSolve[] (or use the script gambit/test/csumsolve.gcl):
+
+  GCL1:= << n:=LoadNfg["../nfg/cs1.nfg"]
+  (Nfg) ""
+  GCL2:= << m:=LpSolve[n,stopAfter->0]
+
+  c: { 0.000000 0.000000 0.000000 1.000000 }
+  uc: { 0.000000 0.000000 0.000000 0.000000 }
+  col: 1 cost: 0.000000 label: 4 x: 1.000000
+  col: 2 cost: -1.000000 label: -2 x: In function LpSolve[], in file "stdudfs.gcl" at line 463:
+  In function LpSolve[], in file "console" at line 2:
+  GCL EXCEPTION:Bad index in gArray; Caught in gcl.cc, main()
+
+Bug C19: LiapSolve is giving incorrect solutions, and in the wrong
+precision.  It just retruns the centroid, in Rational precision. 
+
+  GCL1:= << e:=LoadEfg["../efg/e01.efg"]
+  (Efg) "Selten, Figure 1"
+  GCL2:= << LiapSolve[e,True,0,5]
+  { (Behav) { { 1/2 1/2 } }{ { 1/2 1/2 } }{ { 1/2 1/2 } },
+    (Behav) { { 1/2 1/2 } }{ { 1/2 1/2 } }{ { 1/2 1/2 } },
+    (Behav) { { 1/2 1/2 } }{ { 1/2 1/2 } }{ { 1/2 1/2 } } }
+
+
+Bug C20: Read[StdIn,x] hangs the machine (it had to be killed remotely)
+
+  GCL1:= << Read[StdIn,x]
+  GCL: Parameter 2 undefined in call to Read
+  GCL2:= << x:=0
+  0
+  GCL3:= << Read[StdIn,x]
+  Killed
+
+
+
+---------------  These are not bugs but suggested improvements ------------
+
+S1: A suggestion to add command line arguments.  Perhaps we should
+have a -Ifilename flag to include a file?
+
+On Mon, 11 May 1998, Olson Collin K wrote:
+
+> One simple creature comfort that would make programming in Gambit zounds
+> easier would be to take all of the command line arguemnts to gcl32 and
+> automatically Include[] them.  So far as I can tell from the manual, there
+> is no way to do this.
+> 
+> I prefer to code using my own text editor, and this feature would make it
+> much easier to do my own coding from outside the gcl command console and
+> allow me to write software that calls gcl iteratively, for example.
+
