@@ -1234,8 +1234,9 @@ void MixedPortion::SetValue(MixedSolution *value)
 {
   SetGame(&value->Game());
   if (_ref)   {
-    delete rep->value;
-    rep->value = value;
+    ((MixedPortion *) Original())->SetValue(value);
+    rep = ((MixedPortion *) Original())->rep;
+    rep->nref++;
   }
   else  {
     if (--rep->nref == 0)  delete rep;
@@ -1272,7 +1273,7 @@ Portion* MixedPortion::ValCopy(void) const
 Portion* MixedPortion::RefCopy(void) const
 { 
   Portion* p = new MixedPortion(this, true);
-  p->SetOriginal(Original());
+  p->SetOriginal(this);
   return p;
 }
 
@@ -1312,8 +1313,9 @@ void BehavPortion::SetValue(BehavSolution *value)
 {
   SetGame(&value->Game());
   if (_ref)   {
-    delete rep->value;
-    rep->value = value;
+    ((BehavPortion *) Original())->SetValue(value);
+    rep = ((BehavPortion *) Original())->rep;
+    rep->nref++;
   }
   else  {
     if (--rep->nref == 0)  delete rep;
@@ -1349,7 +1351,7 @@ Portion* BehavPortion::ValCopy(void) const
 Portion* BehavPortion::RefCopy(void) const
 { 
   Portion* p = new BehavPortion(this, true); 
-  p->SetOriginal(Original());
+  p->SetOriginal(this);
   return p;
 }
 

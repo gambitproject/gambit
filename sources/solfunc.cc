@@ -622,7 +622,7 @@ static Portion *GSM_SetActionProbs(Portion **param)
   int PlayerNum = 0;
   int InfosetNum = 0;
   
-  BehavSolution *P = ((BehavPortion*) param[0])->Value();
+  BehavSolution *P = new BehavSolution(*((BehavPortion*) param[0])->Value());
   Efg& E = P->Game();
   gArray< EFPlayer* > player = E.Players();
   
@@ -641,9 +641,11 @@ static Portion *GSM_SetActionProbs(Portion **param)
   }
   
   if(((ListPortion*) param[2])->Length() != 
-     E.Players()[PlayerNum]->Infosets()[InfosetNum]->NumActions())
+     E.Players()[PlayerNum]->Infosets()[InfosetNum]->NumActions())  {
+    delete P;
     return new ErrorPortion("Mismatching number of actions");
-  
+  }  
+
   for(k = 1; 
       k <= E.Players()[PlayerNum]->Infosets()[InfosetNum]->NumActions();
       k++)
@@ -652,6 +654,7 @@ static Portion *GSM_SetActionProbs(Portion **param)
     if(p3->Spec().ListDepth > 0)
     {
       delete p3;
+      delete P;
       return new ErrorPortion("Mismatching dimensionality");
     }
 
@@ -661,6 +664,7 @@ static Portion *GSM_SetActionProbs(Portion **param)
     delete p3;
   }
 
+  ((BehavPortion *) param[0])->SetValue(P);
   return param[0]->RefCopy();
 }
 
@@ -677,7 +681,7 @@ static Portion *GSM_SetStrategyProbs(Portion **param)
   Portion* p2;
   int PlayerNum = 0;
 
-  MixedSolution *P = ((MixedPortion *) param[0])->Value();
+  MixedSolution *P = new MixedSolution(*((MixedPortion *) param[0])->Value());
   Nfg& N = P->Game();
   const gArray<NFPlayer *> &player = N.Players();
   
@@ -689,8 +693,10 @@ static Portion *GSM_SetStrategyProbs(Portion **param)
     }
   }
   
-  if(((ListPortion*) param[2])->Length() != N.NumStrats(PlayerNum))
+  if(((ListPortion*) param[2])->Length() != N.NumStrats(PlayerNum))  {
+    delete P;
     return new ErrorPortion("Mismatching number of strategies");
+  }
 
   for(j = 1; j <= N.NumStrats(PlayerNum); j++)
   {
@@ -698,6 +704,7 @@ static Portion *GSM_SetStrategyProbs(Portion **param)
     if(p2->Spec().ListDepth > 0)
     {
       delete p2;
+      delete P;
       return new ErrorPortion("Mismatching dimensionality");
     }
 
@@ -707,6 +714,7 @@ static Portion *GSM_SetStrategyProbs(Portion **param)
     delete p2;
   }
 
+  ((MixedPortion *) param[0])->SetValue(P);
   return param[0]->RefCopy();
 }
 
