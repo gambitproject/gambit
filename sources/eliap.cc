@@ -32,7 +32,7 @@ template <class T> EFLiapParams<T>::EFLiapParams(void)
 template <class T>
 class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
   private:
-    int niters, nevals;
+    long niters, nevals;
     const Efg<T> &E;
     BehavProfile<T> p, pp;
     gDPVector<T> cpay;
@@ -50,8 +50,8 @@ class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
     void Output(gOutput &f) const;
 
     void Randomize(void);
-    int NumIters(void) const;
-    int NumEvals(void) const;
+    long NumIters(void) const;
+    long NumEvals(void) const;
 
     const BehavProfile<T> &GetProfile(void) const;
 };
@@ -95,12 +95,12 @@ template <class T> void EFLiapFunc<T>::Output(gOutput &f) const
   f << "\np = " << pp;
  }
 
-template <class T> int EFLiapFunc<T>::NumIters(void) const
+template <class T> long EFLiapFunc<T>::NumIters(void) const
 {
   return niters;
 }
 
-template <class T> int EFLiapFunc<T>::NumEvals(void) const
+template <class T> long EFLiapFunc<T>::NumEvals(void) const
 {
   return nevals;
 }

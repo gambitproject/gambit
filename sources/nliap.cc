@@ -46,8 +46,8 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
     int Optimize(int &iter, T &value);
     void Output(gOutput &f) const;
 
-    int NumIters(void) const;
-    int NumEvals(void) const;
+    long NumIters(void) const;
+    long NumEvals(void) const;
 
     const gPVector<T> &GetProfile(void) const;
 };
@@ -90,12 +90,12 @@ template <class T> void NFLiapFunc<T>::Output(gOutput &f) const
   f << "\np = " << pp;
  }
 
-template <class T> int NFLiapFunc<T>::NumIters(void) const
+template <class T> long NFLiapFunc<T>::NumIters(void) const
 {
   return niters;
 }
 
-template <class T> int NFLiapFunc<T>::NumEvals(void) const
+template <class T> long NFLiapFunc<T>::NumEvals(void) const
 {
   return nevals;
 }
