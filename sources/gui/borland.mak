@@ -12,9 +12,9 @@
 !include ..\makedef.bcc
 
 WXLIBDIR = $(WXDIR)\lib
-WXLIB = wx32 xpm tiff jpeg winpng zlib
+WXLIB = wx32 tiff jpeg winpng zlib
 
-EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(BCCDIR)\include -I.. -D__BCC55__ -DVERSION=0.97.0.1
+EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(BCCDIR)\include -I.. -D__BCC55__ -DVERSION=\"0.97.0.1\"
 EXTRALINKFLAGS = 
 
 gambit_SOURCES = \
