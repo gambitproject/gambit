@@ -79,109 +79,234 @@ SpreadSheetDrawSettings::SpreadSheetDrawSettings(SpreadSheet3D *_parent, int col
     ToTextPrecision(num_prec);
 }
 
+class dialogSpreadOptions : public guiAutoDialog {
+private:
+  wxButton *m_labelFontButton, *m_dataFontButton;
+  wxSlider *m_horizSize, *m_vertSize, *m_decimals;
+  wxChoice *m_columnList;
+  wxCheckBox *m_horizFit, *m_vertFit;
+  wxCheckBox *m_rowLabels, *m_colLabels, *m_colorLabels;
+  SpreadSheetDrawSettings &m_drawSettings;
 
-void    SpreadSheetDrawSettings::SetOptions(void)
+  static void CallbackLabelFont(wxButton &p_object, wxEvent &)
+    { ((dialogSpreadOptions *) p_object.GetClientData())->OnLabelFont(); }
+  static void CallbackDataFont(wxButton &p_object, wxEvent &)
+    { ((dialogSpreadOptions *) p_object.GetClientData())->OnDataFont(); }
+
+  void OnLabelFont(void);
+  void OnDataFont(void);
+  
+public:
+  dialogSpreadOptions(SpreadSheetDrawSettings &p_options,
+		      wxWindow *p_parent);
+  virtual ~dialogSpreadOptions() { }
+
+  int SelectedColumn(void) const { return m_columnList->GetSelection(); }
+  int ColumnWidth(void) const { return m_horizSize->GetValue(); }
+  int RowHeight(void) const { return m_vertSize->GetValue(); }
+  bool ColumnFit(void) const { return m_horizFit->GetValue(); }
+  bool RowFit(void) const { return m_vertFit->GetValue(); }
+
+  bool RowLabels(void) const { return m_rowLabels->GetValue(); }
+  bool ColumnLabels(void) const { return m_colLabels->GetValue(); }
+  bool ColorCodedLabels(void) const { return m_colorLabels->GetValue(); }
+
+  int NumDecimals(void) const { return m_decimals->GetValue(); }
+};
+
+dialogSpreadOptions::dialogSpreadOptions(SpreadSheetDrawSettings &p_options,
+					 wxWindow *p_parent)
+  : guiAutoDialog(p_parent, "Options"),
+    m_drawSettings(p_options)
 {
-    Bool labels_col = ColLabels(), labels_row = RowLabels();
-    int horiz = col_width[1], vert = row_height;
-    
-    MyDialogBox *options_dialog = new MyDialogBox((wxWindow *)parent, "Options");
-    options_dialog->Add(wxMakeFormMessage("Fonts"));
-    wxFormItem *lfont_but = wxMakeFormButton("Label", (wxFunction)spread_options_lfont_func);
-    options_dialog->Add(lfont_but);
-    wxFormItem *dfont_but = wxMakeFormButton("Data", (wxFunction)spread_options_dfont_func);
-    options_dialog->Add(dfont_but);
-    options_dialog->Add(wxMakeFormNewLine());
-    options_dialog->Add(wxMakeFormMessage("Cell size"));
-    options_dialog->Add(wxMakeFormNewLine());
-    options_dialog->Add(wxMakeFormShort("Horiz", &horiz, wxFORM_SLIDER, 
-                                        new wxList(wxMakeConstraintRange(0, 50), 0)));
-    options_dialog->Add(wxMakeFormBool("char", &horiz_fit));
-    wxStringList *column_list = new wxStringList;
-    char *col_str = new char[10];
-    column_list->Add("None");
-    column_list->Add("All");
-    column_list = wxStringListInts(col_width.Length(), column_list);
-    options_dialog->Add(wxMakeFormString("Col", &col_str, wxFORM_CHOICE,
-                                         new wxList(wxMakeConstraintStrings(column_list), 0)));
-    options_dialog->Add(wxMakeFormNewLine());
-    options_dialog->Add(wxMakeFormShort("Vert", &vert, wxFORM_SLIDER, 
-                                        new wxList(wxMakeConstraintRange(0, 50), 0)));
-    options_dialog->Add(wxMakeFormBool("Fit to font", &vert_fit));
-    options_dialog->Add(wxMakeFormNewLine());
-    options_dialog->Add(wxMakeFormMessage("Show Labels"));
-    options_dialog->Add(wxMakeFormBool("row", &labels_row));
-    options_dialog->Add(wxMakeFormBool("col", &labels_col));
-    options_dialog->Add(wxMakeFormBool("Color Text", &gtext));
-    options_dialog->Add(wxMakeFormNewLine());
-    options_dialog->Add(wxMakeFormShort("Output precision", &num_prec, wxFORM_SLIDER,
-                                        new wxList(wxMakeConstraintRange(0, 16), 0)));
-    options_dialog->Add(wxMakeFormNewLine());
-    Bool save = FALSE;
-    options_dialog->Form()->Add(wxMakeFormBool("Save now", &save));
-    options_dialog->Form()->AssociatePanel(options_dialog);
-    ((wxButton *)dfont_but->GetPanelItem())->SetClientData((char *)this);
-    ((wxButton *)lfont_but->GetPanelItem())->SetClientData((char *)this);
-    options_dialog->Go1();
-    
-    if (options_dialog->Completed() == wxOK)
-    {
-        unsigned int changed = 0; // what exactly has changed ...
-        int which_col = wxListFindString(column_list, col_str);
-        
-        if (which_col) 
-            SetColWidth(horiz, which_col-1);
+  wxGroupBox *fontGroup = new wxGroupBox(this, "Fonts", 1, 1);
 
-        SetRowHeight(row_height);
-        labels = 0;
-        
-        if (labels_row) 
-            labels |= S_LABEL_ROW;
-        
-        if (labels_col) 
-            labels |= S_LABEL_COL;
-        
-        if (ToTextPrecision() != num_prec)
-        {
-            ToTextPrecision(num_prec);
-            changed |= S_PREC_CHANGED;
-        }
-        
-        if (save) 
-            SaveOptions();
+  m_labelFontButton = new wxButton(this, (wxFunction) CallbackLabelFont,
+				   "Label");
+  m_labelFontButton->SetClientData((char *) this);
+  m_dataFontButton = new wxButton(this, (wxFunction) CallbackDataFont, "Data");
+  m_dataFontButton->SetClientData((char *) this);
 
-        parent->OnOptionsChanged(changed);
+  m_labelFontButton->SetConstraints(new wxLayoutConstraints);
+  m_labelFontButton->GetConstraints()->left.SameAs(fontGroup, wxLeft, 10);
+  m_labelFontButton->GetConstraints()->top.SameAs(fontGroup, wxTop, 20);
+  m_labelFontButton->GetConstraints()->width.AsIs();
+  m_labelFontButton->GetConstraints()->height.AsIs();
+
+  m_dataFontButton->SetConstraints(new wxLayoutConstraints);
+  m_dataFontButton->GetConstraints()->left.SameAs(m_labelFontButton,
+						  wxRight, 10);
+  m_dataFontButton->GetConstraints()->top.SameAs(m_labelFontButton, wxTop);
+  m_dataFontButton->GetConstraints()->width.AsIs();
+  m_dataFontButton->GetConstraints()->height.AsIs();
+
+  fontGroup->SetConstraints(new wxLayoutConstraints);
+  fontGroup->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  fontGroup->GetConstraints()->top.SameAs(this, wxTop, 10);
+  fontGroup->GetConstraints()->right.SameAs(m_dataFontButton, wxRight, -10);
+  fontGroup->GetConstraints()->bottom.SameAs(m_dataFontButton, wxBottom, -10);
+
+  wxGroupBox *sizeGroup = new wxGroupBox(this, "Cell sizing");
+
+  m_horizSize = new wxSlider(this, 0, "Column width", 
+			     m_drawSettings.GetColWidth(), 0, 50, 250);
+  m_horizSize->SetConstraints(new wxLayoutConstraints);
+  m_horizSize->GetConstraints()->left.SameAs(sizeGroup, wxLeft, 10);
+  m_horizSize->GetConstraints()->top.SameAs(sizeGroup, wxTop, 20);
+  m_horizSize->GetConstraints()->width.AsIs();
+  m_horizSize->GetConstraints()->height.AsIs();
+
+  m_horizFit = new wxCheckBox(this, 0, "Fit");
+  m_horizFit->SetValue(m_drawSettings.GetColFit());
+  m_horizFit->SetConstraints(new wxLayoutConstraints);
+  m_horizFit->GetConstraints()->left.SameAs(m_horizSize, wxRight, 10);
+  m_horizFit->GetConstraints()->centreY.SameAs(m_horizSize, wxCentreY);
+  m_horizFit->GetConstraints()->width.AsIs();
+  m_horizFit->GetConstraints()->height.AsIs();
+
+  m_columnList = new wxChoice(this, 0, "Column");
+  m_columnList->Append("All");
+  for (int i = 1; i <= p_options.NumColumns(); i++) {
+    m_columnList->Append(ToText(i));
+  } 
+  m_columnList->SetSelection(0);
+  m_columnList->SetConstraints(new wxLayoutConstraints);
+  m_columnList->GetConstraints()->left.SameAs(m_horizFit, wxRight, 10);
+  m_columnList->GetConstraints()->centreY.SameAs(m_horizFit, wxCentreY);
+  m_columnList->GetConstraints()->width.AsIs();
+  m_columnList->GetConstraints()->height.AsIs();
+
+  m_vertSize = new wxSlider(this, 0, "Row height", 
+			    m_drawSettings.GetRowHeight(), 0, 50, 250);
+  m_vertSize->SetConstraints(new wxLayoutConstraints);
+  m_vertSize->GetConstraints()->left.SameAs(m_horizSize, wxLeft);
+  m_vertSize->GetConstraints()->top.SameAs(m_horizSize, wxBottom, 10);
+  m_vertSize->GetConstraints()->width.AsIs();
+  m_vertSize->GetConstraints()->height.AsIs();
+
+  m_vertFit = new wxCheckBox(this, 0, "Fit");
+  m_vertFit->SetValue(m_drawSettings.GetRowFit());
+  m_vertFit->SetConstraints(new wxLayoutConstraints);
+  m_vertFit->GetConstraints()->left.SameAs(m_vertSize, wxRight, 10);
+  m_vertFit->GetConstraints()->centreY.SameAs(m_vertSize, wxCentreY);
+  m_vertFit->GetConstraints()->width.AsIs();
+  m_vertFit->GetConstraints()->height.AsIs();
+
+  sizeGroup->SetConstraints(new wxLayoutConstraints);
+  sizeGroup->GetConstraints()->left.SameAs(fontGroup, wxLeft);
+  sizeGroup->GetConstraints()->top.SameAs(fontGroup, wxBottom, 10);
+  sizeGroup->GetConstraints()->right.SameAs(m_columnList, wxRight, -10);
+  sizeGroup->GetConstraints()->bottom.SameAs(m_vertSize, wxBottom, -10);
+
+  wxGroupBox *labelsGroup = new wxGroupBox(this, "Show labels");
+
+  m_rowLabels = new wxCheckBox(this, 0, "Rows");
+  m_rowLabels->SetValue(m_drawSettings.RowLabels());
+  m_rowLabels->SetConstraints(new wxLayoutConstraints);
+  m_rowLabels->GetConstraints()->left.SameAs(labelsGroup, wxLeft, 10);
+  m_rowLabels->GetConstraints()->top.SameAs(labelsGroup, wxTop, 20);
+  m_rowLabels->GetConstraints()->width.AsIs();
+  m_rowLabels->GetConstraints()->height.AsIs();
+
+  m_colLabels = new wxCheckBox(this, 0, "Columns");
+  m_colLabels->SetValue(m_drawSettings.ColLabels());
+  m_colLabels->SetConstraints(new wxLayoutConstraints);
+  m_colLabels->GetConstraints()->left.SameAs(m_rowLabels, wxRight, 10);
+  m_colLabels->GetConstraints()->top.SameAs(m_rowLabels, wxTop);
+  m_colLabels->GetConstraints()->width.AsIs();
+  m_colLabels->GetConstraints()->height.AsIs();
+
+  m_colorLabels = new wxCheckBox(this, 0, "Color Text");
+  m_colorLabels->SetValue(m_drawSettings.UseGText());
+  m_colorLabels->SetConstraints(new wxLayoutConstraints);
+  m_colorLabels->GetConstraints()->left.SameAs(m_colLabels, wxRight, 10);
+  m_colorLabels->GetConstraints()->top.SameAs(m_colLabels, wxTop);
+  m_colorLabels->GetConstraints()->width.AsIs();
+  m_colorLabels->GetConstraints()->height.AsIs();
+  
+  labelsGroup->SetConstraints(new wxLayoutConstraints);
+  labelsGroup->GetConstraints()->left.SameAs(sizeGroup, wxLeft);
+  labelsGroup->GetConstraints()->top.SameAs(sizeGroup, wxBottom, 10);
+  labelsGroup->GetConstraints()->right.SameAs(m_colorLabels, wxRight, -10);
+  labelsGroup->GetConstraints()->bottom.SameAs(m_colorLabels, wxBottom, -10);
+
+  m_decimals = new wxSlider(this, 0, "Decimal Places", 2, 0, 25, 250);
+  m_decimals->SetConstraints(new wxLayoutConstraints);
+  m_decimals->GetConstraints()->left.SameAs(labelsGroup, wxLeft, 10);
+  m_decimals->GetConstraints()->top.SameAs(labelsGroup, wxBottom, 10);
+  m_decimals->GetConstraints()->width.AsIs();
+  m_decimals->GetConstraints()->height.AsIs();
+
+  m_okButton->GetConstraints()->top.SameAs(m_decimals, wxBottom, 10);
+  m_okButton->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
+
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
+
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_helpButton->GetConstraints()->height.AsIs();
+
+  Go();
+}
+
+void dialogSpreadOptions::OnLabelFont(void)
+{
+  FontDialogBox dialog(NULL, m_drawSettings.GetLabelFont());
+    
+  if (dialog.Completed() == wxOK) {
+    m_drawSettings.SetLabelFont(dialog.MakeFont());
+  }
+}
+
+void dialogSpreadOptions::OnDataFont(void)
+{
+  FontDialogBox dialog(NULL, m_drawSettings.GetDataFont());
+    
+  if (dialog.Completed() == wxOK) {
+    m_drawSettings.SetDataFont(dialog.MakeFont());
+  }
+}
+
+void SpreadSheetDrawSettings::SetOptions(void)
+{
+  dialogSpreadOptions dialog(*this, parent);
+
+  if (dialog.Completed() == wxOK) {
+    unsigned int changed = 0; // what exactly has changed ...
+    int which_col = dialog.SelectedColumn();
+        
+    if (which_col) 
+      SetColWidth(dialog.ColumnWidth(), which_col-1);
+
+    SetRowHeight(dialog.RowHeight());
+    labels = 0;
+        
+    if (dialog.RowLabels()) 
+      labels |= S_LABEL_ROW;
+        
+    if (dialog.ColumnLabels())
+      labels |= S_LABEL_COL;
+        
+    gtext = dialog.ColorCodedLabels();
+    vert_fit = dialog.RowFit();
+    horiz_fit = dialog.ColumnFit();
+
+    if (ToTextPrecision() != dialog.NumDecimals()) {
+      ToTextPrecision(dialog.NumDecimals());
+      changed |= S_PREC_CHANGED;
     }
+        
+    parent->OnOptionsChanged(changed);
+  }
 
-    delete options_dialog;
-    delete col_str;
-    parent->Redraw();
+  parent->Redraw();
 }
-
-
-void    SpreadSheetDrawSettings::spread_options_lfont_func(wxButton &ob, wxEvent &)
-{
-    SpreadSheetDrawSettings  *draw_settings = (SpreadSheetDrawSettings *)ob.GetClientData();
-    FontDialogBox *f = new FontDialogBox(NULL, draw_settings->GetLabelFont());
-    
-    if (f->Completed() == wxOK)
-        draw_settings->SetLabelFont(f->MakeFont());
-
-    delete f;
-}
-
-
-void    SpreadSheetDrawSettings::spread_options_dfont_func(wxButton &ob, wxEvent &)
-{
-    SpreadSheetDrawSettings *draw_settings = (SpreadSheetDrawSettings *)ob.GetClientData();
-    FontDialogBox *f = new FontDialogBox(NULL, draw_settings->GetDataFont());
-    
-    if (f->Completed() == wxOK)
-        draw_settings->SetDataFont(f->MakeFont());
-
-    delete f;
-}
-
 
 void    SpreadSheetDrawSettings::SaveOptions(const char *s)
 {

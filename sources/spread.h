@@ -189,10 +189,6 @@ public:
     // A way to set many options through a dialog
     void SetOptions(void);
 
-    // static functions for the above
-    static void spread_options_lfont_func(wxButton &ob, wxEvent &ev);
-    static void spread_options_dfont_func(wxButton &ob, wxEvent &ev);
-
     // Allows to use a previously created settings with this parent
     void SetParent(SpreadSheet3D *_parent) { parent = _parent; }
 
@@ -205,11 +201,15 @@ public:
     }
 
     void DelCol(int col) { col_width.Remove(col); }
+    int NumColumns(void) const { return col_width.Length(); }
 
     // Data Access, Get* functions
     // These functions control the dimentions of each cell i.e. Width X Height
     int GetRowHeight(void)  { return ((vert_fit) ? (th*5/4+2*TEXT_OFF) : row_height); }
     int GetColWidth(int col = 0);
+
+    bool GetRowFit(void) { return vert_fit; }
+    bool GetColFit(void) { return horiz_fit; }
 
     // These functions tell about the size of the currently selected font
     int GetTextHeight(void) { return th; }
