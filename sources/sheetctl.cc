@@ -1619,7 +1619,7 @@ void wxSheetCellRendererRefData::Draw( wxSheet& grid,
             dc.SetBrush( wxBrush(attr.GetBackgroundColour(), wxSOLID) );
     }
     else
-        dc.SetBrush(wxBrush(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_BTNFACE), wxSOLID));
+        dc.SetBrush(wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE), wxSOLID));
 
     dc.SetPen( *wxTRANSPARENT_PEN );
     dc.DrawRectangle(rect);
@@ -1672,8 +1672,8 @@ void wxSheetCellStringRendererRefData::SetTextColoursAndFont(wxSheet& grid,
     }
     else
     {
-        dc.SetTextBackground(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_BTNFACE));
-        dc.SetTextForeground(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_GRAYTEXT));
+        dc.SetTextBackground(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
+        dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
     }
     
     dc.SetFont( attr.GetFont() );
