@@ -17,6 +17,9 @@
 #define	NFG_SOLVE_STANDARD_MENU			145
 #define	NFG_SOLVE_DATATYPE_MENU			150
 #define	NFG_SOLVE_GAMEINFO_MENU			155
+#define NFG_SOLVE_OUTCOMES_MENU			160
+
+#define NFG_PREFS_OUTCOMES_MENU			350
 
 #define NFG_DISPLAY_COLORS					200
 #define NFG_DISPLAY_ACCELS					202
@@ -31,6 +34,7 @@
 #define NFG_ACCL_NEXT_PAYOFF				410
 // Help system
 #define NFG_GUI_HELP							"Normal Form GUI"
+#define NFG_OUTCOME_HELP					"Outcomes GUI"
 #define NFG_FEATURES_HELP					"Normal Form Features"
 #define NFG_SOLVE_HELP						"Normal Form Solutions"
 #define NFG_INSPECT_HELP					"Normal Solutions Inspect"

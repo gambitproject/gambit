@@ -290,6 +290,8 @@ public:
 	int		Col(void)	{return cell.col;}
 	void	SetRow(int r)	{cell.row=r;ProcessCursor(1);}
 	void 	SetCol(int c)	{cell.col=c;ProcessCursor(1);}
+	// Low level access
+  Bool XYtoRowCol(int x,int y,int *row,int *col);
 	// Printing
 	void Print(wxOutputMedia device,wxOutputOption fit);
 };
@@ -373,6 +375,9 @@ public:
 	void CheckSize(void) {sheet->CheckScrollbars();}
 	void GetLabelExtent(char *str,float *x,float *y)	{sheet->GetLabelExtent(str,x,y);}
 	void GetDataExtent(float *x,float *y,const char *str="W")	{sheet->GetDataExtent(x,y,str);}
+	// Low level access
+	Bool XYtoRowCol(int x,int y,int *row,int *col) {return sheet->XYtoRowCol(x,y,row,col);}
+	SpreadSheetC *GetSheet(void) {return sheet;} // Use w/ caution!
 	// Row/Col manipulation
 	void AddRow(int row=0);
 	void AddCol(int col=0);
@@ -427,8 +432,6 @@ public:
 	// Forced focus.  Need this if focus gets lost to a button/menu.  That would
 	// disable the keyboard input to the canvas.  Call this to force focus.
 	void SetFocus(void) {sheet->SetFocus();}
-	// Direct access to the canvas -- sometimes necessary, but do not abuse.
-	SpreadSheetC	*Sheet(void) {return sheet;}
 	// Debugging
 	void Dump(gOutput &out) const;
 };
@@ -514,7 +517,6 @@ public:
 	// Accesing different levels
 	void		SetLevel(int _l);
 	int			GetLevel(void)		{return cur_level;}
-  SpreadSheetC *GetSheet(void) {return data[cur_level].Sheet();}
 	// Accessing the currently hilighted cell
 	int			CurRow(int level=0) {if (level==0) level=cur_level;return data[level].CurRow();}
 	int			CurCol(int level=0) {if (level==0) level=cur_level;return data[level].CurCol();}
@@ -567,6 +569,8 @@ public:
 	SpreadSheetDataSettings *DataSettings(void)	{return data_settings;}
 	// Some low level info about the canvases
 	void GetDataExtent(float *x,float *y,const char *str="W")	{data[cur_level].GetDataExtent(x,y,str);}
+	Bool XYtoRowCol(int x,int y,int *row,int *col) {return data[cur_level].XYtoRowCol(x,y,row,col);}
+	SpreadSheetC *GetSheet(void) {return data[cur_level].GetSheet();} // Use w/ caution!
 	// Labeling
 	void	FitLabels(void);
 	void	Resize(void);

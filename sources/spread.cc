@@ -279,6 +279,21 @@ temp+=draw_settings->GetRowHeight()*row;
 return temp;
 }
 
+Bool SpreadSheetC::XYtoRowCol(int x,int y,int *row,int *col)
+{
+if (x<MaxX(0) || y<MaxY(0) || x>MaxX() || y>MaxY())
+	{*row=-1;*col=-1; return FALSE;}
+*row=(y-draw_settings->YStart())/draw_settings->GetRowHeight()+1;
+*col=0;int i=1;
+while (*col==0 && i<=sheet->GetCols())
+	{if (x<MaxX(i)) *col=i;i++;}
+if (*row<1) *row=1;
+if (*row>sheet->GetRows()) *row=sheet->GetRows();
+if (*col<1) *col=1;
+if (*col>sheet->GetCols()) *col=sheet->GetCols();
+return TRUE;
+}
+
 void SpreadSheetC::OnSize(int _w,int _h)
 {
 int h,w;
@@ -341,14 +356,7 @@ if (ev.LeftDown() || ev.ButtonDClick())
 {
 	float x,y;
 	ev.Position(&x,&y);
-	cell.row=(int)((y-draw_settings->YStart())/draw_settings->GetRowHeight()+1);
-	cell.col=0;int i=1;
-	while (!cell.col && i<=sheet->GetCols())
-		{if (x<MaxX(i)) cell.col=i;i++;}
-	if (cell.row<1) cell.row=1;
-	if (cell.row>sheet->GetRows()) cell.row=sheet->GetRows();
-	if (cell.col<1) cell.col=1;
-	if (cell.col>sheet->GetCols()) cell.col=sheet->GetCols();
+	if (XYtoRowCol(x,y,&cell.row,&cell.col)==FALSE) return;;
 	if (ev.LeftDown() && !ev.ControlDown()) ProcessCursor(0);
 	if (ev.ButtonDClick() || (ev.LeftDown() && ev.ControlDown()))
 		top_frame->OnDoubleClick(cell.row,cell.col,sheet->GetLevel(),sheet->GetValue(cell.row,cell.col));
