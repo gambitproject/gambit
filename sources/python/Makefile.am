@@ -16,6 +16,8 @@ SWIGFILES = \
 
 EXTRA_DIST = \
 	gambit.py \
+	gbt.py \
+	gbt_wrap_python.cc \
 	${SWIGFILES}
 
 #

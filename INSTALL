@@ -35,23 +35,9 @@ user account, you might do
 
 ./configure --prefix=/home/mylogin/gambit
 
-The graphical interface would then be in /home/mylogin/gambit/bin/gambit,
-and so forth.  (Obviously, you can omit the 'su' in this case.)
-
-Gambit requires wxWindows 2.4.0 or higher to build.  In theory, it will
-probably work with wxWindows as early as 2.3.2; if you're really insistent,
-you'll have to modify the version the configure script looks for.
-
-If wxWindows it isn't installed in a standard place (e.g., /usr or
-/usr/local), you'll need to tell configure where to find it with the
---with-wx-prefix=PREFIX option, for example:
-
-./configure --with-wx-prefix=/home/mylogin/wx
-
-Finally, note that we work almost exclusively with the wxGTK version of
-wxWindows.  There's no reason why one couldn't use the Motif/Lesstif version
-in principle, but it is untested.  If you have success (or failure)
-with the wxMotif version, please also let us know.
+The Gambit library libgambit.so would then be in 
+/home/mylogin/gambit/lib/libgambit.so.
+(Obviously, you can omit the 'su' in this case.)
 
 
 Building Gambit on Windows:
@@ -60,12 +46,11 @@ Building Gambit on Windows:
 The Gambit distribution provides makefiles for Borland C++ 5.5.1.
 These are in borland.mak in the sources directory and its subdirectories.
 To build Gambit, you'll need to create a file sources/makedef.bcc to
-point to your wxWindows installation and your Borland compiler installation.
-For example, if you have wxWindows built in C:\WX2 and the compiler in
+point to your Borland compiler installation.
+For example, if you have the compiler in
 C:\BORLAND\BCC55, and you have the Gambit sources unpacked in C:\GAMBIT,
 you would create a file C:\GAMBIT\SOURCES\MAKEDEF.BCC with the contents
 
-WXDIR = C:\WX2
 BCCDIR = C:\BORLAND\BCC55
 
 Your system will doubtless vary; we do recommend installing both of these
@@ -79,18 +64,7 @@ make -f borland
 
 in the sources directory, which will recursively call the borland.mak
 makefiles in the subdirectories.  Assuming everything builds OK, the
-graphical interface will be in sources/gui/gambit.exe, and wxGCL will
-be in sources/wxgcl/wxgcl.exe.
-
-Note that beginning with wxWindows 2.4, the convention for naming the
-libraries built by wxWindows has changed.  The makefiles are set up assuming
-the static "final" library of wxWindows was built (using the command
-make -f makefile.b32 FINAL=1 as documented in the wxWindows install 
-directions), named wx24s_bcc.  If you build a debugging or hybrid version
-of this library, you will need to replace the reference to that library
-to the correct alternative in both sources/gui/borland.mak and
-sources/wxgcl/borland.mak for a successful link.  Linking against a DLL
-version of wxWindows should also work, but we haven't tested that.
+Gambit library will be in SOURCES/GAMBIT.LIB.
 
 We don't know if Gambit will build with other compilers, though we
 would graciously accept a contribution of makefiles and/or fixes for
@@ -100,36 +74,27 @@ other compilers.
 Building the Python extension
 -----------------------------
 
-The (alpha version) Python API can be found in sources/python in the
-source distributions.  Since it's alpha, it's not integrated into the
-usual build chain yet.  To build it, cd to sources/python and issue a
+The Python API can be found in sources/python in the
+source distributions.  You need to build this separately if you wish to
+use it.  To build it, cd to sources/python and issue a
 
-python setup.py build
+make python
 
-For Windows users, to use the Borland C++ 5.5 compiler (which is what Gambit
-is currently tested with), you'll do
+on Un*x or a 
 
-python setup.py build --compiler=bcpp
+make -f borland 
+
+on Windows.  Note that under Unix, you'll need to have installed
+the main Gambit library via a 'make install' before this will work
+(since it needs to find gambit.so to link).
 
 Note that you may need to take a few additional steps up front for this
 to work; see http://www.python.org/doc/current/inst/non-ms-compilers.html
-for details.  Also, if you do not have Borland C++ 5.5 installed in its
-usual location of C:\BORLAND\BCC55, you'll need to edit the file
-gambit/sources/python/setup.py to point the compiler and linker to the
-correct include and library directories, respectively.
+for details. 
 
 Hopefully, assuming Python is correctly installed on your system, this 
-should build without a problem.  (Windows users will probably need to
-specify an extra flag indicating the compiler to use.)  You can then try
-
-python setup.py install
-
-to install it to the appropriate directories for Python to find it.
-(Unix users will probably want to 'su' before doing this.)  
-
-Note that this is an initial release of the Python API, and as such all
-manner of problems may arise.  We'd *really* like to get reports and
-suggestions regarding this; we want this to be more-or-less "production"
-quality by the release of 0.97.2.0 sometime during academic year 2003-04.
-
+should build without a problem.  There is no installation target provided
+yet.  You'll need the three files gambit.py, gbt.py, and _gbt.so (Un*x)
+or _gbt.pyd (Windows) in the Python search path (sys.path) in order to
+use the extension module.
  
