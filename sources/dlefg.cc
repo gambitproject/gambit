@@ -850,10 +850,8 @@ void dialogEfgPayoffs::OnNext(void)
 //=========================================================================
 
 dialogInfosetReveal::dialogInfosetReveal(const Efg &p_efg, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Reveal to Players", TRUE), m_efg(p_efg)
+  : guiAutoDialog(p_parent, "Reveal to Players"), m_efg(p_efg)
 {
-  SetAutoLayout(TRUE);
-  
   m_playerNameList = new wxListBox(this, 0, "Players", wxMULTIPLE);
 
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
@@ -865,79 +863,32 @@ dialogInfosetReveal::dialogInfosetReveal(const Efg &p_efg, wxWindow *p_parent)
     m_playerNameList->SetSelection(pl - 1, TRUE);
   }
 
-  NewLine();
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "OK");
-  okButton->SetClientData((char *) this);
+  m_okButton->GetConstraints()->top.SameAs(m_playerNameList, wxBottom, 10);
+  m_okButton->GetConstraints()->left.SameAs(m_playerNameList, wxLeft);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
 
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
 
-  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp,
-					"Help");
-  helpButton->SetClientData((char *) this);
-
-  okButton->SetConstraints(new wxLayoutConstraints);
-  okButton->GetConstraints()->top.SameAs(m_playerNameList, wxBottom, 10);
-  okButton->GetConstraints()->right.SameAs(cancelButton, wxLeft, 10);
-  okButton->GetConstraints()->width.SameAs(cancelButton, wxWidth);
-  okButton->GetConstraints()->height.AsIs();
-
-  cancelButton->SetConstraints(new wxLayoutConstraints);
-  cancelButton->GetConstraints()->centreY.SameAs(okButton, wxCentreY);
-  cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
-  cancelButton->GetConstraints()->width.AsIs();
-  cancelButton->GetConstraints()->height.AsIs();
-
-  helpButton->SetConstraints(new wxLayoutConstraints);
-  helpButton->GetConstraints()->centreY.SameAs(okButton, wxCentreY);
-  helpButton->GetConstraints()->left.SameAs(cancelButton, wxRight, 10);
-  helpButton->GetConstraints()->width.SameAs(cancelButton, wxWidth);
-  helpButton->GetConstraints()->height.AsIs();
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_helpButton->GetConstraints()->height.AsIs();
 
   m_playerNameList->SetConstraints(new wxLayoutConstraints);
-  m_playerNameList->GetConstraints()->left.SameAs(okButton, wxLeft);
-  m_playerNameList->GetConstraints()->right.SameAs(helpButton, wxRight);
+  m_playerNameList->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_playerNameList->GetConstraints()->right.SameAs(m_helpButton, wxRight);
   m_playerNameList->GetConstraints()->top.SameAs(this, wxTop, 10);
   m_playerNameList->GetConstraints()->height.AsIs();
 
-  okButton->SetDefault();
-  
-  Layout();
-  int width, height;
-  m_playerNameList->GetSize(&width, &height);
-  SetSize(-1, -1, width + 20, -1);
-
-  Fit();
-  Show(TRUE);
+  Go();
 }
 
 dialogInfosetReveal::~dialogInfosetReveal()
 { }
-
-void dialogInfosetReveal::OnOK(void)
-{
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void dialogInfosetReveal::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool dialogInfosetReveal::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}  \
-
-void dialogInfosetReveal::OnHelp(void)
-{
-  wxHelpContents("Infoset Menu");
-}
 
 gArray<EFPlayer *> dialogInfosetReveal::GetPlayers(void) const
 {
