@@ -8,6 +8,7 @@ class EnumSolveParamsDialog : public OutputParamsDialog
 {
 private:
 	int nequilib;
+	void SaveDefaults(void);
 public:
 	EnumSolveParamsDialog(wxWindow *parent=0);
 	~EnumSolveParamsDialog(void);
@@ -20,6 +21,8 @@ EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *parent)
 
 {
 nequilib=0;
+wxGetResource(PARAMS_SECTION,"Enum-Nequilib",&nequilib,defaults_file);
+
 Form()->Add(wxMakeFormShort("# Equilibria",&nequilib));
 Form()->Add(wxMakeFormNewLine());
 
@@ -28,8 +31,14 @@ MakeOutputFields();
 Go();
 }
 
+void EnumSolveParamsDialog::SaveDefaults(void)
+{
+if (!Default()) return;
+wxWriteResource(PARAMS_SECTION,"Enum-Nequilib",nequilib,defaults_file);
+}
+
 EnumSolveParamsDialog::~EnumSolveParamsDialog(void)
-{}
+{SaveDefaults();}
 
 void EnumSolveParamsDialog::GetParams(EnumParams &P)
 {

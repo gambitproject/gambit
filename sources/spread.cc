@@ -242,7 +242,7 @@ draw_settings->UpdateFontSize(tw,th);
 // Allow double clicking on canvas
 AllowDoubleClick(TRUE);
 // Give myself some scrollbars if necessary
-CheckScrollbars();
+//CheckScrollbars();
 Show(FALSE);	// Do not update myself until told by the parent
 }
 
@@ -298,7 +298,7 @@ if (x_step>0 || y_step>0)
 }
 if (x_step<0 && y_step<0 && draw_settings->Scrolling())
 {
-//	x_step=0;y_step=0;
+	x_step=1;y_step=1;
 	SetScrollbars(x_step,y_step,XSTEPS,YSTEPS,4,4);
 	draw_settings->SetXScroll(x_step);draw_settings->SetYScroll(y_step);
 	draw_settings->SetScrolling(FALSE);
@@ -790,7 +790,12 @@ void SpreadSheet3D::OnSize(int _w,int _h)
 int w,h;
 GetClientSize(&w, &h);
 if (panel) panel->SetSize(0,h-DrawSettings()->PanelSize(),w,DrawSettings()->PanelSize());
-for (int i=1;i<=levels;i++) data[i].SetSize(0,0,w,h-DrawSettings()->PanelSize());
+//for (int i=1;i<=data.Length();i++) data[i].CheckSize();
+for (int i=1;i<=levels;i++)
+{
+	data[i].SetSize(0,0,w,h-DrawSettings()->PanelSize());
+	data[i].CheckSize();
+}
 }
 
 // Callback functions
@@ -957,13 +962,12 @@ void SpreadSheet3D::Resize(void)
 {
 int w,h,w1,h1;
 data[cur_level].GetSize(&w,&h);
-for (int i=1;i<=data.Length();i++) data[i].CheckSize();
 Panel()->Fit();Panel()->GetSize(&w1,&h1);
 w=max(w,w1);
 h1=max(h1,MIN_BUTTON_SPACE);
 DrawSettings()->SetPanelSize(h1);
-Panel()->SetSize(0,h-DrawSettings()->PanelSize(),w,DrawSettings()->PanelSize());
-SetClientSize(w,h+DrawSettings()->PanelSize());
+Panel()->SetSize(0,h,w,h1);
+SetClientSize(w,h+h1);
 }
 
 

@@ -13,8 +13,6 @@
 // Make Output Fields
 void OutputParamsDialog::MakeOutputFields(unsigned int fields)
 {
-defaults_file=wxFindFile("gambit.ini");
-
 Form()->Add(wxMakeFormNewLine());
 if (fields&OUTPUT_FIELD)
 {
@@ -40,7 +38,7 @@ Add(wxMakeFormBool("Save as default",&def));
 // Constructor
 OutputParamsDialog::OutputParamsDialog(const char *label,wxWindow *parent) :
 	MyDialogBox(parent,(char *)label),outname(0),errname(0),outfile(0),errfile(0),trace(0),trace_str(0)
-{ }
+{defaults_file=wxFindFile("gambit.ini");}
 
 // Out File
 gOutput *OutputParamsDialog::OutFile(void)
@@ -194,7 +192,7 @@ if (pxi_command) wxWriteResource(PARAMS_SECTION,"Pxi-Command",pxi_command,defaul
 if (type_str)
 {
 	char tmp_str[100];sprintf(tmp_str,"%s-Plot-Type",algname);
-	wxWriteResource(PARAMS_SECTION,"tmp_str",type_str,defaults_file);
+	wxWriteResource(PARAMS_SECTION,tmp_str,type_str,defaults_file);
 }
 }
 

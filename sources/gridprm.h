@@ -7,6 +7,7 @@ class GridSolveParamsDialog : public PxiParamsDialog
 {
 private:
 	float minLam, maxLam, delLam, delp, tol;
+	void SaveDefaults(void);
 public:
 	GridSolveParamsDialog(wxWindow *parent);
 	~GridSolveParamsDialog(void);
@@ -19,6 +20,12 @@ GridSolveParamsDialog<T>::GridSolveParamsDialog(wxWindow *parent)
 				:PxiParamsDialog("grid","Grid Params",parent)
 {
 minLam=0.01;maxLam=3.0;delLam=.1;delp=.01;tol=.01;
+wxGetResource(PARAMS_SECTION,"Grid-minLam",&minLam,defaults_file);
+wxGetResource(PARAMS_SECTION,"Grid-maxLam",&maxLam,defaults_file);
+wxGetResource(PARAMS_SECTION,"Grid-delLam",&delLam,defaults_file);
+wxGetResource(PARAMS_SECTION,"Grid-delp",&delp,defaults_file);
+wxGetResource(PARAMS_SECTION,"Grid-tol",&tol,defaults_file);
+
 Form()->Add(wxMakeFormFloat("L Start",&minLam,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
 Form()->Add(wxMakeFormFloat("L Stop",&maxLam,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
 Form()->Add(wxMakeFormFloat("L Step",&delLam,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
@@ -33,8 +40,19 @@ Go();
 }
 
 template <class T>
+void GridSolveParamsDialog<T>::SaveDefaults(void)
+{
+if (!Default()) return;
+wxWriteResource(PARAMS_SECTION,"Grid-minLam",minLam,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Grid-maxLam",maxLam,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Grid-delLam",delLam,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Grid-delp",delp,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Grid-tol",tol,defaults_file);
+}
+
+template <class T>
 GridSolveParamsDialog<T>::~GridSolveParamsDialog(void)
-{}
+{SaveDefaults();}
 
 template <class T>
 void GridSolveParamsDialog<T>::GetParams(GridParams<T> &P)

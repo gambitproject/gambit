@@ -7,6 +7,7 @@ class LemkeSolveParamsDialog : public OutputParamsDialog
 {
 private:
 	int plev,nequilib,maxdepth,dup_strat;
+	void SaveDefaults(void);
 public:
 	LemkeSolveParamsDialog(wxWindow *parent=0);
 	~LemkeSolveParamsDialog(void);
@@ -18,7 +19,11 @@ LemkeSolveParamsDialog::LemkeSolveParamsDialog(wxWindow *parent)
 														:OutputParamsDialog("Lemke Params",parent)
 
 {
-dup_strat=0;nequilib=0;maxdepth=0;nequilib=1;
+dup_strat=0;nequilib=0;maxdepth=0;
+wxGetResource(PARAMS_SECTION,"Lemke-dup_strat",&dup_strat,defaults_file);
+wxGetResource(PARAMS_SECTION,"Lemke-Nequilib",&nequilib,defaults_file);
+wxGetResource(PARAMS_SECTION,"Lemke-maxdepth",&maxdepth,defaults_file);
+
 Form()->Add(wxMakeFormBool("All Solutions",&dup_strat));
 Form()->Add(wxMakeFormNewLine());
 Form()->Add(wxMakeFormShort("# Equ",&nequilib));
@@ -29,8 +34,16 @@ MakeOutputFields(OUTPUT_FIELD);
 Go();
 }
 
+void LemkeSolveParamsDialog::SaveDefaults(void)
+{
+if (!Default()) return;
+wxWriteResource(PARAMS_SECTION,"Lemke-dup_strat",dup_strat,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Lemke-Nequilib",nequilib,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Lemke-maxdepth",maxdepth,defaults_file);
+}
+
 LemkeSolveParamsDialog::~LemkeSolveParamsDialog(void)
-{}
+{SaveDefaults();}
 
 void LemkeSolveParamsDialog::GetParams(LemkeParams &P)
 {

@@ -8,6 +8,7 @@ class LiapSolveParamsDialog : public OutputParamsDialog
 private:
 	float tolOpt, tolBrent;
 	int maxitsOpt,maxitsBrent,nequilib,ntries;
+	void SaveDefaults(void);
 public:
 	LiapSolveParamsDialog(wxWindow *parent);
 	~LiapSolveParamsDialog(void);
@@ -20,8 +21,16 @@ template <class T>
 LiapSolveParamsDialog<T>::LiapSolveParamsDialog(wxWindow *parent)
 												:OutputParamsDialog("Liap Params",parent)
 {
-tolOpt=.0001;tolBrent=0.0001;maxitsBrent=100;maxitsOpt=200;
+tolOpt=Funct_tolN;tolBrent=Funct_tolBrent;maxitsBrent=Funct_maxitsBrent;maxitsOpt=Funct_maxitsN;
 nequilib=1;ntries=10;
+
+wxGetResource(PARAMS_SECTION,"Liap-Ntries",&ntries,defaults_file);
+wxGetResource(PARAMS_SECTION,"Liap-Nequilib",&nequilib,defaults_file);
+wxGetResource(PARAMS_SECTION,"Func-tolN",&tolOpt,defaults_file);
+wxGetResource(PARAMS_SECTION,"Func-tolBrent",&tolBrent,defaults_file);
+wxGetResource(PARAMS_SECTION,"Func-maxitsBrent",&maxitsBrent,defaults_file);
+wxGetResource(PARAMS_SECTION,"Func-maxitsOpt",&maxitsOpt,defaults_file);
+
 Form()->Add(wxMakeFormShort("# Equilibria",&nequilib,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL));
 Form()->Add(wxMakeFormShort("# Tries",&ntries,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL));
 Form()->Add(wxMakeFormNewLine());
@@ -37,8 +46,20 @@ Go();
 }
 
 template <class T>
+void LiapSolveParamsDialog<T>::SaveDefaults(void)
+{
+if (!Default()) return;
+wxWriteResource(PARAMS_SECTION,"Liap-Ntries",ntries,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Liap-Nequilib",nequilib,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Func-tolN",ToString(tolOpt),defaults_file);
+wxWriteResource(PARAMS_SECTION,"Func-tolBrent",ToString(tolBrent),defaults_file);
+wxWriteResource(PARAMS_SECTION,"Func-maxitsBrent",maxitsBrent,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Func-maxitsOpt",maxitsOpt,defaults_file);
+}
+template <class T>
 LiapSolveParamsDialog<T>::~LiapSolveParamsDialog(void)
-{}
+{SaveDefaults();}
+
 template <class T>
 void LiapSolveParamsDialog<T>::GetParams(LiapParams<T> &P)
 {
