@@ -16,6 +16,7 @@ GUI       = motif
 GMAKEFILE = Makefile2.generic
 FTPDIR    = /users/ftp/pub/gambit/ver96
 SRCDIR    = ./sources
+WSRCDIR    = ./winsrc
 
 all:
 	@echo Specify a target: gcl, gui, src.
@@ -121,18 +122,19 @@ winsrc:
 
 
 	cd ..; \
-	if [ ! -d $(SRCDIR)/obj ]; then mkdir $(SRCDIR)/obj; fi; \
+	if [ ! -d $(WSRCDIR)/obj ]; then mkdir $(WSRCDIR)/obj; fi; \
 	if [ -f gwinsrc.zip ]; then rm gwinsrc.zip; fi; \
 	zip -l gwinsrc.zip $(SRCDIR)/*.yy \
 	$(SRCDIR)/*.h $(SRCDIR)/*.cc $(SRCDIR)/*.imp \
-	$(SRCDIR)/*.cpp $(SRCDIR)/*.def $(SRCDIR)/res/*.rc* \
+	$(WSRCDIR)/*.h $(WSRCDIR)/*.cc $(WSRCDIR)/*.def \
+	$(WSRCDIR)/res/*.rc* \
+	$(WSRCDIR)/bison.cc $(WSRCDIR)/bison.h \
 	bin/*.gcl bin/ bin/gcl.man; \
-	zip gwinsrc.zip $(SRCDIR)/*.ide $(SRCDIR)/fake/*.* \
-	$(SRCDIR)/bitmaps/*.* \
-	$(SRCDIR)/res/*.ico $(SRCDIR)/res/*.bmp \
-	$(SRCDIR)/obj \
-	bisondos/bison.exe 
+	zip gwinsrc.zip $(SRCDIR)/bitmaps/*.* $(WSRCDIR)/*.ide \
+	$(WSRCDIR)/res/*.ico $(WSRCDIR)/res/*.bmp \
+	$(WSRCDIR)/obj bisondos/bison.exe 
 
+#	cd ..; ftp_put gwinsrc.zip
 	mv ../gwinsrc.zip $(FTPDIR)
 
 wxwin:
