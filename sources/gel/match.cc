@@ -343,6 +343,9 @@ void gelSignature::DefineParams( gelVariableTable* subvt ) const
     case gelNFPLAYER:
       subvt->Define(name, m_Parameters[i]->Type());
       break;
+    case gelINPUT:
+    case gelOUTPUT:
+    case gelANYTYPE:
     case gelUNDEFINED:
       assert( 0 );
       break;
@@ -373,60 +376,62 @@ void gelSignature::AssignParams( gelVariableTable* subvt, gelVariableTable* vt,
     assert( m_Parameters[i]->Type() == params[i]->Type() );
 
     gText name = m_Parameters[i]->Name();
-    switch( m_Parameters[i]->Type() )
-    {
+    switch (m_Parameters[i]->Type())  {
     case gelBOOLEAN:
       subvt->SetValue(name,
-		                  ((gelExpression<gTriState> *) params[i])->Evaluate(vt));
+		      ((gelExpression<gTriState> *) params[i])->Evaluate(vt));
       break;
     case gelNUMBER:
       subvt->SetValue(name,
-		                  ((gelExpression<gNumber> *) params[i])->Evaluate(vt));
+		      ((gelExpression<gNumber> *) params[i])->Evaluate(vt));
       break;
     case gelTEXT:
       subvt->SetValue(name,
-		                  ((gelExpression<gText> *) params[i])->Evaluate(vt));
+		      ((gelExpression<gText> *) params[i])->Evaluate(vt));
       break;
     case gelEFG:
       subvt->SetValue(name,
-		                  ((gelExpression<Efg *> *) params[i])->Evaluate(vt));
+		      ((gelExpression<Efg *> *) params[i])->Evaluate(vt));
       break;
     case gelNODE:
       subvt->SetValue(name,
-		                  ((gelExpression<Node *> *) params[i])->Evaluate(vt));
+		      ((gelExpression<Node *> *) params[i])->Evaluate(vt));
       break;
     case gelACTION:
       subvt->SetValue(name,
-		                  ((gelExpression<Action *> *) params[i])->Evaluate(vt));
+		      ((gelExpression<Action *> *) params[i])->Evaluate(vt));
       break;
     case gelINFOSET:
       subvt->SetValue(name,
-		                  ((gelExpression<Infoset *> *) params[i])->Evaluate(vt));
+		      ((gelExpression<Infoset *> *) params[i])->Evaluate(vt));
       break;
     case gelEFPLAYER:
       subvt->SetValue(name,
-		                  ((gelExpression<EFPlayer *> *) params[i])->Evaluate(vt));
+		      ((gelExpression<EFPlayer *> *) params[i])->Evaluate(vt));
       break;
     case gelEFOUTCOME:
       subvt->SetValue(name,
-		                  ((gelExpression<EFOutcome *> *) params[i])->Evaluate(vt));
+		      ((gelExpression<EFOutcome *> *) params[i])->Evaluate(vt));
       break;
     case gelNFG:
       subvt->SetValue(name,
-		                  ((gelExpression<Nfg *> *) params[i])->Evaluate(vt));
+		      ((gelExpression<Nfg *> *) params[i])->Evaluate(vt));
       break;
     case gelSTRATEGY:
       subvt->SetValue(name,
-		                  ((gelExpression<Strategy *> *) params[i])->Evaluate(vt));
+		      ((gelExpression<Strategy *> *) params[i])->Evaluate(vt));
       break;
     case gelNFPLAYER:
       subvt->SetValue(name,
-		                  ((gelExpression<NFPlayer *> *) params[i])->Evaluate(vt));
+		      ((gelExpression<NFPlayer *> *) params[i])->Evaluate(vt));
       break;
     case gelNFOUTCOME:
       subvt->SetValue(name,
-		                  ((gelExpression<NFOutcome *> *) params[i])->Evaluate(vt));
+		      ((gelExpression<NFOutcome *> *) params[i])->Evaluate(vt));
       break;
+    case gelINPUT:
+    case gelOUTPUT:
+    case gelANYTYPE:
     case gelUNDEFINED:
       assert( 0 );
       break;
