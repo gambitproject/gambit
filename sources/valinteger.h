@@ -16,12 +16,16 @@
 class gIntegerValidator : public wxValidator {
 protected:
   wxString *m_stringValue;
+  bool m_hasMin, m_hasMax;
+  int m_minValue, m_maxValue;
   
   // Event handlers
   void OnChar(wxKeyEvent &);
 
 public:
   gIntegerValidator(wxString *);
+  gIntegerValidator(wxString *, int);
+  gIntegerValidator(wxString *, int, int);
   gIntegerValidator(const gIntegerValidator &);
   virtual ~gIntegerValidator() { }
 

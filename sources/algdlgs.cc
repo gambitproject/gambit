@@ -117,7 +117,6 @@ BEGIN_EVENT_TABLE(dialogAlgorithm, guiAutoDialog)
   EVT_CHECKBOX(idALL_CHECKBOX, dialogAlgorithm::OnAll)
   EVT_BUTTON(idTRACE_BUTTON, dialogAlgorithm::OnTrace)
   EVT_RADIOBOX(idDEPTH_CHOICE, dialogAlgorithm::OnDepth)
-  EVT_BUTTON(wxID_OK, dialogAlgorithm::OnOK)
 END_EVENT_TABLE()
 
 dialogAlgorithm::dialogAlgorithm(const gText &p_label, bool p_usesNfg,
@@ -134,53 +133,50 @@ dialogAlgorithm::dialogAlgorithm(const gText &p_label, bool p_usesNfg,
 }
 
 dialogAlgorithm::~dialogAlgorithm()
-{ }
+{ 
+  if (GetReturnCode() == wxID_OK) {
+    wxConfig config("Gambit");
 
-void dialogAlgorithm::OnOK(wxCommandEvent &p_event)
-{
-  wxConfig config("Gambit");
-
-  if (m_usesNfg) {
-    config.Write("Solutions/Nfg-ElimDom-Depth",
-		 (long) m_depthChoice->GetSelection());
-    if (m_depthChoice->GetSelection() != 0) {
-      config.Write("Solutions/Nfg-ElimDom-Type",
-		   (long) m_typeChoice->GetSelection());
-      config.Write("Solutions/Nfg-ElimDom-Method",
-		   (long) m_methodChoice->GetSelection());
-    }
-  }
-  else {
-    config.Write("Solutions/Efg-ElimDom-Depth",
-		 (long) m_depthChoice->GetSelection());
-    if (m_depthChoice->GetSelection() != 0) {
-      config.Write("Solutions/Efg-ElimDom-Type", 
-		   (long) m_typeChoice->GetSelection());
-    }
-  }
-
-  if (m_subgames) {
-    config.Write("Solutions/Efg-Mark-Subgames",
-		 (long) m_markSubgames->GetValue());
-    config.Write("Solutions/Efg-Interactive-Solutions",
-		 (long) m_selectSolutions->GetValue());
-  }
-
-  if (m_stopAfter) {
-    if (m_findAll->GetValue()) {
-      config.Write("Solutions/StopAfter", 0l);
+    if (m_usesNfg) {
+      config.Write("Solutions/Nfg-ElimDom-Depth",
+		   (long) m_depthChoice->GetSelection());
+      if (m_depthChoice->GetSelection() != 0) {
+	config.Write("Solutions/Nfg-ElimDom-Type",
+		     (long) m_typeChoice->GetSelection());
+	config.Write("Solutions/Nfg-ElimDom-Method",
+		     (long) m_methodChoice->GetSelection());
+      }
     }
     else {
-      config.Write("Solutions/StopAfter", 
-		   (long) ToNumber(m_stopAfter->GetValue().c_str()));
+      config.Write("Solutions/Efg-ElimDom-Depth",
+		   (long) m_depthChoice->GetSelection());
+      if (m_depthChoice->GetSelection() != 0) {
+	config.Write("Solutions/Efg-ElimDom-Type", 
+		     (long) m_typeChoice->GetSelection());
+      }
+    }
+
+    if (m_subgames) {
+      config.Write("Solutions/Efg-Mark-Subgames",
+		   (long) m_markSubgames->GetValue());
+      config.Write("Solutions/Efg-Interactive-Solutions",
+		   (long) m_selectSolutions->GetValue());
+    }
+
+    if (m_stopAfter) {
+      if (m_findAll->GetValue()) {
+	config.Write("Solutions/StopAfter", 0l);
+      }
+      else {
+	config.Write("Solutions/StopAfter", 
+		     (long) ToNumber(m_stopAfter->GetValue().c_str()));
+      }
+    }
+
+    if (m_precision) {
+      config.Write("Solutions/Precision", (long) m_precision->GetSelection());
     }
   }
-
-  if (m_precision) {
-    config.Write("Solutions/Precision", (long) m_precision->GetSelection());
-  }
-
-  p_event.Skip();
 }
 
 void dialogAlgorithm::OnDepth(wxCommandEvent &)
@@ -308,7 +304,8 @@ void dialogAlgorithm::StopAfterField(void)
   m_findAll = new wxCheckBox(this, idALL_CHECKBOX, "Find all");
   m_stopAfter = new wxTextCtrl(this, -1, "",
 			       wxDefaultPosition, wxDefaultSize, 0,
-			       gIntegerValidator(&m_stopAfterValue));
+			       gIntegerValidator(&m_stopAfterValue, 1),
+			       "Stop After");
 
   if (stopAfter == 0) {
     m_findAll->SetValue(true);
@@ -472,10 +469,6 @@ int dialogLcp::StopAfter(void) const
 //                       dialogLiap: Member functions
 //=======================================================================
 
-BEGIN_EVENT_TABLE(dialogLiap, dialogAlgorithm)
-  EVT_BUTTON(wxID_OK, dialogLiap::OnOK)
-END_EVENT_TABLE()
-
 dialogLiap::dialogLiap(wxWindow *p_parent, bool p_subgames, bool p_vianfg)
   : dialogAlgorithm("LiapSolve Parameters", p_vianfg, p_parent)
 {
@@ -483,14 +476,12 @@ dialogLiap::dialogLiap(wxWindow *p_parent, bool p_subgames, bool p_vianfg)
 }
 
 dialogLiap::~dialogLiap()
-{ }
-
-void dialogLiap::OnOK(wxCommandEvent &p_event)
 {
-  wxConfig config("Gambit");
-  config.Write("Solutions/Liap-nTries", (long) NumTries());
-  config.Write("Solutions/Liap-accuracy", (long) Accuracy());
-  p_event.Skip();
+  if (GetReturnCode() == wxID_OK) {
+    wxConfig config("Gambit");
+    config.Write("Solutions/Liap-nTries", (long) NumTries());
+    config.Write("Solutions/Liap-accuracy", (long) Accuracy());
+  }
 }
 
 void dialogLiap::AlgorithmFields(void)
@@ -511,7 +502,8 @@ void dialogLiap::AlgorithmFields(void)
 		   0, wxALL | wxCENTER, 5);
   m_nTries = new wxTextCtrl(this, -1, "",
 			    wxDefaultPosition, wxDefaultSize, 0,
-			    gIntegerValidator(&m_nTriesValue));
+			    gIntegerValidator(&m_nTriesValue, 0),
+			    "# Tries");
   nTriesSizer->Add(m_nTries, 0, wxALL, 5);
   m_algorithmBox->Add(nTriesSizer, 0, wxALL, 5);
 
@@ -524,7 +516,8 @@ void dialogLiap::AlgorithmFields(void)
 		     0, wxALL | wxCENTER, 5);
   m_accuracy = new wxTextCtrl(this, -1, "",
 			      wxDefaultPosition, wxDefaultSize, 0,
-			      gIntegerValidator(&m_accuracyValue));
+			      gIntegerValidator(&m_accuracyValue, 1),
+			      "Accuracy");
   accuracySizer->Add(m_accuracy, 0, wxALL, 5);
   m_algorithmBox->Add(accuracySizer, 0, wxALL, 5);
 
@@ -551,10 +544,6 @@ int dialogLiap::StopAfter(void) const
 //                    dialogSimpdiv: Member functions
 //=======================================================================
 
-BEGIN_EVENT_TABLE(dialogSimpdiv, dialogAlgorithm)
-  EVT_BUTTON(wxID_OK, dialogSimpdiv::OnOK)
-END_EVENT_TABLE()
-
 dialogSimpdiv::dialogSimpdiv(wxWindow *p_parent, bool p_subgames)
   : dialogAlgorithm("SimpdivSolve Parameters", true, p_parent)
 {
@@ -562,14 +551,12 @@ dialogSimpdiv::dialogSimpdiv(wxWindow *p_parent, bool p_subgames)
 }
 
 dialogSimpdiv::~dialogSimpdiv()
-{ }
-
-void dialogSimpdiv::OnOK(wxCommandEvent &p_event)
 {
-  wxConfig config("Gambit");
-  config.Write("Solutions/Simpdiv-nRestarts", (long) NumRestarts());
-  config.Write("Solutions/Simpdiv-leashLength", (long) LeashLength());
-  p_event.Skip();
+  if (GetReturnCode() == wxID_OK) {
+    wxConfig config("Gambit");
+    config.Write("Solutions/Simpdiv-nRestarts", (long) NumRestarts());
+    config.Write("Solutions/Simpdiv-leashLength", (long) LeashLength());
+  }
 }
 
 void dialogSimpdiv::AlgorithmFields(void)
@@ -591,7 +578,8 @@ void dialogSimpdiv::AlgorithmFields(void)
 		    0, wxALL | wxCENTER, 5);
   m_nRestarts = new wxTextCtrl(this, -1, "",
 			       wxDefaultPosition, wxDefaultSize, 0,
-			       gIntegerValidator(&m_nRestartsValue));
+			       gIntegerValidator(&m_nRestartsValue, 0),
+			       "# restarts");
   restartSizer->Add(m_nRestarts, 0, wxALL, 5);
   m_algorithmBox->Add(restartSizer, 0, wxALL, 5);
 
@@ -604,7 +592,8 @@ void dialogSimpdiv::AlgorithmFields(void)
 		  0, wxALL | wxCENTER, 5);
   m_leashLength = new wxTextCtrl(this, -1, "",
 				 wxDefaultPosition, wxDefaultSize, 0,
-				 gIntegerValidator(&m_leashLengthValue));
+				 gIntegerValidator(&m_leashLengthValue, 0),
+				 "Leash length");
   leashSizer->Add(m_leashLength, 0, wxALL, 5);
   m_algorithmBox->Add(leashSizer, 0, wxALL, 5);
 }
@@ -653,7 +642,6 @@ int dialogPolEnum::StopAfter(void) const
 
 BEGIN_EVENT_TABLE(dialogPxi, dialogAlgorithm)
   EVT_CHECKBOX(idRUNPXI_BOX, dialogPxi::OnRun)
-  EVT_BUTTON(wxID_OK, dialogPxi::OnOK)
 END_EVENT_TABLE()
 
 static char *wxOutputFile(const char *name)
@@ -685,15 +673,13 @@ dialogPxi::dialogPxi(const char *p_label, const char *p_filename,
 }
 
 dialogPxi::~dialogPxi()
-{ }
-
-void dialogPxi::OnOK(wxCommandEvent &p_event)
 {
-  wxConfig config("Gambit");
-  config.Write("Solutions/Pxi-Plot-Type", (long) m_plotType->GetSelection());
-  config.Write("Solutions/Run-Pxi", m_runPxi->GetValue());
-  config.Write("Solutions/Pxi-Command", m_pxiCommand->GetValue());
-  p_event.Skip();
+  if (GetReturnCode() == wxID_OK) {
+    wxConfig config("Gambit");
+    config.Write("Solutions/Pxi-Plot-Type", (long) m_plotType->GetSelection());
+    config.Write("Solutions/Run-Pxi", m_runPxi->GetValue());
+    config.Write("Solutions/Pxi-Command", m_pxiCommand->GetValue());
+  }
 }
 
 void dialogPxi::PxiFields(void)
@@ -753,10 +739,6 @@ gText dialogPxi::PxiCommand(void) const
 //                      dialogQre: Member functions
 //=======================================================================
 
-BEGIN_EVENT_TABLE(dialogQre, dialogPxi)
-  EVT_BUTTON(wxID_OK, dialogQre::OnOK)
-END_EVENT_TABLE()
-
 dialogQre::dialogQre(wxWindow *p_parent, const gText &p_filename,
 		     bool p_vianfg)
   : dialogPxi("QreSolve Parameters", p_filename, p_parent)
@@ -765,18 +747,16 @@ dialogQre::dialogQre(wxWindow *p_parent, const gText &p_filename,
 }
 
 dialogQre::~dialogQre()
-{ }
-
-void dialogQre::OnOK(wxCommandEvent &p_event)
 {
-  wxConfig config("Gambit");
-  config.Write("Solutions/Qre-minLam", m_minLam->GetValue());
-  config.Write("Solutions/Qre-maxLam", m_maxLam->GetValue());
-  config.Write("Solutions/Qre-delLam", m_delLam->GetValue());
-  config.Write("Solutions/Qre-accuracy", (long) Accuracy());
-  config.Write("Solutions/Qre-startOption",
-	       (long) m_startOption->GetSelection());
-  p_event.Skip();
+  if (GetReturnCode() == wxID_OK) {
+    wxConfig config("Gambit");
+    config.Write("Solutions/Qre-minLam", m_minLam->GetValue());
+    config.Write("Solutions/Qre-maxLam", m_maxLam->GetValue());
+    config.Write("Solutions/Qre-delLam", m_delLam->GetValue());
+    config.Write("Solutions/Qre-accuracy", (long) Accuracy());
+    config.Write("Solutions/Qre-startOption",
+		 (long) m_startOption->GetSelection());
+  }
 }
 
 void dialogQre::AlgorithmFields(void)
@@ -803,7 +783,7 @@ void dialogQre::AlgorithmFields(void)
 		   0, wxALL | wxCENTER, 5);
   m_minLam = new wxTextCtrl(this, -1, "",
 			    wxDefaultPosition, wxDefaultSize, 0,
-			    gNumberValidator(&m_minLamValue));
+			    gNumberValidator(&m_minLamValue, 0), "minLam");
   minLamSizer->Add(m_minLam, 0, wxALL, 5);
   lambdaSizer->Add(minLamSizer, 0, wxALL, 5);
 
@@ -812,7 +792,7 @@ void dialogQre::AlgorithmFields(void)
 		   0, wxALL | wxCENTER, 5);
   m_maxLam = new wxTextCtrl(this, -1, "",
 			    wxDefaultPosition, wxDefaultSize, 0,
-			    gNumberValidator(&m_maxLamValue));
+			    gNumberValidator(&m_maxLamValue, 0), "maxLam");
   maxLamSizer->Add(m_maxLam, 0, wxALL, 5);
   lambdaSizer->Add(maxLamSizer, 0, wxALL, 5);
 
@@ -821,7 +801,7 @@ void dialogQre::AlgorithmFields(void)
 		   0, wxALL | wxCENTER, 5);
   m_delLam = new wxTextCtrl(this, -1, "",
 			    wxDefaultPosition, wxDefaultSize, 0,
-			    gNumberValidator(&m_delLamValue));
+			    gNumberValidator(&m_delLamValue, 0), "delLam");
   delLamSizer->Add(m_delLam, 0, wxALL, 5);
   lambdaSizer->Add(delLamSizer, 0, wxALL, 5);
 
@@ -832,7 +812,8 @@ void dialogQre::AlgorithmFields(void)
 		     0, wxALL | wxCENTER, 5);
   m_accuracy = new wxTextCtrl(this, -1, "Accuracy: 1.0 e -",
 			      wxDefaultPosition, wxDefaultSize, 0,
-			      gIntegerValidator(&m_accuracyValue));
+			      gIntegerValidator(&m_accuracyValue, 1),
+			      "Accuracy");
   accuracySizer->Add(m_accuracy, 0, wxALL, 5);
   otherSizer->Add(accuracySizer, 0, wxALL, 5);
 
@@ -871,10 +852,6 @@ void dialogQre::AlgorithmFields(void)
 //                    dialogQreGrid: Member functions
 //=======================================================================
 
-BEGIN_EVENT_TABLE(dialogQreGrid, dialogPxi)
-  EVT_BUTTON(wxID_OK, dialogQreGrid::OnOK)
-END_EVENT_TABLE()
-
 dialogQreGrid::dialogQreGrid(wxWindow *p_parent,
 			     const gText &p_filename)
   : dialogPxi("QreGridSolve Parameters", p_filename, p_parent)
@@ -883,22 +860,20 @@ dialogQreGrid::dialogQreGrid(wxWindow *p_parent,
 }
 
 dialogQreGrid::~dialogQreGrid()
-{ }
-
-void dialogQreGrid::OnOK(wxCommandEvent &p_event)
 {
-  wxConfig config("Gambit");
-  config.Write("Solutions/QreGrid-minLam", m_minLam->GetValue());
-  config.Write("Solutions/QreGrid-maxLam", m_maxLam->GetValue());
-  config.Write("Solutions/QreGrid-delLam", m_delLam->GetValue());
-  config.Write("Solutions/QreGrid-delp1", m_delp1->GetValue());
-  config.Write("Solutions/QreGrid-delp2", m_delp2->GetValue());
-  config.Write("Solutions/QreGrid-tol1", m_tol1->GetValue());
-  config.Write("Solutions/QreGrid-tol2", m_tol2->GetValue());
-  config.Write("Solutions/QreGrid-multiGrid", m_multiGrid->GetValue());
-  config.Write("Solutions/QreGrid-startOption", 
-	       (long) m_startOption->GetSelection());
-  p_event.Skip();
+  if (GetReturnCode() == wxID_OK) {
+    wxConfig config("Gambit");
+    config.Write("Solutions/QreGrid-minLam", m_minLam->GetValue());
+    config.Write("Solutions/QreGrid-maxLam", m_maxLam->GetValue());
+    config.Write("Solutions/QreGrid-delLam", m_delLam->GetValue());
+    config.Write("Solutions/QreGrid-delp1", m_delp1->GetValue());
+    config.Write("Solutions/QreGrid-delp2", m_delp2->GetValue());
+    config.Write("Solutions/QreGrid-tol1", m_tol1->GetValue());
+    config.Write("Solutions/QreGrid-tol2", m_tol2->GetValue());
+    config.Write("Solutions/QreGrid-multiGrid", m_multiGrid->GetValue());
+    config.Write("Solutions/QreGrid-startOption", 
+		 (long) m_startOption->GetSelection());
+  }
 }
 
 void dialogQreGrid::AlgorithmFields(void)
@@ -931,7 +906,7 @@ void dialogQreGrid::AlgorithmFields(void)
 		   0, wxALL | wxCENTER, 5);
   m_minLam = new wxTextCtrl(this, -1, "",
 			    wxDefaultPosition, wxDefaultSize, 0,
-			    gNumberValidator(&m_minLamValue));
+			    gNumberValidator(&m_minLamValue, 0), "minLam");
   minLamSizer->Add(m_minLam, 0, wxALL, 5);
   lambdaSizer->Add(minLamSizer, 0, wxALL, 5);
 
@@ -940,7 +915,7 @@ void dialogQreGrid::AlgorithmFields(void)
 		   0, wxALL | wxCENTER, 5);
   m_maxLam = new wxTextCtrl(this, -1, "",
 			    wxDefaultPosition, wxDefaultSize, 0,
-			    gNumberValidator(&m_maxLamValue));
+			    gNumberValidator(&m_maxLamValue, 0), "maxLam");
   maxLamSizer->Add(m_maxLam, 0, wxALL, 5);
   lambdaSizer->Add(maxLamSizer, 0, wxALL, 5);
 
@@ -949,7 +924,7 @@ void dialogQreGrid::AlgorithmFields(void)
 		   0, wxALL | wxCENTER, 5);
   m_delLam = new wxTextCtrl(this, -1, "",
 			    wxDefaultPosition, wxDefaultSize, 0,
-			    gNumberValidator(&m_delLamValue));
+			    gNumberValidator(&m_delLamValue, 0), "delLam");
   delLamSizer->Add(m_delLam, 0, wxALL, 5);
   lambdaSizer->Add(delLamSizer, 0, wxALL, 5);
 
@@ -960,7 +935,7 @@ void dialogQreGrid::AlgorithmFields(void)
 		  0, wxALL | wxCENTER, 5);
   m_delp1 = new wxTextCtrl(this, -1, "",
 			   wxDefaultPosition, wxDefaultSize, 0,
-			   gNumberValidator(&m_delp1Value));
+			   gNumberValidator(&m_delp1Value, 0), "Grid 1 Del");
   delp1Sizer->Add(m_delp1, 0, wxALL, 5);
   tolSizer->Add(delp1Sizer, 0, wxALL, 5);
 
@@ -969,7 +944,7 @@ void dialogQreGrid::AlgorithmFields(void)
 		 0, wxALL | wxCENTER, 5);
   m_tol1 = new wxTextCtrl(this, -1, "",
 			  wxDefaultPosition, wxDefaultSize, 0,
-			  gNumberValidator(&m_tol1Value));
+			  gNumberValidator(&m_tol1Value, 0), "Grid 1 Tol");
   tol1Sizer->Add(m_tol1, 0, wxALL, 5);
   tolSizer->Add(tol1Sizer, 0, wxALL, 5);
 
@@ -978,7 +953,7 @@ void dialogQreGrid::AlgorithmFields(void)
 		  0, wxALL | wxCENTER, 5);
   m_delp2 = new wxTextCtrl(this, -1, "",
 			   wxDefaultPosition, wxDefaultSize, 0,
-			   gNumberValidator(&m_delp2Value));
+			   gNumberValidator(&m_delp2Value, 0), "Grid 2 Del");
   delp2Sizer->Add(m_delp2, 0, wxALL, 5);
   tolSizer->Add(delp2Sizer, 0, wxALL, 5);
 
@@ -987,7 +962,7 @@ void dialogQreGrid::AlgorithmFields(void)
 		 0, wxALL | wxCENTER, 5);
   m_tol2 = new wxTextCtrl(this, -1, "",
 			  wxDefaultPosition, wxDefaultSize, 0,
-			  gNumberValidator(&m_tol2Value));
+			  gNumberValidator(&m_tol2Value, 0), "Grid 2 Tol");
   tol2Sizer->Add(m_tol2, 0, wxALL, 5);
   tolSizer->Add(tol2Sizer, 0, wxALL, 5);
 

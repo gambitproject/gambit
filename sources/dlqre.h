@@ -20,9 +20,6 @@ private:
   
   void AlgorithmFields(void);
 
-  // Event handlers
-  void OnOK(wxCommandEvent &);
-
 public:
   dialogQre(wxWindow *parent, const gText &filename, bool p_vianfg = false);
   virtual ~dialogQre();
@@ -38,8 +35,6 @@ public:
 
   int StartOption(void) const
     { return m_startOption->GetSelection(); }
-
-  DECLARE_EVENT_TABLE()
 };
 
 #endif  // DLQRE_H

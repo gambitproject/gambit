@@ -20,9 +20,6 @@ private:
 
   void AlgorithmFields(void);
 
-  // Event handlers
-  void OnOK(wxCommandEvent &);
-
 public:
   dialogLiap(wxWindow *p_parent, bool p_subgames = false,
 	     bool p_vianfg = false);
@@ -36,8 +33,6 @@ public:
     { return ToNumber(m_nTries->GetValue().c_str()); }
 
   int StartOption(void) const { return m_startOption->GetSelection(); }
-
-  DECLARE_EVENT_TABLE()
 };
 
 #endif  // DLLIAP_H

@@ -43,26 +43,38 @@ static bool IsInteger(const wxString &p_value)
 //               class gIntegerValidator: Member functions
 //------------------------------------------------------------------------
 
-gIntegerValidator::gIntegerValidator(wxString *val)
+gIntegerValidator::gIntegerValidator(wxString *p_value)
+  : m_stringValue(p_value), m_hasMin(false), m_hasMax(false)
+{ }
+
+gIntegerValidator::gIntegerValidator(wxString *p_value, int p_minValue)
+  : m_stringValue(p_value), m_hasMin(true), m_hasMax(false),
+    m_minValue(p_minValue)
+{ }
+
+gIntegerValidator::gIntegerValidator(wxString *p_value,
+				     int p_minValue, int p_maxValue)
+  : m_stringValue(p_value), m_hasMin(true), m_hasMax(true),
+    m_minValue(p_minValue), m_maxValue(p_maxValue)
+{ }
+
+gIntegerValidator::gIntegerValidator(const gIntegerValidator &p_validator)
 {
-  m_stringValue = val ;
+  Copy(p_validator);
 }
 
-gIntegerValidator::gIntegerValidator(const gIntegerValidator& val)
+bool gIntegerValidator::Copy(const gIntegerValidator &p_validator)
 {
-  Copy(val);
-}
-
-bool gIntegerValidator::Copy(const gIntegerValidator& val)
-{
-  wxValidator::Copy(val);
-
-  m_stringValue = val.m_stringValue;
-
+  wxValidator::Copy(p_validator);
+  m_stringValue = p_validator.m_stringValue;
+  m_hasMin = p_validator.m_hasMin;
+  m_hasMax = p_validator.m_hasMax;
+  m_minValue = p_validator.m_minValue;
+  m_maxValue = p_validator.m_maxValue;
   return true;
 }
 
-bool gIntegerValidator::Validate(wxWindow *parent)
+bool gIntegerValidator::Validate(wxWindow *p_parent)
 {
   if (!m_stringValue) {
     return false;
@@ -77,10 +89,18 @@ bool gIntegerValidator::Validate(wxWindow *parent)
   wxString value(control->GetValue());
 
   if (!IsInteger(value)) {
+    wxMessageBox("Invalid integer value '" + value + "' for " +
+		 m_validatorWindow->GetName(), "Error",
+		 wxOK | wxICON_EXCLAMATION, p_parent);
     m_validatorWindow->SetFocus();
+    return false;
+  }
 
-    wxMessageBox("Numeric value out of range", "Validation conflict",
-		 wxOK | wxICON_EXCLAMATION, parent);
+  if ((m_hasMin && atoi(value.c_str()) < m_minValue) ||
+      (m_hasMax && atoi(value.c_str()) > m_maxValue)) {
+    wxMessageBox("Value out of range for " + m_validatorWindow->GetName(),
+		 "Error", wxOK | wxICON_EXCLAMATION, p_parent);
+    m_validatorWindow->SetFocus();
     return false;
   }
 

@@ -88,7 +88,6 @@ protected:
 
   // Event handlers
   void OnRun(wxCommandEvent &);
-  void OnOK(wxCommandEvent &);
 
   void PxiFields(void);
 

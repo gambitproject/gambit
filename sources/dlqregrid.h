@@ -23,9 +23,6 @@ private:
 
   void AlgorithmFields(void);
 
-  // Event handlers
-  void OnOK(wxCommandEvent &);
-
 public:
   dialogQreGrid(wxWindow *p_parent, const gText &p_filename);
   virtual ~dialogQreGrid();
@@ -49,8 +46,6 @@ public:
     { return m_multiGrid->GetValue(); }
   int StartOption(void) const
     { return m_startOption->GetSelection(); }
-
-  DECLARE_EVENT_TABLE()
 };
 
 #endif // DLQREGRID_H
