@@ -30,6 +30,24 @@
 #include <wx/treectrl.h>
 #include "nfgshow.h"
 
+//
+// This is a generic tree control widget that graphically represents
+// a support in a normal form game.  Strategies not in the support are
+// drawn in grey, strategies in the support are drawn in black.
+//
+class gbtNfgSupportWidget : public wxTreeCtrl {
+private:
+  gbtOrdMap<wxTreeItemId, gbtNfgStrategy> m_map;
+
+  void OnTreeItemCollapse(wxTreeEvent &);
+
+public:
+  gbtNfgSupportWidget(wxWindow *p_parent, wxWindowID p_id);
+
+  void SetSupport(const gbtNfgSupport &);
+  gbtNfgStrategy GetStrategy(wxTreeItemId p_id) { return m_map(p_id); }
+};
+
 class gbtNfgSupportWindow;
 
 class gbtNfgSupportFrame : public wxFrame, public gbtGameView {

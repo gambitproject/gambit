@@ -115,20 +115,6 @@ void gbtCmdSetNfgSupport::Do(gbtGameDocument *p_doc)
 //                    class gbtNfgSupportWidget
 //==========================================================================
 
-class gbtNfgSupportWidget : public wxTreeCtrl {
-private:
-  gbtNfgSupportWindow *m_parent;
-  gbtOrdMap<wxTreeItemId, gbtNfgStrategy> m_map;
-
-  void OnTreeItemCollapse(wxTreeEvent &);
-
-public:
-  gbtNfgSupportWidget(wxWindow *p_parent, wxWindowID p_id);
-
-  void SetSupport(const gbtNfgSupport &);
-  gbtNfgStrategy GetStrategy(wxTreeItemId p_id) { return m_map(p_id); }
-};
-
 gbtNfgSupportWidget::gbtNfgSupportWidget(wxWindow *p_parent,
 					 wxWindowID p_id)
   : wxTreeCtrl(p_parent, p_id), m_map(gbtNfgStrategy())

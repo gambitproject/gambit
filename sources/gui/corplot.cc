@@ -28,10 +28,11 @@
 //
 
 #include <math.h>
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
+#include "id.h"
 #include "corplot.h"
 
 //========================================================================
@@ -81,7 +82,10 @@ gbtCorBranchMixed::gbtCorBranchMixed(void)
 
 gbtCorBranchMixed::gbtCorBranchMixed(const gbtList<MixedSolution> &p_data)
   : m_data(p_data)
-{ }
+{
+  m_shown = gbtArray<bool>(m_data[1].GetGame().ProfileLength());
+  for (int i = 1; i <= m_shown.Length(); m_shown[i++] = true);
+}
 
 //------------------------------------------------------------------------
 //                    gbtCorBranchMixed: Data access
@@ -105,6 +109,24 @@ double gbtCorBranchMixed::GetMaxParameter(void) const
 double gbtCorBranchMixed::GetMinParameter(void) const
 { return 0.0; }
 
+gbtText gbtCorBranchMixed::GetLabel(int p_dim) const
+{
+  int index = 1;
+
+  for (int pl = 1; pl <= m_data[1].GetGame().NumPlayers(); pl++) {
+    gbtNfgPlayer player = m_data[1].GetGame().GetPlayer(pl);
+
+    for (int st = 1; st <= player.NumStrategies(); st++) {
+      if (index++ == p_dim) {
+	return player.GetLabel() + ":" + player.GetStrategy(st).GetLabel();
+      }
+    }
+  }
+  return "";
+}
+
+
+
 //========================================================================
 //                  Implementation of gbtCorBranchBehav
 //========================================================================
@@ -118,7 +140,10 @@ gbtCorBranchBehav::gbtCorBranchBehav(void)
 
 gbtCorBranchBehav::gbtCorBranchBehav(const gbtList<BehavSolution> &p_data)
   : m_data(p_data)
-{ }
+{
+  m_shown = gbtArray<bool>(m_data[1].GetGame().ProfileLength());
+  for (int i = 1; i <= m_shown.Length(); m_shown[i++] = true);
+}
 
 //------------------------------------------------------------------------
 //                    gbtCorBranchBehav: Data access
@@ -280,6 +305,34 @@ void gbtCorPlotWindow::DrawDimension(wxDC &p_dc, int p_dim)
   }
 }
 
+void gbtCorPlotWindow::DrawLegend(wxDC &p_dc)
+{
+  int width, height;
+  GetClientSize(&width, &height);
+
+  int shown = 1;
+
+  for (int dim = 1; dim <= m_cor->NumDimensions(); dim++) {
+    if (m_cor->IsDimensionShown(dim)) {
+      static wxPen *pens[] = { wxRED_PEN, wxGREEN_PEN, wxCYAN_PEN,
+			       wxLIGHT_GREY_PEN, wxBLACK_PEN };
+      p_dc.SetPen(*pens[(dim - 1) % 5]);
+
+      p_dc.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+      p_dc.SetTextForeground(*wxBLUE);
+      wxCoord tw,th;
+      p_dc.GetTextExtent(wxString::Format(wxT("%s"),
+					  (char *) m_cor->GetLabel(dim)), &tw, &th);
+      p_dc.DrawLine(width - m_marginX - 50, 3*th*shown/2+th/2,
+		    width - m_marginX - 40, 3*th*shown/2+th/2);
+      p_dc.DrawText(wxString::Format(wxT("%s"),
+				     (char *) m_cor->GetLabel(dim)), 
+		    width - m_marginX - 35, 3*th*shown/2);
+      shown++;
+    }
+  }
+}
+
 void gbtCorPlotWindow::OnPaint(wxPaintEvent &)
 {
   wxPaintDC dc(this);
@@ -288,25 +341,15 @@ void gbtCorPlotWindow::OnPaint(wxPaintEvent &)
   dc.Clear();
   DrawXAxis(dc);
   DrawYAxis(dc);
+  DrawLegend(dc);
 
-  int width, height;
-  GetClientSize(&width, &height);
-
-  for (int i = 1; i <= m_cor->NumDimensions(); i++) {
-    static wxPen *pens[] = { wxRED_PEN, wxGREEN_PEN, wxCYAN_PEN,
-			     wxLIGHT_GREY_PEN, wxBLACK_PEN };
-    dc.SetPen(*pens[(i - 1) % 5]);
-
-    dc.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
-    dc.SetTextForeground(*wxBLUE);
-    wxCoord tw,th;
-    dc.GetTextExtent(wxString::Format(wxT("%s"),
-				      (char *) m_cor->GetLabel(i)), &tw, &th);
-    dc.DrawLine(width - m_marginX - 50, 3*th*i/2+th/2,
-		width - m_marginX - 40, 3*th*i/2+th/2);
-    dc.DrawText(wxString::Format(wxT("%s"), (char *) m_cor->GetLabel(i)), 
-		width - m_marginX - 35, 3*th*i/2);
-    DrawDimension(dc, i);
+  for (int dim = 1; dim <= m_cor->NumDimensions(); dim++) {
+    if (m_cor->IsDimensionShown(dim)) {
+      static wxPen *pens[] = { wxRED_PEN, wxGREEN_PEN, wxCYAN_PEN,
+			       wxLIGHT_GREY_PEN, wxBLACK_PEN };
+      dc.SetPen(*pens[(dim - 1) % 5]);
+      DrawDimension(dc, dim);
+    }
   }
 }
 
@@ -328,6 +371,11 @@ gbtCorBranch *gbtCorPlotWindow::GetCorrespondence(void) const
 //                 Implementation of gbtCorPlotFrame
 //========================================================================
 
+BEGIN_EVENT_TABLE(gbtCorPlotFrame, wxFrame)
+  EVT_MENU(wxID_CLOSE, gbtCorPlotFrame::Close)
+  EVT_MENU(GBT_MENU_QRE_EDIT_SUPPORT, gbtCorPlotFrame::OnEditSupport)
+END_EVENT_TABLE()
+
 gbtCorPlotFrame::gbtCorPlotFrame(wxWindow *p_parent,
 				 const wxPoint &p_position,
 				 const wxSize &p_size)
@@ -339,10 +387,149 @@ gbtCorPlotFrame::gbtCorPlotFrame(wxWindow *p_parent,
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(m_plot, 1, wxEXPAND, 0);
+
+  wxMenu *fileMenu = new wxMenu;
+  fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));
+
+  wxMenu *editMenu = new wxMenu;
+  editMenu->Append(GBT_MENU_QRE_EDIT_SUPPORT, _("Support"),
+		   _("Change the support of strategies shown"));
+
+  wxMenuBar *menuBar = new wxMenuBar;
+  menuBar->Append(fileMenu, _("&File"));
+  menuBar->Append(editMenu, _("&Edit"));
+  SetMenuBar(menuBar);
   
   SetSizer(topSizer);
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
   Layout();
   Show(true);
+}
+
+
+//========================================================================
+//              Implementation of gbtNfgCorPlotSupportDialog
+//========================================================================
+
+const int GBT_NFG_STRATEGY_WIDGET = 8000;
+
+class gbtNfgCorPlotSupportDialog : public wxDialog {
+private:
+  gbtNfgSupport m_support;
+  gbtNfgSupportWidget *m_supportWidget;
+
+  // Event handlers
+  void ToggleStrategy(wxTreeItemId);
+  void OnTreeKeypress(wxTreeEvent &);
+  void OnTreeItemActivated(wxTreeEvent &);
+
+public:
+  gbtNfgCorPlotSupportDialog(wxWindow *p_parent,
+			     const gbtNfgSupport &p_support);
+
+
+  // Only valid if ShowModal() returns wxID_OK
+  const gbtNfgSupport &GetSupport(void) const { return m_support; }
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(gbtNfgCorPlotSupportDialog, wxDialog)
+  EVT_TREE_KEY_DOWN(GBT_NFG_STRATEGY_WIDGET,
+		    gbtNfgCorPlotSupportDialog::OnTreeKeypress)
+  EVT_TREE_ITEM_ACTIVATED(GBT_NFG_STRATEGY_WIDGET,
+			  gbtNfgCorPlotSupportDialog::OnTreeItemActivated)
+END_EVENT_TABLE()
+
+gbtNfgCorPlotSupportDialog::gbtNfgCorPlotSupportDialog(wxWindow *p_parent,
+						       const gbtNfgSupport &p_support)
+  : wxDialog(p_parent, -1, "Choose displayed support", wxDefaultPosition),
+    m_support(p_support)
+{
+  SetAutoLayout(true);
+
+  m_supportWidget = new gbtNfgSupportWidget(this, GBT_NFG_STRATEGY_WIDGET);
+  m_supportWidget->SetSize(300, 300);
+  m_supportWidget->SetSupport(p_support);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(m_supportWidget, 1, wxEXPAND, 0);
+  
+  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
+  okButton->SetDefault();
+  buttonSizer->Add(okButton, 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
+  topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+  CenterOnParent();
+}
+
+void gbtNfgCorPlotSupportDialog::ToggleStrategy(wxTreeItemId p_id)
+{
+  gbtNfgStrategy strategy = m_supportWidget->GetStrategy(p_id);
+  if (strategy.IsNull()) {
+    return;
+  }
+
+  if (m_support.Contains(strategy)) {
+    m_support.RemoveStrategy(strategy);
+  }
+  else {
+    m_support.AddStrategy(strategy);
+  }
+  m_supportWidget->SetSupport(m_support);
+}
+
+void gbtNfgCorPlotSupportDialog::OnTreeKeypress(wxTreeEvent &p_event)
+{
+  if (p_event.GetKeyCode() == WXK_SPACE) {
+    ToggleStrategy(m_supportWidget->GetSelection());
+  }
+}
+
+void gbtNfgCorPlotSupportDialog::OnTreeItemActivated(wxTreeEvent &p_event)
+{
+  ToggleStrategy(p_event.GetItem());
+}
+
+
+//========================================================================
+//                Implementation of gbtNfgCorPlotFrame
+//========================================================================
+
+gbtNfgCorPlotFrame::gbtNfgCorPlotFrame(const gbtNfgSupport &p_support,
+				       wxWindow *p_parent,
+				       const wxPoint &p_position,
+				       const wxSize &p_size)
+  : gbtCorPlotFrame(p_parent, p_position, p_size),
+    m_support(p_support)
+{ }
+
+
+void gbtNfgCorPlotFrame::OnEditSupport(wxCommandEvent &)
+{
+  gbtNfgCorPlotSupportDialog dialog(this, m_support);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    m_support = dialog.GetSupport();
+
+    int index = 1;
+
+    for (int pl = 1; pl <= m_support.GetGame().NumPlayers(); pl++) {
+      gbtNfgPlayer player = m_support.GetGame().GetPlayer(pl);
+
+      for (int st = 1; st <= player.NumStrategies(); st++) {
+	GetCorrespondence()->ShowDimension(index++, 
+					   m_support.Contains(player.GetStrategy(st)));
+      }
+    }
+
+    m_plot->Refresh();
+  }
 }

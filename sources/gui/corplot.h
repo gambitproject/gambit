@@ -30,9 +30,13 @@
 #ifndef CORPLOT_H
 #define CORPLOT_H
 
+#include <wx/treectrl.h>
+
 // For MixedSolution; when gbtCorBranch goes abstract, should be removed
 #include "nash/mixedsol.h"
 #include "nash/behavsol.h"
+
+#include "nfgsupport.h"
 
 //
 // gbtCorBranch is meant to encapsulate the idea of a branch of a
@@ -43,6 +47,10 @@ class gbtCorBranch {
 public:
   // Returns the number of dimensions of the product of simplices
   virtual int NumDimensions(void) const = 0;
+  // Returns 'true' if the 'index'th dimension is to be plotted
+  virtual bool IsDimensionShown(int p_index) const = 0;
+  // Set whether the dimension is to be plotted
+  virtual void ShowDimension(int p_index, bool p_show) = 0;
   // Returns the number of data points in the branch
   virtual int NumData(void) const = 0;
 
@@ -63,6 +71,7 @@ public:
 class gbtCorBranchMixed : public gbtCorBranch {
 private:
   gbtList<MixedSolution> m_data;
+  gbtArray<bool> m_shown;
 
 public:
   // Constructors
@@ -72,6 +81,10 @@ public:
 
   // Returns the number of dimensions of the product of simplices
   int NumDimensions(void) const;
+  // Returns 'true' if the 'index'th dimension is to be plotted
+  bool IsDimensionShown(int p_index) const { return m_shown[p_index]; }
+  // Set whether the dimension is to be plotted
+  void ShowDimension(int p_index, bool p_show) { m_shown[p_index] = p_show; }
   // Returns the number of data points in the branch
   int NumData(void) const;
 
@@ -84,11 +97,15 @@ public:
   double GetMaxParameter(void) const;
   // Get the minimum value of the parameter
   double GetMinParameter(void) const;
+
+  // Get the label associated with dimension 'p_dim'
+  gbtText GetLabel(int p_dim) const;
 };
 
 class gbtCorBranchBehav : public gbtCorBranch {
 private:
   gbtList<BehavSolution> m_data;
+  gbtArray<bool> m_shown;
 
 public:
   // Constructors
@@ -98,6 +115,10 @@ public:
 
   // Returns the number of dimensions of the product of simplices
   int NumDimensions(void) const;
+  // Returns 'true' if the 'index'th dimension is to be plotted
+  bool IsDimensionShown(int p_index) const { return m_shown[p_index]; }
+  // Set whether the dimension is to be plotted
+  void ShowDimension(int p_index, bool p_show) { m_shown[p_index] = p_show; }
   // Returns the number of data points in the branch
   int NumData(void) const;
 
@@ -178,6 +199,7 @@ private:
   // Private auxiliary drawing functions
   void DrawXAxis(wxDC &);
   void DrawYAxis(wxDC &);
+  void DrawLegend(wxDC &);
   void DrawDimension(wxDC &, int);
 
   // Converting from data values to chart coordinates
@@ -192,23 +214,39 @@ public:
 		   const wxSize & = wxDefaultSize);
   virtual ~gbtCorPlotWindow();
 
-  void SetCorrespondence(gbtCorBranch *);
+  void SetCorrespondence(gbtCorBranch *p_branch);
   gbtCorBranch *GetCorrespondence(void) const;
 
   DECLARE_EVENT_TABLE()
 };
 
 class gbtCorPlotFrame : public wxFrame {
-private:
+protected:
   gbtCorPlotWindow *m_plot;
+
+  virtual void OnEditSupport(wxCommandEvent &) { }
 
 public:
   gbtCorPlotFrame(wxWindow *p_parent, const wxPoint &, const wxSize &);
-  
+
   void SetCorrespondence(gbtCorBranch *p_branch)
     { m_plot->SetCorrespondence(p_branch); }
   gbtCorBranch *GetCorrespondence(void) const
     { return m_plot->GetCorrespondence(); }
+
+  DECLARE_EVENT_TABLE()
+};
+
+class gbtNfgCorPlotFrame : public gbtCorPlotFrame {
+private:
+  gbtNfgSupport m_support;
+
+protected:
+  void OnEditSupport(wxCommandEvent &);
+
+public:
+  gbtNfgCorPlotFrame(const gbtNfgSupport &p_support,
+		     wxWindow *p_parent, const wxPoint &, const wxSize &);
 };
 
 #endif  // CORPLOT_H

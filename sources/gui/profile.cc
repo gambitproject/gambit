@@ -250,7 +250,12 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 	return wxString::Format(wxT("%s"), (char *) ToText(behav->IsSubgamePerfect()));
       }
       else {
-	return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsPerfect()));
+	try {
+	  return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsPerfect()));
+	}
+	catch (...) {
+	  return wxT("DK");
+	}
       }
     case 4:
       if (behav) {

@@ -260,13 +260,15 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
 
 void dialogQreFile::OnToolsPlot(wxCommandEvent &)
 {
-  gbtCorPlotFrame *plotFrame = new gbtCorPlotFrame(this,
-						   wxDefaultPosition,
-						   wxSize(500, 300));
   if (m_mixedProfiles.Length() > 0) {
+    gbtNfgSupport support(m_mixedProfiles[1].GetGame());
+    support.SetLabel("Displayed support");
+    gbtNfgCorPlotFrame *plotFrame = 
+      new gbtNfgCorPlotFrame(support, this, wxDefaultPosition,
+			     wxSize(500, 300));
     plotFrame->SetCorrespondence(new gbtCorBranchMixed(m_mixedProfiles));
   }
   else {
-    plotFrame->SetCorrespondence(new gbtCorBranchBehav(m_behavProfiles));
+    //    plotFrame->SetCorrespondence(new gbtCorBranchBehav(m_behavProfiles));
   }
 }
