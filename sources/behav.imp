@@ -262,13 +262,6 @@ template <class T> void ExtForm<T>::Centroid(BehavProfile<T> &profile) const
     }
 }
 
-template <class T> int ReadEfgFile(gInput &f, ExtForm<T> *& E)
-{
-  E = new ExtForm<T>;
-
-  return ReadEfgFile(f, (BaseExtForm *&) E);
-}
-
 //---------------------------------------------------------------------------
 //                    BehavProfile<T> member functions
 //---------------------------------------------------------------------------

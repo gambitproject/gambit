@@ -9,9 +9,6 @@
 #include "ggrstack.h"
 #include "glist.h"
 #include "extform.h"
-#include "player.h"
-#include "infoset.h"
-#include "node.h"
 
 %}
 
@@ -24,7 +21,16 @@
                    gList<gString> actions; \
                    gList<gRational> values; \
                    Player *player; Infoset *infoset; Outcome *outcome; \
-                   int i;  gString iset_name;
+                   int i;  gString iset_name; \
+                   virtual ~EfgFileReader(); \
+                   virtual Outcome *NewOutcome(void) = 0; \
+                   virtual Outcome *GetOutcome(const gString &) = 0; \
+                   virtual void SetOutcome(Outcome *, \
+					   const gList<gRational> &) = 0; \
+                   virtual void SetActionProbs(Infoset *, \
+					       const gList<gRational> &) = 0; \
+                   virtual bool CheckActionProbs(Infoset *, \
+						 const gList<gRational> &) = 0;
 
 
 %define CONSTRUCTOR_PARAM    gInput &f, BaseExtForm *& e
@@ -35,28 +41,14 @@
 %token RBRACE
 %token SLASH
 
-%token TYPEFLOAT
-%token TYPERAT
-
 %token NAME
 %token NUMBER
-
-%token EFGTAG
 
 %%
 
 efgfile:    header { path.Push(E->RootNode()); } body
 
-header:     'E' 'F' 'G' version type NAME { E->SetTitle(last_name); } playerlist
-
-version:    NUMBER   { if (last_rational > (gRational) 1)  YYERROR; }
-
-type:       TYPEFLOAT { if (!E)  E = new ExtForm<double>;
-                        else if (E->Type() != DOUBLE)   YYERROR;
-		      }
-    |       TYPERAT   { if (!E)  E = new ExtForm<gRational>;
-		        else if (E->Type() != RATIONAL)   YYERROR;
-		      }
+header:     NAME { E->SetTitle(last_name); } playerlist
 
 playerlist:   LBRACE RBRACE
           |   LBRACE players RBRACE
@@ -93,20 +85,7 @@ person_node:
 			  E->AppendNode(path.Peek(), infoset);
 			}
 		      }
-		NAME  { if (E->Type() == DOUBLE)
-			  outcome = ((ExtForm<double> *) E)->GetOutcome(last_name);
-			else
-			  outcome = ((ExtForm<gRational> *) E)->GetOutcome(last_name);
-		        if (!outcome && last_name != "")  {
-		          if (E->Type() == DOUBLE)
-			    outcome = ((ExtForm<double> *) E)->NewOutcome();
-			  else
-			    outcome = ((ExtForm<gRational> *) E)->NewOutcome();
-			  outcome->SetName(last_name);
-			}
-			path.Peek()->SetOutcome(outcome);
-		      }
-                payofflistopt   { path.Push(path.Peek()->GetChild(1)); }
+                outcome   { path.Push(path.Peek()->GetChild(1)); }
 
 actionlistopt:  { if (!infoset)   YYERROR; }
           | LBRACE actionlist RBRACE
@@ -125,27 +104,21 @@ chance_node: 'c' NAME  { path.Peek()->SetName(last_name); }
 			   infoset = E->AppendNode(path.Peek(),
 						   player, actions.Length());
 			   infoset->SetName(iset_name);
-			   for (i = 1; i <= actions.Length(); i++)  {
+			   for (i = 1; i <= actions.Length(); i++) 
 			     infoset->SetActionName(i, actions[i]);
-			     if (E->Type() == DOUBLE)
-			       ((ChanceInfoset<double> *) infoset)->SetActionProb(i, values[i]);
-			     else
-			       ((ChanceInfoset<gRational> *) infoset)->SetActionProb(i, values[i]);
-			   }
+			   SetActionProbs(infoset, values);
 			 }
 			 else   {
 			   if (actions.Length() > 0 && actions.Length() != infoset->NumActions())
 			     YYERROR;
-			   for (i = 1; i <= actions.Length(); i++)   {
+			   for (i = 1; i <= actions.Length(); i++) 
 			     if (actions[i] != infoset->GetActionName(i))
 			       YYERROR;
-			     if (E->Type() == DOUBLE && (double) values[i] != ((ChanceInfoset<double> *) infoset)->GetActionProb(i))  YYERROR;
-			     if (E->Type() == RATIONAL && values[i] != ((ChanceInfoset<gRational> *) infoset)->GetActionProb(i))  YYERROR;
-			   }
+			   if (!CheckActionProbs(infoset, values))   YYERROR;
 			   E->AppendNode(path.Peek(), infoset);
 			 }
 		       }
-               NAME payofflistopt  { path.Push(path.Peek()->GetChild(1)); }
+               outcome  { path.Push(path.Peek()->GetChild(1)); }
 
 actionproblistopt:   { if (!infoset)  YYERROR; }
           | LBRACE actionproblist RBRACE
@@ -158,21 +131,7 @@ actionprob:     NAME NUMBER   { actions.Append(last_name);
 
 terminal_node:
              't' NAME  { path.Peek()->SetName(last_name); }
-                 NAME  {
-		   if (E->Type() == DOUBLE)
-		     outcome = ((ExtForm<double> *) E)->GetOutcome(last_name);
-		   else
-		     outcome = ((ExtForm<gRational> *) E)->GetOutcome(last_name);
-		   if (!outcome && last_name != "")  {
-		     if (E->Type() == DOUBLE)
-		       outcome = ((ExtForm<double> *) E)->NewOutcome();
-		     else
-		       outcome = ((ExtForm<gRational> *) E)->NewOutcome();
-		     outcome->SetName(last_name);
-		   }
-		   path.Peek()->SetOutcome(outcome);
-		 }
-              payofflistopt
+                 outcome
               { path.Push(path.Pop()->NextSibling());
 		while (path.Depth() > 1 && !path.Peek())   {
 		  path.Pop();
@@ -180,14 +139,18 @@ terminal_node:
 		}
 	      }
 
+outcome:     NAME   {
+               outcome = GetOutcome(last_name);
+	       if (!outcome && last_name != "")
+		 (outcome = NewOutcome())->SetName(last_name);
+	       path.Peek()->SetOutcome(outcome);
+	     }
+             payofflistopt
+
 payofflistopt:
              | LBRACE  { values.Flush(); } payofflist RBRACE
              { if (values.Length() != E->NumPlayers())   YYERROR;
-	       for (i = 1; i <= values.Length(); i++)
-		 if (E->Type() == DOUBLE)
-		   ((OutcomeVector<double> &) *outcome)[i] = values[i];
-	         else
-		   ((OutcomeVector<gRational> &) *outcome)[i] = values[i];
+	       SetOutcome(outcome, values);
 	     }
 
 payofflist:    NUMBER   { values.Append(last_rational); }
@@ -232,13 +195,7 @@ int EfgFileReader::yylex(void)
       break;
   }
 
-  if (isalpha(c))   {
-    switch (c)   {
-      case 'D':  return TYPEFLOAT;
-      case 'R':  return TYPERAT;
-      default:   return c;
-    }
-  }
+  if (isalpha(c))   return c;
 
   if (c == '"')  {
     infile.unget(c);
@@ -260,18 +217,37 @@ int EfgFileReader::yylex(void)
   }
 }
 
+EfgFileReader::~EfgFileReader()   { }
 
-int ReadEfgFile(gInput &f, BaseExtForm *& E)
+void EfgFileType(gInput &f, DataType &type, bool &valid)
 {
-  EfgFileReader R(f, E);
-
-  if (R.yyparse())   {
-    if (E) delete E;
-    return 0;
+  f.seekp(0);
+  static char *prologue = { "EFG 1 " };
+  char c;
+  for (int i = 0; i < strlen(prologue); i++)  {
+    f.get(c);
+    if (c != prologue[i])   {
+      valid = false;
+      return;
+    }
   }
 
-  return 0;
+  f.get(c);
+  switch (c)   {
+    case 'D':
+      valid = true;
+      type = DOUBLE;
+      return;
+    case 'R':
+      valid = true;
+      type = RATIONAL;
+      return;
+    default:
+      valid = false;
+      return;
+  }
 }
+
 
 #ifdef __GNUG__
 #define TEMPLATE template

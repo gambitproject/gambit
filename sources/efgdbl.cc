@@ -28,14 +28,20 @@ DataType ExtForm<double>::Type(void) const    { return DOUBLE; }
 TEMPLATE class TypedNode<double>;
 TEMPLATE class ChanceInfoset<double>;
 TEMPLATE class OutcomeVector<double>;
-TEMPLATE int ReadEfgFile(gInput &, ExtForm<double> *&);
 TEMPLATE class BehavProfile<double>;
 TEMPLATE gOutput &operator<<(gOutput &, const BehavProfile<double> &);
 //TEMPLATE bool operator==(const gArray<double> &, const gArray<double> &);
 //TEMPLATE bool operator!=(const gArray<double> &, const gArray<double> &);
 
+#include "readefg.imp"
+
+TEMPLATE class EfgFile<double>;
+TEMPLATE int ReadEfgFile(gInput &, ExtForm<double> *&);
+
 #include "glist.imp"
 
 TEMPLATE class gList<BehavProfile<double> >;
 TEMPLATE class gNode<BehavProfile<double> >;
+
+
 

@@ -142,12 +142,11 @@ template <class T> class ExtForm : public BaseExtForm   {
 #include "player.h"
 #include "infoset.h"
 #include "node.h"
-#include "outcome.h"
 
 
 // These functions are provided in readefg.y/readefg.cc
-int ReadEfgFile(gInput &, BaseExtForm *&);
 template <class T> int ReadEfgFile(gInput &, ExtForm<T> *&);
+void EfgFileType(gInput &f, bool &valid, DataType &type);
 
 #endif   //# EXTFORM_H
 

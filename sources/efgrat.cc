@@ -28,11 +28,16 @@ DataType ExtForm<gRational>::Type(void) const   { return RATIONAL; }
 TEMPLATE class TypedNode<gRational>;
 TEMPLATE class ChanceInfoset<gRational>;
 TEMPLATE class OutcomeVector<gRational>;
-TEMPLATE int ReadEfgFile(gInput &, ExtForm<gRational> *&);
 TEMPLATE class BehavProfile<gRational>;
 TEMPLATE gOutput &operator<<(gOutput &, const BehavProfile<gRational> &);
 //TEMPLATE bool operator==(const gArray<gRational> &, const gArray<gRational> &);
 //TEMPLATE bool operator!=(const gArray<gRational> &, const gArray<gRational> &);
+
+#include "readefg.imp"
+
+TEMPLATE class EfgFile<gRational>;
+TEMPLATE int ReadEfgFile(gInput &, ExtForm<gRational> *&);
+
 #include "glist.imp"
 
 TEMPLATE class gList<BehavProfile<gRational> >;
