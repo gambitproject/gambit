@@ -1041,8 +1041,10 @@ int main( void )
   machine->Execute( program );
 */
 
+
   machine->PushRef( "x" );
-  for( i = 0; i < 10; i++ )
+  machine->Push( (double) 10 );
+  for( i = 0; i < 9; i++ )
   {
     machine->Push( (gInteger) i );
   }

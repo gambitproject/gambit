@@ -518,15 +518,16 @@ int List_Portion::Insert( Portion* item, int index )
   {
     gerr << "Portion Error: attempted to insert a Reference_Portion into\n";
     gerr << "               a List_Portion\n";
-    assert(0);
+    result = 0;
   }
-
+  
   if( _Value.Length() == 0 )  // creating a new list
   {
     if( item->Type() == porLIST )
       _DataType = ( (List_Portion*) item )->_DataType;
     else
       _DataType = item->Type();
+    result = _Value.Insert( item, index );
   }
   else  // inserting into an existing list
   {
@@ -535,10 +536,14 @@ int List_Portion::Insert( Portion* item, int index )
     {
       gerr << "Portion Error: attempted to insert conflicting Portion types\n";
       gerr << "               into a List_Portion.\n";
-      assert(0);
+      result = 0;
+    }
+    else
+    {
+      result = _Value.Insert( item, index );
     }
   }
-  result = _Value.Insert( item, index );
+
   return result;
 }
 

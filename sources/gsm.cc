@@ -168,7 +168,11 @@ bool GSM::PushList( const int num_of_elements )
     p = _Stack->Pop();
     if( p->Type() == porREFERENCE )
       p = _ResolveRef( (Reference_Portion*) p );
-    list->Insert( p, 1 );
+    if( list->Insert( p, 1 ) == 0 )
+    {
+      result = false;
+      break;
+    }
   }
   _Stack->Push( list );
 
