@@ -359,14 +359,17 @@ int EfgSolnShow::feature_width[BSOLN_NUM_FEATURES]=
 														{0,-1,8,2,2,2,7,7,7};
 
 EfgSolnShow::EfgSolnShow(const Efg &ef_,BehavSolutionList &soln,
-						int cur_soln_,const GambitDrawSettings &draw_settings_,
-						BSolnSortFilterOptions	&sf_options_,
-						EfgShow *parent_,unsigned int opts_):
-	  SpreadSheet3D(1+soln.Length()*NumIsets(ef_),4,1,"Solutions",parent_,ANY_BUTTON),
-	  dim(ef_.NumActions()),num_players(ef_.NumPlayers()),
-     num_isets(NumIsets(ef_)),num_solutions(soln.Length()),cur_soln(cur_soln_),
-     features(0,BSOLN_NUM_FEATURES-1),opts(opts_),sf_options(sf_options_),
-	  gamb_draw_settings(draw_settings_), ef(ef_), parent(parent_), solns(soln)
+                        int cur_soln_,const GambitDrawSettings &draw_settings_,
+			BSolnSortFilterOptions &sf_options_,
+			EfgShow *parent_,unsigned int opts_):
+                  SpreadSheet3D(1+soln.Length()*NumIsets(ef_),4,1,"Solutions",parent_,ANY_BUTTON),
+                  ef(ef_), parent(parent_), gamb_draw_settings(draw_settings_),
+                  solns(soln), dim(ef_.NumActions()),
+                  num_players(ef_.NumPlayers()), num_isets(NumIsets(ef_)),
+                  num_solutions(soln.Length()), cur_soln(cur_soln_),
+                  features(0,BSOLN_NUM_FEATURES-1), opts(opts_),
+                  sf_options(sf_options_)
+	  
 {
 int i;
 Show(FALSE);
