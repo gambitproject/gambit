@@ -50,6 +50,7 @@ void DisplayNfgAlgType(gOutput &p_file, NfgAlgType p_algorithm)
 MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
 			     NfgAlgType p_creator)
   : m_profile(NFSupport(p_profile.Game())), m_precision(precDOUBLE),
+    m_support(p_profile.Support()),
     m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
     m_isProper(triUNKNOWN), m_epsilon(0.0),
     m_qreLambda(-1), m_qreValue(-1),
@@ -70,6 +71,7 @@ MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
 MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
 			     NfgAlgType p_creator)
   : m_profile(NFSupport(p_profile.Game())), m_precision(precRATIONAL),
+    m_support(p_profile.Support()),
     m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
     m_isProper(triUNKNOWN), m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_id(0)
@@ -89,6 +91,7 @@ MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
 MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
 			     NfgAlgType p_creator)
   : m_profile(NFSupport(p_profile.Game())), m_precision(precRATIONAL),
+    m_support(p_profile.Support()),
     m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
     m_isProper(triUNKNOWN), m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_id(0)
@@ -107,8 +110,8 @@ MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
 }
 
 MixedSolution::MixedSolution(const MixedSolution &p_solution)
-  : m_profile(p_solution.m_profile),
-    m_precision(p_solution.m_precision), m_creator(p_solution.m_creator), 
+  : m_profile(p_solution.m_profile), m_precision(p_solution.m_precision),
+    m_support(p_solution.m_support), m_creator(p_solution.m_creator), 
     m_isNash(p_solution.m_isNash), m_isPerfect(p_solution.m_isPerfect),
     m_isProper(p_solution.m_isProper), m_epsilon(p_solution.m_epsilon),
     m_qreLambda(p_solution.m_qreLambda),
@@ -124,6 +127,7 @@ MixedSolution &MixedSolution::operator=(const MixedSolution &p_solution)
   if (this != &p_solution)  {
     m_profile = p_solution.m_profile;
     m_precision = p_solution.m_precision;
+    m_support = p_solution.m_support;
     m_creator = p_solution.m_creator;
     m_isNash = p_solution.m_isNash;
     m_isPerfect = p_solution.m_isPerfect;
@@ -285,6 +289,7 @@ const gNumber &MixedSolution::LiapValue(void) const
 
 void MixedSolution::Invalidate(void) const
 {
+  m_support = NFSupport(m_profile.Game());
   m_creator = algorithmNfg_USER;
   m_isNash = triUNKNOWN;
   m_isProper = triUNKNOWN;

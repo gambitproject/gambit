@@ -32,6 +32,7 @@ class MixedSolution   {
 protected:
   MixedProfile<gNumber> m_profile;
   gPrecision m_precision;
+  mutable NFSupport m_support;
   mutable NfgAlgType m_creator;
   mutable gTriState m_isNash, m_isPerfect, m_isProper;
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue, m_liapValue;
@@ -73,6 +74,7 @@ public:
 
   unsigned int Id(void) const { return m_id; }
   NfgAlgType Creator(void) const { return m_creator; }
+  const NFSupport &Support(void) const { return m_support; }
   gTriState IsNash(void) const;
   gTriState IsPerfect(void) const;
   gTriState IsProper(void) const;
@@ -99,7 +101,6 @@ public:
   // these are all obsolescent :)
   gNumber Payoff(int p_player) const { return m_profile.Payoff(p_player); }
   const gArray<int> &Lengths(void) const { return m_profile.Lengths(); }
-  NFSupport Support(void) const { return NFSupport(Game()); }
   
   // PAYOFF COMPUTATION
   gNumber Payoff(NFPlayer *, Strategy *) const;

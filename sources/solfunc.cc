@@ -711,7 +711,7 @@ static Portion *GSM_Support_Behav(Portion** param)
 static Portion *GSM_Support_Mixed(Portion** param)
 {
   MixedSolution *P = ((MixedPortion *) param[0])->Value();
-  return new NfSupportPortion(new NFSupport(P->Game()));
+  return new NfSupportPortion(new NFSupport(P->Support()));
 }
 
 
