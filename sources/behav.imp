@@ -300,19 +300,40 @@ BehavProfile<T>::BehavProfile(const BehavSolution &p_solution)
 }
 
 template <class T> BehavProfile<T>::BehavProfile(const EFSupport &p_support) 
-  : gDPVector<T>(p_support.NumActions()), m_efg(&p_support.Game()),
+  : gDPVector<T>(p_support.NumActions()), 
+    m_efg(&p_support.Game()),
     m_root(new BehavNode<T>(m_efg->RootNode(), m_efg->NumPlayers())),
     m_support(p_support),
+    m_chanceprobs(new gPVector<T>(0)),
     m_payoffs(new gRectArray<T>(m_efg->NumOutcomes(), m_efg->NumPlayers()))
 {
   gArray<int> dim(m_efg->GetChance()->NumInfosets());
+
+  //DEBUG
+  //gout << "We got through the construction of the gArray dim.\n\n";
+
   Centroid();
+
+  //DEBUG
+  //gout << "We got through centroid.\n\n";
+
   for (int iset = 1; iset <= dim.Length(); iset++)
     dim[iset] = m_efg->GetChance()->Infosets()[iset]->NumActions();
+  delete m_chanceprobs;
   m_chanceprobs = new gPVector<T>(dim);
+
+  //DEBUG
+  //gout << "We reinitialized m_chanceprobs.\n\n";
+
   for (int iset = 1; iset <= dim.Length(); iset++)
-    for (int act = 1; act <= m_efg->GetChance()->Infosets()[iset]->NumActions(); act++)
-       (*m_chanceprobs)(iset, act) = m_efg->GetChanceProb(m_efg->GetChance()->Infosets()[iset], act);
+    for (int act = 1; 
+	 act <= m_efg->GetChance()->Infosets()[iset]->NumActions(); act++)
+       (*m_chanceprobs)(iset, act) = 
+	 m_efg->GetChanceProb(m_efg->GetChance()->Infosets()[iset], act);
+
+  //DEBUG
+  //gout << "We got this far at least.\n\n";
+  //exit(0);
 
   for (int outc = 1; outc <= m_efg->NumOutcomes(); outc++)
     for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)
@@ -348,6 +369,14 @@ const T &BehavProfile<T>::GetValue(Infoset *p_infoset, int p_action) const
 {
   return (*this)(p_infoset->GetPlayer()->GetNumber(), p_infoset->GetNumber(),
 		 p_action);
+}
+
+template <class T>
+const T &BehavProfile<T>::GetValue(const Action *p_action) const
+{
+  return (*this)(p_action->BelongsTo()->GetPlayer()->GetNumber(), 
+		 p_action->BelongsTo()->GetNumber(),
+		 p_action->GetNumber());
 }
 
 template <class T> T BehavProfile<T>::LiapValue(void) const
@@ -737,13 +766,18 @@ template <class T> void BehavProfile<T>::Centroid(void) const
   T center;
 
   for (int pl = 1; pl <= dvlen.Length(); pl++)
-    for (int iset = 1; iset <= dvlen[pl]; iset++)  {
-      center = ((T) 1 / (T) m_support.NumActions(pl, iset));
-      int act;
-      for (act = 1; act <= svlen[dvidx[pl] + iset - 1]; act++)
-	dvptr[pl][iset][act] = center;
-    }
+    for (int iset = 1; iset <= dvlen[pl]; iset++)
+      if (m_support.NumActions(pl,iset) > 0) {
+	center = ((T) 1 / (T) m_support.NumActions(pl, iset));
+	int act;
+	for (act = 1; act <= svlen[dvidx[pl] + iset - 1]; act++)
+	  dvptr[pl][iset][act] = center;
+      }
 }
+
+//-----------------
+//   Output
+//-----------------
 
 template <class T> gOutput &operator<<(gOutput &p_file,
 				       const BehavProfile<T> &p_profile)
