@@ -1,4 +1,3 @@
-#
 # Generic makefile for Gambit Project
 # 
 # Makes both gui and gcl targets on multiple platforms, and 
@@ -7,11 +6,13 @@
 # Rename this makefile to 'Makefile', and then use 'make gui'
 # to make the gui, and 'make gcl' to make the gcl.
 #
-# Executable is named gcl_$(SYSNAME), or gui_$(SYSNAME), where 
-# $(SYSNAME) is a platform specific identifier, (eg gcl_Linux 
-# or gui_SunOS_5.6).
+# Executable are named gcl_$(SYSNAME) and gui_$(GUI)_$(SYSNAME), 
+# where SYSNAME represents the OS and GUI represents the X libraries 
+# (motif/xt/none) that are available on the system (e.g. gui_Linux_xt or
+# gcl_SunOS_5.6).  SYSNAME and GUI must be passed to this makefile
+# e.g. "make -f Makefile2.generic SYSNAME=solaris GUI=motif".
 #
-# Object files are put in platform specific subdirectories so that 
+# Object files are put in platform-specific subdirectories so that 
 # the same source directory can be used for multiple platforms.  
 # 
 # This Makefile requires 'make.filelist' to exist in the same directory.
@@ -28,23 +29,28 @@
 # Note: If files are moved or renamed, this makefile can get "stuck".  
 #       In this case do 'rm *.d' or 'make clean'
 
+# Name of this makefile.
+
+MYNAME = Makefile.generic
+
 # define compiler and flags
 
 CC = g++ 
 CFLAGS = -O2 -Wall -DGDOUBLE -D__NO_MATH_INLINES -Dwx_motif $(DEFINES) \
 	 -fguiding-decls -fno-implicit-templates $(INCDIR) 
 
-# define variable for system name.  
+#
+# Default system variables, which should be overwritten if necessary.
+# GUI can be "xt" or "motif".  "xt" is only supported for Linux.
+#
 
-ifeq ($(shell uname -s), SunOS)
-SYSNAME = $(shell uname -s)_$(shell uname -r)
-else
-SYSNAME = $(shell uname -s)
-endif
+SYSNAME = Linux
+GUI     = motif
 
 # define directory where object files are put
 
-OBJDIR = obj_$(SYSNAME)
+
+OBJDIR = obj_$(GUI)_$(SYSNAME)
 vpath %.o  $(OBJDIR)
 
 # rule for creating .o (object) files from .cc files
@@ -69,13 +75,17 @@ vpath %.o  $(OBJDIR)
 #   WXLIBDIR = location of wxwin libraries
 #   WXLIB    = any wx libraries used
 
-ifdef WXXT
+ifeq ($(GUI), xt)
+ifneq ($(SYSNAME), Linux)
+@echo Error! Xt interface only works with Linux!
+else
 WXDIR = /home/mill/gambit/wxxt/wxxt-1.67
 WXLIBDIR = -L$(WXDIR)/lib/linux
 WXINCDIR = -I$(WXDIR)/wx -I$(WXDIR)/setup/Linux -I$(WXDIR)/src/xt-widgets \
            -DLINUX_WXXT
 WXLIB = -lwx_xt -lwx_xtwidgets
-else
+endif
+else # motif
 WXDIR = /home/mill/gambit/wxwin
 WXLIBDIR = -L$(WXDIR)/lib
 WXINCDIR = -I$(WXDIR)/include/base -I$(WXDIR)/include/x 
@@ -100,16 +110,16 @@ XINCDIR = -I/usr/include/X11R5 -I/usr/include/Motif1.2
 XLIBDIR = -L/usr/lib/X11R5 -L/usr/lib/Motif1.2
 XLIB = -lXm -lXt -lX11 -lc -lm -lg++
 else # Linux
-ifdef WXXT
+ifeq ($(GUI), xt)
 XINCDIR = -I/usr/X11R6/include
 XLIBDIR = -L/usr/X11R6/lib 
 XLIB = -lXpm -lXaw -lXext -lXmu -lXt -lSM -lICE -lX11 -lm
-else
+else # motif
 XINCDIR = -I/usr/X11R6/include
-XLIBDIR = -L/usr/X11R6/lib 
+XLIBDIR = -L/usr/X11R6/lib
 XLIB = -lX11 -lXm -lXp -lXmu -lXext -lXt -lm
 endif # WXXT
-endif 
+endif
 endif
 
 # Combine the site dependent and independent data
@@ -140,12 +150,32 @@ $(OBJDIR):
 gcl_$(SYSNAME):	$(OBJDIR) $(ALLGCL_OBJECTS)
 	cd $(OBJDIR); $(CC) $(ALLGCL_OBJECTS) -o ../gcl_$(SYSNAME) -lm; cd ..
 
-gcl:	gcl_$(SYSNAME);
+gcl:	
+ifndef SYSNAME
+	@echo usage: make -f $(MYNAME) SYSNAME=\<sysname\> GUI=\<gui\>
+	@echo Must specify a SYSNAME e.g. linux, solaris, hp
+	@exit 1
+endif
+	make -f $(MYNAME) gcl_$(SYSNAME)
 
 gui_$(SYSNAME):	$(OBJDIR) $(ALLGUI_OBJECTS)
-	cd $(OBJDIR); $(CC) $(ALLGUI_OBJECTS) $(LIBDIR) $(GUILIBS) -o ../gui_$(SYSNAME); cd ..
+	cd $(OBJDIR); \
+	$(CC) $(ALLGUI_OBJECTS) $(LIBDIR) $(GUILIBS) \
+	    -o ../gui_$(GUI)_$(SYSNAME); cd ..
 
-gui:    gui_$(SYSNAME);
+gui:
+ifndef SYSNAME
+	@echo usage: make -f $(MYNAME) SYSNAME=\<sysname\> GUI=\<gui\>
+	@echo Must specify a SYSNAME e.g. linux, solaris, hp
+	@exit 1
+endif
+ifndef GUI
+	@echo usage: make -f $(MYNAME) SYSNAME=\<sysname\> GUI=\<gui\>
+	@echo Must specify a GUI e.g. xt, motif
+	@echo \(xt only supported on linux\)
+	@exit 1
+endif
+	make -f $(MYNAME) gui_$(SYSNAME)
 
 readefg.cc:  readefg.yy
 	bison++ -d -h readefg.h -o readefg.cc readefg.yy
@@ -160,4 +190,8 @@ clean:
 	rm -f $(OBJDIR)/*.o
 
 manifest:
-	g++ -MM -MG $(SOURCES) | sed 'y/\ / \n/' | sort | uniq | grep -v ':' > Manifest
+	g++ -MM -MG $(SOURCES) | sed 'y/\ / \n/' | sort | uniq | \
+        grep -v ':' > Manifest
+
+
+
