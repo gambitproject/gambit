@@ -17,6 +17,7 @@ GMAKEFILE = Makefile
 FTPDIR    = /users/ftp/pub/gambit/ver96
 SRCDIR    = ./sources
 WSRCDIR   = ./winsrc
+DISTDIR   = ./distrib
 
 all:
 	@echo Specify a target: gcl, gambit, src.
@@ -67,7 +68,7 @@ gambit:
 
 	@# Copy the setup and initialization files to ../misc
 	cp ./gambit_setup ./gui-init ../misc
-	cp ../sources/.gambitrc ../misc
+	cp ../distrib/.gambitrc ../misc
 	cp ./gambit_setup ..
 
 	@echo
@@ -89,6 +90,7 @@ gambit:
 	  ./efg/*.efg \
 	  ./nfg/*.nfg \
 	  ./gcl/*.gcl \
+	  ./misc/.gambitrc \
 	  ./misc/* \
 	  ./gambit_setup
 
@@ -111,7 +113,7 @@ unixsrc:
 	if [ ! -f $(SRCDIR)/Makefile ]; \
 	then cp $(SRCDIR)/Makefile.generic $(SRCDIR)/Makefile; fi; \
 	zip gunixsrc.zip $(SRCDIR)/*.cc $(SRCDIR)/*.h $(SRCDIR)/*.imp \
-	$(SRCDIR)/*.yy $(SRCDIR)/Makefile  $(SRCDIR)/.gambitrc \
+	$(SRCDIR)/*.yy $(SRCDIR)/Makefile  $(DISTDIR)/.gambitrc \
 	$(SRCDIR)/*.cpp $(SRCDIR)/*.gcl* $(SRCDIR)/*.def $(SRCDIR)/*.rc \
 	$(SRCDIR)/fake/* $(SRCDIR)/fake/sys/* $(SRCDIR)/bitmaps/* \
 	$(SRCDIR)/make.filelist 
