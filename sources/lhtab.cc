@@ -168,7 +168,8 @@ int LHTableau<T>::CanPivot(int outlabel, int inlabel)
 template <class T>
 void LHTableau<T>::Pivot(int outrow,int inlabel)
 {
-  assert( RowIndex(outrow) );
+  if(!RowIndex(outrow) ) throw BadPivot();
+  //  assert( RowIndex(outrow) );
   if(T1.RowIndex(outrow)) T1.Pivot(outrow,inlabel);
   if(T2.RowIndex(outrow)) T2.Pivot(outrow,inlabel);
 }

@@ -20,6 +20,16 @@ private:
   
   void SolveDual();
 public:
+  class BadDim : public gException  {
+  public:
+    virtual ~BadDim();
+    gText Description(void) const;
+  };
+  class BadPivot : public gException  {
+  public:
+    virtual ~BadPivot();
+    gText Description(void) const;
+  };
   LPTableau(const gMatrix<T> &A, const gVector<T> &b); 
   LPTableau(const gMatrix<T> &A, const gBlock<int> &art, const gVector<T> &b); 
   LPTableau(const LPTableau<T>&);

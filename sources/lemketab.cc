@@ -11,10 +11,6 @@
 //                        Lemke Tableau: member functions
 //---------------------------------------------------------------------------
 
-// template <class T> LTableau<T>::LTableau(void)
-//   : Tableau<T>()
-// { } 
-
 template <class T> LTableau<T>::LTableau(const gMatrix<T> &A, 
 					 const gVector<T> &b)
   : Tableau<T>(A,b)
@@ -50,7 +46,9 @@ template <class T> int LTableau<T>::PivotIn(int inlabel)
 //  gout << " outindex = " << outindex;
   if(outindex==0) return inlabel;
   int outlabel = Label(outindex);
-  if(outlabel==0){assert(0);return 0;}
+  if(outlabel==0)
+    throw BadPivot();
+
   //   gout << " outlabel = " << outlabel;
   //   gout << " outindex = " << outindex;
   Pivot(outindex,inlabel);
@@ -81,7 +79,8 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
        && incol[Find(0)]<=eps2 && incol[Find(0)] >= (-eps2) )
       return Find(0);
   */
-  assert(BestSet.Length() > 0);
+    if(BestSet.Length() <= 0) throw BadExitIndex();
+    // assert(BestSet.Length() > 0);
   
       // If there are multiple candidates, break ties by
       // looking at ratios with other columns,
@@ -92,7 +91,8 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
   // gout << "\nLength = " <<  BestSet.Length();
   //* gout << "\n x =     " << col << "\n";
   while (BestSet.Length() > 1)   {
-    assert(c <= MaxRow());
+    if(c > MaxRow()) throw BadExitIndex();
+    //    assert(c <= MaxRow());
     if(c>=MinRow()) {
       SolveColumn(-c,col);
       // gout << "\n-c = " << -c << " col = " << col;
@@ -120,7 +120,8 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
 //    }
     c++;
   }
-  assert(BestSet.Length() > 0);
+  if(BestSet.Length() <= 0) throw BadExitIndex();
+  // assert(BestSet.Length() > 0);
   return BestSet[1];
 }
 
@@ -152,7 +153,8 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
   if(BestSet.Length()==0  
      && incol[Find(0)]<=eps2 && incol[Find(0)] >= (-eps2) )
     return Find(0);
-  assert(BestSet.Length() > 0);
+  if(BestSet.Length() <= 0) throw BadExitIndex();
+  //  assert(BestSet.Length() > 0);
   
       // If there are multiple candidates, break ties by
       // looking at ratios with other columns, 
@@ -163,7 +165,8 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
   // gout << "\nLength = " <<  BestSet.Length();
   //   gout << "\n x =     " << col << "\n";
   while (BestSet.Length() > 1)   {
-    assert(c <= MaxRow());
+    if(c > MaxRow()) throw BadExitIndex();
+    // assert(c <= MaxRow());  // this is the assertion failing in ITEM 0001
     if(c>=MinRow()) {
       SolveColumn(-c,col);
       // gout << "\n-c = " << -c << " col = " << col;
@@ -189,7 +192,8 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
 //    }
     c++;
   }
-  assert(BestSet.Length() > 0);
+  if(BestSet.Length() <= 0) throw BadExitIndex();
+  //  assert(BestSet.Length() > 0);
   return BestSet[1];
 }
 
@@ -256,6 +260,21 @@ template <class T> int LTableau<T>::LemkePath(int dup)
   return 1;
 }
 
+template <class T> LTableau<T>::BadPivot::~BadPivot()
+{ }
+
+template <class T> gText LTableau<T>::BadPivot::Description(void) const
+{
+  return "Bad Pivot in LTableau";
+}
+
+template <class T> LTableau<T>::BadExitIndex::~BadExitIndex()
+{ }
+
+template <class T> gText LTableau<T>::BadExitIndex::Description(void) const
+{
+  return "Bad Exit Index in LTableau";
+}
 
 template class LTableau<double>;
 template class LTableau<gRational>;

@@ -16,6 +16,16 @@ protected:
 //  T eps2;
 public:
 //   LTableau(void);
+  class BadPivot : public gException  {
+  public:
+    virtual ~BadPivot();
+    gText Description(void) const;
+  };
+  class BadExitIndex : public gException  {
+  public:
+    virtual ~BadExitIndex();
+    gText Description(void) const;
+  };
   LTableau(const gMatrix<T> &A, const gVector<T> &b);
   LTableau(Tableau<T> &);
   virtual ~LTableau();

@@ -80,6 +80,11 @@ protected:
   gBlock<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
 
 public:
+  class BadDenom : public gException  {
+  public:
+    virtual ~BadDenom();
+    gText Description(void) const;
+  };
       // constructors and destructors
   Tableau(const gMatrix<gRational> &A, const gVector<gRational> &b); 
   Tableau(const gMatrix<gRational> &A, const gBlock<int> &art, 

@@ -18,10 +18,16 @@
 
 template <class T> class BaseTableau {
 public:
-      // constructors and destructors
-//  virtual ~BaseTableau();
-  
-      // information
+  class BadDim : public gException  {
+  public:
+    virtual ~BadDim();
+    gText Description(void) const;
+  };
+  class BadPivot : public gException  {
+  public:
+    virtual ~BadPivot();
+    gText Description(void) const;
+  };
   bool ColIndex(int) const;
   bool RowIndex(int) const;
   bool ValidIndex(int) const;

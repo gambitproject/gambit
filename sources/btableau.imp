@@ -268,7 +268,8 @@ bool TableauInterface<T>::GeZero(T x) const
 template <class T>
 T TableauInterface<T>::Epsilon(int i) const
 {
-  assert(i==1 || i==2);
+  if(i!=1 && i!=2) throw BadDim();
+  //  assert(i==1 || i==2);
   if(i==1) return eps1;
   return eps2;
 }
@@ -278,3 +279,20 @@ bool TableauInterface<T>::IsArtifColumn(int col) const
 {
   return col>=artificial.First() && col<=artificial.Last();
 }
+
+template <class T> BaseTableau<T>::BadPivot::~BadPivot()
+{ }
+
+template <class T> gText BaseTableau<T>::BadPivot::Description(void) const
+{
+  return "Bad Pivot in BaseTableau";
+}
+
+template <class T> BaseTableau<T>::BadDim::~BadDim()
+{ }
+
+template <class T> gText BaseTableau<T>::BadDim::Description(void) const
+{
+  return "Bad Dimension in BaseTableau";
+}
+
