@@ -30,7 +30,7 @@
 #include "math/rational.h"
 #include "efg.h"
 
-#ifdef __GNUG__
+#if defined(__GNUG__) && !defined(__APPLE_CC__)
 #pragma interface
 #endif   // __GNUG__
 

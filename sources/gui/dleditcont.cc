@@ -38,7 +38,7 @@
 dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
 					     const gbtNfgGame &p_nfg,
 					     const gArray<int> &p_cont)
-  : wxDialog(p_parent, -1, "Contingency properties")
+  : wxDialog(p_parent, -1, "Contingency properties",wxDefaultPosition)
 {
   SetAutoLayout(true);
 

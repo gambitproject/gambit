@@ -1318,7 +1318,7 @@ BEGIN_EVENT_TABLE(dialogNfgNash, wxDialog)
 END_EVENT_TABLE()
 
 dialogNfgNash::dialogNfgNash(wxWindow *p_parent, const gbtNfgSupport &p_support)
-  : wxDialog(p_parent, -1, "Compute Nash equilibria"),
+  : wxDialog(p_parent, -1, "Compute Nash equilibria", wxDefaultPosition),
     m_algorithms(0)
 {
   SetAutoLayout(true);

@@ -36,7 +36,7 @@
 //======================================================================
 
 dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
-  : wxDialog(p_parent, -1, "Node properties"), m_node(p_node)
+  : wxDialog(p_parent, -1, "Node properties", wxDefaultPosition), m_node(p_node)
 {
   SetAutoLayout(true);
 

@@ -48,7 +48,7 @@ END_EVENT_TABLE()
 
 dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
 				 const BehavSolution &p_profile)
-  : wxDialog(p_parent, -1, "Behavior profile properties"),
+  : wxDialog(p_parent, -1, "Behavior profile properties", wxDefaultPosition),
     m_profile(p_profile), m_lastInfoset(0), m_map(gbtEfgInfoset())
 {
   SetAutoLayout(true);

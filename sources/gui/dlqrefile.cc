@@ -45,7 +45,7 @@ END_EVENT_TABLE()
 
 dialogQreFile::dialogQreFile(wxWindow *p_parent,
 			     const gList<MixedSolution> &p_profiles)
-  : wxDialog(p_parent, -1, "Quantal response equilibria"),
+  : wxDialog(p_parent, -1, "Quantal response equilibria",wxDefaultPosition),
     m_mixedProfiles(p_profiles)
 {
   SetAutoLayout(true);
@@ -109,7 +109,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
 
 dialogQreFile::dialogQreFile(wxWindow *p_parent,
 			     const gList<BehavSolution> &p_profiles)
-  : wxDialog(p_parent, -1, "Quantal response equilibria"),
+  : wxDialog(p_parent, -1, "Quantal response equilibria",wxDefaultPosition),
     m_behavProfiles(p_profiles)
 {
   SetAutoLayout(true);

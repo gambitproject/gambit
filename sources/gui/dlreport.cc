@@ -39,7 +39,7 @@ BEGIN_EVENT_TABLE(dialogReport, wxDialog)
 END_EVENT_TABLE()
 
 dialogReport::dialogReport(wxWindow *p_parent, const wxString &p_text)
-  : wxDialog(p_parent, -1, "Report")
+  : wxDialog(p_parent, -1, "Report",wxDefaultPosition)
 {
   SetAutoLayout(true);
 

@@ -44,7 +44,7 @@ END_EVENT_TABLE()
 
 dialogElimMixed::dialogElimMixed(wxWindow *p_parent,
 				 const gArray<gText> &p_players)
-  : wxDialog(p_parent, -1, "Computing Dominated Strategies"),
+  : wxDialog(p_parent, -1, "Computing Dominated Strategies",wxDefaultPosition),
     m_numPlayers(p_players.Length())
 {
   SetAutoLayout(true);

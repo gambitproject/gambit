@@ -39,7 +39,7 @@
 
 dialogInfosetReveal::dialogInfosetReveal(wxWindow *p_parent,
 					 const gbtEfgGame &p_efg)
-  : wxDialog(p_parent, -1, "Reveal move"), m_efg(p_efg)
+  : wxDialog(p_parent, -1, "Reveal move", wxDefaultPosition), m_efg(p_efg)
 {
   SetAutoLayout(true);
 

@@ -25,7 +25,7 @@
 //
 
 #ifndef _Complex_h
-#ifdef __GNUG__
+#if defined(__GNUG__) && !defined(__APPLE_CC__)
 #pragma interface
 #endif
 #define _Complex_h 1

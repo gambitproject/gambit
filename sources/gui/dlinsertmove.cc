@@ -116,7 +116,7 @@ END_EVENT_TABLE()
 
 dialogInsertMove::dialogInsertMove(wxWindow *p_parent, 
 				   gbtGameDocument *p_doc)
-  : wxDialog(p_parent, -1, "Insert Move"), m_doc(p_doc)
+  : wxDialog(p_parent, -1, "Insert Move", wxDefaultPosition), m_doc(p_doc)
 {
   m_playerItem = new wxListBox(this, idMOVE_PLAYER_LISTBOX);
   m_playerItem->Append("Chance");

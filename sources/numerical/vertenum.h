@@ -86,7 +86,9 @@ public:
   long NumPivots() const;
   void Dump(gOutput &) const;
 };
-
+#ifdef _A
+#undef _A
+#endif
 
 template <class T> class DoubleVertEnum {
 private:

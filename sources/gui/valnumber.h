@@ -27,7 +27,7 @@
 #ifndef VALNUMBER_H
 #define VALNUMBER_H
 
-#ifdef __GNUG__
+#if defined(__GNUG__) && !defined(__APPLE_CC__)
 #pragma interface "valnumber.h"
 #endif  // __GNUG__
 

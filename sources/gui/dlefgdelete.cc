@@ -43,7 +43,7 @@ BEGIN_EVENT_TABLE(dialogEfgDelete, wxDialog)
 END_EVENT_TABLE()
 
 dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, gbtEfgNode p_node)
-  : wxDialog(p_parent, -1, "Delete..."), m_node(p_node)
+  : wxDialog(p_parent, -1, "Delete...", wxDefaultPosition), m_node(p_node)
 {
   SetAutoLayout(true);
 

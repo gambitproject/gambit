@@ -50,7 +50,7 @@ BEGIN_EVENT_TABLE(dialogEditMove, wxDialog)
 END_EVENT_TABLE()
 
 dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset)
-  : wxDialog(p_parent, -1, "Move properties"), m_infoset(p_infoset)
+  : wxDialog(p_parent, -1, "Move properties", wxDefaultPosition), m_infoset(p_infoset)
 {
   SetAutoLayout(true);
 

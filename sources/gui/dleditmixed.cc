@@ -46,7 +46,7 @@ END_EVENT_TABLE()
 
 dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
 				 const MixedSolution &p_profile)
-  : wxDialog(p_parent, -1, "Mixed profile properties"),
+  : wxDialog(p_parent, -1, "Mixed profile properties",wxDefaultPosition),
     m_profile(p_profile), m_selection(1)
 {
   SetAutoLayout(true);

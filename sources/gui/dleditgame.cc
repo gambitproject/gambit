@@ -46,7 +46,7 @@ END_EVENT_TABLE()
 
 gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
 				     gbtGameDocument *p_doc)
-  : wxDialog(p_parent, -1, "Game properties"), m_doc(p_doc)
+  : wxDialog(p_parent, -1, "Game properties", wxDefaultPosition), m_doc(p_doc)
 {
   SetAutoLayout(true);
 

@@ -37,7 +37,7 @@
 
 dialogElimBehav::dialogElimBehav(wxWindow *p_parent, 
 				 const gArray<gText> &p_players)
-  : wxDialog(p_parent, -1, "Computing Dominated Actions"),
+  : wxDialog(p_parent, -1, "Computing Dominated Actions",wxDefaultPosition),
     m_numPlayers(p_players.Length())
 {
   SetAutoLayout(true);

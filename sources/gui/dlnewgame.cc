@@ -47,7 +47,7 @@ BEGIN_EVENT_TABLE(dialogNewGame, wxDialog)
 END_EVENT_TABLE()
 
 dialogNewGame::dialogNewGame(wxWindow *p_parent)
-  : wxDialog(p_parent, -1, "Create a new game"), m_lastPlayer(0)
+  : wxDialog(p_parent, -1, "Create a new game",wxDefaultPosition), m_lastPlayer(0)
 {
   SetAutoLayout(true);
 

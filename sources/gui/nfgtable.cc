@@ -93,7 +93,7 @@ wxSize gbtPayoffVectorRenderer::DoGetBestSize(wxGridCellAttr &p_attr,
   wxCoord x = 0, y = 0;
   p_dc.SetFont(p_attr.GetFont());
   p_dc.GetTextExtent(p_text, &x, &y);
-  return wxSize(x * 1.10, y * 1.25);
+  return wxSize((int) (x * 1.10), (int) (y * 1.25));
 }
 
 wxSize gbtPayoffVectorRenderer::GetBestSize(wxGrid &p_grid,

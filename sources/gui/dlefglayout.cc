@@ -265,7 +265,7 @@ panelSubgames::panelSubgames(wxWindow *p_parent,
 
 dialogLayout::dialogLayout(wxWindow *p_parent, 
 			   const gbtPreferences &p_prefs)
-  : wxDialog(p_parent, -1, "Layout options")
+  : wxDialog(p_parent, -1, "Layout options", wxDefaultPosition)
 {
   SetAutoLayout(true);
 

@@ -62,7 +62,7 @@ END_EVENT_TABLE()
 
 dialogEfgColor::dialogEfgColor(wxWindow *p_parent,
 			       const gbtPreferences &p_prefs)
-  : wxDialog(p_parent, -1, "Choose colors")
+  : wxDialog(p_parent, -1, "Choose colors", wxDefaultPosition)
 {
   SetAutoLayout(true);
 

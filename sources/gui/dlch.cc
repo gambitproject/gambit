@@ -31,7 +31,7 @@
 #include "dlch.h"
 
 dialogNfgCH::dialogNfgCH(wxWindow *p_parent, const gbtNfgSupport &p_support)
-  : wxDialog(p_parent, -1, "Compute cognitive hierarchy correspondence")
+  : wxDialog(p_parent, -1, "Compute cognitive hierarchy correspondence", wxDefaultPosition)
 {
   SetAutoLayout(true);
 

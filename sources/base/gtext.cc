@@ -24,7 +24,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifdef __GNUG__
+#if defined(__GNUG__) && !defined(__APPLE_CC__)
 #pragma implementation "gtext.h"
 #endif  // __GNUG__
 

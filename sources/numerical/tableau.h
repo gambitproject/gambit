@@ -139,7 +139,7 @@ public:
   gInteger TotDenom() const;
 };
 
-#ifdef __GNUG__
+#if defined(__GNUG__) && !defined(__APPLE_CC__)
 #include "math/rational.h"
 gOutput &operator<<(gOutput &, const Tableau<double> &);
 gOutput &operator<<(gOutput &, const Tableau<gRational> &);

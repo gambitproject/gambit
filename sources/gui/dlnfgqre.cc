@@ -37,7 +37,7 @@ BEGIN_EVENT_TABLE(dialogNfgQre, wxDialog)
 END_EVENT_TABLE()
 
 dialogNfgQre::dialogNfgQre(wxWindow *p_parent, const gbtNfgSupport &p_support)
-  : wxDialog(p_parent, -1, "Compute quantal response equilibria")
+  : wxDialog(p_parent, -1, "Compute quantal response equilibria", wxDefaultPosition)
 {
   SetAutoLayout(true);
 

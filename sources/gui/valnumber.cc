@@ -29,7 +29,7 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 
-#ifdef __GNUG__
+#if defined(__GNUG__) && !defined(__APPLE_CC__)
 #pragma implementation "valnumber.h"
 #endif  // __GNUG__
 

@@ -37,7 +37,7 @@
 //==========================================================================
 
 dialogLegend::dialogLegend(wxWindow *p_parent, const gbtPreferences &p_prefs)
-  : wxDialog(p_parent, -1, "Legends")
+  : wxDialog(p_parent, -1, "Legends", wxDefaultPosition)
 {
   wxStaticBoxSizer *nodeGroup = 
     new wxStaticBoxSizer(new wxStaticBox(this, -1, "Node Labeling"),

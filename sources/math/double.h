@@ -37,7 +37,7 @@ is different from zero.
 */
 
 #ifndef _Double_h
-#ifdef __GNUG__
+#if defined(__GNUG__) && !defined(__APPLE_CC__)
 #pragma interface
 #endif
 #define _Double_h 1
