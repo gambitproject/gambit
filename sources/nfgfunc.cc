@@ -208,10 +208,14 @@ Portion *GSM_Strategies(Portion **param)
 
 #include "gwatch.h"
 
+
+
+
+//---------------------- ElimDom ----------------------------//
+
 extern NFSupport *ComputeDominated(NFSupport &S, bool strong, 
 				   const gArray<int> &players,
 				   gOutput &tracefile);
-
 
 Portion *GSM_ElimDom(Portion **param)
 {
@@ -233,6 +237,89 @@ Portion *GSM_ElimDom(Portion **param)
   por->AddDependency();
   return por;
 }
+
+
+Portion *GSM_ElimDom_Nfg(Portion **param)
+{
+  NFSupport *S = new NFSupport( * ((NfgPortion *) param[0])->Value() );
+  bool strong = ((BoolPortion *) param[1])->Value();
+  
+  gWatch watch;
+  gBlock<int> players(S->BelongsTo().NumPlayers());
+  int i;
+  for (i = 1; i <= players.Length(); i++)   players[i] = i;
+
+  NFSupport *T = ComputeDominated(*S, strong, players, gout);
+
+  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
+  
+  Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
+
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
+
+
+
+//---------------------------- ElimAllDom ---------------------------//
+
+Portion *GSM_ElimAllDom(Portion **param)
+{
+  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  bool strong = ((BoolPortion *) param[1])->Value();
+  
+  gWatch watch;
+  gBlock<int> players(S->BelongsTo().NumPlayers());
+  int i;
+  for (i = 1; i <= players.Length(); i++)   players[i] = i;
+
+  NFSupport* new_T = S;
+  NFSupport* old_T = S;
+  while( new_T )
+  {
+    old_T = new_T;
+    new_T = ComputeDominated(*old_T, strong, players, gout);
+  }
+
+  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
+  
+  Portion *por = new NfSupportValPortion( old_T );
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
+
+Portion *GSM_ElimAllDom_Nfg(Portion **param)
+{
+  NFSupport *S = new NFSupport( * ((NfgPortion *) param[0])->Value() );
+  bool strong = ((BoolPortion *) param[1])->Value();
+  
+  gWatch watch;
+  gBlock<int> players(S->BelongsTo().NumPlayers());
+  int i;
+  for (i = 1; i <= players.Length(); i++)   players[i] = i;
+
+  NFSupport* new_T = S;
+  NFSupport* old_T = S;
+  while( new_T )
+  {
+    old_T = new_T;
+    new_T = ComputeDominated(*old_T, strong, players, gout);
+  }
+
+  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
+  
+  Portion *por = new NfSupportValPortion( old_T );
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
+
+
 
 
 
@@ -1504,12 +1591,41 @@ void Init_nfgfunc(GSM *gsm)
 
 
 
+  //--------------------- ElimDom ---------------------------//
+
   FuncObj = new FuncDescObj("ElimDom");
   FuncObj->SetFuncInfo(GSM_ElimDom, 3);
   FuncObj->SetParamInfo(GSM_ElimDom, 0, "support", porNF_SUPPORT);
   FuncObj->SetParamInfo(GSM_ElimDom, 1, "strong", porBOOL,
 			new BoolValPortion(false));
   FuncObj->SetParamInfo(GSM_ElimDom, 2, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_ElimDom_Nfg, 3);
+  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 0, "nfg", porNFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 1, "strong", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 2, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+
+
+  FuncObj = new FuncDescObj("ElimAllDom");
+  FuncObj->SetFuncInfo(GSM_ElimAllDom, 3);
+  FuncObj->SetParamInfo(GSM_ElimAllDom, 0, "support", porNF_SUPPORT);
+  FuncObj->SetParamInfo(GSM_ElimAllDom, 1, "strong", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_ElimAllDom, 2, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_ElimAllDom_Nfg, 3);
+  FuncObj->SetParamInfo(GSM_ElimAllDom_Nfg, 0, "nfg", porNFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo(GSM_ElimAllDom_Nfg, 1, "strong", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_ElimAllDom_Nfg, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 

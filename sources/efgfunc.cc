@@ -177,6 +177,12 @@ Portion *GSM_DetachOutcome(Portion **param)
   return por;
 }
 
+Portion *GSM_HasOutcome(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  return new BoolValPortion( n->GetOutcome() != 0 );
+}
+
 Portion *GSM_InsertAction(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
@@ -618,8 +624,11 @@ Portion *GSM_SetPayoff_NodeFloat(Portion **param)
 {
   Portion* element;
   Node* node = ( (NodePortion*) param[ 0 ] )->Value();
+
+  /*
   if (node->GetOutcome())
     return new ErrorPortion("An outcome is already attached to the node");
+    */
 
   BaseEfg* efg = ( (EfgPortion*) param[ 0 ]->Owner() )->Value();
   if( efg->Type() != DOUBLE )
@@ -651,8 +660,11 @@ Portion *GSM_SetPayoff_NodeRational(Portion **param)
 {
   Portion* element;
   Node* node = ( (NodePortion*) param[ 0 ] )->Value();
+
+  /*
   if (node->GetOutcome())
     return new ErrorPortion("An outcome is already attached to the node");
+    */
 
   BaseEfg* efg = ( (EfgPortion*) param[ 0 ]->Owner() )->Value();
   if( efg->Type() != RATIONAL )
@@ -1463,6 +1475,11 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("DetachOutcome");
   FuncObj->SetFuncInfo(GSM_DetachOutcome, 1);
   FuncObj->SetParamInfo(GSM_DetachOutcome, 0, "node", porNODE);
+  gsm->AddFunction(FuncObj);
+  
+  FuncObj = new FuncDescObj("HasOutcome");
+  FuncObj->SetFuncInfo(GSM_HasOutcome, 1);
+  FuncObj->SetParamInfo(GSM_HasOutcome, 0, "node", porNODE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("InsertAction");
