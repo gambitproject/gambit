@@ -162,6 +162,7 @@ public:
   EfgAlgType Creator(void) const { CheckIsValid(); return m_creator; }
   EFSupport Support(void) const { CheckIsValid(); return m_support; }
   const gTriState &IsNash(void) const;
+  BehavSolution PolishEq(void) const;
   const gTriState &IsANFNash(void) const;
   const gTriState &IsSubgamePerfect(void) const;
   const gTriState &IsSequential(void) const;

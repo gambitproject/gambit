@@ -482,6 +482,14 @@ const gTriState &BehavSolution::IsNash(void) const
   return m_Nash.Answer();
 }
 
+#include "epolenum.h"
+
+BehavSolution BehavSolution::PolishEq(void) const
+{
+  bool is_singular = false;
+  return PolishEquilibrium(m_support,*this,is_singular);
+}
+
 const gTriState &BehavSolution::IsANFNash(void) const
 {
   CheckIsValid();
