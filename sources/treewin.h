@@ -221,7 +221,7 @@ public:
     
     // MENU EVENT HANDLERS
     void node_add(void);
-    void node_game(void);
+    void node_insert(void);
     void node_label(void);
     void node_delete(void);
     void node_set_mark(void);

@@ -907,16 +907,13 @@ void EfgShow::OnMenuCommand(int id)
   try {
     switch (id) {
     case NODE_ADD:
-      if (tw->Cursor()->NumChildren() == 0)  
-	tw->node_add();
-      else
-	wxMessageBox("Cannot Add Move at non terminal node");
+      tw->node_add();
       break;
     case NODE_DELETE:
       tw->node_delete();
       break;
     case NODE_INSERT:
-      tw->node_add();
+      tw->node_insert();
       break;
     case NODE_LABEL:
       tw->node_label();
