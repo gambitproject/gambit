@@ -334,7 +334,7 @@ void gbtGameDocument::AddProfile(const BehavSolution &p_profile)
     m_behavProfiles.Append(p_profile);
   }
 
-  MixedSolution mixed(MixedProfile<gbtNumber>(*p_profile.Profile()),
+  MixedSolution mixed(gbtMixedProfile<gbtNumber>(*p_profile.Profile()),
 		      p_profile.GetCreator());
   m_mixedProfiles.Append(mixed);
 
@@ -533,7 +533,7 @@ void gbtGameDocument::AddProfile(const MixedSolution &p_profile)
   }
 
   if (m_efg) {
-    m_behavProfiles.Append(BehavProfile<gbtNumber>(*p_profile.Profile()));
+    m_behavProfiles.Append(gbtBehavProfile<gbtNumber>(*p_profile.Profile()));
   }
 
   UpdateViews();

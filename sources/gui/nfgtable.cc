@@ -359,7 +359,7 @@ wxString NfgGridTable::GetValue(int row, int col)
     strategy[m_doc->GetRowPlayer()] = row + 1;
     strategy[m_doc->GetColPlayer()] = col + 1;
     
-    StrategyProfile profile(m_doc->GetNfg());
+    gbtNfgContingency profile(m_doc->GetNfg());
     for (int pl = 1; pl <= strategy.Length(); pl++) {
       profile.Set(pl, support.GetStrategy(pl, strategy[pl]));
     }

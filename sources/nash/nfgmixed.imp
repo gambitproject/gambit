@@ -134,7 +134,7 @@ gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_supp
       }
 
       if (nash) {
-	MixedProfile<T> profile(p_support);
+	gbtMixedProfile<T> profile(p_support);
 	T sum = (T) 0;
 	for (int k = 1; k <= p_support.NumStrats(1); k++) {
 	  profile(1, k) = (T) 0;

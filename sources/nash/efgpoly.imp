@@ -54,7 +54,7 @@ private:
   long count,nevals;
   double time;
   gbtList<BehavSolution> solutions;
-  const Sfg SF;
+  const gbtSfgGame SF;
   bool is_singular;
   gbtArray<gbtArray<int> * > var;
 
@@ -101,7 +101,7 @@ public:
   // Passing between variables of polynomials and sequence form probs
   gbtPVector<double> SeqFormProbsFromSolVars(const gbtVector<gbtDouble> &) const;
   gbtVector<gbtDouble> SolVarsFromSeqFormProbs(const gbtPVector<double> &) const;
-  gbtVector<gbtDouble> SolVarsFromBehavProfile(const BehavProfile<gbtNumber> &) 
+  gbtVector<gbtDouble> SolVarsFromBehavProfile(const gbtBehavProfile<gbtNumber> &) 
                                                                      const;
 
   const int PolishKnownRoot(gbtVector<gbtDouble> &) const;
@@ -462,7 +462,7 @@ EfgPolEnumModule<T>::SeqFormProbsFromSolVars(const gbtVector<gbtDouble> &v) cons
 }
 
 template <class T> gbtVector<gbtDouble> 
-EfgPolEnumModule<T>::SolVarsFromBehavProfile(const BehavProfile<gbtNumber> &sol)
+EfgPolEnumModule<T>::SolVarsFromBehavProfile(const gbtBehavProfile<gbtNumber> &sol)
   const
 {
   int numvars(0);

@@ -32,15 +32,15 @@
 #include "game/efg.h"
 #include "game/efstrat.h"
 
-class EFNodeSet;
+class gbtEfgNodeSet;
 
-class EFBasis : public gbtEfgSupport {
+class gbtEfgBasis : public gbtEfgSupport {
 protected:
-  gbtArray <EFNodeSet *> nodes;
+  gbtArray <gbtEfgNodeSet *> nodes;
 
   // This is scratch stuff for consistency computation.
   // FIXME: These shouldn't be members!!
-  mutable EFBasis *bigbasis;
+  mutable gbtEfgBasis *bigbasis;
   mutable gbtMatrix<double> *A;
   mutable gbtVector<double> *b,*c;
   mutable gbtDPVector<int> *actIndex, *nodeIndex;
@@ -58,13 +58,13 @@ protected:
   void GetConsistencySolution(const gbtVector<double> &x) const;
   
 public:
-  EFBasis(const gbtEfgGame &);
-  EFBasis(const EFBasis &b); 
-  virtual ~EFBasis();
-  EFBasis &operator=(const EFBasis &b);
+  gbtEfgBasis(const gbtEfgGame &);
+  gbtEfgBasis(const gbtEfgBasis &b); 
+  virtual ~gbtEfgBasis();
+  gbtEfgBasis &operator=(const gbtEfgBasis &b);
 
-  bool operator==(const EFBasis &b) const;
-  bool operator!=(const EFBasis &b) const;
+  bool operator==(const gbtEfgBasis &b) const;
+  bool operator!=(const gbtEfgBasis &b) const;
 
   int NumNodes(int pl, int iset) const;
   int NumNodes(const gbtEfgInfoset &) const;
@@ -86,6 +86,6 @@ public:
   void Dump(gbtOutput &) const;
 };
 
-gbtOutput &operator<<(gbtOutput &f, const EFBasis &);
+gbtOutput &operator<<(gbtOutput &f, const gbtEfgBasis &);
 
 #endif // EFBASIS_H

@@ -32,7 +32,7 @@
 #include "efg.h"
 #include "efstrat.h"
 
-class EfgIter;
+class gbtEfgIterator;
 
 //
 // N.B.: Currently, the contingency iterator only allows one information
@@ -43,22 +43,22 @@ class EfgIter;
 //       Iterating across all contingencies can be achieved by freezing
 //       player number 0 (this is the default state on initialization)
 //
-class EfgContIter    {
-  friend class EfgIter;
+class gbtEfgContIterator    {
+  friend class gbtEfgIterator;
   private:
     int _frozen_pl, _frozen_iset;
     gbtEfgGame m_efg;
     gbtEfgSupport _support;
-    PureBehavProfile<gbtNumber> _profile;
+    gbtPureBehavProfile<gbtNumber> _profile;
     gbtPVector<int> _current;
     gbtBlock<gbtBlock<bool> > _is_active;
     gbtBlock<int> _num_active_infosets;
     mutable gbtVector<gbtNumber> _payoff;
 
   public:
-    EfgContIter(const gbtEfgSupport &);
-    EfgContIter(const gbtEfgSupport &, const gbtList<gbtEfgInfoset> &);
-    ~EfgContIter();
+    gbtEfgContIterator(const gbtEfgSupport &);
+    gbtEfgContIterator(const gbtEfgSupport &, const gbtList<gbtEfgInfoset> &);
+    ~gbtEfgContIterator();
   
     void First(void);
   
@@ -69,7 +69,7 @@ class EfgContIter    {
     void Set(const gbtEfgAction &);
     int Next(int pl, int iset);
   
-    const PureBehavProfile<gbtNumber> &GetProfile(void) const   
+    const gbtPureBehavProfile<gbtNumber> &GetProfile(void) const   
       { return _profile; }
 
     int NextContingency(void);
@@ -82,21 +82,21 @@ class EfgContIter    {
 // The following class is like the above, but intended for iteration
 // over contingencies that are relevant once a particular node 
 // has been reached.
-class EfgConditionalContIter    {
-  friend class EfgIter;
+class gbtEfgConditionalContIterator    {
+  friend class gbtEfgIterator;
   private:
     gbtEfgGame m_efg;
     gbtEfgSupport _support;
-    PureBehavProfile<gbtNumber> _profile;
+    gbtPureBehavProfile<gbtNumber> _profile;
     gbtPVector<int> _current;
     gbtBlock<gbtBlock<bool> > _is_active;
     gbtBlock<int> _num_active_infosets;
     mutable gbtVector<gbtNumber> _payoff;
 
   public:
-    EfgConditionalContIter(const gbtEfgSupport &);
-    EfgConditionalContIter(const gbtEfgSupport &, const gbtList<gbtEfgInfoset> &);
-    ~EfgConditionalContIter();
+    gbtEfgConditionalContIterator(const gbtEfgSupport &);
+    gbtEfgConditionalContIterator(const gbtEfgSupport &, const gbtList<gbtEfgInfoset> &);
+    ~gbtEfgConditionalContIterator();
   
     void First(void); // Sets each infoset's action to the first in the support
   
@@ -104,7 +104,7 @@ class EfgConditionalContIter    {
     void Set(const gbtEfgAction &);
     int Next(int pl, int iset); 
   
-    const PureBehavProfile<gbtNumber> &GetProfile(void) const   
+    const gbtPureBehavProfile<gbtNumber> &GetProfile(void) const   
       { return _profile; }
 
     int NextContingency(void);   // Needs rewriting

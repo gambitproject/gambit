@@ -540,7 +540,7 @@ void NfgShow::OnEditContingency(wxCommandEvent &)
   dialogEditContingency dialog(this, m_doc->GetNfg(), m_doc->GetContingency());
 
   if (dialog.ShowModal() == wxID_OK) {
-    StrategyProfile profile(m_doc->GetNfg());
+    gbtNfgContingency profile(m_doc->GetNfg());
     for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
       profile.Set(pl, m_doc->GetNfg().GetPlayer(pl).GetStrategy(m_doc->GetContingency()[pl]));
     }
@@ -895,7 +895,7 @@ void NfgShow::OnSupportDelete(wxCommandEvent &)
 
 void NfgShow::OnProfilesNew(wxCommandEvent &)
 {
-  MixedSolution profile = MixedProfile<gbtNumber>(gbtNfgSupport(m_doc->GetNfg()));
+  MixedSolution profile = gbtMixedProfile<gbtNumber>(gbtNfgSupport(m_doc->GetNfg()));
 
   dialogEditMixed dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {

@@ -33,22 +33,21 @@
 #include "player.h"
 #include "outcome.h"
 
-class StrategyProfile;
-class Lexicon;
+class gbtNfgContingency;
 class gbtEfgGame;
 class gbtEfgSupport;
 class gbtNfgSupport;
-template <class T> class MixedProfile;
+template <class T> class gbtMixedProfile;
 
 struct gbt_nfg_game_rep;
 
 class gbtNfgGame  {
 friend class Lexicon;
 friend class NfgFileReader;
-friend class StrategyProfile;
-friend class MixedProfile<double>;
-friend class MixedProfile<gbtRational>;
-friend class MixedProfile<gbtNumber>;
+friend class gbtNfgContingency;
+friend class gbtMixedProfile<double>;
+friend class gbtMixedProfile<gbtRational>;
+friend class gbtMixedProfile<gbtNumber>;
 friend void SetEfg(gbtNfgGame, gbtEfgGame);
 protected:
   gbt_nfg_game_rep *rep;

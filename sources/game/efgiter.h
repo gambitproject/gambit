@@ -29,24 +29,24 @@
 
 #include "efg.h"
 
-class EfgContIter;
+class gbtEfgContIterator;
 
-class EfgIter    {
+class gbtEfgIterator    {
   private:
     gbtEfgGame m_efg;
     gbtEfgSupport _support;
-    PureBehavProfile<gbtNumber> _profile;
+    gbtPureBehavProfile<gbtNumber> _profile;
     gbtPVector<int> _current;
     mutable gbtVector<gbtNumber> _payoff;
 
   public:
-    EfgIter(gbtEfgGame);
-    EfgIter(const gbtEfgSupport &);
-    EfgIter(const EfgIter &);
-    EfgIter(const EfgContIter &);
-    ~EfgIter();
+    gbtEfgIterator(gbtEfgGame);
+    gbtEfgIterator(const gbtEfgSupport &);
+    gbtEfgIterator(const gbtEfgIterator &);
+    gbtEfgIterator(const gbtEfgContIterator &);
+    ~gbtEfgIterator();
   
-    EfgIter &operator=(const EfgIter &);
+    gbtEfgIterator &operator=(const gbtEfgIterator &);
   
     void First(void);
     int Next(int p, int iset);

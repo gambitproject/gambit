@@ -63,11 +63,11 @@ template class gbtBlock<gbt_efg_outcome_rep *>;
 template class gbtArray<gbtBlock<bool> >;
 template class gbtBlock<gbtBlock<bool> >;
 
-class EFActionSet;
+class gbtEfgActionSet;
 class EFActionArray;
 
 //template bool operator==(const gbtArray<Action *> &, const gbtArray<Action *> &);
-template class gbtArray<EFActionSet *>;
+template class gbtArray<gbtEfgActionSet *>;
 template class gbtArray<EFActionArray *>;
 
 template class gbtList<gbtEfgNode>;

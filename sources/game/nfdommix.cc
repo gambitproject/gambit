@@ -77,7 +77,7 @@ bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
   return ret;
 }
 
-bool IsMixedDominated(const MixedProfile<gbtNumber> &sol,
+bool IsMixedDominated(const gbtMixedProfile<gbtNumber> &sol,
 		 bool strong, gbtPrecision precision, gbtOutput &tracefile)
 {
   bool ret = false;
@@ -91,19 +91,19 @@ bool IsMixedDominated(const MixedProfile<gbtNumber> &sol,
   return ret;
 }
 
-bool IsMixedDominated(const MixedProfile<gbtNumber> &sol, int pl,
+bool IsMixedDominated(const gbtMixedProfile<gbtNumber> &sol, int pl,
 		 bool strong, gbtPrecision precision, gbtOutput &tracefile)
 {
   bool ret = false;
 
   if(precision == GBT_PREC_RATIONAL) {
-    MixedProfile<gbtRational> p(sol.Support());
+    gbtMixedProfile<gbtRational> p(sol.Support());
     for (int i = 1; i <= p.Length(); i++)
       p[i] = sol[i];
     ret =  IsMixedDominated(p, pl, strong, tracefile);
   }
   else if (precision == GBT_PREC_DOUBLE) {
-    MixedProfile<double> p(sol.Support());
+    gbtMixedProfile<double> p(sol.Support());
     for (int i = 1; i <= p.Length(); i++)
       p[i] = sol[i];
     
@@ -131,10 +131,10 @@ IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
 		 bool strong, double junk, gbtOutput &tracefile);
 
 template bool 
-IsMixedDominated(const MixedProfile<gbtRational> &pr, int pl,
+IsMixedDominated(const gbtMixedProfile<gbtRational> &pr, int pl,
 		 bool strong, gbtOutput &tracefile);
 
 template bool 
-IsMixedDominated(const MixedProfile<double> &pr, int pl,
+IsMixedDominated(const gbtMixedProfile<double> &pr, int pl,
 		 bool strong, gbtOutput &tracefile);
 #endif  // __BCC55__

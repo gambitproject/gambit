@@ -33,7 +33,7 @@
 #include "math/gpvector.h"
 #include "nfstrat.h"
 
-class StrategyProfile   {
+class gbtNfgContingency   {
 friend class gbtNfgGame;
 private:
   gbtNfgGame m_nfg; 
@@ -41,13 +41,13 @@ private:
   gbtArray<gbtNfgStrategy> profile;
   
 public:
-  StrategyProfile(const gbtNfgGame &);
-  StrategyProfile(const gbtNfgGame &, const gbtArray<int> &);
-  StrategyProfile(const StrategyProfile &p);
+  gbtNfgContingency(const gbtNfgGame &);
+  gbtNfgContingency(const gbtNfgGame &, const gbtArray<int> &);
+  gbtNfgContingency(const gbtNfgContingency &p);
 
-  ~StrategyProfile();
+  ~gbtNfgContingency();
   
-  StrategyProfile &operator=(const StrategyProfile &);
+  gbtNfgContingency &operator=(const gbtNfgContingency &);
   
   bool IsValid(void) const; 
   long GetIndex(void) const;

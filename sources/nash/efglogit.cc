@@ -118,7 +118,7 @@ static void NewtonStep(gbtMatrix<double> &q, gbtMatrix<double> &b,
 static void QreLHS(const gbtEfgSupport &p_support, const gbtVector<double> &p_point,
 		   gbtVector<double> &p_lhs)
 {
-  BehavProfile<double> profile(p_support);
+  gbtBehavProfile<double> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = p_point[i];
   }
@@ -152,7 +152,7 @@ static void QreJacobian(const gbtEfgSupport &p_support,
 			gbtMatrix<double> &p_matrix)
 {
   gbtEfgGame efg = p_support.GetGame();
-  BehavProfile<double> profile(p_support);
+  gbtBehavProfile<double> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = p_point[i];
   }
@@ -222,7 +222,7 @@ static void QreJacobian(const gbtEfgSupport &p_support,
   }
 }
 
-static void TracePath(const BehavProfile<double> &p_start,
+static void TracePath(const gbtBehavProfile<double> &p_start,
 		      double p_startLambda, double p_maxLambda, double p_omega,
 		      gbtStatus &p_status,
 		      gbtList<BehavSolution> &p_solutions)
@@ -269,7 +269,7 @@ static void TracePath(const BehavProfile<double> &p_start,
 	}
       }
       
-      BehavProfile<double> newProfile(newSupport);
+      gbtBehavProfile<double> newProfile(newSupport);
       for (int j = 1; j <= newProfile.Length(); j++) {
 	if (j < i) {
 	  newProfile[j] = x[j];
@@ -389,7 +389,7 @@ static void TracePath(const BehavProfile<double> &p_start,
 	  }
 	}
 
-	BehavProfile<double> newProfile(newSupport);
+	gbtBehavProfile<double> newProfile(newSupport);
 	for (int j = 1; j <= newProfile.Length(); j++) {
 	  if (j < i) {
 	    newProfile[j] = u[j];
@@ -410,7 +410,7 @@ static void TracePath(const BehavProfile<double> &p_start,
 
     x[x.Length()] = u[u.Length()];
 
-    BehavProfile<double> foo(p_start);
+    gbtBehavProfile<double> foo(p_start);
     for (int i = 1; i <= foo.Length(); i++) {
       foo[i] = x[i];
     }
@@ -437,7 +437,7 @@ gbtList<BehavSolution> gbtEfgNashLogit::Solve(const gbtEfgSupport &p_support,
 					    gbtStatus &p_status)
 {
   gbtList<BehavSolution> solutions;
-  BehavProfile<double> start(p_support);
+  gbtBehavProfile<double> start(p_support);
 
   try {
     TracePath(start, 0.0, m_maxLam, 1.0, p_status, solutions);

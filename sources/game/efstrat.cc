@@ -29,7 +29,7 @@
 #include "efstrat.h"
 
 class EFActionArray   {
-  friend class EFActionSet;
+  friend class gbtEfgActionSet;
 protected:
   gbtBlock<gbtEfgAction> acts;
 
@@ -90,7 +90,7 @@ bool EFActionArray::operator==(const EFActionArray &a) const
   return (acts == a.acts);
 }
 
-class EFActionSet  {
+class gbtEfgActionSet  {
 protected:
   gbtEfgPlayer efp;
   gbtArray < EFActionArray *> infosets;
@@ -100,13 +100,13 @@ public:
   // Constructors, Destructor, operators
   //----------------------------------------
 
-//  EFActionSet();
-  EFActionSet(const EFActionSet &);
-  EFActionSet(const gbtEfgPlayer &);
-  virtual ~EFActionSet();
+//  gbtEfgActionSet();
+  gbtEfgActionSet(const gbtEfgActionSet &);
+  gbtEfgActionSet(const gbtEfgPlayer &);
+  virtual ~gbtEfgActionSet();
 
-  EFActionSet &operator=(const EFActionSet &);
-  bool operator==(const EFActionSet &s) const;
+  gbtEfgActionSet &operator=(const gbtEfgActionSet &);
+  bool operator==(const gbtEfgActionSet &s) const;
 
   //--------------------
   // Member Functions
@@ -147,20 +147,20 @@ public:
   // Number of Actions in a particular infoset
   int NumActions(int iset) const;
 
-  // return the player of the EFActionSet
+  // return the player of the gbtEfgActionSet
   gbtEfgPlayer GetPlayer(void) const;
 
-  // checks for a valid EFActionSet
+  // checks for a valid gbtEfgActionSet
   bool HasActiveActionsAtAllInfosets(void) const;
   bool HasActiveActionAt(const int &iset) const;
 
 };
 
 //--------------------------------------------------
-// EFActionSet: Constructors, Destructor, operators
+// gbtEfgActionSet: Constructors, Destructor, operators
 //--------------------------------------------------
 
-EFActionSet::EFActionSet(const gbtEfgPlayer &p)
+gbtEfgActionSet::gbtEfgActionSet(const gbtEfgPlayer &p)
   : efp(p), infosets(p.NumInfosets())
 {
   for (int i = 1; i <= p.NumInfosets(); i++) {
@@ -171,7 +171,7 @@ EFActionSet::EFActionSet(const gbtEfgPlayer &p)
   }
 }
 
-EFActionSet::EFActionSet( const EFActionSet &s )
+gbtEfgActionSet::gbtEfgActionSet( const gbtEfgActionSet &s )
 : infosets(s.infosets.Length())
 {
   efp = s.efp;
@@ -180,13 +180,13 @@ EFActionSet::EFActionSet( const EFActionSet &s )
   }
 }
 
-EFActionSet::~EFActionSet()
+gbtEfgActionSet::~gbtEfgActionSet()
 { 
   for (int i = 1; i <= infosets.Length(); i++)
     delete infosets[i];
 }
 
-EFActionSet &EFActionSet::operator=(const EFActionSet &s)
+gbtEfgActionSet &gbtEfgActionSet::operator=(const gbtEfgActionSet &s)
 {
   if (this != &s && efp == s.efp) {
     for (int i = 1; i<= infosets.Length(); i++)  {
@@ -197,7 +197,7 @@ EFActionSet &EFActionSet::operator=(const EFActionSet &s)
   return *this;
 }
 
-bool EFActionSet::operator==(const EFActionSet &s) const
+bool gbtEfgActionSet::operator==(const gbtEfgActionSet &s) const
 {
   if (infosets.Length() != s.infosets.Length() ||
       efp != s.efp)
@@ -210,11 +210,11 @@ bool EFActionSet::operator==(const EFActionSet &s) const
 }
 
 //------------------------------------------
-// EFActionSet: Member functions 
+// gbtEfgActionSet: Member functions 
 //------------------------------------------
 
 // Append an action to a particular infoset;
-void EFActionSet::AddAction(int iset, const gbtEfgAction &s)
+void gbtEfgActionSet::AddAction(int iset, const gbtEfgAction &s)
 { 
   if (infosets[iset]->acts.Find(s))
     return;
@@ -232,7 +232,7 @@ void EFActionSet::AddAction(int iset, const gbtEfgAction &s)
 }
 
 // Insert an action  to a particular infoset at a particular place;
-void EFActionSet::AddAction(int iset, const gbtEfgAction &s, int index)
+void gbtEfgActionSet::AddAction(int iset, const gbtEfgAction &s, int index)
 { 
   if (!infosets[iset]->acts.Find(s)) {
     infosets[iset]->acts.Insert(s,index); 
@@ -241,14 +241,14 @@ void EFActionSet::AddAction(int iset, const gbtEfgAction &s, int index)
 
 // Remove an action from infoset iset at int i, 
 // returns the removed Infoset pointer
-gbtEfgAction EFActionSet::RemoveAction(int iset, int i) 
+gbtEfgAction gbtEfgActionSet::RemoveAction(int iset, int i) 
 { 
   return (infosets[iset]->acts.Remove(i)); 
 }
 
 // Removes an action from infoset iset . Returns true if the 
 //Action was successfully removed, false otherwise.
-bool EFActionSet::RemoveAction(int iset, const gbtEfgAction &s)
+bool gbtEfgActionSet::RemoveAction(int iset, const gbtEfgAction &s)
 { 
   int t = infosets[iset]->acts.Find(s); 
   if (t>0) infosets[iset]->acts.Remove(t); 
@@ -256,30 +256,30 @@ bool EFActionSet::RemoveAction(int iset, const gbtEfgAction &s)
 } 
 
 // Get an action
-gbtEfgAction EFActionSet::GetAction(int iset, int index)
+gbtEfgAction gbtEfgActionSet::GetAction(int iset, int index)
 {
   return (infosets[iset]->acts)[index];
 }
 
 // Number of Actions in a particular infoset
-int EFActionSet::NumActions(int iset) const
+int gbtEfgActionSet::NumActions(int iset) const
 {
   return (infosets[iset]->acts.Length());
 }
 
-// Return the player of this EFActionSet
-gbtEfgPlayer EFActionSet::GetPlayer(void) const
+// Return the player of this gbtEfgActionSet
+gbtEfgPlayer gbtEfgActionSet::GetPlayer(void) const
 {
   return efp;
 }
 
-int EFActionSet::Find(const gbtEfgAction &a) const
+int gbtEfgActionSet::Find(const gbtEfgAction &a) const
 {
   return (infosets[a.GetInfoset().GetId()]->acts.Find(a));
 }
 
-// checks for a valid EFActionSet
-bool EFActionSet::HasActiveActionsAtAllInfosets(void) const
+// checks for a valid gbtEfgActionSet
+bool gbtEfgActionSet::HasActiveActionsAtAllInfosets(void) const
 {
   if (infosets.Length() != efp.NumInfosets())   return false;
 
@@ -289,8 +289,8 @@ bool EFActionSet::HasActiveActionsAtAllInfosets(void) const
   return true;
 }
 
-// checks for a valid EFActionSet
-bool EFActionSet::HasActiveActionAt(const int &iset) const
+// checks for a valid gbtEfgActionSet
+bool gbtEfgActionSet::HasActiveActionAt(const int &iset) const
 {
   if (iset > efp.NumInfosets())   return false;
 
@@ -308,7 +308,7 @@ gbtEfgSupport::gbtEfgSupport(const gbtEfgGame &p_efg)
   : m_efg(p_efg), m_players(p_efg.NumPlayers())
 {
   for (int pl = 1; pl <= m_players.Length(); pl++) {
-    m_players[pl] = new EFActionSet(p_efg.GetPlayer(pl));
+    m_players[pl] = new gbtEfgActionSet(p_efg.GetPlayer(pl));
   }
 }
 
@@ -317,7 +317,7 @@ gbtEfgSupport::gbtEfgSupport(const gbtEfgSupport &p_support)
     m_players(p_support.m_players.Length())
 {
   for (int pl = 1; pl <= m_players.Length(); pl++)
-    m_players[pl] = new EFActionSet(*(p_support.m_players[pl]));
+    m_players[pl] = new gbtEfgActionSet(*(p_support.m_players[pl]));
 }
 
 gbtEfgSupport::~gbtEfgSupport()
@@ -332,7 +332,7 @@ gbtEfgSupport &gbtEfgSupport::operator=(const gbtEfgSupport &p_support)
     m_label = p_support.m_label;
     for (int pl = 1; pl <= m_players.Length(); pl++)  {
       delete m_players[pl];
-      m_players[pl] = new EFActionSet(*(p_support.m_players[pl]));
+      m_players[pl] = new gbtEfgActionSet(*(p_support.m_players[pl]));
     }
   }
   return *this;

@@ -38,7 +38,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
   int i;
   gbtEfgGame efg = p_support.GetGame();
   
-  gbtList<BehavProfile<gbtNumber> > thissolns;
+  gbtList<gbtBehavProfile<gbtNumber> > thissolns;
   thissolns.Append(*solution);
   ((gbtVector<gbtNumber> &) thissolns[1]).operator=(gbtNumber(0));
   
@@ -61,13 +61,13 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
     
     assert(subvalues.Length() == subsolns.Length());
     
-    gbtList<BehavProfile<gbtNumber> > newsolns;
+    gbtList<gbtBehavProfile<gbtNumber> > newsolns;
     gbtList<gbtArray<gbtEfgOutcome> > newsubrootvalues;
     
     for (int soln = 1; soln <= thissolns.Length(); soln++) {
       for (int subsoln = 1; subsoln <= subsolns.Length(); subsoln++) {
-	BehavProfile<gbtNumber> bp(thissolns[soln]);
-	BehavProfile<gbtNumber> tmp(*subsolns[subsoln].Profile());
+	gbtBehavProfile<gbtNumber> bp(thissolns[soln]);
+	gbtBehavProfile<gbtNumber> tmp(*subsolns[subsoln].Profile());
 	for (int j = 1; j <= bp.Length(); j++) {
 	  bp[j] += tmp[j];
 	}
@@ -153,8 +153,8 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	}
 
 	for (int soln = 1; soln <= nfgSolutions.Length(); soln++) {
-	  MixedProfile<gbtNumber> profile(*nfgSolutions[soln].Profile());
-	  sol.Append(BehavProfile<gbtNumber>(profile));
+	  gbtMixedProfile<gbtNumber> profile(*nfgSolutions[soln].Profile());
+	  sol.Append(gbtBehavProfile<gbtNumber>(profile));
 	}
       }
     }
@@ -262,7 +262,7 @@ gbtList<BehavSolution> gbtEfgNashSubgames::Solve(const gbtEfgSupport &p_support,
   solutions.Flush();
   gbtList<gbtEfgOutcome> values;
 
-  solution = new BehavProfile<gbtNumber>(p_support);
+  solution = new gbtBehavProfile<gbtNumber>(p_support);
   ((gbtVector<gbtNumber> &) *solution).operator=(gbtNumber(0));
 
   gbtEfgGame efg = p_support.GetGame().Copy();

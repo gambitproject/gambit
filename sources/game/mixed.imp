@@ -31,28 +31,28 @@
 #include "nfgint.h"
 
 //---------------------------------------------------------------------------
-//                    MixedProfile<T> member functions
+//                    gbtMixedProfile<T> member functions
 //---------------------------------------------------------------------------
 
-template <class T> MixedProfile<T>::MixedProfile(const gbtNfgSupport &s)
+template <class T> gbtMixedProfile<T>::gbtMixedProfile(const gbtNfgSupport &s)
   : gbtPVector<T>(s.NumStrats()), m_nfg(s.GetGame()), support(s)
 {
   InitPayoffs();
   Centroid();
 }
 
-template <class T> MixedProfile<T>::MixedProfile(const MixedProfile<T> &p)
+template <class T> gbtMixedProfile<T>::gbtMixedProfile(const gbtMixedProfile<T> &p)
   : gbtPVector<T>(p), m_nfg(p.m_nfg), support(p.support)
 { 
   InitPayoffs();
 }
 
-template <class T> MixedProfile<T>::~MixedProfile()
+template <class T> gbtMixedProfile<T>::~gbtMixedProfile()
 {
 }
 
 template <class T>
-MixedProfile<T> &MixedProfile<T>::operator=(const MixedProfile<T> &p)
+gbtMixedProfile<T> &gbtMixedProfile<T>::operator=(const gbtMixedProfile<T> &p)
 {
   if (this != &p && m_nfg == p.m_nfg)   {
     // note that a dimensionality change will trigger a failed assertion
@@ -63,7 +63,7 @@ MixedProfile<T> &MixedProfile<T>::operator=(const MixedProfile<T> &p)
   return *this;
 }
 
-template <class T> void MixedProfile<T>::Centroid(void) 
+template <class T> void gbtMixedProfile<T>::Centroid(void) 
 {
   T center;
   
@@ -74,14 +74,14 @@ template <class T> void MixedProfile<T>::Centroid(void)
   }
 }
 
-template <class T> T MixedProfile<T>::LiapValue(void) const
+template <class T> T gbtMixedProfile<T>::LiapValue(void) const
 {
   static const T BIG1 = (T) 100;
   static const T BIG2 = (T) 100;
 
-  MixedProfile<T> p(*this);
+  gbtMixedProfile<T> p(*this);
   ((gbtVector<T> &) p).operator=(*this);
-  MixedProfile<T> tmp(p);
+  gbtMixedProfile<T> tmp(p);
   gbtPVector<T> payoff(p);
   T x, result((T) 0), avg, sum;
   payoff = (T) 0;
@@ -113,7 +113,7 @@ template <class T> T MixedProfile<T>::LiapValue(void) const
   return result;
 }
 
-template <class T> void MixedProfile<T>::Regret(gbtPVector<T> &value) const
+template <class T> void gbtMixedProfile<T>::Regret(gbtPVector<T> &value) const
 {
   int i, j;
   T pay,x;
@@ -130,7 +130,7 @@ template <class T> void MixedProfile<T>::Regret(gbtPVector<T> &value) const
   }
 }
 
-template <class T> T MixedProfile<T>::MaxRegret(void) const
+template <class T> T gbtMixedProfile<T>::MaxRegret(void) const
 {
   int i;
   T maxgripe = (T)0;
@@ -142,18 +142,18 @@ template <class T> T MixedProfile<T>::MaxRegret(void) const
   return maxgripe;
 }
 
-template <class T> T MixedProfile<T>::Payoff(int pl) const
+template <class T> T gbtMixedProfile<T>::Payoff(int pl) const
 {
   if (m_nfg.rep->m_results.Length() > 0) {
     return PPayoff(pl, 1, 1);
   }
   else {
-    return BehavProfile<T>(*this).Payoff(pl);
+    return gbtBehavProfile<T>(*this).Payoff(pl);
   }
 }
 
 template <class T> T
-MixedProfile<T>::Payoff(int pl, gbtNfgStrategy strategy) const
+gbtMixedProfile<T>::Payoff(int pl, gbtNfgStrategy strategy) const
 {
   if (m_nfg.rep->m_results.Length() > 0) {
     T value = (T) 0;
@@ -162,16 +162,16 @@ MixedProfile<T>::Payoff(int pl, gbtNfgStrategy strategy) const
     return value;
   }
   else {
-    MixedProfile<T> foo(*this);
+    gbtMixedProfile<T> foo(*this);
     for (int st = 1; st <= support.NumStrats(strategy.GetPlayer().GetId());
 	 foo(strategy.GetPlayer().GetId(), st++) = 0);
     foo(strategy.GetPlayer().GetId(), support.GetIndex(strategy)) = 1;
-    return BehavProfile<T>(foo).Payoff(pl);
+    return gbtBehavProfile<T>(foo).Payoff(pl);
   }
 }
 
 template <class T> T
-MixedProfile<T>::Payoff(int pl, 
+gbtMixedProfile<T>::Payoff(int pl, 
 			int player1, int strat1, 
 			int player2, int strat2) const
 {
@@ -185,17 +185,17 @@ MixedProfile<T>::Payoff(int pl,
     return value;
   }
   else {
-    MixedProfile<T> foo(*this);
+    gbtMixedProfile<T> foo(*this);
     for (int st = 1; st <= support.NumStrats(player1); foo(player1, st++) = 0);
     for (int st = 1; st <= support.NumStrats(player2); foo(player2, st++) = 0);
     foo(player1, strat1) = 1;
     foo(player2, strat2) = 1;
-    return BehavProfile<T>(foo).Payoff(pl);
+    return gbtBehavProfile<T>(foo).Payoff(pl);
   }
 }
 
 template <class T> 
-void MixedProfile<T>::Payoff(int pl, int player1, gbtVector<T> &value) const
+void gbtMixedProfile<T>::Payoff(int pl, int player1, gbtVector<T> &value) const
 {
   if (m_nfg.rep->m_results.Length() > 0) {
     value = (T) 0;
@@ -209,13 +209,13 @@ void MixedProfile<T>::Payoff(int pl, int player1, gbtVector<T> &value) const
 }
 
 template <class T>
-bool MixedProfile<T>::operator==(const MixedProfile<T> &mp) const
+bool gbtMixedProfile<T>::operator==(const gbtMixedProfile<T> &mp) const
 {
   return (m_nfg == mp.m_nfg &&
 	  (const gbtPVector<T> &) *this == (const gbtPVector<T> &) mp);
 }
 
-template <class T> gbtOutput &operator<<(gbtOutput &f, const MixedProfile<T> &p)
+template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtMixedProfile<T> &p)
 { p.Dump(f);  return f; }
 
 
@@ -224,7 +224,7 @@ template <class T> gbtOutput &operator<<(gbtOutput &f, const MixedProfile<T> &p)
 //--------------------------------------
 
 template <class T>
-T MixedProfile<T>::PPayoff(int pl, int index, int i) const
+T gbtMixedProfile<T>::PPayoff(int pl, int index, int i) const
 {
   int pindex = 0;
 
@@ -249,7 +249,7 @@ T MixedProfile<T>::PPayoff(int pl, int index, int i) const
 }
 
 template <class T>
-void MixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
+void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
 				int cur_pl, long index, T prob, T &value) const
 {
   if (cur_pl == const_pl)
@@ -272,7 +272,7 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
 
 
 template <class T>
-void MixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
+void gbtMixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
 				int const_pl2, int const_st2,
 				int cur_pl, long index, T prob, T &value) const
 {
@@ -296,7 +296,7 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
 }
 
 template <class T>
-void MixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index, 
+void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index, 
 			   T prob, gbtVector<T> &value) const
 {
   if (cur_pl == const_pl)
@@ -321,13 +321,13 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
 }
 
 template <class T>
-void MixedProfile<T>::InitPayoffs(void) const
+void gbtMixedProfile<T>::InitPayoffs(void) const
 {
   m_nfg.InitPayoffs();
 }
 
 template <class T>
-MixedProfile<T>::MixedProfile(const BehavProfile<T> &p_profile)
+gbtMixedProfile<T>::gbtMixedProfile(const gbtBehavProfile<T> &p_profile)
   : gbtPVector<T>(p_profile.GetGame().GetReducedNfg().NumStrats()),
     m_nfg(p_profile.GetGame().GetReducedNfg()), support(m_nfg)
 {

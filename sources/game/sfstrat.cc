@@ -28,18 +28,18 @@
 #include "sfg.h"
 
 //--------------------------------------
-// Sequence:  Member functions
+// gbtSfgSequence:  Member functions
 //--------------------------------------
 
 #include "base/glist.imp"
 #include "base/garray.imp"
 #include "base/gblock.imp"
 
-gbtList<gbtEfgAction> Sequence::History(void) const 
+gbtList<gbtEfgAction> gbtSfgSequence::History(void) const 
 { 
   gbtList<gbtEfgAction> h;
   gbtEfgAction a = action;
-  const Sequence *s = this;
+  const gbtSfgSequence *s = this;
   while (!a.IsNull()) {
     h.Append(a);
     s = s->parent;
@@ -48,7 +48,7 @@ gbtList<gbtEfgAction> Sequence::History(void) const
   return h;    
 }
 
-void Sequence::Dump(gbtOutput &out) const
+void gbtSfgSequence::Dump(gbtOutput &out) const
 {
   int a = 0, p = 0;
   if (!action.IsNull()) a = action.GetId();
@@ -56,7 +56,7 @@ void Sequence::Dump(gbtOutput &out) const
   out << "\nPl#: " << player.GetId() << " Seq# " << number << " act# " << a << " parent: " << p;
 }
 
-gbtOutput& operator<<(gbtOutput& s, const Sequence& seq)
+gbtOutput& operator<<(gbtOutput& s, const gbtSfgSequence& seq)
 {
   seq.Dump(s);
   return s;
@@ -64,22 +64,22 @@ gbtOutput& operator<<(gbtOutput& s, const Sequence& seq)
 
 
 //--------------------------------------
-// SFSequenceSet:  Member functions
+// gbtSfgSequenceSet:  Member functions
 //--------------------------------------
 
-SFSequenceSet::SFSequenceSet(const gbtEfgPlayer &p)
+gbtSfgSequenceSet::gbtSfgSequenceSet(const gbtEfgPlayer &p)
   : efp(p), sequences()
 {
-  Sequence *empty;
-  empty = new Sequence(p,0,0,1);
+  gbtSfgSequence *empty;
+  empty = new gbtSfgSequence(p,0,0,1);
   AddSequence(empty);
 }
 
-SFSequenceSet::SFSequenceSet(const SFSequenceSet &s)
+gbtSfgSequenceSet::gbtSfgSequenceSet(const gbtSfgSequenceSet &s)
   : efp(s.efp), sequences(s.sequences)
 { }
 
-SFSequenceSet::~SFSequenceSet()
+gbtSfgSequenceSet::~gbtSfgSequenceSet()
 { 
 
   // potential problem here?  It is not clear this is where this belongs.  
@@ -90,7 +90,7 @@ SFSequenceSet::~SFSequenceSet()
     delete sequences[i];   
 }
 
-SFSequenceSet &SFSequenceSet::operator=(const SFSequenceSet &s)
+gbtSfgSequenceSet &gbtSfgSequenceSet::operator=(const gbtSfgSequenceSet &s)
 {
   if (this != &s) {
     efp = s.efp;
@@ -100,7 +100,7 @@ SFSequenceSet &SFSequenceSet::operator=(const SFSequenceSet &s)
 }
 
 
-bool SFSequenceSet::operator==(const SFSequenceSet &s)
+bool gbtSfgSequenceSet::operator==(const gbtSfgSequenceSet &s)
 {
   if (sequences.Length() != s.sequences.Length()) return (false);
   int i;
@@ -111,11 +111,11 @@ bool SFSequenceSet::operator==(const SFSequenceSet &s)
 }
 
 //------------------------------------------
-// SFSequenceSet: Member functions 
+// gbtSfgSequenceSet: Member functions 
 //------------------------------------------
 
-// Append a sequences to the SFSequenceSet
-void SFSequenceSet::AddSequence(Sequence *s) 
+// Append a sequences to the gbtSfgSequenceSet
+void gbtSfgSequenceSet::AddSequence(gbtSfgSequence *s) 
 { 
   assert (efp == s->Player());
   sequences.Append(s); 
@@ -123,7 +123,7 @@ void SFSequenceSet::AddSequence(Sequence *s)
 
 // Removes a sequence pointer. Returns true if the sequence was successfully
 // removed, false otherwise.
-bool SFSequenceSet::RemoveSequence( Sequence *s ) 
+bool gbtSfgSequenceSet::RemoveSequence( gbtSfgSequence *s ) 
 { 
   assert (efp == s->Player());
   int t; 
@@ -134,7 +134,7 @@ bool SFSequenceSet::RemoveSequence( Sequence *s )
 
 // Finds the sequence pointer of sequence number j. Returns 0 if there 
 // is no sequence with that number.  
-Sequence *SFSequenceSet::Find( int j ) 
+gbtSfgSequence *gbtSfgSequenceSet::Find( int j ) 
 { 
   int t=1;
   while(t <= sequences.Length()) {
@@ -144,55 +144,55 @@ Sequence *SFSequenceSet::Find( int j )
   return 0;
 }
 
-// Number of Sequences in a SFSequenceSet
-int SFSequenceSet::NumSequences(void) const
+// Number of Sequences in a gbtSfgSequenceSet
+int gbtSfgSequenceSet::NumSequences(void) const
 {
   return (sequences.Length());
 }
 
 // Return the entire sequence set
-const gbtBlock<Sequence *> &SFSequenceSet::GetSFSequenceSet(void) const
+const gbtBlock<gbtSfgSequence *> &gbtSfgSequenceSet::GetSFSequenceSet(void) const
 {
   return sequences;
 }
 
 //-----------------------------------------------
-// SFSupport: Ctors, Dtor, Operators
+// gbtSfgSupport: Ctors, Dtor, Operators
 //-----------------------------------------------
 
-SFSupport::SFSupport(const Sfg &SF) 
+gbtSfgSupport::gbtSfgSupport(const gbtSfgGame &SF) 
   : bsfg(&SF), sups(SF.GetEfg().NumPlayers())
 { 
   for (int i = 1; i <= sups.Length(); i++) {
-    sups[i] = new SFSequenceSet(SF.GetEfg().GetPlayer(i));
+    sups[i] = new gbtSfgSequenceSet(SF.GetEfg().GetPlayer(i));
   }
 }
 
-SFSupport::SFSupport(const SFSupport &s)
+gbtSfgSupport::gbtSfgSupport(const gbtSfgSupport &s)
   : bsfg(s.bsfg), sups(s.sups.Length())
 {
   for (int i = 1; i <= sups.Length(); i++)
-    sups[i] = new SFSequenceSet(*s.sups[i]);
+    sups[i] = new gbtSfgSequenceSet(*s.sups[i]);
 }
 
-SFSupport::~SFSupport()
+gbtSfgSupport::~gbtSfgSupport()
 { 
   for (int i = 1; i <= sups.Length(); i++)
     delete sups[i];
 }
 
-SFSupport &SFSupport::operator=(const SFSupport &s)
+gbtSfgSupport &gbtSfgSupport::operator=(const gbtSfgSupport &s)
 {
   if (this != &s && bsfg == s.bsfg) {
     for (int i = 1; i <= sups.Length(); i++)  {
       delete sups[i];
-      sups[i] = new SFSequenceSet(*s.sups[i]);
+      sups[i] = new gbtSfgSequenceSet(*s.sups[i]);
     }
   }
   return *this;
 }
 
-bool SFSupport::operator==(const SFSupport &s) const
+bool gbtSfgSupport::operator==(const gbtSfgSupport &s) const
 {
   assert(sups.Length() == s.sups.Length());
   int i;
@@ -201,26 +201,26 @@ bool SFSupport::operator==(const SFSupport &s) const
   else return (false);
 }
   
-bool SFSupport::operator!=(const SFSupport &s) const
+bool gbtSfgSupport::operator!=(const gbtSfgSupport &s) const
 {
   return !(*this == s);
 }
 
 //------------------------
-// SFSupport: Members
+// gbtSfgSupport: Members
 //------------------------
 
-const gbtBlock<Sequence *> &SFSupport::Sequences(int pl) const
+const gbtBlock<gbtSfgSequence *> &gbtSfgSupport::Sequences(int pl) const
 {
   return (sups[pl]->GetSFSequenceSet());
 }
 
-int SFSupport::NumSequences(int pl) const
+int gbtSfgSupport::NumSequences(int pl) const
 {
   return sups[pl]->NumSequences();
 }
 
-const gbtArray<int> SFSupport::NumSequences(void) const
+const gbtArray<int> gbtSfgSupport::NumSequences(void) const
 {
   gbtArray<int> a(sups.Length());
 
@@ -229,7 +229,7 @@ const gbtArray<int> SFSupport::NumSequences(void) const
   return a;
 }
 
-int SFSupport::TotalNumSequences(void) const
+int gbtSfgSupport::TotalNumSequences(void) const
 {
   int total = 0;
   for (int i = 1 ; i <= sups.Length(); i++)
@@ -237,31 +237,31 @@ int SFSupport::TotalNumSequences(void) const
   return total;
 }
 
-int SFSupport::Find(Sequence *s) const
+int gbtSfgSupport::Find(gbtSfgSequence *s) const
 {
   return sups[s->Player().GetId()]->GetSFSequenceSet().Find(s);
 }
 
-void SFSupport::AddSequence(Sequence *s)
+void gbtSfgSupport::AddSequence(gbtSfgSequence *s)
 {
   sups[s->Player().GetId()]->AddSequence(s);
 }
 
-bool SFSupport::RemoveSequence(Sequence *s)
+bool gbtSfgSupport::RemoveSequence(gbtSfgSequence *s)
 {
   return sups[s->Player().GetId()]->RemoveSequence(s);
 }
 
 
 // Returns true if all sequences in _THIS_ belong to _S_
-bool SFSupport::IsSubset(const SFSupport &s) const
+bool gbtSfgSupport::IsSubset(const gbtSfgSupport &s) const
 {
   assert(sups.Length() == s.sups.Length());
   for (int i = 1; i <= sups.Length(); i++)
     if (NumSequences(i) > s.NumSequences(i))
       return false;
     else  {
-      const gbtBlock<Sequence *> &strats =
+      const gbtBlock<gbtSfgSequence *> &strats =
         sups[i]->GetSFSequenceSet();
 
       for (int j = 1; j <= NumSequences(i); j++)
@@ -272,12 +272,12 @@ bool SFSupport::IsSubset(const SFSupport &s) const
 }
 
 
-void SFSupport::Dump(gbtOutput&s) const
+void gbtSfgSupport::Dump(gbtOutput&s) const
 {
   int numplayers;
   int i;
   int j;
-  gbtArray<Sequence *> strat;
+  gbtArray<gbtSfgSequence *> strat;
 
   s << "{ ";
   numplayers = (*bsfg).GetEfg().NumPlayers();
@@ -294,13 +294,13 @@ void SFSupport::Dump(gbtOutput&s) const
   s << "} ";
 }
 
-gbtOutput& operator<<(gbtOutput& s, const SFSupport& n)
+gbtOutput& operator<<(gbtOutput& s, const gbtSfgSupport& n)
 {
   n.Dump(s);
   return s;
 }
 
 //template class gbtList<Action *>;
-template class gbtBlock<Sequence *>;
-template class gbtArray<Sequence *>;
-template class gbtArray<SFSequenceSet *>;
+template class gbtBlock<gbtSfgSequence *>;
+template class gbtArray<gbtSfgSequence *>;
+template class gbtArray<gbtSfgSequenceSet *>;

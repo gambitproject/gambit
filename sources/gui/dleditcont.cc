@@ -42,7 +42,7 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
 {
   SetAutoLayout(true);
 
-  StrategyProfile profile(p_nfg);
+  gbtNfgContingency profile(p_nfg);
   for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
     profile.Set(pl, p_nfg.GetPlayer(pl).GetStrategy(p_cont[pl]));
   }

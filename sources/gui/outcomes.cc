@@ -119,7 +119,7 @@ void gbtCmdAttachOutcome::Do(gbtGameDocument *p_doc)
     }
   }
   else {
-    StrategyProfile profile(p_doc->GetNfg());
+    gbtNfgContingency profile(p_doc->GetNfg());
     for (int pl = 1; pl <= p_doc->GetNfg().NumPlayers(); pl++) {
       profile.Set(pl, p_doc->GetNfg().GetPlayer(pl).GetStrategy(p_doc->GetContingency()[pl]));
     }

@@ -33,9 +33,9 @@
 #include "outcome.h"
 
 template <class T> class gbtRectArray;
-template <class T> class BehavProfile;
+template <class T> class gbtBehavProfile;
 
-template <class T> class MixedProfile : public gbtPVector<T>  {
+template <class T> class gbtMixedProfile : public gbtPVector<T>  {
   private:
     gbtNfgGame m_nfg;
     gbtNfgSupport support;
@@ -53,12 +53,12 @@ template <class T> class MixedProfile : public gbtPVector<T>  {
     T Payoff(const gbtNfgOutcome &o, int pl) const;
 
   public:
-    MixedProfile(const gbtNfgSupport &);
-    MixedProfile(const MixedProfile<T> &);
-    MixedProfile(const BehavProfile<T> &);
-    virtual ~MixedProfile();
+    gbtMixedProfile(const gbtNfgSupport &);
+    gbtMixedProfile(const gbtMixedProfile<T> &);
+    gbtMixedProfile(const gbtBehavProfile<T> &);
+    virtual ~gbtMixedProfile();
 
-    MixedProfile<T> &operator=(const MixedProfile<T> &);
+    gbtMixedProfile<T> &operator=(const gbtMixedProfile<T> &);
 
     gbtNfgGame GetGame(void) const  { return m_nfg; }
 
@@ -72,13 +72,13 @@ template <class T> class MixedProfile : public gbtPVector<T>  {
     T Payoff(int pl, int player1, int strat1, int player2, int strat2) const;
     void Payoff(int pl, int const_pl, gbtVector<T> &payoff) const;
 
-    bool operator==(const MixedProfile<T> &) const;
+    bool operator==(const gbtMixedProfile<T> &) const;
 
     const gbtNfgSupport &Support(void) const   { return support; }
 };
 
 #ifndef __BORLANDC__
-template <class T> gbtOutput &operator<<(gbtOutput &f, const MixedProfile<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtMixedProfile<T> &);
 #endif
 
 #endif    // MIXED_H

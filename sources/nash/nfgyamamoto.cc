@@ -52,7 +52,7 @@ static int FirstMember(const gbtMatrix<int> &p_partition, int p_index)
   return 0;
 }
 
-static double Payoff(const MixedProfile<double> &p_profile, int p_player,
+static double Payoff(const gbtMixedProfile<double> &p_profile, int p_player,
 		     const gbtMatrix<int> &p_partition, int p_index)
 {
   for (int st = 1; st <= p_profile.Support().NumStrats(p_player); st++) {
@@ -66,7 +66,7 @@ static double Payoff(const MixedProfile<double> &p_profile, int p_player,
 }
 
 
-static gbtMatrix<int> RankStrategies(const MixedProfile<double> &p_profile,
+static gbtMatrix<int> RankStrategies(const gbtMixedProfile<double> &p_profile,
 				   int p_player)
 {
   gbtVector<double> payoffs(p_profile.Support().NumStrats(p_player));
@@ -113,7 +113,7 @@ static gbtMatrix<int> RankStrategies(const MixedProfile<double> &p_profile,
   return partition;
 }
 
-static void YamamotoJacobian(const MixedProfile<double> &p_profile,
+static void YamamotoJacobian(const gbtMixedProfile<double> &p_profile,
 			     double p_lambda,
 			     const gbtList<gbtMatrix<int> > &p_partition,
 			     gbtMatrix<double> &p_matrix)
@@ -190,7 +190,7 @@ static void YamamotoJacobian(const MixedProfile<double> &p_profile,
   }
 }
 		      
-static void YamamotoComputeStep(const MixedProfile<double> &p_profile,
+static void YamamotoComputeStep(const gbtMixedProfile<double> &p_profile,
 				const gbtMatrix<double> &p_matrix,
 				gbtPVector<double> &p_delta, double &p_lambdainc,
 				double p_initialsign, double p_stepsize)
@@ -240,7 +240,7 @@ static void YamamotoComputeStep(const MixedProfile<double> &p_profile,
   p_lambdainc /= sqrt(norm / p_stepsize);
 }
 
-static gbtList<int> SortProbs(const MixedProfile<double> &p_profile,
+static gbtList<int> SortProbs(const gbtMixedProfile<double> &p_profile,
 			    int p_player,
 			    const gbtMatrix<int> &p_partition,
 			    int p_index)
@@ -294,7 +294,7 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
 {
   // In the notation of Yamamoto's paper, profile(i,j)=x_{ij}
   // and lambda=t
-  MixedProfile<double> profile(p_support);
+  gbtMixedProfile<double> profile(p_support);
   double lambda = 1.0;
   double initialsign = -1.0; 
   gbtList<gbtMatrix<int> > partitions;

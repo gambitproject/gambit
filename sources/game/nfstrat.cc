@@ -31,10 +31,10 @@
 #include "efg.h"
 
 //--------------------------------------------------------
-// StrategyProfile: Constructors, Destructors, Operators
+// gbtNfgContingency: Constructors, Destructors, Operators
 //--------------------------------------------------------
 
-StrategyProfile::StrategyProfile(const gbtNfgGame &p_nfg)
+gbtNfgContingency::gbtNfgContingency(const gbtNfgGame &p_nfg)
   : m_nfg(p_nfg), index(0L), profile(m_nfg.NumPlayers())
 {
   for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++)   {
@@ -43,14 +43,14 @@ StrategyProfile::StrategyProfile(const gbtNfgGame &p_nfg)
   }
 }
 
-StrategyProfile::StrategyProfile(const StrategyProfile &p)
+gbtNfgContingency::gbtNfgContingency(const gbtNfgContingency &p)
   : m_nfg(p.m_nfg), index(p.index), profile(p.profile)
 { }
 
-StrategyProfile::~StrategyProfile()
+gbtNfgContingency::~gbtNfgContingency()
 { }
 
-StrategyProfile &StrategyProfile::operator=(const StrategyProfile &p)
+gbtNfgContingency &gbtNfgContingency::operator=(const gbtNfgContingency &p)
 {
   if (this != &p) {
     m_nfg = p.m_nfg;
@@ -61,50 +61,50 @@ StrategyProfile &StrategyProfile::operator=(const StrategyProfile &p)
 }
 
 //-----------------------------------------
-// StrategyProfile: Members
+// gbtNfgContingency: Members
 //-----------------------------------------
 
-bool StrategyProfile::IsValid(void) const
+bool gbtNfgContingency::IsValid(void) const
 {
   int i;
   for (i = profile.Length(); i > 0 && profile[i] != 0; i--);
   return i;
 }
 
-long StrategyProfile::GetIndex(void) const 
+long gbtNfgContingency::GetIndex(void) const 
 { 
   return index; 
 }
 
-gbtNfgStrategy StrategyProfile::operator[](int p) const 
+gbtNfgStrategy gbtNfgContingency::operator[](int p) const 
 { 
   return profile[p];
 }
 
-gbtNfgStrategy StrategyProfile::Get(int p) const 
+gbtNfgStrategy gbtNfgContingency::Get(int p) const 
 { 
   return profile[p];
 }
 
-void StrategyProfile::Set(int p, gbtNfgStrategy s)
+void gbtNfgContingency::Set(int p, gbtNfgStrategy s)
 {
   index += s.GetIndex() - profile[p].GetIndex();
   profile[p] = s;
 }
 
-void StrategyProfile::SetOutcome(const gbtNfgOutcome &outcome)
+void gbtNfgContingency::SetOutcome(const gbtNfgOutcome &outcome)
 {
   m_nfg.rep->m_results[index + 1] = outcome.rep;
   m_nfg.rep->m_revision++;
   m_nfg.BreakLink();
 }
 
-gbtNfgOutcome StrategyProfile::GetOutcome(void) const
+gbtNfgOutcome gbtNfgContingency::GetOutcome(void) const
 {
   return m_nfg.rep->m_results[index + 1];
 }
 
-gbtNumber StrategyProfile::GetPayoff(const gbtNfgPlayer &p_player) const
+gbtNumber gbtNfgContingency::GetPayoff(const gbtNfgPlayer &p_player) const
 {
   if (m_nfg.rep->m_results.Length() > 0) {
     return m_nfg.rep->m_results[index + 1]->m_payoffs[p_player.GetId()];

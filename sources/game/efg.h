@@ -33,9 +33,9 @@
 
 class gbtEfgSupport;
 class gbtNfgGame;
-template <class T> class BehavProfile;
-template <class T> class MixedProfile;
-template <class T> class PureBehavProfile;
+template <class T> class gbtBehavProfile;
+template <class T> class gbtMixedProfile;
+template <class T> class gbtPureBehavProfile;
 
 #include "outcome.h"
 #include "infoset.h"
@@ -73,9 +73,9 @@ private:
   friend class EfgFileReader;
   friend class EfgFile;
   friend class gbtNfgGame;
-  friend class BehavProfile<double>;
-  friend class BehavProfile<gbtRational>;
-  friend class BehavProfile<gbtNumber>;
+  friend class gbtBehavProfile<double>;
+  friend class gbtBehavProfile<gbtRational>;
+  friend class gbtBehavProfile<gbtNumber>;
   friend void SetEfg(gbtNfgGame, gbtEfgGame);
 
 protected:
@@ -191,7 +191,7 @@ public:
 gbtEfgGame NewEfg(void);
 gbtEfgGame ReadEfg(gbtInput &);
 
-template <class T> class PureBehavProfile   {
+template <class T> class gbtPureBehavProfile   {
   protected:
     gbtEfgGame m_efg;
     gbtArray<gbtArray<gbtEfgAction> *> profile;
@@ -203,12 +203,12 @@ template <class T> class PureBehavProfile   {
     void InfosetProbs(const gbtEfgNode &n, T, gbtPVector<T> &) const;
 
   public:
-    PureBehavProfile(const gbtEfgGame &);
-    PureBehavProfile(const PureBehavProfile<T> &);
-    ~PureBehavProfile();
+    gbtPureBehavProfile(const gbtEfgGame &);
+    gbtPureBehavProfile(const gbtPureBehavProfile<T> &);
+    ~gbtPureBehavProfile();
 
     // Operators
-    PureBehavProfile<T> &operator=(const PureBehavProfile<T> &);
+    gbtPureBehavProfile<T> &operator=(const gbtPureBehavProfile<T> &);
     T operator()(const gbtEfgAction &) const;
 
     // Manipulation

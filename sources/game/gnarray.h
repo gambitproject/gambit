@@ -34,7 +34,7 @@
 //
 // Basic n-dimensional array
 //
-template <class T> class gNArray   {
+template <class T> class gbtNDArray   {
   protected:
     long storage_size;
     T *storage;
@@ -44,12 +44,12 @@ template <class T> class gNArray   {
 //    void ReadFrom(gbtInput &, const gbtVector<int> &, gbtVector<int> &, int);
 
   public:
-    gNArray(void);
-    gNArray(const gbtArray<int> &d);
-    gNArray(const gNArray<T>& a);
-    ~gNArray();
+    gbtNDArray(void);
+    gbtNDArray(const gbtArray<int> &d);
+    gbtNDArray(const gbtNDArray<T>& a);
+    ~gbtNDArray();
 
-    gNArray<T> &operator=(const gNArray<T> &);
+    gbtNDArray<T> &operator=(const gbtNDArray<T> &);
 
     /* not used for now
     T operator[](const gbtVector<int> &) const;
@@ -69,7 +69,7 @@ template <class T> class gNArray   {
 };
 
 #ifdef UNUSED
-template <class T> class gIndexedNArray : private gNArray<T>   {
+template <class T> class gIndexedNArray : private gbtNDArray<T>   {
   private:
     gbtArray<long> *index;
     
@@ -87,9 +87,9 @@ template <class T> class gIndexedNArray : private gNArray<T>   {
     const gbtVector<int> &Dimensionality(void) const   { return dim; }
 
     void Input(gbtInput &f, const gbtVector<int> &v, int i)
-      { gNArray<T>::Input(f, v, i); }
+      { gbtNDArray<T>::Input(f, v, i); }
     void Output(gbtOutput &f) const
-      { gNArray<T>::Output(f); }
+      { gbtNDArray<T>::Output(f); }
 };
 #endif   // UNUSED
 

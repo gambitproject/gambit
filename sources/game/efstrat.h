@@ -32,13 +32,13 @@
 #include "math/gpvector.h"
 #include "efg.h"
 
-class EFActionSet;
+class gbtEfgActionSet;
 
 class gbtEfgSupport {
 protected:
   gbtText m_label;
   gbtEfgGame m_efg;
-  gbtArray<EFActionSet *> m_players;
+  gbtArray<gbtEfgActionSet *> m_players;
 
 public:
   gbtEfgSupport(const gbtEfgGame &);

@@ -203,7 +203,7 @@ void gbtEfgNashLp<T>::GetSolutions(const gbtEfgSupport &p_support,
 				   gbtList<BehavSolution> &solutions) const
 {
   for (int i = 1; i <= List.Length(); i++)    {
-    BehavProfile<T> profile(p_support);
+    gbtBehavProfile<T> profile(p_support);
     GetProfile(p_support, profile.GetDPVector(), List[i],
 	       p_support.GetGame().GetRoot(), 1, 1);
     solutions.Append(BehavSolution(profile, "Lp[EFG]"));

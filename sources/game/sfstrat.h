@@ -30,27 +30,20 @@
 #include "base/base.h"
 #include "game/efg.h"
 
-/*
-class Efg;
-class Sfg;
-class Action;
-*/
-
-struct Sequence {
-friend class Sfg;
-friend class FullEfg;
-friend class SFSequenceSet;
+struct gbtSfgSequence {
+friend class gbtSfgGame;
+friend class gbtSfgSequenceSet;
 private:
   int number;
   gbtText name;
   gbtEfgPlayer player;
   gbtEfgAction action;
-  const Sequence *parent;
+  const gbtSfgSequence *parent;
   
-  Sequence(const gbtEfgPlayer &pl, const gbtEfgAction &a,
-	   const Sequence *p, int n) 
+  gbtSfgSequence(const gbtEfgPlayer &pl, const gbtEfgAction &a,
+	   const gbtSfgSequence *p, int n) 
     : number(n), player(pl), action(a), parent(p) { }
-  ~Sequence() { }
+  ~gbtSfgSequence() { }
 public:
   const gbtText &GetName(void) const   { return name; }
   void SetName(const gbtText &s)       { name = s; }
@@ -61,82 +54,82 @@ public:
   gbtEfgInfoset GetInfoset(void) const 
   { if (!action.IsNull()) return action.GetInfoset(); else return 0; }
   gbtEfgPlayer Player(void) const  { return player; }
-  const Sequence *Parent(void) const   { return parent; }
+  const gbtSfgSequence *Parent(void) const   { return parent; }
   void Dump(gbtOutput &) const;
 };
 
-class SFSequenceSet {
+class gbtSfgSequenceSet {
 protected:
   gbtEfgPlayer efp;
-  gbtBlock <Sequence *> sequences;
+  gbtBlock <gbtSfgSequence *> sequences;
   
 public:
-  SFSequenceSet(const SFSequenceSet &s); 
-  SFSequenceSet(const gbtEfgPlayer &);
+  gbtSfgSequenceSet(const gbtSfgSequenceSet &s); 
+  gbtSfgSequenceSet(const gbtEfgPlayer &);
   
-  SFSequenceSet &operator=(const SFSequenceSet &s); 
-  bool operator==(const SFSequenceSet &s);
+  gbtSfgSequenceSet &operator=(const gbtSfgSequenceSet &s); 
+  bool operator==(const gbtSfgSequenceSet &s);
 
-  virtual ~SFSequenceSet();
+  virtual ~gbtSfgSequenceSet();
 
-  // Append a sequence to the SFSequenceSet
-  void AddSequence(Sequence *s);
+  // Append a sequence to the gbtSfgSequenceSet
+  void AddSequence(gbtSfgSequence *s);
 
   // Removes a sequence pointer. Returns true if the sequence was successfully
   // removed, false otherwise.
-  bool RemoveSequence( Sequence *s ); 
-  Sequence * Find(int j);
+  bool RemoveSequence( gbtSfgSequence *s ); 
+  gbtSfgSequence * Find(int j);
 
-  // Number of sequences in the SFSequenceSet
+  // Number of sequences in the gbtSfgSequenceSet
   int NumSequences(void) const;
 
   //  return the entire sequence set in a const gbtArray
-  const gbtBlock<Sequence *> &GetSFSequenceSet(void) const;
+  const gbtBlock<gbtSfgSequence *> &GetSFSequenceSet(void) const;
 };
 
 
-class SFSupport {
+class gbtSfgSupport {
 protected:
-  const Sfg *bsfg;
-  gbtArray <SFSequenceSet *> sups;
+  const gbtSfgGame *bsfg;
+  gbtArray <gbtSfgSequenceSet *> sups;
   
 public:
-  SFSupport(const Sfg &);
-  SFSupport(const SFSupport &s); 
-  virtual ~SFSupport();
-  SFSupport &operator=(const SFSupport &s);
+  gbtSfgSupport(const gbtSfgGame &);
+  gbtSfgSupport(const gbtSfgSupport &s); 
+  virtual ~gbtSfgSupport();
+  gbtSfgSupport &operator=(const gbtSfgSupport &s);
 
-  bool operator==(const SFSupport &s) const;
-  bool operator!=(const SFSupport &s) const;
+  bool operator==(const gbtSfgSupport &s) const;
+  bool operator!=(const gbtSfgSupport &s) const;
 
-  const Sfg &Game(void) const   { return *bsfg; }
+  const gbtSfgGame &Game(void) const   { return *bsfg; }
   
-  const gbtBlock<Sequence *> &Sequences(int pl) const;
+  const gbtBlock<gbtSfgSequence *> &Sequences(int pl) const;
 
   int NumSequences(int pl) const;
   const gbtArray<int> NumSequences(void) const;
   int TotalNumSequences(void) const;
 
-  void AddSequence(Sequence *);
-  bool RemoveSequence(Sequence *);
+  void AddSequence(gbtSfgSequence *);
+  bool RemoveSequence(gbtSfgSequence *);
   
-  bool IsSubset(const SFSupport &s) const;
+  bool IsSubset(const gbtSfgSupport &s) const;
 
   // returns the index of the sequence in the support if it exists,
   // otherwise returns zero
-  int Find(Sequence *) const; 
+  int Find(gbtSfgSequence *) const; 
 
   void Dump(gbtOutput &) const;
 };
 
 class SequenceProfile   {
-  friend class Sfg;
+  friend class gbtSfgGame;
 private:
   long index;
-  gbtArray<Sequence *> profile;
+  gbtArray<gbtSfgSequence *> profile;
   
 public:
-  SequenceProfile(const Sfg &);
+  SequenceProfile(const gbtSfgGame &);
   SequenceProfile(const SequenceProfile &p);
 
   ~SequenceProfile();
@@ -147,13 +140,13 @@ public:
   
   long GetIndex(void) const;
   
-  Sequence *const operator[](int p) const;
-  Sequence *const Get(int p) const;
-  void Set(int p, Sequence  *const s);
+  gbtSfgSequence *const operator[](int p) const;
+  gbtSfgSequence *const Get(int p) const;
+  void Set(int p, gbtSfgSequence  *const s);
 };
 
 
-gbtOutput &operator<<(gbtOutput &f, const Sequence &);
-gbtOutput &operator<<(gbtOutput &f, const SFSupport &);
+gbtOutput &operator<<(gbtOutput &f, const gbtSfgSequence &);
+gbtOutput &operator<<(gbtOutput &f, const gbtSfgSupport &);
 
 #endif    // SFSTRAT_H

@@ -32,13 +32,13 @@ class EFLiapFunc : public gC1Function<double>  {
 private:
   mutable long _nevals;
   gbtEfgGame m_efg;
-  mutable BehavProfile<double> _p;
+  mutable gbtBehavProfile<double> _p;
 
   double Value(const gbtVector<double> &x) const;
   bool Gradient(const gbtVector<double> &, gbtVector<double> &) const;
 
 public:
-  EFLiapFunc(const gbtEfgGame &, const BehavProfile<double> &);
+  EFLiapFunc(const gbtEfgGame &, const gbtBehavProfile<double> &);
   virtual ~EFLiapFunc();
     
   long NumEvals(void) const  { return _nevals; }
@@ -46,7 +46,7 @@ public:
 
 
 EFLiapFunc::EFLiapFunc(const gbtEfgGame &p_efg,
-		       const BehavProfile<double> &start)
+		       const gbtBehavProfile<double> &start)
   : _nevals(0L), m_efg(p_efg), _p(start)
 { }
 
@@ -123,7 +123,7 @@ bool EFLiapFunc::Gradient(const gbtVector<double> &x,
   return true;
 }
 
-static void PickRandomProfile(BehavProfile<double> &p)
+static void PickRandomProfile(gbtBehavProfile<double> &p)
 {
   double sum, tmp;
 
@@ -157,14 +157,14 @@ gbtList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
 {
   static const double ALPHA = .00000001;
 
-  BehavProfile<double> p(p_support);
+  gbtBehavProfile<double> p(p_support);
   EFLiapFunc F(p_support.GetGame(), p);
 
   // if starting vector not interior, perturb it towards centroid
   int kk = 0;
   for (int kk = 1; kk <= p.Length() && p[kk] > ALPHA; kk++);
   if (kk <= p.Length()) {
-    BehavProfile<double> c(p_support);
+    gbtBehavProfile<double> c(p_support);
     for (int k = 1; k <= p.Length(); k++) {
       p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
     }

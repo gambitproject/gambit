@@ -33,7 +33,7 @@
 // Constructors, Destructor, Constructive Operators
 //----------------------------------------------------
 
-MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
+MixedSolution::MixedSolution(const gbtMixedProfile<double> &p_profile,
 			     const gbtText &p_creator)
   : m_profile(gbtNfgSupport(p_profile.GetGame())), m_precision(GBT_PREC_DOUBLE),
     m_support(p_profile.Support()), 
@@ -53,7 +53,7 @@ MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
   }
 }
 
-MixedSolution::MixedSolution(const MixedProfile<gbtRational> &p_profile,
+MixedSolution::MixedSolution(const gbtMixedProfile<gbtRational> &p_profile,
 			     const gbtText &p_creator)
   : m_profile(gbtNfgSupport(p_profile.GetGame())), m_precision(GBT_PREC_RATIONAL),
     m_support(p_profile.Support()),
@@ -73,7 +73,7 @@ MixedSolution::MixedSolution(const MixedProfile<gbtRational> &p_profile,
   }
 }
 
-MixedSolution::MixedSolution(const MixedProfile<gbtNumber> &p_profile,
+MixedSolution::MixedSolution(const gbtMixedProfile<gbtNumber> &p_profile,
 			     const gbtText &p_creator)
   : m_profile(gbtNfgSupport(p_profile.GetGame())), m_precision(GBT_PREC_RATIONAL),
     m_support(p_profile.Support()),
@@ -202,7 +202,7 @@ void MixedSolution::LevelPrecision(void)
 // Operator overloading
 //------------------------
 
-bool MixedSolution::Equals(const MixedProfile<double> &p_profile) const
+bool MixedSolution::Equals(const gbtMixedProfile<double> &p_profile) const
 { 
   gbtNumber eps(m_epsilon);
   gEpsilon(eps, 4);   // this should be a function of m_epsilon

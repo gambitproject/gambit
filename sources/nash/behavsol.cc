@@ -39,7 +39,7 @@ private:
   gbtNumber eps;
   gbtTriState isSubgamePerfect;
   gbtPVector<int> infoset_subgames;
-  BehavProfile<gbtNumber> start;
+  gbtBehavProfile<gbtNumber> start;
   gbtList<gbtEfgNode> oldroots;
   
   void SolveSubgame(const gbtEfgGame &, const gbtEfgSupport &,
@@ -47,7 +47,7 @@ private:
   
 public:
   SubgamePerfectChecker(const gbtEfgGame &,
-			const BehavProfile<gbtNumber> &,
+			const gbtBehavProfile<gbtNumber> &,
 			const gbtNumber & epsilon);
   virtual ~SubgamePerfectChecker();
   gbtTriState IsSubgamePerfect(void) {return isSubgamePerfect;}
@@ -57,9 +57,9 @@ public:
 // Constructors, Destructor, Constructive Operators
 //----------------------------------------------------
 
-BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
+BehavSolution::BehavSolution(const gbtBehavProfile<double> &p_profile,
 			     const gbtText &p_creator)
-  : m_profile(new BehavProfile<gbtNumber>(gbtEfgSupport(p_profile.GetGame()))),
+  : m_profile(new gbtBehavProfile<gbtNumber>(gbtEfgSupport(p_profile.GetGame()))),
     m_precision(GBT_PREC_DOUBLE),
     m_support(p_profile.Support()), m_creator(p_creator),
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
@@ -85,9 +85,9 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 }
 
 
-BehavSolution::BehavSolution(const BehavProfile<gbtRational> &p_profile,
+BehavSolution::BehavSolution(const gbtBehavProfile<gbtRational> &p_profile,
 			     const gbtText &p_creator)
-  : m_profile(new BehavProfile<gbtNumber>(gbtEfgSupport(p_profile.GetGame()))),
+  : m_profile(new gbtBehavProfile<gbtNumber>(gbtEfgSupport(p_profile.GetGame()))),
     m_precision(GBT_PREC_RATIONAL), 
     m_support(p_profile.Support()), m_creator(p_creator),
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
@@ -110,9 +110,9 @@ BehavSolution::BehavSolution(const BehavProfile<gbtRational> &p_profile,
   }
 }
 
-BehavSolution::BehavSolution(const BehavProfile<gbtNumber> &p_profile, 
+BehavSolution::BehavSolution(const gbtBehavProfile<gbtNumber> &p_profile, 
 			     const gbtText &p_creator)
-  : m_profile(new BehavProfile<gbtNumber>(gbtEfgSupport(p_profile.GetGame()))),
+  : m_profile(new gbtBehavProfile<gbtNumber>(gbtEfgSupport(p_profile.GetGame()))),
     m_precision(GBT_PREC_RATIONAL),
     m_support(p_profile.Support()), m_creator(p_creator),
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
@@ -143,7 +143,7 @@ BehavSolution::BehavSolution(const BehavProfile<gbtNumber> &p_profile,
 }
 
 BehavSolution::BehavSolution(const BehavSolution &p_solution)
-  : m_profile(new BehavProfile<gbtNumber>(*p_solution.m_profile)),
+  : m_profile(new gbtBehavProfile<gbtNumber>(*p_solution.m_profile)),
     m_precision(p_solution.m_precision), 
     m_support(p_solution.m_support), m_creator(p_solution.m_creator),
     m_ANFNash(p_solution.m_ANFNash),
@@ -168,7 +168,7 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 {
   if (this != &p_solution)   {
     delete m_profile;
-    m_profile = new BehavProfile<gbtNumber>(*p_solution.m_profile);
+    m_profile = new gbtBehavProfile<gbtNumber>(*p_solution.m_profile);
     m_precision = p_solution.m_precision;
     m_support = p_solution.m_support;
     m_creator = p_solution.m_creator;
@@ -266,7 +266,7 @@ gbtTriState BehavSolution::GetSubgamePerfect(void) const
   else {
     // for complete profiles, use subgame perfect checker.  
     if (IsComplete()) {
-      BehavProfile<gbtNumber> p(*m_profile);
+      gbtBehavProfile<gbtNumber> p(*m_profile);
       SubgamePerfectChecker checker(p.GetGame(),p, Epsilon());
       gbtNullStatus status;
       checker.Solve(p.Support(), status);
@@ -360,7 +360,7 @@ void BehavSolution::LevelPrecision(void)
 // Operator overloading
 //------------------------
 
-bool BehavSolution::Equals(const BehavProfile<double> &p_profile) const
+bool BehavSolution::Equals(const gbtBehavProfile<double> &p_profile) const
 {  
   gbtNumber eps(m_epsilon);
   gEpsilon(eps, 4);  // this should be a function of m_epsilon
@@ -552,7 +552,7 @@ gbtPVector<gbtNumber> BehavSolution::GetRNFRegret(void) const
     gbtNumber pay = Payoff(pl);
     gbtNfgPlayer player = nfg.GetPlayer(pl);
     for (int st = 1; st <= player.NumStrategies(); st++) {
-      BehavProfile<gbtNumber> scratch(*m_profile);
+      gbtBehavProfile<gbtNumber> scratch(*m_profile);
       const gbtArray<int> *const actions = player.GetStrategy(st).GetBehavior();
       for (int j = 1; j <= actions->Length(); j++) {
 	int a = (*actions)[j];
@@ -625,7 +625,7 @@ gbtOutput &operator<<(gbtOutput &p_file, const BehavSolution &p_solution)
 }
 
 SubgamePerfectChecker::SubgamePerfectChecker(const gbtEfgGame &p_efg,
-					     const BehavProfile<gbtNumber> &s,
+					     const gbtBehavProfile<gbtNumber> &s,
 					     const gbtNumber & epsilon)
   : subgame_number(0), eps(epsilon),  
     isSubgamePerfect(GBT_TRISTATE_TRUE), infoset_subgames(p_efg.NumInfosets()), start(s)
@@ -658,7 +658,7 @@ void SubgamePerfectChecker::SolveSubgame(const gbtEfgGame &p_efg,
 					 gbtList<BehavSolution> &solns,
 					 gbtStatus &p_status)
 {
-  BehavProfile<gbtNumber> bp(sup);
+  gbtBehavProfile<gbtNumber> bp(sup);
   
   subgame_number++;
   

@@ -34,7 +34,7 @@
 
 class MixedSolution   {
 protected:
-  MixedProfile<gbtNumber> m_profile;
+  gbtMixedProfile<gbtNumber> m_profile;
   gbtPrecision m_precision;
   mutable gbtNfgSupport m_support;
   mutable gbtText m_creator;
@@ -53,16 +53,16 @@ protected:
 
 public:
   // CONSTRUCTORS, DESTRUCTOR, AND CONSTRUCTIVE OPERATORS
-  MixedSolution(const MixedProfile<double> &, const gbtText & = "User");
-  MixedSolution(const MixedProfile<gbtRational> &, const gbtText & = "User");
-  MixedSolution(const MixedProfile<gbtNumber> &, const gbtText & = "User");
+  MixedSolution(const gbtMixedProfile<double> &, const gbtText & = "User");
+  MixedSolution(const gbtMixedProfile<gbtRational> &, const gbtText & = "User");
+  MixedSolution(const gbtMixedProfile<gbtNumber> &, const gbtText & = "User");
   MixedSolution(const MixedSolution &);
   virtual ~MixedSolution();
 
   MixedSolution &operator=(const MixedSolution &);
 
   // OPERATOR OVERLOADING
-  bool Equals(const MixedProfile<double> &s) const;
+  bool Equals(const gbtMixedProfile<double> &s) const;
   bool operator==(const MixedSolution &) const;
   bool operator!=(const MixedSolution &S) const { return !(*this == S); } 
 
@@ -78,7 +78,7 @@ public:
   // GENERAL DATA ACCESS
   gbtNfgGame GetGame(void) const { return m_profile.GetGame(); }
   gbtPrecision Precision(void) const { return m_precision; }
-  const MixedProfile<gbtNumber> *Profile(void) const { return &m_profile; }
+  const gbtMixedProfile<gbtNumber> *Profile(void) const { return &m_profile; }
 
   // Do probabilities sum to one (within m_epsilon) for each player?)
   bool IsComplete(void) const;

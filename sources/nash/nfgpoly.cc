@@ -80,7 +80,7 @@ public:
   PolEnumParams &Parameters(void);
 
   const gbtList<MixedSolution> &GetSolutions(void) const;
-  gbtVector<gbtDouble> SolVarsFromMixedProfile(const MixedProfile<gbtNumber> &) 
+  gbtVector<gbtDouble> SolVarsFromMixedProfile(const gbtMixedProfile<gbtNumber> &) 
                                                                      const;
 
   const int PolishKnownRoot(gbtVector<gbtDouble> &) const;
@@ -144,7 +144,7 @@ int PolEnumModule::PolEnum(gbtStatus &p_status)
 
 int PolEnumModule::SaveSolutions(const gbtList<gbtVector<gbtDouble> > &list)
 {
-  MixedProfile<double> profile(support);
+  gbtMixedProfile<double> profile(support);
   int i,j,k,kk,index=0;
   double sum;
 
@@ -231,7 +231,7 @@ gPoly<gbtDouble> PolEnumModule::Prob(int p, int strat) const
 gPoly<gbtDouble> 
 PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 {
-  StrategyProfile profile(m_nfg);
+  gbtNfgContingency profile(m_nfg);
 
   gbtNfgContIterator A(support), B(support);
   A.Freeze(support.GetStrategy(i, strat1));
@@ -354,7 +354,7 @@ MixedSolution PolishEquilibrium(const gbtNfgSupport &support,
 
   /* //DEBUG
   gbtPVector<double> xx = module.SeqFormProbsFromSolVars(vec);
-  MixedProfile<gbtNumber> newsol = module.SequenceForm().ToMixed(xx);
+  gbtMixedProfile<gbtNumber> newsol = module.SequenceForm().ToMixed(xx);
 
   gout << "sol.Profile = " << *(sol.Profile()) << "\n";
   gout << "vec  = " << vec << "\n";
@@ -381,7 +381,7 @@ MixedSolution PolishEquilibrium(const gbtNfgSupport &support,
 
 
 gbtVector<gbtDouble> 
-PolEnumModule::SolVarsFromMixedProfile(const MixedProfile<gbtNumber> &sol) const
+PolEnumModule::SolVarsFromMixedProfile(const gbtMixedProfile<gbtNumber> &sol) const
 {
   int numvars(0);
 
@@ -444,7 +444,7 @@ const int PolEnumModule::PolishKnownRoot(gbtVector<gbtDouble> &point) const
 MixedSolution 
 PolEnumModule::ReturnPolishedSolution(const gbtVector<gbtDouble> &root) const
 {
-  MixedProfile<double> profile(support);
+  gbtMixedProfile<double> profile(support);
 
   int j;
   int kk=0;

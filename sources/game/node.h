@@ -36,7 +36,7 @@
 
 class Lexicon;
 
-template <class T> class BehavAssessment;
+template <class T> class gbtBehavAssessment;
 
 class gbtEfgNode {
 friend class gbtEfgGame;

@@ -41,7 +41,7 @@ wxString gbtBuildHtml(const gbtNfgGame &p_nfg,
 			      (char *) p_nfg.GetLabel());
 
   do {
-    StrategyProfile profile(iter.GetProfile());
+    gbtNfgContingency profile(iter.GetProfile());
 
     if (p_nfg.NumPlayers() > 2) {
       theHtml += wxT("<center><b>Subtable with strategies:</b></center>");

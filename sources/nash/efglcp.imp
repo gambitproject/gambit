@@ -98,7 +98,7 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
   LTableau<T> tab(A,b);
   eps = tab.Epsilon();
   
-  BehavProfile<T> profile(p_support);
+  gbtBehavProfile<T> profile(p_support);
   gbtVector<T> sol(tab.MinRow(),tab.MaxRow());
     
   gbtList<BehavSolution> solutions;
@@ -158,7 +158,7 @@ gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
   T small_num = (T)1/(T)1000;
 
   gbtVector<T> sol(B.MinRow(),B.MaxRow());
-  BehavProfile<T> profile(p_support);
+  gbtBehavProfile<T> profile(p_support);
 
   newsol =0;
   for (i = B.MinRow(); 

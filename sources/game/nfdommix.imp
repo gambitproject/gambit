@@ -376,7 +376,7 @@ bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
 #include "game/mixed.h"
 
 template <class T>
-bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
+bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
 		      bool strong, gbtOutput &tracefile)
 {
   gbtNfgSupport S = pr.Support();

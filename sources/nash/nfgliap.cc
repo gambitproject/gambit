@@ -35,23 +35,23 @@ class NFLiapFunc : public gC1Function<double>  {
 private:
   mutable long _nevals;
   gbtNfgGame m_nfg;
-  mutable MixedProfile<double> _p;
+  mutable gbtMixedProfile<double> _p;
 
   double Value(const gbtVector<double> &) const;
   bool Gradient(const gbtVector<double> &, gbtVector<double> &) const;
 
-  double LiapDerivValue(int, int, const MixedProfile<double> &) const;
+  double LiapDerivValue(int, int, const gbtMixedProfile<double> &) const;
     
 
 public:
-  NFLiapFunc(const gbtNfgGame &, const MixedProfile<double> &);
+  NFLiapFunc(const gbtNfgGame &, const gbtMixedProfile<double> &);
   virtual ~NFLiapFunc();
     
   long NumEvals(void) const  { return _nevals; }
 };
 
 NFLiapFunc::NFLiapFunc(const gbtNfgGame &p_nfg,
-		       const MixedProfile<double> &start)
+		       const gbtMixedProfile<double> &start)
   : _nevals(0L), m_nfg(p_nfg), _p(start)
 { }
 
@@ -59,7 +59,7 @@ NFLiapFunc::~NFLiapFunc()
 { }
 
 double NFLiapFunc::LiapDerivValue(int i1, int j1,
-				  const MixedProfile<double> &p) const
+				  const gbtMixedProfile<double> &p) const
 {
   int i, j;
   double x, x1, psum;
@@ -149,7 +149,7 @@ double NFLiapFunc::Value(const gbtVector<double> &v) const
 
   ((gbtVector<double> &) _p).operator=(v);
   
-  MixedProfile<double> tmp(_p);
+  gbtMixedProfile<double> tmp(_p);
   gbtPVector<double> payoff(_p);
 
   double x, result = 0.0, avg, sum;
@@ -187,7 +187,7 @@ double NFLiapFunc::Value(const gbtVector<double> &v) const
   return result;
 }
 
-static void PickRandomProfile(MixedProfile<double> &p)
+static void PickRandomProfile(gbtMixedProfile<double> &p)
 {
   double sum, tmp;
 
@@ -219,14 +219,14 @@ gbtList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 					   gbtStatus &p_status)
 {
   static const double ALPHA = .00000001;
-  MixedProfile<double> p(p_support);
+  gbtMixedProfile<double> p(p_support);
   NFLiapFunc F(p.GetGame(), p);
 
   // if starting vector not interior, perturb it towards centroid
   int kk;
   for (kk = 1; kk <= p.Length() && p[kk] > ALPHA; kk++);
   if (kk <= p.Length()) {
-    MixedProfile<double> centroid(p.Support());
+    gbtMixedProfile<double> centroid(p.Support());
     for (int k = 1; k <= p.Length(); k++) {
       p[k] = centroid[k] * ALPHA + p[k] * (1.0-ALPHA);
     }
@@ -255,7 +255,7 @@ gbtList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 	    p_status.Get();
 	  }
 	  
-	  MixedProfile<double> q(p);
+	  gbtMixedProfile<double> q(p);
 	  if (!minimizer.Iterate(F, p, fval, gradient, dx)) {
 	    break;
 	  }

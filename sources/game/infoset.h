@@ -33,7 +33,6 @@
 
 #include "math/gvector.h"
 
-class Lexicon;
 class gbtEfgInfoset;
 class gbtEfgNode;
 class gbtEfgPlayer;

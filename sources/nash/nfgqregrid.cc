@@ -96,26 +96,26 @@ that this technique is easily extended to n steps.
 // .    .  .....  .
 // .    .    .    .
 
-class MixedProfileIterator : public MixedProfile<double> {
+class MixedProfileIterator : public gbtMixedProfile<double> {
 private:
   int m_staticPlayer;
   double m_step;
-  MixedProfile<double> m_minVal, m_maxVal;
+  gbtMixedProfile<double> m_minVal, m_maxVal;
   gbtArray<double> m_sums;
 
   bool Next(int row);
 
 public:
-  MixedProfileIterator(const MixedProfile<double> &p_base,
+  MixedProfileIterator(const gbtMixedProfile<double> &p_base,
 		       double p_step, double p_size, int p_staticPlayer);
 
   bool Next(void);
 };
 
-MixedProfileIterator::MixedProfileIterator(const MixedProfile<double> &p_base,
+MixedProfileIterator::MixedProfileIterator(const gbtMixedProfile<double> &p_base,
 					   double p_step, double p_size,
 					   int p_staticPlayer)
-  : MixedProfile<double>(p_base),
+  : gbtMixedProfile<double>(p_base),
     m_staticPlayer(p_staticPlayer), m_step(p_step),
     m_minVal(p_base), m_maxVal(p_base),
     m_sums(p_base.Lengths().Length())
@@ -242,7 +242,7 @@ void QreNfgGrid::OutputHeader(const gbtNfgSupport &p_support, gbtOutput &out) co
 }
 
 void QreNfgGrid::OutputResult(gbtOutput &p_file,
-			      const MixedProfile<double> &p_profile,
+			      const gbtMixedProfile<double> &p_profile,
 			      double p_lambda, double p_objFunc) const
 {
   p_file << p_lambda << ' ' << p_objFunc << ' ';
@@ -277,7 +277,7 @@ double QreNfgGrid::Distance(const gbtVector<double> &a,
 }
 
 
-gbtVector<double> QreNfgGrid::UpdateFunc(const MixedProfile<double> &p_profile,
+gbtVector<double> QreNfgGrid::UpdateFunc(const gbtMixedProfile<double> &p_profile,
 				       int p_player, double p_lambda) const
 {
   gbtVector<double> r(p_profile.Support().NumStrats(p_player));
@@ -296,14 +296,14 @@ gbtVector<double> QreNfgGrid::UpdateFunc(const MixedProfile<double> &p_profile,
 
 
 // Note: static_player just refers to the player w/ the greatest # of strats.
-bool QreNfgGrid::CheckEqu(MixedProfile<double> &p_profile,
+bool QreNfgGrid::CheckEqu(gbtMixedProfile<double> &p_profile,
 			  double p_lambda, int p_staticPlayer,
 			  double p_tol) const
 {
   p_profile.SetRow(p_staticPlayer, 
 		   UpdateFunc(p_profile, p_staticPlayer, p_lambda));
   
-  MixedProfile<double> newProfile(p_profile);
+  gbtMixedProfile<double> newProfile(p_profile);
   for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
     if (pl != p_staticPlayer) {
       newProfile.SetRow(pl, UpdateFunc(p_profile, pl, p_lambda));
@@ -322,7 +322,7 @@ bool QreNfgGrid::CheckEqu(MixedProfile<double> &p_profile,
 //
 static void Jacobian(gbtVector<double> &p_vector, 
 		     gbtSquareMatrix<double> &p_matrix,
-		     const MixedProfile<double> &p_profile, double p_lambda)
+		     const gbtMixedProfile<double> &p_profile, double p_lambda)
 {
   gbtPVector<double> logitterms(p_profile.Lengths());
   for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
@@ -383,7 +383,7 @@ static double Norm(const gbtVector<double> &p_vector)
   return sqrt(norm);
 }
 
-static bool Polish(MixedProfile<double> &p_profile, double p_lambda)
+static bool Polish(gbtMixedProfile<double> &p_profile, double p_lambda)
 {
   gbtVector<double> f(p_profile.Length());
   gbtSquareMatrix<double> J(p_profile.Length());
@@ -443,7 +443,7 @@ void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gbtOutput &p_pxifile,
     numSteps = (int) (log(m_maxLam/m_minLam) / log(m_delLam + 1.0));
   }
 
-  MixedProfile<double> centroid(p_support);
+  gbtMixedProfile<double> centroid(p_support);
   double lambda = m_minLam;
   while (lambda <= m_maxLam) {
     step++;
@@ -460,7 +460,7 @@ void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gbtOutput &p_pxifile,
 	do {
 	  p_status.Get();
 	  if (CheckEqu(iter2, lambda, staticPlayer, m_tol2)) {
-	    MixedProfile<double> candidate(iter2);
+	    gbtMixedProfile<double> candidate(iter2);
 	    if (Polish(candidate, lambda)) {
 	      bool newsoln = true;
 	      for (int j = 1; j <= cursolns.Length(); j++) {

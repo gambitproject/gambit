@@ -27,14 +27,14 @@
 #include "efdom.h"
 #include "game/efgciter.h"
 
-efgDominanceException::efgDominanceException(const gbtText &p_description)
+gbtEfgDominanceException::gbtEfgDominanceException(const gbtText &p_description)
   : m_description(p_description)
 { }
 
-efgDominanceException::~efgDominanceException()
+gbtEfgDominanceException::~gbtEfgDominanceException()
 { }
 
-gbtText efgDominanceException::Description(void) const
+gbtText gbtEfgDominanceException::Description(void) const
 {
   return m_description;
 }
@@ -45,7 +45,7 @@ bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
 {
   gbtEfgInfoset infoset = a.GetInfoset();
   if (infoset != b.GetInfoset())
-    throw efgDominanceException
+    throw gbtEfgDominanceException
       ("Dominates(..) needs actions in same infoset.\n");
 
   const gbtEfgSupportWithActiveInfo SAct(*this);
@@ -54,7 +54,7 @@ bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
   bool equal = true;
 
   if (!conditional) {
-    EfgContIter A(*this), B(*this);
+    gbtEfgContIterator A(*this), B(*this);
     A.Freeze(player.GetId(), infoset.GetId()); 
     B.Freeze(player.GetId(), infoset.GetId());
     A.Set(a);
@@ -88,7 +88,7 @@ bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
       L += ReachableInfosets(nodelist[n], b);
       L.RemoveRedundancies();
       
-      EfgConditionalContIter A(*this,L), B(*this,L);
+      gbtEfgConditionalContIterator A(*this,L), B(*this,L);
       A.Set(a);
       B.Set(b);
       

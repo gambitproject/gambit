@@ -1229,7 +1229,7 @@ void EfgShow::OnSupportDelete(wxCommandEvent &)
 
 void EfgShow::OnProfilesNew(wxCommandEvent &)
 {
-  BehavSolution profile = BehavProfile<gbtNumber>(gbtEfgSupport(m_doc->GetEfg()));
+  BehavSolution profile = gbtBehavProfile<gbtNumber>(gbtEfgSupport(m_doc->GetEfg()));
 
   dialogEditBehav dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {

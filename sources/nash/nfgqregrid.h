@@ -39,11 +39,11 @@ private:
   bool m_fullGraph;
 
   // Auxiliary functions
-  gbtVector<double> UpdateFunc(const MixedProfile<double> &, int, double) const;
-  bool CheckEqu(MixedProfile<double> &, double, int, double) const;
+  gbtVector<double> UpdateFunc(const gbtMixedProfile<double> &, int, double) const;
+  bool CheckEqu(gbtMixedProfile<double> &, double, int, double) const;
 
   void OutputHeader(const gbtNfgSupport &, gbtOutput &) const;
-  void OutputResult(gbtOutput &, const MixedProfile<double> &,
+  void OutputResult(gbtOutput &, const gbtMixedProfile<double> &,
 		    double, double) const;
 
 protected:

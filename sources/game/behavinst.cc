@@ -30,44 +30,44 @@
 class ChanceInfoset;
 
 template<>
-gbtNumber BehavProfile<gbtNumber>::Payoff(const gbtEfgOutcome &p_outcome,
+gbtNumber gbtBehavProfile<gbtNumber>::Payoff(const gbtEfgOutcome &p_outcome,
 				      int pl) const
 { 
   return p_outcome.GetPayoff(m_efg.GetPlayer(pl));
 }
 
 template<>
-gbtRational BehavProfile<gbtRational>::Payoff(const gbtEfgOutcome &p_outcome,
+gbtRational gbtBehavProfile<gbtRational>::Payoff(const gbtEfgOutcome &p_outcome,
 					  int pl) const
 { 
   return p_outcome.GetPayoff(m_efg.GetPlayer(pl));
 }
 
 template<>
-double BehavProfile<double>::Payoff(const gbtEfgOutcome &p_outcome, int pl) const
+double gbtBehavProfile<double>::Payoff(const gbtEfgOutcome &p_outcome, int pl) const
 { 
   return p_outcome.GetPayoff(m_efg.GetPlayer(pl));
 }
 
-template class BehavProfile<double>;
-template class BehavAssessment<double>;
-template gbtOutput &operator<<(gbtOutput &, const BehavProfile<double> &);
-template gbtOutput &operator<<(gbtOutput &, const BehavAssessment<double> &);
+template class gbtBehavProfile<double>;
+template class gbtBehavAssessment<double>;
+template gbtOutput &operator<<(gbtOutput &, const gbtBehavProfile<double> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtBehavAssessment<double> &);
 
-template class BehavProfile<gbtRational>;
-template class BehavAssessment<gbtRational>;
-template gbtOutput &operator<<(gbtOutput &, const BehavProfile<gbtRational> &);
-template gbtOutput &operator<<(gbtOutput &, const BehavAssessment<gbtRational> &);
+template class gbtBehavProfile<gbtRational>;
+template class gbtBehavAssessment<gbtRational>;
+template gbtOutput &operator<<(gbtOutput &, const gbtBehavProfile<gbtRational> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtBehavAssessment<gbtRational> &);
 
-template class BehavProfile<gbtNumber>;
-template class BehavAssessment<gbtNumber>;
-template gbtOutput &operator<<(gbtOutput &, const BehavProfile<gbtNumber> &);
-template gbtOutput &operator<<(gbtOutput &, const BehavAssessment<gbtNumber> &);
+template class gbtBehavProfile<gbtNumber>;
+template class gbtBehavAssessment<gbtNumber>;
+template gbtOutput &operator<<(gbtOutput &, const gbtBehavProfile<gbtNumber> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtBehavAssessment<gbtNumber> &);
 
-template class PureBehavProfile<gbtNumber>;
+template class gbtPureBehavProfile<gbtNumber>;
 
 #include "base/glist.imp"
 
-template class gbtList<BehavProfile<double> >;
-template class gbtList<BehavProfile<gbtRational> >;
-template class gbtList<BehavProfile<gbtNumber> >;
+template class gbtList<gbtBehavProfile<double> >;
+template class gbtList<gbtBehavProfile<gbtRational> >;
+template class gbtList<gbtBehavProfile<gbtNumber> >;

@@ -27,5 +27,5 @@
 #include "gnarray.imp"
 #include "math/rational.h"
 
-template class gNArray<double>;
-template class gNArray<gbtRational>;
+template class gbtNDArray<double>;
+template class gbtNDArray<gbtRational>;

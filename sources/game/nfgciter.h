@@ -47,7 +47,7 @@ private:
   gbtNfgSupport m_support;
   gbtArray<int> m_current;
   gbtNfgGame m_nfg;
-  StrategyProfile m_profile;
+  gbtNfgContingency m_profile;
   gbtBlock<int> m_frozen, m_thawed;
   
 public:
@@ -62,7 +62,7 @@ public:
   // This only has an effect if the player is currently frozen
   int Next(gbtNfgPlayer);
   
-  const StrategyProfile &GetProfile(void) const { return m_profile; }
+  const gbtNfgContingency &GetProfile(void) const { return m_profile; }
 
   int NextContingency(void);
   

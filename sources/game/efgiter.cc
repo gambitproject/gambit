@@ -27,7 +27,7 @@
 #include "efgciter.h"
 #include "efgiter.h"
 
-EfgIter::EfgIter(gbtEfgGame p_efg)
+gbtEfgIterator::gbtEfgIterator(gbtEfgGame p_efg)
   : m_efg(p_efg), _support(p_efg),
     _profile(p_efg), _current(m_efg.NumInfosets()),
     _payoff(m_efg.NumPlayers())
@@ -35,7 +35,7 @@ EfgIter::EfgIter(gbtEfgGame p_efg)
   First();
 }
 
-EfgIter::EfgIter(const gbtEfgSupport &s)
+gbtEfgIterator::gbtEfgIterator(const gbtEfgSupport &s)
   : m_efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(m_efg.NumInfosets()),
     _payoff(m_efg.NumPlayers())
@@ -43,24 +43,24 @@ EfgIter::EfgIter(const gbtEfgSupport &s)
   First();
 }
 
-EfgIter::EfgIter(const EfgIter &it)
+gbtEfgIterator::gbtEfgIterator(const gbtEfgIterator &it)
   : m_efg(it.m_efg), _support(it._support),
     _profile(it._profile), _current(it._current),
     _payoff(m_efg.NumPlayers())
 { }
 
-EfgIter::EfgIter(const EfgContIter &it)
+gbtEfgIterator::gbtEfgIterator(const gbtEfgContIterator &it)
   : m_efg(it.m_efg), _support(it._support),
     _profile(it._profile), _current(it._current),
     _payoff(m_efg.NumPlayers())
 { }
   
 
-EfgIter::~EfgIter()
+gbtEfgIterator::~gbtEfgIterator()
 { }
 
 
-EfgIter &EfgIter::operator=(const EfgIter &it)
+gbtEfgIterator &gbtEfgIterator::operator=(const gbtEfgIterator &it)
 {
   if (this != &it && m_efg == it.m_efg)  {
     _profile = it._profile;
@@ -70,7 +70,7 @@ EfgIter &EfgIter::operator=(const EfgIter &it)
 }
 
 
-void EfgIter::First(void)
+void gbtEfgIterator::First(void)
 {
   _current = 1;
 
@@ -81,7 +81,7 @@ void EfgIter::First(void)
   }
 }
 
-int EfgIter::Next(int pl, int iset)
+int gbtEfgIterator::Next(int pl, int iset)
 {  
   if (_current(pl, iset) == _support.NumActions(pl, iset)) {
     _current(pl, iset) = 1;
@@ -94,7 +94,7 @@ int EfgIter::Next(int pl, int iset)
   return 1;
 }
 
-int EfgIter::Set(int pl, int iset, int act)
+int gbtEfgIterator::Set(int pl, int iset, int act)
 {
   if (pl <= 0 || pl > m_efg.NumPlayers() ||
       iset <= 0 || iset > m_efg.GetPlayer(pl).NumInfosets() ||
@@ -106,25 +106,25 @@ int EfgIter::Set(int pl, int iset, int act)
   return 1;
 }
 
-gbtNumber EfgIter::Payoff(int pl) const
+gbtNumber gbtEfgIterator::Payoff(int pl) const
 {
   _profile.Payoff(_payoff);
   return _payoff[pl];
 }
 
-void EfgIter::Payoff(gbtVector<gbtNumber> &payoff) const
+void gbtEfgIterator::Payoff(gbtVector<gbtNumber> &payoff) const
 {
   _profile.Payoff(payoff);
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)
     payoff[pl] = _payoff[pl];
 }
 
-void EfgIter::Dump(gbtOutput &f) const
+void gbtEfgIterator::Dump(gbtOutput &f) const
 {
   _current.Dump(f);
 }
 
-EfgContIter::EfgContIter(const gbtEfgSupport &s)
+gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &s)
   : _frozen_pl(0), _frozen_iset(0),
     m_efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
@@ -144,7 +144,7 @@ EfgContIter::EfgContIter(const gbtEfgSupport &s)
   First();
 }
 
-EfgContIter::EfgContIter(const gbtEfgSupport &s, 
+gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &s, 
 			 const gbtList<gbtEfgInfoset >&active)
   : _frozen_pl(0), _frozen_iset(0),
     m_efg(s.GetGame()), _support(s),
@@ -169,11 +169,11 @@ EfgContIter::EfgContIter(const gbtEfgSupport &s,
   First();
 }
 
-EfgContIter::~EfgContIter()
+gbtEfgContIterator::~gbtEfgContIterator()
 { }
 
 
-void EfgContIter::First(void)
+void gbtEfgContIterator::First(void)
 {
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)  {
     for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++)
@@ -185,7 +185,7 @@ void EfgContIter::First(void)
   }
 }
 
-void EfgContIter::Set(int pl, int iset, int act)
+void gbtEfgContIterator::Set(int pl, int iset, int act)
 {
   if (pl != _frozen_pl || iset != _frozen_iset)   return;
 
@@ -194,14 +194,14 @@ void EfgContIter::Set(int pl, int iset, int act)
 }
 
 
-void EfgContIter::Set(const gbtEfgAction &a)
+void gbtEfgContIterator::Set(const gbtEfgAction &a)
 {
   if (a.GetInfoset().GetPlayer().GetId() != _frozen_pl ||
       a.GetInfoset().GetId() != _frozen_iset) return;
   _profile.Set(a);
 }
 
-int EfgContIter::Next(int pl, int iset)
+int gbtEfgContIterator::Next(int pl, int iset)
 {
   if (pl != _frozen_pl || iset != _frozen_iset)   return 1;
   
@@ -217,14 +217,14 @@ int EfgContIter::Next(int pl, int iset)
 }
   
 
-void EfgContIter::Freeze(int pl, int iset)
+void gbtEfgContIterator::Freeze(int pl, int iset)
 {
   _frozen_pl = pl;
   _frozen_iset = iset;
   First();
 }
 
-int EfgContIter::NextContingency(void)
+int gbtEfgContIterator::NextContingency(void)
 {
   int pl = m_efg.NumPlayers();
   while (pl > 0 && _num_active_infosets[pl] == 0)
@@ -256,13 +256,13 @@ int EfgContIter::NextContingency(void)
   }
 }
 
-gbtNumber EfgContIter::Payoff(int pl) const
+gbtNumber gbtEfgContIterator::Payoff(int pl) const
 {
   _profile.Payoff(_payoff);
   return _payoff[pl];
 }
 
-void EfgContIter::Dump(gbtOutput &f) const
+void gbtEfgContIterator::Dump(gbtOutput &f) const
 {
   _current.Dump(f);
 }
@@ -270,7 +270,7 @@ void EfgContIter::Dump(gbtOutput &f) const
 
 
 
-EfgConditionalContIter::EfgConditionalContIter(const gbtEfgSupport &s)
+gbtEfgConditionalContIterator::gbtEfgConditionalContIterator(const gbtEfgSupport &s)
   : m_efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
     _is_active(),
@@ -289,7 +289,7 @@ EfgConditionalContIter::EfgConditionalContIter(const gbtEfgSupport &s)
   First();
 }
 
-EfgConditionalContIter::EfgConditionalContIter(const gbtEfgSupport &s, 
+gbtEfgConditionalContIterator::gbtEfgConditionalContIterator(const gbtEfgSupport &s, 
 					       const gbtList<gbtEfgInfoset> &active)
   : m_efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
@@ -313,11 +313,11 @@ EfgConditionalContIter::EfgConditionalContIter(const gbtEfgSupport &s,
   First();
 }
 
-EfgConditionalContIter::~EfgConditionalContIter()
+gbtEfgConditionalContIterator::~gbtEfgConditionalContIterator()
 { }
 
 
-void EfgConditionalContIter::First(void)
+void gbtEfgConditionalContIterator::First(void)
 {
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)  {
     for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++) {
@@ -328,18 +328,18 @@ void EfgConditionalContIter::First(void)
   }
 }
 
-void EfgConditionalContIter::Set(int pl, int iset, int act)
+void gbtEfgConditionalContIterator::Set(int pl, int iset, int act)
 {
   _current(pl, iset) = act;
   _profile.Set(_support.GetAction(pl, iset, act));
 }
 
-void EfgConditionalContIter::Set(const gbtEfgAction &a)
+void gbtEfgConditionalContIterator::Set(const gbtEfgAction &a)
 {
   _profile.Set(a);
 }
 
-int EfgConditionalContIter::Next(int pl, int iset)
+int gbtEfgConditionalContIterator::Next(int pl, int iset)
 {
   if (_current(pl, iset) == _support.NumActions(pl, iset)) {
     _current(pl, iset) = 1;
@@ -352,7 +352,7 @@ int EfgConditionalContIter::Next(int pl, int iset)
   return 1;
 }
 
-int EfgConditionalContIter::NextContingency(void)
+int gbtEfgConditionalContIterator::NextContingency(void)
 {
   int pl = m_efg.NumPlayers();
   while (pl > 0 && _num_active_infosets[pl] == 0)
@@ -385,18 +385,18 @@ int EfgConditionalContIter::NextContingency(void)
   }
 }
 
-gbtNumber EfgConditionalContIter::Payoff(int pl) const
+gbtNumber gbtEfgConditionalContIterator::Payoff(int pl) const
 {
   _profile.Payoff(_payoff);
   return _payoff[pl];
 }
 
-gbtNumber EfgConditionalContIter::Payoff(const gbtEfgNode &n, int pl) const
+gbtNumber gbtEfgConditionalContIterator::Payoff(const gbtEfgNode &n, int pl) const
 {
   return _profile.Payoff(n,pl);
 }
 
-void EfgConditionalContIter::Dump(gbtOutput &f) const
+void gbtEfgConditionalContIterator::Dump(gbtOutput &f) const
 {
   _current.Dump(f);
 }

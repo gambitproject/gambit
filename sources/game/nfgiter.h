@@ -29,7 +29,7 @@
 
 template <class T> class gbtArray;
 
-class StrategyProfile;
+class gbtNfgContingency;
 #include "nfg.h"
 #include "nfstrat.h"
 class gbtNfgContIterator;
@@ -43,7 +43,7 @@ private:
   gbtNfgSupport support;
   gbtNfgGame m_nfg;
   gbtArray<int> current_strat;
-  StrategyProfile profile;
+  gbtNfgContingency profile;
 
 public:
   NfgIter(gbtNfgGame);

@@ -58,7 +58,7 @@ template <class T> gbtNfgNashSimpdiv<T>::~gbtNfgNashSimpdiv()
 //               gbtNfgNashSimpdiv<T>: Private member functions
 //-------------------------------------------------------------------------
 
-template <class T> T gbtNfgNashSimpdiv<T>::Simplex(MixedProfile<T> &y)
+template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
 {
   gbtArray<int> ylabel(2);
   gbtRectArray<int> labels(y.Length(), 2), pi(y.Length(), 2);
@@ -292,7 +292,7 @@ template <class T> void gbtNfgNashSimpdiv<T>::update(gbtRectArray<int> &pi,
   }
 }
 
-template <class T> void gbtNfgNashSimpdiv<T>::getY(MixedProfile<T> &x,
+template <class T> void gbtNfgNashSimpdiv<T>::getY(gbtMixedProfile<T> &x,
 					    gbtPVector<T> &v, 
 					    const gbtPVector<int> &U,
 					    const gbtPVector<int> &TT,
@@ -320,7 +320,7 @@ template <class T> void gbtNfgNashSimpdiv<T>::getY(MixedProfile<T> &x,
   }
 }
 
-template <class T> void gbtNfgNashSimpdiv<T>::getnexty(MixedProfile<T> &x,
+template <class T> void gbtNfgNashSimpdiv<T>::getnexty(gbtMixedProfile<T> &x,
 						const gbtRectArray<int> &pi, 
 						const gbtPVector<int> &U,
 						int i)
@@ -360,7 +360,7 @@ template <class T> int gbtNfgNashSimpdiv<T>::get_c(int j, int h, int nstrats,
   return hh;
 }
 
-template <class T> T gbtNfgNashSimpdiv<T>::getlabel(MixedProfile<T> &yy,
+template <class T> T gbtNfgNashSimpdiv<T>::getlabel(gbtMixedProfile<T> &yy,
 					     gbtArray<int> &ylabel,
 					     gbtPVector<T> &besty)
 {
@@ -426,7 +426,7 @@ gbtNfgNashSimpdiv<T>::Solve(const gbtNfgSupport &p_support,
   }
   mingrid = ((T)(1))/mingrid;
   
-  MixedProfile<T> y(p_support);
+  gbtMixedProfile<T> y(p_support);
   ((gbtVector<T> &) y).operator=((T) 0);
 
   // In principle, this algorithm can be started from any point
@@ -451,7 +451,7 @@ gbtNfgNashSimpdiv<T>::Solve(const gbtNfgSupport &p_support,
     if(maxz<(T)(TOL))qf=1;
   }
     
-  MixedProfile<T> profile(y);
+  gbtMixedProfile<T> profile(y);
   solutions.Append(MixedSolution(profile, "Simpdiv[NFG]"));
 
   return solutions;

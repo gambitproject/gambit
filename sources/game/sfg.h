@@ -33,24 +33,24 @@
 #include "gnarray.h"
 #include "sfstrat.h"
 
-class Sfg  {
+class gbtSfgGame  {
 private:
   gbtEfgGame m_efg;
   const gbtEfgSupport &efsupp;
-  gbtArray<SFSequenceSet *> *sequences;
-  gNArray<gbtArray<gbtNumber> *> *SF;  // sequence form
+  gbtArray<gbtSfgSequenceSet *> *sequences;
+  gbtNDArray<gbtArray<gbtNumber> *> *SF;  // sequence form
   gbtArray<gbtRectArray<gbtNumber> *> *E;   // constraint matrices for sequence form.  
   gbtArray<int> seq;
   gbtPVector<int> isetFlag,isetRow;
   gbtArray<gbtList<gbtEfgInfoset> > infosets;
 
   void MakeSequenceForm(const gbtEfgNode &, gbtNumber,gbtArray<int>, 
-			gbtArray<gbtEfgInfoset>, gbtArray<Sequence *>);
+			gbtArray<gbtEfgInfoset>, gbtArray<gbtSfgSequence *>);
   void GetSequenceDims(const gbtEfgNode &);
 
 public:
-  Sfg(const gbtEfgSupport &);
-  virtual ~Sfg();  
+  gbtSfgGame(const gbtEfgSupport &);
+  virtual ~gbtSfgGame();  
 
   inline int NumSequences(int pl) const {return seq[pl];}
   inline int NumInfosets(int pl) const {return infosets[pl].Length();}
@@ -68,8 +68,8 @@ public:
   gbtEfgInfoset GetInfoset(int pl, int sequence) const;
   gbtEfgAction GetAction(int pl, int sequence) const;
   gbtEfgGame GetEfg(void) const { return m_efg; }
-  BehavProfile<gbtNumber> ToBehav(const gbtPVector<double> &x) const;
-  const Sequence* GetSequence(int pl, int seq) const {return ((*sequences)[pl])->Find(seq);}
+  gbtBehavProfile<gbtNumber> ToBehav(const gbtPVector<double> &x) const;
+  const gbtSfgSequence* GetSequence(int pl, int seq) const {return ((*sequences)[pl])->Find(seq);}
   
   void Dump(gbtOutput &) const;
 

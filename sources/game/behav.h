@@ -33,12 +33,12 @@
 #include "efstrat.h"
 
 class gbtNfgGame;
-template <class T> class MixedProfile;
+template <class T> class gbtMixedProfile;
 template <class T> class gbtPVector;
 template <class T> class gbtRectArray;
 
 //
-//  BehavProfile<T> implements a behavior profile on an Efg.  
+//  gbtBehavProfile<T> implements a behavior profile on an Efg.  
 //
 //  The class assumes that the underlying Efg does not change during the 
 //  life of the profile, and will not correctly invalidate itself if 
@@ -48,7 +48,7 @@ template <class T> class gbtRectArray;
 //  the game payoffs or probabilities may change.  
 // 
 
-template <class T> class BehavProfile : private gbtDPVector<T>  {
+template <class T> class gbtBehavProfile : private gbtDPVector<T>  {
 protected:
   gbtEfgGame m_efg;
   gbtEfgSupport m_support;
@@ -116,7 +116,7 @@ protected:
   void ComputeSolutionData(void);
 
   void BehaviorStrat(const gbtEfgGame &, int, const gbtEfgNode &);
-  void RealizationProbs(const MixedProfile<T> &, const gbtEfgGame &,
+  void RealizationProbs(const gbtMixedProfile<T> &, const gbtEfgGame &,
 			int pl, const gbtArray<int> *const, const gbtEfgNode &);
 
 public:
@@ -128,19 +128,19 @@ public:
 
   // CONSTRUCTORS, DESTRUCTOR
 
-  BehavProfile(const gbtEfgSupport &);
-  BehavProfile(const BehavProfile<T> &);
-  BehavProfile(const MixedProfile<T> &);
-  virtual ~BehavProfile();
+  gbtBehavProfile(const gbtEfgSupport &);
+  gbtBehavProfile(const gbtBehavProfile<T> &);
+  gbtBehavProfile(const gbtMixedProfile<T> &);
+  virtual ~gbtBehavProfile();
   
   // OPERATOR OVERLOADING
 
-  BehavProfile<T> &operator=(const BehavProfile<T> &);
-  inline BehavProfile<T> &operator=(const gbtVector<T> &p)
+  gbtBehavProfile<T> &operator=(const gbtBehavProfile<T> &);
+  inline gbtBehavProfile<T> &operator=(const gbtVector<T> &p)
     { Invalidate(); gbtVector<T>::operator=(p); return *this;}
 
-  bool operator==(const BehavProfile<T> &) const;
-  bool operator!=(const BehavProfile<T> &x) const
+  bool operator==(const gbtBehavProfile<T> &) const;
+  bool operator!=(const gbtBehavProfile<T> &x) const
     { return !(operator==(x)); }  
 
   // INITIALIZATION, VALIDATION
@@ -191,7 +191,7 @@ public:
   T &operator[](int a)
     { Invalidate();  return gbtArray<T>::operator[](a); }
 
-  BehavProfile<T> &operator=(const T &x)  
+  gbtBehavProfile<T> &operator=(const T &x)  
     { Invalidate();  gbtDPVector<T>::operator=(x);  return *this; }
 
   bool operator==(const gbtDPVector<T> &x) const
@@ -199,13 +199,13 @@ public:
   bool operator!=(const gbtDPVector<T> &x) const
     { return gbtDPVector<T>::operator!=(x); }
 
-  BehavProfile<T> &operator+=(const BehavProfile<T> &x)
+  gbtBehavProfile<T> &operator+=(const gbtBehavProfile<T> &x)
     { Invalidate();  gbtDPVector<T>::operator+=(x);  return *this; }
-  BehavProfile<T> &operator+=(const gbtDPVector<T> &x)
+  gbtBehavProfile<T> &operator+=(const gbtDPVector<T> &x)
     { Invalidate();  gbtDPVector<T>::operator+=(x);  return *this; }
-  BehavProfile<T> &operator-=(const BehavProfile<T> &x)
+  gbtBehavProfile<T> &operator-=(const gbtBehavProfile<T> &x)
     { Invalidate();  gbtDPVector<T>::operator-=(x);  return *this; }
-  BehavProfile<T> &operator*=(const T &x)
+  gbtBehavProfile<T> &operator*=(const T &x)
     { Invalidate();  gbtDPVector<T>::operator*=(x);  return *this; }
 
   int Length(void) const
@@ -227,7 +227,7 @@ public:
 // addition to a profile of behavioral strategies
 //
 
-template <class T> class BehavAssessment : public BehavProfile<T> {
+template <class T> class gbtBehavAssessment : public gbtBehavProfile<T> {
 protected:
   gbtDPVector<T> m_beliefs;
   
@@ -237,12 +237,12 @@ protected:
   
 public:
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
-  BehavAssessment(const gbtEfgSupport &);
-  BehavAssessment(const BehavProfile<T> &);
-  BehavAssessment(const BehavAssessment<T> &);
-  virtual ~BehavAssessment();
+  gbtBehavAssessment(const gbtEfgSupport &);
+  gbtBehavAssessment(const gbtBehavProfile<T> &);
+  gbtBehavAssessment(const gbtBehavAssessment<T> &);
+  virtual ~gbtBehavAssessment();
   
-  BehavAssessment<T> &operator=(const BehavAssessment<T> &);
+  gbtBehavAssessment<T> &operator=(const gbtBehavAssessment<T> &);
   
   // GENERAL DATA ACCESS
   bool IsAssessment(void) const { return true; }
@@ -259,8 +259,8 @@ public:
 
 
 #ifndef __BORLANDC__
-template <class T> gbtOutput &operator<<(gbtOutput &, const BehavProfile<T> &);
-template <class T> gbtOutput &operator<<(gbtOutput &, const BehavAssessment<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gbtBehavProfile<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gbtBehavAssessment<T> &);
 #endif
 
 #endif   // BEHAV_H

@@ -36,14 +36,14 @@ private:
   int t, ibar;
   T pay,d,maxz,bestz,mingrid;
 
-  T Simplex(MixedProfile<T> &);
-  T getlabel(MixedProfile<T> &yy, gbtArray<int> &, gbtPVector<T> &);
+  T Simplex(gbtMixedProfile<T> &);
+  T getlabel(gbtMixedProfile<T> &yy, gbtArray<int> &, gbtPVector<T> &);
   void update(gbtRectArray<int> &, gbtRectArray<int> &, gbtPVector<T> &,
 	      const gbtPVector<int> &, int j, int i);
-  void getY(MixedProfile<T> &x, gbtPVector<T> &, 
+  void getY(gbtMixedProfile<T> &x, gbtPVector<T> &, 
 	    const gbtPVector<int> &, const gbtPVector<int> &, 
 	    const gbtPVector<T> &, const gbtRectArray<int> &, int k);
-  void getnexty(MixedProfile<T> &x, const gbtRectArray<int> &,
+  void getnexty(gbtMixedProfile<T> &x, const gbtRectArray<int> &,
 		const gbtPVector<int> &, int i);
   int get_c(int j, int h, int nstrats, const gbtPVector<int> &);
   int get_b(int j, int h, int nstrats, const gbtPVector<int> &);

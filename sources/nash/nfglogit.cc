@@ -118,7 +118,7 @@ static void NewtonStep(gbtMatrix<double> &q, gbtMatrix<double> &b,
 static void QreLHS(const gbtNfgSupport &p_support, const gbtVector<double> &p_point,
 		   gbtVector<double> &p_lhs)
 {
-  MixedProfile<double> profile(p_support);
+  gbtMixedProfile<double> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = p_point[i];
   }
@@ -149,7 +149,7 @@ static void QreJacobian(const gbtNfgSupport &p_support,
 			gbtMatrix<double> &p_matrix)
 {
   gbtNfgGame nfg = p_support.GetGame();
-  MixedProfile<double> profile(p_support);
+  gbtMixedProfile<double> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = p_point[i];
   }
@@ -239,7 +239,7 @@ static void QreJacobian(const gbtNfgSupport &p_support,
 // positive probability.
 //
 
-static void TracePath(const MixedProfile<double> &p_start,
+static void TracePath(const gbtMixedProfile<double> &p_start,
 		      double p_startLambda, double p_maxLambda, double p_omega,
 		      gbtStatus &p_status,
 		      gbtList<MixedSolution> &p_solutions)
@@ -370,7 +370,7 @@ static void TracePath(const MixedProfile<double> &p_start,
 	  }
 	}
 
-	MixedProfile<double> newProfile(newSupport);
+	gbtMixedProfile<double> newProfile(newSupport);
 	for (int j = 1; j <= newProfile.Length(); j++) {
 	  if (j < i) {
 	    newProfile[j] = u[j];
@@ -391,7 +391,7 @@ static void TracePath(const MixedProfile<double> &p_start,
 
     x[x.Length()] = u[u.Length()];
 
-    MixedProfile<double> foo(p_start);
+    gbtMixedProfile<double> foo(p_start);
     for (int i = 1; i <= foo.Length(); i++) {
       foo[i] = x[i];
     }
@@ -418,7 +418,7 @@ gbtList<MixedSolution> gbtNfgNashLogit::Solve(const gbtNfgSupport &p_support,
 					    gbtStatus &p_status)
 {
   gbtList<MixedSolution> solutions;
-  MixedProfile<double> start(p_support);
+  gbtMixedProfile<double> start(p_support);
 
   try {
     TracePath(start, 0.0, m_maxLam, 1.0, p_status, solutions);

@@ -35,7 +35,7 @@
 
 class BehavSolution {
 protected:
-  BehavProfile<gbtNumber> *m_profile;
+  gbtBehavProfile<gbtNumber> *m_profile;
   gbtPrecision m_precision;
   mutable gbtEfgSupport m_support;
   mutable gbtText m_creator;
@@ -57,16 +57,16 @@ protected:
 
 public:
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
-  BehavSolution(const BehavProfile<double> &, const gbtText & = "User");
-  BehavSolution(const BehavProfile<gbtRational> &, const gbtText & = "User");
-  BehavSolution(const BehavProfile<gbtNumber> &, const gbtText & = "User");
+  BehavSolution(const gbtBehavProfile<double> &, const gbtText & = "User");
+  BehavSolution(const gbtBehavProfile<gbtRational> &, const gbtText & = "User");
+  BehavSolution(const gbtBehavProfile<gbtNumber> &, const gbtText & = "User");
   BehavSolution(const BehavSolution &);
   virtual ~BehavSolution();
 
   BehavSolution &operator=(const BehavSolution &);
 
   // OPERATOR OVERLOADING
-  bool Equals(const BehavProfile<double> &) const;
+  bool Equals(const gbtBehavProfile<double> &) const;
   bool operator==(const BehavSolution &) const;
   bool operator!=(const BehavSolution &p_solution) const
     { return !(*this == p_solution); }
@@ -86,7 +86,7 @@ public:
 
   // GENERAL DATA ACCESS
   gbtEfgGame GetGame(void) const { return m_profile->GetGame(); }
-  const BehavProfile<gbtNumber> *Profile(void) const { CheckIsValid(); return m_profile; }
+  const gbtBehavProfile<gbtNumber> *Profile(void) const { CheckIsValid(); return m_profile; }
   gbtPrecision Precision(void) const { return m_precision; }
 
   // Do probabilities sum to one (within m_epsilon) for each infoset?

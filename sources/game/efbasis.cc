@@ -36,7 +36,7 @@
 #include "numerical/lpsolve.h"   
 
 class EFNodeArrays   {
-friend class EFNodeSet;
+friend class gbtEfgNodeSet;
 protected:
   gbtBlock<gbtEfgNode> nodes;
   
@@ -90,7 +90,7 @@ bool EFNodeArrays::operator==(const EFNodeArrays &a) const
   return (nodes == a.nodes);
 }
 
-class EFNodeSet{
+class gbtEfgNodeSet{
 
 protected:
   gbtEfgPlayer efp;
@@ -101,13 +101,13 @@ public:
   // Constructors, Destructor, operators
   //----------------------------------------
 
-//  EFNodeSet();
-  EFNodeSet(const EFNodeSet &);
-  EFNodeSet(const gbtEfgPlayer &);
-  virtual ~EFNodeSet();
+//  gbtEfgNodeSet();
+  gbtEfgNodeSet(const gbtEfgNodeSet &);
+  gbtEfgNodeSet(const gbtEfgPlayer &);
+  virtual ~gbtEfgNodeSet();
 
-  EFNodeSet &operator=(const EFNodeSet &);
-  bool operator==(const EFNodeSet &s) const;
+  gbtEfgNodeSet &operator=(const gbtEfgNodeSet &);
+  bool operator==(const gbtEfgNodeSet &s) const;
 
   //--------------------
   // Member Functions
@@ -140,19 +140,19 @@ public:
   // Number of Nodes in a particular infoset
   int NumNodes(int iset) const;
 
-  // return the player of the EFNodeSet
+  // return the player of the gbtEfgNodeSet
   gbtEfgPlayer GetPlayer(void) const;
 
-  // checks for a valid EFNodeSet
+  // checks for a valid gbtEfgNodeSet
   bool IsValid(void) const;
 
 };
 
 //--------------------------------------------------
-// EFNodeSet: Constructors, Destructor, operators
+// gbtEfgNodeSet: Constructors, Destructor, operators
 //--------------------------------------------------
 
-EFNodeSet::EFNodeSet(const gbtEfgPlayer &p)
+gbtEfgNodeSet::gbtEfgNodeSet(const gbtEfgPlayer &p)
   : efp(p), infosets(p.NumInfosets())
 {
   for (int i = 1; i <= p.NumInfosets(); i++) {
@@ -164,7 +164,7 @@ EFNodeSet::EFNodeSet(const gbtEfgPlayer &p)
   }
 }
 
-EFNodeSet::EFNodeSet( const EFNodeSet &s )
+gbtEfgNodeSet::gbtEfgNodeSet( const gbtEfgNodeSet &s )
 : infosets(s.infosets.Length())
 {
   efp = s.efp;
@@ -173,13 +173,13 @@ EFNodeSet::EFNodeSet( const EFNodeSet &s )
   }
 }
 
-EFNodeSet::~EFNodeSet()
+gbtEfgNodeSet::~gbtEfgNodeSet()
 { 
   for (int i = 1; i <= infosets.Length(); i++)
     delete infosets[i];
 }
 
-EFNodeSet &EFNodeSet::operator=(const EFNodeSet &s)
+gbtEfgNodeSet &gbtEfgNodeSet::operator=(const gbtEfgNodeSet &s)
 {
   if (this != &s && efp == s.efp) {
     for (int i = 1; i<= infosets.Length(); i++)  {
@@ -190,7 +190,7 @@ EFNodeSet &EFNodeSet::operator=(const EFNodeSet &s)
   return *this;
 }
 
-bool EFNodeSet::operator==(const EFNodeSet &s) const
+bool gbtEfgNodeSet::operator==(const gbtEfgNodeSet &s) const
 {
   if (infosets.Length() != s.infosets.Length() ||
       efp != s.efp)
@@ -203,31 +203,31 @@ bool EFNodeSet::operator==(const EFNodeSet &s) const
 }
 
 //------------------------------------------
-// EFNodeSet: Member functions 
+// gbtEfgNodeSet: Member functions 
 //------------------------------------------
 
 // Append a Node to a particular infoset;
-void EFNodeSet::AddNode(int iset, const gbtEfgNode &s)
+void gbtEfgNodeSet::AddNode(int iset, const gbtEfgNode &s)
 { 
   infosets[iset]->nodes.Append(s); 
 }
 
 // Insert a Node  to a particular infoset at a particular place;
-void EFNodeSet::AddNode(int iset, const gbtEfgNode &s, int index) 
+void gbtEfgNodeSet::AddNode(int iset, const gbtEfgNode &s, int index) 
 { 
   infosets[iset]->nodes.Insert(s,index); 
 }
 
 // Remove a Node from infoset iset at int i, 
 // returns the removed Infoset pointer
-gbtEfgNode EFNodeSet::RemoveNode(int iset, int i) 
+gbtEfgNode gbtEfgNodeSet::RemoveNode(int iset, int i) 
 { 
   return (infosets[iset]->nodes.Remove(i)); 
 }
 
 // Removes a Node from infoset iset . Returns true if the 
 //Node was successfully removed, false otherwise.
-bool EFNodeSet::RemoveNode(int iset, const gbtEfgNode &s)
+bool gbtEfgNodeSet::RemoveNode(int iset, const gbtEfgNode &s)
 { 
   int t = infosets[iset]->nodes.Find(s); 
   if (t>0) infosets[iset]->nodes.Remove(t); 
@@ -235,30 +235,30 @@ bool EFNodeSet::RemoveNode(int iset, const gbtEfgNode &s)
 } 
 
 // Get a Node
-gbtEfgNode EFNodeSet::GetNode(int iset, int index)
+gbtEfgNode gbtEfgNodeSet::GetNode(int iset, int index)
 {
   return (infosets[iset]->nodes)[index];
 }
 
 // Number of Nodes in a particular infoset
-int EFNodeSet::NumNodes(int iset) const
+int gbtEfgNodeSet::NumNodes(int iset) const
 {
   return (infosets[iset]->nodes.Length());
 }
 
-// Return the player of this EFNodeSet
-gbtEfgPlayer EFNodeSet::GetPlayer(void) const
+// Return the player of this gbtEfgNodeSet
+gbtEfgPlayer gbtEfgNodeSet::GetPlayer(void) const
 {
   return efp;
 }
 
-int EFNodeSet::Find(const gbtEfgNode &n) const
+int gbtEfgNodeSet::Find(const gbtEfgNode &n) const
 {
   return (infosets[n.GetInfoset().GetId()]->nodes.Find(n));
 }
 
-// checks for a valid EFNodeSet
-bool EFNodeSet::IsValid(void) const
+// checks for a valid gbtEfgNodeSet
+bool gbtEfgNodeSet::IsValid(void) const
 {
   if (infosets.Length() != efp.NumInfosets())   return false;
 
@@ -269,37 +269,37 @@ bool EFNodeSet::IsValid(void) const
 }
 
 //--------------------------------------------------
-// EFBasis: Constructors, Destructors, Operators
+// gbtEfgBasis: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-EFBasis::EFBasis(const gbtEfgGame &p_efg) 
+gbtEfgBasis::gbtEfgBasis(const gbtEfgGame &p_efg) 
   : gbtEfgSupport(p_efg), nodes(p_efg.NumPlayers())
 {
   for (int i = 1; i <= nodes.Length(); i++) {
-    nodes[i] = new EFNodeSet(p_efg.GetPlayer(i));
+    nodes[i] = new gbtEfgNodeSet(p_efg.GetPlayer(i));
   }
 }
 
-EFBasis::EFBasis(const EFBasis &b)
+gbtEfgBasis::gbtEfgBasis(const gbtEfgBasis &b)
   : gbtEfgSupport(b), nodes(b.nodes.Length())
 {
   for (int i = 1; i <= nodes.Length(); i++)
-    nodes[i] = new EFNodeSet(*(b.nodes[i]));
+    nodes[i] = new gbtEfgNodeSet(*(b.nodes[i]));
 }
 
-EFBasis::~EFBasis()
+gbtEfgBasis::~gbtEfgBasis()
 {
   for (int i = 1; i <= nodes.Length(); i++)
     delete nodes[i];
 }
 
-EFBasis &EFBasis::operator=(const EFBasis &b)
+gbtEfgBasis &gbtEfgBasis::operator=(const gbtEfgBasis &b)
 {
   gbtEfgSupport::operator=(b);
   return *this;
 }
 
-bool EFBasis::operator==(const EFBasis &b) const
+bool gbtEfgBasis::operator==(const gbtEfgBasis &b) const
 {
   if( (*this).gbtEfgSupport::operator!=(b)) return false;
 
@@ -310,36 +310,36 @@ bool EFBasis::operator==(const EFBasis &b) const
   return (i > nodes.Length());
 }
 
-bool EFBasis::operator!=(const EFBasis &b) const
+bool gbtEfgBasis::operator!=(const gbtEfgBasis &b) const
 {
   return !(*this == b);
 }
 
 //-----------------------------
-// EFBasis: Member Functions 
+// gbtEfgBasis: Member Functions 
 //-----------------------------
 
-int EFBasis::NumNodes(const gbtEfgInfoset &infoset) const
+int gbtEfgBasis::NumNodes(const gbtEfgInfoset &infoset) const
 {
   return nodes[infoset.GetPlayer().GetId()]->NumNodes(infoset.GetId());
 }
 
-int EFBasis::NumNodes(int pl, int iset) const
+int gbtEfgBasis::NumNodes(int pl, int iset) const
 {
   return nodes[pl]->NumNodes(iset);
 }
 
-const gbtArray<gbtEfgNode> &EFBasis::Nodes(int pl, int iset) const
+const gbtArray<gbtEfgNode> &gbtEfgBasis::Nodes(int pl, int iset) const
 {
   return nodes[pl]->NodeList(iset);
 }
 
-gbtEfgNode EFBasis::GetNode(const gbtEfgInfoset &infoset, int index) const
+gbtEfgNode gbtEfgBasis::GetNode(const gbtEfgInfoset &infoset, int index) const
 {
   return nodes[infoset.GetPlayer().GetId()]->GetNode(infoset.GetId(), index);
 }
 
-int EFBasis::Find(const gbtEfgNode &n) const
+int gbtEfgBasis::Find(const gbtEfgNode &n) const
 {
   if (n.GetInfoset().GetGame() != m_efg)   return 0;
 
@@ -348,7 +348,7 @@ int EFBasis::Find(const gbtEfgNode &n) const
   return nodes[pl]->Find(n);
 }
 
-bool EFBasis::IsValid(void) const
+bool gbtEfgBasis::IsValid(void) const
 {
   if(!(*this).gbtEfgSupport::HasActiveActionsAtAllInfosets()) return false;
   if (nodes.Length() != m_efg.NumPlayers())   return false;
@@ -358,7 +358,7 @@ bool EFBasis::IsValid(void) const
   return true;
 }
 
-gbtPVector<int> EFBasis::NumNodes(void) const
+gbtPVector<int> gbtEfgBasis::NumNodes(void) const
 {
   gbtArray<int> foo(m_efg.NumPlayers());
   int i;
@@ -373,7 +373,7 @@ gbtPVector<int> EFBasis::NumNodes(void) const
   return bar;
 }  
 
-bool EFBasis::RemoveNode(const gbtEfgNode &n)
+bool gbtEfgBasis::RemoveNode(const gbtEfgNode &n)
 {
   gbtEfgInfoset infoset = n.GetInfoset();
   gbtEfgPlayer player = infoset.GetPlayer();
@@ -381,7 +381,7 @@ bool EFBasis::RemoveNode(const gbtEfgNode &n)
   return nodes[player.GetId()]->RemoveNode(infoset.GetId(), n);
 }
 
-bool EFBasis::IsReachable(gbtEfgNode n) const
+bool gbtEfgBasis::IsReachable(gbtEfgNode n) const
 {
   if (n == m_efg.GetRoot()) {
     return true;
@@ -398,7 +398,7 @@ bool EFBasis::IsReachable(gbtEfgNode n) const
   return true;
 }
 
-void EFBasis::AddNode(const gbtEfgNode &n)
+void gbtEfgBasis::AddNode(const gbtEfgNode &n)
 {
   gbtEfgInfoset infoset = n.GetInfoset();
   gbtEfgPlayer player = infoset.GetPlayer();
@@ -406,9 +406,9 @@ void EFBasis::AddNode(const gbtEfgNode &n)
   nodes[player.GetId()]->AddNode(infoset.GetId(), n);
 }
 
-bool EFBasis::IsConsistent(void) const
+bool gbtEfgBasis::IsConsistent(void) const
 {
-  bigbasis = new EFBasis(m_efg);
+  bigbasis = new gbtEfgBasis(m_efg);
   nodeIndex = new gbtDPVector<int>(bigbasis->NumNodes());
   actIndex = new gbtDPVector<int>(bigbasis->NumActions());
   MakeIndices();
@@ -460,7 +460,7 @@ bool EFBasis::IsConsistent(void) const
   return flag;
 }
 
-void EFBasis::MakeIndices(void) const
+void gbtEfgBasis::MakeIndices(void) const
 {
   int i,j;
   int ind = 1;
@@ -491,7 +491,7 @@ void EFBasis::MakeIndices(void) const
   MakeRowIndices();
 }
 
-void EFBasis::MakeRowIndices(void) const
+void gbtEfgBasis::MakeRowIndices(void) const
 {
   int i,j,k,kk;
 
@@ -520,7 +520,7 @@ void EFBasis::MakeRowIndices(void) const
     }
 }
 
-void EFBasis::MakeAb(void) const
+void gbtEfgBasis::MakeAb(void) const
 {
   int i,j,k,kk;
   int eq = num_ineqs+1;
@@ -552,28 +552,28 @@ void EFBasis::MakeAb(void) const
     }
 }
 
-int EFBasis::Col(const gbtEfgAction &p_action) const
+int gbtEfgBasis::Col(const gbtEfgAction &p_action) const
 {
   gbtEfgInfoset iset = p_action.GetInfoset();
   return (*actIndex)(iset.GetPlayer().GetId(), iset.GetId(),
 		     (*bigbasis).gbtEfgSupport::GetIndex(p_action));
 }
 
-int EFBasis::Col(const gbtEfgNode &n) const
+int gbtEfgBasis::Col(const gbtEfgNode &n) const
 {
   gbtEfgInfoset iset = n.GetInfoset();
   return (*nodeIndex)(iset.GetPlayer().GetId(), iset.GetId(),
 		      (*bigbasis).Find(n));
 }
 
-void EFBasis::AddEquation1(int row, const gbtEfgAction &p_action) const
+void gbtEfgBasis::AddEquation1(int row, const gbtEfgAction &p_action) const
 {
   if(Col(p_action))
     (*A)(row,Col(p_action)) = -1.0;
   (*b)[row] = -1.0;
 }
 
-void EFBasis::AddEquation2(int row, gbtEfgNode n) const
+void gbtEfgBasis::AddEquation2(int row, gbtEfgNode n) const
 {
   if(Col(n))
     (*A)(row,Col(n)) = 1.0;
@@ -590,7 +590,7 @@ void EFBasis::AddEquation2(int row, gbtEfgNode n) const
   }
 }
 
-void EFBasis::AddEquation3(int row, const gbtEfgNode &n1, 
+void gbtEfgBasis::AddEquation3(int row, const gbtEfgNode &n1, 
 			   const gbtEfgNode &n2) const
 {
   if(Col(n1))
@@ -599,7 +599,7 @@ void EFBasis::AddEquation3(int row, const gbtEfgNode &n1,
     (*A)(row,Col(n2)) = -1.0;
 }
 
-void EFBasis::AddEquation4(int row, const gbtEfgNode &n1,
+void gbtEfgBasis::AddEquation4(int row, const gbtEfgNode &n1,
 			   const gbtEfgNode &n2) const
 {
   if(Col(n1))
@@ -609,7 +609,7 @@ void EFBasis::AddEquation4(int row, const gbtEfgNode &n1,
   (*b)[row] = -1.0;
 }
 
-void EFBasis::GetConsistencySolution(const gbtVector<double> &x) const
+void gbtEfgBasis::GetConsistencySolution(const gbtVector<double> &x) const
 {
   gbtDPVector<int> nodes(bigbasis->NumNodes());
   gbtDPVector<int> acts(bigbasis->NumActions());
@@ -629,7 +629,7 @@ void EFBasis::GetConsistencySolution(const gbtVector<double> &x) const
   //  gout << "\nnodes: " << nodes;
 }
 
-void EFBasis::Dump(gbtOutput& s) const
+void gbtEfgBasis::Dump(gbtOutput& s) const
 {
   int numplayers;
   int i;
@@ -658,13 +658,13 @@ void EFBasis::Dump(gbtOutput& s) const
   s << "} ";
 }
 
-gbtOutput& operator<<(gbtOutput&s, const EFBasis& e)
+gbtOutput& operator<<(gbtOutput&s, const gbtEfgBasis& e)
 {
   e.Dump(s);
   return s;
 }
 
-template class gbtArray<EFNodeSet *>;
+template class gbtArray<gbtEfgNodeSet *>;
 template class gbtArray<EFNodeArrays *>;
 template class gbtDPVector<int>;
 #ifndef __BCC55__
