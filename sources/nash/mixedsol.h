@@ -28,7 +28,7 @@
 #define MIXEDSOL_H
 
 #include "base/base.h"
-#include "math/gnumber.h"
+#include "math/gmath.h"
 #include "game/nfg.h"
 #include "algutils.h"  // needed for gFact
 
@@ -56,6 +56,9 @@ public:
   MixedSolution(const gbtMixedProfile<double> &, const gbtText & = "User");
   MixedSolution(const gbtMixedProfile<gbtRational> &, const gbtText & = "User");
   MixedSolution(const gbtMixedProfile<gbtNumber> &, const gbtText & = "User");
+#if GBT_WITH_MP_FLOAT
+  MixedSolution(const gbtMixedProfile<gbtMPFloat> &, const gbtText & = "User");
+#endif // GBT_WITH_MP_FLOAT
   MixedSolution(const MixedSolution &);
   virtual ~MixedSolution();
 

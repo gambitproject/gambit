@@ -98,6 +98,33 @@ MixedSolution::MixedSolution(const gbtMixedProfile<gbtNumber> &p_profile,
   gEpsilon(m_epsilon);
 }
 
+#if GBT_WITH_MP_FLOAT
+//
+// Since gbtNumber does not (yet) incorporate multiple-precision,
+// cast the entries of profile down to machine double.
+//
+MixedSolution::MixedSolution(const gbtMixedProfile<gbtMPFloat> &p_profile,
+			     const gbtText &p_creator)
+  : m_profile(gbtNfgSupport(p_profile.GetGame())),
+    m_precision(GBT_PREC_DOUBLE),
+    m_support(p_profile.Support()), 
+    m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
+    m_liapValue(), m_epsilon(0.0), m_qreLambda(-1), m_qreValue(-1),
+    m_revision(p_profile.GetGame().RevisionNumber())
+{
+  gEpsilon(m_epsilon);
+  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
+    for (int st = 1; st <= GetGame().NumStrats(pl); st++) {
+      int index = p_profile.Support().GetIndex(GetGame().GetPlayer(pl).GetStrategy(st));
+      if (index > 0)
+	m_profile(pl, st) = (double) p_profile(pl, index);
+      else
+	m_profile(pl, st) = gbtNumber(0.0);
+    }
+  }
+}
+#endif // GBT_WITH_MP_FLOAT
+
 MixedSolution::MixedSolution(const MixedSolution &p_solution)
   : m_profile(p_solution.m_profile), m_precision(p_solution.m_precision),
     m_support(p_solution.m_support), m_creator(p_solution.m_creator), 

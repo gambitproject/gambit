@@ -27,6 +27,7 @@
 #include "gvector.imp"
 #include "gnumber.h"
 #include "complex.h"
+#include "mpfloat.h"
 
 template class gbtVector<int>;
 template class gbtVector<long>;
@@ -36,13 +37,18 @@ template class gbtVector<gbtRational>;
 template class gbtVector<gbtComplex>;
 template class gbtVector<gbtNumber>;
 
-template gbtOutput & operator<< (gbtOutput&, const gbtVector<int>&);
-template gbtOutput & operator<< (gbtOutput&, const gbtVector<long>&);
-template gbtOutput & operator<< (gbtOutput&, const gbtVector<double>&);
-template gbtOutput & operator<< (gbtOutput&, const gbtVector<gbtInteger>&);
-template gbtOutput & operator<< (gbtOutput&, const gbtVector<gbtRational>&);
-template gbtOutput & operator<< (gbtOutput&, const gbtVector<gbtComplex>&);
-template gbtOutput & operator<< (gbtOutput&, const gbtVector<gbtNumber>&);
+template gbtOutput &operator<<(gbtOutput &, const gbtVector<int> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtVector<long> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtVector<double> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtVector<gbtInteger> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtVector<gbtRational> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtVector<gbtComplex> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtVector<gbtNumber> &);
+
+#if GBT_WITH_MP_FLOAT
+template class gbtVector<gbtMPFloat>;
+template gbtOutput &operator<<(gbtOutput &, const gbtVector<gbtMPFloat> &);
+#endif  // GBT_WITH_MP_FLOAT
 
 template gbtVector<gbtDouble> TogDouble(const gbtVector<gbtRational>&);
 template gbtVector<gbtDouble> TogDouble(const gbtVector<double>&);

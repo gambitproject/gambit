@@ -28,6 +28,7 @@
 #define GMATH_H
 
 #include "gnumber.h"
+#include "mpfloat.h"
 
 template <class T> class gbtArray;
 

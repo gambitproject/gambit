@@ -27,11 +27,20 @@
 #include "gsmatrix.imp"
 #include "rational.h"
 #include "double.h"
+#include "mpfloat.h"
 
 template class gbtSquareMatrix<double>;
 template class gbtSquareMatrix<gbtDouble>;
 template class gbtSquareMatrix<gbtRational>;
 
-template gbtOutput & operator<< (gbtOutput&, const gbtSquareMatrix<double>&);
-template gbtOutput & operator<< (gbtOutput&, const gbtSquareMatrix<gbtDouble>&);
-template gbtOutput & operator<< (gbtOutput&, const gbtSquareMatrix<gbtRational>&);
+template gbtOutput &operator<<(gbtOutput &, const gbtSquareMatrix<double> &);
+template gbtOutput &operator<<(gbtOutput &,
+			       const gbtSquareMatrix<gbtDouble> &);
+template gbtOutput &operator<<(gbtOutput &,
+			       const gbtSquareMatrix<gbtRational> &);
+
+#if GBT_WITH_MP_FLOAT
+template class gbtSquareMatrix<gbtMPFloat>;
+template gbtOutput &operator<<(gbtOutput &,
+			       const gbtSquareMatrix<gbtMPFloat> &);
+#endif // GBT_WITH_MP_FLOAT

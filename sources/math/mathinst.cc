@@ -30,6 +30,7 @@
 #include "base/grarray.imp"
 #include "base/grblock.imp"
 #include "gnumber.h"
+#include "mpfloat.h"
 #include "complex.h"
 
 template class gbtArray<gbtInteger>;
@@ -39,6 +40,11 @@ template class gbtArray<gbtNumber>;
 template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtInteger> &);
 template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtRational> &);
 template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtText> &);
+
+#if GBT_WITH_MP_FLOAT
+template class gbtArray<gbtMPFloat>;
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtMPFloat> &);
+#endif  // GBT_WITH_MP_FLOAT
 
 template class gbtBlock<gbtRational>;
 template class gbtBlock<gbtNumber>;
@@ -54,5 +60,10 @@ template class gbtRectArray<gbtNumber>;
 template gbtOutput &operator<<(gbtOutput &, const gbtRectArray<gbtInteger> &);
 template gbtOutput &operator<<(gbtOutput &, const gbtRectArray<gbtRational> &);
 template gbtOutput &operator<<(gbtOutput &, const gbtRectArray<gbtNumber> &);
+
+#if GBT_WITH_MP_FLOAT
+template class gbtRectArray<gbtMPFloat>;
+template gbtOutput &operator<<(gbtOutput &, const gbtRectArray<gbtMPFloat> &);
+#endif  // GBT_WITH_MP_FLOAT
 
 template class gbtRectBlock<gbtNumber>;

@@ -47,33 +47,38 @@
 
 inline double sqr(double x) { return x*x; }
 
-static void Givens(gbtMatrix<double> &b, gbtMatrix<double> &q,
-		   double &c1, double &c2, int l1, int l2, int l3)
+#if GBT_WITH_MP_FLOAT
+inline double sqr(const gbtMPFloat &x) { return x*x; }
+#endif  // GBT_WITH_MP_FLOAT
+
+template <class T>
+static void Givens(gbtMatrix<T> &b, gbtMatrix<T> &q,
+		   T &c1, T &c2, int l1, int l2, int l3)
 {
   if (fabs(c1) + fabs(c2) == 0.0) {
     return;
   }
 
-  double sn;
+  T sn;
   if (fabs(c2) >= fabs(c1)) {
     sn = sqrt(1.0 + sqr(c1/c2)) * fabs(c2);
   }
   else {
     sn = sqrt(1.0 + sqr(c2/c1)) * fabs(c1);
   }
-  double s1 = c1/sn;
-  double s2 = c2/sn;
+  T s1 = c1/sn;
+  T s2 = c2/sn;
 
   for (int k = 1; k <= q.NumColumns(); k++) {
-    double sv1 = q(l1, k);
-    double sv2 = q(l2, k);
+    T sv1 = q(l1, k);
+    T sv2 = q(l2, k);
     q(l1, k) = s1 * sv1 + s2 * sv2;
     q(l2, k) = -s2 * sv1 + s1 * sv2;
   }
 
   for (int k = l3; k <= b.NumColumns(); k++) {
-    double sv1 = b(l1, k);
-    double sv2 = b(l2, k);
+    T sv1 = b(l1, k);
+    T sv2 = b(l2, k);
     b(l1, k) = s1 * sv1 + s2 * sv2;
     b(l2, k) = -s2 * sv1 + s1 * sv2;
   }
@@ -82,7 +87,16 @@ static void Givens(gbtMatrix<double> &b, gbtMatrix<double> &q,
   c2 = 0.0;
 }
 
-static void QRDecomp(gbtMatrix<double> &b, gbtMatrix<double> &q)
+template static void Givens(gbtMatrix<double> &, gbtMatrix<double> &,
+			    double &, double &, int, int, int);
+#if GBT_WITH_MP_FLOAT
+template static void Givens(gbtMatrix<gbtMPFloat> &, gbtMatrix<gbtMPFloat> &,
+			    gbtMPFloat &, gbtMPFloat &, int, int, int);
+#endif  // GBT_WITH_MP_FLOAT
+
+
+template <class T>
+static void QRDecomp(gbtMatrix<T> &b, gbtMatrix<T> &q)
 {
   q.MakeIdent();
   for (int m = 1; m <= b.NumColumns(); m++) {
@@ -92,9 +106,16 @@ static void QRDecomp(gbtMatrix<double> &b, gbtMatrix<double> &q)
   }
 }
 
-static void NewtonStep(gbtMatrix<double> &q, gbtMatrix<double> &b,
-		       gbtVector<double> &u, gbtVector<double> &y,
-		       double &d)
+template static void QRDecomp(gbtMatrix<double> &, gbtMatrix<double> &);
+#if GBT_WITH_MP_FLOAT
+template static void QRDecomp(gbtMatrix<gbtMPFloat> &, 
+			      gbtMatrix<gbtMPFloat> &);
+#endif  // GBT_WITH_MP_FLOAT
+
+template <class T>
+static void NewtonStep(gbtMatrix<T> &q, gbtMatrix<T> &b,
+		       gbtVector<T> &u, gbtVector<T> &y,
+		       T &d)
 {
   for (int k = 1; k <= b.NumColumns(); k++) {
     for (int l = 1; l <= k - 1; l++) {
@@ -105,7 +126,7 @@ static void NewtonStep(gbtMatrix<double> &q, gbtMatrix<double> &b,
 
   d = 0.0;
   for (int k = 1; k <= b.NumRows(); k++) {
-    double s = 0.0;
+    T s = 0.0;
     for (int l = 1; l <= b.NumColumns(); l++) {
       s += q(l, k) * y[l];
     }
@@ -115,16 +136,29 @@ static void NewtonStep(gbtMatrix<double> &q, gbtMatrix<double> &b,
   d = sqrt(d);
 }
 
-static void QreLHS(const gbtNfgSupport &p_support, const gbtVector<double> &p_point,
-		   gbtVector<double> &p_lhs)
+template static void NewtonStep(gbtMatrix<double> &, gbtMatrix<double> &,
+				gbtVector<double> &, gbtVector<double> &,
+				double &);
+#if GBT_WITH_MP_FLOAT
+template static void NewtonStep(gbtMatrix<gbtMPFloat> &,
+				gbtMatrix<gbtMPFloat> &,
+				gbtVector<gbtMPFloat> &,
+				gbtVector<gbtMPFloat> &,
+				gbtMPFloat &);
+#endif // GBT_WITH_MP_FLOAT 
+
+template <class T>
+static void QreLHS(const gbtNfgSupport &p_support,
+		   const gbtVector<T> &p_point,
+		   gbtVector<T> &p_lhs)
 {
-  gbtMixedProfile<double> profile(p_support);
+  gbtMixedProfile<T> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = p_point[i];
   }
-  double lambda = p_point[p_point.Length()];
+  T lambda = p_point[p_point.Length()];
   
-  p_lhs = 0.0;
+  p_lhs = (T) 0.0;
   int rowno = 0;
 
   for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
@@ -144,12 +178,21 @@ static void QreLHS(const gbtNfgSupport &p_support, const gbtVector<double> &p_po
   }
 }
 
+template static void QreLHS(const gbtNfgSupport &, const gbtVector<double> &,
+			    gbtVector<double> &);
+#if GBT_WITH_MP_FLOAT
+template static void QreLHS(const gbtNfgSupport &, 
+			    const gbtVector<gbtMPFloat> &,
+			    gbtVector<gbtMPFloat> &);
+#endif // GBT_WITH_MP_FLOAT
+
+template <class T>
 static void QreJacobian(const gbtNfgSupport &p_support,
-			const gbtVector<double> &p_point,
-			gbtMatrix<double> &p_matrix)
+			const gbtVector<T> &p_point,
+			gbtMatrix<T> &p_matrix)
 {
   gbtNfgGame nfg = p_support.GetGame();
-  gbtMixedProfile<double> profile(p_support);
+  gbtMixedProfile<T> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = p_point[i];
   }
@@ -204,6 +247,15 @@ static void QreJacobian(const gbtNfgSupport &p_support,
   }
 }
 
+template static void QreJacobian(const gbtNfgSupport &p_support,
+				 const gbtVector<double> &p_point,
+				 gbtMatrix<double> &p_matrix);
+#if GBT_WITH_MP_FLOAT
+template static void QreJacobian(const gbtNfgSupport &p_support,
+				 const gbtVector<gbtMPFloat> &p_point,
+				 gbtMatrix<gbtMPFloat> &p_matrix);
+#endif // GBT_WITH_MP_FLOAT
+
 //
 // TracePath does the real work of tracing a branch of the correspondence
 //
@@ -239,38 +291,39 @@ static void QreJacobian(const gbtNfgSupport &p_support,
 // positive probability.
 //
 
-static void TracePath(const gbtMixedProfile<double> &p_start,
-		      double p_startLambda, double p_maxLambda, double p_omega,
+template <class T>
+static void TracePath(const gbtMixedProfile<T> &p_start,
+		      T p_startLambda, T p_maxLambda, T p_omega,
 		      gbtStatus &p_status,
 		      gbtList<MixedSolution> &p_solutions)
 {
   const int c_maxIters = 5000;     // maximum number of iterations
-  const double c_tol = 1.0e-4;     // tolerance for corrector iteration
-  const double c_maxDecel = 1.1;   // maximal deceleration factor
-  const double c_maxDist = 0.4;    // maximal distance to curve
-  const double c_maxContr = 0.6;   // maximal contraction rate in corrector
-  const double c_eta = 0.1;        // perturbation to avoid cancellation
+  const T c_tol = 1.0e-4;     // tolerance for corrector iteration
+  const T c_maxDecel = 1.1;   // maximal deceleration factor
+  const T c_maxDist = 0.4;    // maximal distance to curve
+  const T c_maxContr = 0.6;   // maximal contraction rate in corrector
+  const T c_eta = 0.1;        // perturbation to avoid cancellation
                                    // in calculating contraction rate
-  double h = .03;                  // initial stepsize
-  const double c_hmin = 1.0e-5;    // minimal stepsize
+  T h = .03;                  // initial stepsize
+  const T c_hmin = 1.0e-5;    // minimal stepsize
 
-  gbtVector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
+  gbtVector<T> x(p_start.Length() + 1), u(p_start.Length() + 1);
   for (int i = 1; i <= p_start.Length(); i++) {
     x[i] = p_start[i];
   }
   x[x.Length()] = p_startLambda;
-  gbtVector<double> t(p_start.Length() + 1);
-  gbtVector<double> y(p_start.Length());
+  gbtVector<T> t(p_start.Length() + 1);
+  gbtVector<T> y(p_start.Length());
 
-  gbtMatrix<double> b(p_start.Length() + 1, p_start.Length());
-  gbtSquareMatrix<double> q(p_start.Length() + 1);
+  gbtMatrix<T> b(p_start.Length() + 1, p_start.Length());
+  gbtSquareMatrix<T> q(p_start.Length() + 1);
   QreJacobian(p_start.Support(), x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
   int niters = 0;
 
-  while (x[x.Length()] >= 0.0 && x[x.Length()] < p_maxLambda) {
+  while (x[x.Length()] >= (T) 0.0 && x[x.Length()] < p_maxLambda) {
     p_status.Get();
     if (niters > c_maxIters) {
       // Give up
@@ -291,7 +344,7 @@ static void TracePath(const gbtMixedProfile<double> &p_start,
     // Predictor step
     for (int k = 1; k <= x.Length(); k++) {
       u[k] = x[k] + h * p_omega * t[k];
-      if (k < x.Length() && u[k] < 0.0) {
+      if (k < x.Length() && u[k] < (T) 0.0) {
 	accept = false;
 	break;
       }
@@ -302,14 +355,14 @@ static void TracePath(const gbtMixedProfile<double> &p_start,
       continue;
     }
 
-    double decel = 1.0 / c_maxDecel;  // initialize deceleration factor
+    T decel = 1.0 / c_maxDecel;  // initialize deceleration factor
     QreJacobian(p_start.Support(), u, b);
     QRDecomp(b, q);
 
     int iter = 1;
-    double disto = 0.0;
+    T disto = 0.0;
     while (true) {
-      double dist;
+      T dist;
 
       QreLHS(p_start.Support(), u, y);
       NewtonStep(q, b, u, y, dist); 
@@ -318,7 +371,7 @@ static void TracePath(const gbtMixedProfile<double> &p_start,
 	break;
       }
       for (int i = 1; i < u.Length(); i++) {
-	if (u[i] < 0.0) {
+	if (u[i] < (T) 0.0) {
 	  // don't go negative
 	  accept = false;
 	  break;
@@ -330,7 +383,7 @@ static void TracePath(const gbtMixedProfile<double> &p_start,
       
       decel = gmax(decel, sqrt(dist / c_maxDist) * c_maxDecel);
       if (iter >= 2) {
-	double contr = dist / (disto + c_tol * c_eta);
+	T contr = dist / (disto + c_tol * c_eta);
 	if (contr > c_maxContr) {
 	  accept = false;
 	  break;
@@ -363,7 +416,7 @@ static void TracePath(const gbtMixedProfile<double> &p_start,
 
     // PC step was successful; update and iterate
     for (int i = 1; i < x.Length(); i++) {
-      if (u[i] < 1.0e-10) {
+      if (u[i] < (T) 1.0e-10) {
 	// Drop this strategy from the support, then recursively call
 	// to continue tracing
 	gbtNfgSupport newSupport(p_start.Support());
@@ -376,7 +429,7 @@ static void TracePath(const gbtMixedProfile<double> &p_start,
 	  }
 	}
 
-	gbtMixedProfile<double> newProfile(newSupport);
+	gbtMixedProfile<T> newProfile(newSupport);
 	for (int j = 1; j <= newProfile.Length(); j++) {
 	  if (j < i) {
 	    newProfile[j] = u[j];
@@ -397,16 +450,16 @@ static void TracePath(const gbtMixedProfile<double> &p_start,
 
     x[x.Length()] = u[u.Length()];
 
-    gbtMixedProfile<double> foo(p_start);
+    gbtMixedProfile<T> foo(p_start);
     for (int i = 1; i <= foo.Length(); i++) {
       foo[i] = x[i];
     }
     p_solutions.Append(MixedSolution(foo, "Qre[NFG]"));
-    p_solutions[p_solutions.Length()].SetQre(x[x.Last()], 0);
+    p_solutions[p_solutions.Length()].SetQre((double) x[x.Last()], 0);
     
-    gbtVector<double> newT(t);
+    gbtVector<T> newT(t);
     q.GetRow(q.NumRows(), newT);  // new tangent
-    if (t * newT < 0.0) {
+    if (t * newT < (T) 0.0) {
       // Bifurcation detected; for now, just "jump over" and continue,
       // taking into account the change in orientation of the curve.
       // Someday, we need to do more here! :)
@@ -416,18 +469,42 @@ static void TracePath(const gbtMixedProfile<double> &p_start,
   }
 }
 
+template static void TracePath(const gbtMixedProfile<double> &p_start,
+			       double p_startLambda, double p_maxLambda, 
+			       double p_omega,
+			       gbtStatus &p_status,
+			       gbtList<MixedSolution> &p_solutions);
+#if GBT_WITH_MP_FLOAT
+template static void TracePath(const gbtMixedProfile<gbtMPFloat> &p_start,
+			       gbtMPFloat p_startLambda,
+			       gbtMPFloat p_maxLambda, 
+			       gbtMPFloat p_omega,
+			       gbtStatus &p_status,
+			       gbtList<MixedSolution> &p_solutions);
+#endif // GBT_WITH_MP_FLOAT
+
 gbtNfgNashLogit::gbtNfgNashLogit(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
 gbtList<MixedSolution> gbtNfgNashLogit::Solve(const gbtNfgSupport &p_support,
-					    gbtStatus &p_status)
+					      gbtStatus &p_status)
 {
   gbtList<MixedSolution> solutions;
+
+#if GBT_WITH_MP_FLOAT
+  gbtMixedProfile<gbtMPFloat> start(p_support);
+#else
   gbtMixedProfile<double> start(p_support);
+#endif  // GBT_WITH_MP_FLOAT
 
   try {
+#if GBT_WITH_MP_FLOAT
+    TracePath(start, gbtMPFloat(0.0), gbtMPFloat(m_maxLam), 
+	      gbtMPFloat(1.0), p_status, solutions);
+#else
     TracePath(start, 0.0, m_maxLam, 1.0, p_status, solutions);
+#endif // GBT_WITH_MP_FLOAT
   }
   catch (...) { }
 

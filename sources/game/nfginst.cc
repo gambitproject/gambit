@@ -26,16 +26,18 @@
 
 #include "behav.h"
 #include "mixed.imp"
-#include "math/rational.h"
+#include "math/gmath.h"
 
-template<>
-gbtNumber gbtMixedProfile<gbtNumber>::Payoff(const gbtNfgOutcome &o, int pl) const
+template<> 
+gbtNumber gbtMixedProfile<gbtNumber>::Payoff(const gbtNfgOutcome &o, 
+					     int pl) const
 { 
   return o.GetPayoff(m_nfg.GetPlayer(pl));
 }
 
 template<>
-gbtRational gbtMixedProfile<gbtRational>::Payoff(const gbtNfgOutcome &o, int pl) const
+gbtRational gbtMixedProfile<gbtRational>::Payoff(const gbtNfgOutcome &o, 
+						 int pl) const
 { 
   return o.GetPayoff(m_nfg.GetPlayer(pl));
 }
@@ -46,6 +48,15 @@ double gbtMixedProfile<double>::Payoff(const gbtNfgOutcome &o, int pl) const
   return o.GetPayoffDouble(pl);
 }
 
+#if GBT_WITH_MP_FLOAT
+template<>
+gbtMPFloat gbtMixedProfile<gbtMPFloat>::Payoff(const gbtNfgOutcome &o,
+					       int pl) const
+{
+  return o.GetPayoffDouble(pl);
+}
+#endif  // GBT_WITH_MP_FLOAT
+
 template class gbtMixedProfile<double>;
 template gbtOutput &operator<<(gbtOutput &, const gbtMixedProfile<double> &);
 
@@ -54,6 +65,12 @@ template gbtOutput &operator<<(gbtOutput &, const gbtMixedProfile<gbtRational> &
 
 template class gbtMixedProfile<gbtNumber>;
 template gbtOutput &operator<<(gbtOutput &, const gbtMixedProfile<gbtNumber> &);
+
+#if GBT_WITH_MP_FLOAT
+template class gbtMixedProfile<gbtMPFloat>;
+template gbtOutput &operator<<(gbtOutput &,
+			       const gbtMixedProfile<gbtMPFloat> &);
+#endif // GBT_WITH_MP_FLOAT
 
 
 #include "base/glist.imp"

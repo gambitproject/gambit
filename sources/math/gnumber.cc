@@ -69,6 +69,12 @@ gbtNumber::gbtNumber(const gbtRational &y)
   : rep(GBT_PREC_RATIONAL), rval(new gbtRational(y))
 { }
 
+#if GBT_WITH_MP_FLOAT
+gbtNumber::gbtNumber(const gbtMPFloat &y)
+  : rep(GBT_PREC_DOUBLE), dval((double) y)
+{ }
+#endif // GBT_WITH_MP_FLOAT
+
 gbtNumber::gbtNumber(const gbtNumber &y) 
   : rep(y.rep)
 {
@@ -458,6 +464,18 @@ gbtNumber::operator gbtRational(void) const
   else
     return *rval;
 }
+
+#if GBT_WITH_MP_FLOAT
+gbtNumber::operator gbtMPFloat(void) const
+{
+  if (rep == GBT_PREC_DOUBLE) {
+    return gbtMPFloat(dval);
+  }
+  else {
+    return gbtMPFloat((double) *rval);
+  }
+}
+#endif // GBT_WITH_MP_FLOAT
 
 bool gbtNumber::IsInteger(void) const
 {

@@ -26,6 +26,7 @@ libmath_a_SOURCES = \
 	integer.cc \
 	mathinst.cc \
 	misc.cc \
+        mpfloat.cc \
 	rational.cc
 
 OBJECTS = $(libmath_a_SOURCES:.cc=.obj)

@@ -49,6 +49,15 @@ double gbtBehavProfile<double>::Payoff(const gbtEfgOutcome &p_outcome, int pl) c
   return p_outcome.GetPayoff(m_efg.GetPlayer(pl));
 }
 
+#if GBT_WITH_MP_FLOAT
+template<>
+gbtMPFloat gbtBehavProfile<gbtMPFloat>::Payoff(const gbtEfgOutcome &p_outcome,
+					       int pl) const
+{
+  return p_outcome.GetPayoff(m_efg.GetPlayer(pl));
+}
+#endif // GBT_WITH_MP_FLOAT
+
 template class gbtBehavProfile<double>;
 template class gbtBehavAssessment<double>;
 template gbtOutput &operator<<(gbtOutput &, const gbtBehavProfile<double> &);
@@ -63,6 +72,15 @@ template class gbtBehavProfile<gbtNumber>;
 template class gbtBehavAssessment<gbtNumber>;
 template gbtOutput &operator<<(gbtOutput &, const gbtBehavProfile<gbtNumber> &);
 template gbtOutput &operator<<(gbtOutput &, const gbtBehavAssessment<gbtNumber> &);
+
+#if GBT_WITH_MP_FLOAT
+template class gbtBehavProfile<gbtMPFloat>;
+template class gbtBehavAssessment<gbtMPFloat>;
+template gbtOutput &operator<<(gbtOutput &, 
+			       const gbtBehavProfile<gbtMPFloat> &);
+template gbtOutput &operator<<(gbtOutput &,
+			       const gbtBehavAssessment<gbtMPFloat> &);
+#endif // GBT_WITH_MP_FLOAT
 
 template class gbtPureBehavProfile<gbtNumber>;
 

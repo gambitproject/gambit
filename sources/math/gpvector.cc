@@ -27,13 +27,19 @@
 #include "base/base.h"
 #include "gpvector.imp"
 #include "gnumber.h"
+#include "mpfloat.h"
 
 template class gbtPVector<int>;
 template class gbtPVector<double>;
 template class gbtPVector<gbtRational>;
 template class gbtPVector<gbtNumber>;
 
-template gbtOutput & operator<< (gbtOutput&, const gbtPVector<int>&);
-template gbtOutput & operator<< (gbtOutput&, const gbtPVector<double>&);
-template gbtOutput & operator<< (gbtOutput&, const gbtPVector<gbtRational>&);
-template gbtOutput & operator<< (gbtOutput&, const gbtPVector<gbtNumber>&);
+template gbtOutput &operator<<(gbtOutput &, const gbtPVector<int> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtPVector<double> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtPVector<gbtRational> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtPVector<gbtNumber> &);
+
+#if GBT_WITH_MP_FLOAT
+template class gbtPVector<gbtMPFloat>;
+template gbtOutput &operator<<(gbtOutput &, const gbtPVector<gbtMPFloat> &);
+#endif // GBT_WITH_MP_FLOAT

@@ -28,7 +28,7 @@
 #define NFG_H
 
 #include "base/base.h"
-#include "math/gnumber.h"
+#include "math/gmath.h"
 #include "strategy.h"
 #include "player.h"
 #include "outcome.h"
@@ -48,6 +48,9 @@ friend class gbtNfgContingency;
 friend class gbtMixedProfile<double>;
 friend class gbtMixedProfile<gbtRational>;
 friend class gbtMixedProfile<gbtNumber>;
+#if GBT_WITH_MP_FLOAT
+ friend class gbtMixedProfile<gbtMPFloat>;
+#endif // GBT_WITH_MP_FLOAT
 friend void SetEfg(gbtNfgGame, gbtEfgGame);
 protected:
   gbt_nfg_game_rep *rep;

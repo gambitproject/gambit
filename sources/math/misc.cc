@@ -26,6 +26,7 @@
 
 #include "gmath.h"
 #include "double.h"
+#include "mpfloat.h"
 
 //--------------------------------------------------------------------------
 //                      Simple mathematical functions
@@ -62,12 +63,18 @@ template float gmin(const float &a, const float &b);
 template double gmin(const double &a, const double &b);
 template gbtRational gmin(const gbtRational &a, const gbtRational &b);
 template gbtDouble gmin(const gbtDouble &a, const gbtDouble &b);
+#if GBT_WITH_MP_FLOAT
+template gbtMPFloat gmin(const gbtMPFloat &, const gbtMPFloat &);
+#endif // GBT_WITH_MP_FLOAT
 
 template int gmax(const int &a, const int &b);
 template float gmax(const float &a, const float &b);
 template double gmax(const double &a, const double &b);
 template gbtRational gmax(const gbtRational &a, const gbtRational &b);
 template gbtDouble gmax(const gbtDouble &a, const gbtDouble &b);
+#if GBT_WITH_MP_FLOAT
+template gbtMPFloat gmax(const gbtMPFloat &, const gbtMPFloat &);
+#endif // GBT_WITH_MP_FLOAT
 
 template int gmax(const gbtArray<int> &);
 

@@ -31,6 +31,8 @@ libmath_a_SOURCES = \
 	integer.h \
 	mathinst.cc \
 	misc.cc \
+	mpfloat.cc \
+	mpfloat.h \
 	rational.cc \
 	rational.h 
 

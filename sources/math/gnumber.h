@@ -29,6 +29,7 @@
 
 #include "base/base.h"
 #include "rational.h"
+#include "mpfloat.h"
 
 class gbtOutput;
 
@@ -57,6 +58,9 @@ public:
   gbtNumber(long n);
   gbtNumber(const gbtInteger &y);
   gbtNumber(const gbtRational &y);
+#if GBT_WITH_MP_FLOAT
+  gbtNumber(const gbtMPFloat &y);
+#endif // GBT_WITH_MP_FLOAT
   gbtNumber(const gbtNumber &y);
   ~gbtNumber();
 
@@ -90,6 +94,10 @@ public:
   // PRECISION-RELATED FUNCTIONS AND CASTS
   operator double() const;
   operator gbtRational() const;
+#if GBT_WITH_MP_FLOAT
+  operator gbtMPFloat() const;
+#endif // GBT_WITH_MP_FLOAT
+
   gbtPrecision Precision(void) const { return rep; }
   bool IsInteger(void) const;
 };
