@@ -221,6 +221,20 @@ CopyTree[n->NODE, to->NODE] =: NODE
 
 ----------
 
+CrunchNfg[N->NFG] =: NFG
+
+   -	Description:  Creates a new problem in normal form for which the 
+	strategies are those of the smallest strategy set of the specified 
+	normal form problem and which contains only those payoff elements
+	corresponding to those strategies.
+   -	Return value:  Returns the new normal form problem.
+   -	Required parameters:
+	  *  N:  The problem in normal form from which the new normal form 
+		problem is to be created.
+   -	Optional parameters:  None.
+
+----------
+
 DeleteAction[n->NODE, br->INTEGER] =: NODE
 
    -	Description:  Deletes the indicated action number from the information
@@ -270,6 +284,32 @@ DetachOutcome[n->NODE] =: NODE
 
 ----------
 
+DisplayEfg[E->EFG]
+
+   -	Description:  Prints the game tree of the specified extensive form
+	problem in outline form.
+   -	Return value:  None.
+   -	Required parameters:
+	  *  E:  The problem in extensive form which is to be displayed.
+   -	Optional parameters:  None.
+
+----------
+
+DisplayNfg[N->NFG, {SSET->INTEGER}]
+
+   -	Description:  Prints specified normal form problem as a list of
+	contingencies and corresponding payoff vectors.  Uses the last strategy
+	set unless otherwise specified.
+   -	Return value:  None.
+   -	Required parameters:
+	  *  N:  The problem in normal form which is to be displayed.
+   -	Optional parameters:
+	  *  SSET:  The number of the strategy set of the specified normal form
+		problem which is to be used in displaying the problem.  If not
+		specified, the last (smallest) strategy set is used.
+
+----------
+
 EfgToNfg[E->EXTFORM, {time<->RATIONAL}] =: NORFORM
 
    -	Description:  Converts a problem in extensive form to the same problem
@@ -280,6 +320,18 @@ EfgToNfg[E->EXTFORM, {time<->RATIONAL}] =: NORFORM
 		form.
    -	Optional parameters:
 	  *  time:  Returns the elapsed time for the operation.
+
+----------
+
+ElapsedTime[] =: RATIONAL
+
+   -	Description:  Calculates the time transpired since the last time
+	StartWatch[] was used if the system stopwatch is currently running.
+	Otherwise, calculates the time elapsed between the last StartWatch[] -
+	StopWatch[] match.
+   -	Return value:  Returns the time value given by the system stopwatch.
+   -	Required parameters:  None.
+   -	Optional parameters:  None.
 
 ----------
 
@@ -435,6 +487,23 @@ GetPriorSibling[n->NODE] =: NODE
 	node.
    -	Required parameters:
 	  *  n:  The node for which the prior sibling is to be found.
+   -	Optional parameters:  None.
+
+----------
+
+GetStratName[N->NFG, pl->INTEGER, st->INTEGER] =: TEXT
+
+   -	Description:  Finds the name assigned to the specified strategy of the
+	indicated player of the given problem in normal form.
+   -	Return value:  Returns the name found.  If a name has not been assigned
+	to the strategy, the empty string is returned.
+   -	Required parameters:
+	  *  N:  The problem in normal form in which the name assigned to the 
+		specified strategy of the indicated player is to be found.
+	  *  pl:  The number corresponding to the player for which the name of
+		the indicated strategy is to be found.
+	  *  st:  The number corresponding to the strategy of the indicated 
+		player for which the name is to be found.
    -	Optional parameters:  None.
 
 ----------
@@ -694,6 +763,130 @@ NewOutcome[E->EXTFORM, {outc->INTEGER}] =: INTEGER
 
 ----------
 
+NthChild[n->NODE, child->INTEGER] =: NODE
+
+   -	Description:  Finds the node which is the indicated child of the 
+	specified node.  The expression:  NthChild[n->node, child->i] is 
+	equivalent to:  node#i.
+   -	Return value:  Returns the node which is the indicated child of the
+	specified node.
+   -	Required parameters:
+	  *  n:  The node for which the indicated child is to be found.
+	  *  child:  The number corresponding to the child of the specified 
+		node which is to be found.
+   -	Optional parameters:  None.
+
+----------
+
+NumChildren[n->NODE] := INTEGER
+
+   -	Description:  Finds the number of children of the specified node.
+   -	Return value:  Returns the number of children of the specified node.
+   -	Required parameters:
+	  *  n:  The node whose children are to be counted.
+   -	Optional parameters:  None.
+
+----------
+
+NumInfosets[E->EXTFORM, pl->INTEGER] =: INTEGER
+
+   -	Description:  Finds the number of information sets belonging to the
+	specified player in the given problem in extensive form.
+   -	Return value:  Returns the number of information sets belonging to
+	the specified player.  If the indicated player is not defined in the 
+	game, the return value is equal to zero.
+   -	Required parameters:
+	  *  E:  The problem in extensive form in which the information sets
+		for the specified player are to be counted.
+	  *  pl:  The number corresponding to the player for which the number 
+		of information sets are to be counted.
+   -	Optional parameters:  None.
+
+----------
+
+NumNodes[E->EXTFORM] =: INTEGER
+
+   -	Description:  Finds the number of nodes (including terminal nodes) in 
+	the specified problem in extensive form.
+   -	Return value:  Returns the number of nodes found.
+   -	Required parameters:
+	  *  E:  The problem in extensive form in which the number of nodes are
+		to be counted.
+   -	Optional parameters:  None.
+
+----------
+
+NumOutcomes[E->EXTFORM] =: INTEGER
+
+   -	Description:  Finds the number of outcomes in the specified problem in
+	extensive form.
+   -	Return value:  Returns the number of outcomes found.
+   -	Required parameters:
+	  *  E:  The problem in extensive form in which the number of outcomes
+		is to be found.
+   -	Optional parameters:  None.
+
+
+NumOutcomes[N->NORFORM] =: INTEGER
+
+   -	Description:  Finds the number of outcomes in the specified problem in
+	normal form.
+   -	Return value:  Returns the number of outcomes found.
+   -	Required parameters:
+	  *  N:  The problem in normal form in which the number of outcomes is
+		to be found.
+   -	Optional parameters:  None.
+
+----------
+
+NumPlayers[E->EXTFORM] =: INTEGER
+
+   -	Description:  Finds the number of players in the specified problem in
+	extensive form.
+   -	Return value:  Returns the number of players found.
+   -	Required parameters:
+	  *  E:  The problem in extensive form in which the number of players
+		is to be found.
+   -	Optional parameters:  None.
+
+----------
+
+OutcomeOf[n->NODE] =: INTEGER
+
+   -	Description:  Finds the number of the outcome associated with the 
+	specified node.
+   -	Return value:  Returns the number corresponding to the outcome attached
+	to the specified node.  If the node does not have an outcome attached,
+	a value of zero is returned.
+   -	Required parameters:
+	  *  n:  The node for which the attached outcome is to be found.
+   -	Optional parameters:  None.
+
+----------
+
+ParentOf[n->NODE] =: NODE
+
+   -	Description:  Finds the node which is the parent of the specified node.
+   -	Return value:  Returns the node which is the parent of the specified
+	node.
+   -	Required parameters:
+	  *  n:  The node for which the parent is to be found.
+   -	Optional parameters:  None.
+
+----------
+
+PlayerOf[n->NODE] =: INTEGER
+
+   -	Description:  Finds the player who makes the decision at the specified
+	node.
+   -	Return value:  Returns the number corresponding to the player found.
+   -	Required parameters:
+	  *  n:  The node for which the player making the decision is to be
+		found.
+   -	Optional parameters:  None.
+
+----------
+
 PureNash[N->NORFORM, {num->INTEGER}, {time<->RATIONAL}, {output->TEXT}]
 	 =: INTEGER
 
@@ -763,6 +956,26 @@ ReadNfgFile[file->TEXT, {type->DATATYPE}] =: NORFORM
 	  *  type:  Indicates whether the file is to be read as a floating-
 		point normal form or as a rational normal form.  If not given,
 		the default value is floating-point.
+
+----------
+
+RemoveOutcome[E->EXTFORM, outc->INTEGER] =: EXTFORM
+
+   -	Description:  Removes the specified outcome from the given problem in
+	extensive form.  All nodes with the specified outcome attached are 
+	reset to having no outcome attached.  If the outcome does not exist in
+	the given problem, no action is taken.  The outcomes remaining in the 
+	game are re-numbered, so that the number of the outcome removed is 
+	given to the outcome which previously had the next highest number, the
+	number previously corresponding to this outcome is assigned to the
+	outcome which previously had the next highest number, and so on.  
+   -	Return value:  Returns the modified extensive form problem.
+   -	Required parameters:
+	  *  E:  The problem in extensive form from which the specified outcome
+		is to be removed.
+	  *  outc:  The number corresponding to the outcome which is to be 
+		removed from the given problem.  If no outcome with that number
+		exists in the problem, no action is taken.
 
 ----------
 
@@ -912,6 +1125,22 @@ SetPlayerName[E->EXTFORM, pl->INTEGER, name->TEXT] =: EXTFORM
 	  *  pl:  The number corresponding to the player which is to be 
 		assigned a name.
 	  *  name:  The name which is to be assigned to the specified player.
+   -	Optional parameters:  None.
+
+----------
+
+SetStratName[N->NFG, pl->INTEGER, st->INTEGER, name->TEXT] =: NFG
+
+   -	Description:  Assigns the given name to the specified strategy of the
+	indicated player in the given problem in normal form.
+   -	Return value:  Returns the modified normal form problem.
+   -	Required parameters:
+	  *  N:  The problem in normal form in which the given name is to be
+		assigned to the specified strategy of the indicated player.
+	  *  pl:  The number corresponding to the player for which the 
+		indicated strategy is to be assigned the given name.
+	  *  st:  The number corresponding to the strategy of the indicated 
+		player to which the given name is to be assigned.
    -	Optional parameters:  None.
 
 ----------
