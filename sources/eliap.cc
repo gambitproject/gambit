@@ -35,7 +35,7 @@ class EFLiapFunc : public gFunction<double>  {
 
 EFLiapFunc::EFLiapFunc(const Efg<double> &E,
 		       const BehavProfile<double> &start)
-  : _nevals(0L), _efg(E), _p(start), _cpay(E.Dimensionality())
+  : _nevals(0L), _efg(E), _p(start), _cpay(E.NumActions())
 { }
 
 EFLiapFunc::~EFLiapFunc()
@@ -54,11 +54,11 @@ double EFLiapFunc::Value(const gVector<double> &v)
   BehavProfile<double> tmp(_p);
   double x, result = 0.0, avg, sum;
 
-  gPVector<double> probs(_efg.Dimensionality().Lengths());  
+  gPVector<double> probs(_efg.NumInfosets());  
   tmp.CondPayoff(_cpay, probs);
 
   for (int i = 1; i <= _efg.NumPlayers(); i++) {
-    EFPlayer *player = _efg.PlayerList()[i];
+    EFPlayer *player = _efg.Players()[i];
     for (int j = 1; j <= player->NumInfosets(); j++) {
       avg = sum = 0.0;
       int k;
@@ -90,7 +90,7 @@ static void PickRandomProfile(BehavProfile<double> &p)
   double sum, tmp;
 
   for (int pl = 1; pl <= p.BelongsTo().NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= p.BelongsTo().PlayerList()[pl]->NumInfosets();
+    for (int iset = 1; iset <= p.BelongsTo().Players()[pl]->NumInfosets();
 	 iset++)  {
       sum = 0.0;
       int act;
@@ -243,18 +243,18 @@ EFLiapBySubgame::EFLiapBySubgame(const Efg<double> &E, const EFLiapParams &p,
 				 const BehavProfile<double> &s, int max)
   : SubgameSolver<double>(E, s.Support(), max),
     nevals(0), subgame_number(0),
-    infoset_subgames(E.PureDimensionality()), params(p), start(s)
+    infoset_subgames(E.NumInfosets()), params(p), start(s)
 {
   gList<Node *> subroots;
   MarkedSubgameRoots(E, subroots);
 
   for (int pl = 1; pl <= E.NumPlayers(); pl++)   {
-    EFPlayer *player = E.PlayerList()[pl];
+    EFPlayer *player = E.Players()[pl];
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
       int index;
 
-      Infoset *infoset = player->InfosetList()[iset];
-      Node *member = infoset->GetMember(1);
+      Infoset *infoset = player->Infosets()[iset];
+      Node *member = infoset->Members()[1];
 
       for (index = 1; index <= subroots.Length() &&
 	   member->GetSubgameRoot() != subroots[index]; index++);

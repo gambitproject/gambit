@@ -16,11 +16,11 @@
 
 template <class T>
 CSSeqFormModule<T>::CSSeqFormModule(const Efg<T> &E, const CSSeqFormParams &p,
-			  const EFSupport &S)
-  : EF(E), params(p), support(E, S), A(0), b(0), c(0), npivots(0), 
+				    const EFSupport &S)
+  : EF(E), params(p), support(S), A(0), b(0), c(0), npivots(0), 
     ns1(S.NumSequences(1)), ns2(S.NumSequences(2)),
-    ni1(E.PlayerList()[1]->NumInfosets()+1),  
-    ni2(E.PlayerList()[2]->NumInfosets()+1)
+    ni1(E.Players()[1]->NumInfosets()+1),  
+    ni2(E.Players()[2]->NumInfosets()+1)
 { }
 
 template <class T> CSSeqFormModule<T>::~CSSeqFormModule()
@@ -126,7 +126,7 @@ template <class T> void CSSeqFormModule<T>
     if(pl==2) {
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=n->GetPlayer()->InfosetList()[i]->NumActions(); 
+	snew+=n->GetPlayer()->Infosets()[i]->NumActions(); 
       for(i=1;i<=n->NumChildren();i++) {
 	v(pl,inf,i) = (T)0;
 //	gout << "\npl1 ";
@@ -148,7 +148,7 @@ template <class T> void CSSeqFormModule<T>
     if(pl==1) {
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=n->GetPlayer()->InfosetList()[i]->NumActions(); 
+	snew+=n->GetPlayer()->Infosets()[i]->NumActions(); 
       for(i=1;i<=n->NumChildren();i++) {
 	v(pl,inf,i) = (T)0;
 //	gout << "\npl2 ";
@@ -195,7 +195,7 @@ template <class T> void CSSeqFormModule<T>
       i1=n->GetInfoset()->GetNumber();
       snew=1;
       for(i=1;i<i1;i++)
-	snew+=n->GetPlayer()->InfosetList()[i]->NumActions();
+	snew+=n->GetPlayer()->Infosets()[i]->NumActions();
       (*A)(s1,ns2+i1+1) = (T) +1;
       for(i=1;i<=n->NumChildren();i++) {
 	(*A)(snew+i,ns2+i1+1) = (T) -1;
@@ -206,7 +206,7 @@ template <class T> void CSSeqFormModule<T>
       i2=n->GetInfoset()->GetNumber();
       snew=1;
       for(i=1;i<i2;i++)
-	snew+=n->GetPlayer()->InfosetList()[i]->NumActions();
+	snew+=n->GetPlayer()->Infosets()[i]->NumActions();
       (*A)(ns1+i2+1,s2) = (T) -1;
       for(i=1;i<=n->NumChildren();i++) {
 	(*A)(ns1+i2+1,snew+i) = (T) +1;

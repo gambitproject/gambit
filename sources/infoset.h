@@ -91,21 +91,12 @@ class Infoset   {
       { actions[i]->name = s; }
     const gString &GetActionName(int i) const  { return actions[i]->name; }
 
-    Action *GetAction(const gString &s) const
-      { for (int i = 1; i <= actions.Length(); i++)
-	  if (actions[i]->name == s)   return actions[i];
-	return 0;
-      }
-
-    const gArray<Action *> &GetActionList(void) const  { return actions; }  
+    const gArray<Action *> &Actions(void) const  { return actions; }  
     int NumActions(void) const   { return actions.Length(); }
 
-    const gArray<Node *> &GetMemberList(void) const   { return members; }
-    Node *GetMember(int i) const   { return members[i]; }
+    const gArray<Node *> &Members(void) const   { return members; }
     int NumMembers(void) const   { return members.Length(); }
 
-// This function exists only to facilitate the current version of efg2nfg
-// and is not guaranteed to exist in the future, so do not depend on it!
     int GetNumber(void) const    { return number; }
 };
 

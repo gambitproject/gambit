@@ -18,7 +18,7 @@ template <class T> int FindPureNash(const Efg<T> &efg, const EFSupport &sup,
 {
   int index;
   EfgContIter<T> citer(sup);
-  gPVector<T> probs(efg.PureDimensionality());
+  gPVector<T> probs(efg.NumInfosets());
 
   do  {
     int flag = 1;
@@ -28,10 +28,10 @@ template <class T> int FindPureNash(const Efg<T> &efg, const EFSupport &sup,
 
     for (int pl = 1; flag && pl <= efg.NumPlayers(); pl++)  {
       T current = citer.Payoff(pl);
-      for (int iset = 1; flag && iset <= efg.PlayerList()[pl]->NumInfosets();
+      for (int iset = 1; flag && iset <= efg.Players()[pl]->NumInfosets();
 	   iset++)  {
 	if (probs(pl, iset) == (T) 0)   continue;
-	Infoset *s = efg.PlayerList()[pl]->InfosetList()[iset];
+	Infoset *s = efg.Players()[pl]->Infosets()[iset];
 	for (int act = 1; act <= s->NumActions(); act++)  {
 	  eiter.Next(pl, iset);
 	  if (eiter.Payoff(pl) > current)  {
@@ -48,7 +48,7 @@ template <class T> int FindPureNash(const Efg<T> &efg, const EFSupport &sup,
       ((gVector<T> &) temp).operator=((T) 0);
       gPVector<int> profile(citer.GetEfgNumbering());
       for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
-	for (int iset = 1; iset <= efg.PlayerList()[pl]->NumInfosets();
+	for (int iset = 1; iset <= efg.Players()[pl]->NumInfosets();
 	     iset++)
 	  temp(pl, iset, profile(pl, iset)) = (T) 1;
       }

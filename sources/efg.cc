@@ -79,20 +79,6 @@ EFPlayer::~EFPlayer()
   while (infosets.Length())   delete infosets.Remove(1);
 }
 
-bool EFPlayer::IsInfosetDefined(const gString &s) const
-{
-  for (int i = 1; i <= infosets.Length(); i++)
-    if (infosets[i]->name == s)   return true;
-  return false;
-}
-
-Infoset *EFPlayer::GetInfoset(const gString &name) const
-{
-  for (int i = 1; i <= infosets.Length(); i++)
-    if (infosets[i]->name == name)   return infosets[i];
-  return 0;
-}
-
 
 //----------------------------------------------------------------------
 //                 Infoset: Member function definitions
@@ -919,7 +905,7 @@ bool BaseEfg::CheckTree(Node *n, Node *base)
   if (n->GetPlayer()->IsChance())   return true;
 
   for (i = 1; i <= n->GetInfoset()->NumMembers(); i++)
-    if (n->GetInfoset()->GetMember(i)->ptr != base)
+    if (n->GetInfoset()->Members()[i]->ptr != base)
       return false;
 
   return true;
@@ -997,7 +983,7 @@ int BaseEfg::ProfileLength(void) const
   return sum;
 }
 
-gArray<int> BaseEfg::PureDimensionality(void) const
+gArray<int> BaseEfg::NumInfosets(void) const
 {
   gArray<int> foo(players.Length());
   
@@ -1007,7 +993,7 @@ gArray<int> BaseEfg::PureDimensionality(void) const
   return foo;
 }
 
-gPVector<int> BaseEfg::Dimensionality(void) const
+gPVector<int> BaseEfg::NumActions(void) const
 {
   gArray<int> foo(players.Length());
   int i;
@@ -1022,7 +1008,7 @@ gPVector<int> BaseEfg::Dimensionality(void) const
   return bar;
 }  
 
-gPVector<int> BaseEfg::BeliefDimensionality(void) const
+gPVector<int> BaseEfg::NumMembers(void) const
 {
   gArray<int> foo(players.Length());
   int i;

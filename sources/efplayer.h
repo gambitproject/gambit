@@ -7,20 +7,18 @@
 #ifndef EFPLAYER_H
 #define EFPLAYER_H
 
-class gRational;
-
 #ifdef __GNUG__
 #pragma interface
 #endif   // __GNUG__
 
+class gRational;
+
 class EFPlayer   {
   friend class BaseEfg;
-  friend class EFActionSet;
   friend class Efg<double>;
   friend class Efg<gRational>;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
-
   private:
     int number;
     gString name;
@@ -40,18 +38,12 @@ class EFPlayer   {
     bool IsChance(void) const      { return (number == 0); }
 
     int NumInfosets(void) const    { return infosets.Length(); }
+    const gArray<Infoset *> &Infosets(void) const  { return infosets; }
 
-    Infoset *GetInfoset(const gString &name) const;
-    const gArray<Infoset *> &InfosetList(void) const  { return infosets; }
-
-    bool IsInfosetDefined(const gString &) const;
-
-// This function exists only to facilitate the current version of efg2nfg
-// and will not exist in the future.  DO NOT USE IN NEW CODE!
     int GetNumber(void) const    { return number; }
 };
 
 
-#endif    //# PLAYER_H
+#endif    // EFPLAYER_H
 
 

@@ -133,7 +133,7 @@ Action *LastAction(Node *node)
   if (parent == 0)  return 0;
   for (int i = 1; i <= parent->NumChildren(); i++) 
     if (parent->GetChild(i) == node)  
-      return parent->GetInfoset()->GetActionList()[i];
+      return parent->GetInfoset()->Actions()[i];
   assert(0);
   return 0;
 }
@@ -142,12 +142,12 @@ Action *LastAction(Node *node)
 bool IsPerfectRecall(const BaseEfg &efg, Infoset *&s1, Infoset *&s2)
 {
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)   {
-    EFPlayer *player = efg.PlayerList()[pl];
+    EFPlayer *player = efg.Players()[pl];
     
     for (int i = 1; i <= player->NumInfosets(); i++)  {
-      Infoset *iset1 = player->InfosetList()[i];
+      Infoset *iset1 = player->Infosets()[i];
       for (int j = 1; j <= player->NumInfosets(); j++)   {
-	Infoset *iset2 = player->InfosetList()[j];
+	Infoset *iset2 = player->Infosets()[j];
 
 	bool precedes = false;
 	int action = 0;
@@ -155,13 +155,13 @@ bool IsPerfectRecall(const BaseEfg &efg, Infoset *&s1, Infoset *&s2)
 	for (int m = 1; m <= iset2->NumMembers(); m++)  {
 	  int n;
 	  for (n = 1; n <= iset1->NumMembers(); n++)  {
-	    if (efg.IsPredecessor(iset1->GetMemberList()[n],
-				  iset2->GetMemberList()[m]) &&
-	        iset1->GetMemberList()[n] != iset2->GetMemberList()[m])  {
+	    if (efg.IsPredecessor(iset1->Members()[n],
+				  iset2->Members()[m]) &&
+	        iset1->Members()[n] != iset2->Members()[m])  {
 	      precedes = true;
 	      for (int act = 1; act <= iset1->NumActions(); act++)  {
-		if (efg.IsPredecessor(iset1->GetMemberList()[n]->GetChild(act),
-				      iset2->GetMemberList()[m]))  {
+		if (efg.IsPredecessor(iset1->Members()[n]->GetChild(act),
+				      iset2->Members()[m]))  {
 		  if (action != 0 && action != act)  {
 		    s1 = iset1;
 		    s2 = iset2;
@@ -200,13 +200,13 @@ template <class T> Efg<T> *CompressEfg(const Efg<T> &efg, const EFSupport &S)
   Efg<T> *newefg = new Efg<T>(efg);
 
   for (int pl = 1; pl <= newefg->NumPlayers(); pl++)   { 
-    EFPlayer *player = newefg->PlayerList()[pl];
+    EFPlayer *player = newefg->Players()[pl];
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
-      Infoset *infoset = player->InfosetList()[iset];
+      Infoset *infoset = player->Infosets()[iset];
       for (int act = infoset->NumActions(); act >= 1; act--)  {
-	Action *oldact = efg.PlayerList()[pl]->InfosetList()[iset]->GetActionList()[act];
+	Action *oldact = efg.Players()[pl]->Infosets()[iset]->Actions()[act];
 	if (!S.Find(oldact))
-	  newefg->DeleteAction(infoset, infoset->GetActionList()[act]);
+	  newefg->DeleteAction(infoset, infoset->Actions()[act]);
       }
     }
   }

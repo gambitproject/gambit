@@ -2330,14 +2330,14 @@ Portion *GSM_Behav_EfgFloat(Portion **param)
       delete P;
       return new ErrorPortion("Mismatching dimensionality");
     }
-    if(((ListPortion*) p1)->Length() != E.PlayerList()[i]->NumInfosets())
+    if(((ListPortion*) p1)->Length() != E.Players()[i]->NumInfosets())
     {
       delete p1;
       delete P;
       return new ErrorPortion("Mismatching number of infosets");
     }
 
-    for(j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++)
+    for(j = 1; j <= E.Players()[i]->NumInfosets(); j++)
     {
       p2 = ((ListPortion*) p1)->SubscriptCopy(j);
       if(p2->Spec().ListDepth == 0)
@@ -2348,7 +2348,7 @@ Portion *GSM_Behav_EfgFloat(Portion **param)
 	return new ErrorPortion("Mismatching dimensionality");
       }
       if(((ListPortion*) p2)->Length() !=
-	 E.PlayerList()[i]->InfosetList()[j]->NumActions())
+	 E.Players()[i]->Infosets()[j]->NumActions())
       {
 	delete p2;
 	delete p1;
@@ -2356,7 +2356,7 @@ Portion *GSM_Behav_EfgFloat(Portion **param)
 	return new ErrorPortion("Mismatching number of actions");
       }
 
-      for(k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++)
+      for(k = 1; k <= E.Players()[i]->Infosets()[j]->NumActions(); k++)
       {
 	p3 = ((ListPortion*) p2)->SubscriptCopy(k);
 	if(p3->Spec().Type != porFLOAT)
@@ -2410,14 +2410,14 @@ Portion *GSM_Behav_EfgRational(Portion **param)
       delete P;
       return new ErrorPortion("Mismatching dimensionality");
     }
-    if(((ListPortion*) p1)->Length() != E.PlayerList()[i]->NumInfosets())
+    if(((ListPortion*) p1)->Length() != E.Players()[i]->NumInfosets())
     {
       delete p1;
       delete P;
       return new ErrorPortion("Mismatching number of infosets");
     }
 
-    for(j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++)
+    for(j = 1; j <= E.Players()[i]->NumInfosets(); j++)
     {
       p2 = ((ListPortion*) p1)->SubscriptCopy(j);
       if(p2->Spec().ListDepth == 0)
@@ -2428,7 +2428,7 @@ Portion *GSM_Behav_EfgRational(Portion **param)
 	return new ErrorPortion("Mismatching dimensionality");
       }
       if(((ListPortion*) p2)->Length() !=
-	 E.PlayerList()[i]->InfosetList()[j]->NumActions())
+	 E.Players()[i]->Infosets()[j]->NumActions())
       {
 	delete p2;
 	delete p1;
@@ -2436,7 +2436,7 @@ Portion *GSM_Behav_EfgRational(Portion **param)
 	return new ErrorPortion("Mismatching number of actions");
       }
 
-      for(k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++)
+      for(k = 1; k <= E.Players()[i]->Infosets()[j]->NumActions(); k++)
       {
 	p3 = ((ListPortion*) p2)->SubscriptCopy(k);
 	if(p3->Spec().Type != porRATIONAL)

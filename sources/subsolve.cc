@@ -52,17 +52,17 @@ void Project(const EFSupport &from, EFSupport &to, Node *n)
   
   for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
     int isetno = 1;
-    for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)  {
-      Infoset *infoset = E.PlayerList()[pl]->InfosetList()[iset];
-      if (E.IsPredecessor(n, infoset->GetMemberList()[1]))  {
-	Infoset *newiset = to.BelongsTo().PlayerList()[pl]->InfosetList()[isetno];
+    for (int iset = 1; iset <= E.Players()[pl]->NumInfosets(); iset++)  {
+      Infoset *infoset = E.Players()[pl]->Infosets()[iset];
+      if (E.IsPredecessor(n, infoset->Members()[1]))  {
+	Infoset *newiset = to.BelongsTo().Players()[pl]->Infosets()[isetno];
 	for (int act = 1; act <= infoset->NumActions(); act++)  {
-	  if (!from.Find(infoset->GetActionList()[act]))
-	    to.RemoveAction(newiset->GetActionList()[act]);
+	  if (!from.Find(infoset->Actions()[act]))
+	    to.RemoveAction(newiset->Actions()[act]);
 	} 
 	isetno++;
       }
-      assert(isetno == to.BelongsTo().PlayerList()[pl]->NumInfosets());
+      assert(isetno == to.BelongsTo().Players()[pl]->NumInfosets());
     }
   }
 }

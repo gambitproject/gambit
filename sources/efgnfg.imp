@@ -46,8 +46,8 @@ void Lexicon<T>::MakeStrategy(EFPlayer *p)
   Correspondence *c = new Correspondence(p->NumInfosets());
   
   for (int i = 1; i <= p->NumInfosets(); i++)  {
-    if (p->InfosetList()[i]->flag == 1)
-      (*c)[i] = p->InfosetList()[i]->whichbranch;
+    if (p->Infosets()[i]->flag == 1)
+      (*c)[i] = p->Infosets()[i]->whichbranch;
     else
       (*c)[i] = 0;
   }
@@ -69,7 +69,7 @@ void Lexicon<T>::MakeReducedStrats(const EFSupport &S,
 	// we haven't visited this infoset before
 	n->infoset->flag = 1;
 	for (i = 1; i <= n->NumChildren(); i++)   {
-	  if (S.Find(n->infoset->GetActionList()[i]))  {
+	  if (S.Find(n->infoset->Actions()[i]))  {
 	    Node *m = n->GetChild(i);
 	    n->whichbranch = m;
 	    n->infoset->whichbranch = i;
@@ -120,7 +120,7 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
 
   Lexicon<T> *L = new Lexicon<T>(E);
   for (i = 1; i <= E.NumPlayers(); i++)  
-    L->MakeReducedStrats(support, E.PlayerList()[i], E.RootNode(), NULL);
+    L->MakeReducedStrats(support, E.Players()[i], E.RootNode(), NULL);
 
   gArray<int> dim(E.NumPlayers());
   for (i = 1; i <= E.NumPlayers(); i++)
@@ -130,7 +130,7 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
   L->N->GameForm().SetTitle(E.GetTitle());
   
   for (i = 1; i <= E.NumPlayers(); i++)   {
-    L->N->Players()[i]->SetName(E.PlayerList()[i]->GetName());
+    L->N->Players()[i]->SetName(E.Players()[i]->GetName());
     for (int j = 1; j <= L->strategies[i].Length(); j++)   {
       gString name;
       for (int k = 1; k <= L->strategies[i][j]->Length(); k++)
@@ -199,7 +199,7 @@ void RealizationProbs(const Nfg<T> &N, const MixedProfile<T> &mp,
 	else
 	  prob = tremble / (T) n->NumChildren();
       }
-      else if (bp.Support().Find(n->GetInfoset()->GetActionList()[i]))
+      else if (bp.Support().Find(n->GetInfoset()->Actions()[i]))
 	prob = (T) 1.0 / (T) bp.Support().NumActions(n->GetPlayer()->GetNumber(),
 							  n->GetInfoset()->GetNumber());
       else
@@ -227,7 +227,7 @@ void BehaviorStrat(const Efg<T> &E, BehavProfile<T> &bp, int pl, Node *n)
       if (((TypedNode<T> *) n)->nval > (T) 0.0 &&
 	  ((TypedNode<T> *) child)->nval > (T) 0.0)  {
 	bp(n->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber(), 
-	   bp.Support().Find(n->GetInfoset()->GetActionList()[i])) =
+	   bp.Support().Find(n->GetInfoset()->Actions()[i])) =
 	  ((TypedNode<T> *) child)->nval / ((TypedNode<T> *) n)->nval;
       }
     BehaviorStrat(E, bp, pl, child);
@@ -294,7 +294,7 @@ void BehavToMixed(const Efg<T> &E, const BehavProfile<T> &bp,
     for (int st = 1; st <= N.NumStrats(pl); st++)  {
       T prob = (T) 1.0;
 
-      for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++) {
+      for (int iset = 1; iset <= E.Players()[pl]->NumInfosets(); iset++) {
 	if ((*E.lexicon->strategies[pl][st])[iset] > 0)
 	  prob *= bp(pl, iset, (*E.lexicon->strategies[pl][st])[iset]);
       }
@@ -306,7 +306,7 @@ void BehavToMixed(const Efg<T> &E, const BehavProfile<T> &bp,
 
 template <class T> Nfg<T> *MakeAfg(Efg<T> &E)
 {
-  Nfg<T> *afg = new Nfg<T>(gArray<int>(E.Dimensionality()));
+  Nfg<T> *afg = new Nfg<T>(gArray<int>(E.NumActions()));
 
   if (!afg)   return 0;
 
@@ -314,8 +314,8 @@ template <class T> Nfg<T> *MakeAfg(Efg<T> &E)
   afg->GameForm().SetTitle(E.GetTitle() + " (Agent Form)");
 
   for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)   {
-    for (int iset = 1; iset <= E.PlayerList()[epl]->NumInfosets(); iset++, npl++)  {
-      Infoset *s = E.PlayerList()[epl]->InfosetList()[iset];
+    for (int iset = 1; iset <= E.Players()[epl]->NumInfosets(); iset++, npl++)  {
+      Infoset *s = E.Players()[epl]->Infosets()[iset];
       for (int act = 1; act <= s->NumActions(); act++)  {
 	Strategy *st = afg->GameForm().Strategies(npl)[act];
 	st->name = ToString(act);
@@ -328,7 +328,7 @@ template <class T> Nfg<T> *MakeAfg(Efg<T> &E)
 
   gArray<int> dim(E.NumPlayers());
   for (int i = 1; i <= dim.Length(); i++)
-    dim[i] = E.PlayerList()[i]->NumInfosets();
+    dim[i] = E.Players()[i]->NumInfosets();
   gPVector<int> profile(dim);
   ((gVector<int> &) profile).operator=(1);
 
@@ -341,7 +341,7 @@ template <class T> Nfg<T> *MakeAfg(Efg<T> &E)
       iter.SetOutcome(afg->NewOutcome());
 
     for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)
-      for (int iset = 1; iset <= E.PlayerList()[epl]->NumInfosets(); iset++, npl++)
+      for (int iset = 1; iset <= E.Players()[epl]->NumInfosets(); iset++, npl++)
 	afg->SetPayoff(iter.GetOutcome(), npl, payoff[epl]);
     
     while (pl > 0)  {

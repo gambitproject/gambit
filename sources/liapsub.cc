@@ -61,7 +61,7 @@ NFLiapBySubgame::NFLiapBySubgame(const Efg<double> &E, const NFLiapParams &p,
 				 const BehavProfile<double> &s, int max)
   : SubgameSolver<double>(E, s.Support(), max),
     nevals(0), subgame_number(0),
-    infoset_subgames(E.PureDimensionality()), params(p), start(s)
+    infoset_subgames(E.NumInfosets()), params(p), start(s)
 { }
 
 NFLiapBySubgame::~NFLiapBySubgame()   { }

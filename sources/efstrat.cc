@@ -126,7 +126,7 @@ EFActionSet::EFActionSet(EFPlayer &p)
 {
   efp = &p;
   for (int i = 1; i <= p.NumInfosets(); i++){
-    infosets[i] = new EFActionArrays(p.infosets[i]->GetActionList());
+    infosets[i] = new EFActionArrays(p.Infosets()[i]->Actions());
   }
 }
 
@@ -241,7 +241,7 @@ bool EFActionSet::IsValid(void) const
 EFSupport::EFSupport(const BaseEfg &E) : befg(&E), sets(E.NumPlayers())
 {
   for (int i = 1; i <= sets.Length(); i++)
-    sets[i] = new EFActionSet(*(E.PlayerList()[i]));
+    sets[i] = new EFActionSet(*(E.Players()[i]));
 }
 
 EFSupport::EFSupport(const EFSupport &s)
@@ -354,9 +354,9 @@ void EFSupport::AddAction(Action *s)
 
 int EFSupport::NumSequences(int j) const
 {
-  if(j<befg->PlayerList().First() || j>befg->PlayerList().Last()) return 1;
+  if (j < befg->Players().First() || j > befg->Players().Last()) return 1;
   gArray<Infoset *> isets;
-  isets = (befg->PlayerList())[j]->InfosetList();
+  isets = befg->Players()[j]->Infosets();
   int num = 1;
   for(int i = isets.First();i<= isets.Last();i++)
     num+=NumActions(j,i);
@@ -376,7 +376,7 @@ void EFSupport::Dump(gOutput& s) const
     EFPlayer& player = sets[i]->GetPlayer();
     s << '"' << player.GetName() << "\" { ";
     for (j = 1; j <= player.NumInfosets(); j++)  {
-      Infoset* infoset = player.InfosetList()[j];
+      Infoset* infoset = player.Infosets()[j];
       s << '"' << infoset->GetName() << "\" { ";
       for (k = 1; k <= NumActions(i, j); k++)  {
 	Action* action = sets[i]->ActionList(j)[k];

@@ -153,13 +153,13 @@ EFSupport *ComputeDominated(EFSupport &S, bool strong,
   // calc total # of isets
   int i,iset;
   for (i = 1; i <= players.Length(); i++)
-    num_isets += S.BelongsTo().PlayerList()[players[i]]->NumInfosets();
+    num_isets += S.BelongsTo().Players()[players[i]]->NumInfosets();
 
   for (i = 1; i <= players.Length() && !status.Get(); i++)   {
     int pl = players[i];
     status << "Dominated strategies for player " << pl << ":\n";
     for (iset = 1;
-	 iset <= S.BelongsTo().PlayerList()[pl]->NumInfosets() && !status.Get();
+	 iset <= S.BelongsTo().Players()[pl]->NumInfosets() && !status.Get();
 	 iset++)   {
       status << "Dominated strategies in infoset " << iset << ":\n";
       status.SetProgress((double)cur_iset/(double)num_isets);cur_iset++;

@@ -49,14 +49,14 @@ class EFGobitFunc : public gFunction<double>   {
 
 EFGobitFunc::EFGobitFunc(const Efg<double> &E,
 			 const BehavProfile<double> &start)
-  : _nevals(0L), _domain_err(false), _efg(E), _probs(E.Dimensionality().Lengths()),
+  : _nevals(0L), _domain_err(false), _efg(E), _probs(E.NumInfosets()),
     _p(start), _cpay(E)
 {
   int pl;
 
   _scratch = new gVector<double> **[_efg.NumPlayers()] - 1;
   for (pl = 1; pl <= _efg.NumPlayers(); pl++)  {
-    int nisets = (_efg.PlayerList()[pl])->NumInfosets();
+    int nisets = (_efg.Players()[pl])->NumInfosets();
     _scratch[pl] = new gVector<double> *[nisets + 1] - 1;
     for (int iset = 1; iset <= nisets; iset++)
       _scratch[pl][iset] = new gVector<double>(_p.Support().NumActions(pl, iset));
@@ -66,7 +66,7 @@ EFGobitFunc::EFGobitFunc(const Efg<double> &E,
 EFGobitFunc::~EFGobitFunc()
 {
   for (int pl = 1; pl <= _efg.NumPlayers(); pl++)  {
-    int nisets = (_efg.PlayerList()[pl])->NumInfosets();
+    int nisets = (_efg.Players()[pl])->NumInfosets();
     for (int iset = 1; iset <= nisets; iset++)
       delete _scratch[pl][iset];
     delete [] (_scratch[pl] + 1);
@@ -87,7 +87,7 @@ double EFGobitFunc::Value(const gVector<double> &v)
   _p.CondPayoff(_cpay, _probs);
   
   for (int pl = 1; pl <= _efg.NumPlayers(); pl++)  {
-    EFPlayer *player = _efg.PlayerList()[pl];
+    EFPlayer *player = _efg.Players()[pl];
     
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
       prob = 0.0;
@@ -132,11 +132,11 @@ static void WritePXIHeader(gOutput &pxifile, const Efg<double> &E,
 
   pxifile << "Dimensionality:\n";
   for (pl = 1; pl <= E.NumPlayers(); pl++)
-    nisets += E.PlayerList()[pl]->NumInfosets();
+    nisets += E.Players()[pl]->NumInfosets();
   pxifile << nisets;
   for (pl = 1; pl <= E.NumPlayers(); pl++)
-    for (iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)
-      pxifile << " " << E.PlayerList()[pl]->InfosetList()[iset]->NumActions();
+    for (iset = 1; iset <= E.Players()[pl]->NumInfosets(); iset++)
+      pxifile << " " << E.Players()[pl]->Infosets()[iset]->NumActions();
   pxifile << "\n";
 
 	pxifile << "Settings:\n" << params.minLam;
@@ -238,10 +238,10 @@ void Gobit(const Efg<double> &E, EFGobitParams &params,
       if (params.pxifile)  {
 	*params.pxifile << "\n" << Lambda << " " << value << " ";
 	for (int pl = 1; pl <= E.NumPlayers(); pl++)
-	  for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets();
+	  for (int iset = 1; iset <= E.Players()[pl]->NumInfosets();
 	       iset++)  {
 	    double prob = 0.0;
-	    for (int act = 1; act <= E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); 
+	    for (int act = 1; act <= E.Players()[pl]->Infosets()[iset]->NumActions(); 
 		 prob += p(pl, iset, act++))
 	      *params.pxifile << p(pl, iset, act) << ' ';
 //	  *params.pxifile << (1.0 - prob) << ' ';

@@ -2698,7 +2698,7 @@ void GSM::UnAssignEfgInfoset( BaseEfg* game, Infoset* infoset )
   assert( infoset );
   int i = 0;
   for( i = 1; i <= infoset->NumActions(); i++ )
-    UnAssignEfgElement( game, porACTION, infoset->GetActionList()[ i ] );
+    UnAssignEfgElement( game, porACTION, infoset->Actions()[ i ] );
   UnAssignEfgElement( game, porINFOSET, infoset );  
 }
 
@@ -2714,7 +2714,7 @@ void GSM::UnAssignEfgSubTree( BaseEfg* game, Node* node )
     Infoset* infoset = node->GetInfoset();
     if( infoset != NULL )
     {
-      const gArray<Action *>& actions = infoset->GetActionList();
+      const gArray<Action *>& actions = infoset->Actions();
       for( j = actions.First(); j <= actions.Last(); j++ )
 	UnAssignEfgElement( game, porACTION, actions[j] );
       UnAssignEfgElement( game, porINFOSET, infoset );

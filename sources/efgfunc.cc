@@ -42,7 +42,7 @@ static Portion *GSM_Actions(Portion **param)
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   EFSupport* sup = ((EfSupportPortion*) param[1])->Value();
 
-  Portion *por = (s->IsChanceInfoset()) ? ArrayToList(s->GetActionList()) :
+  Portion *por = (s->IsChanceInfoset()) ? ArrayToList(s->Actions()) :
                 ArrayToList(sup->Actions(s->GetPlayer()->GetNumber(),
 					 s->GetNumber()));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -427,7 +427,7 @@ static Portion *GSM_Infosets(Portion **param)
 {
   EFPlayer *p = ((EfPlayerPortion *) param[0])->Value();
 
-  Portion* por = ArrayToList(p->InfosetList());
+  Portion* por = ArrayToList(p->Infosets());
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -599,7 +599,7 @@ static Portion *GSM_Members(Portion **param)
 
   Infoset *s = ((InfosetPortion *) param[0])->Value();
 
-  Portion* por = ArrayToList(s->GetMemberList());
+  Portion* por = ArrayToList(s->Members());
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -862,7 +862,7 @@ static Portion *GSM_Outcomes(Portion **param)
 {
   BaseEfg *E = ((EfgPortion*) param[0])->Value();
   
-  Portion* por = ArrayToList(E->OutcomeList());
+  Portion* por = ArrayToList(E->Outcomes());
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -937,7 +937,7 @@ static Portion *GSM_Players_Efg(Portion **param)
 {
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
 
-  Portion* por = ArrayToList(E.PlayerList());
+  Portion* por = ArrayToList(E.Players());
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }

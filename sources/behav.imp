@@ -107,7 +107,7 @@ template <class T> void Efg<T>::CopySubtree(Node *n, Node *m)
     else 
       p = chance;
 
-    Infoset *s = p->infosets[m->infoset->number];
+    Infoset *s = p->Infosets()[m->infoset->number];
     AppendNode(n, s);
     
     for (int i = 1; i <= n->children.Length(); i++)
@@ -126,13 +126,13 @@ template <class T> Efg<T>::Efg(const BaseEfg &E)
   
   for (i = 1; i <= E.NumOutcomes(); i++)  {
     OutcomeVector<T> *c = new OutcomeVector<T>(this, i, E.NumPlayers());
-    c->name = E.OutcomeList()[i]->GetName();
+    c->name = E.Outcomes()[i]->GetName();
     outcomes.Append(c);
   }
 
   
   for (i = 1; i <= E.GetChance()->NumInfosets(); i++)   {
-    ChanceInfoset<T> *t = (ChanceInfoset<T> *) E.GetChance()->InfosetList()[i];
+    ChanceInfoset<T> *t = (ChanceInfoset<T> *) E.GetChance()->Infosets()[i];
     ChanceInfoset<T> *s = new ChanceInfoset<T>(this, i, chance,
 					       t->NumActions());
     s->name = t->GetName();
@@ -438,7 +438,7 @@ void Efg<T>::Payoff(const gArray<gArray<int> *> &profile,
 //-------------------------------------------------------------------------
 
 template <class T> BehavProfile<T>::BehavProfile(const Efg<T> &EF)
-  : gDPVector<T>(EF.Dimensionality()), E(&EF), support(EF)
+  : gDPVector<T>(EF.NumActions()), E(&EF), support(EF)
 {
   Centroid();
 }
@@ -498,15 +498,15 @@ template <class T> T BehavProfile<T>::LiapValue(void) const
   BehavProfile<T> tmp(p);
   T x, result = ((T) 0), avg, sum;
 
-  gDPVector<T> cpay(((Efg<T> *)E)->Dimensionality());  
-  gPVector<T> probs(((Efg<T> *)E)->Dimensionality().Lengths());  
+  gDPVector<T> cpay(E->NumActions());  
+  gPVector<T> probs(E->NumInfosets());
   tmp.CondPayoff(cpay, probs);
 
   for (int i = 1; i <= E->NumPlayers(); i++) {
-    EFPlayer *player = E->PlayerList()[i];
+    EFPlayer *player = E->Players()[i];
     for (int j = 1; j <= player->NumInfosets(); j++) {
       avg = sum = (T)0;
-      Infoset *s = player->InfosetList()[j];
+      Infoset *s = player->Infosets()[j];
       int k;
       for (k = 1; k <= s->NumActions(); k++) {
 	x = p(i, j, k); 
@@ -539,9 +539,9 @@ template <class T> void BehavProfile<T>::Gripe(gDPVector<T> &value) const
   
   for (i = 1; i <= E->NumPlayers(); i++) {
     pay = Payoff(i);
-    EFPlayer *player = E->PlayerList()[i];
+    EFPlayer *player = E->Players()[i];
     for (j = 1; j <= player->NumInfosets(); j++) {
-      Infoset *s = player->InfosetList()[j];
+      Infoset *s = player->Infosets()[j];
       for (k = 1; k <= s->NumActions(); k++) 
 	scratch(i, j, k) = (T)0;
       for (k = 1; k <= s->NumActions(); k++) {
@@ -699,8 +699,8 @@ void BehavProfile<T>::CondPayoff(gDPVector<T> &payoff,
   CondPayoff(E->RootNode(), (T) 1.0, probs, payoff);
 
   for (int i = 1; i <= E->NumPlayers(); i++)
-    for (int j = 1; j <= (E->PlayerList())[i]->infosets.Length(); j++)
-      for (int k = 1; k <= (E->PlayerList())[i]->infosets[j]->actions.Length();
+    for (int j = 1; j <= (E->Players())[i]->infosets.Length(); j++)
+      for (int k = 1; k <= (E->Players())[i]->infosets[j]->actions.Length();
 	   k++)
 	// This will protect against	 divides by zero.
 	// It will leave unreached infoset values at zero, which
@@ -785,7 +785,7 @@ void BehavProfile<T>::Beliefs(Node *n, T prob,
   if (n->infoset == 0)   return;
 
   while(mnum <= n->infoset->NumMembers() &&
-	n->infoset->GetMemberList()[mnum]!=n) 
+	n->infoset->Members()[mnum]!=n) 
     mnum++;
   assert(mnum<=n->infoset->NumMembers());
   
@@ -812,10 +812,10 @@ void BehavProfile<T>::Beliefs(Node *n, T prob,
 
 template <class T> gDPVector<T> BehavProfile<T>::Beliefs(void) const
 {
-  gDPVector<T> BProbs(((Efg<T> *)E)->BeliefDimensionality());
+  gDPVector<T> BProbs(((Efg<T> *)E)->NumMembers());
   BProbs = (T)0;
-  gDPVector<T> payoff(((Efg<T> *)E)->Dimensionality());
-  gPVector<T> probs(((Efg<T> *)E)->Dimensionality().Lengths());
+  gDPVector<T> payoff(((Efg<T> *)E)->NumActions());
+  gPVector<T> probs(((Efg<T> *)E)->NumActions().Lengths());
   CondPayoff( payoff, probs);
   Beliefs ( E->RootNode(), (T)1, BProbs, probs);
 //  gout << "\nBProbs: " << BProbs; 

@@ -101,11 +101,11 @@ protected:
 
     EFPlayer *GetChance(void) const;
     EFPlayer *NewPlayer(void);
-    const gArray<EFPlayer *> &PlayerList(void) const  { return players; }
+    const gArray<EFPlayer *> &Players(void) const  { return players; }
 
        //# DATA ACCESS -- OUTCOMES
     int NumOutcomes(void) const;
-    const gArray<Outcome *> &OutcomeList(void) const  { return outcomes; }
+    const gArray<Outcome *> &Outcomes(void) const  { return outcomes; }
     void DeleteOutcome(Outcome *c);  
  
        //# EDITING OPERATIONS
@@ -145,9 +145,9 @@ protected:
 
 
     int ProfileLength(void) const;
-    gArray<int> PureDimensionality(void) const;
-    gPVector<int> Dimensionality(void) const;
-    gPVector<int> BeliefDimensionality(void) const;
+    gArray<int> NumInfosets(void) const;
+    gPVector<int> NumActions(void) const;
+    gPVector<int> NumMembers(void) const;
 };
 
 
@@ -247,6 +247,6 @@ template <class T> class Efg : public BaseEfg   {
 template <class T> int ReadEfgFile(gInput &, Efg<T> *&);
 void EfgFileType(gInput &f, bool &valid, DataType &type);
 
-#endif   //# EFG_H
+#endif   // EFG_H
 
 

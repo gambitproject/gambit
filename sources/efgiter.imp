@@ -9,7 +9,7 @@
 
 template <class T> EfgIter<T>::EfgIter(Efg<T> &efg)
   : _efg(&efg), _support(efg),
-    _efgidx(_efg->PureDimensionality()), _supidx(_efgidx),
+    _efgidx(_efg->NumInfosets()), _supidx(_efgidx),
     _payoff(_efg->NumPlayers())
 {
   First();
@@ -17,7 +17,7 @@ template <class T> EfgIter<T>::EfgIter(Efg<T> &efg)
 
 template <class T> EfgIter<T>::EfgIter(const EFSupport &s)
   : _efg((Efg<T> *) &s.BelongsTo()), _support(s),
-    _efgidx(_efg->PureDimensionality()), _supidx(_efgidx),
+    _efgidx(_efg->NumInfosets()), _supidx(_efgidx),
     _payoff(_efg->NumPlayers())
 {
   First();
@@ -55,7 +55,7 @@ template <class T> void EfgIter<T>::First(void)
   _supidx = 1;
 
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= _efg->PlayerList()[pl]->NumInfosets(); iset++)
+    for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++)
       _efgidx(pl, iset) = _support.Actions(pl, iset)[1]->GetNumber();
   }
 }
@@ -78,7 +78,7 @@ template <class T> int EfgIter<T>::Next(int pl, int iset)
 template <class T> int EfgIter<T>::Set(int pl, int iset, int act)
 {
   if (pl <= 0 || pl > _efg->NumPlayers() ||
-      iset <= 0 || iset > _efg->PlayerList()[pl]->NumInfosets() ||
+      iset <= 0 || iset > _efg->Players()[pl]->NumInfosets() ||
       act <= 0 || act > _support.NumActions(pl, iset))
     return 0;
 

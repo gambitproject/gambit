@@ -112,7 +112,7 @@ player_number:     NUMBER
                    { if (last_rational.denominator() != 1)  YYERROR;
 		     last_int = last_rational.numerator().as_long();
 		     if (last_int <= 0 || last_int > E->NumPlayers()) YYERROR;
-		     player = E->PlayerList()[last_int];
+		     player = E->Players()[last_int];
 		   }
              ;
 
