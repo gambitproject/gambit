@@ -994,7 +994,8 @@ bool GSM::BindRef( void )
     }
     else
     {
-      func->SetCurrParamIndex( func->GetCurrParamIndex() + 1 );
+      result = func->SetCurrParam( param );
+      //func->SetCurrParamIndex( func->GetCurrParamIndex() + 1 );
     }
   }
 
@@ -1091,13 +1092,14 @@ bool GSM::CallFunction( void )
     {
       func->SetCurrParamIndex( index );
       refp = func->GetCurrParamRef();
+
       if( refp != 0 && param[ index ] != 0 )
       {
 	if( refp->SubValue() == "" )
 	{
 	  _RefTable->Define( refp->Value(), param[ index ] );
 	}
-	else
+	else // ( refp->SubValue != "" )
 	{
 	  if( _RefTable->IsDefined( refp->Value() ) )
 	  {
@@ -1124,7 +1126,7 @@ bool GSM::CallFunction( void )
 	    }
 	    delete param[ index ];
 	  }
-	  else
+	  else // ( !_RefTable->IsDefined( refp->Value() ) )
 	  {
 	    gerr << "GSM Error: attempted to assign the sub-variable of\n";
 	    gerr << "           an undefined variable\n";
@@ -1134,16 +1136,19 @@ bool GSM::CallFunction( void )
 	}
 	delete refp;
       }
-      else
+      else // ( !( refp != 0 && param[ index ] != 0 ) )
       {
 	if( ( refp == 0 ) && ( param[ index ] != 0 ) )
 	  delete param[ index ];
+#ifndef NDEBUG
 	else if( ( refp != 0 ) && ( param[ index ] == 0 ) )
 	{
-	  gerr << "some sort of fatal error; this should not occur\n";
+	  gerr << "GSM Fatal Error; this should never occur\n";
+	  gerr << "Function: " << func->FuncName() << "\n";
 	  gerr << "index: " << index << ", refp: " << refp << "\n";
 	  assert(0);
 	}
+#endif // NDEBUG
       }
     }
   }

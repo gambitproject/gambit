@@ -41,7 +41,7 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
-
+/*
   gout << "\n";
   machine->Push( d_1 );
   machine->Push( d_2 );
@@ -1439,7 +1439,31 @@ int main( void )
   machine->PushRef( "x" );
   machine->Dump();
 
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
 
+
+
+
+  machine->PushRef( "x" );
+  machine->Push( (double) 7 );
+  machine->Assign();
+  machine->PushRef( "y" );
+  machine->Push( (double) 8 );
+  machine->Assign();
+
+
+  machine->InitCallFunction( "Test" );
+  machine->PushRef( "x" );
+  machine->Bind(  );
+  machine->PushRef( "y" );
+  machine->Bind( "x2" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->PushRef( "y" );
+  machine->Dump();
 
 
   machine->InitCallFunction( "Test" );
@@ -1464,6 +1488,26 @@ int main( void )
   machine->Push( (gInteger) 6 );
   machine->Bind();
   machine->CallFunction();
+  machine->Dump();
+
+*/
+
+
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 1 );
+  machine->Push( (gInteger) 2 );
+
+  machine->Push( (gInteger) 11 );
+  machine->Push( (gInteger) 12 );
+  machine->Push( (gInteger) 13 );
+  machine->Push( (gInteger) 14 );
+  machine->Push( (gInteger) 15 );
+  machine->PushList( 5 );
+
+  machine->Push( (gInteger) 4 );
+  machine->Push( (gInteger) 5 );
+  machine->PushList( 5 );
+  machine->Assign();
   machine->Dump();
 
   gout << "*********************** press return to continue ************";

@@ -351,8 +351,10 @@ int CallFuncObj::NumParams( void ) const
 int CallFuncObj::FindParamName( const gString& param_name )
 {
   int f_index;
+  int TempFuncIndex = -1;
   int index;
   int result = PARAM_NOT_FOUND;
+  int times_found = 0;
 
   for( f_index = 0; 
       f_index < _NumFuncs && result != PARAM_AMBIGUOUS;
@@ -365,14 +367,33 @@ int CallFuncObj::FindParamName( const gString& param_name )
 	if( result == PARAM_NOT_FOUND )
 	{
 	  result = index;
-	  break;
+	  TempFuncIndex = f_index;
+	  times_found++;
 	}
-	else if( result != index )
+	else if( result == index )
+	{
+	  times_found++;
+	}
+	else // ( result != index )
 	{
 	  result == PARAM_AMBIGUOUS;
 	  break;
 	}
       }
+    }
+  }
+
+  if( !_ErrorOccurred && times_found == 1 )
+  {
+    if( _FuncIndex == -1 )
+    {
+      _FuncIndex = TempFuncIndex;
+    }
+    else if( _FuncIndex != TempFuncIndex )
+    {
+      gerr << "CallFuncObj Error: conflicting variable name specification\n";
+      _FuncIndex = -1;
+      _ErrorOccurred = true;
     }
   }
   return result;
@@ -401,6 +422,7 @@ void CallFuncObj::SetCurrParamRef( Reference_Portion* ref )
 bool CallFuncObj::SetCurrParam( Portion *param )
 {
   bool result = true;
+  bool type_match;
 
   if( !_ErrorOccurred )
   {
@@ -408,14 +430,29 @@ bool CallFuncObj::SetCurrParam( Portion *param )
     {
       if( !_RunTimeParamInfo[ _CurrParamIndex ].Defined )
       {
-	if( _Param[ _CurrParamIndex ] != NO_DEFAULT_VALUE )
+	type_match = false;
+	if( param == 0 || _FuncIndex == -1 )
+	  type_match = true;
+	else if( param->Type() & 
+		_FuncInfo[ _FuncIndex ].ParamInfo[ _CurrParamIndex ].Type )
+	  type_match = true;
+
+	if( type_match )
 	{
-	  delete _Param[ _CurrParamIndex ];
+	  if( _Param[ _CurrParamIndex ] != NO_DEFAULT_VALUE )
+	  {
+	    delete _Param[ _CurrParamIndex ];
+	  }
+	  _Param[ _CurrParamIndex ] = param;
+	  _RunTimeParamInfo[ _CurrParamIndex ].Defined = true;
+	  _CurrParamIndex++;
+	  _NumParamsDefined++;
 	}
-	_Param[ _CurrParamIndex ] = param;
-	_RunTimeParamInfo[ _CurrParamIndex ].Defined = true;
-	_CurrParamIndex++;
-	_NumParamsDefined++;
+	else
+	{
+	  gerr << "CallFuncObj Error: parameter type mismatch\n";
+	  result = false;
+	}
       }
       else
       {
@@ -444,6 +481,8 @@ bool CallFuncObj::SetCurrParam( Portion *param )
   if( result == false )
   {
     _ErrorOccurred = true;
+    delete param;
+    delete _RunTimeParamInfo[ _CurrParamIndex ].Ref;
   }
   return result;
 }
@@ -494,26 +533,52 @@ Portion* CallFuncObj::CallFunction( Portion **param )
   int index;
   int f_index;
   bool param_match;
+  bool any_defined;
   Portion* result = 0;
 
   if( _FuncIndex == -1 )
   {
-    for( f_index = 0; f_index < _NumFuncs; f_index++ )
+    any_defined = false;
+    for( index = 0; index < _NumFuncs; index++ )
     {
-      param_match = true;
-      for( index = 0; 
-	  index < _FuncInfo[ f_index ].NumParams; 
-	  index++ )
+      if( _Param[ index ] != 0 )
       {
-	if( _Param[ index ] != 0 )
-	  if( _Param[ index ]->Type() != 
-	     _FuncInfo[ f_index ].ParamInfo[ index ].Type )
-	    param_match = false;
-      }
-      if( param_match )
-      {
-	_FuncIndex = f_index;
+	any_defined = true;
 	break;
+      }
+    }
+    if( any_defined )
+    {
+      for( f_index = 0; f_index < _NumFuncs; f_index++ )
+      {
+	param_match = true;
+	for( index = 0; 
+	    index < _FuncInfo[ f_index ].NumParams; 
+	    index++ )
+	{
+	  if( _Param[ index ] != 0 )
+	    if( !( _Param[ index ]->Type() & 
+	       _FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
+	      param_match = false;
+	}
+	if( param_match )
+	{
+	  _FuncIndex = f_index;
+	  break;
+	}
+      }
+    }
+    else // ( !any_defined )
+    {
+      if( _NumFuncs == 1 )
+      {
+	_FuncIndex = 0;
+      }
+      else
+      {
+	gerr << "CallFuncObj Error: no defined parameters; function call\n";
+	gerr << "                   ambiguous\n";
+	_ErrorOccurred = true;
       }
     }
   }
@@ -590,14 +655,9 @@ bool CallFuncObj::ParamPassByReference( const int index ) const
 {
   if( _FuncIndex >= 0 && _FuncIndex < _NumFuncs )
   {
-    if( _CurrParamIndex >= 0 && 
-       _CurrParamIndex < _FuncInfo[ _FuncIndex ].NumParams )
+    if( index >= 0 && index < _FuncInfo[ _FuncIndex ].NumParams )
       return _FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference;
-    else
-      return false;
   }
-  else
-  {
-    return false;
-  }
+
+  return false;
 }
