@@ -264,7 +264,7 @@ template <class T> gVector<T> gVector<T>::Sqwzz(int i) const
   return result;
 }
 
-template <class T> INLINE output &operator<<(output &op, const gVector<T> &v)
+template <class T> INLINE gOutput &operator<<(gOutput &op, const gVector<T> &v)
 {
   op << '{' << ' ';
   for (int i = v.First(); i <= v.Last(); i++)  
