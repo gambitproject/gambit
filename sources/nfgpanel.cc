@@ -121,9 +121,7 @@ void NfgPanel::SetStrategy(int p_player, int p_strategy)
 
 void NfgPanel::OnStrategyChange(wxCommandEvent &)
 {
-  for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
-    m_parent->SetStrategy(pl, m_stratProfile[pl-1]->GetSelection() + 1);
-  }
+  m_parent->SetProfile(GetProfile());
 }
 
 void NfgPanel::OnRowPlayerChange(wxCommandEvent &)
@@ -158,7 +156,7 @@ void NfgPanel::OnColPlayerChange(wxCommandEvent &)
     m_parent->SetPlayers(oldColPlayer, newColPlayer);
   }
   else {
-    m_parent->SetPlayers(m_colChoice->GetSelection() + 1, newColPlayer);
+    m_parent->SetPlayers(m_rowChoice->GetSelection() + 1, newColPlayer);
   }
 }
 

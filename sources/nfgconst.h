@@ -54,14 +54,16 @@
 #define NFG_PREFS_DISPLAY               204
 #define NFG_PREFS_DISPLAY_COLUMNS       205
 #define NFG_PREFS_DISPLAY_DECIMALS      207
-#define NFG_PREFS_FONT                  208
+#define NFG_PREFS_FONT                  212
+#define NFG_PREFS_FONT_DATA             208
+#define NFG_PREFS_FONT_LABELS           203
 #define NFG_PREFS_COLORS                200
 #define NFG_PREFS_ACCELS                202
 #define NFG_PREFS_SAVE                  209
 #define NFG_PREFS_LOAD                  210
 #define NFG_OPTIONS_MENU                211
 
-#define NFG_ACCL_PAYOFF                 400     // these are not real menus, just accels
+#define NFG_ACCL_PAYOFF                 400
 #define NFG_ACCL_NEXT_PAYOFF            410
 
 #define NFG_HELP_ABOUT                  601

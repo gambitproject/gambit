@@ -151,7 +151,8 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_VIEW_GAMEINFO, NfgShow::OnViewGameInfo)
   EVT_MENU(NFG_PREFS_DISPLAY_COLUMNS, NfgShow::OnPrefsDisplayColumns)
   EVT_MENU(NFG_PREFS_DISPLAY_DECIMALS, NfgShow::OnPrefsDisplayDecimals)
-  EVT_MENU(NFG_PREFS_FONT, NfgShow::OnPrefsFont)
+  EVT_MENU(NFG_PREFS_FONT_DATA, NfgShow::OnPrefsFontData)
+  EVT_MENU(NFG_PREFS_FONT_LABELS, NfgShow::OnPrefsFontLabels)
   EVT_MENU(NFG_PREFS_COLORS, NfgShow::OnPrefsColors)
   EVT_MENU(NFG_PREFS_ACCELS, NfgShow::OnPrefsAccels)
   EVT_MENU(NFG_PREFS_SAVE, NfgShow::OnPrefsSave)
@@ -331,7 +332,10 @@ void NfgShow::MakeMenus(void)
 
   prefsMenu->Append(NFG_PREFS_DISPLAY, "&Display", prefsDisplayMenu,
 		    "Configure display options");
-  prefsMenu->Append(NFG_PREFS_FONT, "&Font", "Set font");
+  wxMenu *prefsFontMenu = new wxMenu;
+  prefsFontMenu->Append(NFG_PREFS_FONT_DATA, "&Data", "Set data font");
+  prefsFontMenu->Append(NFG_PREFS_FONT_LABELS, "&Labels", "Set label font");
+  prefsMenu->Append(NFG_PREFS_FONT, "&Font", prefsFontMenu, "Set fonts");
   prefsMenu->Append(NFG_PREFS_COLORS, "&Colors", "Set player colors");
   prefsMenu->Append(NFG_PREFS_ACCELS, "&Accels", "Edit accelerators");
   prefsMenu->AppendSeparator();
@@ -436,15 +440,18 @@ void NfgShow::AdjustSizes(void)
     m_toolbar->SetSize(0, 0, width, toolbarHeight);
   }
   if (m_solutionSashWindow && m_solutionSashWindow->IsShown()) {
-    int solnHeight = gmax(100, height / 3);
-    m_solutionSashWindow->SetSize(0, height - solnHeight, width, solnHeight);
-    height -= solnHeight;
+    m_solutionSashWindow->SetSize(0, height - m_solutionSashWindow->GetRect().height,
+				  width, m_solutionSashWindow->GetRect().height);
+    height -= m_solutionSashWindow->GetRect().height;
   }
   if (m_panelSashWindow) {
-    m_panelSashWindow->SetSize(0, 40, 200, height - 40);
+    m_panelSashWindow->SetSize(0, 40, m_panelSashWindow->GetRect().width,
+			       height - 40);
   }
   if (m_table) {
-    m_table->SetSize(200, 40, width - 200, height - 40);
+    m_table->SetSize(m_table->GetRect().x, m_table->GetRect().y,
+		     width - m_table->GetRect().x,
+		     height - toolbarHeight);
   }
 }
 
@@ -479,7 +486,7 @@ void NfgShow::OnSashDrag(wxSashEvent &p_event)
 			       m_panelSashWindow->GetRect().width,
 			       clientHeight - p_event.GetDragRect().height - 40);
     m_solutionSashWindow->SetSize(0, clientHeight - p_event.GetDragRect().height,
-				  clientWidth, p_event.GetDragRect().width);
+				  clientWidth, p_event.GetDragRect().height);
     break;
   }
 
@@ -1103,7 +1110,7 @@ void NfgShow::OnPrefsDisplayDecimals(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnPrefsFont(wxCommandEvent &)
+void NfgShow::OnPrefsFontData(wxCommandEvent &)
 {
   wxFontData data;
   wxFontDialog dialog(this, &data);
@@ -1111,6 +1118,19 @@ void NfgShow::OnPrefsFont(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_drawSettings.SetDataFont(dialog.GetFontData().GetChosenFont());
     m_table->SetCellTextFont(dialog.GetFontData().GetChosenFont());
+    m_table->OnChangeValues();
+  }
+}
+
+void NfgShow::OnPrefsFontLabels(wxCommandEvent &)
+{
+  wxFontData data;
+  wxFontDialog dialog(this, &data);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    m_drawSettings.SetLabelFont(dialog.GetFontData().GetChosenFont());
+    m_table->SetLabelFont(dialog.GetFontData().GetChosenFont());
+    m_table->OnChangeLabels();
   }
 }
 
@@ -1148,6 +1168,11 @@ void NfgShow::SetStrategy(int p_player, int p_strategy)
 {
   m_panel->SetStrategy(p_player, p_strategy);
   m_table->SetStrategy(p_player, p_strategy);
+}
+
+void NfgShow::SetProfile(const gArray<int> &p_profile)
+{
+  m_table->SetProfile(p_profile);
 }
 
 void NfgShow::UpdateProfile(gArray<int> &profile)
@@ -1289,7 +1314,7 @@ const gList<MixedSolution> &NfgShow::Solutions(void) const
 //-----------------------------------------------------------------------
 
 NormalDrawSettings::NormalDrawSettings(void)
-  : m_decimals(2), m_dataFont(*wxNORMAL_FONT)
+  : m_decimals(2), m_dataFont(*wxNORMAL_FONT), m_labelFont(*wxNORMAL_FONT)
 {
   LoadSettings();
 }

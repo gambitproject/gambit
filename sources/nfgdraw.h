@@ -12,7 +12,7 @@
 class NormalDrawSettings : public GambitDrawSettings {
 private:
   int m_decimals, m_outcomeValues;
-  wxFont m_dataFont;
+  wxFont m_dataFont, m_labelFont;
 
 public:
   NormalDrawSettings(void);
@@ -26,6 +26,9 @@ public:
 
   void SetDataFont(const wxFont &p_font) { m_dataFont = p_font; }
   const wxFont &GetDataFont(void) const { return m_dataFont; }
+
+  void SetLabelFont(const wxFont &p_font) { m_labelFont = p_font; }
+  const wxFont &GetLabelFont(void) const { return m_labelFont; }
 
   void LoadSettings(void);
   void SaveSettings(void) const;

@@ -18,39 +18,50 @@ BEGIN_EVENT_TABLE(NfgTable, wxGrid)
 END_EVENT_TABLE()
 
 NfgTable::NfgTable(NfgShow *p_parent)
-  : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
+  : wxGrid(p_parent, -1, wxPoint(200, 40), wxDefaultSize),
     m_parent(p_parent)
 {
   CreateGrid(p_parent->CurrentSupport()->NumStrats(1),
 	     p_parent->CurrentSupport()->NumStrats(2));
   SetGridCursor(0, 0);
   SetEditable(false);
+  DisableDragRowSize();
   AdjustScrollbars();
   Show(true);
 }
 
 void NfgTable::SetProfile(const gArray<int> &p_profile)
 {
-  SetGridCursor(p_profile[m_parent->GetRowPlayer()],
-		p_profile[m_parent->GetColPlayer()]);
+  OnChangeLabels();
+  OnChangeValues();
+  SetGridCursor(p_profile[m_parent->GetRowPlayer()] - 1,
+		p_profile[m_parent->GetColPlayer()] - 1);
 }
 
 void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
 { 
   const NFSupport &support = *m_parent->CurrentSupport();
 
-  if (support.NumStrats(p_rowPlayer) > GetRows()) {
-    InsertRows(0, support.NumStrats(p_rowPlayer) - GetRows() + m_showDom);
+  if (support.NumStrats(p_rowPlayer) + m_showProb + m_showDom + m_showValue
+      > GetRows()) {
+    InsertRows(0, support.NumStrats(p_rowPlayer) - GetRows() +
+	       m_showProb + m_showDom + m_showValue);
   }
-  else if (support.NumStrats(p_rowPlayer) < GetRows()) {
-    DeleteRows(0, GetRows() - support.NumStrats(p_rowPlayer) - m_showDom);
+  else if (support.NumStrats(p_rowPlayer) + m_showProb + m_showDom +
+	   m_showValue < GetRows()) {
+    DeleteRows(0, GetRows() - support.NumStrats(p_rowPlayer) - m_showProb -
+	       m_showDom - m_showValue);
   }
 
-  if (support.NumStrats(p_colPlayer) > GetCols()) {
-    InsertCols(0, support.NumStrats(p_colPlayer) - GetCols() + m_showDom);
+  if (support.NumStrats(p_colPlayer) + m_showProb + m_showDom + m_showValue
+      > GetCols()) {
+    InsertCols(0, support.NumStrats(p_colPlayer) - GetCols() + m_showProb +
+	       m_showDom + m_showValue);
   }
-  else if (support.NumStrats(p_colPlayer) < GetCols()) {
-    DeleteCols(0, GetCols() - support.NumStrats(p_colPlayer) - m_showDom);
+  else if (support.NumStrats(p_colPlayer) + m_showProb + m_showDom +
+	   m_showValue < GetCols()) {
+    DeleteCols(0, GetCols() - support.NumStrats(p_colPlayer) - m_showProb -
+	       m_showDom - m_showValue);
   }
 
   AdjustScrollbars();
@@ -115,6 +126,7 @@ void NfgTable::OnChangeValues(void)
   int colPlayer = m_parent->GetColPlayer();
 
   ClearGrid();
+  SetCellBackgroundColour(*wxWHITE);
 
   NfgIter iterator(support);
   iterator.Set(m_parent->GetProfile());
@@ -165,8 +177,9 @@ void NfgTable::OnChangeValues(void)
   }
    
   if (ShowDominance()) {
+    int dom_pos = GetRows() - ShowValues();
+
     for (int j = 1; j <= support.NumStrats(m_parent->GetColPlayer()); j++) {
-      int dom_pos = GetRows() - ShowValues();
       Strategy *strategy = support.Strategies(m_parent->GetColPlayer())[j];
       if (support.IsDominated(strategy, true)) { 
 	SetCellValue("S", dom_pos - 1, j - 1);
@@ -177,6 +190,13 @@ void NfgTable::OnChangeValues(void)
       else {
 	SetCellValue("N", dom_pos - 1, j - 1);
       }
+    }
+
+    for (int j = 0; j < GetRows(); j++) {
+      SetCellBackgroundColour(*wxLIGHT_GREY, j, dom_pos - 1);
+    }
+    for (int j = 0; j < GetCols(); j++) {
+      SetCellBackgroundColour(*wxLIGHT_GREY, dom_pos - 1, j);
     }
   }
 
@@ -217,9 +237,6 @@ void NfgTable::OnChangeValues(void)
 		 support.NumStrats(colPlayer));
   }
 
-  // Set the profile boxes to correct values if this is a pure equ
-  SetProfile(profile);
-
   // Hilight the cells w/ nonzero prob
   gNumber eps;
   gEpsilon(eps, GetDecimals());
@@ -234,6 +251,11 @@ void NfgTable::OnChangeValues(void)
       SetCellValue((char *) ToText(soln(support.Strategies(colPlayer)[i]),
 				   GetDecimals()),
 		   support.NumStrats(rowPlayer), i-1);
+
+    for (int i = 0; i < GetRows(); i++) {
+      SetCellBackgroundColour(*wxLIGHT_GREY, i, support.NumStrats(colPlayer));
+      SetCellBackgroundColour(*wxLIGHT_GREY, support.NumStrats(rowPlayer), i);
+    }
   }
 
   if (ShowValues()) {
@@ -249,6 +271,17 @@ void NfgTable::OnChangeValues(void)
 					       support.Strategies(colPlayer)[j]),
 				   GetDecimals()),
 		   support.NumStrats(rowPlayer)+ShowProbs()+ShowDominance(), j-1);
+
+    }
+    
+    for (int i = 0; i < GetRows(); i++) {
+      SetCellBackgroundColour(*wxLIGHT_GREY, i,
+			      support.NumStrats(colPlayer)+ShowProbs()+ShowDominance());
+    }
+    for (int i = 0; i < GetCols(); i++) {
+      SetCellBackgroundColour(*wxLIGHT_GREY,
+			      support.NumStrats(rowPlayer)+ShowProbs()+ShowDominance(),
+			      i);
     }
   }
 }
@@ -310,12 +343,14 @@ void NfgTable::ToggleValues(void)
 
 void NfgTable::OnLeftClick(wxGridEvent &p_event)
 {
-  if (p_event.GetRow() < 
-      m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer())) {
-    m_parent->SetStrategy(m_parent->GetRowPlayer(), p_event.GetRow() + 1);
-  }
-  if (p_event.GetCol() <
+  if (p_event.GetRow() >= 
+      m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer()) ||
+      p_event.GetCol() >=
       m_parent->CurrentSupport()->NumStrats(m_parent->GetColPlayer())) {
+    p_event.Veto();
+  }
+  else {
+    m_parent->SetStrategy(m_parent->GetRowPlayer(), p_event.GetRow() + 1);
     m_parent->SetStrategy(m_parent->GetColPlayer(), p_event.GetCol() + 1);
   }
 }

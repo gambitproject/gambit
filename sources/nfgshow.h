@@ -97,7 +97,8 @@ private:
 
   void OnPrefsDisplayColumns(wxCommandEvent &);
   void OnPrefsDisplayDecimals(wxCommandEvent &);
-  void OnPrefsFont(wxCommandEvent &);
+  void OnPrefsFontData(wxCommandEvent &);
+  void OnPrefsFontLabels(wxCommandEvent &);
   void OnPrefsColors(wxCommandEvent &);
   void OnPrefsAccels(wxCommandEvent &);
   void OnPrefsSave(wxCommandEvent &);
@@ -127,6 +128,7 @@ public:
   void OutcomePayoffs(int st1, int st2, bool next = false);
   void UpdateProfile(gArray<int> &profile);
   void SetStrategy(int p_player, int p_strategy);
+  void SetProfile(const gArray<int> &);
   void SetPlayers(int p_rowPlayer, int p_colPlayer);
   int GetRowPlayer(void) const { return m_rowPlayer; }
   int GetColPlayer(void) const { return m_colPlayer; }
