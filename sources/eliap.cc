@@ -41,7 +41,8 @@ class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
   private:
     int niters, nevals;
     const ExtForm<T> &E;
-    BehavProfile<T> p, pp,cpay;
+    BehavProfile<T> p, pp;
+    gDPVector<T> cpay;
     gMatrix<T> xi;
 
     T Value(const gVector<T> &x);
@@ -70,7 +71,7 @@ template <class T>EFLiapFunc<T>
 ::EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P)
   : gBFunctMin<T>(EF.ProfileLength(),P.tolOpt,P.maxitsOpt,
 		  P.tolBrent,P.maxitsBrent), E(EF), p(EF, false),
-		  pp(EF, false), cpay(EF, false), 
+		  pp(EF, false), cpay(EF.Dimensionality()),
 		  xi(p.Length(),p.Length()),
 		  niters(0), nevals(0)
 {
@@ -84,7 +85,7 @@ template <class T>EFLiapFunc<T>
 			  const BehavProfile<T> &s)
   : gBFunctMin<T>(EF.ProfileLength(),P.tolOpt,P.maxitsOpt,
 		  P.tolBrent,P.maxitsBrent), E(EF), p(EF, false),
-		  pp(EF,false), cpay(EF,false), 
+		  pp(EF,false), cpay(EF.Dimensionality()),
 		  xi(p.Length(),p.Length()),
 		  niters(0), nevals(0)
 {
@@ -156,7 +157,7 @@ template <class T> T EFLiapFunc<T>::Value(const gVector<T> &v)
 
       // Ted -- only reason for this is because you 
       // got rid of CondPayoff ( . , . )
-  gPVector<T> probs;  
+  gPVector<T> probs(E.Dimensionality().Lengths());  
   E.CondPayoff(p,cpay,probs);
 
 //  gout << "\nv = " << v << "\np = " << p << "\ncpay = " << cpay;
@@ -204,7 +205,7 @@ template <class T> EFLiapModule<T>::~EFLiapModule()
 { }
 
 template <class T>
-const gList<gDPVector<T> > &EFLiapModule<T>::GetSolutions(void) const
+const gList<BehavProfile<T> > &EFLiapModule<T>::GetSolutions(void) const
 {
   return solutions;
 }
