@@ -163,8 +163,16 @@ template class gNode<gPoly<gRational> >;
 template gOutput& operator << (gOutput& output, 
 			       const gList<gPoly<gRational> >&);
 
-//template class gList<gDouble>;
-//template class gNode<gDouble>;
+template class gList<gPoly<gRational> >;
+template class gNode<gPoly<gRational> >;
+template gOutput& operator << (gOutput& output, 
+			       const gList<gPoly<gRational> >&);
+
+template class gList<gPoly<double> >;
+template class gNode<gPoly<double> >;
+template gOutput& operator << (gOutput& output, 
+			       const gList<gPoly<double> >&);
+
 #ifdef GDOUBLE
 template class gList< gPoly<gDouble> * >;
 template class gNode< gPoly<gDouble> * >;

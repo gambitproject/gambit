@@ -7,8 +7,6 @@
 #include "gvector.imp"
 #include "gnumber.h"
 
-
-
 template class gVector<int>;
 template class gVector<long>;
 template class gVector<double>;
@@ -22,4 +20,14 @@ template gOutput & operator<< (gOutput&, const gVector<double>&);
 template gOutput & operator<< (gOutput&, const gVector<gInteger>&);
 template gOutput & operator<< (gOutput&, const gVector<gRational>&);
 template gOutput & operator<< (gOutput&, const gVector<gNumber>&);
+
+#include "glist.imp"
+
+template class gList<gVector<double> >;
+template class gNode<gVector<double> >;
+template class gList<gVector<gRational> >;
+template class gNode<gVector<gRational> >;
+template gOutput& operator << (gOutput& output, 
+			       const gList<gVector<gRational> >&);
+
 

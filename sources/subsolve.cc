@@ -30,11 +30,6 @@ template gOutput &operator<<(gOutput &, const gArray<EFOutcome *> &);
 
 #include "glist.imp"
 
-template class gList<gVector<double> >;
-template class gNode<gVector<double> >;
-template class gList<gVector<gRational> >;
-template class gNode<gVector<gRational> >;
-
 template class gList<EFOutcome *>;
 template class gNode<EFOutcome *>;
 
@@ -43,3 +38,5 @@ template class gNode<gArray<EFOutcome *> >;
 
 template class gList<BehavProfile<gNumber> >;
 template class gNode<BehavProfile<gNumber> >;
+
+
