@@ -34,6 +34,7 @@ private:
 
   NfgTable *m_table;
   NfgProfileList *m_solutionTable;
+  wxNotebook *m_infoNotebook;
 
   wxSashWindow *m_solutionSashWindow;
 

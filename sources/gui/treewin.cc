@@ -641,6 +641,9 @@ void TreeWindow::OnLeftDoubleClick(wxMouseEvent &p_event)
 
 void TreeWindow::OnRightClick(wxMouseEvent &p_event)
 {
+// QUERY: Is this constant needed anymore?  It isn't used elsewhere.
+  const int PIXELS_PER_SCROLL = 20;
+
   int x, y;
   CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
   x = (int) ((float) x / m_zoom);

@@ -32,6 +32,18 @@ dialogLayout::dialogLayout(wxWindow *p_parent,
 			   int p_infosetStyle)
   : guiAutoDialog(p_parent, "Layout Options")
 {
+  const int BRANCH_LENGTH_MIN = 0;
+  const int BRANCH_LENGTH_MAX = 100;
+
+  const int NODE_LENGTH_MIN = 20;
+  const int NODE_LENGTH_MAX = 100;
+
+  const int FORK_LENGTH_MIN = 0;
+  const int FORK_LENGTH_MAX = 100;
+
+  const int Y_SPACING_MIN = 15;
+  const int Y_SPACING_MAX = 60;
+
   wxStaticBoxSizer *layoutSizer =
     new wxStaticBoxSizer(new wxStaticBox(this, -1, "Tree layout parameters"),
 			 wxVERTICAL);

@@ -12,7 +12,6 @@
 #include "wx/config.h"
 
 #include "base/base.h"
-#include "treecons.h"
 
 class TreeDrawSettings {
 private:
