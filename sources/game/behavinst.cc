@@ -86,33 +86,21 @@ template class gbtList<gbtBehavProfile<gbtRational> >;
 template class gbtList<gbtBehavProfile<gbtNumber> >;
 
 
-template<>
-gbtNumber gbtMixedProfile<gbtNumber>::Payoff(const gbtGameOutcome &p_outcome,
-					     int pl) const
-{ 
-  return p_outcome->GetPayoff(m_support->GetPlayer(pl));
-}
+template class gbtMixedProfileRep<double>;
+template gbtOutput &operator<<(gbtOutput &, 
+			       const gbtMixedProfile<double> &);
 
-template<>
-gbtRational gbtMixedProfile<gbtRational>::Payoff(const gbtGameOutcome &p_outcome, int pl) const
-{ 
-  return p_outcome->GetPayoff(m_support->GetPlayer(pl));
-}
+template class gbtMixedProfileRep<gbtRational>;
+template gbtOutput &operator<<(gbtOutput &,
+			       const gbtMixedProfile<gbtRational> &);
 
-template<>
-double gbtMixedProfile<double>::Payoff(const gbtGameOutcome &p_outcome, int pl) const
-{ 
-  return p_outcome->GetPayoff(m_support->GetPlayer(pl));
-}
+template class gbtMixedProfileRep<gbtNumber>;
+template gbtOutput &operator<<(gbtOutput &,
+			       const gbtMixedProfile<gbtNumber> &);
 
 template class gbtMixedProfile<double>;
-template gbtOutput &operator<<(gbtOutput &, const gbtMixedProfile<double> &);
-
 template class gbtMixedProfile<gbtRational>;
-template gbtOutput &operator<<(gbtOutput &, const gbtMixedProfile<gbtRational> &);
-
 template class gbtMixedProfile<gbtNumber>;
-template gbtOutput &operator<<(gbtOutput &, const gbtMixedProfile<gbtNumber> &);
 
 
 template class gbtList<gbtMixedProfile<double> >;

@@ -27,6 +27,7 @@
 #include "game.h"
 #include "nfgsupport.h"
 #include "gamebase.h"
+#include "mixed.h"
 
 //==========================================================================
 //                      class gbtNfgSupportPlayerRep
@@ -200,6 +201,23 @@ void gbtNfgSupportBase::RemoveStrategy(gbtGameStrategy s)
 gbtNfgContingency gbtNfgSupportBase::NewContingency(void) const
 {
   return m_nfg->NewContingency();
+}
+
+gbtMixedProfile<double> gbtNfgSupportBase::NewMixedProfile(double) const
+{
+  return new gbtMixedProfileBase<double>(const_cast<gbtNfgSupportBase *>(this));
+}
+
+gbtMixedProfile<gbtRational> 
+gbtNfgSupportBase::NewMixedProfile(const gbtRational &) const
+{
+  return new gbtMixedProfileBase<gbtRational>(const_cast<gbtNfgSupportBase *>(this));
+}
+
+gbtMixedProfile<gbtNumber>
+gbtNfgSupportBase::NewMixedProfile(const gbtNumber &) const
+{
+  return new gbtMixedProfileBase<gbtNumber>(const_cast<gbtNfgSupportBase *>(this));
 }
 
 gbtOutput& operator<<(gbtOutput &p_stream, const gbtNfgSupport &p_support)

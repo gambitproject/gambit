@@ -34,81 +34,94 @@ template <class T> class gbtRectArray;
 template <class T> class gbtBehavProfile;
 
 template <class T>
-class gbtMixedProfile : public gbtPVector<T>, public gbtConstNfgRep {
-private:
-  gbtNfgSupport m_support;
-
-  // Private Payoff functions
-
-  T PPayoff(int pl, int index, int i) const;
-  void PPayoff(int pl, int const_pl, int const_st, int cur_pl, long index,
-	       T prob, T&value) const;
-  void PPayoff(int pl, int const_pl1, int const_st1, int const_pl2, 
-	       int const_st2, int cur_pl, long index, T prob, T &value) const;
-  void PPayoff(int pl, int const_pl, int cur_pl, long index, T prob,
-	       gbtVector<T> &value) const;
-  T Payoff(const gbtGameOutcome &o, int pl) const;
-
+class gbtMixedProfileRep : public gbtConstNfgRep {
+friend class gbtMixedProfile<T>;
 public:
-  gbtMixedProfile(const gbtNfgSupport &);
-  gbtMixedProfile(const gbtMixedProfile<T> &);
-  gbtMixedProfile(const gbtBehavProfile<T> &);
-  virtual ~gbtMixedProfile();
+  virtual ~gbtMixedProfileRep() { }
 
-  gbtMixedProfile<T> &operator=(const gbtMixedProfile<T> &);
-
-  gbtGame GetGame(void) const  { return m_support->GetGame(); }
+  virtual gbtMixedProfileRep<T> *Copy(void) const = 0;
+   
+  virtual gbtGame GetGame(void) const = 0;
   
-  T LiapValue(void) const;
-  void Regret(gbtPVector<T> &value) const;
-  T MaxRegret(void) const;
-  void Centroid(void);
+  virtual T LiapValue(void) const = 0;
+  virtual void Regret(gbtPVector<T> &value) const = 0;
+  virtual T MaxRegret(void) const = 0;
+  virtual void Centroid(void) = 0;
 
-  T Payoff(int pl) const;
-  T Payoff(int pl, gbtGameStrategy) const;
-  T Payoff(int pl, int player1, int strat1, int player2, int strat2) const;
-  void Payoff(int pl, int const_pl, gbtVector<T> &payoff) const;
+  virtual T Payoff(int pl) const = 0;
+  virtual T Payoff(int pl, gbtGameStrategy) const = 0;
+  virtual T Payoff(int pl, int player1, int strat1, int player2, int strat2) const = 0;
+  virtual void Payoff(int pl, int const_pl, gbtVector<T> &payoff) const = 0;
 
-  bool operator==(const gbtMixedProfile<T> &) const;
+  virtual bool operator==(const gbtMixedProfileRep<T> &) const = 0;
 
-  const gbtNfgSupport &GetSupport(void) const   { return m_support; }
+  virtual const gbtNfgSupport &GetSupport(void) const = 0;
 
+  // The following implement the necessary gPVector-style operations
+  // traditionally permitted on mixed profiles.
+  virtual const T &operator()(int, int) const = 0;
+  virtual T &operator()(int, int) = 0;
 
-  // IMPLEMENTATION OF gbtGameObject INTERFACE
-  gbtText GetLabel(void) const { return ""; }
-  void SetLabel(const gbtText &) { }
+  virtual const T &operator[](int) const = 0;
+  virtual T &operator[](int) = 0;
 
-  gbtText GetComment(void) const { return ""; }
-
-  // IMPLEMENTATION OF gbtConstGameRep INTERFACE
-  bool IsTree(void) const { return m_support->IsTree(); }
-  bool IsMatrix(void) const { return m_support->IsMatrix(); }
-  
-  int NumPlayers(void) const { return m_support->NumPlayers(); }
-  gbtGamePlayer GetPlayer(int index) const { return m_support->GetPlayer(index); }
-  
-  int NumOutcomes(void) const { return m_support->NumOutcomes(); }
-  gbtGameOutcome GetOutcome(int index) const 
-  { return m_support->GetOutcome(index); }
-
-  bool IsConstSum(void) const { return m_support->IsConstSum(); }
-  gbtNumber MaxPayoff(int pl = 0) const { return m_support->MaxPayoff(pl); }
-  gbtNumber MinPayoff(int pl = 0) const { return m_support->MinPayoff(pl); }
-
-  // IMPLEMENTATION OF gbtConstNfgRep INTERFACE
-  virtual gbtArray<int> NumStrategies(void) const 
-  { return m_support->NumStrategies(); }
-  virtual int MixedProfileLength(void) const
-  { return m_support->MixedProfileLength(); }
-
-  gbtNfgContingency NewContingency(void) const;
-
-  gbtNfgSupport NewNfgSupport(void) const { return m_support->NewNfgSupport(); }
+  virtual gbtVector<T> GetRow(int) const = 0;
+  virtual void SetRow(int row, const gbtVector<T> &) = 0;
+  virtual void CopyRow(int row, const gbtPVector<T> &) = 0;
+  virtual void CopyRow(int row, const gbtMixedProfile<T> &) = 0;
+  virtual const gbtArray<int> &Lengths(void) const = 0;
 };
 
 
-#ifndef __BORLANDC__
-template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtMixedProfile<T> &);
-#endif
+template <class T> class gbtMixedProfile {
+private:
+  gbtMixedProfileRep<T> *m_rep;
+
+public:
+  gbtMixedProfile(void) : m_rep(0) { }
+  gbtMixedProfile(gbtMixedProfileRep<T> *p_rep)
+    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
+  gbtMixedProfile(const gbtMixedProfile<T> &p_profile)
+    : m_rep(p_profile.m_rep->Copy()) { if (m_rep) m_rep->Reference(); }
+  ~gbtMixedProfile() { if (m_rep && m_rep->Dereference()) delete m_rep; }
+  
+  gbtMixedProfile &operator=(const gbtMixedProfile<T> &p_profile) {
+    if (this != &p_profile) {
+      if (m_rep && m_rep->Dereference()) delete m_rep;
+      m_rep = p_profile.m_rep->Copy();
+      if (m_rep) m_rep->Reference();
+    }
+    return *this;
+  }
+
+  // Equality semantics are defined as having the same profile, not
+  // the same underlying object.
+  bool operator==(const gbtMixedProfile<T> &p_profile) const
+  { return (*m_rep == *p_profile.m_rep); }
+  bool operator!=(const gbtMixedProfile<T> &p_profile) const
+  { return !(*m_rep == *p_profile.m_rep); }
+
+  // Direct access so that the traditional operators work without dereferencing
+  const T &operator()(int pl, int st) const { return (*m_rep)(pl, st); }
+  T &operator()(int pl, int st) { return (*m_rep)(pl, st); }
+
+  // These almost certainly should be obsolete
+  const T &operator[](int i) const { return (*m_rep)[i]; }
+  T &operator[](int i) { return (*m_rep)[i]; }
+
+  gbtMixedProfileRep<T> *operator->(void) 
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
+  const gbtMixedProfileRep<T> *operator->(void) const 
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
+
+
+  gbtMixedProfileRep<T> *Get(void) const { return m_rep; }
+
+  // Questionable whether this should be provided
+  bool IsNull(void) const { return (m_rep == 0); }
+};
+
+template <class T>
+gbtOutput &operator<<(gbtOutput &, const gbtMixedProfile<T> &);
 
 #endif    // MIXED_H

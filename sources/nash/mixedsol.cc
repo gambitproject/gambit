@@ -35,17 +35,17 @@
 
 MixedSolution::MixedSolution(const gbtMixedProfile<double> &p_profile,
 			     const gbtText &p_creator)
-  : m_profile(gbtNfgSupport(p_profile.GetGame()->NewNfgSupport())),
+  : m_profile(p_profile->GetGame()->NewMixedProfile(gbtNumber(0))),
     m_precision(GBT_PREC_DOUBLE),
-    m_support(p_profile.GetSupport()), 
+    m_support(p_profile->GetSupport()), 
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
     m_liapValue(), m_epsilon(0.0), m_qreLambda(-1), m_qreValue(-1),
-    m_revision(p_profile.GetGame()->RevisionNumber())
+    m_revision(p_profile->GetGame()->RevisionNumber())
 {
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
     for (int st = 1; st <= GetGame()->GetPlayer(pl)->NumStrategies(); st++) {
-      int index = p_profile.GetSupport()->GetIndex(GetGame()->GetPlayer(pl)->GetStrategy(st));
+      int index = p_profile->GetSupport()->GetIndex(GetGame()->GetPlayer(pl)->GetStrategy(st));
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else
@@ -56,17 +56,17 @@ MixedSolution::MixedSolution(const gbtMixedProfile<double> &p_profile,
 
 MixedSolution::MixedSolution(const gbtMixedProfile<gbtRational> &p_profile,
 			     const gbtText &p_creator)
-  : m_profile(gbtNfgSupport(p_profile.GetGame()->NewNfgSupport())), 
+  : m_profile(p_profile->GetGame()->NewMixedProfile(gbtNumber(0))),
     m_precision(GBT_PREC_RATIONAL),
-    m_support(p_profile.GetSupport()),
+    m_support(p_profile->GetSupport()),
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
     m_liapValue(), m_qreLambda(-1), m_qreValue(-1),
-    m_revision(p_profile.GetGame()->RevisionNumber())
+    m_revision(p_profile->GetGame()->RevisionNumber())
 {
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
     for (int st = 1; st <= GetGame()->GetPlayer(pl)->NumStrategies(); st++) {
-      int index = p_profile.GetSupport()->GetIndex(GetGame()->GetPlayer(pl)->GetStrategy(st));
+      int index = p_profile->GetSupport()->GetIndex(GetGame()->GetPlayer(pl)->GetStrategy(st));
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else
@@ -77,16 +77,16 @@ MixedSolution::MixedSolution(const gbtMixedProfile<gbtRational> &p_profile,
 
 MixedSolution::MixedSolution(const gbtMixedProfile<gbtNumber> &p_profile,
 			     const gbtText &p_creator)
-  : m_profile(gbtNfgSupport(p_profile.GetGame()->NewNfgSupport())), 
+  : m_profile(p_profile->GetGame()->NewMixedProfile(gbtNumber(0))),
     m_precision(GBT_PREC_RATIONAL),
-    m_support(p_profile.GetSupport()),
+    m_support(p_profile->GetSupport()),
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
     m_liapValue(), m_qreLambda(-1), m_qreValue(-1),
-    m_revision(p_profile.GetGame()->RevisionNumber())
+    m_revision(p_profile->GetGame()->RevisionNumber())
 {
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
     for (int st = 1; st <= GetGame()->GetPlayer(pl)->NumStrategies(); st++) {
-      int index = p_profile.GetSupport()->GetIndex(GetGame()->GetPlayer(pl)->GetStrategy(st));
+      int index = p_profile->GetSupport()->GetIndex(GetGame()->GetPlayer(pl)->GetStrategy(st));
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else
@@ -173,7 +173,7 @@ gbtTriState MixedSolution::GetNash(void) const
 {
   gbtTriState answer;
   if(IsComplete())
-    answer = (m_profile.MaxRegret() <= m_epsilon) ? GBT_TRISTATE_TRUE : GBT_TRISTATE_FALSE;
+    answer = (m_profile->MaxRegret() <= m_epsilon) ? GBT_TRISTATE_TRUE : GBT_TRISTATE_FALSE;
   else
     answer =  GBT_TRISTATE_FALSE;
   if (answer == GBT_TRISTATE_FALSE) {
@@ -237,13 +237,13 @@ bool MixedSolution::Equals(const gbtMixedProfile<double> &p_profile) const
   gbtNumber eps(m_epsilon);
   gEpsilon(eps, 4);   // this should be a function of m_epsilon
 
-  int i = p_profile.First();
-  while (i <= p_profile.Length()) {
+  int i = 1;
+  while (i <= p_profile->MixedProfileLength()) {
     if (abs(m_profile[i] - (gbtNumber) p_profile[i]) > eps) 
       break;
     i++;
   }
-  return (i > p_profile.Length());
+  return (i > p_profile->MixedProfileLength());
 }
 
 bool MixedSolution::operator==(const MixedSolution &p_solution) const
@@ -264,34 +264,6 @@ const gbtNumber &MixedSolution::operator()(gbtGameStrategy p_strategy) const
   gbtGamePlayer player = p_strategy->GetPlayer();
   return m_profile(player->GetId(), p_strategy->GetId()); 
 }
-
-MixedSolution &MixedSolution::operator+=(const MixedSolution &p_solution)
-{
-  Invalidate();
-  m_profile += p_solution.m_profile;
-  if (m_precision == GBT_PREC_RATIONAL && p_solution.m_precision == GBT_PREC_DOUBLE)
-    m_precision = GBT_PREC_DOUBLE;
-  return *this;
-}
-
-MixedSolution &MixedSolution::operator-=(const MixedSolution &p_solution)
-{
-  Invalidate();
-  m_profile -= p_solution.m_profile; 
-  if (m_precision == GBT_PREC_RATIONAL && p_solution.m_precision == GBT_PREC_DOUBLE)
-    m_precision = GBT_PREC_DOUBLE;
-  return *this;
-}
-
-MixedSolution &MixedSolution::operator*=(const gbtNumber &p_constant)
-{ 
-  Invalidate(); 
-  m_profile *= p_constant;
-  if (m_precision == GBT_PREC_RATIONAL && p_constant.Precision() == GBT_PREC_DOUBLE)
-    m_precision = GBT_PREC_DOUBLE;
-  return *this; 
-}
-
 
 //-----------------------
 // General data access
@@ -338,13 +310,13 @@ const gbtNumber &MixedSolution::GetLiapValue(void) const
 { 
   CheckIsValid();
   if(!m_liapValue.Checked())
-    m_liapValue.Set(m_profile.LiapValue());
+    m_liapValue.Set(m_profile->LiapValue());
   return m_liapValue.Answer();
 }
 
 void MixedSolution::Invalidate(void) const
 {
-  m_support = gbtNfgSupport(m_profile.GetGame()->NewNfgSupport());
+  m_support = gbtNfgSupport(m_profile->GetGame()->NewNfgSupport());
   m_creator = "User";
   m_Nash.Invalidate();
   m_Perfect.Invalidate();
@@ -361,12 +333,12 @@ void MixedSolution::Invalidate(void) const
 
 gbtNumber MixedSolution::GetPayoff(gbtGamePlayer p_player) const
 {
-  return m_profile.Payoff(p_player->GetId());
+  return m_profile->Payoff(p_player->GetId());
 }
 
 gbtNumber MixedSolution::GetStrategyValue(gbtGameStrategy p_strategy) const
 {
-  return m_profile.Payoff(p_strategy->GetPlayer()->GetId(), p_strategy); 
+  return m_profile->Payoff(p_strategy->GetPlayer()->GetId(), p_strategy); 
 }
 
 
@@ -376,7 +348,7 @@ gbtNumber MixedSolution::GetStrategyValue(gbtGameStrategy p_strategy) const
 
 void MixedSolution::Dump(gbtOutput &p_file) const
 {
-  m_profile.Dump(p_file);
+  p_file << m_profile;
   DumpInfo(p_file);
 }
 

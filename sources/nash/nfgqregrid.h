@@ -48,6 +48,9 @@ private:
 
 protected:
   // could use norms other then the simple one
+  virtual double Distance(const gbtMixedProfile<gbtNumber> &,
+			  const gbtMixedProfile<double> &) const;
+
   virtual double Distance(const gbtVector<gbtNumber> &,
 			  const gbtVector<double> &) const;
 

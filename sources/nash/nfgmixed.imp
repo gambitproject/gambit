@@ -137,7 +137,7 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
 	}
 	
 	if (nash) {
-	  gbtMixedProfile<T> profile(p_support);
+	  gbtMixedProfile<T> profile = p_support->NewMixedProfile((T) 0.0);
 	  T sum = (T) 0;
 	  for (int k = 1; k <= p_support->GetPlayer(1)->NumStrategies(); k++) {
 	    profile(1, k) = (T) 0;
@@ -177,12 +177,12 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
 	  if (vert1id[i1] == 0) {
 	    id1++;
 	    vert1id[i1] = id1;
-	    key2.Append(profile.GetRow(2));
+	    key2.Append(profile->GetRow(2));
 	  }
 	  if (vert2id[i2] == 0) {
 	    id2++;
 	    vert2id[i2] = id2;
-	    key1.Append(profile.GetRow(1));
+	    key1.Append(profile->GetRow(1));
 	  }
 	  node1.Append(vert2id[i2]);
 	  node2.Append(vert1id[i1]);

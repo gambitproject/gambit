@@ -143,7 +143,7 @@ gbtList<MixedSolution> gbtNfgNashLcp<T>::AddSolutions(const gbtNfgSupport &p_sup
   gbtList<MixedSolution> solutions;
 
   for (i = 1; i <= p_list.Length(); i++)    {
-    gbtMixedProfile<T> profile(p_support);
+    gbtMixedProfile<T> profile = p_support->NewMixedProfile((T) 0);
     T sum = (T) 0;
 
     for (j = 1; j <= n1; j++)

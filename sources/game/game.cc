@@ -33,6 +33,7 @@
 #include "actiter.h"
 #include "nfgiter.h"
 #include "nfgciter.h"
+#include "mixed.h"
 
 // Declarations of internal structures
 #include "gamebase.h"
@@ -1447,6 +1448,25 @@ gbtNfgContingency gbtGameBase::NewContingency(void) const
     return new gbtNfgContingencyTree(const_cast<gbtGameBase *>(this));
   }
 }
+
+gbtMixedProfile<double> gbtGameBase::NewMixedProfile(double) const
+{
+  return new gbtMixedProfileBase<double>(NewNfgSupport());
+}
+
+gbtMixedProfile<gbtRational> 
+gbtGameBase::NewMixedProfile(const gbtRational &) const
+{
+  return new gbtMixedProfileBase<gbtRational>(NewNfgSupport());
+}
+
+gbtMixedProfile<gbtNumber>
+gbtGameBase::NewMixedProfile(const gbtNumber &) const
+{
+  return new gbtMixedProfileBase<gbtNumber>(NewNfgSupport());
+}
+
+
 
 // ---------------------------------------
 // gbtGame: Private member functions

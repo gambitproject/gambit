@@ -55,9 +55,9 @@ static int FirstMember(const gbtMatrix<int> &p_partition, int p_index)
 static double Payoff(const gbtMixedProfile<double> &p_profile, int p_player,
 		     const gbtMatrix<int> &p_partition, int p_index)
 {
-  for (int st = 1; st <= p_profile.GetSupport()->GetPlayer(p_player)->NumStrategies(); st++) {
+  for (int st = 1; st <= p_profile->GetPlayer(p_player)->NumStrategies(); st++) {
     if (p_partition(p_index, st) > 0) {
-      return p_profile.Payoff(p_player, p_profile.GetSupport()->GetStrategy(p_player, st));
+      return p_profile->Payoff(p_player, p_profile->GetSupport()->GetStrategy(p_player, st));
     }
   }
   
@@ -69,9 +69,9 @@ static double Payoff(const gbtMixedProfile<double> &p_profile, int p_player,
 static gbtMatrix<int> RankStrategies(const gbtMixedProfile<double> &p_profile,
 				   int p_player)
 {
-  gbtVector<double> payoffs(p_profile.GetSupport()->GetPlayer(p_player)->NumStrategies());
-  gbtArray<int> strategies(p_profile.GetSupport()->GetPlayer(p_player)->NumStrategies());
-  p_profile.Payoff(p_player, p_player, payoffs);
+  gbtVector<double> payoffs(p_profile->GetPlayer(p_player)->NumStrategies());
+  gbtArray<int> strategies(p_profile->GetPlayer(p_player)->NumStrategies());
+  p_profile->Payoff(p_player, p_player, payoffs);
 
   for (int i = 1; i <= strategies.Length(); i++) {
     strategies[i] = i;
@@ -121,7 +121,7 @@ static void YamamotoJacobian(const gbtMixedProfile<double> &p_profile,
   int rowno = 0;
   p_matrix = 0.0;
 
-  for (int pl = 1; pl <= p_profile.NumPlayers(); pl++) {
+  for (int pl = 1; pl <= p_profile->NumPlayers(); pl++) {
     int strats = 0;
     for (int part = 1; part <= p_partition[pl].NumRows(); part++) {
       if (NumMembers(p_partition[pl], part) > 0) {
@@ -129,8 +129,8 @@ static void YamamotoJacobian(const gbtMixedProfile<double> &p_profile,
 	rowno++;
 
 	int colno = 0;
-	for (int pl2 = 1; pl2 <= p_profile.NumPlayers(); pl2++) {
-	  for (int st2 = 1; st2 <= p_profile.GetSupport()->GetPlayer(pl2)->NumStrategies(); st2++) {
+	for (int pl2 = 1; pl2 <= p_profile->NumPlayers(); pl2++) {
+	  for (int st2 = 1; st2 <= p_profile->GetPlayer(pl2)->NumStrategies(); st2++) {
 	    colno++;
 	    if (pl != pl2) {
 	      continue;
@@ -138,7 +138,7 @@ static void YamamotoJacobian(const gbtMixedProfile<double> &p_profile,
 
 	    if (p_partition[pl](part, st2) > 0) {
 	    // strategy number st2 is in this partition
-	      for (int i = 1; i <= p_profile.GetSupport()->GetPlayer(pl2)->NumStrategies(); i++) {
+	      for (int i = 1; i <= p_profile->GetPlayer(pl2)->NumStrategies(); i++) {
 		p_matrix(rowno, colno) += pow(p_lambda, (double) (i-1));
 	      }
 	    }
@@ -148,13 +148,13 @@ static void YamamotoJacobian(const gbtMixedProfile<double> &p_profile,
 	// The final column is the derivative wrt lambda
 	colno++;
 	double totalprob = 0.0;
-	for (int st = 1; st <= p_profile.GetSupport()->GetPlayer(pl)->NumStrategies(); st++) {
+	for (int st = 1; st <= p_profile->GetPlayer(pl)->NumStrategies(); st++) {
 	  if (p_partition[pl](part, st) > 0) {
 	    totalprob += p_profile(pl, st);
 	  }
 	}
 
-	for (int i = 1; i <= p_profile.GetSupport()->GetPlayer(pl)->NumStrategies(); i++) {
+	for (int i = 1; i <= p_profile->GetPlayer(pl)->NumStrategies(); i++) {
 	  p_matrix(rowno, colno) += ((double) (i - 1)) * pow(p_lambda, (double) (i-2)) * totalprob;
 	}
 
@@ -167,19 +167,19 @@ static void YamamotoJacobian(const gbtMixedProfile<double> &p_profile,
 	// We need to have #members - 1 equations
 	int st1 = FirstMember(p_partition[pl], part);
 
-	for (int st = st1 + 1; st <= p_profile.GetSupport()->GetPlayer(pl)->NumStrategies(); st++) {
+	for (int st = st1 + 1; st <= p_profile->GetPlayer(pl)->NumStrategies(); st++) {
 	  if (p_partition[pl](part, st) > 0) {
 	    rowno++;
 
 	    int colno = 0;
-	    for (int pl2 = 1; pl2 <= p_profile.NumPlayers(); pl2++) {
-	      for (int st2 = 1; st2 <= p_profile.GetSupport()->GetPlayer(pl2)->NumStrategies(); st2++) {
+	    for (int pl2 = 1; pl2 <= p_profile->NumPlayers(); pl2++) {
+	      for (int st2 = 1; st2 <= p_profile->GetPlayer(pl2)->NumStrategies(); st2++) {
 		colno++;
 		if (pl == pl2) {
 		  continue;
 		}
 
-		p_matrix(rowno, colno) = p_profile.Payoff(pl, pl, st1, pl2, st2) - p_profile.Payoff(pl, pl, st, pl2, st2);
+		p_matrix(rowno, colno) = p_profile->Payoff(pl, pl, st1, pl2, st2) - p_profile->Payoff(pl, pl, st, pl2, st2);
 	      }
 	    }
 	  }
@@ -206,8 +206,8 @@ static void YamamotoComputeStep(const gbtMixedProfile<double> &p_profile,
     }
   }
 
-  for (int pl = 1; pl <= p_profile.NumPlayers(); pl++) {
-    for (int st = 1; st <= p_profile.GetSupport()->GetPlayer(pl)->NumStrategies(); st++) {
+  for (int pl = 1; pl <= p_profile->NumPlayers(); pl++) {
+    for (int st = 1; st <= p_profile->GetPlayer(pl)->NumStrategies(); st++) {
       rowno++;
       p_delta(pl, st) = sign * M.Determinant();   
       sign *= -1.0;
@@ -224,15 +224,15 @@ static void YamamotoComputeStep(const gbtMixedProfile<double> &p_profile,
   p_lambdainc = sign * M.Determinant();
 
   double norm = 0.0;
-  for (int pl = 1; pl <= p_profile.NumPlayers(); pl++) {
-    for (int st = 1; st <= p_profile.GetSupport()->GetPlayer(pl)->NumStrategies(); st++) {
+  for (int pl = 1; pl <= p_profile->NumPlayers(); pl++) {
+    for (int st = 1; st <= p_profile->GetPlayer(pl)->NumStrategies(); st++) {
       norm += p_delta(pl, st) * p_delta(pl, st);
     }
   }
   norm += p_lambdainc * p_lambdainc; 
   
-  for (int pl = 1; pl <= p_profile.NumPlayers(); pl++) {
-    for (int st = 1; st <= p_profile.GetSupport()->GetPlayer(pl)->NumStrategies(); st++) {
+  for (int pl = 1; pl <= p_profile->NumPlayers(); pl++) {
+    for (int st = 1; st <= p_profile->GetPlayer(pl)->NumStrategies(); st++) {
       p_delta(pl, st) /= sqrt(norm / p_stepsize);
     }
   }
@@ -294,7 +294,7 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
 {
   // In the notation of Yamamoto's paper, profile(i,j)=x_{ij}
   // and lambda=t
-  gbtMixedProfile<double> profile(p_support);
+  gbtMixedProfile<double> profile = p_support->NewMixedProfile(0.0);
   double lambda = 1.0;
   double initialsign = -1.0; 
   gbtList<gbtMatrix<int> > partitions;
@@ -315,12 +315,14 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
     }
     YamamotoJacobian(profile, lambda, partitions, H);
       
-    gbtPVector<double> delta(profile);
+    gbtPVector<double> delta(profile->NumStrategies());
     double lambdainc;
 
     YamamotoComputeStep(profile, H, delta, lambdainc, initialsign, .000001);
 
-    profile += delta;
+    for (int i = 1; i <= profile->MixedProfileLength(); i++) {
+      profile[i] += delta[i];
+    }
     lambda += lambdainc;
 
     //    gout << lambda << ' ' << profile << '\n';

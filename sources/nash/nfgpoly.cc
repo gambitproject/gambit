@@ -137,7 +137,7 @@ int PolEnumModule::PolEnum(gbtStatus &p_status)
 
 int PolEnumModule::SaveSolutions(const gbtList<gbtVector<gbtDouble> > &list)
 {
-  gbtMixedProfile<double> profile(support);
+  gbtMixedProfile<double> profile = support->NewMixedProfile(0.0);
   int i,j,k,kk,index=0;
   double sum;
 
@@ -342,7 +342,7 @@ MixedSolution PolishEquilibrium(const gbtNfgSupport &support,
 {
   PolEnumParams params;
   PolEnumModule module(support, params);
-  gbtVector<gbtDouble> vec = module.SolVarsFromMixedProfile(*(sol.Profile()));
+  gbtVector<gbtDouble> vec = module.SolVarsFromMixedProfile(sol.Profile());
 
   /* //DEBUG
   gbtPVector<double> xx = module.SeqFormProbsFromSolVars(vec);
@@ -433,7 +433,7 @@ const int PolEnumModule::PolishKnownRoot(gbtVector<gbtDouble> &point) const
 MixedSolution 
 PolEnumModule::ReturnPolishedSolution(const gbtVector<gbtDouble> &root) const
 {
-  gbtMixedProfile<double> profile(support);
+  gbtMixedProfile<double> profile = support->NewMixedProfile(0.0);
 
   int j;
   int kk=0;

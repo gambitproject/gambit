@@ -82,7 +82,7 @@ bool IsMixedDominated(const gbtMixedProfile<gbtNumber> &sol,
 		 bool strong, gbtPrecision precision, gbtOutput &tracefile)
 {
   bool ret = false;
-  int n = sol.GetGame()->NumPlayers();
+  int n = sol->GetGame()->NumPlayers();
   int i=1;
 
   while (i<=n && !ret) {
@@ -98,14 +98,14 @@ bool IsMixedDominated(const gbtMixedProfile<gbtNumber> &sol, int pl,
   bool ret = false;
 
   if(precision == GBT_PREC_RATIONAL) {
-    gbtMixedProfile<gbtRational> p(sol.GetSupport());
-    for (int i = 1; i <= p.Length(); i++)
+    gbtMixedProfile<gbtRational> p = sol->GetSupport()->NewMixedProfile(gbtRational(0));
+    for (int i = 1; i <= p->MixedProfileLength(); i++)
       p[i] = sol[i];
     ret =  IsMixedDominated(p, pl, strong, tracefile);
   }
   else if (precision == GBT_PREC_DOUBLE) {
-    gbtMixedProfile<double> p(sol.GetSupport());
-    for (int i = 1; i <= p.Length(); i++)
+    gbtMixedProfile<double> p = sol->GetSupport()->NewMixedProfile(0.0);
+    for (int i = 1; i <= p->MixedProfileLength(); i++)
       p[i] = sol[i];
     
     ret =  IsMixedDominated(p, pl, strong, tracefile);

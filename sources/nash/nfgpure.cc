@@ -64,7 +64,7 @@ gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
       }
       
       if (flag)  {
-	gbtMixedProfile<gbtNumber> temp(p_support->GetGame()->NewNfgSupport());
+	gbtMixedProfile<gbtNumber> temp = p_support->GetGame()->NewMixedProfile(gbtNumber(0));
 	((gbtVector<gbtNumber> &) temp).operator=(gbtNumber(0));
 	MixedSolution soln(temp, "EnumPure[NFG]");
 	for (int pl = 1; pl <= p_support->NumPlayers(); pl++) {

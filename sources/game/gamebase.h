@@ -28,6 +28,7 @@
 #define GAMEBASE_H
 
 #include "nfgcont.h"
+#include "mixed.h"
 
 //
 // Forward declarations
@@ -362,6 +363,11 @@ public:
 
   gbtNfgContingency NewContingency(void) const;
 
+  // DATA ACCESS -- PROFILES
+  gbtMixedProfile<double> NewMixedProfile(double) const;
+  gbtMixedProfile<gbtRational> NewMixedProfile(const gbtRational &) const;
+  gbtMixedProfile<gbtNumber> NewMixedProfile(const gbtNumber &) const;
+
   // EDITING OPERATIONS
   void DeleteEmptyInfosets(void);
 
@@ -485,6 +491,11 @@ public:
   int GetIndex(gbtGameStrategy) const;
   bool Contains(gbtGameStrategy) const;
 
+  // DATA ACCESS -- PROFILES
+  gbtMixedProfile<double> NewMixedProfile(double) const;
+  gbtMixedProfile<gbtRational> NewMixedProfile(const gbtRational &) const;
+  gbtMixedProfile<gbtNumber> NewMixedProfile(const gbtNumber &) const;
+
   // MANIPULATION
   void AddStrategy(gbtGameStrategy);
   void RemoveStrategy(gbtGameStrategy);
@@ -526,5 +537,103 @@ public:
   gbtNfgContingency NewContingency(void) const;
 
 };
+
+template <class T>
+class gbtMixedProfileBase : public gbtMixedProfileRep<T> {
+private:
+  gbtPVector<T> m_profile;
+  gbtNfgSupport m_support;
+
+  // Private Payoff functions
+
+  T PPayoff(int pl, int index, int i) const;
+  void PPayoff(int pl, int const_pl, int const_st, int cur_pl, long index,
+	       T prob, T&value) const;
+  void PPayoff(int pl, int const_pl1, int const_st1, int const_pl2, 
+	       int const_st2, int cur_pl, long index, T prob, T &value) const;
+  void PPayoff(int pl, int const_pl, int cur_pl, long index, T prob,
+	       gbtVector<T> &value) const;
+  T Payoff(const gbtGameOutcome &o, int pl) const;
+
+public:
+  gbtMixedProfileBase(const gbtNfgSupport &);
+  gbtMixedProfileBase(const gbtMixedProfileBase<T> &);
+  gbtMixedProfileBase(const gbtBehavProfile<T> &);
+  virtual ~gbtMixedProfileBase();
+
+  gbtMixedProfileBase<T> &operator=(const gbtMixedProfileBase<T> &);
+
+  gbtMixedProfileBase<T> *Copy(void) const;
+  
+  gbtGame GetGame(void) const  { return m_support->GetGame(); }
+  
+  T LiapValue(void) const;
+  void Regret(gbtPVector<T> &value) const;
+  T MaxRegret(void) const;
+  void Centroid(void);
+
+  T Payoff(int pl) const;
+  T Payoff(int pl, gbtGameStrategy) const;
+  T Payoff(int pl, int player1, int strat1, int player2, int strat2) const;
+  void Payoff(int pl, int const_pl, gbtVector<T> &payoff) const;
+
+  bool operator==(const gbtMixedProfileRep<T> &) const;
+
+  const gbtNfgSupport &GetSupport(void) const   { return m_support; }
+
+  const T &operator()(int pl, int st) const { return m_profile(pl, st); } 
+  T &operator()(int pl, int st) { return m_profile(pl, st); }
+
+  const T &operator[](int i) const { return m_profile[i]; }
+  T &operator[](int i) { return m_profile[i]; }
+
+  gbtVector<T> GetRow(int row) const { return m_profile.GetRow(row); }
+  void SetRow(int row, const gbtVector<T> &p_vector) 
+  { m_profile.SetRow(row, p_vector); }
+  const gbtArray<int> &Lengths(void) const { return m_profile.Lengths(); }
+
+  void CopyRow(int row, const gbtPVector<T> &p_vector) 
+  { m_profile.CopyRow(row, p_vector); }
+  void CopyRow(int row, const gbtMixedProfile<T> &p_profile) 
+  { m_profile.CopyRow(row, dynamic_cast<gbtMixedProfileBase<T> *>(p_profile.Get())->m_profile); }
+
+  // IMPLEMENTATION OF gbtGameObject INTERFACE
+  gbtText GetLabel(void) const { return ""; }
+  void SetLabel(const gbtText &) { }
+
+  gbtText GetComment(void) const { return ""; }
+
+  // IMPLEMENTATION OF gbtConstGameRep INTERFACE
+  bool IsTree(void) const { return m_support->IsTree(); }
+  bool IsMatrix(void) const { return m_support->IsMatrix(); }
+  
+  int NumPlayers(void) const { return m_support->NumPlayers(); }
+  gbtGamePlayer GetPlayer(int index) const { return m_support->GetPlayer(index); }
+  
+  int NumOutcomes(void) const { return m_support->NumOutcomes(); }
+  gbtGameOutcome GetOutcome(int index) const 
+  { return m_support->GetOutcome(index); }
+
+  bool IsConstSum(void) const { return m_support->IsConstSum(); }
+  gbtNumber MaxPayoff(int pl = 0) const { return m_support->MaxPayoff(pl); }
+  gbtNumber MinPayoff(int pl = 0) const { return m_support->MinPayoff(pl); }
+
+  gbtMixedProfile<double> NewMixedProfile(double) const;
+  gbtMixedProfile<gbtRational> NewMixedProfile(const gbtRational &) const;
+  gbtMixedProfile<gbtNumber> NewMixedProfile(const gbtNumber &) const;
+
+  // IMPLEMENTATION OF gbtConstNfgRep INTERFACE
+  virtual gbtArray<int> NumStrategies(void) const 
+  { return m_support->NumStrategies(); }
+  virtual int MixedProfileLength(void) const
+  { return m_support->MixedProfileLength(); }
+
+  gbtNfgContingency NewContingency(void) const;
+
+  gbtNfgSupport NewNfgSupport(void) const { return m_support->NewNfgSupport(); }
+
+
+};
+
 
 #endif  // GAMEBASE_H

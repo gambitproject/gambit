@@ -152,7 +152,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	}
 
 	for (int soln = 1; soln <= nfgSolutions.Length(); soln++) {
-	  gbtMixedProfile<gbtNumber> profile(*nfgSolutions[soln].Profile());
+	  gbtMixedProfile<gbtNumber> profile(nfgSolutions[soln].Profile());
 	  sol.Append(gbtBehavProfile<gbtNumber>(profile));
 	}
       }

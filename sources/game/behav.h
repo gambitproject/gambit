@@ -263,6 +263,7 @@ public:
   // DATA ACCESS -- SUPPORTS
   gbtEfgSupport NewEfgSupport(void) const { return m_support.NewEfgSupport(); }
 
+  operator gbtMixedProfile<T>(void) const;
 };
 
 

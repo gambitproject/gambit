@@ -96,13 +96,13 @@ gbtCorBranchMixed::gbtCorBranchMixed(const gbtList<MixedSolution> &p_data)
 //------------------------------------------------------------------------
 
 int gbtCorBranchMixed::NumDimensions(void) const
-{ return m_data[1].Profile()->Length(); }
+{ return m_data[1].Profile()->MixedProfileLength(); }
 
 int gbtCorBranchMixed::NumData(void) const
 { return m_data.Length(); }
 
 double gbtCorBranchMixed::GetValue(int p_index, int p_dim) const
-{ return (*m_data[p_index].Profile())[p_dim]; }
+{ return m_data[p_index].Profile()[p_dim]; }
 
 double gbtCorBranchMixed::GetParameter(int p_index) const
 { return m_data[p_index].QreLambda(); }

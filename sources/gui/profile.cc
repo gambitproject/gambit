@@ -339,7 +339,7 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
       int offset = GetInfoColumns() + GetBehavColumns() - 1;
       if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
 	return wxString::Format(wxT("%s"),
-				(char *) ToText((*mixed->Profile())[p_col - offset],
+				(char *) ToText((mixed->Profile())[p_col - offset],
 						m_doc->GetPreferences().NumDecimals()));
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_VECTOR) {
@@ -681,7 +681,7 @@ wxString gbtProfileGrid::GetReport(void) const
 
 	for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
 	  report += wxString::Format(wxT("%-15s "), 
-				     (const char *) ToText((*profiles[i+j].Profile())(pl, st)));
+				     (const char *) ToText((profiles[i+j].Profile())(pl, st)));
 	}
 	report += wxT("\n");
       }

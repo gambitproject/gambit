@@ -69,8 +69,8 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
     m_qreList->InsertItem(i - 1, 
 			  wxString::Format(wxT("%s"),
 					   (char *) ToText(p_profiles[i].QreLambda())));
-    const gbtPVector<gbtNumber> &profile = *p_profiles[i].Profile();
-    for (int j = 1; j <= profile.Length(); j++) {
+    const gbtMixedProfile<gbtNumber> &profile = p_profiles[i].Profile();
+    for (int j = 1; j <= profile->MixedProfileLength(); j++) {
       m_qreList->SetItem(i - 1, j, 
 			 wxString::Format(wxT("%s"),
 					  (char *) ToText(profile[j])));
@@ -203,10 +203,10 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
 	file << "Data:\n";
 
 	for (int i = 1; i <= m_mixedProfiles.Length(); i++) {
-	  const gbtMixedProfile<gbtNumber> &profile = *m_mixedProfiles[i].Profile();
+	  const gbtMixedProfile<gbtNumber> &profile = m_mixedProfiles[i].Profile();
 	  file << ((double) m_mixedProfiles[i].QreLambda()) << " 0.000000 ";
 	  
-	  for (int j = 1; j <= profile.Length(); j++) {
+	  for (int j = 1; j <= profile->MixedProfileLength(); j++) {
 	    file << ((double) profile[j]) << ' ';
 	  }
 

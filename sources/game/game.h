@@ -85,6 +85,8 @@ class gbtNfgSupport;
 
 class gbtNfgContingency;
 
+template <class T> class gbtMixedProfile;
+
 class gbtConstGameRep : public gbtGameObject {
 public:
   // DATA ACCESS -- GENERAL
@@ -115,7 +117,14 @@ public:
 
   // DATA ACCESS -- SUPPORTS
   virtual gbtNfgSupport NewNfgSupport(void) const = 0;
+
+  // DATA ACCESS -- PROFILES
+  // These could be declared template, but aren't, for portability
+  virtual gbtMixedProfile<double> NewMixedProfile(double) const = 0;
+  virtual gbtMixedProfile<gbtRational> NewMixedProfile(const gbtRational &) const = 0;
+  virtual gbtMixedProfile<gbtNumber> NewMixedProfile(const gbtNumber &) const = 0;
 };
+
 
 class gbtConstEfgRep : public virtual gbtConstGameRep {
 public:

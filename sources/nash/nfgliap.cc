@@ -64,23 +64,23 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
   int i, j;
   double x, x1, psum;
   
-  gbtGamePlayer player1 = p.GetSupport()->GetPlayer(i1);
+  gbtGamePlayer player1 = p->GetSupport()->GetPlayer(i1);
   x = 0.0;
   for (i = 1; i <= m_nfg->NumPlayers(); i++)  {
     psum = 0.0;
-    gbtGamePlayer player = p.GetSupport()->GetPlayer(i);
+    gbtGamePlayer player = p->GetSupport()->GetPlayer(i);
     for (j = 1; j <= player->NumStrategies(); j++)  {
       psum += p(i,j);
-      x1 = p.Payoff(i, player->GetStrategy(j)) - p.Payoff(i);
+      x1 = p->Payoff(i, player->GetStrategy(j)) - p->Payoff(i);
       if (i1 == i) {
 	if (x1 > 0.0) {
-	  x -= x1 * p.Payoff(i, player1->GetStrategy(j1));
+	  x -= x1 * p->Payoff(i, player1->GetStrategy(j1));
 	}
       }
       else {
 	if (x1 > 0.0) {
-	  x += x1 * (p.Payoff(i, i, j, i1, j1) - 
-		     p.Payoff(i, player1->GetStrategy(j1)));
+	  x += x1 * (p->Payoff(i, i, j, i1, j1) - 
+		     p->Payoff(i, player1->GetStrategy(j1)));
 	}
       }
     }
@@ -132,14 +132,14 @@ bool NFLiapFunc::Gradient(const gbtVector<double> &v, gbtVector<double> &d) cons
   int i1, j1, ii;
   
   for (i1 = 1, ii = 1; i1 <= m_nfg->NumPlayers(); i1++) {
-    gbtGamePlayer player = _p.GetSupport()->GetPlayer(i1);
+    gbtGamePlayer player = _p->GetSupport()->GetPlayer(i1);
     for (j1 = 1; j1 <= player->NumStrategies(); j1++) {
       d[ii++] = LiapDerivValue(i1, j1, _p);
     }
   }
 
   // Project for constraints
-  Project(d, v, _p.Lengths());
+  Project(d, v, _p->Lengths());
   return true;
 }
   
@@ -153,24 +153,24 @@ double NFLiapFunc::Value(const gbtVector<double> &v) const
   ((gbtVector<double> &) _p).operator=(v);
   
   gbtMixedProfile<double> tmp(_p);
-  gbtPVector<double> payoff(_p);
+  gbtPVector<double> payoff(_p->Lengths());
 
   double x, result = 0.0, avg, sum;
   payoff = 0.0;
   
   for (int i = 1; i <= m_nfg->NumPlayers(); i++)  {
-    tmp.CopyRow(i, payoff);
+    tmp->CopyRow(i, payoff);
     avg = sum = 0.0;
 
     // then for each strategy for player i, consider the value of
     // deviating to that strategy
 
     int j;
-    gbtGamePlayer player = _p.GetSupport()->GetPlayer(i);
+    gbtGamePlayer player = _p->GetSupport()->GetPlayer(i);
     for (j = 1; j <= player->NumStrategies(); j++)  {
       tmp(i, j) = 1.0;
       x = _p(i, j);
-      payoff(i, j) = tmp.Payoff(i);
+      payoff(i, j) = tmp->Payoff(i);
       avg += x * payoff(i, j);
       sum += x;
       if (x > 0.0)  x = 0.0;
@@ -178,7 +178,7 @@ double NFLiapFunc::Value(const gbtVector<double> &v) const
       tmp(i, j) = 0.0;
     }
 
-    tmp.CopyRow(i, _p);
+    tmp->CopyRow(i, _p);
     for (j = 1; j <= player->NumStrategies(); j++)  {
       x = payoff(i, j) - avg;
       if (x < 0.0)  x = 0.0;
@@ -195,11 +195,11 @@ static void PickRandomProfile(gbtMixedProfile<double> &p)
 {
   double sum, tmp;
 
-  for (int pl = 1; pl <= p.GetGame()->NumPlayers(); pl++)  {
+  for (int pl = 1; pl <= p->GetGame()->NumPlayers(); pl++)  {
     sum = 0.0;
     int st;
     
-    gbtGamePlayer player = p.GetSupport()->GetPlayer(pl);
+    gbtGamePlayer player = p->GetSupport()->GetPlayer(pl);
     for (st = 1; st < player->NumStrategies(); st++)  {
       do
 	tmp = Uniform();
@@ -224,15 +224,15 @@ gbtList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 					   gbtStatus &p_status)
 {
   static const double ALPHA = .00000001;
-  gbtMixedProfile<double> p(p_support);
-  NFLiapFunc F(p.GetGame(), p);
+  gbtMixedProfile<double> p = p_support->NewMixedProfile(0.0);
+  NFLiapFunc F(p->GetGame(), p);
 
   // if starting vector not interior, perturb it towards centroid
   int kk;
-  for (kk = 1; kk <= p.Length() && p[kk] > ALPHA; kk++);
-  if (kk <= p.Length()) {
-    gbtMixedProfile<double> centroid(p.GetSupport());
-    for (int k = 1; k <= p.Length(); k++) {
+  for (kk = 1; kk <= p->MixedProfileLength() && p[kk] > ALPHA; kk++);
+  if (kk <= p->MixedProfileLength()) {
+    gbtMixedProfile<double> centroid = p->GetSupport()->NewMixedProfile(0.0);
+    for (int k = 1; k <= p->MixedProfileLength(); k++) {
       p[k] = centroid[k] * ALPHA + p[k] * (1.0-ALPHA);
     }
   }
@@ -249,10 +249,14 @@ gbtList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 			   gbtText("Attempt ") + ToText(i) + 
 			   gbtText(", equilibria so far: ") +
 			   ToText(solutions.Length())); 
-      gbtConjugatePRMinimizer minimizer(p.Length());
-      gbtVector<double> gradient(p.Length()), dx(p.Length());
+      gbtConjugatePRMinimizer minimizer(p->MixedProfileLength());
+      gbtVector<double> gradient(p->MixedProfileLength()), dx(p->MixedProfileLength());
       double fval;
-      minimizer.Set(F, p, fval, gradient, .01, .0001);
+      gbtVector<double> pcopy(p->MixedProfileLength());
+      for (int j = 1; j <= pcopy.Length(); j++) {
+	pcopy[j] = p[j];
+      }
+      minimizer.Set(F, pcopy, fval, gradient, .01, .0001);
 
       try {
 	for (int iter = 1; iter <= m_maxitsN; iter++) {
@@ -261,15 +265,15 @@ gbtList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 	  }
 	  
 	  gbtMixedProfile<double> q(p);
-	  if (!minimizer.Iterate(F, p, fval, gradient, dx)) {
+	  if (!minimizer.Iterate(F, pcopy, fval, gradient, dx)) {
 	    break;
 	  }
 
 	  // Guard against wasting time when we get "stuck" on a
 	  // boundary
 	  double dist = 0.0;
-	  for (int i = 1; i <= p.Length(); i++) {
-	    dist += fabs(p[i] - q[i]);
+	  for (int i = 1; i <= pcopy.Length(); i++) {
+	    dist += fabs(pcopy[i] - q[i]);
 	  }
 	  if (dist <= 1.0e-8) {
 	    break;

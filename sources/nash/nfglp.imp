@@ -113,7 +113,7 @@ void gbtNfgNashLp<T>::GetSolutions(const gbtNfgSupport &p_support,
   solutions.Flush();
 
   for (int i = 1; i <= p_list.Length(); i++)    {
-    gbtMixedProfile<T> profile(p_support);
+    gbtMixedProfile<T> profile = p_support->NewMixedProfile((T) 0.0);
     int j;
     for (j = 1; j <= n1; j++) 
       if (p_list[i].IsDefined(j))   

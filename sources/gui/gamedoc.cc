@@ -319,7 +319,7 @@ void gbtGameDocument::AddProfile(const MixedSolution &p_profile)
   }
 
   if (HasEfg()) {
-    m_behavProfiles.Append(gbtBehavProfile<gbtNumber>(*p_profile.Profile()));
+    m_behavProfiles.Append(gbtBehavProfile<gbtNumber>(p_profile.Profile()));
   }
 
   UpdateViews();

@@ -96,10 +96,11 @@ that this technique is easily extended to n steps.
 // .    .  .....  .
 // .    .    .    .
 
-class MixedProfileIterator : public gbtMixedProfile<double> {
+class MixedProfileIterator {
 private:
   int m_staticPlayer;
   double m_step;
+  gbtMixedProfile<double> m_current;
   gbtMixedProfile<double> m_minVal, m_maxVal;
   gbtArray<double> m_sums;
 
@@ -110,21 +111,21 @@ public:
 		       double p_step, double p_size, int p_staticPlayer);
 
   bool Next(void);
+  gbtMixedProfile<double> &Get(void) { return m_current; }
 };
 
 MixedProfileIterator::MixedProfileIterator(const gbtMixedProfile<double> &p_base,
 					   double p_step, double p_size,
 					   int p_staticPlayer)
-  : gbtMixedProfile<double>(p_base),
-    m_staticPlayer(p_staticPlayer), m_step(p_step),
-    m_minVal(p_base), m_maxVal(p_base),
-    m_sums(p_base.Lengths().Length())
+  : m_staticPlayer(p_staticPlayer), m_step(p_step),
+    m_current(p_base), m_minVal(p_base), m_maxVal(p_base),
+    m_sums(p_base->Lengths().Length())
 {
   for (int i = 1; i <= m_sums.Length(); i++) {
     m_sums[i] = 0;
 
     // Precalc these to save time.  Memory is cheap.
-    for (int j = 1; j <= svlen[i] - 1; j++) { 
+    for (int j = 1; j <= m_current->GetPlayer(i)->NumStrategies() - 1; j++) { 
       if (m_minVal(i,j) >= p_size) {
 	m_minVal(i,j) -= p_size;
       }
@@ -132,8 +133,8 @@ MixedProfileIterator::MixedProfileIterator(const gbtMixedProfile<double> &p_base
 	m_minVal(i,j) = 0.0;
       }
 
-      (*this)(i,j) = m_minVal(i,j);	// start at the minimum
-      m_sums[i] += (*this)(i,j);
+      m_current(i,j) = m_minVal(i,j);	// start at the minimum
+      m_sums[i] += m_current(i,j);
  
       if (m_maxVal(i,j) <= 1.0 - p_size) {
 	m_maxVal(i,j) += p_size;
@@ -143,7 +144,7 @@ MixedProfileIterator::MixedProfileIterator(const gbtMixedProfile<double> &p_base
       }
     }
 
-    (*this)(i, svlen[i]) = 1.0 - m_sums[i];
+    m_current(i, m_current->GetPlayer(i)->NumStrategies()) = 1.0 - m_sums[i];
   }
 }
 
@@ -151,28 +152,28 @@ bool MixedProfileIterator::Next(int row)
 {
   const double eps = 1e-8;
 
-  int dim = svlen[row];
+  int dim = m_current->GetPlayer(row)->NumStrategies();
   // dim==1 is an annoying special case
   if (dim != 1) {
     double &sum = m_sums[row];
     do {
       for (int i = 1; i <= dim-1; i++) {
-	if ((*this)(row,i) < m_maxVal(row,i) - m_step + eps) {
-	  (*this)(row,i) += m_step;
+	if (m_current(row,i) < m_maxVal(row,i) - m_step + eps) {
+	  m_current(row,i) += m_step;
 	  sum += m_step;
 	  break;
 	}
 	else {
-	  sum -= ((*this)(row,i) - m_minVal(row,i));
-	  (*this)(row,i) = m_minVal(row,i);
+	  sum -= (m_current(row,i) - m_minVal(row,i));
+	  m_current(row,i) = m_minVal(row,i);
 	  if (i == dim-1) {
-	    (*this)(row,dim) = 1.0 - sum;
+	    m_current(row,dim) = 1.0 - sum;
 	    return false;
 	  }
 	}
       }
     } while (sum > 1.0 + eps);
-    (*this)(row,dim) = 1.0 - sum;
+    m_current(row,dim) = 1.0 - sum;
     return true;
   }
   else	{
@@ -183,13 +184,13 @@ bool MixedProfileIterator::Next(int row)
 
 bool MixedProfileIterator::Next(void)
 {
-  for (int i = 1; i <= svlen.Length(); i++) {
+  for (int i = 1; i <= m_current->NumPlayers(); i++) {
     if (i == m_staticPlayer) continue;
     if (Next(i)) {
       return true;
     }
     else {
-      if (i == svlen.Length()) {
+      if (i == m_current->NumPlayers()) {
 	return false;
       }
     }
@@ -246,10 +247,22 @@ void QreNfgGrid::OutputResult(gbtOutput &p_file,
 			      double p_lambda, double p_objFunc) const
 {
   p_file << p_lambda << ' ' << p_objFunc << ' ';
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (int i = 1; i <= p_profile->MixedProfileLength(); i++) {
     p_file << p_profile[i] << ' ';
   }
   p_file << '\n';
+}
+
+double QreNfgGrid::Distance(const gbtMixedProfile<gbtNumber> &a,
+			    const gbtMixedProfile<double> &b) const
+{
+  double dist = 0.0;
+  for (int i = 1; i <= a->MixedProfileLength(); i++) {
+    if (abs((double) a[i] - b[i]) > dist) {
+      dist = abs((double) a[i] - b[i]);
+    }
+  }
+  return dist;
 }
 
 double QreNfgGrid::Distance(const gbtVector<gbtNumber> &a,
@@ -280,11 +293,11 @@ double QreNfgGrid::Distance(const gbtVector<double> &a,
 gbtVector<double> QreNfgGrid::UpdateFunc(const gbtMixedProfile<double> &p_profile,
 				       int p_player, double p_lambda) const
 {
-  gbtVector<double> r(p_profile.GetSupport()->GetPlayer(p_player)->NumStrategies());
-  gbtVector<double> tmp(p_profile.GetSupport()->GetPlayer(p_player)->NumStrategies());
+  gbtVector<double> r(p_profile->GetPlayer(p_player)->NumStrategies());
+  gbtVector<double> tmp(p_profile->GetPlayer(p_player)->NumStrategies());
   double denom = 0.0;
   for (int st = 1; st <= r.Length(); st++) {
-    double p = p_profile.Payoff(p_player, p_profile.GetSupport()->GetPlayer(p_player)->GetStrategy(st));
+    double p = p_profile->Payoff(p_player, p_profile->GetPlayer(p_player)->GetStrategy(st));
     tmp[st] = exp(p_lambda * p);
     denom += tmp[st];
   }
@@ -300,14 +313,14 @@ bool QreNfgGrid::CheckEqu(gbtMixedProfile<double> &p_profile,
 			  double p_lambda, int p_staticPlayer,
 			  double p_tol) const
 {
-  p_profile.SetRow(p_staticPlayer, 
-		   UpdateFunc(p_profile, p_staticPlayer, p_lambda));
+  p_profile->SetRow(p_staticPlayer, 
+		    UpdateFunc(p_profile, p_staticPlayer, p_lambda));
   
   gbtMixedProfile<double> newProfile(p_profile);
-  for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= p_profile->NumPlayers(); pl++) {
     if (pl != p_staticPlayer) {
-      newProfile.SetRow(pl, UpdateFunc(p_profile, pl, p_lambda));
-      if (Distance(newProfile.GetRow(pl), p_profile.GetRow(pl)) > p_tol) {
+      newProfile->SetRow(pl, UpdateFunc(p_profile, pl, p_lambda));
+      if (Distance(newProfile->GetRow(pl), p_profile->GetRow(pl)) > p_tol) {
 	return false;
       }
     }
@@ -324,29 +337,29 @@ static void Jacobian(gbtVector<double> &p_vector,
 		     gbtSquareMatrix<double> &p_matrix,
 		     const gbtMixedProfile<double> &p_profile, double p_lambda)
 {
-  gbtPVector<double> logitterms(p_profile.Lengths());
-  for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
-    for (int st = 1; st <= p_profile.GetSupport()->GetPlayer(pl)->NumStrategies(); st++) {
-      logitterms(pl, st) = exp(p_lambda * p_profile.Payoff(pl, p_profile.GetSupport()->GetStrategy(pl, st)));
+  gbtPVector<double> logitterms(p_profile->Lengths());
+  for (int pl = 1; pl <= p_profile->NumPlayers(); pl++) {
+    for (int st = 1; st <= p_profile->GetPlayer(pl)->NumStrategies(); st++) {
+      logitterms(pl, st) = exp(p_lambda * p_profile->Payoff(pl, p_profile->GetSupport()->GetStrategy(pl, st)));
     }
   }
 
   int rowno = 0;
 
-  for (int pl1 = 1; pl1 <= p_profile.GetGame()->NumPlayers(); pl1++) {
+  for (int pl1 = 1; pl1 <= p_profile->NumPlayers(); pl1++) {
     double logitsum = 0.0;
-    for (int st = 1; st <= p_profile.GetSupport()->GetPlayer(pl1)->NumStrategies(); st++) {
+    for (int st = 1; st <= p_profile->GetPlayer(pl1)->NumStrategies(); st++) {
       logitsum += logitterms(pl1, st);
     }
 
-    for (int st1 = 1; st1 <= p_profile.GetSupport()->GetPlayer(pl1)->NumStrategies(); st1++) {
+    for (int st1 = 1; st1 <= p_profile->GetPlayer(pl1)->NumStrategies(); st1++) {
       rowno++;
 
       p_vector[rowno] = p_profile(pl1, st1) * logitsum - logitterms(pl1, st1);
 
       int colno = 0;
-      for (int pl2 = 1; pl2 <= p_profile.GetGame()->NumPlayers(); pl2++) {
-	for (int st2 = 1; st2 <= p_profile.GetSupport()->GetPlayer(pl2)->NumStrategies(); st2++) {
+      for (int pl2 = 1; pl2 <= p_profile->NumPlayers(); pl2++) {
+	for (int st2 = 1; st2 <= p_profile->GetPlayer(pl2)->NumStrategies(); st2++) {
 	  colno++;
 
 	  if (pl1 == pl2) {
@@ -359,11 +372,11 @@ static void Jacobian(gbtVector<double> &p_vector,
 	  }
 	  else {
 	    p_matrix(rowno, colno) = 0.0;
-	    for (int st = 1; st <= p_profile.GetSupport()->GetPlayer(pl1)->NumStrategies(); st++) {
-	      p_matrix(rowno, colno) += p_profile.Payoff(pl1, pl1, st, pl2, st2) * logitterms(pl1, st);
+	    for (int st = 1; st <= p_profile->GetPlayer(pl1)->NumStrategies(); st++) {
+	      p_matrix(rowno, colno) += p_profile->Payoff(pl1, pl1, st, pl2, st2) * logitterms(pl1, st);
 	    }
 	    p_matrix(rowno, colno) *= p_profile(pl1, st1);
-	    p_matrix(rowno, colno) -= p_profile.Payoff(pl1, pl1, st1, pl2, st2) * logitterms(pl1, st1);
+	    p_matrix(rowno, colno) -= p_profile->Payoff(pl1, pl1, st1, pl2, st2) * logitterms(pl1, st1);
 	    p_matrix(rowno, colno) *= p_lambda;
 	  }
 	}
@@ -383,22 +396,33 @@ static double Norm(const gbtVector<double> &p_vector)
   return sqrt(norm);
 }
 
+static double Norm(const gbtMixedProfile<double> &p_vector)
+{
+  double norm = 0.0;
+
+  for (int i = 1; i <= p_vector->MixedProfileLength(); i++) {
+    norm += p_vector[i] * p_vector[i];
+  }
+
+  return sqrt(norm);
+}
+
 static bool Polish(gbtMixedProfile<double> &p_profile, double p_lambda)
 {
-  gbtVector<double> f(p_profile.Length());
-  gbtSquareMatrix<double> J(p_profile.Length());
+  gbtVector<double> f(p_profile->MixedProfileLength());
+  gbtSquareMatrix<double> J(p_profile->MixedProfileLength());
 
   for (int iter = 1; iter <= 100; iter++) {
     try {
       Jacobian(f, J, p_profile, p_lambda);
 
       gbtVector<double> step = J.Inverse() * f;
-      for (int i = 1; i <= p_profile.Length(); i++) {
+      for (int i = 1; i <= p_profile->MixedProfileLength(); i++) {
 	p_profile[i] -= step[i];
       }
 
       if (Norm(step) <= .0000001 * (1.0 + Norm(p_profile))) {
-	for (int i = 1; i <= p_profile.Length(); i++) {
+	for (int i = 1; i <= p_profile->MixedProfileLength(); i++) {
 	  if (p_profile[i] < 0.0) {
 	    return false;
 	  }
@@ -443,7 +467,7 @@ void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gbtOutput &p_pxifile,
     numSteps = (int) (log(m_maxLam/m_minLam) / log(m_delLam + 1.0));
   }
 
-  gbtMixedProfile<double> centroid(p_support);
+  gbtMixedProfile<double> centroid = p_support->NewMixedProfile(0.0);
   double lambda = m_minLam;
   while (lambda <= m_maxLam) {
     step++;
@@ -454,17 +478,17 @@ void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gbtOutput &p_pxifile,
 
     do {
       p_status.Get();
-      if (CheckEqu(iter1, lambda, staticPlayer, m_tol1)) {
-	MixedProfileIterator iter2(iter1, m_delp2, m_delp1 / 2.0,
+      if (CheckEqu(iter1.Get(), lambda, staticPlayer, m_tol1)) {
+	MixedProfileIterator iter2(iter1.Get(), m_delp2, m_delp1 / 2.0,
 				   staticPlayer);
 	do {
 	  p_status.Get();
-	  if (CheckEqu(iter2, lambda, staticPlayer, m_tol2)) {
-	    gbtMixedProfile<double> candidate(iter2);
+	  if (CheckEqu(iter2.Get(), lambda, staticPlayer, m_tol2)) {
+	    gbtMixedProfile<double> candidate(iter2.Get());
 	    if (Polish(candidate, lambda)) {
 	      bool newsoln = true;
 	      for (int j = 1; j <= cursolns.Length(); j++) {
-		if (Distance(*cursolns[j].Profile(), candidate) < .00001) {
+		if (Distance(cursolns[j].Profile(), candidate) < .00001) {
 		  newsoln = false;
 		}
 	      }

@@ -31,6 +31,7 @@
 #include "behav.h"
 #include "actiter.h"
 #include "efgcont.h"
+#include "gamebase.h"
 
 #include "mixed.h"
 
@@ -72,28 +73,26 @@ template <class T> gbtBehavProfile<T>::gbtBehavProfile(const gbtEfgSupport &p_su
 
 template <class T>
 gbtBehavProfile<T>::gbtBehavProfile(const gbtMixedProfile<T> &p_profile)
-  : gbtDPVector<T>(p_profile.GetGame()->NumActions()), 
-    m_support(p_profile.GetGame()),
+  : gbtDPVector<T>(p_profile->GetGame()->NumActions()), 
+    m_support(p_profile->GetGame()),
     m_cached_data(false),
-    m_realizProbs(p_profile.GetGame()->NumNodes()),
-    m_beliefs(p_profile.GetGame()->NumNodes()),
-    m_nvals(p_profile.GetGame()->NumNodes()),
-    m_bvals(p_profile.GetGame()->NumNodes()),
-    m_nodeValues(p_profile.GetGame()->NumNodes(),
-		 p_profile.GetGame()->NumPlayers()),
-    m_infosetValues(p_profile.GetGame()->NumInfosets()),
-    m_actionValues(p_profile.GetGame()->NumActions()),
-    m_gripe(p_profile.GetGame()->NumActions())
+    m_realizProbs(p_profile->GetGame()->NumNodes()),
+    m_beliefs(p_profile->GetGame()->NumNodes()),
+    m_nvals(p_profile->GetGame()->NumNodes()),
+    m_bvals(p_profile->GetGame()->NumNodes()),
+    m_nodeValues(p_profile->GetGame()->NumNodes(),
+		 p_profile->GetGame()->NumPlayers()),
+    m_infosetValues(p_profile->GetGame()->NumInfosets()),
+    m_actionValues(p_profile->GetGame()->NumActions()),
+    m_gripe(p_profile->GetGame()->NumActions())
 {
-  //  gout << "\nin gbtBehavProfile(const gbtMixedProfile<T> &p_profile)";
-
   InitProfile();
 
   ((gbtVector<T> &) *this).operator=((T)0); 
 
   gbtGameNode n = m_support.GetTree()->GetRoot();
-  const gbtNfgSupport &support = p_profile.GetSupport();
-  gbtGame nfg = p_profile.GetGame();
+  const gbtNfgSupport &support = p_profile->GetSupport();
+  gbtGame nfg = p_profile->GetGame();
 
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++)   {
     m_nvals = (T) 0;
@@ -732,6 +731,12 @@ T gbtBehavProfile<T>::MaxRegret(void)
     }
   }
   return ret;
+}
+
+template <class T>
+gbtBehavProfile<T>::operator gbtMixedProfile<T>(void) const
+{
+  return gbtMixedProfile<T>(new gbtMixedProfileBase<T>(*this));
 }
 
 

@@ -152,8 +152,8 @@ static void QreLHS(const gbtNfgSupport &p_support,
 		   const gbtVector<T> &p_point,
 		   gbtVector<T> &p_lhs)
 {
-  gbtMixedProfile<T> profile(p_support);
-  for (int i = 1; i <= profile.Length(); i++) {
+  gbtMixedProfile<T> profile = p_support->NewMixedProfile((T) 0.0);
+  for (int i = 1; i <= profile->MixedProfileLength(); i++) {
     profile[i] = p_point[i];
   }
   T lambda = p_point[p_point.Length()];
@@ -172,8 +172,8 @@ static void QreLHS(const gbtNfgSupport &p_support,
     for (int st = 2; st <= player->NumStrategies(); st++) {
       p_lhs[++rowno] = log(profile(pl, st) / profile(pl, 1));
       p_lhs[rowno] -= (lambda * 
-		       (profile.Payoff(pl, player->GetStrategy(st)) -
-			profile.Payoff(pl, player->GetStrategy(1))));
+		       (profile->Payoff(pl, player->GetStrategy(st)) -
+			profile->Payoff(pl, player->GetStrategy(1))));
       p_lhs[rowno] *= profile(pl, 1) * profile(pl, st);
     }
   }
@@ -192,8 +192,8 @@ static void QreJacobian(const gbtNfgSupport &p_support,
 			const gbtVector<T> &p_point,
 			gbtMatrix<T> &p_matrix)
 {
-  gbtMixedProfile<T> profile(p_support);
-  for (int i = 1; i <= profile.Length(); i++) {
+  gbtMixedProfile<T> profile = p_support->NewMixedProfile((T) 0.0);
+  for (int i = 1; i <= profile->MixedProfileLength(); i++) {
     profile[i] = p_point[i];
   }
   double lambda = p_point[p_point.Length()];
@@ -238,14 +238,14 @@ static void QreJacobian(const gbtNfgSupport &p_support,
 	    }
 	  }
 	  else {
-	    p_matrix(colno, rowno) = -lambda * profile(pl1, 1) * profile(pl1, st1) * (profile.Payoff(pl1, pl1, st1, pl2, st2) - profile.Payoff(pl1, pl1, 1, pl2, st2));
+	    p_matrix(colno, rowno) = -lambda * profile(pl1, 1) * profile(pl1, st1) * (profile->Payoff(pl1, pl1, st1, pl2, st2) - profile->Payoff(pl1, pl1, 1, pl2, st2));
 	  }
 	}
       }
 
       p_matrix(p_matrix.NumRows(), rowno) = -profile(pl1, 1) * profile(pl1, st1) *
-	(profile.Payoff(pl1, p_support->GetStrategy(pl1, st1)) -
-	 profile.Payoff(pl1, p_support->GetStrategy(pl1, 1)));
+	(profile->Payoff(pl1, p_support->GetStrategy(pl1, st1)) -
+	 profile->Payoff(pl1, p_support->GetStrategy(pl1, 1)));
     }
   }
 }
@@ -310,17 +310,17 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
   T h = .03;                  // initial stepsize
   const T c_hmin = 1.0e-5;    // minimal stepsize
 
-  gbtVector<T> x(p_start.Length() + 1), u(p_start.Length() + 1);
-  for (int i = 1; i <= p_start.Length(); i++) {
+  gbtVector<T> x(p_start->MixedProfileLength() + 1), u(p_start->MixedProfileLength() + 1);
+  for (int i = 1; i <= p_start->MixedProfileLength(); i++) {
     x[i] = p_start[i];
   }
   x[x.Length()] = p_startLambda;
-  gbtVector<T> t(p_start.Length() + 1);
-  gbtVector<T> y(p_start.Length());
+  gbtVector<T> t(p_start->MixedProfileLength() + 1);
+  gbtVector<T> y(p_start->MixedProfileLength());
 
-  gbtMatrix<T> b(p_start.Length() + 1, p_start.Length());
-  gbtSquareMatrix<T> q(p_start.Length() + 1);
-  QreJacobian(p_start.GetSupport(), x, b);
+  gbtMatrix<T> b(p_start->MixedProfileLength() + 1, p_start->MixedProfileLength());
+  gbtSquareMatrix<T> q(p_start->MixedProfileLength() + 1);
+  QreJacobian(p_start->GetSupport(), x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
@@ -359,7 +359,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
     }
 
     T decel = 1.0 / c_maxDecel;  // initialize deceleration factor
-    QreJacobian(p_start.GetSupport(), u, b);
+    QreJacobian(p_start->GetSupport(), u, b);
     QRDecomp(b, q);
 
     int iter = 1;
@@ -367,7 +367,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
     while (true) {
       T dist;
 
-      QreLHS(p_start.GetSupport(), u, y);
+      QreLHS(p_start->GetSupport(), u, y);
       NewtonStep(q, b, u, y, dist); 
       if (dist >= c_maxDist) {
 	accept = false;
@@ -422,7 +422,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
       if (u[i] < (T) 1.0e-10) {
 	// Drop this strategy from the support, then recursively call
 	// to continue tracing
-	gbtNfgSupport newSupport(p_start.GetSupport());
+	gbtNfgSupport newSupport(p_start->GetSupport());
 	int index = 1;
 	for (int pl = 1; pl <= newSupport->NumPlayers(); pl++) {
 	  for (int st = 1; st <= newSupport->GetPlayer(pl)->NumStrategies(); st++) {
@@ -432,8 +432,8 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
 	  }
 	}
 
-	gbtMixedProfile<T> newProfile(newSupport);
-	for (int j = 1; j <= newProfile.Length(); j++) {
+	gbtMixedProfile<T> newProfile = newSupport->NewMixedProfile((T) 0.0);
+	for (int j = 1; j <= newProfile->MixedProfileLength(); j++) {
 	  if (j < i) {
 	    newProfile[j] = u[j];
 	  }
@@ -454,7 +454,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
     x[x.Length()] = u[u.Length()];
 
     gbtMixedProfile<T> foo(p_start);
-    for (int i = 1; i <= foo.Length(); i++) {
+    for (int i = 1; i <= foo->MixedProfileLength(); i++) {
       foo[i] = x[i];
     }
     p_solutions.Append(MixedSolution(foo, "Qre[NFG]"));
@@ -498,7 +498,7 @@ gbtList<MixedSolution> gbtNfgNashLogit::Solve(const gbtNfgSupport &p_support,
 #if GBT_WITH_MP_FLOAT
   gbtMixedProfile<gbtMPFloat> start(p_support);
 #else
-  gbtMixedProfile<double> start(p_support);
+  gbtMixedProfile<double> start = p_support->NewMixedProfile(0.0);
 #endif  // GBT_WITH_MP_FLOAT
 
   try {

@@ -939,7 +939,7 @@ void gbtNfgFrame::OnSupportDelete(wxCommandEvent &)
 
 void gbtNfgFrame::OnProfilesNew(wxCommandEvent &)
 {
-  MixedSolution profile = gbtMixedProfile<gbtNumber>(m_doc->GetGame()->NewNfgSupport());
+  MixedSolution profile = m_doc->GetGame()->NewNfgSupport()->NewMixedProfile(gbtNumber(0));
 
   dialogEditMixed dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {

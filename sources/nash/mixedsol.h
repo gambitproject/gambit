@@ -73,14 +73,10 @@ public:
   const gbtNumber &GetStrategyProb(const gbtGameStrategy &p_strategy) const
     { return (*this)(p_strategy); }
 
-  MixedSolution &operator+=(const MixedSolution &);
-  MixedSolution &operator-=(const MixedSolution &);
-  MixedSolution &operator*=(const gbtNumber &);
-
   // GENERAL DATA ACCESS
-  gbtGame GetGame(void) const { return m_profile.GetGame(); }
+  gbtGame GetGame(void) const { return m_profile->GetGame(); }
   gbtPrecision Precision(void) const { return m_precision; }
-  const gbtMixedProfile<gbtNumber> *Profile(void) const { return &m_profile; }
+  const gbtMixedProfile<gbtNumber> &Profile(void) const { return m_profile; }
 
   // Do probabilities sum to one (within m_epsilon) for each player?)
   bool IsComplete(void) const;
@@ -108,8 +104,8 @@ public:
   bool IsValid(void) const {return (m_revision == GetGame()->RevisionNumber());}
   // FUNCTIONS FOR COMPATIBILITY WITH GUI
   // these are all obsolescent :)
-  gbtNumber Payoff(int p_player) const { return m_profile.Payoff(p_player); }
-  const gbtArray<int> &Lengths(void) const { return m_profile.Lengths(); }
+  gbtNumber Payoff(int p_player) const { return m_profile->Payoff(p_player); }
+  const gbtArray<int> &Lengths(void) const { return m_profile->Lengths(); }
   
   // PAYOFF COMPUTATION
   gbtNumber GetPayoff(gbtGamePlayer) const;
