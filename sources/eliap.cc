@@ -115,8 +115,8 @@ static void AddSolution(gList<BehavSolution> &solutions,
 		        double value, double epsilon)
 {
   int i = solutions.Append(BehavSolution(profile, algorithmEfg_LIAP_EFG));
-  solutions[i].SetLiap(value);
-  solutions[i].SetEpsilon(epsilon);
+  //  solutions[i].SetLiap(value);
+  //  solutions[i].SetEpsilon(epsilon);
   //  if (IsPerfectRecall(profile.Game()) && solutions[i].IsNash()) {
   //    solutions[i].SetIsSequential(triTRUE);
   //  }
