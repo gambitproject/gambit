@@ -16,12 +16,12 @@ $$\image{1cm;0cm}{gamblogo}$$\\
 \centerline{An Interactive Extensive Form Game Program}}
 \author{Version 0.96\\
  \\
-Developed by: Richard D. McKelvey\\
-Main Programmer: Theodore Turocy\\
-Polynomial Code: Andrew McLennan\\
-Front End: Eugene Grayver\\
- \\
-Part of the Gambit Project:\\
+%Developed by: Richard D. McKelvey\\
+%Main Programmer: Theodore Turocy\\
+%Polynomial Code: Andrew McLennan\\
+%Front End: Eugene Grayver\\
+% \\
+Part of the \helpref{Gambit Project}{gambitproject}\\
 California Institute of Technology\\ \today.\\
 Funding provided by the National Science Foundation\\
  \\}
@@ -41,7 +41,7 @@ Funding provided by the National Science Foundation\\
 %\setheader{{\it COPYRIGHT}}{}{}{}{}{{\it COPYRIGHT}}%
 %\setfooter{\thepage}{}{}{}{}{\thepage}
 
-Copyright (c) 1995, The Gambit Project, at California Institute of
+Copyright (c) 2000, The Gambit Project, at California Institute of
 Technology and University of Minnesota.
 
 Permission to use, copy, modify, and distribute this software and its
@@ -63,25 +63,99 @@ ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE
 OR PERFORMANCE OF THIS SOFTWARE.
 
 
-\chapter*{Acknowledgments}%
-%\setheader{{\it ACKNOWLEDGEMENTS}}{}{}{}{}{{\it ACKNOWLEDGEMENTS}}%
-%\setfooter{\thepage}{}{}{}{}{\thepage}
+\chapter*{Acknowledgments}\label{gambitproject}
 
 The Gambit Project is a project for the development of computer code
 for the solution of extensive and normal form games.  The software
-developed under the project is public domain.
+developed under the project is public domain. The Gambit Project is
+funded in part by National Science Foundation grants SBR-9308637 and
+SBR-9617854 to the California Institute of Technology and SBR-9308862
+to the University of Minnesota.
 
-The Gambit Project is funded in part by National Science Foundation
-grants SBR-9308637 and SBR-9617854 to the California Institute of
-Technology and SBR-9308862 to the University of Minnesota.
+The Gambit Project is an ongoing project, where the set of active
+participants has changed over time, and will be expected to change
+further in the future.  The main contributors to this release are
+Richard D. McKelvey, Andrew McLennan and Ted L. Turocy.  However, this
+release builds heavily on the previous releases, and we would be
+remiss not to acknowledge the significant contributions of those
+involved in those previous releases.
 
-Numerous students at Caltech and the University of Minnesota have
-contributed to the Gambit Project: Among these are Bruce Bell, Anand
-Chelian, Nelson Escobar, Ben Freeman, Todd Kaplan, Brian Trotter,
-Michael Vanier, and Gary Wu.  We are also indebted to Bernhard von
-Stengel for help and advice on implementation of the sequence form and
-for contributing his ``clique'' code for identification of equilibrium
-components in two person games.  
+The Gambit project was begun in the mid 80's, at which time it
+consisted of an implementaion of the GUI in Basic.  The code has since
+been totally rewritten twice (first in C, then in C++), the
+functionality has been expanded, and the GCL has been developed as an
+alternative to the GUI to support econometric and computationally
+intensive use.
+
+Richard McKelvey has directed the Gambit project since its inception
+in the mid 80's, and was one of the principal investigators on the NSF
+grants for the Gambit Project.  He designed the original GUI, was
+involved in the design of the GCL (1993), and has been responsible for
+implementation of many of the algorithms in gambit.
+
+Andrew Mclennan has worked on the project since 1993, and was one of
+the principal investigators on the NSF grants for the Gambit project.
+Andy was involved in the original design of the GCL (1993).  He has
+been responsible for the implementation of the polynomial solution
+code, which finds all roots of polynomial systems of equations, and
+(effective this release) is used as the default algorithm to find all
+Nash equilibria of n-person games, when n is greater than two.
+
+Ted Turocy has worked on the project since 1992, working full time for
+a year and a half of that time.  He has been the main programmer for
+the project, also responsible for supervising other programmers
+working on the project.  Ted converted the code from C to C++, changed
+it to an object oriented style, wrote code for the container classes
+and for the current implementaton of the extensive and normal form
+classes, and implemented the GCL.  He also made substantial
+improvements to the GUI for this release.
+
+In listing the contributors to previous releases, we must
+first mention Eugene Grayver and Gary Wu, each of whom worked
+for at least four years on the project, making major contributions:
+
+Eugene Grayver worked on the project from 1994 through 1997.
+He wrote the code for the wxwin implementation of the GUI for versions
+.92 through .94, developed our Web page, handled the software
+distributions, and implemented the console interface for version .94
+of the GCL.
+
+Gary Wu worked from 1995 through 1998 on the project.  He was
+responsible for large portions of the GCL implementation, including
+the implementation of ``listability'', implementation of many of the
+built in functions, the command line editor, the original stack
+machine, and the Windows MFC interface for the GCL.
+
+Numerous additional students at Caltech and the University of Minnesota
+have contributed to the Gambit Project:
+
+Bruce Bell worked in 1989 on the first $C$ version of the Gambit GUI,
+which was distributed in 1991-92 as version .13, and later (1994-1995)
+helped with the implementation of the tableau and LU decomposition
+code (used in the two person LCP and LP algorithms). Matthew Derer
+worked in the summer of 1993 to do an initial implementation of the
+GUI for XWindows.  Anand Chelian worked summer of 1994 to do an
+initial implementation of the matrix and vector classes.  Brian
+Trotter worked summer of 1994 on internals of the container classes
+and the extensive form classes.  Todd Kaplan worked in the summer of
+1994 and did initial work towards implementaion of a multivariate
+polynomial class.  Nelson Escobar worked over the summer of 1995 to
+improve the LUDecomposition code, and worked on a second
+implementation of the polynomial classes.  Rob Weber did extensive
+testing from 1994 to 1996, and helped with the documentation of
+version .94.  Geoff Matters worked summer of 1997 to make various
+improvements to the LP solver and on improvements to the built in
+function definitions in the GCL.  Ben Freeman worked in the summer of
+1998 to implement the integer tableau class, which is used to speed up
+the rational computations for two person games.  Michael Vanier worked
+summer of 1998 through the spring of 1999 to set up the CVS repository
+system for source code control, work on the distribution scripts, and
+make various bug fixes to the GUI.
+
+We are also indebted to Bernhard von Stengel at the London School of
+Economics for help and advice on implementation of the sequence form
+and for contributing his ``clique'' code for identification of
+equilibrium components in two person games.
 
 \chapter{Introduction}
 
@@ -89,7 +163,7 @@ Gambit is a library of computer programs, written
 in \verb$C++$, for building, analyzing, and solving n-person games, in
 either extensive or normal form.
 
-The Gambit Graphics User Interface (\popref{Gambit GUI}{guigloss}) is an
+The Gambit Graphics User Interface (Gambit \popref{GUI}{guigloss}) is an
 interactive, menu driven program for accessing this library of programs.
 The Gambit GUI allows for the interactive building and solving of
 extensive and normal form games.  It consists of two separate modules, one
@@ -644,7 +718,7 @@ your screen is output.
 This dialog uses standard settings to compute various types of
 equilibria. For more information on the settings used, see the section
 on \helpref{NFG Standard Solutions}{NFGStandardSolutions} for the
-normal form or \helpref{EFG Standard Solutions}{EFGStandardSolutions}
+normal form or \helpref{EFG Standard Solutions}{EFGStandardSolutions} 
 for the extensive form.
 
 \begin{figure}
@@ -1000,7 +1074,7 @@ the highlighted cell will move to reflect the new strategy.
 
 \section{Normal Form Menu}
 
-\subsection{File}\label{nffile}
+\subsection{File Menu (nfg)}\label{nffile}
 
 Basic input/output operations are handled in this menu item.  
 
@@ -1015,7 +1089,7 @@ previous versions of Gambit.
 \item[Close:] Closes the normal form gui window, along with all child windows that depend on it.  
 \end{description}
 
-\subsection{Edit}\label{nfedit}
+\subsection{Edit Menu (nfg)}\label{nfedit}
 
 This menu item is used to edit the normal form game.  
 
@@ -1047,7 +1121,7 @@ Payoff}{ChangePayoff} dialog is used to edit the payoffs.
 \end{description}
 \end{description}
 
-\subsection{Supports}\label{nfsupports}
+\subsection{Supports Menu (nfg)}\label{nfsupports}
 
 Several menu items are available for manipulating Normal form supports.  
 
@@ -1067,7 +1141,7 @@ it. The \helpref{Edit Support}{EditSupport} dialog is used.
 \item[Select:] Select a support from the list as the current support.  
 \end{description}
 
-\subsection{Solve}\label{nfsolve}
+\subsection{Solve Menu (nfg)}\label{nfsolve}
 
 This menu item provides access to the algorithms for solving the game. 
 
@@ -1110,7 +1184,7 @@ Response Equilibrium}{QRE} correspondence.
 \end{description}
 \end{description}
 
-\subsection{View}\label{nfinspectsec}
+\subsection{View Menu (nfg)}\label{nfinspectsec}
 The normal form {\bf View} menu item allows selection of what
 information to display on the normal form.  The possible selection are 
 
@@ -1140,7 +1214,7 @@ of players, whether or not it is constant sum, and indicates if the
 game has been edited since loading.
 \end{description}
 
-\subsection{Prefs}
+\subsection{Prefs Menu (nfg)}
 The {\bf Prefs} menu item is used to change various display features
 of the normal form matrix:  
 
@@ -1209,7 +1283,7 @@ table:
 \row{     &        & n person              &Strong & Liap-2      & }
 \hline
 \row{Nash & All    & 2 person              &Strong & EnumMixed-0 &  }
-\row{     &        & n person              &Strong & Liap-0      & Not guaranteed}
+\row{     &        & n person              &Strong & PolEnum-0      &  }
 \hline
 \hline
 \row{Perfect & One    & 2 person           &Weak & LCP-1    & }
@@ -1361,9 +1435,9 @@ the data in the dialog that pops up.  Similarly, double clicking on
 the location of an outcome will bring up the payoff dialog for
 outcomes.
 
-\section{Extensive From Menu}
+\section{Extensive Form Menu}
 
-\subsection{File}\label{effile}
+\subsection{File Menu (efg)}\label{effile}
 
 Basic input/output operations are handled in this menu item.  
 
@@ -1380,7 +1454,7 @@ Media}{outputmedia} dialog is used to select where to send the output.
 child windows that depend on it.
 \end{description}
 
-\subsection{Edit}\label{efedit}
+\subsection{Edit Menu (efg)}\label{efedit}
 This menu item is used to build or modify the extensive form game.
 This section assumes a working knowledge of the conventions used in
 the GAMBIT extensive form display (discussed in the \helpref{Extensive
@@ -1498,6 +1572,7 @@ will result in refining the information partitions of players to which
 the information set is revealed in such a way that they observe all
 actions at the information set.
 \end{description}
+
 \item[Outcomes:] Create, edit and delete outcomes
 \begin{description}
 \item[New:] Creates a new outcome for the game, and brings up the 
@@ -1522,6 +1597,7 @@ Payoff}{ChangePayoff} dialog is used to edit the payoffs. If there is
 no outcome attached, then a new outcome is created and attached to the
 node.
 \end{description}
+
 \item[Tree:]
 \begin{description}
 \item[Copy] Copies the part of the tree following the mark to the
@@ -1567,7 +1643,7 @@ information sets.
 \end{description}
 \end{description}
 
-\subsection{Subgames}\label{SubgamesMenu}
+\subsection{Subgames Menu (efg)}\label{SubgamesMenu}
 
 The following list describes the commands for working with subgames. 
 
@@ -1597,7 +1673,7 @@ descendant subgames are expanded.
 as a subgame root.
 \end{description}
 
-\subsection{Supports}\label{efsupport}
+\subsection{Supports Menu (efg)}\label{efsupport}
 
 Several menu items are available for manipulating Normal form supports.  
 
@@ -1622,7 +1698,7 @@ nodes are drawn, but only the branches corresponding to actions in the
 support are drawn.
 \end{description}
 
-\subsection{Solve}\label{efsolve}
+\subsection{Solve Menu (efg)}\label{efsolve}
 
 \begin{description}
 \item[Standard:] Uses standard settings to compute various types of
@@ -1688,7 +1764,7 @@ displays it in the Normal Form GUI.
 \end{description}
 \end{description}
 
-\subsection{Inspect}\label{efinspect}
+\subsection{Inspect Menu (efg)}\label{efinspect}
 
 This menu item allows the selection of information to display:
 
@@ -1713,7 +1789,7 @@ as the number of players, whether the game is Perfect Recall and
 whether it is Constant Sum,
 \end{description}
 
-\subsection{Prefs}\label{displaymenu}
+\subsection{Prefs Menu (efg)}\label{displaymenu}
 
 The {\bf prefs} menu allows you to load, set and save various
 parameters which affect the extensive form display.
@@ -1853,7 +1929,7 @@ given in the following table:
 \row{     &     &  n-person             &  Unmark & Strong & EF/Liap-2 &Not guaranteed}
 \hline
 \row{Nash & All &  2-person             &  Unmark & Strong & NF/EnumMixed-0 &}
-\row{     &     &  n-person             &  Unmark & Strong & EF/Liap-0 &Not guaranteed}
+\row{     &     &  n-person             &  Unmark & Strong & EF/PolEnum &}
 \hline
 \row{Subgame Perfect & One &  2-person constant sum&  Mark & Weak & EF/LP-1 &}
 \row{                &     &  2-person general sum &  Mark & Weak & EF/LCP-1 &}
@@ -2017,7 +2093,7 @@ definitions are saved in the main Gambit defaults file (gambit.ini).  Gambit
 is distributed with the following keys defined.
 \begin{description}
 \item[ENTER:] Marks the node (Edit->Node->Mark)
-\item[SPACE:] Toggles the expand/collapse state of a subgame
+\item[SPACE:] Redraws the screen.  
 \end{description}
 
 \chapter{Solutions of Games}
@@ -2543,7 +2619,7 @@ In the poker example of \helpref{Figure~\ref{fig_samp1}}{normformsec},
 for player 1, strategy \verb+21+ is weakly dominated by strategy \verb+12+, 
 and strongly dominated by \verb+11+. 
 
-\gloss{Gambit GUI}\label{guigloss}
+\gloss{GUI}\label{guigloss}
 This Program -- the Gambit Graphics User Interface.
 
 \gloss{GCL}\label{gclgloss}
