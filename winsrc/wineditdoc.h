@@ -35,6 +35,8 @@ public:
 // Implementation
 public:
 	virtual ~CWinEditDoc();
+
+        virtual BOOL IsModified(void) { return 0; }
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
