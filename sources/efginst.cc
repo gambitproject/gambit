@@ -114,6 +114,7 @@ template class gList<Action *>;
 template class gList<const Action *>;
 
 template class gList<Infoset *>;
+template class gList<const Infoset *>;
 
 template class gList<BehavSolution>;
 
