@@ -4,6 +4,10 @@
 // $Id$
 //
 
+#ifdef __GNUG__
+#pragma implementation "gstring.h"
+#endif  // __GNUG__
+
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>

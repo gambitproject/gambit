@@ -125,6 +125,11 @@ template <class T> class gBlock    {
     int Length(void) const    { return length; }
 
 //
+// Empty the block
+//
+    void Flush(void)   { length = 0;  delete [] data;  data = 0; }
+
+//
 // Print the contents of the block (for debugging purposes)
 //
     void Dump(gOutput &) const;

@@ -136,8 +136,12 @@ template <class T> INLINE T &gNArray<T>::operator[](const gVector<int> &v)
 template <class T> INLINE void gNArray<T>::Output(gOutput &f) const
 {
   if (dim.Length() > 0)   {
+    for (int i = dim.Length(); i > 0; f << i-- << ' ');
+    f << '\n';
+
     gVector<int> v(1, dim.Length());
     DumpFrom(f, 1, v);
+    f << '\n';
   }
 }
 
@@ -147,7 +151,7 @@ void gNArray<T>::DumpFrom(gOutput &f, int offset, gVector<int> &v) const
   for (int i = 1; i <= dim[offset]; i++)   {
     v[offset] = i;
     if (offset == dim.Length())
-      f << v << ": " << (*this)[v] << '\n';
+      f << (*this)[v] << ' ';
     else
       DumpFrom(f, offset + 1, v);
   }

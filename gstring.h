@@ -7,6 +7,10 @@
 #ifndef GSTRING_H
 #define GSTRING_H
 
+#ifdef __GNUG__
+#pragma interface
+#endif    // __GNUG__
+
 #include <string.h>
 #include "gambitio.h"
 
@@ -80,7 +84,7 @@ class gString   {
     operator const char*() const { return storage; }
 
 	// DESTRUCTOR
-    virtual ~gString()     { delete [] storage; }
+    ~gString()     { delete [] storage; }
 };
 
 inline gString operator+(const char *c, const gString &s)
