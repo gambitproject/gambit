@@ -202,7 +202,7 @@ delfunc:      writeopt DELFUNC LBRACK NAME
               { funcname = tval; function = new gList<NewInstr*>; 
                 statementcount = 0; }
               LBRACK formallist RBRACK TYPEopt
-              RBRACK   { if (!triv && !semi) emit(new NewInstr(iOUTPUT));
+              RBRACK   { /*if (!triv && !semi) emit(new NewInstr(iOUTPUT));*/
 			 if (!DeleteFunction())  YYERROR; } 
 
 TYPEopt:      { functype = "ANYTYPE" }
@@ -258,16 +258,21 @@ binding:      RARROW    { refs.Append(false); }
 statement:    writeopt { triv = true; statementcount++; }
          |    expression { triv = false; }
          |    conditional { triv = false; }
+         |    WRITE conditional { triv = false; emit(new NewInstr(iOUTPUT)); }
          |    whileloop { triv = false; }
+         |    WRITE whileloop { triv = false; emit(new NewInstr(iOUTPUT)); }
          |    forloop   { triv = false; }
+         |    WRITE forloop  { triv = false; emit(new NewInstr(iOUTPUT)); }
          |    writeopt QUIT     { triv = false; quit = true; 
                          emit(new NewInstr(iQUIT)); }
 
 
-include:      writeopt INCLUDE LBRACK TEXT RBRACK EOC
+include:      writeopt INCLUDE LBRACK TEXT RBRACK semiopt EOC
               { 
                 LoadInputs( tval );
 	      }
+
+semiopt:   | SEMI
 
 
 conditional:  IF LBRACK CRLFopt expression CRLFopt COMMA 
@@ -303,7 +308,7 @@ whileloop:    WHILE LBRACK CRLFopt { labels.Push(ProgLength() + 1); }
               expression { emit(new NewInstr(iNOT)); emit(0);
 			   labels.Push(ProgLength()); }
               CRLFopt COMMA statements RBRACK 
-              { if (!triv && !semi)   emit(new NewInstr(iOUTPUT));
+              { /*if (!triv && !semi)   emit(new NewInstr(iOUTPUT));*/
                 if (function)
 		  (*function)[labels.Pop()] = 
                     new NewInstr(iIF_GOTO, (long) ProgLength() + 2);
@@ -341,7 +346,7 @@ forloop:      FOR LBRACK CRLFopt exprlist CRLFopt COMMA CRLFopt
               }
               statements RBRACK
               { 
-                if (!triv && !semi)  emit(new NewInstr(iOUTPUT));
+               /* if (!triv && !semi)  emit(new NewInstr(iOUTPUT)); */
                 // emit jump to beginning of increment step
                 emit(new NewInstr(iGOTO, (long) labels.Pop()));
 		// link guard-false branch to end of code
