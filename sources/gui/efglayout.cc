@@ -92,12 +92,15 @@ void NodeEntry::Draw(wxDC &p_dc) const
   }
 
   int textWidth, textHeight;
+  p_dc.SetFont(m_nodeAboveFont);
   p_dc.GetTextExtent(m_nodeAboveLabel, &textWidth, &textHeight);
   p_dc.DrawText(m_nodeAboveLabel,
 		m_x + (m_size - textWidth) / 2, m_y - textHeight - 9);
+  p_dc.SetFont(m_nodeBelowFont);
   p_dc.GetTextExtent(m_nodeBelowLabel, &textWidth, &textHeight);
   p_dc.DrawText(m_nodeBelowLabel,
 		m_x + (m_size - textWidth) / 2, m_y + 9);
+  p_dc.SetFont(m_nodeRightFont);
   p_dc.GetTextExtent(m_nodeRightLabel, &textWidth, &textHeight);
   p_dc.DrawText(m_nodeRightLabel,
 		m_x + GetSize() + 10, m_y - textHeight/2);
@@ -756,8 +759,11 @@ void efgTreeLayout::GenerateLabels(void)
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     NodeEntry *entry = m_nodeList[i];
     entry->SetNodeAboveLabel(CreateNodeAboveLabel(entry));
+    entry->SetNodeAboveFont(settings.NodeAboveFont());
     entry->SetNodeBelowLabel(CreateNodeBelowLabel(entry));
+    entry->SetNodeBelowFont(settings.NodeBelowFont());
     entry->SetNodeRightLabel(CreateNodeRightLabel(entry));
+    entry->SetNodeRightFont(settings.NodeRightFont());
     if (entry->GetChildNumber() > 0) {
       entry->SetBranchAboveLabel(CreateBranchAboveLabel(entry));
       entry->SetBranchAboveFont(settings.BranchAboveFont());

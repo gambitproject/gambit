@@ -41,6 +41,7 @@ private:
   wxString m_nodeAboveLabel, m_nodeBelowLabel, m_nodeRightLabel;
   wxString m_branchAboveLabel, m_branchBelowLabel;
 
+  wxFont m_nodeAboveFont, m_nodeBelowFont, m_nodeRightFont;
   wxFont m_branchAboveFont, m_branchBelowFont;
 
 public:
@@ -121,6 +122,15 @@ public:
     { return m_branchBelowLabel; }
   void SetBranchBelowLabel(const wxString &p_label)
     { m_branchBelowLabel = p_label; }
+
+  const wxFont &GetNodeAboveFont(void) const { return m_nodeAboveFont; }
+  void SetNodeAboveFont(const wxFont &p_font) { m_nodeAboveFont = p_font; }
+
+  const wxFont &GetNodeBelowFont(void) const { return m_nodeBelowFont; }
+  void SetNodeBelowFont(const wxFont &p_font) { m_nodeBelowFont = p_font; }
+
+  const wxFont &GetNodeRightFont(void) const { return m_nodeRightFont; }
+  void SetNodeRightFont(const wxFont &p_font) { m_nodeRightFont = p_font; }
 
   const wxFont &GetBranchAboveFont(void) const { return m_branchAboveFont; }
   void SetBranchAboveFont(const wxFont &p_font) { m_branchAboveFont = p_font; }
