@@ -1894,7 +1894,7 @@ extensive form game, or if \verb+node+ is not a terminal node.
 ArgMax[x->LIST(T)] =: T 
 \end{verbatim} \normalsize
 
-{\it for} {\tt T = INTEGER< FLOAT, RATIONAL} 
+{\it for} {\tt T = INTEGER, FLOAT, RATIONAL} 
 \bd 
 Returns the index of the first element of the list \verb+x+ which
 attains the maximum value of any elements in the list.  
@@ -1947,7 +1947,7 @@ values specified by \verb+value+.  It is an error if the dimensions of
 
 \item
 \protect \large \begin{verbatim}
-Behav[profile->MIXED(T)] =: BEHAV(T)
+Behav[mixed->MIXED(T)] =: BEHAV(T)
 \end{verbatim}\normalsize
 
 {\it for} {\tt T = FLOAT, RATIONAL}
@@ -3524,7 +3524,7 @@ Manual[x->TEXT,{y->OUTPUT}] =: TEXT
 \end{verbatim} \normalsize
 
 \bd 
-Returns the manual entry for the function \verb+x+.  If there is no
+Prints the manual entry for the function \verb+x+.  If there is no
 entry for \verb+x+, the empty string is returned. The parameter
 \verb+y+, which is the null output by default, can be used to print
 the manual entry to an output stream.
@@ -3630,18 +3630,18 @@ specified by \verb+value+.  It is an error if the dimensions of
 \item [See also:] \verb+Behav+, \verb+Centroid+.
 \ed
 
-\item
-\protect \large \begin{verbatim}
-Mixed[profile->BEHAV(T)] =: MIXED(T)
-\end{verbatim}\normalsize
+%\item
+%\protect \large \begin{verbatim}
+%Mixed[profile->BEHAV(T)] =: MIXED(T)
+%\end{verbatim}\normalsize
 
-{\it for} {\tt T = FLOAT, RATIONAL}
-\bd
-Converts \verb+profile+ to the equivalent mixed strategy profile on the
-associated normal form game.  It is an error if there is no associated
-normal form game.
-\item [See also:] \verb+Behav+.
-\ed
+%{\it for} {\tt T = FLOAT, RATIONAL}
+%\bd
+%Converts \verb+profile+ to the equivalent mixed strategy profile on the
+%associated normal form game.  It is an error if there is no associated
+%normal form game.
+%\item [See also:] \verb+Behav+.
+%\ed
 
 \item
 \protect \large \begin{verbatim}
