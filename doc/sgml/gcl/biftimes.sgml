@@ -1,0 +1,53 @@
+<refentry id="bif.Times" xreflabel="Times">
+
+<refmeta>
+<indexterm>
+<primary>Times</primary>
+</indexterm>
+
+<refentrytitle>Times</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Times</refname>
+<refpurpose>
+Returns the product of two numbers, or a number and a profile
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Times[x->NUMBER, y->NUMBER] =: NUMBER 
+Times[x->NUMBER, y->MIXED] =: MIXED 
+Times[x->NUMBER, y->BEHAV] =: BEHAV 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Times</function>
+computes the product of <parameter>x</parameter> and
+<parameter>y</parameter>.  For profiles, the product is defined
+as multiplying elementwise.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>x * y</literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Minus">,
+<xref linkend="bif.Plus">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -197,6 +197,9 @@
 <!ENTITY bifstrategyvalues SYSTEM "gcl/bifstrategyvalues.sgml">
 <!ENTITY bifsubgames SYSTEM "gcl/bifsubgames.sgml">
 <!ENTITY bifsupport SYSTEM "gcl/bifsupport.sgml">
+<!ENTITY biftext SYSTEM "gcl/biftext.sgml">
+<!ENTITY biftimes SYSTEM "gcl/biftimes.sgml">
+<!ENTITY biftranspose SYSTEM "gcl/biftranspose.sgml">
 <!ENTITY algref SYSTEM "algref.sgml">
 <!ENTITY biblio SYSTEM "biblio.sgml">
 

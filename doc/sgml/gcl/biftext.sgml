@@ -1,0 +1,34 @@
+<refentry id="bif.Text" xreflabel="Text">
+
+<refmeta>
+<indexterm>
+<primary>Text</primary>
+</indexterm>
+
+<refentrytitle>Text</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Text</refname>
+<refpurpose>
+Converts a value to a text string
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Text[x->NUMBER] =: TEXT 
+Text[x->TEXT] =: TEXT 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Text</function>
+converts <parameter>x</parameter> into a text string.
+</refsect1>
+
+</refentry>
+
+

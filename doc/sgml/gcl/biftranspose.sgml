@@ -1,0 +1,42 @@
+<refentry id="bif.Transpose" xreflabel="Transpose">
+
+<refmeta>
+<indexterm>
+<primary>Transpose</primary>
+</indexterm>
+
+<refentrytitle>Transpose</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Transpose</refname>
+<refpurpose>
+Returns the transpose of a rectangular matrix
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Transpose[x->LIST(LIST(T))] =: LIST(LIST(T)) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Transpose</function>
+returns the transpose of a rectangular matrix.  It is an error if 
+<parameter>list</parameter>
+is not rectangular.
+</para>
+</refsect1>
+
+<title>See also</title>
+<para>
+<xref linkend="bif.Inverse">.
+</para>
+</refsect1>
+
+</refentry>
+
+
