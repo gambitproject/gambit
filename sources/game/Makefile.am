@@ -5,11 +5,9 @@ noinst_LTLIBRARIES = libgambit_game.la
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
 libgambit_game_la_SOURCES = \
-	efgciter.h \
-	efgiter.cc \
-	efgiter.h \
 	game.h \
 	game-behav-mixed.h \
+	game-behav-pure.h \
 	game-contingency.h \
 	game-file.cc \
 	game-file.h \

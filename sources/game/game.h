@@ -175,6 +175,12 @@ typedef gbtGameObjectHandle<gbtGameNodeRep> gbtGameNode;
 class gbtGameStrategyRep;
 typedef gbtGameObjectHandle<gbtGameStrategyRep> gbtGameStrategy;
 
+class gbtGameBehavContingencyRep;
+typedef gbtGameSingleHandle<gbtGameBehavContingencyRep> gbtGameBehavContingency;
+
+class gbtGameBehavProfileIteratorRep;
+typedef gbtGameSingleHandle<gbtGameBehavProfileIteratorRep> gbtGameBehavProfileIterator;
+
 class gbtGameContingencyRep;
 typedef gbtGameSingleHandle<gbtGameContingencyRep> gbtGameContingency;
 
@@ -183,7 +189,6 @@ typedef gbtGameSingleHandle<gbtGameContingencyIteratorRep> gbtGameContingencyIte
 
 template <class T> class gbtBehavProfile;
 template <class T> class gbtMixedProfile;
-class gbtPureBehavProfile;
 
 //!
 //! An abstract representation of a game.  Implementations of this
@@ -240,6 +245,10 @@ public:
   virtual gbtGameNode GetRoot(void) const = 0;
   /// Returns the number of nodes in the tree.
   virtual int NumNodes(void) const = 0;
+  /// Returns an object representing a behavior contingency in the game
+  virtual gbtGameBehavContingency NewBehavContingency(void) const = 0;
+  /// Returns an object that iterates over all behavior contingencies
+  virtual gbtGameBehavProfileIterator NewBehavProfileIterator(void) const = 0;
   //}
 
   //!
@@ -336,7 +345,7 @@ typedef gbtGameObjectHandle<gbtGameRep> gbtGame;
 #include "game-strategy.h"
 #include "game-contingency.h"
 #include "game-behav-mixed.h"
-#include "tree-behav-pure.h"
+#include "game-behav-pure.h"
 #include "game-strategy-mixed.h"
 
 gbtGame NewEfg(void);

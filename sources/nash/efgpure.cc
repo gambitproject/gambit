@@ -29,8 +29,6 @@
 #include "efgpure.h"
 
 #include "game/game.h"
-#include "game/efgiter.h"
-#include "game/efgciter.h"
 
 class gbtEfgNashEnumPure {
 private:
@@ -52,8 +50,7 @@ gbtEfgNashEnumPure::Solve(const gbtGame &p_game, gbtStatus &p_status)
 {
   gbtList<gbtBehavProfile<gbtRational> > solutions;
 
-  gbtEfgContIterator citer(p_game);
-  gbtPVector<gbtRational> probs(p_game->NumInfosets());
+  gbtGameBehavProfileIterator citer = p_game->NewBehavProfileIterator();
 
   int ncont = 1;
   for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
@@ -64,25 +61,32 @@ gbtEfgNashEnumPure::Solve(const gbtGame &p_game, gbtStatus &p_status)
   }
 
   int contNumber = 1;
+  gbtGameBehavContingency cont = p_game->NewBehavContingency();
   try {
+    // This loop used to take into account unreached information sets
+    // to speed up the search.  It should do so again in the future.
+    // (It currently doesn't while the game API is being reorganized).
     do  {
       p_status.Get();
       p_status.SetProgress((double) contNumber / (double) ncont);
 
       bool flag = true;
-      citer.GetProfile().InfosetProbs(probs);
 
-      gbtEfgIterator eiter(citer);
       
       for (int pl = 1; flag && pl <= p_game->NumPlayers(); pl++)  {
-	gbtRational current = citer.Payoff(pl);
+	for (int i = 1; i <= p_game->NumPlayers(); i++) {
+	  for (int iset = 1; iset <= p_game->GetPlayer(i)->NumInfosets(); iset++) {
+	    cont->SetAction(citer->GetAction(p_game->GetPlayer(i)->GetInfoset(iset)));
+	  }
+	}
+	gbtGamePlayer player = p_game->GetPlayer(pl);
+	gbtRational current = citer->GetPayoff(player);
 	for (int iset = 1;
-	     flag && iset <= p_game->GetPlayer(pl)->NumInfosets();
+	     flag && iset <= player->NumInfosets();
 	     iset++)  {
-	  if (probs(pl, iset) == gbtRational(0))   continue;
-	  for (int act = 1; act <= p_game->GetPlayer(pl)->GetInfoset(iset)->NumActions(); act++)  {
-	    eiter.Next(pl, iset);
-	    if (eiter.Payoff(pl) > current)  {
+	  for (int act = 1; act <= player->GetInfoset(iset)->NumActions(); act++)  {
+	    cont->SetAction(player->GetInfoset(iset)->GetAction(act));
+	    if (cont->GetPayoff(player) > current)  {
 	      flag = false;
 	      break;
 	    }
@@ -92,13 +96,19 @@ gbtEfgNashEnumPure::Solve(const gbtGame &p_game, gbtStatus &p_status)
 
       if (flag)  {
 	gbtBehavProfile<gbtRational> temp = p_game->NewBehavProfile(gbtRational(0));
-	const gbtPureBehavProfile &profile = citer.GetProfile();
+
+	for (int i = 1; i <= p_game->NumPlayers(); i++) {
+	  for (int iset = 1; iset <= p_game->GetPlayer(i)->NumInfosets(); iset++) {
+	    cont->SetAction(citer->GetAction(p_game->GetPlayer(i)->GetInfoset(iset)));
+	  }
+	}
+
 	for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
 	  gbtGamePlayer player = p_game->GetPlayer(pl);
 	  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
 	    gbtGameInfoset infoset = player->GetInfoset(iset);
 	    for (int act = 1; act <= infoset->NumActions(); act++) {
-	      if (profile.GetAction(infoset)->GetId() == act) {
+	      if (cont->GetAction(infoset)->GetId() == act) {
 		temp(pl, iset, act) = 1;
 	      }
 	      else {
@@ -112,7 +122,7 @@ gbtEfgNashEnumPure::Solve(const gbtGame &p_game, gbtStatus &p_status)
       }
       contNumber++;
     }  while ((m_stopAfter == 0 || solutions.Length() < m_stopAfter) &&
-	      citer.NextContingency());
+	      citer->NextContingency());
   }
   catch (gbtInterruptException &) {
     // catch exception; return list of computed equilibria (if any)

@@ -32,6 +32,7 @@
 #include "tree-game.h"
 #include "tree-contingency.h"
 #include "tree-strategy-mixed.h"
+#include "tree-behav-pure.h"
 #include "tree-behav-mixed.h"
 
 //======================================================================
@@ -224,6 +225,14 @@ gbtGameNode gbtTreeGameRep::GetRoot(void) const
 
 int gbtTreeGameRep::NumNodes(void) const
 { return m_numNodes; }
+
+gbtGameBehavContingency
+gbtTreeGameRep::NewBehavContingency(void) const
+{ return new gbtTreeBehavContingencyRep(const_cast<gbtTreeGameRep *>(this)); }
+
+gbtGameBehavProfileIterator
+gbtTreeGameRep::NewBehavProfileIterator(void) const
+{ return new gbtTreeBehavProfileIteratorRep(const_cast<gbtTreeGameRep *>(this)); }
 
 //----------------------------------------------------------------------
 //               class gbtTreeGameRep: Game table

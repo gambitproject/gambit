@@ -42,14 +42,10 @@ template class gbtBlock<gbtTreeNodeRep *>;
 template class gbtArray<gbtTreeActionRep *>;
 template class gbtBlock<gbtTreeActionRep *>;
 
+template class gbtArray<gbtArray<gbtTreeActionRep *> >;
+
 template class gbtArray<gbtTreeStrategyRep *>;
 template class gbtBlock<gbtTreeStrategyRep *>;
-
-template class gbtArray<gbtGameAction>;
-template class gbtBlock<gbtGameAction>;
-
-// Currently used in pure behavior profile.  Probably superfluous?
-template class gbtArray<gbtArray<gbtGameAction> *>;
 
 template class gbtArray<gbtTreeOutcomeRep *>;
 template class gbtBlock<gbtTreeOutcomeRep *>;

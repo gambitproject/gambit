@@ -94,6 +94,8 @@ public:
   bool HasTree(void) const { return true; }
   gbtGameNode GetRoot(void) const;
   int NumNodes(void) const;
+  gbtGameBehavContingency NewBehavContingency(void) const;
+  gbtGameBehavProfileIterator NewBehavProfileIterator(void) const;
   //@}
 
   /// @name Information about the game table

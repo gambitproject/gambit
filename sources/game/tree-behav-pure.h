@@ -27,37 +27,72 @@
 #ifndef TREE_BEHAV_PURE_H
 #define TREE_BEHAV_PURE_H
 
-#include "game.h"
+#include "game-behav-pure.h"
+#include "tree-game.h"
 
-class gbtPureBehavProfile   {
-protected:
-  gbtGame m_efg;
-  gbtArray<gbtArray<gbtGameAction> *> profile;
-
-  void Payoff(const gbtGameNode &n, const gbtRational &, 
-	      gbtArray<gbtRational> &) const;
-  void InfosetProbs(const gbtGameNode &n, const gbtRational &,
-		    gbtPVector<gbtRational> &) const;
-
+class gbtTreeBehavContingencyRep : public gbtGameBehavContingencyRep  {
 public:
-  gbtPureBehavProfile(const gbtGame &);
-  gbtPureBehavProfile(const gbtPureBehavProfile &);
-  ~gbtPureBehavProfile();
+  int m_refCount;
+  gbtTreeGameRep *m_efg;
+  gbtArray<gbtArray<gbtTreeActionRep *> > m_profile;
 
-  // Operators
-  gbtPureBehavProfile &operator=(const gbtPureBehavProfile &);
-  gbtRational operator()(const gbtGameAction &) const;
+  /// @name Constructors and destructor
+  //@{
+  gbtTreeBehavContingencyRep(gbtTreeGameRep *);
+  virtual ~gbtTreeBehavContingencyRep();
+  
+  gbtGameBehavContingencyRep *Copy(void) const;
+  //@}
 
-  // Manipulation
-  void Set(const gbtGameAction &);
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  bool IsDeleted(void) const { return false; }
+  //@}
 
-  // Information
+  /// @name Accessing the state
+  //@{
   gbtGameAction GetAction(const gbtGameInfoset &) const;
-    
-  gbtRational Payoff(const gbtGameNode &, int pl) const;
-  void Payoff(gbtArray<gbtRational> &payoff) const;
-  void InfosetProbs(gbtPVector<gbtRational> &prob) const;
-  gbtGame GetGame(void) const   { return m_efg; }
+  void SetAction(const gbtGameAction &);
+
+  gbtRational GetPayoff(gbtTreeNodeRep *, gbtTreePlayerRep *) const;
+  gbtRational GetPayoff(const gbtGamePlayer &) const;
+  //@}
+};
+
+class gbtTreeBehavProfileIteratorRep : public gbtGameBehavProfileIteratorRep {
+public:
+  int m_refCount;
+  gbtTreeGameRep *m_efg;
+  gbtTreeBehavContingencyRep m_profile;
+
+  /// @name Constructors and destructor
+  //@{
+  gbtTreeBehavProfileIteratorRep(gbtTreeGameRep *);
+  virtual ~gbtTreeBehavProfileIteratorRep() { }
+
+  gbtGameBehavProfileIteratorRep *Copy(void) const;
+  //@}
+  
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  bool IsDeleted(void) const { return false; }
+  //@}
+
+  /// @name Iteration
+  //@{
+  void First(void);
+  bool NextContingency(void);
+  //@}
+
+  /// @name Accessing the state
+  //@{
+  gbtGameAction GetAction(const gbtGameInfoset &) const;
+  gbtRational GetPayoff(const gbtGamePlayer &) const;
+  //@}
 };
 
 #endif  // TREE_BEHAV_PURE_H

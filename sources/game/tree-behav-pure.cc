@@ -26,128 +26,234 @@
 
 #include "tree-behav-pure.h"
 
-//-------------------------------------------------------------------------
-//                    gbtPureBehavProfile member functions
-//-------------------------------------------------------------------------
+//======================================================================
+//        Implementation of class gbtTreeBehavContingencyRep
+//======================================================================
 
-gbtPureBehavProfile::gbtPureBehavProfile(const gbtGame &efg)
-  : m_efg(efg), profile(efg->NumPlayers())
+//----------------------------------------------------------------------
+//    class gbtTreeBehavContingencyRep: Constructor and destructor
+//----------------------------------------------------------------------
+
+gbtTreeBehavContingencyRep::gbtTreeBehavContingencyRep(gbtTreeGameRep *p_efg)
+  : m_refCount(0), m_efg(p_efg), m_profile(m_efg->NumPlayers())
 {
-  for (int pl = 1; pl <= efg->NumPlayers(); pl++)  {
-    gbtGamePlayer player = efg->GetPlayer(pl);
-    profile[pl] = new gbtArray<gbtGameAction>(player->NumInfosets());
+  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
+    gbtTreePlayerRep *player = m_efg->m_players[pl];
+    m_profile[pl] = gbtArray<gbtTreeActionRep *>(player->NumInfosets());
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      (*profile[pl])[iset] = player->GetInfoset(iset)->GetAction(1);
+      m_profile[pl][iset] = player->m_infosets[iset]->m_actions[1];
     }
   }
 }
 
-gbtPureBehavProfile::gbtPureBehavProfile(const gbtPureBehavProfile &p)
-  : m_efg(p.m_efg), profile(p.profile.Length())
+gbtTreeBehavContingencyRep::~gbtTreeBehavContingencyRep()
+{ }
+
+gbtGameBehavContingencyRep *gbtTreeBehavContingencyRep::Copy(void) const
 {
-  for (int pl = 1; pl <= profile.Length(); pl++)   {
-    profile[pl] = new gbtArray<gbtGameAction>(p.profile[pl]->Length());
-    for (int iset = 1; iset <= profile[pl]->Length(); iset++)
-      (*profile[pl])[iset] = (*p.profile[pl])[iset];
+  gbtTreeBehavContingencyRep *rep = new gbtTreeBehavContingencyRep(m_efg);
+
+  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
+    gbtTreePlayerRep *player = m_efg->m_players[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      rep->m_profile[pl][iset] = m_profile[pl][iset];
+    }
+  } 
+
+  return rep;
+}
+
+//----------------------------------------------------------------------
+// class gbtTreeBehavContingencyRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTreeBehavContingencyRep::Reference(void)
+{
+  m_refCount++;
+  m_efg->m_refCount++;
+}
+
+bool gbtTreeBehavContingencyRep::Dereference(void)
+{
+  if (--m_efg->m_refCount == 0) {
+    // Note that if this condition is true, this profile must be the
+    // last reference to the game, so m_refCount will also be one
+    // (and this function will return true)
+    delete m_efg;
   }
+  return (--m_refCount == 0);
 }
 
-gbtPureBehavProfile::~gbtPureBehavProfile()
-{
-  for (int pl = 1; pl <= profile.Length(); delete profile[pl++]);
-}
 
-gbtPureBehavProfile &gbtPureBehavProfile::operator=(const gbtPureBehavProfile &p) 
-{
-  if (this != &p && m_efg == p.m_efg)   {
-    for(int pl = 1; pl <= profile.Length(); pl++)
-    for(int iset = 1; iset <= profile[pl]->Length(); iset++)
-    (*profile[pl])[iset] = (*p.profile[pl])[iset];
-  }
-  return *this;
-}
-
-gbtRational gbtPureBehavProfile::operator()(const gbtGameAction &action) const
-{
-  if ((*profile[action->GetInfoset()->GetPlayer()->GetId()])
-      [action->GetInfoset()->GetId()] == action)
-    return 1;
-  else
-    return 0;
-}
-
-void gbtPureBehavProfile::Set(const gbtGameAction &action)
-{
-  (*profile[action->GetInfoset()->GetPlayer()->GetId()])
-    [action->GetInfoset()->GetId()] = action;
-}
-
+//----------------------------------------------------------------------
+//      class gbtTreeBehavContingencyRep: Accessing the state
+//----------------------------------------------------------------------
 
 gbtGameAction 
-gbtPureBehavProfile::GetAction(const gbtGameInfoset &infoset) const
+gbtTreeBehavContingencyRep::GetAction(const gbtGameInfoset &p_infoset) const
 {
-  return (*profile[infoset->GetPlayer()->GetId()])[infoset->GetId()];
+  if (p_infoset.IsNull())  throw gbtGameNullException();
+  gbtTreeInfosetRep *infoset =
+    dynamic_cast<gbtTreeInfosetRep *>(p_infoset.Get());
+  if (!infoset || infoset->m_player->m_efg != m_efg) {
+    throw gbtGameMismatchException();
+  }
+
+  return m_profile[infoset->m_player->m_id][infoset->m_id];
 }
 
-
-gbtRational gbtPureBehavProfile::Payoff(const gbtGameNode &n, int pl) const
+void gbtTreeBehavContingencyRep::SetAction(const gbtGameAction &p_action)
 {
-  gbtArray<gbtRational> payoff(m_efg->NumPlayers());
-  for (int i = 1; i <= m_efg->NumPlayers(); i++)
-    payoff[i] = 0;
-  Payoff(n, 1, payoff);
-  return payoff[pl];
+  if (p_action.IsNull())  throw gbtGameNullException();
+  gbtTreeActionRep *action = dynamic_cast<gbtTreeActionRep *>(p_action.Get());
+  if (!action || action->m_infoset->m_player->m_efg != m_efg) {
+    throw gbtGameMismatchException();
+  }
+  m_profile[action->m_infoset->m_player->m_id]
+    [action->m_infoset->m_id] = action;
 }
 
-void gbtPureBehavProfile::Payoff(const gbtGameNode &n, 
-				 const gbtRational &prob, 
-				 gbtArray<gbtRational> &payoff) const
+gbtRational 
+gbtTreeBehavContingencyRep::GetPayoff(gbtTreeNodeRep *p_node,
+				      gbtTreePlayerRep *p_player) const
 {
-  if (n->IsTerminal()) {
-    // FIXME: vector version of this?
-    for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-      payoff[pl] += prob * n->GetOutcome()->GetPayoff(m_efg->GetPlayer(pl));
+  gbtRational payoff(0);
+  if (p_node->m_outcome) {
+    payoff += p_node->m_outcome->m_payoffs[p_player->m_id];
+  }
+
+  if (p_node->m_infoset && p_node->m_infoset->m_player->m_id == 0) {
+    for (int i = 1; i <= p_node->m_children.Length(); i++) {
+      payoff += (p_node->m_infoset->m_chanceProbs[i] *
+		 GetPayoff(p_node->m_children[i], p_player));
     }
   }
-  else {
-    if (n->GetPlayer()->IsChance()) {
-      for (int i = 1; i <= n->NumChildren(); i++) {
-	Payoff(n->GetChild(i),
-	       prob * n->GetInfoset()->GetAction(i)->GetChanceProb(), payoff);
-      }
+  else if (p_node->m_children.Length() > 0) {
+    int pl = p_node->m_infoset->m_player->m_id;
+    int iset = p_node->m_infoset->m_id;
+    payoff += GetPayoff(p_node->m_children[m_profile[pl][iset]->m_id], 
+			p_player);
+  }
+
+  return payoff;
+}
+
+gbtRational 
+gbtTreeBehavContingencyRep::GetPayoff(const gbtGamePlayer &p_player) const
+{
+  if (p_player.IsNull())  throw gbtGameNullException();
+  gbtTreePlayerRep *player = dynamic_cast<gbtTreePlayerRep *>(p_player.Get());
+  if (!player || player->m_efg != m_efg) throw gbtGameMismatchException();
+  return GetPayoff(m_efg->m_root, player);
+}
+
+
+//======================================================================
+//      Implementation of class gbtTreeBehavProfileIteratorRep
+//======================================================================
+
+//----------------------------------------------------------------------
+//  class gbtTreeBehavProfileIteratorRep: Constructor and destructor
+//----------------------------------------------------------------------
+
+
+gbtTreeBehavProfileIteratorRep::gbtTreeBehavProfileIteratorRep(gbtTreeGameRep *p_efg)
+  : m_refCount(0), m_efg(p_efg), m_profile(p_efg)
+{
+  First();
+}
+
+gbtGameBehavProfileIteratorRep *
+gbtTreeBehavProfileIteratorRep::Copy(void) const
+{
+  gbtTreeBehavProfileIteratorRep *ret = 
+    new gbtTreeBehavProfileIteratorRep(m_efg);
+
+  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= m_efg->GetPlayer(pl)->NumInfosets(); iset++) {
+      ret->m_profile.m_profile[pl][iset] = m_profile.m_profile[pl][iset];
+    }
+  }
+
+  return ret;
+}
+
+//----------------------------------------------------------------------
+// class gbtTreeBehavProfileIteratorRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTreeBehavProfileIteratorRep::Reference(void)
+{
+  m_refCount++;
+  m_efg->m_refCount++;
+}
+
+bool gbtTreeBehavProfileIteratorRep::Dereference(void)
+{
+  if (--m_efg->m_refCount == 0) {
+    // Note that if this condition is true, this profile must be the
+    // last reference to the game, so m_refCount will also be one
+    // (and this function will return true)
+    delete m_efg;
+  }
+  return (--m_refCount == 0);
+}
+
+
+//----------------------------------------------------------------------
+//          class gbtTreeBehavProfileIteratorRep: Iteration
+//----------------------------------------------------------------------
+
+void gbtTreeBehavProfileIteratorRep::First(void)
+{
+  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= m_efg->GetPlayer(pl)->NumInfosets(); iset++) {
+      m_profile.m_profile[pl][iset] = m_efg->m_players[pl]->m_infosets[iset]->m_actions[1];
+    }
+  }
+}
+
+bool gbtTreeBehavProfileIteratorRep::NextContingency(void)
+{
+  int pl = m_efg->NumPlayers();
+  int iset = m_efg->GetPlayer(pl)->NumInfosets();
+    
+  while (true) {
+    if (m_profile.m_profile[pl][iset]->m_id < 
+	m_efg->GetPlayer(pl)->GetInfoset(iset)->NumActions())  {
+      m_profile.m_profile[pl][iset] = 
+	m_efg->m_players[pl]->m_infosets[iset]->m_actions[m_profile.m_profile[pl][iset]->m_id+1];
+      return true;
     }
     else {
-      Payoff(n->GetChild(GetAction(n->GetInfoset())), prob, payoff);
+      m_profile.m_profile[pl][iset] = 
+	m_efg->m_players[pl]->m_infosets[iset]->m_actions[1];
+    }
+    
+    iset--;
+    if (iset == 0)  {
+      do  {
+	--pl;
+      }  while (pl > 0);
+      
+      if (pl == 0)   return 0;
+      iset = m_efg->GetPlayer(pl)->NumInfosets();
     }
   }
 }
 
-void gbtPureBehavProfile::InfosetProbs(const gbtGameNode &n,
-				       const gbtRational &prob, 
-				       gbtPVector<gbtRational> &probs) const
+//----------------------------------------------------------------------
+//     class gbtTreeBehavProfileIteratorRep: Accessing the state
+//----------------------------------------------------------------------
+
+gbtGameAction 
+gbtTreeBehavProfileIteratorRep::GetAction(const gbtGameInfoset &p_infoset) const
 {
-  if (!n->GetInfoset().IsNull() && n->GetPlayer()->IsChance()) {
-    for (int i = 1; i <= n->NumChildren(); i++) {
-      InfosetProbs(n->GetChild(i),
-		   prob * n->GetInfoset()->GetAction(i)->GetChanceProb(), probs);
-    }
-  }
-  else if (!n->GetInfoset().IsNull())  {
-    probs(n->GetPlayer()->GetId(), n->GetInfoset()->GetId()) += prob;
-    InfosetProbs(n->GetChild((*profile[n->GetPlayer()->GetId()])[n->GetInfoset()->GetId()]->GetId()),
-		 prob, probs);
-  }
+  return m_profile.GetAction(p_infoset);
 }
 
-void gbtPureBehavProfile::Payoff(gbtArray<gbtRational> &payoff) const
+gbtRational 
+gbtTreeBehavProfileIteratorRep::GetPayoff(const gbtGamePlayer &p_player) const
 {
-  for (int pl = 1; pl <= payoff.Length(); payoff[pl++] = 0);
-  Payoff(m_efg->GetRoot(), 1, payoff);
+  return m_profile.GetPayoff(p_player);
 }
-
-void gbtPureBehavProfile::InfosetProbs(gbtPVector<gbtRational> &probs) const
-{
-  ((gbtVector<gbtRational> &) probs).operator=(gbtRational(0));
-  InfosetProbs(m_efg->GetRoot(), 1, probs);
-}
-
