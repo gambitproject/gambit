@@ -44,6 +44,16 @@ static Portion *GSM_AddStrategy(Portion **param)
   return new NfSupportPortion(S);
 }
 
+//------------
+// Comment
+//------------
+
+static Portion *GSM_Comment(Portion **param)
+{
+  Nfg *nfg = ((NfgPortion *) param[0])->Value();
+  return new TextPortion(nfg->GetComment());
+}
+
 //---------------
 // CompressNfg
 //---------------
@@ -363,6 +373,17 @@ static Portion *GSM_SaveNfg(Portion **param)
   return param[0]->ValCopy();
 }
 
+//-------------
+// SetComment
+//-------------
+
+static Portion *GSM_SetComment(Portion **param)
+{
+  Nfg *nfg = ((NfgPortion *) param[0])->Value();
+  gText comment = ((TextPortion *) param[1])->Value();
+  nfg->SetComment(comment);
+  return param[0]->ValCopy();
+}
 
 //------------
 // SetName
@@ -472,18 +493,6 @@ static Portion *GSM_Support(Portion **param)
 }
 
 
-#ifdef ANDY
-//--------------
-// AndyTest
-//--------------
-
-static Portion *GSM_AndyTest(Portion **param)
-{
-  return new TextPortion(" ** Done **");
-}
-#endif
-
-
 void Init_nfgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
@@ -491,6 +500,7 @@ void Init_nfgfunc(GSM *gsm)
   static struct { char *sig; Portion *(*func)(Portion **); } ftable[] =
     { { "AddStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT",
  	GSM_AddStrategy },
+      { "Comment[nfg->EFG] =: TEXT", GSM_Comment },
       { "CompressNfg[support->NFSUPPORT] =: NFG", GSM_CompressNfg },
       { "DeleteOutcome[outcome->NFOUTCOME] =: BOOLEAN", GSM_DeleteOutcome },
       { "Game[player->NFPLAYER] =: NFG", GSM_Game_NfPlayer },
@@ -510,11 +520,10 @@ void Init_nfgfunc(GSM *gsm)
 	GSM_Payoff },
       { "Player[strategy->STRATEGY*] =: NFPLAYER", GSM_Player },
       { "Players[nfg->NFG] =: LIST(NFPLAYER)", GSM_Players },
-      { "StrategyNumber[strategy->STRATEGY, sup->NFSUPPORT] =: NUMBER", 
-	GSM_StrategyNumber },
       { "RemoveStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT",
 	GSM_RemoveStrategy },
       { "SaveNfg[nfg->NFG, file->TEXT] =: NFG", GSM_SaveNfg },
+      { "SetComment[nfg->NFG, comment->TEXT] =: NFG", GSM_SetComment },
       { "SetName[x->NFG, name->TEXT] =: NFG", GSM_SetName_Nfg },
       { "SetName[x->NFPLAYER, name->TEXT] =: NFPLAYER", GSM_SetName_NfPlayer },
       { "SetName[x->STRATEGY, name->TEXT] =: STRATEGY", GSM_SetName_Strategy },
@@ -525,9 +534,8 @@ void Init_nfgfunc(GSM *gsm)
       { "SetPayoff[outcome->NFOUTCOME, player->NFPLAYER, payoff->NUMBER] =: NFOUTCOME", GSM_SetPayoff },
       { "Strategies[player->NFPLAYER, support->NFSUPPORT] =: LIST(STRATEGY)",
 	GSM_Strategies },
-#ifdef ANDY
-      { "AndyTest[] =: TEXT", GSM_AndyTest },
-#endif
+      { "StrategyNumber[strategy->STRATEGY, sup->NFSUPPORT] =: NUMBER", 
+	GSM_StrategyNumber },
       { "Support[nfg->NFG] =: NFSUPPORT", GSM_Support },
       { 0, 0 }
     };

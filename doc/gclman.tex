@@ -3898,6 +3898,17 @@ Unassigns all variables defined in the current scope.  Returns \verb+True+.
 \item [See also:] \verb+Assign+, \verb+UnAssign+.
 \ed
 
+\item\lex{Comment}
+\protect \large \begin{verbatim}
+Comment[efg->EFG] =: TEXT
+Comment[nfg->NFG] =: TEXT
+\end{verbatim}\normalsize
+
+\bd
+Returns the comment associated with the game.
+\item [See also:] \verb+SetComment+.
+\ed
+
 \item\lex{CompressEfg}
 \protect \large \begin{verbatim}
 CompressEfg[support->EFSUPPORT] =: EFG 
@@ -6497,6 +6508,17 @@ Sets the action probabilities for
 \verb+infoset+ to the values given in \verb+probs+.  Returns \verb+infoset+. 
 An error occurs if \verb+infoset+ does not belong to the chance player.
 \item [See also:] \verb+ChanceProb+.
+\ed
+
+\item\lex{SetComment}
+\protect \large \begin{verbatim}
+SetComment[efg->EFG, comment->TEXT] =: EFG
+SetComment[nfg->NFG, comment->TEXT] =: NFG
+\end{verbatim} \normalsize
+
+\bd
+Sets the comment associated with the game.
+\item [See also:] \verb+SetComment+.
 \ed
 
 \item\lex{SetEnv}

@@ -198,6 +198,16 @@ static Portion *GSM_Children(Portion **param)
   return ArrayToList(n->Children());
 }
 
+//------------
+// Comment
+//------------
+
+static Portion *GSM_Comment(Portion **param)
+{
+  Efg *efg = ((EfgPortion *) param[0])->Value();
+  return new TextPortion(efg->GetComment());
+}
+
 //---------------
 // CompressEfg
 //---------------
@@ -981,6 +991,18 @@ static Portion *GSM_SetChanceProbs(Portion **param)
   return new InfosetPortion(s);
 }
 
+//-------------
+// SetComment
+//-------------
+
+static Portion *GSM_SetComment(Portion **param)
+{
+  Efg *efg = ((EfgPortion *) param[0])->Value();
+  gText comment = ((TextPortion *) param[1])->Value();
+  efg->SetComment(comment);
+  return param[0]->ValCopy();
+}
+
 //--------------
 // SetName
 //--------------
@@ -1131,6 +1153,7 @@ void Init_efgfunc(GSM *gsm)
       { "Chance[efg->EFG] =: EFPLAYER", GSM_Chance },
       { "ChanceProb[action->ACTION] =: NUMBER", GSM_ChanceProb },
       { "Children[node->NODE] =: LIST(NODE)", GSM_Children },
+      { "Comment[efg->EFG] =: TEXT", GSM_Comment },
       { "CompressEfg[support->EFSUPPORT] =: EFG", GSM_CompressEfg },
       { "CopyTree[from->NODE, to->NODE] =: NODE", GSM_CopyTree },
       { "DeleteAction[action->ACTION] =: INFOSET", GSM_DeleteAction },
@@ -1206,6 +1229,7 @@ void Init_efgfunc(GSM *gsm)
       { "SaveEfg[efg->EFG, file->TEXT] =: EFG", GSM_SaveEfg },
       { "SetChanceProbs[infoset->INFOSET, probs->LIST(NUMBER)] =: INFOSET",
 	GSM_SetChanceProbs },
+      { "SetComment[efg->EFG, comment->TEXT] =: EFG", GSM_SetComment },
       { "SetName[x->ACTION, name->TEXT] =: ACTION", GSM_SetName },
       { "SetName[x->INFOSET, name->TEXT] =: INFOSET", GSM_SetName },
       { "SetName[x->NODE, name->TEXT] =: NODE", GSM_SetName },
