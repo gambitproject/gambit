@@ -286,8 +286,8 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
   }
 
   while (x[x.Length()] >= 0.0 && x[x.Length()] < p_maxLambda) {
+    p_status.Get();
     if (niters++ % 25 == 0) {
-      p_status.Get();
       p_status.SetProgress(x[x.Length()] / p_maxLambda,
 			   gbtText("Lambda = ") + ToText(x[x.Length()]));
     }
