@@ -18,6 +18,8 @@ class ExtForm    {
 
     void AddPlayer(int);
     int CreateInfoset(int, int);
+    Node DeleteSubtree(Node);
+    Node DeleteTerminalNode(const Node &);
 
   public:
 	// CONSTRUCTORS AND DESTRUCTOR
@@ -42,7 +44,7 @@ class ExtForm    {
       { players.SetInfosetName(n[1], n[2], label); }
 
     void InsertBranch(const Node &n, int where, int number);
-    void DeleteBranch(const Node &n, int which);
+    Node DeleteBranch(const Node &n, int which);
     void LabelBranch(const Node &n, int br, const gString &label)  { }
 
     void SetOutcome(const Node &n, int outcome)

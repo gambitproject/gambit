@@ -76,20 +76,81 @@ Node ExtForm::DeleteNode(const Node &n)
 
 Node ExtForm::JoinInfoset(const Node &new_node, const Node &to_iset)
 {
-  return new_node;
+  if (!nodes.IsMember(new_node) || !nodes.IsMember(to_iset))
+    return Node(dummy, 1, 1);
+  
+  if (nodes.NumChildren(new_node) != nodes.NumChildren(to_iset))
+    return new_node;
+
+  Node ret(to_iset);
+
+  if (nodes.MoveNode(new_node, ret))
+    players.RemoveInfoset(new_node[1], new_node[2]);
+
+  return ret;
+}
+
+Node ExtForm::LeaveInfoset(const Node &n)
+{
+  if (!nodes.IsMember(n))   return Node(dummy, 1, 1);
+
+  if (nodes.NumNodes(n[1], n[2]) == 1)   return n;
+
+  Node ret(n[1], CreateInfoset(n[1], nodes.NumChildren(n)), 1);
+
+      // we already know this won't empty the infoset...
+  nodes.MoveNode(n, ret);
+
+  return ret;
 }
 
 Node ExtForm::MergeInfoset(const Node &from, const Node &into)
 {
-  return from;
+  if (!nodes.IsMember(from) || !nodes.IsMember(into))
+    return Node(dummy, 1, 1);
+
+  if (nodes.NumChildren(from) != nodes.NumChildren(into))
+    return from;
+
+  Node ret(nodes.MoveNodes(from, into));
+
+  players.RemoveInfoset(from[1], from[2]);
+
+  return ret;
 }
+
 
 void ExtForm::InsertBranch(const Node &n, int where, int number)
 {
+  if (!nodes.IsMember(n))   return;
+  
+  for (int i = 0; i < number; i++)  
+    players.InsertBranch(n[1], n[2], where + i);
+
+
+      // we have to remember to insert the branch in all members of the iset
+  for (i = 0; i < number; i++)
+    for (int j = 1; j <= nodes.NumNodes(n[1], n[2]); j++)   
+      nodes.InsertChild(dummy, CreateInfoset(dummy, 0), 
+			Node(n[1], n[2], j), where + i);
+
 }
 
-void ExtForm::DeleteBranch(const Node &n, int which)
+
+Node ExtForm::DeleteBranch(const Node &n, int which)
 {
+  if (!nodes.IsMember(n))    return Node(dummy, 1, 1);
+
+  players.RemoveBranch(n[1], n[2], which);
+
+  Node ret(n);
+
+      // remember to remove branch from all members of iset
+  for (int i = 1; i <= nodes.NumNodes(ret[1], ret[2]); i++)  
+    ret = DeleteTerminalNode(
+	     DeleteTree(nodes.GetChildNumber(Node(ret[1],ret[2],i), which)));
+
+  return ret;
 }
 
 Node ExtForm::MoveTree(const Node &from, const Node &dest)
@@ -102,11 +163,48 @@ Node ExtForm::CopyTree(const Node &from, const Node &dest)
   return from;
 }
 
-Node ExtForm::DeleteTree(const Node &n)
+
+// Delete a terminal node, and return the new ID of its parent
+Node ExtForm::DeleteTerminalNode(const Node &n)
 {
-  return n;
+  Node parent;
+
+  if (nodes.DeleteNode(n, parent))
+    players.RemoveInfoset(n[1], n[2]);
+  return parent;
 }
 
+Node ExtForm::DeleteSubtree(Node n)
+{
+  Node parent;
+
+  while (nodes.NumChildren(n))
+    n = DeleteSubtree(nodes.GetChildNumber(n, 1));
+
+  parent = DeleteTerminalNode(n);
+
+  return parent;
+}
+
+
+// DeleteTree -- delete tree rooted at n, leave n as a terminal node
+Node ExtForm::DeleteTree(const Node &n)
+{
+  if (!nodes.IsMember(n))     return Node(dummy, 1, 1);
+  if (nodes.IsTerminal(n))    return n;
+
+  Node foo(n);
+
+  while (nodes.NumChildren(foo))
+    foo = DeleteSubtree(nodes.GetChildNumber(foo, 1));
+
+  Node ret(dummy, CreateInfoset(dummy, 0), 1);
+
+  if (nodes.MoveNode(foo, ret))
+    players.RemoveInfoset(foo[1], foo[2]);
+
+  return ret;
+}
 
 
 void ExtForm::WriteToFile(FILE *f) const
