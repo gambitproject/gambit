@@ -179,7 +179,7 @@ wxIcon *frame_icon;
 #ifdef wx_msw
 	frame_icon = new wxIcon("gambit_icn");
 #else
-	#include "gambi.xpm"
+	#include "bitmaps/gambi.xpm"
 	frame_icon = new wxIcon(gambi_xpm);
 #endif
 gambit_frame->SetIcon(frame_icon);
