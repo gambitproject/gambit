@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Implementation of main application class
+// Declaration of panel for controlling QRE computation
 //
 // This file is part of Gambit
 // Copyright (c) 2004, The Gambit Project
@@ -24,42 +24,38 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
-#endif  // WX_PRECOMP
-#include <wx/config.h>
+#ifndef PANEL_QRE_H
+#define PANEL_QRE_H
 
-#include "gambit.h"
-#include "game-frame.h"
+#include "game-document.h"
 
-gbtApplication::gbtApplication(void)
-{ }
+class gbtMixedLogitBranch;
+class gbtMixedLogitCtrl;
+class gbtMixedLogitGraph;
 
-bool gbtApplication::OnInit(void)
-{
-  wxInitAllImageHandlers();
+class gbtQrePanel : public wxPanel, public gbtGameView {
+private:
+  wxButton *m_startButton;
+  gbtMixedLogitCtrl *m_profileCtrl;
+  gbtMixedLogitGraph *m_branchGraph;
+  wxThread *m_thread;
+  gbtMixedLogitBranch *m_cor;
+ 
+  // Overriding gbtGameView members
+  void OnUpdate(void) { }
 
-  m_fileHistory = new wxFileHistory;
-  wxConfig config("GambitDev");
-  m_fileHistory->Load(config);
+  // Event handlers
+  void OnStartButton(wxCommandEvent &);
+  void OnThreadDone(wxCommandEvent &);
 
-  gbtArray<int> dim(2);  dim[1] = dim[2] = 2;
-  gbtGame nfg = NewNfg(dim);
-  nfg->SetLabel("Untitled normal form game");
-  (void) new gbtGameFrame(0, new gbtGameDocument(nfg));
-  return true;
-}
+public:
+  gbtQrePanel(wxWindow *p_parent, gbtGameDocument *);
+  virtual ~gbtQrePanel();
 
-int gbtApplication::OnExit(void)
-{
-  wxConfig config("GambitDev");
-  m_fileHistory->Save(config);
-  delete m_fileHistory;
-  return 0;
-}
+  void SetCorrespondence(const gbtMixedLogitBranch &);
+  
+  DECLARE_EVENT_TABLE()
+};
 
-gbtApplication::~gbtApplication()
-{ }
 
-IMPLEMENT_APP(gbtApplication)
+#endif   // PANEL_QRE_H

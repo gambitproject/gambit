@@ -31,7 +31,7 @@
 
 class gbtGameFrame : public wxFrame, gbtGameView {
 private:
-  wxPanel *m_tablePanel, *m_algorithmPanel;
+  wxPanel *m_tablePanel, *m_algorithmPanel, *m_qrePanel;
 
   // Auxiliary functions for setting up frame
   void MakeMenu(void);
@@ -47,6 +47,7 @@ private:
   void OnFileMRU(wxCommandEvent &);
 
   void OnToolsEquilibrium(wxCommandEvent &);
+  void OnToolsQre(wxCommandEvent &);
 
   void OnHelpAbout(wxCommandEvent &);
 

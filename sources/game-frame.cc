@@ -39,8 +39,10 @@
 #include "table-schelling.h"
 #include "table-matrix.h"
 #include "panel-nash.h"
+#include "panel-qre.h"
 
 const int GBT_MENU_TOOLS_EQM = 1000;
+const int GBT_MENU_TOOLS_QRE = 1001;
 
 BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(wxID_NEW, gbtGameFrame::OnFileNew)
@@ -50,6 +52,7 @@ BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(wxID_EXIT, gbtGameFrame::OnFileExit)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, gbtGameFrame::OnFileMRU)
   EVT_MENU(GBT_MENU_TOOLS_EQM, gbtGameFrame::OnToolsEquilibrium)
+  EVT_MENU(GBT_MENU_TOOLS_QRE, gbtGameFrame::OnToolsQre)
   EVT_MENU(wxID_ABOUT, gbtGameFrame::OnHelpAbout)
   EVT_CLOSE(gbtGameFrame::OnCloseWindow)
 END_EVENT_TABLE()
@@ -74,11 +77,17 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   }
 
   m_algorithmPanel = new gbtNashPanel(this, p_doc);
+  m_qrePanel = new gbtQrePanel(this, p_doc);
 
   wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
   sizer->Add(m_tablePanel, 1, wxEXPAND, 0);
+
   sizer->Add(m_algorithmPanel, 1, wxEXPAND, 0);
   sizer->Show(m_algorithmPanel, false);
+
+  sizer->Add(m_qrePanel, 1, wxEXPAND, 0);
+  sizer->Show(m_qrePanel, false);
+
   SetSizer(sizer);
   Layout();
 
@@ -110,6 +119,9 @@ void gbtGameFrame::MakeMenu(void)
   wxMenu *toolsMenu = new wxMenu;	
   toolsMenu->Append(GBT_MENU_TOOLS_EQM, _("&Equilibrium"),
 		    _("Compute Nash equilibria of the game"), true);
+  toolsMenu->Append(GBT_MENU_TOOLS_QRE, _("&QRE"),
+		    _("Compute quantal response equilibria of the game"),
+		    true);
   
   wxMenu *helpMenu = new wxMenu;
   helpMenu->Append(wxID_ABOUT, _("&About"), _("About Gambit"));
@@ -291,8 +303,24 @@ void gbtGameFrame::OnFileExit(wxCommandEvent &)
 
 void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
 {
+  if (GetSizer()->IsShown(m_qrePanel)) {
+    GetSizer()->Show(m_qrePanel, false);
+    GetMenuBar()->Check(GBT_MENU_TOOLS_QRE, false);
+  }
+
   GetSizer()->Show(m_algorithmPanel,
 		   !GetSizer()->IsShown(m_algorithmPanel));
+  Layout();
+}
+
+void gbtGameFrame::OnToolsQre(wxCommandEvent &)
+{
+  if (GetSizer()->IsShown(m_algorithmPanel)) {
+    GetSizer()->Show(m_algorithmPanel, false);
+    GetMenuBar()->Check(GBT_MENU_TOOLS_EQM, false);
+  }
+
+  GetSizer()->Show(m_qrePanel, !GetSizer()->IsShown(m_qrePanel));
   Layout();
 }
 

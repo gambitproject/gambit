@@ -18,6 +18,8 @@ gambit_SOURCES = \
 	pairarr.h \
 	panel-nash.cc \
 	panel-nash.h \
+	panel-qre.cc \
+	panel-qre.h \
 	sheet.cc \
 	sheet.h \
 	sheetctl.cc \
