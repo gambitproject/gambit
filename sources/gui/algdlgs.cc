@@ -21,7 +21,6 @@
 
 #include "nfgconst.h"
 
-#include "dllp.h"
 #include "dllcp.h"
 #include "dlliap.h"
 #include "dlsimpdiv.h"
@@ -355,27 +354,6 @@ gOutput *dialogAlgorithm::TraceFile(void) const
   }
 }
 
-
-//=======================================================================
-//                        dialogLp: Member functions
-//=======================================================================
-
-dialogLp::dialogLp(wxWindow *p_parent, bool p_subgames, bool p_vianfg)
-  : dialogAlgorithm("LpSolve Parameters", p_vianfg, p_parent)
-{
-  MakeCommonFields(true, p_subgames, p_vianfg);
-}
-
-dialogLp::~dialogLp()
-{ }
-
-void dialogLp::AlgorithmFields(void)
-{
-  m_algorithmBox = new wxStaticBoxSizer
-    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
-  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
-  PrecisionField();
-}
 
 //=======================================================================
 //                       dialogLcp: Member functions

@@ -65,6 +65,7 @@
 #include "efgqre.h"
 #include "algenumpure.h"
 #include "algenummixed.h"
+#include "alglp.h"
 
 #include "behavedit.h"
 
@@ -167,7 +168,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LCP,
 	   EfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LP,
-	   EfgShow::OnToolsEquilibriumCustom)
+	   EfgShow::OnToolsEquilibriumCustomEfgLp)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LIAP,
 	   EfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_POLENUM,
@@ -181,7 +182,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LCP,
 	   EfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LP, 
-	   EfgShow::OnToolsEquilibriumCustom)
+	   EfgShow::OnToolsEquilibriumCustomNfgLp)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LIAP,
 	   EfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_SIMPDIV, 
@@ -2204,27 +2205,6 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
 {
   int algorithm = p_event.GetId();
 
-  if (algorithm == efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_ENUMPURE) {
-    gList<BehavSolution> solutions;
-    if (EnumPureEfg(this, *m_currentSupport, solutions)) {
-      for (int soln = 1; soln <= solutions.Length(); soln++) {
-	AddProfile(solutions[soln], true);
-      }
-
-      ChangeProfile(m_profileTable->Length());
-      UpdateMenus();
-      if (!m_solutionSashWindow->IsShown())  {
-	m_profileTable->Show(true);
-	m_solutionSashWindow->Show(true);
-	GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
-	AdjustSizes();
-      }
-    }
-    return;
-  }
-
-
-
   // This is a guard against trying to solve the "trivial" game.
   // Most of the GUI code assumes information sets exist.
   if (m_efg.NumPlayerInfosets() == 0)  return;
@@ -2246,9 +2226,6 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LCP:
     solver = new guiefgLcpEfg(this);
     break;
-  case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LP:
-    solver = new guiefgLpEfg(this);
-    break;
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LIAP:
     solver = new guiefgLiapEfg(this);
     break;
@@ -2261,9 +2238,6 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
 
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LCP: 
     solver = new guiefgLcpNfg(this);
-    break;
-  case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LP:
-    solver = new guiefgLpNfg(this);
     break;
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LIAP: 
     solver = new guiefgLiapNfg(this);
@@ -2335,6 +2309,25 @@ void EfgShow::OnToolsEquilibriumCustomEfgEnumPure(wxCommandEvent &)
   }
 }
 
+void EfgShow::OnToolsEquilibriumCustomEfgLp(wxCommandEvent &)
+{
+  gList<BehavSolution> solutions;
+  if (LpEfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddProfile(solutions[soln], true);
+    }
+    
+    ChangeProfile(m_profileTable->Length());
+    UpdateMenus();
+    if (!m_solutionSashWindow->IsShown())  {
+      m_profileTable->Show(true);
+      m_solutionSashWindow->Show(true);
+      GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+      AdjustSizes();
+    }
+  }
+}
+
 void EfgShow::OnToolsEquilibriumCustomNfgEnumPure(wxCommandEvent &)
 {
   gList<BehavSolution> solutions;
@@ -2358,6 +2351,25 @@ void EfgShow::OnToolsEquilibriumCustomNfgEnumMixed(wxCommandEvent &)
 {
   gList<BehavSolution> solutions;
   if (EnumMixedNfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddProfile(solutions[soln], true);
+    }
+    
+    ChangeProfile(m_profileTable->Length());
+    UpdateMenus();
+    if (!m_solutionSashWindow->IsShown())  {
+      m_profileTable->Show(true);
+      m_solutionSashWindow->Show(true);
+      GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+      AdjustSizes();
+    }
+  }
+}
+
+void EfgShow::OnToolsEquilibriumCustomNfgLp(wxCommandEvent &)
+{
+  gList<BehavSolution> solutions;
+  if (LpNfg(this, *m_currentSupport, solutions)) {
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }

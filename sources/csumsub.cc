@@ -30,8 +30,7 @@ void efgLpNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   delete N;
 }
 
-efgLpNfgSolve::efgLpNfgSolve(const EFSupport &, const ZSumParams &p,
-			     int max)
+efgLpNfgSolve::efgLpNfgSolve(const ZSumParams &p, int max)
   : SubgameSolver(max), npivots(0), params(p)
 { }
 

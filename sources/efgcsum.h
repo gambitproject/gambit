@@ -30,7 +30,7 @@ private:
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_LP_EFG; }    
 
 public:
-  efgLpSolve(const EFSupport &, const CSSeqFormParams &, int max = 0);
+  efgLpSolve(const CSSeqFormParams &, int max = 0);
   virtual ~efgLpSolve();
   
   long NumPivots(void) const  { return npivots; }
