@@ -30,7 +30,7 @@
 #endif  // WX_PRECOMP
 #include "sheet.h"    // for wxSheet
 
-#include <gambit/nash/nfglogit.h>
+#include <libgambit/nash/nfglogit.h>
 
 #include "panel-qre.h"
 

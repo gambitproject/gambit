@@ -7,6 +7,15 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
 
+AC_ARG_WITH(libgambit-prefix,
+[  --with-libgambit-prefix=PREFIX     Prefix where libgambit is installed ],
+  libgambit_prefix="$withval", libgambit_prefix="")
+LIBGAMBIT_INCLUDES="-I${libgambit_prefix}/include"
+AC_SUBST(LIBGAMBIT_INCLUDES)
+
+LIBGAMBIT_LIBS="-L${libgambit_prefix}/lib"
+AC_SUBST(LIBGAMBIT_LIBS)
+
 dnl------------------------
 dnl Checking for wxWindows
 dnl------------------------
@@ -22,12 +31,12 @@ if test "$WXCONFIG" != 1; then
     ])
 fi
 
-CXXFLAGS="${CXXFLAGS} ${WX_CXXFLAGS}"
+CXXFLAGS="${CXXFLAGS} ${WX_CXXFLAGS} ${LIBGAMBIT_INCLUDES}"
 CXXFLAGS=`echo $CXXFLAGS | sed 's/-fno-exceptions//g'`
 dnl Newer versions of gcc issue a warning if /usr/local/include listed
 dnl in search path
 CXXFLAGS=`echo $CXXFLAGS | sed 's/-I\/usr\/local\/include//g'`
-LDFLAGS="${LDFLAGS} ${WX_LIBS}"
+LDFLAGS="${LDFLAGS} ${LIBGAMBIT_LIBS} ${WX_LIBS}"
 
 AC_OUTPUT(Makefile sources/Makefile
           efg/Makefile nfg/Makefile)

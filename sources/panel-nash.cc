@@ -40,8 +40,8 @@ const int GBT_BUTTON_START = 997;
 const int GBT_BUTTON_CANCEL = 998;
 const int GBT_THREAD_DONE = 999;
 
-#include <gambit/nash/nfgbfslcp.h>
-#include <gambit/nash/nfgpns.h>
+#include <libgambit/nash/nfgbfslcp.h>
+#include <libgambit/nash/nfgpns.h>
 
 class gbtOneNashThread : public wxThread {
 private:

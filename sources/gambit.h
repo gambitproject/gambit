@@ -27,7 +27,7 @@
 #ifndef GAMBIT_H
 #define GAMBIT_H
 
-#include <gambit/base/base.h>
+#include <libgambit/base/base.h>
 #include <wx/docview.h>      // for wxFileHistory
 
 class gbtGameFrame;

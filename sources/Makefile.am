@@ -2,7 +2,7 @@
 
 bin_PROGRAMS = gambit
 
-AM_CPPFLAGS = $(WX_CXXFLAGS) -I/usr/local/include/gambit
+#AM_CPPFLAGS = $(WX_CXXFLAGS)
 
 gambit_SOURCES = \
 	control-player.cc \

@@ -27,7 +27,7 @@
 #ifndef GAME_DOCUMENT_H
 #define GAME_DOCUMENT_H
 
-#include <gambit/game/game.h>
+#include <libgambit/libgambit.h>
 
 class gbtGameView;
 
