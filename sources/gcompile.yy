@@ -417,47 +417,47 @@ static struct tokens toktable[] =
     { FLOATPREC, "Float" }, { RATIONALPREC, "Rational" }, { 0, 0 }
 };
 
-  gerr << s << " at line " << current_line << " in file " << current_file
+  _gsm->ErrorStream() << s << " at line " << current_line << " in file " << current_file
        << ": ";
 
   for (int i = 0; toktable[i].tok != 0; i++)
     if (toktable[i].tok == yychar)   {
-      gerr << toktable[i].name << '\n';
+      _gsm->ErrorStream() << toktable[i].name << '\n';
       return;
     }
 
   switch (yychar)   {
     case NAME:
-      gerr << "identifier " << tval << '\n';
+      _gsm->ErrorStream() << "identifier " << tval << '\n';
       break;
     case BOOLEAN:
       if (bval == triTRUE)
-     	gerr << "True\n";
+     	_gsm->ErrorStream() << "True\n";
       else if (bval == triFALSE)
-        gerr << "False\n";
+        _gsm->ErrorStream() << "False\n";
       else  /* (bval == triUNKNOWN) */
-        gerr << "Unknown\n";
+        _gsm->ErrorStream() << "Unknown\n";
       break;
     case FLOAT:
-      gerr << "floating-point constant " << dval << '\n';
+      _gsm->ErrorStream() << "floating-point constant " << dval << '\n';
       break;
     case INTEGER:
-      gerr << "integer constant " << ival << '\n';
+      _gsm->ErrorStream() << "integer constant " << ival << '\n';
       break;
     case TEXT:
-      gerr << "text string " << tval << '\n';
+      _gsm->ErrorStream() << "text string " << tval << '\n';
       break;
     case STDOUT:
-      gerr << "StdOut\n";
+      _gsm->ErrorStream() << "StdOut\n";
       break;
     case gNULL:
-      gerr << "NullOut\n";
+      _gsm->ErrorStream() << "NullOut\n";
       break;
     default:
       if (isprint(yychar) && !isspace(yychar))
-        gerr << ((char) yychar) << '\n';
+        _gsm->ErrorStream() << ((char) yychar) << '\n';
       else 
-        gerr << "nonprinting character " << yychar << '\n';
+        _gsm->ErrorStream() << "nonprinting character " << yychar << '\n';
       break;
   }    
 }
@@ -720,7 +720,7 @@ gclExpression *GCLCompiler::NewFunction(gclExpression *expr)
     funcspec = TextToPortionSpec(functype);
   }
   catch (gclRuntimeError &)  {
-    gerr << "Error: Unknown type " << functype << ", " << 
+    _gsm->ErrorStream() << "Error: Unknown type " << functype << ", " << 
       " as return type in declaration of " << funcname << "[]\n";
     return new gclConstExpr(new BoolPortion(false));;
   }
@@ -749,7 +749,7 @@ gclExpression *GCLCompiler::NewFunction(gclExpression *expr)
 	spec = TextToPortionSpec(types[i]);
       }
       catch (gclRuntimeError &) {
-	gerr << "Error: Unknown type " << types[i] << ", " << 
+	_gsm->ErrorStream() << "Error: Unknown type " << types[i] << ", " << 
 	  PortionSpecToText(spec) << " for parameter " << formals[i] <<
 	  " in declaration of " << funcname << "[]\n";
 	return new gclConstExpr(new BoolPortion(false));;
@@ -786,7 +786,7 @@ gclExpression *GCLCompiler::DeleteFunction(void)
     funcspec = TextToPortionSpec(functype);
   }
   catch (gclRuntimeError &)  {
-    gerr << "Error: Unknown type " << functype << ", " << 
+    _gsm->ErrorStream() << "Error: Unknown type " << functype << ", " << 
       PortionSpecToText(funcspec) << " as return type in declaration of " << 
       funcname << "[]\n";
     return new gclConstExpr(new BoolPortion(false));
@@ -813,7 +813,7 @@ gclExpression *GCLCompiler::DeleteFunction(void)
 					portions[i], BYVAL));
     }
     catch (gclRuntimeError &) {
-      gerr << "Error: Unknown type " << types[i] << ", " << 
+      _gsm->ErrorStream() << "Error: Unknown type " << types[i] << ", " << 
 	PortionSpecToText(spec) << " for parameter " << formals[i] <<
 	" in declaration of " << funcname << "[]\n";
       return new gclConstExpr(new BoolPortion(false));
@@ -841,10 +841,10 @@ int GCLCompiler::Execute(void)
     throw;
   }
   catch (gclRuntimeError &E) {
-    gout << "ERROR: " << E.Description() << '\n';
+    _gsm->OutputStream() << "ERROR: " << E.Description() << '\n';
   }
   catch (gException &E) {
-    gout << "EXCEPTION: " << E.Description() << '\n';
+    _gsm->OutputStream() << "EXCEPTION: " << E.Description() << '\n';
   }
 
   gstatus.Reset();

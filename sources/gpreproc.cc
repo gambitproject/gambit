@@ -10,6 +10,9 @@
 #include "gpreproc.h"
 #include "system.h"
 
+#include "gsm.h"
+extern GSM *_gsm;
+
 //-------------------------------------------------------------------------
 //            gPreprocessor: private auxiliary member functions
 //-------------------------------------------------------------------------
@@ -165,8 +168,9 @@ gText gPreprocessor::GetLine(void)
   m_RawLine = "";
 
   // If no more input available, return nothing.
-  if (eof())
+  if (m_StartupString.Length() == 0 && eof()) {
     return "";
+  }
 
   // Record the current file name and line number.
   m_PrevFileName = m_FileNameStack.Peek();
@@ -188,10 +192,10 @@ gText gPreprocessor::GetLine(void)
     // Strip the trailing backslash
     line = line.Left(line.Length() - 1);
 
-    while (!m_InputStack.Peek()->eof()) {
+    while (m_StartupString.Length () > 0 || !m_InputStack.Peek()->eof()) {
       GetChar(c);
       
-      if (!m_InputStack.Peek()->eof()) {
+      if (m_StartupString.Length() > 0 || !m_InputStack.Peek()->eof()) {
 	// Ignore CR or replace with space as appropriate.
 	if (!EOL(c))
 	  line += c;
@@ -228,7 +232,8 @@ gText gPreprocessor::GetLine(void)
 	  //   until the closing quote mark is found.
 	  SetPrompt(false);	  
 	  quote = !quote;
-	  while (!m_InputStack.Peek()->eof() && quote) {
+	  while ((!m_InputStack.Peek()->eof() || m_StartupString.Length() > 0)
+		 && quote) {
 	    GetChar(c);
 	    line += c;
 
@@ -243,7 +248,8 @@ gText gPreprocessor::GetLine(void)
 	  //   end of line.
 	  line = line.Left(line.Length() - 2);
 
-	  while (!m_InputStack.Peek()->eof() && !EOL(c))
+	  while ((!m_InputStack.Peek()->eof() ||
+		  m_StartupString.Length() > 0) && !EOL(c))
 	    GetChar(c);
 
 	  line += '\n';
@@ -255,8 +261,8 @@ gText gPreprocessor::GetLine(void)
 
 	  SetPrompt(false);
 	  gText comment = "  ";
-	  while (!m_InputStack.Peek()->eof() && 
-		 (comment.Right(2) != "*/" || quote)) {
+	  while ((!m_InputStack.Peek()->eof() || m_StartupString.Length() > 0)
+		 && (comment.Right(2) != "*/" || quote)) {
 	    GetChar(c);
 	    comment += c;
 
@@ -278,7 +284,8 @@ gText gPreprocessor::GetLine(void)
 	  line = line.Left(line.Length() - 7);
 	  c = ' ';
 	  
-	  while (!m_InputStack.Peek()->eof() && c == ' ')
+	  while ((!m_InputStack.Peek()->eof() ||
+		  m_StartupString.Length() > 0) && c == ' ')
 	    GetChar(c);
 
 	  if (c != '[') {
@@ -289,7 +296,8 @@ gText gPreprocessor::GetLine(void)
 	  }
 
 	  c = ' ';
-	  while (!m_InputStack.Peek()->eof() && c == ' ')
+	  while ((!m_InputStack.Peek()->eof() ||
+		  m_StartupString.Length() > 0) && c == ' ')
 	    GetChar(c);
 	  if (c != '\"') {
 	    line += "False";
@@ -301,7 +309,8 @@ gText gPreprocessor::GetLine(void)
 	  gText filename;
 	  c = ' ';
 
-	  while (!m_InputStack.Peek()->eof() && c != '\"' && !EOL(c)) {
+	  while ((!m_InputStack.Peek()->eof() ||
+		  m_StartupString.Length() > 0) && c != '\"' && !EOL(c)) {
 	    GetChar(c);
 	    if (c != '\"')
 	      filename += c;
@@ -315,7 +324,8 @@ gText gPreprocessor::GetLine(void)
 	  }
 
 	  c = ' ';
-	  while (!m_InputStack.Peek()->eof() && c == ' ')
+	  while ((!m_InputStack.Peek()->eof() ||
+		  m_StartupString.Length() > 0) && c == ' ')
 	    GetChar(c);
 	  if (c != ']') {
 	    line += "False";
@@ -327,7 +337,8 @@ gText gPreprocessor::GetLine(void)
 	  // bring in the rest of this line
 	  gText restOfLine;
 	  c = ' ';
-	  while(!m_InputStack.Peek()->eof() && !EOL(c)) {
+	  while ((!m_InputStack.Peek()->eof() ||
+		  m_StartupString.Length () > 0) && !EOL(c)) {
 	    GetChar(c);
 	    restOfLine += c;
 	  }
@@ -343,8 +354,8 @@ gText gPreprocessor::GetLine(void)
 	  }
 	  else {
 	    line += "False";
-	    gerr << "GCL Warning: Include file \"" << filename;
-	    gerr << "\" not found.\n";
+	    _gsm->ErrorStream() << "GCL Warning: Include file \"" << filename;
+	    _gsm->ErrorStream() << "\" not found.\n";
 	  }
 
 	  line += restOfLine;
@@ -374,11 +385,12 @@ gText gPreprocessor::GetLine(void)
     SetPrompt(true);
 
   if (error)
-    gerr << "GCL Error: " << errorMsg << '\n';
+    _gsm->ErrorStream() << "GCL Error: " << errorMsg << '\n';
 
   if (m_InputStack.Peek()->eof()) {
-    if (m_InputStack.Depth() > 1)
+    if (m_InputStack.Depth() > 1) {
       delete m_InputStack.Pop();
+    }
     else
       m_InputStack.Pop();
     m_FileNameStack.Pop();

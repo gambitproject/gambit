@@ -93,7 +93,7 @@ void gCmdLineInput::SetRawTermAttr( void )
 
 gCmdLineInput::gCmdLineInput( int historyDepth )
   : gclCommandLine(historyDepth),
-    m_NumInvoke(0), m_Verbose(true), m_Prompt(true)
+    m_NumInvoke(0), m_EOF(false), m_Verbose(true), m_Prompt(true)
 {
   if( s_NumInstances == 0 )
   {
@@ -338,8 +338,9 @@ void gCmdLineInput::GetCmdExec( void )
 #endif
 
 
-  if( c == EOF )
+  if (c == EOF) {
     m_EOF = true;
+  }
   m_History.Append( cmdBuf );
   m_CmdExec = cmdBuf + "\n";
   gout << '\n';

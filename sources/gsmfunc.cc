@@ -22,6 +22,8 @@
 #include "nfstrat.h"
 #include "efstrat.h"
 
+extern GSM *_gsm;
+
 // This function is called once at the first instance of GSM.
 // The Init function of each module should be placed in this function:
 // Each Init() function should take the argument "this" so each instance
@@ -329,7 +331,7 @@ void gclFunction::SetFuncInfo(int funcindex, const gText& s,
         while (ch != '}') { word += ch; ch = s[index++]; }
         ch=s[index++];
         
-        /*gout << "Default: " << word << "\n";*/
+        /*_gsm->OutputStream() << "Default: " << word << "\n";*/
 
         if (word == "true" || word == "True" || word == "TRUE")
         {
@@ -345,7 +347,7 @@ void gclFunction::SetFuncInfo(int funcindex, const gText& s,
         }
         else if (word == "StdOut")
         {
-          OutputPortion* tmp = new OutputPortion(gout);
+          OutputPortion* tmp = new OutputPortion(_gsm->OutputStream());
           reqList.Append((Portion*)tmp);
           word = "OUTPUT";
         }
@@ -421,7 +423,7 @@ void gclFunction::SetFuncInfo(int funcindex, const gText& s,
 
         else
         {
-          gout << "Unknown optional type!!\n\n";
+          _gsm->OutputStream() << "Unknown optional type!!\n\n";
           int* silly = new int;
           reqList.Append( (Portion *)silly);
           word = "MIXED";    // TEMPORARY ONLY SO THAT IT WORKS -- REMOVE!!
@@ -535,20 +537,20 @@ void gclFunction::SetFuncInfo(int funcindex, const gText& s,
  
 
     // Bunch of prints for debugging purposes.
-  /*gout << "\nReturn Type: " << word << "\n";*/
-  /*gout << "Return listNum: " << listNum << "\n";*/
-  /*gout << "SpecList: \n";*/
-  /*specList.Dump(gout);*/
-  /*gout << "NameList: \n";*/
-  /*nameList.Dump(gout);*/
-  /*gout << "ListList: \n";*/
-  /*listList.Dump(gout);*/
-  /*gout << "RefList: \n";*/
-  /*refList.Dump(gout);*/
+  /*_gsm->OutputStream() << "\nReturn Type: " << word << "\n";*/
+  /*_gsm->OutputStream() << "Return listNum: " << listNum << "\n";*/
+  /*_gsm->OutputStream() << "SpecList: \n";*/
+  /*specList.Dump(_gsm->OutputStream());*/
+  /*_gsm->OutputStream() << "NameList: \n";*/
+  /*nameList.Dump(_gsm->OutputStream());*/
+  /*_gsm->OutputStream() << "ListList: \n";*/
+  /*listList.Dump(_gsm->OutputStream());*/
+  /*_gsm->OutputStream() << "RefList: \n";*/
+  /*refList.Dump(_gsm->OutputStream());*/
   /*int rl = reqList.Length();*/
-  /*gout << "ReqL Length: " << rl << "\n";*/
-  /*gout << "NumArgs: " << numArgs << "\n";*/
-  /*gout << "\n\n";*/
+  /*_gsm->OutputStream() << "ReqL Length: " << rl << "\n";*/
+  /*_gsm->OutputStream() << "NumArgs: " << numArgs << "\n";*/
+  /*_gsm->OutputStream() << "\n\n";*/
 
   
   gclParameter *PIT = new gclParameter[numArgs];
@@ -566,7 +568,7 @@ void gclFunction::SetFuncInfo(int funcindex, const gText& s,
   // Replaces strings with their enumerated types.
 PortionSpec ToSpec(gText &str, int num /* =0 */)
 {
-  /*gout << "ToSpec called with " << str << " and " << num << ".\n";*/
+  /*_gsm->OutputStream() << "ToSpec called with " << str << " and " << num << ".\n";*/
   if (str == "BOOLEAN") 
     return PortionSpec(porBOOLEAN, num); 
   else if (str == "INTEGER")
@@ -1058,8 +1060,8 @@ Portion *CallFuncObj::CallNormalFunction(GSM *gsm, Portion **param)
     throw;
   }
   catch (...) {
-    gout << "In function " << _FuncName << "[], in file \"" << m_file;
-    gout << "\" at line " << ToText(m_line) << ":\n";
+    _gsm->OutputStream() << "In function " << _FuncName << "[], in file \"" << m_file;
+    _gsm->OutputStream() << "\" at line " << ToText(m_line) << ":\n";
     throw;
   }
 }

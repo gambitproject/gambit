@@ -121,6 +121,8 @@ public:
   Portion* GlobalVarValue  ( const gText& var_name ) const;
   void GlobalVarRemove     ( const gText& var_name );
 
+  gOutput &OutputStream(void) const { return _StdOut; }
+  gOutput &ErrorStream(void) const { return _StdErr; }
 };
 
 
@@ -134,7 +136,6 @@ public:
 
   gText Description(void) const;
 };
-
 
 #endif  // GSM_H
 

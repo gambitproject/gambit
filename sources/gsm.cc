@@ -1,5 +1,5 @@
 //
-// FILE: gsm.cc  implementation of GSM (Stack machine)
+// FILE: gsm.cc -- implementation of GSM (Stack machine)
 //
 // $Id$
 //
@@ -87,12 +87,15 @@ public:
 
 int GSM::_NumObj = 0;
 
+extern GSM *_gsm;
+
 GSM::GSM(gInput& s_in, gOutput& s_out, gOutput& s_err)
   : _StdIn(s_in), _StdOut(s_out), _StdErr(s_err)
 {
   // global function default variables initialization
   // these should be done before InitFunctions() is called
 
+  _gsm = this;
   _RefTableStack = new gStack< RefHashTable* >(1);
   _RefTableStack->Push(new RefHashTable);
   _FuncNameStack = new gStack< gText >;

@@ -991,8 +991,8 @@ static Portion* GSM_Precision(Portion** param)
 
 static Portion *GSM_Print(Portion **param)
 {
-  param[0]->Output(gout);
-  gout << '\n';
+  param[0]->Output(_gsm->OutputStream());
+  _gsm->OutputStream() << '\n';
   return param[0]->ValCopy();
 }
 
@@ -1453,7 +1453,7 @@ Portion* GSM_Read_Undefined(Portion** param)
     catch (gclRuntimeError &) {
       delete param[1];
       param[1] = 0;
-      gout << old_pos << '\n'; 
+      _gsm->OutputStream() << old_pos << '\n'; 
       // Not sure if this line is needed... if it's included,
       // segfaults occur.
       //      input.setpos(old_pos);
@@ -2167,7 +2167,7 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Manual, porBOOLEAN, 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porTEXT));
   FuncObj->SetParamInfo(0, 1, gclParameter("y", porOUTPUT,
-					    new OutputPortion(gout)));
+					    new OutputPortion(_gsm->OutputStream())));
   gsm->AddFunction(FuncObj);
   
   FuncObj = new gclFunction("HelpVars", 1);
