@@ -40,11 +40,9 @@ gSpace::gSpace(int nvars)
 
 gSpace::gSpace(const gSpace &p)
 : Variables()
-{gout<<"IF OK, ZAP ME:prepoly.cc3\n";//**
-
+{
   Variable *newvar;
-  for (int i = 1; i <= Variables.Length(); i++){gout<<"IF OK, ZAP ME:prepoly.cc4\n";//**
-
+  for (int i = 1; i <= p.Variables.Length(); i++){
     newvar = new Variable;
     newvar->Name = p.Variables[i]->Name;
     newvar->number = i;
