@@ -33,7 +33,7 @@
 class OutputParamsSettings {
 protected:
   char *outname, *errname;
-  gOutput *outfile, *errfile;
+  mutable gOutput *outfile, *errfile;
   wxStringList *trace_list, *m_precisionList;
   char *trace_str, *m_precisionStr;
  // max solutions_per_subgame, max total solutions
