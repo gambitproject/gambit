@@ -527,7 +527,7 @@ Portion *GSM_LcpSolveEfgFloat(Portion **param)
   }
   else   {
     SeqFormParams SP;
-    SP.nequilib = ((IntPortion *) param[2])->Value();
+    SP.stopAfter = ((IntPortion *) param[2])->Value();
 
     SeqFormBySubgame<double> SM(E, SP);
     
@@ -563,7 +563,7 @@ Portion *GSM_LcpSolveEfgRational(Portion **param)
   }
   else   {
     SeqFormParams SP;
-    SP.nequilib = ((IntPortion *) param[2])->Value();
+    SP.stopAfter = ((IntPortion *) param[2])->Value();
 
     SeqFormBySubgame<gRational> SM(E, SP);
     
