@@ -35,8 +35,6 @@
 #include "gpoly.h"
 #include "gpolylst.h"
 #include "gpartltr.h"
-#include "pelican/pelqhull.h"
-#include "poly/pelclass.h"
 
 class gbtNewtonPolishException : public gbtException  {
 public:

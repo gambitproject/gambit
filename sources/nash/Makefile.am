@@ -4,6 +4,29 @@ noinst_LTLIBRARIES = libgambit_nash.la
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
+nashincludedir = $(includedir)/gambit-$(VERSION)/gambit/nash
+nashinclude_HEADERS = \
+	behavextend.h \
+	clique.h \
+	efglcp.h \
+	efgliap.h \
+	efglogit.h \
+	efglp.h \
+	efgpoly.h \
+	efgpure.h \
+	lhtab.h \
+	nfgch.h \
+	nfglcp.h \
+	nfgliap.h \
+	nfglogit.h \
+	nfglp.h \
+	nfgmixed.h \
+	nfgpoly.h \
+	nfgpure.h \
+	nfgqregrid.h \
+	nfgsimpdiv.h \
+	nfgyamamoto.h 
+
 libgambit_nash_la_SOURCES = \
 	behavextend.cc \
 	behavextend.h \

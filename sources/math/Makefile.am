@@ -4,6 +4,24 @@ noinst_LTLIBRARIES = libgambit_math.la
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
+mathincludedir = $(includedir)/gambit-$(VERSION)/gambit/math
+mathinclude_HEADERS = \
+	complex.h \
+	gdpvect.h \
+	gdpvect.imp \
+	gmath.h \
+	gmatrix.h \
+	gmatrix.imp \
+	gpvector.h \
+	gpvector.imp \
+	gsmatrix.h \
+	gsmatrix.imp \
+	gvector.h \
+	gvector.imp \
+	integer.h \
+	mpfloat.h \
+	rational.h
+
 libgambit_math_la_SOURCES = \
 	complex.cc \
 	complex.h \

@@ -4,6 +4,32 @@ noinst_LTLIBRARIES = libgambit_poly.la
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
+polyincludedir = $(includedir)/gambit-$(VERSION)/gambit/poly
+polyinclude_HEADERS = \
+	gpartltr.h \
+	gpartltr.imp \
+	gpoly.h \
+	gpoly.imp \
+	gpolylst.h \
+	gpolylst.imp \
+	gsolver.h \
+	gsolver.imp \
+	ideal.h \
+	ideal.imp \
+	ineqsolv.h \
+	ineqsolv.imp \
+	interval.h \
+	interval.imp \
+	monomial.h \
+	monomial.imp \
+	poly.h \
+	poly.imp \
+	prepoly.h \
+	quiksolv.h \
+	quiksolv.imp \
+	rectangl.h \
+	rectangl.imp
+
 libgambit_poly_la_SOURCES = \
 	gpartltr.cc \
 	gpartltr.h \

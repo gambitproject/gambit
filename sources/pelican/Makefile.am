@@ -4,6 +4,8 @@ noinst_LTLIBRARIES = libgambit_pelican.la
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
+# Note that we try not to install any pelican headers...
+
 libgambit_pelican_la_SOURCES = \
 	pelclhpk.cc \
 	pelclhpk.h \

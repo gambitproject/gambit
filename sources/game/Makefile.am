@@ -4,6 +4,40 @@ noinst_LTLIBRARIES = libgambit_game.la
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
+gameincludedir = $(includedir)/gambit-$(VERSION)/gambit/game
+gameinclude_HEADERS = \
+	game.h \
+	game-behav-mixed.h \
+	game-behav-pure.h \
+	game-contingency.h \
+	game-file.h \
+	game-infoset.h \
+	game-node.h \
+	game-outcome.h \
+	game-player.h \
+	game-sequence.h \
+	game-strategy.h \
+	game-strategy-mixed.h \
+	sfg.h \
+	sfstrat.h \
+	table-contingency.h \
+	table-game.h \
+	table-outcome.h \
+	table-player.h \
+	table-strategy-mixed.h \
+	table-strategy-mixed.imp \
+	tree-behav-mixed.h \
+	tree-behav-mixed.imp \
+	tree-behav-pure.h \
+	tree-contingency.h \
+	tree-game.h \
+	tree-infoset.h \
+	tree-node.h \
+	tree-outcome.h \
+	tree-player.h \
+	tree-strategy-mixed.h \
+	tree-strategy-mixed.imp
+
 libgambit_game_la_SOURCES = \
 	game.h \
 	game-behav-mixed.h \

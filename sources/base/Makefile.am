@@ -11,6 +11,29 @@ noinst_LTLIBRARIES = libgambit_base.la
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
+baseincludedir = $(includedir)/gambit-$(VERSION)/gambit/base
+baseinclude_HEADERS = \
+	base.h \
+	garray.h \
+	garray.imp \
+	gblock.h \
+	gblock.imp \
+	glist.h \
+	glist.imp \
+	gmap.h \
+	gmap.imp \
+	gmisc.h \
+	gnarray.h \
+	gnarray.imp \
+	grarray.h \
+	grarray.imp \
+	grblock.h \
+	grblock.imp \
+	gstatus.h \
+	gtree.h \
+	gtree.imp \
+	odometer.h
+
 libgambit_base_la_SOURCES = \
 	base.h \
 	garray.cc \
@@ -26,8 +49,8 @@ libgambit_base_la_SOURCES = \
 	gmap.imp \
 	gmisc.cc \
 	gmisc.h \
-	gnarray.imp \
 	gnarray.h \
+	gnarray.imp \
 	grarray.cc \
 	grarray.h \
 	grarray.imp \

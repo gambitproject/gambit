@@ -26,6 +26,8 @@
 
 #include "quiksolv.h"
 #include "math/gmath.h"
+#include "pelican/pelqhull.h"
+#include "poly/pelclass.h"
 
 //---------------------------------------------------------------
 //                      class: gbtPolyQuickSolve

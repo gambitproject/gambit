@@ -4,6 +4,29 @@ noinst_LTLIBRARIES = libgambit_numerical.la
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
+numericalincludedir = $(includedir)/gambit-$(VERSION)/gambit/numerical
+numericalinclude_HEADERS = \
+	basis.h \
+	bfs.h \
+	btableau.h \
+	btableau.imp \
+	gfunc.h \
+	gfuncmin.h \
+	lemketab.h \
+	lemketab.imp \
+	linrcomb.h \
+	linrcomb.imp \
+	lpsolve.h \
+	lpsolve.imp \
+	lptab.h \
+	lptab.imp \
+	ludecomp.h \
+	ludecomp.imp \
+	tableau.h \
+	tableau.imp \
+	vertenum.h \
+	vertenum.imp
+
 libgambit_numerical_la_SOURCES = \
 	basis.cc \
 	basis.h \

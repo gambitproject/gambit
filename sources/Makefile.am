@@ -18,4 +18,3 @@ libgambit_la_LIBADD = \
 	pelican/libgambit_pelican.la \
 	poly/libgambit_poly.la \
 	nash/libgambit_nash.la 
-
