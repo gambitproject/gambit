@@ -41,7 +41,7 @@ private:
   gVector<T> *ub, *lb, *xx, *cost; 
   gVector<T> y, x, d;
   gStatus &status;
-  
+
   void Solve(int phase = 0);
   int Enter(void);
   int Exit(int);
