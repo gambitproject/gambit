@@ -1,12 +1,8 @@
 //#
 //# FILE: grid.cc -- Grid-search solution module
 //#
-//# @(#)grid.cc	1.14 5/2/95
+//# $Id$ 
 //#
-
-#ifdef __GNUG__
-#pragma implementation "grid.h"
-#endif   // __GNUG__
 
 #include "basic.h"
 #include "rational.h"
@@ -120,7 +116,7 @@ for (i=1;i<=st1;i++) p[i] = ((T) exp(l*x[i])) / denom;
 /*--------------------make Y's----------------------*/
 y=(T)0;			// zero out the entire y-vector
 for (i=1;i<=st2;i++)
-	for (j=1;j<=st1;j++) y[i] += matrix(i,j).col*p[j];
+	for (j=1;j<=st1;j++) y[i] += matrix(j,i).col*p[j]; // (i,j) or (j,i) ?!
 /*--------------------make Q_CALC's-----------------*/
 denom=(T)0;
 for (i=1;i<=st2;i++) denom+=exp(l*y[i]);
@@ -139,8 +135,8 @@ for (i=1;i<=st2;i++) q_calc[i]=((T)exp(l*y[i])) / denom;
 ok=true;dist=(T)0;
 for (i = 1; i <= st1; i++)
 {
-	dist += fabs((double)(q[i]-q_calc[i]));
-	if ((T)fabs(q[i]-q_calc[i])>=params.tol) ok=false;
+	dist += abs(q[i]-q_calc[i]);
+	if (abs(q[i]-q_calc[i])>=params.tol) ok=false;
 }
 
 if (ok)
