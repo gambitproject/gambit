@@ -1,7 +1,7 @@
 //#
 //# FILE: gambitio.cc -- Implementation of I/O streaming functions
 //#
-//# $Id$
+//# @(#)gambitio.cc	1.4 11/3/94
 //#
 
 #ifdef __GNUG__
@@ -13,84 +13,84 @@
 
 gFileInput::gFileInput(void)
 {
-  f = 0;
+  f = 0;valid=0;
 }
 
 gFileInput::gFileInput(const char *in)
 {
-  f = fopen(in, "r");
+	f = fopen(in, "r");valid=(f==NULL) ? 0 : 1;
 }
 
 gFileInput::gFileInput(FILE *in)
 {
-  f = in;
+	f = in;valid=(f==NULL) ? 0 : 1;
 }
 
 gFileInput::~gFileInput()
 {
-  if (f)   fclose(f);
+  if (f)   fclose(f);valid=0;
 }
 
 gFileInput &gFileInput::operator=(FILE *in)
 {
   if (f)  fclose(f);
-  f = in;
+	f = in;valid=(f==NULL) ? 0 : 1;
   return *this;
 }
 
 gFileInput &gFileInput::operator=(const char *in)
 {
   if (f)  fclose(f);
-  f = fopen(in, "r");
+	f = fopen(in, "r");valid=(f==NULL) ? 0 : 1;
   return *this;
 }
 
 gInput &gFileInput::operator>>(int &x)
 {
   assert(f);
-  fscanf(f, "%d", &x);
+	int c=fscanf(f, "%d", &x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gInput &gFileInput::operator>>(unsigned int &x)
 {
   assert(f);
-  fscanf(f, "%d", &x);
+	int c=fscanf(f, "%d", &x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gInput &gFileInput::operator>>(long &x)
 {
   assert(f);
-  fscanf(f, "%ld", &x);
+	int c=fscanf(f, "%ld", &x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gInput &gFileInput::operator>>(char &x)
 {
   assert(f);
-  fscanf(f, "%c", &x);
+	int c=fscanf(f, "%c", &x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gInput &gFileInput::operator>>(double &x)
 {
   assert(f);
-  fscanf(f, "%lf", &x);
+	int c=fscanf(f, "%lf", &x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gInput &gFileInput::operator>>(float &x)
 {
   assert(f);
-  fscanf(f, "%f", &x);
+	int c=fscanf(f, "%f", &x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gInput &gFileInput::operator>>(char *x)
 {
   assert(f);
-  fscanf(f, "%s", x);
+	int c=fscanf(f, "%s", x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
@@ -120,103 +120,103 @@ void gFileInput::seekp(long pos) const
 
 int gFileInput::IsValid(void) const
 {
-  return (f != 0);
+  return valid;
 }
 
 
 gFileOutput::gFileOutput(void)
 {
-  f = 0;
+  f = 0;valid=0;
 }
 
 gFileOutput::gFileOutput(const char *out)
 {
-  f = fopen(out, "w");
+	f = fopen(out, "w");valid=(f==NULL) ? 0 : 1;
 }
 
 gFileOutput::gFileOutput(FILE *out)
 {
-  f = out;
+	f = out;valid=(f==NULL) ? 0 : 1;
 }
 
 gFileOutput::~gFileOutput()
 {
-  if (f)   fclose(f);
+	if (f)   fclose(f);valid=0;
 }
 
 gFileOutput &gFileOutput::operator=(FILE *out)
 {
   if (f)   fclose(f);
-  f = out;
+	f = out;valid=(f==NULL) ? 0 : 1;
   return *this;
 }
 
 gFileOutput &gFileOutput::operator=(const char *out)
 {
   if (f)   fclose(f);
-  f = fopen(out, "w");
+	f = fopen(out, "w");valid=(f==NULL) ? 0 : 1;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(int x)
 {
   assert(f);
-  fprintf(f, "%d", x);
+	int c=fprintf(f, "%d", x);
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(unsigned int x)
 {
   assert(f);
-  fprintf(f, "%d", x);
+	int c=fprintf(f, "%d", x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(long x)
 {
   assert(f);
-  fprintf(f, "%ld", x);
+	int c=fprintf(f, "%ld", x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(char x)
 {
   assert(f);
-  fprintf(f, "%c", x);
+	int c=fprintf(f, "%c", x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(double x)
 {
   assert(f);
-  fprintf(f, "%lf", x);
+	int c=fprintf(f, "%lf", x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(float x)
 {
   assert(f);
-  fprintf(f, "%f", x);
+	int c=fprintf(f, "%f", x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(const char *x)
 {
   assert(f);
-  fprintf(f, "%s", x);
+	int c=fprintf(f, "%s", x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(const void *x)
 {
   assert(f);
-  fprintf(f, "%p", x);
+	int c=fprintf(f, "%p", x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 int gFileOutput::IsValid(void) const
 {
-  return (f != 0);
+	return valid;
 }
 
 
