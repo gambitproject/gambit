@@ -1,73 +1,53 @@
 //#
 //# FILE: contiter.imp -- Implementation of contingency iterator
 //#
-//# $Id$
+//# @(#)contiter.imp	1.1 1/17/95
 //#
 
 #include "contiter.h"
 #include "normal.h"
 #include "strategy.h"
 
-template <class T> ContIter<T>::ContIter(NormalForm<T> &nf, int set)
-  : N(&nf), profile(new StrategyProfile(N->NumPlayers())),
-    thawed(N->NumPlayers()), sset(set)
-{
-  for (int i = 1; i <= thawed.Length(); i++)
-    thawed[i] = i;
-  First();
-}
-
-template <class T> ContIter<T>::ContIter(NormalForm<T> *nf, int set)
-  : N(nf), profile(new StrategyProfile(N->NumPlayers())),
-    thawed(N->NumPlayers()), sset(set)
-{
-  for (int i = 1; i <= thawed.Length(); i++)
-    thawed[i] = i;
-  First();
-}
-
 template <class T> ContIter<T>::ContIter(NormalForm<T> &nf)
-  : N(&nf), profile(new StrategyProfile(N->NumPlayers())),
-    thawed(N->NumPlayers()), sset(nf.NumStratSets())
+	: N(&nf), profile(new StrategyProfile(N->NumPlayers())),
+		thawed(N->NumPlayers())
 {
-  for (int i = 1; i <= thawed.Length(); i++)
-    thawed[i] = i;
-  First();
+	for (int i = 1; i <= thawed.Length(); i++)
+		thawed[i] = i;
+	First();
 }
 
 template <class T> ContIter<T>::ContIter(NormalForm<T> *nf)
-  : N(nf), profile(new StrategyProfile(N->NumPlayers())),
-    thawed(N->NumPlayers()), sset(nf->NumStratSets())
+	: N(nf), profile(new StrategyProfile(N->NumPlayers())),
+		thawed(N->NumPlayers())
 {
-  for (int i = 1; i <= thawed.Length(); i++)
-    thawed[i] = i;
-  First();
+	for (int i = 1; i <= thawed.Length(); i++)
+		thawed[i] = i;
+	First();
 }
 
 template <class T> ContIter<T>::~ContIter()
 {
-  delete profile;
+	delete profile;
 }
 
 template <class T> void ContIter<T>::First(void)
 {
-  for (int i = 1; i <= thawed.Length(); i++)  {
-    Strategy *s = (*N->strategies[sset])(thawed[i], 1);
-    profile->Set(thawed[i], s);
-  }
+	for (int i = 1; i <= thawed.Length(); i++)
+		profile->Set(i, (*N->strategies)(i, 1));
 }
-  
+
 template <class T> void ContIter<T>::Set(int pl, int num)
 {
-  if (!frozen.Contains(pl))   return;
+	if (!frozen.Contains(pl))   return;
 
-  profile->Set(pl, N->GetStrategy(pl, num, sset));
+	profile->Set(pl, (*N->strategies)(pl, num));
 }
 
 template <class T> void ContIter<T>::Freeze(const gBlock<int> &freeze)
 {
-  frozen = freeze;
-  thawed = gBlock<int>(N->NumPlayers() - freeze.Length());
+	frozen = freeze;
+	thawed = gBlock<int>(N->NumPlayers() - freeze.Length());
   for (int i = 1, j = 1; i <= N->NumPlayers(); i++)
     if (!frozen.Contains(i))   thawed[j++] = i;
   First();
@@ -83,63 +63,64 @@ template <class T> void ContIter<T>::Freeze(int pl)
 
 template <class T> void ContIter<T>::Thaw(int pl)
 {
-  if (thawed.Contains(pl))   return;
-  frozen.Remove(frozen.Find(pl));
-  int i = 1;
-  while (thawed[i] < pl)   i++;
-  thawed.Insert(pl, i);
-  First();
+	if (thawed.Contains(pl))   return;
+	frozen.Remove(frozen.Find(pl));
+	int i = 1;
+	while (thawed[i] < pl)   i++;
+	thawed.Insert(pl, i);
+	First();
 }
 
 template <class T> int ContIter<T>::NextContingency(void)
 {
-  int j = thawed.Length();
-  
-  while (1)   {
-    int pl = thawed[j];
-    Strategy *s = (*profile)[pl]->next[sset];
-    if (s)  {
-      profile->Set(pl, s);
-      return 1;
-    }
-
-    s = (*N->strategies[sset])(pl, 1);
-    profile->Set(pl, s);
-    j--;
-    if (j == 0)
-      return 0;
-  }
+	int j = thawed.Length();
+	if (j==0) return 0;	// if these is only one contingency
+	while (1)   {
+		int pl = thawed[j];
+		Strategy *s = (*profile)[pl]->next;
+		if (s)  {
+			profile->Set(pl, s);
+			return 1;
+		}
+		profile->Set(pl, (*N->strategies)(pl, 1));
+		j--;
+		if (j == 0)
+			return 0;
+	}
 }
 
 template <class T> long ContIter<T>::GetIndex(void) const
 {
-  return profile->GetIndex();
+	return profile->GetIndex();
 }
 
-template <class T> gTuple<int> ContIter<T>::Get(void) const
+template <class T> void ContIter<T>::Get(gTuple<int> &t) const
 {
-  gTuple<int> current(N->NumPlayers());
-  for (int i = 1; i <= current.Length(); i++)
-    current[i] = (*profile)[i]->number;
-  return current;
+	for (int i = 1; i <= N->NumPlayers(); i++)
+		t[i] = (*profile)[i]->index;
 }
 
-template <class T> const T &ContIter<T>::Payoff(int pl) const
+template <class T> const T &ContIter<T>::Payoff(int p) const
 {
-  return N->Payoff(pl, *profile);
+	return N->Payoff(p, *profile);
 }
 
-template <class T> T &ContIter<T>::Payoff(int pl)
+template <class T> T &ContIter<T>::Payoff(int p)
 {
-  return N->Payoff(pl, *profile);
+  return N->Payoff(p, *profile);
 }
 
-template <class T> void ContIter<T>::Dump(gOutput &f) const
+template <class T> void ContIter<T>::Payoff(gVector<T> &value) const
 {
-  f << "{ ";
+	N->Payoff(*profile, value);
+}
+
+template <class T> void ContIter<T>::Dump(void) const
+{
+  gout << "{ ";
   for (int i = 1; i <= N->NumPlayers(); i++)
-    f << (*profile)[i]->number << ' ';
-  f << '}';
+    gout << (*profile)[i]->number << ' ';
+  gout << '}';
 }
 
-      
+
