@@ -1,6 +1,7 @@
 
 
 #include <stdio.h>
+
 #include "gsm.h"
 #include "rational.h"
 #include "gstring.h"
@@ -9,6 +10,7 @@
 int main( void )
 {
   char cont;
+  int i;
   double d_1 = (double) 7.5;
   double d_2 = (double) 11.5;
   double d_temp;
@@ -23,7 +25,7 @@ int main( void )
   gString z = "z";
 
 
-  GSM *machine = new GSM( 256 );
+  GSM *machine = new GSM( 32 );
   
 
   gout << "\n";
@@ -258,6 +260,20 @@ int main( void )
   gin >> cont;
 
   machine->Flush();
+  machine->PushRef( (gString) "c" );
+  machine->Push( (bool) true );
+  machine->Assign();
+  machine->Flush();
+
+  machine->PushRef( (gString) "c" );
+  machine->PushRef( (gString) "c" );
+  machine->AND();
+  machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  machine->Flush();
 /*
   gout << "Testing CallFunction(\"Sign\")\n";
   machine->CallFunction( (gString) "Sign" );
@@ -330,31 +346,167 @@ int main( void )
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
-  
-  gout << "Testing nested List structures\n";
-  machine->Push( (double) 1 );
-  machine->Push( (double) 2 );
-  machine->Push( (gRational) 3 );
-  machine->Push( (double) 4 );
-  machine->Push( (double) 5 );
-  machine->PushList( 3 );
-  machine->Push( (double) 6 );
-  machine->Push( (double) 7 );
-  machine->PushList( 4 );
-  machine->Push( (double) 8 );
-  machine->PushList( 3 );
-  machine->Push( (double) 9 );
-  machine->Push( (double) 10 );
-  machine->Push( (double) 11 );
-  machine->PushList( 4 );
+
+  machine->Flush();
+  machine->Push( (gInteger) 1 );
+  machine->PushList( 1 );
+  machine->PushList( 1 );
+  machine->PushList( 1 );
+  machine->PushList( 1 );
+  machine->PushList( 1 );
+  machine->PushList( 1 );
+  machine->Push( (gInteger) 2 );
+  machine->PushList( 2 );
+  machine->PushList( 1 );
+  machine->PushList( 1 );
+  machine->PushList( 1 );
   machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  gout << "General testing:\n";
+  machine->Flush();
+  machine->PushRef( (gString) "x1" );
+  machine->Push( (double) 7 );
+  machine->Push( (double) 8 );
+  machine->EqualTo();
+  machine->Assign();
+  machine->Dump();
+  machine->Flush();
+  machine->PushRef( (gString) "y1" );
+  machine->Push( (gInteger) 11 );
+  machine->Push( (gInteger) 13 );
+  machine->Multiply();
+  machine->Push( (gInteger) 130 );
+  machine->GreaterThan();
+  machine->Assign();
+  machine->Dump();
+  machine->Flush();
+  machine->PushRef( (gString) "x1" );
+  machine->PushRef( (gString) "y1" );
+  machine->Dump();
+  machine->Flush();
+  machine->PushRef( (gString) "x1" );
+  machine->PushRef( (gString) "y1" );
+  machine->AND();
+  machine->Dump();
+  machine->Flush();
+  machine->PushRef( (gString) "x1" );
+  machine->PushRef( (gString) "y1" );
+  machine->OR();
+  machine->Dump();
+/*
+  machine->Flush();
+  machine->PushRef( (gString) "x1" );
+  machine->PushRef( (gString) "y1" );
+  machine->Push( (bool) true );
+  machine->PushList( 3 );
+  machine->Dump();
+*/
+  machine->Flush();
+  machine->Push( (gInteger) 11 );
+  machine->Push( (gInteger) 13 );
+  machine->GreaterThan();
+  machine->Push( (gInteger) 13 );
+  machine->Push( (gInteger) 11 );
+  machine->GreaterThan();
+  machine->Push( (gInteger) 12 );
+  machine->Push( (gInteger) 12 );
+  machine->GreaterThanOrEqualTo();
+  machine->Push( (gInteger) 24 );
+  machine->Push( (gInteger) 25 );
+  machine->GreaterThanOrEqualTo();
+  machine->Push( (double) 11 );
+  machine->Push( (double) 11 );
+  machine->GreaterThan();
+  machine->Push( (gInteger) 11 );
+  machine->Push( (gInteger) 11 );
+  machine->GreaterThanOrEqualTo();
+  machine->Push( (gInteger) 11 );
+  machine->Push( (gInteger) 110 );
+  machine->GreaterThan();
+  machine->Push( (double) 110 );
+  machine->Push( (double) 11 );
+  machine->GreaterThanOrEqualTo();
+  machine->Push( (gInteger) 11 );
+  machine->Push( (gInteger) 11 );
+  machine->GreaterThan();
+  machine->Push( (gInteger) -10 );
+  machine->Push( (gInteger) -11 );
+  machine->GreaterThan();
+  machine->PushList( 10 );
+  machine->Dump();
+
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+
+  gout << "Testing (double) 1 * 10000 using Add()\n";
+  machine->Flush();
+  machine->Push( (double) 1 );
+  for( i = 2; i <= 10000; i++ )
+  {
+    machine->Push( (double) 1 );
+    machine->Add();
+  }
+  machine->Dump();
+
+  
+  gout << "Testing CallFunction( \"Sqr\" ) on (double) 99 ^ 99 for 10 times\n";
+  machine->Flush();
+  machine->Push( (double) 99 );
+  for( i = 2; i <= 99; i++ )
+  {
+    machine->Push( (double) 99 );
+    machine->Multiply();
+  }
+  for( i = 1; i <= 10; i++ )
+  {
+    machine->CallFunction( (gString) "Sqr" );
+  }
+  machine->Dump();
+
+  
+  machine->Flush();
+  gout << "Testing (gRational) ( 11 / 17 ) ^ 32\n";
+  gRational t = ( (gRational) 11 )/( (gRational) 17 );
+  for( i = 1; i <= 32; i++ )
+  {
+    machine->Push( t );  
+  }
+  for( i = 1; i <= 31; i++ )
+  {
+    machine->Multiply();  
+  }
+  machine->Dump();
+
+
+  gout << "Testing (gRational) 99 ^ 99\n";
+  machine->Flush();
+  machine->Push( (gRational) 99 );
+  for( i = 2; i <= 99; i++ )
+  {
+    machine->Push( (gRational) 99 );
+    machine->Multiply();
+  }
+  machine->Dump();
+
+  gout << "Testing (gRational) 1 ^ 10000\n";
+  machine->Flush();
+  machine->Push( (gRational) 1 );
+  for( i = 2; i <= 10000; i++ )
+  {
+    machine->Push( (gRational) 1 );
+    machine->Multiply();
+  }
+  machine->Dump();
+
 
 
   delete machine;
 
   return 0;
 }
-
-
-
 

@@ -16,8 +16,22 @@
 
 //--------------------------- base type -------------------------------
 
+
+// variable used to detect memory leakage
+// int Portion::num_of_Portions = 0;
+
+Portion::Portion()
+{
+  // The following two lines are for detecting memory leakage.
+  // num_of_Portions++;
+  // gout << "Portions:" << num_of_Portions << "\n";
+}
+
 Portion::~Portion()
 {
+  // The following two lines are for detecting memory leakage.
+  // num_of_Portions--;
+  // gout << "Portions:" << num_of_Portions << "\n";
 }
 
 
@@ -110,21 +124,21 @@ template <class T>
 
 template <class T> void numerical_Portion<T>::Output( gOutput& s ) const
 {
-  s << value;
   switch( Type() )
   {
   case porDOUBLE:
-    s << "     type: double\n";
+    s << " (double) ";
     break;
   case porINTEGER:
-    s << "     type: gInteger\n";
+    s << " (gInteger) ";
     break;
   case porRATIONAL:
-    s << "     type: gRational\n";
+    s << " (gRational) ";
     break;
   default:
-    s << "     type: unknown numerical\n";
+    s << " (unknown numerical) ";
   }
+  s << value << "\n";
 }
 
 
@@ -147,7 +161,7 @@ PortionType bool_Portion::Type( void ) const
 Portion *bool_Portion::Copy( void ) const
 { return new bool_Portion( value ); }
 
-int bool_Portion:: Operation( Portion *p, OperationMode mode )
+int bool_Portion::Operation( Portion *p, OperationMode mode )
 {
   int result = 0;
   bool& p_value = ( (bool_Portion *)p )->Value();
@@ -183,11 +197,11 @@ int bool_Portion:: Operation( Portion *p, OperationMode mode )
 
 void bool_Portion::Output( gOutput& s ) const
 {
+  s << " (bool) ";
   if( value == true )
-    s << "true";
+    s << "true\n";
   else
-    s << "false";
-  s << "     type: bool\n";
+    s << "false\n";
 }
 
 
@@ -209,7 +223,7 @@ PortionType gString_Portion::Type( void ) const
 Portion *gString_Portion::Copy( void ) const
 { return new gString_Portion( value ); }
 
-int gString_Portion:: Operation( Portion *p, OperationMode mode )
+int gString_Portion::Operation( Portion *p, OperationMode mode )
 {
   int result = 0;
   gString& p_value = ( (gString_Portion *)p )->Value();
@@ -257,7 +271,7 @@ int gString_Portion:: Operation( Portion *p, OperationMode mode )
 
 void gString_Portion::Output( gOutput& s ) const
 {
-  s << value << "     type: gString\n";
+  s << " (gString) " << value << "\n";
 }
 
 
@@ -282,7 +296,7 @@ Portion *Reference_Portion::Copy( void ) const
 
 void Reference_Portion::Output( gOutput& s ) const
 {
-  s << value << "     type: Reference\n";
+  s << " (Reference) " << value << "\n";
 }
 
 
@@ -348,7 +362,7 @@ int List_Portion::TypeCheck( Portion *item )
 
 
 
-int List_Portion:: Operation( Portion *p, OperationMode mode )
+int List_Portion::Operation( Portion *p, OperationMode mode )
 {
   int result = 0;
   gBlock<Portion *>& p_value = ( (List_Portion *)p )->Value();
@@ -377,13 +391,18 @@ void List_Portion::Output( gOutput& s ) const
 {
   int i, length;
 
-  s << "type: List\n";
+  s << " (List)\n"; 
+  s << "  {\n";
   for( i = 1, length = value.Length(); i <= length; i++ )
   {
     s << "    list item " << i << " : ";
     value[i]->Output( s );
   }
+  s << "  }\n";
 }
+
+
+
 
 Portion *List_Portion::operator[] ( int index )
 {
@@ -400,7 +419,20 @@ int List_Portion::Insert( Portion *item, int index )
   int result;
   int type_match;
 
-  if( value.Length() > 0 )
+  if( item->Type() == porREFERENCE )
+  {
+    gerr << "** Portion Error: attempted to insert a Reference type into List_Portion\n";
+    assert(0);
+  }
+
+  if( value.Length() == 0 )  // creating a new list
+  {
+    if( item->Type() == porLIST )
+      data_type = ( (List_Portion *)item )->data_type;
+    else
+      data_type = item->Type();
+  }
+  else  // inserting into an existing list
   {
     type_match = TypeCheck( item );
     if( !type_match )
@@ -410,21 +442,9 @@ int List_Portion::Insert( Portion *item, int index )
       assert(0);
     }
   }
-  else
-  {
-    if( item->Type() != porLIST )
-      data_type = item->Type();
-    else
-      data_type = ( (List_Portion *)item )->data_type;
-  }
-  
-  if( item->Type() != porREFERENCE )
-    result = value.Insert( item, index );
-  else
-  {
-    gerr << "** Portion Error: attempted to insert a Reference type into List_Portion\n";
-    assert(0);
-  }
+
+  result = value.Insert( item, index );
+
   return result;
 }
 

@@ -59,7 +59,6 @@ class GSM
 
 
   void PushRef( const gString& data );
-
   void Assign( void );
   void UnAssign( const gString& ref );
 
@@ -85,7 +84,6 @@ class GSM
   void Concatenate( void );
 
   
-
   static void AddFunction(const gString& funcname, FuncDescObj *func );
   static int FunctionParamCheck(const PortionType stack_param_type, 
 				const PortionType func_param_type );

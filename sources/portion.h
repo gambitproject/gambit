@@ -9,6 +9,7 @@
 #define PORTION_H
 
 #include <assert.h>
+#include "basic.h"
 
 #include "rational.h"
 #include "gstring.h"
@@ -43,7 +44,12 @@ class GSM;
 
 class Portion
 {
+ private:
+  // variable used to detect memory leakage
+  // static int num_of_Portions;
+
  public:
+  Portion();
   virtual ~Portion();
   virtual PortionType Type( void ) const = 0;
   virtual Portion *Copy( void ) const = 0;
@@ -51,6 +57,7 @@ class Portion
   virtual int Operation( Portion *p, OperationMode mode );
   virtual void Output( gOutput& s ) const = 0;
 };
+
 
 
 

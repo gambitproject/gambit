@@ -21,8 +21,8 @@ gOutput& operator << ( class gOutput &s, class Portion * (*funcname)() )
 class FunctionHashTable : public HashTable<gString, FuncDescObj *>
 {
  private:
-  int NumBuckets() const { return 1; }
-  int Hash( const gString &funcname ) const { return 0; }
+  int NumBuckets() const { return 26; }
+  int Hash( const gString &funcname ) const { return (int)( funcname[0] % 26 ); }
   void DeleteAction( FuncDescObj *func ) { delete func; }
  public:
   FunctionHashTable() { Init(); }
@@ -36,8 +36,8 @@ FunctionHashTable *GSM::FuncTable = new FunctionHashTable;
 class RefHashTable : public HashTable<gString, Portion *>
 {
  private:
-  int NumBuckets( void ) const { return 1; }
-  int Hash( const gString& ref ) const { return 0; }
+  int NumBuckets( void ) const { return 26; }
+  int Hash( const gString& ref ) const { return (int)( ref[0] % 26 ); }
   void DeleteAction( Portion *value ) { delete value; }
  public:
   RefHashTable() { Init(); }
@@ -73,14 +73,14 @@ void GSM::CallFunction( const gString& funcname )
   FuncDescObj *func;
   Portion **param_list;
   Portion *p;
-  int i, current_index, num_of_params;
+  int i, num_of_params;
   int type_match;
 
   if( FuncTable->IsDefined( funcname ) )
   {
     func = (*FuncTable)( funcname );
     num_of_params = func->NumParams();
-    param_list = new (Portion*) [ num_of_params ];
+    param_list = new Portion* [ num_of_params ];
     for( i = num_of_params - 1; i >= 0; i-- )
     {
       param_list[ i ] = stack->Pop();
@@ -197,7 +197,6 @@ void GSM::PushList( const int num_of_elements )
   int i;
   Portion *p;
   List_Portion *list;
-  PortionType type;
 
   assert( num_of_elements > 0 );
 
@@ -238,7 +237,6 @@ void GSM::PushRef( const gString& data )
 
 void GSM::Assign( void )
 {
-  int result = 0;
   Portion *p2, *p1;
   gString ref;
 
@@ -379,7 +377,7 @@ void GSM::unary_operation( OperationMode mode )
 
 
 //-----------------------------------------------------------------
-  // operations
+  // built-in operations
 //-----------------------------------------------------------------
 
 void GSM::Add ( void )
