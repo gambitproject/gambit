@@ -21,7 +21,7 @@ gcl:
 	@echo Updating gcl_$(HOST) on hss
 	$(MAKE) -f Makefile gcl GUI=$(GUI) HOST=$(HOST)
 	strip gcl_$(HOST)
-	zip gcl_$(HOST) gcl_$(HOST) ./efg/*.efg ./nfg/*.nfg ./gcl/*.gcl
+	zip gcl_$(HOST) gcl_$(HOST) ./efg/*.efg ./nfg/*.nfg ./gclsamp/*.gcl
 	ftp_put gcl_$(HOST).zip
 	rm gcl_$(HOST).zip
 source:
