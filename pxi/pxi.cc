@@ -410,8 +410,9 @@ if (ev.ShiftDown() && ev.ButtonDown())	// use shift mouse click to add a label
 		if (labels[i].x+TEXT_MARGIN>tmp_label.x && labels[i].x-TEXT_MARGIN<tmp_label.x &&
 				labels[i].y+TEXT_MARGIN>tmp_label.y && labels[i].y-TEXT_MARGIN<tmp_label.y)
 					clicked_on=i;
-	tmp_label.label=wxGetTextFromUser("Enter Label","Enter Label",
-																		(clicked_on) ? (char *)labels[clicked_on].label : "");
+	const char * junk = (clicked_on) ? (char *)labels[clicked_on].label : "";
+	tmp_label.label=wxGetTextFromUser("Enter Label","Enter Label", (char *)junk);
+	//					  (clicked_on) ? (char *)labels[clicked_on].label : "");
 	if (!clicked_on)
 		labels.Append(tmp_label);
 	else
@@ -595,12 +596,12 @@ if (settings->Completed()==wxOK)
 		bench=0.00015;
 		double l_steps;
 		double num_steps;
-		num_steps=(double)calc_num_steps(settings->GetMatrix().Dim(),(int)(1.0/settings->GetPStep()+0.03));
+		num_steps=(double)calc_num_steps(settings->GetMatrix()->Dim(),(int)(1.0/settings->GetPStep()+0.03));
 		if (settings->GetDataType()==DATA_TYPE_ARITH)
 			l_steps=(settings->GetLStop()-settings->GetLStart())/settings->GetLStep();
 		else
 			l_steps=log(settings->GetLStop()/settings->GetLStart())/log(settings->GetLStep());
-		long total_time=(long)(bench*(double)settings->GetMatrix().Dim()*l_steps*num_steps);
+		long total_time=(long)(bench*(double)settings->GetMatrix()->Dim()*l_steps*num_steps);
 		long secs=total_time;
 		sprintf(tempstr,"This will take approximately %02ld:%02ld",secs/60,secs%60);
 		int go=wxMessageBox(tempstr,"Time projection",wxOK|wxCANCEL|wxCENTRE);

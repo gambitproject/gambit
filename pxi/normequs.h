@@ -32,74 +32,80 @@ typedef struct {double row;double col;} PayoffStruct;
 class NormalMatrix
 {
 private:
-	PayoffStruct	**data;
-	int			dim;
+  PayoffStruct **data;
+  mutable int dim;
 public:
-	NormalMatrix(char *file_name);
-	NormalMatrix(FILE *fp);
-	NormalMatrix(gInput &in);
-	NormalMatrix(NormalMatrix &m);
-	NormalMatrix(int _dim);
-	void WriteMatrix(char *file_name);
-	void WriteMatrix(FILE *fp);
+  NormalMatrix(char *file_name);
+  NormalMatrix(FILE *fp);
+  NormalMatrix(gInput &in);
+  NormalMatrix(NormalMatrix &m);
+  NormalMatrix(NormalMatrix *m);
+  NormalMatrix(int _dim);
+  ~NormalMatrix(void);
+
+  void WriteMatrix(char *file_name);
+  void WriteMatrix(FILE *fp);
   void WriteMatrix(gOutput &out);
-	~NormalMatrix(void);
-	PayoffStruct operator()(int index1,int index2) const {assert(data!=NULL);assert(index1<dim);assert(index2<dim);return data[index1][index2];}
-	void SetValue(int row,int col,double p_row,double p_col)
-		{assert(data!=NULL);assert(row<dim);assert(col<dim);
-		data[row][col].row=p_row;data[row][col].col=p_col;}
-	int	Dim(void) {return dim;}
-	int	DimX(void) {return dim;}
-	int	DimY(void) {return dim;}
-
+  PayoffStruct operator()(int index1,int index2) const 
+    {assert(data!=NULL);assert(index1<dim);
+    assert(index2<dim);return data[index1][index2];}
+  void SetValue(int row,int col,double p_row,double p_col)
+    {assert(data!=NULL);assert(row<dim);assert(col<dim);
+    data[row][col].row=p_row;data[row][col].col=p_col;}
+  int Dim(void) {return dim;}
+  int DimX(void) {return dim;}
+  int DimY(void) {return dim;}
 };
-
 
 class NormalEquSolver
 {
 private:
-	typedef enum {MODE_NORMAL,MODE_NEW,MODE_DONE} output_modes;
-	double l_start,l_stop,dl,dp,m_error;
-	double *p,*x,*y,*q_calc;
-	NormalMatrix 	*matrix;   /* payoff table: matrix[p][q][ROW/COL]	*/
-	char 	file_name[80];
-	Bool	keep,done;
-	int		dim;
-  int		data_type;
-	void  (*update_func)(void);
-	void	OutputResult(double l,double *q,double *p,double dist,output_modes mode=MODE_NORMAL);
-	Bool	Check_Equ(double *q,double l);
+  typedef enum {MODE_NORMAL,MODE_NEW,MODE_DONE} output_modes;
+  double l_start,l_stop,dl,dp,m_error;
+  double *p,*x,*y,*q_calc;
+  NormalMatrix 	*matrix;   /* payoff table: matrix[p][q][ROW/COL]	*/
+  char file_name[80];
+  Bool keep,done;
+  int dim;
+  int data_type;
+  void (*update_func)(void);
+  void OutputResult(double l,double *q,double *p,
+		    double dist,output_modes mode=MODE_NORMAL);
+  Bool	Check_Equ(double *q,double l);
 public:
-	// Constructors
-	NormalEquSolver(char *_matrix_file_name,double _l_start,double _l_stop,double _dl,double _dp,double _m_error,int _data_type,char *out_file_name=NULL);
-	NormalEquSolver(NormalMatrix _matrix,double _l_start,double _l_stop,double _dl,double _dp,double _m_error,int _data_type,char *out_file_name=NULL);
-	NormalEquSolver(void);
-	// Destructor
-	~NormalEquSolver(void);
-	// Set* functions to use with void contructor
-	void	SetOutFileName(char *_file_name);
-	void	SetMatrixFileName(char *_matrix_file_name);
-	void	SetMatrix(NormalMatrix &_matrix);
-	void	SetLStart(double _l_start);
-	void	SetLEnd(double _l_end);
-	void	SetDeltaL(double _dl);
-	void	SetDeltaP(double _dp);
-	void	SetKeepFile(Bool _keep) {keep=_keep;}
-	void	SetUpdateFunc(void (*_update_func)(void)) {update_func=_update_func;}
-	// Get* functions to get info about this solver
-	char *GetOutFileName(void) {return file_name;}
-	NormalMatrix *	GetMatrix(NormalMatrix &_matrix) {assert(matrix!=NULL);return matrix;}
-	double	GetLStart(void) {return l_start;}
-	double	GetLStop(void) {return l_stop;}
-	double	GetDeltaL(void) {return dl;}
-	double	GetDeltaP(void) {return dp;}
-	Bool	GetKeepFile(void) {return keep;}
-
-	Bool	Done(void) {return done;}
-
-	// Start function
-	void Go(void);
-
+  // Constructors
+  NormalEquSolver(char *_matrix_file_name,double _l_start, 
+		  double _l_stop,double _dl,double _dp,double _m_error,
+		  int _data_type,char *out_file_name=NULL);
+  NormalEquSolver(NormalMatrix _matrix,double _l_start,
+		  double _l_stop,double _dl,double _dp,double _m_error,
+		  int _data_type,char *out_file_name=NULL);
+  NormalEquSolver(void);
+  // Destructor
+  ~NormalEquSolver(void);
+  // Set* functions to use with void contructor
+  void SetOutFileName(char *_file_name);
+  void SetMatrixFileName(char *_matrix_file_name);
+  void SetMatrix(NormalMatrix &_matrix);
+  void SetLStart(double _l_start);
+  void SetLEnd(double _l_end);
+  void SetDeltaL(double _dl);
+  void SetDeltaP(double _dp);
+  void SetKeepFile(Bool _keep) {keep=_keep;}
+  void SetUpdateFunc(void (*_update_func)(void)) {update_func=_update_func;}
+  // Get* functions to get info about this solver
+  char *GetOutFileName(void) {return file_name;}
+  NormalMatrix * GetMatrix(NormalMatrix &_matrix) {assert(matrix!=NULL);return matrix;}
+  double GetLStart(void) {return l_start;}
+  double GetLStop(void) {return l_stop;}
+  double GetDeltaL(void) {return dl;}
+  double GetDeltaP(void) {return dp;}
+  Bool GetKeepFile(void) {return keep;}
+  
+  Bool Done(void) {return done;}
+  
+  // Start function
+  void Go(void);
 };
 
 #define	ROW		0
