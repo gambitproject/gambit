@@ -26,6 +26,93 @@ extern Portion *ArrayToList(const gArray<gRational> &);
 template <class T> Portion *ArrayToList(const gList<T> &);
 template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 
+//----------------
+// ActionProb
+//----------------
+
+Portion *GSM_ActionProb_Float(Portion **param)
+{
+  Portion* por;
+  BehavSolution<double>* bp = 
+    (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
+  Action* a = ((ActionPortion*) param[1])->Value();
+  Infoset* s = a->BelongsTo();
+  EFPlayer* p = s->GetPlayer();
+  BaseEfg* e = p->BelongsTo();
+  
+  int i = 0;
+  int player = 0;
+  int infoset = 0;
+  int action = 0;
+  for(i=1; i<=s->NumActions(); i++)
+    if(s->GetActionList()[i] == a)
+      action = i;
+  for(i=1; i<=p->NumInfosets(); i++)
+    if(p->InfosetList()[i] == s)
+      infoset = i;
+  for(i=1; i<=e->NumPlayers(); i++)
+    if(e->PlayerList()[i] == p)
+      player = i;
+  assert(player > 0);
+  assert(infoset > 0);
+  assert(action > 0);
+
+  if (!s->GetPlayer()->IsChance()) 
+  {
+    por = new FloatValPortion((*bp)(player, infoset, action));
+  }
+  else
+  {
+    por = new FloatValPortion(((ChanceInfoset<double> *) s)->GetActionProbs()[action]);
+  }
+
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
+Portion *GSM_ActionProb_Rational(Portion **param)
+{
+  Portion* por;
+  BehavSolution<gRational>* bp = 
+    (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
+  Action* a = ((ActionPortion*) param[1])->Value();
+  Infoset* s = a->BelongsTo();
+  EFPlayer* p = s->GetPlayer();
+  BaseEfg* e = p->BelongsTo();
+  
+  int i = 0;
+  int player = 0;
+  int infoset = 0;
+  int action = 0;
+  for(i=1; i<=s->NumActions(); i++)
+    if(s->GetActionList()[i] == a)
+      action = i;
+  for(i=1; i<=p->NumInfosets(); i++)
+    if(p->InfosetList()[i] == s)
+      infoset = i;
+  for(i=1; i<=e->NumPlayers(); i++)
+    if(e->PlayerList()[i] == p)
+      player = i;
+  assert(player > 0);
+  assert(infoset > 0);
+  assert(action > 0);
+
+  if (!s->GetPlayer()->IsChance()) 
+  {
+    por = new RationalValPortion((*bp)(player, infoset, action));
+  }
+  else
+  {
+    por = new RationalValPortion(((ChanceInfoset<gRational> *) s)->GetActionProbs()[action]);
+  }
+
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
+
 //------------------
 // ActionValue
 //------------------
@@ -38,7 +125,7 @@ Portion *GSM_ActionValue_Float(Portion **param)
 
   if (s->BelongsTo() != bp->BelongsTo())
     return new ErrorPortion("Solution and infoset must belong to same game");
-  
+
   if (s->GetPlayer()->IsChance())
     return new ErrorPortion("Infoset must belong to personal player");
 
@@ -87,7 +174,7 @@ Portion *GSM_ActionValuesFloat(Portion **param)
 
   if (s->BelongsTo() != bp->BelongsTo())
     return new ErrorPortion("Solution and infoset must belong to same game");
-  
+
   if (s->GetPlayer()->IsChance())
     return new ErrorPortion("Infoset must belong to personal player");
 
@@ -112,7 +199,7 @@ Portion *GSM_ActionValuesRational(Portion **param)
 
   if (s->BelongsTo() != bp->BelongsTo())
     return new ErrorPortion("Solution and infoset must belong to same game");
-  
+
   if (s->GetPlayer()->IsChance())
     return new ErrorPortion("Infoset must belong to personal player");
 
@@ -1806,13 +1893,25 @@ void Init_solfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
+  FuncObj = new FuncDescObj("ActionProb", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionProb_Float, 
+				       porFLOAT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("action", porACTION));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ActionProb_Rational, 
+				       porRATIONAL, 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("action", porACTION));
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("ActionValue", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionValue_Float, 
 				       porFLOAT, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("action", porACTION));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ActionValuesRational, 
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ActionValue_Rational, 
 				       porRATIONAL, 2));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("action", porACTION));
