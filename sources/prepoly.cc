@@ -1,15 +1,13 @@
 //
 // FILE: prepoly.cc  -- Implementation of supporting classes for polynomials
 //
-// @(#)prepoly.cc	2.1 3/27/97
+// $Id$
 //
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
+#include "garray.h"
+
+#ifdef __BORLANDC__
 bool operator!=(const gArray<int> &, const gArray<int> &);
-void gList<gBlock<int> >::Dump(gOutput &) const { };
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
@@ -653,9 +651,9 @@ term_order term_order::WithVariableAppended(const gSpace* ExtendedSpace) const
 
 // INSTATIATIONS OF NEEDED LISTS
 
-TEMPLATE class gList<exp_vect>;
-TEMPLATE class gNode<exp_vect>;
-TEMPLATE gOutput& operator << (gOutput& output, const gList<exp_vect>&);
+template class gList<exp_vect>;
+template class gNode<exp_vect>;
+template gOutput& operator << (gOutput& output, const gList<exp_vect>&);
 
-TEMPLATE class gList<exp_vect*>;
-TEMPLATE class gNode<exp_vect*>;
+template class gList<exp_vect*>;
+template class gNode<exp_vect*>;

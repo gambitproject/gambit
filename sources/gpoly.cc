@@ -1,49 +1,43 @@
 //
 // FILE: gpoly.cc -- Instantiation of gPoly class
 //
-// @(#)gpoly.cc	1.5 19 May 1997
+// $Id$
 //
 
 #include "gpoly.imp"
 #include "double.h"
 #include "rational.h"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
-TEMPLATE class gPoly<gRational>;
+template class gPoly<gRational>;
 #ifndef MINI_POLY
-TEMPLATE gPoly<gRational> operator*(const gRational val, const gPoly<gRational> poly);
-TEMPLATE gPoly<gRational> operator*(const gPoly<gRational> poly, const gRational val);
+template gPoly<gRational> operator*(const gRational val, const gPoly<gRational> poly);
+template gPoly<gRational> operator*(const gPoly<gRational> poly, const gRational val);
 #endif   // MINI_POLY
-TEMPLATE gOutput &operator<<(gOutput &f, const gPoly<gRational> &y);
-TEMPLATE gString &operator<<(gString &, const gPoly<gRational> &);
+template gOutput &operator<<(gOutput &f, const gPoly<gRational> &y);
+template gString &operator<<(gString &, const gPoly<gRational> &);
 
-TEMPLATE class gPoly<double>;
+template class gPoly<double>;
 #ifndef MINI_POLY
-TEMPLATE gPoly<double> operator*(const double val, const gPoly<double> poly);
-TEMPLATE gPoly<double> operator*(const gPoly<double> poly, const double val);
+template gPoly<double> operator*(const double val, const gPoly<double> poly);
+template gPoly<double> operator*(const gPoly<double> poly, const double val);
 #endif   // MINI_POLY
-TEMPLATE gOutput &operator<<(gOutput &f, const gPoly<double> &y);
-TEMPLATE gString &operator<<(gString &, const gPoly<double> &);
+template gOutput &operator<<(gOutput &f, const gPoly<double> &y);
+template gString &operator<<(gString &, const gPoly<double> &);
 
-TEMPLATE class gPoly<gDouble>;
+#ifdef GDOUBLE
+template class gPoly<gDouble>;
 #ifndef MINI_POLY
-TEMPLATE gPoly<gDouble> operator*(const gDouble val, const gPoly<gDouble> poly);
-TEMPLATE gPoly<gDouble> operator*(const gPoly<gDouble> poly, const gDouble val);
+template gPoly<gDouble> operator*(const gDouble val, const gPoly<gDouble> poly);
+template gPoly<gDouble> operator*(const gPoly<gDouble> poly, const gDouble val);
 #endif   // MINI_POLY
-TEMPLATE gOutput &operator<<(gOutput &f, const gPoly<gDouble> &y);
-TEMPLATE gString &operator<<(gString &, const gPoly<gDouble> &);
-
+template gOutput &operator<<(gOutput &f, const gPoly<gDouble> &y);
+template gString &operator<<(gString &, const gPoly<gDouble> &);
+#endif   // GDOUBLE
 /*
-TEMPLATE class gPoly<long>;
-TEMPLATE gPoly<long> operator*(const long val, const gPoly<long> poly);
-TEMPLATE gPoly<long> operator*(const gPoly<long> poly, const long val);
-TEMPLATE gOutput &operator<<(gOutput &f, const gPoly<long> &y);
+template class gPoly<long>;
+template gPoly<long> operator*(const long val, const gPoly<long> poly);
+template gPoly<long> operator*(const gPoly<long> poly, const long val);
+template gOutput &operator<<(gOutput &f, const gPoly<long> &y);
 */
 
 /*
@@ -85,6 +79,7 @@ double gPoly<double>::String_Coeff(double nega)
   else return (nega * FromString(Coeff,doub));  
 }
 
+#ifdef GDOUBLE
 gDouble gPoly<gDouble>::String_Coeff(gDouble nega)
 {
   double doub;
@@ -97,6 +92,7 @@ gDouble gPoly<gDouble>::String_Coeff(gDouble nega)
   if (Coeff == "") return (nega);
   else return (nega * (gDouble)FromString(Coeff,doub));  
 }
+#endif   // GDOUBLE
 
 gRational gPoly<gRational>::String_Coeff(gRational nega)
 {
@@ -116,27 +112,30 @@ gRational gPoly<gRational>::String_Coeff(gRational nega)
 #include "garray.imp"
 #include "gblock.imp"
 
-TEMPLATE class gArray< gPoly< int > * >;
-TEMPLATE class gArray< gPoly< double > * >;
-TEMPLATE class gArray< gPoly< gRational > *>;
-TEMPLATE class gArray< Variable * >;
+template class gArray< gPoly< int > * >;
+template class gArray< gPoly< double > * >;
+template class gArray< gPoly< gRational > *>;
+template class gArray< Variable * >;
 
-TEMPLATE class gBlock<Variable *>;
+template class gBlock<Variable *>;
 
-TEMPLATE class gList< gPoly<int> * >;
-TEMPLATE class gNode< gPoly<int> * >;
-TEMPLATE class gList< gPoly<gRational> * >;
-TEMPLATE class gNode< gPoly<gRational> * >;
-TEMPLATE class gList< gPoly<double> * >;
-TEMPLATE class gNode< gPoly<double> * >;
-//TEMPLATE class gList<gDouble>;
-//TEMPLATE class gNode<gDouble>;
-TEMPLATE class gList< gPoly<gDouble> * >;
-TEMPLATE class gNode< gPoly<gDouble> * >;
-TEMPLATE class gList< gPoly<gDouble> >;
-TEMPLATE class gNode< gPoly<gDouble> >;
-//TEMPLATE class gList< gPoly<long> * >;
-//TEMPLATE class gNode< gPoly<long> * >;
+template class gList< gPoly<int> * >;
+template class gNode< gPoly<int> * >;
+template class gList< gPoly<gRational> * >;
+template class gNode< gPoly<gRational> * >;
+template class gList< gPoly<double> * >;
+template class gNode< gPoly<double> * >;
+//template class gList<gDouble>;
+//template class gNode<gDouble>;
+#ifdef GDOUBLE
+template class gList< gPoly<gDouble> * >;
+template class gNode< gPoly<gDouble> * >;
+template class gList< gPoly<gDouble> >;
+template class gNode< gPoly<gDouble> >;
+#endif   // GDOUBLE
+
+//template class gList< gPoly<long> * >;
+//template class gNode< gPoly<long> * >;
 
 
 

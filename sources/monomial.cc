@@ -1,7 +1,7 @@
 //
 // FILE: monomial.cc -- Instantiation of gMono classes
 //
-// @(#)monomial.cc	1.6 13 Jun 1997
+// $Id$
 //
 
 #include "monomial.imp"
@@ -10,36 +10,33 @@
 #include "garray.imp"
 #include "gblock.imp"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
 //TEMPLATE class gArray<gDouble>;
 //TEMPLATE class gBlock<gDouble>;
 
-TEMPLATE class gMono<int>;
-TEMPLATE gOutput& operator << (gOutput& output, const gMono<int>& x);
+template class gMono<int>;
+template gOutput& operator << (gOutput& output, const gMono<int>& x);
 
-TEMPLATE class gMono<double>;
-TEMPLATE gOutput& operator << (gOutput& output, const gMono<double>& x);
+template class gMono<double>;
+template gOutput& operator << (gOutput& output, const gMono<double>& x);
 
-TEMPLATE class gMono<gRational>;
-TEMPLATE gOutput& operator << (gOutput& output, const gMono<gRational>& x);
+template class gMono<gRational>;
+template gOutput& operator << (gOutput& output, const gMono<gRational>& x);
 
-TEMPLATE class gMono<gDouble>;
-TEMPLATE gOutput& operator << (gOutput& output, const gMono<gDouble>& x);
+#ifdef GDOUBLE
+template class gMono<gDouble>;
+template gOutput& operator << (gOutput& output, const gMono<gDouble>& x);
+#endif   // GDOUBLE
 
-TEMPLATE class gList< gMono<int> >;
-TEMPLATE class gNode< gMono<int> >;
+template class gList< gMono<int> >;
+template class gNode< gMono<int> >;
 
-TEMPLATE class gList< gMono<double> >;
-TEMPLATE class gNode< gMono<double> >;
+template class gList< gMono<double> >;
+template class gNode< gMono<double> >;
 
-TEMPLATE class gList< gMono<gRational> >;
-TEMPLATE class gNode< gMono<gRational> >;
+template class gList< gMono<gRational> >;
+template class gNode< gMono<gRational> >;
 
-TEMPLATE class gList< gMono<gDouble> >;
-TEMPLATE class gNode< gMono<gDouble> >;
+#ifdef GDOUBLE
+template class gList< gMono<gDouble> >;
+template class gNode< gMono<gDouble> >;
+#endif   // GDOUBLE
