@@ -20,45 +20,50 @@ template class gStack<Node *>;
 %name EfgFileReader
 
 %define MEMBERS    gInput &infile; \
-                   gString last_name;  gNumber last_number;  \
+                   gString last_name, last_poly;  gNumber last_number;  \
                    int last_int, iset_idx; \
+		   bool polymode; \
                    Efg *& E; \
+		   gString title, comment; \
                    gStack<Node *> path; \
-                   gList<gString> actions; \
-                   gList<gNumber> values; \
+                   gList<gString> actions, players, params; \
+                   gList<gPoly<gNumber> > values; \
                    EFPlayer *player; Infoset *infoset; EFOutcome *outcome; \
                    int i;  gString iset_name, outc_name; \
                    virtual ~EfgFileReader(); \
                    EFOutcome *NewOutcome(void); \
                    void SetOutcome(EFOutcome *, \
-			           const gList<gNumber> &); \
+			           const gList<gPoly<gNumber> > &); \
                    void SetActionProbs(Infoset *, \
-			               const gList<gNumber> &); \
+			               const gList<gPoly<gNumber> > &); \
                    bool CheckActionProbs(Infoset *, \
-					 const gList<gNumber> &);\
+					 const gList<gPoly<gNumber> > &);\
                    bool CheckOutcome(EFOutcome *, \
-				     const gList<gNumber> &); \
-		   int Parse(void);
+				     const gList<gPoly<gNumber> > &); \
+	           bool ExistsVariable(const gString &); \
+		   int Parse(void); \
+                   void CreateEfg(void);
 
 
 %define CONSTRUCTOR_PARAM    gInput &f, Efg *& e
 
-%define CONSTRUCTOR_INIT     : infile(f), E(e), path(32)
+%define CONSTRUCTOR_INIT     : infile(f), polymode(false), E(e), path(32)
 
 %token LBRACE
 %token RBRACE
 %token SLASH
 
 %token NAME
+%token VARNAME
 %token NUMBER
 
 %%
 
-efgfile:           header  { path.Push(E->RootNode()); }
+efgfile:           header  { CreateEfg(); path.Push(E->RootNode()); }
                    body    { E->Reindex();  return 0; }
        ;
 
-header:            NAME  { E->SetTitle(last_name); }  playerlist commentopt
+header:            NAME  { title = last_name; }  playerlist paramsopt commentopt
       ;
 
 playerlist:        LBRACE RBRACE
@@ -68,11 +73,19 @@ players:           player
        |           players player
        ;
 
-player:            NAME   { E->NewPlayer()->SetName(last_name); }
+player:            NAME   { players.Append(last_name); }
       ;
 
+paramsopt:        
+         |         LBRACE paramlist RBRACE
+         ;
+
+paramlist:         NAME   { params.Append(last_name); }
+         |         paramlist NAME  { params.Append(last_name); }
+         ;
+
 commentopt:        
-          |        NAME   { E->SetComment(last_name); }
+          |        NAME   { comment = last_name; }
           ;
 
 body:              node
@@ -184,7 +197,10 @@ actionproblist:    actionprob
               ;
 
 actionprob:        NAME NUMBER
-                   { actions.Append(last_name); values.Append(last_number); }
+                   { actions.Append(last_name); 
+                     values.Append(gPoly<gNumber>(E->Parameters(),
+     						  last_number,
+ 						  E->ParamOrder())); }	
           ;
  
 outcome_number:    NUMBER
@@ -196,8 +212,11 @@ outcome_number:    NUMBER
               ;
 
 outcome_info:      { if (!outcome && last_int != 0)  YYERROR; }
-            |      outcome_name LBRACE { values.Flush(); } payofflist RBRACE
-                   { if (values.Length() != E->NumPlayers())   YYERROR;
+            |      outcome_name LBRACE 
+                   { values.Flush(); polymode = true; } payofflist
+                   RBRACE
+                   { polymode = false;
+                     if (values.Length() != E->NumPlayers())   YYERROR;
 		     if (!outcome)   {
 		       outcome = E->CreateOutcomeByIndex(last_int);
 		       outcome->SetName(outc_name);
@@ -217,12 +236,46 @@ payofflist:        payoff
           |        payofflist commaopt payoff
           ;
 
-payoff:            NUMBER  { values.Append(last_number); }   
-      ;
-
 commaopt:          
         |          ','
         ;
+
+payoff:            NUMBER 
+    { values.Append(gPoly<gNumber>(E->Parameters(), last_number, E->ParamOrder())); }
+      |            polynomial 
+    { values.Append(gPoly<gNumber>(E->Parameters(), last_poly, E->ParamOrder())); gout << last_poly << '\n'; last_poly = ""; }
+      |            NUMBER '+'
+    { last_poly = ToString(last_number) + " + "; }
+                  polynomial
+    { values.Append(gPoly<gNumber>(E->Parameters(), last_poly, E->ParamOrder())); gout << last_poly << '\n'; last_poly = ""; }
+      |            NUMBER '-'
+    { last_poly = ToString(last_number) + " - "; }
+                  polynomial
+    { values.Append(gPoly<gNumber>(E->Parameters(), last_poly, E->ParamOrder())); gout << last_poly << '\n'; last_poly = ""; }
+      ;
+
+polynomial:        polyterm
+          |        polynomial '+' { last_poly += "+ "; } polyterm
+          |        polynomial '-' { last_poly += "- "; } polyterm
+          ;
+
+polyterm:          NUMBER { last_poly += ToString(last_number) + ' '; }
+                   variables
+        ;
+
+variables:         variable
+         |         variables variable
+         ;
+
+variable:          varname
+                   { last_poly += ' '; }
+        |          varname '^' NUMBER
+                   { last_poly += "^" + ToString(last_number) + ' '; }
+        ;
+
+varname:           VARNAME
+                   { if (!ExistsVariable(last_name))  YYERROR;
+                     last_poly += last_name; }
 
 %%
 
@@ -263,7 +316,18 @@ int EfgFileReader::yylex(void)
       break;
   }
 
-  if (isalpha(c))   return c;
+  if (isalpha(c))   {
+    if (!polymode) 
+      return c;	
+    last_name = c;
+    infile >> c;
+    while (isalpha(c))   {
+      last_name += c;
+      infile >> c;
+    }  
+    infile.unget(c);
+    return VARNAME;
+  }   
 
   if (c == '"')  {
     infile.unget(c);
@@ -278,6 +342,17 @@ int EfgFileReader::yylex(void)
   }
   
   switch (c)   {
+    case '-':  infile >> c;
+               if (isdigit(c))  {
+                 infile.unget(c);
+                 infile >> last_number;
+		 last_number = -last_number;
+                 return NUMBER;
+               }
+               else  {
+                 infile.unget(c);
+                 return '-';
+               }
     case '{':  return LBRACE;
     case '}':  return RBRACE;
     default:   return c;
@@ -292,30 +367,42 @@ EFOutcome *EfgFileReader::NewOutcome(void)
   return E->NewOutcome();
 }
 
-void EfgFileReader::SetOutcome(EFOutcome *c, const gList<gNumber> &p)
+void EfgFileReader::SetOutcome(EFOutcome *c, const gList<gPoly<gNumber> > &p)
 {
   for (int i = 1; i <= p.Length(); i++)
-    E->SetPayoff(c, i, gPoly<gNumber>(E->Parameters(), p[i], E->ParamOrder()));
+    E->SetPayoff(c, i, p[i]);
 }
 
-void EfgFileReader::SetActionProbs(Infoset *s, const gList<gNumber> &p)
+void EfgFileReader::SetActionProbs(Infoset *s,
+	 			   const gList<gPoly<gNumber> > &p)
 {
+  gArray<gNumber> zeroes(E->Parameters()->Dmnsn());
   for (int i = 1; i <= p.Length(); i++)
-    E->SetChanceProb(s, i, p[i]);
+    E->SetChanceProb(s, i, p[i].Evaluate(zeroes));
 }
 
-bool EfgFileReader::CheckActionProbs(Infoset *s, const gList<gNumber> &p)
+bool EfgFileReader::CheckActionProbs(Infoset *s, 
+                                     const gList<gPoly<gNumber> > &p)
 {
+  gArray<gNumber> zeroes(E->Parameters()->Dmnsn());	
   for (int i = 1; i <= p.Length(); i++)
-    if (E->GetChanceProb(s, i) != p[i])  return false;
+    if (E->GetChanceProb(s, i) != p[i].Evaluate(zeroes))  return false;
   return true;
 }
 
-bool EfgFileReader::CheckOutcome(EFOutcome *c, const gList<gNumber> &p)
+bool EfgFileReader::CheckOutcome(EFOutcome *c, const gList<gPoly<gNumber> > &p)
 {
   for (int i = 1; i <= p.Length(); i++)
-    if (E->Payoff(c, i) != gPoly<gNumber>(E->Parameters(), p[i], E->ParamOrder()))   return false;
+    if (E->Payoff(c, i) != p[i])   return false;
   return true;
+}
+
+bool EfgFileReader::ExistsVariable(const gString &varname)
+{
+  for (int var = 1; var <= E->Parameters()->Dmnsn(); var++)
+    if (E->Parameters()->GetVariableName(var) == varname)
+      return true;
+  return false;
 }
 
 int EfgFileReader::Parse(void)
@@ -333,13 +420,23 @@ int EfgFileReader::Parse(void)
   return yyparse();
 }
 
+void EfgFileReader::CreateEfg(void)
+{
+  gSpace *space = new gSpace(params.Length());
+  for (int var = 1; var <= params.Length(); var++)
+    space->SetVariableName(var, params[var]);
+  ORD_PTR ord = &lex;
+  E = new Efg(space, new term_order(space, ord));
+
+  E->SetTitle(title);
+  E->SetComment(comment);
+  for (int pl = 1; pl <= players.Length(); pl++)
+    E->NewPlayer()->SetName(players[pl]);
+}	
+
 int ReadEfgFile(gInput &f, Efg *& E)
 {
   assert(!E);
-
-  gSpace *space = new gSpace;
-  ORD_PTR ord = &lex;
-  E = new Efg(space, new term_order(space, ord));
 
   EfgFileReader R(f, E);
   
