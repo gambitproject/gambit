@@ -638,10 +638,10 @@ bool GSM::_BinaryOperation( const gString& funcname )
   _Push( p2 );
   _Push( p1 );
   
-  prog.Append( new class :: InitCallFunction( funcname ) );
-  prog.Append( new class :: Bind );
-  prog.Append( new class :: Bind );
-  prog.Append( new class :: CallFunction );
+  prog.Append( new /* class */ ::InitCallFunction( funcname ) );
+  prog.Append( new /* class */ ::Bind );
+  prog.Append( new /* class */ ::Bind );
+  prog.Append( new /* class */ ::CallFunction );
   result = Execute( prog );
 
   if( result == rcSUCCESS )
@@ -670,9 +670,9 @@ bool GSM::_UnaryOperation( const gString& funcname )
   assert( _Depth() >= 1 );
 #endif // NDEBUG
 
-  prog.Append( new class :: InitCallFunction( funcname ) );
-  prog.Append( new class :: Bind );
-  prog.Append( new class :: CallFunction );
+  prog.Append( new /*class*/ :: InitCallFunction( funcname ) );
+  prog.Append( new /*class*/ :: Bind );
+  prog.Append( new /*class*/ :: CallFunction );
   result = Execute( prog );
 
   if( result == rcSUCCESS )
@@ -1485,10 +1485,10 @@ void GSM::_ErrorMessage
 (
  gOutput&        s,
  const int       error_num,
- const long& num1, 
- const long& num2,
+ const long& /*num1*/, 
+ const long& /*num2*/,
  const gString&  str1,
- const gString&  str2
+ const gString& /*str2*/
  )
 {
 #if 0

@@ -61,7 +61,7 @@ class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
 //----------------------------------------------------------------------
 
 template <class T>
-EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &P)
+EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &)
   : gBFunctMin<T>(EF.ProfileLength()), niters(0), nevals(0), E(EF),
     p(EF, false), pp(EF, false), cpay(EF.Dimensionality()),
     xi(p.Length(), p.Length())
@@ -70,7 +70,7 @@ EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &P)
 }
 
 template <class T>
-EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &P,
+EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &,
 			  const BehavProfile<T> &start)
   : gBFunctMin<T>(EF.ProfileLength()), niters(0), nevals(0), E(EF),
     p(EF, false), pp(EF,false), cpay(EF.Dimensionality()),
@@ -125,7 +125,8 @@ template <class T> void EFLiapFunc<T>::Randomize(void)
     for(int j=1;j<=player->NumInfosets();j++) {
       sum = (T) 0;
       Infoset *s = player->InfosetList()[j];
-      for (int k = 1; k < s->NumActions(); k++)  {
+      int k;
+      for (k = 1; k < s->NumActions(); k++)  {
 	do
 	  tmp = (T) Uniform();
 	while (tmp + sum > (T) 1);
@@ -161,7 +162,8 @@ template <class T> T EFLiapFunc<T>::Value(const gVector<T> &v)
     for(int j=1;j<=player->NumInfosets();j++) {
       avg = sum = (T) 0;
       Infoset *s = player->InfosetList()[j];
-      for (int k = 1; k <= s->NumActions(); k++) {
+      int k;
+      for (k = 1; k <= s->NumActions(); k++) {
 	x = p(i, j, k); 
 	avg += (x * cpay(i, j, k));
 	sum += x;
