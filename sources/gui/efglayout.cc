@@ -157,12 +157,14 @@ void NodeEntry::DrawIncomingBranch(wxDC &p_dc) const
     p_dc.DrawLine(xStart, yStart, xEnd, yEnd);
 
     // Draw in the highlight indicating action probabilities
-    p_dc.SetPen(*wxBLACK_PEN);
-    p_dc.DrawLine(xStart, yStart, 
-		  xStart +
-		  (int) ((double) (xEnd - xStart) * (double) m_actionProb),
-		  yStart +
-		  (int) ((double) (xEnd - xStart) * (double) m_actionProb));
+    if (m_actionProb >= gNumber(0)) {
+      p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxSOLID));
+      p_dc.DrawLine(xStart, yStart, 
+		    xStart +
+		    (int) ((double) (xEnd - xStart) * (double) m_actionProb),
+		    yStart +
+		    (int) ((double) (yEnd - yStart) * (double) m_actionProb));
+    }
 
     int textWidth, textHeight;
     p_dc.SetFont(m_branchAboveFont);
@@ -227,12 +229,14 @@ void NodeEntry::DrawIncomingBranch(wxDC &p_dc) const
     p_dc.DrawLine(xStart + m_branchLength, yEnd, xEnd, yEnd);
     
     // Draw in the highlight indicating action probabilities
-    p_dc.SetPen(*wxBLACK_PEN);
-    p_dc.DrawLine(xStart, yStart, 
-		  xStart + 
-		  (int) ((double) m_branchLength * (double) m_actionProb),
-		  yStart + 
-		  (int) ((double) (yEnd - yStart) * (double) m_actionProb));
+    if (m_actionProb >= gNumber(0)) {
+      p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxSOLID));
+      p_dc.DrawLine(xStart, yStart, 
+		    xStart + 
+		    (int) ((double) m_branchLength * (double) m_actionProb),
+		    yStart + 
+		    (int) ((double) (yEnd - yStart) * (double) m_actionProb));
+    }
 
     int textWidth, textHeight;
     p_dc.SetFont(m_branchAboveFont);
@@ -929,6 +933,8 @@ void efgTreeLayout::GenerateLabels(void)
       entry->SetBranchAboveFont(settings.BranchAboveFont());
       entry->SetBranchBelowLabel(CreateBranchBelowLabel(entry));
       entry->SetBranchBelowFont(settings.BranchBelowFont());
+      entry->SetActionProb(m_parent->Parent()->ActionProb(entry->GetNode()->GetParent(),
+							  entry->child_number));
     }
   }
 }

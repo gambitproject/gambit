@@ -314,7 +314,7 @@ EfgShow::~EfgShow()
 void EfgShow::ChangeProfile(int sol)
 {
   m_currentProfile = sol;
-  m_treeWindow->Refresh();
+  m_treeWindow->RefreshLabels();
   if (m_navigateWindow) {
     m_navigateWindow->Set(m_treeWindow->Cursor());
   }

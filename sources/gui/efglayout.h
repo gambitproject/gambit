@@ -114,6 +114,9 @@ public:
   const wxFont &GetBranchBelowFont(void) const { return m_branchBelowFont; }
   void SetBranchBelowFont(const wxFont &p_font) { m_branchBelowFont = p_font; }
 
+  const gNumber &GetActionProb(void) const { return m_actionProb; }
+  void SetActionProb(const gNumber &p_prob) { m_actionProb = p_prob; }
+
   int GetX(void) const;
 
   bool NodeHitTest(int p_x, int p_y) const;
