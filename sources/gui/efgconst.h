@@ -1,17 +1,21 @@
 //
-// FILE: efgconst.h -- constants used in extensive form windows 
-//                     for menu items and various features
+// $Source$
+// $Date$
+// $Revision$
 //
-//  $Id$
+// DESCRIPTION:
+// Declaration of constants used for extensive form menu items
 //
 
 #ifndef EFGCONST_H
 #define EFGCONST_H
 
 typedef enum {
+  efgmenuEDIT_INSERT = 1100,
+  efgmenuEDIT_DELETE = 1101,
+
   efgmenuEDIT_NODE = 900,
   efgmenuEDIT_NODE_ADD = 1105,
-  efgmenuEDIT_NODE_DELETE = 1108,
   efgmenuEDIT_NODE_INSERT = 1109,
   efgmenuEDIT_NODE_LABEL = 1110,
   efgmenuEDIT_NODE_SET_MARK = 1112,
@@ -42,7 +46,6 @@ typedef enum {
   efgmenuEDIT_OUTCOMES_NEW = 1326,
 
   efgmenuEDIT_TREE = 930,
-  efgmenuEDIT_TREE_DELETE = 1302,
   efgmenuEDIT_TREE_COPY = 1303,
   efgmenuEDIT_TREE_INSERT = 1304,
   efgmenuEDIT_TREE_MOVE = 1307,
@@ -60,7 +63,6 @@ typedef enum {
   efgmenuFORMAT_LEGEND = 1604,
   efgmenuFORMAT_SAVE = 1605,
   efgmenuFORMAT_LOAD = 1606,
-  efgmenuFORMAT_REDRAW = 1611,  // accelerator only (?)
   efgmenuFORMAT_FONTS = 1612,
   efgmenuFORMAT_FONTS_ABOVENODE = 1613,
   efgmenuFORMAT_FONTS_BELOWNODE = 1614,

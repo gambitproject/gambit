@@ -72,8 +72,10 @@ private:
   void OnFileExit(wxCommandEvent &);
   void OnFileMRUFile(wxCommandEvent &);
 
+  void OnEditInsert(wxCommandEvent &);
+  void OnEditDelete(wxCommandEvent &);
+
   void OnEditNodeAdd(wxCommandEvent &);
-  void OnEditNodeDelete(wxCommandEvent &);
   void OnEditNodeInsert(wxCommandEvent &);
   void OnEditNodeLabel(wxCommandEvent &);
   void OnEditNodeSetMark(wxCommandEvent &);
@@ -100,7 +102,6 @@ private:
   void OnEditOutcomesNew(wxCommandEvent &);
   void OnEditOutcomesDelete(wxCommandEvent &);
 
-  void OnEditTreeDelete(wxCommandEvent &);
   void OnEditTreeCopy(wxCommandEvent &);
   void OnEditTreeMove(wxCommandEvent &);
   void OnEditTreeInfosets(wxCommandEvent &);

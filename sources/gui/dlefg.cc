@@ -1,14 +1,16 @@
 //
-// FILE: dlefg.cc -- Extensive form-related dialog implementations
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of dialogs for extensive form window
 //
 
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
-#include "wx/sizer.h"
 
 #include "guishare/wxmisc.h"
 
@@ -19,7 +21,7 @@
 
 #include "dlefgplayer.h"
 #include "dlmoveadd.h"
-#include "dlnodedelete.h"
+#include "dlefgdelete.h"
 #include "dlactionlabel.h"
 #include "dlactionselect.h"
 #include "dlactionprobs.h"
@@ -227,26 +229,33 @@ int dialogMoveAdd::GetActions(void) const
 }
 
 //=========================================================================
-//                   dialogNodeDelete: Member functions
+//                   dialogEfgDelete: Member functions
 //=========================================================================
 
-
-dialogNodeDelete::dialogNodeDelete(Node *p_node, wxWindow *p_parent)
-  : guiAutoDialog(p_parent, "Delete Node"), m_node(p_node)
+dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, Node *p_node)
+  : wxDialog(p_parent, -1, "Delete..."), m_node(p_node)
 {
   m_branchList = new wxListBox(this, -1);
-  for (int  act = 1; act <= m_node->Game()->NumChildren(m_node); act++) {
+  for (int act = 1; act <= m_node->Game()->NumChildren(m_node); act++) {
     m_branchList->Append((char *) (ToText(act) + ": " + 
 				   m_node->GetInfoset()->Actions()[act]->GetName()));
   }
   m_branchList->SetSelection(0);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(new wxStaticText(this, -1, "Keep subtree at branch"), 0, wxCENTRE | wxALL, 5);
-  topSizer->Add(m_branchList, 0, wxCENTRE | wxALL, 5);
-  topSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
+  topSizer->Add(new wxStaticText(this, -1, "Keep subtree after action"),
+		0, wxCENTER | wxALL, 5);
+  topSizer->Add(m_branchList, 0, wxCENTER | wxALL, 5);
 
-  SetAutoLayout(TRUE);
+  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  okButton->SetDefault();
+  buttonSizer->Add(okButton, 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  topSizer->Add(buttonSizer, 0, wxCENTER | wxALL, 5);
+
+  SetAutoLayout(true);
   SetSizer(topSizer); 
   topSizer->Fit(this);
   topSizer->SetSizeHints(this); 

@@ -40,7 +40,7 @@
 
 #include "dlefgplayer.h"
 #include "dlmoveadd.h"
-#include "dlnodedelete.h"
+#include "dlefgdelete.h"
 #include "dlefgoutcome.h"
 #include "dlefgpayoff.h"
 #include "dlefgreveal.h"
@@ -91,8 +91,9 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(wxID_PRINT, EfgShow::OnFilePrint)
   EVT_MENU(wxID_EXIT, EfgShow::OnFileExit)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, EfgShow::OnFileMRUFile)
+  EVT_MENU(efgmenuEDIT_INSERT, EfgShow::OnEditInsert)
+  EVT_MENU(efgmenuEDIT_DELETE, EfgShow::OnEditDelete)
   EVT_MENU(efgmenuEDIT_NODE_ADD, EfgShow::OnEditNodeAdd)
-  EVT_MENU(efgmenuEDIT_NODE_DELETE, EfgShow::OnEditNodeDelete)
   EVT_MENU(efgmenuEDIT_NODE_INSERT, EfgShow::OnEditNodeInsert)
   EVT_MENU(efgmenuEDIT_NODE_LABEL, EfgShow::OnEditNodeLabel)
   EVT_MENU(efgmenuEDIT_NODE_SET_MARK, EfgShow::OnEditNodeSetMark)
@@ -115,7 +116,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuEDIT_OUTCOMES_PAYOFFS, EfgShow::OnEditOutcomesPayoffs)
   EVT_MENU(efgmenuEDIT_OUTCOMES_NEW, EfgShow::OnEditOutcomesNew)
   EVT_MENU(efgmenuEDIT_OUTCOMES_DELETE, EfgShow::OnEditOutcomesDelete)
-  EVT_MENU(efgmenuEDIT_TREE_DELETE, EfgShow::OnEditTreeDelete)
   EVT_MENU(efgmenuEDIT_TREE_COPY, EfgShow::OnEditTreeCopy)
   EVT_MENU(efgmenuEDIT_TREE_MOVE, EfgShow::OnEditTreeMove)
   EVT_MENU(efgmenuEDIT_TREE_INFOSETS, EfgShow::OnEditTreeInfosets)
@@ -293,6 +293,7 @@ EfgShow::EfgShow(FullEfg &p_efg, wxWindow *p_parent)
   // Force this at end to make sure item is unchecked; under MSW,
   // the ordering of events in creating the window leaves this checked
   GetMenuBar()->Check(efgmenuVIEW_NAVIGATION, false);
+  UpdateMenus();
 }
 
 EfgShow::~EfgShow()
@@ -580,11 +581,12 @@ void EfgShow::MakeMenus(void)
   editMenu->Enable(wxID_COPY, false);
   editMenu->Enable(wxID_PASTE, false);
   editMenu->AppendSeparator();
+  editMenu->Append(efgmenuEDIT_INSERT, "&Insert", "Insert a move");
+  editMenu->Append(efgmenuEDIT_DELETE, "&Delete...", "Delete an object");
+  editMenu->AppendSeparator();
 
   wxMenu *nodeMenu = new wxMenu;
   nodeMenu->Append(efgmenuEDIT_NODE_ADD, "&Add Move", "Add a move");
-  nodeMenu->Append(efgmenuEDIT_NODE_DELETE, "&Delete Move",
-		   "Remove move at cursor");
   nodeMenu->Append(efgmenuEDIT_NODE_INSERT, "&Insert Move",
 		   "Insert move at cursor");
   nodeMenu->Append(efgmenuEDIT_NODE_LABEL, "&Label", "Label cursor node");
@@ -640,8 +642,6 @@ void EfgShow::MakeMenus(void)
 		   "Copy tree from marked node");
   treeMenu->Append(efgmenuEDIT_TREE_MOVE, "&Move",
 		   "Move tree from marked node");
-  treeMenu->Append(efgmenuEDIT_TREE_DELETE, "&Delete",
-		   "Delete recursively from cursor");
   treeMenu->Append(efgmenuEDIT_TREE_INFOSETS, "&Infosets",
 		   "Edit/View infosets");
 
@@ -842,10 +842,11 @@ void EfgShow::UpdateMenus(void)
   Node *cursor = Cursor(), *markNode = m_treeWindow->MarkNode();
   wxMenuBar *menuBar = GetMenuBar();
 
+  menuBar->Enable(efgmenuEDIT_DELETE,
+		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
+
   menuBar->Enable(efgmenuEDIT_NODE_ADD,
 		  (!cursor || m_efg.NumChildren(cursor) > 0) ? false : true);
-  menuBar->Enable(efgmenuEDIT_NODE_DELETE,
-		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_NODE_INSERT, (cursor) ? true : false);
   menuBar->Enable(efgmenuEDIT_NODE_LABEL, (cursor) ? true : false);
   menuBar->Enable(efgmenuEDIT_NODE_SET_MARK, (cursor) ? true : false);
@@ -885,8 +886,6 @@ void EfgShow::UpdateMenus(void)
 		  (cursor && cursor->GetInfoset() &&
 		   cursor->GetPlayer()->IsChance()) ? true : false);
 
-  menuBar->Enable(efgmenuEDIT_TREE_DELETE,
-		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_TREE_COPY,
 		  (markNode && cursor &&
 		   cursor->GetSubgameRoot() == markNode->GetSubgameRoot()) ? true : false);
@@ -1088,6 +1087,38 @@ void EfgShow::OnFileMRUFile(wxCommandEvent &p_event)
 }
 
 //----------------------------------------------------------------------
+//                EfgShow: Menu handlers - Edit menu
+//----------------------------------------------------------------------
+
+void EfgShow::OnEditInsert(wxCommandEvent &)
+{
+
+}
+
+void EfgShow::OnEditDelete(wxCommandEvent &)
+{
+  try {
+    dialogEfgDelete dialog(this, Cursor());
+
+    if (dialog.ShowModal() == wxID_OK) {
+      if (dialog.DeleteTree()) {
+	m_efg.DeleteTree(Cursor());
+	m_efg.DeleteEmptyInfosets();
+      }
+      else {
+	Node *keep = dialog.KeepNode();
+	m_treeWindow->SetCursorPosition(m_efg.DeleteNode(Cursor(), keep));
+      }
+      m_treeWindow->RefreshTree();
+      m_treeWindow->RefreshLayout();
+    }
+  }
+  catch (gException &ex) {
+    guiExceptionDialog(ex.Description(), this);
+  }
+}
+
+//----------------------------------------------------------------------
 //             EfgShow: Menu handlers - Edit->Node menu
 //----------------------------------------------------------------------
 
@@ -1122,21 +1153,6 @@ void EfgShow::OnEditNodeAdd(wxCommandEvent &)
     catch (gException &ex) {
       guiExceptionDialog(ex.Description(), this);
     }
-  }
-}
-
-void EfgShow::OnEditNodeDelete(wxCommandEvent &)
-{
-  try {
-    dialogNodeDelete dialog(Cursor(), this);
-
-    if (dialog.ShowModal() == wxID_OK) {
-      Node *keep = dialog.KeepNode();
-      m_treeWindow->SetCursorPosition(m_efg.DeleteNode(Cursor(), keep));
-    }
-  }
-  catch (gException &ex) {
-    guiExceptionDialog(ex.Description(), this);
   }
 }
 
@@ -1470,21 +1486,6 @@ void EfgShow::OnEditInfosetReveal(wxCommandEvent &)
 //----------------------------------------------------------------------
 //           EfgShow: Menu handlers - Edit->Tree menu
 //----------------------------------------------------------------------
-
-void EfgShow::OnEditTreeDelete(wxCommandEvent &)
-{
-  wxMessageDialog dialog(this, "Delete the whole subtree?", "Confirm");
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      m_efg.DeleteTree(Cursor());
-      m_efg.DeleteEmptyInfosets();
-    }
-    catch (gException &ex) {
-      guiExceptionDialog(ex.Description(), this);
-    }
-  }
-}
 
 void EfgShow::OnEditTreeCopy(wxCommandEvent &)
 {
