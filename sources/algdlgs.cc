@@ -32,10 +32,10 @@ Bool wxGetResourceStr(char *section, char *entry, char *value, char *file)
 //            dialogAlgorithm: Member function definitions
 //========================================================================
 
-dialogAlgorithm::dialogAlgorithm(const gText &label,
-                                       wxWindow *parent, 
-                                       const char */*help_str*/)
-  : wxDialogBox(parent, label, TRUE), m_depthChoice(0), m_typeChoice(0),
+dialogAlgorithm::dialogAlgorithm(const gText &p_label,
+				 wxWindow *p_parent, 
+				 const char */*help_str*/)
+  : wxDialogBox(p_parent, p_label, TRUE), m_depthChoice(0), m_typeChoice(0),
     m_methodChoice(0), m_markSubgames(0)
 { }
 
@@ -71,12 +71,10 @@ void dialogAlgorithm::OnDepth(void)
 
 void dialogAlgorithm::DominanceFields(bool p_usesNfg)
 {
-  wxMessage *header = new wxMessage(this, "");
-  header->SetLabelFont(new wxFont(12, wxROMAN, wxNORMAL, wxBOLD, false));
   if (p_usesNfg)
-    header->SetLabel("Eliminate dominated mixed strategies");
+    (void) new wxMessage(this, "Eliminate dominated mixed strategies");
   else
-    header->SetLabel("Eliminate dominated behavior strategies");
+    (void) new wxMessage(this, "Eliminate dominated behavior strategies");
   NewLine();
 
   char *depthChoices[] = { "None", "Once", "Iterative" };
@@ -103,8 +101,7 @@ void dialogAlgorithm::DominanceFields(bool p_usesNfg)
 
 void dialogAlgorithm::SubgameFields(void)
 {
-  wxMessage *header = new wxMessage(this, "Subgames");
-  header->SetLabelFont(new wxFont(12, wxROMAN, wxNORMAL, wxBOLD, false));
+  (void) new wxMessage(this, "Subgames");
   NewLine();
 
   m_markSubgames = new wxCheckBox(this, 0, "Mark subgames before solving");
@@ -184,20 +181,45 @@ dialogEnumPure::dialogEnumPure(wxWindow *p_parent, bool p_subgames,
 }
 
 dialogEnumPure::~dialogEnumPure()
-{ }
+{
+  wxWriteResource("Algorithm Params", "EnumPure-stopAfter", StopAfter(),
+		  "gambit.ini");
+}
 
 void dialogEnumPure::AlgorithmFields(void)
 {
-  int x, y;
-  GetCursor(&x, &y);
-
-  wxMessage *header = new wxMessage(this, "");
-  header->SetLabelFont(new wxFont(12, wxROMAN, wxNORMAL, wxBOLD, false));
-  header->SetLabel("Algorithm parameters");
+  wxMessage *header = new wxMessage(this, "Algorithm parameters:");
   NewLine();
-  m_stopAfter = new wxIntegerItem(this, "Stop after", 0);
+
+  int stopAfter = 0;
+  wxGetResource("Algorithm Params", "EnumPure-stopAfter", &stopAfter,
+		"gambit.ini");
+  
+  m_findAll = new wxCheckBox(this, (wxFunction) CallbackAll, "Find all");
+  m_findAll->SetClientData((char *) this);
+
+  m_stopAfter = new wxIntegerItem(this, "Stop after",
+				  (stopAfter > 0) ? stopAfter : 1,
+				  -1, -1, 100, -1);
+
+  if (stopAfter == 0) {
+    m_findAll->SetValue(true);
+    m_stopAfter->Enable(FALSE);
+  }
+
   NewLine();
 }
 
+void dialogEnumPure::OnAll(void)
+{
+  m_stopAfter->Enable(!m_findAll->GetValue());
+}
+
 int dialogEnumPure::StopAfter(void) const
-{ return m_stopAfter->GetInteger(); }
+{
+  if (m_findAll->GetValue())
+    return 0;
+  else
+    return m_stopAfter->GetInteger(); 
+}
+

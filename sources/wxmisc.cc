@@ -1117,9 +1117,13 @@ static bool IsInteger(wxText &p_item)
 
 wxIntegerItem::wxIntegerItem(wxPanel *p_parent, char *p_label, int p_default,
 			     int p_x, int p_y, int p_width, int p_height)
-  : wxText(p_parent, (wxFunction) EventCallback, p_label, ToText(p_default),
+  : wxText(p_parent, (wxFunction) EventCallback, p_label, "",
 	   p_x, p_y, p_width, p_height), m_value(0)
-{ }
+{
+  // Passing a nonempty string to the wxText ctor affects the default
+  // sizing.  So, we set after the fact instead.
+  SetValue(ToText(p_default));
+}
 
 void wxIntegerItem::EventCallback(wxIntegerItem &p_item,
 				  wxCommandEvent &p_event)
