@@ -41,7 +41,7 @@ GAME_OBJECTS = $(GAME_SOURCES:.cc=$(OBJECT_SUFFIX))
 
 EALG_SOURCES = egobit.cc eliap.cc seqform.cc subsolve.cc efgpure.cc efdom.cc \
                efgcsum.cc efbasis.cc epolenum.cc efgensup.cc seqeq.cc \
-	       efgalleq.cc
+	       efgalleq.cc behavextend.cc
 
 EALG_OBJECTS = $(EALG_SOURCES:.cc=$(OBJECT_SUFFIX))
 

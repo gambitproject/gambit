@@ -1034,6 +1034,7 @@ gOutput& operator<<(gOutput&s, const EFSupportWithActiveInfo& e)
 
 
 // Instantiations
+template class gList<EFSupport>;
 template class gList<const EFSupport>;
 template class gList<const EFSupportWithActiveInfo>;
 

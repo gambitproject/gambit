@@ -11,9 +11,6 @@
 #include "math/gdpvect.h"
 #include "efstrat.h"
 
-#include "rectangl.h"
-#include "ineqsolv.h"
-
 class Infoset;
 class Nfg;
 template <class T> class MixedProfile;
@@ -106,76 +103,6 @@ protected:
   void RealizationProbs(const MixedProfile<T> &, const Efg &,
 			int pl, const gArray<int> *const, BehavNode *);
 
-  // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH
-  
-  gPolyList<gDouble> ActionProbsSumToOneIneqs(const gSpace &, 
-					      const term_order &,
-					      const EFSupport &,
-					      const gList<gList<int> > &) const;
-  
-  bool ANFNodeProbabilityPoly(gPoly<gDouble> &,
-			      const gSpace &, 
-			      const term_order &,
-			      const EFSupport &,
-			      const gList<gList<int> > &,
-			      const Node *,
-			      const int &pl,
-			      const int &i,
-			      const int &j) const;
-  
-  gPolyList<gDouble> ANFExpectedPayoffDiffPolys(const gSpace &, 
-						const term_order&,
-						const EFSupport &,
-						const EFSupport &,
-						const gList<gList<int> > &) const;
-  
-  gPolyList<gDouble> ExtendsToANFNashIneqs(const gSpace &, 
-					   const term_order&,
-					   const EFSupport&,
-					   const EFSupport&,
-					   const gList<gList<int> > &) const;
-  
-  // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO BEHAV NASH
-  
-  void DeviationInfosetsRECURSION(gList<const Infoset *> &,
-				  const EFSupport & big_supp,
-				  const EFPlayer *pl,
-				  const Node* node,
-				  const Action *act) const;
-  
-  const gList<const Infoset *> DeviationInfosets(const EFSupport &,
-						 const EFPlayer *,
-						 const Infoset *,
-						 const Action *) const;
-  
-  const gList<const EFSupport> DeviationSupports(const EFSupport &,
-						 const gList<const Infoset*> &,
-						 const EFPlayer *,
-						 const Infoset *,
-						 const Action *) const;
-  
-  bool NashNodeProbabilityPoly(      gPoly<gDouble> &,
-				     const gSpace &, 
-				     const term_order &,
-				     const EFSupport &,
-				     const gList<gList<int> > &,
-				     const Node *,
-				     const EFPlayer *,
-				     const Infoset *,
-				     const Action *) const;
-  
-  gPolyList<gDouble> NashExpectedPayoffDiffPolys(const gSpace &, 
-						 const term_order&,
-						 const EFSupport &,
-						 const EFSupport &,
-						 const gList<gList<int> > &) const;
-  
-  gPolyList<gDouble> ExtendsToNashIneqs(const gSpace &, 
-					const term_order&,
-					const EFSupport&,
-					const EFSupport&,
-					const gList<gList<int> > &) const;
-  
 public:
   class BadStuff : public gException  {
   public:
@@ -255,11 +182,6 @@ public:
   const T &GetActionValue(const Action *act);
   const T &GetRegret(const Action *act);
 
-  // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH, NASH
-
-  bool ExtendsToANFNash(const EFSupport &, const EFSupport &, gStatus &) const;
-  bool ExtendsToNash(const EFSupport &, const EFSupport &, gStatus &) const;
-  
   // COMPUTATION OF INTERESTING QUANTITIES
 
   T Payoff(int p_player) const;
