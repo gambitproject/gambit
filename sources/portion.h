@@ -445,6 +445,7 @@ class Stream_Portion : public Portion
 {
  private:
   gFileOutput* _Value;
+  gString      _FileName;
 
  public:
   Stream_Portion( const gString& filename );
