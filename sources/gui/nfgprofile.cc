@@ -231,9 +231,9 @@ BEGIN_EVENT_TABLE(gbtNfgProfileGrid, wxGrid)
   EVT_GRID_LABEL_RIGHT_CLICK(gbtNfgProfileGrid::OnRightClick)
 END_EVENT_TABLE()
 
-gbtNfgProfileGrid::gbtNfgProfileGrid(gbtGameDocument *p_doc, wxWindow *p_parent)
-  : wxGrid(p_parent, idNFG_SOLUTION_LIST, wxDefaultPosition,
-	   wxDefaultSize),
+gbtNfgProfileGrid::gbtNfgProfileGrid(gbtGameDocument *p_doc, 
+				     wxWindow *p_parent)
+  : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
     gbtGameView(p_doc)
 {
   SetTable(new gbtNfgProfileTable(m_doc), true);
@@ -244,10 +244,12 @@ gbtNfgProfileGrid::gbtNfgProfileGrid(gbtGameDocument *p_doc, wxWindow *p_parent)
   SetSelectionMode(wxGrid::wxGridSelectRows);
 
   m_menu = new wxMenu("Profiles");
-  m_menu->Append(GBT_NFG_MENU_PROFILES_NEW, "New profile", "Create a new profile");
+  m_menu->Append(GBT_NFG_MENU_PROFILES_NEW, "New profile", 
+		 "Create a new profile");
   m_menu->Append(GBT_NFG_MENU_PROFILES_DUPLICATE, "Duplicate profile",
 		 "Duplicate this profile");
-  m_menu->Append(GBT_NFG_MENU_PROFILES_DELETE, "Delete profile", "Delete this profile");
+  m_menu->Append(GBT_NFG_MENU_PROFILES_DELETE, "Delete profile", 
+		 "Delete this profile");
   m_menu->Append(GBT_NFG_MENU_PROFILES_PROPERTIES, "Properties",
 		 "View and edit properties of this profile");
   m_menu->Append(GBT_NFG_MENU_PROFILES_REPORT, "Report",
@@ -259,6 +261,10 @@ gbtNfgProfileGrid::~gbtNfgProfileGrid()
 
 void gbtNfgProfileGrid::OnUpdate(gbtGameView *)
 {
+  SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
+  SetLabelFont(m_doc->GetPreferences().GetLabelFont());
+  SetColLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+
   if (GetRows() > m_doc->AllMixedProfiles().Length())  {
     DeleteRows(0, GetRows() - m_doc->AllMixedProfiles().Length());
   }

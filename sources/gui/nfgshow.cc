@@ -115,8 +115,6 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(GBT_NFG_MENU_PROFILES_DELETE, NfgShow::OnProfilesDelete)
   EVT_MENU(GBT_NFG_MENU_PROFILES_PROPERTIES, NfgShow::OnProfilesProperties)
   EVT_MENU(GBT_NFG_MENU_PROFILES_REPORT, NfgShow::OnProfilesReport)
-  EVT_LIST_ITEM_ACTIVATED(idNFG_SOLUTION_LIST, NfgShow::OnProfilesProperties)
-  EVT_LIST_ITEM_SELECTED(idNFG_SOLUTION_LIST, NfgShow::OnProfileSelected)
   EVT_SIZE(NfgShow::OnSize)
   EVT_CLOSE(NfgShow::OnCloseWindow)
   EVT_SASH_DRAGGED(idINFOWINDOW, NfgShow::OnSashDrag)
@@ -228,11 +226,6 @@ void NfgShow::OnUpdate(gbtGameView *)
 	      m_doc->GetPreferences().OutcomeLabel() == GBT_OUTCOME_LABEL_LABEL);
 }
 
-void NfgShow::OnProfileSelected(wxListEvent &p_event)
-{
-  m_doc->SetCurrentProfile(p_event.GetIndex() + 1);
-}
- 
 //----------------------------------------------------------------------
 //           NfgShow: Creating and updating menus and toolbar
 //----------------------------------------------------------------------

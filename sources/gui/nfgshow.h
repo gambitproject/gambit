@@ -42,8 +42,6 @@
 #include "gambit.h"
 #include "nfgconst.h"
 
-const int idNFG_SOLUTION_LIST = 1900;
-
 class NfgNavigateWindow;
 class NfgOutcomeWindow;
 class NfgSupportWindow;
@@ -123,7 +121,6 @@ private:
   void OnSize(wxSizeEvent &);
   void OnSashDrag(wxSashEvent &);
   void OnSetFocus(wxFocusEvent &);
-  void OnProfileSelected(wxListEvent &);
 
   bool IsEfgView(void) const { return false; }
   bool IsNfgView(void) const { return true; }

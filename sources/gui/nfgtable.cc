@@ -29,6 +29,7 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 #include "wx/config.h"
+#include "wx/tokenzr.h"  // for wxStringTokenizer
 #include "nfgshow.h"
 #include "nfgtable.h"
 #include "nfgconst.h"
@@ -92,7 +93,7 @@ wxSize gbtPayoffVectorRenderer::DoGetBestSize(wxGridCellAttr &p_attr,
   wxCoord x = 0, y = 0;
   p_dc.SetFont(p_attr.GetFont());
   p_dc.GetTextExtent(p_text, &x, &y);
-  return wxSize(x, y);
+  return wxSize(x * 1.10, y * 1.25);
 }
 
 wxSize gbtPayoffVectorRenderer::GetBestSize(wxGrid &p_grid,
@@ -125,27 +126,139 @@ void gbtPayoffVectorRenderer::Draw(wxGrid &p_grid, wxGridCellAttr &p_attr,
   p_dc.GetTextExtent("(", &x, &y);
   rect.x += x;
 
-  int pl = 1;
-  p_dc.SetTextForeground(m_doc->GetPreferences().PlayerColor(pl));
-  for (unsigned int i = 0; i < text.Length(); i++) {
-    if (text[i] == ',') {
-      p_dc.SetTextForeground(*wxBLACK);
-      p_grid.DrawTextRectangle(p_dc, wxString(","), rect);
-      p_dc.GetTextExtent(",", &x, &y);
+  wxStringTokenizer tok(text, ",");
+  for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
+    p_dc.SetTextForeground(m_doc->GetPreferences().PlayerColor(pl));
+    wxString payoff = tok.GetNextToken();
+    p_grid.DrawTextRectangle(p_dc, payoff, rect);
+    p_dc.GetTextExtent(payoff, &x, &y);
+    rect.x += x;
+    
+    p_dc.SetTextForeground(*wxBLACK);
+    if (pl < m_doc->GetNfg().NumPlayers()) {
+      p_grid.DrawTextRectangle(p_dc, ",", rect);
+      p_dc.GetTextExtent(")", &x, &y);
       rect.x += x;
-
-      p_dc.SetTextForeground(m_doc->GetPreferences().PlayerColor(++pl));
     }
     else {
-      p_grid.DrawTextRectangle(p_dc, wxString(text[i]), rect);
-      p_dc.GetTextExtent(text[i], &x, &y);
-      rect.x += x;
+      p_grid.DrawTextRectangle(p_dc, wxString(")"), rect); 
     }
   }
-  
-  p_dc.SetTextForeground(*wxBLACK);
-  p_grid.DrawTextRectangle(p_dc, wxString(")"), rect); 
 }
+
+
+//---------------------------------------------------------------------
+//                   class gbtSchellingRenderer
+//---------------------------------------------------------------------
+
+//
+// The Schelling-style renderer puts the row player payoff in the lower-left
+// corner, and the column player payoff in the upper-right corner, in
+// a style which originated (apparently) with Thomas Schelling.
+// 
+// This style is only valid for two-player games, and the code is written
+// assuming this.  Bad Things might happen if this assumption is violated.
+//
+class gbtSchellingRenderer : public wxGridCellRenderer {
+private:
+  gbtGameDocument *m_doc;
+
+protected:
+  // set the text colours before drawing
+  void SetTextColoursAndFont(wxGrid &grid, wxGridCellAttr &attr,
+			     wxDC &dc, bool isSelected);
+
+  // calc the string extent for given string/font
+  wxSize DoGetBestSize(wxGridCellAttr &attr, wxDC &dc,
+		       const wxString &text);
+public:
+  gbtSchellingRenderer(gbtGameDocument *p_doc)
+    : m_doc(p_doc) { }
+
+  // draw the string
+  virtual void Draw(wxGrid &grid, wxGridCellAttr &attr,
+		    wxDC &dc, const wxRect &rect,
+		    int row, int col, bool isSelected);
+
+  // return the string extent
+  virtual wxSize GetBestSize(wxGrid &grid, wxGridCellAttr &attr,
+			     wxDC &dc, int row, int col);
+
+  virtual wxGridCellRenderer *Clone() const
+    { return new gbtSchellingRenderer(m_doc); }
+};
+
+void gbtSchellingRenderer::SetTextColoursAndFont(wxGrid &p_grid,
+						 wxGridCellAttr &p_attr,
+						 wxDC &p_dc,
+						 bool p_isSelected)
+{
+  p_dc.SetBackgroundMode(wxTRANSPARENT);
+
+  if (p_isSelected) {
+    p_dc.SetTextBackground(p_grid.GetSelectionBackground());
+    p_dc.SetTextForeground(p_grid.GetSelectionForeground());
+  }
+  else {
+    p_dc.SetTextBackground(p_attr.GetBackgroundColour());
+    p_dc.SetTextForeground(p_attr.GetTextColour());
+  }
+
+  p_dc.SetFont(p_attr.GetFont());
+}
+
+wxSize gbtSchellingRenderer::DoGetBestSize(wxGridCellAttr &p_attr,
+					   wxDC &p_dc,
+					   const wxString &p_text)
+{
+  wxCoord x = 0, y = 0;
+  p_dc.SetFont(p_attr.GetFont());
+  p_dc.GetTextExtent(p_text, &x, &y);
+  return wxSize(x, 2 * y);
+}
+
+wxSize gbtSchellingRenderer::GetBestSize(wxGrid &p_grid,
+					 wxGridCellAttr &p_attr,
+					 wxDC &p_dc, int p_row, int p_col)
+{
+  return DoGetBestSize(p_attr, p_dc,
+		       _T("(") + p_grid.GetCellValue(p_row, p_col) + _T(")"));
+}
+
+void gbtSchellingRenderer::Draw(wxGrid &p_grid, wxGridCellAttr &p_attr,
+				wxDC &p_dc, const wxRect &p_rectCell,
+				int p_row, int p_col, bool p_isSelected)
+{
+  wxGridCellRenderer::Draw(p_grid, p_attr, p_dc, p_rectCell,
+			   p_row, p_col, p_isSelected);
+
+  // now we only have to draw the text
+  SetTextColoursAndFont(p_grid, p_attr, p_dc, p_isSelected);
+
+  wxStringTokenizer tok(p_grid.GetCellValue(p_row, p_col), ",");
+
+  // A small margin to place around payoffs to avoid butting up against
+  // grid lines
+  const int c_margin = 3;
+  wxCoord x, y;
+  
+  // Draw player 1's payoffs, lower-left corner
+  wxRect rect = p_rectCell;
+  rect.x += c_margin;
+  rect.y += rect.height / 2;
+  p_dc.SetTextForeground(m_doc->GetPreferences().PlayerColor(1));
+  p_grid.DrawTextRectangle(p_dc, tok.GetNextToken(), rect);
+
+  // Draw player 2's payoffs, upper-right corner
+  wxString player2 = tok.GetNextToken();
+  p_dc.GetTextExtent(player2, &x, &y);
+  rect = p_rectCell;
+  rect.x = rect.x + rect.width - x - c_margin;
+  rect.y += c_margin;
+  p_dc.SetTextForeground(m_doc->GetPreferences().PlayerColor(2));
+  p_grid.DrawTextRectangle(p_dc, player2, rect);
+}
+
 
 //---------------------------------------------------------------------
 //                       class NfgGridTable
@@ -398,7 +511,12 @@ wxGridCellAttr *NfgGridTable::GetAttr(int row, int col,
     attr->SetBackgroundColour(*wxLIGHT_GREY);
   }
   else {
-    attr->SetRenderer(new gbtPayoffVectorRenderer(m_doc));
+    if (m_doc->GetNfg().NumPlayers() == 2) {
+      attr->SetRenderer(new gbtSchellingRenderer(m_doc));
+    }
+    else {
+      attr->SetRenderer(new gbtPayoffVectorRenderer(m_doc));
+    }
   }
 
   attr->SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
@@ -430,6 +548,8 @@ NfgTable::NfgTable(gbtGameDocument *p_doc, wxWindow *p_parent)
   m_grid->SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
   m_grid->SetLabelFont(m_doc->GetPreferences().GetLabelFont());
   m_grid->SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  m_grid->SetRowLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  m_grid->SetColLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   m_grid->DisableDragRowSize();
   m_grid->DisableDragColSize();
   m_grid->AutoSizeRows();
