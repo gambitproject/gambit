@@ -573,7 +573,10 @@ gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
     case tIsetValue:    // terminal not ok, not implemented
       {
 	if (!n->GetPlayer()) return "N/A";
-	return ToText(cur.IsetValue(n->GetInfoset()), tw->NumDecimals());
+	if (cur.IsetProb(n->GetInfoset()) > gNumber(0))
+	  return ToText(cur.IsetValue(n->GetInfoset()), tw->NumDecimals());
+	else        // this is due to a bug in the value computation
+	  return "N/A";
       }
     default:
       return "N/A";
