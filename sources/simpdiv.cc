@@ -22,7 +22,7 @@
 #include "normal.h"
 #include "normiter.h"
 #include "rational.h"
-#include "gmatrix.h"
+#include "grarray.h"
 #include "gpvector.h"
 #include "gwatch.h"
 #include "simpdiv.h"
@@ -45,7 +45,7 @@ private:
   T pay,d,maxz,bestz,mingrid;
   gTuple<int> nstrats,ylabel;
   gVector<T> M;
-  gMatrix<int> labels,pi;
+  gRectArray<int> labels,pi;
   gPVector<int> U,TT;
   gPVector<T> ab,y,besty,v;
 public:
@@ -53,7 +53,7 @@ public:
 	      int ndivs, int leashlength)
     : rep(N),ab(rep.Dimensionality()),
   nstrats(rep.Dimensionality()),y(rep.Dimensionality()), plev(plev),
-  pi(1,rep.ProfileLength(),1,2), labels(1,rep.ProfileLength(),1,2),
+  pi(rep.ProfileLength(), 2), labels(rep.ProfileLength(), 2),
   ylabel(2),leash(leashlength),ndivs(ndivs), nevals(0), nits(0),
   U(rep.Dimensionality()), TT(rep.Dimensionality()),
   besty(rep.Dimensionality()),v(rep.Dimensionality()){ }
