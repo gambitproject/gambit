@@ -198,9 +198,8 @@ END_EVENT_TABLE()
 
 EfgShow::EfgShow(FullEfg &p_efg, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
-    m_efg(p_efg), m_treeWindow(0), 
-    m_treeZoomWindow(0), m_currentProfile(0),
-    m_profileTable(0), m_solutionSashWindow(0),
+    m_efg(p_efg), m_treeWindow(0), m_cursor(0),
+    m_currentProfile(0), m_profileTable(0), m_solutionSashWindow(0),
     m_navigateWindow(0), m_outcomeWindow(0), m_supportWindow(0)
 {
   SetSizeHints(300, 300);
@@ -247,7 +246,7 @@ EfgShow::EfgShow(FullEfg &p_efg, wxWindow *p_parent)
   m_infoNotebook = new wxNotebook(m_nodeSashWindow, idINFONOTEBOOK);
 
   m_navigateWindow = new EfgNavigateWindow(this, m_infoNotebook);
-  m_navigateWindow->Set(m_treeWindow->Cursor());
+  m_navigateWindow->Set(m_cursor);
   m_navigateWindow->SetSize(200, 200);
   m_infoNotebook->AddPage(m_navigateWindow, "Navigation");
 
@@ -300,7 +299,7 @@ void EfgShow::ChangeProfile(int sol)
   m_currentProfile = sol;
   m_treeWindow->RefreshLabels();
   if (m_navigateWindow) {
-    m_navigateWindow->Set(m_treeWindow->Cursor());
+    m_navigateWindow->Set(m_cursor);
   }
   if (m_profileTable) {
     m_profileTable->UpdateValues();
@@ -312,7 +311,9 @@ void EfgShow::RemoveProfiles(void)
 {
   m_currentProfile = 0;
   m_profileTable->Flush();
-  OnSelectedMoved(0); // update the node inspect window if any
+  if (m_navigateWindow) {
+    m_navigateWindow->Set(m_cursor);
+  }
 }
 
 const BehavSolution &EfgShow::GetCurrentProfile(void) const
@@ -473,15 +474,6 @@ gText EfgShow::UniqueSupportName(void) const
   }
 }
 
-void EfgShow::OnSelectedMoved(const Node *n)
-{
-  // The only time the inspection window won't be around is on construction
-  if (m_navigateWindow) {
-    m_navigateWindow->Set(n);
-  }
-  UpdateMenus();
-}
-
 void EfgShow::SetFilename(const wxString &p_name)
 {
   m_filename = p_name;
@@ -534,10 +526,18 @@ void EfgShow::OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged)
   UpdateMenus();
 }
 
-Node *EfgShow::Cursor(void) const
+void EfgShow::SetCursor(Node *p_node)
 {
-  return m_treeWindow->Cursor();
+  if (m_treeWindow) {
+    m_treeWindow->SetCursorPosition(p_node);
+  }
+  if (m_navigateWindow) {
+    m_navigateWindow->Set(p_node);
+  }
+  m_cursor = p_node;
+  UpdateMenus();
 }
+
 
 //--------------------------------------------------------------------
 //          EfgShow: Creating and updating menus and toolbar

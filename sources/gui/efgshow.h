@@ -23,7 +23,6 @@ class EfgNavigateWindow;
 class EfgOutcomeWindow;
 class EfgSupportWindow;
 class TreeWindow;
-class TreeZoomWindow;
 
 const int idEFG_SOLUTION_LIST = 900;
 
@@ -31,7 +30,7 @@ class EfgShow : public wxFrame {
 private:
   FullEfg &m_efg;
   TreeWindow *m_treeWindow;
-  TreeZoomWindow *m_treeZoomWindow;
+  Node *m_cursor;
 
   int m_currentProfile;
   gList<EFSupport *> m_supports;
@@ -49,8 +48,6 @@ private:
 
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
-  
-  void NodeInspect(bool insp);
 
   void MakeMenus(void);
   void MakeToolbar(void);
@@ -182,8 +179,6 @@ public:
   gText GetActionProb(const Node *, int act) const;
   gNumber ActionProb(const Node *n, int br) const;
 
-  void OnSelectedMoved(const Node *n);
-
   // Solution interface to normal form
   void AddProfile(const BehavSolution &, bool map);
   FullEfg *Game(void) { return &m_efg; }
@@ -204,7 +199,8 @@ public:
   void SetFilename(const wxString &s);
   const wxString &Filename(void) const { return m_filename; }
 
-  Node *Cursor(void) const;
+  void SetCursor(Node *m_node);
+  Node *Cursor(void) const { return m_cursor; }
 
   void OnEditProperties(wxCommandEvent &);
   void OnTreeChanged(bool, bool);

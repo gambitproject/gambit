@@ -26,7 +26,6 @@ private:
 
   double m_zoom;
   wxMenu *m_nodeMenu, *m_gameMenu;
-  Node *m_cursor; 
 
   wxDragImage *m_dragImage;
   Node *m_dragSource;
@@ -72,7 +71,6 @@ public:
   TreeDrawSettings &DrawSettings(void) { return m_drawSettings; }
   const TreeDrawSettings &DrawSettings(void) const { return m_drawSettings; }
   
-  Node *Cursor(void) const { return m_cursor; }
   void SetCursorPosition(Node *p_cursor);
     
   void UpdateMenus(void);
