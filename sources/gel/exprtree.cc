@@ -382,7 +382,8 @@ template class gelUDF<gOutput *>;
 #include "glist.imp"
 
 template class gList<Efg *>;
-template class gList<Action *>;
+// gList<Action *> is provided by sfstrat.cc
+// template class gList<Action *>;
 template class gList<Infoset *>;
 template class gList<EFPlayer *>;
 // gList<EFOutcome *> provided by subsolve.cc currently
