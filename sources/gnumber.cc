@@ -165,7 +165,7 @@ bool operator>=(const gNumber &x, const gNumber &y)
   }
 }
 
-gNumber &gNumber::operator += (const gNumber &y) 
+gNumber &gNumber::operator+=(const gNumber &y) 
 {
   if (rep == precDOUBLE)   {
     if (y.rep == precDOUBLE)
@@ -175,10 +175,10 @@ gNumber &gNumber::operator += (const gNumber &y)
   }
   else   {  // this is a rational
     if (y.rep == precDOUBLE)   {
-      dval = double(*rval) + y.dval;
+      double dtmp = double(*rval) + y.dval;
       rep = precDOUBLE;
       delete rval;
-      rval = 0;
+      dval = dtmp;
     }
     else // if (y.rep == precRATIONAL;
       *rval += *y.rval;
@@ -196,10 +196,10 @@ gNumber &gNumber::operator-=(const gNumber &y)
   }
   else  {  // this is a rational
     if (y.rep == precDOUBLE)  {
-      dval = double(*rval) - y.dval;
+      double dtmp = double(*rval) - y.dval;
       rep = precDOUBLE;
       delete rval;
-      rval = 0;
+      dval = dtmp;
     }
     else    // if (y.rep == precRATIONAL)
       *rval -= *y.rval;
@@ -217,10 +217,10 @@ gNumber &gNumber::operator*=(const gNumber &y)
   }
   else   {  // this is a rational
     if (y.rep == precDOUBLE)  {
-      dval = double(*rval) * y.dval;
+      double dtmp = double(*rval) * y.dval;
       rep = precDOUBLE;
       delete rval;
-      rval = 0;
+      dval = dtmp;
     }
     else    // if (y.rep == precRATIONAL)
       *rval *= *y.rval;
@@ -243,10 +243,10 @@ gNumber &gNumber::operator/=(const gNumber &y)
   else  {   // this is a rational 
     if (y.rep == precDOUBLE)  {
       if (y.dval == 0.0)   throw DivideByZero();
-      dval = double(*rval) / y.dval;
+      double dtmp = double(*rval) / y.dval;
       rep = precDOUBLE;
       delete rval;
-      rval = 0;
+      dval = dtmp; 
     }
     else   {  // if (y.rep == precRATIONAL)
       if (*y.rval == gRational(0))    throw DivideByZero();
