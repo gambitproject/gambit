@@ -80,7 +80,7 @@ WXLIB = -lwx_motif_$(SYSNAME)
 #   XLIBDIR = location of X libraries
 #   XLIB    = any X libraries used
 
-ifeq ($(SYSNAME), SunOS_5.6)
+ifeq ($(SYSNAME), SunOS_5_6)
 XINCDIR = -I/usr/local/X11R6.4/include/X11
 XLIBDIR = -L/usr/local/X11R6.4/lib 
 XLIB = -lsocket -lnsl -lX11 -lXm -lXmu -lXt -lgen -lm
