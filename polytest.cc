@@ -142,25 +142,25 @@ main ()
   gout << "\n****************Press return to continue.  ";
   gin >> continuing;
 
-  gPolynom<Rational> pb('b', 2, 4);
-  gPolynom<Rational> pxx('x', 0, 1);
-  gPolynom<Rational> pyv("yv", 0, 1);
-  gPolynom<Rational> pzo('z', 1, 1);
-  gPolynom<Rational> pzz("zz", 1, 1);
+  gPolynom<gRational> pb('b', 2, 4);
+  gPolynom<gRational> pxx('x', 0, 1);
+  gPolynom<gRational> pyv("yv", 0, 1);
+  gPolynom<gRational> pzo('z', 1, 1);
+  gPolynom<gRational> pzz("zz", 1, 1);
   
-  pb[4] = (Rational) 1;
-  pzz[1] = (Rational) 1/2;
+  pb[4] = (gRational) 1;
+  pzz[1] = (gRational) 1/2;
   pb[3] = pzz;
-  pzo[1] = (Rational) 3;
-  pxx[1] = (Rational) 4;
+  pzo[1] = (gRational) 3;
+  pxx[1] = (gRational) 4;
   pxx[0] = pzo;
-  pyv[1] = (Rational) 0.5;
+  pyv[1] = (gRational) 0.5;
   pyv[0]= pxx;
   pb[2] = pyv;
-  pxx[1] = (Rational) 6;
-  pxx[0] = (Rational) 0;
+  pxx[1] = (gRational) 6;
+  pxx[0] = (gRational) 0;
   pb[1] = pxx;
-  pb[0] = (Rational) 7;
+  pb[0] = (gRational) 7;
   gout << "\nA disordered polynomial, as input.\n";
   gout << pb << "\n";
   pb.AutoSwap();
@@ -185,7 +185,7 @@ main ()
 
   gout << "Division (by constant)\n";
   gout << pb << " / 4\n";
-  gout << "= " << pb / (Rational) 4 << "\n";
+  gout << "= " << pb / (gRational) 4 << "\n";
 
   gout << "\n****************Press return to continue.  ";
   gin >> continuing;
@@ -207,27 +207,27 @@ main ()
   gout << "        Set 3 |   1, 2  |   1, 2  |\n";
   gout << "\n";
 
-  gPolynom<Rational> pp1s1("pp1s1");
-  gPolynom<Rational> pp1s2("pp1s2");
-  gPolynom<Rational> pp1s3("pp1s3");
-  gPolynom<Rational> pp2s1("pp2s1");
-  gPolynom<Rational> pp2s2("pp2s2");
+  gPolynom<gRational> pp1s1("pp1s1");
+  gPolynom<gRational> pp1s2("pp1s2");
+  gPolynom<gRational> pp1s3("pp1s3");
+  gPolynom<gRational> pp2s1("pp2s1");
+  gPolynom<gRational> pp2s2("pp2s2");
 
   gout << "\nThe sum of a player's probabilities should equal 1,\n";
   gout << "  so these should equal 0:\n";
-  gPolynom<Rational> *probsums;
-  probsums = new gPolynom<Rational>[num_players];
-  gPolynom<Rational> zeroPoly;
+  gPolynom<gRational> *probsums;
+  probsums = new gPolynom<gRational>[num_players];
+  gPolynom<gRational> zeroPoly;
   probsums[0] = zeroPoly;
-  probsums[0].vcoef(0) = (Rational) -1;
-  pp1s1[1] = (Rational) 1;
-  pp1s2[1] = (Rational) 1;
-  pp1s3[1] = (Rational) 1;
+  probsums[0].vcoef(0) = (gRational) -1;
+  pp1s1[1] = (gRational) 1;
+  pp1s2[1] = (gRational) 1;
+  pp1s3[1] = (gRational) 1;
   probsums[0] = probsums[0] + pp1s1 + pp1s2 + pp1s3;
   probsums[1] = zeroPoly;
-  probsums[1].vcoef(0) = (Rational) -1;
-  pp2s1[1] = (Rational) 1;
-  pp2s2[1] = (Rational) 1;
+  probsums[1].vcoef(0) = (gRational) -1;
+  pp2s1[1] = (gRational) 1;
+  pp2s2[1] = (gRational) 1;
   probsums[1] = probsums[1] + pp2s1 + pp2s2;
   for (i = 1; i <= num_players; i++) {
     probsums[i-1].Prune();
@@ -236,8 +236,8 @@ main ()
   gout << "\n";
 
   gout << "Individual probabilities: (greater than or equal to 0)\n";
-  gPolynom<Rational> *probs;
-  probs = new gPolynom<Rational>[tot_strat];
+  gPolynom<gRational> *probs;
+  probs = new gPolynom<gRational>[tot_strat];
   probs[0] = pp1s1;
   probs[1] = pp1s2;
   probs[2] = pp1s3;
@@ -249,8 +249,8 @@ main ()
   gout << "\n";
 
   gout << "Expected payoffs for each strategy: \n";
-  gPolynom<Rational> *payoffs;
-  payoffs = new gPolynom<Rational>[tot_strat];
+  gPolynom<gRational> *payoffs;
+  payoffs = new gPolynom<gRational>[tot_strat];
   payoffs[0] = (3 * pp2s1) + (2 * pp2s2);
   payoffs[1] = (2 * pp2s1) + (3 * pp2s2);
   payoffs[2] = (1 * pp2s1) + (1 * pp2s2);
