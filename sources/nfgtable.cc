@@ -16,46 +16,132 @@
 class NfgGridTable : public wxGridTableBase {
 private:
   Nfg *m_nfg;
+  NfgTable *m_table;
 
 public:
-  NfgGridTable(Nfg *p_nfg);
+  NfgGridTable(NfgTable *p_table, Nfg *p_nfg);
   virtual ~NfgGridTable() { }
 
-  int GetNumberRows(void) { return m_nfg->NumStrats(1); }
-  int GetNumberCols(void) { return m_nfg->NumStrats(2); }
-  wxString GetValue(int row, int col) {
-    gArray<int> strategy(m_nfg->NumPlayers());
-    for (int pl = 1; pl <= strategy.Length(); pl++) {
-      strategy[pl] = 1;
-    }
-    strategy[1] = row + 1;
-    strategy[2] = col + 1;
-
-    NFOutcome *outcome = m_nfg->GetOutcome(strategy);
-    return wxString::Format("%s,%s",
-			    (char *) ToText(m_nfg->Payoff(outcome, 1)),
-			    (char *) ToText(m_nfg->Payoff(outcome, 2)));
-  }
-
+  int GetNumberRows(void);
+  int GetNumberCols(void);
+  wxString GetValue(int row, int col);
   wxString GetRowLabelValue(int);
   wxString GetColLabelValue(int);
   void SetValue(int, int, const wxString &) { /* ignore */ }
   bool IsEmptyCell(int, int) { return false; }
+
+  bool InsertRows(size_t pos = 0, size_t numRows = 1);
+  bool AppendRows(size_t numRows = 1);
+  bool DeleteRows(size_t pos = 0, size_t numRows = 1);
+  bool InsertCols(size_t pos = 0, size_t numCols = 1);
+  bool AppendCols(size_t numCols = 1);
+  bool DeleteCols(size_t pos = 0, size_t numCols = 1);
 };
 
-NfgGridTable::NfgGridTable(Nfg *p_nfg)
-  : m_nfg(p_nfg)
+NfgGridTable::NfgGridTable(NfgTable *p_table, Nfg *p_nfg)
+  : m_table(p_table), m_nfg(p_nfg)
 { }
+
+int NfgGridTable::GetNumberRows(void)
+{
+  return m_nfg->NumStrats(m_table->GetRowPlayer());
+}
+
+int NfgGridTable::GetNumberCols(void)
+{
+  return m_nfg->NumStrats(m_table->GetColPlayer());
+}
 
 wxString NfgGridTable::GetRowLabelValue(int p_row)
 {
-  return (char *) m_nfg->Strategies(1)[p_row+1]->Name();
+  return (char *) m_nfg->Strategies(m_table->GetRowPlayer())[p_row+1]->Name();
 }
 
 wxString NfgGridTable::GetColLabelValue(int p_col)
 {
-  return (char *) m_nfg->Strategies(2)[p_col+1]->Name();
+  return (char *) m_nfg->Strategies(m_table->GetColPlayer())[p_col+1]->Name();
 }
+
+wxString NfgGridTable::GetValue(int row, int col)
+{
+  gArray<int> strategy(m_table->GetProfile());
+  strategy[m_table->GetRowPlayer()] = row + 1;
+  strategy[m_table->GetColPlayer()] = col + 1;
+  NFOutcome *outcome = m_nfg->GetOutcome(strategy);
+  if (m_table->OutcomeValues()) {
+    wxString ret = "(";
+    for (int pl = 1; pl <= strategy.Length(); pl++) {
+      ret += wxString::Format("%s",
+			      (char *) ToText(m_nfg->Payoff(outcome, pl),
+					      m_table->GetDecimals()));
+      if (pl < strategy.Length()) {
+	ret += wxString(",");
+      }
+    }
+    ret += ")";
+    return ret;
+  }
+  else {
+    if (outcome) {
+      wxString ret = (char *) outcome->GetName();
+      if (ret == "") {
+	ret = (char *) (gText("Outcome") + ToText(outcome->GetNumber()));
+      }
+      return ret;
+    }
+    else {
+      return "Null";
+    }
+  }
+}
+
+bool NfgGridTable::InsertRows(size_t pos, size_t numRows)
+{
+  wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_INSERTED,
+			 pos, numRows);
+  GetView()->ProcessTableMessage(msg);
+  return true;
+}
+
+bool NfgGridTable::AppendRows(size_t numRows)
+{
+  wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, numRows);
+  GetView()->ProcessTableMessage(msg);
+  return true;
+}
+
+bool NfgGridTable::DeleteRows(size_t pos, size_t numRows)
+{
+  wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED,
+			 pos, numRows);
+  GetView()->ProcessTableMessage(msg);
+  return true;
+}
+
+bool NfgGridTable::InsertCols(size_t pos, size_t numCols)
+{
+  wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_INSERTED,
+			 pos, numCols);
+  GetView()->ProcessTableMessage(msg);
+  return true;
+}
+
+bool NfgGridTable::AppendCols(size_t numCols)
+{
+  wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, numCols);
+  GetView()->ProcessTableMessage(msg);
+  return true;
+}
+
+bool NfgGridTable::DeleteCols(size_t pos, size_t numCols)
+{
+  wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED,
+			 pos, numCols);
+  GetView()->ProcessTableMessage(msg);
+  return true;
+}
+
+
 
 class ColoredStringRenderer : public wxGridCellRenderer {
 public:
@@ -256,14 +342,12 @@ NfgTable::NfgTable(Nfg &p_nfg, wxWindow *p_parent)
   navPanelSizer->Add(contViewSizer, 0, wxALL | wxEXPAND, 10);
 
   m_grid = new wxGrid(this, -1, wxDefaultPosition, wxDefaultSize);
-  //  m_grid->SetTable(new NfgGridTable(&m_nfg), true);
-  m_grid->CreateGrid(m_support.NumStrats(1),
-  		     m_support.NumStrats(2));
+  m_grid->SetTable(new NfgGridTable(this, &m_nfg), true);
   m_grid->SetGridCursor(0, 0);
   m_grid->SetEditable(false);
   m_grid->DisableDragRowSize();
   m_grid->AdjustScrollbars();
-  m_grid->SetDefaultRenderer(new ColoredStringRenderer);
+  //  m_grid->SetDefaultRenderer(new ColoredStringRenderer);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(navPanelSizer, 0, wxALL, 5);
@@ -274,9 +358,6 @@ NfgTable::NfgTable(Nfg &p_nfg, wxWindow *p_parent)
   topSizer->SetSizeHints(this);
 
   Layout();
-
-  OnChangeLabels();
-  OnChangeValues();
   Show(true);
 }
 
@@ -286,10 +367,9 @@ void NfgTable::SetProfile(const gArray<int> &p_profile)
     m_stratProfile[i-1]->SetSelection(p_profile[i] - 1);
   }
 
-  OnChangeLabels();
-  OnChangeValues();
   m_grid->SetGridCursor(p_profile[GetRowPlayer()] - 1,
 			p_profile[GetColPlayer()] - 1);
+  m_grid->Refresh();
 }
 
 gArray<int> NfgTable::GetProfile(void) const
@@ -303,36 +383,34 @@ gArray<int> NfgTable::GetProfile(void) const
 
 void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
 { 
+  if (m_nfg.NumStrats(m_rowPlayer) > m_nfg.NumStrats(p_rowPlayer)) {
+    m_grid->DeleteRows(0,
+		       m_nfg.NumStrats(m_rowPlayer) - 
+		       m_nfg.NumStrats(p_rowPlayer));
+  }
+  else if (m_nfg.NumStrats(m_rowPlayer) < m_nfg.NumStrats(p_rowPlayer)) {
+    m_grid->InsertRows(0,
+		       m_nfg.NumStrats(p_rowPlayer) - 
+		       m_nfg.NumStrats(m_rowPlayer));
+  }
+
+  if (m_nfg.NumStrats(m_colPlayer) > m_nfg.NumStrats(p_colPlayer)) {
+    m_grid->DeleteCols(0,
+		       m_nfg.NumStrats(m_colPlayer) -
+		       m_nfg.NumStrats(p_colPlayer));
+  }
+  else if (m_nfg.NumStrats(m_colPlayer) < m_nfg.NumStrats(p_colPlayer)) {
+    m_grid->InsertCols(0,
+		       m_nfg.NumStrats(p_colPlayer) -
+		       m_nfg.NumStrats(m_colPlayer));
+  }
+
   m_rowPlayer = p_rowPlayer;
   m_colPlayer = p_colPlayer;
   SetStrategy(m_rowPlayer, 1);
   SetStrategy(m_colPlayer, 1);
-
-  if (m_support.NumStrats(p_rowPlayer) + m_showProb + m_showDom + m_showValue
-      > m_grid->GetRows()) {
-    m_grid->InsertRows(0, m_support.NumStrats(p_rowPlayer) - m_grid->GetRows() +
-		       m_showProb + m_showDom + m_showValue);
-  }
-  else if (m_support.NumStrats(p_rowPlayer) + m_showProb + m_showDom +
-	   m_showValue < m_grid->GetRows()) {
-    m_grid->DeleteRows(0, m_grid->GetRows() - m_support.NumStrats(p_rowPlayer) - m_showProb -
-		       m_showDom - m_showValue);
-  }
-
-  if (m_support.NumStrats(p_colPlayer) + m_showProb + m_showDom + m_showValue
-      > m_grid->GetCols()) {
-    m_grid->InsertCols(0, m_support.NumStrats(p_colPlayer) - m_grid->GetCols() + m_showProb +
-		       m_showDom + m_showValue);
-  }
-  else if (m_support.NumStrats(p_colPlayer) + m_showProb + m_showDom +
-	   m_showValue < m_grid->GetCols()) {
-    m_grid->DeleteCols(0, m_grid->GetCols() - m_support.NumStrats(p_colPlayer) - m_showProb -
-		       m_showDom - m_showValue);
-  }
-
   m_grid->AdjustScrollbars();
-  OnChangeLabels();
-  OnChangeValues();
+  m_grid->Refresh();
 }
 
 void NfgTable::SetStrategy(int p_player, int p_strategy)
@@ -347,264 +425,25 @@ void NfgTable::SetStrategy(int p_player, int p_strategy)
   }
 }
 
-void NfgTable::OnChangeLabels(void)
-{
-  gArray<int> profile = GetProfile();
-  int rowPlayer = GetRowPlayer();
-  int colPlayer = GetColPlayer();
-
-  for (int i = 1; i <= m_support.NumStrats(colPlayer); i++) {
-    m_grid->SetLabelValue(wxHORIZONTAL,
-			  (char *) m_support.Strategies(colPlayer)[i]->Name(),
-			  i - 1);
-  }
-  
-  for (int i = 1; i <= m_support.NumStrats(rowPlayer); i++) {
-    m_grid->SetLabelValue(wxVERTICAL,
-			  (char *) m_support.Strategies(rowPlayer)[i]->Name(),
-			  i - 1);
-  }
-
-  if (m_showProb) {
-    m_grid->SetLabelValue(wxHORIZONTAL, "Prob", m_support.NumStrats(colPlayer));
-    m_grid->SetLabelValue(wxVERTICAL, "Prob", m_support.NumStrats(rowPlayer));
-  }
-
-  if (m_showDom) {
-    m_grid->SetLabelValue(wxHORIZONTAL, "Domin",
-			  m_support.NumStrats(colPlayer) + m_showProb);
-    m_grid->SetLabelValue(wxVERTICAL, "Domin",
-			  m_support.NumStrats(rowPlayer) + m_showProb);
-  }
-
-  if (m_showValue) {
-    m_grid->SetLabelValue(wxHORIZONTAL, "Value", m_support.NumStrats(colPlayer) + 
-			  m_showProb + m_showDom);
-    m_grid->SetLabelValue(wxVERTICAL, "Value", m_support.NumStrats(rowPlayer) +
-			  m_showProb + m_showDom);
-  }
-}
-
-void NfgTable::OnChangeValues(void)
-{
-  const Nfg &nfg = m_nfg;
-  int rowPlayer = GetRowPlayer();
-  int colPlayer = GetColPlayer();
-
-  m_grid->ClearGrid();
-  m_grid->SetCellBackgroundColour(*wxWHITE);
-
-  NfgIter iterator(m_support);
-  iterator.Set(GetProfile());
-
-  for (int i = 1; i <= m_support.NumStrats(GetRowPlayer()); i++) {
-    for (int j = 1; j <= m_support.NumStrats(GetColPlayer()); j++) {
-      iterator.Set(GetRowPlayer(), i);
-      iterator.Set(GetColPlayer(), j);
-      gText pay_str;
-      NFOutcome *outcome = iterator.GetOutcome();
-
-      if (OutcomeValues()) {
-	for (int k = 1; k <= nfg.NumPlayers(); k++) {
-	  pay_str += ToText(nfg.Payoff(outcome, k), GetDecimals());
-	  
-	  if (k != nfg.NumPlayers())
-	    pay_str += ',';
-	}
-      }
-      else {
-	if (outcome) {
-	  pay_str = outcome->GetName();
-
-	  if (pay_str == "")
-	    pay_str = "Outcome" + ToText(outcome->GetNumber());
-	}
-	else {
-	  pay_str = "Null";
-	}
-      }
-
-      m_grid->SetCellValue((char *) pay_str, i - 1, j - 1);
-    }
-    if (ShowDominance()) { 
-      int dom_pos = m_grid->GetCols() - ShowValues();
-      Strategy *strategy = m_support.Strategies(GetRowPlayer())[i];
-      if (m_support.IsDominated(strategy, true)) {
-	m_grid->SetCellValue("S", i - 1, dom_pos - 1);
-      }
-      else if (m_support.IsDominated(strategy, false)) {
-	m_grid->SetCellValue("W", i - 1, dom_pos - 1);
-      }
-      else {
-        m_grid->SetCellValue("N", i - 1, dom_pos - 1);
-      }
-    }
-  }
-
-  if (ShowDominance()) {
-    int dom_pos = m_grid->GetRows() - ShowValues();
-
-    for (int j = 1; j <= m_support.NumStrats(GetColPlayer()); j++) {
-      Strategy *strategy = m_support.Strategies(GetColPlayer())[j];
-      if (m_support.IsDominated(strategy, true)) { 
-	m_grid->SetCellValue("S", dom_pos - 1, j - 1);
-      }
-      else if (m_support.IsDominated(strategy, false)) {
-	m_grid->SetCellValue("W", dom_pos - 1, j - 1);
-      }
-      else {
-	m_grid->SetCellValue("N", dom_pos - 1, j - 1);
-      }
-    }
-
-    for (int j = 0; j < m_grid->GetRows(); j++) {
-      m_grid->SetCellBackgroundColour(*wxLIGHT_GREY, j, dom_pos - 1);
-    }
-    for (int j = 0; j < m_grid->GetCols(); j++) {
-      m_grid->SetCellBackgroundColour(*wxLIGHT_GREY, dom_pos - 1, j);
-    }
-  }
-
-  if (m_solution == 0) {
-    return;
-  }
-
-  gNumber t_max;
-  gArray<int> profile(nfg.NumPlayers());
-
-  // Figure out the index in the current support,
-  // then map it onto the full support
-  for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-    profile[pl] = 1;
-    t_max = (*m_solution)(nfg.Players()[pl]->Strategies()[1]);
-
-    for (int st1 = 1; st1 <= m_support.NumStrats(pl); st1++) {
-      if ((*m_solution)(m_support.Strategies(pl)[st1]) > t_max) {
-	profile[pl] = st1;
-	t_max = (*m_solution)(m_support.Strategies(pl)[st1]);
-      }
-    }
-  }
-
-  if (ShowProbs()) {
-    gNumber cont_prob(1);
-
-    for (int i = 1; i <= nfg.NumPlayers(); i++) {
-      if (i != rowPlayer && i != colPlayer) {
-	NFPlayer *player = nfg.Players()[i];
-	cont_prob *= (*m_solution)(player->Strategies()[profile[i]]);
-      }
-    }
-
-    m_grid->SetCellValue((char *) ToText(cont_prob, GetDecimals()),
-			 m_support.NumStrats(rowPlayer),
-			 m_support.NumStrats(colPlayer));
-  }
-
-  // Hilight the cells w/ nonzero prob
-  gNumber eps;
-  gEpsilon(eps, GetDecimals());
- 
-  if (ShowProbs()) {
-    for (int i = 1; i <= m_support.NumStrats(rowPlayer); i++)
-      m_grid->SetCellValue((char *) ToText((*m_solution)(m_support.Strategies(rowPlayer)[i]),
-					   GetDecimals()),
-			   i-1, m_support.NumStrats(colPlayer));
-
-    for (int i = 1; i <= m_support.NumStrats(colPlayer); i++)
-      m_grid->SetCellValue((char *) ToText((*m_solution)(m_support.Strategies(colPlayer)[i]),
-					   GetDecimals()),
-			   m_support.NumStrats(rowPlayer), i-1);
-
-    for (int i = 0; i < m_grid->GetRows(); i++) {
-      m_grid->SetCellBackgroundColour(*wxLIGHT_GREY, i,
-				      m_support.NumStrats(colPlayer));
-      m_grid->SetCellBackgroundColour(*wxLIGHT_GREY, 
-				      m_support.NumStrats(rowPlayer), i);
-    }
-  }
-
-  if (ShowValues()) {
-    for (int i = 1; i <= m_support.NumStrats(rowPlayer); i++) {
-      m_grid->SetCellValue((char *) ToText(m_solution->Payoff(nfg.Players()[rowPlayer],
-						       m_support.Strategies(rowPlayer)[i]),
-					   GetDecimals()),
-			   i-1, m_support.NumStrats(colPlayer)+ShowProbs()+ShowDominance());
-    }
-    
-    for (int j = 1; j <= m_support.NumStrats(colPlayer); j++) {
-      m_grid->SetCellValue((char *) ToText(m_solution->Payoff(nfg.Players()[colPlayer],
-						       m_support.Strategies(colPlayer)[j]),
-					   GetDecimals()),
-			   m_support.NumStrats(rowPlayer)+ShowProbs()+ShowDominance(), j-1);
-
-    }
-    
-    for (int i = 0; i < m_grid->GetRows(); i++) {
-      m_grid->SetCellBackgroundColour(*wxLIGHT_GREY, i,
-				      m_support.NumStrats(colPlayer)+ShowProbs()+ShowDominance());
-    }
-    for (int i = 0; i < m_grid->GetCols(); i++) {
-      m_grid->SetCellBackgroundColour(*wxLIGHT_GREY,
-				      m_support.NumStrats(rowPlayer)+ShowProbs()+ShowDominance(),
-				      i);
-    }
-  }
-}
-
 void NfgTable::ToggleProbs(void)
 {
-  if (m_showProb) {
-    m_grid->DeleteRows(m_grid->GetRows() - 1);
-    m_grid->DeleteCols(m_grid->GetCols() - 1);
-    m_showProb = 0;
-  }
-  else {
-    m_grid->InsertRows();
-    m_grid->InsertCols();
-    m_showProb = 1;
-  }
-
+  m_showProb = 1 - m_showProb;
   m_grid->AdjustScrollbars();
-  OnChangeLabels();
-  OnChangeValues();
+  m_grid->Refresh();
 }
 
 void NfgTable::ToggleDominance(void)
 {
-  if (m_showDom) {
-    m_grid->DeleteRows(m_grid->GetRows() - 1);
-    m_grid->DeleteCols(m_grid->GetCols() - 1);
-    m_showDom = 0;
-  }
-  else {
-    m_grid->InsertRows();
-    m_grid->InsertCols();
-    m_showDom = 1;
-  }
-
+  m_showDom = 1 - m_showDom;
   m_grid->AdjustScrollbars();
-  OnChangeLabels();
-  OnChangeValues();
+  m_grid->Refresh();
 }
-
 
 void NfgTable::ToggleValues(void)
 {
-  if (m_showValue) {
-    m_grid->DeleteRows(m_grid->GetRows() - 1);
-    m_grid->DeleteCols(m_grid->GetCols() - 1);
-    m_showValue = 0;
-  }
-  else {
-    m_grid->InsertRows();
-    m_grid->InsertCols();
-    m_showValue = 1;
-  }
-
+  m_showValue = 1 - m_showValue;
   m_grid->AdjustScrollbars();
-  OnChangeLabels();
-  OnChangeValues();
+  m_grid->Refresh();
 }
 
 void NfgTable::OnLeftClick(wxGridEvent &p_event)
@@ -639,6 +478,7 @@ void NfgTable::OnLabelLeftClick(wxGridEvent &p_event)
 void NfgTable::OnStrategyChange(wxCommandEvent &)
 {
   SetProfile(GetProfile());
+  m_grid->Refresh();
 }
 
 void NfgTable::OnRowPlayerChange(wxCommandEvent &)
@@ -657,6 +497,7 @@ void NfgTable::OnRowPlayerChange(wxCommandEvent &)
   else {
     SetPlayers(newRowPlayer, m_colChoice->GetSelection() + 1);
   }
+  m_grid->Refresh();
 }
 
 void NfgTable::OnColPlayerChange(wxCommandEvent &)
@@ -675,6 +516,7 @@ void NfgTable::OnColPlayerChange(wxCommandEvent &)
   else {
     SetPlayers(m_rowChoice->GetSelection() + 1, newColPlayer);
   }
+  m_grid->Refresh();
 }
 
 void NfgTable::SetSupport(const NFSupport &p_support)
@@ -693,6 +535,7 @@ void NfgTable::SetSupport(const NFSupport &p_support)
     m_stratProfile[pl-1]->SetSelection(0);
   }
   SetPlayers(m_rowPlayer, m_colPlayer);
+  m_grid->Refresh();
 }
 
 void NfgTable::SetSolution(const MixedSolution &p_solution)
@@ -701,7 +544,7 @@ void NfgTable::SetSolution(const MixedSolution &p_solution)
     delete m_solution;
   }
   m_solution = new MixedSolution(p_solution);
-  OnChangeValues();
+  m_grid->Refresh();
 }
 
 void NfgTable::ClearSolution(void)

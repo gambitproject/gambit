@@ -83,8 +83,6 @@ public:
   void SetCellFont(const wxFont &p_font) 
     { m_grid->SetDefaultCellFont(p_font); }
   void SetLabelFont(const wxFont &p_font) { m_grid->SetLabelFont(p_font); }
-  void OnChangeValues(void);
-  void OnChangeLabels(void);
 
   void SetSupport(const NFSupport &);
 

@@ -557,8 +557,7 @@ void NfgShow::OnEditStrategies(wxCommandEvent &)
   dialog.ShowModal();
 
   if (dialog.GameChanged()) {
-    m_table->OnChangeLabels();
-    m_table->OnChangeValues();
+    m_table->Refresh();
   }
 }
 
@@ -571,14 +570,14 @@ void NfgShow::OnEditOutcomeAttach(wxCommandEvent &)
     
   if (dialog.ShowModal() == wxID_OK) {
     m_nfg.SetOutcome(m_table->GetProfile(), dialog.GetOutcome());
-    m_table->OnChangeValues();
+    m_table->Refresh();
   }
 }
 
 void NfgShow::OnEditOutcomeDetach(wxCommandEvent &)
 {
   m_nfg.SetOutcome(m_table->GetProfile(), 0);
-  m_table->OnChangeValues();
+  m_table->Refresh();
 }
 
 void NfgShow::OnEditOutcomeNew(wxCommandEvent &)
@@ -604,7 +603,7 @@ void NfgShow::OnEditOutcomeDelete(wxCommandEvent &)
     
   if (dialog.ShowModal() == wxID_OK) {
     m_nfg.DeleteOutcome(dialog.GetOutcome());
-    m_table->OnChangeValues();
+    m_table->Refresh();
   }
 }
 
@@ -706,7 +705,7 @@ void NfgShow::OnSupportEdit(wxCommandEvent &)
       *m_currentSupport = dialog.Support();
       m_currentSupport->SetName(dialog.Name());
       ChangeSolution(0);
-      m_table->OnChangeValues();
+      m_table->Refresh();
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), this);
@@ -981,7 +980,7 @@ void NfgShow::OnViewValues(wxCommandEvent &)
 void NfgShow::OnViewOutcomes(wxCommandEvent &)
 {
   m_table->SetOutcomeValues(1 - m_table->OutcomeValues());
-  m_table->OnChangeValues();
+  m_table->Refresh();
 }
 
 void NfgShow::OnViewGameInfo(wxCommandEvent &)
@@ -1073,7 +1072,7 @@ void NfgShow::OnPrefsDisplayDecimals(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     m_table->SetDecimals(dialog.GetValue());
-    m_table->OnChangeValues();
+    m_table->Refresh();
   }
 }
 
@@ -1085,7 +1084,7 @@ void NfgShow::OnPrefsFontData(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     //    m_drawSettings.SetDataFont(dialog.GetFontData().GetChosenFont());
     m_table->SetCellFont(dialog.GetFontData().GetChosenFont());
-    m_table->OnChangeValues();
+    m_table->Refresh();
   }
 }
 
@@ -1097,7 +1096,7 @@ void NfgShow::OnPrefsFontLabels(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     // m_drawSettings.SetLabelFont(dialog.GetFontData().GetChosenFont());
     m_table->SetLabelFont(dialog.GetFontData().GetChosenFont());
-    m_table->OnChangeLabels();
+    m_table->Refresh();
   }
 }
 
@@ -1211,7 +1210,7 @@ void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
       m_nfg.SetPayoff(outc, i, payoffs[i]);
     outc->SetName(dialog.Name());
 
-    m_table->OnChangeValues();
+    m_table->Refresh();
   }
 }
 
