@@ -1,15 +1,11 @@
 //#
 //# FILE: purenash.h -- Interface to pure-strategy Nash equilibrium finder
 //#
-//# @(#)purenash.h	1.3 1/26/95
+//# $Id$
 //#
 
 #ifndef PURENASH_H
 #define PURENASH_H
-
-#ifdef __GNUG__
-#pragma interface
-#endif   // __GNUG__
 
 #include "normal.h"
 #include "rational.h"
