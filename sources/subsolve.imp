@@ -113,12 +113,12 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
 	  
 	for (int act = 1; act <= p->InfosetList()[iset]->NumActions();
 	     act++)  {
-	  if (!support.Find((*infosets[pl])[index]->GetActionList()[act]))
+	  if (!support.Find((*infosets[pl])[index]->GetActionList()[act])) 
 	    subsupport.RemoveAction(p->InfosetList()[iset]->GetActionList()[act]);
 	}
       }
     }
-	
+
     failed = SolveSubgame(foo, subsupport, sol);
     
     SelectSolutions(subgame_number, foo, sol);
@@ -226,10 +226,20 @@ void SubgameSolver<T>::SelectSolutions(int, const Efg<T> &,
 
 template <class T> 
 SubgameSolver<T>::SubgameSolver(const Efg<T> &E, const EFSupport &S, int max)
-  : max_solns(max), efg(E), support(S), solution(S), infosets(E.NumPlayers())
+  : max_solns(max), efg(E), support(efg), solution(S), infosets(E.NumPlayers())
 {
   for (int i = 1; i <= efg.NumPlayers(); i++)
     infosets[i] = new gArray<Infoset *>(efg.PlayerList()[i]->InfosetList());
+  
+  for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
+    EFPlayer *player = E.PlayerList()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+      Infoset *infoset = player->InfosetList()[iset];
+      for (int act = 1; act <= infoset->NumActions(); act++) 
+	if (!S.Find(infoset->GetActionList()[act]))
+	  support.RemoveAction(efg.PlayerList()[pl]->InfosetList()[iset]->GetActionList()[act]);
+    }
+  }
 }
 
 template <class T> SubgameSolver<T>::~SubgameSolver()  
