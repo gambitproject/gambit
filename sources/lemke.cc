@@ -521,15 +521,15 @@ int Lemke(const NormalForm<T> &N, const LemkeParams &p,
 }
 
 #ifdef __GNUG__
-template int Lemke(const NormalForm<double> &, const LemkeParams,
+template int Lemke(const NormalForm<double> &, const LemkeParams &,
 		   gList<gPVector<double> > &, int &, gRational &);
-template int Lemke(const NormalForm<gRational> &, const LemkeParams,
+template int Lemke(const NormalForm<gRational> &, const LemkeParams &,
 		   gList<gPVector<gRational> > &, int &, gRational &);
 #elif defined __BORLANDC__
 #pragma option -Jgd
-int Lemke(const NormalForm<double> &, const LemkeParams,
+int Lemke(const NormalForm<double> &, const LemkeParams &,
 	  gList<gPVector<double> > &, int &, gRational &);
-int Lemke(const NormalForm<gRational> &, const LemkeParams,
+int Lemke(const NormalForm<gRational> &, const LemkeParams &,
 	  gList<gPVector<gRational> > &, int &, gRational &);
 #pragma option -Jgx
 #endif   // __GNUG__, __BORLANDC__
