@@ -128,26 +128,44 @@ are not necessary for the procedure to function.
 
 AllLemke[N->NORFORM] =: NORFORM
 
-	Searches for all solutions of the specified normal form game using the
-Lemke-Howson algorithm.  Returns the same problem in normal form.
+   -	Description:  Searches for all solutions of the specified normal form
+	problem using the Lemke-Howson algorithm.
+   -	Return value:  Returns the same problem in 
+	normal form.
+   -	Required parameters:
+	  *  N:  The problem normal form for which solutions are to be found.
+   -	Optional parameters:  None.
 
 ----------
 
 AppendNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
 
-	Appends the number of branches specified by 'br' to the terminal node 
-indicated by 'n' and places the node in a new information set for player 'pl'.
-If the player specified is not already defined in the game, the player is 
-created automatically.  Returns the node to which new branches have been
-appended.
+   -	Description:  Appends the number of branches specified to the indicated
+	terminal node and places the node in a new information set for the
+	given player.
+   -	Return value:  Returns the node to which new branches have been 
+	appended.
+   -	Required parameters:
+	  *  n:  The terminal node to which branches are to be added.
+	  *  pl:  The player whose information set the node will now belong to.
+	     If the player specified is not already defined in the game, the 
+	     player is created automatically. 
+	  *  br:  The number of branches to be appended to the node.
+   -	Optional parameters:  None.
 
 ----------
 
 AttachOutcome[n->NODE, outc->INTEGER] =: NODE
 
-	Attaches the outcome with the indicated number to the specified node.
-If no outcome with the indicated number exists, no action is taken.  Note that
-the node need not be terminal in order to have an outcome attached.
+   -	Description:  Attaches the indicated outcome to the specified node.  
+   -	Return value:  Returns the node to which the outcome is attached.
+   -	Required parameters:
+	  *  n:  The node to which the outcome is to be attached.  Note that
+	     the node need not be terminal in order to have an outcome 
+	     attached.
+	  *  outc:  The number of the outcome to be attached.  If no outcome 
+	     with the indicated number exists, no action is taken.  
+   -	Optional parameters:  None.
 
 ----------
 
@@ -156,7 +174,11 @@ Car[l->INTLIST] =: INTEGER
 Car[l->RATLIST] =: RATIONAL
 Car[l->TEXTLIST] =: TEXT
 
-	Returns the first element of the list specified by `l`.
+   -	Description:  Finds the first element of the specified list.
+   -	Return value:  The first element of the list.
+   -	Required parameters:
+	  *  l:  The list on which the procedure is to be performed.
+   -	Optional parameters:  None.
 
 ----------
 
@@ -165,8 +187,11 @@ Cdr[l->INTLIST] =: INTLIST
 Cdr[l->RATLIST] =: RATLIST
 Cdr[l->TEXTLIST] =: TEXTLIST
 
-	Returns the list consisting of the list specified by 'l' minus its 
-first element.
+   -	Description:  Deletes the first element of the specified list.
+   -	Return value:  The list minus the first element.
+   -	Required parameters:
+	  *  l:  The list on which the procedure is to be performed.
+   -	Optional parameters:  None.
 
 ----------
 
@@ -175,83 +200,124 @@ Contains[e->INTEGER, l->INTLIST] =: BOOLEAN
 Contains[e->RATIONAL, l->RATLIST] =: BOOLEAN
 Contains[e->TEXT, l->TEXTLIST] =: BOOLEAN
 
-	Returns True when the value specified by 'e' is contained as an element
-of the list specified by 'l'.
+   -	Description:  Finds whether the specified value is contained in the 
+	indicated list.
+   -	Return value:  True when the specified value is contained in the list.
+   -	Required parameters:
+	  *  e:  The value to be searched for.
+	  *  l:  The list which is to be searched in.
+   -	Optional parameters:  None.
 
 ----------
 
 CopyTree[n->NODE, to->NODE] =: NODE
 
-	Copy the subtree rooted at the node specified by 'n' to the node given
-by `to`.
+   -	Description:  Copies the subtree rooted at the specified node to the 
+	indicated node.
+   -	Return value:  XXXX.
+   -	Required parameters:
+	  *  n:  The node at which the subtree to be copied is rooted.
+	  *  to:  The node to which the subtree is to be copied.
+   -	Optional parameters:  None.
 
 ----------
 
 DeleteAction[n->NODE, br->INTEGER] =: NODE
 
-	Deletes the action number indicated by 'br' from the information set
-containing the node specified by 'n'.
+   -	Description:  Deletes the indicated action number from the information
+	set containing the specified node.
+   -	Return value:  The given node.
+   -	Required parameters:
+	  *  n:  The node belonging to the information set from which the 
+	     action is to be deleted.
+	  *  br:  The number of the branch to be deleted.
+   -	Optional parameters:  None.
 
 ----------
 
 DeleteNode[n->NODE, keep->INTEGER] =: NODE
 
-	Deletes the node indicated by 'n' from the tree.  The child of the 
-deleted node with the number specified by 'keep' is kept and replaces the node
-in its spot in the tree.  The subtrees associated with all other children of 
-the deleted node are deleted.
+   -	Description:  Deletes the indicated node from the tree.  The specified
+	child of the deleted node is kept and replaces the node in its spot in
+	the tree.  The subtrees associated with all other children of the 
+	deleted node are deleted.
+   -	Return value:  The node which replaces the deleted node.
+   -	Required parameters:
+	  *  n:  The node to be deleted.
+	  *  keep:  The child of the deleted node which is to be kept.
+   -	Optional parameters:  None.
 
 ----------
 
 DeleteTree[n->NODE] =: NODE
 
-	Deletes the subtree rooted at the node specified by 'n'.  This node 
-then becomes a terminal node.
+   -	Description:  Deletes the subtree rooted at the specified node.  This 
+	node then becomes a terminal node.
+   -	Return value:  The indicated node which is now a terminal node.
+   -	Required parameters:
+	  *  n:  The node where the subtree to be deleted is rooted.
+   -	Optional parameters:  None.
 
 ----------
 
 DetachOutcome[n->NODE] =: NODE
 
-	Sets the outomce attached to the node specified by 'n' to the null
-outcome.
+   -	Description:  Sets the outcome attached to the specified node to the 
+	null outcome.
+   -	Return value:  The indicated node.
+   -	Required parameters:
+	  *  n:  The node whose outcome is to be detached.
+   -	Optional parameters:  None.
 
 ----------
 
 ElimAllDom[N->NORFORM, {strong->BOOLEAN}, {time<->RATIONAL}, {output->TEXT}] 
 	=: INTEGER
 
-	Iteratively eliminates dominated strategies for all players.  The 
-optional `strong` parameter determines the type or dominance used.  The
-default value is False, which signifies that weak dominance is used.  If 
-`strong` is specified to be True, strong dominance is used.  Returns the
-number of the new strategy set.  (The original full strategy set is 
-numbered 1.  Each iteration creates a new strategy set with an integer value
-one greater than that of the previous strategy set.  Therefore, if no
-dominated strategies are found, ElimAllDom returns a value of 1.)  The
-optional parameter 'time' returns the elapsed time for the operation.  The 
-optional parameter `output` can be used to redirect the output of this 
-procedure to a file.  Directing output to ``/dev/null'' under Unix turns output
-off.  By default, it directs output to the screen.
+   -	Description:  Iteratively eliminates dominated strategies for all 
+	players.
+   -	Return value:  The number of the new strategy set.  The original full
+	strategy set is numbered 1.  Each iteration creates a new strategy set
+	with an integer value one greater than that of the previous strategy 
+	set.  Therefore, if no dominated strategies are found, the return value
+	is equal to 1.
+   -	Required parameters:
+	  *  N:  The problem in normal form for which dominated strategies are
+	     to be eliminated.
+   -	Optional parameters:
+	  *  strong:  Determines the type of dominance used.  The default value
+	     is False, which signifies that weak dominance is used.  If 
+	     `strong` is specified to be True, strong dominance is used.  
+	  *  time:  Returns the elapsed time for the operation.
+	  *  output:  Redirects the output of the procedure to a specified 
+	     file.  Directing output to ``/dev/null'' under Unix turns output
+	     off.  By default, it directs output to the screen.
 
 ----------
 
 ElimDom[N->NORFORM, {pl->INTLIST}, {strong->BOOLEAN}, {time<->RATIONAL},
 	{output->TEXT}] =: INTEGER
 
-	Performs one iteration of eliminating dominated strategies for the
-list of players specified.  If unspecified, the optional parameter 'pl'
-defaults to all players.  The optional `strong` parameter determines the 
-type of dominance used.  The default value is False, which signifies that 
-weak dominance is used.  If `strong` is specified to be True, strong
-dominance is used.  Returns the number of the new strategy set.  (The
-original full strategy set is numbered 1.  Each iteration creates a new
-strategy set with an integer value one greater than that of the previous 
-strategy set.  Therefore, if no dominated strategies are found, ElimDom 
-returns a  value of 1.)  The optional parameter 'time' returns the elapsed
-time for the operation.  The optional parameter `output` can be used to 
-redirect the output of this procedure to a file.  Directing output to ``/dev/
-null'' under Unix turns output off.  By default, it directs output to the 
-screen.
+   -	Description:  Performs one iteration of eliminating dominated 
+	strategies for the list of players specified.  
+   -	Return value:  The number of the new strategy set.  The original full
+	strategy set is numbered 1.  Each iteration creates a new strategy set
+	with an integer value one greater than that of the previous strategy 
+	set.  Therefore, if no dominated strategies are found, the return value
+	is equal to 1.
+   -	Required paremeters:
+	  *  N:  The problem in normal form for which dominated strategies are
+	     to be eliminated.
+   -	Optional parameters:
+	  *  pl:  Specifies the list of players for which the procedure is to
+	     be performed.  If unspecified, it defaults to all players. 
+ 	  *  strong:  Determines the type of dominance used.  The default value
+	     is False, which signifies that weak dominance is used.  If 
+	     `strong` is specified to be True, strong dominance is used.  
+	  *  time:  Returns the elapsed time for the operation.
+	  *  output:  Redirects the output of the procedure to a specified 
+	     file.  Directing output to ``/dev/null'' under Unix turns output
+	     off.  By default, it directs output to the screen.
 
 ----------
 
