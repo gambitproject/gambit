@@ -438,8 +438,11 @@ void PxiCanvas::Update(wxDC& dc,int device)
   const wxFont &font = draw_settings->GetAxisFont(); 
   wxBeginBusyCursor();
   GetClientSize(&cw,&ch);
+  cw=850/2;ch=1100/2;
 
   if (device==PXI_UPDATE_SCREEN) {
+    PrepareDC(dc);
+    dc.SetUserScale(GetScale(), GetScale());
     dc.SetBackground(*wxWHITE_BRUSH);
     dc.Clear();
   }
@@ -462,7 +465,7 @@ void PxiCanvas::Update(wxDC& dc,int device)
       
       // Get the size of the DC in pixels
       int w, h;
-      dc->GetSize(&w, &h);
+      dc.GetSize(&w, &h);
       
       // Calculate a suitable scaling factor
       float scaleX=(float)(w/maxX);
@@ -470,21 +473,15 @@ void PxiCanvas::Update(wxDC& dc,int device)
       float actualScale = wxMin(scaleX,scaleY);
     
       // Calculate the position on the DC for centring the graphic
-      //    float posX = (float)((w - (200*actualScale))/2.0);
-      //    float posY = (float)((h - (200*actualScale))/2.0);
       float posX = (float)((w - (cw*actualScale))/2.0);
       float posY = (float)((h - (ch*actualScale))/2.0);
       
       // Set the scale and origin
-      dc->SetUserScale(actualScale, actualScale);
-      dc->SetDeviceOrigin( (long)posX, (long)posY );
+      dc.SetUserScale(actualScale, actualScale);
+      dc.SetDeviceOrigin( (long)posX, (long)posY );
       
       /*
       frame->Draw(*dc);
-
-
-
-
       wxCoord width,height;
       dc.GetSize(&width,&height);
       cw=width*0.8;ch=height*0.8;
@@ -511,9 +508,6 @@ void PxiCanvas::Update(wxDC& dc,int device)
     int whichplot =  nplots*(page-1)+j;
     if(whichplot <= draw_settings->GetNumPlots()) {
       const PlotInfo &thisplot(draw_settings->GetPlotInfo(whichplot));
-      //      wxString tmp;
-      //      tmp.Printf("j: %d, whichplot: %d, plotNum: %d", j, whichplot, thisplot.GetPlotNumber());
-      //      wxMessageBox(tmp);
       dc.SetPen(*wxBLACK_PEN);
       for (int i=1;i<=headers.Length();i++) {
 	// used for square aspect ratio that fits in window

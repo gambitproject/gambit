@@ -49,6 +49,19 @@
 #define	PXI_PREFS_FONT_LABEL    133
 #define	PXI_PAGE_NEXT           135
 #define	PXI_PAGE_PREV           136
+#define	PXI_PREFS_SCALE         137
+#define	PXI_PREFS_SCALE_1         138
+#define	PXI_PREFS_SCALE_2         139
+#define	PXI_PREFS_SCALE_3         140
+#define	PXI_PREFS_SCALE_4         141
+#define	PXI_PREFS_SCALE_5         142
+#define	PXI_PREFS_SCALE_6         143
+#define	PXI_PREFS_SCALE_7         144
+#define	PXI_PREFS_SCALE_8         145
+#define	PXI_PREFS_SCALE_9         146
+#define	PXI_PREFS_SCALE_10         147
+#define	PXI_PREFS_ZOOM_IN         150
+#define	PXI_PREFS_ZOOM_OUT         151
 
 #define	PXI_NO_SET_STOP      -1.0
 #define	PXI_SET_STOP          127
@@ -339,6 +352,25 @@ private:
   Bool	stopped;
   double cur_e;
   bool painting;
+  bool m_landscape;                     // landscap mode if true
+  int m_width, m_height;                // width, height of page
+  double m_scale;                        // scaling factor
+  double m_ppu;                        // pixels per scroll unit
+
+  int Width(void) const 
+    {if(m_landscape) return m_height; return m_width;}
+  int Height(void) const 
+    {if(m_landscape) return m_width; return m_height;}
+  void SetLandscape(bool flag) 
+    {m_landscape = flag;}
+  bool GetLandscape(void) 
+    {return m_landscape;}
+  double GetScale(void) const {return m_scale;} 
+  void SetScale(double x) 
+    {
+      m_scale = x; 
+      SetScrollbars(m_ppu,m_ppu,GetScale()*Width()/m_ppu, GetScale()*Height()/m_ppu);
+    }
 
   void DoPlot_X(wxDC& dc,const PlotInfo &thisplot,
 		int x0, int y0, int cw,int ch, int level=1);
@@ -429,6 +461,8 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
+class PxiChildToolbar;
+
 class PxiChild: public wxFrame
 {
 private:
@@ -437,9 +471,9 @@ private:
 
   wxPrintData  *m_printData;
   wxPageSetupData* m_pageSetupData;
+  gBlock<double>  scaleValues;
+  PxiChildToolbar *m_toolbar;
 
-
-  //  void MyPrint(wxCommandEvent &);  // output to printer
   void OnPrint(wxCommandEvent &);  // output to printer
   void OnPrintPreview(wxCommandEvent &);  // output to printer
 
@@ -452,7 +486,11 @@ private:
   void OnPrefsFontAxis(wxCommandEvent &);
   void OnPrefsFontLabel(wxCommandEvent &);
   void OnPrefsFontOverlay(wxCommandEvent &);
+  void OnPrefsScale(wxCommandEvent &);
+  void MarkScaleMenu(void);
   void OnPrefsColors(wxCommandEvent &);
+  void OnPrefsZoomIn(wxCommandEvent &);
+  void OnPrefsZoomOut(wxCommandEvent &);
   void OnNextPage(wxCommandEvent &);
   void OnPreviousPage(wxCommandEvent &);
   void OnHelpAbout(wxCommandEvent &);

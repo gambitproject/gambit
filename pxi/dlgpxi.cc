@@ -593,3 +593,58 @@ void dialogOverlayOptions::Run()
   }
 }
 
+
+// ----------------------------------------------------------------------
+//
+//     dialogSelectScale
+//
+// ----------------------------------------------------------------------
+
+dialogSelectScale::dialogSelectScale(wxWindow *p_parent, double scale)
+  : guiAutoDialog(p_parent, "Change Scale")
+{
+  wxString scaleChoices[] = { ".25", 
+			      ".50", 
+			      ".75", 
+			      "1.00", 
+			      "1.25", 
+			      "1.50", 
+			      "1.75", 
+			      "2.00" };
+  m_size = new wxRadioBox(this, -1,"Plot Scale",
+			      wxDefaultPosition, 
+#ifdef __WXMOTIF__ // bug in wxmotif
+			      wxSize(250,25),8, scaleChoices, 1, wxRA_SPECIFY_COLS
+#else
+			      wxDefaultSize,8, scaleChoices, 1, wxRA_SPECIFY_COLS
+#endif
+			      );
+
+
+  double s;
+  for(int i=0;i<m_size->Number();i++) {
+    m_size->GetLabel(i).ToDouble(&s);
+    if(scale == s)m_size->SetSelection(i);
+  }
+  wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
+  allSizer->Add(m_size, 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
+  
+  SetAutoLayout(TRUE);
+  SetSizer(allSizer); 
+  allSizer->Fit(this);
+  allSizer->SetSizeHints(this); 
+  Layout();
+}
+
+dialogSelectScale::~dialogSelectScale()
+{ }
+
+double dialogSelectScale::GetScale(void)
+{
+  double scale;
+  m_size->GetLabel(m_size->GetSelection()).ToDouble(&scale);
+  return scale;
+}
+
+

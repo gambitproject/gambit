@@ -131,7 +131,8 @@ BEGIN_EVENT_TABLE(PxiToolbar, wxToolBar)
 END_EVENT_TABLE()
 
 PxiToolbar::PxiToolbar(wxFrame *p_parent)
-  : wxToolBar(p_parent, PXI_TOOLBAR_ID),
+  : wxToolBar(p_parent, PXI_TOOLBAR_ID, wxDefaultPosition, 
+	      wxDefaultSize, wxTB_DOCKABLE),
     m_parent(p_parent)
 {
 #ifdef __WXMSW__
@@ -267,6 +268,83 @@ void PxiFrame::LoadFile(const wxString &p_filename)
     wxMessageBox("Unknown file type");
 }
 
+//=====================================================================
+//                          class PxiChildToolbar
+//=====================================================================
+
+const int PXI_CHILD_TOOLBAR_ID = 2102;
+
+class PxiChildToolbar : public wxToolBar {
+private:
+  wxFrame *m_parent;
+
+  // Event handlers
+  void OnMouseEnter(wxCommandEvent &);
+
+public:
+  PxiChildToolbar(wxFrame *p_frame, wxWindow *p_parent);
+  ~PxiChildToolbar() { }
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(PxiChildToolbar, wxToolBar)
+  EVT_TOOL_ENTER(PXI_CHILD_TOOLBAR_ID, PxiChildToolbar::OnMouseEnter)
+END_EVENT_TABLE()
+
+PxiChildToolbar::PxiChildToolbar(wxFrame *p_frame, wxWindow *p_parent)
+  : wxToolBar(p_parent, PXI_CHILD_TOOLBAR_ID, wxDefaultPosition, 
+	      wxDefaultSize, wxTB_DOCKABLE), m_parent(p_frame)
+{
+#ifdef __WXMSW__
+  wxBitmap printBitmap("PRINT_BITMAP");
+  wxBitmap zoominBitmap("ZOOMIN_BITMAP");
+  wxBitmap zoomoutBitmap("ZOOMOUT_BITMAP");
+  wxBitmap helpBitmap("HELP_BITMAP");
+  wxBitmap optionsBitmap("OPTIONS_BITMAP");
+  wxBitmap inspectBitmap("INSPECT_BITMAP");
+#else
+#include "../sources/bitmaps/print.xpm"
+#include "../sources/bitmaps/zoomin.xpm"
+#include "../sources/bitmaps/zoomout.xpm"
+#include "../sources/bitmaps/help.xpm"
+#include "../sources/bitmaps/options.xpm"
+#include "../sources/bitmaps/inspect.xpm"
+  wxBitmap printBitmap(print_xpm);
+  wxBitmap zoominBitmap(zoomin_xpm);
+  wxBitmap zoomoutBitmap(zoomout_xpm);
+  wxBitmap helpBitmap(help_xpm);
+  wxBitmap optionsBitmap(options_xpm);
+  wxBitmap inspectBitmap(inspect_xpm);
+#endif  // __WXMSW__
+    
+  SetMargins(2, 2);
+#ifdef __WXMSW__
+  SetToolBitmapSize(wxSize(33, 30));
+#endif // _WXMSW__
+  AddTool(wxID_PREVIEW, printBitmap);
+  AddSeparator();
+  AddTool(PXI_DISPLAY_OPTIONS, inspectBitmap);
+  AddSeparator();
+  AddTool(PXI_PREFS_ZOOM_IN, zoominBitmap);
+  AddTool(PXI_PREFS_ZOOM_OUT, zoomoutBitmap);
+  AddTool(PXI_PREFS_COLORS, optionsBitmap);
+  AddSeparator();
+  AddTool(PXI_HELP_ABOUT, helpBitmap);
+
+  Realize();
+}
+
+void PxiChildToolbar::OnMouseEnter(wxCommandEvent &p_event)
+{
+  if (p_event.GetSelection() > 0) {
+    m_parent->SetStatusText(m_parent->GetMenuBar()->GetHelpString(p_event.GetSelection()));
+  }
+  else {
+    m_parent->SetStatusText("");
+  }
+}
+
 BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   //  EVT_MENU(PXI_LOAD_FILE, PxiChild::On)
   //  EVT_MENU(PXI_OUTPUT, PxiChild::OnFileOutput)
@@ -281,6 +359,10 @@ BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   EVT_MENU(PXI_PREFS_FONT_AXIS, PxiChild::OnPrefsFontAxis)
   EVT_MENU(PXI_PREFS_FONT_LABEL, PxiChild::OnPrefsFontLabel)
   EVT_MENU(PXI_PREFS_FONT_OVERLAY, PxiChild::OnPrefsFontOverlay)
+  EVT_MENU(PXI_PREFS_ZOOM_IN, PxiChild::OnPrefsZoomIn)
+  EVT_MENU(PXI_PREFS_ZOOM_OUT, PxiChild::OnPrefsZoomOut)
+  //  EVT_MENU(PXI_PREFS_SCALE, PxiChild::OnPrefsScaleMenu)
+  EVT_MENU_RANGE(PXI_PREFS_SCALE_1, PXI_PREFS_SCALE_8, PxiChild::OnPrefsScale)
   EVT_MENU(PXI_PREFS_COLORS, PxiChild::OnPrefsColors)
   EVT_MENU(PXI_PAGE_NEXT, PxiChild::OnNextPage)
   EVT_MENU(PXI_PAGE_PREV, PxiChild::OnPreviousPage)
@@ -325,6 +407,7 @@ void PxiChild::OnFileDetail(wxCommandEvent &)
   canvas->ShowDetail();
 }
 
+#ifdef UNUSED
 void PxiChild::OnFileOutput(wxCommandEvent &)
 {
   wxOutputDialogBox dialog(0,this);
@@ -340,6 +423,7 @@ void PxiChild::OnFileOutput(wxCommandEvent &)
       break;
     }
 }
+#endif // UNUSED
 
 void PxiChild::OnNextPage(wxCommandEvent &)
 {
@@ -398,6 +482,46 @@ void PxiChild::OnPrefsFontOverlay(wxCommandEvent &)
   }
 }
 
+
+void PxiChild::OnPrefsZoomOut(wxCommandEvent &event)
+{
+  double scale = canvas->GetScale();
+  int i=1;
+  while(scale > scaleValues[i] && i< scaleValues.Length()) {i++;}
+  if(i>1)i--;
+  canvas->SetScale(scaleValues[i]);
+  MarkScaleMenu();
+  canvas->Render();
+}
+
+void PxiChild::OnPrefsZoomIn(wxCommandEvent &event)
+{
+  double scale = canvas->GetScale();
+  int i=scaleValues.Length();
+  while(scale < scaleValues[i] && i>1) {i--;}
+  if(i<scaleValues.Length())i++;
+  canvas->SetScale(scaleValues[i]);
+  MarkScaleMenu();
+  canvas->Render();
+}
+
+void PxiChild::OnPrefsScale(wxCommandEvent &event)
+{
+  double scale = scaleValues[event.GetSelection() - PXI_PREFS_SCALE_1+1];
+  canvas->SetScale(scale);
+  MarkScaleMenu();
+  canvas->Render();
+}
+
+void PxiChild::MarkScaleMenu(void)
+{
+  for(int i=0;i<8;i++) {
+    GetMenuBar()->Check(PXI_PREFS_SCALE_1+i,false);
+    if(canvas->GetScale() == scaleValues[i+1])
+      GetMenuBar()->Check(PXI_PREFS_SCALE_1+i,true);
+  }
+}
+
 void PxiChild::OnHelpAbout(wxCommandEvent &)
 {
   wxHelpAbout();
@@ -416,8 +540,13 @@ void PxiChild::OnDisplayOptions(wxCommandEvent &)
 
 PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
   wxFrame(p_parent, -1, p_filename, wxPoint(0,0),wxSize(480,480), 
-	  wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT), parent(p_parent)
+	  wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT), parent(p_parent),
+  	  m_toolbar(0)
 {
+  scaleValues=gBlock<double>(8);
+  for(int i=1;i<=scaleValues.Length();i++)
+    scaleValues[i]=.25*i;
+  
   m_printData = new wxPrintData;
   m_pageSetupData = new wxPageSetupDialogData;
 
@@ -439,13 +568,14 @@ PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
 
   CreateStatusBar();
   MakeMenus();
-
-  //  m_toolbar = new PxiChildToolbar(this, this);
+  m_toolbar = new PxiChildToolbar(this, this);
 
   int width, height;
   GetClientSize(&width, &height);
     // save the canvas in subframe
   canvas = new PxiCanvas(this, wxPoint(0, 0), wxSize(width, height),wxRETAINED,p_filename);
+  SetToolBar(m_toolbar);
+  MarkScaleMenu();
   Show(true);
 }
 
@@ -467,15 +597,30 @@ void PxiChild::MakeMenus(void)
   
   wxMenu *prefs_menu = new wxMenu;
   wxMenu *prefs_font_menu = new wxMenu;
+  wxMenu *prefs_scale_menu = new wxMenu;
 
   prefs_font_menu->Append(PXI_PREFS_FONT_AXIS,"&Axes", "Change Axes Font");
   prefs_font_menu->Append(PXI_PREFS_FONT_LABEL,"&Label", "Change Lable Font");
   prefs_font_menu->Append(PXI_PREFS_FONT_OVERLAY,"&Overlay", "Change Overlay Font");
+
   prefs_menu->Append(PXI_PREFS_FONTS, "&Fonts", prefs_font_menu,
 		     "Set display fonts");
 
   prefs_menu->Append(PXI_PREFS_COLORS,"&Colors", "Change Colors");
 
+ 
+  for(int i=0;i<8;i++) {
+    wxString tmp;
+    tmp.Printf("%4.2f",scaleValues[i+1]);
+    prefs_scale_menu->Append(PXI_PREFS_SCALE_1+i,tmp,tmp,true);
+  }  
+  prefs_menu->Append(PXI_PREFS_SCALE, "&Scale", prefs_scale_menu,
+		     "Set display scale");
+
+  prefs_menu->AppendSeparator();
+  prefs_menu->Append(PXI_PREFS_ZOOM_OUT,"Zoom &Out", "Zoom Out");
+  prefs_menu->Append(PXI_PREFS_ZOOM_IN,"Zoom &In", "Zoom In");
+  
   wxMenu *page_menu = new wxMenu;
   page_menu->Append(PXI_PAGE_PREV,"&Previous (PgUp)", "Previous Page");
   page_menu->Append(PXI_PAGE_NEXT,"&Next     (PgDn)", "Next Page");
@@ -610,54 +755,33 @@ END_EVENT_TABLE()
 PxiCanvas::PxiCanvas(wxFrame *frame, const wxPoint &p_position,
 		     const wxSize &p_size, int style,const char *file_name):
   wxScrolledWindow(frame, -1, p_position, p_size, style),
-  exp_data(NULL),draw_settings(NULL), probs(file_name), painting(false)
+  exp_data(NULL),draw_settings(NULL), probs(file_name), painting(false), 
+  m_landscape(false), m_width(850/2), m_height(1100/2), m_scale(1.0), 
+  m_ppu(25)
 {
   headers.Append(FileHeader(file_name));
   draw_settings=new PxiDrawSettings(headers[1]);
   frame->SetTitle(headers[1].FileName());
+
+  // fit to 8 1/2 x 11 inch  
+  SetScale(1.0);
+
   Show(true);
 }
 
 #include "wx/printdlg.h"
-#ifdef UNUSED
-void PxiChild::MyPrint(wxCommandEvent &event)
-{
-
-/*
-	wxPrintData data;
-	wxPrintDialogData dd(data);
-	dd.SetMaxPage(canvas->draw_settings->GetMaxPage());
-	wxPrintDialog dialog(this,&dd);
-*/
-   wxPrintDialog dialog(this);
-   dialog.GetPrintDialogData().SetMaxPage(canvas->draw_settings->GetMaxPage());
-	if(dialog.ShowModal() == wxID_OK) {
-		wxDC *dc(dialog.GetPrintDC());
-      if (dc->Ok()) {
-      	if(dialog.GetPrintDialogData().GetPrintToFile())
-      //			if(dd.GetPrintToFile())
-			dc->StartDoc("PXI printout");
-			dc->StartPage();
-			this->canvas->Update(*dc,PXI_UPDATE_PRINTER);
-	    dc->EndPage();
-	    dc->EndDoc();
- 	 }
-  this->canvas->Update(*dc,PXI_UPDATE_SCREEN);
-  }
-}
-#endif // UNUSED
 
 void PxiChild::OnPrint(wxCommandEvent& event)
 {
-    wxPrintDialogData printDialogData(* m_printData);
-
-    wxPrinter printer(& printDialogData);
-    PxiPrintout printout(*canvas, "PXI printout");
-    if (!printer.Print(this, &printout, TRUE))
-      wxMessageBox("There was a problem printing.\nPerhaps your current printer is not set correctly?", "Printing", wxOK);
-    else {
-      (*m_printData) = printer.GetPrintDialogData().GetPrintData();
-    }
+  wxPrintDialogData printDialogData(* m_printData);
+  
+  wxPrinter printer(& printDialogData);
+  PxiPrintout printout(*canvas, "PXI printout");
+  if (!printer.Print(this, &printout, TRUE))
+    wxMessageBox("There was a problem printing.\nPerhaps your current printer is not set correctly?", "Printing", wxOK);
+  else {
+    (*m_printData) = printer.GetPrintDialogData().GetPrintData();
+  }
 }
 
 void PxiChild::OnPrintPreview(wxCommandEvent& event)
@@ -682,6 +806,7 @@ void PxiChild::OnPrintPreview(wxCommandEvent& event)
   frame->Show(TRUE);
 }
 
+#ifdef UNUSED
 void PxiChild::print(wxOutputOption fit, bool preview)
 {
 
@@ -691,25 +816,24 @@ void PxiChild::print(wxOutputOption fit, bool preview)
 	dd.SetMaxPage(canvas->draw_settings->GetMaxPage());
 	wxPrintDialog dialog(this,&dd);
 */
-   wxPrintDialog dialog(this);
-   dialog.GetPrintDialogData().SetMaxPage(canvas->draw_settings->GetMaxPage());
-	if(dialog.ShowModal() == wxID_OK) {
-		wxDC *dc(dialog.GetPrintDC());
-      if (dc->Ok()) {
-      	if(dialog.GetPrintDialogData().GetPrintToFile())
-      //			if(dd.GetPrintToFile())
-			dc->StartDoc("PXI printout");
-			dc->StartPage();
-			this->canvas->Update(*dc,PXI_UPDATE_PRINTER);
-	    dc->EndPage();
-	    dc->EndDoc();
- 	 }
-  this->canvas->Update(*dc,PXI_UPDATE_SCREEN);
+  wxPrintDialog dialog(this);
+  dialog.GetPrintDialogData().SetMaxPage(canvas->draw_settings->GetMaxPage());
+  if(dialog.ShowModal() == wxID_OK) {
+    wxDC *dc(dialog.GetPrintDC());
+    if (dc->Ok()) {
+      if(dialog.GetPrintDialogData().GetPrintToFile())
+	//			if(dd.GetPrintToFile())
+	dc->StartDoc("PXI printout");
+      dc->StartPage();
+      this->canvas->Update(*dc,PXI_UPDATE_PRINTER);
+      dc->EndPage();
+      dc->EndDoc();
+    }
+    this->canvas->Update(*dc,PXI_UPDATE_SCREEN);
   }
 
 }
 
-#ifdef UNUSED
 void PxiChild::print(wxOutputOption fit, bool preview)
 {
   if (!preview)
@@ -1229,3 +1353,4 @@ void MyFrame::OnPageSetupPS(wxCommandEvent& WXUNUSED(event))
 }
 #endif
 #endif // UNUSED
+

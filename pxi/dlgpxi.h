@@ -120,6 +120,17 @@ public:
   virtual ~dialogOverlayOptions();
 };
 
+class dialogSelectScale : public guiAutoDialog {
+private:
+  wxRadioBox *m_size;
+  
+  const char *HelpString(void) const { return "Change Scale"; }
+public:
+  dialogSelectScale(wxWindow *, double scale);
+  virtual ~dialogSelectScale();
+  double GetScale(void);
+};
+
 const int idEXPDATA_BROWSE1_BUTTON = 3051;
 const int idEXPDATA_BROWSE2_BUTTON = 3052;
 
