@@ -1225,10 +1225,18 @@ void dialogQre::AlgorithmFields(void)
 			      2, plotTypeChoices);
   if (plotType == 0 || plotType == 1)
     m_plotType->SetSelection(plotType);
+#ifdef wx_motif
+  NewLine();
+#endif  // wx_motif
 
   m_plotType->SetConstraints(new wxLayoutConstraints);
+#ifdef wx_motif
+  m_plotType->GetConstraints()->top.SameAs(m_startOption, wxBottom, 10);
+  m_plotType->GetConstraints()->left.SameAs(m_startOption, wxLeft);
+#else
   m_plotType->GetConstraints()->top.SameAs(m_startOption, wxTop);
   m_plotType->GetConstraints()->left.SameAs(m_startOption, wxRight, 10);
+#endif  // wx_motif
   m_plotType->GetConstraints()->width.AsIs();
   m_plotType->GetConstraints()->height.AsIs();
 
@@ -1236,7 +1244,7 @@ void dialogQre::AlgorithmFields(void)
   m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
   m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
   m_algorithmGroup->GetConstraints()->right.SameAs(m_tolND, wxRight, -10);
-  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_startOption, wxBottom, -10);
+  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_plotType, wxBottom, -10);
 
   PxiFields();
 }
