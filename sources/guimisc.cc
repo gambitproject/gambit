@@ -1,8 +1,10 @@
+//
 // File: guimisc.cc -- overloads some standard functions to provide extra
 // functionality in the GUI enviroment.  This is only needed/working under
 // windows.
 // $Id$
 //
+
 #ifdef __BORLANDC__
 
 #include <assert.h>
@@ -11,7 +13,7 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "wx.h"
+#include "wx/wx.h"
 #include "wxio.h"
 
 // This assert will work ONLY under a 16bit compile
@@ -43,12 +45,15 @@ exit(1);
 extern "C"
 int printf(const char _FAR *fmt, ...)
 {
-va_list ap;
-static char buffer[512];
-va_start(ap, fmt);
-int ret=wvsprintf(buffer,fmt,ap) ;
-(*wout)<<buffer;
-return ret;
+#ifdef NOT_PORTED_YET
+  va_list ap;
+  static char buffer[512];
+  va_start(ap, fmt);
+  int ret=wvsprintf(buffer,fmt,ap) ;
+  (*wout)<<buffer;
+  return ret;
+#endif  // NOT_PORTED_YET
+  return 1;
 }
 
 int     _RTLENTRY _EXPFUNC fprintf(FILE _FAR *__stream, const char _FAR *fmt, ...)

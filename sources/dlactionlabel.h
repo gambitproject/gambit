@@ -7,6 +7,8 @@
 #ifndef DLACTIONLABEL_H
 #define DLACTIONLABEL_H
 
+#include "wx/grid.h"
+
 class dialogActionLabel : public guiPagedDialog {
 private:
   Infoset *m_infoset;
@@ -17,7 +19,7 @@ public:
   dialogActionLabel(Infoset *, wxWindow *);
   virtual ~dialogActionLabel() { }
 
-  const gText &GetActionLabel(int p_action) const
+  gText GetActionLabel(int p_action) const
     { return GetValue(p_action); }
 };
 

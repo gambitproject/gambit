@@ -12,8 +12,8 @@ const int NUM_NFG_EVENTS = 33;
 AccelEvent nfg_events[NUM_NFG_EVENTS]=
 {
   AccelEvent("FileSave", NFG_FILE_SAVE),
-  AccelEvent("FilePrint", OUTPUT_MENU),
-  AccelEvent("FileClose", CLOSE_MENU),
+  AccelEvent("FilePrint", NFG_FILE_OUTPUT),
+  AccelEvent("FileClose", NFG_FILE_CLOSE),
   AccelEvent("EditLabel", NFG_EDIT_LABEL),
   AccelEvent("EditStrategies", NFG_EDIT_STRATS),
   AccelEvent("EditPlayers", NFG_EDIT_PLAYERS),
@@ -40,8 +40,8 @@ AccelEvent nfg_events[NUM_NFG_EVENTS]=
   AccelEvent("ViewOutcomes", NFG_VIEW_OUTCOMES),
   AccelEvent("PrefsColors", NFG_PREFS_COLORS),
   AccelEvent("PrefsAccels", NFG_PREFS_ACCELS),
-  AccelEvent("HelpAbout", HELP_MENU_ABOUT),
-  AccelEvent("HelpContents", HELP_MENU_CONTENTS),
+  AccelEvent("HelpAbout", NFG_HELP_ABOUT),
+  AccelEvent("HelpContents", NFG_HELP_CONTENTS),
   AccelEvent("EditPayoff", NFG_ACCL_PAYOFF),
   AccelEvent("EditNextPayoff", NFG_ACCL_NEXT_PAYOFF)
 };

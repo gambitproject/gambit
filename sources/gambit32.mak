@@ -1,27 +1,22 @@
 
 .AUTODEPEND
 
-WXDIR = D:\WXWIN
+WXDIR = E:\WX2
 BCCDIR = C:\BC5
 SRCSUFF = .cc
 EXTRALIBS = # bin32\gambit
-EXTRACPPFLAGS = 
-EXTRALINKFLAGS = -Tpe -aa -V4.0 -c
+EXTRACPPFLAGS = -v 
+EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
 TARGET = gambit
-OBJECTS =    spreadconfig.obj\
-   spreadcanvas.obj\
-   spread3d.obj\
-   dlnfg.obj\
+OBJECTS =   dlnfg.obj\
    dlefg.obj\
    treedrag.obj\
    treerender.obj\
    dlsupport.obj\
    nfgsolvd.obj\
    efgsolvd.obj\
-   spread.obj\
    nfgshow.obj\
-   spreadim.obj\
    treedraw.obj\
    nfgsoln.obj\
    wxsignal.obj\
@@ -41,7 +36,6 @@ OBJECTS =    spreadconfig.obj\
    wxmisc.obj\
    gambit.obj\
    gambdraw.obj\
-   guimisc.obj\
    system.obj\
    gpool.obj\
    gstream.obj\
@@ -68,6 +62,7 @@ OBJECTS =    spreadconfig.obj\
    efbasis.obj\
    nfginst.obj\
    efginst.obj\
+   behavinst.obj\
    readnfg.obj\
    readefg.obj\
    nfgutils.obj\
@@ -145,8 +140,8 @@ OBJECTS =    spreadconfig.obj\
 CFG = gambit32.cfg
 WXLIBDIR = $(WXDIR)\lib
 WXLIB = wx32
-WXINC = -I$(WXDIR)\include\base -I$(WXDIR)\include\msw
-WIN95FLAG = -D__WIN95__ -D__WINDOWS__
+WXINC = -I$(WXDIR)\include
+#WIN95FLAG = -D__WIN95__ -D__WINDOWS__
 
 OPT = -Od
 
@@ -165,6 +160,7 @@ LINKFLAGS= /Tpe /L$(WXLIBDIR);$(BCCDIR)\lib $(EXTRALINKFLAGS)
 OPT = -Od
 DEBUG_FLAGS= -v
 
+
 CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
 
 all: $(TARGET).exe $(EXTRATARGETS)
@@ -180,7 +176,7 @@ $(TARGET).res
 !
 
 gambit.res :      ..\winsrc\res\gambit.rc 
-    brc32 -r -fo.\gambit.res /i$(BCCDIR)\include /i$(WXDIR)\include\msw /i$(WXDIR)\contrib\fafa ..\winsrc\res\gambit
+    brc32 -r -fo.\gambit.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include ..\winsrc\res\gambit
 
 clean:
         -erase *.obj

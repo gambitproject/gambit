@@ -15,7 +15,7 @@ template class gIdeal<gRational>;
 //template class gBasis<gRational>;
 //template gOutput &operator<<(gOutput &f, const gBasis<gRational> &y);
 
-template class gIdeal<double>;
+//template class gIdeal<double>;
 //template class gBasis<double>;
 //template gOutput &operator<<(gOutput &f, const gBasis<double> &y);
 

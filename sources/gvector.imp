@@ -179,12 +179,9 @@ template <class T> T gVector<T>::NormSquared(void) const
   return answer;
 }
 
-
-
 template <class T> gOutput &operator<<(gOutput &f, const gVector<T> &V)
 { V.Dump(f);  return f; }
 
-#ifdef GDOUBLE
 template <class T> gVector<gDouble> TogDouble(const gVector<T>& V)
 {
   gVector<gDouble> answer(V.Length());
@@ -192,4 +189,3 @@ template <class T> gVector<gDouble> TogDouble(const gVector<T>& V)
     answer[i] = (gDouble)V[i];
   return answer;
 }
-#endif // GDOUBLE

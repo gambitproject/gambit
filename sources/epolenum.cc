@@ -1,7 +1,7 @@
 //
 // FILE: epolenum.cc  Extensive form version of polynomial enumeration
 //
-// $Id$
+// $id$
 //
 
 #include "epolenum.imp"

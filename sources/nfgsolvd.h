@@ -19,24 +19,24 @@ typedef enum {
 class dialogNfgSolveStandard : public guiAutoDialog {
 private:
   wxRadioBox *m_standardType, *m_standardNum, *m_precision;
-  wxText *m_description;
+  wxTextCtrl *m_description;
   const Nfg &m_nfg;
 
-  static void CallbackChanged(wxRadioBox &p_object, wxEvent &)
-    { ((dialogNfgSolveStandard *) p_object.GetClientData())->OnChanged(); }
-
-  void OnChanged(void);
+  // Button event handler
+  void OnChanged(wxCommandEvent &);
 
   const char *HelpString(void) const { return "NFG Standard Solutions"; }
 
 public:
-  dialogNfgSolveStandard(const Nfg &p_nfg, wxWindow *p_parent);
+  dialogNfgSolveStandard(wxWindow *p_parent, const Nfg &p_nfg);
   virtual ~dialogNfgSolveStandard();
 
   nfgStandardType Type(void) const;
   nfgStandardNum Number(void) const;
   gPrecision Precision(void) const
    { return ((m_precision->GetSelection() == 0) ? precDOUBLE : precRATIONAL); }
+
+  DECLARE_EVENT_TABLE()
 };
 
 

@@ -1,7 +1,7 @@
 //
 // FILE: epolenum.imp -- Polynomial Nash Enum module for Extensive form games
 //
-// $Id$ 
+// $Id$
 //
 
 #include "gwatch.h"

@@ -960,9 +960,6 @@ static Portion *GSM_Lp_Efg(Portion **param)
   }
 }
 
-#ifndef MINI_POLY
-
-
 //------------------
 //  PolEnumSolve (was AllNashSolve)
 //------------------
@@ -1122,7 +1119,6 @@ static Portion *GSM_SequentialEquilib(Portion **param)
   return new Behav_ListPortion(solutions);
 }
 #endif // INTERNAL_VERSION
-#endif // ! MINI_POLY
 
 //---------
 // Nfg
@@ -1647,8 +1643,6 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(0), BYREF));
   gsm->AddFunction(FuncObj);
 
-#ifndef MINI_POLY
-
   FuncObj = new gclFunction("PolEnumSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_PolEnumSolve_Nfg, 
 				       PortionSpec(porMIXED, 1), 8));
@@ -1716,8 +1710,6 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 #endif // INTERNAL_VERSION
-#endif // ! MINI_POLY
-
 
   FuncObj = new gclFunction("Payoff", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Payoff_Behav, porNUMBER, 2,

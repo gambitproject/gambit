@@ -4,7 +4,7 @@
 // $Id$
 //
 
-#include "wx.h"
+#include "wx/wx.h"
 #include "wxmisc.h"
 #ifdef wx_msw
 #include "wx_mf.h"
@@ -15,6 +15,7 @@
 #include "legendc.h"
 #include "twflash.h"
 #include "treewin.h"
+#include "treezoom.h"
 #include "efgshow.h"
 
 int INFOSET_SPACING = 10;
@@ -23,80 +24,385 @@ int SUBGAME_SMALL_ICON_SIZE = 10;
 int SUBGAME_PICK_SIZE = 30;
 
 //-----------------------------------------------------------------------
+//                class guiNodeList: Member functions
+//-----------------------------------------------------------------------
+
+guiNodeList::guiNodeList(FullEfg &p_efg, TreeRender *p_parent)
+  : m_efg(p_efg), m_parent(p_parent)
+{
+  m_subgameList.Append(SubgameEntry(m_efg.RootNode()));
+}
+
+Node *guiNodeList::NodeHitTest(int p_x, int p_y, int p_nodeLength) const
+{
+  const int DELTA = 8;
+
+  for (int i = 1; i <= Length(); i++) {
+    NodeEntry *entry = (*this)[i];
+
+    if (p_x > entry->x &&
+	p_x < entry->x + p_nodeLength + entry->nums*INFOSET_SPACING &&
+	p_y > entry->y - DELTA &&
+	p_y < entry->y + DELTA) {
+      return (Node *) entry->n;
+    }
+  }
+
+  return 0;
+}
+
+NodeEntry *guiNodeList::GetValidParent(Node *e)
+{
+  NodeEntry *n = GetNodeEntry(e->GetParent());
+  if (n) {
+    return n;
+  }
+  else { 
+    return GetValidParent(e->GetParent());
+  }
+}
+
+NodeEntry *guiNodeList::GetValidChild(Node *e)
+{
+  for (int i = 1; i <= e->Game()->NumChildren(e); i++)  {
+    NodeEntry *n = GetNodeEntry(e->GetChild(i));
+    if (n) {
+      return n;
+    }
+    else  {
+      n = GetValidChild(e->GetChild(i));
+      if (n) return n;
+    }
+  }
+  return 0;
+}
+
+NodeEntry *guiNodeList::GetEntry(Node *p_node) const
+{
+  for (int i = 1; i <= Length(); i++) {
+    if ((*this)[i]->n == p_node) {
+      return (*this)[i];
+    }
+  }
+  return 0;
+}
+
+Node *guiNodeList::PriorSameLevel(Node *p_node) const
+{
+  NodeEntry *entry = GetEntry(p_node);
+  if (entry) {
+    for (int i = Find(entry) - 1; i >= 1; i--) {
+      if ((*this)[i]->level == entry->level)
+	return (*this)[i]->n;
+    }
+  }
+  return 0;
+}
+
+Node *guiNodeList::NextSameLevel(Node *p_node) const
+{
+  NodeEntry *entry = GetEntry(p_node);
+  if (entry) {
+    for (int i = Find(entry) + 1; i <= Length(); i++) {
+      if ((*this)[i]->level == entry->level) { 
+	return (*this)[i]->n;
+      }
+    }
+  }
+  return 0;
+}
+
+SubgameEntry &guiNodeList::GetSubgameEntry(Node *p_node)
+{
+  for (int i = 1; i <= m_subgameList.Length(); i++) {
+    if (m_subgameList[i].root == p_node)  {
+      return m_subgameList[i];
+    }
+  }
+
+  return m_subgameList[1];  // root subgame
+}
+
+int guiNodeList::FillTable(Node *n, const EFSupport &cur_sup, int level,
+			   int &maxlev, int &maxy, int &miny, int &ycoord)
+{
+  int y1 = -1, yn=0;
+  const TreeDrawSettings &draw_settings = m_parent->DrawSettings();
+    
+  SubgameEntry &subgame_entry = GetSubgameEntry(n->GetSubgameRoot());
+    
+  NodeEntry *entry = new NodeEntry;
+  entry->n = n;   // store the node the entry is for
+  (*this) += entry;
+  entry->in_sup = true;
+  if (n->Game()->NumChildren(n)>0 && subgame_entry.expanded) {
+    for (int i = 1; i <= n->Game()->NumChildren(n); i++) {
+      bool in_sup = true;
+      if (n->GetPlayer()->GetNumber())        // pn == 0 for chance nodes
+	in_sup = cur_sup.Find(n->GetInfoset()->Actions()[i]);
+      if (in_sup) {
+	yn = FillTable(n->GetChild(i), cur_sup, level+1,
+		       maxlev, maxy, miny, ycoord);
+	if (y1 == -1)  y1 = yn;
+      }
+      else {  // not in the support.
+	if (!draw_settings.RootReachable()) {
+	  // show only nodes reachable from root
+	  // still consider this node, but mark it as invisible
+	  yn = FillTable(n->GetChild(i), cur_sup, level+1,
+			 maxlev, maxy, miny, ycoord);
+	  if (y1 == -1)  y1 = yn;
+	  GetNodeEntry(n->GetChild(i))->in_sup = false;
+	}
+      }
+    }
+    entry->y = (y1 + yn) / 2;
+  }
+  else {
+    entry->y = ycoord;
+    ycoord += draw_settings.YSpacing();
+  }
+    
+  entry->level = level;
+  entry->has_children = n->Game()->NumChildren(n);
+  // Find out what branch of the parent this node is on
+  if (n == m_efg.RootNode()) {
+    entry->child_number = 0;
+  }
+  else {
+    Node *parent = n->GetParent();
+    for (int i = 1; i <= parent->Game()->NumChildren(parent); i++)
+      if (parent->GetChild(i) == n)
+	entry->child_number = i;
+  }
+    
+  entry->infoset.y = -1;
+  entry->infoset.x = -1;
+  entry->num = 0;
+  entry->nums = 0;
+  entry->x = level * 
+    (draw_settings.NodeLength() + draw_settings.BranchLength() +
+     draw_settings.ForkLength());
+  if (n->GetPlayer()) {
+    entry->color = draw_settings.GetPlayerColor(n->GetPlayer()->GetNumber());
+  }
+  else {
+    entry->color = draw_settings.GetPlayerColor(-1);
+  }  
+  
+  entry->expanded = subgame_entry.expanded;
+    
+  maxlev = gmax(level, maxlev);
+  maxy = gmax(entry->y, maxy);
+  miny = gmin(entry->y, miny);
+    
+  return entry->y;
+}
+
+//
+// Checks if there are any nodes in the same infoset as e that are either
+// on the same level (if SHOWISET_SAME) or on any level (if SHOWISET_ALL)
+//
+NodeEntry *guiNodeList::NextInfoset(NodeEntry *e)
+{
+  const TreeDrawSettings &draw_settings = m_parent->DrawSettings();
+  
+  for (int pos = Find(e)+1; pos <= Length(); pos++) {
+    NodeEntry *e1 = (*this)[pos];
+    // infosets are the same and the nodes are on the same level
+    if (e->n->GetInfoset() == e1->n->GetInfoset()) {
+      if (draw_settings.ShowInfosets() == SHOWISET_ALL) {
+	return e1;
+      }
+      else if (e->level == e1->level) {
+	return e1;
+      }
+    }
+  }
+  return 0;
+}
+
+//
+// CheckInfosetEntry.  Checks how many infoset lines are to be drawn at each
+// level, spaces them by setting each infoset's node's num to the previous
+// infoset node+1.  Also lengthens the nodes by the amount of space taken up
+// by the infoset lines.
+//
+void guiNodeList::CheckInfosetEntry(NodeEntry *e)
+{
+  int pos;
+  NodeEntry *infoset_entry, *e1;
+  const TreeDrawSettings &draw_settings = m_parent->DrawSettings();
+  // Check if the infoset this entry belongs to (on this level) has already
+  // been processed.  If so, make this entry->num the same as the one already
+  // processed and return
+  infoset_entry = NextInfoset(e);
+  for (pos = 1; pos <= Length(); pos++) {
+    e1 = (*this)[pos];
+    // if the infosets are the same and they are on the same level and e1 has been processed
+    if (e->n->GetInfoset() == e1->n->GetInfoset() && 
+	e->level == e1->level && e1->num) {
+      e->num = e1->num;
+      if (infoset_entry) {
+	e->infoset.y = infoset_entry->y;
+	if (draw_settings.ShowInfosets() == SHOWISET_ALL)
+	  e->infoset.x = infoset_entry->x;
+      }
+      return;
+    }
+  }
+    
+  // If we got here, this entry does not belong to any processed infoset yet.
+  // Check if it belongs to ANY infoset, if not just return
+  if (!infoset_entry) return;
+    
+  // If we got here, then this entry is new and is connected to other entries
+  // find the entry on the same level with the maximum num.
+  // This entry will have num = num+1.
+  int num = 0;
+  for (pos = 1; pos <= Length(); pos++) {
+    e1 = (*this)[pos];
+    // Find the max num for this level
+    if (e->level == e1->level) num = gmax(e1->num, num);
+  }
+  num++;
+  e->num = num;
+  e->infoset.y = infoset_entry->y;
+  if (draw_settings.ShowInfosets() == SHOWISET_ALL) {
+    e->infoset.x = infoset_entry->x;
+  }
+}
+
+void guiNodeList::FillInfosetTable(Node *n, const EFSupport &cur_sup)
+{
+  const TreeDrawSettings &draw_settings = m_parent->DrawSettings();
+  NodeEntry *entry = GetNodeEntry(n);
+  if (n->Game()->NumChildren(n)>0) {
+    for (int i = 1; i <= n->Game()->NumChildren(n); i++) {
+      bool in_sup = true;
+      if (n->GetPlayer()->GetNumber()) {
+	in_sup = cur_sup.Find(n->GetInfoset()->Actions()[i]);
+      }
+            
+      if (in_sup || !draw_settings.RootReachable()) {
+	FillInfosetTable(n->GetChild(i), cur_sup);
+      }
+    }
+  }
+
+  if (entry) {
+    CheckInfosetEntry(entry);
+  }
+}
+
+void guiNodeList::UpdateTableInfosets(void)
+{
+  // Note that levels are numbered from 0, not 1.
+  // create an array to hold max num for each level
+  gArray<int> nums(0, m_maxlev+1); 
+    
+  for (int i = 0; i <= m_maxlev + 1; nums[i++] = 0);
+  NodeEntry *e;
+  // find the max e->num for each level
+  for (int pos = 1; pos <= Length(); pos++) {
+    e = (*this)[pos];
+    nums[e->level] = gmax(e->num+1, nums[e->level]);
+  }
+    
+  // record the max e->num for each level for each node
+  for (int pos = 1; pos <= Length(); pos++) {
+    e = (*this)[pos];
+    e->nums = nums[e->level];
+  }
+    
+  for (int i = 0; i <= m_maxlev; i++)  nums[i+1] += nums[i];
+    
+  // now add the needed length to each level
+  for (int pos = 1; pos <= (*this).Length(); pos++) {
+    e = (*this)[pos];
+    if (e->level != 0) 
+      e->x += nums[e->level-1]*INFOSET_SPACING;
+  }
+}
+
+void guiNodeList::UpdateTableParents(void)
+{
+  for (int pos = 1; pos <= Length(); pos++) {
+    NodeEntry *e = (*this)[pos];
+    e->parent = (e->n == m_efg.RootNode()) ? e : GetValidParent(e->n);
+    if (!GetValidChild(e->n)) e->has_children = 0;
+  }
+}
+
+void guiNodeList::Layout(const EFSupport &p_support)
+{
+  const int TOP_MARGIN = 40;
+
+  Flush();
+
+  int maxlev = 0, miny = 0, maxy = 0, ycoord = TOP_MARGIN;
+  FillTable(m_efg.RootNode(), p_support, 0, maxlev, maxy, miny, ycoord);
+  m_maxlev = maxlev;
+
+  const TreeDrawSettings &draw_settings = m_parent->DrawSettings();
+  if (draw_settings.ShowInfosets()) {
+    // FIXME! This causes lines to disappear... sometimes.
+    FillInfosetTable(m_efg.RootNode(), p_support);
+    UpdateTableInfosets();
+  }
+
+  UpdateTableParents();
+
+  m_maxX = ((maxlev + 1) * (draw_settings.BranchLength() + 
+			    draw_settings.ForkLength() + 
+			    draw_settings.NodeLength()) + 
+	    draw_settings.OutcomeLength());
+  m_maxY = maxy + 25;
+}
+
+//-----------------------------------------------------------------------
 //                    MISCELLANEOUS FUNCTIONS
 //-----------------------------------------------------------------------
 
 inline void DrawLine(wxDC &dc, double x_s, double y_s, double x_e, double y_e,
-                     int color = 0, int thick = 0)
+                     const wxColour &color, int thick = 0)
 {
-  if (dc.Colour) { 
-    if (color > -1 && color < WX_COLOR_LIST_LENGTH) {
-      dc.SetPen(wxThePenList->FindOrCreatePen((char *) wx_color_list[color],
-					      (thick) ? 8 : 2, wxSOLID));
-    }
-        
-    if (color >= WX_COLOR_LIST_LENGTH && color < 2 * WX_COLOR_LIST_LENGTH) {
-      dc.SetPen(wxThePenList->FindOrCreatePen
-		((char *) wx_hilight_color_list[color % WX_COLOR_LIST_LENGTH],
-		 2, wxSOLID));
-    }
-  }
-  else
-    dc.SetPen(wxThePenList->FindOrCreatePen("BLACK", 2, wxSOLID));
-    
+  dc.SetPen(wxPen(color, (thick) ? 8 : 2, wxSOLID));
   dc.DrawLine(x_s, y_s, x_e, y_e);
 }
 
 inline void DrawRectangle(wxDC &dc, int x_s, int y_s, int w, int h,
-                          int color = 0)
+                          const wxColour &color)
 {
-  if (color > -1) {
-    dc.SetPen(wxThePenList->FindOrCreatePen((char *) wx_color_list[color], 
-					    2, wxSOLID));
-  }
-  
+  dc.SetPen(wxPen(color, 2, wxSOLID));
   dc.DrawRectangle(x_s, y_s, w, h);
 }
 
 inline void DrawThinLine(wxDC &dc, int x_s, int y_s, int x_e, int y_e,
-                         int color = 0)
+                         const wxColour &color)
 {
-  if (dc.Colour && color > -1)
-    dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_color_list[color],
-					    1, wxSOLID));
-  else
-    dc.SetPen(wxThePenList->FindOrCreatePen("BLACK", 1, wxSOLID));
-    
+  dc.SetPen(wxPen(color, 1, wxSOLID));
   dc.DrawLine(x_s, y_s, x_e, y_e);
 }
 
 inline void DrawDashedLine(wxDC &dc, int x_s, int y_s, int x_e, int y_e,
-			   int color = 0)
+			   const wxColour &color)
 {
-  if (dc.Colour && color > -1)
-    dc.SetPen(wxThePenList->FindOrCreatePen((char *) wx_color_list[color],
-					    1, wxSHORT_DASH));
-  else
-    dc.SetPen(wxThePenList->FindOrCreatePen("BLACK", 1, wxSOLID));
-    
+  dc.SetPen(wxPen(color, 1, wxSHORT_DASH));
   dc.DrawLine(x_s, y_s, x_e, y_e);
 }
 
-inline void DrawCircle(wxDC &dc, int x, int y, int r, int color = 0)
+inline void DrawCircle(wxDC &dc, int x, int y, int r, const wxColour &color)
 {
-  if (color > -1 && dc.Colour)
-    dc.SetPen(wxThePenList->FindOrCreatePen((char *) wx_color_list[color],
-					    3, wxSOLID));
-  else
-    dc.SetPen(wxThePenList->FindOrCreatePen("BLACK", 3, wxSOLID));
+  dc.SetPen(wxPen(color, 3, wxSOLID));
   dc.DrawEllipse(x-r, y-r, 2*r, 2*r);
 }
 
 
 void DrawLargeSubgameIcon(wxDC &dc, const NodeEntry &entry, int nl)
 {
-  dc.SetPen(wxThePenList->FindOrCreatePen("INDIAN RED", 2, wxSOLID));
-  dc.SetBrush(wxTheBrushList->FindOrCreateBrush("RED", wxSOLID));
+  dc.SetPen(*wxThePenList->FindOrCreatePen("INDIAN RED", 2, wxSOLID));
+  dc.SetBrush(*wxTheBrushList->FindOrCreateBrush("RED", wxSOLID));
   wxPoint points[3];
   int x0 = (entry.x + nl +
 	    entry.nums * INFOSET_SPACING - SUBGAME_LARGE_ICON_SIZE);
@@ -112,8 +418,8 @@ void DrawLargeSubgameIcon(wxDC &dc, const NodeEntry &entry, int nl)
 
 void DrawSmallSubgameIcon(wxDC &dc, const NodeEntry &entry)
 {
-  dc.SetPen(wxThePenList->FindOrCreatePen("INDIAN RED", 2, wxSOLID));
-  dc.SetBrush(wxTheBrushList->FindOrCreateBrush("RED", wxSOLID));
+  dc.SetPen(*wxThePenList->FindOrCreatePen("INDIAN RED", 2, wxSOLID));
+  dc.SetBrush(*wxTheBrushList->FindOrCreateBrush("RED", wxSOLID));
   wxPoint points[3];
   points[0].x = entry.x;
   points[0].y = entry.y;
@@ -126,7 +432,7 @@ void DrawSmallSubgameIcon(wxDC &dc, const NodeEntry &entry)
 
 void DrawSubgamePickIcon(wxDC &dc, const NodeEntry &entry)
 {
-  dc.SetPen(wxThePenList->FindOrCreatePen("BLACK", 2, wxSOLID));
+  dc.SetPen(*wxThePenList->FindOrCreatePen("BLACK", 2, wxSOLID));
   dc.DrawLine(entry.x, entry.y - SUBGAME_PICK_SIZE/2,
 	      entry.x, entry.y + SUBGAME_PICK_SIZE/2);
   dc.DrawLine(entry.x, entry.y - SUBGAME_PICK_SIZE/2,
@@ -140,31 +446,31 @@ void DrawSubgamePickIcon(wxDC &dc, const NodeEntry &entry)
 //                        TreeRender: Life cycle
 //-----------------------------------------------------------------------
 
-TreeRender::TreeRender(wxFrame *frame, TreeWindow *parent_,
-                       const gList<NodeEntry *> &node_list_,
-                       const Infoset * &hilight_infoset_,
-                       const Infoset * &hilight_infoset1_,
-                       const Node *&mark_node_, const Node *&subgame_node_,
-                       const TreeDrawSettings &draw_settings_)
-  : wxCanvas(frame, -1, -1, -1, -1, 0),
-    node_list(node_list_),
-    hilight_infoset(hilight_infoset_), hilight_infoset1(hilight_infoset1_),
-    mark_node(mark_node_), subgame_node(subgame_node_),
-    parent(parent_), draw_settings(draw_settings_),
-    flasher(0), painting(false)
+BEGIN_EVENT_TABLE(TreeRender, wxScrolledWindow)
+  EVT_PAINT(TreeRender::OnPaint)
+END_EVENT_TABLE()
+
+TreeRender::TreeRender(wxWindow *frame, TreeWindow *parent_)
+  : wxScrolledWindow(frame),
+    parent(parent_), flasher(0), painting(false)
 { }
 
 TreeRender::~TreeRender(void)
 {
-  if (flasher) delete flasher;
+  if (flasher)  {
+    delete flasher;
+  }
 }
 
-void TreeRender::OnPaint(void)
+void TreeRender::OnPaint(wxPaintEvent &)
 {
   if (painting) 
     return; // prevent re-entry
   painting = true;
-  Render(*GetDC());
+  wxPaintDC dc(this);
+  dc.SetBackground(*wxWHITE_BRUSH);
+  dc.SetUserScale(GetZoom(), GetZoom());
+  Render(dc);
   painting = false;
 }
 
@@ -179,11 +485,11 @@ void TreeRender::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
 {
   gText label = "";     // temporary to hold the label
   const Node *n = child_entry->n;
-  float tw, th;
+  long tw, th;
   bool hilight = false;
     
   // First take care of labeling the node on top.
-  switch (draw_settings.LabelNodeAbove()) {
+  switch (DrawSettings().LabelNodeAbove()) {
   case NODE_ABOVE_NOTHING:
     label ="";  
     break;
@@ -232,7 +538,7 @@ void TreeRender::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
   }
     
   if (label != "") {
-    dc.SetFont(draw_settings.NodeAboveFont());
+    dc.SetFont(DrawSettings().NodeAboveFont());
     dc.GetTextExtent("0", &tw, &th);
     gDrawText(dc, label, 
 	      child_entry->x + child_entry->nums * INFOSET_SPACING + 3,
@@ -240,7 +546,7 @@ void TreeRender::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
   }
   
   // Take care of labeling the node on the bottom.
-  switch (draw_settings.LabelNodeBelow()) { 
+  switch (DrawSettings().LabelNodeBelow()) { 
   case NODE_BELOW_NOTHING:
     label = "";
     break;
@@ -289,7 +595,7 @@ void TreeRender::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
   }
     
   if (label != "") {
-    dc.SetFont(draw_settings.NodeBelowFont());
+    dc.SetFont(DrawSettings().NodeBelowFont());
     gDrawText(dc, label, 
 	      child_entry->x + child_entry->nums * INFOSET_SPACING + 3,
 	      child_entry->y + 5);
@@ -298,7 +604,7 @@ void TreeRender::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
   if (child_entry->n != entry->n) {   // no branches for root
     // Now take care of branches....
     // Take care of labeling the branch on the top.
-    switch (draw_settings.LabelBranchAbove()) {
+    switch (DrawSettings().LabelBranchAbove()) {
     case BRANCH_ABOVE_NOTHING:
       label = "";
       break;
@@ -329,16 +635,16 @@ void TreeRender::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
     }
     
     if (label != "") {
-      dc.SetFont(draw_settings.BranchAboveFont());
+      dc.SetFont(DrawSettings().BranchAboveFont());
       dc.GetTextExtent("0", &tw, &th);
       gDrawText(dc, label, 
 		entry->x + entry->nums * INFOSET_SPACING + 
-		draw_settings.ForkLength() + draw_settings.NodeLength() + 3,
+		DrawSettings().ForkLength() + DrawSettings().NodeLength() + 3,
 		child_entry->y - th - 5);
     }
         
     // Take care of labeling the branch on the bottom.
-    switch (draw_settings.LabelBranchBelow()) { 
+    switch (DrawSettings().LabelBranchBelow()) { 
     case BRANCH_BELOW_NOTHING:
       label = "";
       break;
@@ -369,10 +675,10 @@ void TreeRender::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
     }
         
     if (label != "") {
-      dc.SetFont(draw_settings.BranchBelowFont());
+      dc.SetFont(DrawSettings().BranchBelowFont());
       gDrawText(dc, label,
 		entry->x + entry->nums * INFOSET_SPACING + 
-		draw_settings.ForkLength() + draw_settings.NodeLength() + 3,
+		DrawSettings().ForkLength() + DrawSettings().NodeLength() + 3,
 		child_entry->y + 5);
     }
   }
@@ -380,7 +686,7 @@ void TreeRender::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
   // Now take care of displaying the terminal node labels.
   hilight = false;
     
-  switch (draw_settings.LabelNodeRight()) { 
+  switch (DrawSettings().LabelNodeRight()) { 
   case NODE_RIGHT_NOTHING:
     label = "";
     break;
@@ -400,9 +706,9 @@ void TreeRender::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
   }
         
   if (label != "") { 
-    dc.SetFont(draw_settings.NodeRightFont());
+    dc.SetFont(DrawSettings().NodeRightFont());
     gDrawText(dc, label,
-	      child_entry->x + draw_settings.NodeLength() +
+	      child_entry->x + DrawSettings().NodeLength() +
 	      child_entry->nums * INFOSET_SPACING + 10,
 	      child_entry->y - 12);
   }
@@ -427,27 +733,28 @@ void TreeRender::RenderSubtree(wxDC &dc)
   NodeEntry entry, child_entry;
   // Determine the visible region on screen to implement clipping
   int x_start, y_start, width, height;
+
+  wxPoint deviceOrigin = dc.GetDeviceOrigin();
   
   ViewStart(&x_start, &y_start);
   GetClientSize(&width, &height);
   
   // go through the list of nodes, plotting them
-  for (int pos = 1; pos <= node_list.Length(); pos++) {
-    child_entry = *node_list[pos];    // must make a copy to use Translate
+  for (int pos = 1; pos <= NodeList().Length(); pos++) {
+    child_entry = *NodeList()[pos];    // must make a copy to use Translate
     entry = *child_entry.parent;
         
-    // If we are just a renderer, there can be no zoom! 
-    // For zoom, override JustRender().
     float zoom = GetZoom();
 
     // Check if this node/labels are visible
-    if (!(child_entry.x+dc.device_origin_x < x_start*PIXELS_PER_SCROLL  ||
-	  entry.x+dc.device_origin_x > x_start*PIXELS_PER_SCROLL+width/zoom ||
-	  (entry.y+dc.device_origin_y > y_start*PIXELS_PER_SCROLL+height/zoom &&
-	   child_entry.y+dc.device_origin_y > y_start*PIXELS_PER_SCROLL+height/zoom) ||
-	  (entry.y+dc.device_origin_y < y_start*PIXELS_PER_SCROLL && 
-	   child_entry.y+dc.device_origin_y < y_start*PIXELS_PER_SCROLL)) ||
-	(entry.infoset.y+dc.device_origin_y < y_start*PIXELS_PER_SCROLL+height/zoom)) {
+    if (!(child_entry.x+deviceOrigin.x < x_start*PIXELS_PER_SCROLL  ||
+	  entry.x+deviceOrigin.x > x_start*PIXELS_PER_SCROLL+width/zoom ||
+	  (entry.y+deviceOrigin.y > y_start*PIXELS_PER_SCROLL+height/zoom &&
+	   child_entry.y+deviceOrigin.y > y_start*PIXELS_PER_SCROLL+height/zoom) ||
+	  (entry.y+deviceOrigin.y < y_start*PIXELS_PER_SCROLL && 
+	   child_entry.y+deviceOrigin.y < y_start*PIXELS_PER_SCROLL)) ||
+	(entry.infoset.y+deviceOrigin.y < y_start*PIXELS_PER_SCROLL+height/zoom)) {
+
       // draw the labels
       RenderLabels(dc, &child_entry, &entry);
 
@@ -461,10 +768,10 @@ void TreeRender::RenderSubtree(wxDC &dc)
       if (child_entry.child_number == 1) {
 	// draw the 'node' line
 	bool hilight = 
-	  (hilight_infoset  && (entry.n->GetInfoset() == hilight_infoset)) ||
-	  (hilight_infoset1 && (entry.n->GetInfoset() == hilight_infoset1));
+	  (HighlightInfoset()  && (entry.n->GetInfoset() == HighlightInfoset())) ||
+	  (HighlightInfoset1() && (entry.n->GetInfoset() == HighlightInfoset1()));
 	::DrawLine(dc, entry.x, entry.y,
-		   entry.x + draw_settings.NodeLength() + 
+		   entry.x + DrawSettings().NodeLength() + 
 		   entry.nums * INFOSET_SPACING, entry.y, 
 		   entry.color, hilight ? 1 : 0);
 	
@@ -473,24 +780,24 @@ void TreeRender::RenderSubtree(wxDC &dc)
 		     3, entry.color);
       }
       
-      if (child_entry.n == subgame_node)
+      if (child_entry.n == SubgameNode())
 	DrawSubgamePickIcon(dc, child_entry);
     
       // draw the 'branches'
       if (child_entry.n->GetParent() && child_entry.in_sup) {
 	// no branches for root node
-	xs = entry.x+draw_settings.NodeLength()+entry.nums*INFOSET_SPACING;
+	xs = entry.x+DrawSettings().NodeLength()+entry.nums*INFOSET_SPACING;
 	ys = entry.y;
-	xe = xs+draw_settings.ForkLength();
+	xe = xs+DrawSettings().ForkLength();
 	ye = child_entry.y;
 	::DrawLine(dc, xs, ys, xe, ye, entry.color);
 
 	// Draw the highlight... y = a + bx = ys + (ye-ys) / (xe-xs) * x
-	double prob = parent->GetEfgFrame()->ActionProb(entry.n,
-							child_entry.child_number);
+	double prob = parent->Parent()->ActionProb(entry.n,
+						   child_entry.child_number);
 	if (prob > 0) {
-	  ::DrawLine(dc, xs, ys, (xs + draw_settings.ForkLength() * prob), 
-		     (ys + (ye - ys) * prob), WX_COLOR_LIST_LENGTH - 1);
+	  ::DrawLine(dc, xs, ys, (xs + DrawSettings().ForkLength() * prob), 
+		     (ys + (ye - ys) * prob), *wxBLACK);
 	}
 	
 	xs = xe;
@@ -508,35 +815,35 @@ void TreeRender::RenderSubtree(wxDC &dc)
       // (either real terminal or collapsed subgames)
       if (!child_entry.has_children) { 
 	::DrawLine(dc, xe, ye, 
-		   xe + draw_settings.NodeLength() + 
+		   xe + DrawSettings().NodeLength() + 
 		   child_entry.nums * INFOSET_SPACING, 
-		   ye, draw_settings.GetPlayerColor(-1));
+		   ye, DrawSettings().GetPlayerColor(-1));
       
 	// Collapsed subgame: subgame icon is drawn at this terminal node.
 	if ((child_entry.n->GetSubgameRoot() == child_entry.n) && 
 	    !child_entry.expanded)
-	  DrawLargeSubgameIcon(dc, child_entry, draw_settings.NodeLength());
+	  DrawLargeSubgameIcon(dc, child_entry, DrawSettings().NodeLength());
       
 	// Marked Node: a circle is drawn at this terminal node
-	if (child_entry.n == mark_node) {
+	if (child_entry.n == MarkNode()) {
 	  ::DrawCircle(dc, 
 		       xe + child_entry.nums * INFOSET_SPACING +
-		       draw_settings.NodeLength(), ye, 
-		       4, draw_settings.CursorColor());
+		       DrawSettings().NodeLength(), ye, 
+		       4, DrawSettings().CursorColor());
 	}
       }
 
       // Draw a circle to show the marked node
-      if ((entry.n == mark_node) && 
+      if ((entry.n == MarkNode()) && 
 	  (child_entry.child_number == entry.n->Game()->NumChildren(entry.n))) {
 	::DrawCircle(dc, entry.x + entry.nums * INFOSET_SPACING + 
-		     draw_settings.NodeLength(), entry.y, 
-		     4, draw_settings.CursorColor());
+		     DrawSettings().NodeLength(), entry.y, 
+		     4, DrawSettings().CursorColor());
       }
     }
 
     if (child_entry.child_number == 1) {
-      if (draw_settings.ShowInfosets()) {
+      if (DrawSettings().ShowInfosets()) {
 	if (entry.infoset.y != -1) {
 	  ::DrawThinLine(dc, 
 			 entry.x + entry.num * INFOSET_SPACING, 
@@ -569,19 +876,25 @@ void TreeRender::RenderSubtree(wxDC &dc)
   }
 }
 
-void TreeRender::UpdateCursor(const NodeEntry *entry)
+void TreeRender::UpdateCursor(void)
 {
+  NodeEntry *entry = NodeList().GetNodeEntry(Cursor());
+
+  if (!entry) {
+    return;
+  }
+
   if (entry->n->GetSubgameRoot() == entry->n && !entry->expanded) {
-    flasher->SetFlashNode(entry->x + draw_settings.NodeLength() +
+    flasher->SetFlashNode(entry->x + DrawSettings().NodeLength() +
 			  entry->nums*INFOSET_SPACING - SUBGAME_LARGE_ICON_SIZE,
 			  entry->y,
-			  entry->x + draw_settings.NodeLength() +
+			  entry->x + DrawSettings().NodeLength() +
 			  entry->nums*INFOSET_SPACING,
 			  entry->y, subgameCursor);
   }
   else {
     flasher->SetFlashNode(entry->x + entry->nums*INFOSET_SPACING, entry->y,
-			  entry->x + draw_settings.NodeLength() + 
+			  entry->x + DrawSettings().NodeLength() + 
 			  entry->nums*INFOSET_SPACING - 8,
 			  entry->y, nodeCursor);
   }
@@ -591,18 +904,14 @@ void TreeRender::UpdateCursor(const NodeEntry *entry)
 
 void TreeRender::Render(wxDC &dc)
 { 
+  dc.Clear();
   RenderSubtree(dc);
-}
-
-Bool TreeRender::JustRender(void) const 
-{
-  return TRUE;
 }
 
 void TreeRender::MakeFlasher(void)
 {
-  flasher = ((draw_settings.FlashingCursor()) ? new TreeNodeFlasher(GetDC()) :
-	     new TreeNodeCursor(GetDC()));
+  flasher = ((DrawSettings().FlashingCursor()) ? new TreeNodeFlasher(this) :
+	     new TreeNodeCursor(this));
 }
 
 gText TreeRender::OutcomeAsString(const Node *n, bool &/*hilight*/) const
@@ -615,16 +924,16 @@ gText TreeRender::OutcomeAsString(const Node *n, bool &/*hilight*/) const
     for (int i = v.First(); i <= v.Last(); i++) {
       if (i != 1) 
 	tmp += ",";
-      
-      if (draw_settings.ColorCodedOutcomes())
-	tmp += ("\\C{"+ToText(draw_settings.GetPlayerColor(i))+"}");
-      
+      /*      
+      if (DrawSettings().ColorCodedOutcomes())
+	tmp += ("\\C{"+ToText(DrawSettings().GetPlayerColor(i))+"}");
+      */
       tmp += ToText(v[i], NumDecimals());
     }
-
-    if (draw_settings.ColorCodedOutcomes()) 
+    /*
+    if (DrawSettings().ColorCodedOutcomes()) 
       tmp += ("\\C{"+ToText(WX_COLOR_LIST_LENGTH-1)+"}");
-
+    */
     tmp += ")";
         
     return tmp;
@@ -639,50 +948,13 @@ gText TreeRender::OutcomeAsString(const Node *n, bool &/*hilight*/) const
 //                   TreeZoomWindow: Member functions
 //----------------------------------------------------------------------
 
-class TreeZoomFrame : public wxFrame {
-private:
-  TreeWindow *m_parent;
-
-public:
-  TreeZoomFrame(wxFrame *p_frame, TreeWindow *p_parent);
-  virtual ~TreeZoomFrame() { }
-  
-  Bool OnClose(void);
-};
-
-TreeZoomFrame::TreeZoomFrame(wxFrame *p_frame, TreeWindow *p_parent)
-  : wxFrame(p_frame, "Zoom Window", -1, -1, 250, 250), m_parent(p_parent)
-{
-  // Make sure the frame doesn't get any smaller than the default size
-  SetSizeHints(250, 250);
-}
-
-Bool TreeZoomFrame::OnClose(void)
-{
-  Show(FALSE);
-  m_parent->GetEfgFrame()->OnZoomWindowClose();
-  return FALSE;
-}
-
-TreeZoomWindow::TreeZoomWindow(wxFrame *frame, TreeWindow *parent,
-                               const gList<NodeEntry *> &node_list_,
-                               const Infoset * &hilight_infoset_,
-                               const Infoset * &hilight_infoset1_,
-                               const Node *&mark_node_,
-                               const Node *&subgame_node_,
-                               const TreeDrawSettings &draw_settings_,
-                               const NodeEntry *cursor_entry)
-  : TreeRender(new TreeZoomFrame(frame, parent), parent,
-	       node_list_, hilight_infoset_, hilight_infoset1_,
-	       mark_node_, subgame_node_, draw_settings_),
+TreeZoomWindow::TreeZoomWindow(wxFrame *frame, TreeWindow *parent)
+  : TreeRender(frame, parent),
     m_parent(parent), m_zoom(1.0)
 {
   MakeFlasher();
-  UpdateCursor(cursor_entry);
-  GetParent()->Show(TRUE);
-#ifdef wx_x
-  SetSize(250, 250);
-#endif
+  UpdateCursor();
+  Show(false);
 }
 
 //
@@ -706,20 +978,21 @@ void TreeZoomWindow::Render(wxDC &dc)
   dc.SetDeviceOrigin(ox * m_zoom, oy * m_zoom);
 
   TreeRender::Render(dc);
-  flasher->Flash();
+  flasher->Flash(dc);
 }
 
-void TreeZoomWindow::UpdateCursor(const NodeEntry *entry)
+void TreeZoomWindow::UpdateCursor(void)
 {
-  TreeRender::UpdateCursor(entry);
+  TreeRender::UpdateCursor();
   flasher->GetFlashNode(xs, ys, xe, ye);
-  Render(*GetDC());
+  wxClientDC dc(this);
+  dc.SetUserScale(m_zoom, m_zoom);
+  Render(dc);
 }
 
 void TreeZoomWindow::SetZoom(float p_zoom)
 {
   m_zoom = p_zoom;
-  GetDC()->SetUserScale(m_zoom, m_zoom);
 }
 
 float TreeZoomWindow::GetZoom(void) const
@@ -727,11 +1000,26 @@ float TreeZoomWindow::GetZoom(void) const
   return m_zoom;
 }
 
-void TreeZoomWindow::OnChar(wxKeyEvent &p_event)
-{
-  m_parent->OnChar(p_event);
-}
-
 int TreeZoomWindow::NumDecimals(void) const
 { return parent->NumDecimals(); }
 
+Infoset *TreeZoomWindow::HighlightInfoset(void) const
+{ return parent->HighlightInfoset(); }
+
+Infoset *TreeZoomWindow::HighlightInfoset1(void) const
+{ return parent->HighlightInfoset1(); }
+
+Node *TreeZoomWindow::MarkNode(void) const
+{ return parent->MarkNode(); }
+
+Node *TreeZoomWindow::SubgameNode(void) const
+{ return parent->SubgameNode(); }
+
+guiNodeList &TreeZoomWindow::NodeList(void)
+{ return parent->NodeList(); }
+
+const TreeDrawSettings &TreeZoomWindow::DrawSettings(void) const
+{ return parent->DrawSettings(); }
+
+Node *TreeZoomWindow::Cursor(void) const
+{ return parent->Cursor(); }

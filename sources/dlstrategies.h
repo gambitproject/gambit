@@ -14,15 +14,12 @@ private:
   Strategy *m_prevStrategy;
 
   wxListBox *m_playerItem, *m_strategyItem;
-  wxText *m_strategyNameItem;
+  wxTextCtrl *m_strategyNameItem;
 	
-  static void CallbackPlayer(wxListBox &, wxCommandEvent &);
-  static void CallbackStrategy(wxListBox &, wxCommandEvent &);
-
   const char *HelpString(void) const { return "Edit Menu (nfg)"; }
 
-  void OnPlayer(int);
-  void OnStrategy(int);
+  void OnPlayer(wxCommandEvent &i);
+  void OnStrategy(wxCommandEvent &i);
 
   void OnOk(void);
 
@@ -31,6 +28,8 @@ public:
   virtual ~dialogStrategies() { }
 
   bool GameChanged(void) const { return m_gameChanged; } 
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif   // DLSTRATEGIES_H

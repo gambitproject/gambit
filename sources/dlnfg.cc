@@ -4,7 +4,7 @@
 // $Id$
 //
 
-#include "wx.h"
+#include "wx/wx.h"
 #include "wxmisc.h"
 
 #include "nfg.h"
@@ -24,43 +24,43 @@
 
 dialogNfgPayoffs::dialogNfgPayoffs(const Nfg &p_nfg, NFOutcome *p_outcome,
 				   wxWindow *p_parent)
-  : guiPagedDialog(p_parent, "Change Payoffs", p_nfg.NumPlayers()),
+  : guiPagedDialog(p_parent, "Change Payoffs", p_nfg.NumPlayers() + 1),
     m_outcome(p_outcome), m_nfg(p_nfg)
 {
-  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++)
-    SetValue(pl, ToText(m_nfg.Payoff(p_outcome, pl)));
+  SetLabel(1, "Name");
+  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
+    if (m_nfg.Players()[pl]->GetName() != "") {
+      SetLabel(pl + 1, m_nfg.Players()[pl]->GetName());
+    }
+    else {
+      SetLabel(pl + 1, (char *) ("Player " + ToText(pl)));
+    }
+    SetValue(pl + 1, ToText(m_nfg.Payoff(p_outcome, pl)));
+  }
 
-  m_outcomeName = new wxText(this, 0, "Outcome", "", 1, 1);
-  if (p_outcome)
-    m_outcomeName->SetValue(p_outcome->GetName());
-  else
-    m_outcomeName->SetValue("Outcome" + ToText(p_nfg.NumOutcomes() + 1));
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(m_grid, 0, wxALL, 5);
+  topSizer->Add(m_buttonSizer, 0, wxALL, 5);
 
-  m_outcomeName->SetConstraints(new wxLayoutConstraints);
-  m_outcomeName->GetConstraints()->top.SameAs(this, wxTop, 10);
-  m_outcomeName->GetConstraints()->left.SameAs(m_dataFields[0], wxLeft);
-  m_outcomeName->GetConstraints()->right.SameAs(m_dataFields[0], wxRight);
-  m_outcomeName->GetConstraints()->height.AsIs();
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
 
-  m_dataFields[0]->GetConstraints()->top.SameAs(m_outcomeName, wxBottom, 10);
-  m_dataFields[0]->SetFocus();
-  m_dataFields[0]->SetSelection(0, strlen(m_dataFields[0]->GetValue()));
-
-  Go();
+  Layout();
 }
 
 gArray<gNumber> dialogNfgPayoffs::Payoffs(void) const
 {
   gArray<gNumber> ret(m_nfg.NumPlayers());
   for (int pl = 1; pl <= ret.Length(); pl++) {
-    ret[pl] = ToNumber(GetValue(pl));
+    ret[pl] = ToNumber(GetValue(pl+1));
   }
   return ret;
 }
 
 gText dialogNfgPayoffs::Name(void) const
 {
-  return m_outcomeName->GetValue();
+  return GetValue(1);
 }
 
 //=========================================================================
@@ -70,7 +70,7 @@ gText dialogNfgPayoffs::Name(void) const
 dialogNfgOutcomeSelect::dialogNfgOutcomeSelect(Nfg &p_nfg, wxWindow *p_parent)
   : guiAutoDialog(p_parent, "Select Outcome"), m_nfg(p_nfg)
 {
-  m_outcomeList = new wxListBox(this, 0, "Outcome", wxSINGLE, 1, 1);
+  m_outcomeList = new wxListBox(this, -1);
   
   for (int outc = 1; outc <= m_nfg.NumOutcomes(); outc++) {
     NFOutcome *outcome = m_nfg.Outcomes()[outc];
@@ -90,32 +90,21 @@ dialogNfgOutcomeSelect::dialogNfgOutcomeSelect(Nfg &p_nfg, wxWindow *p_parent)
     else
       item += ")";
 
-    m_outcomeList->Append(item);
+    m_outcomeList->Append((char *) item);
   }
 
   m_outcomeList->SetSelection(0);
-  m_outcomeList->SetConstraints(new wxLayoutConstraints);
-  m_outcomeList->GetConstraints()->left.SameAs(m_okButton, wxLeft);
-  m_outcomeList->GetConstraints()->top.SameAs(this, wxTop, 10);
-  m_outcomeList->GetConstraints()->right.SameAs(m_helpButton, wxRight);
-  m_outcomeList->GetConstraints()->height.AsIs();
 
-  m_okButton->GetConstraints()->left.SameAs(this, wxLeft, 10);
-  m_okButton->GetConstraints()->top.SameAs(m_outcomeList, wxBottom, 10);
-  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-  m_okButton->GetConstraints()->height.AsIs();
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(new wxStaticText(this, -1, "Outcome"), 0, wxCENTRE | wxALL, 5);
+  topSizer->Add(m_outcomeList, 0, wxCENTRE | wxALL, 5);
+  topSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
 
-  m_cancelButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
-  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_cancelButton->GetConstraints()->width.AsIs();
-  m_cancelButton->GetConstraints()->height.AsIs();
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
 
-  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
-  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-  m_helpButton->GetConstraints()->height.AsIs();
-
-  Go();
+  Layout();
 }
 
 NFOutcome *dialogNfgOutcomeSelect::GetOutcome(void)
@@ -127,55 +116,53 @@ NFOutcome *dialogNfgOutcomeSelect::GetOutcome(void)
 //                   dialogNfgPlayers: Member functions
 //=========================================================================
 
+BEGIN_EVENT_TABLE(dialogNfgPlayers, guiAutoDialog)
+  EVT_BUTTON(idNFPLAYERS_EDIT_BUTTON, dialogNfgPlayers::OnEdit)
+END_EVENT_TABLE()
+
 dialogNfgPlayers::dialogNfgPlayers(Nfg &p_nfg, wxWindow *p_parent)
   : guiAutoDialog(p_parent, "Player Names"), m_nfg(p_nfg)
 {
-  m_playerNameList = new wxListBox(this, 0, "Player", wxSINGLE);
+  m_playerNameList = new wxListBox(this, -1);
   for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-    m_playerNameList->Append(ToText(pl) + ": " + m_nfg.Players()[pl]->GetName());
+    m_playerNameList->Append((char *) (ToText(pl) + ": " + m_nfg.Players()[pl]->GetName()));
   }
   m_playerNameList->SetSelection(0);
   m_lastSelection = 0;
 
-  m_playerNameList->SetConstraints(new wxLayoutConstraints);
-  m_playerNameList->GetConstraints()->left.SameAs(this, wxLeft, 10);
-  m_playerNameList->GetConstraints()->top.SameAs(this, wxTop, 10);
-  m_playerNameList->GetConstraints()->width.AsIs();
-  m_playerNameList->GetConstraints()->height.AsIs();
-
-  wxButton *editPlayer = new wxButton(this, (wxFunction) CallbackEdit, "Edit...");
-  editPlayer->SetClientData((char *) this);
-
-  editPlayer->SetConstraints(new wxLayoutConstraints);
-  editPlayer->GetConstraints()->left.SameAs(m_playerNameList, wxRight, 10);
-  editPlayer->GetConstraints()->top.SameAs(m_playerNameList, wxTop);
-  editPlayer->GetConstraints()->width.AsIs();
-  editPlayer->GetConstraints()->height.AsIs();
-
-  m_okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
-  m_okButton->GetConstraints()->top.SameAs(m_playerNameList, wxBottom, 10);
-  m_okButton->GetConstraints()->width.SameAs(m_helpButton, wxWidth);
-  m_okButton->GetConstraints()->height.AsIs();
-
-  m_helpButton->GetConstraints()->left.SameAs(this, wxCentreX, 5);
-  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_helpButton->GetConstraints()->width.AsIs();
-  m_helpButton->GetConstraints()->height.AsIs();
+  wxButton *editPlayer = new wxButton(this, idNFPLAYERS_EDIT_BUTTON, "Edit...");
 
   m_cancelButton->Show(FALSE);
 
-  Go();
+  wxBoxSizer *rightSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
+
+  rightSizer->Add(editPlayer, 0, wxALL, 5);
+
+  topSizer->Add(new wxStaticText(this, -1, "Player:"), 0, wxCENTRE | wxALL, 5);
+  topSizer->Add(m_playerNameList, 0, wxEXPAND | wxALL, 5);
+  topSizer->Add(rightSizer, 0, wxALL, 5);
+
+  allSizer->Add(topSizer, 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
+  
+  SetAutoLayout(TRUE);
+  SetSizer(allSizer); 
+  allSizer->Fit(this);
+  allSizer->SetSizeHints(this); 
+  Layout();
 }
 
-void dialogNfgPlayers::OnEdit(void)
+void dialogNfgPlayers::OnEdit(wxCommandEvent &)
 {
   int selection = m_playerNameList->GetSelection();
   gText defaultName = m_nfg.Players()[selection + 1]->GetName();
 
-  char *newName = wxGetTextFromUser("Name", "Enter Name", defaultName, this);
-  if (newName) {
+  gText newName = wxGetTextFromUser("Name", "Enter Name", (char *) defaultName, this).c_str();
+  if (newName != "") {
     m_nfg.Players()[selection + 1]->SetName(newName);
-    m_playerNameList->SetString(selection, ToText(selection + 1) + ": " + newName);
+    m_playerNameList->SetString(selection, (char *) (ToText(selection + 1) + ": " + newName));
   }
 }
 
@@ -183,84 +170,82 @@ void dialogNfgPlayers::OnEdit(void)
 //                    dialogStrategies: Member functions
 //=========================================================================
 
+BEGIN_EVENT_TABLE(dialogStrategies, guiAutoDialog)
+  EVT_LISTBOX(idSTRATEGY_PLAYER_LISTBOX, dialogStrategies::OnPlayer)
+  EVT_LISTBOX(idSTRATEGY_STRATEGY_LISTBOX, dialogStrategies::OnStrategy)
+END_EVENT_TABLE()
+
 dialogStrategies::dialogStrategies(Nfg &p_nfg, wxFrame *p_parent)
   : guiAutoDialog(p_parent, "Strategy Information"), 
     m_nfg(p_nfg), m_gameChanged(false), m_prevStrategy(0)
 {
-  SetLabelPosition(wxVERTICAL);
-  m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player");
-  m_playerItem->wxEvtHandler::SetClientData((char *) this);
-  m_playerItem->SetConstraints(new wxLayoutConstraints());
-  m_playerItem->GetConstraints()->top.SameAs(this, wxTop, 10);
-  m_playerItem->GetConstraints()->left.SameAs(this, wxLeft, 10);
-  m_playerItem->GetConstraints()->width.AsIs();
-  m_playerItem->GetConstraints()->height.AsIs();
-
-  m_strategyItem = new wxListBox(this, (wxFunction) CallbackStrategy,
-				 "Strategy");
-  m_strategyItem->wxEvtHandler::SetClientData((char *) this);
-  m_strategyItem->SetConstraints(new wxLayoutConstraints());
-  m_strategyItem->GetConstraints()->top.SameAs(this, wxTop, 10);
-  m_strategyItem->GetConstraints()->left.SameAs(m_playerItem, wxRight, 10);
-  m_strategyItem->GetConstraints()->width.AsIs();
-  m_strategyItem->GetConstraints()->height.AsIs();
-
-  m_strategyNameItem = new wxText(this, 0, "Strategy Name");
-  m_strategyNameItem->SetConstraints(new wxLayoutConstraints());
-  m_strategyNameItem->GetConstraints()->top.SameAs(m_strategyItem, wxTop);
-  m_strategyNameItem->GetConstraints()->left.SameAs(m_strategyItem,
-						    wxRight, 10);
-  m_strategyNameItem->GetConstraints()->height.AsIs();
-  m_strategyNameItem->GetConstraints()->width.PercentOf(m_playerItem,
-							wxWidth, 50);
-
+  m_playerItem = new wxListBox(this, idSTRATEGY_PLAYER_LISTBOX);
   for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-    m_playerItem->Append(ToText(pl) + ": " + 
-			 m_nfg.Players()[pl]->GetName());
+    m_playerItem->Append((char *) (ToText(pl) + ": " + 
+			 m_nfg.Players()[pl]->GetName()));
   }
+  m_strategyItem = new wxListBox(this, idSTRATEGY_STRATEGY_LISTBOX);
 
-  m_okButton->GetConstraints()->top.SameAs(m_playerItem, wxBottom, 10);
-  m_okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
-  m_okButton->GetConstraints()->height.AsIs();
-  m_okButton->GetConstraints()->width.SameAs(m_helpButton, wxWidth);
+  m_strategyNameItem = new wxTextCtrl(this, -1,"",
+				      wxDefaultPosition, wxDefaultSize,
+				      wxTE_READONLY);
 
-  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_helpButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
-  m_helpButton->GetConstraints()->height.AsIs();
-  m_helpButton->GetConstraints()->width.AsIs();
+  wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer *leftSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *midSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *rightSizer = new wxBoxSizer(wxVERTICAL);
 
-  m_cancelButton->Show(FALSE);
-  m_cancelButton->GetConstraints()->top.SameAs(this, wxTop);
-  m_cancelButton->GetConstraints()->left.SameAs(this, wxLeft);
-  m_cancelButton->GetConstraints()->height.AsIs();
-  m_cancelButton->GetConstraints()->width.AsIs();
+  leftSizer->Add(new wxStaticText(this, -1, "Player:"), 0, wxCENTRE | wxALL, 5);
+  leftSizer->Add(m_playerItem, 0, wxCENTRE | wxALL, 5);
 
-  OnPlayer(0);
-  Go();
+  midSizer->Add(new wxStaticText(this, -1, "Strategies:"), 0, wxCENTRE | wxALL, 5);
+  midSizer->Add(m_strategyItem, 0, wxCENTRE | wxALL, 5);
+
+  rightSizer->Add(new wxStaticText(this, -1, "StrategyName:"), 0, wxCENTRE | wxALL, 5);
+  rightSizer->Add(m_strategyNameItem, 0, wxCENTRE | wxALL, 5);
+
+  topSizer->Add(leftSizer, 0, wxALL, 5);
+  topSizer->Add(midSizer, 0, wxALL, 5);
+  topSizer->Add(rightSizer, 0, wxALL, 5);
+
+  allSizer->Add(topSizer, 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
+  
+  SetSizer(allSizer); 
+  allSizer->Fit(this);
+  allSizer->SetSizeHints(this); 
+  Layout();
+
+  wxCommandEvent event;
+  OnPlayer(event);
 }
 
-void dialogStrategies::OnPlayer(int p_number)
+void dialogStrategies::OnPlayer(wxCommandEvent &)
 {
-  m_playerItem->SetSelection(p_number);
+  int p_number = m_playerItem->GetSelection();
   NFPlayer *player = m_nfg.Players()[p_number+1];
   m_strategyItem->Clear();
   for (int st = 1; st <= player->NumStrats(); st++)
-    m_strategyItem->Append(ToText(st));
-  OnStrategy(0);
+    m_strategyItem->Append((char *) ToText(st));
+
+  wxCommandEvent event;
+  OnStrategy(event);
 }
 
-void dialogStrategies::OnStrategy(int p_number)
+void dialogStrategies::OnStrategy(wxCommandEvent &)
 {
+  int p_number = m_strategyItem->GetSelection();
   if (m_prevStrategy)
     if (strcmp(m_prevStrategy->Name(), m_strategyNameItem->GetValue()) != 0) {
-      m_prevStrategy->SetName(m_strategyNameItem->GetValue());
+      m_prevStrategy->SetName(m_strategyNameItem->GetValue().c_str());
       m_gameChanged = true;
     }
 
   NFPlayer *player = m_nfg.Players()[m_playerItem->GetSelection()+1];
   m_strategyItem->SetSelection(p_number);
   Strategy *strategy = player->Strategies()[p_number+1];
-  m_strategyNameItem->SetValue(strategy->Name());
+  m_strategyNameItem->SetValue((char *) strategy->Name());
   m_prevStrategy = strategy;
 }
 
@@ -269,108 +254,98 @@ void dialogStrategies::OnOk(void)
   NFPlayer *player = m_nfg.Players()[m_playerItem->GetSelection()+1];
   Strategy *strategy = player->Strategies()[m_strategyItem->GetSelection()+1];
   if (strcmp(strategy->Name(), m_strategyNameItem->GetValue()) != 0) {
-    strategy->SetName(m_strategyNameItem->GetValue());
+    strategy->SetName(m_strategyNameItem->GetValue().c_str());
     m_gameChanged = true;
   }
 
   Show(FALSE);
 }
 
-void dialogStrategies::CallbackPlayer(wxListBox &p_object,
-				      wxCommandEvent &p_event)
-{
-  ((dialogStrategies *) p_object.wxEvtHandler::GetClientData())->
-    OnPlayer(p_event.commandInt);
-}
-
-void dialogStrategies::CallbackStrategy(wxListBox &p_object, 
-					wxCommandEvent &p_event)
-{
-  ((dialogStrategies *) p_object.wxEvtHandler::GetClientData())->
-    OnStrategy(p_event.commandInt);
-}
-
 //=========================================================================
 //                   dialogNfgEditSupport: Member functions
 //=========================================================================
+
+BEGIN_EVENT_TABLE(dialogNfgEditSupport, guiAutoDialog)
+  EVT_LISTBOX(idNFSUPPORT_PLAYER_LISTBOX, dialogNfgEditSupport::OnPlayer)
+  EVT_LISTBOX(idNFSUPPORT_STRATEGY_LISTBOX, dialogNfgEditSupport::OnStrategy)
+END_EVENT_TABLE()
 
 dialogNfgEditSupport::dialogNfgEditSupport(const NFSupport &p_support,
 					   wxWindow *p_parent)
   : guiAutoDialog(p_parent, "Edit support"),
     m_nfg(p_support.Game()), m_support(p_support)
 {
-  m_nameItem = new wxText(this, 0, "Name");
-  m_nameItem->SetValue(p_support.GetName());
-  m_nameItem->SetConstraints(new wxLayoutConstraints);
-  m_nameItem->GetConstraints()->top.SameAs(this, wxTop, 10);
-  m_nameItem->GetConstraints()->left.SameAs(this, wxLeft, 10);
-  m_nameItem->GetConstraints()->width.AsIs();
-  m_nameItem->GetConstraints()->height.AsIs();
+  m_nameItem = new wxTextCtrl(this, -1);
+  m_nameItem->SetValue((char *) p_support.GetName());
 
-  SetLabelPosition(wxVERTICAL);
-  m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player");
-  m_playerItem->wxEvtHandler::SetClientData((char *) this);
-  m_playerItem->SetConstraints(new wxLayoutConstraints);
-  m_playerItem->GetConstraints()->top.SameAs(m_nameItem, wxBottom, 10);
-  m_playerItem->GetConstraints()->left.SameAs(m_nameItem, wxLeft);
-  m_playerItem->GetConstraints()->width.AsIs();
-  m_playerItem->GetConstraints()->height.AsIs();
-
-  m_strategyItem = new wxListBox(this, (wxFunction) CallbackStrategy,
-				 "Strategy", wxMULTIPLE);
-  m_strategyItem->wxEvtHandler::SetClientData((char *) this);
-  m_strategyItem->SetConstraints(new wxLayoutConstraints);
-  m_strategyItem->GetConstraints()->top.SameAs(m_playerItem, wxTop);
-  m_strategyItem->GetConstraints()->left.SameAs(m_playerItem, wxRight, 10);
-  m_strategyItem->GetConstraints()->width.AsIs();
-  m_strategyItem->GetConstraints()->height.AsIs();
-
+  m_playerItem = new wxListBox(this, idNFSUPPORT_PLAYER_LISTBOX);
   for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-    m_playerItem->Append(ToText(pl) + ": " + 
-			 m_nfg.Players()[pl]->GetName());
-#ifndef LINUX_WXXT
-    m_playerItem->SetSelection(pl - 1, TRUE);
-#endif  // LINUX_WXXT
+    m_playerItem->Append((char *) (ToText(pl) + ": " + 
+			 m_nfg.Players()[pl]->GetName()));
   }
+  m_playerItem->SetSelection(0);
 
-  m_okButton->GetConstraints()->top.SameAs(m_playerItem, wxBottom, 10);
-  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
-  m_okButton->GetConstraints()->height.AsIs();
-  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+#ifdef __WXGTK__
+  // the wxGTK multiple-selection listbox is flaky (2.1.11)
+  m_strategyItem = new wxListBox(this, idNFSUPPORT_STRATEGY_LISTBOX,
+				 wxDefaultPosition, wxDefaultSize,
+				 0, 0, wxLB_EXTENDED);
+#else
+  m_strategyItem = new wxListBox(this, idNFSUPPORT_STRATEGY_LISTBOX,
+				 wxDefaultPosition, wxDefaultSize,
+				 0, 0, wxLB_MULTIPLE);
+#endif // __WXGTK__
 
-  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
-  m_cancelButton->GetConstraints()->height.AsIs();
-  m_cancelButton->GetConstraints()->width.AsIs();
+  wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer *botSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer *leftSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *rightSizer = new wxBoxSizer(wxVERTICAL);
 
-  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
-  m_helpButton->GetConstraints()->height.AsIs();
-  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  leftSizer->Add(new wxStaticText(this, -1, "Player"), 0, wxCENTRE | wxALL, 5);
+  leftSizer->Add(m_playerItem, 0, wxCENTRE | wxALL, 5);
 
-  OnPlayer(0);
-  Go();
+  rightSizer->Add(new wxStaticText(this, -1, "Strategy"),
+		  0, wxCENTRE | wxALL, 5);
+  rightSizer->Add(m_strategyItem, 0, wxCENTRE | wxALL, 5);
+
+  topSizer->Add(new wxStaticText(this, -1, "Name"), 0, wxCENTRE | wxALL, 5);
+  topSizer->Add(m_nameItem, 1, wxEXPAND | wxALL, 5);
+
+  botSizer->Add(leftSizer, 0, wxALL, 5);
+  botSizer->Add(rightSizer, 0, wxALL, 5);
+
+  allSizer->Add(topSizer, 1, wxEXPAND | wxALL, 5);
+  allSizer->Add(botSizer, 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
+  
+  SetSizer(allSizer); 
+  allSizer->Fit(this);
+  allSizer->SetSizeHints(this); 
+  Layout();
+
+  wxCommandEvent event;
+  OnPlayer(event);
 }
 
-void dialogNfgEditSupport::OnPlayer(int p_number)
+void dialogNfgEditSupport::OnPlayer(wxCommandEvent &)
 {
-  m_playerItem->SetSelection(p_number);
-  NFPlayer *player = m_nfg.Players()[p_number+1];
+  NFPlayer *player = m_nfg.Players()[m_playerItem->GetSelection() + 1];
   m_strategyItem->Clear();
   for (int st = 1; st <= player->NumStrats(); st++) {
-    m_strategyItem->Append(ToText(st) + ": " +
-			   player->Strategies()[st]->Name());
+    m_strategyItem->Append((char *) (ToText(st) + ": " +
+			   player->Strategies()[st]->Name()));
     if (m_support.Find(player->Strategies()[st])) {
-      m_strategyItem->SetSelection(st - 1, TRUE);
+      m_strategyItem->SetSelection(st - 1, true);
     }
   }
 }
 
-void dialogNfgEditSupport::OnStrategy(int /*p_strategy*/)
+void dialogNfgEditSupport::OnStrategy(wxCommandEvent &)
 {
-  int player = m_playerItem->GetSelection() + 1;
+  NFPlayer *player = m_nfg.Players()[m_playerItem->GetSelection() + 1];
   for (int st = 0; st < m_strategyItem->Number(); st++) {
-    Strategy *strategy = m_nfg.Players()[player]->Strategies()[st+1];
+    Strategy *strategy = player->Strategies()[st+1];
     if (m_strategyItem->Selected(st)) {
       m_support.AddStrategy(strategy);
     }
@@ -380,95 +355,73 @@ void dialogNfgEditSupport::OnStrategy(int /*p_strategy*/)
   }
 }
 
-void dialogNfgEditSupport::CallbackPlayer(wxListBox &p_object,
-					  wxCommandEvent &p_event)
-{
-  ((dialogNfgEditSupport *) p_object.wxEvtHandler::GetClientData())->
-    OnPlayer(p_event.commandInt);
-}
-
-void dialogNfgEditSupport::CallbackStrategy(wxListBox &p_object, 
-					    wxCommandEvent &p_event)
-{
-  ((dialogNfgEditSupport *) p_object.wxEvtHandler::GetClientData())->
-    OnStrategy(p_event.commandInt);
-}
+gText dialogNfgEditSupport::Name(void) const
+{ return m_nameItem->GetValue().c_str(); }
 
 //=========================================================================
 //                     dialogNfgSave: Member functions
 //=========================================================================
+
+BEGIN_EVENT_TABLE(dialogNfgSave, wxDialog)
+  EVT_BUTTON(idNFG_BROWSE_BUTTON, dialogNfgSave::OnBrowse)
+END_EVENT_TABLE()
 
 dialogNfgSave::dialogNfgSave(const gText &p_name,
 			     const gText &p_label, int p_decimals,
 			     wxWindow *p_parent)
   : guiAutoDialog(p_parent, "Save File")
 {
-  m_fileName = new wxText(this, 0, "Path:", "", 1, 1);
-  m_fileName->SetValue(p_name);
-  m_fileName->SetConstraints(new wxLayoutConstraints);
-  m_fileName->GetConstraints()->top.SameAs(this, wxTop, 10);
-  m_fileName->GetConstraints()->left.SameAs(this, wxLeft, 10);
-  m_fileName->GetConstraints()->width.AsIs();
-  m_fileName->GetConstraints()->height.AsIs();
+  wxBoxSizer *filenameSizer = new wxBoxSizer(wxHORIZONTAL);
+  filenameSizer->Add(new wxStaticText(this, -1, "File"), 0,
+		     wxCENTER | wxALL, 5);
+  m_fileName = new wxTextCtrl(this, -1, (char *) p_name);
+  filenameSizer->Add(m_fileName, 1, wxEXPAND | wxALL, 5);
+  wxButton *browseButton = new wxButton(this, idNFG_BROWSE_BUTTON, "Browse...");
+  filenameSizer->Add(browseButton, 0, wxALL, 5);
 
-  wxButton *browseButton = new wxButton(this, (wxFunction) CallbackBrowse,
-					"Browse...", 1, 1);
-  browseButton->SetClientData((char *) this);
-  browseButton->SetConstraints(new wxLayoutConstraints);
-  browseButton->GetConstraints()->top.SameAs(m_fileName, wxTop);
-  browseButton->GetConstraints()->left.SameAs(m_fileName, wxRight, 10);
-  browseButton->GetConstraints()->width.AsIs();
-  browseButton->GetConstraints()->height.AsIs();
+  wxBoxSizer *labelSizer = new wxBoxSizer(wxHORIZONTAL);
+  labelSizer->Add(new wxStaticText(this, -1, "Label"), 0,
+		  wxCENTER | wxALL, 5);  
+  m_treeLabel = new wxTextCtrl(this, -1, (char *) p_label);
+  labelSizer->Add(m_treeLabel, 1, wxEXPAND | wxALL, 5);
 
-  m_treeLabel = new wxText(this, 0, "Description:", "", 1, 1);
-  m_treeLabel->SetValue(p_label);
-  m_treeLabel->SetConstraints(new wxLayoutConstraints);
-  m_treeLabel->GetConstraints()->top.SameAs(m_fileName, wxBottom, 10);
-  m_treeLabel->GetConstraints()->left.SameAs(m_fileName, wxLeft);
-  m_treeLabel->GetConstraints()->right.SameAs(browseButton, wxRight);
-  m_treeLabel->GetConstraints()->height.AsIs();
+  wxBoxSizer *decimalsSizer = new wxBoxSizer(wxHORIZONTAL);
+  decimalsSizer->Add(new wxStaticText(this, -1, "Decimal places"),
+		     0, wxALL, 5);
+  m_numDecimals = new wxSlider(this, -1, p_decimals, 0, 25,
+			       wxDefaultPosition, wxDefaultSize,
+			       wxSL_HORIZONTAL | wxSL_LABELS);
+  decimalsSizer->Add(m_numDecimals, 1, wxEXPAND | wxALL, 5);
+ 
+  m_helpButton->Enable(false);
 
-  m_numDecimals = new wxSlider(this, 0, "Decimal places:",
-			       p_decimals, 0, 25, -1, 1, 1);
-  m_numDecimals->SetConstraints(new wxLayoutConstraints);
-  m_numDecimals->GetConstraints()->top.SameAs(m_treeLabel, wxBottom, 10);
-  m_numDecimals->GetConstraints()->left.SameAs(m_treeLabel, wxLeft);
-  m_numDecimals->GetConstraints()->right.SameAs(browseButton, wxRight);
-  m_numDecimals->GetConstraints()->height.AsIs();
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(filenameSizer, 1, wxEXPAND | wxALL, 5);
+  topSizer->Add(labelSizer, 1, wxEXPAND | wxALL, 5);
+  topSizer->Add(decimalsSizer, 1, wxEXPAND | wxALL, 5);
+  topSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
 
-  m_okButton->GetConstraints()->top.SameAs(m_numDecimals, wxBottom, 10);
-  m_okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
-  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-  m_okButton->GetConstraints()->height.AsIs();
-
-  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_cancelButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
-  m_cancelButton->GetConstraints()->width.AsIs();
-  m_cancelButton->GetConstraints()->height.AsIs();
-
-  m_helpButton->GetConstraints()->top.AsIs();
-  m_helpButton->GetConstraints()->left.AsIs();
-  m_helpButton->GetConstraints()->width.AsIs();
-  m_helpButton->GetConstraints()->height.AsIs();
-  m_helpButton->Show(FALSE);
-
-  Go();
+  SetAutoLayout(TRUE);
+  SetSizer(topSizer); 
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this); 
+  Layout();
 }
 
-void dialogNfgSave::OnBrowse(void)
+void dialogNfgSave::OnBrowse(wxCommandEvent &)
 {
-#ifdef wx_motif
-  char *file = wxGetTextFromUser("Save data file", "Save data file",
-				 m_fileName->GetValue());
-#else
-  char *file = wxFileSelector("Save data file", 
-			      gPathOnly(m_fileName->GetValue()),
-			      gFileNameFromPath(m_fileName->GetValue()),
-			      ".nfg", "*.nfg");
-#endif  // wx_motif
+  const char *file = wxFileSelector("Save data file", 
+				    gPathOnly(m_fileName->GetValue()),
+				    gFileNameFromPath(m_fileName->GetValue()),
+				    ".nfg", "*.nfg");
 
   if (file) {
     m_fileName->SetValue(file);
   }
 }
 
+gText dialogNfgSave::Filename(void) const
+{ return m_fileName->GetValue().c_str(); }
+
+gText dialogNfgSave::Label(void) const
+{ return m_treeLabel->GetValue().c_str(); }

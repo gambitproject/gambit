@@ -5,10 +5,9 @@
 // $Id$
 //
 
-#ifndef NfgSoln_H
-#define NfgSoln_H
+#ifndef NFGSOLN_H
+#define NFGSOLN_H
 
-#include "spread3d.h"
 #include "msolnsf.h"
 
 //****************************************************************************
@@ -20,60 +19,49 @@
 #define		MSOLN_O_EFGNFG		16
 
 class NfgShow;
-class NfgSolnShow: public SpreadSheet3D
-{
-private:
-	static void settings_button(wxButton &ob,wxEvent &ev);
-	static void extensive_button(wxButton &ob,wxEvent &ev);
-	static void add_button(wxButton &ob,wxEvent &ev);
-	static void edit_button(wxButton &ob,wxEvent &ev);
-	static void delete_button(wxButton &ob,wxEvent &ev);
-	static void delete_all_button(wxButton &ob,wxEvent &ev);
-	static void sortfilt_button(wxButton &ob,wxEvent &ev);
+
+class NfgSolnShow : public wxGrid {
 protected:
-	NfgShow *parent;
-	gSortList<MixedSolution> &solns;
-	int 	num_players,cur_soln,num_solutions;
-	NormalDrawSettings	&norm_draw_settings;
-	gBlock<Bool> features;
-	static char *feature_names[];
-	static int   feature_width[];
-	MSolnSortFilterOptions &sf_options;
-	void		UpdateSoln(int row,int col);
-	int		FeaturePos(int feature);
-	int		SolnNum(int row);
-	int		SolnPos(int soln_num);
-	void		UpdateValues(void);
-	virtual void	OnRemove(bool all);
-	virtual void	OnAdd(void);
-	virtual void	OnEdit(void);
-	virtual void	SortFilter(bool inter=true);
-	virtual void	SetOptions(void);
+  NfgShow *parent;
+  gSortList<MixedSolution> &solns;
+  int 	num_players,cur_soln,num_solutions;
+  NormalDrawSettings	&norm_draw_settings;
+  gBlock<bool> features;
+  static char *feature_names[];
+  static int   feature_width[];
+  MSolnSortFilterOptions &sf_options;
+  void		UpdateSoln(int row,int col);
+  int		FeaturePos(int feature);
+  int		SolnNum(int row);
+  int		SolnPos(int soln_num);
+  void		UpdateValues(void);
+  virtual void	OnRemove(bool all);
+  virtual void	OnAdd(void);
+  virtual void	OnEdit(void);
+  virtual void	SortFilter(bool inter=true);
+  virtual void	SetOptions(void);
+
+  // Overriding wxGrid event handling
+  virtual void OnSelectCell(int row, int col);
+
 public:
-	NfgSolnShow(gSortList<MixedSolution> &soln,int num_players,int max_strats,
-						int cur_soln_,NormalDrawSettings	&ds,
-						MSolnSortFilterOptions &sf_options,
-						NfgShow *parent_=0,wxFrame *parent_frame=0,
-						unsigned int opts=MSOLN_O_OPTIONS|MSOLN_O_EDIT|MSOLN_O_SORTFILT|MSOLN_O_EFGNFG);
-   // Allow solution transfer to an EFG
-	void SolutionToExtensive(void);
-	// Double clicking on a solution will update the parent
-	void OnDoubleClick(int row,int col,int level,const gText &value);
-	// Moving a cell updates the parent, if the dynamic option is set
-	void OnSelectedMoved(int row,int col,SpreadMoveDir how);
-	// OnOk must be defined to inform parent that I am killed
-	void OnOk(void);
-	// Overide help system
-	void OnHelp(int help_type=0);
-	// Take care of some options changes
-	void OnOptionsChanged(unsigned int options=0);
-  // OnClose calls OnOk
-  virtual Bool OnClose(void);
+  NfgSolnShow(gSortList<MixedSolution> &soln,int num_players,int max_strats,
+	      int cur_soln_,NormalDrawSettings	&ds,
+	      MSolnSortFilterOptions &sf_options,
+	      NfgShow *parent_=0);
+  // Allow solution transfer to an EFG
+  void SolutionToExtensive(void);
+  // Double clicking on a solution will update the parent
+  void OnDoubleClick(int row,int col,int level,const gText &value);
+  // Take care of some options changes
+  void OnOptionsChanged(unsigned int options=0);
 };
 
 //****************************************************************************
 //                       MIXED SOLUTION PICKER (single)
 //****************************************************************************
+
+#ifdef NOT_PORTED_YET
 
 class Nfg1SolnPicker: public NfgSolnShow
 {
@@ -98,7 +86,9 @@ public:
 	// Return the pick
 	int Picked(void) const;
   // OnClose calls OnOk
-  virtual Bool OnClose(void);
+  virtual bool OnClose(void);
 };
+
+#endif // NOT_PORTED_YET
 
 #endif

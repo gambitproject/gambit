@@ -1,6 +1,5 @@
 //
-// FILE: gambdraw.h -- declaration of the generic display parameter class
-// for gambit.  Currently only the player colors are set here.
+// FILE: gambdraw.h -- Generic display parameters
 //
 // $Id$
 //
@@ -12,28 +11,19 @@
 #include "gtext.h"
 
 class GambitDrawSettings {
-private:
-  void UpdatePlayerColor(int pl);
-
 protected:
-  static gBlock<int> player_colors;
+  mutable gBlock<wxColour> m_colors;
 
 public:
   GambitDrawSettings(void);
   virtual ~GambitDrawSettings() { }
 
-  void SetPlayerColor(int pl, int color);
-  int GetPlayerColor(int pl) const;
+  void SetPlayerColor(int pl, const wxColour &);
+  const wxColour &GetPlayerColor(int pl) const;
 
-  // Allows to save/restore settings from file
-  void SaveOptions(char *f = 0) const;
-  void LoadOptions(char *f);
-
-  // GUI Set colors
-  void PlayerColorDialog(gArray<gText> &);
+  void LoadOptions(void);
+  void SaveOptions(void) const;
 };
-
-#define INIFILE     (gambitApp.ResourceFile())
 
 #endif  // GAMBDRAW_H
 

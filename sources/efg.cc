@@ -302,6 +302,10 @@ FullEfg::~FullEfg()
   if (lexicon)   delete lexicon;
   lexicon = 0;
 
+  for (i = 1; i <= m_clients.Length(); i++) {
+    m_clients[i]->OnEfgDestructed();
+  }
+
 #ifdef MEMCHECK
   _NumObj--;
   gout << "--- Efg Dtor: " << _NumObj << "\n";
@@ -874,6 +878,7 @@ Infoset *FullEfg::AppendNode(Node *n, EFPlayer *p, int count)
 
   DeleteLexicon();
   SortInfosets();
+  NotifyClients(true, true);
   return n->infoset;
 }  
 
@@ -896,6 +901,7 @@ Infoset *FullEfg::AppendNode(Node *n, Infoset *s)
 
   DeleteLexicon();
   SortInfosets();
+  NotifyClients(true, true);
   return s;
 }
   
@@ -927,7 +933,7 @@ Node *FullEfg::DeleteNode(Node *n, Node *keep)
   sortisets = true;
 
   SortInfosets();
-
+  NotifyClients(true, true);
   return keep;
 }
 
@@ -952,6 +958,7 @@ Infoset *FullEfg::InsertNode(Node *n, EFPlayer *p, int count)
 
   DeleteLexicon();
   SortInfosets();
+  NotifyClients(true, true);
   return m->infoset;
 }
 
@@ -981,6 +988,7 @@ Infoset *FullEfg::InsertNode(Node *n, Infoset *s)
 
   DeleteLexicon();
   SortInfosets();
+  NotifyClients(true, true);
   return m->infoset;
 }
 
@@ -1016,6 +1024,7 @@ Infoset *FullEfg::JoinInfoset(Infoset *s, Node *n)
 
   DeleteLexicon();
   SortInfosets();
+  NotifyClients(true, true);
   return s;
 }
 
@@ -1042,6 +1051,7 @@ Infoset *FullEfg::LeaveInfoset(Node *n)
 
   DeleteLexicon();
   SortInfosets();
+  NotifyClients(true, true);
   return n->infoset;
 }
 
@@ -1072,6 +1082,7 @@ Infoset *FullEfg::SplitInfoset(Node *n)
 
   DeleteLexicon();
   SortInfosets();
+  NotifyClients(true, true);
   return n->infoset;
 }
 
@@ -1096,6 +1107,7 @@ Infoset *FullEfg::MergeInfoset(Infoset *to, Infoset *from)
 
   DeleteLexicon();
   SortInfosets();
+  NotifyClients(true, true);
   return to;
 }
 
@@ -1110,6 +1122,7 @@ bool FullEfg::DeleteEmptyInfoset(Infoset *s)
   s->player->infosets.Remove(s->player->infosets.Find(s));
   delete s;
 
+  NotifyClients(false, true);
   return true;
 }
 
@@ -1128,6 +1141,7 @@ Infoset *FullEfg::SwitchPlayer(Infoset *s, EFPlayer *p)
 
   DeleteLexicon();
   SortInfosets();
+  NotifyClients(false, true);
   return s;
 }
 
@@ -1199,6 +1213,7 @@ void FullEfg::Reveal(Infoset *where, const gArray<EFPlayer *> &who)
   }
 
   Reindex();
+  NotifyClients(true, true);
 }
 
 Node *FullEfg::CopyTree(Node *src, Node *dest)
@@ -1219,6 +1234,7 @@ Node *FullEfg::CopyTree(Node *src, Node *dest)
     SortInfosets();
   }
 
+  NotifyClients(true, true);
   return dest;
 }
 
@@ -1244,6 +1260,7 @@ Node *FullEfg::MoveTree(Node *src, Node *dest)
   
   DeleteLexicon();
   SortInfosets();
+  NotifyClients(true, true);
   return dest;
 }
 
@@ -1268,6 +1285,7 @@ Node *FullEfg::DeleteTree(Node *n)
 
   DeleteLexicon();
   SortInfosets();
+  NotifyClients(true, true);
   return n;
 }
 
@@ -1281,6 +1299,7 @@ Action *FullEfg::InsertAction(Infoset *s)
   for (int i = 1; i <= s->members.Length(); i++)
     s->members[i]->children.Append(new Node(this, s->members[i]));
   DeleteLexicon();
+  NotifyClients(true, true);
   return action;
 }
 
@@ -1300,6 +1319,7 @@ Action *FullEfg::InsertAction(Infoset *s, const Action *a)
     s->members[i]->children.Insert(new Node(this, s->members[i]), where);
 
   DeleteLexicon();
+  NotifyClients(true, true);
   return action;
 }
 
@@ -1319,6 +1339,7 @@ Infoset *FullEfg::DeleteAction(Infoset *s, const Action *a)
     delete s->members[i]->children.Remove(where);
   }
   DeleteLexicon();
+  NotifyClients(true, true);
   return s;
 }
 
@@ -1643,5 +1664,38 @@ Nfg *FullEfg::AssociatedAfg(void) const
   return afg;
 }
 
+void FullEfg::RegisterClient(EfgClient *p_client)
+{
+  m_clients.Append(p_client);
+}
+
+void FullEfg::UnregisterClient(EfgClient *p_client)
+{
+  m_clients.Remove(m_clients.Find(p_client));
+}
+
+void FullEfg::NotifyClients(bool p_nodesChanged, bool p_infosetsChanged) const
+{
+  for (int i = 1; i <= m_clients.Length(); i++) {
+    m_clients[i]->OnTreeChanged(p_nodesChanged, p_infosetsChanged);
+  }
+}
 
 
+EfgClient::EfgClient(FullEfg *p_efg)
+  : m_efg(p_efg)
+{
+  p_efg->RegisterClient(this);
+}
+
+EfgClient::~EfgClient()
+{
+  if (m_efg) {
+    m_efg->UnregisterClient(this);
+  }
+}
+
+void EfgClient::OnEfgDestructed(void)
+{
+  m_efg = 0;
+}

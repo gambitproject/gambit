@@ -1,133 +1,143 @@
 //
-// FILE: flasher.cc -- implements the cursor for navigating the extensive
-// form tree.  Can be set to flash at regular intervals or be solid.  If
-// not flashing, make sure to call Flash after every move.
+// FILE: twflash.cc -- implements the cursor for navigating the tree
 //
 // $Id$
 //
 
-#include "wx.h"
+#include "wx/wx.h"
 #include "twflash.h"
+#include "treewin.h"
 
-/*****************************TREE NODE CURSOR*****************************/
-TreeNodeCursor::TreeNodeCursor(wxDC *_dc)
+//-----------------------------------------------------------------------
+//                         class TreeNodeCursor
+//-----------------------------------------------------------------------
+
+TreeNodeCursor::TreeNodeCursor(TreeRender *p_parent)
+  : m_parent(p_parent)
 {
-    SetType(myCursor);
-    old_x_s = -1;
-    old_x_e = -1;
-    old_y_s = -1;
-    old_y_e = -1;
-    dc = _dc;
-    cursor_type = nodeCursor;
-    old_cursor_type = nodeCursor;
-    SetFlashNode(-1, -1, -1, -1, nodeCursor);
-    SetFlashing(TRUE);
+  SetType(myCursor);
+  old_x_s = -1;
+  old_x_e = -1;
+  old_y_s = -1;
+  old_y_e = -1;
+  cursor_type = nodeCursor;
+  old_cursor_type = nodeCursor;
+  SetFlashNode(-1, -1, -1, -1, nodeCursor);
+  SetFlashing(TRUE);
 }
 
-TreeNodeCursor::~TreeNodeCursor(void)
+TreeNodeCursor::~TreeNodeCursor()
+{ }
+
+void TreeNodeCursor::SetFlashNode(int _x_s, int _y_s, int _x_e, int _y_e,
+				  CursorType type)
 {
-    dc = NULL;
-    flashing = FALSE;
+  x_s = _x_s;
+  y_s = _y_s;
+  x_e = _x_e;
+  y_e = _y_e;
+  cursor_type = type;
 }
 
-void TreeNodeCursor::SetFlashNode(int _x_s, int _y_s, int _x_e, int _y_e, CursorType type)
+void TreeNodeCursor::GetFlashNode(int & _x_s, int & _y_s, int & _x_e,
+				  int & _y_e) const
 {
-    x_s = _x_s;
-    y_s = _y_s;
-    x_e = _x_e;
-    y_e = _y_e;
-    cursor_type = type;
+  _x_s = x_s;
+  _y_s = y_s;
+  _x_e = x_e;
+  _y_e = y_e;
 }
 
-void TreeNodeCursor::GetFlashNode(int & _x_s, int & _y_s, int & _x_e, int & _y_e) const
+void TreeNodeCursor::DrawCursor(wxDC &p_dc, int xs, int ys, int xe, int ye, 
+				CursorType type)
 {
-    _x_s = x_s;
-    _y_s = y_s;
-    _x_e = x_e;
-    _y_e = y_e;
-}
-
-void TreeNodeCursor::DrawCursor(int xs, int ys, int xe, int ye, CursorType type)
-{
-    switch (type)
-    {
-    case nodeCursor:    // just a line
-        dc->DrawLine(xs+5, ys-4, xe, ye-4);
-        break;
-    case subgameCursor: // an isosceles triangle w/ height=base=(xe-xs)
-        int icon_size = xe-xs;
-        dc->DrawLine(xs-4, ys-4, xe+4, ys-6-icon_size/2);
-        dc->DrawLine(xs-4, ys+4, xe+4, ys+6+icon_size/2);
-        dc->DrawLine(xe+4, ys+6+icon_size/2, xe+4, ys-6-icon_size/2);
-        break;
-    }
+  switch (type) {
+  case nodeCursor:    // just a line
+    p_dc.DrawLine(xs+5, ys-4, xe, ye-4);
+    break;
+  case subgameCursor: // an isosceles triangle w/ height=base=(xe-xs)
+    int icon_size = xe-xs;
+    p_dc.DrawLine(xs-4, ys-4, xe+4, ys-6-icon_size/2);
+    p_dc.DrawLine(xs-4, ys+4, xe+4, ys+6+icon_size/2);
+    p_dc.DrawLine(xe+4, ys+6+icon_size/2, xe+4, ys-6-icon_size/2);
+    break;
+  }
 }
 
 void TreeNodeCursor::Flash(void)
 {
-    static int cur_color;
-    char        *cur_clr;
-    
-    if (flashing && dc && x_s != -1)
-    {
-        // Alternate between black and white colors
-        if (__mytype == myFlasher)
-        {
-            cur_color = (cur_color+1)%2;
-            
-            if (cur_color == 0) cur_clr = "BLACK";
-            else cur_clr = "WHITE";
-        }
-        else    // __type==wxCURSOR
-            cur_clr = "BLACK";
-        
-        if (x_s != old_x_s || x_e != old_x_e || y_s != old_y_s || y_e != old_y_e)
-        {
-            if (old_x_s != -1)  // if this is not the first time
-            {
-                // if we move to a different node, erase the old cursor
-                dc->SetPen(wxThePenList->FindOrCreatePen("WHITE", 4, wxSOLID));
-                DrawCursor(old_x_s, old_y_s, old_x_e, old_y_e, old_cursor_type);
-
-                // after moving to a new node, flash black right away!
-                cur_clr = "BLACK";
-                cur_color = 1;
-            }
-
-            old_x_s = x_s;
-            old_y_s = y_s;
-            old_x_e = x_e;
-            old_y_e = y_e;
-            old_cursor_type = cursor_type;
-        }
-
-        // Draw the new cursor
-        dc->SetPen(wxThePenList->FindOrCreatePen(cur_clr, 4, wxSOLID));
-        DrawCursor(x_s, y_s, x_e, y_e, cursor_type);
-    }
+  wxClientDC dc(m_parent);
+  dc.SetUserScale(m_parent->GetZoom(), m_parent->GetZoom());
+  Flash(dc);
 }
 
-/*************************** TREE NODE FLASHER ****************************/
-TreeNodeFlasher::TreeNodeFlasher(wxDC *_dc):wxTimer(), TreeNodeCursor(_dc)
+void TreeNodeCursor::Flash(wxDC &p_dc)
 {
-    SetType(myFlasher);
-    SetFlashing(TRUE);
+  static int cur_color;
+  char        *cur_clr;
+    
+  if (flashing && x_s != -1) {
+    // Alternate between black and white colors
+    if (__mytype == myFlasher) {
+      cur_color = (cur_color+1)%2;
+      
+      if (cur_color == 0) cur_clr = "BLACK";
+      else cur_clr = "WHITE";
+    }
+    else    // __type==wxCURSOR
+      cur_clr = "BLACK";
+    
+    if (x_s != old_x_s || x_e != old_x_e || y_s != old_y_s || y_e != old_y_e) {
+      if (old_x_s != -1)  { // if this is not the first time
+	// if we move to a different node, erase the old cursor
+	p_dc.SetPen(*wxThePenList->FindOrCreatePen("WHITE", 4, wxSOLID));
+	DrawCursor(p_dc, old_x_s, old_y_s, old_x_e, old_y_e, old_cursor_type);
+
+	// after moving to a new node, flash black right away!
+	cur_clr = "BLACK";
+	cur_color = 1;
+      }
+
+      old_x_s = x_s;
+      old_y_s = y_s;
+      old_x_e = x_e;
+      old_y_e = y_e;
+      old_cursor_type = cursor_type;
+    }
+
+    // Draw the new cursor
+    p_dc.SetPen(*wxThePenList->FindOrCreatePen(cur_clr, 4, wxSOLID));
+    DrawCursor(p_dc, x_s, y_s, x_e, y_e, cursor_type);
+  }
+}
+
+//-----------------------------------------------------------------------
+//                         class TreeNodeFlasher
+//-----------------------------------------------------------------------
+
+TreeNodeFlasher::TreeNodeFlasher(TreeRender *p_parent)
+  : TreeNodeCursor(p_parent)
+{
+  SetType(myFlasher);
+  SetFlashing(true);
 }
 
 TreeNodeFlasher::~TreeNodeFlasher(void)
 {
-    Stop();
+  Stop();
 }
 
-#define FLASHDELAY 200
-void TreeNodeFlasher::SetFlashing(Bool _flashing)
+void TreeNodeFlasher::SetFlashing(bool _flashing)
 {
-    TreeNodeCursor::SetFlashing(_flashing);
+  const int FLASHDELAY = 200;
+  TreeNodeCursor::SetFlashing(_flashing);
     
-    if (TreeNodeCursor::Flashing() == TRUE)
-        Start(FLASHDELAY);
-    else
-        Stop();
+  if (TreeNodeCursor::Flashing()) {
+    Start(FLASHDELAY);
+  }
+  else {
+    Stop();
+  }
 }
 
 

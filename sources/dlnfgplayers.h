@@ -14,16 +14,15 @@ private:
 
   wxListBox *m_playerNameList;
 
-  static void CallbackEdit(wxButton &p_object, wxCommandEvent &)
-    { ((dialogNfgPlayers *) p_object.GetClientData())->OnEdit(); }
-
-  void OnEdit(void);
+  void OnEdit(wxCommandEvent &);
 
   const char *HelpString(void) const { return "Edit Menu (nfg)"; }
 
 public:
   dialogNfgPlayers(Nfg &p_nfg, wxWindow *p_parent = 0);
   virtual ~dialogNfgPlayers()  { }
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif  // DLNFGPLAYERS_H

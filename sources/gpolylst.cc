@@ -1,5 +1,5 @@
 //
-// FILE: ideal.cc  
+// FILE: gpolylst.cc  
 //        -- Instantiations of classes gBasis and gIdeal
 //
 // $Id$
@@ -19,8 +19,8 @@
 template class gPolyList<gRational>;
 template gOutput &operator<<(gOutput &f, const gPolyList<gRational> &y);
 
-template class gPolyList<double>;
-template gOutput &operator<<(gOutput &f, const gPolyList<double> &y);
+//template class gPolyList<double>;
+//template gOutput &operator<<(gOutput &f, const gPolyList<double> &y);
 
 template class gPolyList<gDouble>;
 template gOutput &operator<<(gOutput &f, const gPolyList<gDouble> &y);
@@ -46,7 +46,7 @@ template class gArray<gPoly<gDouble>*>;
 template class gRectArray<gPoly<gRational>*>;
 //template class gArray<gPoly<gRational>*>;
 
-template class gRectArray<gPoly<double>*>;
+//template class gRectArray<gPoly<double>*>;
 //template class gArray<gPoly<double>*>;
 
 

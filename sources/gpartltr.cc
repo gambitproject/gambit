@@ -35,16 +35,16 @@ template gOutput &operator<<(gOutput &f,
 			     const ListOfPartialTrees<gRational> &y);
 
 
-template class TreeOfPartials<double>;
-template gOutput &operator<<(gOutput &f, const TreeOfPartials<double> &y);
-template class gList<TreeOfPartials<double> >;
-template gOutput &operator<<(gOutput &f, 
-			     const gList<TreeOfPartials<double> > &y);
-template class gList<gList<TreeOfPartials<double> > >;
-template gOutput &operator<<(gOutput &f, 
-			     const gList<gList<TreeOfPartials<double> > > &y);
-template class gList<gList<gList<TreeOfPartials<double> > > >;
-template class ListOfPartialTrees<double>;
-template gOutput &operator<<(gOutput &f, 
-			     const ListOfPartialTrees<double> &y);
+//template class TreeOfPartials<double>;
+//template gOutput &operator<<(gOutput &f, const TreeOfPartials<double> &y);
+//template class gList<TreeOfPartials<double> >;
+//template gOutput &operator<<(gOutput &f, 
+//			     const gList<TreeOfPartials<double> > &y);
+//template class gList<gList<TreeOfPartials<double> > >;
+//template gOutput &operator<<(gOutput &f, 
+//			     const gList<gList<TreeOfPartials<double> > > &y);
+//template class gList<gList<gList<TreeOfPartials<double> > > >;
+//template class ListOfPartialTrees<double>;
+//template gOutput &operator<<(gOutput &f, 
+//			     const ListOfPartialTrees<double> &y);
 

@@ -8,11 +8,10 @@
 #define GAMBIT_H
 
 #include "gtext.h"
-#include "wx.h"
-#include "wx_doc.h"
+#include "wx/wx.h"
+#include "wx/config.h"    // for wxConfig
+#include "wx/docview.h"   // for wxFileHistory
 
-class GambitFrame;
-extern GambitFrame *main_gambit_frame;
 extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
                                long p_style = wxOK | wxCENTRE);
 
@@ -20,32 +19,44 @@ extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
 class GambitApp : public wxApp {
 private:
   gText m_currentDir; /* Current position in directory tree. */
-  gText m_resourceFile;  /* path to resource file */
-  wxFileHistory *m_recentFiles;
+
+  bool OnInit(void);
 
 public:
-  wxFrame *OnInit(void);
-  int OnExit(void);
-
-  const gText &CurrentDir(void)   { return m_currentDir; }
+  virtual ~GambitApp() { }
+  
+  const gText &CurrentDir(void)  { return m_currentDir; }
   void SetCurrentDir(const gText &p_dir)  { m_currentDir = p_dir; }
-
-  const gText &ResourceFile(void)  { return m_resourceFile; }
-
-  void AddFileToHistory(const gText &p_name);
-  gText GetHistoryFile(int i)
-    { return m_recentFiles->GetHistoryFile(i); }
 };
 
-extern GambitApp gambitApp;
-
+DECLARE_APP(GambitApp)
 
 class GambitFrame : public wxFrame {
+private:
+  wxFileHistory m_fileHistory;
+
+  // Menu event handlers
+  void OnNewEfg(wxCommandEvent &);
+  void OnNewNfg(wxCommandEvent &);
+  void OnLoad(wxCommandEvent &);
+  void OnMRUFile(wxCommandEvent &);
+  void OnHelpAbout(wxCommandEvent &);
+  void OnHelpContents(wxCommandEvent &);
+
+  // Other event handlers
+  void OnCloseWindow(wxCloseEvent &);
+
+  int GetPlayers(void);
+  int GetStrategies(gArray<int> &);
+
 public:
-  GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int type);
-  Bool OnClose(void);
-  void OnMenuCommand(int id);
+  GambitFrame(wxFrame *p_parent, const wxString &p_title,
+	      const wxPoint &p_position, const wxSize &p_size);
+  virtual ~GambitFrame();
+
   void LoadFile(const gText &);
+
+  DECLARE_EVENT_TABLE()
 };
 
 

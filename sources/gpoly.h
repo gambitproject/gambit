@@ -8,11 +8,8 @@
 #define GPOLY_H
 
 #include "monomial.h"
-
-#ifndef MINI_POLY
 #include "poly.h"
 #include "gsmatrix.h"
-#endif
 
 // These classes are used to store and mathematically manipulate polynomials.
 
@@ -40,13 +37,9 @@ private:
   // some private members
   //----------------------
 
-#ifndef MINI_POLY
-
     // Information
   exp_vect  OrderMaxMonomialDivisibleBy(const term_order& order,
 					const exp_vect& expv);
-#endif   // MINI_POLY
-
     // Arithmetic
   gList<gMono<T> > Adder(const gList<gMono<T> >&, 
 			 const gList<gMono<T> >&)          const;
@@ -77,12 +70,8 @@ private:
   //   private friends
   //----------------------
 
-#ifndef MINI_POLY
-
   friend gPoly<T> operator*(const gPoly<T> &poly, const T val);
   friend gPoly<T> operator*(const T val, const gPoly<T> &poly);
-
-#endif   // MINI_POLY
 
 public:
 
@@ -147,14 +136,9 @@ public:
   bool                IsMultiaffine()                      const;
   int                 UniqueActiveVariable()               const;
                       // returns 0 if constant, -1 if truly multivariate
-#ifndef MINI_POLY
   polynomial<T>       UnivariateEquivalent(int activar)    const;
                       // assumes UniqueActiveVariable() is true
-#endif   // MINI_POLY
-
   T                   Evaluate(const gArray<T> &values)    const;
-
-#ifndef MINI_POLY
   gPoly<T>           EvaluateOneVar(int varnumber, T val)  const;
   gPoly<T>           PartialDerivative(int varnumber)      const;
   int                No_Monomials()                        const;
@@ -180,8 +164,6 @@ public:
 					  const gPoly<T> &);
   gPoly<T>       S_Polynomial(const term_order &, const gPoly<T> &) const;
 
-#endif    // MINI_POLY
-
   //---------------
   // Printing Stuff
   //---------------
@@ -195,10 +177,8 @@ public:
   // Conversion:
   //-------------
 
-#ifdef GDOUBLE
 template <class T> gPoly<gDouble> TogDouble(const gPoly<T>&);
 template <class T> gPoly<gDouble> NormalizationOfPoly(const gPoly<T>&);
-#endif   // GDOUBLE
 
 // global multiply by scalar operators
 template <class T> gPoly<T> operator*(const T val, const gPoly<T> &poly);
@@ -211,8 +191,6 @@ template <class T> gPoly<T> operator+(const gPoly<T> &poly, const T val);
 template <class T> gText ToText(const gPoly<T> &p);
 
 template <class T> gOutput &operator<< (gOutput &f, const gPoly<T> &y);
-
-
 
 #endif //# GPOLY_H
 

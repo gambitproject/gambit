@@ -15,9 +15,9 @@ private:
 
   const char *HelpString(void) const { return "Normal form Supports"; }
 
-  static void CallbackMethod(wxListBox &p_object, wxCommandEvent &)
-    { ((dialogElimMixed *) p_object.wxEvtHandler::GetClientData())->OnMethod(); }
-  void OnMethod(void);
+  // Event handlers
+  void OnOK(wxCommandEvent &);
+  void OnMethod(wxCommandEvent &);
   
 public:
   dialogElimMixed(wxWindow *, const gArray<gText> &p_players);
@@ -30,6 +30,8 @@ public:
   bool DomMixed(void) const { return (m_domMethodBox->GetSelection() == 1); }
   gPrecision Precision(void) const
     { return (m_domPrecisionBox->GetSelection() == 0) ? precDOUBLE : precRATIONAL; }
+
+  DECLARE_EVENT_TABLE()
 };
 
 class dialogElimBehav : public guiAutoDialog {
@@ -40,6 +42,9 @@ private:
 
   const char *HelpString(void) const { return "Extensive form Supports"; }
   
+  // Event handlers
+  void OnOK(wxCommandEvent &);
+
 public:
   dialogElimBehav(wxWindow *, const gArray<gText> &p_players);
   virtual ~dialogElimBehav();
@@ -50,6 +55,8 @@ public:
   bool DomStrong(void) const { return (m_domTypeBox->GetSelection() == 1); }
   bool DomConditional(void) const 
     { return (m_domConditionalBox->GetSelection() == 0); }
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif   // DLELIM_H

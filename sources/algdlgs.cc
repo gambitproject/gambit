@@ -14,6 +14,16 @@
 
 #include "nfgconst.h"
 
+#include "dlenumpure.h"
+#include "dlenummixed.h"
+#include "dllp.h"
+#include "dllcp.h"
+#include "dlliap.h"
+#include "dlsimpdiv.h"
+#include "dlpolenum.h"
+#include "dlqre.h"
+#include "dlqregrid.h"
+
 //========================================================================
 //                  dialogTrace auxiliary dialog class
 //========================================================================
@@ -21,13 +31,10 @@
 class dialogTrace : public guiAutoDialog {
 private:
   wxRadioBox *m_traceDest;
-  wxText *m_traceFile;
-  wxIntegerItem *m_traceLevel;
+  wxTextCtrl *m_traceFile;
+  wxSlider *m_traceLevel;
 
-  static void CallbackTrace(wxRadioBox &p_object, wxEvent &)
-    { ((dialogTrace *) p_object.GetClientData())->OnTrace(); }
-
-  void OnTrace(void);
+  void OnTrace(wxCommandEvent &);
 
 public:
   dialogTrace(wxWindow *p_parent, int p_traceDest, const gText &p_traceFile,
@@ -35,154 +42,160 @@ public:
   virtual ~dialogTrace();
 
   int TraceDest(void) const  { return m_traceDest->GetSelection(); }
-  gText TraceFile(void) const  { return m_traceFile->GetValue(); }
-  int TraceLevel(void) const { return m_traceLevel->GetInteger(); }
+  gText TraceFile(void) const;
+  int TraceLevel(void) const { return m_traceLevel->GetValue(); }
+
+  DECLARE_EVENT_TABLE()
 };
+
+BEGIN_EVENT_TABLE(dialogTrace, guiAutoDialog)
+  EVT_RADIOBOX(idTRACE_CHOICE, dialogTrace::OnTrace)
+END_EVENT_TABLE()
 
 dialogTrace::dialogTrace(wxWindow *p_parent,
                          int p_traceDest, const gText &p_traceFile,
                          int p_traceLevel)
   : guiAutoDialog(p_parent, "Tracing Parameters")
 {
-  char *traceChoices[] = { "None", "Window", "File" };
-  m_traceDest = new wxRadioBox(this, (wxFunction) CallbackTrace,
-			       "Destination", 1, 1, -1, -1,
-			       3, traceChoices);
+  wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+
+  wxString traceChoices[] = { "None", "Window", "File" };
+  m_traceDest = new wxRadioBox(this, idTRACE_CHOICE, "Destination",
+			       wxDefaultPosition, wxDefaultSize,
+			       3, traceChoices, 0, wxRA_SPECIFY_ROWS);
   m_traceDest->SetSelection(p_traceDest);
-  m_traceDest->SetClientData((char *) this);
+  sizer->Add(m_traceDest, 0, wxALL, 5);
 
-  m_traceFile = new wxText(this, 0, "Filename", "", 1, 1);
-  m_traceFile->SetValue(p_traceFile);
+  wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
+  fileSizer->Add(new wxStaticText(this, -1, "Filename"),
+		 0, wxALL | wxCENTER, 5);
+  m_traceFile = new wxTextCtrl(this, -1);
+  m_traceFile->SetValue((char *) p_traceFile);
   m_traceFile->Enable(p_traceDest == 2);
+  fileSizer->Add(m_traceFile, 1, wxEXPAND | wxALL, 5);
+  sizer->Add(fileSizer, 1, wxEXPAND | wxALL, 5);
 
-  m_traceLevel = new wxIntegerItem(this, "Level", 0, 1, 1, 100, -1);
-  m_traceLevel->SetInteger(p_traceLevel);
+  wxBoxSizer *levelSizer = new wxBoxSizer(wxHORIZONTAL);
+  levelSizer->Add(new wxStaticText(this, -1, "Trace level"),
+		  0, wxALL | wxCENTER, 5);
+  m_traceLevel = new wxSlider(this, -1, p_traceLevel, 0, 10, 
+			      wxDefaultPosition, wxDefaultSize,
+			      wxSL_HORIZONTAL | wxSL_LABELS);
   m_traceLevel->Enable(p_traceDest > 0);
+  levelSizer->Add(m_traceLevel, 1, wxEXPAND | wxALL, 5);
+  sizer->Add(levelSizer, 0, wxEXPAND | wxALL, 5);
 
-  m_traceDest->SetConstraints(new wxLayoutConstraints);
-  m_traceDest->GetConstraints()->top.SameAs(this, wxTop, 10);
-  m_traceDest->GetConstraints()->left.SameAs(this, wxLeft, 10);
-  m_traceDest->GetConstraints()->width.AsIs();
-  m_traceDest->GetConstraints()->height.AsIs();
+  sizer->Add(m_buttonSizer, 0, wxALL | wxCENTER, 5);
+  m_helpButton->Enable(false);
 
-  m_traceFile->SetConstraints(new wxLayoutConstraints);
-  m_traceFile->GetConstraints()->top.SameAs(m_traceDest, wxBottom, 10);
-  m_traceFile->GetConstraints()->left.SameAs(m_traceDest, wxLeft);
-  m_traceFile->GetConstraints()->width.AsIs();
-  m_traceFile->GetConstraints()->height.AsIs();
-
-  m_traceLevel->SetConstraints(new wxLayoutConstraints);
-  m_traceLevel->GetConstraints()->top.SameAs(m_traceFile, wxTop);
-  m_traceLevel->GetConstraints()->left.SameAs(m_traceFile, wxRight, 10);
-  m_traceLevel->GetConstraints()->width.AsIs();
-  m_traceLevel->GetConstraints()->height.AsIs();
-
-  m_okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
-  m_okButton->GetConstraints()->top.SameAs(m_traceLevel, wxBottom, 10);
-  m_okButton->GetConstraints()->height.AsIs();
-  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-
-  m_cancelButton->GetConstraints()->left.SameAs(this, wxCentreX, 5);
-  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_cancelButton->GetConstraints()->height.AsIs();
-  m_cancelButton->GetConstraints()->width.AsIs();
-
-  m_helpButton->Show(FALSE);
-
-  Go();
+  SetSizer(sizer); 
+  sizer->Fit(this);
+  sizer->SetSizeHints(this); 
+  Layout();
 }
 
 dialogTrace::~dialogTrace()
 { }
 
-void dialogTrace::OnTrace(void)
+void dialogTrace::OnTrace(wxCommandEvent &)
 {
   m_traceFile->Enable(m_traceDest->GetSelection() == 2);
   m_traceLevel->Enable(m_traceDest->GetSelection() != 0);
 }
 
+gText dialogTrace::TraceFile(void) const
+{ return m_traceFile->GetValue().c_str(); }
+
 //========================================================================
 //            dialogAlgorithm: Member function definitions
 //========================================================================
+
+BEGIN_EVENT_TABLE(dialogAlgorithm, guiAutoDialog)
+  EVT_CHECKBOX(idALL_CHECKBOX, dialogAlgorithm::OnAll)
+  EVT_BUTTON(idTRACE_BUTTON, dialogAlgorithm::OnTrace)
+  EVT_RADIOBOX(idDEPTH_CHOICE, dialogAlgorithm::OnDepth)
+  EVT_BUTTON(wxID_OK, dialogAlgorithm::OnOK)
+END_EVENT_TABLE()
 
 dialogAlgorithm::dialogAlgorithm(const gText &p_label, bool p_usesNfg,
 				 wxWindow *p_parent)
   : guiAutoDialog(p_parent, p_label),
     m_usesNfg(p_usesNfg), m_subgames(false),
     m_traceDest(0), m_traceLevel(0), m_traceFile(""),
-    m_dominanceGroup(0), m_subgamesGroup(0), m_algorithmGroup(0),
+    m_dominanceBox(0), m_subgamesBox(0), m_algorithmBox(0),
     m_depthChoice(0), m_typeChoice(0),
     m_methodChoice(0), m_markSubgames(0), m_selectSolutions(0),
     m_stopAfter(0), m_findAll(0), m_precision(0)
-{ }
-
-dialogAlgorithm::~dialogAlgorithm()
 {
-  if (Completed() == wxOK) {
-    if(m_depthChoice)
-      if (m_usesNfg) {
-	wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Depth",
-			m_depthChoice->GetSelection(), gambitApp.ResourceFile());
-	if (m_depthChoice->GetSelection() != 0) {
-	  if(m_typeChoice)
-	    wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Type",
-			    m_typeChoice->GetSelection(), gambitApp.ResourceFile());
-	  if(m_methodChoice)
-	    wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Method",
-			    m_methodChoice->GetSelection(), gambitApp.ResourceFile());
-	}
-      }
-      else {
-	wxWriteResource("Soln-Defaults", "Efg-ElimDom-Depth",
-			m_depthChoice->GetSelection(), gambitApp.ResourceFile());
-	if (m_depthChoice->GetSelection() != 0)
-	  if(m_typeChoice)
-	    wxWriteResource("Soln-Defaults", "Efg-ElimDom-Type",
-			    m_typeChoice->GetSelection(), gambitApp.ResourceFile());
-      }
-    
-    if (m_subgames) {
-      if(m_markSubgames)
-	wxWriteResource("Soln-Defaults", "Efg-Mark-Subgames",
-			m_markSubgames->GetValue(), gambitApp.ResourceFile());
-      if(m_selectSolutions)
-	wxWriteResource("Soln-Defaults", "Efg-Interactive-Solns",
-			m_selectSolutions->GetValue(), gambitApp.ResourceFile());
-    }
-
-    if (m_stopAfter) {
-      if(m_findAll)
-	if (m_findAll->GetValue())
-	  wxWriteResource("Algorithm Params", "StopAfter", 0, gambitApp.ResourceFile());
-	else
-	  if(m_stopAfter)
-	    wxWriteResource("Algorithm Params", "StopAfter",
-			    m_stopAfter->GetInteger(), gambitApp.ResourceFile());
-    }
-
-    if (m_precision) {
-      wxWriteResource("Algorithm Params", "Precision", m_precision->GetSelection(), gambitApp.ResourceFile());
-    }
-  }
+  m_topSizer = new wxBoxSizer(wxVERTICAL);
 }
 
-void dialogAlgorithm::OnDepth(void)
+dialogAlgorithm::~dialogAlgorithm()
+{ }
+
+void dialogAlgorithm::OnOK(wxCommandEvent &p_event)
+{
+  wxConfig config("Gambit");
+
+  if (m_usesNfg) {
+    config.Write("Solutions/Nfg-ElimDom-Depth",
+		 (long) m_depthChoice->GetSelection());
+    if (m_depthChoice->GetSelection() != 0) {
+      config.Write("Solutions/Nfg-ElimDom-Type",
+		   (long) m_typeChoice->GetSelection());
+      config.Write("Solutions/Nfg-ElimDom-Method",
+		   (long) m_methodChoice->GetSelection());
+    }
+  }
+  else {
+    config.Write("Solutions/Efg-ElimDom-Depth",
+		 (long) m_depthChoice->GetSelection());
+    if (m_depthChoice->GetSelection() != 0) {
+      config.Write("Solutions/Efg-ElimDom-Type", 
+		   (long) m_typeChoice->GetSelection());
+    }
+  }
+
+  if (m_subgames) {
+    config.Write("Solutions/Efg-Mark-Subgames",
+		 (long) m_markSubgames->GetValue());
+    config.Write("Solutions/Efg-Interactive-Solutions",
+		 (long) m_selectSolutions->GetValue());
+  }
+
+  if (m_stopAfter) {
+    if (m_findAll->GetValue()) {
+      config.Write("Solutions/StopAfter", 0l);
+    }
+    else {
+      config.Write("Solutions/StopAfter", (long) m_stopAfter->GetInteger());
+    }
+  }
+
+  if (m_precision) {
+    config.Write("Solutions/Precision", (long) m_precision->GetSelection());
+  }
+
+  p_event.Skip();
+}
+
+void dialogAlgorithm::OnDepth(wxCommandEvent &)
 {
   m_typeChoice->Enable(m_depthChoice->GetSelection() > 0);
   if (m_methodChoice && m_usesNfg)
     m_methodChoice->Enable(m_depthChoice->GetSelection() > 0);
 }
 
-void dialogAlgorithm::OnAll(void)
+void dialogAlgorithm::OnAll(wxCommandEvent &)
 {
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-void dialogAlgorithm::OnTrace(void)
+void dialogAlgorithm::OnTrace(wxCommandEvent &)
 {
   dialogTrace dialog(this, m_traceDest, m_traceFile, m_traceLevel);
 
-  if (dialog.Completed() == wxOK)  {
+  if (dialog.ShowModal() == wxID_OK)  {
     m_traceLevel = dialog.TraceLevel();
     m_traceFile = dialog.TraceFile();
     m_traceDest = dialog.TraceDest();
@@ -191,107 +204,76 @@ void dialogAlgorithm::OnTrace(void)
 
 void dialogAlgorithm::DominanceFields(bool p_usesNfg)
 {
-  int depth = 0, type = 0, method = 0;
+  long depth = 0, type = 0, method = 0;
 
   if (p_usesNfg) {
-    m_dominanceGroup = new wxGroupBox(this, "Eliminate dominated mixed strategies");
-    wxGetResource("Soln-Defaults", "Nfg-ElimDom-Depth", &depth, gambitApp.ResourceFile());
-    wxGetResource("Soln-Defaults", "Nfg-ElimDom-Type", &type, gambitApp.ResourceFile());
-    wxGetResource("Soln-Defaults", "Nfg-ElimDom-Method", &method,
-		  gambitApp.ResourceFile());
+    m_dominanceBox = new wxStaticBoxSizer
+      (new wxStaticBox(this, -1, "Eliminate dominated mixed strategies"),
+       wxHORIZONTAL);
+
+    wxConfig config("Gambit");
+    config.Read("Solutions/Nfg-ElimDom-Depth", &depth);
+    config.Read("Solutions/Nfg-ElimDom-Type", &type);
+    config.Read("Solutions/Nfg-ElimDom-Method", &method);
   }
   else {
-    m_dominanceGroup = new wxGroupBox(this, "Eliminate dominated behavior strategies");
-    wxGetResource("Soln-Defaults", "Efg-ElimDom-Depth", &depth, gambitApp.ResourceFile());
-    wxGetResource("Soln-Defaults", "Efg-ElimDom-Type", &type, gambitApp.ResourceFile());
-  }
-  NewLine();
+    m_dominanceBox = new wxStaticBoxSizer
+      (new wxStaticBox(this, -1, "Eliminate dominated behavior strategies"),
+       wxHORIZONTAL);
 
-  char *depthChoices[] = { "None", "Once", "Iterative" };
-  m_depthChoice = new wxRadioBox(this, (wxFunction) CallbackDepth, "Depth",
-				 -1, -1, -1, -1, 3, depthChoices, 0, wxVERTICAL);
-  m_depthChoice->SetClientData((char *) this);
+    wxConfig config("Gambit");
+    config.Read("Solutions/Efg-ElimDom-Depth", &depth);
+    config.Read("Solutions/Efg-ElimDom-Type", &type);
+  }
+  m_topSizer->Add(m_dominanceBox, 0, wxALL, 5);
+
+  wxString depthChoices[] = { "None", "Once", "Iterative" };
+  m_depthChoice = new wxRadioBox(this, idDEPTH_CHOICE, "Depth",
+				 wxDefaultPosition, wxDefaultSize,
+				 3, depthChoices, 0, wxRA_SPECIFY_COLS);
   if (depth >= 0 && depth <= 2)
     m_depthChoice->SetSelection(depth);
+  m_dominanceBox->Add(m_depthChoice, 0, wxALL, 5);
 
-  char *typeChoices[] = { "Weak", "Strong" };
-  m_typeChoice = new wxRadioBox(this, 0, "Type", -1, -1, -1, -1,
-				2, typeChoices, 0, wxVERTICAL);
+  wxString typeChoices[] = { "Weak", "Strong" };
+  m_typeChoice = new wxRadioBox(this, -1, "Type",
+				wxDefaultPosition, wxDefaultSize,
+				2, typeChoices, 0, wxRA_SPECIFY_COLS);
   if (m_depthChoice->GetSelection() == 0)
-    m_typeChoice->Enable(FALSE);
+    m_typeChoice->Enable(false);
   else if (type == 0 || type == 1)
     m_typeChoice->SetSelection(type);
+  m_dominanceBox->Add(m_typeChoice, 0, wxALL, 5);
 
-  char *methodChoices[] = { "Pure", "Mixed" };
-  m_methodChoice = new wxRadioBox(this, 0, "Method", -1, -1, -1, -1,
- 	    2, methodChoices, 0, wxVERTICAL);
+  wxString methodChoices[] = { "Pure", "Mixed" };
+  m_methodChoice = new wxRadioBox(this, -1, "Method",
+				  wxDefaultPosition, wxDefaultSize,
+				  2, methodChoices, 0, wxRA_SPECIFY_COLS);
   if (m_depthChoice->GetSelection() == 0 || !p_usesNfg)
-    m_methodChoice->Enable(FALSE);
+    m_methodChoice->Enable(false);
   else if (method == 0 || method == 1)
     m_methodChoice->SetSelection(method);
-
-  m_depthChoice->SetConstraints(new wxLayoutConstraints);
-  m_depthChoice->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft, 10);
-  m_depthChoice->GetConstraints()->top.SameAs(m_dominanceGroup, wxTop, 20);
-  m_depthChoice->GetConstraints()->height.AsIs();
-  m_depthChoice->GetConstraints()->width.AsIs();
-
-  m_typeChoice->SetConstraints(new wxLayoutConstraints);
-  m_typeChoice->GetConstraints()->left.SameAs(m_depthChoice, wxRight, 10);
-  m_typeChoice->GetConstraints()->top.SameAs(m_depthChoice, wxTop);
-  m_typeChoice->GetConstraints()->height.AsIs();
-  m_typeChoice->GetConstraints()->width.AsIs();
-
-  m_methodChoice->SetConstraints(new wxLayoutConstraints);
-  m_methodChoice->GetConstraints()->top.SameAs(m_depthChoice, wxTop);
-  m_methodChoice->GetConstraints()->left.SameAs(m_typeChoice, wxRight, 10);
-  m_methodChoice->GetConstraints()->height.AsIs();
-  m_methodChoice->GetConstraints()->width.AsIs();
-
-  m_dominanceGroup->SetConstraints(new wxLayoutConstraints);    
-  m_dominanceGroup->GetConstraints()->top.SameAs(this, wxTop, 5);
-  m_dominanceGroup->GetConstraints()->left.SameAs(this, wxLeft, 5);
-  m_dominanceGroup->GetConstraints()->bottom.SameAs(m_depthChoice, wxBottom, -10);
-  m_dominanceGroup->GetConstraints()->right.SameAs(m_methodChoice, wxRight, -10);
-
-  NewLine();
+  m_dominanceBox->Add(m_methodChoice, 0, wxALL, 5);
 }
 
 void dialogAlgorithm::SubgameFields(void)
 {
-  Bool mark = false, select = false;
-  m_subgamesGroup = new wxGroupBox(this, "Subgames");
-  NewLine();
+  long mark = 0, select = 0;
+  m_subgamesBox = new wxStaticBoxSizer(new wxStaticBox(this, -1, "Subgames"), 
+				       wxVERTICAL);
+  m_topSizer->Add(m_subgamesBox, 0, wxALL, 5);
 
-  wxGetResource("Soln-Defaults", "Efg-Mark-Subgames", &mark, gambitApp.ResourceFile());
-  wxGetResource("Soln-Defaults", "Efg-Interactive-Solns", &select,
-		gambitApp.ResourceFile());
+  wxConfig config("Gambit");
+  config.Read("Solutions/Efg-Mark-Subgames", &mark);
+  config.Read("Solutions/Efg-Interactive-Solutions", &select);
 
-  m_markSubgames = new wxCheckBox(this, 0, "Mark subgames before solving");
+  m_markSubgames = new wxCheckBox(this, -1, "Mark subgames before solving");
   m_markSubgames->SetValue(mark);
-  NewLine();
-  m_selectSolutions = new wxCheckBox(this, 0,
+  m_subgamesBox->Add(m_markSubgames, 0, wxALL, 5);
+  m_selectSolutions = new wxCheckBox(this, -1,
 				     "Interactively select subgame solutions");
   m_selectSolutions->SetValue(select);
-  NewLine();
-
-  m_markSubgames->SetConstraints(new wxLayoutConstraints);
-  m_markSubgames->GetConstraints()->left.SameAs(m_subgamesGroup, wxLeft, 10);
-  m_markSubgames->GetConstraints()->top.SameAs(m_subgamesGroup, wxTop, 20);
-  m_markSubgames->GetConstraints()->height.AsIs();
-  m_markSubgames->GetConstraints()->width.AsIs();
-
-  m_selectSolutions->SetConstraints(new wxLayoutConstraints);
-  m_selectSolutions->GetConstraints()->left.SameAs(m_markSubgames, wxLeft);
-  m_selectSolutions->GetConstraints()->top.SameAs(m_markSubgames, wxBottom, 10);
-  m_selectSolutions->GetConstraints()->height.AsIs();
-  m_selectSolutions->GetConstraints()->width.AsIs();
-
-  m_subgamesGroup->SetConstraints(new wxLayoutConstraints);
-  m_subgamesGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
-  m_subgamesGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
-  m_subgamesGroup->GetConstraints()->bottom.SameAs(m_selectSolutions, wxBottom, -10);
-  m_subgamesGroup->GetConstraints()->right.SameAs(m_selectSolutions, wxRight, -10);
+  m_subgamesBox->Add(m_selectSolutions, 0, wxALL, 5);
 }
 
 void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
@@ -302,45 +284,23 @@ void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
   if (p_subgames)    SubgameFields();
   AlgorithmFields();
 
-  wxButton *traceButton = new wxButton(this, (wxFunction) CallbackTrace,
-					"Trace...");
-  traceButton->SetClientData((char *) this);
-
-  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
-  m_okButton->GetConstraints()->top.SameAs(m_algorithmGroup, wxBottom, 10);
-  m_okButton->GetConstraints()->height.AsIs();
-  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-
-  m_cancelButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
-  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_cancelButton->GetConstraints()->height.AsIs();
-  m_cancelButton->GetConstraints()->width.AsIs();
-
-  // The following constraints are handled differently due to what appears
-  // to be some type of compiler (or wxwin?) bug involving setting
-  // constraints for pointers on the stack, under Linux and Solaris
-  // and g++ 2.8.1.  -- TLT 
-  wxLayoutConstraints *constraints = new wxLayoutConstraints;
-  constraints->left.SameAs(m_cancelButton, wxRight, 10);
-  constraints->centreY.SameAs(m_okButton, wxCentreY);
-  constraints->height.AsIs();
-  constraints->width.AsIs();
-  traceButton->SetConstraints(constraints);
-
-  m_helpButton->GetConstraints()->left.SameAs(traceButton, wxRight, 10);
-  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_helpButton->GetConstraints()->height.AsIs();
-  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_buttonSizer->Add(new wxButton(this, idTRACE_BUTTON, "Trace..."),
+		     0, wxALL, 5);
+  
+  m_topSizer->Add(m_buttonSizer, 0, wxALL | wxCENTER, 5);
+  SetSizer(m_topSizer); 
+  m_topSizer->Fit(this);
+  m_topSizer->SetSizeHints(this); 
+  Layout();
 }
 
 void dialogAlgorithm::StopAfterField(void)
 {
-  int stopAfter = 0;
-  wxGetResource("Algorithm Params", "StopAfter", &stopAfter, gambitApp.ResourceFile());
+  long stopAfter = 0;
+  wxConfig config("Gambit");
+  config.Read("Solutions/StopAfter", &stopAfter);
 
-  m_findAll = new wxCheckBox(this, (wxFunction) CallbackAll, "Find all", 1, 1);
-  m_findAll->SetClientData((char *) this);
-
+  m_findAll = new wxCheckBox(this, idALL_CHECKBOX, "Find all");
   m_stopAfter = new wxIntegerItem(this, "Stop after",
 				  (stopAfter > 0) ? stopAfter : 1,
 				  1, 1, -1, -1);
@@ -349,18 +309,27 @@ void dialogAlgorithm::StopAfterField(void)
     m_findAll->SetValue(true);
     m_stopAfter->Enable(FALSE);
   }
+
+  wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
+  sizer->Add(m_findAll, 0, wxALL, 5);
+  sizer->Add(m_stopAfter, 0, wxALL, 5);
+  m_algorithmBox->Add(sizer, 0, wxALL, 5);
 }
 
 void dialogAlgorithm::PrecisionField(void)
 {
-  int precision = 0;
-  wxGetResource("Algorithm Params", "Precision", &precision, gambitApp.ResourceFile());
+  long precision = 0;
+  wxConfig config("Gambit");
+  config.Read("Solutions/Precision", &precision);
 
-  char *precisionChoices[] = { "Float", "Rational" };
-  m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
-			       2, precisionChoices);
-  if (precision == 0 || precision == 1)
-    m_precision->SetSelection(precision);;
+  wxString precisionChoices[] = { "Float", "Rational" };
+  m_precision = new wxRadioBox(this, -1, "Precision",
+			       wxDefaultPosition, wxDefaultSize,
+			       2, precisionChoices, 0, wxRA_SPECIFY_ROWS);
+  if (precision == 0 || precision == 1) {
+    m_precision->SetSelection(precision);
+  }
+  m_algorithmBox->Add(m_precision, 0, wxALL, 5);
 }
 
 gOutput *dialogAlgorithm::TraceFile(void) const
@@ -387,14 +356,11 @@ gOutput *dialogAlgorithm::TraceFile(void) const
 //                   dialogEnumPure: Member functions
 //=======================================================================
 
-#include "dlenumpure.h"
-
 dialogEnumPure::dialogEnumPure(wxWindow *p_parent, bool p_subgames,
 			       bool p_vianfg)
   : dialogAlgorithm("EnumPureSolve Parameters", p_vianfg, p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
-  Go();
 }
 
 dialogEnumPure::~dialogEnumPure()
@@ -402,33 +368,10 @@ dialogEnumPure::~dialogEnumPure()
 
 void dialogEnumPure::AlgorithmFields(void)
 {
-  m_algorithmGroup = new wxGroupBox(this, "Algorithm parameters");
-  NewLine();
+  m_algorithmBox = new wxStaticBoxSizer
+    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
+  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
   StopAfterField();
-
-  m_algorithmGroup->SetConstraints(new wxLayoutConstraints);
-  if (m_subgames) {
-    m_algorithmGroup->GetConstraints()->top.SameAs(m_subgamesGroup, wxBottom, 15);
-  }
-  else {
-    m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
-  }
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
-  m_algorithmGroup->GetConstraints()->right.SameAs(m_stopAfter, wxRight, -10);
-  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_stopAfter, wxBottom, -10);
-
-  m_findAll->SetConstraints(new wxLayoutConstraints);
-  m_findAll->GetConstraints()->centreY.SameAs(m_stopAfter, wxCentreY);
-  m_findAll->GetConstraints()->left.SameAs(m_algorithmGroup, wxLeft, 10);
-  m_findAll->GetConstraints()->width.AsIs();
-  m_findAll->GetConstraints()->height.AsIs();
-  
-  m_stopAfter->SetConstraints(new wxLayoutConstraints);
-  m_stopAfter->GetConstraints()->top.SameAs(m_algorithmGroup, wxTop, 20);
-  m_stopAfter->GetConstraints()->left.SameAs(m_findAll, wxRight, 10);
-  m_stopAfter->GetConstraints()->width.AsIs();
-  m_stopAfter->GetConstraints()->height.AsIs();
-
 }
 
 int dialogEnumPure::StopAfter(void) const
@@ -443,13 +386,10 @@ int dialogEnumPure::StopAfter(void) const
 //                   dialogEnumMixed: Member functions
 //=======================================================================
 
-#include "dlenummixed.h"
-
 dialogEnumMixed::dialogEnumMixed(wxWindow *p_parent, bool p_subgames)
   : dialogAlgorithm("EnumMixedSolve Parameters", true, p_parent)
 {
   MakeCommonFields(true, p_subgames, true);
-  Go();
 }
 
 dialogEnumMixed::~dialogEnumMixed()
@@ -457,42 +397,11 @@ dialogEnumMixed::~dialogEnumMixed()
 
 void dialogEnumMixed::AlgorithmFields(void)
 {
-  m_algorithmGroup = new wxGroupBox(this, "Algorithm parameters");
-  NewLine();
+  m_algorithmBox = new wxStaticBoxSizer
+    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
+  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
   StopAfterField();
-  NewLine();
   PrecisionField();
-
-  m_algorithmGroup->SetConstraints(new wxLayoutConstraints);
-  if (m_subgames) {
-    m_algorithmGroup->GetConstraints()->top.SameAs(m_subgamesGroup, wxBottom, 15);
-  }
-  else {
-    m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
-  }
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
-  m_algorithmGroup->GetConstraints()->right.SameAs(m_stopAfter, wxRight, -10);
-  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_precision, wxBottom, -10);
-
-  m_findAll->SetConstraints(new wxLayoutConstraints);
-  m_findAll->GetConstraints()->centreY.SameAs(m_stopAfter, wxCentreY);
-  m_findAll->GetConstraints()->left.SameAs(m_algorithmGroup, wxLeft, 10);
-  m_findAll->GetConstraints()->width.AsIs();
-  m_findAll->GetConstraints()->height.AsIs();
-  
-  m_stopAfter->SetConstraints(new wxLayoutConstraints);
-  m_stopAfter->GetConstraints()->top.SameAs(m_algorithmGroup, wxTop, 20);
-  m_stopAfter->GetConstraints()->left.SameAs(m_findAll, wxRight, 10);
-  m_stopAfter->GetConstraints()->width.AsIs();
-  m_stopAfter->GetConstraints()->height.AsIs();
-
-  m_precision->SetConstraints(new wxLayoutConstraints);
-  m_precision->GetConstraints()->top.SameAs(m_stopAfter, wxBottom, 10);
-  m_precision->GetConstraints()->left.SameAs(m_findAll, wxLeft);
-  m_precision->GetConstraints()->width.AsIs();
-  m_precision->GetConstraints()->height.AsIs();
-
-  NewLine();
 }
 
 int dialogEnumMixed::StopAfter(void) const
@@ -510,48 +419,23 @@ wxEnumStatus::wxEnumStatus(wxFrame *p_parent)
 void wxEnumStatus::SetProgress(double p_value)
 {
   if (p_value > -.5)  {
-    // actually, as long as its not -1.0, but floating point ==
-    gauge->SetValue((int) ((p_value + pass) / 3.0 *100.0));
+    m_value = (int) ((p_value + pass) / 3.0 * 100.0);
+    Update(m_value);
   }
   else {
     pass++;
   }
   wxYield();
 }
-
-#include "dlpolenum.h"
-
-wxPolEnumStatus::wxPolEnumStatus(wxFrame *p_parent)
-  : wxStatus(p_parent, "PolEnumSolve"), pass(0)
-{ }
-
-void wxPolEnumStatus::SetProgress(double p_value)
-{
-  if (p_value > -.5)  {
-    // actually, as long as its not -1.0
-    if(pass==0)  // allocate a quarter of the time to enumerating supports
-      gauge->SetValue((int)(p_value/4.0  * 100.0));
-    else  // and the rest to computing the solutions
-      gauge->SetValue((int) ((3.0*p_value + pass) / 4.0 * 100.0));
-  }
-  else {
-    pass++;
-  }
-  wxYield();
-}
-
 
 //=======================================================================
 //                        dialogLp: Member functions
 //=======================================================================
 
-#include "dllp.h"
-
 dialogLp::dialogLp(wxWindow *p_parent, bool p_subgames, bool p_vianfg)
   : dialogAlgorithm("LpSolve Parameters", p_vianfg, p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
-  Go();
 }
 
 dialogLp::~dialogLp()
@@ -559,41 +443,20 @@ dialogLp::~dialogLp()
 
 void dialogLp::AlgorithmFields(void)
 {
-  m_algorithmGroup = new wxGroupBox(this, "Algorithm parameters");
-  NewLine();
+  m_algorithmBox = new wxStaticBoxSizer
+    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
+  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
   PrecisionField();
-
-  m_algorithmGroup->SetConstraints(new wxLayoutConstraints);
-  if (m_subgames) {
-    m_algorithmGroup->GetConstraints()->top.SameAs(m_subgamesGroup, wxBottom, 15);
-  }
-  else {
-    m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
-  }
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
-  m_algorithmGroup->GetConstraints()->right.SameAs(m_precision, wxRight, -10);
-  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_precision, wxBottom, -10);
-
-  m_precision->SetConstraints(new wxLayoutConstraints);
-  m_precision->GetConstraints()->top.SameAs(m_algorithmGroup, wxTop, 20);
-  m_precision->GetConstraints()->left.SameAs(m_algorithmGroup, wxLeft, 10);
-  m_precision->GetConstraints()->width.AsIs();
-  m_precision->GetConstraints()->height.AsIs();
-
-  NewLine();
 }
 
 //=======================================================================
 //                       dialogLcp: Member functions
 //=======================================================================
 
-#include "dllcp.h"
-
 dialogLcp::dialogLcp(wxWindow *p_parent, bool p_subgames, bool p_vianfg)
   : dialogAlgorithm("LcpSolve Parameters", p_vianfg, p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
-  Go();
 }
 
 dialogLcp::~dialogLcp()
@@ -601,42 +464,11 @@ dialogLcp::~dialogLcp()
 
 void dialogLcp::AlgorithmFields(void)
 {
-  m_algorithmGroup = new wxGroupBox(this, "Algorithm parameters");
-  NewLine();
+  m_algorithmBox = new wxStaticBoxSizer
+    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
+  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
   StopAfterField();
-  NewLine();
   PrecisionField();
-
-  m_algorithmGroup->SetConstraints(new wxLayoutConstraints);
-  if (m_subgames) {
-    m_algorithmGroup->GetConstraints()->top.SameAs(m_subgamesGroup, wxBottom, 15);
-  }
-  else {
-    m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
-  }
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
-  m_algorithmGroup->GetConstraints()->right.SameAs(m_stopAfter, wxRight, -10);
-  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_precision, wxBottom, -10);
-
-  m_findAll->SetConstraints(new wxLayoutConstraints);
-  m_findAll->GetConstraints()->centreY.SameAs(m_stopAfter, wxCentreY);
-  m_findAll->GetConstraints()->left.SameAs(m_algorithmGroup, wxLeft, 10);
-  m_findAll->GetConstraints()->width.AsIs();
-  m_findAll->GetConstraints()->height.AsIs();
-  
-  m_stopAfter->SetConstraints(new wxLayoutConstraints);
-  m_stopAfter->GetConstraints()->top.SameAs(m_algorithmGroup, wxTop, 20);
-  m_stopAfter->GetConstraints()->left.SameAs(m_findAll, wxRight, 10);
-  m_stopAfter->GetConstraints()->width.AsIs();
-  m_stopAfter->GetConstraints()->height.AsIs();
-
-  m_precision->SetConstraints(new wxLayoutConstraints);
-  m_precision->GetConstraints()->top.SameAs(m_stopAfter, wxBottom, 10);
-  m_precision->GetConstraints()->left.SameAs(m_findAll, wxLeft);
-  m_precision->GetConstraints()->width.AsIs();
-  m_precision->GetConstraints()->height.AsIs();
-
-  NewLine();
 }
 
 int dialogLcp::StopAfter(void) const
@@ -651,89 +483,64 @@ int dialogLcp::StopAfter(void) const
 //                       dialogLiap: Member functions
 //=======================================================================
 
-#include "dlliap.h"
+BEGIN_EVENT_TABLE(dialogLiap, dialogAlgorithm)
+  EVT_BUTTON(wxID_OK, dialogLiap::OnOK)
+END_EVENT_TABLE()
 
 dialogLiap::dialogLiap(wxWindow *p_parent, bool p_subgames, bool p_vianfg)
   : dialogAlgorithm("LiapSolve Parameters", p_vianfg, p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
-  Go();
 }
 
 dialogLiap::~dialogLiap()
+{ }
+
+void dialogLiap::OnOK(wxCommandEvent &p_event)
 {
-  if (Completed() == wxOK) {
-    wxWriteResource("Algorithm Params", "Liap-nTries", NumTries(), 
-		    gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Liap-accuracy", Accuracy(),
-		    gambitApp.ResourceFile());
-  }
+  wxConfig config("Gambit");
+  config.Write("Solutions/Liap-nTries", (long) NumTries());
+  config.Write("Solutions/Liap-accuracy", (long) Accuracy());
+  p_event.Skip();
 }
 
 void dialogLiap::AlgorithmFields(void)
 {
-  m_algorithmGroup = new wxGroupBox(this, "Algorithm parameters", 1, 1);
+  wxConfig config("Gambit");
+
+  m_algorithmBox = new wxStaticBoxSizer
+    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
+  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
   StopAfterField();
 
-  m_findAll->SetConstraints(new wxLayoutConstraints);
-  m_findAll->GetConstraints()->centreY.SameAs(m_stopAfter, wxCentreY);
-  m_findAll->GetConstraints()->left.SameAs(m_algorithmGroup, wxLeft, 10);
-  m_findAll->GetConstraints()->width.AsIs();
-  m_findAll->GetConstraints()->height.AsIs();
-  
-  m_stopAfter->SetConstraints(new wxLayoutConstraints);
-  m_stopAfter->GetConstraints()->top.SameAs(m_algorithmGroup, wxTop, 20);
-  m_stopAfter->GetConstraints()->left.SameAs(m_findAll, wxRight, 10);
-  m_stopAfter->GetConstraints()->width.AsIs();
-  m_stopAfter->GetConstraints()->height.AsIs();
-
-  int nTries = 0;
-  wxGetResource("Algorithm Params", "Liap-nTries", &nTries, gambitApp.ResourceFile());
+  long nTries = 0;
+  config.Read("Solutions/Liap-nTries", &nTries);
+  wxBoxSizer *nTriesSizer = new wxBoxSizer(wxHORIZONTAL);
+  nTriesSizer->Add(new wxStaticText(this, -1, "# Tries"),
+		   0, wxALL | wxCENTER, 5);
   m_nTries = new wxIntegerItem(this, "nTries", nTries, 1, 1);
-  m_nTries->SetConstraints(new wxLayoutConstraints);
-  m_nTries->GetConstraints()->top.SameAs(m_stopAfter, wxBottom, 10);
-  m_nTries->GetConstraints()->left.SameAs(m_findAll, wxLeft);
-  m_nTries->GetConstraints()->width.AsIs();
-  m_nTries->GetConstraints()->height.AsIs();
-  NewLine();
+  nTriesSizer->Add(m_nTries, 0, wxALL, 5);
+  m_algorithmBox->Add(nTriesSizer, 0, wxALL, 5);
 
-  int accuracy = 4;
-  wxGetResource("Algorithm Params", "Liap-accuracy", 
-		&accuracy, gambitApp.ResourceFile());
+  long accuracy = 4;
+  config.Read("Solutions/Liap-accuracy", &accuracy);
+  wxBoxSizer *accuracySizer = new wxBoxSizer(wxHORIZONTAL);
+  accuracySizer->Add(new wxStaticText(this, -1, "Accuracy: 1.0 e -"),
+		     0, wxALL | wxCENTER, 5);
   m_accuracy = new wxIntegerItem(this, "Accuracy: 1.0 e -", accuracy,
 				 1, 1, 150, -1);
-  m_accuracy->SetConstraints(new wxLayoutConstraints);
-  m_accuracy->GetConstraints()->top.SameAs(m_nTries, wxBottom, 10);
-  m_accuracy->GetConstraints()->left.SameAs(m_findAll, wxLeft);
-  m_accuracy->GetConstraints()->width.AsIs();
-  m_accuracy->GetConstraints()->height.AsIs();
-  NewLine();
+  accuracySizer->Add(m_accuracy, 0, wxALL, 5);
+  m_algorithmBox->Add(accuracySizer, 0, wxALL, 5);
 
-  int startOption = 0;
-  wxGetResource("Algorithm Params", "Start-Option", &startOption,
-		gambitApp.ResourceFile());
-  char *startOptions[] = { "Default", "Saved", "Prompt" };
-  m_startOption = new wxRadioBox(this, 0, "Start", 1, 1, -1, -1,
-				 3, startOptions);
+  long startOption = 0;
+  config.Read("Solutions/Liap-startOption", &startOption);
+  wxString startOptions[] = { "Default", "Saved", "Prompt" };
+  m_startOption = new wxRadioBox(this, -1, "Start",
+				 wxDefaultPosition, wxDefaultSize,
+				 3, startOptions, 0, wxRA_SPECIFY_ROWS);
   if (startOption >= 0 && startOption <= 2)
     m_startOption->SetSelection(startOption);
-  m_startOption->SetConstraints(new wxLayoutConstraints);
-  m_startOption->GetConstraints()->top.SameAs(m_accuracy, wxBottom, 10);
-  m_startOption->GetConstraints()->left.SameAs(m_findAll, wxLeft);
-  m_startOption->GetConstraints()->width.AsIs();
-  m_startOption->GetConstraints()->height.AsIs();
-  NewLine();
-
-  m_algorithmGroup->SetConstraints(new wxLayoutConstraints);
-  if (m_subgames) {
-    m_algorithmGroup->GetConstraints()->top.SameAs(m_subgamesGroup, wxBottom, 15);
-  }
-  else {
-    m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
-  }
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
-  m_algorithmGroup->GetConstraints()->right.SameAs(m_stopAfter, wxRight, -10);
-  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_startOption, wxBottom, -10);
+  m_algorithmBox->Add(m_startOption, 0, wxALL, 5);
 }
 
 int dialogLiap::StopAfter(void) const
@@ -748,86 +555,56 @@ int dialogLiap::StopAfter(void) const
 //                    dialogSimpdiv: Member functions
 //=======================================================================
 
-#include "dlsimpdiv.h"
+BEGIN_EVENT_TABLE(dialogSimpdiv, dialogAlgorithm)
+  EVT_BUTTON(wxID_OK, dialogSimpdiv::OnOK)
+END_EVENT_TABLE()
 
 dialogSimpdiv::dialogSimpdiv(wxWindow *p_parent, bool p_subgames)
   : dialogAlgorithm("SimpdivSolve Parameters", true, p_parent)
 {
   MakeCommonFields(true, p_subgames, true);
-  Go();
 }
 
 dialogSimpdiv::~dialogSimpdiv()
+{ }
+
+void dialogSimpdiv::OnOK(wxCommandEvent &p_event)
 {
-  if (Completed() == wxOK) {
-    wxWriteResource("Algorithm Params", "Simpdiv-nRestarts", NumRestarts(),
-		    gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Simpdiv-leashLength", LeashLength(),
-		    gambitApp.ResourceFile());
-  }
+  wxConfig config("Gambit");
+  config.Write("Solutions/Simpdiv-nRestarts", (long) NumRestarts());
+  config.Write("Solutions/Simpdiv-leashLength", (long) LeashLength());
+  p_event.Skip();
 }
 
 void dialogSimpdiv::AlgorithmFields(void)
 {
-  m_algorithmGroup = new wxGroupBox(this, "Algorithm parameters");
-  NewLine();
+  wxConfig config("Gambit");
+
+  m_algorithmBox = new wxStaticBoxSizer
+    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
+  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
   StopAfterField();
-  NewLine();
   PrecisionField();
 
-  m_findAll->SetConstraints(new wxLayoutConstraints);
-  m_findAll->GetConstraints()->centreY.SameAs(m_stopAfter, wxCentreY);
-  m_findAll->GetConstraints()->left.SameAs(m_algorithmGroup, wxLeft, 10);
-  m_findAll->GetConstraints()->width.AsIs();
-  m_findAll->GetConstraints()->height.AsIs();
-  
-  m_stopAfter->SetConstraints(new wxLayoutConstraints);
-  m_stopAfter->GetConstraints()->top.SameAs(m_algorithmGroup, wxTop, 20);
-  m_stopAfter->GetConstraints()->left.SameAs(m_findAll, wxRight, 10);
-  m_stopAfter->GetConstraints()->width.AsIs();
-  m_stopAfter->GetConstraints()->height.AsIs();
-
-  m_precision->SetConstraints(new wxLayoutConstraints);
-  m_precision->GetConstraints()->top.SameAs(m_stopAfter, wxBottom, 10);
-  m_precision->GetConstraints()->left.SameAs(m_findAll, wxLeft);
-  m_precision->GetConstraints()->width.AsIs();
-  m_precision->GetConstraints()->height.AsIs();
-
-  NewLine();
-
-  int nRestarts = 0;
-  wxGetResource("Algorithm Params", "Simpdiv-nRestarts", &nRestarts,
-		gambitApp.ResourceFile());
+  long nRestarts = 0;
+  config.Read("Solutions/Simpdiv-nRestarts", &nRestarts);
+  wxBoxSizer *restartSizer = new wxBoxSizer(wxHORIZONTAL);
+  restartSizer->Add(new wxStaticText(this, -1, "# restarts"),
+		    0, wxALL | wxCENTER, 5);
   m_nRestarts = new wxIntegerItem(this, "# restarts", nRestarts,
 				  -1, -1, 150, -1);
-  m_nRestarts->SetConstraints(new wxLayoutConstraints);
-  m_nRestarts->GetConstraints()->top.SameAs(m_precision, wxBottom, 10);
-  m_nRestarts->GetConstraints()->left.SameAs(m_findAll, wxLeft);
-  m_nRestarts->GetConstraints()->width.AsIs();
-  m_nRestarts->GetConstraints()->height.AsIs();
+  restartSizer->Add(m_nRestarts, 0, wxALL, 5);
+  m_algorithmBox->Add(restartSizer, 0, wxALL, 5);
 
-  int leashLength = 0;
-  wxGetResource("Algorithm Params", "Simpdiv-leashLength", &leashLength,
-		gambitApp.ResourceFile());
+  long leashLength = 0;
+  config.Read("Solutions/Simpdiv-leashLength", &leashLength);
+  wxBoxSizer *leashSizer = new wxBoxSizer(wxHORIZONTAL);
+  leashSizer->Add(new wxStaticText(this, -1, "Leash length"),
+		  0, wxALL | wxCENTER, 5);
   m_leashLength = new wxIntegerItem(this, "Leash length", leashLength,
 				    -1, -1, 150, -1);
-  m_leashLength->SetConstraints(new wxLayoutConstraints);
-  m_leashLength->GetConstraints()->top.SameAs(m_nRestarts, wxTop);
-  m_leashLength->GetConstraints()->left.SameAs(m_nRestarts, wxRight, 10);
-  m_leashLength->GetConstraints()->width.AsIs();
-  m_leashLength->GetConstraints()->height.AsIs();
-  NewLine();
-
-  m_algorithmGroup->SetConstraints(new wxLayoutConstraints);
-  if (m_subgames) {
-    m_algorithmGroup->GetConstraints()->top.SameAs(m_subgamesGroup, wxBottom, 15);
-  }
-  else {
-    m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
-  }
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
-  m_algorithmGroup->GetConstraints()->right.SameAs(m_leashLength, wxRight, -10);
-  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_leashLength, wxBottom, -10);
+  leashSizer->Add(m_leashLength, 0, wxALL, 5);
+  m_algorithmBox->Add(leashSizer, 0, wxALL, 5);
 }
 
 int dialogSimpdiv::StopAfter(void) const
@@ -842,14 +619,11 @@ int dialogSimpdiv::StopAfter(void) const
 //                    dialogPolEnum: Member functions
 //=======================================================================
 
-#include "dlpolenum.h"
-
 dialogPolEnum::dialogPolEnum(wxWindow *p_parent,
 			     bool p_subgames, bool p_vianfg)
   : dialogAlgorithm("PolEnumSolve Parameters", p_vianfg, p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
-  Go();
 }
 
 dialogPolEnum::~dialogPolEnum()
@@ -857,32 +631,10 @@ dialogPolEnum::~dialogPolEnum()
 
 void dialogPolEnum::AlgorithmFields(void)
 {
-  m_algorithmGroup = new wxGroupBox(this, "Algorithm parameters");
-  NewLine();
+  m_algorithmBox = new wxStaticBoxSizer
+    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
+  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
   StopAfterField();
-
-  m_algorithmGroup->SetConstraints(new wxLayoutConstraints);
-  if (m_subgames) {
-    m_algorithmGroup->GetConstraints()->top.SameAs(m_subgamesGroup, wxBottom, 15);
-  }
-  else {
-    m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
-  }
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
-  m_algorithmGroup->GetConstraints()->right.SameAs(m_stopAfter, wxRight, -10);
-  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_stopAfter, wxBottom, -10);
-
-  m_findAll->SetConstraints(new wxLayoutConstraints);
-  m_findAll->GetConstraints()->centreY.SameAs(m_stopAfter, wxCentreY);
-  m_findAll->GetConstraints()->left.SameAs(m_algorithmGroup, wxLeft, 10);
-  m_findAll->GetConstraints()->width.AsIs();
-  m_findAll->GetConstraints()->height.AsIs();
-  
-  m_stopAfter->SetConstraints(new wxLayoutConstraints);
-  m_stopAfter->GetConstraints()->top.SameAs(m_algorithmGroup, wxTop, 20);
-  m_stopAfter->GetConstraints()->left.SameAs(m_findAll, wxRight, 10);
-  m_stopAfter->GetConstraints()->width.AsIs();
-  m_stopAfter->GetConstraints()->height.AsIs();
 }
 
 int dialogPolEnum::StopAfter(void) const
@@ -893,9 +645,37 @@ int dialogPolEnum::StopAfter(void) const
     return m_stopAfter->GetInteger(); 
 }
 
+wxPolEnumStatus::wxPolEnumStatus(wxFrame *p_parent)
+  : wxStatus(p_parent, "PolEnumSolve"), pass(0)
+{ }
+
+void wxPolEnumStatus::SetProgress(double p_value)
+{
+  if (p_value > -.5)  {
+    if (pass == 0)  {
+      // allocate a quarter of the time to enumerating supports
+      m_value = (int) (p_value/4.0  * 100.0);
+    }
+    else {
+      // and the rest to computing the solutions
+      m_value = (int) ((3.0*p_value + pass) / 4.0 * 100.0);
+    }
+    Update(m_value);
+  }
+  else {
+    pass++;
+  }
+  wxYield();
+}
+
 //=======================================================================
 //                   class dialogPxi: Member functions
 //=======================================================================
+
+BEGIN_EVENT_TABLE(dialogPxi, dialogAlgorithm)
+  EVT_CHECKBOX(idRUNPXI_BOX, dialogPxi::OnRun)
+  EVT_BUTTON(wxID_OK, dialogPxi::OnOK)
+END_EVENT_TABLE()
 
 static char *wxOutputFile(const char *name)
 {
@@ -926,70 +706,50 @@ dialogPxi::dialogPxi(const char *p_label, const char *p_filename,
 }
 
 dialogPxi::~dialogPxi()
+{ }
+
+void dialogPxi::OnOK(wxCommandEvent &p_event)
 {
-  if (Completed() == wxOK) {
-    if(m_plotType)
-      wxWriteResource("Algorithm Params", "Pxi-Plot-Type",
-		      m_plotType->GetSelection(), gambitApp.ResourceFile());
-    if(m_runPxi) {
-      wxWriteResource("Algorithm Params", "Run-Pxi",
-		      m_runPxi->GetValue(), gambitApp.ResourceFile());
-      if (m_runPxi->GetValue()) 
-	wxWriteResource("Algorithm Params", "Pxi-Command",
-			m_pxiCommand->GetValue(), gambitApp.ResourceFile());
-    }
-  }
+  wxConfig config("Gambit");
+  config.Write("Solutions/Pxi-Plot-Type", (long) m_plotType->GetSelection());
+  config.Write("Solutions/Run-Pxi", m_runPxi->GetValue());
+  config.Write("Solutions/Pxi-Command", m_pxiCommand->GetValue());
+  p_event.Skip();
 }
 
 void dialogPxi::PxiFields(void)
 {
-  m_pxiGroup = new wxGroupBox(this, "PXI options");
+  m_pxiBox = new wxStaticBoxSizer(new wxStaticBox(this, -1, "PXI options"),
+				  wxVERTICAL);
+  m_topSizer->Add(m_pxiBox, 0, wxALL, 5);
 
-  m_pxiFile = new wxText(this, 0, "PXI file");
-  m_pxiFile->SetValue(m_defaultPxiFile);
-  NewLine();
+  wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
+  fileSizer->Add(new wxStaticText(this, -1, "File"), 0, wxALL | wxCENTER, 5);
+  m_pxiFile = new wxTextCtrl(this, -1);
+  m_pxiFile->SetValue((char *) m_defaultPxiFile);
+  fileSizer->Add(m_pxiFile, 0, wxALL, 5);
+  m_pxiBox->Add(fileSizer, 0, wxALL, 5);
 
-  Bool runPxi = false;
-  wxGetResource("Algorithm Params", "Run-Pxi", &runPxi, gambitApp.ResourceFile());
-  m_runPxi = new wxCheckBox(this, (wxFunction) CallbackRun, "Run PXI");
-  m_runPxi->SetClientData((char *) this);
+  wxBoxSizer *commandSizer = new wxBoxSizer(wxHORIZONTAL);
+  long runPxi = 0;
+  wxConfig config("Gambit");
+  config.Read("Solutions/Run-Pxi", &runPxi);
+  m_runPxi = new wxCheckBox(this, idRUNPXI_BOX, "Run PXI");
   m_runPxi->SetValue(runPxi);
-  NewLine();
+  commandSizer->Add(m_runPxi, 0, wxALL, 5);
 
-  gText pxiCommand;
-  wxGetResourceStr("Algorithm Params", "Pxi-Command", pxiCommand, 
-		   gambitApp.ResourceFile());
-  m_pxiCommand = new wxText(this, 0, "PXI command");
+  commandSizer->Add(new wxStaticText(this, -1, "PXI Command"),
+		    0, wxALL | wxCENTER, 5);
+  wxString pxiCommand;
+  config.Read("Solutions/Pxi-Command", &pxiCommand);
+  m_pxiCommand = new wxTextCtrl(this, -1);
   m_pxiCommand->SetValue(pxiCommand);
   m_pxiCommand->Enable(m_runPxi->GetValue());
-  NewLine();
-
-  m_pxiGroup->SetConstraints(new wxLayoutConstraints);
-  m_pxiGroup->GetConstraints()->top.SameAs(m_algorithmGroup, wxBottom, 10);
-  m_pxiGroup->GetConstraints()->bottom.SameAs(m_pxiCommand, wxBottom, -10);
-  m_pxiGroup->GetConstraints()->left.SameAs(m_algorithmGroup, wxLeft);
-  m_pxiGroup->GetConstraints()->right.SameAs(m_algorithmGroup, wxRight);
-
-  m_pxiFile->SetConstraints(new wxLayoutConstraints);
-  m_pxiFile->GetConstraints()->top.SameAs(m_pxiGroup, wxTop, 20);
-  m_pxiFile->GetConstraints()->left.SameAs(m_pxiGroup, wxLeft, 10);
-  m_pxiFile->GetConstraints()->right.SameAs(m_pxiGroup, wxRight, 10);
-  m_pxiFile->GetConstraints()->height.AsIs();
-
-  m_runPxi->SetConstraints(new wxLayoutConstraints);
-  m_runPxi->GetConstraints()->top.SameAs(m_pxiFile, wxBottom, 10);
-  m_runPxi->GetConstraints()->left.SameAs(m_pxiFile, wxLeft);
-  m_runPxi->GetConstraints()->width.AsIs();
-  m_runPxi->GetConstraints()->height.AsIs();
-
-  m_pxiCommand->SetConstraints(new wxLayoutConstraints);
-  m_pxiCommand->GetConstraints()->centreY.SameAs(m_runPxi, wxCentreY);
-  m_pxiCommand->GetConstraints()->left.SameAs(m_runPxi, wxRight, 10);
-  m_pxiCommand->GetConstraints()->right.SameAs(m_pxiGroup, wxRight, 10);
-  m_pxiCommand->GetConstraints()->height.AsIs();
+  commandSizer->Add(m_pxiCommand, 0, wxALL, 5);
+  m_pxiBox->Add(commandSizer, 0, wxALL, 5);
 }
 
-void dialogPxi::OnRun(void)
+void dialogPxi::OnRun(wxCommandEvent &)
 {
   m_pxiCommand->Enable(m_runPxi->GetValue());
 }
@@ -1004,129 +764,115 @@ gOutput *dialogPxi::PxiFile(void) const
   }
 }
 
+gText dialogPxi::PxiFilename(void) const
+{ return m_pxiFile->GetValue().c_str(); }
+
+gText dialogPxi::PxiCommand(void) const
+{ return m_pxiCommand->GetValue().c_str(); }
+
 //=======================================================================
 //                      dialogQre: Member functions
 //=======================================================================
 
-#include "dlqre.h"
+BEGIN_EVENT_TABLE(dialogQre, dialogPxi)
+  EVT_BUTTON(wxID_OK, dialogQre::OnOK)
+END_EVENT_TABLE()
 
 dialogQre::dialogQre(wxWindow *p_parent, const gText &p_filename,
 		     bool p_vianfg)
   : dialogPxi("QreSolve Parameters", p_filename, p_parent)
 {
   MakeCommonFields(true, false, p_vianfg);
-  m_okButton->GetConstraints()->top.SameAs(m_pxiGroup, wxBottom, 10);
-  Go();
 }
 
 dialogQre::~dialogQre()
+{ }
+
+void dialogQre::OnOK(wxCommandEvent &p_event)
 {
-  if (Completed() == wxOK) {
-    if(m_minLam)
-      wxWriteResource("Algorithm Params", "Qre-minLam",
-		      m_minLam->GetValue(), gambitApp.ResourceFile());
-    if(m_maxLam)
-      wxWriteResource("Algorithm Params", "Qre-maxLam",
-		      m_maxLam->GetValue(), gambitApp.ResourceFile());
-    if(m_delLam)
-      wxWriteResource("Algorithm Params", "Qre-delLam",
-		      m_delLam->GetValue(), gambitApp.ResourceFile());
-    if(m_accuracy)
-      wxWriteResource("Algorithm Params", "Qre-accuracy",
-		      m_accuracy->GetInteger(), gambitApp.ResourceFile());
-    if(m_startOption)
-      wxWriteResource("Algorithm Params", "Qre-startOption",
-		      m_startOption->GetSelection(), gambitApp.ResourceFile());
-  }
+  wxConfig config("Gambit");
+  config.Write("Solutions/Qre-minLam", m_minLam->GetValue());
+  config.Write("Solutions/Qre-maxLam", m_maxLam->GetValue());
+  config.Write("Solutions/Qre-delLam", m_delLam->GetValue());
+  config.Write("Solutions/Qre-accuracy", (long) m_accuracy->GetInteger());
+  config.Write("Solutions/Qre-startOption",
+	       (long) m_startOption->GetSelection());
+  p_event.Skip();
 }
 
 void dialogQre::AlgorithmFields(void)
 {
-  m_algorithmGroup = new wxGroupBox(this, "Algorithm parameters");
-  NewLine();
+  m_algorithmBox = new wxStaticBoxSizer
+    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
+  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
 
-  gText minLam, maxLam, delLam;
-  int accuracy = 4;
-  wxGetResourceStr("Algorithm Params", "Qre-minLam", minLam, gambitApp.ResourceFile());
-  wxGetResourceStr("Algorithm Params", "Qre-maxLam", maxLam, gambitApp.ResourceFile());
-  wxGetResourceStr("Algorithm Params", "Qre-delLam", delLam, gambitApp.ResourceFile());
-  wxGetResource("Algorithm Params", "Qre-accuracy", &accuracy, gambitApp.ResourceFile());
+  wxString minLam, maxLam, delLam;
+  long accuracy = 4;
+  wxConfig config("Gambit");
+  config.Read("Solutions/Qre-minLam", &minLam);
+  config.Read("Solutions/Qre-maxLam", &maxLam);
+  config.Read("Solutions/Qre-delLam", &delLam);
+  config.Read("Solutions/Qre-accuracy", &accuracy);
 
-  m_minLam = new wxNumberItem(this, "minLam", minLam);
-  m_minLam->SetConstraints(new wxLayoutConstraints);
-  m_minLam->GetConstraints()->top.SameAs(m_algorithmGroup, wxTop, 20);
-  m_minLam->GetConstraints()->left.SameAs(m_algorithmGroup, wxLeft, 10);
-  m_minLam->GetConstraints()->width.AsIs();
-  m_minLam->GetConstraints()->height.AsIs();
-  NewLine();
+  wxBoxSizer *lambdaSizer = new wxBoxSizer(wxVERTICAL);
 
-  m_maxLam = new wxNumberItem(this, "maxLam", maxLam);
-  m_maxLam->SetConstraints(new wxLayoutConstraints);
-  m_maxLam->GetConstraints()->top.SameAs(m_minLam, wxBottom, 10);
-  m_maxLam->GetConstraints()->left.SameAs(m_minLam, wxLeft);
-  m_maxLam->GetConstraints()->width.AsIs();
-  m_maxLam->GetConstraints()->height.AsIs();
-  
-  m_delLam = new wxNumberItem(this, "delLam", delLam);
-  m_delLam->SetConstraints(new wxLayoutConstraints);
-  m_delLam->GetConstraints()->top.SameAs(m_maxLam, wxBottom, 10);
-  m_delLam->GetConstraints()->left.SameAs(m_minLam, wxLeft);
-  m_delLam->GetConstraints()->width.AsIs();
-  m_delLam->GetConstraints()->height.AsIs();
-  NewLine();
+  wxBoxSizer *minLamSizer = new wxBoxSizer(wxHORIZONTAL);
+  minLamSizer->Add(new wxStaticText(this, -1, "minLam"),
+		   0, wxALL | wxCENTER, 5);
+  m_minLam = new wxNumberItem(this, "minLam", minLam.c_str());
+  minLamSizer->Add(m_minLam, 0, wxALL, 5);
+  lambdaSizer->Add(minLamSizer, 0, wxALL, 5);
 
+  wxBoxSizer *maxLamSizer = new wxBoxSizer(wxHORIZONTAL);
+  maxLamSizer->Add(new wxStaticText(this, -1, "maxLam"),
+		   0, wxALL | wxCENTER, 5);
+  m_maxLam = new wxNumberItem(this, "maxLam", maxLam.c_str());
+  maxLamSizer->Add(m_maxLam, 0, wxALL, 5);
+  lambdaSizer->Add(maxLamSizer, 0, wxALL, 5);
+
+  wxBoxSizer *delLamSizer = new wxBoxSizer(wxHORIZONTAL);
+  delLamSizer->Add(new wxStaticText(this, -1, "delLam"),
+		   0, wxALL | wxCENTER, 5);
+  m_delLam = new wxNumberItem(this, "delLam", delLam.c_str());
+  delLamSizer->Add(m_delLam, 0, wxALL, 5);
+  lambdaSizer->Add(delLamSizer, 0, wxALL, 5);
+
+  wxBoxSizer *otherSizer = new wxBoxSizer(wxVERTICAL);
+
+  wxBoxSizer *accuracySizer = new wxBoxSizer(wxHORIZONTAL);
+  accuracySizer->Add(new wxStaticText(this, -1, "Accuracy: 1.0 e -"),
+		     0, wxALL | wxCENTER, 5);
   m_accuracy = new wxIntegerItem(this, "Accuracy: 1.0 e -", accuracy, -1, -1, -1, -1);
-  m_accuracy->SetConstraints(new wxLayoutConstraints);
-  m_accuracy->GetConstraints()->top.SameAs(m_minLam, wxTop);
-  m_accuracy->GetConstraints()->left.SameAs(m_minLam, wxRight, 10);
-  m_accuracy->GetConstraints()->width.AsIs();
-  m_accuracy->GetConstraints()->height.AsIs();
+  accuracySizer->Add(m_accuracy, 0, wxALL, 5);
+  otherSizer->Add(accuracySizer, 0, wxALL, 5);
 
-  NewLine();
-
-  int startOption;
-  wxGetResource("Algorithm Params", "Qre-startOption",
-		&startOption, gambitApp.ResourceFile());
-  char *startOptions[] = { "Default", "Saved", "Prompt" };
-  m_startOption = new wxRadioBox(this, 0, "Starting Point", -1, -1, -1, -1,
-				 3, startOptions);
-  if (startOption >= 0 && startOption <= 2)
+  long startOption = 0;
+  config.Read("Solutions/Qre-startOption", &startOption);
+  wxString startOptions[] = { "Default", "Saved", "Prompt" };
+  m_startOption = new wxRadioBox(this, -1, "Starting Point",
+				 wxDefaultPosition, wxDefaultSize,
+				 3, startOptions, 0, wxRA_SPECIFY_ROWS);
+  if (startOption >= 0 && startOption <= 2) {
     m_startOption->SetSelection(startOption);
+  }
+  otherSizer->Add(m_startOption, 0, wxALL, 5);
 
-  m_startOption->SetConstraints(new wxLayoutConstraints);
-  m_startOption->GetConstraints()->top.SameAs(m_delLam, wxBottom, 10);
-  m_startOption->GetConstraints()->left.SameAs(m_minLam, wxLeft);
-  m_startOption->GetConstraints()->width.AsIs();
-  m_startOption->GetConstraints()->height.AsIs();
-  NewLine();
-
-  int plotType = 0;
-  wxGetResource("Algorithm Params", "Pxi-Plot-Type", &plotType, gambitApp.ResourceFile());
-  char *plotTypeChoices[] = { "Log", "Linear" };
-  m_plotType = new wxRadioBox(this, 0, "Plot type", -1, -1, -1, -1,
-			      2, plotTypeChoices);
-  if (plotType == 0 || plotType == 1)
+  long plotType = 0;
+  config.Read("Solutions/Pxi-Plot-Type", &plotType);
+  wxString plotTypeChoices[] = { "Log", "Linear" };
+  m_plotType = new wxRadioBox(this, -1, "Plot type",
+			      wxDefaultPosition, wxDefaultSize,
+			      2, plotTypeChoices, 0, wxRA_SPECIFY_ROWS);
+  if (plotType == 0 || plotType == 1) {
     m_plotType->SetSelection(plotType);
-#ifdef wx_motif
-  NewLine();
-#endif  // wx_motif
+  }
+  otherSizer->Add(m_plotType, 0, wxALL, 5);
 
-  m_plotType->SetConstraints(new wxLayoutConstraints);
-#ifdef wx_motif
-  m_plotType->GetConstraints()->top.SameAs(m_startOption, wxBottom, 10);
-  m_plotType->GetConstraints()->left.SameAs(m_startOption, wxLeft);
-#else
-  m_plotType->GetConstraints()->top.SameAs(m_startOption, wxTop);
-  m_plotType->GetConstraints()->left.SameAs(m_startOption, wxRight, 10);
-#endif  // wx_motif
-  m_plotType->GetConstraints()->width.AsIs();
-  m_plotType->GetConstraints()->height.AsIs();
+  wxBoxSizer *parallelSizer = new wxBoxSizer(wxHORIZONTAL);
+  parallelSizer->Add(lambdaSizer, 0, wxALL, 5);
+  parallelSizer->Add(otherSizer, 0, wxALL, 5);
 
-  m_algorithmGroup->SetConstraints(new wxLayoutConstraints);
-  m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
-  m_algorithmGroup->GetConstraints()->right.SameAs(m_accuracy, wxRight, -10);
-  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_plotType, wxBottom, -10);
+  m_algorithmBox->Add(parallelSizer, 0, wxALL, 5);
 
   PxiFields();
 }
@@ -1135,158 +881,140 @@ void dialogQre::AlgorithmFields(void)
 //                    dialogQreGrid: Member functions
 //=======================================================================
 
-#include "dlqregrid.h"
+BEGIN_EVENT_TABLE(dialogQreGrid, dialogPxi)
+  EVT_BUTTON(wxID_OK, dialogQreGrid::OnOK)
+END_EVENT_TABLE()
 
 dialogQreGrid::dialogQreGrid(wxWindow *p_parent,
 			     const gText &p_filename)
   : dialogPxi("QreGridSolve Parameters", p_filename, p_parent)
 {
   MakeCommonFields(true, false, true);
-  m_okButton->GetConstraints()->top.SameAs(m_pxiGroup, wxBottom, 10);
-  Go();
 }
 
 dialogQreGrid::~dialogQreGrid()
+{ }
+
+void dialogQreGrid::OnOK(wxCommandEvent &p_event)
 {
-  if (Completed() == wxOK) {
-    if(m_minLam)
-      wxWriteResource("Algorithm Params", "QreGrid-minLam",
-		      (float) m_minLam->GetNumber(), gambitApp.ResourceFile());
-    if(m_maxLam)
-      wxWriteResource("Algorithm Params", "QreGrid-maxLam",
-		      (float) m_maxLam->GetNumber(), gambitApp.ResourceFile());
-    if(m_delLam)
-      wxWriteResource("Algorithm Params", "QreGrid-delLam",
-		      (float) m_delLam->GetNumber(), gambitApp.ResourceFile());
-    if(m_delp1)
-      wxWriteResource("Algorithm Params", "QreGrid-delp1",
-		      (float) m_delp1->GetNumber(), gambitApp.ResourceFile());
-    if(m_delp2)
-      wxWriteResource("Algorithm Params", "QreGrid-delp2",
-		      (float) m_delp2->GetNumber(), gambitApp.ResourceFile());
-    if(m_tol1)
-      wxWriteResource("Algorithm Params", "QreGrid-tol1",
-		      (float) m_tol1->GetNumber(), gambitApp.ResourceFile());
-    if(m_tol2)
-      wxWriteResource("Algorithm Params", "QreGrid-tol2",
-		      (float) m_tol2->GetNumber(), gambitApp.ResourceFile());
-    if(m_multiGrid)
-      wxWriteResource("Algorithm Params", "QreGrid-multiGrid",
-		      m_multiGrid->GetValue(), gambitApp.ResourceFile());
-  }
+  wxConfig config("Gambit");
+  config.Write("Solutions/QreGrid-minLam", m_minLam->GetValue());
+  config.Write("Solutions/QreGrid-maxLam", m_maxLam->GetValue());
+  config.Write("Solutions/QreGrid-delLam", m_delLam->GetValue());
+  config.Write("Solutions/QreGrid-delp1", m_delp1->GetValue());
+  config.Write("Solutions/QreGrid-delp2", m_delp2->GetValue());
+  config.Write("Solutions/QreGrid-tol1", m_tol1->GetValue());
+  config.Write("Solutions/QreGrid-tol2", m_tol2->GetValue());
+  config.Write("Solutions/QreGrid-multiGrid", m_multiGrid->GetValue());
+  config.Write("Solutions/QreGrid-startOption", 
+	       (long) m_startOption->GetSelection());
+  p_event.Skip();
 }
 
 void dialogQreGrid::AlgorithmFields(void)
 {
-  gText minLam, maxLam, delLam, delp1, delp2, tol1, tol2;
+  wxString minLam, maxLam, delLam, delp1, delp2, tol1, tol2;
 
-  wxGetResourceStr("Algorithm Params", "QreGrid-minLam", minLam, gambitApp.ResourceFile());
-  wxGetResourceStr("Algorithm Params", "QreGrid-maxLam", maxLam, gambitApp.ResourceFile());
-  wxGetResourceStr("Algorithm Params", "QreGrid-delLam", delLam, gambitApp.ResourceFile());
-  wxGetResourceStr("Algorithm Params", "QreGrid-delp1", delp1, gambitApp.ResourceFile());
-  wxGetResourceStr("Algorithm Params", "QreGrid-delp2", delp2, gambitApp.ResourceFile());
-  wxGetResourceStr("Algorithm Params", "QreGrid-tol1", tol1, gambitApp.ResourceFile());
-  wxGetResourceStr("Algorithm Params", "QreGrid-tol2", tol2, gambitApp.ResourceFile());
+  wxConfig config("Gambit");
+  config.Read("Solutions/QreGrid-minLam", &minLam);
+  config.Read("Solutions/QreGrid-maxLam", &maxLam);
+  config.Read("Solutions/QreGrid-delLam", &delLam);
+  config.Read("Solutions/QreGrid-delp1", &delp1);
+  config.Read("Solutions/QreGrid-delp2", &delp2);
+  config.Read("Solutions/QreGrid-tol1", &tol1);
+  config.Read("Solutions/QreGrid-tol2", &tol2);
 
-  m_algorithmGroup = new wxGroupBox(this, "Algorithm parameters");
+  m_algorithmBox = new wxStaticBoxSizer
+    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
+  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
 
-  m_minLam = new wxNumberItem(this, "minLam", minLam);
-  m_minLam->SetConstraints(new wxLayoutConstraints);
-  m_minLam->GetConstraints()->top.SameAs(m_algorithmGroup, wxTop, 20);
-  m_minLam->GetConstraints()->left.SameAs(m_algorithmGroup, wxLeft, 10);
-  m_minLam->GetConstraints()->width.AsIs();
-  m_minLam->GetConstraints()->height.AsIs();
-  NewLine();
+  wxBoxSizer *lambdaSizer = new wxBoxSizer(wxVERTICAL);
 
-  m_maxLam = new wxNumberItem(this, "maxLam", maxLam);
-  m_maxLam->SetConstraints(new wxLayoutConstraints);
-  m_maxLam->GetConstraints()->top.SameAs(m_minLam, wxBottom, 10);
-  m_maxLam->GetConstraints()->left.SameAs(m_minLam, wxLeft);
-  m_maxLam->GetConstraints()->width.AsIs();
-  m_maxLam->GetConstraints()->height.AsIs();
-  NewLine();
+  wxBoxSizer *minLamSizer = new wxBoxSizer(wxHORIZONTAL);
+  minLamSizer->Add(new wxStaticText(this, -1, "minLam"),
+		   0, wxALL | wxCENTER, 5);
+  m_minLam = new wxNumberItem(this, "minLam", minLam.c_str());
+  minLamSizer->Add(m_minLam, 0, wxALL, 5);
+  lambdaSizer->Add(minLamSizer, 0, wxALL, 5);
 
-  m_delLam = new wxNumberItem(this, "delLam", delLam);
-  m_delLam->SetConstraints(new wxLayoutConstraints);
-  m_delLam->GetConstraints()->top.SameAs(m_maxLam, wxBottom, 10);
-  m_delLam->GetConstraints()->left.SameAs(m_minLam, wxLeft);
-  m_delLam->GetConstraints()->width.AsIs();
-  m_delLam->GetConstraints()->height.AsIs();
-  NewLine();
+  wxBoxSizer *maxLamSizer = new wxBoxSizer(wxHORIZONTAL);
+  maxLamSizer->Add(new wxStaticText(this, -1, "maxLam"),
+		   0, wxALL | wxCENTER, 5);
+  m_maxLam = new wxNumberItem(this, "maxLam", maxLam.c_str());
+  maxLamSizer->Add(m_maxLam, 0, wxALL, 5);
+  lambdaSizer->Add(maxLamSizer, 0, wxALL, 5);
 
-  m_delp1 = new wxNumberItem(this, "Grid 1 Del", delp1);
-  m_delp1->SetConstraints(new wxLayoutConstraints);
-  m_delp1->GetConstraints()->top.SameAs(m_minLam, wxTop);
-  m_delp1->GetConstraints()->left.SameAs(m_minLam, wxRight, 10);
-  m_delp1->GetConstraints()->width.AsIs();
-  m_delp1->GetConstraints()->height.AsIs();
+  wxBoxSizer *delLamSizer = new wxBoxSizer(wxHORIZONTAL);
+  delLamSizer->Add(new wxStaticText(this, -1, "delLam"),
+		   0, wxALL | wxCENTER, 5);
+  m_delLam = new wxNumberItem(this, "delLam", delLam.c_str());
+  delLamSizer->Add(m_delLam, 0, wxALL, 5);
+  lambdaSizer->Add(delLamSizer, 0, wxALL, 5);
 
-  m_tol1 = new wxNumberItem(this, "Grid 1 Tol", tol1);
-  m_tol1->SetConstraints(new wxLayoutConstraints);
-  m_tol1->GetConstraints()->top.SameAs(m_delp1, wxBottom, 10);
-  m_tol1->GetConstraints()->left.SameAs(m_delp1, wxLeft);
-  m_tol1->GetConstraints()->width.AsIs();
-  m_tol1->GetConstraints()->height.AsIs();
+  wxBoxSizer *tolSizer = new wxBoxSizer(wxVERTICAL);
+  
+  wxBoxSizer *delp1Sizer = new wxBoxSizer(wxHORIZONTAL);
+  delp1Sizer->Add(new wxStaticText(this, -1, "Grid 1 Del"),
+		  0, wxALL | wxCENTER, 5);
+  m_delp1 = new wxNumberItem(this, "Grid 1 Del", delp1.c_str());
+  delp1Sizer->Add(m_delp1, 0, wxALL, 5);
+  tolSizer->Add(delp1Sizer, 0, wxALL, 5);
 
-  NewLine();
-  m_delp2 = new wxNumberItem(this, "Grid 2 Del", delp2);
-  m_delp2->SetConstraints(new wxLayoutConstraints);
-  m_delp2->GetConstraints()->top.SameAs(m_tol1, wxBottom, 10);
-  m_delp2->GetConstraints()->left.SameAs(m_delp1, wxLeft);
-  m_delp2->GetConstraints()->width.AsIs();
-  m_delp2->GetConstraints()->height.AsIs();
+  wxBoxSizer *tol1Sizer = new wxBoxSizer(wxHORIZONTAL);
+  tol1Sizer->Add(new wxStaticText(this, -1, "Grid 1 Tol"),
+		 0, wxALL | wxCENTER, 5);
+  m_tol1 = new wxNumberItem(this, "Grid 1 Tol", tol1.c_str());
+  tol1Sizer->Add(m_tol1, 0, wxALL, 5);
+  tolSizer->Add(tol1Sizer, 0, wxALL, 5);
 
-  NewLine();
-  m_tol2 = new wxNumberItem(this, "Grid 2 Tol", tol2);
-  m_tol2->SetConstraints(new wxLayoutConstraints);
-  m_tol2->GetConstraints()->top.SameAs(m_delp2, wxBottom, 10);
-  m_tol2->GetConstraints()->left.SameAs(m_delp1, wxLeft);
-  m_tol2->GetConstraints()->width.AsIs();
-  m_tol2->GetConstraints()->height.AsIs();
+  wxBoxSizer *delp2Sizer = new wxBoxSizer(wxHORIZONTAL);
+  delp2Sizer->Add(new wxStaticText(this, -1, "Grid 2 Del"),
+		  0, wxALL | wxCENTER, 5);
+  m_delp2 = new wxNumberItem(this, "Grid 2 Del", delp2.c_str());
+  delp2Sizer->Add(m_delp2, 0, wxALL, 5);
+  tolSizer->Add(delp2Sizer, 0, wxALL, 5);
 
-  Bool multiGrid = true;
-  wxGetResource("Algorithm Params", "QreGrid-multiGrid",
-		&multiGrid, gambitApp.ResourceFile());
-  m_multiGrid = new wxCheckBox(this, 0, "Use MultiGrid");
+  wxBoxSizer *tol2Sizer = new wxBoxSizer(wxHORIZONTAL);
+  tol2Sizer->Add(new wxStaticText(this, -1, "Grid 2 Tol"),
+		 0, wxALL | wxCENTER, 5);
+  m_tol2 = new wxNumberItem(this, "Grid 2 Tol", tol2.c_str());
+  tol2Sizer->Add(m_tol2, 0, wxALL, 5);
+  tolSizer->Add(tol2Sizer, 0, wxALL, 5);
+
+  wxBoxSizer *parallelSizer = new wxBoxSizer(wxHORIZONTAL);
+  parallelSizer->Add(lambdaSizer, 0, wxALL, 5);
+  parallelSizer->Add(tolSizer, 0, wxALL, 5);
+  m_algorithmBox->Add(parallelSizer, 0, wxALL, 5);
+
+  long multiGrid = 1;
+  config.Read("Solutions/QreGrid-multiGrid", &multiGrid);
+  m_multiGrid = new wxCheckBox(this, -1, "Use MultiGrid");
   m_multiGrid->SetValue(multiGrid);
-  m_multiGrid->SetConstraints(new wxLayoutConstraints);
-  m_multiGrid->GetConstraints()->centreY.SameAs(m_tol2, wxCentreY);
-  m_multiGrid->GetConstraints()->left.SameAs(m_minLam, wxLeft);
-  m_multiGrid->GetConstraints()->width.AsIs();
-  m_multiGrid->GetConstraints()->height.AsIs();
+  m_algorithmBox->Add(m_multiGrid);
 
-  int plotType = 0;
-  wxGetResource("Algorithm Params", "Pxi-Plot-Type", &plotType, gambitApp.ResourceFile());
-  char *plotTypeChoices[] = { "Log", "Linear" };
-  m_plotType = new wxRadioBox(this, 0, "Plot type", -1, -1, -1, -1,
-			      2, plotTypeChoices);
-  if (plotType == 0 || plotType == 1)
+  long startOption = 0;
+  config.Read("Solutions/QreGrid-startOption", &startOption);
+  wxString startOptions[] = { "Default", "Saved", "Prompt" };
+  m_startOption = new wxRadioBox(this, -1, "Starting Point",
+				 wxDefaultPosition, wxDefaultSize,
+				 3, startOptions, 0, wxRA_SPECIFY_ROWS);
+  if (startOption >= 0 && startOption <= 2) {
+    m_startOption->SetSelection(startOption);
+  }
+  m_algorithmBox->Add(m_startOption, 0, wxALL, 5);
+
+  long plotType = 0;
+  config.Read("Solutions/Pxi-Plot-Type", &plotType);
+  wxString plotTypeChoices[] = { "Log", "Linear" };
+  m_plotType = new wxRadioBox(this, -1, "Plot type",
+			      wxDefaultPosition, wxDefaultSize,
+			      2, plotTypeChoices, 0, wxRA_SPECIFY_ROWS);
+  if (plotType == 0 || plotType == 1) {
     m_plotType->SetSelection(plotType);
-#ifdef wx_motif
-  NewLine();
-#endif  // wx_motif
-
-  m_plotType->SetConstraints(new wxLayoutConstraints);
-#ifdef wx_motif
-  m_plotType->GetConstraints()->top.SameAs(m_tol2, wxBottom, 10);
-  m_plotType->GetConstraints()->left.SameAs(m_minLam, wxLeft);
-#else
-  m_plotType->GetConstraints()->top.SameAs(m_tol2, wxBottom, 10);
-  m_plotType->GetConstraints()->left.SameAs(m_minLam, wxRight, 10);
-#endif  // wx_motif
-  m_plotType->GetConstraints()->width.AsIs();
-  m_plotType->GetConstraints()->height.AsIs();
-
-  m_algorithmGroup->SetConstraints(new wxLayoutConstraints);
-  m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
-  m_algorithmGroup->GetConstraints()->right.SameAs(m_delp1, wxRight, -10);
-  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_plotType, wxBottom, -10);
-
-  NewLine();
+  }
+  m_algorithmBox->Add(m_plotType, 0, wxALL, 5);
 
   PxiFields();
-  NewLine();
 }
 
 

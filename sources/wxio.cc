@@ -1,38 +1,40 @@
 //
 // FILE: wxio.cc -- Implementation of more complicated I/O functions
 //
-
 // $Id$
+//
 
-#include "wx.h"
+#include "wx/wx.h"
 #include "wxio.h"
 
 static char wxio_buffer[100];
 
-class gWxIOFrame: public wxFrame
-{
+class gWxIOFrame : public wxFrame {
 private:
-    gWxOutput *parent;
+  gWxOutput *parent;
 
 public:
-    wxTextWindow *f;
-    gWxIOFrame(gWxOutput *parent, const char *label);
-    Bool OnClose(void);
+  wxTextCtrl *f;
+
+  gWxIOFrame(gWxOutput *parent, const char *label);
+  bool OnClose(void);
 };
 
 
 gWxIOFrame::gWxIOFrame(gWxOutput *parent_, const char *label)
-    : wxFrame(NULL, (char *)label, 0, 0, 200, 200), parent(parent_)
+  : wxFrame(NULL, -1, (char *)label, wxPoint(0, 0), wxSize(200, 200)),
+    parent(parent_)
 {
-    f = new wxTextWindow(this, -1, -1, -1, -1, wxREADONLY);
-    Show(TRUE);
+  f = new wxTextCtrl(this, -1, "", wxPoint(0, 0), wxSize(200, 200),
+		     wxTE_READONLY | wxTE_MULTILINE);
+  Show(TRUE);
 }
 
 
-Bool gWxIOFrame::OnClose(void)
+bool gWxIOFrame::OnClose(void)
 {
-    parent->OnClose();
-    return TRUE;
+  parent->OnClose();
+  return TRUE;
 }
 
 

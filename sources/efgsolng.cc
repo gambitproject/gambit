@@ -5,8 +5,7 @@
 // $Id$
 //
 
-#include "wx.h"
-#include "wx_form.h"
+#include "wx/wx.h"
 #include "wxmisc.h"
 #include "wxstatus.h"
 #include "subsolve.h"
@@ -32,7 +31,7 @@ guiEfgSolution::guiEfgSolution(const EFSupport &p_support,
 class guiSubgameSolver {
 protected:
   EfgShowInterface *m_parent;
-  Bool m_pickSoln;
+  bool m_pickSoln;
   gList<Node *> m_subgameRoots;
   bool m_eliminate, m_iterative, m_strong;
   
@@ -52,8 +51,10 @@ guiSubgameSolver::guiSubgameSolver(EfgShowInterface *p_parent, const Efg &p_efg,
     m_eliminate(p_eliminate), m_iterative(p_iterative), m_strong(p_strong)
 {
   MarkedSubgameRoots(p_efg, m_subgameRoots);
+#ifdef NOT_PORTED_YET
   wxGetResource("Soln-Defaults", "Efg-Interactive-Solns",
 		&m_pickSoln, gambitApp.ResourceFile());
+#endif // NOT_PORTED_YET
 }
 
 //
@@ -270,7 +271,7 @@ bool guiefgLiapEfg::SolveSetup(void)
 { 
   dialogLiap dialog(m_parent->Frame(), true);
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -347,7 +348,7 @@ bool guiefgLiapNfg::SolveSetup(void)
 {
   dialogLiap dialog(m_parent->Frame(), true, true);
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -438,7 +439,7 @@ bool guiefgLcpEfg::SolveSetup(void)
 { 
   dialogLcp dialog(m_parent->Frame(), true);
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -510,7 +511,7 @@ bool guiefgLcpNfg::SolveSetup(void)
 {
   dialogLcp dialog(m_parent->Frame(), true, true); 
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -585,7 +586,7 @@ bool guiefgEnumPureNfg::SolveSetup(void)
 {
   dialogEnumPure dialog(m_parent->Frame(), true, true); 
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -647,7 +648,7 @@ bool guiefgEnumPureEfg::SolveSetup(void)
 {
   dialogEnumPure dialog(m_parent->Frame(), true);
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -734,7 +735,7 @@ bool guiefgEnumMixedNfg::SolveSetup(void)
 {
   dialogEnumMixed dialog(m_parent->Frame(), true); 
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -813,7 +814,7 @@ bool guiefgLpNfg::SolveSetup(void)
 {
   dialogLp dialog(m_parent->Frame(), true, true); 
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -899,7 +900,7 @@ bool guiefgLpEfg::SolveSetup(void)
 {
   dialogLp dialog(m_parent->Frame(), true);
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -992,7 +993,7 @@ bool guiefgSimpdivNfg::SolveSetup(void)
 {
   dialogSimpdiv dialog(m_parent->Frame(), true); 
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -1074,7 +1075,7 @@ bool guiefgPolEnumNfg::SolveSetup(void)
 {
   dialogPolEnum dialog(m_parent->Frame(), true, true); 
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -1156,7 +1157,7 @@ bool guiefgPolEnumEfg::SolveSetup(void)
 {
   dialogPolEnum dialog(m_parent->Frame(), true); 
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -1216,7 +1217,7 @@ gList<BehavSolution> guiefgQreNfg::Solve(void) const
   catch (gSignalBreak &) { }
 
   if (m_runPxi) {
-    if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
+    if (!wxExecute((char *) (m_pxiCommand + " " + m_pxiFilename))) {
       wxMessageBox("Unable to launch PXI successfully");
     }
   }
@@ -1237,7 +1238,7 @@ bool guiefgQreNfg::SolveSetup(void)
 {
   dialogQre dialog(m_parent->Frame(), m_parent->Filename(), true);
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -1321,7 +1322,7 @@ gList<BehavSolution> guiefgQreEfg::Solve(void) const
 		 "Returning last value.\n");
   }
   if (m_runPxi) {
-    if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
+    if (!wxExecute((char *) (m_pxiCommand + " " + m_pxiFilename))) {
       wxMessageBox("Unable to launch PXI successfully");
     }
   }
@@ -1333,7 +1334,7 @@ bool guiefgQreEfg::SolveSetup(void)
 { 
   dialogQre dialog(m_parent->Frame(), m_parent->Filename()); 
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -1400,7 +1401,7 @@ gList<BehavSolution> guiefgQreAllNfg::Solve(void) const
   catch (gSignalBreak &) { }
 
   if (m_runPxi) {
-    if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
+    if (!wxExecute((char *) (m_pxiCommand + " " + m_pxiFilename))) {
       wxMessageBox("Unable to launch PXI successfully");
     }
   }
@@ -1421,7 +1422,7 @@ bool guiefgQreAllNfg::SolveSetup(void)
 {
   dialogQreGrid dialog(m_parent->Frame(), m_parent->Filename()); 
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();

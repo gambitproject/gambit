@@ -18,24 +18,24 @@ typedef enum {
 class dialogEfgSolveStandard : public guiAutoDialog {
 private:
   wxRadioBox *m_standardType, *m_standardNum, *m_precision;
-  wxText *m_description;
+  wxTextCtrl *m_description;
   const Efg &m_efg;
 
-  static void CallbackChanged(wxRadioBox &p_object, wxEvent &)
-    { ((dialogEfgSolveStandard *) p_object.GetClientData())->OnChanged(); }
-
-  void OnChanged(void);
+  // Button event handler
+  void OnChanged(wxCommandEvent &);
 
   const char *HelpString(void) const { return "EFG Standard Solutions"; }
 
 public:
-  dialogEfgSolveStandard(const Efg &p_efg, wxWindow *p_parent);
+  dialogEfgSolveStandard(wxWindow *p_parent, const Efg &p_efg);
   virtual ~dialogEfgSolveStandard();
 
   efgStandardType Type(void) const;
   efgStandardNum Number(void) const;
   gPrecision Precision(void) const
    { return ((m_precision->GetSelection() == 0) ? precDOUBLE : precRATIONAL); }
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif   // EFGSOLVD_H

@@ -17,7 +17,7 @@ private:
 
 public:
   dialogInfosetReveal(const Efg &, wxWindow *);
-  virtual ~dialogInfosetReveal();
+  virtual ~dialogInfosetReveal() { } 
 
   gArray<EFPlayer *> GetPlayers(void) const;
 };

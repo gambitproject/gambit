@@ -13,7 +13,7 @@
 // All possible algorithms that could create a behav solution and their
 // corresponding ids.  Note that the indexing should start from 1, not 0.
 
-char *MSolnSortFilterOptions::filter_cr_str[NUM_MCREATORS+1] =
+wxString MSolnSortFilterOptions::filter_cr_str[NUM_MCREATORS+1] =
 {
   "Error", "User",
   "EnumPure", "EnumMixed", "Lcp", "Lp", "Liap", "Simpdiv", "PolEnum",
@@ -30,7 +30,7 @@ NfgAlgType MSolnSortFilterOptions::filter_cr_id[NUM_MCREATORS+1] =
   algorithmNfg_QRE, algorithmNfg_QREALL
 };
 
-char *MSolnSortFilterOptions::filter_tri_str[3+1] = { "E", "Yes", "No", "DK" };
+wxString MSolnSortFilterOptions::filter_tri_str[3+1] = { "E", "Yes", "No", "DK" };
 
 gTriState MSolnSortFilterOptions::filter_tri_id[3+1] = { triUNKNOWN, triTRUE, triFALSE, triUNKNOWN };
 

@@ -162,4 +162,6 @@ class NFOutcome   {
     Nfg *Game(void) const   { return nfg; }
 };
 
+extern Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S);
+
 #endif    // NFG_H

@@ -12,7 +12,7 @@
 
 // All possible algorithms that could create a behav solution and their
 // corresponding ids Note that the indexing should start from 1, not 0
-char *BSolnSortFilterOptions::filter_cr_str[NUM_BCREATORS+1] =
+wxString BSolnSortFilterOptions::filter_cr_str[NUM_BCREATORS+1] =
 {
   "Error", "User",
   "EnumPure[EFG]", "EnumPure[NFG]", "EnumMixed[NFG]",
@@ -36,7 +36,7 @@ EfgAlgType BSolnSortFilterOptions::filter_cr_id[NUM_BCREATORS+1] =
   algorithmEfg_QREALL_NFG
 };
 
-char *BSolnSortFilterOptions::filter_tri_str[3+1] = 
+wxString BSolnSortFilterOptions::filter_tri_str[3+1] = 
 { "E", "Yes", "No", "DK" };
 
 gTriState BSolnSortFilterOptions::filter_tri_id[3+1] = 

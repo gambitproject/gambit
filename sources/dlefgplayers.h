@@ -14,19 +14,16 @@ private:
 
   wxListBox *m_playerNameList;
 
-  static void CallbackEdit(wxButton &p_object, wxCommandEvent &)
-    { ((dialogEfgPlayers *) p_object.GetClientData())->OnEdit(); }
-  static void CallbackNew(wxButton &p_object, wxCommandEvent &)
-    { ((dialogEfgPlayers *) p_object.GetClientData())->OnNew(); }
-
-  void OnEdit(void);
-  void OnNew(void);
+  void OnEdit(wxCommandEvent &);
+  void OnNew(wxCommandEvent &);
 
   const char *HelpString(void) const { return "Edit Menu (efg)"; }
 
 public:
   dialogEfgPlayers(FullEfg &p_efg, wxWindow *p_parent = 0);
   virtual ~dialogEfgPlayers()  { }
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif  // DLEFGPLAYERS_H

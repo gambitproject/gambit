@@ -68,8 +68,6 @@ friend gOutput& operator << (gOutput& output, const gRectangle<T>& x);
   // Conversion:
   //-------------
 
-#ifdef GDOUBLE
 template <class T> gRectangle<gDouble> TogDouble(const gRectangle<T>&);
-#endif   // GDOUBLE
 
 #endif // RECTANGL_H

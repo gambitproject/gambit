@@ -88,6 +88,8 @@ public:
   virtual Lexicon *GetLexicon(void) const = 0;
 };
 
+class EfgClient;
+
 class FullEfg : public Efg  {
 private:
   // this is used to track memory leakage; #define MEMCHECK to use it
@@ -111,6 +113,7 @@ protected:
   EFPlayer *chance;
   mutable Nfg *afg;
   mutable Lexicon *lexicon;
+  gList<EfgClient *> m_clients;
 
   // this is for use with the copy constructor
   void CopySubtree(Node *, Node *);
@@ -155,6 +158,8 @@ protected:
 			      gList<const Node*> &) const;
   void TerminalDescendants(const Node *, const EFSupport&, 
 			   gList<const Node*> &) const;
+
+  void NotifyClients(bool, bool) const;
 
 public:
   FullEfg(void);
@@ -276,6 +281,9 @@ public:
 
   friend Nfg *MakeReducedNfg(const EFSupport &);
   friend Nfg *MakeAfg(const Efg &);
+
+  void RegisterClient(EfgClient *);
+  void UnregisterClient(EfgClient *);
 };
 
 #include "behav.h"
@@ -327,6 +335,22 @@ template <class T> class PureBehavProfile   {
 
 #include "efgutils.h"
 
+//
+// An abstract base class for notification of other data structures when
+// changes occur in an extensive form
+//
+class EfgClient {
+friend class FullEfg;
+private:
+  FullEfg *m_efg;
+  
+protected:
+  EfgClient(FullEfg *);
+  virtual ~EfgClient();
+
+  virtual void OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged) = 0;
+  void OnEfgDestructed(void);
+};
 
 #endif   // EFG_H
 

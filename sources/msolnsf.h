@@ -4,6 +4,8 @@
 #ifndef MSOLNSF_H
 #define MSOLNSF_H
 
+#include "wx/wx.h"
+
 #include "garray.h"
 #include "gslist.h"
 #include "mixedsol.h"
@@ -19,9 +21,9 @@ private:
 
 public:
     // these variables are mostly for GUI use.  they may not belong here
-    static char *filter_cr_str[];
+    static wxString filter_cr_str[];
     static NfgAlgType filter_cr_id[];
-    static char *filter_tri_str[];
+    static wxString filter_tri_str[];
     static gTriState filter_tri_id[];
 
     // Contructor

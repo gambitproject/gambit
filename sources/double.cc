@@ -261,25 +261,3 @@ template class gBlock<gDouble>;
 template class gRectArray<gDouble>;
 template class gMatrix<gDouble>;
 template gOutput & operator<< (gOutput&, const gVector<gDouble>&);
-
-#ifndef GDOUBLE
-
-template class gMono<gDouble>;
-template gOutput & operator<< (gOutput&, const gMono<gDouble>&);
-
-template class gList<gMono<gDouble> >;
-#endif  // ! GDouble
-
-/*
-#include "gmisc.cc"
-template gDouble gmin(const gDouble &a, const gDouble &b);
-template gDouble gmax(const gDouble &a, const gDouble &b);
-*/
-
-/*
-#include "objcount.imp"
-
-class gDouble;
-template class Counted<gDouble>;
-int Counted<gDouble>::numObjects = 0;
-*/

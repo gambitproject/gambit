@@ -8,13 +8,10 @@
 #ifndef ALGDLGS_H
 #define ALGDLGS_H
 
-#include "wx.h"
-#include "wx_form.h"
+#include "wx/wx.h"
 #include "wxmisc.h"
 
 #include "gnumber.h"  
-
-#define PARAMS_SECTION  "Algorithm Params"      // section in .ini file
 
 //=========================================================================
 //                 dialogAlgorithm: Class declaration
@@ -22,22 +19,18 @@
 
 class dialogAlgorithm : public guiAutoDialog {
 private:
-  static void CallbackDepth(wxRadioBox &p_object, wxEvent &)
-    { ((dialogAlgorithm *) p_object.GetClientData())->OnDepth(); }
-  static void CallbackAll(wxCheckBox &p_object, wxEvent &)
-    { ((dialogAlgorithm *) p_object.GetClientData())->OnAll(); } 
-  static void CallbackTrace(wxButton &p_object, wxEvent &)
-    { ((dialogAlgorithm *) p_object.GetClientData())->OnTrace(); }
-
-  void OnDepth(void);
-  void OnAll(void);
-  void OnTrace(void);
+  // Event handlers
+  void OnDepth(wxCommandEvent &);
+  void OnAll(wxCommandEvent &);
+  void OnTrace(wxCommandEvent &);
+  void OnOK(wxCommandEvent &);
 
 protected:
   bool m_usesNfg, m_subgames;
   int m_traceDest, m_traceLevel;
   gText m_traceFile;
-  wxGroupBox *m_dominanceGroup, *m_subgamesGroup, *m_algorithmGroup;
+  wxBoxSizer *m_topSizer;
+  wxStaticBoxSizer *m_dominanceBox, *m_subgamesBox, *m_algorithmBox;
   wxRadioBox *m_depthChoice, *m_typeChoice, *m_methodChoice;
   wxCheckBox *m_markSubgames, *m_selectSolutions;
 
@@ -74,6 +67,8 @@ public:
   int TraceLevel(void) const { return m_traceLevel; }
 
   virtual gPrecision Precision(void) const { return precDOUBLE; }
+
+  DECLARE_EVENT_TABLE()
 };
 
 
@@ -85,14 +80,13 @@ class dialogPxi : public dialogAlgorithm {
 protected:
   gText m_defaultPxiFile;
   wxRadioBox *m_plotType;
-  wxText *m_pxiFile, *m_pxiCommand;
+  wxTextCtrl *m_pxiFile, *m_pxiCommand;
   wxCheckBox *m_runPxi;
-  wxGroupBox *m_pxiGroup;
+  wxStaticBoxSizer *m_pxiBox;
 
-  static void CallbackRun(wxCheckBox &p_object, wxEvent &)
-    { ((dialogPxi *) p_object.GetClientData())->OnRun(); }
-
-  void OnRun(void);
+  // Event handlers
+  void OnRun(wxCommandEvent &);
+  void OnOK(wxCommandEvent &);
 
   void PxiFields(void);
 
@@ -104,12 +98,12 @@ public:
   bool LinearPlot(void) const 
     { return (m_plotType->GetSelection() == 1); }
   gOutput *PxiFile(void) const;
-  gText PxiFilename(void) const
-    { return m_pxiFile->GetValue(); }
+  gText PxiFilename(void) const;
   bool RunPxi(void) const
     { return m_runPxi->GetValue(); }
-  gText PxiCommand(void) const
-    { return m_pxiCommand->GetValue(); }
+  gText PxiCommand(void) const;
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif   // ALGDLGS_H

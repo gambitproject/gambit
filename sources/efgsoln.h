@@ -8,113 +8,78 @@
 #ifndef EFGSOLN_H
 #define EFGSOLN_H
 
+#include "wx/grid.h"
 #include "efg.h"
 #include "efgconst.h"
 #include "efgshow.h"
-#include "spread3d.h"
 #include "bsolnsf.h"
 
-//****************************************************************************
-//                       NODE INSPECT WINDOW
-//****************************************************************************
-
-class NodeSolnShow: public SpreadSheet3D
-{
+class NodeSolnShow : public wxGrid {
 private:
-    const EfgShow *parent;
-    const Node *cur_n; // use to refresh data
-    gArray<Bool> features;
-    static char *feature_names[];
-    int num_players;
-    int Pos(int feature);
-    void SetOptions(void);
-    wxMenuBar *MakeMenuBar(long menus);
+  EfgShow *m_parent;
+  const Node *m_cursor;
+  static const int s_numFeatures;
+  static char *s_featureNames[];
+
 public:
-    NodeSolnShow(int num_players, const EfgShow *parent);
-    // Data entry functions
-    void Set(const Node *n);
-    // Take care of some options changes
-    void OnOptionsChanged(unsigned int options = 0);
-    // Override menu handling
-    void OnMenuCommand(int id);
-    // Override the help system
-    void OnHelp(int =0);
-    Bool OnClose(void);
+  NodeSolnShow(EfgShow *p_efgShow, wxWindow *p_parent);
+  virtual ~NodeSolnShow() { }
+
+  void Set(const Node *p_cursor);
 };
 
 
-//****************************************************************************
-//                       BEHAV SOLUTION SHOW
-//****************************************************************************
 #define     BSOLN_O_OPTIONS     1
 #define     BSOLN_O_EDIT        2
 #define     BSOLN_O_SORTFILT    4
 #define     BSOLN_O_PICKER      (8|BSOLN_O_OPTIONS|BSOLN_O_SORTFILT)
 #define     BSOLN_O_EFGNFG      16
 
-class GambitDrawSettings;
-
-class EfgSolnShow: public SpreadSheet3D
-{
+class EfgSolnShow : public wxGrid {
 private:
-    const Efg &ef;
-    EfgShow *parent;
-    void    UpdateValues(void);
-    const GambitDrawSettings &gamb_draw_settings;
-    static void normal_button(wxButton &ob, wxEvent &ev);
-    static void add_button(wxButton &ob, wxEvent &ev);
-    static void edit_button(wxButton &ob, wxEvent &ev);
-    static void delete_button(wxButton &ob, wxEvent &ev);
-    static void delete_all_button(wxButton &ob, wxEvent &ev);
-    static void sortfilt_button(wxButton &ob, wxEvent &ev);
-    // Options button
-    static void settings_button(wxButton &ob, wxEvent &ev);
-    void    UpdateSoln(int row, int col);
+  EfgShow *m_parent;
 
 protected:
-    BehavSolutionList &solns;
-    const gPVector<int> dim;        // dimensionality dim[player][iset]
-    int     num_players, num_isets, num_solutions, cur_soln;
-    gBlock<Bool> features;
-    unsigned int opts;
-    static char *feature_names[];
-    static int   feature_width[];
-    BSolnSortFilterOptions  &sf_options;
-    virtual void SetOptions(void);
-    int     FeaturePos(int feature);
-    int     SolnNum(int row);
-    int     SolnPos(int soln);
-    virtual void    OnRemove(bool all);
-    virtual void    OnAdd(void);
-    virtual void    OnEdit(void);
-    virtual void  SortFilter(bool inter = true);
+  BehavSolutionList &solns;
+  //  const gPVector<int> dim;        // dimensionality dim[player][iset]
+  int num_solutions, cur_soln;
+  gBlock<bool> features;
+  static char *feature_names[];
+  static int   feature_width[];
+  BSolnSortFilterOptions  &sf_options;
+  int     FeaturePos(int feature);
+  int     SolnNum(int row);
+  int     SolnPos(int soln);
+  virtual void    OnRemove(bool all);
+  virtual void    OnAdd(void);
+  virtual void    OnEdit(void);
+  virtual void  SortFilter(bool inter = true);
+
+  // Overriding wxGrid event handling
+  virtual void OnSelectCell(int row, int col);
+  virtual void OnLabelLeftClick(int row, int col, int x, int y,
+				bool control, bool shift);
 
 public:
-    EfgSolnShow(const Efg &ef_, BehavSolutionList &soln,
-                int cur_soln_, const GambitDrawSettings &draw_settings,
-                BSolnSortFilterOptions  &sf_options,
-                EfgShow *parent_ = 0,
-                unsigned int opts = 
-				BSOLN_O_OPTIONS|BSOLN_O_EDIT|BSOLN_O_SORTFILT|BSOLN_O_EFGNFG);
+  EfgSolnShow(EfgShow *p_efgShow, wxWindow *p_parent,
+	      BehavSolutionList &p_solutions,
+	      BSolnSortFilterOptions  &p_options);
+  virtual ~EfgSolnShow() { }
 
-    // Implement the infoset hilighting behavior.  If iset = 0, just return
-    // the option state.
-    Bool HilightInfoset(int pl = 0, int iset = 0);
-    // Overide help system
-    void OnHelp(int help_type = 0);
-    // Take care of some options changes
-    void OnOptionsChanged(unsigned int options = 0);
-    // Double clicking on a solution will update the parent
-    void OnDoubleClick(int row, int col, int level, const gText &value);
-    // Moving a cell updates the parent, if the dynamic option is set
-    void OnSelectedMoved(int row, int col, SpreadMoveDir how);
-    // OnOk must be defined to inform parent that I am killed
-    void OnOk(void);
-    // Send one BehavProfile to a MixedProfile NF (Not implemented)
-    void SolutionToNormal(void);
-  // OnClose calls OnOk
-  virtual Bool OnClose(void); 
+  // Implement the infoset hilighting behavior.  If iset = 0, just return
+  // the option state.
+  bool HilightInfoset(int pl = 0, int iset = 0);
+  // Take care of some options changes
+  void OnOptionsChanged(unsigned int options = 0) { } 
+  // Double clicking on a solution will update the parent
+  void OnDoubleClick(int row, int col, int level, const gText &value);
+
+  void UpdateValues(void);
+
+  DECLARE_EVENT_TABLE()
 };
+
+#ifdef NOT_PORTED_YET
 
 //****************************************************************************
 //                       BEHAV SOLUTION PICKER (multiple)
@@ -126,7 +91,7 @@ private:
     gArray<bool> picked;
     void PickSoln(int row);
     wxButton *pick_all_button;
-    Bool pick_all;
+    bool pick_all;
     static void pick_all_func(wxButton &ob, wxEvent &);
     void OnPickAll(void);
 
@@ -176,5 +141,6 @@ public:
     int Picked(void) const;
 };
 
+#endif // NOT_PORTED_YET
 
 #endif // EFGSOLN_H

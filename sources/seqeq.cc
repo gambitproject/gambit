@@ -1,7 +1,7 @@
 //
 // FILE: seqeq.cc  Sequential equilibrium solver
 //
-// $Id$ 
+// $Id$
 //
 
 #include "seqeq.imp"

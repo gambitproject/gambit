@@ -4,50 +4,36 @@
 // $Id$
 //
 
-#include <assert.h>
 #include <string.h>
 #include <ctype.h>
-#include "wx.h"
-
-#ifdef wx_msw
-#include "wx_bbar.h"
-#else
-#include "wx_tbar.h"
-#endif
 
 #ifdef __BORLANDC__
 #pragma hdrstop
 #endif // __BORLANDC__
 
-#include "wxio.h"
 #include "gambit.h"
 #include "wxmisc.h"
-#include "nfggui.h"
-#include "efggui.h"
+#include "efgshow.h"
+#include "nfgshow.h"
 #include "system.h"
 #include <signal.h>
 #include <math.h>
-
-#ifdef _AIX
-extern wxApp *wxTheApp = 1;
-#endif
-
-
-GambitApp   gambitApp;
-GambitFrame *main_gambit_frame;
 
 typedef void (*fptr)(int);
 
 
 void SigFPEHandler(int type)
 {
-    signal(SIGFPE, (fptr)SigFPEHandler);  // Reinstall signal handler.
-    wxMessageBox("A floating point error has occured!\n"
-                 "The results returned may be invalid");
+  signal(SIGFPE, (fptr)SigFPEHandler);  // Reinstall signal handler.
+  wxMessageBox("A floating point error has occured!\n"
+	       "The results returned may be invalid");
 }
 
-
-class MathErrHandl : public wxDialogBox {
+//
+// FIXME: Figure out how to handle math errors!
+//
+#ifdef UNUSED
+class MathErrHandl : public wxDialog {
 private:
   wxRadioBox *opt_box;
   int opt;
@@ -61,10 +47,11 @@ public:
 };
 
 MathErrHandl::MathErrHandl(const char *err)
-  : wxDialogBox(0, "Numerical Error", TRUE)
+  : wxDialog(0, 0, "Numerical Error")
 {
   char *options[3] = {"Continue", "Ignore", "Quit"};
-  (void) new wxMessage(this, (char *)err);
+  /*
+  wxMessage(this, (char *)err);
   this->NewLine();
   opt_box = new wxRadioBox(this, 0, "What now?", 
 			   -1, -1, -1, -1, 3, 
@@ -74,103 +61,136 @@ MathErrHandl::MathErrHandl(const char *err)
   ok->SetClientData((char *)this);
   Fit();
   ok->Centre(wxHORIZONTAL);
-  Show(TRUE);
+  */
+  ShowModal();
 }
     
-#ifdef wx_msw // this handler is defined differently under win/unix
-#define MATH_CONTINUE	0
-#define	MATH_IGNORE		1
-#define	MATH_QUIT			2
+#ifdef __WXMSW__ // this handler is defined differently under win/unix
+const int MATH_CONTINUE = 0;
+const int MATH_IGNORE = 1;
+const int MATH_QUIT = 2;
 int _RTLENTRY _matherr (struct exception *e)
-  /*
 #else
 #ifdef _LINUX
-struct exception {char *name;double arg1,arg2;int type;};
+struct exception { char *name; double arg1, arg2; int type; };
 #endif
 int matherr(struct exception *e)
 #endif
-  */
 {
-static char *whyS [] =
-{
-		"argument domain error",
-		"argument singularity ",
-		"overflow range error ",
-		"underflow range error",
-		"total loss of significance",
-		"partial loss of significance"
-};
-static option=MATH_CONTINUE;
-char errMsg[ 80 ];
-if (option!=MATH_IGNORE)
-{
-sprintf (errMsg,
-			"%s (%8g,%8g): %s\n", e->name, e->arg1, e->arg2, whyS [e->type - 1]);
-MathErrHandl E(errMsg);
-option=E.Option();
-if (option==MATH_QUIT) wxExit();
-}
-return 1;		// we did not really fix anything, but want no more warnings
-}
-#endif
+  static char *whyS[] = { "argument domain error",
+                          "argument singularity ",
+			  "overflow range error ",
+			  "underflow range error",
+			  "total loss of significance",
+			  "partial loss of significance" };
 
-char *wxStrLwr(char *s)
+  static int option = MATH_CONTINUE;
+  char errMsg[80];
+  if (option != MATH_IGNORE)   {
+  sprintf (errMsg, "%s (%8g,%8g): %s\n",
+	   e->name, e->arg1, e->arg2, whyS [e->type - 1]);
+  MathErrHandl E(errMsg);
+  option = E.Option();
+  if (option==MATH_QUIT)   {
+    wxExit();
+  }
+  // we did not really fix anything, but want no more warnings
+  return 1;	
+}
+#endif  // UNUSED
+
+bool GambitApp::OnInit(void)
 {
-    for (unsigned int i = 0; i < (unsigned int)strlen(s); i++) 
-        s[i] = tolower(s[i]);
+  wxConfig config("Gambit");
+
+  // Create the main frame window.
+  GambitFrame *gambitFrame = new GambitFrame(0, "Gambit", 
+					      wxPoint(0, 0), wxSize(200, 150));
+
+  // Set up the help system.
+  wxString helpDir = wxGetWorkingDirectory();
+  config.Read("Help-Directory", &helpDir);
+
+  wxInitHelp(gText(helpDir.c_str()) + "/gambit", 
+	     "Gambit Graphics User Interface, Version 0.96.1\n"
+	     "Built with " wxVERSION_STRING "\n\n"
+	     "Part of the Gambit Project\n"
+	     "www.hss.caltech.edu/~gambit/Gambit.html\n"
+	     "gambit@hss.caltech.edu\n\n"
+	     "Copyright (C) 1999-2000\n"
+	     "California Institute of Technology\n"
+	     "Funding provided by the National Science Foundation");
+  
+  gambitFrame->Show(true);
+
+  // Set up the error handling functions.
+  // For some reason this does not work w/ BC++ (crash on exit)
+#ifndef __BORLANDC__ 
+  signal(SIGFPE, (fptr) SigFPEHandler);
+#endif
     
-    return s;
+  // Process command line arguments, if any.
+  if (argc > 1) { 
+    gambitFrame->LoadFile(argv[1]);
+  }
+
+  // Set current directory.
+  wxGetApp().SetCurrentDir(gText(wxGetWorkingDirectory()));
+
+  return true;
 }
 
+IMPLEMENT_APP(GambitApp)
 
 //=====================================================================
-//                       class GambitToolBar
+//                       class GambitToolbar
 //=====================================================================
 
-class GambitToolBar
-#ifdef wx_msw
-  : public wxButtonBar {
-#else
-  : public wxToolBar {
-#endif
+const int GAMBIT_TOOLBAR_ID = 101;
+
+class GambitToolbar : public wxToolBar {
 private:
-  wxFrame *parent;
+  wxFrame *m_parent;
+
+  // Event handlers
+  void OnMouseEnter(wxCommandEvent &);
     
 public:
-  GambitToolBar(wxFrame *frame);
-  Bool OnLeftClick(int toolIndex, Bool toggled);
-  void OnMouseEnter(int toolIndex);
+  GambitToolbar(wxFrame *, const wxPoint &, const wxSize &);
+  virtual ~GambitToolbar() { }
+
+  DECLARE_EVENT_TABLE()
 };
 
+BEGIN_EVENT_TABLE(GambitToolbar, wxToolBar)
+  EVT_TOOL_ENTER(GAMBIT_TOOLBAR_ID, GambitToolbar::OnMouseEnter)
+END_EVENT_TABLE()
 
-GambitToolBar::GambitToolBar(wxFrame *frame)
-#ifdef wx_msw
-  : wxButtonBar(frame, 0, 0, -1, -1, 0, wxVERTICAL, 1), parent(frame)
-#else
-  : wxToolBar(frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30), parent(frame)
-#endif
+GambitToolbar::GambitToolbar(wxFrame *p_parent, const wxPoint &p_position,
+			     const wxSize &p_size)
+  : wxToolBar(p_parent, GAMBIT_TOOLBAR_ID, p_position, p_size),
+    m_parent(p_parent)
 {
-#ifdef wx_msw    
-  wxBitmap *loadBitmap = new wxBitmap("OPEN_BITMAP");
-  wxBitmap *efgBitmap = new wxBitmap("EFG_BITMAP");
-  wxBitmap *nfgBitmap = new wxBitmap("NFG_BITMAP");
-  wxBitmap *helpBitmap = new wxBitmap("HELP_BITMAP");
+#ifdef __WXMSW__
+  wxBitmap loadBitmap("OPEN_BITMAP");
+  wxBitmap efgBitmap("EFG_BITMAP");
+  wxBitmap nfgBitmap("NFG_BITMAP");
+  wxBitmap helpBitmap("HELP_BITMAP");
 #else
 #include "bitmaps/open.xpm"
 #include "bitmaps/help.xpm"
 #include "bitmaps/efg.xpm"
 #include "bitmaps/nfg.xpm"
-  wxBitmap *loadBitmap = new wxBitmap(open_xpm);
-  wxBitmap *efgBitmap  = new wxBitmap(efg_xpm);
-  wxBitmap *nfgBitmap  = new wxBitmap(nfg_xpm);
-  wxBitmap *helpBitmap = new wxBitmap(help_xpm);
-#endif  // wx_msw 
+  wxBitmap loadBitmap(open_xpm);
+  wxBitmap efgBitmap(efg_xpm);
+  wxBitmap nfgBitmap(nfg_xpm);
+  wxBitmap helpBitmap(help_xpm);
+#endif  // __WXMSW__
   
   SetMargins(2, 2);
-#ifdef wx_msw
-  SetDefaultSize(33, 31);
-#endif // wx_msw
- 
+#ifdef __WXMSW__
+  SetToolBitmapSize(wxSize(33, 30));
+#endif  // __WXMSW__
   AddTool(FILE_LOAD, loadBitmap);
   AddSeparator();
   AddTool(FILE_NEW_EFG, efgBitmap);
@@ -178,305 +198,254 @@ GambitToolBar::GambitToolBar(wxFrame *frame)
   AddSeparator();
   AddTool(GAMBIT_HELP_CONTENTS, helpBitmap);
 
-  GetDC()->SetBackground(wxLIGHT_GREY_BRUSH);
+  Realize();
+}
 
-  CreateTools();
+void GambitToolbar::OnMouseEnter(wxCommandEvent &p_event)
+{
+  if (p_event.GetSelection() > 0) {
+    m_parent->SetStatusText(m_parent->GetMenuBar()->GetHelpString(p_event.GetSelection()));
+  }
+  else {
+    m_parent->SetStatusText("");
+  }
+}
+
+//=====================================================================
+//                       class GambitFrame
+//=====================================================================
+
+GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
+			 const wxPoint &p_position, const wxSize &p_size)
+  : wxFrame(p_parent, -1, p_title, p_position, p_size),
+    m_fileHistory(5)
+{
+#ifdef __WXMSW__
+  SetIcon(wxIcon("gambit_icn"));
+#else
+#include "bitmaps/gambi.xpm"
+  SetIcon(wxIcon(gambi_xpm));
+#endif
+    
+  wxMenu *fileMenu = new wxMenu;
+  wxMenu *newMenu = new wxMenu;
+  newMenu->Append(FILE_NEW_NFG, "Normal", "Normal form game");
+  newMenu->Append(FILE_NEW_EFG, "Extensive", "Extensive form game");
+  fileMenu->Append(FILE_NEW, "&New", newMenu, "Create a new game");
+  fileMenu->Append(FILE_LOAD, "&Open", "Open a file");
+  fileMenu->Append(FILE_QUIT, "&Quit", "Quit program");
+
+  wxMenu *helpMenu = new wxMenu;
+  helpMenu->Append(GAMBIT_HELP_ABOUT, "&About", "About this program");
+  helpMenu->Append(GAMBIT_HELP_CONTENTS, "&Contents", "Table of contents");
+  
+  wxMenuBar *menuBar = new wxMenuBar;
+  menuBar->Append(fileMenu, "&File");
+  menuBar->Append(helpMenu, "&Help");
+  SetMenuBar(menuBar);
+
+  wxConfig config("Gambit");
+  m_fileHistory.Load(config);
+  m_fileHistory.UseMenu(fileMenu);
+  m_fileHistory.AddFilesToMenu();
+
+  CreateStatusBar();
+
+  (void) new GambitToolbar(this, wxPoint(0, 0), wxSize(200, 40));
+}
+
+GambitFrame::~GambitFrame()
+{
+  wxConfig config("Gambit");
+  m_fileHistory.Save(config);
+}
+
+//--------------------------------------------------------------------
+//              GambitFrame: Event-handling members
+//--------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(GambitFrame, wxFrame)
+  EVT_MENU(FILE_NEW_EFG, GambitFrame::OnNewEfg)
+  EVT_MENU(FILE_NEW_NFG, GambitFrame::OnNewNfg)
+  EVT_MENU(FILE_LOAD, GambitFrame::OnLoad)
+  EVT_MENU(FILE_QUIT, wxWindow::Close)
+  EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, GambitFrame::OnMRUFile)
+  EVT_MENU(GAMBIT_HELP_CONTENTS, GambitFrame::OnHelpContents)
+  EVT_MENU(GAMBIT_HELP_ABOUT, GambitFrame::OnHelpAbout)
+  EVT_CLOSE(GambitFrame::OnCloseWindow)
+END_EVENT_TABLE()
+
+void GambitFrame::OnNewNfg(wxCommandEvent &)
+{
+  int numPlayers = GetPlayers();
+  if (numPlayers >= 2) {
+    gArray<int> dimensionality(numPlayers);
+    if (GetStrategies(dimensionality)) {
+      Nfg *nfg = new Nfg(dimensionality);
+      NfgShow *nfgShow = new NfgShow(*nfg, 0, this);
+      nfgShow->SetFileName("");
+    }
+  }
+}
+
+void GambitFrame::OnNewEfg(wxCommandEvent &)
+{
+  EfgShow *efgShow = new EfgShow(*(new FullEfg), 0, this);
+  efgShow->SetFileName("");
+}
+
+void GambitFrame::OnLoad(wxCommandEvent &)
+{
+  Enable(false); // Don't allow anything while the dialog is up.
+
+  gText filename = wxFileSelector("Load data file", wxGetApp().CurrentDir(),
+				  NULL, NULL, "*.?fg").c_str();
+  Enable(true);
+
+  if (filename == "") {
+    return;
+  }
+
+  wxGetApp().SetCurrentDir(gPathOnly(filename));
+
+  LoadFile(filename);
+}
+
+void GambitFrame::OnMRUFile(wxCommandEvent &p_event)
+{
+  LoadFile(m_fileHistory.GetHistoryFile(p_event.GetSelection() - wxID_FILE1).c_str());
+}
+
+void GambitFrame::OnHelpAbout(wxCommandEvent &)
+{
+  wxHelpAbout(); 
+}
+
+void GambitFrame::OnHelpContents(wxCommandEvent &)
+{
+  wxHelpContents(GAMBIT_GUI_HELP);
+}
+
+class dialogDimensionality : public guiPagedDialog {
+public:
+  dialogDimensionality(wxWindow *p_parent, int p_numPlayers);
+  virtual ~dialogDimensionality() { }
+};
+
+dialogDimensionality::dialogDimensionality(wxWindow *p_parent,
+					   int p_numPlayers)
+  : guiPagedDialog(p_parent, "Number of Strategies", p_numPlayers)
+{
+  for (int pl = 1; pl <= p_numPlayers; pl++) {
+    SetValue(pl, "2");
+  }
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(m_grid, 0, wxALL, 5);
+  topSizer->Add(m_buttonSizer, 0, wxALL, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+
   Layout();
 }
 
-Bool GambitToolBar::OnLeftClick(int tool, Bool)
+int GambitFrame::GetPlayers(void)
 {
-  parent->OnMenuCommand(tool);
-  return TRUE;
-}
+  int numPlayers = 2;
 
-void GambitToolBar::OnMouseEnter(int tool)
-{
-  parent->SetStatusText(parent->GetMenuBar()->GetHelpString(tool));
-}
-
-
-//---------------------------------------------------------------------
-//                     GAMBITFRAME: CONSTRUCTOR
-//---------------------------------------------------------------------
-
-static gText ResolveVersion(void)
-{
-#ifdef __BORLANDC__
-  gText resourceFile = "gambit.ini";
-  gText firstPath = System::GetEnv("GAMBITHOME");
-
-  if (firstPath != "") {
-    int ver = 0;
-    wxGetResource("Gambit", "Gambit-Version", &ver,
-                  gText(firstPath) + "/" + resourceFile);
-
-    if (ver == GAMBIT_VERSION)
-      return gText(firstPath) + "/" + resourceFile;
-  }
-
-  char *workingDir = wxGetWorkingDirectory();
-  if (workingDir)  {
-    int ver = 0;
-    wxGetResource("Gambit", "Gambit-Version", &ver,
-                  gText(workingDir) + "/" + resourceFile);
-
-    if (ver == GAMBIT_VERSION)
-      return gText(workingDir) + "/" + resourceFile;
-  }
-
-  int ver = 0;
-  wxGetResource("Gambit", "Gambit-Version", &ver, resourceFile);
-  if (ver == GAMBIT_VERSION)
-    return resourceFile;
-
-  return "";
-
-#else   // non-microsoft platforms
-  int ver = 0;
-  wxGetResource("Gambit", "Gambit-Version", &ver, "gambitrc");
-  if (ver == GAMBIT_VERSION)
-    return "gambitrc";
-  else
-    return "";
-#endif
-}
-
-// The `main program' equivalent, creating the windows and returning the
-// main frame
-
-wxFrame *GambitApp::OnInit(void)
-{
-  // First check if we have a current settings file (gambit.ini).  If not, exit!
-  m_resourceFile = ResolveVersion();
-  
-  if (m_resourceFile == "") {
-    wxMessageBox("Gambit is unable to locate a current configuration file.\n"
-		 "Please make sure that the program was installed correctly",
-		 "Config Error");
-    return NULL;
-  }
-
-  // Create the main frame window.
-  GambitFrame *gambit_frame = new GambitFrame(NULL, "Gambit", 
-					      0, 0, 200, 150, wxDEFAULT_FRAME);
-
-  // Give it an icon.
-  wxIcon *frame_icon;
-    
-#ifdef wx_msw
-  frame_icon = new wxIcon("gambit_icn");
-#else
-#include "bitmaps/gambi.xpm"
-  frame_icon = new wxIcon(gambi_xpm);
-#endif
-    
-  gambit_frame->SetIcon(frame_icon);
-    
-  // Make a menubar.
-  wxMenu *file_menu = new wxMenu;
-  wxMenu *new_menu = new wxMenu;
-  new_menu->Append(FILE_NEW_NFG, "Normal",               "Normal form game");
-  new_menu->Append(FILE_NEW_EFG, "Extensive",            "Extensive form game");
-  file_menu->Append(FILE_NEW,    "&New", new_menu,       "Create a new game");
-  file_menu->Append(FILE_LOAD,   "&Open",                "Open a file");
-  file_menu->Append(FILE_QUIT,   "&Quit",                "Quit program");
-
-  wxMenu *help_menu = new wxMenu;
-  help_menu->Append(GAMBIT_HELP_CONTENTS, "&Contents",   "Table of contents");
-  help_menu->Append(GAMBIT_HELP_ABOUT,    "&About",      "About this program");
-  
-  wxMenuBar *menu_bar = new wxMenuBar;
-  menu_bar->Append(file_menu, "&File");
-  menu_bar->Append(help_menu, "&Help");
-  
-  // Associate the menu bar with the frame.
-  gambit_frame->SetMenuBar(menu_bar);
-  gambit_frame->CreateStatusLine();
-  (void) new GambitToolBar(gambit_frame);
-  
-  // Set up the help system.
-  gText helpDir = wxGetWorkingDirectory();
-  wxGetResourceStr("Gambit", "Help-Directory", helpDir,
-		   gambitApp.ResourceFile());
-
-  wxInitHelp(helpDir + "/gambit", "Gambit Graphics User Interface, Version 0.96.2\n\n"
-	     "Part of the Gambit Project\n\n"
-	     "www.hss.caltech.edu/~gambit/Gambit.html\n"
-	     "gambit@hss.caltech.edu\n\n"
-	     "Copyright (C) 1999-2000\n"
-	     "California Institute of Technology\n"
-	     "Funding provided by the National Science Foundation");
-  
-  // Initialize the output (floating point) precision.
-  int num_prec;
-  wxGetResource("Gambit", "Output-Precision", &num_prec,
-		gambitApp.ResourceFile());
-  ToTextPrecision(num_prec);
-  
-  gambit_frame->Show(TRUE);
-  
-  m_recentFiles = new wxFileHistory(5);
-  m_recentFiles->FileHistoryUseMenu(file_menu);
-  for (int i = 5; i >= 1; i--) {
-    gText fileName;
-    wxGetResourceStr("Gambit", "file" + ToText(i), fileName, m_resourceFile);
-    if (fileName != "") {
-      gambitApp.AddFileToHistory(fileName);
+  const char *label = wxGetTextFromUser("Number of players",
+					"Create new normal form",
+					(char *) ToText(numPlayers));
+  if (label) {
+    numPlayers = ToNumber(label);
+    if (numPlayers < 1) {
+      return 0;
+    }
+    else {
+      return numPlayers;
     }
   }
-
-  // Set up the error handling functions.
-#ifndef __BORLANDC__ // For some reason this does not work w/ BC++ (crash on exit)
-  signal(SIGFPE, (fptr)SigFPEHandler);
-#endif
-    
-  // Process command line arguments, if any.
-  if (argc > 1) 
-    gambit_frame->LoadFile(argv[1]);
-  
-  // Set current directory.
-
-  gambitApp.SetCurrentDir(gText(wxGetWorkingDirectory()));
-  
-  // Return the main frame window.
-  main_gambit_frame = gambit_frame;
-  return gambit_frame;
+  else {
+    return 0;
+  }
 }
-
-void GambitApp::AddFileToHistory(const gText &p_file)
+ 
+int GambitFrame::GetStrategies(gArray<int> &p_dimensionality)
 {
-  m_recentFiles->AddFileToHistory(p_file);
+  dialogDimensionality dialog(this, p_dimensionality.Length());
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    for (int pl = 1; pl <= p_dimensionality.Length(); pl++) {
+      p_dimensionality[pl] = ToNumber(dialog.GetValue(pl));
+    }
+    return 1;
+  }
+  else {
+    return 0;
+  }
 }
-
-int GambitApp::OnExit(void)
-{
-#ifndef LINUX_WXXT // there is no global wx_frame in wxxt(linux)
-  if (wx_frame) 
-    wx_frame->OnClose();
-#endif
-
-  m_recentFiles->FileHistorySave(ResourceFile(), "Gambit");
-  return TRUE;
-}
-
-
-// Define my frame constructor.
-GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int )
-  : wxFrame(frame, title, x, y, w, h)
-{ }
-
-
-//--------------------------------------------------------------------
-//              GAMBITFRAME: EVENT-HANDLING MEMBERS
-//--------------------------------------------------------------------
-
-//********************************************************************
-//                       FILE-LOAD MENU HANDLER
-//********************************************************************
 
 void GambitFrame::LoadFile(const gText &p_filename)
 {    
-  gText new_s(p_filename);
+  gText filename(gFileNameFromPath(p_filename));
+  filename = filename.Dncase();
 
-  if (p_filename == "") {
-    Enable(FALSE); // Don't allow anything while the dialog is up.
+  if (strstr((const char *) filename, ".nfg")) {
+    // This must be a normal form.
+    try {
+      gFileInput infile(p_filename);
+      Nfg *nfg = 0;
 
-#ifdef wx_motif
-    gText s = wxGetTextFromUser("Load data file", "Load data file",
-				gambitApp.CurrentDir());
-#else
-    gText s = wxFileSelector("Load data file", gambitApp.CurrentDir(),
-			     NULL, NULL, "*.?fg");
-#endif // wx_motif
-    Enable(TRUE);
+      ReadNfgFile(infile, nfg);
 
-    if (s == "")
-      return;
-
-    // Save the current directory.
-    // WARNING: since wxFileSelector returns the address of
-    // a global buffer in wxxt, we have to copy s to a new
-    // location.  This is probably also a memory leak.
-    new_s = s;
-    gText path(gPathOnly(s));
-    gambitApp.SetCurrentDir(path);
-  }
-  
-  if (strcmp(new_s, "") != 0) {
-    gText filename(gFileNameFromPath(new_s));
-    filename = filename.Dncase();
-
-    if (strstr((const char *) filename, ".nfg")) {
-      // This must be a normal form.
-      NfgGUI(0, new_s, 0, this);
+      if (!nfg) {
+	wxMessageBox((char *) (p_filename + " is not a valid .nfg file"));
+      }
+      else {
+	m_fileHistory.AddFileToHistory((char *) p_filename);
+      }
+      NfgShow *nfgShow = new NfgShow(*nfg, 0, this);
+      nfgShow->SetFileName(p_filename);
       return;
     }
-    else if (strstr((const char *) filename, ".efg")) {
-      // This must be an extensive form.
-      EfgGUI(0, new_s, 0, this);
+    catch (gFileInput::OpenFailed &) {
+      wxMessageBox((char *) ("Could not open " + p_filename + " for reading"));
       return;
     }
-    
-    wxMessageBox("Unknown file type");
   }
+  else if (strstr((const char *) filename, ".efg")) {
+    // This must be an extensive form.
+    try {
+      gFileInput infile(p_filename);
+      FullEfg *efg = ReadEfgFile(infile);
+                
+      if (!efg) {
+	wxMessageBox((char *) (filename + " is not a valid .efg file"));
+      }
+      else {
+	m_fileHistory.AddFileToHistory((char *) p_filename);
+      }
+
+      EfgShow *efgShow = new EfgShow(*efg, 0, this);
+      efgShow->SetFileName(filename);
+      return;
+    }
+    catch (gFileInput::OpenFailed &) { 
+      wxMessageBox((char *) ("Could not open " + filename + " for reading"));
+      return;
+    }
+  }
+
+  wxMessageBox("Unknown file type");
 }
 
-
-//*******************************************************************
-//                    COMMAND EVENT HANDLER
-//*******************************************************************
-
-void GambitFrame::OnMenuCommand(int id)
+void GambitFrame::OnCloseWindow(wxCloseEvent &)
 {
-  switch (id) {
-  case FILE_QUIT:
-    Close();
-    break;
-  case FILE_LOAD:
-    LoadFile("");
-    break;
-  case wxID_FILE1:
-  case wxID_FILE2:
-  case wxID_FILE3:
-  case wxID_FILE4:
-  case wxID_FILE5:
-    LoadFile(gambitApp.GetHistoryFile(id - wxID_FILE1));
-    break;
-  case FILE_NEW_NFG: 
-    NfgGUI(0, "", 0, this);
-    break;
-  case FILE_NEW_EFG: 
-    EfgGUI(0, "", 0, this);
-    break;
-  case GAMBIT_HELP_ABOUT:
-    wxHelpAbout(); 
-    break;
-  case GAMBIT_HELP_CONTENTS: 
-    wxHelpContents(GAMBIT_GUI_HELP);
-    break;
-        
-  default: 
-    wxMessageBox("Error: Unknown Menu Selection"); 
-    break;
-  }
-}
-
-
-#ifdef wx_x
-extern void wxFlushResources(void);
-#endif
-
-
-Bool GambitFrame::OnClose()
-{
-  Show(FALSE);
-#ifdef wx_x
-  wxFlushResources();
-#endif
   wxKillHelp();
-  wout->OnClose(); werr->OnClose();
-  return TRUE;
+  //  wout->OnClose(); werr->OnClose();
+  Destroy();
 }
 
 
@@ -487,7 +456,7 @@ void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
             long p_style /*= wxOK | wxCENTRE*/)
 {
   gText message = "An internal error occurred in Gambit:\n" + p_message;
-  wxMessageBox(message, "Gambit Error", p_style, p_parent);
+  wxMessageBox((char *) message, "Gambit Error", p_style, p_parent);
 }
 
 

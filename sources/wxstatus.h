@@ -1,55 +1,56 @@
-// File: wxstatus.h -- definition of the class to implement progress
-// indication/cancel feature for the gambit algorithms in the gui.
+//
+// FILE: wxstatus.h -- Progress indication / cancel dialog
+//
 // $Id$
+//
 
 #ifndef WXSTATUS_H
 #define WXSTATUS_H
 
-#include "wx.h"
+#include "wx/wx.h"
+#include "wx/progdlg.h"
 #include "gstatus.h"
 
-class wxStatus: public wxDialogBox, public gStatus
-{
+class wxStatus : public wxProgressDialog, public gStatus {
 protected:
-    int          Width, Prec;
-    char         Represent;
-    wxGauge     *gauge;
-    wxMultiText *twin;
-    bool         sig;
-    static void button_proc(wxButton& but, wxCommandEvent& event);
-
+  int m_width, m_prec;
+  char m_represent;
+  bool m_sig;
+  
+  int m_value;
+  
 public:
-    wxStatus(wxFrame *frame, const char *title = "Progress");
-    ~wxStatus();
+  wxStatus(wxWindow *, const gText &);
+  virtual ~wxStatus();
+    
+  // functions for gOutput
+  int GetWidth(void) const { return m_width; }
+  gOutput &SetWidth(int p_width) { m_width = p_width; return *this; }
+  int GetPrec(void) const { return m_prec; }
+  gOutput &SetPrec(int p_prec)  { m_prec = p_prec; return *this; }
+  gOutput &SetExpMode(void) { m_represent = 'e'; return *this; }
+  gOutput &SetFloatMode(void) { m_represent = 'f'; return *this; }
+  char GetRepMode(void) const { return m_represent; }
 
-    // functions for gProgress::gOutput
-    int      GetWidth(void) const     { return Width; }
-    gOutput &SetWidth(int w)          { Width = w; return *this; }
-    int      GetPrec(void)  const     { return Prec; }
-    gOutput &SetPrec(int p)           { Prec = p; return *this; }
-    gOutput &SetExpMode(void)         { Represent = 'e'; return *this; }
-    gOutput &SetFloatMode(void)       { Represent = 'f'; return *this; }
-    char GetRepMode(void)   const     { return Represent; }
+  gOutput &operator<<(int x);
+  gOutput &operator<<(unsigned int x);
+  gOutput &operator<<(bool x);
+  gOutput &operator<<(long x);
+  gOutput &operator<<(char x);
+  gOutput &operator<<(double x);
+  gOutput &operator<<(float x);
+  gOutput &operator<<(const char *x);
+  gOutput &operator<<(const void *x);
 
-    gOutput &operator<<(int x);
-    gOutput &operator<<(unsigned int x);
-    gOutput &operator<<(bool x);
-    gOutput &operator<<(long x);
-    gOutput &operator<<(char x);
-    gOutput &operator<<(double x);
-    gOutput &operator<<(float x);
-    gOutput &operator<<(const char *x);
-    gOutput &operator<<(const void *x);
+  bool IsValid(void) const { return true; }
 
-    bool IsValid(void) const { return true; }
+  // functions for gProgress
+  virtual void SetProgress(double p);
 
-    // functions for gProgress
-    virtual void SetProgress(double p);
-
-    // functions for gSignal
-    virtual void SetSignal(void) { sig = true; }
-    virtual void Get(void) const;
-    virtual void Reset(void)     { sig = false; }
+  // functions for gSignal
+  virtual void SetSignal(void) { m_sig = true; }
+  virtual void Get(void) const;
+  virtual void Reset(void)     { m_sig = false; }
 };
 
-#endif
+#endif  // WXSTATUS_H

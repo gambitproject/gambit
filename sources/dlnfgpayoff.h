@@ -11,7 +11,6 @@ class dialogNfgPayoffs : public guiPagedDialog {
 private:
   NFOutcome *m_outcome;
   const Nfg &m_nfg;
-  wxText *m_outcomeName;
 
   const char *HelpString(void) const { return "Change Payoffs Dialog"; }
 

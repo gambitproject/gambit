@@ -26,9 +26,8 @@ private:
   wxBitmap *m_b, *c_b;
   wxMemoryDC *move_dc, *copy_dc;
   TreeWindow *parent;
-  wxCanvasDC *dc;
   int drag_now;
-  float x, y, ox, oy;  // position and old position
+  long x, y, ox, oy;  // position and old position
   int c, oc; // control pressed and old control pressed
   Node *start_node, *end_node;
     
@@ -38,7 +37,7 @@ public:
   NodeDragger(TreeWindow *parent, FullEfg &ef);
   ~NodeDragger();
     
-  int OnEvent(wxMouseEvent &ev, Bool &nodes_changed);
+  int OnEvent(wxMouseEvent &ev);
 
   int ControlDown(void) const { return c; }
   int Dragging(void) const { return drag_now; }
@@ -56,9 +55,8 @@ class TreeWindow::IsetDragger {
 private:
   FullEfg &ef;
   TreeWindow *parent;
-  wxCanvasDC *dc;
   int drag_now;
-  float x, y, ox, oy, sx, sy;    // current, previous, start positions
+  long x, y, ox, oy, sx, sy;    // current, previous, start positions
   Node *start_node, *end_node;
     
   void RedrawObject(void);
@@ -67,7 +65,7 @@ public:
   IsetDragger(TreeWindow *parent, FullEfg &ef);
   ~IsetDragger();
     
-  int OnEvent(wxMouseEvent &ev, Bool &infosets_changed);
+  int OnEvent(wxMouseEvent &ev);
   int Dragging(void) const { return drag_now; }
     
   Node *StartNode(void) { return start_node; }
@@ -84,10 +82,9 @@ class TreeWindow::BranchDragger {
 private:
   FullEfg &ef;
   TreeWindow *parent;
-  wxCanvasDC *dc;
   int drag_now;
   int br;
-  float x, y, ox, oy, sx, sy;    // current, previous, start positions
+  long x, y, ox, oy, sx, sy;    // current, previous, start positions
   Node *start_node;
     
   void RedrawObject(void);
@@ -96,7 +93,7 @@ public:
   BranchDragger(TreeWindow *parent, FullEfg &ef);
   ~BranchDragger();
     
-  int OnEvent(wxMouseEvent &ev, Bool &infosets_changed);
+  int OnEvent(wxMouseEvent &ev);
   int Dragging(void) const { return drag_now; }
     
   Node *StartNode(void) { return start_node; }
@@ -111,17 +108,18 @@ private:
   int drag_now;
   EFOutcome *outcome;
   Node *start_node;
-  float x, y;
+  long x, y;
+#ifdef NOT_PORTED_YET
   wxCursor *outcome_cursor;
-    
+#endif // NOT_PORTED_YET    
+
 public:
   OutcomeDragger(TreeWindow *parent, FullEfg &ef);
   ~OutcomeDragger();
     
   int Dragging(void) const { return drag_now; }
-  int OnEvent(wxMouseEvent &ev, Bool &outcomes_changed);
+  int OnEvent(wxMouseEvent &ev, bool &outcomes_changed);
 };
-
 
 #endif  // TREEDRAG_H
 

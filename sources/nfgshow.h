@@ -7,10 +7,9 @@
 #ifndef NFGSHOW_H
 #define NFGSHOW_H
 
-#include "wx.h"
+#include "wx/wx.h"
 #include "wxmisc.h"
 
-#include "spread3d.h"
 #include "nfgdraw.h"
 #include "accels.h"
 
@@ -20,41 +19,31 @@
 #include "nfgiter.h"
 #include "mixedsol.h"
 #include "nfgsolng.h"
-
+#include "solnlist.h"
 #include "msolnsf.h"
 
 #include "efgnfgi.h"
 
 class NfgSolnShow;
-class NormalSpread;
+class NfgTable;
 class dialogNfgSupportInspect;
-
-template <class T> class SolutionList: public gSortList<T>
-{
-private:
-    unsigned int max_id;
-
-public:
-    SolutionList(void):gSortList<T>(), max_id(1) { }
-    SolutionList(const gList<T> &l): gSortList<T>(l), max_id(1) { }
-
-    virtual int Append(const T &a)
-    {
-        (*this)[gSortList<T>::Append(a)].SetId(max_id++);
-        return Length();
-    }
-};
 
 typedef SolutionList<MixedSolution> MixedSolutionList;
 
-class NfgShow: public EfgNfgInterface, public NfgShowInterface {
+class NfgPanel;
+class NfgToolbar;
+
+class NfgShow : public wxFrame, 
+		public EfgNfgInterface, public NfgShowInterface {
 private:
-  Nfg &nf;
-  NfgIter nf_iter;
+  Nfg &m_nfg;
   gList<NFSupport *> supports;
   MixedSolutionList solns;
 
-  wxFrame *m_frame;
+  NfgPanel *m_panel;
+  NfgToolbar *m_toolbar;
+  NfgTable *m_table;
+  NfgSolnShow *m_solutionTable;
 
   struct StartingPoints {
     MixedSolutionList profiles;
@@ -64,86 +53,87 @@ private:
 
   int cur_soln;
 
-  NFSupport *cur_sup;
+  NFSupport *m_currentSupport;
 
-  NormalSpread    *spread;
-  int pl1, pl2;
-  int rows, cols;
-  NfgSolnShow *soln_show; // need to keep track of this to kill at the end
+  int m_rowPlayer, m_colPlayer;
   NormalDrawSettings  draw_settings;
   MSolnSortFilterOptions sf_options;
   gList<Accel>    accelerators;
   gText filename;
   
   // Private functions
+  void MakeMenus(void);
+
   void UpdateContingencyProb(const gArray<int> &profile);
-  void DumpAscii(Bool all_cont);
 
   gText UniqueSupportName(void) const;
+
+  void AdjustSizes(void);
+  void UpdateMenus(void);
 
   // process accelerators
   gArray<AccelEvent> MakeEventNames(void);
 
+  // Menu event handlers
+  void OnFileSave(wxCommandEvent &);
+  void OnFileOutput(wxCommandEvent &);
+
+  void OnEditLabel(wxCommandEvent &);
+  void OnEditPlayers(wxCommandEvent &);
+  void OnEditStrategies(wxCommandEvent &);
+  void OnEditOutcomeNew(wxCommandEvent &);
+  void OnEditOutcomeDelete(wxCommandEvent &);
+  void OnEditOutcomeAttach(wxCommandEvent &);
+  void OnEditOutcomeDetach(wxCommandEvent &);
+  void OnEditOutcomePayoffs(wxCommandEvent &);
+
+  void OnSupportUndominated(wxCommandEvent &);
+  void OnSupportNew(wxCommandEvent &);
+  void OnSupportEdit(wxCommandEvent &);
+  void OnSupportDelete(wxCommandEvent &);
+  void OnSupportSelectFromList(wxCommandEvent &);
+  void OnSupportSelectPrevious(wxCommandEvent &);
+  void OnSupportSelectNext(wxCommandEvent &);
+
+  void OnSolveStandard(wxCommandEvent &);
+  void OnSolveCustom(wxCommandEvent &);
+
+  void OnViewSolutions(wxCommandEvent &);
+  void OnViewDominance(wxCommandEvent &);
+  void OnViewProbabilities(wxCommandEvent &);
+  void OnViewValues(wxCommandEvent &);
+  void OnViewOutcomes(wxCommandEvent &);
+  void OnViewGameInfo(wxCommandEvent &);
+
+  void OnPrefsDisplayColumns(wxCommandEvent &);
+  void OnPrefsDisplayDecimals(wxCommandEvent &);
+  void OnPrefsFont(wxCommandEvent &);
+  void OnPrefsColors(wxCommandEvent &);
+  void OnPrefsAccels(wxCommandEvent &);
+  void OnPrefsSave(wxCommandEvent &);
+  void OnPrefsLoad(wxCommandEvent &);
+
+  // Other event handlers
+  void OnCloseWindow(wxCloseEvent &);
+  void OnSize(wxSizeEvent &);
+
 public:
-  // Constructor
   NfgShow(Nfg &N, EfgNfgInterface *efg = 0, wxFrame *pframe = 0);
   virtual ~NfgShow();
 
-  void SetPlayers(int _pl1, int _pl2, bool first_time = false);
+  gArray<int> GetProfile(void) const;
 
-  // Print takes care of ALL output needs.  Currently it supports
-  // output in the following formats: Printer(win),
-  // PostScript, Metafile/Clipboard(win), PrintPreview(win), Ascii
-  void Print(void);
-  void SetColors(void);
-
-  void EditLabel(void);
-  void SetStrategyLabels(void);
-  void SetPlayerLabels(void);
-
-  // Saving the game in native (.nfg) format
-  Bool Save(void);
-
-  // Supports and domination
-  int SolveElimDom(void);
-
-  void SupportNew(void);
-  void SupportEdit(void);
-  void SupportDelete(void);
-  void SupportSelectFromList(void);
-  void SupportSelectPrevious(void);
-  void SupportSelectNext(void);
-  NFSupport *MakeSupport(void);
-  NFSupport *CurrentSupport(void) const { return cur_sup; }
+  NFSupport *CurrentSupport(void) const { return m_currentSupport; }
   int NumSupports(void) const { return supports.Length(); }
   
-  void OutcomeNew(void);
-  void OutcomeDelete(void);
-  void OutcomeAttach(void);
-  void OutcomeDetach(void);
   void OutcomePayoffs(int st1, int st2, bool next = false);
-  void OutcomeOptions(void)
-    { draw_settings.SetOutcomeDisp(1 - draw_settings.OutcomeDisp());
-      UpdateVals();
-    }
-
-  void PrefsDisplayColumns(void);
-  void PrefsDisplayDecimals(void);
-  void PrefsFont(void);
-  void PrefsSave(void);
-  void PrefsLoad(void);
-
-  void UpdateVals(void);
   void UpdateSoln(void);
   void UpdateProfile(gArray<int> &profile);
+  void SetStrategy(int p_player, int p_strategy);
+  void SetPlayers(int p_rowPlayer, int p_colPlayer);
+  int GetRowPlayer(void) const { return m_rowPlayer; }
+  int GetColPlayer(void) const { return m_colPlayer; }
   
-  // OnOK clean up
-  void OnOk(void);
-
-  // Now come the solution functions
-  void Solve(int);
-  void SolveStandard(void);
-  void InspectSolutions(int what);
   void ClearSolutions(void);
   void RemoveSolutions(void);
   MixedSolution CreateSolution(void);
@@ -161,149 +151,25 @@ public:
   void SetFileName(const gText &s);
   const gText &Filename(void) const { return filename; }
 
-  const Nfg &Game(void) const { return nf; }  
-  // Display some inherent game properties
-  void ShowGameInfo(void);
-  bool GameIsDirty(void) const { return nf.IsDirty(); }
+  const Nfg &Game(void) const { return m_nfg; }  
+  wxFrame *Frame(void) { return this; }
+
+  bool GameIsDirty(void) const { return m_nfg.IsDirty(); }
 
   int GetDecimals(void) const { return draw_settings.GetDecimals(); }
   void SetDecimals(int p_decimals) { draw_settings.SetDecimals(p_decimals); }
 
   // Process Accelerator Keys
-  void EditAccelerators(void);
   int  CheckAccelerators(wxKeyEvent &ev);
-
-  // Access to the actual window
-  wxFrame *Frame(void) { return m_frame; }
 
   // Access to the draw settings.
   const NormalDrawSettings& getNormalDrawSettings() { return draw_settings; }
 
-  // Access to the underlying spreadsheet.
-  const NormalSpread& getNormalSpread() { return *spread; }
+  DECLARE_EVENT_TABLE()
 };
 
-
-class NormalSpread : public SpreadSheet3D {
-private:
-  gArray<wxChoice *> strat_profile;
-  wxChoice *row_choice, *col_choice;
-  wxSlider *slider;
-  NfgShow *parent;
-  int pl1, pl2;
-  gArray<int> dimensionality;
-
-  struct ns_features_struct {
-    int prob, dom, val; /* these are actually int, not bool 0 or 1 */
-    Bool verbose;
-    ns_features_struct(void) :prob(0), dom(0), val(0), verbose(TRUE) { }
-    ns_features_struct(const ns_features_struct &s): prob(s.prob), dom(s.dom),
-      val(s.val), verbose(s.verbose) { }
-  } features;
-
-protected:
-  wxMenuBar *MakeMenuBar(long menus);
-  void UpdateMenus(void);
-
-public:
-  // Constructor
-  NormalSpread(const NFSupport *sup, int _pl1, int _pl2, NfgShow *p, 
-           wxFrame *pframe = 0);
-
-  // Takes care of updating the player's strategy choice boxes
-  void UpdateProfile(void);
-
-  // Takes care of updating what players are used for row/col
-  void UpdatePlayers(void)
-    { parent->SetPlayers(row_choice->GetSelection()+1, col_choice->GetSelection()+1); }
-  
-  // Allows the user to set the entire profile at one time
-  void SetProfile(const gArray<int> &profile);
-  // Returns the current profile
-  gArray<int> GetProfile(void);
-
-  // Set Dimensionality.  This is needed for elimdom stuff
-  void SetDimensionality(const NFSupport *sup);
-
-  void SetStrategyLabels(const NFSupport *);
-  void SetPlayerLabels(const NFSupport *);
-
-  // Functions to display the row/col players
-  void SetRowPlayer(int pl)
-    {
-      row_choice->SetSelection(pl-1);
-      pl1 = pl;
-    }
-
-  void SetColPlayer(int pl)
-    {
-      col_choice->SetSelection(pl-1);
-      pl2 = pl;
-    }
-
-  // Functions to create an extra row&col to display probs, dominators, values
-  void MakeProbDisp(void);
-  void RemoveProbDisp(void);
-  int  HaveProbs(void) const { return features.prob; }
-  void MakeDomDisp(void);
-  void RemoveDomDisp(void);
-  int  HaveDom(void) const { return features.dom; }
-  void MakeValDisp(void);
-  void RemoveValDisp(void);
-  int  HaveVal(void) const { return features.val; }
-  
-  // Callback for double clicking on a cell.
-  void OnDoubleClick(int row, int col, int, const gText &) 
-    { parent->OutcomePayoffs(row, col); }
-
-  // Callback for moving the selected cell.  Currently this updates the pl1, pl2 choice boxes
-  void OnSelectedMoved(int row, int col, SpreadMoveDir /*how*/ = SpreadMoveJump)
-    {
-      strat_profile[pl1]->SetSelection(row-1);
-      strat_profile[pl2]->SetSelection(col-1);
-      UpdateMenus();
-    }
-
-  // Callback function for all output
-  void OnPrint(void);
-
-  // Callback for the OK button, deletes this sheet
-  void OnOk(void)
-    {
-      Show(FALSE);
-      parent->OnOk();
-    }
-
-  Bool OnClose(void);
-  
-  // Override menu handling
-  void OnMenuCommand(int id);
-  
-  // Override character input handling
-  Bool OnCharNew(wxKeyEvent &ev);
-  
-  // Override help system
-  void OnHelp(int help_type = 0);
-
-  // Process some options changes
-  void OnOptionsChanged(unsigned int options = 0);
-
-  // Static Callbacks.
-  static void normal_strat_func(wxChoice &ob, wxEvent &)
-    {
-      NormalSpread *ns = (NormalSpread *)ob.GetClientData();
-      ns->UpdateProfile();
-      ns->CanvasFocus();
-    }
-
-  static void normal_player_func(wxChoice &ob, wxEvent &)
-    {
-      NormalSpread *ns = (NormalSpread *)ob.GetClientData();
-      ns->UpdatePlayers();
-      ns->CanvasFocus();
-    }
-
-  int GetDecimals(void) const { return parent->GetDecimals(); }
-};
 
 #endif  // NFGSHOW_H
+
+
+

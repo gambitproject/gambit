@@ -6,7 +6,7 @@
 
 #include <ctype.h>
 
-#include "wx.h"
+#include "wx/wx.h"
 #include "wxmisc.h"
 #include "gmisc.h"
 
@@ -101,16 +101,9 @@ private:
 
   gList<Accel> m_accels;
   const gArray<AccelEvent> &m_events;
-    
-  static void CallbackEvent(wxListBox &p_object, wxCommandEvent &)
-    { ((EditAccelDialog *) p_object.wxEvtHandler::GetClientData())->
-	OnEventBox(); }
-  static void CallbackKey(wxListBox &p_object, wxCommandEvent &)
-    { ((EditAccelDialog *) p_object.wxEvtHandler::GetClientData())->
-	OnKeyBox(); }
-    
-  void OnEventBox(void);
-  void OnKeyBox(void);
+
+  void OnEventBox(wxCommandEvent &);
+  void OnKeyBox(wxCommandEvent &);
 
   int GetAccelKey(int);
   int GetKeyIndex(int);
@@ -123,8 +116,15 @@ public:
   virtual ~EditAccelDialog() { }
 
   const gList<Accel> &GetAccels(void) const { return m_accels; }
+
+  DECLARE_EVENT_TABLE()
 };
 
+
+BEGIN_EVENT_TABLE(EditAccelDialog, guiAutoDialog)
+  EVT_LISTBOX(idACCELS_EVENT_LISTBOX, EditAccelDialog::OnEventBox)
+  EVT_LISTBOX(idACCELS_KEY_LISTBOX, EditAccelDialog::OnKeyBox)
+END_EVENT_TABLE()
 
 EditAccelDialog::EditAccelDialog(wxWindow *p_parent,
 				 const gList<Accel> &p_accels,
@@ -132,51 +132,42 @@ EditAccelDialog::EditAccelDialog(wxWindow *p_parent,
   : guiAutoDialog(p_parent, "Accelerators"),
     m_accels(p_accels), m_events(p_events)
 {
-  char **eventNames = new char *[m_events.Length()];
-  for (int i = 1; i <= m_events.Length(); i++) 
-    eventNames[i-1] = m_events[i].name;
-    
-  SetLabelPosition(wxVERTICAL);
-  m_eventBox = new wxListBox(this, (wxFunction) CallbackEvent,
-			     "Event", wxSINGLE,
-			     1, 1, -1, -1, m_events.Length(), 
-			     eventNames);
-  m_eventBox->wxEvtHandler::SetClientData((char *) this);
+  m_eventBox = new wxListBox(this, idACCELS_EVENT_LISTBOX);
+  for (int i = 1; i<=m_events.Length(); i++) {
+    m_eventBox->Append((char *)m_events[i].name);
+  }
   m_eventBox->SetSelection(0);
-  m_eventBox->SetConstraints(new wxLayoutConstraints);
-  m_eventBox->GetConstraints()->top.SameAs(this, wxTop, 10);
-  m_eventBox->GetConstraints()->left.SameAs(this, wxLeft, 10);
-  m_eventBox->GetConstraints()->width.AsIs();
-  m_eventBox->GetConstraints()->height.AsIs();
 
-  m_keyBox = new wxListBox(this, (wxFunction) CallbackKey, "Key");
+  m_keyBox = new wxListBox(this, idACCELS_KEY_LISTBOX);
   for (int i = 0; keyInfo[i].m_name; i++) {
     m_keyBox->Append(keyInfo[i].m_name);
   }
-  m_keyBox->wxEvtHandler::SetClientData((char *) this);
-  m_keyBox->SetConstraints(new wxLayoutConstraints);
-  m_keyBox->GetConstraints()->top.SameAs(m_eventBox, wxTop);
-  m_keyBox->GetConstraints()->left.SameAs(m_eventBox, wxRight, 10);
-  m_keyBox->GetConstraints()->width.AsIs();
-  m_keyBox->GetConstraints()->height.AsIs();
 
-  m_okButton->GetConstraints()->top.SameAs(m_eventBox, wxBottom, 10);
-  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
-  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-  m_okButton->GetConstraints()->height.AsIs();
+  wxBoxSizer *leftSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *rightSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
 
-  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
-  m_cancelButton->GetConstraints()->width.AsIs();
-  m_cancelButton->GetConstraints()->height.AsIs();
+  leftSizer->Add(new wxStaticText(this, -1, "Event:"), 0, wxCENTRE | wxALL, 5);
+  leftSizer->Add(m_eventBox, 0, wxALL, 5);
 
-  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
-  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-  m_helpButton->GetConstraints()->height.AsIs();
+  rightSizer->Add(new wxStaticText(this, -1, "Key:"), 0, wxCENTRE | wxALL, 5);
+  rightSizer->Add(m_keyBox, 0, wxALL, 5);
 
-  OnEventBox();
-  Go();
+  topSizer->Add(leftSizer, 0, wxALL, 5);
+  topSizer->Add(rightSizer, 0, wxALL, 5);
+
+  allSizer->Add(topSizer, 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
+  
+  SetAutoLayout(TRUE);
+  SetSizer(allSizer); 
+  allSizer->Fit(this);
+  allSizer->SetSizeHints(this); 
+  Layout();
+
+  wxCommandEvent event;
+  OnEventBox(event);
 }
 
 int EditAccelDialog::GetAccelKey(int p_id)
@@ -204,7 +195,7 @@ int EditAccelDialog::GetKeyIndex(int p_key)
   return 0;
 }
 
-void EditAccelDialog::OnEventBox(void)
+void EditAccelDialog::OnEventBox(wxCommandEvent &)
 {
   int id = m_events[m_eventBox->GetSelection()+1].id;
 
@@ -219,7 +210,7 @@ void EditAccelDialog::OnEventBox(void)
   m_keyBox->SetSelection(0);
 }
 
-void EditAccelDialog::OnKeyBox(void)
+void EditAccelDialog::OnKeyBox(wxCommandEvent &)
 {
   int id = m_events[m_eventBox->GetSelection()+1].id;
 
@@ -234,9 +225,9 @@ void EditAccelDialog::OnKeyBox(void)
       else if (m_accels[i].Key() == key) {
 	for (int j = 1; ; j++) {
 	  if (m_events[j].id == m_accels[i].Id()) {
-	    wxMessageBox(gText(keyInfo[m_keyBox->GetSelection()].m_name) + 
+	    wxMessageBox((char *) (gText(keyInfo[m_keyBox->GetSelection()].m_name) + 
 			 " is already bound to " +
-			 m_events[j].name, "Error");
+			 m_events[j].name), "Error");
 	    m_keyBox->SetSelection(GetAccelKey(id));
 	    return;
 	  }
@@ -322,7 +313,7 @@ int ReadAccelerators(gList<Accel> &list,
     int control, shift;
     long key, id;
     gText tmpStr = "Accel" + ToText(i);
-    wxGetResource(section, tmpStr, &tmp_str1, file_name);
+    wxGetResource(section, (char *) tmpStr, &tmp_str1, file_name);
     sscanf(tmp_str1, "%d %d %ld %ld",
 	   &control, &shift, &key, &id);
     list += Accel((AccelState) control, (AccelState) shift, key, id);
@@ -346,7 +337,7 @@ int WriteAccelerators(const gList<Accel> &list,
     gText tmpStr = "Accel" + ToText(i);
     sprintf(tmp_str1, "%d %d %ld %ld",
 	    list[i].Control(), list[i].Shift(), list[i].Key(), list[i].Id());
-    wxWriteResource(section, tmpStr, tmp_str1, file_name);
+    wxWriteResource(section, (char *) tmpStr, tmp_str1, file_name);
   }
     
   return 1;
@@ -368,7 +359,7 @@ void EditAccelerators(gList<Accel> &list, const gArray<AccelEvent> &events)
 {
   EditAccelDialog dialog(NULL, list, events);
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     list = dialog.GetAccels();
   }
 }

@@ -78,11 +78,9 @@ public:
 template <class T> gOutput &operator<<(gOutput &, const gVector<T> &);
 #endif
 
-#ifdef GDOUBLE
 #include "double.h"
 
 template <class T> gVector<gDouble> TogDouble(const gVector<T>&);
-#endif // GDOUBLE
 
 #endif   //# GVECTOR_H
 

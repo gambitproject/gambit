@@ -4,71 +4,89 @@
 // $Id$
 //
 
-#include "wx.h"
+#include "wx/wx.h"
+#include "wx/fontdlg.h"
+#include "wx/colordlg.h"
 #include "wxmisc.h"
 #include "wxstatus.h"
 
 #include "efg.h"
+#include "infoset.h"
+#include "node.h"
+#include "efplayer.h"
 #include "efgutils.h"
 #include "behavsol.h"
 #include "efdom.h"
+#include "nfg.h"
 
 #include "efgconst.h"
 #include "treewin.h"
+#include "treezoom.h"
 #include "efgshow.h"
 #include "efgsoln.h"
-#include "nfggui.h"
 #include "efgnfgi.h"
+#include "nfgshow.h"
+#include "efgsolvd.h"
+
+#include "dlefgsave.h"
+#include "dlmoveadd.h"
+#include "dlnodedelete.h"
+#include "dlefgplayer.h"
+#include "dlefgoutcome.h"
+#include "dlefgpayoff.h"
+#include "dlefgreveal.h"
+#include "dlactionselect.h"
+#include "dlactionlabel.h"
+#include "dlactionprobs.h"
+#include "dlefgplayers.h"
+#include "dlinfosets.h"
+
+#include "dllayout.h"
+#include "dllegends.h"
 
 #include "dlelim.h"
 #include "dlsupportselect.h"
 #include "dlefgeditsupport.h"
 
 //=====================================================================
-//                       class EfgShowToolBar
+//                          class EfgToolbar
 //=====================================================================
 
-#ifdef wx_msw
-#include "wx_bbar.h"
-#else
-#include "wx_tbar.h"
-#endif
+const int EFG_TOOLBAR_ID = 102;
 
-#ifdef wx_msw
-class guiEfgShowToolBar : public wxButtonBar {
-#else
-class guiEfgShowToolBar : public wxToolBar {
-#endif   // wx_msw
+class EfgToolbar : public wxToolBar {
 private:
   wxFrame *m_parent;
 
+  // Event handlers
+  void OnMouseEnter(wxCommandEvent &);
+
 public:
-  guiEfgShowToolBar(wxFrame *p_frame);
-  ~guiEfgShowToolBar() { }
-  Bool OnLeftClick(int p_toolIndex, Bool p_toggled);
-  void OnMouseEnter(int p_toolIndex);
+  EfgToolbar(wxFrame *p_frame, wxWindow *p_parent);
+  ~EfgToolbar() { }
+
+  DECLARE_EVENT_TABLE()
 };
 
-guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
-#ifdef wx_msw
-  : wxButtonBar(p_frame, 0, 0, -1, -1, 0, wxVERTICAL, 1),
-#else
-  : wxToolBar(p_frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30),
-#endif  // wx_msw
-    m_parent(p_frame)
+BEGIN_EVENT_TABLE(EfgToolbar, wxToolBar)
+  EVT_TOOL_ENTER(EFG_TOOLBAR_ID, EfgToolbar::OnMouseEnter)
+END_EVENT_TABLE()
+
+EfgToolbar::EfgToolbar(wxFrame *p_frame, wxWindow *p_parent)
+  : wxToolBar(p_parent, EFG_TOOLBAR_ID), m_parent(p_frame)
 {
-#ifdef wx_msw
-  wxBitmap *saveBitmap = new wxBitmap("SAVE_BITMAP");
-  wxBitmap *printBitmap = new wxBitmap("PRINT_BITMAP");
-  wxBitmap *deleteBitmap = new wxBitmap("DELETE_BITMAP");
-  wxBitmap *solveBitmap = new wxBitmap("SOLVE_BITMAP");
-  wxBitmap *zoominBitmap = new wxBitmap("ZOOMIN_BITMAP");
-  wxBitmap *zoomoutBitmap = new wxBitmap("ZOOMOUT_BITMAP");
-  wxBitmap *helpBitmap = new wxBitmap("HELP_BITMAP");
-  wxBitmap *addBitmap = new wxBitmap("ADD_BITMAP");
-  wxBitmap *optionsBitmap = new wxBitmap("OPTIONS_BITMAP");
-  wxBitmap *makenfBitmap = new wxBitmap("NFG_BITMAP");
-  wxBitmap *inspectBitmap = new wxBitmap("INSPECT_BITMAP");
+#ifdef __WXMSW__
+  wxBitmap saveBitmap("SAVE_BITMAP");
+  wxBitmap printBitmap("PRINT_BITMAP");
+  wxBitmap deleteBitmap("DELETE_BITMAP");
+  wxBitmap solveBitmap("SOLVE_BITMAP");
+  wxBitmap zoominBitmap("ZOOMIN_BITMAP");
+  wxBitmap zoomoutBitmap("ZOOMOUT_BITMAP");
+  wxBitmap helpBitmap("HELP_BITMAP");
+  wxBitmap addBitmap("ADD_BITMAP");
+  wxBitmap optionsBitmap("OPTIONS_BITMAP");
+  wxBitmap makenfBitmap("NFG_BITMAP");
+  wxBitmap inspectBitmap("INSPECT_BITMAP");
 #else
 #include "bitmaps/save.xpm"
 #include "bitmaps/print.xpm"
@@ -81,25 +99,23 @@ guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
 #include "bitmaps/options.xpm"
 #include "bitmaps/makenf.xpm"
 #include "bitmaps/inspect.xpm"
-  wxBitmap *saveBitmap = new wxBitmap(save_xpm);
-  wxBitmap *printBitmap = new wxBitmap(print_xpm);
-  wxBitmap *deleteBitmap = new wxBitmap(delete_xpm);
-  wxBitmap *solveBitmap = new wxBitmap(solve_xpm);
-  wxBitmap *zoominBitmap = new wxBitmap(zoomin_xpm);
-  wxBitmap *zoomoutBitmap = new wxBitmap(zoomout_xpm);
-  wxBitmap *helpBitmap = new wxBitmap(help_xpm);
-  wxBitmap *addBitmap = new wxBitmap(add_xpm);
-  wxBitmap *optionsBitmap = new wxBitmap(options_xpm);
-  wxBitmap *makenfBitmap = new wxBitmap(makenf_xpm);
-  wxBitmap *inspectBitmap = new wxBitmap(inspect_xpm);
-#endif  // wx_msw
+  wxBitmap saveBitmap(save_xpm);
+  wxBitmap printBitmap(print_xpm);
+  wxBitmap deleteBitmap(delete_xpm);
+  wxBitmap solveBitmap(solve_xpm);
+  wxBitmap zoominBitmap(zoomin_xpm);
+  wxBitmap zoomoutBitmap(zoomout_xpm);
+  wxBitmap helpBitmap(help_xpm);
+  wxBitmap addBitmap(add_xpm);
+  wxBitmap optionsBitmap(options_xpm);
+  wxBitmap makenfBitmap(makenf_xpm);
+  wxBitmap inspectBitmap(inspect_xpm);
+#endif  // __WXMSW__
     
   SetMargins(2, 2);
-#ifdef wx_msw
-  SetDefaultSize(33, 30);
-#endif  // wx_msw
-  GetDC()->SetBackground(wxLIGHT_GREY_BRUSH);
-
+#ifdef __WXMSW__
+  SetToolBitmapSize(wxSize(33, 30));
+#endif // _WXMSW__
   AddTool(efgmenuFILE_SAVE, saveBitmap);
   AddTool(efgmenuFILE_OUTPUT, printBitmap);
   AddSeparator();
@@ -116,81 +132,181 @@ guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
   AddSeparator();
   AddTool(efgmenuHELP_CONTENTS, helpBitmap);
 
-  CreateTools();
-  Layout();
+  Realize();
 }
 
-Bool guiEfgShowToolBar::OnLeftClick(int p_toolIndex, Bool /*p_toggled*/)
+void EfgToolbar::OnMouseEnter(wxCommandEvent &p_event)
 {
-  m_parent->OnMenuCommand(p_toolIndex);
-  return TRUE;
-}
-
-void guiEfgShowToolBar::OnMouseEnter(int p_toolIndex)
-{
-  m_parent->SetStatusText(m_parent->GetMenuBar()->GetHelpString(p_toolIndex));
+  if (p_event.GetSelection() > 0) {
+    m_parent->SetStatusText(m_parent->GetMenuBar()->GetHelpString(p_event.GetSelection()));
+  }
+  else {
+    m_parent->SetStatusText("");
+  }
 }
 
 //=====================================================================
 //                     EfgShow MEMBER FUNCTIONS
 //=====================================================================
 
+const int idTREEWINDOW = 999;
+const int idNODEWINDOW = 998;
+const int idTOOLWINDOW = 997;
+const int idSOLUTIONWINDOW = 996;
+
+BEGIN_EVENT_TABLE(EfgShow, wxFrame)
+  EVT_MENU(efgmenuFILE_OUTPUT, EfgShow::OnFileOutput)
+  EVT_MENU(efgmenuFILE_SAVE, EfgShow::OnFileSave)
+  EVT_MENU(efgmenuFILE_CLOSE, EfgShow::Close)
+  EVT_MENU(efgmenuEDIT_NODE_ADD, EfgShow::OnEditNodeAdd)
+  EVT_MENU(efgmenuEDIT_NODE_DELETE, EfgShow::OnEditNodeDelete)
+  EVT_MENU(efgmenuEDIT_NODE_INSERT, EfgShow::OnEditNodeInsert)
+  EVT_MENU(efgmenuEDIT_NODE_LABEL, EfgShow::OnEditNodeLabel)
+  EVT_MENU(efgmenuEDIT_NODE_SET_MARK, EfgShow::OnEditNodeSetMark)
+  EVT_MENU(efgmenuEDIT_NODE_GOTO_MARK, EfgShow::OnEditNodeGotoMark)
+  EVT_MENU(efgmenuEDIT_ACTION_DELETE, EfgShow::OnEditActionDelete)
+  EVT_MENU(efgmenuEDIT_ACTION_INSERT, EfgShow::OnEditActionInsert)
+  EVT_MENU(efgmenuEDIT_ACTION_APPEND, EfgShow::OnEditActionAppend)
+  EVT_MENU(efgmenuEDIT_ACTION_LABEL, EfgShow::OnEditActionLabel)
+  EVT_MENU(efgmenuEDIT_ACTION_PROBS, EfgShow::OnEditActionProbs)
+  EVT_MENU(efgmenuEDIT_INFOSET_MERGE, EfgShow::OnEditInfosetMerge)
+  EVT_MENU(efgmenuEDIT_INFOSET_BREAK, EfgShow::OnEditInfosetBreak)
+  EVT_MENU(efgmenuEDIT_INFOSET_SPLIT, EfgShow::OnEditInfosetSplit)
+  EVT_MENU(efgmenuEDIT_INFOSET_JOIN, EfgShow::OnEditInfosetJoin)
+  EVT_MENU(efgmenuEDIT_INFOSET_LABEL, EfgShow::OnEditInfosetLabel)
+  EVT_MENU(efgmenuEDIT_INFOSET_PLAYER, EfgShow::OnEditInfosetPlayer)
+  EVT_MENU(efgmenuEDIT_INFOSET_REVEAL, EfgShow::OnEditInfosetReveal)
+  EVT_MENU(efgmenuEDIT_OUTCOMES_ATTACH, EfgShow::OnEditOutcomesAttach)
+  EVT_MENU(efgmenuEDIT_OUTCOMES_DETACH, EfgShow::OnEditOutcomesDetach)
+  EVT_MENU(efgmenuEDIT_OUTCOMES_LABEL, EfgShow::OnEditOutcomesLabel)
+  EVT_MENU(efgmenuEDIT_OUTCOMES_PAYOFFS, EfgShow::OnEditOutcomesPayoffs)
+  EVT_MENU(efgmenuEDIT_OUTCOMES_NEW, EfgShow::OnEditOutcomesNew)
+  EVT_MENU(efgmenuEDIT_OUTCOMES_DELETE, EfgShow::OnEditOutcomesDelete)
+  EVT_MENU(efgmenuEDIT_TREE_DELETE, EfgShow::OnEditTreeDelete)
+  EVT_MENU(efgmenuEDIT_TREE_COPY, EfgShow::OnEditTreeCopy)
+  EVT_MENU(efgmenuEDIT_TREE_MOVE, EfgShow::OnEditTreeMove)
+  EVT_MENU(efgmenuEDIT_TREE_LABEL, EfgShow::OnEditTreeLabel)
+  EVT_MENU(efgmenuEDIT_TREE_PLAYERS, EfgShow::OnEditTreePlayers)
+  EVT_MENU(efgmenuEDIT_TREE_INFOSETS, EfgShow::OnEditTreeInfosets)
+  EVT_MENU(efgmenuSUBGAME_MARKALL, EfgShow::OnSubgamesMarkAll)
+  EVT_MENU(efgmenuSUBGAME_MARK, EfgShow::OnSubgamesMark)
+  EVT_MENU(efgmenuSUBGAME_UNMARKALL, EfgShow::OnSubgamesUnMarkAll)
+  EVT_MENU(efgmenuSUBGAME_UNMARK, EfgShow::OnSubgamesUnMark)
+  EVT_MENU(efgmenuSUBGAME_COLLAPSEALL, EfgShow::OnSubgamesCollapseAll) 
+  EVT_MENU(efgmenuSUBGAME_COLLAPSE, EfgShow::OnSubgamesCollapse)
+  EVT_MENU(efgmenuSUBGAME_EXPANDALL, EfgShow::OnSubgamesExpandAll)
+  EVT_MENU(efgmenuSUBGAME_EXPANDBRANCH, EfgShow::OnSubgamesExpandBranch)
+  EVT_MENU(efgmenuSUBGAME_EXPAND, EfgShow::OnSubgamesExpand)
+  EVT_MENU(efgmenuSUPPORT_UNDOMINATED, EfgShow::OnSupportUndominated)
+  EVT_MENU(efgmenuSUPPORT_NEW, EfgShow::OnSupportNew)
+  EVT_MENU(efgmenuSUPPORT_EDIT, EfgShow::OnSupportEdit)
+  EVT_MENU(efgmenuSUPPORT_DELETE, EfgShow::OnSupportDelete)
+  EVT_MENU(efgmenuSUPPORT_SELECT_FROMLIST, EfgShow::OnSupportSelectFromList)
+  EVT_MENU(efgmenuSUPPORT_SELECT_PREVIOUS, EfgShow::OnSupportSelectPrevious)
+  EVT_MENU(efgmenuSUPPORT_SELECT_NEXT, EfgShow::OnSupportSelectNext)
+  EVT_MENU(efgmenuSUPPORT_REACHABLE, EfgShow::OnSupportReachable)
+  EVT_MENU(efgmenuSOLVE_STANDARD, EfgShow::OnSolveStandard)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_EFG_ENUMPURE, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_EFG_LCP, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_EFG_LP, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_EFG_LIAP, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_EFG_POLENUM, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_EFG_QRE, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_ENUMPURE, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_ENUMMIXED, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_LCP, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_LP, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_LIAP, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_SIMPDIV, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_POLENUM, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_QRE, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_QREGRID, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_NFG_REDUCED, EfgShow::OnSolveNormalReduced)
+  EVT_MENU(efgmenuSOLVE_NFG_AGENT, EfgShow::OnSolveNormalAgent)
+  EVT_MENU(efgmenuINSPECT_SOLUTIONS, EfgShow::OnInspectSolutions)
+  EVT_MENU(efgmenuINSPECT_CURSOR, EfgShow::OnInspectCursor)
+  EVT_MENU(efgmenuINSPECT_INFOSETS, EfgShow::OnInspectInfosets)
+  EVT_MENU(efgmenuINSPECT_ZOOM_WIN, EfgShow::OnInspectZoom)
+  EVT_MENU(efgmenuINSPECT_GAMEINFO, EfgShow::OnInspectGameInfo)
+  EVT_MENU(efgmenuPREFS_INC_ZOOM, EfgShow::OnPrefsZoomIn)
+  EVT_MENU(efgmenuPREFS_DEC_ZOOM, EfgShow::OnPrefsZoomOut)
+  EVT_MENU(efgmenuPREFS_LEGEND, EfgShow::OnPrefsLegend)
+  EVT_MENU(efgmenuPREFS_FONTS_ABOVENODE, EfgShow::OnPrefsFontsAboveNode)
+  EVT_MENU(efgmenuPREFS_FONTS_BELOWNODE, EfgShow::OnPrefsFontsBelowNode)
+  EVT_MENU(efgmenuPREFS_FONTS_AFTERNODE, EfgShow::OnPrefsFontsAfterNode)
+  EVT_MENU(efgmenuPREFS_FONTS_ABOVEBRANCH, EfgShow::OnPrefsFontsAboveBranch)
+  EVT_MENU(efgmenuPREFS_FONTS_BELOWBRANCH, EfgShow::OnPrefsFontsBelowBranch)
+  EVT_MENU(efgmenuPREFS_DISPLAY_LAYOUT, EfgShow::OnPrefsDisplayLayout)
+  EVT_MENU(efgmenuPREFS_DISPLAY_FLASHING, EfgShow::OnPrefsDisplayFlashing)
+  EVT_MENU(efgmenuPREFS_DISPLAY_DECIMALS, EfgShow::OnPrefsDisplayDecimals)
+  EVT_MENU(efgmenuPREFS_COLORS, EfgShow::OnPrefsColors)
+  EVT_MENU(efgmenuPREFS_SAVE, EfgShow::OnPrefsSave)
+  EVT_MENU(efgmenuPREFS_LOAD, EfgShow::OnPrefsLoad)
+  EVT_MENU(efgmenuPREFS_ACCELS, EfgShow::OnPrefsAccels)
+  EVT_MENU(efgmenuHELP_ABOUT, EfgShow::OnHelpAbout)
+  EVT_MENU(efgmenuHELP_CONTENTS, EfgShow::OnHelpContents)
+  EVT_SET_FOCUS(EfgShow::OnFocus)
+  EVT_SIZE(EfgShow::OnSize)
+  EVT_CLOSE(EfgShow::OnCloseWindow)
+  EVT_SASH_DRAGGED_RANGE(idSOLUTIONWINDOW, idTREEWINDOW, EfgShow::OnSashDrag)
+END_EVENT_TABLE()
+
 //---------------------------------------------------------------------
 //               EfgShow: Constructor and destructor
 //---------------------------------------------------------------------
 
-EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, int, wxFrame *p_frame,
-                 char *p_title, int p_x, int p_y, int p_w, int p_h, int p_type)
-  : wxFrame(p_frame, p_title, p_x, p_y, p_w, p_h, p_type), 
+EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent)
+  : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
     EfgNfgInterface(gEFG, p_nfg), 
-    parent(p_frame), ef(p_efg), cur_soln(0),
-    soln_show(0), node_inspect(0), tw(0)
+    parent(p_parent), m_efg(p_efg), m_treeWindow(0), 
+    m_treeZoomWindow(0), cur_soln(0),
+    m_solutionTable(0), m_toolbar(0),
+    m_solutionSashWindow(0), node_inspect(0)
 {
-  Show(FALSE);
+  SetSizeHints(300, 300);
 
   // Give the frame an icon
-#ifdef wx_msw
-  wxIcon *frame_icon = new wxIcon("efg_icn");
+#ifdef __WXMSW__
+  SetIcon(wxIcon("efg_icn"));
 #else
 #include "efg.xbm"
-  wxIcon *frame_icon = new wxIcon(efg_bits, efg_width, efg_height);
+  SetIcon(wxIcon(efg_bits, efg_width, efg_height));
 #endif
 
-  SetIcon(frame_icon);
-  // Create the status bar
-  CreateStatusLine();
-  // Create the menu bar
+  CreateStatusBar();
   MakeMenus();
-  // Create the accelerators (to add an accelerator, see const.h)
-  ReadAccelerators(accelerators, "EfgAccelerators", gambitApp.ResourceFile());
+  //  ReadAccelerators(accelerators, "EfgAccelerators", wxGetApp().ResourceFile());
     
-  cur_sup = new EFSupport(ef);
-  cur_sup->SetName("Full Support");
-  supports.Append(cur_sup);
-  // Create the canvas(TreeWindow) on which to draw the tree
-  tw = new TreeWindow(ef, cur_sup, this);
-  // Create the toolbar (must be after the status bar creation)
-  toolbar = new guiEfgShowToolBar(this);
-  // Create the all_nodes list.
-  Nodes(ef, all_nodes);
+  m_currentSupport = new EFSupport(m_efg);
+  m_currentSupport->SetName("Full Support");
+  m_supports.Append(m_currentSupport);
 
-  OnSize(-1, -1);
-  // now zoom in/out to show the full tree
-  tw->display_zoom_fit();
-    
-  node_inspect = new NodeSolnShow(ef.NumPlayers(), this);
-  node_inspect->Set(tw->Cursor());
+  m_toolbar = new EfgToolbar(this, this);
+  
+  m_nodeSashWindow = new wxSashWindow(this, idNODEWINDOW,
+				      wxPoint(0, 40), wxSize(200, 200),
+				      wxNO_BORDER | wxSW_3D);
+  m_nodeSashWindow->SetSashVisible(wxSASH_RIGHT, true);
 
-  ef.SetIsDirty(false);
-  Show(TRUE);
+  m_treeWindow = new TreeWindow(this, this);
+  m_treeWindow->SetSize(200, 40, 200, 200);
+
+  node_inspect = new NodeSolnShow(this, m_nodeSashWindow);
+  node_inspect->Set(m_treeWindow->Cursor());
+  node_inspect->SetSize(200, 200);
+  node_inspect->Show(true);
+
+  m_efg.SetIsDirty(false);
+
+  m_treeZoomWindow = new TreeZoomWindow(this, m_treeWindow);
+
+  m_treeWindow->UpdateCursor();
+  Show(true);
 }
 
-EfgShow::~EfgShow(void)
+EfgShow::~EfgShow()
 {
-  Show(FALSE);
-  delete &ef;
-  delete toolbar;
-  delete tw;
+  delete &m_efg;
 }
 
 void EfgShow::OnSelectedMoved(const Node *n)
@@ -199,276 +315,24 @@ void EfgShow::OnSelectedMoved(const Node *n)
   if (node_inspect) {
     node_inspect->Set(n);
   }
+  m_treeZoomWindow->UpdateCursor();
+  UpdateMenus();
 }
 
 //*******************************************************************
 //                          SOLUTION ROUTINES                       *
 //*******************************************************************
 
-#include "efgsolvd.h"
-
-void EfgShow::SolveStandard(void)
-{
-  // This is a guard against trying to solve the "trivial" game.
-  // Most of the GUI code assumes information sets exist.
-  if (ef.NumPlayerInfosets() == 0)  return;
-
-  bool isPerfectRecall;
-
-  if ((isPerfectRecall = IsPerfectRecall(ef)) == false) {
-    if (wxMessageBox("This game is not perfect recall\n"
-		     "Do you wish to continue?", 
-		     "Solve Warning", 
-		     wxOK | wxCANCEL | wxCENTRE, this) != wxOK)
-      return;
-  }
-
-  dialogEfgSolveStandard dialog(ef, this);
-  if (dialog.Completed() != wxOK)  return;
-
-  guiEfgSolution *solver = 0;
-
-  wxBeginBusyCursor();
-
-  bool markSubgames = false;
-  
-  switch (dialog.Type()) {
-  case efgSTANDARD_NASH:
-    switch (dialog.Number()) {
-    case efgSTANDARD_ONE:
-      markSubgames = true;
-      if (ef.NumPlayers() == 2 && isPerfectRecall) {
-	if (ef.IsConstSum()) 
-	  solver = new guiefgLpEfg(*cur_sup, this, 1, dialog.Precision());
-	else
-	  solver = new guiefgLcpEfg(*cur_sup, this, 1, dialog.Precision());
-      }
-      else if (ef.NumPlayers() == 2 && !isPerfectRecall)
-	solver = new guiefgQreEfg(*cur_sup, this, 1);
-      else 
-	solver = new guiefgSimpdivNfg(*cur_sup, this, 1, dialog.Precision(),
-				      true);
-      break;
-    case efgSTANDARD_TWO:
-      if (ef.NumPlayers() == 2)
-	solver = new guiefgEnumMixedNfg(*cur_sup, this, 2,
-					dialog.Precision(), false);
-      else {
-	wxMessageBox("Not guaranteed to find two solutions", "Warning");
-	solver = new guiefgLiapEfg(*cur_sup, this, 2, 10);
-      }
-      break;
-    case efgSTANDARD_ALL:
-      if (ef.NumPlayers() == 2) {
-	solver = new guiefgEnumMixedNfg(*cur_sup, this, 0,
-					dialog.Precision(), false);
-      }
-      else  {
-	solver = new guiefgPolEnumEfg(*cur_sup, this, 0);
-      }
-      break;
-    }
-    break;
-
-  case efgSTANDARD_PERFECT:
-    markSubgames = true;
-    switch (dialog.Number()) {
-    case efgSTANDARD_ONE:
-      if (ef.NumPlayers() == 2 && isPerfectRecall) {
-	if (ef.IsConstSum()) 
-	  solver = new guiefgLpEfg(*cur_sup, this, 1, dialog.Precision());
-	else
-	  solver = new guiefgLcpEfg(*cur_sup, this, 1, dialog.Precision());
-      }
-      else if (ef.NumPlayers() == 2 && !isPerfectRecall)
-	solver = new guiefgQreEfg(*cur_sup, this, 1);
-      else 
-	solver = new guiefgSimpdivNfg(*cur_sup, this, 1, dialog.Precision(),
-				      true);
-      break;
-    case efgSTANDARD_TWO:
-      if (ef.NumPlayers() == 2)
-	solver = new guiefgEnumMixedNfg(*cur_sup, this, 2,
-					dialog.Precision(), false);
-      else {
-	wxMessageBox("Not guaranteed to find two solutions", "Warning");
-	solver = new guiefgLiapEfg(*cur_sup, this, 2, 10);
-      }
-      break;
-    case efgSTANDARD_ALL:
-      if (ef.NumPlayers() == 2)
-	solver = new guiefgEnumMixedNfg(*cur_sup, this, 0,
-					dialog.Precision(), false);
-      else {
-	solver = new guiefgPolEnumEfg(*cur_sup, this, 0);
-      }
-      break;
-    }
-    break;
-
-  case efgSTANDARD_SEQUENTIAL:
-    switch (dialog.Number()) {
-    case efgSTANDARD_ONE:
-      solver = new guiefgQreEfg(*cur_sup, this, 1);
-      break;
-    case efgSTANDARD_TWO:
-      wxMessageBox("Not guaranteed to find two solutions", "Warning");
-      solver = new guiefgLiapEfg(*cur_sup, this, 2, 10);
-      break;
-    case efgSTANDARD_ALL:
-      wxMessageBox("Not guaranteed to find all solutions", "Warning");
-      solver = new guiefgLiapEfg(*cur_sup, this, 0, 0);
-      break;
-    }
-  }
-
-  try {
-    wxWriteResource("Soln-Defaults", "Efg-Interactive-Solns",
-		    FALSE, gambitApp.ResourceFile());
-    if (markSubgames)  
-      tw->SubgameMarkAll();
-    else
-      tw->SubgameUnmarkAll();
-
-    solns += solver->Solve();
-    wxEndBusyCursor();
-  }
-  catch (gException &E) {
-    wxEndBusyCursor();
-    guiExceptionDialog(E.Description(), this);
-  }
-
-  delete solver;
-
-  ChangeSolution(solns.VisibleLength());
-  InspectSolutions(CREATE_DIALOG);
-}
-
-void EfgShow::Solve(int p_algorithm)
-{
-  // This is a guard against trying to solve the "trivial" game.
-  // Most of the GUI code assumes information sets exist.
-  if (ef.NumPlayerInfosets() == 0)  return;
-
-  // check that the game is perfect recall, if not give a warning
-  if (!IsPerfectRecall(ef)) {
-    int completed = wxMessageBox("This game is not perfect recall\n"
-				 "Do you wish to continue?", 
-				 "Solve Warning", 
-				 wxOK | wxCANCEL | wxCENTRE, this);
-    if (completed != wxOK) return;
-  }
-    
-  // do not want users doing anything while solving
-  Enable(FALSE);
-
-  guiEfgSolution *solver = 0;
-
-  switch (p_algorithm) {
-  case efgmenuSOLVE_CUSTOM_EFG_ENUMPURE:
-    solver = new guiefgEnumPureEfg(*cur_sup, this);
-    break;
-  case efgmenuSOLVE_CUSTOM_EFG_LCP:
-    solver = new guiefgLcpEfg(*cur_sup, this);
-    break;
-  case efgmenuSOLVE_CUSTOM_EFG_LP:
-    solver = new guiefgLpEfg(*cur_sup, this);
-    break;
-  case efgmenuSOLVE_CUSTOM_EFG_LIAP:
-    solver = new guiefgLiapEfg(*cur_sup, this);
-    break;
-  case efgmenuSOLVE_CUSTOM_EFG_POLENUM:
-    solver = new guiefgPolEnumEfg(*cur_sup, this);
-    break;
-  case efgmenuSOLVE_CUSTOM_EFG_QRE:
-    solver = new guiefgQreEfg(*cur_sup, this);
-    break;
-
-  case efgmenuSOLVE_CUSTOM_NFG_ENUMPURE: 
-    solver = new guiefgEnumPureNfg(*cur_sup, this);
-    break;
-  case efgmenuSOLVE_CUSTOM_NFG_ENUMMIXED:
-    solver = new guiefgEnumMixedNfg(*cur_sup, this);
-    break;
-  case efgmenuSOLVE_CUSTOM_NFG_LCP: 
-    solver = new guiefgLcpNfg(*cur_sup, this);
-    break;
-  case efgmenuSOLVE_CUSTOM_NFG_LP:
-    solver = new guiefgLpNfg(*cur_sup, this);
-    break;
-  case efgmenuSOLVE_CUSTOM_NFG_LIAP: 
-    solver = new guiefgLiapNfg(*cur_sup, this);
-    break;
-  case efgmenuSOLVE_CUSTOM_NFG_SIMPDIV:
-    solver = new guiefgSimpdivNfg(*cur_sup, this);
-    break;
-  case efgmenuSOLVE_CUSTOM_NFG_POLENUM:
-    solver = new guiefgPolEnumNfg(*cur_sup, this);
-    break;
-  case efgmenuSOLVE_CUSTOM_NFG_QRE:
-    solver = new guiefgQreNfg(*cur_sup, this);
-    break;
-  case efgmenuSOLVE_CUSTOM_NFG_QREGRID: 
-    solver = new guiefgQreAllNfg(*cur_sup, this);
-    break;
-  default:
-    // internal error, we'll just ignore silently
-    return;
-  }
-
-  bool go = solver->SolveSetup();
-  
-  try {
-    if (go) {
-      if (solver->MarkSubgames())
-	tw->SubgameMarkAll();
-      wxBeginBusyCursor();
-      solns += solver->Solve();
-      wxEndBusyCursor();
-    }
-  }
-  catch (gException &E) {
-    wxEndBusyCursor();
-    guiExceptionDialog(E.Description(), this);
-  }
-
-  delete solver;
- 
-  ChangeSolution(solns.VisibleLength());
-  Enable(TRUE);
-  if (go)  InspectSolutions(CREATE_DIALOG);
-}
-
-
-void EfgShow::InspectSolutions(int what)
-{
-  if (what == CREATE_DIALOG) {
-    if (solns.Length() == 0) {
-      wxMessageBox("Solution list currently empty"); 
-      return;
-    }
-
-    if (soln_show) {
-      soln_show->Show(FALSE); 
-      delete soln_show;
-    }
-
-    soln_show = new EfgSolnShow(ef, solns, cur_soln, tw->DrawSettings(), sf_options, this);
-  }
-
-  if (what == DESTROY_DIALOG && soln_show) {
-    soln_show = 0;
-  }
-}
-
-
 void EfgShow::ChangeSolution(int sol)
 {
   if (cur_soln != sol) {
     cur_soln = sol;
-    tw->OnPaint();
+    m_treeWindow->Render();
     if (node_inspect) {
-      node_inspect->Set(tw->Cursor());
+      node_inspect->Set(m_treeWindow->Cursor());
+    }
+    if (m_solutionTable) {
+      m_solutionTable->UpdateValues();
     }
   }
 }
@@ -486,19 +350,19 @@ void EfgShow::RemoveStartProfiles(void)
 
 void EfgShow::RemoveSolutions(void)
 {
-    if (soln_show) 
-        delete soln_show; 
-    soln_show = 0;
-    cur_soln = 0;
-    solns.Flush();
-    Nodes(ef, all_nodes);
-    OnSelectedMoved(0); // update the node inspect window if any
+  if (m_solutionTable) 
+    delete m_solutionTable; 
+  m_solutionTable = 0;
+
+  cur_soln = 0;
+  solns.Flush();
+  OnSelectedMoved(0); // update the node inspect window if any
 }
 
 
 BehavSolution EfgShow::CreateSolution(void)
 {
-    return BehavSolution(BehavProfile<gNumber>(*cur_sup));
+  return BehavSolution(BehavProfile<gNumber>(*m_currentSupport));
 }
 
 //************************************************************************
@@ -511,14 +375,14 @@ BehavSolution EfgShow::CreateSolution(void)
 
 void EfgShow::SolutionToEfg(const BehavProfile<gNumber> &s, bool set)
 {
-    assert(Interface());    // we better have someone to get a solution from!
-    solns.Append(s);
+  assert(Interface());    // we better have someone to get a solution from!
+  solns.Append(s);
 
-    if (set)
-    {
-        cur_soln = solns.VisibleLength();
-        tw->OnPaint();
-    }
+  if (set) {
+    cur_soln = solns.VisibleLength();
+    wxClientDC dc(m_treeWindow);
+    m_treeWindow->Render(dc);
+  }
 }
 
 // Solution access for TreeWindow
@@ -529,7 +393,8 @@ gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
   // Special case that does not fit in ANYWHERE: Chance nodes have probs w/out solutions
   if (what == tBranchProb && n->GetPlayer())
     if (n->GetPlayer()->IsChance())
-      return ToText(ef.GetChanceProb(n->GetInfoset(), br),tw->NumDecimals());
+      return ToText(m_efg.GetChanceProb(n->GetInfoset(), br),
+		    m_treeWindow->NumDecimals());
   
   if (!n || !cur_soln) return "N/A";
   
@@ -538,42 +403,42 @@ gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
   switch (what) 
     {
     case tRealizProb:           // terminal ok
-      return ToText(cur.RealizProb(n), tw->NumDecimals());
+      return ToText(cur.RealizProb(n), m_treeWindow->NumDecimals());
     case tBeliefProb: // terminal ok
       {
 	if (!n->GetPlayer()) return "N/A";
-	return ToText(cur.BeliefProb(n), tw->NumDecimals());
+	return ToText(cur.BeliefProb(n), m_treeWindow->NumDecimals());
       }
     case tNodeValue:  // terminal ok
       {
 	gText tmp = "(";
-	for (i = 1; i <= ef.NumPlayers(); i++)
-	  tmp += ToText(cur.NodeValue(n)[i], tw->NumDecimals())+((i == ef.NumPlayers()) ? ")" : ",");
+	for (i = 1; i <= m_efg.NumPlayers(); i++)
+	  tmp += ToText(cur.NodeValue(n)[i], m_treeWindow->NumDecimals())+((i == m_efg.NumPlayers()) ? ")" : ",");
 	return tmp;
       }
     case tIsetProb: // terminal not ok
       {
 	if (!n->GetPlayer()) return "N/A";
-	return ToText(cur.IsetProb(n->GetInfoset()), tw->NumDecimals());
+	return ToText(cur.IsetProb(n->GetInfoset()), m_treeWindow->NumDecimals());
       }
     case tBranchVal: // terminal not ok
       {
 	if (!n->GetPlayer()) return "N/A";
 	if (n->GetPlayer()->IsChance()) return "N/A";
 	if (cur.IsetProb(n->GetInfoset()) > gNumber(0))
-	  return ToText(cur.ActionValue(n->GetInfoset()->Actions()[br]),tw->NumDecimals());
+	  return ToText(cur.ActionValue(n->GetInfoset()->Actions()[br]),m_treeWindow->NumDecimals());
 	else        // this is due to a bug in the value computation
 	  return "N/A";
       }
     case tBranchProb:   // terminal not ok
       if (!n->GetPlayer()) return "N/A";
       // For chance node prob, see first line of this function
-      return ToText(cur.ActionProb(n->GetInfoset()->Actions()[br]),tw->NumDecimals());
+      return ToText(cur.ActionProb(n->GetInfoset()->Actions()[br]),m_treeWindow->NumDecimals());
     case tIsetValue:    // terminal not ok, not implemented
       {
 	if (!n->GetPlayer()) return "N/A";
 	if (cur.IsetProb(n->GetInfoset()) > gNumber(0))
-	  return ToText(cur.IsetValue(n->GetInfoset()), tw->NumDecimals());
+	  return ToText(cur.IsetValue(n->GetInfoset()), m_treeWindow->NumDecimals());
 	else        // this is due to a bug in the value computation
 	  return "N/A";
       }
@@ -582,69 +447,16 @@ gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
     }
 }
 
-
-
-// Get Action Prob: used by TreeWindow
-#include "infoset.h"
-#include "node.h"
-#include "efplayer.h"
-
-gNumber EfgShow::ActionProb(const Node *n, int br)
+gNumber EfgShow::ActionProb(const Node *p_node, int p_action)
 {
-  if (n->GetPlayer())
-    if (n->GetPlayer()->IsChance())
-      return ef.GetChanceProb(n->GetInfoset(), br);
-  if (cur_soln && n->GetInfoset())
-    return solns[cur_soln].ActionProb(n->GetInfoset()->Actions()[br]);
+  if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
+    return m_efg.GetChanceProb(p_node->GetInfoset(), p_action);
+  }
+
+  if (cur_soln && p_node->GetInfoset()) {
+    return solns[cur_soln](p_node->GetInfoset()->Actions()[p_action]);
+  }
   return -1;
-}
-
-
-#include "nfg.h"
-Nfg *MakeReducedNfg(const EFSupport &support);
-Nfg *MakeAfg(const Efg &);
-
-
-bool EfgShow::SolveNormalReduced(void)
-{
-  // check that the game is perfect recall, if not give a warning
-  Infoset *bad1, *bad2;
-
-  if (!IsPerfectRecall(ef, bad1, bad2)) {
-    int completed = wxMessageBox("This game is not perfect recall\n"
-				 "Do you wish to continue?", 
-				 "Reduced normal form", 
-				 wxOK|wxCANCEL|wxCENTRE, this);
-    
-    if (completed != wxOK) 
-      return false;
-  }
-    
-  Nfg *N = MakeReducedNfg(*cur_sup);
-  if (N) NfgGUI(N, "", (EfgNfgInterface *) this, this);
-
-  return false;
-}
-
-bool EfgShow::SolveNormalAgent(void)
-{
-  // check that the game is perfect recall, if not give a warning
-  Infoset *bad1, *bad2;
-
-  if (!IsPerfectRecall(ef, bad1, bad2)) {
-    int completed = wxMessageBox("This game is not perfect recall\n"
-				 "Do you wish to continue?", 
-				 "Agent normal form", 
-				 wxOK|wxCANCEL|wxCENTRE, this);
-    
-    if (completed != wxOK) 
-      return false;
-  }
-    
-  Nfg *N = MakeAfg(ef);
-  if (N) NfgGUI(N, "", (EfgNfgInterface *) this, this);
-
-  return false;
 }
 
 //************************************************************************
@@ -667,32 +479,35 @@ wxFrame *EfgShow::Frame(void)
 void EfgShow::PickSolutions(const Efg &p_efg, Node *p_rootnode,
 			    gList<BehavSolution> &p_solns)
 {
+#ifdef NOT_PORTED_YET
   try {
-    tw->SetSubgamePickNode(p_rootnode);
+    m_treeWindow->SetSubgamePickNode(p_rootnode);
     BehavSolutionList temp_solns;
     temp_solns += p_solns;       
     EfgSolnPicker *pick = new EfgSolnPicker(p_efg, temp_solns,
-					    tw->DrawSettings(),
+					    m_treeWindow->DrawSettings(),
 					    sf_options, this);
-    Enable(FALSE);
+    Enable(false);
     while (pick->Completed() == wxRUNNING) wxYield();
-    Enable(TRUE);
+    Enable(true);
     p_solns = temp_solns; 
     delete pick;
-    tw->SetSubgamePickNode(0);
+    m_treeWindow->SetSubgamePickNode(0);
   }
   catch (...) {
-    tw->SetSubgamePickNode(0);
+    m_treeWindow->SetSubgamePickNode(0);
     throw;
   }
+#endif // NOT_PORTED_YET
 }
 
 // how: 0-default, 1-saved, 2-query
 
 BehavProfile<gNumber> EfgShow::CreateStartProfile(int how)
 {
-    BehavProfile<gNumber> start(*cur_sup);
+    BehavProfile<gNumber> start(*m_currentSupport);
     if (how == 0)   start.Centroid();
+#ifdef NOT_PORTED_YET
     if (how == 1 || how == 2)
     {
         if (starting_points.last == -1 || how == 2)
@@ -700,30 +515,18 @@ BehavProfile<gNumber> EfgShow::CreateStartProfile(int how)
             BSolnSortFilterOptions sf_opts; // no sort, filter
             if (starting_points.profiles.Length() == 0)
                 starting_points.profiles += start;
-            Ext1SolnPicker *start_dialog = new Ext1SolnPicker(ef, starting_points.profiles, tw->DrawSettings(), sf_opts, this);
-            Enable(FALSE);  // disable this window until the edit window is closed
+            Ext1SolnPicker *start_dialog = new Ext1SolnPicker(ef, starting_points.profiles, m_treeWindow->DrawSettings(), sf_opts, this);
+            Enable(false);  // disable this window until the edit window is closed
             while (start_dialog->Completed() == wxRUNNING) wxYield();
-            Enable(TRUE);
+            Enable(true);
             starting_points.last = start_dialog->Picked();
             delete start_dialog;
         }
         if (starting_points.last)
             start = BehavProfile<gNumber>(starting_points.profiles[starting_points.last]);
     }
+#endif  // NOT_PORTED_YET
     return start;
-}
-
-void EfgShow::OnSize(int , int )
-{
-    if (!tw) 
-        return;
-
-    int toolbar_height = 40;
-    int frame_w, frame_h;
-    GetClientSize(&frame_w, &frame_h);
-    toolbar->SetSize(0, 0, frame_w, toolbar_height);
-    tw->SetSize(0, toolbar_height, frame_w, frame_h-toolbar_height);
-    tw->SetFocus();
 }
 
 void EfgShow::MakeMenus(void)
@@ -838,7 +641,7 @@ void EfgShow::MakeMenus(void)
   supports_menu->AppendSeparator();
   supports_menu->Append(efgmenuSUPPORT_REACHABLE, "&Root Reachable",
 			"Display only nodes that are support-reachable",
-			TRUE);
+			true);
   
   wxMenu *solve_menu = new wxMenu;
   solve_menu->Append(efgmenuSOLVE_STANDARD, "S&tandard...", "Standard solutions");
@@ -897,13 +700,13 @@ void EfgShow::MakeMenus(void)
   
   wxMenu *inspect_menu = new wxMenu;
   inspect_menu->Append(efgmenuINSPECT_SOLUTIONS, "&Solutions",
-		       "Inspect existing solutions");
+		       "Inspect existing solutions", true);
   inspect_menu->Append(efgmenuINSPECT_CURSOR, "&Cursor",
-		       "Information about the node at cursor");
+		       "Information about the node at cursor", true);
   inspect_menu->Append(efgmenuINSPECT_INFOSETS, "&Infosets",
-		       "Inspect information sets", TRUE);
+		       "Inspect information sets", true);
   inspect_menu->Append(efgmenuINSPECT_ZOOM_WIN, "Zoom &Window",
-		       "Open zoom window", TRUE);
+		       "Open zoom window", true);
   inspect_menu->AppendSeparator();
   inspect_menu->Append(efgmenuINSPECT_GAMEINFO, "Game&Info",
 		       "Information about this game");
@@ -913,7 +716,7 @@ void EfgShow::MakeMenus(void)
   prefsDisplayMenu->Append(efgmenuPREFS_DISPLAY_DECIMALS, "&Decimal Places",
 			   "Set number of decimal places to display");
   prefsDisplayMenu->Append(efgmenuPREFS_DISPLAY_FLASHING, "&Flashing Cursor",
-			   "Toggle flashing cursor", TRUE);
+			   "Toggle flashing cursor", true);
   prefsDisplayMenu->Append(efgmenuPREFS_DISPLAY_LAYOUT, "&Layout",
 			   "Set tree layout parameters");
   prefs_menu->Append(efgmenuPREFS_DISPLAY, "&Display", prefsDisplayMenu,
@@ -962,321 +765,9 @@ void EfgShow::MakeMenus(void)
   SetMenuBar(menu_bar);
 }
 
-Bool EfgShow::OnClose(void)
-{
-  if (ef.IsDirty()) {
-    if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
-		     wxOK | wxCANCEL) == wxCANCEL)
-      return FALSE;
-    else {
-      InspectSolutions(DESTROY_DIALOG);
-      Show(FALSE);
-      return TRUE;
-    }
-  }
-  else {
-    return TRUE;
-  }
-}
-
 //---------------------------------------------------------------------
 //             EXTENSIVE SHOW: EVENT-HANDLING HOOK MEMBERS
 //---------------------------------------------------------------------
-void EfgShow::OnSetFocus(void)
-{
-    tw->SetFocus();
-}
-
-void EfgShow::OnMenuCommand(int id)
-{
-  try {
-    switch (id) {
-    case efgmenuFILE_OUTPUT:
-      tw->output();
-      break;
-    case efgmenuFILE_SAVE:
-      tw->file_save();
-      break;
-    case efgmenuFILE_CLOSE:
-      Close();
-      break;
-
-    case efgmenuEDIT_NODE_ADD:
-      tw->node_add();
-      break;
-    case efgmenuEDIT_NODE_DELETE:
-      tw->node_delete();
-      break;
-    case efgmenuEDIT_NODE_INSERT:
-      tw->node_insert();
-      break;
-    case efgmenuEDIT_NODE_LABEL:
-      tw->node_label();
-      break;
-    case efgmenuEDIT_NODE_SET_MARK:
-      tw->node_set_mark();
-      break;
-    case efgmenuEDIT_NODE_GOTO_MARK:
-      tw->node_goto_mark();
-      break;
-
-    case efgmenuEDIT_ACTION_DELETE:
-      tw->action_delete();
-      break;
-    case efgmenuEDIT_ACTION_INSERT:
-      tw->action_insert();
-      break;
-    case efgmenuEDIT_ACTION_APPEND:
-      tw->action_append();
-      break;
-    case efgmenuEDIT_ACTION_LABEL:
-      tw->action_label();
-      break;
-    case efgmenuEDIT_ACTION_PROBS:
-      tw->action_probs();
-      break;
-
-    case efgmenuEDIT_INFOSET_MERGE:
-      tw->infoset_merge();
-      break;
-    case efgmenuEDIT_INFOSET_BREAK:
-      tw->infoset_break();
-      break;
-    case efgmenuEDIT_INFOSET_SPLIT:
-      tw->infoset_split();
-      break;
-    case efgmenuEDIT_INFOSET_JOIN:
-      tw->infoset_join();
-      break;
-    case efgmenuEDIT_INFOSET_LABEL:
-      tw->infoset_label();
-      break;
-    case efgmenuEDIT_INFOSET_PLAYER:
-      tw->infoset_switch_player();
-      break;
-    case efgmenuEDIT_INFOSET_REVEAL:
-      tw->infoset_reveal();
-      break;
-
-    case efgmenuEDIT_OUTCOMES_ATTACH:
-      tw->EditOutcomeAttach();
-      break;
-    case efgmenuEDIT_OUTCOMES_DETACH:
-      tw->EditOutcomeDetach();
-      break;
-    case efgmenuEDIT_OUTCOMES_LABEL:
-      tw->EditOutcomeLabel();
-      break;
-    case efgmenuEDIT_OUTCOMES_PAYOFFS:
-      tw->EditOutcomePayoffs();
-      break;
-    case efgmenuEDIT_OUTCOMES_NEW:
-      tw->EditOutcomeNew();
-      break;
-    case efgmenuEDIT_OUTCOMES_DELETE:
-      tw->EditOutcomeDelete();
-      break;
-
-    case efgmenuEDIT_TREE_DELETE:
-      tw->tree_delete();
-      break;
-    case efgmenuEDIT_TREE_COPY:
-      tw->tree_copy();
-      break;
-    case efgmenuEDIT_TREE_MOVE:
-      tw->tree_move();
-      break;
-    case efgmenuEDIT_TREE_LABEL:
-      tw->tree_label();
-      SetFileName();
-      break;
-    case efgmenuEDIT_TREE_PLAYERS:
-      tw->tree_players();
-      break;
-    case efgmenuEDIT_TREE_INFOSETS:
-      tw->tree_infosets();
-      break;
-
-    case efgmenuSUBGAME_MARKALL:
-      tw->SubgameMarkAll();
-      break;
-    case efgmenuSUBGAME_MARK:
-      tw->SubgameMark();
-      break;
-    case efgmenuSUBGAME_UNMARKALL:
-      tw->SubgameUnmarkAll();
-      break;
-    case efgmenuSUBGAME_UNMARK:
-      tw->SubgameUnmark();
-      break;
-    case efgmenuSUBGAME_COLLAPSEALL:
-      tw->SubgameCollapseAll();
-      break;
-    case efgmenuSUBGAME_COLLAPSE:
-      tw->SubgameCollapse();
-      break;
-    case efgmenuSUBGAME_EXPANDALL:
-      tw->SubgameExpandAll();
-      break;
-    case efgmenuSUBGAME_EXPANDBRANCH:
-      tw->SubgameExpandBranch();
-      break;
-    case efgmenuSUBGAME_EXPAND:
-      tw->SubgameExpand();
-      break;
-
-    case efgmenuSUPPORT_UNDOMINATED: 
-      SupportUndominated();
-      break;
-    case efgmenuSUPPORT_NEW:
-      SupportNew();
-      break;
-    case efgmenuSUPPORT_EDIT:
-      SupportEdit();
-      break;
-    case efgmenuSUPPORT_DELETE:
-      SupportDelete();
-      break;
-    case efgmenuSUPPORT_SELECT_FROMLIST:
-      SupportSelectFromList();
-      break;
-    case efgmenuSUPPORT_SELECT_PREVIOUS:
-      SupportSelectPrevious();
-      break;
-    case efgmenuSUPPORT_SELECT_NEXT:
-      SupportSelectNext();
-      break;
-    case efgmenuSUPPORT_REACHABLE:
-      SupportReachable();
-      break;
-
-    case efgmenuINSPECT_SOLUTIONS: 
-      InspectSolutions(CREATE_DIALOG);
-      break;
-    case efgmenuINSPECT_CURSOR:
-      node_inspect->Set(tw->Cursor());
-      node_inspect->Show(TRUE);
-      break;
-    case efgmenuINSPECT_INFOSETS:
-      features.iset_hilight = !features.iset_hilight;
-      if (!features.iset_hilight) {
-	HilightInfoset(0, 0, 1);
-	HilightInfoset(0, 0, 2);
-      }
-      GetMenuBar()->Check(efgmenuINSPECT_INFOSETS, features.iset_hilight);
-      break;
-    case efgmenuINSPECT_ZOOM_WIN:
-      tw->display_zoom_win();
-      break;
-    case efgmenuINSPECT_GAMEINFO: 
-      ShowGameInfo();
-      break;
-
-    case efgmenuSOLVE_CUSTOM_EFG_ENUMPURE:
-    case efgmenuSOLVE_CUSTOM_EFG_LCP:
-    case efgmenuSOLVE_CUSTOM_EFG_LP:
-    case efgmenuSOLVE_CUSTOM_EFG_LIAP:
-    case efgmenuSOLVE_CUSTOM_EFG_POLENUM:
-    case efgmenuSOLVE_CUSTOM_EFG_QRE:
-    case efgmenuSOLVE_CUSTOM_NFG_ENUMPURE:
-    case efgmenuSOLVE_CUSTOM_NFG_ENUMMIXED:
-    case efgmenuSOLVE_CUSTOM_NFG_LCP:
-    case efgmenuSOLVE_CUSTOM_NFG_LP:
-    case efgmenuSOLVE_CUSTOM_NFG_LIAP:
-    case efgmenuSOLVE_CUSTOM_NFG_SIMPDIV:
-    case efgmenuSOLVE_CUSTOM_NFG_POLENUM:
-    case efgmenuSOLVE_CUSTOM_NFG_QRE:
-    case efgmenuSOLVE_CUSTOM_NFG_QREGRID:
-      Solve(id);
-      break;
-    case efgmenuSOLVE_NFG_REDUCED: 
-      SolveNormalReduced();
-      break;
-    case efgmenuSOLVE_NFG_AGENT:
-      SolveNormalAgent();
-      break;
-    case efgmenuSOLVE_STANDARD:
-      SolveStandard();
-      break;
-
-    case efgmenuPREFS_INC_ZOOM:
-      tw->display_zoom_in();
-      GetMenuBar()->Check(efgmenuINSPECT_ZOOM_WIN, TRUE);
-      break;
-    case efgmenuPREFS_DEC_ZOOM:
-      tw->display_zoom_out();
-      GetMenuBar()->Check(efgmenuINSPECT_ZOOM_WIN, TRUE);
-      break;
-    case efgmenuPREFS_LEGEND:
-      tw->display_legends();
-      break;
-    case efgmenuPREFS_FONTS_ABOVENODE:
-      tw->display_fonts_abovenode();
-      break;
-    case efgmenuPREFS_FONTS_BELOWNODE:
-      tw->display_fonts_belownode();
-      break;
-    case efgmenuPREFS_FONTS_AFTERNODE:
-      tw->display_fonts_afternode();
-      break;
-    case efgmenuPREFS_FONTS_ABOVEBRANCH:
-      tw->display_fonts_abovebranch();
-      break;
-    case efgmenuPREFS_FONTS_BELOWBRANCH:
-      tw->display_fonts_belowbranch();
-      break;
-    case efgmenuPREFS_DISPLAY_LAYOUT:
-      tw->prefs_display_layout();
-      break;
-    case efgmenuPREFS_DISPLAY_FLASHING:
-      tw->prefs_display_flashing();
-      GetMenuBar()->Check(efgmenuPREFS_DISPLAY_FLASHING,
-			  tw->DrawSettings().FlashingCursor());
-      break;
-    case efgmenuPREFS_DISPLAY_DECIMALS:
-      tw->prefs_display_decimals();
-      break;
-    case efgmenuPREFS_COLORS:
-      tw->display_colors();
-      break;
-    case efgmenuPREFS_SAVE:
-      tw->display_save_options();
-      break;
-    case efgmenuPREFS_LOAD:
-      tw->display_load_options();
-      break;
-    case efgmenuPREFS_REDRAW: 
-      /* redraws automatically after switch */ 
-      break;
-    case efgmenuPREFS_ACCELS:
-      EditAccelerators(accelerators, MakeEventNames());
-      WriteAccelerators(accelerators, "EfgAccelerators", gambitApp.ResourceFile());
-      break;
-
-    case efgmenuHELP_ABOUT:
-      wxHelpAbout();
-      break;
-    case efgmenuHELP_CONTENTS:
-      wxHelpContents(EFG_GUI_HELP);
-      break;
-    default:
-      parent->OnMenuCommand(id);
-      break;
-    }
-
-    // Most menu selections modify the display somehow, so redraw w/ exceptions
-    if (id != efgmenuFILE_CLOSE && id != efgmenuSUPPORT_SELECT)  { 
-      tw->OnPaint();
-      tw->SetFocus();
-    }
-    tw->UpdateMenus();
-  }
-  catch (gException &E) {
-    guiExceptionDialog(E.Description(), this);
-  }
-}
-
-
 #include "efgaccl.h"
 gArray<AccelEvent> EfgShow::MakeEventNames(void)
 {
@@ -1296,7 +787,7 @@ int EfgShow::CheckAccelerators(wxKeyEvent &ev)
   //  gout << id << '\n';
   
   if (id) { 
-    OnMenuCommand(id);
+    //    OnMenuCommand(id);
   }
    
   return id;
@@ -1306,46 +797,589 @@ int EfgShow::CheckAccelerators(wxKeyEvent &ev)
 // if who == 1, hilight in the solution window display
 void EfgShow::HilightInfoset(int pl, int iset, int who)
 {
-    if (!features.iset_hilight) 
-        return;
+  if (!features.iset_hilight) 
+    return;
 
-    if (who == 1)
-        soln_show->HilightInfoset(pl, iset);
+  if (who == 1)
+    m_solutionTable->HilightInfoset(pl, iset);
 
-    if (who == 2) tw->HilightInfoset(pl, iset);
+  if (who == 2) m_treeWindow->HilightInfoset(pl, iset);
 }
 
 gText EfgShow::UniqueSupportName(void) const
 {
-  int number = supports.Length() + 1;
+  int number = m_supports.Length() + 1;
   while (1) {
     int i;
-    for (i = 1; i <= supports.Length(); i++) {
-      if (supports[i]->GetName() == "Support" + ToText(number)) {
+    for (i = 1; i <= m_supports.Length(); i++) {
+      if (m_supports[i]->GetName() == "Support" + ToText(number)) {
 	break;
       }
     }
 
-    if (i > supports.Length())
+    if (i > m_supports.Length())
       return "Support" + ToText(number);
     
     number++;
   }
 }
 
-void EfgShow::SupportNew(void)
+void EfgShow::OnFileOutput(wxCommandEvent &)
 {
-  EFSupport newSupport(ef);
+  m_treeWindow->output();
+}
+
+void EfgShow::OnFileSave(wxCommandEvent &)
+{
+  static int s_nDecimals = 6;
+  dialogEfgSave dialog(Filename(), m_efg.GetTitle(), s_nDecimals, this);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    if (wxFileExists((char *) dialog.Filename())) {
+      if (wxMessageBox((char *) ("File " + dialog.Filename() +
+				 " exists.  Overwrite?"),
+		       "Confirm", wxOK | wxCANCEL) != wxOK) {
+	return;
+      }
+    }
+
+    m_efg.SetTitle(dialog.Label());
+
+    FullEfg *efg = 0;
+    try {
+      gFileOutput file(dialog.Filename());
+      efg = CompressEfg(m_efg, *GetSupport());
+      efg->WriteEfgFile(file, s_nDecimals);
+      delete efg;
+      SetFileName(dialog.Filename());
+    }
+    catch (gFileOutput::OpenFailed &) {
+      wxMessageBox((char *) ("Could not open " + dialog.Filename() + " for writing."),
+		   "Error", wxOK);
+      if (efg)  delete efg;
+    }
+    catch (gFileOutput::WriteFailed &) {
+      wxMessageBox((char *) ("Write error occurred in saving " + dialog.Filename()),
+		   "Error", wxOK);
+      if (efg)  delete efg;
+    }
+    catch (Efg::Exception &) {
+      wxMessageBox("Internal exception in extensive form", "Error", wxOK);
+      if (efg)  delete efg;
+    }
+  }
+}
+
+void EfgShow::OnEditNodeAdd(wxCommandEvent &)
+{
+  static int branches = 2; // make this static so it remembers the last entry
+  static EFPlayer *player = 0;
+  static Infoset *infoset = 0;
+  static Efg *last_ef = 0; // need this to make sure player,infoset are valid
+
+  if (last_ef != &m_efg)  {
+    player = 0;
+    infoset = 0;
+    last_ef = &m_efg;
+  }
+    
+  dialogMoveAdd dialog(this, m_efg, "Add Move", player, infoset, branches);
+
+  if (dialog.ShowModal() == wxID_OK)  {
+    NodeAddMode mode = dialog.GetAddMode();
+    player = dialog.GetPlayer();
+    infoset = dialog.GetInfoset();
+    branches = dialog.GetActions();
+    try {
+      if (mode == NodeAddNew) { 
+	m_efg.AppendNode(Cursor(), player, branches);
+      }
+      else {
+	m_efg.AppendNode(Cursor(), infoset);
+      }
+      GameChanged();
+    }
+    catch (gException &ex) {
+      guiExceptionDialog(ex.Description(), this);
+    }
+ 
+  }
+}
+
+void EfgShow::OnEditNodeDelete(wxCommandEvent &)
+{
+  try {
+    dialogNodeDelete dialog(Cursor(), this);
+
+    if (dialog.ShowModal() == wxID_OK) {
+      Node *keep = dialog.KeepNode();
+      m_treeWindow->SetCursorPosition(m_efg.DeleteNode(Cursor(), keep));
+      GameChanged();
+    }
+  }
+  catch (gException &ex) {
+    guiExceptionDialog(ex.Description(), this);
+  }
+}
+
+void EfgShow::OnEditNodeInsert(wxCommandEvent &)
+{
+  static int branches = 2; // make this static so it remembers the last entry
+  static EFPlayer *player = 0;
+  static Infoset *infoset = 0;
+  static Efg *last_ef = 0; // need this to make sure player,infoset are valid
+
+  if (last_ef != &m_efg)  {
+    player = 0;
+    infoset = 0;
+    last_ef = &m_efg;
+  }
+    
+  dialogMoveAdd dialog(this, m_efg, "Insert Move", player, infoset, branches);
+
+  if (dialog.ShowModal() == wxID_OK)  {
+    NodeAddMode mode = dialog.GetAddMode();
+    player = dialog.GetPlayer();
+    infoset = dialog.GetInfoset();
+    branches = dialog.GetActions();
+
+    try {
+      if (mode == NodeAddNew) {
+	m_efg.InsertNode(Cursor(), player, branches);
+      }
+      else {
+	m_efg.InsertNode(Cursor(), infoset);
+      }
+
+      m_treeWindow->SetCursorPosition(Cursor()->GetParent());
+      GameChanged();
+    }
+    catch (gException &ex) {
+      guiExceptionDialog(ex.Description(), this);
+    }
+  }
+}
+
+void EfgShow::OnEditNodeLabel(wxCommandEvent &)
+{
+  wxTextEntryDialog dialog(this, "Label node", "Label of node",
+			   (char *) Cursor()->GetName());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    Cursor()->SetName(dialog.GetValue().c_str());
+    m_treeWindow->Render();
+  }
+}
+
+void EfgShow::OnEditNodeSetMark(wxCommandEvent &)
+{
+  m_treeWindow->node_set_mark();
+  m_treeWindow->Render();
+}
+
+void EfgShow::OnEditNodeGotoMark(wxCommandEvent &)
+{
+  m_treeWindow->node_goto_mark();
+}
+
+void EfgShow::OnEditActionDelete(wxCommandEvent &)
+{
+  Infoset *infoset = Cursor()->GetInfoset();
+  dialogActionSelect dialog(infoset, "Delete Action", "Action to delete",
+			    this);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    try {
+      m_efg.DeleteAction(infoset, dialog.GetAction());
+      GameChanged();
+    }
+    catch (gException &ex) {
+      guiExceptionDialog(ex.Description(), this);
+    }
+  }
+}
+
+void EfgShow::OnEditActionInsert(wxCommandEvent &)
+{
+  Infoset *infoset = Cursor()->GetInfoset();
+  dialogActionSelect dialog(infoset, "Insert action",
+			    "Insert new action before", this);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    try {
+      m_efg.InsertAction(infoset, dialog.GetAction());
+      GameChanged();
+    }
+    catch (gException &ex) {
+      guiExceptionDialog(ex.Description(), this);
+    }
+  }
+}
+
+void EfgShow::OnEditActionAppend(wxCommandEvent &)
+{
+  try {
+    m_efg.InsertAction(Cursor()->GetInfoset());
+    GameChanged();
+  }
+  catch (gException &ex) {
+    guiExceptionDialog(ex.Description(), this);
+  }
+}
+
+void EfgShow::OnEditActionLabel(wxCommandEvent &)
+{
+  Infoset *infoset = Cursor()->GetInfoset();
+  dialogActionLabel dialog(infoset, this);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    try {
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	infoset->Actions()[act]->SetName(dialog.GetActionLabel(act));
+      }
+      GameChanged();
+    }
+    catch (gException &ex) {
+      guiExceptionDialog(ex.Description(), this);
+    }
+  }
+}
+
+void EfgShow::OnEditActionProbs(wxCommandEvent &)
+{
+  Infoset *infoset = Cursor()->GetInfoset();
+  dialogActionProbs dialog(infoset, this);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    try {
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	m_efg.SetChanceProb(infoset, act, dialog.GetActionProb(act));
+      }
+      GameChanged();
+    }
+    catch (gException &ex) {
+      guiExceptionDialog(ex.Description(), this);
+    }
+  }
+}
+
+void EfgShow::OnEditOutcomesAttach(wxCommandEvent &)
+{
+  dialogEfgOutcomeSelect dialog(m_efg, this);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    Cursor()->SetOutcome(dialog.GetOutcome());
+    m_treeWindow->OutcomeChange();
+    m_treeWindow->Render();
+    UpdateMenus();
+  }
+}
+
+void EfgShow::OnEditOutcomesDetach(wxCommandEvent &)
+{
+  Cursor()->SetOutcome(0);
+  m_treeWindow->OutcomeChange();
+  m_treeWindow->Render();
+  UpdateMenus();
+}
+
+void EfgShow::OnEditOutcomesLabel(wxCommandEvent &)
+{
+  wxTextEntryDialog dialog(this, "New outcome label", "Label outcome",
+			   (char *) Cursor()->GetOutcome()->GetName());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    Cursor()->GetOutcome()->SetName(dialog.GetValue().c_str());
+    m_treeWindow->OutcomeChange();
+    m_treeWindow->Render();
+  }
+}
+
+void EfgShow::OnEditOutcomesPayoffs(wxCommandEvent &)
+{
+  dialogEfgPayoffs dialog(m_efg, Cursor()->GetOutcome(), this);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    EFOutcome *outc = Cursor()->GetOutcome();
+    gArray<gNumber> payoffs(dialog.Payoffs());
+
+    if (!outc) {
+      outc = m_efg.NewOutcome();
+      Cursor()->SetOutcome(outc);
+    }
+
+    for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+      m_efg.SetPayoff(outc, pl, payoffs[pl]);
+    }
+    outc->SetName(dialog.Name());
+
+    m_treeWindow->OutcomeChange();
+    m_treeWindow->Render();
+    UpdateMenus();
+  }
+}
+
+void EfgShow::OnEditOutcomesNew(wxCommandEvent &)
+{
+  dialogEfgPayoffs dialog(m_efg, 0, this);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    try {
+      EFOutcome *outc = m_efg.NewOutcome();
+      gArray<gNumber> payoffs(dialog.Payoffs());
+
+      for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+	m_efg.SetPayoff(outc, pl, payoffs[pl]);
+      }
+      outc->SetName(dialog.Name());
+      
+      m_treeWindow->OutcomeChange();
+      m_treeWindow->Render();
+      UpdateMenus();
+    }
+    catch (gException &ex) {
+      guiExceptionDialog(ex.Description(), this);
+    }
+  }
+}
+
+void EfgShow::OnEditOutcomesDelete(wxCommandEvent &)
+{
+  dialogEfgOutcomeSelect dialog(m_efg, this);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    try {
+      m_efg.DeleteOutcome(dialog.GetOutcome());
+      m_treeWindow->OutcomeChange();
+      m_treeWindow->Render();
+      UpdateMenus();
+    }
+    catch (gException &ex) {
+      guiExceptionDialog(ex.Description(), this);
+    }
+  }
+}
+
+void EfgShow::OnEditInfosetMerge(wxCommandEvent &)
+{
+  try {
+    m_efg.MergeInfoset(m_treeWindow->MarkNode()->GetInfoset(),
+		       Cursor()->GetInfoset());
+    GameChanged();
+  }
+  catch (gException &ex) {
+    guiExceptionDialog(ex.Description(), this);
+  }
+}
+
+void EfgShow::OnEditInfosetBreak(wxCommandEvent &)
+{
+  try {
+    m_efg.LeaveInfoset(Cursor());
+    GameChanged();
+  }
+  catch (gException &ex) {
+    guiExceptionDialog(ex.Description(), this);
+  }
+}
+
+void EfgShow::OnEditInfosetSplit(wxCommandEvent &)
+{
+  try {
+    m_efg.SplitInfoset(Cursor());
+    GameChanged();
+  }
+  catch (gException &ex) {
+    guiExceptionDialog(ex.Description(), this);
+  }
+}
+
+void EfgShow::OnEditInfosetJoin(wxCommandEvent &)
+{
+  try {
+    m_efg.JoinInfoset(m_treeWindow->MarkNode()->GetInfoset(), Cursor());
+    GameChanged();
+  }
+  catch (gException &ex) {
+    guiExceptionDialog(ex.Description(), this);
+  }
+}
+
+void EfgShow::OnEditInfosetLabel(wxCommandEvent &)
+{
+  Infoset *infoset = Cursor()->GetInfoset();
+  wxTextEntryDialog dialog(this, "New label for information set ",
+			   "Label Infoset", (char *) infoset->GetName());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    infoset->SetName(dialog.GetValue().c_str());
+    m_treeWindow->Render();
+  }
+}
+
+void EfgShow::OnEditInfosetPlayer(wxCommandEvent &)
+{
+  try {
+    dialogEfgSelectPlayer dialog(m_efg, false, this);
+        
+    if (dialog.ShowModal() == wxID_OK) {
+      if (dialog.GetPlayer() != Cursor()->GetInfoset()->GetPlayer()) {
+	m_efg.SwitchPlayer(Cursor()->GetInfoset(), dialog.GetPlayer());
+	GameChanged();
+      }
+    }
+  }
+  catch (gException &ex) {
+    guiExceptionDialog(ex.Description(), this);
+  }
+}
+
+void EfgShow::OnEditInfosetReveal(wxCommandEvent &)
+{
+  dialogInfosetReveal dialog(m_efg, this);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    try {
+      m_efg.Reveal(Cursor()->GetInfoset(), dialog.GetPlayers());
+      GameChanged();
+    }
+    catch (gException &ex) {
+      guiExceptionDialog(ex.Description(), this);
+    }
+  }
+}
+
+void EfgShow::OnEditTreeDelete(wxCommandEvent &)
+{
+  wxMessageDialog dialog(this, "Delete the whole subtree?", "Confirm");
+
+  if (dialog.ShowModal() == wxID_OK) {
+    try {
+      m_efg.DeleteTree(Cursor());
+      GameChanged();
+    }
+    catch (gException &ex) {
+      guiExceptionDialog(ex.Description(), this);
+    }
+  }
+}
+
+void EfgShow::OnEditTreeCopy(wxCommandEvent &)
+{
+  try {
+    m_efg.CopyTree(m_treeWindow->MarkNode(), Cursor());
+    GameChanged();
+  }
+  catch (gException &ex) {
+    guiExceptionDialog(ex.Description(), this);
+  }
+}
+
+void EfgShow::OnEditTreeMove(wxCommandEvent &)
+{
+  try {
+    m_efg.MoveTree(m_treeWindow->MarkNode(), Cursor());
+    GameChanged();
+  }
+  catch (gException &ex) {
+    guiExceptionDialog(ex.Description(), this);
+  }
+}
+
+void EfgShow::OnEditTreeLabel(wxCommandEvent &)
+{
+  wxTextEntryDialog dialog(this, "Label game", "Label of game",
+			   (char *) m_efg.GetTitle());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    m_efg.SetTitle(dialog.GetValue().c_str());
+    SetFileName(Filename());
+  }
+}
+
+void EfgShow::OnEditTreePlayers(wxCommandEvent &)
+{
+  dialogEfgPlayers dialog(m_efg, this);
+  dialog.ShowModal();
+}
+
+void EfgShow::OnEditTreeInfosets(wxCommandEvent &)
+{
+  dialogInfosets dialog(m_efg, this);
+  dialog.ShowModal();
+
+  if (dialog.GameChanged()) {
+    GameChanged();
+  }
+}
+
+void EfgShow::OnSubgamesMarkAll(wxCommandEvent &)
+{
+  m_treeWindow->SubgameMarkAll();
+  m_treeWindow->Render();
+}
+
+void EfgShow::OnSubgamesMark(wxCommandEvent &)
+{
+  m_treeWindow->SubgameMark();
+  m_treeWindow->Render();
+}
+
+void EfgShow::OnSubgamesUnMarkAll(wxCommandEvent &)
+{
+  m_treeWindow->SubgameUnmarkAll();
+  m_treeWindow->Render();
+}
+
+void EfgShow::OnSubgamesUnMark(wxCommandEvent &)
+{
+  m_treeWindow->SubgameUnmark();
+  m_treeWindow->Render();
+}
+
+void EfgShow::OnSubgamesCollapseAll(wxCommandEvent &)
+{
+  m_treeWindow->SubgameCollapseAll();
+  m_treeWindow->Render();
+}
+
+void EfgShow::OnSubgamesCollapse(wxCommandEvent &)
+{
+  m_treeWindow->SubgameCollapse();
+  m_treeWindow->Render();
+}
+
+void EfgShow::OnSubgamesExpandAll(wxCommandEvent &)
+{
+  m_treeWindow->SubgameExpandAll();
+  m_treeWindow->Render();
+}
+
+void EfgShow::OnSubgamesExpand(wxCommandEvent &)
+{
+  m_treeWindow->SubgameExpand();
+  m_treeWindow->Render();
+}
+
+void EfgShow::OnSubgamesExpandBranch(wxCommandEvent &)
+{
+  m_treeWindow->SubgameExpandBranch();
+  m_treeWindow->Render();
+}
+
+void EfgShow::OnSupportNew(wxCommandEvent &)
+{
+  EFSupport newSupport(m_efg);
   newSupport.SetName(UniqueSupportName());
   dialogEfgEditSupport dialog(newSupport, this);
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     try {
       EFSupport *support = new EFSupport(dialog.Support());
-      supports.Append(support);
+      m_supports.Append(support);
 
-      cur_sup = support;
-      tw->SupportChanged();
+      m_currentSupport = support;
+      m_treeWindow->SupportChanged();
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), this);
@@ -1353,15 +1387,15 @@ void EfgShow::SupportNew(void)
   }
 }
 
-void EfgShow::SupportEdit(void)
+void EfgShow::OnSupportEdit(wxCommandEvent &)
 {
-  dialogEfgEditSupport dialog(*cur_sup, this);
+  dialogEfgEditSupport dialog(*m_currentSupport, this);
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     try {
-      *cur_sup = dialog.Support();
-      cur_sup->SetName(dialog.Name());
-      tw->SupportChanged();
+      *m_currentSupport = dialog.Support();
+      m_currentSupport->SetName(dialog.Name());
+      m_treeWindow->SupportChanged();
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), this);
@@ -1369,18 +1403,19 @@ void EfgShow::SupportEdit(void)
   }
 }
 
-void EfgShow::SupportDelete(void)
+void EfgShow::OnSupportDelete(wxCommandEvent &)
 {
-  if (supports.Length() == 1)  return;
+  if (m_supports.Length() == 1)  return;
 
-  dialogSupportSelect dialog(supports, cur_sup, "Delete Support", this);
+  dialogSupportSelect dialog(this, m_supports, m_currentSupport,
+			     "Delete Support");
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     try {
-      delete supports.Remove(dialog.Selected());
-      if (!supports.Find(cur_sup)) {
-	cur_sup = supports[1];
-	tw->SupportChanged();
+      delete m_supports.Remove(dialog.Selected());
+      if (!m_supports.Find(m_currentSupport)) {
+	m_currentSupport = m_supports[1];
+	m_treeWindow->SupportChanged();
       }
     }
     catch (gException &E) {
@@ -1389,14 +1424,15 @@ void EfgShow::SupportDelete(void)
   }
 }
 
-void EfgShow::SupportSelectFromList(void)
+void EfgShow::OnSupportSelectFromList(wxCommandEvent &)
 {
-  dialogSupportSelect dialog(supports, cur_sup, "Select Support", this);
+  dialogSupportSelect dialog(this, m_supports, m_currentSupport, 
+			     "Select Support");
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     try {
-      cur_sup = supports[dialog.Selected()];
-      tw->SupportChanged();
+      m_currentSupport = m_supports[dialog.Selected()];
+      m_treeWindow->SupportChanged();
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), this);
@@ -1404,40 +1440,40 @@ void EfgShow::SupportSelectFromList(void)
   }
 }
 
-void EfgShow::SupportSelectPrevious(void)
+void EfgShow::OnSupportSelectPrevious(wxCommandEvent &)
 {
-  int index = supports.Find(cur_sup);
+  int index = m_supports.Find(m_currentSupport);
   if (index == 1) {
-    cur_sup = supports[supports.Length()];
+    m_currentSupport = m_supports[m_supports.Length()];
   }
   else {
-    cur_sup = supports[index - 1];
+    m_currentSupport = m_supports[index - 1];
   }
-  tw->SupportChanged();
+  m_treeWindow->SupportChanged();
 }
 
-void EfgShow::SupportSelectNext(void)
+void EfgShow::OnSupportSelectNext(wxCommandEvent &)
 {
-  int index = supports.Find(cur_sup);
-  if (index == supports.Length()) {
-    cur_sup = supports[1];
+  int index = m_supports.Find(m_currentSupport);
+  if (index == m_supports.Length()) {
+    m_currentSupport = m_supports[1];
   }
   else {
-    cur_sup = supports[index + 1];
+    m_currentSupport = m_supports[index + 1];
   }
-  tw->SupportChanged();
+  m_treeWindow->SupportChanged();
 }
 
 
-void EfgShow::SupportUndominated(void)
+void EfgShow::OnSupportUndominated(wxCommandEvent &)
 {
-  gArray<gText> playerNames(ef.NumPlayers());
+  gArray<gText> playerNames(m_efg.NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++)
-    playerNames[pl] = ef.Players()[pl]->GetName();
+    playerNames[pl] = m_efg.Players()[pl]->GetName();
   dialogElimBehav dialog(this, playerNames);
 
-  if (dialog.Completed() == wxOK) {
-    EFSupport *sup = cur_sup;
+  if (dialog.ShowModal() == wxID_OK) {
+    EFSupport *sup = m_currentSupport;
     wxStatus status(this, "Dominance Elimination");
 
     try {
@@ -1446,7 +1482,7 @@ void EfgShow::SupportUndominated(void)
 				       dialog.DomConditional(),
 				       dialog.Players(), gnull, status)) != 0) {
 	  sup->SetName(UniqueSupportName());
-	  supports.Append(sup);
+	  m_supports.Append(sup);
 	}
       }
       else {
@@ -1454,42 +1490,667 @@ void EfgShow::SupportUndominated(void)
 				    dialog.DomConditional(),
 				    dialog.Players(), gnull, status)) != 0) {
 	  sup->SetName(UniqueSupportName());
-	  supports.Append(sup);
+	  m_supports.Append(sup);
 	}
       }
     }
     catch (gSignalBreak &E) { }
     
-    if (cur_sup != sup) {
-      cur_sup = supports[supports.Length()]; // displaying the last created support
-      tw->SupportChanged();
+    if (m_currentSupport != sup) {
+      m_currentSupport = m_supports[m_supports.Length()]; // displaying the last created support
+      m_treeWindow->SupportChanged();
     }
   }
 }
 
-void EfgShow::SupportReachable(void)
+void EfgShow::OnSupportReachable(wxCommandEvent &)
 {
-  tw->DrawSettings().SetRootReachable(!tw->DrawSettings().RootReachable());
-  tw->ForceRecalc();
+  m_treeWindow->DrawSettings().SetRootReachable(!m_treeWindow->DrawSettings().RootReachable());
+  m_treeWindow->ForceRecalc();
+  m_treeWindow->Render();
+}
+
+void EfgShow::OnSolveStandard(wxCommandEvent &)
+{
+  // This is a guard against trying to solve the "trivial" game.
+  // Most of the GUI code assumes information sets exist.
+  if (m_efg.NumPlayerInfosets() == 0)  return;
+
+  bool isPerfectRecall;
+
+  if ((isPerfectRecall = IsPerfectRecall(m_efg)) == false) {
+    if (wxMessageBox("This game is not perfect recall\n"
+		     "Do you wish to continue?", 
+		     "Solve Warning", 
+		     wxOK | wxCANCEL | wxCENTRE, this) != wxOK) {
+      return;
+    }
+  }
+
+  dialogEfgSolveStandard dialog(this, m_efg);
+  if (dialog.ShowModal() != wxID_OK)  {
+    return;
+  }
+
+  guiEfgSolution *solver = 0;
+
+  wxBeginBusyCursor();
+
+  bool markSubgames = false;
+  
+  switch (dialog.Type()) {
+  case efgSTANDARD_NASH:
+    switch (dialog.Number()) {
+    case efgSTANDARD_ONE:
+      markSubgames = true;
+      if (m_efg.NumPlayers() == 2 && isPerfectRecall) {
+	if (m_efg.IsConstSum()) 
+	  solver = new guiefgLpEfg(*m_currentSupport, this, 1, dialog.Precision());
+	else
+	  solver = new guiefgLcpEfg(*m_currentSupport, this, 1, dialog.Precision());
+      }
+      else if (m_efg.NumPlayers() == 2 && !isPerfectRecall)
+	solver = new guiefgQreEfg(*m_currentSupport, this, 1);
+      else 
+	solver = new guiefgSimpdivNfg(*m_currentSupport, this, 1, dialog.Precision(),
+				      true);
+      break;
+    case efgSTANDARD_TWO:
+      if (m_efg.NumPlayers() == 2)
+	solver = new guiefgEnumMixedNfg(*m_currentSupport, this, 2,
+					dialog.Precision(), false);
+      else {
+	wxMessageBox("Not guaranteed to find two solutions", "Warning");
+	solver = new guiefgLiapEfg(*m_currentSupport, this, 2, 10);
+      }
+      break;
+    case efgSTANDARD_ALL:
+      if (m_efg.NumPlayers() == 2) {
+	solver = new guiefgEnumMixedNfg(*m_currentSupport, this, 0,
+					dialog.Precision(), false);
+      }
+      else  {
+	solver = new guiefgPolEnumEfg(*m_currentSupport, this, 0);
+      }
+      break;
+    }
+    break;
+
+  case efgSTANDARD_PERFECT:
+    markSubgames = true;
+    switch (dialog.Number()) {
+    case efgSTANDARD_ONE:
+      if (m_efg.NumPlayers() == 2 && isPerfectRecall) {
+	if (m_efg.IsConstSum()) 
+	  solver = new guiefgLpEfg(*m_currentSupport, this, 1, dialog.Precision());
+	else
+	  solver = new guiefgLcpEfg(*m_currentSupport, this, 1, dialog.Precision());
+      }
+      else if (m_efg.NumPlayers() == 2 && !isPerfectRecall)
+	solver = new guiefgQreEfg(*m_currentSupport, this, 1);
+      else 
+	solver = new guiefgSimpdivNfg(*m_currentSupport, this, 1, dialog.Precision(),
+				      true);
+      break;
+    case efgSTANDARD_TWO:
+      if (m_efg.NumPlayers() == 2)
+	solver = new guiefgEnumMixedNfg(*m_currentSupport, this, 2,
+					dialog.Precision(), false);
+      else {
+	wxMessageBox("Not guaranteed to find two solutions", "Warning");
+	solver = new guiefgLiapEfg(*m_currentSupport, this, 2, 10);
+      }
+      break;
+    case efgSTANDARD_ALL:
+      if (m_efg.NumPlayers() == 2)
+	solver = new guiefgEnumMixedNfg(*m_currentSupport, this, 0,
+					dialog.Precision(), false);
+      else {
+	solver = new guiefgPolEnumEfg(*m_currentSupport, this, 0);
+      }
+      break;
+    }
+    break;
+
+  case efgSTANDARD_SEQUENTIAL:
+    switch (dialog.Number()) {
+    case efgSTANDARD_ONE:
+      solver = new guiefgQreEfg(*m_currentSupport, this, 1);
+      break;
+    case efgSTANDARD_TWO:
+      wxMessageBox("Not guaranteed to find two solutions", "Warning");
+      solver = new guiefgLiapEfg(*m_currentSupport, this, 2, 10);
+      break;
+    case efgSTANDARD_ALL:
+      wxMessageBox("Not guaranteed to find all solutions", "Warning");
+      solver = new guiefgLiapEfg(*m_currentSupport, this, 0, 0);
+      return;
+    }
+  }
+
+  try {
+    wxConfig config("Gambit");
+    config.Write("Solutions/Efg-Interactive-Solutions", 0l);
+    if (markSubgames)  
+      m_treeWindow->SubgameMarkAll();
+    else
+      m_treeWindow->SubgameUnmarkAll();
+
+    solns += solver->Solve();
+    wxEndBusyCursor();
+  }
+  catch (gException &E) {
+    wxEndBusyCursor();
+    guiExceptionDialog(E.Description(), this);
+  }
+
+  delete solver;
+
+  ChangeSolution(solns.VisibleLength());
+  UpdateMenus();
+}
+
+void EfgShow::OnSolveCustom(wxCommandEvent &p_event)
+{
+  int algorithm = p_event.GetInt();
+
+  // This is a guard against trying to solve the "trivial" game.
+  // Most of the GUI code assumes information sets exist.
+  if (m_efg.NumPlayerInfosets() == 0)  return;
+
+  // check that the game is perfect recall, if not give a warning
+  if (!IsPerfectRecall(m_efg)) {
+    if (wxMessageBox("This game is not perfect recall\n"
+		     "Do you wish to continue?", 
+		     "Solve Warning", 
+		     wxOK | wxCANCEL | wxCENTRE, this) != wxOK) {
+      return;
+    }
+  }
+    
+  // do not want users doing anything while solving
+  Enable(false);
+
+  guiEfgSolution *solver = 0;
+
+  switch (algorithm) {
+  case efgmenuSOLVE_CUSTOM_EFG_ENUMPURE:
+    solver = new guiefgEnumPureEfg(*m_currentSupport, this);
+    break;
+  case efgmenuSOLVE_CUSTOM_EFG_LCP:
+    solver = new guiefgLcpEfg(*m_currentSupport, this);
+    break;
+  case efgmenuSOLVE_CUSTOM_EFG_LP:
+    solver = new guiefgLpEfg(*m_currentSupport, this);
+    break;
+  case efgmenuSOLVE_CUSTOM_EFG_LIAP:
+    solver = new guiefgLiapEfg(*m_currentSupport, this);
+    break;
+  case efgmenuSOLVE_CUSTOM_EFG_POLENUM:
+    solver = new guiefgPolEnumEfg(*m_currentSupport, this);
+    break;
+  case efgmenuSOLVE_CUSTOM_EFG_QRE:
+    solver = new guiefgQreEfg(*m_currentSupport, this);
+    break;
+
+  case efgmenuSOLVE_CUSTOM_NFG_ENUMPURE: 
+    solver = new guiefgEnumPureNfg(*m_currentSupport, this);
+    break;
+  case efgmenuSOLVE_CUSTOM_NFG_ENUMMIXED:
+    solver = new guiefgEnumMixedNfg(*m_currentSupport, this);
+    break;
+  case efgmenuSOLVE_CUSTOM_NFG_LCP: 
+    solver = new guiefgLcpNfg(*m_currentSupport, this);
+    break;
+  case efgmenuSOLVE_CUSTOM_NFG_LP:
+    solver = new guiefgLpNfg(*m_currentSupport, this);
+    break;
+  case efgmenuSOLVE_CUSTOM_NFG_LIAP: 
+    solver = new guiefgLiapNfg(*m_currentSupport, this);
+    break;
+  case efgmenuSOLVE_CUSTOM_NFG_SIMPDIV:
+    solver = new guiefgSimpdivNfg(*m_currentSupport, this);
+    break;
+  case efgmenuSOLVE_CUSTOM_NFG_POLENUM:
+    solver = new guiefgPolEnumNfg(*m_currentSupport, this);
+    break;
+  case efgmenuSOLVE_CUSTOM_NFG_QRE:
+    solver = new guiefgQreNfg(*m_currentSupport, this);
+    break;
+  case efgmenuSOLVE_CUSTOM_NFG_QREGRID: 
+    solver = new guiefgQreAllNfg(*m_currentSupport, this);
+    break;
+  default:
+    // internal error, we'll just ignore silently
+    return;
+  }
+
+  bool go = solver->SolveSetup();
+  
+  try {
+    if (go) {
+      if (solver->MarkSubgames())
+	m_treeWindow->SubgameMarkAll();
+      wxBeginBusyCursor();
+      solns += solver->Solve();
+      wxEndBusyCursor();
+    }
+  }
+  catch (gException &E) {
+    wxEndBusyCursor();
+    guiExceptionDialog(E.Description(), this);
+  }
+
+  delete solver;
+ 
+  ChangeSolution(solns.VisibleLength());
+  UpdateMenus();
+  Enable(true);
+}
+
+void EfgShow::OnSolveNormalReduced(wxCommandEvent &)
+{
+  // check that the game is perfect recall, if not give a warning
+  if (!IsPerfectRecall(m_efg)) {
+    if (wxMessageBox("This game is not perfect recall\n"
+		     "Do you wish to continue?", 
+		     "Reduced normal form", 
+		     wxOK | wxCANCEL | wxCENTRE, this) != wxOK) {
+      return;
+    }
+  }
+    
+  Nfg *N = MakeReducedNfg(*m_currentSupport);
+  if (N) {
+    (void) new NfgShow(*N, (EfgNfgInterface *) this, this);
+  }
+}
+
+void EfgShow::OnSolveNormalAgent(wxCommandEvent &)
+{
+  // check that the game is perfect recall, if not give a warning
+  if (!IsPerfectRecall(m_efg)) {
+    if (wxMessageBox("This game is not perfect recall\n"
+		     "Do you wish to continue?", 
+		     "Agent normal form", 
+		     wxOK | wxCANCEL | wxCENTRE, this) != wxOK) {
+      return;
+    }
+  }
+    
+  Nfg *N = MakeAfg(m_efg);
+  if (N) {
+    (void) new NfgShow(*N, (EfgNfgInterface *) this, this);
+  }
+}
+
+
+void EfgShow::OnInspectSolutions(wxCommandEvent &)
+{
+  if (solns.Length() == 0) {
+    wxMessageBox("Solution list currently empty"); 
+    return;
+  }
+
+  if (m_solutionTable) {
+    delete m_solutionTable;
+    m_solutionTable = 0;
+    delete m_solutionSashWindow;
+    m_solutionSashWindow = 0;
+  }
+  else {
+    m_solutionSashWindow = new wxSashWindow(this, idSOLUTIONWINDOW,
+					    wxDefaultPosition,
+					    wxSize(600, 100));
+    m_solutionSashWindow->SetSashVisible(wxSASH_TOP, true);
+
+    m_solutionTable = new EfgSolnShow(this, m_solutionSashWindow,
+				      solns, sf_options);
+    m_solutionTable->Show(true);
+  }
+  AdjustSizes();
+}
+
+void EfgShow::OnInspectCursor(wxCommandEvent &)
+{
+  if (node_inspect->IsShown()) {
+    node_inspect->Show(false);
+    GetMenuBar()->Check(efgmenuINSPECT_CURSOR, false);
+  }
+  else {
+    node_inspect->Set(m_treeWindow->Cursor());
+    node_inspect->Show(true);
+    GetMenuBar()->Check(efgmenuINSPECT_CURSOR, true);
+  }
+
+  AdjustSizes();
+}
+
+void EfgShow::OnInspectInfosets(wxCommandEvent &)
+{
+  features.iset_hilight = !features.iset_hilight;
+  if (!features.iset_hilight) {
+    HilightInfoset(0, 0, 1);
+    HilightInfoset(0, 0, 2);
+  }
+  GetMenuBar()->Check(efgmenuINSPECT_INFOSETS, features.iset_hilight);
+}
+
+void EfgShow::OnInspectZoom(wxCommandEvent &)
+{
+  //  m_treeZoomWindow->Show(!m_treeZoomWindow->IsShown());
+  AdjustSizes();
+}
+
+void EfgShow::OnInspectGameInfo(wxCommandEvent &)
+{
+  gText tmp;
+  char tempstr[200];
+  sprintf(tempstr, "Number of Players: %d", m_efg.NumPlayers());
+  tmp += tempstr;
+  tmp += "\n";
+  sprintf(tempstr, "Is %sconstant sum", ((m_efg.IsConstSum()) ? "" : "NOT "));
+  tmp += tempstr;
+  tmp += "\n";
+  sprintf(tempstr, "Is %sperfect recall", ((IsPerfectRecall(m_efg)) ? "" : "NOT "));
+  tmp += tempstr;
+  tmp += "\n";
+
+  wxMessageBox((char *) tmp, "Efg Game Info", wxOK, this);
+}
+
+const float ZOOM_DELTA = .1;
+const float ZOOM_MAX = 1;
+const float ZOOM_MIN = .2;
+
+void EfgShow::OnPrefsZoomIn(wxCommandEvent &)
+{
+  float zoom = m_treeZoomWindow->GetZoom();
+  zoom = gmin(zoom + ZOOM_DELTA, ZOOM_MAX);
+  m_treeZoomWindow->SetZoom(zoom);
+
+  //  m_treeZoomWindow->Show(true);
+  GetMenuBar()->Check(efgmenuINSPECT_ZOOM_WIN, true);
+}
+
+void EfgShow::OnPrefsZoomOut(wxCommandEvent &)
+{
+  float zoom = m_treeZoomWindow->GetZoom();
+  zoom = gmax(zoom - ZOOM_DELTA, ZOOM_MIN);
+  m_treeZoomWindow->SetZoom(zoom);
+  
+  // m_treeZoomWindow->Show(true);
+  GetMenuBar()->Check(efgmenuINSPECT_ZOOM_WIN, true);
+}
+
+void EfgShow::OnPrefsLegend(wxCommandEvent &)
+{
+  dialogLegends dialog(this, m_treeWindow->DrawSettings());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    m_treeWindow->DrawSettings().SetLabelNodeAbove(dialog.GetNodeAbove());
+    m_treeWindow->DrawSettings().SetLabelNodeBelow(dialog.GetNodeBelow());
+    m_treeWindow->DrawSettings().SetLabelNodeRight(dialog.GetNodeAfter());
+    m_treeWindow->DrawSettings().SetLabelBranchAbove(dialog.GetBranchAbove());
+    m_treeWindow->DrawSettings().SetLabelBranchBelow(dialog.GetBranchBelow());
+  }
+}
+
+void EfgShow::OnPrefsFontsAboveNode(wxCommandEvent &)
+{
+  wxFontData data;
+  wxFontDialog dialog(this, &data);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    m_treeWindow->DrawSettings().SetNodeAboveFont(dialog.GetFontData().GetChosenFont());
+    m_treeWindow->ForceRecalc();
+  }
+}
+
+void EfgShow::OnPrefsFontsBelowNode(wxCommandEvent &)
+{
+  wxFontData data;
+  wxFontDialog dialog(this, &data);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    m_treeWindow->DrawSettings().SetNodeBelowFont(dialog.GetFontData().GetChosenFont());
+    m_treeWindow->ForceRecalc();
+  }
+}
+
+void EfgShow::OnPrefsFontsAfterNode(wxCommandEvent &)
+{
+  wxFontData data;
+  wxFontDialog dialog(this, &data);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    m_treeWindow->DrawSettings().SetNodeRightFont(dialog.GetFontData().GetChosenFont());
+    m_treeWindow->ForceRecalc();
+  }
+}
+
+void EfgShow::OnPrefsFontsAboveBranch(wxCommandEvent &)
+{
+  wxFontData data;
+  wxFontDialog dialog(this, &data);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    m_treeWindow->DrawSettings().SetBranchAboveFont(dialog.GetFontData().GetChosenFont());
+    m_treeWindow->ForceRecalc();
+  }
+}
+
+void EfgShow::OnPrefsFontsBelowBranch(wxCommandEvent &)
+{
+  wxFontData data;
+  wxFontDialog dialog(this, &data);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    m_treeWindow->DrawSettings().SetBranchBelowFont(dialog.GetFontData().GetChosenFont());
+    m_treeWindow->ForceRecalc();
+  }
+}
+
+void EfgShow::OnPrefsDisplayLayout(wxCommandEvent &)
+{
+  TreeDrawSettings &settings = m_treeWindow->DrawSettings();
+
+  dialogLayout dialog(this,
+		      settings.BranchLength(), settings.NodeLength(),
+		      settings.ForkLength(), settings.YSpacing(),
+		      settings.ShowInfosets());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    settings.SetBranchLength(dialog.BranchLength());
+    settings.SetNodeLength(dialog.NodeLength());
+    settings.SetForkLength(dialog.ForkLength());
+    settings.SetYSpacing(dialog.YSpacing());
+    settings.SetShowInfosets(dialog.InfosetStyle());
+
+    m_treeWindow->ForceRecalc();
+  }
+}
+
+void EfgShow::OnPrefsDisplayFlashing(wxCommandEvent &)
+{
+  m_treeWindow->prefs_display_flashing();
+  GetMenuBar()->Check(efgmenuPREFS_DISPLAY_FLASHING,
+		      m_treeWindow->DrawSettings().FlashingCursor());
+}
+
+void EfgShow::OnPrefsDisplayDecimals(wxCommandEvent &)
+{
+  guiSliderDialog dialog(this, "Decimal places", 0, 25,
+			 m_treeWindow->DrawSettings().NumDecimals());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    m_treeWindow->DrawSettings().SetNumDecimals(dialog.GetValue());
+    m_treeWindow->ForceRecalc();
+    m_treeWindow->Render();
+  }
+}
+
+void EfgShow::OnPrefsColors(wxCommandEvent &)
+{
+  wxColourData data;
+  wxColourDialog dialog(this, &data);
+ 
+  if (dialog.ShowModal() == wxID_OK) {
+    if (Cursor()->GetPlayer()) {
+      m_treeWindow->DrawSettings().SetPlayerColor(Cursor()->GetPlayer()->GetNumber(),
+						  dialog.GetColourData().GetColour());
+    }
+    else {
+      m_treeWindow->DrawSettings().SetPlayerColor(-1,
+						  dialog.GetColourData().GetColour());
+    }
+    m_treeWindow->ForceRecalc();
+  }
+}
+
+void EfgShow::OnPrefsSave(wxCommandEvent &)
+{
+  m_treeWindow->DrawSettings().SaveOptions();
+}
+
+void EfgShow::OnPrefsLoad(wxCommandEvent &)
+{
+  m_treeWindow->DrawSettings().LoadOptions();
+}
+
+void EfgShow::OnPrefsAccels(wxCommandEvent &)
+{
+  EditAccelerators(accelerators, MakeEventNames());
+  //  WriteAccelerators(accelerators, "EfgAccelerators", wxGetApp().ResourceFile());
+}
+
+void EfgShow::OnHelpAbout(wxCommandEvent &)
+{
+  wxHelpAbout();
+}
+
+void EfgShow::OnHelpContents(wxCommandEvent &)
+{
+  wxHelpContents(EFG_GUI_HELP);
+}
+
+void EfgShow::OnCloseWindow(wxCloseEvent &p_event)
+{
+  if (p_event.CanVeto() && m_efg.IsDirty()) {
+    if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
+		     wxOK | wxCANCEL) == wxCANCEL) {
+      p_event.Veto();
+      return;
+    }
+  }
+
+  if (m_solutionTable)  {
+    delete m_solutionTable;
+  }
+
+  Show(false);
+  Destroy();
+}
+
+void EfgShow::OnFocus(wxFocusEvent &)
+{
+  m_treeWindow->SetFocus();
+}
+
+void EfgShow::OnSize(wxSizeEvent &)
+{
+  AdjustSizes();
+}
+
+void EfgShow::OnSashDrag(wxSashEvent &p_event)
+{
+  int clientWidth, clientHeight;
+  GetClientSize(&clientWidth, &clientHeight);
+
+  switch (p_event.GetId()) {
+  case idNODEWINDOW:
+    if (m_solutionSashWindow) {
+      clientHeight -= m_solutionSashWindow->GetRect().height;
+    }
+    m_treeWindow->SetSize(p_event.GetDragRect().width, 40,
+			  clientWidth - p_event.GetDragRect().width,
+			  clientHeight - 40);
+    m_nodeSashWindow->SetSize(0, 40,
+			      p_event.GetDragRect().width,
+			      clientHeight - 40);
+    break;
+  case idSOLUTIONWINDOW:
+    m_treeWindow->SetSize(m_nodeSashWindow->GetRect().width, 40,
+			  clientWidth - m_nodeSashWindow->GetRect().width,
+			  clientHeight - p_event.GetDragRect().height - 40);
+    m_nodeSashWindow->SetSize(0, 40,
+			      m_nodeSashWindow->GetRect().width,
+			      clientHeight - p_event.GetDragRect().height - 40);
+    m_solutionSashWindow->SetSize(0, clientHeight - p_event.GetDragRect().height,
+				  clientWidth, p_event.GetDragRect().height);
+    break;
+  }
+}
+
+void EfgShow::AdjustSizes(void)
+{
+  const int toolbarHeight = 40;
+  int width, height;
+  GetClientSize(&width, &height);
+  if (m_toolbar) {
+    m_toolbar->SetSize(0, 0, width, toolbarHeight);
+  }
+  if (m_solutionTable && m_solutionTable->IsShown()) {
+    m_solutionSashWindow->SetSize(0, height - m_solutionSashWindow->GetRect().height,
+				  width, m_solutionSashWindow->GetRect().height);
+    height -= m_solutionSashWindow->GetRect().height;
+  }
+
+  if ((node_inspect && node_inspect->IsShown()) ||
+      (m_treeZoomWindow && m_treeZoomWindow->IsShown())) {
+    if (m_treeWindow) {
+      m_treeWindow->SetSize(250, toolbarHeight,
+			    width - 250, height - toolbarHeight);
+    }
+  }
+  else if (m_treeWindow) {
+    m_treeWindow->SetSize(0, toolbarHeight, width, height - toolbarHeight);
+  }
+
+  if (node_inspect && node_inspect->IsShown()) {
+    if (m_treeZoomWindow && m_treeZoomWindow->IsShown()) {
+      m_nodeSashWindow->SetSize(0, toolbarHeight,
+				250, height - toolbarHeight - 200);
+      m_treeZoomWindow->SetSize(0, height - 200,
+				250, 200);
+    }
+    else {
+      m_nodeSashWindow->SetSize(0, toolbarHeight,
+				250, height - toolbarHeight);
+    }
+  }
+  else if (m_treeZoomWindow && m_treeZoomWindow->IsShown()) {
+    m_treeZoomWindow->SetSize(0, toolbarHeight, 250, height - toolbarHeight);
+  }
+
+  if (m_treeWindow) {
+    m_treeWindow->SetFocus();
+  }
 }
 
 
 void EfgShow::GameChanged(void)
 {
-  while (supports.Length()) 
-    delete supports.Remove(1);
+  while (m_supports.Length()) 
+    delete m_supports.Remove(1);
 
   // Create the full support.
-  cur_sup = new EFSupport(ef);
-  supports.Append(cur_sup);
-  cur_sup->SetName("Full Support");
+  m_currentSupport = new EFSupport(m_efg);
+  m_supports.Append(m_currentSupport);
+  m_currentSupport->SetName("Full Support");
   RemoveStartProfiles();
-}
-
-
-void EfgShow::SetFileName(void)
-{
-  SetTitle("[" + filename + "] " + ef.GetTitle());
+  UpdateMenus();
+  m_treeWindow->Render();
 }
 
 void EfgShow::SetFileName(const gText &p_name)
@@ -1499,181 +2160,110 @@ void EfgShow::SetFileName(const gText &p_name)
   else
     filename = "untitled.efg";
 
-  SetTitle("[" + filename + "] " + ef.GetTitle());
-}
-
-
-// Show some game info
-bool IsPerfectRecall(const Efg &, Infoset *&, Infoset *&);
-
-void EfgShow::ShowGameInfo(void)
-{
-    gText tmp;
-    char tempstr[200];
-    sprintf(tempstr, "Number of Players: %d", ef.NumPlayers());
-    tmp += tempstr;
-    tmp += "\n";
-    sprintf(tempstr, "Is %sconstant sum", ((ef.IsConstSum()) ? "" : "NOT "));
-    tmp += tempstr;
-    tmp += "\n";
-    Infoset *bad1, *bad2;
-    sprintf(tempstr, "Is %sperfect recall", ((IsPerfectRecall(ef, bad1, bad2)) ? "" : "NOT "));
-    tmp += tempstr;
-    tmp += "\n";
-
-    wxMessageBox(tmp, "Efg Game Info", wxOK, this);
+  SetTitle((char *) ("[" + filename + "] " + m_efg.GetTitle()));
 }
 
 const EFSupport *EfgShow::GetSupport(void)
 {
-  return cur_sup;
+  return m_currentSupport;
 }
 
 int EfgShow::NumDecimals(void) const
 {
-  return tw->NumDecimals();
+  return m_treeWindow->NumDecimals();
 }
 
-void EfgShow::OnZoomWindowClose(void)
+void EfgShow::UpdateMenus(void)
 {
-  GetMenuBar()->Check(efgmenuINSPECT_ZOOM_WIN, FALSE);
-}
-
-void EfgShow::UpdateMenus(Node *p_cursor, Node *p_markNode)
-{
+  Node *cursor = Cursor(), *markNode = m_treeWindow->MarkNode();
   wxMenuBar *menuBar = GetMenuBar();
+
   menuBar->Enable(efgmenuEDIT_NODE_ADD,
-		  (ef.NumChildren(p_cursor) > 0) ? FALSE : TRUE);
+		  (m_efg.NumChildren(cursor) > 0) ? false : true);
   menuBar->Enable(efgmenuEDIT_NODE_DELETE,
-		  (ef.NumChildren(p_cursor) > 0) ? TRUE : FALSE);
-  menuBar->Enable(efgmenuEDIT_NODE_GOTO_MARK, (p_markNode) ? TRUE : FALSE);
+		  (m_efg.NumChildren(cursor) > 0) ? true : false);
+  menuBar->Enable(efgmenuEDIT_NODE_GOTO_MARK, (markNode) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_MERGE,
-		  (p_markNode && p_markNode->GetInfoset() &&
-		   p_cursor->GetInfoset() &&
-		   p_markNode->GetSubgameRoot() == p_cursor->GetSubgameRoot() &&
-		   p_markNode->GetPlayer() == p_cursor->GetPlayer()) ? TRUE : FALSE);
+		  (markNode && markNode->GetInfoset() &&
+		   cursor->GetInfoset() &&
+		   markNode->GetSubgameRoot() == cursor->GetSubgameRoot() &&
+		   markNode->GetPlayer() == cursor->GetPlayer()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_BREAK, 
-		  (p_cursor->GetInfoset()) ? TRUE : FALSE);
+		  (cursor->GetInfoset()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_SPLIT,
-		  (p_cursor->GetInfoset()) ? TRUE : FALSE);
+		  (cursor->GetInfoset()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_JOIN, 
-		  (p_markNode && p_markNode->GetInfoset() &&
-		   p_cursor->GetInfoset() &&
-		   p_markNode->GetSubgameRoot() == p_cursor->GetSubgameRoot()) ? TRUE : FALSE);
+		  (markNode && markNode->GetInfoset() &&
+		   cursor->GetInfoset() &&
+		   markNode->GetSubgameRoot() == cursor->GetSubgameRoot()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_LABEL,
-		  (p_cursor->GetInfoset()) ? TRUE : FALSE);
+		  (cursor->GetInfoset()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_PLAYER,
-		  (p_cursor->GetInfoset() &&
-		   !p_cursor->GetPlayer()->IsChance()) ? TRUE : FALSE);
+		  (cursor->GetInfoset() &&
+		   !cursor->GetPlayer()->IsChance()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_REVEAL, 
-		  (p_cursor->GetInfoset()) ? TRUE : FALSE);
+		  (cursor->GetInfoset()) ? true : false);
 
   menuBar->Enable(efgmenuEDIT_ACTION_LABEL,
-		  (p_cursor->GetInfoset() &&
-		   p_cursor->GetInfoset()->NumActions() > 0) ? TRUE : FALSE);
+		  (cursor->GetInfoset() &&
+		   cursor->GetInfoset()->NumActions() > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_ACTION_INSERT,
-		  (ef.NumChildren(p_cursor) > 0) ? TRUE : FALSE);
+		  (m_efg.NumChildren(cursor) > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_ACTION_APPEND,
-		  (ef.NumChildren(p_cursor) > 0) ? TRUE : FALSE);
+		  (m_efg.NumChildren(cursor) > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_ACTION_DELETE, 
-		  (ef.NumChildren(p_cursor) > 0) ? TRUE : FALSE);
+		  (m_efg.NumChildren(cursor) > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_ACTION_PROBS,
-		  (p_cursor->GetInfoset() &&
-		   p_cursor->GetPlayer()->IsChance()) ? TRUE : FALSE);
+		  (cursor->GetInfoset() &&
+		   cursor->GetPlayer()->IsChance()) ? true : false);
 
   menuBar->Enable(efgmenuEDIT_TREE_DELETE,
-		  (ef.NumChildren(p_cursor) > 0) ? TRUE : FALSE);
+		  (m_efg.NumChildren(cursor) > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_TREE_COPY,
-		  (p_markNode &&
-		   p_cursor->GetSubgameRoot() == p_markNode->GetSubgameRoot()) ? TRUE : FALSE);
+		  (markNode &&
+		   cursor->GetSubgameRoot() == markNode->GetSubgameRoot()) ? true : false);
   menuBar->Enable(efgmenuEDIT_TREE_MOVE,
-		  (p_markNode &&
-		   p_cursor->GetSubgameRoot() == p_markNode->GetSubgameRoot()) ? TRUE : FALSE);
+		  (markNode &&
+		   cursor->GetSubgameRoot() == markNode->GetSubgameRoot()) ? true : false);
 
   menuBar->Enable(efgmenuEDIT_OUTCOMES_ATTACH,
-		  (ef.NumOutcomes() > 0) ? TRUE : FALSE);
+		  (m_efg.NumOutcomes() > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_OUTCOMES_DETACH,
-		  (p_cursor->GetOutcome()) ? TRUE : FALSE);
+		  (cursor->GetOutcome()) ? true : false);
   menuBar->Enable(efgmenuEDIT_OUTCOMES_LABEL,
-		  (p_cursor->GetOutcome()) ? TRUE : FALSE);
+		  (cursor->GetOutcome()) ? true : false);
   menuBar->Enable(efgmenuEDIT_OUTCOMES_DELETE,
-		  (ef.NumOutcomes() > 0) ? TRUE : FALSE);
+		  (m_efg.NumOutcomes() > 0) ? true : false);
   
-  if (tw) {
-    menuBar->Check(efgmenuSUPPORT_REACHABLE, tw->DrawSettings().RootReachable());
+  if (m_treeWindow) {
+    menuBar->Check(efgmenuSUPPORT_REACHABLE, m_treeWindow->DrawSettings().RootReachable());
   }
 
   menuBar->Enable(efgmenuSOLVE_CUSTOM_EFG_LP,
-		  ef.NumPlayers() == 2 && ef.IsConstSum());
-  menuBar->Enable(efgmenuSOLVE_CUSTOM_EFG_LCP, ef.NumPlayers() == 2);
+		  m_efg.NumPlayers() == 2 && m_efg.IsConstSum());
+  menuBar->Enable(efgmenuSOLVE_CUSTOM_EFG_LCP, m_efg.NumPlayers() == 2);
 
   menuBar->Enable(efgmenuSOLVE_CUSTOM_NFG_LP,
-		  ef.NumPlayers() == 2 && ef.IsConstSum());
-  menuBar->Enable(efgmenuSOLVE_CUSTOM_NFG_LCP, ef.NumPlayers() == 2);
-  menuBar->Enable(efgmenuSOLVE_CUSTOM_NFG_ENUMMIXED, ef.NumPlayers() == 2);
+		  m_efg.NumPlayers() == 2 && m_efg.IsConstSum());
+  menuBar->Enable(efgmenuSOLVE_CUSTOM_NFG_LCP, m_efg.NumPlayers() == 2);
+  menuBar->Enable(efgmenuSOLVE_CUSTOM_NFG_ENUMMIXED, m_efg.NumPlayers() == 2);
+
+  menuBar->Enable(efgmenuINSPECT_SOLUTIONS, solns.Length() > 0);
+
+  m_treeWindow->UpdateMenus();
 }
 
-
-
-
-#include "efggui.h"
-#include "dlefgplayers.h"
-
-//-------------------------------------------------------------------------
-//                        EfgGUI: Member functions
-//-------------------------------------------------------------------------
-
-EfgGUI::EfgGUI(FullEfg *p_efg, const gText &p_filename,
-               EfgNfgInterface *p_interface, wxFrame *p_parent)
+Node *EfgShow::Cursor(void) const
 {
-  if (!p_efg) {
-    // must create a new extensive form from scratch or file
-    if (p_filename == "") {  // from scratch
-      p_efg = new FullEfg;
-      p_efg->NewPlayer();
-      p_efg->NewPlayer();
-      if (!GetParams(*p_efg, p_parent)) {
-	delete p_efg;
-	p_efg = 0;
-      }
-    }
-    else {
-      // from data file
-      try {
-	gFileInput infile(p_filename);
-	p_efg = ReadEfgFile(infile);
-                
-	if (!p_efg) {
-	  wxMessageBox(p_filename + " is not a valid .efg file");
-	}
-	else {
-	  gambitApp.AddFileToHistory(p_filename);
-	}
-      }
-      catch (gFileInput::OpenFailed &) { 
-	wxMessageBox("Could not open " + p_filename + " for reading");
-	return;
-      }
-    }
-  }
-
-  EfgShow *efgShow = 0;
-
-  if (p_efg) {
-    efgShow = new EfgShow(*p_efg, p_interface, 1, p_parent);
-  }
-
-  if (efgShow) 
-    efgShow->SetFileName(p_filename);
-}
-
-int EfgGUI::GetParams(FullEfg &p_efg, wxFrame *p_parent)
-{
-  dialogEfgPlayers dialog(p_efg, p_parent);
-  return (dialog.Completed() == wxOK);
+  return m_treeWindow->Cursor();
 }
 
 template class SolutionList<BehavSolution>;
+
+#include "glist.imp"
+
+template class gList<EFSupport *>;
+
 
 
 

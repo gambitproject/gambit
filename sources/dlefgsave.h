@@ -9,21 +9,20 @@
 
 class dialogEfgSave : public guiAutoDialog {
 private:
-  wxText *m_fileName, *m_treeLabel;
+  wxTextCtrl *m_fileName, *m_treeLabel;
   wxSlider *m_numDecimals;
 
-  static void CallbackBrowse(wxButton &p_object, wxEvent &)
-    { ((dialogEfgSave *) p_object.GetClientData())->OnBrowse(); }
-
-  void OnBrowse(void);
+  void OnBrowse(wxCommandEvent &);
 
 public:
   dialogEfgSave(const gText &, const gText &, int, wxWindow *);
   virtual ~dialogEfgSave() { }
 
-  gText Filename(void) const { return m_fileName->GetValue(); }
-  gText Label(void) const { return m_treeLabel->GetValue(); }
+  gText Filename(void) const;
+  gText Label(void) const;
   int NumDecimals(void) const { return m_numDecimals->GetValue(); }
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif  // DLEFGSAVE_H

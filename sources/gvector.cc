@@ -24,11 +24,9 @@ template gOutput & operator<< (gOutput&, const gVector<gRational>&);
 template gOutput & operator<< (gOutput&, const gVector<gComplex>&);
 template gOutput & operator<< (gOutput&, const gVector<gNumber>&);
 
-#ifdef GDOUBLE
 template gVector<gDouble> TogDouble(const gVector<gRational>&);
 template gVector<gDouble> TogDouble(const gVector<double>&);
 template gVector<gDouble> TogDouble(const gVector<gDouble>&);
-#endif //GDOUBLE
 
 #include "glist.imp"
 

@@ -457,8 +457,6 @@ template <class T> T gPoly<T>::Evaluate(const gArray<T> &values) const
 }
 
 
-#ifndef MINI_POLY
-
 template <class T> gList<exp_vect> gPoly<T>::ExponentVectors() const
 {
   gList<exp_vect> result;
@@ -509,8 +507,6 @@ polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
 
   return  polynomial<T>(coefs);
 } 
-
-#endif   // MINI_POLY
 
 //-------------------------------------------------------------
 //           Private Versions of Arithmetic Operators
@@ -626,8 +622,6 @@ gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> &den) const
   return result;
 } 
 
-#ifndef MINI_POLY
-
 template <class T> 
 gPoly<T> gPoly<T>::EvaluateOneVar( int varnumber, T val) const
 {
@@ -673,9 +667,6 @@ gPoly<T> gPoly<T>::PartialDerivative(int varnumber) const
   return (newPoly);
 } 
 
-#endif   // MINI_POLY
-
-
 template <class T> 
 gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
 {
@@ -696,8 +687,6 @@ gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
 //--------------------
 // Term Order Concepts
 //--------------------
-
-#ifndef MINI_POLY
 
 template <class T> 
 exp_vect gPoly<T>::LeadingPowerProduct(const term_order & order) const
@@ -871,9 +860,6 @@ T gPoly<T>::MaximalValueOfNonlinearPart(const T& radius)  const
   return maxcon;
 }
 
-#endif   // MINI_POLY
-
-
 //---------------------------
 //    Global Operators
 //---------------------------
@@ -948,8 +934,6 @@ template <class T> gText &operator<<(gText &t, const gPoly<T> &p)
 //           Conversion
 //----------------------------------
 
-#ifdef GDOUBLE
-
 template<class T>  
 gPoly<gDouble>  TogDouble(const gPoly<T>& given) 
 {
@@ -990,8 +974,6 @@ gPoly<gDouble>  NormalizationOfPoly(const gPoly<T>& given)
   
   return answer;
 }
-
-#endif   // GDOUBLE
 
 template <class T> gOutput &operator<<(gOutput &f, const gPoly<T> &p)
 {

@@ -15,32 +15,24 @@ private:
   int m_branches;
 
   wxListBox *m_playerItem, *m_infosetItem;
-  wxText *m_actionItem;
+  wxTextCtrl *m_actionItem;
 
-  static void CallbackPlayer(wxListBox &p_object, wxCommandEvent &p_event)
-    { ((dialogMoveAdd *) p_object.wxEvtHandler::GetClientData())->
-	OnPlayer(p_event.commandInt); }
-  static void CallbackInfoset(wxListBox &p_object, wxCommandEvent &p_event)
-    { ((dialogMoveAdd *) p_object.wxEvtHandler::GetClientData())->
-	OnInfoset(p_event.commandInt); }
-
-  void OnPlayer(int);
-  void OnInfoset(int);
-
-  void OnOk(void);
+  void OnPlayer(wxCommandEvent &);
+  void OnInfoset(wxCommandEvent &);
 
   const char *HelpString(void) const { return "Add Move Dialog"; }
   
 public:
-  dialogMoveAdd(FullEfg &, const gText &,
-		EFPlayer *player=0, Infoset *infoset=0,
-                int branches=2, wxFrame *frame=0);
-  virtual ~dialogMoveAdd();
+  dialogMoveAdd(wxWindow *, FullEfg &, const gText &,
+		EFPlayer *, Infoset *, int branches);
+  virtual ~dialogMoveAdd() { } 
 
   NodeAddMode GetAddMode(void) const;
   EFPlayer *GetPlayer(void) const;
   Infoset *GetInfoset(void) const;
   int GetActions(void) const;
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif  // DLMOVEADD_H

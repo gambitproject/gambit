@@ -7,98 +7,47 @@
 #ifndef WXMISC_H
 #define WXMISC_H
 
-#ifndef wxRUNNING
-#define wxRUNNING 12345
-#endif
+#include "wx/grid.h"
 
 #include <stdio.h>
-#include "wx_timer.h"
-#include "wx_form.h"
-
 #include "garray.h"
-
-#define WX_COLOR_LIST_LENGTH 11
-
-#ifndef WXMISC_C
-extern const char *wx_color_list[WX_COLOR_LIST_LENGTH];
-extern const char *wx_hilight_color_list[WX_COLOR_LIST_LENGTH];
-#else
-const char *wx_color_list[WX_COLOR_LIST_LENGTH] = 
-{
-    "GREEN", "RED", "BLUE", "YELLOW", "VIOLET RED", "SALMON", "ORCHID",
-    "TURQUOISE", "BROWN", "PALE GREEN", "BLACK"
-};
-
-const char *wx_hilight_color_list[WX_COLOR_LIST_LENGTH] = 
-{
-    "PALE GREEN", "INDIAN RED", "MEDIUM BLUE", "YELLOW GREEN",
-    "MEDIUM VIOLET RED", "TAN", "MEDIUM ORCHID", "MEDIUM TURQUOISE",
-    "KHAKI", "SEA GREEN", "DARK GREY"
-};
-#endif
-
+#include "gnumber.h"
 
 //
 // A generic standard dialog box featuring automatic layout, frame control
 // handling, and standard button placement
 //
-class guiAutoDialog : public wxDialogBox {
-private:
-  int m_completed;
-
-  static void CallbackOk(wxButton &p_object, wxEvent &)
-    { ((guiAutoDialog *) p_object.GetClientData())->OnOk(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((guiAutoDialog *) p_object.GetClientData())->OnClose(); }
-  static void CallbackHelp(wxButton &p_object, wxEvent &)
-    { ((guiAutoDialog *) p_object.GetClientData())->OnHelp(); }
-
-  Bool OnClose(void);
-
+class guiAutoDialog : public wxDialog {
 protected:
   wxButton *m_okButton, *m_cancelButton, *m_helpButton;
+  wxBoxSizer *m_buttonSizer;
 
   virtual const char *HelpString(void) const { return ""; }
 
-  virtual void OnOk(void);
-  void OnCancel(void);
   void OnHelp(void);
+
+  void Go(void);
 
 public:
   guiAutoDialog(wxWindow *p_parent, char *p_title);
-  virtual ~guiAutoDialog() { }
-
-  void Go(void);
-  int Completed(void) const { return m_completed; }
+  virtual ~guiAutoDialog();
 };
 
 /**
  * A "paged" dialog class (i.e., with "back" and "next" buttons)
  */
 class guiPagedDialog : public guiAutoDialog {
-private:
-  static void CallbackNext(wxButton &p_object, wxEvent &)
-    { ((guiPagedDialog *) p_object.GetClientData())->OnNext(); }
-  static void CallbackBack(wxButton &p_object, wxEvent &)
-    { ((guiPagedDialog *) p_object.GetClientData())->OnBack(); }
-
-  void OnOk(void);
-  void OnNext(void);
-  void OnBack(void);
-
 protected:
-  int m_pageNumber, m_numFields;
-  static int s_itemsPerPage;
-  wxText **m_dataFields;
-  wxButton *m_backButton, *m_nextButton;
-  gArray<gText> m_dataValues;
+  wxGrid *m_grid;
 
 public:
   guiPagedDialog(wxWindow *p_parent, char *p_title, int p_numItems);
   virtual ~guiPagedDialog();
 
-  const gText &GetValue(int p_index) const { return m_dataValues[p_index]; }
+  gText GetValue(int p_index) const;
   void SetValue(int p_index, const gText &p_value);
+
+  void SetLabel(int p_index, const gText &p_label);
 };
 
 /**
@@ -116,40 +65,6 @@ public:
 
   int GetValue(void) const { return m_slider->GetValue(); }
 };
-
-/**
- * A dialog box with just a single float input field
- */
-
-class guiFloatDialog : public guiAutoDialog {
-private:
-  double m_min, m_max;
-  wxText *m_value;
-
-  void OnOk(void);
-
-public:
-  guiFloatDialog(wxWindow *p_parent, const gText &p_caption,
-		 const gText &p_label, double p_min, double p_max,
-		 double p_default);
-  virtual ~guiFloatDialog() { }
-
-  double GetValue(void) const;
-};
-
-class FontDialogBox : public guiAutoDialog {
-private:
-  wxChoice *m_nameItem, *m_sizeItem;
-  wxRadioBox *m_styleItem, *m_weightItem;
-  wxCheckBox *m_underlineItem;
-
-public:
-  FontDialogBox(wxWindow *parent, wxFont *def = 0);
-  virtual ~FontDialogBox() { }
-
-  wxFont  *MakeFont(void);
-};
-
 
 typedef enum {
   wxWYSIWYG, wxFITTOPAGE
@@ -174,7 +89,7 @@ public:
   /** Returns the additional media type given in extra_media, if any */
   int GetExtraMedia(void) const;
   /** Returns true if the selection was an extra_media */
-  Bool ExtraMedia(void) const;
+  bool ExtraMedia(void) const;
   /** Returns either wysiwyg or fit to page if appropriate */
   wxOutputOption GetOption(void) const;
 };
@@ -197,11 +112,11 @@ char *wxFontToString(wxFont *f);
 wxFont *wxStringToFont(char *s);
 
 // Some basic keyboard stuff...
-Bool    IsCursor(wxKeyEvent &ev);
-Bool    IsEnter(wxKeyEvent &ev);
-Bool    IsNumeric(wxKeyEvent &ev);
-Bool    IsAlphaNum(wxKeyEvent &ev);
-Bool    IsDelete(wxKeyEvent &ev);
+bool    IsCursor(wxKeyEvent &ev);
+bool    IsEnter(wxKeyEvent &ev);
+bool    IsNumeric(wxKeyEvent &ev);
+bool    IsAlphaNum(wxKeyEvent &ev);
+bool    IsDelete(wxKeyEvent &ev);
 
 // gDrawText is an extension of the wxWindow's wxDC::DrawText function
 // Besides providing the same features, it also supports imbedded codes
@@ -217,8 +132,6 @@ void gGetTextExtent(wxDC &dc, const gText &s0, float *x, float *y);
 
 // Returns just the text portion of a gDrawText formated string
 gText gPlainText(const gText &s);
-gText gGetTextLine(const gText &s0 = "", wxFrame *parent = 0, int x = -1, int y = -1,
-                   const char *title = "", bool titlebar = false);
 
 // Returns the file name from a path.  The function FileNameFromPath()
 // crashes when there is no path
@@ -238,9 +151,6 @@ void wxHelpContents(const char *name);
 void wxHelpAbout(const char *help_str = 0);
 void wxKillHelp(void);
 
-Bool wxGetResourceStr(char *section, char *entry, gText &value, char *file);
-
-
 #define CREATE_DIALOG       0
 #define DESTROY_DIALOG      1
 #define UPDATE_DIALOG       2
@@ -249,11 +159,10 @@ Bool wxGetResourceStr(char *section, char *entry, gText &value, char *file);
 //
 // Some specialized panel items that implement constraints
 //
-class wxIntegerItem : public wxText {
+class wxIntegerItem : public wxTextCtrl {
 private:
   int m_value;
-
-  static void EventCallback(wxIntegerItem &p_object, wxCommandEvent &p_event);
+  wxString m_data;
 
 public:
   wxIntegerItem(wxPanel *p_parent, char *p_label, int p_default = 0,
@@ -264,13 +173,10 @@ public:
   int GetInteger(void) const { return m_value; }
 };
 
-#include "gnumber.h"
-
-class wxNumberItem : public wxText {
+class wxNumberItem : public wxTextCtrl {
 private:
   gNumber m_value;
-
-  static void EventCallback(wxNumberItem &p_object, wxCommandEvent &p_event);
+  wxString m_data;
 
 public:
   wxNumberItem(wxPanel *p_parent, char *p_label, const gText &p_default,
@@ -281,5 +187,53 @@ public:
   gNumber GetNumber(void) const { return m_value; }
 };
 
-#endif // WXMISC_H
+// in efgsolvd.cc, nfgsolvd.cc
+const int idTYPE_RADIOBOX = 501;
+const int idNUM_RADIOBOX = 502;
 
+// in dlefg.cc
+const int idMOVE_PLAYER_LISTBOX = 1011;
+const int idMOVE_INFOSET_LISTBOX = 1012;
+const int idINFOSET_EDIT_BUTTON = 1021;
+const int idINFOSET_PLAYER_LISTBOX = 1022;
+const int idINFOSET_INFOSET_LISTBOX = 1023;
+const int idINFOSET_NEW_BUTTON = 1024;
+const int idINFOSET_REMOVE_BUTTON = 1025;
+const int idEFPLAYERS_NEW_BUTTON = 1031;
+const int idEFPLAYERS_EDIT_BUTTON = 1032;
+const int idEFSUPPORT_PLAYER_LISTBOX = 1041;
+const int idEFSUPPORT_INFOSET_LISTBOX = 1042;
+const int idEFSUPPORT_ACTION_LISTBOX = 1043;
+const int idEFG_BROWSE_BUTTON = 1051;
+
+// in dlsupport.cc
+const int idMETHOD_BOX = 1200;
+
+// in nfgshow.cc
+const int idSTRATEGY_CHOICE = 2001;
+const int idROWPLAYER_CHOICE = 2002;
+const int idCOLPLAYER_CHOICE = 2003;
+
+// in algdlgs.cc
+const int idTRACE_CHOICE = 2400;
+const int idALL_CHECKBOX = 2500;
+const int idTRACE_BUTTON = 2501;
+const int idDEPTH_CHOICE = 2502;
+const int idRUNPXI_BOX = 2300;
+
+// in dlnfg.cc
+const int idNFPLAYERS_EDIT_BUTTON = 3001;
+const int idSTRATEGY_PLAYER_LISTBOX = 3011;
+const int idSTRATEGY_STRATEGY_LISTBOX = 3012;
+const int idNFSUPPORT_PLAYER_LISTBOX = 3021;
+const int idNFSUPPORT_STRATEGY_LISTBOX = 3022;
+const int idNFG_BROWSE_BUTTON = 3031;
+
+// in accels.cc
+const int idACCELS_EVENT_LISTBOX = 4001;
+const int idACCELS_KEY_LISTBOX = 4002;
+
+// in efgsolutions.cc, nfgsolutions.cc
+const int idSOLUTION_WINDOW = 5001;
+
+#endif // WXMISC_H

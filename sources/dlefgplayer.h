@@ -17,7 +17,7 @@ private:
 
 public:
   dialogEfgSelectPlayer(const Efg &, bool p_chance = true, wxWindow * = 0);
-  virtual ~dialogEfgSelectPlayer();
+  virtual ~dialogEfgSelectPlayer() { } 
 
   EFPlayer *GetPlayer(void);
 };

@@ -12,7 +12,7 @@ private:
   EFOutcome *m_outcome;
   const FullEfg &m_efg;
   gText m_name;
-  wxText *m_outcomeName;
+  wxTextCtrl *m_outcomeName;
 
   const char *HelpString(void) const { return "Change Payoffs Dialog"; }
 

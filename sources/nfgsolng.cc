@@ -5,8 +5,7 @@
 // $Id$
 //
 
-#include "wx.h"
-#include "wx_form.h"
+#include "wx/wx.h"
 #include "wxmisc.h"
 #include "wxstatus.h"
 #include "glist.h"
@@ -115,7 +114,7 @@ bool guinfgEnumPure::SolveSetup(void)
 {
   dialogEnumPure dialog(m_parent->Frame(), false, true);
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -177,7 +176,7 @@ bool guinfgEnumMixed::SolveSetup(void)
 {
   dialogEnumMixed dialog(m_parent->Frame());
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -242,7 +241,7 @@ bool guinfgLcp::SolveSetup(void)
 {
   dialogLcp dialog(m_parent->Frame(), false, true);
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -307,7 +306,7 @@ bool guinfgLp::SolveSetup(void)
 {
   dialogLp dialog(m_parent->Frame(), false, true);
   
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -373,7 +372,7 @@ bool guinfgLiap::SolveSetup(void)
 {
   dialogLiap dialog(m_parent->Frame(), false, true);
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -444,7 +443,7 @@ bool guinfgSimpdiv::SolveSetup(void)
 {
   dialogSimpdiv dialog(m_parent->Frame());
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -510,7 +509,7 @@ bool guinfgPolEnum::SolveSetup(void)
 {
   dialogPolEnum dialog(m_parent->Frame(), false, true);
   
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -560,7 +559,7 @@ gList<MixedSolution> guinfgQre::Solve(void)
   catch (gSignalBreak &) { }
 
   if (m_runPxi) {
-    if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
+    if (!wxExecute((char *) (m_pxiCommand + " " + m_pxiFilename))) {
       wxMessageBox("Unable to launch PXI successfully");
     }
   }
@@ -572,7 +571,7 @@ bool guinfgQre::SolveSetup(void)
 {
   dialogQre dialog(m_parent->Frame(), m_parent->Filename(), true);
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
@@ -635,7 +634,7 @@ gList<MixedSolution> guinfgQreAll::Solve(void)
   catch (gSignalBreak &) { }
   
   if (m_runPxi) {
-    if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
+    if (!wxExecute((char *) (m_pxiCommand + " " + m_pxiFilename))) {
       wxMessageBox("Unable to launch PXI successfully");
     }
   }
@@ -646,7 +645,7 @@ bool guinfgQreAll::SolveSetup(void)
 {
   dialogQreGrid dialog(m_parent->Frame(), m_parent->Filename());
 
-  if (dialog.Completed() == wxOK) {
+  if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();

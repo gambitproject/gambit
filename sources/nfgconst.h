@@ -9,6 +9,8 @@
 
 // must make sure that none of the menus are a power of two
 #define NFG_FILE_SAVE                   250
+#define NFG_FILE_OUTPUT                 251
+#define NFG_FILE_CLOSE                  252
 
 #define NFG_EDIT_LABEL                  300
 #define NFG_EDIT_STRATS                 301
@@ -57,9 +59,13 @@
 #define NFG_PREFS_ACCELS                202
 #define NFG_PREFS_SAVE                  209
 #define NFG_PREFS_LOAD                  210
+#define NFG_OPTIONS_MENU                211
 
 #define NFG_ACCL_PAYOFF                 400     // these are not real menus, just accels
 #define NFG_ACCL_NEXT_PAYOFF            410
+
+#define NFG_HELP_ABOUT                  601
+#define NFG_HELP_CONTENTS               602
 
 // Help system
 #define NFG_GUI_HELP                    "Normal Form GUI"

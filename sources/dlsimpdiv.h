@@ -17,6 +17,9 @@ private:
 
   void AlgorithmFields(void);
 
+  // Event handlers
+  void OnOK(wxCommandEvent &);
+
 public:
   dialogSimpdiv(wxWindow *p_parent = 0, bool p_subgames = false);
   virtual ~dialogSimpdiv();
@@ -26,6 +29,8 @@ public:
   int StopAfter(void) const;
   gPrecision Precision(void) const
     { return (m_precision->GetSelection() == 0) ? precDOUBLE : precRATIONAL; }
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif  // DLSIMPDIV_H

@@ -17,12 +17,12 @@
 #include "gtree.imp"
 #include "glist.imp"
 
-template class gTreeNode<gPoly<double> >;
-template class gList<gTreeNode<gPoly<double> >*>;
-template class gTree<gPoly<double> >;
-template class gList<gTree<gPoly<double> > >;
-template gOutput& operator << (gOutput& output, 
-			       const gTree<gPoly<double> >&);
+//template class gTreeNode<gPoly<double> >;
+//template class gList<gTreeNode<gPoly<double> >*>;
+//template class gTree<gPoly<double> >;
+//template class gList<gTree<gPoly<double> > >;
+//template gOutput& operator << (gOutput& output, 
+//			       const gTree<gPoly<double> >&);
 
 template class gTreeNode<gPoly<gRational> >;
 template class gList<gTreeNode<gPoly<gRational> >*>;

@@ -4,111 +4,85 @@
 // $Id$
 //
 
-#include "wx.h"
+#include "wx/wx.h"
 #include "wxmisc.h"
 
 #include "nfg.h"
 #include "gambit.h"
 #include "nfgsolvd.h"
 
-static const char *SOLN_SECT = "Soln-Defaults";
-
 //========================================================================
 //                dialogNfgSolveStandard: Member functions
 //========================================================================
 
-dialogNfgSolveStandard::dialogNfgSolveStandard(const Nfg &p_nfg,
-					       wxWindow *p_parent)
+BEGIN_EVENT_TABLE(dialogNfgSolveStandard, guiAutoDialog)
+  EVT_RADIOBOX(idTYPE_RADIOBOX, dialogNfgSolveStandard::OnChanged)
+  EVT_RADIOBOX(idNUM_RADIOBOX, dialogNfgSolveStandard::OnChanged)
+END_EVENT_TABLE()
+
+dialogNfgSolveStandard::dialogNfgSolveStandard(wxWindow *p_parent,
+					       const Nfg &p_nfg)
   : guiAutoDialog(p_parent, "Standard Solution"), m_nfg(p_nfg)
 {
-  gText defaultsFile(gambitApp.ResourceFile());
-  int standardType = 0, standardNum = 0, precision = 0;
-  wxGetResource(SOLN_SECT, "Nfg-Standard-Type", &standardType,
-		defaultsFile);
-  wxGetResource(SOLN_SECT, "Nfg-Standard-Num", &standardNum,
-		defaultsFile);
-  wxGetResource(SOLN_SECT, "Nfg-Standard-Precision", &precision, defaultsFile);
+  wxString standardType = "Nash", standardNum = "One", precision = "Float";
+  wxConfig config("Gambit");
+  config.Read("Solutions/Nfg-Standard-Type", &standardType);
+  config.Read("Solutions/Nfg-Standard-Num", &standardNum);
+  config.Read("Solutions/Nfg-Standard-Precision", &precision);
 
-  char *typeChoices[] = { "Nash", "Perfect" };
-  m_standardType = new wxRadioBox(this, (wxFunction) CallbackChanged,
-				  "Type", -1, -1, -1, -1,
+  wxBoxSizer *radioSizer = new wxBoxSizer(wxHORIZONTAL);
+
+  wxString typeChoices[] = { "Nash", "Perfect" };
+  m_standardType = new wxRadioBox(this, idTYPE_RADIOBOX, "Type",
+				  wxDefaultPosition, wxDefaultSize,
 				  (m_nfg.NumPlayers() == 2) ? 2 : 1,
-				  typeChoices, 0, wxVERTICAL);
-  m_standardType->SetClientData((char *) this);
-  m_standardType->SetSelection(standardType);
-  m_standardType->SetConstraints(new wxLayoutConstraints);
-  m_standardType->GetConstraints()->left.SameAs(this, wxLeft, 10);
-  m_standardType->GetConstraints()->top.SameAs(this, wxTop, 10);
-  m_standardType->GetConstraints()->width.AsIs();
-  m_standardType->GetConstraints()->height.AsIs();
+				  typeChoices, 0, wxRA_SPECIFY_ROWS);
+  m_standardType->SetStringSelection(standardType);
+  radioSizer->Add(m_standardType, 0, wxALL, 5);
 
-  char *numChoices[] = { "One", "Two", "All" };
-  m_standardNum = new wxRadioBox(this, (wxFunction) CallbackChanged,
-				 "Number", -1, -1, -1, -1,
-				 3, numChoices, 0, wxVERTICAL);
-  m_standardNum->SetClientData((char *) this);
-  m_standardNum->SetSelection(standardNum);
-  m_standardNum->SetConstraints(new wxLayoutConstraints);
-  m_standardNum->GetConstraints()->left.SameAs(m_standardType, wxRight, 10);
-  m_standardNum->GetConstraints()->top.SameAs(m_standardType, wxTop);
-  m_standardNum->GetConstraints()->width.AsIs();
-  m_standardNum->GetConstraints()->height.AsIs();
+  wxString numChoices[] = { "One", "Two", "All" };
+  m_standardNum = new wxRadioBox(this, idNUM_RADIOBOX, "Number",
+				 wxDefaultPosition, wxDefaultSize,
+				 3, numChoices, 0, wxRA_SPECIFY_ROWS);
+  m_standardNum->SetStringSelection(standardNum); 
+  radioSizer->Add(m_standardNum, 0, wxALL, 5);
 
-  char *precisionChoices[] = { "Float", "Rational" };
-  m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
-			       2, precisionChoices, 0, wxVERTICAL);
-  m_precision->SetSelection(precision);
-  m_precision->SetConstraints(new wxLayoutConstraints);
-  m_precision->GetConstraints()->left.SameAs(m_standardNum, wxRight, 10);
-  m_precision->GetConstraints()->top.SameAs(m_standardType, wxTop);
-  m_precision->GetConstraints()->width.AsIs();
-  m_precision->GetConstraints()->height.AsIs();
+  wxString precisionChoices[] = { "Float", "Rational" };
+  m_precision = new wxRadioBox(this, -1, "Precision",
+			       wxDefaultPosition, wxDefaultSize,
+			       2, precisionChoices, 0, wxRA_SPECIFY_ROWS);
+  m_precision->SetStringSelection(precision);
+  radioSizer->Add(m_precision, 0, wxALL, 5);
   
-  m_description = new wxText(this, 0, "Using algorithm");
-  m_description->Enable(FALSE);
-  m_description->SetConstraints(new wxLayoutConstraints);
-  m_description->GetConstraints()->left.SameAs(m_standardType, wxLeft);
-  m_description->GetConstraints()->right.SameAs(m_precision, wxRight);
-  m_description->GetConstraints()->height.AsIs();
-  m_description->GetConstraints()->top.SameAs(m_standardNum, wxBottom, 5);
+  m_description = new wxTextCtrl(this, -1);
+  m_description->Enable(false);
 
-  m_okButton->GetConstraints()->top.SameAs(m_description, wxBottom, 10);
-  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
-  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-  m_okButton->GetConstraints()->height.AsIs();
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(radioSizer, 0, wxALL, 5);
+  topSizer->Add(m_description, 0, wxEXPAND | wxALL, 5);
+  topSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
 
-  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_cancelButton->GetConstraints()->centreX.SameAs(m_description, wxCentreX);
-  m_cancelButton->GetConstraints()->width.AsIs();
-  m_cancelButton->GetConstraints()->height.AsIs();
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
 
-  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
-  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-  m_helpButton->GetConstraints()->height.AsIs();
-
-  OnChanged();
-
-  Go();
+  wxCommandEvent event;
+  OnChanged(event);
+  Layout();
 }
 
 dialogNfgSolveStandard::~dialogNfgSolveStandard()
 {
-  if (Completed() == wxOK) {
-    gText defaultsFile(gambitApp.ResourceFile());
-    if(m_standardType)
-      wxWriteResource(SOLN_SECT, "Nfg-Standard-Type",
-		      m_standardType->GetSelection(), defaultsFile);
-    if(m_standardNum)
-      wxWriteResource(SOLN_SECT, "Nfg-Standard-Num",
-		      m_standardNum->GetSelection(), defaultsFile);
-    if(m_precision)
-      wxWriteResource(SOLN_SECT, "Nfg-Standard-Precision",
-		      m_precision->GetSelection(), defaultsFile);
-  }
+  wxConfig config("Gambit");
+  config.Write("Solutions/Nfg-Standard-Type",
+	       m_standardType->GetStringSelection());
+  config.Write("Solutions/Nfg-Standard-Num",
+	       m_standardNum->GetStringSelection());
+  config.Write("Solutions/Nfg-Standard-Precision",
+	       m_precision->GetStringSelection());
 }
 
-void dialogNfgSolveStandard::OnChanged(void)
+void dialogNfgSolveStandard::OnChanged(wxCommandEvent &)
 {
   switch (m_standardType->GetSelection()) {
   case 0:
@@ -116,37 +90,37 @@ void dialogNfgSolveStandard::OnChanged(void)
     case 0:
       if (m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg)) {
 	m_description->SetValue("LpSolve");
-	m_precision->Enable(TRUE);
+	m_precision->Enable(true);
       }
       else if (m_nfg.NumPlayers() == 2) {
 	m_description->SetValue("LcpSolve");
-	m_precision->Enable(TRUE);
+	m_precision->Enable(true);
       }
       else {
 	m_description->SetValue("SimpdivSolve");
-	m_precision->Enable(TRUE);
+	m_precision->Enable(true);
       }
       break;
     case 1:
       if (m_nfg.NumPlayers() == 2) {
 	m_description->SetValue("EnumMixedSolve");
-	m_precision->Enable(TRUE);
+	m_precision->Enable(true);
       }
       else {
 	m_description->SetValue("LiapSolve");
 	m_precision->SetSelection(0);
-	m_precision->Enable(FALSE);
+	m_precision->Enable(false);
       }
       break;
     case 2:
       if (m_nfg.NumPlayers() == 2) {
 	m_description->SetValue("EnumMixedSolve");
-	m_precision->Enable(TRUE);
+	m_precision->Enable(true);
       }
       else {
 	m_description->SetValue("PolEnumSolve");
 	m_precision->SetSelection(1);
-	m_precision->Enable(FALSE);
+	m_precision->Enable(false);
       }
       break;
     }
@@ -157,7 +131,7 @@ void dialogNfgSolveStandard::OnChanged(void)
     case 0:
       if (m_nfg.NumPlayers() == 2) {
 	m_description->SetValue("EnumMixedSolve");
-	m_precision->Enable(TRUE);
+	m_precision->Enable(true);
       }
       else 
 	m_description->SetValue("NOT IMPLEMENTED");
@@ -165,7 +139,7 @@ void dialogNfgSolveStandard::OnChanged(void)
     case 1:
       if (m_nfg.NumPlayers() == 2) {
 	m_description->SetValue("EnumMixedSolve");
-	m_precision->Enable(TRUE);
+	m_precision->Enable(true);
       }
       else
 	m_description->SetValue("NOT IMPLEMENTED");
@@ -173,7 +147,7 @@ void dialogNfgSolveStandard::OnChanged(void)
     case 2:
       if (m_nfg.NumPlayers() == 2) {
 	m_description->SetValue("EnumMixedSolve");
-	m_precision->Enable(TRUE);
+	m_precision->Enable(true);
       }
       else
 	m_description->SetValue("NOT IMPLEMENTED");

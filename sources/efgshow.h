@@ -7,162 +7,220 @@
 #ifndef EFGSHOW_H
 #define EFGSHOW_H
 
+#include "wx/sashwin.h"
+
 #include "efgnfgi.h"
 #include "gambit.h"
 #include "accels.h"
 #include "bsolnsf.h"
 #include "efgsolng.h"
 #include "efgconst.h"
+#include "solnlist.h"
 
 class EfgSolnShow;
-class guiEfgShowToolBar;
+class EfgToolbar;
 class NodeSolnShow;
 class TreeWindow;
-
-template <class T> class SolutionList: public gSortList<T>
-{
-private:
-    unsigned int max_id;
-
-public:
-    SolutionList(void):gSortList<T>(), max_id(1) { }
-    SolutionList(const gList<T> &l): gSortList<T>(l), max_id(1) { }
-    virtual int Append(const T &a)
-    { (*this)[gSortList<T>::Append(a)].SetId(max_id++); return Length(); }
-};
+class TreeZoomWindow;
 
 typedef SolutionList<BehavSolution> BehavSolutionList;
 
-class EfgShow: public wxFrame, public EfgNfgInterface, public EfgShowInterface {
+class EfgShow : public wxFrame,
+		public EfgNfgInterface, public EfgShowInterface {
 private:
-    wxFrame *parent;
-    FullEfg &ef;
+  wxFrame *parent;
+  FullEfg &m_efg;
+  TreeWindow *m_treeWindow;
+  TreeZoomWindow *m_treeZoomWindow;
 
-    // Solution routines
-    BehavSolutionList solns;
-    struct StartingPoints
-    {
-        BehavSolutionList profiles;
-        int last;
-        StartingPoints() : last(-1) { }
-    } starting_points;
-    int cur_soln;
+  // Solution routines
+  BehavSolutionList solns;
+  struct StartingPoints {
+    BehavSolutionList profiles;
+    int last;
+    StartingPoints() : last(-1) { }
+  } starting_points;
+  
+  int cur_soln;
 
-    gList<EFSupport *> supports;
-    EFSupport *cur_sup;
+  gList<EFSupport *> m_supports;
+  EFSupport *m_currentSupport;
 
-    // all_nodes must at all times refer to the prefix traversal order of the tree.
-    // It is TreeWindow's job to call RemoveSolutions every time the nodes are
-    // changes.  all_nodes is maintained in RemoveSolutions.
-    gList<Node *> all_nodes;
-    EfgSolnShow *soln_show;
-    BSolnSortFilterOptions sf_options;
-    gList<Accel>    accelerators;
-    gText   filename;
-    guiEfgShowToolBar *toolbar;
+  EfgSolnShow *m_solutionTable;
+  BSolnSortFilterOptions sf_options;
+  gList<Accel>    accelerators;
+  gText   filename;
+  EfgToolbar *m_toolbar;
+  wxSashWindow *m_treeSashWindow, *m_nodeSashWindow, *m_toolSashWindow;
+  wxSashWindow *m_solutionSashWindow;
 
-    // Private functions
-    gArray<AccelEvent> MakeEventNames(void);
-    NodeSolnShow *node_inspect;
+  // Private functions
+  gArray<AccelEvent> MakeEventNames(void);
+  NodeSolnShow *node_inspect;
 
-    bool SolveNormalReduced(void);
-    bool SolveNormalAgent(void);
-
-    void SubgamesSetup(void);
-    void NodeInspect(bool insp);
+  void NodeInspect(bool insp);
 
   struct es_features {
-    Bool iset_hilight;
+    bool iset_hilight;
     es_features(void) : iset_hilight(FALSE) { }
   } features;
 
-    void MakeMenus(void);
+  void MakeMenus(void);
+  void AdjustSizes(void);
+  
+  // Event handlers
+  void OnCloseWindow(wxCloseEvent &);
+  void OnFocus(wxFocusEvent &);
+  void OnSize(wxSizeEvent &);
+  void OnSashDrag(wxSashEvent &);
+
+  // Menu event handlers
+  void OnFileOutput(wxCommandEvent &);
+  void OnFileSave(wxCommandEvent &);
+  
+  void OnEditNodeAdd(wxCommandEvent &);
+  void OnEditNodeDelete(wxCommandEvent &);
+  void OnEditNodeInsert(wxCommandEvent &);
+  void OnEditNodeLabel(wxCommandEvent &);
+  void OnEditNodeSetMark(wxCommandEvent &);
+  void OnEditNodeGotoMark(wxCommandEvent &);
+
+  void OnEditActionDelete(wxCommandEvent &);
+  void OnEditActionInsert(wxCommandEvent &);
+  void OnEditActionAppend(wxCommandEvent &);
+  void OnEditActionLabel(wxCommandEvent &);
+  void OnEditActionProbs(wxCommandEvent &);
+
+  void OnEditInfosetMerge(wxCommandEvent &);
+  void OnEditInfosetBreak(wxCommandEvent &);
+  void OnEditInfosetSplit(wxCommandEvent &);
+  void OnEditInfosetJoin(wxCommandEvent &);
+  void OnEditInfosetLabel(wxCommandEvent &);
+  void OnEditInfosetPlayer(wxCommandEvent &);
+  void OnEditInfosetReveal(wxCommandEvent &);
+
+  void OnEditOutcomesAttach(wxCommandEvent &);
+  void OnEditOutcomesDetach(wxCommandEvent &);
+  void OnEditOutcomesLabel(wxCommandEvent &);
+  void OnEditOutcomesPayoffs(wxCommandEvent &);
+  void OnEditOutcomesNew(wxCommandEvent &);
+  void OnEditOutcomesDelete(wxCommandEvent &);
+
+  void OnEditTreeDelete(wxCommandEvent &);
+  void OnEditTreeCopy(wxCommandEvent &);
+  void OnEditTreeMove(wxCommandEvent &);
+  void OnEditTreeLabel(wxCommandEvent &);
+  void OnEditTreePlayers(wxCommandEvent &);
+  void OnEditTreeInfosets(wxCommandEvent &);
+
+  void OnSubgamesMarkAll(wxCommandEvent &);
+  void OnSubgamesMark(wxCommandEvent &);
+  void OnSubgamesUnMarkAll(wxCommandEvent &);
+  void OnSubgamesUnMark(wxCommandEvent &);
+  void OnSubgamesCollapseAll(wxCommandEvent &);
+  void OnSubgamesCollapse(wxCommandEvent &);
+  void OnSubgamesExpandAll(wxCommandEvent &);
+  void OnSubgamesExpandBranch(wxCommandEvent &);
+  void OnSubgamesExpand(wxCommandEvent &);
+
+  void OnSupportUndominated(wxCommandEvent &);
+  void OnSupportNew(wxCommandEvent &);
+  void OnSupportEdit(wxCommandEvent &);
+  void OnSupportDelete(wxCommandEvent &);
+  void OnSupportSelectFromList(wxCommandEvent &);
+  void OnSupportSelectPrevious(wxCommandEvent &);
+  void OnSupportSelectNext(wxCommandEvent &);
+  void OnSupportReachable(wxCommandEvent &);
+
+  void OnSolveStandard(wxCommandEvent &);
+  void OnSolveCustom(wxCommandEvent &);
+  void OnSolveNormalReduced(wxCommandEvent &);
+  void OnSolveNormalAgent(wxCommandEvent &);
+
+  void OnInspectSolutions(wxCommandEvent &);
+  void OnInspectCursor(wxCommandEvent &);
+  void OnInspectInfosets(wxCommandEvent &);
+  void OnInspectZoom(wxCommandEvent &);
+  void OnInspectGameInfo(wxCommandEvent &);
+
+  void OnPrefsZoomIn(wxCommandEvent &);
+  void OnPrefsZoomOut(wxCommandEvent &);
+  void OnPrefsLegend(wxCommandEvent &);
+  void OnPrefsFontsAboveNode(wxCommandEvent &);
+  void OnPrefsFontsBelowNode(wxCommandEvent &);
+  void OnPrefsFontsAfterNode(wxCommandEvent &);
+  void OnPrefsFontsAboveBranch(wxCommandEvent &);
+  void OnPrefsFontsBelowBranch(wxCommandEvent &);
+  void OnPrefsDisplayLayout(wxCommandEvent &);
+  void OnPrefsDisplayFlashing(wxCommandEvent &);
+  void OnPrefsDisplayDecimals(wxCommandEvent &);
+  void OnPrefsColors(wxCommandEvent &);
+  void OnPrefsSave(wxCommandEvent &);
+  void OnPrefsLoad(wxCommandEvent &);
+  void OnPrefsAccels(wxCommandEvent &);
+  void OnHelpAbout(wxCommandEvent &);
+  void OnHelpContents(wxCommandEvent &);
 
 public:
-  TreeWindow *tw;
-
   // CONSTRUCTOR AND DESTRUCTOR
-  EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg = 0, int p_subgame = 1, 
-	  wxFrame *p_frame = 0, char *p_title = 0, 
-	  int p_x = -1, int p_y = -1, int p_w = 600,
-	  int p_h = 400, int p_type = wxDEFAULT_FRAME);
-  ~EfgShow();
+  EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent);
+  virtual ~EfgShow();
 
-    // Event handlers
-    Bool        OnClose(void);
-    void        OnMenuCommand(int id);
-    void        OnSize(int w, int h);
-    void        OnSetFocus(void);
+  // Solution routines
+  void RemoveSolutions(void);
+  void ChangeSolution(int soln);
+  void OnSelectedMoved(const Node *n);
+  BehavSolution CreateSolution(void);
 
-    // Solution routines
-    void        Solve(int id);
+  // Solution interface to the algorithms
+  void PickSolutions(const Efg &, Node *, gList<BehavSolution> &);
+  BehavProfile<gNumber> CreateStartProfile(int how);
+  void RemoveStartProfiles(void);
 
-    void        SolveStandard(void);
-    void        InspectSolutions(int what);
-    void        RemoveSolutions(void);
-    void        ChangeSolution(int soln);
-    void        OnSelectedMoved(const Node *n);
-    BehavSolution CreateSolution(void);
+  // Solution interface to normal form
+  void SolutionToEfg(const BehavProfile<gNumber> &s, bool set = false);
+  const Efg *InterfaceObjectEfg(void) { return &m_efg; }
+  FullEfg *Game(void) { return &m_efg; }
+  wxFrame *Frame(void);
 
-    // Solution interface to the algorithms
-    void PickSolutions(const Efg &, Node *, gList<BehavSolution> &);
-    BehavProfile<gNumber> CreateStartProfile(int how);
-    void        RemoveStartProfiles(void);
+  gNumber ActionProb(const Node *n, int br);
 
-    // Solution interface to normal form
-    void        SolutionToEfg(const BehavProfile<gNumber> &s, bool set = false);
-    const  Efg *InterfaceObjectEfg(void) { return &ef; }
-    wxFrame *Frame(void);
+  // Reset the supports.
+  void GameChanged(void);
 
-    gNumber ActionProb(const Node *n, int br);
+  // Interface for infoset hilighting between the tree and solution display
+  void HilightInfoset(int pl, int iset, int who);
 
-    // Reset the supports.
-    void GameChanged(void);
+  // Accelerators allow for platform-indep handling of hotkeys
+  int CheckAccelerators(wxKeyEvent &ev);
 
-    // Interface for infoset hilighting between the tree and solution display
-    void HilightInfoset(int pl, int iset, int who);
-
-    // Accelerators allow for platform-indep handling of hotkeys
-    int CheckAccelerators(wxKeyEvent &ev);
-
-    // Supports
-  void SupportUndominated(void);
-  void SupportNew(void);
-  void SupportEdit(void);
-  void SupportDelete(void);
-  void SupportSelectFromList(void);
-  void SupportSelectPrevious(void);
-  void SupportSelectNext(void);
-  void SupportReachable(void);
   gText UniqueSupportName(void) const;
 
-    // Used by TreeWindow
-    virtual gText AsString(TypedSolnValues what, const Node *n, int br = 0) const;
+  // Used by TreeWindow
+  virtual gText AsString(TypedSolnValues what, const Node *n, int br = 0) const;
 
-    // Display some inherent game properties
-    void ShowGameInfo(void);
-
-    // Currently used support
-    const EFSupport *GetSupport(void);
-
-  void UpdateMenus(Node *p_cursor, Node *p_markNode);
+  // Currently used support
+  const EFSupport *GetSupport(void);
+  TreeWindow *GetTreeWindow(void) const { return m_treeWindow; }
+  
+  void UpdateMenus(void);
   int NumDecimals(void) const;
 
-  void OnZoomWindowClose(void);
-  
-    // File name
-    void         SetFileName(void);
-    void         SetFileName(const gText &s);
-    const gText &Filename(void) const;
+  // File name
+  void SetFileName(const gText &s);
+  const gText &Filename(void) const;
+
+  Node *Cursor(void) const;
+
+  DECLARE_EVENT_TABLE()
 };
 
 
 // Solution constants
-typedef enum
-{
-    EFG_NO_SOLUTION = -1, EFG_QRE_SOLUTION, EFG_LIAP_SOLUTION,
-    EFG_LCP_SOLUTION, EFG_PURENASH_SOLUTION, EFG_CSUM_SOLUTION,
-    EFG_NUM_SOLUTIONS
+typedef enum {
+  EFG_NO_SOLUTION = -1, EFG_QRE_SOLUTION, EFG_LIAP_SOLUTION,
+  EFG_LCP_SOLUTION, EFG_PURENASH_SOLUTION, EFG_CSUM_SOLUTION,
+  EFG_NUM_SOLUTIONS
 } EfgSolutionT;
 
 #endif // EFGSHOW_H

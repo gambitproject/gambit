@@ -4,8 +4,7 @@
 // $Id$
 //
 
-#include "wx.h"
-#include "wx_form.h"
+#include "wx/wx.h"
 
 #ifdef __BORLANDC__
 #pragma hdrstop
@@ -14,416 +13,218 @@
 #include "wxmisc.h"
 #include "gambit.h"
 #include "treedraw.h"
-#include "legendc.h"
-
-TreeDrawSettings::TreeDrawSettings(void)
-  : x_origin(0), y_origin(0), max_x(0), max_y(0),
-    node_above_font(NULL), node_below_font(NULL), node_right_font(NULL),
-    branch_above_font(NULL), branch_below_font(NULL),
-    zoom_factor(1.0)
-{
-  LoadOptions(INIFILE);
-}
-
-class dialogTreeOptions : public guiAutoDialog {
-private:
-  wxSlider *m_branchLength, *m_nodeLength, *m_forkLength, *m_ySpacing;
-  wxRadioBox *m_infosetLines;
-
-  const char *HelpString(void) const { return "Prefs Menu (efg)"; }
-
-public:
-  dialogTreeOptions(const TreeDrawSettings &p_settings, wxWindow *p_parent);
-  virtual ~dialogTreeOptions() { }
-
-  int BranchLength(void) const { return m_branchLength->GetValue(); }
-  int NodeLength(void) const { return m_nodeLength->GetValue(); }
-  int ForkLength(void) const { return m_forkLength->GetValue(); }
-  int YSpacing(void) const { return m_ySpacing->GetValue(); }
-
-  int InfosetStyle(void) const { return m_infosetLines->GetSelection(); }
-};
-
-dialogTreeOptions::dialogTreeOptions(const TreeDrawSettings &p_settings,
-				     wxWindow *p_parent)
-  : guiAutoDialog(p_parent, "Draw Options")
-{
-  m_branchLength = new wxSlider(this, 0, "Branch Length",
-				p_settings.BranchLength(),
-				BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX,
-				250, 1, 1);
-  m_nodeLength = new wxSlider(this, 0, "Node Length",
-			      p_settings.NodeLength(),
-			      NODE_LENGTH_MIN, NODE_LENGTH_MAX,
-			      250, 1, 1);
-  m_forkLength = new wxSlider(this, 0, "Fork Length",
-			      p_settings.ForkLength(),
-			      FORK_LENGTH_MIN, FORK_LENGTH_MAX,
-			      250, 1, 1);
-  m_ySpacing = new wxSlider(this, 0, "Vertical Spacing",
-			    p_settings.YSpacing(),
-			    Y_SPACING_MIN, Y_SPACING_MAX, 250, 1, 1);
-
-  wxGroupBox *layoutGroup = new wxGroupBox(this, "Tree layout parameters");
-  layoutGroup->SetConstraints(new wxLayoutConstraints);
-  layoutGroup->GetConstraints()->left.SameAs(this, wxLeft, 10);
-  layoutGroup->GetConstraints()->top.SameAs(this, wxTop, 10);
-  layoutGroup->GetConstraints()->right.SameAs(m_ySpacing, wxRight, -10);
-  layoutGroup->GetConstraints()->bottom.SameAs(m_ySpacing, wxBottom, -10);
-
-  m_branchLength->SetConstraints(new wxLayoutConstraints);
-  m_branchLength->GetConstraints()->left.SameAs(layoutGroup, wxLeft, 10);
-  m_branchLength->GetConstraints()->top.SameAs(layoutGroup, wxTop, 20);
-  m_branchLength->GetConstraints()->width.AsIs();
-  m_branchLength->GetConstraints()->height.AsIs();
-
-  m_nodeLength->SetConstraints(new wxLayoutConstraints);
-  m_nodeLength->GetConstraints()->left.SameAs(m_branchLength, wxLeft);
-  m_nodeLength->GetConstraints()->top.SameAs(m_branchLength, wxBottom, 10);
-  m_nodeLength->GetConstraints()->width.AsIs();
-  m_nodeLength->GetConstraints()->height.AsIs();
-
-  m_forkLength->SetConstraints(new wxLayoutConstraints);
-  m_forkLength->GetConstraints()->left.SameAs(m_nodeLength, wxLeft);
-  m_forkLength->GetConstraints()->top.SameAs(m_nodeLength, wxBottom, 10);
-  m_forkLength->GetConstraints()->width.AsIs();
-  m_forkLength->GetConstraints()->height.AsIs();
-
-  m_ySpacing->SetConstraints(new wxLayoutConstraints);
-  m_ySpacing->GetConstraints()->left.SameAs(m_forkLength, wxLeft);
-  m_ySpacing->GetConstraints()->top.SameAs(m_forkLength, wxBottom, 10);
-  m_ySpacing->GetConstraints()->width.AsIs();
-  m_ySpacing->GetConstraints()->height.AsIs();
-
-  char *lineChoices[] = { "None", "Same Level", "All Levels" };
-  m_infosetLines = new wxRadioBox(this, 0, "Show Infoset Lines",
-				  1, 1, -1, -1, 3, lineChoices);
-  m_infosetLines->SetSelection(p_settings.ShowInfosets());
-  m_infosetLines->SetConstraints(new wxLayoutConstraints);
-  m_infosetLines->GetConstraints()->left.SameAs(layoutGroup, wxLeft);
-  m_infosetLines->GetConstraints()->top.SameAs(layoutGroup, wxBottom, 10);
-  m_infosetLines->GetConstraints()->width.AsIs();
-  m_infosetLines->GetConstraints()->height.AsIs();
-
-  m_okButton->GetConstraints()->top.SameAs(m_infosetLines, wxBottom, 10);
-  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
-  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-  m_okButton->GetConstraints()->height.AsIs();
-
-  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_cancelButton->GetConstraints()->centreX.SameAs(layoutGroup, wxCentreX);
-  m_cancelButton->GetConstraints()->width.AsIs();
-  m_cancelButton->GetConstraints()->height.AsIs();
-
-  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
-  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-  m_helpButton->GetConstraints()->height.AsIs();
-
-  Go();
-}
-
-void TreeDrawSettings::SetOptions(void)
-{
-  dialogTreeOptions dialog(*this, 0);
-
-  if (dialog.Completed() == wxOK) {
-    branch_length = dialog.BranchLength();
-    node_length = dialog.NodeLength();
-    fork_length = dialog.ForkLength();
-    y_spacing = dialog.YSpacing();
-    show_infosets = dialog.InfosetStyle();
-  }
-}
-
-
-// SetLegends
-// Selects what get displayed at different points on the tree and in what
-// font it will be displayed
-void TreeDrawSettings::draw_params_legends_func(wxButton &ob, wxCommandEvent &)
-{
-    FontDialogBox *f = 0;
-    draw_params_legend_struct *dpls = (draw_params_legend_struct *)ob.GetClientData();
-
-    // The following case makes sure that the currently set font comes up first.
-    switch (dpls->what_font)
-    {
-    case NODE_ABOVE_LEGEND: 
-        f = new FontDialogBox((wxWindow *)ob.GetParent(), 
-                              dpls->draw_settings->NodeAboveFont());
-        break;
-
-    case NODE_BELOW_LEGEND: 
-        f = new FontDialogBox((wxWindow *)ob.GetParent(), 
-                              dpls->draw_settings->NodeBelowFont());
-        break;
-
-    case BRANCH_ABOVE_LEGEND: 
-        f = new FontDialogBox((wxWindow *)ob.GetParent(), 
-                              dpls->draw_settings->BranchAboveFont());
-        break;
-
-    case BRANCH_BELOW_LEGEND: 
-        f = new FontDialogBox((wxWindow *)ob.GetParent(), 
-                              dpls->draw_settings->BranchBelowFont());
-        break;
-
-    case NODE_RIGHT_LEGEND: 
-        f = new FontDialogBox((wxWindow *)ob.GetParent(), 
-                              dpls->draw_settings->NodeRightFont());
-        break;
-    }
-
-    if (f->Completed() == wxOK)
-    {
-        wxFont *the_font = f->MakeFont();
-        switch (dpls->what_font)
-        {
-        case NODE_ABOVE_LEGEND: 
-            dpls->draw_settings->SetNodeAboveFont(the_font);
-            break;
-
-        case NODE_BELOW_LEGEND: 
-            dpls->draw_settings->SetNodeBelowFont(the_font);
-            break;
-
-        case BRANCH_ABOVE_LEGEND: 
-            dpls->draw_settings->SetBranchAboveFont(the_font);
-            break;
-
-        case BRANCH_BELOW_LEGEND: 
-            dpls->draw_settings->SetBranchBelowFont(the_font);
-            break;
-
-        case NODE_RIGHT_LEGEND: 
-            dpls->draw_settings->SetNodeRightFont(the_font);
-            break;
-        }
-    }
-
-    delete f;
-}
-
-
 #include "legend.h"
 
-class dialogLegends : public guiAutoDialog {
-private:
-  wxChoice *m_nodeAbove, *m_nodeBelow, *m_nodeAfter;
-  wxChoice *m_branchAbove, *m_branchBelow;
+#include "dllayout.h"
+#include "dllegends.h"
 
-  const char *HelpString(void) const { return "Legends Dialog"; }
+TreeDrawSettings::TreeDrawSettings(void)
+  : node_above_font(*wxNORMAL_FONT), node_below_font(*wxNORMAL_FONT),
+    node_right_font(*wxNORMAL_FONT), branch_above_font(*wxNORMAL_FONT),
+    branch_below_font(*wxNORMAL_FONT)
+{
+  LoadOptions();
+}
 
-public:
-  dialogLegends(const TreeDrawSettings &, wxWindow *);
-  virtual ~dialogLegends() { }
+dialogLayout::dialogLayout(wxWindow *p_parent,
+			   int p_branchLength, int p_nodeLength,
+			   int p_forkLength, int p_ySpacing,
+			   int p_infosetStyle)
+  : guiAutoDialog(p_parent, "Layout Options")
+{
+  wxStaticBoxSizer *layoutSizer =
+    new wxStaticBoxSizer(new wxStaticBox(this, -1, "Tree layout parameters"),
+			 wxVERTICAL);
+			 
+  wxBoxSizer *branchSizer = new wxBoxSizer(wxHORIZONTAL);
+  branchSizer->Add(new wxStaticText(this, -1, "Branch length"),
+		   0, wxCENTER | wxALL, 5);
+  m_branchLength = new wxSlider(this, -1, p_branchLength, 
+				BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX,
+				wxDefaultPosition, wxDefaultSize,
+				wxSL_HORIZONTAL | wxSL_LABELS);
+  branchSizer->Add(m_branchLength, 1, wxALL | wxEXPAND, 5);
 
-  int GetNodeAbove(void) const { return m_nodeAbove->GetSelection(); }
-  int GetNodeBelow(void) const { return m_nodeBelow->GetSelection(); }
-  int GetNodeAfter(void) const { return m_nodeAfter->GetSelection(); }
+  wxBoxSizer *nodeSizer = new wxBoxSizer(wxHORIZONTAL);
+  nodeSizer->Add(new wxStaticText(this, -1, "Node length"),
+		 0, wxCENTER | wxALL, 5);
+  m_nodeLength = new wxSlider(this, -1, p_nodeLength,
+			      NODE_LENGTH_MIN, NODE_LENGTH_MAX,
+			      wxDefaultPosition, wxDefaultSize,
+			      wxSL_HORIZONTAL | wxSL_LABELS);
+  nodeSizer->Add(m_nodeLength, 1, wxEXPAND | wxALL, 5);
 
-  int GetBranchAbove(void) const { return m_branchAbove->GetSelection(); }
-  int GetBranchBelow(void) const { return m_branchBelow->GetSelection(); }
-};
+  wxBoxSizer *forkSizer = new wxBoxSizer(wxHORIZONTAL);
+  forkSizer->Add(new wxStaticText(this, -1, "Fork length"),
+		 0, wxCENTER | wxALL, 5);
+  m_forkLength = new wxSlider(this, -1, p_forkLength,
+			      FORK_LENGTH_MIN, FORK_LENGTH_MAX,
+			      wxDefaultPosition, wxDefaultSize,
+			      wxSL_HORIZONTAL | wxSL_LABELS);
+  forkSizer->Add(m_forkLength, 1, wxEXPAND | wxALL, 5);
 
-dialogLegends::dialogLegends(const TreeDrawSettings &p_options,
-			     wxWindow *p_parent)
+  wxBoxSizer *spacingSizer = new wxBoxSizer(wxHORIZONTAL);
+  spacingSizer->Add(new wxStaticText(this, -1, "Vertical spacing"),
+		    0, wxCENTER | wxALL, 5);
+  m_ySpacing = new wxSlider(this, -1, p_ySpacing,
+			    Y_SPACING_MIN, Y_SPACING_MAX,
+			    wxDefaultPosition, wxDefaultSize,
+			    wxSL_HORIZONTAL | wxSL_LABELS);
+  spacingSizer->Add(m_ySpacing, 1, wxEXPAND | wxALL, 5);
+
+  layoutSizer->Add(branchSizer, 0, wxEXPAND | wxALL, 5);
+  layoutSizer->Add(nodeSizer, 0, wxEXPAND | wxALL, 5);
+  layoutSizer->Add(forkSizer, 0, wxEXPAND | wxALL, 5);
+  layoutSizer->Add(spacingSizer, 0, wxEXPAND | wxALL, 5);
+
+  wxString lineChoices[] = { "None", "Same Level", "All Levels" };
+  m_infosetStyle = new wxRadioBox(this, -1, "Show Infoset Lines",
+				  wxDefaultPosition, wxDefaultSize,
+				  3, lineChoices);
+  m_infosetStyle->SetSelection(p_infosetStyle);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(layoutSizer, 0, wxEXPAND | wxALL, 5);
+  topSizer->Add(m_infosetStyle, 0, wxCENTER | wxALL, 5);
+  topSizer->Add(m_buttonSizer, 0, wxALL, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+
+  Layout();
+}
+
+dialogLegends::dialogLegends(wxWindow *p_parent,
+			     const TreeDrawSettings &p_options)	
   : guiAutoDialog(p_parent, "Legends")
 {
-  wxGroupBox *nodeGroup = new wxGroupBox(this, "Nodes");
+  wxStaticBoxSizer *nodeGroup = 
+    new wxStaticBoxSizer(new wxStaticBox(this, -1, "Nodes"), wxHORIZONTAL);
 
-  char *nodeLabelList[] = { "Nothing", "Node Label", "Player",
-			    "Infoset Label", "Infoset ID",
-			    "Outcome", "Realiz Prob", "Belief Prob",
-			    "Value" };
-  m_nodeAbove = new wxChoice(this, 0, "Above", 1, 1, -1, -1,
+  wxString nodeLabelList[] = { "Nothing", "Node Label", "Player",
+			       "Infoset Label", "Infoset ID",
+			       "Outcome", "Realiz Prob", "Belief Prob",
+			       "Value" };
+
+  wxBoxSizer *nodeAboveSizer = new wxBoxSizer(wxVERTICAL);
+  nodeAboveSizer->Add(new wxStaticText(this, -1, "Above"),
+		      0, wxCENTER | wxALL, 5);
+  m_nodeAbove = new wxChoice(this, -1,
+			     wxDefaultPosition, wxDefaultSize,
 			     9, nodeLabelList);
   m_nodeAbove->SetSelection(p_options.LabelNodeAbove());
-  m_nodeAbove->SetConstraints(new wxLayoutConstraints);
-  m_nodeAbove->GetConstraints()->top.SameAs(nodeGroup, wxTop, 20);
-  m_nodeAbove->GetConstraints()->left.SameAs(nodeGroup, wxLeft, 10);
-  m_nodeAbove->GetConstraints()->width.AsIs();
-  m_nodeAbove->GetConstraints()->height.AsIs();
+  nodeAboveSizer->Add(m_nodeAbove, 0, wxALL, 5);
 
-  m_nodeBelow = new wxChoice(this, 0, "Below", 1, 1, -1, -1,
+  wxBoxSizer *nodeBelowSizer = new wxBoxSizer(wxVERTICAL);
+  nodeBelowSizer->Add(new wxStaticText(this, -1, "Below"),
+		      0, wxALL | wxCENTER, 5);
+  m_nodeBelow = new wxChoice(this, -1,
+			     wxDefaultPosition, wxDefaultSize,
 			     9, nodeLabelList);
   m_nodeBelow->SetSelection(p_options.LabelNodeBelow());
-  m_nodeBelow->SetConstraints(new wxLayoutConstraints);
-  m_nodeBelow->GetConstraints()->top.SameAs(m_nodeAbove, wxBottom, 10);
-  m_nodeBelow->GetConstraints()->left.SameAs(m_nodeAbove, wxLeft);
-  m_nodeBelow->GetConstraints()->width.AsIs();
-  m_nodeBelow->GetConstraints()->height.AsIs();
+  nodeBelowSizer->Add(m_nodeBelow, 0, wxALL, 5);
 
-  char *nodeAfterList[] = { "Nothing", "Payoffs", "Name" };
-  m_nodeAfter = new wxChoice(this, 0, "After", 1, 1, -1, -1,
+  wxBoxSizer *nodeAfterSizer = new wxBoxSizer(wxVERTICAL);
+  nodeAfterSizer->Add(new wxStaticText(this, -1, "Right"),
+		      0, wxALL | wxCENTER, 5);
+  wxString nodeAfterList[] = { "Nothing", "Payoffs", "Name" };
+  m_nodeAfter = new wxChoice(this, -1,
+			     wxDefaultPosition, wxDefaultSize,
 			     3, nodeAfterList);
   m_nodeAfter->SetSelection(p_options.LabelNodeRight());
-  m_nodeAfter->SetConstraints(new wxLayoutConstraints);
-  m_nodeAfter->GetConstraints()->top.SameAs(m_nodeBelow, wxBottom, 10);
-  m_nodeAfter->GetConstraints()->left.SameAs(m_nodeBelow, wxLeft);
-  m_nodeAfter->GetConstraints()->width.AsIs();
-  m_nodeAfter->GetConstraints()->height.AsIs();
+  nodeAfterSizer->Add(m_nodeAfter, 0, wxALL, 5);
 
-  nodeGroup->SetConstraints(new wxLayoutConstraints);
-  nodeGroup->GetConstraints()->top.SameAs(this, wxTop, 10);
-  nodeGroup->GetConstraints()->bottom.SameAs(m_nodeAfter, wxBottom, -10);
-  nodeGroup->GetConstraints()->left.SameAs(this, wxLeft, 10);
-  nodeGroup->GetConstraints()->right.SameAs(m_nodeAbove, wxRight, -10); 
+  nodeGroup->Add(nodeAboveSizer, 0, wxALL, 5);
+  nodeGroup->Add(nodeBelowSizer, 0, wxALL, 5);
+  nodeGroup->Add(nodeAfterSizer, 0, wxALL, 5);
 
-  wxGroupBox *branchGroup = new wxGroupBox(this, "Branches");
+  wxStaticBoxSizer *branchGroup =
+    new wxStaticBoxSizer(new wxStaticBox(this, -1, "Branches"), wxHORIZONTAL);
 
-  char *branchLabelList[] = { "Nothing", "Label", "Player", "Probs", "Value" };
-  m_branchAbove = new wxChoice(this, 0, "Above", 1, 1, -1, -1,
+  wxBoxSizer *branchAboveSizer = new wxBoxSizer(wxVERTICAL);
+  branchAboveSizer->Add(new wxStaticText(this, -1, "Above"),
+			0, wxALL | wxCENTER, 5);  
+  wxString branchLabelList[] = { "Nothing", "Label", "Player",
+				 "Probs", "Value" };
+  m_branchAbove = new wxChoice(this, -1, 
+			       wxDefaultPosition, wxDefaultSize,
 			       5, branchLabelList);
   m_branchAbove->SetSelection(p_options.LabelBranchAbove());
-  m_branchAbove->SetConstraints(new wxLayoutConstraints);
-  m_branchAbove->GetConstraints()->top.SameAs(branchGroup, wxTop, 20);
-  m_branchAbove->GetConstraints()->left.SameAs(branchGroup, wxLeft, 10);
-  m_branchAbove->GetConstraints()->width.AsIs();
-  m_branchAbove->GetConstraints()->height.AsIs();
+  branchAboveSizer->Add(m_branchAbove, 0, wxALL, 5);
 
-  m_branchBelow = new wxChoice(this, 0, "Below", 1, 1, -1, -1,
+  wxBoxSizer *branchBelowSizer = new wxBoxSizer(wxVERTICAL);
+  branchBelowSizer->Add(new wxStaticText(this, -1, "Below"),
+			0, wxALL | wxCENTER, 5);
+  m_branchBelow = new wxChoice(this, -1,
+			       wxDefaultPosition, wxDefaultSize,
 			       5, branchLabelList);
   m_branchBelow->SetSelection(p_options.LabelBranchBelow());
-  m_branchBelow->SetConstraints(new wxLayoutConstraints);
-  m_branchBelow->GetConstraints()->top.SameAs(m_branchAbove, wxBottom, 10);
-  m_branchBelow->GetConstraints()->left.SameAs(m_branchAbove, wxLeft);
-  m_branchBelow->GetConstraints()->width.AsIs();
-  m_branchBelow->GetConstraints()->height.AsIs();
+  branchBelowSizer->Add(m_branchBelow, 0, wxALL, 5);
 
-  branchGroup->SetConstraints(new wxLayoutConstraints);
-  branchGroup->GetConstraints()->top.SameAs(nodeGroup, wxTop);
-  branchGroup->GetConstraints()->bottom.SameAs(m_branchBelow, wxBottom, -10);
-  branchGroup->GetConstraints()->left.SameAs(nodeGroup, wxRight, 10);
-  branchGroup->GetConstraints()->right.SameAs(m_branchAbove, wxRight, -10);
+  branchGroup->Add(branchAboveSizer, 0, wxALL, 5);
+  branchGroup->Add(branchBelowSizer, 0, wxALL, 5);
 
-  m_okButton->GetConstraints()->top.SameAs(nodeGroup, wxBottom, 10);
-  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
-  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-  m_okButton->GetConstraints()->height.AsIs();
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(nodeGroup, 0, wxCENTER | wxALL, 5);
+  topSizer->Add(branchGroup, 0, wxCENTER | wxALL, 5);
+  topSizer->Add(m_buttonSizer, 0, wxCENTER | wxALL, 5);
 
-  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
-  m_cancelButton->GetConstraints()->width.AsIs();
-  m_cancelButton->GetConstraints()->height.AsIs();
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
 
-  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
-  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-  m_helpButton->GetConstraints()->height.AsIs();
-
-  Go();
+  Layout();
 }
 
-void TreeDrawSettings::SetLegends(void)
+void TreeDrawSettings::SaveOptions(void)
 {
-  dialogLegends dialog(*this, 0);
+  wxConfig config("Gambit");
+  config.Write("TreeDisplay/Branch-Length", (long) branch_length);
+  config.Write("TreeDisplay/Fork-Length", (long) fork_length);
+  config.Write("TreeDisplay/Outcome-Length", (long) outcome_length);
+  config.Write("TreeDisplay/Y-Spacing", (long) y_spacing);
 
-  if (dialog.Completed() == wxOK) {
-    SetLabelNodeAbove(dialog.GetNodeAbove());
-    SetLabelNodeBelow(dialog.GetNodeBelow());
-    SetLabelNodeRight(dialog.GetNodeAfter());
-    SetLabelBranchAbove(dialog.GetBranchAbove());
-    SetLabelBranchBelow(dialog.GetBranchBelow());
-  }
+  config.Write("TreeDisplay/Chance-Color", (long) chance_color);
+  config.Write("TreeDisplay/Cursor-Color", (long) cursor_color);
+  config.Write("TreeDisplay/Show-Infosets", (long) show_infosets);
+  config.Write("TreeDisplay/Node-Above-Label", (long) node_above_label);
+  config.Write("TreeDisplay/Node-Below-Label", (long) node_below_label);
+  config.Write("TreeDisplay/Node-Right-Label", (long) node_right_label);
+  config.Write("TreeDisplay/Branch-Above-Label", (long) branch_above_label);
+  config.Write("TreeDisplay/Branch-Below-Label", (long) branch_below_label);
+
+  config.Write("TreeDisplay/Flashing-Cursor",  (long) flashing_cursor);
+  config.Write("TreeDisplay/Color-Outcomes", (long) color_coded_outcomes);
+  config.Write("TreeDisplay/Root-Reachable", (long) root_reachable);
+
+  GambitDrawSettings::SaveOptions();
 }
 
-// Save options.  Uses the resource writing capability of wxwin to create
-// the file "gambit.ini" to which to write all the current settings from
-// draw_settings.  The file is ASCII and can be edited by hand if necessary.
-void TreeDrawSettings::SaveOptions(char *s)
+void TreeDrawSettings::LoadOptions(void)
 {
-    char *file_name = (s) ? s : (char *) INIFILE;
-    wxWriteResource("Gambit", "Branch-Length",    branch_length,    file_name);
-    wxWriteResource("Gambit", "Node-Length",      node_length,      file_name);
-    wxWriteResource("Gambit", "Fork-Length",      fork_length,      file_name);
-    wxWriteResource("Gambit", "Outcome-Length",   outcome_length,   file_name);
-    wxWriteResource("Gambit", "Y-Spacing",        y_spacing,        file_name);
-    wxWriteResource("Gambit", "Chance-Color",     chance_color,     file_name);
-    wxWriteResource("Gambit", "Cursor-Color",     cursor_color,     file_name);
-    wxWriteResource("Gambit", "Show-Infosets",    show_infosets,    file_name);
-    wxWriteResource("Gambit", "Node-Above-Label", node_above_label, file_name);
-    wxWriteResource("Gambit", "Node-Below-Label", node_below_label, file_name);
-    wxWriteResource("Gambit", "Node-Right-Label", node_right_label, file_name);
-    wxWriteResource("Gambit", "Branch-Above-Label",  branch_above_label,  file_name);
-    wxWriteResource("Gambit", "Branch-Below-Label",  branch_below_label,  file_name);
-    wxWriteResource("Gambit", "Flashing-Cursor",  flashing_cursor,      file_name);
-    wxWriteResource("Gambit", "Color-Outcomes",   color_coded_outcomes, file_name);
-    wxWriteResource("Gambit", "Root-Reachable",   root_reachable,       file_name);
-    wxWriteResource("Gambit", "Output-Precision", num_prec,             file_name);
+  wxConfig config("Gambit");
+  config.Read("TreeDisplay/Branch-Length", &branch_length, 60);
+  config.Read("TreeDisplay/Node-Length", &node_length, 60);
+  config.Read("TreeDisplay/Fork-Length", &fork_length, 60);
+  config.Read("TreeDisplay/Outcome-Length", &outcome_length, 60);
+  config.Read("TreeDisplay/Y-Spacing", &y_spacing, 30);
 
-    // Save the font settings.
-    wxWriteResource("Gambit", "Node-Above-Font", 
-                    wxFontToString(node_above_font), file_name);
-    wxWriteResource("Gambit", "Node-Below-Font", 
-                    wxFontToString(node_below_font), file_name);
-    wxWriteResource("Gambit", "Branch-Above-Font", 
-                    wxFontToString(branch_above_font), file_name);
-    wxWriteResource("Gambit", "Branch-Below-Font", 
-                    wxFontToString(branch_below_font), file_name);
-    wxWriteResource("Gambit", "Node-Right-Font", 
-                    wxFontToString(node_right_font), file_name);
+  config.Read("TreeDisplay/Display-Precision", &num_prec, 2);
 
-    GambitDrawSettings::SaveOptions(file_name);
+  config.Read("TreeDisplay/Chance-Color", &chance_color, 0);
+  config.Read("TreeDisplay/Cursor-Color", &cursor_color, 10);
+  config.Read("TreeDisplay/Show-Infosets", &show_infosets, 2);
+  config.Read("TreeDisplay/Node-Above-Label", &node_above_label, 1);
+  config.Read("TreeDisplay/Node-Below-Label", &node_below_label, 4);
+  config.Read("TreeDisplay/Branch-Above-Label", &branch_above_label, 1);
+  config.Read("TreeDisplay/Branch-Below-Label", &branch_below_label, 3);
+  config.Read("TreeDisplay/Node-Right-Label", &node_right_label, 1);
+  
+  config.Read("TreeDisplay/Flashing-Cursor", &flashing_cursor, 1);
+  config.Read("TreeDisplay/Color-Outcomes", &color_coded_outcomes, 1);
+  config.Read("TreeDisplay/Root-Reachable", &root_reachable, 0);
+
+  GambitDrawSettings::LoadOptions();
 }
 
-// Load options.  Uses the resource writing capability of wxwin to read from
-// the file file_name all the current settings for the
-// draw_settings.  The file is ASCII and can be edited by hand if necessary.
-void TreeDrawSettings::LoadOptions(char *file_name)
-{
-    if (!file_name) file_name = INIFILE;
-    wxGetResource("Gambit", "Branch-Length",       &branch_length,        file_name);
-    wxGetResource("Gambit", "Node-Length",         &node_length,          file_name);
-    wxGetResource("Gambit", "Fork-Length",         &fork_length,          file_name);
-    wxGetResource("Gambit", "Outcome-Length",      &outcome_length,       file_name);
-    wxGetResource("Gambit", "Y-Spacing",           &y_spacing,            file_name);
-    wxGetResource("Gambit", "Chance-Color",        &chance_color,         file_name);
-    wxGetResource("Gambit", "Cursor-Color",        &cursor_color,         file_name);
-    wxGetResource("Gambit", "Show-Infosets",       &show_infosets,        file_name);
-    wxGetResource("Gambit", "Node-Above-Label",    &node_above_label,     file_name);
-    wxGetResource("Gambit", "Node-Below-Label",    &node_below_label,     file_name);
-    wxGetResource("Gambit", "Branch-Above-Label",  &branch_above_label,   file_name);
-    wxGetResource("Gambit", "Branch-Below-Label",  &branch_below_label,   file_name);
-    wxGetResource("Gambit", "Node-Right-Label",    &node_right_label,     file_name);
-    wxGetResource("Gambit", "Flashing-Cursor",     &flashing_cursor,      file_name);
-    wxGetResource("Gambit", "Color-Outcomes",      &color_coded_outcomes, file_name);
-    wxGetResource("Gambit", "Root-Reachable",      &root_reachable,       file_name);
-    wxGetResource("Gambit", "Output-Precision",    &num_prec,             file_name);
-
-    // Load the font settings.
-    char *l_tempstr = new char[100];
-    wxGetResource("Gambit", "Node-Above-Font", &l_tempstr, file_name);
-    SetNodeAboveFont(wxStringToFont(l_tempstr));
-    wxGetResource("Gambit", "Node-Below-Font", &l_tempstr, file_name);
-    SetNodeBelowFont(wxStringToFont(l_tempstr));
-    wxGetResource("Gambit", "Branch-Above-Font", &l_tempstr, file_name);
-    SetBranchAboveFont(wxStringToFont(l_tempstr));
-    wxGetResource("Gambit", "Branch-Below-Font", &l_tempstr, file_name);
-    SetBranchBelowFont(wxStringToFont(l_tempstr));
-    wxGetResource("Gambit", "Node-Right-Font", &l_tempstr, file_name);
-    SetNodeRightFont(wxStringToFont(l_tempstr));
-    GambitDrawSettings::LoadOptions(file_name);
-    delete [] l_tempstr;
-}
-
-
-// Set force=true to set a zoom that is outside the MIN_ZOOM, MAX_ZOOM range.
-void TreeDrawSettings::SetZoom(float z, bool force)
-{
-  const double MAX_ZOOM = 10.0;
-  const double MIN_ZOOM = 0.1;
-
-  if (z < -0.5) {
-    guiFloatDialog dialog(NULL, "Set Zoom", "Zoom [0.1-10]",
-			  MIN_ZOOM, MAX_ZOOM, zoom_factor);
-
-    if (dialog.Completed() == wxOK) {
-      zoom_factor = dialog.GetValue();
-    }
-  }
-  else {
-    if ((z >= MIN_ZOOM) && (z <= MAX_ZOOM) || force)
-      zoom_factor = z;
-  }
-}
