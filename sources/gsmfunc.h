@@ -13,8 +13,7 @@
 
 
 #include "gsmincl.h"
-
-#include "gstring.h"
+#include "gtext.h"
 
 
 class gOutput;
@@ -51,7 +50,7 @@ class GSM;
 class Portion;
 class ListPortion;
 class ReferencePortion;
-class gString;
+class gText;
 class gclExpression;
 
 template <class T> class gList;
@@ -61,7 +60,7 @@ template <class T> class RefCountHashTable;
 class ParamInfoType
 {
 public:
-  gString      Name;
+  gText      Name;
   PortionSpec  Spec;
   Portion*     DefaultValue;
   bool         PassByReference;
@@ -70,7 +69,7 @@ public:
   ParamInfoType(const ParamInfoType& paraminfo);
   ParamInfoType
     ( 
-     const gString& name, 
+     const gText& name, 
      const PortionSpec& spec,
      Portion* default_value = REQUIRED, 
      const bool pass_by_ref = false
@@ -95,7 +94,7 @@ public:
   FuncFlagType         Flag;
   int                  NumParams;
   ParamInfoType*       ParamInfo;
-  gString              Desc;
+  gText              Desc;
 
   FuncInfoType(void);
   FuncInfoType(const FuncInfoType& funcinfo);
@@ -130,20 +129,20 @@ private:
 protected:
   FuncDescObj( FuncDescObj& func );
 
-  gString        _FuncName;
+  gText        _FuncName;
   int            _NumFuncs;
   FuncInfoType*  _FuncInfo;
 
   
 public:
-  FuncDescObj(const gString& func_name, int numfuncs);
-  FuncDescObj(const gString& func_proto, Portion* (*funcptr)(Portion**),
+  FuncDescObj(const gText& func_name, int numfuncs);
+  FuncDescObj(const gText& func_proto, Portion* (*funcptr)(Portion**),
                    FuncFlagType = funcLISTABLE  );
   virtual ~FuncDescObj();
 
   void SetFuncInfo(int funcindex, FuncInfoType funcinfo);
-  void SetFuncInfo(int funcindex, const gString& s);
-  void SetFuncInfo(int funcindex, const gString& s, 
+  void SetFuncInfo(int funcindex, const gText& s);
+  void SetFuncInfo(int funcindex, const gText& s, 
                    Portion* (*funcptr)(Portion**), 
                    FuncFlagType = funcLISTABLE  );
   void SetParamInfo(int funcindex, int index, const ParamInfoType paraminfo);  
@@ -153,12 +152,12 @@ public:
   bool Delete(FuncDescObj* newfunc);
   void Delete(int delete_index);
 
-  gString FuncName(void) const;
+  gText FuncName(void) const;
   
   bool UDF( void ) const;
   bool BIF( void ) const;
 
-  gList<gString> FuncList(bool udf = true, bool bif = true, 
+  gList<gText> FuncList(bool udf = true, bool bif = true, 
 			  bool getdesc = false) const;
   void Dump(gOutput& f, int i) const;
   void Dump(gOutput& f) const;
@@ -189,7 +188,7 @@ class CallFuncObj : public FuncDescObj
   int                   _CurrParamIndex;
   bool                  _ErrorOccurred;
 
-  gString _ParamName( const int index ) const;
+  gText _ParamName( const int index ) const;
 
   static bool _TypeMatch(Portion* p, PortionSpec ExpectedSpec, 
 			 bool Listable, bool return_type_check = false);
@@ -202,10 +201,10 @@ class CallFuncObj : public FuncDescObj
      gOutput& s,
      const int error_num, 
      const long& num1 = 0,
-     const gString& str1 = "",
-     const gString& str2 = "",
-     const gString& str3 = "",
-     const gString& str4 = ""
+     const gText& str1 = "",
+     const gText& str2 = "",
+     const gText& str3 = "",
+     const gText& str4 = ""
      );
 
  public:
@@ -213,7 +212,7 @@ class CallFuncObj : public FuncDescObj
   ~CallFuncObj();
 
   int         NumParams ( void ) const;
-  bool        SetCurrParamIndex ( const gString& param_name );
+  bool        SetCurrParamIndex ( const gText& param_name );
 
   bool  SetCurrParam ( Portion* param, bool auto_val_or_ref = false );
 
@@ -228,7 +227,7 @@ class CallFuncObj : public FuncDescObj
   void Dump(gOutput& f) const;
 };
 
-PortionSpec ToSpec(gString &str, int num=0);
+PortionSpec ToSpec(gText &str, int num=0);
 
 
 #endif  // GSMFUNC_H

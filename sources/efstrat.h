@@ -1,13 +1,13 @@
 //
 // FILE: efstrat.h -- Supports and stuff for the extensive form games
 //
-// @(#)efstrat.h	2.3 19 Jul 1997
+// $Id$
 //
 
 #ifndef EFSTRAT_H
 #define EFSTRAT_H
 
-#include "gstring.h"
+#include "gtext.h"
 #include "gblock.h"
 #include "efg.h"
 #include "gpvector.h"
@@ -21,7 +21,7 @@ class Efg;
 
 class EFSupport {
   protected:
-    gString name;
+    gText name;
     const Efg *befg;
     gArray<EFActionSet *> sets;
 

@@ -7,8 +7,6 @@
 
 
 #include <assert.h>
-#include <string.h>
-
 
 //----------------------------------------------------------------------
 //                         class instantiations
@@ -201,14 +199,14 @@ void Portion::SetGame(const Efg *game)
 //                          Error class
 //---------------------------------------------------------------------
 
-ErrorPortion::ErrorPortion(const gString& value)
+ErrorPortion::ErrorPortion(const gText& value)
 : _Value(value)
 { }
 
 ErrorPortion::~ErrorPortion()
 { }
 
-gString ErrorPortion::Value(void) const
+gText ErrorPortion::Value(void) const
 { return _Value; }
 
 PortionSpec ErrorPortion::Spec(void) const
@@ -220,7 +218,7 @@ void ErrorPortion::Output(gOutput& s) const
   s << OutputString();
 }
 
-gString ErrorPortion::OutputString( void ) const
+gText ErrorPortion::OutputString( void ) const
 {
   if(_Value == "")
     return "(Error)";
@@ -262,9 +260,9 @@ void NullPortion::Output(gOutput& s) const
   s << OutputString();
 }
 
-gString NullPortion::OutputString( void ) const
+gText NullPortion::OutputString( void ) const
 {
-  return (gString) "Null(" + PortionSpecToText(_DataType) + ")";
+  return (gText) "Null(" + PortionSpecToText(_DataType) + ")";
 }
 
 Portion* NullPortion::ValCopy(void) const
@@ -281,14 +279,14 @@ bool NullPortion::IsReference(void) const
 //                          Reference class
 //---------------------------------------------------------------------
 
-ReferencePortion::ReferencePortion(const gString& value)
+ReferencePortion::ReferencePortion(const gText& value)
 : _Value(value)
 { }
 
 ReferencePortion::~ReferencePortion()
 { }
 
-gString ReferencePortion::Value(void)
+gText ReferencePortion::Value(void)
 { return _Value; }
 
 PortionSpec ReferencePortion::Spec(void) const
@@ -300,9 +298,9 @@ void ReferencePortion::Output(gOutput& s) const
   s << OutputString();
 }
 
-gString ReferencePortion::OutputString( void ) const
+gText ReferencePortion::OutputString( void ) const
 {
-  return (gString) "(Reference) \"" + _Value + "\""; 
+  return (gText) "(Reference) \"" + _Value + "\""; 
 }
 
 Portion* ReferencePortion::ValCopy(void) const
@@ -342,7 +340,7 @@ void PrecisionPortion::Output(gOutput& s) const
   s << ((*_Value == precDOUBLE) ? "Machine" : "Rational");
 }
 
-gString PrecisionPortion::OutputString( void ) const
+gText PrecisionPortion::OutputString( void ) const
 {
   return (*_Value == precDOUBLE) ? "Machine" : "Rational";
 }
@@ -388,9 +386,9 @@ void IntPortion::Output(gOutput& s) const
   s << *_Value; 
 }
 
-gString IntPortion::OutputString( void ) const
+gText IntPortion::OutputString( void ) const
 {
-  return ToString( *_Value );
+  return ToText( *_Value );
 }
 
 Portion* IntPortion::ValCopy(void) const
@@ -434,9 +432,9 @@ void NumberPortion::Output(gOutput& s) const
   s << *_Value; 
 }
 
-gString NumberPortion::OutputString( void ) const
+gText NumberPortion::OutputString( void ) const
 {
-  return ToString(*_Value);
+  return ToText(*_Value);
 }
 
 Portion* NumberPortion::ValCopy(void) const
@@ -459,18 +457,18 @@ bool NumberPortion::IsReference(void) const
 //                          Text class
 //---------------------------------------------------------------------
 
-TextPortion::TextPortion(const gString &value)
-  : _Value(new gString(value)), _ref(false)
+TextPortion::TextPortion(const gText &value)
+  : _Value(new gText(value)), _ref(false)
 { }
 
-TextPortion::TextPortion(gString &value, bool ref)
+TextPortion::TextPortion(gText &value, bool ref)
   : _Value(&value), _ref(ref)
 { }
 
 TextPortion::~TextPortion()
 { }
 
-gString& TextPortion::Value(void) const
+gText& TextPortion::Value(void) const
 { return *_Value; }
 
 PortionSpec TextPortion::Spec(void) const
@@ -482,11 +480,11 @@ void TextPortion::Output(gOutput& s) const
   s << OutputString();
 }
 
-gString TextPortion::OutputString( void ) const
+gText TextPortion::OutputString( void ) const
 {
-  gString text = *_Value;
+  gText text = *_Value;
   if(_WriteQuoted) 
-    text = (gString) '\"' + text + "\"";
+    text = (gText) '\"' + text + "\"";
   return text;
 }
 
@@ -531,7 +529,7 @@ void BoolPortion::Output(gOutput& s) const
   s << OutputString();
 }
 
-gString BoolPortion::OutputString( void ) const
+gText BoolPortion::OutputString( void ) const
 {
   return (*_Value ? "True" : "False");  
 }
@@ -594,7 +592,7 @@ void EfOutcomePortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\"\n";
 }
 
-gString EfOutcomePortion::OutputString( void ) const
+gText EfOutcomePortion::OutputString( void ) const
 {
   return "(EFOutcome)";
 }
@@ -658,7 +656,7 @@ void NfPlayerPortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
-gString NfPlayerPortion::OutputString( void ) const
+gText NfPlayerPortion::OutputString( void ) const
 {
   return "(NfPlayer)";
 }
@@ -720,7 +718,7 @@ void StrategyPortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->name << "\""; 
 }
 
-gString StrategyPortion::OutputString( void ) const
+gText StrategyPortion::OutputString( void ) const
 {
   return "(Strategy)";
 }
@@ -787,7 +785,7 @@ void NfOutcomePortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\"";
 }
 
-gString NfOutcomePortion::OutputString( void ) const
+gText NfOutcomePortion::OutputString( void ) const
 {
   return "(Outcome)";
 }
@@ -855,7 +853,7 @@ void NfSupportPortion::Output(gOutput& s) const
     s << ' ' << **_Value;  
 }
 
-gString NfSupportPortion::OutputString( void ) const
+gText NfSupportPortion::OutputString( void ) const
 {
   return "(NfSupport)";
 }
@@ -928,7 +926,7 @@ void EfSupportPortion::Output(gOutput& s) const
     s << ' ' << **_Value;
 }
 
-gString EfSupportPortion::OutputString( void ) const
+gText EfSupportPortion::OutputString( void ) const
 {
   return "(EfSupport)";
 }
@@ -990,7 +988,7 @@ void EfPlayerPortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
-gString EfPlayerPortion::OutputString( void ) const
+gText EfPlayerPortion::OutputString( void ) const
 {
   return "(EfPlayer)";
 }
@@ -1056,7 +1054,7 @@ void InfosetPortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
-gString InfosetPortion::OutputString( void ) const
+gText InfosetPortion::OutputString( void ) const
 {
   return "(Infoset)";
 }
@@ -1119,7 +1117,7 @@ void NodePortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
-gString NodePortion::OutputString( void ) const
+gText NodePortion::OutputString( void ) const
 {
   return "(Node)";
 }
@@ -1182,7 +1180,7 @@ void ActionPortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
-gString ActionPortion::OutputString( void ) const
+gText ActionPortion::OutputString( void ) const
 {
   return "(Action)";
 }
@@ -1259,7 +1257,7 @@ void MixedPortion::Output(gOutput& s) const
 }
 
 
-gString MixedPortion::OutputString( void ) const
+gText MixedPortion::OutputString( void ) const
 {
   return "(Mixed)";
 }
@@ -1337,7 +1335,7 @@ void BehavPortion::Output(gOutput& s) const
     (*rep->value).BehavProfile<gNumber>::Dump(s);
 }
 
-gString BehavPortion::OutputString( void ) const
+gText BehavPortion::OutputString( void ) const
 {
   return "(Behav)";
 }
@@ -1409,7 +1407,7 @@ void NfgPortion::Output(gOutput& s) const
   s << "(Nfg) \"" << (*_Value)->GetTitle() << "\"";
 }
 
-gString NfgPortion::OutputString( void ) const
+gText NfgPortion::OutputString( void ) const
 {
   return "(Nfg)";
 }
@@ -1482,7 +1480,7 @@ void EfgPortion::Output(gOutput& s) const
   s << "(Efg) \"" << (*_Value)->GetTitle() << "\""; 
 }
 
-gString EfgPortion::OutputString( void ) const
+gText EfgPortion::OutputString( void ) const
 {
   return "(Efg)";
 }
@@ -1536,7 +1534,7 @@ void OutputPortion::Output(gOutput& s) const
   s << "(Output)"; 
 }
 
-gString OutputPortion::OutputString(void) const
+gText OutputPortion::OutputString(void) const
 {
   return "(Output)";
 }
@@ -1591,7 +1589,7 @@ void InputPortion::Output(gOutput& s) const
   s << "(Input)"; 
 }
 
-gString InputPortion::OutputString( void ) const
+gText InputPortion::OutputString( void ) const
 {
   return "(Input)";
 }
@@ -1868,9 +1866,9 @@ void ListPortion::Output(gOutput& s, long ListLF) const
 }
 
 
-gString ListPortion::OutputString( void ) const
+gText ListPortion::OutputString( void ) const
 {
-  gString text( "{ " );
+  gText text( "{ " );
   int i = 0;
   for( i = 1; i <= Length(); i++ )
   {

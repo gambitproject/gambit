@@ -168,7 +168,7 @@ extern int ReadNfgFile(gInput &f, Nfg *& Nrat);
 
 static Portion *GSM_LoadNfg(Portion **param)
 {
-  gString file = ((TextPortion *) param[0])->Value();
+  gText file = ((TextPortion *) param[0])->Value();
 
   gFileInput f(file);
 
@@ -364,7 +364,7 @@ static Portion *GSM_RemoveStrategy(Portion **param)
 static Portion *GSM_SaveNfg(Portion **param)
 {
   Nfg *N = ((NfgPortion *) param[0])->Value();
-  gString file = ((TextPortion *) param[1])->Value();
+  gText file = ((TextPortion *) param[1])->Value();
   gFileOutput f(file);
 
   if (!f.IsValid())
@@ -383,7 +383,7 @@ static Portion *GSM_SaveNfg(Portion **param)
 static Portion *GSM_SetName_Nfg(Portion **param)
 {
   Nfg &N = * ((NfgPortion *) param[0])->Value();
-  gString name = ((TextPortion *) param[1])->Value();
+  gText name = ((TextPortion *) param[1])->Value();
   N.SetTitle(name);
   return param[0]->ValCopy();
 }
@@ -391,7 +391,7 @@ static Portion *GSM_SetName_Nfg(Portion **param)
 static Portion *GSM_SetName_NfPlayer(Portion **param)
 {
   NFPlayer *p = ((NfPlayerPortion *) param[0])->Value();
-  gString name = ((TextPortion *) param[1])->Value();
+  gText name = ((TextPortion *) param[1])->Value();
   p->SetName(name);
   return param[0]->ValCopy();
 }
@@ -399,7 +399,7 @@ static Portion *GSM_SetName_NfPlayer(Portion **param)
 static Portion *GSM_SetName_Strategy(Portion **param)
 {
   Strategy *s = ((StrategyPortion *) param[0])->Value();
-  gString name = ((TextPortion *) param[1])->Value();
+  gText name = ((TextPortion *) param[1])->Value();
   s->name = name;
   return param[0]->ValCopy();
 }
@@ -407,7 +407,7 @@ static Portion *GSM_SetName_Strategy(Portion **param)
 static Portion *GSM_SetName_NfOutcome(Portion **param)
 {
   NFOutcome *c = ((NfOutcomePortion *) param[0])->Value();
-  gString name = ((TextPortion *) param[1])->Value();
+  gText name = ((TextPortion *) param[1])->Value();
   c->SetName(name);
   return param[0]->ValCopy();
 }

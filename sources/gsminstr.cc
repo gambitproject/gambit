@@ -85,7 +85,7 @@ gclExpression *gclReqParameterList::operator[](int index) const
 gclOptParameterList::gclOptParameterList(void)
 { }
 
-gclOptParameterList::gclOptParameterList(const gString &s, gclExpression *p)
+gclOptParameterList::gclOptParameterList(const gText &s, gclExpression *p)
 {
   names.Append(s);
   exprs.Append(p);
@@ -96,7 +96,7 @@ gclOptParameterList::~gclOptParameterList()
   for (int i = 1; i <= exprs.Length(); delete exprs[i++]);
 }
 
-void gclOptParameterList::Append(const gString &s, gclExpression *p)
+void gclOptParameterList::Append(const gText &s, gclExpression *p)
 {
   names.Append(s);
   exprs.Append(p);
@@ -112,7 +112,7 @@ gclExpression *gclOptParameterList::operator[](int index) const
   return exprs[index];
 }
 
-gString gclOptParameterList::FormalName(int index) const
+gText gclOptParameterList::FormalName(int index) const
 {
   return names[index];
 }
@@ -141,18 +141,18 @@ gclParameterList::~gclParameterList()
 }
 
 
-gclFunctionCall::gclFunctionCall(const gString &s)
+gclFunctionCall::gclFunctionCall(const gText &s)
   : name(s), params(new gclParameterList), funcptr(0), type(porANYTYPE)
 { }
 
-gclFunctionCall::gclFunctionCall(const gString &s, gclExpression *op)
+gclFunctionCall::gclFunctionCall(const gText &s, gclExpression *op)
   : name(s), params(new gclParameterList), funcptr(0), type(porANYTYPE)
 {
   params->req->Append(op);
   AttemptMatch();
 }
 
-gclFunctionCall::gclFunctionCall(const gString &s,
+gclFunctionCall::gclFunctionCall(const gText &s,
 				 gclExpression *op1, gclExpression *op2)
   : name(s), params(new gclParameterList), funcptr(0), type(porANYTYPE)
 {
@@ -161,7 +161,7 @@ gclFunctionCall::gclFunctionCall(const gString &s,
   AttemptMatch();
 }
 
-gclFunctionCall::gclFunctionCall(const gString &s, gclParameterList *p)
+gclFunctionCall::gclFunctionCall(const gText &s, gclParameterList *p)
   : name(s), params(p), funcptr(0), type(porANYTYPE)
 {
   AttemptMatch();
@@ -271,7 +271,7 @@ Portion *gclFunctionCall::Evaluate(void)
     }
   }
   else 
-    ret = new ErrorPortion("Parameter " + ToString(undefined) + 
+    ret = new ErrorPortion("Parameter " + ToText(undefined) + 
                            " undefined in call to " + name);
     
   delete call;
@@ -389,7 +389,7 @@ Portion *gclListConstant::Evaluate(void)
 }
 
 
-gclVarName::gclVarName(const gString &name)
+gclVarName::gclVarName(const gText &name)
   : value(new ReferencePortion(name))
 { }
 

@@ -1,7 +1,7 @@
 //#
 //# FILE: gstack.imp -- Implementation of stack type
 //#
-//# $Id$
+//# @(#)gstack.imp	2.1 03/24/97
 //#
 
 #include "gstack.h"

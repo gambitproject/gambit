@@ -10,7 +10,7 @@
 
 
 #include "gambitio.h"
-#include "gstring.h"
+#include "gtext.h"
 #include "gsmincl.h"
 #include "gsminstr.h"
 #include "gsmhash.h"
@@ -22,7 +22,7 @@ class RefHashTable;
 class FunctionHashTable;
 class FuncInfoType;
 
-class gString;
+class gText;
 class gRational;
 
 class Node;
@@ -59,14 +59,14 @@ private:
 
   gStack< gStack< Portion* >* >* _StackStack;
   gStack< RefHashTable* >*       _RefTableStack;
-  gStack< gString >*             _FuncNameStack;
+  gStack< gText >*             _FuncNameStack;
   RefHashTable                   _GlobalRefTable;
   FunctionHashTable*             _FuncTable;
 
   void _BindCheck ( void ) const;
-  bool _Bind ( const gString& param_name ) const;
+  bool _Bind ( const gText& param_name ) const;
 
-  Portion* _VarRemove    ( const gString& var_name );
+  Portion* _VarRemove    ( const gText& var_name );
 
   static void _ErrorMessage
     (
@@ -74,9 +74,9 @@ private:
      const int       error_num = 0,
      const long& num1      = 0, 
      const long& num2      = 0,
-     const gString&  str1      = "",
-     const gString&  str2      = "",
-     const gString&  str3      = ""
+     const gText&  str1      = "",
+     const gText&  str2      = "",
+     const gText&  str3      = ""
      );
 
   // This function is located in gsmfunc.cc
@@ -92,15 +92,15 @@ public:
 
   static int& GameRefCount(void*);
 
-  bool PushRef  ( const gString& ref );
+  bool PushRef  ( const gText& ref );
   void _ResolveRef ( Portion*& p );
 
 
   // Assign() will delete lhs and rhs
   Portion* Assign       ( Portion* lhs, Portion* rhs );
-  bool     VarDefine    ( const gString& var_name, Portion* p );
-  bool     VarIsDefined ( const gString& var_name ) const;
-  Portion* VarValue     ( const gString& var_name ) const;
+  bool     VarDefine    ( const gText& var_name, Portion* p );
+  bool     VarIsDefined ( const gText& var_name ) const;
+  Portion* VarValue     ( const gText& var_name ) const;
   bool     UnAssign     ( Portion * );
   Portion* UnAssignExt  ( Portion * );
 
@@ -111,15 +111,15 @@ public:
   Portion* ExecuteUserFunc( gclExpression& program, 
 			   const FuncInfoType& func_info,
 			   Portion** param, 
-			   const gString& funcname );
-  gString UserFuncName( void ) const;
+			   const gText& funcname );
+  gText UserFuncName( void ) const;
   
   void Clear  ( void );
 
   Portion* PopValue( void );
 
-  Portion* Help(gString text, bool udf, bool bif, bool getdesc = false );
-  Portion* HelpVars(gString text);
+  Portion* Help(gText text, bool udf, bool bif, bool getdesc = false );
+  Portion* HelpVars(gText text);
 
   void InvalidateGameProfile( void* game, bool IsEfg );
   void UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec );  
@@ -138,10 +138,10 @@ public:
 
 
 
-  void GlobalVarDefine     ( const gString& var_name, Portion* p );
-  bool GlobalVarIsDefined  ( const gString& var_name ) const;
-  Portion* GlobalVarValue  ( const gString& var_name ) const;
-  void GlobalVarRemove     ( const gString& var_name );
+  void GlobalVarDefine     ( const gText& var_name, Portion* p );
+  bool GlobalVarIsDefined  ( const gText& var_name ) const;
+  Portion* GlobalVarValue  ( const gText& var_name ) const;
+  void GlobalVarRemove     ( const gText& var_name );
 
 };
 

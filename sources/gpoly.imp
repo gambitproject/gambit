@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.imp  -- Implementation of gPoly data type
 //
-// @(#)gpoly.imp	1.10 03 Jun 1997
+// $Id$
 //
 
 #include "gpoly.h"
@@ -30,7 +30,7 @@ template <class T> gPoly<T>::gPoly(const gSpace*     p,
 }
 
 template <class T> gPoly<T>::gPoly(const gSpace *p, 
-				       const gString &s,
+				       const gText &s,
 				       const term_order* o)
 : Space(p), Order(o), Terms()
 {
@@ -83,7 +83,7 @@ template<class T> gPoly<T> &gPoly<T>::operator=(const gPoly<T> &p)
   Terms = p.Terms; return (*this);
 }
 
-template <class T> gPoly<T>& gPoly<T>::operator=(const gString &Hold)
+template <class T> gPoly<T>& gPoly<T>::operator=(const gText &Hold)
 {
   gList<gMono<T> > nullTerms;
   Terms = nullTerms;           // get rid of old Terms
@@ -96,7 +96,7 @@ template <class T> gPoly<T>& gPoly<T>::operator=(const gString &Hold)
 
   charc = TheString[charnum];
 
-  while (charnum <= TheString.length() && contflag){
+  while (charnum <= TheString.Length() && contflag){
     switch (charc) {
     case '+' :
     case ' ':
@@ -249,7 +249,7 @@ template <class T> void gPoly<T>::String_Term(T nega)
 template <class T> int gPoly<T>::String_GetPow(void)
 {
 
-  gString Pow = "";
+  gText Pow = "";
   while (charc == ' '){
     charnum++;
     charc = TheString[charnum];
@@ -260,12 +260,12 @@ template <class T> int gPoly<T>::String_GetPow(void)
     charnum++;
     charc = TheString[charnum];
   }
-  return (atoi(Pow.stradr()));
+  return (atoi(Pow));
 }
 
 template <class T> void gPoly<T>::String_VarAndPow(gArray<int> &PowArray)
 {
-  gString VarName = "";
+  gText VarName = "";
   int pow, varname;
   while (charc != '^' && charc != ' '){
     VarName += charc;
@@ -286,7 +286,7 @@ template <class T> void gPoly<T>::String_VarAndPow(gArray<int> &PowArray)
 
 // bool function to check the string in &Hold
 
-template <class T> bool gPoly<T>::Check_String(const gString &Hold){
+template <class T> bool gPoly<T>::Check_String(const gText &Hold){
  int charnum=0;
  int boolflag=0;
 // state variables
@@ -297,10 +297,10 @@ template <class T> bool gPoly<T>::Check_String(const gString &Hold){
  enum number {nonumberbef, numberbef};
  enum var {novarbef, varbef};
  enum sign {nosignbef, signbef}; 
- gString TheString = Hold;
+ gText TheString = Hold;
  char charc=TheString[charnum];
 //movement along the string with a switch case
- while (charnum < TheString.length()){
+ while (charnum < TheString.Length()){
   switch (charc){
    case '0':
    case '1':
@@ -317,7 +317,7 @@ template <class T> bool gPoly<T>::Check_String(const gString &Hold){
     break;
    case 'n':
     if (statenumber==0 && statesign==0) boolflag++;
-    if (charnum==(TheString.length()-1)) boolflag++;
+    if (charnum==(TheString.Length()-1)) boolflag++;
     statenumber=number(0);
     statevar=varbef;
     statesign=nosignbef;
@@ -325,7 +325,7 @@ template <class T> bool gPoly<T>::Check_String(const gString &Hold){
    case '^':
     if (statenumber==0) boolflag++;
     if (statevar==0) boolflag++;
-    if (charnum==(TheString.length()-1)) boolflag++;
+    if (charnum==(TheString.Length()-1)) boolflag++;
     statenumber=nonumberbef;
     statevar=novarbef;
     statesign=nosignbef;
@@ -333,14 +333,14 @@ template <class T> bool gPoly<T>::Check_String(const gString &Hold){
    case '/':
    case '.':
     if (statenumber==0) boolflag++;
-    if (charnum==(TheString.length()-1)) boolflag++;
+    if (charnum==(TheString.Length()-1)) boolflag++;
     statenumber=nonumberbef;
     statesign=nosignbef;
     break;
    case '+':
    case '-':
     if (statenumber==0 && charnum!=0) boolflag++;
-    if (charnum==(TheString.length()-1)) boolflag++;
+    if (charnum==(TheString.Length()-1)) boolflag++;
     statenumber=nonumberbef;
     statevar=novarbef;
     statesign=signbef;
@@ -795,9 +795,9 @@ template<class T> gPoly<T> operator*(const gPoly<T> &poly, const T val)
   return val * poly;
 }
 
-template <class T> gString &operator<<(gString &t, const gPoly<T> &p)
+template <class T> gText &operator<<(gText &t, const gPoly<T> &p)
 {
-  gString s;
+  gText s;
   if (p.Terms.Length() == 0) s += "0";
   else {
     for (int j = 1; j <= p.Terms.Length(); j++)
@@ -811,9 +811,9 @@ template <class T> gString &operator<<(gString &t, const gPoly<T> &p)
 	if ( (p.Terms[j].Coef() != (T)1 && -p.Terms[j].Coef() != (T)1) ||
 	    p.Terms[j].IsConstant() ) 
 	  if (p.Terms[j].Coef() < (T)0) 
-	    s += ToString(-p.Terms[j].Coef());
+	    s += ToText(-p.Terms[j].Coef());
 	  else                        
-	    s += ToString( p.Terms[j].Coef());
+	    s += ToText( p.Terms[j].Coef());
 	
 	for (int k = 1; k <= p.Space->Dmnsn(); k++) {
 	  int exp = p.Terms[j].ExpV() [k];
@@ -822,7 +822,7 @@ template <class T> gString &operator<<(gString &t, const gPoly<T> &p)
 	    s += (*p.Space)[k]->Name;
 	    if (exp != 1) {
 	      s += '^';
-	      s += ToString(exp);
+	      s += ToText(exp);
 	    }
 	  }
 	}
@@ -862,7 +862,7 @@ gPoly<gDouble>  TogDouble(const gPoly<T>& given)
 
 template <class T> gOutput &operator<<(gOutput &f, const gPoly<T> &p)
 {
-  gString s;
+  gText s;
   s << p;
   f << s;
   return f;

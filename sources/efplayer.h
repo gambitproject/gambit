@@ -18,7 +18,7 @@ class EFPlayer   {
   friend class BehavProfile<gNumber>;
   private:
     int number;
-    gString name;
+    gText name;
     Efg *E;
     
     gBlock<Infoset *> infosets;
@@ -29,8 +29,8 @@ class EFPlayer   {
   public:
     Efg *Game(void) const   { return E; }
   
-    const gString &GetName(void) const   { return name; }
-    void SetName(const gString &s)       { name = s; }
+    const gText &GetName(void) const   { return name; }
+    void SetName(const gText &s)       { name = s; }
 
     bool IsChance(void) const      { return (number == 0); }
 

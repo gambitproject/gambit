@@ -32,7 +32,7 @@ gSpace::gSpace(int nvars)
   for (int i = 1; i <= nvars; i++){
     newvar = new Variable;
     newvar->Name = 'n';
-    newvar->Name += ToString(i);
+    newvar->Name += ToText(i);
     newvar->number = i;
     Variables.Append(newvar);
   }
@@ -80,13 +80,13 @@ Variable * gSpace::VariableWithNumber(int i) const
   return Variables[i];
 }
 
-const gString & gSpace::GetVariableName(int i) const
+const gText & gSpace::GetVariableName(int i) const
 {gout<<"IF OK, ZAP ME:prepoly.cc10\n";//**
 
   return ((Variables[i])->Name);
 }
 
-void gSpace::SetVariableName(int i, const gString &s)
+void gSpace::SetVariableName(int i, const gText &s)
 {
   (Variables[i])->Name = s;
 }
@@ -100,7 +100,7 @@ void gSpace::CreateVariables (int nvars )
 
     var = new Variable;
     var->Name = 'n';
-    var->Name += ToString(n + i);
+    var->Name += ToText(n + i);
     Variables.Append(var);
   }
 }

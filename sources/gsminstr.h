@@ -12,7 +12,7 @@
 #define GSMINSTR_H
 
 
-#include "gstring.h"
+#include "gtext.h"
 #include "gmisc.h"
 #include "portion.h"
 
@@ -65,19 +65,19 @@ class gclReqParameterList  {
 
 class gclOptParameterList  {
   private:
-    gList<gString> names;
+    gList<gText> names;
     gList<gclExpression *> exprs;
 
   public: 
     gclOptParameterList(void);
-    gclOptParameterList(const gString &, gclExpression *);
+    gclOptParameterList(const gText &, gclExpression *);
     virtual ~gclOptParameterList();
   
-    void Append(const gString &, gclExpression *);
+    void Append(const gText &, gclExpression *);
 
     int NumParams(void) const;
     gclExpression *operator[](int index) const;
-    gString FormalName(int index) const;
+    gText FormalName(int index) const;
 };
 
 class gclParameterList   {
@@ -97,7 +97,7 @@ class gclParameterList   {
 
 class gclFunctionCall : public gclExpression   {
   private:
-    gString name;
+    gText name;
     gclParameterList *params;
     
     Portion *(*funcptr)(Portion **);
@@ -106,11 +106,11 @@ class gclFunctionCall : public gclExpression   {
     void AttemptMatch(void);
 
   public:
-    gclFunctionCall(const gString &name);
-    gclFunctionCall(const gString &name, gclExpression *op);
-    gclFunctionCall(const gString &name,
+    gclFunctionCall(const gText &name);
+    gclFunctionCall(const gText &name, gclExpression *op);
+    gclFunctionCall(const gText &name,
                     gclExpression *op1, gclExpression *op2);
-    gclFunctionCall(const gString &name, gclParameterList *params);
+    gclFunctionCall(const gText &name, gclParameterList *params);
     virtual ~gclFunctionCall();
 
     PortionSpec Type(void) const;
@@ -186,7 +186,7 @@ class gclVarName : public gclExpression   {
     Portion *value;
 
   public:
-    gclVarName(const gString &);
+    gclVarName(const gText &);
     virtual ~gclVarName();
 
     Portion *Evaluate(void);

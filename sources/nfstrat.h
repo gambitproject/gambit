@@ -7,7 +7,7 @@
 #ifndef NFSTRAT_H
 #define NFSTRAT_H
 
-#include "gstring.h"
+#include "gtext.h"
 #include "gblock.h"
 #include "gambitio.h"
 
@@ -17,7 +17,7 @@ struct Strategy   {
   int number;
   NFPlayer *nfp;
   long index;
-  gString name;
+  gText name;
 
   Strategy(NFPlayer *);
   Strategy(const Strategy &s);

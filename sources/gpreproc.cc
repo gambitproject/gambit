@@ -34,7 +34,7 @@
 //    replaced with a space.
 //---------------------------------------------------------------------    
 
-gString gPreprocessor::GetLine( void )
+gText gPreprocessor::GetLine( void )
 {
   
   m_RawLine = "";
@@ -42,7 +42,7 @@ gString gPreprocessor::GetLine( void )
 
   // If no more input available, return nothing.
   if( eof() )
-    return gString( "" );
+    return gText( "" );
 
   // Record the current file name and line number.
   m_PrevFileName = m_FileNameStack.Peek();
@@ -52,9 +52,9 @@ gString gPreprocessor::GetLine( void )
 
   // This is initialized to work with the explicit continuation
   //   processing code.  The backslask will be stripped.
-  gString line = '\\';
+  gText line = '\\';
   
-  gString errorMsg;
+  gText errorMsg;
 
   char c = 0;
   bool quote = false;
@@ -63,10 +63,10 @@ gString gPreprocessor::GetLine( void )
   bool continuation = false;
 
 
-  while( line.right( 1 ) == '\\' && !error )
+  while( line.Right( 1 ) == '\\' && !error )
   {
     // Strip the trailing backslash
-    line = line.left( line.length() - 1 );
+    line = line.Left( line.Length() - 1 );
 
     while( !m_InputStack.Peek()->eof() )
     {
@@ -81,8 +81,8 @@ gString gPreprocessor::GetLine( void )
 	{ 
 	  if( bracket > 0 )
 	  {
-	    if( line.right( 1 ) == '\\' )
-	      line = line.left( line.length() - 1 );
+	    if( line.Right( 1 ) == '\\' )
+	      line = line.Left( line.Length() - 1 );
 	    line += '\n';
 	  }
 	  else
@@ -133,25 +133,25 @@ gString gPreprocessor::GetLine( void )
 
 	assert( !quote );
 
-	if( line.right( 2 ) == "//" )
+	if( line.Right( 2 ) == "//" )
 	{
 	  // In a line comment.  Ignore everything until
 	  //   end of line.
-	  line = line.left( line.length() - 2 );
+	  line = line.Left( line.Length() - 2 );
 
 	  while( !m_InputStack.Peek()->eof() && !EOL( c ) )
 	    GetChar( c );
 	}
-	else if( line.right( 2 ) == "/*" )
+	else if( line.Right( 2 ) == "/*" )
 	{
 	  // In a C style comment.  Ignore everything until
 	  //   comment closing is found.
-	  line = line.left( line.length() - 2 );
+	  line = line.Left( line.Length() - 2 );
 
 	  SetPrompt( false );
-	  gString comment = "  ";
+	  gText comment = "  ";
 	  while( !m_InputStack.Peek()->eof() && 
-		( comment.right( 2 ) != "*/" || quote ) )
+		( comment.Right( 2 ) != "*/" || quote ) )
 	  {
 	    GetChar( c );
 	    comment += c;
@@ -170,11 +170,11 @@ gString gPreprocessor::GetLine( void )
 	}
 
 	//------------------- Include -------------------------------
-	else if( line.right( 7 ) == "Include" )
+	else if( line.Right( 7 ) == "Include" )
 	{
 	  // Process Include[] calls.
 
-	  line = line.left( line.length() - 7 );
+	  line = line.Left( line.Length() - 7 );
 
 	  c = ' ';
 	  while( !m_InputStack.Peek()->eof() && c == ' ' )
@@ -198,7 +198,7 @@ gString gPreprocessor::GetLine( void )
 	    break;
 	  }
 
-	  gString filename;
+	  gText filename;
 	  c = ' ';
 	  while( !m_InputStack.Peek()->eof() && c != '\"' && !EOL( c ) )
 	  {
@@ -226,7 +226,7 @@ gString gPreprocessor::GetLine( void )
 	  }
 
 	  // bring in the rest of this line
-	  gString restOfLine;
+	  gText restOfLine;
 	  c = ' ';
 	  while( !m_InputStack.Peek()->eof() && !EOL( c ) )
 	  {
@@ -257,7 +257,7 @@ gString gPreprocessor::GetLine( void )
 	} // "Include"
 
 	//------------------- GetPath -------------------------------
-	else if( line.right( 7 ) == "GetPath" )
+	else if( line.Right( 7 ) == "GetPath" )
 	{
 	  // Process GetPath[] calls.
 
@@ -266,7 +266,7 @@ gString gPreprocessor::GetLine( void )
 	  bool file = true;
 	  bool path = true;
 
-	  line = line.left( line.length() - 7 );
+	  line = line.Left( line.Length() - 7 );
 
 	  c = ' ';
 	  while( !m_InputStack.Peek()->eof() && c == ' ' )
@@ -375,7 +375,7 @@ gString gPreprocessor::GetLine( void )
 
 	  // now the file and path variables are defined,
 	  //   determine return value
-	  gString txt = GetFileName();
+	  gText txt = GetFileName();
 	  const char SLASH = System::Slash();
 
 	  if( file && path )
@@ -383,20 +383,20 @@ gString gPreprocessor::GetLine( void )
 	  }
 	  else if( file )
 	  {
-	    if( txt.lastOccur( SLASH ) > 0 )
-	      txt = txt.right( txt.length() - txt.lastOccur( SLASH ) );
+	    if( txt.LastOccur( SLASH ) > 0 )
+	      txt = txt.Right( txt.Length() - txt.LastOccur( SLASH ) );
 	  }
 	  else if( path )
 	  {
-	    if( txt.lastOccur( SLASH ) > 0 )
-	      txt = txt.left( txt.lastOccur( SLASH ) );
+	    if( txt.LastOccur( SLASH ) > 0 )
+	      txt = txt.Left( txt.LastOccur( SLASH ) );
 	    else
 	      txt = "";
 	  }
 	  else
 	    txt = "";
 	  
-	  line += (gString) '\"' + (gString) txt + (gString) '\"';
+	  line += (gText) '\"' + (gText) txt + (gText) '\"';
 
 	} // "GetPath"
 
@@ -404,7 +404,7 @@ gString gPreprocessor::GetLine( void )
     }
 
     // This outer loop deals with explicit line continuation characters
-    if( line.right( 1 ) == '\\' )
+    if( line.Right( 1 ) == '\\' )
     {
       if( !continuation )
 	SetPrompt( false );
@@ -436,7 +436,7 @@ gString gPreprocessor::GetLine( void )
 
 
 // note: filename might be changed after this call
-gInput* gPreprocessor::LoadInput( gString& name )
+gInput* gPreprocessor::LoadInput( gText& name )
 {
   gInput* _Input = NULL;
   extern char* _SourceDir;
@@ -448,7 +448,7 @@ gInput* gPreprocessor::LoadInput( gString& name )
   bool search = false;
   if( strchr( (char *) name, SLASH ) == NULL )
     search = true;
-  gString IniFileName;
+  gText IniFileName;
   
   IniFileName = name;
   _Input = new gFileInput( IniFileName );
@@ -464,7 +464,7 @@ gInput* gPreprocessor::LoadInput( gString& name )
   {
     if( System::GetEnv( "HOME" ) != NULL )
     {
-      IniFileName = (gString) System::GetEnv( "HOME" ) + (gString) SLASH + (gString) name;
+      IniFileName = (gText) System::GetEnv( "HOME" ) + (gText) SLASH + (gText) name;
       _Input = new gFileInput( IniFileName );
       if( _Input->IsValid() )
       {
@@ -477,7 +477,7 @@ gInput* gPreprocessor::LoadInput( gString& name )
 
     if( System::GetEnv( "GCLLIB" ) != NULL )
     {
-      IniFileName = (gString) System::GetEnv( "GCLLIB" ) + (gString) SLASH + (gString) name;
+      IniFileName = (gText) System::GetEnv( "GCLLIB" ) + (gText) SLASH + (gText) name;
       _Input = new gFileInput( IniFileName );
       if( _Input->IsValid() )
       {
@@ -490,7 +490,7 @@ gInput* gPreprocessor::LoadInput( gString& name )
 
     if( SOURCE != NULL )
     {
-      IniFileName = (gString) SOURCE + (gString) SLASH + (gString) name;
+      IniFileName = (gText) SOURCE + (gText) SLASH + (gText) name;
       _Input = new gFileInput( IniFileName );
       if( _Input->IsValid() )
       {

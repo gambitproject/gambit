@@ -6,7 +6,7 @@
 
 #include "behavsol.h"
 
-gString NameEfgAlgType(EfgAlgType i)
+gText NameEfgAlgType(EfgAlgType i)
 {
   switch(i)
   {

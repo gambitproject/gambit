@@ -8,7 +8,7 @@
 #include "mixedsol.h"
 
 
-gString NameNfgAlgType(NfgAlgType i)
+gText NameNfgAlgType(NfgAlgType i)
 {
   switch(i)
   {

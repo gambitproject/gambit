@@ -10,7 +10,7 @@
 
 #include <math.h>
 #include "gambitio.h"
-#include "gstring.h"
+#include "gtext.h"
 #include "garray.h"
 #include "glist.h"
 #include "gblock.h"
@@ -37,8 +37,8 @@ built on top of a pointer to a function for computing an order.
 // gSpace declaration
 // *************************
 
-struct Variable{
-  gString Name;
+struct Variable  { 
+  gText Name;
   int number;
 };
 
@@ -61,11 +61,11 @@ public:
   // information
   int             Dmnsn(void)              const;
   Variable*       VariableWithNumber(int)  const;
-  const gString&  GetVariableName(int)     const;
+  const gText&  GetVariableName(int)     const;
   gSpace          WithVariableAppended()   const;
 
   // manipulation
-  void            SetVariableName(int, const gString &);
+  void            SetVariableName(int, const gText &);
   void            CreateVariables (int nvars = 1);
 
   void            Dump(gOutput &) const;  // Debugging output

@@ -11,7 +11,7 @@
 #include "gmisc.h"
 #include "behav.h"
 #include "gambitio.h"
-#include "gstring.h"
+#include "gtext.h"
 #include "gnumber.h"
 
 typedef enum 
@@ -34,7 +34,7 @@ typedef enum
   EfgAlg_POLENUM,
 } EfgAlgType;
 
-gString NameEfgAlgType(EfgAlgType i);
+gText NameEfgAlgType(EfgAlgType i);
 void DisplayEfgAlgType(gOutput& o, EfgAlgType i);
 
 

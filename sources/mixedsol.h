@@ -10,7 +10,7 @@
 #include "gmisc.h"
 #include "mixed.h"
 #include "gambitio.h"
-#include "gstring.h"
+#include "gtext.h"
 #include "gnumber.h"
 
 typedef enum 
@@ -28,7 +28,7 @@ typedef enum
   NfgAlg_POLENUM
 } NfgAlgType;
 
-gString NameNfgAlgType(NfgAlgType i);
+gText NameNfgAlgType(NfgAlgType i);
 void DisplayNfgAlgType(gOutput& o, NfgAlgType i);
 
 

@@ -24,7 +24,7 @@
 
 #include "system.h"
 #include "gstack.h"
-#include "gstring.h"
+#include "gtext.h"
 
 
 #include "gcmdline.h"
@@ -793,7 +793,7 @@ Portion* GSM_NewOutputStream(Portion** param)
   Portion* result = 0;
   gOutput* g;
   
-  gString filename = ((TextPortion*) param[0])->Value();
+  gText filename = ((TextPortion*) param[0])->Value();
   bool append = ((BoolPortion*) param[1])->Value();
 
   g = new gFileOutput(filename, append);
@@ -801,7 +801,7 @@ Portion* GSM_NewOutputStream(Portion** param)
   if(g->IsValid())
     result = new OutputPortion(*g);    
   else
-    result = new ErrorPortion((gString) "Error opening file \"" + 
+    result = new ErrorPortion((gText) "Error opening file \"" + 
 			      ((TextPortion*) param[0])->Value() + "\"");
   return result;
 }
@@ -819,7 +819,7 @@ Portion* GSM_NewInputStream(Portion** param)
   if(g->IsValid())
     result = new InputPortion(*g);
   else
-    result = new ErrorPortion((gString) "Error opening file \"" + 
+    result = new ErrorPortion((gText) "Error opening file \"" + 
 			      ((TextPortion*) param[0])->Value() + "\"");
   
   return result;
@@ -855,8 +855,8 @@ void GSM_SetWriteOptions(void)
   Portion::_SetWriteListIndent(_WriteListIndent);
   Portion::_SetWriteSolutionInfo(_WriteSolutionInfo);
 
-  ToStringWidth( _WriteWidth );
-  ToStringPrecision( _WritePrecis );
+  ToTextWidth( _WriteWidth );
+  ToTextPrecision( _WritePrecis );
 }
 
 
@@ -1122,8 +1122,8 @@ Portion* GSM_Read_Number(Portion** param)
 Portion* GSM_Read_Text(Portion** param)
 {
   char c = ' ';
-  gString s;
-  gString t;
+  gText s;
+  gText t;
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();
 
@@ -1338,10 +1338,10 @@ Portion* GSM_Help(Portion** param)
 		    ((BoolPortion*) param[2])->Value() );
 }
 
-gString GetLine(gInput& f)
+gText GetLine(gInput& f)
 {
   char c = 0;
-  gString result;
+  gText result;
   while(f.IsValid())
   {
     f >> c;
@@ -1357,7 +1357,7 @@ gString GetLine(gInput& f)
 
 Portion* GSM_Manual(Portion** param)
 {
-  gString txt = ((TextPortion*) param[0])->Value();
+  gText txt = ((TextPortion*) param[0])->Value();
   gOutput& s = ((OutputPortion*) param[1])->Value();
   ListPortion* Prototypes = (ListPortion*) _gsm->Help(txt, true, true, true);
   int i;
@@ -1370,7 +1370,7 @@ Portion* GSM_Manual(Portion** param)
   }
 
 
-//  gString name = "gcl.man";   This gives problems on BC (rdm)
+//  gText name = "gcl.man";   This gives problems on BC (rdm)
   char * name = "gcl.man";    // this change necessary for BC
   gFileInput* f = NULL;
 
@@ -1398,9 +1398,9 @@ Portion* GSM_Manual(Portion** param)
   bool man_found = false;
   if( strchr( name, SLASH1 ) == NULL )
 	 search = true;
-  gString ManFileName;
+  gText ManFileName;
 
-  ManFileName = (gString) name;
+  ManFileName = (gText) name;
   f = new gFileInput( ManFileName );
   if (!f->IsValid())
   {
@@ -1417,7 +1417,7 @@ Portion* GSM_Manual(Portion** param)
 
     if( !man_found && (System::GetEnv( "HOME" ) != NULL) )
     {
-      ManFileName = (gString) System::GetEnv( "HOME" ) + SLASH + name;
+      ManFileName = (gText) System::GetEnv( "HOME" ) + SLASH + name;
       f = new gFileInput( ManFileName );
       if (!f->IsValid())
       {
@@ -1432,7 +1432,7 @@ Portion* GSM_Manual(Portion** param)
 
     if( !man_found && (System::GetEnv( "GCLLIB" ) != NULL) )
     {
-      ManFileName = (gString) System::GetEnv( "GCLLIB" ) + SLASH + name;
+      ManFileName = (gText) System::GetEnv( "GCLLIB" ) + SLASH + name;
       f = new gFileInput( ManFileName );
       if (!f->IsValid())
       {
@@ -1447,7 +1447,7 @@ Portion* GSM_Manual(Portion** param)
 
     if( !man_found && (SOURCE != NULL) )
     {
-      ManFileName = (gString) SOURCE + SLASH + name;
+      ManFileName = (gText) SOURCE + SLASH + name;
       f = new gFileInput( ManFileName );
       if (!f->IsValid())
       {
@@ -1468,14 +1468,14 @@ Portion* GSM_Manual(Portion** param)
     return new BoolPortion(false);
 
 
-  gString line;
-  gString line_out;
+  gText line;
+  gText line_out;
   bool found = false;
   while(f->IsValid() && !f->eof() && !found)
   {
     line = GetLine(*f);
-    if(line.length() > txt.length())
-      if( line.left(txt.length() + 1).dncase() == (txt + "[").dncase() )
+    if(line.Length() > txt.Length())
+      if( line.Left(txt.Length() + 1).Dncase() == (txt + "[").Dncase() )
 	found = true;
   }
   if(found)
@@ -1484,7 +1484,7 @@ Portion* GSM_Manual(Portion** param)
     while(f->IsValid() && !f->eof())
     {
       line = GetLine(*f);      
-      if(line.length()>=3 && line.left(3) == "\\bd")
+      if(line.Length()>=3 && line.Left(3) == "\\bd")
 	body++;
       if(body > 0)
       {
@@ -1494,34 +1494,34 @@ Portion* GSM_Manual(Portion** param)
 	  char* s;
 	  int idx;
 	  int numchars = 0;
-	  if((s=strstr(line_out.stradr(), "\\bd")) != 0)
+	  if((s=strstr(line_out, "\\bd")) != 0)
 	    numchars = 3;
-	  else if((s=strstr(line_out.stradr(), "\\ed")) != 0)
+	  else if((s=strstr(line_out, "\\ed")) != 0)
 	    numchars = 3;
-	  else if((s=strstr(line_out.stradr(), "\\item")) != 0)
+	  else if((s=strstr(line_out, "\\item")) != 0)
 	    numchars = 5;
-	  else if((s=strstr(line_out.stradr(), "\\tt")) != 0)
+	  else if((s=strstr(line_out, "\\tt")) != 0)
 	    numchars = 4;
-	  else if((s=strstr(line_out.stradr(), "\\em")) != 0)
+	  else if((s=strstr(line_out, "\\em")) != 0)
 	    numchars = 4;
-	  else if((s=strstr(line_out.stradr(), "$")) != 0)
+	  else if((s=strstr(line_out, "$")) != 0)
 	  {
-	    idx = s - line_out.stradr();
+	    idx = s - (char *) line_out;
 	    line_out[idx] = '\'';
 	    numchars = 0;
 	  }
-	  else if((s=strstr(line_out.stradr(), "\\verb")) != 0)
+	  else if((s=strstr(line_out, "\\verb")) != 0)
 	  {
 	    numchars = 5;
-	    idx = s - line_out.stradr();
+	    idx = s - (char *) line_out;
 	    for(i=0; i<numchars; i++) 
-	      line_out.remove(idx);
-	    if(line_out.length()>idx)
+	      line_out.Remove(idx);
+	    if(line_out.Length()>idx)
 	    {
 	      char c;
 	      c = line_out[idx];
 	      line_out[idx] = '\"';
-	      while(line_out.length()>idx)
+	      while(line_out.Length()>idx)
 	      {
 		idx++;
 		if(line_out[idx]==c)
@@ -1533,17 +1533,17 @@ Portion* GSM_Manual(Portion** param)
 	  }
 	  else
 	    break;
-	  idx = s - line_out.stradr();
+	  idx = s - (char *) line_out;
 	  for(i=0; i<numchars; i++) 
-	    line_out.remove(idx);
-	  if(line_out.length()>idx && line_out[idx] == ' ')
-	    line_out.remove(idx);
+	    line_out.Remove(idx);
+	  if(line_out.Length()>idx && line_out[idx] == ' ')
+	    line_out.Remove(idx);
 	}
 	for(i=0; i<body; i++)
 	  s << ' ';
 	s << line_out << '\n';
       }
-      if(line.length()>=3 && line.left(3) == "\\ed")
+      if(line.Length()>=3 && line.Left(3) == "\\ed")
       {
 	body--;
 	if(body <= 0)
@@ -1581,7 +1581,7 @@ Portion* GSM_Clear(Portion**)
 
 Portion* GSM_GetEnv( Portion** param )
 {
-  if( ((TextPortion*) param[0])->Value().length() == 0 )
+  if( ((TextPortion*) param[0])->Value().Length() == 0 )
     return new ErrorPortion( "Invalid environment variable name" );
 
   return 
@@ -1590,7 +1590,7 @@ Portion* GSM_GetEnv( Portion** param )
 
 Portion* GSM_SetEnv( Portion** param )
 {
-  if( ((TextPortion*) param[0])->Value().length() == 0 )
+  if( ((TextPortion*) param[0])->Value().Length() == 0 )
     return new ErrorPortion( "Invalid environment variable name" );
 
   int result = 0;
@@ -1604,7 +1604,7 @@ Portion* GSM_SetEnv( Portion** param )
 
 Portion* GSM_UnSetEnv( Portion** param )
 {
-  if( ((TextPortion*) param[0])->Value().length() == 0 )
+  if( ((TextPortion*) param[0])->Value().Length() == 0 )
     return new ErrorPortion( "Invalid environment variable name" );
 
   int result = 0;
@@ -1617,20 +1617,20 @@ Portion* GSM_UnSetEnv( Portion** param )
 
 Portion* GSM_Shell( Portion** param )
 {
-  gString str = ((TextPortion*) param[0])->Value();
+  gText str = ((TextPortion*) param[0])->Value();
   bool spawn = ((BoolPortion*) param[1])->Value();
 
   int result = -1;
   if( !spawn )
   {
-    if( str.length() > 0 )
+    if( str.Length() > 0 )
       result = System::Shell( str );
     else
       result = System::Shell( 0 );
   }
   else
   {
-    if( str.length() > 0 )
+    if( str.Length() > 0 )
       result = System::Spawn( str );
     else
       result = System::Spawn( 0 );
@@ -1652,22 +1652,22 @@ Portion* GSM_ExePath( Portion** param)
   bool path = ((BoolPortion*) param[1])->Value();
 
   assert( _ExePath );
-  gString txt( _ExePath );
+  gText txt( _ExePath );
 
   if( file && path )
   {
   }
   else if( file )
   {
-    if( txt.lastOccur( SLASH ) > 0 )
-      txt = txt.right( txt.length() - txt.lastOccur( SLASH ) );
+    if( txt.LastOccur( SLASH ) > 0 )
+      txt = txt.Right( txt.Length() - txt.LastOccur( SLASH ) );
     else
       txt = "";
   }
   else if( path )
   {
-    if( txt.lastOccur( SLASH ) > 0 )
-      txt = txt.left( txt.lastOccur( SLASH ) );
+    if( txt.LastOccur( SLASH ) > 0 )
+      txt = txt.Left( txt.LastOccur( SLASH ) );
   }
   if( !file && !path )
     txt = "";
@@ -1700,7 +1700,7 @@ Portion* GSM_Platform( Portion** )
 }
 
 
-extern gStack<gString> GCL_InputFileNames;
+extern gStack<gText> GCL_InputFileNames;
 Portion* GSM_GetPath( Portion** param )
 {
 #ifdef __GNUG__
@@ -1712,22 +1712,22 @@ Portion* GSM_GetPath( Portion** param )
   bool path = ((BoolPortion*) param[1])->Value();
   if( GCL_InputFileNames.Depth() > 0 )
   {
-    gString txt = GCL_InputFileNames.Peek();
+    gText txt = GCL_InputFileNames.Peek();
 
     if( file && path )
     {
     }
     else if( file )
     {
-      if( txt.lastOccur( SLASH ) > 0 )
-	txt = txt.right( txt.length() - txt.lastOccur( SLASH ) );
+      if( txt.LastOccur( SLASH ) > 0 )
+	txt = txt.Right( txt.Length() - txt.LastOccur( SLASH ) );
       else
 	txt = "";
     }
     else if( path )
     {
-      if( txt.lastOccur( SLASH ) > 0 )
-	txt = txt.left( txt.lastOccur( SLASH ) );
+      if( txt.LastOccur( SLASH ) > 0 )
+	txt = txt.Left( txt.LastOccur( SLASH ) );
     }
     if( !file && !path )
       txt = "";
@@ -1749,9 +1749,9 @@ Portion* GSM_GetPath( Portion** param )
 Portion* GSM_Date(Portion**)
 {
   time_t now = time(0);
-  gString AscTime = asctime(localtime(&now));
-  return new TextPortion(AscTime.mid(11, 1) +
-			    AscTime.mid(4, 21) + ", " + AscTime.mid(8, 12));
+  gText AscTime = asctime(localtime(&now));
+  return new TextPortion(AscTime.Mid(11, 1) +
+			    AscTime.Mid(4, 21) + ", " + AscTime.Mid(8, 12));
 }
 
 
@@ -1765,7 +1765,7 @@ Portion* GSM_IsList( Portion** p )
 
 Portion* GSM_SaveGlobalVar( Portion** param )
 {
-  gString& varname = ((TextPortion*) param[0])->Value();
+  gText& varname = ((TextPortion*) param[0])->Value();
   _gsm->GlobalVarDefine( varname, 
 			 param[1]->ValCopy() );
   return _gsm->GlobalVarValue( varname )->RefCopy();
@@ -1773,7 +1773,7 @@ Portion* GSM_SaveGlobalVar( Portion** param )
 
 Portion* GSM_LoadGlobalVar( Portion** param )
 {
-  gString& varname = ((TextPortion*) param[0])->Value();
+  gText& varname = ((TextPortion*) param[0])->Value();
   if( _gsm->GlobalVarIsDefined( varname ) )
     return _gsm->GlobalVarValue( varname )->RefCopy();
   else
@@ -1783,8 +1783,8 @@ Portion* GSM_LoadGlobalVar( Portion** param )
 
 Portion* GSM_SaveLocalVar( Portion** param )
 {
-  gString varname =
-    _gsm->UserFuncName() + gString((char) 1) + ((TextPortion*) param[0])->Value();
+  gText varname =
+    _gsm->UserFuncName() + gText((char) 1) + ((TextPortion*) param[0])->Value();
   _gsm->GlobalVarDefine( varname, 
 			 param[1]->ValCopy() );
   return _gsm->GlobalVarValue( varname )->RefCopy();
@@ -1792,8 +1792,8 @@ Portion* GSM_SaveLocalVar( Portion** param )
 
 Portion* GSM_LoadLocalVar( Portion** param )
 {
-  gString varname =
-    _gsm->UserFuncName() + gString((char) 1) + ((TextPortion*) param[0])->Value();
+  gText varname =
+    _gsm->UserFuncName() + gText((char) 1) + ((TextPortion*) param[0])->Value();
   if( _gsm->GlobalVarIsDefined( varname ) )
     return _gsm->GlobalVarValue( varname )->RefCopy();
   else

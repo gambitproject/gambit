@@ -8,7 +8,7 @@
 #define BEHAV_H
 
 #include "gmisc.h"
-#include "gstring.h"
+#include "gtext.h"
 #include "efstrat.h"
 
 #include "gdpvect.h"

@@ -19,13 +19,13 @@
 
 class Portion;
 class FuncDescObj;
-class gString;
+class gText;
 
 
-class RefHashTable : public HashTable<gString, Portion*>
+class RefHashTable : public HashTable<gText, Portion*>
 {
  private:
-  int Hash( const gString& ref ) const;
+  int Hash( const gText& ref ) const;
   void DeleteAction( Portion* value );
   
  public:
@@ -37,10 +37,10 @@ class RefHashTable : public HashTable<gString, Portion*>
 
 
 
-class FunctionHashTable : public HashTable<gString, FuncDescObj*>
+class FunctionHashTable : public HashTable<gText, FuncDescObj*>
 {
  private:
-  int Hash( const gString& funcname ) const;
+  int Hash( const gText& funcname ) const;
   void DeleteAction( FuncDescObj* func );
 
  public:

@@ -68,12 +68,12 @@ Portion* GSM_Index( Portion** param )
 void GSM_Flatten_Top(ListPortion* list, int levels, int depth, 
 		     ListPortion* result)
 {
-  int length = list->Length();
+  int Length = list->Length();
   int i;
   assert(levels >= 0);
   if(levels == 0)
   {
-    for(i=1; i<=length; i++)
+    for(i=1; i<=Length; i++)
       if((*list)[i]->Spec().ListDepth == 0)
 	result->Append((*list)[i]->ValCopy());
       else
@@ -82,10 +82,10 @@ void GSM_Flatten_Top(ListPortion* list, int levels, int depth,
   else if(levels > 0)
   {
     if(depth >= levels)
-      for(i=1; i<=length; i++)
+      for(i=1; i<=Length; i++)
 	result->Append((*list)[i]->ValCopy());
     else
-      for(i=1; i<=length; i++)
+      for(i=1; i<=Length; i++)
 	if((*list)[i]->Spec().ListDepth == 0)
 	  result->Append((*list)[i]->ValCopy());
 	else
@@ -96,13 +96,13 @@ void GSM_Flatten_Top(ListPortion* list, int levels, int depth,
 void GSM_Flatten_Bottom(ListPortion* list, int levels, int depth, 
 			ListPortion* result)
 {
-  int length = result->Length();
+  int Length = result->Length();
   int i;
   assert(levels > 0);
   assert(list == 0);
   if(depth >= levels-1)
   {
-    for(i=1; i<=length; i++)
+    for(i=1; i<=Length; i++)
       if((*result)[i]->Spec().ListDepth == 0)
 	;
       else
@@ -116,7 +116,7 @@ void GSM_Flatten_Bottom(ListPortion* list, int levels, int depth,
   }
   else
   {
-    for(i=1; i<=length; i++)
+    for(i=1; i<=Length; i++)
       if((*result)[i]->Spec().ListDepth == 0)
 	;
       else
@@ -147,13 +147,13 @@ Portion* GSM_Flatten(Portion** param)
 bool ListDimCheck(ListPortion* p0, ListPortion* p1)
 {
   int i;
-  int length;
+  int Length;
   assert(p0->Spec().ListDepth > 0);
   assert(p1->Spec().ListDepth > 0);
-  length = p0->Length();
-  if(length != p1->Length())
+  Length = p0->Length();
+  if(Length != p1->Length())
     return false;
-  for(i = 1; i <= length; i++)
+  for(i = 1; i <= Length; i++)
   {
     if((*p0)[i]->Spec().ListDepth != (*p1)[i]->Spec().ListDepth)
       return false;
@@ -167,9 +167,9 @@ bool ListDimCheck(ListPortion* p0, ListPortion* p1)
 ListPortion* GSM_Filter_Aid(ListPortion* p0, ListPortion* p1)
 {
   int i;
-  int length = p0->Length();
+  int Length = p0->Length();
   ListPortion* list = new ListPortion();
-  for(i=1; i<=length; i++)
+  for(i=1; i<=Length; i++)
     if((*p0)[i]->Spec().ListDepth == 0)
     {
       assert((*p1)[i]->Spec().Type == porBOOL);
@@ -351,14 +351,14 @@ Portion *GSM_LengthList(Portion **param)
 
 Portion *GSM_LengthText(Portion **param)
 {
-  return new IntPortion(((TextPortion *) param[0])->Value().length());
+  return new IntPortion(((TextPortion *) param[0])->Value().Length());
 }
 
 Portion *GSM_NthChar(Portion **param)
 {
-  gString text(((TextPortion *) param[0])->Value());
+  gText text(((TextPortion *) param[0])->Value());
   int n = ((IntPortion *) param[1])->Value();
-  if (n <= 0 || n > text.length())
+  if (n <= 0 || n > text.Length())
     return 0;
   return new TextPortion(text[n-1]);
 }
@@ -368,12 +368,12 @@ Portion *GSM_NthChar(Portion **param)
 
 Portion *GSM_TextInt(Portion **param)
 {
-  return new TextPortion(ToString(((IntPortion *) param[0])->Value()));
+  return new TextPortion(ToText(((IntPortion *) param[0])->Value()));
 }
 
 Portion *GSM_Text_Number(Portion **param)
 {
-  return new TextPortion(ToString(((NumberPortion *) param[0])->Value()));
+  return new TextPortion(ToText(((NumberPortion *) param[0])->Value()));
 }
 
 Portion *GSM_TextText(Portion **param)
@@ -446,7 +446,7 @@ Portion* GSM_List( Portion** param )
   assert( param[0]->Spec().Type != porERROR );  
 
   if( ((IntPortion*) param[1])->Value() < 0 )
-    return new ErrorPortion( "Invalid list length" );
+    return new ErrorPortion( "Invalid list Length" );
 
   p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
@@ -462,7 +462,7 @@ Portion* GSM_List_List( Portion** param )
   assert( param[0]->Spec().Type != porERROR );  
 
   if( ((IntPortion*) param[1])->Value() < 0 )
-    return new ErrorPortion( "Invalid list length" );
+    return new ErrorPortion( "Invalid list Length" );
 
   p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
@@ -478,7 +478,7 @@ Portion* GSM_List_Integer( Portion** param )
   int i;
 
   if( ((IntPortion*) param[1])->Value() < 0 )
-    return new ErrorPortion( "Invalid list length" );
+    return new ErrorPortion( "Invalid list Length" );
 
   p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
@@ -494,7 +494,7 @@ Portion* GSM_List_Number( Portion** param )
   int i;
 
   if( ((IntPortion*) param[1])->Value() < 0 )
-    return new ErrorPortion( "Invalid list length" );
+    return new ErrorPortion( "Invalid list Length" );
 
   p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
@@ -513,7 +513,7 @@ Portion* GSM_List_Nfg( Portion** param )
   assert( param[0]->Spec().Type != porERROR );  
 
   if( ((IntPortion*) param[1])->Value() < 0 )
-    return new ErrorPortion( "Invalid list length" );
+    return new ErrorPortion( "Invalid list Length" );
 
 
   p = new ListPortion();
@@ -534,7 +534,7 @@ Portion* GSM_List_Efg( Portion** param )
   assert( param[0]->Spec().Type != porERROR );  
 
   if( ((IntPortion*) param[1])->Value() < 0 )
-    return new ErrorPortion( "Invalid list length" );
+    return new ErrorPortion( "Invalid list Length" );
 
 
   p = new ListPortion();
@@ -670,13 +670,13 @@ Portion* GSM_Transpose( Portion** param )
 {
   int i;
   int j;
-  int length = 0;
+  int Length = 0;
   int width = 0;
   ListPortion* p;
   ListPortion* s;
   assert( param[0]->Spec().ListDepth > 0 );
-  length = ((ListPortion*) param[0])->Length();
-  for( i = 1; i <= length; i++ )
+  Length = ((ListPortion*) param[0])->Length();
+  for( i = 1; i <= Length; i++ )
   {
     if( (*(ListPortion*) param[0])[i]->Spec().ListDepth == 0 )
       return new ErrorPortion( "Bad dimensionality" );
@@ -690,7 +690,7 @@ Portion* GSM_Transpose( Portion** param )
   for( i = 1; i <= width; i++ )
   {
     s = new ListPortion();
-    for( j = 1; j <= length; j++ )
+    for( j = 1; j <= Length; j++ )
     {
       s->Append( (*(ListPortion*)(*(ListPortion*) param[0])[j])[i]->ValCopy());
     }
@@ -753,7 +753,7 @@ void Init_listfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Length", 1);
+  FuncObj = new FuncDescObj("length", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LengthList, porINTEGER, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("list", 
                               PortionSpec(porANYTYPE, 1, porNULLSPEC )));

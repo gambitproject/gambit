@@ -5,7 +5,6 @@
 //
 
 #include "gsmincl.h"
-#include "string.h"
 
 
 bool PortionSpecMatch( const PortionSpec& t1, const PortionSpec& t2 )
@@ -80,10 +79,10 @@ PortionSpecTextType _PortionSpecText[] =
 };
 
 
-gString PortionSpecToText(const PortionSpec& spec)
+gText PortionSpecToText(const PortionSpec& spec)
 {
   int i;
-  gString result;
+  gText result;
   for(i=0; i<NUM_PortionSpecs; i++)
     if(spec.Type == _PortionSpecText[i].Type)
     {
@@ -105,43 +104,43 @@ gString PortionSpecToText(const PortionSpec& spec)
   
   if(spec.ListDepth != NLIST)
     for(i=0; i<spec.ListDepth; i++)
-      result = (gString) "LIST(" + result + ")";
+      result = (gText) "LIST(" + result + ")";
   else
-    result = (gString) "NLIST(" + result + ")";
+    result = (gText) "NLIST(" + result + ")";
   return result;
 }
 
 
 #include "gambitio.h"
 
-PortionSpec TextToPortionSpec(const gString& text)
+PortionSpec TextToPortionSpec(const gText& text)
 {
   int i;
-  gString t = text;
+  gText t = text;
   PortionSpec result = porERROR;
 
-  while(t.left(5) == "LIST(")
+  while(t.Left(5) == "LIST(")
   {
     result.ListDepth++;
-    t = t.mid(t.length()-6, 6);
+    t = t.Mid(t.Length()-6, 6);
   }
-  if(t.left(6) == "NLIST(")
+  if(t.Left(6) == "NLIST(")
   {
     result.ListDepth = NLIST;
-    t = t.mid(t.length()-7, 7);
+    t = t.Mid(t.Length()-7, 7);
   }
   for(i=0; i<NUM_PortionSpecs; i++)
-    if(t.left(strlen(_PortionSpecText[i].Text)) == _PortionSpecText[i].Text)
+    if(t.Left(strlen(_PortionSpecText[i].Text)) == _PortionSpecText[i].Text)
     {
       result.Type = result.Type | _PortionSpecText[i].Type;
-      t = t.right(t.length() - strlen(_PortionSpecText[i].Text));
-		if(t.left(1) == "*")
+      t = t.Right(t.Length() - strlen(_PortionSpecText[i].Text));
+		if(t.Left(1) == "*")
       {
 	result.Null = true;
-	t.remove(0);
+	t.Remove(0);
       }
-      if(t.left(1) == " ")
-	t.remove(0);
+      if(t.Left(1) == " ")
+	t.Remove(0);
     }
 
   return result;

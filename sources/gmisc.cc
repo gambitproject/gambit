@@ -14,7 +14,7 @@
 #include <ctype.h>
 
 #include "gambitio.h"
-#include "gstring.h"
+#include "gtext.h"
 
 //--------------------------------------------------------------------------
 //                      Simple mathematical functions
@@ -135,59 +135,59 @@ static char gconvert_buffer[GCONVERT_BUFFER_LENGTH];
 static int precision = 6;
 static int width = 0;
 
-void ToStringWidth(int i)
+void ToTextWidth(int i)
 {
   width = i;
 }
 
-int ToStringWidth(void)
+int ToTextWidth(void)
 {
   return width;
 }
 
 
-void ToStringPrecision(int i)
+void ToTextPrecision(int i)
 {
   precision = i;
 }
 
-int ToStringPrecision(void)
+int ToTextPrecision(void)
 {
   return precision;
 }
 
-gString ToString(int i)
+gText ToText(int i)
 {
   sprintf(gconvert_buffer, "%d", i);
-  return gString(gconvert_buffer);
+  return gText(gconvert_buffer);
 }
 
-gString ToString(long l)
+gText ToText(long l)
 {
   // sprintf(gconvert_buffer, "%.*ld", precision, l);
   sprintf(gconvert_buffer, "%*ld", width, l);
-  return gString(gconvert_buffer);
+  return gText(gconvert_buffer);
 }
 
-gString ToString(double d)
+gText ToText(double d)
 {
   // sprintf(gconvert_buffer, "%.*f", precision, d);
   sprintf(gconvert_buffer, "%*.*f", width, precision, d);
-  return gString(gconvert_buffer);
+  return gText(gconvert_buffer);
 }
 
-gString ToString(const gNumber &n)
+gText ToText(const gNumber &n)
 {
   if (n.GetPrecision() == precDOUBLE)
-    return ToString((double) n);
+    return ToText((double) n);
   else
-    return ToString((gRational) n);
+    return ToText((gRational) n);
 }
 
 
-gString ToString(const gInteger &i)
+gText ToText(const gInteger &i)
 {
-  return gString(Itoa(i));
+  return gText(Itoa(i));
 }
 
 // Note: when converting a double to a gRational, the num & den often turn out
@@ -197,7 +197,7 @@ gString ToString(const gInteger &i)
 // no attempt will be made to 'approx reduce' the fractions.  Thus the
 // approximation feature is disabled for now.
 
-gString ToString(const gRational &r, bool )
+gText ToText(const gRational &r, bool )
 {
 /*
   if (approx)   {
@@ -212,7 +212,7 @@ gString ToString(const gRational &r, bool )
       double den=r.denominator().as_double();
       double num=r.numerator().as_double();
       if (log(num)<=precision && log(den)<=precision)
-	return ToString(r,false);	// exact will do just fine.
+	return ToText(r,false);	// exact will do just fine.
       // these are nasty, huge numbers.  Make num be precision digits long,
 			// and hope den will follow
       double order=pow(10.0,ceil(log(gmin(num,den))));
@@ -240,17 +240,17 @@ gString ToString(const gRational &r, bool )
 		}
   }
   
-  return gString(gconvert_buffer);
+  return gText(gconvert_buffer);
 }
 
 
 // conversions from strings to numbers
 
-gRational FromString(const gString &f,gRational &y)
+gRational FromText(const gText &f,gRational &y)
 {
   char ch = ' ';
   int sign = 1;
-  int index=0,length=f.length();
+  int index=0,length=f.Length();
   gInteger num = 0, denom = 1;
 
   while (isspace(ch) && index<=length)    ch=f[index++];
@@ -292,35 +292,35 @@ gRational FromString(const gString &f,gRational &y)
 
 // this two-step process allows us to read in a double using either the
 // standard form xxx.xxxx or a/b form.
-double FromString(const gString &f,double &d)
+double FromText(const gText &f,double &d)
 {
   gRational R;
-  FromString(f,R);
+  FromText(f,R);
   d=(double)R;
   return d;
 }
 
-double ToDouble(const gString &s)
+double ToDouble(const gText &s)
 { return strtod(s, NULL); }
 
 // Rational if there is no decimal point
-gNumber FromString(const gString &s,gNumber &n)
+gNumber FromText(const gText &s,gNumber &n)
 {
   gRational r;
   double d;
-  gString tmp=s;
-  if (tmp.lastOccur('.'))
-    n=FromString(s,d);
+  gText tmp=s;
+  if (tmp.LastOccur('.'))
+    n=FromText(s,d);
   else
-    n=FromString(s,r);
+    n=FromText(s,r);
   return n;
 }
 
-gString EscapeQuotes(const gString &s)
+gText EscapeQuotes(const gText &s)
 {
-  gString ret;
+  gText ret;
   
-  for (int i = 0; i < s.length(); i++)  {
+  for (int i = 0; i < s.Length(); i++)  {
     if (s[i] == '"')   ret += '\\';
     ret += s[i];
   }
@@ -331,7 +331,7 @@ gString EscapeQuotes(const gString &s)
 
 //------------------------ TriState functions -----------------//
 
-gString NameTriState(TriState i)
+gText NameTriState(TriState i)
 {
   switch(i)
     {

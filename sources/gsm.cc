@@ -26,9 +26,9 @@ template class gStack< RefHashTable* >;
 class FuncDescObj;
 template class gSortList<FuncDescObj*>;
 template class gListSorter<FuncDescObj*>;
-#include "gstring.h"
-template class gSortList<gString>;
-template class gListSorter<gString>;
+#include "gtext.h"
+template class gSortList<gText>;
+template class gListSorter<gText>;
 
 
 
@@ -97,10 +97,10 @@ public:
     {}
 };
 
-class gTextListSorter : public gListSorter<gString>
+class gTextListSorter : public gListSorter<gText>
 {
 protected:
-  CompareResult Compare(gString const& a, gString const& b) const
+  CompareResult Compare(gText const& a, gText const& b) const
   {
     if(a < b)
       return GreaterThan;
@@ -110,8 +110,8 @@ protected:
       return Equal;
   }
 public:
-  gTextListSorter(gSortList<gString>& list)
-    : gListSorter<gString>(list)
+  gTextListSorter(gSortList<gText>& list)
+    : gListSorter<gText>(list)
     {}
 };
 
@@ -142,7 +142,7 @@ GSM::GSM(int size, gInput& s_in, gOutput& s_out, gOutput& s_err)
   _StackStack->Push(new gStack< Portion* >(size));
   _RefTableStack = new gStack< RefHashTable* >(1);
   _RefTableStack->Push(new RefHashTable);
-  _FuncNameStack = new gStack< gString >;
+  _FuncNameStack = new gStack< gText >;
 
   _FuncTable     = new FunctionHashTable;
   InitFunctions();  // This function is located in gsmfunc.cc
@@ -178,7 +178,7 @@ GSM::~GSM()
 
 
 
-bool GSM::VarIsDefined(const gString& var_name) const
+bool GSM::VarIsDefined(const gText& var_name) const
 {
   assert(var_name != "");
 
@@ -186,7 +186,7 @@ bool GSM::VarIsDefined(const gString& var_name) const
 }
 
 
-bool GSM::VarDefine(const gString& var_name, Portion* p)
+bool GSM::VarDefine(const gText& var_name, Portion* p)
 {
   Portion* old_value = 0;
   bool type_match = true;
@@ -241,14 +241,14 @@ bool GSM::VarDefine(const gString& var_name, Portion* p)
 }
 
 
-Portion* GSM::VarValue(const gString& var_name) const
+Portion* GSM::VarValue(const gText& var_name) const
 {
   assert(var_name != "");
   return (*_RefTableStack->Peek())(var_name);
 }
 
 
-Portion* GSM::_VarRemove(const gString& var_name)
+Portion* GSM::_VarRemove(const gText& var_name)
 {
   Portion* p;
 
@@ -267,7 +267,7 @@ Portion* GSM::_VarRemove(const gString& var_name)
 Portion* GSM::Assign( Portion* p1, Portion* p2 )
 {
   Portion* result = 0;
-  gString varname;
+  gText varname;
 
   if(p1->Spec().Type == porREFERENCE)
     varname = ((ReferencePortion*) p1)->Value();
@@ -478,11 +478,11 @@ bool GSM::UnAssign(Portion *p)
 
 Portion* GSM::UnAssignExt(Portion *p)
 {
-  gString txt;
+  gText txt;
 
   if(p->Spec().Type == porREFERENCE)
   {
-    gString varname = ((ReferencePortion*) p)->Value(); 
+    gText varname = ((ReferencePortion*) p)->Value(); 
     if(VarIsDefined( varname ) )
     {
       delete p;
@@ -511,7 +511,7 @@ Portion* GSM::UnAssignExt(Portion *p)
 void GSM::_ResolveRef( Portion*& p )
 {
   Portion*  result = 0;
-  gString ref;
+  gText ref;
   
   if(p->Spec().Type == porREFERENCE)
   {
@@ -614,7 +614,7 @@ Portion *GSM::Execute(gclExpression *expr, bool /*user_func*/)
 Portion* GSM::ExecuteUserFunc(gclExpression& program, 
 			      const FuncInfoType& func_info,
 			      Portion** param, 
-			      const gString& funcname )
+			      const gText& funcname )
 {
   Portion* result;
   Portion* result_copy;
@@ -676,7 +676,7 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 
 
 
-gString GSM::UserFuncName( void ) const
+gText GSM::UserFuncName( void ) const
 {
   if( _FuncNameStack->Depth() > 0 )
     return _FuncNameStack->Peek();
@@ -702,7 +702,7 @@ void GSM::Clear(void)
 
 
 
-Portion* GSM::Help(gString funcname, bool udf, bool bif, bool getdesc)
+Portion* GSM::Help(gText funcname, bool udf, bool bif, bool getdesc)
 {
   int i;
   int j;
@@ -711,7 +711,7 @@ Portion* GSM::Help(gString funcname, bool udf, bool bif, bool getdesc)
   int cfk;
   bool match;
   int found = 0;
-  gString curname;
+  gText curname;
   const gList<FuncDescObj*>* funcs = _FuncTable->Value();
   FuncDescObj *func;
   gList<FuncDescObj*> funclist;
@@ -721,14 +721,14 @@ Portion* GSM::Help(gString funcname, bool udf, bool bif, bool getdesc)
   if(_FuncTable->IsDefined(funcname))
   {
     func = (*_FuncTable)(funcname);
-    gList<gString> list = func->FuncList( udf, bif, getdesc );
+    gList<gText> list = func->FuncList( udf, bif, getdesc );
     result = new ListPortion();
     for(i=1; i<=list.Length(); i++)
       ((ListPortion*) result)->Append(new TextPortion(list[i]));
   }
   else
   {
-    funcname = funcname.dncase();
+    funcname = funcname.Dncase();
     for(i=0; i<_FuncTable->NumBuckets(); i++)
       for(j=1; j<=funcs[i].Length(); j++)
 	funclist.Append(funcs[i][j]);
@@ -736,21 +736,21 @@ Portion* GSM::Help(gString funcname, bool udf, bool bif, bool getdesc)
     for(i=1; i<=funclist.Length(); i++)
     {
       match = true;
-      curname = funclist[i]->FuncName().dncase();
+      curname = funclist[i]->FuncName().Dncase();
       fk = 0; 
       ck = 0;
       cfk = -1;
-      while(match && (fk<funcname.length()) && (ck<curname.length()))
+      while(match && (fk<funcname.Length()) && (ck<curname.Length()))
       {
 	if(funcname[fk]=='*')
 	{
-	  if(fk+1==funcname.length())
+	  if(fk+1==funcname.Length())
 	    break;
 	  cfk = fk;
 	  fk++;
-	  while(ck<curname.length() && funcname[fk]!=curname[ck])
+	  while(ck<curname.Length() && funcname[fk]!=curname[ck])
 	    ck++;
-	  if(ck==curname.length())
+	  if(ck==curname.Length())
 	  { match = false; break; }	  
 	}
 	
@@ -767,9 +767,9 @@ Portion* GSM::Help(gString funcname, bool udf, bool bif, bool getdesc)
 	}
       }
 
-      if((fk>=funcname.length()) != (ck>=curname.length()))	
+      if((fk>=funcname.Length()) != (ck>=curname.Length()))	
 	match = false;
-      if(fk+1==funcname.length() && funcname[fk]=='*')
+      if(fk+1==funcname.Length() && funcname[fk]=='*')
 	match = true;
       if(match)
       {	
@@ -786,7 +786,7 @@ Portion* GSM::Help(gString funcname, bool udf, bool bif, bool getdesc)
     gFuncListSorter sorter(funcslist);
     if(found==1)
     {
-      gList<gString> list = func->FuncList( udf, bif, getdesc );
+      gList<gText> list = func->FuncList( udf, bif, getdesc );
       result = new ListPortion();
       for(i=1; i<=list.Length(); i++)
 	((ListPortion*) result)->Append(new TextPortion(list[i]));
@@ -807,7 +807,7 @@ Portion* GSM::Help(gString funcname, bool udf, bool bif, bool getdesc)
 }
 
 
-Portion* GSM::HelpVars(gString varname)
+Portion* GSM::HelpVars(gText varname)
 {
   int i;
   int j;
@@ -816,11 +816,11 @@ Portion* GSM::HelpVars(gString varname)
   int cfk;
   bool match;
   int found = 0;
-  gString curname;
-  const gList<gString>* vars = _RefTableStack->Peek()->Key();
-  gString var;
-  gList<gString> varlist;
-  gSortList<gString> varslist;
+  gText curname;
+  const gList<gText>* vars = _RefTableStack->Peek()->Key();
+  gText var;
+  gList<gText> varlist;
+  gSortList<gText> varslist;
   Portion* result = 0;
 
   if(_RefTableStack->Peek()->IsDefined(varname))
@@ -831,7 +831,7 @@ Portion* GSM::HelpVars(gString varname)
   }
   else
   {
-    varname = varname.dncase();
+    varname = varname.Dncase();
     for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
       for(j=1; j<=vars[i].Length(); j++)
 	varlist.Append(vars[i][j]);
@@ -839,21 +839,21 @@ Portion* GSM::HelpVars(gString varname)
     for(i=1; i<=varlist.Length(); i++)
     {
       match = true;
-      curname = varlist[i].dncase();
+      curname = varlist[i].Dncase();
       fk = 0; 
       ck = 0;
       cfk = -1;
-      while(match && (fk<varname.length()) && (ck<curname.length()))
+      while(match && (fk<varname.Length()) && (ck<curname.Length()))
       {
 	if(varname[fk]=='*')
 	{
-	  if(fk+1==varname.length())
+	  if(fk+1==varname.Length())
 	    break;
 	  cfk = fk;
 	  fk++;
-	  while(ck<curname.length() && varname[fk]!=curname[ck])
+	  while(ck<curname.Length() && varname[fk]!=curname[ck])
 	    ck++;
-	  if(ck==curname.length())
+	  if(ck==curname.Length())
 	  { match = false; break; }	  
 	}
 	
@@ -870,9 +870,9 @@ Portion* GSM::HelpVars(gString varname)
 	}
       }
 
-      if((fk>=varname.length()) != (ck>=curname.length()))	
+      if((fk>=varname.Length()) != (ck>=curname.Length()))	
 	match = false;
-      if(fk+1==varname.length() && varname[fk]=='*')
+      if(fk+1==varname.Length() && varname[fk]=='*')
 	match = true;
       if(match)
       {	
@@ -1139,9 +1139,9 @@ void GSM::_ErrorMessage
  const int       error_num,
  const long&     num1, 
  const long&     num2,
- const gString&  str1,
- const gString&  str2,
- const gString&  str3
+ const gText&  str1,
+ const gText&  str2,
+ const gText&  str3
 )
 {
 #if 0
@@ -1224,24 +1224,24 @@ void GSM::_ErrorMessage
 
 
 
-void GSM::GlobalVarDefine     ( const gString& var_name, Portion* p )
+void GSM::GlobalVarDefine     ( const gText& var_name, Portion* p )
 {
   assert(var_name != "");
   if( GlobalVarIsDefined( var_name ) )
     GlobalVarRemove( var_name );
   _GlobalRefTable.Define(var_name, p);
 }
-bool GSM::GlobalVarIsDefined  ( const gString& var_name ) const
+bool GSM::GlobalVarIsDefined  ( const gText& var_name ) const
 {
   assert(var_name != "");
   return _GlobalRefTable.IsDefined(var_name);
 }
-Portion* GSM::GlobalVarValue  ( const gString& var_name ) const
+Portion* GSM::GlobalVarValue  ( const gText& var_name ) const
 {
   assert(var_name != "");
   return _GlobalRefTable(var_name);
 }
-void GSM::GlobalVarRemove     ( const gString& var_name )
+void GSM::GlobalVarRemove     ( const gText& var_name )
 {
   assert(var_name != "");
   delete _GlobalRefTable.Remove(var_name);

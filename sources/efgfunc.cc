@@ -417,7 +417,7 @@ static Portion *GSM_IsSuccessor(Portion **param)
 
 static Portion *GSM_LoadEfg(Portion **param)
 {
-  gString file = ((TextPortion *) param[0])->Value();
+  gText file = ((TextPortion *) param[0])->Value();
   
   gFileInput f(file);
 
@@ -841,7 +841,7 @@ static Portion *GSM_RootNode(Portion **param)
 static Portion *GSM_SaveEfg(Portion **param)
 {
   Efg* E = ((EfgPortion *) param[0])->Value();
-  gString text = ((TextPortion *) param[1])->Value();
+  gText text = ((TextPortion *) param[1])->Value();
   gFileOutput f(text);
 
   if (!f.IsValid())
@@ -879,7 +879,7 @@ static Portion *GSM_SetChanceProbs(Portion **param)
 
 static Portion *GSM_SetName(Portion **param)
 {
-  gString name(((TextPortion *) param[1])->Value());
+  gText name(((TextPortion *) param[1])->Value());
   
   switch (param[0]->Spec().Type)   {
     case porACTION:

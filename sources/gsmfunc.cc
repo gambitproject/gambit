@@ -135,7 +135,7 @@ Portion* CallFuncObj::CallNormalFunction( GSM* gsm, Portion** param )
     else 
       result = gsm->ExecuteUserFunc(*(_FuncInfo[_FuncIndex].FuncInstr), 
 				    _FuncInfo[_FuncIndex], param,
-				    FuncName() + gString((char) (_FuncIndex+1)) );
+				    FuncName() + gText((char) (_FuncIndex+1)) );
   }
   return result;
 }
@@ -305,7 +305,7 @@ ParamInfoType::ParamInfoType(const ParamInfoType& paraminfo)
 
 ParamInfoType::ParamInfoType
 (
- const gString& name,
+ const gText& name,
  const PortionSpec& spec,
  Portion* default_value, 
  const bool pass_by_ref
@@ -446,7 +446,7 @@ FuncDescObj::FuncDescObj(FuncDescObj& func)
 }
 
 
-FuncDescObj::FuncDescObj(const gString& func_name, int numfuncs)
+FuncDescObj::FuncDescObj(const gText& func_name, int numfuncs)
 : _FuncName(func_name), _NumFuncs(numfuncs)
 {
   _FuncInfo = new FuncInfoType[_NumFuncs];
@@ -454,7 +454,7 @@ FuncDescObj::FuncDescObj(const gString& func_name, int numfuncs)
 
 
   // Assumes one argument, which has a prototype func_proto
-FuncDescObj::FuncDescObj( const gString& func_proto, 
+FuncDescObj::FuncDescObj( const gText& func_proto, 
                           Portion* (*funcptr)(Portion**),
                           FuncFlagType FFT /* = funcLISTABLE */  )
 {
@@ -463,7 +463,7 @@ FuncDescObj::FuncDescObj( const gString& func_proto,
   
   char ch = ' ';
   int index = 0;
-  gString func_name;
+  gText func_name;
 
   ch = func_proto[index++];
   while (isalpha(ch))
@@ -527,7 +527,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, FuncInfoType funcinfo)
       _RefCountTable(funcinfo.FuncInstr)++;
 }
 
-void FuncDescObj::SetFuncInfo(int funcindex, const gString& s)
+void FuncDescObj::SetFuncInfo(int funcindex, const gText& s)
 {
   SetFuncInfo(funcindex, s, 0);
 }
@@ -536,18 +536,18 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s)
   // in it is used to determine the function info, and then SetFuncInfo 
   // is called with all data passed as arguments rather than a string.
 
-void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
+void FuncDescObj::SetFuncInfo(int funcindex, const gText& s,
                               Portion* (*funcptr)(Portion**), 
                               FuncFlagType FFT /* = funcLISTABLE */  )
 {
 
   char ch = ' ';
-  int index=0, length=s.length();
+  int index=0, length=s.Length();
   int numArgs=0;
   bool done = false;
   bool required = false;
-  gList<gString> specList;
-  gList<gString> nameList;
+  gList<gText> specList;
+  gList<gText> nameList;
   gList<int>     listList;
   gList<bool>    refList;
   gList<Portion*>     reqList;
@@ -575,7 +575,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
     }
   
       // name gets the name of the variable
-    gString name = ch;
+    gText name = ch;
     ch=s[index++];
     while (isalpha(ch)) { name += ch; ch = s[index++]; }
     nameList.Append(name);
@@ -605,7 +605,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
       ch=s[index++];
   
         // Word gets the word, which is the type of variable.
-      gString word = ch;
+      gText word = ch;
       int     listNum = 0;
       ch=s[index++];
       if (required)  // If required, get word in normal fashion.
@@ -653,7 +653,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
           // If it is a text string (for now just assume it is if it begins '"')
         else if (word[0] == '"')
         {
-          gString* tmp = new gString(word);
+          gText* tmp = new gText(word);
           reqList.Append((Portion*)tmp);
           word = "TEXT";
         }
@@ -788,7 +788,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   ch=s[index++];
   
     // Word gets the word, which is the type of variable.
-  gString word = ch;
+  gText word = ch;
   ch=s[index++];
   while (isalpha(ch)) { word += ch; ch = s[index++]; }
   int     listNum = 0;
@@ -854,7 +854,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
 }
 
   // Replaces strings with their enumerated types.
-PortionSpec ToSpec(gString &str, int num /* =0 */)
+PortionSpec ToSpec(gText &str, int num /* =0 */)
 {
   /*gout << "ToSpec called with " << str << " and " << num << ".\n";*/
   if (str == "NUMBER")
@@ -1155,7 +1155,7 @@ void FuncDescObj::Delete(int delete_index)
 }
 
 
-gString FuncDescObj::FuncName(void) const
+gText FuncDescObj::FuncName(void) const
 { return _FuncName; }
 
 
@@ -1186,10 +1186,10 @@ bool FuncDescObj::BIF( void ) const
 
 
 
-gList<gString> FuncDescObj::FuncList( bool udf, bool bif, bool getdesc ) const
+gList<gText> FuncDescObj::FuncList( bool udf, bool bif, bool getdesc ) const
 {
-  gList<gString> list;
-  gString f;
+  gList<gText> list;
+  gText f;
   int i;
   int j;
 
@@ -1223,7 +1223,7 @@ gList<gString> FuncDescObj::FuncList( bool udf, bool bif, bool getdesc ) const
 	f += '\n';
 	*/
 
-      if( getdesc && _FuncInfo[i].Desc.length() > 0 )
+      if( getdesc && _FuncInfo[i].Desc.Length() > 0 )
       {
 	f += '\n';
 	f += _FuncInfo[i].Desc;
@@ -1353,7 +1353,7 @@ bool CallFuncObj::_TypeMatch(Portion* p, PortionSpec ExpectedSpec,
 
 
 
-bool CallFuncObj::SetCurrParamIndex(const gString& param_name)
+bool CallFuncObj::SetCurrParamIndex(const gText& param_name)
 {
   int f_index;
   int TempFuncIndex = -1;
@@ -1972,9 +1972,9 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 
 
 
-gString CallFuncObj::_ParamName(const int index) const
+gText CallFuncObj::_ParamName(const int index) const
 {
-  gString param_name;
+  gText param_name;
   int f_index;
 
   if(_FuncIndex != -1 && _CurrParamIndex < _FuncInfo[_FuncIndex].NumParams)
@@ -2023,10 +2023,10 @@ void CallFuncObj::_ErrorMessage
  gOutput& s,
  const int error_num, 
  const long& num1,
- const gString& str1,
- const gString& str2,
- const gString& str3,
- const gString& str4
+ const gText& str1,
+ const gText& str2,
+ const gText& str3,
+ const gText& str4
 )
 {
 #if 0

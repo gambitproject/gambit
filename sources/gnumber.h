@@ -1,7 +1,7 @@
 //
 // FILE: gnumber.h -- Number class for Gambit project. 
 //
-// $Id$
+// @(#)gnumber.h	2.5 02/05/98
 //
 
 #ifndef GNUMBER_H

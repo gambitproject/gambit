@@ -120,7 +120,7 @@ void gCmdLineInput::GetCmdExec( void )
 
   int i = 0;
 
-  if( m_CmdExec.length() > 0 )
+  if( m_CmdExec.Length() > 0 )
     return;
 
 
@@ -152,9 +152,9 @@ void gCmdLineInput::GetCmdExec( void )
     strcpy(buf, "");
 
 
-  gString cmdBuf = buf;
-  gString cmdBufOld;
-  int curPos = cmdBuf.length();
+  gText cmdBuf = buf;
+  gText cmdBufOld;
+  int curPos = cmdBuf.Length();
   char c = 0;
 
   int historyPos = m_History.Length() + 1;
@@ -164,7 +164,7 @@ void gCmdLineInput::GetCmdExec( void )
   for( ; ; ) // infinite loop
   {
     assert( 0 <= curPos );
-    assert( curPos <= cmdBuf.length() );
+    assert( curPos <= cmdBuf.Length() );
 
 #ifdef __BORLANDC__
     winio_setecho( winio_current(), false );
@@ -193,7 +193,7 @@ void gCmdLineInput::GetCmdExec( void )
 	break;
 
       case ESC_RIGHT:
-	if( curPos < cmdBuf.length() )
+	if( curPos < cmdBuf.Length() )
 	{
 	  gout << cmdBuf[curPos];
 	  ++curPos;
@@ -212,10 +212,10 @@ void gCmdLineInput::GetCmdExec( void )
 	  for( i = 0; i < curPos; ++i )
 	    gout << '\b';
 #endif
-	  for( i = 0; i < cmdBuf.length(); ++i )
+	  for( i = 0; i < cmdBuf.Length(); ++i )
 	    gout << ' ';
 #ifndef USE_CR
-	  for( i = 0; i < cmdBuf.length(); ++i )
+	  for( i = 0; i < cmdBuf.Length(); ++i )
 	    gout << '\b';
 #endif
 
@@ -228,7 +228,7 @@ void gCmdLineInput::GetCmdExec( void )
 #ifndef USE_OLD_PROMPT
 	  cmdBuf = UpdatePromptNum( cmdBuf );
 #endif
-	  curPos = cmdBuf.length();
+	  curPos = cmdBuf.Length();
 
 	  // display the new line
 #ifdef USE_CR
@@ -250,10 +250,10 @@ void gCmdLineInput::GetCmdExec( void )
 	  for( i = 0; i < curPos; ++i )
 	    gout << '\b';
 #endif
-	  for( i = 0; i < cmdBuf.length(); ++i )
+	  for( i = 0; i < cmdBuf.Length(); ++i )
 	    gout << ' ';
 #ifndef USE_CR
-	  for( i = 0; i < cmdBuf.length(); ++i )
+	  for( i = 0; i < cmdBuf.Length(); ++i )
 	    gout << '\b';
 #endif
 
@@ -267,7 +267,7 @@ void gCmdLineInput::GetCmdExec( void )
 	  }
 	  else // restore the latest line
 	    cmdBuf = cmdBufOld;
-	  curPos = cmdBuf.length();
+	  curPos = cmdBuf.Length();
 	  
 	  // display the new line
 #ifdef USE_CR
@@ -280,16 +280,16 @@ void gCmdLineInput::GetCmdExec( void )
 	break;
 
       case ESC_DELETE:
-	if( curPos < cmdBuf.length() )
+	if( curPos < cmdBuf.Length() )
 	{
-	  cmdBuf.remove( curPos );
+	  cmdBuf.Remove( curPos );
 
 	  // print the entire string after the current cursor position
-	  gout << cmdBuf.right( cmdBuf.length() - curPos );
+	  gout << cmdBuf.Right( cmdBuf.Length() - curPos );
 	  gout << ' '; // this to erase the last character
 
 	  // reposition the cursor
-	  for( i = 0; i < cmdBuf.length() - curPos + 1; ++i )
+	  for( i = 0; i < cmdBuf.Length() - curPos + 1; ++i )
 	    gout << '\b';
 	}
 	else // nothing to delete, beep
@@ -304,22 +304,22 @@ void gCmdLineInput::GetCmdExec( void )
     {
       gout << "^R\n";
       gout << cmdBuf;
-      curPos = cmdBuf.length();
+      curPos = cmdBuf.Length();
     }
     else if( c == '\b' || c == 127 ) // backspace
     {
       if( curPos > 0 )
       {
-	cmdBuf.remove( curPos - 1 );
+	cmdBuf.Remove( curPos - 1 );
 	--curPos;
 
 	// print the entire string after the current cursor position
 	gout << '\b';
-	gout << cmdBuf.right( cmdBuf.length() - curPos );
+	gout << cmdBuf.Right( cmdBuf.Length() - curPos );
 	gout << ' '; // this to erase the last character
 
 	// reposition the cursor
-	for( i = 0; i < cmdBuf.length() - curPos + 1; ++i )
+	for( i = 0; i < cmdBuf.Length() - curPos + 1; ++i )
 	  gout << '\b';
       }
       else // nothing to delete, beep
@@ -327,14 +327,14 @@ void gCmdLineInput::GetCmdExec( void )
     }
     else if( isprint( c ) )// normal characters
     {
-      cmdBuf.insert( c, curPos );
+      cmdBuf.Insert( c, curPos );
       ++curPos;
       
       // print the entire string after the current cursor position
-      gout << cmdBuf.right( cmdBuf.length() - curPos + 1 );
+      gout << cmdBuf.Right( cmdBuf.Length() - curPos + 1 );
       
       // reposition the cursor
-      for( i = 0; i < cmdBuf.length() - curPos; ++i )
+      for( i = 0; i < cmdBuf.Length() - curPos; ++i )
 	gout << '\b';
     }
   }
@@ -427,10 +427,10 @@ gCmdLineInput::EscapeCode gCmdLineInput::GetEscapeSequence( void ) const
 
 void gCmdLineInput::EatSpace( int num )
 {
-  assert( num <= m_CmdExec.length() );
+  assert( num <= m_CmdExec.Length() );
   int i = 0;
   for( i = 0; i < num; ++i )
-    m_CmdExec.remove( 0 );
+    m_CmdExec.Remove( 0 );
 }
 
 
@@ -443,10 +443,10 @@ gInput& gCmdLineInput::operator >> (int &x)
   while( tokens == 0 )
   {
     GetCmdExec();
-    assert( m_CmdExec.length() > 0 );
+    assert( m_CmdExec.Length() > 0 );
     
     int num = 0;
-    tokens = sscanf( m_CmdExec.stradr(), "%d%n", &x, &num );
+    tokens = sscanf(m_CmdExec, "%d%n", &x, &num );
     EatSpace( num );
   }
   return *this; 
@@ -458,10 +458,10 @@ gInput& gCmdLineInput::operator >> (unsigned int &x)
   while( tokens == 0 )
   {
     GetCmdExec();
-    assert( m_CmdExec.length() > 0 );
+    assert( m_CmdExec.Length() > 0 );
     
     int num = 0;
-    tokens = sscanf( m_CmdExec.stradr(), "%d%n", &x, &num );
+    tokens = sscanf( m_CmdExec, "%d%n", &x, &num );
     EatSpace( num );
   }
   return *this; 
@@ -473,10 +473,10 @@ gInput& gCmdLineInput::operator >> (long &x)
   while( tokens == 0 )
   {
     GetCmdExec();
-    assert( m_CmdExec.length() > 0 );
+    assert( m_CmdExec.Length() > 0 );
     
     int num = 0;
-    tokens = sscanf( m_CmdExec.stradr(), "%ld%n", &x, &num );
+    tokens = sscanf( m_CmdExec, "%ld%n", &x, &num );
     EatSpace( num );
   }
   return *this; 
@@ -488,10 +488,10 @@ gInput& gCmdLineInput::operator >> (char &x)
   while( tokens == 0 )
   {
     GetCmdExec();
-    assert( m_CmdExec.length() > 0 );
+    assert( m_CmdExec.Length() > 0 );
     
     int num = 0;
-    tokens = sscanf( m_CmdExec.stradr(), "%c%n", &x, &num );
+    tokens = sscanf( m_CmdExec, "%c%n", &x, &num );
     EatSpace( num );
   }
   return *this; 
@@ -503,10 +503,10 @@ gInput& gCmdLineInput::operator >> (double &x)
   while( tokens == 0 )
   {
     GetCmdExec();
-    assert( m_CmdExec.length() > 0 );
+    assert( m_CmdExec.Length() > 0 );
     
     int num = 0;
-    tokens = sscanf( m_CmdExec.stradr(), "%lf%n", &x, &num );
+    tokens = sscanf( m_CmdExec, "%lf%n", &x, &num );
     EatSpace( num );
   }
   return *this;
@@ -518,10 +518,10 @@ gInput& gCmdLineInput::operator >> (float &x)
   while( tokens == 0 )
   {
     GetCmdExec();
-    assert( m_CmdExec.length() > 0 );
+    assert( m_CmdExec.Length() > 0 );
     
     int num = 0;
-    tokens = sscanf( m_CmdExec.stradr(), "%f%n", &x, &num );
+    tokens = sscanf( m_CmdExec, "%f%n", &x, &num );
     EatSpace( num );
   }
   return *this; 
@@ -533,10 +533,10 @@ gInput& gCmdLineInput::operator >> (char *x)
   while( tokens == 0 )
   {
     GetCmdExec();
-    assert( m_CmdExec.length() > 0 );
+    assert( m_CmdExec.Length() > 0 );
 
     int num = 0;
-    tokens = sscanf( m_CmdExec.stradr(), "%s%n", x, &num );
+    tokens = sscanf( m_CmdExec, "%s%n", x, &num );
     EatSpace( num );
   }
   return *this; 
@@ -545,7 +545,7 @@ gInput& gCmdLineInput::operator >> (char *x)
 
 
 
-gString gCmdLineInput::UpdatePromptNum( gString cmdBuf ) const
+gText gCmdLineInput::UpdatePromptNum( gText cmdBuf ) const
 {
   char buf[512] = "";
   int val0 = 0;

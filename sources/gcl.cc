@@ -11,7 +11,6 @@
 #include <stdlib.h>
 
 #include "rational.h"
-#include "gstring.h"
 #include "glist.h"
 #include "gsm.h"
 #include "gstack.h"

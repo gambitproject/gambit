@@ -16,7 +16,7 @@ class EFOutcome   {
 
   protected:
     int number;
-    gString name;
+    gText name;
     Efg *E;
     gPolyBlock<gNumber> payoffs;
 
@@ -27,8 +27,8 @@ class EFOutcome   {
   public:
     Efg *BelongsTo(void) const   { return E; }
 
-    const gString &GetName(void) const   { return name; }
-    void SetName(const gString &s)       { name = s; }
+    const gText &GetName(void) const   { return name; }
+    void SetName(const gText &s)       { name = s; }
 
     int GetNumber(void) const   { return number; }
 };

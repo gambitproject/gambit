@@ -13,12 +13,9 @@
 
 
 #include "gsmincl.h"
-
-
-
 #include "gblock.h"
 #include "glist.h"
-#include "gstring.h"
+#include "gtext.h"
 #include "gnumber.h"
 
 
@@ -76,7 +73,7 @@ public:
   virtual PortionSpec Spec(void) const = 0;
 
   virtual void Output(gOutput& s) const;
-  virtual gString OutputString( void ) const = 0;
+  virtual gText OutputString( void ) const = 0;
 
   virtual Portion* ValCopy(void) const = 0;
   virtual Portion* RefCopy(void) const = 0;
@@ -95,17 +92,17 @@ public:
 class ErrorPortion : public Portion
 {
 protected:
-  gString _Value;
+  gText _Value;
 
 public:
-  ErrorPortion(const gString& value = "");
+  ErrorPortion(const gText& value = "");
   virtual ~ErrorPortion();
 
-  gString Value(void) const;
+  gText Value(void) const;
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -131,7 +128,7 @@ public:
   unsigned long DataType(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -147,17 +144,17 @@ public:
 class ReferencePortion : public Portion
 {
 protected:
-  gString _Value;
+  gText _Value;
 
 public:
-  ReferencePortion(const gString& value);
+  ReferencePortion(const gText& value);
   virtual ~ReferencePortion();
 
-  gString Value(void);
+  gText Value(void);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -184,7 +181,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -212,7 +209,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -241,7 +238,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -257,19 +254,19 @@ public:
 class TextPortion : public Portion
 {
 protected:
-  gString* _Value;
+  gText* _Value;
   bool _ref;
 
 public:
-  TextPortion(const gString &);
-  TextPortion(gString &, bool);
+  TextPortion(const gText &);
+  TextPortion(gText &, bool);
   virtual ~TextPortion();
 
-  gString& Value(void) const;
+  gText& Value(void) const;
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -298,7 +295,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -330,7 +327,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -362,7 +359,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -393,7 +390,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -425,7 +422,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -458,7 +455,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -491,7 +488,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -524,7 +521,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -556,7 +553,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -589,7 +586,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -622,7 +619,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -660,7 +657,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString(void) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -700,7 +697,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString(void) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -729,7 +726,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString(void) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -758,7 +755,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -795,7 +792,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -833,7 +830,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -886,7 +883,7 @@ public:
 
   void Output(gOutput& s) const;
   void Output(gOutput& s, long ListLF) const;
-  gString OutputString( void ) const;
+  gText OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;

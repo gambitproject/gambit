@@ -14,7 +14,7 @@ class NFPlayer {
 
 private:
   int number;
-  gString name;
+  gText name;
   Nfg *N;
   
   gArray<Strategy *> strategies;
@@ -25,8 +25,8 @@ public:
 
   Nfg &Game(void) const;
   
-  const gString &GetName(void) const;
-  void SetName(const gString &s);
+  const gText &GetName(void) const;
+  void SetName(const gText &s);
 
   int NumStrats(void) const;
 

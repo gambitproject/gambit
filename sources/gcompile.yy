@@ -15,7 +15,7 @@
 
 #include "gambitio.h"
 
-#include "gstring.h"
+#include "gtext.h"
 #include "rational.h"
 #include "glist.h"
 #include "gstack.h"
@@ -30,7 +30,7 @@
 #include "gstack.imp"
 
 
-template class gStack<gString>;
+template class gStack<gText>;
 template class gStack<int>;
 template class gStack<char>;
 template class gStack<gInput *>;
@@ -45,7 +45,7 @@ template class gList<gclExpression *>;
 template class gNode<gclExpression *>;
 
 extern GSM* _gsm;  // defined at the end of gsm.cc
-gStack<gString> GCL_InputFileNames(4);
+gStack<gText> GCL_InputFileNames(4);
 
 %}
 
@@ -55,13 +55,13 @@ gStack<gString> GCL_InputFileNames(4);
   GSM& gsm; \
   bool record_funcbody, in_funcdecl; \
   int current_char, current_line; \
-  gString current_expr, current_file, current_rawline; \
-  gString funcbody, funcname, funcdesc, paramtype, functype; \
-  gList<gString> formals, types; \
+  gText current_expr, current_file, current_rawline; \
+  gText funcbody, funcname, funcdesc, paramtype, functype; \
+  gList<gText> formals, types; \
   gList<Portion *> portions; \
   gList<bool> refs; \
-  gStack<gString> funcnames; \
-  gString tval; \
+  gStack<gText> funcnames; \
+  gText tval; \
   gclExpression *exprtree; \
   bool bval; \
   double dval; \
@@ -74,8 +74,8 @@ gStack<gString> GCL_InputFileNames(4);
   bool DeleteFunction(void); \
   void RecoverFromError(void); \
   \
-  int Parse(const gString& line, const gString &file, int lineno, \
-            const gString& rawline); \
+  int Parse(const gText& line, const gText &file, int lineno, \
+            const gText& rawline); \
   int Execute(void); 
 
 %define CONSTRUCTOR_INIT     : gsm(*_gsm), \
@@ -456,7 +456,7 @@ int GCLCompiler::yylex(void)
   }  while (isspace(c) || c == '\r' || c == '\n');
 
   if (isalpha(c))  {
-    gString s(c);
+    gText s(c);
     c = nextchar();
     while (isalpha(c) || isdigit(c))   {
       s += c;
@@ -502,8 +502,8 @@ int GCLCompiler::yylex(void)
       tval += c;
       
       if( check_digraph && 
-          tval.length() >= 2 && 
-          tval[ tval.length() - 2 ] == '\\' )
+          tval.Length() >= 2 && 
+          tval[ tval.Length() - 2 ] == '\\' )
       {
         switch( c )
         {
@@ -511,35 +511,35 @@ int GCLCompiler::yylex(void)
 	case '\"':
 	case '\?':
 	case '\\':
-          tval = tval.left( tval.length() - 2 ) + gString(c);
+          tval = tval.Left( tval.Length() - 2 ) + gText(c);
           check_digraph = false;
           break;
         case 'a':
-          tval = tval.left( tval.length() - 2 ) + gString('\a');
+          tval = tval.Left( tval.Length() - 2 ) + gText('\a');
           check_digraph = false;
           break;            
         case 'b':
-          tval = tval.left( tval.length() - 2 ) + gString('\b');
+          tval = tval.Left( tval.Length() - 2 ) + gText('\b');
           check_digraph = false;
           break;            
         case 'f':
-          tval = tval.left( tval.length() - 2 ) + gString('\f');
+          tval = tval.Left( tval.Length() - 2 ) + gText('\f');
           check_digraph = false;
           break;            
         case 'n':
-          tval = tval.left( tval.length() - 2 ) + gString('\n');
+          tval = tval.Left( tval.Length() - 2 ) + gText('\n');
           check_digraph = false;
           break;            
         case 'r':
-          tval = tval.left( tval.length() - 2 ) + gString('\r');
+          tval = tval.Left( tval.Length() - 2 ) + gText('\r');
           check_digraph = false;
           break;            
         case 't':
-          tval = tval.left( tval.length() - 2 ) + gString('\t');
+          tval = tval.Left( tval.Length() - 2 ) + gText('\t');
           check_digraph = false;
           break;            
         case 'v':
-          tval = tval.left( tval.length() - 2 ) + gString('\v');
+          tval = tval.Left( tval.Length() - 2 ) + gText('\v');
           check_digraph = false;
           break;            
         } // switch( c )
@@ -549,7 +549,7 @@ int GCLCompiler::yylex(void)
         check_digraph = true;
         if( c == '\"' )
         {
-          tval = tval.left( tval.length() - 1 );
+          tval = tval.Left( tval.Length() - 1 );
           quote = false;
         }
       }
@@ -558,7 +558,7 @@ int GCLCompiler::yylex(void)
   }
 
   if (isdigit(c))   {
-    gString s(c);
+    gText s(c);
     c = nextchar();
     while (isdigit(c))   {
       s += c;
@@ -589,7 +589,7 @@ int GCLCompiler::yylex(void)
     case '.':   c = nextchar();
       if (c < '0' || c > '9')  { ungetchar(c);  return DOT; }
       else  {
-	gString s(".");
+	gText s(".");
 	s += c;
         c = nextchar();
         while (isdigit(c))  {
@@ -659,8 +659,8 @@ int GCLCompiler::yylex(void)
   }
 }
 
-int GCLCompiler::Parse(const gString& line, const gString &file, int lineno,
-                       const gString& rawline )
+int GCLCompiler::Parse(const gText& line, const gText &file, int lineno,
+                       const gText& rawline )
 {
   current_expr = line;
   current_char = 0;
@@ -668,7 +668,7 @@ int GCLCompiler::Parse(const gString& line, const gString &file, int lineno,
   current_line = lineno;
   current_rawline = rawline;
 
-  for (int i = 0; i < line.length(); i++)   {
+  for (int i = 0; i < line.Length(); i++)   {
     if (!isspace(line[i]))  {	
       if (!yyparse())  {	
         Execute();
@@ -711,7 +711,7 @@ gclExpression *GCLCompiler::DefineFunction(gclExpression *expr)
     else
       funcinfo.Desc = "/*Private*/";
 
-    if( funcdesc.length() > 0 )
+    if( funcdesc.Length() > 0 )
       funcinfo.Desc += "\n\n" + funcdesc;
     funcdesc = "";
 
@@ -851,9 +851,9 @@ void GCLCompiler::LoadInputs( const char* name )
   bool ini_found = false;
   if( strchr( name, SLASH1 ) == NULL )
     search = true;
-  gString IniFileName;
+  gText IniFileName;
 
-  IniFileName = (gString) name;
+  IniFileName = (gText) name;
   inputs.Push( new gFileInput( IniFileName ) );
   if (!inputs.Peek()->IsValid())
     delete inputs.Pop();
@@ -868,7 +868,7 @@ void GCLCompiler::LoadInputs( const char* name )
 
     if( !ini_found && (System::GetEnv( "HOME" ) != NULL) )
     {
-      IniFileName = (gString) System::GetEnv( "HOME" ) + SLASH + name;
+      IniFileName = (gText) System::GetEnv( "HOME" ) + SLASH + name;
       inputs.Push( new gFileInput( IniFileName ) );
       if (!inputs.Peek()->IsValid())
         delete inputs.Pop();
@@ -881,7 +881,7 @@ void GCLCompiler::LoadInputs( const char* name )
 
     if( !ini_found && (System::GetEnv( "GCLLIB" ) != NULL) )
     {
-      IniFileName = (gString) System::GetEnv( "GCLLIB" ) + SLASH + name;
+      IniFileName = (gText) System::GetEnv( "GCLLIB" ) + SLASH + name;
       inputs.Push( new gFileInput( IniFileName ) );
       if (!inputs.Peek()->IsValid())
         delete inputs.Pop();
@@ -894,7 +894,7 @@ void GCLCompiler::LoadInputs( const char* name )
 
     if( !ini_found && (SOURCE != NULL) )
     {
-      IniFileName = (gString) SOURCE + SLASH + name;
+      IniFileName = (gText) SOURCE + SLASH + name;
       inputs.Push( new gFileInput( IniFileName ) );
       if (!inputs.Peek()->IsValid())
         delete inputs.Pop();

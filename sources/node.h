@@ -28,7 +28,7 @@ class Node    {
     bool mark;
     int number;
     Efg *E;
-    gString name;
+    gText name;
     Infoset *infoset;
     Node *parent;
     EFOutcome *outcome;
@@ -53,8 +53,8 @@ class Node    {
     Node *NextSibling(void) const;
     Node *PriorSibling(void) const;
 
-    const gString &GetName(void) const   { return name; }
-    void SetName(const gString &s)       { name = s; }
+    const gText &GetName(void) const   { return name; }
+    void SetName(const gText &s)       { name = s; }
 
     EFOutcome *GetOutcome(void) const   { return outcome; }
     void SetOutcome(EFOutcome *outc)    { outcome = outc; }

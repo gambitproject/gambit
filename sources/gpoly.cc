@@ -19,7 +19,7 @@ template gPoly<gRational> operator*(const gPoly<gRational> &poly, const gRationa
 template gPoly<gDouble> TogDouble(const gPoly<gRational>&);
 #endif   // GDOUBLE
 template gOutput &operator<<(gOutput &f, const gPoly<gRational> &y);
-template gString &operator<<(gString &, const gPoly<gRational> &);
+template gText &operator<<(gText &, const gPoly<gRational> &);
 
 template class gPoly<gNumber>;
 template gPoly<gNumber> operator*(const gNumber val, const gPoly<gNumber> &poly);
@@ -29,7 +29,7 @@ template gPoly<gNumber> operator*(const gPoly<gNumber> &poly, const gNumber val)
 template gPoly<gDouble> TogDouble(const gPoly<gNumber>&);
 #endif   // GDOUBLE
 template gOutput &operator<<(gOutput &f, const gPoly<gNumber> &y);
-template gString &operator<<(gString &, const gPoly<gNumber> &);
+template gText &operator<<(gText &, const gPoly<gNumber> &);
 
 template class gPoly<double>;
 template gPoly<double> operator*(const double val, const gPoly<double> &poly);
@@ -39,7 +39,7 @@ template gPoly<double> operator*(const gPoly<double> &poly, const double val);
 template gPoly<gDouble> TogDouble(const gPoly<double>&);
 #endif   // GDOUBLE
 template gOutput &operator<<(gOutput &f, const gPoly<double> &y);
-template gString &operator<<(gString &, const gPoly<double> &);
+template gText &operator<<(gText &, const gPoly<double> &);
 
 #ifdef GDOUBLE
 template class gPoly<gDouble>;
@@ -48,7 +48,7 @@ template gPoly<gDouble> operator*(const gPoly<gDouble> poly, const gDouble val);
 
 template gPoly<gDouble> TogDouble(const gPoly<gDouble>&);
 template gOutput &operator<<(gOutput &f, const gPoly<gDouble> &y);
-template gString &operator<<(gString &, const gPoly<gDouble> &);
+template gText &operator<<(gText &, const gPoly<gDouble> &);
 #endif   // GDOUBLE
 /*
 template class gPoly<long>;
@@ -61,7 +61,7 @@ template gOutput &operator<<(gOutput &f, const gPoly<long> &y);
 /*
 int gPoly<int>::String_Coeff(int nega)
 {
-  gString Coeff = "";
+  gText Coeff = "";
   while (charc >= '0' && charc <= '9'){
     Coeff += charc;
     charnum++;
@@ -73,7 +73,7 @@ int gPoly<int>::String_Coeff(int nega)
 
 long gPoly<long>::String_Coeff(long nega)
 {
-  gString Coeff = "";
+  gText Coeff = "";
   while (charc >= '0' && charc <= '9'){
     Coeff += charc;
     charnum++;
@@ -87,49 +87,49 @@ long gPoly<long>::String_Coeff(long nega)
 double gPoly<double>::String_Coeff(double nega)
 {
   double doub;
-  gString Coeff = "";
+  gText Coeff = "";
   while (charc >= '0' && charc <= '9' || charc == '.'){
     Coeff += charc;
     charnum++;
     GetChar();
   }
   if (Coeff == "") return (nega);
-  else return (nega * FromString(Coeff,doub));  
+  else return (nega * FromText(Coeff,doub));  
 }
 
 #ifdef GDOUBLE
 gDouble gPoly<gDouble>::String_Coeff(gDouble nega)
 {
   double doub;
-  gString Coeff = "";
+  gText Coeff = "";
   while (charc >= '0' && charc <= '9' || charc == '.'){
     Coeff += charc;
     charnum++;
     GetChar();
   }
   if (Coeff == "") return (nega);
-  else return (nega * (gDouble)FromString(Coeff,doub));  
+  else return (nega * (gDouble)FromText(Coeff,doub));  
 }
 #endif   // GDOUBLE
 
 gRational gPoly<gRational>::String_Coeff(gRational nega)
 {
   gRational rat;
-  gString Coeff = "";
+  gText Coeff = "";
   while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
     Coeff += charc;
     charnum++;
     GetChar();
   }
   if (Coeff == "") return (nega);
-  else return (nega * FromString(Coeff,rat));  
+  else return (nega * FromText(Coeff,rat));  
 }
 
 
 gNumber gPoly<gNumber>::String_Coeff(gNumber nega)
 {
   gNumber num;
-  gString Coeff = "";
+  gText Coeff = "";
   while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
     Coeff += charc;
     charnum++;
@@ -137,12 +137,12 @@ gNumber gPoly<gNumber>::String_Coeff(gNumber nega)
   }
 
   if (Coeff == "") return (nega);
-  else return (nega * gNumber(FromString(Coeff, num)));  
+  else return (nega * gNumber(FromText(Coeff, num)));  
 }
 
-gString ToString(const gPoly<gNumber> &p)
+gText ToText(const gPoly<gNumber> &p)
 {
-  gString t;
+  gText t;
   t << p;
   return t;
 }

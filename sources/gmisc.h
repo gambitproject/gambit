@@ -19,9 +19,9 @@ typedef enum { precERROR, precDOUBLE, precRATIONAL, precMIXED }  Precision;
 
 typedef enum { T_NO=0, T_YES=1, T_DONTKNOW=2 } TriState;
 
-class gString;
+class gText;
 class gOutput;
-gString NameTriState(TriState i);
+gText NameTriState(TriState i);
 void DisplayTriState(gOutput& o, TriState i);
 
 //
@@ -58,28 +58,28 @@ long ran1(long* idum);
 class gInteger;
 class gRational;
 
-void ToStringWidth(int); // Set # of decimal places for floating point
-int  ToStringWidth(void); // Get the current value of the above
-void ToStringPrecision(int); // Set # of decimal places for floating point
-int  ToStringPrecision(void); // Get the current value of the above
+void ToTextWidth(int); // Set # of decimal places for floating point
+int  ToTextWidth(void); // Get the current value of the above
+void ToTextPrecision(int); // Set # of decimal places for floating point
+int  ToTextPrecision(void); // Get the current value of the above
 
-gString ToString(int);
-gString ToString(long);
-gString ToString(double);
-gString ToString(const gInteger &);
-gString ToString(const gRational &, bool approx = true);
-gString ToString(const gNumber &);
+gText ToText(int);
+gText ToText(long);
+gText ToText(double);
+gText ToText(const gInteger &);
+gText ToText(const gRational &, bool approx = true);
+gText ToText(const gNumber &);
 
-double		FromString(const gString &s,double &d);
-gRational	FromString(const gString &s,gRational &r);
-gNumber		FromString(const gString &s,gNumber &n);
-double		ToDouble(const gString &);
+double		FromText(const gText &s,double &d);
+gRational	FromText(const gText &s,gRational &r);
+gNumber		FromText(const gText &s,gNumber &n);
+double		ToDouble(const gText &);
 
 
 //
 /// Return a copy of the string with all quotes preceded by a backslash
 //
-gString EscapeQuotes(const gString &);
+gText EscapeQuotes(const gText &);
 
 //
 // Type dependent epsilon

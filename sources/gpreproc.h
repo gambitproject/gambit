@@ -15,7 +15,7 @@
 #include <string.h>
 
 #include "gcmdline.h"
-#include "gstring.h"
+#include "gtext.h"
 #include "gstack.h"
 
 
@@ -26,17 +26,17 @@ private:
 
   gStack< gInput* > m_InputStack;
   gStack< int >     m_LineNumberStack;
-  gStack< gString > m_FileNameStack;
+  gStack< gText > m_FileNameStack;
 
-  gString           m_RawLine;
-  gString           m_PrevFileName;
+  gText           m_RawLine;
+  gText           m_PrevFileName;
   int               m_PrevLineNumber;
 
-  gString           m_StartupString;
+  gText           m_StartupString;
   
 
 
-  gInput* LoadInput( gString& name );
+  gInput* LoadInput( gText& name );
   bool ExpectText( const char* text );
   
   bool EOL( char c ) const { return ( c == '\n' || c == '\r' ); }
@@ -49,10 +49,10 @@ private:
 
   void GetChar( char& c )
   {
-    if( m_StartupString.length() > 0 )
+    if( m_StartupString.Length() > 0 )
     {
       c = m_StartupString[0];
-      m_StartupString = m_StartupString.right( m_StartupString.length() - 1 );
+      m_StartupString = m_StartupString.Right( m_StartupString.Length() - 1 );
     }
     else
     {
@@ -65,17 +65,17 @@ private:
     m_RawLine += c;
   }
 
-  bool IsQuoteEscapeSequence( const gString& line ) const
+  bool IsQuoteEscapeSequence( const gText& line ) const
   {
     bool backslash = false;
-    assert( line.length() > 0 );
-    char c = line[ line.length() - 1 ];
+    assert( line.Length() > 0 );
+    char c = line[ line.Length() - 1 ];
     if( c == '\"' )
     {
       // if there's an odd number of consecutive backslashes,
       //   then it's an escape sequence 
       int i = 2;
-      while( line.length() >= i && line[ line.length() - i ] == '\\' )
+      while( line.Length() >= i && line[ line.Length() - i ] == '\\' )
       {
 	backslash = !backslash;
 	++i;
@@ -96,7 +96,7 @@ public:
     m_FileNameStack.Push( m_PrevFileName );
     m_LineNumberStack.Push( m_PrevLineNumber );
 
-    if( !EOL( m_StartupString[ m_StartupString.length() - 1 ] ) )
+    if( !EOL( m_StartupString[ m_StartupString.Length() - 1 ] ) )
       m_StartupString += '\n';
   }
 
@@ -120,7 +120,7 @@ public:
   //   Returns the preprocessed lines.  See 
   //   gpreproc.cc for details.
   //----------------------------------------------
-  gString GetLine( void );
+  gText GetLine( void );
 
 
   //---------------------------------------------
@@ -128,7 +128,7 @@ public:
   //   Returns the un-preprocessed line corresponding to
   //   the previous GetLine() call.
   //----------------------------------------------
-  const gString& GetRawLine( void ) const
+  const gText& GetRawLine( void ) const
   { return m_RawLine; }
 
 
@@ -138,7 +138,7 @@ public:
   //   Returns the file name corresponding to
   //   the previous GetLine() call.
   //---------------------------------------------
-  const gString& GetFileName( void ) const 
+  const gText& GetFileName( void ) const 
   { return m_PrevFileName; }
   
 

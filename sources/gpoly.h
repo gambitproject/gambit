@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.h  --  Declaration of gPoly data type
 // 
-// @(#)gpoly.h	2.12 01/18/98
+// $Id$
 //
 
 #ifndef GPOLY_H
@@ -16,9 +16,9 @@
 // These classes are used to store and mathematically manipulate polynomials.
 
 //  **NOTE**
-//  Every type T to be used needs a procedure to convert a gString coefficient
-//  to the type T for the gString SOP input form and a procedure to convert 
-//  the coefficient into a gString for the SOP output form.  
+//  Every type T to be used needs a procedure to convert a gText coefficient
+//  to the type T for the gText SOP input form and a procedure to convert 
+//  the coefficient into a gText for the SOP output form.  
 
 
 // *******************
@@ -32,8 +32,8 @@ private:
   const term_order*    Order;
   gList<gMono<T> >     Terms;    // alternative implementation
 
-  // used for gString parsing;
-  int charnum;   char charc;   gString TheString;
+  // used for gText parsing;
+  int charnum;   char charc;   gText TheString;
 
   //----------------------
   // some private members
@@ -55,17 +55,17 @@ private:
 
 
   //-----------------------------------------------
-  // Going back and forth from gStrings to gPoly's
+  // Going back and forth from gTexts to gPoly's
   //-----------------------------------------------
 
-  // gString input parser functions
+  // gText input parser functions
   void      String_Term(T          nega);
   T         String_Coeff(T       nega);
   int       String_GetPow(void);
   void      String_VarAndPow(gArray<int> &PowArray);
   void      GetChar();
   // Is the string a valid polynomial?
-  bool      Check_String(const gString &Hold);
+  bool      Check_String(const gText &Hold);
 
   //----------------------
   //   private friends
@@ -86,8 +86,8 @@ public:
 
   // Null gPoly constructor
   gPoly(const gSpace *, const term_order *);
-  // Constructs a gPoly equal to the SOP representation in the gString
-  gPoly(const gSpace *, const gString &, const term_order *);
+  // Constructs a gPoly equal to the SOP representation in the gText
+  gPoly(const gSpace *, const gText &, const term_order *);
   // Constructs a constant gPoly
   gPoly(const gSpace *, const T &, const term_order *);
   // Constructs a gPoly equal to another;
@@ -106,7 +106,7 @@ public:
   //----------
   
   gPoly<T>& operator =  (const gPoly<T> &);
-  gPoly<T>& operator =  (const gString &);  
+  gPoly<T>& operator =  (const gText &);  
                         //Set polynomial equal to the SOP form in the string
   gPoly<T>  operator -  ()                  const;
   gPoly<T>  operator -  (const gPoly<T> &) const;
@@ -175,7 +175,7 @@ public:
 
  // Print polynomial in SOP form
   friend gOutput &operator<< (gOutput &f, const gPoly<T> &y);
-  friend gString &operator<< (gString &, const gPoly<T> &);
+  friend gText &operator<< (gText &, const gPoly<T> &);
 };
 
   //-------------
@@ -190,7 +190,7 @@ template <class T>  gPoly<gDouble>         TogDouble(const gPoly<T>&);
 template <class T> gPoly<T> operator*(const T val, const gPoly<T> &poly);
 template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T val);
 
-template <class T> gString ToString(const gPoly<T> &p);
+template <class T> gText ToText(const gPoly<T> &p);
 
 #endif //# GPOLY_H
 

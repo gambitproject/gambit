@@ -6,7 +6,7 @@
 
 #include "gmisc.h"
 #include "glist.imp"
-#include "gstring.h"
+#include "gtext.h"
 #include "rational.h"
 #include "gnumber.h"
 
@@ -29,8 +29,8 @@ template class gNode<long>;
 template class gList<double>;
 template class gNode<double>;
 
-template class gList<gString>;
-template class gNode<gString>;
+template class gList<gText>;
+template class gNode<gText>;
 
 template class gList<gBlock<int> >;
 template class gNode<gBlock<int> >;

@@ -8,7 +8,7 @@
 #define NFG_H
 
 #include "garray.h"
-#include "gstring.h"
+#include "gtext.h"
 #include "grblock.h"
 #include "gnumber.h"
 #include "gpoly.h"
@@ -34,7 +34,7 @@ friend class Lexicon;
 friend void SetEfg(Nfg *, const Efg *);
 #endif   // NFG_ONLY
 protected:
-  gString title, comment;
+  gText title, comment;
   gArray<int> dimensions;
 
   gArray<NFPlayer *> players;
@@ -62,11 +62,11 @@ public:
   ~Nfg();
     
   // GENERAL DATA ACCESS AND MANIPULATION  
-  void SetTitle(const gString &s);
-  const gString &GetTitle(void) const;
+  void SetTitle(const gText &s);
+  const gText &GetTitle(void) const;
 
-  void SetComment(const gString &);
-  const gString &GetComment(void) const;
+  void SetComment(const gText &);
+  const gText &GetComment(void) const;
 
   gSpace *Parameters(void) const    { return parameters; }
   term_order *ParamOrder(void) const   { return paramorder; }
@@ -119,7 +119,7 @@ class NFOutcome   {
   private:
     int number;
     Nfg *nfg;
-    gString name;
+    gText name;
     gPolyArray<gNumber> payoffs;
 
     NFOutcome(int n, Nfg *N)
@@ -131,8 +131,8 @@ class NFOutcome   {
   public:
     int GetNumber(void) const    { return number; }
 
-    const gString &GetName(void) const   { return name; }
-    void SetName(const gString &s)   { name = s; }
+    const gText &GetName(void) const   { return name; }
+    void SetName(const gText &s)   { name = s; }
 
     Nfg *Game(void) const   { return nfg; }
 };

@@ -1,7 +1,11 @@
+//
+// FILE: gcmdline.h -- Command line interface for GCL
+//
+// $Id$
+//
 
-
-#ifndef __gcmdline_h__
-#define __gcmdline_h__
+#ifndef GCMDLINE_H
+#define GCMDLINE_H
 
 
 #include <stdlib.h>
@@ -12,7 +16,7 @@
 #endif   // __GNUG__, __BORLANDC__
 
 #include "gambitio.h"
-#include "gstring.h"
+#include "gtext.h"
 #include "glist.h"
 #include "gstack.h"
 
@@ -33,14 +37,14 @@ public:
 
 private:
   // the history of commands already executed
-  gList< gString > m_History;
+  gList< gText > m_History;
   
   // the maximum history size
   int m_HistoryDepth;
   int m_NumInvoke;
 
   // the last command being executed
-  gString m_CmdExec;
+  gText m_CmdExec;
 
   // whether EOF has been reached
   bool m_EOF;
@@ -77,7 +81,7 @@ private:
 
   // this function strips old commands of their original
   //   prompt numbers and puts in the current one
-  gString UpdatePromptNum( gString cmdBuf ) const;
+  gText UpdatePromptNum( gText cmdBuf ) const;
 
 
 public:
@@ -101,7 +105,7 @@ public:
   }
   virtual void unget(char c) 
   {
-    m_CmdExec.insert( c, 0 ); 
+    m_CmdExec.Insert( c, 0 ); 
   }
 
   virtual bool eof(void) const { return m_EOF; }
@@ -140,4 +144,4 @@ public:
 
 extern gCmdLineInput &gcmdline;
 
-#endif // __gcmdline_h__
+#endif   // GCMDLINE_H 

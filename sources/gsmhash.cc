@@ -8,9 +8,7 @@
 
 
 
-#include "gstring.h"
-
-class NewInstr;
+#include "gtext.h"
 
 template <class T> class gList;
 template <class T> class gNode;
@@ -34,8 +32,8 @@ template class gNode< FuncDescObj* >;
 
 #include "hash.imp"
 
-template class HashTable< gString, Portion* >;
-template class HashTable< gString, FuncDescObj* >;
+template class HashTable< gText, Portion* >;
+template class HashTable< gText, FuncDescObj* >;
 template class HashTable< gclExpression*, int >;
 template class HashTable< void*, int >;
 
@@ -51,7 +49,7 @@ template class HashTable< void*, int >;
 int RefHashTable::NumBuckets( void ) const
 { return 26; }
 
-int RefHashTable::Hash( const gString& ref ) const
+int RefHashTable::Hash( const gText& ref ) const
 { return (int)( ref[0] % 26 ); }
 
 void RefHashTable::DeleteAction( Portion* value )
@@ -68,7 +66,7 @@ RefHashTable::~RefHashTable()
 int FunctionHashTable::NumBuckets() const
 { return 26; }
 
-int FunctionHashTable::Hash( const gString& funcname ) const 
+int FunctionHashTable::Hash( const gText& funcname ) const 
 { return (int)( funcname[0] ) % 26; }
 
 void FunctionHashTable::DeleteAction( FuncDescObj* func ) 

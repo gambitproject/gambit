@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "gambitio.h"
-#include "gstring.h"
+#include "gtext.h"
 #include "rational.h"
 #include "gnumber.h"
 #include "gstack.h"
@@ -20,16 +20,16 @@ template class gStack<Node *>;
 %name EfgFileReader
 
 %define MEMBERS    gInput &infile; \
-                   gString last_name, last_poly;  gNumber last_number;  \
+                   gText last_name, last_poly;  gNumber last_number;  \
                    int last_int, iset_idx; \
 		   bool polymode; \
                    Efg *& E; \
-		   gString title, comment; \
+		   gText title, comment; \
                    gStack<Node *> path; \
-                   gList<gString> actions, players, params; \
+                   gList<gText> actions, players, params; \
                    gList<gPoly<gNumber> > values; \
                    EFPlayer *player; Infoset *infoset; EFOutcome *outcome; \
-                   int i;  gString iset_name, outc_name; \
+                   int i;  gText iset_name, outc_name; \
                    virtual ~EfgFileReader(); \
                    EFOutcome *NewOutcome(void); \
                    void SetOutcome(EFOutcome *, \
@@ -40,7 +40,7 @@ template class gStack<Node *>;
 					 const gList<gPoly<gNumber> > &);\
                    bool CheckOutcome(EFOutcome *, \
 				     const gList<gPoly<gNumber> > &); \
-	           bool ExistsVariable(const gString &); \
+	           bool ExistsVariable(const gText &); \
 		   int Parse(void); \
                    void CreateEfg(void);
 
@@ -50,7 +50,7 @@ template class gStack<Node *>;
 %define CONSTRUCTOR_INIT     : infile(f), polymode(false), E(e), path(32)
 
 %union  {
-  gString *text;
+  gText *text;
 }
 
 %type <text> number
@@ -246,7 +246,7 @@ commaopt:
         |          ','
         ;
 
-number:            NUMBER    { $$ = new gString(ToString(last_number)); }
+number:            NUMBER    { $$ = new gText(ToText(last_number)); }
 
 payoff:            number
     { values.Append(gPoly<gNumber>(E->Parameters(), *$1, E->ParamOrder())); delete $1; }
@@ -405,7 +405,7 @@ bool EfgFileReader::CheckOutcome(EFOutcome *c, const gList<gPoly<gNumber> > &p)
   return true;
 }
 
-bool EfgFileReader::ExistsVariable(const gString &varname)
+bool EfgFileReader::ExistsVariable(const gText &varname)
 {
   for (int var = 1; var <= E->Parameters()->Dmnsn(); var++)
     if (E->Parameters()->GetVariableName(var) == varname)

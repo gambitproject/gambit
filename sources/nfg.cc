@@ -31,9 +31,9 @@ Nfg::Nfg(const gArray<int> &dim,
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dim[pl]);
-	  players[pl]->name = ToString(pl);
+	  players[pl]->name = ToText(pl);
     for (int st = 1; st <= players[pl]->NumStrats(); st++)
-      players[pl]->strategies[st]->name = ToString(st);
+      players[pl]->strategies[st]->name = ToText(st);
   }
   IndexStrategies();
 
@@ -191,16 +191,16 @@ const gArray<Strategy *> &Nfg::Strategies(int p) const
   return (players[p]->Strategies());
 }
 
-void Nfg::SetTitle(const gString &s) 
+void Nfg::SetTitle(const gText &s) 
 { title = s; }
 
-const gString &Nfg::GetTitle(void) const 
+const gText &Nfg::GetTitle(void) const 
 { return title; }
 
-void Nfg::SetComment(const gString &s)
+void Nfg::SetComment(const gText &s)
 { comment = s; }
 
-const gString &Nfg::GetComment(void) const
+const gText &Nfg::GetComment(void) const
 { return comment; }
 
 
@@ -313,12 +313,12 @@ Nfg &NFPlayer::Game(void) const
   return *N;
 }
 
-const gString &NFPlayer::GetName(void) const
+const gText &NFPlayer::GetName(void) const
 {
   return name;
 }
 
-void NFPlayer::SetName(const gString &s)
+void NFPlayer::SetName(const gText &s)
 {
   name = s;
 }

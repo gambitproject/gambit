@@ -9,10 +9,9 @@
 #ifndef GSMINCL_H
 #define GSMINCL_H
 
-#include "gstring.h"
+#include "gtext.h"
 #include "gmisc.h"
 
-class gString;
 class gOutput;
 
 typedef enum
@@ -113,8 +112,8 @@ public:
 bool PortionSpecMatch( const PortionSpec& t1, const PortionSpec& t2 );
 
 
-gString PortionSpecToText( const PortionSpec& type );
-PortionSpec TextToPortionSpec( const gString& text );
+gText PortionSpecToText( const PortionSpec& type );
+PortionSpec TextToPortionSpec( const gText& text );
 void PrintPortionSpec( gOutput& s, PortionSpec type );
 gOutput& operator << ( gOutput& s, PortionSpec spec );
 

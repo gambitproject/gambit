@@ -75,7 +75,7 @@ Infoset::Infoset(Efg *e, int n, EFPlayer *p, int br)
   : E(e), number(n), player(p), actions(br), flag(0) 
 {
   while (br)   {
-    actions[br] = new Action(br, ToString(br), this);
+    actions[br] = new Action(br, ToText(br), this);
     br--; 
   }
 }
@@ -463,16 +463,16 @@ void Efg::CopySubtree(Node *n, Node *m)
 //               Efg: Title access and manipulation
 //------------------------------------------------------------------------
 
-void Efg::SetTitle(const gString &s)
+void Efg::SetTitle(const gText &s)
 { title = s; }
 
-const gString &Efg::GetTitle(void) const
+const gText &Efg::GetTitle(void) const
 { return title; }
 
-void Efg::SetComment(const gString &s)
+void Efg::SetComment(const gText &s)
 { comment = s; }
 
-const gString &Efg::GetComment(void) const
+const gText &Efg::GetComment(void) const
 { return comment; }
   
 

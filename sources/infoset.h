@@ -26,16 +26,16 @@ class Action   {
   friend class Infoset;
   private:
     int number;
-    gString name;
+    gText name;
     Infoset *owner;
 
-    Action(int br, const gString &n, Infoset *s)
+    Action(int br, const gText &n, Infoset *s)
       : number(br), name(n), owner(s)   { }
     ~Action()   { }
 
   public:
-    const gString &GetName(void) const   { return name; }
-    void SetName(const gString &s)       { name = s; }
+    const gText &GetName(void) const   { return name; }
+    void SetName(const gText &s)       { name = s; }
 
     int GetNumber(void) const        { return number; }
     Infoset *BelongsTo(void) const   { return owner; }
@@ -52,7 +52,7 @@ class Infoset   {
   protected:
     Efg *E;
     int number;
-    gString name;
+    gText name;
     EFPlayer *player;
     gBlock<Action *> actions;
     gBlock<Node *> members;
@@ -70,15 +70,15 @@ class Infoset   {
 
     EFPlayer *GetPlayer(void) const    { return player; }
 
-    void SetName(const gString &s)    { name = s; }
-    const gString &GetName(void) const   { return name; }
+    void SetName(const gText &s)    { name = s; }
+    const gText &GetName(void) const   { return name; }
 
     virtual Action *InsertAction(int where);
     virtual void RemoveAction(int which);
 
-    void SetActionName(int i, const gString &s)
+    void SetActionName(int i, const gText &s)
       { actions[i]->name = s; }
-    const gString &GetActionName(int i) const  { return actions[i]->name; }
+    const gText &GetActionName(int i) const  { return actions[i]->name; }
 
     const gArray<Action *> &Actions(void) const  { return actions; }  
     int NumActions(void) const   { return actions.Length(); }

@@ -7,7 +7,7 @@
 #ifndef EFG_H
 #define EFG_H
 
-#include "gstring.h"
+#include "gtext.h"
 #include "gblock.h"
 #include "glist.h"
 
@@ -43,7 +43,7 @@ friend class Nfg;
 
 protected:
     bool sortisets;
-    gString title, comment;
+    gText title, comment;
     gBlock<EFPlayer *> players;
     gBlock<EFOutcome *> outcomes;
     Node *root;
@@ -100,11 +100,11 @@ protected:
     ~Efg();
 
        //# TITLE ACCESS AND MANIPULATION
-    void SetTitle(const gString &s);
-    const gString &GetTitle(void) const;
+    void SetTitle(const gText &s);
+    const gText &GetTitle(void) const;
 
-    void SetComment(const gString &);
-    const gString &GetComment(void) const;
+    void SetComment(const gText &);
+    const gText &GetComment(void) const;
 
        //# WRITING DATA FILES
     void WriteEfgFile(gOutput &f) const;

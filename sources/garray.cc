@@ -6,7 +6,7 @@
 
 #include "garray.imp"
 #include "gmisc.h"
-#include "gstring.h"
+#include "gtext.h"
 #include "rational.h"
 #include "gnumber.h"
 
@@ -18,7 +18,7 @@ template class gArray<double>;
 template class gArray<gInteger>;
 template class gArray<gRational>;
 template class gArray<gNumber>;
-template class gArray<gString>;
+template class gArray<gText>;
 template class gArray<gArray<int> >;
 template class gArray<gArray<int> *>;
 template class gArray<gArray<double> >;
@@ -45,7 +45,7 @@ template gOutput &operator<<(gOutput &, const gArray<float> &);
 template gOutput &operator<<(gOutput &, const gArray<double> &);
 template gOutput &operator<<(gOutput &, const gArray<gInteger> &);
 template gOutput &operator<<(gOutput &, const gArray<gRational> &);
-template gOutput &operator<<(gOutput &, const gArray<gString> &);
+template gOutput &operator<<(gOutput &, const gArray<gText> &);
 template gOutput &operator<<(gOutput &, const gArray<gArray<int> > &);
 template gOutput &operator<<(gOutput &, const gArray<gArray<int> *> &);
 template gOutput &operator<<(gOutput &, const gArray<gArray<double> > &);

@@ -16,22 +16,22 @@
 %name NfgFileReader
 
 %define MEMBERS      gInput &infile;  \
-                     gString last_name;  gNumber last_number; \
-                     gString title, comment; \
+                     gText last_name;  gNumber last_number; \
+                     gText title, comment; \
                      Nfg *& N; \
                      int ncont, pl, cont; \
-		     gString last_poly; \
-                     gList<gString> names, params; \
+		     gText last_poly; \
+                     gList<gText> names, params; \
                      gList<gNumber> numbers; \
-                     gList<gString> stratnames; \
+                     gList<gText> stratnames; \
                      NFOutcome *outcome; \
                      \
-                     bool CreateNfg(const gList<gString> &, \
+                     bool CreateNfg(const gList<gText> &, \
 					    const gList<gNumber> &, \
-					    const gList<gString> &); \
+					    const gList<gText> &); \
                      void SetPayoff(int cont, int pl, \
 				    const gPoly<gNumber> &); \
-  	             bool ExistsVariable(const gString &); \
+  	             bool ExistsVariable(const gText &); \
 		     int Parse(void); \
                      virtual ~NfgFileReader();
 
@@ -40,7 +40,7 @@
 %define CONSTRUCTOR_INIT      : infile(f), N(nfg)
 
 %union  {
-  gString *text;
+  gText *text;
 }
 
 %type <text> number
@@ -178,7 +178,7 @@ outcpay:       number
  
 commaopt:    | ','   
 
-number:           NUMBER    { $$ = new gString(ToString(last_number)); }
+number:           NUMBER    { $$ = new gText(ToText(last_number)); }
 
 contingencylist:  contingency
                |  contingencylist contingency
@@ -204,7 +204,7 @@ variables:         variable
 variable:          varname
                    { last_poly += " "; }
         |          varname '^' NUMBER
-                   { last_poly += "^" + ToString(last_number) + " "; }
+                   { last_poly += "^" + ToText(last_number) + " "; }
         ;
 
 varname:           VARNAME
@@ -296,9 +296,9 @@ int NfgFileReader::yylex(void)
 NfgFileReader::~NfgFileReader()   { }
 
 
-bool NfgFileReader::CreateNfg(const gList<gString> &players,
+bool NfgFileReader::CreateNfg(const gList<gText> &players,
 			      const gList<gNumber> &dims,
-			      const gList<gString> &strats)
+			      const gList<gText> &strats)
 {
   if (players.Length() != dims.Length())   return false;
 
@@ -335,7 +335,7 @@ void NfgFileReader::SetPayoff(int cont, int pl,
   N->SetPayoff(N->GetOutcome(cont), pl, value);
 }
 
-bool NfgFileReader::ExistsVariable(const gString &varname)
+bool NfgFileReader::ExistsVariable(const gText &varname)
 {
   for (int var = 1; var <= N->Parameters()->Dmnsn(); var++)
     if (N->Parameters()->GetVariableName(var) == varname)
