@@ -172,7 +172,7 @@ gVector<T>::Dump(gOutput &to) const
   to<<"{ ";
   for(int i=min; i<=max; i++)
     to<<(*this)[i]<<" ";
-  to<<"}\n";
+  to<<"}";
 }
 
 

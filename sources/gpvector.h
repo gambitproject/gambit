@@ -246,7 +246,7 @@ gPVector<T>::Dump(gOutput &to) const
       to<<"{ ";
       for(int j=1; j<=svlen[i]; j++)
 	to<<(*this)(i,j)<<" ";
-      to<<"}\n";
+      to<<"}";
     }
 }
 
