@@ -1,0 +1,748 @@
+//# FILE: gpoly1.imp  -- Implementation of gPoly1 data type
+//#
+//# @(#)gpoly1.imp	1.9 1/23/96
+//#
+
+#include "gpoly1.h"
+
+
+//---------------------------------------------------------------
+//                      gPoly1
+//---------------------------------------------------------------
+
+//---------------------------
+// Constructors / Destructors
+//---------------------------
+
+
+template <class T> gPoly1<T>::gPoly1(const gSpace* p, const term_order* o)
+: Space(p), Order(o), Terms()
+{
+}
+
+template <class T> gPoly1<T>::gPoly1(const gSpace*     p, 
+				     const T&          constant,
+				     const term_order* o)
+: Space(p), Order(o), Terms()
+{
+//DEBUG
+gout << "The constant constructor is just now tested!\n";
+
+  if (constant != (T)0)   Terms += gMono<T>(p,constant);
+}
+
+template <class T> gPoly1<T>::gPoly1(const gSpace *p, 
+				       const gString &s,
+				       const term_order* o)
+: Space(p), Order(o), Terms()
+{
+  *this=s;  // Operator = needs to be fixed
+}
+
+template <class T> gPoly1<T>::gPoly1(const gSpace *p, int var_no, int exp,
+				       const term_order* o)
+: Space(p), Order(o), Terms()
+{
+//DEBUG
+gout << "The x_i^p constructor is just now tested!\n";
+
+  Terms += gMono<T>((T)1,exp_vect(p,var_no,exp));
+}
+
+template <class T> gPoly1<T>::gPoly1(const gSpace *p, 
+				       exp_vect exps, 
+				       T coeff,
+				       const term_order* o)
+: Space(p), Order(o), Terms()
+{
+//DEBUG
+gout << "The constantXx^exps constructor is just now tested!\n";
+
+  Terms += gMono<T>(coeff,exps);
+}
+
+template <class T> gPoly1<T>::gPoly1(const gSpace *p, 
+				       const gMono<T>& mono, 
+				       const term_order* o)
+: Space(p), Order(o), Terms()
+{
+//DEBUG
+gout << "The mono constructor is just now tested!\n";
+
+  Terms += mono;
+}
+
+template <class T> gPoly1<T>::gPoly1(const gPoly1<T> &p)
+: Space(p.Space), Order(p.Order), Terms(p.Terms)
+{
+  *this=p; 
+}
+
+template <class T> gPoly1<T>::~gPoly1()
+{
+}
+
+//----------------------------------
+//        Operators
+//----------------------------------
+
+
+template<class T> gPoly1<T> &gPoly1<T>::operator=(const gPoly1<T> &p)
+{
+  assert (Space == p.Space && Order == p.Order);
+
+  Terms = p.Terms; return (*this);
+}
+
+template<class T> gPoly1<T> gPoly1<T>::operator-() const
+{
+  gPoly1<T> neg(*this);
+  for (int i = 1; i <= Terms.Length(); i++)  neg.Terms[i] = -Terms[i];
+  return neg;
+}
+
+template<class T> gPoly1<T> gPoly1<T>::operator-(const gPoly1<T> &p) const
+{
+  gPoly1<T> dif(*this);
+  dif -= p;
+  return dif;
+}
+
+template<class T> void gPoly1<T>::operator-=(const gPoly1<T> &p)
+{
+  assert(Space == p.Space);
+
+  gPoly1<T> neg = p;
+  for (int i = 1; i <= neg.Terms.Length(); i++)
+    neg.Terms[i] = - neg.Terms[i];
+  Terms = Adder(Terms,neg.Terms);
+}
+
+template<class T> gPoly1<T> gPoly1<T>::operator+(const gPoly1<T> &p) const
+{ 
+  gPoly1<T> sum(*this);
+  sum += p;
+  return sum;
+}
+
+template<class T> void gPoly1<T>::operator+=(const gPoly1<T> &p)
+{
+  assert(Space == p.Space);
+
+  Terms = Adder(Terms,p.Terms); 
+}
+
+template<class T> gPoly1<T> gPoly1<T>::operator*(const gPoly1<T> &p) const
+{
+  gPoly1<T> prod(*this);
+  prod *= p;
+  return prod;
+}
+
+template<class T> gPoly1<T> gPoly1<T>::operator/(const T val) const
+{
+  assert (val != (T)0);
+  return (1/val) * (*this);
+}
+
+template<class T> 
+gPoly1<T> gPoly1<T>::operator/(const gPoly1<T> & den) const
+{
+  return DivideByPolynomial(den);
+}
+
+template<class T> bool gPoly1<T>::operator==(gPoly1<T> &p) const
+{
+  assert(Space == p.Space && Order == p.Order);
+
+  return (Terms == p.Terms);
+}
+
+template<class T> bool gPoly1<T>::operator!=(gPoly1<T> &p) const
+{
+  return !(*this == p);
+}
+
+template<class T> void gPoly1<T>::operator*=(const gPoly1<T> &p)
+{ 
+  assert(Space == p.Space);
+
+  Terms = Mult(Terms,p.Terms);
+}
+
+template<class T> void gPoly1<T>::operator*=(const T& val)
+{ 
+  for (int i = 1; i <= Terms.Length(); i++)
+    Terms[i] *= val;
+}
+
+template <class T> gPoly1<T>& gPoly1<T>::operator=(const gString &Hold)
+{
+  charnum = 0;
+  int contflag = 1;
+  T nega = 1;
+  gArray<int> PowArray(Space->Dmnsn());
+  TheString = Hold + " +";
+
+  GetChar();
+
+  while (charnum <= TheString.length() && contflag){
+    switch (charc) {
+    case '+' :
+    case ' ':
+      charnum++;
+      GetChar();
+      break;
+    case '-':
+      charnum++;
+      GetChar();
+      nega = -nega;
+      break;
+    case 0:  //Null termination of string
+      contflag = 0;
+      break;
+    default:
+      String_Term(nega);
+      nega = T (1);
+      break;
+    }
+  }
+
+  return (*this);
+}
+
+
+//----------------------------------
+//        Member Functions
+//----------------------------------
+
+template <class T> void gPoly1<T>::String_Term(T nega)
+{
+  gArray<int> PowArray(Dmnsn());
+  for (int a=1; a<= Dmnsn(); a++) PowArray[a] = 0;
+  T val;
+  val = String_Coeff(nega);
+  
+  while (charc != '+' && charc != '-') {
+    if (charc == ' ') { charnum ++; GetChar(); }
+    else String_VarAndPow(PowArray);
+  }
+
+  Terms += gMono<T>(val, exp_vect(Space,PowArray));
+}
+
+//  **  Different String_Coeff procedure for Different Instantiations **
+//  **  So that the parser will interpret the coefficients correctly  **
+
+template <class T> int gPoly1<T>::String_Coeff(int nega)
+{
+  gString Coeff = "";
+  while (charc >= '0' && charc <= '9'){
+    Coeff += charc;
+    charnum++;
+    GetChar();
+  }
+  if (Coeff == "") return (nega);
+  else return (nega * atoi(Coeff.stradr()));  
+}
+
+template <class T> long gPoly1<T>::String_Coeff(long nega)
+{
+  gString Coeff = "";
+  while (charc >= '0' && charc <= '9'){
+    Coeff += charc;
+    charnum++;
+    GetChar();
+  }
+  if (Coeff == "") return (nega);
+  else return (nega * atol(Coeff.stradr()));  
+}
+
+template <class T> double gPoly1<T>::String_Coeff(double nega)
+{
+  double doub;
+  gString Coeff = "";
+  while (charc >= '0' && charc <= '9' || charc == '.'){
+    Coeff += charc;
+    charnum++;
+    GetChar();
+  }
+  if (Coeff == "") return (nega);
+  else return (nega * FromString(Coeff,doub));  
+}
+
+template <class T> gRational gPoly1<T>::String_Coeff(gRational nega)
+{
+  gRational rat;
+  gString Coeff = "";
+  while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
+    Coeff += charc;
+    charnum++;
+    GetChar();
+  }
+  if (Coeff == "") return (nega);
+  else return (nega * FromString(Coeff,rat));  
+}
+
+template <class T> int gPoly1<T>::String_GetPow(void)
+{
+
+  gString Pow = "";
+  while (charc == ' '){
+    charnum++;
+    GetChar();
+  }
+
+  while (charc >= '0' && charc <= '9'){
+    Pow += charc;
+    charnum++;
+    GetChar();
+  }
+  return (atoi(Pow.stradr()));
+}
+
+template <class T> void gPoly1<T>::String_VarAndPow(gArray<int> &PowArray)
+{
+  gString VarName = "";
+  int pow, varname;
+  while (charc != '^' && charc != ' '){
+    VarName += charc;
+    charnum++;
+    GetChar();
+  }
+  if (charc == '^') { charnum++; GetChar(); pow = String_GetPow(); }
+  else pow = 1;
+  for(varname = 1;varname <= Dmnsn() &&  
+      VarName != (Space->VariableWithNumber(varname))->Name;
+      varname ++);
+  if (varname <= Dmnsn()) PowArray[varname] = pow;
+}
+
+template <class T> void gPoly1<T>::GetChar(void)
+{
+  charc = TheString[charnum];
+}
+  
+template <class T> const gSpace* gPoly1<T>::GetSpace(void) const
+{
+  return (gSpace *) Space;  
+}
+
+template <class T> int gPoly1<T>::DegreeOfVar(int var_no) const
+{
+  int max = 0;
+  for (int i = 1; i <= Terms.Length(); i++) 
+    if (max < Terms[i].ExpV()[var_no]) 
+      max = Terms[i].ExpV()[var_no];
+  return max;
+}
+
+template <class T> int gPoly1<T>::Degree() const
+{
+  int max = 0;
+  for (int i = 1; i <= Terms.Length(); i++)
+    if (Terms[i].TotalDegree() > max)  
+      max = Terms[i].TotalDegree();
+  return max;
+}
+
+template <class T> T gPoly1<T>::GetCoef(const gArray<int> &Powers) const
+{
+  return GetCoef(exp_vect(Space,Powers));
+}
+
+template <class T> T gPoly1<T>::GetCoef(const exp_vect &Powers) const
+{
+  for (int i = 1; i <= Terms.Length(); i++)
+    if (Terms[i].ExpV() == Powers)
+      return Terms[i].Coef();
+  return (T)0;
+}
+
+template <class T> T gPoly1<T>::NumLeadCoeff() const
+{
+  assert (Degree() == 0 && Terms.Length() <= 1);
+
+  if (Terms.Length() == 1) return Terms[1].Coef();
+  else                     return (T)0;
+}
+
+template <class T> T gPoly1<T>::Evaluate(const gArray<T> &values) const
+{
+  T answer=0;
+  for (int i = 1; i <= Terms.Length(); i++)
+    answer += Terms[i].Evaluate(values);
+  return answer;
+}
+
+template <class T> gList<exp_vect> gPoly1<T>::ExponentVectors() const
+{
+  gList<exp_vect> result;
+  for (int i = 1; i <= Terms.Length(); i++)
+    result += exp_vect(Terms[i].ExpV());
+  return result;
+}
+
+template <class T> int gPoly1<T>::No_Monomials() const
+{
+  gout << "Eliminate old code in No_monomials, if successful.\n";
+
+  return Terms.Length();
+}
+
+// ** different GetCoefToString for each instantiation **
+
+template <class T> gString gPoly1<T>::GetCoefToString( int val ) const
+{
+  gString Coeff = ToString(val);
+  return (Coeff);
+}
+
+template <class T> gString gPoly1<T>::GetCoefToString( long val ) const
+{
+  gString Coeff = ToString(val);
+  return (Coeff);
+}
+
+template <class T> gString gPoly1<T>::GetCoefToString( double val ) const
+{
+  gString Coeff = ToString(val);
+  return (Coeff);
+}
+
+template <class T> gString gPoly1<T>::GetCoefToString( gRational val ) const
+{
+  gString Coeff = ToString(val, false);
+  return (Coeff);
+}
+
+template <class T> int gPoly1<T>::Dmnsn() const
+{
+  return Space->Dmnsn();
+}
+
+template <class T> 
+gList< gMono<T> > gPoly1<T>::Adder(const gList<gMono<T> >& One, 
+				   const gList<gMono<T> >& Two) const
+{
+  if (One.Length() == 0) return Two; if (Two.Length() == 0) return One;
+
+  gList<gMono<T> > answer;
+
+  int i = 1; int j = 1;
+  while (i <= One.Length() || j <= Two.Length()) {
+    if      (i > One.Length()) { answer += Two[j]; j++; }
+    else if (j > Two.Length()) { answer += One[i]; i++; }
+    else {
+      if      ( Order->Less(   One[i].ExpV(),Two[j].ExpV()) ) 
+	{ answer += One[i]; i++; }
+      else if ( Order->Greater(One[i].ExpV(),Two[j].ExpV()) ) 
+	{ answer += Two[j]; j++; }
+      else
+	{ answer += One[i] + Two[j]; i++; j++; }
+    }
+  }
+
+  return answer;
+}
+
+template <class T> 
+gList< gMono<T> > gPoly1<T>::Mult(const gList<gMono<T> >& One, 
+				  const gList<gMono<T> >& Two) const
+{
+  gList<gMono<T> > answer;
+
+  if (One.Length() == 0 || Two.Length() == 0) return answer;
+
+  for (int i = 1; i <= One.Length(); i++)
+    for (int j = 1; j <= Two.Length(); j++) 
+      {
+	gMono<T> next = One[i] * Two[j];
+
+	if (answer.Length() == 0) answer += next;
+
+	else
+	  {
+	    int bot = 1; int top = answer.Length();
+	    if      ( Order->Less   (answer[top].ExpV(),next.ExpV()) ) 
+	      answer += next;
+	    else if ( Order->Greater(answer[bot].ExpV(),next.ExpV()) )
+	      answer.Insert(next,1);
+	    else
+	      {
+		if      ( answer[bot].ExpV() == next.ExpV() ) top = bot;
+		else if ( answer[top].ExpV() == next.ExpV() ) bot = top;
+		
+		while (bot < top - 1)
+		  {
+		    int test = bot + (top - bot)/2;
+		    if ( answer[test].ExpV() == next.ExpV() ) bot = top = test;
+		    else
+		      if      (Order->Less   (answer[test].ExpV(),next.ExpV()))
+			bot = test;
+		      else // (Order->Greater(answer[test].ExpV(),next.ExpV()))
+			top = test;
+		  }
+
+		if (bot == top) answer[bot] += next;
+		else            answer.Insert(next,top);
+	      }
+	  }
+      }
+  return answer;
+}
+
+template<class T> 
+gPoly1<T> gPoly1<T>::DivideByPolynomial(const gPoly1<T> den) const
+{
+  gPoly1<T> zero(Space,(T)0,Order);
+
+  assert(den != zero);
+  assert(*this == zero || den.Degree() <= Degree());
+
+  // assumes exact divisibility!
+
+  gPoly1<T> result = zero;
+
+  if (*this == zero) return result;
+  else if (den.Degree() == 0)
+    { result = *this/den.NumLeadCoeff(); return result; }
+  else
+    {
+      int last = Dmnsn();
+      while (den.DegreeOfVar(last) == 0) last--;
+
+      gPoly1<T> remainder = *this;
+
+      while (remainder != zero)
+	{
+	  gPoly1<T> quot = remainder.LeadingCoefficient(last) /
+	                     den.LeadingCoefficient(last);
+	  gPoly1<T> power_of_last(Space,last,remainder.DegreeOfVar(last) - 
+			                        den.DegreeOfVar(last),Order);
+	  result += quot * power_of_last;
+	  remainder -= quot * power_of_last * den;
+	}
+    }
+  return result;
+}
+
+template <class T> 
+gPoly1<T> gPoly1<T>::EvaluateOneVar( int varnumber, T val) const
+{
+  gPoly1<T> newPoly(*this); 
+
+  for (int i = 1; i <= Terms.Length(); i++) 
+    newPoly.Terms[i] = 
+      gMono<T>(Terms[i].Coef()*pow(val,Terms[i].ExpV()[varnumber]), 
+	       Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber));
+
+  for (int i = 1; i <= Terms.Length(); i++) 
+    newPoly.Terms[i] = 
+      gMono<T>(Terms[i].Coef()*pow(val,Terms[i].ExpV()[varnumber]), 
+	       Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber));
+
+  return (newPoly);
+}
+
+template <class T>
+exp_vect gPoly1<T>::OrderMaxMonomialDivisibleBy(const term_order& order,
+						const exp_vect& expv)
+{
+  gout << "You have just tested OrderMaxMonomialDivisibleBy.\n";
+
+  exp_vect answer(Space); // constructs [0,..,0]
+  for (int i = 1; i <= Terms.Length(); i++)
+    if ( order.Less(answer,Terms[i].ExpV()) && answer < Terms[i].ExpV() )
+      answer = Terms[i].ExpV();
+  return answer;
+}
+
+template <class T> 
+gPoly1<T> gPoly1<T>::PartialDerivative(int varnumber) const
+{
+  gPoly1<T> newPoly(*this); 
+
+  for (int i = 1; i <= newPoly.Terms.Length(); i++)
+    newPoly.Terms[i] = gMono<T>(newPoly.Terms[i].Coef()
+                           * (T)newPoly.Terms[i].ExpV()[varnumber],
+	  newPoly.Terms[i].ExpV().AfterDecrementingExpOfVariable(varnumber));
+  int i = 1;
+  while (i <= newPoly.Terms.Length()) {
+    if (newPoly.Terms[i].Coef() == (T)0) newPoly.Terms.Remove(i);
+    else i++;
+  }
+
+  return (newPoly);
+}
+
+
+template <class T> 
+gPoly1<T> gPoly1<T>::LeadingCoefficient(int varnumber) const
+{
+  gPoly1<T> newPoly(*this); 
+
+  int degree = DegreeOfVar(varnumber);
+
+  newPoly.Terms = gList<gMono<T> >();
+  for (int i = 1; i <= Terms.Length(); i++) {
+    if (Terms[i].ExpV()[varnumber] == degree)
+      newPoly.Terms += gMono<T>(Terms[i].Coef(),
+	      Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber));
+  }
+
+  return (newPoly);
+}
+
+//--------------------
+// Term Order Concepts
+//--------------------
+
+// NEEDS TEST
+template <class T> 
+exp_vect gPoly1<T>::LeadingPowerProduct(const term_order & order) const
+{
+//DEBUG
+gout << "You have just tested LeadingPowerProduct.\n";
+
+  if (*Order == order) // worth a try ...
+    return Terms[Terms.Length()].ExpV();
+  else {
+    int max = 1;
+    for (int i = 2; i <= Terms.Length(); i++)
+      if ( order.Less(Terms[max].ExpV(),Terms[i].ExpV()) )
+	max = i;
+    return Terms[max].ExpV();
+  }
+}
+
+// NEEDS TEST
+template <class T> 
+T gPoly1<T>::LeadingCoefficient(const term_order & order) const
+{
+  if (*Order == order) // worth a try ...
+    return Terms[Terms.Length()].Coef();
+  else {
+    int max = 1;
+    for (int i = 2; i <= Terms.Length(); i++)
+      if ( order.Less(Terms[max].ExpV(),Terms[i].ExpV()) )
+	max = i;
+    return Terms[max].Coef();
+  }
+}
+
+// NEEDS TEST
+template <class T>
+gPoly1<T> gPoly1<T>::LeadingTerm(const term_order & order) const
+{
+  if (*Order == order) // worth a try ...
+    return gPoly1<T>(Space,Terms[Terms.Length()],Order);
+  else {
+    int max = 1;
+    for (int i = 2; i <= Terms.Length(); i++)
+      if ( order.Less(Terms[max].ExpV(),Terms[i].ExpV()) )
+	max = i;
+    return gPoly1<T>(Space,Terms[max],Order);
+  }
+}
+
+template <class T>
+void gPoly1<T>::ReduceByDivisionAtExpV(const term_order & order, 
+				      const gPoly1<T> & divisor, 
+				      const exp_vect & expv)
+{
+  assert(expv >= divisor.LeadingPowerProduct(order));
+  assert(divisor.LeadingCoefficient(order) != (T)0);
+
+  gPoly1<T> factor(Space, 
+		    expv - divisor.LeadingPowerProduct(order), 
+		    (T)1,
+		    Order);
+
+  *this -= (GetCoef(expv) / divisor.LeadingCoefficient(order)) * 
+           factor * divisor;
+}
+
+template <class T>
+void gPoly1<T>::ReduceByRepeatedDivision(const term_order & order, 
+					const gPoly1<T> & divisor)
+{
+  exp_vect zero_exp_vec(Space);
+
+  exp_vect exps = OrderMaxMonomialDivisibleBy(order,
+			       divisor.LeadingPowerProduct(order));
+
+  while (exps != zero_exp_vec) {
+    ReduceByDivisionAtExpV(order, divisor, exps);
+    exps = OrderMaxMonomialDivisibleBy(order,
+      		       divisor.LeadingPowerProduct(order));
+  }
+}
+
+template <class T>
+gPoly1<T> gPoly1<T>::S_Polynomial(const term_order& order, 
+                                const gPoly1<T>& arg2) const
+{
+  exp_vect exp_lcm = 
+        (LeadingPowerProduct(order)).LCM(arg2.LeadingPowerProduct(order));
+  gPoly1<T> lcm = gPoly1<T>(Space,exp_lcm,(T)1,Order);
+  gPoly1<T> L1 = lcm/LeadingTerm(order);
+  gPoly1<T> L2 = lcm/arg2.LeadingTerm(order);
+
+  return L1*(*this) - L2*arg2;
+}
+
+
+//---------------------------
+//    Global Operators
+//---------------------------
+
+template<class T> gPoly1<T> operator*(const T val, const gPoly1<T> poly)
+{
+  gPoly1<T> prod(poly);
+  prod *= val;
+  return prod;
+}
+
+template<class T> gPoly1<T> operator*(const gPoly1<T> poly, const T val)
+{
+  return val * poly;
+}
+
+template <class T> gOutput& operator<<(gOutput &f, const gPoly1<T> &p)
+{
+  gString s;
+  if (p.Terms.Length() == 0) s += "0";
+  else {
+    for (int i = 1; i <= p.Terms.Length(); i++)
+      {
+	if (p.Terms[i].Coef() < (T)0) s += "- ";
+	else if (i > 1) s += "+ ";
+	
+	if ( (p.Terms[i].Coef() != (T)1 && -p.Terms[i].Coef() != (T)1) ||
+	    p.Terms[i].IsConstant() )
+	  if (p.Terms[i].Coef() < (T)0) 
+	    s += p.GetCoefToString(-p.Terms[i].Coef());
+	  else                        
+	    s += p.GetCoefToString( p.Terms[i].Coef());
+	
+	for (int j = 1; j <= p.Space->Dmnsn(); j++) {
+	  int exp = p.Terms[i].ExpV() [j];
+	  if (exp > 0) {
+	    s += (*p.Space)[j]->Name;
+	    if (exp != 1) {
+	      s += '^';
+	      s += ToString(exp);
+	    }
+	  }
+	}
+	
+	if (i < p.Terms.Length()) s += " ";
+      }
+  }
+  if (s == "") s = " 0";
+
+  f << s; return f;
+}
+
+
