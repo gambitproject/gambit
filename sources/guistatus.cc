@@ -27,8 +27,8 @@ guiStatus::guiStatus(wxFrame *p_parent, const char *p_title)
 {
   m_gauge = new wxGauge(this, -1, 100, wxPoint(20, 10), wxSize(240, 50));
 
-  wxButton *cancelButton = new wxButton(this, wxID_CANCEL, "Cancel",
-					wxPoint(100, 170), wxSize(100, 30));
+  (void) new wxButton(this, wxID_CANCEL, "Cancel",
+		      wxPoint(100, 170), wxSize(100, 30));
   Show(TRUE);
 }
 

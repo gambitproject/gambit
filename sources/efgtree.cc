@@ -519,8 +519,8 @@ void guiEfgTree::OnLeftClick(wxMouseEvent &p_event)
   scrollX *= (m_maxX / 15);
   scrollY *= (m_maxY / 15);
 
-  m_curX = (p_event.GetX() + scrollX) / m_zoomFactor;
-  m_curY = (p_event.GetY() + scrollY) / m_zoomFactor;
+  m_curX = (int) ((p_event.GetX() + scrollX) / m_zoomFactor);
+  m_curY = (int) ((p_event.GetY() + scrollY) / m_zoomFactor);
   m_oldX = 0;
   m_oldY = 0;
   m_startX = m_curX;

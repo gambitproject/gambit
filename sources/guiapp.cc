@@ -99,9 +99,7 @@ void gambitFrame::OnNewEfg(wxCommandEvent &)
 
   int width, height;
   GetClientSize(&width, &height);
-  gambitGameView *subframe = new guiEfgFrame(this, efg,
-					     wxPoint(-1, -1),
-					     wxSize(width, height));
+  (void) new guiEfgFrame(this, efg, wxPoint(-1, -1), wxSize(width, height));
 }
 
 void gambitFrame::OnNewNfg(wxCommandEvent &)
@@ -112,9 +110,7 @@ void gambitFrame::OnNewNfg(wxCommandEvent &)
   Nfg *nfg = new Nfg(dim);
   int width, height;
   GetClientSize(&width, &height);
-  gambitGameView *subframe = new guiNfgFrame(this, nfg,
-					     wxPoint(-1, -1),
-					     wxSize(width, height));
+  (void) new guiNfgFrame(this, nfg, wxPoint(-1, -1), wxSize(width, height));
 }
 
 void gambitFrame::OnOpenEfg(wxCommandEvent &)
@@ -140,9 +136,7 @@ void gambitFrame::OnOpenEfg(wxCommandEvent &)
     if (efg) {
       int width, height;
       GetClientSize(&width, &height);
-      gambitGameView *subframe = new guiEfgFrame(this, efg,
-						 wxPoint(-1, -1),
-						 wxSize(width, height));
+      (void) new guiEfgFrame(this, efg, wxPoint(-1, -1), wxSize(width, height));
     }
   }
 }
@@ -170,9 +164,7 @@ void gambitFrame::OnOpenNfg(wxCommandEvent &)
     if (nfg) {
       int width, height;
       GetClientSize(&width, &height);
-      gambitGameView *subframe = new guiNfgFrame(this, nfg,
-						 wxPoint(-1, -1),
-						 wxSize(width, height));
+      (void) new guiNfgFrame(this, nfg, wxPoint(-1, -1), wxSize(width, height));
     }
   }
 }

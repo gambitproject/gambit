@@ -118,7 +118,7 @@ void gambitGameView::OnActivate(wxActivateEvent& event)
 //========================================================================
 
 guiAutoDialog::guiAutoDialog(wxWindow *p_parent, char *p_title)
-  : wxDialog(p_parent, -1, p_title)
+  : wxDialog(p_parent, -1, p_title, wxDefaultPosition, wxDefaultSize)
 {
   SetAutoLayout(TRUE);
 
