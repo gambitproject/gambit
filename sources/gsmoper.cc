@@ -1506,7 +1506,7 @@ static Portion* GSM_FloatFormat(Portion** param)
 
   GSM_SetWriteOptions();
 
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }
 
 static Portion* GSM_GetFloatFormat(Portion** param)
@@ -1515,7 +1515,7 @@ static Portion* GSM_GetFloatFormat(Portion** param)
   ((NumberPortion*) param[2])->SetValue(_WritePrecis.Value());
   ((BoolPortion*) param[3])->SetValue(_WriteExpmode.Value());
 
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }
 
 static Portion* GSM_TextFormat(Portion** param)
@@ -1524,14 +1524,14 @@ static Portion* GSM_TextFormat(Portion** param)
 
   GSM_SetWriteOptions();
 
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }
 
 static Portion* GSM_GetTextFormat(Portion** param)
 {
   ((BoolPortion*) param[1])->SetValue(_WriteQuoted.Value());
 
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }
 
 static Portion* GSM_SolutionFormat(Portion** param)
@@ -1541,14 +1541,14 @@ static Portion* GSM_SolutionFormat(Portion** param)
 
   GSM_SetWriteOptions();
 
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }
 
 static Portion* GSM_GetSolutionFormat(Portion** param)
 {
   ((BoolPortion*) param[1])->SetValue(_WriteSolutionInfo.Value());
 
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }
 
 
