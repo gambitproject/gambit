@@ -22,7 +22,6 @@ template <class T> class MixedProfile : public gPVector<T>  {
   private:
     const Nfg *N;
     NFSupport support;
-    gRectArray<T> *payoffs;
 
     // Private Payoff functions
 
@@ -49,7 +48,6 @@ template <class T> class MixedProfile : public gPVector<T>  {
     bool IsPure(void) const;
     bool IsPure(int pl) const;
     void Centroid(void);
-    void SetPayoffs(void);    
 
     T Payoff(int pl) const;
     T Payoff(int pl, int player1, int strat1) const;

@@ -321,7 +321,6 @@ void MixedSolution::Invalidate(void) const
   m_qreLambda = -1;
   m_qreValue = -1;
   m_liapValue = -1;
-  m_profile.SetPayoffs();
   m_revision = Game().RevisionNumber();
 }
 
