@@ -7,8 +7,11 @@ dnl Checks for programs.
 AC_PROG_YACC
 AC_PROG_CC
 AC_PROG_CXX
-AC_PROG_MAKE_SET
 AC_PROG_RANLIB
+
+dnl A number of the following checks are currently commented out.
+dnl These are checks for functions and headers we do actually use,
+dnl but for which we don't have any workarounds should they be missing.
 
 dnl AC_DEFINE(__WXGTK__, 1, use GTK version of wxWindows)
 CPPFLAGS="$(CPPFLAGS) -fno-implicit-templates -DNEWSTYLE_TEMPLATES -D__WXGTK__"
@@ -19,7 +22,7 @@ AC_CHECK_LIB(wx_gtk, main)
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(fcntl.h limits.h malloc.h sys/time.h unistd.h)
+dnl AC_CHECK_HEADERS(fcntl.h limits.h malloc.h sys/time.h unistd.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -31,7 +34,7 @@ AC_STRUCT_TM
 dnl Checks for library functions.
 AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS(ftime putenv strdup strstr strtod strtol)
+dnl AC_CHECK_FUNCS(ftime putenv strdup strstr strtod strtol)
 
 AC_OUTPUT(Makefile sources/Makefile \
           sources/base/Makefile \
