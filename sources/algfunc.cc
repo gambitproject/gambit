@@ -16,12 +16,16 @@
 
 template <class T> int BuildReducedNormal(const ExtForm<T> &,
 					  NormalForm<T> *&);
+#include "gwatch.h"
 
 Portion *GSM_Nfg(Portion **param)
 {
   ExtForm<double> &E = ((EfgPortion<double> *) param[0])->Value();
   NormalForm<double> *N = 0;
+  gWatch watch;
   BuildReducedNormal(E, (NormalForm<double>*&) N);
+  
+  ((FloatPortion *) param[1])->Value() = watch.Elapsed();
   return new NfgValPortion<double>(*N);
 }
 
@@ -220,10 +224,12 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Nfg");
-  FuncObj->SetFuncInfo(GSM_Nfg, 1);
+  FuncObj->SetFuncInfo(GSM_Nfg, 2);
   FuncObj->SetParamInfo(GSM_Nfg, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE,
 			PASS_BY_VALUE, DEFAULT_EFG );
+  FuncObj->SetParamInfo(GSM_Nfg, 1, "time", porFLOAT,
+			new FloatValPortion(0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
 }
