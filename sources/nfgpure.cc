@@ -37,13 +37,12 @@ template <class T> class PureNashModule {
   public: 
     PureNashModule(const NormalForm<T> &r);
     virtual ~PureNashModule(void);
+    int PureNash(void); /*takes the SP and return index*/
     void SingleNash(long i);/*checks if the given SP in a Nash equilibria*/
     int Reverse (long index, int player);/*take index and the player number and 
 					 returns number of the strategy*/
-    int PureNash(void); /*takes the SP and return index*/
-    int NumNash() const;
+    int NumNash(void) const;
 };
-
 
 template <class T> int PureNashModule<T>::NumNash(void) const
 {
@@ -60,7 +59,7 @@ template <class T> int PureNashModule<T>::PureNash(void)
 
   for (i = 0; i < sindex[players]; i++)
     SingleNash(i);
-  gout << NumNash();
+  gout << solution.Length();
   /**********print payoffs**************/
  
   return 0;
@@ -158,6 +157,8 @@ template <class T> void PureNashModule<T>::SingleNash(long i)
       gout << "\n";
     }
 }
+
+typedef PureNashModule<double> Fred;
 
 int PureNashSolver::PureNash(void)
 {

@@ -19,7 +19,7 @@
 
 LemkeParams::LemkeParams(void) : dup_strat(0), plev(0)
 { }
-
+/*
 //
 // Here is the LemkeSolution class.  To be used, it needs to have private
 // members added to store whatever information is interesting, beyond just
@@ -35,7 +35,7 @@ template <class T> class LemkeSolution : public MixedSolution<T>   {
     void Output(gOutput &f) const
       { f << "Lemke solution: " << p << '\n'; }
 };
-
+*/
 
 class BaseLemke    {
   protected:
