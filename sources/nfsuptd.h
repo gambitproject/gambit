@@ -1,8 +1,8 @@
 //
-// FILE: efsuptd.h -- Declarations of dialogs for dealing with NF
+// FILE: nfsuptd.h -- Declarations of dialogs for dealing with NF
 // supports.
 //
-//  $Id$
+// $Id$
 //
 
 #ifndef NFSUPTD_H
@@ -38,9 +38,9 @@ private:
 	{
 	if (bns->MakeSupport())
 	{
-		disp_item->Append(ToString(sups.Length()));
+		disp_item->Append(ToText(sups.Length()));
 		disp_item->SetSize(-1,-1,-1,-1);
-		cur_item->Append(ToString(sups.Length()));
+		cur_item->Append(ToText(sups.Length()));
 		cur_item->SetSize(-1,-1,-1,-1);
 	}
 	}
@@ -60,10 +60,10 @@ private:
 	{disp_dim->SetValue(array_to_string(sups[disp_sup]->NumStrats()));}
 
 // Utility funcs
-	static gString array_to_string(const gArray<int> &a)
+	static gText array_to_string(const gArray<int> &a)
 	{
-	gString tmp='(';
-	for (int i=1;i<=a.Length();i++) tmp+=ToString(a[i])+((i==a.Length()) ? ")" : ",");
+	gText tmp='(';
+	for (int i=1;i<=a.Length();i++) tmp+=ToText(a[i])+((i==a.Length()) ? ")" : ",");
 	return tmp;
 	}
 public:
@@ -80,8 +80,8 @@ public:
 											array_to_string(sups[disp_sup]->NumStrats()),
 											-1,-1,80,-1,wxREADONLY);
 	support_list=wxStringListInts(sups.Length());
-	cur_str=new char[10];strcpy(cur_str,ToString(cur_sup));
-	disp_str=new char[10];strcpy(disp_str,ToString(disp_sup));
+	cur_str=new char[10];strcpy(cur_str,ToText(cur_sup));
+	disp_str=new char[10];strcpy(disp_str,ToText(disp_sup));
 	wxFormItem *cur_fitem=wxMakeFormString("",&cur_str,wxFORM_CHOICE,
 					new wxList(wxMakeConstraintStrings(support_list),0));
 	f->Add(cur_fitem);
@@ -139,7 +139,7 @@ void NFSupportInspectDialog::OnRemoveSupport(void)
 		}
 	 disp_item->Clear();cur_item->Clear();
 	 for (i=1;i<=sups.Length();i++)
-		{disp_item->Append(ToString(i));cur_item->Append(ToString(i));}
+		{disp_item->Append(ToText(i));cur_item->Append(ToText(i));}
 	 disp_item->SetSize(-1,-1,-1,-1);cur_item->SetSize(-1,-1,-1,-1);
 	 disp_item->SetSelection(0);cur_item->SetSelection(0);
 	 if (revert) bns->ChangeSupport(UPDATE_DIALOG);
