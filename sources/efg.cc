@@ -181,7 +181,7 @@ double ExtForm::GetBranchProb(const Node &n, int br) const
 void ExtForm::SetBranchProbs(const Node &n, const gVector<double> &probs)
 {
   if (!nodes.IsMember(n) || n[1] != 0)   return;
-  return players.SetBranchProbs(n[0], n[2], probs);
+  players.SetBranchProbs(n[0], n[2], probs);
 }
 
 
