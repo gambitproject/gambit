@@ -28,6 +28,9 @@
 #define EFGCONST_H
 
 typedef enum {
+  efgmenuFILE_EXPORT = 1110,
+  efgmenuFILE_EXPORT_POSTSCRIPT = 1111,
+
   efgmenuEDIT_INSERT = 1100,
   efgmenuEDIT_DELETE = 1101,
   efgmenuEDIT_REVEAL = 1407,

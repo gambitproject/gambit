@@ -31,6 +31,7 @@
 #include "wx/notebook.h"
 #include "wx/fontdlg.h"
 #include "wx/printdlg.h"
+#include "wx/dcps.h"
 #include "dlspinctrl.h"
 #include "wxstatus.h"
 
@@ -86,6 +87,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(wxID_CLOSE, EfgShow::Close)
   EVT_MENU(wxID_SAVE, EfgShow::OnFileSave)
   EVT_MENU(wxID_SAVEAS, EfgShow::OnFileSave)
+  EVT_MENU(efgmenuFILE_EXPORT_POSTSCRIPT, EfgShow::OnFileExportPS)
   EVT_MENU(wxID_PRINT_SETUP, EfgShow::OnFilePageSetup)
   EVT_MENU(wxID_PREVIEW, EfgShow::OnFilePrintPreview)
   EVT_MENU(wxID_PRINT, EfgShow::OnFilePrint)
@@ -576,6 +578,11 @@ void EfgShow::MakeMenus(void)
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_SAVE, "&Save\tCtrl-S", "Save this game");
   fileMenu->Append(wxID_SAVEAS, "Save &as", "Save game to a different file");
+  wxMenu *fileExportMenu = new wxMenu;
+  fileExportMenu->Append(efgmenuFILE_EXPORT_POSTSCRIPT, "&PostScript",
+			 "Save a printout of the game in PostScript format");
+  fileMenu->Append(efgmenuFILE_EXPORT, "&Export", fileExportMenu,
+		   "Export the game in various formats");
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_PRINT_SETUP, "Page Se&tup",
 		   "Set up preferences for printing");
@@ -880,6 +887,63 @@ void EfgShow::OnFilePrint(wxCommandEvent &)
   else {
     m_printData = printer.GetPrintDialogData().GetPrintData();
   }
+}
+
+void EfgShow::OnFileExportPS(wxCommandEvent &)
+{
+  wxPrintData printData(m_printData);
+
+  wxFileDialog dialog(this, "Choose output file", wxGetApp().CurrentDir(), "",
+		      "PostScript files (*.ps)|*.ps", wxSAVE);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    printData.SetFilename(dialog.GetPath());
+  }
+  else {
+    return;
+  }
+  printData.SetPrintMode(wxPRINT_MODE_FILE);
+
+  // This code is borrowed from the extensive form printout class.
+  // Seems like it would be nice to consolidate it in one place.
+  wxPostScriptDC dc(printData);
+  dc.StartDoc("Extensive form game");
+  dc.SetBackgroundMode(wxTRANSPARENT);
+  dc.StartPage();
+
+  // The actual size of the tree, in pixels
+  int maxX = m_treeWindow->m_layout.MaxX();
+  int maxY = m_treeWindow->m_layout.MaxY();
+
+  // Margins
+  int marginX = 50;
+  int marginY = 50;
+
+  maxX += 2 * marginX;
+  maxY += 2 * marginY;
+
+  // Get the size of the DC in pixels
+  wxCoord w, h;
+  dc.GetSize(&w, &h);
+
+  // Calculate a scaling factor
+  float scaleX = (float) w / (float) maxX;
+  float scaleY = (float) h / (float) maxY;
+
+  float actualScale = (scaleX < scaleY) ? scaleX : scaleY;
+
+  // Calculate the position on the DC to center the tree
+  float posX = (float) ((w - (m_treeWindow->m_layout.MaxX() * actualScale)) / 2.0);
+  float posY = (float) ((h - (m_treeWindow->m_layout.MaxY() * actualScale)) / 2.0);
+
+  // Set the scale and origin
+  dc.SetUserScale(actualScale, actualScale);
+  dc.SetDeviceOrigin((long) posX, (long) posY);
+
+  // Draw!
+  m_treeWindow->OnDraw(dc, actualScale);
+  dc.EndPage();
+  dc.EndDoc();
 }
 
 void EfgShow::OnFileExit(wxCommandEvent &)
