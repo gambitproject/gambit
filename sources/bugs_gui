@@ -102,12 +102,16 @@ But I will have to look at the code to see what this actually does.
 Perhaps it is not implemented correctly. 
 
 
+//------------------------------
+
 Bug D9: Need color coding of payoffs in outcome window
 
 The outcome editing window should color-code the payoffs for
 each player in the same way that they're displayed in the nfg 
 and efg displays.
 
+
+//------------------------------
 
 Bug D10: Drag and drop of outcomes don't always work in NFG
 
@@ -116,10 +120,14 @@ the desired one, dragging and dropping of the outcome doesn't work.
 E.g. try 8x8.nfg.
 
 
+//------------------------------
+
 Bug D11: guiman.tex needs to be updated and recompiled.
 
 We get TeX errors when running latex on this file.
 
+
+//------------------------------
 
 Bug D12: Does Windows help support HTML?
 
@@ -128,10 +136,55 @@ to use HTML for all our help files.  If Windows help supports HTML this
 would be much easier.
 
 
+//------------------------------
+
 Bug D13: Interrupting solution causes cursor to remain a watch.
 
-This is self-explanatory.
+Actually, even if the solution This is self-explanatory.
 
+//------------------------------
+
+Bug D14:  windows for text entries are not wide enough.  
+
+On Linux, load an extensive form game, and go to
+
+  Solve->Custom->ExtensiveForm->QRE.
+
+The fields for entry of the PXI file and PXI command are much too narrow.  
+
+//------------------------------
+
+Bug D15:  Won't accept file name abbreviations
+
+In fields requiring file names, the GUI will not accept the "~"
+character or aliases.  For example, running QRE on poker.efg, the
+following errors result, even though both
+'~rdm/gambit/pxi/pxi_motif_Linux' and and 'newpxi' refer to valid
+executable files, and run fine when entered from the command line.
+ 
+  wxWindows: could not execute '~rdm/gambit/pxi/pxi_motif_Linux'
+  wxWindows: could not execute 'newpxi'
+
+//------------------------------
+
+Bug D16:  Stray files appear.  
+
+After running the GUI, empty files called 'gout' or gerr' will appear
+in the executable directory. This happens, for example after loading
+poker.efg, and doing Solve->Custom->ExtensiveForm->Qre->OK, and then
+closing the gui.
+
+//------------------------------
+
+Bug D17:  Need "in place" editing of outcomes for large games.  
+
+This is really more of an enhancement than a bug.  
+
+In the normal and extensive form, if the game is large, it takes a
+long time to bring up the outcome window, and find the outcome
+associated with a given location in the EF/NF game.  We should
+have "in place" editing, where you can edit the outcome right on the
+normal or extensive form dislpay.
 
 
 
