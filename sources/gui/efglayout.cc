@@ -13,7 +13,6 @@
 
 #include "efg.h"
 
-#include "twflash.h"
 #include "treewin.h"
 #include "efgshow.h"
 #include "legend.h"
