@@ -1008,25 +1008,30 @@ private:
   Bool OnClose(void);
 
 public:
-  nfgOutcomePayoffsDialog(NFOutcome *, bool, wxWindow *parent);
+  nfgOutcomePayoffsDialog(const Nfg &, NFOutcome *, bool, wxWindow *parent);
   virtual ~nfgOutcomePayoffsDialog() { }
 
   int Completed(void) const { return m_completed; }
   const gArray<gNumber> &Payoffs(void) const { return m_payoffs; }
-  gText Name(void) const { return m_outcomeName->GetValue(); }
+  gText Name(void) const { return m_name; }
 };
 
-nfgOutcomePayoffsDialog::nfgOutcomePayoffsDialog(NFOutcome *p_outcome,
+nfgOutcomePayoffsDialog::nfgOutcomePayoffsDialog(const Nfg &p_nfg,
+						 NFOutcome *p_outcome,
 						 bool p_solutions,
 						 wxWindow *p_parent)
   : wxDialogBox(p_parent, "Change Payoffs", TRUE),
-    m_outcome(p_outcome), m_nfg(*p_outcome->Game()),
-    m_payoffs(p_outcome->Game()->NumPlayers())
+    m_outcome(p_outcome), m_nfg(p_nfg),
+    m_payoffs(p_nfg.NumPlayers())
 {
   new wxMessage(this, "Change payoffs for outcome:");
   NewLine();
 
   m_outcomeName = new wxText(this, 0, "Outcome");
+  if (p_outcome)
+    m_outcomeName->SetValue(p_outcome->GetName());
+  else
+    m_outcomeName->SetValue("Outcome" + ToText(p_nfg.NumOutcomes() + 1));
   NewLine();
 
   if (p_solutions) {
@@ -1045,9 +1050,12 @@ nfgOutcomePayoffsDialog::nfgOutcomePayoffsDialog(NFOutcome *p_outcome,
       NewLine();
   }
 
+  m_outcomePayoffs[0]->SetFocus();
+
   NewLine();
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
   okButton->SetClientData((char *) this);
+  okButton->SetDefault();
   wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
   cancelButton->SetClientData((char *) this);
@@ -1137,6 +1145,7 @@ nfgOutcomeSelectDialog::nfgOutcomeSelectDialog(Nfg &p_nfg, wxWindow *p_parent)
   NewLine();
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
   okButton->SetClientData((char *) this);
+  okButton->SetDefault();
   wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
   cancelButton->SetClientData((char *) this);
@@ -1167,7 +1176,7 @@ Bool nfgOutcomeSelectDialog::OnClose(void)
 
 NFOutcome *nfgOutcomeSelectDialog::GetOutcome(void)
 {
-  return m_nfg.Outcomes()[m_outcomeSelected];
+  return m_nfg.Outcomes()[m_outcomeSelected + 1];
 }
 
 void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
@@ -1200,8 +1209,8 @@ void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
   nf_iter.Set(pl1, st1);
   nf_iter.Set(pl2, st2);
 
-  nfgOutcomePayoffsDialog dialog(nf.GetOutcome(profile), solns.Length() > 0,
-				 spread);
+  nfgOutcomePayoffsDialog dialog(nf, nf.GetOutcome(profile),
+				 solns.Length() > 0, spread);
 
   if (dialog.Completed() == wxOK) {
     NFOutcome *outc = nf.GetOutcome(profile);
@@ -1245,7 +1254,7 @@ void NfgShow::OutcomeDetach(void)
 
 void NfgShow::OutcomeNew(void)
 {
-  nfgOutcomePayoffsDialog dialog(0, solns.Length() > 0, pframe);
+  nfgOutcomePayoffsDialog dialog(nf, 0, solns.Length() > 0, pframe);
 
   if (dialog.Completed() == wxOK) {
     NFOutcome *outc = nf.NewOutcome();
