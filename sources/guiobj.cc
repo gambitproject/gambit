@@ -22,7 +22,6 @@
 // GuiNames class.  The gList template is necessary 
 // because the hash implementation uses gLists.
 
-template class gList<int>;  // is this necessary?
 template class HashTable<gText, int>;
 
 
