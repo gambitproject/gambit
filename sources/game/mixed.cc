@@ -4,10 +4,10 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Instantiation of behavior profile classes
+// Instantiation of mixed profile classes
 //
 // This file is part of Gambit
-// Copyright (c) 2002, The Gambit Project
+// Copyright (c) 2003, The Gambit Project
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,33 +24,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "behav.imp"
+#include "gamebase.h"
+#include "behav.h"
 #include "mixed.imp"
 #include "base/glist.imp"
-
-
-template class gbtBehavProfileBase<double>;
-template class gbtBehavProfileBase<gbtRational>;
-template class gbtBehavProfileBase<gbtNumber>;
-
-template class gbtBehavProfile<double>;
-template gbtOutput &operator<<(gbtOutput &, const gbtBehavProfile<double> &);
-
-template class gbtBehavProfile<gbtRational>;
-template gbtOutput &operator<<(gbtOutput &, const gbtBehavProfile<gbtRational> &);
-
-template class gbtBehavProfile<gbtNumber>;
-template gbtOutput &operator<<(gbtOutput &, const gbtBehavProfile<gbtNumber> &);
-
-#if GBT_WITH_MP_FLOAT
-template class gbtBehavProfile<gbtMPFloat>;
-template gbtOutput &operator<<(gbtOutput &, 
-			       const gbtBehavProfile<gbtMPFloat> &);
-#endif // GBT_WITH_MP_FLOAT
-
-template class gbtList<gbtBehavProfile<double> >;
-template class gbtList<gbtBehavProfile<gbtRational> >;
-template class gbtList<gbtBehavProfile<gbtNumber> >;
 
 template class gbtMixedProfileRep<double>;
 template class gbtMixedProfileRep<gbtRational>;

@@ -9,7 +9,7 @@ libgame_a_SOURCES = \
         actiter.h \
 	behav.h \
 	behav.imp \
-	behavinst.cc \
+	behav.cc \
 	efbasis.cc \
 	efbasis.h \
 	efdom.cc \
@@ -33,6 +33,7 @@ libgame_a_SOURCES = \
 	gnarray.imp \
 	infoset.cc \
 	infoset.h \
+	mixed.cc \
 	mixed.h \
 	mixed.imp \
 	nfdom.cc \
