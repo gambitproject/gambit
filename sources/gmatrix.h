@@ -1,5 +1,5 @@
 //#
-//# FILE: gmatrix.h -- Implementation of normal matrix classes
+//# FILE: gmatrix.h -- Implementation of matrix classes
 //#
 //# $Id$
 //#
@@ -67,12 +67,7 @@ template <class T> class gMatrix : public gRectArray<T>  {
   void GetColumn(int, gVector<T>&) const;
   void SetColumn(int, const gVector<T>&);
 
-  gMatrix<T> GetSubMatrix(const gBlock<int> &, const gBlock<int> &) const;
-  gMatrix<T> GetSlice(int, int, int, int) const;
-  gMatrix<T> Invert(void) const;
-  gMatrix<T> ExternalPivot(int, int) const;
   void Pivot(int, int);
-  T Determinant(void) const;
 
 
   // check functions

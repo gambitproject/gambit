@@ -1,5 +1,5 @@
 //#
-//# FILE: gmatrix1.cc -- Instantiation of common matrix types
+//# FILE: gmatrix.cc -- Instantiation of common matrix types
 //#
 //# $Id$
 //#

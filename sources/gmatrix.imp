@@ -548,140 +548,7 @@ gMatrix<T>::SetColumn(int col, const gVector<T> &v)
 
 // more complex functions
 
-
-//
-// These probably aren't useful, but I'll leave them in here for the time
-// being just in case...
-//
-
-template<class T> gMatrix<T>
-gMatrix<T>::GetSlice(int rl, int rh, int cl, int ch) const
-{
-  assert( CheckRow(rl) && CheckRow(rh) && CheckColumn(cl) && CheckColumn(ch) );
-  assert( rh >= rl-1 && ch >= cl-1 );
-  gMatrix<T> m(rh-rl+1, ch-cl+1);
-  for(int i=rl; i<=rh; i++)
-    {
-/*
-      for(int j=cl; j<=ch; j++)
-	m(i-rl,j-cl)= (*this)(i,j);
-*/
-      // inner loop
-      T* src= data[i] + cl;
-      T* dst= m.data[i-rl] + 1;
-      int j= ch-cl+1;
-      while( j-- )
-	*(dst++)= *(src++);
-      assert( dst-1 == m.data[i-rl] + (ch-cl+1) ); // debug
-      assert( src-1 == data[i] + ch ); // debug
-      // end inner loop
-    }
-  return m;
-}
-
-template<class T> gMatrix<T>
-gMatrix<T>::GetSubMatrix(const gBlock<int> &rowV,
-			  const gBlock<int> &colV) const
-{
-  int rows= rowV.Length();
-  int cols= colV.Length();
-  for(int i=1; i<=rows; i++)
-    assert( CheckRow(rowV[i]) );
-  for(int j=1; j<=cols; j++)
-    assert( CheckColumn(colV[j]) );
-
-  gMatrix<T> m( rows, cols );
-  for(i=1; i<=rows; i++)
-    {
-      T* srcrow= data[ rowV[i] ];
-      T* dstrow= m.data[i];
-		for(j=1; j<=cols; j++)
-	dstrow[j]= srcrow[ colV[j] ];
-    }
-  return m;
-}
-
-template<class T> gMatrix<T>
-gMatrix<T>::Invert(void) const
-{
-  assert( mincol==minrow && maxcol==maxrow );
-  gMatrix<T> copy(*this);
-  gMatrix<T> inv(minrow,maxrow, mincol,maxcol);
-
-  // initialize inverse matrix and prescale row vectors
-  for(int i=minrow; i<=maxrow; i++)
-    {
-      T max= (T)0;
-      for(int j=mincol; j<=maxcol; j++)
-	{
-	  T abs= copy.data[i][j];
-	  if( abs < (T)0 )
-	    abs= -abs;
-	  if( abs > max )
-	    max= abs;
-	}
-		assert( max!= (T) 0 );
-      T scale= (T)1/max;
-      for(j=mincol; j<=maxcol; j++)
-	{
-	  copy.data[i][j]*= scale;
-	  if(i==j)
-	    inv.data[i][j]= scale;
-	  else
-	    inv.data[i][j]= (T)0;
-	}
-    }
-
-//gout<<"debug: Invert:\ncopy:\n"<<copy<<"inv:\n"<<inv<<"\n";
-//char c; gin.get(c);
-  for(i=mincol; i<=maxcol; i++)
-    {
-      // find pivot row
-      T max= copy.data[i][i];
-      if(max<(T)0)
-	max= -max;
-      int row= i;
-      for(int j=i+1; j<=maxrow; j++)
-	{
-	  T abs= copy.data[j][i];
-	  if( abs < (T)0 )
-	    abs= -abs;
-	  if( abs > max )
-	    { max= abs; row= j; }
-	}
-      assert( max > (T)0 );
-      copy.SwitchRows(i,row);
-      inv.SwitchRows(i,row);
-//gout<<"debug: swapped rows "<<i<<" and "<<row
-//  <<":\ncopy:\n"<<copy<<"inv:\n"<<inv<<"\n";
-      // scale pivot row
-      T factor= (T)1/copy.data[i][i];
-      for(int k=mincol; k<=maxcol; k++)
-	{
-	  copy.data[i][k]*= factor;
-	  inv.data[i][k]*= factor;
-	}
-
-      // reduce other rows
-      for(j=minrow; j<=maxrow; j++)
-	{
-	  if(j!=i)
-	    {
-	      T mult= copy.data[j][i];
-	      for(k=mincol; k<=maxcol; k++)
-		{
-		  copy.data[j][k]-= copy.data[i][k]*mult;
-		  inv.data[j][k]-= inv.data[i][k]*mult;
-		}
-	    }
-	} // end for(j)
-//gout<<"debug: after pivot #"<<i<<":\ncopy:\n"<<copy<<"inv:\n"<<inv<<"\n";
-//gin.get(c);
-    } // end for(i)
-
-  return inv;
-}
-
+#ifdef UNUSED
 template<class T> gMatrix<T>
 gMatrix<T>::ExternalPivot(int row, int col) const
 {
@@ -717,6 +584,7 @@ gMatrix<T>::ExternalPivot(int row, int col) const
     }
   return m;
 }
+#endif    // UNUSED
 
 template<class T> void
 gMatrix<T>::Pivot(int row, int col)
@@ -746,35 +614,6 @@ gMatrix<T>::Pivot(int row, int col)
 	  // end inner loop
 	}
     }
-}
-
-template<class T> T
-gMatrix<T>::Determinant(void) const
-{
-  assert(minrow==mincol && maxrow==maxcol);
-  assert(NumRows()>0);
-  if(NumRows()==1)
-    return (*this)(minrow,mincol);
-  if(NumRows()==2)
-    return (*this)(minrow,mincol) * (*this)(maxrow,maxcol)
-         - (*this)(minrow,maxcol) * (*this)(maxrow,mincol);
-
-  T result= (T)0;
-  int i,j;
-  T l=(T)1;
-  gBlock<int> rows, cols;
-  for(i=minrow+1; i<=maxrow; i++)
-    rows.Append(i);
-  for(i=minrow; i<=maxrow; i++)
-    {
-      for(j=mincol; j<=maxcol; j++)
-	if(j!=i) cols.Append(j);
-      gMatrix<T> tmp= GetSubMatrix(rows,cols);
-      result+= (tmp.Determinant()*l*(*this)(1,i));
-      l*=(T)(-1);
-      cols.Flush();
-    }
-  return result;
 }
 
 template <class T> gOutput &operator<<(gOutput &to, const gMatrix<T> &M)
