@@ -5,7 +5,7 @@
 //#
 
 #include "extform.h"
-#include "node.h"
+#include "gametree.h"
 #include "outcome.h"
 #include "gmapiter.h"
 

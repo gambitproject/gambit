@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "gstring.h"
-#include "node.h"
+#include "gametree.h"
 #include "extform.h"
 #include "outcome.h"
 
