@@ -60,6 +60,14 @@ bool gbtAllActionIterator::operator==(const gbtAllActionIterator &p_iter) const
 
 bool gbtAllActionIterator::GoToNext(void)
 {
+  while (iset > m_support.GetGame().GetPlayer(pl).NumInfosets()) {
+    pl++;
+    iset = 1;
+    if (pl > m_support.GetGame().NumPlayers()) {
+      return false;
+    }
+  }
+
   if (act != m_support.NumActions(pl,iset)) {
     act++; 
     return true;
