@@ -1,8 +1,8 @@
-//#
-//# FILE: gmatrix.imp -- Implementation of gMatrix method functions
-//#
-//# $Id$
-//#
+//
+// FILE: gmatrix.imp -- Implementation of gMatrix method functions
+//
+// $Id$
+//
 
 #include "gmatrix.h"
 
@@ -35,6 +35,14 @@ template <class T> gMatrix<T>::~gMatrix()
 template <class T> gMatrix<T> &gMatrix<T>::operator=(const gMatrix<T> &M)
 {
   gRectArray<T>::operator=(M);
+  return *this;
+}
+
+template <class T> gMatrix<T> &gMatrix<T>::operator=(const T &c)
+{
+  for (int i = minrow; i <= maxrow; i++) 
+    for (int j = mincol; j <= maxcol; j++) 
+      (*this)(i, j) = c;
   return *this;
 }
 

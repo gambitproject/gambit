@@ -1,8 +1,8 @@
-//#
-//# FILE: gmatrix.h -- Implementation of matrix classes
-//#
-//# $Id$
-//#
+//
+// FILE: gmatrix.h -- Implementation of matrix classes
+//
+// $Id$
+//
 
 #ifndef GMATRIX_H
 #define GMATRIX_H
@@ -24,6 +24,7 @@ template <class T> class gMatrix : public gRectArray<T>  {
     virtual ~gMatrix();
 
     gMatrix<T> &operator=(const gMatrix<T> &);
+    gMatrix<T> &operator=(const T &);
 
        // ADDITIVE OPERATORS
     gMatrix<T> operator+(const gMatrix<T> &) const;
