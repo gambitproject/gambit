@@ -73,6 +73,7 @@ int efg_yylex(void);
 %token COLON     260
 %token LBRACE    261
 %token RBRACE    262
+%token SLASH     263
 
 %token NAME      270
 %token INTEGER   271
@@ -140,12 +141,7 @@ int yylex(void)
     do  {
       *input_stream >> c;
     }  while (isspace(c));
-    
-
-    break;
-
-// Comment features of the lexer are not yet implemented...
-/*
+ 
     if (c == '/')   {
       *input_stream >> d;
       if (d == '/')  {
@@ -163,13 +159,14 @@ int yylex(void)
 	  if (d == '/')   done = 1;
 	}
       }
-      else
-	    // unget character d
-	    // return SLASH
-      }	
-    */
+      else  {
+	input_stream->unget(d);
+	return SLASH;
+      }
+    }
+    else
+      break;
   }
-
   
   if (isalpha(c) || c == '"')  {
     input_stream->unget(c);
