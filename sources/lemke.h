@@ -7,12 +7,9 @@
 #ifndef LEMKE_H
 #define LEMKE_H
 
-#ifdef __GNUG__
-#pragma interface
-#endif   // __GNUG__
-
 #include "normal.h"
 #include "rational.h"
+#include "glist.h"
 
 class LemkeParams     {
   public:
@@ -22,35 +19,37 @@ class LemkeParams     {
     LemkeParams(void);
 };
 
-class LemkeSolver  {
+//
+// The general-purpose interface to the solver routines
+//
+template <class T> class LemkeSolver  {
   private:
-    const BaseNormalForm &nf;
+    const NormalForm<T> &nf;
     LemkeParams params;
     int npivots;
     gRational time;
+    gList<gPVector<T> > solutions;
 
   public:
-    LemkeSolver(const BaseNormalForm &N, const LemkeParams &p) 
-      : nf(N), params(p)   { }
-    ~LemkeSolver()   { }
+    LemkeSolver(const NormalForm<T> &N, const LemkeParams &p); 
 
     int Lemke(void);
     
-    int NumPivots(void) const    { return npivots; }
-    gRational Time(void) const    { return time; }
+    int NumPivots(void) const;
+    gRational Time(void) const;
 
-    LemkeParams &Parameters(void)   { return params; }
+    LemkeParams &Parameters(void);
+
+    const gList<gPVector<T> > &GetSolutions(void) const;
 };
 
 //
-// This is a dirty hack.  It returns the solutions from the last invocation
-// of LemkeSolver::Lemke() as a block of pointers to profile vectors.
-// The user is responsible for deleting the pointers after he is done with
-// them.
+// Convenience functions for "one-shot" evaluations
 //
-template <class T> GetLemkeSolution(gBlock<gPVector<T> *> &);
-
-
+template <class T> int Lemke(const NormalForm<T> &N, const LemkeParams &p,
+			     gList<gPVector<T> > &solutions,
+			     int &npivots, gRational &time);
+				   
 #endif    // LEMKE_H
 
 

@@ -4,88 +4,61 @@
 //# $Id$
 //#
 
-#ifdef __GNUG__
-#pragma implementation "lemke.h"
-#endif   // __GNUG__
+#include "rational.h"
+#include "gwatch.h"
+#include "gpvector.h"
 
-#include "gambitio.h"
 #include "normal.h"
 #include "normiter.h"
+
 #include "gtableau.h"
-#include "rational.h"
-#include "gpvector.h"
-#include "solution.h"
-#include "gwatch.h"
+
 #include "lemke.h"
 
-//---------
-// HACK!
-// This is a hack to get the solutions out of the module.  Future proper
-// redesign will solve the problem in a better fashion.
-// Don't let anyone ever know I did this.
-//---------
-
-gBlock<gPVector<double> *> sol_double;
-gBlock<gPVector<gRational> *> sol_rational;
-
-void GetLemkeSolution(gBlock<gPVector<double> *> &sols)
-{
-  sols = gBlock<gPVector<double> *>(sol_double.Length());
-  for (int i = 1; i <= sols.Length(); i++)
-    sols[i] = new gPVector<double>(*sol_double[i]);
-}
-
-void GetLemkeSolution(gBlock<gPVector<gRational> *> &sols)
-{
-  sols = gBlock<gPVector<gRational> *>(sol_rational.Length());
-  for (int i = 1; i <= sols.Length(); i++)
-    sols[i] = new gPVector<gRational>(*sol_rational[i]);
-}
-
-void ClearLemkeSolution(void)
-{
-  for (int i = 1; i <= sol_double.Length(); i++)
-    delete sol_double[i];
-  for (i = 1; i <= sol_rational.Length(); i++)
-    delete sol_rational[i];
-
-  sol_double = gBlock<gPVector<double> *>();
-  sol_rational = gBlock<gPVector<gRational> *>();
-}
-
-void AddLemkeSolution(gPVector<double> *sol)
-{
-  sol_double.Append(sol);
-}
-
-void AddLemkeSolution(gPVector<gRational> *sol)
-{
-  sol_rational.Append(sol);
-}
-
+//---------------------------------------------------------------------------
+//                        LemkeParams: member functions
+//---------------------------------------------------------------------------
 
 LemkeParams::LemkeParams(void) : dup_strat(0), plev(0)
 { }
+
+//---------------------------------------------------------------------------
+//               BaseLemke: class definition and implementation
+//---------------------------------------------------------------------------
 
 class BaseLemke    {
   protected:
     int num_pivots;
     
-    BaseLemke(void) : num_pivots(0)  { }
+    BaseLemke(void);
 
   public:
     virtual int Lemke(int) = 0;
-    virtual void GetSolutions(void) const = 0;
-    virtual ~BaseLemke()   { }
+    virtual ~BaseLemke();
     
-    int NumPivots(void) const   { return num_pivots; }
+    int NumPivots(void) const;
 };
 
-template <class T> class LemkeTableau
-  : public gTableau<T>, public BaseLemke, public SolutionModule  {
+BaseLemke::BaseLemke(void) : num_pivots(0)   { }
+
+BaseLemke::~BaseLemke()
+{ }
+
+int BaseLemke::NumPivots(void) const
+{
+  return num_pivots;
+}
+
+//---------------------------------------------------------------------------
+//                    LemkeTableau<T>: class definition
+//---------------------------------------------------------------------------
+
+template <class T> class LemkeTableau : public gTableau<T>, public BaseLemke  {
   private:
-    const NormalForm<T> &rep;
+    const NormalForm<T> &N;
     int num_strats;
+    gOutput &output, &errors;
+    int printlevel;
     BFS_List List;
    
     int Lemke_Step(int);
@@ -95,12 +68,77 @@ template <class T> class LemkeTableau
     void Pivot(int, int);
  
   public:
-    LemkeTableau(const NormalForm<T> &, gOutput &ofile, gOutput &efile, int plev);
-    virtual ~LemkeTableau()   { }
+    LemkeTableau(const NormalForm<T> &, gOutput &ofile, gOutput &efile,
+		 int plev);
+    virtual ~LemkeTableau();
 
     int Lemke(int);
-    void GetSolutions(void) const;
+    void GetSolutions(gList<gPVector<T> > &) const;
 };
+
+//-------------------------------------------------------------------------
+//               LemkeTableau<T>: constructor and destructor
+//-------------------------------------------------------------------------
+
+template <class T>
+LemkeTableau<T>::LemkeTableau(const NormalForm<T> &NF,
+			      gOutput &ofile, gOutput &efile, int plev)
+     : gTableau<T>(1, NF.NumStrats(1) + NF.NumStrats(2),
+		   NF.NumStrats(1) + NF.NumStrats(2),
+		   0, NF.NumStrats(1) + NF.NumStrats(2) + 1,
+		   NF.NumStrats(1) + NF.NumStrats(2)),
+		   N(NF), output(ofile), errors(efile), printlevel(plev),
+		   num_strats(NF.NumStrats(1) + NF.NumStrats(2))
+{
+  NormalIter<T> iter(N);
+  T min = (T) 0, x;
+  int n1 = N.NumStrats(1), n2 = N.NumStrats(2);
+
+  for (int i = 1; i <= n1 + n2; i++)  {
+    Col_Labels[i] = i;
+    Row_Labels[i] = -i;
+  }
+
+  for (i = 1; i <= n1; i++)   {
+    for (int j = 1; j <= n2; j++)  {
+      x = iter.Payoff(1);
+      if (x < min)   min = x;
+      x = iter.Payoff(2);
+      if (x < min)   min = x;
+      iter.Next(2);
+    }
+    iter.Next(1);
+  }
+
+  for (i = 1; i <= n1; i++) 
+    for (int j = 1; j <= n1; j++) 
+      Tableau(i, j) = 0.0;
+
+  for (i = n1 + 1; i <= n1 + n2; i++)
+    for (int j = n1 + 1; j <= n1 + n2; j++)
+      Tableau(i, j) = 0.0;
+
+
+  for (i = 1; i <= n1; i++)  {
+    for (int j = 1; j <= n2; j++)  {
+      Tableau(i, n1 + j) = iter.Payoff(1) - min;
+      Tableau(n1 + j, i) = iter.Payoff(2) - min;
+      iter.Next(2);
+    }
+    iter.Next(1);
+  }
+
+  for (i = 1; i <= n1 + n2; Tableau(i++, 0) = -1.0);
+  for (i = 1; i <= n1 + n2; Tableau(i++, n1 + n2 + 1) = 0.0);
+}
+
+template <class T> LemkeTableau<T>::~LemkeTableau()
+{ }
+
+
+//-------------------------------------------------------------------------
+//                    LemkeTableau<T>: member functions
+//-------------------------------------------------------------------------
 
 //
 // Pivot implements the pivoting procedure.
@@ -332,95 +370,48 @@ template <class T> int LemkeTableau<T>::Exit_Row(int col)
   return BestSet[1];
 }
 
-template <class T> void LemkeTableau<T>::GetSolutions(void) const
+//-------------------------------------------------------------------------
+//                   LemkeTableau<T>: Returning solutions
+//-------------------------------------------------------------------------
+
+template <class T>
+void LemkeTableau<T>::GetSolutions(gList<gPVector<T> > &solutions) const
 {
-  ClearLemkeSolution();
+  solutions.Flush();
 
   for (int i = 1; i <= List.Length(); i++)    {
     gTuple<int> dim(2);
-    dim[1] = rep.NumStrats(1);
-    dim[2] = rep.NumStrats(2);
+    dim[1] = N.NumStrats(1);
+    dim[2] = N.NumStrats(2);
 
-    gPVector<T> *profile = new gPVector<T>(dim);
+    gPVector<T> profile(dim);
     T sum = (T) 0;
 
-    for (int j = 1; j <= rep.NumStrats(1); j++)
+    for (int j = 1; j <= N.NumStrats(1); j++)
       if (List[i].IsDefined(j))   sum += List[i](j);
 
     if (sum == (T) 0)  continue;
 
-    for (j = 1; j <= rep.NumStrats(1); j++) 
-      if (List[i].IsDefined(j))   (*profile)(1, j) = List[i](j) / sum;
-      else  (*profile)(1, j) = (T) 0;
+    for (j = 1; j <= N.NumStrats(1); j++) 
+      if (List[i].IsDefined(j))   profile(1, j) = List[i](j) / sum;
+      else  profile(1, j) = (T) 0;
 
     sum = (T) 0;
 
-    for (j = 1; j <= rep.NumStrats(2); j++)
-      if (List[i].IsDefined(rep.NumStrats(1) + j))  
-	sum += List[i](rep.NumStrats(1) + j);
+    for (j = 1; j <= N.NumStrats(2); j++)
+      if (List[i].IsDefined(N.NumStrats(1) + j))  
+	sum += List[i](N.NumStrats(1) + j);
 
     if (sum == (T) 0)  continue;
 
-    for (j = 1; j <= rep.NumStrats(2); j++)
-      if (List[i].IsDefined(rep.NumStrats(1) + j))
-	(*profile)(2, j) = List[i](rep.NumStrats(1) + j) / sum;
+    for (j = 1; j <= N.NumStrats(2); j++)
+      if (List[i].IsDefined(N.NumStrats(1) + j))
+	profile(2, j) = List[i](N.NumStrats(1) + j) / sum;
       else
-	(*profile)(2, j) = (T) 0;
+	profile(2, j) = (T) 0;
 
-    AddLemkeSolution(profile);
+    solutions.Append(profile);
   }
-}
-
-template <class T>
-LemkeTableau<T>::LemkeTableau(const NormalForm<T> &r,
-			      gOutput &ofile, gOutput &efile, int plev)
-     : gTableau<T>(1, r.NumStrats(1) + r.NumStrats(2),
-		   r.NumStrats(1) + r.NumStrats(2),
-		   0, r.NumStrats(1) + r.NumStrats(2) + 1,
-		   r.NumStrats(1) + r.NumStrats(2)), 
-       SolutionModule(ofile, efile, plev), rep(r),
-       num_strats(r.NumStrats(1) + r.NumStrats(2))
-{
-  NormalIter<T> iter(r);
-  T min = (T) 0, x;
-  int n1 = r.NumStrats(1), n2 = r.NumStrats(2);
-
-  for (int i = 1; i <= n1 + n2; i++)  {
-    Col_Labels[i] = i;
-    Row_Labels[i] = -i;
-  }
-
-  for (i = 1; i <= n1; i++)   {
-    for (int j = 1; j <= n2; j++)  {
-      x = iter.Payoff(1);
-      if (x < min)   min = x;
-      x = iter.Payoff(2);
-      if (x < min)   min = x;
-      iter.Next(2);
-    }
-    iter.Next(1);
-  }
-
-  for (i = 1; i <= n1; i++) 
-    for (int j = 1; j <= n1; j++) 
-      Tableau(i, j) = 0.0;
-
-  for (i = n1 + 1; i <= n1 + n2; i++)
-    for (int j = n1 + 1; j <= n1 + n2; j++)
-      Tableau(i, j) = 0.0;
-
-
-  for (i = 1; i <= n1; i++)  {
-    for (int j = 1; j <= n2; j++)  {
-      Tableau(i, n1 + j) = iter.Payoff(1) - min;
-      Tableau(n1 + j, i) = iter.Payoff(2) - min;
-      iter.Next(2);
-    }
-    iter.Next(1);
-  }
-
-  for (i = 1; i <= n1 + n2; Tableau(i++, 0) = -1.0);
-  for (i = 1; i <= n1 + n2; Tableau(i++, n1 + n2 + 1) = 0.0);
 }
 
 #ifdef __GNUG__
@@ -433,15 +424,23 @@ class LemkeTableau<gRational>;
 #pragma option -Jgx
 #endif   // __GNUG__
 
-int LemkeSolver::Lemke(void)
+//-------------------------------------------------------------------------
+//                    LemkeSolver<T>: Member functions
+//-------------------------------------------------------------------------
+
+template <class T>
+LemkeSolver<T>::LemkeSolver(const NormalForm<T> &N, const LemkeParams &p)
+  : nf(N), params(p)
+{ }
+
+template <class T> int LemkeSolver<T>::Lemke(void)
 {
   if (nf.NumPlayers() != 2)   return 0;
 
   if (params.dup_strat < 0 ||
       params.dup_strat > nf.NumStrats(1) + nf.NumStrats(2))
     params.dup_strat = 0;
-
-  BaseLemke *T;
+  
   gOutput *outfile = &gout, *errfile = &gerr;
 
   if (params.outfile != "")
@@ -453,31 +452,88 @@ int LemkeSolver::Lemke(void)
  
   gWatch watch;
 
-  switch (nf.Type())   {
-    case DOUBLE:
-      T = new LemkeTableau<double>((NormalForm<double> &) nf,
-				   *outfile, *errfile, params.plev);
-      break;
-    case RATIONAL:
-      T = new LemkeTableau<gRational>((NormalForm<gRational> &) nf,
-				      *outfile, *errfile, params.plev);
-      break;
-  }
+  LemkeTableau<T> LT(nf, *outfile, *errfile, params.plev);
+  LT.Lemke(params.dup_strat);
 
-  T->Lemke(params.dup_strat);
-
-  npivots = T->NumPivots();
   time = (gRational) watch.Elapsed();
+  npivots = LT.NumPivots();
 
-  T->GetSolutions();
+  LT.GetSolutions(solutions);
 
   if (params.outfile != "")
     delete outfile;
   if (params.errfile != "" && params.errfile != params.outfile)
     delete errfile;
 
-  delete T;
   return 1;
 }
+
+template <class T> int LemkeSolver<T>::NumPivots(void) const
+{
+  return npivots;
+}
+
+template <class T> gRational LemkeSolver<T>::Time(void) const
+{
+  return time;
+}
+
+template <class T> LemkeParams &LemkeSolver<T>::Parameters(void)
+{
+  return params;
+}
+
+template <class T>
+const gList<gPVector<T> > &LemkeSolver<T>::GetSolutions(void) const
+{
+  return solutions;
+}
+
+#ifdef __GNUG__
+template class LemkeSolver<double>;
+template class LemkeSolver<gRational>;
+#elif defined __BORLANDC__
+#pragma option -Jgd
+class LemkeSolver<double>;
+class LemkeSolver<gRational>;
+#pragma option -Jgx
+#endif   // __GNUG__, __BORLANDC__
+
+
+//-------------------------------------------------------------------------
+//                    Convenience functions for Lemke
+//-------------------------------------------------------------------------
+
+template <class T>
+int Lemke(const NormalForm<T> &N, const LemkeParams &p,
+	  gList<gPVector<T> > &solutions,
+	  int &npivots, gRational &time)
+{
+  LemkeSolver<T> LS(N, p);
+  int result = LS.Lemke();
+
+  npivots = LS.NumPivots();
+  time = LS.Time();
+  
+  solutions = LS.GetSolutions();
+
+  return result;
+}
+
+#ifdef __GNUG__
+template int Lemke(const NormalForm<double> &, const LemkeParams,
+		   gList<gPVector<double> > &, int &, gRational &);
+template int Lemke(const NormalForm<gRational> &, const LemkeParams,
+		   gList<gPVector<gRational> > &, int &, gRational &);
+#elif defined __BORLANDC__
+#pragma option -Jgd
+int Lemke(const NormalForm<double> &, const LemkeParams,
+	  gList<gPVector<double> > &, int &, gRational &);
+int Lemke(const NormalForm<gRational> &, const LemkeParams,
+	  gList<gPVector<gRational> > &, int &, gRational &);
+#pragma option -Jgx
+#endif   // __GNUG__, __BORLANDC__
+
+
 
 
