@@ -177,40 +177,32 @@ public:
 };
 
 
-//**************************** Output Dialog ************************
-typedef enum
-{
-    wxWYSIWYG, wxFITTOPAGE
+typedef enum {
+  wxWYSIWYG, wxFITTOPAGE
 } wxOutputOption;
 
-typedef enum
-{
-    wxMEDIA_PRINTER = 0, wxMEDIA_PS, wxMEDIA_CLIPBOARD, 
-    wxMEDIA_METAFILE, wxMEDIA_PREVIEW, wxMEDIA_NUM
+typedef enum {
+  wxMEDIA_PRINTER = 0, wxMEDIA_PS, wxMEDIA_CLIPBOARD, 
+  wxMEDIA_METAFILE, wxMEDIA_PREVIEW, wxMEDIA_NUM
 } wxOutputMedia;
 
-
-class wxOutputDialogBox : public MyDialogBox
-{
+class wxOutputDialogBox : public guiAutoDialog {
 private:
-    wxRadioBox *media_box;
-    wxCheckBox *fit_box;
+  wxRadioBox *m_mediaBox;
+  wxCheckBox *m_fitBox;
 
 public:
-    // Constructor
-    wxOutputDialogBox(wxStringList *extra_media = 0, wxWindow *parent = 0);
+  wxOutputDialogBox(wxStringList *extra_media = 0, wxWindow *parent = 0);
+  virtual ~wxOutputDialogBox() { }
 
-    // Returns one of the built-in media types
-    wxOutputMedia GetMedia(void);
-
-    // Returns the additional media type given in extra_media, if any
-    int GetExtraMedia(void);
-
-    // Returns true if the selection was an extra_media
-    Bool ExtraMedia(void);
-
-    // Returns either wysiwyg or fit to page if appropriate
-    wxOutputOption GetOption(void);
+  /** Returns one of the built-in media types */
+  wxOutputMedia GetMedia(void) const;
+  /** Returns the additional media type given in extra_media, if any */
+  int GetExtraMedia(void) const;
+  /** Returns true if the selection was an extra_media */
+  Bool ExtraMedia(void) const;
+  /** Returns either wysiwyg or fit to page if appropriate */
+  wxOutputOption GetOption(void) const;
 };
 
 

@@ -630,67 +630,89 @@ wxFont *FontDialogBox::MakeFont(void)
 }
 
 
+//========================================================================
+//                    wxOutputDialogBox: Member functions
+//========================================================================
 
-//************************ OUTPUT DIALOG ***************************
-wxOutputDialogBox::wxOutputDialogBox(wxStringList *extra_media, wxWindow *parent)
-    : MyDialogBox(parent, "Output Media")
+wxOutputDialogBox::wxOutputDialogBox(wxStringList *p_extraMedia,
+				     wxWindow *p_parent)
+  : guiAutoDialog(p_parent, "Output Media")
 {
-    wxStringList media_list("Printer", "PS File", "Clipboard", "Meta File", "PrintPreview", 0);
-    
-    if (extra_media)
-    {
-        for (int i = 0; i < extra_media->Number(); i++)
-            media_list.Add((const char *)(extra_media->Nth(i)->Data()));
-    }
+  wxStringList mediaList("Printer", "PostScript", "Clipboard",
+			 "Metafile", "Print Preview", 0);
+  if (p_extraMedia) {
+    for (int i = 0; i < p_extraMedia->Number(); i++)
+      mediaList.Add((const char *)(p_extraMedia->Nth(i)->Data()));
+  }
 
-    media_box = new wxRadioBox(this, NULL, "Media", -1, -1, -1, -1, 
-                               media_list.Number(), media_list.ListToArray(), 
-                               (int)(media_list.Number()/2));
-    NewLine();
-    fit_box = new wxCheckBox(this, 0, "Fit to page");
+  m_mediaBox = new wxRadioBox(this, 0, "Media", 1, 1, -1, -1, 
+			      mediaList.Number(), mediaList.ListToArray(), 
+			      (int)(mediaList.Number()/2));
+  m_mediaBox->SetConstraints(new wxLayoutConstraints);
+  m_mediaBox->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_mediaBox->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_mediaBox->GetConstraints()->width.AsIs();
+  m_mediaBox->GetConstraints()->height.AsIs();
+
+  m_fitBox = new wxCheckBox(this, 0, "Fit to page");
+  m_fitBox->SetConstraints(new wxLayoutConstraints);
+  m_fitBox->GetConstraints()->top.SameAs(m_mediaBox, wxBottom, 10);
+  m_fitBox->GetConstraints()->left.SameAs(m_mediaBox, wxLeft);
+  m_fitBox->GetConstraints()->width.AsIs();
+  m_fitBox->GetConstraints()->height.AsIs();
 
 #ifdef wx_x // Printer, Clipboard, and MetaFiles are not yet supp'ed
-    media_box->Enable(0, FALSE);
-    media_box->Enable(2, FALSE);
-    media_box->Enable(3, FALSE);
-    fit_box->Enable(FALSE);
-#endif
+  m_mediaBox->Enable(0, FALSE);
+  m_mediaBox->Enable(2, FALSE);
+  m_mediaBox->Enable(3, FALSE);
+  m_fitBox->Enable(FALSE);
+#endif  // wx_x
 
-    Go();
+  m_okButton->GetConstraints()->top.SameAs(m_fitBox, wxBottom, 10);
+  m_okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
+
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
+
+  m_helpButton->GetConstraints()->top.AsIs();
+  m_helpButton->GetConstraints()->left.AsIs();
+  m_helpButton->GetConstraints()->width.AsIs();
+  m_helpButton->GetConstraints()->height.AsIs();
+  m_helpButton->Show(FALSE);
+
+  Go();
 }
 
-
-wxOutputMedia wxOutputDialogBox::GetMedia(void)
+wxOutputMedia wxOutputDialogBox::GetMedia(void) const
 {
-    switch (media_box->GetSelection())
-    {
-    case 0: return wxMEDIA_PRINTER;
-    case 1: return wxMEDIA_PS;
-    case 2: return wxMEDIA_CLIPBOARD;
-    case 3: return wxMEDIA_METAFILE;
-    case 4: return wxMEDIA_PREVIEW;
-    }
-
-    return wxMEDIA_NUM;
+  switch (m_mediaBox->GetSelection()) {
+  case 0: return wxMEDIA_PRINTER;
+  case 1: return wxMEDIA_PS;
+  case 2: return wxMEDIA_CLIPBOARD;
+  case 3: return wxMEDIA_METAFILE;
+  case 4: return wxMEDIA_PREVIEW;
+  default: return wxMEDIA_NUM;
+  }
 }
 
-
-int wxOutputDialogBox::GetExtraMedia(void)
+int wxOutputDialogBox::GetExtraMedia(void) const
 {
-    return (media_box->GetSelection() >= wxMEDIA_NUM) ? 
-        media_box->GetSelection() : -1;
+  return ((m_mediaBox->GetSelection() >= wxMEDIA_NUM) ? 
+	  m_mediaBox->GetSelection() : -1);
 }
 
-
-wxOutputOption wxOutputDialogBox::GetOption(void)
+wxOutputOption wxOutputDialogBox::GetOption(void) const
 {
-    return (fit_box->GetValue()) ? wxFITTOPAGE : wxWYSIWYG;
+  return (m_fitBox->GetValue()) ? wxFITTOPAGE : wxWYSIWYG;
 }
 
-
-Bool wxOutputDialogBox::ExtraMedia(void)
+Bool wxOutputDialogBox::ExtraMedia(void) const
 {
-    return (media_box->GetSelection() >= wxMEDIA_NUM);
+  return (m_mediaBox->GetSelection() >= wxMEDIA_NUM);
 }
 
 
