@@ -2122,10 +2122,8 @@ void TreeWindow::tree_infosets(void)
 {
   dialogInfosets dialog(ef, pframe);
 
-  if (dialog.Completed() == wxOK) {
-    if (dialog.GameChanged()) 
-      infosets_changed = true;
-  }
+  if (dialog.GameChanged()) 
+    infosets_changed = true;
 }
 
 //-----------------------------------------------------------------------

@@ -886,8 +886,10 @@ void dialogInfosets::OnPlayer(int p_number)
 void dialogInfosets::OnInfoset(int p_number)
 {
   if (m_prevInfoset)
-    if (strcmp(m_prevInfoset->GetName(),m_infosetNameItem->GetValue())!=0)
+    if (strcmp(m_prevInfoset->GetName(),m_infosetNameItem->GetValue())!=0) {
       m_prevInfoset->SetName(m_infosetNameItem->GetValue());
+      m_gameChanged = true;
+    }
 
   EFPlayer *player = m_efg.Players()[m_playerItem->GetSelection()+1];
   if (player->NumInfosets() == 0) { // can have players w/ no infosets
@@ -945,7 +947,10 @@ void dialogInfosets::OnOk(void)
 {
   EFPlayer *player = m_efg.Players()[m_playerItem->GetSelection()+1];
   Infoset *infoset = player->Infosets()[m_infosetItem->GetSelection()+1];
-  infoset->SetName(m_infosetNameItem->GetValue());
+  if (strcmp(infoset->GetName(),m_infosetNameItem->GetValue())!=0) {
+    infoset->SetName(m_infosetNameItem->GetValue());
+    m_gameChanged = true;
+  }
 
   m_completed = wxOK;
   Show(FALSE);
