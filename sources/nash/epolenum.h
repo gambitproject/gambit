@@ -29,12 +29,13 @@
 
 #include "base/base.h"
 #include "game/efg.h"
-#include "algutils.h"
 #include "game/behav.h"
 #include "behavsol.h"
 
-class EfgPolEnumParams : public AlgParams {
+class EfgPolEnumParams {
 public:
+  int stopAfter;
+
   EfgPolEnumParams(void);
 };
 

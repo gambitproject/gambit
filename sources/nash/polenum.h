@@ -29,12 +29,13 @@
 
 #include "base/base.h"
 #include "game/nfg.h"
-#include "algutils.h"
 #include "game/mixed.h"
 #include "mixedsol.h"
 
-class PolEnumParams : public AlgParams  {
+class PolEnumParams {
 public:
+  int stopAfter;
+
   PolEnumParams(void);
 };
 

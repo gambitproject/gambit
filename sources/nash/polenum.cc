@@ -318,6 +318,7 @@ bool PolEnumModule::IsSingular() const
 //---------------------------------------------------------------------------
 
 PolEnumParams::PolEnumParams(void)
+  : stopAfter(0)
 { }
 
 int PolEnum(const gbtNfgSupport &support, const PolEnumParams &params,
