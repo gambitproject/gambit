@@ -200,6 +200,10 @@ Bug D20: Problems with custom algorithms
 
   PolEnum algorithm does not find any solutions on 2x2x2.efg.  
 
+COMMENT (magyar, 1/2/99):  The first one is fixed.  The second occurs because
+the algorithm is not enabled since at last I was aware, Efg->PolEnum was
+not certain to be included in this release.
+
 //------------------------------
 
 Bug D21: Problems with progress displays

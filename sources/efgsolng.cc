@@ -416,6 +416,11 @@ EfgSeqFormG::EfgSeqFormG(const Efg &p_efg, const EFSupport &p_support,
 
 gList<BehavSolution> EfgSeqFormG::Solve(void) const
 {
+  if (ef.NumPlayers() != 2) {
+    wxMessageBox("Only valid for two-player games");
+    return gList<BehavSolution>();
+  }
+
   wxStatus status(parent->Frame(), "LCP Algorithm");
   SeqFormParamsSettings SFPS;
   SeqFormParams P(status);
