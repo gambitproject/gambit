@@ -151,6 +151,72 @@ the node need not be terminal in order to have an outcome attached.
 
 ----------
 
+Car[l->BOOLLIST] =: BOOLEAN
+Car[l->INTLIST] =: INTEGER
+Car[l->RATLIST] =: RATIONAL
+Car[l->TEXTLIST] =: TEXT
+
+	Returns the first element of the list specified by `l`.
+
+----------
+
+Cdr[l->BOOLLIST] =: BOOLLIST
+Cdr[l->INTLIST] =: INTLIST
+Cdr[l->RATLIST] =: RATLIST
+Cdr[l->TEXTLIST] =: TEXTLIST
+
+	Returns the list consisting of the list specified by 'l' minus its 
+first element.
+
+----------
+
+Contains[e->BOOLEAN, l->BOOLLIST] =: BOOLEAN
+Contains[e->INTEGER, l->INTLIST] =: BOOLEAN
+Contains[e->RATIONAL, l->RATLIST] =: BOOLEAN
+Contains[e->TEXT, l->TEXTLIST] =: BOOLEAN
+
+	Returns True when the value specified by 'e' is contained as an element
+of the list specified by 'l'.
+
+----------
+
+CopyTree[n->NODE, to->NODE] =: NODE
+
+	Copy the subtree rooted at the node specified by 'n' to the node given
+by `to`.
+
+----------
+
+DeleteAction[n->NODE, br->INTEGER] =: NODE
+
+	Deletes the action number indicated by 'br' from the information set
+containing the node specified by 'n'.
+
+----------
+
+DeleteNode[n->NODE, keep->INTEGER] =: NODE
+
+	Deletes the node indicated by 'n' from the tree.  The child of the 
+deleted node with the number specified by 'keep' is kept and replaces the node
+in its spot in the tree.  The subtrees associated with all other children of 
+the deleted node are deleted.
+
+----------
+
+DeleteTree[n->NODE] =: NODE
+
+	Deletes the subtree rooted at the node specified by 'n'.  This node 
+then becomes a terminal node.
+
+----------
+
+DetachOutcome[n->NODE] =: NODE
+
+	Sets the outomce attached to the node specified by 'n' to the null
+outcome.
+
+----------
+
 ElimAllDom[N->NORFORM, {strong->BOOLEAN}, {time<->RATIONAL}, {output->TEXT}] 
 	=: INTEGER
 
@@ -197,6 +263,61 @@ returns the elapsed time for the operation.
 
 ----------
 
+GetActionName[n->NODE, br->INTEGER] =: TEXT
+
+	Returns the name assigned to the action corresponding to the branch
+indicated by 'br` of the node specified by 'n'.
+
+----------
+
+GetInfosetName[n->NODE] =: TEXT
+
+	Returns the name of the information set to which the node specified by
+'n' belongs.
+
+----------
+
+GetNextSibling[n->NODE] =: NODE
+
+	Returns the next sibling of the node specified by 'n'.
+
+----------
+
+GetOutcome[E->EXTFORM, outc->INTEGER] =: RATLIST
+
+	Returns the vector of payoffs to the players for the outcome whose
+number is indicated by 'outc' in the problem in extensive form given by 'E'.
+If the outcome is not defined, the procedure returns the empty list.
+
+---------
+
+GetOutcomeName[E->EXTFORM, outc->INTEGER] =: TEXT
+
+	Returns the name of the outcome specified by 'outc' in the problem in
+extensive form indicated by 'E'.  If the outcome is not defined, an error is
+given.  By default, the name of an outcome is the empty string.
+
+----------
+
+GetPlayerName[E->EXTFORM, pl->INTEGER] =: TEXT
+
+	Returns the name of the player indicated by 'pl' in the problem in 
+extensive form given by 'E'.
+
+----------
+
+GetPriorSibling[n->NODE] =: NODE
+
+	Returns the prior sibling of the node specified by 'n'.
+
+----------
+
+GetTitle[E->EXTFORM] =: TEXT
+
+	Returns the title of the problem in extensive form specified by 'E'.
+
+----------
+
 Gobit[N->NORFORM, {nequilib->INTEGER}, {type->INTEGER},
 	{maxitsDFP->INTEGER}, {maxitsBrent->INTEGER}, {minLam->RATIONAL},
 	{maxLam->RATIONAL}, {delLam->RATIONAL}, {tolDFP->RATIONAL},
@@ -217,6 +338,13 @@ returns the elapsed time for the operation.  The optional parameter `output`
 can be used to redirect the output of this procedure to a file.  Directing output to ``/dev/null'' under Unix turns output off.  By default, it
 directs output to the screen.
 
+----------
+
+HasOutcome[E->EXTFORM, outc->INTEGER] =: BOOLEAN
+
+	Returns True exactly when the problem in extensive form specified by 
+'E' contains an outcome with the number given by 'outc'.  Returns false 
+otherwise.
 
 ----------
 
@@ -267,6 +395,7 @@ number specified by `outc` already exists as an outcome, no action is taken and
 the procedure returns a value of zero.
 
 ----------
+
 PureNash[N->NORFORM, {num->INTEGER}, {time<->RATIONAL}, {output->TEXT}]
 	 =: INTEGER
 
@@ -334,6 +463,13 @@ node to the name given.
 
 ----------
 
+SetInfosetName[n->NODE, name->TEXT] =: NODE
+
+	Assigns the name given by 'name' to the information set to which the 
+node indicated by 'n' belongs.
+
+----------
+
 SetOutcome[E->EXTFORM, outc->INTEGER, value->INTLIST] =: EXTFORM
 SetOutcome[E->EXTFORM, outc->INTEGER, value->RATLIST] =: EXTFORM
 
@@ -361,6 +497,21 @@ SetOutcomeName[E->EXTFORM, outc->INTEGER, name->TEXT] =: EXTFORM
 assigned.
 
 ----------
+
+SetPlayerName[E->EXTFORM, pl->INTEGER, name->TEXT] =: EXTFORM
+
+	Assigns the player with the specified number the namer given by 'name'.
+Returns the original extensive form problem with the player name assigned.
+
+----------
+
+SetTitle[E->EXTFORM, title->TEXT] =: EXTFORM
+
+	Assigns the title specified by `title` to the problem in extensive form
+given by 'E'.  Returns the problem with the title assigned.
+
+----------
+
 StartWatch[] =: INTEGER
 
 	Starts the system stopwatch.  The return value is uninteresting.
