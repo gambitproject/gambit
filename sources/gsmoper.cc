@@ -2681,10 +2681,35 @@ Portion* GSM_Shell( Portion** param )
 
 
 extern char* _ExePath;
-Portion* GSM_ExePath( Portion** )
+Portion* GSM_ExePath( Portion** param)
 {
+#ifdef __GNUG__
+  const char SLASH = '/';
+#elif defined __BORLANDC__
+  const char SLASH = '\\';
+#endif   // __GNUG__
+  bool file = ((BoolPortion*) param[0])->Value();
+  bool path = ((BoolPortion*) param[1])->Value();
+
   assert( _ExePath );
-  return new TextValPortion( _ExePath );
+  gString txt( _ExePath );
+
+  if( file && path )
+  {
+  }
+  else if( file )
+  {
+    if( txt.lastOccur( SLASH ) > 0 )
+      txt = txt.right( txt.length() - txt.lastOccur( SLASH ) );
+  }
+  else if( path )
+  {
+    if( txt.lastOccur( SLASH ) > 0 )
+      txt = txt.left( txt.lastOccur( SLASH ) );
+  }
+  if( !file && !path )
+    txt = "";
+  return new TextValPortion( txt );
 }
 
 
@@ -2714,10 +2739,37 @@ Portion* GSM_Platform( Portion** )
 
 
 extern gStack<gString> GCL_InputFileNames;
-Portion* GSM_GetPath( Portion** )
+Portion* GSM_GetPath( Portion** param )
 {
+#ifdef __GNUG__
+  const char SLASH = '/';
+#elif defined __BORLANDC__
+  const char SLASH = '\\';
+#endif   // __GNUG__
+  bool file = ((BoolPortion*) param[0])->Value();
+  bool path = ((BoolPortion*) param[1])->Value();
   if( GCL_InputFileNames.Depth() > 0 )
-    return new TextValPortion( GCL_InputFileNames.Peek() );
+  {
+    gString txt = GCL_InputFileNames.Peek();
+
+    if( file && path )
+    {
+    }
+    else if( file )
+    {
+      if( txt.lastOccur( SLASH ) > 0 )
+	txt = txt.right( txt.length() - txt.lastOccur( SLASH ) );
+    }
+    else if( path )
+    {
+      if( txt.lastOccur( SLASH ) > 0 )
+	txt = txt.left( txt.lastOccur( SLASH ) );
+    }
+    if( !file && !path )
+      txt = "";
+    
+    return new TextValPortion( txt );
+  }
   else
     return new TextValPortion( "" );
 }
@@ -3606,7 +3658,11 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj = new FuncDescObj("ExePath", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ExePath, porTEXT, 0));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ExePath, porTEXT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("file", porBOOL,
+					    new BoolValPortion( true ) ) );
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("path", porBOOL,
+					    new BoolValPortion( true ) ) );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Platform", 1);
@@ -3614,7 +3670,11 @@ void Init_gsmoper(GSM* gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GetPath", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetPath, porTEXT, 0));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetPath, porTEXT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("file", porBOOL,
+					    new BoolValPortion( true ) ) );
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("path", porBOOL,
+					    new BoolValPortion( true ) ) );
   gsm->AddFunction(FuncObj);
 
 }
