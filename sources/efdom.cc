@@ -28,69 +28,25 @@ bool Dominates(const EFSupport &S,
 	       const bool conditional,
 	       const gStatus &status)
 {
-
-  //DEBUG
-  if (a == b) 
-    { gout << "Error: checking whether a dominates itself!\n"; exit(0); }
-
-  /*
-  //DEBUG
-  gout << "Got in ";
-  if (conditional) gout << "with conditional true ";
-  else             gout << "with conditional false ";
-  if (strong) gout << "and strong true.\n";
-  else        gout << "and strong false.\n";
-  */
-
-  const Infoset *infoset = S.Game().GetInfosetByIndex(pl,iset);
-
-  if (!conditional) {
-    if (!S.MayReach(infoset))
-      return false;
-    if (S.AlwaysReaches(infoset) || !strong)
-      return Dominates(S,pl,iset,a,b,strong,true,status);
-    else
-      return false;
-  }
-
   const EFSupportWithActiveInfo SAct(S);
+  const Infoset *infoset = S.Game().GetInfosetByIndex(pl,iset);
   Action *aAct = S.Actions(pl,iset)[a];
   Action *bAct = S.Actions(pl,iset)[b];
 
-  //DEBUG
-  //gout << "The actions are a= " << aAct->GetName() << " and b = " 
-  //   << bAct->GetName() << ".\n";
-
-  gList<const Node *> nodelist = SAct.ReachableNodesInInfoset(infoset);  
-  if (nodelist.Length() == 0)
-    nodelist = infoset->ListOfMembers();  // This may not be a good idea;
-                                          // I suggest checking for this 
-                                          // prior to entry
-  //DEBUG
-  //gout << "Got here with nodelist.Length() = " << nodelist.Length() << ".\n";
-
   bool equal = true;
-  for (int n = 1; n <= nodelist.Length(); n++) {
 
-    gList<const Infoset *> L;
-    L += S.ReachableInfosets(nodelist[n],aAct);
-    L += S.ReachableInfosets(nodelist[n],bAct);
-    L.RemoveRedundancies();
+  if (!conditional) {
 
-    //DEBUG
-    //gout << "L.Length() = " << L.Length() << ".\n";
-
-    EfgConditionalContIter A(S,L), B(S,L);
-    A.Set(pl, iset, a); // A.Dump(gout); gout << "\n"; //DEBUG
-    B.Set(pl, iset, b); // B.Dump(gout); gout << "\n"; //DEBUG
+    EfgContIter A(S), B(S);
+    A.Freeze(pl, iset); 
+    B.Freeze(pl, iset); 
+    A.Set(pl, iset, a); 
+    B.Set(pl, iset, b); 
     
     do  {
       status.Get();
-      gRational ap = A.Payoff(nodelist[n],pl);  
-      gRational bp = B.Payoff(nodelist[n],pl);
-      
-      //DEBUG
-      //gout << "ap = " << ap << ", while bp = " << bp << ".\n";
+      gRational ap = A.Payoff(pl);  
+      gRational bp = B.Payoff(pl);
 
       if (strong)
 	{ if (ap <= bp)  return false; }
@@ -99,7 +55,39 @@ bool Dominates(const EFSupport &S,
 	else if (ap > bp)  equal = false;
     } while (A.NextContingency() && B.NextContingency());
   }
+
+  else {
+    gList<const Node *> nodelist = SAct.ReachableNodesInInfoset(infoset);  
+    if (nodelist.Length() == 0)
+      nodelist = infoset->ListOfMembers();  // This may not be a good idea;
+                                            // I suggest checking for this 
+                                            // prior to entry
     
+    for (int n = 1; n <= nodelist.Length(); n++) {
+      
+      gList<const Infoset *> L;
+      L += S.ReachableInfosets(nodelist[n],aAct);
+      L += S.ReachableInfosets(nodelist[n],bAct);
+      L.RemoveRedundancies();
+      
+      EfgConditionalContIter A(S,L), B(S,L);
+      A.Set(pl, iset, a); 
+      B.Set(pl, iset, b); 
+      
+      do  {
+	status.Get();
+	gRational ap = A.Payoff(nodelist[n],pl);  
+	gRational bp = B.Payoff(nodelist[n],pl);
+	
+	if (strong)
+	  { if (ap <= bp)  return false; }
+	else
+	  if (ap < bp)   return false; 
+	  else if (ap > bp)  equal = false;
+      } while (A.NextContingency() && B.NextContingency());
+    }
+  }
+  
   if (strong) return true;
   else  return (!equal); 
 }
@@ -114,7 +102,8 @@ bool Dominates(const EFSupport &S,
 {
   const Infoset *infoset = a->BelongsTo();
   if (infoset != b->BelongsTo())
-    throw efgDominanceException("Dominates(..) needs actions in same infoset.\n");
+    throw efgDominanceException
+      ("Dominates(..) needs actions in same infoset.\n");
   const EFPlayer *player = infoset->GetPlayer();
 
   return Dominates(S,player->GetNumber(),infoset->GetNumber(),
@@ -134,6 +123,31 @@ bool SomeListElementDominates(const EFSupport &S,
       if (Dominates(S,l[i],a,strong,conditional,status))
 	return true;
   return false;
+}
+
+bool SomeArrayElementDominates(const EFSupport &S, 
+			       const gArray<Action *> &array,
+			       const Action *a, 
+			       const bool strong,
+			       const bool conditional,
+			       const gStatus &status)
+{
+  for (int i = 1; i <= array.Length(); i++)
+    if (array[i] != a)
+      if (Dominates(S,array[i],a,strong,conditional,status)) {
+	return true;
+      }
+  return false;
+}
+
+bool IsDominated(const EFSupport &S, 
+		 const Action *a, 
+		 const bool strong,
+		 const bool conditional,
+		 const gStatus &status)
+{
+  gArray<Action *> array(S.Actions(a->BelongsTo()));
+  return SomeArrayElementDominates(S,array,a,strong,conditional,status);
 }
 
 bool InfosetHasDominatedElement(const EFSupport &S, 
@@ -234,7 +248,7 @@ EFSupport *SupportWithoutDominatedOfPlayerList(const EFSupport &S,
   return T;
 }
 
-void AndyTest(const EFSupport &);
+void AndyTest(const EFSupport &, gStatus &status);
 
 EFSupport *DominanceTruncatedSupport(const EFSupport &S, 
 				     const bool strong,
@@ -242,7 +256,7 @@ EFSupport *DominanceTruncatedSupport(const EFSupport &S,
 				           gOutput & out, // tracefile 
 				           gStatus &status)
 {
-  //  AndyTest(S); exit(0);
+  AndyTest(S,status); exit(0);
 
   gBlock<int> players(S.Game().NumPlayers());
   int i;
@@ -252,13 +266,3 @@ EFSupport *DominanceTruncatedSupport(const EFSupport &S,
 					    strong, conditional, players, 
 					    out, status);
 }
-
-/*
-EFSupport *UnconditionalDominanceTruncatedSupport(const EFSupport &S, 
-						  const bool strong,
-						   gOutput & out, // tracefile 
-						   gStatus &status)
-{
-  return DominanceTruncatedSupport(S, strong, false, out, status);
-}
-*/

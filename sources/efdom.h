@@ -44,12 +44,26 @@ bool Dominates(const EFSupport &S,
 	       const bool conditional,
 	       const gStatus &status);
 
-bool SomeListElementDominates(const EFSupport &S, 
+bool SomeListElementDominates(const EFSupport &S,
 			      const gList<Action *> &l,
 			      const Action *a, 
 			      const bool strong,
 			      const bool conditional,
 			      const gStatus &status);
+
+bool SomeArrayElementDominates(const EFSupport &S,
+			       const gArray<Action *> &l,
+			       const Action *a, 
+			       const bool strong,
+			       const bool conditional,
+			       const gStatus &status);
+
+
+bool IsDominated(const EFSupport &S,
+		 const Action *a, 
+		 const bool strong,
+		 const bool conditional,
+		 const gStatus &status);
 
 bool InfosetHasDominatedElement(const EFSupport &S, 
 				const Infoset *i,

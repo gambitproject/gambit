@@ -56,8 +56,8 @@ public:
   const EFActionArray    *ActionArray(const Infoset *) const;
 
   // Action editing functions
-  virtual  void AddAction(Action *);
-  virtual  bool RemoveAction(Action *);
+  virtual  void AddAction(const Action *);
+  virtual  bool RemoveAction(const Action *);
 
   // Returns the Efg associated with this Support.
   const Efg &Game(void) const;
@@ -132,9 +132,10 @@ public:
   const gList<const Node *> ReachableNonterminalNodes() const;
 
   // Action editing functions
-  void AddAction(Action *);
-  bool RemoveAction(Action *);
-  bool RemoveActionReturningDeletedInfosets(Action *, gList<Infoset *> *);
+  void AddAction(const Action *);
+  bool RemoveAction(const Action *);
+  bool RemoveActionReturningDeletedInfosets(const Action *, 
+					    gList<Infoset *> *);
   //  void GoToNextSubsupportOf(const EFSupport &);
 
   // Information
@@ -145,16 +146,18 @@ public:
   bool NodeIsActive(const int pl, const int iset, const int node) const;
   bool NodeIsActive(const Node *) const;
 
-  inline  EFSupport UnderlyingSupport() { return (EFSupport)(*this); }
+  inline  EFSupport UnderlyingSupport() const { return (EFSupport)(*this); }
+
+  bool HasActiveActionsAtActiveInfosets();
+  bool HasActiveActionsAtActiveInfosetsAndNoOthers();
+
+  void Dump(gOutput& s) const;
 };
+
+gOutput &operator<<(gOutput &f, const EFSupportWithActiveInfo &);
 
 
 #endif  //# EFSTRAT_H
-
-
-
-
-
 
 
 
