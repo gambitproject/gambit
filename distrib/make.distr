@@ -66,6 +66,7 @@ gambit:
 
 	@# Copy the setup and initialization files to ../misc
 	cp ./gambit_setup ./gui-init ../misc
+	cp ../sources/gambit.ini ../misc
 	cp ./gambit_setup ..
 
 	@echo
