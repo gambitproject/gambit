@@ -193,7 +193,15 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
     old_value = (*_RefTableStack->Peek())( var_name );
     if( old_value->Type() != p->Type() )
     {
-      type_match = false;
+      if( 
+	 !( 
+	   ( ( old_value->Type() & porMIXED ) && ( p->Type() & porMIXED ) ) ||
+	   ( ( old_value->Type() & porBEHAV ) && ( p->Type() & porBEHAV ) ) ||
+	   ( ( old_value->Type() & porNFG   ) && ( p->Type() & porNFG   ) ) ||
+	   ( ( old_value->Type() & porEFG   ) && ( p->Type() & porEFG   ) ) 
+	   ) 
+	 )
+	type_match = false;
     }
     else if( p->Type() == porLIST )
     {
