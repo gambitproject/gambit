@@ -59,7 +59,7 @@
 // is advisable to call CanvasFocus member after processing any panel item
 // events.
 
-// @(#)spread.h	1.9 8/7/95
+// $Id$
 
 #ifndef	SPREAD_H
 #define	SPREAD_H
@@ -405,8 +405,8 @@ public:
 	void		SetCurRow(int r)	{sheet->SetRow(r);}
 	void		SetCurCol(int c)	{sheet->SetCol(c);}
 	// Equality operators to allow this class to be used in a gList
-	int			operator==(const SpreadSheet &s) {return 0;}
-	int			operator!=(const SpreadSheet &s) {return 1;}
+	int			operator==(const SpreadSheet &) {return 0;}
+	int			operator!=(const SpreadSheet &) {return 1;}
 	// Printing
 	void Print(wxOutputMedia device,wxOutputOption fit) {sheet->Print(device,fit);}
 	// Forced updating
@@ -471,11 +471,11 @@ public:
 	virtual void OnMenuCommand(int id);
 	virtual void OnOk(void);
 	virtual void OnCancel(void);
-	virtual void OnDoubleClick(int row,int col,int level,const gString &value) { }
-	virtual void OnSelectedMoved(int row,int col) { }
+	virtual void OnDoubleClick(int ,int ,int ,const gString &) { }
+	virtual void OnSelectedMoved(int ,int ) { }
 	virtual void OnPrint(void);
-	virtual void OnHelp(int help_type=0) { }
-	virtual Bool OnCharNew(wxKeyEvent &ev) {return FALSE;}
+	virtual void OnHelp(int =0) { }
+	virtual Bool OnCharNew(wxKeyEvent &) {return FALSE;}
 	void CanvasFocus(void) {data[cur_level].SetFocus();}
 	// General data access
 	void		SetType(int row,int col,gSpreadValType t) {data[cur_level].SetType(row,col,t);}

@@ -140,19 +140,19 @@ if (iset_item->GetSelection()!=0) iset_item->SetSelection(0);
 }
 
 //***************************** EVENT HANDLERS-LOW LEVEL **********************
-void NodeAddDialog::player_func(wxChoice &ob,wxCommandEvent &ev)
+void NodeAddDialog::player_func(wxChoice &ob,wxCommandEvent &)
 {
 NodeAddDialog *parent=(NodeAddDialog *)ob.GetClientData();
 parent->OnPlayer(ob.GetStringSelection());
 }
 
-void NodeAddDialog::iset_func(wxChoice &ob,wxCommandEvent &ev)
+void NodeAddDialog::iset_func(wxChoice &ob,wxCommandEvent &)
 {
 NodeAddDialog *parent=(NodeAddDialog *)ob.GetClientData();
 parent->OnIset(ob.GetStringSelection());
 }
 
-void NodeAddDialog::branch_func(wxText &ob,wxCommandEvent &ev)
+void NodeAddDialog::branch_func(wxText &ob,wxCommandEvent &)
 {
 NodeAddDialog *parent=(NodeAddDialog *)ob.GetClientData();
 parent->OnBranch();

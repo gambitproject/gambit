@@ -3,7 +3,7 @@
 // Update: this dialog box now also includes the NormalForm solution
 // efg_algorithms.  They are enabled by selecting the 'Use NF' box.  This is
 // why "nfgsolvd.h" is included here
-
+// $Id$
 #define SD_CANCEL			-1
 #define SD_SOLVE			1
 #define	SD_ALGORITHM 	2
@@ -23,17 +23,17 @@ private:
 	gBlock<int> solns;
 	enum {useEFG,useNFG} use;
 	// Event Handlers: low level
-	static void use_nfg_func(wxCheckBox &ob,wxEvent &ev)
+	static void use_nfg_func(wxCheckBox &ob,wxEvent &)
 	{((EfgSolveParamsDialog *)ob.GetClientData())->OnUseNF(ob.GetValue());}
-	static void solve_button_func(wxButton &ob,wxEvent &ev)
+	static void solve_button_func(wxButton &ob,wxEvent &)
 	{((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_SOLVE);}
-	static void inspect_button_func(wxButton &ob,wxEvent &ev)
+	static void inspect_button_func(wxButton &ob,wxEvent &)
 	{((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_INSPECT);}
-	static void cancel_button_func(wxButton &ob,wxEvent &ev)
+	static void cancel_button_func(wxButton &ob,wxEvent &)
 	{((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_CANCEL);}
-	static void algorithm_box_func(wxRadioBox &ob,wxEvent &ev)
+	static void algorithm_box_func(wxRadioBox &ob,wxEvent &)
 	{((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_ALGORITHM);}
-	static void help_button_func(wxButton &ob,wxEvent &ev)
+	static void help_button_func(wxButton &,wxEvent &)
 	{wxHelpContents(EFG_SOLVE_HELP);}
 	// Event handlers: high level
 	void OnEvent(int event)

@@ -2,6 +2,7 @@
 // This creates a text window that will accept output and provide input
 // using the << and >> redirection operators.  One instance of this class
 // will always be created and called gdebug, (see also gerror,gin,gout).
+// $Id$
 #ifndef 	WXIO_H
 #define WXIO_H
 
@@ -77,7 +78,7 @@ public:
 //
 // Unget the character given.  Only one character of pushback is guaranteed.
 //
-		int get(char &c)	{return 1;}
+		int get(char &)	{return 1;}
 		void unget(char c) {;}
 		bool eof(void) const {return 0;};
 
@@ -85,7 +86,7 @@ public:
 // Returns nonzero if the end-of-file marker has been reached.
 //
 		bool IsValid(void) const	{return ok;}
-		void seekp(long pos) const {;}
+		void seekp(long ) const {;}
 };
 
 //

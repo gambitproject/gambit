@@ -4,6 +4,8 @@
 // of the algorithms that will not work with this number of players.
 // Please list these explicitly
 // Only work for 2 players: Lemke, Enum
+// $Id$
+
 #define SD_CANCEL			-1
 #define SD_SOLVE			1
 #define	SD_ALGORITHM 	2
@@ -59,15 +61,15 @@ private:
 	int result,extensive;
 	gList<int> solns;
 // Static event handlers
-	static void solve_button_func(wxButton &ob,wxEvent &ev)
+	static void solve_button_func(wxButton &ob,wxEvent &)
 	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_SOLVE);}
-	static void inspect_button_func(wxButton &ob,wxEvent &ev)
+	static void inspect_button_func(wxButton &ob,wxEvent &)
 	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_INSPECT);}
-	static void cancel_button_func(wxButton &ob,wxEvent &ev)
+	static void cancel_button_func(wxButton &ob,wxEvent &)
 	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_CANCEL);}
-	static void help_button_func(wxButton &ob,wxEvent &ev)
+	static void help_button_func(wxButton &,wxEvent &)
 	{wxHelpContents(NFG_SOLVE_HELP);}
-	static void nfg_algorithm_box_func(wxRadioBox &ob,wxEvent &ev)
+	static void nfg_algorithm_box_func(wxRadioBox &ob,wxEvent &)
 	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_ALGORITHM);}
 
 public:

@@ -1,6 +1,6 @@
 // File: elimdomd.h -- declarations for classes dealing with inspection and
 // creation of dominated strategy supports
-// $Id$
+// @(#)elimdomd.h	1.7 11/7/95
 class ElimDomParamsDialog // Can not use MyDialogBox due to wxMULTIPLE
 {
 private:
@@ -29,11 +29,11 @@ private:
 	}
 	d->Show(FALSE);delete d;
 	}
-	static void ok_button_func(wxButton &ob,wxEvent &ev)
+	static void ok_button_func(wxButton &ob,wxEvent &)
 	{((ElimDomParamsDialog *)ob.GetClientData())->OnEvent(wxOK);}
-	static void cancel_button_func(wxButton &ob,wxEvent &ev)
+	static void cancel_button_func(wxButton &ob,wxEvent &)
 	{((ElimDomParamsDialog *)ob.GetClientData())->OnEvent(wxCANCEL);}
-	static void help_button_func(wxButton &ob,wxEvent &ev)
+	static void help_button_func(wxButton &,wxEvent &)
 	{wxHelpContents(NFG_ELIMDOM_HELP);}
 
 public:
@@ -57,7 +57,7 @@ public:
 	ok_button->SetClientData((char *)this);
 	wxButton *cancel_button=new wxButton(d,(wxFunction)cancel_button_func,"Cancel");
 	cancel_button->SetClientData((char *)this);
-	wxButton *help_button=new wxButton(d,(wxFunction)help_button_func,"?");
+	new wxButton(d,(wxFunction)help_button_func,"?");
 	d->Fit();
 	d->Show(TRUE);
 	}
@@ -79,17 +79,17 @@ private:
 	char *cur_str,*disp_str;
 	wxStringList *support_list;
 // Low level event handlers
-	static void cur_func(wxChoice &ob,wxEvent &ev)
+	static void cur_func(wxChoice &ob,wxEvent &)
 	{((SupportInspectDialog *)ob.GetClientData())->OnCur(ob.GetSelection()+1);}
-	static void disp_func(wxChoice &ob,wxEvent &ev)
+	static void disp_func(wxChoice &ob,wxEvent &)
 	{((SupportInspectDialog *)ob.GetClientData())->OnDisp(ob.GetSelection()+1);}
-	static void new_sup_func(wxButton &ob,wxEvent &ev)
+	static void new_sup_func(wxButton &ob,wxEvent &)
 	{((SupportInspectDialog *)ob.GetClientData())->OnNewSupport();}
 	static void change_sup_func(wxButton &ob,wxEvent &ev)
 	{((BaseNormShow *)ob.GetClientData())->SupportInspect(SUPPORT_CHANGE);}
-	static void help_func(wxButton &ob,wxEvent &ev)
+	static void help_func(wxButton &ob,wxEvent &)
 	{wxHelpContents(NFG_SUPPORTS_HELP);}
-	static void close_func(wxButton &ob,wxEvent &ev)
+	static void close_func(wxButton &ob,wxEvent &)
 	{((BaseNormShow *)ob.GetClientData())->SupportInspect(SUPPORT_CLOSE);}
 // High level event handlers
 	void OnNewSupport(void)
@@ -115,7 +115,7 @@ private:
 	}
 public:
 	SupportInspectDialog(const gList<NFSupport *> &sups_,int cur_sup,int disp_sup,BaseNormShow *bns_,wxWindow *parent=0)
-		: wxDialogBox(parent,"Supports"),sups(sups_),bns(bns_)
+		: wxDialogBox(parent,"Supports"),bns(bns_),sups(sups_)
 	{
 	wxForm *f=new wxForm(0);
 	SetLabelPosition(wxVERTICAL);

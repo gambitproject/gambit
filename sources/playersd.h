@@ -75,7 +75,7 @@ MyDialogBox::OnOk();
 }
 
 
-void PlayerNamesDialog::name_func(wxChoice &ob,wxCommandEvent &ev)
+void PlayerNamesDialog::name_func(wxChoice &ob,wxCommandEvent &)
 {
 PlayerNamesDialog *parent=(PlayerNamesDialog *)ob.GetClientData();
 parent->UpdateName();

@@ -94,15 +94,15 @@ friend class ExtensivePrintout;
 public:
 typedef struct SUBGAMEENTRY {
 					const Node *root;
-					int  subgame_y;
 					bool expanded;
+					int  subgame_y;
 					SUBGAMEENTRY(void):root(0),expanded(true),subgame_y(-1) { }
 					SUBGAMEENTRY(const Node *r,bool e=true):root(r),expanded(e),
 																									subgame_y(-1) { }
 					SUBGAMEENTRY(const SUBGAMEENTRY &s):root(s.root),
 														expanded(s.expanded),subgame_y(s.subgame_y) { }
 					SUBGAMEENTRY &operator=(const SUBGAMEENTRY &s)
-						{root=s.root;expanded=s.expanded;subgame_y=s.subgame_y;}
+						{root=s.root;expanded=s.expanded;subgame_y=s.subgame_y; return (*this);}
 					// need these to make a list
 					int operator==(const SUBGAMEENTRY &s) {return (s.root==root);}
 					int operator!=(const SUBGAMEENTRY &s) {return (s.root!=root);}
@@ -243,12 +243,6 @@ public:
 	void tree_outcomes(const gString out_name=gString(),int save_num=0);
 	void action_probs(void);
 	void node_outcome(const gString out_name);
-#ifdef SUBGAMES
-	// Subgame handlers
-	void OpenSubgame(int num);
-	void CloseSubgame(int num);
-	void MakeSubgame(void);
-#endif
 };
 
 #endif   // TREEWINDOW_H

@@ -1,6 +1,6 @@
 // File: treedraw.cc -- contains the configuration class for the extensive
 // form
-// @(#)treedraw.cc	1.13 11/7/95
+// $Id$
 #include "wx.h"
 #include "wx_form.h"
 #pragma hdrstop
@@ -100,7 +100,7 @@ tree_options_dialog->Go();
 #define	NTF	14
 #define NRF	15
 #pragma argsused		// turn off the ev not used message
-void TreeDrawSettings::draw_params_legends_func(wxButton &ob,wxCommandEvent &ev)
+void TreeDrawSettings::draw_params_legends_func(wxButton &ob,wxCommandEvent &)
 {
 FontDialogBox *f;
 draw_params_legend_struct *dpls=(draw_params_legend_struct *)ob.GetClientData();
