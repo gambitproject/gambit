@@ -169,7 +169,7 @@ int num_steps;
 if (params.type)
 	num_steps=(int)((params.maxLam-params.minLam)/params.delLam);
 else
-	num_steps=(int)log(params.maxLam/params.minLam)/log(params.delLam);
+	num_steps=(int)(log(params.maxLam/params.minLam)/log(params.delLam));
 T l=params.minLam;
 for (int step=1;step<num_steps;step++)
 {
