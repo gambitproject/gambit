@@ -534,11 +534,11 @@ void dialogLiap::AlgorithmFields(void)
 
   long startOption = 0;
   config.Read("Solutions/Liap-startOption", &startOption);
-  wxString startOptions[] = { "Default", "Saved", "Prompt" };
+  wxString startOptions[] = { "Default", "Selected" };
   m_startOption = new wxRadioBox(this, -1, "Start",
 				 wxDefaultPosition, wxDefaultSize,
-				 3, startOptions, 0, wxRA_SPECIFY_ROWS);
-  if (startOption >= 0 && startOption <= 2)
+				 2, startOptions, 0, wxRA_SPECIFY_ROWS);
+  if (startOption >= 0 && startOption <= 1)
     m_startOption->SetSelection(startOption);
   m_algorithmBox->Add(m_startOption, 0, wxALL, 5);
 }
@@ -848,11 +848,11 @@ void dialogQre::AlgorithmFields(void)
 
   long startOption = 0;
   config.Read("Solutions/Qre-startOption", &startOption);
-  wxString startOptions[] = { "Default", "Saved", "Prompt" };
+  wxString startOptions[] = { "Default", "Selection" };
   m_startOption = new wxRadioBox(this, -1, "Starting Point",
 				 wxDefaultPosition, wxDefaultSize,
-				 3, startOptions, 0, wxRA_SPECIFY_ROWS);
-  if (startOption >= 0 && startOption <= 2) {
+				 2, startOptions, 0, wxRA_SPECIFY_ROWS);
+  if (startOption >= 0 && startOption <= 1) {
     m_startOption->SetSelection(startOption);
   }
   otherSizer->Add(m_startOption, 0, wxALL, 5);

@@ -13,8 +13,8 @@
 #include "efgnfgi.h"
 #include "gambit.h"
 #include "accels.h"
-#include "efgsolng.h"
 #include "efgconst.h"
+#include "behavsol.h"
 #include "solnlist.h"
 
 class EfgProfileList;
@@ -27,21 +27,13 @@ typedef SolutionList<BehavSolution> BehavSolutionList;
 
 const int idEFG_SOLUTION_LIST = 900;
 
-class EfgShow : public wxFrame,
-		public EfgNfgInterface, public EfgShowInterface {
+class EfgShow : public wxFrame, public EfgNfgInterface {
 private:
   wxFrame *parent;
   FullEfg &m_efg;
   TreeWindow *m_treeWindow;
   TreeZoomWindow *m_treeZoomWindow;
 
-  // Solution routines
-  struct StartingPoints {
-    BehavSolutionList profiles;
-    int last;
-    StartingPoints() : last(-1) { }
-  } starting_points;
-  
   int cur_soln;
 
   gList<EFSupport *> m_supports;
@@ -184,8 +176,6 @@ public:
 
   // Solution interface to the algorithms
   void PickSolutions(const Efg &, Node *, gList<BehavSolution> &);
-  BehavProfile<gNumber> CreateStartProfile(int how);
-  void RemoveStartProfiles(void);
 
   // Solution interface to normal form
   void SolutionToEfg(const BehavProfile<gNumber> &s, bool set = false);

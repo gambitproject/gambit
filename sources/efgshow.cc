@@ -26,6 +26,7 @@
 #include "efgprofile.h"
 #include "efgcursor.h"
 #include "efgsoln.h"
+#include "efgsolng.h"
 #include "efgnfgi.h"
 #include "nfgshow.h"
 #include "efgsolvd.h"
@@ -366,13 +367,6 @@ void EfgShow::ChangeSolution(int sol)
 }
 
 
-// RemoveStartProfiles.  Should be called if game structure changes
-
-void EfgShow::RemoveStartProfiles(void)
-{
-    starting_points = StartingPoints();
-}
-
 void EfgShow::RemoveSolutions(void)
 {
   cur_soln = 0;
@@ -574,34 +568,6 @@ void EfgShow::PickSolutions(const Efg &p_efg, Node *p_rootnode,
     throw;
   }
 #endif // NOT_PORTED_YET
-}
-
-// how: 0-default, 1-saved, 2-query
-
-BehavProfile<gNumber> EfgShow::CreateStartProfile(int how)
-{
-    BehavProfile<gNumber> start(*m_currentSupport);
-    if (how == 0)   start.Centroid();
-#ifdef NOT_PORTED_YET
-    if (how == 1 || how == 2)
-    {
-        if (starting_points.last == -1 || how == 2)
-        {
-            BSolnSortFilterOptions sf_opts; // no sort, filter
-            if (starting_points.profiles.Length() == 0)
-                starting_points.profiles += start;
-            Ext1SolnPicker *start_dialog = new Ext1SolnPicker(ef, starting_points.profiles, m_treeWindow->DrawSettings(), sf_opts, this);
-            Enable(false);  // disable this window until the edit window is closed
-            while (start_dialog->Completed() == wxRUNNING) wxYield();
-            Enable(true);
-            starting_points.last = start_dialog->Picked();
-            delete start_dialog;
-        }
-        if (starting_points.last)
-            start = BehavProfile<gNumber>(starting_points.profiles[starting_points.last]);
-    }
-#endif  // NOT_PORTED_YET
-    return start;
 }
 
 void EfgShow::MakeMenus(void)
@@ -1622,32 +1588,32 @@ void EfgShow::OnSolveStandard(wxCommandEvent &)
       markSubgames = true;
       if (m_efg.NumPlayers() == 2 && isPerfectRecall) {
 	if (m_efg.IsConstSum()) 
-	  solver = new guiefgLpEfg(*m_currentSupport, this, 1, dialog.Precision());
+	  solver = new guiefgLpEfg(this, 1, dialog.Precision());
 	else
-	  solver = new guiefgLcpEfg(*m_currentSupport, this, 1, dialog.Precision());
+	  solver = new guiefgLcpEfg(this, 1, dialog.Precision());
       }
       else if (m_efg.NumPlayers() == 2 && !isPerfectRecall)
-	solver = new guiefgQreEfg(*m_currentSupport, this, 1);
+	solver = new guiefgQreEfg(this, 1);
       else 
-	solver = new guiefgSimpdivNfg(*m_currentSupport, this, 1, dialog.Precision(),
+	solver = new guiefgSimpdivNfg(this, 1, dialog.Precision(),
 				      true);
       break;
     case efgSTANDARD_TWO:
       if (m_efg.NumPlayers() == 2)
-	solver = new guiefgEnumMixedNfg(*m_currentSupport, this, 2,
+	solver = new guiefgEnumMixedNfg(this, 2,
 					dialog.Precision(), false);
       else {
 	wxMessageBox("Not guaranteed to find two solutions", "Warning");
-	solver = new guiefgLiapEfg(*m_currentSupport, this, 2, 10);
+	solver = new guiefgLiapEfg(this, 2, 10);
       }
       break;
     case efgSTANDARD_ALL:
       if (m_efg.NumPlayers() == 2) {
-	solver = new guiefgEnumMixedNfg(*m_currentSupport, this, 0,
+	solver = new guiefgEnumMixedNfg(this, 0,
 					dialog.Precision(), false);
       }
       else  {
-	solver = new guiefgPolEnumEfg(*m_currentSupport, this, 0);
+	solver = new guiefgPolEnumEfg(this, 0);
       }
       break;
     }
@@ -1659,31 +1625,31 @@ void EfgShow::OnSolveStandard(wxCommandEvent &)
     case efgSTANDARD_ONE:
       if (m_efg.NumPlayers() == 2 && isPerfectRecall) {
 	if (m_efg.IsConstSum()) 
-	  solver = new guiefgLpEfg(*m_currentSupport, this, 1, dialog.Precision());
+	  solver = new guiefgLpEfg(this, 1, dialog.Precision());
 	else
-	  solver = new guiefgLcpEfg(*m_currentSupport, this, 1, dialog.Precision());
+	  solver = new guiefgLcpEfg(this, 1, dialog.Precision());
       }
       else if (m_efg.NumPlayers() == 2 && !isPerfectRecall)
-	solver = new guiefgQreEfg(*m_currentSupport, this, 1);
+	solver = new guiefgQreEfg(this, 1);
       else 
-	solver = new guiefgSimpdivNfg(*m_currentSupport, this, 1, dialog.Precision(),
+	solver = new guiefgSimpdivNfg(this, 1, dialog.Precision(),
 				      true);
       break;
     case efgSTANDARD_TWO:
       if (m_efg.NumPlayers() == 2)
-	solver = new guiefgEnumMixedNfg(*m_currentSupport, this, 2,
+	solver = new guiefgEnumMixedNfg(this, 2,
 					dialog.Precision(), false);
       else {
 	wxMessageBox("Not guaranteed to find two solutions", "Warning");
-	solver = new guiefgLiapEfg(*m_currentSupport, this, 2, 10);
+	solver = new guiefgLiapEfg(this, 2, 10);
       }
       break;
     case efgSTANDARD_ALL:
       if (m_efg.NumPlayers() == 2)
-	solver = new guiefgEnumMixedNfg(*m_currentSupport, this, 0,
+	solver = new guiefgEnumMixedNfg(this, 0,
 					dialog.Precision(), false);
       else {
-	solver = new guiefgPolEnumEfg(*m_currentSupport, this, 0);
+	solver = new guiefgPolEnumEfg(this, 0);
       }
       break;
     }
@@ -1692,15 +1658,15 @@ void EfgShow::OnSolveStandard(wxCommandEvent &)
   case efgSTANDARD_SEQUENTIAL:
     switch (dialog.Number()) {
     case efgSTANDARD_ONE:
-      solver = new guiefgQreEfg(*m_currentSupport, this, 1);
+      solver = new guiefgQreEfg(this, 1);
       break;
     case efgSTANDARD_TWO:
       wxMessageBox("Not guaranteed to find two solutions", "Warning");
-      solver = new guiefgLiapEfg(*m_currentSupport, this, 2, 10);
+      solver = new guiefgLiapEfg(this, 2, 10);
       break;
     case efgSTANDARD_ALL:
       wxMessageBox("Not guaranteed to find all solutions", "Warning");
-      solver = new guiefgLiapEfg(*m_currentSupport, this, 0, 0);
+      solver = new guiefgLiapEfg(this, 0, 0);
       return;
     }
   }
@@ -1713,7 +1679,7 @@ void EfgShow::OnSolveStandard(wxCommandEvent &)
     else
       m_treeWindow->SubgameUnmarkAll();
 
-    *m_solutionTable += solver->Solve();
+    *m_solutionTable += solver->Solve(*m_currentSupport);
     wxEndBusyCursor();
   }
   catch (gException &E) {
@@ -1752,50 +1718,50 @@ void EfgShow::OnSolveCustom(wxCommandEvent &p_event)
 
   switch (algorithm) {
   case efgmenuSOLVE_CUSTOM_EFG_ENUMPURE:
-    solver = new guiefgEnumPureEfg(*m_currentSupport, this);
+    solver = new guiefgEnumPureEfg(this);
     break;
   case efgmenuSOLVE_CUSTOM_EFG_LCP:
-    solver = new guiefgLcpEfg(*m_currentSupport, this);
+    solver = new guiefgLcpEfg(this);
     break;
   case efgmenuSOLVE_CUSTOM_EFG_LP:
-    solver = new guiefgLpEfg(*m_currentSupport, this);
+    solver = new guiefgLpEfg(this);
     break;
   case efgmenuSOLVE_CUSTOM_EFG_LIAP:
-    solver = new guiefgLiapEfg(*m_currentSupport, this);
+    solver = new guiefgLiapEfg(this);
     break;
   case efgmenuSOLVE_CUSTOM_EFG_POLENUM:
-    solver = new guiefgPolEnumEfg(*m_currentSupport, this);
+    solver = new guiefgPolEnumEfg(this);
     break;
   case efgmenuSOLVE_CUSTOM_EFG_QRE:
-    solver = new guiefgQreEfg(*m_currentSupport, this);
+    solver = new guiefgQreEfg(this);
     break;
 
   case efgmenuSOLVE_CUSTOM_NFG_ENUMPURE: 
-    solver = new guiefgEnumPureNfg(*m_currentSupport, this);
+    solver = new guiefgEnumPureNfg(this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_ENUMMIXED:
-    solver = new guiefgEnumMixedNfg(*m_currentSupport, this);
+    solver = new guiefgEnumMixedNfg(this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_LCP: 
-    solver = new guiefgLcpNfg(*m_currentSupport, this);
+    solver = new guiefgLcpNfg(this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_LP:
-    solver = new guiefgLpNfg(*m_currentSupport, this);
+    solver = new guiefgLpNfg(this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_LIAP: 
-    solver = new guiefgLiapNfg(*m_currentSupport, this);
+    solver = new guiefgLiapNfg(this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_SIMPDIV:
-    solver = new guiefgSimpdivNfg(*m_currentSupport, this);
+    solver = new guiefgSimpdivNfg(this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_POLENUM:
-    solver = new guiefgPolEnumNfg(*m_currentSupport, this);
+    solver = new guiefgPolEnumNfg(this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_QRE:
-    solver = new guiefgQreNfg(*m_currentSupport, this);
+    solver = new guiefgQreNfg(this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_QREGRID: 
-    solver = new guiefgQreAllNfg(*m_currentSupport, this);
+    solver = new guiefgQreAllNfg(this);
     break;
   default:
     // internal error, we'll just ignore silently
@@ -1809,7 +1775,7 @@ void EfgShow::OnSolveCustom(wxCommandEvent &p_event)
       if (solver->MarkSubgames())
 	m_treeWindow->SubgameMarkAll();
       wxBeginBusyCursor();
-      *m_solutionTable += solver->Solve();
+      *m_solutionTable += solver->Solve(*m_currentSupport);
       wxEndBusyCursor();
     }
   }
@@ -2213,7 +2179,6 @@ void EfgShow::GameChanged(void)
   m_currentSupport = new EFSupport(m_efg);
   m_supports.Append(m_currentSupport);
   m_currentSupport->SetName("Full Support");
-  RemoveStartProfiles();
   UpdateMenus();
   m_treeWindow->Render();
 }

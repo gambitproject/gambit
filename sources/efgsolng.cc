@@ -18,10 +18,8 @@
 //                     guiEfgSolution: Member functions
 //=========================================================================
 
-guiEfgSolution::guiEfgSolution(const EFSupport &p_support,
-			       EfgShowInterface *p_parent)
-  : m_efg(p_support.Game()), m_support(p_support), m_parent(p_parent),
-    m_traceFile(&gnull), m_traceLevel(0)
+guiEfgSolution::guiEfgSolution(EfgShow *p_parent)
+  : m_parent(p_parent), m_traceFile(&gnull), m_traceLevel(0)
 { }
 
 //=========================================================================
@@ -30,7 +28,7 @@ guiEfgSolution::guiEfgSolution(const EFSupport &p_support,
 
 class guiSubgameSolver {
 protected:
-  EfgShowInterface *m_parent;
+  EfgShow *m_parent;
   bool m_pickSoln;
   gList<Node *> m_subgameRoots;
   bool m_eliminate, m_iterative, m_strong;
@@ -38,13 +36,13 @@ protected:
   void BaseSelectSolutions(int, const Efg &, gList<BehavSolution> &);
 
 public:
-  guiSubgameSolver(EfgShowInterface *, const Efg &,
+  guiSubgameSolver(EfgShow *, const Efg &,
 		 bool p_eliminate = false, bool p_iterative = false,
 		 bool p_strong = false);
   virtual ~guiSubgameSolver() { } 
 };
 
-guiSubgameSolver::guiSubgameSolver(EfgShowInterface *p_parent, const Efg &p_efg,
+guiSubgameSolver::guiSubgameSolver(EfgShow *p_parent, const Efg &p_efg,
 			       bool p_eliminate, bool p_iterative,
 			       bool p_strong)
   : m_parent(p_parent), m_pickSoln(false),
@@ -78,7 +76,7 @@ protected:
   void BaseViewSubgame(int, const Efg &, EFSupport &);
 
 public:
-  guiSubgameViaEfg(EfgShowInterface *p_parent, const Efg &p_efg,
+  guiSubgameViaEfg(EfgShow *p_parent, const Efg &p_efg,
 		   bool p_eliminate, bool p_iterative,
 		   bool p_strong)
     : guiSubgameSolver(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
@@ -123,7 +121,7 @@ protected:
   void BaseViewNormal(const Nfg &, NFSupport &);
 
 public:
-  guiSubgameViaNfg(EfgShowInterface *p_parent, const Efg &p_efg,
+  guiSubgameViaNfg(EfgShow *p_parent, const Efg &p_efg,
 		   bool p_eliminate, bool p_iterative,
 		   bool p_strong, bool p_mixed)
     : guiSubgameSolver(p_parent, p_efg, p_eliminate, p_iterative, p_strong),
@@ -218,21 +216,19 @@ public:
 		   const BehavProfile<gNumber> &p_start, 
 		   bool p_eliminate, bool p_iterative, bool p_strong,
 		   int p_max = 0,
-		   EfgShowInterface *p_parent = 0)
+		   EfgShow *p_parent = 0)
     : efgLiapSolve(p_efg, p_params, p_start, p_max),
       guiSubgameViaEfg(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
     { }
 };
 
-guiefgLiapEfg::guiefgLiapEfg(const EFSupport &p_support,
-			     EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgLiapEfg::guiefgLiapEfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-guiefgLiapEfg::guiefgLiapEfg(const EFSupport &p_support,
-			     EfgShowInterface *p_parent,
+guiefgLiapEfg::guiefgLiapEfg(EfgShow *p_parent,
 			     int p_stopAfter, int p_nTries)
-  : guiEfgSolution(p_support, p_parent),
+  : guiEfgSolution(p_parent),
     m_nTries(p_nTries), m_stopAfter(p_stopAfter)
 {
   m_eliminate = false;
@@ -245,10 +241,11 @@ guiefgLiapEfg::guiefgLiapEfg(const EFSupport &p_support,
   m_startOption = 0;
 }
 
-gList<BehavSolution> guiefgLiapEfg::Solve(void) const
+gList<BehavSolution> guiefgLiapEfg::Solve(const EFSupport &p_support) const
 {
-  wxStatus status(m_parent->Frame(), "LiapSolve Progress");
-  BehavProfile<gNumber> start = m_parent->CreateStartProfile(m_startOption);
+  wxStatus status(m_parent, "LiapSolve Progress");
+  // For the moment, we will always start at the centroid
+  BehavProfile<gNumber> start(p_support);
 
   EFLiapParams params(status);
   params.stopAfter = m_stopAfter;
@@ -258,7 +255,7 @@ gList<BehavSolution> guiefgLiapEfg::Solve(void) const
   params.tracefile = m_traceFile;
 
   try {
-    return EFLiapBySubgameG(m_efg, params, start, m_eliminate,
+    return EFLiapBySubgameG(p_support.Game(), params, start, m_eliminate,
 			    m_eliminateAll, !m_eliminateWeak,
 			    0, m_parent).Solve(start.Support());
   }
@@ -269,7 +266,7 @@ gList<BehavSolution> guiefgLiapEfg::Solve(void) const
 
 bool guiefgLiapEfg::SolveSetup(void)
 { 
-  dialogLiap dialog(m_parent->Frame(), true);
+  dialogLiap dialog(m_parent, true);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -309,7 +306,7 @@ public:
 		   const BehavSolution &p_start,
 		   bool p_eliminate, bool p_iterative, bool p_strong,
 		   bool p_mixed, int p_max = 0, 
-		   EfgShowInterface *p_parent = 0)
+		   EfgShow *p_parent = 0)
     : efgLiapNfgSolve(p_efg, p_params,
 		      BehavProfile<gNumber>(p_start), p_max),
       guiSubgameViaNfg(p_parent, p_efg,
@@ -317,15 +314,14 @@ public:
     { }
 };
 
-guiefgLiapNfg::guiefgLiapNfg(const EFSupport &p_support, 
-			     EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgLiapNfg::guiefgLiapNfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-gList<BehavSolution> guiefgLiapNfg::Solve(void) const
+gList<BehavSolution> guiefgLiapNfg::Solve(const EFSupport &p_support) const
 {
-  wxStatus status(m_parent->Frame(), "LiapSolve Progress");
-  BehavProfile<gNumber> start = m_parent->CreateStartProfile(m_startOption);
+  wxStatus status(m_parent, "LiapSolve Progress");
+  BehavProfile<gNumber> start(p_support);
 
   NFLiapParams params(status);
   params.stopAfter = m_stopAfter;
@@ -335,9 +331,10 @@ gList<BehavSolution> guiefgLiapNfg::Solve(void) const
   params.tracefile = m_traceFile;
 
   try {
-    return NFLiapBySubgameG(m_efg, params, start, m_eliminate, m_eliminateAll,
+    return NFLiapBySubgameG(p_support.Game()
+			    , params, start, m_eliminate, m_eliminateAll,
 			    !m_eliminateWeak, m_eliminateMixed,
-			    0, m_parent).Solve(EFSupport(m_efg));
+			    0, m_parent).Solve(EFSupport(p_support.Game()));
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -346,7 +343,7 @@ gList<BehavSolution> guiefgLiapNfg::Solve(void) const
 
 bool guiefgLiapNfg::SolveSetup(void)
 {
-  dialogLiap dialog(m_parent->Frame(), true, true);
+  dialogLiap dialog(m_parent, true, true);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -392,21 +389,19 @@ public:
   SeqFormBySubgameG(const Efg &p_efg, const EFSupport &p_support,
 		    const SeqFormParams &p_params,
 		    bool p_eliminate, bool p_iterative, bool p_strong,
-		    int p_max = 0, EfgShowInterface *p_parent = 0)
+		    int p_max = 0, EfgShow *p_parent = 0)
     : efgLcpSolve(p_support, p_params, p_max),
       guiSubgameViaEfg(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
     { }
 };
 
-guiefgLcpEfg::guiefgLcpEfg(const EFSupport &p_support, 
-			   EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgLcpEfg::guiefgLcpEfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-guiefgLcpEfg::guiefgLcpEfg(const EFSupport &p_support,
-			   EfgShowInterface *p_parent,
+guiefgLcpEfg::guiefgLcpEfg(EfgShow *p_parent,
 			   int p_stopAfter, gPrecision p_precision)
-  : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter),
+  : guiEfgSolution(p_parent), m_stopAfter(p_stopAfter),
     m_precision(p_precision)
 {
   m_eliminate = false;
@@ -416,9 +411,9 @@ guiefgLcpEfg::guiefgLcpEfg(const EFSupport &p_support,
   m_markSubgames = false;
 }
 
-gList<BehavSolution> guiefgLcpEfg::Solve(void) const
+gList<BehavSolution> guiefgLcpEfg::Solve(const EFSupport &p_support) const
 {
-  wxStatus status(m_parent->Frame(), "LcpSolve Progress");
+  wxStatus status(m_parent, "LcpSolve Progress");
   SeqFormParams params(status);
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
@@ -426,9 +421,9 @@ gList<BehavSolution> guiefgLcpEfg::Solve(void) const
   params.tracefile = m_traceFile;
 
   try {
-    return SeqFormBySubgameG(m_efg, m_support, params, m_eliminate,
+    return SeqFormBySubgameG(p_support.Game(), p_support, params, m_eliminate,
 			     m_eliminateAll, !m_eliminateWeak,
-			     0, m_parent).Solve(m_support);
+			     0, m_parent).Solve(p_support);
   }
   catch (gSignalBreak &) { }
 
@@ -437,7 +432,7 @@ gList<BehavSolution> guiefgLcpEfg::Solve(void) const
 
 bool guiefgLcpEfg::SolveSetup(void)
 { 
-  dialogLcp dialog(m_parent->Frame(), true);
+  dialogLcp dialog(m_parent, true);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -475,21 +470,20 @@ public:
   LemkeBySubgameG(const Efg &p_efg, const EFSupport &p_support,
 		  const LemkeParams &p_params, bool p_eliminate,
 		  bool p_iterative, bool p_strong, bool p_mixed, int p_max = 0,
-		  EfgShowInterface *p_parent = 0)
+		  EfgShow *p_parent = 0)
     : efgLcpNfgSolve(p_support, p_params, p_max), 
       guiSubgameViaNfg(p_parent, p_efg,
 		       p_eliminate, p_iterative, p_strong, p_mixed)
     { }
 };
 
-guiefgLcpNfg::guiefgLcpNfg(const EFSupport &p_support, 
-			   EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgLcpNfg::guiefgLcpNfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-gList<BehavSolution> guiefgLcpNfg::Solve(void) const
+gList<BehavSolution> guiefgLcpNfg::Solve(const EFSupport &p_support) const
 {
-  wxStatus status(m_parent->Frame(), "LcpSolve Progress");
+  wxStatus status(m_parent, "LcpSolve Progress");
 
   LemkeParams params(status);
   params.stopAfter = m_stopAfter;
@@ -498,9 +492,10 @@ gList<BehavSolution> guiefgLcpNfg::Solve(void) const
   params.tracefile = m_traceFile;
 
   try {
-    LemkeBySubgameG M(m_efg, m_support, params, m_eliminate, m_eliminateAll,
+    LemkeBySubgameG M(p_support.Game(),
+		      p_support, params, m_eliminate, m_eliminateAll,
 		      !m_eliminateWeak, m_eliminateMixed, 0, m_parent);
-    return M.Solve(m_support);
+    return M.Solve(p_support);
   }
   catch (gSignalBreak &)  {
     return gList<BehavSolution>();
@@ -509,7 +504,7 @@ gList<BehavSolution> guiefgLcpNfg::Solve(void) const
 
 bool guiefgLcpNfg::SolveSetup(void)
 {
-  dialogLcp dialog(m_parent->Frame(), true, true); 
+  dialogLcp dialog(m_parent, true, true); 
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -554,7 +549,7 @@ public:
   guiSubgameEnumPureNfg(const Efg &p_efg, const EFSupport &p_support,
 			bool p_eliminate, bool p_iterative, bool p_strong,
 			bool p_mixed, int p_stopAfter, gStatus &p_status,
-			EfgShowInterface *p_parent = 0)
+			EfgShow *p_parent = 0)
     : efgEnumPureNfgSolve(p_support, p_stopAfter, p_status),
       guiSubgameViaNfg(p_parent, p_efg,
 		       p_eliminate, p_iterative, p_strong, p_mixed)
@@ -562,20 +557,20 @@ public:
   virtual ~guiSubgameEnumPureNfg() { }
 };
 
-guiefgEnumPureNfg::guiefgEnumPureNfg(const EFSupport &p_support, 
-				     EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgEnumPureNfg::guiefgEnumPureNfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-gList<BehavSolution> guiefgEnumPureNfg::Solve(void) const
+gList<BehavSolution> guiefgEnumPureNfg::Solve(const EFSupport &p_support) const
 {
-  wxStatus status(m_parent->Frame(), "EnumPureSolve Progress");
+  wxStatus status(m_parent, "EnumPureSolve Progress");
 
   try {
-    return guiSubgameEnumPureNfg(m_efg, m_support, m_eliminate, m_eliminateAll,
+    return guiSubgameEnumPureNfg(p_support.Game(),
+				 p_support, m_eliminate, m_eliminateAll,
 				 !m_eliminateWeak, m_eliminateMixed,
 				 m_stopAfter,
-				 status, m_parent).Solve(m_support);
+				 status, m_parent).Solve(p_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -584,7 +579,7 @@ gList<BehavSolution> guiefgEnumPureNfg::Solve(void) const
 
 bool guiefgEnumPureNfg::SolveSetup(void)
 {
-  dialogEnumPure dialog(m_parent->Frame(), true, true); 
+  dialogEnumPure dialog(m_parent, true, true); 
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -618,26 +613,25 @@ public:
   guiEnumPureEfgSubgame(const Efg &p_efg, const EFSupport &p_support,
 			int p_stopAfter, 
 			bool p_eliminate, bool p_iterative, bool p_strong,
-			gStatus &p_status, EfgShowInterface *p_parent = 0)
+			gStatus &p_status, EfgShow *p_parent = 0)
     : efgEnumPure(p_stopAfter, p_status),
       guiSubgameViaEfg(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
     { }
   virtual ~guiEnumPureEfgSubgame() { }
 };
 
-guiefgEnumPureEfg::guiefgEnumPureEfg(const EFSupport &p_support, 
-				     EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgEnumPureEfg::guiefgEnumPureEfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-gList<BehavSolution> guiefgEnumPureEfg::Solve(void) const
+gList<BehavSolution> guiefgEnumPureEfg::Solve(const EFSupport &p_support) const
 {
-  wxStatus status(m_parent->Frame(), "EnumPureSolve Progress");
+  wxStatus status(m_parent, "EnumPureSolve Progress");
 
   try {
-    return guiEnumPureEfgSubgame(m_efg, m_support, m_stopAfter,
+    return guiEnumPureEfgSubgame(p_support.Game(), p_support, m_stopAfter,
 				 m_eliminate, m_eliminateAll, !m_eliminateWeak,
-				 status, m_parent).Solve(m_support);
+				 status, m_parent).Solve(p_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -646,7 +640,7 @@ gList<BehavSolution> guiefgEnumPureEfg::Solve(void) const
 
 bool guiefgEnumPureEfg::SolveSetup(void)
 {
-  dialogEnumPure dialog(m_parent->Frame(), true);
+  dialogEnumPure dialog(m_parent, true);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -686,23 +680,21 @@ public:
 		 const EnumParams &p_params,
 		 bool p_eliminate, bool p_iterative, bool p_strong,
 		 bool p_mixed,
-		 int p_max = 0, EfgShowInterface *p_parent = 0)
+		 int p_max = 0, EfgShow *p_parent = 0)
     : EnumBySubgame(p_support, p_params, p_max), 
       guiSubgameViaNfg(p_parent, p_efg,
 		       p_eliminate, p_iterative, p_strong, p_mixed)
     { }
 };
 
-guiefgEnumMixedNfg::guiefgEnumMixedNfg(const EFSupport &p_support,
-				       EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgEnumMixedNfg::guiefgEnumMixedNfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-guiefgEnumMixedNfg::guiefgEnumMixedNfg(const EFSupport &p_support,
-				       EfgShowInterface *p_parent,
+guiefgEnumMixedNfg::guiefgEnumMixedNfg(EfgShow *p_parent,
 				       int p_stopAfter, gPrecision p_precision,
 				       bool p_eliminateWeak)
-  : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter),
+  : guiEfgSolution(p_parent), m_stopAfter(p_stopAfter),
     m_precision(p_precision)
 {
   m_eliminate = true;
@@ -712,9 +704,9 @@ guiefgEnumMixedNfg::guiefgEnumMixedNfg(const EFSupport &p_support,
   m_markSubgames = false;
 }
 
-gList<BehavSolution> guiefgEnumMixedNfg::Solve(void) const
+gList<BehavSolution> guiefgEnumMixedNfg::Solve(const EFSupport &p_support) const
 {
-  wxEnumStatus status(m_parent->Frame());
+  wxEnumStatus status(m_parent);
   EnumParams params(status);
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
@@ -722,9 +714,9 @@ gList<BehavSolution> guiefgEnumMixedNfg::Solve(void) const
   params.tracefile = m_traceFile;
 
   try {
-    EnumBySubgameG M(m_efg, m_support, params, m_eliminate, m_eliminateAll,
+    EnumBySubgameG M(p_support.Game(), p_support, params, m_eliminate, m_eliminateAll,
 		     !m_eliminateWeak, m_eliminateMixed, 0, m_parent);
-    return M.Solve(m_support);
+    return M.Solve(p_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -733,7 +725,7 @@ gList<BehavSolution> guiefgEnumMixedNfg::Solve(void) const
 
 bool guiefgEnumMixedNfg::SolveSetup(void)
 {
-  dialogEnumMixed dialog(m_parent->Frame(), true); 
+  dialogEnumMixed dialog(m_parent, true); 
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -778,21 +770,20 @@ public:
   ZSumBySubgameG(const Efg &p_efg, const EFSupport &p_support,
 		 const ZSumParams &p_params, bool p_eliminate,
 		 bool p_iterative, bool p_strong, bool p_mixed, int p_max = 0,
-		 EfgShowInterface *p_parent = 0)
+		 EfgShow *p_parent = 0)
     : efgLpNfgSolve(p_support, p_params, p_max), 
       guiSubgameViaNfg(p_parent, p_efg,
 		       p_eliminate, p_iterative, p_strong, p_mixed)
     { }
 };
 
-guiefgLpNfg::guiefgLpNfg(const EFSupport &p_support,
-			 EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgLpNfg::guiefgLpNfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-gList<BehavSolution> guiefgLpNfg::Solve(void) const
+gList<BehavSolution> guiefgLpNfg::Solve(const EFSupport &p_support) const
 {
-  wxStatus status(m_parent->Frame(), "LpSolve Progress");
+  wxStatus status(m_parent, "LpSolve Progress");
   status << "Progress not implemented\n" << "Cancel button disabled\n";
   ZSumParams params;
   params.stopAfter = m_stopAfter;
@@ -801,9 +792,9 @@ gList<BehavSolution> guiefgLpNfg::Solve(void) const
   params.tracefile = m_traceFile;
 
   try {
-    ZSumBySubgameG M(m_efg, m_support, params, m_eliminate, m_eliminateAll,
+    ZSumBySubgameG M(p_support.Game(), p_support, params, m_eliminate, m_eliminateAll,
 		     !m_eliminateWeak, m_eliminateMixed, 0, m_parent);
-    return M.Solve(m_support);
+    return M.Solve(p_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -812,7 +803,7 @@ gList<BehavSolution> guiefgLpNfg::Solve(void) const
 
 bool guiefgLpNfg::SolveSetup(void)
 {
-  dialogLp dialog(m_parent->Frame(), true, true); 
+  dialogLp dialog(m_parent, true, true); 
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -850,21 +841,19 @@ public:
   EfgCSumBySubgameG(const Efg &p_efg, const EFSupport &p_support,
 		    const CSSeqFormParams &p_params, 
 		    bool p_eliminate, bool p_iterative, bool p_strong,
-		    int p_max = 0, EfgShowInterface *p_parent = 0)
+		    int p_max = 0, EfgShow *p_parent = 0)
     : efgLpSolve(p_support, p_params, p_max),
       guiSubgameViaEfg(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
     { }
 };
 
-guiefgLpEfg::guiefgLpEfg(const EFSupport &p_support,
-			 EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgLpEfg::guiefgLpEfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-guiefgLpEfg::guiefgLpEfg(const EFSupport &p_support,
-			 EfgShowInterface *p_parent,
+guiefgLpEfg::guiefgLpEfg(EfgShow *p_parent,
 			 int p_stopAfter, gPrecision p_precision)
-  : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter),
+  : guiEfgSolution(p_parent), m_stopAfter(p_stopAfter),
     m_precision(p_precision)
 {
   m_eliminate = false;
@@ -874,9 +863,9 @@ guiefgLpEfg::guiefgLpEfg(const EFSupport &p_support,
   m_markSubgames = false;
 }
 
-gList<BehavSolution> guiefgLpEfg::Solve(void) const
+gList<BehavSolution> guiefgLpEfg::Solve(const EFSupport &p_support) const
 {
-  wxStatus status(m_parent->Frame(), "LpSolve Progress");
+  wxStatus status(m_parent, "LpSolve Progress");
   status << "Progress not implemented\n" << "Cancel button disabled\n";
 
   CSSeqFormParams params(status);
@@ -886,10 +875,10 @@ gList<BehavSolution> guiefgLpEfg::Solve(void) const
   params.tracefile = m_traceFile;
 
   try {
-    EfgCSumBySubgameG M(m_efg, m_support, params,
+    EfgCSumBySubgameG M(p_support.Game(), p_support, params,
 			m_eliminate, m_eliminateAll, !m_eliminateWeak,
 			0, m_parent);
-    return M.Solve(m_support);
+    return M.Solve(p_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -898,7 +887,7 @@ gList<BehavSolution> guiefgLpEfg::Solve(void) const
 
 bool guiefgLpEfg::SolveSetup(void)
 {
-  dialogLp dialog(m_parent->Frame(), true);
+  dialogLp dialog(m_parent, true);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -941,23 +930,21 @@ public:
   SimpdivBySubgameG(const Efg &p_efg, const EFSupport &p_support,
 		    const SimpdivParams &p_params, bool p_eliminate,
 		    bool p_iterative, bool p_strong, bool p_mixed, 
-		    int p_max = 0, EfgShowInterface *p_parent = 0)
+		    int p_max = 0, EfgShow *p_parent = 0)
     : efgSimpDivNfgSolve(p_support, p_params, p_max),
       guiSubgameViaNfg(p_parent, p_efg,
 		       p_eliminate, p_iterative, p_strong, p_mixed)
     { }
 };
 
-guiefgSimpdivNfg::guiefgSimpdivNfg(const EFSupport &p_support, 
-				   EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgSimpdivNfg::guiefgSimpdivNfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-guiefgSimpdivNfg::guiefgSimpdivNfg(const EFSupport &p_support,
-				   EfgShowInterface *p_parent,
+guiefgSimpdivNfg::guiefgSimpdivNfg(EfgShow *p_parent,
 				   int p_stopAfter, gPrecision p_precision,
 				   bool p_eliminateWeak)
-  : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter),
+  : guiEfgSolution(p_parent), m_stopAfter(p_stopAfter),
     m_nRestarts(20), m_leashLength(0), m_precision(p_precision)
 {
   m_eliminate = true;
@@ -967,9 +954,9 @@ guiefgSimpdivNfg::guiefgSimpdivNfg(const EFSupport &p_support,
   m_markSubgames = false;
 }
 
-gList<BehavSolution> guiefgSimpdivNfg::Solve(void) const
+gList<BehavSolution> guiefgSimpdivNfg::Solve(const EFSupport &p_support) const
 {
-  wxStatus status(m_parent->Frame(), "SimpdivSolve Progress");
+  wxStatus status(m_parent, "SimpdivSolve Progress");
 
   SimpdivParams params(status);
   params.stopAfter = m_stopAfter;
@@ -980,9 +967,9 @@ gList<BehavSolution> guiefgSimpdivNfg::Solve(void) const
   params.tracefile = m_traceFile;
 
   try {
-    SimpdivBySubgameG M(m_efg, m_support, params, m_eliminate, m_eliminateAll,
+    SimpdivBySubgameG M(p_support.Game(), p_support, params, m_eliminate, m_eliminateAll,
 			!m_eliminateWeak, m_eliminateMixed, 0, m_parent);
-    return M.Solve(m_support);
+    return M.Solve(p_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -991,7 +978,7 @@ gList<BehavSolution> guiefgSimpdivNfg::Solve(void) const
 
 bool guiefgSimpdivNfg::SolveSetup(void)
 {
-  dialogSimpdiv dialog(m_parent->Frame(), true); 
+  dialogSimpdiv dialog(m_parent, true); 
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -1038,21 +1025,20 @@ public:
 			    const PolEnumParams &p_params,
 			    bool p_eliminate, bool p_iterative,
 			    bool p_strong, bool p_mixed, int p_max = 0,
-			    EfgShowInterface *p_parent = 0)
+			    EfgShow *p_parent = 0)
     : efgPolEnumNfgSolve(p_support, p_params, p_max),
       guiSubgameViaNfg(p_parent, p_efg,
 		       p_eliminate, p_iterative, p_strong, p_mixed)
     { }
 };
 
-guiefgPolEnumNfg::guiefgPolEnumNfg(const EFSupport &p_support, 
-				   EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgPolEnumNfg::guiefgPolEnumNfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-gList<BehavSolution> guiefgPolEnumNfg::Solve(void) const
+gList<BehavSolution> guiefgPolEnumNfg::Solve(const EFSupport &p_support) const
 {
-  wxPolEnumStatus status(m_parent->Frame());
+  wxPolEnumStatus status(m_parent);
   status.SetProgress(0.0);
   PolEnumParams params(status);
   params.stopAfter = m_stopAfter;
@@ -1060,11 +1046,11 @@ gList<BehavSolution> guiefgPolEnumNfg::Solve(void) const
   params.tracefile = m_traceFile;
 
   try {
-    guiPolEnumEfgByNfgSubgame M(m_efg, m_support, params,
+    guiPolEnumEfgByNfgSubgame M(p_support.Game(), p_support, params,
 				m_eliminate, m_eliminateAll,
 				!m_eliminateWeak, m_eliminateMixed,
 				0, m_parent);
-    return M.Solve(m_support);
+    return M.Solve(p_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -1073,7 +1059,7 @@ gList<BehavSolution> guiefgPolEnumNfg::Solve(void) const
 
 bool guiefgPolEnumNfg::SolveSetup(void)
 {
-  dialogPolEnum dialog(m_parent->Frame(), true, true); 
+  dialogPolEnum dialog(m_parent, true, true); 
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -1110,21 +1096,18 @@ public:
   EfgPolEnumBySubgameG(const Efg &p_efg, const EFSupport &p_support,
 		       const EfgPolEnumParams &p_params,
 		       bool p_eliminate, bool p_iterative, bool p_strong,
-		       int p_max = 0, EfgShowInterface *p_parent = 0)
+		       int p_max = 0, EfgShow *p_parent = 0)
     : efgPolEnumSolve(p_support, p_params, p_max),
       guiSubgameViaEfg(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
     { }
 };
 
-guiefgPolEnumEfg::guiefgPolEnumEfg(const EFSupport &p_support, 
-				   EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgPolEnumEfg::guiefgPolEnumEfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-guiefgPolEnumEfg::guiefgPolEnumEfg(const EFSupport &p_support,
-				   EfgShowInterface *p_parent,
-				   int p_stopAfter)
-  : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter)
+guiefgPolEnumEfg::guiefgPolEnumEfg(EfgShow *p_parent, int p_stopAfter)
+  : guiEfgSolution(p_parent), m_stopAfter(p_stopAfter)
 {
   m_eliminate = false;
   m_eliminateAll = false;
@@ -1133,9 +1116,9 @@ guiefgPolEnumEfg::guiefgPolEnumEfg(const EFSupport &p_support,
   m_markSubgames = false;
 }
 
-gList<BehavSolution> guiefgPolEnumEfg::Solve(void) const
+gList<BehavSolution> guiefgPolEnumEfg::Solve(const EFSupport &p_support) const
 {
-  wxPolEnumStatus status(m_parent->Frame());
+  wxPolEnumStatus status(m_parent);
   status.SetProgress(0.0);
   EfgPolEnumParams params(status);
   params.stopAfter = m_stopAfter;
@@ -1145,9 +1128,9 @@ gList<BehavSolution> guiefgPolEnumEfg::Solve(void) const
   gList<BehavSolution> solutions;
 
   try {
-    return EfgPolEnumBySubgameG(m_efg, m_support, params, m_eliminate,
+    return EfgPolEnumBySubgameG(p_support.Game(), p_support, params, m_eliminate,
 				m_eliminateAll, !m_eliminateWeak,
-				0, m_parent).Solve(m_support);
+				0, m_parent).Solve(p_support);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -1155,7 +1138,7 @@ gList<BehavSolution> guiefgPolEnumEfg::Solve(void) const
 
 bool guiefgPolEnumEfg::SolveSetup(void)
 {
-  dialogPolEnum dialog(m_parent->Frame(), true); 
+  dialogPolEnum dialog(m_parent, true); 
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -1184,15 +1167,14 @@ bool guiefgPolEnumEfg::SolveSetup(void)
 
 #include "ngobit.h"
 
-guiefgQreNfg::guiefgQreNfg(const EFSupport &p_support, 
-			   EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgQreNfg::guiefgQreNfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-gList<BehavSolution> guiefgQreNfg::Solve(void) const
+gList<BehavSolution> guiefgQreNfg::Solve(const EFSupport &p_support) const
 {
-  wxStatus status(m_parent->Frame(), "QreSolve Progress");
-  BehavProfile<gNumber> startb = m_parent->CreateStartProfile(m_startOption);
+  wxStatus status(m_parent, "QreSolve Progress");
+  BehavProfile<gNumber> startb(p_support);
 
   NFQreParams params(status);
   params.minLam = m_minLam;
@@ -1204,7 +1186,7 @@ gList<BehavSolution> guiefgQreNfg::Solve(void) const
   params.trace = m_traceLevel;
   params.tracefile = m_traceFile;
 
-  Nfg *N = MakeReducedNfg(EFSupport(m_efg));
+  Nfg *N = MakeReducedNfg(EFSupport(p_support.Game()));
 
   MixedProfile<gNumber> startm(startb);
   
@@ -1236,7 +1218,7 @@ gList<BehavSolution> guiefgQreNfg::Solve(void) const
 
 bool guiefgQreNfg::SolveSetup(void)
 {
-  dialogQre dialog(m_parent->Frame(), m_parent->Filename(), true);
+  dialogQre dialog(m_parent, m_parent->Filename(), true);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -1271,14 +1253,12 @@ bool guiefgQreNfg::SolveSetup(void)
 
 #include "egobit.h"
 
-guiefgQreEfg::guiefgQreEfg(const EFSupport &p_support, 
-			   EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgQreEfg::guiefgQreEfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-guiefgQreEfg::guiefgQreEfg(const EFSupport &p_support,
-			   EfgShowInterface *p_parent, int p_stopAfter)
-  : guiEfgSolution(p_support, p_parent),
+guiefgQreEfg::guiefgQreEfg(EfgShow *p_parent, int p_stopAfter)
+  : guiEfgSolution(p_parent),
     m_stopAfter(p_stopAfter), m_pxiFile(0), m_runPxi(false)
 {
   m_eliminate = false;
@@ -1293,10 +1273,10 @@ guiefgQreEfg::guiefgQreEfg(const EFSupport &p_support,
   m_powLam = 1;
 }
 
-gList<BehavSolution> guiefgQreEfg::Solve(void) const
+gList<BehavSolution> guiefgQreEfg::Solve(const EFSupport &p_support) const
 {
-  wxStatus status(m_parent->Frame(), "QreSolve Progress");
-  BehavProfile<gNumber> start = m_parent->CreateStartProfile(m_startOption);
+  wxStatus status(m_parent, "QreSolve Progress");
+  BehavProfile<gNumber> start(p_support);
   EFQreParams params(status);
   params.minLam = m_minLam;
   params.maxLam = m_maxLam;
@@ -1311,7 +1291,7 @@ gList<BehavSolution> guiefgQreEfg::Solve(void) const
   gList<BehavSolution> solns;
 
   try {
-    Qre(m_efg, params, start, solns, nevals, nits);
+    Qre(p_support.Game(), params, start, solns, nevals, nits);
   }
   catch (gSignalBreak &) { }
 
@@ -1332,7 +1312,7 @@ gList<BehavSolution> guiefgQreEfg::Solve(void) const
 
 bool guiefgQreEfg::SolveSetup(void)
 { 
-  dialogQre dialog(m_parent->Frame(), m_parent->Filename()); 
+  dialogQre dialog(m_parent, m_parent->Filename()); 
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -1368,14 +1348,13 @@ bool guiefgQreEfg::SolveSetup(void)
 #include "dlqregrid.h"
 #include "grid.h"
 
-guiefgQreAllNfg::guiefgQreAllNfg(const EFSupport &p_support, 
-				 EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support, p_parent)
+guiefgQreAllNfg::guiefgQreAllNfg(EfgShow *p_parent)
+  : guiEfgSolution(p_parent)
 { }
 
-gList<BehavSolution> guiefgQreAllNfg::Solve(void) const
+gList<BehavSolution> guiefgQreAllNfg::Solve(const EFSupport &p_support) const
 {
-  wxStatus status(m_parent->Frame(), "QreGridSolve Progress");
+  wxStatus status(m_parent, "QreGridSolve Progress");
 
   GridParams params(status);
   params.minLam = m_minLam;
@@ -1391,7 +1370,7 @@ gList<BehavSolution> guiefgQreAllNfg::Solve(void) const
   params.trace = m_traceLevel;
   params.tracefile = m_traceFile;
 
-  Nfg *N = MakeReducedNfg(m_support);
+  Nfg *N = MakeReducedNfg(p_support);
   NFSupport S(*N);
 
   gList<MixedSolution> nfg_solns;
@@ -1420,7 +1399,7 @@ gList<BehavSolution> guiefgQreAllNfg::Solve(void) const
 
 bool guiefgQreAllNfg::SolveSetup(void)
 {
-  dialogQreGrid dialog(m_parent->Frame(), m_parent->Filename()); 
+  dialogQreGrid dialog(m_parent, m_parent->Filename()); 
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
