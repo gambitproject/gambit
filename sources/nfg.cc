@@ -25,8 +25,7 @@ int Nfg::Product(const gArray<int> &dim)
 }
   
 Nfg::Nfg(const gArray<int> &dim)
-  : dimensions(dim), players(dim.Length()), results(Product(dim)),
-    payoffs(0, dim.Length())
+  : dimensions(dim), players(dim.Length()), results(Product(dim))
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dim[pl]);
@@ -43,7 +42,7 @@ Nfg::Nfg(const gArray<int> &dim)
 Nfg::Nfg(const Nfg &b)
   : title(b.title), dimensions(b.dimensions),
     players(b.players.Length()), outcomes(b.outcomes.Length()),
-    results(b.results.Length()), payoffs(b.payoffs)
+    results(b.results.Length())
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dimensions[pl]);
@@ -58,6 +57,7 @@ Nfg::Nfg(const Nfg &b)
   for (int outc = 1; outc <= outcomes.Length(); outc++)  {
     outcomes[outc] = new NFOutcome(outc, this);
     outcomes[outc]->SetName(b.outcomes[outc]->GetName());
+    outcomes[outc]->payoffs = b.outcomes[outc]->payoffs;
   }
 
   for (int cont = 1; cont <= results.Length(); cont++)    
@@ -152,17 +152,11 @@ NFOutcome *Nfg::NewOutcome(void)
 {
   NFOutcome *outcome = new NFOutcome(outcomes.Length() + 1, this);
   outcomes.Append(outcome);
-
-  gVector<gNumber> zeroes(NumPlayers());
-  zeroes = (gNumber) 0;
-  payoffs.AddRow(zeroes);
-
   return outcome;
 }
 
 void Nfg::DeleteOutcome(NFOutcome *outcome)
 {
-  payoffs.RemoveRow(outcome->GetNumber());
   delete outcomes.Remove(outcome->GetNumber());
 
   for (int outc = 1; outc <= outcomes.Length(); outc++)
@@ -240,13 +234,13 @@ NFOutcome *Nfg::GetOutcome(const StrategyProfile &p) const
 void Nfg::SetPayoff(NFOutcome *outcome,
 					            int pl, const gNumber &value)
 {
-  if (outcome)   payoffs(outcome->GetNumber(), pl) = value;
+  if (outcome)   outcome->payoffs[pl] = value;
 }
 
 gNumber Nfg::Payoff(NFOutcome *outcome, int pl) const
 {
   if (outcome)
-	  return payoffs(outcome->GetNumber(), pl);
+	  return outcome->payoffs[pl];
   else
 	  return (gNumber) 0;
 }

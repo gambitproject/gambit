@@ -1,7 +1,7 @@
 //
 // FILE: nfgutils.cc -- useful utilities for the normal form
 //
-// $Id$
+// @(#)nfgutils.cc	2.15 23 Jul 1997
 //
 
 #include "gmisc.h"
@@ -54,13 +54,13 @@ bool IsConstSum(const Nfg &nfg)
   if (nfg.NumOutcomes() == 0)  return true;
 
   for (pl = 1; pl <= nfg.NumPlayers(); pl++)
-    cvalue += nfg.payoffs(1, pl);
-  
-  for (index = 2; index <= nfg.payoffs.NumRows(); index++)  {
+    cvalue += nfg.Payoff(nfg.outcomes[1], pl);
+
+  for (index = 2; index <= nfg.outcomes.Length(); index++)  {
     gNumber thisvalue = (gNumber) 0;
 
     for (pl = 1; pl <= nfg.NumPlayers(); pl++)
-      thisvalue += nfg.payoffs(index, pl);
+      thisvalue += nfg.Payoff(nfg.outcomes[index], pl);
 
     if (thisvalue > cvalue || thisvalue < cvalue)
       return false;
@@ -76,18 +76,18 @@ gNumber MinPayoff(const Nfg &nfg, int player)
   
   if (nfg.NumOutcomes() == 0)  return (gNumber) 0;
 
-  if (player) 
+  if (player)
     p1 = p2 = player;
   else   {
     p1 = 1;
     p2 = nfg.NumPlayers();
   }
 
-  minpay = nfg.payoffs(1, p1);
-  for (index = 2; index <= nfg.payoffs.NumRows(); index++)  {
+  minpay = nfg.Payoff(nfg.outcomes[1], p1);
+  for (index = 2; index <= nfg.outcomes.Length(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (nfg.payoffs(index, p) < minpay)
-	minpay = nfg.payoffs(index, p);
+      if (nfg.Payoff(nfg.outcomes[index], p) < minpay)
+	minpay = nfg.Payoff(nfg.outcomes[index], p);
   }
   return minpay;
 }
@@ -99,18 +99,18 @@ gNumber MaxPayoff(const Nfg &nfg, int player)
 
   if (nfg.NumOutcomes() == 0)  return (gNumber) 0;
 
-  if (player) 
+  if (player)
     p1 = p2 = player;
   else   {
     p1 = 1;
     p2 = nfg.NumPlayers();
   }
 
-  maxpay = nfg.payoffs(1, p1);
-  for (index = 2; index <= nfg.payoffs.NumRows(); index++)  {
+  maxpay = nfg.Payoff(nfg.outcomes[1], p1);
+  for (index = 2; index <= nfg.outcomes.Length(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (nfg.payoffs(index, p) > maxpay)
-	maxpay = nfg.payoffs(index, p);
+      if (nfg.Payoff(nfg.outcomes[index], p) > maxpay)
+	maxpay = nfg.Payoff(nfg.outcomes[index], p);
   }
   return maxpay;
 }
@@ -118,8 +118,8 @@ gNumber MaxPayoff(const Nfg &nfg, int player)
 void RandomNfg(Nfg &nfg)
 {
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)
-    for (int outc = 1; outc <= nfg.payoffs.NumRows(); outc++)
-      nfg.payoffs(outc, pl) = (gNumber) Uniform();
+    for (int outc = 1; outc <= nfg.outcomes.Length(); outc++)
+      nfg.SetPayoff(nfg.outcomes[outc], pl, (gNumber) Uniform());
 }  
 
 

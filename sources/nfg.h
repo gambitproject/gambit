@@ -12,26 +12,8 @@
 #include "grblock.h"
 #include "gnumber.h"
 
-class NFOutcome   {
-  friend class Nfg;
-  private:
-    int number;
-    Nfg *nfg;
-    gString name;
+class NFOutcome;
 
-    NFOutcome(int n, Nfg *N) : number(n), nfg(N)  { }
-    NFOutcome(int n, const NFOutcome &c) 
-      : number(n), nfg(c.nfg),name(c.name) { }
-    ~NFOutcome() { }
-
-  public:
-    int GetNumber(void) const    { return number; }
-
-    const gString &GetName(void) const   { return name; }
-    void SetName(const gString &s)   { name = s; }
-
-    Nfg *Game(void) const   { return nfg; }
-};
 
 #include "gblock.h"
 
@@ -57,8 +39,6 @@ protected:
   gBlock<NFOutcome *> outcomes;
 
   gArray<NFOutcome *> results;
-
-  gRectBlock<gNumber> payoffs;
 #ifndef NFG_ONLY
   const Efg *efg;
 #endif  // NFG_ONLY
@@ -122,5 +102,27 @@ public:
 };
 
 int ReadNfgFile(gInput &, Nfg *&);
+
+class NFOutcome   {
+  friend class Nfg;
+  private:
+    int number;
+    Nfg *nfg;
+    gString name;
+    gArray<gNumber> payoffs;
+
+    NFOutcome(int n, Nfg *N) : number(n), nfg(N), payoffs(N->NumPlayers())  { }
+    NFOutcome(int n, const NFOutcome &c)
+      : number(n), nfg(c.nfg),name(c.name), payoffs(c.payoffs) { }
+    ~NFOutcome() { }
+
+  public:
+    int GetNumber(void) const    { return number; }
+
+    const gString &GetName(void) const   { return name; }
+    void SetName(const gString &s)   { name = s; }
+
+    Nfg *Game(void) const   { return nfg; }
+};
 
 #endif    // NFG_H

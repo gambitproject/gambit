@@ -308,10 +308,8 @@ EFOutcome *EfgFile::NewOutcome(void)
 void EfgFile::SetOutcome(EFOutcome *c,
 			 const gList<gNumber> &p)
 {
-  int outc;
-  for (outc = 1; E->Outcomes()[outc] != c; outc++);
   for (int i = 1; i <= p.Length(); i++)
-    E->payoffs(outc, i) = p[i];
+    E->SetPayoff(c, i, p[i]);
 }
 
 void EfgFile::SetActionProbs(Infoset *s,
@@ -332,10 +330,8 @@ bool EfgFile::CheckActionProbs(Infoset *s,
 bool EfgFile::CheckOutcome(EFOutcome *c,
 			   const gList<gNumber> &p)
 {
-  int outc;
-  for (outc = 1; E->Outcomes()[outc] != c; outc++);
   for (int i = 1; i <= p.Length(); i++)
-    if (E->payoffs(outc, i) != p[i])   return false;
+    if (E->Payoff(c, i) != p[i])   return false;
   return true;
 }
 

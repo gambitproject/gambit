@@ -18,8 +18,9 @@ class EFOutcome   {
     int number;
     gString name;
     Efg *E;
+    gBlock<gNumber> payoffs;
 
-    EFOutcome(Efg *e, int n) : number(n), E(e)   { }
+    EFOutcome(Efg *e, int n) : number(n), E(e), payoffs(e->NumPlayers())   { }
     ~EFOutcome()   { }
   
   public:

@@ -15,6 +15,8 @@
 #include "grblock.h"
 #include "gnumber.h"
 
+#include "gpolyctr.h"
+
 class EFOutcome;
 class EFPlayer;
 class Infoset;
@@ -45,7 +47,6 @@ protected:
     gBlock<EFOutcome *> outcomes;
     Node *root;
     EFPlayer *chance;
-    gRectBlock<gNumber> payoffs;
 #ifndef EFG_ONLY
     mutable Nfg *afg;
 #endif  EFG_ONLY
