@@ -245,7 +245,7 @@ BehavProfile<T>::BehavProfile(const BehavProfile<T> &p_profile)
   : gDPVector<T>(p_profile), m_efg(p_profile.m_efg),
     m_root(new BehavNode((Efg *)p_profile.m_efg, p_profile.m_efg->RootNode(),
 			 p_profile.m_efg->NumPlayers())),
-    m_support(new EFSupport(*p_profile.m_support)),
+    m_support(p_profile.m_support),
     m_isets(p_profile.m_isets.Length()), 
     m_cached_data(false)
 {
@@ -257,7 +257,8 @@ BehavProfile<T>::BehavProfile(const BehavSolution &p_solution)
   : gDPVector<T>(p_solution.Game().NumActions()), m_efg(&p_solution.Game()),
     m_root(new BehavNode((Efg*)m_efg, p_solution.Game().RootNode(),
 			 p_solution.Game().NumPlayers())),
-    m_support(new EFSupport(p_solution.Game())), m_isets(p_solution.Game().TotalNumInfosets()), 
+    m_support(p_solution.Game()),
+    m_isets(p_solution.Game().TotalNumInfosets()), 
     m_cached_data(false)
 
 {
@@ -276,7 +277,7 @@ template <class T> BehavProfile<T>::BehavProfile(const EFSupport &p_support)
   : gDPVector<T>(p_support.NumActions()), 
     m_efg(&p_support.Game()),
     m_root(new BehavNode((Efg *)m_efg, m_efg->RootNode(), m_efg->NumPlayers())),
-    m_support(new EFSupport(p_support)), m_isets(m_efg->TotalNumInfosets()), 
+    m_support(p_support), m_isets(m_efg->TotalNumInfosets()), 
     m_cached_data(false)
 
 {
@@ -289,7 +290,7 @@ BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
   : gDPVector<T>(p_profile.Game().AssociatedEfg()->NumActions()), 
     m_efg(p_profile.Game().AssociatedEfg()),
     m_root(new BehavNode((Efg *)m_efg, m_efg->RootNode(), m_efg->NumPlayers())),
-    m_support(new EFSupport(*m_efg)),  
+    m_support(*m_efg),  
     m_isets(p_profile.Game().AssociatedEfg()->TotalNumInfosets()), 
     m_cached_data(false)
 
@@ -334,7 +335,6 @@ template <class T> BehavProfile<T>::~BehavProfile()
   for (int i = 1; i <= m_isets.Length(); i++)  {
     delete m_isets[i];
   }
-  delete m_support;
 }
 
 //-------------------------------------------------------------------------
@@ -404,7 +404,7 @@ void BehavProfile<T>::InitPayoffs(void) const
 
   const gArray<Infoset *> &isets = ((FullEfg *)m_efg)->GetChance()->Infosets();
   for(int iset=1;iset<=isets.Length();iset++) {
-    const gArray<Action *> &acts = m_support->Actions(isets[iset]);
+    const gArray<Action *> &acts = m_support.Actions(isets[iset]);
     for(int act=1;act<=acts.Length();act++) 
       *(((BehavAction *)(acts[act]->solution))->probability) 
 	= ((FullEfg *)m_efg)->GetChanceProb(acts[act]);
@@ -419,7 +419,7 @@ void BehavProfile<T>::InitProfile(void)
   const gBlock<Infoset *> &efg_isets = ((FullEfg *)m_efg)->Infosets();
   for(int i=1;i<=efg_isets.Length();i++) {
     int pl = efg_isets[i]->GetPlayer()->GetNumber();
-    m_isets[i] = new BehavInfoset(*m_support,efg_isets[i],m_efg->NumPlayers());
+    m_isets[i] = new BehavInfoset(m_support,efg_isets[i],m_efg->NumPlayers());
     int iset = m_isets[i]->iset->GetNumber();
     for(int j=1;j<=m_isets[i]->actions.Length();j++) 
       m_isets[i]->actions[j]->probability = &((*this)(pl,iset,j));
@@ -430,7 +430,7 @@ void BehavProfile<T>::InitProfile(void)
   const gArray<Infoset *> &chance_isets = ((FullEfg *)m_efg)->GetChance()->Infosets();
   assert(efg_isets.Length()+chance_isets.Length()==m_isets.Length());
   for(int i=1;i<=chance_isets.Length();i++) {
-    m_isets[n1+i] = new BehavInfoset(*m_support,chance_isets[i],m_efg->NumPlayers());
+    m_isets[n1+i] = new BehavInfoset(m_support,chance_isets[i],m_efg->NumPlayers());
     for(int j=1;j<=m_isets[n1+i]->actions.Length();j++) 
       m_isets[n1+i]->actions[j]->probability = new T(0); 
   }
@@ -449,8 +449,8 @@ template <class T> void BehavProfile<T>::Centroid(void) const
 
   for (int pl = 1; pl <= dvlen.Length(); pl++)
     for (int iset = 1; iset <= dvlen[pl]; iset++)
-      if (m_support->NumActions(pl,iset) > 0) {
-	center = ((T) 1 / (T) m_support->NumActions(pl, iset));
+      if (m_support.NumActions(pl,iset) > 0) {
+	center = ((T) 1 / (T) m_support.NumActions(pl, iset));
 	int act;
 	for (act = 1; act <= svlen[dvidx[pl] + iset - 1]; act++)
 	  dvptr[pl][iset][act] = center;
@@ -604,7 +604,7 @@ void BehavProfile<T>::Payoff(Node *node, T prob, int player, T &value) const
   }
 
   if (node->children.Length())  {
-    const gArray<Action *> &acts = m_support->Actions(iset);
+    const gArray<Action *> &acts = m_support.Actions(iset);
     for (int act = 1; act <= acts.Length(); act++) 
       Payoff(node->GetChild(acts[act]), prob * ActionProb(acts[act]), player, value);
   }
@@ -801,7 +801,7 @@ void BehavProfile<T>::ComputeActionValues(Node *node, T prob)
     
     nv = (T) 0;
     
-    const gArray<Action *> &acts = m_support->Actions(iset);
+    const gArray<Action *> &acts = m_support.Actions(iset);
     for (int act = 1; act <= acts.Length(); act++)  {
       Node * child = node->GetChild(acts[act]);
       
@@ -882,7 +882,7 @@ template <class T> T BehavProfile<T>::LiapValue(void)
   for (int i = 1; i <= players.Length(); i++) {
     const gArray<Infoset *> &infosets = players[i]->Infosets();
     for (int iset = 1; iset <= infosets.Length(); iset++) {
-      const gArray<Action *> &acts = m_support->Actions(infosets[iset]);
+      const gArray<Action *> &acts = m_support.Actions(infosets[iset]);
       avg = sum = (T)0;
 
       for (int act = 1; act <= acts.Length(); act++) {
@@ -1616,7 +1616,7 @@ void BehavAssessment<T>::CondPayoff(BehavProfile<T>::BehavNode *p_node,
     // path.  So, we must traverse the whole tree, and cannot ignore
     // the (zero-probability) actions which do not appear in the support
     for (int child = 1; child <= m_efg->NumChildren(p_node->node); child++) {
-      int act = m_support->Find(p_node->node->GetInfoset()->Actions()[child]);
+      int act = m_support.Find(p_node->node->GetInfoset()->Actions()[child]);
       T newprob;
       if (act)
 	newprob = (*this)(npl, iset, act);
