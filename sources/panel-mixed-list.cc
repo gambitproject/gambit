@@ -64,32 +64,6 @@ gbtMixedProfileCtrl::gbtMixedProfileCtrl(wxWindow *p_parent,
   AdjustScrollbars();
 }
 
-static wxString ToMyerson(const gbtMixedProfile<double> &p_profile,
-			  const gbtGamePlayer &p_player)
-{
-  wxString ret = "";
-  for (int st = 1; st <= p_player->NumStrategies(); st++) {
-    gbtGameStrategy strategy = p_player->GetStrategy(st);
-    if (p_profile->GetStrategyProb(strategy) > 0.0) {
-      if (ret != "") {
-	ret += " + ";
-      }
-
-      if (strategy->GetLabel() != "") {
-	ret += wxString::Format("%f*[%s]",
-				p_profile->GetStrategyProb(strategy),
-				strategy->GetLabel().c_str());
-      }
-      else {
-	ret += wxString::Format("%f*[<%d>]",
-				p_profile->GetStrategyProb(strategy), st);
-      }
-    }
-  }
-
-  return ret;
-}
-
 wxString gbtMixedProfileCtrl::GetCellValue(const wxSheetCoords &p_coords)
 {
   if (IsRowLabelCell(p_coords)) {
@@ -102,8 +76,7 @@ wxString gbtMixedProfileCtrl::GetCellValue(const wxSheetCoords &p_coords)
     return "#";
   }
 
-  return ToMyerson(m_eqa[p_coords.GetRow() + 1],
-		   m_doc->GetGame()->GetPlayer(p_coords.GetCol() + 1));
+  return m_eqa[p_coords.GetRow() + 1]->ToMyerson(m_doc->GetGame()->GetPlayer(p_coords.GetCol() + 1)).c_str();
 }
 
 wxSheetCellAttr gbtMixedProfileCtrl::GetAttr(const wxSheetCoords &p_coords,
