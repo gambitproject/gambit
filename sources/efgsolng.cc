@@ -186,7 +186,7 @@ LiapSolveParamsDialog::LiapSolveParamsDialog(wxWindow *p_parent,
 					     bool p_subgames)
   : OutputParamsDialog("LiapSolve Parameters", p_parent)
 {
-  MakeDominanceFields();
+  MakeCommonFields(true, p_subgames);
 
   Add(wxMakeFormShort("Max # Tries", &nTries, wxFORM_DEFAULT, NULL, NULL,
 		      wxVERTICAL, 100));
@@ -383,7 +383,7 @@ SeqFormParamsDialog::SeqFormParamsDialog(wxWindow *p_parent /* =0 */,
 					 bool p_subgames /* = false */)
   : OutputParamsDialog("LcpSolve Params", p_parent)
 {
-  MakeDominanceFields();
+  MakeCommonFields(true, p_subgames);
 
   Add(wxMakeFormBool("All Solutions", &dup_strat));
   Add(wxMakeFormNewLine());
@@ -471,7 +471,7 @@ LemkeSolveParamsDialog::LemkeSolveParamsDialog(wxWindow *p_parent /* = 0 */,
 					       bool p_subgames /* = false */)
   : OutputParamsDialog("LcpSolve Params", p_parent, LCP_HELP)
 {
-  MakeDominanceFields();
+  MakeCommonFields(true, p_subgames);
 
   MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD | PRECISION_FIELD |
 		   ((p_subgames) ? SPS_FIELD : 0));
@@ -556,7 +556,7 @@ PureNashSolveParamsDialog::PureNashSolveParamsDialog(wxWindow *p_parent /*=0*/,
 						     bool p_subgames/*=false*/)
   : OutputParamsDialog("EnumPureSolve Params", p_parent)
 {
-  MakeDominanceFields();
+  MakeCommonFields(true, p_subgames);
 
   MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD |
 		   ((p_subgames) ? SPS_FIELD : 0));
@@ -697,7 +697,7 @@ EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *p_parent,
 					     bool p_subgames)
   : OutputParamsDialog("EnumMixedSolve Params", p_parent, ENUMMIXED_HELP)
 {
-  MakeDominanceFields();
+  MakeCommonFields(true, p_subgames);
 
   Add(wxMakeFormNewLine());
 
@@ -819,7 +819,7 @@ void LPParamsSettings::GetParams(CSSeqFormParams &p_params)
 LPSolveParamsDialog::LPSolveParamsDialog(wxWindow *p_parent, bool p_subgames)
   : OutputParamsDialog("LpSolve Params", p_parent, LP_HELP)
 {
-  MakeDominanceFields();
+  MakeCommonFields(true, p_subgames);
   Add(wxMakeFormNewLine());
 
   MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD | PRECISION_FIELD |
@@ -997,7 +997,7 @@ SimpdivSolveParamsDialog::SimpdivSolveParamsDialog(wxWindow *p_parent /*=0*/,
 						   bool p_subgames /*=false*/)
   : OutputParamsDialog("SimpdivSolve Params", p_parent, SIMPDIV_HELP)
 {
-  MakeDominanceFields();
+  MakeCommonFields(true, p_subgames);
 
   Add(wxMakeFormNewLine());
   Add(wxMakeFormShort("# Restarts", &nRestarts));
@@ -1073,7 +1073,7 @@ bool EfgSimpdivG::SolveSetup(void) const
 #include "egobit.h"
 
 QreParamsSettings::QreParamsSettings(const char *p_filename)
-  : PxiParamsSettings("QreSolve", p_filename)
+  : PxiParamsSettings("Qre", p_filename)
 {
   wxGetResource(PARAMS_SECTION, "Qre-minLam", &minLam, defaults_file);
   wxGetResource(PARAMS_SECTION, "Qre-maxLam", &maxLam, defaults_file);
@@ -1141,12 +1141,12 @@ QreSolveParamsDialog::QreSolveParamsDialog(wxWindow *p_parent,
 		    QRE_HELP),
     QreParamsSettings(p_filename), PxiParamsSettings("Qre", p_filename)
 {
-  MakeDominanceFields();
+  MakeCommonFields(true, false);
 
   Add(wxMakeFormFloat("minLam", &minLam, wxFORM_DEFAULT,
 		      NULL, NULL, wxVERTICAL, 100));
   Add(wxMakeFormFloat("maxLam", &maxLam, wxFORM_DEFAULT,
-			      NULL, NULL, wxVERTICAL, 100));
+		      NULL, NULL, wxVERTICAL, 100));
   Add(wxMakeFormFloat("delLam", &delLam, wxFORM_DEFAULT,
 		      NULL, NULL, wxVERTICAL, 100));
   Add(wxMakeFormNewLine());

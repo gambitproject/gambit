@@ -166,36 +166,41 @@ OutputParamsDialog::OutputParamsDialog(const char *label,
 OutputParamsDialog::~OutputParamsDialog(void)
 { }
 
-void OutputParamsDialog::MakeDominanceFields(void)
+void OutputParamsDialog::MakeCommonFields(bool p_dominance, bool p_subgames)
 {
-  Add(wxMakeFormMessage("Dominance elimination:"));
-  Add(wxMakeFormNewLine());
+  if (p_dominance) {
+    Add(wxMakeFormMessage("Dominance elimination:"));
+    Add(wxMakeFormNewLine());
 
-  m_domDepthList = new wxStringList("None", "Once", "Iterative", 0);
-  Add(wxMakeFormString("Depth", &m_domDepthStr, wxFORM_RADIOBOX,
-		       new wxList(wxMakeConstraintStrings(m_domDepthList), 0),
-		       0, wxVERTICAL));
-  Add(wxMakeFormNewLine());
+    m_domDepthList = new wxStringList("None", "Once", "Iterative", 0);
+    Add(wxMakeFormString("Depth", &m_domDepthStr, wxFORM_RADIOBOX,
+			 new wxList(wxMakeConstraintStrings(m_domDepthList),
+				    0), 0, wxVERTICAL));
+    Add(wxMakeFormNewLine());
 
-  dom_type_list = new wxStringList("Weak", "Strong", 0);
-  dom_type_str = new char[20];
-  strcpy(dom_type_str, (char *) dom_type_list->Nth(dom_type)->Data());
-  Add(wxMakeFormString("Type", &dom_type_str, wxFORM_RADIOBOX,
-		       new wxList(wxMakeConstraintStrings(dom_type_list), 0),
-		       0, wxVERTICAL));
+    dom_type_list = new wxStringList("Weak", "Strong", 0);
+    dom_type_str = new char[20];
+    strcpy(dom_type_str, (char *) dom_type_list->Nth(dom_type)->Data());
+    Add(wxMakeFormString("Type", &dom_type_str, wxFORM_RADIOBOX,
+			 new wxList(wxMakeConstraintStrings(dom_type_list), 0),
+			 0, wxVERTICAL));
   
-  dom_method_list = new wxStringList("Pure", "Mixed", 0);
-  dom_method_str = new char[20];
-  strcpy(dom_method_str, (char *) dom_method_list->Nth(dom_method)->Data());
-  Add(wxMakeFormString("Method", &dom_method_str, wxFORM_RADIOBOX,
-		       new wxList(wxMakeConstraintStrings(dom_method_list), 0),
-		       0, wxVERTICAL));
+    dom_method_list = new wxStringList("Pure", "Mixed", 0);
+    dom_method_str = new char[20];
+    strcpy(dom_method_str, (char *) dom_method_list->Nth(dom_method)->Data());
+    Add(wxMakeFormString("Method", &dom_method_str, wxFORM_RADIOBOX,
+			 new wxList(wxMakeConstraintStrings(dom_method_list),
+				    0), 0, wxVERTICAL));
   
-  Add(wxMakeFormNewLine());
-  Add(wxMakeFormMessage("Subgames:"));
-  Add(wxMakeFormNewLine());
-  Add(wxMakeFormBool("Mark subgames before solving", &markSubgames));
-  Add(wxMakeFormNewLine());
+    Add(wxMakeFormNewLine());
+  }
+  
+  if (p_subgames) {
+    Add(wxMakeFormMessage("Subgames:"));
+    Add(wxMakeFormNewLine());
+    Add(wxMakeFormBool("Mark subgames before solving", &markSubgames));
+    Add(wxMakeFormNewLine());
+  }
 
   Add(wxMakeFormMessage("Algorithm behavior:"));
   Add(wxMakeFormNewLine());

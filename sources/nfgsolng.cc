@@ -240,8 +240,8 @@ NfgQreG::NfgQreG(const Nfg &p_nfg, const NFSupport &p_support,
 gList<MixedSolution> NfgQreG::Solve(void) const
 {
   QreParamsSettings GSPD(parent->Filename());
-  wxStatus *status = new wxStatus(parent->Frame(), "QRE Algorithm");
-  NFQreParams P(*status);
+  wxStatus status(parent->Frame(), "QRE Algorithm");
+  NFQreParams P(status);
   GSPD.GetParams(P);
 
   MixedProfile<gNumber> start(parent->CreateStartProfile(GSPD.StartOption()));
@@ -249,7 +249,6 @@ gList<MixedSolution> NfgQreG::Solve(void) const
   long nevals, nits;
   Qre(nf, P, start, solns, nevals, nits);
 
-  delete status;
   GSPD.RunPxi();
   return solns;
 }
