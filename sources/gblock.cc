@@ -1,14 +1,14 @@
-//#
-//# FILE: gblock.cc -- Provide implementations for commonly-used blocks
-//#
-//# $Id$
-//#
+//
+// FILE: gblock.cc -- Provide implementations for commonly-used blocks
+//
+// $Id$
+//
 
 #include "gmisc.h"
 #include "gblock.imp"
 #include "gstring.h"
 #include "rational.h"
-
+#include "gnumber.h"
 
 template class gBlock<bool>;
 template class gBlock<int>;
@@ -17,6 +17,7 @@ template class gBlock<float>;
 template class gBlock<double>;
 template class gBlock<gRational>;
 template class gBlock<gString>;
+template class gBlock<gNumber>;
 
 #include "garray.imp"
 template class gArray<gBlock<int> >;

@@ -62,11 +62,15 @@ void ToStringWidth(int); // Set # of decimal places for floating point
 int  ToStringWidth(void); // Get the current value of the above
 void ToStringPrecision(int); // Set # of decimal places for floating point
 int  ToStringPrecision(void); // Get the current value of the above
+
+class gNumber;
+
 gString ToString(int);
 gString ToString(long);
 gString ToString(double);
 gString ToString(const gInteger &);
 gString ToString(const gRational &, bool approx = true);
+gString ToString(const gNumber &);
 
 double		FromString(const gString &s,double &d);
 gRational	FromString(const gString &s,gRational &r);

@@ -6,6 +6,7 @@
 #include "gambitio.h"
 #include "gstring.h"
 #include "rational.h"
+#include "gnumber.h"
 #include "gstack.h"
 #include "glist.h"
 #include "efg.h"
@@ -24,19 +25,19 @@ template class gStack<Node *>;
                    Efg *& E; \
                    gStack<Node *> path; \
                    gList<gString> actions; \
-                   gList<gRational> values; \
+                   gList<gNumber> values; \
                    EFPlayer *player; Infoset *infoset; EFOutcome *outcome; \
                    int i;  gString iset_name, outc_name; \
                    virtual ~EfgFileReader(); \
                    virtual EFOutcome *NewOutcome(void) = 0; \
                    virtual void SetOutcome(EFOutcome *, \
-					   const gList<gRational> &) = 0; \
+					   const gList<gNumber> &) = 0; \
                    virtual void SetActionProbs(Infoset *, \
-					       const gList<gRational> &) = 0; \
+					       const gList<gNumber> &) = 0; \
                    virtual bool CheckActionProbs(Infoset *, \
-						 const gList<gRational> &)=0;\
+						 const gList<gNumber> &)=0;\
                    virtual bool CheckOutcome(EFOutcome *, \
-					     const gList<gRational> &) = 0;
+					     const gList<gNumber> &) = 0;
 
 
 %define CONSTRUCTOR_PARAM    gInput &f, Efg *& e
@@ -286,10 +287,10 @@ class EfgFile : public EfgFileReader    {
     int Parse(void);
 
     EFOutcome *NewOutcome(void);
-    void SetOutcome(EFOutcome *, const gList<gRational> &);
-    void SetActionProbs(Infoset *, const gList<gRational> &);
-    bool CheckActionProbs(Infoset *, const gList<gRational> &);
-    bool CheckOutcome(EFOutcome *, const gList<gRational> &);
+    void SetOutcome(EFOutcome *, const gList<gNumber> &);
+    void SetActionProbs(Infoset *, const gList<gNumber> &);
+    bool CheckActionProbs(Infoset *, const gList<gNumber> &);
+    bool CheckOutcome(EFOutcome *, const gList<gNumber> &);
 };
 
 EfgFile::EfgFile(gInput &f, Efg *& E)
@@ -305,7 +306,7 @@ EFOutcome *EfgFile::NewOutcome(void)
 }
 
 void EfgFile::SetOutcome(EFOutcome *c,
-			 const gList<gRational> &p)
+			 const gList<gNumber> &p)
 {
   int outc;
   for (outc = 1; E->Outcomes()[outc] != c; outc++);
@@ -314,14 +315,14 @@ void EfgFile::SetOutcome(EFOutcome *c,
 }
 
 void EfgFile::SetActionProbs(Infoset *s,
-			     const gList<gRational> &p)
+			     const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
     E->SetChanceProb(s, i, p[i]);
 }
 
 bool EfgFile::CheckActionProbs(Infoset *s,
-			       const gList<gRational> &p)
+			       const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
     if (E->GetChanceProb(s, i) != p[i])  return false;
@@ -329,7 +330,7 @@ bool EfgFile::CheckActionProbs(Infoset *s,
 }
 
 bool EfgFile::CheckOutcome(EFOutcome *c,
-			   const gList<gRational> &p)
+			   const gList<gNumber> &p)
 {
   int outc;
   for (outc = 1; E->Outcomes()[outc] != c; outc++);

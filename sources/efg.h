@@ -13,7 +13,7 @@
 
 #include "gpvector.h"
 #include "grblock.h"
-
+#include "gnumber.h"
 
 class EFOutcome;
 class EFPlayer;
@@ -45,7 +45,7 @@ protected:
     gBlock<EFOutcome *> outcomes;
     Node *root;
     EFPlayer *chance;
-    gRectBlock<gRational> payoffs;
+    gRectBlock<gNumber> payoffs;
 #ifndef EFG_ONLY
     mutable Nfg *afg;
 #endif  EFG_ONLY
@@ -77,10 +77,10 @@ protected:
 
     void WriteEfgFile(gOutput &, Node *) const;
 
-    void Payoff(Node *n, gRational, const gPVector<int> &, gVector<gRational> &) const;
-    void Payoff(Node *n, gRational, const gArray<gArray<int> *> &, gVector<gRational> &) const;
+    void Payoff(Node *n, gNumber, const gPVector<int> &, gVector<gNumber> &) const;
+    void Payoff(Node *n, gNumber, const gArray<gArray<int> *> &, gVector<gNumber> &) const;
 
-    void InfosetProbs(Node *n, gRational, const gPVector<int> &, gPVector<gRational> &) const;
+    void InfosetProbs(Node *n, gNumber, const gPVector<int> &, gPVector<gNumber> &) const;
 
 
 // These are used in identification of subgames
@@ -104,8 +104,8 @@ protected:
 
        //# DATA ACCESS -- GENERAL INFORMATION
     bool IsConstSum(void) const;
-    gRational MinPayoff(int pl = 0) const;
-    gRational MaxPayoff(int pl = 0) const;
+    gNumber MinPayoff(int pl = 0) const;
+    gNumber MaxPayoff(int pl = 0) const;
 
     Node *RootNode(void) const;
     bool IsSuccessor(const Node *n, const Node *from) const;
@@ -149,13 +149,13 @@ protected:
 
     void Reveal(Infoset *, const gArray<EFPlayer *> &);
 
-    void SetChanceProb(Infoset *, int, const gRational &);
-    gRational GetChanceProb(Infoset *, int) const;
-    gArray<gRational> GetChanceProbs(Infoset *) const;
+    void SetChanceProb(Infoset *, int, const gNumber &);
+    gNumber GetChanceProb(Infoset *, int) const;
+    gArray<gNumber> GetChanceProbs(Infoset *) const;
 
-    void SetPayoff(EFOutcome *, int pl, const gRational &value);
-    gRational Payoff(EFOutcome *, int pl) const;
-    gVector<gRational> Payoff(EFOutcome *) const;
+    void SetPayoff(EFOutcome *, int pl, const gNumber &value);
+    gNumber Payoff(EFOutcome *, int pl) const;
+    gVector<gNumber> Payoff(EFOutcome *) const;
 
 
     // Unmarks all subgames in the subtree rooted at n
@@ -174,11 +174,11 @@ protected:
     gPVector<int> NumMembers(void) const;
 
         //# COMPUTING VALUES OF PROFILES
-    void Payoff(const gPVector<int> &profile, gVector<gRational> &payoff) const;
+    void Payoff(const gPVector<int> &profile, gVector<gNumber> &payoff) const;
     void Payoff(const gArray<gArray<int> *> &profile,
-		gVector<gRational> &payoff) const;
+		gVector<gNumber> &payoff) const;
 
-    void InfosetProbs(const gPVector<int> &profile, gPVector<gRational> &prob) const;
+    void InfosetProbs(const gPVector<int> &profile, gPVector<gNumber> &prob) const;
 
     // defined in efgutils.cc
     friend void RandomEfg(Efg &);

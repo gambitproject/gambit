@@ -420,18 +420,18 @@ bool IntPortion::IsReference(void) const
 //                          Rational class
 //---------------------------------------------------------------------
 
-NumberPortion::NumberPortion(const gRational &value)
-  : _Value(new gRational(value)), _ref(false)
+NumberPortion::NumberPortion(const gNumber &value)
+  : _Value(new gNumber(value)), _ref(false)
 { }
 
-NumberPortion::NumberPortion(gRational &value, bool ref)
+NumberPortion::NumberPortion(gNumber &value, bool ref)
   : _Value(&value), _ref(ref)
 { }
 
 NumberPortion::~NumberPortion()
 { }
 
-gRational& NumberPortion::Value(void) const
+gNumber& NumberPortion::Value(void) const
 { return *_Value; }
 
 PortionSpec NumberPortion::Spec(void) const
@@ -445,7 +445,7 @@ void NumberPortion::Output(gOutput& s) const
 
 gString NumberPortion::OutputString( void ) const
 {
-  return ToString( *_Value );
+  return ToString(*_Value);
 }
 
 Portion* NumberPortion::ValCopy(void) const

@@ -477,7 +477,7 @@ Portion* GSM_List_Number( Portion** param )
   p->SetDataType( param[0]->Spec().Type );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( new NumberPortion( ((NumberPortion*) param[0])->Value()+
-				      (gRational)(i-1)*
+				      (gNumber)(i-1)*
 				      ((NumberPortion*) param[2])->Value()));
   return p;
 }
@@ -627,7 +627,7 @@ Portion* GSM_ArgMax_Number( Portion** param )
     p = (*(ListPortion*) param[0])[i];
     if( p->Spec() == porNUMBER )
     {
-      if( ((NumberPortion*) p)->Value() >= max ||
+      if( ((NumberPortion*) p)->Value() >= gNumber(max) ||
 	 i == ((ListPortion*) param[0])->Length() )
       {
 	max = ((NumberPortion*) p)->Value();

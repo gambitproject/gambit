@@ -18,7 +18,7 @@ template <class T> int FindPureNash(const Efg &efg, const EFSupport &sup,
 {
   int index;
   EfgContIter<T> citer(sup);
-  gPVector<gRational> probs(efg.NumInfosets());
+  gPVector<gNumber> probs(efg.NumInfosets());
 
   do  {
     int flag = 1;

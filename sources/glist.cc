@@ -8,6 +8,7 @@
 #include "glist.imp"
 #include "gstring.h"
 #include "rational.h"
+#include "gnumber.h"
 
 #include "garray.h"
 #include "gblock.h"
@@ -15,6 +16,9 @@
 
 template class gList<gRational>;
 template class gNode<gRational>;
+
+template class gList<gNumber>;
+template class gNode<gNumber>;
 
 template class gList<int>;
 template class gNode<int>;

@@ -153,8 +153,8 @@ NFOutcome *Nfg::NewOutcome(void)
   NFOutcome *outcome = new NFOutcome(outcomes.Length() + 1, this);
   outcomes.Append(outcome);
 
-  gVector<gRational> zeroes(NumPlayers());
-  zeroes = (gRational) 0;
+  gVector<gNumber> zeroes(NumPlayers());
+  zeroes = (gNumber) 0;
   payoffs.AddRow(zeroes);
 
   return outcome;
@@ -238,17 +238,17 @@ NFOutcome *Nfg::GetOutcome(const StrategyProfile &p) const
 }
 
 void Nfg::SetPayoff(NFOutcome *outcome,
-					            int pl, const gRational &value)
+					            int pl, const gNumber &value)
 {
   if (outcome)   payoffs(outcome->GetNumber(), pl) = value;
 }
 
-gRational Nfg::Payoff(NFOutcome *outcome, int pl) const
+gNumber Nfg::Payoff(NFOutcome *outcome, int pl) const
 {
   if (outcome)
 	  return payoffs(outcome->GetNumber(), pl);
   else
-	  return (gRational) 0;
+	  return (gNumber) 0;
 }
 
 // ---------------------------------------

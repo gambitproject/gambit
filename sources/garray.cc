@@ -1,14 +1,14 @@
-//#
-//# FILE: garray.cc -- Instantiations for common gArray classes
-//#
-//# $Id$
-//#
+//
+// FILE: garray.cc -- Instantiations for common gArray classes
+//
+// $Id$
+//
 
 #include "garray.imp"
 #include "gmisc.h"
 #include "gstring.h"
 #include "rational.h"
-
+#include "gnumber.h"
 
 template class gArray<bool>;
 template class gArray<int>;
@@ -17,6 +17,7 @@ template class gArray<float>;
 template class gArray<double>;
 template class gArray<gInteger>;
 template class gArray<gRational>;
+template class gArray<gNumber>;
 template class gArray<gString>;
 template class gArray<gArray<int> >;
 template class gArray<gArray<int> *>;

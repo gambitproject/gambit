@@ -16,7 +16,7 @@ template <class T> class EfgIter    {
     Efg *_efg;
     EFSupport _support;
     gPVector<int> _efgidx, _supidx;
-    mutable gVector<gRational> _payoff;
+    mutable gVector<gNumber> _payoff;
 
   public:
     EfgIter(Efg &);

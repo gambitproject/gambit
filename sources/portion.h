@@ -18,7 +18,7 @@
 
 #include "glist.h"
 #include "gstring.h"
-#include "rational.h"
+#include "gnumber.h"
 
 
 
@@ -228,16 +228,16 @@ public:
 class NumberPortion : public Portion
 {
 protected:
-  gRational* _Value;
+  gNumber* _Value;
   bool _ref;
 
-  NumberPortion(gRational &, bool);
+  NumberPortion(gNumber &, bool);
 
 public:
-  NumberPortion(const gRational &);
+  NumberPortion(const gNumber &);
   virtual ~NumberPortion();
 
-  gRational& Value(void) const;
+  gNumber& Value(void) const;
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;

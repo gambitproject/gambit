@@ -1,5 +1,5 @@
 //
-// FILE nfgutils.cc -- useful utilities for the normal form
+// FILE: nfgutils.cc -- useful utilities for the normal form
 //
 // $Id$
 //
@@ -49,7 +49,7 @@ Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S)
 bool IsConstSum(const Nfg &nfg)
 {
   int pl, index;
-  gRational cvalue = (gRational) 0;
+  gNumber cvalue = (gNumber) 0;
 
   if (nfg.NumOutcomes() == 0)  return true;
 
@@ -57,7 +57,7 @@ bool IsConstSum(const Nfg &nfg)
     cvalue += nfg.payoffs(1, pl);
   
   for (index = 2; index <= nfg.payoffs.NumRows(); index++)  {
-    gRational thisvalue = (gRational) 0;
+    gNumber thisvalue = (gNumber) 0;
 
     for (pl = 1; pl <= nfg.NumPlayers(); pl++)
       thisvalue += nfg.payoffs(index, pl);
@@ -69,12 +69,12 @@ bool IsConstSum(const Nfg &nfg)
   return true;
 }
 
-gRational MinPayoff(const Nfg &nfg, int player)
+gNumber MinPayoff(const Nfg &nfg, int player)
 {
   int index, p, p1, p2;
-  gRational minpay;
+  gNumber minpay;
   
-  if (nfg.NumOutcomes() == 0)  return (gRational) 0;
+  if (nfg.NumOutcomes() == 0)  return (gNumber) 0;
 
   if (player) 
     p1 = p2 = player;
@@ -92,12 +92,12 @@ gRational MinPayoff(const Nfg &nfg, int player)
   return minpay;
 }
 
-gRational MaxPayoff(const Nfg &nfg, int player)
+gNumber MaxPayoff(const Nfg &nfg, int player)
 {
   int index, p, p1, p2;
-  gRational maxpay;
+  gNumber maxpay;
 
-  if (nfg.NumOutcomes() == 0)  return (gRational) 0;
+  if (nfg.NumOutcomes() == 0)  return (gNumber) 0;
 
   if (player) 
     p1 = p2 = player;
@@ -119,7 +119,7 @@ void RandomNfg(Nfg &nfg)
 {
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)
     for (int outc = 1; outc <= nfg.payoffs.NumRows(); outc++)
-      nfg.payoffs(outc, pl) = (gRational) Uniform();
+      nfg.payoffs(outc, pl) = (gNumber) Uniform();
 }  
 
 

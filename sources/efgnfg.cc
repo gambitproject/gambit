@@ -1,7 +1,7 @@
 //
 // FILE: efgnfg.cc -- efg<->nfg conversion routines
 //
-// $Id$
+// @(#)efgnfg.cc	2.7 21 Jul 1997
 //
 
 #include "efg.h"
@@ -144,7 +144,7 @@ Nfg *MakeReducedNfg(const Efg &E, const EFSupport &support)
     corr[i] = L->strategies[i][1];
   }
 
-  gVector<gRational> value(E.NumPlayers());
+  gVector<gNumber> value(E.NumPlayers());
 
   int pl = E.NumPlayers();
   while (1)  {
@@ -203,7 +203,7 @@ Nfg *MakeAfg(const Efg &E)
   gPVector<int> profile(dim);
   ((gVector<int> &) profile).operator=(1);
 
-  gVector<gRational> payoff(E.NumPlayers());
+  gVector<gNumber> payoff(E.NumPlayers());
   
   while (1)  {
     E.Payoff(profile, payoff);

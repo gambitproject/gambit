@@ -89,7 +89,7 @@ template <class T> int EfgIter<T>::Set(int pl, int iset, int act)
 
 template <class T> T EfgIter<T>::Payoff(int pl) const
 {
-  _efg->Payoff(_efgidx, (gVector<gRational> &) _payoff);
+  _efg->Payoff(_efgidx, _payoff);
   return _payoff[pl];
 }
 

@@ -10,7 +10,7 @@
 #include "garray.h"
 #include "gstring.h"
 #include "grblock.h"
-#include "rational.h"
+#include "gnumber.h"
 
 class NFOutcome   {
   friend class Nfg;
@@ -58,7 +58,7 @@ protected:
 
   gArray<NFOutcome *> results;
 
-  gRectBlock<gRational> payoffs;
+  gRectBlock<gNumber> payoffs;
 #ifndef NFG_ONLY
   const Efg *efg;
 #endif  // NFG_ONLY
@@ -107,14 +107,14 @@ public:
   void SetOutcome(int index, NFOutcome *outcome)  { results[index] = outcome; }
   NFOutcome *GetOutcome(int index) const   { return results[index]; }
 
-  void SetPayoff(NFOutcome *, int pl, const gRational &value);
-  gRational Payoff(NFOutcome *, int pl) const;
+  void SetPayoff(NFOutcome *, int pl, const gNumber &value);
+  gNumber Payoff(NFOutcome *, int pl) const;
 
     // defined in nfgutils.cc
   friend void RandomNfg(Nfg &);
   friend bool IsConstSum(const Nfg &);
-  friend gRational MinPayoff(const Nfg &, int pl = 0);
-  friend gRational MaxPayoff(const Nfg &, int pl = 0);
+  friend gNumber MinPayoff(const Nfg &, int pl = 0);
+  friend gNumber MaxPayoff(const Nfg &, int pl = 0);
 
 #ifndef NFG_ONLY
   const Efg *AssociatedEfg(void) const   { return efg; }

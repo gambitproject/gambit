@@ -6,6 +6,7 @@
 
 #include "gmisc.h"
 #include "rational.h"
+#include "gnumber.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -179,6 +180,15 @@ gString ToString(double d)
   sprintf(gconvert_buffer, "%*.*f", width, precision, d);
   return gString(gconvert_buffer);
 }
+
+gString ToString(const gNumber &n)
+{
+  if (n.GetRep() == DOUBLE)
+    return ToString((double) n);
+  else
+    return ToString((gRational) n);
+}
+
 
 gString ToString(const gInteger &i)
 {

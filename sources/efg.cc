@@ -115,11 +115,9 @@ void Infoset::RemoveAction(int which)
 
 class ChanceInfoset : public Infoset  {
   friend class Efg;
-  friend class BehavProfile<double>;
-  friend class BehavProfile<gRational>;
 
   private:
-    gBlock<gRational> probs;
+    gBlock<gNumber> probs;
 
     ChanceInfoset(Efg *E, int n, EFPlayer *p, int br);
     virtual ~ChanceInfoset()    { }
@@ -130,9 +128,9 @@ class ChanceInfoset : public Infoset  {
     Action *InsertAction(int where);
     void RemoveAction(int which);
 
-    void SetActionProb(int i, const gRational &value)  { probs[i] = value; }
-    const gRational &GetActionProb(int i) const   { return probs[i]; }
-    const gArray<gRational> &GetActionProbs(void) const  { return probs; }
+    void SetActionProb(int i, const gNumber &value)  { probs[i] = value; }
+    const gNumber &GetActionProb(int i) const   { return probs[i]; }
+    const gArray<gNumber> &GetActionProbs(void) const  { return probs; }
 };
 
 
@@ -145,7 +143,7 @@ ChanceInfoset::ChanceInfoset(Efg *E, int n, EFPlayer *p, int br)
 Action *ChanceInfoset::InsertAction(int where)
 { 
   Action *action = Infoset::InsertAction(where);
-  probs.Insert((gRational) 0, where);
+  probs.Insert((gNumber) 0, where);
   return action;
 }
 
@@ -428,8 +426,8 @@ Infoset *Efg::CreateInfoset(int n, EFPlayer *p, int br)
 
 EFOutcome *Efg::CreateOutcomeByIndex(int index)
 {
-  gVector<gRational> zeroes(NumPlayers());
-  zeroes = (gRational) 0;
+  gVector<gNumber> zeroes(NumPlayers());
+  zeroes = (gNumber) 0;
   payoffs.AddRow(zeroes);
 
   NewOutcome(index);
@@ -556,8 +554,8 @@ EFPlayer *Efg::NewPlayer(void)
   EFPlayer *ret = new EFPlayer(this, players.Length() + 1);
   players.Append(ret);
 
-  gVector<gRational> zeroes(NumOutcomes());
-  zeroes = (gRational) 0;
+  gVector<gNumber> zeroes(NumOutcomes());
+  zeroes = (gNumber) 0;
   payoffs.AddColumn(zeroes);
   DeleteLexicon();
   return ret;
@@ -568,8 +566,8 @@ int Efg::NumOutcomes(void) const
 
 EFOutcome *Efg::NewOutcome(void)
 {
-  gVector<gRational> zeroes(NumPlayers());
-  zeroes = (gRational) 0;
+  gVector<gNumber> zeroes(NumPlayers());
+  zeroes = (gNumber) 0;
   payoffs.AddRow(zeroes);
 
   NewOutcome(outcomes.Length() + 1);
@@ -584,19 +582,19 @@ void Efg::DeleteOutcome(EFOutcome *outc)
   DeleteLexicon();
 }
 
-void Efg::SetPayoff(EFOutcome *outc, int pl, const gRational &value)
+void Efg::SetPayoff(EFOutcome *outc, int pl, const gNumber &value)
 {
   payoffs(outc->GetNumber(), pl) = value;
 }
 
-gRational Efg::Payoff(EFOutcome *outc, int pl) const
+gNumber Efg::Payoff(EFOutcome *outc, int pl) const
 {
   return payoffs(outc->GetNumber(), pl);
 }
 
-gVector<gRational> Efg::Payoff(EFOutcome *outc) const
+gVector<gNumber> Efg::Payoff(EFOutcome *outc) const
 {
-  gVector<gRational> ret(NumPlayers());
+  gVector<gNumber> ret(NumPlayers());
   payoffs.GetRow(outc->GetNumber(), ret);
   return ret;
 }
@@ -604,7 +602,7 @@ gVector<gRational> Efg::Payoff(EFOutcome *outc) const
 bool Efg::IsConstSum(void) const
 {
   int pl, index;
-  gRational cvalue = (gRational) 0;
+  gNumber cvalue = (gNumber) 0;
 
   if (outcomes.Length() == 0)  return true;
 
@@ -612,7 +610,7 @@ bool Efg::IsConstSum(void) const
     cvalue += payoffs(1, pl);
 
   for (index = 2; index <= outcomes.Length(); index++)  {
-    gRational thisvalue = (gRational) 0;
+    gNumber thisvalue = (gNumber) 0;
 
     for (pl = 1; pl <= players.Length(); pl++)
       thisvalue += payoffs(index, pl);
@@ -624,12 +622,12 @@ bool Efg::IsConstSum(void) const
   return true;
 }
 
-gRational Efg::MinPayoff(int pl) const
+gNumber Efg::MinPayoff(int pl) const
 {
   int index, p, p1, p2;
-  gRational minpay;
+  gNumber minpay;
 
-  if (NumOutcomes() == 0)  return (gRational) 0;
+  if (NumOutcomes() == 0)  return (gNumber) 0;
 
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}
@@ -644,12 +642,12 @@ gRational Efg::MinPayoff(int pl) const
   return minpay;
 }
 
-gRational Efg::MaxPayoff(int pl) const
+gNumber Efg::MaxPayoff(int pl) const
 {
   int index, p, p1, p2;
-  gRational maxpay;
+  gNumber maxpay;
 
-  if (NumOutcomes() == 0)  return (gRational) 0;
+  if (NumOutcomes() == 0)  return (gNumber) 0;
 
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}
@@ -1103,26 +1101,26 @@ Infoset *Efg::DeleteAction(Infoset *s, Action *a)
   return s;
 }
 
-void Efg::SetChanceProb(Infoset *infoset, int act, const gRational &value)
+void Efg::SetChanceProb(Infoset *infoset, int act, const gNumber &value)
 {
   if (infoset->IsChanceInfoset())
     ((ChanceInfoset *) infoset)->SetActionProb(act, value);
 }
 
-gRational Efg::GetChanceProb(Infoset *infoset, int act) const
+gNumber Efg::GetChanceProb(Infoset *infoset, int act) const
 {
   if (infoset->IsChanceInfoset())
     return ((ChanceInfoset *) infoset)->GetActionProb(act);
   else
-    return (gRational) 0;
+    return (gNumber) 0;
 }
 
-gArray<gRational> Efg::GetChanceProbs(Infoset *infoset) const
+gArray<gNumber> Efg::GetChanceProbs(Infoset *infoset) const
 {
   if (infoset->IsChanceInfoset())
     return ((ChanceInfoset *) infoset)->GetActionProbs();
   else
-    return gArray<gRational>(infoset->NumActions());
+    return gArray<gNumber>(infoset->NumActions());
 }
 
 //---------------------------------------------------------------------
@@ -1270,8 +1268,8 @@ gPVector<int> Efg::NumMembers(void) const
 //                   Efg<T>: Payoff computation
 //------------------------------------------------------------------------
 
-void Efg::Payoff(Node *n, gRational prob, const gPVector<int> &profile,
-			gVector<gRational> &payoff) const
+void Efg::Payoff(Node *n, gNumber prob, const gPVector<int> &profile,
+			gVector<gNumber> &payoff) const
 {
   if (n->outcome)
     for (int i = 1; i <= players.Length(); i++)
@@ -1287,8 +1285,8 @@ void Efg::Payoff(Node *n, gRational prob, const gPVector<int> &profile,
 	   prob, profile, payoff);
 }
 
-void Efg::InfosetProbs(Node *n, gRational prob, const gPVector<int> &profile,
-			  gPVector<gRational> &probs) const
+void Efg::InfosetProbs(Node *n, gNumber prob, const gPVector<int> &profile,
+			  gPVector<gNumber> &probs) const
 {
   if (n->infoset && n->infoset->player->IsChance())
     for (int i = 1; i <= n->children.Length(); i++)
@@ -1302,21 +1300,21 @@ void Efg::InfosetProbs(Node *n, gRational prob, const gPVector<int> &profile,
   }
 }
 
-void Efg::Payoff(const gPVector<int> &profile, gVector<gRational> &payoff) const
+void Efg::Payoff(const gPVector<int> &profile, gVector<gNumber> &payoff) const
 {
-  ((gVector<gRational> &) payoff).operator=((gRational) 0);
+  ((gVector<gNumber> &) payoff).operator=((gNumber) 0);
   Payoff(root, 1.0, profile, payoff);
 }
 
 void Efg::InfosetProbs(const gPVector<int> &profile,
-			  gPVector<gRational> &probs) const
+			  gPVector<gNumber> &probs) const
 {
-  ((gVector<gRational> &) probs).operator=((gRational) 0);
+  ((gVector<gNumber> &) probs).operator=((gNumber) 0);
   InfosetProbs(root, 1.0, profile, probs);
 }
 
-void Efg::Payoff(Node *n, gRational prob, const gArray<gArray<int> *> &profile,
-		    gVector<gRational> &payoff) const
+void Efg::Payoff(Node *n, gNumber prob, const gArray<gArray<int> *> &profile,
+		    gVector<gNumber> &payoff) const
 {
   if (n->outcome)
     for (int i = 1; i <= players.Length(); i++)
@@ -1333,9 +1331,9 @@ void Efg::Payoff(Node *n, gRational prob, const gArray<gArray<int> *> &profile,
 }
 
 void Efg::Payoff(const gArray<gArray<int> *> &profile,
-		    gVector<gRational> &payoff) const
+		    gVector<gNumber> &payoff) const
 {
-  ((gVector<gRational> &) payoff).operator=((gRational) 0);
+  ((gVector<gNumber> &) payoff).operator=((gNumber) 0);
   Payoff(root, 1.0, profile, payoff);
 }
 

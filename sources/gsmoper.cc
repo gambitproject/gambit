@@ -384,7 +384,7 @@ Portion* GSM_Divide_int(Portion** param)
 Portion* GSM_Divide_Number(Portion** param)
 {
   Portion* result = 0;
-  if(((NumberPortion*) param[1])->Value() != (gRational)0)
+  if(((NumberPortion*) param[1])->Value() != (gNumber)0)
   {
     result = new NumberPortion
       (
@@ -2840,9 +2840,9 @@ Portion* GSM_Date(Portion**)
 Portion* GSM_CallFunction( Portion** param )
 {
   _gsm->InitCallFunction( ( (TextPortion*) param[0] )->Value() );
-  _gsm->Push( param[1]->ValCopy() );
+  _gsm->Push( param[1] );
   _gsm->BindVal();
-  _gsm->Push( param[2]->ValCopy() );
+  _gsm->Push( param[2] );
   _gsm->BindVal();
   _gsm->CallFunction();
   return _gsm->PopValue();

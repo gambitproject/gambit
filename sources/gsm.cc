@@ -1,7 +1,7 @@
 //
 // FILE: gsm.cc  implementation of GSM (Stack machine)
 //
-// $Id$
+// @(#)gsm.cc	2.17 19 Jul 1997
 //
 
 
@@ -973,7 +973,7 @@ bool GSM::Divide (void)
       p = new NumberPortion(((IntPortion*) p1)->Value());
       ((NumberPortion*) p)->Value() /= ((IntPortion*) p2)->Value();
     }
-    else if(p->Spec().Type==porNUMBER && ((NumberPortion*) p2)->Value() != (gRational)0)
+    else if(p->Spec().Type==porNUMBER && ((NumberPortion*) p2)->Value() != (gNumber)0)
       ((NumberPortion*) p)->Value() /= ((NumberPortion*) p2)->Value();
     else
       result = false;

@@ -29,7 +29,7 @@ template <class T> class EfgContIter    {
     Efg *_efg;
     EFSupport _support;
     gPVector<int> _efgidx, _supidx;
-    mutable gVector<gRational> _payoff;
+    mutable gVector<gNumber> _payoff;
 
   public:
     EfgContIter(const EFSupport &);
