@@ -5007,6 +5007,18 @@ IsConstSum[efg->EFG] =: BOOLEAN
 Returns \verb+True+ when the game \verb+efg+ or \verb+nfg+ is constant sum.
 \ed
 
+\item\lex{IsDefined}
+\protect \large \begin{verbatim}
+IsDefined[x->T] =: BOOLEAN
+\end{varbatim}\normalsize
+
+{\it for all types} {\tt T}
+\marginpar{Better description?}
+\bd
+Returns \verb+True+ if \verb+x+ has been defined.  Useful for testing
+the existence of static variables.
+\ed
+
 \item\lex{IsEof}
 \protect \large \begin{verbatim}
 IsEof[input->INPUT] =: BOOLEAN
