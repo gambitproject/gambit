@@ -7,7 +7,7 @@
 #ifndef VERTENUM_H
 #define VERTENUM_H
 
-#include "tableau.h"
+#include "lptab.h"
 #include "bfs.h"
 #include "gstatus.h"
 #include "garray.h"
