@@ -117,28 +117,32 @@ protected:
   gList<gList<bool> >         is_infoset_active;
   gList<gList<gList<bool> > > is_nonterminal_node_active;
 
-  void InitializeActiveListsToAllActive();
+  void InitializeActiveListsToAllInactive();
   void InitializeActiveLists();
 
-  gList<const Node *> reachable_nt_nodes;  // Old implementation, keep to debug
-  gBlock<gBlock<gList<const Node *> > > reachable_nonterminal_nodes;
-
-  void generate_nonterminal_nodes(const Node *);
-  void delete_this_and_lower_nonterminal_nodes(const Node *);
+  void activate(const Node *);
+  void deactivate(const Node *);
+  void activate(const Infoset *);
+  void deactivate(const Infoset *);
+  bool infoset_has_active_nodes(const int pl, const int iset) const;
+  bool infoset_has_active_nodes(const Infoset *i) const;
+  void activate_this_and_lower_nodes(const Node *);
+  void deactivate_this_and_lower_nodes(const Node *);
 
 public:
   EFSupportWithActiveInfo ( const Efg &);
   EFSupportWithActiveInfo ( const EFSupport &);
   EFSupportWithActiveInfo ( const EFSupportWithActiveInfo &);
   virtual ~EFSupportWithActiveInfo();
-  EFSupportWithActiveInfo &operator=(const EFSupportWithActiveInfo &);
 
+  // Operators
+  EFSupportWithActiveInfo &operator=(const EFSupportWithActiveInfo &);
   bool operator==(const EFSupportWithActiveInfo &) const;
   bool operator!=(const EFSupportWithActiveInfo &) const;
 
   // Find the reachable nodes at an infoset
-  const gList<const Node *> *ReachableNonterminalNodes() const;
   const gList<const Node *> ReachableNodesInInfoset(const Infoset *) const;
+  const gList<const Node *> ReachableNonterminalNodes() const;
 
   // Action editing functions
   void AddAction(Action *);
@@ -149,6 +153,8 @@ public:
   bool ActionIsActive(const Action *) const;
   bool InfosetIsActive(const int pl, const int iset) const;
   bool InfosetIsActive(const Infoset *) const;
+  int  NumActiveNodes(const int pl, const int iset) const;
+  int  NumActiveNodes(const Infoset *) const;
   bool NodeIsActive(const int pl, const int iset, const int node) const;
   bool NodeIsActive(const Node *) const;
 };
