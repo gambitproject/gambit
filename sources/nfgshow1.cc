@@ -68,7 +68,7 @@ void NfgShow::SetPlayers(int _pl1, int _pl2, bool first_time)
 
     for (i = 1; i <= rows; i++)
     {
-        label = disp_sup->Strategies(pl1)[i]->name;
+        label = disp_sup->Strategies(pl1)[i]->Name();
 
         if (label == "") 
             label = ToText(i);
@@ -78,7 +78,7 @@ void NfgShow::SetPlayers(int _pl1, int _pl2, bool first_time)
 
     for (i = 1; i <= cols; i++)
     {
-        label = disp_sup->Strategies(pl2)[i]->name;
+        label = disp_sup->Strategies(pl2)[i]->Name();
 
         if (label == "") 
             label = ToText(i);
@@ -124,7 +124,7 @@ NFSupport *NfgShow::MakeSupport(void)
         int j;
 
         for (j = 0; j < num_strats; j++) 
-            strats[j] = copystring(nf.Strategies(i)[j+1]->name);
+            strats[j] = copystring(nf.Strategies(i)[j+1]->Name());
 
         players[i] = new wxListBox(support, 0, nf.Players()[i]->GetName(), 
                                    TRUE, -1, -1, 80, 100,
@@ -454,7 +454,7 @@ void NfgShow::SetLabels(int what)
 
             for (j = 1; j <= disp_sup->NumStrats(i); j++)
             {
-                labels->SetCell(i, j, disp_sup->Strategies(i)[j]->name);
+                labels->SetCell(i, j, disp_sup->Strategies(i)[j]->Name());
                 labels->SetType(i, j, 1, gSpreadStr);
             } // note that we continue using j
 
@@ -474,7 +474,7 @@ void NfgShow::SetLabels(int what)
         {
             for (i = 1; i <= num_players; i++)
                 for (int j = 1; j <= disp_sup->NumStrats(i); j++)
-                    disp_sup->Strategies(i)[j]->name = labels->GetCell(i, j);
+                    disp_sup->Strategies(i)[j]->Name() = labels->GetCell(i, j);
         }
 
         delete labels;
@@ -809,7 +809,7 @@ NormalSpread::NormalSpread(const NFSupport *sup, int _pl1, int _pl2, NfgShow *p,
         for (j = 0; j < dimensionality[i]; j++)
         {
             if (features.verbose)
-                strat_profile_str[j] = copystring(sup->Strategies(i)[j+1]->name);
+                strat_profile_str[j] = copystring(sup->Strategies(i)[j+1]->Name());
             else
                 strat_profile_str[j] = copystring(ToText(j + 1));
         }
@@ -916,15 +916,15 @@ void NormalSpread::SetLabels(const NFSupport *disp_sup, int what)
             strat_profile[i]->Clear();
 
             for (int j = 1; j <= disp_sup->NumStrats(i); j++)
-                strat_profile[i]->Append(disp_sup->Strategies(i)[j]->name);
+                strat_profile[i]->Append(disp_sup->Strategies(i)[j]->Name());
         }
 
         // Update the row/col labels
         for (i = 1; i <= disp_sup->NumStrats(pl1); i++)
-            SetLabelRow(i, disp_sup->Strategies(pl1)[i]->name);
+            SetLabelRow(i, disp_sup->Strategies(pl1)[i]->Name());
 
         for (i = 1; i <= disp_sup->NumStrats(pl2); i++)
-            SetLabelCol(i, disp_sup->Strategies(pl2)[i]->name);
+            SetLabelCol(i, disp_sup->Strategies(pl2)[i]->Name());
 
         for (i = 1; i <= dimensionality.Length(); i++) 
             strat_profile[i]->SetSelection(profile[i] - 1);
@@ -1074,7 +1074,7 @@ void NormalSpread::SetDimensionality(const NFSupport *sup)
             strat_profile[i]->Clear();
 
             for (int j = 1; j <= dim[i]; j++)
-                strat_profile[i]->Append(sup->Strategies(i)[j]->name);
+                strat_profile[i]->Append(sup->Strategies(i)[j]->Name());
 
             strat_profile[i]->SetSelection(0);
             dimensionality[i] = dim[i];
