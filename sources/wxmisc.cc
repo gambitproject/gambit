@@ -1160,6 +1160,15 @@ wxNumberItem::wxNumberItem(wxPanel *p_parent, char *p_label,
   ToTextPrecision(toTextPrecision);
 }
 
+wxNumberItem::wxNumberItem(wxPanel *p_parent, char *p_label,
+			   const gText &p_default,
+			   int p_x, int p_y, int p_width, int p_height)
+  : wxText(p_parent, (wxFunction) EventCallback, p_label, "",
+	   p_x, p_y, p_width, p_height), m_value(ToNumber(p_default))
+{
+  SetValue(p_default);
+}
+
 void wxNumberItem::EventCallback(wxNumberItem &p_item,
 				 wxCommandEvent &p_event)
 {

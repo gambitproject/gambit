@@ -13,7 +13,7 @@
 
 #include "nfgconst.h"
 
-// Need this function since the default wxGetResource takes a char **value,
+// Need this function since the default wxGeResource takes a char **value,
 // and replaces it with a newly created string (while deleting the old one).
 // This is NOT what we want.
 
@@ -695,11 +695,11 @@ dialogQre::~dialogQre()
 {
   if (m_completed == wxOK) {
     wxWriteResource("Algorithm Params", "Qre-minLam",
-		    (float) m_minLam->GetNumber(), "gambit.ini");
+		    m_minLam->GetValue(), "gambit.ini");
     wxWriteResource("Algorithm Params", "Qre-maxLam",
-		    (float) m_maxLam->GetNumber(), "gambit.ini");
+		    m_maxLam->GetValue(), "gambit.ini");
     wxWriteResource("Algorithm Params", "Qre-delLam",
-		    (float) m_delLam->GetNumber(), "gambit.ini");
+		    m_delLam->GetValue(), "gambit.ini");
     wxWriteResource("Algorithm Params", "Func-tolND",
 		    m_tolN->GetInteger(), "gambit.ini");
     wxWriteResource("Algorithm Params", "Func-tol1D",
@@ -718,11 +718,11 @@ void dialogQre::AlgorithmFields(void)
   (void) new wxMessage(this, "Algorithm parameters");
   NewLine();
 
-  float minLam, maxLam, delLam;
+  gText minLam, maxLam, delLam;
   int tolN, tol1, maxitsN, maxits1;
-  wxGetResource("Algorithm Params", "Qre-minLam", &minLam, "gambit.ini");
-  wxGetResource("Algorithm Params", "Qre-maxLam", &maxLam, "gambit.ini");
-  wxGetResource("Algorithm Params", "Qre-delLam", &delLam, "gambit.ini");
+  wxGetResourceStr("Algorithm Params", "Qre-minLam", minLam, "gambit.ini");
+  wxGetResourceStr("Algorithm Params", "Qre-maxLam", maxLam, "gambit.ini");
+  wxGetResourceStr("Algorithm Params", "Qre-delLam", delLam, "gambit.ini");
   wxGetResource("Algorithm Params", "Func-tolND", &tolN, "gambit.ini");
   wxGetResource("Algorithm Params", "Func-tol1D", &tol1, "gambit.ini");
   wxGetResource("Algorithm Params", "Func-maxitsND", &maxitsN, "gambit.ini");
