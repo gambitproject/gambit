@@ -1,9 +1,12 @@
-# Generic makefile for Gambit Project
+#
+# FILE: Makefile.generic -- Makefile for Gambit 
+#
+# $Id$
 # 
 # Makes both gui and gcl targets on multiple platforms, and 
 # automatically updates dependencies (no need to do make depend).
 #
-# Rename this makefile to 'Makefile', and then use 'make gui'
+# Rename or symlinkk this makefile to 'Makefile', and then use 'make gui'
 # to make the gui, and 'make gcl' to make the gcl.
 #
 # Executable are named gcl_$(SYSNAME) and gui_$(GUI)_$(SYSNAME), 
@@ -17,14 +20,7 @@
 # 
 # This Makefile requires 'make.filelist' to exist in the same directory.
 # 'make.filelist' contains the current file list, and defines
-# the 'ALLGCL_OBJECT' and 'ALLGUI_OBJECTS' variables. 
-#
-# The Makefile also requires the subdirectory ./fake to exist. This
-# subdirectory contains "fake" (empty)  wxwin and system header
-# files to prevent tracking down dependencies in those files.  
-#
-# Do 'cvs co -d. gambit/sources' in your gambit/sources directory to 
-# initialize the ./fake (and other subdirectories) needed by the makefile
+# the 'ALLGCL_OBJECTS' and 'ALLGUI_OBJECTS' variables. 
 #
 # Note: If files are moved or renamed, this makefile can get "stuck".  
 #       In this case do 'rm *.d' or 'make clean'
@@ -32,16 +28,16 @@
 # define compiler and flags
 
 CC = g++
-CFLAGS = -Wall -DGDOUBLE -D__NO_MATH_INLINES $(DEFINES) -Dwx_motif \
+CFLAGS = -Wall -D__NO_MATH_INLINES $(DEFINES) \
 	 -fguiding-decls -fno-implicit-templates $(INCDIR) 
-
+OBJECT_SUFFIX = .o
+ 
 #
 # Default system variables, which should be overwritten if necessary.
-# GUI can be "xt" or "motif".  "xt" is only supported for Linux.
 #
 
 SYSNAME = Linux
-GUI     = motif
+GUI     = gtk
 
 # define directory where object files are put
 
@@ -58,12 +54,9 @@ vpath %.o  $(OBJDIR)
 
 %.d: %.cc
 	@echo updating dependencies: $@
-	@$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) -Ifake $< \
+	@$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) $(INCDIR) $< \
 		| sed '\''s/\($*\)\.o[ :]*/\1.o $@ : /g'\'' > $@; \
 		[ -s $@ ] || rm -f $@'
-
-# Note: everything from here to 'EndNote' (as well as all gui targets) 
-#       can be removed if only gcl targets are used 
 
 # Generic WxWin information:
 # 
@@ -71,21 +64,16 @@ vpath %.o  $(OBJDIR)
 #   WXLIBDIR = location of wxwin libraries
 #   WXLIB    = any wx libraries used
 
-ifeq ($(GUI), xt)
-ifneq ($(SYSNAME), Linux)
-@echo Error! Xt interface only works with Linux!
-else
-WXDIR = /users/gambit/wxxt/wxxt-1.67
-WXLIBDIR = -L$(WXDIR)/lib/linux
-WXINCDIR = -I$(WXDIR)/wx -I$(WXDIR)/setup/linux -I$(WXDIR)/src/xt-widgets \
-           -DLINUX_WXXT
-WXLIB = -lwx_xt -lwx_xtwidgets
-endif
+ifeq ($(GUI), gtk)
+WXDIR = /users/gambit/wxGTK
+WXLIBDIR = -L$(WXDIR)/lib
+WXINCDIR = -I$(WXDIR)/wx -D__WXGTK__
+WXLIB = -lwx_gtk
 else # motif
 WXDIR = /users/gambit/wxwin
 WXLIBDIR = -L$(WXDIR)/lib
-WXINCDIR = -I$(WXDIR)/include/base -I$(WXDIR)/include/x 
-WXLIB = -lwx_motif_$(SYSNAME)
+WXINCDIR = -I$(WXDIR)/wx -D__WXMOTIF__
+WXLIB = -lwx_motif
 endif
 
 # Site Specific information:
@@ -108,11 +96,11 @@ XLIB = -lXm -lXt -lX11 -lc -lm -lg++
 else # Linux
 XINCDIR = -I/usr/X11R6/include
 XLIBDIR = -L/usr/X11R6/lib 
-ifeq ($(GUI), xt)
-XLIB = -lXpm -lXaw -lXext -lXmu -lXt -lSM -lICE -lX11 -lm
+ifeq ($(GUI), gtk)
+XLIB = -lgtk -lgdk -lpthread
 else # motif
-XLIB = -lX11 -lXm -lXp -lXmu -lXext -lXt -lm
-endif # GUI=xt
+XLIB = -lX11 -lXm -lXp -lXpm -lXmu -lXext -lXt -lpthread -ldl -lm
+endif # GUI=gtk
 endif
 endif
 
@@ -121,8 +109,6 @@ endif
 LIBDIR = $(WXLIBDIR) $(XLIBDIR)
 INCDIR = $(WXINCDIR) $(XINCDIR) -Ibitmaps
 GUILIBS = $(WXLIB) $(XLIB)
-
-# EndNote 
 
 # Include the list of files, which defines
 #
@@ -165,8 +151,7 @@ ifndef SYSNAME
 endif
 ifndef GUI
 	@echo usage: make SYSNAME=\<sysname\> GUI=\<gui\>
-	@echo Must specify a GUI e.g. xt, motif
-	@echo \(xt only supported on linux\)
+	@echo Must specify a GUI e.g. gtk, motif
 	@exit 1
 endif
 	make gui_$(GUI)_$(SYSNAME) GUI=$(GUI) SYSNAME=$(SYSNAME)
