@@ -1465,7 +1465,8 @@ void CallFuncObj::ComputeFuncIndex(GSM *gsm, Portion **param)
 	      matchlevel = matchNONE;
 	  }
 	  
-	  if (_FuncInfo[f_index].ParamInfo[index].DefaultValue == 0)
+	  if (_FuncInfo[f_index].ParamInfo[index].DefaultValue == 0 &&
+	      _FuncInfo[f_index].ParamInfo[index].Spec.Type != porUNDEFINED)
 	    matchlevel = matchNONE;
 	}
       }
