@@ -49,6 +49,8 @@ template <class T> class QuikSolv {
  private:
   const gPolyList<T>                 System;
   const gPolyList<gDouble>           gDoubleSystem;
+  const int                          NoEquations;
+  const int                          NoInequalities;
   const ListOfPartialTrees<gDouble>  TreesOfPartials;
         bool                         HasBeenSolved;
         gList<gVector<gDouble> >     Roots;
@@ -62,10 +64,12 @@ template <class T> class QuikSolv {
    bool SystemHasNoRootsIn(const gRectangle<gDouble>& r, gArray<int>&)   const;
 
 
-  // Ask whether Newton's method leads to a root without leaving the rectangle
+  // Ask whether Newton's method leads to a root 
 
-   bool NewtonRootInRectangle(const gRectangle<gDouble>&, 
-			            gVector<gDouble>&) const;
+   bool NewtonRootInRectangle(  const gRectangle<gDouble>&, 
+			              gVector<gDouble>&) const;
+   bool NewtonRootNearRectangle(const gRectangle<gDouble>&, 
+			              gVector<gDouble>&) const;
 
 
   // Ask whether we can prove that there is no root other than 
@@ -100,7 +104,7 @@ template <class T> class QuikSolv {
 			            gVector<gDouble>&) const;
 
 
-  // Recursive part of recursive method
+  // Recursive parts of recursive methods
 
   void               FindRootsRecursion(      gList<gVector<gDouble> >*,
 					const gRectangle<gDouble>&, 
@@ -110,8 +114,14 @@ template <class T> class QuikSolv {
 					const int&,
 					      int*)                  const;
 
+  const bool         ARootExistsRecursion(const gRectangle<gDouble>&, 
+					        gVector<gDouble>&,
+					  const gRectangle<gDouble>&, 
+					        gArray<int>&)        const;
+
  public:
    QuikSolv(const gPolyList<T> &);  
+   QuikSolv(const gPolyList<T> &, const int &);  
    QuikSolv(const QuikSolv<T> &);
    ~QuikSolv();
 
@@ -142,6 +152,7 @@ template <class T> class QuikSolv {
 				       const int&,
 				       const int&);
    bool     FindRoots  (const gRectangle<T>&, const int&);
+   bool     ARootExists (const gRectangle<T>&, gVector<gDouble>&)    const;
 
 friend gOutput& operator << (gOutput& output, const QuikSolv<T>& x);
 };  
