@@ -23,51 +23,51 @@ class FileHeader
 {
 friend gOutput &operator<<(gOutput &op,const FileHeader &f);
 private:
-	int	num_infosets;
-	gBlock<int>	strategies;
-	double e_step,e_start,e_stop;
-	double data_max,data_min;
-	int	data_type;
-	double merror,q_step;	// optional
-	int	num_columns;
-	int	e_column,delta_column;
-	gBlock< gBlock<int> > prob_cols;		// [iset][strategy]
-	NormalMatrix *matrix;	// optional
-	gString	file_name;
+  int num_infosets;
+  gBlock<int> strategies;
+  double e_step,e_start,e_stop;
+  double data_max,data_min;
+  int data_type;
+  double merror,q_step;	// optional
+  int num_columns;
+  int e_column,delta_column;
+  gBlock< gBlock<int> > prob_cols;            // [iset][strategy]
+  NormalMatrix *matrix;	// optional
+  gString file_name;
 public:
-	// Constructors
-	FileHeader(void):strategies(),prob_cols(),matrix(0)	{}
-	FileHeader(const char *in_filename);
-	FileHeader(gInput &in);
-	FileHeader(const FileHeader &F);
-	// Post-Constructor
-	void Init(gInput &in);
-	// Assignment operators
-	FileHeader &operator=(const FileHeader &H);
-	// Comparison operators
-	int operator==(const FileHeader &H)
-	{return (strategies==H.strategies && num_infosets==H.num_infosets);}
-	int operator!=(const FileHeader &H)
-	{return !(*this==H);}
-	// Data access functions
-	int			NumColumns(void) const						{return num_columns;}
-	int			NumInfosets(void) const						{return num_infosets;}
-	int 		NumStrategies(int i) const				{return strategies[i];}
-	gBlock<int> NumStrategies(void) const			{return strategies;}
-	int 		Col(int iset,int st) const				{return prob_cols[iset][st];}
-	int			ECol(void) const									{return e_column;}
-	int			DeltaCol(void) const							{return delta_column;}
-	int			DataType(void) const							{return data_type;}
-	double 	MError(void) const								{return merror;}
-	double	QStep(void) const									{return q_step;}
+  // Constructors
+  FileHeader(void):strategies(),prob_cols(),matrix(0)	{}
+  FileHeader(const char *in_filename);
+  FileHeader(gInput &in);
+  FileHeader(const FileHeader &F);
+  // Post-Constructor
+  void Init(gInput &in);
+  // Assignment operators
+  FileHeader &operator=(const FileHeader &H);
+  // Comparison operators
+  int operator==(const FileHeader &H)
+    {return (strategies==H.strategies && num_infosets==H.num_infosets);}
+  int operator!=(const FileHeader &H)
+    {return !(*this==H);}
+  // Data access functions
+  int NumColumns(void) const {return num_columns;}
+  int NumInfosets(void) const {return num_infosets;}
+  int NumStrategies(int i) const {return strategies[i];}
+  gBlock<int> NumStrategies(void) const {return strategies;}
+  int Col(int iset,int st) const {return prob_cols[iset][st];}
+  int ECol(void) const {return e_column;}
+  int DeltaCol(void) const {return delta_column;}
+  int DataType(void) const {return data_type;}
+  double MError(void) const {return merror;}
+  double QStep(void) const {return q_step;}
   // Note that e_step is stored as e_step-1 if log plots are used. i.e. step of .1 is 1.1
-	double	EStep(void) const									{return (data_type) ? 1+e_step : e_step;}
-	double	EStart(void) const								{return e_start;}
-	double	EStop(void)	const									{return e_stop;}
-	double	DataMax(void) const								{return data_max;}
-	double	DataMin(void) const								{return data_min;}
-	NormalMatrix *Matrix(void) const 					{return matrix;}
-	gString	FileName(void) const							{return file_name;}
+  double EStep(void) const {return (data_type) ? 1+e_step : e_step;}
+  double EStart(void) const {return e_start;}
+  double EStop(void) const {return e_stop;}
+  double DataMax(void) const {return data_max;}
+  double DataMin(void) const {return data_min;}
+  NormalMatrix *Matrix(void) const {return matrix;}
+  gString FileName(void) const {return file_name;}
 };
 
 inline gInput  &operator>>(gInput &in,FileHeader &f) {f.Init(in); return in;}
@@ -75,48 +75,50 @@ inline gInput  &operator>>(gInput &in,FileHeader &f) {f.Init(in); return in;}
 class DataLine
 {
 private:
-	FileHeader	header;
-	gBlock<PointNd>	data;
-	double	e,delta;
+  FileHeader header;
+  gBlock<PointNd> data;
+  double e,delta;
 public:
-	// Constructors
-	DataLine(void):header(),data(),e(0.0),delta(0.0) {}
-	DataLine(gInput &in):header(in)	{Init();}
-	DataLine(const char *in_filename):header(in_filename) {Init();}
-	DataLine(const DataLine &L):header(L.header),data(L.data),e(L.e),delta(L.delta)	{}
-	// Post-constructors
-	void Init(void);
-	// Data Input, returns a 0 on failure to read
-	int	Read(gInput &in);
-	// Data Output
-	void Write(gOutput &out) const;
-	// Operator overloading
-	DataLine &operator=(const DataLine &L)
-	{header=L.header;data=L.data;e=L.e;delta=L.delta; return *this;}
-	int	operator==(const DataLine &l) {return (e==l.e && delta==l.delta);}
-	int operator!=(const DataLine &l) {return !((*this)==l);}
-	// General Data Access
-	// Number of infosets
-	int	NumInfosets(void) const		{return header.NumInfosets();}
-	// Number of strategies for infoset iset
-	int	NumStrategies(int iset) const 	{return header.NumStrategies(iset);}
-	// Is this the last e value in the data file?
-	int Done(void)						{if (header.DataType()==DATA_TYPE_ARITH)
-															return (e>=header.EStop()-header.EStep());
-														 else
-															return (e>=(header.EStop()/header.EStep()/header.EStep()));}
-	// Return probs for i'th infoset
-	const PointNd &operator[](int iset) const {return data[iset];}
-	PointNd	&operator[](int iset)	{return data[iset];}
-	// Return the data/e/delta stuff
-	double	E(void)	{return e;}
-	double Delta(void) const {return delta;}
-	double 	&Delta(void)	{return delta;}
-	// Give access to the file header
-	const FileHeader &Header() {return header;}
+  // Constructors
+  DataLine(void):header(),data(),e(0.0),delta(0.0) {}
+  DataLine(gInput &in):header(in)	{Init();}
+  DataLine(const char *in_filename):header(in_filename) {Init();}
+  DataLine(const DataLine &L):header(L.header),data(L.data),e(L.e),delta(L.delta)	{}
+  // Post-constructors
+  void Init(void);
+  // Data Input, returns a 0 on failure to read
+  int Read(gInput &in);
+  // Data Output
+  void Write(gOutput &out) const;
+  // Operator overloading
+  DataLine &operator=(const DataLine &L)
+    {header=L.header;data=L.data;e=L.e;delta=L.delta; return *this;}
+  int operator==(const DataLine &l) {return (e==l.e && delta==l.delta);}
+  int operator!=(const DataLine &l) {return !((*this)==l);}
+  // General Data Access
+  // Number of infosets
+  int NumInfosets(void) const {return header.NumInfosets();}
+  // Number of strategies for infoset iset
+  int NumStrategies(int iset) const {return header.NumStrategies(iset);}
+  // Is this the last e value in the data file?
+  int Done(void) 
+    {if (header.DataType()==DATA_TYPE_ARITH)
+      return (e>=header.EStop()-header.EStep());
+    else
+      return (e>=(header.EStop()/header.EStep()/header.EStep()));
+    }
+  // Return probs for i'th infoset
+  const PointNd &operator[](int iset) const {return data[iset];}
+  PointNd &operator[](int iset)	{return data[iset];}
+  // Return the data/e/delta stuff
+  double E(void) {return e;}
+  double Delta(void) const {return delta;}
+  double &Delta(void) {return delta;}
+  // Give access to the file header
+  const FileHeader &Header() {return header;}
 };
 
 inline gOutput &operator<<(gOutput &op,const DataLine &l) {l.Write(op);return op;}
-inline gInput	 &operator>>(gInput &in, DataLine &l) {l.Read(in);return in;}
+inline gInput  &operator>>(gInput &in, DataLine &l) {l.Read(in);return in;}
 
 #endif
