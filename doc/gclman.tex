@@ -1736,7 +1736,7 @@ is saved as a variable \verb+b+ of type \verb+BEHAV+.
 
 \begin{verbatim}
 GCL1:= e:=LoadEfg["poker.efg"]
-GCL2:= << b:=LcpSolve[e]_1
+GCL2:= << b:=EnumMixedSolve[e]_1
 (Behav) { { 1.000 0.000 }{ 0.333 0.667 } }{ { 0.667 0.333 } }
 GCL3:= DeleteTree[RootNode[e]#1]
 GCL4:= << b
@@ -2443,19 +2443,19 @@ game \verb+e+ by using the command \tindex{Behav}.  Thus
 
 \begin{verbatim}
 n := Nfg[e];
-m := LcpSolve[n];
+m := EnumMixedSolve[n];
 b := Behav[m]
 \end{verbatim}
 
 \noindent
 will convert the game \verb+e+ to reduced normal form, solve it using
-the \tindex{LcpSolve} algorithm, and then convert all mixed profiles found back
+the \tindex{EnumMixedSolve} algorithm, and then convert all mixed profiles found back
 to behavior profiles, and display the list, \verb+b+ of behavior
 profiles found. The avove can also be done in one command without saving
 intermediate steps as follows:  
   
 \begin{verbatim}
-b := Behav[LcpSolve[Nfg[e]]]
+b := Behav[EnumMixedSolve[Nfg[e]]]
 \end{verbatim}
 
 \chapter{Solving Games}\index{Solving games}
@@ -4353,8 +4353,8 @@ used to limit the flattening to the topmost \verb+levels+.
 Float[x->NUMBER] =: NUMBER
 \end{verbatim} \normalsize
 
-\bd
-Converts \verb+x+ into a number with floating-point precision.
+\bd Converts the internal representation of \verb+x+ to Floating point
+precision.
 \item [See also:] \verb+Rational+.
 \ed
 
@@ -4605,7 +4605,7 @@ used to identify \verb+Include[]+ files.
 \protect \large \begin{verbatim}
 QreGridSolve[support->NFSUPPORT, {pxifile->}, 
                {minLam->0.001000}, {maxLam->500.000000}, 
-               {delLam->0.020000}, {powLam->1}, 
+               {delLam->0.020000}, {powLam->1},{fullGraph->False}, 
                {delp1->0.100000}, {tol1->0.100000}, 
                {delp2->0.010000}, {tol2->0.010000}, 
                {nEvals<->0}, {time<->0.000000}, 
@@ -5227,10 +5227,10 @@ Returns \verb+True+ when the system stopwatch is currently running.
 
 \item\lex{LcpSolve}
 \protect \large \begin{verbatim}
-LcpSolve[support->NFSUPPORT, {stopAfter->0}, {precision->Machine}, 
+LcpSolve[support->NFSUPPORT, {stopAfter->1}, {precision->Machine}, 
          {nPivots<->0}, {time<->0}, {traceFile<->(Output)}, 
          {traceLevel->0}] =: LIST(MIXED) 
-LcpSolve[support->EFSUPPORT, {asNfg->False}, {stopAfter->0}, 
+LcpSolve[support->EFSUPPORT, {asNfg->False}, {stopAfter->1}, 
          {precision->Machine}, {nPivots<->0}, {time<->0.000000}, 
          {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
@@ -5251,9 +5251,9 @@ form is converted to its corresponding reduced normal form, solved
 via Lemke-Howson, and the mixed strategy solutions converted back into
 behavior profiles.
 \item
-[stopAfter:] Specifies the maximum number of equilibria to find.  If
-not specified, the default value is zero, which means that all
-equilibria reachable by the algorithm are to be found.
+[stopAfter:] Specifies the maximum number of equilibria to find.  The
+default is one. If set to zero then all equilibria reachable by the
+algorithm will be found.
 \item
 [precision:] Determines the precision of the computation. Default is
 machine precision (floating point). 
@@ -7543,31 +7543,6 @@ EnumPureSolve[Support[efg], False, stopAfter, precision, time,
 
 \item\lex{Float}
 \protect \large \begin{verbatim}
-Float[x->NUMBER] =: NUMBER 
-\end{verbatim}\normalsize
-
-\bd 
-Converts the internal representation of \verb+x+ to Floating point.  
-\begin{verbatim}
-0.0+x
-\end{verbatim} 
-\ed
-
-\item\lex{Float}
-\protect \large \begin{verbatim}
-Float[x->INTEGER] =: NUMBER 
-\end{verbatim}\normalsize
-
-\bd 
-Converts \verb+x+ to \verb+NUMBER+ with internal representation of
-x to Floating point.
-\begin{verbatim}
-Float[Number[x]]
-\end{verbatim} 
-\ed
-
-\item\lex{Float}
-\protect \large \begin{verbatim}
 Float[x->BEHAV] =: BEHAV 
 Float[x->MIXED] =: MIXED 
 \end{verbatim}\normalsize
@@ -7581,14 +7556,35 @@ Converts the internal representation of x to Floating point.
 
 \item\lex{Float}
 \protect \large \begin{verbatim}
-Float[x->EFOUTCOME] =: EFOUTCOME 
-Float[x->NFOUTCOME] =: NFOUTCOME 
+Float[g->EFG] =: EFG 
 \end{verbatim}\normalsize
 
 \bd 
-Converts the internal representation of x to Floating point.  
+Converts the internal representation of g to Floating point.  
 \begin{verbatim}
-SetPayoffs[x,Float[Payoffs[x]]];
+NewFunction[Float[g->EFG]=:EFG,
+  gg:=CompressEfg[Support[g]];    // to make a copy
+  i:=Infosets[Chance[gg]];
+  SetChanceProbs[i,Float[ChanceProb[Actions[i]]]];
+  SetPayoffs[Outcomes[gg],Float[Payoffs[Outcomes[gg]]]];
+  gg;
+];  
+\end{verbatim} 
+\ed
+
+\item\lex{Float}
+\protect \large \begin{verbatim}
+Float[g->NFG] =: NFG 
+\end{verbatim}\normalsize
+
+\bd 
+Converts the internal representation of g to Floating point.  
+\begin{verbatim}
+NewFunction[Float[g->NFG]=:NFG,
+  gg:=CompressNfg[Support[g]];    // to make a copy
+  SetPayoffs[Outcomes[gg],Float[Payoffs[Outcomes[gg]]]];
+  gg;
+];  
 \end{verbatim} 
 \ed
 
@@ -8625,6 +8621,40 @@ number generator.
 \begin{verbatim}
 num:=Randomize[1,seed]/MaxInt[];
 If[IsFloat[x],Float[num],num];
+\end{verbatim} 
+\ed
+
+\item\lex{Rational}
+\protect \large \begin{verbatim}
+Rational[g->EFG] =: EFG 
+\end{verbatim}\normalsize
+
+\bd 
+Converts the internal representation of g to Rational.  
+\begin{verbatim}
+NewFunction[Rational[g->EFG]=:EFG,
+  gg:=CompressEfg[Support[g]];    // to make a copy
+  i:=Infosets[Chance[gg]];
+  SetChanceProbs[i,Rational[ChanceProb[Actions[i]]]];
+  SetPayoffs[Outcomes[gg],Rational[Payoffs[Outcomes[gg]]]];
+  gg;
+];  
+\end{verbatim} 
+\ed
+
+\item\lex{Rational}
+\protect \large \begin{verbatim}
+Rational[g->NFG] =: NFG 
+\end{verbatim}\normalsize
+
+\bd 
+Converts the internal representation of g to Rational.  
+\begin{verbatim}
+NewFunction[Rational[g->NFG]=:NFG,
+  gg:=CompressNfg[Support[g]];    // to make a copy
+  SetPayoffs[Outcomes[gg],Rational[Payoffs[Outcomes[gg]]]];
+  gg;
+];  
 \end{verbatim} 
 \ed
 
