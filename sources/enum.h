@@ -29,7 +29,8 @@ public:
 };
 
 int Enum(const NFSupport &, const EnumParams &,
-	 gList<MixedSolution> &, gStatus &, long &npivots, double &time);
+	 gList<MixedSolution> &, gOutput &,
+	 gStatus &, long &npivots, double &time);
 
 #endif    // ENUM_H
 

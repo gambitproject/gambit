@@ -19,7 +19,7 @@ void EnumBySubgame::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   long npiv;
   double time;
 
-  Enum(support, params, solutions, p_status, npiv, time);
+  Enum(support, params, solutions, gnull, p_status, npiv, time);
 
   npivots += npiv;
   

@@ -175,7 +175,7 @@ gList<MixedSolution> guinfgEnumMixed::Solve(const NFSupport &p_support)
   double time;
   gList<MixedSolution> solutions;
   try {
-    Enum(p_support, params, solutions, status, npivots, time);
+    Enum(p_support, params, solutions, gnull, status, npivots, time);
   }
   catch (gSignalBreak &) { }
   return solutions;

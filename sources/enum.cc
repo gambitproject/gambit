@@ -16,7 +16,8 @@ EnumParams::EnumParams(void)
 { }
 
 int Enum(const NFSupport &support, const EnumParams &params,
-	 gList<MixedSolution> &solutions, gStatus &p_status,
+	 gList<MixedSolution> &solutions, 
+	 gOutput &p_output, gStatus &p_status,
 	 long &npivots, double &time)
 {
   if (params.precision == precDOUBLE)  {
@@ -26,7 +27,9 @@ int Enum(const NFSupport &support, const EnumParams &params,
     npivots = module.NumPivots();
     time = module.Time();
     solutions = module.GetSolutions();
-    if(params.cliques) module.GetCliques();
+    if (params.cliques) {
+      module.GetCliques(p_output);
+    }
   }
   else if (params.precision == precRATIONAL)  {
     EnumModule<gRational> module(support, params);
@@ -35,7 +38,9 @@ int Enum(const NFSupport &support, const EnumParams &params,
     npivots = module.NumPivots();
     time = module.Time();
     solutions = module.GetSolutions();
-    if(params.cliques) module.GetCliques();
+    if (params.cliques) {
+      module.GetCliques(p_output);
+    }
   }
   return 1;
 }

@@ -45,7 +45,7 @@ public:
   EnumParams &Parameters(void);
 
   const gList<MixedSolution> &GetSolutions(void) const;
-  void GetCliques() const;
+  void GetCliques(gOutput &) const;
 };
 
 //-------------------------------------------------------------------------
@@ -371,26 +371,26 @@ const gList<MixedSolution> &EnumModule<T>::GetSolutions(void) const
   return solutions;
 }
 
-template <class T> void EnumModule<T>::GetCliques() const
+template <class T> void EnumModule<T>::GetCliques(gOutput &p_stream) const
 {
-  int i,n = node1.Length();
-  assert (node2.Length() == n);
+  int n = node1.Length();
+  assert(node2.Length() == n);
 
   gArray<edge> edgelist(n);
 
-  gout << "\nKey:\nPlayer 1:";
-  for(i=1;i<=key1.Length();i++) {
-    gout << "\n" << i << ": " << key1[i];
+  p_stream << "\nKey:\nPlayer 1:";
+  for (int i = 1; i <= key1.Length(); i++) {
+    p_stream << "\n" << i << ": " << key1[i];
   }
-  gout << "\nPlayer 2:";
-  for(i=1;i<=key2.Length();i++)
-    gout << "\n" << i << ": " << key2[i];
-  gout << "\nExtreme equilibria:";
-  for(int i=1;i<=n;i++) {
+  p_stream << "\nPlayer 2:";
+  for (int i = 1; i <= key2.Length(); i++) {
+    p_stream << "\n" << i << ": " << key2[i];
+  }
+  p_stream << "\nExtreme equilibria:";
+  for (int i = 1; i <= n; i++) {
     edgelist[i].node1 = node1[i];
     edgelist[i].node2 = node2[i];
-    gout << "\n" << node1[i] << " " << node2[i];
+    p_stream << "\n" << node1[i] << " " << node2[i];
   }
-  EnumCliques clique(edgelist,v2+1,v1+1);
+  EnumCliques clique(edgelist, v2+1, v1+1);
 }
-

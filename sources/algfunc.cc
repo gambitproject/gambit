@@ -199,7 +199,8 @@ static Portion *GSM_EnumMixed_Nfg(GSM &gsm, Portion **param)
   try {
     double time;
     long npivots;
-    Enum(*S, params, solutions, gsm.GetStatusMonitor(), npivots, time);
+    Enum(*S, params, solutions, gsm.OutputStream(),
+	 gsm.GetStatusMonitor(), npivots, time);
     ((NumberPortion *) param[3])->SetValue(npivots);
     ((NumberPortion *) param[4])->SetValue(time);
   }
