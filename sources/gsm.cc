@@ -1,16 +1,11 @@
-//
-//  FILE: GSM.cc  implementation of GSM (stack machine)
-//
-//
-
+//#
+//# FILE: gsm.cc  implementation of GSM (stack machine)
+//#
+//# $Id$
+//#
 
 #include "gsm.h"
-
-#include "hash.imp"
-
-
-
-
+#include "hash.h"
 
 //--------------------------------------------------------------------
   // hash tables used by GSM
@@ -32,14 +27,8 @@ class FunctionHashTable : public HashTable<gString, Portion *(*)( void )>
   ~FunctionHashTable() { Flush(); }  
 };
 
-
-
 int GSM::FunctionsInitialized = false;
 FunctionHashTable *GSM::FuncTable = new FunctionHashTable;
-
-
-
-
 
 class RefHashTable : public HashTable<gString, Portion *>
 {
@@ -411,3 +400,28 @@ void GSM::Flush( void )
   RefTable->Flush();
   assert( stack->Depth() == 0 );
 }
+
+//-----------------------------------------------------------------------
+//                       Template instantiations
+//-----------------------------------------------------------------------
+
+#include "hash.imp"
+
+template class HashTable<gString, Portion *(*)(void)>;
+template class HashTable<gString, Portion *>;
+
+#include "glist.imp"
+
+template class gList<Portion *>;
+template class gNode<Portion *>;
+
+template class gList<Portion *(*)(void)>;
+template class gNode<Portion *(*)(void)>;
+
+template class gList<gString>;
+template class gNode<gString>;
+
+#include "gstack.imp"
+
+template class gStack<Portion *>;
+

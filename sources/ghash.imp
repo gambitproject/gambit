@@ -1,7 +1,12 @@
+//#
+//# FILE: hash.imp -- Implementation of hash table member functions
+//#
+//# $Id$
+//#
 
-#include "glist.imp"
-#include "hash.h"
 #include "gambitio.h"
+#include "glist.h"
+#include "hash.h"
 
 
 template <class K, class T> HashTable<K,T>::HashTable()
