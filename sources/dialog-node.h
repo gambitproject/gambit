@@ -40,7 +40,7 @@ public:
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   std::string GetNodeLabel(void) const 
-    { return m_nodeLabel->GetValue().mb_str(); }
+    { return (const char *) m_nodeLabel->GetValue().mb_str(); }
   int GetOutcome(void) const { return m_outcome->GetSelection(); }
   gbtGameInfoset GetInfoset(void) const;
 };

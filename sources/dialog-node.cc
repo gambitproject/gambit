@@ -103,7 +103,7 @@ gbtNodeDialog::gbtNodeDialog(wxWindow *p_parent,
     wxString item = wxString::Format(wxT("%d: %s"),
 				     outc,
 				     outcome->GetLabel().c_str());
-    if (item == "") {
+    if (item == wxT("")) {
       item = wxString::Format(wxT("Outcome%d"), outc);
     }
 

@@ -392,8 +392,8 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc) const
 
   for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
     gbtGamePlayer player = m_doc->GetGame()->GetPlayer(pl);
-    wxString label = wxString::Format(wxT("%s"),
-				      ToText(outcome->GetPayoff(player)).c_str());
+    wxString label = wxString(ToText(outcome->GetPayoff(player)).c_str(),
+			      *wxConvCurrent);
     int width, height;
     p_dc.GetTextExtent(label, &width, &height);
     p_dc.SetTextForeground(m_doc->GetPlayerColor(pl));
@@ -414,8 +414,8 @@ int gbtNodeEntry::GetOutcomeExtent(void) const
 
   for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
     gbtGamePlayer player = m_doc->GetGame()->GetPlayer(pl);
-    wxString label = wxString::Format(wxT("%s"),
-				      ToText(outcome->GetPayoff(player)).c_str());
+    wxString label = wxString(ToText(outcome->GetPayoff(player)).c_str(),
+			      *wxConvCurrent);
     int width, height;
     dc.GetTextExtent(label, &width, &height);
     extent += width + 10;
@@ -518,20 +518,20 @@ wxString gbtTreeLayout::CreateNodeLabel(const gbtNodeEntry *p_entry,
   case GBT_LABEL_NODE_NONE:
     return _T("");
   case GBT_LABEL_NODE_LABEL:
-    return wxString::Format(_T("%s"), n->GetLabel().c_str());
+    return wxString(n->GetLabel().c_str(), *wxConvCurrent);
   case GBT_LABEL_NODE_PLAYER:
     if (!n->GetPlayer().IsNull()) {
-      return wxString::Format(_T("%s"), n->GetPlayer()->GetLabel().c_str());
+      return wxString(n->GetPlayer()->GetLabel().c_str(), *wxConvCurrent);
     }
     else {
-      return _T("");
+      return wxT("");
     }
   case GBT_LABEL_NODE_INFOSET:
     if (!n->GetInfoset().IsNull()) {
-      return wxString::Format(_T("%s"), n->GetInfoset()->GetLabel().c_str());
+      return wxString(n->GetInfoset()->GetLabel().c_str(), *wxConvCurrent);
     }
     else {
-      return _T("");
+      return wxT("");
     }
   case GBT_LABEL_NODE_INFOSETID:
     if (!n->GetInfoset().IsNull()) {
@@ -558,17 +558,16 @@ wxString gbtTreeLayout::CreateOutcomeLabel(const gbtNodeEntry *p_entry,
     return wxString::Format(_T("%s"),
 			    (const char *) m_parent->OutcomeAsString(node));
     */
-    return _T("");
+    return wxT("");
   case GBT_LABEL_OUTCOME_LABEL:
     if (!node->GetOutcome().IsNull()) {
-      return wxString::Format(_T("%s"), 
-			      node->GetOutcome()->GetLabel().c_str());
+      return wxString(node->GetOutcome()->GetLabel().c_str(), *wxConvCurrent);
     }
     else {
-      return _T("");
+      return wxT("");
     }
   default:
-    return _T("");
+    return wxT("");
   }
 }
 
@@ -579,19 +578,18 @@ wxString gbtTreeLayout::CreateBranchLabel(const gbtNodeEntry *p_entry,
 
   switch (p_type) {
   case GBT_LABEL_BRANCH_NONE:
-    return _T("");
+    return wxT("");
   case GBT_LABEL_BRANCH_LABEL:
-    return wxString::Format(_T("%s"), 
-			    parent->GetInfoset()->GetAction(p_entry->GetChildNumber())->GetLabel().c_str());
+    return wxString(parent->GetInfoset()->GetAction(p_entry->GetChildNumber())->GetLabel().c_str(), *wxConvCurrent);
   case GBT_LABEL_BRANCH_PROB:
     /*
     return wxString::Format(_T("%s"), 
 			    m_parent->Parent()->GetActionProb(parent,
 							    p_entry->GetChildNumber()));
     */
-    return _T("");
+    return wxT("");
   default:
-    return _T("");
+    return wxT("");
   }
 }
 

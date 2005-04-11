@@ -570,11 +570,9 @@ void gbtGameFrame::OnFilePrintPreview(wxCommandEvent &)
   wxPrintDialogData data(m_printData);
   wxPrintPreview *preview = 
     new wxPrintPreview(new gbtTreePrintout(m_treeDisplay->GetLayout(),
-					   wxString::Format(_T("%s"), 
-							    m_doc->GetGame()->GetLabel().c_str())),
+					   wxString(m_doc->GetGame()->GetLabel().c_str(), *wxConvCurrent)),
 		       new gbtTreePrintout(m_treeDisplay->GetLayout(),
-					   wxString::Format(_T("%s"), 
-							    m_doc->GetGame()->GetLabel().c_str())),
+					   wxString(m_doc->GetGame()->GetLabel().c_str(), *wxConvCurrent)),
 		       &data);
 
   if (!preview->Ok()) {
@@ -595,8 +593,8 @@ void gbtGameFrame::OnFilePrint(wxCommandEvent &)
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
   gbtTreePrintout printout(m_treeDisplay->GetLayout(),
-			   wxString::Format(_T("%s"), 
-					    m_doc->GetGame()->GetLabel().c_str()));
+			   wxString(m_doc->GetGame()->GetLabel().c_str(),
+				    *wxConvCurrent));
 
   if (!printer.Print(this, &printout, true)) {
     if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
@@ -777,15 +775,23 @@ void gbtGameFrame::OnHelpAbout(wxCommandEvent &)
 void gbtGameFrame::OnUpdate(void)
 {
   if (m_doc->GetFilename() == wxT("")) {
-    SetTitle(wxString::Format(_("Gambit: [<no file>%s] %s"),
-			      (m_doc->IsModified()) ? "*" : "",
-			      m_doc->GetGame()->GetLabel().c_str()));
+    wxString title = wxT("Gambit: [<no file>");
+    if (m_doc->IsModified()) {
+      title += wxT("*");
+    }
+    title += wxT("] ");
+    title += wxString(m_doc->GetGame()->GetLabel().c_str(), *wxConvCurrent);
+    SetTitle(title);
   }
   else {
-    SetTitle(wxString::Format(_("Gambit: [%s%s] %s"),
-			      m_doc->GetFilename().c_str(),
-			      (m_doc->IsModified()) ? "*" : "",
-			      m_doc->GetGame()->GetLabel().c_str()));
+    wxString title = wxT("Gambit: [");
+    title += m_doc->GetFilename();
+    if (m_doc->IsModified()) {
+      title += wxT("*");
+    }
+    title += wxT("] ");
+    title += wxString(m_doc->GetGame()->GetLabel().c_str(), *wxConvCurrent);
+    SetTitle(title);
   }
 
   if (m_schellingPanel && GetSizer()->IsShown(m_schellingPanel) && 
@@ -810,13 +816,13 @@ void gbtGameFrame::OnUpdate(void)
   }
 
   GetMenuBar()->Enable(GBT_MENU_FILE_EXPORT,
-		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
+		       m_treeDisplay && GetSizer()->IsShown(m_treePanel));
   GetMenuBar()->Enable(wxID_PRINT_SETUP,
-		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
+		       m_treeDisplay && GetSizer()->IsShown(m_treePanel));
   GetMenuBar()->Enable(wxID_PREVIEW,
-		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
+		       m_treeDisplay && GetSizer()->IsShown(m_treePanel));
   GetMenuBar()->Enable(wxID_PRINT,
-		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
+		       m_treeDisplay && GetSizer()->IsShown(m_treePanel));
 
   GetMenuBar()->Enable(wxID_UNDO, m_doc->CanUndo());
   if (m_doc->CanUndo()) {
