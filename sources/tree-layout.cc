@@ -582,12 +582,13 @@ wxString gbtTreeLayout::CreateBranchLabel(const gbtNodeEntry *p_entry,
   case GBT_LABEL_BRANCH_LABEL:
     return wxString(parent->GetInfoset()->GetAction(p_entry->GetChildNumber())->GetLabel().c_str(), *wxConvCurrent);
   case GBT_LABEL_BRANCH_PROB:
-    /*
-    return wxString::Format(_T("%s"), 
-			    m_parent->Parent()->GetActionProb(parent,
-							    p_entry->GetChildNumber()));
-    */
-    return wxT("");
+    if (!parent.IsNull() && parent->GetPlayer()->IsChance()) {
+      return wxString(ToText(parent->GetInfoset()->GetAction(p_entry->GetChildNumber())->GetChanceProb()).c_str(),
+		      *wxConvCurrent);
+    }
+    else {
+      return wxT("");
+    }
   default:
     return wxT("");
   }
