@@ -30,6 +30,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
+#include <wx/choicebk.h>     // for use on analysis panel
 
 #include "gambit.h"
 #include "game-frame.h"
@@ -44,6 +45,35 @@
 #include "table-matrix.h"
 #include "panel-nash.h"
 #include "panel-qre.h"
+
+class gbtAnalysisPanel : public wxPanel {
+private:
+  wxChoicebook *m_notebook;
+  wxPanel *m_algorithmPanel, *m_qrePanel;
+
+public:
+  gbtAnalysisPanel(wxWindow *p_parent, gbtGameDocument *p_doc);
+};
+
+gbtAnalysisPanel::gbtAnalysisPanel(wxWindow *p_parent,
+				   gbtGameDocument *p_doc)
+  : wxPanel(p_parent, -1)
+{
+  m_notebook = new wxChoicebook(this, -1);
+  
+  m_algorithmPanel = new gbtNashPanel(m_notebook, p_doc);
+  m_qrePanel = new gbtQrePanel(m_notebook, p_doc);
+
+  m_notebook->AddPage(m_algorithmPanel, _("Compute Nash equilibria"));
+  m_notebook->AddPage(m_qrePanel, _("Compute quantal response"));
+  
+  wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+  sizer->Add(m_notebook, 1, wxALL | wxEXPAND, 0);
+
+  SetSizer(sizer);
+  Layout();
+}
+
 
 enum {
   GBT_MENU_FILE_NEW_EFG = 968,
@@ -63,8 +93,7 @@ enum {
   GBT_MENU_FORMAT_LABELS = 961,
   GBT_MENU_FORMAT_FONT = 962,
 
-  GBT_MENU_TOOLS_EQM = 1000,
-  GBT_MENU_TOOLS_QRE = 1001
+  GBT_MENU_TOOLS_ANALYSIS = 1000
 };
 
 BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
@@ -90,8 +119,7 @@ BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(GBT_MENU_FORMAT_LAYOUT, gbtGameFrame::OnFormatLayout)
   EVT_MENU(GBT_MENU_FORMAT_LABELS, gbtGameFrame::OnFormatLabels)
   EVT_MENU(GBT_MENU_FORMAT_FONT, gbtGameFrame::OnFormatFont)
-  EVT_MENU(GBT_MENU_TOOLS_EQM, gbtGameFrame::OnToolsEquilibrium)
-  EVT_MENU(GBT_MENU_TOOLS_QRE, gbtGameFrame::OnToolsQre)
+  EVT_MENU(GBT_MENU_TOOLS_ANALYSIS, gbtGameFrame::OnToolsAnalysis)
   EVT_MENU(wxID_ABOUT, gbtGameFrame::OnHelpAbout)
   EVT_CLOSE(gbtGameFrame::OnCloseWindow)
 END_EVENT_TABLE()
@@ -129,9 +157,6 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
     m_treeDisplay = 0;
   }
 
-  m_algorithmPanel = new gbtNashPanel(this, p_doc);
-  m_qrePanel = new gbtQrePanel(this, p_doc);
-
   wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
   if (m_treeDisplay) {
     sizer->Add(m_treePanel, 1, wxEXPAND, 0);
@@ -146,11 +171,9 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
 		!m_doc->GetGame()->HasTree() && m_doc->GetGame()->NumPlayers() == 2);
   }
 
-  sizer->Add(m_algorithmPanel, 1, wxEXPAND, 0);
-  sizer->Show(m_algorithmPanel, false);
-
-  sizer->Add(m_qrePanel, 1, wxEXPAND, 0);
-  sizer->Show(m_qrePanel, false);
+  m_analysisPanel = new gbtAnalysisPanel(this, p_doc);
+  sizer->Add(m_analysisPanel, 1, wxEXPAND, 0);
+  sizer->Show(m_analysisPanel, false);
 
   SetSizer(sizer);
   Layout();
@@ -231,10 +254,8 @@ void gbtGameFrame::MakeMenu(void)
 		     _("Configuring display fonts for game objects"));
 
   wxMenu *toolsMenu = new wxMenu;	
-  toolsMenu->Append(GBT_MENU_TOOLS_EQM, _("&Equilibrium"),
-		    _("Compute Nash equilibria of the game"), true);
-  toolsMenu->Append(GBT_MENU_TOOLS_QRE, _("&QRE"),
-		    _("Compute quantal response equilibria of the game"),
+  toolsMenu->Append(GBT_MENU_TOOLS_ANALYSIS, _("&Analysis"),
+		    _("Show or hide panel to control equilibrium analysis"),
 		    true);
   
   wxMenu *helpMenu = new wxMenu;
@@ -739,26 +760,10 @@ void gbtGameFrame::OnFormatFont(wxCommandEvent &)
 }
 
 
-void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
+void gbtGameFrame::OnToolsAnalysis(wxCommandEvent &)
 {
-  if (GetSizer()->IsShown(m_qrePanel)) {
-    GetSizer()->Show(m_qrePanel, false);
-    GetMenuBar()->Check(GBT_MENU_TOOLS_QRE, false);
-  }
-
-  GetSizer()->Show(m_algorithmPanel,
-		   !GetSizer()->IsShown(m_algorithmPanel));
-  Layout();
-}
-
-void gbtGameFrame::OnToolsQre(wxCommandEvent &)
-{
-  if (GetSizer()->IsShown(m_algorithmPanel)) {
-    GetSizer()->Show(m_algorithmPanel, false);
-    GetMenuBar()->Check(GBT_MENU_TOOLS_EQM, false);
-  }
-
-  GetSizer()->Show(m_qrePanel, !GetSizer()->IsShown(m_qrePanel));
+  GetSizer()->Show(m_analysisPanel,
+		   GetMenuBar()->IsChecked(GBT_MENU_TOOLS_ANALYSIS));
   Layout();
 }
 

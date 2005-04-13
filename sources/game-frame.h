@@ -36,7 +36,7 @@ class gbtTreeDisplay;
 class gbtGameFrame : public wxFrame, gbtGameView {
 private:
   wxPanel *m_treePanel, *m_matrixPanel, *m_schellingPanel;
-  wxPanel *m_algorithmPanel, *m_qrePanel;
+  wxPanel *m_analysisPanel;
   gbtTreeDisplay *m_treeDisplay;
 
   // Printing state... should be part of document instead?
@@ -76,8 +76,7 @@ private:
   void OnFormatLabels(wxCommandEvent &);
   void OnFormatFont(wxCommandEvent &);
 
-  void OnToolsEquilibrium(wxCommandEvent &);
-  void OnToolsQre(wxCommandEvent &);
+  void OnToolsAnalysis(wxCommandEvent &);
 
   void OnHelpAbout(wxCommandEvent &);
 
