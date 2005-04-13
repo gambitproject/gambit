@@ -27,16 +27,16 @@
     #include "wx/arrstr.h"
 #endif
 
-class WXDLLIMPEXP_ADV wxSheet;
-class WXDLLIMPEXP_ADV wxSheetCellAttr;
-class WXDLLIMPEXP_ADV wxSheetCoords;
-class WXDLLIMPEXP_ADV wxSheetCellEditorRefData;
-class WXDLLIMPEXP_ADV wxSheetCellRendererRefData;
+class wxSheet;
+class wxSheetCellAttr;
+class wxSheetCoords;
+class wxSheetCellEditorRefData;
+class wxSheetCellRendererRefData;
 
-class WXDLLEXPORT wxCheckBox;
-class WXDLLEXPORT wxComboBox;
-class WXDLLEXPORT wxTextCtrl;
-class WXDLLEXPORT wxSpinCtrl;
+class wxCheckBox;
+class wxComboBox;
+class wxTextCtrl;
+class wxSpinCtrl;
 
 // classes must define a "bool Copy(const classname& other)" function to copy all
 // the data in the class so that Clone can create a "new" copied instance.
@@ -55,7 +55,7 @@ class WXDLLEXPORT wxSpinCtrl;
 // even for the entire grid (the default).
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxSheetCellEditor : public wxObject
+class wxSheetCellEditor : public wxObject
 {
 public:
     wxSheetCellEditor( wxSheetCellEditorRefData *editor = NULL );
@@ -145,7 +145,7 @@ extern const wxSheetCellEditor wxNullSheetCellEditor;
 // ----------------------------------------------------------------------------    
 // wxSheetCellEditorRefData
 // ----------------------------------------------------------------------------    
-class WXDLLIMPEXP_ADV wxSheetCellEditorRefData : public wxObject, public wxObjectRefData
+class wxSheetCellEditorRefData : public wxObject, public wxObjectRefData
 {
 public:
     wxSheetCellEditorRefData() : m_control(NULL) {}
@@ -201,7 +201,7 @@ public:
 //-----------------------------------------------------------------------------
 #if wxUSE_TEXTCTRL
 
-class WXDLLIMPEXP_ADV wxSheetCellTextEditorRefData : public wxSheetCellEditorRefData
+class wxSheetCellTextEditorRefData : public wxSheetCellEditorRefData
 {
 public:
     wxSheetCellTextEditorRefData() : m_maxChars(0) {}
@@ -249,7 +249,7 @@ public:
 // wxSheetCellAutoWrapStringEditorRefData
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxSheetCellAutoWrapStringEditorRefData : public wxSheetCellTextEditorRefData
+class wxSheetCellAutoWrapStringEditorRefData : public wxSheetCellTextEditorRefData
 {
 public:
     wxSheetCellAutoWrapStringEditorRefData() : wxSheetCellTextEditorRefData() { }
@@ -270,7 +270,7 @@ public:
 //-----------------------------------------------------------------------------
 #if defined(wxUSE_TEXTCTRL) && defined(wxUSE_SPINCTRL)
 
-class WXDLLIMPEXP_ADV wxSheetCellNumberEditorRefData : public wxSheetCellTextEditorRefData
+class wxSheetCellNumberEditorRefData : public wxSheetCellTextEditorRefData
 {
 public:
     // specify the range - if min == max == -1, no range checking is done
@@ -315,7 +315,7 @@ public:
 //-----------------------------------------------------------------------------
 #if wxUSE_TEXTCTRL
 
-class WXDLLIMPEXP_ADV wxSheetCellFloatEditorRefData : public wxSheetCellTextEditorRefData
+class wxSheetCellFloatEditorRefData : public wxSheetCellTextEditorRefData
 {
 public:
     wxSheetCellFloatEditorRefData(int width = -1, int precision = -1)
@@ -353,7 +353,7 @@ public:
 //-----------------------------------------------------------------------------
 #if wxUSE_CHECKBOX
 
-class WXDLLIMPEXP_ADV wxSheetCellBoolEditorRefData : public wxSheetCellEditorRefData
+class wxSheetCellBoolEditorRefData : public wxSheetCellEditorRefData
 {
 public:
     wxSheetCellBoolEditorRefData() : m_startValue(FALSE) {}
@@ -390,7 +390,7 @@ public:
 //-----------------------------------------------------------------------------
 #if wxUSE_COMBOBOX
 
-class WXDLLIMPEXP_ADV wxSheetCellChoiceEditorRefData : public wxSheetCellEditorRefData
+class wxSheetCellChoiceEditorRefData : public wxSheetCellEditorRefData
 {
 public:
     // if !allowOthers, user can't type a string not in choices array
@@ -431,7 +431,7 @@ public:
 // wxSheetCellEnumEditorRefData
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxSheetCellEnumEditorRefData : public wxSheetCellChoiceEditorRefData
+class wxSheetCellEnumEditorRefData : public wxSheetCellChoiceEditorRefData
 {
 public:
     wxSheetCellEnumEditorRefData( const wxString& choices = wxEmptyString );
@@ -452,7 +452,7 @@ public:
 // ----------------------------------------------------------------------------
 // wxSheetCellEditorEvtHandler
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetCellEditorEvtHandler : public wxEvtHandler
+class wxSheetCellEditorEvtHandler : public wxEvtHandler
 {
 public:
     wxSheetCellEditorEvtHandler() : m_sheet(NULL), m_editor(NULL) { }
@@ -491,7 +491,7 @@ private:
 // Rendering is done by the wxObject::m_refData which must be derived from
 // wxSheetCellRendererRefData.
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetCellRenderer : public wxObject
+class wxSheetCellRenderer : public wxObject
 {
 public:
     wxSheetCellRenderer(wxSheetCellRendererRefData *renderer = NULL);
@@ -524,7 +524,7 @@ extern const wxSheetCellRenderer wxNullSheetCellRenderer;
 // ----------------------------------------------------------------------------
 // wxSheetCellRendererRefData - base class for rendering a cell
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetCellRendererRefData : public wxObjectRefData, public wxObject
+class wxSheetCellRendererRefData : public wxObjectRefData, public wxObject
 {
 public:
     wxSheetCellRendererRefData() {}
@@ -554,7 +554,7 @@ public:
 // ----------------------------------------------------------------------------
 
 // the default renderer for the cells containing string data
-class WXDLLIMPEXP_ADV wxSheetCellStringRendererRefData : public wxSheetCellRendererRefData
+class wxSheetCellStringRendererRefData : public wxSheetCellRendererRefData
 {
 public:
     wxSheetCellStringRendererRefData();
@@ -591,7 +591,7 @@ public:
 // ----------------------------------------------------------------------------
 
 // the default renderer for the cells containing numeric (long) data
-class WXDLLIMPEXP_ADV wxSheetCellNumberRendererRefData : public wxSheetCellStringRendererRefData
+class wxSheetCellNumberRendererRefData : public wxSheetCellStringRendererRefData
 {
 public:
     wxSheetCellNumberRendererRefData() {}
@@ -614,7 +614,7 @@ public:
 // ----------------------------------------------------------------------------
 // wxSheetCellFloatRendererRefData
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetCellFloatRendererRefData : public wxSheetCellStringRendererRefData
+class wxSheetCellFloatRendererRefData : public wxSheetCellStringRendererRefData
 {
 public:
     wxSheetCellFloatRendererRefData(int width = -1, int precision = -1)
@@ -653,7 +653,7 @@ protected:
 // wxSheetCellBitmapRendererRefData
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxSheetCellBitmapRendererRefData : public wxSheetCellStringRendererRefData
+class wxSheetCellBitmapRendererRefData : public wxSheetCellStringRendererRefData
 {
 public:
     wxSheetCellBitmapRendererRefData() {}
@@ -684,7 +684,7 @@ public:
 // wxSheetCellBoolRendererRefData
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxSheetCellBoolRendererRefData : public wxSheetCellRendererRefData
+class wxSheetCellBoolRendererRefData : public wxSheetCellRendererRefData
 {
 public:
     wxSheetCellBoolRendererRefData() {}
@@ -713,7 +713,7 @@ protected:
 #if wxUSE_DATETIME
 
 // the default renderer for the cells containing Time and dates..
-class WXDLLIMPEXP_ADV wxSheetCellDateTimeRendererRefData : public wxSheetCellStringRendererRefData
+class wxSheetCellDateTimeRendererRefData : public wxSheetCellStringRendererRefData
 {
 public:
     wxSheetCellDateTimeRendererRefData(wxString outFormat = _T("%c"),
@@ -754,7 +754,7 @@ protected:
 // ----------------------------------------------------------------------------
 // wxSheetCellEnumRendererRefData - renderers Time and dates..
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetCellEnumRendererRefData : public wxSheetCellStringRendererRefData
+class wxSheetCellEnumRendererRefData : public wxSheetCellStringRendererRefData
 {
 public:
     wxSheetCellEnumRendererRefData( const wxString& choices = wxEmptyString );
@@ -783,7 +783,7 @@ protected:
 // wxSheetCellAutoWrapStringRendererRefData
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxSheetCellAutoWrapStringRendererRefData : public wxSheetCellStringRendererRefData
+class wxSheetCellAutoWrapStringRendererRefData : public wxSheetCellStringRendererRefData
 {
 public:
     wxSheetCellAutoWrapStringRendererRefData() : wxSheetCellStringRendererRefData() { }
@@ -809,7 +809,7 @@ public:
 // ----------------------------------------------------------------------------
 
 // the default renderer for the cells containing string data
-class WXDLLIMPEXP_ADV wxSheetCellRolColLabelRendererRefData : public wxSheetCellStringRendererRefData
+class wxSheetCellRolColLabelRendererRefData : public wxSheetCellStringRendererRefData
 {
 public:
     wxSheetCellRolColLabelRendererRefData() {}

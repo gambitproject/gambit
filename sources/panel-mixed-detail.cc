@@ -69,8 +69,8 @@ wxString gbtMixedProfileDetail::GetCellValue(const wxSheetCoords &p_coords)
     else {
       gbtGamePlayer player = m_doc->GetGame()->GetPlayer(p_coords.GetRow());
       if (player->GetLabel() != "") {
-	return wxString::Format(wxT("Payoff to %s"),
-				player->GetLabel().c_str());
+	return (wxT("Payoff to ") +
+		wxString(player->GetLabel().c_str(), *wxConvCurrent));
       }
       else {
 	return wxString::Format(wxT("Payoff to Player %d"),

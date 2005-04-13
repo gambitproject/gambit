@@ -21,8 +21,8 @@
 
 #include "wx24defs.h"  // wx24 backwards compatibility
 
-class WXDLLIMPEXP_ADV wxSheetCoords;
-class WXDLLIMPEXP_ADV wxSheetBlock;
+class wxSheetCoords;
+class wxSheetBlock;
 
 // ----------------------------------------------------------------------------
 // wxSheetCoords: location of a cell in the grid
@@ -30,7 +30,7 @@ class WXDLLIMPEXP_ADV wxSheetBlock;
 // Though this is based on a wxPoint you are *STRONGLY* discouraged from using
 // the members int x,y use Get/SetRow and Get/SetCol
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetCoords
+class wxSheetCoords
 {
 public:
     wxSheetCoords() : m_row(0), m_col(0) {}
@@ -72,13 +72,13 @@ public:
     int m_col;    
 };
 
-WX_DECLARE_OBJARRAY_WITH_DECL(wxSheetCoords, wxArraySheetCoords, class WXDLLIMPEXP_ADV);
+WX_DECLARE_OBJARRAY_WITH_DECL(wxSheetCoords, wxArraySheetCoords, class );
 
 // ----------------------------------------------------------------------------
 // wxSheetBlock: a rectangular block of cells
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxSheetBlock
+class wxSheetBlock
 {
 public:    
     wxSheetBlock() : m_row(0), m_col(0), m_height(0), m_width(0) {}
@@ -218,21 +218,21 @@ public:
 };
 
 // For comparisons...
-extern const WXDLLIMPEXP_ADV wxSheetCoords wxNullSheetCoords;        // (-2, -2)
-extern const WXDLLIMPEXP_ADV wxSheetCoords wxGridCellSheetCoords;    // ( 0,  0)
-extern const WXDLLIMPEXP_ADV wxSheetCoords wxRowLabelSheetCoords;    // ( 0, -1)
-extern const WXDLLIMPEXP_ADV wxSheetCoords wxColLabelSheetCoords;    // (-1,  0)
-extern const WXDLLIMPEXP_ADV wxSheetCoords wxCornerLabelSheetCoords; // (-1, -1)
+extern const wxSheetCoords wxNullSheetCoords;        // (-2, -2)
+extern const wxSheetCoords wxGridCellSheetCoords;    // ( 0,  0)
+extern const wxSheetCoords wxRowLabelSheetCoords;    // ( 0, -1)
+extern const wxSheetCoords wxColLabelSheetCoords;    // (-1,  0)
+extern const wxSheetCoords wxCornerLabelSheetCoords; // (-1, -1)
 
-extern const WXDLLIMPEXP_ADV wxSheetBlock  wxNullSheetBlock;  // (0, 0, 0, 0)
-extern const WXDLLIMPEXP_ADV wxRect        wxSheetNoCellRect; // FIXME this is not necessary
+extern const wxSheetBlock  wxNullSheetBlock;  // (0, 0, 0, 0)
+extern const wxRect        wxSheetNoCellRect; // FIXME this is not necessary
 
-WX_DECLARE_OBJARRAY_WITH_DECL(wxSheetBlock, wxArraySheetBlock, class WXDLLIMPEXP_ADV);
+WX_DECLARE_OBJARRAY_WITH_DECL(wxSheetBlock, wxArraySheetBlock, class );
 
 // ----------------------------------------------------------------------------
 // wxSheetSelection
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetSelection
+class wxSheetSelection
 {
 public:
     wxSheetSelection();

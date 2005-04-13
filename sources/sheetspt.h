@@ -40,7 +40,7 @@ enum wxSheetSplitMode
     wxSHEET_SPLIT_HORIZONTAL
 };
 
-class WXDLLIMPEXP_ADV wxSheetSplitter : public wxWindow
+class  wxSheetSplitter : public wxWindow
 {
 public:    
     wxSheetSplitter() : wxWindow() { Init(); }
@@ -151,7 +151,7 @@ private:
 // wxSheetSplitterEvent
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxSheetSplitterEvent : public wxNotifyEvent
+class wxSheetSplitterEvent : public wxNotifyEvent
 {
 public:
     wxSheetSplitterEvent(int id = 0, wxEventType type = wxEVT_NULL)
@@ -181,15 +181,15 @@ public:
 
 BEGIN_DECLARE_EVENT_TYPES()
     // The splitter buttons in the sheet have been clicked to begin splitting
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_SPLIT_BEGIN, 1593)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_SPLIT_BEGIN, 1593)
     // The splitter sash position is changing
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_SPLIT_CHANGING, 1593)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_SPLIT_CHANGING, 1593)
     // The splitter sash position has changed
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_SPLIT_CHANGED, 1593)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_SPLIT_CHANGED, 1593)
     // The splitter sash position has been double clicked on, will unsplit
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_SPLIT_DOUBLECLICKED, 1593)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_SPLIT_DOUBLECLICKED, 1593)
     // The splitter has been unsplit
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_SPLIT_UNSPLIT, 1593)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_SPLIT_UNSPLIT, 1593)
 END_DECLARE_EVENT_TYPES()
 
 typedef void (wxEvtHandler::*wxSheetSplitterEventFunction)(wxSheetSplitterEvent&);

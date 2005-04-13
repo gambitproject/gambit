@@ -152,15 +152,13 @@ wxString gbtMixedLogitCtrl::GetCellValue(const wxSheetCoords &p_coords)
 			    m_cor.GetLambda(p_coords.GetRow() + 1));
   }
   else if (IsColLabelCell(p_coords)) {
-    return wxString::Format(wxT("%s"),
-			    m_doc->GetGame()->GetPlayer(p_coords.GetCol() + 1)->GetLabel().c_str());
+    return wxString(m_doc->GetGame()->GetPlayer(p_coords.GetCol() + 1)->GetLabel().c_str(), *wxConvCurrent);
   }
   else if (IsCornerLabelCell(p_coords)) {
     return _("Lambda");
   }
 
-  return ToMyerson(m_cor.GetProfile(p_coords.GetRow() + 1),
-		   m_doc->GetGame()->GetPlayer(p_coords.GetCol() + 1));
+  return wxString(m_cor.GetProfile(p_coords.GetRow() + 1)->ToMyerson(m_doc->GetGame()->GetPlayer(p_coords.GetCol() + 1)).c_str(), *wxConvCurrent);
 }
 
 wxSheetCellAttr gbtMixedLogitCtrl::GetAttr(const wxSheetCoords &p_coords,

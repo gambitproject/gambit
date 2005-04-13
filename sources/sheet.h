@@ -21,8 +21,8 @@
 #include "wx/object.h"
 #include "wx/event.h"
 
-class WXDLLEXPORT wxTimer;
-class WXDLLEXPORT wxTimerEvent;
+class wxTimer;
+class wxTimerEvent;
 
 #include "wx/hashmap.h"
 #include "wx/panel.h"
@@ -40,21 +40,21 @@ class WXDLLEXPORT wxTimerEvent;
 #include "wx/grid.h"   // get wxLongToLongHashMap, wxGridStringArray from grid 
 
 // classes implemented by wxSheet
-class WXDLLIMPEXP_ADV wxSheet;
-class WXDLLIMPEXP_ADV wxSheetCellAttr;
-class WXDLLIMPEXP_ADV wxSheetCellRenderer;
-class WXDLLIMPEXP_ADV wxSheetCellEditor;
-class WXDLLIMPEXP_ADV wxSheetGridWindow;
-class WXDLLIMPEXP_ADV wxSheetRowLabelWindow;
-class WXDLLIMPEXP_ADV wxSheetColLabelWindow;
-class WXDLLIMPEXP_ADV wxSheetCornerLabelWindow;
-class WXDLLIMPEXP_ADV wxSheetTableBase;
-class WXDLLIMPEXP_ADV wxSheetTypeRegistry;
-class WXDLLIMPEXP_ADV wxSheetCoords;
-class WXDLLIMPEXP_ADV wxSheetBlock;
-class WXDLLIMPEXP_ADV wxSheetSelection;
-class WXDLLIMPEXP_ADV wxSheetEvent;
-class WXDLLIMPEXP_ADV wxSheetSplitterEvent;
+class wxSheet;
+class wxSheetCellAttr;
+class wxSheetCellRenderer;
+class wxSheetCellEditor;
+class wxSheetGridWindow;
+class wxSheetRowLabelWindow;
+class wxSheetColLabelWindow;
+class wxSheetCornerLabelWindow;
+class wxSheetTableBase;
+class wxSheetTypeRegistry;
+class wxSheetCoords;
+class wxSheetBlock;
+class wxSheetSelection;
+class wxSheetEvent;
+class wxSheetSplitterEvent;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -91,7 +91,7 @@ class WXDLLIMPEXP_ADV wxSheetSplitterEvent;
 
 // use the one in wx/grid.h for wx >= 2.5
 //WX_DECLARE_HASH_MAP_WITH_DECL( long, long, wxIntegerHash, wxIntegerEqual,
-//                               wxLongToLongHashMap, class WXDLLIMPEXP_ADV );
+//                               wxLongToLongHashMap, class );
 #if wxMINOR_VERSION < 5
 WX_DECLARE_HASH_MAP( long, long, wxIntegerHash, wxIntegerEqual,
                      wxLongToLongHashMap );
@@ -275,7 +275,7 @@ enum wxSheetAttrOverflowMarker_Type
     wxSHEET_AttrOverflowMarkerType_Mask = (wxSHEET_AttrOverflowMarker|wxSHEET_AttrOverflowMarkerNot)
 };
 
-class WXDLLIMPEXP_ADV wxSheetCellAttr : public wxObject
+class wxSheetCellAttr : public wxObject
 {
 public:
     // if create then create with ref data
@@ -357,7 +357,7 @@ public:
 // 
 // only use this as a LAST resort to overriding the behavior
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetCellAttrRefData : public wxObjectRefData
+class wxSheetCellAttrRefData : public wxObjectRefData
 {
 public:    
     wxSheetCellAttrRefData();
@@ -381,10 +381,10 @@ extern const wxSheetCellAttr wxNullSheetCellAttr;
 #include "sheetctl.h"  // have to include this here to get renderer/editor 
 
 WX_DECLARE_OBJARRAY_WITH_DECL(wxSheetCellAttr, wxArraySheetCellAttr,
-                              class WXDLLIMPEXP_ADV);
+                              class );
 
-DECLARE_PAIRED_DATA_ARRAYS(int, wxArrayInt, wxSheetCellAttr, wxArraySheetCellAttr, wxPairArrayIntSheetCellAttr, class WXDLLIMPEXP_ADV)
-DECLARE_PAIRED_DATA_ARRAYS(wxSheetCoords, wxArraySheetCoords, wxSheetCellAttr, wxArraySheetCellAttr, wxPairArraySheetCoordsCellAttrBase, class WXDLLIMPEXP_ADV)
+DECLARE_PAIRED_DATA_ARRAYS(int, wxArrayInt, wxSheetCellAttr, wxArraySheetCellAttr, wxPairArrayIntSheetCellAttr, class )
+DECLARE_PAIRED_DATA_ARRAYS(wxSheetCoords, wxArraySheetCoords, wxSheetCellAttr, wxArraySheetCellAttr, wxPairArraySheetCoordsCellAttrBase, class )
 
 class wxPairArraySheetCoordsCellAttr : public wxPairArraySheetCoordsCellAttrBase
 {
@@ -404,7 +404,7 @@ public:
 // the default implementation is reasonably efficient for the generic case,
 // but you might still wish to implement your own for some specific situations
 // if you have performance problems with the stock one
-class WXDLLIMPEXP_ADV wxSheetCellAttrProvider : public wxClientDataContainer
+class wxSheetCellAttrProvider : public wxClientDataContainer
 {
 public:
     wxSheetCellAttrProvider() {}
@@ -460,7 +460,7 @@ enum wxSheetTableRequest       // IDs for messages sent from grid table to view
     wxSHEETTABLE_NOTIFY_COLS_DELETED
 };
 
-class WXDLLIMPEXP_ADV wxSheetTableMessage
+class wxSheetTableMessage
 {
 public:
     wxSheetTableMessage() : m_table(NULL), m_id(-1), m_comInt1(-1), m_comInt2(-1) {}
@@ -500,7 +500,7 @@ protected:
 //  if (!ContainsGridCell(coords)) return wxSheetTableBase::GetValue(coords);
 //  to have the default processing occur
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetTableBase : public wxObject, public wxClientDataContainer
+class wxSheetTableBase : public wxObject, public wxClientDataContainer
 {
 public:
     wxSheetTableBase( wxSheet *sheet = NULL );
@@ -615,7 +615,7 @@ protected:
 // The data is stored in wxArrayStrings as a 2x2 matrix [rows][cols]
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxSheetStringTable : public wxSheetTableBase
+class wxSheetStringTable : public wxSheetTableBase
 {
 public:
     wxSheetStringTable() : wxSheetTableBase() {}
@@ -663,11 +663,11 @@ protected:
 // ----------------------------------------------------------------------------
 
 // Make a int, wxString pair array for row/col labels and for grid cols
-DECLARE_PAIRED_DATA_ARRAYS(int, wxArrayInt, wxString, wxArrayString, wxPairArrayIntSheetString, class WXDLLIMPEXP_ADV)
+DECLARE_PAIRED_DATA_ARRAYS(int, wxArrayInt, wxString, wxArrayString, wxPairArrayIntSheetString, class )
 // Make a pair array of int, (int, wxString) pair arrays for rows     
 WX_DECLARE_OBJARRAY_WITH_DECL(wxPairArrayIntSheetString, wxArrayPairArrayIntSheetString,
-                              class WXDLLIMPEXP_ADV);
-DECLARE_PAIRED_DATA_ARRAYS(int, wxArrayInt, wxPairArrayIntSheetString, wxArrayPairArrayIntSheetString, wxPairArrayIntPairArraySheetStringBase, class WXDLLIMPEXP_ADV)
+                              class );
+DECLARE_PAIRED_DATA_ARRAYS(int, wxArrayInt, wxPairArrayIntSheetString, wxArrayPairArrayIntSheetString, wxPairArrayIntPairArraySheetStringBase, class )
 
 class wxPairArrayIntPairArraySheetString : public wxPairArrayIntPairArraySheetStringBase
 {
@@ -675,7 +675,7 @@ public:
     void RemoveEmptyRows();
 };
 
-class WXDLLIMPEXP_ADV wxSheetStringSparseTable : public wxSheetTableBase
+class wxSheetStringSparseTable : public wxSheetTableBase
 {
 public:
     wxSheetStringSparseTable() : wxSheetTableBase(), m_numRows(0), m_numCols(0) {}
@@ -719,7 +719,7 @@ protected:
 // ----------------------------------------------------------------------------
 // wxSheetRowLabelWindow - the row label window (left window)
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetRowLabelWindow : public wxWindow
+class wxSheetRowLabelWindow : public wxWindow
 {
 public:
     wxSheetRowLabelWindow() : m_owner(NULL) { }
@@ -749,7 +749,7 @@ private:
 // ----------------------------------------------------------------------------
 // wxSheetColLabelWindow - col label window (top window)
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetColLabelWindow : public wxWindow
+class wxSheetColLabelWindow : public wxWindow
 {
 public:
     wxSheetColLabelWindow() : m_owner(NULL) { }
@@ -779,7 +779,7 @@ private:
 // ----------------------------------------------------------------------------
 // wxSheetCornerLabelWindow - corner label window (upper left window)
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetCornerLabelWindow : public wxWindow
+class wxSheetCornerLabelWindow : public wxWindow
 {
 public:
     wxSheetCornerLabelWindow() : m_owner(NULL) { }
@@ -808,7 +808,7 @@ private:
 // ----------------------------------------------------------------------------
 // wxSheetGridWindow - the grid window
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetGridWindow : public wxWindow
+class wxSheetGridWindow : public wxWindow
 {
 public:
     wxSheetGridWindow() : m_owner(NULL) {}
@@ -848,7 +848,7 @@ private:
 // subclassed refdata then in your wxSheet constructor (or Create) function call
 // UnRef to delete the original and m_refData=new MySheetRefData to set the new.
 //-----------------------------------------------------------------------------
-class WXDLLEXPORT wxSheetRefData : public wxObjectRefData
+class wxSheetRefData : public wxObjectRefData
 {
 public:
     wxSheetRefData();
@@ -946,7 +946,7 @@ public:
 // ----------------------------------------------------------------------------
 // wxSheet
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheet : public wxWindow
+class wxSheet : public wxWindow
 {
 public:
     wxSheet() : m_gridWin(NULL) { Init(); }
@@ -1990,7 +1990,7 @@ private:
 // ----------------------------------------------------------------------------
 // wxSheetEvent
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetEvent : public wxNotifyEvent
+class wxSheetEvent : public wxNotifyEvent
 {
 public:
     wxSheetEvent(int id=0, wxEventType type=wxEVT_NULL, wxObject* obj=NULL,
@@ -2037,7 +2037,7 @@ public:
 // ----------------------------------------------------------------------------
 // wxSheetRangeSelectEvent - wxEVT_SHEET_RANGE_SELECTING(ED)
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetRangeSelectEvent : public wxSheetEvent
+class wxSheetRangeSelectEvent : public wxSheetEvent
 {
 public:
     wxSheetRangeSelectEvent( int id=0, wxEventType type=wxEVT_NULL, wxObject* obj=NULL,
@@ -2075,7 +2075,7 @@ public:
 // ----------------------------------------------------------------------------
 // wxSheetEditorCreatedEvent - wxEVT_SHEET_EDITOR_CREATED
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_ADV wxSheetEditorCreatedEvent : public wxCommandEvent 
+class wxSheetEditorCreatedEvent : public wxCommandEvent 
 {
 public:
     wxSheetEditorCreatedEvent( int id=0, wxEventType type=wxEVT_NULL, wxObject* obj=NULL,
@@ -2111,60 +2111,60 @@ public:
 
 BEGIN_DECLARE_EVENT_TYPES()
     // The origin of the grid window has changed
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_VIEW_CHANGED, 1592)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_VIEW_CHANGED, 1592)
 
     // The grid cursor is about to be in a new cell, veto or !Skip() to block 
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_SELECTING_CELL, 1592)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_SELECTING_CELL, 1592)
     // The grid cursor is in a new cell
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_SELECTED_CELL, 1592)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_SELECTED_CELL, 1592)
 
     // left down click in a grid cell
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_CELL_LEFT_DOWN, 1580)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_CELL_LEFT_DOWN, 1580)
     // right down click in a grid cell
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_CELL_RIGHT_DOWN, 1581)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_CELL_RIGHT_DOWN, 1581)
     // left up click in a grid cell, sent after default processing
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_CELL_LEFT_UP, 1580)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_CELL_LEFT_UP, 1580)
     // right up click in a grid cell
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_CELL_RIGHT_UP, 1581)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_CELL_RIGHT_UP, 1581)
     // left double click in a grid cell
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_CELL_LEFT_DCLICK, 1582)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_CELL_LEFT_DCLICK, 1582)
     // right double click in a grid cell
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_CELL_RIGHT_DCLICK, 1583)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_CELL_RIGHT_DCLICK, 1583)
 
     // left down click in a label cell
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_LABEL_LEFT_DOWN, 1584)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_LABEL_LEFT_DOWN, 1584)
     // right down click in a label cell
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_LABEL_RIGHT_DOWN, 1585)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_LABEL_RIGHT_DOWN, 1585)
     // left up click in a label cell, sent after default processing
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_LABEL_LEFT_UP, 1584)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_LABEL_LEFT_UP, 1584)
     // right up click in a label cell
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_LABEL_RIGHT_UP, 1585)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_LABEL_RIGHT_UP, 1585)
     // left double click in a label cell
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_LABEL_LEFT_DCLICK, 1586)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_LABEL_LEFT_DCLICK, 1586)
     // right double click in a label cell
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_LABEL_RIGHT_DCLICK, 1587)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_LABEL_RIGHT_DCLICK, 1587)
     
     // A row has been resized, sent after default processing
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_ROW_SIZE, 1588)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_ROW_SIZE, 1588)
     // A col has been resized, sent after default processing
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_COL_SIZE, 1589)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_COL_SIZE, 1589)
     
     // A block of cells is about to be (de)selected (veto to stop)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_RANGE_SELECTING, 1590)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_RANGE_SELECTING, 1590)
     // A block of cells has been (de)selected
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_RANGE_SELECTED, 1590)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_RANGE_SELECTED, 1590)
     
     // The value of a cell is about to be changed (veto to stop)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_CELL_VALUE_CHANGING, 1591)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_CELL_VALUE_CHANGING, 1591)
     // The value of a cell has been changed (veto to put old val back)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_CELL_VALUE_CHANGED, 1591)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_CELL_VALUE_CHANGED, 1591)
     
     // From EnableCellEditControl, the control is about to enabled (can veto)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_EDITOR_ENABLED, 1593)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_EDITOR_ENABLED, 1593)
     // From DisableCellEditControl, the control is about to disabled (can veto)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_EDITOR_DISABLED, 1594)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_EDITOR_DISABLED, 1594)
     // From EnableCellEditControl, the edit control has been created
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_SHEET_EDITOR_CREATED, 1595)
+    DECLARE_EXPORTED_EVENT_TYPE(, wxEVT_SHEET_EDITOR_CREATED, 1595)
 END_DECLARE_EVENT_TYPES()
 
 typedef void (wxEvtHandler::*wxSheetEventFunction)(wxSheetEvent&);

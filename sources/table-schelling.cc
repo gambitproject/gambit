@@ -210,12 +210,12 @@ wxString gbtSchellingMatrix::GetCellValue(const wxSheetCoords &p_coords)
 {
   // Labels
   if (IsRowLabelCell(p_coords)) {
-    return wxString::Format(wxT("%s"),
-			    m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer())->GetStrategy(p_coords.GetRow() / 2 + 1)->GetLabel().c_str());
+    return wxString(m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer())->GetStrategy(p_coords.GetRow() / 2 + 1)->GetLabel().c_str(),
+		    *wxConvCurrent);
   }
   else if (IsColLabelCell(p_coords)) {
-    return wxString::Format(wxT("%s"),
-			    m_doc->GetGame()->GetPlayer(m_view->GetColPlayer())->GetStrategy(p_coords.GetCol() / 2 + 1)->GetLabel().c_str());
+    return wxString(m_doc->GetGame()->GetPlayer(m_view->GetColPlayer())->GetStrategy(p_coords.GetCol() / 2 + 1)->GetLabel().c_str(),
+		    *wxConvCurrent);
   }
   else if (IsCornerLabelCell(p_coords)) {
     return wxT("");
@@ -233,12 +233,12 @@ wxString gbtSchellingMatrix::GetCellValue(const wxSheetCoords &p_coords)
   profile->SetStrategy(m_doc->GetGame()->GetPlayer(m_view->GetColPlayer())->GetStrategy(colStrat + 1));
 
   if (rowSubcell) {
-    return wxString::Format(wxT("%s"),
-			    ToText(profile->GetPayoff(m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer()))).c_str());
+    return wxString(ToText(profile->GetPayoff(m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer()))).c_str(),
+		    *wxConvCurrent);
   }
   else if (colSubcell) {
-    return wxString::Format(wxT("%s"),
-			    ToText(profile->GetPayoff(m_doc->GetGame()->GetPlayer(m_view->GetColPlayer()))).c_str());
+    return wxString(ToText(profile->GetPayoff(m_doc->GetGame()->GetPlayer(m_view->GetColPlayer()))).c_str(), 
+		    *wxConvCurrent);
   }
   else {
     return wxT("");
