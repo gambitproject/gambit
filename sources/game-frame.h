@@ -55,6 +55,7 @@ private:
   void OnFileOpen(wxCommandEvent &);
   void OnFileClose(wxCommandEvent &);
   void OnFileSave(wxCommandEvent &);
+  void OnFileSaveAs(wxCommandEvent &);
   void OnFileExportBMP(wxCommandEvent &);
   void OnFileExportJPG(wxCommandEvent &);
   void OnFileExportPNG(wxCommandEvent &);

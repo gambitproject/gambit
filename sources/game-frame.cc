@@ -102,6 +102,7 @@ BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(wxID_OPEN, gbtGameFrame::OnFileOpen)
   EVT_MENU(wxID_CLOSE, gbtGameFrame::OnFileClose)
   EVT_MENU(wxID_SAVE, gbtGameFrame::OnFileSave)
+  EVT_MENU(wxID_SAVEAS, gbtGameFrame::OnFileSaveAs)
   EVT_MENU(wxID_PRINT_SETUP, gbtGameFrame::OnFilePageSetup)
   EVT_MENU(wxID_PREVIEW, gbtGameFrame::OnFilePrintPreview)
   EVT_MENU(wxID_PRINT, gbtGameFrame::OnFilePrint)
@@ -209,6 +210,7 @@ void gbtGameFrame::MakeMenu(void)
   fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_SAVE, _("&Save"), _("Save this game"));
+  fileMenu->Append(wxID_SAVEAS, _("&Save as"), _("Save the game to a different file"));
   
   wxMenu *fileExportMenu = new wxMenu;
   fileExportMenu->Append(GBT_MENU_FILE_EXPORT_BMP, _("&BMP"),
@@ -462,25 +464,61 @@ void gbtGameFrame::OnFileClose(wxCommandEvent &)
   Close();
 }
 
-void gbtGameFrame::OnFileSave(wxCommandEvent &)
+void gbtGameFrame::OnFileSave(wxCommandEvent &p_event)
 {
-  wxFileDialog dialog(this, _("Choose file"),
-		      wxPathOnly(m_doc->GetFilename()),
-		      wxFileNameFromPath(m_doc->GetFilename()), 
-		      _T("Gambit files (*.gbt)|*.gbt"),
-		      wxSAVE | wxOVERWRITE_PROMPT);
-
-  switch (dialog.ShowModal()) {
-  case wxID_OK:
-    m_doc->SetFilename(dialog.GetPath());
-    break;
-  case wxID_CANCEL:
-  default:
+  if (m_doc->GetFilename() == wxT("") ||
+      m_doc->GetFilename().Right(4) == wxT(".efg") ||
+      m_doc->GetFilename().Right(4) == wxT(".nfg")) {
+    OnFileSaveAs(p_event);
     return;
   }
 
-  m_doc->Save(dialog.GetPath());
+  m_doc->Save(m_doc->GetFilename());
   m_doc->SetModified(false);
+}
+
+void gbtGameFrame::OnFileSaveAs(wxCommandEvent &)
+{
+  wxString filter;
+  if (m_doc->GetGame()->HasTree()) {
+    filter = wxT("Gambit files (*.gbt)|*.gbt|"
+		 "Extensive form files (*.efg)|*.efg|"
+		 "Normal form files (*.nfg)}*.nfg");
+  }
+  else {
+    filter = wxT("Gambit files (*.gbt)|*.gbt|"
+		 "Normal form files (*.nfg)}*.nfg");
+  }
+
+  wxFileDialog dialog(this, _("Choose file"),
+		      wxPathOnly(m_doc->GetFilename()),
+		      wxFileNameFromPath(m_doc->GetFilename()), filter, 
+		      wxSAVE | wxOVERWRITE_PROMPT);
+
+  if (dialog.ShowModal() != wxID_OK) {
+    return;
+  }
+
+  try {
+    if (dialog.GetPath().Right(4) == wxT(".efg")) {
+      std::ofstream file((const char *) dialog.GetPath().mb_str());
+      m_doc->GetGame()->WriteEfg(file);
+    }
+    else if (dialog.GetPath().Right(4) == wxT(".nfg")) {
+      std::ofstream file((const char *) dialog.GetPath().mb_str());
+      m_doc->GetGame()->WriteNfg(file);
+    }
+    else {
+      m_doc->Save(dialog.GetPath());
+      m_doc->SetModified(false);
+    }
+  }
+  catch (...) {
+    wxMessageBox(_("An error occurred in writing '") + 
+		 dialog.GetPath() + wxT("'."),
+		 _("Error"), wxOK, 0);
+
+  }
 }
 
 void gbtGameFrame::OnFileExportBMP(wxCommandEvent &)

@@ -234,6 +234,38 @@ are only available for game trees in this version.
 
 </sect1>
 
+<sect1 id="overview.files">
+<title>File formats</title>
+
+<para>
+Previous versions of Gambit read and wrote two file formats: one for
+extensive games (files usually ending in <filename>.efg</filename>) and
+one for normal form games (files usually ending in <filename>.nfg</filename>).
+</para>
+
+<para>
+This version of the graphical interface introduces a new experimental
+file format, with suggested ending <filename>.gbt</filename>.  This format
+is intended to store other features of the working environment besides
+just the game: colors for the players, settings for the layout, and
+computed strategy profiles. (Note that at this writing not all of these
+are actually saved.)
+</para>
+
+<para>
+When you save a game in the graphical interface, you may choose which
+of the three formats to save in.  (The extensive form format will
+not be available if the game you're working with only has a normal form
+representation.)  If you're intending to use the game with the underlying
+Gambit library (in C++ or Python), you should save the game in either
+<filename>.efg</filename> or <filename>.nfg</filename> format: indicate this by specifying an extension of <filename>.efg</filename> or
+<filename>.nfg</filename> for your file.  If you specify any other
+extension, the game will be saved in the extended graphical interface
+format.
+</para>
+
+</sect1>
+
 </chapter>
 
 
