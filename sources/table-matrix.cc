@@ -31,7 +31,8 @@
 
 #include "table-matrix.h"
 
-#include "sheet.h"     // the wxSheet widget
+#include "sheet.h"              // the wxSheet widget
+#include "render-rational.h"    // the renderer for fractions
 
 class gbtTablePlayerCtrl : public wxScrolledWindow {
 private:
@@ -574,6 +575,7 @@ wxSheetCellAttr gbtMatrixSheet::GetAttr(const wxSheetCoords &p_coords,
   attr.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
   attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
+  attr.SetRenderer(wxSheetCellRenderer(new gbtRationalRendererRefData()));
   switch (p_coords.GetCol() % m_doc->GetGame()->NumPlayers()) {
   case 0:
     attr.SetForegroundColour(m_doc->GetPlayerColor(m_view->GetRowPlayer()));

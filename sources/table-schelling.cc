@@ -31,7 +31,8 @@
 
 #include "table-schelling.h"
 
-#include "sheet.h"     // the wxSheet widget
+#include "sheet.h"              // the wxSheet widget
+#include "render-rational.h"    // the renderer for fractions
 
 class gbtSchellingMatrix : public wxSheet, public gbtGameView {
 private:
@@ -337,6 +338,7 @@ wxSheetCellAttr gbtSchellingMatrix::GetAttr(const wxSheetCoords &p_coords,
   attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
   attr.SetReadOnly(TRUE);
+  attr.SetRenderer(wxSheetCellRenderer(new gbtRationalRendererRefData()));
   if (rowSubcell) {
     attr.SetForegroundColour(m_doc->GetPlayerColor(m_view->GetRowPlayer()));
     attr.SetReadOnly(FALSE);

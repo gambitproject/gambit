@@ -32,6 +32,8 @@ gambit_SOURCES = \
 	panel-nash.h \
 	panel-qre.cc \
 	panel-qre.h \
+	render-rational.cc \
+	render-rational.h \
 	sheet.cc \
 	sheet.h \
 	sheetctl.cc \
