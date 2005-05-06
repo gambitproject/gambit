@@ -32,6 +32,8 @@
 
 class gbtTreeToolbar : public wxScrolledWindow, public gbtGameView {
 private:
+  gbtBlock<wxRect> m_rects;
+
   // Implementation of gbtGameView members
   void OnUpdate(void);
 

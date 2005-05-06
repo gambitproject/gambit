@@ -35,6 +35,52 @@
 #include "dialog-outcome.h"  // for outcome payoffs
 
 //--------------------------------------------------------------------------
+//                       Bitmap drawing functions
+//--------------------------------------------------------------------------
+
+static wxBitmap MakePlayerBitmap(const wxColour &p_color, 
+				 const wxString &p_label)
+{
+  wxBitmap bitmap(100, 31);
+  wxMemoryDC dc;
+  dc.SelectObject(bitmap);
+  dc.SetBackground(wxBrush(*wxLIGHT_GREY, wxSOLID));
+  dc.Clear();
+  if (p_color == *wxBLACK) {
+    dc.SetPen(wxPen(*wxWHITE, 1, wxSOLID));
+  }
+  else {
+    dc.SetPen(wxPen(*wxBLACK, 1, wxSOLID));
+  }
+  dc.SetBrush(wxBrush(p_color, wxSOLID));
+  dc.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+  dc.DrawRoundedRectangle(0, 0, 100, 31, 15);
+
+  int width, height;
+  dc.GetTextExtent(p_label, &width, &height);
+  dc.DrawText(p_label, 50 - width/2, 15 - height/2);
+  return bitmap;
+}
+
+static wxBitmap MakeOutcomeBitmap(void)
+{
+  wxBitmap bitmap(32, 32);
+  wxMemoryDC dc;
+  dc.SelectObject(bitmap);
+  dc.Clear();
+  dc.SetPen(wxPen(*wxBLACK, 1, wxSOLID));
+  dc.SetBrush(*wxWHITE_BRUSH);
+  dc.DrawCircle(16, 16, 15);
+  dc.SetFont(wxFont(16, wxSWISS, wxNORMAL, wxBOLD));
+  dc.SetTextForeground(wxColour(0, 192, 0));
+
+  int width, height;
+  dc.GetTextExtent(wxT("$"), &width, &height);
+  dc.DrawText(wxT("$"), 16 - width/2, 16 - height/2);
+  return bitmap;
+}
+
+//--------------------------------------------------------------------------
 //                         class gbtTreeToolbar
 //--------------------------------------------------------------------------
 
@@ -43,29 +89,37 @@ BEGIN_EVENT_TABLE(gbtTreeToolbar, wxScrolledWindow)
 END_EVENT_TABLE()
 
 gbtTreeToolbar::gbtTreeToolbar(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxScrolledWindow(p_parent, -1), gbtGameView(p_doc)
+  : wxScrolledWindow(p_parent, -1, wxDefaultPosition, wxSize(110, -1)), 
+    gbtGameView(p_doc)
 { 
+  SetBackgroundColour(*wxLIGHT_GREY);
   OnUpdate();
 }
 
 void gbtTreeToolbar::OnDraw(wxDC &p_dc)
 {
+  int width, height;
+  p_dc.SetFont(wxFont(12, wxSWISS, wxNORMAL, wxBOLD));
+  p_dc.GetTextExtent(wxT("Players:"), &width, &height);
+  p_dc.SetTextForeground(*wxBLACK);
+  p_dc.DrawText(wxT("Players:"), 55 - width/2, 5);
+
+  int x = 5, y = 5 + height + 10;
+
+  m_rects = gbtBlock<wxRect>();
   for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
-    int x = (pl - 1) * 20 + 10;
-    int y = 5;
-    p_dc.SetPen(wxPen(*wxBLACK, 1, wxSOLID));
-    p_dc.SetBrush(wxBrush(m_doc->GetPlayerColor(pl), wxSOLID));
-    p_dc.SetFont(wxFont(8, wxSWISS, wxNORMAL, wxBOLD));
-    p_dc.DrawRectangle(x, y, 16, 15);
-    p_dc.DrawText(wxString::Format(_("%d"), pl), x + 4, y);
+    gbtGamePlayer player = m_doc->GetGame()->GetPlayer(pl);
+    wxBitmap bitmap = MakePlayerBitmap(m_doc->GetPlayerColor(player->GetId()),
+				       wxString(player->GetLabel().c_str(),
+						*wxConvCurrent));
+    p_dc.DrawBitmap(bitmap, x, y);
+    m_rects.Append(wxRect(x, y, bitmap.GetWidth(), bitmap.GetHeight()));
+    y += bitmap.GetHeight() + 10;
   }
 
-  int x = m_doc->GetGame()->NumPlayers() * 20 + 10;
-  int y = 5;
-
-  p_dc.SetBrush(*wxWHITE_BRUSH);
-  p_dc.DrawRectangle(x, y, 16, 15);
-  p_dc.DrawText(_("+"), x + 4, y);
+  wxBitmap bitmap = MakePlayerBitmap(*wxWHITE, wxT("Add player"));
+  p_dc.DrawBitmap(bitmap, x, y);
+  m_rects.Append(wxRect(x, y, bitmap.GetWidth(), bitmap.GetHeight()));
 }
 
 void gbtTreeToolbar::OnUpdate(void)
@@ -75,31 +129,24 @@ void gbtTreeToolbar::OnUpdate(void)
 
 void gbtTreeToolbar::OnLeftDown(wxMouseEvent &p_event)
 {
-  if (p_event.GetY() < 5 || p_event.GetY() > 20) {
-    p_event.Skip();
-    return;
+  for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
+    if (m_rects[pl].Inside(p_event.GetPosition())) {
+      wxBitmap bitmap = MakePlayerBitmap(m_doc->GetPlayerColor(pl),
+					 wxString(m_doc->GetGame()->GetPlayer(pl)->GetLabel().c_str(),
+						  *wxConvCurrent));
+
+      wxIcon icon;
+      icon.CopyFromBitmap(bitmap);
+      
+      wxTextDataObject textData(wxString::Format(wxT("P%d"), pl));
+      wxDropSource source(textData, this, icon, icon, icon);
+      wxDragResult result = source.DoDragDrop(wxDrag_DefaultMove);
+      return;
+    }
   }
 
-  int pl = ((p_event.GetX() - 10) / 20) + 1;
-  if (pl == m_doc->GetGame()->NumPlayers() + 1) {
+  if (m_rects[m_doc->GetGame()->NumPlayers()+1].Inside(p_event.GetPosition())) {
     m_doc->NewPlayer();
-  }
-  else if (pl >= 1 && pl <= m_doc->GetGame()->NumPlayers()) {
-    wxBitmap bitmap(16, 15);
-    wxMemoryDC dc;
-    dc.SelectObject(bitmap);
-    dc.SetPen(wxPen(*wxBLACK, 1, wxSOLID));
-    dc.SetBrush(wxBrush(m_doc->GetPlayerColor(pl), wxSOLID));
-    dc.SetFont(wxFont(8, wxSWISS, wxNORMAL, wxBOLD));
-    dc.DrawRectangle(0, 0, 16, 15);
-    dc.DrawText(wxString::Format(_("%d"), pl), 4, 0);
-
-    wxIcon icon;
-    icon.CopyFromBitmap(bitmap);
-
-    wxTextDataObject textData(wxString::Format(wxT("P%d"), pl));
-    wxDropSource source(textData, this, icon, icon, icon);
-    wxDragResult result = source.DoDragDrop(wxDrag_DefaultMove);
   }
 }
 
@@ -291,20 +338,17 @@ void gbtTreeDisplay::OnMouseMotion(wxMouseEvent &p_event)
     gbtGameNode node = m_layout.NodeHitTest(x, y);
     
     if (!node.IsNull() && node->NumChildren() > 0) {
-      wxBitmap bitmap(16, 15);
-      wxMemoryDC dc;
-      dc.SelectObject(bitmap);
-      dc.SetPen(wxPen(*wxBLACK, 1, wxSOLID));
-      dc.SetBrush(wxBrush(m_doc->GetPlayerColor(node->GetPlayer()->GetId()), 
-			  wxSOLID));
-      dc.SetFont(wxFont(8, wxSWISS, wxNORMAL, wxBOLD));
-      dc.DrawRectangle(0, 0, 16, 15);
+      gbtGamePlayer player = node->GetPlayer();
+      wxString label;
       if (p_event.ShiftDown()) {
-	dc.DrawText(wxT("i"), 4, 0);
+	label = wxT("i");
       }
       else {
-	dc.DrawText(wxString::Format(_("%d"), node->GetPlayer()->GetId()), 4, 0);
+	label = wxString(player->GetLabel().c_str(), *wxConvCurrent);
       }
+
+      wxBitmap bitmap = MakePlayerBitmap(m_doc->GetPlayerColor(player->GetId()),
+					 label);
 
       wxIcon icon;
       icon.CopyFromBitmap(bitmap);
@@ -330,15 +374,7 @@ void gbtTreeDisplay::OnMouseMotion(wxMouseEvent &p_event)
     node = m_layout.OutcomeHitTest(x, y);
     
     if (!node.IsNull() && !node->GetOutcome().IsNull()) {
-      wxBitmap bitmap(16, 15);
-      wxMemoryDC dc;
-      dc.SelectObject(bitmap);
-      dc.SetPen(wxPen(*wxBLACK, 1, wxSOLID));
-      dc.SetBrush(wxBrush(*wxWHITE, wxSOLID));
-      dc.SetFont(wxFont(8, wxSWISS, wxNORMAL, wxBOLD));
-      dc.DrawRectangle(0, 0, 16, 15);
-      dc.DrawText(wxT("$"), 4, 0);
-
+      wxBitmap bitmap = MakeOutcomeBitmap();
       wxIcon icon;
       icon.CopyFromBitmap(bitmap);
 

@@ -143,9 +143,9 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
     
     gbtTreeToolbar *treeToolbar = new gbtTreeToolbar(m_treePanel, p_doc);
 
-    wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
-    sizer->Add(treeToolbar, 1, wxEXPAND, 0);
-    sizer->Add(m_treeDisplay, 10, wxEXPAND, 0);
+    wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
+    sizer->Add(treeToolbar, 0, wxEXPAND, 0);
+    sizer->Add(m_treeDisplay, 1, wxEXPAND, 0);
     m_treePanel->SetSizer(sizer);
     m_treePanel->Layout();
     m_matrixPanel = 0;
