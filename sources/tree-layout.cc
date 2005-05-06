@@ -385,11 +385,38 @@ void gbtNodeEntry::DrawIncomingBranch(wxDC &p_dc) const
   }
 }
 
+static wxPoint DrawFraction(wxDC &p_dc, wxPoint p_point,
+			    const gbtRational &p_value)
+{
+  p_dc.SetFont(wxFont(7, wxSWISS, wxNORMAL, wxBOLD));
+  
+  int numWidth, numHeight;
+  wxString num = wxString(ToText(p_value.GetNumerator()).c_str(),
+			  *wxConvCurrent);
+  p_dc.GetTextExtent(num, &numWidth, &numHeight);
+
+  int denWidth, denHeight;
+  wxString den = wxString(ToText(p_value.GetDenominator()).c_str(),
+			  *wxConvCurrent);
+  p_dc.GetTextExtent(den, &denWidth, &denHeight);
+
+  int width = ((numWidth > denWidth) ? numWidth : denWidth);
+
+  p_dc.DrawLine(p_point.x, p_point.y, p_point.x + width + 4, p_point.y);
+  p_dc.DrawText(num,
+		p_point.x + 2 + (width - numWidth) / 2,
+		p_point.y - 2 - numHeight);
+  p_dc.DrawText(den,
+		p_point.x + 2 + (width - denWidth) / 2,
+		p_point.y + 2);
+
+  p_point.x += width + 14;
+  return p_point;
+}
+
 void gbtNodeEntry::DrawOutcome(wxDC &p_dc) const
 {
   wxPoint point(m_x + m_size + 20, m_y);
-
-  p_dc.SetFont(wxFont(9, wxSWISS, wxNORMAL, wxBOLD));
 
   gbtGameOutcome outcome = m_node->GetOutcome();
   if (outcome.IsNull()) {
@@ -406,12 +433,20 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc) const
   int width, height;
   for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
     gbtGamePlayer player = m_doc->GetGame()->GetPlayer(pl);
-    wxString label = wxString(ToText(outcome->GetPayoff(player)).c_str(),
-			      *wxConvCurrent);
-    p_dc.GetTextExtent(label, &width, &height);
     p_dc.SetTextForeground(m_doc->GetPlayerColor(pl));
-    p_dc.DrawText(label, point.x, point.y - height / 2);
-    point.x += width + 10;
+
+    if (outcome->GetPayoff(player).GetDenominator() != 1) {
+      p_dc.SetPen(wxPen(m_doc->GetPlayerColor(pl), 1, wxSOLID));
+      point = DrawFraction(p_dc, point, outcome->GetPayoff(player));
+    }
+    else {
+      wxString label = wxString(ToText(outcome->GetPayoff(player)).c_str(),
+				*wxConvCurrent);
+      p_dc.GetTextExtent(label, &width, &height);
+      p_dc.SetFont(wxFont(9, wxSWISS, wxNORMAL, wxBOLD));
+      p_dc.DrawText(label, point.x, point.y - height / 2);
+      point.x += width + 10;
+    }
   }
 
   m_outcomeRect = wxRect(m_x + m_size + 20, m_y - height / 2,
