@@ -11,6 +11,8 @@ gambit_SOURCES = \
 	dialog-about.h \
 	dialog-node.cc \
 	dialog-node.h \
+	dialog-outcome.cc \
+	dialog-outcome.h \
 	dialog-tree-label.cc \
 	dialog-tree-label.h \
 	dialog-tree-layout.cc \

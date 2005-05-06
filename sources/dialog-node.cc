@@ -49,8 +49,8 @@ gbtNodeDialog::gbtNodeDialog(wxWindow *p_parent,
   labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Node label")),
 		  0, wxALL | wxCENTER, 5);
   m_nodeLabel = new wxTextCtrl(this, -1, 
-			       wxString::Format(_T("%s"), 
-						m_node->GetLabel().c_str()));
+			       wxString(m_node->GetLabel().c_str(),
+					*wxConvCurrent));
   labelSizer->Add(m_nodeLabel, 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 5);
 
@@ -100,30 +100,11 @@ gbtNodeDialog::gbtNodeDialog(wxWindow *p_parent,
 
   for (int outc = 1; outc <= p_game->NumOutcomes(); outc++) {
     gbtGameOutcome outcome = p_game->GetOutcome(outc);
-    wxString item = wxString::Format(wxT("%d: %s"),
-				     outc,
-				     outcome->GetLabel().c_str());
+    wxString item = (wxString::Format(wxT("%d: "), outc) +
+		     wxString(outcome->GetLabel().c_str(), *wxConvCurrent));
     if (item == wxT("")) {
       item = wxString::Format(wxT("Outcome%d"), outc);
     }
-
-    /*
-    item += wxString::Format(wxT("%s"),
-			     ToText(outcome->GetPayoff(p_game->GetPlayer(1)))
-	     ToText(efg.Payoff(outcome, efg.Players()[2])));
-    if (efg.NumPlayers() > 2) {
-      item += ", " + ToText(efg.Payoff(outcome, efg.Players()[3]));
-      if (efg.NumPlayers() > 3) {
-	item += ",...)";
-      }
-      else {
-	item += ")";
-      }
-    }
-    else {
-      item += ")";
-    }
-    */
 
     m_outcome->Append(item);
     if (m_node->GetOutcome() == outcome) {

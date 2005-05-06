@@ -31,7 +31,8 @@
 #include <wx/dnd.h>    // for drag-and-drop support
 
 #include "tree-display.h"
-#include "dialog-node.h"   // for node properties dialog
+#include "dialog-node.h"     // for node properties dialog
+#include "dialog-outcome.h"  // for outcome payoffs
 
 //--------------------------------------------------------------------------
 //                         class gbtTreeToolbar
@@ -149,7 +150,8 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
   gbtGameNode node = m_owner->GetLayout().NodeHitTest(x, y);
 
   if (!node.IsNull()) {
-    if (p_text[0] == 'P') { 
+    switch (p_text[0]) {
+    case 'P': {
       long pl;
       p_text.Right(p_text.Length() - 1).ToLong(&pl);
       gbtGamePlayer player = doc->GetGame()->GetPlayer(pl);
@@ -165,7 +167,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       }
       return true;
     }
-    else if (p_text[0] == 'C') {
+    case 'C': {
       long n;
       p_text.Right(p_text.Length() - 1).ToLong(&n);
       gbtGameNode srcNode = GetNode(doc->GetGame()->GetRoot(), n);
@@ -181,7 +183,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       
       return false;
     }
-    else if (p_text[0] == 'M') {
+    case 'M': {
       long n;
       p_text.Right(p_text.Length() - 1).ToLong(&n);
       gbtGameNode srcNode = GetNode(doc->GetGame()->GetRoot(), n);
@@ -197,7 +199,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       
       return false;
     }
-    else if (p_text[0] == 'I') {
+    case 'I': {
       long n;
       p_text.Right(p_text.Length() - 1).ToLong(&n);
       gbtGameNode srcNode = GetNode(doc->GetGame()->GetRoot(), n);
@@ -213,10 +215,36 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       
       return false;
     }
-  }
-  else {
-    return false;
-  }
+    case 'O': {
+      long n;
+      p_text.Right(p_text.Length() - 1).ToLong(&n);
+      gbtGameNode srcNode = GetNode(doc->GetGame()->GetRoot(), n);
+      
+      if (srcNode.IsNull()) {
+	return false;
+      }
+      
+      printf("%p\n", srcNode->GetOutcome().Get());
+      doc->SetOutcome(node, srcNode->GetOutcome());
+      return true;
+    }
+    case 'o': {
+      long n;
+      p_text.Right(p_text.Length() - 1).ToLong(&n);
+      gbtGameNode srcNode = GetNode(doc->GetGame()->GetRoot(), n);
+      
+      if (srcNode.IsNull()) {
+	return false;
+      }
+      
+      printf("%p\n", srcNode->GetOutcome().Get());
+      doc->MoveOutcome(node, srcNode);
+      return true;
+    }
+    }
+  } 
+
+  return false;
 }
 
 //--------------------------------------------------------------------------
@@ -264,7 +292,7 @@ void gbtTreeDisplay::OnMouseMotion(wxMouseEvent &p_event)
   
     gbtGameNode node = m_layout.NodeHitTest(x, y);
     
-    if (!node.IsNull()) {
+    if (!node.IsNull() && node->NumChildren() > 0) {
       wxBitmap bitmap(16, 15);
       wxMemoryDC dc;
       dc.SelectObject(bitmap);
@@ -298,6 +326,34 @@ void gbtTreeDisplay::OnMouseMotion(wxMouseEvent &p_event)
 	wxDropSource source(textData, this, icon, icon, icon);
 	wxDragResult result = source.DoDragDrop(wxDrag_DefaultMove);
       }
+      return;
+    }
+
+    node = m_layout.OutcomeHitTest(x, y);
+    
+    if (!node.IsNull() && !node->GetOutcome().IsNull()) {
+      wxBitmap bitmap(16, 15);
+      wxMemoryDC dc;
+      dc.SelectObject(bitmap);
+      dc.SetPen(wxPen(*wxBLACK, 1, wxSOLID));
+      dc.SetBrush(wxBrush(*wxWHITE, wxSOLID));
+      dc.SetFont(wxFont(8, wxSWISS, wxNORMAL, wxBOLD));
+      dc.DrawRectangle(0, 0, 16, 15);
+      dc.DrawText(wxT("$"), 4, 0);
+
+      wxIcon icon;
+      icon.CopyFromBitmap(bitmap);
+
+      if (p_event.ControlDown()) {
+	wxTextDataObject textData(wxString::Format(wxT("O%d"), node->GetId()));
+	wxDropSource source(textData, this, icon, icon, icon);
+	wxDragResult result = source.DoDragDrop(true);
+      }
+      else {
+	wxTextDataObject textData(wxString::Format(wxT("o%d"), node->GetId()));
+	wxDropSource source(textData, this, icon, icon, icon);
+	wxDragResult result = source.DoDragDrop(wxDrag_DefaultMove);
+      }
     }
   }
 }
@@ -322,6 +378,38 @@ void gbtTreeDisplay::OnLeftClick(wxMouseEvent &p_event)
 	  dialog.GetInfoset() != node->GetInfoset()) {
 	m_doc->SetInfoset(node, dialog.GetInfoset());
       }
+
+      if (dialog.GetOutcome() > 0) {
+	if (node->GetOutcome().IsNull() || 
+	    node->GetOutcome()->GetId() != dialog.GetOutcome()) {
+	  m_doc->SetOutcome(node,
+			    m_doc->GetGame()->GetOutcome(dialog.GetOutcome()));
+	}
+      }
+      else {
+	if (!node->GetOutcome().IsNull()) {
+	  m_doc->SetOutcome(node, 0);
+	}
+      }
     }
+    return;
+  }
+
+  node = m_layout.OutcomeHitTest(x, y);
+  if (!node.IsNull()) {
+    gbtOutcomeDialog dialog(this, m_doc, m_doc->GetGame(), node->GetOutcome());
+
+    if (dialog.ShowModal() == wxID_OK) {
+      gbtGameOutcome outcome = node->GetOutcome();
+      if (outcome.IsNull()) {
+	outcome = m_doc->NewOutcome();
+	node->SetOutcome(outcome);
+      }
+      for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
+	m_doc->SetPayoff(outcome, m_doc->GetGame()->GetPlayer(pl),
+			 dialog.GetPayoff(pl));
+      }
+    }
+    return;
   }
 }

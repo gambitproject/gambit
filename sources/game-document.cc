@@ -158,6 +158,24 @@ void gbtGameDocument::SetPayoff(gbtGameOutcome p_outcome,
   UpdateViews(); 
 }
 
+void gbtGameDocument::SetOutcome(gbtGameNode p_node,
+				 gbtGameOutcome p_outcome)
+{
+  SaveUndo(_("setting outcome"));
+  p_node->SetOutcome(p_outcome);
+  m_modified = true;
+  UpdateViews();
+}
+
+void gbtGameDocument::MoveOutcome(gbtGameNode p_destNode,
+				  gbtGameNode p_srcNode)
+{
+  SaveUndo(_("moving outcome"));
+  p_destNode->SetOutcome(p_srcNode->GetOutcome());
+  p_srcNode->SetOutcome(0);
+  m_modified = true;
+  UpdateViews();
+}
 
 void gbtGameDocument::NewPlayer(void)
 {

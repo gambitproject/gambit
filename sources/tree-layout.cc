@@ -85,6 +85,8 @@ private:
   wxFont m_nodeAboveFont, m_nodeBelowFont, m_nodeRightFont;
   wxFont m_branchAboveFont, m_branchBelowFont;
 
+  mutable wxRect m_outcomeRect;    // rectangle surrounding outcome
+
 public:
   gbtNodeEntry(gbtGameDocument *p_doc, const gbtGameNode &p_node);
 
@@ -171,6 +173,8 @@ public:
   void SetActionProb(const wxString &p_prob) { m_actionProb = p_prob; }
 
   bool NodeHitTest(int p_x, int p_y) const;
+  bool OutcomeHitTest(int p_x, int p_y) const
+  { return (m_outcomeRect.Inside(p_x, p_y)); }
 
   void Draw(wxDC &) const;
   void DrawIncomingBranch(wxDC &) const;
@@ -388,18 +392,30 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc) const
   p_dc.SetFont(wxFont(9, wxSWISS, wxNORMAL, wxBOLD));
 
   gbtGameOutcome outcome = m_node->GetOutcome();
-  if (outcome.IsNull())  return;
+  if (outcome.IsNull()) {
+    int width, height;
+    p_dc.SetFont(wxFont(9, wxSWISS, wxITALIC, wxBOLD));
+    p_dc.SetTextForeground(*wxLIGHT_GREY);
+    p_dc.GetTextExtent(wxT("(none)"), &width, &height);
+    p_dc.DrawText(wxT("(none)"), point.x, point.y - height / 2);
+    m_outcomeRect = wxRect(point.x, point.y - height / 2,
+			   width, height);
+    return;
+  }
 
+  int width, height;
   for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
     gbtGamePlayer player = m_doc->GetGame()->GetPlayer(pl);
     wxString label = wxString(ToText(outcome->GetPayoff(player)).c_str(),
 			      *wxConvCurrent);
-    int width, height;
     p_dc.GetTextExtent(label, &width, &height);
     p_dc.SetTextForeground(m_doc->GetPlayerColor(pl));
     p_dc.DrawText(label, point.x, point.y - height / 2);
     point.x += width + 10;
   }
+
+  m_outcomeRect = wxRect(m_x + m_size + 20, m_y - height / 2,
+			 point.x - (m_x + m_size + 20), height);
 }
 
 int gbtNodeEntry::GetOutcomeExtent(void) const
@@ -452,6 +468,16 @@ gbtGameNode gbtTreeLayout::NodeHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     if (m_nodeList[i]->NodeHitTest(p_x, p_y)) {
+      return m_nodeList[i]->GetNode();
+    }
+  }
+  return 0;
+}
+
+gbtGameNode gbtTreeLayout::OutcomeHitTest(int p_x, int p_y) const
+{
+  for (int i = 1; i <= m_nodeList.Length(); i++) {
+    if (m_nodeList[i]->OutcomeHitTest(p_x, p_y)) {
       return m_nodeList[i]->GetNode();
     }
   }

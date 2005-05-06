@@ -74,6 +74,8 @@ public:
   gbtGameOutcome NewOutcome(void);
   void SetPayoff(gbtGameOutcome p_outcome,
 		 const gbtGamePlayer &p_player, const gbtRational &p_value);
+  void SetOutcome(gbtGameNode p_node, gbtGameOutcome p_outcome);
+  void MoveOutcome(gbtGameNode p_destNode, gbtGameNode p_srcNode);
 
   void NewPlayer(void);
   void InsertStrategy(int player, int where);

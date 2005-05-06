@@ -364,6 +364,49 @@ that node, its information set, and the actions at that information set.
 
 </sect2>
 
+<sect2 id="efg.editing.outcomes">
+<title>Outcomes and payoffs</title>
+
+<para>
+Outcomes can be attached to any node in an extensive form.  In most
+cases, outcomes appear at terminal nodes of a game, but Gambit permits
+outcomes to appear at nonterminal nodes as well.  This facility is
+often helpful when constructing multiple-stage games, where the overall
+payoff a player gets can be expressed as the sum of payoffs from different
+stage games.  Gambit calculates the payoff of any terminal node as the sum
+of all outcomes on nodes leading up to that terminal node.
+</para>
+
+<para>
+The outcome associated with a node is displayed to the right of the node.
+Nodes without an outcome display the legend &quot;(none)&quot; in light
+grey in this position.  Nodes with an outcome display the payoffs to
+the players.  These payoffs are color-coded by player.
+</para>
+
+<para>
+Double-clicking on the outcome legend displays a dialog for editing the
+payoffs for the outcome.  Outcomes may also optionally be given a textual
+label for reference.  Dismissing this dialog with the &quot;OK&quot;
+button saves the changes to the payoffs. For nodes without an associated 
+outcome, a new outcome is created. Note that any outcome may be associated with
+multiple nodes in the tree; editing the outcome will edit the payoffs at
+all nodes where that outcome appears.
+Dismissing with &quot;Cancel&quot; discards any edits. 
+</para>
+
+<para>
+The outcome associated with a node can be changed using the
+Node Properties dialog, which is displayed by double-clicking on the
+node.  Outcomes may also be manipulated using a drag-and-drop idiom.
+To copy an outcome, hold down the Control key while dragging from the
+outcome legend to the node to which the outcome is to be copied.
+To move an outcome, drag (holding no keys down) from the outcome legend to the
+node to which the outcome is to be moved.
+</para>
+
+</sect2>
+
 </sect1>
 
 <sect1 id="efg.printing">

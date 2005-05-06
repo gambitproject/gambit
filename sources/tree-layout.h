@@ -182,6 +182,7 @@ public:
   int GetMaxY(void) const { return m_maxY; }
 
   gbtGameNode NodeHitTest(int, int) const;
+  gbtGameNode OutcomeHitTest(int, int) const;
   gbtGameNode BranchHitTest(int, int) const;
   gbtGameNode InfosetHitTest(int, int) const;
 
