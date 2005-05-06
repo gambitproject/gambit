@@ -220,11 +220,10 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       p_text.Right(p_text.Length() - 1).ToLong(&n);
       gbtGameNode srcNode = GetNode(doc->GetGame()->GetRoot(), n);
       
-      if (srcNode.IsNull()) {
+      if (srcNode.IsNull() || node == srcNode) {
 	return false;
       }
       
-      printf("%p\n", srcNode->GetOutcome().Get());
       doc->SetOutcome(node, srcNode->GetOutcome());
       return true;
     }
@@ -233,11 +232,10 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       p_text.Right(p_text.Length() - 1).ToLong(&n);
       gbtGameNode srcNode = GetNode(doc->GetGame()->GetRoot(), n);
       
-      if (srcNode.IsNull()) {
+      if (srcNode.IsNull() || node == srcNode) {
 	return false;
       }
       
-      printf("%p\n", srcNode->GetOutcome().Get());
       doc->MoveOutcome(node, srcNode);
       return true;
     }
