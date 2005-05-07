@@ -447,3 +447,20 @@ void gbtTreeDisplay::OnLeftClick(wxMouseEvent &p_event)
     return;
   }
 }
+
+//--------------------------------------------------------------------------
+//                         class gbtTreePanel
+//--------------------------------------------------------------------------
+
+gbtTreePanel::gbtTreePanel(wxWindow *p_parent, gbtGameDocument *p_doc)
+  : wxPanel(p_parent, -1)
+{
+  m_display = new gbtTreeDisplay(this, p_doc);
+  m_toolbar = new gbtTreeToolbar(this, p_doc);
+
+  wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
+  sizer->Add(m_toolbar, 0, wxEXPAND, 0);
+  sizer->Add(m_display, 1, wxEXPAND, 0);
+  SetSizer(sizer);
+  Layout();
+}

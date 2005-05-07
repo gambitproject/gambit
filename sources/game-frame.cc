@@ -74,8 +74,89 @@ gbtAnalysisPanel::gbtAnalysisPanel(wxWindow *p_parent,
   Layout();
 }
 
+//
+// This panel dynamically displays either the Schelling-style payoff
+// table (for two-player games), or the matrix-style payoff table
+// (otherwise).  Also, no table is shown until OnNotebookShow() is
+// called: this way, the normal form of a game is not computed unless
+// the user asks for it.
+//
+class gbtStrategicPanel : public wxPanel, public gbtGameView {
+private:
+  wxPanel *m_matrixPanel, *m_schellingPanel;
+
+public:
+  gbtStrategicPanel(wxWindow *, gbtGameDocument *);
+
+  void OnUpdate(void);
+  void OnNotebookShow(void);
+};
+
+gbtStrategicPanel::gbtStrategicPanel(wxWindow *p_parent,
+				     gbtGameDocument *p_doc)
+  : wxPanel(p_parent, -1), gbtGameView(p_doc),
+    m_matrixPanel(0), m_schellingPanel(0)
+{
+  wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
+  SetSizer(sizer);
+  Layout();
+
+  if (!m_doc->GetGame()->HasTree()) {
+    OnNotebookShow();
+  }
+}
+
+void gbtStrategicPanel::OnUpdate(void)
+{
+  if (!m_matrixPanel && !m_schellingPanel)  return;
+
+  if (m_doc->GetGame()->NumPlayers() == 2) {
+    if (!m_schellingPanel) {
+      m_schellingPanel = new gbtTableSchelling(this, m_doc);
+      GetSizer()->Add(m_schellingPanel, 1, wxEXPAND, 0);
+    }
+
+    if (m_matrixPanel) {
+      GetSizer()->Show(m_matrixPanel, false);
+    }
+
+    GetSizer()->Show(m_schellingPanel, true);
+    GetSizer()->Layout();
+  }
+  else {
+    if (!m_matrixPanel) {
+      m_matrixPanel = new gbtTableMatrix(this, m_doc);
+      GetSizer()->Add(m_matrixPanel, 1, wxEXPAND, 0);
+    }
+    
+    if (m_schellingPanel) {
+      GetSizer()->Show(m_schellingPanel, false);
+    }
+    
+    GetSizer()->Show(m_matrixPanel, true);
+    GetSizer()->Layout();
+  }
+}
+
+void gbtStrategicPanel::OnNotebookShow(void)
+{
+  if (m_matrixPanel || m_schellingPanel)  return;
+
+  if (m_doc->GetGame()->NumPlayers() == 2) {
+    m_schellingPanel = new gbtTableSchelling(this, m_doc);
+    GetSizer()->Add(m_schellingPanel, 1, wxEXPAND, 0);
+  }
+  else {
+    m_matrixPanel = new gbtTableMatrix(this, m_doc);
+    GetSizer()->Add(m_matrixPanel, 1, wxEXPAND, 0);
+  }
+
+  GetSizer()->Layout();
+}
 
 enum {
+  GBT_GAME_NOTEBOOK = 900,
+
   GBT_MENU_FILE_NEW_EFG = 968,
   GBT_MENU_FILE_NEW_NFG = 969,
   GBT_MENU_FILE_EXPORT = 970,
@@ -83,9 +164,6 @@ enum {
   GBT_MENU_FILE_EXPORT_JPG = 972,
   GBT_MENU_FILE_EXPORT_PNG = 973,
 
-  GBT_MENU_VIEW_EFG = 998,
-  GBT_MENU_VIEW_NFG = 999,
-  
   GBT_MENU_VIEW_ZOOMIN = 997,
   GBT_MENU_VIEW_ZOOMOUT = 996,
 
@@ -113,8 +191,6 @@ BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, gbtGameFrame::OnFileMRU)
   EVT_MENU(wxID_UNDO, gbtGameFrame::OnEditUndo)
   EVT_MENU(wxID_REDO, gbtGameFrame::OnEditRedo)
-  EVT_MENU(GBT_MENU_VIEW_EFG, gbtGameFrame::OnViewEfg)
-  EVT_MENU(GBT_MENU_VIEW_NFG, gbtGameFrame::OnViewNfg)
   EVT_MENU(GBT_MENU_VIEW_ZOOMIN, gbtGameFrame::OnViewZoomIn)
   EVT_MENU(GBT_MENU_VIEW_ZOOMOUT, gbtGameFrame::OnViewZoomOut)
   EVT_MENU(GBT_MENU_FORMAT_LAYOUT, gbtGameFrame::OnFormatLayout)
@@ -122,6 +198,8 @@ BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(GBT_MENU_FORMAT_FONT, gbtGameFrame::OnFormatFont)
   EVT_MENU(GBT_MENU_TOOLS_ANALYSIS, gbtGameFrame::OnToolsAnalysis)
   EVT_MENU(wxID_ABOUT, gbtGameFrame::OnHelpAbout)
+  EVT_NOTEBOOK_PAGE_CHANGING(GBT_GAME_NOTEBOOK,
+  			     gbtGameFrame::OnPageChanging)
   EVT_CLOSE(gbtGameFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
@@ -137,40 +215,24 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   wxGetApp().AddWindow(this);
   MakeMenu();
 
-  if (p_doc->GetGame()->HasTree()) {
-    m_treePanel = new wxPanel(this);
-    m_treeDisplay = new gbtTreeDisplay(m_treePanel, p_doc);
-    
-    gbtTreeToolbar *treeToolbar = new gbtTreeToolbar(m_treePanel, p_doc);
+  m_notebook = new wxNotebook(this, GBT_GAME_NOTEBOOK, 
+			      wxDefaultPosition, wxDefaultSize,
+			      wxNB_BOTTOM);
 
-    wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
-    sizer->Add(treeToolbar, 0, wxEXPAND, 0);
-    sizer->Add(m_treeDisplay, 1, wxEXPAND, 0);
-    m_treePanel->SetSizer(sizer);
-    m_treePanel->Layout();
-    m_matrixPanel = 0;
-    m_schellingPanel = 0;
+  if (p_doc->GetGame()->HasTree()) {
+    m_treePanel = new gbtTreePanel(m_notebook, p_doc);
+    m_notebook->AddPage(m_treePanel, wxT("Extensive"));
+
+    m_strategicPanel = new gbtStrategicPanel(m_notebook, p_doc);
+    m_notebook->AddPage(m_strategicPanel, wxT("Strategic"));
   }
   else {
-    m_matrixPanel = new gbtTableMatrix(this, p_doc);
-    m_schellingPanel = new gbtTableSchelling(this, p_doc);
-    m_treePanel = 0;
-    m_treeDisplay = 0;
+    m_strategicPanel = new gbtStrategicPanel(m_notebook, p_doc);
+    m_notebook->AddPage(m_strategicPanel, wxT("Strategic"));
   }
 
   wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
-  if (m_treeDisplay) {
-    sizer->Add(m_treePanel, 1, wxEXPAND, 0);
-  }
-  else {
-    sizer->Add(m_matrixPanel, 1, wxEXPAND, 0);
-    sizer->Show(m_matrixPanel, 
-		!m_doc->GetGame()->HasTree() && m_doc->GetGame()->NumPlayers() > 2);
-
-    sizer->Add(m_schellingPanel, 1, wxEXPAND, 0);
-    sizer->Show(m_schellingPanel, 
-		!m_doc->GetGame()->HasTree() && m_doc->GetGame()->NumPlayers() == 2);
-  }
+  sizer->Add(m_notebook, 1, wxEXPAND, 0);
 
   m_analysisPanel = new gbtAnalysisPanel(this, p_doc);
   sizer->Add(m_analysisPanel, 1, wxEXPAND, 0);
@@ -237,11 +299,6 @@ void gbtGameFrame::MakeMenu(void)
   editMenu->Append(wxID_REDO, _("&Redo"), _("Redo the last undone action"));
 
   wxMenu *viewMenu = new wxMenu;
-  viewMenu->Append(GBT_MENU_VIEW_EFG, _("&Extensive form"),
-		   _("Show the extensive form of this game"), true);
-  viewMenu->Append(GBT_MENU_VIEW_NFG, _("&Normal form"),
-		   _("Show the normal form of this game"), true);
-  viewMenu->AppendSeparator();
   viewMenu->Append(GBT_MENU_VIEW_ZOOMIN, _("Zoom &in"),
 		   _("Increase magnification of tree"));
   viewMenu->Append(GBT_MENU_VIEW_ZOOMOUT, _("Zoom &out"),
@@ -523,8 +580,8 @@ void gbtGameFrame::OnFileSaveAs(wxCommandEvent &)
 
 void gbtGameFrame::OnFileExportBMP(wxCommandEvent &)
 {
-  if (m_treeDisplay->GetLayout().GetMaxX() > 65000 ||
-      m_treeDisplay->GetLayout().GetMaxY() > 65000) {
+  if (m_treePanel->GetLayout().GetMaxX() > 65000 ||
+      m_treePanel->GetLayout().GetMaxY() > 65000) {
     wxMessageDialog dialog(this,
 			   _("Game image too large to export to graphics file"),
 			   _("Error"), wxOK);
@@ -539,11 +596,11 @@ void gbtGameFrame::OnFileExportBMP(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     wxMemoryDC dc;
-    wxBitmap bitmap(m_treeDisplay->GetLayout().GetMaxX(),
-		    m_treeDisplay->GetLayout().GetMaxY());
+    wxBitmap bitmap(m_treePanel->GetLayout().GetMaxX(),
+		    m_treePanel->GetLayout().GetMaxY());
     dc.SelectObject(bitmap);
     dc.Clear();
-    m_treeDisplay->GetLayout().DrawTree(dc);
+    m_treePanel->GetLayout().DrawTree(dc);
     if (!bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_BMP)) {
       wxMessageBox(wxString::Format(_("An error occurred in writing '%s'."),
 				    (const char *) dialog.GetPath().mb_str()),
@@ -554,8 +611,8 @@ void gbtGameFrame::OnFileExportBMP(wxCommandEvent &)
 
 void gbtGameFrame::OnFileExportJPG(wxCommandEvent &)
 {
-  if (m_treeDisplay->GetLayout().GetMaxX() > 65000 ||
-      m_treeDisplay->GetLayout().GetMaxY() > 65000) {
+  if (m_treePanel->GetLayout().GetMaxX() > 65000 ||
+      m_treePanel->GetLayout().GetMaxY() > 65000) {
     wxMessageDialog dialog(this,
 			   _("Game image too large to export to graphics file"),
 			   _("Error"), wxOK);
@@ -571,11 +628,11 @@ void gbtGameFrame::OnFileExportJPG(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     wxMemoryDC dc;
-    wxBitmap bitmap(m_treeDisplay->GetLayout().GetMaxX(),
-		    m_treeDisplay->GetLayout().GetMaxY());
+    wxBitmap bitmap(m_treePanel->GetLayout().GetMaxX(),
+		    m_treePanel->GetLayout().GetMaxY());
     dc.SelectObject(bitmap);
     dc.Clear();
-    m_treeDisplay->GetLayout().DrawTree(dc);
+    m_treePanel->GetLayout().DrawTree(dc);
     if (!bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_JPEG)) {
       wxMessageBox(wxString::Format(_("An error occurred in writing '%s'."),
 				    (const char *) dialog.GetPath().mb_str()),
@@ -586,8 +643,8 @@ void gbtGameFrame::OnFileExportJPG(wxCommandEvent &)
 
 void gbtGameFrame::OnFileExportPNG(wxCommandEvent &)
 {
-  if (m_treeDisplay->GetLayout().GetMaxX() > 65000 ||
-      m_treeDisplay->GetLayout().GetMaxY() > 65000) {
+  if (m_treePanel->GetLayout().GetMaxX() > 65000 ||
+      m_treePanel->GetLayout().GetMaxY() > 65000) {
     wxMessageDialog dialog(this,
 			   _("Game image too large to export to graphics file"),
 			   _("Error"), wxOK);
@@ -602,11 +659,11 @@ void gbtGameFrame::OnFileExportPNG(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     wxMemoryDC dc;
-    wxBitmap bitmap(m_treeDisplay->GetLayout().GetMaxX(),
-		    m_treeDisplay->GetLayout().GetMaxY());
+    wxBitmap bitmap(m_treePanel->GetLayout().GetMaxX(),
+		    m_treePanel->GetLayout().GetMaxY());
     dc.SelectObject(bitmap);
     dc.Clear();
-    m_treeDisplay->GetLayout().DrawTree(dc);
+    m_treePanel->GetLayout().DrawTree(dc);
     if (!bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_PNG)) {
       wxMessageBox(wxString::Format(_("An error occurred in writing '%s'."),
 				    (const char *) dialog.GetPath().mb_str()),
@@ -628,9 +685,9 @@ void gbtGameFrame::OnFilePrintPreview(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrintPreview *preview = 
-    new wxPrintPreview(new gbtTreePrintout(m_treeDisplay->GetLayout(),
+    new wxPrintPreview(new gbtTreePrintout(m_treePanel->GetLayout(),
 					   wxString(m_doc->GetGame()->GetLabel().c_str(), *wxConvCurrent)),
-		       new gbtTreePrintout(m_treeDisplay->GetLayout(),
+		       new gbtTreePrintout(m_treePanel->GetLayout(),
 					   wxString(m_doc->GetGame()->GetLabel().c_str(), *wxConvCurrent)),
 		       &data);
 
@@ -651,7 +708,7 @@ void gbtGameFrame::OnFilePrint(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
-  gbtTreePrintout printout(m_treeDisplay->GetLayout(),
+  gbtTreePrintout printout(m_treePanel->GetLayout(),
 			   wxString(m_doc->GetGame()->GetLabel().c_str(),
 				    *wxConvCurrent));
 
@@ -695,55 +752,6 @@ void gbtGameFrame::OnEditUndo(wxCommandEvent &)
 void gbtGameFrame::OnEditRedo(wxCommandEvent &)
 {
   m_doc->Redo();
-}
-
-void gbtGameFrame::OnViewEfg(wxCommandEvent &)
-{
-  if (GetSizer()->IsShown(m_treePanel)) {
-    GetMenuBar()->Check(GBT_MENU_VIEW_EFG, true);
-    return;
-  }
-  
-  GetSizer()->Show(m_treePanel, true);
-  GetSizer()->Show(m_schellingPanel, false);
-  GetSizer()->Show(m_matrixPanel, false);
-  GetMenuBar()->Check(GBT_MENU_VIEW_NFG, false);
-  Layout();
-  OnUpdate();
-}
-
-void gbtGameFrame::OnViewNfg(wxCommandEvent &)
-{
-  if (m_matrixPanel &&
-      (GetSizer()->IsShown(m_matrixPanel) ||
-       GetSizer()->IsShown(m_schellingPanel))) {
-    GetMenuBar()->Check(GBT_MENU_VIEW_NFG, true);
-    return;
-  }
-
-  // TODO: Generate reduced strategies in another thread that can be
-  // stopped, in case user tries to generate them for a game that's
-  // just way too big.
-
-  // At this point, we know that there must be a tree view to hide
-  GetSizer()->Show(m_treePanel, false);
-  if (m_doc->GetGame()->NumPlayers() == 2) {
-    if (!m_schellingPanel) {
-      m_schellingPanel = new gbtTableSchelling(this, m_doc);
-      GetSizer()->Insert(0, m_schellingPanel, 1, wxEXPAND, 0);
-    }
-    GetSizer()->Show(m_schellingPanel, true);
-  }
-  else {
-    if (!m_matrixPanel) {
-      m_matrixPanel = new gbtTableMatrix(this, m_doc);
-      GetSizer()->Insert(0, m_matrixPanel, 1, wxEXPAND, 0);
-    }
-    GetSizer()->Show(m_matrixPanel, true);
-  }
-  GetMenuBar()->Check(GBT_MENU_VIEW_EFG, false);
-  Layout();
-  OnUpdate();
 }
 
 void gbtGameFrame::OnViewZoomIn(wxCommandEvent &)
@@ -811,6 +819,15 @@ void gbtGameFrame::OnHelpAbout(wxCommandEvent &)
 }
 
 
+void gbtGameFrame::OnPageChanging(wxNotebookEvent &p_event)
+{
+  if (p_event.GetSelection() == 1) {
+    m_strategicPanel->OnNotebookShow();
+    m_strategicPanel->Refresh();
+  }
+  p_event.Skip();
+}
+
 //-------------------------------------------------------------------------
 //           gbtGameFrame: Implementation of view interface
 //-------------------------------------------------------------------------
@@ -837,35 +854,14 @@ void gbtGameFrame::OnUpdate(void)
     SetTitle(title);
   }
 
-  if (m_schellingPanel && GetSizer()->IsShown(m_schellingPanel) && 
-      m_doc->GetGame()->NumPlayers() > 2) {
-    GetSizer()->Show(m_schellingPanel, false);
-    if (!m_matrixPanel) {
-      m_matrixPanel = new gbtTableMatrix(this, m_doc);
-      GetSizer()->Insert(0, m_matrixPanel, 1, wxEXPAND, 0);
-    }
-    GetSizer()->Show(m_matrixPanel, true);
-    Layout();
-  }
-  else if (m_matrixPanel && GetSizer()->IsShown(m_matrixPanel) &&
-	   m_doc->GetGame()->NumPlayers() == 2) {
-    GetSizer()->Show(m_matrixPanel, false);
-    if (!m_schellingPanel) {
-      m_schellingPanel = new gbtTableSchelling(this, m_doc);
-      GetSizer()->Insert(0, m_schellingPanel, 1, wxEXPAND, 0);
-    }
-    GetSizer()->Show(m_schellingPanel, true);
-    Layout();
-  }
-
   GetMenuBar()->Enable(GBT_MENU_FILE_EXPORT,
-		       m_treeDisplay && GetSizer()->IsShown(m_treePanel));
+		       m_treePanel && GetSizer()->IsShown(m_treePanel));
   GetMenuBar()->Enable(wxID_PRINT_SETUP,
-		       m_treeDisplay && GetSizer()->IsShown(m_treePanel));
+		       m_treePanel && GetSizer()->IsShown(m_treePanel));
   GetMenuBar()->Enable(wxID_PREVIEW,
-		       m_treeDisplay && GetSizer()->IsShown(m_treePanel));
+		       m_treePanel && GetSizer()->IsShown(m_treePanel));
   GetMenuBar()->Enable(wxID_PRINT,
-		       m_treeDisplay && GetSizer()->IsShown(m_treePanel));
+		       m_treePanel && GetSizer()->IsShown(m_treePanel));
 
   GetMenuBar()->Enable(wxID_UNDO, m_doc->CanUndo());
   if (m_doc->CanUndo()) {
@@ -886,14 +882,10 @@ void gbtGameFrame::OnUpdate(void)
   }
   
   
-  GetMenuBar()->Check(GBT_MENU_VIEW_EFG, 
-		      m_treeDisplay && GetSizer()->IsShown(m_treePanel));
-  GetMenuBar()->Enable(GBT_MENU_VIEW_EFG, m_doc->GetGame()->HasTree());
-  GetMenuBar()->Check(GBT_MENU_VIEW_NFG, 
-		      GetSizer()->IsShown(m_matrixPanel) ||
-		      GetSizer()->IsShown(m_schellingPanel));
   GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMIN,
-		       m_treeDisplay && GetSizer()->IsShown(m_treePanel));
+		       m_doc->GetGame()->HasTree() && 
+		       m_notebook->GetSelection() == 0);
   GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMOUT,
-		       m_treeDisplay && GetSizer()->IsShown(m_treePanel));
+		       m_doc->GetGame()->HasTree() &&
+		       m_notebook->GetSelection() == 0);
 }

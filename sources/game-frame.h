@@ -27,17 +27,20 @@
 #ifndef GAME_FRAME_H
 #define GAME_FRAME_H
 
+#include <wx/notebook.h>         // for notebook
 #include <wx/printdlg.h>         // for wxPageSetupData, wxPrintData
 
 #include "game-document.h"
 
-class gbtTreeDisplay;
+class gbtTreePanel;
+class gbtStrategicPanel;
 
 class gbtGameFrame : public wxFrame, gbtGameView {
 private:
-  wxPanel *m_treePanel, *m_matrixPanel, *m_schellingPanel;
+  wxNotebook *m_notebook;
+  gbtTreePanel *m_treePanel;
+  gbtStrategicPanel *m_strategicPanel;
   wxPanel *m_analysisPanel;
-  gbtTreeDisplay *m_treeDisplay;
 
   // Printing state... should be part of document instead?
   wxPageSetupData m_pageSetupData;
@@ -48,6 +51,7 @@ private:
   void MakeMenu(void);
 
   void OnCloseWindow(wxCloseEvent &);
+  void OnPageChanging(wxNotebookEvent &);
 
   // Menu command handlers
   void OnFileNewEfg(wxCommandEvent &);
@@ -68,8 +72,6 @@ private:
   void OnEditUndo(wxCommandEvent &);
   void OnEditRedo(wxCommandEvent &);
 
-  void OnViewEfg(wxCommandEvent &);
-  void OnViewNfg(wxCommandEvent &);
   void OnViewZoomIn(wxCommandEvent &);
   void OnViewZoomOut(wxCommandEvent &);
 
@@ -80,6 +82,7 @@ private:
   void OnToolsAnalysis(wxCommandEvent &);
 
   void OnHelpAbout(wxCommandEvent &);
+
 
   // Implementation of gbtGameView members
   void OnUpdate(void);

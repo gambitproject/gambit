@@ -68,6 +68,17 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
+class gbtTreePanel : public wxPanel {
+private:
+  gbtTreeToolbar *m_toolbar;
+  gbtTreeDisplay *m_display;
+
+public:
+  gbtTreePanel(wxWindow *p_parent, gbtGameDocument *p_doc);
+
+  const gbtTreeLayout &GetLayout(void) const { return m_display->GetLayout(); }
+};
+
 #endif  // TREE_DISPLAY_H
 
 
