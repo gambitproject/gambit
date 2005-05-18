@@ -396,8 +396,8 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
     std::ifstream file(dialog.GetPath().mb_str());
 
     if (!file.is_open()) {
-      wxMessageBox(wxString::Format(_("Could not open '%s' for reading"),
-				    (const char *) dialog.GetPath().mb_str()),
+      wxMessageBox(wxT("Could not open '") +
+		   dialog.GetPath() + wxT("' for reading"),
 		   _("Error"), wxOK, 0);
       return;
     }
@@ -407,8 +407,8 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
     try {
       game = ReadNfg(file);
       if (file.bad()) {
-	wxMessageBox(wxString::Format(_("An error occured in reading '%s'"),
-				      (const char *) dialog.GetPath().mb_str()),
+	wxMessageBox(wxT("An error occurred in reading '") +
+		     dialog.GetPath() + wxT("'"),
 		     _("Error"), wxOK, 0);
 	return;
       }
@@ -427,15 +427,15 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
       game = ReadEfg(file);
       game->Canonicalize();
       if (file.bad()) {
-	wxMessageBox(wxString::Format(_("An error occured in reading '%s'"),
-				      (const char *) dialog.GetPath().mb_str()),
+	wxMessageBox(wxT("An error occurred in reading '") +
+		     dialog.GetPath() + wxT("'"),
 		     _("Error"), wxOK, 0);
 	return;
       }
     }
     catch (gbtEfgParserException &) {
-      wxMessageBox(wxString::Format(_("File '%s' not in a recognized format"),
-				    (const char *) dialog.GetPath().mb_str()),
+      wxMessageBox(wxT("File '") + dialog.GetPath() + 
+		   wxT("' is not in a recognized format"),
 		   _("Error"), wxOK, 0);
 
       return;
