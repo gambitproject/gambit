@@ -25,3 +25,5 @@ gambit_nfg_ipa_SOURCES = \
 gambit_nfg_ipa_LDADD = \
 	$(top_builddir)/sources/libgambit/libgambit.la
 
+EXTRA_DIST = README
+
