@@ -1,0 +1,171 @@
+//
+// $Source$
+// $Date$
+// $Revision$
+//
+// DESCRIPTION:
+// Gambit frontend to Gametracer IPA
+//
+// This file is part of Gambit
+// Copyright (c) 2005, The Gambit Project
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+
+#include <unistd.h>
+#include <math.h>
+#include <iostream>
+#include <fstream>
+#include "libgambit/libgambit.h"
+
+#include "nfgame.h"
+#include "ipa.h"
+
+#define ALPHA 0.02
+#define EQERR 1e-6
+
+int g_numDecimals = 6;
+
+void PrintProfile(std::ostream &p_stream,
+		  const gbtNfgGame &p_game, cvector *p_profile)
+{
+  p_stream.setf(std::ios::fixed);
+  p_stream << "NE";
+  for (int i = 0; i < p_game.ProfileLength(); i++) {
+    p_stream << "," << std::setprecision(g_numDecimals) << (*p_profile)[i];
+  }
+  p_stream << std::endl;
+}
+
+void PrintBanner(std::ostream &p_stream)
+{
+  p_stream << "Compute Nash equilibria using iterated polymatrix approximation\n";
+  p_stream << "Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Christian Shelton\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
+  p_stream << "This is free software, distributed under the GNU GPL\n\n";
+}
+
+void PrintHelp(char *progname)
+{
+  PrintBanner(std::cerr);
+  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
+  std::cerr << "Accepts strategic game on standard input.\n";
+
+  std::cerr << "Options:\n";
+  std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
+  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  exit(1);
+}
+
+void Solve(const gbtNfgGame &p_game, const gbtArray<double> &p_pert)
+{
+  int i;
+
+  int *actions = new int[p_game.NumPlayers()];
+  int veclength = p_game.NumPlayers();
+  for (int pl = 1; pl <= p_game.NumPlayers(); pl++) {
+    actions[pl-1] = p_game.GetPlayer(pl)->NumStrats();
+    veclength *= p_game.GetPlayer(pl)->NumStrats();
+  }
+  cvector payoffs(veclength);
+  
+  gnmgame *A = new nfgame(p_game.NumPlayers(), actions, payoffs);
+  
+  int *profile = new int[p_game.NumPlayers()];
+  gbtNfgContingencyIterator iter(&p_game);
+  do {
+    for (int pl = 1; pl <= p_game.NumPlayers(); pl++) {
+      profile[pl-1] = iter.GetProfile().GetStrategy(pl)->GetNumber() - 1;
+    }
+
+    for (int pl = 1; pl <= p_game.NumPlayers(); pl++) {
+      A->setPurePayoff(pl-1, profile,
+		       (double) iter.GetPayoff(pl));
+    }
+  } while (iter.NextContingency());
+
+  cvector g(A->getNumActions()); // perturbation ray
+  int numEq;
+
+  cvector ans(A->getNumActions());
+  cvector zh(A->getNumActions(),1.0);
+  do {
+    for(i = 0; i < A->getNumActions(); i++) {
+      g[i] = p_pert[i+1];
+    }
+    g /= g.norm(); // normalized
+    numEq = IPA(*A, g, zh, ALPHA, EQERR, ans);
+  } while(numEq == 0);
+
+
+  PrintProfile(std::cout, p_game, &ans);
+
+  delete A;
+}
+
+
+int main(int argc, char *argv[])
+{
+  opterr = 0;
+  bool quiet = false;
+
+  int c;
+  while ((c = getopt(argc, argv, "d:qh")) != -1) {
+    switch (c) {
+    case 'q':
+      quiet = true;
+      break;
+    case 'd':
+      g_numDecimals = atoi(optarg);
+      break;
+    case 'h':
+      PrintHelp(argv[0]);
+      break;
+    case '?':
+      if (isprint(optopt)) {
+	std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
+      }
+      else {
+	std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
+      }
+      return 1;
+    default:
+      abort();
+    }
+  }
+
+  if (!quiet) {
+    PrintBanner(std::cerr);
+  }
+
+  gbtNfgGame *nfg;
+
+  try {
+    nfg = ReadNfg(std::cin);
+  }
+  catch (...) {
+    return 1;
+  }
+
+  gbtArray<double> pert(nfg->ProfileLength());
+  for (int i = 1; i <= pert.Length(); i++) {
+    pert[i] = 1.0;
+  }
+
+  Solve(*nfg, pert);
+  
+  return 0;
+}

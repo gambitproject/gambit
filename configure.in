@@ -128,6 +128,7 @@ AC_OUTPUT(Makefile sources/Makefile \
 	  sources/tools/enummixed/Makefile \
 	  sources/tools/enumpoly/Makefile \
 	  sources/tools/enumpure/Makefile \
+          sources/tools/gt/Makefile \
 	  sources/tools/lcp/Makefile \
 	  sources/tools/liap/Makefile \
 	  sources/tools/logit/Makefile \

@@ -4,6 +4,7 @@ SUBDIRS = convert \
 	enummixed \
 	enumpoly \
 	enumpure \
+	gt \
 	lcp \
 	liap \
 	logit \
