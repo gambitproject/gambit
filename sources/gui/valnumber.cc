@@ -24,21 +24,17 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
-#ifndef WX_PRECOMP
-#include "wx/wx.h"
-#endif  // WX_PRECOMP
-
-#if defined(__GNUG__) && !defined(__APPLE_CC__)
-#pragma implementation "valnumber.h"
-#endif  // __GNUG__
-
-#include "valnumber.h"
-#include "base/base.h"
-
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include <wx/wxprec.h>
+#ifndef WX_PRECOMP
+#include <wx/wx.h>
+#endif  // WX_PRECOMP
+
+#include "libgambit/libgambit.h"
+#include "valnumber.h"
 
 BEGIN_EVENT_TABLE(gbtNumberValidator, wxValidator)
   EVT_CHAR(gbtNumberValidator::OnChar)
@@ -124,21 +120,19 @@ bool gbtNumberValidator::Validate(wxWindow *p_parent)
   wxString value(control->GetValue());
 
   if (!IsNumeric(value)) {
-    wxMessageBox(wxT("The value ") + value + wxT(" in ") +
-		 m_validatorWindow->GetName() + wxT(" is not a valid number."),
+    wxMessageBox(_T("The value ") + value + _T(" in ") +
+		 m_validatorWindow->GetName() + _T(" is not a valid number."),
 		 _("Error"), wxOK | wxICON_EXCLAMATION, p_parent);
     m_validatorWindow->SetFocus();
     return false;
   }
 
-  if ((m_hasMin && ToNumber(gbtText(value.mb_str())) < m_minValue) ||
-      (m_hasMax && ToNumber(gbtText(value.mb_str())) > m_maxValue)) {
-    wxMessageBox(wxT("The value ") + value + wxT(" in ") +
-		 m_validatorWindow->GetName() + wxT(" is out of the range [") +
-		 wxString::Format(wxT("%s"), (char *) ToText(m_minValue)) + 
-		 wxT(", ") + 
-		 wxString::Format(wxT("%s"), (char *) ToText(m_maxValue)) +
-		 wxT("]."),
+  if ((m_hasMin && ToNumber((const char *) value.mb_str()) < m_minValue) ||
+      (m_hasMax && ToNumber((const char *) value.mb_str()) > m_maxValue)) {
+    wxMessageBox(_T("The value ") + value + _T(" in ") +
+		 m_validatorWindow->GetName() + _T(" is out of the range [") +
+		 wxString(ToText(m_minValue).c_str(), *wxConvCurrent) + _T(", ") + 
+		 wxString(ToText(m_maxValue).c_str(), *wxConvCurrent) + _T("]."),
 		 _("Error"), wxOK | wxICON_EXCLAMATION, p_parent);
     m_validatorWindow->SetFocus();
     return false;
@@ -174,7 +168,7 @@ bool gbtNumberValidator::TransferFromWindow(void)
 void gbtNumberValidator::OnChar(wxKeyEvent &p_event)
 {
   if (m_validatorWindow) {
-    int keyCode = (int) p_event.KeyCode();
+    int keyCode = (int) p_event.GetKeyCode();
 
     // we don't filter special keys and Delete
     if (!(keyCode < WXK_SPACE || keyCode == WXK_DELETE || 
@@ -187,7 +181,35 @@ void gbtNumberValidator::OnChar(wxKeyEvent &p_event)
 
       return;
     }
+
+    wxTextCtrl *control = (wxTextCtrl *) m_validatorWindow;
+    wxString value = control->GetValue();
+
+    if ((keyCode == '.' || keyCode == '/') && 
+	(value.Find('.') != -1 || value.Find('/') != -1)) {
+      // At most one slash or decimal point is allowed
+      if (!wxValidator::IsSilent())  wxBell();
+      return;
+    }
+
+    if (keyCode == '/' && 
+	(control->GetInsertionPoint() == 0 ||
+	 (control->GetInsertionPoint() == 1 && value == wxT("-")))) {
+      // Can't start with a slash
+      if (!wxValidator::IsSilent())  wxBell();
+      return;
+    }
+
+    if (keyCode == '-' && control->GetInsertionPoint() != 0) {
+      // Only permit minus signs at the start of the text
+      if (!wxValidator::IsSilent())  wxBell();
+      return;
+    }
   }
 
   p_event.Skip();
 }
+
+
+
+

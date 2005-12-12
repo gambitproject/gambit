@@ -1,0 +1,102 @@
+#
+# $Source$
+# $Date$
+# $Revision$
+#
+# DESCRIPTION:
+# automake input for extensive form samples directory
+#
+
+EXTRA_DIST = \
+	2s2x2x2.efg \
+	2smp.efg \
+	2x2x2.efg \
+	4cards.efg \
+	artist1.efg \
+	artist2.efg \
+	badgame1.efg \
+	badgame2.efg \
+	bayes1a.efg \
+	bayes2a.efg \
+	bcp2.efg \
+	bcp3.efg \
+	bcp4.efg \
+	bhg1.efg \
+	bhg2.efg \
+	bhg3.efg \
+	bhg4.efg \
+	bhg5.efg \
+	caro2.efg \
+	cent2.efg \
+	cent3.efg \
+	cent4.efg \
+	cent6.efg \
+	centcs10.efg \
+	centcs6.efg \
+	condjury.efg \
+	coord2.efg \
+	coord2ts.efg \
+	coord3.efg \
+	coord4.efg \
+	cross.efg \
+	cs.efg \
+	e01.efg \
+	e02.efg \
+	e03.efg \
+	e04.efg \
+	e05.efg \
+	e06.efg \
+	e07.efg \
+	e08.efg \
+	e09.efg \
+	e10a.efg \
+	e10.efg \
+	e13.efg \
+	e16.efg \
+	e17.efg \
+	e18.efg \
+	g1.efg \
+	g2.efg \
+	g3.efg \
+	holdout7.efg \
+	holdout.efg \
+	hs1.efg \
+	jury_mr.efg \
+	jury_un.efg \
+	km1.efg \
+	km2.efg \
+	km3.efg \
+	km6.efg \
+	montyhal.efg \
+	my_2-1.efg \
+	my_2-4.efg \
+	my_2-8.efg \
+	my_3-3a.efg \
+	my_3-3b.efg \
+	my_3-3c.efg \
+	my_3-3d.efg \
+	my_3-3e.efg \
+	my_3-4.efg \
+	myerson.efg \
+	nim7.efg \
+	nim.efg \
+	palf2.efg \
+	palf3.efg \
+	palf.efg \
+	poker2.efg \
+	poker.efg \
+	pvw2.efg \
+	pvw.efg \
+	sh3.efg \
+	sww1.efg \
+	sww2.efg \
+	sww3.efg \
+	tim.efg \
+	ttt.efg \
+	vd.efg \
+	w_ex1.efg \
+	w_ex2.efg \
+	wilson1.efg \
+	work1.efg \
+	work2.efg \
+	work3.efg

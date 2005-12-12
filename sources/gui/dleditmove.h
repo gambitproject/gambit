@@ -27,44 +27,28 @@
 #ifndef DLEDITMOVE_H
 #define DLEDITMOVE_H
 
-#include "gamedoc.h"
+#include "sheet.h"
 
-class dialogEditMove : public wxDialog {
+class gbtEditMoveDialog : public wxDialog {
 private:
-  gbtGameInfoset m_infoset;
+  gbtEfgInfoset *m_infoset;
   wxChoice *m_player;
-  wxTextCtrl *m_infosetName, *m_actionName, *m_actionProb;
-  wxString m_actionProbValue;
-  wxListBox *m_actionList;
-  wxButton *m_addBeforeButton, *m_addAfterButton, *m_deleteButton;
-  gbtBlock<gbtText> m_actionNames;
-  gbtBlock<gbtNumber> m_actionProbs;
-  gbtBlock<gbtGameAction> m_actions;
-  int m_lastSelection;
-
-  // Event handlers
-  void OnActionChanged(wxCommandEvent &);
-  void OnAddActionBefore(wxCommandEvent &);
-  void OnAddActionAfter(wxCommandEvent &);
-  void OnDeleteAction(wxCommandEvent &);
-  void OnOK(wxCommandEvent &);
+  wxTextCtrl *m_infosetName;
+  wxSheet *m_actionSheet;
 
 public:
   // Lifecycle
-  dialogEditMove(wxWindow *p_parent, gbtGame p_game, gbtGameInfoset p_infoset);
+  gbtEditMoveDialog(wxWindow *p_parent, gbtEfgInfoset *p_infoset);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetInfosetName(void) const { return m_infosetName->GetValue(); }
   int GetPlayer(void) const { return (m_player->GetSelection() + 1); }
 
-  int NumActions(void) const { return m_actions.Length(); }
-  const gbtBlock<gbtGameAction> &GetActions(void) const { return m_actions; }
-  gbtText GetActionName(int p_act) const { return m_actionNames[p_act]; }
-  gbtNumber GetActionProb(int p_act) const { return m_actionProbs[p_act]; }
-
-  gbtGameCommand *GetCommand(void) const;
-
-  DECLARE_EVENT_TABLE()
+  int NumActions(void) const { return m_actionSheet->GetNumberRows(); }
+  //  const gbtArray<gbtEfgAction *> &GetActions(void) const 
+  //  { return m_infoset->Actions(); }
+  std::string GetActionName(int p_act) const;
+  std::string GetActionProb(int p_act) const; 
 };
 
 #endif   // DLEDITMOVE_H

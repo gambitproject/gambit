@@ -10,7 +10,7 @@ dnl
 dnl ---------------------------------------------------------------------------
 dnl WX_PATH_WXCONFIG(VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
-dnl Test for wxWindows, and define WX_CFLAGS and WX_LIBS. Set WX_CONFIG
+dnl Test for wxWidgets, and define WX_CFLAGS and WX_LIBS. Set WX_CONFIG
 dnl environment variable to override the default name of the wx-config script
 dnl to use.
 dnl ---------------------------------------------------------------------------
@@ -20,9 +20,9 @@ AC_DEFUN(WX_PATH_WXCONFIG,
 dnl 
 dnl Get the cflags and libraries from the wx-config script
 dnl
-AC_ARG_WITH(wx-prefix, [  --with-wx-prefix=PREFIX   Prefix where wxWindows is installed (optional)],
+AC_ARG_WITH(wx-prefix, [  --with-wx-prefix=PREFIX   Prefix where wxWidgets is installed (optional)],
             wx_config_prefix="$withval", wx_config_prefix="")
-AC_ARG_WITH(wx-exec-prefix,[  --with-wx-exec-prefix=PREFIX Exec prefix where wxWindows is installed (optional)],
+AC_ARG_WITH(wx-exec-prefix,[  --with-wx-exec-prefix=PREFIX Exec prefix where wxWidgets is installed (optional)],
             wx_config_exec_prefix="$withval", wx_config_exec_prefix="")
 
   dnl deal with optional prefixes
@@ -41,7 +41,7 @@ AC_ARG_WITH(wx-exec-prefix,[  --with-wx-exec-prefix=PREFIX Exec prefix where wxW
 
   AC_PATH_PROG(WX_CONFIG, wx-config, no)
   min_wx_version=ifelse([$1], ,2.3.2,$1)
-  AC_MSG_CHECKING(for wxWindows version >= $min_wx_version)
+  AC_MSG_CHECKING(for wxWidgets version >= $min_wx_version)
   no_wx=""
   if test "$WX_CONFIG" = "no" ; then
     no_wx=yes

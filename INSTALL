@@ -1,109 +1,84 @@
-Building Gambit on un*ces:
---------------------------
+General information
+-------------------
 
-On un*ces, Gambit is configured and built with the standard autotools
-mechanism:
+Gambit uses the standard autotools mechanism for configuring and building.
+This should be familiar to most users of Un*ces and MacOS X.  In general,
+you just need to unpack the sources, change directory to the top level
+of the sources (typically of the form gambit-0.yyyy.mm.dd), and do the
+usual
 
 ./configure
 make
-su
-make install
-
-Note that we do most of our development on Linux, so it is possible the
-configure script is not doing enough checking for things that happen 
-on other Linux flavors.  If you encounter compile problems, please report
-them to us at gambit (at) econmail (dot) tamu (dot) edu, or the 
-gambit-devel mailing list, so we can address them.
-
-If you are building from CVS instead of a released source package, you will
-need to precede the above steps with
-
-aclocal
-automake
-autoconf
-
-You should only need to do this the first time you build after your initial
-CVS checkout.  Subsequent updates should build by just running 'make'
-as usual.
+sudo make install
 
 Command-line options are available to modify the configuration process;
 do `./configure --help` for information.  
 
-By default, Gambit is installed in /usr/local.  You can modify this by
-the --prefix option.  For example, if you wanted to install it in your
-user account, you might do
+By default Gambit will be installed in /usr/local.  You can change this
+by replacing configure step with one of the form
 
-./configure --prefix=/home/mylogin/gambit
+./configure --prefix=/your/path/here
 
-The Gambit library libgambit.so would then be in 
-/home/mylogin/gambit/lib/libgambit.so.
-(Obviously, you can omit the 'su' in this case.)
+NOTE: The graphical interface relies on external calls to other
+programs built in this process, especially for the computation of
+equilibria.  It is strongly recommended that you install the Gambit
+executables to a directory in your path!
 
+Note that if you install to a different location than the default, on
+some systems (especially linux) you may have to run ldconfig manually.
 
-Building Gambit on Windows:
----------------------------
+For Windows users
+-----------------
 
-The Gambit distribution provides makefiles for Borland C++ 5.5.1.
-These are in borland.mak in the sources directory and its subdirectories.
-To build Gambit, you'll need to create a file sources/makedef.bcc to
-point to your Borland compiler installation.
-For example, if you have the compiler in
-C:\BORLAND\BCC55, and you have the Gambit sources unpacked in C:\GAMBIT,
-you would create a file C:\GAMBIT\SOURCES\MAKEDEF.BCC with the contents
+For Windows users wanting to compile Gambit on their own, you'll need
+to use either the Cygwin or MinGW environments.  We do compilation and
+testing of Gambit on Windows using MinGW, which can be gotten from
 
-BCCDIR = C:\BORLAND\BCC55
+http://www.mingw.org
 
-Your system will doubtless vary; we do recommend installing both of these
-in paths that have no spaces in the directory names.  Additionally, you
-should make sure the compiler binary is in your PATH (e.g., $(BCCDIR)\BIN
-in the example above).
+We prefer MinGW over Cygwin because MinGW will create native Windows
+applications, whereas Cygwin requires an extra compatibility layer.
 
-Once you're set up, run
+Note that support for the Borland C++ 5.5 compiler has been removed from
+Gambit.  This is because that compiler is now sufficiently old that
+significant numbers of special cases had to be handled to reconcile
+the C++ it accepts with that accepted by modern versions of gcc
+(which attempt to adhere to the C++ standard).  We are open to supporting
+other compilers in Gambit if there are volunteers willing to contribute
+and maintain build systems for them.
 
-make -f borland
+The graphical interface and wxWidgets
+-------------------------------------
 
-in the sources directory, which will recursively call the borland.mak
-makefiles in the subdirectories.  Assuming everything builds OK, the
-Gambit library will be in SOURCES/GAMBIT.LIB.
+Note that Gambit requires wxWidgets version 2.6.0 or higher for the
+graphical interface.  See their website at
 
-We don't know if Gambit will build with other compilers, though we
-would graciously accept a contribution of makefiles and/or fixes for
-other compilers.
+http://www.wxwidgets.org
 
+to download this if you need it.  Packages of this should be available
+for most Un*x users through their package managers (apt or rpm).  Note
+that you'll need the appropriate -dev package for wxWidgets to get the
+header files needed to build Gambit.
 
-Building the Python extension
------------------------------
+Un*x users, please note that Gambit at this time only supports the
+GTK port of wxWidgets, and not the Motif/Lesstif or the Universal ports.
+Neither of the latter ports support drag-and-drop features, which are
+heavily used in the graphical interface.
 
-The Python API can be found in sources/python in the
-source distributions.  You need to build this separately if you wish to
-use it.  To build it, cd to sources/python and issue a
+If wxWidgets it isn't installed in a standard place (e.g., /usr or
+/usr/local), you'll need to tell configure where to find it with the
+--with-wx-prefix=PREFIX option, for example:
 
-make python
+./configure --with-wx-prefix=/home/mylogin/wx
 
-on Un*x or a 
+Finally, if you don't want to build the graphical interface, you
+can either (a) simply not install wxWidgets, or (b) pass the argument
+--disable-gui to the configure step, for example,
 
-make -f borland 
+./configure --disable-gui
 
-on Windows.  Note that under Unix, you'll need to have installed
-the main Gambit library via a 'make install' before this will work
-(since it needs to find gambit.so to link).
-
-Note that you may need to take a few additional steps up front for this
-to work; see http://www.python.org/doc/current/inst/non-ms-compilers.html
-for details.  In particular, you will probably need to create a version
-of the Python library that is compatible with the Borland compiler.
-You will need to create the library using the command
-
-coff2omf python23.lib python23_bcpp.lib
-
-The coff2omf program comes with your Borland C++ installation, and the
-command should be issued from the directory in which your copy of
-python23.lib resides.
+This will just build the command-line tools, and will not require
+a wxWidgets installation.
 
 
-Hopefully, assuming Python is correctly installed on your system, this 
-should build without a problem.  There is no installation target provided
-yet.  You'll need the three files gambit.py, gbt.py, and _gbt.so (Un*x)
-or _gbt.pyd (Windows) in the Python search path (sys.path) in order to
-use the extension module.
  

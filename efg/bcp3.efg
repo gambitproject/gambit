@@ -1,7 +1,7 @@
 EFG 2 R "Banks-Camerer-Porter (GEB 94), Game 3" { "Player 1" "Player 2" }
 ""
 
-c "ROOT" 1 "(0,1)" { "type 1" 1/2 "type 2" 1/2 } 0
+c "" 1 "(0,1)" { "type 1" 1/2 "type 2" 1/2 } 0
 p "" 1 1 "(1,1)" { "m1" "m2" "m3" } 0
 p "" 2 1 "(2,1)" { "a1" "a2" "a3" } 0
 t "" 1 "a" { 0, 3 }

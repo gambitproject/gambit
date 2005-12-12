@@ -1,0 +1,427 @@
+<refentry id="nash.efg.logit">
+<refentryinfo>
+<date>2006-07-25</date>
+</refentryinfo>
+
+<refmeta>
+<refentrytitle>
+<application>gambit-efg-logit</application>
+</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo>Gambit 1.0</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>
+<application>gambit-efg-logit</application>
+</refname>
+<refpurpose>
+Computes the principal branch of the (logit) agent quantal response
+correspondence in an extensive game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<refsynopsisdivinfo>
+<date>2006-07-25</date>
+</refsynopsisdivinfo>
+<cmdsynopsis>
+<command>gambit-efg-logit</command>
+<arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
+<arg><option>-s </option><replaceable class="parameter">STEP</replaceable></arg>
+<arg><option>-a </option><replaceable class="parameter">ACCEL</replaceable></arg>
+<arg><option>-m </option><replaceable class="parameter">MAXLAMBDA</replaceable></arg>
+<arg><option>-h</option></arg>
+<arg><option>-q</option></arg>
+<arg><option>-e</option></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<refsect1info>
+<date>2006-07-25</date>
+</refsect1info>
+<title>DESCRIPTION</title>
+<para>
+<command>gambit-efg-logit</command> reads an extensive game on standard
+input and computes the principal branch of the
+(logit) agent quantal response correspondence.
+</para>
+
+<para>
+The method is based on the procedure described in Turocy
+[<xref linkend="Tur05">].  It uses standard path-following methods
+(as described in Allgower and Georg's &quot;Numerical Continuation
+Methods&quot;) to adaptively trace the principal branch of the
+correspondence efficiently and securely.
+</para>
+
+<para>
+The method used is a predictor-corrector method, which first generates
+a prediction using the differential equations describing the branch
+of the correspondence, followed by a corrector step which refines the
+prediction using Newton's method for finding a zero of a function.
+Two parameters control the operation of this tracing.  The option
+<option>-s</option> sets the initial step size for the predictor phase
+of the tracing.  This step size is then dynamically adjusted based on
+the rate of convergence of Newton's method in the corrector step.
+If the convergence is fast, the step size is adjusted upward (accelerated);
+if it is slow, the step size is decreased (decelerated).  The
+option <option>-a</option> sets the maximum acceleration (or
+deceleration).  As described in Turocy [<xref linkend="Tur05">], this
+acceleration helps to efficiently trace the correspondence when
+it reaches its asymptotic phase for large values of the precision
+parameter lambda.
+</para>
+
+<para>
+The default values of these parameters are chosen to work reasonably
+well on games in which the payoffs of the players are in the range
+[-10,10].  Since lambda has a cardinal, and not just ordinal, effect
+on the perturbed payoffs, scaling the payoffs in the game also scales the 
+interpretation of lambda; these parameters should thus be adjusted for
+use in games with larger payoff ranges.  
+</para>
+
+<para>
+The default values of the parameters are also chosen with the goal
+of tracing the entire branch to determine the terminal Nash equilibrium
+and general shape of the branch relatively quickly.  Users interested
+in using the output of this method for maximum likelihood analysis
+of data from laboratory experiments should set the initial stepsize
+smaller, and the maximum acceleration closer to 1, in order to compute
+more points on the branch.
+</para>
+
+</refsect1>
+
+<refsect1>
+<title>OPTIONS</title>
+<variablelist>
+<varlistentry>
+<term><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></term>
+<listitem>
+<para>
+Express all output using decimal representations with 
+<replaceable class="parameter">DECIMALS</replaceable> digits.  
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-s </option><replaceable class="parameter">STEP</replaceable></term>
+<listitem>
+<para>
+Sets the initial step size for the predictor phase of the tracing
+procedure.  The default value is .03.  The step size is specified in terms
+of the arclength along the branch of the correspondence, and not the size
+of the step measured in terms of lambda.  So, for example, if the step size
+is currently .03, but the position of the strategy profile on the branch
+is changing rapidly with lambda, then lambda will change by much less then
+.03 between points reported by the program.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-a </option><replaceable class="parameter">ACCEL</replaceable></term>
+<listitem>
+<para>
+Sets the maximum acceleration of the step size during the tracing
+procedure.  This is interpreted as a multiplier.  The default is 1.1,
+which means the step size is increased or decreased 
+by no more than ten percent of its current value at every step.
+A value close to one would keep the step size (almost) constant at every
+step.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-m </option><replaceable class="parameter">MAXLAMBDA</replaceable></term>
+<listitem>
+<para>
+Stop when reaching the specified value of the lambda parameter.
+By default, the tracing stops when lambda reaches 1,000,000, which is
+usually suitable for computing a good approximation to a Nash equilibrium.
+For applications, such as to laboratory experiments, where the behavior
+of the correspondence for small values of lambda is of interest and the
+asymptotic behavior is not relevant, setting 
+<replaceable class="parameter">MAXLAMBDA</replaceable> to a much smaller value 
+may be indicated.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-h</option></term>
+<listitem>
+<para>
+Prints a help message listing the available options.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-e</option></term>
+<listitem>
+<para>
+By default, all points computed are output by the program.  If this
+switch is specified, only the approximation to the Nash equilibrium
+at the end of the branch is output.
+</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect1>
+
+<refsect1>
+<title>USAGE</title>
+<para>
+<command>gambit-efg-logit</command> [OPTIONS] < file.efg
+</para>
+</refsect1>
+
+<refsect1>
+<title>CAVEATS</title>
+<para>
+This program does not (yet) detect bifurcations of the correspondence
+in non-generic games.
+</para>
+</refsect1>
+
+<refsect1>
+<title>BUGS</title>
+<para>
+For some games in which an information set is reached with vanishing
+probability in the limit of the branch of the correspondence, the
+procedure will terminate prematurely.
+</para>
+</refsect1>
+
+<refsect1>
+<title>AUTHOR</title>
+<para>
+<author>
+<firstname>Theodore</firstname>
+<surname>Turocy</surname>
+<contrib>Original author</contrib>
+</author>
+</para>
+</refsect1>
+</refentry>
+
+
+<refentry id="nash.nfg.logit">
+<refentryinfo>
+<date>2006-07-25</date>
+</refentryinfo>
+
+<refmeta>
+<refentrytitle>
+<application>gambit-nfg-logit</application>
+</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo>Gambit 1.0</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>
+<application>gambit-nfg-logit</application>
+</refname>
+<refpurpose>
+Computes the principal branch of the (logit) quantal response
+correspondence in a strategic game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<refsynopsisdivinfo>
+<date>2006-07-25</date>
+</refsynopsisdivinfo>
+<cmdsynopsis>
+<command>gambit-nfg-logit</command>
+<arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
+<arg><option>-s </option><replaceable class="parameter">STEP</replaceable></arg>
+<arg><option>-a </option><replaceable class="parameter">ACCEL</replaceable></arg>
+<arg><option>-m </option><replaceable class="parameter">MAXLAMBDA</replaceable></arg>
+<arg><option>-h</option></arg>
+<arg><option>-q</option></arg>
+<arg><option>-e</option></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<refsect1info>
+<date>2006-07-25</date>
+</refsect1info>
+<title>DESCRIPTION</title>
+<para>
+<command>gambit-nfg-logit</command> reads a strategic game on standard
+input and computes the principal branch of the
+(logit) quantal response correspondence.
+</para>
+
+<para>
+The method is based on the procedure described in Turocy
+[<xref linkend="Tur05">].  It uses standard path-following methods
+(as described in Allgower and Georg's &quot;Numerical Continuation
+Methods&quot;) to adaptively trace the principal branch of the
+correspondence efficiently and securely.
+</para>
+
+<para>
+The method used is a predictor-corrector method, which first generates
+a prediction using the differential equations describing the branch
+of the correspondence, followed by a corrector step which refines the
+prediction using Newton's method for finding a zero of a function.
+Two parameters control the operation of this tracing.  The option
+<option>-s</option> sets the initial step size for the predictor phase
+of the tracing.  This step size is then dynamically adjusted based on
+the rate of convergence of Newton's method in the corrector step.
+If the convergence is fast, the step size is adjusted upward (accelerated);
+if it is slow, the step size is decreased (decelerated).  The
+option <option>-a</option> sets the maximum acceleration (or
+deceleration).  As described in Turocy [<xref linkend="Tur05">], this
+acceleration helps to efficiently trace the correspondence when
+it reaches its asymptotic phase for large values of the precision
+parameter lambda.
+</para>
+
+<para>
+The default values of these parameters are chosen to work reasonably
+well on games in which the payoffs of the players are in the range
+[-10,10].  Since lambda has a cardinal, and not just ordinal, effect
+on the perturbed payoffs, scaling the payoffs in the game also scales the 
+interpretation of lambda; these parameters should thus be adjusted for
+use in games with larger payoff ranges.  
+</para>
+
+<para>
+The default values of the parameters are also chosen with the goal
+of tracing the entire branch to determine the terminal Nash equilibrium
+and general shape of the branch relatively quickly.  Users interested
+in using the output of this method for maximum likelihood analysis
+of data from laboratory experiments should set the initial stepsize
+smaller, and the maximum acceleration closer to 1, in order to compute
+more points on the branch.
+</para>
+
+</refsect1>
+
+<refsect1>
+<title>OPTIONS</title>
+<variablelist>
+<varlistentry>
+<term><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></term>
+<listitem>
+<para>
+Express all output using decimal representations with 
+<replaceable class="parameter">DECIMALS</replaceable> digits.  
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-s </option><replaceable class="parameter">STEP</replaceable></term>
+<listitem>
+<para>
+Sets the initial step size for the predictor phase of the tracing
+procedure.  The default value is .03.  The step size is specified in terms
+of the arclength along the branch of the correspondence, and not the size
+of the step measured in terms of lambda.  So, for example, if the step size
+is currently .03, but the position of the strategy profile on the branch
+is changing rapidly with lambda, then lambda will change by much less then
+.03 between points reported by the program.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-a </option><replaceable class="parameter">ACCEL</replaceable></term>
+<listitem>
+<para>
+Sets the maximum acceleration of the step size during the tracing
+procedure.  This is interpreted as a multiplier.  The default is 1.1,
+which means the step size is increased or decreased 
+by no more than ten percent of its current value at every step.
+A value close to one would keep the step size (almost) constant at every
+step.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-m </option><replaceable class="parameter">MAXLAMBDA</replaceable></term>
+<listitem>
+<para>
+Stop when reaching the specified value of the lambda parameter.
+By default, the tracing stops when lambda reaches 1,000,000, which is
+usually suitable for computing a good approximation to a Nash equilibrium.
+For applications, such as to laboratory experiments, where the behavior
+of the correspondence for small values of lambda is of interest and the
+asymptotic behavior is not relevant, setting 
+<replaceable class="parameter">MAXLAMBDA</replaceable> to a much smaller value 
+may be indicated.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-h</option></term>
+<listitem>
+<para>
+Prints a help message listing the available options.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-e</option></term>
+<listitem>
+<para>
+By default, all points computed are output by the program.  If this
+switch is specified, only the approximation to the Nash equilibrium
+at the end of the branch is output.
+</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect1>
+
+<refsect1>
+<title>USAGE</title>
+<para>
+<command>gambit-nfg-logit</command> [OPTIONS] < file.nfg
+</para>
+</refsect1>
+
+<refsect1>
+<title>CAVEATS</title>
+<para>
+This program does not (yet) detect bifurcations of the correspondence
+in non-generic games.
+</para>
+</refsect1>
+
+<refsect1>
+<title>BUGS</title>
+<para>
+None known.
+</para>
+</refsect1>
+
+<refsect1>
+<title>AUTHOR</title>
+<para>
+<author>
+<firstname>Theodore</firstname>
+<surname>Turocy</surname>
+<contrib>Original author</contrib>
+</author>
+</para>
+</refsect1>
+</refentry>
+

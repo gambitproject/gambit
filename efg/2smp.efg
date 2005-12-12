@@ -1,4 +1,4 @@
-EFG 2 R "Two-stage matching pennies game" { "Player1" "Player2" }
+EFG 2 R "Two-stage matching pennies game" { "Player 1" "Player 2" }
 ""
 
 p "" 1 1 "" { "H" "T" } 0

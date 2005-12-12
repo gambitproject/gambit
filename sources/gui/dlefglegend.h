@@ -27,24 +27,22 @@
 #ifndef DLEFGLEGEND_H
 #define DLEFGLEGEND_H
 
-#include "prefs.h"
+#include "style.h"
 
-class dialogLegend : public wxDialog {
+class gbtLegendDialog : public wxDialog {
 private:
-  wxRadioBox *m_nodeAbove, *m_nodeBelow, *m_outcome;
-  wxRadioBox *m_branchAbove, *m_branchBelow;
+  wxChoice *m_nodeAbove, *m_nodeBelow, *m_actionAbove, *m_actionBelow;
 
 public:
   // Lifecycle
-  dialogLegend(wxWindow *, const gbtPreferences &);
+  gbtLegendDialog(wxWindow *, const gbtStyle &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   int GetNodeAbove(void) const { return m_nodeAbove->GetSelection(); }
   int GetNodeBelow(void) const { return m_nodeBelow->GetSelection(); }
-  int GetOutcome(void) const { return m_outcome->GetSelection(); }
 
-  int GetBranchAbove(void) const { return m_branchAbove->GetSelection(); }
-  int GetBranchBelow(void) const { return m_branchBelow->GetSelection(); }
+  int GetBranchAbove(void) const { return m_actionAbove->GetSelection(); }
+  int GetBranchBelow(void) const { return m_actionBelow->GetSelection(); }
 };
 
 #endif // DLEFGLEGEND_H

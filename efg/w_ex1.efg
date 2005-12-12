@@ -1,7 +1,7 @@
 EFG 2 R "Wilson's ex1" { "Player 1" "Player 2" }
 ""
 
-p "ROOT" 1 1 "(1,1)" { "Out" "2" } 0
+p "" 1 1 "(1,1)" { "Out" "2" } 0
 t "" 1 "Outcome 1" { 2, 2 }
 p "" 1 2 "(1,2)" { "A" "B" } 0
 p "" 2 1 "(2,1)" { "a" "b" } 0

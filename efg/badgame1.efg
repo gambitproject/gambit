@@ -1,10 +1,10 @@
-EFG 2 R "Agent Nash not Player Nash" { "" "" }
+EFG 2 R "Agent Nash not Player Nash" { "Player 1" "Player 2" }
 ""
 
-p "" 1 1 "" { "" "" } 0
+p "" 1 1 "" { "A" "B" } 0
 t "" 1 "" { 2, 0 }
-p "" 1 2 "" { "" "" } 0
+p "" 1 2 "" { "X" "Y" } 0
 t "" 2 "" { 1, 0 }
-p "" 2 1 "" { "" "" } 0
+p "" 2 1 "" { "a" "b" } 0
 t "" 3 "" { 100, 100 }
 t "" 4 "" { 0, 0 }

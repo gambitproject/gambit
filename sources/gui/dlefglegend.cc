@@ -24,80 +24,111 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
 
 #include "dlefglegend.h"
 
 
 //==========================================================================
-//                 class dialogLegend: Implementation
+//                 class gbtLegendDialog: Implementation
 //==========================================================================
 
-dialogLegend::dialogLegend(wxWindow *p_parent, const gbtPreferences &p_prefs)
-  : wxDialog(p_parent, -1, _("Legends"), wxDefaultPosition)
+gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
+			   const gbtStyle &p_options)	
+  : wxDialog(p_parent, -1, _("Labels"), wxDefaultPosition)
 {
   wxStaticBoxSizer *nodeGroup = 
-    new wxStaticBoxSizer(new wxStaticBox(this, -1, _("Node Labeling")),
-			 wxHORIZONTAL);
+    new wxStaticBoxSizer(new wxStaticBox(this, -1, _("Node labeling")),
+			 wxVERTICAL);
 
-  wxString nodeLabelList[] = { _("Blank"), _("Node label"), _("Player"),
-			       _("Information set label"),
-			       _("Information set number"),
-			       _("Outcome"), _("Realization probability"), 
-			       _("Belief probability"),
-			       _("Node value") };
+  wxString nodeLabelList[] = { _("no label"), 
+			       _("the node's label"), 
+			       _("the player's name"),
+			       _("the information set's label"),
+			       _("the information set's number"),
+			       _("the realization probability"),
+			       _("the belief probability"),
+			       _("the payoff of reaching the node") };
 
-  m_nodeAbove = new wxRadioBox(this, -1, _("Above Node"),
-			       wxDefaultPosition, wxDefaultSize,
-			       9, nodeLabelList, 1, wxRA_SPECIFY_COLS);
-  m_nodeAbove->SetSelection(p_prefs.NodeAboveLabel());
-  nodeGroup->Add(m_nodeAbove, 0, wxALL, 5);
-
-  m_nodeBelow = new wxRadioBox(this, -1, _("Below Node"),
-			       wxDefaultPosition, wxDefaultSize,
-			       9, nodeLabelList, 1, wxRA_SPECIFY_COLS);
-  m_nodeBelow->SetSelection(p_prefs.NodeBelowLabel());
-  nodeGroup->Add(m_nodeBelow, 0, wxALL, 5);
-
-  wxString nodeAfterList[] = { _("Payoffs"), _("Outcome name") };
-  m_outcome = new wxRadioBox(this, -1, _("Outcome"),
+  wxBoxSizer *nodeAboveSizer = new wxBoxSizer(wxHORIZONTAL);
+  nodeAboveSizer->Add(new wxStaticText(this, wxID_STATIC,
+				       _("Display")),
+		      0, wxALL | wxALIGN_CENTER, 5);
+  m_nodeAbove = new wxChoice(this, -1,
 			     wxDefaultPosition, wxDefaultSize,
-			     2, nodeAfterList, 1, wxRA_SPECIFY_COLS);
-  m_outcome->SetSelection(p_prefs.OutcomeLabel());
-  nodeGroup->Add(m_outcome, 0, wxALL, 5);
+			     8, nodeLabelList);
+  m_nodeAbove->SetSelection(p_options.NodeAboveLabel());
+  nodeAboveSizer->Add(m_nodeAbove, 1, wxALL | wxALIGN_CENTER, 5);
+  nodeAboveSizer->Add(new wxStaticText(this, wxID_STATIC,
+				       _("above each node")),
+		      0, wxALL | wxALIGN_CENTER, 5);
+  nodeGroup->Add(nodeAboveSizer, 0, wxALL | wxEXPAND, 5);
 
-  wxStaticBoxSizer *branchGroup =
-    new wxStaticBoxSizer(new wxStaticBox(this, -1, _("Branch Labelling")),
-			 wxHORIZONTAL);
+  wxBoxSizer *nodeBelowSizer = new wxBoxSizer(wxHORIZONTAL);
+  nodeBelowSizer->Add(new wxStaticText(this, wxID_STATIC,
+				       _("Display")),
+		      0, wxALL | wxALIGN_CENTER, 5);
+  m_nodeBelow = new wxChoice(this, -1,
+			     wxDefaultPosition, wxDefaultSize,
+			     8, nodeLabelList);
+  m_nodeBelow->SetSelection(p_options.NodeBelowLabel());
+  nodeBelowSizer->Add(m_nodeBelow, 1, wxALL | wxALIGN_CENTER, 5);
+  nodeBelowSizer->Add(new wxStaticText(this, wxID_STATIC,
+				       _("below each node")),
+		      0, wxALL | wxALIGN_CENTER, 5);
+  nodeGroup->Add(nodeBelowSizer, 0, wxALL | wxEXPAND, 5);
 
-  wxString branchLabelList[] = { _("Blank"), _("Action label"),
-				 _("Action probability"), _("Action value") };
-  m_branchAbove = new wxRadioBox(this, -1, _("Above Branch"),
+
+  wxStaticBoxSizer *actionGroup = 
+    new wxStaticBoxSizer(new wxStaticBox(this, -1, _("Action labeling")),
+			 wxVERTICAL);
+
+  wxString actionLabelList[] = { _("no label"), 
+				 _("the name of the action"),
+				 _("the probability the action is played"), 
+				 _("the value of the action") };
+
+  wxBoxSizer *actionAboveSizer = new wxBoxSizer(wxHORIZONTAL);
+  actionAboveSizer->Add(new wxStaticText(this, wxID_STATIC,
+					 _("Display")),
+		      0, wxALL | wxALIGN_CENTER, 5);
+  m_actionAbove = new wxChoice(this, -1,
 			       wxDefaultPosition, wxDefaultSize,
-			       5, branchLabelList, 1, wxRA_SPECIFY_COLS);
-  m_branchAbove->SetSelection(p_prefs.BranchAboveLabel());
-  branchGroup->Add(m_branchAbove, 0, wxALL, 5);
+			       4, actionLabelList);
+  m_actionAbove->SetSelection(p_options.BranchAboveLabel());
+  actionAboveSizer->Add(m_actionAbove, 1, wxALL | wxALIGN_CENTER, 5);
+  actionAboveSizer->Add(new wxStaticText(this, wxID_STATIC,
+					 _("above each action")),
+		      0, wxALL | wxALIGN_CENTER, 5);
+  actionGroup->Add(actionAboveSizer, 0, wxALL | wxEXPAND, 5);
 
-  m_branchBelow = new wxRadioBox(this, -1, _("Below Branch"),
-				 wxDefaultPosition, wxDefaultSize,
-				 5, branchLabelList, 1, wxRA_SPECIFY_COLS);
-  m_branchBelow->SetSelection(p_prefs.BranchBelowLabel());
-  branchGroup->Add(m_branchBelow, 0, wxALL, 5);
+  wxBoxSizer *actionBelowSizer = new wxBoxSizer(wxHORIZONTAL);
+  actionBelowSizer->Add(new wxStaticText(this, wxID_STATIC,
+					 _("Display")),
+		      0, wxALL | wxALIGN_CENTER, 5);
+  m_actionBelow = new wxChoice(this, -1,
+			       wxDefaultPosition, wxDefaultSize,
+			       4, actionLabelList);
+  m_actionBelow->SetSelection(p_options.BranchBelowLabel());
+  actionBelowSizer->Add(m_actionBelow, 1, wxALL | wxALIGN_CENTER, 5);
+  actionBelowSizer->Add(new wxStaticText(this, wxID_STATIC,
+					 _("below each action")),
+		      0, wxALL | wxALIGN_CENTER, 5);
+  actionGroup->Add(actionBelowSizer, 0, wxALL | wxEXPAND, 5);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(nodeGroup, 0, wxCENTER | wxALL, 5);
-  topSizer->Add(branchGroup, 0, wxCENTER | wxALL, 5);
+  topSizer->Add(nodeGroup, 0, wxEXPAND | wxALL, 5);
+  topSizer->Add(actionGroup, 0, wxEXPAND | wxALL, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
   wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
-  topSizer->Add(buttonSizer, 0, wxCENTER | wxALL, 5);
+  topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);
 
   SetSizer(topSizer);
   topSizer->Fit(this);

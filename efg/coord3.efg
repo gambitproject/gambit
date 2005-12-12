@@ -1,7 +1,7 @@
 EFG 2 R "Two person 3 x 3 coordination problem with 7 Nash equilibria" { "Player 1" "Player 2" }
 ""
 
-p "ROOT" 1 1 "(1,1)" { "A" "B" "C" } 0
+p "" 1 1 "(1,1)" { "A" "B" "C" } 0
 p "" 2 1 "(2,1)" { "A" "B" "C" } 0
 t "" 1 "Outcome 1" { 3, 2 }
 t "" 2 "Outcome 4" { 0, 0 }

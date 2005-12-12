@@ -1,3 +1,14 @@
-NFG 1 R "2 x 2 constant sum game with unique mixed equilibrium" { "1" "2" } { 2 2 }
+NFG 1 R "2 x 2 constant sum game with unique mixed equilibrium" { "Player 1" "Player 2" }
 
-2 0 0 2 0 2 1 1 
+{ { "1" "2" }
+{ "1" "2" }
+}
+""
+
+{
+{ "" 2, 0 }
+{ "" 0, 2 }
+{ "" 0, 2 }
+{ "" 1, 1 }
+}
+1 2 3 4 

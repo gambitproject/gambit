@@ -1,4 +1,4 @@
-NFG 1 R "Game with no dominated pure strategies but with dominated Nash equilibria" { "1" "2" }
+NFG 1 R "Game with no dominated pure strategies but with dominated Nash equilibria" { "Player 1" "Player 2" }
 
 { { "1" "2" "3" }
 { "1" "2" "3" }

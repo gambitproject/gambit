@@ -27,18 +27,19 @@
 #ifndef DLEFGREVEAL_H
 #define DLEFGREVEAL_H
 
-class dialogInfosetReveal : public wxDialog {
+#include "gamedoc.h"
+
+class gbtRevealMoveDialog : public wxDialog {
 private:
-  gbtGame m_efg;
-  wxCheckBox **m_players;
+  gbtGameDocument *m_doc;
+  gbtArray<wxCheckBox *> m_players;
 
 public:
   // Lifecycle
-  dialogInfosetReveal(wxWindow *, const gbtGame &);
-  virtual ~dialogInfosetReveal();
+  gbtRevealMoveDialog(wxWindow *, gbtGameDocument *);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  bool IsPlayerSelected(int p_id) const;
+  gbtArray<gbtEfgPlayer *> GetPlayers(void) const;
 };
 
 #endif  // DLEFGREVEAL_H

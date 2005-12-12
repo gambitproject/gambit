@@ -1,4 +1,4 @@
-EFG 2 R "Game from van Winden" { "1" "2" }
+EFG 2 R "Game from van Winden" { "Player 1" "Player 2" }
 ""
 
 c "" 1 "(0,1)" { "White" 2/3 "Black" 1/3 } 0

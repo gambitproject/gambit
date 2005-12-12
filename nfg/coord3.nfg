@@ -1,3 +1,19 @@
-NFG 1 R "3x3 coordination game with 7 Nash equilibria" { "1" "2" } { 3 3 }
+NFG 1 R "3x3 coordination game with 7 Nash equilibria" { "Player 1" "Player 2" }
 
-3 2 0 0 0 0 0 0 2 2 0 0 0 0 0 0 1 4 
+{ { "1" "2" "3" }
+{ "1" "2" "3" }
+}
+""
+
+{
+{ "" 3, 2 }
+{ "" 0, 0 }
+{ "" 0, 0 }
+{ "" 0, 0 }
+{ "" 2, 2 }
+{ "" 0, 0 }
+{ "" 0, 0 }
+{ "" 0, 0 }
+{ "" 1, 4 }
+}
+1 2 3 4 5 6 7 8 9 

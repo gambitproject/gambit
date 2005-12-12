@@ -1,7 +1,14 @@
-NFG 1 R "Two person Prisoner's Dilemma game" { "1" "2" }
+NFG 1 R "Two person Prisoner's Dilemma game" { "Player 1" "Player 2" }
 
 { { "1" "2" }
 { "1" "2" }
 }
+""
 
-9 9 10 0 0 10 1 1 
+{
+{ "" 9, 9 }
+{ "" 10, 0 }
+{ "" 0, 10 }
+{ "" 1, 1 }
+}
+1 2 3 4 

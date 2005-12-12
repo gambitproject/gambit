@@ -1,19 +1,19 @@
 -*-text-*-
 
-This is Gambit, a project dedicated to tools and methods for
-computation in game theory.
+This is Gambit, an Open Source software project dedicated to developing and
+providing tools and methods for computation in game theory.
 
 Contacting Gambit:
 ------------------
 
 The Gambit developers can be reached at
-gambit (at) econweb (dot) tamu (dot) edu, or individually at email 
+gambit (at) econmail (dot) tamu (dot) edu, or individually at email 
 addresses listed below.
 
 The surface mail contact address for Gambit is
 
 The Gambit Project
-c/o Prof. Theodore Turocy
+c/o Theodore Turocy
 Department of Economics
 Texas A&M University
 4228 TAMU
@@ -26,11 +26,12 @@ Richard D. McKelvey
 Andrew M. McLennan -- mclennan (at) icarus (dot) socsci (dot) umn (dot) edu
 Theodore L. Turocy -- arbiter (at) econ (dot) tamu (dot) edu
 
-A complete list of contributors to Gambit can be found
-in the History and Acknowledgements section of the
-manual.
 
-In particular, please note the following:
+Other sources of code in this distribution:
+-------------------------------------------
+
+Gambit incorporates portions of other software packages in this distribution.
+These are acknowledged individually below.
 
 Pelican:
 --------
@@ -58,4 +59,36 @@ the copyright statement:
 Copyright (C) 1996, 1997, 1998, 1999, 2000 Fabrice Rossi
 
 These files have been modified only to port them from C to C++ and
-to use the gbtFunction class.
+to use the gFunction class.
+
+Clique determination:
+---------------------
+The gambit-nfg-enummixed program incorporates the code of 
+Bernhard von Stengel to determine the connectedness of components of
+Nash equilibria.  (BvS has also contributed numerous other improvements
+and fixes to other areas of Gambit.)
+
+
+wxSheet classes:
+----------------
+The graphical interface makes significant use of the wxSheet classes for
+wxWidgets, which are Copyright (C) 2004-5 by John Labenski, and distributed
+under the wxWidgets license.  The version included here is the version
+dated 20 July 2005; see http://wxcode.sourceforge.net for details on these
+classes.
+
+
+TinyXML parser:
+---------------
+The graphical interface reads and writes files in XML format.  The parsing
+is done using the TinyXml package from http://www.grinninglizard.com/tinyxml,
+and is distributed under the zlib license.  These are the files named
+tiny* in the sources/gui directory of the distribution.
+
+
+
+
+
+
+
+

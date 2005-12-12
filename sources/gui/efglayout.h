@@ -27,19 +27,21 @@
 #ifndef EFGLAYOUT_H
 #define EFGLAYOUT_H
 
-#include "game/game.h"
+#include "libgambit/libgambit.h"
+#include "style.h"
 #include "gamedoc.h"
 
-class gbtEfgLayoutNode {
+class gbtNodeEntry {
 private:
-  gbtGameNode m_node;        // the corresponding node in the game
-  gbtEfgLayoutNode *m_parent; // parent node
+  gbtEfgNode *m_node;        // the corresponding node in the game
+  gbtNodeEntry *m_parent; // parent node
   int m_x, m_y;        // Cartesian coordinates of node
-  gbtEfgLayoutNode *m_nextMember;  // entry of next information set member 
+  gbtNodeEntry *m_nextMember;  // entry of next information set member 
   bool m_inSupport;    // true if node reachable in current support
-  bool m_cut;         // true if node is in a 'cut' subtree
-  bool m_subgameRoot, m_subgameMarked;
   int m_size;         // horizontal size of the node
+  mutable wxRect m_outcomeRect;
+  mutable gbtArray<wxRect> m_payoffRect;
+  mutable wxRect m_branchAboveRect, m_branchBelowRect;
   int m_token;        // token to draw for node
   wxColour m_color;   // color of node
 
@@ -51,27 +53,29 @@ private:
   int m_sublevel;     // # of the infoset line on this level
   gbtNumber m_actionProb;  // probability incoming action is taken
 
-  wxString m_nodeAboveLabel, m_nodeBelowLabel, m_nodeRightLabel;
+  wxString m_nodeAboveLabel, m_nodeBelowLabel;
   wxString m_branchAboveLabel, m_branchBelowLabel;
 
-  wxFont m_nodeAboveFont, m_nodeBelowFont, m_nodeRightFont;
+  wxFont m_nodeAboveFont, m_nodeBelowFont;
   wxFont m_branchAboveFont, m_branchBelowFont;
 
+  gbtStyle *m_style;
+
 public:
-  gbtEfgLayoutNode(gbtGameNode p_parent);
+  gbtNodeEntry(gbtEfgNode *p_parent);
 
-  gbtGameNode GetNode(void) const { return m_node; }
+  gbtEfgNode *GetNode(void) const { return m_node; }
 
-  gbtEfgLayoutNode *GetParent(void) const { return m_parent; }
-  void SetParent(gbtEfgLayoutNode *p_parent) { m_parent = p_parent; }
+  gbtNodeEntry *GetParent(void) const { return m_parent; }
+  void SetParent(gbtNodeEntry *p_parent) { m_parent = p_parent; }
 
   int X(void) const { return m_x; }
   void SetX(int p_x) { m_x = p_x; }
   int Y(void) const { return m_y; }
   void SetY(int p_y) { m_y = p_y; }
 
-  gbtEfgLayoutNode *GetNextMember(void) const { return m_nextMember; }
-  void SetNextMember(gbtEfgLayoutNode *p_member) { m_nextMember = p_member; }
+  gbtNodeEntry *GetNextMember(void) const { return m_nextMember; }
+  void SetNextMember(gbtNodeEntry *p_member) { m_nextMember = p_member; }
 
   bool InSupport(void) const { return m_inSupport; }
   void SetInSupport(bool p_inSupport) { m_inSupport = p_inSupport; }
@@ -81,12 +85,6 @@ public:
   const wxColour &GetColor(void) const { return m_color; }
   void SetColor(const wxColour &p_color) { m_color = p_color; }
 
-  bool IsCut(void) const { return m_cut; }
-  void SetCut(bool p_cut) { m_cut = p_cut; }
-
-  bool IsSubgameRoot(void) const { return m_subgameRoot; }
-  void SetSubgameRoot(bool p_root) { m_subgameRoot = p_root; }
-  
   int GetSize(void) const { return m_size; }
   void SetSize(int p_size) { m_size = p_size; }
 
@@ -116,10 +114,6 @@ public:
   void SetNodeBelowLabel(const wxString &p_label)
     { m_nodeBelowLabel = p_label; }
 
-  const wxString &GetNodeRightLabel(void) const { return m_nodeRightLabel; }
-  void SetNodeRightLabel(const wxString &p_label)
-    { m_nodeRightLabel = p_label; }
-
   const wxString &GetBranchAboveLabel(void) const 
     { return m_branchAboveLabel; }
   void SetBranchAboveLabel(const wxString &p_label)
@@ -136,9 +130,6 @@ public:
   const wxFont &GetNodeBelowFont(void) const { return m_nodeBelowFont; }
   void SetNodeBelowFont(const wxFont &p_font) { m_nodeBelowFont = p_font; }
 
-  const wxFont &GetNodeRightFont(void) const { return m_nodeRightFont; }
-  void SetNodeRightFont(const wxFont &p_font) { m_nodeRightFont = p_font; }
-
   const wxFont &GetBranchAboveFont(void) const { return m_branchAboveFont; }
   void SetBranchAboveFont(const wxFont &p_font) { m_branchAboveFont = p_font; }
 
@@ -148,67 +139,83 @@ public:
   const gbtNumber &GetActionProb(void) const { return m_actionProb; }
   void SetActionProb(const gbtNumber &p_prob) { m_actionProb = p_prob; }
 
-  bool NodeHitTest(int p_x, int p_y) const;
+  void SetStyle(gbtStyle *p_style) { m_style = p_style; }
 
-  void Draw(wxDC &, bool p_selected) const;
+  bool NodeHitTest(int p_x, int p_y) const;
+  bool OutcomeHitTest(int p_x, int p_y) const
+  { return (m_outcomeRect.Inside(p_x, p_y)); }
+  bool BranchAboveHitTest(int p_x, int p_y) const
+  { return (m_branchAboveRect.Inside(p_x, p_y)); }
+  bool BranchBelowHitTest(int p_x, int p_y) const
+  { return (m_branchBelowRect.Inside(p_x, p_y)); }
+
+  const wxRect &GetOutcomeExtent(void) const { return m_outcomeRect; }
+  const wxRect &GetPayoffExtent(int pl) const { return m_payoffRect[pl]; }
+
+  void Draw(wxDC &, gbtEfgNode *selection, bool p_noHints) const;
   void DrawIncomingBranch(wxDC &) const;
+  void DrawOutcome(wxDC &, bool p_noHints) const;
 };
 
-class gbtTreeView;
+class gbtEfgDisplay;
 
-class gbtEfgLayout {
+class gbtTreeLayout : public gbtGameView {
 private:
-  gbtGameDocument *m_doc;
-  gbtList<gbtEfgLayoutNode *> m_nodeList;
-  int m_maxX, m_maxY, m_maxLevel;
+  gbtEfgDisplay *m_parent;
+  gbtArray<gbtNodeEntry *> m_nodeList;
+  mutable int m_maxX, m_maxY, m_maxLevel;
   int m_infosetSpacing;
 
   const int c_leftMargin, c_topMargin;
 
-  gbtEfgLayoutNode *GetEntry(const gbtGameNode &) const;
+  gbtNodeEntry *GetEntry(gbtEfgNode *) const;
 
-  gbtEfgLayoutNode *NextInfoset(gbtEfgLayoutNode *);
-  void CheckInfosetEntry(gbtEfgLayoutNode *);
+  gbtNodeEntry *NextInfoset(gbtNodeEntry *);
+  void CheckInfosetEntry(gbtNodeEntry *);
 
-  void BuildNodeList(const gbtGameNode &, const gbtEfgSupport &, 
-		     gbtEfgLayoutNode *, int);
+  void BuildNodeList(gbtEfgNode *, const gbtEfgSupport &, int);
 
-  int LayoutSubtree(const gbtGameNode &, const gbtEfgSupport &,
-		    int &, int &, int &);
-  void FillInfosetTable(const gbtGameNode &, const gbtEfgSupport &);
+  int LayoutSubtree(gbtEfgNode *, const gbtEfgSupport &, int &, int &, int &);
+  void FillInfosetTable(gbtEfgNode *, const gbtEfgSupport &);
   void UpdateTableInfosets(void);
+  void UpdateTableParents(void);
 
-  wxString CreateNodeLabel(const gbtEfgLayoutNode *, int) const;
-  wxString CreateOutcomeLabel(const gbtEfgLayoutNode *) const;
-  wxString CreateBranchLabel(const gbtEfgLayoutNode *, int) const;
+  wxString CreateNodeLabel(const gbtNodeEntry *, int) const;
+  wxString CreateBranchLabel(const gbtNodeEntry *, int) const;
 
-  void RenderSubtree(wxDC &dc) const;
+  void RenderSubtree(wxDC &dc, bool p_noHints) const;
+
+  // Overriding gbtGameView members
+  void OnUpdate(void) { }
 
 public:
-  gbtEfgLayout(gbtGameDocument *p_doc);
-  virtual ~gbtEfgLayout() { }
+  gbtTreeLayout(gbtEfgDisplay *p_parent, gbtGameDocument *p_doc);
+  virtual ~gbtTreeLayout() { }
 
-  gbtGameNode PriorSameLevel(const gbtGameNode &) const;
-  gbtGameNode NextSameLevel(const gbtGameNode &) const;
+  gbtEfgNode *PriorSameLevel(gbtEfgNode *) const;
+  gbtEfgNode *NextSameLevel(gbtEfgNode *) const;
 
   void BuildNodeList(const gbtEfgSupport &);
   void Layout(const gbtEfgSupport &);
   void GenerateLabels(void);
 
-  void SetCutNode(const gbtGameNode &);
-
   // The following member functions are for temporary compatibility only
-  gbtEfgLayoutNode *GetNodeEntry(const gbtGameNode &p_node) const
+  gbtNodeEntry *GetNodeEntry(gbtEfgNode *p_node) const
     { return GetEntry(p_node); }
+  gbtNodeEntry *GetValidParent(gbtEfgNode *);
+  gbtNodeEntry *GetValidChild(gbtEfgNode *);
 
   int MaxX(void) const { return m_maxX; }
   int MaxY(void) const { return m_maxY; }
 
-  gbtGameNode NodeHitTest(int, int) const;
-  gbtGameNode BranchHitTest(int, int) const;
-  gbtGameNode InfosetHitTest(int, int) const;
+  gbtEfgNode *NodeHitTest(int, int) const;
+  gbtEfgNode *OutcomeHitTest(int, int) const;
+  gbtEfgNode *BranchAboveHitTest(int, int) const;
+  gbtEfgNode *BranchBelowHitTest(int, int) const;
+  gbtEfgNode *InfosetHitTest(int, int) const;
 
-  void Render(wxDC &) const;
+  void Render(wxDC &, bool p_noHints) const;
 };
 
 #endif  // EFGLAYOUT_H
+

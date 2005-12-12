@@ -27,19 +27,23 @@
 #ifndef DLEFGLAYOUT_H
 #define DLEFGLAYOUT_H
 
-#include "wx/notebook.h"
-#include "prefs.h"
+#include <wx/notebook.h>
+#include "style.h"
 
-class dialogLayout : public wxDialog {
+class gbtLayoutDialog : public wxDialog {
 private:
+  bool m_toDefaults;
   wxNotebook *m_notebook;
+
+  // Event handlers
+  void OnSetDefaults(wxCommandEvent &);
 
 public:
   // Lifecycle
-  dialogLayout(wxWindow *p_parent, const gbtPreferences &);
+  gbtLayoutDialog(wxWindow *p_parent, const gbtStyle &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  void GetPreferences(gbtPreferences &);
+  void GetSettings(gbtStyle &);
 };
 
 #endif  // DLEFGLAYOUT_H

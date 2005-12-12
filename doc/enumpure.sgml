@@ -1,0 +1,204 @@
+<refentry id="utils.nash.efg.enumpure">
+<refentryinfo>
+<date>2006-07-11</date>
+</refentryinfo>
+<refmeta>
+<refentrytitle>
+<application>gambit-efg-enumpure</application>
+</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo>Gambit 1.0</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>
+<application>gambit-efg-enumpure</application>
+</refname>
+<refpurpose>
+Searches for pure-strategy Nash equilibria in an
+extensive game.
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<refsynopsisdivinfo>
+<date>2006-07-11</date>
+</refsynopsisdivinfo>
+<cmdsynopsis>
+<command>gambit-efg-enumpure</command>
+<arg><option>-h</option></arg>
+<arg><option>-q</option></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<refsect1info>
+<date>2006-07-11</date>
+</refsect1info>
+<title>DESCRIPTION</title>
+<para>
+<command>gambit-efg-enumpure</command> reads an extensive game
+on standard input and searches for pure-strategy
+Nash equilibria.
+</para>
+</refsect1>
+
+<refsect1>
+<title>OPTIONS</title>
+<variablelist>
+<varlistentry>
+<term><option>-h</option></term>
+<listitem>
+<para>
+Prints a help message listing the available options.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-q</option></term>
+<listitem>
+<para>
+Suppresses printing of the banner at program launch.
+</para>
+</listitem>
+</varlistentry>
+</variablelist>
+</refsect1>
+
+<refsect1>
+<title>USAGE</title>
+<para>
+<command>gambit-efg-enumpure</command> [OPTIONS] < file.efg
+</para>
+</refsect1>
+
+<refsect1>
+<title>CAVEATS</title>
+<para>
+Not all games have Nash equilibria in pure strategies.
+</para>
+</refsect1>
+
+<refsect1>
+<title>BUGS</title>
+<para>
+None known.
+</para>
+</refsect1>
+
+<refsect1>
+<title>AUTHOR</title>
+<para>
+<author>
+<firstname>Theodore</firstname>
+<surname>Turocy</surname>
+<contrib>Original author</contrib>
+</author>
+</para>
+</refsect1>
+</refentry>
+
+
+<refentry id="utils.nash.nfg.enumpure">
+<refentryinfo>
+<date>2006-07-11</date>
+</refentryinfo>
+<refmeta>
+<refentrytitle>
+<application>gambit-nfg-enumpure</application>
+</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo>Gambit 1.0</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>
+<application>gambit-nfg-enumpure</application>
+</refname>
+<refpurpose>
+Searches for pure-strategy Nash equilibria in a
+strategic game.
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<refsynopsisdivinfo>
+<date>2006-07-11</date>
+</refsynopsisdivinfo>
+<cmdsynopsis>
+<command>gambit-nfg-enumpure</command>
+<arg><option>-h</option></arg>
+<arg><option>-q</option></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<refsect1info>
+<date>2006-07-11</date>
+</refsect1info>
+<title>DESCRIPTION</title>
+<para>
+<command>gambit-nfg-enumpure</command> reads a strategic game
+on standard input and searches for pure-strategy
+Nash equilibria.
+</para>
+</refsect1>
+
+<refsect1>
+<title>OPTIONS</title>
+<variablelist>
+<varlistentry>
+<term><option>-h</option></term>
+<listitem>
+<para>
+Prints a help message listing the available options.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-q</option></term>
+<listitem>
+<para>
+Suppresses printing of the banner at program launch.
+</para>
+</listitem>
+</varlistentry>
+</variablelist>
+</refsect1>
+
+<refsect1>
+<title>USAGE</title>
+<para>
+<command>gambit-nfg-enumpure</command> [OPTIONS] < file.nfg
+</para>
+</refsect1>
+
+<refsect1>
+<title>CAVEATS</title>
+<para>
+Not all games have Nash equilibria in pure strategies.
+</para>
+</refsect1>
+
+<refsect1>
+<title>BUGS</title>
+<para>
+None known.
+</para>
+</refsect1>
+
+<refsect1>
+<title>AUTHOR</title>
+<para>
+<author>
+<firstname>Theodore</firstname>
+<surname>Turocy</surname>
+<contrib>Original author</contrib>
+</author>
+</para>
+</refsect1>
+
+</refentry>
+

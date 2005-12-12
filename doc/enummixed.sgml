@@ -1,0 +1,131 @@
+<refentry id="nash.nfg.enummixed">
+<refentryinfo>
+<date>2005-08-15</date>
+</refentryinfo>
+
+<refmeta>
+<refentrytitle>
+<application>gambit-nfg-enummixed</application>
+</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo>Gambit 1.0</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>
+<application>gambit-nfg-enummixed</application>
+</refname>
+<refpurpose>
+Computes Nash equilibria in a two-player strategic game using extreme
+point enumeration
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<refsynopsisdivinfo>
+<date>2005-08-15</date>
+</refsynopsisdivinfo>
+<cmdsynopsis>
+<command>gambit-nfg-enummixed</command>
+<arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
+<arg><option>-h</option></arg>
+<arg><option>-q</option></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<refsect1info>
+<date>2005-08-15</date>
+</refsect1info>
+<title>DESCRIPTION</title>
+<para>
+<command>gambit-nfg-enummixed</command> reads a two-player strategic
+game on standard input and computes Nash equilibria 
+using extreme point enumeration.
+</para>
+
+<para>
+This program searches for all Nash equilibria in a two-player strategic
+game by enumerating all possible extreme points of the convex components
+of Nash equilibria.  These extreme points are exactly those that could
+in principle be visited by the path-following procedure of
+Lemke and Howson; however, the enumeration method visits all such points
+(whereas some points are not accessible via the method of Lemke and Howson).
+</para>
+
+<para>
+In general, the set of Nash equilibria in a two-player strategic game can
+be expressed as the union of convex sets.  The equilibrium profiles generated
+by this program are the extreme points of those convex sets.
+</para>
+
+</refsect1>
+
+<refsect1>
+<title>OPTIONS</title>
+<variablelist>
+<varlistentry>
+<term><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></term>
+<listitem>
+<para>
+By default, this program computes using exact rational arithmetic.  Since
+the extreme points computed by this method are guaranteed to be rational
+when the payoffs in the game are rational, this permits exact computation
+of the equilibrium set.  Computation using rational arithmetic is in
+general slow, however.  For most games, acceptable results can be obtained
+by computing using the computer's native floating-point arithmetic.
+Using this flag enables computation in floating-point, and
+expresses all output using decimal representations with 
+<replaceable class="parameter">DECIMALS</replaceable> digits.  
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-h</option></term>
+<listitem>
+<para>
+Prints a help message listing the available options.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-q</option></term>
+<listitem>
+<para>
+Suppresses printing of the banner at program launch.
+</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect1>
+
+<refsect1>
+<title>USAGE</title>
+<para>
+<command>gambit-nfg-enummixed</command> [OPTIONS] < file.nfg
+</para>
+</refsect1>
+
+<refsect1>
+<title>BUGS</title>
+<para>
+This program does not currently output any information to indicate if
+and where connected components of equilibria exist.
+</para>
+</refsect1>
+
+<refsect1>
+<title>AUTHOR</title>
+<para>
+<author>
+<firstname>Theodore</firstname>
+<surname>Turocy</surname>
+<contrib>Original author</contrib>
+</author>
+</para>
+</refsect1>
+</refentry>
+

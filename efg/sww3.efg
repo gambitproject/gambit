@@ -1,7 +1,7 @@
 EFG 2 R "Schotter-Weigelt-Wilson (GEB 94), Fig 3" { "Player 1" "Player 2" }
 ""
 
-p "ROOT" 1 1 "(1,1)" { "R" "L" } 0
+p "" 1 1 "(1,1)" { "R" "L" } 0
 p "" 2 1 "(2,1)" { "R" "L" } 0
 p "" 1 2 "(1,2)" { "T" "B" } 0
 p "" 2 2 "(2,2)" { "T" "B" } 0

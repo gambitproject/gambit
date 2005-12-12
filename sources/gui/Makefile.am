@@ -1,111 +1,89 @@
 ## Process this file with automake to create Makefile.in
 
+SUBDIRS = bitmaps
+
 bin_PROGRAMS = gambit
 
-AM_CPPFLAGS = $(WX_CXXFLAGS) -I$(top_srcdir)/sources
+AM_CPPFLAGS = -I$(top_srcdir)/sources ${WX_CXXFLAGS}
 
 gambit_SOURCES = \
-	corplot.cc \
-	corplot.h \
+	analysis.cc \
+	analysis.h \
+	ctrlplay.cc \
+	ctrlplay.h \
+	edittext.cc edittext.h \
 	dlabout.cc \
 	dlabout.h \
-	dlch.cc \
-	dlch.h \
-	dleditbehav.cc \
-	dleditbehav.h \
-	dleditcont.cc \
-	dleditcont.h \
-	dleditgame.cc \
-	dleditgame.h \
-	dleditmixed.cc \
-	dleditmixed.h \
 	dleditmove.cc \
 	dleditmove.h \
 	dleditnode.cc \
 	dleditnode.h \
-	dlefgcolor.cc \
-	dlefgcolor.h \
-	dlefgdelete.cc \
-	dlefgdelete.h \
 	dlefglayout.cc \
 	dlefglayout.h \
 	dlefglegend.cc \
 	dlefglegend.h \
-	dlefgnash.cc \
-	dlefgnash.h \
+	dlefglogit.cc \
+	dlefglogit.h \
 	dlefgreveal.cc \
 	dlefgreveal.h \
-	dlelimbehav.cc \
-	dlelimbehav.h \
-	dlelimmixed.cc \
-	dlelimmixed.h \
+	dlgameprop.cc \
+	dlgameprop.h \
 	dlinsertmove.cc \
 	dlinsertmove.h \
-	dlnewgame.cc \
-	dlnewgame.h \
-	dlnfgnash.cc \
-	dlnfgnash.h \
-	dlnfgqre.cc \
-	dlnfgqre.h \
-	dlnfgstrategies.cc \
-	dlnfgstrategies.h \
-	dlqrefile.cc \
-	dlqrefile.h \
-	dlreport.cc \
-	dlreport.h \
-	dlspinctrl.cc \
-	dlspinctrl.h \
+	dlnash.cc \
+	dlnash.h \
+	dlnashmon.cc \
+	dlnashmon.h \
+	dlnfglogit.cc \
+	dlnfglogit.h \
+	efgdisplay.cc \
+	efgdisplay.h \
 	efglayout.cc \
 	efglayout.h \
-	efgnavigate.cc \
-	efgnavigate.h \
-	efgprint.cc \
-	efgprint.h \
-	efgshow.cc \
-	efgshow.h \
-	efgsupport.cc \
-	efgsupport.h \
+	efgpanel.cc \
+	efgpanel.h \
+	efgprofile.cc \
+	efgprofile.h \
 	gambit.cc \
 	gambit.h \
 	gamedoc.cc \
 	gamedoc.h \
-	id.h \
-	nfgnavigate.cc \
-	nfgnavigate.h \
-	nfgprint.cc \
-	nfgprint.h \
-	nfgshow.cc \
-	nfgshow.h \
-	nfgsupport.cc \
-	nfgsupport.h \
+	gameframe.cc \
+	gameframe.h \
+	menuconst.h \
+	nfgpanel.cc \
+	nfgpanel.h \
+	nfgprofile.cc \
+	nfgprofile.h \
 	nfgtable.cc \
 	nfgtable.h \
-	numberedit.cc \
-	numberedit.h \
-	outcomes.cc \
-	outcomes.h \
-	prefs.cc \
-	prefs.h \
-	profile.cc \
-	profile.h \
-	support.cc \
-	support.h \
-	treewin.cc \
-	treewin.h \
+	renratio.cc \
+	renratio.h \
+	subsolve.cc \
+	subsolve.h \
+	style.cc \
+	style.h \
 	valnumber.cc \
 	valnumber.h \
-	wxstatus.cc \
-	wxstatus.h 
+	sheetatr.cc sheetatr.h \
+	sheet.cc sheet.h \
+	sheetedg.cc sheetedg.h \
+	sheetedt.cc sheetedt.h \
+	sheetren.cc sheetren.h \
+	sheetsel.cc sheetsel.h \
+	sheetspt.cc sheetspt.h \
+	sheettbl.cc sheettbl.h \
+	sheetval.cc sheetval.h \
+	pairarr.h sheetdef.h srtobjar.h wx24defs.h \
+	tinyxml.cc \
+	tinyxml.h \
+	tinyxmlerror.cc \
+	tinyxmlparser.cc
+
 
 gambit_LDADD = \
-        $(GUI_LIBS) \
-	$(top_builddir)/sources/nash/libnash.a \
-	$(top_builddir)/sources/game/libgame.a \
-	$(top_builddir)/sources/poly/libpoly.a \
-	$(top_builddir)/sources/pelican/libpelican.a \
-	$(top_builddir)/sources/numerical/libnumerical.a \
-	$(top_builddir)/sources/math/libmath.a \
-	$(top_builddir)/sources/base/libbase.a
+        $(RC_OBJECT_PATH) $(WX_LIBS) \
+	$(top_builddir)/sources/libgambit/libgambit.la
 
-EXTRA_DIST = borland.mak gambit.rc
+
 

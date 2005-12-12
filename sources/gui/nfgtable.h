@@ -4,7 +4,10 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Panel to display normal form games in tabular format
+// Declaration of control to display/edit strategic game tables
+//
+// This file is part of Gambit
+// Copyright (c) 2005, The Gambit Project
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,44 +27,121 @@
 #ifndef NFGTABLE_H
 #define NFGTABLE_H
 
-#include "wx/grid.h"
+class gbtGameDocument;
+class gbtNfgPanel;
 
-class gbtNfgTable : public wxGrid, public gbtGameView {
+//!
+//! This is a panel which manages three wxSheet instances: one which
+//! contains the payoffs of the strategic form, and two which handle
+//! the display of row and column labels
+//!
+class gbtTableWidget : public wxPanel {
 private:
-  bool m_editable;
-  int m_showProb, m_showDom, m_showValue;
+  gbtGameDocument *m_doc;
+  gbtNfgPanel *m_nfgPanel;
+  wxSheet *m_payoffSheet, *m_rowSheet, *m_colSheet;
 
-  // Event handlers
-  void OnLeftClick(wxGridEvent &);
-  void OnLeftDoubleClick(wxGridEvent &);
-  void OnLabelLeftClick(wxGridEvent &);
+  gbtArray<int> m_rowPlayers, m_colPlayers;
 
-  // Overriding view members
-  bool IsEfgView(void) const { return false; }
-  bool IsNfgView(void) const { return true; }
-  void OnUpdate(gbtGameView *);
+  /// @name Event handlers
+  //@{
+  /// Called when row label sheet is scrolled
+  void OnRowSheetScroll(wxSheetEvent &);
+  /// Called when column label sheet is scrolled
+  void OnColSheetScroll(wxSheetEvent &);
+  /// Called when payoff sheet is scrolled
+  void OnPayoffScroll(wxSheetEvent &);
+
+  /// Called when row label sheet row is resized
+  void OnRowSheetRow(wxSheetEvent &);
+  /// Called when payoff sheet row is resized
+  void OnPayoffRow(wxSheetEvent &);
+
+  /// Called when col label sheet column is resized
+  void OnColSheetColumn(wxSheetEvent &);
+  /// Called when payoff sheet column is resized
+  void OnPayoffColumn(wxSheetEvent &);
+
+  /// Called when row label sheet column is resized
+  void OnRowSheetColumn(wxSheetEvent &);
+  /// Called when column label sheet row is resized
+  void OnColSheetRow(wxSheetEvent &);
+
+  /// Called when editing begins in any cell
+  void OnBeginEdit(wxSheetEvent &);
+  //@}
 
 public:
-  gbtNfgTable(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~gbtNfgTable() { }
+  gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id,
+		 gbtGameDocument *p_doc);
 
-  void ToggleProbs(void);
-  int ShowProbs(void) const { return m_showProb; }
-  void ToggleDominance(void);
-  int ShowDominance(void) const { return m_showDom; }
-  void ToggleValues(void);
-  int ShowValues(void) const { return m_showValue; }
+  /// @name Coordination of sheets
+  //@{
+  /// Scroll row and column label sheets
+  void SetGridOrigin(int x, int y);
 
-  bool IsEditable(void) const { return m_editable; }
-  void SetEditable(bool p_editable) { m_editable = p_editable; }
+  /// Synchronize with document state
+  void OnUpdate(void);
 
-  DECLARE_EVENT_TABLE()
+  /// Post any pending edits
+  void PostPendingChanges(void);
+
+  /// Are we showing dominance indicators or not?
+  bool ShowDominance(void) const;
+  //@}
+
+  /// @name View state
+  //@{
+  /// Returns the number of players assigned to the rows
+  int NumRowPlayers(void) const { return m_rowPlayers.Length(); }
+
+  /// Returns the index'th player assigned to the rows (1=slowest incrementing)
+  int GetRowPlayer(int index) const { return m_rowPlayers[index]; }
+
+  /// Sets the index'th row player (1=slowest, n+1=fastest)
+  void SetRowPlayer(int index, int pl);
+
+  /// Returns the number of row contingencies (i.e., rows in the table)
+  int NumRowContingencies(void) const;
+
+  /// Returns the number of rows spanned by strategy of row player index
+  int NumRowsSpanned(int index) const;
+
+  /// Returns the strategy index for row player 'player' corresponding to 'row'
+  int RowToStrategy(int player, int row) const;
+
+  /// Returns the number of players assigned to the columns
+  int NumColPlayers(void) const { return m_colPlayers.Length(); }
+
+  /// Returns the index'th player assigned to the columns (1=slowest)
+  int GetColPlayer(int index) const { return m_colPlayers[index]; }
+
+  /// Sets the index'th column player (1=slowest, n+1=fastest)
+  void SetColPlayer(int index, int pl);
+
+  /// Returns the number of column contingencies 
+  /// (Note that each column contingency corresponds to #players cols!)
+  int NumColContingencies(void) const;
+
+  /// Returns the number of columns spanned by strategy of column player index
+  int NumColsSpanned(int index) const;
+
+  /// Returns the strategy index for row player 'player' corresponding to 'row'
+  int ColToStrategy(int player, int row) const;
+
+  /// Returns the strategy profile corresponding to a cell
+  gbtStrategyProfile CellToProfile(const wxSheetCoords &) const;
+  //@}
+
+  /// @name Exporting/printing graphics
+  //@{
+  /// Creates a printout object of the game as currently displayed
+  wxPrintout *GetPrintout(void);
+  /// Creates a bitmap of the game as currently displayed
+  wxBitmap GetBitmap(int marginX, int marginY);
+  /// Prints the game as currently displayed, centered on the DC
+  void RenderGame(wxDC &p_dc, int marginX, int marginY);
+  //@}
 };
 
 #endif  // NFGTABLE_H
-
-
-
-
-
-

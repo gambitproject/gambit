@@ -24,159 +24,93 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
+#include "libgambit/libgambit.h"
 #include "dlinsertmove.h"
 
 //=========================================================================
-//                class gbtCmdInsertMove: Implementation
+//                   gbtInsertMoveDialog: Member functions
 //=========================================================================
 
-class gbtCmdInsertMove : public gbtGameCommand {
-private:
-  int m_playerNumber, m_actions;
-
-public:
-  gbtCmdInsertMove(int p_playerNumber, int p_actions)
-    : m_playerNumber(p_playerNumber), m_actions(p_actions) { }
-  virtual ~gbtCmdInsertMove() { }
-
-  void Do(gbtGameDocument *);
-
-  bool ModifiesGame(void) const { return true; }
-  bool ModifiesPayoffs(void) const { return false; }
-};
-  
-
-void gbtCmdInsertMove::Do(gbtGameDocument *p_doc)
-{
-  gbtGamePlayer player;
-
-  if (m_playerNumber == 0) {
-    player = p_doc->GetGame()->GetChance();
-  }
-  else if (m_playerNumber <= p_doc->GetGame()->NumPlayers()) {
-    player = p_doc->GetGame()->GetPlayer(m_playerNumber);
-  }
-  else {
-    gbtGamePlayer player = p_doc->GetGame()->NewPlayer();
-    player->SetLabel("Player " + ToText(p_doc->GetGame()->NumPlayers()));
-  }
-
-  p_doc->GetCursor()->InsertMove(player->NewInfoset(m_actions));
-}
-
-//=========================================================================
-//             class gbtCmdInsertMoveInfoset: Implementation
-//=========================================================================
-
-class gbtCmdInsertMoveInfoset : public gbtGameCommand {
-private:
-  int m_playerNumber, m_infosetNumber;
-
-public:
-  gbtCmdInsertMoveInfoset(int p_playerNumber, int p_infosetNumber)
-    : m_playerNumber(p_playerNumber), m_infosetNumber(p_infosetNumber) { }
-  virtual ~gbtCmdInsertMoveInfoset() { }
-
-  void Do(gbtGameDocument *);
-  
-  bool ModifiesGame(void) const { return true; }
-  bool ModifiesPayoffs(void) const { return false; }
-};
-  
-
-void gbtCmdInsertMoveInfoset::Do(gbtGameDocument *p_doc)
-{
-  gbtGamePlayer player;
-
-  if (m_playerNumber == 0) {
-    player = p_doc->GetGame()->GetChance();
-  }
-  else if (m_playerNumber <= p_doc->GetGame()->NumPlayers()) {
-    player = p_doc->GetGame()->GetPlayer(m_playerNumber);
-  }
-  else {
-    gbtGamePlayer player = p_doc->GetGame()->NewPlayer();
-    player->SetLabel("Player " + ToText(p_doc->GetGame()->NumPlayers()));
-  }
-
-  p_doc->GetCursor()->InsertMove(player->GetInfoset(m_infosetNumber));
-}
-
-//=========================================================================
-//                   dialogInsertMove: Member functions
-//=========================================================================
-
-const int idMOVE_PLAYER_LISTBOX = 1000;
-const int idMOVE_INFOSET_LISTBOX = 1001;
-
-BEGIN_EVENT_TABLE(dialogInsertMove, wxDialog)
-  EVT_LISTBOX(idMOVE_PLAYER_LISTBOX, dialogInsertMove::OnPlayer)
-  EVT_LISTBOX(idMOVE_INFOSET_LISTBOX, dialogInsertMove::OnInfoset)
-END_EVENT_TABLE()
-
-dialogInsertMove::dialogInsertMove(wxWindow *p_parent, 
-				   gbtGameDocument *p_doc)
+gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent, 
+					 gbtGameDocument *p_doc)
   : wxDialog(p_parent, -1, _("Insert Move"), wxDefaultPosition), m_doc(p_doc)
 {
-  m_playerItem = new wxListBox(this, idMOVE_PLAYER_LISTBOX);
-  m_playerItem->Append(_("Chance"));
-  for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
-    m_playerItem->Append(wxString::Format(wxT("%s"),
-					  (char *)
-					  (ToText(pl) + ": " + m_doc->GetGame()->GetPlayer(pl)->GetLabel())));
+  m_playerItem = new wxChoice(this, -1);
+  m_playerItem->Append(_("Insert move for the chance player"));
+  for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+    wxString s = _("Insert move for ");
+    gbtEfgPlayer *player = m_doc->GetEfg()->GetPlayer(pl);
+    if (player->GetLabel() != "") {
+      s += wxString(player->GetLabel().c_str(), *wxConvCurrent);
+    }
+    else {
+      s += wxString::Format(_("player %d"), pl);
+    }
+    m_playerItem->Append(s);
   }
-  m_playerItem->Append(_("New Player"));
+  m_playerItem->Append(_("Insert move for a new player"));
   m_playerItem->SetSelection(1);
+  Connect(m_playerItem->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
+	  wxCommandEventHandler(gbtInsertMoveDialog::OnPlayer));
 
-  m_infosetItem = new wxListBox(this, idMOVE_INFOSET_LISTBOX);
-  m_infosetItem->Append(_("New"));
-  gbtGamePlayer player = p_doc->GetGame()->GetPlayer(1);
+  m_infosetItem = new wxChoice(this, -1);
+  m_infosetItem->Append(_("at a new information set"));
+  gbtEfgPlayer *player = m_doc->GetEfg()->GetPlayer(1);
   for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-    m_infosetItem->Append(wxString::Format(wxT("%s"),
-					   (char *) (ToText(iset) + ": " +
-						     player->GetInfoset(iset)->GetLabel())));
+    wxString s = _("at information set ");
+    gbtEfgInfoset *infoset = player->GetInfoset(iset);
+    if (infoset->GetLabel() != "") {
+      s += wxString(infoset->GetLabel().c_str(), *wxConvCurrent);
+    }
+    else {
+      s += wxString::Format(wxT("%d"), iset);
+    }
+
+    s += wxString::Format(wxT(" (%d action"), infoset->NumActions());
+    if (infoset->NumActions() > 1) {
+      s += wxT("s");
+    }
+
+    s += wxString::Format(wxT(", %d member node"), infoset->NumMembers());
+    if (infoset->NumMembers() > 1) {
+      s += wxT("s)");
+    }
+    else {
+      s += wxT(")");
+    }
+    m_infosetItem->Append(s);
   }
   m_infosetItem->SetSelection(0);
-
-  wxBoxSizer *playerSizer = new wxBoxSizer(wxVERTICAL);
-  playerSizer->Add(new wxStaticText(this, -1, _("Player")), 0, wxALL, 5);
-  playerSizer->Add(m_playerItem, 0, wxEXPAND | wxALL, 5);
-
-  wxBoxSizer *infosetSizer = new wxBoxSizer(wxVERTICAL);
-  infosetSizer->Add(new wxStaticText(this, -1, _("Information set")),
-		    0, wxALL, 5);
-  infosetSizer->Add(m_infosetItem, 0, wxEXPAND | wxALL, 5);
-
-  wxBoxSizer *playerInfosetSizer = new wxBoxSizer(wxHORIZONTAL);
-  playerInfosetSizer->Add(playerSizer, 1, wxALL, 5);
-  playerInfosetSizer->Add(infosetSizer, 1, wxALL, 5);
+  Connect(m_infosetItem->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
+	  wxCommandEventHandler(gbtInsertMoveDialog::OnInfoset));
 
   wxBoxSizer *actionSizer = new wxBoxSizer(wxHORIZONTAL);
-  actionSizer->Add(new wxStaticText(this, -1, _("Number of actions")),
-		   0, wxALL, 5);
-  m_actions = new wxSpinCtrl(this, -1, wxT("2"),
+  actionSizer->Add(new wxStaticText(this, wxID_STATIC, _("with")),
+		   0, wxALL | wxALIGN_CENTER, 5);
+  m_actions = new wxSpinCtrl(this, -1, _T("2"),
 			     wxDefaultPosition, wxDefaultSize,
 			     wxSP_ARROW_KEYS, 1, 10000, 2);
   m_actions->Enable(m_infosetItem->GetSelection() == 0);
   actionSizer->Add(m_actions, 0, wxALL, 5);
+  actionSizer->Add(new wxStaticText(this, wxID_STATIC, _("actions")),
+		   0, wxALL | wxALIGN_CENTER, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
   wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(playerInfosetSizer, 0, wxALL | wxCENTER, 5);
-  topSizer->Add(actionSizer, 0, wxALL | wxCENTER, 5);
-  topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(m_playerItem, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5);
+  topSizer->Add(m_infosetItem, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5);
+  topSizer->Add(actionSizer, 0, wxALL | wxALIGN_CENTER, 5);
+  topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);
   
-  SetAutoLayout(true);
   SetSizer(topSizer); 
   topSizer->Fit(this);
   topSizer->SetSizeHints(this); 
@@ -184,59 +118,110 @@ dialogInsertMove::dialogInsertMove(wxWindow *p_parent,
   CenterOnParent();
 }
 
-void dialogInsertMove::OnPlayer(wxCommandEvent &)
+void gbtInsertMoveDialog::OnPlayer(wxCommandEvent &)
 {
   int playerNumber = m_playerItem->GetSelection(); 
 
-  gbtGamePlayer player;
+  gbtEfgPlayer *player = 0;
   if (playerNumber == 0)
-    player = m_doc->GetGame()->GetChance();
-  else if (playerNumber <= m_doc->GetGame()->NumPlayers())
-    player = m_doc->GetGame()->GetPlayer(playerNumber);
+    player = m_doc->GetEfg()->GetChance();
+  else if (playerNumber <= m_doc->NumPlayers())
+    player = m_doc->GetEfg()->GetPlayer(playerNumber);
 
   m_infosetItem->Clear();
-  m_infosetItem->Append(_("New"));
-  if (!player.IsNull()) {
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      m_infosetItem->Append(wxString::Format(wxT("%s"),
-					     (char *) (ToText(iset) + ": " +
-						       player->GetInfoset(iset)->GetLabel())));
-    }
+  m_infosetItem->Append(_("at a new information set"));
+
+  if (!player) {
+    m_infosetItem->SetSelection(0);
+    m_actions->Enable(true);
+    return;
   }
+
+  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+    wxString s = _("at information set ");
+    gbtEfgInfoset *infoset = player->GetInfoset(iset);
+    if (infoset->GetLabel() != "") {
+      s += wxString(infoset->GetLabel().c_str(), *wxConvCurrent);
+    }
+    else {
+      s += wxString::Format(wxT("%d"), iset);
+    }
+
+    s += wxString::Format(wxT(" (%d action"), infoset->NumActions());
+    if (infoset->NumActions() > 1) {
+      s += wxT("s");
+    }
+
+    s += wxString::Format(wxT(", %d member node"), infoset->NumMembers());
+    if (infoset->NumMembers() > 1) {
+      s += wxT("s)");
+    }
+    else {
+      s += wxT(")");
+    }
+    m_infosetItem->Append(s);
+  }
+
   m_infosetItem->SetSelection(0);
-  m_actions->SetValue(2);
   m_actions->Enable(true);
 }
 
-void dialogInsertMove::OnInfoset(wxCommandEvent &)
+void gbtInsertMoveDialog::OnInfoset(wxCommandEvent &)
 {
   int infosetNumber = m_infosetItem->GetSelection();
 
   if (infosetNumber > 0) {
     int playerNumber = m_playerItem->GetSelection();
-    gbtGameInfoset infoset;
+    gbtEfgInfoset *infoset;
     if (playerNumber == 0)
-      infoset = m_doc->GetGame()->GetChance()->GetInfoset(infosetNumber);
+      infoset = m_doc->GetEfg()->GetChance()->GetInfoset(infosetNumber);
     else
-      infoset = m_doc->GetGame()->GetPlayer(playerNumber)->GetInfoset(infosetNumber);
+      infoset = m_doc->GetEfg()->GetPlayer(playerNumber)->GetInfoset(infosetNumber);
     m_actions->Enable(false);
     m_actions->SetValue(infoset->NumActions());
   }
   else {
     m_actions->Enable(true);
-    m_actions->SetValue(2);
   }
 }
 
-gbtGameCommand *dialogInsertMove::GetCommand(void) const
+gbtEfgPlayer *gbtInsertMoveDialog::GetPlayer(void) const
 {
   int playerNumber = m_playerItem->GetSelection();
-  int infosetNumber = m_infosetItem->GetSelection();
 
-  if (infosetNumber > 0) {
-    return new gbtCmdInsertMoveInfoset(playerNumber, infosetNumber);
+  if (playerNumber == 0) {
+    return m_doc->GetEfg()->GetChance();
+  }
+  else if (playerNumber <= m_doc->NumPlayers()) {
+    return m_doc->GetEfg()->GetPlayer(playerNumber);
   }
   else {
-    return new gbtCmdInsertMove(playerNumber, m_actions->GetValue());
+    gbtEfgPlayer *player = m_doc->GetEfg()->NewPlayer();
+    player->SetLabel("Player " + ToText(m_doc->NumPlayers()));
+    return player;
   }
 }
+
+gbtEfgInfoset *gbtInsertMoveDialog::GetInfoset(void) const
+{
+  if (m_playerItem->GetSelection() <= m_doc->NumPlayers()) {
+    gbtEfgPlayer *player = GetPlayer();
+    int infosetNumber = m_infosetItem->GetSelection();
+    
+    if (player && infosetNumber > 0) {
+      return player->GetInfoset(infosetNumber);
+    }
+    else {
+      return 0;
+    }
+  }
+  else {
+    return 0;
+  }
+}
+
+int gbtInsertMoveDialog::GetActions(void) const
+{
+  return ((GetInfoset()) ? GetInfoset()->NumActions() : m_actions->GetValue());
+}
+

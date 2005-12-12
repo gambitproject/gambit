@@ -29,19 +29,19 @@
 
 class dialogEditNode : public wxDialog {
 private:
-  gbtGameNode m_node;
+  gbtEfgNode *m_node;
   wxTextCtrl *m_nodeName;
   wxChoice *m_outcome, *m_infoset;
-  gbtBlock<gbtGameInfoset> m_infosetList;
+  gbtArray<gbtEfgInfoset *> m_infosetList;
 
 public:
   // Lifecycle
-  dialogEditNode(wxWindow *p_parent, gbtGame p_game, gbtGameNode p_node);
+  dialogEditNode(wxWindow *p_parent, gbtEfgNode *p_node);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetNodeName(void) const { return m_nodeName->GetValue(); }
   int GetOutcome(void) const { return m_outcome->GetSelection(); }
-  gbtGameInfoset GetInfoset(void) const;
+  gbtEfgInfoset *GetInfoset(void) const;
 };
 
 #endif   // DLEDITNODE_H

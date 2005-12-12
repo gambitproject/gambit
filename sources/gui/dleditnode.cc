@@ -28,15 +28,14 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
-#include "game/game.h"
+#include "libgambit/libgambit.h"
 #include "dleditnode.h"
 
 //======================================================================
 //                      class dialogEditNode
 //======================================================================
 
-dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtGame p_game,
-			       gbtGameNode p_node)
+dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode *p_node)
   : wxDialog(p_parent, -1, _("Node properties"), wxDefaultPosition), 
     m_node(p_node)
 {
@@ -47,9 +46,8 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtGame p_game,
   wxBoxSizer *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Node label")),
 		  0, wxALL | wxCENTER, 5);
-  m_nodeName = new wxTextCtrl(this, -1,
-			      wxString::Format(wxT("%s"),
-					       (const char *) m_node->GetLabel()));
+  m_nodeName = new wxTextCtrl(this, -1, 
+			      wxString(m_node->GetLabel().c_str(), *wxConvCurrent));
   labelSizer->Add(m_nodeName, 1, wxALL | wxCENTER | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 5);
 
@@ -59,23 +57,40 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtGame p_game,
   m_infoset = new wxChoice(this, -1);
   if (p_node->NumChildren() > 0) {
     m_infoset->Append(_("New information set"));
-    int selection = 0;
-    for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      for (gbtGameInfosetIterator infoset(p_game->GetPlayer(pl));
-	   !infoset.End(); infoset++) {
-	if (!(*infoset)->IsChanceInfoset() &&
-	    (*infoset)->NumActions() == p_node->NumChildren()) {
-	  m_infosetList.Append(*infoset);
-	  m_infoset->Append(wxString::Format(wxT("Player %d, Infoset %d"),
-					     (*infoset)->GetPlayer()->GetId(),
-					     (*infoset)->GetId()));
-	  if (*infoset == p_node->GetInfoset()) {
-	    selection = m_infoset->GetCount() - 1;
+    if (p_node->GetInfoset()->IsChanceInfoset()) {
+      int selection = 0;
+      for (int iset = 1; iset <= p_node->GetGame()->GetChance()->NumInfosets();
+	   iset++) {
+	gbtEfgInfoset *infoset = p_node->GetGame()->GetChance()->GetInfoset(iset);
+	if (infoset->NumActions() == p_node->NumChildren()) {
+	  m_infosetList.Append(infoset);
+	  m_infoset->Append(wxString::Format(_("Chance infoset %d"),
+					     infoset->GetNumber()));
+	  if (infoset == p_node->GetInfoset()) {
+	    selection = m_infosetList.Length();
 	  }
 	}
       }
+      m_infoset->SetSelection(selection);
     }
-    m_infoset->SetSelection(selection);
+    else {
+      int selection = 0;
+      for (int pl = 1; pl <= p_node->GetGame()->NumPlayers(); pl++) {
+	gbtEfgPlayer *player = p_node->GetGame()->GetPlayer(pl);
+	for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	  gbtEfgInfoset *infoset = player->GetInfoset(iset);
+	  if (infoset->NumActions() == p_node->NumChildren()) {
+	    m_infosetList.Append(infoset);
+	    m_infoset->Append(wxString::Format(_("Player %d, Infoset %d"),
+					       pl, iset));
+	    if (infoset == p_node->GetInfoset()) {
+	      selection = m_infosetList.Length();
+	    }
+	  }
+	}
+      }
+      m_infoset->SetSelection(selection);
+    }
   }
   else {
     m_infoset->Append(_("(none)"));
@@ -86,7 +101,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtGame p_game,
   topSizer->Add(infosetSizer, 0, wxALL | wxEXPAND, 5);
 
   wxBoxSizer *subgameSizer = new wxBoxSizer(wxVERTICAL);
-  if (p_node->GetParent().IsNull()) {
+  if (!p_node->GetParent()) {
     subgameSizer->Add(new wxStaticText(this, wxID_STATIC,
 				       _("This is the root node of the tree")),
 		      0, wxALL | wxCENTER, 5);
@@ -104,18 +119,20 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtGame p_game,
   m_outcome = new wxChoice(this, -1);
   m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
-  for (int outc = 1; outc <= p_game->NumOutcomes(); outc++) {
-    gbtGameOutcome outcome = p_game->GetOutcome(outc);
-    gbtText item = ToText(outc) + ": " + outcome->GetLabel();
+  const gbtEfgGame &efg = *p_node->GetGame();
+  for (int outc = 1; outc <= efg.NumOutcomes(); outc++) {
+    gbtEfgOutcome *outcome = efg.GetOutcome(outc);
+    std::string item = ToText(outc) + ": " + outcome->GetLabel();
     if (item == "") {
-      item = gbtText("Outcome") + ToText(outc);
+      item = "Outcome" + ToText(outc);
     }
 
-    item += (" (" + ToText(outcome->GetPayoff(p_game->GetPlayer(1))) + ", " +
-	     ToText(outcome->GetPayoff(p_game->GetPlayer(2))));
-    if (p_game->NumPlayers() > 2) {
-      item += ", " + ToText(outcome->GetPayoff(p_game->GetPlayer(3)));
-      if (p_game->NumPlayers() > 3) {
+    item += (" (" + 
+	     ToText(outcome->GetPayoff(1)) + ", " +
+	     ToText(outcome->GetPayoff(2)));
+    if (efg.NumPlayers() > 2) {
+      item += ", " + ToText(outcome->GetPayoff(3));
+      if (efg.NumPlayers() > 3) {
 	item += ",...)";
       }
       else {
@@ -126,7 +143,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtGame p_game,
       item += ")";
     }
 
-    m_outcome->Append(wxString::Format(wxT("%s"), (const char *) item));
+    m_outcome->Append(wxString(item.c_str(), *wxConvCurrent));
     if (m_node->GetOutcome() == outcome) {
       m_outcome->SetSelection(outc);
     }
@@ -135,12 +152,11 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtGame p_game,
   topSizer->Add(outcomeSizer, 0, wxALL | wxEXPAND, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
   wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
-  topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -150,7 +166,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtGame p_game,
   CenterOnParent();
 }
 
-gbtGameInfoset dialogEditNode::GetInfoset(void) const
+gbtEfgInfoset *dialogEditNode::GetInfoset(void) const
 {
   if (m_infoset->GetSelection() == 0) {
     return 0;

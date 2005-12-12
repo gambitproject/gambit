@@ -1,7 +1,7 @@
 EFG 2 R "Game from Tim Feddersen" { "Player 1" "Player 2" }
 ""
 
-c "ROOT" 1 "(0,1)" { "o_1 = 1" 0.490000 "o_1 = 0" 0.510000 } 0
+c "" 1 "(0,1)" { "o_1 = 1" 0.490000 "o_1 = 0" 0.510000 } 0
 p "" 1 1 "(1,1)" { "Specialize" "Not" } 0
 p "" 1 2 "(1,2)" { "Hearing" "No Hearing" } 1 "Outcome 5" { -1/100, 0 }
 c "" 2 "(0,2)" { "o_2 = 1" 0.600000 "o_2 = 0" 0.400000 } 0

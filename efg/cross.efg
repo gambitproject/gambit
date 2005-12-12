@@ -1,4 +1,5 @@
-EFG 2 D "Criss-crossing infosets" { "1" "2" }
+EFG 2 R "Criss-crossing infosets" { "Player 1" "Player 2" }
+""
 
 p "ROOT" 1 1 "" { "1" "2" } 0
 p "" 2 1 "" { "1" "2" } 0

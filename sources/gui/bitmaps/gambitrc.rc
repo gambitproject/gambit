@@ -1,0 +1,8 @@
+
+#include <wx/msw/wx.rc>
+
+
+gambit_icn ICON "gambit.ico"
+efg_icn    ICON "efg.ico"
+nfg_icn    ICON "nfg.ico"
+gambit     BITMAP "gambit.bmp"

@@ -27,13 +27,10 @@
 #ifndef DLABOUT_H
 #define DLABOUT_H
 
-#include "wx/wx.h"
-
-class dialogAbout : public wxDialog {
+class gbtAboutDialog : public wxDialog {
 public:
-  dialogAbout(wxWindow *p_parent, const wxString &p_title,
-	      const wxString &p_programName, const wxString &p_versionString);
-  virtual ~dialogAbout() { }
+  gbtAboutDialog(wxWindow *p_parent);
+  virtual ~gbtAboutDialog() { }
 };
 
 #endif  // DLABOUT_H

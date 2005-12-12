@@ -1,4 +1,4 @@
-EFG 2 R "UNTITLED" { "Player1" "Player2" "Player3" }
+EFG 2 R "Jury game, unanimous vote required" { "Player 1" "Player 2" "Player 3" }
 ""
 
 c "" 1 "" { "Guilty" 1/2 "Innocent" 1/2 } 0

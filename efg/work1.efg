@@ -1,7 +1,7 @@
 EFG 2 R "Employer - Employee problem, one stage" { "Player 1" "Player 2" }
 ""
 
-c "ROOT" 1 "(0,1)" { "HW" 1/2 "L" 1/2 } 0
+c "" 1 "(0,1)" { "HW" 1/2 "L" 1/2 } 0
 p "" 1 1 "(1,1)" { "F" "H" } 0
 t "" 1 "Outcome 1" { 0, 0 }
 p "" 2 1 "(2,1)" { "Q" "W" } 2 "Outcome 2" { -2, 2 }

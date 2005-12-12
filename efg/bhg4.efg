@@ -1,7 +1,7 @@
 EFG 2 R "Brandts-Holt, IJGT 93, Game 4" { "Player 1" "Player 2" }
 ""
 
-c "ROOT" 1 "(0,1)" { "Type A" 1/2 "Type B" 1/2 } 0
+c "" 1 "(0,1)" { "Type A" 1/2 "Type B" 1/2 } 0
 p "" 1 1 "(1,1)" { "N" "S" } 0
 p "" 2 1 "(2,1)" { "C" "D" "E" } 0
 t "" 1 "Outcome 1" { 30, 30 }

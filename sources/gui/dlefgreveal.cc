@@ -29,55 +29,52 @@
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
 
-#include "game/game.h"
+#include "libgambit/libgambit.h"
 #include "dlefgreveal.h"
 
 
 //=========================================================================
-//                  dialogInfosetReveal: Member functions
+//                  gbtRevealMoveDialog: Member functions
 //=========================================================================
 
-dialogInfosetReveal::dialogInfosetReveal(wxWindow *p_parent,
-					 const gbtGame &p_efg)
-  : wxDialog(p_parent, -1, _("Reveal move"), wxDefaultPosition), m_efg(p_efg)
+gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent,
+					 gbtGameDocument *p_doc)
+  : wxDialog(p_parent, -1, _("Reveal this move to players"), 
+	     wxDefaultPosition), 
+    m_doc(p_doc)
 {
-  SetAutoLayout(true);
-
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
   wxStaticBoxSizer *playerBox =
-    new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC,
-					 _("Reveal to players")),
-			 wxHORIZONTAL);
+    new wxStaticBoxSizer(wxHORIZONTAL, this, 
+			 _("Reveal the move to players"));
 
-  wxFlexGridSizer *gridSizer = new wxFlexGridSizer(wxVERTICAL,
-						   (m_efg->NumPlayers() <= 2) ?
-						   2 : 3);
-  m_players = new wxCheckBox *[m_efg->NumPlayers()];
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    gbtGamePlayer player = m_efg->GetPlayer(pl);
+  wxBoxSizer *boxSizer = new wxBoxSizer(wxVERTICAL);	
+
+  for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+    gbtEfgPlayer *player = m_doc->GetEfg()->GetPlayer(pl);
     if (player->GetLabel() != "") {
-      m_players[pl-1] = new wxCheckBox(this, -1,
-				       wxString::Format(wxT("%s"),
-							(char *) player->GetLabel()));
+      m_players.Append(new wxCheckBox(this, -1, 
+				      wxString(player->GetLabel().c_str(),
+					       *wxConvCurrent)));
     }
     else {
-      m_players[pl-1] = new wxCheckBox(this, -1, 
-				       wxString::Format(_("Player %d"), pl));
+      m_players.Append(new wxCheckBox(this, -1, 
+				      wxString::Format(_T("Player %d"), pl)));
     }
-    m_players[pl-1]->SetValue(1);
-    gridSizer->Add(m_players[pl-1], 1, wxALL | wxEXPAND, 0);
+    m_players[pl]->SetValue(1);
+    m_players[pl]->SetForegroundColour(m_doc->GetStyle().GetPlayerColor(pl));
+    boxSizer->Add(m_players[pl], 1, wxALL | wxEXPAND, 0);
   }
-  playerBox->Add(gridSizer, 1, wxALL, 5);
-  topSizer->Add(playerBox, 1, wxALL | wxCENTER, 5);
+  playerBox->Add(boxSizer, 1, wxALL | wxEXPAND, 5);
+  topSizer->Add(playerBox, 1, wxALL | wxEXPAND, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
   wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
-  topSizer->Add(buttonSizer, 0, wxCENTER | wxALL, 5);
+  topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -86,12 +83,15 @@ dialogInfosetReveal::dialogInfosetReveal(wxWindow *p_parent,
   CenterOnParent();
 }
 
-dialogInfosetReveal::~dialogInfosetReveal()
+gbtArray<gbtEfgPlayer *> gbtRevealMoveDialog::GetPlayers(void) const
 {
-  delete [] m_players;
-}
+  gbtArray<gbtEfgPlayer *> players;
 
-bool dialogInfosetReveal::IsPlayerSelected(int p_index) const
-{
-  return m_players[p_index-1]->GetValue();
+  for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+    if (m_players[pl]->GetValue()) {
+      players.Append(m_doc->GetEfg()->GetPlayer(pl));
+    }
+  }
+
+  return players;
 }

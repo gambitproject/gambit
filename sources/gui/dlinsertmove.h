@@ -27,14 +27,14 @@
 #ifndef DLINSERTMOVE_H
 #define DLINSERTMOVE_H
 
-#include "wx/spinctrl.h"
+#include <wx/spinctrl.h>
 #include "gamedoc.h"
 
-class dialogInsertMove : public wxDialog {
+class gbtInsertMoveDialog : public wxDialog {
 private:
   gbtGameDocument *m_doc;
 
-  wxListBox *m_playerItem, *m_infosetItem;
+  wxChoice *m_playerItem, *m_infosetItem;
   wxSpinCtrl *m_actions;
 
   void OnPlayer(wxCommandEvent &);
@@ -42,17 +42,16 @@ private:
 
 public:
   // Constructor
-  dialogInsertMove(wxWindow *, gbtGameDocument *);
+  gbtInsertMoveDialog(wxWindow *, gbtGameDocument *);
 
   // Data access (only valid if ShowModal() returns wxID_OK.
-  gbtGameCommand *GetCommand(void) const;
-
-  DECLARE_EVENT_TABLE()
+  // If GetInfoset() returns null, user selected "new infoset"
+  gbtEfgPlayer *GetPlayer(void) const;
+  gbtEfgInfoset *GetInfoset(void) const;
+  int GetActions(void) const;
 };
 
-
-
-#endif  // DLMOVEADD_H
+#endif  // DLINSERTMOVE_H
 
 
 

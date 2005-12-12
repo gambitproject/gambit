@@ -1,0 +1,1544 @@
+<chapter id="gui">
+<title>The graphical interface</title>
+<para>
+The most visible component of Gambit, especially for the new user,
+is the graphical user interface.  This program is an
+&quot;integrated development environment&quot; to help visually
+construct games and to investigate their strategic features.
+</para>
+
+<para>
+The graphical interface is largely intended for the interactive
+construction and analysis of small to medium games.  Repeating the
+caution from the introduction of this manual, the computation time
+required for the equilibrium analysis of games increases rapidly in the
+size of the game.  The graphical interface is ideal for
+students learning about the fundamentals of game theory, or for
+practitioners prototyping games of interest.  In graduating to larger
+applications, users are encouraged to make use of the underlying
+Gambit libraries and programs directly.  More details on Gambit's
+command-line tools for analyzing games are available in
+<xref linkend="utils">.
+</para>
+
+<sect1>
+<title>Getting started: Tutorials</title>
+
+<para>
+The documentation of the graphical interface focuses on detailing the
+concepts and features of the program.  To get started using the program,
+recommend viewing the selection of tutorials available
+on the &quot;Documentation&quot; page of the Gambit website.  These
+tutorials illustrate the use of the graphical interface in analyzing some
+common types of games, and are suitable for users with any level of
+experience with game theory.  Students, in particular, may find some of
+the examples helpful with coursework.
+</para>
+
+<para>
+We encourage new users to check out at least a selection of the tutorials
+prior to attempting to digest this manual.  This is because:
+<orderedlist>
+<listitem>
+<para>
+The animations in the tutorials do a good job of illustrating how to
+use the program visually, far better than a static manual can.
+</para>
+</listitem>
+<listitem>
+<para>
+The tutorials focus on using the graphical interface for particular
+tasks in the analysis of games, and thus group features more naturally
+for their respective uses.
+</para>
+</listitem>
+<listitem>
+<para>
+Most importantly, while we attempt to make this documentation as clear,
+complete, and accurate as possible, the Gambit maintainers are notoriously 
+bad documentation writers!
+</para>
+</listitem>
+</orderedlist>
+</para>
+
+<para>
+Once you're comfortable with some of the tutorials, this manual ought
+to be helpful in filling in some of the gaps, and listing more completely
+the features of the graphical interface.
+</para>
+
+</sect1>
+
+<sect1>
+<title>General concepts</title>
+
+<para>
+This section gives an overview of the graphical interface.
+</para>
+
+<sect2>
+<title>General layout of the main window</title>
+
+<para>
+<xref linkend="figure.overview"> shows the typical configuration of a 
+window after the graphical interface is launched.
+<figure id="figure.overview">
+<title>A typical appearance of the graphical interface, showing a
+simple poker game</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/overview.png">
+</imageobject>
+</mediaobject>
+</figure>
+The frame presenting a game consists of two principal panels.  The
+main panel, to the right, displays the game graphically; in this
+case, showing the game tree of a simple one-card poker game.  To the left
+is the player panel, which lists the players in the game; here,
+Fred and Alice are the players.  Note that
+where applicable, information is color-coded to match the colors 
+assigned to the players: Fred's moves and payoffs are all presented in
+red, and Alice's in blue. 
+The color assigned to a player can be changed by clicking on the color icon
+<guiicon><inlinegraphic fileref="../icons/color.gif"></guiicon>
+located to the left of the player's name on the player panel.
+Player names are edited by clicking on the player's name, and editing
+the name in the text control that appears.
+</para>
+
+<para>
+Two additional panels are available.  Selecting
+<guimenu>Tools</guimenu>-><guimenuitem>Dominance</guimenuitem> toggles
+the display of an additional toolbar across the top of the window.  This
+toolbar controls the indication and elimination of actions or strategies 
+that are dominated. The use of this toolbar is discussed in 
+<xref linkend="gui.dominance">. 
+</para>
+
+<para>
+Selecting <guimenu>View</guimenu>-><guimenuitem>Profiles</guimenuitem>,
+or clicking the show profiles icon
+<guiicon><inlinegraphic fileref="../icons/profiles.gif"></guiicon>
+on the toolbar, toggles
+the display of the list of computed strategy profiles on the game. 
+More on the way the interface handles the computation of Nash equilibria
+and other kinds of strategy profiles is presented in
+<xref linkend="gui.nash">.
+</para>
+
+</sect2>
+
+
+<sect2 id="gui.numbers">
+<title>Payoffs and probabilities in Gambit</title>
+
+<para>
+Gambit stores all payoffs in games in an arbitrary-precision format.
+Payoffs may be entered as decimal numbers with arbitrarily many
+decimal places.  In addition, Gambit supports representing payoffs
+using rational numbers.  So, for example, in any place in which
+a payoff may appear, either an outcome of an extensive game or a
+payoff entry in a strategic game, the payoff one-tenth may be entered either
+as <literal>.1</literal> or <literal>1/10</literal>.
+</para>
+
+<para>
+The advantage of this format is that, in certain circumstances, Gambit
+may be able to compute equilibria exactly.  In addition, some methods
+for computing equilibria construct good numerical approximations to
+equilibrium points.  For these methods, the computed equilibria are
+stored in floating-point format.  To increase the number of
+decimal places shown for these profiles, click the increase decimals icon
+<guiicon><inlinegraphic fileref="../icons/adddecimal.gif"></guiicon>.
+To decrease the number of decimal places shown, click the 
+decrease decimals icon
+<guiicon><inlinegraphic fileref="../icons/deldecimal.gif"></guiicon>.
+</para>
+
+<para>
+Note that increasing or decreasing the number of decimals displayed
+in computed strategy profiles will not have any effect on the display
+of outcome payoffs in the game itself, since those are stored in
+arbitrary precision.
+</para>
+
+</sect2>
+
+<sect2 id="gui.file">
+<title>A word about file formats</title>
+
+<para>
+The graphical interface manipulates several different file formats for
+representing games.  This section gives a quick overview of those formats.
+</para>
+
+<para>
+Gambit has for many years supported two file formats for representing
+games, one for extensive games (typically using the filename extension
+.efg) and one for strategic games (typically using the filename extension
+.nfg).  These file formats are recognized by all Gambit versions dating
+back to release 0.94 in 1995.  (Users interested in the details of these
+file formats can consult <xref linkend="file"> for more information.)
+</para>
+
+<para>
+Beginning with release 2005.12.xx, the graphical interface now reads
+and writes a new file format, which is referred to as a
+&quot;Gambit workbook.&quot;  This extended file format stores not only
+the representation of the game, but also additional information, including
+parameters for laying out the game tree, the colors assigned to players,
+any equilibria or other analysis done on the game, and so forth.  So,
+for example, the workbook file can be used to store the analysis of
+a game and then return to it.  These files by convention end in
+the extension .gbt.
+</para>
+
+<para>
+The graphical interface will read files in all three formats: .gbt, .efg,
+and .nfg.  The &quot;Save&quot; and &quot;Save as&quot; commands,
+however, always save in the Gambit workbook (.gbt) format.  To save the
+game itself as an extensive (.efg) or strategic (.nfg) game, use the
+items on the &quot;Export&quot; submenu of the &quot;File&quot; menu.
+This is useful in interfacing with older versions of Gambit, with
+other tools which read and write those formats, and in using the
+underlying Gambit analysis command-line tools directly, as those
+programs accept .efg or .nfg game files.  Users primarily interested
+in using Gambit solely via the graphical interface are encouraged to
+use the workbook (.gbt) format.
+</para>
+
+<note>
+<para>
+As it is a new format, the Gambit workbook format is still under
+development and may change in details.  It is intended that newer
+versions of the graphical interface will still be able to read workbook
+files written in older formats.  Should this fail to hold, note that
+the Gambit workbook format is an XML file stored in plain text, so it
+can be viewed and edited in any text editor or word processor, and so
+data stored in this format will not be lost due to such an incompatibility.
+</para>
+</note>
+
+</sect2>
+
+</sect1>
+
+
+<sect1 id="gui.efg">
+<title>Extensive games</title>
+<para>
+The graphical interface provides a flexible set of operations for constructing
+and editing general extensive games.  These are outlined below.
+</para>
+
+<sect2 id="gui.efg.overview">
+<title>Creating a new extensive game</title>
+<para>
+To create a new extensive game, select
+<guimenu>File</guimenu>-><guisubmenu>New</guisubmenu>-><guimenuitem>Extensive game</guimenuitem>, or click on the new extensive game icon
+<guiicon><inlinegraphic fileref="../icons/newtree.gif"></guiicon>.
+The extensive game created is a trivial game with two players,
+named by default <guilabel>Player 1</guilabel> and 
+<guilabel>Player 2</guilabel>, with one node, which is both the root
+and terminal node of the game.
+In addition, extensive games have a special player labeled
+<guilabel>Chance</guilabel>, which is used to represent random events
+not controlled by any of the strategic players in the game.
+</para>
+
+</sect2>
+
+<sect2 id="gui.efg.addmove">
+<title>Adding moves</title>
+
+<formalpara>
+<title>Inserting a move, the graphical way</title>
+<para>
+Moves can be added to the tree using a drag-and-drop idiom.  From the
+player list window, drag the
+player icon 
+<guiicon><inlinegraphic fileref="../icons/person.gif"></guiicon>
+located to the left of the player who will have the move to any
+terminal node in the game tree.  The tree will be extended with a new
+move for that player, with two actions at the new move.
+Adding a move for the chance player is done the same way, except the dice icon
+<guiicon><inlinegraphic fileref="../icons/dice.gif"></guiicon>
+appearing to the left of the chance player in the player list window is
+used instead of the player icon.  For the chance player, the two actions
+created will each be given a probability weight of one-half.
+If the desired move has more than two actions, additional actions
+can be added by dragging the same player's icon to the move node; this
+will add one action to the move each time this is done.
+</para>
+</formalpara>
+
+<formalpara>
+<title>Inserting a move, the dialog way</title>
+<para>
+Click on any terminal node in the tree, and select 
+<guimenu>Edit</guimenu>-><guimenuitem>Insert move</guimenuitem>
+to display the <guilabel>Insert move</guilabel> dialog
+(<xref linkend="figure.insertmove">).
+<figure id="figure.insertmove">
+<title>The insert move dialog</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/insertmove.png">
+</imageobject>
+</mediaobject>
+</figure>
+The dialog is intended to read like a sentence:
+<itemizedlist>
+<listitem>
+<para>
+The first control specifies the player who will make the move.
+The move can be assigned to a new player by specifying
+<guilabel>Insert move for a new player</guilabel> here.
+</para>
+</listitem>
+
+<listitem>
+<para>
+The second control selects the information set to which to add the move.
+To create the move in a new information set, 
+select <guilabel>at a new information set</guilabel>
+for this control.
+</para>
+</listitem>
+
+<listitem>
+<para>
+The third control sets the number
+of actions.  This control is disabled unless the second control is set
+to &quot;at a new information set&quot; otherwise, it is set automatically
+to the number of actions at the selected information set.
+</para>
+</listitem>
+</itemizedlist>
+
+</para>
+</formalpara>
+
+<para>
+The two methods have different advantages.  The drag-and-drop approach
+is a bit quicker to use, especially when creating trees that have few
+actions at each move.  The dialog approach is a bit more flexible, in that
+a move can be added for a new, as-yet-undefined player, a move can be
+added directly into an existing information set, and a move can be immediately
+given more than two actions.
+</para>
+
+</sect2>
+
+<sect2 id="gui.efg.trees">
+<title>Copying and moving subtrees</title>
+
+<para>
+Many extensive games have structures that appear in multiple parts of the
+tree.  It is often efficient to create the structure once, and then
+copy it as needed elsewhere.
+</para>
+
+<para>
+The interface provides a convenient idiom for this.  Clicking on any
+nonterminal node and dragging to any terminal node implements a move
+operation, which moves the entire subtree rooted at the original,
+nonterminal node to the terminal node.
+</para>
+
+<para>
+When this same operation is done while holding down the Control
+(<keycap>Ctrl</keycap>)
+key on the keyboard, the operation is turned into a copy operation.
+The entire subtree rooted at the original node is copied, starting
+at the terminal node.  In this copy operation, each node in the copied
+image is placed in the same information set as the corresponding node
+in the original subtree.
+<note>
+<para>
+See the poker tutorial on the Gambit website for how this can be used
+to good effect in speeding up the building of games.
+</para>
+</note>
+</para>
+
+<para>
+Also, copying a subtree to a terminal node in that subtree is supported;
+in this case, the copying operation is halted when reaching the terminal
+node, to avoid an infinite regress.  Thus, this feature can also be
+helpful in constructing multiple-stage games.
+</para>
+
+</sect2>
+
+<sect2 id="gui.efg.delete">
+<title>Removing parts of a game tree</title>
+<para>
+Two deletion operations are supported on extensive games.
+To delete the entire subtree rooted at a node, click on that node 
+and select <guimenu>Edit</guimenu>-><guimenuitem>Delete subtree</guimenuitem>.
+</para>
+
+<para>
+To delete an individual move from the game, click on one of the
+direct children of that node, and select
+<guimenu>Edit</guimenu>-><guimenuitem>Delete parent</guimenuitem>.
+This operation deletes the parent node, as well as all the children of
+the parent other than the selected node.  The selected child node now
+takes the place of the parent node in the tree.
+</para>
+
+</sect2>
+
+<sect2 id="gui.efg.information">
+<title>Managing information sets</title>
+
+<para>
+Gambit provides several methods to help manage the information
+structure in an extensive game.
+</para>
+
+<para>
+When building a tree, new moves can be placed in a given information
+set using the <guilabel>Insert move</guilabel> dialog
+(see <xref linkend="gui.efg.addmove">).  Additionally, new moves can
+be created using the drag-and-drop idiom by holding down the
+<keycap>Shift</keycap> key and dragging a node in the tree.
+During the drag operation, the cursor changes to the move icon
+<guiicon><inlinegraphic fileref="../icons/move.gif"></guiicon>.
+Dropping the move icon on another node places the target node in
+the same information set as the node where the drag operation
+began.
+</para>
+
+<para>
+The information set to which a node belongs can also be set by
+selecting <guimenu>Edit</guimenu>-><guimenuitem>Node</guimenuitem>.
+This displays the node properties dialog
+(<xref linkend="figure.editnode">).
+<figure id="figure.editnode">
+<title>The node properties dialog</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/editnode.png">
+</imageobject>
+</mediaobject>
+</figure>
+The <guilabel>Information set</guilabel> dropdown is set to the
+current information set to which the node belongs, and contains a list
+of all other information sets in the game which are compatible with
+the node, that is, which have the same number of actions.
+Additionally, the node can be moved to a new, singleton information
+set by setting this dropdown to the
+<guilabel>New information set</guilabel> entry.
+</para>
+
+<para>
+In building a game tree using the copy methods described in
+<xref linkend="gui.efg.trees">, by default the nodes created in the
+copy of the subtree remain in the same information set as the
+corresponding nodes in the original subtree.  In many cases, though,
+these trees differ in the information available to some or all of
+the players.  To help speed the process of adjusting information sets
+in bulk, Gambit offers a &quot;reveal&quot; operation, which
+breaks information sets based on the action taken at a particular node.
+Click on a node at which the action taken is to be made known
+subsequently to other players, and select
+<guimenu>Edit</guimenu>-><guimenuitem>Reveal</guimenuitem>.
+This displays a dialog listing the players in the game.  Check the
+boxes next to the players who observe the outcome of the move at
+the node, and click <guibutton>OK</guibutton>.  The information sets
+at nodes below the selected one are adjusted based on the action
+selected at this node.
+
+<note>
+<para>
+This is an operation that is easier to see than the explain.  See
+the poker tutorial on the Gambit website for an application of the
+revelation operation in conjunction with the tree-copy operation.
+</para>
+</note>
+
+<note>
+<para>
+This operation only has an effect at the time it is done.  In particular,
+it does <emphasis>not</emphasis> enforce the separation of information
+sets based on this information during subsequent editing of the game.
+</para>
+</note>
+
+</para>
+
+</sect2>
+
+
+
+<sect2 id="gui.efg.payoffs">
+<title>Outcomes and payoffs</title>
+<para>
+Gambit supports the specification of payoffs at any node in a game tree,
+whether terminal or not.  By default, each node is created with no
+outcome attached; in this case, the payoff at each node is zero to all
+players.  These are indicated in the game tree by the presence of a
+&quot;(u)&quot; in light grey to the right of a node.
+</para>
+
+<para>
+To set the payoffs at a node, double-click on the 
+&quot;(u)&quot; to the right of the node.  This creates a new outcome
+at the node, with payoffs of zero for all players, and displays an editor
+to set the payoff of the first player.
+</para>
+
+<para>
+The payoff to a player for an outcome can be edited by double-clicking
+on the payoff entry.  This action creates a text edit control in which
+the payoff to that player can be modified.  Edits to the payoff can
+be accepted by pressing the <keycap>Enter</keycap> key.  In addition,
+accepting the payoff by pressing the <keycap>Tab</keycap> key both
+stores the changes to the player's payoff, and advances the editor to
+the payoff for the next player at that outcome, if any.
+</para>
+
+<para>
+Outcomes may also be moved or copied using a drag-and-drop idiom.
+Left-clicking and dragging an outcome to another node moves the outcome
+from the original node to the target node.  Copying an outcome may be
+accomplished by doing this same action while holding down the Control
+(Ctrl) key on the keyboard.
+</para>
+
+<note>
+<para>
+When using the copy idiom described above, the action assigns the same 
+outcome to both the involved nodes.  Therefore, if subsequently the
+payoffs of the outcome are edited, the payoffs at both nodes will be
+modified.  To copy the outcome in such a way that the outcome at the
+target node is a different outcome from the one at the source, but with
+the same payoffs, hold down the Shift key instead of the Control key while
+dragging.
+</para>
+</note>
+
+<para>
+To remove an outcome from a node, click on the node, and select
+<guimenu>Edit</guimenu>-><guimenuitem>Remove outcome</guimenuitem>.
+</para>
+
+</sect2>
+
+
+<sect2 id="gui.efg.labels">
+<title>Formatting and labeling the tree</title>
+
+<para>
+Gambit offers some options for customizing the display of game trees.
+</para>
+
+<note>
+<para>
+Beginning in version 0.2005.12.12, all formatting information, including
+colors, fonts, layout, labeling, and so forth, are stored with the
+game in the Gambit workbook (<filename>.gbt</filename>) file format.
+This contrasts with previous behavior of the graphical interface, in which
+the settings were stored on a per-user basis, and games were displayed
+with the current settings only.
+</para>
+</note>
+
+
+<sect3 id="gui.efg.labels.labels">
+<title>Labels on nodes and branches</title>
+
+<para>
+The information displayed at the nodes and on the branches of the
+tree can be configured by selecting
+<guimenu>Format</guimenu>-><guimenuitem>Labels</guimenuitem>,
+which displays the dialog depicted in
+<xref linkend="figure.labels">.
+</para>
+
+<figure id="figure.labels">
+<title>Configuring the labeling of the game tree</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/labels.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+Above and below each node, the following information can be displayed:
+<itemizedlist>
+<listitem>
+<para>
+<guilabel>No label</guilabel>: the space is left blank.
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>The node's label</guilabel>: the text label
+assigned to the node.
+(This is the default labeling above each node.)
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>The player's name</guilabel>: the name of the player making
+the move at the node.
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>The information set's label</guilabel>: the name of the
+information set to which the node belongs.
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>The information set's number</guilabel>: a unique identifier of
+the information set, in the form player number:information set number.
+(This is the default labeling below each node.)
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>The realization probability</guilabel>: 
+The probability the node is reached.  (Only displayed when a
+behavior strategy is selected to be displayed on the tree.)
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>The belief probability</guilabel>: 
+The probability a player assigns to being at the node, conditional on
+reaching the information set.  (Only displayed when a behavior strategy
+is selected to be displayed on the tree.)
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>The payoff of reaching the node</guilabel>:
+The expected payoff to the player making the choice at the node,
+conditional on reaching the node.  (Only displayed when a behavior
+strategy is selected to be displayed on the tree.)
+</para>
+</listitem>
+</itemizedlist>
+
+</para>
+
+<para>
+Above and below each branch, the following information can be displayed:
+<itemizedlist>
+<listitem>
+<para>
+<guilabel>No label</guilabel>: the space is left blank.
+</para>
+</listitem>
+
+<listitem>
+<para>
+<guilabel>The name of the action</guilabel>: the name of the action
+taken on the branch.  (This it the default labeling above the branch.)
+</para>
+</listitem>
+
+<listitem>
+<para>
+<guilabel>The probability the action is played</guilabel>:
+For chance actions, the probability the branch is taken; this is always
+displayed.  For player actions, the probability the action is taken
+in the selected profile (only displayed when a behavior strategy is
+selected to be displayed on the tree).  In some cases, behavior
+strategies do not fully specify behavior sufficiently far off the
+equilibrium path; in such cases, an asterisk is shown for such
+action probabilities.  (This is the default labeling below each branch.)
+</para>
+</listitem>
+
+<listitem>
+<para>
+<guilabel>The value of the action</guilabel>: the expected payoff to
+the player of taking the action, conditional on reaching the information
+set.  (Only displayed when a behavior strategy is selected to be 
+displayed on the tree.)
+</para>
+</listitem>
+
+</itemizedlist>
+</para>
+
+</sect3>
+
+<sect3 id="gui.efg.labels.layout">
+<title>Controlling the layout of the tree</title>
+
+<para>
+Gambit implements an automatic system for layout out game trees, which
+provides generally good results for most games.  These can be adjusted
+by selecting <guimenu>Format</guimenu>-><guimenuitem>Layout</guimenuitem>.
+This dialog has three tabs, which are discussed in turn.
+</para>
+
+<para>
+The first tab, labeled <guilabel>Nodes</guilabel>, controls the
+size, location, and rendering of nodes in the tree (see
+<xref linkend="figure.layoutnodes">).  Nodes can be indicated using one
+of five tokens: a horizontal line (the &quot;traditional&quot; Gambit
+style from previous versions), a box, a diamond, an unfilled circle, and
+a filled circle).  These can be set independently to distinguish
+chance and terminal nodes from player nodes. 
+</para>
+
+<figure id="figure.layoutnodes">
+<title>Controlling the layout and drawing of nodes in the game tree</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/layoutnodes.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+The sizing of nodes can be configured for best results.  Gambit styling
+from previous versions used the horizontal line tokens with relatively
+long lines; when using the other tokens, smaller node sizes often look
+better.
+</para>
+
+<para>
+The layout algorithm is based upon identifying the location of terminal
+nodes.  The vertical spacing between these nodes can be set; making this
+value larger will tend to give the tree a larger vertical extent.
+</para>
+
+
+<para>
+The second tab, labeled <guilabel>Branches</guilabel>, controls the
+display of the branches of the tree 
+(see <xref linkend="figure.layoutbranches">).  
+The traditional Gambit way
+of drawing branches is a &quot;fork-tine&quot; approach, in which there is
+a flat part at the end of each branch at which labels are displayed.
+Alternatively, branches can be drawn directly between nodes by
+setting <guilabel>Draw branches</guilabel> to 
+<guilabel>using straight lines between nodes</guilabel>.  With this
+setting, labels are now displayed at points along the (usually)
+diagonal branches.  Labels are usually shown horizontally; however,
+they can be drawn rotated parallel to the branches by
+setting <guilabel>Draw labels</guilabel> to <guilabel>rotated</guilabel>.
+</para>
+
+<note>
+<para>
+The rotated label drawing is experimental, and does not always look good
+on screen.
+</para>
+</note>
+
+<figure id="figure.layoutbranches">
+<title>Controlling the drawing of branches in the game tree</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/layoutbranches.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+The length used for branches and their tines, if drawn, can be configured.
+Longer branch and tine lengths give more space for longer labels to
+be drawn, at the cost of giving the tree a larger horizontal extent.
+</para>
+
+<para>
+Finally, display of the information sets in the game is configured
+under the tab labeled <guilabel>Information sets</guilabel>
+(see <xref linkend="figure.layoutinfosets">).  Members of information
+sets are by default connected using a &quot;bubble&quot; similar to
+that drawn in textbook diagrams of games.  The can be modified to
+use a single line to connect nodes in the same information set.
+In conjunction with using lines for nodes, this can sometimes lead to
+a more compact representation of a tree where there are many information
+sets at the same horizontal location.
+</para>
+
+<figure id="figure.layoutinfosets">
+<title>Configuring the drawing of information sets in the game tree</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/layoutinfosets.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+The layout of the tree may be such that members of the same information
+set appear at different horizontal locations in the tree.  In such a case,
+by default, Gambit draws a horizontal arrow pointing rightward or leftward
+to indicate the continuation of the information set, as in
+<xref linkend="figure.connectinfoset">.  These connections can be disabled
+by setting <guilabel>Connect members of information sets</guilabel> to
+<guilabel>only when on the same level</guilabel>.  In addition, drawing
+information set indicators can be disabled entirely by setting this
+to <guilabel>invisibly (don't draw indicators)</guilabel>.
+</para>
+
+<figure id="figure.connectinfoset">
+<title>Showing information sets spanning multiple levels</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/connectinfoset.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+</sect3>
+
+<sect3 id="gui.efg.labels.fontcolor">
+<title>Selecting fonts and colors</title>
+
+<para>
+To select the font used to draw the labels in the tree,
+select <guimenu>Format</guimenu>-><guimenuitem>Font</guimenuitem>.
+The standard font selection dialog for the operating system is
+displayed, showing the fonts available on the system.
+Since available fonts vary across systems, when opening a workbook
+on a system different from the system on which it was saved, Gambit
+tries to match the font style as closely as possible when the original
+font is not available.
+</para>
+
+<para>
+The color-coding for each player can be changed by clicking on the
+color icon
+<guiicon><inlinegraphic fileref="../icons/color.gif"></guiicon>
+to the left of the corresponding player.
+</para>
+
+</sect3>
+
+</sect2>
+
+</sect1>
+
+<sect1 id="gui.nfg">
+<title>Strategic games</title>
+
+<para>
+Gambit has full support for constructing and manipulating arbitrary
+N-player strategic (also known as normal form) games.
+</para>
+
+<para>
+For extensive games, Gambit automatically computes the corresponding
+reduced strategic game.  To view the reduced strategic game corresponding
+to an extensive game, select
+<guimenu>View</guimenu>-><guisubmenu>Strategic game</guisubmenu>
+or click the strategic game table icon
+<guiicon><inlinegraphic fileref="../icons/table.gif"></guiicon>
+on the toolbar.
+</para>
+
+<note>
+<para>
+The strategic games computed by Gambit as the reduced strategic game
+of an extensive game cannot be modified directly.  Instead, edit the
+original extensive game; Gambit automatically recomputes the
+strategic game after any changes to the extensive game.
+</para>
+</note>
+
+<para>
+Strategic games may also be input directly.  To create a new
+strategic game, select
+<guimenu>File</guimenu>-><guisubmenu>New</guisubmenu>-><guimenuitem>Strategic game</guimenuitem>, 
+or click the new strategic game icon
+<guiicon><inlinegraphic fileref="../icons/newtable.gif"></guiicon>
+on the toolbar.
+</para>
+
+<sect2 id="gui.nfg.navigate">
+<title>Navigating a strategic game</title>
+
+<para>
+Gambit displays a strategic game in table form.  All players are
+assigned to be either row players or column players, and the payoffs
+for each entry in the strategic game table correspond to the payoffs
+corresponding to the situation in which all the row players play
+the strategy specified on that row for them, and all the column
+players play the strategy specified on that column for them.
+</para>
+
+<para>
+For games with two players, this presentation is by default configured to
+be similar to the standard presenation of strategic games as tables, 
+in which one player is assigned to be the &quot;row&quot; player and the
+other the &quot;column&quot; player. However, Gambit permits a more
+flexible assignment, in which multiple players can be assigned to the rows
+and multiple players to the columns.  This is of particular use for
+games with more than two players.  In print, a three-player strategic
+game is usually presented as a collection of tables, with one player
+choosing the row, the second the column, and the third the table.
+Gambit presents such games by hierarchially listing the strategies
+of one or more players on both rows and columns.
+
+<tip>
+<para>
+The hierarchical presentation of the table is similar to that of
+a contingency table in a spreadsheet application.
+</para>
+</tip>
+
+</para>
+
+<para>
+<xref linkend="figure.pd1"> shows a typical Gambit display of an
+instance of the famous Prisoner's Dilemma game.
+Here, <guilabel>Alice</guilabel>, shown in red, has her strategies 
+listed on the rows of the table, and <guilabel>Bob</guilabel>, shown in
+Blue, has his strategies listed on the columns of the table.
+</para>
+<figure id="figure.pd1">
+<title>A prisoner's dilemma</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/pd1.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+The assignment of players to row and column roles is fully customizable.
+To change the assignment of a player, drag the person icon
+<guiicon><inlinegraphic fileref="../icons/person.gif"></guiicon>
+appearing to the left of the player's name on the player toolbar to
+either of the areas in the payoff table displaying the strategy labels.
+</para>
+
+<para>
+For example, dragging the player icon from the left of
+<guilabel>Bob</guilabel>'s name in the list of players and dropping it 
+on the right side of Alice's strategy label column changes
+the display of the game as in <xref linkend="figure.pd2">.
+Here, the strategies are shown in a hierarchical format, enumerating
+the outcomes of the game first by Alice's (red) strategy choice, then
+by Bob's (blue) strategy choice. 
+</para>
+<figure id="figure.pd2">
+<title>A prisoner's dilemma, with contingencies shown in list style</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/pd2.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+Alternatively, the game can be
+displayed by listing the outcomes with Bob's strategy choice first, then
+Alice's.  Drag Bob's player icon and drop it on the left side of Alice's
+strategy choices, and the game display changes to look like
+that in <xref linkend="figure.pd3">.
+</para>
+<figure id="figure.pd3">
+<title>Another view of the prisoner's dilemma</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/pd3.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+The same dragging operation can be used to assign players to the columns.
+Assigning multiple players to the columns gives the same hierarchical
+presentation of those players' strategies.  Dropping a player above
+another player's strategy labels assigns him to a higher level of
+the column player hierarchy; dropping a player below another player's
+strategy labels assigns him to a lower level of the column player
+hierarchy.
+</para>
+
+<para>
+Note that as the assignment of players in the row and column
+hierarchies changes, the ordering of the payoffs in each cell of
+the table also changes.  In all cases, the color-coding of
+the entries identifies the player to whom each payoff corresponds.
+The ordering convention is chosen so that for a two player game
+in which one player is a row player and the other a column player,
+the row player's payoff is shown first, followed by the column player,
+which is the most common convention in print.
+</para>
+
+</sect2>
+
+<sect2 id="gui.nfg.players">
+<title>Adding players and strategies</title>
+
+<para>
+To add an additional player to the game, use the menu item 
+<guimenu>Edit</guimenu>-><guimenuitem>Add player</guimenuitem>, 
+or the corresponding toolbar icon 
+<guiicon><inlinegraphic fileref="../icons/newplayer.gif"></guiicon>.
+The newly created player has one strategy, by default labeled
+<guilabel>1</guilabel>.
+</para>
+
+<para>
+Gambit supports arbitrary numbers of strategies for each player.
+To add a new strategy for a player, click the new strategy icon
+<guiicon><inlinegraphic fileref="../icons/newrow.gif"></guiicon>
+located to the left of that player's name.
+</para>
+
+<para>
+To edit the names of strategies, click on any cell in the strategic
+game table where the strategy label appears, and edit the label using
+the edit control.
+</para>
+
+</sect2>
+
+<sect2 id="gui.nfg.payoffs">
+<title>Editing payoffs</title>
+
+<para>
+Payoffs for each player are specified individually for each contingency,
+or collection of strategies, in the game.
+To edit any payoff in the table, click that cell in the table and edit
+the payoff. 
+Pressing the Escape key (<keycap>Esc</keycap>)
+cancels any editing of the payoff and restores
+the previous value.
+</para>
+
+<para>
+To speed entry of many payoffs, as is typical when creating a new game,
+accepting a payoff entry via the <keycap>Tab</keycap>
+key automatically moves the edit
+control to the next cell to the right.  If the payoff is the last payoff 
+listed in a row of the table, the edit control wraps around to the first
+payoff in the next row; if the payoff is in the last row, 
+the edit control wraps around to the first payoff in the first row.
+So a strategic game payoff table can be quickly entered by clicking
+on the first payoff in the upper-left cell of the table, inputting the
+payoff for the first (row) player, pressing the <keycap>Tab</keycap>
+key, inputting
+the payoff for the second (column) player, pressing the 
+<keycap>Tab</keycap> key, and so forth,
+until all the payoff entries in the table have been filled.
+</para>
+
+</sect2>
+
+</sect1>
+
+<sect1 id="gui.dominance">
+<title>Investigating dominated strategies and actions</title>
+<para>
+Selecting <guimenu>Tools</guimenu>-><guimenuitem>Dominance</guimenuitem>
+toggles the appearance of a toolbar which can be used to investigate
+the structure of dominated strategies and actions.
+</para>
+
+<sect2 id="gui.dominance.efg">
+<title>Dominated actions in extensive game</title>
+
+<para>
+In extensive games, the dominance toolbar controls the elimination
+of actions which are conditionally dominated.
+<xref linkend="figure.pokerdom1"> illustrates the appearance of the
+poker game example with the dominance toolbar shown.
+</para>
+
+<figure id="figure.pokerdom1">
+<title>The poker game, with the dominance toolbar shown</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/pokerdom1.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+Actions may be eliminated based on two criteria:
+<itemizedlist>
+<listitem>
+<para>Strict dominance: the action is always worse than another,
+regardless of beliefs at the information set;
+</para>
+</listitem>
+<listitem>
+<para>Strict or weak dominance: there is another action at the information
+set that is always at least as good as the action, and strictly better
+in some cases.
+</para>
+</listitem>
+</itemizedlist>
+For example, in the poker game, it is strictly dominated for Fred
+to choose Fold after Red.  Clicking the next level icon
+<guiicon><inlinegraphic fileref="../icons/next.gif"></guiicon>
+removes the dominated action from the game display, as in
+<xref linkend="figure.pokerdom2">.
+</para>
+
+<figure id="figure.pokerdom2">
+<title>The poker game, with the dominated action eliminated</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/pokerdom2.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+The tree layout remains unchanged, including nodes which can only
+be reached using actions which have been eliminated.  To compress
+the tree to remove the unreachable nodes, check the box labeled
+<guilabel>Show only reachable nodes</guilabel>.  The tree is 
+redisplayed as in
+<xref linkend="figure.pokerdom3">.
+</para>
+
+<figure id="figure.pokerdom3">
+<title>The poker game, showing only nodes reachable via uneliminated
+actions</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/pokerdom3.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+For this game, no further actions can be eliminated.  In general,
+further steps of elimination can be done by again clicking the
+next level icon.
+<guiicon><inlinegraphic fileref="../icons/next.gif"></guiicon>.
+The toolbar keeps track of the number of levels of elimination currently
+shown; the previous level icon
+<guiicon><inlinegraphic fileref="../icons/prev.gif"></guiicon>
+moves up one level of elimination.
+</para>
+
+<para>
+The elimination of multiple levels can be automated using the
+fast forward icon
+<guiicon><inlinegraphic fileref="../icons/toend.gif"></guiicon>,
+which iteratively eliminates dominated actions until no further
+actions can be eliminated.  The rewind icon
+<guiicon><inlinegraphic fileref="../icons/tobegin.gif"></guiicon>
+restores the display to the full game.
+</para>
+
+</sect2>
+
+<sect2 id="gui.dominance.nfg">
+<title>Dominated strategies in strategic games</title>
+
+<para>
+The dominance toolbar operates in strategic games in the same way as
+the in the extensive game.  Strategies can be eliminated iteratively
+based on whether they are strictly or weakly dominated.
+</para>
+
+<para>
+When the dominance toolbar is shown, the strategic game table contains
+indicators of strategies that are dominated.  For example, 
+<xref linkend="figure.pddom1"> shows the prisoner's dilemma example with
+the dominance toolbar shown.
+</para>
+
+<figure id="figure.pddom1">
+<title>The prisoner's dilemma example, with dominated strategies
+indicated</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/pddom1.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+In the prisoner's dilemma, the <guilabel>Cooperate</guilabel> strategy
+is strictly dominated for both players.  This strict dominance is indicated
+by the solid &quot;X&quot; drawn across the corresponding strategy
+labels for both players.  In addition, the payoffs corresponding to
+the dominated strategies are also drawn with a solid &quot;X&quot;
+across them.  Thus, any contingency in the table containing at least
+one &quot;X&quot; is a contingency that can only be reached by at
+least one player playing a strategy that is dominated.
+</para>
+
+<para>
+Strategies that are weakly dominated are similarly indicated, except
+the &quot;X&quot; shape is drawn using a thinner, dashed line instead
+of the thick, solid line.
+</para>
+
+<para>
+Clicking the next level icon
+<guiicon><inlinegraphic fileref="../icons/next.gif"></guiicon>
+removes the strictly dominated strategies from the display,
+and presents the prisoner's dilemma as in <xref linkend="figure.pddom2">.
+</para>
+
+<figure id="figure.pddom2">
+<title>The prisoner's dilemma example, with dominated strategies
+removed</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/pddom2.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+</sect2>
+
+</sect1>
+
+<sect1 id="gui.nash">
+<title>Computing Nash equilibria</title>
+
+<para>
+Gambit offers broad support for computing Nash equilibria in both
+extensive and strategic games.  To access the provided algorithms for
+computing equilibria, select 
+<guimenu>Tools</guimenu>-><guimenuitem>Equilibrium</guimenuitem>,
+or click on the calculate icon
+<guiicon><inlinegraphic fileref="../icons/calc.gif"></guiicon>
+on the toolbar.
+
+
+<sect2 id="gui.nash.dialog">
+<title>Selecting the method of computing equilibria</title>
+
+<para>
+The process of computing Nash equilibria in extensive and strategic
+games is similar.  This section focuses on the case of extensive games;
+the process for strategic games is analogous, except the extensive
+game-specific features, such as displaying the profiles on the game tree,
+are not applicable.
+</para>
+
+<para>
+Gambit presents options for computing Nash equilibrium in a dialog,
+as shown in <xref linkend="figure.nash">.
+</para>
+
+<figure id="figure.nash">
+<title>Dialog to select method for computing Nash equilibria</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/nash.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+The methods applicable to a particular game depend on three criteria:
+the number of equilibria to compute, whether the computation is
+to be done on the extensive or strategic games, and on details of
+the game, such as whether the game has two players or more, and whether
+the game is constant-sum.
+</para>
+
+<para>
+The first step in finding equilibria is to specify how many equilibria
+are to be found.  Some algorithms for computing equilibria are adapted
+to finding a single equilibrium, while others attempt to compute the
+whole equilibrium set.  The first drop-down in the dialog specifies
+how many equilibria to compute.  In this drop-down there are options for
+&quot;as many equilibria as possible&quot; and &quot;all equilibria.&quot;
+For some games, there exist algorithms which will compute many equilibria
+(relatively) efficiently, but are not guaranteed to find all equilibria.
+</para>
+
+<para>
+To simplify this process of choosing the method to compute equilibria
+in the second drop-down, Gambit provides for any game &quot;recommended&quot;
+methods for computing one, some, and all Nash equilibria, respectively.
+These methods are selected based on experience as to the efficiency and
+reliability of the methods, and should generally work well on most games.
+For more control over the process, the user can select from the second
+drop-down in the dialog one of the appropriate methods for computing
+equilibria.  This list only shows the methods which are appropriate for
+the game, given the selection of how many equilibria to compute.
+More details on these methods are contained in
+<xref linkend="utils.nash">.
+</para>
+
+<para>
+Finally, for extensive games, there is an option of whether to use
+the extensive or strategic game for computation.  In general, computation
+using the extensive game is preferred, since it is often a significantly
+more compact representation of the strategic characeteristics of the
+game than the reduced strategic game is.
+</para>
+
+<para>
+For even moderate sized games, computation of equilibrium can be a 
+time-intensive process.  Gambit runs all computations in the background,
+and displays a dialog, like the one in <xref linkend="figure.computing">,
+showing all equilibria computed so far.  The computation can be
+cancelled at any time by clicking on the cancel icon
+<guiicon><inlinegraphic fileref="../icons/stop.gif"></guiicon>,
+which terminates the computation but keeps any equilibria computed.
+</para>
+
+<figure id="figure.computing">
+<title>Monitoring the equilibria computed in a larger game</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/computing.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+</sect2>
+
+<sect2 id="gui.nash.profiles">
+<title>Viewing computed profiles in the game</title>
+
+<para>
+After computing equilibria, a panel showing the list of equilibria
+computed is displayed automatically.  The display of this panel can
+be toggled by selecting
+<guimenu>View</guimenu>-><guimenuitem>Profiles</guimenuitem>, or
+clicking on the playing card icon
+<guiicon><inlinegraphic fileref="../icons/profiles.gif"></guiicon>
+on the toolbar.
+For example, after computing all equilibria in the poker example, the
+game window looks like <xref linkend="figure.profiles">.
+</para>
+
+<figure id="figure.profiles">
+<title>The poker game with the unique equilibrium displayed</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/profiles.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+This game has a unique equilibrium in which Fred raises after Red with
+probability one, and raises with probability one-third after Black.
+Alice, at her only information set, plays meet with probability two-thirds
+and raise with probability one-third.
+</para>
+
+<para>
+This equilibrium is displayed in a table in the profiles panel.
+If more than one equilibrium is found, this panel lists all equilibria
+found.  Equilibria computed are grouped by separate computational runs;
+computing equilibria using a different method (or different settings)
+will add a second list of profiles.  The list of profiles displayed
+is selected using the drop-down at the top left of the profiles
+panel; in <xref linkend="figure.profiles">, it is set to
+<guilabel>Profiles 1</guilabel>.  A brief description of the method
+used to compute the equilibria is listed across the top of the profiles
+panel.
+</para>
+
+<para>
+The currently selected equilibrium is shown in bold in the profiles listing,
+and information about this equilibrium is displayed in the extensive
+game.  In the figure, the probabilities of selecting each action are
+displayed below each branch of the tree.  (This is the default Gambit
+setting; see <xref linkend="gui.efg.labels"> for configuring the
+labeling of trees.)  Each branch of the tree also shows a black line,
+the length of which is proportional to the probability with which the
+action is played.
+</para>
+
+<para>
+Clicking on any node in the tree displays additional information about
+the profile at that node.  For example, <xref linkend="figure.beliefs">
+shows the display after clicking on the first (top) node in Alice's
+information set.  The player panel displays information relevant to this
+node, including the payoff to all players conditional on reaching the
+node, as well as information about Alice's beliefs at the node.
+</para>
+
+<figure id="figure.beliefs">
+<title>More information about the equilibrium in the poker game</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/beliefs.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+The computed profiles can also be viewed in the reduced strategic
+game.  Clicking on the strategic game icon
+<guiicon><inlinegraphic fileref="../icons/table.gif"></guiicon>
+changes the view to the reduced strategic form of the game, and
+shows the equilibrium profiles converted to mixed strategies
+in the strategic game.
+</para>
+
+</sect2>
+
+</sect1>
+
+<sect1>
+<title>Computing quantal response equilibria</title>
+
+<para>
+Gambit provides methods for computing the logit quantal response
+equilibrium correspondence for extensive games
+(<xref linkend="McKPal98">) and strategic games
+(<xref linkend="McKPal95">), using the tracing method of
+(<xref linkend="Tur05">).
+</para>
+
+<para>
+To compute the correspondence, select
+<guimenu>Tools</guimenu>-><guimenuitem>Qre</guimenuitem>.
+If viewing an extensive game, the agent quantal response equilibrium
+correspondence is computed; if viewing a strategic game (including the
+reduced strategic game derived from an extensive game), the correspondence
+is computed in mixed strategies.
+</para>
+
+<para>
+For example, the output of tracing the correspondence for the extensive
+game of the poker example is shown in
+<xref linkend="figure.qre">.
+</para>
+
+<figure id="figure.qre">
+<title>Agent quantal response equilibria in the poker example</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/qre.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+The computed correspondence values can be saved to a CSV
+(comma-separated values) file by clicking the button labeled
+<guibutton>Save correspondence to .csv file</guibutton>.  This format
+is suitable for reading by a spreadsheet or graphing application.
+</para>
+
+</sect1>
+
+<sect1 id="gui.output">
+<title>Printing and exporting games</title>
+<para>
+Gambit supports (almost) WYSIWYG (what you see is what you get) output
+of both extensive and strategic games, both to a printer and to 
+several graphical formats.  For all of these operations, the game is
+drawn exactly as currently displayed on the screen, including whether
+the extensive or strategic representation is used, the layout,
+colors for players, dominance and probability indicators, and so forth. 
+</para>
+
+<note>
+<para>
+There are currently a few outstanding issues with printing on Linux
+systems, especially with regard to the setting of page size.  If these
+are an issue for you, consider exporting to one of the graphical output
+formats, and then using an image viewer or manipulation program for
+the printing phase.
+</para>
+</note>
+
+<sect2 id="gui.output.printing">
+<title>Printing a game</title>
+
+<para>
+To print the game, press <keycap>Ctrl</keycap>-<keycap>P</keycap>,
+select <guimenu>File</guimenu>-><guimenuitem>Print</guimenuitem>,
+or click the printer icon 
+<guiicon><inlinegraphic fileref="../icons/print.gif"></guiicon> on the toolbar.  
+The game is scaled so that
+the printout fits on one page, while maintaining the same ratio
+of horizontal to vertical size; that is, the scaling factor is the
+same in both horizontal and vertical dimensions.
+</para>
+
+<para>
+Note that especially for extensive games, one dimension of the tree
+is much larger than the other.  Typically, the extent of the tree
+vertically is much greater than its horizontal extent.
+Because the printout is scaled to fit on one page, printing such
+a tree will generally result in what appears to be a thin line
+running vertically down the center of the page.  This is in fact
+the tree, shrunk so the large vertical dimension fits on the page,
+meaning that the horizontal dimension, scaled at the same ratio,
+becomes very tiny.
+</para>
+
+</sect2>
+
+<sect2 id="gui.output.export">
+<title>Saving to a graphics file</title>
+
+<para>
+Gambit supports export to four graphical file formats:
+<itemizedlist>
+<listitem>
+<para>Windows bitmaps (<filename>.bmp</filename>)</para>
+</listitem>
+<listitem>
+<para>JPEG, a lossy compressed format
+(<filename>.jpg</filename>, <filename>.jpeg</filename>)</para>
+</listitem>
+<listitem>
+<para>PNG, a lossless compressed format (<filename>.png</filename>); these
+are similar to GIFs</para>
+</listitem>
+<listitem>
+<para>Encapsulated PostScript (<filename>.ps</filename>)</para>
+</listitem>
+</itemizedlist>
+
+To export a game to one of these formats, select
+<guimenu>File</guimenu>-><guisubmenu>Export</guisubmenu>, and select
+the corresponding menu entry.
+</para>
+
+<para>
+The Windows bitmap and PNG formats are generally recommended for
+export, as they both are lossless formats, which will reproduce the
+game image exactly as in Gambit.  PNG files use a lossless compression
+algorithm, so they are typically much smaller than the Windows bitmap
+for the same game.  Not all image viewing and manipulation tools
+handle PNG files; in those cases, use the Windows bitmap output instead.
+JPEG files use a compression algorithm that only approximates the
+original version, which often makes it ill-suited for use in saving
+game images, since it often leads to &quot;blocking&quot; in the 
+image file.
+</para>
+
+<para>
+For all three of these formats, the dimensions of the exported graphic
+are determined by the dimensions of the game as drawn on screen.
+Image export is only supported for games which are less than about 65000
+pixels in either the horizontal or vertical dimensions.  This is unlikely
+to be a practical problem, since such games are so large they usually
+cannot be drawn in such a way that a human can make sense of them.
+</para>
+
+<para>
+Encapsulated PostScript output is generally useful for inclusion in
+LaTeX and other scientific document preparation systems.  This is
+a vector-based output, and thus can be rescaled much more effectively
+than the other output formats.
+</para>
+
+</sect2>
+
+</sect1>
+
+</chapter>
+
+

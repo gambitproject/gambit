@@ -1,0 +1,52 @@
+<chapter id="utils">
+<title>The Gambit tools</title>
+
+<para>
+Gambit provides an array of programs for manipulating and analyzing games.
+This chapter describes these programs in detail.
+</para>
+
+<sect1 id="utils.nash">
+<title>Programs for computing Nash equilibria</title>
+<para>
+This section describes the implementations of various methods for
+computing Nash equilibria provided by Gambit.  For a general overview
+of the formulations of the Nash equilibrium problem, see the survey
+of McKelvey and McLennan (1996) [<xref linkend="McKMcL96">].
+</para>
+
+<para>
+By convention, these programs take an extensive or strategic game file
+on standard input, and output a list of equilibria computed.  The
+equilibria computed are presented as a list of comma-separated probabilities,
+preceded by the tag &quot;NE&quot;.  Many of the programs optionally
+output additional information about the operation of the algorithm;
+these outputs have other, program-specific tags, described in the
+individual program documentation.
+</para>
+
+&enumpure;
+&enumpoly;
+&enummixed;
+&lcp;
+&lp;
+&liap;
+&simpdiv;
+&logit;
+
+</sect1>
+
+<sect1 id="utils.convert">
+<title>Programs to convert among formats</title>
+
+<para>
+These programs convert among various representation formats for games.
+</para>
+
+&nfg2html;
+&nfg2tex;
+
+</sect1>
+
+</chapter>
+

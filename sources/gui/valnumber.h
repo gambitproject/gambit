@@ -27,12 +27,8 @@
 #ifndef VALNUMBER_H
 #define VALNUMBER_H
 
-#if defined(__GNUG__) && !defined(__APPLE_CC__)
-#pragma interface "valnumber.h"
-#endif  // __GNUG__
-
-#include "wx/validate.h"
-#include "math/gnumber.h"
+#include <wx/validate.h>
+#include "libgambit/libgambit.h"
 
 class gbtNumberValidator : public wxValidator {
 protected:

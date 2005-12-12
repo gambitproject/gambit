@@ -1,7 +1,7 @@
-NFG 1 R "Two person 2 x 2 game with unique mixed equilibrium" { "Alice" "Bob" }
+NFG 1 R "Two person 2 x 2 game with unique mixed equilibrium" { "Player 1" "Player 2" }
 
-{ { "U" "D" }
-{ "L" "R" }
+{ { "1" "2" }
+{ "1" "2" }
 }
 ""
 

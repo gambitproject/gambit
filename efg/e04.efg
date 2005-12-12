@@ -1,10 +1,11 @@
 EFG 2 R "Kreps-Wilson (Econometrica, 85), Figures 1,4,9, and 14" { "Player 1" "Player 2" }
+""
 
-p "ROOT" 1 1 "(1,1)" { "A" "R" "L" } 0
-t "" 1 "Outcome 1" { 0 0 }
+p "" 1 1 "(1,1)" { "A" "R" "L" } 0
+t "" 1 "Outcome 1" { 0, 0 }
 p "" 2 1 "(2,1)" { "R" "L" } 0
-t "" 2 "Outcome 2" { -1 2 }
-t "" 3 "Outcome 3" { -1 0 }
+t "" 2 "Outcome 2" { -1, 2 }
+t "" 3 "Outcome 3" { -1, 0 }
 p "" 2 1 "(2,1)" { "R" "L" } 0
-t "" 4 "Outcome 4" { -2 -2 }
-t "" 5 "Outcome 5" { 3 -1 }
+t "" 4 "Outcome 4" { -2, -2 }
+t "" 5 "Outcome 5" { 3, -1 }

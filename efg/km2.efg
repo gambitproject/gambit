@@ -1,7 +1,7 @@
 EFG 2 R "Kohlberg, Mertens, Example 2" { "Player 1" "Player 2" }
 ""
 
-p "ROOT" 1 1 "(1,1)" { "1" "2" "3" } 0
+p "" 1 1 "(1,1)" { "1" "2" "3" } 0
 t "" 1 "Outcome 1" { 2, 2 }
 p "" 2 1 "(2,1)" { "1" "2" } 0
 t "" 2 "Outcome 2" { 3, 3 }

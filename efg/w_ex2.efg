@@ -1,7 +1,7 @@
 EFG 2 R "Wilson's ex2:  Two stage battle of the sexes" { "Player 1" "Player 2" }
 ""
 
-p "ROOT" 1 1 "(1,1)" { "A" "B" } 1 "Outcome 5" { 1, 1 }
+p "" 1 1 "(1,1)" { "A" "B" } 1 "Outcome 5" { 1, 1 }
 p "" 2 1 "(2,1)" { "A" "B" } 0
 p "" 1 2 "(1,2)" { "A" "B" } 2 "Outcome 1" { 0, 0 }
 p "" 2 2 "(2,2)" { "A" "B" } 0

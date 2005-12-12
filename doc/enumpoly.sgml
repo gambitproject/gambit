@@ -1,0 +1,299 @@
+<refentry id="nash.efg.enumpoly">
+<refentryinfo>
+<date>2005-08-15</date>
+</refentryinfo>
+
+<refmeta>
+<refentrytitle>
+<application>gambit-efg-enumpoly</application>
+</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo>Gambit 1.0</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>
+<application>gambit-efg-enumpoly</application>
+</refname>
+<refpurpose>
+Computes Nash equilibria in an extensive game by solving polynomial systems
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<refsynopsisdivinfo>
+<date>2005-08-15</date>
+</refsynopsisdivinfo>
+<cmdsynopsis>
+<command>gambit-efg-enumpoly</command>
+<arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
+<arg><option>-h</option></arg>
+<arg><option>-q</option></arg>
+<arg><option>-v</option></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<refsect1info>
+<date>2005-08-15</date>
+</refsect1info>
+<title>DESCRIPTION</title>
+<para>
+<command>gambit-efg-enumpoly</command> reads an extensive game on standard
+input and computes Nash equilibria by solving systems of polynomial
+equations and inequalities.
+</para>
+
+<para>
+This program searches for all Nash equilibria in an extensive game using
+a support enumeration approach.  This approach computes all the supports
+which could, in principle, be the support of a Nash equilibrium, and then
+searches for a totally mixed equilibrium on that support by solving
+a system of polynomial equalities and inequalities formed by the Nash
+equilibrium conditions.  The ordering of the supports is done in such
+a way as to maximize use of previously computed information, making it
+suited to the computation of all Nash equilibria.
+</para>
+
+<para>
+When the verbose switch <option>-v</option> is used, the program outputs
+each support as it is considered.  The supports are presented as
+a comma-separated list of binary strings, where each entry represents
+one information set.  The digit 1 represents an action which is
+present in the support, and the digit 0 represents an action which is
+not present.  Each candidate support is printed with the label
+&quot;candidate,&quot;.
+</para>
+
+<para>
+The subroutine to compute a solution to the system of polynomial
+equations and inequalities will fail in degenerate cases.  When the
+verbose switch <option>-v</option> is used, these supports are identified
+on standard output with the label &quot;singular,&quot;.  It is possible
+that there exist equilibria, often a connected component of equilibria,
+on these singular supports.
+</para>
+
+</refsect1>
+
+<refsect1>
+<title>OPTIONS</title>
+<variablelist>
+<varlistentry>
+<term><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></term>
+<listitem>
+<para>
+Express all output using decimal representations with 
+<replaceable class="parameter">DECIMALS</replaceable> digits.  
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-h</option></term>
+<listitem>
+<para>
+Prints a help message listing the available options.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-q</option></term>
+<listitem>
+<para>
+Suppresses printing of the banner at program launch.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-v</option></term>
+<listitem>
+<para>
+Sets verbose mode.  In verbose mode, supports are printed on standard
+output with the label &quot;candidate&quot; as they are considered, 
+and singular supports are identified with the label &quot;singular.&quot;
+By default, no information about supports is printed.
+</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect1>
+
+<refsect1>
+<title>USAGE</title>
+<para>
+<command>gambit-efg-enumpoly</command> [OPTIONS] < file.efg
+</para>
+</refsect1>
+
+<refsect1>
+<title>BUGS</title>
+<para>
+None known.
+</para>
+</refsect1>
+
+<refsect1>
+<title>AUTHOR</title>
+<para>
+<author>
+<firstname>Andrew</firstname>
+<surname>McLennan</surname>
+<contrib>Original author</contrib>
+</author>
+</para>
+</refsect1>
+</refentry>
+
+<refentry id="nash.nfg.enumpoly">
+<refentryinfo>
+<date>2005-08-15</date>
+</refentryinfo>
+
+<refmeta>
+<refentrytitle>
+<application>gambit-nfg-enumpoly</application>
+</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo>Gambit 1.0</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>
+<application>gambit-nfg-enumpoly</application>
+</refname>
+<refpurpose>
+Computes Nash equilibria in a strategic game by solving polynomial systems
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<refsynopsisdivinfo>
+<date>2005-08-15</date>
+</refsynopsisdivinfo>
+<cmdsynopsis>
+<command>gambit-nfg-enumpoly</command>
+<arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
+<arg><option>-h</option></arg>
+<arg><option>-q</option></arg>
+<arg><option>-v</option></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<refsect1info>
+<date>2005-08-15</date>
+</refsect1info>
+<title>DESCRIPTION</title>
+<para>
+<command>gambit-nfg-enumpoly</command> reads a strategic game on standard
+input and computes Nash equilibria by solving systems of polynomial
+equations and inequalities.
+</para>
+
+<para>
+This program searches for all Nash equilibria in a strategic game using
+a support enumeration approach.  This approach computes all the supports
+which could, in principle, be the support of a Nash equilibrium, and then
+searches for a totally mixed equilibrium on that support by solving
+a system of polynomial equalities and inequalities formed by the Nash
+equilibrium conditions.  The ordering of the supports is done in such
+a way as to maximize use of previously computed information, making it
+suited to the computation of all Nash equilibria.
+</para>
+
+<para>
+When the verbose switch <option>-v</option> is used, the program outputs
+each support as it is considered.  The supports are presented as 
+a comma-separated list of binary strings, where each entry represents
+one player.  The digit 1 represents a strategy which is present in the
+support, and the digit 0 represents a strategy which is not present.
+Each candidate support is printed with the label &quot;candidate,&quot;.
+</para>
+
+<para>
+Note that the subroutine to compute a solution to the system of polynomial
+equations and inequalities will fail in degenerate cases.  When the
+verbose switch <option>-v</option> is used, these supports are identified
+on standard output with the label &quot;singular,&quot;.  It is possible
+that there exist equilibria, often a connected component of equilibria,
+on these singular supports.
+</para>
+
+</refsect1>
+
+<refsect1>
+<title>OPTIONS</title>
+<variablelist>
+<varlistentry>
+<term><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></term>
+<listitem>
+<para>
+Express all output using decimal representations with 
+<replaceable class="parameter">DECIMALS</replaceable> digits.  
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-h</option></term>
+<listitem>
+<para>
+Prints a help message listing the available options.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-q</option></term>
+<listitem>
+<para>
+Suppresses printing of the banner at program launch.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-v</option></term>
+<listitem>
+<para>
+Sets verbose mode.  In verbose mode, supports are printed on standard
+output with the label &quot;candidate&quot; as they are considered, 
+and singular supports are identified with the label &quot;singular.&quot;
+By default, no information about supports is printed.
+</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect1>
+
+<refsect1>
+<title>USAGE</title>
+<para>
+<command>gambit-nfg-enumpoly</command> [OPTIONS] < file.nfg
+</para>
+</refsect1>
+
+<refsect1>
+<title>BUGS</title>
+<para>
+None known.
+</para>
+</refsect1>
+
+<refsect1>
+<title>AUTHOR</title>
+<para>
+<author>
+<firstname>Andrew</firstname>
+<surname>McLennan</surname>
+<contrib>Original author</contrib>
+</author>
+</para>
+</refsect1>
+</refentry>
+
