@@ -27,7 +27,7 @@
 #ifndef EFGPROFILE_H
 #define EFGPROFILE_H
 
-#include "sheet.h"
+#include "wx/sheet/sheet.h"
 #include "gamedoc.h"
 
 class gbtBehavProfileList : public wxSheet, public gbtGameView {

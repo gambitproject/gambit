@@ -33,7 +33,7 @@
 #include <wx/txtstrm.h>
 #include <wx/tokenzr.h>
 
-#include "sheet.h"
+#include "wx/sheet/sheet.h"
 #include "dlnfglogit.h"
 
 class gbtLogitMixedList : public wxSheet {

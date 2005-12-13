@@ -31,7 +31,7 @@
 
 #include "renratio.h"
 
-#include "sheet.h"     // the wxSheet widget
+#include "wx/sheet/sheet.h"     // the wxSheet widget
 
 //----------------------------------------------------------------------------
 //                   class gbtRationalRendererRefData

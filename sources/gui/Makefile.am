@@ -4,7 +4,7 @@ SUBDIRS = bitmaps
 
 bin_PROGRAMS = gambit
 
-AM_CPPFLAGS = -I$(top_srcdir)/sources ${WX_CXXFLAGS}
+AM_CPPFLAGS = -I$(top_srcdir)/sources -I$(top_srcdir)/sources/labenski/include ${WX_CXXFLAGS}
 
 gambit_SOURCES = \
 	analysis.cc \
@@ -65,16 +65,6 @@ gambit_SOURCES = \
 	style.h \
 	valnumber.cc \
 	valnumber.h \
-	sheetatr.cc sheetatr.h \
-	sheet.cc sheet.h \
-	sheetedg.cc sheetedg.h \
-	sheetedt.cc sheetedt.h \
-	sheetren.cc sheetren.h \
-	sheetsel.cc sheetsel.h \
-	sheetspt.cc sheetspt.h \
-	sheettbl.cc sheettbl.h \
-	sheetval.cc sheetval.h \
-	pairarr.h sheetdef.h srtobjar.h wx24defs.h \
 	tinyxml.cc \
 	tinyxml.h \
 	tinyxmlerror.cc \
@@ -82,7 +72,9 @@ gambit_SOURCES = \
 
 
 gambit_LDADD = \
-        $(RC_OBJECT_PATH) $(WX_LIBS) \
+        $(RC_OBJECT_PATH) \
+	$(top_builddir)/sources/labenski/src/liblabenski.la \
+	$(WX_LIBS) \
 	$(top_builddir)/sources/libgambit/libgambit.la
 
 

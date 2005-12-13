@@ -31,7 +31,7 @@
 #include <wx/dnd.h>      // for drag-and-drop support
 #include <wx/print.h>    // for printing support
 
-#include "sheet.h"
+#include "wx/sheet/sheet.h"
 #include "renratio.h"    // special renderer for rational numbers
 
 #include "nfgpanel.h"
@@ -100,6 +100,16 @@ public:
   /// Called when the drop target receives text.
   virtual bool DropText(int p_x, int p_y, const wxString &p_text)
   { return false; }
+  //@}
+
+  /// @name Access to scrollbars from underlying wxSheet
+  //@{
+  /// Get the vertical scrollbar
+  wxScrollBar *GetVerticalScrollBar(void) const
+  { return m_vertScrollBar; }
+  /// Get the horizontal scrollbar
+  wxScrollBar *GetHorizontalScrollBar(void) const 
+  { return m_horizScrollBar; }
   //@}
 };
 
@@ -966,8 +976,8 @@ void gbtTableWidget::OnUpdate(void)
 
   // We add margins to the player labels to match the scrollbars,
   // so scrolling matches up
-  m_colSheet->SetMargins(m_payoffSheet->GetVerticalScrollBar()->GetSize().GetWidth(), -1);
-  m_rowSheet->SetMargins(-1, m_payoffSheet->GetHorizontalScrollBar()->GetSize().GetHeight());
+  m_colSheet->SetMargins(dynamic_cast<gbtPayoffsWidget *>(m_payoffSheet)->GetVerticalScrollBar()->GetSize().GetWidth(), -1);
+  m_rowSheet->SetMargins(-1, dynamic_cast<gbtPayoffsWidget *>(m_payoffSheet)->GetHorizontalScrollBar()->GetSize().GetHeight());
 
   dynamic_cast<gbtRowPlayerWidget *>(m_rowSheet)->OnUpdate();
   dynamic_cast<gbtColPlayerWidget *>(m_colSheet)->OnUpdate();

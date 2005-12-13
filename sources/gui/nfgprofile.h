@@ -27,7 +27,7 @@
 #ifndef NFGPROFILE_H
 #define NFGPROFILE_H
 
-#include "sheet.h"
+#include "wx/sheet/sheet.h"
 #include "gamedoc.h"
 
 class gbtMixedProfileList : public wxSheet, public gbtGameView {

@@ -28,7 +28,7 @@
 #define NFGPANEL_H
 
 #include "ctrlplay.h"     // for row and column player controls
-#include "sheet.h"        // for wxSheet
+#include "wx/sheet/sheet.h"        // for wxSheet
 
 class wxPrintout;
 class gbtTableWidget;

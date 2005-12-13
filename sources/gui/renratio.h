@@ -27,7 +27,7 @@
 #ifndef RENRATIO_H
 #define RENRATIO_H
 
-#include "sheet.h"     // the wxSheet widget
+#include "wx/sheet/sheet.h"     // the wxSheet widget
 
 //
 // This class is based on the wxSheetCellStringRendererRefData implementation

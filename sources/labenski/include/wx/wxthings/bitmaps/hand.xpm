@@ -1,0 +1,22 @@
+/* XPM */
+static const char *hand_xpm[] = {
+"16 16 3 1",
+"  c None",
+"a c Black",
+"c c #FFFFFF",
+"       aa       ",
+"   aa accaaa    ",
+"  accaaccacca   ",
+"  accaaccacca a ",
+"   accaccaccaaca",
+"   accaccaccacca",
+" aa acccccccacca",
+"accaacccccccccca",
+"acccaccccccccca ",
+" acccccccccccca ",
+"  accccccccccca ",
+"  acccccccccca  ",
+"   accccccccca  ",
+"    accccccca   ",
+"     acccccca   ",
+"     acccccca   "};

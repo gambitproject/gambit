@@ -1,0 +1,27 @@
+/* XPM */
+static const char *new_xpm[] = {
+/* columns rows colors chars-per-pixel */
+"16 16 5 1",
+"  c None",
+"a c Black",
+"b c #C0C0C0",
+"d c #FFFFFF",
+"e c #808080",
+/* pixels */
+"                ",
+"  aaaaaaaa      ",
+"  abbbbbbaa     ",
+"  abdddddada    ",
+"  abdddddaaaa   ",
+"  abddddddddae  ",
+"  abddddddddae  ",
+"  abddddddddae  ",
+"  abddddddddae  ",
+"  abddddddddae  ",
+"  abddddddddae  ",
+"  abddddddddae  ",
+"  abddddddddae  ",
+"  abddddddddae  ",
+"  aaaaaaaaaaae  ",
+"   eeeeeeeeeee  "
+};

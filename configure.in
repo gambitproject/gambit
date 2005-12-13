@@ -84,13 +84,13 @@ if test "${WITH_GUI}" == 1; then
   if test `echo ${WX_CXXFLAGS} | grep -c __WXGTK__` -eq 1; then
     AC_MSG_RESULT(GTK)
     WXPORT="GTK"
-    GUI_DIRS="gui"
+    GUI_DIRS="labenski gui"
   fi
 
   if test `echo ${WX_CXXFLAGS} | grep -c __WXMSW__` -eq 1; then
     AC_MSG_RESULT(Windows)
     WXPORT="MSW"
-    GUI_DIRS="gui"
+    GUI_DIRS="labenski gui"
     dnl Windows uses the resources file
     RC_OBJECT="gambitrc.o"
     RC_OBJECT_PATH="bitmaps/gambitrc.o"
@@ -101,7 +101,7 @@ if test "${WITH_GUI}" == 1; then
   if test `echo ${WX_CXXFLAGS} | grep -c __WXMAC__` -eq 1; then
     AC_MSG_RESULT(Macintosh)
     WXPORT="MAC"
-    GUI_DIRS="gui"
+    GUI_DIRS="labenski gui"
   fi
 
   if test -z "$WXPORT"; then
@@ -135,6 +135,14 @@ AC_OUTPUT(Makefile sources/Makefile \
 	  sources/tools/lp/Makefile \
 	  sources/tools/mixdom/Makefile \
 	  sources/tools/simpdiv/Makefile \
+          sources/labenski/Makefile \
+          sources/labenski/include/Makefile \
+          sources/labenski/include/wx/Makefile \
+          sources/labenski/include/wx/wxthings/bitmaps/Makefile \
+          sources/labenski/include/wx/wxthings/Makefile \
+          sources/labenski/include/wx/sheet/Makefile \
+          sources/labenski/src/Makefile \
+          sources/labenski/doc/Makefile \
 	  sources/gui/bitmaps/Makefile \
           sources/gui/Makefile \
           doc/Makefile efg/Makefile nfg/Makefile)

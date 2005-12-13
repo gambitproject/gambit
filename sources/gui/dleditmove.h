@@ -27,7 +27,7 @@
 #ifndef DLEDITMOVE_H
 #define DLEDITMOVE_H
 
-#include "sheet.h"
+#include "wx/sheet/sheet.h"
 
 class gbtEditMoveDialog : public wxDialog {
 private:
