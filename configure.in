@@ -36,7 +36,7 @@ dnl Checks for library functions.
 dnl AC_FUNC_MEMCMP
 dnl AC_TYPE_SIGNAL
 dnl AC_CHECK_FUNCS(ftime putenv strdup strstr strtod strtol)
-AC_CHECK_FUNCS(srand48 drand48)
+AC_CHECK_FUNCS(bcmp srand48 drand48)
 
 
 if test "${WITH_GUI}" == 1; then

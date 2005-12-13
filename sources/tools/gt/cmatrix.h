@@ -198,15 +198,21 @@ public:
 	}
 	inline bool operator==(const cvector &v) const {
 		if (m!=v.m) return false;
+#if !defined(HAVE_BCMP)
+		for(int i=0;i<m;i++) if (v.x[i]!=x[i]) return false;
+		return true;
+#else
 		return bcmp(x,v.x,m*sizeof(double))==0;
-		//for(int i=0;i<m;i++) if (v.x[i]!=x[i]) return false;
-		//return true;
+#endif // HAVE_BCMP
 	}
 	inline bool IsEqual(cvector *v) const {
 		if (m!=v->m) return false;
+#if !defined(HAVE_BCMP)
+		for(int i=0;i<m;i++) if (v->x[i]!=x[i]) return false;
+		return true;
+#else
 		return bcmp(x,v->x,m*sizeof(double))==0;
-		//for(int i=0;i<m;i++) if (v.x[i]!=x[i]) return false;
-		//return true;
+#endif // HAVE_BCMP
 	}	
 	inline bool operator==(const double &a) const {
 		for(int i=0;i<m;i++) if (a!=x[i]) return false;
@@ -214,9 +220,12 @@ public:
 	}
 	inline bool operator!=(const cvector &v) const {
 		if (m!=v.m) return true;
+#if !defined(HAVE_BCMP)
+		for(int i=0;i<m;i++) if (v.x[i]!=x[i]) return true;
+		return false;
+#else
 		return bcmp(x,v.x,m*sizeof(double))!=0;
-		//for(int i=0;i<m;i++) if (v.x[i]!=x[i]) return true;
-		//return false;
+#endif // HAVE_BCMP
 	}
 	inline bool operator!=(const double &a) const {
 		for(int i=0;i<m;i++) if (a!=x[i]) return true;
@@ -718,9 +727,12 @@ public:
 
 	inline bool operator==(const cmatrix &ma) const {
 		if (ma.n!=n||ma.m!=m) return false;
+#if !defined(HAVE_BCMP)
+		for(int i=0;i<s;i++) if (ma.x[i]!=x[i]) return false;
+		return true;
+#else
 		return bcmp(ma.x,x,s*sizeof(double))==0.0;
-		//for(int i=0;i<s;i++) if (ma.x[i]!=x[i]) return false;
-		//return true;
+#endif // HAVE_BCMP
 	}
 	inline bool operator==(const double &a) const {
 		for(int i=0;i<s;i++) if (x[i]!=a) return false;
@@ -728,9 +740,12 @@ public:
 	}
 	inline bool operator!=(const cmatrix &ma) const {
 		if (ma.n!=n||ma.m!=m) return true;
+#if !defined(HAVE_BCMP)
+		for(int i=0;i<s;i++) if (ma.x[i]!=x[i]) return true;
+		return false;
+#else
 		return bcmp(ma.x,x,s*sizeof(double))!=0.0;
-		//for(int i=0;i<s;i++) if (ma.x[i]!=x[i]) return true;
-		//return false;
+#endif // HAVE_BCMP
 	}
 	inline bool operator!=(const double &a) const {
 		for(int i=0;i<s;i++) if (x[i]!=a) return true;
