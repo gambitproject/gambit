@@ -2472,7 +2472,7 @@ bool wxSheet::ToggleColSelection( int col, bool addToSelected, bool sendEvt )
 //#define wxDF_wxSHEET (wxDF_MAX+1001)  // works w/ GTK 1.2 non unicode
 const wxChar* wxDF_wxSHEET = wxT("wxDF_wxSHEET");
 
-class WXDLLEXPORT wxSheetDataObject : public wxDataObjectSimple
+class wxSheetDataObject : public wxDataObjectSimple
 {
 public:
     wxSheetDataObject() : wxDataObjectSimple(wxDF_wxSHEET) {}

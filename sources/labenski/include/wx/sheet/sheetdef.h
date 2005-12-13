@@ -30,6 +30,7 @@
 // ----------------------------------------------------------------------------
 
 // These are our DLL macros (see the contrib libs like wxPlot)
+/*
 #ifdef WXMAKINGDLL_SHEET
     #define WXDLLIMPEXP_SHEET WXEXPORT
     #define WXDLLIMPEXP_DATA_SHEET(type) WXEXPORT type
@@ -37,9 +38,12 @@
     #define WXDLLIMPEXP_SHEET WXIMPORT
     #define WXDLLIMPEXP_DATA_SHEET(type) WXIMPORT type
 #else // not making nor using DLL
+*/
     #define WXDLLIMPEXP_SHEET
     #define WXDLLIMPEXP_DATA_SHEET(type) type
+/*
 #endif
+*/
 
 // ----------------------------------------------------------------------------
 // Two simple macros that do wxCHECK_RET/MSG for the UpdatePos functions

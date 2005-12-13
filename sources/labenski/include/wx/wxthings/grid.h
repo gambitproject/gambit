@@ -18,6 +18,7 @@ class wxGridCellTextEditor;
 class wxSpinCtrlDbl;
 class wxBlockIntSelection;
 
+#include "wx/wxthings/thingdef.h"
 #include "wx/grid.h"
 
 enum CellPos_Type
@@ -263,7 +264,7 @@ protected:
 // TheGridTable
 //----------------------------------------------------------------------------
 
-class WXDLLEXPORT TheGridTable : public wxGridTableBase
+class WXDLLIMPEXP_THINGS TheGridTable : public wxGridTableBase
 {
 public:
     TheGridTable():wxGridTableBase() { m_rows = 0; m_cols = 0; }

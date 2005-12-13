@@ -74,7 +74,7 @@ private:
 // subclassed refdata then in your wxSheet constructor (or Create) function call
 // UnRef to delete the original and m_refData=new MySheetRefData to set the new.
 //-----------------------------------------------------------------------------
-class WXDLLEXPORT wxSheetRefData : public wxObjectRefData
+class WXDLLIMPEXP_SHEET wxSheetRefData : public wxObjectRefData
 {
 public:
     wxSheetRefData();

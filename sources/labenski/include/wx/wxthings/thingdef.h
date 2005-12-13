@@ -24,6 +24,7 @@
 // ----------------------------------------------------------------------------
 
 // These are our DLL macros (see the contrib libs like wxPlot)
+/*
 #ifdef WXMAKINGDLL_THINGS
     #define WXDLLIMPEXP_THINGS WXEXPORT
     #define WXDLLIMPEXP_DATA_THINGS(type) WXEXPORT type
@@ -31,8 +32,11 @@
     #define WXDLLIMPEXP_THINGS WXIMPORT
     #define WXDLLIMPEXP_DATA_THINGS(type) WXIMPORT type
 #else // not making nor using DLL
+*/
     #define WXDLLIMPEXP_THINGS
     #define WXDLLIMPEXP_DATA_THINGS(type) type
+/*
 #endif
+*/
 
 #endif  // __WX_THINGDEF_H__
