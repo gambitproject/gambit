@@ -128,7 +128,8 @@ template <class T> class QuikSolv {
 					const gRectangle<gDouble>&, 
 					const int&,
 					      gbtArray<int>&,
-					      int&,
+					      int &iterations,
+					      int depth,
 					const int&,
 					      int*)                  const;
 

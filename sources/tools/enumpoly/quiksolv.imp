@@ -524,6 +524,7 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
 		     max_iterations, 
 		     precedence, 
 		     iterations,
+		     1,
 		     max_no_roots,
 		     no_found);
 
@@ -554,12 +555,25 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
 }
 
 
+//
+// TLT: In some cases, this recursive process apparently goes into an
+// infinite regress.  I'm not able to identify just why this occurs,
+// but as at least a temporary safeguard, we will limit the maximum depth
+// of this recursive search.
+//
+// This limit has been chosen only because it doesn't look like any
+// "serious" search (i.e., one that actually terminates with a result)
+// will take more than a depth of 32.
+//
+#define MAX_DEPTH  32
+
 template <class T> void // gbtList<gbtVector<gDouble> >  
 QuikSolv<T>::FindRootsRecursion(      gbtList<gbtVector<gDouble> >* rootlistptr,
 				const gRectangle<gDouble>& r, 
 				const int& max_iterations,
 				      gbtArray<int>& precedence,
 				      int& iterations,
+				      int depth,
 				const int& max_no_roots,
 				      int* roots_found)    const
 {
@@ -593,7 +607,7 @@ QuikSolv<T>::FindRootsRecursion(      gbtList<gbtVector<gDouble> >* rootlistptr,
   int N = r.NumberOfCellsInSubdivision();
   for (int i = 1; i <= N; i++)
     if (max_no_roots == 0 || *roots_found < max_no_roots) {
-      if (iterations >= max_iterations) return;
+      if (iterations >= max_iterations || depth == MAX_DEPTH) return;
       else {
 	iterations++;
 	FindRootsRecursion(rootlistptr,
@@ -601,6 +615,7 @@ QuikSolv<T>::FindRootsRecursion(      gbtList<gbtVector<gDouble> >* rootlistptr,
 			   max_iterations, 
 			   precedence, 
 			   iterations,
+			   depth+1,
 			   max_no_roots,
 			   roots_found);
       } 
