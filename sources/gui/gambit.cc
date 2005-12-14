@@ -148,7 +148,7 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
   infile.seekg(0);
 
   try {
-    gbtEfgGame *efg = ReadEfgFile(infile);
+    gbtEfgGame *efg = ReadEfg(infile);
                 
     if (!efg)  return GBT_APP_PARSE_FAILED;
 

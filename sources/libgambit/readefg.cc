@@ -787,10 +787,10 @@ static void BuildEfg(gbtEfgGame *p_efg, TreeData &p_treeData)
 
 
 //=========================================================================
-// ReadEfgFile: Global visible function to read an extensive form savefile
+//  ReadEfg: Global visible function to read an extensive form savefile
 //=========================================================================
 
-gbtEfgGame *ReadEfgFile(std::istream &p_file)
+gbtEfgGame *ReadEfg(std::istream &p_file)
 {
   ParserState parser(p_file);
   TreeData treeData;

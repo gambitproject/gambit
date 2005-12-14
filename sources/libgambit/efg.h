@@ -435,9 +435,7 @@ public:
     
 };
 
-//#include "behav.h"
-
-gbtEfgGame *ReadEfgFile(std::istream &);
+gbtEfgGame *ReadEfg(std::istream &);
 
 class gbtPureBehavProfile   {
 protected:

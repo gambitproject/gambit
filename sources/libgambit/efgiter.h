@@ -30,35 +30,6 @@
 #include "efg.h"
 #include "efstrat.h"
 
-class EfgContIter;
-
-class EfgIter    {
-  private:
-    const gbtEfgGame *_efg;
-    gbtEfgSupport _support;
-    gbtPureBehavProfile _profile;
-    gbtPVector<int> _current;
-    mutable gbtVector<gbtRational> _payoff;
-
-  public:
-    EfgIter(gbtEfgGame &);
-    EfgIter(const gbtEfgSupport &);
-    EfgIter(const EfgIter &);
-    EfgIter(const EfgContIter &);
-    ~EfgIter();
-  
-    EfgIter &operator=(const EfgIter &);
-  
-    void First(void);
-    int Next(int p, int iset);
-    int Set(int p, int iset, int act);
-  
-    gbtRational Payoff(int p) const;
-    void Payoff(gbtVector<gbtRational> &) const;
-
-    const gbtEfgSupport &Support(void) const;
-};
-
 //
 // N.B.: Currently, the contingency iterator only allows one information
 //       set to be "frozen".  There is a list of "active" information

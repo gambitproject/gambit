@@ -241,7 +241,7 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
   TiXmlNode *efgfile = game->FirstChild("efgfile");
   if (efgfile) {
     std::istringstream s(efgfile->FirstChild()->Value());
-    m_efg = ReadEfgFile(s);
+    m_efg = ReadEfg(s);
 
   }
   

@@ -537,7 +537,7 @@ int main(int argc, char *argv[])
   gbtEfgGame *efg;
 
   try {
-    efg = ReadEfgFile(std::cin);
+    efg = ReadEfg(std::cin);
   }
   catch (...) {
     return 1;

@@ -43,8 +43,6 @@ template <class T> class gbtRectArray;
 //  life of the profile, and will not correctly invalidate itself if 
 //  the game does change.  
 // 
-//  The BehavSolution class should be used For interactive use, where 
-//  the game payoffs or probabilities may change.  
 // 
 
 template <class T> class gbtBehavProfile : private gbtDPVector<T>  {
