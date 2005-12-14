@@ -14,6 +14,7 @@
     #pragma interface "geometry.h"
 #endif
 
+#include "wx/wxthings/thingdef.h"
 #include "wx/geometry.h"
 
 #define wxGEOMETRY_INF 1E100
@@ -246,7 +247,7 @@ public :
 // wxCircleDouble   m_r*m_r = (x-m_origin.m_x)^2 + (y-m_origin.m_y)^2
 //-----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxCircleDouble : public wxPoint2DDouble
+class WXDLLIMPEXP_THINGS wxCircleDouble : public wxPoint2DDouble
 {
 public :
     

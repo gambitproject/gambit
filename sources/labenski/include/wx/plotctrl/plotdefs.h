@@ -24,6 +24,7 @@
 // ----------------------------------------------------------------------------
 
 // These are our DLL macros (see the contrib libs like wxPlot)
+/*
 #ifdef WXMAKINGDLL_PLOTLIB
     #define WXDLLIMPEXP_PLOTLIB WXEXPORT
     #define WXDLLIMPEXP_DATA_PLOTLIB(type) WXEXPORT type
@@ -31,8 +32,11 @@
     #define WXDLLIMPEXP_PLOTLIB WXIMPORT
     #define WXDLLIMPEXP_DATA_PLOTLIB(type) WXIMPORT type
 #else // not making nor using DLL
+*/
     #define WXDLLIMPEXP_PLOTLIB
     #define WXDLLIMPEXP_DATA_PLOTLIB(type) type
+/*
 #endif
+*/
 
 #endif  // __WX_PLOTDEF_H__
