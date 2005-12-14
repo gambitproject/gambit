@@ -154,7 +154,7 @@ public:
   friend int      odd(const gbtInteger&); // true if odd
   friend int      sign(const gbtInteger&); // returns -1, 0, +1
 
-  friend void     (setbit)(gbtInteger& x, long b);   // set b'th bit of x
+  friend void     setbit(gbtInteger& x, long b);   // set b'th bit of x
   friend void     clearbit(gbtInteger& x, long b); // clear b'th bit
   friend int      testbit(const gbtInteger& x, long b);  // return b'th bit
 

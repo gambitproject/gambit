@@ -207,9 +207,9 @@ gbtRational pow(const gbtRational& x, const gbtInteger& y)
   return pow(x, yy);
 }               
 
-gbtRational operator - (const gbtRational& x) 
+gbtRational gbtRational::operator-(void) const
 {
-  gbtRational r(x); r.negate(); return r;
+  gbtRational r(*this); r.negate(); return r;
 }
 
 gbtRational abs(const gbtRational& x) 
@@ -413,34 +413,34 @@ gbtRational &gbtRational::operator =  (const gbtRational& y)
   num = y.num;  den = y.den;   return *this;
 }
 
-int operator == (const gbtRational& x, const gbtRational& y)
+bool gbtRational::operator==(const gbtRational &y) const
 {
-  return compare(x.num, y.num) == 0 && compare(x.den, y.den) == 0;
+  return compare(num, y.num) == 0 && compare(den, y.den) == 0;
 }
 
-int operator != (const gbtRational& x, const gbtRational& y)
+bool gbtRational::operator!=(const gbtRational &y) const
 {
-  return compare(x.num, y.num) != 0 || compare(x.den, y.den) != 0;
+  return compare(num, y.num) != 0 || compare(den, y.den) != 0;
 }
 
-int operator <  (const gbtRational& x, const gbtRational& y)
+bool gbtRational::operator< (const gbtRational &y) const
 {
-  return compare(x, y) <  0; 
+  return compare(*this, y) <  0; 
 }
 
-int operator <= (const gbtRational& x, const gbtRational& y)
+bool gbtRational::operator<=(const gbtRational &y) const
 {
-  return compare(x, y) <= 0; 
+  return compare(*this, y) <= 0; 
 }
 
-int operator >  (const gbtRational& x, const gbtRational& y)
+bool gbtRational::operator> (const gbtRational &y) const
 {
-  return compare(x, y) >  0; 
+  return compare(*this, y) >  0; 
 }
 
-int operator >= (const gbtRational& x, const gbtRational& y)
+bool gbtRational::operator>=(const gbtRational &y) const
 {
-  return compare(x, y) >= 0; 
+  return compare(*this, y) >= 0; 
 }
 
 int sign(const gbtRational& x)
@@ -454,48 +454,52 @@ void gbtRational::negate()
 }
 
 
-void gbtRational::operator += (const gbtRational& y) 
+gbtRational &gbtRational::operator+=(const gbtRational& y) 
 {
   add(*this, y, *this);
+  return *this;
 }
 
-void gbtRational::operator -= (const gbtRational& y) 
+gbtRational &gbtRational::operator-=(const gbtRational& y) 
 {
   sub(*this, y, *this);
+  return *this;
 }
 
-void gbtRational::operator *= (const gbtRational& y) 
+gbtRational &gbtRational::operator*=(const gbtRational& y) 
 {
   mul(*this, y, *this);
+  return *this;
 }
 
-void gbtRational::operator /= (const gbtRational& y) 
+gbtRational &gbtRational::operator/=(const gbtRational& y) 
 {
   div(*this, y, *this);
+  return *this;
 }
 
 const gbtInteger& gbtRational::numerator() const { return num; }
 const gbtInteger& gbtRational::denominator() const { return den; }
 gbtRational::operator double() const { return ratio(num, den); }
 
-gbtRational operator + (const gbtRational& x, const gbtRational& y) 
+gbtRational gbtRational::operator+(const gbtRational &y) const
 {
-  gbtRational r; add(x, y, r); return r;
+  gbtRational r; add(*this, y, r); return r;
 }
 
-gbtRational operator - (const gbtRational& x, const gbtRational& y)
+gbtRational gbtRational::operator-(const gbtRational &y) const
 {
-  gbtRational r; sub(x, y, r); return r;
+  gbtRational r; sub(*this, y, r); return r;
 }
 
-gbtRational operator * (const gbtRational& x, const gbtRational& y)
+gbtRational gbtRational::operator*(const gbtRational &y) const
 {
-  gbtRational r; mul(x, y, r); return r;
+  gbtRational r; mul(*this, y, r); return r;
 }
 
-gbtRational operator / (const gbtRational& x, const gbtRational& y)
+gbtRational gbtRational::operator/(const gbtRational &y) const
 {
-  gbtRational r; div(x, y, r); return r;
+  gbtRational r; div(*this, y, r); return r;
 }
 
 

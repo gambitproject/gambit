@@ -65,24 +65,24 @@ public:
 
   gbtRational &operator =  (const gbtRational& y);
 
-  friend int       operator == (const gbtRational& x, const gbtRational& y);
-  friend int       operator != (const gbtRational& x, const gbtRational& y);
-  friend int       operator <  (const gbtRational& x, const gbtRational& y);
-  friend int       operator <= (const gbtRational& x, const gbtRational& y);
-  friend int       operator >  (const gbtRational& x, const gbtRational& y);
-  friend int       operator >= (const gbtRational& x, const gbtRational& y);
+  bool operator==(const gbtRational &y) const;
+  bool operator!=(const gbtRational &y) const;
+  bool operator< (const gbtRational &y) const;
+  bool operator<=(const gbtRational &y) const;
+  bool operator> (const gbtRational &y) const;
+  bool operator>=(const gbtRational &y) const;
 
-  friend gbtRational  operator +  (const gbtRational& x, const gbtRational& y);
-  friend gbtRational  operator -  (const gbtRational& x, const gbtRational& y);
-  friend gbtRational  operator *  (const gbtRational& x, const gbtRational& y);
-  friend gbtRational  operator /  (const gbtRational& x, const gbtRational& y);
+  gbtRational operator+(const gbtRational &y) const;
+  gbtRational operator-(const gbtRational &y) const;
+  gbtRational operator*(const gbtRational &y) const;
+  gbtRational operator/(const gbtRational &y) const;
 
-  void             operator += (const gbtRational& y);
-  void             operator -= (const gbtRational& y);
-  void             operator *= (const gbtRational& y);
-  void             operator /= (const gbtRational& y);
+  gbtRational &operator+=(const gbtRational& y);
+  gbtRational &operator-=(const gbtRational& y);
+  gbtRational &operator*=(const gbtRational& y);
+  gbtRational &operator/=(const gbtRational& y);
 
-  friend gbtRational  operator - (const gbtRational& x);
+  gbtRational operator-(void) const;
 
 
 // builtin gbtRational functions
