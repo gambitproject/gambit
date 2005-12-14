@@ -275,6 +275,11 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     x[i] = p_start[i];
   }
   x[x.Length()] = p_startLambda;
+
+  if (g_fullGraph) {
+    PrintProfile(std::cout, p_start.Support(), x);
+  }
+
   gbtVector<double> t(p_start.Length() + 1);
   gbtVector<double> y(p_start.Length());
 
