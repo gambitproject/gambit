@@ -31,6 +31,7 @@
 #include "gamedoc.h"
 
 class gbtLogitMixedList;
+class gbtLogitPlotCtrl;
 
 class gbtLogitMixedDialog : public wxDialog {
 private:
@@ -42,7 +43,8 @@ private:
   wxButton *m_stopButton, *m_okButton, *m_saveButton;
   wxTimer m_timer;
   wxString m_output;
-  
+  gbtLogitPlotCtrl *m_plot;
+
   void OnStop(wxCommandEvent &);
   void OnTimer(wxTimerEvent &);
   void OnIdle(wxIdleEvent &);
@@ -57,4 +59,4 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
-#endif  // DLLOGIT_H
+#endif  // DLNFGLOGIT_H

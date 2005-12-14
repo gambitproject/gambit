@@ -34,7 +34,12 @@
 #include <wx/tokenzr.h>
 
 #include "wx/sheet/sheet.h"
+#include "wx/plotctrl/plotwin.h"
 #include "dlnfglogit.h"
+
+//========================================================================
+//                      class gbtLogitMixedList
+//========================================================================
 
 class gbtLogitMixedList : public wxSheet {
 private:
@@ -69,6 +74,10 @@ public:
   virtual ~gbtLogitMixedList();
 
   void AddProfile(const wxString &p_text, bool p_forceShow);
+
+  const gbtList<double> &GetLambdas(void) const { return m_lambdas; }
+  const gbtList<gbtMixedProfile<double> > &GetProfiles(void) const 
+  { return m_profiles; }
 };
 
 gbtLogitMixedList::gbtLogitMixedList(wxWindow *p_parent, 
@@ -204,6 +213,112 @@ void gbtLogitMixedList::AddProfile(const wxString &p_text,
   AutoSizeCol(0);
 }
 
+
+//========================================================================
+//                      class gbtLogitPlotCtrl
+//========================================================================
+
+class gbtLogitPlotCtrl : public wxPlotWindow {
+private:
+  gbtGameDocument *m_doc;
+
+  /// Overriding x (lambda) axis labeling
+  void CalcXAxisTickPositions(void);
+  double LambdaToX(double p_lambda)
+  { return p_lambda / (1.0 + p_lambda); }
+  double XToLambda(double p_x)
+  { return p_x / (1.0 - p_x); }
+  
+public:
+  gbtLogitPlotCtrl(wxWindow *p_parent, gbtGameDocument *p_doc);
+
+  void SetProfiles(const gbtList<double> &,
+		   const gbtList<gbtMixedProfile<double> > &);
+};
+
+gbtLogitPlotCtrl::gbtLogitPlotCtrl(wxWindow *p_parent, 
+				   gbtGameDocument *p_doc)
+  : wxPlotWindow(p_parent), m_doc(p_doc)
+{
+  SetAxisLabelColour(*wxBLUE);
+  wxFont labelFont(8, wxSWISS, wxNORMAL, wxBOLD);
+  SetAxisLabelFont(labelFont);
+  SetAxisColour(*wxBLUE);
+  SetAxisFont(labelFont);
+
+  // SetAxisFont resets the width of the y axis labels, assuming
+  // a fairly long label.
+  int x=6, y=12, descent=0, leading=0;
+  GetTextExtent(wxT("0.88"), &x, &y, &descent, &leading, &labelFont);
+  m_y_axis_text_width = x + leading;
+
+  SetXAxisLabel(wxT("Lambda"));
+  SetShowXAxisLabel(true);
+  SetYAxisLabel(wxT("Probability"));
+  SetShowYAxisLabel(true);
+
+  SetShowKey(true);
+
+  m_xAxisTick_step = 0.2;
+  SetViewRect(wxRect2DDouble(0, 0, 1, 1));
+} 
+
+//
+// This differs from the wxPlotWindow original only by the use of
+// XToLambda() to construct the tick labels.
+//
+void gbtLogitPlotCtrl::CalcXAxisTickPositions(void)
+{
+  double current = ceil(m_viewRect.GetLeft() / m_xAxisTick_step) * m_xAxisTick_step;
+  m_xAxisTicks.Clear();
+  m_xAxisTickLabels.Clear();
+  int i, x, windowWidth = GetPlotAreaRect().width;
+  for (i=0; i<m_xAxisTick_count; i++) {
+    if (!IsFinite(current, wxT("axis label is not finite"))) return;
+                
+    x = GetClientCoordFromPlotX( current );
+            
+    if ((x >= -1) && (x < windowWidth+2)) {
+      m_xAxisTicks.Add(x);
+      m_xAxisTickLabels.Add(wxString::Format(m_xAxisTickFormat.c_str(), 
+					     XToLambda(current)));
+    }
+
+    current += m_xAxisTick_step;
+  }
+}
+
+void gbtLogitPlotCtrl::SetProfiles(const gbtList<double> &p_lambdas,
+				   const gbtList<gbtMixedProfile<double> > &p_profiles)
+{
+  if (p_lambdas.Length() == 0)  return;
+
+  wxBitmap bitmap(1, 1);
+  
+  for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
+    gbtNfgPlayer *player = m_doc->GetNfg()->GetPlayer(pl);
+    for (int st = 1; st <= player->NumStrats(); st++) {
+      wxPlotData *curve = new wxPlotData(p_lambdas.Length());
+      curve->SetFilename(wxString::Format(wxT("%d:%d"), pl, st));
+    
+      for (int i = 0; i < p_lambdas.Length(); i++) {
+	curve->SetValue(i, LambdaToX(p_lambdas[i+1]), 
+			p_profiles[i+1](pl, st));
+      }
+
+      curve->SetPen(wxPLOTPEN_NORMAL, 
+		    wxPen(m_doc->GetStyle().GetPlayerColor(pl), 1, wxSOLID));
+      curve->SetSymbol(bitmap);
+
+      AddCurve(curve);
+    }
+  }
+}
+
+//========================================================================
+//                      class gbtLogitMixedDialog
+//========================================================================
+
 const int GBT_ID_TIMER = 1000;
 const int GBT_ID_PROCESS = 1001;
 
@@ -239,10 +354,17 @@ gbtLogitMixedDialog::gbtLogitMixedDialog(wxWindow *p_parent,
 
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
+  wxBoxSizer *midSizer = new wxBoxSizer(wxHORIZONTAL);
   m_mixedList = new gbtLogitMixedList(this, m_doc);
-  m_mixedList->SetSizeHints(wxSize(600, 400));
-  sizer->Add(m_mixedList, 0, wxALL | wxALIGN_CENTER, 5);
+  m_mixedList->SetSizeHints(wxSize(300, 400));
+  midSizer->Add(m_mixedList, 0, wxALL | wxALIGN_CENTER, 5);
   
+  m_plot = new gbtLogitPlotCtrl(this, m_doc);
+  m_plot->SetSizeHints(wxSize(400, 400));
+  midSizer->Add(m_plot, 0, wxALL | wxALIGN_CENTER, 5);
+
+  sizer->Add(midSizer, 0, wxALL | wxALIGN_CENTER, 5);
+
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   m_saveButton = new wxButton(this, wxID_SAVE, 
 			      wxT("Save correspondence to .csv file"));
@@ -352,6 +474,7 @@ void gbtLogitMixedDialog::OnEndProcess(wxProcessEvent &p_event)
 
   m_okButton->Enable(true);
   m_saveButton->Enable(true);
+  m_plot->SetProfiles(m_mixedList->GetLambdas(), m_mixedList->GetProfiles());
 }
 
 void gbtLogitMixedDialog::OnStop(wxCommandEvent &)
@@ -380,3 +503,4 @@ void gbtLogitMixedDialog::OnSave(wxCommandEvent &)
     file << ((const char *) m_output.mb_str());
   }
 }
+
