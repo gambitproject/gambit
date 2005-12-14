@@ -29,6 +29,8 @@
 
 #include "gpvector.h"
 #include "gdpvect.h"
+#include "game.h"
+
 
 class gbtEfgGame;
 class gbtEfgPlayer;
@@ -50,7 +52,7 @@ public:
 };
 
 
-class gbtEfgOutcome {
+class gbtEfgOutcome : public gbtGameObject {
   friend class gbtEfgGame;
   friend class gbtBehavProfile<double>;
   friend class gbtBehavProfile<gbtRational>;
@@ -78,7 +80,7 @@ public:
   const std::string &GetPayoffText(int pl) const { return m_textPayoffs[pl]; }
 };
 
-class gbtEfgAction   {
+class gbtEfgAction : public gbtGameObject {
   friend class gbtEfgGame;
   friend class gbtBehavProfile<double>;
   friend class gbtBehavProfile<gbtRational>;
@@ -104,7 +106,7 @@ public:
   bool Precedes(const gbtEfgNode *) const;
 };
 
-class gbtEfgInfoset   {
+class gbtEfgInfoset : public gbtGameObject {
   friend class gbtEfgGame;
   friend class gbtEfgPlayer;
   friend class gbtEfgNode;
@@ -155,7 +157,7 @@ public:
   const std::string &GetActionProbText(int i) const { return m_textProbs[i]; }
 };
 
-class gbtEfgPlayer   {
+class gbtEfgPlayer : public gbtGameObject  {
   friend class gbtEfgGame;
   friend class gbtBehavProfile<double>;
   friend class gbtBehavProfile<gbtRational>;
@@ -188,7 +190,7 @@ public:
   gbtEfgInfoset *GetInfoset(int p_index) const { return m_infosets[p_index]; }
 };
 
-class gbtEfgNode    {
+class gbtEfgNode : public gbtGameObject {
   friend class gbtEfgGame;
   friend class gbtBehavProfile<double>;
   friend class gbtBehavProfile<gbtRational>;
@@ -240,7 +242,7 @@ public:
   bool IsSubgameRoot(void) const;
 };
 
-class gbtEfgGame {
+class gbtEfgGame : public gbtGame {
 private:
   friend class EfgFileReader;
   friend class EfgFile;

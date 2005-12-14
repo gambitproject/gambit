@@ -9,6 +9,7 @@ libgambit_la_SOURCES = \
 	efg.cc efg.h \
 	efgiter.cc efgiter.h \
 	efstrat.cc efstrat.h \
+	game.h \
 	garray.h \
 	gdpvect.cc gdpvect.h gdpvect.imp \
 	glist.h \
@@ -38,6 +39,7 @@ libgambitinclude_HEADERS = \
 	efg.h \
 	efgiter.h \
 	efstrat.h \
+	game.h \
 	garray.h \
 	gdpvect.h gdpvect.imp \
 	glist.h \

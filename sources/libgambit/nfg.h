@@ -29,6 +29,8 @@
 
 #include "base.h"
 #include "rational.h"
+#include "game.h"
+
 
 class gbtNfgGame;
 template <class T> class gbtMixedProfile;
@@ -39,7 +41,7 @@ class gbtNumber;
 /// using text strings, in either decimal or rational format.  All
 /// payoffs are treated as exact (that is, no conversion to floating
 /// point is done).
-class gbtNfgOutcome   {
+class gbtNfgOutcome : public gbtGameObject  {
   friend class gbtNfgGame;
   friend class gbtMixedProfile<double>;
   friend class gbtMixedProfile<gbtRational>;
@@ -91,7 +93,7 @@ template <class T> class gbtMixedProfile;
 /// strategies gives the index into the strategic game's table to
 /// find the outcome for that strategy profile, making payoff computation
 /// relatively efficient.
-class gbtNfgStrategy   {
+class gbtNfgStrategy : public gbtGameObject  {
   friend class gbtNfgGame;
   friend class gbtNfgPlayer;
   friend class gbtStrategyProfile;
@@ -130,7 +132,7 @@ public:
 };
 
 /// This class represents a player in a strategic game.
-class gbtNfgPlayer {
+class gbtNfgPlayer : public gbtGameObject {
   friend class gbtNfgGame;
   friend class gbtNfgStrategy;
 private:
@@ -184,7 +186,7 @@ class gbtEfgGame;
 /// creation, all entries in the table are set to the null pointer.
 /// See gbtStrategyProfile for the facilities for setting entries
 /// in the game table.
-class gbtNfgGame  {
+class gbtNfgGame : public gbtGame {
 friend class gbtStrategyProfile;
 friend class NfgFileReader;
 friend void SetEfg(gbtNfgGame *, const gbtEfgGame *);

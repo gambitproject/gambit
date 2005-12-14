@@ -77,7 +77,7 @@ gbtNfgPlayer::gbtNfgPlayer(int n, gbtNfgGame *N, int num)
 
 gbtNfgPlayer::~gbtNfgPlayer()
 { 
-  for (int j = 1; j <= strategies.Length(); delete strategies[j++]);
+  for (int j = 1; j <= strategies.Length(); strategies[j++]->Invalidate());
 }
 
 //---------------------------------------------------------------------------
@@ -103,7 +103,7 @@ void gbtNfgStrategy::DeleteStrategy(void)
     m_player->strategies[st]->m_number = st;
   }
   m_player->m_nfg->RebuildTable();
-  delete this;
+  this->Invalidate();
 }
 
 //===========================================================================
@@ -171,8 +171,8 @@ gbtNfgGame::gbtNfgGame(const gbtNfgGame &b)
 
 gbtNfgGame::~gbtNfgGame()
 {
-  for (int pl = 1; pl <= players.Length(); delete players[pl++]);
-  for (int outc = 1; outc <= outcomes.Length(); delete outcomes[outc++]);
+  for (int pl = 1; pl <= players.Length(); players[pl++]->Invalidate());
+  for (int outc = 1; outc <= outcomes.Length(); outcomes[outc++]->Invalidate());
 }
 
 //---------------------------------------------------------------------------
@@ -377,7 +377,7 @@ void gbtNfgGame::DeleteOutcome(gbtNfgOutcome *outcome)
       results[i] = 0;
   }
 
-  delete outcomes.Remove(outcome->GetNumber());
+  outcomes.Remove(outcome->GetNumber())->Invalidate();
 
   for (int outc = 1; outc <= outcomes.Length(); outc++)
     outcomes[outc]->number = outc;

@@ -34,7 +34,7 @@
 
 gbtEfgPlayer::~gbtEfgPlayer()
 {
-  while (m_infosets.Length()) delete m_infosets.Remove(1);
+  while (m_infosets.Length())  m_infosets.Remove(1)->Invalidate();
 }
 
 
@@ -79,7 +79,7 @@ gbtEfgInfoset::gbtEfgInfoset(gbtEfgGame *p_efg, int p_number,
 
 gbtEfgInfoset::~gbtEfgInfoset()  
 {
-  for (int act = 1; act <= m_actions.Length(); delete m_actions[act++]);
+  for (int act = 1; act <= m_actions.Length(); m_actions[act++]->Invalidate());
 }
 
 bool gbtEfgInfoset::IsChanceInfoset(void) const
@@ -114,7 +114,7 @@ gbtEfgAction *gbtEfgInfoset::InsertAction(int where)
 
 void gbtEfgInfoset::RemoveAction(int which)
 {
-  delete m_actions.Remove(which);
+  m_actions.Remove(which)->Invalidate();
   for (; which <= m_actions.Length(); which++)
     m_actions[which]->m_number = which;
 
@@ -141,7 +141,7 @@ gbtEfgNode::gbtEfgNode(gbtEfgGame *e, gbtEfgNode *p)
 
 gbtEfgNode::~gbtEfgNode()
 {
-  for (int i = children.Length(); i; delete children[i--]);
+  for (int i = children.Length(); i; children[i--]->Invalidate());
 }
 
 
@@ -268,7 +268,7 @@ gbtEfgGame::gbtEfgGame(const gbtEfgGame &E, gbtEfgNode *n /* = 0 */)
     for (int pl = 1; pl <= players.Length(); pl++)  {
       for (int i = 1; i <= players[pl]->m_infosets.Length(); i++)  {
 	if (players[pl]->m_infosets[i]->m_members.Length() == 0)
-	  delete players[pl]->m_infosets.Remove(i--);
+	  players[pl]->m_infosets.Remove(i--)->Invalidate();
       }
     }
   }
@@ -279,11 +279,11 @@ gbtEfgGame::gbtEfgGame(const gbtEfgGame &E, gbtEfgNode *n /* = 0 */)
 
 gbtEfgGame::~gbtEfgGame()
 {
-  delete m_root;
-  delete chance;
+  m_root->Invalidate();
+  chance->Invalidate();
 
-  for (int i = 1; i <= players.Length(); delete players[i++]);
-  for (int i = 1; i <= outcomes.Last(); delete outcomes[i++]);
+  for (int i = 1; i <= players.Length(); players[i++]->Invalidate());
+  for (int i = 1; i <= outcomes.Last(); outcomes[i++]->Invalidate());
 
   if (m_reducedNfg) {
     delete m_reducedNfg;
@@ -648,7 +648,7 @@ gbtEfgOutcome *gbtEfgGame::NewOutcome(void)
 void gbtEfgGame::DeleteOutcome(gbtEfgOutcome *p_outcome)
 {
   m_root->DeleteOutcome(p_outcome);
-  delete outcomes.Remove(outcomes.Find(p_outcome));
+  outcomes.Remove(outcomes.Find(p_outcome))->Invalidate();
   DeleteLexicon();
 }
 
@@ -839,7 +839,7 @@ gbtEfgNode *gbtEfgGame::DeleteNode(gbtEfgNode *n, gbtEfgNode *keep)
   else
     m_root = keep;
 
-  delete n;
+  n->Invalidate();
   DeleteLexicon();
 
   sortisets = true;
@@ -999,7 +999,7 @@ bool gbtEfgGame::DeleteEmptyInfoset(gbtEfgInfoset *s)
   if (s->NumMembers() > 0)   return false;
 
   s->m_player->m_infosets.Remove(s->m_player->m_infosets.Find(s));
-  delete s;
+  s->Invalidate();
 
   return true;
 }
@@ -1161,7 +1161,7 @@ gbtEfgNode *gbtEfgGame::DeleteTree(gbtEfgNode *n)
 
   while (n->NumChildren() > 0)   {
     DeleteTree(n->children[1]);
-    delete n->children.Remove(1);
+    n->children.Remove(1)->Invalidate();
   }
   
   if (n->infoset)  {
@@ -1217,7 +1217,7 @@ gbtEfgInfoset *gbtEfgGame::DeleteAction(gbtEfgInfoset *s, const gbtEfgAction *a)
   s->RemoveAction(where);
   for (int i = 1; i <= s->m_members.Length(); i++)   {
     DeleteTree(s->m_members[i]->children[where]);
-    delete s->m_members[i]->children.Remove(where);
+    s->m_members[i]->children.Remove(where)->Invalidate();
   }
   DeleteLexicon();
   SortInfosets();
