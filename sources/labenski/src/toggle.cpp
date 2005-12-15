@@ -41,7 +41,7 @@ IMPLEMENT_DYNAMIC_CLASS( wxCustomButton, wxControl )
 BEGIN_EVENT_TABLE(wxCustomButton,wxControl)
     EVT_MOUSE_EVENTS ( wxCustomButton::OnMouseEvents )
     EVT_PAINT        ( wxCustomButton::OnPaint )
-    EVT_TIMER        ( wxID_ANY, wxCustomButton::OnTimer) 
+    EVT_TIMER        ( wxID_ANY, wxCustomButton::OnTimer)
     EVT_SIZE         ( wxCustomButton::OnSize )
 END_EVENT_TABLE()
 
@@ -70,20 +70,20 @@ bool wxCustomButton::Create(wxWindow* parent, wxWindowID id,
 {
     if (!wxControl::Create(parent,id,pos,size,wxNO_BORDER|wxCLIP_CHILDREN,val,name))
         return false;
-    
-    wxControl::SetLabel(label);    
+
+    wxControl::SetLabel(label);
     wxControl::SetBackgroundColour(parent->GetBackgroundColour());
     wxControl::SetForegroundColour(parent->GetForegroundColour());
     wxControl::SetFont(parent->GetFont());
 
     if (bitmap.Ok()) m_bmpLabel = bitmap;
-    
+
     if (!SetButtonStyle(style)) return false;
 
     wxSize bestSize = DoGetBestSize();
     SetSize(wxSize(size.x<0 ? bestSize.x:size.x, size.y<0 ? bestSize.y:size.y));
     SetBestSize(GetSize());
-    
+
     CalcLayout(true);
     return true;
 }
@@ -103,7 +103,7 @@ bool wxCustomButton::SetButtonStyle(long style)
     if ((style & wxCUSTBUT_TOP) != 0)    n_styles++;
     if ((style & wxCUSTBUT_BOTTOM) != 0) n_styles++;
     wxCHECK_MSG(n_styles < 2, false, wxT("Only one wxCustomButton label position allowed"))
-    
+
     n_styles = 0;
     if ((style & wxCUSTBUT_NOTOGGLE) != 0)       n_styles++;
     if ((style & wxCUSTBUT_BUTTON) != 0)         n_styles++;
@@ -113,10 +113,10 @@ bool wxCustomButton::SetButtonStyle(long style)
     wxCHECK_MSG(n_styles < 2, false, wxT("Only one wxCustomButton style allowed"))
 
     m_button_style = style;
-    
-    if ((m_button_style & wxCUSTBUT_BUTTON) != 0) 
+
+    if ((m_button_style & wxCUSTBUT_BUTTON) != 0)
         m_down = 0;
-    
+
     CalcLayout(true);
     return true;
 }
@@ -132,12 +132,12 @@ void wxCustomButton::SetLabel( const wxString &label )
 void wxCustomButton::OnMouseEvents(wxMouseEvent& event)
 {
     if (m_button_style & wxCUSTBUT_NOTOGGLE) return;
-    
+
     if (event.LeftDown() || event.RightDown())
     {
-        if (!HasCapture()) 
+        if (!HasCapture())
             CaptureMouse(); // keep depressed until up
-        
+
         m_down++;
         Redraw();
     }
@@ -148,11 +148,11 @@ void wxCustomButton::OnMouseEvents(wxMouseEvent& event)
     }
     else if (event.LeftUp())
     {
-        if (HasCapture()) 
+        if (HasCapture())
             ReleaseMouse();
-        
+
         m_eventType = wxEVT_LEFT_UP;
-        
+
         if (wxRect(wxPoint(0,0), GetSize()).Inside(event.GetPosition()))
         {
             if ((m_button_style & wxCUSTBUT_BUTTON) && (m_down > 0))
@@ -173,8 +173,8 @@ void wxCustomButton::OnMouseEvents(wxMouseEvent& event)
                 {
                     m_eventType = wxEVT_LEFT_DCLICK;
                 }
-                
-                if ((m_button_style & wxCUSTBUT_TOGGLE) && 
+
+                if ((m_button_style & wxCUSTBUT_TOGGLE) &&
                     (m_button_style & wxCUSTBUT_TOG_DCLICK_BUT)) m_down++;
             }
         }
@@ -183,9 +183,9 @@ void wxCustomButton::OnMouseEvents(wxMouseEvent& event)
     }
     else if (event.RightUp())
     {
-        if (HasCapture()) 
+        if (HasCapture())
             ReleaseMouse();
-        
+
         m_eventType = wxEVT_RIGHT_UP;
 
         if (wxRect(wxPoint(0,0), GetSize()).Inside(event.GetPosition()))
@@ -200,7 +200,7 @@ void wxCustomButton::OnMouseEvents(wxMouseEvent& event)
             else
             {
                 m_down++;
-            
+
                 if (!m_timer)
                 {
                     m_timer = new wxTimer(this, m_down);
@@ -212,15 +212,15 @@ void wxCustomButton::OnMouseEvents(wxMouseEvent& event)
                 }
             }
         }
-        
+
         Redraw();
     }
     else if (event.Entering())
     {
         m_focused = true;
-        if ((event.LeftIsDown() || event.RightIsDown()) && HasCapture()) 
+        if ((event.LeftIsDown() || event.RightIsDown()) && HasCapture())
             m_down++;
-        
+
         Redraw();
     }
     else if (event.Leaving())
@@ -228,7 +228,7 @@ void wxCustomButton::OnMouseEvents(wxMouseEvent& event)
         m_focused = false;
         if ((event.LeftIsDown() || event.RightIsDown()) && HasCapture())
             m_down--;
-        
+
         Redraw();
     }
 }
@@ -238,10 +238,10 @@ void wxCustomButton::OnTimer( wxTimerEvent &event )
     m_timer->Stop();
     delete m_timer;
     m_timer = NULL;
-    
-    // Clean up the button presses 
+
+    // Clean up the button presses
     // FIXME - GTK eats second left down for a DClick, who know about the others?
-    if (m_button_style & wxCUSTBUT_BUTTON) 
+    if (m_button_style & wxCUSTBUT_BUTTON)
     {
         m_down = 0;
     }
@@ -251,15 +251,15 @@ void wxCustomButton::OnTimer( wxTimerEvent &event )
             m_down = event.GetId()%2 ? 0 : 1;
         else
             m_down = event.GetId()%2 ? 1 : 0;
-    } 
-    else if (m_button_style & wxCUSTBUT_BUT_DCLICK_TOG) 
+    }
+    else if (m_button_style & wxCUSTBUT_BUT_DCLICK_TOG)
     {
         if (m_eventType == wxEVT_LEFT_DCLICK)
             m_down = event.GetId()%2 ? 0 : 1;
         else
             m_down = event.GetId()%2 ? 1 : 0;
     }
-    else if (m_button_style & wxCUSTBUT_TOG_DCLICK_BUT) 
+    else if (m_button_style & wxCUSTBUT_TOG_DCLICK_BUT)
     {
         if (m_eventType == wxEVT_LEFT_UP)
             m_down = event.GetId()%2 ? 0 : 1;
@@ -273,7 +273,7 @@ void wxCustomButton::OnTimer( wxTimerEvent &event )
 
 void wxCustomButton::SendEvent()
 {
-    if (((m_button_style & wxCUSTBUT_TOGGLE) && (m_eventType == wxEVT_LEFT_UP)) || 
+    if (((m_button_style & wxCUSTBUT_TOGGLE) && (m_eventType == wxEVT_LEFT_UP)) ||
         ((m_button_style & wxCUSTBUT_BUT_DCLICK_TOG) && (m_eventType == wxEVT_LEFT_DCLICK)) ||
         ((m_button_style & wxCUSTBUT_TOG_DCLICK_BUT) && (m_eventType == wxEVT_LEFT_UP)))
     {
@@ -294,13 +294,13 @@ void wxCustomButton::SendEvent()
 }
 
 wxBitmap wxCustomButton::CreateBitmapDisabled(const wxBitmap &bitmap) const
-{    
+{
     wxCHECK_MSG(bitmap.Ok(), wxNullBitmap, wxT("invalid bitmap"));
-    
+
     unsigned char br = GetBackgroundColour().Red();
     unsigned char bg = GetBackgroundColour().Green();
     unsigned char bb = GetBackgroundColour().Blue();
-        
+
     wxImage image = bitmap.ConvertToImage();
     int pos, width = image.GetWidth(), height = image.GetHeight();
     unsigned char *img_data = image.GetData();
@@ -308,19 +308,19 @@ wxBitmap wxCustomButton::CreateBitmapDisabled(const wxBitmap &bitmap) const
     for (int j=0; j<height; j++)
     {
         for (int i=j%2; i<width; i+=2)
-        {   
+        {
             pos = (j*width+i)*3;
-            img_data[pos  ] = br; 
-            img_data[pos+1] = bg; 
-            img_data[pos+2] = bb; 
+            img_data[pos  ] = br;
+            img_data[pos+1] = bg;
+            img_data[pos+2] = bb;
         }
     }
-        
+
     return wxBitmap(image);
 
 /*      // FIXME why bother creating focused wxCustomButton's bitmap
         wxImage imgFoc = bitmap.ConvertToImage();
-    
+
         bool mask = false;
         unsigned char mr=0, mg=0, mb=0;
         if (img.HasMask())
@@ -330,7 +330,7 @@ wxBitmap wxCustomButton::CreateBitmapDisabled(const wxBitmap &bitmap) const
             mg = imgDis.GetMaskGreen();
             mb = imgDis.GetMaskBlue();
         }
-        unsigned char *r, *g, *b;       
+        unsigned char *r, *g, *b;
         unsigned char *focData = imgFoc.GetData();
         r = imgFoc.GetData();
         g = imgFoc.GetData() + 1;
@@ -349,13 +349,13 @@ wxBitmap wxCustomButton::CreateBitmapDisabled(const wxBitmap &bitmap) const
         }
         m_bmpFocus = wxBitmap(imgFoc);
 */
-    
+
 }
 
 void wxCustomButton::SetBitmapLabel(const wxBitmap& bitmap)
-{ 
-    m_bmpLabel = bitmap; 
-    CalcLayout(true); 
+{
+    m_bmpLabel = bitmap;
+    CalcLayout(true);
 }
 
 void wxCustomButton::OnPaint(wxPaintEvent& WXUNUSED(event))
@@ -376,7 +376,7 @@ void wxCustomButton::Paint( wxDC &dc )
 
     int w, h;
     GetSize(&w,&h);
- 
+
     wxColour foreColour = GetForegroundColour();
     wxColour backColour = GetBackgroundColour();
 
@@ -388,14 +388,14 @@ void wxCustomButton::Paint( wxDC &dc )
     }
 
     wxBitmap bitmap;
-    
+
     if (IsEnabled())
     {
-        if (GetValue() && m_bmpSelected.Ok()) 
+        if (GetValue() && m_bmpSelected.Ok())
             bitmap = m_bmpSelected;
-        else if (m_focused && m_bmpFocus.Ok()) 
+        else if (m_focused && m_bmpFocus.Ok())
             bitmap = m_bmpFocus;
-        else if (m_bmpLabel.Ok())  
+        else if (m_bmpLabel.Ok())
             bitmap = m_bmpLabel;
     }
     else
@@ -406,7 +406,7 @@ void wxCustomButton::Paint( wxDC &dc )
 
         if (m_bmpDisabled.Ok())
             bitmap = m_bmpDisabled;
-        else if (m_bmpLabel.Ok()) 
+        else if (m_bmpLabel.Ok())
             bitmap = m_bmpLabel;
 
         foreColour = wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT);
@@ -419,7 +419,7 @@ void wxCustomButton::Paint( wxDC &dc )
 
     dc.DrawRectangle(0, 0, w, h);
 
-    if (bitmap.Ok()) 
+    if (bitmap.Ok())
         dc.DrawBitmap(bitmap, m_bitmapPos.x, m_bitmapPos.y, true );
 
     if (!GetLabel().IsEmpty())
@@ -429,7 +429,7 @@ void wxCustomButton::Paint( wxDC &dc )
         dc.SetTextForeground(foreColour);
         dc.DrawText(GetLabel(), m_labelPos.x, m_labelPos.y);
     }
-    
+
     if (GetValue())                                        // draw sunken border
     {
         dc.SetPen(*wxGREY_PEN);
@@ -462,22 +462,22 @@ void wxCustomButton::OnSize( wxSizeEvent &event )
 }
 
 void wxCustomButton::SetMargins(const wxSize &margin, bool fit)
-{ 
-    m_labelMargin = margin; 
-    m_bitmapMargin = margin; 
-    CalcLayout(true); 
+{
+    m_labelMargin = margin;
+    m_bitmapMargin = margin;
+    CalcLayout(true);
     if (fit) SetSize(DoGetBestSize());
 }
-void wxCustomButton::SetLabelMargin(const wxSize &margin, bool fit) 
-{ 
-    m_labelMargin = margin; 
-    CalcLayout(true); 
+void wxCustomButton::SetLabelMargin(const wxSize &margin, bool fit)
+{
+    m_labelMargin = margin;
+    CalcLayout(true);
     if (fit) SetSize(DoGetBestSize());
 }
-void wxCustomButton::SetBitmapMargin(const wxSize &margin, bool fit) 
-{ 
-    m_bitmapMargin = margin; 
-    CalcLayout(true); 
+void wxCustomButton::SetBitmapMargin(const wxSize &margin, bool fit)
+{
+    m_bitmapMargin = margin;
+    CalcLayout(true);
     if (fit) SetSize(DoGetBestSize());
 }
 
@@ -487,7 +487,7 @@ wxSize wxCustomButton::DoGetBestSize() const
     int bw=0, bh=0;
     bool has_bitmap = false;
     bool has_label = false;
-    
+
     if (!GetLabel().IsEmpty())
     {
         GetTextExtent(GetLabel(), &lw, &lh);
@@ -532,7 +532,7 @@ void wxCustomButton::CalcLayout(bool refresh)
     {
         GetTextExtent(label, &lw, &lh);
     }
-    
+
     // Center the label or bitmap if only one or the other
     if (!m_bmpLabel.Ok())
     {
@@ -568,6 +568,6 @@ void wxCustomButton::CalcLayout(bool refresh)
         m_bitmapPos = wxPoint((w - bw)/2, (h - (bh+lh+m_labelMargin.y+m_bitmapMargin.y+mid_margin))/2 + m_bitmapMargin.y);
         m_labelPos  = wxPoint((w - lw)/2, m_bitmapPos.y + bh + mid_margin);
     }
-    
+
     if (refresh) Refresh(false);
 }

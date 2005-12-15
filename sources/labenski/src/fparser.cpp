@@ -1,10 +1,10 @@
-//==============================
-// Function parser v2.7 by Warp
-//==============================
+//===============================
+// Function parser v2.71 by Warp
+//===============================
 
 // Modified for use with wxWidgets by John Labenski 1/20/04
 // removed all non ASCII chars from this file for unicode compatibility.
-// I apologize for mangling peoples names, but some unicode editors could not 
+// I apologize for mangling peoples names, but some unicode editors could not
 // properly load this file previously.
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
@@ -24,23 +24,27 @@
     #include "wx/string.h"
 #endif
 
+#if defined(__VISUALC__) && wxUSE_DEBUG_NEW_ALWAYS && defined(new)
+    #undef new // turn off wxWidgets debug code
+#endif
+
 // Turn off warnings generated from MSVC's buggy std:: lib header files.
 #if defined(__VISUALC__)
     #include <yvals.h>
     #pragma warning(disable: 4018)  // signed/unsigned mismatch
     #pragma warning(disable: 4100)  // unreferenced formal parameter
-    #pragma warning(disable: 4146)  // unary minus operator applied to unsigned type, 
+    #pragma warning(disable: 4146)  // unary minus operator applied to unsigned type,
                                     // result still unsigned
-    #pragma warning(disable: 4244)  // 'conversion' conversion from 'type1' to 'type2', 
+    #pragma warning(disable: 4244)  // 'conversion' conversion from 'type1' to 'type2',
                                     // possible loss of data
-    #pragma warning(disable: 4245)  // conversion from 'type1' to 'type2', signed/unsigned 
+    #pragma warning(disable: 4245)  // conversion from 'type1' to 'type2', signed/unsigned
                                     // mismatch
     #pragma warning(disable: 4511)  // 'class' : copy constructor could not be generated
     #pragma warning(disable: 4512)  // 'class' : assignment operator could not be generated
-    #pragma warning(disable: 4663)  // C++ language change: to explicitly specialize class 
+    #pragma warning(disable: 4663)  // C++ language change: to explicitly specialize class
                                     // template 'vector'
     #pragma warning(disable: 4710)  // 'function' : function not inlined
-    #pragma warning(disable: 4786)  // identifier was truncated to 'number' characters 
+    #pragma warning(disable: 4786)  // identifier was truncated to 'number' characters
 #endif
 
 // Comment out the following line if your compiler supports the (non-standard)
@@ -72,16 +76,16 @@ double logoneplusx(double x)
 
 double asinh(double x)
 {
-    if (fabs(x) > 1.0E10)   
+    if (fabs(x) > 1.0E10)
         return ((x > 0.0) ? 0.69314718055995+log(fabs(x)) :
                            -0.69314718055995+log(fabs(x)));
     else
     {
         double y = x*x;
-        return ((x == 0.0) ? 0.0 : ((x > 0.0) ? 
+        return ((x == 0.0) ? 0.0 : ((x > 0.0) ?
                                logoneplusx(fabs(x)+y/(1.0+sqrt(1.0+y))) :
                               -logoneplusx(fabs(x)+y/(1.0+sqrt(1.0+y)))));
-    }    
+    }
 }
 
 double acosh(double x)
@@ -94,11 +98,11 @@ double atanh(double x)
 {
     double ax = fabs(x);
     if (ax >= 1.0)
-        return ((x > 0.0) ? DBL_MAX : -DBL_MAX); 
+        return ((x > 0.0) ? DBL_MAX : -DBL_MAX);
     else
     {
         return ((x == 0) ? 0.0 : ((x > 0.0) ? 0.5*logoneplusx(2.0*ax/(1.0-ax)) :
-                                             -0.5*logoneplusx(2.0*ax/(1.0-ax)))); 
+                                             -0.5*logoneplusx(2.0*ax/(1.0-ax))));
     }
 }
 
@@ -114,7 +118,9 @@ double atanh(double x)
 // but it will not do anything.
 // If you are unsure, just leave it. It won't slow down the other parts of
 // the library.
+#ifndef NO_SUPPORT_OPTIMIZER
 #define SUPPORT_OPTIMIZER
+#endif
 
 #include "wx/plotctrl/fparser.h"
 #include "fparser.hh"
@@ -148,7 +154,7 @@ int wxFunctionParser::Parse(const wxString& function, const wxString& vars,
 
     int ret = m_functionParser->Parse(Function, Vars, useDegrees);
     m_ok = (ret == -1) && ErrorMsg().IsEmpty();
-    
+
     return ret;
 }
 wxString wxFunctionParser::ErrorMsg() const
@@ -156,7 +162,7 @@ wxString wxFunctionParser::ErrorMsg() const
     const char *msg = m_functionParser->ErrorMsg();
     if (!msg)
         return wxEmptyString;
-    
+
     return wxConvUTF8.cMB2WX(msg);
 }
 wxFunctionParser::ParseErrorType wxFunctionParser::GetParseErrorType() const
@@ -195,6 +201,10 @@ int wxFunctionParser::GetNumberVariables() const
 {
     return m_functionParser->GetNumberVariables();
 }
+bool wxFunctionParser::GetUseDegrees() const
+{
+    return m_functionParser->GetUseDegrees();
+}
 wxString wxFunctionParser::GetVariableName(size_t n) const
 {
     int numVars = GetNumberVariables();
@@ -208,7 +218,7 @@ wxString wxFunctionParser::GetVariableName(size_t n) const
         if (vars[i] == wxT(','))
             count++;
     }
-    
+
     return wxEmptyString;
 }
 
@@ -381,7 +391,7 @@ namespace
         }
         return 0;
     }
-};
+}
 
 
 //---------------------------------------------------------------------------
@@ -472,9 +482,9 @@ FunctionParser::Data::Data(const Data& cpy):
     if(ImmedSize) Immed = new double[ImmedSize];
     if(StackSize) Stack = new double[StackSize];
 
-    unsigned i; // MSVC doesn't allow i used twice in for loops
-    for(i=0; i<ByteCodeSize; ++i) ByteCode[i] = cpy.ByteCode[i];
-    for(i=0; i<ImmedSize; ++i) Immed[i] = cpy.Immed[i];
+    // MSVC doesn't allow i used twice in for loops
+    for(unsigned i=0; i<ByteCodeSize; ++i) ByteCode[i] = cpy.ByteCode[i];
+    for(unsigned j=0; j<ImmedSize; ++j) Immed[j] = cpy.Immed[j];
 
     // No need to copy the stack contents because it's obsolete outside Eval()
 }
@@ -526,7 +536,7 @@ namespace
         }
         return true;
     }
-};
+}
 
 bool FunctionParser::isValidName(const std::string& name) const
 {
@@ -665,7 +675,7 @@ namespace
     {
         while(F[Ind] && isspace(F[Ind])) ++Ind;
     }
-};
+}
 
 // Returns an iterator to the variable with the same name as 'F', or to
 // Variables.end() if no such variable exists:
@@ -2376,8 +2386,8 @@ private:
             {
                 //bool didsomething = true;
 
-                pit poslogpos; bool foundposlog = false;
-                pit neglogpos; bool foundneglog = false;
+                pit poslogpos = NULL; bool foundposlog = false;
+                pit neglogpos = NULL; bool foundneglog = false;
 
                 ConstList cl = p1->BuildConstList();
 
@@ -3379,7 +3389,7 @@ void FunctionParser::Optimize()
 #else /* !SUPPORT_OPTIMIZER */
 
 /* keep the linker happy */
-void FunctionParser::MakeTree(CodeTree *) const {}
+void FunctionParser::MakeTree(void *) const {}
 void FunctionParser::Optimize()
 {
     // Do nothing if no optimizations are supported.

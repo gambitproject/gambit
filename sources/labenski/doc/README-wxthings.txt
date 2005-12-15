@@ -1,14 +1,16 @@
+readme.txt for wxThings
+
 block.h/cpp - wxBlockInt is a wxGridSelection type class based on
-wxRect2DInt to store selected 2-D rectangular areas. It knows how to 
-combine with other blocks. wxBlockIntSelection consists of an array 
-of wxBlockInts. It minimizes them if possible so they never overlap 
+wxRect2DInt to store selected 2-D rectangular areas. It knows how to
+combine with other blocks. wxBlockIntSelection consists of an array
+of wxBlockInts. It minimizes them if possible so they never overlap
 and can sort them from each corner.
 
 range.h/cpp - wxRangeInt min/max class for storing a 1-D range of
 values and knows how to combine with other wxRangeInts.
 wxRangeIntSelection contains an array of wxRangeInts and minimizes them
-if possible, they never overlap, and always stay in order from low to 
-high. wxRangeDbl and wxRangeDblSelection is the same, but for double 
+if possible, they never overlap, and always stay in order from low to
+high. wxRangeDbl and wxRangeDblSelection is the same, but for double
 valued ranges.
 
 filebrws.h/cpp & filebrws_icons_wdr.h - wxFileBrowser is an Explorer
@@ -20,21 +22,15 @@ geometry.h/cpp - wxCircleInt, wxCircleDouble, wxRay2DDouble, wxRay2DInt
 wxEllipseInt, wxEllipseDouble, etc... not fully finished.
 
 genergdi.h/cpp - wxGenericColour, wxGenericPen. A color and pen that store
-the values themselves and have identical functions as wxColour and wxPen. 
-They do not require a GUI and are suited to instances where you may want to 
+the values themselves and have identical functions as wxColour and wxPen.
+They do not require a GUI and are suited to instances where you may want to
 store a considerable number of different ones.
-
-grid.h/cpp - wxGrid derived class to make things easier, copy and paste
-mechanism using wxBlockSelection. Unlike popular spreadsheets you can 
-copy from arbitrarily disconnected selections to a differently 
-disconnected selections as well as the more pedestrian connected
-selections. This is depricated and for academic purposes only.
 
 optvalue.h/cpp - wxOptionValue class contains a string type and two
 arrays of options and values. It works on the same format as the
-wxFileConfig class and can load and save to a string/stream. 
-[opt valuetype] 
-option1 = value1 
+wxFileConfig class and can load and save to a string/stream.
+[opt valuetype]
+option1 = value1
 option2 = value2
 
 spinctld.h/cpp - wxSpinCtrlDbl is a drop in replacement for a
@@ -55,10 +51,10 @@ click. Note: to differentiate between single and double clicks a timer
 is used, if you want it to be just a regular toggle button I suggest
 you remove the timer code.
 
-dropdown.h/cpp - DropDownBase a base class for a combobox type widget. It 
+dropdown.h/cpp - DropDownBase a base class for a combobox type widget. It
 manages a wxPopupTransientWindow as a child. See wxBitmapComboBox.
 
-bmpcombo.h/cpp - wxBitmapComboBox is a wxComboBox widget for bitmaps. You 
+bmpcombo.h/cpp - wxBitmapComboBox is a wxComboBox widget for bitmaps. You
 Append some bitmaps either individually or with an array. Since bitmaps are
 refed this should be a fast process and you don't have to keep them around.
 It acts just like a wxComboBox otherwise, sends a EVT_COMBOBOX when selections
@@ -80,9 +76,4 @@ pixel qsort, and a pixel qsort that sorts two arrays together (only one
 is used for the comparison, the  other just follows). They can be
 DECLARED in headers, DEFINED in you  cpp files, or just used inline.
 Since they're macros you can set if they're for arrays of doubles,
-ints, chars... 
-
-
-
-test.cpp is a sample program to test the wxSpinCtrlDbl and the
-wxCustomButton, the Makefile is for gcc and the test.dsp is for VC.
+ints, chars...

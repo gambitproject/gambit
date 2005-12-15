@@ -18,7 +18,6 @@ liblabenski_la_SOURCES = \
 	dropdown.cpp \
 	genergdi.cpp \
 	geometry.cpp \
-	grid.cpp \
 	menubtn.cpp \
 	optvalue.cpp \
 	range.cpp \
@@ -26,11 +25,12 @@ liblabenski_la_SOURCES = \
 	toggle.cpp \
 	fparser.cpp fparser.hh fourier.c \
 	lm_lsqr.cpp \
+	plotctrl.cpp \
 	plotcurv.cpp \
 	plotdata.cpp \
+	plotdraw.cpp \
 	plotfunc.cpp \
-	plotwin.cpp
-
-EXTRA_DIST = ledgreen.xpm ledgrey.xpm fparser.txt fourier.txt
+	plotmark.cpp \
+	plotprnt.cpp
 
 liblabenski_la_LDFLAGS = $(WX_LIBS)

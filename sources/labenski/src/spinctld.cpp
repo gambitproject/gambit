@@ -25,20 +25,20 @@
 #include "wx/wxthings/spinctld.h"
 #include <math.h>
 
-#if wxMINOR_VERSION > 4
+#if wxCHECK_VERSION(2,5,0)
     #include "wx/math.h"
 #else
-#if defined(__VISUALC__) || defined(__BORLANDC__) || defined(__WATCOMC__)
-    #include <float.h>
-    #define wxFinite(x) _finite(x)
-#elif defined(__GNUG__)||defined(__GNUWIN32__)||defined(__DJGPP__)|| \
-      defined(__SGI_CC__)||defined(__SUNCC__)||defined(__XLC__)|| \
+    #if defined(__VISUALC__) || defined(__BORLANDC__) || defined(__WATCOMC__)
+        #include <float.h>
+        #define wxFinite(x) _finite(x)
+    #elif defined(__GNUG__)||defined(__GNUWIN32__)||defined(__DJGPP__)|| \
+          defined(__SGI_CC__)||defined(__SUNCC__)||defined(__XLC__)|| \
           defined(__HPUX__)||defined(__MWERKS__)
-    #define wxFinite(x) finite(x)
-#else
-    #define wxFinite(x) ((x) == (x))
-#endif
-#endif
+        #define wxFinite(x) finite(x)
+    #else
+        #define wxFinite(x) ((x) == (x))
+    #endif
+#endif // wxCHECK_VERSION(2,5,0)
 
 // NOTES : if the textctrl is focused and the program is ending, a killfocus
 //         event is sent in MSW, this is why m_textCtrl is set to NULL in it's
@@ -136,17 +136,17 @@ void wxSpinCtrlDbl::Init()
 
 bool wxSpinCtrlDbl::Create( wxWindow *parent, wxWindowID id,
                             const wxString& value,
-                            const wxPoint& pos, const wxSize& size, 
+                            const wxPoint& pos, const wxSize& size,
                             long style,
                             double min, double max,
                             double initial,
                             double increment, int digits,
                             const wxString& name)
 {
-    if (!wxControl::Create(parent, id, pos, size, style|wxNO_BORDER, 
+    if (!wxControl::Create(parent, id, pos, size, style|wxNO_BORDER,
                            wxDefaultValidator, name))
         return false;
-    
+
     wxControl::SetLabel(name);
     wxControl::SetBackgroundColour(parent->GetBackgroundColour());
     wxControl::SetForegroundColour(parent->GetForegroundColour());
@@ -159,8 +159,8 @@ bool wxSpinCtrlDbl::Create( wxWindow *parent, wxWindowID id,
 
     // Create a validator for numbers, +-, and eE for exponential
     wxTextValidator validator(wxFILTER_INCLUDE_CHAR_LIST);
-    
-#if wxCHECK_VERSION(2, 5, 4)    
+
+#if wxCHECK_VERSION(2, 5, 4)
     wxArrayString list;
 
     wxString valid_chars(wxT(" 0123456789+-.eE"));
@@ -178,18 +178,18 @@ bool wxSpinCtrlDbl::Create( wxWindow *parent, wxWindowID id,
         list.Add(wxString(valid_chars.GetChar(i)));
 
     validator.SetIncludeList(list);
-#endif // wxCHECK_VER(2, 5, 4)   
-    
+#endif // wxCHECK_VER(2, 5, 4)
+
     m_spinButton = new wxSpinButton( this, id, wxPoint(0,0), wxSize(-1, height),
                                      wxSP_ARROW_KEYS|wxSP_VERTICAL|wxSP_WRAP);
-    m_textCtrl = new wxSpinCtrlDblTextCtrl( this, id, value, 
+    m_textCtrl = new wxSpinCtrlDblTextCtrl( this, id, value,
                       wxPoint(0,0),
                       wxSize(width-m_spinButton->GetSize().GetWidth(), height),
                       wxTE_NOHIDESEL|wxTE_PROCESS_ENTER, validator);
 
     DoSetSize( pos.x, pos.y, width, height );
     SetBestSize(wxSize(width, height));
-    
+
     m_min = min;
     m_max = max;
     m_value = initial;
@@ -198,9 +198,9 @@ bool wxSpinCtrlDbl::Create( wxWindow *parent, wxWindowID id,
     SetDigits( digits );
 
     // set the value here without generating an event
-    if (!value.IsEmpty()) 
+    if (!value.IsEmpty())
         m_textCtrl->SetValue(value);
-    else 
+    else
         m_textCtrl->SetValue(wxString::Format(m_textFormat.c_str(), initial));
 
     return true;
@@ -208,7 +208,7 @@ bool wxSpinCtrlDbl::Create( wxWindow *parent, wxWindowID id,
 
 wxSpinCtrlDbl::~wxSpinCtrlDbl()
 {
-    if (m_textCtrl) // null this since MSW sends KILL_FOCUS on deletion 
+    if (m_textCtrl) // null this since MSW sends KILL_FOCUS on deletion
     {
         m_textCtrl->m_parent = NULL;
 
@@ -227,7 +227,7 @@ wxSpinCtrlDbl::~wxSpinCtrlDbl()
 void wxSpinCtrlDbl::DoSetSize(int x, int y, int width, int height, int sizeFlags)
 {
     //wxPrintf(wxT("DoSetSize %d, %d %d %d %d %d\n"), GetId(), x, y, width, height, sizeFlags);
-    
+
     wxSize bestSize( DoGetBestSize() );
     if (width < 0)  width  = bestSize.GetWidth();
     if (height < 0) height = bestSize.GetHeight();
@@ -236,7 +236,7 @@ void wxSpinCtrlDbl::DoSetSize(int x, int y, int width, int height, int sizeFlags
 
     int spinwidth  = wxSPINCTRLDBL_SPIN_WIDTH;
     int spinheight = wxSPINCTRLDBL_SPIN_HEIGHT;
-    if (m_spinButton) 
+    if (m_spinButton)
         m_spinButton->GetSize( &spinwidth, &spinheight );
 
 #ifdef __WIN95__   // humm... these used to be different
@@ -253,16 +253,16 @@ void wxSpinCtrlDbl::DoSetSize(int x, int y, int width, int height, int sizeFlags
 static wxSize s_spinctrl_bestSize(-999,-999);
 
 wxSize wxSpinCtrlDbl::DoGetBestSize() const
-{   
+{
     //wxPrintf(wxT("GetBestSize %d\n"), GetId());
     if (s_spinctrl_bestSize.x == -999)
     {
         wxSpinCtrl spin((wxWindow*)this, wxID_ANY);
         s_spinctrl_bestSize = spin.GetBestSize();
         // oops something went wrong, set to reasonable value
-        if (s_spinctrl_bestSize.GetWidth()  < 20) 
+        if (s_spinctrl_bestSize.GetWidth()  < 20)
             s_spinctrl_bestSize.SetWidth(95);
-        if (s_spinctrl_bestSize.GetHeight() < 10) 
+        if (s_spinctrl_bestSize.GetHeight() < 10)
             s_spinctrl_bestSize.SetHeight(wxSPINCTRLDBL_SPIN_HEIGHT);
     }
 
@@ -280,9 +280,9 @@ void wxSpinCtrlDbl::DoSendEvent()
 
 void wxSpinCtrlDbl::OnSpinUp( wxSpinEvent &WXUNUSED(event) )
 {
-    if (m_textCtrl && m_textCtrl->IsModified() ) 
+    if (m_textCtrl && m_textCtrl->IsModified() )
         SyncSpinToText(false);
-    
+
     if ( InRange(m_value + m_increment) )
     {
         m_value += m_increment;
@@ -293,9 +293,9 @@ void wxSpinCtrlDbl::OnSpinUp( wxSpinEvent &WXUNUSED(event) )
 
 void wxSpinCtrlDbl::OnSpinDown( wxSpinEvent &WXUNUSED(event) )
 {
-    if (m_textCtrl && m_textCtrl->IsModified() ) 
+    if (m_textCtrl && m_textCtrl->IsModified() )
         SyncSpinToText(false);
-    
+
     if ( InRange(m_value - m_increment) )
     {
         m_value -= m_increment;
@@ -397,9 +397,9 @@ void wxSpinCtrlDbl::SetValue( double value )
                 value = m_default_value + ceil(snap_value) * m_increment;
         }
     }
-    
+
     wxString str(wxString::Format(m_textFormat.c_str(), value));
-    
+
     if ((value != m_value) || (str != m_textCtrl->GetValue()))
     {
         m_textCtrl->SetValue( str );
@@ -414,7 +414,7 @@ void wxSpinCtrlDbl::SetValue( const wxString& text, bool force )
     if (!m_textCtrl) return;
 
     double value;
-    if ( text.ToDouble(&value) ) 
+    if ( text.ToDouble(&value) )
         SetValue( value );
     else if (force)
     {
@@ -431,9 +431,9 @@ void wxSpinCtrlDbl::SetRange( double min_val, double max_val )
 
     if (HasRange())
     {
-        if (m_value > m_max) 
+        if (m_value > m_max)
             SetValue(m_max);
-        else if (m_value < m_min) 
+        else if (m_value < m_min)
             SetValue(m_min);
     }
 }
@@ -496,12 +496,12 @@ void wxSpinCtrlDbl::SetDigits( int digits, formatType fmt )
     switch (fmt)
     {
         case le_fmt : m_textFormat.Printf(wxT("%%.%dle"), m_digits ); break;
-        case lg_fmt : 
+        case lg_fmt :
         {
             if (m_digits == -1)
-                m_textFormat.Printf(wxT("%%lg") ); 
-            else 
-                m_textFormat.Printf(wxT("%%.%dlg"), m_digits ); 
+                m_textFormat.Printf(wxT("%%lg") );
+            else
+                m_textFormat.Printf(wxT("%%.%dlg"), m_digits );
             break;
         }
         case lf_fmt :
@@ -514,9 +514,9 @@ void wxSpinCtrlDbl::SetDigits( int digits, formatType fmt )
 void wxSpinCtrlDbl::SetFormat( const wxString& format )
 {
     wxString wxstr;
-    if ( wxstr.Printf(format.c_str(), 123456.123456) > 0 ) 
+    if ( wxstr.Printf(format.c_str(), 123456.123456) > 0 )
         m_textFormat = format;
-    
+
     SetValue(m_value);
 }
 
@@ -540,7 +540,7 @@ void wxSpinCtrlDbl::SetSnapToTicks(bool forceTicks)
 
 void wxSpinCtrlDbl::OnFocus( wxFocusEvent &event )
 {
-    if (m_textCtrl) 
+    if (m_textCtrl)
         m_textCtrl->SetFocus(); // this is to pass TAB navigation
 
     event.Skip();
@@ -564,9 +564,9 @@ void wxSpinCtrlDbl::SyncSpinToText(bool send_event, bool force_valid)
         {
             if (force_valid && HasRange())
             {
-                if (txt_value > GetMax()) 
+                if (txt_value > GetMax())
                     txt_value = GetMax();
-                else if (txt_value < GetMin()) 
+                else if (txt_value < GetMin())
                     txt_value = GetMin();
             }
 
@@ -578,7 +578,7 @@ void wxSpinCtrlDbl::SyncSpinToText(bool send_event, bool force_valid)
         }
     }
     else if (force_valid)
-    {  
+    {
         // textctrl is out of sync, discard and reset
         SetValue(GetValue());
     }
@@ -593,4 +593,32 @@ wxFont wxSpinCtrlDbl::GetFont() const
 {
     if (!m_textCtrl) return GetFont();
     return m_textCtrl->GetFont();
+}
+
+bool wxSpinCtrlDbl::SetBackgroundColour(const wxColour& colour)
+{
+    if (!m_textCtrl) return wxControl::SetBackgroundColour(colour);
+    bool ret = false;
+    ret = m_textCtrl->SetBackgroundColour(colour);
+    m_textCtrl->Refresh(); // FIXME is this necessary in GTK/OSX
+    return ret;
+}
+wxColour wxSpinCtrlDbl::GetBackgroundColour() const
+{
+    if (!m_textCtrl) return wxControl::GetBackgroundColour();
+    return m_textCtrl->GetBackgroundColour();
+}
+
+bool wxSpinCtrlDbl::SetForegroundColour(const wxColour& colour)
+{
+    if (!m_textCtrl) return wxControl::SetForegroundColour(colour);
+    bool ret = false;
+    ret = m_textCtrl->SetForegroundColour(colour);
+    m_textCtrl->Refresh();
+    return ret;
+}
+wxColour wxSpinCtrlDbl::GetForegroundColour() const
+{
+    if (!m_textCtrl) return wxControl::GetForegroundColour();
+    return m_textCtrl->GetForegroundColour();
 }

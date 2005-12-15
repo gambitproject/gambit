@@ -13,7 +13,7 @@
 wxMenuButton is a button that drops down an assigned wxMenu
 
 Create the button with either a text or bitmap label.
-    Create a new wxMenu and call AssignMenu and thats it. When you press the 
+    Create a new wxMenu and call AssignMenu and thats it. When you press the
     dropdown button the menu appears. When you press the label button the next
     wxITEM_RADIO (ie wxMenuItem::GetKind) in the menu is selected round robin.
     If there are no radio items then it really just acts like a menubar, though
@@ -60,7 +60,7 @@ public:
 
     // Use this constructor if you need one compatible with a wxButton
     //   setup the button later with AssignMenu
-    wxMenuButton( wxWindow* parent, 
+    wxMenuButton( wxWindow* parent,
                   wxWindowID id,
                   const wxString &label,
                   const wxPoint& pos = wxDefaultPosition,
@@ -73,14 +73,14 @@ public:
         Init();
         Create(parent,id,label,wxNullBitmap,pos,size,style,val,name);
     }
-    
+
     // Use this constructor if you need one compatible with a wxBitmapButton
     //   setup the button later with AssignMenu
     wxMenuButton( wxWindow* parent, wxWindowID id,
-                  const wxBitmap &bitmap, 
+                  const wxBitmap &bitmap,
                   const wxPoint& pos = wxDefaultPosition,
                   const wxSize& size = wxDefaultSize,
-                  long style = 0, 
+                  long style = 0,
 				  const wxValidator& val = wxDefaultValidator,
                   const wxString& name = wxT("wxMenuButton"))
                   : wxControl()
@@ -95,7 +95,7 @@ public:
                   const wxPoint& pos = wxDefaultPosition,
                   const wxSize& size = wxDefaultSize,
                   int n = 0, const wxString choices[] = (const wxString *) NULL,
-                  long style = 0, 
+                  long style = 0,
 				  const wxValidator& val = wxDefaultValidator,
                   const wxString& name = wxT("wxMenuButton"))
                   : wxControl()
@@ -104,14 +104,14 @@ public:
         Init();
         Create(parent, id, value, wxNullBitmap, pos, size, style, val, name);
     }
-    
+
     // Native constructor
     wxMenuButton( wxWindow* parent, wxWindowID id,
                   const wxString &label, const wxBitmap &bitmap,
                   wxMenu *menu, bool static_menu = false,
                   const wxPoint& pos = wxDefaultPosition,
                   const wxSize& size = wxDefaultSize,
-                  long style = 0, 
+                  long style = 0,
 				  const wxValidator& val = wxDefaultValidator,
                   const wxString& name = wxT("wxMenuButton"))
                   : wxControl()
@@ -120,9 +120,9 @@ public:
         AssignMenu(menu, static_menu);
         Create(parent,id,label,bitmap,pos,size,style,val,name);
     }
-    
+
     virtual ~wxMenuButton();
-        
+
     bool Create( wxWindow* parent,
                  wxWindowID id,
                  const wxString &label,
@@ -135,22 +135,22 @@ public:
 
     // Gets the id of the first selected radio item or wxNOT_FOUND (-1) if none
     int GetSelection() const;
-    
+
     // This menu will be displayed when the dropdown button is pressed.
     //   if static_menu is false it will be deleted when the buttton is destroyed.
-    void AssignMenu(wxMenu *menu, bool static_menu = false); 
-    
+    void AssignMenu(wxMenu *menu, bool static_menu = false);
+
     wxMenu *GetMenu() const { return m_menu; }
-    
+
     // get a pointer to the label button, for turning it into a toggle perhaps
     wxCustomButton *GetLabelButton() const { return m_labelButton; }
     wxCustomButton *GetDropDownButton() const { return m_dropdownButton; }
-    
+
     void SetToolTip(const wxString &tip);
     void SetToolTip(wxToolTip *tip);
-    
+
 protected:
-    void OnButton(wxCommandEvent &event);    
+    void OnButton(wxCommandEvent &event);
 
     virtual void DoSetSize(int x, int y, int width, int height,
                            int sizeFlags = wxSIZE_AUTO);
@@ -178,7 +178,7 @@ private:
 
 //-----------------------------------------------------------------------------
 // wxMenuButtonEvents
-// 
+//
 // EVT_MENUBUTTON_OPEN(id, fn) - menu is about to be opened, (dis)(en)able items
 //                               or call Veto() to stop menu from popping up
 //                               this is a wxNotifyEvent

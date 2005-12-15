@@ -34,7 +34,7 @@
 #include <wx/tokenzr.h>
 
 #include "wx/sheet/sheet.h"
-#include "wx/plotctrl/plotwin.h"
+#include "wx/plotctrl/plotctrl.h"
 #include "dlnfglogit.h"
 
 //========================================================================
@@ -218,7 +218,7 @@ void gbtLogitMixedList::AddProfile(const wxString &p_text,
 //                      class gbtLogitPlotCtrl
 //========================================================================
 
-class gbtLogitPlotCtrl : public wxPlotWindow {
+class gbtLogitPlotCtrl : public wxPlotCtrl {
 private:
   gbtGameDocument *m_doc;
 
@@ -238,7 +238,7 @@ public:
 
 gbtLogitPlotCtrl::gbtLogitPlotCtrl(wxWindow *p_parent, 
 				   gbtGameDocument *p_doc)
-  : wxPlotWindow(p_parent), m_doc(p_doc)
+  : wxPlotCtrl(p_parent), m_doc(p_doc)
 {
   SetAxisLabelColour(*wxBLUE);
   wxFont labelFont(8, wxSWISS, wxNORMAL, wxBOLD);

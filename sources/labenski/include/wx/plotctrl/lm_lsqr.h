@@ -19,7 +19,7 @@
  * burton s. garbow, kenneth e. hillstrom, jorge j. more
  *
  * C translation by Steve Moshier http://www.moshier.net/
- * 
+ *
  * C++ "translation" for use w/ wxWindows by John Labenski
  */
 
@@ -31,8 +31,8 @@
 #endif
 
 #include "wx/plotctrl/plotdefs.h"
-class WXDLLIMPEXP_PLOTLIB wxPlotData;
-class WXDLLIMPEXP_PLOTLIB wxPlotFunction;
+class WXDLLIMPEXP_PLOTCTRL wxPlotData;
+class WXDLLIMPEXP_PLOTCTRL wxPlotFunction;
 
 // When SetLM_LeastSquareProgressHandler is called with a non NULL handler it will be
 //   called when fitting a curve every SetLM_LeastSquareProgressHandlerTicks
@@ -41,7 +41,7 @@ class WXDLLIMPEXP_PLOTLIB wxPlotFunction;
 //          note: current may exceed max by a few iterations in some cases
 
 // Usage: create a function like this
-//   void LM_LeastSquareProgressHandler(const wxString &text, int current, int max) 
+//   void LM_LeastSquareProgressHandler(const wxString &text, int current, int max)
 //     { [ do stuff... for example update a progress dialog ]
 //       wxString str = text + wxString::Format(wxT("\nIteration # %d of %d"), current, max);
 //       int percent = wxMin(int(100.0*current/max), 99); // iterations may overflow!
@@ -50,8 +50,8 @@ class WXDLLIMPEXP_PLOTLIB wxPlotFunction;
 //   then call SetLM_LeastSquareProgressHandler( LM_LeastSquareProgressHandler );
 
 extern "C" {
-typedef bool (*LM_LeastSquareProgressHandler_)(const wxString &WXUNUSED(text), 
-                                               int WXUNUSED(current), 
+typedef bool (*LM_LeastSquareProgressHandler_)(const wxString &WXUNUSED(text),
+                                               int WXUNUSED(current),
                                                int WXUNUSED(max));
 extern void SetLM_LeastSquareProgressHandler( LM_LeastSquareProgressHandler_ handler );
 extern void SetLM_LeastSquareProgressHandlerTicks( int iterations );
@@ -67,7 +67,7 @@ extern void SetLM_LeastSquareProgressHandlerTicks( int iterations );
 //   the plotfunction MUST! have the LAST variable as 'x'
 //   you can set the starting values by filling 'initial_vals', size = (plotFunc.GetNumberVars - 1)
 //   if initial_vars = NULL then they are all 0.1
-//  
+//
 // Sample usage :
 //  wxString message;
 //  // Create some plotData, in this case from a known function
@@ -76,43 +76,43 @@ extern void SetLM_LeastSquareProgressHandlerTicks( int iterations );
 //  wxPlotFunction func("a*x*x+b*x+c+d*log(x)+e*exp(f*x/(x+g))", "a,b,c,d,e,f,g,x", message);
 //  LM_LeastSquare lmLeastSquare;
 //  if (lmLeastSquare.Create(data, func)) {
-//      lmLeastSquare.Fit(NULL); 
+//      lmLeastSquare.Fit(NULL);
 //      or Fit(init, init_count) where double init[init_count] = { a, b, c, ... }
 //      for (int k=0; k<lmLeastSquare.GetNumberVariables(); k++) // print a,b,c,...
-//           wxPrintf(wxT("%s=%g; "), func.GetVariableName(k).c_str(), lmLeastSquare.GetVariable(k)); 
+//           wxPrintf(wxT("%s=%g; "), func.GetVariableName(k).c_str(), lmLeastSquare.GetVariable(k));
 //
 //=============================================================================
 
-class WXDLLIMPEXP_PLOTLIB LM_LeastSquare
+class WXDLLIMPEXP_PLOTCTRL LM_LeastSquare
 {
 public:
     LM_LeastSquare();
     virtual ~LM_LeastSquare() { Destroy(); }
-    
-    // Initialize everything, returns sucess, on failure GetResultMessage() 
-    //   you may call Create and then Fit on a single instance on this 
+
+    // Initialize everything, returns sucess, on failure GetResultMessage()
+    //   you may call Create and then Fit on a single instance on this
     //   as many times as you like.
     bool Create(const wxPlotData &plotData, const wxPlotFunction &plotFunc);
     // Has this been sucessfully created and is ready to be Fit()
     bool Ok() const { return m_ok; }
-    
+
     // After creation fit the plotFunc's vars to the plotData, returns # iterations
     //   initial_vals are initial guesses for the variables which may be NULL
     //   specify the number of initial variables with init_count
     int Fit(const double *initial_vals = NULL, int init_count = 0);
     // returns true if this is currently fitting
     bool IsFitting() const { return m_fitting; }
-    // abort a currently running fit, this may take a cycle or two so check 
+    // abort a currently running fit, this may take a cycle or two so check
     //   IsFitting to determine when it is done.
     void AbortFitting() { m_abort_fitting = true; }
     // was the last fit aborted, reset when Create or Fit is called again
     bool GetAbortFitting() const { return m_abort_fitting; }
-    
-    // If you don't cal Fit(some_vars, count) then the variables are all 
+
+    // If you don't cal Fit(some_vars, count) then the variables are all
     // initialized with this value, default = 0.1
     double GetInitValue() const { return m_init_value; }
     void SetInitValue(double init_val) { m_init_value = init_val; }
-    
+
     // Get the number of evaluations performed to find best fit
     int GetNumberIterations() const { return m_nfev; }
     // Get the euclidean norm of errors between data and function points
@@ -141,27 +141,27 @@ protected:
     // this is the function to calculate the difference
     virtual void fcn(int m, int n, double x[], double fvec[], int *iflag);
 
-    void lmdif( int m, int n, double x[], double fvec[], double ftol, 
+    void lmdif( int m, int n, double x[], double fvec[], double ftol,
                 double xtol, double gtol, int maxfev, double epsfcn,
-                double diag[], int mode, double factor, int nprint, int *info, 
-                int *nfev, double fjac[], int ldfjac, int ipvt[], double qtf[], 
+                double diag[], int mode, double factor, int nprint, int *info,
+                int *nfev, double fjac[], int ldfjac, int ipvt[], double qtf[],
                 double wa1[], double wa2[], double wa3[], double wa4[]);
 
     // implementation - you probably don't want to mess with these!
 
-    void lmpar(int n, double r[], int ldr, int ipvt[], 
+    void lmpar(int n, double r[], int ldr, int ipvt[],
                double diag[], double qtb[], double delta, double *par,
                double x[], double sdiag[], double wa1[], double wa2[]);
 
-    void qrfac(int m, int n, double a[], int lda, int pivot, int ipvt[], 
+    void qrfac(int m, int n, double a[], int lda, int pivot, int ipvt[],
                int lipvt, double rdiag[], double acnorm[], double wa[]);
 
-    void qrsolv(int n, double r[], int ldr, int ipvt[], double diag[], 
+    void qrsolv(int n, double r[], int ldr, int ipvt[], double diag[],
                 double qtb[], double x[], double sdiag[], double wa[]);
 
     double enorm(int n, double x[]);
 
-    void fdjac2(int m,int n, double x[], double fvec[], double fjac[], 
+    void fdjac2(int m,int n, double x[], double fvec[], double fjac[],
                 int ldfjac, int *iflag, double epsfcn, double wa[]);
 
     int    m_n;       // # of variables of plotFunc
@@ -187,9 +187,9 @@ protected:
     double *m_qtf;    // output array the first n elements of the vector (q transpose)*fvec
     int    *m_ipvt;   // integer output array of length n
     int    m_maxfev;  // maximum number of iterations to try
-    
+
 private:
-    void Init();    
+    void Init();
 };
 
 #endif // _LM_LEASTSQUARE_H_

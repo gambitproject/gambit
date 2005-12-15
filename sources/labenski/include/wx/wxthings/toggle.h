@@ -4,7 +4,7 @@
 // Author:      Bruce Phillips modified by John Labenski
 // Modified by:
 // Created:     11/05/2002
-// RCS-ID:      
+// RCS-ID:
 // Copyright:   (c) Bruce Phillips, John Labenski
 // Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
@@ -23,7 +23,7 @@ The event's wxCommandEvent::GetExtraLong contains one of the following
 There are four styles the button can take.
 
 wxCUSTBUT_BUTTON == wxButton
-    Left and Right clicks and double clicks all send 
+    Left and Right clicks and double clicks all send
         wxEVT_COMMAND_BUTTON_CLICKED => EVT_BUTTON(id,fn)
 
 wxCUSTBUT_TOGGLE == wxToggleButton
@@ -32,8 +32,8 @@ wxCUSTBUT_TOGGLE == wxToggleButton
     Left double clicks and Right clicks send
         wxEVT_COMMAND_BUTTON_CLICKED => EVT_BUTTON(id,fn)
 
-wxCUSTBUT_BUT_DCLICK_TOG 
-    Left and Right clicks and Right double clicks send 
+wxCUSTBUT_BUT_DCLICK_TOG
+    Left and Right clicks and Right double clicks send
         wxEVT_COMMAND_BUTTON_CLICKED => EVT_BUTTON(id,fn)
     Left double clicks sends
         wxEVT_COMMAND_TOGGLEBUTTON_CLICKED => EVT_TOGGLEBUTTON(id, fn)
@@ -44,19 +44,19 @@ wxCUSTBUT_TOG_DCLICK_BUT
     Left and Right double clicks and Right clicks send
         wxEVT_COMMAND_BUTTON_CLICKED => EVT_BUTTON(id,fn)
 
-The event's wxCommandEvent::GetInt (IsChecked) is true (1) if the button is 
+The event's wxCommandEvent::GetInt (IsChecked) is true (1) if the button is
     depressed, this is only useful for the wxToggleButton styles
 
-For both types of button when double-clicked it sends this event 
+For both types of button when double-clicked it sends this event
     wxEVT_COMMAND_BUTTON_CLICKED => EVT_BUTTON(id, fn)
     and the button state does not change. Only a single EVT_BUTTON event should
     be sent on double-click and event.GetExtraLong == wxEVT_XXX_DCLICK,
     if not then there's a bug.
 
-If no bitmaps are set the text is centered, if only a bitmap it set then 
-    it's centered, if a bitmap and text are set then the text is one of the 
+If no bitmaps are set the text is centered, if only a bitmap it set then
+    it's centered, if a bitmap and text are set then the text is one of the
     positions wxCUSTBUT_LEFT/RIGHT/TOP/BOTTOM
-    
+
 The disabled bitmap it automatically created by dithering with the background,
     the others just copy the bitmap in the constructor. The control assumes they
     are all the same size.
@@ -93,7 +93,7 @@ enum wxCustomButton_Style
     wxCUSTBUT_BUTTON         = 0x0200,
     wxCUSTBUT_TOGGLE         = 0x0400,
     wxCUSTBUT_BUT_DCLICK_TOG = 0x0800,
-    wxCUSTBUT_TOG_DCLICK_BUT = 0x1000, 
+    wxCUSTBUT_TOG_DCLICK_BUT = 0x1000,
     // drawing styles
     wxCUSTBUT_FLAT           = 0x2000 // flat, mouseover raises if not depressed
 };
@@ -107,7 +107,7 @@ class WXDLLIMPEXP_THINGS wxCustomButton : public wxControl
 public:
 
     wxCustomButton() : wxControl() { Init(); }
-    
+
     // wxToggleButton or wxButton compatible constructor (also wxTextCtrl)
     wxCustomButton(wxWindow* parent, wxWindowID id,
                    const wxString& label,
@@ -151,7 +151,7 @@ public:
     }
 
     virtual ~wxCustomButton();
-        
+
     bool Create(wxWindow* parent,
                 wxWindowID id,
                 const wxString& label,
@@ -168,7 +168,7 @@ public:
     // Use combinations of wxCustomButton_Style(s)
     long GetButtonStyle() const { return m_button_style; }
     bool SetButtonStyle( long style );
-    
+
     // Set the text label, wxEmptyString for none
     void SetLabel( const wxString &label );
 
@@ -190,11 +190,11 @@ public:
 
     // Creates a "disabled" bitmap by dithering it with the background colour
     wxBitmap CreateBitmapDisabled(const wxBitmap &bitmap) const;
-    
+
     // set/get the margins (in pixels) around the label and bitmap
     //    if fit = true then resize the button to fit
-    void SetMargins(const wxSize &margin, bool fit = false); 
-    
+    void SetMargins(const wxSize &margin, bool fit = false);
+
     // set/get the margins around the text label
     //    the inter bitmap/label margin is the max of either margin, not the sum
     void SetLabelMargin(const wxSize &margin, bool fit = false);
@@ -203,11 +203,11 @@ public:
     //    the inter bitmap/label margin is the max of either margin, not the sum
     void SetBitmapMargin(const wxSize &margin, bool fit = false);
     wxSize GetBitmapMargin() const { return m_bitmapMargin; }
-    
+
     // can be used to activate the focused behavior (see MenuButton)
     void SetFocused(bool focused) { m_focused = focused; Refresh(false); }
     bool GetFocused() const { return m_focused; }
-    
+
 protected:
     void OnPaint(wxPaintEvent &event);
     void Redraw();
@@ -216,7 +216,7 @@ protected:
     virtual wxSize DoGetBestSize() const;
 
     virtual void SendEvent();
-    
+
     void OnMouseEvents(wxMouseEvent &event);
 
     void OnTimer(wxTimerEvent &event);
@@ -242,7 +242,7 @@ protected:
             m_labelPos;
 
     wxTimer *m_timer;
-    
+
     wxEventType m_eventType;     // store the mouse event type
 
 private:

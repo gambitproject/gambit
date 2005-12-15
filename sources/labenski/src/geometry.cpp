@@ -9,7 +9,7 @@
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma implementation "geometry.h"
 #endif
- 
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include <wx/wxprec.h>
 
@@ -27,16 +27,16 @@ E = A*(a_0 + b_0) + B*(a_1 + b_1); F = C*(a_0 + c_0) + D*(a_1 + c_1);
 G = 2.0*(A*(c_1 - b_1)-B*(c_0 - b_0));
 p_0 = (D*E - B*F) / G; p_1 = (A*F - C*E) / G;
 If G is zero then the three points are collinear and no finite-radius circle through them exists. Otherwise, the radius of the circle is:
-r^2 = (a_0 - p_0)^2 + (a_1 - p_1)^2 
-[O' Rourke (C)] p. 201. Simplified by Jim Ward. 
+r^2 = (a_0 - p_0)^2 + (a_1 - p_1)^2
+[O' Rourke (C)] p. 201. Simplified by Jim Ward.
 */
 
-wxCircleDouble::wxCircleDouble(const wxPoint2DDouble &p1, 
-                               const wxPoint2DDouble &p2, 
+wxCircleDouble::wxCircleDouble(const wxPoint2DDouble &p1,
+                               const wxPoint2DDouble &p2,
                                const wxPoint2DDouble &p3)
 {
     wxDouble A = p2.m_x - p1.m_x,
-             B = p2.m_y - p1.m_y, 
+             B = p2.m_y - p1.m_y,
              C = p3.m_x - p1.m_x,
              D = p3.m_y - p1.m_y;
 
@@ -44,43 +44,43 @@ wxCircleDouble::wxCircleDouble(const wxPoint2DDouble &p1,
              F = C*(p1.m_x + p3.m_x) + D*(p1.m_y + p3.m_y),
              G = 2.0*(A*(p3.m_y - p2.m_y)-B*(p3.m_x - p2.m_x));
 
-    if (G == 0) 
+    if (G == 0)
     {
         m_x = m_y = m_r = 0;
         return;
     }
-    
-    m_x = (D*E - B*F) / G, 
+
+    m_x = (D*E - B*F) / G,
     m_y = (A*F - C*E) / G;
     m_r = sqrt( (p1.m_x - m_x)*(p1.m_x - m_x) + (p1.m_y - m_y)*(p1.m_y - m_y) );
 }
 
-int wxCircleDouble::IntersectLine( const wxRay2DDouble &line, 
+int wxCircleDouble::IntersectLine( const wxRay2DDouble &line,
                                    wxPoint2DDouble *pt1,
                                    wxPoint2DDouble *pt2 ) const
 {
     //if (line.GetDistanceToPoint(m_origin) > m_r) return 0;
-        
+
     wxDouble l1_x = m_x-m_r, l1_y = line.GetYFromX(l1_x);
     wxDouble l2_x = m_x+m_r, l2_y = line.GetYFromX(l2_x);
-    
+
     // quick check to see it it intersects at all
     //wxDouble top = m_origin.m_y-m_r, bot = m_origin.m_y+m_r;
     //if (((l1_y < top)&&(l2_y < top))||((l1_y > bot)&&(l2_y > bot))) return 0;
-    
+
     wxDouble l2_l1_x = l2_x - l1_x, l2_l1_y = l2_y - l1_y;
-    
+
     wxDouble a  = l2_l1_x*l2_l1_x + l2_l1_y*l2_l1_y;
     wxDouble b  = 2.0 * (l2_l1_x * (l1_x - m_x) + l2_l1_y * (l1_y - m_y) );
-    
+
     wxDouble c = m_x*m_x + m_y*m_y + l1_x*l1_x + l1_y*l1_y - 2.0*(m_x*l1_x + m_y*l1_y) - m_r*m_r;
     wxDouble det = b*b - 4.0*a*c;
 
-    if ( det < 0 ) 
+    if ( det < 0 )
     {
         return 0;
-    } 
-    else if ( det == 0 ) 
+    }
+    else if ( det == 0 )
     {
         if (pt1)
         {
@@ -89,25 +89,25 @@ int wxCircleDouble::IntersectLine( const wxRay2DDouble &line,
             pt1->m_y = l2_y + u*l2_l1_y;
         }
         return 1;
-    } 
+    }
     // else det > 0 so 2 points intersect
     wxDouble e  = sqrt(det);
-    
+
     if (pt1)
     {
         wxDouble u1 = (-b - e)/( 2.0*a );
         pt1->m_x = l1_x + u1*l2_l1_x;
-        pt1->m_y = l1_y + u1*l2_l1_y; 
+        pt1->m_y = l1_y + u1*l2_l1_y;
     }
     if (pt2)
     {
         wxDouble u2 = (-b + e)/( 2.0*a );
         pt2->m_x = l1_x + u2*l2_l1_x;
-        pt2->m_y = l1_y + u2*l2_l1_y; 
+        pt2->m_y = l1_y + u2*l2_l1_y;
     }
 
     return 2;
-}   
+}
 
 
 
@@ -121,44 +121,44 @@ int wxEllipseInt::IntersectLine( const wxLine2DInt &line,
                                  wxPoint2DInt &pt1,
                                  wxPoint2DInt &pt2 ) const
 {
-    
+
     //Intersection.intersectEllipseLine = function(c, rx, ry, a1, a2) {
     //var result;
     //line.m_pt    // var origin = new Vector2D(a1.x, a1.y);
     wxPoint2DInt dir = pt2 - p21;   // var dir = Vector2D.fromPoints(a1, a2);
     //m_origin   //var center = new Vector2D(c.x, c.y);
     wxPoint2DInt diff = line.m_pt - m_origin; //var diff   = origin.subtract(center);
-    
+
     //var mDir   = new Vector2D( dir.x/(rx*rx),  dir.y/(ry*ry)  );
-    wxPoint2DDouble mDir = wxPoint2DDouble(wxDouble(dir.m_x)/(m_radius.m_x*m_radius.m_x), 
-                                           wxDouble(dir.m_y)/(m_radius.m_y*m_radius.m_y)); 
+    wxPoint2DDouble mDir = wxPoint2DDouble(wxDouble(dir.m_x)/(m_radius.m_x*m_radius.m_x),
+                                           wxDouble(dir.m_y)/(m_radius.m_y*m_radius.m_y));
     //var mDiff  = new Vector2D( diff.x/(rx*rx), diff.y/(ry*ry) );
-    wxPoint2DDouble mDiff = wxPoint2DDouble(wxDouble(diff.m_x)/(m_radius.m_x*m_radius.m_x), 
-                                            wxDouble(diff.m_y)/(m_radius.m_y*m_radius.m_y)); 
+    wxPoint2DDouble mDiff = wxPoint2DDouble(wxDouble(diff.m_x)/(m_radius.m_x*m_radius.m_x),
+                                            wxDouble(diff.m_y)/(m_radius.m_y*m_radius.m_y));
 
     wxDouble a = dir.GetDotProduct(mDir);    //var a = dir.dot(mDir);
     wxDouble b = dir.GetDotProduct(mDiff);   //var b = dir.dot(mDiff);
     wxDouble c = diff.GetDotProduct(m_diff); //var c = diff.dot(mDiff) - 1.0;
     wxDouble d = b*b - a*c;                  //var d = b*b - a*c;
 
-    if ( d < 0 ) 
+    if ( d < 0 )
     {
         return 0; //result = new Intersection("Outside");
-    } 
-    else if ( d > 0 ) 
+    }
+    else if ( d > 0 )
     {
         wxDouble root = sqrt(d);      //var root = Math.sqrt(d);
         wxDouble t_a = (-b - root)/a; //var t_a  = (-b - root) / a;
         wxDouble t_b = (-b + root)/a; //var t_b  = (-b + root) / a;
 
-        if ( (t_a < 0 || 1 < t_a) && (t_b < 0 || 1 < t_b) ) 
+        if ( (t_a < 0 || 1 < t_a) && (t_b < 0 || 1 < t_b) )
         {
             if ( (t_a < 0 && t_b < 0) || (t_a > 1 && t_b > 1) )
                 result = new Intersection("Outside");
             else
                 result = new Intersection("Inside");
-        } 
-        else 
+        }
+        else
         {
             result = new Intersection("Intersection");
             if ( 0 <= t_a && t_a <= 1 )
@@ -166,20 +166,20 @@ int wxEllipseInt::IntersectLine( const wxLine2DInt &line,
             if ( 0 <= t_b && t_b <= 1 )
                 result.appendPoint( a1.lerp(a2, t_b) );
         }
-    } 
-    else 
+    }
+    else
     {
         var t = -b/a;
-        if ( 0 <= t && t <= 1 ) 
+        if ( 0 <= t && t <= 1 )
         {
             result = new Intersection("Intersection");
             result.appendPoint( a1.lerp(a2, t) );
-        } else 
+        } else
         {
             result = new Intersection("Outside");
         }
     }
-    
+
     return result;
 }
 */

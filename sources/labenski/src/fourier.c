@@ -1,14 +1,14 @@
 /*============================================================================
 
-    fourier.c (originally fourier(f)(d).c and fftmisc.c)  
+    fourier.c (originally fourier(f)(d).c and fftmisc.c)
         -  Don Cross <dcross@intersrv.com>
 
     The file FFT.ZIP contains C source code for performing Discrete Fast Fourier
-    Transforms (DFFTs) and inverse DFFTs.  
+    Transforms (DFFTs) and inverse DFFTs.
 
     Please see fouier.txt which was the readme.txt that Don Cross provided.
 
-    This source code is public domain. Use at your own risk.  
+    This source code is public domain. Use at your own risk.
 
     For more information, point your web browser at:  (dead link)
     http://www.intersrv.com/~dcross/fft.html
@@ -66,7 +66,7 @@ unsigned NumberOfBitsNeeded ( unsigned PowerOfTwo )
         if ( PowerOfTwo & (1 << i) )
             return i;
     }
-    
+
     return 0;
 }
 
@@ -186,7 +186,7 @@ int fft_double (
         double cm2 = cos ( -2 * delta_angle );
         double cm1 = cos ( -delta_angle );
         double w = 2 * cm1;
-        /* double ar[3], ai[3]; replaced array with fixed vals below - labenski */ 
+        /* double ar[3], ai[3]; replaced array with fixed vals below - labenski */
         double ar0, ar1, ar2, ai0, ai1, ai2;
 
         for ( i=0; i < NumSamples; i += BlockSize )
@@ -236,7 +236,7 @@ int fft_double (
             ImagOut[i] /= denom;
         }
     }
-    
+
     return 1;
 }
 
@@ -302,7 +302,7 @@ int fft_float (
 
     if ( InverseTransform )
         angle_numerator = -angle_numerator;
-    
+
     CHECKPOINTERFLOAT ( RealIn );
     CHECKPOINTERFLOAT ( RealOut );
     CHECKPOINTERFLOAT ( ImagOut );
@@ -333,7 +333,7 @@ int fft_float (
         double cm2 = cos ( -2 * delta_angle );
         double cm1 = cos ( -delta_angle );
         double w = 2 * cm1;
-        /* double ar[3], ai[3]; replaced array with fixed vals below - labenski */ 
+        /* double ar[3], ai[3]; replaced array with fixed vals below - labenski */
         double ar0, ar1, ar2, ai0, ai1, ai2;
         /* double temp; */
 

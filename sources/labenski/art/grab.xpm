@@ -1,0 +1,23 @@
+/* XPM */
+static const char *grab_xpm[]={
+"16 16 4 1",
+". c None",
+"a c #000000",
+"# c #000040",
+"b c #ffffff",
+"................",
+"................",
+"................",
+"....#aa##a##....",
+"...abbabbabbaa..",
+"...abbabbabbab#.",
+".aa.abbbbbbbabba",
+"abbaabbbbbbbbbba",
+"abbbabbbbbbbbba.",
+".abbbbbbbbbbbba.",
+"..abbbbbbbbbbba.",
+"..abbbbbbbbbba..",
+"...abbbbbbbbba..",
+"....abbbbbbba...",
+".....abbbbbba...",
+".....abbbbbba..."};

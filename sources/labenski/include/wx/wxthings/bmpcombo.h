@@ -70,7 +70,7 @@ public:
         {
             if ((n > 0) && choices)
             {
-                for (int i=0; i<n; i++) 
+                for (int i=0; i<n; i++)
                     Append(choices[i], wxNullBitmap);
             }
             else
@@ -79,7 +79,7 @@ public:
         Create(parent, id, pos, size, style, val, name);
     }
 
-    // Native constructor (only adds first item) you probably want to 
+    // Native constructor (only adds first item) you probably want to
     // use the largest item first so that the size is correct from the start.
     wxBitmapComboBox(wxWindow* parent, wxWindowID id,
                      const wxString& label,
@@ -91,13 +91,13 @@ public:
                      const wxString& name = wxT("wxBitmapComboBox"))
                     :DropDownBase()
     {
-        Init();       
+        Init();
         Append(label, bitmap);
         Create(parent, id, pos, size, style, val, name);
     }
 
     virtual ~wxBitmapComboBox();
-        
+
     bool Create(wxWindow* parent, wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
@@ -111,33 +111,33 @@ public:
     // Append/Insert an item, either label and bitmap may be empty/null
     void Append( const wxString &label, const wxBitmap &bitmap, int count = 1 );
     void Insert( int n, const wxString &label, const wxBitmap &bitmap );
-    
+
     // Clear or delete a single or number of items starting from n
     void Clear();
     void Delete( int n, int count = 1 );
 
     int GetCount() const { return m_labels.GetCount(); }
-    
-    int GetSelection() const { return m_selection; }
+
+    int  GetSelection() const { return m_selection; }
     void SetSelection( int n, bool send_event = false );
     void SetNextSelection(bool foward, bool send_event = false);
-    
+
     wxString GetLabel( int n ) const;
     wxBitmap GetBitmap( int n ) const;
-    
+
     void SetBitmap(int n, const wxBitmap &bitmap);
     void SetLabel(int n, const wxString &label);
     void SetItem(int n, const wxString &label, const wxBitmap &bitmap)
         { SetLabel(n, label); SetBitmap(n, bitmap); }
-    
+
     virtual bool SetBackgroundColour(const wxColour &colour);
-    
+
     virtual void HidePopup();
 
     // When adding/deleting many items freeze it and thaw when done
     void Freeze() { m_frozen = true; }
     void Thaw();
-        
+
     // implementation
     wxBitmapComboLabel* GetLabelWindow() { return m_labelWin; }
     // Get the largest label, bitmap, item=(label+bitmap) size
@@ -147,11 +147,11 @@ public:
     void CalcLabelBitmapPos(int n, const wxSize &area, wxPoint &labelPos, wxPoint &bitmapPos) const;
     void CalcLayout();
     void DrawItem(wxDC &dc, int n) const;
-    
+
 protected:
     virtual void DoSetSize(int x, int y, int width, int height,
                            int sizeFlags = wxSIZE_AUTO);
-    
+
     void OnSize( wxSizeEvent& event );
     virtual wxSize DoGetBestSize() const;
 
@@ -162,12 +162,12 @@ protected:
 
     wxArrayPtrVoid m_bitmaps;   // the individual bitmaps
     wxArrayString m_labels;     // the individual labels
-    
+
     wxSize m_labelSize;         // the max size of all the labels
     wxSize m_bitmapSize;        // the max size of all the bitmaps
     wxSize m_itemSize;          // the max size of all the items
 
-    int m_selection;       
+    int m_selection;
     int m_win_border;           // the wxSUNKEN_BORDER size
     long m_label_style;
     bool m_frozen;
@@ -188,13 +188,13 @@ public:
                     : wxWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, style),
                       m_bmpCombo(parent) {}
 
-protected:    
+protected:
     void OnPaint( wxPaintEvent &event );
     void OnChar( wxKeyEvent &event );
 
     wxBitmapComboBox *m_bmpCombo;
 private:
-    DECLARE_CLASS(wxBitmapComboLabel)
+    DECLARE_DYNAMIC_CLASS(wxBitmapComboLabel)
     DECLARE_EVENT_TABLE()
 };
 
@@ -206,7 +206,7 @@ class WXDLLIMPEXP_THINGS wxBitmapComboPopupChild : public wxScrolledWindow
 {
 public:
     wxBitmapComboPopupChild(wxWindow *parent, wxBitmapComboBox *owner);
-    
+
     void DrawSelection( int n, wxDC& dc );
 
     void OnMouse( wxMouseEvent &event );
@@ -215,8 +215,8 @@ public:
 
     wxBitmapComboBox *m_bmpCombo;
     int m_last_selection;
-    
-private:    
+
+private:
     DECLARE_EVENT_TABLE()
 };
 

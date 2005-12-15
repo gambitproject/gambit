@@ -6,9 +6,9 @@ EXTRA_DIST = \
 	block.h \
 	bmpcombo.h \
 	dropdown.h \
+	filebrws.h \
 	genergdi.h \
 	geometry.h \
-	grid.h \
 	medsort.h \
 	menubtn.h \
 	optvalue.h \

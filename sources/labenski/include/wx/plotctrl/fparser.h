@@ -51,13 +51,13 @@ class FunctionParser;
 // ----------------------------------------------------------------------------
 // wxFunctionParser - a thin wrapper around FunctionParser
 //
-// It converts wxString to std::string (for unicode) and isolates the std:: 
-// warnings that MSVC 6 generates from it's own headers. 
+// It converts wxString to std::string (for unicode) and isolates the std::
+// warnings that MSVC 6 generates from it's own headers.
 // Additionally, the original fparser.hh and fparser.cpp files do not require
 // any modification other than adding some code.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOTLIB wxFunctionParser
+class WXDLLIMPEXP_PLOTCTRL wxFunctionParser
 {
 public:
     enum ParseErrorType
@@ -78,13 +78,13 @@ public:
     // in the function. func = "sin(x) + 2*t*x", vars = "x,t"
     int Parse(const wxString& Function, const wxString& Vars,
               bool useDegrees = false);
-    
+
     // Get a readable error message if error after a call to parse or empty string
     wxString ErrorMsg() const;
     // Get the wxFunctionParser::ParseErrorType error id
     ParseErrorType GetParseErrorType() const;
-    
-    // Evaluate the function (must have called Parse first) where vars is an 
+
+    // Evaluate the function (must have called Parse first) where vars is an
     //  array of the variable values to use.
     double Eval(const double* Vars);
     // Not really sure - some sort of error flag?
@@ -92,7 +92,7 @@ public:
 
     // Add a constant to the function parser
     bool AddConstant(const wxString& name, double value);
-    
+
     // Function type that can be added to the parser
     typedef double (*FunctionPtr)(const double*);
     // Add a function to the parser
@@ -113,6 +113,8 @@ public:
     wxString GetVariableString() const { return m_variables; }
     // Get one of the variable names from the string sent to Parse
     wxString GetVariableName(size_t n) const;
+    // Was this parsed using degrees
+    bool GetUseDegrees() const;
 
     // operators
     wxFunctionParser& operator=(const wxFunctionParser&);
@@ -122,7 +124,7 @@ public:
 
 protected:
     FunctionParser *m_functionParser;
-    wxString m_function, m_variables;  
+    wxString m_function, m_variables;
     bool m_ok;
 };
 

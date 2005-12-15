@@ -2,7 +2,7 @@
 // Name:        plotdefs.h
 // Purpose:     Definitions for wxPlotLib
 // Author:      John Labenski
-// Modified by: 
+// Modified by:
 // Created:     1/08/2005
 // RCS-ID:      $Id$
 // Copyright:   (c) John Labenski
@@ -12,12 +12,7 @@
 #ifndef __WX_PLOTDEF_H__
 #define __WX_PLOTDEF_H__
 
-//#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-//    #pragma interface "plotdefs.h"
-//#endif
-
 #include "wx/defs.h"
-//#include "wxthings/wx24defs.h"   // wx2.4 backwards compatibility
 
 // ----------------------------------------------------------------------------
 // DLLIMPEXP macros
@@ -25,18 +20,29 @@
 
 // These are our DLL macros (see the contrib libs like wxPlot)
 /*
-#ifdef WXMAKINGDLL_PLOTLIB
-    #define WXDLLIMPEXP_PLOTLIB WXEXPORT
-    #define WXDLLIMPEXP_DATA_PLOTLIB(type) WXEXPORT type
+#ifdef WXMAKINGDLL_PLOTCTRL
+    #define WXDLLIMPEXP_PLOTCTRL WXEXPORT
+    #define WXDLLIMPEXP_DATA_PLOTCTRL(type) WXEXPORT type
 #elif defined(WXUSINGDLL)
-    #define WXDLLIMPEXP_PLOTLIB WXIMPORT
-    #define WXDLLIMPEXP_DATA_PLOTLIB(type) WXIMPORT type
+    #define WXDLLIMPEXP_PLOTCTRL WXIMPORT
+    #define WXDLLIMPEXP_DATA_PLOTCTRL(type) WXIMPORT type
 #else // not making nor using DLL
 */
-    #define WXDLLIMPEXP_PLOTLIB
-    #define WXDLLIMPEXP_DATA_PLOTLIB(type) type
+    #define WXDLLIMPEXP_PLOTCTRL
+    #define WXDLLIMPEXP_DATA_PLOTCTRL(type) type
 /*
 #endif
 */
+
+// ----------------------------------------------------------------------------
+// Convenience macros
+// ----------------------------------------------------------------------------
+
+// Check if value is >= min_val and <= max_val
+#define wxPCHECK_MINMAX_RET(val, min_val, max_val, msg) \
+    wxCHECK_RET((int(val)>=int(min_val))&&(int(val)<=int(max_val)), msg)
+
+#define wxPCHECK_MINMAX_MSG(val, min_val, max_val, ret, msg) \
+    wxCHECK_MSG((int(val)>=int(min_val))&&(int(val)<=int(max_val)), ret, msg)
 
 #endif  // __WX_PLOTDEF_H__

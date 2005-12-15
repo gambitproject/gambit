@@ -1,5 +1,5 @@
 /***************************************************************************\
-|* Function parser v2.7 by Warp                                            *|
+|* Function parser v2.71 by Warp                                           *|
 |* ----------------------------                                            *|
 |* Parses and evaluates the given function with the given variable values. *|
 |*                                                                         *|
@@ -56,6 +56,7 @@ public:
     void Optimize();
 
     int GetNumberVariables() const { return data->varAmount; }
+    bool GetUseDegrees() const { return data->useDegreeConversion; }
 
     FunctionParser();
     ~FunctionParser();

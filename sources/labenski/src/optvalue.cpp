@@ -35,7 +35,7 @@ WX_DEFINE_OBJARRAY(wxArrayOptionValue);
 /*
 wxArrayString wxStringToWords( const wxString &string )
 {
-    
+
 //  wxArrayString arr;
 //  wxString word, s = string.Strip(wxString::both);
 //  wxMemoryInputStream memstream( s.c_str(), string.Length() );
@@ -58,28 +58,47 @@ wxArrayString wxStringToWords( const wxString &string )
 }
 */
 
+//----------------------------------------------------------------------------
+// wxOptionValueRefData
+//----------------------------------------------------------------------------
+
 class wxOptionValueRefData: public wxObjectRefData
 {
 public:
-    wxOptionValueRefData()
-    { 
-        m_children = NULL; 
-    }
-    
-    ~wxOptionValueRefData() 
+    wxOptionValueRefData() : wxObjectRefData() {}
+
+    wxOptionValueRefData(const wxOptionValueRefData& data) : wxObjectRefData()
     {
-        if (m_children) delete m_children;
+        m_type         = data.m_type;
+        m_optionNames  = data.m_optionNames;
+        m_optionValues = data.m_optionValues;
+        m_children     = data.m_children;;
     }
-    
-    wxString m_type;
-    wxArrayString m_optionNames;
-    wxArrayString m_optionValues;
-    wxArrayOptionValue *m_children;
+
+    ~wxOptionValueRefData() {}
+
+    wxString            m_type;
+    wxArrayString       m_optionNames;
+    wxArrayString       m_optionValues;
+    wxArrayOptionValue  m_children;
 };
 
 #define M_OPTVALUDATA ((wxOptionValueRefData *)m_refData)
 
+//----------------------------------------------------------------------------
+// wxOptionValue - a ref counted wxString key, wxString value container
+//----------------------------------------------------------------------------
+
 IMPLEMENT_DYNAMIC_CLASS(wxOptionValue, wxObject);
+
+wxObjectRefData *wxOptionValue::CreateRefData() const
+{
+    return new wxOptionValueRefData;
+}
+wxObjectRefData *wxOptionValue::CloneRefData(const wxObjectRefData *data) const
+{
+    return new wxOptionValueRefData(*(const wxOptionValueRefData *)data);
+}
 
 bool wxOptionValue::Create()
 {
@@ -88,12 +107,12 @@ bool wxOptionValue::Create()
     return Ok();
 }
 
-bool wxOptionValue::Create( const wxOptionValue &optvalue )
+bool wxOptionValue::Create( const wxOptionValue &optValue )
 {
-    wxCHECK_MSG( optvalue.Ok(), false, wxT("Invalid wxOptionValue") );
-    
+    wxCHECK_MSG( optValue.Ok(), false, wxT("Invalid wxOptionValue") );
+
     UnRef();
-    Ref( optvalue );
+    Ref( optValue );
     return Ok();
 }
 
@@ -101,13 +120,13 @@ bool wxOptionValue::Create( const wxString &string )
 {
     UnRef();
     m_refData = new wxOptionValueRefData();
-    
+
     int i, start = 0, length = string.Length();
-    
+
     wxString buff;
-    
+
     const wxChar *s = string.GetData();
-    
+
 //  const wxChar comma = 44; // comma
     const wxChar tab = 9;  // tab
 //    const wxChar space = 32; // space
@@ -117,17 +136,17 @@ bool wxOptionValue::Create( const wxString &string )
     const wxChar closebracket  = wxT(']');
     const wxChar equals = wxT('=');
     const wxChar ccr = wxT('\n');
-    
+
     bool has_type = false;
-    
+
     for (i=0; i<length; i++, s++)                    // find opening [ for type
     {
-        if (*s == openbracket) 
-        { 
-            start = i+1; 
+        if (*s == openbracket)
+        {
+            start = i+1;
             s++;                               // don't include bracket in type
             has_type = true;
-            break; 
+            break;
         }
     }
     if (has_type)
@@ -145,11 +164,11 @@ bool wxOptionValue::Create( const wxString &string )
             {
                 buff.Append(*s);
             }
-            else 
+            else
                 return false;
         }
     }
-    
+
     buff.Clear();
     for (i=start; i<length; i++)  // add options
     {
@@ -177,23 +196,23 @@ bool wxOptionValue::Create( const wxString &string )
                 M_OPTVALUDATA->m_optionNames.Add(buff.Mid(j));
                 buff.Remove(j).Trim(true);
             }
-            if (!buff.IsEmpty()) 
+            if (!buff.IsEmpty())
                 M_OPTVALUDATA->m_optionValues.Add(buff);
-            
+
             buff.Clear();
         }
         s++;
     }
-    
+
     buff.Trim(false).Trim(true);
     if (!buff.IsEmpty())
         M_OPTVALUDATA->m_optionValues.Add(buff);
-    
-    if ((M_OPTVALUDATA->m_optionValues.GetCount() != M_OPTVALUDATA->m_optionNames.GetCount())) 
+
+    if ((M_OPTVALUDATA->m_optionValues.GetCount() != M_OPTVALUDATA->m_optionNames.GetCount()))
     {
         int i;
         wxPrintf(wxT("wxOptionValue::wxOptionValue( const wxString &string BUSTED\n"));
-        
+
         wxPrintf(wxT("[%s]\n"), M_OPTVALUDATA->m_type.c_str());
         for (i=0; i<(int)M_OPTVALUDATA->m_optionNames.GetCount(); i++)
             wxPrintf(wxT("{%s}\n"), M_OPTVALUDATA->m_optionNames[i].c_str());
@@ -202,23 +221,25 @@ bool wxOptionValue::Create( const wxString &string )
         fflush(stdout);
     }
 
-    return ((M_OPTVALUDATA->m_optionValues.GetCount() > 0) && 
-            (M_OPTVALUDATA->m_optionValues.GetCount() != 
+    return ((M_OPTVALUDATA->m_optionValues.GetCount() > 0) &&
+            (M_OPTVALUDATA->m_optionValues.GetCount() !=
              M_OPTVALUDATA->m_optionNames.GetCount()));
 }
 
 bool wxOptionValue::Copy( const wxOptionValue &optValue )
 {
     wxCHECK_MSG( optValue.Ok(), false, wxT("Invalid wxOptionValue") );
-    
-    M_OPTVALUDATA->m_type = optValue.GetType();
-    
-    M_OPTVALUDATA->m_optionNames.Clear();
-    M_OPTVALUDATA->m_optionValues.Clear();
-    
-    WX_APPEND_ARRAY(M_OPTVALUDATA->m_optionNames, optValue.GetOptionNames());
-    WX_APPEND_ARRAY(M_OPTVALUDATA->m_optionValues, optValue.GetOptionValues());
-    
+
+    if (!Ok()) Create();
+
+    M_OPTVALUDATA->m_type         = optValue.GetType();
+    M_OPTVALUDATA->m_optionNames  = optValue.GetOptionNames();
+    M_OPTVALUDATA->m_optionValues = optValue.GetOptionValues();
+    if (optValue.GetChildrenCount())
+        M_OPTVALUDATA->m_children = *optValue.GetChildren();
+    else
+        M_OPTVALUDATA->m_children.Clear();
+
     return true;
 }
 
@@ -248,44 +269,34 @@ void wxOptionValue::SetType( const wxString &type )
 
 //-----------------------------------------------------------------------------
 
-int wxOptionValue::HasChildren() const
+size_t wxOptionValue::GetChildrenCount() const
 {
     wxCHECK_MSG( Ok(), 0, wxT("Invalid wxOptionValue") );
-    if (!M_OPTVALUDATA->m_children) return 0;
-    return int(M_OPTVALUDATA->m_children->GetCount());
+    return M_OPTVALUDATA->m_children.GetCount();
 }
 wxArrayOptionValue *wxOptionValue::GetChildren() const
 {
     wxCHECK_MSG( Ok(), NULL, wxT("Invalid wxOptionValue") );
-    return M_OPTVALUDATA->m_children;
+    return &M_OPTVALUDATA->m_children;
 }
-    
-bool wxOptionValue::AddChild( wxOptionValue *child )
+bool wxOptionValue::AddChild( const wxOptionValue& child )
 {
-    wxCHECK_MSG( Ok() && child, 0, wxT("Invalid wxOptionValue") );
-    if (!M_OPTVALUDATA->m_children) 
-        M_OPTVALUDATA->m_children = new wxArrayOptionValue();
-    
-    M_OPTVALUDATA->m_children->Add(child);
+    wxCHECK_MSG( Ok() && child.Ok(), 0, wxT("Invalid wxOptionValue") );
+    M_OPTVALUDATA->m_children.Add(child);
     return true;
 }
-
-void wxOptionValue::DeleteChildren() 
+void wxOptionValue::DeleteChildren()
 {
     wxCHECK_RET( Ok(), wxT("Invalid wxOptionValue") );
-    if (M_OPTVALUDATA->m_children) 
-    {
-        delete M_OPTVALUDATA->m_children;
-        M_OPTVALUDATA->m_children = NULL;
-    }
+    M_OPTVALUDATA->m_children.Clear();
 }
 
 //-----------------------------------------------------------------------------
 
-int wxOptionValue::GetOptionCount() const
+size_t wxOptionValue::GetOptionCount() const
 {
     wxCHECK_MSG( Ok(), 0, wxT("Invalid wxOptionValue") );
-    return int(M_OPTVALUDATA->m_optionNames.GetCount());
+    return M_OPTVALUDATA->m_optionNames.GetCount();
 }
 
 wxArrayString wxOptionValue::GetOptionNames() const
@@ -299,16 +310,17 @@ wxArrayString wxOptionValue::GetOptionValues() const
     return M_OPTVALUDATA->m_optionValues;
 }
 
-wxString wxOptionValue::GetOptionName( int n ) const
+wxString wxOptionValue::GetOptionName( size_t n ) const
 {
-    wxCHECK_MSG( Ok() && (n>=0) && (n<int(M_OPTVALUDATA->m_optionNames.GetCount())), 
+    wxCHECK_MSG( Ok() && (n<M_OPTVALUDATA->m_optionNames.GetCount()),
                  wxEmptyString, wxT("Invalid wxOptionValue") );
     return M_OPTVALUDATA->m_optionNames[n];
 }
 
-wxString wxOptionValue::GetOptionValue( int n ) const
+wxString wxOptionValue::GetOptionValue( size_t n ) const
 {
-    wxCHECK_MSG( Ok() && (n>=0) && (n<int(M_OPTVALUDATA->m_optionValues.GetCount())), wxEmptyString, wxT("Invalid wxOptionValue") );
+    wxCHECK_MSG( Ok() && (n<M_OPTVALUDATA->m_optionValues.GetCount()),
+                 wxEmptyString, wxT("Invalid wxOptionValue") );
     return M_OPTVALUDATA->m_optionValues[n];
 }
 
@@ -323,7 +335,7 @@ int wxOptionValue::FindOption(const wxString &part_of_option_name) const
 {
     wxCHECK_MSG( Ok(), wxNOT_FOUND, wxT("Invalid wxOptionValue") );
     int i, count = M_OPTVALUDATA->m_optionNames.GetCount();
-    
+
     for (i=0; i<count; i++)
     {
         if (M_OPTVALUDATA->m_optionNames[i].Contains(part_of_option_name))
@@ -338,17 +350,17 @@ bool wxOptionValue::DeleteOption(const wxString &name)
     int index = M_OPTVALUDATA->m_optionNames.Index(name, false);
     if (index == wxNOT_FOUND) return false;
     M_OPTVALUDATA->m_optionNames.RemoveAt(index);
-    M_OPTVALUDATA->m_optionValues.RemoveAt(index);   
+    M_OPTVALUDATA->m_optionValues.RemoveAt(index);
     return true;
 }
 
-bool wxOptionValue::DeleteOption( int n )
+bool wxOptionValue::DeleteOption( size_t n )
 {
     wxCHECK_MSG( Ok(), false, wxT("Invalid wxOptionValue") );
-    wxCHECK_MSG( (n>=0) && (n<int(M_OPTVALUDATA->m_optionValues.GetCount())), false, wxT("invalid index"));
+    wxCHECK_MSG( n < M_OPTVALUDATA->m_optionValues.GetCount(), false, wxT("invalid index"));
     M_OPTVALUDATA->m_optionNames.RemoveAt(n);
-    M_OPTVALUDATA->m_optionValues.RemoveAt(n);  
-    return true;    
+    M_OPTVALUDATA->m_optionValues.RemoveAt(n);
+    return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -367,7 +379,7 @@ void wxOptionValue::SetOption(const wxString& name, const wxString& value, bool 
     }
     else if (force)
     {
-        M_OPTVALUDATA->m_optionNames[idx] = name;
+        M_OPTVALUDATA->m_optionNames[idx]  = name;
         M_OPTVALUDATA->m_optionValues[idx] = value;
     }
 }
@@ -392,7 +404,7 @@ wxString wxOptionValue::GetOption(const wxString& name) const
     int idx = M_OPTVALUDATA->m_optionNames.Index(name, false);
     if (idx != wxNOT_FOUND)
         return M_OPTVALUDATA->m_optionValues[idx];
-    
+
     return wxEmptyString;
 }
 
@@ -409,20 +421,20 @@ bool wxOptionValue::GetOption(const wxString& name, wxString &value ) const
 }
 bool wxOptionValue::GetOption(const wxString& name, int *value ) const
 {
-    int n;
-    if ((wxSscanf(GetOption(name).c_str(), wxT("%d"), &n) == 1))
+    long n;
+    if (GetOption(name).ToLong(&n))
     {
-        *value = n;
+        *value = (int)n;
         return true;
     }
     return false;
 }
 bool wxOptionValue::GetOption(const wxString& name, float *value ) const
 {
-    float n;
-    if ((wxSscanf(GetOption(name).c_str(), wxT("%f"), &n) == 1))
+    double n;
+    if (GetOption(name, &n))
     {
-        *value = n;
+        *value = (float)n;
         return true;
     }
     return false;
@@ -430,7 +442,7 @@ bool wxOptionValue::GetOption(const wxString& name, float *value ) const
 bool wxOptionValue::GetOption(const wxString& name, double *value ) const
 {
     double n;
-    if ((wxSscanf(GetOption(name).c_str(), wxT("%lf"), &n) == 1))
+    if (GetOption(name).ToDouble(&n))
     {
         *value = n;
         return true;
@@ -444,154 +456,147 @@ int wxOptionValue::GetOption(const wxString& name, const wxChar *format, ...) co
     if (n.IsEmpty()) return 0;
     va_list argptr;
     va_start(argptr, format);
-//  int i = wxVsscanf(n.c_str(), format, argptr); // VisualStudio doesn't have this 
+//  int i = wxVsscanf(n.c_str(), format, argptr); // VisualStudio doesn't have this
     int i = wxSscanf(n.c_str(), format, argptr);
     va_end(argptr);
     return i;
 }
 
-int wxOptionValue::GetOption(const wxString& name, wxArrayInt &values ) const
+int wxOptionValue::GetOption(const wxString& name, wxArrayInt &values,
+                             int count, const wxString& delims) const
 {
     wxString value = GetOption(name);
-    wxStringTokenizer tokens(value, wxT(" ,\t\r\n"),wxTOKEN_STRTOK);
-    int count = 0;
-    
-    while (tokens.HasMoreTokens())
+    wxStringTokenizer tokens(value, delims, wxTOKEN_STRTOK);
+    int read_count = 0;
+
+    while (((count < 0) || (read_count <= count)) && tokens.HasMoreTokens())
     {
         long num;
-        if (!tokens.GetNextToken().ToLong(&num)) return count;
+        if (!tokens.GetNextToken().ToLong(&num)) return read_count;
         values.Add(num);
-        count++;
+        read_count++;
     }
-    return count;
+    return read_count;
 }
 
-bool wxOptionValue::GetOption(const wxString& name, unsigned char *value, int count ) const
+bool wxOptionValue::GetOption(const wxString& name, unsigned char *value, int count,
+                              const wxString& delims) const
 {
-    long *nums = (long*)malloc(sizeof(long)*count);
-    if (GetOption(name, nums, count))
+    wxArrayInt intArr; intArr.Alloc(count);
+    if (GetOption(name, intArr, count, delims) != count)
+        return false;
+
+    for (int i = 0; i < count; i++) value[i] = (unsigned char)intArr[i];
+    return true;
+}
+bool wxOptionValue::GetOption(const wxString& name, int *value, int count,
+                              const wxString& delims) const
+{
+    wxArrayInt intArr; intArr.Alloc(count);
+    if (GetOption(name, intArr, count, delims) != count)
+        return false;
+
+    for (int i = 0; i < count; i++) value[i] = intArr[i];
+    return true;
+}
+bool wxOptionValue::GetOption(const wxString& name, long *value, int count,
+                              const wxString& delims) const
+{
+    wxArrayInt intArr; intArr.Alloc(count);
+    if (GetOption(name, intArr, count, delims) != count)
+        return false;
+
+    for (int i = 0; i < count; i++) value[i] = intArr[i];
+    return true;
+}
+bool wxOptionValue::GetOption(const wxString& name, float *value, int count,
+                              const wxString& delims) const
+{
+    double *nums = (double*)malloc(sizeof(double)*count);
+    if (GetOption(name, nums, count, delims))
     {
-        for (int i=0; i<count; i++) value[i] = (unsigned char)nums[i];
+        for (int i=0; i < count; i++) value[i] = (float)nums[i];
         free(nums);
         return true;
     }
     free(nums);
     return false;
 }
-bool wxOptionValue::GetOption(const wxString& name, int *value, int count ) const
+bool wxOptionValue::GetOption(const wxString& name, double *value, int count,
+                              const wxString& delims) const
 {
-    long *nums = (long*)malloc(sizeof(long)*count);
-    if (GetOption(name, nums, count))
-    {
-        for (int i=0; i<count; i++) value[i] = (int)nums[i];
-        free(nums);
-        return true;
-    }
-    free(nums);
-    return false;
-}
-bool wxOptionValue::GetOption(const wxString& name, long *value, int count ) const
-{
-    int i;
-    long *nums = (long*)malloc(sizeof(long)*count);
-    wxString word, s = GetOption(name).Strip(wxString::both);
+    wxString optValue = GetOption(name);
+    wxStringTokenizer tokens(optValue, delims, wxTOKEN_STRTOK);
+    int read_count = 0;
+    double *nums = (double*)malloc(sizeof(double)*count);
+    double num;
 
-    for (i=0; i<count; i++)
+    while ((read_count <= count) && tokens.HasMoreTokens())
     {
-        word = s.BeforeFirst(wxT(' '));
-        if ((!word.IsEmpty()) || !word.ToLong( &nums[i] ))
+        if (!tokens.GetNextToken().ToDouble(&num))
         {
             free(nums);
             return false;
         }
-        s = s.AfterFirst(wxT(' ')).Strip(wxString::both);
+        if (read_count >= count) break;
+        read_count++;
     }
-    if (i==count) for (i=0; i<count; i++) value[i] = nums[i];
-    free(nums);
-    return true;
-}
-bool wxOptionValue::GetOption(const wxString& name, float *value, int count ) const
-{
-    double *nums = (double*)malloc(sizeof(double)*count);
-    if (GetOption(name, nums, count))
+
+    if (read_count == count)
     {
-        for (int i=0; i<count; i++) value[i] = (float)nums[i];
+        for (int i = 0; i < count; i++) value[i] = nums[i];
         free(nums);
         return true;
     }
+
     free(nums);
     return false;
 }
-bool wxOptionValue::GetOption(const wxString& name, double *value, int count ) const
-{
-    int i;
-    double *nums = (double*)malloc(sizeof(double)*count);
-    wxString word, s = GetOption(name).Strip(wxString::both);
 
-    for (i=0; i<count; i++)
-    {
-        word = s.BeforeFirst(wxT(' '));
-        if ((!word.IsEmpty()) || !word.ToDouble( &nums[i] ))
-        {
-            free(nums);
-            return false;
-        }
-        s = s.AfterFirst(wxT(' ')).Strip(wxString::both);
-    }
-    if (i==count) for (i=0; i<count; i++) value[i] = nums[i];
-    free(nums);
+
+bool wxOptionValue::GetOption(const wxString& name, int *v1, int *v2,
+                              const wxString& delims) const
+{
+    wxArrayInt intArr;
+    if (GetOption(name, intArr, 2, delims) != 2)
+        return false;
+
+    if (v1) *v1 = intArr[0];
+    if (v2) *v2 = intArr[1];
+    return true;
+}
+bool wxOptionValue::GetOption(const wxString& name, int *v1, int *v2, int *v3,
+                              const wxString& delims) const
+{
+    wxArrayInt intArr;
+    if (GetOption(name, intArr, 3, delims) != 3)
+        return false;
+
+    if (v1) *v1 = intArr[0];
+    if (v2) *v2 = intArr[1];
+    if (v3) *v3 = intArr[2];
+    return true;
+}
+bool wxOptionValue::GetOption(const wxString& name, float *v1, float *v2, float *v3,
+                              const wxString& delims) const
+{
+    double nums[3];
+    if (GetOption(name, nums, 3, delims))
+        return false;
+
+    if (v1) *v1 = (float)nums[0];
+    if (v2) *v2 = (float)nums[1];
+    if (v3) *v3 = (float)nums[2];
     return true;
 }
 
+bool wxOptionValue::GetOption(const wxString& name, wxRect &value,
+                              const wxString& delims) const
+{
+    wxArrayInt intArr;
+    if (GetOption(name, intArr, 4, delims) != 4)
+        return false;
 
-bool wxOptionValue::GetOption(const wxString& name, int *v1, int *v2, int *v3 ) const   
-{
-    int n1, n2, n3;
-    if (wxSscanf(GetOption(name).c_str(), wxT("%d %d %d"), &n1, &n2, &n3) == 3)
-    {
-        *v1 = n1; *v2 = n2; *v3 = n3;
-        return true;
-    }
-    return false;
-}
-bool wxOptionValue::GetOption(const wxString& name, float *v1, float *v2, float *v3 ) const
-{
-    float n1, n2, n3;
-    if (wxSscanf(GetOption(name).c_str(), wxT("%f %f %f"), &n1, &n2, &n3) == 3)
-    {
-        *v1 = n1; *v2 = n2; *v3 = n3;
-        return true;
-    }
-    return false;
-}
-    
-bool wxOptionValue::GetOption(const wxString& name, wxPoint &value ) const  
-{
-    int n1, n2;
-    if (wxSscanf(GetOption(name).c_str(), wxT("%d %d"), &n1, &n2) == 2)
-    {
-        value = wxPoint( n1, n2 );
-        return true;
-    }
-    return false;
-}
-bool wxOptionValue::GetOption(const wxString& name, wxSize &value ) const   
-{
-    int n1, n2;
-    if (wxSscanf(GetOption(name).c_str(), wxT("%d %d"), &n1, &n2) == 2)
-    {
-        value = wxSize( n1, n2 );
-        return true;
-    }
-    return false;
-}
-bool wxOptionValue::GetOption(const wxString& name, wxRect &value ) const   
-{
-    int n1, n2, n3, n4;
-    if (wxSscanf(GetOption(name).c_str(), wxT("%d %d %d %d"), &n1, &n2, &n3, &n4) == 4)
-    {
-        value = wxRect( n1, n2, n3, n4 );
-        return true;
-    }
-    return false;
+    value = wxRect(intArr[0], intArr[1], intArr[2], intArr[3]);
+    return true;
 }

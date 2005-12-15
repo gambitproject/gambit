@@ -2,7 +2,7 @@
 // Name:        thingdef.h
 // Purpose:     Definitions for wxThings
 // Author:      John Labenski
-// Modified by: 
+// Modified by:
 // Created:     1/08/1999
 // RCS-ID:      $Id$
 // Copyright:   (c) John Labenski
@@ -12,12 +12,7 @@
 #ifndef __WX_THINGDEF_H__
 #define __WX_THINGDEF_H__
 
-//#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-//    #pragma interface "thingdef.h"
-//#endif
-
 #include "wx/defs.h"
-//#include "wxthings/wx24defs.h"   // wx2.4 backwards compatibility
 
 // ----------------------------------------------------------------------------
 // DLLIMPEXP macros

@@ -22,7 +22,7 @@
 
 #ifndef WX_PRECOMP
     #include "wx/control.h"
-    #include "wx/bitmap.h"    
+    #include "wx/bitmap.h"
 #endif // WX_PRECOMP
 
 #include "wx/timer.h"
@@ -52,7 +52,7 @@ static wxBitmap s_dropdownBitmap; // all buttons share the same bitmap
 #define USE_POPUP_TIMER 0 // FIXME after 2.5.4 we don't need either
 #define USE_POPUP_IDLE  0
 
-IMPLEMENT_CLASS( DropDownPopup, wxPopupTransientWindow )
+IMPLEMENT_DYNAMIC_CLASS( DropDownPopup, wxPopupTransientWindow )
 
 BEGIN_EVENT_TABLE(DropDownPopup, wxPopupTransientWindow)
     EVT_KEY_DOWN(DropDownPopup::OnKeyDown)
@@ -65,7 +65,7 @@ BEGIN_EVENT_TABLE(DropDownPopup, wxPopupTransientWindow)
 #endif // USE_POPUP_IDLE
 END_EVENT_TABLE()
 
-bool DropDownPopup::Create(DropDownBase *parent, int style) 
+bool DropDownPopup::Create(DropDownBase *parent, int style)
 {
     m_owner = parent;
     return wxPopupTransientWindow::Create(parent, style);
@@ -89,20 +89,20 @@ void DropDownPopup::StartTimer()
 #if USE_POPUP_TIMER
     if (!m_timer)
         m_timer = new wxTimer(this, wxID_ANY);
-    
-    m_timer->Start(200, false);    
+
+    m_timer->Start(200, false);
 #endif // USE_POPUP_TIMER
 }
 
 void DropDownPopup::StopTimer()
 {
-    if (m_timer) 
+    if (m_timer)
     {
-        if (m_timer->IsRunning()) 
+        if (m_timer->IsRunning())
             m_timer->Stop();
         delete m_timer;
         m_timer = NULL;
-    }        
+    }
 }
 
 void DropDownPopup::PushPopupHandler(wxWindow* child)
@@ -110,46 +110,46 @@ void DropDownPopup::PushPopupHandler(wxWindow* child)
     if (child && m_handlerPopup && m_popped_handler)
     {
         m_popped_handler = false;
-        
+
         if (child->GetEventHandler() != (wxEvtHandler*)m_handlerPopup)
             child->PushEventHandler((wxEvtHandler*)m_handlerPopup);
         if (!child->HasCapture())
             child->CaptureMouse();
-        
+
         child->SetFocus();
-    }        
+    }
 }
 void DropDownPopup::PopPopupHandler(wxWindow* child)
 {
     if (child && m_handlerPopup && !m_popped_handler)
     {
         m_popped_handler = true;
-        
+
         if (child->GetEventHandler() == (wxEvtHandler*)m_handlerPopup)
-            child->PopEventHandler(false);         
+            child->PopEventHandler(false);
         if (child->HasCapture())
             child->ReleaseMouse();
-            
-        child->SetFocus();            
-    }    
+
+        child->SetFocus();
+    }
 }
 
 void DropDownPopup::OnTimer( wxTimerEvent &WXUNUSED(event) )
-{   
+{
     if (!IsShown()) return;
-   
+
     m_mouse = ScreenToClient(wxGetMousePosition());
 
     wxWindow *child = GetChild();
     if (!child) return; // nothing to do
-    
+
     wxRect clientRect(GetClientRect());
     //wxPrintf(wxT("**DropDownPopup::OnTimer mouse %d %d -- %d %d %d\n"), m_mouse.x, m_mouse.y, m_popped_handler, m_child, m_handlerPopup); fflush(stdout);
-    // pop the event handler if inside the child window or 
+    // pop the event handler if inside the child window or
     // restore the event handler if not in the child window
     if (clientRect.Inside(m_mouse))
         PopPopupHandler(child);
-    else 
+    else
         PushPopupHandler(child);
 }
 
@@ -159,17 +159,17 @@ void DropDownPopup::OnIdle( wxIdleEvent& event )
     {
         m_mouse = ScreenToClient(wxGetMousePosition());
         wxPrintf(wxT("OnIdle mouse %d %d\n"), m_mouse.x, m_mouse.y);
-        
+
         wxWindow *child = GetChild();
         if (!child) return; // nothing to do
-    
+
         wxRect clientRect(GetClientRect());
         //wxPrintf(wxT("**DropDownPopup::OnIdle mouse %d %d -- %d %d %d\n"), m_mouse.x, m_mouse.y, m_popped_handler, m_child, m_handlerPopup); fflush(stdout);
-        // pop the event handler if inside the child window or 
+        // pop the event handler if inside the child window or
         // restore the event handler if not in the child window
         if (clientRect.Inside(m_mouse))
             PopPopupHandler(child);
-        else 
+        else
             PushPopupHandler(child);
     }
     event.Skip();
@@ -178,11 +178,11 @@ void DropDownPopup::OnIdle( wxIdleEvent& event )
 void DropDownPopup::OnMouse( wxMouseEvent& event )
 {
     m_mouse = event.GetPosition();
-    event.Skip();    
+    event.Skip();
 }
 
 void DropDownPopup::OnKeyDown( wxKeyEvent &event )
-{    
+{
     if (GetChild() && GetChild()->ProcessEvent(event))
         event.Skip(false);
     else
@@ -197,13 +197,13 @@ void DropDownPopup::SetChild(wxWindow *win)
 void DropDownPopup::Popup(wxWindow *focus)
 {
     wxPopupTransientWindow::Popup(focus);
-    
+
 #if USE_POPUP_IDLE
     Connect(wxID_ANY, wxEVT_IDLE,
            (wxObjectEventFunction)(wxEventFunction)(wxIdleEventFunction)
             &DropDownPopup::OnIdle, 0, this);
 #endif //USE_POPUP_IDLE
-  
+
 #if USE_POPUP_TIMER
     // start the timer to track the mouse position
     StartTimer();
@@ -213,15 +213,15 @@ void DropDownPopup::Popup(wxWindow *focus)
 void DropDownPopup::Dismiss()
 {
 #if USE_POPUP_IDLE
-    Disconnect(wxID_ANY, wxEVT_IDLE, 
+    Disconnect(wxID_ANY, wxEVT_IDLE,
                (wxObjectEventFunction)(wxEventFunction)(wxIdleEventFunction)
                &DropDownPopup::OnIdle, 0, this);
 #endif //USE_POPUP_IDLE
 
 #if USE_POPUP_TIMER
-    StopTimer();    
+    StopTimer();
 #endif //USE_POPUP_TIMER
-    
+
     // restore the event handler if necessary for the base class Dismiss
     wxWindow *child = GetChild();
     if (child) PushPopupHandler(child);
@@ -235,11 +235,11 @@ bool DropDownPopup::ProcessLeftDown( wxMouseEvent &event )
 {
     m_mouse = event.GetPosition();
     //wxPrintf(wxT("DropDownPopup::ProcessLeftDown %d %d\n"), m_mouse.x, m_mouse.y); fflush(stdout);
-    
+
     if (m_popped_handler) return true; // shouldn't ever get here, but just in case
 
-    StopTimer();    
-    
+    StopTimer();
+
     // don't let the click on the dropdown button actually press it
     wxCustomButton *dropBut = m_owner->GetDropDownButton();
     if (dropBut)
@@ -252,7 +252,7 @@ bool DropDownPopup::ProcessLeftDown( wxMouseEvent &event )
             return true;
         }
     }
-    
+
     if (GetClientRect().Inside(m_mouse))
         return false;
 
@@ -264,7 +264,7 @@ bool DropDownPopup::ProcessLeftDown( wxMouseEvent &event )
 // DropDownBase
 // ============================================================================
 
-IMPLEMENT_CLASS( DropDownBase, wxControl )
+IMPLEMENT_DYNAMIC_CLASS( DropDownBase, wxControl )
 
 BEGIN_EVENT_TABLE(DropDownBase, wxControl)
     EVT_BUTTON(IDD_DROPDOWN_BUTTON, DropDownBase::OnDropButton)
@@ -288,31 +288,31 @@ bool DropDownBase::Create( wxWindow* parent, wxWindowID id,
 {
     if (!wxControl::Create(parent,id,pos,size,wxNO_BORDER|wxCLIP_CHILDREN|style,val,name))
         return false;
-    
+
     if (!s_dropdownBitmap.Ok())
         s_dropdownBitmap = wxBitmap(down_arrow_xpm_data);
-    
-    m_dropdownButton = new wxCustomButton(this, IDD_DROPDOWN_BUTTON, 
-		                                  s_dropdownBitmap, 
-										  wxDefaultPosition, 
+
+    m_dropdownButton = new wxCustomButton(this, IDD_DROPDOWN_BUTTON,
+		                                  s_dropdownBitmap,
+										  wxDefaultPosition,
 										  wxSize(DROPDOWN_DROP_WIDTH, wxDefaultCoord),
 										  wxCUSTBUT_BUTTON);
-    
+
     return true;
 }
 
 void DropDownBase::OnSize( wxSizeEvent& event )
 {
     event.Skip();
-/*    
+/*
     if (!m_dropdownButton) return;
-        
+
 	wxSize size = GetClientSize();
     wxPrintf(wxT("DropDownBase %d %d\n"), size.x, size.y);
-    
+
 	wxSize dropSize = m_dropdownButton->GetSize();
-    m_dropdownButton->SetSize(size.x-dropSize.x, 0, dropSize.x, size.y);    
-*/    
+    m_dropdownButton->SetSize(size.x-dropSize.x, 0, dropSize.x, size.y);
+*/
 }
 
 void DropDownBase::DoSetSize(int x, int y, int width, int height, int sizeFlags)
@@ -323,23 +323,23 @@ void DropDownBase::DoSetSize(int x, int y, int width, int height, int sizeFlags)
         width = curSize.GetWidth();
     if (height == -1)
         height = curSize.GetHeight();
-    
+
     wxControl::DoSetSize(x, y, width, height, sizeFlags);
 
 	wxSize dropSize = m_dropdownButton->GetSize();
-    m_dropdownButton->SetSize(width-dropSize.x, 0, dropSize.x, height);    
+    m_dropdownButton->SetSize(width-dropSize.x, 0, dropSize.x, height);
 }
 
 wxSize DropDownBase::DoGetBestSize() const
-{   
+{
     return wxSize(95, DROPDOWN_DROP_HEIGHT);
 }
 
 bool DropDownBase::ShowPopup()
-{           
+{
     int x = 0, y = GetSize().y;
     ClientToScreen( &x, &y );
-    
+
     // control too low, can't show scrollbar, don't bother displaying
     wxRect displayRect = wxGetClientDisplayRect();
     if (displayRect.GetBottom() - y < DROPDOWN_DROP_HEIGHT) return false;
@@ -349,13 +349,13 @@ bool DropDownBase::ShowPopup()
     if (height < 1) return false;
 
 	m_popupWin = new DropDownPopup(this);
-    
+
     m_popupWin->SetSize(x, y, width, height);
     if (m_popupWin->GetChild())
         m_popupWin->GetChild()->SetSize(width, height);
 
     //wxPrintf(wxT("ShowPopup %d %d, %d %d -- %d\n"), width, height, m_popupWin->GetSize().x, m_popupWin->GetSize().y, m_popupWin->GetMinHeight());
-    
+
     return DoShowPopup();
 }
 
@@ -365,11 +365,11 @@ bool DropDownBase::DoShowPopup()
     {
         if (m_popupWin->GetChild())
             m_popupWin->GetChild()->SetSize(m_popupWin->GetClientSize());
-        
+
         m_popupWin->Popup(this);
         return true;
     }
-    
+
     return false;
 }
 
@@ -381,7 +381,7 @@ void DropDownBase::HidePopup()
         m_popupWin->Destroy();
         m_popupWin = NULL;
     }
-    
+
     m_dropdownButton->Refresh(true);  // MSW help in toolbar
 }
 
@@ -397,8 +397,8 @@ void DropDownBase::OnDropButton( wxCommandEvent &WXUNUSED(event))
         m_popupWin->m_ignore_popup = false;
         return;
     }
-    
-    if (IsPopupShown()) 
+
+    if (IsPopupShown())
         HidePopup();
     else
         ShowPopup();
