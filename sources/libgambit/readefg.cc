@@ -96,7 +96,7 @@ InfosetData *NodeData::AddInfosetData(const std::string &m_infosetName)
 class DefinedInfosetData {
 public:
   int m_fileID;
-  gbtEfgInfoset *m_infoset;
+  gbtEfgInfoset m_infoset;
   DefinedInfosetData *m_next;
 
   DefinedInfosetData(void) : m_fileID(-1), m_infoset(0), m_next(0) { }
@@ -110,8 +110,8 @@ public:
 
   PlayerData(void);
   ~PlayerData();
-  void AddInfoset(int p_number, gbtEfgInfoset *p_infoset);
-  gbtEfgInfoset *GetInfoset(int p_number);
+  void AddInfoset(int p_number, gbtEfgInfoset p_infoset);
+  gbtEfgInfoset GetInfoset(int p_number);
 };
 
 PlayerData::PlayerData(void)
@@ -128,7 +128,7 @@ PlayerData::~PlayerData()
   }
 }
 
-void PlayerData::AddInfoset(int p_number, gbtEfgInfoset *p_infoset)
+void PlayerData::AddInfoset(int p_number, gbtEfgInfoset p_infoset)
 {
   DefinedInfosetData *infoset = new DefinedInfosetData;
   infoset->m_fileID = p_number;
@@ -149,7 +149,7 @@ void PlayerData::AddInfoset(int p_number, gbtEfgInfoset *p_infoset)
 // been created, returns the pointer to the Infoset structure; otherwise,
 // returns null.
 //
-gbtEfgInfoset *PlayerData::GetInfoset(int p_number)
+gbtEfgInfoset PlayerData::GetInfoset(int p_number)
 {
   for (DefinedInfosetData *infoset = m_firstInfoset;
        infoset; infoset = infoset->m_next) {
@@ -164,9 +164,9 @@ gbtEfgInfoset *PlayerData::GetInfoset(int p_number)
 class DefinedOutcomeData {
 public:
   int m_fileID;
-  gbtEfgOutcome *m_outcome;
+  gbtEfgOutcome m_outcome;
 
-  DefinedOutcomeData(int p_number, gbtEfgOutcome *p_outcome)
+  DefinedOutcomeData(int p_number, gbtEfgOutcome p_outcome)
     : m_fileID(p_number), m_outcome(p_outcome) { }
 };
 
@@ -183,7 +183,7 @@ public:
 
   void AddPlayer(const std::string &);
   NodeData *AddNode(const std::string &, int, int);
-  gbtEfgOutcome *GetOutcome(int p_number) const;
+  gbtEfgOutcome GetOutcome(int p_number) const;
 };
 
 TreeData::TreeData(void)
@@ -255,7 +255,7 @@ NodeData *TreeData::AddNode(const std::string &p_name, int p_player, int p_infos
 // been created, returns a pointer to the outcome;
 // otherwise, returns a null outcome
 //
-gbtEfgOutcome *TreeData::GetOutcome(int p_number) const
+gbtEfgOutcome TreeData::GetOutcome(int p_number) const
 {
   for (int outc = 1; outc <= m_outcomes.Length(); outc++) {
     if (m_outcomes[outc]->m_fileID == p_number) {
@@ -696,7 +696,7 @@ static void Parse(ParserState &p_state, TreeData &p_treeData)
 // the actual tree to be returned
 //
 
-static void BuildSubtree(gbtEfgGame *p_efg, gbtEfgNode *p_node,
+static void BuildSubtree(gbtEfgGame *p_efg, gbtEfgNode p_node,
 			 TreeData &p_treeData, NodeData **p_nodeData)
 {
   p_node->SetLabel((*p_nodeData)->m_name);
@@ -706,7 +706,7 @@ static void BuildSubtree(gbtEfgGame *p_efg, gbtEfgNode *p_node,
       p_node->SetOutcome(p_treeData.GetOutcome((*p_nodeData)->m_outcome));
     }
     else {
-      gbtEfgOutcome *outcome = p_efg->NewOutcome();
+      gbtEfgOutcome outcome = p_efg->NewOutcome();
       outcome->SetLabel((*p_nodeData)->m_outcomeData->m_name);
       p_treeData.m_outcomes.Append(new DefinedOutcomeData((*p_nodeData)->m_outcome,
 							  outcome));
@@ -722,11 +722,11 @@ static void BuildSubtree(gbtEfgGame *p_efg, gbtEfgNode *p_node,
     for (int i = 1; i < (*p_nodeData)->m_player; i++, player = player->m_next);
 
     if (player->GetInfoset((*p_nodeData)->m_infoset)) {
-      gbtEfgInfoset *infoset = player->GetInfoset((*p_nodeData)->m_infoset);
+      gbtEfgInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
       p_efg->AppendNode(p_node, infoset);
     }
     else {
-      gbtEfgInfoset *infoset =
+      gbtEfgInfoset infoset =
 	p_efg->AppendNode(p_node, p_efg->GetPlayer((*p_nodeData)->m_player),
 			  (*p_nodeData)->m_infosetData->m_actions.Length());
 
@@ -746,11 +746,11 @@ static void BuildSubtree(gbtEfgGame *p_efg, gbtEfgNode *p_node,
     PlayerData *player = &p_treeData.m_chancePlayer;
 
     if (player->GetInfoset((*p_nodeData)->m_infoset)) {
-      gbtEfgInfoset *infoset = player->GetInfoset((*p_nodeData)->m_infoset);
+      gbtEfgInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
       p_efg->AppendNode(p_node, infoset);
     }
     else {
-      gbtEfgInfoset *infoset = p_efg->AppendNode(p_node, p_efg->GetChance(),
+      gbtEfgInfoset infoset = p_efg->AppendNode(p_node, p_efg->GetChance(),
 					   (*p_nodeData)->m_infosetData->m_actions.Length());
 
       infoset->SetLabel((*p_nodeData)->m_infosetData->m_name);

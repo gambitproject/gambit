@@ -43,7 +43,7 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent,
   m_playerItem->Append(_("Insert move for the chance player"));
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     wxString s = _("Insert move for ");
-    gbtEfgPlayer *player = m_doc->GetEfg()->GetPlayer(pl);
+    gbtEfgPlayer player = m_doc->GetEfg()->GetPlayer(pl);
     if (player->GetLabel() != "") {
       s += wxString(player->GetLabel().c_str(), *wxConvCurrent);
     }
@@ -59,10 +59,10 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent,
 
   m_infosetItem = new wxChoice(this, -1);
   m_infosetItem->Append(_("at a new information set"));
-  gbtEfgPlayer *player = m_doc->GetEfg()->GetPlayer(1);
+  gbtEfgPlayer player = m_doc->GetEfg()->GetPlayer(1);
   for (int iset = 1; iset <= player->NumInfosets(); iset++) {
     wxString s = _("at information set ");
-    gbtEfgInfoset *infoset = player->GetInfoset(iset);
+    gbtEfgInfoset infoset = player->GetInfoset(iset);
     if (infoset->GetLabel() != "") {
       s += wxString(infoset->GetLabel().c_str(), *wxConvCurrent);
     }
@@ -122,7 +122,7 @@ void gbtInsertMoveDialog::OnPlayer(wxCommandEvent &)
 {
   int playerNumber = m_playerItem->GetSelection(); 
 
-  gbtEfgPlayer *player = 0;
+  gbtEfgPlayer player;
   if (playerNumber == 0)
     player = m_doc->GetEfg()->GetChance();
   else if (playerNumber <= m_doc->NumPlayers())
@@ -139,7 +139,7 @@ void gbtInsertMoveDialog::OnPlayer(wxCommandEvent &)
 
   for (int iset = 1; iset <= player->NumInfosets(); iset++) {
     wxString s = _("at information set ");
-    gbtEfgInfoset *infoset = player->GetInfoset(iset);
+    gbtEfgInfoset infoset = player->GetInfoset(iset);
     if (infoset->GetLabel() != "") {
       s += wxString(infoset->GetLabel().c_str(), *wxConvCurrent);
     }
@@ -172,7 +172,7 @@ void gbtInsertMoveDialog::OnInfoset(wxCommandEvent &)
 
   if (infosetNumber > 0) {
     int playerNumber = m_playerItem->GetSelection();
-    gbtEfgInfoset *infoset;
+    gbtEfgInfoset infoset;
     if (playerNumber == 0)
       infoset = m_doc->GetEfg()->GetChance()->GetInfoset(infosetNumber);
     else
@@ -185,7 +185,7 @@ void gbtInsertMoveDialog::OnInfoset(wxCommandEvent &)
   }
 }
 
-gbtEfgPlayer *gbtInsertMoveDialog::GetPlayer(void) const
+gbtEfgPlayer gbtInsertMoveDialog::GetPlayer(void) const
 {
   int playerNumber = m_playerItem->GetSelection();
 
@@ -196,16 +196,16 @@ gbtEfgPlayer *gbtInsertMoveDialog::GetPlayer(void) const
     return m_doc->GetEfg()->GetPlayer(playerNumber);
   }
   else {
-    gbtEfgPlayer *player = m_doc->GetEfg()->NewPlayer();
+    gbtEfgPlayer player = m_doc->GetEfg()->NewPlayer();
     player->SetLabel("Player " + ToText(m_doc->NumPlayers()));
     return player;
   }
 }
 
-gbtEfgInfoset *gbtInsertMoveDialog::GetInfoset(void) const
+gbtEfgInfoset gbtInsertMoveDialog::GetInfoset(void) const
 {
   if (m_playerItem->GetSelection() <= m_doc->NumPlayers()) {
-    gbtEfgPlayer *player = GetPlayer();
+    gbtEfgPlayer player = GetPlayer();
     int infosetNumber = m_infosetItem->GetSelection();
     
     if (player && infosetNumber > 0) {

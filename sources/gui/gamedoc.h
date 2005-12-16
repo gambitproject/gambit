@@ -230,7 +230,7 @@ private:
   wxString m_filename;
 
   gbtStyle m_style;
-  gbtEfgNode *m_selectNode;
+  gbtEfgNode m_selectNode;
   bool m_modified;
 
   gbtBehavDominanceStack m_behavSupports;
@@ -344,17 +344,17 @@ public:
   int GetStrategyElimLevel(void) const;
   //@}
 
-  gbtEfgNode *GetSelectNode(void) const { return m_selectNode; }
-  void SetSelectNode(gbtEfgNode *);
+  gbtEfgNode GetSelectNode(void) const { return m_selectNode; }
+  void SetSelectNode(gbtEfgNode);
 
-  std::string GetRealizProb(const gbtEfgNode *) const;
-  std::string GetBeliefProb(const gbtEfgNode *) const;
-  std::string GetNodeValue(const gbtEfgNode *, int pl) const;
-  std::string GetInfosetProb(const gbtEfgNode *) const;
-  std::string GetInfosetValue(const gbtEfgNode *) const;
-  std::string GetActionValue(const gbtEfgNode *, int act) const;
-  std::string GetActionProb(const gbtEfgNode *, int act) const;
-  gbtNumber ActionProb(const gbtEfgNode *n, int br) const;
+  std::string GetRealizProb(const gbtEfgNode &) const;
+  std::string GetBeliefProb(const gbtEfgNode &) const;
+  std::string GetNodeValue(const gbtEfgNode &, int pl) const;
+  std::string GetInfosetProb(const gbtEfgNode &) const;
+  std::string GetInfosetValue(const gbtEfgNode &) const;
+  std::string GetActionValue(const gbtEfgNode &, int act) const;
+  std::string GetActionProb(const gbtEfgNode &, int act) const;
+  gbtNumber ActionProb(const gbtEfgNode &n, int br) const;
 
   void UpdateViews(gbtGameModificationType p_modifications);
 

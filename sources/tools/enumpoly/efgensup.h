@@ -115,22 +115,22 @@ public:
   bool GoToNext();
 
   // Information
-  const gbtEfgAction *GetAction() const;
+  gbtEfgAction GetAction() const;
   int ActionIndex() const;
-  const gbtEfgInfoset *GetInfoset() const;
+  gbtEfgInfoset GetInfoset() const;
   int InfosetIndex() const;
-  const gbtEfgPlayer *GetPlayer() const;
+  gbtEfgPlayer GetPlayer() const;
   int PlayerIndex() const;
 
   bool IsLast() const;
-  bool IsSubsequentTo(const gbtEfgAction *) const;
+  bool IsSubsequentTo(const gbtEfgAction &) const;
 
   // Special
   bool InfosetGuaranteedActiveByPriorCommitments(const 
 						     gbtEfgSupportWithActiveInfo *,
-						 const gbtEfgInfoset *);
+						 const gbtEfgInfoset &);
   bool DeletionsViolateActiveCommitments(const gbtEfgSupportWithActiveInfo *,
-					 const gbtList<gbtEfgInfoset *> *);
+					 const gbtList<gbtEfgInfoset> *);
 };
 
 

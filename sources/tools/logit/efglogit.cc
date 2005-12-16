@@ -128,7 +128,7 @@ static void QreLHS(const gbtEfgSupport &p_support,
   int rowno = 0;
 
   for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
-    gbtEfgPlayer *player = p_support.GetGame().GetPlayer(pl);
+    gbtEfgPlayer player = p_support.GetGame().GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       rowno++;
       for (int act = 1; act <= p_support.NumActions(pl, iset); act++) {
@@ -160,14 +160,14 @@ static void QreJacobian(const gbtEfgSupport &p_support,
 
   int rowno = 0; 
   for (int pl1 = 1; pl1 <= efg.NumPlayers(); pl1++) {
-    gbtEfgPlayer *player1 = efg.GetPlayer(pl1);
+    gbtEfgPlayer player1 = efg.GetPlayer(pl1);
     for (int iset1 = 1; iset1 <= player1->NumInfosets(); iset1++) {
-      gbtEfgInfoset *infoset1 = player1->GetInfoset(iset1);
+      gbtEfgInfoset infoset1 = player1->GetInfoset(iset1);
       rowno++;
       // First, do the "sum to one" equation
       int colno = 0;
       for (int pl2 = 1; pl2 <= efg.NumPlayers(); pl2++) {
-	gbtEfgPlayer *player2 = efg.GetPlayer(pl2);
+	gbtEfgPlayer player2 = efg.GetPlayer(pl2);
 	for (int iset2 = 1; iset2 <= player2->NumInfosets(); iset2++) {
 	  for (int act2 = 1; act2 <= p_support.NumActions(pl2, iset2); act2++) {
 	    colno++;
@@ -187,9 +187,9 @@ static void QreJacobian(const gbtEfgSupport &p_support,
 	int colno = 0;
 
 	for (int pl2 = 1; pl2 <= efg.NumPlayers(); pl2++) {
-	  gbtEfgPlayer *player2 = efg.GetPlayer(pl2);
+	  gbtEfgPlayer player2 = efg.GetPlayer(pl2);
 	  for (int iset2 = 1; iset2 <= player2->NumInfosets(); iset2++) {
-	    gbtEfgInfoset *infoset2 = player2->GetInfoset(iset2);
+	    gbtEfgInfoset infoset2 = player2->GetInfoset(iset2);
 
 	    for (int act2 = 1; act2 <= p_support.NumActions(pl2, iset2); act2++) {
 	      colno++;
@@ -239,9 +239,9 @@ void PrintProfile(std::ostream &p_stream,
 
   int index = 1;
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-    gbtEfgPlayer *player = efg->GetPlayer(pl);
+    gbtEfgPlayer player = efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtEfgInfoset *infoset = player->GetInfoset(iset);
+      gbtEfgInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
 	if (p_support.Find(infoset->GetAction(act))) {
 	  p_stream << "," << x[index++];
@@ -298,7 +298,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
       gbtEfgSupport newSupport(p_start.Support());
       int index = 1;
       for (int pl = 1; pl <= newSupport.GetGame().NumPlayers(); pl++) {
-	gbtEfgPlayer *player = newSupport.GetGame().GetPlayer(pl);
+	gbtEfgPlayer player = newSupport.GetGame().GetPlayer(pl);
 	for (int iset = 1; iset <= player->NumInfosets(); iset++) {
 	  for (int act = 1; act <= newSupport.NumActions(pl, iset); act++) {
 	    if (index++ == i) {
@@ -411,7 +411,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
 	gbtEfgSupport newSupport(p_start.Support());
 	int index = 1;
 	for (int pl = 1; pl <= newSupport.GetGame().NumPlayers(); pl++) {
-	  gbtEfgPlayer *player = newSupport.GetGame().GetPlayer(pl);
+	  gbtEfgPlayer player = newSupport.GetGame().GetPlayer(pl);
 	  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
 	    for (int act = 1; act <= newSupport.NumActions(pl, iset); act++) {
 	      if (index++ == i) {

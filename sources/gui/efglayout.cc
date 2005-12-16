@@ -37,7 +37,7 @@
 //                   class gbtNodeEntry: Member functions
 //-----------------------------------------------------------------------
 
-gbtNodeEntry::gbtNodeEntry(gbtEfgNode *p_node)
+gbtNodeEntry::gbtNodeEntry(gbtEfgNode p_node)
   : m_node(p_node), m_parent(0),
     m_x(-1), m_y(-1), m_nextMember(0), m_inSupport(true),
     m_size(20), m_token(GBT_NODE_TOKEN_CIRCLE),
@@ -60,7 +60,7 @@ int gbtNodeEntry::GetChildNumber(void) const
 // Draws the node token itself, as well as the incoming branch
 // (if not the root node)
 //
-void gbtNodeEntry::Draw(wxDC &p_dc, gbtEfgNode *p_selection,
+void gbtNodeEntry::Draw(wxDC &p_dc, gbtEfgNode p_selection,
 			bool p_noHints) const
 {
   if (m_node->GetParent() && m_inSupport) {
@@ -284,7 +284,7 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
 {
   wxPoint point(m_x + m_size + 20, m_y);
 
-  gbtEfgOutcome *outcome = m_node->GetOutcome();
+  gbtEfgOutcome outcome = m_node->GetOutcome();
   if (!outcome) {
     if (p_noHints)  return;
 
@@ -302,7 +302,7 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
   int width, height = 25;
   m_payoffRect = gbtArray<wxRect>();
   for (int pl = 1; pl <= m_node->GetGame()->NumPlayers(); pl++) {
-    gbtEfgPlayer *player = m_node->GetGame()->GetPlayer(pl);
+    gbtEfgPlayer player = m_node->GetGame()->GetPlayer(pl);
     p_dc.SetTextForeground(m_style->GetPlayerColor(pl));
 
     std::string payoff = outcome->GetPayoffText(pl);
@@ -359,7 +359,7 @@ gbtTreeLayout::gbtTreeLayout(gbtEfgDisplay *p_parent, gbtGameDocument *p_doc)
     c_leftMargin(20), c_topMargin(40)
 { }
 
-gbtEfgNode *gbtTreeLayout::NodeHitTest(int p_x, int p_y) const
+gbtEfgNode gbtTreeLayout::NodeHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     if (m_nodeList[i]->NodeHitTest(p_x, p_y)) {
@@ -369,7 +369,7 @@ gbtEfgNode *gbtTreeLayout::NodeHitTest(int p_x, int p_y) const
   return 0;
 }
 
-gbtEfgNode *gbtTreeLayout::OutcomeHitTest(int p_x, int p_y) const
+gbtEfgNode gbtTreeLayout::OutcomeHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     if (m_nodeList[i]->OutcomeHitTest(p_x, p_y)) {
@@ -379,7 +379,7 @@ gbtEfgNode *gbtTreeLayout::OutcomeHitTest(int p_x, int p_y) const
   return 0;
 }
 
-gbtEfgNode *gbtTreeLayout::BranchAboveHitTest(int p_x, int p_y) const
+gbtEfgNode gbtTreeLayout::BranchAboveHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     if (m_nodeList[i]->BranchAboveHitTest(p_x, p_y)) {
@@ -389,7 +389,7 @@ gbtEfgNode *gbtTreeLayout::BranchAboveHitTest(int p_x, int p_y) const
   return 0;
 }
 
-gbtEfgNode *gbtTreeLayout::BranchBelowHitTest(int p_x, int p_y) const
+gbtEfgNode gbtTreeLayout::BranchBelowHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     if (m_nodeList[i]->BranchAboveHitTest(p_x, p_y)) {
@@ -399,7 +399,7 @@ gbtEfgNode *gbtTreeLayout::BranchBelowHitTest(int p_x, int p_y) const
   return 0;
 }
 
-gbtEfgNode *gbtTreeLayout::InfosetHitTest(int p_x, int p_y) const
+gbtEfgNode gbtTreeLayout::InfosetHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     gbtNodeEntry *entry = m_nodeList[i];
@@ -423,7 +423,7 @@ gbtEfgNode *gbtTreeLayout::InfosetHitTest(int p_x, int p_y) const
 wxString gbtTreeLayout::CreateNodeLabel(const gbtNodeEntry *p_entry,
 					int p_which) const
 {
-  gbtEfgNode *n = p_entry->GetNode();
+  gbtEfgNode n = p_entry->GetNode();
 
   switch (p_which) {
   case GBT_NODE_LABEL_NOTHING:
@@ -478,7 +478,7 @@ wxString gbtTreeLayout::CreateNodeLabel(const gbtNodeEntry *p_entry,
 wxString gbtTreeLayout::CreateBranchLabel(const gbtNodeEntry *p_entry,
 					  int p_which) const
 {
-  const gbtEfgNode *parent = p_entry->GetParent()->GetNode();
+  gbtEfgNode parent = p_entry->GetParent()->GetNode();
 
   switch (p_which) {
   case GBT_BRANCH_LABEL_NOTHING:
@@ -499,7 +499,7 @@ wxString gbtTreeLayout::CreateBranchLabel(const gbtNodeEntry *p_entry,
   }
 }
 
-gbtNodeEntry *gbtTreeLayout::GetValidParent(gbtEfgNode *e)
+gbtNodeEntry *gbtTreeLayout::GetValidParent(gbtEfgNode e)
 {
   gbtNodeEntry *n = GetNodeEntry(e->GetParent());
   if (n) {
@@ -510,7 +510,7 @@ gbtNodeEntry *gbtTreeLayout::GetValidParent(gbtEfgNode *e)
   }
 }
 
-gbtNodeEntry *gbtTreeLayout::GetValidChild(gbtEfgNode *e)
+gbtNodeEntry *gbtTreeLayout::GetValidChild(gbtEfgNode e)
 {
   for (int i = 1; i <= e->NumChildren(); i++)  {
     gbtNodeEntry *n = GetNodeEntry(e->GetChild(i));
@@ -525,7 +525,7 @@ gbtNodeEntry *gbtTreeLayout::GetValidChild(gbtEfgNode *e)
   return 0;
 }
 
-gbtNodeEntry *gbtTreeLayout::GetEntry(gbtEfgNode *p_node) const
+gbtNodeEntry *gbtTreeLayout::GetEntry(gbtEfgNode p_node) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     if (m_nodeList[i]->GetNode() == p_node) {
@@ -535,7 +535,7 @@ gbtNodeEntry *gbtTreeLayout::GetEntry(gbtEfgNode *p_node) const
   return 0;
 }
 
-gbtEfgNode *gbtTreeLayout::PriorSameLevel(gbtEfgNode *p_node) const
+gbtEfgNode gbtTreeLayout::PriorSameLevel(gbtEfgNode p_node) const
 {
   gbtNodeEntry *entry = GetEntry(p_node);
   if (entry) {
@@ -547,7 +547,7 @@ gbtEfgNode *gbtTreeLayout::PriorSameLevel(gbtEfgNode *p_node) const
   return 0;
 }
 
-gbtEfgNode *gbtTreeLayout::NextSameLevel(gbtEfgNode *p_node) const
+gbtEfgNode gbtTreeLayout::NextSameLevel(gbtEfgNode p_node) const
 {
   gbtNodeEntry *entry = GetEntry(p_node);
   if (entry) {
@@ -560,7 +560,7 @@ gbtEfgNode *gbtTreeLayout::NextSameLevel(gbtEfgNode *p_node) const
   return 0;
 }
 
-int gbtTreeLayout::LayoutSubtree(gbtEfgNode *p_node, const gbtEfgSupport &p_support,
+int gbtTreeLayout::LayoutSubtree(gbtEfgNode p_node, const gbtEfgSupport &p_support,
 				 int &p_maxy, int &p_miny, int &p_ycoord)
 {
   int y1 = -1, yn = 0;
@@ -570,7 +570,7 @@ int gbtTreeLayout::LayoutSubtree(gbtEfgNode *p_node, const gbtEfgSupport &p_supp
   entry->SetNextMember(0);
   if (m_doc->GetStyle().RootReachable() &&
       p_node->GetInfoset() && !p_node->GetInfoset()->GetPlayer()->IsChance()) {
-    gbtEfgInfoset *infoset = p_node->GetInfoset();
+    gbtEfgInfoset infoset = p_node->GetInfoset();
     for (int i = 1; i <= p_support.NumActions(infoset); i++) {
       yn = LayoutSubtree(p_node->GetChild(p_support.Actions(infoset)[i]->GetNumber()),
 			 p_support, p_maxy, p_miny, p_ycoord);
@@ -708,7 +708,7 @@ void gbtTreeLayout::CheckInfosetEntry(gbtNodeEntry *e)
   e->SetNextMember(infoset_entry);
 }
 
-void gbtTreeLayout::FillInfosetTable(gbtEfgNode *n, const gbtEfgSupport &cur_sup)
+void gbtTreeLayout::FillInfosetTable(gbtEfgNode n, const gbtEfgSupport &cur_sup)
 {
   const gbtStyle &draw_settings = m_doc->GetStyle();
   gbtNodeEntry *entry = GetNodeEntry(n);
@@ -797,7 +797,7 @@ void gbtTreeLayout::Layout(const gbtEfgSupport &p_support)
   m_maxY = maxy + 25;
 }
 
-void gbtTreeLayout::BuildNodeList(gbtEfgNode *p_node, const gbtEfgSupport &p_support,
+void gbtTreeLayout::BuildNodeList(gbtEfgNode p_node, const gbtEfgSupport &p_support,
 				  int p_level)
 {
   gbtNodeEntry *entry = new gbtNodeEntry(p_node);
@@ -805,7 +805,7 @@ void gbtTreeLayout::BuildNodeList(gbtEfgNode *p_node, const gbtEfgSupport &p_sup
   m_nodeList.Append(entry);
   entry->SetLevel(p_level);
   if (m_doc->GetStyle().RootReachable()) {
-    gbtEfgInfoset *infoset = p_node->GetInfoset();
+    gbtEfgInfoset infoset = p_node->GetInfoset();
     if (infoset) {
       if (infoset->GetPlayer()->IsChance()) {
 	for (int i = 1; i <= p_node->NumChildren(); i++) {

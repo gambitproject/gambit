@@ -53,10 +53,10 @@ private:
   efgNashAlgorithm *m_efgAlgorithm;
   nfgNashAlgorithm *m_nfgAlgorithm;
 
-  gbtArray<gbtArray<gbtEfgInfoset *> *> infosets;
+  gbtArray<gbtArray<gbtEfgInfoset> *> infosets;
 
   void FindSubgames(const gbtEfgSupport &,
-		    gbtEfgNode *, gbtList<gbtBehavProfile<gbtNumber> > &, gbtList<gbtEfgOutcome *> &);
+		    gbtEfgNode , gbtList<gbtBehavProfile<gbtNumber> > &, gbtList<gbtEfgOutcome> &);
   
 public:
   SubgameSolver(void) : m_efgAlgorithm(0), m_nfgAlgorithm(0) { }

@@ -33,7 +33,7 @@
 
 class gbtNodeEntry {
 private:
-  gbtEfgNode *m_node;        // the corresponding node in the game
+  gbtEfgNode m_node;        // the corresponding node in the game
   gbtNodeEntry *m_parent; // parent node
   int m_x, m_y;        // Cartesian coordinates of node
   gbtNodeEntry *m_nextMember;  // entry of next information set member 
@@ -62,9 +62,9 @@ private:
   gbtStyle *m_style;
 
 public:
-  gbtNodeEntry(gbtEfgNode *p_parent);
+  gbtNodeEntry(gbtEfgNode p_parent);
 
-  gbtEfgNode *GetNode(void) const { return m_node; }
+  gbtEfgNode GetNode(void) const { return m_node; }
 
   gbtNodeEntry *GetParent(void) const { return m_parent; }
   void SetParent(gbtNodeEntry *p_parent) { m_parent = p_parent; }
@@ -152,7 +152,7 @@ public:
   const wxRect &GetOutcomeExtent(void) const { return m_outcomeRect; }
   const wxRect &GetPayoffExtent(int pl) const { return m_payoffRect[pl]; }
 
-  void Draw(wxDC &, gbtEfgNode *selection, bool p_noHints) const;
+  void Draw(wxDC &, gbtEfgNode selection, bool p_noHints) const;
   void DrawIncomingBranch(wxDC &) const;
   void DrawOutcome(wxDC &, bool p_noHints) const;
 };
@@ -168,15 +168,15 @@ private:
 
   const int c_leftMargin, c_topMargin;
 
-  gbtNodeEntry *GetEntry(gbtEfgNode *) const;
+  gbtNodeEntry *GetEntry(gbtEfgNode) const;
 
   gbtNodeEntry *NextInfoset(gbtNodeEntry *);
   void CheckInfosetEntry(gbtNodeEntry *);
 
-  void BuildNodeList(gbtEfgNode *, const gbtEfgSupport &, int);
+  void BuildNodeList(gbtEfgNode, const gbtEfgSupport &, int);
 
-  int LayoutSubtree(gbtEfgNode *, const gbtEfgSupport &, int &, int &, int &);
-  void FillInfosetTable(gbtEfgNode *, const gbtEfgSupport &);
+  int LayoutSubtree(gbtEfgNode, const gbtEfgSupport &, int &, int &, int &);
+  void FillInfosetTable(gbtEfgNode, const gbtEfgSupport &);
   void UpdateTableInfosets(void);
   void UpdateTableParents(void);
 
@@ -192,27 +192,27 @@ public:
   gbtTreeLayout(gbtEfgDisplay *p_parent, gbtGameDocument *p_doc);
   virtual ~gbtTreeLayout() { }
 
-  gbtEfgNode *PriorSameLevel(gbtEfgNode *) const;
-  gbtEfgNode *NextSameLevel(gbtEfgNode *) const;
+  gbtEfgNode PriorSameLevel(gbtEfgNode) const;
+  gbtEfgNode NextSameLevel(gbtEfgNode) const;
 
   void BuildNodeList(const gbtEfgSupport &);
   void Layout(const gbtEfgSupport &);
   void GenerateLabels(void);
 
   // The following member functions are for temporary compatibility only
-  gbtNodeEntry *GetNodeEntry(gbtEfgNode *p_node) const
+  gbtNodeEntry *GetNodeEntry(gbtEfgNode p_node) const
     { return GetEntry(p_node); }
-  gbtNodeEntry *GetValidParent(gbtEfgNode *);
-  gbtNodeEntry *GetValidChild(gbtEfgNode *);
+  gbtNodeEntry *GetValidParent(gbtEfgNode);
+  gbtNodeEntry *GetValidChild(gbtEfgNode);
 
   int MaxX(void) const { return m_maxX; }
   int MaxY(void) const { return m_maxY; }
 
-  gbtEfgNode *NodeHitTest(int, int) const;
-  gbtEfgNode *OutcomeHitTest(int, int) const;
-  gbtEfgNode *BranchAboveHitTest(int, int) const;
-  gbtEfgNode *BranchBelowHitTest(int, int) const;
-  gbtEfgNode *InfosetHitTest(int, int) const;
+  gbtEfgNode NodeHitTest(int, int) const;
+  gbtEfgNode OutcomeHitTest(int, int) const;
+  gbtEfgNode BranchAboveHitTest(int, int) const;
+  gbtEfgNode BranchBelowHitTest(int, int) const;
+  gbtEfgNode InfosetHitTest(int, int) const;
 
   void Render(wxDC &, bool p_noHints) const;
 };

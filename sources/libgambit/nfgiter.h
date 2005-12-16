@@ -32,7 +32,6 @@ template <class T> class gbtArray;
 class gbtStrategyProfile;
 #include "nfstrat.h"
 
-class gbtNfgOutcome;
 class gbtNfgContingencyIterator;
 
 /// This class iterates through the contingencies in a strategic game.
@@ -74,9 +73,9 @@ public:
   const gbtStrategyProfile &GetProfile(void) const { return profile; }
   
   /// Get the outcome assigned to the current contingency
-  gbtNfgOutcome *GetOutcome(void) const;
+  gbtNfgOutcome GetOutcome(void) const;
   /// Set the outcome assigned to the current contingency
-  void SetOutcome(gbtNfgOutcome *);
+  void SetOutcome(gbtNfgOutcome);
   /// Get the payoff to player 'pl' at the current contingency
   gbtRational GetPayoff(int pl) const;
   //@}

@@ -425,7 +425,7 @@ EfgPolEnumModule<T>::SolVarsFromgbtBehavProfile(const gbtBehavProfile<gbtNumber>
   int numvars(0);
 
   for (int pl = 1; pl <= EF.NumPlayers(); pl++) {
-    gbtEfgPlayer *player = EF.GetPlayer(pl);
+    gbtEfgPlayer player = EF.GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       const gbtEfgInfoset *infoset = player->GetInfoset(iset);
       if ( support.MayReach(infoset) )
@@ -437,7 +437,7 @@ EfgPolEnumModule<T>::SolVarsFromgbtBehavProfile(const gbtBehavProfile<gbtNumber>
   int count(0);
 
   for (int pl = 1; pl <= EF.NumPlayers(); pl++) {
-    gbtEfgPlayer *player = EF.GetPlayer(pl);
+    gbtEfgPlayer player = EF.GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       const gbtEfgInfoset *infoset = player->GetInfoset(iset);
       if ( support.MayReach(infoset) ) {
@@ -567,9 +567,9 @@ gbtBehavProfile<double> ToFullSupport(const gbtBehavProfile<double> &p_profile)
 
   int index = 1;
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-    gbtEfgPlayer *player = efg->GetPlayer(pl);
+    gbtEfgPlayer player = efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtEfgInfoset *infoset = player->GetInfoset(iset);
+      gbtEfgInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
 	if (support.Find(infoset->GetAction(act))) {
 	  fullProfile(pl, iset, act) = p_profile[index++];
@@ -601,10 +601,10 @@ void PrintSupport(std::ostream &p_stream,
   p_stream << p_label;
 
   for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
-    gbtEfgPlayer *player = p_support.GetGame().GetPlayer(pl);
+    gbtEfgPlayer player = p_support.GetGame().GetPlayer(pl);
 
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtEfgInfoset *infoset = player->GetInfoset(iset);
+      gbtEfgInfoset infoset = player->GetInfoset(iset);
 
       p_stream << ",";
 

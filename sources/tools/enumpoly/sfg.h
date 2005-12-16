@@ -41,11 +41,11 @@ private:
   gbtArray<gbtRectArray<gbtRational> *> *E;   // constraint matrices for sequence form.  
   gbtArray<int> seq;
   gbtPVector<int> isetFlag,isetRow;
-  gbtArray<gbtList<gbtEfgInfoset *> > infosets;
+  gbtArray<gbtList<gbtEfgInfoset> > infosets;
 
-  void MakeSequenceForm(const gbtEfgNode *, gbtRational,gbtArray<int>, gbtArray<gbtEfgInfoset *>,
+  void MakeSequenceForm(const gbtEfgNode &, gbtRational,gbtArray<int>, gbtArray<gbtEfgInfoset>,
 		      gbtArray<Sequence *>);
-  void GetSequenceDims(const gbtEfgNode *);
+  void GetSequenceDims(const gbtEfgNode &);
 
 public:
   Sfg(const gbtEfgSupport &);
@@ -64,8 +64,8 @@ public:
   gbtRectArray<gbtRational> Constraints(int player) const {return *((*E)[player]);};
   int InfosetRowNumber(int pl, int sequence) const;
   int ActionNumber(int pl, int sequence) const;
-  const gbtEfgInfoset* GetInfoset(int pl, int sequence) const;
-  const gbtEfgAction*  GetAction(int pl, int sequence) const;
+  gbtEfgInfoset GetInfoset(int pl, int sequence) const;
+  gbtEfgAction GetAction(int pl, int sequence) const;
   const gbtEfgGame &GetEfg(void) const {return EF;}
   gbtBehavProfile<double> ToBehav(const gbtPVector<double> &x) const;
   const Sequence* GetSequence(int pl, int seq) const {return ((*sequences)[pl])->Find(seq);}

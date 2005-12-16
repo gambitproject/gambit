@@ -28,6 +28,7 @@
 #ifndef LIBGAMBIT_GAME_H
 #define LIBGAMBIT_GAME_H
 
+namespace Gambit {
 
 /// This is a base class for all game-related objects.  Primary among
 /// its responsibility is maintaining a reference count.  Calling code
@@ -38,7 +39,7 @@
 /// but will instead be marked as deleted.  Calling code should always
 /// be careful to check the deleted status of the object before any
 /// operations on it.
-class gbtGameObject {
+class GameObject {
 protected:
   int m_refCount;
   bool m_valid;
@@ -47,7 +48,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructor; initializes reference count
-  gbtGameObject(void) : m_refCount(0), m_valid(true) { }
+  GameObject(void) : m_refCount(0), m_valid(true) { }
   //@}
 
   /// @name Validation
@@ -70,9 +71,48 @@ public:
 
 
 //
+// This is a handle class that is used by all calling code to refer to
+// member objects of games.  It takes care of all the reference-counting
+// considerations.
+//
+template <class T> class GameObjectPtr {
+private:
+  T *rep;
+
+public:
+  GameObjectPtr(T *r = 0) : rep(r)
+    { if (rep) rep->IncRef(); }
+  GameObjectPtr(const GameObjectPtr<T> &r) : rep(r.rep)
+    { if (rep) rep->IncRef(); }
+  ~GameObjectPtr() { if (rep) rep->DecRef(); }
+
+  GameObjectPtr<T> &operator=(const GameObjectPtr<T> &r)
+    { if (&r != this) {
+	if (rep) rep->DecRef();
+	rep = r.rep;
+	if (rep) rep->IncRef();
+      }
+      return *this;
+    }
+
+  T *operator->(void) const { return rep; }
+
+  bool operator==(const GameObjectPtr<T> &r) const
+  { return (rep == r.rep); }
+  bool operator==(T *r) const { return (rep == r); }
+  bool operator!=(const GameObjectPtr<T> &r) const 
+  { return (rep != r.rep); }
+  bool operator!=(T *r) const { return (rep != r); }
+
+  operator T *(void) const { return rep; }
+
+  bool operator!(void) const { return !rep; }
+};
+
+//
 // This is a base class for representing an arbitrary finite game.
 //
-class gbtGame {
+class Game {
 public:
   /// Get the text label associated with the game
   virtual const std::string &GetTitle(void) const = 0;
@@ -92,6 +132,6 @@ public:
   virtual gbtRational GetMaxPayoff(int pl = 0) const = 0;
 };
 
-
+} // end namespace gambit
 
 #endif   // LIBGAMBIT_GAME_H

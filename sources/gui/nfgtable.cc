@@ -277,7 +277,7 @@ void gbtRowPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
   const gbtNfgSupport &support = m_doc->GetNfgSupport();
   int player = m_table->GetRowPlayer(p_coords.GetCol() + 1);
   int strat = m_table->RowToStrategy(p_coords.GetCol() + 1, p_coords.GetRow());
-  gbtNfgStrategy *strategy = support.GetStrategy(player, strat);
+  gbtNfgStrategy strategy = support.GetStrategy(player, strat);
 
   if (support.IsDominated(strategy, false)) {
     wxRect rect = CellToRect(p_coords);
@@ -499,7 +499,7 @@ void gbtColPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
   const gbtNfgSupport &support = m_doc->GetNfgSupport();
   int player = m_table->GetColPlayer(p_coords.GetRow() + 1);
   int strat = m_table->ColToStrategy(p_coords.GetRow() + 1, p_coords.GetCol());
-  gbtNfgStrategy *strategy = support.GetStrategy(player, strat);
+  gbtNfgStrategy strategy = support.GetStrategy(player, strat);
 
   if (support.IsDominated(strategy, false)) {
     wxRect rect = CellToRect(p_coords);
@@ -641,7 +641,7 @@ wxString gbtPayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
   if (IsLabelCell(p_coords))  return wxT("");
 
   gbtStrategyProfile profile = m_table->CellToProfile(p_coords);
-  gbtNfgOutcome *outcome = profile.GetOutcome();
+  gbtNfgOutcome outcome = profile.GetOutcome();
   if (outcome) {
     int player = ColToPlayer(p_coords.GetCol());
     return wxString(outcome->GetPayoffText(player).c_str(), *wxConvCurrent);
@@ -655,7 +655,7 @@ void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords,
 				    const wxString &p_value)
 {
   gbtStrategyProfile profile = m_table->CellToProfile(p_coords);
-  gbtNfgOutcome *outcome = profile.GetOutcome();
+  gbtNfgOutcome outcome = profile.GetOutcome();
   if (!outcome) {
     outcome = m_doc->GetNfg()->NewOutcome();
     profile.SetOutcome(outcome);

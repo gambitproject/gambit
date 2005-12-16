@@ -40,7 +40,7 @@ void AllSubsupportsRECURSIVE(const gbtEfgSupport &s,
   ActionCursorForSupport c_copy(*c);
 
   do {
-    if ( sact->ActionIsActive((gbtEfgAction *)c_copy.GetAction()) ) {
+    if ( sact->ActionIsActive(c_copy.GetAction()) ) {
       sact->RemoveAction(c_copy.GetAction());
       AllSubsupportsRECURSIVE(s,sact,&c_copy,list);
       sact->AddAction(c_copy.GetAction());
@@ -78,9 +78,9 @@ void AllInequivalentSubsupportsRECURSIVE(const gbtEfgSupport &s,
   ActionCursorForSupport c_copy(*c);
 
   do {
-    if ( sact->ActionIsActive((gbtEfgAction *)c_copy.GetAction()) ) {
+    if ( sact->ActionIsActive(c_copy.GetAction()) ) {
 
-      gbtList<gbtEfgInfoset *> deactivated_infosets;
+      gbtList<gbtEfgInfoset> deactivated_infosets;
       sact->RemoveActionReturningDeletedInfosets(c_copy.GetAction(),
 						 &deactivated_infosets); 
 
@@ -114,12 +114,12 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtEfgSupport &s,
   bool check_domination = false;
   if (sact->HasActiveActionsAtActiveInfosets()) 
     check_domination = true;
-  gbtList<gbtEfgAction *> deletion_list;
+  gbtList<gbtEfgAction> deletion_list;
   ActionCursorForSupport scanner(s);
 
   // First we collect all the actions that can be deleted.
   do {
-    gbtEfgAction *this_action = (gbtEfgAction *)scanner.GetAction();
+    gbtEfgAction this_action = scanner.GetAction();
     bool delete_this_action = false;
 
     if ( sact->ActionIsActive(this_action) ) 
@@ -141,10 +141,10 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtEfgSupport &s,
 
   // Now we delete them, recurse, then restore
   if (!abort && !no_deletions) {
-    gbtList<gbtEfgAction *> actual_deletions;
+    gbtList<gbtEfgAction> actual_deletions;
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
       actual_deletions.Append(deletion_list[i]);
-      gbtList<gbtEfgInfoset *> deactivated_infosets;
+      gbtList<gbtEfgInfoset> deactivated_infosets;
       
       sact->RemoveActionReturningDeletedInfosets(deletion_list[i],
 						   &deactivated_infosets); 
@@ -173,9 +173,9 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtEfgSupport &s,
     ActionCursorForSupport c_copy(*c);
     
     do {
-      if ( sact->ActionIsActive((gbtEfgAction *)c_copy.GetAction()) ) {
+      if ( sact->ActionIsActive(c_copy.GetAction()) ) {
 	
-	gbtList<gbtEfgInfoset *> deactivated_infosets;
+	gbtList<gbtEfgInfoset> deactivated_infosets;
 	sact->RemoveActionReturningDeletedInfosets(c_copy.GetAction(),
 						   &deactivated_infosets); 
 	
@@ -222,11 +222,11 @@ void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport &s,
   bool check_domination = false;
   if (sact->HasActiveActionsAtActiveInfosets()) 
     check_domination = true;
-  gbtList<gbtEfgAction *> deletion_list;
+  gbtList<gbtEfgAction> deletion_list;
   ActionCursorForSupport scanner(s);
 
   do {
-    gbtEfgAction *this_action = (gbtEfgAction *)scanner.GetAction();
+    gbtEfgAction this_action = scanner.GetAction();
     bool delete_this_action = false;
 
     if ( sact->ActionIsActive(this_action) ) 
@@ -250,10 +250,10 @@ void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport &s,
   } while (!abort && scanner.GoToNext());
   
   if (!abort) {
-    gbtList<gbtEfgAction *> actual_deletions;
+    gbtList<gbtEfgAction> actual_deletions;
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
       actual_deletions.Append(deletion_list[i]);
-      gbtList<gbtEfgInfoset *> deactivated_infosets;
+      gbtList<gbtEfgInfoset> deactivated_infosets;
       sact->RemoveActionReturningDeletedInfosets(deletion_list[i],
 						   &deactivated_infosets); 
       if (c->DeletionsViolateActiveCommitments(sact,&deactivated_infosets))
@@ -274,8 +274,8 @@ void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport &s,
       list.Append(sact->UnderlyingSupport());    
     ActionCursorForSupport c_copy(*c);
     do {
-      if ( sact->ActionIsActive((gbtEfgAction *)c_copy.GetAction()) ) {
-	gbtList<gbtEfgInfoset *> deactivated_infosets;
+      if ( sact->ActionIsActive(c_copy.GetAction()) ) {
+	gbtList<gbtEfgInfoset> deactivated_infosets;
 	sact->RemoveActionReturningDeletedInfosets(c_copy.GetAction(),
 						   &deactivated_infosets); 
 	if (!c_copy.DeletionsViolateActiveCommitments(sact,
@@ -350,10 +350,10 @@ gbtList<gbtEfgSupport> PossibleNashSubsupports(const gbtEfgSupport &S)
     ActionCursorForSupport crsr(S);
     bool remove = false;
     do {
-      const gbtEfgAction *act = crsr.GetAction();
-      if (current.ActionIsActive((gbtEfgAction *)act)) 
+      gbtEfgAction act = crsr.GetAction();
+      if (current.ActionIsActive(act)) 
 	for (int j = 1; j <= act->GetInfoset()->NumActions(); j++) {
-	  gbtEfgAction *other_act = act->GetInfoset()->GetAction(j);
+	  gbtEfgAction other_act = act->GetInfoset()->GetAction(j);
 	  if (other_act != act)
 	    if (current.ActionIsActive(other_act)) {
 	      if (current.Dominates(other_act,act,false,true) ||
@@ -465,7 +465,7 @@ ActionCursorForSupport::GoToNext()
   return false;
 }
 
-const gbtEfgAction *ActionCursorForSupport::GetAction() const
+gbtEfgAction ActionCursorForSupport::GetAction() const
 {
   return support->Actions(pl,iset)[act];
 }
@@ -476,7 +476,7 @@ int ActionCursorForSupport::ActionIndex() const
 }
 
 
-const gbtEfgInfoset *ActionCursorForSupport::GetInfoset() const
+gbtEfgInfoset ActionCursorForSupport::GetInfoset() const
 {
   return support->GetGame().GetPlayer(pl)->GetInfoset(iset);
 }
@@ -486,7 +486,7 @@ int ActionCursorForSupport::InfosetIndex() const
   return iset;
 }
 
-const gbtEfgPlayer *ActionCursorForSupport::GetPlayer() const
+gbtEfgPlayer ActionCursorForSupport::GetPlayer() const
 {
   return support->GetGame().GetPlayer(pl);
 }
@@ -507,7 +507,7 @@ ActionCursorForSupport::IsLast() const
 }
 
 bool 
-ActionCursorForSupport::IsSubsequentTo(const gbtEfgAction *a) const
+ActionCursorForSupport::IsSubsequentTo(const gbtEfgAction &a) const
 {
   if (pl > a->GetInfoset()->GetPlayer()->GetNumber())
     return true; 
@@ -528,10 +528,10 @@ ActionCursorForSupport::IsSubsequentTo(const gbtEfgAction *a) const
 
 bool ActionCursorForSupport::
 DeletionsViolateActiveCommitments(const gbtEfgSupportWithActiveInfo *S,
-				   const gbtList<gbtEfgInfoset *> *infosetlist)
+				   const gbtList<gbtEfgInfoset> *infosetlist)
 {
   for (int i = 1; i <= infosetlist->Length(); i++) {
-    const gbtEfgInfoset *infoset = (*infosetlist)[i];
+    gbtEfgInfoset infoset = (*infosetlist)[i];
     if (infoset->GetPlayer()->GetNumber() < PlayerIndex() ||
 	( infoset->GetPlayer()->GetNumber() == PlayerIndex() &&
 	  infoset->GetNumber() < InfosetIndex()) )
@@ -551,15 +551,15 @@ DeletionsViolateActiveCommitments(const gbtEfgSupportWithActiveInfo *S,
 
 bool ActionCursorForSupport::
 InfosetGuaranteedActiveByPriorCommitments(const gbtEfgSupportWithActiveInfo *S,
-					  const gbtEfgInfoset *infoset)
+					  const gbtEfgInfoset &infoset)
 {
-  gbtList<gbtEfgNode *> members;
+  gbtList<gbtEfgNode> members;
   for (int i = 1; i <= infoset->NumMembers(); i++) {
     members.Append(infoset->GetMember(i));
   }
 
   for (int i = 1; i <= members.Length(); i++) {
-    const gbtEfgNode* current = members[i];
+    gbtEfgNode current = members[i];
     if ( current == S->GetGame().GetRoot() )
       return true;
     else

@@ -31,14 +31,14 @@
 
 class gbtEditMoveDialog : public wxDialog {
 private:
-  gbtEfgInfoset *m_infoset;
+  gbtEfgInfoset m_infoset;
   wxChoice *m_player;
   wxTextCtrl *m_infosetName;
   wxSheet *m_actionSheet;
 
 public:
   // Lifecycle
-  gbtEditMoveDialog(wxWindow *p_parent, gbtEfgInfoset *p_infoset);
+  gbtEditMoveDialog(wxWindow *p_parent, gbtEfgInfoset p_infoset);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetInfosetName(void) const { return m_infosetName->GetValue(); }

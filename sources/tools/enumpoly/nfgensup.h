@@ -110,12 +110,12 @@ public:
   bool GoToNext();
 
   // Information
-  const gbtNfgStrategy *GetStrategy() const;
+  gbtNfgStrategy GetStrategy() const;
   int StrategyIndex() const;
-  const gbtNfgPlayer *GetPlayer() const;
+  gbtNfgPlayer GetPlayer() const;
   int PlayerIndex() const;
 
   bool IsLast() const;
-  bool IsSubsequentTo(const gbtNfgStrategy *) const;
+  bool IsSubsequentTo(const gbtNfgStrategy &) const;
 };
 

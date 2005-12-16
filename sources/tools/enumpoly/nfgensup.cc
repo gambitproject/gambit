@@ -40,7 +40,7 @@ void AllSubsupportsRECURSIVE(const gbtNfgSupport &s,
   StrategyCursorForSupport c_copy(*c);
 
   do {
-    gbtNfgStrategy *str_ptr = (gbtNfgStrategy *)c_copy.GetStrategy();
+    gbtNfgStrategy str_ptr = c_copy.GetStrategy();
     if (sact->Contains(str_ptr)) {
       sact->RemoveStrategy(str_ptr);
       AllSubsupportsRECURSIVE(s,sact,&c_copy,p_list);
@@ -74,7 +74,7 @@ void AllValidSubsupportsRECURSIVE(const gbtNfgSupport &s,
 
   do {
     if ( sact->NumStrats(c_copy.PlayerIndex()) > 1 ) {
-      gbtNfgStrategy *str_ptr = (gbtNfgStrategy *)c_copy.GetStrategy();
+      gbtNfgStrategy str_ptr = c_copy.GetStrategy();
       sact->RemoveStrategy(str_ptr); 
       AllValidSubsupportsRECURSIVE(s,sact,&c_copy,p_list);
       sact->AddStrategy(str_ptr);
@@ -104,12 +104,12 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport &s,
   bool no_deletions = true;
 
 
-  gbtList<gbtNfgStrategy *> deletion_list;
+  gbtList<gbtNfgStrategy> deletion_list;
   StrategyCursorForSupport scanner(s);
 
   // First we collect all the strategies that can be deleted.
   do {
-    gbtNfgStrategy *this_strategy = (gbtNfgStrategy *)scanner.GetStrategy();
+    gbtNfgStrategy this_strategy = scanner.GetStrategy();
     bool delete_this_strategy = false;
     if (sact->Contains(this_strategy)) 
       if (sact->IsDominated(this_strategy,strong) ) 
@@ -126,7 +126,7 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport &s,
 
   // Now we delete them, recurse, then restore
   if (!abort && !no_deletions) {
-    gbtList<gbtNfgStrategy *> actual_deletions;
+    gbtList<gbtNfgStrategy> actual_deletions;
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
       actual_deletions.Append(deletion_list[i]);
 
@@ -152,10 +152,10 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport &s,
     StrategyCursorForSupport c_copy(*c);
     
     do {
-      if (sact->Contains((gbtNfgStrategy *)c_copy.GetStrategy()) &&
+      if (sact->Contains(c_copy.GetStrategy()) &&
 	  sact->NumStrats(c_copy.PlayerIndex()) > 1 ) {
 
-	gbtNfgStrategy *str_ptr = (gbtNfgStrategy *)c_copy.GetStrategy();
+	gbtNfgStrategy str_ptr = c_copy.GetStrategy();
 	sact->RemoveStrategy(str_ptr); 
 	AllUndominatedSubsupportsRECURSIVE(s,
 					   sact,
@@ -197,11 +197,11 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport &s,
   bool abort = false;
   bool no_deletions = true;
 
-  gbtList<gbtNfgStrategy *> deletion_list;
+  gbtList<gbtNfgStrategy> deletion_list;
   StrategyCursorForSupport scanner(s);
 
   do {
-    gbtNfgStrategy *this_strategy = (gbtNfgStrategy *)scanner.GetStrategy();
+    gbtNfgStrategy this_strategy = scanner.GetStrategy();
     bool delete_this_strategy = false;
     if (sact->Contains(this_strategy)) 
       if (sact->IsDominated(this_strategy,true) ) {
@@ -217,7 +217,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport &s,
   } while (!abort && scanner.GoToNext());
   
   if (!abort) {
-    gbtList<gbtNfgStrategy *> actual_deletions;
+    gbtList<gbtNfgStrategy> actual_deletions;
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
       actual_deletions.Append(deletion_list[i]);
       sact->RemoveStrategy(deletion_list[i]); 
@@ -234,7 +234,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport &s,
     
     StrategyCursorForSupport c_copy(*c);
     do {
-      gbtNfgStrategy *str_ptr = (gbtNfgStrategy *)c_copy.GetStrategy();
+      gbtNfgStrategy str_ptr = c_copy.GetStrategy();
       if (sact->Contains(str_ptr) &&
 	  sact->NumStrats(str_ptr->GetPlayer()->GetNumber()) > 1 ) {
 	sact->RemoveStrategy(str_ptr); 
@@ -306,10 +306,10 @@ gbtList<gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S)
     StrategyCursorForSupport crsr(S);
     bool remove = false;
     do {
-      gbtNfgStrategy *strat = (gbtNfgStrategy *)crsr.GetStrategy();
+      gbtNfgStrategy strat = crsr.GetStrategy();
       if (current.Contains(strat)) 
 	for (int j = 1; j <= strat->GetPlayer()->NumStrats(); j++) {
-	  gbtNfgStrategy *other_strat = strat->GetPlayer()->GetStrategy(j);
+	  gbtNfgStrategy other_strat = strat->GetPlayer()->GetStrategy(j);
 	  if (other_strat != strat)
 	    if (current.Contains(other_strat)) {
 	      if (current.Dominates(other_strat,strat,false)) 
@@ -386,7 +386,7 @@ StrategyCursorForSupport::GoToNext()
   else return false;
 }
 
-const gbtNfgStrategy *StrategyCursorForSupport::GetStrategy() const
+gbtNfgStrategy StrategyCursorForSupport::GetStrategy() const
 {
   return support->GetStrategy(pl, strat);
 }
@@ -396,7 +396,7 @@ int StrategyCursorForSupport::StrategyIndex() const
   return strat;
 }
 
-const gbtNfgPlayer *StrategyCursorForSupport::GetPlayer() const
+gbtNfgPlayer StrategyCursorForSupport::GetPlayer() const
 {
   return support->GetGame()->GetPlayer(pl);
 }
@@ -416,7 +416,7 @@ StrategyCursorForSupport::IsLast() const
 }
 
 bool 
-StrategyCursorForSupport::IsSubsequentTo(const gbtNfgStrategy *s) const
+StrategyCursorForSupport::IsSubsequentTo(const gbtNfgStrategy &s) const
 {
   if (pl > s->GetPlayer()->GetNumber())
     return true; 

@@ -28,21 +28,21 @@
 #include "behav.imp"
 
 template<>
-gbtNumber gbtBehavProfile<gbtNumber>::Payoff(gbtEfgOutcome *p_outcome,
+gbtNumber gbtBehavProfile<gbtNumber>::Payoff(gbtEfgOutcomeRep *p_outcome,
 				      int pl) const
 { 
   return p_outcome->m_ratPayoffs[pl];
 }
 
 template<>
-gbtRational gbtBehavProfile<gbtRational>::Payoff(gbtEfgOutcome *p_outcome,
+gbtRational gbtBehavProfile<gbtRational>::Payoff(gbtEfgOutcomeRep *p_outcome,
 					  int pl) const
 { 
   return p_outcome->m_ratPayoffs[pl];
 }
 
 template<>
-double gbtBehavProfile<double>::Payoff(gbtEfgOutcome *p_outcome, int pl) const
+double gbtBehavProfile<double>::Payoff(gbtEfgOutcomeRep *p_outcome, int pl) const
 { 
   return p_outcome->m_doublePayoffs[pl];
 }
@@ -59,8 +59,8 @@ gbtPureBehavProfile::gbtPureBehavProfile(gbtEfgGame *p_efg)
   : m_efg(p_efg), m_profile(m_efg->NumPlayers())
 {
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
-    gbtEfgPlayer *player = m_efg->GetPlayer(pl);
-    m_profile[pl] = gbtArray<gbtEfgAction *>(player->NumInfosets());
+    gbtEfgPlayer player = m_efg->GetPlayer(pl);
+    m_profile[pl] = gbtArray<gbtEfgAction>(player->NumInfosets());
     for (int iset = 1; iset <= player->NumInfosets(); iset++)
       m_profile[pl][iset] = player->GetInfoset(iset)->GetAction(1);
   }
@@ -78,7 +78,7 @@ gbtPureBehavProfile &gbtPureBehavProfile::operator=(const gbtPureBehavProfile &p
   return *this;
 }
 
-gbtRational gbtPureBehavProfile::operator()(gbtEfgAction *action) const
+gbtRational gbtPureBehavProfile::operator()(gbtEfgAction action) const
 {
   if (m_profile[action->GetInfoset()->GetPlayer()->GetNumber()]
       [action->GetInfoset()->GetNumber()] == action)
@@ -87,24 +87,24 @@ gbtRational gbtPureBehavProfile::operator()(gbtEfgAction *action) const
     return 0;
 }
 
-void gbtPureBehavProfile::Set(gbtEfgAction *action)
+void gbtPureBehavProfile::Set(gbtEfgAction action)
 {
   m_profile[action->GetInfoset()->GetPlayer()->GetNumber()]
     [action->GetInfoset()->GetNumber()] = action;
 }
 
-void gbtPureBehavProfile::Set(gbtEfgPlayer *player,
-			   const gbtArray<gbtEfgAction *> &actions)
+void gbtPureBehavProfile::Set(gbtEfgPlayer player,
+			      const gbtArray<gbtEfgAction> &actions)
 {
   m_profile[player->GetNumber()] = actions;
 }
 
-gbtEfgAction *gbtPureBehavProfile::GetAction(gbtEfgInfoset *infoset) const
+gbtEfgAction gbtPureBehavProfile::GetAction(gbtEfgInfoset infoset) const
 {
   return m_profile[infoset->GetPlayer()->GetNumber()][infoset->GetNumber()];
 }
 
-gbtRational gbtPureBehavProfile::Payoff(const gbtEfgNode *n, int pl) const
+gbtRational gbtPureBehavProfile::Payoff(const gbtEfgNode &n, int pl) const
 {
   gbtArray<gbtRational> payoff(m_efg->NumPlayers());
   for (int i = 1; i <= m_efg->NumPlayers(); payoff[i++] = 0);
@@ -112,11 +112,11 @@ gbtRational gbtPureBehavProfile::Payoff(const gbtEfgNode *n, int pl) const
   return payoff[pl];
 }
 
-void gbtPureBehavProfile::GetPayoff(const gbtEfgNode *n, const gbtRational &prob, 
+void gbtPureBehavProfile::GetPayoff(const gbtEfgNode &n, const gbtRational &prob, 
 				 gbtArray<gbtRational> &payoff) const
 {
   if (n->IsTerminal()) {
-    if (n->GetOutcome()) {
+    if (n->outcome) {
       for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
 	payoff[pl] += prob * n->GetOutcome()->GetPayoff(pl); 
       }
@@ -136,7 +136,7 @@ void gbtPureBehavProfile::GetPayoff(const gbtEfgNode *n, const gbtRational &prob
     }
 }
 
-void gbtPureBehavProfile::InfosetProbs(gbtEfgNode *n, const gbtRational &prob, 
+void gbtPureBehavProfile::InfosetProbs(gbtEfgNode n, const gbtRational &prob, 
 				    gbtPVector<gbtRational> &probs) const
 {
   if (n->GetInfoset() && n->GetPlayer()->IsChance())

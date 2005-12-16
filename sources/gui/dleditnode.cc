@@ -35,12 +35,10 @@
 //                      class dialogEditNode
 //======================================================================
 
-dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode *p_node)
+dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
   : wxDialog(p_parent, -1, _("Node properties"), wxDefaultPosition), 
     m_node(p_node)
 {
-  SetAutoLayout(true);
-
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
   wxBoxSizer *labelSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -61,7 +59,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode *p_node)
       int selection = 0;
       for (int iset = 1; iset <= p_node->GetGame()->GetChance()->NumInfosets();
 	   iset++) {
-	gbtEfgInfoset *infoset = p_node->GetGame()->GetChance()->GetInfoset(iset);
+	gbtEfgInfoset infoset = p_node->GetGame()->GetChance()->GetInfoset(iset);
 	if (infoset->NumActions() == p_node->NumChildren()) {
 	  m_infosetList.Append(infoset);
 	  m_infoset->Append(wxString::Format(_("Chance infoset %d"),
@@ -76,9 +74,9 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode *p_node)
     else {
       int selection = 0;
       for (int pl = 1; pl <= p_node->GetGame()->NumPlayers(); pl++) {
-	gbtEfgPlayer *player = p_node->GetGame()->GetPlayer(pl);
+	gbtEfgPlayer player = p_node->GetGame()->GetPlayer(pl);
 	for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	  gbtEfgInfoset *infoset = player->GetInfoset(iset);
+	  gbtEfgInfoset infoset = player->GetInfoset(iset);
 	  if (infoset->NumActions() == p_node->NumChildren()) {
 	    m_infosetList.Append(infoset);
 	    m_infoset->Append(wxString::Format(_("Player %d, Infoset %d"),
@@ -121,7 +119,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode *p_node)
   m_outcome->SetSelection(0);
   const gbtEfgGame &efg = *p_node->GetGame();
   for (int outc = 1; outc <= efg.NumOutcomes(); outc++) {
-    gbtEfgOutcome *outcome = efg.GetOutcome(outc);
+    gbtEfgOutcome outcome = efg.GetOutcome(outc);
     std::string item = ToText(outc) + ": " + outcome->GetLabel();
     if (item == "") {
       item = "Outcome" + ToText(outc);
@@ -166,7 +164,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode *p_node)
   CenterOnParent();
 }
 
-gbtEfgInfoset *dialogEditNode::GetInfoset(void) const
+gbtEfgInfoset dialogEditNode::GetInfoset(void) const
 {
   if (m_infoset->GetSelection() == 0) {
     return 0;

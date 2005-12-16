@@ -30,7 +30,6 @@
 #include "gdpvect.h"
 #include "efg.h"
 
-class gbtEfgInfoset;
 class gbtNfgGame;
 template <class T> class gbtMixedProfile;
 template <class T> class gbtPVector;
@@ -71,50 +70,50 @@ protected:
   // data has been computed.  
   // Use public versions (GetNodeValue, GetIsetProb, etc) if this is not known.
 
-  const T &RealizProb(const gbtEfgNode *node) const;
-  T &RealizProb(const gbtEfgNode *node);
+  const T &RealizProb(const gbtEfgNode &node) const;
+  T &RealizProb(const gbtEfgNode &node);
 
-  const T &BeliefProb(const gbtEfgNode *node) const;
-  T &BeliefProb(const gbtEfgNode *node);
+  const T &BeliefProb(const gbtEfgNode &node) const;
+  T &BeliefProb(const gbtEfgNode &node);
   
-  gbtVector<T> NodeValues(const gbtEfgNode *node) const
+  gbtVector<T> NodeValues(const gbtEfgNode &node) const
     { return m_nodeValues.Row(node->number); }
-  const T &NodeValue(const gbtEfgNode *node, int pl) const
+  const T &NodeValue(const gbtEfgNode &node, int pl) const
     { return m_nodeValues(node->number, pl); }
-  T &NodeValue(const gbtEfgNode *node, int pl)
+  T &NodeValue(const gbtEfgNode &node, int pl)
     { return m_nodeValues(node->number, pl); }
 
-  T IsetProb(const gbtEfgInfoset *iset) const;
+  T IsetProb(const gbtEfgInfoset &iset) const;
 
-  const T &IsetValue(const gbtEfgInfoset *iset) const;
-  T &IsetValue(const gbtEfgInfoset *iset);
+  const T &IsetValue(const gbtEfgInfoset &iset) const;
+  T &IsetValue(const gbtEfgInfoset &iset);
 
-  const T &ActionValue(const gbtEfgAction *act) const 
+  const T &ActionValue(const gbtEfgAction &act) const 
     { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			    act->GetInfoset()->GetNumber(),
 			    act->m_number); }
-  T &ActionValue(const gbtEfgAction *act)
+  T &ActionValue(const gbtEfgAction &act)
     { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			    act->GetInfoset()->GetNumber(),
 			    act->m_number); }
   
-  T ActionProb(const gbtEfgAction *act) const;
+  T ActionProb(const gbtEfgAction &act) const;
 
-  const T &Regret(const gbtEfgAction * act) const;
-  T &Regret(const gbtEfgAction *);
+  const T &Regret(const gbtEfgAction &act) const;
+  T &Regret(const gbtEfgAction &);
 
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
 
-  void Payoff(gbtEfgNode *, T, int, T &) const;
-  T Payoff(gbtEfgOutcome *, int pl) const;
+  void Payoff(gbtEfgNodeRep *, T, int, T &) const;
+  T Payoff(gbtEfgOutcomeRep *, int pl) const;
   
-  void ComputeSolutionDataPass2(const gbtEfgNode *node) const;
-  void ComputeSolutionDataPass1(const gbtEfgNode *node) const;
+  void ComputeSolutionDataPass2(const gbtEfgNode &node) const;
+  void ComputeSolutionDataPass1(const gbtEfgNode &node) const;
   void ComputeSolutionData(void) const;
 
-  void BehaviorStrat(const gbtEfgGame &, int, gbtEfgNode *);
+  void BehaviorStrat(const gbtEfgGame &, int, gbtEfgNode &);
   void RealizationProbs(const gbtMixedProfile<T> &, const gbtEfgGame &,
-			int pl, const gbtArray<int> &, gbtEfgNode *);
+			int pl, const gbtArray<int> &, gbtEfgNode);
 
 public:
   // CONSTRUCTORS, DESTRUCTOR
@@ -143,14 +142,14 @@ public:
   gbtEfgGame &GetGame(void) const   { return const_cast<gbtEfgGame &>(*m_efg); }
   const gbtEfgSupport &Support(void) const   { return m_support; }
   
-  const T &GetRealizProb(const gbtEfgNode *node) const;
-  const T &GetBeliefProb(const gbtEfgNode *node) const;
-  gbtVector<T> GetNodeValue(const gbtEfgNode *node) const;
-  T GetIsetProb(const gbtEfgInfoset *iset) const;
-  const T &GetIsetValue(const gbtEfgInfoset *iset) const;
-  T GetActionProb(const gbtEfgAction *act) const;
-  const T &GetActionValue(const gbtEfgAction *act) const;
-  const T &GetRegret(const gbtEfgAction *act) const;
+  const T &GetRealizProb(const gbtEfgNode &node) const;
+  const T &GetBeliefProb(const gbtEfgNode &node) const;
+  gbtVector<T> GetNodeValue(const gbtEfgNode &node) const;
+  T GetIsetProb(const gbtEfgInfoset &iset) const;
+  const T &GetIsetValue(const gbtEfgInfoset &iset) const;
+  T GetActionProb(const gbtEfgAction &act) const;
+  const T &GetActionValue(const gbtEfgAction &act) const;
+  const T &GetRegret(const gbtEfgAction &act) const;
 
   // COMPUTATION OF INTERESTING QUANTITIES
 
@@ -160,12 +159,14 @@ public:
   T LiapValueOnDefined(void) const;
   T MaxRegret(void);
 
-  bool IsDefinedAt(gbtEfgInfoset *p_infoset) const;
+  bool IsDefinedAt(gbtEfgInfoset p_infoset) const;
 
-  T DiffActionValue(const gbtEfgAction *action, const gbtEfgAction *oppAction) const;
-  T DiffRealizProb(const gbtEfgNode *node, const gbtEfgAction *oppAction) const;
-  T DiffNodeValue(const gbtEfgNode *node, const gbtEfgPlayer *player,
-		  const gbtEfgAction *oppAction) const;
+  T DiffActionValue(const gbtEfgAction &action, 
+		    const gbtEfgAction &oppAction) const;
+  T DiffRealizProb(const gbtEfgNode &node, 
+		   const gbtEfgAction &oppAction) const;
+  T DiffNodeValue(const gbtEfgNode &node, const gbtEfgPlayer &player,
+		  const gbtEfgAction &oppAction) const;
 
   // IMPLEMENTATION OF gbtDPVector OPERATIONS
   // These are reimplemented here to correctly handle invalidation

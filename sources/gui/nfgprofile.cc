@@ -65,11 +65,11 @@ void gbtMixedProfileList::OnCellClick(wxSheetEvent &p_event)
   m_doc->SetCurrentProfile(RowToProfile(p_event.GetRow()));
 }
 
-static gbtNfgStrategy *GetStrategy(gbtGameDocument *p_doc, int p_index)
+static gbtNfgStrategy GetStrategy(gbtGameDocument *p_doc, int p_index)
 {
   int index = 0;
   for (int pl = 1; pl <= p_doc->GetNfg()->NumPlayers(); pl++) {
-    gbtNfgPlayer *player = p_doc->GetNfg()->GetPlayer(pl);
+    gbtNfgPlayer player = p_doc->GetNfg()->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrats(); st++) {
       if (index++ == p_index) {
 	return player->GetStrategy(st);
@@ -87,7 +87,7 @@ wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
   else if (IsColLabelCell(p_coords)) {
     int index = 0;
     for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
-      gbtNfgPlayer *player = m_doc->GetNfg()->GetPlayer(pl);
+      gbtNfgPlayer player = m_doc->GetNfg()->GetPlayer(pl);
       for (int st = 1; st <= player->NumStrats(); st++) {
 	if (index++ == p_coords.GetCol()) {
 	  return (wxString::Format(wxT("%d: "), pl) +
@@ -111,7 +111,7 @@ wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
 		    *wxConvCurrent);
   }
   else {
-    gbtNfgStrategy *strategy = GetStrategy(m_doc, p_coords.GetCol());
+    gbtNfgStrategy strategy = GetStrategy(m_doc, p_coords.GetCol());
     return wxString(ToText(profile.GetPayoff(strategy->GetPlayer()->GetNumber(),
 					     strategy),
 			   m_doc->GetStyle().NumDecimals()).c_str(), 
@@ -124,7 +124,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 {
   int index = 0;
   for (int pl = 1; pl <= p_doc->GetNfg()->NumPlayers(); pl++) {
-    gbtNfgPlayer *player = p_doc->GetNfg()->GetPlayer(pl);
+    gbtNfgPlayer player = p_doc->GetNfg()->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrats(); st++) {
       if (index++ == p_index) {
 	return p_doc->GetStyle().GetPlayerColor(pl);

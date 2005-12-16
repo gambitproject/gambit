@@ -52,7 +52,7 @@ gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent,
   wxBoxSizer *boxSizer = new wxBoxSizer(wxVERTICAL);	
 
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
-    gbtEfgPlayer *player = m_doc->GetEfg()->GetPlayer(pl);
+    gbtEfgPlayer player = m_doc->GetEfg()->GetPlayer(pl);
     if (player->GetLabel() != "") {
       m_players.Append(new wxCheckBox(this, -1, 
 				      wxString(player->GetLabel().c_str(),
@@ -83,9 +83,9 @@ gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent,
   CenterOnParent();
 }
 
-gbtArray<gbtEfgPlayer *> gbtRevealMoveDialog::GetPlayers(void) const
+gbtArray<gbtEfgPlayer> gbtRevealMoveDialog::GetPlayers(void) const
 {
-  gbtArray<gbtEfgPlayer *> players;
+  gbtArray<gbtEfgPlayer> players;
 
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     if (m_players[pl]->GetValue()) {

@@ -136,7 +136,7 @@ void QreLHS(const gbtNfgSupport &p_support,
 
   int rowno = 0;
   for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    gbtNfgPlayer *player = p_support.GetGame()->GetPlayer(pl);
+    gbtNfgPlayer player = p_support.GetGame()->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrats(); st++) {
       rowno++;
       if (st == 1) {
@@ -178,7 +178,7 @@ void QreJacobian(const gbtNfgSupport &p_support,
 
   int rowno = 0;
   for (int i = 1; i <= p_support.GetGame()->NumPlayers(); i++) {
-    gbtNfgPlayer *player = p_support.GetGame()->GetPlayer(i);
+    gbtNfgPlayer player = p_support.GetGame()->GetPlayer(i);
 
     for (int j = 1; j <= player->NumStrats(); j++) {
       rowno++;
@@ -187,7 +187,7 @@ void QreJacobian(const gbtNfgSupport &p_support,
 	
 	int colno = 0;
 	for (int ell = 1; ell <= p_support.GetGame()->NumPlayers(); ell++) {
-	  gbtNfgPlayer *player2 = p_support.GetGame()->GetPlayer(ell);
+	  gbtNfgPlayer player2 = p_support.GetGame()->GetPlayer(ell);
 
 	  for (int m = 1; m <= player2->NumStrats(); m++) {
 	    colno++;
@@ -209,7 +209,7 @@ void QreJacobian(const gbtNfgSupport &p_support,
 
 	int colno = 0;
 	for (int ell = 1; ell <= p_support.GetGame()->NumPlayers(); ell++) {
-	  gbtNfgPlayer *player2 = p_support.GetGame()->GetPlayer(ell);
+	  gbtNfgPlayer player2 = p_support.GetGame()->GetPlayer(ell);
 
 	  for (int m = 1; m <= player2->NumStrats(); m++) {
 	    colno++;

@@ -33,7 +33,6 @@
 
 
 class gbtNfgGame;
-class gbtNfgOutcome;
 
 template <class T> class gbtRectArray;
 template <class T> class gbtBehavProfile;
@@ -50,7 +49,7 @@ private:
 	       int const_st2, int cur_pl, long index, T prob, T &value) const;
   void PPayoff(int pl, int const_pl, int cur_pl, long index, T prob,
 	       gbtVector<T> &value) const;
-  T Payoff(gbtNfgOutcome *o, int pl) const;
+  T Payoff(gbtNfgOutcomeRep *o, int pl) const;
 
 public:
   gbtMixedProfile(const gbtNfgSupport &);
@@ -72,7 +71,7 @@ public:
 
   T GetPayoff(int pl) const;
   T GetPayoff(int pl, int player1, int strat1) const;
-  T GetPayoff(int pl, gbtNfgStrategy *) const;
+  T GetPayoff(int pl, const gbtNfgStrategy &) const;
   T GetPayoff(int pl, int player1, int strat1, int player2, int strat2) const;
   void GetPayoff(int pl, int const_pl, gbtVector<T> &payoff) const;
 };

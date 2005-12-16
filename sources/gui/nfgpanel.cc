@@ -223,7 +223,7 @@ void gbtTablePlayerPanel::OnNewStrategy(wxCommandEvent &)
 {
   m_doc->PostPendingChanges();
 
-  gbtNfgStrategy *strategy = 
+  gbtNfgStrategy strategy = 
     m_doc->GetNfg()->GetPlayer(m_player)->NewStrategy();
   strategy->SetName(ToText(strategy->GetNumber()));
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);

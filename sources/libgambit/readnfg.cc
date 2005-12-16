@@ -600,7 +600,7 @@ static void ReadOutcomeList(gbtGameParserState &p_parser, gbtNfgGame *p_nfg)
       throw gbtNfgParserException();
     }
 
-    gbtNfgOutcome *outcome = p_nfg->NewOutcome();
+    gbtNfgOutcome outcome = p_nfg->NewOutcome();
     outcome->SetName(label);
     for (pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
       outcome->SetPayoff(pl, payoffs[pl]);

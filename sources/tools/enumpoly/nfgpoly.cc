@@ -449,7 +449,7 @@ gbtMixedProfile<double> ToFullSupport(const gbtMixedProfile<double> &p_profile)
 
   int index = 1;
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-    gbtNfgPlayer *player = nfg->GetPlayer(pl);
+    gbtNfgPlayer player = nfg->GetPlayer(pl);
     for (int st = 1; st <= nfg->NumStrats(pl); st++) {
       if (support.Contains(player->GetStrategy(st))) {
 	fullProfile(pl, st) = p_profile[index++];
@@ -466,7 +466,7 @@ void PrintSupport(std::ostream &p_stream,
   p_stream << p_label;
 
   for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    gbtNfgPlayer *player = p_support.GetGame()->GetPlayer(pl);
+    gbtNfgPlayer player = p_support.GetGame()->GetPlayer(pl);
 
     p_stream << ",";
     for (int st = 1; st <= player->NumStrats(); st++) {

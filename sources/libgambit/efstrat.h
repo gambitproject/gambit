@@ -29,9 +29,6 @@
 
 #include "libgambit.h"
 
-class gbtEfgAction;
-class gbtEfgPlayer;
-
 class gbtEfgSupportPlayer;
 
 class gbtEfgSupport {
@@ -55,53 +52,55 @@ public:
   void SetName(const std::string &p_name) { m_name = p_name; }
 
   int NumActions(int pl, int iset) const;
-  int NumActions(const gbtEfgInfoset *) const;
+  int NumActions(const gbtEfgInfoset &) const;
   gbtPVector<int> NumActions(void) const;
   int NumDegreesOfFreedom(void) const;
 
   // Checks to see that every infoset in the support has at least one
   // action in it.
-  bool HasActiveActionAt(const gbtEfgInfoset *) const;
+  bool HasActiveActionAt(const gbtEfgInfoset &) const;
   bool HasActiveActionsAtAllInfosets(void) const;
 
   // Returns the position of the action in the support. 
   // Returns zero if the action is not contained in the support
-  int Find(const gbtEfgAction *) const;
-  int Find(int, int, gbtEfgAction *) const;
+  int Find(const gbtEfgAction &) const;
+  int Find(int, int, gbtEfgAction) const;
 
   bool ActionIsActive(const int pl, const int iset, const int act) const;
-  bool ActionIsActive(gbtEfgAction *) const;
+  bool ActionIsActive(gbtEfgAction) const;
   bool AllActionsInSupportAtInfosetAreActive(const gbtEfgSupport &,
-					     const gbtEfgInfoset *) const;
+					     const gbtEfgInfoset &) const;
 
   // Find the active actions at an infoset
-  const gbtArray<gbtEfgAction *> &Actions(int pl, int iset) const;
-  gbtArray<gbtEfgAction *> Actions(const gbtEfgInfoset *) const;
-  gbtList<gbtEfgAction *> ListOfActions(const gbtEfgInfoset *) const;
+  const gbtArray<gbtEfgAction> &Actions(int pl, int iset) const;
+  gbtArray<gbtEfgAction> Actions(const gbtEfgInfoset &) const;
+  gbtList<gbtEfgAction> ListOfActions(const gbtEfgInfoset &) const;
 
   // Action editing functions
-  virtual void AddAction(const gbtEfgAction *);
-  virtual bool RemoveAction(const gbtEfgAction *);
+  virtual void AddAction(const gbtEfgAction &);
+  virtual bool RemoveAction(const gbtEfgAction &);
 
   // Number of Sequences for the player
   int NumSequences(int pl) const;
   int TotalNumSequences(void) const;
 
   // Reachable Nodes and Information Sets
-  gbtList<gbtEfgNode *> ReachableNonterminalNodes(const gbtEfgNode *) const;
-  gbtList<gbtEfgNode *> ReachableNonterminalNodes(const gbtEfgNode *, const gbtEfgAction *) const;
-  gbtList<gbtEfgInfoset *> ReachableInfosets(const gbtEfgNode *) const;
-  gbtList<gbtEfgInfoset *> ReachableInfosets(const gbtEfgNode *, const gbtEfgAction *) const;
-  gbtList<gbtEfgInfoset *> ReachableInfosets(const gbtEfgPlayer *) const;
+  gbtList<gbtEfgNode> ReachableNonterminalNodes(const gbtEfgNode &) const;
+  gbtList<gbtEfgNode> ReachableNonterminalNodes(const gbtEfgNode &, 
+						const gbtEfgAction &) const;
+  gbtList<gbtEfgInfoset> ReachableInfosets(const gbtEfgNode &) const;
+  gbtList<gbtEfgInfoset> ReachableInfosets(const gbtEfgNode &, 
+					   const gbtEfgAction &) const;
+  gbtList<gbtEfgInfoset> ReachableInfosets(const gbtEfgPlayer &) const;
 
-  bool AlwaysReaches(const gbtEfgInfoset *) const;
-  bool AlwaysReachesFrom(const gbtEfgInfoset *, const gbtEfgNode *) const;
-  bool MayReach(const gbtEfgNode *) const;
-  bool MayReach(const gbtEfgInfoset *) const;
+  bool AlwaysReaches(const gbtEfgInfoset &) const;
+  bool AlwaysReachesFrom(const gbtEfgInfoset &, const gbtEfgNode &) const;
+  bool MayReach(const gbtEfgNode &) const;
+  bool MayReach(const gbtEfgInfoset &) const;
 
-  bool Dominates(const gbtEfgAction *a, const gbtEfgAction *b,
+  bool Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
 		 bool strong, bool conditional) const;
-  bool IsDominated(const gbtEfgAction *a, 
+  bool IsDominated(const gbtEfgAction &a, 
 		   bool strong, bool conditional) const;
   gbtEfgSupport Undominated(bool strong, bool conditional,
 			 const gbtArray<int> &players,
@@ -124,17 +123,17 @@ protected:
   void InitializeActiveListsToAllInactive();
   void InitializeActiveLists();
 
-  void activate(const gbtEfgNode *);
-  void deactivate(const gbtEfgNode *);
-  void activate(const gbtEfgInfoset *);
-  void deactivate(const gbtEfgInfoset *);
+  void activate(const gbtEfgNode &);
+  void deactivate(const gbtEfgNode &);
+  void activate(const gbtEfgInfoset &);
+  void deactivate(const gbtEfgInfoset &);
   bool infoset_has_active_nodes(const int pl, const int iset) const;
-  bool infoset_has_active_nodes(const gbtEfgInfoset *i) const;
-  void activate_this_and_lower_nodes(const gbtEfgNode *);
-  void deactivate_this_and_lower_nodes(const gbtEfgNode *);
+  bool infoset_has_active_nodes(const gbtEfgInfoset &i) const;
+  void activate_this_and_lower_nodes(const gbtEfgNode &);
+  void deactivate_this_and_lower_nodes(const gbtEfgNode &);
   void deactivate_this_and_lower_nodes_returning_deactivated_infosets(
-                                                 const gbtEfgNode *,
-						 gbtList<gbtEfgInfoset *> *);
+                                                 const gbtEfgNode &,
+						 gbtList<gbtEfgInfoset> *);
 
 public:
   gbtEfgSupportWithActiveInfo ( const gbtEfgGame &);
@@ -148,23 +147,23 @@ public:
   bool operator!=(const gbtEfgSupportWithActiveInfo &) const;
 
   // Find the reachable nodes at an infoset
-  const gbtList<const gbtEfgNode *> ReachableNodesInInfoset(const gbtEfgInfoset *) const;
-  const gbtList<const gbtEfgNode *> ReachableNonterminalNodes() const;
+  gbtList<gbtEfgNode> ReachableNodesInInfoset(const gbtEfgInfoset &) const;
+  gbtList<gbtEfgNode> ReachableNonterminalNodes() const;
 
   // Action editing functions
-  void AddAction(const gbtEfgAction *);
-  bool RemoveAction(const gbtEfgAction *);
-  bool RemoveActionReturningDeletedInfosets(const gbtEfgAction *, 
-					    gbtList<gbtEfgInfoset *> *);
+  void AddAction(const gbtEfgAction &);
+  bool RemoveAction(const gbtEfgAction &);
+  bool RemoveActionReturningDeletedInfosets(const gbtEfgAction &, 
+					    gbtList<gbtEfgInfoset> *);
   //  void GoToNextSubsupportOf(const gbtEfgSupport &);
 
   // Information
   bool InfosetIsActive(const int pl, const int iset) const;
-  bool InfosetIsActive(const gbtEfgInfoset *) const;
+  bool InfosetIsActive(const gbtEfgInfoset &) const;
   int  NumActiveNodes(const int pl, const int iset) const;
-  int  NumActiveNodes(const gbtEfgInfoset *) const;
+  int  NumActiveNodes(const gbtEfgInfoset &) const;
   bool NodeIsActive(const int pl, const int iset, const int node) const;
-  bool NodeIsActive(const gbtEfgNode *) const;
+  bool NodeIsActive(const gbtEfgNode &) const;
 
   inline  gbtEfgSupport UnderlyingSupport() const { return (gbtEfgSupport)(*this); }
 

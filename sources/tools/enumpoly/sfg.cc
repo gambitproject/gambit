@@ -39,7 +39,7 @@ Sfg::Sfg(const gbtEfgSupport &S)
     isetRow(S.GetGame().NumInfosets()), infosets(EF.NumPlayers())
 { 
   int i;
-  gbtArray<gbtEfgInfoset *> zero(EF.NumPlayers());
+  gbtArray<gbtEfgInfoset> zero(EF.NumPlayers());
   gbtArray<int> one(EF.NumPlayers());
 
   gbtEfgSupport support(EF);
@@ -106,8 +106,8 @@ Sfg::~Sfg()
 }
 
 void Sfg::
-MakeSequenceForm(const gbtEfgNode *n, gbtRational prob,gbtArray<int>seq, 
-		 gbtArray<gbtEfgInfoset *> iset, gbtArray<Sequence *> parent) 
+MakeSequenceForm(const gbtEfgNode &n, gbtRational prob,gbtArray<int>seq, 
+		 gbtArray<gbtEfgInfoset> iset, gbtArray<Sequence *> parent) 
 { 
   int i,pl;
 
@@ -162,7 +162,7 @@ MakeSequenceForm(const gbtEfgNode *n, gbtRational prob,gbtArray<int>seq,
 }
 
 void Sfg::
-GetSequenceDims(const gbtEfgNode *n) 
+GetSequenceDims(const gbtEfgNode &n) 
 { 
   int i;
 
@@ -221,16 +221,16 @@ int Sfg::ActionNumber(int pl, int j) const
 {
   if(j==1) return 0;
   int isetnum = (*sequences)[pl]->Find(j)->GetInfoset()->GetNumber();
-  return efsupp.Find(pl,isetnum,(gbtEfgAction *)GetAction(pl,j));
+  return efsupp.Find(pl,isetnum,GetAction(pl,j));
 }
 
-const gbtEfgInfoset*  Sfg::GetInfoset(int pl, int j) const 
+gbtEfgInfoset Sfg::GetInfoset(int pl, int j) const 
 {
   if(j==1) return 0;
   return (*sequences)[pl]->Find(j)->GetInfoset();
 }
 
-const gbtEfgAction* Sfg::GetAction(int pl, int j) const
+gbtEfgAction Sfg::GetAction(int pl, int j) const
 {
   if(j==1) return 0;
   return (*sequences)[pl]->Find(j)->GetAction();

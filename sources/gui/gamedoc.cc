@@ -622,13 +622,13 @@ int gbtGameDocument::GetStrategyElimLevel(void) const
 }
 
 
-void gbtGameDocument::SetSelectNode(gbtEfgNode *p_node)
+void gbtGameDocument::SetSelectNode(gbtEfgNode p_node)
 {
   m_selectNode = p_node;
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-std::string gbtGameDocument::GetRealizProb(const gbtEfgNode *p_node) const
+std::string gbtGameDocument::GetRealizProb(const gbtEfgNode &p_node) const
 {
   if (GetCurrentProfile() == 0 || !p_node) {
     return "";
@@ -637,7 +637,7 @@ std::string gbtGameDocument::GetRealizProb(const gbtEfgNode *p_node) const
 		m_style.NumDecimals());
 }
 
-std::string gbtGameDocument::GetBeliefProb(const gbtEfgNode *p_node) const
+std::string gbtGameDocument::GetBeliefProb(const gbtEfgNode &p_node) const
 {
   if (GetCurrentProfile() == 0 || !p_node || !p_node->GetPlayer()) {
     return "";
@@ -653,7 +653,7 @@ std::string gbtGameDocument::GetBeliefProb(const gbtEfgNode *p_node) const
   }
 }
 
-std::string gbtGameDocument::GetNodeValue(const gbtEfgNode *p_node,
+std::string gbtGameDocument::GetNodeValue(const gbtEfgNode &p_node,
 					  int p_player) const
 {
   if (GetCurrentProfile() == 0 || !p_node) {
@@ -664,7 +664,7 @@ std::string gbtGameDocument::GetNodeValue(const gbtEfgNode *p_node,
 		m_style.NumDecimals());
 }
 
-std::string gbtGameDocument::GetInfosetProb(const gbtEfgNode *p_node) const
+std::string gbtGameDocument::GetInfosetProb(const gbtEfgNode &p_node) const
 {
   if (GetCurrentProfile() == 0 || !p_node || !p_node->GetPlayer()) {
     return "";
@@ -673,7 +673,7 @@ std::string gbtGameDocument::GetInfosetProb(const gbtEfgNode *p_node) const
 		m_style.NumDecimals());
 }
 
-std::string gbtGameDocument::GetInfosetValue(const gbtEfgNode *p_node) const
+std::string gbtGameDocument::GetInfosetValue(const gbtEfgNode &p_node) const
 {
   if (GetCurrentProfile() == 0 || !p_node || !p_node->GetPlayer() ||
       p_node->GetPlayer()->IsChance()) {
@@ -689,7 +689,7 @@ std::string gbtGameDocument::GetInfosetValue(const gbtEfgNode *p_node) const
   }
 }
 
-std::string gbtGameDocument::GetActionProb(const gbtEfgNode *p_node, int p_act) const
+std::string gbtGameDocument::GetActionProb(const gbtEfgNode &p_node, int p_act) const
 {
   if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
     return p_node->GetInfoset()->GetActionProbText(p_act);
@@ -709,7 +709,7 @@ std::string gbtGameDocument::GetActionProb(const gbtEfgNode *p_node, int p_act) 
 		m_style.NumDecimals());
 }
 
-std::string gbtGameDocument::GetActionValue(const gbtEfgNode *p_node, int p_act) const
+std::string gbtGameDocument::GetActionValue(const gbtEfgNode &p_node, int p_act) const
 {
   if (GetCurrentProfile() == 0 || !p_node || !p_node->GetPlayer() ||
       p_node->GetPlayer()->IsChance()) {
@@ -726,7 +726,7 @@ std::string gbtGameDocument::GetActionValue(const gbtEfgNode *p_node, int p_act)
   }
 }
 
-gbtNumber gbtGameDocument::ActionProb(const gbtEfgNode *p_node, int p_action) const
+gbtNumber gbtGameDocument::ActionProb(const gbtEfgNode &p_node, int p_action) const
 {
   if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
     return p_node->GetInfoset()->GetActionProb(p_action);

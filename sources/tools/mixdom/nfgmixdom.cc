@@ -213,7 +213,7 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
 }
 
 template <class T>
-bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy *str,
+bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
 		      bool strong, T /*junk*/,
 		      std::ostream &tracefile)
 {
@@ -555,10 +555,10 @@ ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,int pl, bool stro
 		      double junk, std::ostream &tracefile);
 
 template bool
-IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy *str,
+IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
 		 bool strong, gbtRational junk, std::ostream &tracefile);
 template bool
-IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy *str,
+IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
 		 bool strong, double junk, std::ostream &tracefile);
 
 template bool 

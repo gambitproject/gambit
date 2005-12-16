@@ -84,7 +84,7 @@ gbtBehavProfile<T>::gbtBehavProfile(const gbtMixedProfile<T> &p_profile)
 
   ((gbtVector<T> &) *this).operator=((T)0); 
 
-  gbtEfgNode *n = m_efg->GetRoot();
+  gbtEfgNode n = m_efg->GetRoot();
   const gbtNfgSupport &support = p_profile.GetSupport();
   const gbtNfgGame &nfg = *p_profile.GetGame();
 
@@ -97,7 +97,7 @@ gbtBehavProfile<T>::gbtBehavProfile(const gbtMixedProfile<T> &p_profile)
       if (p_profile(pl, st) > (T) 0)  {
 	const gbtArray<int> &actions = m_efg->players[pl]->m_strategies[snum];
 
-	m_bvals[n->number] = p_profile(pl, st);
+	m_bvals[n->GetNumber()] = p_profile(pl, st);
 
 	RealizationProbs(p_profile, *m_efg, pl, actions, m_efg->GetRoot());
       }
@@ -169,7 +169,7 @@ template <class T> void gbtBehavProfile<T>::Centroid(void) const
 //-------------------------------------------------------------------------
 
 template <class T>
-T gbtBehavProfile<T>::ActionProb(const gbtEfgAction *action) const
+T gbtBehavProfile<T>::ActionProb(const gbtEfgAction &action) const
 {
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
     return action->GetInfoset()->GetActionProb(action->GetNumber());
@@ -185,32 +185,32 @@ T gbtBehavProfile<T>::ActionProb(const gbtEfgAction *action) const
 }
 
 template <class T>
-const T &gbtBehavProfile<T>::RealizProb(const gbtEfgNode *node) const
+const T &gbtBehavProfile<T>::RealizProb(const gbtEfgNode &node) const
 {
   return m_realizProbs[node->number];
 }
 
 template <class T>
-T &gbtBehavProfile<T>::RealizProb(const gbtEfgNode *node)
+T &gbtBehavProfile<T>::RealizProb(const gbtEfgNode &node)
 {
   return m_realizProbs[node->number];
 }
 
 template <class T>
-const T &gbtBehavProfile<T>::BeliefProb(const gbtEfgNode *node) const
+const T &gbtBehavProfile<T>::BeliefProb(const gbtEfgNode &node) const
 {
   return m_beliefs[node->number];
 }
 
 template <class T>
-T &gbtBehavProfile<T>::BeliefProb(const gbtEfgNode *node)
+T &gbtBehavProfile<T>::BeliefProb(const gbtEfgNode &node)
 {
   return m_beliefs[node->number];
 }
 
 
 template <class T>
-T gbtBehavProfile<T>::IsetProb(const gbtEfgInfoset *iset) const
+T gbtBehavProfile<T>::IsetProb(const gbtEfgInfoset &iset) const
 {
   T prob = (T) 0;
   for (int i = 1; i <= iset->NumMembers(); i++) {
@@ -220,25 +220,25 @@ T gbtBehavProfile<T>::IsetProb(const gbtEfgInfoset *iset) const
 }
 
 template <class T>
-const T &gbtBehavProfile<T>::IsetValue(const gbtEfgInfoset *iset) const
+const T &gbtBehavProfile<T>::IsetValue(const gbtEfgInfoset &iset) const
 {
   return m_infosetValues(iset->GetPlayer()->GetNumber(), iset->GetNumber());
 }
 
 template <class T>
-T &gbtBehavProfile<T>::IsetValue(const gbtEfgInfoset *iset)
+T &gbtBehavProfile<T>::IsetValue(const gbtEfgInfoset &iset)
 {
   return m_infosetValues(iset->GetPlayer()->GetNumber(), iset->GetNumber());
 }
 
 
-template <class T> const T &gbtBehavProfile<T>::Regret(const gbtEfgAction * act) const
+template <class T> const T &gbtBehavProfile<T>::Regret(const gbtEfgAction &act) const
 {
   return m_gripe(act->GetInfoset()->GetPlayer()->GetNumber(),
 		 act->GetInfoset()->GetNumber(), act->m_number);
 }	
 
-template <class T> T &gbtBehavProfile<T>::Regret(const gbtEfgAction * act)
+template <class T> T &gbtBehavProfile<T>::Regret(const gbtEfgAction &act)
 {
   return m_gripe(act->GetInfoset()->GetPlayer()->GetNumber(),
 		 act->GetInfoset()->GetNumber(), act->m_number);
@@ -249,7 +249,7 @@ template <class T> T &gbtBehavProfile<T>::Regret(const gbtEfgAction * act)
 //-------------------------------------------------------------------------
 
 template <class T>
-const T &gbtBehavProfile<T>::GetRealizProb(const gbtEfgNode *node) const
+const T &gbtBehavProfile<T>::GetRealizProb(const gbtEfgNode &node) const
 { 
   ComputeSolutionData();
   return RealizProb(node);
@@ -258,49 +258,49 @@ const T &gbtBehavProfile<T>::GetRealizProb(const gbtEfgNode *node) const
 
 
 template <class T>
-const T &gbtBehavProfile<T>::GetBeliefProb(const gbtEfgNode *node) const
+const T &gbtBehavProfile<T>::GetBeliefProb(const gbtEfgNode &node) const
 { 
   ComputeSolutionData();
   return BeliefProb(node);
 }
 
 template <class T>
-gbtVector<T> gbtBehavProfile<T>::GetNodeValue(const gbtEfgNode *node) const
+gbtVector<T> gbtBehavProfile<T>::GetNodeValue(const gbtEfgNode &node) const
 { 
   ComputeSolutionData();
   return NodeValues(node);
 }
 
 template <class T>
-T gbtBehavProfile<T>::GetIsetProb(const gbtEfgInfoset *iset) const
+T gbtBehavProfile<T>::GetIsetProb(const gbtEfgInfoset &iset) const
 { 
   ComputeSolutionData();
   return IsetProb(iset);
 }
 
 template <class T>
-const T &gbtBehavProfile<T>::GetIsetValue(const gbtEfgInfoset *iset) const
+const T &gbtBehavProfile<T>::GetIsetValue(const gbtEfgInfoset &iset) const
 { 
   ComputeSolutionData();
   return IsetValue(iset);
 }
 
 template <class T>
-T gbtBehavProfile<T>::GetActionProb(const gbtEfgAction *act) const
+T gbtBehavProfile<T>::GetActionProb(const gbtEfgAction &act) const
 { 
-  return ActionProb((gbtEfgAction *)act);
+  return ActionProb(act);
 }
 
 
 template <class T>
-const T &gbtBehavProfile<T>::GetActionValue(const gbtEfgAction *act) const
+const T &gbtBehavProfile<T>::GetActionValue(const gbtEfgAction &act) const
 { 
   ComputeSolutionData();
   return ActionValue(act);
 }
 
 template <class T>
-const T &gbtBehavProfile<T>::GetRegret(const gbtEfgAction * act) const
+const T &gbtBehavProfile<T>::GetRegret(const gbtEfgAction &act) const
 { 
   ComputeSolutionData();
   return Regret(act);
@@ -316,16 +316,16 @@ const T &gbtBehavProfile<T>::GetRegret(const gbtEfgAction * act) const
 
 
 template <class T>
-void gbtBehavProfile<T>::Payoff(gbtEfgNode *node, T prob, int player, T &value) const
+void gbtBehavProfile<T>::Payoff(gbtEfgNodeRep *node, T prob, int player, T &value) const
 {
-  gbtEfgInfoset * iset = node->infoset;
+  gbtEfgInfosetRep *iset = node->infoset;
 
   if (node->outcome) {
     value += prob * Payoff(node->outcome, player);
   }
 
   if (node->children.Length())  {
-    const gbtArray<gbtEfgAction *> &acts = m_support.Actions(iset);
+    const gbtArray<gbtEfgAction> &acts = m_support.Actions(iset);
     for (int act = 1; act <= acts.Length(); act++) 
       Payoff(node->GetChild(acts[act]->GetNumber()), 
 	     prob * ActionProb(acts[act]), player, value);
@@ -353,16 +353,16 @@ template <class T> T gbtBehavProfile<T>::Payoff(int player) const
 //
 
 template <class T>
-T gbtBehavProfile<T>::DiffActionValue(const gbtEfgAction *p_action,
-				   const gbtEfgAction *p_oppAction) const
+T gbtBehavProfile<T>::DiffActionValue(const gbtEfgAction &p_action,
+				      const gbtEfgAction &p_oppAction) const
 {
   ((gbtBehavProfile<T> *) this)->ComputeSolutionData();
   T deriv = (T) 0;
-  gbtEfgInfoset *infoset = p_action->GetInfoset();
-  gbtEfgPlayer *player = p_action->GetInfoset()->GetPlayer();
+  gbtEfgInfoset infoset = p_action->GetInfoset();
+  gbtEfgPlayer player = p_action->GetInfoset()->GetPlayer();
 
   for (int i = 1; i <= infoset->NumMembers(); i++) {
-    gbtEfgNode *member = infoset->GetMember(i);
+    gbtEfgNode member = infoset->GetMember(i);
 
     //    gout << member->number << ' ' << player->GetNumber() << ' ' << p_action->GetInfoset()->GetNumber() << ' '  << p_action->number << ' ' << p_oppAction->GetInfoset()->GetPlayer()->GetNumber() << ' ' << p_oppAction->GetInfoset()->GetNumber() << ' ' << p_oppAction->number << ' ';
     deriv += DiffRealizProb(member, p_oppAction) *
@@ -380,15 +380,15 @@ T gbtBehavProfile<T>::DiffActionValue(const gbtEfgAction *p_action,
 }
 
 template <class T>
-T gbtBehavProfile<T>::DiffRealizProb(const gbtEfgNode *p_node,
-				  const gbtEfgAction *p_oppAction) const
+T gbtBehavProfile<T>::DiffRealizProb(const gbtEfgNode &p_node,
+				     const gbtEfgAction &p_oppAction) const
 {
   ((gbtBehavProfile<T> *) this)->ComputeSolutionData();
   T deriv = (T) 1;
   bool isPrec = false;
-  const gbtEfgNode *node = p_node;
+  gbtEfgNode node = p_node;
   while (node->GetParent()) {
-    gbtEfgAction *prevAction = node->GetPriorAction();
+    gbtEfgAction prevAction = node->GetPriorAction();
     if (prevAction != p_oppAction) {
       deriv *= GetActionProb(prevAction);
     }
@@ -402,13 +402,14 @@ T gbtBehavProfile<T>::DiffRealizProb(const gbtEfgNode *p_node,
 }
 
 template <class T>
-T gbtBehavProfile<T>::DiffNodeValue(const gbtEfgNode *p_node, const gbtEfgPlayer *p_player,
-				 const gbtEfgAction *p_oppAction) const
+T gbtBehavProfile<T>::DiffNodeValue(const gbtEfgNode &p_node, 
+				    const gbtEfgPlayer &p_player,
+				    const gbtEfgAction &p_oppAction) const
 {
   ((gbtBehavProfile<T> *) this)->ComputeSolutionData();
 
   if (p_node->NumChildren() > 0) {
-    gbtEfgInfoset *infoset = p_node->GetInfoset();
+    gbtEfgInfoset infoset = p_node->GetInfoset();
 
     if (infoset == p_oppAction->GetInfoset()) {
       // We've encountered the action; since we assume perfect recall,
@@ -438,7 +439,7 @@ T gbtBehavProfile<T>::DiffNodeValue(const gbtEfgNode *p_node, const gbtEfgPlayer
 // 
 
 template <class T>
-void gbtBehavProfile<T>::ComputeSolutionDataPass2(const gbtEfgNode *node) const
+void gbtBehavProfile<T>::ComputeSolutionDataPass2(const gbtEfgNode &node) const
 {
   if (node->outcome) {
     for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) { 
@@ -446,7 +447,7 @@ void gbtBehavProfile<T>::ComputeSolutionDataPass2(const gbtEfgNode *node) const
     }
   }
 
-  gbtEfgInfoset *iset = node->infoset;
+  gbtEfgInfoset iset = node->infoset;
 
   if(iset) {
     if (IsetProb(iset) != IsetProb(iset) * (T) 0)
@@ -463,10 +464,10 @@ void gbtBehavProfile<T>::ComputeSolutionDataPass2(const gbtEfgNode *node) const
     }
 
     for (int child = 1; child <= node->NumChildren(); child++)  {
-      gbtEfgNode *childNode = node->GetChild(child);
+      gbtEfgNode childNode = node->GetChild(child);
       ComputeSolutionDataPass2(childNode);
 
-      gbtEfgAction *act = childNode->GetPriorAction();
+      gbtEfgAction act = childNode->GetPriorAction();
 
       for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
 	m_nodeValues(node->number, pl) +=
@@ -490,7 +491,7 @@ void gbtBehavProfile<T>::ComputeSolutionDataPass2(const gbtEfgNode *node) const
 
 // compute realization probabilities for nodes and isets.  
 template <class T>
-void gbtBehavProfile<T>::ComputeSolutionDataPass1(const gbtEfgNode *node) const
+void gbtBehavProfile<T>::ComputeSolutionDataPass1(const gbtEfgNode &node) const
 {
   if (node->GetParent()) {
     m_realizProbs[node->number] = RealizProb(node->GetParent()) * ActionProb(node->GetPriorAction());
@@ -519,17 +520,17 @@ void gbtBehavProfile<T>::ComputeSolutionData(void) const
 
     for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
       for (int iset = 1; iset <= m_efg->NumInfosets()[pl]; iset++) {
-	gbtEfgInfoset *infoset = m_efg->GetPlayer(pl)->GetInfoset(iset);
+	gbtEfgInfoset infoset = m_efg->GetPlayer(pl)->GetInfoset(iset);
 
 	m_infosetValues(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()) = (T) 0;
 	for (int act = 1; act <= infoset->NumActions(); act++) {
-	  gbtEfgAction *action = infoset->GetAction(act);
+	  gbtEfgAction action = infoset->GetAction(act);
 	  m_infosetValues(infoset->GetPlayer()->GetNumber(),
 			  infoset->GetNumber()) += ActionProb(action) * ActionValue(action);
 	}
 
 	for (int act = 1; act <= infoset->NumActions(); act++) {
-	  gbtEfgAction *action = infoset->GetAction(act);
+	  gbtEfgAction action = infoset->GetAction(act);
 	  m_gripe(action->GetInfoset()->GetPlayer()->GetNumber(),
 		  action->GetInfoset()->GetNumber(), action->m_number) = 
 	    (ActionValue(action) - IsetValue(infoset)) * IsetProb(infoset);
@@ -542,10 +543,10 @@ void gbtBehavProfile<T>::ComputeSolutionData(void) const
 
 template <class T>
 void gbtBehavProfile<T>::BehaviorStrat(const gbtEfgGame &E, int pl,
-				    gbtEfgNode *n)
+				       gbtEfgNode &n)
 {
   for (int i = 1; i <= n->children.Length(); i++)   {
-    gbtEfgNode *child = n->children[i];
+    gbtEfgNode child = n->children[i];
     if (n->GetPlayer() && n->GetPlayer()->GetNumber() == pl)
       if (m_nvals[n->number] > (T) 0 && 
 	  m_nvals[child->number] > (T) 0)  {
@@ -562,7 +563,7 @@ template <class T>
 void gbtBehavProfile<T>::RealizationProbs(const gbtMixedProfile<T> &mp,
 				       const gbtEfgGame &E, int pl,
 				       const gbtArray<int> &actions,
-				       gbtEfgNode *node)
+				       gbtEfgNode node)
 {
   static const T tremble = (T) 0;
   T prob;
@@ -585,7 +586,7 @@ void gbtBehavProfile<T>::RealizationProbs(const gbtMixedProfile<T> &mp,
       prob = node->GetInfoset()->GetActionProb(i);
     }
 
-    gbtEfgNode *child = node->children[i];
+    gbtEfgNode child = node->children[i];
     m_bvals[child->number] = prob * m_bvals[node->number];
     m_nvals[child->number] += m_bvals[child->number];
 
@@ -601,9 +602,9 @@ template <class T> gbtDPVector<T> gbtBehavProfile<T>::Beliefs(void)
   bprobs = (T) 0;
 
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    gbtEfgPlayer *player = m_efg->GetPlayer(pl);
+    gbtEfgPlayer player = m_efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtEfgInfoset *infoset = player->GetInfoset(iset);
+      gbtEfgInfoset infoset = player->GetInfoset(iset);
       for (int i = 1; i <= infoset->NumMembers(); i++) 
 	bprobs(player->GetNumber(),infoset->GetNumber(),i) = BeliefProb(infoset->GetMember(i));
     }
@@ -625,7 +626,7 @@ template <class T> T gbtBehavProfile<T>::LiapValue(void) const
 
   for (int i = 1; i <= m_efg->NumPlayers(); i++) {
     for (int iset = 1; iset <= m_efg->GetPlayer(i)->NumInfosets(); iset++) {
-      const gbtArray<gbtEfgAction *> &acts = m_support.Actions(m_efg->GetPlayer(i)->GetInfoset(iset));
+      const gbtArray<gbtEfgAction> &acts = m_support.Actions(m_efg->GetPlayer(i)->GetInfoset(iset));
       avg = sum = (T)0;
 
       for (int act = 1; act <= acts.Length(); act++) {
@@ -671,7 +672,7 @@ template <class T> T gbtBehavProfile<T>::LiapValueOnDefined(void) const
 
   for (int i = 1; i <= m_efg->NumPlayers(); i++) {
     for (int iset = 1; iset <= m_efg->GetPlayer(i)->NumInfosets(); iset++) {
-      const gbtArray<gbtEfgAction *> &acts = m_support.Actions(m_efg->GetPlayer(i)->GetInfoset(iset));
+      const gbtArray<gbtEfgAction> &acts = m_support.Actions(m_efg->GetPlayer(i)->GetInfoset(iset));
       avg = sum = (T)0;
 
       for (int act = 1; act <= acts.Length(); act++) {
@@ -712,7 +713,7 @@ T gbtBehavProfile<T>::MaxRegret(void)
 }
 
 template <class T>
-bool gbtBehavProfile<T>::IsDefinedAt(gbtEfgInfoset *p_infoset) const
+bool gbtBehavProfile<T>::IsDefinedAt(gbtEfgInfoset p_infoset) const
 {
   for (int act = 1; act <= p_infoset->NumActions(); act++) {
     if (GetActionProb(p_infoset->GetAction(act)) > (T) 0) {

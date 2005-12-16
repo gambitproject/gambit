@@ -53,7 +53,7 @@ class EfgContIter    {
 
   public:
     EfgContIter(const gbtEfgSupport &);
-    EfgContIter(const gbtEfgSupport &, const gbtList<gbtEfgInfoset *> &);
+    EfgContIter(const gbtEfgSupport &, const gbtList<gbtEfgInfoset> &);
     ~EfgContIter();
   
     void First(void);
@@ -62,7 +62,7 @@ class EfgContIter    {
   
   // These next two only work on frozen infosets
     void Set(int pl, int iset, int act);
-    void Set(const gbtEfgAction *a);
+    void Set(const gbtEfgAction &a);
     int Next(int pl, int iset);
   
     const gbtPureBehavProfile &GetProfile(void) const  { return _profile; }
@@ -88,13 +88,13 @@ class EfgConditionalContIter    {
 
   public:
     EfgConditionalContIter(const gbtEfgSupport &);
-    EfgConditionalContIter(const gbtEfgSupport &, const gbtList<gbtEfgInfoset *> &);
+    EfgConditionalContIter(const gbtEfgSupport &, const gbtList<gbtEfgInfoset> &);
     ~EfgConditionalContIter();
   
     void First(void); // Sets each infoset's action to the first in the support
   
     void Set(int pl, int iset, int act);
-    void Set(const gbtEfgAction *a);
+    void Set(const gbtEfgAction &a);
     int Next(int pl, int iset); 
   
     const gbtPureBehavProfile &GetProfile(void) const   { return _profile; }
@@ -102,7 +102,7 @@ class EfgConditionalContIter    {
     int NextContingency(void);   // Needs rewriting
   
     gbtRational Payoff(int pl) const;
-    gbtRational Payoff(const gbtEfgNode *, int pl) const;
+    gbtRational Payoff(const gbtEfgNode &, int pl) const;
 };
 
 #endif   // EFGITER_H

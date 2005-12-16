@@ -27,7 +27,7 @@
 #include <iostream>
 #include "libgambit.h"
 
-bool gbtNfgSupport::Dominates(gbtNfgStrategy *s, gbtNfgStrategy *t, 
+bool gbtNfgSupport::Dominates(gbtNfgStrategy s, gbtNfgStrategy t, 
 			      bool strong) const
 {
   gbtNfgGame *n = GetGame();
@@ -74,7 +74,7 @@ bool gbtNfgSupport::Dominates(gbtNfgStrategy *s, gbtNfgStrategy *t,
 }
 
 
-bool gbtNfgSupport::IsDominated(gbtNfgStrategy *s, bool strong) const
+bool gbtNfgSupport::IsDominated(gbtNfgStrategy s, bool strong) const
 {
   for (int i = 1; i <= NumStrats(s->GetPlayer()->GetNumber()); i++) {
     if (GetStrategy(s->GetPlayer()->GetNumber(), i) != s &&

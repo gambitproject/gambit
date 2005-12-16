@@ -30,9 +30,7 @@
 #include "base.h"
 #include "nfg.h"
 
-class gbtNfgPlayer;
 class gbtNfgGame;
-class gbtNfgOutcome;
 
 /// This class represents a strategy profile on a normal form game.
 /// It specifies exactly one strategy for each player defined on the
@@ -42,7 +40,7 @@ class gbtStrategyProfile  {
 private:
   long m_index;
   gbtNfgGame *m_nfg;
-  gbtArray<gbtNfgStrategy *> m_profile;
+  gbtArray<gbtNfgStrategy> m_profile;
   
 public:
   /// @name Lifecycle
@@ -54,14 +52,14 @@ public:
   /// @name Data access and manipulation
   //@{
   /// Get the strategy played by player pl  
-  gbtNfgStrategy *GetStrategy(int pl) const { return m_profile[pl]; }
+  gbtNfgStrategy GetStrategy(int pl) const { return m_profile[pl]; }
   /// Set the strategy for a player
-  void SetStrategy(gbtNfgStrategy *);
+  void SetStrategy(const gbtNfgStrategy &);
 
   /// Get the outcome that results from the profile
-  gbtNfgOutcome *GetOutcome(void) const;
+  gbtNfgOutcome GetOutcome(void) const;
   /// Set the outcome that results from the profile
-  void SetOutcome(gbtNfgOutcome *p_outcome); 
+  void SetOutcome(gbtNfgOutcome p_outcome); 
 
   /// Get the payoff to player pl that results from the profile
   gbtRational GetPayoff(int pl) const;
@@ -81,7 +79,7 @@ public:
 class gbtNfgSupport {
 protected:
   const gbtNfgGame *m_nfg;
-  gbtArray<gbtArray<gbtNfgStrategy *> > m_support;
+  gbtArray<gbtArray<gbtNfgStrategy> > m_support;
   
   bool Undominated(gbtNfgSupport &newS, int pl, bool strong,
 		   std::ostream &tracefile) const;
@@ -118,15 +116,15 @@ public:
   int ProfileLength(void) const;
 
   /// Returns the strategy in the st'th position for player pl.
-  gbtNfgStrategy *GetStrategy(int pl, int st) const 
+  gbtNfgStrategy GetStrategy(int pl, int st) const 
     { return m_support[pl][st]; }
 
   /// Retuns the index of the strategy in the support.
-  int GetIndex(gbtNfgStrategy *s) const
+  int GetIndex(const gbtNfgStrategy &s) const
     { return m_support[s->GetPlayer()->GetNumber()].Find(s); }
 
   /// Returns true exactly when the strategy is in the support.
-  bool Contains(gbtNfgStrategy *s) const
+  bool Contains(const gbtNfgStrategy &s) const
     { return m_support[s->GetPlayer()->GetNumber()].Contains(s); }
 
   /// Returns true iff this support is a (weak) subset of the specified support
@@ -137,7 +135,7 @@ public:
   /// @name Modifying the support
   //@{
   /// Add a strategy to the support.
-  void AddStrategy(gbtNfgStrategy *);
+  void AddStrategy(gbtNfgStrategy);
 
   /// Remove a strategy from the support; return true if successful.
 
@@ -145,13 +143,13 @@ public:
   /// not present, or if the strategy is the only strategy for that
   /// player, it is not removed.  Returns true if the removal was
   /// executed, and false if not.
-  bool RemoveStrategy(gbtNfgStrategy *);
+  bool RemoveStrategy(gbtNfgStrategy);
   //@}
 
   /// @name Identification of dominated strategies
   //@{
-  bool Dominates(gbtNfgStrategy *s, gbtNfgStrategy *t, bool strong) const;
-  bool IsDominated(gbtNfgStrategy *s, bool strong) const; 
+  bool Dominates(gbtNfgStrategy s, gbtNfgStrategy t, bool strong) const;
+  bool IsDominated(gbtNfgStrategy s, bool strong) const; 
 
   gbtNfgSupport Undominated(bool strong, const gbtArray<int> &players,
 			    std::ostream &tracefile) const;

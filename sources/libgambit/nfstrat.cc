@@ -47,22 +47,22 @@ gbtStrategyProfile::gbtStrategyProfile(gbtNfgGame *p_nfg)
 //                      Data access and manipulation
 //---------------------------------------------------------------------------
 
-void gbtStrategyProfile::SetStrategy(gbtNfgStrategy *s)
+void gbtStrategyProfile::SetStrategy(const gbtNfgStrategy &s)
 {
   if (!s) return;
   m_index += s->m_index - m_profile[s->GetPlayer()->GetNumber()]->m_index;
   m_profile[s->GetPlayer()->GetNumber()] = s;
 }
 
-gbtNfgOutcome *gbtStrategyProfile::GetOutcome(void) const
+gbtNfgOutcome gbtStrategyProfile::GetOutcome(void) const
 { return m_nfg->results[m_index+1]; }
 
-void gbtStrategyProfile::SetOutcome(gbtNfgOutcome *p_outcome)
+void gbtStrategyProfile::SetOutcome(gbtNfgOutcome p_outcome)
 { m_nfg->results[m_index+1] = p_outcome; }
 
 gbtRational gbtStrategyProfile::GetPayoff(int pl) const
 {
-  gbtNfgOutcome *outcome = GetOutcome();
+  gbtNfgOutcome outcome = GetOutcome();
   if (outcome) {
     return outcome->GetPayoff(pl);
   }
@@ -83,7 +83,7 @@ gbtNfgSupport::gbtNfgSupport(const gbtNfgGame *p_nfg)
   : m_nfg(p_nfg)
 { 
   for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
-    m_support.Append(gbtArray<gbtNfgStrategy *>());
+    m_support.Append(gbtArray<gbtNfgStrategy>());
     for (int st = 1; st <= p_nfg->NumStrats(pl); st++) {
       m_support[pl].Append(p_nfg->GetPlayer(pl)->GetStrategy(st));
     }
@@ -134,9 +134,9 @@ bool gbtNfgSupport::IsSubsetOf(const gbtNfgSupport &p_support) const
 //                        Modifying the support
 //---------------------------------------------------------------------------
 
-void gbtNfgSupport::AddStrategy(gbtNfgStrategy *s)
+void gbtNfgSupport::AddStrategy(gbtNfgStrategy s)
 { 
-  gbtArray<gbtNfgStrategy *> &sup = m_support[s->GetPlayer()->GetNumber()];
+  gbtArray<gbtNfgStrategy> &sup = m_support[s->GetPlayer()->GetNumber()];
   if (sup.Contains(s))  return;
 
   int index;
@@ -146,9 +146,9 @@ void gbtNfgSupport::AddStrategy(gbtNfgStrategy *s)
   sup.Insert(s, index);
 }
 
-bool gbtNfgSupport::RemoveStrategy(gbtNfgStrategy *s) 
+bool gbtNfgSupport::RemoveStrategy(gbtNfgStrategy s) 
 { 
-  gbtArray<gbtNfgStrategy *> &sup = m_support[s->GetPlayer()->GetNumber()];
+  gbtArray<gbtNfgStrategy> &sup = m_support[s->GetPlayer()->GetNumber()];
   if (!sup.Contains(s)) return false;
   if (sup.Contains(s) && sup.Length() == 1)  return false;
   sup.Remove(sup.Find(s));

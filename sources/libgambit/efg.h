@@ -31,12 +31,26 @@
 #include "gdpvect.h"
 #include "game.h"
 
+//
+// Forward declarations of classes defined in this file.
+//
+
+class gbtEfgOutcomeRep;
+typedef Gambit::GameObjectPtr<gbtEfgOutcomeRep> gbtEfgOutcome;
+
+class gbtEfgActionRep;
+typedef Gambit::GameObjectPtr<gbtEfgActionRep> gbtEfgAction;
+
+class gbtEfgInfosetRep;
+typedef Gambit::GameObjectPtr<gbtEfgInfosetRep> gbtEfgInfoset;
+
+class gbtEfgPlayerRep;
+typedef Gambit::GameObjectPtr<gbtEfgPlayerRep> gbtEfgPlayer;
+
+class gbtEfgNodeRep;
+typedef Gambit::GameObjectPtr<gbtEfgNodeRep> gbtEfgNode;
 
 class gbtEfgGame;
-class gbtEfgPlayer;
-class gbtEfgInfoset;
-class gbtEfgNode;
-class gbtEfgAction;
 class gbtEfgSupport;
 class gbtNfgGame;
 class gbtNumber;
@@ -52,7 +66,7 @@ public:
 };
 
 
-class gbtEfgOutcome : public gbtGameObject {
+class gbtEfgOutcomeRep : public Gambit::GameObject {
   friend class gbtEfgGame;
   friend class gbtBehavProfile<double>;
   friend class gbtBehavProfile<gbtRational>;
@@ -65,8 +79,8 @@ protected:
   gbtArray<gbtRational> m_ratPayoffs;
   gbtArray<double> m_doublePayoffs;
 
-  gbtEfgOutcome(gbtEfgGame *p_efg, int p_number);
-  ~gbtEfgOutcome()  { }
+  gbtEfgOutcomeRep(gbtEfgGame *p_efg, int p_number);
+  ~gbtEfgOutcomeRep()  { }
 
 public:
   gbtEfgGame *GetGame(void) const { return m_efg; }
@@ -80,102 +94,105 @@ public:
   const std::string &GetPayoffText(int pl) const { return m_textPayoffs[pl]; }
 };
 
-class gbtEfgAction : public gbtGameObject {
+
+class gbtEfgActionRep : public Gambit::GameObject {
   friend class gbtEfgGame;
   friend class gbtBehavProfile<double>;
   friend class gbtBehavProfile<gbtRational>;
   friend class gbtBehavProfile<gbtNumber>;
-  friend class gbtEfgInfoset;
+  friend class gbtEfgInfosetRep;
 private:
   int m_number;
   std::string m_label;
-  gbtEfgInfoset *m_infoset;
+  gbtEfgInfosetRep *m_infoset;
 
-  gbtEfgAction(int p_number, const std::string &p_label, 
-	       gbtEfgInfoset *p_infoset)
+  gbtEfgActionRep(int p_number, const std::string &p_label, 
+		  gbtEfgInfosetRep *p_infoset)
     : m_number(p_number), m_label(p_label), m_infoset(p_infoset) { }
-  ~gbtEfgAction()   { }
+  ~gbtEfgActionRep()   { }
 
 public:
   int GetNumber(void) const { return m_number; }
-  gbtEfgInfoset *GetInfoset(void) const { return m_infoset; }
+  gbtEfgInfoset GetInfoset(void) const { return m_infoset; }
 
   const std::string &GetLabel(void) const { return m_label; }
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
-  bool Precedes(const gbtEfgNode *) const;
+  bool Precedes(const gbtEfgNode &) const;
 };
 
-class gbtEfgInfoset : public gbtGameObject {
+
+class gbtEfgInfosetRep : public Gambit::GameObject {
   friend class gbtEfgGame;
-  friend class gbtEfgPlayer;
-  friend class gbtEfgNode;
+  friend class gbtEfgPlayerRep;
+  friend class gbtEfgNodeRep;
   friend class gbtBehavProfile<double>;
   friend class gbtBehavProfile<gbtRational>;
   friend class gbtBehavProfile<gbtNumber>;
-  friend void MakeStrategy(gbtEfgPlayer *);
-  friend void MakeReducedStrats(gbtEfgPlayer *p, gbtEfgNode *n, gbtEfgNode *nn);
+  friend void MakeStrategy(gbtEfgPlayerRep *);
+  friend void MakeReducedStrats(gbtEfgPlayerRep *p, gbtEfgNodeRep *n, gbtEfgNodeRep *nn);
 
 protected:
   gbtEfgGame *m_efg;
   int m_number;
   std::string m_label;
-  gbtEfgPlayer *m_player;
-  gbtArray<gbtEfgAction *> m_actions;
-  gbtArray<gbtEfgNode *> m_members;
+  gbtEfgPlayerRep *m_player;
+  gbtArray<gbtEfgActionRep *> m_actions;
+  gbtArray<gbtEfgNodeRep *> m_members;
   int flag, whichbranch;
   gbtArray<std::string> m_textProbs;
   gbtArray<gbtRational> m_ratProbs;
   
-  gbtEfgInfoset(gbtEfgGame *p_efg, int p_number, gbtEfgPlayer *p_player, 
-		int p_actions);
-  ~gbtEfgInfoset();  
+  gbtEfgInfosetRep(gbtEfgGame *p_efg, int p_number, gbtEfgPlayerRep *p_player, 
+		   int p_actions);
+  ~gbtEfgInfosetRep();  
 
 public:
   gbtEfgGame *GetGame(void) const { return m_efg; }
   int GetNumber(void) const { return m_number; }
   
-  gbtEfgPlayer *GetPlayer(void) const { return m_player; }
+  gbtEfgPlayer GetPlayer(void) const { return m_player; }
   bool IsChanceInfoset(void) const;
 
   void SetLabel(const std::string &p_label) { m_label = p_label; }
   const std::string &GetLabel(void) const { return m_label; }
   
-  gbtEfgAction *InsertAction(int where);
+  gbtEfgAction InsertAction(int where);
   void RemoveAction(int which);
 
   int NumActions(void) const { return m_actions.Length(); }
-  gbtEfgAction *GetAction(int p_index) const { return m_actions[p_index]; }
+  gbtEfgAction GetAction(int p_index) const { return m_actions[p_index]; }
 
   int NumMembers(void) const { return m_members.Length(); }
-  gbtEfgNode *GetMember(int p_index) const { return m_members[p_index]; }
+  gbtEfgNode GetMember(int p_index) const { return m_members[p_index]; }
 
-  bool Precedes(gbtEfgNode *) const;
+  bool Precedes(gbtEfgNode) const;
 
   void SetActionProb(int i, const std::string &p_value);
   const gbtRational &GetActionProb(int i) const { return m_ratProbs[i]; }
   const std::string &GetActionProbText(int i) const { return m_textProbs[i]; }
 };
 
-class gbtEfgPlayer : public gbtGameObject  {
+class gbtEfgPlayerRep : public Gambit::GameObject  {
   friend class gbtEfgGame;
+  friend class gbtPureBehavProfile;
   friend class gbtBehavProfile<double>;
   friend class gbtBehavProfile<gbtRational>;
   friend class gbtBehavProfile<gbtNumber>;
   friend class gbtMixedProfile<double>;
   friend class gbtMixedProfile<gbtRational>;
   friend class gbtMixedProfile<gbtNumber>;
-  friend void MakeStrategy(gbtEfgPlayer *);
+  friend void MakeStrategy(gbtEfgPlayerRep *);
 
 private:
   gbtEfgGame *m_efg;
   int m_number;
   std::string m_label;
-  gbtArray<gbtEfgInfoset *> m_infosets;
+  gbtArray<gbtEfgInfosetRep *> m_infosets;
   gbtList<gbtArray<int> > m_strategies;
 
-  gbtEfgPlayer(gbtEfgGame *p_efg, int p_id) : m_number(p_id), m_efg(p_efg)  { }
-  ~gbtEfgPlayer();
+  gbtEfgPlayerRep(gbtEfgGame *p_efg, int p_id) : m_number(p_id), m_efg(p_efg)  { }
+  ~gbtEfgPlayerRep();
 
 public:
   int GetNumber(void) const { return m_number; }
@@ -187,31 +204,32 @@ public:
   bool IsChance(void) const { return (m_number == 0); }
 
   int NumInfosets(void) const { return m_infosets.Length(); }
-  gbtEfgInfoset *GetInfoset(int p_index) const { return m_infosets[p_index]; }
+  gbtEfgInfoset GetInfoset(int p_index) const { return m_infosets[p_index]; }
 };
 
-class gbtEfgNode : public gbtGameObject {
+class gbtEfgNodeRep : public Gambit::GameObject {
   friend class gbtEfgGame;
   friend class gbtBehavProfile<double>;
   friend class gbtBehavProfile<gbtRational>;
   friend class gbtBehavProfile<gbtNumber>;
-  friend void MakeReducedStrats(gbtEfgPlayer *p, gbtEfgNode *n, gbtEfgNode *nn);
+  friend class gbtPureBehavProfile;
+  friend void MakeReducedStrats(gbtEfgPlayerRep *p, gbtEfgNodeRep *n, gbtEfgNodeRep *nn);
   
 protected:
   bool mark;
   int number; 
   gbtEfgGame *m_efg;
   std::string m_label;
-  gbtEfgInfoset *infoset;
-  gbtEfgNode *parent;
-  gbtEfgOutcome *outcome;
-  gbtArray<gbtEfgNode *> children;
-  gbtEfgNode *whichbranch, *ptr;
+  gbtEfgInfosetRep *infoset;
+  gbtEfgNodeRep *parent;
+  gbtEfgOutcomeRep *outcome;
+  gbtArray<gbtEfgNodeRep *> children;
+  gbtEfgNodeRep *whichbranch, *ptr;
 
-  gbtEfgNode(gbtEfgGame *e, gbtEfgNode *p);
-  ~gbtEfgNode();
+  gbtEfgNodeRep(gbtEfgGame *e, gbtEfgNodeRep *p);
+  ~gbtEfgNodeRep();
 
-  void DeleteOutcome(gbtEfgOutcome *outc);
+  void DeleteOutcome(gbtEfgOutcomeRep *outc);
 
 public:
   gbtEfgGame *GetGame(void) const { return m_efg; }
@@ -221,35 +239,35 @@ public:
 
   int GetNumber(void) const { return number; }
   int NumberInInfoset(void) const
-    { return infoset->m_members.Find(const_cast<gbtEfgNode *>(this)); }
+  { return infoset->m_members.Find(const_cast<gbtEfgNodeRep *>(this)); }
 
   int NumChildren(void) const    { return children.Length(); }
 
-  gbtEfgInfoset *GetInfoset(void) const   { return infoset; }
+  gbtEfgInfoset GetInfoset(void) const   { return infoset; }
   bool IsTerminal(void) const { return (children.Length() == 0); }
-  gbtEfgPlayer *GetPlayer(void) const
+  gbtEfgPlayer GetPlayer(void) const
     { return (infoset) ? infoset->GetPlayer() : 0; }
-  gbtEfgAction *GetPriorAction(void) const; // returns null if root node
-  gbtEfgNode *GetChild(int i) const    { return children[i]; }
-  gbtEfgNode *GetParent(void) const    { return parent; }
-  gbtEfgNode *GetNextSibling(void) const;
-  gbtEfgNode *GetPriorSibling(void) const;
+  gbtEfgAction GetPriorAction(void) const; // returns null if root node
+  gbtEfgNode GetChild(int i) const    { return children[i]; }
+  gbtEfgNode GetParent(void) const    { return parent; }
+  gbtEfgNode GetNextSibling(void) const;
+  gbtEfgNode GetPriorSibling(void) const;
 
-  gbtEfgOutcome *GetOutcome(void) const { return outcome; }
-  void SetOutcome(gbtEfgOutcome *p_outcome);
+  gbtEfgOutcome GetOutcome(void) const { return gbtEfgOutcome(outcome); }
+  void SetOutcome(const gbtEfgOutcome &p_outcome);
 
-  bool IsSuccessorOf(gbtEfgNode *from) const;
+  bool IsSuccessorOf(gbtEfgNode from) const;
   bool IsSubgameRoot(void) const;
 };
 
-class gbtEfgGame : public gbtGame {
+class gbtEfgGame : public Gambit::Game {
 private:
   friend class EfgFileReader;
   friend class EfgFile;
   friend class gbtNfgGame;
-  friend class gbtEfgNode;
-  friend class gbtEfgOutcome;
-  friend class gbtEfgInfoset;
+  friend class gbtEfgNodeRep;
+  friend class gbtEfgOutcomeRep;
+  friend class gbtEfgInfosetRep;
   friend class gbtBehavProfile<double>;
   friend class gbtBehavProfile<gbtRational>;
   friend class gbtBehavProfile<gbtNumber>;
@@ -260,47 +278,45 @@ private:
 protected:
   bool sortisets;
   std::string title, comment;
-  gbtArray<gbtEfgPlayer *> players;
-  gbtArray<gbtEfgOutcome *> outcomes;
-  gbtEfgNode *m_root;
-  gbtEfgPlayer *chance;
+  gbtArray<gbtEfgPlayerRep *> players;
+  gbtArray<gbtEfgOutcomeRep *> outcomes;
+  gbtEfgNodeRep *m_root;
+  gbtEfgPlayerRep *chance;
   mutable gbtNfgGame *m_reducedNfg;
   
   // this is for use with the copy constructor
-  void CopySubtree(gbtEfgNode *, gbtEfgNode *);
+  void CopySubtree(gbtEfgNodeRep *, gbtEfgNodeRep *);
 
-  void CopySubtree(gbtEfgNode *, gbtEfgNode *, gbtEfgNode *);
-  void MarkSubtree(gbtEfgNode *);
-  void UnmarkSubtree(gbtEfgNode *);
+  void CopySubtree(gbtEfgNodeRep *, gbtEfgNodeRep *, gbtEfgNodeRep *);
+  void MarkSubtree(gbtEfgNodeRep *);
+  void UnmarkSubtree(gbtEfgNodeRep *);
 
   void SortInfosets(void);
-  void NumberNodes(gbtEfgNode *, int &);
+  void NumberNodes(gbtEfgNodeRep *, int &);
   
   void DeleteLexicon(void) const;
 
-  gbtEfgOutcome *NewOutcome(int index);
+  void WriteEfgFile(std::ostream &, gbtEfgNodeRep *) const;
 
-  void WriteEfgFile(std::ostream &, gbtEfgNode *) const;
-
-  void Payoff(gbtEfgNode *n, gbtRational, const gbtPVector<int> &, gbtVector<gbtRational> &) const;
-  void Payoff(gbtEfgNode *n, gbtRational, const gbtArray<gbtArray<int> > &, gbtArray<gbtRational> &) const;
+  void Payoff(gbtEfgNodeRep *n, gbtRational, const gbtPVector<int> &, gbtVector<gbtRational> &) const;
+  void Payoff(gbtEfgNodeRep *n, gbtRational, const gbtArray<gbtArray<int> > &, gbtArray<gbtRational> &) const;
   
-  void InfosetProbs(gbtEfgNode *n, gbtRational, const gbtPVector<int> &, gbtPVector<gbtRational> &) const;
+  void InfosetProbs(gbtEfgNodeRep *n, gbtRational, const gbtPVector<int> &, gbtPVector<gbtRational> &) const;
     
     
   // These are used in identification of subgames
-  void MarkTree(gbtEfgNode *, gbtEfgNode *);
-  bool CheckTree(gbtEfgNode *, gbtEfgNode *);
+  void MarkTree(gbtEfgNodeRep *, gbtEfgNodeRep *);
+  bool CheckTree(gbtEfgNodeRep *, gbtEfgNodeRep *);
 
   // Recursive calls
-  void DescendantNodes(const gbtEfgNode *, const gbtEfgSupport &, 
-		       gbtList<gbtEfgNode *> &) const;
-  void NonterminalDescendants(const gbtEfgNode *, const gbtEfgSupport&, 
-			      gbtList<const gbtEfgNode*> &) const;
-  void TerminalDescendants(const gbtEfgNode *, const gbtEfgSupport&, 
-			   gbtList<gbtEfgNode *> &) const;
+  void DescendantNodes(const gbtEfgNodeRep *, const gbtEfgSupport &, 
+		       gbtList<gbtEfgNode> &) const;
+  void NonterminalDescendants(const gbtEfgNodeRep *, const gbtEfgSupport&, 
+			      gbtList<gbtEfgNode> &) const;
+  void TerminalDescendants(const gbtEfgNodeRep *, const gbtEfgSupport&, 
+			   gbtList<gbtEfgNode> &) const;
 
-  gbtEfgInfoset *CreateInfoset(int n, gbtEfgPlayer *pl, int br);
+  gbtEfgInfosetRep *CreateInfoset(int n, gbtEfgPlayerRep *pl, int br);
 
 public:
   /// @name Lifecycle
@@ -308,7 +324,7 @@ public:
   /// Construct a new trivial extensive game
   gbtEfgGame(void);
   /// Create a copy of the extensive game, starting at the specified node
-  gbtEfgGame(const gbtEfgGame &, gbtEfgNode * = 0);
+  gbtEfgGame(const gbtEfgGame &, gbtEfgNode = 0);
   /// Clean up the extensive game
   ~gbtEfgGame();
   //@}
@@ -334,10 +350,10 @@ public:
 
   /// Returns true if the game is perfect recall.  If not, the specified
   /// a pair of violating information sets is returned in the parameters.  
-  bool IsPerfectRecall(gbtEfgInfoset *&, gbtEfgInfoset *&) const;
+  bool IsPerfectRecall(gbtEfgInfoset &, gbtEfgInfoset &) const;
   /// Returns true if the game is perfect recall
   bool IsPerfectRecall(void) const
-    { gbtEfgInfoset *s, *t; return IsPerfectRecall(s, t); }
+    { gbtEfgInfoset s, t; return IsPerfectRecall(s, t); }
 
   /// Returns the reduced normal form representation of the game,
   /// if computed.
@@ -358,17 +374,17 @@ public:
   /// Returns the number of players in the game
   int NumPlayers(void) const;
   /// Returns the pl'th player in the game
-  gbtEfgPlayer *GetPlayer(int pl) const { return players[pl]; }
+  gbtEfgPlayer GetPlayer(int pl) const { return players[pl]; }
   /// Returns the chance (nature) player
-  gbtEfgPlayer *GetChance(void) const;
+  gbtEfgPlayer GetChance(void) const;
   /// Creates a new player in the game, with no moves
-  gbtEfgPlayer *NewPlayer(void);
+  gbtEfgPlayer NewPlayer(void);
   //@}
 
   /// @name Nodes
   //@{
   /// Returns the root node of the game
-  gbtEfgNode *GetRoot(void) const { return m_root; }
+  gbtEfgNode GetRoot(void) const { return m_root; }
   /// Returns the number of nodes in the game
   int NumNodes(void) const;
   //@}
@@ -376,11 +392,11 @@ public:
   /// @name Information sets
   //@{
   /// Returns the iset'th information set in the game (numbered globally)
-  gbtEfgInfoset *GetInfoset(int iset) const;
+  gbtEfgInfoset GetInfoset(int iset) const;
   /// Returns an array with the number of information sets per personal player
   gbtArray<int> NumInfosets(void) const;
   /// Returns the act'th action in the game (numbered globally)
-  gbtEfgAction *GetAction(int act) const;
+  gbtEfgAction GetAction(int act) const;
   /// Returns the total number of actions in the game
   int ProfileLength(void) const;
   //@}
@@ -390,40 +406,40 @@ public:
   /// Returns the number of outcomes defined in the game
   int NumOutcomes(void) const;
   /// Returns the index'th outcome defined in the game
-  gbtEfgOutcome *GetOutcome(int index) const;
+  gbtEfgOutcome GetOutcome(int index) const;
 
   /// Creates a new outcome in the game
-  gbtEfgOutcome *NewOutcome(void);
+  gbtEfgOutcome NewOutcome(void);
   /// Deletes the specified outcome from the game
-  void DeleteOutcome(gbtEfgOutcome *);
+  void DeleteOutcome(const gbtEfgOutcome &);
   //@}
 
   // EDITING OPERATIONS
-  gbtEfgInfoset *AppendNode(gbtEfgNode *n, gbtEfgPlayer *p, int br);
-  gbtEfgInfoset *AppendNode(gbtEfgNode *n, gbtEfgInfoset *s);
-  gbtEfgNode *DeleteNode(gbtEfgNode *n, gbtEfgNode *keep);
-  gbtEfgInfoset *InsertNode(gbtEfgNode *n, gbtEfgPlayer *p, int br);
-  gbtEfgInfoset *InsertNode(gbtEfgNode *n, gbtEfgInfoset *s);
+  gbtEfgInfoset AppendNode(gbtEfgNode n, gbtEfgPlayer p, int br);
+  gbtEfgInfoset AppendNode(gbtEfgNode n, gbtEfgInfoset s);
+  gbtEfgNode DeleteNode(gbtEfgNode n, gbtEfgNode keep);
+  gbtEfgInfoset InsertNode(gbtEfgNode n, gbtEfgPlayer p, int br);
+  gbtEfgInfoset InsertNode(gbtEfgNode n, gbtEfgInfoset s);
 
-  gbtEfgInfoset *CreateInfoset(gbtEfgPlayer *pl, int br);
-  bool DeleteEmptyInfoset(gbtEfgInfoset *);
+  gbtEfgInfoset CreateInfoset(gbtEfgPlayer pl, int br);
+  bool DeleteEmptyInfoset(gbtEfgInfoset);
   void DeleteEmptyInfosets(void);
-  gbtEfgInfoset *JoinInfoset(gbtEfgInfoset *s, gbtEfgNode *n);
-  gbtEfgInfoset *LeaveInfoset(gbtEfgNode *n);
-  gbtEfgInfoset *SplitInfoset(gbtEfgNode *n);
-  gbtEfgInfoset *MergeInfoset(gbtEfgInfoset *to, gbtEfgInfoset *from);
+  gbtEfgInfoset JoinInfoset(gbtEfgInfoset s, gbtEfgNode n);
+  gbtEfgInfoset LeaveInfoset(gbtEfgNode n);
+  gbtEfgInfoset SplitInfoset(gbtEfgNode n);
+  gbtEfgInfoset MergeInfoset(gbtEfgInfoset to, gbtEfgInfoset from);
 
-  gbtEfgInfoset *SwitchPlayer(gbtEfgInfoset *s, gbtEfgPlayer *p);
+  gbtEfgInfoset SwitchPlayer(gbtEfgInfoset s, gbtEfgPlayer p);
   
-  gbtEfgNode *CopyTree(gbtEfgNode *src, gbtEfgNode *dest);
-  gbtEfgNode *MoveTree(gbtEfgNode *src, gbtEfgNode *dest);
-  gbtEfgNode *DeleteTree(gbtEfgNode *n);
+  gbtEfgNode CopyTree(gbtEfgNode src, gbtEfgNode dest);
+  gbtEfgNode MoveTree(gbtEfgNode src, gbtEfgNode dest);
+  gbtEfgNode DeleteTree(gbtEfgNode n);
 
-  gbtEfgAction *InsertAction(gbtEfgInfoset *s);
-  gbtEfgAction *InsertAction(gbtEfgInfoset *s, const gbtEfgAction *at);
-  gbtEfgInfoset *DeleteAction(gbtEfgInfoset *s, const gbtEfgAction *a);
+  gbtEfgAction InsertAction(gbtEfgInfoset s);
+  gbtEfgAction InsertAction(gbtEfgInfoset s, const gbtEfgAction &at);
+  gbtEfgInfoset DeleteAction(gbtEfgInfoset s, const gbtEfgAction &a);
 
-  void Reveal(gbtEfgInfoset *, const gbtArray<gbtEfgPlayer *> &);
+  void Reveal(gbtEfgInfoset, const gbtArray<gbtEfgPlayer> &);
 
   gbtPVector<int> NumActions(void) const;
   gbtPVector<int> NumMembers(void) const;
@@ -442,11 +458,11 @@ gbtEfgGame *ReadEfg(std::istream &);
 class gbtPureBehavProfile   {
 protected:
   gbtEfgGame *m_efg;
-  gbtArray<gbtArray<gbtEfgAction *> > m_profile;
+  gbtArray<gbtArray<gbtEfgAction> > m_profile;
 
-  void GetPayoff(const gbtEfgNode *n, const gbtRational &, 
+  void GetPayoff(const gbtEfgNode &n, const gbtRational &, 
 		 gbtArray<gbtRational> &) const;
-  void InfosetProbs(gbtEfgNode *n, const gbtRational &, 
+  void InfosetProbs(gbtEfgNode n, const gbtRational &, 
 		    gbtPVector<gbtRational> &) const;
 
 public:
@@ -454,16 +470,16 @@ public:
 
   // Operators
   gbtPureBehavProfile &operator=(const gbtPureBehavProfile &);
-  gbtRational operator()(gbtEfgAction *) const;
+  gbtRational operator()(gbtEfgAction) const;
 
   // Manipulation
-  void Set(gbtEfgAction *);
-  void Set(gbtEfgPlayer *, const gbtArray<gbtEfgAction *> &);
+  void Set(gbtEfgAction);
+  void Set(gbtEfgPlayer, const gbtArray<gbtEfgAction> &);
   
   // Information
-  gbtEfgAction *GetAction(gbtEfgInfoset *) const;
+  gbtEfgAction GetAction(gbtEfgInfoset) const;
    
-  gbtRational Payoff(const gbtEfgNode *, int pl) const;
+  gbtRational Payoff(const gbtEfgNode &, int pl) const;
   void Payoff(gbtArray<gbtRational> &payoff) const;
   void InfosetProbs(gbtPVector<gbtRational> &prob) const;
   gbtEfgGame *GetGame(void) const   { return m_efg; }

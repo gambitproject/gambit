@@ -354,7 +354,7 @@ void gbtGameFrame::OnUpdate(void)
     SetTitle(GetTitle() + wxT(" (unsaved changes)"));
   }
 
-  gbtEfgNode *selectNode = m_doc->GetSelectNode();
+  gbtEfgNode selectNode = m_doc->GetSelectNode();
   wxMenuBar *menuBar = GetMenuBar();
 
   menuBar->Enable(GBT_MENU_FILE_EXPORT_EFG, m_doc->GetEfg());
@@ -1022,7 +1022,7 @@ void gbtGameFrame::OnEditInsertMove(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK)  {
     try {
       if (!dialog.GetInfoset()) {
-	gbtEfgInfoset *infoset = m_doc->GetEfg()->InsertNode(m_doc->GetSelectNode(), 
+	gbtEfgInfoset infoset = m_doc->GetEfg()->InsertNode(m_doc->GetSelectNode(), 
 						       dialog.GetPlayer(),
 						       dialog.GetActions());
 	for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -1043,10 +1043,10 @@ void gbtGameFrame::OnEditInsertMove(wxCommandEvent &)
 
 void gbtGameFrame::OnEditInsertAction(wxCommandEvent &)
 {
-  gbtEfgNode *node = m_doc->GetSelectNode();
+  gbtEfgNode node = m_doc->GetSelectNode();
   if (!node || !node->GetInfoset())  return;
 
-  gbtEfgAction *action = m_doc->GetEfg()->InsertAction(node->GetInfoset());
+  gbtEfgAction action = m_doc->GetEfg()->InsertAction(node->GetInfoset());
   action->SetLabel(ToText(action->GetNumber()));
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
@@ -1123,7 +1123,7 @@ void gbtGameFrame::OnEditNode(wxCommandEvent &)
 
 void gbtGameFrame::OnEditMove(wxCommandEvent &)
 {
-  gbtEfgInfoset *infoset = m_doc->GetSelectNode()->GetInfoset();
+  gbtEfgInfoset infoset = m_doc->GetSelectNode()->GetInfoset();
   if (!infoset)  return;
 
   gbtEditMoveDialog dialog(this, infoset);
@@ -1170,11 +1170,11 @@ void gbtGameFrame::OnEditGame(wxCommandEvent &)
 void gbtGameFrame::OnEditNewPlayer(wxCommandEvent &)
 {
   if (m_doc->GetEfg()) {
-    gbtEfgPlayer *player = m_doc->GetEfg()->NewPlayer();
+    gbtEfgPlayer player = m_doc->GetEfg()->NewPlayer();
     player->SetLabel("Player " + ToText(player->GetNumber()));
   }
   else {
-    gbtNfgPlayer *player = m_doc->GetNfg()->NewPlayer();
+    gbtNfgPlayer player = m_doc->GetNfg()->NewPlayer();
     player->SetName("Player " + ToText(player->GetNumber()));
     player->GetStrategy(1)->SetName("1");
   }

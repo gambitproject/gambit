@@ -67,9 +67,9 @@ private:
   int ns1,ns2,ni1,ni2;
   T maxpay,eps;
   gbtList<BFS<T> > List;
-  gbtList<gbtEfgInfoset *> isets1, isets2;
+  gbtList<gbtEfgInfoset> isets1, isets2;
 
-  void FillTableau(const gbtEfgSupport &, gbtMatrix<T> &, const gbtEfgNode *, T,
+  void FillTableau(const gbtEfgSupport &, gbtMatrix<T> &, const gbtEfgNode &, T,
 		   int, int, int, int);
   int Add_BFS(const LTableau<T> &tab);
   int All_Lemke(const gbtEfgSupport &, int dup, LTableau<T> &B,
@@ -77,7 +77,7 @@ private:
   
   void GetProfile(const gbtEfgSupport &, const LTableau<T> &tab, 
 		  gbtDPVector<T> &, const gbtVector<T> &, 
-		  const gbtEfgNode *n, int,int);
+		  const gbtEfgNode &n, int,int);
 
 public:
   efgLcp(void);
@@ -116,9 +116,9 @@ void UndefinedToCentroid(gbtBehavProfile<T> &p_profile)
   gbtEfgGame *efg = &p_profile.GetGame();
 
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-    gbtEfgPlayer *player = efg->GetPlayer(pl);
+    gbtEfgPlayer player = efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      const gbtEfgInfoset *infoset = player->GetInfoset(iset);
+      gbtEfgInfoset infoset = player->GetInfoset(iset);
       
       if (p_profile.GetIsetProb(infoset) > (T) 0) {
 	continue;
@@ -310,8 +310,8 @@ efgLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
 
 template <class T>
 void efgLcp<T>::FillTableau(const gbtEfgSupport &p_support, gbtMatrix<T> &A,
-				   const gbtEfgNode *n, T prob,
-				   int s1, int s2, int i1, int i2)
+			    const gbtEfgNode &n, T prob,
+			    int s1, int s2, int i1, int i2)
 {
   int snew;
   if (n->GetOutcome()) {
@@ -366,7 +366,7 @@ template <class T>
 void efgLcp<T>::GetProfile(const gbtEfgSupport &p_support,
 				  const LTableau<T> &tab, 
 				  gbtDPVector<T> &v, const gbtVector<T> &sol,
-				  const gbtEfgNode *n, int s1,int s2)
+				  const gbtEfgNode &n, int s1,int s2)
 {
   int i,pl,inf,snew,ind,ind2;
   if(n->GetInfoset()) {

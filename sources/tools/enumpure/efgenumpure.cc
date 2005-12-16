@@ -112,7 +112,7 @@ void EfgIter::First(void)
 
 int EfgIter::Next(int pl, int iset)
 {
-  const gbtArray<gbtEfgAction *> &actions = _support.Actions(pl, iset);
+  const gbtArray<gbtEfgAction> &actions = _support.Actions(pl, iset);
   
   if (_current(pl, iset) == actions.Length())   {
     _current(pl, iset) = 1;
@@ -174,7 +174,7 @@ void Solve(const gbtEfgSupport &p_support)
 
   int ncont = 1;
   for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
-    gbtEfgPlayer *player = p_support.GetGame().GetPlayer(pl);
+    gbtEfgPlayer player = p_support.GetGame().GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++)
       ncont *= p_support.NumActions(pl, iset);
   }

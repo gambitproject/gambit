@@ -35,33 +35,33 @@ friend class SFSequenceSet;
 private:
   int number;
   std::string name;
-  const gbtEfgPlayer *player;
-  gbtEfgAction *action;
+  gbtEfgPlayer player;
+  gbtEfgAction action;
   const Sequence *parent;
   
-  Sequence(const gbtEfgPlayer *pl, gbtEfgAction *a, const Sequence *p, int n) 
+  Sequence(gbtEfgPlayer pl, gbtEfgAction a, const Sequence *p, int n) 
     : number(n), player(pl), action(a), parent(p) { }
   ~Sequence() { }
 public:
   const std::string &GetName(void) const   { return name; }
   void SetName(const std::string &s)       { name = s; }
   
-  gbtList<const gbtEfgAction *> History(void) const;
+  gbtList<gbtEfgAction> History(void) const;
   int GetNumber(void) const        { return number; }
-  gbtEfgAction *GetAction(void) const  {return action; }
-  const gbtEfgInfoset *GetInfoset(void) const   { if(action) return action->GetInfoset();return 0; }
-  const gbtEfgPlayer *Player(void) const  { return player; }
+  gbtEfgAction GetAction(void) const  {return action; }
+  gbtEfgInfoset GetInfoset(void) const   { if(action) return action->GetInfoset();return 0; }
+  gbtEfgPlayer Player(void) const  { return player; }
   const Sequence *Parent(void) const   { return parent; }
 };
 
 class SFSequenceSet {
 protected:
-  const gbtEfgPlayer *efp;
+  gbtEfgPlayer efp;
   gbtArray <Sequence *> sequences;
   
 public:
   SFSequenceSet(const SFSequenceSet &s); 
-  SFSequenceSet(const gbtEfgPlayer *p);
+  SFSequenceSet(const gbtEfgPlayer &p);
   
   SFSequenceSet &operator=(const SFSequenceSet &s); 
   bool operator==(const SFSequenceSet &s);

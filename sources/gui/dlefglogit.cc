@@ -93,7 +93,7 @@ wxString gbtLogitBehavList::GetCellValue(const wxSheetCoords &p_coords)
       return wxT("Lambda");
     }
     else {
-      gbtEfgAction *action = m_doc->GetEfg()->GetAction(p_coords.GetCol());
+      gbtEfgAction action = m_doc->GetEfg()->GetAction(p_coords.GetCol());
       return (wxString::Format(wxT("%d: "), 
 			       action->GetInfoset()->GetNumber())+
 	      wxString(action->GetLabel().c_str(), *wxConvCurrent));
@@ -121,7 +121,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 {
   if (p_index == 0)  return *wxBLACK;
 
-  gbtEfgAction *action = p_doc->GetEfg()->GetAction(p_index);
+  gbtEfgAction action = p_doc->GetEfg()->GetAction(p_index);
   return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber());
 }
 
@@ -154,7 +154,7 @@ wxSheetCellAttr gbtLogitBehavList::GetAttr(const wxSheetCoords &p_coords,
   attr.SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
   if (p_coords.GetCol() > 0) {
-    gbtEfgAction *action = m_doc->GetEfg()->GetAction(p_coords.GetCol());
+    gbtEfgAction action = m_doc->GetEfg()->GetAction(p_coords.GetCol());
     attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber()));
     if (action->GetInfoset()->GetNumber() % 2 == 0) {
       attr.SetBackgroundColour(wxColour(250, 250, 250));
