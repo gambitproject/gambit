@@ -200,7 +200,7 @@ void gbtLogitMixedList::AddProfile(const wxString &p_text,
   m_lambdas.Append((double) ToNumber(std::string((const char *) tok.GetNextToken().mb_str())));
 
   for (int i = 1; i <= profile.Length(); i++) {
-    profile[i] = ToDouble(std::string((const char *) tok.GetNextToken().mb_str()));
+    profile[i] = ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
   }
 
   m_profiles.Append(profile);
