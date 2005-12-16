@@ -1483,7 +1483,7 @@ becomes very tiny.
 <title>Saving to a graphics file</title>
 
 <para>
-Gambit supports export to four graphical file formats:
+Gambit supports export to five graphical file formats:
 <itemizedlist>
 <listitem>
 <para>Windows bitmaps (<filename>.bmp</filename>)</para>
@@ -1498,6 +1498,9 @@ are similar to GIFs</para>
 </listitem>
 <listitem>
 <para>Encapsulated PostScript (<filename>.ps</filename>)</para>
+</listitem>
+<listitem>
+<para>Scalable vector graphics (<filename>.svg</filename>)</para>
 </listitem>
 </itemizedlist>
 

@@ -64,6 +64,7 @@ private:
   void OnFileExportNfg(wxCommandEvent &);
   void OnFileExportGraphic(wxCommandEvent &);
   void OnFileExportPS(wxCommandEvent &);
+  void OnFileExportSVG(wxCommandEvent &);
 
   void OnFilePageSetup(wxCommandEvent &);
   void OnFilePrintPreview(wxCommandEvent &);

@@ -30,8 +30,10 @@
 #endif  // WX_PRECOMP
 #include <wx/dnd.h>      // for drag-and-drop support
 #include <wx/print.h>    // for printing support
+#include "dcsvg.h"         // for SVG output
 
 #include "wx/sheet/sheet.h"
+
 #include "renratio.h"    // special renderer for rational numbers
 
 #include "nfgpanel.h"
@@ -1163,6 +1165,22 @@ wxBitmap gbtTableWidget::GetBitmap(int p_marginX, int p_marginY)
   dc.Clear();
   RenderGame(dc, p_marginX, p_marginY);
   return bitmap;
+}
+
+void gbtTableWidget::GetSVG(const wxString &p_filename,
+			    int p_marginX, int p_marginY)
+{
+  int width = (m_rowSheet->CellToRect(wxSheetCoords(0, m_rowSheet->GetNumberCols() - 1)).GetRight() +
+	       m_colSheet->CellToRect(wxSheetCoords(0, m_colSheet->GetNumberCols() - 1)).GetRight() +
+	       2 * p_marginX);
+  int height = (m_rowSheet->CellToRect(wxSheetCoords(m_rowSheet->GetNumberRows() - 1, 0)).GetBottom() +
+		m_colSheet->CellToRect(wxSheetCoords(m_colSheet->GetNumberRows() - 1, 0)).GetBottom() +
+		2 * p_marginY);
+
+  wxSVGFileDC dc(p_filename, width, height);
+  // For some reason, this needs to be initialized
+  dc.SetLogicalScale(1.0, 1.0);
+  RenderGame(dc, p_marginX, p_marginY);
 }
 
 void gbtTableWidget::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)

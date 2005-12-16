@@ -33,6 +33,8 @@
 #include <wx/print.h>         // for printing support
 #include <wx/colordlg.h>      // for picking player colors
 
+#include "dcsvg.h"         // for SVG output
+
 #include "efgpanel.h"
 #include "efgdisplay.h"  // FIXME: communicate with tree window via events.
 #include "menuconst.h"
@@ -743,6 +745,19 @@ wxBitmap gbtEfgPanel::GetBitmap(int p_marginX, int p_marginY)
   return bitmap;
 }
 
+void gbtEfgPanel::GetSVG(const wxString &p_filename,
+			 int p_marginX, int p_marginY)
+{
+  // The size of the image to be drawn
+  int maxX = m_treeWindow->GetLayout().MaxX();
+  int maxY = m_treeWindow->GetLayout().MaxY();
+
+  wxSVGFileDC dc(p_filename, maxX + 2*p_marginX, maxY + 2*p_marginY);
+  // For some reason, this needs to be initialized
+  dc.SetLogicalScale(1.0, 1.0);
+  RenderGame(dc, p_marginX, p_marginY);
+}
+
 void gbtEfgPanel::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
 {
   // The size of the image to be drawn
@@ -765,6 +780,8 @@ void gbtEfgPanel::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
   double posX = (double) ((w - (maxX * scale)) / 2.0);
   double posY = (double) ((h - (maxY * scale)) / 2.0);
   p_dc.SetDeviceOrigin((int) posX, (int) posY);
+
+  printf("Drawing with scale %f\n", scale);
 
   // Draw!
   m_treeWindow->OnDraw(p_dc, scale);

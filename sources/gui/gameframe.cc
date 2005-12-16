@@ -36,8 +36,6 @@
 #include <wx/dcps.h>
 #endif  // !defined(__WXMSW__) || wxUSE_POSTSCRIPT
 #include <wx/splitter.h>
-#include <wx/busyinfo.h>   // for wxBusyInfo while solving for equilibria
-#include <wx/choicebk.h>   // for profile choicebook
 
 #include "libgambit/libgambit.h"
 
@@ -208,6 +206,7 @@ BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(GBT_MENU_FILE_EXPORT_JPEG, gbtGameFrame::OnFileExportGraphic)
   EVT_MENU(GBT_MENU_FILE_EXPORT_PNG, gbtGameFrame::OnFileExportGraphic)
   EVT_MENU(GBT_MENU_FILE_EXPORT_POSTSCRIPT, gbtGameFrame::OnFileExportPS)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_SVG, gbtGameFrame::OnFileExportSVG)
   EVT_MENU(wxID_PRINT_SETUP, gbtGameFrame::OnFilePageSetup)
   EVT_MENU(wxID_PREVIEW, gbtGameFrame::OnFilePrintPreview)
   EVT_MENU(wxID_PRINT, gbtGameFrame::OnFilePrint)
@@ -487,6 +486,8 @@ void gbtGameFrame::MakeMenus(void)
   fileExportMenu->Append(GBT_MENU_FILE_EXPORT_POSTSCRIPT, _("Post&Script"),
 			 _("Save a printout of the game in PostScript format"));
   fileExportMenu->Enable(GBT_MENU_FILE_EXPORT_POSTSCRIPT, wxUSE_POSTSCRIPT);
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_SVG, _("S&VG"),
+			 _("Save a rendering of the game in SVG format"));
   fileMenu->Append(GBT_MENU_FILE_EXPORT, _("&Export"), fileExportMenu,
 		   _("Export the game in various formats"));
   fileMenu->AppendSeparator();
@@ -977,6 +978,24 @@ void gbtGameFrame::OnFileExportPS(wxCommandEvent &)
   dc.EndPage();
   dc.EndDoc();
 #endif  // wxUSE_POSTSCRIPT
+}
+
+void gbtGameFrame::OnFileExportSVG(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, _("Choose output file"), 
+		      wxGetApp().GetCurrentDir(), _T(""),
+		      wxT("SVG files (*.svg)|*.svg|"
+			  "All files (*.*)|*.*"),
+		      wxSAVE | wxOVERWRITE_PROMPT);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    if (m_efgPanel && m_efgPanel->IsShown()) {
+      m_efgPanel->GetSVG(dialog.GetPath(), 50, 50);
+    }
+    else {
+      m_nfgPanel->GetSVG(dialog.GetPath(), 50, 50);
+    }
+  }
 }
 
 void gbtGameFrame::OnFileExit(wxCommandEvent &p_event)

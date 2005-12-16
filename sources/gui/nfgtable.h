@@ -139,6 +139,8 @@ public:
   wxPrintout *GetPrintout(void);
   /// Creates a bitmap of the game as currently displayed
   wxBitmap GetBitmap(int marginX, int marginY);
+  /// Outputs the game as currently displayed to a SVG file
+  void GetSVG(const wxString &p_filename, int marginX, int marginY);
   /// Prints the game as currently displayed, centered on the DC
   void RenderGame(wxDC &p_dc, int marginX, int marginY);
   //@}

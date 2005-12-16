@@ -68,7 +68,8 @@ gambit_SOURCES = \
 	tinyxml.cc \
 	tinyxml.h \
 	tinyxmlerror.cc \
-	tinyxmlparser.cc
+	tinyxmlparser.cc \
+	dcsvg.cc dcsvg.h
 
 
 gambit_LDADD = \

@@ -571,6 +571,12 @@ wxBitmap gbtNfgPanel::GetBitmap(int p_marginX, int p_marginY)
   return m_tableWidget->GetBitmap(p_marginX, p_marginY);
 }
 
+void gbtNfgPanel::GetSVG(const wxString &p_filename,
+			 int p_marginX, int p_marginY)
+{
+  m_tableWidget->GetSVG(p_filename, p_marginX, p_marginY);
+}
+
 void gbtNfgPanel::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
 {
   m_tableWidget->RenderGame(p_dc, p_marginX, p_marginY);
