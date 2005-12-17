@@ -112,7 +112,7 @@ public:
 //
 // This is a base class for representing an arbitrary finite game.
 //
-class Game {
+class Game : public GameObject {
 public:
   /// Get the text label associated with the game
   virtual const std::string &GetTitle(void) const = 0;

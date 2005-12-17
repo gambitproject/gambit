@@ -50,7 +50,7 @@ void PrintProfile(std::ostream &p_stream,
 {
   p_stream.setf(std::ios::fixed);
   p_stream << "NE";
-  for (int i = 0; i < p_game.ProfileLength(); i++) {
+  for (int i = 0; i < p_game->ProfileLength(); i++) {
     p_stream << "," << std::setprecision(g_numDecimals) << (*p_profile)[i];
   }
   p_stream << std::endl;
@@ -81,24 +81,24 @@ void Solve(const gbtNfgGame &p_game)
 {
   int i;
 
-  int *actions = new int[p_game.NumPlayers()];
-  int veclength = p_game.NumPlayers();
-  for (int pl = 1; pl <= p_game.NumPlayers(); pl++) {
-    actions[pl-1] = p_game.GetPlayer(pl)->NumStrats();
-    veclength *= p_game.GetPlayer(pl)->NumStrats();
+  int *actions = new int[p_game->NumPlayers()];
+  int veclength = p_game->NumPlayers();
+  for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
+    actions[pl-1] = p_game->GetPlayer(pl)->NumStrats();
+    veclength *= p_game->GetPlayer(pl)->NumStrats();
   }
   cvector payoffs(veclength);
   
-  gnmgame *A = new nfgame(p_game.NumPlayers(), actions, payoffs);
+  gnmgame *A = new nfgame(p_game->NumPlayers(), actions, payoffs);
   
-  int *profile = new int[p_game.NumPlayers()];
-  gbtNfgContingencyIterator iter(&p_game);
+  int *profile = new int[p_game->NumPlayers()];
+  gbtNfgContingencyIterator iter(p_game);
   do {
-    for (int pl = 1; pl <= p_game.NumPlayers(); pl++) {
+    for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
       profile[pl-1] = iter.GetProfile().GetStrategy(pl)->GetNumber() - 1;
     }
 
-    for (int pl = 1; pl <= p_game.NumPlayers(); pl++) {
+    for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
       A->setPurePayoff(pl-1, profile,
 		       (double) iter.GetPayoff(pl));
     }
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  gbtNfgGame *nfg;
+  gbtNfgGame nfg;
 
   try {
     nfg = ReadNfg(std::cin);
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  Solve(*nfg);
+  Solve(nfg);
   
   return 0;
 }

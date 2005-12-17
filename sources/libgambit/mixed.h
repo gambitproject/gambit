@@ -32,8 +32,6 @@
 #include "nfstrat.h"
 
 
-class gbtNfgGame;
-
 template <class T> class gbtRectArray;
 template <class T> class gbtBehavProfile;
 
@@ -61,7 +59,7 @@ public:
 
   bool operator==(const gbtMixedProfile<T> &) const;
 
-  gbtNfgGame *GetGame(void) const  { return support.GetGame(); }
+  gbtNfgGame GetGame(void) const  { return support.GetGame(); }
   const gbtNfgSupport &GetSupport(void) const  { return support; }
 
   T GetLiapValue(void) const;

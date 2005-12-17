@@ -97,7 +97,7 @@ efgLp<T>::efgLp(void)
 template <class T>
 void UndefinedToCentroid(gbtBehavProfile<T> &p_profile)
 {
-  gbtEfgGame *efg = &p_profile.GetGame();
+  gbtEfgGame efg = p_profile.GetGame();
 
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
     gbtEfgPlayer player = efg->GetPlayer(pl);
@@ -129,14 +129,14 @@ void efgLp<T>::Solve(const gbtEfgSupport &p_support)
   
   ns1 = p_support.NumSequences(1);
   ns2 = p_support.NumSequences(2);
-  ni1 = p_support.GetGame().GetPlayer(1)->NumInfosets()+1;  
-  ni2 = p_support.GetGame().GetPlayer(2)->NumInfosets()+1; 
-  isets1 = p_support.ReachableInfosets(p_support.GetGame().GetPlayer(1));
-  isets2 = p_support.ReachableInfosets(p_support.GetGame().GetPlayer(2)); 
+  ni1 = p_support.GetGame()->GetPlayer(1)->NumInfosets()+1;  
+  ni2 = p_support.GetGame()->GetPlayer(2)->NumInfosets()+1; 
+  isets1 = p_support.ReachableInfosets(p_support.GetGame()->GetPlayer(1));
+  isets2 = p_support.ReachableInfosets(p_support.GetGame()->GetPlayer(2)); 
 
-  if (p_support.GetGame().NumPlayers() != 2 ||
-      !p_support.GetGame().IsConstSum() ||
-      !p_support.GetGame().IsPerfectRecall()) {
+  if (p_support.GetGame()->NumPlayers() != 2 ||
+      !p_support.GetGame()->IsConstSum() ||
+      !p_support.GetGame()->IsPerfectRecall()) {
     return;
   }
   
@@ -146,12 +146,12 @@ void efgLp<T>::Solve(const gbtEfgSupport &p_support)
   gbtVector<T> b(1,ns1+ni2);
   gbtVector<T> c(1,ns2+ni1);
 
-  maxpay = p_support.GetGame().GetMaxPayoff() + gbtRational(1);
-  minpay = p_support.GetGame().GetMinPayoff() - gbtRational(1);
+  maxpay = p_support.GetGame()->GetMaxPayoff() + gbtRational(1);
+  minpay = p_support.GetGame()->GetMinPayoff() - gbtRational(1);
 
   A = (T)0;
   T prob = (T)1;
-  FillTableau(p_support, A, p_support.GetGame().GetRoot(),prob,1,1,0,0);
+  FillTableau(p_support, A, p_support.GetGame()->GetRoot(),prob,1,1,0,0);
   A(1,ns2+1) = -(T)1;
   A(ns1+1,1) = (T)1;
 
@@ -290,7 +290,7 @@ void efgLp<T>::GetSolutions(const gbtEfgSupport &p_support) const
     gbtBehavProfile<T> profile(p_support);
     GetProfile(p_support,
 	       profile.GetDPVector(), List[i],
-	       p_support.GetGame().GetRoot(), 1, 1);
+	       p_support.GetGame()->GetRoot(), 1, 1);
     UndefinedToCentroid(profile);
     PrintProfile(std::cout, "NE", profile);
   }
@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  gbtEfgGame *efg;
+  gbtEfgGame efg;
 
   try {
     efg = ReadEfg(std::cin);
@@ -368,11 +368,11 @@ int main(int argc, char *argv[])
 
   if (useFloat) {
     efgLp<double> algorithm;
-    algorithm.Solve(*efg);
+    algorithm.Solve(efg);
   }
   else {
     efgLp<gbtRational> algorithm;
-    algorithm.Solve(*efg);
+    algorithm.Solve(efg);
   }
 
   return 0;

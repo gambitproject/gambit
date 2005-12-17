@@ -565,7 +565,7 @@ void nfgSimpdiv::Solve(const gbtNfgGame &p_nfg,
 
 void Randomize(gbtMixedProfile<gbtRational> &p_profile, int p_denom)
 {
-  const gbtNfgGame *nfg = p_profile.GetGame();
+  gbtNfgGame nfg = p_profile.GetGame();
 
   ((gbtVector<gbtRational> &) p_profile) = gbtRational(0);
 
@@ -669,7 +669,7 @@ int main(int argc, char *argv[])
 
 
 
-  gbtNfgGame *nfg;
+  gbtNfgGame nfg;
 
   try {
     nfg = ReadNfg(std::cin);
@@ -685,7 +685,7 @@ int main(int argc, char *argv[])
       gbtMixedProfile<gbtRational> start(nfg);
       if (ReadProfile(startPoints, start)) {
 	nfgSimpdiv algorithm;
-	algorithm.Solve(*nfg, start);
+	algorithm.Solve(nfg, start);
       }
     }
   }
@@ -695,7 +695,7 @@ int main(int argc, char *argv[])
       Randomize(start, randDenom);
 
       nfgSimpdiv algorithm;
-      algorithm.Solve(*nfg, start);
+      algorithm.Solve(nfg, start);
     }
   }
   else {
@@ -709,6 +709,6 @@ int main(int argc, char *argv[])
     }
 
     nfgSimpdiv algorithm;
-    algorithm.Solve(*nfg, start);
+    algorithm.Solve(nfg, start);
   }
 }

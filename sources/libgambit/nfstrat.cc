@@ -34,7 +34,7 @@
 //                               Lifecycle
 //---------------------------------------------------------------------------
 
-gbtStrategyProfile::gbtStrategyProfile(gbtNfgGame *p_nfg)
+gbtStrategyProfile::gbtStrategyProfile(const gbtNfgGame &p_nfg)
   : m_index(0L), m_nfg(p_nfg), m_profile(m_nfg->NumPlayers())
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
@@ -79,7 +79,7 @@ gbtRational gbtStrategyProfile::GetPayoff(int pl) const
 //                               Lifecycle
 //---------------------------------------------------------------------------
 
-gbtNfgSupport::gbtNfgSupport(const gbtNfgGame *p_nfg) 
+gbtNfgSupport::gbtNfgSupport(const gbtNfgGame &p_nfg) 
   : m_nfg(p_nfg)
 { 
   for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {

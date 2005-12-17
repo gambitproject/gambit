@@ -34,7 +34,7 @@
 
 class Sfg  {
 private:
-  const gbtEfgGame &EF;
+  gbtEfgGame EF;
   const gbtEfgSupport &efsupp;
   gbtArray<SFSequenceSet *> *sequences;
   gNArray<gbtArray<gbtRational> *> *SF;  // sequence form
@@ -56,7 +56,7 @@ public:
   inline gbtArray<int> NumSequences() const {return seq;}
   int TotalNumSequences() const;
   int NumPlayerInfosets() const;
-  inline int NumPlayers() const {return EF.NumPlayers();}
+  inline int NumPlayers() const {return EF->NumPlayers();}
   
   inline gbtArray<gbtRational> Payoffs(const gbtArray<int> & index) const {return *((*SF)[index]);}
   gbtRational Payoff(const gbtArray<int> & index,int pl) const;

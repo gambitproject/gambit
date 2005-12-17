@@ -179,7 +179,7 @@ void gbtLogitBehavList::AddProfile(const wxString &p_text,
     AppendCols(m_doc->GetEfg()->ProfileLength() + 1);
   }
 
-  gbtBehavProfile<double> profile(*m_doc->GetEfg());
+  gbtBehavProfile<double> profile(m_doc->GetEfg());
 
   wxStringTokenizer tok(p_text, wxT(","));
 

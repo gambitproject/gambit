@@ -113,7 +113,7 @@ template <class T> efgLcp<T>::~efgLcp()
 template <class T>
 void UndefinedToCentroid(gbtBehavProfile<T> &p_profile)
 {
-  gbtEfgGame *efg = &p_profile.GetGame();
+  gbtEfgGame efg = p_profile.GetGame();
 
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
     gbtEfgPlayer player = efg->GetPlayer(pl);
@@ -151,27 +151,27 @@ void efgLcp<T>::Solve(const gbtEfgSupport &p_support)
   BFS<T> cbfs((T) 0);
   int i, j;
   
-  if (p_support.GetGame().NumPlayers() != 2) {
+  if (p_support.GetGame()->NumPlayers() != 2) {
     return;
   }
   
-  isets1 = p_support.ReachableInfosets(p_support.GetGame().GetPlayer(1));
-  isets2 = p_support.ReachableInfosets(p_support.GetGame().GetPlayer(2));
+  isets1 = p_support.ReachableInfosets(p_support.GetGame()->GetPlayer(1));
+  isets2 = p_support.ReachableInfosets(p_support.GetGame()->GetPlayer(2));
 
   List = gbtList<BFS<T> >();
 
   int ntot;
   ns1 = p_support.NumSequences(1);
   ns2 = p_support.NumSequences(2);
-  ni1 = p_support.GetGame().GetPlayer(1)->NumInfosets()+1;
-  ni2 = p_support.GetGame().GetPlayer(2)->NumInfosets()+1;
+  ni1 = p_support.GetGame()->GetPlayer(1)->NumInfosets()+1;
+  ni2 = p_support.GetGame()->GetPlayer(2)->NumInfosets()+1;
 
   ntot = ns1+ns2+ni1+ni2;
 
   gbtMatrix<T> A(1,ntot,0,ntot);
   gbtVector<T> b(1,ntot);
 
-  maxpay = p_support.GetGame().GetMaxPayoff() + gbtRational(1);
+  maxpay = p_support.GetGame()->GetMaxPayoff() + gbtRational(1);
 
   T prob = (T)1;
   for (i = A.MinRow(); i <= A.MaxRow(); i++) {
@@ -181,7 +181,7 @@ void efgLcp<T>::Solve(const gbtEfgSupport &p_support)
     }
   }
 
-  FillTableau(p_support, A, p_support.GetGame().GetRoot(), prob, 1, 1, 0, 0);
+  FillTableau(p_support, A, p_support.GetGame()->GetRoot(), prob, 1, 1, 0, 0);
   for (i = A.MinRow(); i <= A.MaxRow(); i++) { 
     A(i,0) = -(T) 1;
   }
@@ -209,7 +209,7 @@ void efgLcp<T>::Solve(const gbtEfgSupport &p_support)
       Add_BFS(tab);
       tab.BasisVector(sol);
       GetProfile(p_support, tab, 
-		 profile.GetDPVector(),sol,p_support.GetGame().GetRoot(),1,1);
+		 profile.GetDPVector(),sol,p_support.GetGame()->GetRoot(),1,1);
       UndefinedToCentroid(profile);
 
       PrintProfile(std::cout, "NE", profile);
@@ -287,7 +287,7 @@ efgLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
       if(BCopy.SF_LCPPath(-missing)==1) {
 	newsol = Add_BFS(BCopy);
 	BCopy.BasisVector(sol);
-	GetProfile(p_support, BCopy, profile.GetDPVector(),sol,p_support.GetGame().GetRoot(),1,1);
+	GetProfile(p_support, BCopy, profile.GetDPVector(),sol,p_support.GetGame()->GetRoot(),1,1);
 	UndefinedToCentroid(profile);
 	if (newsol) {
 	  PrintProfile(std::cout, "NE", profile);
@@ -474,7 +474,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  gbtEfgGame *efg;
+  gbtEfgGame efg;
 
   try {
     efg = ReadEfg(std::cin);
@@ -489,11 +489,11 @@ int main(int argc, char *argv[])
 
   if (useFloat) {
     efgLcp<double> algorithm;
-    algorithm.Solve(*efg);
+    algorithm.Solve(efg);
   }
   else {
     efgLcp<gbtRational> algorithm;
-    algorithm.Solve(*efg);
+    algorithm.Solve(efg);
   }
 
   return 0;

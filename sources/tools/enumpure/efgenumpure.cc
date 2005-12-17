@@ -30,14 +30,14 @@
 
 class EfgIter    {
   private:
-    const gbtEfgGame *_efg;
+    gbtEfgGame _efg;
     gbtEfgSupport _support;
     gbtPureBehavProfile _profile;
     gbtPVector<int> _current;
     mutable gbtVector<gbtRational> _payoff;
 
   public:
-    EfgIter(gbtEfgGame &);
+    EfgIter(gbtEfgGame);
     EfgIter(const gbtEfgSupport &);
     EfgIter(const EfgIter &);
     EfgIter(const EfgContIter &);
@@ -57,17 +57,17 @@ class EfgIter    {
 
 
 
-EfgIter::EfgIter(gbtEfgGame &efg)
-  : _efg(&efg), _support(efg),
-    _profile(&efg), _current(_efg->NumInfosets()),
+EfgIter::EfgIter(gbtEfgGame efg)
+  : _efg(efg), _support(efg),
+    _profile(efg), _current(_efg->NumInfosets()),
     _payoff(_efg->NumPlayers())
 {
   First();
 }
 
 EfgIter::EfgIter(const gbtEfgSupport &s)
-  : _efg(&s.GetGame()), _support(s),
-    _profile(&s.GetGame()), _current(_efg->NumInfosets()),
+  : _efg(s.GetGame()), _support(s),
+    _profile(s.GetGame()), _current(_efg->NumInfosets()),
     _payoff(_efg->NumPlayers())
 {
   First();
@@ -170,11 +170,11 @@ void PrintProfile(std::ostream &p_stream,
 void Solve(const gbtEfgSupport &p_support)
 {
   EfgContIter citer(p_support);
-  gbtPVector<gbtRational> probs(p_support.GetGame().NumInfosets());
+  gbtPVector<gbtRational> probs(p_support.GetGame()->NumInfosets());
 
   int ncont = 1;
-  for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
-    gbtEfgPlayer player = p_support.GetGame().GetPlayer(pl);
+  for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
+    gbtEfgPlayer player = p_support.GetGame()->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++)
       ncont *= p_support.NumActions(pl, iset);
   }
@@ -187,10 +187,10 @@ void Solve(const gbtEfgSupport &p_support)
       
       EfgIter eiter(citer);
       
-      for (int pl = 1; flag && pl <= p_support.GetGame().NumPlayers(); pl++)  {
+      for (int pl = 1; flag && pl <= p_support.GetGame()->NumPlayers(); pl++)  {
 	gbtRational current = citer.Payoff(pl);
 	for (int iset = 1;
-	     flag && iset <= p_support.GetGame().GetPlayer(pl)->NumInfosets();
+	     flag && iset <= p_support.GetGame()->GetPlayer(pl)->NumInfosets();
 	     iset++)  {
 	  if (probs(pl, iset) == gbtRational(0))   continue;
 	  for (int act = 1; act <= p_support.NumActions(pl, iset); act++)  {
@@ -208,12 +208,12 @@ void Solve(const gbtEfgSupport &p_support)
 	// zero out all the entries, since any equilibria are pure
 	((gbtVector<gbtRational> &) temp).operator=(gbtRational(0));
 	const gbtPureBehavProfile &profile = citer.GetProfile();
-	for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++)  {
+	for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++)  {
 	  for (int iset = 1;
-	       iset <= p_support.GetGame().GetPlayer(pl)->NumInfosets();
+	       iset <= p_support.GetGame()->GetPlayer(pl)->NumInfosets();
 	       iset++)
 	    temp(pl, iset,
-		 profile.GetAction(p_support.GetGame().GetPlayer(pl)->
+		 profile.GetAction(p_support.GetGame()->GetPlayer(pl)->
 				   GetInfoset(iset))->GetNumber()) = 1;
 	}
 
@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  gbtEfgGame *efg;
+  gbtEfgGame efg;
 
   try {
     efg = ReadEfg(std::cin);
@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  Solve(*efg);
+  Solve(efg);
 
   return 0;
 }

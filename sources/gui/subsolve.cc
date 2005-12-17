@@ -47,7 +47,7 @@ static void NDoChild(const gbtEfgGame &e, gbtEfgNode n, gbtList<gbtEfgNode> &lis
 static void Nodes (const gbtEfgGame &befg, gbtList <gbtEfgNode> &list)
 {
   list = gbtList<gbtEfgNode>();
-  NDoChild(befg, befg.GetRoot(), list); 
+  NDoChild(befg, befg->GetRoot(), list); 
 }
 
 static void Nodes (const gbtEfgGame &efg, gbtEfgNode n, gbtList <gbtEfgNode> &list)
@@ -66,7 +66,7 @@ void SubgameSolver::FindSubgames(const gbtEfgSupport &p_support,
 				 gbtList<gbtEfgOutcome> &values)
 {
   int i;
-  gbtEfgGame &efg = p_support.GetGame();
+  gbtEfgGame efg = p_support.GetGame();
   
   gbtList<gbtBehavProfile<gbtNumber> > thissolns;
   thissolns.Append(*solution);

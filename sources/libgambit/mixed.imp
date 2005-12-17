@@ -314,17 +314,17 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
 
 template <class T>
 gbtMixedProfile<T>::gbtMixedProfile(const gbtBehavProfile<T> &p_profile)
-  : gbtPVector<T>(p_profile.GetGame().AssociatedNfg()->NumStrats()),
-    support(p_profile.GetGame().AssociatedNfg())
+  : gbtPVector<T>(p_profile.GetGame()->AssociatedNfg()->NumStrats()),
+    support(p_profile.GetGame()->AssociatedNfg())
 {
-  const gbtEfgGame &efg = p_profile.GetGame();
+  gbtEfgGame efg = p_profile.GetGame();
   for (int pl = 1; pl <= support.GetGame()->NumPlayers(); pl++)  {
     for (int st = 1; st <= support.GetGame()->NumStrats(pl); st++)  {
       T prob = (T) 1;
 
-      for (int iset = 1; iset <= efg.GetPlayer(pl)->NumInfosets(); iset++) {
-	if (efg.players[pl]->m_strategies[st][iset] > 0)
-	  prob *= p_profile(pl, iset, efg.players[pl]->m_strategies[st][iset]);
+      for (int iset = 1; iset <= efg->GetPlayer(pl)->NumInfosets(); iset++) {
+	if (efg->players[pl]->m_strategies[st][iset] > 0)
+	  prob *= p_profile(pl, iset, efg->players[pl]->m_strategies[st][iset]);
       }
       (*this)(pl, st) = prob;
     }

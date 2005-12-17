@@ -35,7 +35,7 @@
 //                               Lifecycle
 //---------------------------------------------------------------------------
 
-gbtNfgOutcomeRep::gbtNfgOutcomeRep(int n, gbtNfgGame *N)
+gbtNfgOutcomeRep::gbtNfgOutcomeRep(int n, gbtNfgGameRep *N)
   : number(n), nfg(N),
     m_textPayoffs(nfg->NumPlayers()), 
     m_ratPayoffs(nfg->NumPlayers()),
@@ -66,7 +66,7 @@ void gbtNfgOutcomeRep::SetPayoff(int pl, const std::string &p_value)
 //                               Lifecycle
 //---------------------------------------------------------------------------
 
-gbtNfgPlayerRep::gbtNfgPlayerRep(int n, gbtNfgGame *N, int num)
+gbtNfgPlayerRep::gbtNfgPlayerRep(int n, gbtNfgGameRep *N, int num)
   : number(n), m_nfg(N), strategies(num)
 { 
   for (int j = 1; j <= num; j++) {
@@ -126,8 +126,8 @@ static int Product(const gbtArray<int> &dim)
   return accum;
 }
   
-gbtNfgGame::gbtNfgGame(const gbtArray<int> &dim)
-  : m_title("Untitled strategic form game"),
+gbtNfgGameRep::gbtNfgGameRep(const gbtArray<int> &dim)
+  : m_title("Untitled strategic game"),
     dimensions(dim), players(dim.Length()),
     results(Product(dim)), efg(0)
 {
@@ -143,36 +143,7 @@ gbtNfgGame::gbtNfgGame(const gbtArray<int> &dim)
        results[cont++] = 0);
 }
 
-gbtNfgGame::gbtNfgGame(const gbtNfgGame &b)
-  : m_title(b.m_title), m_comment(b.m_comment), 
-    dimensions(b.dimensions),
-    players(b.players.Length()), outcomes(b.outcomes.Length()),
-    results(b.results.Length()), efg(0)
-{
-  for (int pl = 1; pl <= players.Length(); pl++)  {
-    players[pl] = new gbtNfgPlayerRep(pl, this, dimensions[pl]);
-    players[pl]->name = b.players[pl]->name;
-    for (int st = 1; st <= players[pl]->NumStrats(); st++)  {
-      *(players[pl]->strategies[st]) = *(b.players[pl]->strategies[st]);
-      players[pl]->strategies[st]->m_player = players[pl];
-    }
-  }
-  IndexStrategies();
-  
-  for (int outc = 1; outc <= outcomes.Length(); outc++)  {
-    outcomes[outc] = new gbtNfgOutcomeRep(outc, this);
-    outcomes[outc]->SetName(b.outcomes[outc]->GetName());
-    outcomes[outc]->m_textPayoffs = b.outcomes[outc]->m_textPayoffs;
-    outcomes[outc]->m_ratPayoffs = b.outcomes[outc]->m_ratPayoffs;
-    outcomes[outc]->m_doublePayoffs = b.outcomes[outc]->m_doublePayoffs;
-  }
-
-  for (int cont = 1; cont <= results.Length(); cont++)    
-    results[cont] = (b.results[cont]) ?
-                     outcomes[b.results[cont]->GetNumber()] : 0;
-}
-
-gbtNfgGame::~gbtNfgGame()
+gbtNfgGameRep::~gbtNfgGameRep()
 {
   for (int pl = 1; pl <= players.Length(); players[pl++]->Invalidate());
   for (int outc = 1; outc <= outcomes.Length(); outcomes[outc++]->Invalidate());
@@ -182,9 +153,9 @@ gbtNfgGame::~gbtNfgGame()
 //                          General data access
 //---------------------------------------------------------------------------
 
-bool gbtNfgGame::IsConstSum(void) const
+bool gbtNfgGameRep::IsConstSum(void) const
 {
-  gbtNfgContingencyIterator iter(this);
+  gbtNfgContingencyIterator iter(gbtNfgSupport(const_cast<gbtNfgGameRep *>(this)));
 
   gbtRational sum(0);
   for (int pl = 1; pl <= players.Length(); pl++) {
@@ -205,7 +176,7 @@ bool gbtNfgGame::IsConstSum(void) const
   return true;
 }
 
-gbtRational gbtNfgGame::GetMinPayoff(int player) const
+gbtRational gbtNfgGameRep::GetMinPayoff(int player) const
 {
   int index, p, p1, p2;
   
@@ -230,7 +201,7 @@ gbtRational gbtNfgGame::GetMinPayoff(int player) const
   return minpay;
 }
 
-gbtRational gbtNfgGame::GetMaxPayoff(int player) const
+gbtRational gbtNfgGameRep::GetMaxPayoff(int player) const
 {
   int index, p, p1, p2;
 
@@ -271,7 +242,7 @@ static std::string EscapeQuotes(const std::string &s)
   return ret;
 }
 
-void gbtNfgGame::WriteNfgFile(std::ostream &p_file) const
+void gbtNfgGameRep::WriteNfgFile(std::ostream &p_file) const
 { 
   p_file << "NFG 1 R";
   p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
@@ -325,7 +296,7 @@ void gbtNfgGame::WriteNfgFile(std::ostream &p_file) const
 //                               Players
 //---------------------------------------------------------------------------
 
-gbtNfgPlayer gbtNfgGame::NewPlayer(void)
+gbtNfgPlayer gbtNfgGameRep::NewPlayer(void)
 {
   gbtNfgPlayerRep *player = new gbtNfgPlayerRep(players.Length() + 1, this, 1);
   players.Append(player);
@@ -344,12 +315,12 @@ gbtNfgPlayer gbtNfgGame::NewPlayer(void)
 //                               Strategies
 //---------------------------------------------------------------------------
 
-int gbtNfgGame::NumStrats(int pl) const
+int gbtNfgGameRep::NumStrats(int pl) const
 {
   return players[pl]->strategies.Length();
 }
 
-int gbtNfgGame::ProfileLength(void) const
+int gbtNfgGameRep::ProfileLength(void) const
 {
   int nprof = 0;
   for (int i = 1; i <= players.Length();
@@ -363,7 +334,7 @@ int gbtNfgGame::ProfileLength(void) const
 
 /// Creates a new outcome in the strategic game.  By default, all
 /// payoffs to players are set to zero.  Returns the newly created outcome.
-gbtNfgOutcome gbtNfgGame::NewOutcome(void)
+gbtNfgOutcome gbtNfgGameRep::NewOutcome(void)
 {
   gbtNfgOutcomeRep *outcome = new gbtNfgOutcomeRep(outcomes.Length() + 1, this);
   outcomes.Append(outcome);
@@ -373,7 +344,7 @@ gbtNfgOutcome gbtNfgGame::NewOutcome(void)
 /// Deletes an outcome from the strategic game.  If the outcome appears
 /// in any contingency of the game, the outcome of those contingencies
 /// are reset to the trivial null outcome.
-void gbtNfgGame::DeleteOutcome(gbtNfgOutcome outcome)
+void gbtNfgGameRep::DeleteOutcome(gbtNfgOutcome outcome)
 {
   for (int i = 1; i <= results.Length(); i++) {
     if (results[i] == outcome)
@@ -390,7 +361,7 @@ void gbtNfgGame::DeleteOutcome(gbtNfgOutcome outcome)
 //                         Private member functions
 //---------------------------------------------------------------------------
 
-void gbtNfgGame::IndexStrategies(void)
+void gbtNfgGameRep::IndexStrategies(void)
 {
   long offset = 1L;
 
@@ -408,7 +379,7 @@ void gbtNfgGame::IndexStrategies(void)
 /// This rebuilds a new table of outcomes after the game has been
 /// redimensioned (change in the number of strategies).  Strategies
 /// numbered -1 are identified as the new strategies.
-void gbtNfgGame::RebuildTable(void)
+void gbtNfgGameRep::RebuildTable(void)
 {
   long size = 1L;
   gbtArray<long> offsets(players.Length());
@@ -420,7 +391,7 @@ void gbtNfgGame::RebuildTable(void)
   gbtArray<gbtNfgOutcomeRep *> newResults(size);
   for (int i = 1; i <= newResults.Length(); newResults[i++] = 0);
 
-  gbtNfgContingencyIterator iter(this);
+  gbtNfgContingencyIterator iter(gbtNfgSupport(const_cast<gbtNfgGameRep *>(this)));
 
   do {
     long newindex = 0L;

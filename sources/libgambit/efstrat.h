@@ -34,7 +34,7 @@ class gbtEfgSupportPlayer;
 class gbtEfgSupport {
 protected:
   std::string m_name;
-  gbtEfgGame *m_efg;
+  gbtEfgGame m_efg;
   gbtArray<gbtEfgSupportPlayer *> m_players;
 
 public:
@@ -46,7 +46,7 @@ public:
   bool operator==(const gbtEfgSupport &) const;
   bool operator!=(const gbtEfgSupport &) const;
 
-  gbtEfgGame &GetGame(void) const { return *m_efg; }
+  gbtEfgGame GetGame(void) const { return m_efg; }
 
   const std::string &GetName(void) const { return m_name; }
   void SetName(const std::string &p_name) { m_name = p_name; }

@@ -225,8 +225,8 @@ private:
       if (m_views.Length() == 0)  delete this;
     }
 
-  gbtEfgGame *m_efg;
-  gbtNfgGame *m_nfg;
+  gbtEfgGame m_efg;
+  gbtNfgGame m_nfg;
   wxString m_filename;
 
   gbtStyle m_style;
@@ -242,8 +242,8 @@ private:
   gbtList<std::string> m_undoList, m_redoList;
 
 public:
-  gbtGameDocument(gbtEfgGame *p_efg);
-  gbtGameDocument(gbtNfgGame *p_nfg); 
+  gbtGameDocument(gbtEfgGame p_efg);
+  gbtGameDocument(gbtNfgGame p_nfg); 
   
   ~gbtGameDocument();
 
@@ -257,8 +257,8 @@ public:
   void SaveDocument(std::ostream &) const;
   //@}
 
-  gbtEfgGame *GetEfg(void) const { return m_efg; }
-  gbtNfgGame *GetNfg(void) const 
+  gbtEfgGame GetEfg(void) const { return m_efg; }
+  gbtNfgGame GetNfg(void) const 
     { 
       if (m_efg) return m_efg->AssociatedNfg();
       else return m_nfg;

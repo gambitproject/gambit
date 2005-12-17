@@ -29,10 +29,7 @@
 
 template <class T> class gbtArray;
 
-class gbtStrategyProfile;
 #include "nfstrat.h"
-
-class gbtNfgContingencyIterator;
 
 /// This class iterates through the contingencies in a strategic game.
 /// It visits each strategy profile in turn, advancing one contingency
@@ -40,7 +37,7 @@ class gbtNfgContingencyIterator;
 /// one player may be held fixed during the iteration (by the use of the
 /// second constructor).
 class gbtNfgContingencyIterator {
-  friend class gbtNfgGame;
+  friend class gbtNfgGameRep;
 private:
   gbtNfgSupport support;
   gbtArray<int> m_currentStrat;

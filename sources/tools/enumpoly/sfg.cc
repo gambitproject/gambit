@@ -35,16 +35,16 @@
 
 
 Sfg::Sfg(const gbtEfgSupport &S)
-  : EF(S.GetGame()), efsupp(S), seq(EF.NumPlayers()), isetFlag(S.GetGame().NumInfosets()),
-    isetRow(S.GetGame().NumInfosets()), infosets(EF.NumPlayers())
+  : EF(S.GetGame()), efsupp(S), seq(EF->NumPlayers()), isetFlag(S.GetGame()->NumInfosets()),
+    isetRow(S.GetGame()->NumInfosets()), infosets(EF->NumPlayers())
 { 
   int i;
-  gbtArray<gbtEfgInfoset> zero(EF.NumPlayers());
-  gbtArray<int> one(EF.NumPlayers());
+  gbtArray<gbtEfgInfoset> zero(EF->NumPlayers());
+  gbtArray<int> one(EF->NumPlayers());
 
   gbtEfgSupport support(EF);
 
-  for(i=1;i<=EF.NumPlayers();i++) {
+  for(i=1;i<=EF->NumPlayers();i++) {
     seq[i]=1;
     zero[i]=0;
     one[i]=1;
@@ -53,7 +53,7 @@ Sfg::Sfg(const gbtEfgSupport &S)
   isetFlag = 0;
   isetRow = 0;
 
-  GetSequenceDims(EF.GetRoot());
+  GetSequenceDims(EF->GetRoot());
 
   isetFlag = 0;
 
@@ -61,13 +61,13 @@ Sfg::Sfg(const gbtEfgSupport &S)
 
   SF = new gNArray<gbtArray<gbtRational> *>(seq);
   while (index.Turn()) {
-    (*SF)[index.CurrentIndices()] = new gbtArray<gbtRational>(EF.NumPlayers());
-    for(i=1;i<=EF.NumPlayers();i++)
+    (*SF)[index.CurrentIndices()] = new gbtArray<gbtRational>(EF->NumPlayers());
+    for(i=1;i<=EF->NumPlayers();i++)
       (*(*SF)[index.CurrentIndices()])[i]=(gbtRational)0;
   } 
 
-  E = new gbtArray<gbtRectArray<gbtRational> *> (EF.NumPlayers());
-  for(i=1;i<=EF.NumPlayers();i++) {
+  E = new gbtArray<gbtRectArray<gbtRational> *> (EF->NumPlayers());
+  for(i=1;i<=EF->NumPlayers();i++) {
     (*E)[i] = new gbtRectArray<gbtRational>(infosets[i].Length()+1,seq[i]);
     for(int j = (*(*E)[i]).MinRow();j<=(*(*E)[i]).MaxRow();j++)
       for(int k = (*(*E)[i]).MinCol();k<=(*(*E)[i]).MaxCol();k++)
@@ -75,15 +75,15 @@ Sfg::Sfg(const gbtEfgSupport &S)
     (*(*E)[i])(1,1)=(gbtRational)1;
   } 
 
-  sequences = new gbtArray<SFSequenceSet *>(EF.NumPlayers());
-  for(i=1;i<=EF.NumPlayers();i++)
-    (*sequences)[i] = new SFSequenceSet(EF.GetPlayer(i));
+  sequences = new gbtArray<SFSequenceSet *>(EF->NumPlayers());
+  for(i=1;i<=EF->NumPlayers();i++)
+    (*sequences)[i] = new SFSequenceSet(EF->GetPlayer(i));
 
-  gbtArray<Sequence *> parent(EF.NumPlayers());
-  for(i=1;i<=EF.NumPlayers();i++)
+  gbtArray<Sequence *> parent(EF->NumPlayers());
+  for(i=1;i<=EF->NumPlayers();i++)
     parent[i] = (((*sequences)[i])->GetSFSequenceSet())[1];
 
-  MakeSequenceForm(EF.GetRoot(),(gbtRational)1,one,zero,parent);
+  MakeSequenceForm(EF->GetRoot(),(gbtRational)1,one,zero,parent);
 }
 
 Sfg::~Sfg()
@@ -96,11 +96,11 @@ Sfg::~Sfg()
 
   int i;
 
-  for(i=1;i<=EF.NumPlayers();i++)
+  for(i=1;i<=EF->NumPlayers();i++)
     delete (*E)[i];
   delete E;
 
-  for(i=1;i<=EF.NumPlayers();i++)
+  for(i=1;i<=EF->NumPlayers();i++)
     delete (*sequences)[i];
   delete sequences;
 }
@@ -247,7 +247,7 @@ gbtBehavProfile<double> Sfg::ToBehav(const gbtPVector<double> &x) const
   gbtRational value;
 
   int i,j;
-  for(i=1;i<=EF.NumPlayers();i++)
+  for(i=1;i<=EF->NumPlayers();i++)
     for(j=2;j<=seq[i];j++) {
       sij = ((*sequences)[i]->GetSFSequenceSet())[j];
       int sn = sij->GetNumber();

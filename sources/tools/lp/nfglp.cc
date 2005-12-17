@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  gbtNfgGame *nfg;
+  gbtNfgGame nfg;
 
   try {
     nfg = ReadNfg(std::cin);

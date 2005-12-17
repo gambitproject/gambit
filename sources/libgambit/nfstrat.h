@@ -30,23 +30,21 @@
 #include "base.h"
 #include "nfg.h"
 
-class gbtNfgGame;
-
 /// This class represents a strategy profile on a normal form game.
 /// It specifies exactly one strategy for each player defined on the
 /// game.
 class gbtStrategyProfile  {
-  friend class gbtNfgGame;
+  friend class gbtNfgGameRep;
 private:
   long m_index;
-  gbtNfgGame *m_nfg;
+  gbtNfgGame m_nfg;
   gbtArray<gbtNfgStrategy> m_profile;
   
 public:
   /// @name Lifecycle
   //@{
   /// Construct a new strategy profile on the specified game
-  gbtStrategyProfile(gbtNfgGame *);
+  gbtStrategyProfile(const gbtNfgGame &);
   //@}
 
   /// @name Data access and manipulation
@@ -78,7 +76,7 @@ public:
 /// in which they appear in the underlying game.
 class gbtNfgSupport {
 protected:
-  const gbtNfgGame *m_nfg;
+  gbtNfgGame m_nfg;
   gbtArray<gbtArray<gbtNfgStrategy> > m_support;
   
   bool Undominated(gbtNfgSupport &newS, int pl, bool strong,
@@ -88,7 +86,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructor.  By default, a support contains all strategies.
-  gbtNfgSupport(const gbtNfgGame *);
+  gbtNfgSupport(const gbtNfgGame &);
   //@}
 
   /// @name Operator overloading
@@ -104,7 +102,7 @@ public:
   /// @name General information
   //@{
   /// Returns the game on which the support is defined.
-  gbtNfgGame *GetGame(void) const { return const_cast<gbtNfgGame *>(m_nfg); }
+  gbtNfgGame GetGame(void) const { return m_nfg; }
 
   /// Returns the number of strategies in the support for player pl.
   int NumStrats(int pl) const  { return m_support[pl].Length(); }

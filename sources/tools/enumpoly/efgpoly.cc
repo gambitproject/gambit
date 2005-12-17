@@ -108,7 +108,7 @@ public:
 template <class T>
 EfgPolEnumModule<T>::EfgPolEnumModule(const gbtEfgSupport &S)
   : EF(S.GetGame()), support(S), count(0), nevals(0), SF(S),
-    is_singular(false), var(S.GetGame().NumPlayers())
+    is_singular(false), var(S.GetGame()->NumPlayers())
 { 
 //  gEpsilon(eps,12);
 
@@ -120,7 +120,7 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const gbtEfgSupport &S)
   int kk=0;
   int tnv = 0;
 
-  for(int i=1;i<=EF.NumPlayers();i++) {
+  for(int i=1;i<=EF->NumPlayers();i++) {
     var[i] = new gbtArray<int>(SF.NumSequences(i));
     (*(var[i]))[1] = 0;
     for(int seq = 2;seq<=SF.NumSequences(i);seq++) {
@@ -139,7 +139,7 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const gbtEfgSupport &S)
 template <class T>
 EfgPolEnumModule<T>::~EfgPolEnumModule()
 { 
-  for(int i=1;i<=EF.NumPlayers();i++)
+  for(int i=1;i<=EF->NumPlayers();i++)
     delete var[i];
   delete Lex;
   delete Space;
@@ -196,7 +196,7 @@ EfgPolEnumModule<T>::Payoff(int pl) const
     if( pay != gbtRational(0)) {
       gPoly<T> term(Space,(T)pay,Lex);
       int k;
-      for(k=1;k<=EF.NumPlayers();k++) 
+      for(k=1;k<=EF->NumPlayers();k++) 
 	term*=ProbOfSequence(k,(index.CurrentIndices())[k]);
       equation+=term;
     }
@@ -302,7 +302,7 @@ EfgPolEnumModule<T>::SeqFormVectorFromSolFormVector(const gbtVector<gDouble> &v)
 {
   gbtPVector<double> x(SF.NumSequences());
 
-  for (int i = 1; i <= EF.NumPlayers(); i++) 
+  for (int i = 1; i <= EF->NumPlayers(); i++) 
     for (int j = 1; j <= SF.NumSequences()[i]; j++)
       x(i,j) = NumProbOfSequence(i,j,v);
   
@@ -411,7 +411,7 @@ EfgPolEnumModule<T>::SeqFormProbsFromSolVars(const gbtVector<gDouble> &v) const
 {
   gbtPVector<double> x(SF.NumSequences());
 
-  for(int pl=1;pl<=EF.NumPlayers();pl++) 
+  for(int pl=1;pl<=EF->NumPlayers();pl++) 
     for(int seq=1;seq<=SF.NumSequences()[pl];seq++)
       x(pl,seq) = NumProbOfSequence(pl,seq,v);
 
@@ -424,8 +424,8 @@ EfgPolEnumModule<T>::SolVarsFromgbtBehavProfile(const gbtBehavProfile<gbtNumber>
 {
   int numvars(0);
 
-  for (int pl = 1; pl <= EF.NumPlayers(); pl++) {
-    gbtEfgPlayer player = EF.GetPlayer(pl);
+  for (int pl = 1; pl <= EF->NumPlayers(); pl++) {
+    gbtEfgPlayer player = EF->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       const gbtEfgInfoset *infoset = player->GetInfoset(iset);
       if ( support.MayReach(infoset) )
@@ -436,8 +436,8 @@ EfgPolEnumModule<T>::SolVarsFromgbtBehavProfile(const gbtBehavProfile<gbtNumber>
   gbtVector<gDouble> answer(numvars);
   int count(0);
 
-  for (int pl = 1; pl <= EF.NumPlayers(); pl++) {
-    gbtEfgPlayer player = EF.GetPlayer(pl);
+  for (int pl = 1; pl <= EF->NumPlayers(); pl++) {
+    gbtEfgPlayer player = EF->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       const gbtEfgInfoset *infoset = player->GetInfoset(iset);
       if ( support.MayReach(infoset) ) {
@@ -460,7 +460,7 @@ EfgPolEnumModule<T>::SolVarsFromSeqFormProbs(const gbtPVector<double> &x) const
 
   // Old version that doesn't work 
   int numvars = 0;
-  for(int pl=1;pl<=EF.NumPlayers();pl++) 
+  for(int pl=1;pl<=EF->NumPlayers();pl++) 
     for(int seq=2;seq<=SF.NumSequences()[pl];seq++) {
       int act  = SF.ActionNumber(pl,seq);
       if(act<support.NumActions(SF.GetInfoset(pl,seq))) 
@@ -470,7 +470,7 @@ EfgPolEnumModule<T>::SolVarsFromSeqFormProbs(const gbtPVector<double> &x) const
   //  gbtVector<gDouble> v(SF.NumIndepVars());
 
   int count = 0;
-  for(int pl=1;pl<=EF.NumPlayers();pl++) 
+  for(int pl=1;pl<=EF->NumPlayers();pl++) 
     for(int seq=2;seq<=SF.NumSequences()[pl];seq++) {
       int act  = SF.ActionNumber(pl,seq);
       if(act<support.NumActions(SF.GetInfoset(pl,seq))) {
@@ -536,7 +536,7 @@ EfgPolEnumModule<T>::ReturnPolishedSolution(const gbtVector<gDouble> &root) cons
 {
   gbtPVector<double> x(SF.NumSequences());
 
-  for(int i=1;i<=EF.NumPlayers();i++) 
+  for(int i=1;i<=EF->NumPlayers();i++) 
     for(int j=1;j<=SF.NumSequences()[i];j++) 
       x(i,j) = NumProbOfSequence(i,j,root);
 
@@ -559,10 +559,10 @@ void PrintProfile(std::ostream &p_stream,
 
 gbtBehavProfile<double> ToFullSupport(const gbtBehavProfile<double> &p_profile)
 {
-  gbtEfgGame *efg = &p_profile.GetGame();
+  gbtEfgGame efg = p_profile.GetGame();
   const gbtEfgSupport &support = p_profile.Support();
 
-  gbtBehavProfile<double> fullProfile(*efg);
+  gbtBehavProfile<double> fullProfile(efg);
   for (int i = 1; i <= fullProfile.Length(); fullProfile[i++] = 0.0);
 
   int index = 1;
@@ -600,8 +600,8 @@ void PrintSupport(std::ostream &p_stream,
 {
   p_stream << p_label;
 
-  for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
-    gbtEfgPlayer player = p_support.GetGame().GetPlayer(pl);
+  for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
+    gbtEfgPlayer player = p_support.GetGame()->GetPlayer(pl);
 
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       gbtEfgInfoset infoset = player->GetInfoset(iset);
@@ -715,7 +715,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  gbtEfgGame *efg;
+  gbtEfgGame efg;
 
   try {
     efg = ReadEfg(std::cin);
@@ -724,7 +724,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  Solve(*efg);
+  Solve(efg);
 
   return 0;
 }

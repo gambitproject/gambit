@@ -30,7 +30,6 @@
 #include "gdpvect.h"
 #include "efg.h"
 
-class gbtNfgGame;
 template <class T> class gbtMixedProfile;
 template <class T> class gbtPVector;
 template <class T> class gbtRectArray;
@@ -46,7 +45,7 @@ template <class T> class gbtRectArray;
 
 template <class T> class gbtBehavProfile : private gbtDPVector<T>  {
 protected:
-  const gbtEfgGame *m_efg;
+  gbtEfgGame m_efg;
   gbtEfgSupport m_support;
   mutable bool m_cached_data;
 
@@ -139,7 +138,7 @@ public:
 
   // GENERAL DATA ACCESS
 
-  gbtEfgGame &GetGame(void) const   { return const_cast<gbtEfgGame &>(*m_efg); }
+  gbtEfgGame GetGame(void) const   { return m_efg; }
   const gbtEfgSupport &Support(void) const   { return m_support; }
   
   const T &GetRealizProb(const gbtEfgNode &node) const;

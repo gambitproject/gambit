@@ -28,8 +28,8 @@
 
 EfgContIter::EfgContIter(const gbtEfgSupport &s)
   : _frozen_pl(0), _frozen_iset(0),
-    _efg(&s.GetGame()), _support(s),
-    _profile(&s.GetGame()), _current(s.GetGame().NumInfosets()),
+    _efg(s.GetGame()), _support(s),
+    _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
     _is_active(),
     _num_active_infosets(_efg->NumPlayers()),
     _payoff(_efg->NumPlayers())
@@ -48,8 +48,8 @@ EfgContIter::EfgContIter(const gbtEfgSupport &s)
 
 EfgContIter::EfgContIter(const gbtEfgSupport &s, const gbtList<gbtEfgInfoset>& active)
   : _frozen_pl(0), _frozen_iset(0),
-    _efg(&s.GetGame()), _support(s),
-    _profile(&s.GetGame()), _current(s.GetGame().NumInfosets()),
+    _efg(s.GetGame()), _support(s),
+    _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
     _is_active(),
     _num_active_infosets(_efg->NumPlayers()),
     _payoff(_efg->NumPlayers())
@@ -169,8 +169,8 @@ gbtRational EfgContIter::Payoff(int pl) const
 
 
 EfgConditionalContIter::EfgConditionalContIter(const gbtEfgSupport &s)
-  : _efg(&s.GetGame()), _support(s),
-    _profile(&s.GetGame()), _current(s.GetGame().NumInfosets()),
+  : _efg(s.GetGame()), _support(s),
+    _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
     _is_active(),
     _num_active_infosets(_efg->NumPlayers()),
     _payoff(_efg->NumPlayers())
@@ -189,8 +189,8 @@ EfgConditionalContIter::EfgConditionalContIter(const gbtEfgSupport &s)
 
 EfgConditionalContIter::EfgConditionalContIter(const gbtEfgSupport &s, 
 					       const gbtList<gbtEfgInfoset>& active)
-  : _efg(&s.GetGame()), _support(s),
-    _profile(&s.GetGame()), _current(s.GetGame().NumInfosets()),
+  : _efg(s.GetGame()), _support(s),
+    _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
     _is_active(),
     _num_active_infosets(_efg->NumPlayers()),
     _payoff(_efg->NumPlayers())

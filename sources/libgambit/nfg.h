@@ -24,8 +24,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef NFG_H
-#define NFG_H
+#ifndef LIBGAMBIT_TABLEGAME_H
+#define LIBGAMBIT_TABLEGAME_H
 
 #include "base.h"
 #include "rational.h"
@@ -44,9 +44,9 @@ typedef Gambit::GameObjectPtr<gbtNfgStrategyRep> gbtNfgStrategy;
 class gbtNfgPlayerRep;
 typedef Gambit::GameObjectPtr<gbtNfgPlayerRep> gbtNfgPlayer;
 
+class gbtNfgGameRep;
+typedef Gambit::GameObjectPtr<gbtNfgGameRep> gbtNfgGame;
 
-
-class gbtNfgGame;
 template <class T> class gbtMixedProfile;
 class gbtNumber;
 
@@ -56,13 +56,13 @@ class gbtNumber;
 /// payoffs are treated as exact (that is, no conversion to floating
 /// point is done).
 class gbtNfgOutcomeRep : public Gambit::GameObject  {
-  friend class gbtNfgGame;
+  friend class gbtNfgGameRep;
   friend class gbtMixedProfile<double>;
   friend class gbtMixedProfile<gbtRational>;
   friend class gbtMixedProfile<gbtNumber>;
 private:
   int number;
-  gbtNfgGame *nfg;
+  gbtNfgGameRep *nfg;
   std::string name;
   gbtArray<std::string> m_textPayoffs;
   gbtArray<gbtRational> m_ratPayoffs;
@@ -71,14 +71,14 @@ private:
   /// @name Lifecycle
   //@{
   /// Creates a new outcome object, with payoffs set to zero
-  gbtNfgOutcomeRep(int n, gbtNfgGame *N);
+  gbtNfgOutcomeRep(int n, gbtNfgGameRep *N);
   //@}
 
 public:
   /// @name Data access
   //@{
   /// Returns the strategic game on which the outcome is defined.
-  gbtNfgGame *GetGame(void) const { return nfg; }
+  gbtNfgGame GetGame(void) const { return nfg; }
   /// Returns the index number of the outcome
   int GetNumber(void) const { return number; }
 
@@ -109,7 +109,7 @@ template <class T> class gbtMixedProfile;
 /// find the outcome for that strategy profile, making payoff computation
 /// relatively efficient.
 class gbtNfgStrategyRep : public Gambit::GameObject  {
-  friend class gbtNfgGame;
+  friend class gbtNfgGameRep;
   friend class gbtNfgPlayerRep;
   friend class gbtStrategyProfile;
   friend class gbtMixedProfile<double>;
@@ -149,19 +149,19 @@ public:
 
 /// This class represents a player in a strategic game.
 class gbtNfgPlayerRep : public Gambit::GameObject {
-  friend class gbtNfgGame;
+  friend class gbtNfgGameRep;
   friend class gbtNfgStrategyRep;
 private:
   int number;
   std::string name;
-  gbtNfgGame *m_nfg;
+  gbtNfgGameRep *m_nfg;
   
   gbtArray<gbtNfgStrategyRep *> strategies;
 
   /// @name Lifecycle
   //@{
   /// Constructs a new player in the specified game, with 'num' strategies
-  gbtNfgPlayerRep(int n, gbtNfgGame *no, int num);
+  gbtNfgPlayerRep(int n, gbtNfgGameRep *no, int num);
   /// Cleans up a player object; responsible for deallocating strategies
   ~gbtNfgPlayerRep();
   //@}
@@ -175,7 +175,7 @@ public:
   void SetName(const std::string &s) { name = s; }
 
   /// Returns the game on which the player is defined
-  gbtNfgGame *GetGame(void) const { return m_nfg; }
+  gbtNfgGame GetGame(void) const { return m_nfg; }
   /// Returns the index of the player in its game
   int GetNumber(void) const  { return number; }
   //@}
@@ -193,7 +193,6 @@ public:
 
 
 class gbtStrategyProfile;
-class gbtEfgGame;
 
 /// This class represents a strategic game in a tabular format.
 /// The table is a list of outcomes, each of which may appear in
@@ -203,15 +202,14 @@ class gbtEfgGame;
 /// creation, all entries in the table are set to the null pointer.
 /// See gbtStrategyProfile for the facilities for setting entries
 /// in the game table.
-class gbtNfgGame : public Gambit::Game {
+class gbtNfgGameRep : public Gambit::Game {
 friend class gbtStrategyProfile;
 friend class NfgFileReader;
-friend void SetEfg(gbtNfgGame *, const gbtEfgGame *);
-friend class gbtEfgGame;
+friend class gbtEfgGameRep;
 friend class gbtNfgPlayerRep;
 friend class gbtNfgStrategyRep;
-friend void SetPayoff(gbtNfgGame *, int, int, const std::string &);
-friend void ParseOutcomeBody(class gbtGameParserState &, gbtNfgGame *);
+friend void SetPayoff(gbtNfgGame, int, int, const std::string &);
+friend void ParseOutcomeBody(class gbtGameParserState &, gbtNfgGame);
 friend class gbtMixedProfile<double>;
 friend class gbtMixedProfile<gbtRational>;
 friend class gbtMixedProfile<gbtNumber>;
@@ -224,7 +222,7 @@ protected:
 
   gbtArray<gbtNfgOutcomeRep *> results;
 
-  const gbtEfgGame *efg;
+  gbtEfgGame efg;
 
   /// @name Private auxiliary functions
   //@{
@@ -236,11 +234,11 @@ public:
   /// @name Lifecycle
   //@{
   /// Construct a new strategic form game with the specified dimension
-  gbtNfgGame(const gbtArray<int> &dim);
+  gbtNfgGameRep(const gbtArray<int> &dim);
   /// Create a copy of a strategic form game
-  gbtNfgGame(const gbtNfgGame &b);
+    //gbtNfgGame(const gbtNfgGame &b);
   /// Clean up a strategic form game
-  ~gbtNfgGame();
+  ~gbtNfgGameRep();
   //@}
     
   /// @name General data access
@@ -263,8 +261,8 @@ public:
   gbtRational GetMaxPayoff(int pl = 0) const;
 
   /// Returns the extensive form associated with this game, if any
-  gbtEfgGame *AssociatedEfg(void) const 
-    { return const_cast<gbtEfgGame *>(efg); }
+  gbtEfgGame AssociatedEfg(void) const 
+  { return efg; }
   //@}
 
   /// @name Writing data files
@@ -325,6 +323,6 @@ public:
 };
 
 /// Reads a strategic game in .nfg format from the input stream
-gbtNfgGame *ReadNfg(std::istream &);
+gbtNfgGame ReadNfg(std::istream &);
 
-#endif    // NFG_H
+#endif  // LIBGAMBIT_TABLEGAME_H

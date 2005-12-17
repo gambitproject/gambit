@@ -705,7 +705,7 @@ void gbtGameFrame::MakeToolbar(void)
 
 void gbtGameFrame::OnFileNewEfg(wxCommandEvent &)
 {
-  gbtEfgGame *efg = new gbtEfgGame;
+  gbtEfgGame efg = new gbtEfgGameRep;
   efg->SetTitle("Untitled Extensive Game");
   efg->NewPlayer()->SetLabel("Player 1");
   efg->NewPlayer()->SetLabel("Player 2");
@@ -718,7 +718,7 @@ void gbtGameFrame::OnFileNewNfg(wxCommandEvent &)
   gbtArray<int> dim(2);
   dim[1] = 2;
   dim[2] = 2;
-  gbtNfgGame *nfg = new gbtNfgGame(dim);
+  gbtNfgGame nfg = new gbtNfgGameRep(dim);
   nfg->SetTitle("Untitled Strategic Game");
   nfg->GetPlayer(1)->SetName("Player 1");
   nfg->GetPlayer(2)->SetName("Player 2");
@@ -1172,12 +1172,12 @@ void gbtGameFrame::OnEditGame(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     if (m_doc->GetEfg()) {
-      gbtEfgGame *efg = m_doc->GetEfg();
+      gbtEfgGame efg = m_doc->GetEfg();
       efg->SetTitle((const char *) dialog.GetTitle().mb_str());
       efg->SetComment((const char *) dialog.GetComment().mb_str());
     }
     else {
-      gbtNfgGame *nfg = m_doc->GetNfg();
+      gbtNfgGame nfg = m_doc->GetNfg();
       nfg->SetTitle((const char *) dialog.GetTitle().mb_str());
       nfg->SetComment((const char *) dialog.GetComment().mb_str());
     }

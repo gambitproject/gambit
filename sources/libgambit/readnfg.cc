@@ -549,7 +549,7 @@ static void ParseHeader(gbtGameParserState &p_state, gbtTableFileGame &p_data)
   }
 }
 
-static void ReadOutcomeList(gbtGameParserState &p_parser, gbtNfgGame *p_nfg)
+static void ReadOutcomeList(gbtGameParserState &p_parser, gbtNfgGame p_nfg)
 {
   if (p_parser.GetNextSymbol() == symRBRACE) {
     // Special case: empty outcome list
@@ -615,7 +615,7 @@ static void ReadOutcomeList(gbtGameParserState &p_parser, gbtNfgGame *p_nfg)
   p_parser.GetNextSymbol();
 }
 
-void ParseOutcomeBody(gbtGameParserState &p_parser, gbtNfgGame *p_nfg)
+void ParseOutcomeBody(gbtGameParserState &p_parser, gbtNfgGame p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
 
@@ -637,7 +637,7 @@ void ParseOutcomeBody(gbtGameParserState &p_parser, gbtNfgGame *p_nfg)
   }
 }
 
-void SetPayoff(gbtNfgGame *p_nfg, int p_cont, int p_pl, 
+void SetPayoff(gbtNfgGame p_nfg, int p_cont, int p_pl, 
 	       const std::string &p_text)
 {
   if (p_pl == 1)  {
@@ -648,7 +648,7 @@ void SetPayoff(gbtNfgGame *p_nfg, int p_cont, int p_pl,
 }
 
 static void ParsePayoffBody(gbtGameParserState &p_parser, 
-			    gbtNfgGame *p_nfg)
+			    gbtNfgGame p_nfg)
 {
   int cont = 1, pl = 1;
 
@@ -674,14 +674,14 @@ static void ParsePayoffBody(gbtGameParserState &p_parser,
   }
 }
 
-static gbtNfgGame *BuildNfg(gbtGameParserState &p_parser, 
-			    gbtTableFileGame &p_data)
+static gbtNfgGame BuildNfg(gbtGameParserState &p_parser, 
+			   gbtTableFileGame &p_data)
 {
   gbtArray<int> dim(p_data.NumPlayers());
   for (int pl = 1; pl <= dim.Length(); pl++) {
     dim[pl] = p_data.NumStrategies(pl);
   }
-  gbtNfgGame *nfg = new gbtNfgGame(dim);
+  gbtNfgGame nfg = new gbtNfgGameRep(dim);
 
   nfg->SetTitle(p_data.m_title);
   nfg->SetComment(p_data.m_comment);
@@ -712,7 +712,7 @@ static gbtNfgGame *BuildNfg(gbtGameParserState &p_parser,
 //   ReadNfg: Global visible function to read a normal form savefile
 //=========================================================================
 
-gbtNfgGame *ReadNfg(std::istream &p_file)
+gbtNfgGame ReadNfg(std::istream &p_file)
 {
   gbtGameParserState parser(p_file);
   gbtTableFileGame data;

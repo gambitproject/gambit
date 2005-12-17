@@ -696,7 +696,7 @@ static void Parse(ParserState &p_state, TreeData &p_treeData)
 // the actual tree to be returned
 //
 
-static void BuildSubtree(gbtEfgGame *p_efg, gbtEfgNode p_node,
+static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
 			 TreeData &p_treeData, NodeData **p_nodeData)
 {
   p_node->SetLabel((*p_nodeData)->m_name);
@@ -773,7 +773,7 @@ static void BuildSubtree(gbtEfgGame *p_efg, gbtEfgNode p_node,
   }
 }
 
-static void BuildEfg(gbtEfgGame *p_efg, TreeData &p_treeData)
+static void BuildEfg(gbtEfgGame p_efg, TreeData &p_treeData)
 {
   p_efg->SetTitle(p_treeData.m_title);
   p_efg->SetComment(p_treeData.m_comment);
@@ -790,12 +790,12 @@ static void BuildEfg(gbtEfgGame *p_efg, TreeData &p_treeData)
 //  ReadEfg: Global visible function to read an extensive form savefile
 //=========================================================================
 
-gbtEfgGame *ReadEfg(std::istream &p_file)
+gbtEfgGame ReadEfg(std::istream &p_file)
 {
   ParserState parser(p_file);
   TreeData treeData;
 
-  gbtEfgGame *efg = new gbtEfgGame;
+  gbtEfgGame efg = new gbtEfgGameRep;
 
   try {
     Parse(parser, treeData);
@@ -803,11 +803,9 @@ gbtEfgGame *ReadEfg(std::istream &p_file)
     return efg;
   }
   catch (ParserError &) {
-    delete efg;
     return 0;
   }
   catch (...) {
-    delete efg;
     return 0;
   }
 }

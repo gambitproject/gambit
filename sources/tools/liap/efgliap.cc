@@ -34,21 +34,21 @@
 class EFLiapFunc : public gC1Function<double>  {
 private:
   mutable long _nevals;
-  const gbtEfgGame &_efg;
+  gbtEfgGame _efg;
   mutable gbtBehavProfile<double> _p;
 
   double Value(const gbtVector<double> &x) const;
   bool Gradient(const gbtVector<double> &, gbtVector<double> &) const;
 
 public:
-  EFLiapFunc(const gbtEfgGame &, const gbtBehavProfile<double> &);
+  EFLiapFunc(gbtEfgGame, const gbtBehavProfile<double> &);
   virtual ~EFLiapFunc();
     
   long NumEvals(void) const  { return _nevals; }
 };
 
 
-EFLiapFunc::EFLiapFunc(const gbtEfgGame &E,
+EFLiapFunc::EFLiapFunc(gbtEfgGame E,
 		       const gbtBehavProfile<double> &start)
   : _nevals(0L), _efg(E), _p(start)
 { }
@@ -112,8 +112,8 @@ static void PickRandomProfile(gbtBehavProfile<double> &p)
 {
   double sum, tmp;
 
-  for (int pl = 1; pl <= p.GetGame().NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= p.GetGame().GetPlayer(pl)->NumInfosets();
+  for (int pl = 1; pl <= p.GetGame()->NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= p.GetGame()->GetPlayer(pl)->NumInfosets();
 	 iset++)  {
       sum = 0.0;
       int act;
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  gbtEfgGame *efg;
+  gbtEfgGame efg;
 
   try {
     efg = ReadEfg(std::cin);
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
     std::ifstream startPoints(startFile.c_str());
 
     while (!startPoints.eof() && !startPoints.bad()) {
-      gbtBehavProfile<double> start(*efg);
+      gbtBehavProfile<double> start(efg);
       if (ReadProfile(startPoints, start)) {
 	starts.Append(start);
       }
@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
   else {
     // Generate the desired number of points randomly
     for (int i = 1; i <= m_numTries; i++) {
-      gbtBehavProfile<double> start(*efg);
+      gbtBehavProfile<double> start(efg);
       PickRandomProfile(start);
       starts.Append(start);
     }
@@ -286,13 +286,13 @@ int main(int argc, char *argv[])
 	PrintProfile(std::cout, "start", p);
       }
 
-      EFLiapFunc F(*efg, p);
+      EFLiapFunc F(efg, p);
 
       // if starting vector not interior, perturb it towards centroid
       int kk;
       for (int kk = 1; kk <= p.Length() && p[kk] > ALPHA; kk++);
       if (kk <= p.Length()) {
-	gbtBehavProfile<double> c(*efg);
+	gbtBehavProfile<double> c(efg);
 	for (int k = 1; k <= p.Length(); k++) {
 	  p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
 	}

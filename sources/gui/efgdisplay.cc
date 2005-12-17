@@ -141,7 +141,7 @@ static gbtEfgNode GetNode(gbtEfgNode p_node, int p_id)
 bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
 				     const wxString &p_text)
 {
-  gbtEfgGame *efg = m_owner->GetDocument()->GetEfg();
+  gbtEfgGame efg = m_owner->GetDocument()->GetEfg();
 
   int x, y;
 #if defined( __WXMSW__) or defined(__WXMAC__)

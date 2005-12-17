@@ -142,10 +142,10 @@ const gbtArray<Sequence *> &SFSequenceSet::GetSFSequenceSet(void) const
 // SFSupport: Ctors, Dtor, Operators
 //-----------------------------------------------
 
-SFSupport::SFSupport(const Sfg &SF) : bsfg(&SF), sups(SF.GetEfg().NumPlayers())
+SFSupport::SFSupport(const Sfg &SF) : bsfg(&SF), sups(SF.GetEfg()->NumPlayers())
 { 
   for (int i = 1; i <= sups.Length(); i++)
-    sups[i] = new SFSequenceSet(SF.GetEfg().GetPlayer(i));
+    sups[i] = new SFSequenceSet(SF.GetEfg()->GetPlayer(i));
 }
 
 SFSupport::SFSupport(const SFSupport &s)

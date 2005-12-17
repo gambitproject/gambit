@@ -59,8 +59,6 @@ gambit_SOURCES = \
 	nfgtable.h \
 	renratio.cc \
 	renratio.h \
-	subsolve.cc \
-	subsolve.h \
 	style.cc \
 	style.h \
 	valnumber.cc \

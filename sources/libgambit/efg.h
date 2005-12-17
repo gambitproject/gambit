@@ -24,8 +24,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef EFG_H
-#define EFG_H
+#ifndef LIBGAMBIT_TREEGAME_H
+#define LIBGAMBIT_TREEGAME_H
 
 #include "gpvector.h"
 #include "gdpvect.h"
@@ -50,9 +50,16 @@ typedef Gambit::GameObjectPtr<gbtEfgPlayerRep> gbtEfgPlayer;
 class gbtEfgNodeRep;
 typedef Gambit::GameObjectPtr<gbtEfgNodeRep> gbtEfgNode;
 
-class gbtEfgGame;
+class gbtEfgGameRep;
+typedef Gambit::GameObjectPtr<gbtEfgGameRep> gbtEfgGame;
+
+//
+// External declarations
+//
+class gbtNfgGameRep;
+typedef Gambit::GameObjectPtr<gbtNfgGameRep> gbtNfgGame;
+
 class gbtEfgSupport;
-class gbtNfgGame;
 class gbtNumber;
 
 template <class T> class gbtBehavProfile;
@@ -67,23 +74,23 @@ public:
 
 
 class gbtEfgOutcomeRep : public Gambit::GameObject {
-  friend class gbtEfgGame;
+  friend class gbtEfgGameRep;
   friend class gbtBehavProfile<double>;
   friend class gbtBehavProfile<gbtRational>;
   friend class gbtBehavProfile<gbtNumber>;
 protected:
-  gbtEfgGame *m_efg; 
+  gbtEfgGameRep *m_efg; 
   int m_number;
   std::string m_label;
   gbtArray<std::string> m_textPayoffs;
   gbtArray<gbtRational> m_ratPayoffs;
   gbtArray<double> m_doublePayoffs;
 
-  gbtEfgOutcomeRep(gbtEfgGame *p_efg, int p_number);
+  gbtEfgOutcomeRep(gbtEfgGameRep *p_efg, int p_number);
   ~gbtEfgOutcomeRep()  { }
 
 public:
-  gbtEfgGame *GetGame(void) const { return m_efg; }
+  gbtEfgGame GetGame(void) const { return m_efg; }
   int GetNumber(void) const { return m_number; }
   
   const std::string &GetLabel(void) const { return m_label; }
@@ -96,7 +103,7 @@ public:
 
 
 class gbtEfgActionRep : public Gambit::GameObject {
-  friend class gbtEfgGame;
+  friend class gbtEfgGameRep;
   friend class gbtBehavProfile<double>;
   friend class gbtBehavProfile<gbtRational>;
   friend class gbtBehavProfile<gbtNumber>;
@@ -123,7 +130,7 @@ public:
 
 
 class gbtEfgInfosetRep : public Gambit::GameObject {
-  friend class gbtEfgGame;
+  friend class gbtEfgGameRep;
   friend class gbtEfgPlayerRep;
   friend class gbtEfgNodeRep;
   friend class gbtBehavProfile<double>;
@@ -133,7 +140,7 @@ class gbtEfgInfosetRep : public Gambit::GameObject {
   friend void MakeReducedStrats(gbtEfgPlayerRep *p, gbtEfgNodeRep *n, gbtEfgNodeRep *nn);
 
 protected:
-  gbtEfgGame *m_efg;
+  gbtEfgGameRep *m_efg;
   int m_number;
   std::string m_label;
   gbtEfgPlayerRep *m_player;
@@ -143,12 +150,12 @@ protected:
   gbtArray<std::string> m_textProbs;
   gbtArray<gbtRational> m_ratProbs;
   
-  gbtEfgInfosetRep(gbtEfgGame *p_efg, int p_number, gbtEfgPlayerRep *p_player, 
+  gbtEfgInfosetRep(gbtEfgGameRep *p_efg, int p_number, gbtEfgPlayerRep *p_player, 
 		   int p_actions);
   ~gbtEfgInfosetRep();  
 
 public:
-  gbtEfgGame *GetGame(void) const { return m_efg; }
+  gbtEfgGame GetGame(void) const { return m_efg; }
   int GetNumber(void) const { return m_number; }
   
   gbtEfgPlayer GetPlayer(void) const { return m_player; }
@@ -174,7 +181,7 @@ public:
 };
 
 class gbtEfgPlayerRep : public Gambit::GameObject  {
-  friend class gbtEfgGame;
+  friend class gbtEfgGameRep;
   friend class gbtPureBehavProfile;
   friend class gbtBehavProfile<double>;
   friend class gbtBehavProfile<gbtRational>;
@@ -185,18 +192,18 @@ class gbtEfgPlayerRep : public Gambit::GameObject  {
   friend void MakeStrategy(gbtEfgPlayerRep *);
 
 private:
-  gbtEfgGame *m_efg;
+  gbtEfgGameRep *m_efg;
   int m_number;
   std::string m_label;
   gbtArray<gbtEfgInfosetRep *> m_infosets;
   gbtList<gbtArray<int> > m_strategies;
 
-  gbtEfgPlayerRep(gbtEfgGame *p_efg, int p_id) : m_number(p_id), m_efg(p_efg)  { }
+  gbtEfgPlayerRep(gbtEfgGameRep *p_efg, int p_id) : m_number(p_id), m_efg(p_efg)  { }
   ~gbtEfgPlayerRep();
 
 public:
   int GetNumber(void) const { return m_number; }
-  gbtEfgGame *GetGame(void) const { return m_efg; }
+  gbtEfgGame GetGame(void) const { return m_efg; }
   
   const std::string &GetLabel(void) const { return m_label; }
   void SetLabel(const std::string &p_label) { m_label = p_label; }
@@ -208,7 +215,7 @@ public:
 };
 
 class gbtEfgNodeRep : public Gambit::GameObject {
-  friend class gbtEfgGame;
+  friend class gbtEfgGameRep;
   friend class gbtBehavProfile<double>;
   friend class gbtBehavProfile<gbtRational>;
   friend class gbtBehavProfile<gbtNumber>;
@@ -218,7 +225,7 @@ class gbtEfgNodeRep : public Gambit::GameObject {
 protected:
   bool mark;
   int number; 
-  gbtEfgGame *m_efg;
+  gbtEfgGameRep *m_efg;
   std::string m_label;
   gbtEfgInfosetRep *infoset;
   gbtEfgNodeRep *parent;
@@ -226,13 +233,13 @@ protected:
   gbtArray<gbtEfgNodeRep *> children;
   gbtEfgNodeRep *whichbranch, *ptr;
 
-  gbtEfgNodeRep(gbtEfgGame *e, gbtEfgNodeRep *p);
+  gbtEfgNodeRep(gbtEfgGameRep *e, gbtEfgNodeRep *p);
   ~gbtEfgNodeRep();
 
   void DeleteOutcome(gbtEfgOutcomeRep *outc);
 
 public:
-  gbtEfgGame *GetGame(void) const { return m_efg; }
+  gbtEfgGame GetGame(void) const { return m_efg; }
 
   const std::string &GetLabel(void) const { return m_label; } 
   void SetLabel(const std::string &p_label) { m_label = p_label; }
@@ -260,11 +267,11 @@ public:
   bool IsSubgameRoot(void) const;
 };
 
-class gbtEfgGame : public Gambit::Game {
+class gbtEfgGameRep : public Gambit::Game {
 private:
   friend class EfgFileReader;
   friend class EfgFile;
-  friend class gbtNfgGame;
+  friend class gbtNfgGameRep;
   friend class gbtEfgNodeRep;
   friend class gbtEfgOutcomeRep;
   friend class gbtEfgInfosetRep;
@@ -282,7 +289,7 @@ protected:
   gbtArray<gbtEfgOutcomeRep *> outcomes;
   gbtEfgNodeRep *m_root;
   gbtEfgPlayerRep *chance;
-  mutable gbtNfgGame *m_reducedNfg;
+  mutable gbtNfgGame m_reducedNfg;
   
   // this is for use with the copy constructor
   void CopySubtree(gbtEfgNodeRep *, gbtEfgNodeRep *);
@@ -322,11 +329,11 @@ public:
   /// @name Lifecycle
   //@{
   /// Construct a new trivial extensive game
-  gbtEfgGame(void);
+  gbtEfgGameRep(void);
   /// Create a copy of the extensive game, starting at the specified node
-  gbtEfgGame(const gbtEfgGame &, gbtEfgNode = 0);
+    //gbtEfgGameRep(const gbtEfgGame &, gbtEfgNode = 0);
   /// Clean up the extensive game
-  ~gbtEfgGame();
+  virtual ~gbtEfgGameRep();
   //@}
 
   /// @name General data access
@@ -357,10 +364,10 @@ public:
 
   /// Returns the reduced normal form representation of the game,
   /// if computed.
-  gbtNfgGame *AssociatedNfg(void) const { return m_reducedNfg; }
+  gbtNfgGame AssociatedNfg(void) const { return m_reducedNfg; }
 
   /// Builds the reduced normal form representation of the game
-  gbtNfgGame *MakeReducedNfg(void);
+  gbtNfgGame MakeReducedNfg(void);
   //@}
 
   /// @name Writing data files
@@ -453,11 +460,11 @@ public:
     
 };
 
-gbtEfgGame *ReadEfg(std::istream &);
+gbtEfgGame ReadEfg(std::istream &);
 
 class gbtPureBehavProfile   {
 protected:
-  gbtEfgGame *m_efg;
+  gbtEfgGame m_efg;
   gbtArray<gbtArray<gbtEfgAction> > m_profile;
 
   void GetPayoff(const gbtEfgNode &n, const gbtRational &, 
@@ -466,7 +473,7 @@ protected:
 		    gbtPVector<gbtRational> &) const;
 
 public:
-  gbtPureBehavProfile(gbtEfgGame *);
+  gbtPureBehavProfile(gbtEfgGame);
 
   // Operators
   gbtPureBehavProfile &operator=(const gbtPureBehavProfile &);
@@ -482,9 +489,9 @@ public:
   gbtRational Payoff(const gbtEfgNode &, int pl) const;
   void Payoff(gbtArray<gbtRational> &payoff) const;
   void InfosetProbs(gbtPVector<gbtRational> &prob) const;
-  gbtEfgGame *GetGame(void) const   { return m_efg; }
+  gbtEfgGame GetGame(void) const   { return m_efg; }
 };
 
-#endif   // EFG_H
+#endif   // LIBGAMBIT_TREEGAME_H
 
 

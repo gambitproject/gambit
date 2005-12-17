@@ -69,7 +69,7 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-template <class T> void Solve(gbtNfgGame *p_nfg, const T &)
+template <class T> void Solve(gbtNfgGame p_nfg, const T &)
 {
   gbtList<gbtVector<T> > key1, key2;  
   gbtList<int> node1, node2;   // IDs of each component of the extreme equilibria
@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  gbtNfgGame *nfg;
+  gbtNfgGame nfg;
 
   try {
     nfg = ReadNfg(std::cin);

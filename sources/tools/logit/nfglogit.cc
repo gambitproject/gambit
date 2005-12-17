@@ -685,7 +685,7 @@ int main(int argc, char *argv[])
   }
 
 
-  gbtNfgGame *nfg;
+  gbtNfgGame nfg;
 
   try {
     nfg = ReadNfg(std::cin);

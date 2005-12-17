@@ -66,7 +66,7 @@ void gbtBehavDominanceStack::Reset(void)
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
   m_supports = gbtArray<gbtEfgSupport *>();
   if (m_doc->GetEfg()) {
-    m_supports.Append(new gbtEfgSupport(*m_doc->GetEfg()));
+    m_supports.Append(new gbtEfgSupport(m_doc->GetEfg()));
     m_current = 1;
   }
 }
@@ -192,7 +192,7 @@ bool gbtStrategyDominanceStack::PreviousLevel(void)
 //                          class gbtGameDocument
 //=========================================================================
 
-gbtGameDocument::gbtGameDocument(gbtEfgGame *p_efg) 
+gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg) 
   : m_efg(p_efg), m_nfg(0),
     m_selectNode(0), m_modified(false),
     m_behavSupports(this, true), m_stratSupports(this, true),
@@ -205,7 +205,7 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame *p_efg)
   m_undoList.Append(s.str());
 }
 
-gbtGameDocument::gbtGameDocument(gbtNfgGame *p_nfg) 
+gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg) 
   : m_efg(0), m_nfg(p_nfg),
     m_selectNode(0), m_modified(false),
     m_behavSupports(this, true), m_stratSupports(this, true),
@@ -249,7 +249,7 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
   if (nfgfile) {
     std::istringstream s(nfgfile->FirstChild()->Value());
     m_nfg = ReadNfg(s);
-    if (m_efg) { delete m_efg; m_efg = 0; }
+    if (m_efg) { m_efg = 0; }
   }
 
   if (!efgfile && !nfgfile) {
@@ -434,11 +434,9 @@ void gbtGameDocument::Undo(void)
   m_undoList.Remove(m_undoList.Length());
 
   if (m_efg) {
-    delete m_efg;
     m_efg = 0;
   }
   else {
-    delete m_nfg;
     m_nfg = 0;
   }
 
@@ -462,11 +460,9 @@ void gbtGameDocument::Redo(void)
   m_redoList.Remove(m_redoList.Length());
 
   if (m_efg) {
-    delete m_efg;
     m_efg = 0;
   }
   else {
-    delete m_nfg;
     m_nfg = 0;
   }
 

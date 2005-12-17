@@ -67,7 +67,7 @@ static gbtMixedProfile<gbtNumber> TextToMixedProfile(gbtGameDocument *p_doc,
 static gbtBehavProfile<gbtNumber> TextToBehavProfile(gbtGameDocument *p_doc,
 						     const wxString &p_text)
 {
-  gbtBehavProfile<gbtNumber> profile(*p_doc->GetEfg());
+  gbtBehavProfile<gbtNumber> profile(p_doc->GetEfg());
 
   wxStringTokenizer tok(p_text, wxT(","));
 

@@ -385,7 +385,7 @@ gbtList<gbtEfgSupport> PossibleNashSubsupports(const gbtEfgSupport &S)
 ActionCursorForSupport::ActionCursorForSupport(const gbtEfgSupport &S)
   : support(&S), pl(1), iset(1), act(1)
 {
-  gbtEfgGame *efg = &S.GetGame();
+  gbtEfgGame efg = S.GetGame();
 
   // Make sure that (pl,iset) points to a valid information set:
   // when solving by subgames, some players may not have any information
@@ -448,8 +448,8 @@ ActionCursorForSupport::GoToNext()
   int tempiset(iset);
   tempiset ++; 
 
-  while (temppl <= support->GetGame().NumPlayers()) {
-    while (tempiset <= support->GetGame().GetPlayer(temppl)->NumInfosets()) {
+  while (temppl <= support->GetGame()->NumPlayers()) {
+    while (tempiset <= support->GetGame()->GetPlayer(temppl)->NumInfosets()) {
       if (support->NumActions(temppl,tempiset) > 0) {
 	pl = temppl;
 	iset = tempiset;
@@ -478,7 +478,7 @@ int ActionCursorForSupport::ActionIndex() const
 
 gbtEfgInfoset ActionCursorForSupport::GetInfoset() const
 {
-  return support->GetGame().GetPlayer(pl)->GetInfoset(iset);
+  return support->GetGame()->GetPlayer(pl)->GetInfoset(iset);
 }
 
 int ActionCursorForSupport::InfosetIndex() const
@@ -488,7 +488,7 @@ int ActionCursorForSupport::InfosetIndex() const
 
 gbtEfgPlayer ActionCursorForSupport::GetPlayer() const
 {
-  return support->GetGame().GetPlayer(pl);
+  return support->GetGame()->GetPlayer(pl);
 }
 
 int ActionCursorForSupport::PlayerIndex() const
@@ -499,8 +499,8 @@ int ActionCursorForSupport::PlayerIndex() const
 bool 
 ActionCursorForSupport::IsLast() const
 {
-  if (pl == support->GetGame().NumPlayers())
-    if (iset == support->GetGame().GetPlayer(pl)->NumInfosets())
+  if (pl == support->GetGame()->NumPlayers())
+    if (iset == support->GetGame()->GetPlayer(pl)->NumInfosets())
       if (act == support->NumActions(pl,iset))
 	return true;
   return false;
@@ -560,13 +560,13 @@ InfosetGuaranteedActiveByPriorCommitments(const gbtEfgSupportWithActiveInfo *S,
 
   for (int i = 1; i <= members.Length(); i++) {
     gbtEfgNode current = members[i];
-    if ( current == S->GetGame().GetRoot() )
+    if ( current == S->GetGame()->GetRoot() )
       return true;
     else
       while ( S->ActionIsActive(current->GetPriorAction()) &&
 	      IsSubsequentTo(current->GetPriorAction()) ) {
 	current = current->GetParent();
-	if ( current == S->GetGame().GetRoot() )
+	if ( current == S->GetGame()->GetRoot() )
 	  return true;
       }
   }

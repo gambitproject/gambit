@@ -40,7 +40,7 @@ bool g_verbose = false;
 class PolEnumModule  {
 private:
   gDouble eps;
-  const gbtNfgGame &NF;
+  gbtNfgGame NF;
   const gbtNfgSupport &support;
   gSpace Space;
   term_order Lex;
@@ -89,9 +89,9 @@ public:
 //-------------------------------------------------------------------------
 
 PolEnumModule::PolEnumModule(const gbtNfgSupport &S)
-  : NF(*S.GetGame()), support(S),
-    Space(support.ProfileLength()-NF.NumPlayers()), 
-    Lex(&Space, lex), num_vars(support.ProfileLength()-NF.NumPlayers()), 
+  : NF(S.GetGame()), support(S),
+    Space(support.ProfileLength()-NF->NumPlayers()), 
+    Lex(&Space, lex), num_vars(support.ProfileLength()-NF->NumPlayers()), 
     count(0), nevals(0), is_singular(false)
 { 
 //  gEpsilon(eps,12);
@@ -104,11 +104,11 @@ int PolEnumModule::PolEnum(void)
 
   /*
   // equations for equality of strat j to strat j+1
-  for( i=1;i<=NF.NumPlayers();i++) 
+  for( i=1;i<=NF->NumPlayers();i++) 
     for(j=1;j<support.NumStrats(i);j++) 
       equations+=IndifferenceEquation(i,j,j+1);
 
-  for( i=1;i<=NF.NumPlayers();i++)
+  for( i=1;i<=NF->NumPlayers();i++)
     if(support.NumStrats(i)>2) 
       equations+=Prob(i,support.NumStrats(i));
   */
@@ -136,7 +136,7 @@ int PolEnumModule::SaveSolutions(const gbtList<gbtVector<gDouble> > &list)
 
   for(k=1;k<=list.Length();k++) {
     kk=0;
-    for(i=1;i<=NF.NumPlayers();i++) {
+    for(i=1;i<=NF->NumPlayers();i++) {
       sum=0;
       for(j=1;j<support.NumStrats(i);j++) {
 	profile(i,j) = (list[k][j+kk]).ToDouble();
@@ -209,7 +209,7 @@ gPoly<gDouble> PolEnumModule::Prob(int p, int strat) const
 gPoly<gDouble> 
 PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 {
-  gbtStrategyProfile profile(const_cast<gbtNfgGame *>(&NF));
+  gbtStrategyProfile profile(NF);
 
   gbtNfgContingencyIterator A(support, i, strat1);
   gbtNfgContingencyIterator B(support, i, strat2);
@@ -219,7 +219,7 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
     gPoly<gDouble> term(&Space,(gDouble)1,&Lex);
     profile = A.GetProfile();
     int k;
-    for(k=1;k<=NF.NumPlayers();k++) 
+    for(k=1;k<=NF->NumPlayers();k++) 
       if(i!=k) 
 	term*=Prob(k,support.GetIndex(profile.GetStrategy(k)));
     gDouble coeff,ap,bp;
@@ -238,7 +238,7 @@ gPolyList<gDouble>   PolEnumModule::IndifferenceEquations()  const
 {
   gPolyList<gDouble> equations(&Space,&Lex);
 
-  for(int pl=1;pl<=NF.NumPlayers();pl++) 
+  for(int pl=1;pl<=NF->NumPlayers();pl++) 
     for(int j=1;j<support.NumStrats(pl);j++) 
       equations+=IndifferenceEquation(pl,j,j+1);
 
@@ -249,7 +249,7 @@ gPolyList<gDouble> PolEnumModule::LastActionProbPositiveInequalities() const
 {
   gPolyList<gDouble> equations(&Space,&Lex);
 
-  for(int pl=1;pl<=NF.NumPlayers();pl++)
+  for(int pl=1;pl<=NF->NumPlayers();pl++)
     if(support.NumStrats(pl)>2) 
       equations+=Prob(pl,support.NumStrats(pl));
 
@@ -355,13 +355,13 @@ PolEnumModule::SolVarsFromgbtMixedProfile(const gbtMixedProfile<double> &sol) co
 {
   int numvars(0);
 
-  for (int pl = 1; pl <= NF.NumPlayers(); pl++) 
+  for (int pl = 1; pl <= NF->NumPlayers(); pl++) 
     numvars += support.NumStrats(pl) - 1;
 
   gbtVector<gDouble> answer(numvars);
   int count(0);
 
-  for (int pl = 1; pl <= NF.NumPlayers(); pl++) 
+  for (int pl = 1; pl <= NF->NumPlayers(); pl++) 
     for (int j = 1; j < support.NumStrats(pl); j++) {
       count ++;
       answer[count] = (gDouble)sol(pl,j);
@@ -413,7 +413,7 @@ PolEnumModule::ReturnPolishedSolution(const gbtVector<gDouble> &root) const
 
   int j;
   int kk=0;
-  for(int pl=1;pl<=NF.NumPlayers();pl++) {
+  for(int pl=1;pl<=NF->NumPlayers();pl++) {
     double sum=0;
     for(j=1;j<support.NumStrats(pl);j++) {
       profile(pl,j) = (root[j+kk]).ToDouble();
@@ -441,7 +441,7 @@ void PrintProfile(std::ostream &p_stream,
 
 gbtMixedProfile<double> ToFullSupport(const gbtMixedProfile<double> &p_profile)
 {
-  gbtNfgGame *nfg = p_profile.GetGame();
+  gbtNfgGame nfg = p_profile.GetGame();
   const gbtNfgSupport &support = p_profile.GetSupport();
 
   gbtMixedProfile<double> fullProfile(nfg);
@@ -483,7 +483,7 @@ void PrintSupport(std::ostream &p_stream,
 
 void Solve(const gbtNfgGame &p_nfg)
 {
-  gbtList<gbtNfgSupport> supports = PossibleNashSubsupports(const_cast<gbtNfgGame *>(&p_nfg));
+  gbtList<gbtNfgSupport> supports = PossibleNashSubsupports(p_nfg);
 
   try {
     for (int i = 1; i <= supports.Length(); i++) {
@@ -576,7 +576,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  gbtNfgGame *nfg;
+  gbtNfgGame nfg;
 
   try {
     nfg = ReadNfg(std::cin);
@@ -585,7 +585,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  Solve(*nfg);
+  Solve(nfg);
   
   return 0;
 }

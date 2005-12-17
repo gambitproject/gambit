@@ -117,9 +117,9 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
   m_outcome = new wxChoice(this, -1);
   m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
-  const gbtEfgGame &efg = *p_node->GetGame();
-  for (int outc = 1; outc <= efg.NumOutcomes(); outc++) {
-    gbtEfgOutcome outcome = efg.GetOutcome(outc);
+  gbtEfgGame efg = p_node->GetGame();
+  for (int outc = 1; outc <= efg->NumOutcomes(); outc++) {
+    gbtEfgOutcome outcome = efg->GetOutcome(outc);
     std::string item = ToText(outc) + ": " + outcome->GetLabel();
     if (item == "") {
       item = "Outcome" + ToText(outc);
@@ -128,9 +128,9 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
     item += (" (" + 
 	     ToText(outcome->GetPayoff(1)) + ", " +
 	     ToText(outcome->GetPayoff(2)));
-    if (efg.NumPlayers() > 2) {
+    if (efg->NumPlayers() > 2) {
       item += ", " + ToText(outcome->GetPayoff(3));
-      if (efg.NumPlayers() > 3) {
+      if (efg->NumPlayers() > 3) {
 	item += ",...)";
       }
       else {

@@ -91,7 +91,7 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
 		0, wxALL, 5);
 
   if (m_doc->GetEfg()) {
-    gbtEfgGame *efg = m_doc->GetEfg();
+    gbtEfgGame efg = m_doc->GetEfg();
     boxSizer->Add(new wxStaticText(this, wxID_STATIC,
 				   wxString::Format(_("Number of players: %d"),
 						    efg->NumPlayers())),
@@ -118,7 +118,7 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
     }
   }
   else {
-    gbtNfgGame *nfg = m_doc->GetNfg();
+    gbtNfgGame nfg = m_doc->GetNfg();
 
     boxSizer->Add(new wxStaticText(this, wxID_STATIC,
 				   wxString::Format(_("Number of players: %d"),

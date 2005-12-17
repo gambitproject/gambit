@@ -30,7 +30,7 @@
 bool gbtNfgSupport::Dominates(gbtNfgStrategy s, gbtNfgStrategy t, 
 			      bool strong) const
 {
-  gbtNfgGame *n = GetGame();
+  gbtNfgGame n = GetGame();
 
   gbtNfgContingencyIterator A(*this,
 			      s->GetPlayer()->GetNumber(), GetIndex(s));

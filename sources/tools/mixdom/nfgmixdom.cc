@@ -33,7 +33,7 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
 			   int pl, bool strong, T /*junk*/,
 			   std::ostream &tracefile)
 {
-  const gbtNfgGame *nfg = S.GetGame();
+  gbtNfgGame nfg = S.GetGame();
   
   gbtArray<bool> dom(S.NumStrats(pl));
   
@@ -218,7 +218,7 @@ bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
 		      std::ostream &tracefile)
 {
   int pl = str->GetPlayer()->GetNumber();
-  gbtNfgGame *nfg = str->GetPlayer()->GetGame();
+  gbtNfgGame nfg = str->GetPlayer()->GetGame();
   int whichstrat = str->GetNumber();
   int strats = S.NumStrats(pl);
 
@@ -379,7 +379,7 @@ bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
 		      bool strong, std::ostream &tracefile)
 {
   gbtNfgSupport S = pr.GetSupport();
-  gbtNfgGame *nfg = pr.GetGame();
+  gbtNfgGame nfg = pr.GetGame();
   int strats = S.NumStrats(pl);
   gbtVector<T> prob = pr.GetRow(pl);
   assert( prob.Length() == strats);
