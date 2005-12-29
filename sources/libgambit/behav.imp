@@ -321,7 +321,7 @@ void gbtBehavProfile<T>::Payoff(gbtEfgNodeRep *node, T prob, int player, T &valu
   gbtEfgInfosetRep *iset = node->infoset;
 
   if (node->outcome) {
-    value += prob * Payoff(node->outcome, player);
+    value += prob * node->outcome->GetPayoff(player);
   }
 
   if (node->children.Length())  {
@@ -443,7 +443,7 @@ void gbtBehavProfile<T>::ComputeSolutionDataPass2(const gbtEfgNode &node) const
 {
   if (node->outcome) {
     for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) { 
-      m_nodeValues(node->number, pl) += Payoff(node->outcome, pl);
+      m_nodeValues(node->number, pl) += node->outcome->GetPayoff(pl);
     }
   }
 

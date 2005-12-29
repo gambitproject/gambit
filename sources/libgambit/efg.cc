@@ -183,14 +183,14 @@ gbtEfgAction gbtEfgNodeRep::GetPriorAction(void) const
   return 0;
 }
 
-void gbtEfgNodeRep::DeleteOutcome(gbtEfgOutcomeRep *outc)
+void gbtEfgNodeRep::DeleteOutcome(Gambit::GameOutcomeRep *outc)
 {
   if (outc == outcome)   outcome = 0;
   for (int i = 1; i <= children.Length(); i++)
     children[i]->DeleteOutcome(outc);
 }
 
-void gbtEfgNodeRep::SetOutcome(const gbtEfgOutcome &p_outcome)
+void gbtEfgNodeRep::SetOutcome(const Gambit::GameOutcome &p_outcome)
 {
   if (p_outcome != outcome) {
     outcome = p_outcome;
@@ -488,7 +488,6 @@ gbtEfgPlayer gbtEfgGameRep::NewPlayer(void)
   for (int outc = 1; outc <= outcomes.Last(); outc++) {
     outcomes[outc]->m_textPayoffs.Append("0");
     outcomes[outc]->m_ratPayoffs.Append(0);
-    outcomes[outc]->m_doublePayoffs.Append(0.0);
   }
 
   ClearComputedValues();
@@ -547,20 +546,20 @@ gbtEfgAction gbtEfgGameRep::GetAction(int p_index) const
 int gbtEfgGameRep::NumOutcomes(void) const
 { return outcomes.Last(); }
 
-gbtEfgOutcome gbtEfgGameRep::NewOutcome(void)
+Gambit::GameOutcome gbtEfgGameRep::NewOutcome(void)
 {
-  outcomes.Append(new gbtEfgOutcomeRep(this, outcomes.Length() + 1));
+  outcomes.Append(new Gambit::GameOutcomeRep(this, outcomes.Length() + 1));
   return outcomes[outcomes.Last()];
 }
 
-void gbtEfgGameRep::DeleteOutcome(const gbtEfgOutcome &p_outcome)
+void gbtEfgGameRep::DeleteOutcome(const Gambit::GameOutcome &p_outcome)
 {
   m_root->DeleteOutcome(p_outcome);
   outcomes.Remove(outcomes.Find(p_outcome))->Invalidate();
   ClearComputedValues();
 }
 
-gbtEfgOutcome gbtEfgGameRep::GetOutcome(int p_index) const
+Gambit::GameOutcome gbtEfgGameRep::GetOutcome(int p_index) const
 {
   return outcomes[p_index];
 }
@@ -1412,27 +1411,5 @@ gbtNfgGame gbtEfgGameRep::MakeReducedNfg(void)
   }
 
   return m_reducedNfg;
-}
-
-gbtEfgOutcomeRep::gbtEfgOutcomeRep(gbtEfgGameRep *p_efg, int p_number)
-  : m_efg(p_efg), m_number(p_number), 
-    m_textPayoffs(p_efg->NumPlayers()), 
-    m_ratPayoffs(p_efg->NumPlayers()),
-    m_doublePayoffs(p_efg->NumPlayers())
-{
-  for (int pl = 1; pl <= m_textPayoffs.Length(); pl++) {
-    m_textPayoffs[pl] = "0";
-    m_doublePayoffs[pl] = 0.0;
-  }
-}
-
-void gbtEfgOutcomeRep::SetPayoff(int pl, const std::string &p_value)
-{
-  m_textPayoffs[pl] = p_value;
-  // Note that ToRational() converts a decimal text string into
-  // an exact fraction
-  m_ratPayoffs[pl] = ToRational(p_value);
-  m_doublePayoffs[pl] = (double) m_ratPayoffs[pl];
-  m_efg->ClearComputedValues();
 }
 

@@ -70,9 +70,9 @@ public:
   const gbtStrategyProfile &GetProfile(void) const { return profile; }
   
   /// Get the outcome assigned to the current contingency
-  gbtNfgOutcome GetOutcome(void) const;
+  Gambit::GameOutcome GetOutcome(void) const;
   /// Set the outcome assigned to the current contingency
-  void SetOutcome(gbtNfgOutcome);
+  void SetOutcome(Gambit::GameOutcome);
   /// Get the payoff to player 'pl' at the current contingency
   gbtRational GetPayoff(int pl) const;
   //@}

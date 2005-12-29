@@ -285,7 +285,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
 	return false;
       }
   
-      gbtEfgOutcome outcome = srcNode->GetGame()->NewOutcome();
+      Gambit::GameOutcome outcome = srcNode->GetGame()->NewOutcome();
       outcome->SetLabel("Outcome" + ToText(outcome->GetNumber()));
       for (int pl = 1; pl <= srcNode->GetGame()->NumPlayers(); pl++) {
 	outcome->SetPayoff(pl, srcNode->GetOutcome()->GetPayoffText(pl));
@@ -434,7 +434,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     else if (p_event.GetKeyCode() == WXK_TAB) {
       m_payoffEditor->EndEdit();
       
-      gbtEfgOutcome outcome = m_payoffEditor->GetOutcome();
+      Gambit::GameOutcome outcome = m_payoffEditor->GetOutcome();
       int player = m_payoffEditor->GetPlayer();
       outcome->SetPayoff(player, 
 			 (const char *) m_payoffEditor->GetValue().mb_str());
@@ -540,7 +540,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 void gbtEfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
 {
   m_payoffEditor->EndEdit();
-  gbtEfgOutcome outcome = m_payoffEditor->GetOutcome();
+  Gambit::GameOutcome outcome = m_payoffEditor->GetOutcome();
   int player = m_payoffEditor->GetPlayer();
   outcome->SetPayoff(player, 
 		     (const char *) m_payoffEditor->GetValue().mb_str());

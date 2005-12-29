@@ -643,7 +643,7 @@ wxString gbtPayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
   if (IsLabelCell(p_coords))  return wxT("");
 
   gbtStrategyProfile profile = m_table->CellToProfile(p_coords);
-  gbtNfgOutcome outcome = profile.GetOutcome();
+  Gambit::GameOutcome outcome = profile.GetOutcome();
   if (outcome) {
     int player = ColToPlayer(p_coords.GetCol());
     return wxString(outcome->GetPayoffText(player).c_str(), *wxConvCurrent);
@@ -657,7 +657,7 @@ void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords,
 				    const wxString &p_value)
 {
   gbtStrategyProfile profile = m_table->CellToProfile(p_coords);
-  gbtNfgOutcome outcome = profile.GetOutcome();
+  Gambit::GameOutcome outcome = profile.GetOutcome();
   if (!outcome) {
     outcome = m_doc->GetNfg()->NewOutcome();
     profile.SetOutcome(outcome);

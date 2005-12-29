@@ -164,9 +164,9 @@ gbtEfgInfoset PlayerData::GetInfoset(int p_number)
 class DefinedOutcomeData {
 public:
   int m_fileID;
-  gbtEfgOutcome m_outcome;
+  Gambit::GameOutcome m_outcome;
 
-  DefinedOutcomeData(int p_number, gbtEfgOutcome p_outcome)
+  DefinedOutcomeData(int p_number, Gambit::GameOutcome p_outcome)
     : m_fileID(p_number), m_outcome(p_outcome) { }
 };
 
@@ -183,7 +183,7 @@ public:
 
   void AddPlayer(const std::string &);
   NodeData *AddNode(const std::string &, int, int);
-  gbtEfgOutcome GetOutcome(int p_number) const;
+  Gambit::GameOutcome GetOutcome(int p_number) const;
 };
 
 TreeData::TreeData(void)
@@ -255,7 +255,7 @@ NodeData *TreeData::AddNode(const std::string &p_name, int p_player, int p_infos
 // been created, returns a pointer to the outcome;
 // otherwise, returns a null outcome
 //
-gbtEfgOutcome TreeData::GetOutcome(int p_number) const
+Gambit::GameOutcome TreeData::GetOutcome(int p_number) const
 {
   for (int outc = 1; outc <= m_outcomes.Length(); outc++) {
     if (m_outcomes[outc]->m_fileID == p_number) {
@@ -706,7 +706,7 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
       p_node->SetOutcome(p_treeData.GetOutcome((*p_nodeData)->m_outcome));
     }
     else {
-      gbtEfgOutcome outcome = p_efg->NewOutcome();
+      Gambit::GameOutcome outcome = p_efg->NewOutcome();
       outcome->SetLabel((*p_nodeData)->m_outcomeData->m_name);
       p_treeData.m_outcomes.Append(new DefinedOutcomeData((*p_nodeData)->m_outcome,
 							  outcome));

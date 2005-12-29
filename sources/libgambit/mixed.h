@@ -47,7 +47,6 @@ private:
 	       int const_st2, int cur_pl, long index, T prob, T &value) const;
   void PPayoff(int pl, int const_pl, int cur_pl, long index, T prob,
 	       gbtVector<T> &value) const;
-  T Payoff(gbtNfgOutcomeRep *o, int pl) const;
 
 public:
   gbtMixedProfile(const gbtNfgSupport &);

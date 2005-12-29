@@ -119,7 +119,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
   m_outcome->SetSelection(0);
   gbtEfgGame efg = p_node->GetGame();
   for (int outc = 1; outc <= efg->NumOutcomes(); outc++) {
-    gbtEfgOutcome outcome = efg->GetOutcome(outc);
+    Gambit::GameOutcome outcome = efg->GetOutcome(outc);
     std::string item = ToText(outc) + ": " + outcome->GetLabel();
     if (item == "") {
       item = "Outcome" + ToText(outc);

@@ -33,7 +33,7 @@
 class gbtPayoffEditor : public wxTextCtrl {
 private:
   gbtNodeEntry *m_entry;
-  gbtEfgOutcome m_outcome;
+  Gambit::GameOutcome m_outcome;
   int m_player;
 
   /// @name Event handlers
@@ -50,7 +50,7 @@ public:
   bool IsEditing(void) const { return IsShown(); }
 
   gbtNodeEntry *GetEntry(void) const { return m_entry; }
-  gbtEfgOutcome GetOutcome(void) const { return m_outcome; }
+  Gambit::GameOutcome GetOutcome(void) const { return m_outcome; }
   int GetPlayer(void) const { return m_player; }
  
   DECLARE_EVENT_TABLE()

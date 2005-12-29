@@ -55,9 +55,9 @@ public:
   void SetStrategy(const gbtNfgStrategy &);
 
   /// Get the outcome that results from the profile
-  gbtNfgOutcome GetOutcome(void) const;
+  Gambit::GameOutcome GetOutcome(void) const;
   /// Set the outcome that results from the profile
-  void SetOutcome(gbtNfgOutcome p_outcome); 
+  void SetOutcome(Gambit::GameOutcome p_outcome); 
 
   /// Get the payoff to player pl that results from the profile
   gbtRational GetPayoff(int pl) const;

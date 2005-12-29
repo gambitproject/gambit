@@ -54,15 +54,15 @@ void gbtStrategyProfile::SetStrategy(const gbtNfgStrategy &s)
   m_profile[s->GetPlayer()->GetNumber()] = s;
 }
 
-gbtNfgOutcome gbtStrategyProfile::GetOutcome(void) const
+Gambit::GameOutcome gbtStrategyProfile::GetOutcome(void) const
 { return m_nfg->results[m_index+1]; }
 
-void gbtStrategyProfile::SetOutcome(gbtNfgOutcome p_outcome)
+void gbtStrategyProfile::SetOutcome(Gambit::GameOutcome p_outcome)
 { m_nfg->results[m_index+1] = p_outcome; }
 
 gbtRational gbtStrategyProfile::GetPayoff(int pl) const
 {
-  gbtNfgOutcome outcome = GetOutcome();
+  Gambit::GameOutcome outcome = GetOutcome();
   if (outcome) {
     return outcome->GetPayoff(pl);
   }

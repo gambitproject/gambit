@@ -27,26 +27,6 @@
 #include "libgambit.h"
 #include "behav.imp"
 
-template<>
-gbtNumber gbtBehavProfile<gbtNumber>::Payoff(gbtEfgOutcomeRep *p_outcome,
-				      int pl) const
-{ 
-  return p_outcome->m_ratPayoffs[pl];
-}
-
-template<>
-gbtRational gbtBehavProfile<gbtRational>::Payoff(gbtEfgOutcomeRep *p_outcome,
-					  int pl) const
-{ 
-  return p_outcome->m_ratPayoffs[pl];
-}
-
-template<>
-double gbtBehavProfile<double>::Payoff(gbtEfgOutcomeRep *p_outcome, int pl) const
-{ 
-  return p_outcome->m_doublePayoffs[pl];
-}
-
 template class gbtBehavProfile<double>;
 template class gbtBehavProfile<gbtRational>;
 template class gbtBehavProfile<gbtNumber>;

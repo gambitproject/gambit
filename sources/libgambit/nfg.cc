@@ -28,37 +28,6 @@
 #include "libgambit.h"
 
 //===========================================================================
-//                          class gbtNfgOutcome
-//===========================================================================
-
-//---------------------------------------------------------------------------
-//                               Lifecycle
-//---------------------------------------------------------------------------
-
-gbtNfgOutcomeRep::gbtNfgOutcomeRep(int n, gbtNfgGameRep *N)
-  : number(n), nfg(N),
-    m_textPayoffs(nfg->NumPlayers()), 
-    m_ratPayoffs(nfg->NumPlayers()),
-    m_doublePayoffs(nfg->NumPlayers())
-{ 
-  for (int pl = 1; pl <= m_textPayoffs.Length(); pl++) {
-    m_textPayoffs[pl] = "0";
-    m_doublePayoffs[pl] = 0.0;
-  }
-}
-
-//---------------------------------------------------------------------------
-//                              Data access
-//---------------------------------------------------------------------------
-
-void gbtNfgOutcomeRep::SetPayoff(int pl, const std::string &p_value)
-{
-  m_textPayoffs[pl] = p_value;
-  m_ratPayoffs[pl] = ToRational(p_value);
-  m_doublePayoffs[pl] = (double) m_ratPayoffs[pl];
-}
-
-//===========================================================================
 //                          class gbtNfgPlayer
 //===========================================================================
 
@@ -270,7 +239,7 @@ void gbtNfgGameRep::WriteNfgFile(std::ostream &p_file) const
 
   p_file << "{\n";
   for (int outc = 1; outc <= outcomes.Length(); outc++)   {
-    p_file << "{ \"" << EscapeQuotes(outcomes[outc]->name) << "\" ";
+    p_file << "{ \"" << EscapeQuotes(outcomes[outc]->m_label) << "\" ";
     for (int pl = 1; pl <= players.Length(); pl++)  {
       p_file << outcomes[outc]->m_textPayoffs[pl];
 
@@ -284,7 +253,7 @@ void gbtNfgGameRep::WriteNfgFile(std::ostream &p_file) const
   
   for (int cont = 1; cont <= ncont; cont++)  {
     if (results[cont] != 0)
-      p_file << results[cont]->number << ' ';
+      p_file << results[cont]->m_number << ' ';
     else
       p_file << "0 ";
   }
@@ -305,7 +274,6 @@ gbtNfgPlayer gbtNfgGameRep::NewPlayer(void)
   for (int outc = 1; outc <= outcomes.Length(); outc++) {
     outcomes[outc]->m_textPayoffs.Append("0");
     outcomes[outc]->m_ratPayoffs.Append(0);
-    outcomes[outc]->m_doublePayoffs.Append(0.0);
   }
 
   return player;
@@ -334,9 +302,9 @@ int gbtNfgGameRep::ProfileLength(void) const
 
 /// Creates a new outcome in the strategic game.  By default, all
 /// payoffs to players are set to zero.  Returns the newly created outcome.
-gbtNfgOutcome gbtNfgGameRep::NewOutcome(void)
+Gambit::GameOutcome gbtNfgGameRep::NewOutcome(void)
 {
-  gbtNfgOutcomeRep *outcome = new gbtNfgOutcomeRep(outcomes.Length() + 1, this);
+  Gambit::GameOutcomeRep *outcome = new Gambit::GameOutcomeRep(this, outcomes.Length() + 1);
   outcomes.Append(outcome);
   return outcome;
 }
@@ -344,7 +312,7 @@ gbtNfgOutcome gbtNfgGameRep::NewOutcome(void)
 /// Deletes an outcome from the strategic game.  If the outcome appears
 /// in any contingency of the game, the outcome of those contingencies
 /// are reset to the trivial null outcome.
-void gbtNfgGameRep::DeleteOutcome(gbtNfgOutcome outcome)
+void gbtNfgGameRep::DeleteOutcome(Gambit::GameOutcome outcome)
 {
   for (int i = 1; i <= results.Length(); i++) {
     if (results[i] == outcome)
@@ -353,8 +321,9 @@ void gbtNfgGameRep::DeleteOutcome(gbtNfgOutcome outcome)
 
   outcomes.Remove(outcome->GetNumber())->Invalidate();
 
-  for (int outc = 1; outc <= outcomes.Length(); outc++)
-    outcomes[outc]->number = outc;
+  for (int outc = 1; outc <= outcomes.Length(); outc++) {
+    outcomes[outc]->m_number = outc;
+  }
 }
 
 //---------------------------------------------------------------------------
@@ -388,7 +357,7 @@ void gbtNfgGameRep::RebuildTable(void)
     size *= players[pl]->NumStrats();
   }
 
-  gbtArray<gbtNfgOutcomeRep *> newResults(size);
+  gbtArray<Gambit::GameOutcomeRep *> newResults(size);
   for (int i = 1; i <= newResults.Length(); newResults[i++] = 0);
 
   gbtNfgContingencyIterator iter(gbtNfgSupport(const_cast<gbtNfgGameRep *>(this)));

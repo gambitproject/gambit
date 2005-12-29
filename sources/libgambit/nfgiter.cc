@@ -106,12 +106,12 @@ bool gbtNfgContingencyIterator::NextContingency(void)
 //                              Data access
 //---------------------------------------------------------------------------
 
-gbtNfgOutcome gbtNfgContingencyIterator::GetOutcome(void) const
+Gambit::GameOutcome gbtNfgContingencyIterator::GetOutcome(void) const
 {
   return profile.GetOutcome();
 }
 
-void gbtNfgContingencyIterator::SetOutcome(gbtNfgOutcome outcome)
+void gbtNfgContingencyIterator::SetOutcome(Gambit::GameOutcome outcome)
 {
   profile.SetOutcome(outcome);
 }

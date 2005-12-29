@@ -284,7 +284,7 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
 {
   wxPoint point(m_x + m_size + 20, m_y);
 
-  gbtEfgOutcome outcome = m_node->GetOutcome();
+  Gambit::GameOutcome outcome = m_node->GetOutcome();
   if (!outcome) {
     if (p_noHints)  return;
 

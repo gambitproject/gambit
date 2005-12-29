@@ -31,24 +31,6 @@
 #include "gpvector.h"
 #include "mixed.h"
 
-template<>
-gbtNumber gbtMixedProfile<gbtNumber>::Payoff(gbtNfgOutcomeRep *o, int pl) const
-{ 
-  return o->m_ratPayoffs[pl];
-}
-
-template<>
-gbtRational gbtMixedProfile<gbtRational>::Payoff(gbtNfgOutcomeRep *o, int pl) const
-{ 
-  return o->m_ratPayoffs[pl];
-}
-
-template<>
-double gbtMixedProfile<double>::Payoff(gbtNfgOutcomeRep *o, int pl) const
-{ 
-  return o->m_doublePayoffs[pl];
-}
-
 //---------------------------------------------------------------------------
 //                    gbtMixedProfile<T> member functions
 //---------------------------------------------------------------------------
@@ -245,7 +227,7 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
 	    prob, value);
   else if (cur_pl > support.GetGame()->NumPlayers())  {
     if (support.GetGame()->results[index]) {
-      value += prob * Payoff(support.GetGame()->results[index], pl);
+      value += prob * support.GetGame()->results[index]->GetPayoff(pl);
     }
   }
   else   {
@@ -271,7 +253,7 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
 	    cur_pl + 1, index,prob, value);
   else if (cur_pl > support.GetGame()->NumPlayers())  {
     if (support.GetGame()->results[index]) {
-      value += prob * Payoff(support.GetGame()->results[index], pl);
+      value += prob * support.GetGame()->results[index]->GetPayoff(pl);
     }
   }
   else   {
@@ -298,7 +280,7 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
     for (int j = 1; j <= support.NumStrats(const_pl); j++ ){ 
       s = support.GetStrategy(const_pl, j);
       if (support.GetGame()->results[index + s->m_index]) {
-	value[j] += prob * Payoff(support.GetGame()->results[index + s->m_index], pl);
+	value[j] += prob * support.GetGame()->results[index + s->m_index]->GetPayoff(pl);
       }
     }
   }

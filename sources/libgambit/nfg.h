@@ -35,9 +35,6 @@
 //
 // Forward declarations of classes defined in this file.
 //
-class gbtNfgOutcomeRep;
-typedef Gambit::GameObjectPtr<gbtNfgOutcomeRep> gbtNfgOutcome;
-
 class gbtNfgStrategyRep;
 typedef Gambit::GameObjectPtr<gbtNfgStrategyRep> gbtNfgStrategy;
 
@@ -47,59 +44,7 @@ typedef Gambit::GameObjectPtr<gbtNfgPlayerRep> gbtNfgPlayer;
 class gbtNfgGameRep;
 typedef Gambit::GameObjectPtr<gbtNfgGameRep> gbtNfgGame;
 
-template <class T> class gbtMixedProfile;
 class gbtNumber;
-
-/// This class represents an outcome in a strategic game.  An outcome
-/// specifies a vector of payoffs to players.  Payoffs are specified
-/// using text strings, in either decimal or rational format.  All
-/// payoffs are treated as exact (that is, no conversion to floating
-/// point is done).
-class gbtNfgOutcomeRep : public Gambit::GameObject  {
-  friend class gbtNfgGameRep;
-  friend class gbtMixedProfile<double>;
-  friend class gbtMixedProfile<gbtRational>;
-  friend class gbtMixedProfile<gbtNumber>;
-private:
-  int number;
-  gbtNfgGameRep *nfg;
-  std::string name;
-  gbtArray<std::string> m_textPayoffs;
-  gbtArray<gbtRational> m_ratPayoffs;
-  gbtArray<double> m_doublePayoffs;
-
-  /// @name Lifecycle
-  //@{
-  /// Creates a new outcome object, with payoffs set to zero
-  gbtNfgOutcomeRep(int n, gbtNfgGameRep *N);
-  //@}
-
-public:
-  /// @name Data access
-  //@{
-  /// Returns the strategic game on which the outcome is defined.
-  gbtNfgGame GetGame(void) const { return nfg; }
-  /// Returns the index number of the outcome
-  int GetNumber(void) const { return number; }
-
-  /// Returns the text label associated with the outcome
-  const std::string &GetName(void) const { return name; }
-  /// Sets the text label associated with the outcome 
-  void SetName(const std::string &s) { name = s; }
-
-  /// Gets the payoff associated with the outcome to player 'pl'
-  const gbtRational &GetPayoff(int pl) const { return m_ratPayoffs[pl]; }
-  /// Gets the text representation of the payoff to player 'pl'
-  const std::string &GetPayoffText(int pl) const
-    { return m_textPayoffs[pl]; }
-  /// Sets the payoff to player 'pl'
-  void SetPayoff(int pl, const std::string &);
-  //@}
-
-};
-
-
-
 class gbtStrategyProfile;
 template <class T> class gbtMixedProfile;
 
@@ -203,7 +148,7 @@ class gbtStrategyProfile;
 /// creation, all entries in the table are set to the null pointer.
 /// See gbtStrategyProfile for the facilities for setting entries
 /// in the game table.
-class gbtNfgGameRep : public Gambit::Game {
+class gbtNfgGameRep : public Gambit::GameRep {
 friend class gbtStrategyProfile;
 friend class NfgFileReader;
 friend class gbtEfgGameRep;
@@ -219,9 +164,9 @@ protected:
   gbtArray<int> dimensions;
 
   gbtArray<gbtNfgPlayerRep *> players;
-  gbtArray<gbtNfgOutcomeRep *> outcomes;
+  gbtArray<Gambit::GameOutcomeRep *> outcomes;
 
-  gbtArray<gbtNfgOutcomeRep *> results;
+  gbtArray<Gambit::GameOutcomeRep *> results;
 
   gbtEfgGame efg;
 
@@ -297,12 +242,12 @@ public:
   /// Returns the number of outcomes defined in the game
   int NumOutcomes(void) const   { return outcomes.Length(); }
   /// Returns the p_outc'th outcome defined in the game
-  gbtNfgOutcome GetOutcome(int p_outc) const { return outcomes[p_outc]; }
+  Gambit::GameOutcome GetOutcome(int p_outc) const { return outcomes[p_outc]; }
 
   /// Creates a new outcome in the game
-  gbtNfgOutcome NewOutcome(void);
+  Gambit::GameOutcome NewOutcome(void);
   /// Deletes the specified outcome from the game
-  void DeleteOutcome(gbtNfgOutcome);
+  void DeleteOutcome(Gambit::GameOutcome);
   //@}
 
   /// Renumber all game objects in a canonical way

@@ -35,9 +35,6 @@
 // Forward declarations of classes defined in this file.
 //
 
-class gbtEfgOutcomeRep;
-typedef Gambit::GameObjectPtr<gbtEfgOutcomeRep> gbtEfgOutcome;
-
 class gbtEfgActionRep;
 typedef Gambit::GameObjectPtr<gbtEfgActionRep> gbtEfgAction;
 
@@ -70,35 +67,6 @@ public:
   virtual ~gbtEfgException()   { }
   std::string GetDescription(void) const  
     { return "Internal error in extensive form representation"; }
-};
-
-
-class gbtEfgOutcomeRep : public Gambit::GameObject {
-  friend class gbtEfgGameRep;
-  friend class gbtBehavProfile<double>;
-  friend class gbtBehavProfile<gbtRational>;
-  friend class gbtBehavProfile<gbtNumber>;
-protected:
-  gbtEfgGameRep *m_efg; 
-  int m_number;
-  std::string m_label;
-  gbtArray<std::string> m_textPayoffs;
-  gbtArray<gbtRational> m_ratPayoffs;
-  gbtArray<double> m_doublePayoffs;
-
-  gbtEfgOutcomeRep(gbtEfgGameRep *p_efg, int p_number);
-  ~gbtEfgOutcomeRep()  { }
-
-public:
-  gbtEfgGame GetGame(void) const { return m_efg; }
-  int GetNumber(void) const { return m_number; }
-  
-  const std::string &GetLabel(void) const { return m_label; }
-  void SetLabel(const std::string &p_label) { m_label = p_label; }
-
-  void SetPayoff(int pl, const std::string &value);
-  const gbtRational GetPayoff(int pl) const  { return m_ratPayoffs[pl]; }
-  const std::string &GetPayoffText(int pl) const { return m_textPayoffs[pl]; }
 };
 
 
@@ -229,14 +197,14 @@ protected:
   std::string m_label;
   gbtEfgInfosetRep *infoset;
   gbtEfgNodeRep *parent;
-  gbtEfgOutcomeRep *outcome;
+  Gambit::GameOutcomeRep *outcome;
   gbtArray<gbtEfgNodeRep *> children;
   gbtEfgNodeRep *whichbranch, *ptr;
 
   gbtEfgNodeRep(gbtEfgGameRep *e, gbtEfgNodeRep *p);
   ~gbtEfgNodeRep();
 
-  void DeleteOutcome(gbtEfgOutcomeRep *outc);
+  void DeleteOutcome(Gambit::GameOutcomeRep *outc);
 
 public:
   gbtEfgGame GetGame(void) const { return m_efg; }
@@ -260,14 +228,14 @@ public:
   gbtEfgNode GetNextSibling(void) const;
   gbtEfgNode GetPriorSibling(void) const;
 
-  gbtEfgOutcome GetOutcome(void) const { return gbtEfgOutcome(outcome); }
-  void SetOutcome(const gbtEfgOutcome &p_outcome);
+  Gambit::GameOutcome GetOutcome(void) const { return outcome; }
+  void SetOutcome(const Gambit::GameOutcome &p_outcome);
 
   bool IsSuccessorOf(gbtEfgNode from) const;
   bool IsSubgameRoot(void) const;
 };
 
-class gbtEfgGameRep : public Gambit::Game {
+class gbtEfgGameRep : public Gambit::GameRep {
 private:
   friend class EfgFileReader;
   friend class EfgFile;
@@ -285,7 +253,7 @@ private:
 protected:
   std::string title, comment;
   gbtArray<gbtEfgPlayerRep *> players;
-  gbtArray<gbtEfgOutcomeRep *> outcomes;
+  gbtArray<Gambit::GameOutcomeRep *> outcomes;
   gbtEfgNodeRep *m_root;
   gbtEfgPlayerRep *chance;
   mutable gbtNfgGame m_reducedNfg;
@@ -406,12 +374,12 @@ public:
   /// Returns the number of outcomes defined in the game
   int NumOutcomes(void) const;
   /// Returns the index'th outcome defined in the game
-  gbtEfgOutcome GetOutcome(int index) const;
+  Gambit::GameOutcome GetOutcome(int index) const;
 
   /// Creates a new outcome in the game
-  gbtEfgOutcome NewOutcome(void);
+  Gambit::GameOutcome NewOutcome(void);
   /// Deletes the specified outcome from the game
-  void DeleteOutcome(const gbtEfgOutcome &);
+  void DeleteOutcome(const Gambit::GameOutcome &);
   //@}
 
   /// Renumber all game objects in a canonical way

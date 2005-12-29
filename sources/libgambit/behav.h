@@ -104,7 +104,6 @@ protected:
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
 
   void Payoff(gbtEfgNodeRep *, T, int, T &) const;
-  T Payoff(gbtEfgOutcomeRep *, int pl) const;
   
   void ComputeSolutionDataPass2(const gbtEfgNode &node) const;
   void ComputeSolutionDataPass1(const gbtEfgNode &node) const;

@@ -28,6 +28,9 @@
 #ifndef LIBGAMBIT_GAME_H
 #define LIBGAMBIT_GAME_H
 
+class gbtEfgGameRep;
+class gbtNfgGameRep;
+
 namespace Gambit {
 
 /// This is a base class for all game-related objects.  Primary among
@@ -112,7 +115,7 @@ public:
 //
 // This is a base class for representing an arbitrary finite game.
 //
-class Game : public GameObject {
+class GameRep : public GameObject {
 public:
   /// Get the text label associated with the game
   virtual const std::string &GetTitle(void) const = 0;
@@ -133,7 +136,75 @@ public:
 
   /// Renumber all game objects in a canonical way
   virtual void Canonicalize(void) = 0;  
+
+  /// Returns the number of players in the game
+  virtual int NumPlayers(void) const = 0; 
 };
+
+typedef GameObjectPtr<GameRep> Game;
+
+
+/// This class represents an outcome in a game.  An outcome
+/// specifies a vector of payoffs to players.  Payoffs are specified
+/// using text strings, in either decimal or rational format.  All
+/// payoffs are treated as exact (that is, no conversion to floating
+/// point is done).
+class GameOutcomeRep : public GameObject  {
+  friend class ::gbtNfgGameRep;
+  friend class ::gbtEfgGameRep;
+
+private:
+  GameRep *m_game;
+  int m_number;
+  std::string m_label;
+  gbtArray<std::string> m_textPayoffs;
+  gbtArray<gbtRational> m_ratPayoffs;
+
+  /// @name Lifecycle
+  //@{
+  /// Creates a new outcome object, with payoffs set to zero
+  GameOutcomeRep(GameRep *p_game, int p_number)
+    : m_game(p_game), m_number(p_number),
+      m_textPayoffs(m_game->NumPlayers()),
+      m_ratPayoffs(m_game->NumPlayers())
+    {
+      for (int pl = 1; pl <= m_textPayoffs.Length(); pl++) {
+	m_textPayoffs[pl] = "0";
+      }
+    }
+
+  virtual ~GameOutcomeRep() { }
+  //@}
+
+public:
+  /// @name Data access
+  //@{
+  /// Returns the strategic game on which the outcome is defined.
+  Gambit::Game GetGame(void) const { return m_game; }
+  /// Returns the index number of the outcome
+  int GetNumber(void) const { return m_number; }
+
+  /// Returns the text label associated with the outcome
+  const std::string &GetLabel(void) const { return m_label; }
+  /// Sets the text label associated with the outcome 
+  void SetLabel(const std::string &p_label) { m_label = p_label; }
+
+  /// Gets the payoff associated with the outcome to player 'pl'
+  const gbtRational &GetPayoff(int pl) const { return m_ratPayoffs[pl]; }
+  /// Gets the text representation of the payoff to player 'pl'
+  const std::string &GetPayoffText(int pl) const { return m_textPayoffs[pl]; }
+  /// Sets the payoff to player 'pl'
+  void SetPayoff(int pl, const std::string &p_value)
+  {
+    m_textPayoffs[pl] = p_value;
+    m_ratPayoffs[pl] = ToRational(p_value);
+    //  m_efg->ClearComputedValues();
+  }
+  //@}
+
+};
+
+typedef GameObjectPtr<GameOutcomeRep> GameOutcome;
 
 } // end namespace gambit
 
