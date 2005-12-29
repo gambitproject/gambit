@@ -95,6 +95,7 @@ public:
   /// Sets the payoff to player 'pl'
   void SetPayoff(int pl, const std::string &);
   //@}
+
 };
 
 
@@ -304,6 +305,8 @@ public:
   void DeleteOutcome(gbtNfgOutcome);
   //@}
 
+  /// Renumber all game objects in a canonical way
+  void Canonicalize(void) { }
 };
 
 // Exception thrown by ReadNfg if not valid .nfg file

@@ -238,7 +238,6 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       if (node->NumChildren() > 0 &&
 	  node->NumChildren() == srcNode->NumChildren()) {
 	efg->JoinInfoset(srcNode->GetInfoset(), node);
-	efg->DeleteEmptyInfosets();
 	m_owner->GetDocument()->UpdateViews(GBT_DOC_MODIFIED_GAME);
 	return true;
       }

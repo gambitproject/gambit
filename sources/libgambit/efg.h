@@ -283,7 +283,6 @@ private:
   friend class gbtMixedProfile<gbtNumber>;
   
 protected:
-  bool sortisets;
   std::string title, comment;
   gbtArray<gbtEfgPlayerRep *> players;
   gbtArray<gbtEfgOutcomeRep *> outcomes;
@@ -291,17 +290,13 @@ protected:
   gbtEfgPlayerRep *chance;
   mutable gbtNfgGame m_reducedNfg;
   
-  // this is for use with the copy constructor
-  void CopySubtree(gbtEfgNodeRep *, gbtEfgNodeRep *);
-
   void CopySubtree(gbtEfgNodeRep *, gbtEfgNodeRep *, gbtEfgNodeRep *);
   void MarkSubtree(gbtEfgNodeRep *);
   void UnmarkSubtree(gbtEfgNodeRep *);
 
-  void SortInfosets(void);
   void NumberNodes(gbtEfgNodeRep *, int &);
   
-  void DeleteLexicon(void) const;
+  void ClearComputedValues(void) const;
 
   void WriteEfgFile(std::ostream &, gbtEfgNodeRep *) const;
 
@@ -330,8 +325,6 @@ public:
   //@{
   /// Construct a new trivial extensive game
   gbtEfgGameRep(void);
-  /// Create a copy of the extensive game, starting at the specified node
-    //gbtEfgGameRep(const gbtEfgGame &, gbtEfgNode = 0);
   /// Clean up the extensive game
   virtual ~gbtEfgGameRep();
   //@}
@@ -421,6 +414,9 @@ public:
   void DeleteOutcome(const gbtEfgOutcome &);
   //@}
 
+  /// Renumber all game objects in a canonical way
+  void Canonicalize(void);
+
   // EDITING OPERATIONS
   gbtEfgInfoset AppendNode(gbtEfgNode n, gbtEfgPlayer p, int br);
   gbtEfgInfoset AppendNode(gbtEfgNode n, gbtEfgInfoset s);
@@ -428,9 +424,6 @@ public:
   gbtEfgInfoset InsertNode(gbtEfgNode n, gbtEfgPlayer p, int br);
   gbtEfgInfoset InsertNode(gbtEfgNode n, gbtEfgInfoset s);
 
-  gbtEfgInfoset CreateInfoset(gbtEfgPlayer pl, int br);
-  bool DeleteEmptyInfoset(gbtEfgInfoset);
-  void DeleteEmptyInfosets(void);
   gbtEfgInfoset JoinInfoset(gbtEfgInfoset s, gbtEfgNode n);
   gbtEfgInfoset LeaveInfoset(gbtEfgNode n);
   gbtEfgInfoset SplitInfoset(gbtEfgNode n);

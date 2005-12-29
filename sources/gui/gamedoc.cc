@@ -382,6 +382,13 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
 {
   if (p_modifications != GBT_DOC_MODIFIED_NONE) {
     m_modified = true;
+    if (m_efg) {
+      m_efg->Canonicalize();
+    }
+    else {
+      m_nfg->Canonicalize();
+    }
+
     m_redoList = gbtList<std::string>();
 
     std::ostringstream s;

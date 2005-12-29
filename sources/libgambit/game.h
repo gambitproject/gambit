@@ -130,6 +130,9 @@ public:
   virtual gbtRational GetMinPayoff(int pl = 0) const = 0;
   /// Returns the largest payoff in any outcome of the game
   virtual gbtRational GetMaxPayoff(int pl = 0) const = 0;
+
+  /// Renumber all game objects in a canonical way
+  virtual void Canonicalize(void) = 0;  
 };
 
 } // end namespace gambit

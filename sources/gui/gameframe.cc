@@ -1075,7 +1075,6 @@ void gbtGameFrame::OnEditDeleteTree(wxCommandEvent &)
   if (!m_doc->GetSelectNode())  return;
 
   m_doc->GetEfg()->DeleteTree(m_doc->GetSelectNode());
-  m_doc->GetEfg()->DeleteEmptyInfosets();
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -1085,7 +1084,6 @@ void gbtGameFrame::OnEditDeleteParent(wxCommandEvent &)
 
   m_doc->GetEfg()->DeleteNode(m_doc->GetSelectNode()->GetParent(),
 			      m_doc->GetSelectNode());
-  m_doc->GetEfg()->DeleteEmptyInfosets();
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -1104,7 +1102,6 @@ void gbtGameFrame::OnEditReveal(wxCommandEvent &)
     try {
       m_doc->GetEfg()->Reveal(m_doc->GetSelectNode()->GetInfoset(), 
 			      dialog.GetPlayers());
-      m_doc->GetEfg()->DeleteEmptyInfosets();
       m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
     }
     catch (gbtException &ex) {
@@ -1133,7 +1130,6 @@ void gbtGameFrame::OnEditNode(wxCommandEvent &)
       else {
 	m_doc->GetEfg()->JoinInfoset(dialog.GetInfoset(), 
 				     m_doc->GetSelectNode());
-	m_doc->GetEfg()->DeleteEmptyInfosets();
       }
     }
     m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
