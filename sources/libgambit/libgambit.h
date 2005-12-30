@@ -56,7 +56,6 @@ inline double pow(double x, long y)
 
 #include "gvector.h"
 #include "gmatrix.h"
-#include "gsmatrix.h"
 
 #include "efg.h"
 #include "efstrat.h"

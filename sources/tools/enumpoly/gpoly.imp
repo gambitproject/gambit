@@ -837,7 +837,7 @@ gPoly<T>::TranslateOfPoly(const gbtVector<T>& new_origin) const
 
 template<class T> gPoly<T>  
 gPoly<T>::MonoInNewCoordinates(const gMono<T>& m, 
-					    const gbtSquareMatrix<T>& M) const
+			       const Gambit::SquareMatrix<T>& M) const
 {
   assert(M.NumRows() == Dmnsn());
 
@@ -860,7 +860,7 @@ gPoly<T>::MonoInNewCoordinates(const gMono<T>& m,
 }
 
 template<class T> 
-gPoly<T> gPoly<T>::PolyInNewCoordinates(const gbtSquareMatrix<T>& M) const
+gPoly<T> gPoly<T>::PolyInNewCoordinates(const Gambit::SquareMatrix<T>& M) const
 {
   gPoly<T> answer(GetSpace(), GetOrder());
   for (int i = 1; i <= MonomialList().Length(); i++) 

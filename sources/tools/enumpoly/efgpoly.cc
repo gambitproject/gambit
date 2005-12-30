@@ -272,7 +272,7 @@ EfgPolEnumModule<T>::NashOnSupportSolnVectors(const gPolyList<T> &equations,
 #endif  // UNUSED
     }
   }
-  catch (gbtSingularMatrixException) {
+  catch (Gambit::SingularMatrixException) {
     is_singular = true;
   }
   
@@ -519,7 +519,7 @@ const int EfgPolEnumModule<T>::PolishKnownRoot(gbtVector<gDouble> &point) const
     try { 
       point = quickie.NewtonPolishedRoot(point);
     }
-    catch (gbtSingularMatrixException &) {
+    catch (Gambit::SingularMatrixException &) {
       return 0;
     }
 

@@ -29,7 +29,8 @@
 #include <math.h>
 #include <iostream>
 #include <fstream>
-#include "libgambit/libgambit.h"
+#include <libgambit/libgambit.h>
+#include <libgambit/sqmatrix.h>
 
 //=========================================================================
 //             QRE Correspondence Computation via Homotopy
@@ -404,7 +405,7 @@ static void TracePath(const gbtMixedProfile<double> &p_start,
   gbtVector<double> y(p_start.Length());
 
   gbtMatrix<double> b(p_start.Length() + 1, p_start.Length());
-  gbtSquareMatrix<double> q(p_start.Length() + 1);
+  Gambit::SquareMatrix<double> q(p_start.Length() + 1);
   QreJacobian(p_start.GetSupport(), x, isLog, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);

@@ -277,7 +277,7 @@ PolEnumModule::NashOnSupportSolnVectors(const gPolyList<gDouble> &equations,
   try {
     quickie.FindCertainNumberOfRoots(Cube,2147483647,0);
   }
-  catch (gbtSingularMatrixException) {
+  catch (Gambit::SingularMatrixException) {
     is_singular = true;
   }
 
@@ -394,7 +394,7 @@ const int PolEnumModule::PolishKnownRoot(gbtVector<gDouble> &point) const
     try { 
       point = quickie.NewtonPolishedRoot(point);
     }
-    catch (gbtSingularMatrixException &) {
+    catch (Gambit::SingularMatrixException &) {
       return 0;
     }
 

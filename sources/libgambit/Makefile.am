@@ -18,7 +18,7 @@ libgambit_la_SOURCES = \
 	gnumber.cc gnumber.h \
 	gpvector.cc gpvector.h gpvector.imp \
 	grarray.h \
-	gsmatrix.cc gsmatrix.h gsmatrix.imp \
+	sqmatrix.cc sqmatrix.h sqmatrix.imp \
 	gvector.cc gvector.h gvector.imp \
 	integer.cc integer.h \
 	libgambit.h \
@@ -48,7 +48,7 @@ libgambitinclude_HEADERS = \
 	gnumber.h \
 	gpvector.h gpvector.imp \
 	grarray.h \
-	gsmatrix.h gsmatrix.imp \
+	sqmatrix.h sqmatrix.imp \
 	gvector.h gvector.imp \
 	integer.h \
 	libgambit.h \

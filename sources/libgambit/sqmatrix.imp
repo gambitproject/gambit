@@ -24,47 +24,49 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gsmatrix.h"
+#include "sqmatrix.h"
+
+namespace Gambit {
 
 //-----------------------------------------------------------------------------
-//     gbtSquareMatrix<T>: Constructors, destructor, constructive operators
+//     SquareMatrix<T>: Constructors, destructor, constructive operators
 //-----------------------------------------------------------------------------
 
-template <class T> gbtSquareMatrix<T>::gbtSquareMatrix(void)   { }
+template <class T> SquareMatrix<T>::SquareMatrix(void)   { }
 
-template <class T> gbtSquareMatrix<T>::gbtSquareMatrix(int size)
+template <class T> SquareMatrix<T>::SquareMatrix(int size)
   : gbtMatrix<T>(size, size)
 { }
 
-template <class T> gbtSquareMatrix<T>::gbtSquareMatrix(const gbtMatrix<T> &M)
+template <class T> SquareMatrix<T>::SquareMatrix(const gbtMatrix<T> &M)
   : gbtMatrix<T>(M)
 { assert ( M.NumRows() == M.NumColumns() ); }
 
-template <class T> gbtSquareMatrix<T>::gbtSquareMatrix(const gbtSquareMatrix<T> &M)
+template <class T> SquareMatrix<T>::SquareMatrix(const SquareMatrix<T> &M)
   : gbtMatrix<T>(M)
 { }
 
-template <class T> gbtSquareMatrix<T>::~gbtSquareMatrix()   { }
+template <class T> SquareMatrix<T>::~SquareMatrix()   { }
 
 template <class T>
-gbtSquareMatrix<T> &gbtSquareMatrix<T>::operator=(const gbtSquareMatrix<T> &M)
+SquareMatrix<T> &SquareMatrix<T>::operator=(const SquareMatrix<T> &M)
 {
   gbtMatrix<T>::operator=(M);
   return *this;
 }
 
 //-----------------------------------------------------------------------------
-//                gbtSquareMatrix<T>: Public member functions
+//                SquareMatrix<T>: Public member functions
 //-----------------------------------------------------------------------------
 
-template <class T> gbtSquareMatrix<T> gbtSquareMatrix<T>::Inverse(void) const
+template <class T> SquareMatrix<T> SquareMatrix<T>::Inverse(void) const
 {
   if (this->mincol != this->minrow || this->maxcol != this->maxrow) {
     throw gbtDimensionException();
   }
 
-  gbtSquareMatrix<T> copy(*this);
-  gbtSquareMatrix<T> inv(this->maxrow);
+  SquareMatrix<T> copy(*this);
+  SquareMatrix<T> inv(this->maxrow);
 
   // initialize inverse matrix and prescale row vectors
   for (int i = this->minrow; i <= this->maxrow; i++)   {
@@ -78,7 +80,7 @@ template <class T> gbtSquareMatrix<T> gbtSquareMatrix<T>::Inverse(void) const
     }
 
     if (max == (T) 0) {
-      throw gbtSingularMatrixException();
+      throw SingularMatrixException();
     }
 
     T scale = (T) 1 / max;
@@ -108,7 +110,7 @@ template <class T> gbtSquareMatrix<T> gbtSquareMatrix<T>::Inverse(void) const
     }
     
     if (max <= (T) 0) {
-      throw gbtSingularMatrixException();
+      throw SingularMatrixException();
     }
 
     copy.SwitchRows(i, row);
@@ -135,10 +137,10 @@ template <class T> gbtSquareMatrix<T> gbtSquareMatrix<T>::Inverse(void) const
   return inv;
 }
 
-template <class T> T gbtSquareMatrix<T>::Determinant(void) const
+template <class T> T SquareMatrix<T>::Determinant(void) const
 {
   T factor = (T) 1;
-  gbtSquareMatrix<T> M(*this);
+  SquareMatrix<T> M(*this);
   
   for (int row = this->minrow; row <= this->maxrow; row++)  {
 
@@ -179,4 +181,4 @@ template <class T> T gbtSquareMatrix<T>::Determinant(void) const
 }
 
 
-
+}  // end namespace Gambit

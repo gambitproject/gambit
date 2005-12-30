@@ -459,11 +459,11 @@ ListOfPartialTrees<T>::DerivativeMatrix(const gbtVector<T>& p,
   return answer;
 }
 
-template <class T> gbtSquareMatrix<T> 
+template <class T> Gambit::SquareMatrix<T> 
 ListOfPartialTrees<T>::SquareDerivativeMatrix(const gbtVector<T>& p) const
 {
   assert (Length() >= Dmnsn());
-  gbtSquareMatrix<T> answer(Dmnsn());
+  Gambit::SquareMatrix<T> answer(Dmnsn());
   int i;
   for (i = 1; i <= Dmnsn(); i++)
     for (int j = 1; j <= Dmnsn(); j++)

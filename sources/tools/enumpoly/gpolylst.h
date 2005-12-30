@@ -28,7 +28,7 @@
 #define GPOLYLST_H
 
 #include "odometer.h"
-#include "libgambit/gsmatrix.h"
+#include <libgambit/sqmatrix.h>
 #include "gpoly.h"
 
 //!
@@ -106,7 +106,7 @@ template <class T> class gPolyList
 
   // New Coordinate Systems
    gPolyList<T> TranslateOfSystem(const gbtVector<T>&)            const;
-   gPolyList<T> SystemInNewCoordinates(const gbtSquareMatrix<T>&) const;
+   gPolyList<T> SystemInNewCoordinates(const Gambit::SquareMatrix<T>&) const;
 
   // Truncations
    gPolyList<T> InteriorSegment(int, int)                       const;
@@ -123,7 +123,7 @@ template <class T> class gPolyList
    const gbtRectArray<gPoly<T>*> DerivativeMatrix()                     const;
    const gPoly<T>           DetOfDerivativeMatrix()                   const;
    const gbtMatrix<T>         DerivativeMatrix(const gbtVector<T>&)       const;
-   const gbtSquareMatrix<T>   SquareDerivativeMatrix(const gbtVector<T>&) const;
+   const Gambit::SquareMatrix<T>   SquareDerivativeMatrix(const gbtVector<T>&) const;
 
 //  inline int static Count() { return Counted<gPolyList<T> >::objCount(); }
 

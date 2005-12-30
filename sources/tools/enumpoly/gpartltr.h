@@ -126,7 +126,7 @@ public:
     { assert (Length() > 0); return PartialTreeList[1].Dmnsn(); }
   gbtMatrix<T> DerivativeMatrix(const gbtVector<T>&)                  const; 
   gbtMatrix<T> DerivativeMatrix(const gbtVector<T>&, const int&)      const; 
-  gbtSquareMatrix<T> SquareDerivativeMatrix(const gbtVector<T>&)      const; 
+  Gambit::SquareMatrix<T> SquareDerivativeMatrix(const gbtVector<T>&)      const; 
   gbtVector<T> ValuesOfRootPolys(const gbtVector<T>&, const int&)     const;
    T         MaximalNonconstantDifference(const int&,
 					  const int&,

@@ -24,10 +24,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gsmatrix.imp"
+#include "sqmatrix.imp"
 #include "rational.h"
 
-template class gbtSquareMatrix<double>;
-template class gbtSquareMatrix<gbtRational>;
+template class Gambit::SquareMatrix<double>;
+template class Gambit::SquareMatrix<gbtRational>;
 
 

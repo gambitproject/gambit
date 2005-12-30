@@ -27,7 +27,8 @@
 #ifndef GPOLY_H
 #define GPOLY_H
 
-#include "libgambit/libgambit.h"
+#include <libgambit/libgambit.h>
+#include <libgambit/sqmatrix.h>
 #include "monomial.h"
 #include "poly.h"
 
@@ -70,7 +71,7 @@ private:
   // The following is used to construct the translate of *this.
   gPoly<T> TranslateOfMono(const gMono<T>&, const gbtVector<T>&) const;
   gPoly<T> MonoInNewCoordinates(const gMono<T>&, 
-				const gbtSquareMatrix<T>&)       const;
+				const Gambit::SquareMatrix<T>&)       const;
 
 
   //-----------------------------------------------
@@ -166,7 +167,7 @@ public:
   gbtList<gMono<T> >   MonomialList()                        const;
 
   gPoly<T>           TranslateOfPoly(const gbtVector<T>&)    const;
-  gPoly<T>   PolyInNewCoordinates(const gbtSquareMatrix<T>&) const;
+  gPoly<T>   PolyInNewCoordinates(const Gambit::SquareMatrix<T>&) const;
   T                  MaximalValueOfNonlinearPart(const T&) const;
 
   //--------------------

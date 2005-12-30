@@ -24,30 +24,35 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GSMATRIX_H
-#define GSMATRIX_H
+#ifndef LIBGAMBIT_SQMATRIX_H
+#define LIBGAMBIT_SQMATRIX_H
 
 #include "gmatrix.h"
 
-class gbtSingularMatrixException : public gbtException {
+
+namespace Gambit {
+
+class SingularMatrixException : public ::gbtException {
 public:
-  virtual ~gbtSingularMatrixException() { }
+  virtual ~SingularMatrixException() { }
   std::string GetDescription(void) const
     { return "Attempted to invert a singular matrix"; }
 };
 
-template <class T> class gbtSquareMatrix : public gbtMatrix<T>   {
+template <class T> class SquareMatrix : public ::gbtMatrix<T>   {
 public:
-  gbtSquareMatrix(void);
-  gbtSquareMatrix(int size);
-  gbtSquareMatrix(const gbtMatrix<T> &);
-  gbtSquareMatrix(const gbtSquareMatrix<T> &);
-  virtual ~gbtSquareMatrix();
+  SquareMatrix(void);
+  SquareMatrix(int size);
+  SquareMatrix(const ::gbtMatrix<T> &);
+  SquareMatrix(const SquareMatrix<T> &);
+  virtual ~SquareMatrix();
 
-  gbtSquareMatrix<T> &operator=(const gbtSquareMatrix<T> &);
+  SquareMatrix<T> &operator=(const SquareMatrix<T> &);
 
-  gbtSquareMatrix<T> Inverse(void) const;
+  SquareMatrix<T> Inverse(void) const;
   T Determinant(void) const;
 };
 
-#endif    // GSMATRIX_H
+}  // end namespace Gambit
+
+#endif   // LIBGAMBIT_SQMATRIX_H

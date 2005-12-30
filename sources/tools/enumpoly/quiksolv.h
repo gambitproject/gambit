@@ -109,11 +109,11 @@ template <class T> class QuikSolv {
    gDouble MaxDistanceFromPointToVertexAfterTransformation(
 				      const gRectangle<gDouble>&,
 				      const gbtVector<gDouble>&,
-				      const gbtSquareMatrix<gDouble>&)     const;
+				      const Gambit::SquareMatrix<gDouble>&)     const;
 
    bool HasNoOtherRootsIn(const gRectangle<gDouble>&,
 			  const gbtVector<gDouble>&,
-			  const gbtSquareMatrix<gDouble>&)                 const;
+			  const Gambit::SquareMatrix<gDouble>&)                 const;
 
 
   // Combine the last two steps into a single query

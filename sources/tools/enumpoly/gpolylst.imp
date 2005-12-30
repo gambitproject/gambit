@@ -411,7 +411,7 @@ gPolyList<T>::TranslateOfSystem(const gbtVector<T>& new_origin) const
 }
 
 template<class T> gPolyList<T> 
-gPolyList<T>::SystemInNewCoordinates(const gbtSquareMatrix<T>& M) const
+gPolyList<T>::SystemInNewCoordinates(const Gambit::SquareMatrix<T>& M) const
 {
   gbtList<gPoly<T> > new_polys;
   for (int i = 1; i <= Length(); i++) {
@@ -521,12 +521,12 @@ const gbtMatrix<T> gPolyList<T>::DerivativeMatrix(const gbtVector<T>& p) const
   return answer;
 }
   
-template<class T> const gbtSquareMatrix<T> 
+template<class T> const Gambit::SquareMatrix<T> 
 gPolyList<T>::SquareDerivativeMatrix(const gbtVector<T>& p) const
 {
   assert (Length() == Dmnsn());
 
-  gbtSquareMatrix<T> answer(Length());
+  Gambit::SquareMatrix<T> answer(Length());
   gbtList<gPoly<T> > list = UnderlyingbtList();
   int ii;
   for (ii = 1; ii <= Length(); ii++)

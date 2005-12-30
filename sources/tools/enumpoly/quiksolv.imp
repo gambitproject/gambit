@@ -200,7 +200,7 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
     try {
       newpoint = NewtonPolishOnce(point);
     }
-    catch (gbtSingularMatrixException) {
+    catch (Gambit::SingularMatrixException) {
       bool nonsingular = false;
       int direction = 1;
       while (direction < Dmnsn() && !nonsingular) {
@@ -217,7 +217,7 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
 	  newpoint = point + 
 	    (NewtonPolishOnce(perturbed_point) - perturbed_point);
 	}
-	catch (gbtSingularMatrixException) {
+	catch (Gambit::SingularMatrixException) {
 	  nonsingular = false;
 	}
 	direction++;
@@ -293,7 +293,7 @@ template<class T>
    gDouble QuikSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
 				      const gRectangle<gDouble>& r,
 				      const gbtVector<gDouble>& p,
-				      const gbtSquareMatrix<gDouble>& M)    const
+				      const Gambit::SquareMatrix<gDouble>& M)    const
 {
   assert( r.Contains(p) );
 
@@ -322,7 +322,7 @@ template<class T>
 template<class T>
 bool QuikSolv<T>::HasNoOtherRootsIn(const gRectangle<gDouble>& r,
 			  const gbtVector<gDouble>& p,
-			  const gbtSquareMatrix<gDouble>& M)  const
+			  const Gambit::SquareMatrix<gDouble>& M)  const
 {
   assert (NoEquations == System.Dmnsn());
 
@@ -352,7 +352,7 @@ bool QuikSolv<T>::NewtonRootIsOnlyInRct(const gRectangle<gDouble>& r,
   assert (NoEquations == System.Dmnsn());
 
   if ( NewtonRootInRectangle(r,point) ) {
-    gbtSquareMatrix<gDouble> Df = TreesOfPartials.SquareDerivativeMatrix(point);
+    Gambit::SquareMatrix<gDouble> Df = TreesOfPartials.SquareDerivativeMatrix(point);
     if ( HasNoOtherRootsIn(r,point,Df.Inverse()) ) return true;
     else                                           return false;
   }
@@ -402,7 +402,7 @@ QuikSolv<T>::NewtonPolishOnce(const gbtVector<gDouble>& point) const
   gbtVector<gDouble> oldevals = TreesOfPartials.ValuesOfRootPolys(point,
 								NoEquations);
   gbtMatrix<gDouble> Df = TreesOfPartials.DerivativeMatrix(point,NoEquations);
-  gbtSquareMatrix<gDouble> M(Df * Df.Transpose());
+  Gambit::SquareMatrix<gDouble> M(Df * Df.Transpose());
   
   gbtVector<gDouble> Del = - (Df.Transpose() * M.Inverse()) * oldevals;
 
@@ -415,7 +415,7 @@ QuikSolv<T>::SlowNewtonPolishOnce(const gbtVector<gDouble>& point) const
   gbtVector<gDouble> oldevals = TreesOfPartials.ValuesOfRootPolys(point,
 								NoEquations);
   gbtMatrix<gDouble> Df = TreesOfPartials.DerivativeMatrix(point,NoEquations);
-  gbtSquareMatrix<gDouble> M(Df * Df.Transpose());
+  Gambit::SquareMatrix<gDouble> M(Df * Df.Transpose());
   
   gbtVector<gDouble> Del = - (Df.Transpose() * M.Inverse()) * oldevals;
 
