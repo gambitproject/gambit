@@ -46,8 +46,8 @@ public:
 
   // Data access (only valid if ShowModal() returns wxID_OK.
   // If GetInfoset() returns null, user selected "new infoset"
-  gbtEfgPlayer GetPlayer(void) const;
-  gbtEfgInfoset GetInfoset(void) const;
+  Gambit::GamePlayer GetPlayer(void) const;
+  Gambit::GameInfoset GetInfoset(void) const;
   int GetActions(void) const;
 };
 

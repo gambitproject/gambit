@@ -46,7 +46,7 @@
 int g_numDecimals = 6;
 
 void PrintProfile(std::ostream &p_stream,
-		  const gbtNfgGame &p_game, cvector *p_profile)
+		  const Gambit::GameTable &p_game, cvector *p_profile)
 {
   p_stream.setf(std::ios::fixed);
   p_stream << "NE";
@@ -77,7 +77,7 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-void Solve(const gbtNfgGame &p_game)
+void Solve(const Gambit::GameTable &p_game)
 {
   int i;
 
@@ -164,10 +164,10 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  gbtNfgGame nfg;
+  Gambit::GameTable nfg;
 
   try {
-    nfg = ReadNfg(std::cin);
+    nfg = Gambit::ReadNfg(std::cin);
   }
   catch (...) {
     return 1;

@@ -353,7 +353,7 @@ void gbtGameFrame::OnUpdate(void)
     SetTitle(GetTitle() + wxT(" (unsaved changes)"));
   }
 
-  gbtEfgNode selectNode = m_doc->GetSelectNode();
+  Gambit::GameNode selectNode = m_doc->GetSelectNode();
   wxMenuBar *menuBar = GetMenuBar();
 
   menuBar->Enable(GBT_MENU_FILE_EXPORT_EFG, m_doc->GetEfg());
@@ -705,7 +705,7 @@ void gbtGameFrame::MakeToolbar(void)
 
 void gbtGameFrame::OnFileNewEfg(wxCommandEvent &)
 {
-  gbtEfgGame efg = new gbtEfgGameRep;
+  Gambit::GameTree efg = new Gambit::GameTreeRep;
   efg->SetTitle("Untitled Extensive Game");
   efg->NewPlayer()->SetLabel("Player 1");
   efg->NewPlayer()->SetLabel("Player 2");
@@ -718,7 +718,7 @@ void gbtGameFrame::OnFileNewNfg(wxCommandEvent &)
   gbtArray<int> dim(2);
   dim[1] = 2;
   dim[2] = 2;
-  gbtNfgGame nfg = new gbtNfgGameRep(dim);
+  Gambit::GameTable nfg = new Gambit::GameTableRep(dim);
   nfg->SetTitle("Untitled Strategic Game");
   nfg->GetPlayer(1)->SetName("Player 1");
   nfg->GetPlayer(2)->SetName("Player 2");
@@ -1041,7 +1041,7 @@ void gbtGameFrame::OnEditInsertMove(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK)  {
     try {
       if (!dialog.GetInfoset()) {
-	gbtEfgInfoset infoset = m_doc->GetEfg()->InsertNode(m_doc->GetSelectNode(), 
+	Gambit::GameInfoset infoset = m_doc->GetEfg()->InsertNode(m_doc->GetSelectNode(), 
 						       dialog.GetPlayer(),
 						       dialog.GetActions());
 	for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -1062,10 +1062,10 @@ void gbtGameFrame::OnEditInsertMove(wxCommandEvent &)
 
 void gbtGameFrame::OnEditInsertAction(wxCommandEvent &)
 {
-  gbtEfgNode node = m_doc->GetSelectNode();
+  Gambit::GameNode node = m_doc->GetSelectNode();
   if (!node || !node->GetInfoset())  return;
 
-  gbtEfgAction action = m_doc->GetEfg()->InsertAction(node->GetInfoset());
+  Gambit::GameAction action = m_doc->GetEfg()->InsertAction(node->GetInfoset());
   action->SetLabel(ToText(action->GetNumber()));
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
@@ -1138,7 +1138,7 @@ void gbtGameFrame::OnEditNode(wxCommandEvent &)
 
 void gbtGameFrame::OnEditMove(wxCommandEvent &)
 {
-  gbtEfgInfoset infoset = m_doc->GetSelectNode()->GetInfoset();
+  Gambit::GameInfoset infoset = m_doc->GetSelectNode()->GetInfoset();
   if (!infoset)  return;
 
   gbtEditMoveDialog dialog(this, infoset);
@@ -1168,12 +1168,12 @@ void gbtGameFrame::OnEditGame(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     if (m_doc->GetEfg()) {
-      gbtEfgGame efg = m_doc->GetEfg();
+      Gambit::GameTree efg = m_doc->GetEfg();
       efg->SetTitle((const char *) dialog.GetTitle().mb_str());
       efg->SetComment((const char *) dialog.GetComment().mb_str());
     }
     else {
-      gbtNfgGame nfg = m_doc->GetNfg();
+      Gambit::GameTable nfg = m_doc->GetNfg();
       nfg->SetTitle((const char *) dialog.GetTitle().mb_str());
       nfg->SetComment((const char *) dialog.GetComment().mb_str());
     }
@@ -1185,11 +1185,11 @@ void gbtGameFrame::OnEditGame(wxCommandEvent &)
 void gbtGameFrame::OnEditNewPlayer(wxCommandEvent &)
 {
   if (m_doc->GetEfg()) {
-    gbtEfgPlayer player = m_doc->GetEfg()->NewPlayer();
+    Gambit::GamePlayer player = m_doc->GetEfg()->NewPlayer();
     player->SetLabel("Player " + ToText(player->GetNumber()));
   }
   else {
-    gbtNfgPlayer player = m_doc->GetNfg()->NewPlayer();
+    Gambit::TablePlayer player = m_doc->GetNfg()->NewPlayer();
     player->SetName("Player " + ToText(player->GetNumber()));
     player->GetStrategy(1)->SetName("1");
   }

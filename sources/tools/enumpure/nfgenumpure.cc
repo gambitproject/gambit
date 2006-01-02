@@ -43,7 +43,7 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-void Solve(gbtNfgGame p_nfg)
+void Solve(Gambit::GameTable p_nfg)
 {
   gbtNfgContingencyIterator citer(p_nfg);
 
@@ -133,10 +133,10 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  gbtNfgGame nfg;
+  Gambit::GameTable nfg;
 
   try {
-    nfg = ReadNfg(std::cin);
+    nfg = Gambit::ReadNfg(std::cin);
   }
   catch (...) {
     return 1;

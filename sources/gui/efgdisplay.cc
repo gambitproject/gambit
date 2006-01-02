@@ -121,7 +121,7 @@ public:
 // This recurses the subtree starting at 'p_node' looking for a node
 // with the ID 'p_id'. 
 //
-static gbtEfgNode GetNode(gbtEfgNode p_node, int p_id)
+static Gambit::GameNode GetNode(Gambit::GameNode p_node, int p_id)
 {
   if (p_node->GetNumber() == p_id) {
     return p_node;
@@ -131,7 +131,7 @@ static gbtEfgNode GetNode(gbtEfgNode p_node, int p_id)
   }
   else {
     for (int i = 1; i <= p_node->NumChildren(); i++) {
-      gbtEfgNode node = GetNode(p_node->GetChild(i), p_id);
+      Gambit::GameNode node = GetNode(p_node->GetChild(i), p_id);
       if (node) return node;
     }
     return 0;
@@ -141,7 +141,7 @@ static gbtEfgNode GetNode(gbtEfgNode p_node, int p_id)
 bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
 				     const wxString &p_text)
 {
-  gbtEfgGame efg = m_owner->GetDocument()->GetEfg();
+  Gambit::GameTree efg = m_owner->GetDocument()->GetEfg();
 
   int x, y;
 #if defined( __WXMSW__) or defined(__WXMAC__)
@@ -158,14 +158,14 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
   x = (int) ((float) x / (.01 * m_owner->GetZoom()));
   y = (int) ((float) y / (.01 * m_owner->GetZoom()));
 
-  gbtEfgNode node = m_owner->GetLayout().NodeHitTest(x, y);
+  Gambit::GameNode node = m_owner->GetLayout().NodeHitTest(x, y);
 
   if (node) {
     switch (p_text[0]) {
     case 'P': {
       long pl;
       p_text.Right(p_text.Length() - 1).ToLong(&pl);
-      gbtEfgPlayer player;
+      Gambit::GamePlayer player;
       if (pl == 0) {
 	player = efg->GetChance();
       }
@@ -174,12 +174,12 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       }
     
       if (node->NumChildren() == 0) {
-	gbtEfgInfoset infoset = efg->AppendNode(node, player, 2);
+	Gambit::GameInfoset infoset = efg->AppendNode(node, player, 2);
 	infoset->GetAction(1)->SetLabel("1");
 	infoset->GetAction(2)->SetLabel("2");
       }
       else if (node->GetPlayer() == player) {
-	gbtEfgAction action = efg->InsertAction(node->GetInfoset());
+	Gambit::GameAction action = efg->InsertAction(node->GetInfoset());
 	action->SetLabel(ToText(action->GetNumber()));
       }
       else if (!player->IsChance() && !node->GetPlayer()->IsChance()) {
@@ -195,7 +195,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
     case 'C': {
       long n;
       p_text.Right(p_text.Length() - 1).ToLong(&n);
-      gbtEfgNode srcNode = GetNode(m_owner->GetDocument()->GetEfg()->GetRoot(), n);
+      Gambit::GameNode srcNode = GetNode(m_owner->GetDocument()->GetEfg()->GetRoot(), n);
 
       if (!srcNode) {
 	return false;
@@ -212,7 +212,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
     case 'M': {
       long n;
       p_text.Right(p_text.Length() - 1).ToLong(&n);
-      gbtEfgNode srcNode = GetNode(efg->GetRoot(), n);
+      Gambit::GameNode srcNode = GetNode(efg->GetRoot(), n);
 
       if (!srcNode) {
 	return false;
@@ -229,7 +229,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
     case 'I': {
       long n;
       p_text.Right(p_text.Length() - 1).ToLong(&n);
-      gbtEfgNode srcNode = GetNode(efg->GetRoot(), n);
+      Gambit::GameNode srcNode = GetNode(efg->GetRoot(), n);
 
       if (!srcNode) {
 	return false;
@@ -252,7 +252,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
     case 'O': {
       long n;
       p_text.Right(p_text.Length() - 1).ToLong(&n);
-      gbtEfgNode srcNode = GetNode(efg->GetRoot(), n);
+      Gambit::GameNode srcNode = GetNode(efg->GetRoot(), n);
       
       if (!srcNode || node == srcNode) {
 	return false;
@@ -265,7 +265,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
     case 'o': {
       long n;
       p_text.Right(p_text.Length() - 1).ToLong(&n);
-      gbtEfgNode srcNode = GetNode(efg->GetRoot(), n);
+      Gambit::GameNode srcNode = GetNode(efg->GetRoot(), n);
       
       if (!srcNode || node == srcNode) {
 	return false;
@@ -279,7 +279,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
     case 'p': {
       long n;
       p_text.Right(p_text.Length() - 1).ToLong(&n);
-      gbtEfgNode srcNode = GetNode(efg->GetRoot(), n);
+      Gambit::GameNode srcNode = GetNode(efg->GetRoot(), n);
       
       if (!srcNode || node == srcNode) {
 	return false;
@@ -372,9 +372,9 @@ void gbtEfgDisplay::MakeMenus(void)
 //                  gbtEfgDisplay: Event-hook members
 //---------------------------------------------------------------------
 
-static gbtEfgNode PriorSameIset(const gbtEfgNode &n)
+static Gambit::GameNode PriorSameIset(const Gambit::GameNode &n)
 {
-    gbtEfgInfoset iset = n->GetInfoset();
+    Gambit::GameInfoset iset = n->GetInfoset();
     if (!iset) return 0;
     for (int i = 1; i <= iset->NumMembers(); i++)
         if (iset->GetMember(i) == n)
@@ -385,9 +385,9 @@ static gbtEfgNode PriorSameIset(const gbtEfgNode &n)
     return 0;
 }
 
-static gbtEfgNode NextSameIset(const gbtEfgNode &n)
+static Gambit::GameNode NextSameIset(const Gambit::GameNode &n)
 {
-    gbtEfgInfoset iset = n->GetInfoset();
+    Gambit::GameInfoset iset = n->GetInfoset();
     if (!iset) return 0;
     for (int i = 1; i <= iset->NumMembers(); i++)
         if (iset->GetMember(i) == n)
@@ -418,7 +418,7 @@ static gbtEfgNode NextSameIset(const gbtEfgNode &n)
 //     
 void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 {
-  gbtEfgNode selectNode = m_doc->GetSelectNode();
+  Gambit::GameNode selectNode = m_doc->GetSelectNode();
 
   if (p_event.GetKeyCode() == 'R' || p_event.GetKeyCode() == 'r') {
     m_doc->SetSelectNode(m_doc->GetEfg()->GetRoot());
@@ -440,7 +440,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 			 (const char *) m_payoffEditor->GetValue().mb_str());
 
       // When we update views, the node entries get redone...
-      gbtEfgNode node = m_payoffEditor->GetEntry()->GetNode();
+      Gambit::GameNode node = m_payoffEditor->GetEntry()->GetNode();
       m_doc->UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
       // Payoff rectangles are actually set during drawing, so
       // force a refresh
@@ -497,7 +497,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     }
     return;
   case WXK_UP: {
-    gbtEfgNode prior = ((!p_event.AltDown()) ? 
+    Gambit::GameNode prior = ((!p_event.AltDown()) ? 
 			m_layout.PriorSameLevel(selectNode) :
 			PriorSameIset(selectNode));
     if (prior) {
@@ -507,7 +507,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     return;
   }
   case WXK_DOWN: {
-    gbtEfgNode next = ((!p_event.AltDown()) ?
+    Gambit::GameNode next = ((!p_event.AltDown()) ?
 		       m_layout.NextSameLevel(selectNode) :
 		       NextSameIset(selectNode));
     if (next) {
@@ -570,7 +570,7 @@ void gbtEfgDisplay::OnUpdate(void)
   // Force a rebuild on every change for now.
   RefreshTree();
 
-  gbtEfgNode selectNode = m_doc->GetSelectNode();
+  Gambit::GameNode selectNode = m_doc->GetSelectNode();
 
   m_nodeMenu->Enable(wxID_UNDO, m_doc->CanUndo());
   m_nodeMenu->Enable(wxID_REDO, m_doc->CanRedo());
@@ -680,7 +680,7 @@ void gbtEfgDisplay::OnDraw(wxDC &p_dc, double p_zoom)
   m_zoom = saveZoom;
 }
 
-void gbtEfgDisplay::EnsureNodeVisible(gbtEfgNode p_node)
+void gbtEfgDisplay::EnsureNodeVisible(Gambit::GameNode p_node)
 {
   if (!p_node)  return;
 
@@ -742,7 +742,7 @@ void gbtEfgDisplay::OnLeftClick(wxMouseEvent &p_event)
   x = (int) ((float) x / (.01 * m_zoom));
   y = (int) ((float) y / (.01 * m_zoom));
 
-  gbtEfgNode node = m_layout.NodeHitTest(x, y);
+  Gambit::GameNode node = m_layout.NodeHitTest(x, y);
   if (node != m_doc->GetSelectNode()) {
     m_doc->SetSelectNode(node);
   }
@@ -759,7 +759,7 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
   x = (int) ((float) x / (.01 * m_zoom));
   y = (int) ((float) y / (.01 * m_zoom));
 
-  gbtEfgNode node = m_layout.NodeHitTest(x, y);
+  Gambit::GameNode node = m_layout.NodeHitTest(x, y);
   if (node) {
     m_doc->SetSelectNode(node);
     wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_NODE);
@@ -845,10 +845,10 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
     x = (int) ((float) x / (.01 * GetZoom()));
     y = (int) ((float) y / (.01 * GetZoom()));
   
-    gbtEfgNode node = m_layout.NodeHitTest(x, y);
+    Gambit::GameNode node = m_layout.NodeHitTest(x, y);
     
     if (node && node->NumChildren() > 0) {
-      gbtEfgPlayer player = node->GetPlayer();
+      Gambit::GamePlayer player = node->GetPlayer();
       wxString label;
       if (p_event.ShiftDown()) {
 	label = wxT("i");
@@ -946,7 +946,7 @@ void gbtEfgDisplay::OnRightClick(wxMouseEvent &p_event)
   x = (int) ((float) x / (.01 * m_zoom));
   y = (int) ((float) y / (.01 * m_zoom));
 
-  gbtEfgNode node = m_layout.NodeHitTest(x, y);
+  Gambit::GameNode node = m_layout.NodeHitTest(x, y);
   if (node != m_doc->GetSelectNode()) {
     m_doc->SetSelectNode(node);
   }

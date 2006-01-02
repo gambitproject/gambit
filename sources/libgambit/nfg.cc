@@ -27,24 +27,26 @@
 #include <iostream>
 #include "libgambit.h"
 
+namespace Gambit {
+
 //===========================================================================
-//                          class gbtNfgPlayer
+//                          class TablePlayer
 //===========================================================================
 
 //---------------------------------------------------------------------------
 //                               Lifecycle
 //---------------------------------------------------------------------------
 
-gbtNfgPlayerRep::gbtNfgPlayerRep(int n, gbtNfgGameRep *N, int num)
+TablePlayerRep::TablePlayerRep(int n, GameTableRep *N, int num)
   : number(n), m_nfg(N), strategies(num)
 { 
   for (int j = 1; j <= num; j++) {
-    strategies[j] = new gbtNfgStrategyRep(this);
+    strategies[j] = new GameStrategyRep(this);
     strategies[j]->m_number = 1;
   }
 }
 
-gbtNfgPlayerRep::~gbtNfgPlayerRep()
+TablePlayerRep::~TablePlayerRep()
 { 
   for (int j = 1; j <= strategies.Length(); strategies[j++]->Invalidate());
 }
@@ -53,9 +55,9 @@ gbtNfgPlayerRep::~gbtNfgPlayerRep()
 //                               Strategies
 //---------------------------------------------------------------------------
 
-gbtNfgStrategy gbtNfgPlayerRep::NewStrategy(void)
+GameStrategy TablePlayerRep::NewStrategy(void)
 {
-  gbtNfgStrategyRep *strategy = new gbtNfgStrategyRep(this);
+  GameStrategyRep *strategy = new GameStrategyRep(this);
   strategies.Append(strategy);
   strategy->m_number = strategies.Length();
   strategy->m_index = -1;   // this flags this action as new
@@ -63,7 +65,7 @@ gbtNfgStrategy gbtNfgPlayerRep::NewStrategy(void)
   return strategy;
 }
 
-void gbtNfgStrategyRep::DeleteStrategy(void)
+void GameStrategyRep::DeleteStrategy(void)
 {
   if (m_player->NumStrats() == 1)  return;
 
@@ -75,11 +77,11 @@ void gbtNfgStrategyRep::DeleteStrategy(void)
   this->Invalidate();
 }
 
-gbtNfgPlayer gbtNfgStrategyRep::GetPlayer(void) const
+TablePlayer GameStrategyRep::GetPlayer(void) const
 { return m_player; }
 
 //===========================================================================
-//                            class gbtNfgGame
+//                            class GameTable
 //===========================================================================
 
 //---------------------------------------------------------------------------
@@ -95,13 +97,13 @@ static int Product(const gbtArray<int> &dim)
   return accum;
 }
   
-gbtNfgGameRep::gbtNfgGameRep(const gbtArray<int> &dim)
+GameTableRep::GameTableRep(const gbtArray<int> &dim)
   : m_title("Untitled strategic game"),
     dimensions(dim), players(dim.Length()),
     results(Product(dim)), efg(0)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
-    players[pl] = new gbtNfgPlayerRep(pl, this, dim[pl]);
+    players[pl] = new TablePlayerRep(pl, this, dim[pl]);
     players[pl]->name = ToText(pl);
     for (int st = 1; st <= players[pl]->NumStrats(); st++)
       players[pl]->strategies[st]->m_name = ToText(st);
@@ -112,7 +114,7 @@ gbtNfgGameRep::gbtNfgGameRep(const gbtArray<int> &dim)
        results[cont++] = 0);
 }
 
-gbtNfgGameRep::~gbtNfgGameRep()
+GameTableRep::~GameTableRep()
 {
   for (int pl = 1; pl <= players.Length(); players[pl++]->Invalidate());
   for (int outc = 1; outc <= outcomes.Length(); outcomes[outc++]->Invalidate());
@@ -122,9 +124,9 @@ gbtNfgGameRep::~gbtNfgGameRep()
 //                          General data access
 //---------------------------------------------------------------------------
 
-bool gbtNfgGameRep::IsConstSum(void) const
+bool GameTableRep::IsConstSum(void) const
 {
-  gbtNfgContingencyIterator iter(gbtNfgSupport(const_cast<gbtNfgGameRep *>(this)));
+  gbtNfgContingencyIterator iter(gbtNfgSupport(const_cast<GameTableRep *>(this)));
 
   gbtRational sum(0);
   for (int pl = 1; pl <= players.Length(); pl++) {
@@ -145,7 +147,7 @@ bool gbtNfgGameRep::IsConstSum(void) const
   return true;
 }
 
-gbtRational gbtNfgGameRep::GetMinPayoff(int player) const
+gbtRational GameTableRep::GetMinPayoff(int player) const
 {
   int index, p, p1, p2;
   
@@ -170,7 +172,7 @@ gbtRational gbtNfgGameRep::GetMinPayoff(int player) const
   return minpay;
 }
 
-gbtRational gbtNfgGameRep::GetMaxPayoff(int player) const
+gbtRational GameTableRep::GetMaxPayoff(int player) const
 {
   int index, p, p1, p2;
 
@@ -211,7 +213,7 @@ static std::string EscapeQuotes(const std::string &s)
   return ret;
 }
 
-void gbtNfgGameRep::WriteNfgFile(std::ostream &p_file) const
+void GameTableRep::WriteNfgFile(std::ostream &p_file) const
 { 
   p_file << "NFG 1 R";
   p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
@@ -222,7 +224,7 @@ void gbtNfgGameRep::WriteNfgFile(std::ostream &p_file) const
   p_file << "}\n\n{ ";
   
   for (int i = 1; i <= NumPlayers(); i++)   {
-    gbtNfgPlayerRep *player = GetPlayer(i);
+    TablePlayerRep *player = GetPlayer(i);
     p_file << "{ ";
     for (int j = 1; j <= player->NumStrats(); j++)
       p_file << '"' << EscapeQuotes(player->GetStrategy(j)->GetName()) << "\" ";
@@ -265,9 +267,9 @@ void gbtNfgGameRep::WriteNfgFile(std::ostream &p_file) const
 //                               Players
 //---------------------------------------------------------------------------
 
-gbtNfgPlayer gbtNfgGameRep::NewPlayer(void)
+TablePlayer GameTableRep::NewPlayer(void)
 {
-  gbtNfgPlayerRep *player = new gbtNfgPlayerRep(players.Length() + 1, this, 1);
+  TablePlayerRep *player = new TablePlayerRep(players.Length() + 1, this, 1);
   players.Append(player);
   dimensions.Append(1);
 
@@ -283,12 +285,12 @@ gbtNfgPlayer gbtNfgGameRep::NewPlayer(void)
 //                               Strategies
 //---------------------------------------------------------------------------
 
-int gbtNfgGameRep::NumStrats(int pl) const
+int GameTableRep::NumStrats(int pl) const
 {
   return players[pl]->strategies.Length();
 }
 
-int gbtNfgGameRep::ProfileLength(void) const
+int GameTableRep::ProfileLength(void) const
 {
   int nprof = 0;
   for (int i = 1; i <= players.Length();
@@ -302,7 +304,7 @@ int gbtNfgGameRep::ProfileLength(void) const
 
 /// Creates a new outcome in the strategic game.  By default, all
 /// payoffs to players are set to zero.  Returns the newly created outcome.
-Gambit::GameOutcome gbtNfgGameRep::NewOutcome(void)
+Gambit::GameOutcome GameTableRep::NewOutcome(void)
 {
   Gambit::GameOutcomeRep *outcome = new Gambit::GameOutcomeRep(this, outcomes.Length() + 1);
   outcomes.Append(outcome);
@@ -312,7 +314,7 @@ Gambit::GameOutcome gbtNfgGameRep::NewOutcome(void)
 /// Deletes an outcome from the strategic game.  If the outcome appears
 /// in any contingency of the game, the outcome of those contingencies
 /// are reset to the trivial null outcome.
-void gbtNfgGameRep::DeleteOutcome(Gambit::GameOutcome outcome)
+void GameTableRep::DeleteOutcome(Gambit::GameOutcome outcome)
 {
   for (int i = 1; i <= results.Length(); i++) {
     if (results[i] == outcome)
@@ -330,14 +332,14 @@ void gbtNfgGameRep::DeleteOutcome(Gambit::GameOutcome outcome)
 //                         Private member functions
 //---------------------------------------------------------------------------
 
-void gbtNfgGameRep::IndexStrategies(void)
+void GameTableRep::IndexStrategies(void)
 {
   long offset = 1L;
 
   for (int i = 1; i <= NumPlayers(); i++)  {
     int j;
     for (j = 1; j <= NumStrats(i); j++)  {
-      gbtNfgStrategyRep *s = (players[i])->strategies[j];
+      GameStrategyRep *s = (players[i])->strategies[j];
       s->m_number = j;
       s->m_index = (j - 1) * offset;
     }
@@ -348,7 +350,7 @@ void gbtNfgGameRep::IndexStrategies(void)
 /// This rebuilds a new table of outcomes after the game has been
 /// redimensioned (change in the number of strategies).  Strategies
 /// numbered -1 are identified as the new strategies.
-void gbtNfgGameRep::RebuildTable(void)
+void GameTableRep::RebuildTable(void)
 {
   long size = 1L;
   gbtArray<long> offsets(players.Length());
@@ -360,7 +362,7 @@ void gbtNfgGameRep::RebuildTable(void)
   gbtArray<Gambit::GameOutcomeRep *> newResults(size);
   for (int i = 1; i <= newResults.Length(); newResults[i++] = 0);
 
-  gbtNfgContingencyIterator iter(gbtNfgSupport(const_cast<gbtNfgGameRep *>(this)));
+  gbtNfgContingencyIterator iter(gbtNfgSupport(const_cast<GameTableRep *>(this)));
 
   do {
     long newindex = 0L;
@@ -385,3 +387,4 @@ void gbtNfgGameRep::RebuildTable(void)
   IndexStrategies();
 }
 
+}  // end namespace Gambit

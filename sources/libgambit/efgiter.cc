@@ -46,7 +46,7 @@ EfgContIter::EfgContIter(const gbtEfgSupport &s)
   First();
 }
 
-EfgContIter::EfgContIter(const gbtEfgSupport &s, const gbtList<gbtEfgInfoset>& active)
+EfgContIter::EfgContIter(const gbtEfgSupport &s, const gbtList<Gambit::GameInfoset>& active)
   : _frozen_pl(0), _frozen_iset(0),
     _efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
@@ -95,7 +95,7 @@ void EfgContIter::Set(int pl, int iset, int act)
 }
 
 
-void EfgContIter::Set(const gbtEfgAction &a) 
+void EfgContIter::Set(const Gambit::GameAction &a) 
 {
   if (a->GetInfoset()->GetPlayer()->GetNumber() != _frozen_pl ||
       a->GetInfoset()->GetNumber() != _frozen_iset) return;
@@ -106,7 +106,7 @@ int EfgContIter::Next(int pl, int iset)
 {
   if (pl != _frozen_pl || iset != _frozen_iset)   return 1;
 
-  const gbtArray<gbtEfgAction> &actions = _support.Actions(pl, iset);
+  const gbtArray<Gambit::GameAction> &actions = _support.Actions(pl, iset);
   
   if (_current(pl, iset) == actions.Length())   {
     _current(pl, iset) = 1;
@@ -188,7 +188,7 @@ EfgConditionalContIter::EfgConditionalContIter(const gbtEfgSupport &s)
 }
 
 EfgConditionalContIter::EfgConditionalContIter(const gbtEfgSupport &s, 
-					       const gbtList<gbtEfgInfoset>& active)
+					       const gbtList<Gambit::GameInfoset>& active)
   : _efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
     _is_active(),
@@ -232,14 +232,14 @@ void EfgConditionalContIter::Set(int pl, int iset, int act)
   _profile.Set(_support.Actions(pl, iset)[act]);
 }
 
-void EfgConditionalContIter::Set(const gbtEfgAction &a) 
+void EfgConditionalContIter::Set(const Gambit::GameAction &a) 
 {
   _profile.Set(a);
 }
 
 int EfgConditionalContIter::Next(int pl, int iset)
 {
-  const gbtArray<gbtEfgAction> &actions = _support.Actions(pl, iset);
+  const gbtArray<Gambit::GameAction> &actions = _support.Actions(pl, iset);
   
   if (_current(pl, iset) == actions.Length())   {
     _current(pl, iset) = 1;
@@ -291,7 +291,7 @@ gbtRational EfgConditionalContIter::Payoff(int pl) const
   return _payoff[pl];
 }
 
-gbtRational EfgConditionalContIter::Payoff(const gbtEfgNode &n, int pl) const
+gbtRational EfgConditionalContIter::Payoff(const Gambit::GameNode &n, int pl) const
 {
   return _profile.Payoff(n,pl);
 }

@@ -99,7 +99,7 @@ public:
   
   const gbtTreeLayout &GetLayout(void) const { return m_layout; }
 
-  void EnsureNodeVisible(gbtEfgNode);
+  void EnsureNodeVisible(Gambit::GameNode);
 
   DECLARE_EVENT_TABLE()
 };

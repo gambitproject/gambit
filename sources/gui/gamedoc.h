@@ -225,12 +225,12 @@ private:
       if (m_views.Length() == 0)  delete this;
     }
 
-  gbtEfgGame m_efg;
-  gbtNfgGame m_nfg;
+  Gambit::GameTree m_efg;
+  Gambit::GameTable m_nfg;
   wxString m_filename;
 
   gbtStyle m_style;
-  gbtEfgNode m_selectNode;
+  Gambit::GameNode m_selectNode;
   bool m_modified;
 
   gbtBehavDominanceStack m_behavSupports;
@@ -242,8 +242,8 @@ private:
   gbtList<std::string> m_undoList, m_redoList;
 
 public:
-  gbtGameDocument(gbtEfgGame p_efg);
-  gbtGameDocument(gbtNfgGame p_nfg); 
+  gbtGameDocument(Gambit::GameTree p_efg);
+  gbtGameDocument(Gambit::GameTable p_nfg); 
   
   ~gbtGameDocument();
 
@@ -257,8 +257,8 @@ public:
   void SaveDocument(std::ostream &) const;
   //@}
 
-  gbtEfgGame GetEfg(void) const { return m_efg; }
-  gbtNfgGame GetNfg(void) const 
+  Gambit::GameTree GetEfg(void) const { return m_efg; }
+  Gambit::GameTable GetNfg(void) const 
     { 
       if (m_efg) return m_efg->AssociatedNfg();
       else return m_nfg;
@@ -344,17 +344,17 @@ public:
   int GetStrategyElimLevel(void) const;
   //@}
 
-  gbtEfgNode GetSelectNode(void) const { return m_selectNode; }
-  void SetSelectNode(gbtEfgNode);
+  Gambit::GameNode GetSelectNode(void) const { return m_selectNode; }
+  void SetSelectNode(Gambit::GameNode);
 
-  std::string GetRealizProb(const gbtEfgNode &) const;
-  std::string GetBeliefProb(const gbtEfgNode &) const;
-  std::string GetNodeValue(const gbtEfgNode &, int pl) const;
-  std::string GetInfosetProb(const gbtEfgNode &) const;
-  std::string GetInfosetValue(const gbtEfgNode &) const;
-  std::string GetActionValue(const gbtEfgNode &, int act) const;
-  std::string GetActionProb(const gbtEfgNode &, int act) const;
-  gbtNumber ActionProb(const gbtEfgNode &n, int br) const;
+  std::string GetRealizProb(const Gambit::GameNode &) const;
+  std::string GetBeliefProb(const Gambit::GameNode &) const;
+  std::string GetNodeValue(const Gambit::GameNode &, int pl) const;
+  std::string GetInfosetProb(const Gambit::GameNode &) const;
+  std::string GetInfosetValue(const Gambit::GameNode &) const;
+  std::string GetActionValue(const Gambit::GameNode &, int act) const;
+  std::string GetActionProb(const Gambit::GameNode &, int act) const;
+  gbtNumber ActionProb(const Gambit::GameNode &n, int br) const;
 
   void UpdateViews(gbtGameModificationType p_modifications);
 

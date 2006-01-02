@@ -63,15 +63,15 @@ private:
   T maxpay, minpay;
   int ns1,ns2,ni1,ni2;
   gbtList<BFS<T> > List;
-  gbtList<gbtEfgInfoset> isets1, isets2;
+  gbtList<Gambit::GameInfoset> isets1, isets2;
 
   void FillTableau(const gbtEfgSupport &,
-		   gbtMatrix<T> &, const gbtEfgNode &, T ,int ,int , int ,int );
+		   gbtMatrix<T> &, const Gambit::GameNode &, T ,int ,int , int ,int );
   void GetSolutions(const gbtEfgSupport &) const;
   int Add_BFS(/*const*/ LPSolve<T> &B);
   
   void GetProfile(const gbtEfgSupport &, gbtDPVector<T> &v, const BFS<T> &sol,
-		  const gbtEfgNode &n, int s1,int s2) const;
+		  const Gambit::GameNode &n, int s1,int s2) const;
 
 public:
   efgLp(void);
@@ -97,12 +97,12 @@ efgLp<T>::efgLp(void)
 template <class T>
 void UndefinedToCentroid(gbtBehavProfile<T> &p_profile)
 {
-  gbtEfgGame efg = p_profile.GetGame();
+  Gambit::GameTree efg = p_profile.GetGame();
 
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-    gbtEfgPlayer player = efg->GetPlayer(pl);
+    Gambit::GamePlayer player = efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player->GetInfoset(iset);
+      Gambit::GameInfoset infoset = player->GetInfoset(iset);
       
       if (p_profile.GetIsetProb(infoset) > (T) 0) {
 	continue;
@@ -187,7 +187,7 @@ template <class T> int efgLp<T>::Add_BFS(/*const*/ LPSolve<T> &lp)
 template <class T> void efgLp<T>::GetProfile(const gbtEfgSupport &p_support,
 					     gbtDPVector<T> &v,
 					     const BFS<T> &sol,
-					     const gbtEfgNode &n,
+					     const Gambit::GameNode &n,
 					     int s1,int s2) const
 {
   
@@ -242,7 +242,7 @@ template <class T> void efgLp<T>::GetProfile(const gbtEfgSupport &p_support,
 
 template <class T>
 void efgLp<T>::FillTableau(const gbtEfgSupport &p_support,
-			   gbtMatrix<T> &A, const gbtEfgNode &n, T prob,
+			   gbtMatrix<T> &A, const Gambit::GameNode &n, T prob,
 			   int s1, int s2, int i1, int i2)
 {
   int i,snew;
@@ -353,10 +353,10 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  gbtEfgGame efg;
+  Gambit::GameTree efg;
 
   try {
-    efg = ReadEfg(std::cin);
+    efg = Gambit::ReadEfg(std::cin);
   }
   catch (...) {
     return 1;

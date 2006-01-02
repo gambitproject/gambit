@@ -31,10 +31,10 @@
 // Sequence:  Member functions
 //--------------------------------------
 
-gbtList<gbtEfgAction> Sequence::History(void) const 
+gbtList<Gambit::GameAction> Sequence::History(void) const 
 { 
-  gbtList<gbtEfgAction> h;
-  gbtEfgAction a = action;
+  gbtList<Gambit::GameAction> h;
+  Gambit::GameAction a = action;
   const Sequence * s = (this);
   while(a) {
     h.Append(a);
@@ -49,7 +49,7 @@ gbtList<gbtEfgAction> Sequence::History(void) const
 // SFSequenceSet:  Member functions
 //--------------------------------------
 
-SFSequenceSet::SFSequenceSet(const gbtEfgPlayer &p)
+SFSequenceSet::SFSequenceSet(const Gambit::GamePlayer &p)
   : efp(p), sequences()
 {
   Sequence *empty;

@@ -34,25 +34,25 @@
 /// It specifies exactly one strategy for each player defined on the
 /// game.
 class gbtStrategyProfile  {
-  friend class gbtNfgGameRep;
+  friend class Gambit::GameTableRep;
 private:
   long m_index;
-  gbtNfgGame m_nfg;
-  gbtArray<gbtNfgStrategy> m_profile;
+  Gambit::GameTable m_nfg;
+  gbtArray<Gambit::GameStrategy> m_profile;
   
 public:
   /// @name Lifecycle
   //@{
   /// Construct a new strategy profile on the specified game
-  gbtStrategyProfile(const gbtNfgGame &);
+  gbtStrategyProfile(const Gambit::GameTable &);
   //@}
 
   /// @name Data access and manipulation
   //@{
   /// Get the strategy played by player pl  
-  gbtNfgStrategy GetStrategy(int pl) const { return m_profile[pl]; }
+  Gambit::GameStrategy GetStrategy(int pl) const { return m_profile[pl]; }
   /// Set the strategy for a player
-  void SetStrategy(const gbtNfgStrategy &);
+  void SetStrategy(const Gambit::GameStrategy &);
 
   /// Get the outcome that results from the profile
   Gambit::GameOutcome GetOutcome(void) const;
@@ -76,8 +76,8 @@ public:
 /// in which they appear in the underlying game.
 class gbtNfgSupport {
 protected:
-  gbtNfgGame m_nfg;
-  gbtArray<gbtArray<gbtNfgStrategy> > m_support;
+  Gambit::GameTable m_nfg;
+  gbtArray<gbtArray<Gambit::GameStrategy> > m_support;
   
   bool Undominated(gbtNfgSupport &newS, int pl, bool strong,
 		   std::ostream &tracefile) const;
@@ -86,7 +86,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructor.  By default, a support contains all strategies.
-  gbtNfgSupport(const gbtNfgGame &);
+  gbtNfgSupport(const Gambit::GameTable &);
   //@}
 
   /// @name Operator overloading
@@ -102,7 +102,7 @@ public:
   /// @name General information
   //@{
   /// Returns the game on which the support is defined.
-  gbtNfgGame GetGame(void) const { return m_nfg; }
+  Gambit::GameTable GetGame(void) const { return m_nfg; }
 
   /// Returns the number of strategies in the support for player pl.
   int NumStrats(int pl) const  { return m_support[pl].Length(); }
@@ -114,15 +114,15 @@ public:
   int ProfileLength(void) const;
 
   /// Returns the strategy in the st'th position for player pl.
-  gbtNfgStrategy GetStrategy(int pl, int st) const 
+  Gambit::GameStrategy GetStrategy(int pl, int st) const 
     { return m_support[pl][st]; }
 
   /// Retuns the index of the strategy in the support.
-  int GetIndex(const gbtNfgStrategy &s) const
+  int GetIndex(const Gambit::GameStrategy &s) const
     { return m_support[s->GetPlayer()->GetNumber()].Find(s); }
 
   /// Returns true exactly when the strategy is in the support.
-  bool Contains(const gbtNfgStrategy &s) const
+  bool Contains(const Gambit::GameStrategy &s) const
     { return m_support[s->GetPlayer()->GetNumber()].Contains(s); }
 
   /// Returns true iff this support is a (weak) subset of the specified support
@@ -133,7 +133,7 @@ public:
   /// @name Modifying the support
   //@{
   /// Add a strategy to the support.
-  void AddStrategy(gbtNfgStrategy);
+  void AddStrategy(Gambit::GameStrategy);
 
   /// Remove a strategy from the support; return true if successful.
 
@@ -141,13 +141,13 @@ public:
   /// not present, or if the strategy is the only strategy for that
   /// player, it is not removed.  Returns true if the removal was
   /// executed, and false if not.
-  bool RemoveStrategy(gbtNfgStrategy);
+  bool RemoveStrategy(Gambit::GameStrategy);
   //@}
 
   /// @name Identification of dominated strategies
   //@{
-  bool Dominates(gbtNfgStrategy s, gbtNfgStrategy t, bool strong) const;
-  bool IsDominated(gbtNfgStrategy s, bool strong) const; 
+  bool Dominates(Gambit::GameStrategy s, Gambit::GameStrategy t, bool strong) const;
+  bool IsDominated(Gambit::GameStrategy s, bool strong) const; 
 
   gbtNfgSupport Undominated(bool strong, const gbtArray<int> &players,
 			    std::ostream &tracefile) const;

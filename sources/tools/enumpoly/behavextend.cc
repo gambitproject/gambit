@@ -30,7 +30,7 @@
 #include "rectangl.h"
 #include "ineqsolv.h"
 
-void TerminalDescendants(gbtEfgNode p_node, gbtList<gbtEfgNode> &current)
+void TerminalDescendants(Gambit::GameNode p_node, gbtList<Gambit::GameNode> &current)
 {
   if (p_node->IsTerminal()) { 
     current.Append(p_node);
@@ -42,9 +42,9 @@ void TerminalDescendants(gbtEfgNode p_node, gbtList<gbtEfgNode> &current)
   }
 }
 
-gbtList<gbtEfgNode> TerminalNodes(gbtEfgGame p_efg)
+gbtList<Gambit::GameNode> TerminalNodes(Gambit::GameTree p_efg)
 {
-  gbtList<gbtEfgNode> ret;
+  gbtList<Gambit::GameNode> ret;
   TerminalDescendants(p_efg->GetRoot(), ret);
   return ret;
 }
@@ -62,15 +62,15 @@ gbtList<gbtEfgNode> TerminalNodes(gbtEfgGame p_efg)
 //                      class algExtendsToNash
 //=========================================================================
 
-static void DeviationInfosets(gbtList<gbtEfgInfoset> &answer,
+static void DeviationInfosets(gbtList<Gambit::GameInfoset> &answer,
 			      const gbtEfgSupport & big_supp,
-			      const gbtEfgPlayer &pl,
-			      const gbtEfgNode &node,
-			      const gbtEfgAction &act)
+			      const Gambit::GamePlayer &pl,
+			      const Gambit::GameNode &node,
+			      const Gambit::GameAction &act)
 {
-  gbtEfgNode child  = node->GetChild(act->GetNumber());
+  Gambit::GameNode child  = node->GetChild(act->GetNumber());
   if (!child->IsTerminal()) {
-    gbtEfgInfoset iset = child->GetInfoset();
+    Gambit::GameInfoset iset = child->GetInfoset();
     if ( iset->GetPlayer() == pl ) {
       int insert = 0;
       bool done = false;
@@ -83,7 +83,7 @@ static void DeviationInfosets(gbtList<gbtEfgInfoset> &answer,
       answer.Insert(iset,insert);
     }
 
-    gbtList<gbtEfgAction> action_list;
+    gbtList<Gambit::GameAction> action_list;
     for (int j = 1; j <= iset->NumActions(); j++) {
       action_list.Append(iset->GetAction(j));
     }
@@ -93,14 +93,14 @@ static void DeviationInfosets(gbtList<gbtEfgInfoset> &answer,
   }
 }
 
-static gbtList<gbtEfgInfoset> DeviationInfosets(const gbtEfgSupport &big_supp,
-					  const gbtEfgPlayer &pl,
-					  const gbtEfgInfoset &iset,
-					  const gbtEfgAction &act)
+static gbtList<Gambit::GameInfoset> DeviationInfosets(const gbtEfgSupport &big_supp,
+					  const Gambit::GamePlayer &pl,
+					  const Gambit::GameInfoset &iset,
+					  const Gambit::GameAction &act)
 {
-  gbtList<gbtEfgInfoset> answer;
+  gbtList<Gambit::GameInfoset> answer;
   
-  gbtList<gbtEfgNode> node_list;
+  gbtList<Gambit::GameNode> node_list;
   for (int i = 1; i <= iset->NumMembers(); i++) {
     node_list.Append(iset->GetMember(i));
   }
@@ -123,7 +123,7 @@ ActionProbsSumToOneIneqs(const gbtBehavProfile<double> &p_solution,
 
   for (int pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++) 
     for (int i = 1; i <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); i++) {
-      gbtEfgInfoset current_infoset = p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i);
+      Gambit::GameInfoset current_infoset = p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i);
       if ( !big_supp.HasActiveActionAt(current_infoset) ) {
 	int index_base = var_index[pl][i];
 	gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
@@ -137,10 +137,10 @@ ActionProbsSumToOneIneqs(const gbtBehavProfile<double> &p_solution,
 
 static gbtList<gbtEfgSupport> 
 DeviationSupports(const gbtEfgSupport & big_supp,
-		  const gbtList<gbtEfgInfoset> & isetlist,
-		  const gbtEfgPlayer &/*pl*/,
-		  const gbtEfgInfoset &/*iset*/,
-		  const gbtEfgAction &/*act*/)
+		  const gbtList<Gambit::GameInfoset> & isetlist,
+		  const Gambit::GamePlayer &/*pl*/,
+		  const Gambit::GameInfoset &/*iset*/,
+		  const Gambit::GameAction &/*act*/)
 {
   gbtList<gbtEfgSupport> answer;
 
@@ -214,15 +214,15 @@ NashNodeProbabilityPoly(const gbtBehavProfile<double> &p_solution,
 			const term_order &Lex,
 			const gbtEfgSupport &dsupp,
 			const gbtList<gbtList<int> > &var_index,
-			gbtEfgNode tempnode,
-			const gbtEfgPlayer &/*pl*/,
-			const gbtEfgInfoset &iset,
-			const gbtEfgAction &act)
+			Gambit::GameNode tempnode,
+			const Gambit::GamePlayer &/*pl*/,
+			const Gambit::GameInfoset &iset,
+			const Gambit::GameAction &act)
 {
   while (tempnode != p_solution.GetGame()->GetRoot()) {
 
-    gbtEfgAction last_action = tempnode->GetPriorAction();
-    gbtEfgInfoset last_infoset = last_action->GetInfoset();
+    Gambit::GameAction last_action = tempnode->GetPriorAction();
+    Gambit::GameInfoset last_infoset = last_action->GetInfoset();
     
     if (last_infoset->IsChanceInfoset()) 
       node_prob *= (gDouble) last_infoset->GetActionProb(last_action->GetNumber());
@@ -275,24 +275,24 @@ NashExpectedPayoffDiffPolys(const gbtBehavProfile<double> &p_solution,
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
-  gbtList<gbtEfgNode> terminal_nodes = TerminalNodes(p_solution.GetGame());
+  gbtList<Gambit::GameNode> terminal_nodes = TerminalNodes(p_solution.GetGame());
 
   for (int pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++) {
-    gbtArray<gbtEfgInfoset> isets_for_pl;
+    gbtArray<Gambit::GameInfoset> isets_for_pl;
     for (int iset = 1; iset <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
       isets_for_pl.Append(p_solution.GetGame()->GetPlayer(pl)->GetInfoset(iset));
     }
 			  
     for (int i = 1; i <= isets_for_pl.Length(); i++) {
       if (little_supp.MayReach(isets_for_pl[i])) {
-	gbtArray<gbtEfgAction> acts_for_iset;
+	gbtArray<Gambit::GameAction> acts_for_iset;
 	for (int act = 1; act <= isets_for_pl[i]->NumActions(); act++) {
 	  acts_for_iset.Append(isets_for_pl[i]->GetAction(act));
 	}
 
 	for (int j = 1; j <= acts_for_iset.Length(); j++)
 	  if ( !little_supp.ActionIsActive(acts_for_iset[j]) ) {
-	    gbtList<gbtEfgInfoset> isetlist = DeviationInfosets(big_supp, 
+	    gbtList<Gambit::GameInfoset> isetlist = DeviationInfosets(big_supp, 
 								p_solution.GetGame()->GetPlayer(pl),
 							  isets_for_pl[i],
 							  acts_for_iset[j]);
@@ -427,14 +427,14 @@ static bool ANFNodeProbabilityPoly(const gbtBehavProfile<double> &p_solution,
 				   const term_order &Lex,
 				   const gbtEfgSupport &big_supp,
 				   const gbtList<gbtList<int> > &var_index,
-				   gbtEfgNode tempnode,
+				   Gambit::GameNode tempnode,
 				   const int &pl,
 				   const int &i,
 				   const int &j)
 {
   while (tempnode != p_solution.GetGame()->GetRoot()) {
-    gbtEfgAction last_action = tempnode->GetPriorAction();
-    gbtEfgInfoset last_infoset = last_action->GetInfoset();
+    Gambit::GameAction last_action = tempnode->GetPriorAction();
+    Gambit::GameInfoset last_infoset = last_action->GetInfoset();
     
     if (last_infoset->IsChanceInfoset()) 
       node_prob *= (gDouble) last_infoset->GetActionProb(last_action->GetNumber());
@@ -481,11 +481,11 @@ ANFExpectedPayoffDiffPolys(const gbtBehavProfile<double> &p_solution,
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
-  gbtList<gbtEfgNode> terminal_nodes = TerminalNodes(p_solution.GetGame());
+  gbtList<Gambit::GameNode> terminal_nodes = TerminalNodes(p_solution.GetGame());
 
   for (int pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++)
     for (int i = 1; i <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); i++) {
-      gbtEfgInfoset infoset = p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i);
+      Gambit::GameInfoset infoset = p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i);
       if (little_supp.MayReach(infoset)) 
 	for (int j = 1; j <= infoset->NumActions(); j++)
 	  if (!little_supp.ActionIsActive(pl,i,j)) {

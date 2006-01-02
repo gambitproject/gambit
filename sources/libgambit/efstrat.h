@@ -34,11 +34,11 @@ class gbtEfgSupportPlayer;
 class gbtEfgSupport {
 protected:
   std::string m_name;
-  gbtEfgGame m_efg;
+  Gambit::GameTree m_efg;
   gbtArray<gbtEfgSupportPlayer *> m_players;
 
 public:
-  gbtEfgSupport(const gbtEfgGame &);
+  gbtEfgSupport(const Gambit::GameTree &);
   gbtEfgSupport(const gbtEfgSupport &);
   virtual ~gbtEfgSupport();
   gbtEfgSupport &operator=(const gbtEfgSupport &);
@@ -46,61 +46,61 @@ public:
   bool operator==(const gbtEfgSupport &) const;
   bool operator!=(const gbtEfgSupport &) const;
 
-  gbtEfgGame GetGame(void) const { return m_efg; }
+  Gambit::GameTree GetGame(void) const { return m_efg; }
 
   const std::string &GetName(void) const { return m_name; }
   void SetName(const std::string &p_name) { m_name = p_name; }
 
   int NumActions(int pl, int iset) const;
-  int NumActions(const gbtEfgInfoset &) const;
+  int NumActions(const Gambit::GameInfoset &) const;
   gbtPVector<int> NumActions(void) const;
   int NumDegreesOfFreedom(void) const;
 
   // Checks to see that every infoset in the support has at least one
   // action in it.
-  bool HasActiveActionAt(const gbtEfgInfoset &) const;
+  bool HasActiveActionAt(const Gambit::GameInfoset &) const;
   bool HasActiveActionsAtAllInfosets(void) const;
 
   // Returns the position of the action in the support. 
   // Returns zero if the action is not contained in the support
-  int Find(const gbtEfgAction &) const;
-  int Find(int, int, gbtEfgAction) const;
+  int Find(const Gambit::GameAction &) const;
+  int Find(int, int, Gambit::GameAction) const;
 
   bool ActionIsActive(const int pl, const int iset, const int act) const;
-  bool ActionIsActive(gbtEfgAction) const;
+  bool ActionIsActive(Gambit::GameAction) const;
   bool AllActionsInSupportAtInfosetAreActive(const gbtEfgSupport &,
-					     const gbtEfgInfoset &) const;
+					     const Gambit::GameInfoset &) const;
 
   // Find the active actions at an infoset
-  const gbtArray<gbtEfgAction> &Actions(int pl, int iset) const;
-  gbtArray<gbtEfgAction> Actions(const gbtEfgInfoset &) const;
-  gbtList<gbtEfgAction> ListOfActions(const gbtEfgInfoset &) const;
+  const gbtArray<Gambit::GameAction> &Actions(int pl, int iset) const;
+  gbtArray<Gambit::GameAction> Actions(const Gambit::GameInfoset &) const;
+  gbtList<Gambit::GameAction> ListOfActions(const Gambit::GameInfoset &) const;
 
   // Action editing functions
-  virtual void AddAction(const gbtEfgAction &);
-  virtual bool RemoveAction(const gbtEfgAction &);
+  virtual void AddAction(const Gambit::GameAction &);
+  virtual bool RemoveAction(const Gambit::GameAction &);
 
   // Number of Sequences for the player
   int NumSequences(int pl) const;
   int TotalNumSequences(void) const;
 
   // Reachable Nodes and Information Sets
-  gbtList<gbtEfgNode> ReachableNonterminalNodes(const gbtEfgNode &) const;
-  gbtList<gbtEfgNode> ReachableNonterminalNodes(const gbtEfgNode &, 
-						const gbtEfgAction &) const;
-  gbtList<gbtEfgInfoset> ReachableInfosets(const gbtEfgNode &) const;
-  gbtList<gbtEfgInfoset> ReachableInfosets(const gbtEfgNode &, 
-					   const gbtEfgAction &) const;
-  gbtList<gbtEfgInfoset> ReachableInfosets(const gbtEfgPlayer &) const;
+  gbtList<Gambit::GameNode> ReachableNonterminalNodes(const Gambit::GameNode &) const;
+  gbtList<Gambit::GameNode> ReachableNonterminalNodes(const Gambit::GameNode &, 
+						const Gambit::GameAction &) const;
+  gbtList<Gambit::GameInfoset> ReachableInfosets(const Gambit::GameNode &) const;
+  gbtList<Gambit::GameInfoset> ReachableInfosets(const Gambit::GameNode &, 
+					   const Gambit::GameAction &) const;
+  gbtList<Gambit::GameInfoset> ReachableInfosets(const Gambit::GamePlayer &) const;
 
-  bool AlwaysReaches(const gbtEfgInfoset &) const;
-  bool AlwaysReachesFrom(const gbtEfgInfoset &, const gbtEfgNode &) const;
-  bool MayReach(const gbtEfgNode &) const;
-  bool MayReach(const gbtEfgInfoset &) const;
+  bool AlwaysReaches(const Gambit::GameInfoset &) const;
+  bool AlwaysReachesFrom(const Gambit::GameInfoset &, const Gambit::GameNode &) const;
+  bool MayReach(const Gambit::GameNode &) const;
+  bool MayReach(const Gambit::GameInfoset &) const;
 
-  bool Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
+  bool Dominates(const Gambit::GameAction &a, const Gambit::GameAction &b,
 		 bool strong, bool conditional) const;
-  bool IsDominated(const gbtEfgAction &a, 
+  bool IsDominated(const Gambit::GameAction &a, 
 		   bool strong, bool conditional) const;
   gbtEfgSupport Undominated(bool strong, bool conditional,
 			 const gbtArray<int> &players,
@@ -123,20 +123,20 @@ protected:
   void InitializeActiveListsToAllInactive();
   void InitializeActiveLists();
 
-  void activate(const gbtEfgNode &);
-  void deactivate(const gbtEfgNode &);
-  void activate(const gbtEfgInfoset &);
-  void deactivate(const gbtEfgInfoset &);
+  void activate(const Gambit::GameNode &);
+  void deactivate(const Gambit::GameNode &);
+  void activate(const Gambit::GameInfoset &);
+  void deactivate(const Gambit::GameInfoset &);
   bool infoset_has_active_nodes(const int pl, const int iset) const;
-  bool infoset_has_active_nodes(const gbtEfgInfoset &i) const;
-  void activate_this_and_lower_nodes(const gbtEfgNode &);
-  void deactivate_this_and_lower_nodes(const gbtEfgNode &);
+  bool infoset_has_active_nodes(const Gambit::GameInfoset &i) const;
+  void activate_this_and_lower_nodes(const Gambit::GameNode &);
+  void deactivate_this_and_lower_nodes(const Gambit::GameNode &);
   void deactivate_this_and_lower_nodes_returning_deactivated_infosets(
-                                                 const gbtEfgNode &,
-						 gbtList<gbtEfgInfoset> *);
+                                                 const Gambit::GameNode &,
+						 gbtList<Gambit::GameInfoset> *);
 
 public:
-  gbtEfgSupportWithActiveInfo ( const gbtEfgGame &);
+  gbtEfgSupportWithActiveInfo ( const Gambit::GameTree &);
   gbtEfgSupportWithActiveInfo ( const gbtEfgSupport &);
   gbtEfgSupportWithActiveInfo ( const gbtEfgSupportWithActiveInfo &);
   virtual ~gbtEfgSupportWithActiveInfo();
@@ -147,23 +147,23 @@ public:
   bool operator!=(const gbtEfgSupportWithActiveInfo &) const;
 
   // Find the reachable nodes at an infoset
-  gbtList<gbtEfgNode> ReachableNodesInInfoset(const gbtEfgInfoset &) const;
-  gbtList<gbtEfgNode> ReachableNonterminalNodes() const;
+  gbtList<Gambit::GameNode> ReachableNodesInInfoset(const Gambit::GameInfoset &) const;
+  gbtList<Gambit::GameNode> ReachableNonterminalNodes() const;
 
   // Action editing functions
-  void AddAction(const gbtEfgAction &);
-  bool RemoveAction(const gbtEfgAction &);
-  bool RemoveActionReturningDeletedInfosets(const gbtEfgAction &, 
-					    gbtList<gbtEfgInfoset> *);
+  void AddAction(const Gambit::GameAction &);
+  bool RemoveAction(const Gambit::GameAction &);
+  bool RemoveActionReturningDeletedInfosets(const Gambit::GameAction &, 
+					    gbtList<Gambit::GameInfoset> *);
   //  void GoToNextSubsupportOf(const gbtEfgSupport &);
 
   // Information
   bool InfosetIsActive(const int pl, const int iset) const;
-  bool InfosetIsActive(const gbtEfgInfoset &) const;
+  bool InfosetIsActive(const Gambit::GameInfoset &) const;
   int  NumActiveNodes(const int pl, const int iset) const;
-  int  NumActiveNodes(const gbtEfgInfoset &) const;
+  int  NumActiveNodes(const Gambit::GameInfoset &) const;
   bool NodeIsActive(const int pl, const int iset, const int node) const;
-  bool NodeIsActive(const gbtEfgNode &) const;
+  bool NodeIsActive(const Gambit::GameNode &) const;
 
   inline  gbtEfgSupport UnderlyingSupport() const { return (gbtEfgSupport)(*this); }
 

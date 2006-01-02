@@ -279,7 +279,7 @@ void gbtRowPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
   const gbtNfgSupport &support = m_doc->GetNfgSupport();
   int player = m_table->GetRowPlayer(p_coords.GetCol() + 1);
   int strat = m_table->RowToStrategy(p_coords.GetCol() + 1, p_coords.GetRow());
-  gbtNfgStrategy strategy = support.GetStrategy(player, strat);
+  Gambit::GameStrategy strategy = support.GetStrategy(player, strat);
 
   if (support.IsDominated(strategy, false)) {
     wxRect rect = CellToRect(p_coords);
@@ -501,7 +501,7 @@ void gbtColPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
   const gbtNfgSupport &support = m_doc->GetNfgSupport();
   int player = m_table->GetColPlayer(p_coords.GetRow() + 1);
   int strat = m_table->ColToStrategy(p_coords.GetRow() + 1, p_coords.GetCol());
-  gbtNfgStrategy strategy = support.GetStrategy(player, strat);
+  Gambit::GameStrategy strategy = support.GetStrategy(player, strat);
 
   if (support.IsDominated(strategy, false)) {
     wxRect rect = CellToRect(p_coords);

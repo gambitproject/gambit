@@ -28,9 +28,6 @@
 #ifndef LIBGAMBIT_GAME_H
 #define LIBGAMBIT_GAME_H
 
-class gbtEfgGameRep;
-class gbtNfgGameRep;
-
 namespace Gambit {
 
 /// This is a base class for all game-related objects.  Primary among
@@ -150,8 +147,8 @@ typedef GameObjectPtr<GameRep> Game;
 /// payoffs are treated as exact (that is, no conversion to floating
 /// point is done).
 class GameOutcomeRep : public GameObject  {
-  friend class ::gbtNfgGameRep;
-  friend class ::gbtEfgGameRep;
+  friend class GameTableRep;
+  friend class GameTreeRep;
 
 private:
   GameRep *m_game;

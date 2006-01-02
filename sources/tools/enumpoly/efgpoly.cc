@@ -41,7 +41,7 @@ bool g_verbose = false;
 template <class T> class EfgPolEnumModule  {
 private:
   T eps;
-  const gbtEfgGame &EF;
+  const Gambit::GameTree &EF;
   const gbtEfgSupport &support;
   gSpace *Space;
   term_order *Lex;
@@ -425,9 +425,9 @@ EfgPolEnumModule<T>::SolVarsFromgbtBehavProfile(const gbtBehavProfile<gbtNumber>
   int numvars(0);
 
   for (int pl = 1; pl <= EF->NumPlayers(); pl++) {
-    gbtEfgPlayer player = EF->GetPlayer(pl);
+    Gambit::GamePlayer player = EF->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      const gbtEfgInfoset *infoset = player->GetInfoset(iset);
+      const Gambit::GameInfoset *infoset = player->GetInfoset(iset);
       if ( support.MayReach(infoset) )
 	numvars += support.Actions(infoset).Length() - 1;
     }
@@ -437,11 +437,11 @@ EfgPolEnumModule<T>::SolVarsFromgbtBehavProfile(const gbtBehavProfile<gbtNumber>
   int count(0);
 
   for (int pl = 1; pl <= EF->NumPlayers(); pl++) {
-    gbtEfgPlayer player = EF->GetPlayer(pl);
+    Gambit::GamePlayer player = EF->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      const gbtEfgInfoset *infoset = player->GetInfoset(iset);
+      const Gambit::GameInfoset *infoset = player->GetInfoset(iset);
       if ( support.MayReach(infoset) ) {
-	const gbtArray<gbtEfgAction *> acts = support.Actions(infoset);
+	const gbtArray<Gambit::GameAction *> acts = support.Actions(infoset);
 	for (int act = 1; act <= acts.Length() - 1; act++) {
 	  count++;
 	  answer[count] = (gDouble)sol.GetActionProb(acts[act]);
@@ -559,7 +559,7 @@ void PrintProfile(std::ostream &p_stream,
 
 gbtBehavProfile<double> ToFullSupport(const gbtBehavProfile<double> &p_profile)
 {
-  gbtEfgGame efg = p_profile.GetGame();
+  Gambit::GameTree efg = p_profile.GetGame();
   const gbtEfgSupport &support = p_profile.Support();
 
   gbtBehavProfile<double> fullProfile(efg);
@@ -567,9 +567,9 @@ gbtBehavProfile<double> ToFullSupport(const gbtBehavProfile<double> &p_profile)
 
   int index = 1;
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-    gbtEfgPlayer player = efg->GetPlayer(pl);
+    Gambit::GamePlayer player = efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player->GetInfoset(iset);
+      Gambit::GameInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
 	if (support.Find(infoset->GetAction(act))) {
 	  fullProfile(pl, iset, act) = p_profile[index++];
@@ -601,10 +601,10 @@ void PrintSupport(std::ostream &p_stream,
   p_stream << p_label;
 
   for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    gbtEfgPlayer player = p_support.GetGame()->GetPlayer(pl);
+    Gambit::GamePlayer player = p_support.GetGame()->GetPlayer(pl);
 
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player->GetInfoset(iset);
+      Gambit::GameInfoset infoset = player->GetInfoset(iset);
 
       p_stream << ",";
 
@@ -621,7 +621,7 @@ void PrintSupport(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-void Solve(const gbtEfgGame &p_game)
+void Solve(const Gambit::GameTree &p_game)
 {
   gbtList<gbtEfgSupport> supports = PossibleNashSubsupports(p_game);
 
@@ -715,10 +715,10 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  gbtEfgGame efg;
+  Gambit::GameTree efg;
 
   try {
-    efg = ReadEfg(std::cin);
+    efg = Gambit::ReadEfg(std::cin);
   }
   catch (...) {
     return 1;

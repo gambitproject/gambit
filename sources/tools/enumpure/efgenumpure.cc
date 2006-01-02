@@ -30,14 +30,14 @@
 
 class EfgIter    {
   private:
-    gbtEfgGame _efg;
+    Gambit::GameTree _efg;
     gbtEfgSupport _support;
     gbtPureBehavProfile _profile;
     gbtPVector<int> _current;
     mutable gbtVector<gbtRational> _payoff;
 
   public:
-    EfgIter(gbtEfgGame);
+    EfgIter(Gambit::GameTree);
     EfgIter(const gbtEfgSupport &);
     EfgIter(const EfgIter &);
     EfgIter(const EfgContIter &);
@@ -57,7 +57,7 @@ class EfgIter    {
 
 
 
-EfgIter::EfgIter(gbtEfgGame efg)
+EfgIter::EfgIter(Gambit::GameTree efg)
   : _efg(efg), _support(efg),
     _profile(efg), _current(_efg->NumInfosets()),
     _payoff(_efg->NumPlayers())
@@ -112,7 +112,7 @@ void EfgIter::First(void)
 
 int EfgIter::Next(int pl, int iset)
 {
-  const gbtArray<gbtEfgAction> &actions = _support.Actions(pl, iset);
+  const gbtArray<Gambit::GameAction> &actions = _support.Actions(pl, iset);
   
   if (_current(pl, iset) == actions.Length())   {
     _current(pl, iset) = 1;
@@ -174,7 +174,7 @@ void Solve(const gbtEfgSupport &p_support)
 
   int ncont = 1;
   for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    gbtEfgPlayer player = p_support.GetGame()->GetPlayer(pl);
+    Gambit::GamePlayer player = p_support.GetGame()->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++)
       ncont *= p_support.NumActions(pl, iset);
   }
@@ -279,10 +279,10 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  gbtEfgGame efg;
+  Gambit::GameTree efg;
 
   try {
-    efg = ReadEfg(std::cin);
+    efg = Gambit::ReadEfg(std::cin);
   }
   catch (...) {
     return 1;

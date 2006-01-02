@@ -32,21 +32,23 @@
 #include "game.h"
 
 
-//
-// Forward declarations of classes defined in this file.
-//
-class gbtNfgStrategyRep;
-typedef Gambit::GameObjectPtr<gbtNfgStrategyRep> gbtNfgStrategy;
-
-class gbtNfgPlayerRep;
-typedef Gambit::GameObjectPtr<gbtNfgPlayerRep> gbtNfgPlayer;
-
-class gbtNfgGameRep;
-typedef Gambit::GameObjectPtr<gbtNfgGameRep> gbtNfgGame;
-
 class gbtNumber;
 class gbtStrategyProfile;
 template <class T> class gbtMixedProfile;
+
+namespace Gambit {
+
+//
+// Forward declarations of classes defined in this file.
+//
+class GameStrategyRep;
+typedef Gambit::GameObjectPtr<GameStrategyRep> GameStrategy;
+
+class TablePlayerRep;
+typedef Gambit::GameObjectPtr<TablePlayerRep> TablePlayer;
+
+class GameTableRep;
+typedef Gambit::GameObjectPtr<GameTableRep> GameTable;
 
 /// This class represents a strategy in a strategic game.
 /// Internally, this strategy stores an 'index'.  This index has the
@@ -54,23 +56,23 @@ template <class T> class gbtMixedProfile;
 /// strategies gives the index into the strategic game's table to
 /// find the outcome for that strategy profile, making payoff computation
 /// relatively efficient.
-class gbtNfgStrategyRep : public Gambit::GameObject  {
-  friend class gbtNfgGameRep;
-  friend class gbtNfgPlayerRep;
-  friend class gbtStrategyProfile;
+class GameStrategyRep : public GameObject  {
+  friend class GameTableRep;
+  friend class TablePlayerRep;
+  friend class ::gbtStrategyProfile;
   friend class gbtMixedProfile<double>;
   friend class gbtMixedProfile<gbtRational>;
   friend class gbtMixedProfile<gbtNumber>;
 private:
   int m_number;
-  gbtNfgPlayerRep *m_player;
+  TablePlayerRep *m_player;
   long m_index;
   std::string m_name;
 
   /// @name Lifecycle
   //@{
   /// Creates a new strategy for the given player.
-  gbtNfgStrategyRep(gbtNfgPlayerRep *p_player)
+  GameStrategyRep(TablePlayerRep *p_player)
     : m_number(0), m_player(p_player), m_index(0L) { }
   //@}
 
@@ -83,7 +85,7 @@ public:
   void SetName(const std::string &s) { m_name = s; }
   
   /// Returns the player for whom this is a strategy
-  gbtNfgPlayer GetPlayer(void) const;
+  TablePlayer GetPlayer(void) const;
   /// Returns the index of the strategy for its player
   int GetNumber(void) const { return m_number; }
 
@@ -94,22 +96,22 @@ public:
 
 
 /// This class represents a player in a strategic game.
-class gbtNfgPlayerRep : public Gambit::GameObject {
-  friend class gbtNfgGameRep;
-  friend class gbtNfgStrategyRep;
+class TablePlayerRep : public Gambit::GameObject {
+  friend class GameTableRep;
+  friend class GameStrategyRep;
 private:
   int number;
   std::string name;
-  gbtNfgGameRep *m_nfg;
+  GameTableRep *m_nfg;
   
-  gbtArray<gbtNfgStrategyRep *> strategies;
+  gbtArray<GameStrategyRep *> strategies;
 
   /// @name Lifecycle
   //@{
   /// Constructs a new player in the specified game, with 'num' strategies
-  gbtNfgPlayerRep(int n, gbtNfgGameRep *no, int num);
+  TablePlayerRep(int n, GameTableRep *no, int num);
   /// Cleans up a player object; responsible for deallocating strategies
-  ~gbtNfgPlayerRep();
+  ~TablePlayerRep();
   //@}
 
 public:
@@ -121,7 +123,7 @@ public:
   void SetName(const std::string &s) { name = s; }
 
   /// Returns the game on which the player is defined
-  gbtNfgGame GetGame(void) const { return m_nfg; }
+  GameTable GetGame(void) const { return m_nfg; }
   /// Returns the index of the player in its game
   int GetNumber(void) const  { return number; }
   //@}
@@ -131,9 +133,9 @@ public:
   /// Returns the number of strategies available to the player
   int NumStrats(void) const { return strategies.Length(); }
   /// Returns the st'th strategy for the player
-  gbtNfgStrategy GetStrategy(int st) { return strategies[st]; }
+  GameStrategy GetStrategy(int st) { return strategies[st]; }
   /// Creates a new strategy for the player
-  gbtNfgStrategy NewStrategy(void);
+  GameStrategy NewStrategy(void);
   //@}
 };
 
@@ -148,14 +150,14 @@ class gbtStrategyProfile;
 /// creation, all entries in the table are set to the null pointer.
 /// See gbtStrategyProfile for the facilities for setting entries
 /// in the game table.
-class gbtNfgGameRep : public Gambit::GameRep {
-friend class gbtStrategyProfile;
+class GameTableRep : public GameRep {
+friend class ::gbtStrategyProfile;
 friend class NfgFileReader;
-friend class gbtEfgGameRep;
-friend class gbtNfgPlayerRep;
-friend class gbtNfgStrategyRep;
-friend void SetPayoff(gbtNfgGame, int, int, const std::string &);
-friend void ParseOutcomeBody(class gbtGameParserState &, gbtNfgGame);
+friend class Gambit::GameTreeRep;
+friend class TablePlayerRep;
+friend class GameStrategyRep;
+friend void SetPayoff(GameTable, int, int, const std::string &);
+friend void ParseOutcomeBody(class gbtGameParserState &, Gambit::GameTable);
 friend class gbtMixedProfile<double>;
 friend class gbtMixedProfile<gbtRational>;
 friend class gbtMixedProfile<gbtNumber>;
@@ -163,12 +165,12 @@ protected:
   std::string m_title, m_comment;
   gbtArray<int> dimensions;
 
-  gbtArray<gbtNfgPlayerRep *> players;
+  gbtArray<TablePlayerRep *> players;
   gbtArray<Gambit::GameOutcomeRep *> outcomes;
 
   gbtArray<Gambit::GameOutcomeRep *> results;
 
-  gbtEfgGame efg;
+  Gambit::GameTree efg;
 
   /// @name Private auxiliary functions
   //@{
@@ -180,11 +182,11 @@ public:
   /// @name Lifecycle
   //@{
   /// Construct a new strategic form game with the specified dimension
-  gbtNfgGameRep(const gbtArray<int> &dim);
+  GameTableRep(const gbtArray<int> &dim);
   /// Create a copy of a strategic form game
-    //gbtNfgGame(const gbtNfgGame &b);
+    //GameTable(const GameTable &b);
   /// Clean up a strategic form game
-  ~gbtNfgGameRep();
+  ~GameTableRep();
   //@}
     
   /// @name General data access
@@ -207,7 +209,7 @@ public:
   gbtRational GetMaxPayoff(int pl = 0) const;
 
   /// Returns the extensive form associated with this game, if any
-  gbtEfgGame AssociatedEfg(void) const 
+  Gambit::GameTree AssociatedEfg(void) const 
   { return efg; }
   //@}
 
@@ -222,9 +224,9 @@ public:
   /// Returns the number of players in the game
   int NumPlayers(void) const { return players.Length(); }
   /// Returns the pl'th player in the game
-  gbtNfgPlayer GetPlayer(int pl) const { return players[pl]; }
+  TablePlayer GetPlayer(int pl) const { return players[pl]; }
   /// Creates a new player in the game, with one strategy
-  gbtNfgPlayer NewPlayer(void);
+  TablePlayer NewPlayer(void);
   //@}
 
   /// @name Strategies
@@ -271,6 +273,8 @@ public:
 };
 
 /// Reads a strategic game in .nfg format from the input stream
-gbtNfgGame ReadNfg(std::istream &);
+GameTable ReadNfg(std::istream &);
+
+}  // end namespace Gambit
 
 #endif  // LIBGAMBIT_TABLEGAME_H

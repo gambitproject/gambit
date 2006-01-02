@@ -35,13 +35,13 @@
 
 class gbtActionSheet : public wxSheet {
 private:
-  gbtEfgInfoset m_infoset;
+  Gambit::GameInfoset m_infoset;
 
   // Overriding wxSheet members
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const;
 
 public:
-  gbtActionSheet(wxWindow *p_parent, gbtEfgInfoset p_infoset)
+  gbtActionSheet(wxWindow *p_parent, Gambit::GameInfoset p_infoset)
     : wxSheet(p_parent, 1), m_infoset(p_infoset) { }
 };
 
@@ -89,7 +89,7 @@ gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 //======================================================================
 
 gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
-				     gbtEfgInfoset p_infoset)
+				     Gambit::GameInfoset p_infoset)
   : wxDialog(p_parent, -1, _("Move properties"), wxDefaultPosition), 
     m_infoset(p_infoset)
 {

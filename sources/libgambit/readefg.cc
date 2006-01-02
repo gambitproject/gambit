@@ -30,6 +30,8 @@
 
 #include "libgambit.h"
 
+namespace Gambit {
+
 //=========================================================================
 //                  Temporary representation classes
 //=========================================================================
@@ -96,7 +98,7 @@ InfosetData *NodeData::AddInfosetData(const std::string &m_infosetName)
 class DefinedInfosetData {
 public:
   int m_fileID;
-  gbtEfgInfoset m_infoset;
+  Gambit::GameInfoset m_infoset;
   DefinedInfosetData *m_next;
 
   DefinedInfosetData(void) : m_fileID(-1), m_infoset(0), m_next(0) { }
@@ -110,8 +112,8 @@ public:
 
   PlayerData(void);
   ~PlayerData();
-  void AddInfoset(int p_number, gbtEfgInfoset p_infoset);
-  gbtEfgInfoset GetInfoset(int p_number);
+  void AddInfoset(int p_number, Gambit::GameInfoset p_infoset);
+  Gambit::GameInfoset GetInfoset(int p_number);
 };
 
 PlayerData::PlayerData(void)
@@ -128,7 +130,7 @@ PlayerData::~PlayerData()
   }
 }
 
-void PlayerData::AddInfoset(int p_number, gbtEfgInfoset p_infoset)
+void PlayerData::AddInfoset(int p_number, Gambit::GameInfoset p_infoset)
 {
   DefinedInfosetData *infoset = new DefinedInfosetData;
   infoset->m_fileID = p_number;
@@ -149,7 +151,7 @@ void PlayerData::AddInfoset(int p_number, gbtEfgInfoset p_infoset)
 // been created, returns the pointer to the Infoset structure; otherwise,
 // returns null.
 //
-gbtEfgInfoset PlayerData::GetInfoset(int p_number)
+Gambit::GameInfoset PlayerData::GetInfoset(int p_number)
 {
   for (DefinedInfosetData *infoset = m_firstInfoset;
        infoset; infoset = infoset->m_next) {
@@ -696,7 +698,7 @@ static void Parse(ParserState &p_state, TreeData &p_treeData)
 // the actual tree to be returned
 //
 
-static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
+static void BuildSubtree(Gambit::GameTree p_efg, Gambit::GameNode p_node,
 			 TreeData &p_treeData, NodeData **p_nodeData)
 {
   p_node->SetLabel((*p_nodeData)->m_name);
@@ -722,11 +724,11 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
     for (int i = 1; i < (*p_nodeData)->m_player; i++, player = player->m_next);
 
     if (player->GetInfoset((*p_nodeData)->m_infoset)) {
-      gbtEfgInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
+      Gambit::GameInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
       p_efg->AppendNode(p_node, infoset);
     }
     else {
-      gbtEfgInfoset infoset =
+      Gambit::GameInfoset infoset =
 	p_efg->AppendNode(p_node, p_efg->GetPlayer((*p_nodeData)->m_player),
 			  (*p_nodeData)->m_infosetData->m_actions.Length());
 
@@ -746,11 +748,11 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
     PlayerData *player = &p_treeData.m_chancePlayer;
 
     if (player->GetInfoset((*p_nodeData)->m_infoset)) {
-      gbtEfgInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
+      Gambit::GameInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
       p_efg->AppendNode(p_node, infoset);
     }
     else {
-      gbtEfgInfoset infoset = p_efg->AppendNode(p_node, p_efg->GetChance(),
+      Gambit::GameInfoset infoset = p_efg->AppendNode(p_node, p_efg->GetChance(),
 					   (*p_nodeData)->m_infosetData->m_actions.Length());
 
       infoset->SetLabel((*p_nodeData)->m_infosetData->m_name);
@@ -773,7 +775,7 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
   }
 }
 
-static void BuildEfg(gbtEfgGame p_efg, TreeData &p_treeData)
+static void BuildEfg(Gambit::GameTree p_efg, TreeData &p_treeData)
 {
   p_efg->SetTitle(p_treeData.m_title);
   p_efg->SetComment(p_treeData.m_comment);
@@ -790,12 +792,12 @@ static void BuildEfg(gbtEfgGame p_efg, TreeData &p_treeData)
 //  ReadEfg: Global visible function to read an extensive form savefile
 //=========================================================================
 
-gbtEfgGame ReadEfg(std::istream &p_file)
+Gambit::GameTree ReadEfg(std::istream &p_file)
 {
   ParserState parser(p_file);
   TreeData treeData;
 
-  gbtEfgGame efg = new gbtEfgGameRep;
+  Gambit::GameTree efg = new Gambit::GameTreeRep;
 
   try {
     Parse(parser, treeData);
@@ -810,3 +812,4 @@ gbtEfgGame ReadEfg(std::istream &p_file)
   }
 }
 
+}  // end namespace Gambit

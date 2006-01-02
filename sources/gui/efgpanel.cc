@@ -360,7 +360,7 @@ void gbtTreePlayerPanel::OnUpdate(void)
 		       wxString(pay.c_str(), *wxConvCurrent));
     GetSizer()->Show(m_payoff, true);
 
-    gbtEfgNode node = m_doc->GetSelectNode();
+    Gambit::GameNode node = m_doc->GetSelectNode();
 
     if (node) {
       m_nodeValue->SetForegroundColour(color);

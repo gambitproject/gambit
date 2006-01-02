@@ -58,7 +58,7 @@ public:
 
   bool operator==(const gbtMixedProfile<T> &) const;
 
-  gbtNfgGame GetGame(void) const  { return support.GetGame(); }
+  Gambit::GameTable GetGame(void) const  { return support.GetGame(); }
   const gbtNfgSupport &GetSupport(void) const  { return support; }
 
   T GetLiapValue(void) const;
@@ -68,7 +68,7 @@ public:
 
   T GetPayoff(int pl) const;
   T GetPayoff(int pl, int player1, int strat1) const;
-  T GetPayoff(int pl, const gbtNfgStrategy &) const;
+  T GetPayoff(int pl, const Gambit::GameStrategy &) const;
   T GetPayoff(int pl, int player1, int strat1, int player2, int strat2) const;
   void GetPayoff(int pl, int const_pl, gbtVector<T> &payoff) const;
 };

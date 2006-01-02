@@ -34,7 +34,7 @@
 //                               Lifecycle
 //---------------------------------------------------------------------------
 
-gbtStrategyProfile::gbtStrategyProfile(const gbtNfgGame &p_nfg)
+gbtStrategyProfile::gbtStrategyProfile(const Gambit::GameTable &p_nfg)
   : m_index(0L), m_nfg(p_nfg), m_profile(m_nfg->NumPlayers())
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
@@ -47,7 +47,7 @@ gbtStrategyProfile::gbtStrategyProfile(const gbtNfgGame &p_nfg)
 //                      Data access and manipulation
 //---------------------------------------------------------------------------
 
-void gbtStrategyProfile::SetStrategy(const gbtNfgStrategy &s)
+void gbtStrategyProfile::SetStrategy(const Gambit::GameStrategy &s)
 {
   if (!s) return;
   m_index += s->m_index - m_profile[s->GetPlayer()->GetNumber()]->m_index;
@@ -79,11 +79,11 @@ gbtRational gbtStrategyProfile::GetPayoff(int pl) const
 //                               Lifecycle
 //---------------------------------------------------------------------------
 
-gbtNfgSupport::gbtNfgSupport(const gbtNfgGame &p_nfg) 
+gbtNfgSupport::gbtNfgSupport(const Gambit::GameTable &p_nfg) 
   : m_nfg(p_nfg)
 { 
   for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
-    m_support.Append(gbtArray<gbtNfgStrategy>());
+    m_support.Append(gbtArray<Gambit::GameStrategy>());
     for (int st = 1; st <= p_nfg->NumStrats(pl); st++) {
       m_support[pl].Append(p_nfg->GetPlayer(pl)->GetStrategy(st));
     }
@@ -134,9 +134,9 @@ bool gbtNfgSupport::IsSubsetOf(const gbtNfgSupport &p_support) const
 //                        Modifying the support
 //---------------------------------------------------------------------------
 
-void gbtNfgSupport::AddStrategy(gbtNfgStrategy s)
+void gbtNfgSupport::AddStrategy(Gambit::GameStrategy s)
 { 
-  gbtArray<gbtNfgStrategy> &sup = m_support[s->GetPlayer()->GetNumber()];
+  gbtArray<Gambit::GameStrategy> &sup = m_support[s->GetPlayer()->GetNumber()];
   if (sup.Contains(s))  return;
 
   int index;
@@ -146,9 +146,9 @@ void gbtNfgSupport::AddStrategy(gbtNfgStrategy s)
   sup.Insert(s, index);
 }
 
-bool gbtNfgSupport::RemoveStrategy(gbtNfgStrategy s) 
+bool gbtNfgSupport::RemoveStrategy(Gambit::GameStrategy s) 
 { 
-  gbtArray<gbtNfgStrategy> &sup = m_support[s->GetPlayer()->GetNumber()];
+  gbtArray<Gambit::GameStrategy> &sup = m_support[s->GetPlayer()->GetNumber()];
   if (!sup.Contains(s)) return false;
   if (sup.Contains(s) && sup.Length() == 1)  return false;
   sup.Remove(sup.Find(s));

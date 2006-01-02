@@ -105,7 +105,7 @@ public:
   int LeashLength(void) const { return m_leashLength; }
   void SetLeashLength(int p_leashLength) { m_leashLength = p_leashLength; }
 
-  void Solve(const gbtNfgGame &, const gbtMixedProfile<gbtRational> &);
+  void Solve(const Gambit::GameTable &, const gbtMixedProfile<gbtRational> &);
 };
 
 
@@ -526,7 +526,7 @@ gbtInteger find_lcd(const gbtVector<gbtRational> &vec)
   return lcd;
 }
 
-void nfgSimpdiv::Solve(const gbtNfgGame &p_nfg, 
+void nfgSimpdiv::Solve(const Gambit::GameTable &p_nfg, 
 		       const gbtMixedProfile<gbtRational> &p_start)
 {
   int qf,i,j,ii;
@@ -565,7 +565,7 @@ void nfgSimpdiv::Solve(const gbtNfgGame &p_nfg,
 
 void Randomize(gbtMixedProfile<gbtRational> &p_profile, int p_denom)
 {
-  gbtNfgGame nfg = p_profile.GetGame();
+  Gambit::GameTable nfg = p_profile.GetGame();
 
   ((gbtVector<gbtRational> &) p_profile) = gbtRational(0);
 
@@ -669,10 +669,10 @@ int main(int argc, char *argv[])
 
 
 
-  gbtNfgGame nfg;
+  Gambit::GameTable nfg;
 
   try {
-    nfg = ReadNfg(std::cin);
+    nfg = Gambit::ReadNfg(std::cin);
   }
   catch (...) {
     return 1;

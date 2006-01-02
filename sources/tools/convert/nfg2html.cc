@@ -30,7 +30,7 @@
 
 #include "libgambit/libgambit.h"
 
-void WriteHtmlFile(std::ostream &p_file, const gbtNfgGame &p_nfg,
+void WriteHtmlFile(std::ostream &p_file, const Gambit::GameTable &p_nfg,
 		   int p_rowPlayer, int p_colPlayer)
 {
   std::string theHtml;
@@ -163,10 +163,10 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  gbtNfgGame nfg;
+  Gambit::GameTable nfg;
 
   try {
-    nfg = ReadNfg(std::cin);
+    nfg = Gambit::ReadNfg(std::cin);
   }
   catch (...) {
     return 1;

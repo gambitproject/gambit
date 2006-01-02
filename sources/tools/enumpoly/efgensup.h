@@ -115,22 +115,22 @@ public:
   bool GoToNext();
 
   // Information
-  gbtEfgAction GetAction() const;
+  Gambit::GameAction GetAction() const;
   int ActionIndex() const;
-  gbtEfgInfoset GetInfoset() const;
+  Gambit::GameInfoset GetInfoset() const;
   int InfosetIndex() const;
-  gbtEfgPlayer GetPlayer() const;
+  Gambit::GamePlayer GetPlayer() const;
   int PlayerIndex() const;
 
   bool IsLast() const;
-  bool IsSubsequentTo(const gbtEfgAction &) const;
+  bool IsSubsequentTo(const Gambit::GameAction &) const;
 
   // Special
   bool InfosetGuaranteedActiveByPriorCommitments(const 
 						     gbtEfgSupportWithActiveInfo *,
-						 const gbtEfgInfoset &);
+						 const Gambit::GameInfoset &);
   bool DeletionsViolateActiveCommitments(const gbtEfgSupportWithActiveInfo *,
-					 const gbtList<gbtEfgInfoset> *);
+					 const gbtList<Gambit::GameInfoset> *);
 };
 
 

@@ -110,12 +110,12 @@ public:
   bool GoToNext();
 
   // Information
-  gbtNfgStrategy GetStrategy() const;
+  Gambit::GameStrategy GetStrategy() const;
   int StrategyIndex() const;
-  gbtNfgPlayer GetPlayer() const;
+  Gambit::TablePlayer GetPlayer() const;
   int PlayerIndex() const;
 
   bool IsLast() const;
-  bool IsSubsequentTo(const gbtNfgStrategy &) const;
+  bool IsSubsequentTo(const Gambit::GameStrategy &) const;
 };
 

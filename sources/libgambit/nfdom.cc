@@ -27,10 +27,10 @@
 #include <iostream>
 #include "libgambit.h"
 
-bool gbtNfgSupport::Dominates(gbtNfgStrategy s, gbtNfgStrategy t, 
+bool gbtNfgSupport::Dominates(Gambit::GameStrategy s, Gambit::GameStrategy t, 
 			      bool strong) const
 {
-  gbtNfgGame n = GetGame();
+  Gambit::GameTable n = GetGame();
 
   gbtNfgContingencyIterator A(*this,
 			      s->GetPlayer()->GetNumber(), GetIndex(s));
@@ -74,7 +74,7 @@ bool gbtNfgSupport::Dominates(gbtNfgStrategy s, gbtNfgStrategy t,
 }
 
 
-bool gbtNfgSupport::IsDominated(gbtNfgStrategy s, bool strong) const
+bool gbtNfgSupport::IsDominated(Gambit::GameStrategy s, bool strong) const
 {
   for (int i = 1; i <= NumStrats(s->GetPlayer()->GetNumber()); i++) {
     if (GetStrategy(s->GetPlayer()->GetNumber(), i) != s &&

@@ -106,7 +106,7 @@ wxString gbtLogitMixedList::GetCellValue(const wxSheetCoords &p_coords)
     else {
       int index = 1;
       for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
-	gbtNfgPlayer player = m_doc->GetNfg()->GetPlayer(pl);
+	Gambit::TablePlayer player = m_doc->GetNfg()->GetPlayer(pl);
 	for (int st = 1; st <= player->NumStrats(); st++) {
 	  if (index++ == p_coords.GetCol()) {
 	    return (wxString::Format(wxT("%d: "), pl) +
@@ -142,7 +142,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 
   int index = 1;
   for (int pl = 1; pl <= p_doc->GetNfg()->NumPlayers(); pl++) {
-    gbtNfgPlayer player = p_doc->GetNfg()->GetPlayer(pl);
+    Gambit::TablePlayer player = p_doc->GetNfg()->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrats(); st++) {
       if (index++ == p_index) {
 	return p_doc->GetStyle().GetPlayerColor(pl);
@@ -296,7 +296,7 @@ void gbtLogitPlotCtrl::SetProfiles(const gbtList<double> &p_lambdas,
   wxBitmap bitmap(1, 1);
   
   for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
-    gbtNfgPlayer player = m_doc->GetNfg()->GetPlayer(pl);
+    Gambit::TablePlayer player = m_doc->GetNfg()->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrats(); st++) {
       wxPlotData *curve = new wxPlotData(p_lambdas.Length());
       curve->SetFilename(wxString::Format(wxT("%d:%d"), pl, st));

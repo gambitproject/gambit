@@ -39,7 +39,7 @@ public:
   gbtRevealMoveDialog(wxWindow *, gbtGameDocument *);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  gbtArray<gbtEfgPlayer> GetPlayers(void) const;
+  gbtArray<Gambit::GamePlayer> GetPlayers(void) const;
 };
 
 #endif  // DLEFGREVEAL_H

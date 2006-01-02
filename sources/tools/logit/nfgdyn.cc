@@ -52,7 +52,7 @@ int g_numDecimals = 6;
 void LogitBR(const gbtMixedProfile<double> &p_profile, double p_lambda,
 	     gbtMixedProfile<double> &p_br)
 {
-  gbtNfgGame nfg = p_profile.GetGame();
+  Gambit::GameTable nfg = p_profile.GetGame();
 
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
     gbtArray<double> lval(nfg->NumStrats(pl));
@@ -71,7 +71,7 @@ void LogitBR(const gbtMixedProfile<double> &p_profile, double p_lambda,
 
 void Randomize(gbtMixedProfile<double> &p_profile)
 {
-  gbtNfgGame nfg = p_profile.GetGame();
+  Gambit::GameTable nfg = p_profile.GetGame();
 
   ((gbtVector<double> &) p_profile) = 0.0;
 
@@ -152,10 +152,10 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  gbtNfgGame nfg;
+  Gambit::GameTable nfg;
 
   try {
-    nfg = ReadNfg(std::cin);
+    nfg = Gambit::ReadNfg(std::cin);
   }
   catch (...) {
     return 1;

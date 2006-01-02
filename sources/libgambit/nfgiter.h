@@ -37,7 +37,7 @@ template <class T> class gbtArray;
 /// one player may be held fixed during the iteration (by the use of the
 /// second constructor).
 class gbtNfgContingencyIterator {
-  friend class gbtNfgGameRep;
+  friend class Gambit::GameTableRep;
 private:
   gbtNfgSupport support;
   gbtArray<int> m_currentStrat;

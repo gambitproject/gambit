@@ -151,7 +151,7 @@ T gbtMixedProfile<T>::GetPayoff(int pl, int player1, int strat1) const
 }
 
 template <class T> T
-gbtMixedProfile<T>::GetPayoff(int pl, const gbtNfgStrategy &strategy) const
+gbtMixedProfile<T>::GetPayoff(int pl, const Gambit::GameStrategy &strategy) const
 {
   T value = (T) 0;
   PPayoff(pl, strategy->GetPlayer()->GetNumber(), strategy->GetNumber(), 1,
@@ -193,7 +193,7 @@ bool gbtMixedProfile<T>::operator==(const gbtMixedProfile<T> &mp) const
 template <class T>
 T gbtMixedProfile<T>::PPayoff(int pl, int index, int i) const
 {
-  gbtNfgStrategyRep *s;
+  Gambit::GameStrategyRep *s;
   int pindex = 0;
 
   if (i > support.GetGame()->NumPlayers())  {
@@ -220,7 +220,7 @@ template <class T>
 void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
 				int cur_pl, long index, T prob, T &value) const
 {
-  gbtNfgStrategyRep *s;
+  Gambit::GameStrategyRep *s;
 
   if (cur_pl == const_pl)
     PPayoff(pl, const_pl, const_st, cur_pl + 1, index,
@@ -246,7 +246,7 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
 				int const_pl2, int const_st2,
 				int cur_pl, long index, T prob, T &value) const
 {
-  gbtNfgStrategyRep *s;
+  Gambit::GameStrategyRep *s;
 
   if (cur_pl == const_pl1 || cur_pl == const_pl2)
     PPayoff(pl, const_pl1, const_st1, const_pl2, const_st2,
@@ -271,7 +271,7 @@ template <class T>
 void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index, 
 			   T prob, gbtVector<T> &value) const
 {
-  gbtNfgStrategyRep *s;
+  Gambit::GameStrategyRep *s;
 
   if (cur_pl == const_pl)
     PPayoff(pl, const_pl, cur_pl + 1, index,
@@ -299,7 +299,7 @@ gbtMixedProfile<T>::gbtMixedProfile(const gbtBehavProfile<T> &p_profile)
   : gbtPVector<T>(p_profile.GetGame()->AssociatedNfg()->NumStrats()),
     support(p_profile.GetGame()->AssociatedNfg())
 {
-  gbtEfgGame efg = p_profile.GetGame();
+  Gambit::GameTree efg = p_profile.GetGame();
   for (int pl = 1; pl <= support.GetGame()->NumPlayers(); pl++)  {
     for (int st = 1; st <= support.GetGame()->NumStrats(pl); st++)  {
       T prob = (T) 1;

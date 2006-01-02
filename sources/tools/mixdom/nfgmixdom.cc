@@ -33,7 +33,7 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
 			   int pl, bool strong, T /*junk*/,
 			   std::ostream &tracefile)
 {
-  gbtNfgGame nfg = S.GetGame();
+  Gambit::GameTable nfg = S.GetGame();
   
   gbtArray<bool> dom(S.NumStrats(pl));
   
@@ -213,12 +213,12 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
 }
 
 template <class T>
-bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
+bool IsMixedDominated(const gbtNfgSupport &S, Gambit::GameStrategy str,
 		      bool strong, T /*junk*/,
 		      std::ostream &tracefile)
 {
   int pl = str->GetPlayer()->GetNumber();
-  gbtNfgGame nfg = str->GetPlayer()->GetGame();
+  Gambit::GameTable nfg = str->GetPlayer()->GetGame();
   int whichstrat = str->GetNumber();
   int strats = S.NumStrats(pl);
 
@@ -379,7 +379,7 @@ bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
 		      bool strong, std::ostream &tracefile)
 {
   gbtNfgSupport S = pr.GetSupport();
-  gbtNfgGame nfg = pr.GetGame();
+  Gambit::GameTable nfg = pr.GetGame();
   int strats = S.NumStrats(pl);
   gbtVector<T> prob = pr.GetRow(pl);
   assert( prob.Length() == strats);
@@ -531,7 +531,7 @@ bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
 }
 
 
-bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy *str,
+bool IsMixedDominated(const gbtNfgSupport &S, Gambit::GameStrategy *str,
 		      bool strong, bool rational,
 		      std::ostream &tracefile)
 {
@@ -555,10 +555,10 @@ ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,int pl, bool stro
 		      double junk, std::ostream &tracefile);
 
 template bool
-IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
+IsMixedDominated(const gbtNfgSupport &S, Gambit::GameStrategy str,
 		 bool strong, gbtRational junk, std::ostream &tracefile);
 template bool
-IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
+IsMixedDominated(const gbtNfgSupport &S, Gambit::GameStrategy str,
 		 bool strong, double junk, std::ostream &tracefile);
 
 template bool 
