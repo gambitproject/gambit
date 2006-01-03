@@ -249,12 +249,30 @@ bool GameNodeRep::IsSuccessorOf(GameNode p_node) const
 
 bool GameNodeRep::IsSubgameRoot(void) const
 {
-  if (children.Length() == 0)  return false;
+  // First take care of a couple easy cases
+  if (children.Length() == 0 || infoset->NumMembers() > 1) return false;
+  if (!parent) return true;
 
-  m_efg->MarkTree(const_cast<GameNodeRep *>(this), 
-		  const_cast<GameNodeRep *>(this));
-  return m_efg->CheckTree(const_cast<GameNodeRep *>(this),
-			  const_cast<GameNodeRep *>(this));
+  // A node is a subgame root if and only if in every information set,
+  // either all members succeed the node in the tree,
+  // or all members do not succeed the node in the tree.
+  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
+    GamePlayerRep *player = m_efg->GetPlayer(pl);
+    
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfosetRep *infoset = player->GetInfoset(iset);
+
+      bool precedes = infoset->GetMember(1)->IsSuccessorOf(const_cast<GameNodeRep *>(this));
+
+      for (int mem = 2; mem <= infoset->NumMembers(); mem++) {
+	if (infoset->GetMember(mem)->IsSuccessorOf(const_cast<GameNodeRep *>(this)) != precedes) {
+	  return false;
+	}
+      }
+    }
+  }
+
+  return true;
 }
 
 //========================================================================
@@ -1497,31 +1515,6 @@ void GameRep::UnmarkSubtree(GameNodeRep *p_node)
   for (int i = 1; i <= p_node->children.Length(); i++) {
     UnmarkSubtree(p_node->children[i]);
   }
-}
-
-void GameRep::MarkTree(GameNodeRep *n, GameNodeRep *base)
-{
-  n->ptr = base;
-  for (int i = 1; i <= n->NumChildren(); i++)
-    MarkTree(n->GetChild(i), base);
-}
-
-bool GameRep::CheckTree(GameNodeRep *n, GameNodeRep *base)
-{
-  int i;
-
-  if (n->NumChildren() == 0)   return true;
-
-  for (i = 1; i <= n->NumChildren(); i++)
-    if (!CheckTree(n->GetChild(i), base))  return false;
-
-  if (n->GetPlayer()->IsChance())   return true;
-
-  for (i = 1; i <= n->GetInfoset()->NumMembers(); i++)
-    if (n->GetInfoset()->GetMember(i)->ptr != base)
-      return false;
-
-  return true;
 }
 
 void GameRep::IndexStrategies(void)

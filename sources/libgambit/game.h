@@ -123,7 +123,7 @@ public:
   { return (rep != r.rep); }
   bool operator!=(T *r) const { return (rep != r); }
 
-  operator T *(void) const { if (!rep) throw NullException(); return rep; }
+  operator T *(void) const { return rep; }
 
   bool operator!(void) const { return !rep; }
 };
@@ -460,9 +460,6 @@ protected:
 
   void NumberNodes(GameNodeRep *, int &);
 
-  // These are used in identification of subgames
-  void MarkTree(GameNodeRep *, GameNodeRep *);
-  bool CheckTree(GameNodeRep *, GameNodeRep *);
   // These are used in Reveal (and only reveal?)
   void MarkSubtree(GameNodeRep *);
   void UnmarkSubtree(GameNodeRep *);
