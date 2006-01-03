@@ -65,8 +65,8 @@ void gbtBehavDominanceStack::Reset(void)
 {
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
   m_supports = gbtArray<gbtEfgSupport *>();
-  if (m_doc->GetEfg()) {
-    m_supports.Append(new gbtEfgSupport(m_doc->GetEfg()));
+  if (m_doc->IsTree()) {
+    m_supports.Append(new gbtEfgSupport(m_doc->GetGame()));
     m_current = 1;
   }
 }
@@ -83,7 +83,7 @@ bool gbtBehavDominanceStack::NextLevel(void)
   }
 
   gbtArray<int> players;
-  for (int pl = 1; pl <= m_doc->GetEfg()->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
     players.Append(pl);
   }
   
@@ -139,10 +139,8 @@ void gbtStrategyDominanceStack::Reset(void)
 {
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
   m_supports = gbtArray<gbtNfgSupport *>();
-  if (m_doc->GetNfg()) {
-    m_supports.Append(new gbtNfgSupport(m_doc->GetNfg()));
-    m_current = 1;
-  }
+  m_supports.Append(new gbtNfgSupport(m_doc->GetGame()));
+  m_current = 1;
   m_noFurther = false;
 }
 
@@ -158,7 +156,7 @@ bool gbtStrategyDominanceStack::NextLevel(void)
   }
 
   gbtArray<int> players;
-  for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
     players.Append(pl);
   }
 
@@ -192,25 +190,14 @@ bool gbtStrategyDominanceStack::PreviousLevel(void)
 //                          class gbtGameDocument
 //=========================================================================
 
-gbtGameDocument::gbtGameDocument(Gambit::GameTree p_efg) 
-  : m_efg(p_efg), m_nfg(0),
+gbtGameDocument::gbtGameDocument(Gambit::Game p_game) 
+  : m_game(p_game),
     m_selectNode(0), m_modified(false),
     m_behavSupports(this, true), m_stratSupports(this, true),
     m_currentProfileList(0)
 {
-  wxGetApp().AddDocument(this);
-
-  std::ostringstream s;
-  SaveDocument(s);
-  m_undoList.Append(s.str());
-}
-
-gbtGameDocument::gbtGameDocument(Gambit::GameTable p_nfg) 
-  : m_efg(0), m_nfg(p_nfg),
-    m_selectNode(0), m_modified(false),
-    m_behavSupports(this, true), m_stratSupports(this, true),
-    m_currentProfileList(0)
-{
+  m_game->Canonicalize();
+  m_game->BuildComputedValues();
   wxGetApp().AddDocument(this);
 
   std::ostringstream s;
@@ -241,15 +228,14 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
   TiXmlNode *efgfile = game->FirstChild("efgfile");
   if (efgfile) {
     std::istringstream s(efgfile->FirstChild()->Value());
-    m_efg = Gambit::ReadEfg(s);
+    m_game = Gambit::ReadEfg(s);
 
   }
   
   TiXmlNode *nfgfile = game->FirstChild("nfgfile");
   if (nfgfile) {
     std::istringstream s(nfgfile->FirstChild()->Value());
-    m_nfg = Gambit::ReadNfg(s);
-    if (m_efg) { m_efg = 0; }
+    m_game = Gambit::ReadNfg(s);
   }
 
   if (!efgfile && !nfgfile) {
@@ -306,7 +292,7 @@ void gbtGameDocument::SaveDocument(std::ostream &p_file) const
   p_file << m_style.GetColorXML();
   p_file << m_style.GetFontXML();
 
-  if (m_efg) {
+  if (m_game->IsTree()) {
     p_file << m_style.GetLayoutXML();
     p_file << m_style.GetLabelXML();
   }
@@ -315,9 +301,9 @@ void gbtGameDocument::SaveDocument(std::ostream &p_file) const
 
   p_file << "<game>\n";
 
-  if (m_efg) {
+  if (m_game->IsTree()) {
     p_file << "<efgfile>\n";
-    m_efg->WriteEfgFile(p_file);
+    m_game->WriteEfgFile(p_file);
     p_file << "</efgfile>\n";
 
     for (int i = 1; i <= m_profiles.Length(); i++) {
@@ -346,7 +332,7 @@ void gbtGameDocument::SaveDocument(std::ostream &p_file) const
   }
   else {
     p_file << "<nfgfile>\n";
-    m_nfg->WriteNfgFile(p_file);
+    m_game->WriteNfgFile(p_file);
     p_file << "</nfgfile>\n";
 
     for (int i = 1; i <= m_profiles.Length(); i++) {
@@ -382,13 +368,8 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
 {
   if (p_modifications != GBT_DOC_MODIFIED_NONE) {
     m_modified = true;
-    if (m_efg) {
-      m_efg->Canonicalize();
-    }
-    else {
-      m_nfg->Canonicalize();
-    }
-
+    m_game->Canonicalize();
+    m_game->BuildComputedValues();
     m_redoList = gbtList<std::string>();
 
     std::ostringstream s;
@@ -419,8 +400,8 @@ void gbtGameDocument::PostPendingChanges(void)
 
 void gbtGameDocument::BuildNfg(void)
 { 
-  if (m_efg && m_efg->AssociatedNfg() == 0) {
-    m_efg->MakeReducedNfg();
+  if (m_game->IsTree()) {
+    m_game->BuildComputedValues();
     m_stratSupports.Reset();
     for (int i = 1; i <= m_profiles.Length(); m_profiles[i++].BuildNfg());
   }
@@ -440,12 +421,7 @@ void gbtGameDocument::Undo(void)
   m_redoList.Append(m_undoList[m_undoList.Length()]);
   m_undoList.Remove(m_undoList.Length());
 
-  if (m_efg) {
-    m_efg = 0;
-  }
-  else {
-    m_nfg = 0;
-  }
+  m_game = 0;
 
   m_profiles = gbtList<gbtAnalysisProfileList>();
   m_currentProfileList = 0;
@@ -466,12 +442,7 @@ void gbtGameDocument::Redo(void)
   m_undoList.Append(m_redoList[m_redoList.Length()]);
   m_redoList.Remove(m_redoList.Length());
 
-  if (m_efg) {
-    m_efg = 0;
-  }
-  else {
-    m_nfg = 0;
-  }
+  m_game = 0;
 
   m_profiles = gbtList<gbtAnalysisProfileList>();
   m_currentProfileList = 0;

@@ -58,7 +58,7 @@ public:
 
   bool operator==(const gbtMixedProfile<T> &) const;
 
-  Gambit::GameTable GetGame(void) const  { return support.GetGame(); }
+  Gambit::Game GetGame(void) const  { return support.GetGame(); }
   const gbtNfgSupport &GetSupport(void) const  { return support; }
 
   T GetLiapValue(void) const;

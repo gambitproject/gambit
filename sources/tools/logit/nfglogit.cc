@@ -137,13 +137,13 @@ void QreLHS(const gbtNfgSupport &p_support,
 
   int rowno = 0;
   for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    Gambit::TablePlayer player = p_support.GetGame()->GetPlayer(pl);
-    for (int st = 1; st <= player->NumStrats(); st++) {
+    Gambit::GamePlayer player = p_support.GetGame()->GetPlayer(pl);
+    for (int st = 1; st <= player->NumStrategies(); st++) {
       rowno++;
       if (st == 1) {
 	// should be st==lead: sum-to-one equation
 	p_lhs[rowno] = -1.0;
-	for (int j = 1; j <= player->NumStrats(); j++) {
+	for (int j = 1; j <= player->NumStrategies(); j++) {
 	  p_lhs[rowno] += profile(pl, j);
 	}
       }
@@ -179,18 +179,18 @@ void QreJacobian(const gbtNfgSupport &p_support,
 
   int rowno = 0;
   for (int i = 1; i <= p_support.GetGame()->NumPlayers(); i++) {
-    Gambit::TablePlayer player = p_support.GetGame()->GetPlayer(i);
+    Gambit::GamePlayer player = p_support.GetGame()->GetPlayer(i);
 
-    for (int j = 1; j <= player->NumStrats(); j++) {
+    for (int j = 1; j <= player->NumStrategies(); j++) {
       rowno++;
       if (j == 1) {
 	// Should be j == lead: sum-to-one equation
 	
 	int colno = 0;
 	for (int ell = 1; ell <= p_support.GetGame()->NumPlayers(); ell++) {
-	  Gambit::TablePlayer player2 = p_support.GetGame()->GetPlayer(ell);
+	  Gambit::GamePlayer player2 = p_support.GetGame()->GetPlayer(ell);
 
-	  for (int m = 1; m <= player2->NumStrats(); m++) {
+	  for (int m = 1; m <= player2->NumStrategies(); m++) {
 	    colno++;
 	    
 	    if (i == ell) {
@@ -210,9 +210,9 @@ void QreJacobian(const gbtNfgSupport &p_support,
 
 	int colno = 0;
 	for (int ell = 1; ell <= p_support.GetGame()->NumPlayers(); ell++) {
-	  Gambit::TablePlayer player2 = p_support.GetGame()->GetPlayer(ell);
+	  Gambit::GamePlayer player2 = p_support.GetGame()->GetPlayer(ell);
 
-	  for (int m = 1; m <= player2->NumStrats(); m++) {
+	  for (int m = 1; m <= player2->NumStrategies(); m++) {
 	    colno++;
 
 	    if (i == ell) {
@@ -686,7 +686,7 @@ int main(int argc, char *argv[])
   }
 
 
-  Gambit::GameTable nfg;
+  Gambit::Game nfg;
 
   try {
     nfg = Gambit::ReadNfg(std::cin);
@@ -696,7 +696,7 @@ int main(int argc, char *argv[])
   }
 
   if (mleFile != "") {
-    g_obsProbs = gbtArray<double>(nfg->ProfileLength());
+    g_obsProbs = gbtArray<double>(nfg->MixedProfileLength());
     std::ifstream mleData(mleFile.c_str());
     ReadProfile(mleData, g_obsProbs);
     g_maxLike = true;

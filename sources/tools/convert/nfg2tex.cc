@@ -30,7 +30,7 @@
 
 #include "libgambit/libgambit.h"
 
-void WriteOsborneFile(std::ostream &p_file, const Gambit::GameTable &p_nfg,
+void WriteOsborneFile(std::ostream &p_file, const Gambit::Game &p_nfg,
 		      int p_rowPlayer, int p_colPlayer)
 {
   std::string theHtml;
@@ -40,13 +40,13 @@ void WriteOsborneFile(std::ostream &p_file, const Gambit::GameTable &p_nfg,
     gbtStrategyProfile profile(iter.GetProfile());
 
     theHtml += "\\begin{game}{";
-    theHtml += ToText(p_nfg->NumStrats(p_rowPlayer));
+    theHtml += ToText(p_nfg->GetPlayer(p_rowPlayer)->NumStrategies());
     theHtml += "}{";
-    theHtml += ToText(p_nfg->NumStrats(p_colPlayer));
+    theHtml += ToText(p_nfg->GetPlayer(p_colPlayer)->NumStrategies());
     theHtml += "}[";
-    theHtml += p_nfg->GetPlayer(p_rowPlayer)->GetName();
+    theHtml += p_nfg->GetPlayer(p_rowPlayer)->GetLabel();
     theHtml += "][";
-    theHtml += p_nfg->GetPlayer(p_colPlayer)->GetName();
+    theHtml += p_nfg->GetPlayer(p_colPlayer)->GetLabel();
     theHtml += "]";
 
     if (p_nfg->NumPlayers() > 2) {
@@ -67,19 +67,19 @@ void WriteOsborneFile(std::ostream &p_file, const Gambit::GameTable &p_nfg,
 
     theHtml += "\n&";
 
-    for (int st = 1; st <= p_nfg->NumStrats(p_colPlayer); st++) {
+    for (int st = 1; st <= p_nfg->GetPlayer(p_colPlayer)->NumStrategies(); st++) {
       theHtml += p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st)->GetName();
-      if (st < p_nfg->NumStrats(p_colPlayer)) {
+      if (st < p_nfg->GetPlayer(p_colPlayer)->NumStrategies()) {
 	theHtml += " & ";
       }
     } 
     theHtml += "\\\\\n";
 
-    for (int st1 = 1; st1 <= p_nfg->NumStrats(p_rowPlayer); st1++) {
+    for (int st1 = 1; st1 <= p_nfg->GetPlayer(p_rowPlayer)->NumStrategies(); st1++) {
       profile.SetStrategy(p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1));
       theHtml += p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1)->GetName();
       theHtml += " & ";
-      for (int st2 = 1; st2 <= p_nfg->NumStrats(p_colPlayer); st2++) {
+      for (int st2 = 1; st2 <= p_nfg->GetPlayer(p_colPlayer)->NumStrategies(); st2++) {
 	profile.SetStrategy(p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st2));
 	theHtml += " $";
 	for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
@@ -94,11 +94,11 @@ void WriteOsborneFile(std::ostream &p_file, const Gambit::GameTable &p_nfg,
 	  }
 	}
 	theHtml += "$ ";
-	if (st2 < p_nfg->NumStrats(p_colPlayer)) {
+	if (st2 < p_nfg->GetPlayer(p_colPlayer)->NumStrategies()) {
 	  theHtml += " & ";
 	}
       }
-      if (st1 < p_nfg->NumStrats(p_rowPlayer)) {
+      if (st1 < p_nfg->GetPlayer(p_rowPlayer)->NumStrategies()) {
 	theHtml += "\\\\\n";
       }
     } 
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::GameTable nfg;
+  Gambit::Game nfg;
 
   try {
     nfg = Gambit::ReadNfg(std::cin);

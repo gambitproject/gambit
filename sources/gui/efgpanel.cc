@@ -341,12 +341,12 @@ gbtTreePlayerPanel::gbtTreePlayerPanel(wxWindow *p_parent,
 
 void gbtTreePlayerPanel::OnUpdate(void)
 {
-  if (!m_doc->GetEfg())  return;
+  if (!m_doc->IsTree())  return;
 
   wxColour color = m_doc->GetStyle().GetPlayerColor(m_player);
 
   m_playerLabel->SetForegroundColour(color);
-  m_playerLabel->SetValue(wxString(m_doc->GetEfg()->GetPlayer(m_player)->GetLabel().c_str(),
+  m_playerLabel->SetValue(wxString(m_doc->GetGame()->GetPlayer(m_player)->GetLabel().c_str(),
 				   *wxConvCurrent));
 
   m_payoff->SetForegroundColour(color);
@@ -452,7 +452,7 @@ void gbtTreePlayerPanel::OnEditPlayerLabel(wxCommandEvent &)
 
 void gbtTreePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
 {
-  m_doc->GetEfg()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
+  m_doc->GetGame()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
   m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
@@ -460,7 +460,7 @@ void gbtTreePlayerPanel::PostPendingChanges(void)
 {
   if (m_playerLabel->IsEditing()) {
     m_playerLabel->EndEdit(true);
-    m_doc->GetEfg()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
+    m_doc->GetGame()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
     m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
   }
 }
@@ -555,7 +555,7 @@ gbtTreeChancePanel::gbtTreeChancePanel(wxWindow *p_parent,
 
 void gbtTreeChancePanel::OnUpdate(void)
 {
-  if (!m_doc->GetEfg())  return;
+  if (!m_doc->GetGame())  return;
 
   m_playerLabel->SetForegroundColour(m_doc->GetStyle().ChanceColor());
   GetSizer()->Layout();
@@ -725,7 +725,7 @@ public:
 wxPrintout *gbtEfgPanel::GetPrintout(void)
 {
   return new gbtEfgPrintout(this,
-			    wxString(m_doc->GetEfg()->GetTitle().c_str(),
+			    wxString(m_doc->GetGame()->GetTitle().c_str(),
 				     *wxConvCurrent));
 }
 

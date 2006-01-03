@@ -97,7 +97,7 @@ efgLp<T>::efgLp(void)
 template <class T>
 void UndefinedToCentroid(gbtBehavProfile<T> &p_profile)
 {
-  Gambit::GameTree efg = p_profile.GetGame();
+  Gambit::Game efg = p_profile.GetGame();
 
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
     Gambit::GamePlayer player = efg->GetPlayer(pl);
@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::GameTree efg;
+  Gambit::Game efg;
 
   try {
     efg = Gambit::ReadEfg(std::cin);

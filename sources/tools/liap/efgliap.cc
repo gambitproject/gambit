@@ -34,21 +34,21 @@
 class EFLiapFunc : public gC1Function<double>  {
 private:
   mutable long _nevals;
-  Gambit::GameTree _efg;
+  Gambit::Game _efg;
   mutable gbtBehavProfile<double> _p;
 
   double Value(const gbtVector<double> &x) const;
   bool Gradient(const gbtVector<double> &, gbtVector<double> &) const;
 
 public:
-  EFLiapFunc(Gambit::GameTree, const gbtBehavProfile<double> &);
+  EFLiapFunc(Gambit::Game, const gbtBehavProfile<double> &);
   virtual ~EFLiapFunc();
     
   long NumEvals(void) const  { return _nevals; }
 };
 
 
-EFLiapFunc::EFLiapFunc(Gambit::GameTree E,
+EFLiapFunc::EFLiapFunc(Gambit::Game E,
 		       const gbtBehavProfile<double> &start)
   : _nevals(0L), _efg(E), _p(start)
 { }
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::GameTree efg;
+  Gambit::Game efg;
 
   try {
     efg = Gambit::ReadEfg(std::cin);

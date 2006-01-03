@@ -69,7 +69,7 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-template <class T> void Solve(Gambit::GameTable p_nfg, const T &)
+template <class T> void Solve(Gambit::Game p_nfg, const T &)
 {
   gbtList<gbtVector<T> > key1, key2;  
   gbtList<int> node1, node2;   // IDs of each component of the extreme equilibria
@@ -90,12 +90,14 @@ template <class T> void Solve(Gambit::GameTable p_nfg, const T &)
   gbtRational fac(1, max - min);
 
   // Construct matrices A1, A2
-  gbtMatrix<T> A1(1, p_nfg->NumStrats(1), 1, p_nfg->NumStrats(2));
-  gbtMatrix<T> A2(1, p_nfg->NumStrats(2), 1, p_nfg->NumStrats(1));
+  gbtMatrix<T> A1(1, p_nfg->GetPlayer(1)->NumStrategies(), 
+		  1, p_nfg->GetPlayer(2)->NumStrategies());
+  gbtMatrix<T> A2(1, p_nfg->GetPlayer(2)->NumStrategies(),
+		  1, p_nfg->GetPlayer(1)->NumStrategies());
 
-  for (int i = 1; i <= p_nfg->NumStrats(1); i++) {
+  for (int i = 1; i <= p_nfg->GetPlayer(1)->NumStrategies(); i++) {
     profile.SetStrategy(p_nfg->GetPlayer(1)->GetStrategy(i));
-    for (int j = 1; j <= p_nfg->NumStrats(2); j++) {
+    for (int j = 1; j <= p_nfg->GetPlayer(2)->NumStrategies(); j++) {
       profile.SetStrategy(p_nfg->GetPlayer(2)->GetStrategy(j));
       A1(i, j) = fac * (profile.GetPayoff(1) - min);
       A2(j, i) = fac * (profile.GetPayoff(2) - min);
@@ -103,7 +105,8 @@ template <class T> void Solve(Gambit::GameTable p_nfg, const T &)
   }
 
   // Construct vectors b1, b2
-  gbtVector<T> b1(1, p_nfg->NumStrats(1)), b2(1, p_nfg->NumStrats(2));
+  gbtVector<T> b1(1, p_nfg->GetPlayer(1)->NumStrategies());
+  gbtVector<T> b2(1, p_nfg->GetPlayer(2)->NumStrategies());
   b1 = (T) -1;
   b2 = (T) -1;
 
@@ -134,13 +137,13 @@ template <class T> void Solve(Gambit::GameTable p_nfg, const T &)
 	// check if solution is nash 
 	// need only check complementarity, since it is feasible
 	bool nash = true;
-	for (int k = 1; nash && k <= p_nfg->NumStrats(1); k++) {
+	for (int k = 1; nash && k <= p_nfg->GetPlayer(1)->NumStrategies(); k++) {
 	  if (bfs1.IsDefined(k) && bfs2.IsDefined(-k)) {
 	    nash = nash && EqZero(bfs1(k) * bfs2(-k));
 	  }
 	}
 
-	for (int k = 1; nash && k <= p_nfg->NumStrats(2); k++) {
+	for (int k = 1; nash && k <= p_nfg->GetPlayer(2)->NumStrategies(); k++) {
 	  if (bfs2.IsDefined(k) && bfs1.IsDefined(-k)) {
 	    nash = nash && EqZero(bfs2(k) * bfs1(-k));
 	  }
@@ -149,7 +152,7 @@ template <class T> void Solve(Gambit::GameTable p_nfg, const T &)
 	if (nash) {
 	  gbtMixedProfile<T> profile(p_nfg);
 	  T sum = (T) 0;
-	  for (int k = 1; k <= p_nfg->NumStrats(1); k++) {
+	  for (int k = 1; k <= p_nfg->GetPlayer(1)->NumStrategies(); k++) {
 	    profile(1, k) = (T) 0;
 	    if (bfs1.IsDefined(k)) {
 	      profile(1,k) = -bfs1(k);
@@ -157,14 +160,14 @@ template <class T> void Solve(Gambit::GameTable p_nfg, const T &)
 	    }
 	  } 
 	  
-	  for (int k = 1; k <= p_nfg->NumStrats(1); k++) {
+	  for (int k = 1; k <= p_nfg->GetPlayer(1)->NumStrategies(); k++) {
 	    if (bfs1.IsDefined(k)) { 
 	      profile(1,k) /= sum;
 	    }
 	  }
 	  
 	  sum = (T) 0;
-	  for (int k = 1; k <= p_nfg->NumStrats(2); k++) {
+	  for (int k = 1; k <= p_nfg->GetPlayer(2)->NumStrategies(); k++) {
 	    profile(2,k) = (T) 0;
 	    if (bfs2.IsDefined(k)) {
 	      profile(2,k) =-bfs2(k);
@@ -172,7 +175,7 @@ template <class T> void Solve(Gambit::GameTable p_nfg, const T &)
 	    }
 	  } 
 	  
-	  for (int k = 1; k <= p_nfg->NumStrats(2); k++) {
+	  for (int k = 1; k <= p_nfg->GetPlayer(2)->NumStrategies(); k++) {
 	    if (bfs2.IsDefined(k)) { 
 	      profile(2,k) /= sum;
 	    }
@@ -288,7 +291,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::GameTable nfg;
+  Gambit::Game nfg;
 
   try {
     nfg = Gambit::ReadNfg(std::cin);

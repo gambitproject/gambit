@@ -52,18 +52,18 @@ int g_numDecimals = 6;
 void LogitBR(const gbtMixedProfile<double> &p_profile, double p_lambda,
 	     gbtMixedProfile<double> &p_br)
 {
-  Gambit::GameTable nfg = p_profile.GetGame();
+  Gambit::Game nfg = p_profile.GetGame();
 
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-    gbtArray<double> lval(nfg->NumStrats(pl));
+    gbtArray<double> lval(nfg->GetPlayer(pl)->NumStrategies());
     double sum = 0.0;
 
-    for (int st = 1; st <= nfg->NumStrats(pl); st++) {
+    for (int st = 1; st <= nfg->GetPlayer(pl)->NumStrategies(); st++) {
       lval[st] = exp(p_lambda * p_profile.GetPayoff(pl, pl, st));
       sum += lval[st];
     }
 
-    for (int st = 1; st <= nfg->NumStrats(pl); st++) {
+    for (int st = 1; st <= nfg->GetPlayer(pl)->NumStrategies(); st++) {
       p_br(pl, st) = lval[st] / sum;
     }
   }
@@ -71,18 +71,18 @@ void LogitBR(const gbtMixedProfile<double> &p_profile, double p_lambda,
 
 void Randomize(gbtMixedProfile<double> &p_profile)
 {
-  Gambit::GameTable nfg = p_profile.GetGame();
+  Gambit::Game nfg = p_profile.GetGame();
 
   ((gbtVector<double> &) p_profile) = 0.0;
 
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
     double sum = 0.0;
-    for (int st = 1; st < nfg->NumStrats(pl); st++) {
+    for (int st = 1; st < nfg->GetPlayer(pl)->NumStrategies(); st++) {
       p_profile(pl, st) = (1.0 - sum) * (double) rand() / (double) RAND_MAX;
       sum += p_profile(pl, st);
     }
 
-    p_profile(pl, nfg->NumStrats(pl)) = 1.0 - sum;
+    p_profile(pl, nfg->GetPlayer(pl)->NumStrategies()) = 1.0 - sum;
   }
 }
 
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  Gambit::GameTable nfg;
+  Gambit::Game nfg;
 
   try {
     nfg = Gambit::ReadNfg(std::cin);

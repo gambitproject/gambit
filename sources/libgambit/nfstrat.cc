@@ -34,7 +34,7 @@
 //                               Lifecycle
 //---------------------------------------------------------------------------
 
-gbtStrategyProfile::gbtStrategyProfile(const Gambit::GameTable &p_nfg)
+gbtStrategyProfile::gbtStrategyProfile(const Gambit::Game &p_nfg)
   : m_index(0L), m_nfg(p_nfg), m_profile(m_nfg->NumPlayers())
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
@@ -55,10 +55,10 @@ void gbtStrategyProfile::SetStrategy(const Gambit::GameStrategy &s)
 }
 
 Gambit::GameOutcome gbtStrategyProfile::GetOutcome(void) const
-{ return m_nfg->results[m_index+1]; }
+{ return m_nfg->m_results[m_index+1]; }
 
 void gbtStrategyProfile::SetOutcome(Gambit::GameOutcome p_outcome)
-{ m_nfg->results[m_index+1] = p_outcome; }
+{ m_nfg->m_results[m_index+1] = p_outcome; }
 
 gbtRational gbtStrategyProfile::GetPayoff(int pl) const
 {
@@ -79,12 +79,12 @@ gbtRational gbtStrategyProfile::GetPayoff(int pl) const
 //                               Lifecycle
 //---------------------------------------------------------------------------
 
-gbtNfgSupport::gbtNfgSupport(const Gambit::GameTable &p_nfg) 
+gbtNfgSupport::gbtNfgSupport(const Gambit::Game &p_nfg) 
   : m_nfg(p_nfg)
 { 
   for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
     m_support.Append(gbtArray<Gambit::GameStrategy>());
-    for (int st = 1; st <= p_nfg->NumStrats(pl); st++) {
+    for (int st = 1; st <= p_nfg->GetPlayer(pl)->NumStrategies(); st++) {
       m_support[pl].Append(p_nfg->GetPlayer(pl)->GetStrategy(st));
     }
   }

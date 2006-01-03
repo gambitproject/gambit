@@ -27,13 +27,42 @@
 #ifndef BEHAV_H
 #define BEHAV_H
 
-#include "gdpvect.h"
-#include "efg.h"
-#include "nfg.h"
+#include "game.h"
 
 template <class T> class gbtMixedProfile;
 template <class T> class gbtPVector;
 template <class T> class gbtRectArray;
+
+class gbtPureBehavProfile   {
+protected:
+  Gambit::Game m_efg;
+  gbtArray<gbtArray<Gambit::GameAction> > m_profile;
+
+  void GetPayoff(const Gambit::GameNode &n, const gbtRational &, 
+		 gbtArray<gbtRational> &) const;
+  void InfosetProbs(Gambit::GameNode n, const gbtRational &, 
+		    gbtPVector<gbtRational> &) const;
+
+public:
+  gbtPureBehavProfile(Gambit::Game);
+
+  // Operators
+  gbtPureBehavProfile &operator=(const gbtPureBehavProfile &);
+  gbtRational operator()(Gambit::GameAction) const;
+
+  // Manipulation
+  void Set(Gambit::GameAction);
+  void Set(Gambit::GamePlayer, const gbtArray<Gambit::GameAction> &);
+  
+  // Information
+  Gambit::GameAction GetAction(Gambit::GameInfoset) const;
+   
+  gbtRational Payoff(const Gambit::GameNode &, int pl) const;
+  void Payoff(gbtArray<gbtRational> &payoff) const;
+  void InfosetProbs(gbtPVector<gbtRational> &prob) const;
+  Gambit::Game GetGame(void) const   { return m_efg; }
+};
+
 
 //
 //  gbtBehavProfile<T> implements a behavior profile on an Efg.  
@@ -46,7 +75,7 @@ template <class T> class gbtRectArray;
 
 template <class T> class gbtBehavProfile : private gbtDPVector<T>  {
 protected:
-  Gambit::GameTree m_efg;
+  Gambit::Game m_efg;
   gbtEfgSupport m_support;
   mutable bool m_cached_data;
 
@@ -110,8 +139,8 @@ protected:
   void ComputeSolutionDataPass1(const Gambit::GameNode &node) const;
   void ComputeSolutionData(void) const;
 
-  void BehaviorStrat(const Gambit::GameTree &, int, Gambit::GameNode &);
-  void RealizationProbs(const gbtMixedProfile<T> &, const Gambit::GameTree &,
+  void BehaviorStrat(const Gambit::Game &, int, Gambit::GameNode &);
+  void RealizationProbs(const gbtMixedProfile<T> &, const Gambit::Game &,
 			int pl, const gbtArray<int> &, Gambit::GameNode);
 
 public:
@@ -138,7 +167,7 @@ public:
 
   // GENERAL DATA ACCESS
 
-  Gambit::GameTree GetGame(void) const   { return m_efg; }
+  Gambit::Game GetGame(void) const   { return m_efg; }
   const gbtEfgSupport &Support(void) const   { return m_support; }
   
   const T &GetRealizProb(const Gambit::GameNode &node) const;

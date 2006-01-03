@@ -67,8 +67,8 @@ template <class T> gbtBehavProfile<T>::gbtBehavProfile(const gbtEfgSupport &p_su
 
 template <class T>
 gbtBehavProfile<T>::gbtBehavProfile(const gbtMixedProfile<T> &p_profile)
-  : gbtDPVector<T>(p_profile.GetGame()->AssociatedEfg()->NumActions()), 
-    m_efg(p_profile.GetGame()->AssociatedEfg()),
+  : gbtDPVector<T>(p_profile.GetGame()->NumActions()), 
+    m_efg(p_profile.GetGame()),
     m_support(m_efg),  
     m_cached_data(false),
     m_realizProbs(m_efg->NumNodes()),
@@ -86,7 +86,7 @@ gbtBehavProfile<T>::gbtBehavProfile(const gbtMixedProfile<T> &p_profile)
 
   Gambit::GameNode n = m_efg->GetRoot();
   const gbtNfgSupport &support = p_profile.GetSupport();
-  Gambit::GameTable nfg = p_profile.GetGame();
+  Gambit::Game nfg = p_profile.GetGame();
 
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++)   {
     m_nvals = (T) 0;
@@ -95,7 +95,7 @@ gbtBehavProfile<T>::gbtBehavProfile(const gbtMixedProfile<T> &p_profile)
     for (int st = 1; st <= support.NumStrats(pl); st++)  {
       int snum = support.GetStrategy(pl, st)->GetNumber();
       if (p_profile(pl, st) > (T) 0)  {
-	const gbtArray<int> &actions = m_efg->players[pl]->m_strategies[snum];
+	const gbtArray<int> &actions = m_efg->m_players[pl]->m_strategies[snum]->m_behav;
 
 	m_bvals[n->GetNumber()] = p_profile(pl, st);
 
@@ -542,7 +542,7 @@ void gbtBehavProfile<T>::ComputeSolutionData(void) const
 }
 
 template <class T>
-void gbtBehavProfile<T>::BehaviorStrat(const Gambit::GameTree &E, int pl,
+void gbtBehavProfile<T>::BehaviorStrat(const Gambit::Game &E, int pl,
 				       Gambit::GameNode &n)
 {
   for (int i = 1; i <= n->children.Length(); i++)   {
@@ -561,7 +561,7 @@ void gbtBehavProfile<T>::BehaviorStrat(const Gambit::GameTree &E, int pl,
 
 template <class T>
 void gbtBehavProfile<T>::RealizationProbs(const gbtMixedProfile<T> &mp,
-				       const Gambit::GameTree &E, int pl,
+				       const Gambit::Game &E, int pl,
 				       const gbtArray<int> &actions,
 				       Gambit::GameNode node)
 {

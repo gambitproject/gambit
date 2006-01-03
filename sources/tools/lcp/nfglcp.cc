@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::GameTable nfg;
+  Gambit::Game nfg;
 
   try {
     nfg = Gambit::ReadNfg(std::cin);

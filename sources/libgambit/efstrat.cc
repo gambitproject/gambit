@@ -302,7 +302,7 @@ bool gbtEfgSupportPlayer::HasActiveActionAt(const int &iset) const
 // gbtEfgSupport: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-gbtEfgSupport::gbtEfgSupport(const Gambit::GameTree &p_efg) 
+gbtEfgSupport::gbtEfgSupport(const Gambit::Game &p_efg) 
   : m_efg(p_efg), m_players(p_efg->NumPlayers())
 {
   for (int pl = 1; pl <= m_players.Length(); pl++) {
@@ -793,7 +793,7 @@ void gbtEfgSupportWithActiveInfo::InitializeActiveLists()
 }
 
 // Constructors and Destructor
-gbtEfgSupportWithActiveInfo::gbtEfgSupportWithActiveInfo(const Gambit::GameTree &E) 
+gbtEfgSupportWithActiveInfo::gbtEfgSupportWithActiveInfo(const Gambit::Game &E) 
   : gbtEfgSupport(E), 
     is_infoset_active(0,E->NumPlayers()), 
     is_nonterminal_node_active(0,E->NumPlayers())

@@ -765,7 +765,7 @@ void gbtTreeLayout::UpdateTableParents(void)
 {
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
     gbtNodeEntry *e = m_nodeList[pos];
-    e->SetParent((e->GetNode() == m_doc->GetEfg()->GetRoot()) ? 
+    e->SetParent((e->GetNode() == m_doc->GetGame()->GetRoot()) ? 
 		 e : GetValidParent(e->GetNode()));
   }
 }
@@ -776,18 +776,18 @@ void gbtTreeLayout::Layout(const gbtEfgSupport &p_support)
   m_infosetSpacing = 
     (m_doc->GetStyle().InfosetJoin() == GBT_INFOSET_JOIN_LINES) ? 10 : 40;
 
-  if (m_nodeList.Length() != m_doc->GetEfg()->NumNodes()) {
+  if (m_nodeList.Length() != m_doc->GetGame()->NumNodes()) {
     // A rebuild is in order; force it
     BuildNodeList(p_support);
   }
 
   int miny = 0, maxy = 0, ycoord = c_topMargin;
-  LayoutSubtree(m_doc->GetEfg()->GetRoot(), p_support, maxy, miny, ycoord);
+  LayoutSubtree(m_doc->GetGame()->GetRoot(), p_support, maxy, miny, ycoord);
 
   const gbtStyle &draw_settings = m_doc->GetStyle();
   if (draw_settings.InfosetConnect() != GBT_INFOSET_CONNECT_NONE) {
     // FIXME! This causes lines to disappear... sometimes.
-    FillInfosetTable(m_doc->GetEfg()->GetRoot(), p_support);
+    FillInfosetTable(m_doc->GetGame()->GetRoot(), p_support);
     UpdateTableInfosets();
   }
 
@@ -835,7 +835,7 @@ void gbtTreeLayout::BuildNodeList(const gbtEfgSupport &p_support)
   }
 
   m_maxLevel = 0;
-  BuildNodeList(m_doc->GetEfg()->GetRoot(), p_support, 0);
+  BuildNodeList(m_doc->GetGame()->GetRoot(), p_support, 0);
 }
 
 

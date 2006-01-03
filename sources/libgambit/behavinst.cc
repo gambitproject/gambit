@@ -35,7 +35,7 @@ template class gbtBehavProfile<gbtNumber>;
 //                    gbtPureBehavProfile member functions
 //-------------------------------------------------------------------------
 
-gbtPureBehavProfile::gbtPureBehavProfile(Gambit::GameTree p_efg)
+gbtPureBehavProfile::gbtPureBehavProfile(Gambit::Game p_efg)
   : m_efg(p_efg), m_profile(m_efg->NumPlayers())
 {
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {

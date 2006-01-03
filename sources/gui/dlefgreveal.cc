@@ -52,7 +52,7 @@ gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent,
   wxBoxSizer *boxSizer = new wxBoxSizer(wxVERTICAL);	
 
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = m_doc->GetEfg()->GetPlayer(pl);
+    Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
     if (player->GetLabel() != "") {
       m_players.Append(new wxCheckBox(this, -1, 
 				      wxString(player->GetLabel().c_str(),
@@ -89,7 +89,7 @@ gbtArray<Gambit::GamePlayer> gbtRevealMoveDialog::GetPlayers(void) const
 
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     if (m_players[pl]->GetValue()) {
-      players.Append(m_doc->GetEfg()->GetPlayer(pl));
+      players.Append(m_doc->GetGame()->GetPlayer(pl));
     }
   }
 

@@ -42,7 +42,7 @@ void TerminalDescendants(Gambit::GameNode p_node, gbtList<Gambit::GameNode> &cur
   }
 }
 
-gbtList<Gambit::GameNode> TerminalNodes(Gambit::GameTree p_efg)
+gbtList<Gambit::GameNode> TerminalNodes(Gambit::Game p_efg)
 {
   gbtList<Gambit::GameNode> ret;
   TerminalDescendants(p_efg->GetRoot(), ret);

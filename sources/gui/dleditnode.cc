@@ -117,7 +117,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
   m_outcome = new wxChoice(this, -1);
   m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
-  Gambit::GameTree efg = p_node->GetGame();
+  Gambit::Game efg = p_node->GetGame();
   for (int outc = 1; outc <= efg->NumOutcomes(); outc++) {
     Gambit::GameOutcome outcome = efg->GetOutcome(outc);
     std::string item = ToText(outc) + ": " + outcome->GetLabel();

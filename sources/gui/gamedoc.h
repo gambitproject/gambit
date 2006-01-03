@@ -225,8 +225,7 @@ private:
       if (m_views.Length() == 0)  delete this;
     }
 
-  Gambit::GameTree m_efg;
-  Gambit::GameTable m_nfg;
+  Gambit::Game m_game;
   wxString m_filename;
 
   gbtStyle m_style;
@@ -242,9 +241,7 @@ private:
   gbtList<std::string> m_undoList, m_redoList;
 
 public:
-  gbtGameDocument(Gambit::GameTree p_efg);
-  gbtGameDocument(Gambit::GameTable p_nfg); 
-  
+  gbtGameDocument(Gambit::Game p_game);
   ~gbtGameDocument();
 
   //!
@@ -257,13 +254,7 @@ public:
   void SaveDocument(std::ostream &) const;
   //@}
 
-  Gambit::GameTree GetEfg(void) const { return m_efg; }
-  Gambit::GameTable GetNfg(void) const 
-    { 
-      if (m_efg) return m_efg->AssociatedNfg();
-      else return m_nfg;
-    }
-
+  Gambit::Game GetGame(void) const { return m_game; }
   void BuildNfg(void);
 
   const wxString &GetFilename(void) const { return m_filename; }
@@ -274,11 +265,9 @@ public:
 
   gbtStyle &GetStyle(void) { return m_style; }
 
-  int NumPlayers(void) const
-    { return (m_efg) ? m_efg->NumPlayers() : m_nfg->NumPlayers(); }
-  bool IsConstSum(void) const
-    { return ((m_efg && m_efg->IsConstSum()) || 
-	      (!m_efg && m_nfg->IsConstSum())); }
+  int NumPlayers(void) const { return m_game->NumPlayers(); }
+  bool IsConstSum(void) const { return m_game->IsConstSum(); }
+  bool IsTree(void) const { return m_game->IsTree(); }
 
 
   //!

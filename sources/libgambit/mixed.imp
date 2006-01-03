@@ -24,7 +24,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "nfg.h"
+#include "game.h"
 #include "nfstrat.h"
 
 
@@ -114,7 +114,7 @@ template <class T> void gbtMixedProfile<T>::GetRegret(gbtPVector<T> &value) cons
   
   for (i = 1; i <= support.GetGame()->NumPlayers(); i++) {
     pay = GetPayoff(i);
-    for (j = 1; j <= support.GetGame()->NumStrats(i); j++) {
+    for (j = 1; j <= support.GetGame()->GetPlayer(i)->NumStrategies(); j++) {
       x = GetPayoff(i, support.GetGame()->GetPlayer(i)->GetStrategy(j));
       if(x > pay)
 	value(i, j) = x - pay;
@@ -129,7 +129,7 @@ template <class T> T gbtMixedProfile<T>::GetMaxRegret(void) const
   int i;
   T maxgripe = (T)0;
 
-  gbtPVector<T> v(support.GetGame()->NumStrats());
+  gbtPVector<T> v(support.GetGame()->NumStrategies());
   GetRegret(v);
   for(i=v.First(); i<=v.Last(); i++)
     if(v[i] > maxgripe) maxgripe = v[i];
@@ -197,8 +197,8 @@ T gbtMixedProfile<T>::PPayoff(int pl, int index, int i) const
   int pindex = 0;
 
   if (i > support.GetGame()->NumPlayers())  {
-    if (support.GetGame()->results[index]) {
-      return support.GetGame()->results[index]->GetPayoff(pl);
+    if (support.GetGame()->m_results[index]) {
+      return support.GetGame()->m_results[index]->GetPayoff(pl);
     }
     else {
       return (T) 0;
@@ -226,8 +226,8 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
     PPayoff(pl, const_pl, const_st, cur_pl + 1, index,
 	    prob, value);
   else if (cur_pl > support.GetGame()->NumPlayers())  {
-    if (support.GetGame()->results[index]) {
-      value += prob * support.GetGame()->results[index]->GetPayoff(pl);
+    if (support.GetGame()->m_results[index]) {
+      value += prob * support.GetGame()->m_results[index]->GetPayoff(pl);
     }
   }
   else   {
@@ -252,8 +252,8 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
     PPayoff(pl, const_pl1, const_st1, const_pl2, const_st2,
 	    cur_pl + 1, index,prob, value);
   else if (cur_pl > support.GetGame()->NumPlayers())  {
-    if (support.GetGame()->results[index]) {
-      value += prob * support.GetGame()->results[index]->GetPayoff(pl);
+    if (support.GetGame()->m_results[index]) {
+      value += prob * support.GetGame()->m_results[index]->GetPayoff(pl);
     }
   }
   else   {
@@ -279,8 +279,8 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
   else if (cur_pl > support.GetGame()->NumPlayers())  {
     for (int j = 1; j <= support.NumStrats(const_pl); j++ ){ 
       s = support.GetStrategy(const_pl, j);
-      if (support.GetGame()->results[index + s->m_index]) {
-	value[j] += prob * support.GetGame()->results[index + s->m_index]->GetPayoff(pl);
+      if (support.GetGame()->m_results[index + s->m_index]) {
+	value[j] += prob * support.GetGame()->m_results[index + s->m_index]->GetPayoff(pl);
       }
     }
   }
@@ -296,17 +296,17 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
 
 template <class T>
 gbtMixedProfile<T>::gbtMixedProfile(const gbtBehavProfile<T> &p_profile)
-  : gbtPVector<T>(p_profile.GetGame()->AssociatedNfg()->NumStrats()),
-    support(p_profile.GetGame()->AssociatedNfg())
+  : gbtPVector<T>(p_profile.GetGame()->NumStrategies()),
+    support(p_profile.GetGame())
 {
-  Gambit::GameTree efg = p_profile.GetGame();
+  Gambit::Game efg = p_profile.GetGame();
   for (int pl = 1; pl <= support.GetGame()->NumPlayers(); pl++)  {
-    for (int st = 1; st <= support.GetGame()->NumStrats(pl); st++)  {
+    for (int st = 1; st <= support.GetGame()->GetPlayer(pl)->NumStrategies(); st++)  {
       T prob = (T) 1;
 
       for (int iset = 1; iset <= efg->GetPlayer(pl)->NumInfosets(); iset++) {
-	if (efg->players[pl]->m_strategies[st][iset] > 0)
-	  prob *= p_profile(pl, iset, efg->players[pl]->m_strategies[st][iset]);
+	if (efg->m_players[pl]->m_strategies[st]->m_behav[iset] > 0)
+	  prob *= p_profile(pl, iset, efg->m_players[pl]->m_strategies[st]->m_behav[iset]);
       }
       (*this)(pl, st) = prob;
     }

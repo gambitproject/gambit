@@ -30,14 +30,14 @@
 
 class EfgIter    {
   private:
-    Gambit::GameTree _efg;
+    Gambit::Game _efg;
     gbtEfgSupport _support;
     gbtPureBehavProfile _profile;
     gbtPVector<int> _current;
     mutable gbtVector<gbtRational> _payoff;
 
   public:
-    EfgIter(Gambit::GameTree);
+    EfgIter(Gambit::Game);
     EfgIter(const gbtEfgSupport &);
     EfgIter(const EfgIter &);
     EfgIter(const EfgContIter &);
@@ -57,7 +57,7 @@ class EfgIter    {
 
 
 
-EfgIter::EfgIter(Gambit::GameTree efg)
+EfgIter::EfgIter(Gambit::Game efg)
   : _efg(efg), _support(efg),
     _profile(efg), _current(_efg->NumInfosets()),
     _payoff(_efg->NumPlayers())
@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::GameTree efg;
+  Gambit::Game efg;
 
   try {
     efg = Gambit::ReadEfg(std::cin);

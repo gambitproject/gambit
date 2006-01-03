@@ -6,10 +6,9 @@ libgambit_la_SOURCES = \
 	base.h \
 	behav.h behav.imp behavinst.cc \
 	efdom.cc efdom.h \
-	efg.cc efg.h \
 	efgiter.cc efgiter.h \
 	efstrat.cc efstrat.h \
-	game.h \
+	game.cc game.h \
 	garray.h \
 	gdpvect.cc gdpvect.h gdpvect.imp \
 	glist.h \
@@ -24,7 +23,7 @@ libgambit_la_SOURCES = \
 	libgambit.h \
 	mixed.h mixed.imp \
 	nfdom.cc \
-	nfg.cc nfg.h nfginst.cc \
+	nfginst.cc \
 	nfgiter.cc nfgiter.h \
 	nfstrat.cc nfstrat.h \
 	rational.cc rational.h \
@@ -36,7 +35,6 @@ libgambitinclude_HEADERS = \
 	base.h \
 	behav.h behav.imp \
 	efdom.h \
-	efg.h \
 	efgiter.h \
 	efstrat.h \
 	game.h \
@@ -53,7 +51,6 @@ libgambitinclude_HEADERS = \
 	integer.h \
 	libgambit.h \
 	mixed.h mixed.imp \
-	nfg.h \
 	nfgiter.h \
 	nfstrat.h \
 	rational.h	

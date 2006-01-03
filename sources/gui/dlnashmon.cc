@@ -48,7 +48,7 @@ public:
 static gbtMixedProfile<gbtNumber> TextToMixedProfile(gbtGameDocument *p_doc,
 						     const wxString &p_text)
 {
-  gbtMixedProfile<gbtNumber> profile(p_doc->GetNfg());
+  gbtMixedProfile<gbtNumber> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
 
@@ -67,7 +67,7 @@ static gbtMixedProfile<gbtNumber> TextToMixedProfile(gbtGameDocument *p_doc,
 static gbtBehavProfile<gbtNumber> TextToBehavProfile(gbtGameDocument *p_doc,
 						     const wxString &p_text)
 {
-  gbtBehavProfile<gbtNumber> profile(p_doc->GetEfg());
+  gbtBehavProfile<gbtNumber> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
 
@@ -164,10 +164,10 @@ void gbtNashMonitorDialog::Start(const gbtAnalysisProfileList &p_command)
   
   std::ostringstream s;
   if (m_useBehav) {
-    m_doc->GetEfg()->WriteEfgFile(s);
+    m_doc->GetGame()->WriteEfgFile(s);
   }
   else {
-    m_doc->GetNfg()->WriteNfgFile(s);
+    m_doc->GetGame()->WriteNfgFile(s);
   }
   wxString str(wxString(s.str().c_str(), *wxConvCurrent));
   

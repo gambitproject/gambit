@@ -43,13 +43,13 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-void Solve(Gambit::GameTable p_nfg)
+void Solve(Gambit::Game p_nfg)
 {
   gbtNfgContingencyIterator citer(p_nfg);
 
   int ncont = 1;
   for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
-    ncont *= p_nfg->NumStrats(pl);
+    ncont *= p_nfg->GetPlayer(pl)->NumStrategies();
   }
 
   int contNumber = 1;
@@ -59,7 +59,7 @@ void Solve(Gambit::GameTable p_nfg)
     for (int pl = 1; flag && pl <= p_nfg->NumPlayers(); pl++)  {
       gbtRational current = citer.GetPayoff(pl);
       gbtStrategyProfile p = citer.GetProfile();
-      for (int i = 1; i <= p_nfg->NumStrats(pl); i++)  {
+      for (int i = 1; i <= p_nfg->GetPlayer(pl)->NumStrategies(); i++)  {
 	p.SetStrategy(p_nfg->GetPlayer(pl)->GetStrategy(i));
 	if (p.GetPayoff(pl) > current)  {
 	  flag = false;
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::GameTable nfg;
+  Gambit::Game nfg;
 
   try {
     nfg = Gambit::ReadNfg(std::cin);

@@ -385,7 +385,7 @@ gbtList<gbtEfgSupport> PossibleNashSubsupports(const gbtEfgSupport &S)
 ActionCursorForSupport::ActionCursorForSupport(const gbtEfgSupport &S)
   : support(&S), pl(1), iset(1), act(1)
 {
-  Gambit::GameTree efg = S.GetGame();
+  Gambit::Game efg = S.GetGame();
 
   // Make sure that (pl,iset) points to a valid information set:
   // when solving by subgames, some players may not have any information

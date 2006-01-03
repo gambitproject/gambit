@@ -259,7 +259,7 @@ wxSheetCellAttr gbtRowPlayerWidget::GetAttr(const wxSheetCoords &p_coords,
   attr.SetOrientation(wxHORIZONTAL);
   if (m_table->NumRowPlayers() > 0) {
     attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(m_table->GetRowPlayer(p_coords.GetCol()+1)));
-    attr.SetReadOnly(m_doc->GetEfg());
+    attr.SetReadOnly(m_doc->IsTree());
   }
   else {
     attr.SetForegroundColour(*wxBLACK);
@@ -299,8 +299,6 @@ void gbtRowPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
 
 void gbtRowPlayerWidget::OnUpdate(void)
 {
-  if (!m_doc->GetNfg())  return;
-
   int newRows = m_table->NumRowContingencies();
   if (newRows > GetNumberRows())  InsertRows(0, newRows - GetNumberRows());
   if (newRows < GetNumberRows())  DeleteRows(0, GetNumberRows() - newRows);
@@ -418,8 +416,6 @@ gbtColPlayerWidget::gbtColPlayerWidget(gbtTableWidget *p_parent,
 
 void gbtColPlayerWidget::OnUpdate(void)
 {
-  if (!m_doc->GetNfg()) return;
-
   int newCols = m_table->NumColContingencies() * m_doc->NumPlayers();
   if (newCols > GetNumberCols())  InsertCols(0, newCols - GetNumberCols());
   if (newCols < GetNumberCols())  DeleteCols(0, GetNumberCols() - newCols); 
@@ -481,7 +477,7 @@ wxSheetCellAttr gbtColPlayerWidget::GetAttr(const wxSheetCoords &p_coords,
   attr.SetOrientation(wxHORIZONTAL);
   if (m_table->NumColPlayers() > 0) {
     attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(m_table->GetColPlayer(p_coords.GetRow()+1)));
-    attr.SetReadOnly(m_doc->GetEfg());
+    attr.SetReadOnly(m_doc->IsTree());
   }
   else {
     attr.SetForegroundColour(*wxBLACK);
@@ -625,8 +621,6 @@ int gbtPayoffsWidget::ColToPlayer(int p_col) const
 
 void gbtPayoffsWidget::OnUpdate(void)
 {
-  if (!m_doc->GetNfg()) return;
-
   int newCols = m_table->NumColContingencies() * m_doc->NumPlayers();
   if (newCols > GetNumberCols())  InsertCols(0, newCols - GetNumberCols());
   if (newCols < GetNumberCols())  DeleteCols(0, GetNumberCols() - newCols);
@@ -659,7 +653,7 @@ void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords,
   gbtStrategyProfile profile = m_table->CellToProfile(p_coords);
   Gambit::GameOutcome outcome = profile.GetOutcome();
   if (!outcome) {
-    outcome = m_doc->GetNfg()->NewOutcome();
+    outcome = m_doc->GetGame()->NewOutcome();
     profile.SetOutcome(outcome);
   }
   int player = ColToPlayer(p_coords.GetCol());
@@ -684,7 +678,7 @@ wxSheetCellAttr gbtPayoffsWidget::GetAttr(const wxSheetCoords &p_coords,
   attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(player));
   attr.SetRenderer(wxSheetCellRenderer(new gbtRationalRendererRefData()));
   attr.SetEditor(wxSheetCellEditor(new gbtRationalEditorRefData()));
-  attr.SetReadOnly(m_doc->GetEfg());
+  attr.SetReadOnly(m_doc->IsTree());
   return attr;
 }
 
@@ -699,7 +693,7 @@ void gbtPayoffsWidget::DrawCellBorder(wxDC &p_dc,
   p_dc.SetPen(wxPen(*wxBLACK, 1, wxSOLID));
 
   // Draw the dark border to the right of the last column of a contingency
-  if ((p_coords.GetCol() + 1) % m_doc->GetNfg()->NumPlayers() == 0) {
+  if ((p_coords.GetCol() + 1) % m_doc->GetGame()->NumPlayers() == 0) {
     p_dc.DrawLine(rect.x + rect.width, rect.y,
 		  rect.x + rect.width, rect.y + rect.height + 1);
   }
@@ -951,8 +945,6 @@ void gbtTableWidget::OnBeginEdit(wxSheetEvent &)
 
 void gbtTableWidget::OnUpdate(void)
 {
-  if (!m_doc->GetNfg())  return;
-
   if (m_doc->NumPlayers() > m_rowPlayers.Length() + m_colPlayers.Length()) {
     for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
       if (!m_rowPlayers.Contains(pl) && !m_colPlayers.Contains(pl)) {
@@ -1031,7 +1023,6 @@ void gbtTableWidget::SetRowPlayer(int index, int pl)
 
 int gbtTableWidget::NumRowContingencies(void) const
 {
-  if (!m_doc->GetNfg())  return 0;
   int ncont = 1;
   const gbtNfgSupport &support = m_doc->GetNfgSupport();
   for (int i = 1; i <= NumRowPlayers(); 
@@ -1041,7 +1032,6 @@ int gbtTableWidget::NumRowContingencies(void) const
 
 int gbtTableWidget::NumRowsSpanned(int index) const
 {
-  if (!m_doc->GetNfg())  return 0;
   int ncont = 1;
   const gbtNfgSupport &support = m_doc->GetNfgSupport();
   for (int i = index + 1; i <= NumRowPlayers(); 
@@ -1076,7 +1066,6 @@ void gbtTableWidget::SetColPlayer(int index, int pl)
 
 int gbtTableWidget::NumColContingencies(void) const
 {
-  if (!m_doc->GetNfg())  return 0;
   int ncont = 1;
   const gbtNfgSupport &support = m_doc->GetNfgSupport();
   for (int i = 1; i <= NumColPlayers(); 
@@ -1086,7 +1075,6 @@ int gbtTableWidget::NumColContingencies(void) const
 
 int gbtTableWidget::NumColsSpanned(int index) const
 {
-  if (!m_doc->GetNfg())  return 0;
   int ncont = 1;
   const gbtNfgSupport &support = m_doc->GetNfgSupport();
   for (int i = index + 1; i <= NumColPlayers(); 
@@ -1105,7 +1093,7 @@ gbtTableWidget::CellToProfile(const wxSheetCoords &p_coords) const
 {
   const gbtNfgSupport &support = m_doc->GetNfgSupport();
 
-  gbtStrategyProfile profile(m_doc->GetNfg());
+  gbtStrategyProfile profile(m_doc->GetGame());
   for (int i = 1; i <= NumRowPlayers(); i++) {
     int player = GetRowPlayer(i);
     profile.SetStrategy(support.GetStrategy(player,
@@ -1141,7 +1129,7 @@ public:
 wxPrintout *gbtTableWidget::GetPrintout(void)
 {
   return new gbtNfgPrintout(this,
-			    wxString(m_doc->GetNfg()->GetTitle().c_str(),
+			    wxString(m_doc->GetGame()->GetTitle().c_str(),
 				     *wxConvCurrent));
 }
 

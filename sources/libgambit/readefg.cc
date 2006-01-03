@@ -698,7 +698,7 @@ static void Parse(ParserState &p_state, TreeData &p_treeData)
 // the actual tree to be returned
 //
 
-static void BuildSubtree(Gambit::GameTree p_efg, Gambit::GameNode p_node,
+static void BuildSubtree(Gambit::Game p_efg, Gambit::GameNode p_node,
 			 TreeData &p_treeData, NodeData **p_nodeData)
 {
   p_node->SetLabel((*p_nodeData)->m_name);
@@ -775,7 +775,7 @@ static void BuildSubtree(Gambit::GameTree p_efg, Gambit::GameNode p_node,
   }
 }
 
-static void BuildEfg(Gambit::GameTree p_efg, TreeData &p_treeData)
+static void BuildEfg(Gambit::Game p_efg, TreeData &p_treeData)
 {
   p_efg->SetTitle(p_treeData.m_title);
   p_efg->SetComment(p_treeData.m_comment);
@@ -792,12 +792,12 @@ static void BuildEfg(Gambit::GameTree p_efg, TreeData &p_treeData)
 //  ReadEfg: Global visible function to read an extensive form savefile
 //=========================================================================
 
-Gambit::GameTree ReadEfg(std::istream &p_file)
+Gambit::Game ReadEfg(std::istream &p_file)
 {
   ParserState parser(p_file);
   TreeData treeData;
 
-  Gambit::GameTree efg = new Gambit::GameTreeRep;
+  Gambit::Game efg = new Gambit::GameRep;
 
   try {
     Parse(parser, treeData);

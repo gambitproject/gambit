@@ -44,16 +44,14 @@ void
 gbtAnalysisProfileList::Append(const gbtBehavProfile<gbtNumber> &p_profile)
 {
   m_behavProfiles.Append(p_profile);
-  if (m_doc->GetNfg()) {
-    m_mixedProfiles.Append(gbtMixedProfile<gbtNumber>(p_profile));
-  }
+  m_mixedProfiles.Append(gbtMixedProfile<gbtNumber>(p_profile));
 }
 
 void
 gbtAnalysisProfileList::Append(const gbtMixedProfile<gbtNumber> &p_profile)
 {
   m_mixedProfiles.Append(p_profile);
-  if (m_doc->GetEfg()) {
+  if (m_doc->IsTree()) {
     m_behavProfiles.Append(gbtBehavProfile<gbtNumber>(p_profile));
   }
 }
@@ -67,7 +65,7 @@ void gbtAnalysisProfileList::BuildNfg(void)
 
 int gbtAnalysisProfileList::NumProfiles(void) const
 {
-  if (m_doc->GetEfg()) {
+  if (m_doc->IsTree()) {
     return m_behavProfiles.Length();
   }
   else {
@@ -91,7 +89,7 @@ void gbtAnalysisProfileList::Clear(void)
 static gbtMixedProfile<gbtNumber> 
 TextToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
 {
-  gbtMixedProfile<gbtNumber> profile(p_doc->GetNfg());
+  gbtMixedProfile<gbtNumber> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
 
@@ -105,7 +103,7 @@ TextToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
 static gbtBehavProfile<gbtNumber> 
 TextToBehavProfile(gbtGameDocument *p_doc, const wxString &p_text)
 {
-  gbtBehavProfile<gbtNumber> profile(p_doc->GetEfg());
+  gbtBehavProfile<gbtNumber> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
   for (int i = 1; i <= profile.Length(); i++) {
@@ -129,7 +127,7 @@ void gbtAnalysisProfileList::Load(TiXmlNode *p_analysis)
 			     *wxConvCurrent);
   }
 
-  if (m_doc->GetEfg()) {
+  if (m_doc->IsTree()) {
     for (TiXmlNode *node = p_analysis->FirstChild("profile"); node;
 	 node = node->NextSiblingElement()) {
       Append(TextToBehavProfile(m_doc,

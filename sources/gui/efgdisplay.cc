@@ -141,7 +141,7 @@ static Gambit::GameNode GetNode(Gambit::GameNode p_node, int p_id)
 bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
 				     const wxString &p_text)
 {
-  Gambit::GameTree efg = m_owner->GetDocument()->GetEfg();
+  Gambit::Game efg = m_owner->GetDocument()->GetGame();
 
   int x, y;
 #if defined( __WXMSW__) or defined(__WXMAC__)
@@ -195,7 +195,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
     case 'C': {
       long n;
       p_text.Right(p_text.Length() - 1).ToLong(&n);
-      Gambit::GameNode srcNode = GetNode(m_owner->GetDocument()->GetEfg()->GetRoot(), n);
+      Gambit::GameNode srcNode = GetNode(m_owner->GetDocument()->GetGame()->GetRoot(), n);
 
       if (!srcNode) {
 	return false;
@@ -421,7 +421,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
   Gambit::GameNode selectNode = m_doc->GetSelectNode();
 
   if (p_event.GetKeyCode() == 'R' || p_event.GetKeyCode() == 'r') {
-    m_doc->SetSelectNode(m_doc->GetEfg()->GetRoot());
+    m_doc->SetSelectNode(m_doc->GetGame()->GetRoot());
     EnsureNodeVisible(m_doc->GetSelectNode());
     return;
   }
@@ -771,7 +771,7 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
   if (node) {
     if (!node->GetOutcome()) {
       // Create a new outcome
-      node->SetOutcome(m_doc->GetEfg()->NewOutcome());
+      node->SetOutcome(m_doc->GetGame()->NewOutcome());
       m_doc->UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
       // Payoff rectangles are actually set during drawing, so
       // force a refresh

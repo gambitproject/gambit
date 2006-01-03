@@ -152,7 +152,7 @@ static void QreJacobian(const gbtEfgSupport &p_support,
 			const gbtVector<double> &p_point,
 			gbtMatrix<double> &p_matrix)
 {
-  Gambit::GameTree efg = p_support.GetGame();
+  Gambit::Game efg = p_support.GetGame();
   gbtBehavProfile<double> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = p_point[i];
@@ -236,7 +236,7 @@ void PrintProfile(std::ostream &p_stream,
   else {
     p_stream << "NE";
   }
-  Gambit::GameTree efg = p_support.GetGame();
+  Gambit::Game efg = p_support.GetGame();
 
   int index = 1;
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
@@ -535,7 +535,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::GameTree efg;
+  Gambit::Game efg;
 
   try {
     efg = Gambit::ReadEfg(std::cin);

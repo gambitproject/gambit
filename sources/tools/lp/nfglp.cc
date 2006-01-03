@@ -134,8 +134,8 @@ template <class T> int nfgLp<T>::Add_BFS(const gbtNfgSupport &p_support,
   // LPSolve<T>::GetAll() does not currently work correctly; for now,
   // LpSolve is restricted to returning only one equilibrium
   lp.OptBFS(cbfs);
-  cbfs.Remove(p_support.GetGame()->NumStrats(1)+1);
-  cbfs.Remove(-p_support.GetGame()->NumStrats(2)-1);
+  cbfs.Remove(p_support.GetGame()->GetPlayer(1)->NumStrategies()+1);
+  cbfs.Remove(-p_support.GetGame()->GetPlayer(2)->NumStrategies()-1);
   if (p_list.Contains(cbfs))  return 0;
   p_list.Append(cbfs);
   return 1;
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::GameTable nfg;
+  Gambit::Game nfg;
 
   try {
     nfg = Gambit::ReadNfg(std::cin);

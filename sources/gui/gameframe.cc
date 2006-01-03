@@ -88,7 +88,7 @@ gbtProfileListPanel::gbtProfileListPanel(wxWindow *p_parent,
 { 
   wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  if (p_doc->GetEfg()) {
+  if (p_doc->IsTree()) {
     m_behavProfiles = new gbtBehavProfileList(this, p_doc);
     m_behavProfiles->Show(false);
     topSizer->Add(m_behavProfiles, 1, wxEXPAND, 0);
@@ -279,7 +279,7 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   SetAcceleratorTable(accel);
 
   m_splitter = new wxSplitterWindow(this, -1);
-  if (p_doc->GetEfg()) {
+  if (p_doc->IsTree()) {
     m_efgPanel = new gbtEfgPanel(m_splitter, p_doc);
   }
   else {
@@ -287,14 +287,14 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   }
 
   m_nfgPanel = new gbtNfgPanel(m_splitter, p_doc);
-  if (p_doc->GetEfg()) {
+  if (p_doc->IsTree()) {
     m_nfgPanel->Show(false);
   }
 
   m_analysisPanel = new gbtAnalysisNotebook(m_splitter, p_doc);
   m_analysisPanel->Show(false);
 
-  if (p_doc->GetEfg()) {
+  if (p_doc->IsTree()) {
     m_splitter->Initialize(m_efgPanel);
   }
   else {
@@ -311,7 +311,7 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   SetSizer(topSizer);
   Layout();
 
-  if (p_doc->GetEfg()) {
+  if (p_doc->IsTree()) {
     m_efgPanel->SetFocus();
   }
   else {
@@ -332,12 +332,7 @@ gbtGameFrame::~gbtGameFrame()
 void gbtGameFrame::OnUpdate(void)
 {
   std::string gameTitle;
-  if (m_doc->GetEfg()) {
-    gameTitle = m_doc->GetEfg()->GetTitle();
-  }
-  else {
-    gameTitle = m_doc->GetNfg()->GetTitle();
-  }
+  gameTitle = m_doc->GetGame()->GetTitle();
 
   if (m_doc->GetFilename() != wxT("")) {
     SetTitle(wxT("Gambit - [") + m_doc->GetFilename() +
@@ -356,7 +351,7 @@ void gbtGameFrame::OnUpdate(void)
   Gambit::GameNode selectNode = m_doc->GetSelectNode();
   wxMenuBar *menuBar = GetMenuBar();
 
-  menuBar->Enable(GBT_MENU_FILE_EXPORT_EFG, m_doc->GetEfg());
+  menuBar->Enable(GBT_MENU_FILE_EXPORT_EFG, m_doc->IsTree());
 
   menuBar->Enable(wxID_UNDO, m_doc->CanUndo());
   GetToolBar()->EnableTool(wxID_UNDO, m_doc->CanUndo());
@@ -516,7 +511,7 @@ void gbtGameFrame::MakeMenus(void)
   AppendBitmapItem(editMenu, GBT_MENU_EDIT_NEWPLAYER, _("Add p&layer"),
 		   _("Add a new player to the game"), wxBitmap(newplayer_xpm));
 
-  if (m_doc->GetEfg()) {
+  if (m_doc->IsTree()) {
     editMenu->AppendSeparator();
     editMenu->Append(GBT_MENU_EDIT_INSERT_MOVE, _("&Insert move"), 
 		     _("Insert a move"));
@@ -564,7 +559,7 @@ void gbtGameFrame::MakeMenus(void)
 		   _("Rescale to show entire tree in window"),
 		   wxBitmap(zoomfit_xpm));
 
-  if (m_doc->GetEfg()) {
+  if (m_doc->IsTree()) {
     viewMenu->AppendSeparator();
     
     viewMenu->Append(GBT_MENU_VIEW_STRATEGIC, _("&Strategic game"),
@@ -650,7 +645,7 @@ void gbtGameFrame::MakeToolbar(void)
   toolBar->AddTool(GBT_MENU_EDIT_NEWPLAYER, wxBitmap(newplayer_xpm),
 		   wxNullBitmap, false, -1, -1, 0,
 		   _("Add a new player"), _("Add a new player to the game"));
-  if (m_doc->GetEfg()) {
+  if (m_doc->IsTree()) {
     toolBar->AddTool(GBT_MENU_VIEW_ZOOMIN, wxBitmap(zoomin_xpm), wxNullBitmap,
 		     false, -1, -1, 0, 
 		     _("Zoom in"), _("Increase magnification"));
@@ -674,7 +669,7 @@ void gbtGameFrame::MakeToolbar(void)
 		   _("Decrease the number of decimal places shown"));
 
   toolBar->AddSeparator();
-  if (m_doc->GetEfg()) {
+  if (m_doc->IsTree()) {
     toolBar->AddTool(GBT_MENU_VIEW_STRATEGIC, wxBitmap(table_xpm),
 		     wxNullBitmap, true, -1, -1, 0, 
 		     _("Display the reduced strategic representation "
@@ -705,7 +700,7 @@ void gbtGameFrame::MakeToolbar(void)
 
 void gbtGameFrame::OnFileNewEfg(wxCommandEvent &)
 {
-  Gambit::GameTree efg = new Gambit::GameTreeRep;
+  Gambit::Game efg = new Gambit::GameRep;
   efg->SetTitle("Untitled Extensive Game");
   efg->NewPlayer()->SetLabel("Player 1");
   efg->NewPlayer()->SetLabel("Player 2");
@@ -718,10 +713,10 @@ void gbtGameFrame::OnFileNewNfg(wxCommandEvent &)
   gbtArray<int> dim(2);
   dim[1] = 2;
   dim[2] = 2;
-  Gambit::GameTable nfg = new Gambit::GameTableRep(dim);
+  Gambit::Game nfg = new Gambit::GameRep(dim);
   nfg->SetTitle("Untitled Strategic Game");
-  nfg->GetPlayer(1)->SetName("Player 1");
-  nfg->GetPlayer(2)->SetName("Player 2");
+  nfg->GetPlayer(1)->SetLabel("Player 1");
+  nfg->GetPlayer(2)->SetLabel("Player 2");
   gbtGameDocument *doc = new gbtGameDocument(nfg);
   (void) new gbtGameFrame(0, doc);
 }
@@ -866,7 +861,7 @@ void gbtGameFrame::OnFileExportEfg(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     std::ofstream file((const char *) dialog.GetPath().mb_str());
-    m_doc->GetEfg()->WriteEfgFile(file);
+    m_doc->GetGame()->WriteEfgFile(file);
     m_doc->UpdateViews(GBT_DOC_MODIFIED_NONE);
   }
 }
@@ -881,10 +876,8 @@ void gbtGameFrame::OnFileExportNfg(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     std::ofstream file((const char *) dialog.GetPath().mb_str());
-    if (!m_doc->GetNfg()) {
-      m_doc->BuildNfg();
-    }
-    m_doc->GetNfg()->WriteNfgFile(file);
+    m_doc->BuildNfg();
+    m_doc->GetGame()->WriteNfgFile(file);
     m_doc->UpdateViews(GBT_DOC_MODIFIED_NONE);
   }
 }
@@ -1041,7 +1034,7 @@ void gbtGameFrame::OnEditInsertMove(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK)  {
     try {
       if (!dialog.GetInfoset()) {
-	Gambit::GameInfoset infoset = m_doc->GetEfg()->InsertNode(m_doc->GetSelectNode(), 
+	Gambit::GameInfoset infoset = m_doc->GetGame()->InsertNode(m_doc->GetSelectNode(), 
 						       dialog.GetPlayer(),
 						       dialog.GetActions());
 	for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -1049,7 +1042,7 @@ void gbtGameFrame::OnEditInsertMove(wxCommandEvent &)
 	}
       }
       else {
-	m_doc->GetEfg()->InsertNode(m_doc->GetSelectNode(), 
+	m_doc->GetGame()->InsertNode(m_doc->GetSelectNode(), 
 				    dialog.GetInfoset());
       }
       m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
@@ -1065,7 +1058,7 @@ void gbtGameFrame::OnEditInsertAction(wxCommandEvent &)
   Gambit::GameNode node = m_doc->GetSelectNode();
   if (!node || !node->GetInfoset())  return;
 
-  Gambit::GameAction action = m_doc->GetEfg()->InsertAction(node->GetInfoset());
+  Gambit::GameAction action = m_doc->GetGame()->InsertAction(node->GetInfoset());
   action->SetLabel(ToText(action->GetNumber()));
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
@@ -1074,7 +1067,7 @@ void gbtGameFrame::OnEditDeleteTree(wxCommandEvent &)
 {
   if (!m_doc->GetSelectNode())  return;
 
-  m_doc->GetEfg()->DeleteTree(m_doc->GetSelectNode());
+  m_doc->GetGame()->DeleteTree(m_doc->GetSelectNode());
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -1082,8 +1075,8 @@ void gbtGameFrame::OnEditDeleteParent(wxCommandEvent &)
 {
   if (!m_doc->GetSelectNode() || !m_doc->GetSelectNode()->GetParent())  return;
 
-  m_doc->GetEfg()->DeleteNode(m_doc->GetSelectNode()->GetParent(),
-			      m_doc->GetSelectNode());
+  m_doc->GetGame()->DeleteNode(m_doc->GetSelectNode()->GetParent(),
+			       m_doc->GetSelectNode());
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -1100,8 +1093,8 @@ void gbtGameFrame::OnEditReveal(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_doc->GetEfg()->Reveal(m_doc->GetSelectNode()->GetInfoset(), 
-			      dialog.GetPlayers());
+      m_doc->GetGame()->Reveal(m_doc->GetSelectNode()->GetInfoset(), 
+			       dialog.GetPlayers());
       m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
     }
     catch (gbtException &ex) {
@@ -1116,7 +1109,7 @@ void gbtGameFrame::OnEditNode(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->GetSelectNode()->SetLabel((const char *) dialog.GetNodeName().mb_str());
     if (dialog.GetOutcome() > 0) {
-      m_doc->GetSelectNode()->SetOutcome(m_doc->GetEfg()->GetOutcome(dialog.GetOutcome()));
+      m_doc->GetSelectNode()->SetOutcome(m_doc->GetGame()->GetOutcome(dialog.GetOutcome()));
     }
     else {
       m_doc->GetSelectNode()->SetOutcome(0);
@@ -1125,11 +1118,11 @@ void gbtGameFrame::OnEditNode(wxCommandEvent &)
     if (m_doc->GetSelectNode()->NumChildren() > 0 &&
 	dialog.GetInfoset() != m_doc->GetSelectNode()->GetInfoset()) {
       if (dialog.GetInfoset() == 0) {
-	m_doc->GetEfg()->LeaveInfoset(m_doc->GetSelectNode());
+	m_doc->GetGame()->LeaveInfoset(m_doc->GetSelectNode());
       }
       else {
-	m_doc->GetEfg()->JoinInfoset(dialog.GetInfoset(), 
-				     m_doc->GetSelectNode());
+	m_doc->GetGame()->JoinInfoset(dialog.GetInfoset(), 
+				      m_doc->GetSelectNode());
       }
     }
     m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
@@ -1147,8 +1140,8 @@ void gbtGameFrame::OnEditMove(wxCommandEvent &)
     
     if (!infoset->IsChanceInfoset() && 
 	dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
-      m_doc->GetEfg()->SwitchPlayer(infoset, 
-				    m_doc->GetEfg()->GetPlayer(dialog.GetPlayer()));
+      m_doc->GetGame()->SwitchPlayer(infoset, 
+				     m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
     }
 
     for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -1167,30 +1160,18 @@ void gbtGameFrame::OnEditGame(wxCommandEvent &)
   gbtGamePropertiesDialog dialog(this, m_doc);
 
   if (dialog.ShowModal() == wxID_OK) {
-    if (m_doc->GetEfg()) {
-      Gambit::GameTree efg = m_doc->GetEfg();
-      efg->SetTitle((const char *) dialog.GetTitle().mb_str());
-      efg->SetComment((const char *) dialog.GetComment().mb_str());
-    }
-    else {
-      Gambit::GameTable nfg = m_doc->GetNfg();
-      nfg->SetTitle((const char *) dialog.GetTitle().mb_str());
-      nfg->SetComment((const char *) dialog.GetComment().mb_str());
-    }
-
+    Gambit::Game game = m_doc->GetGame();
+    game->SetTitle((const char *) dialog.GetTitle().mb_str());
+    game->SetComment((const char *) dialog.GetComment().mb_str());
     m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
   }
 }
 
 void gbtGameFrame::OnEditNewPlayer(wxCommandEvent &)
 {
-  if (m_doc->GetEfg()) {
-    Gambit::GamePlayer player = m_doc->GetEfg()->NewPlayer();
-    player->SetLabel("Player " + ToText(player->GetNumber()));
-  }
-  else {
-    Gambit::TablePlayer player = m_doc->GetNfg()->NewPlayer();
-    player->SetName("Player " + ToText(player->GetNumber()));
+  Gambit::GamePlayer player = m_doc->GetGame()->NewPlayer();
+  player->SetLabel("Player " + ToText(player->GetNumber()));
+  if (!m_doc->IsTree()) {
     player->GetStrategy(1)->SetName("1");
   }
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
@@ -1229,27 +1210,16 @@ void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
   if (m_efgPanel->IsShown()) {
     // We are switching to strategic view
 
-    if (!m_doc->GetNfg()) {
-      // check that the game is perfect recall, if not give a warning
-      if (!m_doc->GetEfg()->IsPerfectRecall()) {
-	if (wxMessageBox(_("This is not a game of perfect recall\n"
-			   "Do you wish to continue?"), 
-			 _("Strategic form"), 
-			 wxOK | wxCANCEL | wxALIGN_CENTER, this) != wxOK) {
-	  return;
-	}
-      }
-    
-      m_doc->BuildNfg();
-
-      if (!m_doc->GetNfg()) {
-	// This will fail for memory or other problems on very large games.
-	// Issue a (semi-)informative message.
-	wxMessageBox(_("Could not create strategic form game."),
-		     _("Strategic form"), wxOK);
+    if (!m_doc->GetGame()->IsPerfectRecall()) {
+      if (wxMessageBox(_("This is not a game of perfect recall\n"
+			 "Do you wish to continue?"), 
+		       _("Strategic game"), 
+		       wxOK | wxCANCEL | wxALIGN_CENTER, this) != wxOK) {
 	return;
       }
     }
+    
+    m_doc->BuildNfg();
 
     m_splitter->ReplaceWindow(m_efgPanel, m_nfgPanel);
     m_efgPanel->Show(false);

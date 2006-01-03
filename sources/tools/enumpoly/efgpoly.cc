@@ -41,7 +41,7 @@ bool g_verbose = false;
 template <class T> class EfgPolEnumModule  {
 private:
   T eps;
-  const Gambit::GameTree &EF;
+  const Gambit::Game &EF;
   const gbtEfgSupport &support;
   gSpace *Space;
   term_order *Lex;
@@ -559,7 +559,7 @@ void PrintProfile(std::ostream &p_stream,
 
 gbtBehavProfile<double> ToFullSupport(const gbtBehavProfile<double> &p_profile)
 {
-  Gambit::GameTree efg = p_profile.GetGame();
+  Gambit::Game efg = p_profile.GetGame();
   const gbtEfgSupport &support = p_profile.Support();
 
   gbtBehavProfile<double> fullProfile(efg);
@@ -621,7 +621,7 @@ void PrintSupport(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-void Solve(const Gambit::GameTree &p_game)
+void Solve(const Gambit::Game &p_game)
 {
   gbtList<gbtEfgSupport> supports = PossibleNashSubsupports(p_game);
 
@@ -715,7 +715,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::GameTree efg;
+  Gambit::Game efg;
 
   try {
     efg = Gambit::ReadEfg(std::cin);

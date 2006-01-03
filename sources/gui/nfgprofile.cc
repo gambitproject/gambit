@@ -68,9 +68,9 @@ void gbtMixedProfileList::OnCellClick(wxSheetEvent &p_event)
 static Gambit::GameStrategy GetStrategy(gbtGameDocument *p_doc, int p_index)
 {
   int index = 0;
-  for (int pl = 1; pl <= p_doc->GetNfg()->NumPlayers(); pl++) {
-    Gambit::TablePlayer player = p_doc->GetNfg()->GetPlayer(pl);
-    for (int st = 1; st <= player->NumStrats(); st++) {
+  for (int pl = 1; pl <= p_doc->GetGame()->NumPlayers(); pl++) {
+    Gambit::GamePlayer player = p_doc->GetGame()->GetPlayer(pl);
+    for (int st = 1; st <= player->NumStrategies(); st++) {
       if (index++ == p_index) {
 	return player->GetStrategy(st);
       }
@@ -86,9 +86,9 @@ wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
   }
   else if (IsColLabelCell(p_coords)) {
     int index = 0;
-    for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
-      Gambit::TablePlayer player = m_doc->GetNfg()->GetPlayer(pl);
-      for (int st = 1; st <= player->NumStrats(); st++) {
+    for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
+      Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
+      for (int st = 1; st <= player->NumStrategies(); st++) {
 	if (index++ == p_coords.GetCol()) {
 	  return (wxString::Format(wxT("%d: "), pl) +
 		  wxString(player->GetStrategy(st)->GetName().c_str(),
@@ -123,9 +123,9 @@ wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
 static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 {
   int index = 0;
-  for (int pl = 1; pl <= p_doc->GetNfg()->NumPlayers(); pl++) {
-    Gambit::TablePlayer player = p_doc->GetNfg()->GetPlayer(pl);
-    for (int st = 1; st <= player->NumStrats(); st++) {
+  for (int pl = 1; pl <= p_doc->GetGame()->NumPlayers(); pl++) {
+    Gambit::GamePlayer player = p_doc->GetGame()->GetPlayer(pl);
+    for (int st = 1; st <= player->NumStrategies(); st++) {
       if (index++ == p_index) {
 	return p_doc->GetStyle().GetPlayerColor(pl);
       }
@@ -184,7 +184,7 @@ wxSheetCellAttr gbtMixedProfileList::GetAttr(const wxSheetCoords &p_coords,
 
 void gbtMixedProfileList::OnUpdate(void)
 {
-  if (!m_doc->GetNfg() || m_doc->NumProfileLists() == 0) {
+  if (m_doc->NumProfileLists() == 0) {
     DeleteRows(0, GetNumberRows());
     return;
   }
@@ -197,7 +197,7 @@ void gbtMixedProfileList::OnUpdate(void)
   DeleteRows(0, GetNumberRows());
   InsertRows(0, newRows);
 	     
-  int profileLength = m_doc->GetNfg()->ProfileLength();
+  int profileLength = m_doc->GetGame()->MixedProfileLength();
   int newCols = profileLength;
   DeleteCols(0, GetNumberCols());
   InsertCols(0, newCols);

@@ -30,7 +30,7 @@
 
 #include "libgambit/libgambit.h"
 
-void WriteHtmlFile(std::ostream &p_file, const Gambit::GameTable &p_nfg,
+void WriteHtmlFile(std::ostream &p_file, const Gambit::Game &p_nfg,
 		   int p_rowPlayer, int p_colPlayer)
 {
   std::string theHtml;
@@ -57,20 +57,20 @@ void WriteHtmlFile(std::ostream &p_file, const Gambit::GameTable &p_nfg,
     theHtml += "<table>";
     theHtml += "<tr>";
     theHtml += "<td></td>";
-    for (int st = 1; st <= p_nfg->NumStrats(p_colPlayer); st++) {
+    for (int st = 1; st <= p_nfg->GetPlayer(p_colPlayer)->NumStrategies(); st++) {
       theHtml += "<td align=center><b>";
       theHtml += p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st)->GetName();
       theHtml += "</b></td>";
     } 
     theHtml += "</tr>";
-    for (int st1 = 1; st1 <= p_nfg->NumStrats(p_rowPlayer); st1++) {
+    for (int st1 = 1; st1 <= p_nfg->GetPlayer(p_rowPlayer)->NumStrategies(); st1++) {
       gbtStrategyProfile profile(iter.GetProfile());
       profile.SetStrategy(p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1));
       theHtml += "<tr>";
       theHtml += "<td align=center><b>";
       theHtml += p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1)->GetName();
       theHtml += "</b></td>";
-      for (int st2 = 1; st2 <= p_nfg->NumStrats(p_colPlayer); st2++) {
+      for (int st2 = 1; st2 <= p_nfg->GetPlayer(p_colPlayer)->NumStrategies(); st2++) {
 	profile.SetStrategy(p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st2));
 	theHtml += "<td align=center>";
 	for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  Gambit::GameTable nfg;
+  Gambit::Game nfg;
 
   try {
     nfg = Gambit::ReadNfg(std::cin);

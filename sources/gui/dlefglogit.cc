@@ -93,7 +93,7 @@ wxString gbtLogitBehavList::GetCellValue(const wxSheetCoords &p_coords)
       return wxT("Lambda");
     }
     else {
-      Gambit::GameAction action = m_doc->GetEfg()->GetAction(p_coords.GetCol());
+      Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol());
       return (wxString::Format(wxT("%d: "), 
 			       action->GetInfoset()->GetNumber())+
 	      wxString(action->GetLabel().c_str(), *wxConvCurrent));
@@ -121,7 +121,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 {
   if (p_index == 0)  return *wxBLACK;
 
-  Gambit::GameAction action = p_doc->GetEfg()->GetAction(p_index);
+  Gambit::GameAction action = p_doc->GetGame()->GetAction(p_index);
   return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber());
 }
 
@@ -154,7 +154,7 @@ wxSheetCellAttr gbtLogitBehavList::GetAttr(const wxSheetCoords &p_coords,
   attr.SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
   if (p_coords.GetCol() > 0) {
-    Gambit::GameAction action = m_doc->GetEfg()->GetAction(p_coords.GetCol());
+    Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol());
     attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber()));
     if (action->GetInfoset()->GetNumber() % 2 == 0) {
       attr.SetBackgroundColour(wxColour(250, 250, 250));
@@ -176,10 +176,10 @@ void gbtLogitBehavList::AddProfile(const wxString &p_text,
 				   bool p_forceShow)
 {
   if (GetNumberCols() == 0) {
-    AppendCols(m_doc->GetEfg()->ProfileLength() + 1);
+    AppendCols(m_doc->GetGame()->BehavProfileLength() + 1);
   }
 
-  gbtBehavProfile<double> profile(m_doc->GetEfg());
+  gbtBehavProfile<double> profile(m_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
 
@@ -266,7 +266,7 @@ void gbtLogitBehavDialog::Start(void)
   m_pid = wxExecute(wxT("gambit-efg-logit"), wxEXEC_ASYNC, m_process);
   
   std::ostringstream s;
-  m_doc->GetEfg()->WriteEfgFile(s);
+  m_doc->GetGame()->WriteEfgFile(s);
   wxString str(wxString(s.str().c_str(), *wxConvCurrent));
   
   // It is possible that the whole string won't write on one go, so

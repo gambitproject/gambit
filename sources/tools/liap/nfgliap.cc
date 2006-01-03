@@ -38,7 +38,7 @@
 class NFLiapFunc : public gC1Function<double>  {
 private:
   mutable long _nevals;
-  Gambit::GameTable _nfg;
+  Gambit::Game _nfg;
   mutable gbtMixedProfile<double> _p;
 
   double Value(const gbtVector<double> &) const;
@@ -48,13 +48,13 @@ private:
     
 
 public:
-  NFLiapFunc(const Gambit::GameTable &, const gbtMixedProfile<double> &);
+  NFLiapFunc(const Gambit::Game &, const gbtMixedProfile<double> &);
   virtual ~NFLiapFunc();
     
   long NumEvals(void) const  { return _nevals; }
 };
 
-NFLiapFunc::NFLiapFunc(const Gambit::GameTable &N,
+NFLiapFunc::NFLiapFunc(const Gambit::Game &N,
 		       const gbtMixedProfile<double> &start)
   : _nevals(0L), _nfg(N), _p(start)
 { }
@@ -306,7 +306,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::GameTable nfg;
+  Gambit::Game nfg;
 
   try {
     nfg = Gambit::ReadNfg(std::cin);

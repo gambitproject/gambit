@@ -27,18 +27,18 @@
 #ifndef EFSTRAT_H
 #define EFSTRAT_H
 
-#include "libgambit.h"
+#include "game.h"
 
 class gbtEfgSupportPlayer;
 
 class gbtEfgSupport {
 protected:
   std::string m_name;
-  Gambit::GameTree m_efg;
+  Gambit::Game m_efg;
   gbtArray<gbtEfgSupportPlayer *> m_players;
 
 public:
-  gbtEfgSupport(const Gambit::GameTree &);
+  gbtEfgSupport(const Gambit::Game &);
   gbtEfgSupport(const gbtEfgSupport &);
   virtual ~gbtEfgSupport();
   gbtEfgSupport &operator=(const gbtEfgSupport &);
@@ -46,7 +46,7 @@ public:
   bool operator==(const gbtEfgSupport &) const;
   bool operator!=(const gbtEfgSupport &) const;
 
-  Gambit::GameTree GetGame(void) const { return m_efg; }
+  Gambit::Game GetGame(void) const { return m_efg; }
 
   const std::string &GetName(void) const { return m_name; }
   void SetName(const std::string &p_name) { m_name = p_name; }
@@ -136,7 +136,7 @@ protected:
 						 gbtList<Gambit::GameInfoset> *);
 
 public:
-  gbtEfgSupportWithActiveInfo ( const Gambit::GameTree &);
+  gbtEfgSupportWithActiveInfo ( const Gambit::Game &);
   gbtEfgSupportWithActiveInfo ( const gbtEfgSupport &);
   gbtEfgSupportWithActiveInfo ( const gbtEfgSupportWithActiveInfo &);
   virtual ~gbtEfgSupportWithActiveInfo();

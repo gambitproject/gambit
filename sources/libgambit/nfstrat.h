@@ -27,24 +27,23 @@
 #ifndef NFSTRAT_H
 #define NFSTRAT_H
 
-#include "base.h"
-#include "nfg.h"
+#include "libgambit.h"
 
 /// This class represents a strategy profile on a normal form game.
 /// It specifies exactly one strategy for each player defined on the
 /// game.
 class gbtStrategyProfile  {
-  friend class Gambit::GameTableRep;
+  friend class Gambit::GameRep;
 private:
   long m_index;
-  Gambit::GameTable m_nfg;
+  Gambit::Game m_nfg;
   gbtArray<Gambit::GameStrategy> m_profile;
   
 public:
   /// @name Lifecycle
   //@{
   /// Construct a new strategy profile on the specified game
-  gbtStrategyProfile(const Gambit::GameTable &);
+  gbtStrategyProfile(const Gambit::Game &);
   //@}
 
   /// @name Data access and manipulation
@@ -76,7 +75,7 @@ public:
 /// in which they appear in the underlying game.
 class gbtNfgSupport {
 protected:
-  Gambit::GameTable m_nfg;
+  Gambit::Game m_nfg;
   gbtArray<gbtArray<Gambit::GameStrategy> > m_support;
   
   bool Undominated(gbtNfgSupport &newS, int pl, bool strong,
@@ -86,7 +85,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructor.  By default, a support contains all strategies.
-  gbtNfgSupport(const Gambit::GameTable &);
+  gbtNfgSupport(const Gambit::Game &);
   //@}
 
   /// @name Operator overloading
@@ -102,7 +101,7 @@ public:
   /// @name General information
   //@{
   /// Returns the game on which the support is defined.
-  Gambit::GameTable GetGame(void) const { return m_nfg; }
+  Gambit::Game GetGame(void) const { return m_nfg; }
 
   /// Returns the number of strategies in the support for player pl.
   int NumStrats(int pl) const  { return m_support[pl].Length(); }

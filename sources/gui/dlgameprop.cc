@@ -46,39 +46,22 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
   wxBoxSizer *titleSizer = new wxBoxSizer(wxHORIZONTAL);
   titleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Title")),
 		  0, wxALL | wxALIGN_CENTER, 5);
-  if (m_doc->GetEfg()) {
-    m_title = new wxTextCtrl(this, -1, 
-			     wxString(m_doc->GetEfg()->GetTitle().c_str(),
-				      *wxConvCurrent),
-			     wxDefaultPosition, wxSize(400, -1));
-  }
-  else {
-    m_title = new wxTextCtrl(this, -1, 
-			     wxString(m_doc->GetNfg()->GetTitle().c_str(),
-				      *wxConvCurrent),
-			     wxDefaultPosition, wxSize(400, -1));
-  }
+  m_title = new wxTextCtrl(this, -1, 
+			   wxString(m_doc->GetGame()->GetTitle().c_str(),
+				    *wxConvCurrent),
+			   wxDefaultPosition, wxSize(400, -1));
+
   titleSizer->Add(m_title, 1, wxALL | wxALIGN_CENTER, 5);
   topSizer->Add(titleSizer, 0, wxALL | wxEXPAND, 0);
 
   wxBoxSizer *commentSizer = new wxBoxSizer(wxHORIZONTAL);
   commentSizer->Add(new wxStaticText(this, wxID_STATIC, _("Comment")),
 		    0, wxALL | wxALIGN_CENTER, 5);
-  if (m_doc->GetEfg()) {
-    m_comment = new wxTextCtrl(this, -1, 
-			       wxString(m_doc->GetEfg()->GetComment().c_str(),
-					*wxConvCurrent),
-			       wxDefaultPosition, wxSize(400, -1),
-			       wxTE_MULTILINE);
-  }
-  else {
-    m_comment = new wxTextCtrl(this, -1, 
-			       wxString(m_doc->GetNfg()->GetComment().c_str(),
-					*wxConvCurrent),
-			       wxDefaultPosition, wxSize(400, -1),
-			       wxTE_MULTILINE);
-  }
-
+  m_comment = new wxTextCtrl(this, -1, 
+			     wxString(m_doc->GetGame()->GetComment().c_str(),
+				      *wxConvCurrent),
+			     wxDefaultPosition, wxSize(400, -1),
+			     wxTE_MULTILINE);
   commentSizer->Add(m_comment, 1, wxALL | wxALIGN_CENTER, 5);
   topSizer->Add(commentSizer, 1, wxALL | wxEXPAND, 0);
 	
@@ -90,23 +73,25 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
 				 m_doc->GetFilename()),
 		0, wxALL, 5);
 
-  if (m_doc->GetEfg()) {
-    Gambit::GameTree efg = m_doc->GetEfg();
-    boxSizer->Add(new wxStaticText(this, wxID_STATIC,
-				   wxString::Format(_("Number of players: %d"),
-						    efg->NumPlayers())),
+
+  Gambit::Game game = m_doc->GetGame();
+  boxSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 wxString::Format(_("Number of players: %d"),
+						  game->NumPlayers())),
+		0, wxALL, 5);
+  if (game->IsConstSum()) {
+    boxSizer->Add(new wxStaticText(this, wxID_STATIC, 
+				   _("This is a constant-sum game")),
 		  0, wxALL, 5);
-    if (efg->IsConstSum()) {
-      boxSizer->Add(new wxStaticText(this, wxID_STATIC, 
-				     _("This is a constant-sum game")),
-		    0, wxALL, 5);
-    }
-    else {
-      boxSizer->Add(new wxStaticText(this, wxID_STATIC, 
-				     _("This is not a constant-sum game")),
-		    0, wxALL, 5);
-    }
-    if (efg->IsPerfectRecall()) {
+  }
+  else {
+    boxSizer->Add(new wxStaticText(this, wxID_STATIC, 
+				   _("This is not a constant-sum game")),
+		  0, wxALL, 5);
+  }
+
+  if (m_doc->IsTree()) {
+    if (game->IsPerfectRecall()) {
       boxSizer->Add(new wxStaticText(this, wxID_STATIC,
 				     _("This is a game of perfect recall")),
 		    0, wxALL, 5);
@@ -114,25 +99,6 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
     else {
       boxSizer->Add(new wxStaticText(this, wxID_STATIC,
 				     _("This is not a game of perfect recall")),
-		    0, wxALL, 5);
-    }
-  }
-  else {
-    Gambit::GameTable nfg = m_doc->GetNfg();
-
-    boxSizer->Add(new wxStaticText(this, wxID_STATIC,
-				   wxString::Format(_("Number of players: %d"),
-						    nfg->NumPlayers())),
-		  0, wxALL, 5);
-    if (nfg->IsConstSum()) {
-      boxSizer->Add(new wxStaticText(this, wxID_STATIC,
-				     wxString(_("This is a constant-sum game"))),
-		    0, wxALL, 5);
-      
-    }
-    else {
-      boxSizer->Add(new wxStaticText(this, wxID_STATIC,
-				     wxString(_("This is not a constant-sum game"))),
 		    0, wxALL, 5);
     }
   }

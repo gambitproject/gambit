@@ -27,7 +27,6 @@
 #ifndef EFGITER_H
 #define EFGITER_H
 
-#include "efg.h"
 #include "efstrat.h"
 
 //
@@ -43,7 +42,7 @@ class EfgContIter    {
   friend class EfgIter;
   private:
     int _frozen_pl, _frozen_iset;
-    Gambit::GameTree _efg;
+    Gambit::Game _efg;
     gbtEfgSupport _support;
     gbtPureBehavProfile _profile;
     gbtPVector<int> _current;
@@ -78,7 +77,7 @@ class EfgContIter    {
 class EfgConditionalContIter    {
   friend class EfgIter;
   private:
-    Gambit::GameTree _efg;
+    Gambit::Game _efg;
     gbtEfgSupport _support;
     gbtPureBehavProfile _profile;
     gbtPVector<int> _current;

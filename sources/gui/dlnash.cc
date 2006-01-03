@@ -74,7 +74,7 @@ gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent,
   m_methodChoice->SetSelection(0);
   topSizer->Add(m_methodChoice, 0, wxALL | wxEXPAND, 5);
 
-  if (m_doc->GetEfg()) {
+  if (m_doc->IsTree()) {
     wxString repChoices[] = { wxT("using the extensive game"),
 			      wxT("using the strategic game") };
     m_repChoice = new wxChoice(this, -1, wxDefaultPosition, wxDefaultSize,

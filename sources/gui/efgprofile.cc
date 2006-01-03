@@ -63,7 +63,7 @@ void gbtBehavProfileList::OnLabelClick(wxSheetEvent &p_event)
   else {
     // Clicking on an action column sets the selected node to the first
     // member of that information set.
-    Gambit::GameAction action = m_doc->GetEfg()->GetAction(p_event.GetCol()+1);
+    Gambit::GameAction action = m_doc->GetGame()->GetAction(p_event.GetCol()+1);
     m_doc->SetSelectNode(action->GetInfoset()->GetMember(1));
   }
 }
@@ -79,7 +79,7 @@ wxString gbtBehavProfileList::GetCellValue(const wxSheetCoords &p_coords)
     return wxString::Format(wxT("%d"), p_coords.GetRow() + 1);
   }
   else if (IsColLabelCell(p_coords)) {
-    Gambit::GameAction action = m_doc->GetEfg()->GetAction(p_coords.GetCol()+1);
+    Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol()+1);
     return (wxString::Format(wxT("%d: "), 
 			     action->GetInfoset()->GetNumber()) +
 	    wxString(action->GetLabel().c_str(), *wxConvCurrent));
@@ -90,7 +90,7 @@ wxString gbtBehavProfileList::GetCellValue(const wxSheetCoords &p_coords)
 
   const gbtBehavProfile<gbtNumber> &profile = m_doc->GetProfiles().GetBehav(p_coords.GetRow()+1);
 
-  if (profile.IsDefinedAt(m_doc->GetEfg()->GetAction(p_coords.GetCol()+1)->GetInfoset())) {
+  if (profile.IsDefinedAt(m_doc->GetGame()->GetAction(p_coords.GetCol()+1)->GetInfoset())) {
     return wxString(ToText(profile[p_coords.GetCol()+1],
 			   m_doc->GetStyle().NumDecimals()).c_str(), 
 		    *wxConvCurrent);
@@ -102,7 +102,7 @@ wxString gbtBehavProfileList::GetCellValue(const wxSheetCoords &p_coords)
 
 static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 {
-  Gambit::GameAction action = p_doc->GetEfg()->GetAction(p_index+1);
+  Gambit::GameAction action = p_doc->GetGame()->GetAction(p_index+1);
   return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber());
 }
 
@@ -150,7 +150,7 @@ wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords,
   attr.SetOrientation(wxHORIZONTAL);
   attr.SetRenderer(wxSheetCellRenderer(new gbtRationalRendererRefData()));
 
-  Gambit::GameAction action = m_doc->GetEfg()->GetAction(p_coords.GetCol()+1);
+  Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol()+1);
   attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber()));
   if (action->GetInfoset()->GetNumber() % 2 == 0) {
     attr.SetBackgroundColour(wxColour(250, 250, 250));
@@ -164,13 +164,13 @@ wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords,
 
 void gbtBehavProfileList::OnUpdate(void)
 {
-  if (!m_doc->GetEfg() || m_doc->NumProfileLists() == 0) {
+  if (!m_doc->GetGame() || m_doc->NumProfileLists() == 0) {
     DeleteRows(0, GetNumberRows());
     return;
   }
 
   const gbtAnalysisProfileList &profiles = m_doc->GetProfiles();
-  int profileLength = m_doc->GetEfg()->ProfileLength();
+  int profileLength = m_doc->GetGame()->BehavProfileLength();
 
   BeginBatch();
   if (GetNumberRows() > profiles.NumProfiles()) {

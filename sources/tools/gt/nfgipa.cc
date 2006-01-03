@@ -39,11 +39,11 @@
 int g_numDecimals = 6;
 
 void PrintProfile(std::ostream &p_stream,
-		  const Gambit::GameTable &p_game, cvector *p_profile)
+		  const Gambit::Game &p_game, cvector *p_profile)
 {
   p_stream.setf(std::ios::fixed);
   p_stream << "NE";
-  for (int i = 0; i < p_game->ProfileLength(); i++) {
+  for (int i = 0; i < p_game->MixedProfileLength(); i++) {
     p_stream << "," << std::setprecision(g_numDecimals) << (*p_profile)[i];
   }
   p_stream << std::endl;
@@ -70,15 +70,15 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-void Solve(const Gambit::GameTable &p_game, const gbtArray<double> &p_pert)
+void Solve(const Gambit::Game &p_game, const gbtArray<double> &p_pert)
 {
   int i;
 
   int *actions = new int[p_game->NumPlayers()];
   int veclength = p_game->NumPlayers();
   for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-    actions[pl-1] = p_game->GetPlayer(pl)->NumStrats();
-    veclength *= p_game->GetPlayer(pl)->NumStrats();
+    actions[pl-1] = p_game->GetPlayer(pl)->NumStrategies();
+    veclength *= p_game->GetPlayer(pl)->NumStrategies();
   }
   cvector payoffs(veclength);
   
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::GameTable nfg;
+  Gambit::Game nfg;
 
   try {
     nfg = Gambit::ReadNfg(std::cin);
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  gbtArray<double> pert(nfg->ProfileLength());
+  gbtArray<double> pert(nfg->MixedProfileLength());
   for (int i = 1; i <= pert.Length(); i++) {
     pert[i] = 1.0;
   }

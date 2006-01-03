@@ -40,7 +40,7 @@ bool g_verbose = false;
 class PolEnumModule  {
 private:
   gDouble eps;
-  Gambit::GameTable NF;
+  Gambit::Game NF;
   const gbtNfgSupport &support;
   gSpace Space;
   term_order Lex;
@@ -441,7 +441,7 @@ void PrintProfile(std::ostream &p_stream,
 
 gbtMixedProfile<double> ToFullSupport(const gbtMixedProfile<double> &p_profile)
 {
-  Gambit::GameTable nfg = p_profile.GetGame();
+  Gambit::Game nfg = p_profile.GetGame();
   const gbtNfgSupport &support = p_profile.GetSupport();
 
   gbtMixedProfile<double> fullProfile(nfg);
@@ -449,8 +449,8 @@ gbtMixedProfile<double> ToFullSupport(const gbtMixedProfile<double> &p_profile)
 
   int index = 1;
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-    Gambit::TablePlayer player = nfg->GetPlayer(pl);
-    for (int st = 1; st <= nfg->NumStrats(pl); st++) {
+    Gambit::GamePlayer player = nfg->GetPlayer(pl);
+    for (int st = 1; st <= player->NumStrategies(); st++) {
       if (support.Contains(player->GetStrategy(st))) {
 	fullProfile(pl, st) = p_profile[index++];
       }
@@ -466,10 +466,10 @@ void PrintSupport(std::ostream &p_stream,
   p_stream << p_label;
 
   for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    Gambit::TablePlayer player = p_support.GetGame()->GetPlayer(pl);
+    Gambit::GamePlayer player = p_support.GetGame()->GetPlayer(pl);
 
     p_stream << ",";
-    for (int st = 1; st <= player->NumStrats(); st++) {
+    for (int st = 1; st <= player->NumStrategies(); st++) {
       if (p_support.Contains(player->GetStrategy(st))) {
 	p_stream << "1";
       }
@@ -481,7 +481,7 @@ void PrintSupport(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-void Solve(const Gambit::GameTable &p_nfg)
+void Solve(const Gambit::Game &p_nfg)
 {
   gbtList<gbtNfgSupport> supports = PossibleNashSubsupports(p_nfg);
 
@@ -576,7 +576,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::GameTable nfg;
+  Gambit::Game nfg;
 
   try {
     nfg = Gambit::ReadNfg(std::cin);

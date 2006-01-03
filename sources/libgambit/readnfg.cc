@@ -551,7 +551,7 @@ static void ParseHeader(gbtGameParserState &p_state, gbtTableFileGame &p_data)
   }
 }
 
-static void ReadOutcomeList(gbtGameParserState &p_parser, Gambit::GameTable p_nfg)
+static void ReadOutcomeList(gbtGameParserState &p_parser, Gambit::Game p_nfg)
 {
   if (p_parser.GetNextSymbol() == symRBRACE) {
     // Special case: empty outcome list
@@ -617,7 +617,7 @@ static void ReadOutcomeList(gbtGameParserState &p_parser, Gambit::GameTable p_nf
   p_parser.GetNextSymbol();
 }
 
-void ParseOutcomeBody(gbtGameParserState &p_parser, Gambit::GameTable p_nfg)
+void ParseOutcomeBody(gbtGameParserState &p_parser, Gambit::Game p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
 
@@ -630,27 +630,27 @@ void ParseOutcomeBody(gbtGameParserState &p_parser, Gambit::GameTable p_nfg)
 
     int outcomeId = p_parser.GetLastInteger().as_long();
     if (outcomeId > 0)  {
-      p_nfg->results[cont++] = p_nfg->GetOutcome(outcomeId);
+      p_nfg->m_results[cont++] = p_nfg->GetOutcome(outcomeId);
     }
     else {
-      p_nfg->results[cont++] = 0;
+      p_nfg->m_results[cont++] = 0;
     }
     p_parser.GetNextSymbol();
   }
 }
 
-void SetPayoff(Gambit::GameTable p_nfg, int p_cont, int p_pl, 
+void SetPayoff(Gambit::Game p_nfg, int p_cont, int p_pl, 
 	       const std::string &p_text)
 {
   if (p_pl == 1)  {
     p_nfg->NewOutcome();
-    p_nfg->results[p_cont] = p_nfg->GetOutcome(p_nfg->NumOutcomes());
+    p_nfg->m_results[p_cont] = p_nfg->GetOutcome(p_nfg->NumOutcomes());
   }
-  p_nfg->results[p_cont]->SetPayoff(p_pl, p_text);
+  p_nfg->m_results[p_cont]->SetPayoff(p_pl, p_text);
 }
 
 static void ParsePayoffBody(gbtGameParserState &p_parser, 
-			    Gambit::GameTable p_nfg)
+			    Gambit::Game p_nfg)
 {
   int cont = 1, pl = 1;
 
@@ -676,20 +676,20 @@ static void ParsePayoffBody(gbtGameParserState &p_parser,
   }
 }
 
-static Gambit::GameTable BuildNfg(gbtGameParserState &p_parser, 
+static Gambit::Game BuildNfg(gbtGameParserState &p_parser, 
 			   gbtTableFileGame &p_data)
 {
   gbtArray<int> dim(p_data.NumPlayers());
   for (int pl = 1; pl <= dim.Length(); pl++) {
     dim[pl] = p_data.NumStrategies(pl);
   }
-  Gambit::GameTable nfg = new Gambit::GameTableRep(dim);
+  Gambit::Game nfg = new Gambit::GameRep(dim);
 
   nfg->SetTitle(p_data.m_title);
   nfg->SetComment(p_data.m_comment);
   
   for (int pl = 1; pl <= dim.Length(); pl++) {
-    nfg->GetPlayer(pl)->SetName(p_data.GetPlayer(pl));
+    nfg->GetPlayer(pl)->SetLabel(p_data.GetPlayer(pl));
     for (int st = 1; st <= dim[pl]; st++) {
       nfg->GetPlayer(pl)->GetStrategy(st)->SetName(p_data.GetStrategy(pl,st));
     }
@@ -714,7 +714,7 @@ static Gambit::GameTable BuildNfg(gbtGameParserState &p_parser,
 //   ReadNfg: Global visible function to read a normal form savefile
 //=========================================================================
 
-Gambit::GameTable ReadNfg(std::istream &p_file)
+Gambit::Game ReadNfg(std::istream &p_file)
 {
   gbtGameParserState parser(p_file);
   gbtTableFileGame data;

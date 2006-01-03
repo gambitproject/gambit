@@ -94,7 +94,7 @@ gbtLogitMixedList::~gbtLogitMixedList()
 
 wxString gbtLogitMixedList::GetCellValue(const wxSheetCoords &p_coords)
 {
-  if (!m_doc->GetNfg())  return wxT("");
+  if (!m_doc->GetGame())  return wxT("");
 
   if (IsRowLabelCell(p_coords)) {
     return wxString::Format(wxT("%d"), p_coords.GetRow() + 1);
@@ -105,9 +105,9 @@ wxString gbtLogitMixedList::GetCellValue(const wxSheetCoords &p_coords)
     }
     else {
       int index = 1;
-      for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
-	Gambit::TablePlayer player = m_doc->GetNfg()->GetPlayer(pl);
-	for (int st = 1; st <= player->NumStrats(); st++) {
+      for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
+	Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
+	for (int st = 1; st <= player->NumStrategies(); st++) {
 	  if (index++ == p_coords.GetCol()) {
 	    return (wxString::Format(wxT("%d: "), pl) +
 		    wxString(player->GetStrategy(st)->GetName().c_str(),
@@ -138,12 +138,12 @@ wxString gbtLogitMixedList::GetCellValue(const wxSheetCoords &p_coords)
 
 static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 {
-  if (!p_doc->GetNfg())  return *wxBLACK;
+  if (!p_doc->GetGame())  return *wxBLACK;
 
   int index = 1;
-  for (int pl = 1; pl <= p_doc->GetNfg()->NumPlayers(); pl++) {
-    Gambit::TablePlayer player = p_doc->GetNfg()->GetPlayer(pl);
-    for (int st = 1; st <= player->NumStrats(); st++) {
+  for (int pl = 1; pl <= p_doc->GetGame()->NumPlayers(); pl++) {
+    Gambit::GamePlayer player = p_doc->GetGame()->GetPlayer(pl);
+    for (int st = 1; st <= player->NumStrategies(); st++) {
       if (index++ == p_index) {
 	return p_doc->GetStyle().GetPlayerColor(pl);
       }
@@ -190,10 +190,10 @@ void gbtLogitMixedList::AddProfile(const wxString &p_text,
 				   bool p_forceShow)
 {
   if (GetNumberCols() == 0) {
-    AppendCols(m_doc->GetNfg()->ProfileLength() + 1);
+    AppendCols(m_doc->GetGame()->MixedProfileLength() + 1);
   }
 
-  gbtMixedProfile<double> profile(m_doc->GetNfg());
+  gbtMixedProfile<double> profile(m_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
 
@@ -295,9 +295,9 @@ void gbtLogitPlotCtrl::SetProfiles(const gbtList<double> &p_lambdas,
 
   wxBitmap bitmap(1, 1);
   
-  for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
-    Gambit::TablePlayer player = m_doc->GetNfg()->GetPlayer(pl);
-    for (int st = 1; st <= player->NumStrats(); st++) {
+  for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
+    Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
+    for (int st = 1; st <= player->NumStrategies(); st++) {
       wxPlotData *curve = new wxPlotData(p_lambdas.Length());
       curve->SetFilename(wxString::Format(wxT("%d:%d"), pl, st));
     
@@ -394,7 +394,7 @@ void gbtLogitMixedDialog::Start(void)
   m_pid = wxExecute(wxT("gambit-nfg-logit"), wxEXEC_ASYNC, m_process);
   
   std::ostringstream s;
-  m_doc->GetNfg()->WriteNfgFile(s);
+  m_doc->GetGame()->WriteNfgFile(s);
   wxString str(wxString(s.str().c_str(), *wxConvCurrent));
   
   // It is possible that the whole string won't write on one go, so

@@ -134,7 +134,7 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
   wxStaticBitmap *playerIcon = new gbtTablePlayerIcon(this, m_player);
   labelSizer->Add(playerIcon, 0, wxALL | wxALIGN_CENTER, 0);
 
-  if (!m_doc->GetEfg()) {
+  if (!m_doc->IsTree()) {
     wxBitmapButton *addStrategyIcon = 
       new wxBitmapButton(this, -1, wxBitmap(newrow_xpm),
 			 wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
@@ -180,12 +180,10 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
 
 void gbtTablePlayerPanel::OnUpdate(void)
 {
-  if (!m_doc->GetNfg())  return;
-
   wxColour color = m_doc->GetStyle().GetPlayerColor(m_player);
 
   m_playerLabel->SetForegroundColour(color);
-  m_playerLabel->SetValue(wxString(m_doc->GetNfg()->GetPlayer(m_player)->GetName().c_str(),
+  m_playerLabel->SetValue(wxString(m_doc->GetGame()->GetPlayer(m_player)->GetLabel().c_str(),
 				   *wxConvCurrent));
 
   if (m_doc->GetCurrentProfile() > 0) {
@@ -224,7 +222,7 @@ void gbtTablePlayerPanel::OnNewStrategy(wxCommandEvent &)
   m_doc->PostPendingChanges();
 
   Gambit::GameStrategy strategy = 
-    m_doc->GetNfg()->GetPlayer(m_player)->NewStrategy();
+    m_doc->GetGame()->GetPlayer(m_player)->NewStrategy();
   strategy->SetName(ToText(strategy->GetNumber()));
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
@@ -252,11 +250,7 @@ void gbtTablePlayerPanel::OnEditPlayerLabel(wxCommandEvent &)
 
 void gbtTablePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
 {
-  if (m_doc->GetEfg()) {
-    m_doc->GetEfg()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
-  }
-
-  m_doc->GetNfg()->GetPlayer(m_player)->SetName((const char *) m_playerLabel->GetValue().mb_str());
+  m_doc->GetGame()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
   m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
@@ -264,10 +258,7 @@ void gbtTablePlayerPanel::PostPendingChanges(void)
 {
   if (m_playerLabel->IsEditing()) {
     m_playerLabel->EndEdit(true);
-    if (m_doc->GetEfg()) {
-      m_doc->GetEfg()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
-    }
-    m_doc->GetNfg()->GetPlayer(m_player)->SetName((const char *) m_playerLabel->GetValue().mb_str());
+    m_doc->GetGame()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
     m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
   }
 }
@@ -311,8 +302,6 @@ gbtTablePlayerToolbar::gbtTablePlayerToolbar(gbtNfgPanel *p_parent,
 
 void gbtTablePlayerToolbar::OnUpdate(void)
 {
-  if (!m_doc->GetNfg())  return;
-
   while (m_playerPanels.Length() < m_doc->NumPlayers()) {
     gbtTablePlayerPanel *panel = 
       new gbtTablePlayerPanel(this, m_nfgPanel, m_doc,
@@ -549,15 +538,12 @@ void gbtNfgPanel::OnToolsDominance(wxCommandEvent &p_event)
 
 void gbtNfgPanel::OnUpdate(void)
 { 
-  if (!m_doc->GetNfg())  return;
- 
   m_tableWidget->OnUpdate();
   GetSizer()->Layout();
 }
 
 void gbtNfgPanel::PostPendingChanges(void)
 {
-  if (!m_doc->GetNfg()) return;
   m_tableWidget->PostPendingChanges();
 }
 

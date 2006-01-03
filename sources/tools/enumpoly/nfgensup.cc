@@ -308,7 +308,7 @@ gbtList<gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S)
     do {
       Gambit::GameStrategy strat = crsr.GetStrategy();
       if (current.Contains(strat)) 
-	for (int j = 1; j <= strat->GetPlayer()->NumStrats(); j++) {
+	for (int j = 1; j <= strat->GetPlayer()->NumStrategies(); j++) {
 	  Gambit::GameStrategy other_strat = strat->GetPlayer()->GetStrategy(j);
 	  if (other_strat != strat)
 	    if (current.Contains(other_strat)) {
@@ -396,7 +396,7 @@ int StrategyCursorForSupport::StrategyIndex() const
   return strat;
 }
 
-Gambit::TablePlayer StrategyCursorForSupport::GetPlayer() const
+Gambit::GamePlayer StrategyCursorForSupport::GetPlayer() const
 {
   return support->GetGame()->GetPlayer(pl);
 }

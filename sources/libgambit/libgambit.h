@@ -57,12 +57,12 @@ inline double pow(double x, long y)
 #include "gvector.h"
 #include "gmatrix.h"
 
-#include "efg.h"
+#include "game.h"
+
 #include "efstrat.h"
 #include "behav.h"
 #include "efgiter.h"
 
-#include "nfg.h"
 #include "nfstrat.h"
 #include "mixed.h"
 #include "nfgiter.h"

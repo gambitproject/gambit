@@ -105,7 +105,7 @@ public:
   int LeashLength(void) const { return m_leashLength; }
   void SetLeashLength(int p_leashLength) { m_leashLength = p_leashLength; }
 
-  void Solve(const Gambit::GameTable &, const gbtMixedProfile<gbtRational> &);
+  void Solve(const Gambit::Game &, const gbtMixedProfile<gbtRational> &);
 };
 
 
@@ -526,7 +526,7 @@ gbtInteger find_lcd(const gbtVector<gbtRational> &vec)
   return lcd;
 }
 
-void nfgSimpdiv::Solve(const Gambit::GameTable &p_nfg, 
+void nfgSimpdiv::Solve(const Gambit::Game &p_nfg, 
 		       const gbtMixedProfile<gbtRational> &p_start)
 {
   int qf,i,j,ii;
@@ -565,13 +565,13 @@ void nfgSimpdiv::Solve(const Gambit::GameTable &p_nfg,
 
 void Randomize(gbtMixedProfile<gbtRational> &p_profile, int p_denom)
 {
-  Gambit::GameTable nfg = p_profile.GetGame();
+  Gambit::Game nfg = p_profile.GetGame();
 
   ((gbtVector<gbtRational> &) p_profile) = gbtRational(0);
 
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
     int sum = 0;
-    for (int st = 1; sum < p_denom && st < nfg->NumStrats(pl); st++) {
+    for (int st = 1; sum < p_denom && st < nfg->GetPlayer(pl)->NumStrategies(); st++) {
       double r = ((double) rand() / ((double) (RAND_MAX) + 1.0));
       double x = r * (p_denom - sum + 1);
       int y = (int) x;
@@ -580,7 +580,7 @@ void Randomize(gbtMixedProfile<gbtRational> &p_profile, int p_denom)
       sum += y;
     }
 
-    p_profile(pl, nfg->NumStrats(pl)) = gbtRational(p_denom - sum, p_denom);
+    p_profile(pl, nfg->GetPlayer(pl)->NumStrategies()) = gbtRational(p_denom - sum, p_denom);
   }
 }
 
@@ -669,7 +669,7 @@ int main(int argc, char *argv[])
 
 
 
-  Gambit::GameTable nfg;
+  Gambit::Game nfg;
 
   try {
     nfg = Gambit::ReadNfg(std::cin);
@@ -703,7 +703,7 @@ int main(int argc, char *argv[])
   
     for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
       start(pl, 1) = gbtRational(1);
-      for (int st = 2; st <= nfg->NumStrats(pl); st++) {
+      for (int st = 2; st <= nfg->GetPlayer(pl)->NumStrategies(); st++) {
 	start(pl, st) = gbtRational(0);
       }
     }

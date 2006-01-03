@@ -34,7 +34,7 @@
 
 class Sfg  {
 private:
-  Gambit::GameTree EF;
+  Gambit::Game EF;
   const gbtEfgSupport &efsupp;
   gbtArray<SFSequenceSet *> *sequences;
   gNArray<gbtArray<gbtRational> *> *SF;  // sequence form
@@ -66,7 +66,7 @@ public:
   int ActionNumber(int pl, int sequence) const;
   Gambit::GameInfoset GetInfoset(int pl, int sequence) const;
   Gambit::GameAction GetAction(int pl, int sequence) const;
-  const Gambit::GameTree &GetEfg(void) const {return EF;}
+  const Gambit::Game &GetEfg(void) const {return EF;}
   gbtBehavProfile<double> ToBehav(const gbtPVector<double> &x) const;
   const Sequence* GetSequence(int pl, int seq) const {return ((*sequences)[pl])->Find(seq);}
 

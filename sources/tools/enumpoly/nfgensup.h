@@ -112,7 +112,7 @@ public:
   // Information
   Gambit::GameStrategy GetStrategy() const;
   int StrategyIndex() const;
-  Gambit::TablePlayer GetPlayer() const;
+  Gambit::GamePlayer GetPlayer() const;
   int PlayerIndex() const;
 
   bool IsLast() const;
