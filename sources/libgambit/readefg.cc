@@ -804,11 +804,8 @@ Gambit::Game ReadEfg(std::istream &p_file)
     BuildEfg(efg, treeData);
     return efg;
   }
-  catch (ParserError &) {
-    return 0;
-  }
   catch (...) {
-    return 0;
+    throw InvalidFileException();
   }
 }
 

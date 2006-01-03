@@ -432,7 +432,7 @@ std::string gbtTableFileGame::GetStrategy(int p_player, int p_strategy) const
 static void ReadPlayers(gbtGameParserState &p_state, gbtTableFileGame &p_data)
 {
   if (p_state.GetNextSymbol() != symLBRACE) {
-    throw Gambit::gbtNfgParserException();
+    throw InvalidFileException();
   }
 
   while (p_state.GetNextSymbol() == symTEXT) {
@@ -440,7 +440,7 @@ static void ReadPlayers(gbtGameParserState &p_state, gbtTableFileGame &p_data)
   }
 
   if (p_state.GetCurrentSymbol() != symRBRACE) {
-    throw Gambit::gbtNfgParserException();
+    throw InvalidFileException();
   }
 
   p_state.GetNextSymbol();
@@ -449,7 +449,7 @@ static void ReadPlayers(gbtGameParserState &p_state, gbtTableFileGame &p_data)
 static void ReadStrategies(gbtGameParserState &p_state, gbtTableFileGame &p_data)
 {
   if (p_state.GetCurrentSymbol() != symLBRACE) {
-    throw Gambit::gbtNfgParserException();
+    throw InvalidFileException();
   }
   p_state.GetNextSymbol();
 
@@ -459,7 +459,7 @@ static void ReadStrategies(gbtGameParserState &p_state, gbtTableFileGame &p_data
     while (p_state.GetCurrentSymbol() == symLBRACE) {
       if (!player) {
 	// Not enough players for number of strategy entries
-	throw Gambit::gbtNfgParserException();
+	throw InvalidFileException();
       }
 
       while (p_state.GetNextSymbol() == symTEXT) {
@@ -467,7 +467,7 @@ static void ReadStrategies(gbtGameParserState &p_state, gbtTableFileGame &p_data
       }
 
       if (p_state.GetCurrentSymbol() != symRBRACE) {
-	throw Gambit::gbtNfgParserException();
+	throw InvalidFileException();
       }
 
       p_state.GetNextSymbol();
@@ -476,11 +476,11 @@ static void ReadStrategies(gbtGameParserState &p_state, gbtTableFileGame &p_data
 
     if (player) {
       // Players with strategies undefined
-      throw Gambit::gbtNfgParserException();
+      throw InvalidFileException();
     }
 
     if (p_state.GetCurrentSymbol() != symRBRACE) {
-      throw Gambit::gbtNfgParserException();
+      throw InvalidFileException();
     }
 
     p_state.GetNextSymbol();
@@ -491,7 +491,7 @@ static void ReadStrategies(gbtGameParserState &p_state, gbtTableFileGame &p_data
     while (p_state.GetCurrentSymbol() == symINTEGER) {
       if (!player) {
 	// Not enough players for number of strategy entries
-	throw Gambit::gbtNfgParserException();
+	throw InvalidFileException();
       }
 
       for (int st = 1; st <= p_state.GetLastInteger(); st++) {
@@ -503,18 +503,18 @@ static void ReadStrategies(gbtGameParserState &p_state, gbtTableFileGame &p_data
     }
 
     if (p_state.GetCurrentSymbol() != symRBRACE) {
-      throw Gambit::gbtNfgParserException();
+      throw InvalidFileException();
     }
 
     if (player) {
       // Players with strategies undefined
-      throw Gambit::gbtNfgParserException();
+      throw InvalidFileException();
     }
 
     p_state.GetNextSymbol();
   }
   else {
-    throw Gambit::gbtNfgParserException();
+    throw InvalidFileException();
   }
 }
 
@@ -523,21 +523,21 @@ static void ParseHeader(gbtGameParserState &p_state, gbtTableFileGame &p_data)
   gbtGameParserSymbol symbol;
 
   if (p_state.GetNextSymbol() != symNFG) {
-    throw Gambit::gbtNfgParserException();
+    throw InvalidFileException();
   }
   if (p_state.GetNextSymbol() != symINTEGER) {
-    throw Gambit::gbtNfgParserException();
+    throw InvalidFileException();
   }
   if (p_state.GetLastInteger() != 1) {
-    throw Gambit::gbtNfgParserException();
+    throw InvalidFileException();
   }
 
   symbol = p_state.GetNextSymbol();
   if (symbol != symD && symbol != symR) {
-    throw Gambit::gbtNfgParserException();
+    throw InvalidFileException();
   }
   if (p_state.GetNextSymbol() != symTEXT) {
-    throw Gambit::gbtNfgParserException();
+    throw InvalidFileException();
   }
   p_data.m_title = p_state.GetLastText();
 
@@ -551,7 +551,7 @@ static void ParseHeader(gbtGameParserState &p_state, gbtTableFileGame &p_data)
   }
 }
 
-static void ReadOutcomeList(gbtGameParserState &p_parser, Gambit::Game p_nfg)
+static void ReadOutcomeList(gbtGameParserState &p_parser, Game p_nfg)
 {
   if (p_parser.GetNextSymbol() == symRBRACE) {
     // Special case: empty outcome list
@@ -560,7 +560,7 @@ static void ReadOutcomeList(gbtGameParserState &p_parser, Gambit::Game p_nfg)
   }
 
   if (p_parser.GetCurrentSymbol() != symLBRACE) {
-    throw Gambit::gbtNfgParserException();
+    throw InvalidFileException();
   }
 
   while (p_parser.GetCurrentSymbol() == symLBRACE) {
@@ -568,7 +568,7 @@ static void ReadOutcomeList(gbtGameParserState &p_parser, Gambit::Game p_nfg)
     int pl = 1;
 
     if (p_parser.GetNextSymbol() != symTEXT) {
-      throw Gambit::gbtNfgParserException();
+      throw InvalidFileException();
     }
     std::string label = p_parser.GetLastText();
     p_parser.GetNextSymbol();
@@ -577,7 +577,7 @@ static void ReadOutcomeList(gbtGameParserState &p_parser, Gambit::Game p_nfg)
 	   p_parser.GetCurrentSymbol() == symRATIONAL ||
 	   p_parser.GetCurrentSymbol() == symDOUBLE) {
       if (pl > p_nfg->NumPlayers()) {
-	throw Gambit::gbtNfgParserException();
+	throw InvalidFileException();
       }
 
       if (p_parser.GetCurrentSymbol() == symINTEGER) {
@@ -595,14 +595,14 @@ static void ReadOutcomeList(gbtGameParserState &p_parser, Gambit::Game p_nfg)
     }
 
     if (pl <= p_nfg->NumPlayers()) {
-      throw Gambit::gbtNfgParserException();
+      throw InvalidFileException();
     }
 
     if (p_parser.GetCurrentSymbol() != symRBRACE) {
-      throw Gambit::gbtNfgParserException();
+      throw InvalidFileException();
     }
 
-    Gambit::GameOutcome outcome = p_nfg->NewOutcome();
+    GameOutcome outcome = p_nfg->NewOutcome();
     outcome->SetLabel(label);
     for (pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
       outcome->SetPayoff(pl, payoffs[pl]);
@@ -612,12 +612,12 @@ static void ReadOutcomeList(gbtGameParserState &p_parser, Gambit::Game p_nfg)
   }
 
   if (p_parser.GetCurrentSymbol() != symRBRACE) {
-    throw Gambit::gbtNfgParserException();
+    throw InvalidFileException();
   }
   p_parser.GetNextSymbol();
 }
 
-void ParseOutcomeBody(gbtGameParserState &p_parser, Gambit::Game p_nfg)
+void ParseOutcomeBody(gbtGameParserState &p_parser, Game p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
 
@@ -625,7 +625,7 @@ void ParseOutcomeBody(gbtGameParserState &p_parser, Gambit::Game p_nfg)
 
   while (p_parser.GetCurrentSymbol() != symEOF) {
     if (p_parser.GetCurrentSymbol() != symINTEGER) {
-      throw Gambit::gbtNfgParserException();
+      throw InvalidFileException();
     }
 
     int outcomeId = p_parser.GetLastInteger().as_long();
@@ -641,7 +641,7 @@ void ParseOutcomeBody(gbtGameParserState &p_parser, Gambit::Game p_nfg)
 }
 
 static void ParsePayoffBody(gbtGameParserState &p_parser, 
-			    Gambit::Game p_nfg)
+			    Game p_nfg)
 {
   gbtNfgContingencyIterator iter(p_nfg);
   int pl = 1;
@@ -657,7 +657,7 @@ static void ParsePayoffBody(gbtGameParserState &p_parser,
       iter.GetOutcome()->SetPayoff(pl, p_parser.GetLastText());
     }
     else {
-      throw Gambit::gbtNfgParserException();
+      throw InvalidFileException();
     }
 
     if (++pl > p_nfg->NumPlayers()) {
@@ -668,14 +668,14 @@ static void ParsePayoffBody(gbtGameParserState &p_parser,
   }
 }
 
-static Gambit::Game BuildNfg(gbtGameParserState &p_parser, 
+static Game BuildNfg(gbtGameParserState &p_parser, 
 			   gbtTableFileGame &p_data)
 {
   gbtArray<int> dim(p_data.NumPlayers());
   for (int pl = 1; pl <= dim.Length(); pl++) {
     dim[pl] = p_data.NumStrategies(pl);
   }
-  Gambit::Game nfg = new Gambit::GameRep(dim);
+  Game nfg = new GameRep(dim);
 
   nfg->SetTitle(p_data.m_title);
   nfg->SetComment(p_data.m_comment);
@@ -696,7 +696,7 @@ static Gambit::Game BuildNfg(gbtGameParserState &p_parser,
     ParsePayoffBody(p_parser, nfg);
   }
   else {
-    throw Gambit::gbtNfgParserException();
+    throw InvalidFileException();
   }
 
   return nfg;
@@ -706,7 +706,7 @@ static Gambit::Game BuildNfg(gbtGameParserState &p_parser,
 //   ReadNfg: Global visible function to read a normal form savefile
 //=========================================================================
 
-Gambit::Game ReadNfg(std::istream &p_file)
+Game ReadNfg(std::istream &p_file)
 {
   gbtGameParserState parser(p_file);
   gbtTableFileGame data;
@@ -715,27 +715,10 @@ Gambit::Game ReadNfg(std::istream &p_file)
     ParseHeader(parser, data);
     return BuildNfg(parser, data);
   }
-  catch (gbtGameParserException& e) {
-    throw Gambit::gbtNfgParserException(e.GetDescription());
-  }
-  catch (Gambit::gbtNfgParserException& e) {
-    throw e;
-  }
   catch (...) {
-    // We'll just lump anything that goes wrong in here as a "parse error"
-    throw Gambit::gbtNfgParserException();
+    throw InvalidFileException();
   }
-
-  return 0;
 }
 
-
-gbtNfgParserException::gbtNfgParserException(int p_line, 
-					     const std::string &p_description)
-{
-  std::ostringstream out;
-  out << "Error in line " << p_line << ": " << p_description;
-  m_description = out.str();
-}
 
 } // end namespace Gambit

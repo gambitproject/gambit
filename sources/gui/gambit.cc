@@ -150,8 +150,6 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
   try {
     Gambit::Game efg = Gambit::ReadEfg(infile);
                 
-    if (!efg)  return GBT_APP_PARSE_FAILED;
-
     m_fileHistory.AddFileToHistory(p_filename);
     gbtGameDocument *doc = new gbtGameDocument(efg);
     doc->SetFilename(wxT(""));

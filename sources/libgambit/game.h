@@ -660,25 +660,15 @@ public:
     { return "Undefined operation on game"; }
 };
 
-
-Game ReadEfg(std::istream &);
-
-// Exception thrown by ReadNfg if not valid .nfg file
-class gbtNfgParserException : public gbtException {
-private:
-  std::string m_description;
-
+class InvalidFileException : public gbtException {
 public:
-  gbtNfgParserException(void)
-    : m_description("Not a valid .nfg file") { }
-  gbtNfgParserException(const std::string &p_description) 
-    : m_description(p_description) { }
-  gbtNfgParserException(int p_line, const std::string &p_description);
-  virtual ~gbtNfgParserException() { }
-
-  std::string GetDescription(void) const { return m_description; }
+  virtual ~InvalidFileException() { }
+  std::string GetDescription(void) const
+    { return "File not in a recognized format"; }
 };
 
+/// Reads an extensive game in .efg format from the input stream
+Game ReadEfg(std::istream &);
 /// Reads a strategic game in .nfg format from the input stream
 Game ReadNfg(std::istream &);
 
