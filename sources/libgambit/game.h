@@ -82,6 +82,13 @@ public:
 };
 
 
+class NullException : public gbtException {
+public:
+  virtual ~NullException() { }
+  std::string GetDescription(void) const
+    { return "Dereferencing null pointer"; }
+};
+
 //
 // This is a handle class that is used by all calling code to refer to
 // member objects of games.  It takes care of all the reference-counting
@@ -107,7 +114,7 @@ public:
       return *this;
     }
 
-  T *operator->(void) const { return rep; }
+  T *operator->(void) const { if (!rep) throw NullException(); return rep; }
 
   bool operator==(const GameObjectPtr<T> &r) const
   { return (rep == r.rep); }
@@ -116,7 +123,7 @@ public:
   { return (rep != r.rep); }
   bool operator!=(T *r) const { return (rep != r); }
 
-  operator T *(void) const { return rep; }
+  operator T *(void) const { if (!rep) throw NullException(); return rep; }
 
   bool operator!(void) const { return !rep; }
 };
