@@ -621,7 +621,7 @@ void ParseOutcomeBody(gbtGameParserState &p_parser, Gambit::Game p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
 
-  int cont = 1;
+  gbtNfgContingencyIterator iter(p_nfg);
 
   while (p_parser.GetCurrentSymbol() != symEOF) {
     if (p_parser.GetCurrentSymbol() != symINTEGER) {
@@ -630,46 +630,38 @@ void ParseOutcomeBody(gbtGameParserState &p_parser, Gambit::Game p_nfg)
 
     int outcomeId = p_parser.GetLastInteger().as_long();
     if (outcomeId > 0)  {
-      p_nfg->m_results[cont++] = p_nfg->GetOutcome(outcomeId);
+      iter.SetOutcome(p_nfg->GetOutcome(outcomeId));
     }
     else {
-      p_nfg->m_results[cont++] = 0;
+      iter.SetOutcome(0);
     }
     p_parser.GetNextSymbol();
+    iter.NextContingency();
   }
-}
-
-void SetPayoff(Gambit::Game p_nfg, int p_cont, int p_pl, 
-	       const std::string &p_text)
-{
-  if (p_pl == 1)  {
-    p_nfg->NewOutcome();
-    p_nfg->m_results[p_cont] = p_nfg->GetOutcome(p_nfg->NumOutcomes());
-  }
-  p_nfg->m_results[p_cont]->SetPayoff(p_pl, p_text);
 }
 
 static void ParsePayoffBody(gbtGameParserState &p_parser, 
 			    Gambit::Game p_nfg)
 {
-  int cont = 1, pl = 1;
+  gbtNfgContingencyIterator iter(p_nfg);
+  int pl = 1;
 
   while (p_parser.GetCurrentSymbol() != symEOF) {
-    if (p_parser.GetCurrentSymbol() == symINTEGER) {
-      SetPayoff(p_nfg, cont, pl, p_parser.GetLastText());
+    if (pl == 1) {
+      iter.SetOutcome(p_nfg->NewOutcome());
     }
-    else if (p_parser.GetCurrentSymbol() == symDOUBLE) {
-      SetPayoff(p_nfg, cont, pl, p_parser.GetLastText());
-    }
-    else if (p_parser.GetCurrentSymbol() == symRATIONAL) {
-      SetPayoff(p_nfg, cont, pl, p_parser.GetLastText());
+
+    if (p_parser.GetCurrentSymbol() == symINTEGER ||
+	p_parser.GetCurrentSymbol() == symDOUBLE ||
+	p_parser.GetCurrentSymbol() == symRATIONAL) {
+      iter.GetOutcome()->SetPayoff(pl, p_parser.GetLastText());
     }
     else {
       throw Gambit::gbtNfgParserException();
     }
 
     if (++pl > p_nfg->NumPlayers()) {
-      cont++;
+      iter.NextContingency();
       pl = 1;
     }
     p_parser.GetNextSymbol();

@@ -107,56 +107,48 @@ template <class T> T gbtMixedProfile<T>::GetLiapValue(void) const
   return result;
 }
 
-template <class T> void gbtMixedProfile<T>::GetRegret(gbtPVector<T> &value) const
-{
-  int i, j;
-  T pay,x;
-  
-  for (i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-    pay = GetPayoff(i);
-    for (j = 1; j <= support.GetGame()->GetPlayer(i)->NumStrategies(); j++) {
-      x = GetPayoff(i, support.GetGame()->GetPlayer(i)->GetStrategy(j));
-      if(x > pay)
-	value(i, j) = x - pay;
-      // use pay - pay instead of zero for correct precision
-      else value(i,j) = pay - pay; 
-    }
-  }
-}
-
-template <class T> T gbtMixedProfile<T>::GetMaxRegret(void) const
-{
-  int i;
-  T maxgripe = (T)0;
-
-  gbtPVector<T> v(support.GetGame()->NumStrategies());
-  GetRegret(v);
-  for(i=v.First(); i<=v.Last(); i++)
-    if(v[i] > maxgripe) maxgripe = v[i];
-  return maxgripe;
-}
-
 template <class T> T gbtMixedProfile<T>::GetPayoff(int pl) const
 {
-  return PPayoff(pl, 1, 1);
+  if (support.GetGame()->IsTree()) {
+    return gbtBehavProfile<T>(*this).Payoff(pl);
+  }
+  else {
+    return PPayoff(pl, 1, 1);
+  }
 }
 
 template <class T>
 T gbtMixedProfile<T>::GetPayoff(int pl, int player1, int strat1) const
 {
-  T value = (T) 0;
-  PPayoff(pl, player1, strat1, 1,
-	 support.GetStrategy(player1, strat1)->m_index + 1, (T) 1, value);
-  return value;
+  if (support.GetGame()->IsTree()) {
+    gbtMixedProfile<T> foo(*this);
+    for (int st = 1; st <= support.NumStrats(player1); st++) {
+      foo(player1, st) = (T) 0;
+    }
+    foo(player1, strat1) = (T) 1;
+    return foo.GetPayoff(pl);
+  }
+  else {
+    T value = (T) 0;
+    PPayoff(pl, player1, strat1, 1,
+	    support.GetStrategy(player1, strat1)->m_index + 1, (T) 1, value);
+    return value;
+  }
 }
 
 template <class T> T
 gbtMixedProfile<T>::GetPayoff(int pl, const Gambit::GameStrategy &strategy) const
 {
-  T value = (T) 0;
-  PPayoff(pl, strategy->GetPlayer()->GetNumber(), strategy->GetNumber(), 1,
-	  strategy->m_index + 1, (T) 1, value);
-  return value;
+  if (support.GetGame()->IsTree()) {
+    return GetPayoff(pl, strategy->GetPlayer()->GetNumber(), 
+		     support.GetIndex(strategy));
+  }
+  else {
+    T value = (T) 0;
+    PPayoff(pl, strategy->GetPlayer()->GetNumber(), strategy->GetNumber(), 1,
+	    strategy->m_index + 1, (T) 1, value);
+    return value;
+  }
 }
 
 template <class T> T
@@ -164,19 +156,30 @@ gbtMixedProfile<T>::GetPayoff( int pl, int player1, int strat1, int player2,
 			       int strat2 ) const
 {
   if (player1 == player2) return (T) 0;
-  T value = (T) 0;
-  PPayoff(pl, player1, strat1, player2, strat2, 1,
-	 support.GetStrategy(player1, strat1)->m_index +
-	 support.GetStrategy(player2, strat2)->m_index + 1,
-	 (T) 1, value);
-  return value;
-}
 
-template <class T> 
-void gbtMixedProfile<T>::GetPayoff( int pl, int player1, gbtVector<T> &value) const
-{
-  value = (T) 0;
-  PPayoff(pl, player1, 1, 1, (T) 1, value);
+
+  if (support.GetGame()->IsTree()) {
+    gbtMixedProfile<T> foo(*this);
+    for (int st = 1; st <= support.NumStrats(player1); st++) {
+      foo(player1, st) = (T) 0;
+    }
+    foo(player1, strat1) = (T) 1;
+
+    for (int st = 1; st <= support.NumStrats(player2); st++) {
+      foo(player2, st) = (T) 0;
+    }
+    foo(player2, strat2) = (T) 1;
+
+    return foo.GetPayoff(pl);
+  }
+  else {
+    T value = (T) 0;
+    PPayoff(pl, player1, strat1, player2, strat2, 1,
+	    support.GetStrategy(player1, strat1)->m_index +
+	    support.GetStrategy(player2, strat2)->m_index + 1,
+	    (T) 1, value);
+    return value;
+  }
 }
 
 template <class T>

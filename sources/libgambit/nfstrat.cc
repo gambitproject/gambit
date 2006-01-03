@@ -55,19 +55,68 @@ void gbtStrategyProfile::SetStrategy(const Gambit::GameStrategy &s)
 }
 
 Gambit::GameOutcome gbtStrategyProfile::GetOutcome(void) const
-{ return m_nfg->m_results[m_index+1]; }
+{ 
+  if (m_nfg->IsTree()) {
+    throw Gambit::UndefinedException();
+  }
+  else {
+    return m_nfg->m_results[m_index+1]; 
+  }
+}
 
 void gbtStrategyProfile::SetOutcome(Gambit::GameOutcome p_outcome)
-{ m_nfg->m_results[m_index+1] = p_outcome; }
+{
+  if (m_nfg->IsTree()) {
+    throw Gambit::UndefinedException();
+  }
+  else {
+    m_nfg->m_results[m_index+1] = p_outcome; 
+  }
+}
 
 gbtRational gbtStrategyProfile::GetPayoff(int pl) const
 {
-  Gambit::GameOutcome outcome = GetOutcome();
-  if (outcome) {
-    return outcome->GetPayoff(pl);
+  if (m_nfg->IsTree()) {
+    gbtPureBehavProfile behav(m_nfg);
+    for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
+      Gambit::GamePlayer player = m_nfg->GetPlayer(i);
+      for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	behav.Set(player->GetInfoset(iset)->GetAction(m_profile[i]->m_behav[iset]));
+      }
+    }
+    return behav.Payoff(m_nfg->GetRoot(), pl);
   }
   else {
-    return gbtRational(0);
+    Gambit::GameOutcome outcome = GetOutcome();
+    if (outcome) {
+      return outcome->GetPayoff(pl);
+    }
+    else {
+      return gbtRational(0);
+    }
+  }
+}
+
+std::string gbtStrategyProfile::GetPayoffText(int pl) const
+{
+  if (m_nfg->IsTree()) {
+    gbtPureBehavProfile behav(m_nfg);
+    for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
+      Gambit::GamePlayer player = m_nfg->GetPlayer(i);
+      for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	behav.Set(player->GetInfoset(iset)->GetAction(m_profile[i]->m_behav[iset]));
+      }
+    }
+    return ToText(behav.Payoff(m_nfg->GetRoot(), pl));
+  }
+  else {
+    Gambit::GameOutcome outcome = GetOutcome();
+    if (outcome) {
+      return outcome->GetPayoffText(pl);
+    }
+    else {
+      return "0";
+    }
   }
 }
 

@@ -604,6 +604,10 @@ void MakeReducedStrats(GamePlayerRep *p, GameNodeRep *n, GameNodeRep *nn)
 
 void GameRep::BuildComputedValues(void)
 {
+  ClearComputedValues();
+
+  if (!IsTree()) return;
+
   for (int i = 1; i <= m_players.Length(); i++) {
     MakeReducedStrats(m_players[i], m_root, NULL);
   }
@@ -627,42 +631,6 @@ void GameRep::BuildComputedValues(void)
       }
       GetPlayer(i)->GetStrategy(j)->SetName(name);
     }
-  }
-
-  gbtNfgSupport S(Game(const_cast<GameRep *>(this)));
-  gbtNfgContingencyIterator iter(S);
-  gbtArray<gbtArray<int> > corr(NumPlayers());
-  gbtArray<int> corrs(NumPlayers());
-  for (int i = 1; i <= NumPlayers(); i++)  {
-    corrs[i] = 1;
-    corr[i] = m_players[i]->m_strategies[1]->m_behav;
-  }
-
-  gbtArray<gbtRational> value(NumPlayers());
-
-  int pl = NumPlayers();
-  while (1)  {
-    Payoff(corr, value);
-
-    iter.SetOutcome(NewOutcome());
-    for (int j = 1; j <= NumPlayers(); j++) {
-      iter.GetOutcome()->SetPayoff(j, ToText(value[j]));
-    }
-
-    iter.NextContingency();
-    while (pl > 0)   {
-      corrs[pl]++;
-      if (corrs[pl] <= m_players[pl]->m_strategies.Length())  {
-	corr[pl] = m_players[pl]->m_strategies[corrs[pl]]->m_behav;
-	break;
-      }
-      corrs[pl] = 1;
-      corr[pl] = m_players[pl]->m_strategies[1]->m_behav;
-      pl--;
-    }
-
-    if (pl == 0)  break;
-    pl = NumPlayers();
   }
 }
 
@@ -711,14 +679,18 @@ static void WriteEfgFile(std::ostream &f, GameNodeRep *n)
       for (int pl = 1; pl <= n->GetGame()->NumPlayers(); pl++)  {
 	f << n->GetOutcome()->GetPayoffText(pl);
 
-	if (pl < n->GetGame()->NumPlayers())
+	if (pl < n->GetGame()->NumPlayers()) {
 	  f << ", ";
-	else
+	}
+	else {
 	  f << " }\n";
+	}
       }
     }
-    else
+    else {
       f << "0\n";
+    }
+    return;
   }
 
   if (n->GetInfoset()->IsChanceInfoset()) {
@@ -787,29 +759,50 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
 
   p_file << "\"" << EscapeQuotes(m_comment) << "\"\n\n";
 
-  int ncont = 1;
-  for (int i = 1; i <= NumPlayers(); i++)
-    ncont *= m_players[i]->m_strategies.Length();
-
-  p_file << "{\n";
-  for (int outc = 1; outc <= m_outcomes.Length(); outc++)   {
-    p_file << "{ \"" << EscapeQuotes(m_outcomes[outc]->m_label) << "\" ";
-    for (int pl = 1; pl <= m_players.Length(); pl++)  {
-      p_file << m_outcomes[outc]->m_textPayoffs[pl];
-
-      if (pl < m_players.Length())
-	p_file << ", ";
-      else
-	p_file << " }\n";
-    }
+  if (IsTree()) {
+    // For trees, we write the payoff version, since there need not be
+    // a one-to-one correspondence between outcomes and entries, when there
+    // are chance moves.
+    gbtNfgContingencyIterator iter(Game(const_cast<GameRep *>(this)));
+    
+    do {
+      for (int pl = 1; pl <= NumPlayers(); pl++) {
+	p_file << iter.GetPayoff(pl) << " ";
+      }
+      p_file << "\n";
+    } while (iter.NextContingency());
+    
   }
-  p_file << "}\n";
+  else {
+    int ncont = 1;
+    for (int i = 1; i <= NumPlayers(); i++) {
+      ncont *= m_players[i]->m_strategies.Length();
+    }
+
+    p_file << "{\n";
+    for (int outc = 1; outc <= m_outcomes.Length(); outc++)   {
+      p_file << "{ \"" << EscapeQuotes(m_outcomes[outc]->m_label) << "\" ";
+      for (int pl = 1; pl <= m_players.Length(); pl++)  {
+	p_file << m_outcomes[outc]->m_textPayoffs[pl];
+
+	if (pl < m_players.Length()) {
+	  p_file << ", ";
+	}
+	else {
+	  p_file << " }\n";
+	}
+      }
+    }
+    p_file << "}\n";
   
-  for (int cont = 1; cont <= ncont; cont++)  {
-    if (m_results[cont] != 0)
-      p_file << m_results[cont]->m_number << ' ';
-    else
-      p_file << "0 ";
+    for (int cont = 1; cont <= ncont; cont++)  {
+      if (m_results[cont] != 0) {
+	p_file << m_results[cont]->m_number << ' ';
+      }
+      else {
+	p_file << "0 ";
+      }
+    }
   }
 
   p_file << '\n';

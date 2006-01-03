@@ -82,12 +82,12 @@ void gbtNfgContingencyIterator::First(void)
 
 bool gbtNfgContingencyIterator::NextContingency(void)
 {
-  int pl = support.GetGame()->NumPlayers();
+  int pl = 1;
 
   while (1)   {
     if (pl == m_frozen1 || pl == m_frozen2) {
-      pl--;
-      if (pl == 0)  return false;
+      pl++;
+      if (pl > support.GetGame()->NumPlayers())  return false;
       continue;
     }
 
@@ -97,8 +97,8 @@ bool gbtNfgContingencyIterator::NextContingency(void)
     }
     profile.SetStrategy(support.GetStrategy(pl, 1));
     m_currentStrat[pl] = 1;
-    pl--;
-    if (pl == 0)  return false;
+    pl++;
+    if (pl > support.GetGame()->NumPlayers())  return false;
   }
 }
 
@@ -118,10 +118,5 @@ void gbtNfgContingencyIterator::SetOutcome(Gambit::GameOutcome outcome)
 
 gbtRational gbtNfgContingencyIterator::GetPayoff(int pl) const
 {
-  if (profile.GetOutcome()) {
-    return profile.GetOutcome()->GetPayoff(pl);
-  }
-  else {
-    return gbtRational(0);
-  }
+  return profile.GetPayoff(pl);
 }

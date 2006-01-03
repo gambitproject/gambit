@@ -62,15 +62,12 @@ public:
   const gbtNfgSupport &GetSupport(void) const  { return support; }
 
   T GetLiapValue(void) const;
-  void GetRegret(gbtPVector<T> &value) const;
-  T GetMaxRegret(void) const;
   void SetCentroid(void);
 
   T GetPayoff(int pl) const;
   T GetPayoff(int pl, int player1, int strat1) const;
   T GetPayoff(int pl, const Gambit::GameStrategy &) const;
   T GetPayoff(int pl, int player1, int strat1, int player2, int strat2) const;
-  void GetPayoff(int pl, int const_pl, gbtVector<T> &payoff) const;
 };
 
 #endif    // MIXED_H

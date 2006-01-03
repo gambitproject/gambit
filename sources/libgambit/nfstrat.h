@@ -60,6 +60,8 @@ public:
 
   /// Get the payoff to player pl that results from the profile
   gbtRational GetPayoff(int pl) const;
+  /// Get the payoff to player pl that results from the profile
+  std::string GetPayoffText(int pl) const;
   //@}
 };
 

@@ -441,9 +441,6 @@ class GameRep : public GameObject {
   friend class gbtMixedProfile<double>;
   friend class gbtMixedProfile<gbtRational>;
   friend class gbtMixedProfile<gbtNumber>;
-  friend void ParseOutcomeBody(class gbtGameParserState &p_parser, Game p_nfg);
-  friend void SetPayoff(Game p_nfg, int p_cont, int p_pl, 
-			const std::string &p_text);
 protected:
   std::string m_title, m_comment;
   gbtArray<GamePlayerRep *> m_players;
@@ -650,6 +647,13 @@ public:
   virtual ~gbtEfgException()   { }
   std::string GetDescription(void) const  
     { return "Internal error in extensive form representation"; }
+};
+
+class UndefinedException : public gbtException {
+public:
+  virtual ~UndefinedException() { }
+  std::string GetDescription(void) const
+    { return "Undefined operation on game"; }
 };
 
 
