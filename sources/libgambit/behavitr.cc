@@ -26,7 +26,9 @@
 
 #include "libgambit.h"
 
-EfgContIter::EfgContIter(const Gambit::BehavSupport &s)
+namespace Gambit {
+
+BehavIterator::BehavIterator(const BehavSupport &s)
   : _frozen_pl(0), _frozen_iset(0),
     _efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
@@ -46,7 +48,7 @@ EfgContIter::EfgContIter(const Gambit::BehavSupport &s)
   First();
 }
 
-EfgContIter::EfgContIter(const Gambit::BehavSupport &s, const gbtList<Gambit::GameInfoset>& active)
+BehavIterator::BehavIterator(const BehavSupport &s, const gbtList<GameInfoset>& active)
   : _frozen_pl(0), _frozen_iset(0),
     _efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
@@ -70,11 +72,11 @@ EfgContIter::EfgContIter(const Gambit::BehavSupport &s, const gbtList<Gambit::Ga
   First();
 }
 
-EfgContIter::~EfgContIter()
+BehavIterator::~BehavIterator()
 { }
 
 
-void EfgContIter::First(void)
+void BehavIterator::First(void)
 {
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
     for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++)
@@ -86,7 +88,7 @@ void EfgContIter::First(void)
   }
 }
 
-void EfgContIter::Set(int pl, int iset, int act)
+void BehavIterator::Set(int pl, int iset, int act)
 {
   if (pl != _frozen_pl || iset != _frozen_iset)   return;
 
@@ -95,18 +97,18 @@ void EfgContIter::Set(int pl, int iset, int act)
 }
 
 
-void EfgContIter::Set(const Gambit::GameAction &a) 
+void BehavIterator::Set(const GameAction &a) 
 {
   if (a->GetInfoset()->GetPlayer()->GetNumber() != _frozen_pl ||
       a->GetInfoset()->GetNumber() != _frozen_iset) return;
   _profile.SetAction(a);
 }
 
-int EfgContIter::Next(int pl, int iset)
+int BehavIterator::Next(int pl, int iset)
 {
   if (pl != _frozen_pl || iset != _frozen_iset)   return 1;
 
-  const gbtArray<Gambit::GameAction> &actions = _support.Actions(pl, iset);
+  const gbtArray<GameAction> &actions = _support.Actions(pl, iset);
   
   if (_current(pl, iset) == actions.Length())   {
     _current(pl, iset) = 1;
@@ -120,14 +122,14 @@ int EfgContIter::Next(int pl, int iset)
 }
   
 
-void EfgContIter::Freeze(int pl, int iset)
+void BehavIterator::Freeze(int pl, int iset)
 {
   _frozen_pl = pl;
   _frozen_iset = iset;
   First();
 }
 
-int EfgContIter::NextContingency(void)
+int BehavIterator::NextContingency(void)
 {
   int pl = _efg->NumPlayers();
   while (pl > 0 && _num_active_infosets[pl] == 0)
@@ -159,140 +161,10 @@ int EfgContIter::NextContingency(void)
   }
 }
 
-gbtRational EfgContIter::Payoff(int pl) const
+gbtRational BehavIterator::GetPayoff(int pl) const
 {
   return _profile.GetPayoff(pl);
 }
 
 
-
-
-EfgConditionalContIter::EfgConditionalContIter(const Gambit::BehavSupport &s)
-  : _efg(s.GetGame()), _support(s),
-    _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
-    _is_active(),
-    _num_active_infosets(_efg->NumPlayers()),
-    _payoff(_efg->NumPlayers())
-{
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
-    _num_active_infosets[pl] = 0;
-    gbtArray<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
-    for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      active_for_pl[iset] = true;
-      _num_active_infosets[pl]++;
-    }
-    _is_active.Append(active_for_pl);
-  }
-  First();
-}
-
-EfgConditionalContIter::EfgConditionalContIter(const Gambit::BehavSupport &s, 
-					       const gbtList<Gambit::GameInfoset>& active)
-  : _efg(s.GetGame()), _support(s),
-    _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
-    _is_active(),
-    _num_active_infosets(_efg->NumPlayers()),
-    _payoff(_efg->NumPlayers())
-{
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
-    _num_active_infosets[pl] = 0;
-    gbtArray<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
-    for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      if ( active.Contains(_efg->GetPlayer(pl)->GetInfoset(iset)) ) {
-	active_for_pl[iset] = true;
-	_num_active_infosets[pl]++;
-      }
-      else
-	active_for_pl[iset] = false;
-    }
-    _is_active.Append(active_for_pl);
-  }
-  First();
-}
-
-EfgConditionalContIter::~EfgConditionalContIter()
-{ }
-
-
-void EfgConditionalContIter::First(void)
-{
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      _current(pl, iset) = 1;
-      if (_is_active[pl][iset])
-	_profile.SetAction(_support.Actions(pl, iset)[1]);
-    }
-  }
-}
-
-void EfgConditionalContIter::Set(int pl, int iset, int act)
-{
-  _current(pl, iset) = act;
-  _profile.SetAction(_support.Actions(pl, iset)[act]);
-}
-
-void EfgConditionalContIter::Set(const Gambit::GameAction &a) 
-{
-  _profile.SetAction(a);
-}
-
-int EfgConditionalContIter::Next(int pl, int iset)
-{
-  const gbtArray<Gambit::GameAction> &actions = _support.Actions(pl, iset);
-  
-  if (_current(pl, iset) == actions.Length())   {
-    _current(pl, iset) = 1;
-    _profile.SetAction(actions[1]);
-    return 0;
-  }
-
-  _current(pl, iset)++;
-  _profile.SetAction(actions[_current(pl, iset)]);
-  return 1;
-}
-
-int EfgConditionalContIter::NextContingency(void)
-{
-  int pl = _efg->NumPlayers();
-  while (pl > 0 && _num_active_infosets[pl] == 0)
-    --pl;
-  if (pl == 0)   return 0;
-  int iset = _efg->GetPlayer(pl)->NumInfosets();
-    
-  while (true) {
-
-    if (_is_active[pl][iset]) 
-      if (_current(pl, iset) < _support.NumActions(pl, iset))  {
-	_current(pl, iset) += 1;
-	_profile.SetAction(_support.Actions(pl, iset)[_current(pl, iset)]);
-	return 1;
-      }
-      else {
-	_current(pl, iset) = 1;
-	_profile.SetAction(_support.Actions(pl, iset)[1]);
-      }
-    
-    iset--;
-    if (iset == 0)  {
-      do  {
-	--pl;
-      }  while (pl > 0 && _num_active_infosets[pl] == 0);
-      
-      if (pl == 0)   return 0;
-      iset = _efg->GetPlayer(pl)->NumInfosets();
-    }
-  }
-}
-
-gbtRational EfgConditionalContIter::Payoff(int pl) const
-{
-  return _profile.GetPayoff(pl);
-}
-
-gbtRational EfgConditionalContIter::Payoff(const Gambit::GameNode &n, int pl) const
-{
-  return _profile.GetNodeValue(n, pl);
-}
-
-
-
+} // end namespace Gambit

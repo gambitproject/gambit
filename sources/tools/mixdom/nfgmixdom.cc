@@ -65,7 +65,7 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
     B[n] = (T) 1;
     C[k] = (T) 1;
     
-    gbtNfgContingencyIterator s(S, pl, 1);
+    Gambit::StrategyIterator s(S, pl, 1);
 
     for (n = 1; n <= contingencies; n++) {
       Gambit::PureStrategyProfile profile(s.GetProfile());
@@ -143,7 +143,7 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
     }
     B[n]=(T)1;
     
-    gbtNfgContingencyIterator s(S, pl, 1);
+    Gambit::StrategyIterator s(S, pl, 1);
 
     for(n=1;n<=contingencies;n++) {
       Gambit::PureStrategyProfile profile(s.GetProfile());
@@ -249,7 +249,7 @@ bool IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy str
     B[n] = (T) 1;
     C[k] = (T) 1;
     
-    gbtNfgContingencyIterator s(S, pl, whichstrat);
+    Gambit::StrategyIterator s(S, pl, whichstrat);
 
     for (n = 1; n <= contingencies; n++) {
       B[n] = -s.GetPayoff(pl);
@@ -314,7 +314,7 @@ bool IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy str
     }
     B[n]=(T)1;
     
-    gbtNfgContingencyIterator s(S, pl, whichstrat);
+    Gambit::StrategyIterator s(S, pl, whichstrat);
 
     for(n=1;n<=contingencies;n++) {
       B[n]=-s.GetPayoff(pl);
@@ -410,7 +410,7 @@ bool IsMixedDominated(const Gambit::MixedStrategyProfile<T> &pr, int pl,
     B[n] = (T) 1;
     C[k] = (T) 1;
     
-    gbtNfgContingencyIterator s(S, pl, 1);
+    Gambit::StrategyIterator s(S, pl, 1);
     for (n = 1; n <= contingencies; n++) {
       Gambit::PureStrategyProfile profile(s.GetProfile());
       B[n]=(T)0;
@@ -469,7 +469,7 @@ bool IsMixedDominated(const Gambit::MixedStrategyProfile<T> &pr, int pl,
     }
     B[n]=(T)1;
     
-    gbtNfgContingencyIterator s(S, pl, 1);
+    Gambit::StrategyIterator s(S, pl, 1);
 
     for(n=1;n<=contingencies;n++) {
       Gambit::PureStrategyProfile profile(s.GetProfile());

@@ -117,16 +117,14 @@ bool StrategySupport::RemoveStrategy(GameStrategy s)
 //                 Identification of dominated strategies
 //---------------------------------------------------------------------------
 
-bool StrategySupport::Dominates(Gambit::GameStrategy s, 
-				Gambit::GameStrategy t, 
+bool StrategySupport::Dominates(GameStrategy s, 
+				GameStrategy t, 
 				bool strong) const
 {
-  Gambit::Game n = GetGame();
+  Game n = GetGame();
 
-  gbtNfgContingencyIterator A(*this,
-			      s->GetPlayer()->GetNumber(), GetIndex(s));
-  gbtNfgContingencyIterator B(*this,
-			      t->GetPlayer()->GetNumber(), GetIndex(t));
+  StrategyIterator A(*this, s->GetPlayer()->GetNumber(), GetIndex(s));
+  StrategyIterator B(*this, t->GetPlayer()->GetNumber(), GetIndex(t));
 
   if (strong)  {
     do  {
@@ -165,7 +163,7 @@ bool StrategySupport::Dominates(Gambit::GameStrategy s,
 }
 
 
-bool StrategySupport::IsDominated(Gambit::GameStrategy s, bool strong) const
+bool StrategySupport::IsDominated(GameStrategy s, bool strong) const
 {
   for (int i = 1; i <= NumStrats(s->GetPlayer()->GetNumber()); i++) {
     if (GetStrategy(s->GetPlayer()->GetNumber(), i) != s &&

@@ -40,6 +40,8 @@ template <class T> void RemoveRedundancies(gbtList<T> &p_list)
   }
 }
 
+
+
 class BehavSupportInfoset   {
   friend class BehavSupportPlayer;
 protected:
@@ -636,6 +638,168 @@ bool BehavSupport::MayReach(const GameNode &n) const
   }
 }
 
+// This class iterates
+// over contingencies that are relevant once a particular node 
+// has been reached.
+class BehavConditionalIterator    {
+  friend class EfgIter;
+private:
+  Game _efg;
+  BehavSupport _support;
+  PureBehavProfile _profile;
+  gbtPVector<int> _current;
+  gbtArray<gbtArray<bool> > _is_active;
+  gbtArray<int> _num_active_infosets;
+  mutable gbtVector<gbtRational> _payoff;
+
+public:
+  BehavConditionalIterator(const BehavSupport &);
+  BehavConditionalIterator(const BehavSupport &, const gbtList<GameInfoset> &);
+  ~BehavConditionalIterator();
+  
+  void First(void); // Sets each infoset's action to the first in the support
+  
+  void Set(int pl, int iset, int act);
+  void Set(const GameAction &a);
+  int Next(int pl, int iset); 
+  
+  const PureBehavProfile &GetProfile(void) const   { return _profile; }
+
+  int NextContingency(void);   // Needs rewriting
+  
+  gbtRational GetPayoff(int pl) const;
+  gbtRational GetPayoff(const GameNode &, int pl) const;
+};
+
+
+BehavConditionalIterator::BehavConditionalIterator(const BehavSupport &s)
+  : _efg(s.GetGame()), _support(s),
+    _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
+    _is_active(),
+    _num_active_infosets(_efg->NumPlayers()),
+    _payoff(_efg->NumPlayers())
+{
+  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
+    _num_active_infosets[pl] = 0;
+    gbtArray<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
+    for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
+      active_for_pl[iset] = true;
+      _num_active_infosets[pl]++;
+    }
+    _is_active.Append(active_for_pl);
+  }
+  First();
+}
+
+BehavConditionalIterator::BehavConditionalIterator(const BehavSupport &s, 
+					       const gbtList<GameInfoset>& active)
+  : _efg(s.GetGame()), _support(s),
+    _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
+    _is_active(),
+    _num_active_infosets(_efg->NumPlayers()),
+    _payoff(_efg->NumPlayers())
+{
+  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
+    _num_active_infosets[pl] = 0;
+    gbtArray<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
+    for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
+      if ( active.Contains(_efg->GetPlayer(pl)->GetInfoset(iset)) ) {
+	active_for_pl[iset] = true;
+	_num_active_infosets[pl]++;
+      }
+      else
+	active_for_pl[iset] = false;
+    }
+    _is_active.Append(active_for_pl);
+  }
+  First();
+}
+
+BehavConditionalIterator::~BehavConditionalIterator()
+{ }
+
+
+void BehavConditionalIterator::First(void)
+{
+  for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
+      _current(pl, iset) = 1;
+      if (_is_active[pl][iset])
+	_profile.SetAction(_support.Actions(pl, iset)[1]);
+    }
+  }
+}
+
+void BehavConditionalIterator::Set(int pl, int iset, int act)
+{
+  _current(pl, iset) = act;
+  _profile.SetAction(_support.Actions(pl, iset)[act]);
+}
+
+void BehavConditionalIterator::Set(const GameAction &a) 
+{
+  _profile.SetAction(a);
+}
+
+int BehavConditionalIterator::Next(int pl, int iset)
+{
+  const gbtArray<GameAction> &actions = _support.Actions(pl, iset);
+  
+  if (_current(pl, iset) == actions.Length())   {
+    _current(pl, iset) = 1;
+    _profile.SetAction(actions[1]);
+    return 0;
+  }
+
+  _current(pl, iset)++;
+  _profile.SetAction(actions[_current(pl, iset)]);
+  return 1;
+}
+
+int BehavConditionalIterator::NextContingency(void)
+{
+  int pl = _efg->NumPlayers();
+  while (pl > 0 && _num_active_infosets[pl] == 0)
+    --pl;
+  if (pl == 0)   return 0;
+  int iset = _efg->GetPlayer(pl)->NumInfosets();
+    
+  while (true) {
+
+    if (_is_active[pl][iset]) 
+      if (_current(pl, iset) < _support.NumActions(pl, iset))  {
+	_current(pl, iset) += 1;
+	_profile.SetAction(_support.Actions(pl, iset)[_current(pl, iset)]);
+	return 1;
+      }
+      else {
+	_current(pl, iset) = 1;
+	_profile.SetAction(_support.Actions(pl, iset)[1]);
+      }
+    
+    iset--;
+    if (iset == 0)  {
+      do  {
+	--pl;
+      }  while (pl > 0 && _num_active_infosets[pl] == 0);
+      
+      if (pl == 0)   return 0;
+      iset = _efg->GetPlayer(pl)->NumInfosets();
+    }
+  }
+}
+
+gbtRational BehavConditionalIterator::GetPayoff(int pl) const
+{
+  return _profile.GetPayoff(pl);
+}
+
+gbtRational BehavConditionalIterator::GetPayoff(const GameNode &n, int pl) const
+{
+  return _profile.GetNodeValue(n, pl);
+}
+
+
 bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
 			      bool strong, bool conditional) const
 {
@@ -650,15 +814,15 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
   bool equal = true;
 
   if (!conditional) {
-    EfgContIter A(*this), B(*this);
+    BehavIterator A(*this), B(*this);
     A.Freeze(player->GetNumber(), infoset->GetNumber()); 
     B.Freeze(player->GetNumber(), infoset->GetNumber());
     A.Set(a);
     B.Set(b);
 
     do  {
-      gbtRational ap = A.Payoff(pl);  
-      gbtRational bp = B.Payoff(pl);
+      gbtRational ap = A.GetPayoff(pl);  
+      gbtRational bp = B.GetPayoff(pl);
 
       if (strong)
 	{ if (ap <= bp)  return false; }
@@ -685,13 +849,13 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
       L += ReachableInfosets(nodelist[n], b);
       RemoveRedundancies(L);
       
-      EfgConditionalContIter A(*this,L), B(*this,L);
+      BehavConditionalIterator A(*this,L), B(*this,L);
       A.Set(a);
       B.Set(b);
       
       do  {
-	gbtRational ap = A.Payoff(nodelist[n],pl);  
-	gbtRational bp = B.Payoff(nodelist[n],pl);
+	gbtRational ap = A.GetPayoff(nodelist[n],pl);  
+	gbtRational bp = B.GetPayoff(nodelist[n],pl);
 	
 	if (strong)
 	  { if (ap <= bp)  return false; }

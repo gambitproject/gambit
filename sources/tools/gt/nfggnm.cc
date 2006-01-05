@@ -92,7 +92,7 @@ void Solve(const Gambit::Game &p_game)
   gnmgame *A = new nfgame(p_game->NumPlayers(), actions, payoffs);
   
   int *profile = new int[p_game->NumPlayers()];
-  gbtNfgContingencyIterator iter(p_game);
+  Gambit::StrategyIterator iter(p_game);
   do {
     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
       profile[pl-1] = iter.GetProfile().GetStrategy(pl)->GetNumber() - 1;

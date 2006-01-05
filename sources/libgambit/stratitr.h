@@ -24,36 +24,38 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef NFGITER_H
-#define NFGITER_H
+#ifndef LIBGAMBIT_STRATITR_H
+#define LIBGAMBIT_STRATITR_H
 
 template <class T> class gbtArray;
 
 #include "game.h"
+
+namespace Gambit {
 
 /// This class iterates through the contingencies in a strategic game.
 /// It visits each strategy profile in turn, advancing one contingency
 /// on each call of NextContingency().  Optionally, the strategy of
 /// one player may be held fixed during the iteration (by the use of the
 /// second constructor).
-class gbtNfgContingencyIterator {
-  friend class Gambit::GameRep;
+class StrategyIterator {
+  friend class GameRep;
 private:
-  Gambit::StrategySupport support;
+  StrategySupport support;
   gbtArray<int> m_currentStrat;
-  Gambit::PureStrategyProfile profile;
+  PureStrategyProfile profile;
   int m_frozen1, m_frozen2;
   
 public:
   /// @name Lifecycle
   //@{
   /// Construct a new iterator on the support, with no strategies held fixed
-  gbtNfgContingencyIterator(const Gambit::StrategySupport &);
+  StrategyIterator(const StrategySupport &);
   /// Construct a new iterator on the support, fixing player pl's strategy
-  gbtNfgContingencyIterator(const Gambit::StrategySupport &s, int pl, int st);
+  StrategyIterator(const StrategySupport &s, int pl, int st);
   /// Construct a new iterator on the support, fixing two players' strategies
-  gbtNfgContingencyIterator(const Gambit::StrategySupport &s, 
-			    int pl1, int st1, int pl2, int st2);
+  StrategyIterator(const StrategySupport &s, 
+		   int pl1, int st1, int pl2, int st2);
   //@}
 
   /// @name Iteration
@@ -67,18 +69,20 @@ public:
   /// @name Data access
   //@{
   /// Get the current strategy profile
-  const Gambit::PureStrategyProfile &GetProfile(void) const { return profile; }
+  const PureStrategyProfile &GetProfile(void) const { return profile; }
   
   /// Get the outcome assigned to the current contingency
-  Gambit::GameOutcome GetOutcome(void) const;
+  GameOutcome GetOutcome(void) const;
   /// Set the outcome assigned to the current contingency
-  void SetOutcome(Gambit::GameOutcome);
+  void SetOutcome(GameOutcome);
   /// Get the payoff to player 'pl' at the current contingency
   gbtRational GetPayoff(int pl) const;
   //@}
 };
 
-#endif   // NFGITER_H
+} // end namespace Gambit
+
+#endif // LIBGAMBIT_STRATITR_H
 
 
 

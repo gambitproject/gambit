@@ -36,7 +36,7 @@ void WriteHtmlFile(std::ostream &p_file, const Gambit::Game &p_nfg,
   std::string theHtml;
   theHtml += "<center><h1>" + p_nfg->GetTitle() + "</h1></center>\n";
 
-  gbtNfgContingencyIterator iter(p_nfg, p_rowPlayer, 1, p_colPlayer, 1);
+  Gambit::StrategyIterator iter(p_nfg, p_rowPlayer, 1, p_colPlayer, 1);
 
   do {
     if (p_nfg->NumPlayers() > 2) {

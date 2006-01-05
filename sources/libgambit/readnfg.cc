@@ -621,7 +621,7 @@ void ParseOutcomeBody(gbtGameParserState &p_parser, Game p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
 
-  gbtNfgContingencyIterator iter(p_nfg);
+  StrategyIterator iter(p_nfg);
 
   while (p_parser.GetCurrentSymbol() != symEOF) {
     if (p_parser.GetCurrentSymbol() != symINTEGER) {
@@ -643,7 +643,7 @@ void ParseOutcomeBody(gbtGameParserState &p_parser, Game p_nfg)
 static void ParsePayoffBody(gbtGameParserState &p_parser, 
 			    Game p_nfg)
 {
-  gbtNfgContingencyIterator iter(p_nfg);
+  StrategyIterator iter(p_nfg);
   int pl = 1;
 
   while (p_parser.GetCurrentSymbol() != symEOF) {

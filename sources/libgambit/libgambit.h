@@ -61,10 +61,10 @@ inline double pow(double x, long y)
 
 #include "behavspt.h"
 #include "behav.h"
-#include "efgiter.h"
+#include "behavitr.h"
 
 #include "stratspt.h"
 #include "mixed.h"
-#include "nfgiter.h"
+#include "stratitr.h"
 
 #endif // LIBGAMBIT_H

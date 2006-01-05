@@ -211,8 +211,8 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 {
   Gambit::PureStrategyProfile profile(NF);
 
-  gbtNfgContingencyIterator A(support, i, strat1);
-  gbtNfgContingencyIterator B(support, i, strat2);
+  Gambit::StrategyIterator A(support, i, strat1);
+  Gambit::StrategyIterator B(support, i, strat2);
 
   gPoly<gDouble> equation(&Space,&Lex);
   do {

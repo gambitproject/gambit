@@ -45,7 +45,7 @@ void PrintProfile(std::ostream &p_stream,
 
 void Solve(Gambit::Game p_nfg)
 {
-  gbtNfgContingencyIterator citer(p_nfg);
+  Gambit::StrategyIterator citer(p_nfg);
 
   int ncont = 1;
   for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {

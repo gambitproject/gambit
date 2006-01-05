@@ -26,15 +26,17 @@
 
 #include "libgambit.h"
 
+namespace Gambit {
+
 //===========================================================================
-//                    class gbtNfgContingencyIterator
+//                        class StrategyIterator
 //===========================================================================
 
 //---------------------------------------------------------------------------
 //                               Lifecycle
 //---------------------------------------------------------------------------
 
-gbtNfgContingencyIterator::gbtNfgContingencyIterator(const Gambit::StrategySupport &s)
+StrategyIterator::StrategyIterator(const StrategySupport &s)
   : support(s),
     m_currentStrat(s.GetGame()->NumPlayers()),
     profile(s.GetGame()), m_frozen1(0), m_frozen2(0)
@@ -42,7 +44,7 @@ gbtNfgContingencyIterator::gbtNfgContingencyIterator(const Gambit::StrategySuppo
   First();
 }
 
-gbtNfgContingencyIterator::gbtNfgContingencyIterator(const Gambit::StrategySupport &s,
+StrategyIterator::StrategyIterator(const StrategySupport &s,
 						     int pl, int st)
   : support(s), 
     m_currentStrat(s.GetGame()->NumPlayers()),
@@ -53,7 +55,7 @@ gbtNfgContingencyIterator::gbtNfgContingencyIterator(const Gambit::StrategySuppo
   First();
 }
 
-gbtNfgContingencyIterator::gbtNfgContingencyIterator(const Gambit::StrategySupport &s,
+StrategyIterator::StrategyIterator(const StrategySupport &s,
 						     int pl1, int st1,
 						     int pl2, int st2)
   : support(s), 
@@ -71,7 +73,7 @@ gbtNfgContingencyIterator::gbtNfgContingencyIterator(const Gambit::StrategySuppo
 //                                Iteration
 //---------------------------------------------------------------------------
 
-void gbtNfgContingencyIterator::First(void)
+void StrategyIterator::First(void)
 {
   for (int pl = 1; pl <= support.GetGame()->NumPlayers(); pl++) {
     if (pl == m_frozen1 || pl == m_frozen2) continue;
@@ -80,7 +82,7 @@ void gbtNfgContingencyIterator::First(void)
   }	
 }
 
-bool gbtNfgContingencyIterator::NextContingency(void)
+bool StrategyIterator::NextContingency(void)
 {
   int pl = 1;
 
@@ -106,17 +108,19 @@ bool gbtNfgContingencyIterator::NextContingency(void)
 //                              Data access
 //---------------------------------------------------------------------------
 
-Gambit::GameOutcome gbtNfgContingencyIterator::GetOutcome(void) const
+GameOutcome StrategyIterator::GetOutcome(void) const
 {
   return profile.GetOutcome();
 }
 
-void gbtNfgContingencyIterator::SetOutcome(Gambit::GameOutcome outcome)
+void StrategyIterator::SetOutcome(GameOutcome outcome)
 {
   profile.SetOutcome(outcome);
 }
 
-gbtRational gbtNfgContingencyIterator::GetPayoff(int pl) const
+gbtRational StrategyIterator::GetPayoff(int pl) const
 {
   return profile.GetPayoff(pl);
 }
+
+} // end namespace Gambit

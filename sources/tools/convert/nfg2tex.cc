@@ -34,7 +34,7 @@ void WriteOsborneFile(std::ostream &p_file, const Gambit::Game &p_nfg,
 		      int p_rowPlayer, int p_colPlayer)
 {
   std::string theHtml;
-  gbtNfgContingencyIterator iter(p_nfg, p_rowPlayer, 1, p_colPlayer, 1);
+  Gambit::StrategyIterator iter(p_nfg, p_rowPlayer, 1, p_colPlayer, 1);
 
   do {
     Gambit::PureStrategyProfile profile(iter.GetProfile());

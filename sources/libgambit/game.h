@@ -335,7 +335,6 @@ public:
 class GamePlayerRep : public GameObject  {
   friend class GameRep;
   friend class GameStrategyRep;
-  friend class gbtPureBehavProfile;
   friend class MixedBehavProfile<double>;
   friend class MixedBehavProfile<gbtRational>;
   friend class MixedBehavProfile<gbtNumber>;

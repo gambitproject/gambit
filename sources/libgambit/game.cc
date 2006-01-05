@@ -486,17 +486,17 @@ GameRep::~GameRep()
 bool GameRep::IsConstSum(void) const
 {
   if (m_root) {
-    EfgContIter iter(BehavSupport(const_cast<GameRep *>(this)));
+    BehavIterator iter(BehavSupport(const_cast<GameRep *>(this)));
 
     gbtRational sum(0);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
-      sum += iter.Payoff(pl);
+      sum += iter.GetPayoff(pl);
     }
 
     while (iter.NextContingency()) {
       gbtRational newsum(0);
       for (int pl = 1; pl <= m_players.Length(); pl++) {
-	newsum += iter.Payoff(pl);
+	newsum += iter.GetPayoff(pl);
       }
       
       if (newsum != sum) {
@@ -507,7 +507,7 @@ bool GameRep::IsConstSum(void) const
     return true;
   }
   else {
-    gbtNfgContingencyIterator iter(StrategySupport(const_cast<GameRep *>(this)));
+    StrategyIterator iter(StrategySupport(const_cast<GameRep *>(this)));
 
     gbtRational sum(0);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
@@ -933,7 +933,7 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
     // For trees, we write the payoff version, since there need not be
     // a one-to-one correspondence between outcomes and entries, when there
     // are chance moves.
-    gbtNfgContingencyIterator iter(Game(const_cast<GameRep *>(this)));
+    StrategyIterator iter(Game(const_cast<GameRep *>(this)));
     
     do {
       for (int pl = 1; pl <= NumPlayers(); pl++) {
@@ -1589,7 +1589,7 @@ void GameRep::RebuildTable(void)
   gbtArray<GameOutcomeRep *> newResults(size);
   for (int i = 1; i <= newResults.Length(); newResults[i++] = 0);
 
-  gbtNfgContingencyIterator iter(StrategySupport(const_cast<GameRep *>(this)));
+  StrategyIterator iter(StrategySupport(const_cast<GameRep *>(this)));
 
   do {
     long newindex = 0L;
