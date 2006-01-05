@@ -1010,7 +1010,25 @@ void gbtGameFrame::OnFileExit(wxCommandEvent &p_event)
 
 void gbtGameFrame::OnFileMRUFile(wxCommandEvent &p_event)
 {
-  wxGetApp().LoadFile(wxGetApp().GetHistoryFile(p_event.GetId() - wxID_FILE1));
+  wxString filename = wxGetApp().GetHistoryFile(p_event.GetId() - wxID_FILE1);
+  gbtAppLoadResult result = wxGetApp().LoadFile(filename);
+
+  if (result == GBT_APP_OPEN_FAILED) {
+    wxMessageDialog dialog(this,
+			   wxT("Gambit could not open file '") + 
+			   filename + wxT("' for reading."), 
+			   wxT("Unable to open file"),
+			   wxOK | wxICON_ERROR);
+    dialog.ShowModal();
+  }
+  else if (result == GBT_APP_PARSE_FAILED) {
+    wxMessageDialog dialog(this,
+			   wxT("File '") + filename +
+			   wxT("' is not in a format Gambit recognizes."),
+			   wxT("Unable to read file"),
+			   wxOK | wxICON_ERROR);
+    dialog.ShowModal();
+  }
 }
 
 //----------------------------------------------------------------------

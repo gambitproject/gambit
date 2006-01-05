@@ -726,10 +726,8 @@ public:
     { return "File not in a recognized format"; }
 };
 
-/// Reads an extensive game in .efg format from the input stream
-Game ReadEfg(std::istream &);
-/// Reads a strategic game in .nfg format from the input stream
-Game ReadNfg(std::istream &);
+/// Reads a game in .efg or .nfg format from the input stream
+Game ReadGame(std::istream &) throw (InvalidFileException);
 
 } // end namespace gambit
 

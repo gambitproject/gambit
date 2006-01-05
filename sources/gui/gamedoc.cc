@@ -228,14 +228,14 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
   TiXmlNode *efgfile = game->FirstChild("efgfile");
   if (efgfile) {
     std::istringstream s(efgfile->FirstChild()->Value());
-    m_game = Gambit::ReadEfg(s);
+    m_game = Gambit::ReadGame(s);
 
   }
   
   TiXmlNode *nfgfile = game->FirstChild("nfgfile");
   if (nfgfile) {
     std::istringstream s(nfgfile->FirstChild()->Value());
-    m_game = Gambit::ReadNfg(s);
+    m_game = Gambit::ReadGame(s);
   }
 
   if (!efgfile && !nfgfile) {

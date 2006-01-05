@@ -165,29 +165,15 @@ we have chosen and is not a requirement of the file structure itself.)
 
 <para>
 The prologue is
-constructed as follows: the first seven characters must be
-<programlisting>
-EFG 2 R
-</programlisting>
-</para>
-
-<note>
-<para>
-Historical reasons for this structure: the digit 2 is a version number,
-but since only version 2 files have been supported for more than a
-decade, all files have a 2 in this position.  The letter R used to
+constructed as follows. The file begins with the token
+<literal>EFG</literal>, identifying it as an extensive gamefile.
+Next is the digit <literal>2</literal>; this digit is a version number.
+Since only version 2 files have been supported for more than a
+decade, all files have a 2 in this position.  
+Next comes the letter <literal>R</literal>. The letter R used to
 distinguish files which had rational numbers for numerical data; this
 distinction is obsolete, so all new files should have R in this position.
 </para>
-</note>
-
-<note>
-<para>
-The current Gambit implementation requires that the first seven
-characters of the file be EFG 2 R.  This is an exception to the
-whitespace rules given above.  We apologize for any inconvenience.
-</para> 
-</note>
 
 <para>
 The prologue continues with the title of the game. 
@@ -396,29 +382,15 @@ NFG 1 R "Selten (IJGT, 75), Figure 2, normal form"
 
 <para>
 The prologue is
-constructed as follows: the first seven characters must be
-<programlisting>
-NFG 1 R
-</programlisting>
-</para>
-
-<note>
-<para>
-Historical reasons for this structure: the digit 1 is a version number,
-but since only version 1 files are supported,
-all files have a 1 in this position.  The letter R used to
+constructed as follows. The file begins with the token
+<literal>NFG</literal>, identifying it as a strategic gamefile.
+Next is the digit <literal>1</literal>; this digit is a version number.
+Since only version 1 files have been supported for more than a
+decade, all files have a 1 in this position.  
+Next comes the letter <literal>R</literal>. The letter R used to
 distinguish files which had rational numbers for numerical data; this
 distinction is obsolete, so all new files should have R in this position.
 </para>
-</note>
-
-<note>
-<para>
-The current Gambit implementation requires that the first seven
-characters of the file be NFG 1 R.  This is an exception to the
-whitespace rules given above.  We apologize for any inconvenience.
-</para> 
-</note>
 
 <para>
 The prologue continues with the title of the game. 
@@ -458,18 +430,25 @@ of 1, and player 2 receives a payoff of 1.
 </para>
 
 <para>
-Next, the strategy of the <emphasis>last</emphasis> player is incremented.  Thus,
+Next, the strategy of the <emphasis>first</emphasis> player is incremented.  Thus,
 player 2's strategy is incremented to his second strategy.  In this
-case, when player 1 plays his first strategy and player 2 his second
+case, when player 1 plays his second strategy and player 2 his first
 strategy, the payoffs are <literal>0 2</literal>: a payoff of 0 to
 player 1 and a payoff of 2 to player 2.
 </para>
 
 <para>
-Now, the strategy of the last player is incremented again.  But, the
-second player was already playing strategy number 2 of 2.  Thus, his
-strategy now &quot;rolls over&quot; to 1, and the strategy of the first
-player increments to 2.  Then, the entries <literal>0 2</literal> correspond
+Now the strategy of the first player is again incremented.  Thus,
+the first player is playing his third strategy, and the second player his
+first strategy; the payoffs are again <literal>0 2</literal>.
+</para>
+
+<para>
+Now, the strategy of the first player is incremented yet again.  But, the
+first player was already playing strategy number 3 of 3.  Thus, his
+strategy now &quot;rolls over&quot; to 1, and the strategy of the second
+player increments to 2.  Then, the next entries
+<literal>1 1</literal> correspond
 to the payoffs of player 1 and player 2, respectively, in the case
 where player 1 plays his second strategy, and player 2 his first strategy.
 </para>
@@ -534,29 +513,15 @@ NFG 1 R "Selten (IJGT, 75), Figure 2, normal form" { "Player 1" "Player 2" }
 
 <para>
 The prologue is
-constructed as follows: the first seven characters must be
-<programlisting>
-NFG 1 R
-</programlisting>
-</para>
-
-<note>
-<para>
-Historical reasons for this structure: the digit 1 is a version number,
-but since only version 1 files are supported,
-all files have a 1 in this position.  The letter R used to
+constructed as follows. The file begins with the token
+<literal>NFG</literal>, identifying it as a strategic gamefile.
+Next is the digit <literal>1</literal>; this digit is a version number.
+Since only version 1 files have been supported for more than a
+decade, all files have a 1 in this position.  
+Next comes the letter <literal>R</literal>. The letter R used to
 distinguish files which had rational numbers for numerical data; this
 distinction is obsolete, so all new files should have R in this position.
 </para>
-</note>
-
-<note>
-<para>
-The current Gambit implementation requires that the first seven
-characters of the file be NFG 1 R.  This is an exception to the
-whitespace rules given above.  We apologize for any inconvenience.
-</para> 
-</note>
 
 <para>
 The prologue continues with the title of the game. 

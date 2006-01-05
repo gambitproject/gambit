@@ -135,7 +135,7 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
   }
 
   try {
-    Gambit::Game nfg = Gambit::ReadNfg(infile);
+    Gambit::Game nfg = Gambit::ReadGame(infile);
 
     m_fileHistory.AddFileToHistory(p_filename);
     gbtGameDocument *doc = new gbtGameDocument(nfg);
@@ -143,20 +143,7 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
     (void) new gbtGameFrame(0, doc);
     return GBT_APP_FILE_OK;
   }
-  catch (...) { }
-
-  infile.seekg(0);
-
-  try {
-    Gambit::Game efg = Gambit::ReadEfg(infile);
-                
-    m_fileHistory.AddFileToHistory(p_filename);
-    gbtGameDocument *doc = new gbtGameDocument(efg);
-    doc->SetFilename(wxT(""));
-    (void) new gbtGameFrame(0, doc);
-    return GBT_APP_FILE_OK;
-  }
-  catch (...) {
+  catch (Gambit::InvalidFileException) {
     return GBT_APP_PARSE_FAILED;
   }
 }

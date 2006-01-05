@@ -477,7 +477,7 @@ int main(int argc, char *argv[])
   Gambit::Game efg;
 
   try {
-    efg = Gambit::ReadEfg(std::cin);
+    efg = Gambit::ReadGame(std::cin);
   }
   catch (...) {
     return 1;

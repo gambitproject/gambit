@@ -24,8 +24,7 @@ libgambit_la_SOURCES = \
 	stratitr.cc stratitr.h \
 	stratspt.cc stratspt.h \
 	rational.cc rational.h \
-	readefg.cc \
-	readnfg.cc
+	file.cc
 
 libgambitincludedir = $(includedir)/libgambit
 libgambitinclude_HEADERS = \
