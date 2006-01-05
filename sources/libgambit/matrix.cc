@@ -25,22 +25,22 @@
 //
 
 #include "libgambit.h"
-#include "gmatrix.imp"
+#include "matrix.imp"
 
-template class gbtMatrix<double>;
-template class gbtMatrix<gbtRational>;
-template class gbtMatrix<gbtInteger>;
-template class gbtMatrix<int>;
-template class gbtMatrix<gbtNumber>;
+template class Gambit::Matrix<double>;
+template class Gambit::Matrix<gbtRational>;
+template class Gambit::Matrix<gbtInteger>;
+template class Gambit::Matrix<int>;
+template class Gambit::Matrix<gbtNumber>;
 
-template gbtVector<double> operator*(const gbtVector<double> &,
-				   const gbtMatrix<double> &);
-template gbtVector<gbtRational> operator*(const gbtVector<gbtRational> &,
-				      const gbtMatrix<gbtRational> &);
-template gbtVector<gbtInteger> operator*(const gbtVector<gbtInteger> &,
-				     const gbtMatrix<gbtInteger> &);
-template gbtVector<int> operator*(const gbtVector<int> &,
-				const gbtMatrix<int> &);
-template gbtVector<gbtNumber> operator*(const gbtVector<gbtNumber> &,
-				    const gbtMatrix<gbtNumber> &);
+template gbtVector<double> Gambit::operator*(const gbtVector<double> &,
+					     const Gambit::Matrix<double> &);
+template gbtVector<gbtRational> Gambit::operator*(const gbtVector<gbtRational> &,
+						  const Gambit::Matrix<gbtRational> &);
+template gbtVector<gbtInteger> Gambit::operator*(const gbtVector<gbtInteger> &,
+						 const Gambit::Matrix<gbtInteger> &);
+template gbtVector<int> Gambit::operator*(const gbtVector<int> &,
+					  const Gambit::Matrix<int> &);
+template gbtVector<gbtNumber> Gambit::operator*(const gbtVector<gbtNumber> &,
+						const Gambit::Matrix<gbtNumber> &);
 

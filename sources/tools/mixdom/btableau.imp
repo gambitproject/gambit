@@ -57,7 +57,7 @@ void BaseTableau<T>::CompPivot(int outlabel, int col)
 // Constructors and Destructor
  
 template <class T> 
-TableauInterface<T>::TableauInterface(const gbtMatrix<T> &A, const gbtVector<T> &b)
+TableauInterface<T>::TableauInterface(const Gambit::Matrix<T> &A, const gbtVector<T> &b)
   : A(&A), b(&b), basis(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()), 
     solution(A.MinRow(),A.MaxRow()), npivots(0), 
     artificial(A.MaxCol()+1,A.MaxCol())
@@ -71,7 +71,7 @@ TableauInterface<T>::TableauInterface(const gbtMatrix<T> &A, const gbtVector<T> 
 }
 
 template <class T> 
-TableauInterface<T>::TableauInterface(const gbtMatrix<T> &A, 
+TableauInterface<T>::TableauInterface(const Gambit::Matrix<T> &A, 
 				      const gbtArray<int> &art, const gbtVector<T> &b)
   : A(&A), b(&b), 
     basis(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()+art.Length()), 
@@ -127,7 +127,7 @@ template <class T>
 Basis & TableauInterface<T>::GetBasis(void) {return basis; }
 
 template <class T>
-const gbtMatrix<T> & TableauInterface<T>::Get_A(void) const {return *A; }
+const Gambit::Matrix<T> & TableauInterface<T>::Get_A(void) const {return *A; }
 
 template <class T>
 const gbtVector<T> & TableauInterface<T>::Get_b(void) const {return *b;}

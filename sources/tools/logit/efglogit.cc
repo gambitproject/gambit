@@ -47,7 +47,7 @@
 
 inline double sqr(double x) { return x*x; }
 
-static void Givens(gbtMatrix<double> &b, gbtMatrix<double> &q,
+static void Givens(Gambit::Matrix<double> &b, Gambit::Matrix<double> &q,
 		   double &c1, double &c2, int l1, int l2, int l3)
 {
   if (fabs(c1) + fabs(c2) == 0.0) {
@@ -82,7 +82,7 @@ static void Givens(gbtMatrix<double> &b, gbtMatrix<double> &q,
   c2 = 0.0;
 }
 
-static void QRDecomp(gbtMatrix<double> &b, gbtMatrix<double> &q)
+static void QRDecomp(Gambit::Matrix<double> &b, Gambit::Matrix<double> &q)
 {
   q.MakeIdent();
   for (int m = 1; m <= b.NumColumns(); m++) {
@@ -92,7 +92,7 @@ static void QRDecomp(gbtMatrix<double> &b, gbtMatrix<double> &q)
   }
 }
 
-static void NewtonStep(gbtMatrix<double> &q, gbtMatrix<double> &b,
+static void NewtonStep(Gambit::Matrix<double> &q, Gambit::Matrix<double> &b,
 		       gbtVector<double> &u, gbtVector<double> &y,
 		       double &d)
 {
@@ -150,7 +150,7 @@ static void QreLHS(const gbtEfgSupport &p_support,
 
 static void QreJacobian(const gbtEfgSupport &p_support,
 			const gbtVector<double> &p_point,
-			gbtMatrix<double> &p_matrix)
+			Gambit::Matrix<double> &p_matrix)
 {
   Gambit::Game efg = p_support.GetGame();
   gbtBehavProfile<double> profile(p_support);
@@ -284,7 +284,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
   gbtVector<double> t(p_start.Length() + 1);
   gbtVector<double> y(p_start.Length());
 
-  gbtMatrix<double> b(p_start.Length() + 1, p_start.Length());
+  Gambit::Matrix<double> b(p_start.Length() + 1, p_start.Length());
   Gambit::SquareMatrix<double> q(p_start.Length() + 1);
   QreJacobian(p_start.Support(), x, b);
   QRDecomp(b, q);

@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
 	}
       }
 
-      gbtMatrix<double> xi(p.Length(), p.Length());
+      Gambit::Matrix<double> xi(p.Length(), p.Length());
   
       gConjugatePR minimizer(p.Length());
       gbtVector<double> gradient(p.Length()), dx(p.Length());

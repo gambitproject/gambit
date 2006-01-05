@@ -51,8 +51,8 @@ private:
 
 public:
       // constructors and destructors
-  Tableau(const gbtMatrix<double> &A, const gbtVector<double> &b); 
-  Tableau(const gbtMatrix<double> &A, const gbtArray<int> &art, 
+  Tableau(const Gambit::Matrix<double> &A, const gbtVector<double> &b); 
+  Tableau(const Gambit::Matrix<double> &A, const gbtArray<int> &art, 
 	  const gbtVector<double> &b); 
   Tableau(const Tableau<double>&);
   virtual ~Tableau();
@@ -87,9 +87,9 @@ template<>
 class Tableau<gbtRational> : public TableauInterface<gbtRational>{
 private:
   int remap(int col_index) const;  // aligns the column indexes
-  gbtMatrix<gbtRational> GetInverse();
+  Gambit::Matrix<gbtRational> GetInverse();
 
-  gbtMatrix<gbtInteger> Tabdat;  // This caries the full tableau
+  Gambit::Matrix<gbtInteger> Tabdat;  // This caries the full tableau
   gbtVector<gbtInteger> Coeff;   // and coeffieient vector
   gbtInteger totdenom;  // This carries the denominator for Q data or 1 for Z
   gbtInteger denom;  // This is the denominator for the simplex
@@ -108,8 +108,8 @@ public:
     std::string GetDescription(void) const;
   };
       // constructors and destructors
-  Tableau(const gbtMatrix<gbtRational> &A, const gbtVector<gbtRational> &b); 
-  Tableau(const gbtMatrix<gbtRational> &A, const gbtArray<int> &art, 
+  Tableau(const Gambit::Matrix<gbtRational> &A, const gbtVector<gbtRational> &b); 
+  Tableau(const Gambit::Matrix<gbtRational> &A, const gbtArray<int> &art, 
 	  const gbtVector<gbtRational> &b); 
   Tableau(const Tableau<gbtRational>&);
   virtual ~Tableau();

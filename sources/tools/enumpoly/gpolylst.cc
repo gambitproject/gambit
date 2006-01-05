@@ -27,7 +27,7 @@
 #include "gpolylst.imp"
 #include "double.h"
 #include "libgambit/gnumber.h"
-#include "libgambit/gmatrix.imp"
+#include "libgambit/matrix.imp"
 
 //template class gPolyList<int>;
 //template gOutput &operator<<(gOutput &f, const gPolyList<int> &y);

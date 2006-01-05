@@ -30,7 +30,7 @@
 //                        Lemke Tableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> LTableau<T>::LTableau(const gbtMatrix<T> &A, 
+template <class T> LTableau<T>::LTableau(const Gambit::Matrix<T> &A, 
 					 const gbtVector<T> &b)
   : Tableau<T>(A,b)
 { } 

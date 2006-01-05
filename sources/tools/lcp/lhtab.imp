@@ -31,13 +31,13 @@
 //                        LemkeHowson Tableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> gbtMatrix<T> Make_A1(const gbtNfgSupport &S,
+template <class T> Gambit::Matrix<T> Make_A1(const gbtNfgSupport &S,
                                       const T &)
 {
   int n1, n2, i,j;
   n1=S.NumStrats(1);
   n2=S.NumStrats(2);
-  gbtMatrix<T> A1(1,n1,n1+1,n1+n2);
+  Gambit::Matrix<T> A1(1,n1,n1+1,n1+n2);
 
   gbtStrategyProfile profile(S.GetGame());
 
@@ -64,13 +64,13 @@ template <class T> gbtMatrix<T> Make_A1(const gbtNfgSupport &S,
   return A1;
 }
 
-template <class T> gbtMatrix<T> Make_A2(const gbtNfgSupport &S,
+template <class T> Gambit::Matrix<T> Make_A2(const gbtNfgSupport &S,
                                       const T &)
 {
   int n1, n2, i,j;
   n1=S.NumStrats(1);
   n2=S.NumStrats(2);
-  gbtMatrix<T> A2(n1+1,n1+n2,1,n1);
+  Gambit::Matrix<T> A2(n1+1,n1+n2,1,n1);
 
   gbtStrategyProfile profile(S.GetGame());
 
@@ -121,7 +121,7 @@ template <class T> gbtVector<T> Make_b2(const gbtNfgSupport &S, const T &)
 }
 
 template <class T>
-LHTableau<T>::LHTableau(const gbtMatrix<T> &A1, const gbtMatrix<T> &A2, 
+LHTableau<T>::LHTableau(const Gambit::Matrix<T> &A1, const Gambit::Matrix<T> &A2, 
 			const gbtVector<T> &b1, const gbtVector<T> &b2)
   : T1(A1,b1), T2(A2,b2), 
 //    tmpcol(b1.First(),b2.Last()), 

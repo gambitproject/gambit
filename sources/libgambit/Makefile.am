@@ -13,7 +13,7 @@ libgambit_la_SOURCES = \
 	gdpvect.cc gdpvect.h gdpvect.imp \
 	glist.h \
 	gmap.h \
-	gmatrix.cc gmatrix.h gmatrix.imp \
+	matrix.cc matrix.h matrix.imp \
 	gnumber.cc gnumber.h \
 	gpvector.cc gpvector.h gpvector.imp \
 	grarray.h \
@@ -42,7 +42,7 @@ libgambitinclude_HEADERS = \
 	gdpvect.h gdpvect.imp \
 	glist.h \
 	gmap.h \
-	gmatrix.h gmatrix.imp \
+	matrix.h matrix.imp \
 	gnumber.h \
 	gpvector.h gpvector.imp \
 	grarray.h \

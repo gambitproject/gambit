@@ -26,7 +26,7 @@
 
 #include "libgambit/rational.h"
 #include "tableau.imp"
-#include "libgambit/gmatrix.imp"
+#include <libgambit/matrix.imp>
 
 
 

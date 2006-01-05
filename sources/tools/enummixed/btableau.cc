@@ -25,7 +25,7 @@
 //
 
 #include "libgambit/libgambit.h"
-#include "libgambit/gmatrix.imp"
+#include <libgambit/matrix.imp>
 #include "btableau.imp"
 
 template class BaseTableau<double>;

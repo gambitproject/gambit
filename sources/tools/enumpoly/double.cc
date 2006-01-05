@@ -35,7 +35,7 @@
 
 #include "double.h"
 #include "libgambit/gvector.imp"
-#include "libgambit/gmatrix.imp"
+#include <libgambit/matrix.imp>
 #include <libgambit/sqmatrix.imp>
 
 //--------------------------------------------------------------------------
@@ -253,6 +253,6 @@ gDouble TOgDouble(const std::string &s)
 }
 
 template class gbtVector<gDouble>;
-template class gbtMatrix<gDouble>;
+template class Gambit::Matrix<gDouble>;
 template class Gambit::SquareMatrix<gDouble>;
 

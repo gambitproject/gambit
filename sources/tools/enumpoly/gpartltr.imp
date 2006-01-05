@@ -435,9 +435,9 @@ ListOfPartialTrees<T>::operator !=(const ListOfPartialTrees<T>& rhs) const
 }
 
 template <class T> 
-gbtMatrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const gbtVector<T>& p) const
+Gambit::Matrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const gbtVector<T>& p) const
 {
-  gbtMatrix<T> answer(Length(),Dmnsn());
+  Gambit::Matrix<T> answer(Length(),Dmnsn());
   int i;
   for (i = 1; i <= Length(); i++)
     for (int j = 1; j <= Dmnsn(); j++)
@@ -446,11 +446,11 @@ gbtMatrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const gbtVector<T>& p) cons
   return answer;
 }
 
-template <class T> gbtMatrix<T> 
+template <class T> Gambit::Matrix<T> 
 ListOfPartialTrees<T>::DerivativeMatrix(const gbtVector<T>& p,
 					const int& NoEquations) const
 {
-  gbtMatrix<T> answer(NoEquations,Dmnsn());
+  Gambit::Matrix<T> answer(NoEquations,Dmnsn());
   int i;
   for (i = 1; i <= NoEquations; i++)
     for (int j = 1; j <= Dmnsn(); j++)

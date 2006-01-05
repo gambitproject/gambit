@@ -55,7 +55,7 @@ inline double pow(double x, long y)
 #include "gnumber.h"
 
 #include "gvector.h"
-#include "gmatrix.h"
+#include "matrix.h"
 
 #include "game.h"
 

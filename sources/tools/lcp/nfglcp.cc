@@ -58,11 +58,11 @@ void PrintProfile(std::ostream &p_stream,
 }
 
 
-template <class T> gbtMatrix<T> Make_A1(const gbtNfgSupport &, 
+template <class T> Gambit::Matrix<T> Make_A1(const gbtNfgSupport &, 
 				      const T &);
 template <class T> gbtVector<T> Make_b1(const gbtNfgSupport &, 
 				      const T &);
-template <class T> gbtMatrix<T> Make_A2(const gbtNfgSupport &,
+template <class T> Gambit::Matrix<T> Make_A2(const gbtNfgSupport &,
 				      const T &);
 template <class T> gbtVector<T> Make_b2(const gbtNfgSupport &,
 				      const T &);
@@ -107,9 +107,9 @@ void nfgLcp<T>::Solve(const gbtNfgSupport &p_support)
   gbtList<BFS<T> > bfsList;
 
   try {
-    gbtMatrix<T> A1 = Make_A1(p_support, (T) 0);
+    Gambit::Matrix<T> A1 = Make_A1(p_support, (T) 0);
     gbtVector<T> b1 = Make_b1(p_support, (T) 0);
-    gbtMatrix<T> A2 = Make_A2(p_support, (T) 0);
+    Gambit::Matrix<T> A2 = Make_A2(p_support, (T) 0);
     gbtVector<T> b2 = Make_b2(p_support, (T) 0);
     LHTableau<T> B(A1,A2,b1,b2);
     if (m_stopAfter != 1) {

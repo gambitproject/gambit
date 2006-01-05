@@ -39,7 +39,7 @@ protected:
   gbtVector<T> solution;
 public:
       // constructors and destructors
-  LHTableau(const gbtMatrix<T> &A1, const gbtMatrix<T> &A2, 
+  LHTableau(const Gambit::Matrix<T> &A1, const Gambit::Matrix<T> &A2, 
 	    const gbtVector<T> &b1, const gbtVector<T> &b2); 
   LHTableau(const LHTableau<T>&);
   virtual ~LHTableau();

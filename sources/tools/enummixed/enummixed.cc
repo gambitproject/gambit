@@ -90,9 +90,9 @@ template <class T> void Solve(Gambit::Game p_nfg, const T &)
   gbtRational fac(1, max - min);
 
   // Construct matrices A1, A2
-  gbtMatrix<T> A1(1, p_nfg->GetPlayer(1)->NumStrategies(), 
+  Gambit::Matrix<T> A1(1, p_nfg->GetPlayer(1)->NumStrategies(), 
 		  1, p_nfg->GetPlayer(2)->NumStrategies());
-  gbtMatrix<T> A2(1, p_nfg->GetPlayer(2)->NumStrategies(),
+  Gambit::Matrix<T> A2(1, p_nfg->GetPlayer(2)->NumStrategies(),
 		  1, p_nfg->GetPlayer(1)->NumStrategies());
 
   for (int i = 1; i <= p_nfg->GetPlayer(1)->NumStrategies(); i++) {

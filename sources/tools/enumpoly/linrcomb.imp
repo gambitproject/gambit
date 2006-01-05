@@ -32,13 +32,13 @@
 //-------------------------------------------------------------------------
 
 template <class T> 
-LinearCombination<T>::LinearCombination(const gbtMatrix<T> &M)
+LinearCombination<T>::LinearCombination(const Gambit::Matrix<T> &M)
 : scrambled(M), weights(M.NumRows()), last_row_is_spanned(true)
 { 
   int K = scrambled.NumRows() - 1;
 
   int i,j;
-  gbtMatrix<T> B(K,K);           // Initialize the matrix recording the
+  Gambit::Matrix<T> B(K,K);           // Initialize the matrix recording the
   for (i = 1; i <= K; i++) // effect of all row operations.
     for (j = 1; j <= K; j++)
       if (i == j) B(i,j) = 1;
@@ -58,7 +58,7 @@ LinearCombination<T>::LinearCombination(const gbtMatrix<T> &M)
       else { c++; i1 = i; }
     if (c > M.NumColumns()) {
       //      gout << "First NumRows() rows not linearly independent in "
-      //	<< "LinearCombination(gbtMatrix<T> M).\n";
+      //	<< "LinearCombination(Gambit::Matrix<T> M).\n";
       exit(1);
     }
 
@@ -88,7 +88,7 @@ LinearCombination<T>::LinearCombination(const gbtMatrix<T> &M)
 	   scrambled(PivotRow[K],PivotColumn[K]) == (T)0 ) PivotColumn[K]++;
     if (PivotColumn[K] > M.NumColumns()) {
       //      gout << "First NumRows()-1 rows not linearly independent in "
-      //	<< "LinearCombination(gbtMatrix<T> M).\n";
+      //	<< "LinearCombination(Gambit::Matrix<T> M).\n";
       // gout << "At the time of failure, scrambled is \n"
       //	<< scrambled << "\n";
       exit(1);
@@ -172,7 +172,7 @@ template <class T>
 void LinearCombination<T>::AddMultipleOfRowiToRowj(const int& i, 
 						   const int& j,
 						   const T& scalar,
-						   gbtMatrix<T>& B)
+						   Gambit::Matrix<T>& B)
 {
   for (int k = 1; k <= B.NumColumns(); k++)
     B(j,k) += scalar * B(i,k);

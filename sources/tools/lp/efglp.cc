@@ -66,7 +66,7 @@ private:
   gbtList<Gambit::GameInfoset> isets1, isets2;
 
   void FillTableau(const gbtEfgSupport &,
-		   gbtMatrix<T> &, const Gambit::GameNode &, T ,int ,int , int ,int );
+		   Gambit::Matrix<T> &, const Gambit::GameNode &, T ,int ,int , int ,int );
   void GetSolutions(const gbtEfgSupport &) const;
   int Add_BFS(/*const*/ LPSolve<T> &B);
   
@@ -142,7 +142,7 @@ void efgLp<T>::Solve(const gbtEfgSupport &p_support)
   
   List = gbtList<BFS<T> >();
   
-  gbtMatrix<T> A(1,ns1+ni2,1,ns2+ni1);
+  Gambit::Matrix<T> A(1,ns1+ni2,1,ns2+ni1);
   gbtVector<T> b(1,ns1+ni2);
   gbtVector<T> c(1,ns2+ni1);
 
@@ -242,7 +242,7 @@ template <class T> void efgLp<T>::GetProfile(const gbtEfgSupport &p_support,
 
 template <class T>
 void efgLp<T>::FillTableau(const gbtEfgSupport &p_support,
-			   gbtMatrix<T> &A, const Gambit::GameNode &n, T prob,
+			   Gambit::Matrix<T> &A, const Gambit::GameNode &n, T prob,
 			   int s1, int s2, int i1, int i2)
 {
   int i,snew;

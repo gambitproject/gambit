@@ -69,11 +69,11 @@ private:
   gbtList<BFS<T> > List;
   gbtList<Gambit::GameInfoset> isets1, isets2;
 
-  void FillTableau(const gbtEfgSupport &, gbtMatrix<T> &, const Gambit::GameNode &, T,
+  void FillTableau(const gbtEfgSupport &, Gambit::Matrix<T> &, const Gambit::GameNode &, T,
 		   int, int, int, int);
   int Add_BFS(const LTableau<T> &tab);
   int All_Lemke(const gbtEfgSupport &, int dup, LTableau<T> &B,
-		int depth, gbtMatrix<T> &);
+		int depth, Gambit::Matrix<T> &);
   
   void GetProfile(const gbtEfgSupport &, const LTableau<T> &tab, 
 		  gbtDPVector<T> &, const gbtVector<T> &, 
@@ -168,7 +168,7 @@ void efgLcp<T>::Solve(const gbtEfgSupport &p_support)
 
   ntot = ns1+ns2+ni1+ni2;
 
-  gbtMatrix<T> A(1,ntot,0,ntot);
+  Gambit::Matrix<T> A(1,ntot,0,ntot);
   gbtVector<T> b(1,ntot);
 
   maxpay = p_support.GetGame()->GetMaxPayoff() + gbtRational(1);
@@ -246,7 +246,7 @@ template <class T> int efgLcp<T>::Add_BFS(const LTableau<T> &tableau)
 template <class T> int 
 efgLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
 		     int j, LTableau<T> &B, int depth,
-		     gbtMatrix<T> &A)
+		     Gambit::Matrix<T> &A)
 {
   if (m_maxDepth != 0 && depth > m_maxDepth) {
     return 1;
@@ -309,7 +309,7 @@ efgLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
 }
 
 template <class T>
-void efgLcp<T>::FillTableau(const gbtEfgSupport &p_support, gbtMatrix<T> &A,
+void efgLcp<T>::FillTableau(const gbtEfgSupport &p_support, Gambit::Matrix<T> &A,
 			    const Gambit::GameNode &n, T prob,
 			    int s1, int s2, int i1, int i2)
 {

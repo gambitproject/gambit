@@ -27,7 +27,7 @@
 #ifndef LIBGAMBIT_SQMATRIX_H
 #define LIBGAMBIT_SQMATRIX_H
 
-#include "gmatrix.h"
+#include "matrix.h"
 
 
 namespace Gambit {
@@ -39,11 +39,11 @@ public:
     { return "Attempted to invert a singular matrix"; }
 };
 
-template <class T> class SquareMatrix : public ::gbtMatrix<T>   {
+template <class T> class SquareMatrix : public Matrix<T>   {
 public:
   SquareMatrix(void);
   SquareMatrix(int size);
-  SquareMatrix(const ::gbtMatrix<T> &);
+  SquareMatrix(const Matrix<T> &);
   SquareMatrix(const SquareMatrix<T> &);
   virtual ~SquareMatrix();
 

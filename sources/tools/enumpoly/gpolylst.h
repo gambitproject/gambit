@@ -122,7 +122,7 @@ template <class T> class gPolyList
    const bool               IsRoot(const gbtVector<T>&)                 const;
    const gbtRectArray<gPoly<T>*> DerivativeMatrix()                     const;
    const gPoly<T>           DetOfDerivativeMatrix()                   const;
-   const gbtMatrix<T>         DerivativeMatrix(const gbtVector<T>&)       const;
+   const Gambit::Matrix<T>         DerivativeMatrix(const gbtVector<T>&)       const;
    const Gambit::SquareMatrix<T>   SquareDerivativeMatrix(const gbtVector<T>&) const;
 
 //  inline int static Count() { return Counted<gPolyList<T> >::objCount(); }

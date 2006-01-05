@@ -32,13 +32,13 @@
 
 
 template <class T>
-LPTableau<T>::LPTableau(const gbtMatrix<T> &A, const gbtVector<T> &b)
+LPTableau<T>::LPTableau(const Gambit::Matrix<T> &A, const gbtVector<T> &b)
   : Tableau<T>(A,b), dual(A.MinRow(),A.MaxRow()),
     unitcost(A.MinRow(),A.MaxRow()), cost(A.MinCol(),A.MaxCol())
 { };
 
 template <class T>
-LPTableau<T>::LPTableau(const gbtMatrix<T> &A, const gbtArray<int> &art, 
+LPTableau<T>::LPTableau(const Gambit::Matrix<T> &A, const gbtArray<int> &art, 
 			const gbtVector<T> &b)
   : Tableau<T>(A,art,b), dual(A.MinRow(),A.MaxRow()),
     unitcost(A.MinRow(),A.MaxRow()), cost(A.MinCol(),A.MaxCol()+art.Length())

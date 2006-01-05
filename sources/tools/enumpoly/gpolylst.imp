@@ -509,9 +509,9 @@ const gPoly<T> gPolyList<T>::DetOfDerivativeMatrix() const
 }
   
 template<class T> 
-const gbtMatrix<T> gPolyList<T>::DerivativeMatrix(const gbtVector<T>& p) const
+const Gambit::Matrix<T> gPolyList<T>::DerivativeMatrix(const gbtVector<T>& p) const
 {
-  gbtMatrix<T> answer(Length(),Dmnsn());
+  Gambit::Matrix<T> answer(Length(),Dmnsn());
   gbtList<gPoly<T> > list = UnderlyingbtList();
   int ii;
   for (ii = 1; ii <= Length(); ii++)

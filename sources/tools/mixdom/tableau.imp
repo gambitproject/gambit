@@ -32,13 +32,13 @@
 
 // Constructors and Destructor
  
-Tableau<double>::Tableau(const gbtMatrix<double> &A, const gbtVector<double> &b)
+Tableau<double>::Tableau(const Gambit::Matrix<double> &A, const gbtVector<double> &b)
   : TableauInterface<double>(A,b), B(*this), tmpcol(b.First(),b.Last())
 {
   Solve(b, solution);
 };
 
-Tableau<double>::Tableau(const gbtMatrix<double> &A, const gbtArray<int> &art, 
+Tableau<double>::Tableau(const Gambit::Matrix<double> &A, const gbtArray<int> &art, 
 			 const gbtVector<double> &b)
   : TableauInterface<double>(A,art,b), B(*this), tmpcol(b.First(),b.Last())
 {
@@ -177,7 +177,7 @@ bool Tableau<double>::IsLexMin()
 // ---------------------------------------------------------------------------
 
 
-gbtInteger find_lcd(const gbtMatrix<gbtRational> &mat)
+gbtInteger find_lcd(const Gambit::Matrix<gbtRational> &mat)
 {
   gbtInteger lcd(1);
   for(int i=mat.MinRow();i<=mat.MaxRow();i++)
@@ -196,7 +196,7 @@ gbtInteger find_lcd(const gbtVector<gbtRational> &vec)
 
 // Constructors and Destructor
  
-Tableau<gbtRational>::Tableau(const gbtMatrix<gbtRational> &A, 
+Tableau<gbtRational>::Tableau(const Gambit::Matrix<gbtRational> &A, 
 			    const gbtVector<gbtRational> &b) 
   : TableauInterface<gbtRational>(A,b), 
     Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()),
@@ -225,7 +225,7 @@ Tableau<gbtRational>::Tableau(const gbtMatrix<gbtRational> &A,
     solution[i] = (gbtRational)Coeff[i];
 }
 
-Tableau<gbtRational>::Tableau(const gbtMatrix<gbtRational> &A, 
+Tableau<gbtRational>::Tableau(const Gambit::Matrix<gbtRational> &A, 
 			    const gbtArray<int> &art, 
 			    const gbtVector<gbtRational> &b) 
   : TableauInterface<gbtRational>(A,art,b), 
@@ -292,10 +292,10 @@ int Tableau<gbtRational>::remap(int col_index) const
   return i;
 }
 
-gbtMatrix<gbtRational> Tableau<gbtRational>::GetInverse()
+Gambit::Matrix<gbtRational> Tableau<gbtRational>::GetInverse()
 {
   gbtVector<gbtRational> mytmpcol(tmpcol.First(),tmpcol.Last());
-  gbtMatrix<gbtRational> inv(MinRow(),MaxRow(),MinRow(),MaxRow());
+  Gambit::Matrix<gbtRational> inv(MinRow(),MaxRow(),MinRow(),MaxRow());
   for(int i=inv.MinCol();i<=inv.MaxCol();i++){
     MySolveColumn(-i,mytmpcol);
     inv.SetColumn(i,mytmpcol);
@@ -446,8 +446,8 @@ void Tableau<gbtRational>::Refactor()
   // gout << "\ndenom: " << denom << " totdenom: " << totdenom;
 
   int i,j;
-  gbtMatrix<gbtRational> inv(GetInverse());
-  gbtMatrix<gbtRational> Tabnew(Tabdat.MinRow(),Tabdat.MaxRow(),Tabdat.MinCol(),Tabdat.MaxCol());
+  Gambit::Matrix<gbtRational> inv(GetInverse());
+  Gambit::Matrix<gbtRational> Tabnew(Tabdat.MinRow(),Tabdat.MaxRow(),Tabdat.MinCol(),Tabdat.MaxCol());
   for(i=nonbasic.First();i<=nonbasic.Last();i++) {
     GetColumn(nonbasic[i],mytmpcol);
     //    if(nonbasic[i]>=0) mytmpcol*=gbtRational(totdenom);

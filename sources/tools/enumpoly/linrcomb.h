@@ -39,11 +39,11 @@ independent.
 #define LINRCOMB_H
 
 #include "libgambit/rational.h"
-#include "libgambit/gmatrix.h"
+#include "libgambit/matrix.h"
 
 template <class T> class LinearCombination  {
   private:
-    gbtMatrix<T> scrambled;
+    Gambit::Matrix<T> scrambled;
     gbtVector<T> weights;
     bool       last_row_is_spanned;
 
@@ -53,14 +53,14 @@ template <class T> class LinearCombination  {
     void AddMultipleOfRowiToRowj(const int& i, 
 				 const int& j, 
 				 const T& scalar,
-				 gbtMatrix<T>& B);
+				 Gambit::Matrix<T>& B);
 
   // This function is left unimplemented to avoid copying
     LinearCombination<T>& operator=(const LinearCombination<T> &);
   
   public:
        // Constructors, Destructor, Constructive Operators
-    LinearCombination(const gbtMatrix<T> &);
+    LinearCombination(const Gambit::Matrix<T> &);
     LinearCombination(const LinearCombination<T> &);
 
     virtual ~LinearCombination();

@@ -29,7 +29,9 @@
 
 #include "base.h"
 
-template <class T> class gbtMatrix;
+namespace Gambit {
+  template <class T> class Matrix;
+}
 
 /** 
  * General purpose vector representation and calculation class.
@@ -39,7 +41,7 @@ template <class T> class gbtMatrix;
  * be defined for the type.
  */
 template <class T> class gbtVector : public gbtArray<T>   {
-  friend class gbtMatrix<T>;
+  friend class Gambit::Matrix<T>;
 public:
   /** Create a vector of length len, starting at 1 */
   gbtVector(unsigned int len = 0);

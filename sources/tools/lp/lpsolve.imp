@@ -35,7 +35,7 @@ template <class T> gbtArray<int> Artificials(const gbtVector<T> &b)
 }
 
 template <class T> 
-LPSolve<T>::LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &b,
+LPSolve<T>::LPSolve(const Gambit::Matrix<T> &A, const gbtVector<T> &b,
 		    const gbtVector<T> &c, int nequals)
   : well_formed(1), feasible(1), bounded(1), aborted(0), 
     nvars(c.Length()),neqns(b.Length()), nequals(nequals),
@@ -204,7 +204,7 @@ LPSolve<T>::LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &b,
 }
 
 //template <class T> LPSolve<T>::
-//LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &/*B*/, 
+//LPSolve(const Gambit::Matrix<T> &A, const gbtVector<T> &/*B*/, 
 //	const gbtVector<T> &/*C*/,  const gbtVector<int> &/*sense*/, 
 //	const gbtVector<int> &/*LB*/,  const gbtVector<T> &/*lb*/, 
 //	const gbtVector<int> &/*UB*/, const gbtVector<T> &/*ub*/)

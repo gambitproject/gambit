@@ -46,7 +46,7 @@
 
 inline double sqr(double x) { return x*x; }
 
-static void Givens(gbtMatrix<double> &b, gbtMatrix<double> &q,
+static void Givens(Gambit::Matrix<double> &b, Gambit::Matrix<double> &q,
 		   double &c1, double &c2, int l1, int l2, int l3)
 {
   if (fabs(c1) + fabs(c2) == 0.0) {
@@ -81,7 +81,7 @@ static void Givens(gbtMatrix<double> &b, gbtMatrix<double> &q,
   c2 = 0.0;
 }
 
-static void QRDecomp(gbtMatrix<double> &b, gbtMatrix<double> &q)
+static void QRDecomp(Gambit::Matrix<double> &b, Gambit::Matrix<double> &q)
 {
   q.MakeIdent();
   for (int m = 1; m <= b.NumColumns(); m++) {
@@ -91,7 +91,7 @@ static void QRDecomp(gbtMatrix<double> &b, gbtMatrix<double> &q)
   }
 }
 
-static void NewtonStep(gbtMatrix<double> &q, gbtMatrix<double> &b,
+static void NewtonStep(Gambit::Matrix<double> &q, Gambit::Matrix<double> &b,
 		       gbtVector<double> &u, gbtVector<double> &y,
 		       double &d)
 {
@@ -160,7 +160,7 @@ void QreLHS(const gbtNfgSupport &p_support,
 void QreJacobian(const gbtNfgSupport &p_support,
 		 const gbtVector<double> &p_point,
 		 const gbtArray<bool> &p_isLog,
-		 gbtMatrix<double> &p_matrix)
+		 Gambit::Matrix<double> &p_matrix)
 {
   gbtMixedProfile<double> profile(p_support), logprofile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
@@ -404,7 +404,7 @@ static void TracePath(const gbtMixedProfile<double> &p_start,
   gbtVector<double> t(p_start.Length() + 1);
   gbtVector<double> y(p_start.Length());
 
-  gbtMatrix<double> b(p_start.Length() + 1, p_start.Length());
+  Gambit::Matrix<double> b(p_start.Length() + 1, p_start.Length());
   Gambit::SquareMatrix<double> q(p_start.Length() + 1);
   QreJacobian(p_start.GetSupport(), x, isLog, b);
   QRDecomp(b, q);

@@ -52,7 +52,7 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
     for(k=1;k<=nfg->NumPlayers();k++)
       if(k!=pl) contingencies*=S.NumStrats(k);
     
-    gbtMatrix<T> A(1,contingencies+1,1,strats);
+    Gambit::Matrix<T> A(1,contingencies+1,1,strats);
     gbtVector<T> B(1,contingencies+1);
     gbtVector<T> C(1,strats);
     
@@ -132,7 +132,7 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
     for(k=1;k<=nfg->NumPlayers();k++)
       if(k!=pl) contingencies*=S.NumStrats(k);
     
-    gbtMatrix<T> A(1,contingencies+1,1,strats-1);
+    Gambit::Matrix<T> A(1,contingencies+1,1,strats-1);
     gbtVector<T> B(1,contingencies+1);
     gbtVector<T> C(1,strats-1);
     
@@ -236,7 +236,7 @@ bool IsMixedDominated(const gbtNfgSupport &S, Gambit::GameStrategy str,
   
   if (strong)   {
     T COpt;
-    gbtMatrix<T> A(1,contingencies+1,1,strats);
+    Gambit::Matrix<T> A(1,contingencies+1,1,strats);
     gbtVector<T> B(1,contingencies+1);
     gbtVector<T> C(1,strats);
     
@@ -303,7 +303,7 @@ bool IsMixedDominated(const gbtNfgSupport &S, Gambit::GameStrategy str,
   else  {    // look for weak domination
     T C0 = (T) 0, COpt;
 
-    gbtMatrix<T> A(1,contingencies+1,1,strats-1);
+    Gambit::Matrix<T> A(1,contingencies+1,1,strats-1);
     gbtVector<T> B(1,contingencies+1);
     gbtVector<T> C(1,strats-1);
     
@@ -397,7 +397,7 @@ bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
   
   if (strong)   {
     T COpt;
-    gbtMatrix<T> A(1,contingencies+1,1,strats+1);
+    Gambit::Matrix<T> A(1,contingencies+1,1,strats+1);
     gbtVector<T> B(1,contingencies+1);
     gbtVector<T> C(1,strats+1);
     
@@ -458,7 +458,7 @@ bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
   else  {    // look for weak domination
     T C0 = (T) 0, COpt;
 
-    gbtMatrix<T> A(1,contingencies+1,1,strats);
+    Gambit::Matrix<T> A(1,contingencies+1,1,strats);
     gbtVector<T> B(1,contingencies+1);
     gbtVector<T> C(1,strats);
     

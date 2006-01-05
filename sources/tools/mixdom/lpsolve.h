@@ -58,9 +58,9 @@ private:
   int Enter(void);
   int Exit(int);
 public:
-  LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &B, const gbtVector<T> &C,
+  LPSolve(const Gambit::Matrix<T> &A, const gbtVector<T> &B, const gbtVector<T> &C,
 	  int nequals);   // nequals = number of equalities (last nequals rows)
-//  LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &B, 
+//  LPSolve(const Gambit::Matrix<T> &A, const gbtVector<T> &B, 
 //	  const gbtVector<T> &C,  const gbtVector<int> &sense, 
 //	  const gbtVector<int> &LB,  const gbtVector<T> &lb, 
 //	  const gbtVector<int> &UB, const gbtVector<T> &ub);

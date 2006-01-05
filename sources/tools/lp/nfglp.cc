@@ -91,7 +91,7 @@ void nfgLp<T>::Solve(const gbtNfgSupport &p_support)
   
   m = p_support.NumStrats(1);
   k = p_support.NumStrats(2);
-  gbtMatrix<T> A(1,k+1,1,m+1);
+  Gambit::Matrix<T> A(1,k+1,1,m+1);
   gbtVector<T> b(1,k+1);
   gbtVector<T> c(1,m+1);
   gbtStrategyProfile profile(p_support.GetGame());

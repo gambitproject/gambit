@@ -76,7 +76,7 @@ public:
 
 template <class T> class TableauInterface : public BaseTableau<T>{
 protected:
-  const gbtMatrix<T> *A;  // should this be private?
+  const Gambit::Matrix<T> *A;  // should this be private?
   const gbtVector<T> *b;  // should this be private?
   Basis basis; 
   gbtVector<T> solution;  // current solution vector. should this be private?
@@ -85,8 +85,8 @@ protected:
   gbtArray<int> artificial;  // artificial variables
 
 public:
-  TableauInterface(const gbtMatrix<T> &A, const gbtVector<T> &b); 
-  TableauInterface(const gbtMatrix<T> &A, const gbtArray<int> &art, 
+  TableauInterface(const Gambit::Matrix<T> &A, const gbtVector<T> &b); 
+  TableauInterface(const Gambit::Matrix<T> &A, const gbtArray<int> &art, 
 		   const gbtVector<T> &b); 
   TableauInterface(const TableauInterface<T>&);
   virtual ~TableauInterface();
@@ -101,7 +101,7 @@ public:
   int MaxCol() const;
 
   Basis & GetBasis(void);
-  const gbtMatrix<T> & Get_A(void) const;
+  const Gambit::Matrix<T> & Get_A(void) const;
   const gbtVector<T> & Get_b(void) const;
   
   bool Member(int i) const;

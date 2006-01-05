@@ -144,7 +144,7 @@ private:
   
   void FactorBasis();
 
-  void GaussElem( gbtMatrix<T> &, int, int );
+  void GaussElem( Gambit::Matrix<T> &, int, int );
 
   bool CheckBasis();
   bool RefactorCheck();

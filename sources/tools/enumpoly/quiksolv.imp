@@ -401,7 +401,7 @@ QuikSolv<T>::NewtonPolishOnce(const gbtVector<gDouble>& point) const
 {
   gbtVector<gDouble> oldevals = TreesOfPartials.ValuesOfRootPolys(point,
 								NoEquations);
-  gbtMatrix<gDouble> Df = TreesOfPartials.DerivativeMatrix(point,NoEquations);
+  Gambit::Matrix<gDouble> Df = TreesOfPartials.DerivativeMatrix(point,NoEquations);
   Gambit::SquareMatrix<gDouble> M(Df * Df.Transpose());
   
   gbtVector<gDouble> Del = - (Df.Transpose() * M.Inverse()) * oldevals;
@@ -414,7 +414,7 @@ QuikSolv<T>::SlowNewtonPolishOnce(const gbtVector<gDouble>& point) const
 {
   gbtVector<gDouble> oldevals = TreesOfPartials.ValuesOfRootPolys(point,
 								NoEquations);
-  gbtMatrix<gDouble> Df = TreesOfPartials.DerivativeMatrix(point,NoEquations);
+  Gambit::Matrix<gDouble> Df = TreesOfPartials.DerivativeMatrix(point,NoEquations);
   Gambit::SquareMatrix<gDouble> M(Df * Df.Transpose());
   
   gbtVector<gDouble> Del = - (Df.Transpose() * M.Inverse()) * oldevals;

@@ -146,7 +146,7 @@ template<class T> gbtList<gbtVector<gDouble> > gSolver<T>::Roots()
   gbtList<polynomial<T> > UnivariateRootEquations;
   int i;
   for (i = 1; i <= TheIdeal.Dmnsn(); i++) {
-    gbtMatrix<T> CoefficientMatrix(mon_bss.Length()+1, mon_bss.Length());
+    Gambit::Matrix<T> CoefficientMatrix(mon_bss.Length()+1, mon_bss.Length());
     int j = 0; 
     bool done = false;
     while (!done) {
@@ -161,7 +161,7 @@ template<class T> gbtList<gbtVector<gDouble> > gSolver<T>::Roots()
 //gout << "After updating, j = " << j
 //  << "and CoefficientMatrix is\n" << CoefficientMatrix << "\n";
 
-      gbtMatrix<T> SubMatrix(j+1,mon_bss.Length());
+      Gambit::Matrix<T> SubMatrix(j+1,mon_bss.Length());
       for (int m = 1; m <= j+1; m++)
 	for (int n = 1; n <= mon_bss.Length(); n++)
 	  SubMatrix(m,n) = CoefficientMatrix(m,n);

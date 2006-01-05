@@ -48,8 +48,8 @@ public:
     virtual ~BadPivot();
     std::string GetDescription(void) const;
   };
-  LPTableau(const gbtMatrix<T> &A, const gbtVector<T> &b); 
-  LPTableau(const gbtMatrix<T> &A, const gbtArray<int> &art, const gbtVector<T> &b); 
+  LPTableau(const Gambit::Matrix<T> &A, const gbtVector<T> &b); 
+  LPTableau(const Gambit::Matrix<T> &A, const gbtArray<int> &art, const gbtVector<T> &b); 
   LPTableau(const LPTableau<T>&);
   virtual ~LPTableau();
   

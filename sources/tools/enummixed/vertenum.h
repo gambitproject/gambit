@@ -51,7 +51,7 @@ private:
   int n;  // N is the number of columns, which is the # of dimensions.
   int k;  // K is the number of inequalities given.
     // Removed const on A and b (Geoff)
-  const gbtMatrix<T> &A;   
+  const Gambit::Matrix<T> &A;   
   const gbtVector<T> &b;
   gbtVector<T> btemp,c;
   gbtList<BFS<T> > List;
@@ -66,7 +66,7 @@ private:
   void Search(LPTableau<T> &tab);
   void DualSearch(LPTableau<T> &tab);
 public:
-  VertEnum(const gbtMatrix<T> &, const gbtVector<T> &);
+  VertEnum(const Gambit::Matrix<T> &, const gbtVector<T> &);
   VertEnum(LPTableau<T> &);
   virtual ~VertEnum();
 

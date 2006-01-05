@@ -44,7 +44,7 @@ public:
     virtual ~BadExitIndex();
     std::string GetDescription(void) const;
   };
-  LTableau(const gbtMatrix<T> &A, const gbtVector<T> &b);
+  LTableau(const Gambit::Matrix<T> &A, const gbtVector<T> &b);
   LTableau(Tableau<T> &);
   virtual ~LTableau();
 

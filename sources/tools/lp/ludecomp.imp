@@ -215,7 +215,7 @@ void LUdecomp<T>::FactorBasis()
   int i, j, piv;
   T pivVal;
 
-  gbtMatrix<T> B(basis.First(), basis.Last(), 
+  Gambit::Matrix<T> B(basis.First(), basis.Last(), 
 	       basis.First(), basis.Last());
 
   for( i = basis.First(); i <= basis.Last(); i++ ) {
@@ -252,7 +252,7 @@ void LUdecomp<T>::FactorBasis()
 }
 
 template<class T>
-void LUdecomp<T>::GaussElem(gbtMatrix<T> &B, int row, int col)
+void LUdecomp<T>::GaussElem(Gambit::Matrix<T> &B, int row, int col)
 {
   if( B(row, col) == (T) 0) throw BadPivot();
 

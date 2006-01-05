@@ -27,7 +27,7 @@
 #include "vertenum.h"
 
 template <class T>
-VertEnum<T>::VertEnum(const gbtMatrix<T> &_A, const gbtVector<T> &_b) 
+VertEnum<T>::VertEnum(const Gambit::Matrix<T> &_A, const gbtVector<T> &_b) 
   : mult_opt(0), depth(0), A(_A), b(_b), btemp(_b), 
     c(_A.MinCol(),_A.MaxCol()), npivots(0), nodes(0)
 {

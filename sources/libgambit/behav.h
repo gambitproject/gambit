@@ -81,7 +81,7 @@ protected:
 
   // structures for storing cached data: nodes
   mutable gbtVector<T> m_realizProbs, m_beliefs, m_nvals, m_bvals;
-  mutable gbtMatrix<T> m_nodeValues;
+  mutable Gambit::Matrix<T> m_nodeValues;
 
   // structures for storing cached data: information sets
   mutable gbtPVector<T> m_infosetValues;

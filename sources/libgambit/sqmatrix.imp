@@ -35,15 +35,15 @@ namespace Gambit {
 template <class T> SquareMatrix<T>::SquareMatrix(void)   { }
 
 template <class T> SquareMatrix<T>::SquareMatrix(int size)
-  : gbtMatrix<T>(size, size)
+  : Matrix<T>(size, size)
 { }
 
-template <class T> SquareMatrix<T>::SquareMatrix(const gbtMatrix<T> &M)
-  : gbtMatrix<T>(M)
+template <class T> SquareMatrix<T>::SquareMatrix(const Matrix<T> &M)
+  : Matrix<T>(M)
 { assert ( M.NumRows() == M.NumColumns() ); }
 
 template <class T> SquareMatrix<T>::SquareMatrix(const SquareMatrix<T> &M)
-  : gbtMatrix<T>(M)
+  : Matrix<T>(M)
 { }
 
 template <class T> SquareMatrix<T>::~SquareMatrix()   { }
@@ -51,7 +51,7 @@ template <class T> SquareMatrix<T>::~SquareMatrix()   { }
 template <class T>
 SquareMatrix<T> &SquareMatrix<T>::operator=(const SquareMatrix<T> &M)
 {
-  gbtMatrix<T>::operator=(M);
+  Matrix<T>::operator=(M);
   return *this;
 }
 
