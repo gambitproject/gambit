@@ -64,9 +64,9 @@ void gbtBehavDominanceStack::SetStrict(bool p_strict)
 void gbtBehavDominanceStack::Reset(void)
 {
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
-  m_supports = gbtArray<gbtEfgSupport *>();
+  m_supports = gbtArray<Gambit::BehavSupport *>();
   if (m_doc->IsTree()) {
-    m_supports.Append(new gbtEfgSupport(m_doc->GetGame()));
+    m_supports.Append(new Gambit::BehavSupport(m_doc->GetGame()));
     m_current = 1;
   }
 }
@@ -88,11 +88,11 @@ bool gbtBehavDominanceStack::NextLevel(void)
   }
   
   std::ostringstream gnull;
-  gbtEfgSupport newSupport = 
+  Gambit::BehavSupport newSupport = 
     m_supports[m_current]->Undominated(m_strict, true, players, gnull);
 
   if (newSupport != *m_supports[m_current]) {
-    m_supports.Append(new gbtEfgSupport(newSupport));
+    m_supports.Append(new Gambit::BehavSupport(newSupport));
     m_current++;
     return true;
   }
@@ -138,8 +138,8 @@ void gbtStrategyDominanceStack::SetStrict(bool p_strict)
 void gbtStrategyDominanceStack::Reset(void)
 {
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
-  m_supports = gbtArray<gbtNfgSupport *>();
-  m_supports.Append(new gbtNfgSupport(m_doc->GetGame()));
+  m_supports = gbtArray<Gambit::StrategySupport *>();
+  m_supports.Append(new Gambit::StrategySupport(m_doc->GetGame()));
   m_current = 1;
   m_noFurther = false;
 }
@@ -161,11 +161,11 @@ bool gbtStrategyDominanceStack::NextLevel(void)
   }
 
   std::ostringstream gnull;
-  gbtNfgSupport newSupport = 
+  Gambit::StrategySupport newSupport = 
     m_supports[m_current]->Undominated(m_strict, players, gnull);
 
   if (newSupport != *m_supports[m_current]) {
-    m_supports.Append(new gbtNfgSupport(newSupport));
+    m_supports.Append(new Gambit::StrategySupport(newSupport));
     m_current++;
     return true;
   }

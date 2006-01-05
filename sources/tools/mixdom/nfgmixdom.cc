@@ -29,7 +29,7 @@
 #include "lpsolve.h"
 
 template <class T>
-bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
+bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySupport &R,
 			   int pl, bool strong, T /*junk*/,
 			   std::ostream &tracefile)
 {
@@ -213,7 +213,7 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
 }
 
 template <class T>
-bool IsMixedDominated(const gbtNfgSupport &S, Gambit::GameStrategy str,
+bool IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy str,
 		      bool strong, T /*junk*/,
 		      std::ostream &tracefile)
 {
@@ -378,7 +378,7 @@ template <class T>
 bool IsMixedDominated(const Gambit::MixedStrategyProfile<T> &pr, int pl,
 		      bool strong, std::ostream &tracefile)
 {
-  gbtNfgSupport S = pr.GetSupport();
+  Gambit::StrategySupport S = pr.GetSupport();
   Gambit::Game nfg = pr.GetGame();
   int strats = S.NumStrats(pl);
   gbtVector<T> prob = pr.GetRow(pl);
@@ -531,7 +531,7 @@ bool IsMixedDominated(const Gambit::MixedStrategyProfile<T> &pr, int pl,
 }
 
 
-bool IsMixedDominated(const gbtNfgSupport &S, Gambit::GameStrategy *str,
+bool IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy *str,
 		      bool strong, bool rational,
 		      std::ostream &tracefile)
 {
@@ -548,17 +548,17 @@ bool IsMixedDominated(const gbtNfgSupport &S, Gambit::GameStrategy *str,
 // There is probably a cleaner way to do this.  
 
 template bool 
-ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,int pl, bool strong, 
+ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySupport &R,int pl, bool strong, 
 		      gbtRational junk, std::ostream &tracefile);
 template bool 
-ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,int pl, bool strong, 
+ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySupport &R,int pl, bool strong, 
 		      double junk, std::ostream &tracefile);
 
 template bool
-IsMixedDominated(const gbtNfgSupport &S, Gambit::GameStrategy str,
+IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy str,
 		 bool strong, gbtRational junk, std::ostream &tracefile);
 template bool
-IsMixedDominated(const gbtNfgSupport &S, Gambit::GameStrategy str,
+IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy str,
 		 bool strong, double junk, std::ostream &tracefile);
 
 template bool 

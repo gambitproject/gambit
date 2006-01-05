@@ -26,7 +26,7 @@
 
 #include "libgambit.h"
 
-EfgContIter::EfgContIter(const gbtEfgSupport &s)
+EfgContIter::EfgContIter(const Gambit::BehavSupport &s)
   : _frozen_pl(0), _frozen_iset(0),
     _efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
@@ -46,7 +46,7 @@ EfgContIter::EfgContIter(const gbtEfgSupport &s)
   First();
 }
 
-EfgContIter::EfgContIter(const gbtEfgSupport &s, const gbtList<Gambit::GameInfoset>& active)
+EfgContIter::EfgContIter(const Gambit::BehavSupport &s, const gbtList<Gambit::GameInfoset>& active)
   : _frozen_pl(0), _frozen_iset(0),
     _efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
@@ -167,7 +167,7 @@ gbtRational EfgContIter::Payoff(int pl) const
 
 
 
-EfgConditionalContIter::EfgConditionalContIter(const gbtEfgSupport &s)
+EfgConditionalContIter::EfgConditionalContIter(const Gambit::BehavSupport &s)
   : _efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
     _is_active(),
@@ -186,7 +186,7 @@ EfgConditionalContIter::EfgConditionalContIter(const gbtEfgSupport &s)
   First();
 }
 
-EfgConditionalContIter::EfgConditionalContIter(const gbtEfgSupport &s, 
+EfgConditionalContIter::EfgConditionalContIter(const Gambit::BehavSupport &s, 
 					       const gbtList<Gambit::GameInfoset>& active)
   : _efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),

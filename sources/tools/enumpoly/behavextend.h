@@ -32,15 +32,15 @@
 class algExtendsToNash {
 public:
   bool ExtendsToNash(const Gambit::MixedBehavProfile<double> &p_solution,
-		     const gbtEfgSupport &p_littleSupport,
-		     const gbtEfgSupport &p_bigSupport);
+		     const Gambit::BehavSupport &p_littleSupport,
+		     const Gambit::BehavSupport &p_bigSupport);
 };
 
 class algExtendsToAgentNash {
 public:
   bool ExtendsToAgentNash(const Gambit::MixedBehavProfile<double> &p_solution,
-			  const gbtEfgSupport &p_littleSupport,
-			  const gbtEfgSupport &p_bigSupport);
+			  const Gambit::BehavSupport &p_littleSupport,
+			  const Gambit::BehavSupport &p_bigSupport);
 };
 
 

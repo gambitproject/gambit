@@ -31,14 +31,14 @@
 class EfgIter    {
   private:
     Gambit::Game _efg;
-    gbtEfgSupport _support;
+    Gambit::BehavSupport _support;
     Gambit::PureBehavProfile _profile;
     gbtPVector<int> _current;
     mutable gbtVector<gbtRational> _payoff;
 
   public:
     EfgIter(Gambit::Game);
-    EfgIter(const gbtEfgSupport &);
+    EfgIter(const Gambit::BehavSupport &);
     EfgIter(const EfgIter &);
     EfgIter(const EfgContIter &);
     ~EfgIter();
@@ -52,7 +52,7 @@ class EfgIter    {
     gbtRational Payoff(int p) const;
     void Payoff(gbtVector<gbtRational> &) const;
 
-    const gbtEfgSupport &Support(void) const;
+    const Gambit::BehavSupport &Support(void) const;
 };
 
 
@@ -65,7 +65,7 @@ EfgIter::EfgIter(Gambit::Game efg)
   First();
 }
 
-EfgIter::EfgIter(const gbtEfgSupport &s)
+EfgIter::EfgIter(const Gambit::BehavSupport &s)
   : _efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(_efg->NumInfosets()),
     _payoff(_efg->NumPlayers())
@@ -166,7 +166,7 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-void Solve(const gbtEfgSupport &p_support)
+void Solve(const Gambit::BehavSupport &p_support)
 {
   EfgContIter citer(p_support);
   gbtPVector<gbtRational> probs(p_support.GetGame()->NumInfosets());
@@ -205,7 +205,7 @@ void Solve(const gbtEfgSupport &p_support)
       }
       
       if (flag)  {
-	Gambit::MixedBehavProfile<gbtRational> temp(gbtEfgSupport(p_support.GetGame()));
+	Gambit::MixedBehavProfile<gbtRational> temp(Gambit::BehavSupport(p_support.GetGame()));
 	// zero out all the entries, since any equilibria are pure
 	((gbtVector<gbtRational> &) temp).operator=(gbtRational(0));
 	const Gambit::PureBehavProfile &profile = citer.GetProfile();

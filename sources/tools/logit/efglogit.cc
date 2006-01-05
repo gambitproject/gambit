@@ -115,7 +115,7 @@ static void NewtonStep(Gambit::Matrix<double> &q, Gambit::Matrix<double> &b,
   d = sqrt(d);
 }
 
-static void QreLHS(const gbtEfgSupport &p_support, 
+static void QreLHS(const Gambit::BehavSupport &p_support, 
 		   const gbtVector<double> &p_point,
 		   gbtVector<double> &p_lhs)
 {
@@ -148,7 +148,7 @@ static void QreLHS(const gbtEfgSupport &p_support,
   }
 }
 
-static void QreJacobian(const gbtEfgSupport &p_support,
+static void QreJacobian(const Gambit::BehavSupport &p_support,
 			const gbtVector<double> &p_point,
 			Gambit::Matrix<double> &p_matrix)
 {
@@ -226,7 +226,7 @@ static void QreJacobian(const gbtEfgSupport &p_support,
 int g_numDecimals = 6;
 
 void PrintProfile(std::ostream &p_stream,
-		  const gbtEfgSupport &p_support, const gbtVector<double> &x,
+		  const Gambit::BehavSupport &p_support, const gbtVector<double> &x,
 		  bool p_terminal = false)
 {
   // By convention, we output lambda first
@@ -296,7 +296,7 @@ static void TracePath(const Gambit::MixedBehavProfile<double> &p_start,
     if (x[i] < 1.0e-10) {
       // Drop this strategy from the support, then recursively call
       // to continue tracing
-      gbtEfgSupport newSupport(p_start.GetSupport());
+      Gambit::BehavSupport newSupport(p_start.GetSupport());
       int index = 1;
       for (int pl = 1; pl <= newSupport.GetGame()->NumPlayers(); pl++) {
 	Gambit::GamePlayer player = newSupport.GetGame()->GetPlayer(pl);
@@ -409,7 +409,7 @@ static void TracePath(const Gambit::MixedBehavProfile<double> &p_start,
       if (u[i] < 1.0e-10) {
 	// Drop this strategy from the support, then recursively call
 	// to continue tracing
-	gbtEfgSupport newSupport(p_start.GetSupport());
+	Gambit::BehavSupport newSupport(p_start.GetSupport());
 	int index = 1;
 	for (int pl = 1; pl <= newSupport.GetGame()->NumPlayers(); pl++) {
 	  Gambit::GamePlayer player = newSupport.GetGame()->GetPlayer(pl);

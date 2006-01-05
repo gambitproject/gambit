@@ -29,7 +29,6 @@
 
 #include "base.h"
 #include "gpvector.h"
-#include "nfstrat.h"
 
 template <class T> class gbtRectArray;
 
@@ -37,7 +36,7 @@ namespace Gambit {
 
 template <class T> class MixedStrategyProfile : public gbtPVector<T>  {
 private:
-  gbtNfgSupport support;
+  StrategySupport support;
 
   // Private Payoff functions
   T PPayoff(int pl, int index, int i) const;
@@ -51,7 +50,7 @@ private:
 public:
   /// @name Lifecycle
   //@{
-  MixedStrategyProfile(const gbtNfgSupport &);
+  MixedStrategyProfile(const StrategySupport &);
   MixedStrategyProfile(const MixedStrategyProfile<T> &);
   MixedStrategyProfile(const MixedBehavProfile<T> &);
   virtual ~MixedStrategyProfile() { }
@@ -69,7 +68,7 @@ public:
   /// @name General data access
   //@{
   Game GetGame(void) const { return support.GetGame(); }
-  const gbtNfgSupport &GetSupport(void) const { return support; }
+  const StrategySupport &GetSupport(void) const { return support; }
   void SetCentroid(void);
   //@}
 

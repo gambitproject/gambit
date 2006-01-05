@@ -26,6 +26,8 @@
 
 #include "libgambit.h"
 
+namespace Gambit {
+
 template <class T> void RemoveRedundancies(gbtList<T> &p_list)
 {
   int i = 1; int j = 2;		
@@ -38,160 +40,160 @@ template <class T> void RemoveRedundancies(gbtList<T> &p_list)
   }
 }
 
-class gbtEfgSupportInfoset   {
-  friend class gbtEfgSupportPlayer;
+class BehavSupportInfoset   {
+  friend class BehavSupportPlayer;
 protected:
-  gbtArray<Gambit::GameAction> acts;
+  gbtArray<GameAction> acts;
 
 public:
-  gbtEfgSupportInfoset(Gambit::GameInfoset);
-  gbtEfgSupportInfoset ( const gbtEfgSupportInfoset &a);
-  virtual ~gbtEfgSupportInfoset();
-  gbtEfgSupportInfoset &operator=( const gbtEfgSupportInfoset &a);
-  bool operator==( const gbtEfgSupportInfoset &a) const;
-  inline const Gambit::GameAction operator[](const int &i) const { return acts[i]; }
+  BehavSupportInfoset(GameInfoset);
+  BehavSupportInfoset ( const BehavSupportInfoset &a);
+  virtual ~BehavSupportInfoset();
+  BehavSupportInfoset &operator=( const BehavSupportInfoset &a);
+  bool operator==( const BehavSupportInfoset &a) const;
+  inline const GameAction operator[](const int &i) const { return acts[i]; }
 
   // Information
   inline const int Length() const { return acts.Length(); }
 };
 
 //----------------------------------------------------
-// gbtEfgSupportInfoset: Constructors, Destructor, operators
+// BehavSupportInfoset: Constructors, Destructor, operators
 // ---------------------------------------------------
 
-gbtEfgSupportInfoset::gbtEfgSupportInfoset(Gambit::GameInfoset p_infoset)
+BehavSupportInfoset::BehavSupportInfoset(GameInfoset p_infoset)
 {
   for (int i = 1; i <= p_infoset->NumActions(); i++) {
     acts.Append(p_infoset->GetAction(i));
   }
  }
 
-gbtEfgSupportInfoset::gbtEfgSupportInfoset(const gbtEfgSupportInfoset &a)
+BehavSupportInfoset::BehavSupportInfoset(const BehavSupportInfoset &a)
   : acts(a.acts)
 { }
 
-gbtEfgSupportInfoset::~gbtEfgSupportInfoset ()
+BehavSupportInfoset::~BehavSupportInfoset ()
 { }
 
-gbtEfgSupportInfoset &gbtEfgSupportInfoset::operator=( const gbtEfgSupportInfoset &a)
+BehavSupportInfoset &BehavSupportInfoset::operator=( const BehavSupportInfoset &a)
 {
   acts = a.acts; 
   return *this;
 }
 
-bool gbtEfgSupportInfoset::operator==(const gbtEfgSupportInfoset &a) const
+bool BehavSupportInfoset::operator==(const BehavSupportInfoset &a) const
 {
   return (acts == a.acts);
 }
 
-class gbtEfgSupportPlayer{
+class BehavSupportPlayer{
 
 protected:
-  Gambit::GamePlayer efp;
-  gbtArray < gbtEfgSupportInfoset *> infosets;
+  GamePlayer efp;
+  gbtArray < BehavSupportInfoset *> infosets;
 public:
   
   //----------------------------------------
   // Constructors, Destructor, operators
   //----------------------------------------
 
-//  gbtEfgSupportPlayer();
-  gbtEfgSupportPlayer(const gbtEfgSupportPlayer &);
-  gbtEfgSupportPlayer(Gambit::GamePlayer);
-  virtual ~gbtEfgSupportPlayer();
+//  BehavSupportPlayer();
+  BehavSupportPlayer(const BehavSupportPlayer &);
+  BehavSupportPlayer(GamePlayer);
+  virtual ~BehavSupportPlayer();
 
-  gbtEfgSupportPlayer &operator=(const gbtEfgSupportPlayer &);
-  bool operator==(const gbtEfgSupportPlayer &s) const;
+  BehavSupportPlayer &operator=(const BehavSupportPlayer &);
+  bool operator==(const BehavSupportPlayer &s) const;
 
   //--------------------
   // Member Functions
   //--------------------
 
   // Append an action to an infoset;
-  void AddAction(int iset, const Gambit::GameAction &);
+  void AddAction(int iset, const GameAction &);
 
   // Insert an action in a particular place in an infoset;
-  void AddAction(int iset, const Gambit::GameAction &, int index);
+  void AddAction(int iset, const GameAction &, int index);
 
 
   // Remove an action at int i, returns the removed action pointer
-  Gambit::GameAction RemoveAction(int iset, int i);
+  GameAction RemoveAction(int iset, int i);
 
   // Remove an action from an infoset . 
   // Returns true if the action was successfully removed, false otherwise.
-  bool RemoveAction(int iset, Gambit::GameAction);
+  bool RemoveAction(int iset, GameAction);
 
   // Get a garray of the actions in an Infoset
-  const gbtArray<Gambit::GameAction> &ActionList(int iset) const
+  const gbtArray<GameAction> &ActionList(int iset) const
      { return infosets[iset]->acts; }
 
-  // Get the gbtEfgSupportInfoset of an iset
-  const gbtEfgSupportInfoset *ActionArray(int iset) const
+  // Get the BehavSupportInfoset of an iset
+  const BehavSupportInfoset *ActionArray(int iset) const
      { return infosets[iset]; }
 
-  // Get the gbtEfgSupportInfoset of an Infoset
-  const gbtEfgSupportInfoset *ActionArray(const Gambit::GameInfoset &i) const
+  // Get the BehavSupportInfoset of an Infoset
+  const BehavSupportInfoset *ActionArray(const GameInfoset &i) const
      { return infosets[i->GetNumber()]; }
   
   // Get an Action
-  Gambit::GameAction GetAction(int iset, int index);
+  GameAction GetAction(int iset, int index);
 
   // returns the index of the action if it is in the ActionSet
-  int Find(const Gambit::GameAction &) const;
-  int Find(int, Gambit::GameAction) const;
+  int Find(const GameAction &) const;
+  int Find(int, GameAction) const;
 
   // Number of Actions in a particular infoset
   int NumActions(int iset) const;
 
-  // return the Gambit::GamePlayer of the gbtEfgSupportPlayer
-  Gambit::GamePlayer GetPlayer(void) const;
+  // return the GamePlayer of the BehavSupportPlayer
+  GamePlayer GetPlayer(void) const;
 
-  // checks for a valid gbtEfgSupportPlayer
+  // checks for a valid BehavSupportPlayer
   bool HasActiveActionsAtAllInfosets(void) const;
   bool HasActiveActionAt(const int &iset) const;
 
 };
 
 //--------------------------------------------------
-// gbtEfgSupportPlayer: Constructors, Destructor, operators
+// BehavSupportPlayer: Constructors, Destructor, operators
 //--------------------------------------------------
 
-gbtEfgSupportPlayer::gbtEfgSupportPlayer(Gambit::GamePlayer p)
+BehavSupportPlayer::BehavSupportPlayer(GamePlayer p)
   : infosets(p->NumInfosets())
 {
   efp = p;
   for (int i = 1; i <= p->NumInfosets(); i++) {
-    infosets[i] = new gbtEfgSupportInfoset(p->GetInfoset(i));
+    infosets[i] = new BehavSupportInfoset(p->GetInfoset(i));
   }
 }
 
-gbtEfgSupportPlayer::gbtEfgSupportPlayer( const gbtEfgSupportPlayer &s )
+BehavSupportPlayer::BehavSupportPlayer( const BehavSupportPlayer &s )
 : infosets(s.infosets.Length())
 {
   efp = s.efp;
   for (int i = 1; i <= s.infosets.Length(); i++){
-    infosets[i] = new gbtEfgSupportInfoset(*(s.infosets[i]));
+    infosets[i] = new BehavSupportInfoset(*(s.infosets[i]));
   }
 }
 
-gbtEfgSupportPlayer::~gbtEfgSupportPlayer()
+BehavSupportPlayer::~BehavSupportPlayer()
 { 
   for (int i = 1; i <= infosets.Length(); i++)
     delete infosets[i];
 }
 
-gbtEfgSupportPlayer &gbtEfgSupportPlayer::operator=(const gbtEfgSupportPlayer &s)
+BehavSupportPlayer &BehavSupportPlayer::operator=(const BehavSupportPlayer &s)
 {
   if (this != &s && efp == s.efp) {
     for (int i = 1; i<= infosets.Length(); i++)  {
       delete infosets[i];
-      infosets[i] = new gbtEfgSupportInfoset(*(s.infosets[i]));
+      infosets[i] = new BehavSupportInfoset(*(s.infosets[i]));
     }
   }    
   return *this;
 }
 
-bool gbtEfgSupportPlayer::operator==(const gbtEfgSupportPlayer &s) const
+bool BehavSupportPlayer::operator==(const BehavSupportPlayer &s) const
 {
   if (infosets.Length() != s.infosets.Length() ||
       efp != s.efp)
@@ -204,11 +206,11 @@ bool gbtEfgSupportPlayer::operator==(const gbtEfgSupportPlayer &s) const
 }
 
 //------------------------------------------
-// gbtEfgSupportPlayer: Member functions 
+// BehavSupportPlayer: Member functions 
 //------------------------------------------
 
 // Append an action to a particular infoset;
-void gbtEfgSupportPlayer::AddAction(int iset, const Gambit::GameAction &s)
+void BehavSupportPlayer::AddAction(int iset, const GameAction &s)
 { 
   if (infosets[iset]->acts.Find(s))
     return;
@@ -226,7 +228,7 @@ void gbtEfgSupportPlayer::AddAction(int iset, const Gambit::GameAction &s)
 }
 
 // Insert an action  to a particular infoset at a particular place;
-void gbtEfgSupportPlayer::AddAction(int iset, const Gambit::GameAction &s, int index)
+void BehavSupportPlayer::AddAction(int iset, const GameAction &s, int index)
 { 
   if (!infosets[iset]->acts.Find(s))
     infosets[iset]->acts.Insert(s,index); 
@@ -234,14 +236,14 @@ void gbtEfgSupportPlayer::AddAction(int iset, const Gambit::GameAction &s, int i
 
 // Remove an action from infoset iset at int i, 
 // returns the removed Infoset pointer
-Gambit::GameAction gbtEfgSupportPlayer::RemoveAction(int iset, int i) 
+GameAction BehavSupportPlayer::RemoveAction(int iset, int i) 
 { 
   return (infosets[iset]->acts.Remove(i)); 
 }
 
 // Removes an action from infoset iset . Returns true if the 
 //Action was successfully removed, false otherwise.
-bool gbtEfgSupportPlayer::RemoveAction(int  iset, Gambit::GameAction s )
+bool BehavSupportPlayer::RemoveAction(int  iset, GameAction s )
 { 
   int t = infosets[iset]->acts.Find(s); 
   if (t>0) infosets[iset]->acts.Remove(t); 
@@ -249,35 +251,35 @@ bool gbtEfgSupportPlayer::RemoveAction(int  iset, Gambit::GameAction s )
 } 
 
 // Get an action
-Gambit::GameAction gbtEfgSupportPlayer::GetAction(int iset, int index)
+GameAction BehavSupportPlayer::GetAction(int iset, int index)
 {
   return (infosets[iset]->acts)[index];
 }
 
 // Number of Actions in a particular infoset
-int gbtEfgSupportPlayer::NumActions(int iset) const
+int BehavSupportPlayer::NumActions(int iset) const
 {
   return (infosets[iset]->acts.Length());
 }
 
-// Return the Gambit::GamePlayer of this gbtEfgSupportPlayer
-Gambit::GamePlayer gbtEfgSupportPlayer::GetPlayer(void) const
+// Return the GamePlayer of this BehavSupportPlayer
+GamePlayer BehavSupportPlayer::GetPlayer(void) const
 {
   return efp;
 }
 
-int gbtEfgSupportPlayer::Find(const Gambit::GameAction &a) const
+int BehavSupportPlayer::Find(const GameAction &a) const
 {
   return (infosets[a->GetInfoset()->GetNumber()]->acts.Find(a));
 }
 
-int gbtEfgSupportPlayer::Find(int p_infoset, Gambit::GameAction a) const
+int BehavSupportPlayer::Find(int p_infoset, GameAction a) const
 {
   return (infosets[p_infoset]->acts.Find(a));
 }
 
-// checks for a valid gbtEfgSupportPlayer
-bool gbtEfgSupportPlayer::HasActiveActionsAtAllInfosets(void) const
+// checks for a valid BehavSupportPlayer
+bool BehavSupportPlayer::HasActiveActionsAtAllInfosets(void) const
 {
   if (infosets.Length() != efp->NumInfosets())   return false;
 
@@ -287,8 +289,8 @@ bool gbtEfgSupportPlayer::HasActiveActionsAtAllInfosets(void) const
   return true;
 }
 
-// checks for a valid gbtEfgSupportPlayer
-bool gbtEfgSupportPlayer::HasActiveActionAt(const int &iset) const
+// checks for a valid BehavSupportPlayer
+bool BehavSupportPlayer::HasActiveActionAt(const int &iset) const
 {
   if (iset > efp->NumInfosets())   return false;
 
@@ -299,44 +301,44 @@ bool gbtEfgSupportPlayer::HasActiveActionAt(const int &iset) const
 
 
 //--------------------------------------------------
-// gbtEfgSupport: Constructors, Destructors, Operators
+// BehavSupport: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-gbtEfgSupport::gbtEfgSupport(const Gambit::Game &p_efg) 
+BehavSupport::BehavSupport(const Game &p_efg) 
   : m_efg(p_efg), m_players(p_efg->NumPlayers())
 {
   for (int pl = 1; pl <= m_players.Length(); pl++) {
-    m_players[pl] = new gbtEfgSupportPlayer(p_efg->GetPlayer(pl));
+    m_players[pl] = new BehavSupportPlayer(p_efg->GetPlayer(pl));
   }
 }
 
-gbtEfgSupport::gbtEfgSupport(const gbtEfgSupport &p_support)
+BehavSupport::BehavSupport(const BehavSupport &p_support)
   : m_name(p_support.m_name), m_efg(p_support.m_efg),
     m_players(p_support.m_players.Length())
 {
   for (int pl = 1; pl <= m_players.Length(); pl++)
-    m_players[pl] = new gbtEfgSupportPlayer(*(p_support.m_players[pl]));
+    m_players[pl] = new BehavSupportPlayer(*(p_support.m_players[pl]));
 }
 
-gbtEfgSupport::~gbtEfgSupport()
+BehavSupport::~BehavSupport()
 {
   for (int pl = 1; pl <= m_players.Length(); pl++)
     delete m_players[pl];
 }
 
-gbtEfgSupport &gbtEfgSupport::operator=(const gbtEfgSupport &p_support)
+BehavSupport &BehavSupport::operator=(const BehavSupport &p_support)
 {
   if (this != &p_support && m_efg == p_support.m_efg) {
     m_name = p_support.m_name;
     for (int pl = 1; pl <= m_players.Length(); pl++)  {
       delete m_players[pl];
-      m_players[pl] = new gbtEfgSupportPlayer(*(p_support.m_players[pl]));
+      m_players[pl] = new BehavSupportPlayer(*(p_support.m_players[pl]));
     }
   }
   return *this;
 }
 
-bool gbtEfgSupport::operator==(const gbtEfgSupport &p_support) const
+bool BehavSupport::operator==(const BehavSupport &p_support) const
 {
   if (m_players.Length() != p_support.m_players.Length())
     return false;
@@ -347,21 +349,21 @@ bool gbtEfgSupport::operator==(const gbtEfgSupport &p_support) const
   return (pl > m_players.Length());
 }
 
-bool gbtEfgSupport::operator!=(const gbtEfgSupport &p_support) const
+bool BehavSupport::operator!=(const BehavSupport &p_support) const
 {
   return !(*this == p_support);
 }
 
 //-----------------------------
-// gbtEfgSupport: Member Functions 
+// BehavSupport: Member Functions 
 //-----------------------------
 
-int gbtEfgSupport::NumActions(int pl, int iset) const
+int BehavSupport::NumActions(int pl, int iset) const
 {
   return m_players[pl]->NumActions(iset);
 }
 
-int gbtEfgSupport::NumActions(const Gambit::GameInfoset &i) const
+int BehavSupport::NumActions(const GameInfoset &i) const
 {
   if (i->GetPlayer()->IsChance())
     return i->NumActions();
@@ -369,15 +371,15 @@ int gbtEfgSupport::NumActions(const Gambit::GameInfoset &i) const
     return m_players[i->GetPlayer()->GetNumber()]->NumActions(i->GetNumber());
 }
 
-const gbtArray<Gambit::GameAction> &gbtEfgSupport::Actions(int pl, int iset) const
+const gbtArray<GameAction> &BehavSupport::Actions(int pl, int iset) const
 {
   return m_players[pl]->ActionList(iset);
 }
 
-gbtArray<Gambit::GameAction> gbtEfgSupport::Actions(const Gambit::GameInfoset &i) const
+gbtArray<GameAction> BehavSupport::Actions(const GameInfoset &i) const
 {
   if (i->GetPlayer()->IsChance()) {
-    gbtArray<Gambit::GameAction> actions;
+    gbtArray<GameAction> actions;
     for (int act = 1; act <= i->NumActions(); act++) {
       actions.Append(i->GetAction(act));
     }
@@ -387,16 +389,16 @@ gbtArray<Gambit::GameAction> gbtEfgSupport::Actions(const Gambit::GameInfoset &i
     return m_players[i->GetPlayer()->GetNumber()]->ActionList(i->GetNumber());
 }
 
-gbtList<Gambit::GameAction> gbtEfgSupport::ListOfActions(const Gambit::GameInfoset &i) const
+gbtList<GameAction> BehavSupport::ListOfActions(const GameInfoset &i) const
 {
-  gbtArray<Gambit::GameAction> actions = Actions(i);
-  gbtList<Gambit::GameAction> answer;
+  gbtArray<GameAction> actions = Actions(i);
+  gbtList<GameAction> answer;
   for (int i = 1; i <= actions.Length(); i++)
     answer.Append(actions[i]);
   return answer;
 }
 
-int gbtEfgSupport::Find(const Gambit::GameAction &a) const
+int BehavSupport::Find(const GameAction &a) const
 {
   if (a->GetInfoset()->GetGame() != m_efg)  assert(0);
 
@@ -405,12 +407,12 @@ int gbtEfgSupport::Find(const Gambit::GameAction &a) const
   return m_players[pl]->Find(a);
 }
 
-int gbtEfgSupport::Find(int p_player, int p_infoset, Gambit::GameAction p_action) const
+int BehavSupport::Find(int p_player, int p_infoset, GameAction p_action) const
 {
   return m_players[p_player]->Find(p_infoset, p_action);
 }
 
-bool gbtEfgSupport::ActionIsActive(Gambit::GameAction a) const
+bool BehavSupport::ActionIsActive(GameAction a) const
 {
   //DEBUG
   //  if (a == NULL) { gout << "Action* is null.\n"; exit(0); }
@@ -429,7 +431,7 @@ bool gbtEfgSupport::ActionIsActive(Gambit::GameAction a) const
     return true;
 }
 
-bool gbtEfgSupport::ActionIsActive(const int pl,
+bool BehavSupport::ActionIsActive(const int pl,
 			       const int iset, 
 			       const int act) const
 {
@@ -438,10 +440,10 @@ bool gbtEfgSupport::ActionIsActive(const int pl,
 }
 
 bool 
-gbtEfgSupport::AllActionsInSupportAtInfosetAreActive(const gbtEfgSupport &S,
-						 const Gambit::GameInfoset &infset) const
+BehavSupport::AllActionsInSupportAtInfosetAreActive(const BehavSupport &S,
+						 const GameInfoset &infset) const
 {
-  gbtArray<Gambit::GameAction> support_actions = S.Actions(infset);
+  gbtArray<GameAction> support_actions = S.Actions(infset);
   for (int i = 1; i <= support_actions.Length(); i++) {
     if (!ActionIsActive(support_actions[i]))
       return false;
@@ -449,7 +451,7 @@ gbtEfgSupport::AllActionsInSupportAtInfosetAreActive(const gbtEfgSupport &S,
   return true;
 }
 
-bool gbtEfgSupport::HasActiveActionAt(const Gambit::GameInfoset &infoset) const
+bool BehavSupport::HasActiveActionAt(const GameInfoset &infoset) const
 {
   if 
     ( !m_players[infoset->GetPlayer()->GetNumber()]->
@@ -459,18 +461,18 @@ bool gbtEfgSupport::HasActiveActionAt(const Gambit::GameInfoset &infoset) const
   return true;
 }
 
-int gbtEfgSupport::NumDegreesOfFreedom(void) const
+int BehavSupport::NumDegreesOfFreedom(void) const
 {
   int answer(0);
 
-  gbtList<Gambit::GameInfoset> active_infosets = ReachableInfosets(GetGame()->GetRoot());
+  gbtList<GameInfoset> active_infosets = ReachableInfosets(GetGame()->GetRoot());
   for (int i = 1; i <= active_infosets.Length(); i++)
     answer += NumActions(active_infosets[i]) - 1;
 
   return answer;  
 }
 
-bool gbtEfgSupport::HasActiveActionsAtAllInfosets(void) const
+bool BehavSupport::HasActiveActionsAtAllInfosets(void) const
 {
   if (m_players.Length() != m_efg->NumPlayers())   return false;
   for (int i = 1; i <= m_players.Length(); i++)
@@ -479,7 +481,7 @@ bool gbtEfgSupport::HasActiveActionsAtAllInfosets(void) const
   return true;
 }
 
-gbtPVector<int> gbtEfgSupport::NumActions(void) const
+gbtPVector<int> BehavSupport::NumActions(void) const
 {
   gbtArray<int> foo(m_efg->NumPlayers());
   int i;
@@ -494,34 +496,34 @@ gbtPVector<int> gbtEfgSupport::NumActions(void) const
   return bar;
 }  
 
-bool gbtEfgSupport::RemoveAction(const Gambit::GameAction &s)
+bool BehavSupport::RemoveAction(const GameAction &s)
 {
-  Gambit::GameInfoset infoset = s->GetInfoset();
-  Gambit::GamePlayer player = infoset->GetPlayer();
+  GameInfoset infoset = s->GetInfoset();
+  GamePlayer player = infoset->GetPlayer();
  
   return m_players[player->GetNumber()]->RemoveAction(infoset->GetNumber(), s);
 }
 
-void gbtEfgSupport::AddAction(const Gambit::GameAction &s)
+void BehavSupport::AddAction(const GameAction &s)
 {
-  Gambit::GameInfoset infoset = s->GetInfoset();
-  Gambit::GamePlayer player = infoset->GetPlayer();
+  GameInfoset infoset = s->GetInfoset();
+  GamePlayer player = infoset->GetPlayer();
 
   m_players[player->GetNumber()]->AddAction(infoset->GetNumber(), s);
 				      
 }
 
-int gbtEfgSupport::NumSequences(int j) const
+int BehavSupport::NumSequences(int j) const
 {
   if (j < 1 || j > m_efg->NumPlayers()) return 1;
-  gbtList<Gambit::GameInfoset> isets = ReachableInfosets(m_efg->GetPlayer(j));
+  gbtList<GameInfoset> isets = ReachableInfosets(m_efg->GetPlayer(j));
   int num = 1;
   for(int i = 1; i <= isets.Length(); i++)
     num+=NumActions(isets[i]);
   return num;
 }
 
-int gbtEfgSupport::TotalNumSequences(void) const
+int BehavSupport::TotalNumSequences(void) const
 {
   int total = 0;
   for (int i = 1 ; i <= m_efg->NumPlayers(); i++)
@@ -529,13 +531,13 @@ int gbtEfgSupport::TotalNumSequences(void) const
   return total;
 }
 
-gbtList<Gambit::GameNode> gbtEfgSupport::ReachableNonterminalNodes(const Gambit::GameNode &n) const
+gbtList<GameNode> BehavSupport::ReachableNonterminalNodes(const GameNode &n) const
 {
-  gbtList<Gambit::GameNode> answer;
+  gbtList<GameNode> answer;
   if (!n->IsTerminal()) {
-    const gbtArray<Gambit::GameAction> &actions = Actions(n->GetInfoset());
+    const gbtArray<GameAction> &actions = Actions(n->GetInfoset());
     for (int i = 1; i <= actions.Length(); i++) {
-      Gambit::GameNode nn = n->GetChild(actions[i]->GetNumber());
+      GameNode nn = n->GetChild(actions[i]->GetNumber());
       if (!nn->IsTerminal()) {
 	answer.Append(nn);
 	answer += ReachableNonterminalNodes(nn);
@@ -545,12 +547,12 @@ gbtList<Gambit::GameNode> gbtEfgSupport::ReachableNonterminalNodes(const Gambit:
   return answer;
 }
 
-gbtList<Gambit::GameNode> 
-gbtEfgSupport::ReachableNonterminalNodes(const Gambit::GameNode &n,
-					 const Gambit::GameAction &a) const
+gbtList<GameNode> 
+BehavSupport::ReachableNonterminalNodes(const GameNode &n,
+					 const GameAction &a) const
 {
-  gbtList<Gambit::GameNode> answer;
-  Gambit::GameNode nn = n->GetChild(a->GetNumber());
+  gbtList<GameNode> answer;
+  GameNode nn = n->GetChild(a->GetNumber());
   if (!nn->IsTerminal()) {
     answer.Append(nn);
     answer += ReachableNonterminalNodes(nn);
@@ -558,14 +560,14 @@ gbtEfgSupport::ReachableNonterminalNodes(const Gambit::GameNode &n,
   return answer;
 }
 
-gbtList<Gambit::GameInfoset> 
-gbtEfgSupport::ReachableInfosets(const Gambit::GamePlayer &p) const
+gbtList<GameInfoset> 
+BehavSupport::ReachableInfosets(const GamePlayer &p) const
 { 
-  gbtArray<Gambit::GameInfoset> isets;
+  gbtArray<GameInfoset> isets;
   for (int iset = 1; iset <= p->NumInfosets(); iset++) {
     isets.Append(p->GetInfoset(iset));
   }
-  gbtList<Gambit::GameInfoset> answer;
+  gbtList<GameInfoset> answer;
 
   for (int i = isets.First(); i <= isets.Last(); i++)
     if (MayReach(isets[i]))
@@ -573,40 +575,40 @@ gbtEfgSupport::ReachableInfosets(const Gambit::GamePlayer &p) const
   return answer;
 }
 
-gbtList<Gambit::GameInfoset> gbtEfgSupport::ReachableInfosets(const Gambit::GameNode &n) const
+gbtList<GameInfoset> BehavSupport::ReachableInfosets(const GameNode &n) const
 {
-  gbtList<Gambit::GameInfoset> answer;
-  gbtList<Gambit::GameNode> nodelist = ReachableNonterminalNodes(n);
+  gbtList<GameInfoset> answer;
+  gbtList<GameNode> nodelist = ReachableNonterminalNodes(n);
   for (int i = 1; i <= nodelist.Length(); i++)
     answer.Append(nodelist[i]->GetInfoset());
   RemoveRedundancies(answer);
   return answer;
 }
 
-gbtList<Gambit::GameInfoset> 
-gbtEfgSupport::ReachableInfosets(const Gambit::GameNode &n, 
-				 const Gambit::GameAction &a) const
+gbtList<GameInfoset> 
+BehavSupport::ReachableInfosets(const GameNode &n, 
+				 const GameAction &a) const
 {
-  gbtList<Gambit::GameInfoset> answer;
-  gbtList<Gambit::GameNode> nodelist = ReachableNonterminalNodes(n,a);
+  gbtList<GameInfoset> answer;
+  gbtList<GameNode> nodelist = ReachableNonterminalNodes(n,a);
   for (int i = 1; i <= nodelist.Length(); i++)
     answer.Append(nodelist[i]->GetInfoset());
   RemoveRedundancies(answer);
   return answer;
 }
 
-bool gbtEfgSupport::AlwaysReaches(const Gambit::GameInfoset &i) const
+bool BehavSupport::AlwaysReaches(const GameInfoset &i) const
 {
   return AlwaysReachesFrom(i, m_efg->GetRoot());
 }
 
-bool gbtEfgSupport::AlwaysReachesFrom(const Gambit::GameInfoset &i, const Gambit::GameNode &n) const
+bool BehavSupport::AlwaysReachesFrom(const GameInfoset &i, const GameNode &n) const
 {
   if (n->IsTerminal()) return false;
   else
     if (n->GetInfoset() == i) return true;
     else {
-      gbtArray<Gambit::GameAction> actions = Actions(n->GetInfoset());
+      gbtArray<GameAction> actions = Actions(n->GetInfoset());
       for (int j = 1; j <= actions.Length(); j++)
 	if (!AlwaysReachesFrom(i,n->GetChild(actions[j]->GetNumber()))) 
 	  return false;
@@ -614,7 +616,7 @@ bool gbtEfgSupport::AlwaysReachesFrom(const Gambit::GameInfoset &i, const Gambit
   return true;
 }
 
-bool gbtEfgSupport::MayReach(const Gambit::GameInfoset &i) const
+bool BehavSupport::MayReach(const GameInfoset &i) const
 {
   for (int j = 1; j <= i->NumMembers(); j++)
     if (MayReach(i->GetMember(j)))
@@ -622,7 +624,7 @@ bool gbtEfgSupport::MayReach(const Gambit::GameInfoset &i) const
   return false;
 }
 
-bool gbtEfgSupport::MayReach(const Gambit::GameNode &n) const
+bool BehavSupport::MayReach(const GameNode &n) const
 {
   if (n == m_efg->GetRoot())
     return true;
@@ -634,13 +636,188 @@ bool gbtEfgSupport::MayReach(const Gambit::GameNode &n) const
   }
 }
 
+bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
+			      bool strong, bool conditional) const
+{
+  GameInfoset infoset = a->GetInfoset();
+  if (infoset != b->GetInfoset()) {
+    throw UndefinedException();
+  }
+
+  const BehavSupportWithActiveInfo SAct(*this);
+  GamePlayer player = infoset->GetPlayer();
+  int pl = player->GetNumber();
+  bool equal = true;
+
+  if (!conditional) {
+    EfgContIter A(*this), B(*this);
+    A.Freeze(player->GetNumber(), infoset->GetNumber()); 
+    B.Freeze(player->GetNumber(), infoset->GetNumber());
+    A.Set(a);
+    B.Set(b);
+
+    do  {
+      gbtRational ap = A.Payoff(pl);  
+      gbtRational bp = B.Payoff(pl);
+
+      if (strong)
+	{ if (ap <= bp)  return false; }
+      else
+	if (ap < bp)   return false; 
+	else if (ap > bp)  equal = false;
+    } while (A.NextContingency() && B.NextContingency());
+  }
+
+  else {
+    gbtList<GameNode> nodelist = SAct.ReachableNodesInInfoset(infoset);  
+    if (nodelist.Length() == 0) {
+      // This may not be a good idea; I suggest checking for this
+      // prior to entry
+      for (int i = 1; i <= infoset->NumMembers(); i++) {
+	nodelist.Append(infoset->GetMember(i));
+      }
+    }
+    
+    for (int n = 1; n <= nodelist.Length(); n++) {
+      
+      gbtList<GameInfoset> L;
+      L += ReachableInfosets(nodelist[n], a);
+      L += ReachableInfosets(nodelist[n], b);
+      RemoveRedundancies(L);
+      
+      EfgConditionalContIter A(*this,L), B(*this,L);
+      A.Set(a);
+      B.Set(b);
+      
+      do  {
+	gbtRational ap = A.Payoff(nodelist[n],pl);  
+	gbtRational bp = B.Payoff(nodelist[n],pl);
+	
+	if (strong)
+	  { if (ap <= bp)  return false; }
+	else
+	  if (ap < bp)   return false; 
+	  else if (ap > bp)  equal = false;
+      } while (A.NextContingency() && B.NextContingency());
+    }
+  }
+  
+  if (strong) return true;
+  else  return (!equal); 
+  /*
+  return ::Dominates(*this,player->GetNumber(),infoset->GetNumber(),
+		   a->GetNumber(),b->GetNumber(),
+		   strong, conditional);
+  */
+}
+
+bool SomeElementDominates(const BehavSupport &S, 
+			  const gbtArray<GameAction> &array,
+			  const GameAction &a, 
+			  const bool strong,
+			  const bool conditional)
+{
+  for (int i = 1; i <= array.Length(); i++)
+    if (array[i] != a)
+      if (S.Dominates(array[i],a,strong,conditional)) {
+	return true;
+      }
+  return false;
+}
+
+bool BehavSupport::IsDominated(const GameAction &a, 
+				bool strong, bool conditional) const
+{
+  gbtArray<GameAction> array(Actions(a->GetInfoset()));
+  return SomeElementDominates(*this,array,a,strong,conditional);
+}
+
+bool InfosetHasDominatedElement(const BehavSupport &S, 
+				const GameInfoset &i,
+				bool strong,
+				bool conditional)
+{
+  gbtArray<GameAction> actions = S.Actions(i);
+  for (int i = 1; i <= actions.Length(); i++)
+    if (SomeElementDominates(S,actions,actions[i],
+			     strong,conditional))
+      return true;
+
+  return false;
+}
+
+bool ElimDominatedInInfoset(const BehavSupport &S, BehavSupport &T,
+			    const int pl, 
+			    const int iset, 
+			    const bool strong,
+			    const bool conditional)
+{
+  const gbtArray<GameAction> &actions = S.Actions(pl, iset);
+
+  gbtArray<bool> is_dominated(actions.Length());
+  for (int k = 1; k <= actions.Length(); k++)
+    is_dominated[k] = false;
+
+  for (int i = 1; i <= actions.Length(); i++)
+    for (int j = 1; j <= actions.Length(); j++)
+      if (i != j && !is_dominated[i] && !is_dominated[j]) 
+	if (S.Dominates(actions[i], actions[j], strong, conditional)) {
+	  is_dominated[j] = true;
+	}
+      
+  bool action_was_eliminated = false;
+  int k = 1;
+  while (k <= actions.Length() && !action_was_eliminated) {
+    if (is_dominated[k]) action_was_eliminated = true;
+    else k++;
+  }
+  while (k <= actions.Length()) {
+    if (is_dominated[k]) 
+      T.RemoveAction(actions[k]);
+    k++;
+  }
+
+  return action_was_eliminated;
+}
+
+bool ElimDominatedForPlayer(const BehavSupport &S, BehavSupport &T,
+			    const int pl, int &cumiset,
+			    const bool strong,
+			    const bool conditional)
+{
+  bool action_was_eliminated = false;
+
+  for (int iset = 1; iset <= S.GetGame()->GetPlayer(pl)->NumInfosets();
+       iset++, cumiset++) {
+    if (ElimDominatedInInfoset(S, T, pl, iset, strong, conditional)) 
+      action_was_eliminated = true;
+  }
+
+  return action_was_eliminated;
+}
+
+BehavSupport BehavSupport::Undominated(bool strong, bool conditional,
+				       const gbtArray<int> &players,
+				       std::ostream &) const
+{
+  BehavSupport T(*this);
+  int cumiset = 0;
+
+  for (int i = 1; i <= players.Length(); i++)   {
+    int pl = players[i];
+    ElimDominatedForPlayer(*this, T, pl, cumiset, 
+			   strong, conditional); 
+  }
+
+  return T;
+}
 
 //----------------------------------------------------
-//                gbtEfgSupportWithActiveInfo
+//                BehavSupportWithActiveInfo
 // ---------------------------------------------------
 
 // Utilities 
-bool gbtEfgSupportWithActiveInfo::infoset_has_active_nodes(const int pl,
+bool BehavSupportWithActiveInfo::infoset_has_active_nodes(const int pl,
 						       const int iset) const
 {
   //DEBUG
@@ -669,61 +846,61 @@ bool gbtEfgSupportWithActiveInfo::infoset_has_active_nodes(const int pl,
   return false;
 }
 
-bool gbtEfgSupportWithActiveInfo::infoset_has_active_nodes(const Gambit::GameInfoset &i) const
+bool BehavSupportWithActiveInfo::infoset_has_active_nodes(const GameInfoset &i) const
 {
   return infoset_has_active_nodes(i->GetPlayer()->GetNumber(), i->GetNumber());
 }
 
-void gbtEfgSupportWithActiveInfo::activate(const Gambit::GameNode &n)
+void BehavSupportWithActiveInfo::activate(const GameNode &n)
 {
   is_nonterminal_node_active[n->GetPlayer()->GetNumber()]
                             [n->GetInfoset()->GetNumber()]
                             [n->NumberInInfoset()] = true;
 }
 
-void gbtEfgSupportWithActiveInfo::deactivate(const Gambit::GameNode &n)
+void BehavSupportWithActiveInfo::deactivate(const GameNode &n)
 {
   is_nonterminal_node_active[n->GetPlayer()->GetNumber()]
                             [n->GetInfoset()->GetNumber()]
                             [n->NumberInInfoset()] = false;
 }
 
-void gbtEfgSupportWithActiveInfo::activate(const Gambit::GameInfoset &i)
+void BehavSupportWithActiveInfo::activate(const GameInfoset &i)
 {
   is_infoset_active[i->GetPlayer()->GetNumber()][i->GetNumber()] = true;
 }
 
-void gbtEfgSupportWithActiveInfo::deactivate(const Gambit::GameInfoset &i)
+void BehavSupportWithActiveInfo::deactivate(const GameInfoset &i)
 {
   is_infoset_active[i->GetPlayer()->GetNumber()][i->GetNumber()] = false;
 }
 
-void gbtEfgSupportWithActiveInfo::activate_this_and_lower_nodes(const Gambit::GameNode &n)
+void BehavSupportWithActiveInfo::activate_this_and_lower_nodes(const GameNode &n)
 {
   if (!n->IsTerminal()) {
     activate(n); 
     activate(n->GetInfoset());
-    gbtArray<Gambit::GameAction> actions(Actions(n->GetInfoset()));
+    gbtArray<GameAction> actions(Actions(n->GetInfoset()));
     for (int i = 1; i <= actions.Length(); i++) 
       activate_this_and_lower_nodes(n->GetChild(actions[i]->GetNumber()));    
   }
 }
 
-void gbtEfgSupportWithActiveInfo::deactivate_this_and_lower_nodes(const Gambit::GameNode &n)
+void BehavSupportWithActiveInfo::deactivate_this_and_lower_nodes(const GameNode &n)
 {
   if (!n->IsTerminal()) {  // THIS ALL LOOKS FISHY
     deactivate(n); 
     if ( !infoset_has_active_nodes(n->GetInfoset()) )
       deactivate(n->GetInfoset());
-    gbtArray<Gambit::GameAction> actions(Actions(n->GetInfoset()));
+    gbtArray<GameAction> actions(Actions(n->GetInfoset()));
       for (int i = 1; i <= actions.Length(); i++) 
 	deactivate_this_and_lower_nodes(n->GetChild(actions[i]->GetNumber()));    
   }
 }
 
-void gbtEfgSupportWithActiveInfo::
-deactivate_this_and_lower_nodes_returning_deactivated_infosets(const Gambit::GameNode &n, 
-                                                gbtList<Gambit::GameInfoset> *list)
+void BehavSupportWithActiveInfo::
+deactivate_this_and_lower_nodes_returning_deactivated_infosets(const GameNode &n, 
+                                                gbtList<GameInfoset> *list)
 {
   if (!n->IsTerminal()) {
     deactivate(n); 
@@ -738,17 +915,17 @@ deactivate_this_and_lower_nodes_returning_deactivated_infosets(const Gambit::Gam
       list->Append(n->GetInfoset()); 
       deactivate(n->GetInfoset());
     }
-    gbtArray<Gambit::GameAction> actions(Actions(n->GetInfoset()));
+    gbtArray<GameAction> actions(Actions(n->GetInfoset()));
       for (int i = 1; i <= actions.Length(); i++) 
 	deactivate_this_and_lower_nodes_returning_deactivated_infosets(
 			     n->GetChild(actions[i]->GetNumber()),list);    
   }
 }
 
-void gbtEfgSupportWithActiveInfo::InitializeActiveListsToAllActive()
+void BehavSupportWithActiveInfo::InitializeActiveListsToAllActive()
 {
   for (int pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl); 
+    GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl); 
     gbtList<bool>         is_players_infoset_active;
     gbtList<gbtList<bool> > is_players_node_active;
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
@@ -764,10 +941,10 @@ void gbtEfgSupportWithActiveInfo::InitializeActiveListsToAllActive()
   }
 }
 
-void gbtEfgSupportWithActiveInfo::InitializeActiveListsToAllInactive()
+void BehavSupportWithActiveInfo::InitializeActiveListsToAllInactive()
 {
   for (int pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl);
+    GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl);
     gbtList<bool>         is_players_infoset_active;
     gbtList<gbtList<bool> > is_players_node_active;
 
@@ -785,7 +962,7 @@ void gbtEfgSupportWithActiveInfo::InitializeActiveListsToAllInactive()
   }
 }
 
-void gbtEfgSupportWithActiveInfo::InitializeActiveLists()
+void BehavSupportWithActiveInfo::InitializeActiveLists()
 {
   InitializeActiveListsToAllInactive();
 
@@ -793,25 +970,25 @@ void gbtEfgSupportWithActiveInfo::InitializeActiveLists()
 }
 
 // Constructors and Destructor
-gbtEfgSupportWithActiveInfo::gbtEfgSupportWithActiveInfo(const Gambit::Game &E) 
-  : gbtEfgSupport(E), 
+BehavSupportWithActiveInfo::BehavSupportWithActiveInfo(const Game &E) 
+  : BehavSupport(E), 
     is_infoset_active(0,E->NumPlayers()), 
     is_nonterminal_node_active(0,E->NumPlayers())
 {
   InitializeActiveLists();
 }
 
-gbtEfgSupportWithActiveInfo::gbtEfgSupportWithActiveInfo(const gbtEfgSupport& given)
-  : gbtEfgSupport(given), 
+BehavSupportWithActiveInfo::BehavSupportWithActiveInfo(const BehavSupport& given)
+  : BehavSupport(given), 
     is_infoset_active(0,given.GetGame()->NumPlayers()), 
     is_nonterminal_node_active(0,given.GetGame()->NumPlayers())
 {
   InitializeActiveLists();
 }
 
-gbtEfgSupportWithActiveInfo::gbtEfgSupportWithActiveInfo(
-				  const gbtEfgSupportWithActiveInfo& given)
-  : gbtEfgSupport(given.UnderlyingSupport()), 
+BehavSupportWithActiveInfo::BehavSupportWithActiveInfo(
+				  const BehavSupportWithActiveInfo& given)
+  : BehavSupport(given),
     //is_infoset_active(0,given.GetGame()->NumPlayers()), 
         is_infoset_active(is_infoset_active), 
     is_nonterminal_node_active(given.is_nonterminal_node_active)
@@ -819,15 +996,15 @@ gbtEfgSupportWithActiveInfo::gbtEfgSupportWithActiveInfo(
   //  InitializeActiveLists();
 }
 
-gbtEfgSupportWithActiveInfo::~gbtEfgSupportWithActiveInfo()
+BehavSupportWithActiveInfo::~BehavSupportWithActiveInfo()
 {}
 
 // Operators
-gbtEfgSupportWithActiveInfo &
-gbtEfgSupportWithActiveInfo::operator=(const gbtEfgSupportWithActiveInfo &s)
+BehavSupportWithActiveInfo &
+BehavSupportWithActiveInfo::operator=(const BehavSupportWithActiveInfo &s)
 {
   if (this != &s) {
-    ((gbtEfgSupport&) *this) = s;
+    ((BehavSupport&) *this) = s;
     is_infoset_active = s.is_infoset_active;
     is_nonterminal_node_active = s.is_nonterminal_node_active;
   }
@@ -835,9 +1012,9 @@ gbtEfgSupportWithActiveInfo::operator=(const gbtEfgSupportWithActiveInfo &s)
 }
 
 bool 
-gbtEfgSupportWithActiveInfo::operator==(const gbtEfgSupportWithActiveInfo &s) const
+BehavSupportWithActiveInfo::operator==(const BehavSupportWithActiveInfo &s) const
 {
-  if ((gbtEfgSupport&) *this != (gbtEfgSupport&) s) {
+  if ((BehavSupport&) *this != (BehavSupport&) s) {
     //  gout << "Underlying supports differ.\n"; 
     return false; 
   }
@@ -861,15 +1038,15 @@ gbtEfgSupportWithActiveInfo::operator==(const gbtEfgSupportWithActiveInfo &s) co
 }
 
 bool 
-gbtEfgSupportWithActiveInfo::operator!=(const gbtEfgSupportWithActiveInfo &s) const
+BehavSupportWithActiveInfo::operator!=(const BehavSupportWithActiveInfo &s) const
 {
   return !(*this == s);
 }
 
-gbtList<Gambit::GameNode> 
-gbtEfgSupportWithActiveInfo::ReachableNodesInInfoset(const Gambit::GameInfoset &i) const
+gbtList<GameNode> 
+BehavSupportWithActiveInfo::ReachableNodesInInfoset(const GameInfoset &i) const
 {
-  gbtList<Gambit::GameNode> answer;
+  gbtList<GameNode> answer;
   int pl = i->GetPlayer()->GetNumber();
   int iset = i->GetNumber();
   for (int j = 1; j <= i->NumMembers(); j++)
@@ -878,12 +1055,12 @@ gbtEfgSupportWithActiveInfo::ReachableNodesInInfoset(const Gambit::GameInfoset &
   return answer;
 }
 
-gbtList<Gambit::GameNode>
-gbtEfgSupportWithActiveInfo::ReachableNonterminalNodes() const
+gbtList<GameNode>
+BehavSupportWithActiveInfo::ReachableNonterminalNodes() const
 {
-  gbtList<Gambit::GameNode> answer;
+  gbtList<GameNode> answer;
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
-    Gambit::GamePlayer p = GetGame()->GetPlayer(pl);
+    GamePlayer p = GetGame()->GetPlayer(pl);
     for (int iset = 1; iset <= p->NumInfosets(); iset++)
       answer += ReachableNodesInInfoset(p->GetInfoset(iset));
   }
@@ -891,40 +1068,40 @@ gbtEfgSupportWithActiveInfo::ReachableNonterminalNodes() const
 }
 
 // Editing functions
-void gbtEfgSupportWithActiveInfo::AddAction(const Gambit::GameAction &s)
+void BehavSupportWithActiveInfo::AddAction(const GameAction &s)
 {
-  gbtEfgSupport::AddAction(s);
+  BehavSupport::AddAction(s);
 
-  gbtList<Gambit::GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
+  gbtList<GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     activate_this_and_lower_nodes(startlist[i]);
 }
 
-bool gbtEfgSupportWithActiveInfo::RemoveAction(const Gambit::GameAction &s)
+bool BehavSupportWithActiveInfo::RemoveAction(const GameAction &s)
 {
-  gbtList<Gambit::GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
+  gbtList<GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     deactivate_this_and_lower_nodes(startlist[i]->GetChild(s->GetNumber()));
 
   // the following returns false if s was not active
-  return gbtEfgSupport::RemoveAction(s);
+  return BehavSupport::RemoveAction(s);
 }
 
 bool 
-gbtEfgSupportWithActiveInfo::RemoveActionReturningDeletedInfosets(const Gambit::GameAction &s,
-					   gbtList<Gambit::GameInfoset> *list)
+BehavSupportWithActiveInfo::RemoveActionReturningDeletedInfosets(const GameAction &s,
+					   gbtList<GameInfoset> *list)
 {
 
-  gbtList<Gambit::GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
+  gbtList<GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     deactivate_this_and_lower_nodes_returning_deactivated_infosets(
                            startlist[i]->GetChild(s->GetNumber()),list);
 
   // the following returns false if s was not active
-  return gbtEfgSupport::RemoveAction(s);
+  return BehavSupport::RemoveAction(s);
 }
 
-int gbtEfgSupportWithActiveInfo::NumActiveNodes(const int pl,
+int BehavSupportWithActiveInfo::NumActiveNodes(const int pl,
 					     const int iset) const
 {
   int answer = 0;
@@ -934,37 +1111,37 @@ int gbtEfgSupportWithActiveInfo::NumActiveNodes(const int pl,
   return answer;
 }
 
-int gbtEfgSupportWithActiveInfo::NumActiveNodes(const Gambit::GameInfoset &i) const
+int BehavSupportWithActiveInfo::NumActiveNodes(const GameInfoset &i) const
 {
   return NumActiveNodes(i->GetPlayer()->GetNumber(),i->GetNumber());
 }
 
-bool gbtEfgSupportWithActiveInfo::InfosetIsActive(const int pl,
+bool BehavSupportWithActiveInfo::InfosetIsActive(const int pl,
 					      const int iset) const
 {
   return is_infoset_active[pl][iset];
 }
 
-bool gbtEfgSupportWithActiveInfo::InfosetIsActive(const Gambit::GameInfoset &i) const
+bool BehavSupportWithActiveInfo::InfosetIsActive(const GameInfoset &i) const
 {
   return InfosetIsActive(i->GetPlayer()->GetNumber(),i->GetNumber());
 }
 
-bool gbtEfgSupportWithActiveInfo::NodeIsActive(const int pl,
+bool BehavSupportWithActiveInfo::NodeIsActive(const int pl,
 					   const int iset,
 					   const int node) const
 {
   return is_nonterminal_node_active[pl][iset][node];
 }
 
-bool gbtEfgSupportWithActiveInfo::NodeIsActive(const Gambit::GameNode &n) const
+bool BehavSupportWithActiveInfo::NodeIsActive(const GameNode &n) const
 {
   return NodeIsActive(n->GetInfoset()->GetPlayer()->GetNumber(),
 		      n->GetInfoset()->GetNumber(),
 		      n->NumberInInfoset());
 }
 
-bool gbtEfgSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()
+bool BehavSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()
 {
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++)
     for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) 
@@ -974,7 +1151,7 @@ bool gbtEfgSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()
   return true;
 }
 
-bool gbtEfgSupportWithActiveInfo::HasActiveActionsAtActiveInfosetsAndNoOthers()
+bool BehavSupportWithActiveInfo::HasActiveActionsAtActiveInfosetsAndNoOthers()
 {
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++)
     for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
@@ -988,3 +1165,4 @@ bool gbtEfgSupportWithActiveInfo::HasActiveActionsAtActiveInfosetsAndNoOthers()
   return true;
 }
 
+} // end namespace Gambit

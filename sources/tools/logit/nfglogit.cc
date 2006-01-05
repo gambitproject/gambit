@@ -115,7 +115,7 @@ static void NewtonStep(Gambit::Matrix<double> &q, Gambit::Matrix<double> &b,
 }
 
 
-void QreLHS(const gbtNfgSupport &p_support, 
+void QreLHS(const Gambit::StrategySupport &p_support, 
 	    const gbtVector<double> &p_point,
 	    const gbtArray<bool> &p_isLog,
 	    gbtVector<double> &p_lhs)
@@ -157,7 +157,7 @@ void QreLHS(const gbtNfgSupport &p_support,
   }
 }
 
-void QreJacobian(const gbtNfgSupport &p_support,
+void QreJacobian(const Gambit::StrategySupport &p_support,
 		 const gbtVector<double> &p_point,
 		 const gbtArray<bool> &p_isLog,
 		 Gambit::Matrix<double> &p_matrix)
@@ -293,7 +293,7 @@ double DiffLogLike(const gbtArray<double> &p_point,
 int g_numDecimals = 6;
 
 void PrintProfile(std::ostream &p_stream,
-		  const gbtNfgSupport &p_support, const gbtVector<double> &x,
+		  const Gambit::StrategySupport &p_support, const gbtVector<double> &x,
 		  const gbtArray<bool> &p_isLog,
 		  bool p_terminal = false)
 {

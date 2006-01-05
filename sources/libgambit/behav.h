@@ -41,7 +41,7 @@ namespace Gambit {
 template <class T> class MixedBehavProfile : private gbtDPVector<T>  {
 protected:
   Game m_efg;
-  gbtEfgSupport m_support;
+  BehavSupport m_support;
   mutable bool m_cached_data;
 
   // structures for storing cached data: nodes
@@ -111,7 +111,7 @@ protected:
 public:
   /// @name Lifecycle
   //@{
-  MixedBehavProfile(const gbtEfgSupport &);
+  MixedBehavProfile(const BehavSupport &);
   MixedBehavProfile(const MixedBehavProfile<T> &);
   MixedBehavProfile(const MixedStrategyProfile<T> &);
   virtual ~MixedBehavProfile();
@@ -138,7 +138,7 @@ public:
   /// @name General data access
   //@{
   Game GetGame(void) const { return m_efg; }
-  const gbtEfgSupport &GetSupport(void) const { return m_support; }
+  const BehavSupport &GetSupport(void) const { return m_support; }
   
   const T &GetRealizProb(const GameNode &node) const;
   const T &GetBeliefProb(const GameNode &node) const;

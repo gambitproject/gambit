@@ -30,7 +30,6 @@
 template <class T> class gbtArray;
 
 #include "game.h"
-#include "nfstrat.h"
 
 /// This class iterates through the contingencies in a strategic game.
 /// It visits each strategy profile in turn, advancing one contingency
@@ -40,7 +39,7 @@ template <class T> class gbtArray;
 class gbtNfgContingencyIterator {
   friend class Gambit::GameRep;
 private:
-  gbtNfgSupport support;
+  Gambit::StrategySupport support;
   gbtArray<int> m_currentStrat;
   Gambit::PureStrategyProfile profile;
   int m_frozen1, m_frozen2;
@@ -49,11 +48,11 @@ public:
   /// @name Lifecycle
   //@{
   /// Construct a new iterator on the support, with no strategies held fixed
-  gbtNfgContingencyIterator(const gbtNfgSupport &);
+  gbtNfgContingencyIterator(const Gambit::StrategySupport &);
   /// Construct a new iterator on the support, fixing player pl's strategy
-  gbtNfgContingencyIterator(const gbtNfgSupport &s, int pl, int st);
+  gbtNfgContingencyIterator(const Gambit::StrategySupport &s, int pl, int st);
   /// Construct a new iterator on the support, fixing two players' strategies
-  gbtNfgContingencyIterator(const gbtNfgSupport &s, 
+  gbtNfgContingencyIterator(const Gambit::StrategySupport &s, 
 			    int pl1, int st1, int pl2, int st2);
   //@}
 

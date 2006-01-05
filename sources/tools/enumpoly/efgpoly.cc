@@ -42,7 +42,7 @@ template <class T> class EfgPolEnumModule  {
 private:
   T eps;
   const Gambit::Game &EF;
-  const gbtEfgSupport &support;
+  const Gambit::BehavSupport &support;
   gSpace *Space;
   term_order *Lex;
   int num_vars;
@@ -79,7 +79,7 @@ private:
   int SaveNashSolutions(const gbtList<gbtVector<gDouble> > &list);
 
 public:
-  EfgPolEnumModule(const gbtEfgSupport &);
+  EfgPolEnumModule(const Gambit::BehavSupport &);
   ~EfgPolEnumModule();
 
   int EfgPolEnum(void);
@@ -106,7 +106,7 @@ public:
 //-------------------------------------------------------------------------
 
 template <class T>
-EfgPolEnumModule<T>::EfgPolEnumModule(const gbtEfgSupport &S)
+EfgPolEnumModule<T>::EfgPolEnumModule(const Gambit::BehavSupport &S)
   : EF(S.GetGame()), support(S), count(0), nevals(0), SF(S),
     is_singular(false), var(S.GetGame()->NumPlayers())
 { 
@@ -314,8 +314,8 @@ EfgPolEnumModule<T>::ExtendsToANFNash(const Gambit::MixedBehavProfile<double> &b
 {
   algExtendsToAgentNash algorithm;
   return algorithm.ExtendsToAgentNash(bs, 
-				      gbtEfgSupport(bs.GetGame()),
-				      gbtEfgSupport(bs.GetGame()));
+				      Gambit::BehavSupport(bs.GetGame()),
+				      Gambit::BehavSupport(bs.GetGame()));
 }
 
 template <class T> int 
@@ -339,8 +339,8 @@ EfgPolEnumModule<T>::ExtendsToNash(const Gambit::MixedBehavProfile<double> &bs) 
 {
   algExtendsToNash algorithm;
   return algorithm.ExtendsToNash(bs, 
-				 gbtEfgSupport(bs.GetGame()),
-				 gbtEfgSupport(bs.GetGame()));
+				 Gambit::BehavSupport(bs.GetGame()),
+				 Gambit::BehavSupport(bs.GetGame()));
 }
 
 template <class T> int 
@@ -560,7 +560,7 @@ void PrintProfile(std::ostream &p_stream,
 Gambit::MixedBehavProfile<double> ToFullSupport(const Gambit::MixedBehavProfile<double> &p_profile)
 {
   Gambit::Game efg = p_profile.GetGame();
-  const gbtEfgSupport &support = p_profile.GetSupport();
+  const Gambit::BehavSupport &support = p_profile.GetSupport();
 
   Gambit::MixedBehavProfile<double> fullProfile(efg);
   for (int i = 1; i <= fullProfile.Length(); fullProfile[i++] = 0.0);
@@ -581,7 +581,7 @@ Gambit::MixedBehavProfile<double> ToFullSupport(const Gambit::MixedBehavProfile<
   return fullProfile;
 }
 
-int EfgPolEnum(const gbtEfgSupport &support, 
+int EfgPolEnum(const Gambit::BehavSupport &support, 
 	       gbtList<Gambit::MixedBehavProfile<double> > &solutions,
 	       long &nevals, double &time, bool &is_singular)
 {
@@ -596,7 +596,7 @@ int EfgPolEnum(const gbtEfgSupport &support,
 }
 
 void PrintSupport(std::ostream &p_stream,
-		  const std::string &p_label, const gbtEfgSupport &p_support)
+		  const std::string &p_label, const Gambit::BehavSupport &p_support)
 {
   p_stream << p_label;
 
@@ -623,7 +623,7 @@ void PrintSupport(std::ostream &p_stream,
 
 void Solve(const Gambit::Game &p_game)
 {
-  gbtList<gbtEfgSupport> supports = PossibleNashSubsupports(p_game);
+  gbtList<Gambit::BehavSupport> supports = PossibleNashSubsupports(p_game);
 
   try {
     for (int i = 1; i <= supports.Length(); i++) {

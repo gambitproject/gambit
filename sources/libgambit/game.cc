@@ -225,14 +225,14 @@ GameAction GameNodeRep::GetPriorAction(void) const
   return 0;
 }
 
-void GameNodeRep::DeleteOutcome(Gambit::GameOutcomeRep *outc)
+void GameNodeRep::DeleteOutcome(GameOutcomeRep *outc)
 {
   if (outc == outcome)   outcome = 0;
   for (int i = 1; i <= children.Length(); i++)
     children[i]->DeleteOutcome(outc);
 }
 
-void GameNodeRep::SetOutcome(const Gambit::GameOutcome &p_outcome)
+void GameNodeRep::SetOutcome(const GameOutcome &p_outcome)
 {
   if (p_outcome != outcome) {
     outcome = p_outcome;
@@ -486,7 +486,7 @@ GameRep::~GameRep()
 bool GameRep::IsConstSum(void) const
 {
   if (m_root) {
-    EfgContIter iter(gbtEfgSupport(const_cast<GameRep *>(this)));
+    EfgContIter iter(BehavSupport(const_cast<GameRep *>(this)));
 
     gbtRational sum(0);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
@@ -507,7 +507,7 @@ bool GameRep::IsConstSum(void) const
     return true;
   }
   else {
-    gbtNfgContingencyIterator iter(gbtNfgSupport(const_cast<GameRep *>(this)));
+    gbtNfgContingencyIterator iter(StrategySupport(const_cast<GameRep *>(this)));
 
     gbtRational sum(0);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
@@ -1586,10 +1586,10 @@ void GameRep::RebuildTable(void)
     size *= m_players[pl]->NumStrategies();
   }
 
-  gbtArray<Gambit::GameOutcomeRep *> newResults(size);
+  gbtArray<GameOutcomeRep *> newResults(size);
   for (int i = 1; i <= newResults.Length(); newResults[i++] = 0);
 
-  gbtNfgContingencyIterator iter(gbtNfgSupport(const_cast<GameRep *>(this)));
+  gbtNfgContingencyIterator iter(StrategySupport(const_cast<GameRep *>(this)));
 
   do {
     long newindex = 0L;

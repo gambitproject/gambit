@@ -560,7 +560,7 @@ Gambit::GameNode gbtTreeLayout::NextSameLevel(Gambit::GameNode p_node) const
   return 0;
 }
 
-int gbtTreeLayout::LayoutSubtree(Gambit::GameNode p_node, const gbtEfgSupport &p_support,
+int gbtTreeLayout::LayoutSubtree(Gambit::GameNode p_node, const Gambit::BehavSupport &p_support,
 				 int &p_maxy, int &p_miny, int &p_ycoord)
 {
   int y1 = -1, yn = 0;
@@ -708,7 +708,7 @@ void gbtTreeLayout::CheckInfosetEntry(gbtNodeEntry *e)
   e->SetNextMember(infoset_entry);
 }
 
-void gbtTreeLayout::FillInfosetTable(Gambit::GameNode n, const gbtEfgSupport &cur_sup)
+void gbtTreeLayout::FillInfosetTable(Gambit::GameNode n, const Gambit::BehavSupport &cur_sup)
 {
   const gbtStyle &draw_settings = m_doc->GetStyle();
   gbtNodeEntry *entry = GetNodeEntry(n);
@@ -770,7 +770,7 @@ void gbtTreeLayout::UpdateTableParents(void)
   }
 }
 
-void gbtTreeLayout::Layout(const gbtEfgSupport &p_support)
+void gbtTreeLayout::Layout(const Gambit::BehavSupport &p_support)
 {
   // Kinda kludgey; probably should query draw settings whenever needed.
   m_infosetSpacing = 
@@ -797,7 +797,7 @@ void gbtTreeLayout::Layout(const gbtEfgSupport &p_support)
   m_maxY = maxy + 25;
 }
 
-void gbtTreeLayout::BuildNodeList(Gambit::GameNode p_node, const gbtEfgSupport &p_support,
+void gbtTreeLayout::BuildNodeList(Gambit::GameNode p_node, const Gambit::BehavSupport &p_support,
 				  int p_level)
 {
   gbtNodeEntry *entry = new gbtNodeEntry(p_node);
@@ -828,7 +828,7 @@ void gbtTreeLayout::BuildNodeList(Gambit::GameNode p_node, const gbtEfgSupport &
   m_maxLevel = gmax(p_level, m_maxLevel);
 }
 
-void gbtTreeLayout::BuildNodeList(const gbtEfgSupport &p_support)
+void gbtTreeLayout::BuildNodeList(const Gambit::BehavSupport &p_support)
 {
   while (m_nodeList.Length() > 0) {
     delete m_nodeList.Remove(1);

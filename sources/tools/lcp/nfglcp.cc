@@ -58,13 +58,13 @@ void PrintProfile(std::ostream &p_stream,
 }
 
 
-template <class T> Gambit::Matrix<T> Make_A1(const gbtNfgSupport &, 
+template <class T> Gambit::Matrix<T> Make_A1(const Gambit::StrategySupport &, 
 				      const T &);
-template <class T> gbtVector<T> Make_b1(const gbtNfgSupport &, 
+template <class T> gbtVector<T> Make_b1(const Gambit::StrategySupport &, 
 				      const T &);
-template <class T> Gambit::Matrix<T> Make_A2(const gbtNfgSupport &,
+template <class T> Gambit::Matrix<T> Make_A2(const Gambit::StrategySupport &,
 				      const T &);
-template <class T> gbtVector<T> Make_b2(const gbtNfgSupport &,
+template <class T> gbtVector<T> Make_b2(const Gambit::StrategySupport &,
 				      const T &);
 
 
@@ -73,9 +73,9 @@ private:
   int m_stopAfter, m_maxDepth;
 
   int AddBfs(LHTableau<T> &, gbtList<BFS<T> > &);
-  void AddSolutions(const gbtNfgSupport &,
+  void AddSolutions(const Gambit::StrategySupport &,
 		    const gbtList<BFS<T> > &, const T &);
-  void AllLemke(const gbtNfgSupport &, int, LHTableau<T> &B, gbtList<BFS<T> > &,
+  void AllLemke(const Gambit::StrategySupport &, int, LHTableau<T> &B, gbtList<BFS<T> > &,
 		int depth);
   
 public:
@@ -88,7 +88,7 @@ public:
   int MaxDepth(void) const { return m_maxDepth; }
   void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
 
-  void Solve(const gbtNfgSupport &);
+  void Solve(const Gambit::StrategySupport &);
 };
 
 //---------------------------------------------------------------------------
@@ -96,7 +96,7 @@ public:
 //---------------------------------------------------------------------------
 
 template <class T> 
-void nfgLcp<T>::Solve(const gbtNfgSupport &p_support)
+void nfgLcp<T>::Solve(const Gambit::StrategySupport &p_support)
 {
   BFS<T> cbfs((T) 0);
 
@@ -150,7 +150,7 @@ template <class T> int nfgLcp<T>::AddBfs(LHTableau<T> &p_tableau,
 // From each new accessible equilibrium, it follows
 // all possible paths, adding any new equilibria to the List.  
 //
-template <class T> void nfgLcp<T>::AllLemke(const gbtNfgSupport &p_support,
+template <class T> void nfgLcp<T>::AllLemke(const Gambit::StrategySupport &p_support,
 					    int j, LHTableau<T> &B,
 					    gbtList<BFS<T> > &p_list,
 					    int depth)
@@ -181,7 +181,7 @@ template <class T> void nfgLcp<T>::AllLemke(const gbtNfgSupport &p_support,
 }
 
 template <class T>
-void nfgLcp<T>::AddSolutions(const gbtNfgSupport &p_support,
+void nfgLcp<T>::AddSolutions(const Gambit::StrategySupport &p_support,
 			     const gbtList<BFS<T> > &p_list,
 			     const T &epsilon)
 {

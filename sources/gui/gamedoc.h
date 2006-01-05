@@ -42,7 +42,7 @@ class gbtBehavDominanceStack {
 private:
   gbtGameDocument *m_doc;
   bool m_strict;
-  gbtArray<gbtEfgSupport *> m_supports;
+  gbtArray<Gambit::BehavSupport *> m_supports;
   int m_current;
   bool m_noFurther;
 
@@ -59,12 +59,12 @@ public:
   //! Get the i'th support in the stack
   //! (where i=1 is always the "full" support)
   //!
-  const gbtEfgSupport &GetSupport(int i) const { return *m_supports[i]; }
+  const Gambit::BehavSupport &GetSupport(int i) const { return *m_supports[i]; }
 
   //!
   //! Get the current support
   //!
-  const gbtEfgSupport &GetCurrent(void) const { return *m_supports[m_current]; }
+  const Gambit::BehavSupport &GetCurrent(void) const { return *m_supports[m_current]; }
 
   //!
   //! Get the level of iteration (1 = no iteration)
@@ -114,7 +114,7 @@ class gbtStrategyDominanceStack {
 private:
   gbtGameDocument *m_doc;
   bool m_strict;
-  gbtArray<gbtNfgSupport *> m_supports;
+  gbtArray<Gambit::StrategySupport *> m_supports;
   int m_current;
   bool m_noFurther;
 
@@ -131,12 +131,12 @@ public:
   //! Get the i'th support in the stack
   //! (where i=1 is always the "full" support)
   //!
-  const gbtNfgSupport &GetSupport(int i) const { return *m_supports[i]; }
+  const Gambit::StrategySupport &GetSupport(int i) const { return *m_supports[i]; }
 
   //!
   //! Get the current support
   //!
-  const gbtNfgSupport &GetCurrent(void) const { return *m_supports[m_current]; }
+  const Gambit::StrategySupport &GetCurrent(void) const { return *m_supports[m_current]; }
 
   //!
   //! Get the level of iteration (1 = no iteration)
@@ -308,7 +308,7 @@ public:
   //! @name Handling of behavior supports
   //!
   //@{
-  const gbtEfgSupport &GetEfgSupport(void) const
+  const Gambit::BehavSupport &GetEfgSupport(void) const
     { return m_behavSupports.GetCurrent(); }
   void SetBehavElimStrength(bool p_strict);
   bool NextBehavElimLevel(void);
@@ -322,7 +322,7 @@ public:
   //! @name Handling of strategy supports
   //!
   //@{
-  const gbtNfgSupport &GetNfgSupport(void) const
+  const Gambit::StrategySupport &GetNfgSupport(void) const
     { return m_stratSupports.GetCurrent(); }
   void SetStrategyElimStrength(bool p_strict);
   bool GetStrategyElimStrength(void) const;

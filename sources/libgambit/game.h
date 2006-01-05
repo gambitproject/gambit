@@ -30,7 +30,6 @@
 
 #include "gdpvect.h"
 
-class gbtEfgSupport;
 class gbtNumber;
 
 namespace Gambit {

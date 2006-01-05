@@ -59,11 +59,11 @@ inline double pow(double x, long y)
 
 #include "game.h"
 
-#include "efstrat.h"
+#include "behavspt.h"
 #include "behav.h"
 #include "efgiter.h"
 
-#include "nfstrat.h"
+#include "stratspt.h"
 #include "mixed.h"
 #include "nfgiter.h"
 

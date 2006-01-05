@@ -32,21 +32,21 @@ class StrategyCursorForSupport;
 // final one, which is our goal, is the undominated support function.
 // We begin by simply enumerating all subsupports.
 
-void AllSubsupportsRECURSIVE(const gbtNfgSupport &s,
-			     gbtNfgSupport *sact,
+void AllSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
+			     Gambit::StrategySupport *sact,
 			     StrategyCursorForSupport *c,
-			     gbtList<gbtNfgSupport> &list);
+			     gbtList<Gambit::StrategySupport> &list);
 
-gbtList<gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S);
+gbtList<Gambit::StrategySupport> AllSubsupports(const Gambit::StrategySupport &S);
 
 // Subsupports of a given support are _valid_ if each agent has an action.
 
-void AllValidSubsupportsRECURSIVE(const gbtNfgSupport &s,
-				  gbtNfgSupport *sact,
+void AllValidSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
+				  Gambit::StrategySupport *sact,
 				  StrategyCursorForSupport *c,
-				  gbtList<gbtNfgSupport> &list);
+				  gbtList<Gambit::StrategySupport> &list);
 
-gbtList<gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S);
+gbtList<Gambit::StrategySupport> AllValidSubsupports(const Gambit::StrategySupport &S);
 
 // The following routines combine to return all supports that do not 
 // exhibit particular type of domination.  This was a prototype for 
@@ -57,13 +57,13 @@ gbtList<gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S);
 // process, when, after more truncations, it might be no longer weakly
 // dominated, and thus part of an allowed subsupport.
 
-void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport &s,
-					gbtNfgSupport *sact,
+void AllUndominatedSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
+					Gambit::StrategySupport *sact,
 					StrategyCursorForSupport *c,
 					bool strong,
-					gbtList<gbtNfgSupport> &list);
+					gbtList<Gambit::StrategySupport> &list);
   
-gbtList<gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
+gbtList<Gambit::StrategySupport> AllUndominatedSubsupports(const Gambit::StrategySupport &S,
 					       bool strong,
 					       bool conditional);
 
@@ -78,26 +78,26 @@ gbtList<gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
 // of having active strategys at all active infosets, and not at other
 // infosets.
 
-void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport &s,
-				      gbtNfgSupport *sact,
+void PossibleNashSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
+				      Gambit::StrategySupport *sact,
 				      StrategyCursorForSupport *c,
-				      gbtList<gbtNfgSupport> &list);
+				      gbtList<Gambit::StrategySupport> &list);
 
-gbtList<gbtNfgSupport> SortSupportsBySize(gbtList<gbtNfgSupport> &);
+gbtList<Gambit::StrategySupport> SortSupportsBySize(gbtList<Gambit::StrategySupport> &);
   
-gbtList<gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S);
+gbtList<Gambit::StrategySupport> PossibleNashSubsupports(const Gambit::StrategySupport &S);
 
 ///////////////// Utility Cursor Class /////////////////////
 
 class StrategyCursorForSupport {
 protected:
-  const gbtNfgSupport *support;
+  const Gambit::StrategySupport *support;
   int pl;
   int strat;
 
 public:
   //Constructors and dtor
-  StrategyCursorForSupport(const gbtNfgSupport &S);
+  StrategyCursorForSupport(const Gambit::StrategySupport &S);
   StrategyCursorForSupport(const StrategyCursorForSupport &s);
   ~StrategyCursorForSupport();
 

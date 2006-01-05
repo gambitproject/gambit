@@ -173,10 +173,10 @@ private:
   gbtNodeEntry *NextInfoset(gbtNodeEntry *);
   void CheckInfosetEntry(gbtNodeEntry *);
 
-  void BuildNodeList(Gambit::GameNode, const gbtEfgSupport &, int);
+  void BuildNodeList(Gambit::GameNode, const Gambit::BehavSupport &, int);
 
-  int LayoutSubtree(Gambit::GameNode, const gbtEfgSupport &, int &, int &, int &);
-  void FillInfosetTable(Gambit::GameNode, const gbtEfgSupport &);
+  int LayoutSubtree(Gambit::GameNode, const Gambit::BehavSupport &, int &, int &, int &);
+  void FillInfosetTable(Gambit::GameNode, const Gambit::BehavSupport &);
   void UpdateTableInfosets(void);
   void UpdateTableParents(void);
 
@@ -195,8 +195,8 @@ public:
   Gambit::GameNode PriorSameLevel(Gambit::GameNode) const;
   Gambit::GameNode NextSameLevel(Gambit::GameNode) const;
 
-  void BuildNodeList(const gbtEfgSupport &);
-  void Layout(const gbtEfgSupport &);
+  void BuildNodeList(const Gambit::BehavSupport &);
+  void Layout(const Gambit::BehavSupport &);
   void GenerateLabels(void);
 
   // The following member functions are for temporary compatibility only

@@ -41,7 +41,7 @@ class PolEnumModule  {
 private:
   gDouble eps;
   Gambit::Game NF;
-  const gbtNfgSupport &support;
+  const Gambit::StrategySupport &support;
   gSpace Space;
   term_order Lex;
   int num_vars;
@@ -67,7 +67,7 @@ private:
 
   int SaveSolutions(const gbtList<gbtVector<gDouble> > &list);
 public:
-  PolEnumModule(const gbtNfgSupport &);
+  PolEnumModule(const Gambit::StrategySupport &);
   
   int PolEnum(void);
   
@@ -88,7 +88,7 @@ public:
 //                    PolEnumModule: Member functions
 //-------------------------------------------------------------------------
 
-PolEnumModule::PolEnumModule(const gbtNfgSupport &S)
+PolEnumModule::PolEnumModule(const Gambit::StrategySupport &S)
   : NF(S.GetGame()), support(S),
     Space(support.ProfileLength()-NF->NumPlayers()), 
     Lex(&Space, lex), num_vars(support.ProfileLength()-NF->NumPlayers()), 
@@ -294,7 +294,7 @@ bool PolEnumModule::IsSingular() const
 //                        PolEnumParams: member functions
 //---------------------------------------------------------------------------
 
-int PolEnum(const gbtNfgSupport &support,
+int PolEnum(const Gambit::StrategySupport &support,
 	    gbtList<Gambit::MixedStrategyProfile<double> > &solutions, 
 	    long &nevals, double &time, bool &is_singular)
 {
@@ -315,7 +315,7 @@ int PolEnum(const gbtNfgSupport &support,
 //                        Polish Equilibrum for Nfg
 //---------------------------------------------------------------------------
 
-Gambit::MixedStrategyProfile<double> PolishEquilibrium(const gbtNfgSupport &support, 
+Gambit::MixedStrategyProfile<double> PolishEquilibrium(const Gambit::StrategySupport &support, 
 				       const Gambit::MixedStrategyProfile<double> &sol, 
 				       bool &is_singular)
 {
@@ -442,7 +442,7 @@ void PrintProfile(std::ostream &p_stream,
 Gambit::MixedStrategyProfile<double> ToFullSupport(const Gambit::MixedStrategyProfile<double> &p_profile)
 {
   Gambit::Game nfg = p_profile.GetGame();
-  const gbtNfgSupport &support = p_profile.GetSupport();
+  const Gambit::StrategySupport &support = p_profile.GetSupport();
 
   Gambit::MixedStrategyProfile<double> fullProfile(nfg);
   for (int i = 1; i <= fullProfile.Length(); fullProfile[i++] = 0.0);
@@ -461,7 +461,7 @@ Gambit::MixedStrategyProfile<double> ToFullSupport(const Gambit::MixedStrategyPr
 }
 
 void PrintSupport(std::ostream &p_stream, 
-		  const std::string &p_label, const gbtNfgSupport &p_support)
+		  const std::string &p_label, const Gambit::StrategySupport &p_support)
 {
   p_stream << p_label;
 
@@ -483,7 +483,7 @@ void PrintSupport(std::ostream &p_stream,
 
 void Solve(const Gambit::Game &p_nfg)
 {
-  gbtList<gbtNfgSupport> supports = PossibleNashSubsupports(p_nfg);
+  gbtList<Gambit::StrategySupport> supports = PossibleNashSubsupports(p_nfg);
 
   try {
     for (int i = 1; i <= supports.Length(); i++) {

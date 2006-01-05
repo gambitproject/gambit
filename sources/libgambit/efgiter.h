@@ -27,7 +27,7 @@
 #ifndef EFGITER_H
 #define EFGITER_H
 
-#include "efstrat.h"
+#include "behavspt.h"
 
 //
 // N.B.: Currently, the contingency iterator only allows one information
@@ -43,7 +43,7 @@ class EfgContIter    {
   private:
     int _frozen_pl, _frozen_iset;
     Gambit::Game _efg;
-    gbtEfgSupport _support;
+    Gambit::BehavSupport _support;
     Gambit::PureBehavProfile _profile;
     gbtPVector<int> _current;
     gbtArray<gbtArray<bool> > _is_active;
@@ -51,8 +51,8 @@ class EfgContIter    {
     mutable gbtVector<gbtRational> _payoff;
 
   public:
-    EfgContIter(const gbtEfgSupport &);
-    EfgContIter(const gbtEfgSupport &, const gbtList<Gambit::GameInfoset> &);
+    EfgContIter(const Gambit::BehavSupport &);
+    EfgContIter(const Gambit::BehavSupport &, const gbtList<Gambit::GameInfoset> &);
     ~EfgContIter();
   
     void First(void);
@@ -78,7 +78,7 @@ class EfgConditionalContIter    {
   friend class EfgIter;
   private:
     Gambit::Game _efg;
-    gbtEfgSupport _support;
+    Gambit::BehavSupport _support;
     Gambit::PureBehavProfile _profile;
     gbtPVector<int> _current;
     gbtArray<gbtArray<bool> > _is_active;
@@ -86,8 +86,8 @@ class EfgConditionalContIter    {
     mutable gbtVector<gbtRational> _payoff;
 
   public:
-    EfgConditionalContIter(const gbtEfgSupport &);
-    EfgConditionalContIter(const gbtEfgSupport &, const gbtList<Gambit::GameInfoset> &);
+    EfgConditionalContIter(const Gambit::BehavSupport &);
+    EfgConditionalContIter(const Gambit::BehavSupport &, const gbtList<Gambit::GameInfoset> &);
     ~EfgConditionalContIter();
   
     void First(void); // Sets each infoset's action to the first in the support

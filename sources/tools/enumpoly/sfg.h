@@ -35,7 +35,7 @@
 class Sfg  {
 private:
   Gambit::Game EF;
-  const gbtEfgSupport &efsupp;
+  const Gambit::BehavSupport &efsupp;
   gbtArray<SFSequenceSet *> *sequences;
   gNArray<gbtArray<gbtRational> *> *SF;  // sequence form
   gbtArray<gbtRectArray<gbtRational> *> *E;   // constraint matrices for sequence form.  
@@ -48,7 +48,7 @@ private:
   void GetSequenceDims(const Gambit::GameNode &);
 
 public:
-  Sfg(const gbtEfgSupport &);
+  Sfg(const Gambit::BehavSupport &);
   virtual ~Sfg();  
 
   inline int NumSequences(int pl) const {return seq[pl];}

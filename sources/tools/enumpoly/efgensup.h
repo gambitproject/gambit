@@ -32,12 +32,12 @@ class ActionCursorForSupport;
 // final one, which is our goal, is the undominated support function.
 // We begin by simply enumerating all subsupports.
 
-void AllSubsupportsRECURSIVE(const gbtEfgSupport &s,
-			     gbtEfgSupportWithActiveInfo *sact,
+void AllSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
+			     Gambit::BehavSupportWithActiveInfo *sact,
 			     ActionCursorForSupport *c,
-			     gbtList<gbtEfgSupport> &list);
+			     gbtList<Gambit::BehavSupport> &list);
 
-gbtList<gbtEfgSupport> AllSubsupports(const gbtEfgSupport &S);
+gbtList<Gambit::BehavSupport> AllSubsupports(const Gambit::BehavSupport &S);
 
 
 // Subsupports of a given support are _path equivalent_ if they
@@ -46,12 +46,12 @@ gbtList<gbtEfgSupport> AllSubsupports(const gbtEfgSupport &S);
 // class by outputting only those subsupports with _no_ active 
 // actions at each unreached infoset.  
 
-void AllInequivalentSubsupportsRECURSIVE(const gbtEfgSupport &s,
-					 gbtEfgSupportWithActiveInfo *sact,
+void AllInequivalentSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
+					 Gambit::BehavSupportWithActiveInfo *sact,
 					 ActionCursorForSupport *c,
-					 gbtList<gbtEfgSupport> &list);
+					 gbtList<Gambit::BehavSupport> &list);
 
-gbtList<gbtEfgSupport> AllInequivalentSubsupports(const gbtEfgSupport &S);
+gbtList<Gambit::BehavSupport> AllInequivalentSubsupports(const Gambit::BehavSupport &S);
 
 // The following routines combine to return all supports that do not 
 // exhibit particular type of domination.  This was a prototype for 
@@ -62,13 +62,13 @@ gbtList<gbtEfgSupport> AllInequivalentSubsupports(const gbtEfgSupport &S);
 // process, when, after more truncations, it might be no longer weakly
 // dominated, and thus part of an allowed subsupport.
 
-void AllUndominatedSubsupportsRECURSIVE(const gbtEfgSupport &s,
-					gbtEfgSupportWithActiveInfo *sact,
+void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
+					Gambit::BehavSupportWithActiveInfo *sact,
 					ActionCursorForSupport *c,
 					bool strong, bool conditional,
-					gbtList<gbtEfgSupport> &list);
+					gbtList<Gambit::BehavSupport> &list);
   
-gbtList<gbtEfgSupport> AllUndominatedSubsupports(const gbtEfgSupport &S,
+gbtList<Gambit::BehavSupport> AllUndominatedSubsupports(const Gambit::BehavSupport &S,
 					       bool strong, bool conditional);
 
 // The following two routines combine to produce all subsupports that could
@@ -82,27 +82,27 @@ gbtList<gbtEfgSupport> AllUndominatedSubsupports(const gbtEfgSupport &S,
 // of having active actions at all active infosets, and not at other
 // infosets.
 
-void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport &s,
-				      gbtEfgSupportWithActiveInfo *sact,
+void PossibleNashSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
+				      Gambit::BehavSupportWithActiveInfo *sact,
 				      ActionCursorForSupport *c,
-				      gbtList<gbtEfgSupport> &list);
+				      gbtList<Gambit::BehavSupport> &list);
 
-gbtList<gbtEfgSupport> SortSupportsBySize(gbtList<gbtEfgSupport> &);
+gbtList<Gambit::BehavSupport> SortSupportsBySize(gbtList<Gambit::BehavSupport> &);
   
-gbtList<gbtEfgSupport> PossibleNashSubsupports(const gbtEfgSupport &S);
+gbtList<Gambit::BehavSupport> PossibleNashSubsupports(const Gambit::BehavSupport &S);
 
 ///////////////// Utility Cursor Class /////////////////////
 
 class ActionCursorForSupport {
 protected:
-  const gbtEfgSupport *support;
+  const Gambit::BehavSupport *support;
         int pl;
         int iset;
         int act;
 
 public:
   //Constructors and dtor
-  ActionCursorForSupport(const gbtEfgSupport &S);
+  ActionCursorForSupport(const Gambit::BehavSupport &S);
   ActionCursorForSupport(const ActionCursorForSupport &a);
   ~ActionCursorForSupport();
 
@@ -127,9 +127,9 @@ public:
 
   // Special
   bool InfosetGuaranteedActiveByPriorCommitments(const 
-						     gbtEfgSupportWithActiveInfo *,
+						     Gambit::BehavSupportWithActiveInfo *,
 						 const Gambit::GameInfoset &);
-  bool DeletionsViolateActiveCommitments(const gbtEfgSupportWithActiveInfo *,
+  bool DeletionsViolateActiveCommitments(const Gambit::BehavSupportWithActiveInfo *,
 					 const gbtList<Gambit::GameInfoset> *);
 };
 

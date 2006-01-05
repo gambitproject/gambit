@@ -48,7 +48,7 @@ MixedBehavProfile<T>::MixedBehavProfile(const MixedBehavProfile<T> &p_profile)
   InitProfile();
 }
 
-template <class T> MixedBehavProfile<T>::MixedBehavProfile(const gbtEfgSupport &p_support) 
+template <class T> MixedBehavProfile<T>::MixedBehavProfile(const BehavSupport &p_support) 
   : gbtDPVector<T>(p_support.NumActions()), 
     m_efg(p_support.GetGame()),
     m_support(p_support),
@@ -87,7 +87,7 @@ MixedBehavProfile<T>::MixedBehavProfile(const MixedStrategyProfile<T> &p_profile
   ((gbtVector<T> &) *this).operator=((T)0); 
 
   GameNode n = m_efg->GetRoot();
-  const gbtNfgSupport &support = p_profile.GetSupport();
+  const StrategySupport &support = p_profile.GetSupport();
   Game nfg = p_profile.GetGame();
 
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++)   {

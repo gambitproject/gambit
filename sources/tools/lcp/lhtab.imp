@@ -31,7 +31,7 @@
 //                        LemkeHowson Tableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> Gambit::Matrix<T> Make_A1(const gbtNfgSupport &S,
+template <class T> Gambit::Matrix<T> Make_A1(const Gambit::StrategySupport &S,
                                       const T &)
 {
   int n1, n2, i,j;
@@ -64,7 +64,7 @@ template <class T> Gambit::Matrix<T> Make_A1(const gbtNfgSupport &S,
   return A1;
 }
 
-template <class T> Gambit::Matrix<T> Make_A2(const gbtNfgSupport &S,
+template <class T> Gambit::Matrix<T> Make_A2(const Gambit::StrategySupport &S,
                                       const T &)
 {
   int n1, n2, i,j;
@@ -97,7 +97,7 @@ template <class T> Gambit::Matrix<T> Make_A2(const gbtNfgSupport &S,
   return A2;
 }
 
-template <class T> gbtVector<T> Make_b1(const gbtNfgSupport &S,
+template <class T> gbtVector<T> Make_b1(const Gambit::StrategySupport &S,
 				      const T &)
 {
   int n1 = S.NumStrats(1);
@@ -108,7 +108,7 @@ template <class T> gbtVector<T> Make_b1(const gbtNfgSupport &S,
   return b1;
 }
 
-template <class T> gbtVector<T> Make_b2(const gbtNfgSupport &S, const T &)
+template <class T> gbtVector<T> Make_b2(const Gambit::StrategySupport &S, const T &)
 {
   int n1, n2, i;
   n1=S.NumStrats(1);

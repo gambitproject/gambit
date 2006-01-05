@@ -30,12 +30,12 @@
 // final one, which is our goal, is the undominated support function.
 // We begin by simply enumerating all subsupports.
 
-void AllSubsupportsRECURSIVE(const gbtEfgSupport &s,
-			     gbtEfgSupportWithActiveInfo *sact,
+void AllSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
+			     Gambit::BehavSupportWithActiveInfo *sact,
 			     ActionCursorForSupport *c,
-			     gbtList<gbtEfgSupport> &list)
+			     gbtList<Gambit::BehavSupport> &list)
 { 
-  list.Append(sact->UnderlyingSupport());
+  list.Append(*sact);
 
   ActionCursorForSupport c_copy(*c);
 
@@ -48,10 +48,10 @@ void AllSubsupportsRECURSIVE(const gbtEfgSupport &s,
   } while (c_copy.GoToNext()) ;
 }
 
-gbtList<gbtEfgSupport> AllSubsupports(const gbtEfgSupport &S)
+gbtList<Gambit::BehavSupport> AllSubsupports(const Gambit::BehavSupport &S)
 {
-  gbtList<gbtEfgSupport> answer;
-  gbtEfgSupportWithActiveInfo SAct(S);
+  gbtList<Gambit::BehavSupport> answer;
+  Gambit::BehavSupportWithActiveInfo SAct(S);
   ActionCursorForSupport cursor(S);
 
   AllSubsupportsRECURSIVE(S, &SAct, &cursor, answer);
@@ -67,13 +67,13 @@ gbtList<gbtEfgSupport> AllSubsupports(const gbtEfgSupport &S)
 // prototype of the eventual path enumerator, which will also perform
 // dominance elimination.
 
-void AllInequivalentSubsupportsRECURSIVE(const gbtEfgSupport &s,
-					 gbtEfgSupportWithActiveInfo *sact,
+void AllInequivalentSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
+					 Gambit::BehavSupportWithActiveInfo *sact,
 					 ActionCursorForSupport *c,
-					 gbtList<gbtEfgSupport> &list)
+					 gbtList<Gambit::BehavSupport> &list)
 { 
   if (sact->HasActiveActionsAtActiveInfosetsAndNoOthers())
-    list.Append(sact->UnderlyingSupport());
+    list.Append(*sact);
 
   ActionCursorForSupport c_copy(*c);
 
@@ -92,10 +92,10 @@ void AllInequivalentSubsupportsRECURSIVE(const gbtEfgSupport &s,
   } while (c_copy.GoToNext()) ;
 }
 
-gbtList<gbtEfgSupport> AllInequivalentSubsupports(const gbtEfgSupport &S)
+gbtList<Gambit::BehavSupport> AllInequivalentSubsupports(const Gambit::BehavSupport &S)
 {
-  gbtList<gbtEfgSupport> answer;
-  gbtEfgSupportWithActiveInfo SAct(S);
+  gbtList<Gambit::BehavSupport> answer;
+  Gambit::BehavSupportWithActiveInfo SAct(S);
   ActionCursorForSupport cursor(S);
 
   AllInequivalentSubsupportsRECURSIVE(S, &SAct, &cursor, answer);
@@ -103,11 +103,11 @@ gbtList<gbtEfgSupport> AllInequivalentSubsupports(const gbtEfgSupport &S)
   return answer;
 }
 
-void AllUndominatedSubsupportsRECURSIVE(const gbtEfgSupport &s,
-					gbtEfgSupportWithActiveInfo *sact,
+void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
+					Gambit::BehavSupportWithActiveInfo *sact,
 					ActionCursorForSupport *c,
 					bool strong, bool conditional,
-					gbtList<gbtEfgSupport> &list)
+					gbtList<Gambit::BehavSupport> &list)
 { 
   bool abort = false;
   bool no_deletions = true;
@@ -168,7 +168,7 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtEfgSupport &s,
   // If there are no deletions, we ask if it is consistent, then recurse.
   if (!abort && no_deletions) {
     if (sact->HasActiveActionsAtActiveInfosetsAndNoOthers())
-      list.Append(sact->UnderlyingSupport());
+      list.Append(*sact);
     
     ActionCursorForSupport c_copy(*c);
     
@@ -194,11 +194,11 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtEfgSupport &s,
   }
 }
   
-gbtList<gbtEfgSupport> AllUndominatedSubsupports(const gbtEfgSupport &S,
+gbtList<Gambit::BehavSupport> AllUndominatedSubsupports(const Gambit::BehavSupport &S,
 					       bool strong, bool conditional)
 {
-  gbtList<gbtEfgSupport> answer;
-  gbtEfgSupportWithActiveInfo sact(S);
+  gbtList<Gambit::BehavSupport> answer;
+  Gambit::BehavSupportWithActiveInfo sact(S);
   ActionCursorForSupport cursor(S);
 
   AllUndominatedSubsupportsRECURSIVE(S,
@@ -211,10 +211,10 @@ gbtList<gbtEfgSupport> AllUndominatedSubsupports(const gbtEfgSupport &S,
   return answer;
 }
 
-void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport &s,
-				      gbtEfgSupportWithActiveInfo *sact,
+void PossibleNashSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
+				      Gambit::BehavSupportWithActiveInfo *sact,
 				      ActionCursorForSupport *c,
-				      gbtList<gbtEfgSupport> &list)
+				      gbtList<Gambit::BehavSupport> &list)
 { 
   bool abort = false;
   bool add_support = true;
@@ -271,7 +271,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport &s,
   if (!abort && deletion_list.Length() == 0) {
 
     if (add_support && sact->HasActiveActionsAtActiveInfosetsAndNoOthers())
-      list.Append(sact->UnderlyingSupport());    
+      list.Append(*sact);
     ActionCursorForSupport c_copy(*c);
     do {
       if ( sact->ActionIsActive(c_copy.GetAction()) ) {
@@ -288,7 +288,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport &s,
   }
 }
 
-gbtList<gbtEfgSupport> SortSupportsBySize(gbtList<gbtEfgSupport> &list) 
+gbtList<Gambit::BehavSupport> SortSupportsBySize(gbtList<Gambit::BehavSupport> &list) 
 {
   gbtArray<int> sizes(list.Length());
   for (int i = 1; i <= list.Length(); i++)
@@ -325,17 +325,17 @@ gbtList<gbtEfgSupport> SortSupportsBySize(gbtList<gbtEfgSupport> &list)
       }
   }
 
-  gbtList<gbtEfgSupport> answer;
+  gbtList<Gambit::BehavSupport> answer;
   for (int i = 1; i <= list.Length(); i++)
     answer.Append(list[listproxy[i]]);
 
   return answer;
 }
   
-gbtList<gbtEfgSupport> PossibleNashSubsupports(const gbtEfgSupport &S)
+gbtList<Gambit::BehavSupport> PossibleNashSubsupports(const Gambit::BehavSupport &S)
 {
-  gbtList<gbtEfgSupport> answer;
-  gbtEfgSupportWithActiveInfo sact(S);
+  gbtList<Gambit::BehavSupport> answer;
+  Gambit::BehavSupportWithActiveInfo sact(S);
   ActionCursorForSupport cursor(S);
 
   PossibleNashSubsupportsRECURSIVE(S, &sact, &cursor, answer);
@@ -346,7 +346,7 @@ gbtList<gbtEfgSupport> PossibleNashSubsupports(const gbtEfgSupport &S)
   // subsupports exhibiting domination by currently inactive actions.
 
   for (int i = answer.Length(); i >= 1; i--) {
-    gbtEfgSupportWithActiveInfo current(answer[i]);
+    Gambit::BehavSupportWithActiveInfo current(answer[i]);
     ActionCursorForSupport crsr(S);
     bool remove = false;
     do {
@@ -382,7 +382,7 @@ gbtList<gbtEfgSupport> PossibleNashSubsupports(const gbtEfgSupport &S)
 //                ActionCursorForSupport
 // ---------------------------------------------------
 
-ActionCursorForSupport::ActionCursorForSupport(const gbtEfgSupport &S)
+ActionCursorForSupport::ActionCursorForSupport(const Gambit::BehavSupport &S)
   : support(&S), pl(1), iset(1), act(1)
 {
   Gambit::Game efg = S.GetGame();
@@ -527,7 +527,7 @@ ActionCursorForSupport::IsSubsequentTo(const Gambit::GameAction &a) const
 
 
 bool ActionCursorForSupport::
-DeletionsViolateActiveCommitments(const gbtEfgSupportWithActiveInfo *S,
+DeletionsViolateActiveCommitments(const Gambit::BehavSupportWithActiveInfo *S,
 				   const gbtList<Gambit::GameInfoset> *infosetlist)
 {
   for (int i = 1; i <= infosetlist->Length(); i++) {
@@ -550,7 +550,7 @@ DeletionsViolateActiveCommitments(const gbtEfgSupportWithActiveInfo *S,
 
 
 bool ActionCursorForSupport::
-InfosetGuaranteedActiveByPriorCommitments(const gbtEfgSupportWithActiveInfo *S,
+InfosetGuaranteedActiveByPriorCommitments(const Gambit::BehavSupportWithActiveInfo *S,
 					  const Gambit::GameInfoset &infoset)
 {
   gbtList<Gambit::GameNode> members;

@@ -34,7 +34,7 @@
 //                               Lifecycle
 //---------------------------------------------------------------------------
 
-gbtNfgContingencyIterator::gbtNfgContingencyIterator(const gbtNfgSupport &s)
+gbtNfgContingencyIterator::gbtNfgContingencyIterator(const Gambit::StrategySupport &s)
   : support(s),
     m_currentStrat(s.GetGame()->NumPlayers()),
     profile(s.GetGame()), m_frozen1(0), m_frozen2(0)
@@ -42,7 +42,7 @@ gbtNfgContingencyIterator::gbtNfgContingencyIterator(const gbtNfgSupport &s)
   First();
 }
 
-gbtNfgContingencyIterator::gbtNfgContingencyIterator(const gbtNfgSupport &s,
+gbtNfgContingencyIterator::gbtNfgContingencyIterator(const Gambit::StrategySupport &s,
 						     int pl, int st)
   : support(s), 
     m_currentStrat(s.GetGame()->NumPlayers()),
@@ -53,7 +53,7 @@ gbtNfgContingencyIterator::gbtNfgContingencyIterator(const gbtNfgSupport &s,
   First();
 }
 
-gbtNfgContingencyIterator::gbtNfgContingencyIterator(const gbtNfgSupport &s,
+gbtNfgContingencyIterator::gbtNfgContingencyIterator(const Gambit::StrategySupport &s,
 						     int pl1, int st1,
 						     int pl2, int st2)
   : support(s), 

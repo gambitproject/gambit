@@ -65,19 +65,19 @@ private:
   gbtList<BFS<T> > List;
   gbtList<Gambit::GameInfoset> isets1, isets2;
 
-  void FillTableau(const gbtEfgSupport &,
+  void FillTableau(const Gambit::BehavSupport &,
 		   Gambit::Matrix<T> &, const Gambit::GameNode &, T ,int ,int , int ,int );
-  void GetSolutions(const gbtEfgSupport &) const;
+  void GetSolutions(const Gambit::BehavSupport &) const;
   int Add_BFS(/*const*/ LPSolve<T> &B);
   
-  void GetProfile(const gbtEfgSupport &, gbtDPVector<T> &v, const BFS<T> &sol,
+  void GetProfile(const Gambit::BehavSupport &, gbtDPVector<T> &v, const BFS<T> &sol,
 		  const Gambit::GameNode &n, int s1,int s2) const;
 
 public:
   efgLp(void);
   virtual ~efgLp() { }
 
-  void Solve(const gbtEfgSupport &);
+  void Solve(const Gambit::BehavSupport &);
 };
 
 
@@ -123,7 +123,7 @@ void UndefinedToCentroid(Gambit::MixedBehavProfile<T> &p_profile)
 }
 
 template <class T> 
-void efgLp<T>::Solve(const gbtEfgSupport &p_support)
+void efgLp<T>::Solve(const Gambit::BehavSupport &p_support)
 {
   BFS<T> cbfs((T) 0);
   
@@ -184,7 +184,7 @@ template <class T> int efgLp<T>::Add_BFS(/*const*/ LPSolve<T> &lp)
 
 
 
-template <class T> void efgLp<T>::GetProfile(const gbtEfgSupport &p_support,
+template <class T> void efgLp<T>::GetProfile(const Gambit::BehavSupport &p_support,
 					     gbtDPVector<T> &v,
 					     const BFS<T> &sol,
 					     const Gambit::GameNode &n,
@@ -241,7 +241,7 @@ template <class T> void efgLp<T>::GetProfile(const gbtEfgSupport &p_support,
 
 
 template <class T>
-void efgLp<T>::FillTableau(const gbtEfgSupport &p_support,
+void efgLp<T>::FillTableau(const Gambit::BehavSupport &p_support,
 			   Gambit::Matrix<T> &A, const Gambit::GameNode &n, T prob,
 			   int s1, int s2, int i1, int i2)
 {
@@ -284,7 +284,7 @@ void efgLp<T>::FillTableau(const gbtEfgSupport &p_support,
 }
 
 template <class T>
-void efgLp<T>::GetSolutions(const gbtEfgSupport &p_support) const
+void efgLp<T>::GetSolutions(const Gambit::BehavSupport &p_support) const
 {
   for (int i = 1; i <= List.Length(); i++)    {
     Gambit::MixedBehavProfile<T> profile(p_support);

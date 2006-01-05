@@ -5,9 +5,8 @@ lib_LTLIBRARIES = libgambit.la
 libgambit_la_SOURCES = \
 	base.h \
 	behav.cc behav.h behav.imp \
-	efdom.cc efdom.h \
 	efgiter.cc efgiter.h \
-	efstrat.cc efstrat.h \
+	behavspt.cc behavspt.h \
 	game.cc game.h \
 	garray.h \
 	gdpvect.cc gdpvect.h gdpvect.imp \
@@ -22,9 +21,8 @@ libgambit_la_SOURCES = \
 	integer.cc integer.h \
 	libgambit.h \
 	mixed.cc mixed.h mixed.imp \
-	nfdom.cc \
 	nfgiter.cc nfgiter.h \
-	nfstrat.cc nfstrat.h \
+	stratspt.cc stratspt.h \
 	rational.cc rational.h \
 	readefg.cc \
 	readnfg.cc
@@ -33,9 +31,8 @@ libgambitincludedir = $(includedir)/libgambit
 libgambitinclude_HEADERS = \
 	base.h \
 	behav.h behav.imp \
-	efdom.h \
 	efgiter.h \
-	efstrat.h \
+	behavspt.h \
 	game.h \
 	garray.h \
 	gdpvect.h gdpvect.imp \
@@ -51,7 +48,7 @@ libgambitinclude_HEADERS = \
 	libgambit.h \
 	mixed.h mixed.imp \
 	nfgiter.h \
-	nfstrat.h \
+	stratspt.h \
 	rational.h	
 
 libgambit_la_LDFLAGS = -no-undefined -version-info 0:0:0

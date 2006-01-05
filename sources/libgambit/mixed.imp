@@ -25,7 +25,6 @@
 //
 
 #include "game.h"
-#include "nfstrat.h"
 
 #include "gpvector.h"
 #include "mixed.h"
@@ -36,7 +35,7 @@ namespace Gambit {
 //                    MixedStrategyProfile<T> member functions
 //---------------------------------------------------------------------------
 
-template <class T> MixedStrategyProfile<T>::MixedStrategyProfile(const gbtNfgSupport &s)
+template <class T> MixedStrategyProfile<T>::MixedStrategyProfile(const StrategySupport &s)
   : gbtPVector<T>(s.NumStrats()), support(s)
 {
   SetCentroid();

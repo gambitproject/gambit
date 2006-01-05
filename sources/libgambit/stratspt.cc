@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Compute dominated strategies on normal forms
+// Implementation of strategy classes for normal forms
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,11 +24,102 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <iostream>
 #include "libgambit.h"
 
-bool gbtNfgSupport::Dominates(Gambit::GameStrategy s, Gambit::GameStrategy t, 
-			      bool strong) const
+namespace Gambit {
+
+//===========================================================================
+//                          class StrategySupport
+//===========================================================================
+
+//---------------------------------------------------------------------------
+//                               Lifecycle
+//---------------------------------------------------------------------------
+
+StrategySupport::StrategySupport(const Game &p_nfg) 
+  : m_nfg(p_nfg)
+{ 
+  for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
+    m_support.Append(gbtArray<GameStrategy>());
+    for (int st = 1; st <= p_nfg->GetPlayer(pl)->NumStrategies(); st++) {
+      m_support[pl].Append(p_nfg->GetPlayer(pl)->GetStrategy(st));
+    }
+  }
+}
+
+//---------------------------------------------------------------------------
+//                          General information
+//---------------------------------------------------------------------------
+
+gbtArray<int> StrategySupport::NumStrats(void) const
+{
+  gbtArray<int> a(m_support.Length());
+
+  for (int pl = 1; pl <= a.Length(); pl++) {
+    a[pl] = m_support[pl].Length();
+  }
+  return a;
+}
+
+int StrategySupport::ProfileLength(void) const
+{
+  int total = 0;
+  for (int pl = 1; pl <= m_nfg->NumPlayers();
+       total += m_support[pl++].Length());
+  return total;
+}
+
+bool StrategySupport::IsSubsetOf(const StrategySupport &p_support) const
+{
+  if (m_nfg != p_support.m_nfg)  return false;
+  for (int pl = 1; pl <= m_support.Length(); pl++) {
+    if (m_support[pl].Length() > p_support.m_support[pl].Length()) {
+      return false;
+    }
+    else {
+      for (int st = 1; st <= m_support[pl].Length(); st++) {
+	if (!p_support.m_support[pl].Contains(m_support[pl][st])) {
+	  return false;
+	}
+      }
+    }
+  }
+  return true;
+}
+
+//---------------------------------------------------------------------------
+//                        Modifying the support
+//---------------------------------------------------------------------------
+
+void StrategySupport::AddStrategy(GameStrategy s)
+{ 
+  gbtArray<GameStrategy> &sup = m_support[s->GetPlayer()->GetNumber()];
+  if (sup.Contains(s))  return;
+
+  int index;
+  for (index = 1; 
+       index <= sup.Length() && sup[index]->GetNumber() < s->GetNumber(); 
+       index++);
+  sup.Insert(s, index);
+}
+
+bool StrategySupport::RemoveStrategy(GameStrategy s) 
+{ 
+  gbtArray<GameStrategy> &sup = m_support[s->GetPlayer()->GetNumber()];
+  if (!sup.Contains(s)) return false;
+  if (sup.Contains(s) && sup.Length() == 1)  return false;
+  sup.Remove(sup.Find(s));
+  return true;
+} 
+
+
+//---------------------------------------------------------------------------
+//                 Identification of dominated strategies
+//---------------------------------------------------------------------------
+
+bool StrategySupport::Dominates(Gambit::GameStrategy s, 
+				Gambit::GameStrategy t, 
+				bool strong) const
 {
   Gambit::Game n = GetGame();
 
@@ -74,7 +165,7 @@ bool gbtNfgSupport::Dominates(Gambit::GameStrategy s, Gambit::GameStrategy t,
 }
 
 
-bool gbtNfgSupport::IsDominated(Gambit::GameStrategy s, bool strong) const
+bool StrategySupport::IsDominated(Gambit::GameStrategy s, bool strong) const
 {
   for (int i = 1; i <= NumStrats(s->GetPlayer()->GetNumber()); i++) {
     if (GetStrategy(s->GetPlayer()->GetNumber(), i) != s &&
@@ -85,8 +176,8 @@ bool gbtNfgSupport::IsDominated(Gambit::GameStrategy s, bool strong) const
   return false;
 }
 
-bool gbtNfgSupport::Undominated(gbtNfgSupport &newS, int pl, bool strong,
-			    std::ostream &tracefile) const
+bool StrategySupport::Undominated(StrategySupport &newS, int pl, bool strong,
+				  std::ostream &tracefile) const
 {
   gbtArray<int> set(NumStrats(pl));
   int i;
@@ -146,10 +237,11 @@ bool gbtNfgSupport::Undominated(gbtNfgSupport &newS, int pl, bool strong,
     return false;
 }
 
-gbtNfgSupport gbtNfgSupport::Undominated(bool strong, const gbtArray<int> &players,
-				 std::ostream &tracefile) const
+StrategySupport 
+StrategySupport::Undominated(bool strong, const gbtArray<int> &players,
+			     std::ostream &tracefile) const
 {
-  gbtNfgSupport newS(*this);
+  StrategySupport newS(*this);
   
   for (int i = 1; i <= players.Length(); i++)   {
     int pl = players[i];
@@ -160,5 +252,4 @@ gbtNfgSupport gbtNfgSupport::Undominated(bool strong, const gbtArray<int> &playe
   return newS;
 }
 
-
-
+} // end namespace Gambit

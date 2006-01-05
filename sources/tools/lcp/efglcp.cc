@@ -69,13 +69,13 @@ private:
   gbtList<BFS<T> > List;
   gbtList<Gambit::GameInfoset> isets1, isets2;
 
-  void FillTableau(const gbtEfgSupport &, Gambit::Matrix<T> &, const Gambit::GameNode &, T,
+  void FillTableau(const Gambit::BehavSupport &, Gambit::Matrix<T> &, const Gambit::GameNode &, T,
 		   int, int, int, int);
   int Add_BFS(const LTableau<T> &tab);
-  int All_Lemke(const gbtEfgSupport &, int dup, LTableau<T> &B,
+  int All_Lemke(const Gambit::BehavSupport &, int dup, LTableau<T> &B,
 		int depth, Gambit::Matrix<T> &);
   
-  void GetProfile(const gbtEfgSupport &, const LTableau<T> &tab, 
+  void GetProfile(const Gambit::BehavSupport &, const LTableau<T> &tab, 
 		  gbtDPVector<T> &, const gbtVector<T> &, 
 		  const Gambit::GameNode &n, int,int);
 
@@ -89,7 +89,7 @@ public:
   int MaxDepth(void) const { return m_maxDepth; }
   void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
 
-  void Solve(const gbtEfgSupport &);
+  void Solve(const Gambit::BehavSupport &);
 };
 
 
@@ -146,7 +146,7 @@ void UndefinedToCentroid(Gambit::MixedBehavProfile<T> &p_profile)
 //
 
 template <class T> 
-void efgLcp<T>::Solve(const gbtEfgSupport &p_support)
+void efgLcp<T>::Solve(const Gambit::BehavSupport &p_support)
 {
   BFS<T> cbfs((T) 0);
   int i, j;
@@ -244,7 +244,7 @@ template <class T> int efgLcp<T>::Add_BFS(const LTableau<T> &tableau)
 // all possible paths, adding any new equilibria to the List.  
 //
 template <class T> int 
-efgLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
+efgLcp<T>::All_Lemke(const Gambit::BehavSupport &p_support,
 		     int j, LTableau<T> &B, int depth,
 		     Gambit::Matrix<T> &A)
 {
@@ -309,7 +309,7 @@ efgLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
 }
 
 template <class T>
-void efgLcp<T>::FillTableau(const gbtEfgSupport &p_support, Gambit::Matrix<T> &A,
+void efgLcp<T>::FillTableau(const Gambit::BehavSupport &p_support, Gambit::Matrix<T> &A,
 			    const Gambit::GameNode &n, T prob,
 			    int s1, int s2, int i1, int i2)
 {
@@ -363,7 +363,7 @@ void efgLcp<T>::FillTableau(const gbtEfgSupport &p_support, Gambit::Matrix<T> &A
 
 
 template <class T>
-void efgLcp<T>::GetProfile(const gbtEfgSupport &p_support,
+void efgLcp<T>::GetProfile(const Gambit::BehavSupport &p_support,
 				  const LTableau<T> &tab, 
 				  gbtDPVector<T> &v, const gbtVector<T> &sol,
 				  const Gambit::GameNode &n, int s1,int s2)
