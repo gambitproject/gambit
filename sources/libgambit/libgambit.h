@@ -30,7 +30,7 @@
 #include "base.h"
 #include "garray.h"
 #include "glist.h"
-#include "grarray.h"
+#include "recarray.h"
 
 template <class T> T gmin(const T &a, const T &b)
 { if (a < b) return a; else return b; }

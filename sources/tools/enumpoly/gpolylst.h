@@ -120,7 +120,7 @@ template <class T> class gPolyList
    gbtList<gPoly<T> >         UnderlyingbtList()                          const;
    const gbtVector<T>         Evaluate(const gbtVector<T>&)               const;
    const bool               IsRoot(const gbtVector<T>&)                 const;
-   const gbtRectArray<gPoly<T>*> DerivativeMatrix()                     const;
+   const Gambit::RectArray<gPoly<T>*> DerivativeMatrix()                     const;
    const gPoly<T>           DetOfDerivativeMatrix()                   const;
    const Gambit::Matrix<T>         DerivativeMatrix(const gbtVector<T>&)       const;
    const Gambit::SquareMatrix<T>   SquareDerivativeMatrix(const gbtVector<T>&) const;

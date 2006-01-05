@@ -66,9 +66,9 @@ Sfg::Sfg(const Gambit::BehavSupport &S)
       (*(*SF)[index.CurrentIndices()])[i]=(gbtRational)0;
   } 
 
-  E = new gbtArray<gbtRectArray<gbtRational> *> (EF->NumPlayers());
+  E = new gbtArray<Gambit::RectArray<gbtRational> *> (EF->NumPlayers());
   for(i=1;i<=EF->NumPlayers();i++) {
-    (*E)[i] = new gbtRectArray<gbtRational>(infosets[i].Length()+1,seq[i]);
+    (*E)[i] = new Gambit::RectArray<gbtRational>(infosets[i].Length()+1,seq[i]);
     for(int j = (*(*E)[i]).MinRow();j<=(*(*E)[i]).MaxRow();j++)
       for(int k = (*(*E)[i]).MinCol();k<=(*(*E)[i]).MaxCol();k++)
 	(*(*E)[i])(j,k)=(gbtRational)0;

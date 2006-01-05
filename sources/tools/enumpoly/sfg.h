@@ -38,7 +38,7 @@ private:
   const Gambit::BehavSupport &efsupp;
   gbtArray<SFSequenceSet *> *sequences;
   gNArray<gbtArray<gbtRational> *> *SF;  // sequence form
-  gbtArray<gbtRectArray<gbtRational> *> *E;   // constraint matrices for sequence form.  
+  gbtArray<Gambit::RectArray<gbtRational> *> *E;   // constraint matrices for sequence form.  
   gbtArray<int> seq;
   gbtPVector<int> isetFlag,isetRow;
   gbtArray<gbtList<Gambit::GameInfoset> > infosets;
@@ -61,7 +61,7 @@ public:
   inline gbtArray<gbtRational> Payoffs(const gbtArray<int> & index) const {return *((*SF)[index]);}
   gbtRational Payoff(const gbtArray<int> & index,int pl) const;
 
-  gbtRectArray<gbtRational> Constraints(int player) const {return *((*E)[player]);};
+  Gambit::RectArray<gbtRational> Constraints(int player) const {return *((*E)[player]);};
   int InfosetRowNumber(int pl, int sequence) const;
   int ActionNumber(int pl, int sequence) const;
   Gambit::GameInfoset GetInfoset(int pl, int sequence) const;

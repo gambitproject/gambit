@@ -39,7 +39,6 @@ template class gPolyList<gbtRational>;
 
 template class gPolyList<gDouble>;
 
-template class gbtRectArray<gPoly<gDouble>*>;
-
-template class gbtRectArray<gPoly<gbtRational>*>;
+template class Gambit::RectArray<gPoly<gDouble>*>;
+template class Gambit::RectArray<gPoly<gbtRational>*>;
 

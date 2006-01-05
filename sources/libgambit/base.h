@@ -80,7 +80,7 @@ inline void gEpsilon(double &v, int i = 8)
 
 #include "garray.h"
 #include "glist.h"
-#include "grarray.h"
+#include "recarray.h"
 #include "gmap.h"
 
 #endif // BASE_H

@@ -475,10 +475,10 @@ template<class T> const bool gPolyList<T>::IsRoot(const gbtVector<T>& v) const
 }
   
 template<class T> 
-const gbtRectArray<gPoly<T>*> gPolyList<T>::DerivativeMatrix() const
+const Gambit::RectArray<gPoly<T>*> gPolyList<T>::DerivativeMatrix() const
 {
   gPoly<T> zero(Space, Order);
-  gbtRectArray<gPoly<T>*> answer(Length(),Dmnsn());
+  Gambit::RectArray<gPoly<T>*> answer(Length(),Dmnsn());
   int ii;
   for (ii = 1; ii <= Length(); ii++)
     for (int j = 1; j <= Dmnsn(); j++)
@@ -493,7 +493,7 @@ const gPoly<T> gPolyList<T>::DetOfDerivativeMatrix() const
   assert(List.Length() == Space->Dmnsn());
 
   int n = List.Length();
-  gbtRectArray<gPoly<T>*> deriv_matrix = DerivativeMatrix();
+  Gambit::RectArray<gPoly<T>*> deriv_matrix = DerivativeMatrix();
   gPoly<T> answer(Space, Order);
 
   gPermutationOdometer odo(n);

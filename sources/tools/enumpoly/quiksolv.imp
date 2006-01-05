@@ -81,9 +81,10 @@ template<class T> QuikSolv<T>::~QuikSolv()
 //      Supporting Calculations for the Constructors
 //-------------------------------------------------------
 
-template <class T> gbtRectArray<bool> QuikSolv<T>::Eq_i_Uses_j() const
+template <class T> 
+Gambit::RectArray<bool> QuikSolv<T>::Eq_i_Uses_j(void) const
 {
-  gbtRectArray<bool> answer(System.Length(),Dmnsn());
+  Gambit::RectArray<bool> answer(System.Length(),Dmnsn());
   for (int i = 1; i <= System.Length(); i++)
     for (int j = 1; j <= Dmnsn(); j++)
       if (System[i].DegreeOfVar(j) > 0)

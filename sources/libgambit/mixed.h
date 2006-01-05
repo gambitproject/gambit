@@ -30,8 +30,6 @@
 #include "base.h"
 #include "gpvector.h"
 
-template <class T> class gbtRectArray;
-
 namespace Gambit {
 
 template <class T> class MixedStrategyProfile : public gbtPVector<T>  {

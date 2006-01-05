@@ -37,20 +37,20 @@ template <class T> Matrix<T>::Matrix(void)
 { }
 
 template <class T> Matrix<T>::Matrix(unsigned int rows, unsigned int cols)
-  : gbtRectArray<T>(rows, cols)
+  : RectArray<T>(rows, cols)
 { }
 
 template <class T> Matrix<T>::Matrix(unsigned int rows, unsigned int cols,
 				     int minrows)
-  : gbtRectArray<T>(minrows, minrows + rows - 1, 1, cols)
+  : RectArray<T>(minrows, minrows + rows - 1, 1, cols)
 { }
 
 template <class T> Matrix<T>::Matrix(int rl, int rh, int cl, int ch)
-  : gbtRectArray<T>(rl, rh, cl, ch)
+  : RectArray<T>(rl, rh, cl, ch)
 { }
 
 template <class T> Matrix<T>::Matrix(const Matrix<T> &M)
-  : gbtRectArray<T>(M)
+  : RectArray<T>(M)
 { }
  
 template <class T> Matrix<T>::~Matrix()
@@ -58,7 +58,7 @@ template <class T> Matrix<T>::~Matrix()
 
 template <class T> Matrix<T> &Matrix<T>::operator=(const Matrix<T> &M)
 {
-  gbtRectArray<T>::operator=(M);
+  RectArray<T>::operator=(M);
   return *this;
 }
 

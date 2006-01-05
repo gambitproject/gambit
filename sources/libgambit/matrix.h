@@ -27,12 +27,16 @@
 #ifndef LIBGAMBIT_MATRIX_H
 #define LIBGAMBIT_MATRIX_H
 
-#include "grarray.h"
+#include "recarray.h"
 #include "gvector.h"
 
 namespace Gambit {
 
-template <class T> class Matrix : public gbtRectArray<T>  {
+template <class T> 
+gbtVector<T> operator*(const gbtVector<T> &, const Matrix<T> &);
+
+template <class T> class Matrix : public RectArray<T> {
+friend gbtVector<T> operator*<>(const gbtVector<T> &, const Matrix<T> &);
 public:
   /// @name Lifecycle
   //@{

@@ -30,7 +30,6 @@
 #include "game.h"
 
 template <class T> class gbtPVector;
-template <class T> class gbtRectArray;
 
 namespace Gambit {
 

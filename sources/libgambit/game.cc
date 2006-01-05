@@ -412,16 +412,18 @@ gbtRational PureBehavProfile::GetNodeValue(const GameNode &p_node,
     payoff += p_node->outcome->GetPayoff(pl);
   }
 
-  if (p_node->GetInfoset()->IsChanceInfoset()) {
-    for (int i = 1; i <= p_node->NumChildren(); i++) {
-      payoff += (p_node->GetInfoset()->GetActionProb(i) *
-		 GetNodeValue(p_node->children[i], pl));
+  if (!p_node->IsTerminal()) {
+    if (p_node->GetInfoset()->IsChanceInfoset()) {
+      for (int i = 1; i <= p_node->NumChildren(); i++) {
+	payoff += (p_node->GetInfoset()->GetActionProb(i) *
+		   GetNodeValue(p_node->children[i], pl));
+      }
     }
-  }
-  else if (!p_node->IsTerminal()) {
-    int iset = p_node->GetInfoset()->GetNumber();
-    payoff += GetNodeValue(p_node->children[m_profile[pl][iset]->GetNumber()], 
-			   pl);
+    else {
+      int iset = p_node->GetInfoset()->GetNumber();
+      payoff += GetNodeValue(p_node->children[m_profile[pl][iset]->GetNumber()], 
+			     pl);
+    }
   }
 
   return payoff;

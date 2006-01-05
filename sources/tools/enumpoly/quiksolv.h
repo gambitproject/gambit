@@ -77,11 +77,11 @@ template <class T> class QuikSolv {
         bool                         HasBeenSolved;
         gbtList<gbtVector<gDouble> >     Roots;
   const bool                         isMultiaffine;
-  const gbtRectArray<bool>             Equation_i_uses_var_j;
+  const Gambit::RectArray<bool>             Equation_i_uses_var_j;
 
   // Supporting routines for the constructors
 
-  gbtRectArray<bool> Eq_i_Uses_j()                                         const;
+  Gambit::RectArray<bool> Eq_i_Uses_j() const;
 
   // Get Roots Using Pelican
 

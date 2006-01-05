@@ -85,12 +85,12 @@ private:
 
   gbtRational Simplex(Gambit::MixedStrategyProfile<gbtRational> &);
   gbtRational getlabel(Gambit::MixedStrategyProfile<gbtRational> &yy, gbtArray<int> &, gbtPVector<gbtRational> &);
-  void update(gbtRectArray<int> &, gbtRectArray<int> &, gbtPVector<gbtRational> &,
+  void update(Gambit::RectArray<int> &, Gambit::RectArray<int> &, gbtPVector<gbtRational> &,
 	      const gbtPVector<int> &, int j, int i);
   void getY(Gambit::MixedStrategyProfile<gbtRational> &x, gbtPVector<gbtRational> &, 
 	    const gbtPVector<int> &, const gbtPVector<int> &, 
-	    const gbtPVector<gbtRational> &, const gbtRectArray<int> &, int k);
-  void getnexty(Gambit::MixedStrategyProfile<gbtRational> &x, const gbtRectArray<int> &,
+	    const gbtPVector<gbtRational> &, const Gambit::RectArray<int> &, int k);
+  void getnexty(Gambit::MixedStrategyProfile<gbtRational> &x, const Gambit::RectArray<int> &,
 		const gbtPVector<int> &, int i);
   int get_c(int j, int h, int nstrats, const gbtPVector<int> &);
   int get_b(int j, int h, int nstrats, const gbtPVector<int> &);
@@ -131,7 +131,7 @@ nfgSimpdiv::~nfgSimpdiv()
 gbtRational nfgSimpdiv::Simplex(Gambit::MixedStrategyProfile<gbtRational> &y)
 {
   gbtArray<int> ylabel(2);
-  gbtRectArray<int> labels(y.Length(), 2), pi(y.Length(), 2);
+  Gambit::RectArray<int> labels(y.Length(), 2), pi(y.Length(), 2);
   gbtPVector<int> U(y.GetSupport().NumStrats()), TT(y.GetSupport().NumStrats());
   gbtPVector<gbtRational> ab(y.GetSupport().NumStrats());
   gbtPVector<gbtRational> besty(y.GetSupport().NumStrats());
@@ -318,8 +318,8 @@ gbtRational nfgSimpdiv::Simplex(Gambit::MixedStrategyProfile<gbtRational> &y)
   return maxz;
 }
 
-void nfgSimpdiv::update(gbtRectArray<int> &pi,
-			gbtRectArray<int> &labels,
+void nfgSimpdiv::update(Gambit::RectArray<int> &pi,
+			Gambit::RectArray<int> &labels,
 			gbtPVector<gbtRational> &ab,
 			const gbtPVector<int> &U,
 			int j, int i)
@@ -370,7 +370,7 @@ void nfgSimpdiv::getY(Gambit::MixedStrategyProfile<gbtRational> &x,
 		      const gbtPVector<int> &U,
 		      const gbtPVector<int> &TT,
 		      const gbtPVector<gbtRational> &ab,
-		      const gbtRectArray<int> &pi,
+		      const Gambit::RectArray<int> &pi,
 		      int k)
 {
   int j, h, i,hh;
@@ -394,7 +394,7 @@ void nfgSimpdiv::getY(Gambit::MixedStrategyProfile<gbtRational> &x,
 }
 
 void nfgSimpdiv::getnexty(Gambit::MixedStrategyProfile<gbtRational> &x,
-			  const gbtRectArray<int> &pi, 
+			  const Gambit::RectArray<int> &pi, 
 			  const gbtPVector<int> &U,
 			  int i)
 {
