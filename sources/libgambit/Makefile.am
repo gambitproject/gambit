@@ -4,7 +4,7 @@ lib_LTLIBRARIES = libgambit.la
 
 libgambit_la_SOURCES = \
 	base.h \
-	behav.h behav.imp behavinst.cc \
+	behav.cc behav.h behav.imp \
 	efdom.cc efdom.h \
 	efgiter.cc efgiter.h \
 	efstrat.cc efstrat.h \
@@ -21,9 +21,8 @@ libgambit_la_SOURCES = \
 	gvector.cc gvector.h gvector.imp \
 	integer.cc integer.h \
 	libgambit.h \
-	mixed.h mixed.imp \
+	mixed.cc mixed.h mixed.imp \
 	nfdom.cc \
-	nfginst.cc \
 	nfgiter.cc nfgiter.h \
 	nfstrat.cc nfstrat.h \
 	rational.cc rational.h \

@@ -113,7 +113,7 @@ static gbtList<Gambit::GameInfoset> DeviationInfosets(const gbtEfgSupport &big_s
 }
 
 static gPolyList<gDouble> 
-ActionProbsSumToOneIneqs(const gbtBehavProfile<double> &p_solution,
+ActionProbsSumToOneIneqs(const Gambit::MixedBehavProfile<double> &p_solution,
 			 const gSpace &BehavStratSpace, 
 			 const term_order &Lex,
 			 const gbtEfgSupport &big_supp,
@@ -208,7 +208,7 @@ DeviationSupports(const gbtEfgSupport & big_supp,
 }
 
 static bool 
-NashNodeProbabilityPoly(const gbtBehavProfile<double> &p_solution,
+NashNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_solution,
 			gPoly<gDouble> & node_prob,
 			const gSpace &BehavStratSpace, 
 			const term_order &Lex,
@@ -266,7 +266,7 @@ NashNodeProbabilityPoly(const gbtBehavProfile<double> &p_solution,
 }
 
 static gPolyList<gDouble> 
-NashExpectedPayoffDiffPolys(const gbtBehavProfile<double> &p_solution,
+NashExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 			    const gSpace &BehavStratSpace, 
 			    const term_order &Lex,
 			    const gbtEfgSupport &little_supp,
@@ -327,7 +327,7 @@ NashExpectedPayoffDiffPolys(const gbtBehavProfile<double> &p_solution,
 		  next_poly += node_prob;
 		}
 	      }
-	      answer += -next_poly + (gDouble) p_solution.Payoff(pl);
+	      answer += -next_poly + (gDouble) p_solution.GetPayoff(pl);
 	    }
 	  }
       }
@@ -337,7 +337,7 @@ NashExpectedPayoffDiffPolys(const gbtBehavProfile<double> &p_solution,
 }
 
 static gPolyList<gDouble> 
-ExtendsToNashIneqs(const gbtBehavProfile<double> &p_solution,
+ExtendsToNashIneqs(const Gambit::MixedBehavProfile<double> &p_solution,
 		   const gSpace &BehavStratSpace, 
 		   const term_order &Lex,
 		   const gbtEfgSupport &little_supp,
@@ -358,11 +358,11 @@ ExtendsToNashIneqs(const gbtBehavProfile<double> &p_solution,
   return answer;
 }
 
-bool algExtendsToNash::ExtendsToNash(const gbtBehavProfile<double> &p_solution,
+bool algExtendsToNash::ExtendsToNash(const Gambit::MixedBehavProfile<double> &p_solution,
 				     const gbtEfgSupport &little_supp,
 				     const gbtEfgSupport &big_supp)
 {
-  // This asks whether there is a Nash extension of the gbtBehavProfile<double> to 
+  // This asks whether there is a Nash extension of the Gambit::MixedBehavProfile<double> to 
   // all information sets at which the behavioral probabilities are not
   // specified.  The assumption is that the support has active actions
   // at infosets at which the behavioral probabilities are defined, and
@@ -421,7 +421,7 @@ bool algExtendsToNash::ExtendsToNash(const gbtBehavProfile<double> &p_solution,
 //                   class algExtendsToAgentNash
 //=========================================================================
 
-static bool ANFNodeProbabilityPoly(const gbtBehavProfile<double> &p_solution,
+static bool ANFNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_solution,
 				   gPoly<gDouble> & node_prob,
 				   const gSpace &BehavStratSpace, 
 				   const term_order &Lex,
@@ -472,7 +472,7 @@ static bool ANFNodeProbabilityPoly(const gbtBehavProfile<double> &p_solution,
 }
 
 static gPolyList<gDouble> 
-ANFExpectedPayoffDiffPolys(const gbtBehavProfile<double> &p_solution,
+ANFExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 			   const gSpace &BehavStratSpace, 
 			   const term_order &Lex,
 			   const gbtEfgSupport &little_supp,
@@ -511,14 +511,14 @@ ANFExpectedPayoffDiffPolys(const gbtBehavProfile<double> &p_solution,
 		next_poly += node_prob;
 	      }
 	    }
-	    answer += -next_poly + (gDouble) p_solution.Payoff(pl);
+	    answer += -next_poly + (gDouble) p_solution.GetPayoff(pl);
 	  }
     }
   return answer;
 }
 
 static gPolyList<gDouble> 
-ExtendsToANFNashIneqs(const gbtBehavProfile<double> &p_solution,
+ExtendsToANFNashIneqs(const Gambit::MixedBehavProfile<double> &p_solution,
 		      const gSpace &BehavStratSpace, 
 		      const term_order &Lex,
 		      const gbtEfgSupport &little_supp,
@@ -538,11 +538,11 @@ ExtendsToANFNashIneqs(const gbtBehavProfile<double> &p_solution,
   return answer;
 }
 
-bool algExtendsToAgentNash::ExtendsToAgentNash(const gbtBehavProfile<double> &p_solution,
+bool algExtendsToAgentNash::ExtendsToAgentNash(const Gambit::MixedBehavProfile<double> &p_solution,
 					       const gbtEfgSupport &little_supp,
 					       const gbtEfgSupport &big_supp)
 {
-  // This asks whether there is an ANF Nash extension of the gbtBehavProfile<double> to 
+  // This asks whether there is an ANF Nash extension of the Gambit::MixedBehavProfile<double> to 
   // all information sets at which the behavioral probabilities are not
   // specified.  The assumption is that the support has active actions
   // at infosets at which the behavioral probabilities are defined, and

@@ -44,7 +44,7 @@ class EfgContIter    {
     int _frozen_pl, _frozen_iset;
     Gambit::Game _efg;
     gbtEfgSupport _support;
-    gbtPureBehavProfile _profile;
+    Gambit::PureBehavProfile _profile;
     gbtPVector<int> _current;
     gbtArray<gbtArray<bool> > _is_active;
     gbtArray<int> _num_active_infosets;
@@ -64,7 +64,7 @@ class EfgContIter    {
     void Set(const Gambit::GameAction &a);
     int Next(int pl, int iset);
   
-    const gbtPureBehavProfile &GetProfile(void) const  { return _profile; }
+    const Gambit::PureBehavProfile &GetProfile(void) const  { return _profile; }
 
     int NextContingency(void);
   
@@ -79,7 +79,7 @@ class EfgConditionalContIter    {
   private:
     Gambit::Game _efg;
     gbtEfgSupport _support;
-    gbtPureBehavProfile _profile;
+    Gambit::PureBehavProfile _profile;
     gbtPVector<int> _current;
     gbtArray<gbtArray<bool> > _is_active;
     gbtArray<int> _num_active_infosets;
@@ -96,7 +96,7 @@ class EfgConditionalContIter    {
     void Set(const Gambit::GameAction &a);
     int Next(int pl, int iset); 
   
-    const gbtPureBehavProfile &GetProfile(void) const   { return _profile; }
+    const Gambit::PureBehavProfile &GetProfile(void) const   { return _profile; }
 
     int NextContingency(void);   // Needs rewriting
   

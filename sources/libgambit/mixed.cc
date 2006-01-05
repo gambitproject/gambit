@@ -27,7 +27,7 @@
 #include "libgambit.h"
 #include "mixed.imp"
 
-template class gbtMixedProfile<double>;
-template class gbtMixedProfile<gbtRational>;
-template class gbtMixedProfile<gbtNumber>;
+template class Gambit::MixedStrategyProfile<double>;
+template class Gambit::MixedStrategyProfile<gbtRational>;
+template class Gambit::MixedStrategyProfile<gbtNumber>;
 

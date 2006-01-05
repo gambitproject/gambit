@@ -298,10 +298,10 @@ public:
   int GetCurrentProfile(void) const 
   { return (m_profiles.Length() == 0) ? 0 : GetProfiles().GetCurrent(); }
   void SetCurrentProfile(int p_profile);
-  void AddProfiles(const gbtList<gbtBehavProfile<gbtNumber> > &);
-  void AddProfile(const gbtBehavProfile<gbtNumber> &);
-  void AddProfiles(const gbtList<gbtMixedProfile<gbtNumber> > &);
-  void AddProfile(const gbtMixedProfile<gbtNumber> &);
+  void AddProfiles(const gbtList<Gambit::MixedBehavProfile<gbtNumber> > &);
+  void AddProfile(const Gambit::MixedBehavProfile<gbtNumber> &);
+  void AddProfiles(const gbtList<Gambit::MixedStrategyProfile<gbtNumber> > &);
+  void AddProfile(const Gambit::MixedStrategyProfile<gbtNumber> &);
   //@}
 
   //!

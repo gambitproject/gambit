@@ -130,7 +130,7 @@ public:
   int ColToStrategy(int player, int row) const;
 
   /// Returns the strategy profile corresponding to a cell
-  gbtStrategyProfile CellToProfile(const wxSheetCoords &) const;
+  Gambit::PureStrategyProfile CellToProfile(const wxSheetCoords &) const;
   //@}
 
   /// @name Exporting/printing graphics

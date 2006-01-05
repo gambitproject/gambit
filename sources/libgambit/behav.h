@@ -24,64 +24,29 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef BEHAV_H
-#define BEHAV_H
+#ifndef LIBGAMBIT_BEHAV_H
+#define LIBGAMBIT_BEHAV_H
 
 #include "game.h"
 
-template <class T> class gbtMixedProfile;
 template <class T> class gbtPVector;
 template <class T> class gbtRectArray;
 
-class gbtPureBehavProfile   {
+namespace Gambit {
+
+///
+/// MixedBehavProfile<T> implements a randomized behavior profile on
+/// an extensive game.
+///
+template <class T> class MixedBehavProfile : private gbtDPVector<T>  {
 protected:
-  Gambit::Game m_efg;
-  gbtArray<gbtArray<Gambit::GameAction> > m_profile;
-
-  void GetPayoff(const Gambit::GameNode &n, const gbtRational &, 
-		 gbtArray<gbtRational> &) const;
-  void InfosetProbs(Gambit::GameNode n, const gbtRational &, 
-		    gbtPVector<gbtRational> &) const;
-
-public:
-  gbtPureBehavProfile(Gambit::Game);
-
-  // Operators
-  gbtPureBehavProfile &operator=(const gbtPureBehavProfile &);
-  gbtRational operator()(Gambit::GameAction) const;
-
-  // Manipulation
-  void Set(Gambit::GameAction);
-  void Set(Gambit::GamePlayer, const gbtArray<Gambit::GameAction> &);
-  
-  // Information
-  Gambit::GameAction GetAction(Gambit::GameInfoset) const;
-   
-  gbtRational Payoff(const Gambit::GameNode &, int pl) const;
-  void Payoff(gbtArray<gbtRational> &payoff) const;
-  void InfosetProbs(gbtPVector<gbtRational> &prob) const;
-  Gambit::Game GetGame(void) const   { return m_efg; }
-};
-
-
-//
-//  gbtBehavProfile<T> implements a behavior profile on an Efg.  
-//
-//  The class assumes that the underlying Efg does not change during the 
-//  life of the profile, and will not correctly invalidate itself if 
-//  the game does change.  
-// 
-// 
-
-template <class T> class gbtBehavProfile : private gbtDPVector<T>  {
-protected:
-  Gambit::Game m_efg;
+  Game m_efg;
   gbtEfgSupport m_support;
   mutable bool m_cached_data;
 
   // structures for storing cached data: nodes
   mutable gbtVector<T> m_realizProbs, m_beliefs, m_nvals, m_bvals;
-  mutable Gambit::Matrix<T> m_nodeValues;
+  mutable Matrix<T> m_nodeValues;
 
   // structures for storing cached data: information sets
   mutable gbtPVector<T> m_infosetValues;
@@ -99,106 +64,115 @@ protected:
   // data has been computed.  
   // Use public versions (GetNodeValue, GetIsetProb, etc) if this is not known.
 
-  const T &RealizProb(const Gambit::GameNode &node) const;
-  T &RealizProb(const Gambit::GameNode &node);
+  const T &RealizProb(const GameNode &node) const;
+  T &RealizProb(const GameNode &node);
 
-  const T &BeliefProb(const Gambit::GameNode &node) const;
-  T &BeliefProb(const Gambit::GameNode &node);
+  const T &BeliefProb(const GameNode &node) const;
+  T &BeliefProb(const GameNode &node);
   
-  gbtVector<T> NodeValues(const Gambit::GameNode &node) const
+  gbtVector<T> NodeValues(const GameNode &node) const
     { return m_nodeValues.Row(node->number); }
-  const T &NodeValue(const Gambit::GameNode &node, int pl) const
+  const T &NodeValue(const GameNode &node, int pl) const
     { return m_nodeValues(node->number, pl); }
-  T &NodeValue(const Gambit::GameNode &node, int pl)
+  T &NodeValue(const GameNode &node, int pl)
     { return m_nodeValues(node->number, pl); }
 
-  T IsetProb(const Gambit::GameInfoset &iset) const;
+  T IsetProb(const GameInfoset &iset) const;
 
-  const T &IsetValue(const Gambit::GameInfoset &iset) const;
-  T &IsetValue(const Gambit::GameInfoset &iset);
+  const T &IsetValue(const GameInfoset &iset) const;
+  T &IsetValue(const GameInfoset &iset);
 
-  const T &ActionValue(const Gambit::GameAction &act) const 
+  const T &ActionValue(const GameAction &act) const 
     { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			    act->GetInfoset()->GetNumber(),
 			    act->m_number); }
-  T &ActionValue(const Gambit::GameAction &act)
+  T &ActionValue(const GameAction &act)
     { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			    act->GetInfoset()->GetNumber(),
 			    act->m_number); }
   
-  T ActionProb(const Gambit::GameAction &act) const;
+  T ActionProb(const GameAction &act) const;
 
-  const T &Regret(const Gambit::GameAction &act) const;
-  T &Regret(const Gambit::GameAction &);
+  const T &Regret(const GameAction &act) const;
+  T &Regret(const GameAction &);
 
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
 
-  void Payoff(Gambit::GameNodeRep *, T, int, T &) const;
+  void Payoff(GameNodeRep *, T, int, T &) const;
   
-  void ComputeSolutionDataPass2(const Gambit::GameNode &node) const;
-  void ComputeSolutionDataPass1(const Gambit::GameNode &node) const;
+  void ComputeSolutionDataPass2(const GameNode &node) const;
+  void ComputeSolutionDataPass1(const GameNode &node) const;
   void ComputeSolutionData(void) const;
 
-  void BehaviorStrat(const Gambit::Game &, int, Gambit::GameNode &);
-  void RealizationProbs(const gbtMixedProfile<T> &, const Gambit::Game &,
-			int pl, const gbtArray<int> &, Gambit::GameNode);
+  void BehaviorStrat(const Game &, int, GameNode &);
+  void RealizationProbs(const MixedStrategyProfile<T> &, const Game &,
+			int pl, const gbtArray<int> &, GameNode);
 
 public:
-  // CONSTRUCTORS, DESTRUCTOR
+  /// @name Lifecycle
+  //@{
+  MixedBehavProfile(const gbtEfgSupport &);
+  MixedBehavProfile(const MixedBehavProfile<T> &);
+  MixedBehavProfile(const MixedStrategyProfile<T> &);
+  virtual ~MixedBehavProfile();
 
-  gbtBehavProfile(const gbtEfgSupport &);
-  gbtBehavProfile(const gbtBehavProfile<T> &);
-  gbtBehavProfile(const gbtMixedProfile<T> &);
-  virtual ~gbtBehavProfile();
-  
-  // OPERATOR OVERLOADING
-
-  gbtBehavProfile<T> &operator=(const gbtBehavProfile<T> &);
-  inline gbtBehavProfile<T> &operator=(const gbtVector<T> &p)
+  MixedBehavProfile<T> &operator=(const MixedBehavProfile<T> &);
+  MixedBehavProfile<T> &operator=(const gbtVector<T> &p)
     { Invalidate(); gbtVector<T>::operator=(p); return *this;}
 
-  bool operator==(const gbtBehavProfile<T> &) const;
-  bool operator!=(const gbtBehavProfile<T> &x) const
-    { return !(operator==(x)); }  
+  //@}
+  
+  /// @name Operator overloading
+  //@{
+  bool operator==(const MixedBehavProfile<T> &) const;
+  bool operator!=(const MixedBehavProfile<T> &x) const 
+  { return !(*this == x); }
+  //@}
 
-  // INITIALIZATION, VALIDATION
+  /// @name Initialization, validation
+  //@{
   inline void Invalidate(void) const {m_cached_data=false;}
   void Centroid(void) const;
+  //@}
 
-  // GENERAL DATA ACCESS
-
-  Gambit::Game GetGame(void) const   { return m_efg; }
-  const gbtEfgSupport &Support(void) const   { return m_support; }
+  /// @name General data access
+  //@{
+  Game GetGame(void) const { return m_efg; }
+  const gbtEfgSupport &GetSupport(void) const { return m_support; }
   
-  const T &GetRealizProb(const Gambit::GameNode &node) const;
-  const T &GetBeliefProb(const Gambit::GameNode &node) const;
-  gbtVector<T> GetNodeValue(const Gambit::GameNode &node) const;
-  T GetIsetProb(const Gambit::GameInfoset &iset) const;
-  const T &GetIsetValue(const Gambit::GameInfoset &iset) const;
-  T GetActionProb(const Gambit::GameAction &act) const;
-  const T &GetActionValue(const Gambit::GameAction &act) const;
-  const T &GetRegret(const Gambit::GameAction &act) const;
+  const T &GetRealizProb(const GameNode &node) const;
+  const T &GetBeliefProb(const GameNode &node) const;
+  gbtVector<T> GetNodeValue(const GameNode &node) const;
+  T GetIsetProb(const GameInfoset &iset) const;
+  const T &GetIsetValue(const GameInfoset &iset) const;
+  T GetActionProb(const GameAction &act) const;
+  const T &GetActionValue(const GameAction &act) const;
+  const T &GetRegret(const GameAction &act) const;
+  //@}
 
-  // COMPUTATION OF INTERESTING QUANTITIES
+  /// @name Computation of interesting quantities
+  //@{
+  T GetPayoff(int p_player) const;
+  gbtDPVector<T> GetBeliefs(void);
+  T GetLiapValue(void) const;
+  T GetLiapValueOnDefined(void) const;
+  //T MaxRegret(void);
 
-  T Payoff(int p_player) const;
-  gbtDPVector<T> Beliefs(void);
-  T LiapValue(void) const;
-  T LiapValueOnDefined(void) const;
-  T MaxRegret(void);
+  bool IsDefinedAt(GameInfoset p_infoset) const;
 
-  bool IsDefinedAt(Gambit::GameInfoset p_infoset) const;
+  T DiffActionValue(const GameAction &action, 
+		    const GameAction &oppAction) const;
+  T DiffRealizProb(const GameNode &node, 
+		   const GameAction &oppAction) const;
+  T DiffNodeValue(const GameNode &node, const GamePlayer &player,
+		  const GameAction &oppAction) const;
 
-  T DiffActionValue(const Gambit::GameAction &action, 
-		    const Gambit::GameAction &oppAction) const;
-  T DiffRealizProb(const Gambit::GameNode &node, 
-		   const Gambit::GameAction &oppAction) const;
-  T DiffNodeValue(const Gambit::GameNode &node, const Gambit::GamePlayer &player,
-		  const Gambit::GameAction &oppAction) const;
+  //@}
 
-  // IMPLEMENTATION OF gbtDPVector OPERATIONS
-  // These are reimplemented here to correctly handle invalidation
-  // of cached information.
+  /// @name Implementation of gDPVector opreations
+  // (These are reimplemented here to correctly handle invalidation
+  // of cached information.)
+  //@{
   const T &operator()(int a, int b, int c) const
     { return gbtDPVector<T>::operator()(a, b, c); }
   T &operator()(int a, int b, int c) 
@@ -208,7 +182,7 @@ public:
   T &operator[](int a)
     { Invalidate();  return gbtArray<T>::operator[](a); }
 
-  gbtBehavProfile<T> &operator=(const T &x)  
+  MixedBehavProfile<T> &operator=(const T &x)  
     { Invalidate();  gbtDPVector<T>::operator=(x);  return *this; }
 
   bool operator==(const gbtDPVector<T> &x) const
@@ -216,13 +190,13 @@ public:
   bool operator!=(const gbtDPVector<T> &x) const
     { return gbtDPVector<T>::operator!=(x); }
 
-  gbtBehavProfile<T> &operator+=(const gbtBehavProfile<T> &x)
+  MixedBehavProfile<T> &operator+=(const MixedBehavProfile<T> &x)
     { Invalidate();  gbtDPVector<T>::operator+=(x);  return *this; }
-  gbtBehavProfile<T> &operator+=(const gbtDPVector<T> &x)
+  MixedBehavProfile<T> &operator+=(const gbtDPVector<T> &x)
     { Invalidate();  gbtDPVector<T>::operator+=(x);  return *this; }
-  gbtBehavProfile<T> &operator-=(const gbtBehavProfile<T> &x)
+  MixedBehavProfile<T> &operator-=(const MixedBehavProfile<T> &x)
     { Invalidate();  gbtDPVector<T>::operator-=(x);  return *this; }
-  gbtBehavProfile<T> &operator*=(const T &x)
+  MixedBehavProfile<T> &operator*=(const T &x)
     { Invalidate();  gbtDPVector<T>::operator*=(x);  return *this; }
 
   int Length(void) const
@@ -235,7 +209,9 @@ public:
   const gbtPVector<T> &GetPVector(void) const { return *this; }
   const gbtDPVector<T> &GetDPVector(void) const { return *this; }
   gbtDPVector<T> &GetDPVector(void) { Invalidate(); return *this; }
+  //@}
 };
 
+} // end namespace Gambit
 
-#endif   // BEHAV_H
+#endif // LIBGAMBIT_BEHAV_H

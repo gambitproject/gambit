@@ -32,7 +32,7 @@ class EfgIter    {
   private:
     Gambit::Game _efg;
     gbtEfgSupport _support;
-    gbtPureBehavProfile _profile;
+    Gambit::PureBehavProfile _profile;
     gbtPVector<int> _current;
     mutable gbtVector<gbtRational> _payoff;
 
@@ -106,7 +106,7 @@ void EfgIter::First(void)
 
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
     for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++)
-      _profile.Set(_support.Actions(pl, iset)[1]);
+      _profile.SetAction(_support.Actions(pl, iset)[1]);
   }
 }
 
@@ -116,12 +116,12 @@ int EfgIter::Next(int pl, int iset)
   
   if (_current(pl, iset) == actions.Length())   {
     _current(pl, iset) = 1;
-    _profile.Set(actions[1]);
+    _profile.SetAction(actions[1]);
     return 0;
   }
 
   _current(pl, iset)++;
-  _profile.Set(actions[_current(pl, iset)]);
+  _profile.SetAction(actions[_current(pl, iset)]);
   return 1;
 }
 
@@ -133,21 +133,20 @@ int EfgIter::Set(int pl, int iset, int act)
     return 0;
 
   _current(pl, iset) = act;
-  _profile.Set(_support.Actions(pl, iset)[act]);
+  _profile.SetAction(_support.Actions(pl, iset)[act]);
   return 1;
 }
 
 gbtRational EfgIter::Payoff(int pl) const
 {
-  _profile.Payoff(_payoff);
-  return _payoff[pl];
+  return _profile.GetPayoff(pl);
 }
 
 void EfgIter::Payoff(gbtVector<gbtRational> &payoff) const
 {
-  _profile.Payoff(payoff);
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++)
-    payoff[pl] = _payoff[pl];
+  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
+    payoff[pl] = _profile.GetPayoff(pl);
+  }
 }
 
 
@@ -155,7 +154,7 @@ void EfgIter::Payoff(gbtVector<gbtRational> &payoff) const
 
 template <class T>
 void PrintProfile(std::ostream &p_stream,
-		  const gbtBehavProfile<T> &p_profile)
+		  const Gambit::MixedBehavProfile<T> &p_profile)
 {
   for (int i = 1; i <= p_profile.Length(); i++) {
     p_stream << p_profile[i];
@@ -183,7 +182,9 @@ void Solve(const gbtEfgSupport &p_support)
   try {
     do {
       bool flag = true;
-      citer.GetProfile().InfosetProbs(probs);
+      // Commenting this out means we don't take advantage of reachability
+      // information; fix this in future.
+      //citer.GetProfile().InfosetProbs(probs);
       
       EfgIter eiter(citer);
       
@@ -192,7 +193,7 @@ void Solve(const gbtEfgSupport &p_support)
 	for (int iset = 1;
 	     flag && iset <= p_support.GetGame()->GetPlayer(pl)->NumInfosets();
 	     iset++)  {
-	  if (probs(pl, iset) == gbtRational(0))   continue;
+	  //if (probs(pl, iset) == gbtRational(0))   continue;
 	  for (int act = 1; act <= p_support.NumActions(pl, iset); act++)  {
 	    eiter.Next(pl, iset);
 	    if (eiter.Payoff(pl) > current)  {
@@ -204,10 +205,10 @@ void Solve(const gbtEfgSupport &p_support)
       }
       
       if (flag)  {
-	gbtBehavProfile<gbtRational> temp(gbtEfgSupport(p_support.GetGame()));
+	Gambit::MixedBehavProfile<gbtRational> temp(gbtEfgSupport(p_support.GetGame()));
 	// zero out all the entries, since any equilibria are pure
 	((gbtVector<gbtRational> &) temp).operator=(gbtRational(0));
-	const gbtPureBehavProfile &profile = citer.GetProfile();
+	const Gambit::PureBehavProfile &profile = citer.GetProfile();
 	for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++)  {
 	  for (int iset = 1;
 	       iset <= p_support.GetGame()->GetPlayer(pl)->NumInfosets();

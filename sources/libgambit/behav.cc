@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Algorithms for extending behavior profiles to Nash equilibria
+// Instantiation of behavior profile classes
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,25 +24,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef BEHAVEXTEND_H
-#define BEHAVEXTEND_H
+#include "libgambit.h"
+#include "behav.imp"
 
-#include "libgambit/libgambit.h"
-
-class algExtendsToNash {
-public:
-  bool ExtendsToNash(const Gambit::MixedBehavProfile<double> &p_solution,
-		     const gbtEfgSupport &p_littleSupport,
-		     const gbtEfgSupport &p_bigSupport);
-};
-
-class algExtendsToAgentNash {
-public:
-  bool ExtendsToAgentNash(const Gambit::MixedBehavProfile<double> &p_solution,
-			  const gbtEfgSupport &p_littleSupport,
-			  const gbtEfgSupport &p_bigSupport);
-};
+template class Gambit::MixedBehavProfile<double>;
+template class Gambit::MixedBehavProfile<gbtRational>;
+template class Gambit::MixedBehavProfile<gbtNumber>;
 
 
 
-#endif   // BEHAVEXTEND_H
+
+

@@ -83,14 +83,14 @@ private:
   int t, ibar;
   gbtRational d,pay,maxz,bestz;
 
-  gbtRational Simplex(gbtMixedProfile<gbtRational> &);
-  gbtRational getlabel(gbtMixedProfile<gbtRational> &yy, gbtArray<int> &, gbtPVector<gbtRational> &);
+  gbtRational Simplex(Gambit::MixedStrategyProfile<gbtRational> &);
+  gbtRational getlabel(Gambit::MixedStrategyProfile<gbtRational> &yy, gbtArray<int> &, gbtPVector<gbtRational> &);
   void update(gbtRectArray<int> &, gbtRectArray<int> &, gbtPVector<gbtRational> &,
 	      const gbtPVector<int> &, int j, int i);
-  void getY(gbtMixedProfile<gbtRational> &x, gbtPVector<gbtRational> &, 
+  void getY(Gambit::MixedStrategyProfile<gbtRational> &x, gbtPVector<gbtRational> &, 
 	    const gbtPVector<int> &, const gbtPVector<int> &, 
 	    const gbtPVector<gbtRational> &, const gbtRectArray<int> &, int k);
-  void getnexty(gbtMixedProfile<gbtRational> &x, const gbtRectArray<int> &,
+  void getnexty(Gambit::MixedStrategyProfile<gbtRational> &x, const gbtRectArray<int> &,
 		const gbtPVector<int> &, int i);
   int get_c(int j, int h, int nstrats, const gbtPVector<int> &);
   int get_b(int j, int h, int nstrats, const gbtPVector<int> &);
@@ -105,7 +105,7 @@ public:
   int LeashLength(void) const { return m_leashLength; }
   void SetLeashLength(int p_leashLength) { m_leashLength = p_leashLength; }
 
-  void Solve(const Gambit::Game &, const gbtMixedProfile<gbtRational> &);
+  void Solve(const Gambit::Game &, const Gambit::MixedStrategyProfile<gbtRational> &);
 };
 
 
@@ -128,7 +128,7 @@ nfgSimpdiv::~nfgSimpdiv()
 //               nfgSimpdiv: Private member functions
 //-------------------------------------------------------------------------
 
-gbtRational nfgSimpdiv::Simplex(gbtMixedProfile<gbtRational> &y)
+gbtRational nfgSimpdiv::Simplex(Gambit::MixedStrategyProfile<gbtRational> &y)
 {
   gbtArray<int> ylabel(2);
   gbtRectArray<int> labels(y.Length(), 2), pi(y.Length(), 2);
@@ -365,7 +365,7 @@ void nfgSimpdiv::update(gbtRectArray<int> &pi,
   }
 }
 
-void nfgSimpdiv::getY(gbtMixedProfile<gbtRational> &x,
+void nfgSimpdiv::getY(Gambit::MixedStrategyProfile<gbtRational> &x,
 		      gbtPVector<gbtRational> &v, 
 		      const gbtPVector<int> &U,
 		      const gbtPVector<int> &TT,
@@ -393,7 +393,7 @@ void nfgSimpdiv::getY(gbtMixedProfile<gbtRational> &x,
   }
 }
 
-void nfgSimpdiv::getnexty(gbtMixedProfile<gbtRational> &x,
+void nfgSimpdiv::getnexty(Gambit::MixedStrategyProfile<gbtRational> &x,
 			  const gbtRectArray<int> &pi, 
 			  const gbtPVector<int> &U,
 			  int i)
@@ -433,7 +433,7 @@ int nfgSimpdiv::get_c(int j, int h, int nstrats,
   return hh;
 }
 
-gbtRational nfgSimpdiv::getlabel(gbtMixedProfile<gbtRational> &yy,
+gbtRational nfgSimpdiv::getlabel(Gambit::MixedStrategyProfile<gbtRational> &yy,
 			       gbtArray<int> &ylabel,
 			       gbtPVector<gbtRational> &besty)
 {
@@ -480,7 +480,7 @@ gbtRational nfgSimpdiv::getlabel(gbtMixedProfile<gbtRational> &yy,
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtMixedProfile<gbtRational> &p_profile)
+		  const Gambit::MixedStrategyProfile<gbtRational> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -497,7 +497,7 @@ void PrintProfile(std::ostream &p_stream,
 }
 
 bool ReadProfile(std::istream &p_stream,
-		 gbtMixedProfile<gbtRational> &p_profile)
+		 Gambit::MixedStrategyProfile<gbtRational> &p_profile)
 {
   for (int i = 1; i <= p_profile.Length(); i++) {
     if (p_stream.eof() || p_stream.bad()) {
@@ -527,7 +527,7 @@ gbtInteger find_lcd(const gbtVector<gbtRational> &vec)
 }
 
 void nfgSimpdiv::Solve(const Gambit::Game &p_nfg, 
-		       const gbtMixedProfile<gbtRational> &p_start)
+		       const Gambit::MixedStrategyProfile<gbtRational> &p_start)
 {
   int qf,i,j,ii;
 
@@ -544,7 +544,7 @@ void nfgSimpdiv::Solve(const Gambit::Game &p_nfg,
   gbtInteger k = find_lcd(p_start);
   d = gbtRational(1, k);
     
-  gbtMixedProfile<gbtRational> y(p_start);
+  Gambit::MixedStrategyProfile<gbtRational> y(p_start);
   if (g_verbose) {
     PrintProfile(std::cout, "start", y);
   }
@@ -563,7 +563,7 @@ void nfgSimpdiv::Solve(const Gambit::Game &p_nfg,
   PrintProfile(std::cout, "NE", y);
 }
 
-void Randomize(gbtMixedProfile<gbtRational> &p_profile, int p_denom)
+void Randomize(Gambit::MixedStrategyProfile<gbtRational> &p_profile, int p_denom)
 {
   Gambit::Game nfg = p_profile.GetGame();
 
@@ -682,7 +682,7 @@ int main(int argc, char *argv[])
     std::ifstream startPoints(startFile.c_str());
 
     while (!startPoints.eof() && !startPoints.bad()) {
-      gbtMixedProfile<gbtRational> start(nfg);
+      Gambit::MixedStrategyProfile<gbtRational> start(nfg);
       if (ReadProfile(startPoints, start)) {
 	nfgSimpdiv algorithm;
 	algorithm.Solve(nfg, start);
@@ -691,7 +691,7 @@ int main(int argc, char *argv[])
   }
   else if (useRandom) {
     for (int i = 1; i <= stopAfter; i++) {
-      gbtMixedProfile<gbtRational> start(nfg);
+      Gambit::MixedStrategyProfile<gbtRational> start(nfg);
       Randomize(start, randDenom);
 
       nfgSimpdiv algorithm;
@@ -699,7 +699,7 @@ int main(int argc, char *argv[])
     }
   }
   else {
-    gbtMixedProfile<gbtRational> start(nfg);
+    Gambit::MixedStrategyProfile<gbtRational> start(nfg);
   
     for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
       start(pl, 1) = gbtRational(1);

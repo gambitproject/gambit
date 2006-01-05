@@ -67,7 +67,7 @@ public:
   Gambit::GameInfoset GetInfoset(int pl, int sequence) const;
   Gambit::GameAction GetAction(int pl, int sequence) const;
   const Gambit::Game &GetEfg(void) const {return EF;}
-  gbtBehavProfile<double> ToBehav(const gbtPVector<double> &x) const;
+  Gambit::MixedBehavProfile<double> ToBehav(const gbtPVector<double> &x) const;
   const Sequence* GetSequence(int pl, int seq) const {return ((*sequences)[pl])->Find(seq);}
 
 };

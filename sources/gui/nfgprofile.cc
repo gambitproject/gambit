@@ -102,7 +102,7 @@ wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
     return wxT("#");
   }
 
-  const gbtMixedProfile<gbtNumber> &profile = 
+  const Gambit::MixedStrategyProfile<gbtNumber> &profile = 
     m_doc->GetProfiles().GetMixed(RowToProfile(p_coords.GetRow()));
 
   if (IsProbabilityRow(p_coords.GetRow())) {

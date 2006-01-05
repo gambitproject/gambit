@@ -35,13 +35,13 @@ class EFLiapFunc : public gC1Function<double>  {
 private:
   mutable long _nevals;
   Gambit::Game _efg;
-  mutable gbtBehavProfile<double> _p;
+  mutable Gambit::MixedBehavProfile<double> _p;
 
   double Value(const gbtVector<double> &x) const;
   bool Gradient(const gbtVector<double> &, gbtVector<double> &) const;
 
 public:
-  EFLiapFunc(Gambit::Game, const gbtBehavProfile<double> &);
+  EFLiapFunc(Gambit::Game, const Gambit::MixedBehavProfile<double> &);
   virtual ~EFLiapFunc();
     
   long NumEvals(void) const  { return _nevals; }
@@ -49,7 +49,7 @@ public:
 
 
 EFLiapFunc::EFLiapFunc(Gambit::Game E,
-		       const gbtBehavProfile<double> &start)
+		       const Gambit::MixedBehavProfile<double> &start)
   : _nevals(0L), _efg(E), _p(start)
 { }
 
@@ -62,7 +62,7 @@ double EFLiapFunc::Value(const gbtVector<double> &v) const
   _nevals++;
   ((gbtVector<double> &) _p).operator=(v);
     //_p = v;
-  return _p.LiapValue();
+  return _p.GetLiapValue();
 }
 
 //
@@ -108,7 +108,7 @@ bool EFLiapFunc::Gradient(const gbtVector<double> &x,
   return true;
 }
 
-static void PickRandomProfile(gbtBehavProfile<double> &p)
+static void PickRandomProfile(Gambit::MixedBehavProfile<double> &p)
 {
   double sum, tmp;
 
@@ -118,7 +118,7 @@ static void PickRandomProfile(gbtBehavProfile<double> &p)
       sum = 0.0;
       int act;
     
-      for (act = 1; act < p.Support().NumActions(pl, iset); act++)  {
+      for (act = 1; act < p.GetSupport().NumActions(pl, iset); act++)  {
 	do
 	  tmp = ((double) rand()) / ((double) RAND_MAX);
 	while (tmp + sum > 1.0);
@@ -136,7 +136,7 @@ int g_numDecimals = 6;
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtBehavProfile<double> &p_profile)
+		  const Gambit::MixedBehavProfile<double> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -148,7 +148,7 @@ void PrintProfile(std::ostream &p_stream,
 }
 
 bool ReadProfile(std::istream &p_stream,
-		 gbtBehavProfile<double> &p_profile)
+		 Gambit::MixedBehavProfile<double> &p_profile)
 {
   for (int i = 1; i <= p_profile.Length(); i++) {
     if (p_stream.eof() || p_stream.bad()) {
@@ -255,13 +255,13 @@ int main(int argc, char *argv[])
   }
 
 
-  gbtList<gbtBehavProfile<double> > starts;
+  gbtList<Gambit::MixedBehavProfile<double> > starts;
 
   if (startFile != "") {
     std::ifstream startPoints(startFile.c_str());
 
     while (!startPoints.eof() && !startPoints.bad()) {
-      gbtBehavProfile<double> start(efg);
+      Gambit::MixedBehavProfile<double> start(efg);
       if (ReadProfile(startPoints, start)) {
 	starts.Append(start);
       }
@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
   else {
     // Generate the desired number of points randomly
     for (int i = 1; i <= m_numTries; i++) {
-      gbtBehavProfile<double> start(efg);
+      Gambit::MixedBehavProfile<double> start(efg);
       PickRandomProfile(start);
       starts.Append(start);
     }
@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
 
   try {
     for (int i = 1; i <= starts.Length(); i++) {
-      gbtBehavProfile<double> p(starts[i]);
+      Gambit::MixedBehavProfile<double> p(starts[i]);
 
       if (verbose) {
 	PrintProfile(std::cout, "start", p);
@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
       int kk;
       for (int kk = 1; kk <= p.Length() && p[kk] > ALPHA; kk++);
       if (kk <= p.Length()) {
-	gbtBehavProfile<double> c(efg);
+	Gambit::MixedBehavProfile<double> c(efg);
 	for (int k = 1; k <= p.Length(); k++) {
 	  p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
 	}

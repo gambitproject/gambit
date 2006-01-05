@@ -27,26 +27,27 @@
 #include "game.h"
 #include "nfstrat.h"
 
-
 #include "gpvector.h"
 #include "mixed.h"
 
+namespace Gambit {
+
 //---------------------------------------------------------------------------
-//                    gbtMixedProfile<T> member functions
+//                    MixedStrategyProfile<T> member functions
 //---------------------------------------------------------------------------
 
-template <class T> gbtMixedProfile<T>::gbtMixedProfile(const gbtNfgSupport &s)
+template <class T> MixedStrategyProfile<T>::MixedStrategyProfile(const gbtNfgSupport &s)
   : gbtPVector<T>(s.NumStrats()), support(s)
 {
   SetCentroid();
 }
 
-template <class T> gbtMixedProfile<T>::gbtMixedProfile(const gbtMixedProfile<T> &p)
+template <class T> MixedStrategyProfile<T>::MixedStrategyProfile(const MixedStrategyProfile<T> &p)
   : gbtPVector<T>(p), support(p.support)
 { }
 
 template <class T>
-gbtMixedProfile<T> &gbtMixedProfile<T>::operator=(const gbtMixedProfile<T> &p)
+MixedStrategyProfile<T> &MixedStrategyProfile<T>::operator=(const MixedStrategyProfile<T> &p)
 {
   if (this != &p && support == p.support)   {
     // note that a dimensionality change will trigger a failed assertion
@@ -57,7 +58,7 @@ gbtMixedProfile<T> &gbtMixedProfile<T>::operator=(const gbtMixedProfile<T> &p)
   return *this;
 }
 
-template <class T> void gbtMixedProfile<T>::SetCentroid(void) 
+template <class T> void MixedStrategyProfile<T>::SetCentroid(void) 
 {
   T center;
   
@@ -68,14 +69,14 @@ template <class T> void gbtMixedProfile<T>::SetCentroid(void)
   }
 }
 
-template <class T> T gbtMixedProfile<T>::GetLiapValue(void) const
+template <class T> T MixedStrategyProfile<T>::GetLiapValue(void) const
 {
   static const T BIG1 = (T) 100;
   static const T BIG2 = (T) 100;
 
-  gbtMixedProfile<T> p(*this);
+  MixedStrategyProfile<T> p(*this);
   ((gbtVector<T> &) p).operator=(*this);
-  gbtMixedProfile<T> tmp(p);
+  MixedStrategyProfile<T> tmp(p);
   gbtPVector<T> payoff(p);
   T x, result((T) 0), avg, sum;
   payoff = (T) 0;
@@ -107,10 +108,10 @@ template <class T> T gbtMixedProfile<T>::GetLiapValue(void) const
   return result;
 }
 
-template <class T> T gbtMixedProfile<T>::GetPayoff(int pl) const
+template <class T> T MixedStrategyProfile<T>::GetPayoff(int pl) const
 {
   if (support.GetGame()->IsTree()) {
-    return gbtBehavProfile<T>(*this).Payoff(pl);
+    return MixedBehavProfile<T>(*this).GetPayoff(pl);
   }
   else {
     return PPayoff(pl, 1, 1);
@@ -118,10 +119,10 @@ template <class T> T gbtMixedProfile<T>::GetPayoff(int pl) const
 }
 
 template <class T>
-T gbtMixedProfile<T>::GetPayoff(int pl, int player1, int strat1) const
+T MixedStrategyProfile<T>::GetPayoff(int pl, int player1, int strat1) const
 {
   if (support.GetGame()->IsTree()) {
-    gbtMixedProfile<T> foo(*this);
+    MixedStrategyProfile<T> foo(*this);
     for (int st = 1; st <= support.NumStrats(player1); st++) {
       foo(player1, st) = (T) 0;
     }
@@ -137,7 +138,7 @@ T gbtMixedProfile<T>::GetPayoff(int pl, int player1, int strat1) const
 }
 
 template <class T> T
-gbtMixedProfile<T>::GetPayoff(int pl, const Gambit::GameStrategy &strategy) const
+MixedStrategyProfile<T>::GetPayoff(int pl, const Gambit::GameStrategy &strategy) const
 {
   if (support.GetGame()->IsTree()) {
     return GetPayoff(pl, strategy->GetPlayer()->GetNumber(), 
@@ -152,14 +153,14 @@ gbtMixedProfile<T>::GetPayoff(int pl, const Gambit::GameStrategy &strategy) cons
 }
 
 template <class T> T
-gbtMixedProfile<T>::GetPayoff( int pl, int player1, int strat1, int player2,
+MixedStrategyProfile<T>::GetPayoff( int pl, int player1, int strat1, int player2,
 			       int strat2 ) const
 {
   if (player1 == player2) return (T) 0;
 
 
   if (support.GetGame()->IsTree()) {
-    gbtMixedProfile<T> foo(*this);
+    MixedStrategyProfile<T> foo(*this);
     for (int st = 1; st <= support.NumStrats(player1); st++) {
       foo(player1, st) = (T) 0;
     }
@@ -183,7 +184,7 @@ gbtMixedProfile<T>::GetPayoff( int pl, int player1, int strat1, int player2,
 }
 
 template <class T>
-bool gbtMixedProfile<T>::operator==(const gbtMixedProfile<T> &mp) const
+bool MixedStrategyProfile<T>::operator==(const MixedStrategyProfile<T> &mp) const
 {
   return (support == mp.support && 
 	  (const gbtPVector<T> &) *this == (const gbtPVector<T> &) mp);
@@ -194,7 +195,7 @@ bool gbtMixedProfile<T>::operator==(const gbtMixedProfile<T> &mp) const
 //--------------------------------------
 
 template <class T>
-T gbtMixedProfile<T>::PPayoff(int pl, int index, int i) const
+T MixedStrategyProfile<T>::PPayoff(int pl, int index, int i) const
 {
   Gambit::GameStrategyRep *s;
   int pindex = 0;
@@ -220,7 +221,7 @@ T gbtMixedProfile<T>::PPayoff(int pl, int index, int i) const
 }
 
 template <class T>
-void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
+void MixedStrategyProfile<T>::PPayoff(int pl, int const_pl, int const_st,
 				int cur_pl, long index, T prob, T &value) const
 {
   Gambit::GameStrategyRep *s;
@@ -245,7 +246,7 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
 
 
 template <class T>
-void gbtMixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
+void MixedStrategyProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
 				int const_pl2, int const_st2,
 				int cur_pl, long index, T prob, T &value) const
 {
@@ -271,7 +272,7 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
 }
 
 template <class T>
-void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index, 
+void MixedStrategyProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index, 
 			   T prob, gbtVector<T> &value) const
 {
   Gambit::GameStrategyRep *s;
@@ -298,7 +299,7 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
 }
 
 template <class T>
-gbtMixedProfile<T>::gbtMixedProfile(const gbtBehavProfile<T> &p_profile)
+MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehavProfile<T> &p_profile)
   : gbtPVector<T>(p_profile.GetGame()->NumStrategies()),
     support(p_profile.GetGame())
 {
@@ -315,3 +316,5 @@ gbtMixedProfile<T>::gbtMixedProfile(const gbtBehavProfile<T> &p_profile)
     }
   }
 }
+
+} // end namespace Gambit

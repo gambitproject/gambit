@@ -47,7 +47,7 @@ private:
   int num_vars;
   long count,nevals;
   double time;
-  gbtList<gbtMixedProfile<double> > solutions;
+  gbtList<Gambit::MixedStrategyProfile<double> > solutions;
   bool is_singular;
 
   bool EqZero(gDouble x) const;
@@ -74,12 +74,12 @@ public:
   long NumEvals(void) const;
   double Time(void) const;
   
-  const gbtList<gbtMixedProfile<double> > &GetSolutions(void) const;
-  gbtVector<gDouble> SolVarsFromgbtMixedProfile(const gbtMixedProfile<double> &) const;
+  const gbtList<Gambit::MixedStrategyProfile<double> > &GetSolutions(void) const;
+  gbtVector<gDouble> SolVarsFromMixedProfile(const Gambit::MixedStrategyProfile<double> &) const;
 
   const int PolishKnownRoot(gbtVector<gDouble> &) const;
 
-  gbtMixedProfile<double> ReturnPolishedSolution(const gbtVector<gDouble> &) const;
+  Gambit::MixedStrategyProfile<double> ReturnPolishedSolution(const gbtVector<gDouble> &) const;
 
   bool IsSingular() const;
 };
@@ -130,7 +130,7 @@ int PolEnumModule::PolEnum(void)
 
 int PolEnumModule::SaveSolutions(const gbtList<gbtVector<gDouble> > &list)
 {
-  gbtMixedProfile<double> profile(support);
+  Gambit::MixedStrategyProfile<double> profile(support);
   int i,j,k,kk,index=0;
   double sum;
 
@@ -166,7 +166,7 @@ double PolEnumModule::Time(void) const
   return time;
 }
 
-const gbtList<gbtMixedProfile<double> > &PolEnumModule::GetSolutions(void) const
+const gbtList<Gambit::MixedStrategyProfile<double> > &PolEnumModule::GetSolutions(void) const
 {
   return solutions;
 }
@@ -209,7 +209,7 @@ gPoly<gDouble> PolEnumModule::Prob(int p, int strat) const
 gPoly<gDouble> 
 PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 {
-  gbtStrategyProfile profile(NF);
+  Gambit::PureStrategyProfile profile(NF);
 
   gbtNfgContingencyIterator A(support, i, strat1);
   gbtNfgContingencyIterator B(support, i, strat2);
@@ -295,7 +295,7 @@ bool PolEnumModule::IsSingular() const
 //---------------------------------------------------------------------------
 
 int PolEnum(const gbtNfgSupport &support,
-	    gbtList<gbtMixedProfile<double> > &solutions, 
+	    gbtList<Gambit::MixedStrategyProfile<double> > &solutions, 
 	    long &nevals, double &time, bool &is_singular)
 {
   PolEnumModule module(support);
@@ -315,16 +315,16 @@ int PolEnum(const gbtNfgSupport &support,
 //                        Polish Equilibrum for Nfg
 //---------------------------------------------------------------------------
 
-gbtMixedProfile<double> PolishEquilibrium(const gbtNfgSupport &support, 
-				       const gbtMixedProfile<double> &sol, 
+Gambit::MixedStrategyProfile<double> PolishEquilibrium(const gbtNfgSupport &support, 
+				       const Gambit::MixedStrategyProfile<double> &sol, 
 				       bool &is_singular)
 {
   PolEnumModule module(support);
-  gbtVector<gDouble> vec = module.SolVarsFromgbtMixedProfile(sol);
+  gbtVector<gDouble> vec = module.SolVarsFromMixedProfile(sol);
 
   /* //DEBUG
   gbtPVector<double> xx = module.SeqFormProbsFromSolVars(vec);
-  gbtMixedProfile<gbtNumber> newsol = module.SequenceForm().ToMixed(xx);
+  Gambit::MixedStrategyProfile<gbtNumber> newsol = module.SequenceForm().ToMixed(xx);
 
   gout << "sol.Profile = " << *(sol.Profile()) << "\n";
   gout << "vec  = " << vec << "\n";
@@ -351,7 +351,7 @@ gbtMixedProfile<double> PolishEquilibrium(const gbtNfgSupport &support,
 
 
 gbtVector<gDouble> 
-PolEnumModule::SolVarsFromgbtMixedProfile(const gbtMixedProfile<double> &sol) const
+PolEnumModule::SolVarsFromMixedProfile(const Gambit::MixedStrategyProfile<double> &sol) const
 {
   int numvars(0);
 
@@ -406,10 +406,10 @@ const int PolEnumModule::PolishKnownRoot(gbtVector<gDouble> &point) const
   return 1;	 
 }
 
-gbtMixedProfile<double>
+Gambit::MixedStrategyProfile<double>
 PolEnumModule::ReturnPolishedSolution(const gbtVector<gDouble> &root) const
 {
-  gbtMixedProfile<double> profile(support);
+  Gambit::MixedStrategyProfile<double> profile(support);
 
   int j;
   int kk=0;
@@ -428,7 +428,7 @@ PolEnumModule::ReturnPolishedSolution(const gbtVector<gDouble> &root) const
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtMixedProfile<double> &p_profile)
+		  const Gambit::MixedStrategyProfile<double> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -439,12 +439,12 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-gbtMixedProfile<double> ToFullSupport(const gbtMixedProfile<double> &p_profile)
+Gambit::MixedStrategyProfile<double> ToFullSupport(const Gambit::MixedStrategyProfile<double> &p_profile)
 {
   Gambit::Game nfg = p_profile.GetGame();
   const gbtNfgSupport &support = p_profile.GetSupport();
 
-  gbtMixedProfile<double> fullProfile(nfg);
+  Gambit::MixedStrategyProfile<double> fullProfile(nfg);
   for (int i = 1; i <= fullProfile.Length(); fullProfile[i++] = 0.0);
 
   int index = 1;
@@ -489,7 +489,7 @@ void Solve(const Gambit::Game &p_nfg)
     for (int i = 1; i <= supports.Length(); i++) {
       long newevals = 0;
       double newtime = 0.0;
-      gbtList<gbtMixedProfile<double> > newsolns;
+      gbtList<Gambit::MixedStrategyProfile<double> > newsolns;
       bool is_singular = false;
     
       if (g_verbose) {
@@ -499,7 +499,7 @@ void Solve(const Gambit::Game &p_nfg)
       PolEnum(supports[i], newsolns, newevals, newtime, is_singular);
       
       for (int j = 1; j <= newsolns.Length(); j++) {
-	gbtMixedProfile<double> fullProfile = ToFullSupport(newsolns[j]);
+	Gambit::MixedStrategyProfile<double> fullProfile = ToFullSupport(newsolns[j]);
 	if (fullProfile.GetLiapValue() < 1.0e-6) {
 	  PrintProfile(std::cout, "NE", fullProfile);
 	}

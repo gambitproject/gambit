@@ -45,7 +45,7 @@ class gbtLogitMixedList : public wxSheet {
 private:
   gbtGameDocument *m_doc;
   gbtList<double> m_lambdas;
-  gbtList<gbtMixedProfile<double> > m_profiles;
+  gbtList<Gambit::MixedStrategyProfile<double> > m_profiles;
 
   // Overriding wxSheet members for data access
   wxString GetCellValue(const wxSheetCoords &);
@@ -76,7 +76,7 @@ public:
   void AddProfile(const wxString &p_text, bool p_forceShow);
 
   const gbtList<double> &GetLambdas(void) const { return m_lambdas; }
-  const gbtList<gbtMixedProfile<double> > &GetProfiles(void) const 
+  const gbtList<Gambit::MixedStrategyProfile<double> > &GetProfiles(void) const 
   { return m_profiles; }
 };
 
@@ -128,7 +128,7 @@ wxString gbtLogitMixedList::GetCellValue(const wxSheetCoords &p_coords)
 		    *wxConvCurrent);
   }
   else {
-    const gbtMixedProfile<double> &profile = m_profiles[p_coords.GetRow()+1];
+    const Gambit::MixedStrategyProfile<double> &profile = m_profiles[p_coords.GetRow()+1];
     return wxString(ToText(profile[p_coords.GetCol()],
 			   m_doc->GetStyle().NumDecimals()).c_str(), 
 		    *wxConvCurrent);
@@ -193,7 +193,7 @@ void gbtLogitMixedList::AddProfile(const wxString &p_text,
     AppendCols(m_doc->GetGame()->MixedProfileLength() + 1);
   }
 
-  gbtMixedProfile<double> profile(m_doc->GetGame());
+  Gambit::MixedStrategyProfile<double> profile(m_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
 
@@ -233,7 +233,7 @@ public:
   gbtLogitPlotCtrl(wxWindow *p_parent, gbtGameDocument *p_doc);
 
   void SetProfiles(const gbtList<double> &,
-		   const gbtList<gbtMixedProfile<double> > &);
+		   const gbtList<Gambit::MixedStrategyProfile<double> > &);
 };
 
 gbtLogitPlotCtrl::gbtLogitPlotCtrl(wxWindow *p_parent, 
@@ -289,7 +289,7 @@ void gbtLogitPlotCtrl::CalcXAxisTickPositions(void)
 }
 
 void gbtLogitPlotCtrl::SetProfiles(const gbtList<double> &p_lambdas,
-				   const gbtList<gbtMixedProfile<double> > &p_profiles)
+				   const gbtList<Gambit::MixedStrategyProfile<double> > &p_profiles)
 {
   if (p_lambdas.Length() == 0)  return;
 

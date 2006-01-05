@@ -31,7 +31,7 @@ int g_numDecimals = 6;
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtBehavProfile<double> &p_profile)
+		  const Gambit::MixedStrategyProfile<double> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -43,7 +43,7 @@ void PrintProfile(std::ostream &p_stream,
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtBehavProfile<gbtRational> &p_profile)
+		  const Gambit::MixedStrategyProfile<gbtRational> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -94,7 +94,7 @@ void nfgLp<T>::Solve(const gbtNfgSupport &p_support)
   Gambit::Matrix<T> A(1,k+1,1,m+1);
   gbtVector<T> b(1,k+1);
   gbtVector<T> c(1,m+1);
-  gbtStrategyProfile profile(p_support.GetGame());
+  Gambit::PureStrategyProfile profile(p_support.GetGame());
 
   T minpay = p_support.GetGame()->GetMinPayoff() - gbtRational(1);
 
@@ -151,7 +151,7 @@ void nfgLp<T>::GetSolutions(const gbtNfgSupport &p_support,
   int n2=p_support.NumStrats(2);
 
   for (int i = 1; i <= p_list.Length(); i++)    {
-    gbtMixedProfile<T> profile(p_support);
+    Gambit::MixedStrategyProfile<T> profile(p_support);
     int j;
     for (j = 1; j <= n1; j++) 
       if (p_list[i].IsDefined(j))   

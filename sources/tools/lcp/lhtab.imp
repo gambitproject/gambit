@@ -39,7 +39,7 @@ template <class T> Gambit::Matrix<T> Make_A1(const gbtNfgSupport &S,
   n2=S.NumStrats(2);
   Gambit::Matrix<T> A1(1,n1,n1+1,n1+n2);
 
-  gbtStrategyProfile profile(S.GetGame());
+  Gambit::PureStrategyProfile profile(S.GetGame());
 
   gbtRational min = S.GetGame()->GetMinPayoff();
   if (min > gbtRational(0)) {
@@ -72,8 +72,8 @@ template <class T> Gambit::Matrix<T> Make_A2(const gbtNfgSupport &S,
   n2=S.NumStrats(2);
   Gambit::Matrix<T> A2(n1+1,n1+n2,1,n1);
 
-  gbtStrategyProfile profile(S.GetGame());
-
+  Gambit::PureStrategyProfile profile(S.GetGame());
+  
   gbtRational min = S.GetGame()->GetMinPayoff();
   if (min > gbtRational(0)) {
     min = gbtRational(0);

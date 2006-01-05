@@ -46,7 +46,7 @@ int m_stopAfter = 0;
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtMixedProfile<double> &p_profile)
+		  const Gambit::MixedStrategyProfile<double> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -59,7 +59,7 @@ void PrintProfile(std::ostream &p_stream,
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtMixedProfile<gbtRational> &p_profile)
+		  const Gambit::MixedStrategyProfile<gbtRational> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -74,7 +74,7 @@ template <class T> void Solve(Gambit::Game p_nfg, const T &)
   gbtList<gbtVector<T> > key1, key2;  
   gbtList<int> node1, node2;   // IDs of each component of the extreme equilibria
 
-  gbtStrategyProfile profile(p_nfg);
+  Gambit::PureStrategyProfile profile(p_nfg);
 
   gbtRational min = p_nfg->GetMinPayoff();
   if (min > gbtRational(0)) {
@@ -150,7 +150,7 @@ template <class T> void Solve(Gambit::Game p_nfg, const T &)
 	}
 
 	if (nash) {
-	  gbtMixedProfile<T> profile(p_nfg);
+	  Gambit::MixedStrategyProfile<T> profile(p_nfg);
 	  T sum = (T) 0;
 	  for (int k = 1; k <= p_nfg->GetPlayer(1)->NumStrategies(); k++) {
 	    profile(1, k) = (T) 0;

@@ -189,7 +189,7 @@ void gbtTablePlayerPanel::OnUpdate(void)
   if (m_doc->GetCurrentProfile() > 0) {
     m_payoff->SetForegroundColour(color);
 
-    const gbtMixedProfile<gbtNumber> &profile =
+    const Gambit::MixedStrategyProfile<gbtNumber> &profile =
       m_doc->GetProfiles().GetMixed(m_doc->GetCurrentProfile());
 
     std::string pay = ToText(profile.GetPayoff(m_player),

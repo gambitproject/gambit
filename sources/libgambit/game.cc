@@ -276,6 +276,158 @@ bool GameNodeRep::IsSubgameRoot(void) const
 }
 
 //========================================================================
+//                      class PureStrategyProfile
+//========================================================================
+
+//------------------------------------------------------------------------
+//                    PureStrategyProfile: Lifecycle
+//------------------------------------------------------------------------
+
+PureStrategyProfile::PureStrategyProfile(const Game &p_nfg)
+  : m_index(1L), m_nfg(p_nfg), m_profile(m_nfg->NumPlayers())
+{
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
+    m_profile[pl] = m_nfg->GetPlayer(pl)->GetStrategy(1);
+    m_index += m_profile[pl]->m_index;
+  }
+}
+
+//------------------------------------------------------------------------
+//            PureStrategyProfile: Data access and manipulation
+//------------------------------------------------------------------------
+
+void PureStrategyProfile::SetStrategy(const GameStrategy &s)
+{
+  m_index += s->m_index - m_profile[s->GetPlayer()->GetNumber()]->m_index;
+  m_profile[s->GetPlayer()->GetNumber()] = s;
+}
+
+GameOutcome PureStrategyProfile::GetOutcome(void) const
+{ 
+  if (m_nfg->IsTree()) {
+    throw UndefinedException();
+  }
+  else {
+    return m_nfg->m_results[m_index]; 
+  }
+}
+
+void PureStrategyProfile::SetOutcome(GameOutcome p_outcome)
+{
+  if (m_nfg->IsTree()) {
+    throw UndefinedException();
+  }
+  else {
+    m_nfg->m_results[m_index] = p_outcome; 
+  }
+}
+
+gbtRational PureStrategyProfile::GetPayoff(int pl) const
+{
+  if (m_nfg->IsTree()) {
+    PureBehavProfile behav(m_nfg);
+    for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
+      GamePlayer player = m_nfg->GetPlayer(i);
+      for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	behav.SetAction(player->GetInfoset(iset)->GetAction(m_profile[i]->m_behav[iset]));
+      }
+    }
+    return behav.GetPayoff(pl);
+  }
+  else {
+    GameOutcome outcome = GetOutcome();
+    if (outcome) {
+      return outcome->GetPayoff(pl);
+    }
+    else {
+      return gbtRational(0);
+    }
+  }
+}
+
+std::string PureStrategyProfile::GetPayoffText(int pl) const
+{
+  if (m_nfg->IsTree()) {
+    PureBehavProfile behav(m_nfg);
+    for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
+      GamePlayer player = m_nfg->GetPlayer(i);
+      for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	behav.SetAction(player->GetInfoset(iset)->GetAction(m_profile[i]->m_behav[iset]));
+      }
+    }
+    return ToText(behav.GetPayoff(pl));
+  }
+  else {
+    GameOutcome outcome = GetOutcome();
+    if (outcome) {
+      return outcome->GetPayoffText(pl);
+    }
+    else {
+      return "0";
+    }
+  }
+}
+
+//========================================================================
+//                       class PureBehavProfile
+//========================================================================
+
+//------------------------------------------------------------------------
+//                     PureBehavProfile: Lifecycle
+//------------------------------------------------------------------------
+
+PureBehavProfile::PureBehavProfile(Game p_efg)
+  : m_efg(p_efg), m_profile(m_efg->NumPlayers())
+{
+  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
+    GamePlayerRep *player = m_efg->GetPlayer(pl);
+    m_profile[pl] = gbtArray<GameAction>(player->NumInfosets());
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      m_profile[pl][iset] = player->GetInfoset(iset)->GetAction(1);
+    }
+  }
+}
+
+//------------------------------------------------------------------------
+//              PureBehavProfile: Data access and manipulation
+//------------------------------------------------------------------------
+
+GameAction PureBehavProfile::GetAction(const GameInfoset &infoset) const
+{
+  return m_profile[infoset->GetPlayer()->GetNumber()][infoset->GetNumber()];
+}
+
+void PureBehavProfile::SetAction(const GameAction &action)
+{
+  m_profile[action->GetInfoset()->GetPlayer()->GetNumber()]
+    [action->GetInfoset()->GetNumber()] = action;
+}
+
+gbtRational PureBehavProfile::GetNodeValue(const GameNode &p_node, 
+					   int pl) const
+{
+  gbtRational payoff(0);
+
+  if (p_node->outcome) {
+    payoff += p_node->outcome->GetPayoff(pl);
+  }
+
+  if (p_node->GetInfoset()->IsChanceInfoset()) {
+    for (int i = 1; i <= p_node->NumChildren(); i++) {
+      payoff += (p_node->GetInfoset()->GetActionProb(i) *
+		 GetNodeValue(p_node->children[i], pl));
+    }
+  }
+  else if (!p_node->IsTerminal()) {
+    int iset = p_node->GetInfoset()->GetNumber();
+    payoff += GetNodeValue(p_node->children[m_profile[pl][iset]->GetNumber()], 
+			   pl);
+  }
+
+  return payoff;
+}
+
+//========================================================================
 //                           class GameRep
 //========================================================================
 
@@ -1407,87 +1559,6 @@ GameInfoset GameRep::DeleteAction(GameInfoset s, const GameAction &a)
   }
   ClearComputedValues();
   return s;
-}
-
-
-//------------------------------------------------------------------------
-//           GameRep: Computing payoffs of pure behavior profiles
-//------------------------------------------------------------------------
-
-void GameRep::Payoff(GameNodeRep *n, gbtRational prob, 
-		     const gbtPVector<int> &profile,
-		     gbtVector<gbtRational> &payoff) const
-{
-  if (n->outcome)  {
-    for (int i = 1; i <= m_players.Length(); i++)
-      payoff[i] += prob * n->outcome->m_ratPayoffs[i];
-  }
-
-  if (n->infoset && n->infoset->m_player->IsChance())
-    for (int i = 1; i <= n->children.Length(); i++)
-      Payoff(n->children[i],
-	     prob * n->infoset->GetActionProb(i),
-	     profile, payoff);
-  else if (n->infoset)
-    Payoff(n->children[profile(n->infoset->m_player->m_number,n->infoset->m_number)],
-	   prob, profile, payoff);
-}
-
-void GameRep::InfosetProbs(GameNodeRep *n, gbtRational prob, 
-			   const gbtPVector<int> &profile,
-			   gbtPVector<gbtRational> &probs) const
-{
-  if (n->infoset && n->infoset->m_player->IsChance())
-    for (int i = 1; i <= n->children.Length(); i++)
-      InfosetProbs(n->children[i],
-		   prob * n->infoset->GetActionProb(i),
-		   profile, probs);
-  else if (n->infoset)  {
-    probs(n->infoset->m_player->m_number, n->infoset->m_number) += prob;
-    InfosetProbs(n->children[profile(n->infoset->m_player->m_number,n->infoset->m_number)],
-		 prob, profile, probs);
-  }
-}
-
-void GameRep::Payoff(const gbtPVector<int> &profile, 
-		     gbtVector<gbtRational> &payoff) const
-{
-  ((gbtVector<gbtRational> &) payoff).operator=(gbtRational(0));
-  Payoff(m_root, 1, profile, payoff);
-}
-
-void GameRep::InfosetProbs(const gbtPVector<int> &profile,
-			   gbtPVector<gbtRational> &probs) const
-{
-  ((gbtVector<gbtRational> &) probs).operator=(gbtRational(0));
-  InfosetProbs(m_root, 1, profile, probs);
-}
-
-void GameRep::Payoff(GameNodeRep *n, gbtRational prob, 
-		     const gbtArray<gbtArray<int> > &profile,
-		     gbtArray<gbtRational> &payoff) const
-{
-  if (n->outcome)   {
-    for (int i = 1; i <= m_players.Length(); i++)
-      payoff[i] += prob * n->outcome->m_ratPayoffs[i];
-  }
-  
-  if (n->infoset && n->infoset->m_player->IsChance())
-    for (int i = 1; i <= n->children.Length(); i++)
-      Payoff(n->children[i],
-	     prob * n->infoset->GetActionProb(i),
-	     profile, payoff);
-  else if (n->infoset)
-    Payoff(n->children[profile[n->infoset->m_player->m_number][n->infoset->m_number]],
-	   prob, profile, payoff);
-}
-
-void GameRep::Payoff(const gbtArray<gbtArray<int> > &profile,
-		     gbtArray<gbtRational> &payoff) const
-{
-  for (int i = 1; i <= payoff.Length(); i++)
-    payoff[i] = 0;
-  Payoff(m_root, 1, profile, payoff);
 }
 
 

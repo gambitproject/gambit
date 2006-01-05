@@ -29,43 +29,6 @@
 
 #include "libgambit.h"
 
-/// This class represents a strategy profile on a normal form game.
-/// It specifies exactly one strategy for each player defined on the
-/// game.
-class gbtStrategyProfile  {
-  friend class Gambit::GameRep;
-private:
-  long m_index;
-  Gambit::Game m_nfg;
-  gbtArray<Gambit::GameStrategy> m_profile;
-  
-public:
-  /// @name Lifecycle
-  //@{
-  /// Construct a new strategy profile on the specified game
-  gbtStrategyProfile(const Gambit::Game &);
-  //@}
-
-  /// @name Data access and manipulation
-  //@{
-  /// Get the strategy played by player pl  
-  Gambit::GameStrategy GetStrategy(int pl) const { return m_profile[pl]; }
-  /// Set the strategy for a player
-  void SetStrategy(const Gambit::GameStrategy &);
-
-  /// Get the outcome that results from the profile
-  Gambit::GameOutcome GetOutcome(void) const;
-  /// Set the outcome that results from the profile
-  void SetOutcome(Gambit::GameOutcome p_outcome); 
-
-  /// Get the payoff to player pl that results from the profile
-  gbtRational GetPayoff(int pl) const;
-  /// Get the payoff to player pl that results from the profile
-  std::string GetPayoffText(int pl) const;
-  //@}
-};
-
-
 /// This class represents a subset of the strategies in a normal form game.
 /// It is enforced that each player has at least one strategy; thus,
 /// the strategies in a support can be viewed as a restriction of a game

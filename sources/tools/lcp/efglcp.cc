@@ -37,7 +37,7 @@ int g_numDecimals = 6;
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtBehavProfile<double> &p_profile)
+		  const Gambit::MixedBehavProfile<double> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -49,7 +49,7 @@ void PrintProfile(std::ostream &p_stream,
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtBehavProfile<gbtRational> &p_profile)
+		  const Gambit::MixedBehavProfile<gbtRational> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -111,7 +111,7 @@ template <class T> efgLcp<T>::~efgLcp()
 // the centroid.  This helps IsNash and LiapValue work correctly.
 //
 template <class T>
-void UndefinedToCentroid(gbtBehavProfile<T> &p_profile)
+void UndefinedToCentroid(Gambit::MixedBehavProfile<T> &p_profile)
 {
   Gambit::Game efg = p_profile.GetGame();
 
@@ -195,7 +195,7 @@ void efgLcp<T>::Solve(const gbtEfgSupport &p_support)
   LTableau<T> tab(A,b);
   eps = tab.Epsilon();
   
-  gbtBehavProfile<T> profile(p_support);
+  Gambit::MixedBehavProfile<T> profile(p_support);
   gbtVector<T> sol(tab.MinRow(),tab.MaxRow());
     
   try {
@@ -257,7 +257,7 @@ efgLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
   T small_num = (T)1/(T)1000;
 
   gbtVector<T> sol(B.MinRow(),B.MaxRow());
-  gbtBehavProfile<T> profile(p_support);
+  Gambit::MixedBehavProfile<T> profile(p_support);
 
   newsol =0;
   for (i = B.MinRow(); 

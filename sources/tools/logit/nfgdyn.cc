@@ -49,8 +49,8 @@
 
 int g_numDecimals = 6;
 
-void LogitBR(const gbtMixedProfile<double> &p_profile, double p_lambda,
-	     gbtMixedProfile<double> &p_br)
+void LogitBR(const Gambit::MixedStrategyProfile<double> &p_profile, double p_lambda,
+	     Gambit::MixedStrategyProfile<double> &p_br)
 {
   Gambit::Game nfg = p_profile.GetGame();
 
@@ -69,7 +69,7 @@ void LogitBR(const gbtMixedProfile<double> &p_profile, double p_lambda,
   }
 }
 
-void Randomize(gbtMixedProfile<double> &p_profile)
+void Randomize(Gambit::MixedStrategyProfile<double> &p_profile)
 {
   Gambit::Game nfg = p_profile.GetGame();
 
@@ -88,7 +88,7 @@ void Randomize(gbtMixedProfile<double> &p_profile)
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtMixedProfile<double> &p_profile)
+		  const Gambit::MixedStrategyProfile<double> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -99,7 +99,7 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-double Distance(const gbtMixedProfile<double> &a, const gbtMixedProfile<double> &b)
+double Distance(const Gambit::MixedStrategyProfile<double> &a, const Gambit::MixedStrategyProfile<double> &b)
 {
   double dist = 0.0;
   for (int i = 1; i <= a.Length(); i++) {
@@ -162,12 +162,12 @@ int main(int argc, char *argv[])
   }
 
   for (int i = 1; i <= stopAfter; i++) {
-    gbtMixedProfile<double> profile(nfg);
+    Gambit::MixedStrategyProfile<double> profile(nfg);
     Randomize(profile);
 
     PrintProfile(std::cout, "start", profile);
 
-    gbtMixedProfile<double> br(nfg);
+    Gambit::MixedStrategyProfile<double> br(nfg);
     
     double c_delta = .001;
 

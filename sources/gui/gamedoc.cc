@@ -314,7 +314,7 @@ void gbtGameDocument::SaveDocument(std::ostream &p_file) const
       p_file << "</description>\n";
 
       for (int j = 1; j <= m_profiles[i].NumProfiles(); j++) {
-	const gbtBehavProfile<gbtNumber> &behav = m_profiles[i].GetBehav(j);
+	const Gambit::MixedBehavProfile<gbtNumber> &behav = m_profiles[i].GetBehav(j);
 	p_file << "<profile type=\"behav\">\n";
 	for (int k = 1; k <= behav.Length(); k++) {
 	  p_file << behav[k];
@@ -343,7 +343,7 @@ void gbtGameDocument::SaveDocument(std::ostream &p_file) const
       p_file << "</description>\n";
 
       for (int j = 1; j <= m_profiles[i].NumProfiles(); j++) {
-	const gbtMixedProfile<gbtNumber> &mixed = m_profiles[i].GetMixed(j);
+	const Gambit::MixedStrategyProfile<gbtNumber> &mixed = m_profiles[i].GetMixed(j);
 	p_file << "<profile type=\"mixed\">\n";
 	for (int k = 1; k <= mixed.Length(); k++) {
 	  p_file << mixed[k];
@@ -485,7 +485,7 @@ void gbtGameDocument::SetProfileList(int p_index)
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfiles(const gbtList<gbtBehavProfile<gbtNumber> > &p_profiles)
+void gbtGameDocument::AddProfiles(const gbtList<Gambit::MixedBehavProfile<gbtNumber> > &p_profiles)
 {
   for (int i = 1; i <= p_profiles.Length(); i++) {
     m_profiles[m_currentProfileList].Append(p_profiles[i]);
@@ -495,14 +495,14 @@ void gbtGameDocument::AddProfiles(const gbtList<gbtBehavProfile<gbtNumber> > &p_
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfile(const gbtBehavProfile<gbtNumber> &p_profile)
+void gbtGameDocument::AddProfile(const Gambit::MixedBehavProfile<gbtNumber> &p_profile)
 {
   m_profiles[m_currentProfileList].Append(p_profile);
   m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfiles(const gbtList<gbtMixedProfile<gbtNumber> > &p_profiles)
+void gbtGameDocument::AddProfiles(const gbtList<Gambit::MixedStrategyProfile<gbtNumber> > &p_profiles)
 {
   for (int i = 1; i <= p_profiles.Length(); i++) {
     m_profiles[m_currentProfileList].Append(p_profiles[i]);
@@ -512,7 +512,7 @@ void gbtGameDocument::AddProfiles(const gbtList<gbtMixedProfile<gbtNumber> > &p_
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfile(const gbtMixedProfile<gbtNumber> &p_profile)
+void gbtGameDocument::AddProfile(const Gambit::MixedStrategyProfile<gbtNumber> &p_profile)
 {
   m_profiles[m_currentProfileList].Append(p_profile);
   m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
@@ -673,7 +673,7 @@ std::string gbtGameDocument::GetActionProb(const Gambit::GameNode &p_node, int p
     return "";
   }
   
-  const gbtBehavProfile<gbtNumber> &profile = m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile());
+  const Gambit::MixedBehavProfile<gbtNumber> &profile = m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile());
 
   if (!profile.IsDefinedAt(p_node->GetInfoset())) {
     return "*";

@@ -30,17 +30,15 @@
 
 #include "gdpvect.h"
 
-class gbtStrategyProfile;
-class gbtPureBehavProfile;
-
 class gbtEfgSupport;
 class gbtNumber;
 
-template <class T> class gbtBehavProfile;
-template <class T> class gbtMixedProfile;
-
-
 namespace Gambit {
+
+// Forward declarations of some friends
+template <class T> class MixedStrategyProfile;
+template <class T> class MixedBehavProfile;
+
 
 /// This is a base class for all game-related objects.  Primary among
 /// its responsibility is maintaining a reference count.  Calling code
@@ -208,9 +206,9 @@ typedef GameObjectPtr<GameOutcomeRep> GameOutcome;
 class GameActionRep : public GameObject {
   friend class GameRep;
   friend class GameTreeRep;
-  friend class gbtBehavProfile<double>;
-  friend class gbtBehavProfile<gbtRational>;
-  friend class gbtBehavProfile<gbtNumber>;
+  friend class MixedBehavProfile<double>;
+  friend class MixedBehavProfile<gbtRational>;
+  friend class MixedBehavProfile<gbtNumber>;
   friend class GameInfosetRep;
 private:
   int m_number;
@@ -238,9 +236,9 @@ class GameInfosetRep : public GameObject {
   friend class GameTreeRep;
   friend class GamePlayerRep;
   friend class GameNodeRep;
-  friend class gbtBehavProfile<double>;
-  friend class gbtBehavProfile<gbtRational>;
-  friend class gbtBehavProfile<gbtNumber>;
+  friend class MixedBehavProfile<double>;
+  friend class MixedBehavProfile<gbtRational>;
+  friend class MixedBehavProfile<gbtNumber>;
   friend void MakeStrategy(GamePlayerRep *);
   friend void MakeReducedStrats(GamePlayerRep *p, GameNodeRep *n, GameNodeRep *nn);
 
@@ -294,13 +292,13 @@ public:
 class GameStrategyRep : public GameObject  {
   friend class GameRep;
   friend class GamePlayerRep;
-  friend class ::gbtStrategyProfile;
-  friend class gbtMixedProfile<double>;
-  friend class gbtMixedProfile<gbtRational>;
-  friend class gbtMixedProfile<gbtNumber>;
-  friend class gbtBehavProfile<double>;
-  friend class gbtBehavProfile<gbtRational>;
-  friend class gbtBehavProfile<gbtNumber>;
+  friend class PureStrategyProfile;
+  friend class MixedStrategyProfile<double>;
+  friend class MixedStrategyProfile<gbtRational>;
+  friend class MixedStrategyProfile<gbtNumber>;
+  friend class MixedBehavProfile<double>;
+  friend class MixedBehavProfile<gbtRational>;
+  friend class MixedBehavProfile<gbtNumber>;
   friend void MakeStrategy(GamePlayerRep *);
 private:
   int m_number;
@@ -339,12 +337,12 @@ class GamePlayerRep : public GameObject  {
   friend class GameRep;
   friend class GameStrategyRep;
   friend class gbtPureBehavProfile;
-  friend class gbtBehavProfile<double>;
-  friend class gbtBehavProfile<gbtRational>;
-  friend class gbtBehavProfile<gbtNumber>;
-  friend class gbtMixedProfile<double>;
-  friend class gbtMixedProfile<gbtRational>;
-  friend class gbtMixedProfile<gbtNumber>;
+  friend class MixedBehavProfile<double>;
+  friend class MixedBehavProfile<gbtRational>;
+  friend class MixedBehavProfile<gbtNumber>;
+  friend class MixedStrategyProfile<double>;
+  friend class MixedStrategyProfile<gbtRational>;
+  friend class MixedStrategyProfile<gbtNumber>;
   friend void MakeStrategy(GamePlayerRep *);
 
 private:
@@ -384,10 +382,10 @@ public:
 
 class GameNodeRep : public GameObject {
   friend class GameRep;
-  friend class gbtBehavProfile<double>;
-  friend class gbtBehavProfile<gbtRational>;
-  friend class gbtBehavProfile<gbtNumber>;
-  friend class ::gbtPureBehavProfile;
+  friend class PureBehavProfile;
+  friend class MixedBehavProfile<double>;
+  friend class MixedBehavProfile<gbtRational>;
+  friend class MixedBehavProfile<gbtNumber>;
   friend void MakeReducedStrats(GamePlayerRep *p, GameNodeRep *n, GameNodeRep *nn);
   
 protected:
@@ -436,18 +434,84 @@ public:
 };
 
 
-//
-// This is a base class for representing an arbitrary finite game.
-//
+/// This class represents a strategy profile on a strategic game.
+/// It specifies exactly one strategy for each player defined on the
+/// game.
+/// Note that, although this is in some sense the analog of a node for
+/// a strategic game, this is not a reference-counted object.
+class PureStrategyProfile  {
+  friend class GameRep;
+private:
+  long m_index;
+  Gambit::Game m_nfg;
+  gbtArray<Gambit::GameStrategy> m_profile;
+  
+public:
+  /// @name Lifecycle
+  //@{
+  /// Construct a new strategy profile on the specified game
+  PureStrategyProfile(const Gambit::Game &);
+  //@}
+
+  /// @name Data access and manipulation
+  //@{
+  /// Get the strategy played by player pl  
+  GameStrategy GetStrategy(int pl) const { return m_profile[pl]; }
+  /// Set the strategy for a player
+  void SetStrategy(const GameStrategy &);
+
+  /// Get the outcome that results from the profile
+  GameOutcome GetOutcome(void) const;
+  /// Set the outcome that results from the profile
+  void SetOutcome(GameOutcome p_outcome); 
+
+  /// Get the payoff to player pl that results from the profile
+  gbtRational GetPayoff(int pl) const;
+  /// Get the payoff to player pl that results from the profile
+  std::string GetPayoffText(int pl) const;
+  //@}
+};
+
+/// This class represents a behavior profile on an extensive game.
+/// It specifies exactly one strategy for each information set in the
+/// game.
+class PureBehavProfile {
+private:
+  Game m_efg;
+  gbtArray<gbtArray<GameAction> > m_profile;
+
+public:
+  /// @name Lifecycle
+  //@{
+  /// Construct a new behavior profile on the specified game
+  PureBehavProfile(Game);
+
+  /// @name Data access and manipulation
+  //@{
+  /// Get the action played at an information set
+  GameAction GetAction(const GameInfoset &) const;
+
+  /// Set the action played at an information set
+  void SetAction(const GameAction &);
+   
+  gbtRational GetPayoff(int pl) const;
+  gbtRational GetNodeValue(const GameNode &, int pl) const;
+  //@}
+};
+
+
+///
+/// This is the class for representing an arbitrary finite game.
+///
 class GameRep : public GameObject {
-  friend class ::gbtStrategyProfile;
   friend class GameNodeRep;
-  friend class gbtBehavProfile<double>;
-  friend class gbtBehavProfile<gbtRational>;
-  friend class gbtBehavProfile<gbtNumber>;
-  friend class gbtMixedProfile<double>;
-  friend class gbtMixedProfile<gbtRational>;
-  friend class gbtMixedProfile<gbtNumber>;
+  friend class PureStrategyProfile;
+  friend class MixedBehavProfile<double>;
+  friend class MixedBehavProfile<gbtRational>;
+  friend class MixedBehavProfile<gbtNumber>;
+  friend class MixedStrategyProfile<double>;
+  friend class MixedStrategyProfile<gbtRational>;
+  friend class MixedStrategyProfile<gbtNumber>;
 protected:
   std::string m_title, m_comment;
   gbtArray<GamePlayerRep *> m_players;
@@ -465,12 +529,7 @@ protected:
   void UnmarkSubtree(GameNodeRep *);
 
   void CopySubtree(GameNodeRep *, GameNodeRep *, GameNodeRep *);
-  
-  void Payoff(GameNodeRep *n, gbtRational, const gbtPVector<int> &, gbtVector<gbtRational> &) const;
-  void Payoff(GameNodeRep *n, gbtRational, const gbtArray<gbtArray<int> > &, gbtArray<gbtRational> &) const;
-  
-  void InfosetProbs(GameNodeRep *n, gbtRational, const gbtPVector<int> &, gbtPVector<gbtRational> &) const;
-    
+
   /// @name Private auxiliary functions
   //@{
   void IndexStrategies(void);
@@ -621,20 +680,15 @@ public:
 
   void Reveal(GameInfoset, const gbtArray<GamePlayer> &);
   //@}
-
-  /// @name Computing payoffs of pure behavior profiles
-  //@{
-  void Payoff(const gbtPVector<int> &profile, gbtVector<gbtRational> &payoff) const;
-  void Payoff(const gbtArray<gbtArray<int> > &profile,
-	      gbtArray<gbtRational> &payoff) const;
-
-  void InfosetProbs(const gbtPVector<int> &profile, gbtPVector<gbtRational> &prob) const;
-  //@}
-
 };
 
 typedef GameObjectPtr<GameRep> Game;
 
+
+//=======================================================================
+
+// Here are some functions which are inlined, but cannot be defined until
+// all classes have appeared.
 
 inline GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number)
   : m_game(p_game), m_number(p_number),
@@ -645,6 +699,14 @@ inline GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number)
     m_textPayoffs[pl] = "0";
   }
 }
+
+inline gbtRational PureBehavProfile::GetPayoff(int pl) const
+{ return GetNodeValue(m_efg->GetRoot(), pl); }
+
+//=======================================================================
+
+
+
 
 class gbtEfgException : public gbtException   {
 public:

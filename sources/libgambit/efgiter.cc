@@ -81,7 +81,7 @@ void EfgContIter::First(void)
       if (pl != _frozen_pl && iset != _frozen_iset)   {
 	_current(pl, iset) = 1;
 	if (_is_active[pl][iset])      
-	  _profile.Set(_support.Actions(pl, iset)[1]);
+	  _profile.SetAction(_support.Actions(pl, iset)[1]);
       }
   }
 }
@@ -91,7 +91,7 @@ void EfgContIter::Set(int pl, int iset, int act)
   if (pl != _frozen_pl || iset != _frozen_iset)   return;
 
   _current(pl, iset) = act;
-  _profile.Set(_support.Actions(pl, iset)[act]);
+  _profile.SetAction(_support.Actions(pl, iset)[act]);
 }
 
 
@@ -99,7 +99,7 @@ void EfgContIter::Set(const Gambit::GameAction &a)
 {
   if (a->GetInfoset()->GetPlayer()->GetNumber() != _frozen_pl ||
       a->GetInfoset()->GetNumber() != _frozen_iset) return;
-  _profile.Set(a);
+  _profile.SetAction(a);
 }
 
 int EfgContIter::Next(int pl, int iset)
@@ -110,12 +110,12 @@ int EfgContIter::Next(int pl, int iset)
   
   if (_current(pl, iset) == actions.Length())   {
     _current(pl, iset) = 1;
-    _profile.Set(actions[1]);
+    _profile.SetAction(actions[1]);
     return 0;
   }
 
   _current(pl, iset)++;
-  _profile.Set(actions[_current(pl, iset)]);
+  _profile.SetAction(actions[_current(pl, iset)]);
   return 1;
 }
   
@@ -139,12 +139,12 @@ int EfgContIter::NextContingency(void)
     if (_is_active[pl][iset] && (pl != _frozen_pl || iset != _frozen_iset))
       if (_current(pl, iset) < _support.NumActions(pl, iset))  {
 	_current(pl, iset) += 1;
-	_profile.Set(_support.Actions(pl, iset)[_current(pl, iset)]);
+	_profile.SetAction(_support.Actions(pl, iset)[_current(pl, iset)]);
 	return 1;
       }
       else {
 	_current(pl, iset) = 1;
-	_profile.Set(_support.Actions(pl, iset)[1]);
+	_profile.SetAction(_support.Actions(pl, iset)[1]);
       }
     
     iset--;
@@ -161,8 +161,7 @@ int EfgContIter::NextContingency(void)
 
 gbtRational EfgContIter::Payoff(int pl) const
 {
-  _profile.Payoff(_payoff);
-  return _payoff[pl];
+  return _profile.GetPayoff(pl);
 }
 
 
@@ -221,7 +220,7 @@ void EfgConditionalContIter::First(void)
     for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
       _current(pl, iset) = 1;
       if (_is_active[pl][iset])
-	_profile.Set(_support.Actions(pl, iset)[1]);
+	_profile.SetAction(_support.Actions(pl, iset)[1]);
     }
   }
 }
@@ -229,12 +228,12 @@ void EfgConditionalContIter::First(void)
 void EfgConditionalContIter::Set(int pl, int iset, int act)
 {
   _current(pl, iset) = act;
-  _profile.Set(_support.Actions(pl, iset)[act]);
+  _profile.SetAction(_support.Actions(pl, iset)[act]);
 }
 
 void EfgConditionalContIter::Set(const Gambit::GameAction &a) 
 {
-  _profile.Set(a);
+  _profile.SetAction(a);
 }
 
 int EfgConditionalContIter::Next(int pl, int iset)
@@ -243,12 +242,12 @@ int EfgConditionalContIter::Next(int pl, int iset)
   
   if (_current(pl, iset) == actions.Length())   {
     _current(pl, iset) = 1;
-    _profile.Set(actions[1]);
+    _profile.SetAction(actions[1]);
     return 0;
   }
 
   _current(pl, iset)++;
-  _profile.Set(actions[_current(pl, iset)]);
+  _profile.SetAction(actions[_current(pl, iset)]);
   return 1;
 }
 
@@ -265,12 +264,12 @@ int EfgConditionalContIter::NextContingency(void)
     if (_is_active[pl][iset]) 
       if (_current(pl, iset) < _support.NumActions(pl, iset))  {
 	_current(pl, iset) += 1;
-	_profile.Set(_support.Actions(pl, iset)[_current(pl, iset)]);
+	_profile.SetAction(_support.Actions(pl, iset)[_current(pl, iset)]);
 	return 1;
       }
       else {
 	_current(pl, iset) = 1;
-	_profile.Set(_support.Actions(pl, iset)[1]);
+	_profile.SetAction(_support.Actions(pl, iset)[1]);
       }
     
     iset--;
@@ -287,13 +286,12 @@ int EfgConditionalContIter::NextContingency(void)
 
 gbtRational EfgConditionalContIter::Payoff(int pl) const
 {
-  _profile.Payoff(_payoff);
-  return _payoff[pl];
+  return _profile.GetPayoff(pl);
 }
 
 gbtRational EfgConditionalContIter::Payoff(const Gambit::GameNode &n, int pl) const
 {
-  return _profile.Payoff(n,pl);
+  return _profile.GetNodeValue(n, pl);
 }
 
 

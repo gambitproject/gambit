@@ -24,18 +24,18 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef MIXED_H
-#define MIXED_H
+#ifndef LIBGAMBIT_MIXED_H
+#define LIBGAMBIT_MIXED_H
 
 #include "base.h"
 #include "gpvector.h"
 #include "nfstrat.h"
 
-
 template <class T> class gbtRectArray;
-template <class T> class gbtBehavProfile;
 
-template <class T> class gbtMixedProfile : public gbtPVector<T>  {
+namespace Gambit {
+
+template <class T> class MixedStrategyProfile : public gbtPVector<T>  {
 private:
   gbtNfgSupport support;
 
@@ -49,27 +49,43 @@ private:
 	       gbtVector<T> &value) const;
 
 public:
-  gbtMixedProfile(const gbtNfgSupport &);
-  gbtMixedProfile(const gbtMixedProfile<T> &);
-  gbtMixedProfile(const gbtBehavProfile<T> &);
-  virtual ~gbtMixedProfile() { }
+  /// @name Lifecycle
+  //@{
+  MixedStrategyProfile(const gbtNfgSupport &);
+  MixedStrategyProfile(const MixedStrategyProfile<T> &);
+  MixedStrategyProfile(const MixedBehavProfile<T> &);
+  virtual ~MixedStrategyProfile() { }
 
-  gbtMixedProfile<T> &operator=(const gbtMixedProfile<T> &);
+  MixedStrategyProfile<T> &operator=(const MixedStrategyProfile<T> &);
+  //@}
 
-  bool operator==(const gbtMixedProfile<T> &) const;
+  /// @name Operator overloading
+  //@{
+  bool operator==(const MixedStrategyProfile<T> &) const;
+  bool operator!=(const MixedStrategyProfile<T> &x) const
+  { return !(*this == x); }
+  //@}
 
-  Gambit::Game GetGame(void) const  { return support.GetGame(); }
-  const gbtNfgSupport &GetSupport(void) const  { return support; }
-
-  T GetLiapValue(void) const;
+  /// @name General data access
+  //@{
+  Game GetGame(void) const { return support.GetGame(); }
+  const gbtNfgSupport &GetSupport(void) const { return support; }
   void SetCentroid(void);
+  //@}
 
+  /// @name Computation of interesting quantities
+  //@{
   T GetPayoff(int pl) const;
   T GetPayoff(int pl, int player1, int strat1) const;
-  T GetPayoff(int pl, const Gambit::GameStrategy &) const;
+  T GetPayoff(int pl, const GameStrategy &) const;
   T GetPayoff(int pl, int player1, int strat1, int player2, int strat2) const;
+
+  T GetLiapValue(void) const;
+  //@}
 };
 
-#endif    // MIXED_H
+} // end namespace Gambit
+
+#endif // LIBGAMBIT_MIXED_H
 
 

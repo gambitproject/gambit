@@ -119,7 +119,7 @@ static void QreLHS(const gbtEfgSupport &p_support,
 		   const gbtVector<double> &p_point,
 		   gbtVector<double> &p_lhs)
 {
-  gbtBehavProfile<double> profile(p_support);
+  Gambit::MixedBehavProfile<double> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = p_point[i];
   }
@@ -153,7 +153,7 @@ static void QreJacobian(const gbtEfgSupport &p_support,
 			Gambit::Matrix<double> &p_matrix)
 {
   Gambit::Game efg = p_support.GetGame();
-  gbtBehavProfile<double> profile(p_support);
+  Gambit::MixedBehavProfile<double> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = p_point[i];
   }
@@ -260,7 +260,7 @@ double g_maxDecel = 1.1;
 double g_hStart = .03;
 bool g_fullGraph = true;
 
-static void TracePath(const gbtBehavProfile<double> &p_start,
+static void TracePath(const Gambit::MixedBehavProfile<double> &p_start,
 		      double p_startLambda, double p_maxLambda, double p_omega)
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
@@ -278,7 +278,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
   x[x.Length()] = p_startLambda;
 
   if (g_fullGraph) {
-    PrintProfile(std::cout, p_start.Support(), x);
+    PrintProfile(std::cout, p_start.GetSupport(), x);
   }
 
   gbtVector<double> t(p_start.Length() + 1);
@@ -286,7 +286,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
 
   Gambit::Matrix<double> b(p_start.Length() + 1, p_start.Length());
   Gambit::SquareMatrix<double> q(p_start.Length() + 1);
-  QreJacobian(p_start.Support(), x, b);
+  QreJacobian(p_start.GetSupport(), x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
@@ -296,7 +296,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     if (x[i] < 1.0e-10) {
       // Drop this strategy from the support, then recursively call
       // to continue tracing
-      gbtEfgSupport newSupport(p_start.Support());
+      gbtEfgSupport newSupport(p_start.GetSupport());
       int index = 1;
       for (int pl = 1; pl <= newSupport.GetGame()->NumPlayers(); pl++) {
 	Gambit::GamePlayer player = newSupport.GetGame()->GetPlayer(pl);
@@ -309,7 +309,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
 	}
       }
       
-      gbtBehavProfile<double> newProfile(newSupport);
+      Gambit::MixedBehavProfile<double> newProfile(newSupport);
       for (int j = 1; j <= newProfile.Length(); j++) {
 	if (j < i) {
 	  newProfile[j] = x[j];
@@ -346,7 +346,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     }
 
     double decel = 1.0 / g_maxDecel;  // initialize deceleration factor
-    QreJacobian(p_start.Support(), u, b);
+    QreJacobian(p_start.GetSupport(), u, b);
     QRDecomp(b, q);
 
     int iter = 1;
@@ -354,7 +354,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     while (true) {
       double dist;
 
-      QreLHS(p_start.Support(), u, y);
+      QreLHS(p_start.GetSupport(), u, y);
       NewtonStep(q, b, u, y, dist); 
       if (dist >= c_maxDist) {
 	accept = false;
@@ -409,7 +409,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
       if (u[i] < 1.0e-10) {
 	// Drop this strategy from the support, then recursively call
 	// to continue tracing
-	gbtEfgSupport newSupport(p_start.Support());
+	gbtEfgSupport newSupport(p_start.GetSupport());
 	int index = 1;
 	for (int pl = 1; pl <= newSupport.GetGame()->NumPlayers(); pl++) {
 	  Gambit::GamePlayer player = newSupport.GetGame()->GetPlayer(pl);
@@ -422,7 +422,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
 	  }
 	}
 
-	gbtBehavProfile<double> newProfile(newSupport);
+	Gambit::MixedBehavProfile<double> newProfile(newSupport);
 	for (int j = 1; j <= newProfile.Length(); j++) {
 	  if (j < i) {
 	    newProfile[j] = u[j];
@@ -443,7 +443,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     x[x.Length()] = u[u.Length()];
 
     if (g_fullGraph) {
-      PrintProfile(std::cout, p_start.Support(), x);
+      PrintProfile(std::cout, p_start.GetSupport(), x);
     }
     
     gbtVector<double> newT(t);
@@ -458,7 +458,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
   }
 
   if (!g_fullGraph) {
-    PrintProfile(std::cout, p_start.Support(), x, true);
+    PrintProfile(std::cout, p_start.GetSupport(), x, true);
   }
 }
 
@@ -544,7 +544,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  gbtBehavProfile<double> start(efg);
+  Gambit::MixedBehavProfile<double> start(efg);
 
   try {
     TracePath(start, 0.0, maxLambda, 1.0);

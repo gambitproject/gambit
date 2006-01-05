@@ -30,7 +30,7 @@
 
 template <class T>
 void PrintProfile(std::ostream &p_stream,
-		  const gbtMixedProfile<T> &p_profile)
+		  const Gambit::MixedStrategyProfile<T> &p_profile)
 {
   p_stream << "NE,";
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -58,7 +58,7 @@ void Solve(Gambit::Game p_nfg)
 
     for (int pl = 1; flag && pl <= p_nfg->NumPlayers(); pl++)  {
       gbtRational current = citer.GetPayoff(pl);
-      gbtStrategyProfile p = citer.GetProfile();
+      Gambit::PureStrategyProfile p = citer.GetProfile();
       for (int i = 1; i <= p_nfg->GetPlayer(pl)->NumStrategies(); i++)  {
 	p.SetStrategy(p_nfg->GetPlayer(pl)->GetStrategy(i));
 	if (p.GetPayoff(pl) > current)  {
@@ -69,9 +69,9 @@ void Solve(Gambit::Game p_nfg)
     }
     
     if (flag)  {
-      gbtMixedProfile<gbtRational> temp(p_nfg);
+      Gambit::MixedStrategyProfile<gbtRational> temp(p_nfg);
       ((gbtVector<gbtRational> &) temp).operator=(gbtRational(0));
-      gbtStrategyProfile profile = citer.GetProfile();
+      Gambit::PureStrategyProfile profile = citer.GetProfile();
       for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
 	temp(pl, profile.GetStrategy(pl)->GetNumber()) = 1;
       }

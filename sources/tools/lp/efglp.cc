@@ -35,7 +35,7 @@ int g_numDecimals = 6;
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtBehavProfile<double> &p_profile)
+		  const Gambit::MixedBehavProfile<double> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -47,7 +47,7 @@ void PrintProfile(std::ostream &p_stream,
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtBehavProfile<gbtRational> &p_profile)
+		  const Gambit::MixedBehavProfile<gbtRational> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -95,7 +95,7 @@ efgLp<T>::efgLp(void)
 // the centroid.  This helps IsNash and LiapValue work correctly.
 //
 template <class T>
-void UndefinedToCentroid(gbtBehavProfile<T> &p_profile)
+void UndefinedToCentroid(Gambit::MixedBehavProfile<T> &p_profile)
 {
   Gambit::Game efg = p_profile.GetGame();
 
@@ -287,7 +287,7 @@ template <class T>
 void efgLp<T>::GetSolutions(const gbtEfgSupport &p_support) const
 {
   for (int i = 1; i <= List.Length(); i++)    {
-    gbtBehavProfile<T> profile(p_support);
+    Gambit::MixedBehavProfile<T> profile(p_support);
     GetProfile(p_support,
 	       profile.GetDPVector(), List[i],
 	       p_support.GetGame()->GetRoot(), 1, 1);

@@ -39,23 +39,23 @@ class NFLiapFunc : public gC1Function<double>  {
 private:
   mutable long _nevals;
   Gambit::Game _nfg;
-  mutable gbtMixedProfile<double> _p;
+  mutable Gambit::MixedStrategyProfile<double> _p;
 
   double Value(const gbtVector<double> &) const;
   bool Gradient(const gbtVector<double> &, gbtVector<double> &) const;
 
-  double LiapDerivValue(int, int, const gbtMixedProfile<double> &) const;
+  double LiapDerivValue(int, int, const Gambit::MixedStrategyProfile<double> &) const;
     
 
 public:
-  NFLiapFunc(const Gambit::Game &, const gbtMixedProfile<double> &);
+  NFLiapFunc(const Gambit::Game &, const Gambit::MixedStrategyProfile<double> &);
   virtual ~NFLiapFunc();
     
   long NumEvals(void) const  { return _nevals; }
 };
 
 NFLiapFunc::NFLiapFunc(const Gambit::Game &N,
-		       const gbtMixedProfile<double> &start)
+		       const Gambit::MixedStrategyProfile<double> &start)
   : _nevals(0L), _nfg(N), _p(start)
 { }
 
@@ -63,7 +63,7 @@ NFLiapFunc::~NFLiapFunc()
 { }
 
 double NFLiapFunc::LiapDerivValue(int i1, int j1,
-				  const gbtMixedProfile<double> &p) const
+				  const Gambit::MixedStrategyProfile<double> &p) const
 {
   int i, j;
   double x, x1, psum;
@@ -136,7 +136,7 @@ double NFLiapFunc::Value(const gbtVector<double> &v) const
 
   ((gbtVector<double> &) _p).operator=(v);
   
-  gbtMixedProfile<double> tmp(_p);
+  Gambit::MixedStrategyProfile<double> tmp(_p);
   gbtPVector<double> payoff(_p);
 
   double x, result = 0.0, avg, sum;
@@ -174,7 +174,7 @@ double NFLiapFunc::Value(const gbtVector<double> &v) const
   return result;
 }
 
-static void PickRandomProfile(gbtMixedProfile<double> &p)
+static void PickRandomProfile(Gambit::MixedStrategyProfile<double> &p)
 {
   double sum, tmp;
 
@@ -197,7 +197,7 @@ int g_numDecimals = 6;
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtMixedProfile<double> &p_profile)
+		  const Gambit::MixedStrategyProfile<double> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -209,7 +209,7 @@ void PrintProfile(std::ostream &p_stream,
 }
 
 bool ReadProfile(std::istream &p_stream,
-		 gbtMixedProfile<double> &p_profile)
+		 Gambit::MixedStrategyProfile<double> &p_profile)
 {
   for (int i = 1; i <= p_profile.Length(); i++) {
     if (p_stream.eof() || p_stream.bad()) {
@@ -315,13 +315,13 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  gbtList<gbtMixedProfile<double> > starts;
+  gbtList<Gambit::MixedStrategyProfile<double> > starts;
 
   if (startFile != "") {
     std::ifstream startPoints(startFile.c_str());
 
     while (!startPoints.eof() && !startPoints.bad()) {
-      gbtMixedProfile<double> start(nfg);
+      Gambit::MixedStrategyProfile<double> start(nfg);
       if (ReadProfile(startPoints, start)) {
 	starts.Append(start);
       }
@@ -330,7 +330,7 @@ int main(int argc, char *argv[])
   else {
     // Generate the desired number of points randomly
     for (int i = 1; i <= m_numTries; i++) {
-      gbtMixedProfile<double> start(nfg);
+      Gambit::MixedStrategyProfile<double> start(nfg);
       PickRandomProfile(start);
       starts.Append(start);
     }
@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
 
   try {
     for (int i = 1; i <= starts.Length(); i++) {
-      gbtMixedProfile<double> p(starts[i]);
+      Gambit::MixedStrategyProfile<double> p(starts[i]);
 
       if (verbose) {
 	PrintProfile(std::cout, "start", p);
@@ -352,7 +352,7 @@ int main(int argc, char *argv[])
       int kk;
       for (kk = 1; kk <= p.Length() && p[kk] > ALPHA; kk++);
       if (kk <= p.Length()) {
-	gbtMixedProfile<double> centroid(p.GetSupport());
+	Gambit::MixedStrategyProfile<double> centroid(p.GetSupport());
 	for (int k = 1; k <= p.Length(); k++) {
 	  p[k] = centroid[k] * ALPHA + p[k] * (1.0-ALPHA);
 	}

@@ -34,7 +34,7 @@ int g_numDecimals = 6;
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtBehavProfile<double> &p_profile)
+		  const Gambit::MixedStrategyProfile<double> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -46,7 +46,7 @@ void PrintProfile(std::ostream &p_stream,
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const gbtBehavProfile<gbtRational> &p_profile)
+		  const Gambit::MixedStrategyProfile<gbtRational> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -190,7 +190,7 @@ void nfgLcp<T>::AddSolutions(const gbtNfgSupport &p_support,
   int n2 = p_support.NumStrats(2);
 
   for (i = 1; i <= p_list.Length(); i++)    {
-    gbtMixedProfile<T> profile(p_support);
+    Gambit::MixedStrategyProfile<T> profile(p_support);
     T sum = (T) 0;
 
     for (j = 1; j <= n1; j++)

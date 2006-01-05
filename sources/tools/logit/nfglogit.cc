@@ -120,7 +120,7 @@ void QreLHS(const gbtNfgSupport &p_support,
 	    const gbtArray<bool> &p_isLog,
 	    gbtVector<double> &p_lhs)
 {
-  gbtMixedProfile<double> profile(p_support), logprofile(p_support);
+  Gambit::MixedStrategyProfile<double> profile(p_support), logprofile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     if (p_isLog[i]) {
       profile[i] = exp(p_point[i]);
@@ -162,7 +162,7 @@ void QreJacobian(const gbtNfgSupport &p_support,
 		 const gbtArray<bool> &p_isLog,
 		 Gambit::Matrix<double> &p_matrix)
 {
-  gbtMixedProfile<double> profile(p_support), logprofile(p_support);
+  Gambit::MixedStrategyProfile<double> profile(p_support), logprofile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     if (p_isLog[i]) {
       profile[i] = exp(p_point[i]);
@@ -317,7 +317,7 @@ void PrintProfile(std::ostream &p_stream,
   }
 
   if (g_maxLike) {
-    gbtMixedProfile<double> profile(p_support);
+    Gambit::MixedStrategyProfile<double> profile(p_support);
     for (int i = 1; i <= profile.Length(); i++) {
       if (p_isLog[i]) {
 	profile[i] = exp(x[i]);
@@ -362,7 +362,7 @@ double g_maxDecel = 1.1;
 double g_hStart = .03;
 bool g_fullGraph = true;
 
-static void TracePath(const gbtMixedProfile<double> &p_start,
+static void TracePath(const Gambit::MixedStrategyProfile<double> &p_start,
 		      double p_startLambda, double p_maxLambda, double p_omega)	
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
@@ -703,7 +703,7 @@ int main(int argc, char *argv[])
   }
   
 
-  gbtMixedProfile<double> start(nfg);
+  Gambit::MixedStrategyProfile<double> start(nfg);
 
   try {
     TracePath(start, 0.0, maxLambda, 1.0);

@@ -27,12 +27,14 @@
 
 #include "behav.h"
 
+namespace Gambit {
+
 //-------------------------------------------------------------------------
-//   gbtBehavProfile<T>: Constructors, Destructor
+//   MixedBehavProfile<T>: Constructors, Destructor
 //-------------------------------------------------------------------------
 
 template <class T>
-gbtBehavProfile<T>::gbtBehavProfile(const gbtBehavProfile<T> &p_profile)
+MixedBehavProfile<T>::MixedBehavProfile(const MixedBehavProfile<T> &p_profile)
   : gbtDPVector<T>(p_profile), m_efg(p_profile.m_efg),
     m_support(p_profile.m_support),
     m_cached_data(false),
@@ -46,7 +48,7 @@ gbtBehavProfile<T>::gbtBehavProfile(const gbtBehavProfile<T> &p_profile)
   InitProfile();
 }
 
-template <class T> gbtBehavProfile<T>::gbtBehavProfile(const gbtEfgSupport &p_support) 
+template <class T> MixedBehavProfile<T>::MixedBehavProfile(const gbtEfgSupport &p_support) 
   : gbtDPVector<T>(p_support.NumActions()), 
     m_efg(p_support.GetGame()),
     m_support(p_support),
@@ -66,7 +68,7 @@ template <class T> gbtBehavProfile<T>::gbtBehavProfile(const gbtEfgSupport &p_su
 }
 
 template <class T>
-gbtBehavProfile<T>::gbtBehavProfile(const gbtMixedProfile<T> &p_profile)
+MixedBehavProfile<T>::MixedBehavProfile(const MixedStrategyProfile<T> &p_profile)
   : gbtDPVector<T>(p_profile.GetGame()->NumActions()), 
     m_efg(p_profile.GetGame()),
     m_support(m_efg),  
@@ -84,9 +86,9 @@ gbtBehavProfile<T>::gbtBehavProfile(const gbtMixedProfile<T> &p_profile)
 
   ((gbtVector<T> &) *this).operator=((T)0); 
 
-  Gambit::GameNode n = m_efg->GetRoot();
+  GameNode n = m_efg->GetRoot();
   const gbtNfgSupport &support = p_profile.GetSupport();
-  Gambit::Game nfg = p_profile.GetGame();
+  Game nfg = p_profile.GetGame();
 
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++)   {
     m_nvals = (T) 0;
@@ -108,15 +110,15 @@ gbtBehavProfile<T>::gbtBehavProfile(const gbtMixedProfile<T> &p_profile)
   }
 }
 
-template <class T> gbtBehavProfile<T>::~gbtBehavProfile()
+template <class T> MixedBehavProfile<T>::~MixedBehavProfile()
 { }
 
 //-------------------------------------------------------------------------
-//   gbtBehavProfile<T>: Operator overloading
+//   MixedBehavProfile<T>: Operator overloading
 //-------------------------------------------------------------------------
 
 template <class T>
-gbtBehavProfile<T> &gbtBehavProfile<T>::operator=(const gbtBehavProfile<T> &p_profile)
+MixedBehavProfile<T> &MixedBehavProfile<T>::operator=(const MixedBehavProfile<T> &p_profile)
 {
   if (this != &p_profile && m_efg == p_profile.m_efg)   {
     Invalidate();
@@ -129,18 +131,18 @@ gbtBehavProfile<T> &gbtBehavProfile<T>::operator=(const gbtBehavProfile<T> &p_pr
 }
 
 template <class T>
-bool gbtBehavProfile<T>::operator==(const gbtBehavProfile<T> &p_profile) const
+bool MixedBehavProfile<T>::operator==(const MixedBehavProfile<T> &p_profile) const
 {
   return (m_efg == p_profile.m_efg &&
 	  (gbtDPVector<T> &) *this == (gbtDPVector<T> &) p_profile);
 }
 
 //-------------------------------------------------------------------------
-//   gbtBehavProfile<T>: Initialization, Validation
+//   MixedBehavProfile<T>: Initialization, Validation
 //-------------------------------------------------------------------------
 
 template <class T>
-void gbtBehavProfile<T>::InitProfile(void)
+void MixedBehavProfile<T>::InitProfile(void)
 {
   m_realizProbs = (T) 0.0;
   m_beliefs = (T) 0.0;
@@ -150,7 +152,7 @@ void gbtBehavProfile<T>::InitProfile(void)
   m_gripe = (T) 0.0;
 }
 
-template <class T> void gbtBehavProfile<T>::Centroid(void) const
+template <class T> void MixedBehavProfile<T>::Centroid(void) const
 {
   T center;
 
@@ -165,11 +167,11 @@ template <class T> void gbtBehavProfile<T>::Centroid(void) const
 }
 
 //-------------------------------------------------------------------------
-//   gbtBehavProfile<T>: General data access -- private functions
+//   MixedBehavProfile<T>: General data access -- private functions
 //-------------------------------------------------------------------------
 
 template <class T>
-T gbtBehavProfile<T>::ActionProb(const Gambit::GameAction &action) const
+T MixedBehavProfile<T>::ActionProb(const GameAction &action) const
 {
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
     return action->GetInfoset()->GetActionProb(action->GetNumber());
@@ -185,32 +187,32 @@ T gbtBehavProfile<T>::ActionProb(const Gambit::GameAction &action) const
 }
 
 template <class T>
-const T &gbtBehavProfile<T>::RealizProb(const Gambit::GameNode &node) const
+const T &MixedBehavProfile<T>::RealizProb(const GameNode &node) const
 {
   return m_realizProbs[node->number];
 }
 
 template <class T>
-T &gbtBehavProfile<T>::RealizProb(const Gambit::GameNode &node)
+T &MixedBehavProfile<T>::RealizProb(const GameNode &node)
 {
   return m_realizProbs[node->number];
 }
 
 template <class T>
-const T &gbtBehavProfile<T>::BeliefProb(const Gambit::GameNode &node) const
+const T &MixedBehavProfile<T>::BeliefProb(const GameNode &node) const
 {
   return m_beliefs[node->number];
 }
 
 template <class T>
-T &gbtBehavProfile<T>::BeliefProb(const Gambit::GameNode &node)
+T &MixedBehavProfile<T>::BeliefProb(const GameNode &node)
 {
   return m_beliefs[node->number];
 }
 
 
 template <class T>
-T gbtBehavProfile<T>::IsetProb(const Gambit::GameInfoset &iset) const
+T MixedBehavProfile<T>::IsetProb(const GameInfoset &iset) const
 {
   T prob = (T) 0;
   for (int i = 1; i <= iset->NumMembers(); i++) {
@@ -220,36 +222,36 @@ T gbtBehavProfile<T>::IsetProb(const Gambit::GameInfoset &iset) const
 }
 
 template <class T>
-const T &gbtBehavProfile<T>::IsetValue(const Gambit::GameInfoset &iset) const
+const T &MixedBehavProfile<T>::IsetValue(const GameInfoset &iset) const
 {
   return m_infosetValues(iset->GetPlayer()->GetNumber(), iset->GetNumber());
 }
 
 template <class T>
-T &gbtBehavProfile<T>::IsetValue(const Gambit::GameInfoset &iset)
+T &MixedBehavProfile<T>::IsetValue(const GameInfoset &iset)
 {
   return m_infosetValues(iset->GetPlayer()->GetNumber(), iset->GetNumber());
 }
 
 
-template <class T> const T &gbtBehavProfile<T>::Regret(const Gambit::GameAction &act) const
+template <class T> const T &MixedBehavProfile<T>::Regret(const GameAction &act) const
 {
   return m_gripe(act->GetInfoset()->GetPlayer()->GetNumber(),
 		 act->GetInfoset()->GetNumber(), act->m_number);
 }	
 
-template <class T> T &gbtBehavProfile<T>::Regret(const Gambit::GameAction &act)
+template <class T> T &MixedBehavProfile<T>::Regret(const GameAction &act)
 {
   return m_gripe(act->GetInfoset()->GetPlayer()->GetNumber(),
 		 act->GetInfoset()->GetNumber(), act->m_number);
 }
 
 //-------------------------------------------------------------------------
-//   gbtBehavProfile<T>: General data access -- public functions
+//   MixedBehavProfile<T>: General data access -- public functions
 //-------------------------------------------------------------------------
 
 template <class T>
-const T &gbtBehavProfile<T>::GetRealizProb(const Gambit::GameNode &node) const
+const T &MixedBehavProfile<T>::GetRealizProb(const GameNode &node) const
 { 
   ComputeSolutionData();
   return RealizProb(node);
@@ -258,56 +260,56 @@ const T &gbtBehavProfile<T>::GetRealizProb(const Gambit::GameNode &node) const
 
 
 template <class T>
-const T &gbtBehavProfile<T>::GetBeliefProb(const Gambit::GameNode &node) const
+const T &MixedBehavProfile<T>::GetBeliefProb(const GameNode &node) const
 { 
   ComputeSolutionData();
   return BeliefProb(node);
 }
 
 template <class T>
-gbtVector<T> gbtBehavProfile<T>::GetNodeValue(const Gambit::GameNode &node) const
+gbtVector<T> MixedBehavProfile<T>::GetNodeValue(const GameNode &node) const
 { 
   ComputeSolutionData();
   return NodeValues(node);
 }
 
 template <class T>
-T gbtBehavProfile<T>::GetIsetProb(const Gambit::GameInfoset &iset) const
+T MixedBehavProfile<T>::GetIsetProb(const GameInfoset &iset) const
 { 
   ComputeSolutionData();
   return IsetProb(iset);
 }
 
 template <class T>
-const T &gbtBehavProfile<T>::GetIsetValue(const Gambit::GameInfoset &iset) const
+const T &MixedBehavProfile<T>::GetIsetValue(const GameInfoset &iset) const
 { 
   ComputeSolutionData();
   return IsetValue(iset);
 }
 
 template <class T>
-T gbtBehavProfile<T>::GetActionProb(const Gambit::GameAction &act) const
+T MixedBehavProfile<T>::GetActionProb(const GameAction &act) const
 { 
   return ActionProb(act);
 }
 
 
 template <class T>
-const T &gbtBehavProfile<T>::GetActionValue(const Gambit::GameAction &act) const
+const T &MixedBehavProfile<T>::GetActionValue(const GameAction &act) const
 { 
   ComputeSolutionData();
   return ActionValue(act);
 }
 
 template <class T>
-const T &gbtBehavProfile<T>::GetRegret(const Gambit::GameAction &act) const
+const T &MixedBehavProfile<T>::GetRegret(const GameAction &act) const
 { 
   ComputeSolutionData();
   return Regret(act);
 }
 
 //-------------------------------------------------------------------------
-//   gbtBehavProfile<T>: Computation of interesting quantities
+//   MixedBehavProfile<T>: Computation of interesting quantities
 //-------------------------------------------------------------------------
 
 //--------------
@@ -316,23 +318,23 @@ const T &gbtBehavProfile<T>::GetRegret(const Gambit::GameAction &act) const
 
 
 template <class T>
-void gbtBehavProfile<T>::Payoff(Gambit::GameNodeRep *node, T prob, int player, T &value) const
+void MixedBehavProfile<T>::Payoff(GameNodeRep *node, T prob, int player, T &value) const
 {
-  Gambit::GameInfosetRep *iset = node->infoset;
+  GameInfosetRep *iset = node->infoset;
 
   if (node->outcome) {
     value += prob * node->outcome->GetPayoff(player);
   }
 
   if (node->children.Length())  {
-    const gbtArray<Gambit::GameAction> &acts = m_support.Actions(iset);
+    const gbtArray<GameAction> &acts = m_support.Actions(iset);
     for (int act = 1; act <= acts.Length(); act++) 
       Payoff(node->GetChild(acts[act]->GetNumber()), 
 	     prob * ActionProb(acts[act]), player, value);
   }
 }
 
-template <class T> T gbtBehavProfile<T>::Payoff(int player) const
+template <class T> T MixedBehavProfile<T>::GetPayoff(int player) const
 {
   T value = (T) 0;
   Payoff(m_efg->GetRoot(), (T) 1, player, value);
@@ -353,16 +355,16 @@ template <class T> T gbtBehavProfile<T>::Payoff(int player) const
 //
 
 template <class T>
-T gbtBehavProfile<T>::DiffActionValue(const Gambit::GameAction &p_action,
-				      const Gambit::GameAction &p_oppAction) const
+T MixedBehavProfile<T>::DiffActionValue(const GameAction &p_action,
+				      const GameAction &p_oppAction) const
 {
-  ((gbtBehavProfile<T> *) this)->ComputeSolutionData();
+  ((MixedBehavProfile<T> *) this)->ComputeSolutionData();
   T deriv = (T) 0;
-  Gambit::GameInfoset infoset = p_action->GetInfoset();
-  Gambit::GamePlayer player = p_action->GetInfoset()->GetPlayer();
+  GameInfoset infoset = p_action->GetInfoset();
+  GamePlayer player = p_action->GetInfoset()->GetPlayer();
 
   for (int i = 1; i <= infoset->NumMembers(); i++) {
-    Gambit::GameNode member = infoset->GetMember(i);
+    GameNode member = infoset->GetMember(i);
 
     //    gout << member->number << ' ' << player->GetNumber() << ' ' << p_action->GetInfoset()->GetNumber() << ' '  << p_action->number << ' ' << p_oppAction->GetInfoset()->GetPlayer()->GetNumber() << ' ' << p_oppAction->GetInfoset()->GetNumber() << ' ' << p_oppAction->number << ' ';
     deriv += DiffRealizProb(member, p_oppAction) *
@@ -380,15 +382,15 @@ T gbtBehavProfile<T>::DiffActionValue(const Gambit::GameAction &p_action,
 }
 
 template <class T>
-T gbtBehavProfile<T>::DiffRealizProb(const Gambit::GameNode &p_node,
-				     const Gambit::GameAction &p_oppAction) const
+T MixedBehavProfile<T>::DiffRealizProb(const GameNode &p_node,
+				     const GameAction &p_oppAction) const
 {
-  ((gbtBehavProfile<T> *) this)->ComputeSolutionData();
+  ((MixedBehavProfile<T> *) this)->ComputeSolutionData();
   T deriv = (T) 1;
   bool isPrec = false;
-  Gambit::GameNode node = p_node;
+  GameNode node = p_node;
   while (node->GetParent()) {
-    Gambit::GameAction prevAction = node->GetPriorAction();
+    GameAction prevAction = node->GetPriorAction();
     if (prevAction != p_oppAction) {
       deriv *= GetActionProb(prevAction);
     }
@@ -402,14 +404,14 @@ T gbtBehavProfile<T>::DiffRealizProb(const Gambit::GameNode &p_node,
 }
 
 template <class T>
-T gbtBehavProfile<T>::DiffNodeValue(const Gambit::GameNode &p_node, 
-				    const Gambit::GamePlayer &p_player,
-				    const Gambit::GameAction &p_oppAction) const
+T MixedBehavProfile<T>::DiffNodeValue(const GameNode &p_node, 
+				    const GamePlayer &p_player,
+				    const GameAction &p_oppAction) const
 {
-  ((gbtBehavProfile<T> *) this)->ComputeSolutionData();
+  ((MixedBehavProfile<T> *) this)->ComputeSolutionData();
 
   if (p_node->NumChildren() > 0) {
-    Gambit::GameInfoset infoset = p_node->GetInfoset();
+    GameInfoset infoset = p_node->GetInfoset();
 
     if (infoset == p_oppAction->GetInfoset()) {
       // We've encountered the action; since we assume perfect recall,
@@ -439,7 +441,7 @@ T gbtBehavProfile<T>::DiffNodeValue(const Gambit::GameNode &p_node,
 // 
 
 template <class T>
-void gbtBehavProfile<T>::ComputeSolutionDataPass2(const Gambit::GameNode &node) const
+void MixedBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
 {
   if (node->outcome) {
     for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) { 
@@ -447,7 +449,7 @@ void gbtBehavProfile<T>::ComputeSolutionDataPass2(const Gambit::GameNode &node) 
     }
   }
 
-  Gambit::GameInfoset iset = node->infoset;
+  GameInfoset iset = node->infoset;
 
   if(iset) {
     if (IsetProb(iset) != IsetProb(iset) * (T) 0)
@@ -464,10 +466,10 @@ void gbtBehavProfile<T>::ComputeSolutionDataPass2(const Gambit::GameNode &node) 
     }
 
     for (int child = 1; child <= node->NumChildren(); child++)  {
-      Gambit::GameNode childNode = node->GetChild(child);
+      GameNode childNode = node->GetChild(child);
       ComputeSolutionDataPass2(childNode);
 
-      Gambit::GameAction act = childNode->GetPriorAction();
+      GameAction act = childNode->GetPriorAction();
 
       for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
 	m_nodeValues(node->number, pl) +=
@@ -491,7 +493,7 @@ void gbtBehavProfile<T>::ComputeSolutionDataPass2(const Gambit::GameNode &node) 
 
 // compute realization probabilities for nodes and isets.  
 template <class T>
-void gbtBehavProfile<T>::ComputeSolutionDataPass1(const Gambit::GameNode &node) const
+void MixedBehavProfile<T>::ComputeSolutionDataPass1(const GameNode &node) const
 {
   if (node->GetParent()) {
     m_realizProbs[node->number] = RealizProb(node->GetParent()) * ActionProb(node->GetPriorAction());
@@ -508,7 +510,7 @@ void gbtBehavProfile<T>::ComputeSolutionDataPass1(const Gambit::GameNode &node) 
 }
 
 template <class T>
-void gbtBehavProfile<T>::ComputeSolutionData(void) const
+void MixedBehavProfile<T>::ComputeSolutionData(void) const
 {
   if (!m_cached_data) {
     m_actionValues = (T) 0;
@@ -520,17 +522,17 @@ void gbtBehavProfile<T>::ComputeSolutionData(void) const
 
     for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
       for (int iset = 1; iset <= m_efg->NumInfosets()[pl]; iset++) {
-	Gambit::GameInfoset infoset = m_efg->GetPlayer(pl)->GetInfoset(iset);
+	GameInfoset infoset = m_efg->GetPlayer(pl)->GetInfoset(iset);
 
 	m_infosetValues(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()) = (T) 0;
 	for (int act = 1; act <= infoset->NumActions(); act++) {
-	  Gambit::GameAction action = infoset->GetAction(act);
+	  GameAction action = infoset->GetAction(act);
 	  m_infosetValues(infoset->GetPlayer()->GetNumber(),
 			  infoset->GetNumber()) += ActionProb(action) * ActionValue(action);
 	}
 
 	for (int act = 1; act <= infoset->NumActions(); act++) {
-	  Gambit::GameAction action = infoset->GetAction(act);
+	  GameAction action = infoset->GetAction(act);
 	  m_gripe(action->GetInfoset()->GetPlayer()->GetNumber(),
 		  action->GetInfoset()->GetNumber(), action->m_number) = 
 	    (ActionValue(action) - IsetValue(infoset)) * IsetProb(infoset);
@@ -542,17 +544,17 @@ void gbtBehavProfile<T>::ComputeSolutionData(void) const
 }
 
 template <class T>
-void gbtBehavProfile<T>::BehaviorStrat(const Gambit::Game &E, int pl,
-				       Gambit::GameNode &n)
+void MixedBehavProfile<T>::BehaviorStrat(const Game &E, int pl,
+				       GameNode &n)
 {
   for (int i = 1; i <= n->children.Length(); i++)   {
-    Gambit::GameNode child = n->children[i];
+    GameNode child = n->children[i];
     if (n->GetPlayer() && n->GetPlayer()->GetNumber() == pl)
       if (m_nvals[n->number] > (T) 0 && 
 	  m_nvals[child->number] > (T) 0)  {
 	(*this)(n->GetPlayer()->GetNumber(),
 		n->GetInfoset()->GetNumber(), 
-		Support().Find(n->GetInfoset()->GetAction(i))) =
+		GetSupport().Find(n->GetInfoset()->GetAction(i))) =
 	  m_nvals[child->number] / m_nvals[n->number];
       }
     BehaviorStrat(E, pl, child);
@@ -560,10 +562,10 @@ void gbtBehavProfile<T>::BehaviorStrat(const Gambit::Game &E, int pl,
 }
 
 template <class T>
-void gbtBehavProfile<T>::RealizationProbs(const gbtMixedProfile<T> &mp,
-				       const Gambit::Game &E, int pl,
+void MixedBehavProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp,
+				       const Game &E, int pl,
 				       const gbtArray<int> &actions,
-				       Gambit::GameNode node)
+				       GameNode node)
 {
   static const T tremble = (T) 0;
   T prob;
@@ -576,9 +578,9 @@ void gbtBehavProfile<T>::RealizationProbs(const gbtMixedProfile<T> &mp,
 	else
 	  prob = tremble / (T) node->NumChildren();
       }
-      else if (Support().Find(node->GetInfoset()->GetAction(i)))
-	prob = (T) 1 / (T) Support().NumActions(node->GetPlayer()->GetNumber(),
-						node->GetInfoset()->GetNumber());
+      else if (GetSupport().Find(node->GetInfoset()->GetAction(i)))
+	prob = (T) 1 / (T) GetSupport().NumActions(node->GetPlayer()->GetNumber(),
+						   node->GetInfoset()->GetNumber());
       else
 	prob = (T) 0;
     }
@@ -586,7 +588,7 @@ void gbtBehavProfile<T>::RealizationProbs(const gbtMixedProfile<T> &mp,
       prob = node->GetInfoset()->GetActionProb(i);
     }
 
-    Gambit::GameNode child = node->children[i];
+    GameNode child = node->children[i];
     m_bvals[child->number] = prob * m_bvals[node->number];
     m_nvals[child->number] += m_bvals[child->number];
 
@@ -595,16 +597,16 @@ void gbtBehavProfile<T>::RealizationProbs(const gbtMixedProfile<T> &mp,
 	
 }
 
-template <class T> gbtDPVector<T> gbtBehavProfile<T>::Beliefs(void)
+template <class T> gbtDPVector<T> MixedBehavProfile<T>::GetBeliefs(void)
 {
   ComputeSolutionData();
   gbtDPVector<T> bprobs(m_efg->NumMembers());
   bprobs = (T) 0;
 
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = m_efg->GetPlayer(pl);
+    GamePlayer player = m_efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      Gambit::GameInfoset infoset = player->GetInfoset(iset);
+      GameInfoset infoset = player->GetInfoset(iset);
       for (int i = 1; i <= infoset->NumMembers(); i++) 
 	bprobs(player->GetNumber(),infoset->GetNumber(),i) = BeliefProb(infoset->GetMember(i));
     }
@@ -613,7 +615,7 @@ template <class T> gbtDPVector<T> gbtBehavProfile<T>::Beliefs(void)
   return bprobs;
 }
 
-template <class T> T gbtBehavProfile<T>::LiapValue(void) const
+template <class T> T MixedBehavProfile<T>::GetLiapValue(void) const
 {
   static const T BIG1 = (T) 10000;
   static const T BIG2 = (T) 100;
@@ -626,7 +628,7 @@ template <class T> T gbtBehavProfile<T>::LiapValue(void) const
 
   for (int i = 1; i <= m_efg->NumPlayers(); i++) {
     for (int iset = 1; iset <= m_efg->GetPlayer(i)->NumInfosets(); iset++) {
-      const gbtArray<Gambit::GameAction> &acts = m_support.Actions(m_efg->GetPlayer(i)->GetInfoset(iset));
+      const gbtArray<GameAction> &acts = m_support.Actions(m_efg->GetPlayer(i)->GetInfoset(iset));
       avg = sum = (T)0;
 
       for (int act = 1; act <= acts.Length(); act++) {
@@ -659,7 +661,7 @@ template <class T> T gbtBehavProfile<T>::LiapValue(void) const
 // This is really a hack because we don't have a proper way yet of
 // indicating this.
 // 
-template <class T> T gbtBehavProfile<T>::LiapValueOnDefined(void) const
+template <class T> T MixedBehavProfile<T>::GetLiapValueOnDefined(void) const
 {
   static const T BIG1 = (T) 10000;
   static const T BIG2 = (T) 100;
@@ -672,7 +674,7 @@ template <class T> T gbtBehavProfile<T>::LiapValueOnDefined(void) const
 
   for (int i = 1; i <= m_efg->NumPlayers(); i++) {
     for (int iset = 1; iset <= m_efg->GetPlayer(i)->NumInfosets(); iset++) {
-      const gbtArray<Gambit::GameAction> &acts = m_support.Actions(m_efg->GetPlayer(i)->GetInfoset(iset));
+      const gbtArray<GameAction> &acts = m_support.Actions(m_efg->GetPlayer(i)->GetInfoset(iset));
       avg = sum = (T)0;
 
       for (int act = 1; act <= acts.Length(); act++) {
@@ -698,9 +700,9 @@ template <class T> T gbtBehavProfile<T>::LiapValueOnDefined(void) const
   return result;
 }
 
-
+  /*
 template <class T>
-T gbtBehavProfile<T>::MaxRegret(void)
+T MixedBehavProfile<T>::MaxRegret(void)
 { 
   ComputeSolutionData();
   T ret = (T) 0;
@@ -711,9 +713,10 @@ T gbtBehavProfile<T>::MaxRegret(void)
   }
   return ret;
 }
+  */
 
 template <class T>
-bool gbtBehavProfile<T>::IsDefinedAt(Gambit::GameInfoset p_infoset) const
+bool MixedBehavProfile<T>::IsDefinedAt(GameInfoset p_infoset) const
 {
   for (int act = 1; act <= p_infoset->NumActions(); act++) {
     if (GetActionProb(p_infoset->GetAction(act)) > (T) 0) {
@@ -724,3 +727,4 @@ bool gbtBehavProfile<T>::IsDefinedAt(Gambit::GameInfoset p_infoset) const
 }
 
 
+}  // end namespace Gambit

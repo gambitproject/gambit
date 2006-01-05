@@ -29,6 +29,7 @@
 
 template <class T> class gbtArray;
 
+#include "game.h"
 #include "nfstrat.h"
 
 /// This class iterates through the contingencies in a strategic game.
@@ -41,7 +42,7 @@ class gbtNfgContingencyIterator {
 private:
   gbtNfgSupport support;
   gbtArray<int> m_currentStrat;
-  gbtStrategyProfile profile;
+  Gambit::PureStrategyProfile profile;
   int m_frozen1, m_frozen2;
   
 public:
@@ -67,7 +68,7 @@ public:
   /// @name Data access
   //@{
   /// Get the current strategy profile
-  const gbtStrategyProfile &GetProfile(void) const { return profile; }
+  const Gambit::PureStrategyProfile &GetProfile(void) const { return profile; }
   
   /// Get the outcome assigned to the current contingency
   Gambit::GameOutcome GetOutcome(void) const;
