@@ -1208,24 +1208,25 @@ GameInfoset GameRep::AppendNode(GameNode n, GameInfoset s)
   return s;
 }
   
-GameNode GameRep::DeleteNode(GameNode n, GameNode keep)
+GameNode GameRep::DeleteParent(GameNode p_keep)
 {
-  if (!n || !keep)   throw gbtEfgException();
+  GameNodeRep *parent = p_keep->parent;
+  if (!parent) return p_keep;
 
-  if (keep->parent != n)   return n;
+  parent->children.Remove(parent->children.Find(p_keep));
+  DeleteTree(parent);
+  p_keep->parent = parent->parent;
+  if (parent->parent) {
+    parent->parent->children[parent->parent->children.Find(parent)] = p_keep;
+  }
+  else {
+    m_root = p_keep;
+  }
 
-  n->children.Remove(n->children.Find(keep));
-  DeleteTree(n);
-  keep->parent = n->parent;
-  if (n->parent)
-    n->parent->children[n->parent->children.Find(n)] = keep;
-  else
-    m_root = keep;
-
-  n->Invalidate();
+  parent->Invalidate();
   ClearComputedValues();
 
-  return keep;
+  return p_keep;
 }
 
 GameInfoset GameRep::InsertNode(GameNode n, GamePlayer p, int count)
@@ -1297,6 +1298,26 @@ GameInfoset GameRep::JoinInfoset(GameInfoset s, GameNode n)
   return s;
 }
 
+GameInfoset GameRep::JoinInfoset(GameInfoset to, GameInfoset from)
+{
+  if (!to || !from)  throw gbtEfgException();
+
+  if (to == from ||
+      to->m_actions.Length() != from->m_actions.Length())   return from;
+
+  for (int i = 1; i <= from->m_members.Length(); i++) {
+    to->m_members.Append(from->m_members[i]);
+  }
+
+  for (int i = 1; i <= from->m_members.Length(); i++)
+    from->m_members[i]->infoset = to;
+
+  from->m_members = gbtArray<GameNodeRep *>();
+
+  ClearComputedValues();
+  return to;
+}
+
 GameInfoset GameRep::LeaveInfoset(GameNode n)
 {
   if (!n)  throw gbtEfgException();
@@ -1318,56 +1339,6 @@ GameInfoset GameRep::LeaveInfoset(GameNode n)
 
   ClearComputedValues();
   return n->infoset;
-}
-
-GameInfoset GameRep::SplitInfoset(GameNode n)
-{
-  if (!n)  throw gbtEfgException();
-
-  if (!n->infoset)   return 0;
-
-  GameInfosetRep *s = n->infoset;
-  if (s->m_members.Length() == 1)   return s;
-
-  GamePlayerRep *p = s->m_player;
-  GameInfosetRep *ns = new GameInfosetRep(this, p->m_infosets.Length() + 1, p,
-					  n->children.Length());
-  p->m_infosets.Append(ns);
-  ns->m_label = s->m_label;
-  int i;
-  for (i = s->m_members.Length(); i > s->m_members.Find(n); i--)   {
-    GameNodeRep *nn = s->m_members.Remove(i);
-    ns->m_members.Append(nn);
-    nn->infoset = ns;
-  }
-  for (i = 1; i <= s->m_actions.Length(); i++) {
-    ns->m_actions[i]->m_label = s->m_actions[i]->m_label;
-    if (p == m_chance) {
-      ns->SetActionProb(i, s->GetActionProbText(i));
-    }
-  }
-  ClearComputedValues();
-  return n->infoset;
-}
-
-GameInfoset GameRep::MergeInfoset(GameInfoset to, GameInfoset from)
-{
-  if (!to || !from)  throw gbtEfgException();
-
-  if (to == from ||
-      to->m_actions.Length() != from->m_actions.Length())   return from;
-
-  for (int i = 1; i <= from->m_members.Length(); i++) {
-    to->m_members.Append(from->m_members[i]);
-  }
-
-  for (int i = 1; i <= from->m_members.Length(); i++)
-    from->m_members[i]->infoset = to;
-
-  from->m_members = gbtArray<GameNodeRep *>();
-
-  ClearComputedValues();
-  return to;
 }
 
 GameInfoset GameRep::SwitchPlayer(GameInfoset s, GamePlayer p)

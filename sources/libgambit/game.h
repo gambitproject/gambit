@@ -659,14 +659,13 @@ public:
   //@{
   GameInfoset AppendNode(GameNode n, GamePlayer p, int br);
   GameInfoset AppendNode(GameNode n, GameInfoset s);
-  GameNode DeleteNode(GameNode n, GameNode keep);
+  GameNode DeleteParent(GameNode n);
   GameInfoset InsertNode(GameNode n, GamePlayer p, int br);
   GameInfoset InsertNode(GameNode n, GameInfoset s);
 
   GameInfoset JoinInfoset(GameInfoset s, GameNode n);
+  GameInfoset JoinInfoset(GameInfoset to, GameInfoset from);
   GameInfoset LeaveInfoset(GameNode n);
-  GameInfoset SplitInfoset(GameNode n);
-  GameInfoset MergeInfoset(GameInfoset to, GameInfoset from);
 
   GameInfoset SwitchPlayer(GameInfoset s, GamePlayer p);
   

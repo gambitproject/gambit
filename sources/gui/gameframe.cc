@@ -1075,8 +1075,7 @@ void gbtGameFrame::OnEditDeleteParent(wxCommandEvent &)
 {
   if (!m_doc->GetSelectNode() || !m_doc->GetSelectNode()->GetParent())  return;
 
-  m_doc->GetGame()->DeleteNode(m_doc->GetSelectNode()->GetParent(),
-			       m_doc->GetSelectNode());
+  m_doc->GetGame()->DeleteParent(m_doc->GetSelectNode());
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
