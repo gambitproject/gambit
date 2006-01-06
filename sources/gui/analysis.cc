@@ -94,7 +94,7 @@ TextToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
   wxStringTokenizer tok(p_text, wxT(","));
 
   for (int i = 1; i <= profile.Length(); i++) {
-    profile[i] = ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
+    profile[i] = Gambit::ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
   }
 
   return profile;
@@ -107,7 +107,7 @@ TextToBehavProfile(gbtGameDocument *p_doc, const wxString &p_text)
 
   wxStringTokenizer tok(p_text, wxT(","));
   for (int i = 1; i <= profile.Length(); i++) {
-    profile[i] = ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
+    profile[i] = Gambit::ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
   }
 
   return profile;

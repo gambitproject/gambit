@@ -226,7 +226,7 @@ void LUdecomp<T>::FactorBasis()
   }
   
   for ( i = B.MinRow(); i <= B.MaxRow(); i++) {    
-    pivVal = abs ( B(i, i));
+    pivVal = Gambit::abs ( B(i, i));
     piv = i;
     for ( j = i+1; j <= B.MaxRow(); j++) {
       if (  B( j, i ) * B( j, i )  > pivVal * pivVal ) {

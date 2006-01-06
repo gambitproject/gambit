@@ -29,9 +29,9 @@
 #include "btableau.imp"
 
 template class BaseTableau<double>;
-template class BaseTableau<gbtRational>;
+template class BaseTableau<Gambit::Rational>;
 
 template class TableauInterface<double>;
-template class TableauInterface<gbtRational>;
+template class TableauInterface<Gambit::Rational>;
 
 

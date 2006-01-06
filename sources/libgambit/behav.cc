@@ -28,7 +28,7 @@
 #include "behav.imp"
 
 template class Gambit::MixedBehavProfile<double>;
-template class Gambit::MixedBehavProfile<gbtRational>;
+template class Gambit::MixedBehavProfile<Gambit::Rational>;
 
 
 

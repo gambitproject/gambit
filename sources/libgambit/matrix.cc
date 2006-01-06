@@ -28,15 +28,15 @@
 #include "matrix.imp"
 
 template class Gambit::Matrix<double>;
-template class Gambit::Matrix<gbtRational>;
-template class Gambit::Matrix<gbtInteger>;
+template class Gambit::Matrix<Gambit::Rational>;
+template class Gambit::Matrix<Gambit::Integer>;
 template class Gambit::Matrix<int>;
 
 template gbtVector<double> Gambit::operator*(const gbtVector<double> &,
 					     const Gambit::Matrix<double> &);
-template gbtVector<gbtRational> Gambit::operator*(const gbtVector<gbtRational> &,
-						  const Gambit::Matrix<gbtRational> &);
-template gbtVector<gbtInteger> Gambit::operator*(const gbtVector<gbtInteger> &,
-						 const Gambit::Matrix<gbtInteger> &);
+template gbtVector<Gambit::Rational> Gambit::operator*(const gbtVector<Gambit::Rational> &,
+						  const Gambit::Matrix<Gambit::Rational> &);
+template gbtVector<Gambit::Integer> Gambit::operator*(const gbtVector<Gambit::Integer> &,
+						 const Gambit::Matrix<Gambit::Integer> &);
 template gbtVector<int> Gambit::operator*(const gbtVector<int> &,
 					  const Gambit::Matrix<int> &);

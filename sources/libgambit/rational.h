@@ -30,107 +30,106 @@ License along with this library; if not, write to the Free Software
 Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef _Rational_h
+#ifndef LIBGAMBIT_RATIONAL_H
 #if defined(__GNUG__) && !defined(__APPLE_CC__)
 #pragma interface
 #endif
-#define _Rational_h 1
+#define LIBGAMBIT_RATIONAL_H
 
 #include "integer.h"
 #include <math.h>
 
-class gbtRational
-{
-protected:
-  gbtInteger          num;
-  gbtInteger          den;
+namespace Gambit {
 
-  void             normalize();
+class Rational {
+protected:
+  Integer num, den;
+
+  void normalize();
 
 public:
-                   gbtRational();
-                   gbtRational(double);
-                   gbtRational(int n);
-                   gbtRational(long n);
-                   gbtRational(int n, int d);
-                   gbtRational(long n, long d);
-                   gbtRational(long n, unsigned long d);
-                   gbtRational(unsigned long n, long d);
-                   gbtRational(unsigned long n, unsigned long d);
-                   gbtRational(const gbtInteger& n);
-                   gbtRational(const gbtInteger& n, const gbtInteger& d);
-                   gbtRational(const gbtRational&);
+  Rational(void);
+  Rational(double);
+  Rational(int n);
+  Rational(long n);
+  Rational(int n, int d);
+  Rational(long n, long d);
+  Rational(long n, unsigned long d);
+  Rational(unsigned long n, long d);
+  Rational(unsigned long n, unsigned long d);
+  Rational(const Integer& n);
+  Rational(const Integer& n, const Integer& d);
+  Rational(const Rational&);
+  ~Rational();
 
-                  ~gbtRational();
+  Rational &operator =  (const Rational& y);
 
-  gbtRational &operator =  (const gbtRational& y);
+  bool operator==(const Rational &y) const;
+  bool operator!=(const Rational &y) const;
+  bool operator< (const Rational &y) const;
+  bool operator<=(const Rational &y) const;
+  bool operator> (const Rational &y) const;
+  bool operator>=(const Rational &y) const;
 
-  bool operator==(const gbtRational &y) const;
-  bool operator!=(const gbtRational &y) const;
-  bool operator< (const gbtRational &y) const;
-  bool operator<=(const gbtRational &y) const;
-  bool operator> (const gbtRational &y) const;
-  bool operator>=(const gbtRational &y) const;
+  Rational operator+(const Rational &y) const;
+  Rational operator-(const Rational &y) const;
+  Rational operator*(const Rational &y) const;
+  Rational operator/(const Rational &y) const;
 
-  gbtRational operator+(const gbtRational &y) const;
-  gbtRational operator-(const gbtRational &y) const;
-  gbtRational operator*(const gbtRational &y) const;
-  gbtRational operator/(const gbtRational &y) const;
+  Rational &operator+=(const Rational& y);
+  Rational &operator-=(const Rational& y);
+  Rational &operator*=(const Rational& y);
+  Rational &operator/=(const Rational& y);
 
-  gbtRational &operator+=(const gbtRational& y);
-  gbtRational &operator-=(const gbtRational& y);
-  gbtRational &operator*=(const gbtRational& y);
-  gbtRational &operator/=(const gbtRational& y);
-
-  gbtRational operator-(void) const;
+  Rational operator-(void) const;
 
 
-// builtin gbtRational functions
+  // builtin Rational functions
 
 
   void             negate();                      // x = -x
   void             invert();                      // x = 1/x
 
-  friend int       sign(const gbtRational& x);             // -1, 0, or +1
-  friend gbtRational  abs(const gbtRational& x);              // absolute value
-  friend gbtRational  sqr(const gbtRational& x);              // square
-  friend gbtRational  pow(const gbtRational& x, long y);
-  friend gbtRational  pow(const gbtRational& x, const gbtInteger& y);
-  const gbtInteger&   numerator() const;
-  const gbtInteger&   denominator() const;
+  friend int       sign(const Rational& x);             // -1, 0, or +1
+  friend Rational  abs(const Rational& x);              // absolute value
+  friend Rational  sqr(const Rational& x);              // square
+  friend Rational  pow(const Rational& x, long y);
+  friend Rational  pow(const Rational& x, const Integer& y);
+  const Integer&   numerator() const;
+  const Integer&   denominator() const;
 
-// coercion & conversion
+  // coercion & conversion
 
-                   operator double() const;
-  friend gbtInteger   floor(const gbtRational& x);
-  friend gbtInteger   ceil(const gbtRational& x);
-  friend gbtInteger   trunc(const gbtRational& x);
-  friend gbtInteger   round(const gbtRational& x);
+  operator double() const;
+  friend Integer   floor(const Rational& x);
+  friend Integer   ceil(const Rational& x);
+  friend Integer   trunc(const Rational& x);
+  friend Integer   round(const Rational& x);
 
-  friend std::istream &operator>>(std::istream &s, gbtRational& y);
-  friend std::ostream &operator<<(std::ostream &s, const gbtRational& y);
+  friend std::istream &operator>>(std::istream &s, Rational& y);
+  friend std::ostream &operator<<(std::ostream &s, const Rational& y);
 
   int		   fits_in_float() const;
   int		   fits_in_double() const;
 
-// procedural versions of operators
+  // procedural versions of operators
 
-  friend int       compare(const gbtRational& x, const gbtRational& y);
-  friend void      add(const gbtRational& x, const gbtRational& y, gbtRational& dest);
-  friend void      sub(const gbtRational& x, const gbtRational& y, gbtRational& dest);
-  friend void      mul(const gbtRational& x, const gbtRational& y, gbtRational& dest);
-  friend void      div(const gbtRational& x, const gbtRational& y, gbtRational& dest);
+  friend int       compare(const Rational& x, const Rational& y);
+  friend void      add(const Rational& x, const Rational& y, Rational& dest);
+  friend void      sub(const Rational& x, const Rational& y, Rational& dest);
+  friend void      mul(const Rational& x, const Rational& y, Rational& dest);
+  friend void      div(const Rational& x, const Rational& y, Rational& dest);
 
-// error detection
+  // error detection
 
   void    error(const char* msg) const;
   int              OK() const;
 
 };
 
-std::string ToText(const gbtRational &);
-gbtRational ToRational(const std::string &);
-void gEpsilon(gbtRational &v, int i = 8);
+std::string ToText(const Rational &);
+Rational ToRational(const std::string &);
+void gEpsilon(Rational &v, int i = 8);
 
 //
 // This is implemented so as to convert rational numbers to their
@@ -141,7 +140,9 @@ inline double ToDouble(const std::string &s)
   return (double) ToRational(s);
 }
 
-gbtRational ToNumber(const std::string &p_string);
+Rational ToNumber(const std::string &p_string);
 
-#endif
+} // end namespace Gambit
+
+#endif // LIBGAMBIT_RATIONAL_H
 

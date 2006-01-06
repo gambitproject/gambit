@@ -79,7 +79,7 @@ GameInfosetRep::GameInfosetRep(GameRep *p_efg, int p_number,
 
   if (p_player->IsChance()) {
     for (int act = 1; act <= m_actions.Length(); act++) {
-      m_ratProbs.Append(gbtRational(1, m_actions.Length()));
+      m_ratProbs.Append(Rational(1, m_actions.Length()));
       m_textProbs.Append(ToText(m_ratProbs[act]));
     }
   }
@@ -129,7 +129,7 @@ GameAction GameInfosetRep::InsertAction(GameAction p_action /* =0 */)
   m_actions.Insert(action, where);
   if (m_player->IsChance()) {
     m_textProbs.Insert("0", where);
-    m_ratProbs.Insert(gbtRational(0), where);
+    m_ratProbs.Insert(Rational(0), where);
   }
 
   for (int act = 1; act <= m_actions.Length(); act++) {
@@ -605,7 +605,7 @@ void PureStrategyProfile::SetOutcome(GameOutcome p_outcome)
   }
 }
 
-gbtRational PureStrategyProfile::GetPayoff(int pl) const
+Rational PureStrategyProfile::GetPayoff(int pl) const
 {
   if (m_nfg->IsTree()) {
     PureBehavProfile behav(m_nfg);
@@ -620,10 +620,10 @@ gbtRational PureStrategyProfile::GetPayoff(int pl) const
   else {
     GameOutcome outcome = GetOutcome();
     if (outcome) {
-      return outcome->GetPayoff<gbtRational>(pl);
+      return outcome->GetPayoff<Rational>(pl);
     }
     else {
-      return gbtRational(0);
+      return Rational(0);
     }
   }
 }
@@ -686,13 +686,13 @@ void PureBehavProfile::SetAction(const GameAction &action)
     [action->GetInfoset()->GetNumber()] = action;
 }
 
-gbtRational PureBehavProfile::GetNodeValue(const GameNode &p_node, 
+Rational PureBehavProfile::GetNodeValue(const GameNode &p_node, 
 					   int pl) const
 {
-  gbtRational payoff(0);
+  Rational payoff(0);
 
   if (p_node->outcome) {
-    payoff += p_node->outcome->GetPayoff<gbtRational>(pl);
+    payoff += p_node->outcome->GetPayoff<Rational>(pl);
   }
 
   if (!p_node->IsTerminal()) {
@@ -773,13 +773,13 @@ bool GameRep::IsConstSum(void) const
   if (m_root) {
     BehavIterator iter(BehavSupport(const_cast<GameRep *>(this)));
 
-    gbtRational sum(0);
+    Rational sum(0);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
       sum += iter.GetPayoff(pl);
     }
 
     while (iter.NextContingency()) {
-      gbtRational newsum(0);
+      Rational newsum(0);
       for (int pl = 1; pl <= m_players.Length(); pl++) {
 	newsum += iter.GetPayoff(pl);
       }
@@ -794,13 +794,13 @@ bool GameRep::IsConstSum(void) const
   else {
     StrategyIterator iter(StrategySupport(const_cast<GameRep *>(this)));
 
-    gbtRational sum(0);
+    Rational sum(0);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
       sum += iter.GetPayoff(pl);
     }
 
     while (iter.NextContingency()) {
-      gbtRational newsum(0);
+      Rational newsum(0);
       for (int pl = 1; pl <= m_players.Length(); pl++) {
 	newsum += iter.GetPayoff(pl);
       }
@@ -814,11 +814,11 @@ bool GameRep::IsConstSum(void) const
   }
 }
 
-gbtRational GameRep::GetMinPayoff(int player) const
+Rational GameRep::GetMinPayoff(int player) const
 {
   int index, p, p1, p2;
   
-  if (m_outcomes.Length() == 0)  return gbtRational(0);
+  if (m_outcomes.Length() == 0)  return Rational(0);
 
   if (player) {
     p1 = p2 = player;
@@ -828,22 +828,22 @@ gbtRational GameRep::GetMinPayoff(int player) const
     p2 = NumPlayers();
   }
   
-  gbtRational minpay = m_outcomes[1]->GetPayoff<gbtRational>(p1);
+  Rational minpay = m_outcomes[1]->GetPayoff<Rational>(p1);
   for (index = 1; index <= m_outcomes.Length(); index++)  {
     for (p = p1; p <= p2; p++) {
-      if (m_outcomes[index]->GetPayoff<gbtRational>(p) < minpay) {
-	minpay = m_outcomes[index]->GetPayoff<gbtRational>(p);
+      if (m_outcomes[index]->GetPayoff<Rational>(p) < minpay) {
+	minpay = m_outcomes[index]->GetPayoff<Rational>(p);
       }
     }
   }
   return minpay;
 }
 
-gbtRational GameRep::GetMaxPayoff(int player) const
+Rational GameRep::GetMaxPayoff(int player) const
 {
   int index, p, p1, p2;
 
-  if (m_outcomes.Length() == 0)  return gbtRational(0);
+  if (m_outcomes.Length() == 0)  return Rational(0);
 
   if (player) {
     p1 = p2 = player;
@@ -853,11 +853,11 @@ gbtRational GameRep::GetMaxPayoff(int player) const
     p2 = NumPlayers();
   }
 
-  gbtRational maxpay = m_outcomes[1]->GetPayoff<gbtRational>(p1);
+  Rational maxpay = m_outcomes[1]->GetPayoff<Rational>(p1);
   for (index = 1; index <= m_outcomes.Length(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (m_outcomes[index]->GetPayoff<gbtRational>(p) > maxpay)
-	maxpay = m_outcomes[index]->GetPayoff<gbtRational>(p);
+      if (m_outcomes[index]->GetPayoff<Rational>(p) > maxpay)
+	maxpay = m_outcomes[index]->GetPayoff<Rational>(p);
   }
   return maxpay;
 }

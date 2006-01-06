@@ -40,7 +40,7 @@ namespace Gambit {
 //       Iterating across all contingencies can be achieved by freezing
 //       player number 0 (this is the default state on initialization)
 //
-class BehavIterator    {
+class BehavIterator {
 private:
   int _frozen_pl, _frozen_iset;
   Game _efg;
@@ -49,7 +49,7 @@ private:
   gbtPVector<int> _current;
   gbtArray<gbtArray<bool> > _is_active;
   gbtArray<int> _num_active_infosets;
-  mutable gbtVector<gbtRational> _payoff;
+  mutable gbtVector<Rational> _payoff;
 
 public:
   BehavIterator(const BehavSupport &);
@@ -73,7 +73,7 @@ public:
 
   int NextContingency(void);
   
-  gbtRational GetPayoff(int pl) const;
+  Rational GetPayoff(int pl) const;
 };
 
 } // end namespace Gambit

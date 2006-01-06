@@ -28,7 +28,7 @@
 #include "interval.imp"
 #include "double.h"
 
-template class gInterval<gbtRational>;
+template class gInterval<Gambit::Rational>;
 template class gInterval<int>;
 template class gInterval<double>;
 template class gInterval<gDouble>;

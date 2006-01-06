@@ -106,14 +106,14 @@ wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
     m_doc->GetProfiles().GetMixed(RowToProfile(p_coords.GetRow()));
 
   if (IsProbabilityRow(p_coords.GetRow())) {
-    return wxString(ToText(profile[p_coords.GetCol()+1],
-			   m_doc->GetStyle().NumDecimals()).c_str(), 
+    return wxString(Gambit::ToText(profile[p_coords.GetCol()+1],
+				   m_doc->GetStyle().NumDecimals()).c_str(), 
 		    *wxConvCurrent);
   }
   else {
     Gambit::GameStrategy strategy = GetStrategy(m_doc, p_coords.GetCol());
-    return wxString(ToText(profile.GetPayoff(strategy->GetPlayer()->GetNumber(),
-					     strategy),
+    return wxString(Gambit::ToText(profile.GetPayoff(strategy->GetPlayer()->GetNumber(),
+						     strategy),
 			   m_doc->GetStyle().NumDecimals()).c_str(), 
 		    *wxConvCurrent);
   }

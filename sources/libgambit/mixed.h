@@ -27,7 +27,6 @@
 #ifndef LIBGAMBIT_MIXED_H
 #define LIBGAMBIT_MIXED_H
 
-#include "base.h"
 #include "gpvector.h"
 
 namespace Gambit {

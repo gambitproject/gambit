@@ -34,15 +34,15 @@ class gbtNumberValidator : public wxValidator {
 protected:
   wxString *m_stringValue;
   bool m_hasMin, m_hasMax;
-  gbtRational m_minValue, m_maxValue;
+  Gambit::Rational m_minValue, m_maxValue;
   
   // Event handlers
   void OnChar(wxKeyEvent &);
 
 public:
   gbtNumberValidator(wxString *);
-  gbtNumberValidator(wxString *, const gbtRational &);
-  gbtNumberValidator(wxString *, const gbtRational &, const gbtRational &);
+  gbtNumberValidator(wxString *, const Gambit::Rational &);
+  gbtNumberValidator(wxString *, const Gambit::Rational &, const Gambit::Rational &);
   gbtNumberValidator(const gbtNumberValidator &);
   virtual ~gbtNumberValidator() { }
 

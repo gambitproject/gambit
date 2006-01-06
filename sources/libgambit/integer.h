@@ -31,15 +31,17 @@ License along with this library; if not, write to the Free Software
 Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef _Integer_h
+#ifndef LIBGAMBIT_INTEGER_H
 #if defined(__GNUG__) && !defined(__APPLE_CC__)
 #pragma interface
 #endif
-#define _Integer_h 1
+#define LIBGAMBIT_INTEGER_H
 
 #include <string>
 
-struct gbtIntegerRep                    // internal Integer representations
+namespace Gambit {
+
+struct IntegerRep                    // internal Integer representations
 {
   unsigned short  len;          // current length
   unsigned short  sz;           // allocated space (0 means static).
@@ -49,182 +51,198 @@ struct gbtIntegerRep                    // internal Integer representations
 
 // True if REP is staticly (or manually) allocated,
 // and should not be deleted by an Integer destructor.
-#define STATIC_gbtIntegerRep(rep) ((rep)->sz==0)
+#define STATIC_IntegerRep(rep) ((rep)->sz==0)
 
-extern gbtIntegerRep*  Ialloc(gbtIntegerRep*, const unsigned short *, int, int, int);
-extern gbtIntegerRep*  Icalloc(gbtIntegerRep*, int);
-extern gbtIntegerRep*  Icopy_ulong(gbtIntegerRep*, unsigned long);
-extern gbtIntegerRep*  Icopy_long(gbtIntegerRep*, long);
-extern gbtIntegerRep*  Icopy(gbtIntegerRep*, const gbtIntegerRep*);
-extern gbtIntegerRep*  Iresize(gbtIntegerRep*, int);
-extern gbtIntegerRep*  add(const gbtIntegerRep*, int, const gbtIntegerRep*, int, gbtIntegerRep*);
-extern gbtIntegerRep*  add(const gbtIntegerRep*, int, long, gbtIntegerRep*);
-extern gbtIntegerRep*  multiply(const gbtIntegerRep*, const gbtIntegerRep*, gbtIntegerRep*);
-extern gbtIntegerRep*  multiply(const gbtIntegerRep*, long, gbtIntegerRep*);
-extern gbtIntegerRep*  lshift(const gbtIntegerRep*, long, gbtIntegerRep*);
-extern gbtIntegerRep*  lshift(const gbtIntegerRep*, const gbtIntegerRep*, int, gbtIntegerRep*);
-extern gbtIntegerRep*  bitop(const gbtIntegerRep*, const gbtIntegerRep*, gbtIntegerRep*, char);
-extern gbtIntegerRep*  bitop(const gbtIntegerRep*, long, gbtIntegerRep*, char);
-extern gbtIntegerRep*  power(const gbtIntegerRep*, long, gbtIntegerRep*);
-extern gbtIntegerRep*  div(const gbtIntegerRep*, const gbtIntegerRep*, gbtIntegerRep*);
-extern gbtIntegerRep*  mod(const gbtIntegerRep*, const gbtIntegerRep*, gbtIntegerRep*);
-extern gbtIntegerRep*  div(const gbtIntegerRep*, long, gbtIntegerRep*);
-extern gbtIntegerRep*  mod(const gbtIntegerRep*, long, gbtIntegerRep*);
-extern gbtIntegerRep*  Compl(const gbtIntegerRep*, gbtIntegerRep*);
-extern gbtIntegerRep*  abs(const gbtIntegerRep*, gbtIntegerRep*);
-extern gbtIntegerRep*  negate(const gbtIntegerRep*, gbtIntegerRep*);
-extern gbtIntegerRep*  pow(const gbtIntegerRep*, long);
-extern gbtIntegerRep*  gcd(const gbtIntegerRep*, const gbtIntegerRep* y);
-extern int      compare(const gbtIntegerRep*, const gbtIntegerRep*);
-extern int      compare(const gbtIntegerRep*, long);
-extern int      ucompare(const gbtIntegerRep*, const gbtIntegerRep*);
-extern int      ucompare(const gbtIntegerRep*, long);
-extern std::string Itoa(const gbtIntegerRep* x, int base = 10, int width = 0);
-extern std::string cvtItoa(const gbtIntegerRep* x, std::string fmt, int& fmtlen, int base,
+extern IntegerRep*  Ialloc(IntegerRep*, const unsigned short *, int, int, int);
+extern IntegerRep*  Icalloc(IntegerRep*, int);
+extern IntegerRep*  Icopy_ulong(IntegerRep*, unsigned long);
+extern IntegerRep*  Icopy_long(IntegerRep*, long);
+extern IntegerRep*  Icopy(IntegerRep*, const IntegerRep*);
+extern IntegerRep*  Iresize(IntegerRep*, int);
+extern IntegerRep*  add(const IntegerRep*, int, const IntegerRep*, int, IntegerRep*);
+extern IntegerRep*  add(const IntegerRep*, int, long, IntegerRep*);
+extern IntegerRep*  multiply(const IntegerRep*, const IntegerRep*, IntegerRep*);
+extern IntegerRep*  multiply(const IntegerRep*, long, IntegerRep*);
+extern IntegerRep*  lshift(const IntegerRep*, long, IntegerRep*);
+extern IntegerRep*  lshift(const IntegerRep*, const IntegerRep*, int, IntegerRep*);
+extern IntegerRep*  bitop(const IntegerRep*, const IntegerRep*, IntegerRep*, char);
+extern IntegerRep*  bitop(const IntegerRep*, long, IntegerRep*, char);
+extern IntegerRep*  power(const IntegerRep*, long, IntegerRep*);
+extern IntegerRep*  div(const IntegerRep*, const IntegerRep*, IntegerRep*);
+extern IntegerRep*  mod(const IntegerRep*, const IntegerRep*, IntegerRep*);
+extern IntegerRep*  div(const IntegerRep*, long, IntegerRep*);
+extern IntegerRep*  mod(const IntegerRep*, long, IntegerRep*);
+extern IntegerRep*  Compl(const IntegerRep*, IntegerRep*);
+extern IntegerRep*  abs(const IntegerRep*, IntegerRep*);
+extern IntegerRep*  negate(const IntegerRep*, IntegerRep*);
+extern IntegerRep*  pow(const IntegerRep*, long);
+extern IntegerRep*  gcd(const IntegerRep*, const IntegerRep* y);
+extern int      compare(const IntegerRep*, const IntegerRep*);
+extern int      compare(const IntegerRep*, long);
+extern int      ucompare(const IntegerRep*, const IntegerRep*);
+extern int      ucompare(const IntegerRep*, long);
+extern std::string Itoa(const IntegerRep* x, int base = 10, int width = 0);
+extern std::string cvtItoa(const IntegerRep* x, std::string fmt, int& fmtlen, int base,
                            int showbase, int width, int align_right, 
                            char fillchar, char Xcase, int showpos);
-extern gbtIntegerRep*  atogbtIntegerRep(const char* s, int base = 10);
-extern long     Itolong(const gbtIntegerRep*);
-extern double   Itodouble(const gbtIntegerRep*);
-extern int      Iislong(const gbtIntegerRep*);
-extern int      Iisdouble(const gbtIntegerRep*);
-extern long     lg(const gbtIntegerRep*);
+extern IntegerRep*  atoIntegerRep(const char* s, int base = 10);
+extern long     Itolong(const IntegerRep*);
+extern double   Itodouble(const IntegerRep*);
+extern int      Iislong(const IntegerRep*);
+extern int      Iisdouble(const IntegerRep*);
+extern long     lg(const IntegerRep*);
 
-extern gbtIntegerRep _ZeroRep, _OneRep, _MinusOneRep;
+extern IntegerRep _ZeroRep, _OneRep, _MinusOneRep;
 
-class gbtInteger
-{
+class Integer {
 protected:
-  gbtIntegerRep*         rep;
+  IntegerRep *rep;
+
 public:
-                  gbtInteger();
-                  gbtInteger(int);
-                  gbtInteger(long);
-                  gbtInteger(unsigned long);
-                  gbtInteger(gbtIntegerRep*);
-                  gbtInteger(const gbtInteger&);
+  /// @name Lifecycle
+  //@{
+  Integer(void);
+  Integer(int);
+  Integer(long);
+  Integer(unsigned long);
+  Integer(IntegerRep *);
+  Integer(const Integer &);
+  ~Integer();
 
-                  ~gbtInteger();
+  Integer &operator=(const Integer &);
+  Integer &operator=(long);
+  //@}
 
-  void            operator =  (const gbtInteger&);
-  void            operator =  (long);
 
-// unary operations to self
+  /// @name Unary operations on self
+  //@{
+  void operator ++ ();
+  void operator -- ();
+  void negate();          // negate in-place
+  void abs();             // absolute-value in-place
+  //@{
 
-  void            operator ++ ();
-  void            operator -- ();
-  void            negate();          // negate in-place
-  void            abs();             // absolute-value in-place
-  void            complement();      // bitwise complement in-place
+  /// @name Comparison operators
+  //@{
+  bool operator==(const Integer &) const;
+  bool operator==(long) const;
+  bool operator!=(const Integer &) const;
+  bool operator!=(long) const;
+  bool operator< (const Integer &) const;
+  bool operator< (long) const;
+  bool operator<=(const Integer &) const;
+  bool operator<=(long) const;
+  bool operator> (const Integer &) const;
+  bool operator> (long) const;
+  bool operator>=(const Integer &) const;
+  bool operator>=(long) const;
+  //@}
 
-// assignment-based operations
+  /// @name Assignment-based operations
+  //@{
+  Integer &operator+=(const Integer &);
+  Integer &operator-=(const Integer &);
+  Integer &operator*=(const Integer &);
+  Integer &operator/=(const Integer &);
+  Integer &operator%=(const Integer &);
+  Integer &operator<<=(const Integer &);
+  Integer &operator>>=(const Integer &);
 
-  void            operator += (const gbtInteger&);
-  void            operator -= (const gbtInteger&);
-  void            operator *= (const gbtInteger&);
-  void            operator /= (const gbtInteger&);
-  void            operator %= (const gbtInteger&);
-  void            operator <<=(const gbtInteger&);
-  void            operator >>=(const gbtInteger&);
-  void            operator &= (const gbtInteger&);
-  void            operator |= (const gbtInteger&);
-  void            operator ^= (const gbtInteger&);
+  Integer &operator+=(long);
+  Integer &operator-=(long);
+  Integer &operator*=(long);
+  Integer &operator/=(long);
+  Integer &operator%=(long);
+  Integer &operator<<=(long);
+  Integer &operator>>=(long);
+  //@}
 
-  void            operator += (long);
-  void            operator -= (long);
-  void            operator *= (long);
-  void            operator /= (long);
-  void            operator %= (long);
-  void            operator <<=(long);
-  void            operator >>=(long);
-  void            operator &= (long);
-  void            operator |= (long);
-  void            operator ^= (long);
+  /// @name Operator overloading
+  //@{
+  Integer operator-(void) const;
+  Integer operator+(const Integer &) const;
+  Integer operator+(long) const;
+  Integer operator-(const Integer &) const;
+  Integer operator-(long) const;
+  Integer operator*(const Integer &) const;
+  Integer operator*(long) const;
+  Integer operator/(const Integer &) const;
+  Integer operator/(long) const;
+  Integer operator%(const Integer &) const;
+  Integer operator%(long) const;
+  Integer operator<<(const Integer &) const;
+  Integer operator<<(long) const;
+  Integer operator>>(const Integer &) const;
+  Integer operator>>(long) const;
+  //@}
 
-// (constructive binary operations are inlined below)
+  // builtin Integer functions that must be friends
 
-// builtin Integer functions that must be friends
+  friend long     lg (const Integer&); // floor log base 2 of abs(x)
+  friend double   ratio(const Integer& x, const Integer& y);
+  // return x/y as a double
 
-  friend long     lg (const gbtInteger&); // floor log base 2 of abs(x)
-  friend double   ratio(const gbtInteger& x, const gbtInteger& y);
-                  // return x/y as a double
+  friend Integer  gcd(const Integer&, const Integer&);
+  friend int      even(const Integer&); // true if even
+  friend int      odd(const Integer&); // true if odd
+  friend int      sign(const Integer&); // returns -1, 0, +1
 
-  friend gbtInteger  gcd(const gbtInteger&, const gbtInteger&);
-  friend int      even(const gbtInteger&); // true if even
-  friend int      odd(const gbtInteger&); // true if odd
-  friend int      sign(const gbtInteger&); // returns -1, 0, +1
+  friend void     setbit(Integer& x, long b);   // set b'th bit of x
+  friend void     clearbit(Integer& x, long b); // clear b'th bit
+  friend int      testbit(const Integer& x, long b);  // return b'th bit
 
-  friend void     setbit(gbtInteger& x, long b);   // set b'th bit of x
-  friend void     clearbit(gbtInteger& x, long b); // clear b'th bit
-  friend int      testbit(const gbtInteger& x, long b);  // return b'th bit
+  // procedural versions of operators
 
-// procedural versions of operators
+  friend void     abs(const Integer& x, Integer& dest);
+  friend void     negate(const Integer& x, Integer& dest);
+  friend void     complement(const Integer& x, Integer& dest);
 
-  friend void     abs(const gbtInteger& x, gbtInteger& dest);
-  friend void     negate(const gbtInteger& x, gbtInteger& dest);
-  friend void     complement(const gbtInteger& x, gbtInteger& dest);
+  friend int      compare(const Integer&, const Integer&);  
+  friend int      ucompare(const Integer&, const Integer&); 
+  friend void     add(const Integer& x, const Integer& y, Integer& dest);
+  friend void     sub(const Integer& x, const Integer& y, Integer& dest);
+  friend void     mul(const Integer& x, const Integer& y, Integer& dest);
+  friend void     div(const Integer& x, const Integer& y, Integer& dest);
+  friend void     mod(const Integer& x, const Integer& y, Integer& dest);
+  friend void     divide(const Integer& x, const Integer& y, 
+                         Integer& q, Integer& r);
+  friend void     lshift(const Integer& x, const Integer& y, Integer& dest);
+  friend void     rshift(const Integer& x, const Integer& y, Integer& dest);
+  friend void     pow(const Integer& x, const Integer& y, Integer& dest);
 
-  friend int      compare(const gbtInteger&, const gbtInteger&);  
-  friend int      ucompare(const gbtInteger&, const gbtInteger&); 
-  friend void     add(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest);
-  friend void     sub(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest);
-  friend void     mul(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest);
-  friend void     div(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest);
-  friend void     mod(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest);
-  friend void     divide(const gbtInteger& x, const gbtInteger& y, 
-                         gbtInteger& q, gbtInteger& r);
-  friend void     And(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest);
-  friend void     Or(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest);
-  friend void     Xor(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest);
-  friend void     lshift(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest);
-  friend void     rshift(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest);
-  friend void     pow(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest);
+  friend int      compare(const Integer&, long);  
+  friend int      ucompare(const Integer&, long); 
+  friend void     add(const Integer& x, long y, Integer& dest);
+  friend void     sub(const Integer& x, long y, Integer& dest);
+  friend void     mul(const Integer& x, long y, Integer& dest);
+  friend void     div(const Integer& x, long y, Integer& dest);
+  friend void     mod(const Integer& x, long y, Integer& dest);
+  friend void     divide(const Integer& x, long y, Integer& q, long& r);
+  friend void     lshift(const Integer& x, long y, Integer& dest);
+  friend void     rshift(const Integer& x, long y, Integer& dest);
+  friend void     pow(const Integer& x, long y, Integer& dest);
 
-  friend int      compare(const gbtInteger&, long);  
-  friend int      ucompare(const gbtInteger&, long); 
-  friend void     add(const gbtInteger& x, long y, gbtInteger& dest);
-  friend void     sub(const gbtInteger& x, long y, gbtInteger& dest);
-  friend void     mul(const gbtInteger& x, long y, gbtInteger& dest);
-  friend void     div(const gbtInteger& x, long y, gbtInteger& dest);
-  friend void     mod(const gbtInteger& x, long y, gbtInteger& dest);
-  friend void     divide(const gbtInteger& x, long y, gbtInteger& q, long& r);
-  friend void     And(const gbtInteger& x, long y, gbtInteger& dest);
-  friend void     Or(const gbtInteger& x, long y, gbtInteger& dest);
-  friend void     Xor(const gbtInteger& x, long y, gbtInteger& dest);
-  friend void     lshift(const gbtInteger& x, long y, gbtInteger& dest);
-  friend void     rshift(const gbtInteger& x, long y, gbtInteger& dest);
-  friend void     pow(const gbtInteger& x, long y, gbtInteger& dest);
+  friend int      compare(long, const Integer&);  
+  friend int      ucompare(long, const Integer&); 
+  friend void     add(long x, const Integer& y, Integer& dest);
+  friend void     sub(long x, const Integer& y, Integer& dest);
+  friend void     mul(long x, const Integer& y, Integer& dest);
 
-  friend int      compare(long, const gbtInteger&);  
-  friend int      ucompare(long, const gbtInteger&); 
-  friend void     add(long x, const gbtInteger& y, gbtInteger& dest);
-  friend void     sub(long x, const gbtInteger& y, gbtInteger& dest);
-  friend void     mul(long x, const gbtInteger& y, gbtInteger& dest);
-  friend void     And(long x, const gbtInteger& y, gbtInteger& dest);
-  friend void     Or(long x, const gbtInteger& y, gbtInteger& dest);
-  friend void     Xor(long x, const gbtInteger& y, gbtInteger& dest);
-
-// coercion & conversion
+  // coercion & conversion
 
   int             fits_in_long() const { return Iislong(rep); }
   int             fits_in_double() const { return Iisdouble(rep); }
 
-#if 0
-  // There two operators cause a number of ambiguities.
-                  operator long() const { return Itolong(rep); }
-                  operator double() const { return Itodouble(rep); }
-#endif
   long		  as_long() const { return Itolong(rep); }
   double	  as_double() const { return Itodouble(rep); }
 
-  friend std::string    Itoa(const gbtInteger& x, int base = 10, int width = 0);
-  friend gbtInteger  atoI(const char* s, int base = 10);
-//  void		  printon(ostream& s, int base = 10, int width = 0) const;
+  friend std::string    Itoa(const Integer& x, int base = 10, int width = 0);
+  friend Integer  atoI(const char* s, int base = 10);
   
-  friend std::istream &operator>>(std::istream &s, gbtInteger& y);
-  friend std::ostream &operator<<(std::ostream &s, const gbtInteger& y);
+  friend std::istream &operator>>(std::istream &s, Integer& y);
+  friend std::ostream &operator<<(std::ostream &s, const Integer& y);
 
-// error detection
+  // error detection
 
   int             initialized() const;
   void   error(const char* msg) const;
@@ -234,64 +252,22 @@ public:
 
 //  (These are declared inline)
 
-  int      operator == (const gbtInteger&, const gbtInteger&);
-  int      operator == (const gbtInteger&, long);
-  int      operator != (const gbtInteger&, const gbtInteger&);
-  int      operator != (const gbtInteger&, long);
-  int      operator <  (const gbtInteger&, const gbtInteger&);
-  int      operator <  (const gbtInteger&, long);
-  int      operator <= (const gbtInteger&, const gbtInteger&);
-  int      operator <= (const gbtInteger&, long);
-  int      operator >  (const gbtInteger&, const gbtInteger&);
-  int      operator >  (const gbtInteger&, long);
-  int      operator >= (const gbtInteger&, const gbtInteger&);
-  int      operator >= (const gbtInteger&, long);
-  gbtInteger  operator -  (const gbtInteger&);
-  gbtInteger  operator ~  (const gbtInteger&);
-  gbtInteger  operator +  (const gbtInteger&, const gbtInteger&);
-  gbtInteger  operator +  (const gbtInteger&, long);
-  gbtInteger  operator +  (long, const gbtInteger&);
-  gbtInteger  operator -  (const gbtInteger&, const gbtInteger&);
-  gbtInteger  operator -  (const gbtInteger&, long);
-  gbtInteger  operator -  (long, const gbtInteger&);
-  gbtInteger  operator *  (const gbtInteger&, const gbtInteger&);
-  gbtInteger  operator *  (const gbtInteger&, long);
-  gbtInteger  operator *  (long, const gbtInteger&);
-  gbtInteger  operator /  (const gbtInteger&, const gbtInteger&);
-  gbtInteger  operator /  (const gbtInteger&, long);
-  gbtInteger  operator %  (const gbtInteger&, const gbtInteger&);
-  gbtInteger  operator %  (const gbtInteger&, long);
-  gbtInteger  operator << (const gbtInteger&, const gbtInteger&);
-  gbtInteger  operator << (const gbtInteger&, long);
-  gbtInteger  operator >> (const gbtInteger&, const gbtInteger&);
-  gbtInteger  operator >> (const gbtInteger&, long);
-  gbtInteger  operator &  (const gbtInteger&, const gbtInteger&);
-  gbtInteger  operator &  (const gbtInteger&, long);
-  gbtInteger  operator &  (long, const gbtInteger&);
-  gbtInteger  operator |  (const gbtInteger&, const gbtInteger&);
-  gbtInteger  operator |  (const gbtInteger&, long);
-  gbtInteger  operator |  (long, const gbtInteger&);
-  gbtInteger  operator ^  (const gbtInteger&, const gbtInteger&);
-  gbtInteger  operator ^  (const gbtInteger&, long);
-  gbtInteger  operator ^  (long, const gbtInteger&);
+Integer  abs(const Integer&); // absolute value
+Integer  sqr(const Integer&); // square
 
-  gbtInteger  abs(const gbtInteger&); // absolute value
-  gbtInteger  sqr(const gbtInteger&); // square
-
-  gbtInteger  pow(const gbtInteger& x, const gbtInteger& y);
-  gbtInteger  pow(const gbtInteger& x, long y);
-  gbtInteger  Ipow(long x, long y); // x to the y as gbtInteger 
+Integer  pow(const Integer& x, const Integer& y);
+Integer  pow(const Integer& x, long y);
+Integer  Ipow(long x, long y); // x to the y as Integer 
 
 
-extern std::string    dec(const gbtInteger& x, int width = 0);
-extern std::string    oct(const gbtInteger& x, int width = 0);
-extern std::string    hex(const gbtInteger& x, int width = 0);
-extern gbtInteger  sqrt(const gbtInteger&); // floor of square root
-extern gbtInteger  lcm(const gbtInteger& x, const gbtInteger& y); // least common mult
+extern Integer  sqrt(const Integer&); // floor of square root
+extern Integer  lcm(const Integer& x, const Integer& y); // least common mult
 
-std::string ToText(const gbtInteger &);
+std::string ToText(const Integer &);
 
-#endif /* _Integer_h */
+} // end namespace Gambit
+
+#endif // LIBGAMBIT_INTEGER_H
 
 
 

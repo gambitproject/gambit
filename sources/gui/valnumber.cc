@@ -77,14 +77,14 @@ gbtNumberValidator::gbtNumberValidator(wxString *p_value)
 { }
 
 gbtNumberValidator::gbtNumberValidator(wxString *p_value,
-				       const gbtRational &p_minValue)
+				       const Gambit::Rational &p_minValue)
   : m_stringValue(p_value), m_hasMin(true), m_hasMax(false),
     m_minValue(p_minValue)
 { }
 
 gbtNumberValidator::gbtNumberValidator(wxString *p_value,
-				       const gbtRational &p_minValue,
-				       const gbtRational &p_maxValue)
+				       const Gambit::Rational &p_minValue,
+				       const Gambit::Rational &p_maxValue)
   : m_stringValue(p_value), m_hasMin(true), m_hasMax(true),
     m_minValue(p_minValue), m_maxValue(p_maxValue)
 { }
@@ -127,8 +127,8 @@ bool gbtNumberValidator::Validate(wxWindow *p_parent)
     return false;
   }
 
-  if ((m_hasMin && ToNumber((const char *) value.mb_str()) < m_minValue) ||
-      (m_hasMax && ToNumber((const char *) value.mb_str()) > m_maxValue)) {
+  if ((m_hasMin && Gambit::ToNumber((const char *) value.mb_str()) < m_minValue) ||
+      (m_hasMax && Gambit::ToNumber((const char *) value.mb_str()) > m_maxValue)) {
     wxMessageBox(_T("The value ") + value + _T(" in ") +
 		 m_validatorWindow->GetName() + _T(" is out of the range [") +
 		 wxString(ToText(m_minValue).c_str(), *wxConvCurrent) + _T(", ") + 

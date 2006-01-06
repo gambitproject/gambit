@@ -161,7 +161,7 @@ int BehavIterator::NextContingency(void)
   }
 }
 
-gbtRational BehavIterator::GetPayoff(int pl) const
+Rational BehavIterator::GetPayoff(int pl) const
 {
   return _profile.GetPayoff(pl);
 }

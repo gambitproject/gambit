@@ -56,7 +56,7 @@ TextToMixedProfile(gbtGameDocument *p_doc,
   if (tok.GetNextToken() == wxT("NE")) {
     if (tok.CountTokens() == profile.Length()) {
       for (int i = 1; i <= profile.Length(); i++) {
-	profile[i] = ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
+	profile[i] = Gambit::ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
       }
       return profile;
     }
@@ -75,7 +75,7 @@ static Gambit::MixedBehavProfile<double> TextToBehavProfile(gbtGameDocument *p_d
   if (tok.GetNextToken() == wxT("NE")) {
     if (tok.CountTokens() == profile.Length()) {
       for (int i = 1; i <= profile.Length(); i++) {
-	profile[i] = ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
+	profile[i] = Gambit::ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
       }
       return profile;
     }

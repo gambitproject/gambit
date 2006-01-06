@@ -43,7 +43,7 @@ void PrintProfile(std::ostream &p_stream,
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const Gambit::MixedStrategyProfile<gbtRational> &p_profile)
+		  const Gambit::MixedStrategyProfile<Gambit::Rational> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -96,13 +96,13 @@ void nfgLp<T>::Solve(const Gambit::StrategySupport &p_support)
   gbtVector<T> c(1,m+1);
   Gambit::PureStrategyProfile profile(p_support.GetGame());
 
-  T minpay = p_support.GetGame()->GetMinPayoff() - gbtRational(1);
+  T minpay = p_support.GetGame()->GetMinPayoff() - Gambit::Rational(1);
 
   for (i = 1; i <= k; i++)  {
     profile.SetStrategy(p_support.GetStrategy(2, i));
     for (j = 1; j <= m; j++)  {
       profile.SetStrategy(p_support.GetStrategy(1, j));
-      A(i, j) = gbtRational(minpay) - profile.GetPayoff(1);
+      A(i, j) = Gambit::Rational(minpay) - profile.GetPayoff(1);
     }
     A(i,m+1) = (T)1;
   }
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
     algorithm.Solve(nfg);
   }
   else {
-    nfgLp<gbtRational> algorithm;
+    nfgLp<Gambit::Rational> algorithm;
     algorithm.Solve(nfg);
   }
 

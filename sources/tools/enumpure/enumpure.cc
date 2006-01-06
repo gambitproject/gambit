@@ -45,7 +45,7 @@ void PrintProfile(std::ostream &p_stream,
 void SolveBehav(Gambit::Game p_efg)
 {
   Gambit::BehavIterator citer(p_efg);
-  gbtPVector<gbtRational> probs(p_efg->NumInfosets());
+  gbtPVector<Gambit::Rational> probs(p_efg->NumInfosets());
 
   int contNumber = 1;
   try {
@@ -56,7 +56,7 @@ void SolveBehav(Gambit::Game p_efg)
       //citer.GetProfile().InfosetProbs(probs);
 
       for (int pl = 1; flag && pl <= p_efg->NumPlayers(); pl++)  {
-	gbtRational current = citer.GetPayoff(pl);
+	Gambit::Rational current = citer.GetPayoff(pl);
 	Gambit::PureBehavProfile p = citer.GetProfile();
 	
 	Gambit::GamePlayer player = p_efg->GetPlayer(pl);
@@ -75,9 +75,9 @@ void SolveBehav(Gambit::Game p_efg)
       }
       
       if (flag)  {
-	Gambit::MixedBehavProfile<gbtRational> temp(p_efg);
+	Gambit::MixedBehavProfile<Gambit::Rational> temp(p_efg);
 	// zero out all the entries, since any equilibria are pure
-	((gbtVector<gbtRational> &) temp).operator=(gbtRational(0));
+	((gbtVector<Gambit::Rational> &) temp).operator=(Gambit::Rational(0));
 	const Gambit::PureBehavProfile &profile = citer.GetProfile();
 	for (int pl = 1; pl <= p_efg->NumPlayers(); pl++)  {
 	  for (int iset = 1;
@@ -127,7 +127,7 @@ void SolveMixed(Gambit::Game p_nfg)
     bool flag = true;
 
     for (int pl = 1; flag && pl <= p_nfg->NumPlayers(); pl++)  {
-      gbtRational current = citer.GetPayoff(pl);
+      Gambit::Rational current = citer.GetPayoff(pl);
       Gambit::PureStrategyProfile p = citer.GetProfile();
       for (int i = 1; i <= p_nfg->GetPlayer(pl)->NumStrategies(); i++)  {
 	p.SetStrategy(p_nfg->GetPlayer(pl)->GetStrategy(i));
@@ -139,8 +139,8 @@ void SolveMixed(Gambit::Game p_nfg)
     }
     
     if (flag)  {
-      Gambit::MixedStrategyProfile<gbtRational> temp(p_nfg);
-      ((gbtVector<gbtRational> &) temp).operator=(gbtRational(0));
+      Gambit::MixedStrategyProfile<Gambit::Rational> temp(p_nfg);
+      ((gbtVector<Gambit::Rational> &) temp).operator=(Gambit::Rational(0));
       Gambit::PureStrategyProfile profile = citer.GetProfile();
       for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
 	temp(pl, profile.GetStrategy(pl)->GetNumber()) = 1;

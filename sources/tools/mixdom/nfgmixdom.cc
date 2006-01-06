@@ -536,7 +536,7 @@ bool IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy *st
 		      std::ostream &tracefile)
 {
   if (rational) {
-    return IsMixedDominated(S, str, strong, (gbtRational)0, tracefile);
+    return IsMixedDominated(S, str, strong, (Gambit::Rational)0, tracefile);
   }
   else {
     return IsMixedDominated(S, str, strong, (double)0, tracefile);
@@ -549,20 +549,20 @@ bool IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy *st
 
 template bool 
 ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySupport &R,int pl, bool strong, 
-		      gbtRational junk, std::ostream &tracefile);
+		      Gambit::Rational junk, std::ostream &tracefile);
 template bool 
 ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySupport &R,int pl, bool strong, 
 		      double junk, std::ostream &tracefile);
 
 template bool
 IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy str,
-		 bool strong, gbtRational junk, std::ostream &tracefile);
+		 bool strong, Gambit::Rational junk, std::ostream &tracefile);
 template bool
 IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy str,
 		 bool strong, double junk, std::ostream &tracefile);
 
 template bool 
-IsMixedDominated(const Gambit::MixedStrategyProfile<gbtRational> &pr, int pl,
+IsMixedDominated(const Gambit::MixedStrategyProfile<Gambit::Rational> &pr, int pl,
 		 bool strong, std::ostream &tracefile);
 
 template bool 

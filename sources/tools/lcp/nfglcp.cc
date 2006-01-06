@@ -46,7 +46,7 @@ void PrintProfile(std::ostream &p_stream,
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const Gambit::MixedStrategyProfile<gbtRational> &p_profile)
+		  const Gambit::MixedStrategyProfile<Gambit::Rational> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
     algorithm.Solve(nfg);
   }
   else {
-    nfgLcp<gbtRational> algorithm;
+    nfgLcp<Gambit::Rational> algorithm;
     algorithm.Solve(nfg);
   }
 

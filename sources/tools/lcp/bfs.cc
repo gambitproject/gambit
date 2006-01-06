@@ -55,5 +55,5 @@ template <class T> int BFS<T>::operator!=(const BFS<T> &M) const
 
 
 template class BFS<double>;
-template class BFS<gbtRational>;
+template class BFS<Gambit::Rational>;
 

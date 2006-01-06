@@ -29,8 +29,8 @@
 template class TreeOfPartials<gDouble>;
 template class ListOfPartialTrees<gDouble>;
 
-template class TreeOfPartials<gbtRational>;
-template class ListOfPartialTrees<gbtRational>;
+template class TreeOfPartials<Gambit::Rational>;
+template class ListOfPartialTrees<Gambit::Rational>;
 
 
 //template class TreeOfPartials<double>;
@@ -48,8 +48,8 @@ template class ListOfPartialTrees<gbtRational>;
 
 #include "gtree.imp"
 
-template class gTreeNode<gPoly<gbtRational> >;
-template class gTree<gPoly<gbtRational> >;
+template class gTreeNode<gPoly<Gambit::Rational> >;
+template class gTree<gPoly<Gambit::Rational> >;
 
 template class gTreeNode<gPoly<gDouble> >;
 template class gTree<gPoly<gDouble> >;

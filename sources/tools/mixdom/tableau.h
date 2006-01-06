@@ -80,23 +80,23 @@ public:
 };
 
 // 
-// Tableau<gbtRational> 
+// Tableau<Gambit::Rational> 
 //  
 
 template<>
-class Tableau<gbtRational> : public TableauInterface<gbtRational>{
+class Tableau<Gambit::Rational> : public TableauInterface<Gambit::Rational>{
 private:
   int remap(int col_index) const;  // aligns the column indexes
-  Gambit::Matrix<gbtRational> GetInverse();
+  Gambit::Matrix<Gambit::Rational> GetInverse();
 
-  Gambit::Matrix<gbtInteger> Tabdat;  // This caries the full tableau
-  gbtVector<gbtInteger> Coeff;   // and coeffieient vector
-  gbtInteger totdenom;  // This carries the denominator for Q data or 1 for Z
-  gbtInteger denom;  // This is the denominator for the simplex
+  Gambit::Matrix<Gambit::Integer> Tabdat;  // This caries the full tableau
+  gbtVector<Gambit::Integer> Coeff;   // and coeffieient vector
+  Gambit::Integer totdenom;  // This carries the denominator for Q data or 1 for Z
+  Gambit::Integer denom;  // This is the denominator for the simplex
 
-  gbtVector<gbtRational> tmpcol; // temporary column vector, to avoid allocation
+  gbtVector<Gambit::Rational> tmpcol; // temporary column vector, to avoid allocation
 
-  void MySolveColumn(int, gbtVector<gbtRational> &);  // column in new basis 
+  void MySolveColumn(int, gbtVector<Gambit::Rational> &);  // column in new basis 
 
 protected:
   gbtArray<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
@@ -108,34 +108,34 @@ public:
     std::string GetDescription(void) const;
   };
       // constructors and destructors
-  Tableau(const Gambit::Matrix<gbtRational> &A, const gbtVector<gbtRational> &b); 
-  Tableau(const Gambit::Matrix<gbtRational> &A, const gbtArray<int> &art, 
-	  const gbtVector<gbtRational> &b); 
-  Tableau(const Tableau<gbtRational>&);
+  Tableau(const Gambit::Matrix<Gambit::Rational> &A, const gbtVector<Gambit::Rational> &b); 
+  Tableau(const Gambit::Matrix<Gambit::Rational> &A, const gbtArray<int> &art, 
+	  const gbtVector<Gambit::Rational> &b); 
+  Tableau(const Tableau<Gambit::Rational>&);
   virtual ~Tableau();
   
-  Tableau<gbtRational>& operator=(const Tableau<gbtRational>&);
+  Tableau<Gambit::Rational>& operator=(const Tableau<Gambit::Rational>&);
   
   // pivoting
   int CanPivot(int outgoing,int incoming);
   void Pivot(int outrow,int col); // pivot -- outgoing is row, incoming is column
-  void SolveColumn(int, gbtVector<gbtRational> &);  // column in new basis 
-  void GetColumn(int, gbtVector<gbtRational> &) const;  // column in new basis 
+  void SolveColumn(int, gbtVector<Gambit::Rational> &);  // column in new basis 
+  void GetColumn(int, gbtVector<Gambit::Rational> &) const;  // column in new basis 
   
   // raw Tableau functions
 
   void Refactor();
   void SetRefactor(int);
 
-  void SetConst(const gbtVector<gbtRational> &bnew);
+  void SetConst(const gbtVector<Gambit::Rational> &bnew);
   void SetBasis( const Basis &); // set new Tableau
-  void Solve(const gbtVector<gbtRational> &b, gbtVector<gbtRational> &x);  // solve M x = b
-  void SolveT(const gbtVector<gbtRational> &c, gbtVector<gbtRational> &y);  // solve y M = c
+  void Solve(const gbtVector<Gambit::Rational> &b, gbtVector<Gambit::Rational> &x);  // solve M x = b
+  void SolveT(const gbtVector<Gambit::Rational> &c, gbtVector<Gambit::Rational> &y);  // solve y M = c
   
   bool IsFeasible();
   bool IsLexMin();
-  void BasisVector(gbtVector<gbtRational> &out) const;
-  gbtInteger TotDenom() const;
+  void BasisVector(gbtVector<Gambit::Rational> &out) const;
+  Gambit::Integer TotDenom() const;
 };
 
 #endif     // TABLEAU_H

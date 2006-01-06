@@ -174,9 +174,9 @@ gPoly<T> EfgPolEnumModule<T>::ProbOfSequence(int p, int seq) const
   }
   else {
     for(j=1;j<seq;j++) {
-      if((SF.Constraints(p))(isetrow,j)==gbtRational(-1))
+      if((SF.Constraints(p))(isetrow,j)==Gambit::Rational(-1))
 	equation-=ProbOfSequence(p,j);
-      if((SF.Constraints(p))(isetrow,j)==gbtRational(1))
+      if((SF.Constraints(p))(isetrow,j)==Gambit::Rational(1))
 	equation+=ProbOfSequence(p,j);
     }
   }
@@ -187,12 +187,12 @@ template <class T> gPoly<T>
 EfgPolEnumModule<T>::Payoff(int pl) const
 {
   gIndexOdometer index(SF.NumSequences());
-  gbtRational pay;
+  Gambit::Rational pay;
 
   gPoly<T> equation(Space,Lex);
   while (index.Turn()) {
     pay=SF.Payoff(index.CurrentIndices(),pl);
-    if( pay != gbtRational(0)) {
+    if( pay != Gambit::Rational(0)) {
       gPoly<T> term(Space,(T)pay,Lex);
       int k;
       for(k=1;k<=EF->NumPlayers();k++) 
@@ -396,9 +396,9 @@ NumProbOfSequence(int p,int seq, const gbtVector<gDouble> &x) const
     return x[varno].ToDouble();
   else {    
     for(j=1;j<seq;j++) {
-      if((SF.Constraints(p))(isetrow,j)==gbtRational(-1))
+      if((SF.Constraints(p))(isetrow,j)==Gambit::Rational(-1))
 	value-=NumProbOfSequence(p,j,x);
-      if((SF.Constraints(p))(isetrow,j)==gbtRational(1))
+      if((SF.Constraints(p))(isetrow,j)==Gambit::Rational(1))
 	value+=NumProbOfSequence(p,j,x);
     }
     return value;

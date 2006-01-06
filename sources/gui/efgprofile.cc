@@ -91,8 +91,8 @@ wxString gbtBehavProfileList::GetCellValue(const wxSheetCoords &p_coords)
   const Gambit::MixedBehavProfile<double> &profile = m_doc->GetProfiles().GetBehav(p_coords.GetRow()+1);
 
   if (profile.IsDefinedAt(m_doc->GetGame()->GetAction(p_coords.GetCol()+1)->GetInfoset())) {
-    return wxString(ToText(profile[p_coords.GetCol()+1],
-			   m_doc->GetStyle().NumDecimals()).c_str(), 
+    return wxString(Gambit::ToText(profile[p_coords.GetCol()+1],
+				   m_doc->GetStyle().NumDecimals()).c_str(), 
 		    *wxConvCurrent);
   }
   else {

@@ -642,7 +642,6 @@ bool BehavSupport::MayReach(const GameNode &n) const
 // over contingencies that are relevant once a particular node 
 // has been reached.
 class BehavConditionalIterator    {
-  friend class EfgIter;
 private:
   Game _efg;
   BehavSupport _support;
@@ -650,7 +649,7 @@ private:
   gbtPVector<int> _current;
   gbtArray<gbtArray<bool> > _is_active;
   gbtArray<int> _num_active_infosets;
-  mutable gbtVector<gbtRational> _payoff;
+  mutable gbtVector<Rational> _payoff;
 
 public:
   BehavConditionalIterator(const BehavSupport &);
@@ -667,8 +666,8 @@ public:
 
   int NextContingency(void);   // Needs rewriting
   
-  gbtRational GetPayoff(int pl) const;
-  gbtRational GetPayoff(const GameNode &, int pl) const;
+  Rational GetPayoff(int pl) const;
+  Rational GetPayoff(const GameNode &, int pl) const;
 };
 
 
@@ -789,12 +788,12 @@ int BehavConditionalIterator::NextContingency(void)
   }
 }
 
-gbtRational BehavConditionalIterator::GetPayoff(int pl) const
+Rational BehavConditionalIterator::GetPayoff(int pl) const
 {
   return _profile.GetPayoff(pl);
 }
 
-gbtRational BehavConditionalIterator::GetPayoff(const GameNode &n, int pl) const
+Rational BehavConditionalIterator::GetPayoff(const GameNode &n, int pl) const
 {
   return _profile.GetNodeValue(n, pl);
 }
@@ -821,8 +820,8 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
     B.Set(b);
 
     do  {
-      gbtRational ap = A.GetPayoff(pl);  
-      gbtRational bp = B.GetPayoff(pl);
+      Rational ap = A.GetPayoff(pl);  
+      Rational bp = B.GetPayoff(pl);
 
       if (strong)
 	{ if (ap <= bp)  return false; }
@@ -854,8 +853,8 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
       B.Set(b);
       
       do  {
-	gbtRational ap = A.GetPayoff(nodelist[n],pl);  
-	gbtRational bp = B.GetPayoff(nodelist[n],pl);
+	Rational ap = A.GetPayoff(nodelist[n],pl);  
+	Rational bp = B.GetPayoff(nodelist[n],pl);
 	
 	if (strong)
 	  { if (ap <= bp)  return false; }

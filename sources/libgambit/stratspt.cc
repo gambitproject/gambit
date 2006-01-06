@@ -128,10 +128,10 @@ bool StrategySupport::Dominates(GameStrategy s,
 
   if (strong)  {
     do  {
-      gbtRational ap = ((A.GetOutcome()) ? 
-			A.GetOutcome()->GetPayoff<gbtRational>(s->GetPlayer()->GetNumber()) : gbtRational(0));
-      gbtRational bp = ((B.GetOutcome()) ? 
-			B.GetOutcome()->GetPayoff<gbtRational>(s->GetPlayer()->GetNumber()) : gbtRational(0));
+      Rational ap = ((A.GetOutcome()) ? 
+			A.GetOutcome()->GetPayoff<Rational>(s->GetPlayer()->GetNumber()) : Rational(0));
+      Rational bp = ((B.GetOutcome()) ? 
+			B.GetOutcome()->GetPayoff<Rational>(s->GetPlayer()->GetNumber()) : Rational(0));
 
       if (ap <= bp)  {
 	return false;
@@ -145,10 +145,10 @@ bool StrategySupport::Dominates(GameStrategy s,
   bool equal = true;
   
   do   {
-    gbtRational ap = ((A.GetOutcome()) ? 
-		      A.GetOutcome()->GetPayoff<gbtRational>(s->GetPlayer()->GetNumber()) : gbtRational(0));
-    gbtRational bp = ((B.GetOutcome()) ? 
-		      B.GetOutcome()->GetPayoff<gbtRational>(s->GetPlayer()->GetNumber()) : gbtRational(0));
+    Rational ap = ((A.GetOutcome()) ? 
+		      A.GetOutcome()->GetPayoff<Rational>(s->GetPlayer()->GetNumber()) : Rational(0));
+    Rational bp = ((B.GetOutcome()) ? 
+		      B.GetOutcome()->GetPayoff<Rational>(s->GetPlayer()->GetNumber()) : Rational(0));
 
     if (ap < bp) { 
       return false;

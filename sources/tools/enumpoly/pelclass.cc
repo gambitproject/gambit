@@ -545,7 +545,7 @@ PelView::RealRoots(const gbtList<gbtVector<gComplex> > &clist) const
 
     bool is_real = true;
     for (int j = 1; j <= Dmnsn(); j++)
-      if (abs(clist[i][j].ImaginaryPart()) > 0.0001) 
+      if (Gambit::abs(clist[i][j].ImaginaryPart()) > 0.0001) 
 	is_real = false;
 
     if (is_real) {
@@ -565,7 +565,7 @@ bool PelView::CheckSolutions(const Gen_node g) const
   Gen_node goo;
   goo = g->Genval.lval;
   while (goo!=0) { 
-    if (abs(goo->Genval.dval) > 0.01) 
+    if (Gambit::abs(goo->Genval.dval) > 0.01) 
       return 0;
 
     goo = goo->next;

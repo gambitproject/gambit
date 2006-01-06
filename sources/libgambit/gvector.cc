@@ -30,6 +30,6 @@
 template class gbtVector<int>;
 template class gbtVector<long>;
 template class gbtVector<double>;
-template class gbtVector<gbtInteger>;
-template class gbtVector<gbtRational>;
+template class gbtVector<Gambit::Integer>;
+template class gbtVector<Gambit::Rational>;
 

@@ -27,6 +27,6 @@
 #include "ineqsolv.imp"
 #include "double.h"
 
-template class IneqSolv<gbtRational>;
+template class IneqSolv<Gambit::Rational>;
 template class IneqSolv<gDouble>;
 

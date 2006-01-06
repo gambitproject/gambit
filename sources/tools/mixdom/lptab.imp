@@ -70,12 +70,12 @@ LPTableau<T>& LPTableau<T>::operator=(const LPTableau<T> &orig)
 // cost-based functions
 
 template<>
-void LPTableau<gbtRational>::SetCost(const gbtVector<gbtRational>& c)
+void LPTableau<Gambit::Rational>::SetCost(const gbtVector<Gambit::Rational>& c)
 {
   int i;
   if(cost.First()==c.First() && cost.Last()==c.Last()) {
-    for(i=cost.First();i<=cost.Last();i++) cost[i] = c[i]*(gbtRational)Tableau<gbtRational>::TotDenom();
-    for(i=unitcost.First();i<=unitcost.Last();i++) unitcost[i] = (gbtRational)0;
+    for(i=cost.First();i<=cost.Last();i++) cost[i] = c[i]*(Gambit::Rational)Tableau<Gambit::Rational>::TotDenom();
+    for(i=unitcost.First();i<=unitcost.Last();i++) unitcost[i] = (Gambit::Rational)0;
     Refactor();
     SolveDual();
     return;
@@ -83,13 +83,13 @@ void LPTableau<gbtRational>::SetCost(const gbtVector<gbtRational>& c)
   if(c.First()!=cost.First()) throw gbtDimensionException();
   if(c.Last()!=(cost.Last()+unitcost.Length())) throw gbtDimensionException();
   for(i=c.First();i<=cost.Last();i++)
-    cost[i]=c[i]*(gbtRational)Tableau<gbtRational>::TotDenom();
+    cost[i]=c[i]*(Gambit::Rational)Tableau<Gambit::Rational>::TotDenom();
   for(i=unitcost.First();i<=unitcost.Last();i++)
     unitcost[i]=c[cost.Length()+i-unitcost.First()+1];
   // gout << "\nc: " << c.First() << " " << c.Last() << " " << c;
   // gout << "\ncost: " << cost.First() << " " << cost.Last() << " " << cost;
   // gout << "\nunit: " << unitcost.First() << " " << unitcost.Last() << " " << unitcost;
-  //** added for gbtRational
+  //** added for Gambit::Rational
   Refactor();
   SolveDual();
 }
@@ -114,7 +114,7 @@ void LPTableau<double>::SetCost(const gbtVector<double>& c)
   // gout << "\nc: " << c.First() << " " << c.Last() << " " << c;
   // gout << "\ncost: " << cost.First() << " " << cost.Last() << " " << cost;
   // gout << "\nunit: " << unitcost.First() << " " << unitcost.Last() << " " << unitcost;
-  //** added for gbtRational
+  //** added for Gambit::Rational
   Refactor();
   SolveDual();
 }
@@ -158,14 +158,14 @@ template<> double LPTableau<double>::TotalCost(void)
   return tmpcol*solution;
 }
 
-template<> gbtRational LPTableau<gbtRational>::TotalCost(void)
+template<> Gambit::Rational LPTableau<Gambit::Rational>::TotalCost(void)
 {
-  gbtVector<gbtRational> tmpcol(MinRow(),MaxRow());
-  gbtVector<gbtRational> sol(MinRow(),MaxRow());
+  gbtVector<Gambit::Rational> tmpcol(MinRow(),MaxRow());
+  gbtVector<Gambit::Rational> sol(MinRow(),MaxRow());
   BasisSelect(unitcost,cost,tmpcol);
   BasisVector(sol);
   for(int i=tmpcol.First();i<=tmpcol.Last();i++)
-    if(Label(i)>0)tmpcol[i]/=(gbtRational)Tableau<gbtRational>::TotDenom();
+    if(Label(i)>0)tmpcol[i]/=(Gambit::Rational)Tableau<Gambit::Rational>::TotDenom();
 
   return tmpcol*sol;
 }
@@ -177,7 +177,7 @@ void LPTableau<double>::DualVector(gbtVector<double> &L) const
 }
 
 template<>
-void LPTableau<gbtRational>::DualVector(gbtVector<gbtRational> &out) const
+void LPTableau<Gambit::Rational>::DualVector(gbtVector<Gambit::Rational> &out) const
 {
   out= dual;
   //  for(int i=out.First();i<=out.Last();i++) 

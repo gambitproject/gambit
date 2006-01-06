@@ -34,4 +34,4 @@ template gbtVector<gDouble> Gambit::operator*(const gbtVector<gDouble>&,
 
 template class LinearCombination<double>;
 template class LinearCombination<gDouble>;
-template class LinearCombination<gbtRational>;
+template class LinearCombination<Gambit::Rational>;

@@ -28,7 +28,7 @@
 #include "quiksolv.imp"
 #include "double.h"
 
-template class QuikSolv<gbtRational>;
+template class QuikSolv<Gambit::Rational>;
 template class QuikSolv<gDouble>;
 
 

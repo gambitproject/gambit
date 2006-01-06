@@ -59,20 +59,20 @@ Sfg::Sfg(const Gambit::BehavSupport &S)
 
   gIndexOdometer index(seq);
 
-  SF = new gNArray<gbtArray<gbtRational> *>(seq);
+  SF = new gNArray<gbtArray<Gambit::Rational> *>(seq);
   while (index.Turn()) {
-    (*SF)[index.CurrentIndices()] = new gbtArray<gbtRational>(EF->NumPlayers());
+    (*SF)[index.CurrentIndices()] = new gbtArray<Gambit::Rational>(EF->NumPlayers());
     for(i=1;i<=EF->NumPlayers();i++)
-      (*(*SF)[index.CurrentIndices()])[i]=(gbtRational)0;
+      (*(*SF)[index.CurrentIndices()])[i]=(Gambit::Rational)0;
   } 
 
-  E = new gbtArray<Gambit::RectArray<gbtRational> *> (EF->NumPlayers());
+  E = new gbtArray<Gambit::RectArray<Gambit::Rational> *> (EF->NumPlayers());
   for(i=1;i<=EF->NumPlayers();i++) {
-    (*E)[i] = new Gambit::RectArray<gbtRational>(infosets[i].Length()+1,seq[i]);
+    (*E)[i] = new Gambit::RectArray<Gambit::Rational>(infosets[i].Length()+1,seq[i]);
     for(int j = (*(*E)[i]).MinRow();j<=(*(*E)[i]).MaxRow();j++)
       for(int k = (*(*E)[i]).MinCol();k<=(*(*E)[i]).MaxCol();k++)
-	(*(*E)[i])(j,k)=(gbtRational)0;
-    (*(*E)[i])(1,1)=(gbtRational)1;
+	(*(*E)[i])(j,k)=(Gambit::Rational)0;
+    (*(*E)[i])(1,1)=(Gambit::Rational)1;
   } 
 
   sequences = new gbtArray<SFSequenceSet *>(EF->NumPlayers());
@@ -83,7 +83,7 @@ Sfg::Sfg(const Gambit::BehavSupport &S)
   for(i=1;i<=EF->NumPlayers();i++)
     parent[i] = (((*sequences)[i])->GetSFSequenceSet())[1];
 
-  MakeSequenceForm(EF->GetRoot(),(gbtRational)1,one,zero,parent);
+  MakeSequenceForm(EF->GetRoot(),(Gambit::Rational)1,one,zero,parent);
 }
 
 Sfg::~Sfg()
@@ -106,14 +106,14 @@ Sfg::~Sfg()
 }
 
 void Sfg::
-MakeSequenceForm(const Gambit::GameNode &n, gbtRational prob,gbtArray<int>seq, 
+MakeSequenceForm(const Gambit::GameNode &n, Gambit::Rational prob,gbtArray<int>seq, 
 		 gbtArray<Gambit::GameInfoset> iset, gbtArray<Sequence *> parent) 
 { 
   int i,pl;
 
   if (n->GetOutcome()) {
     for(pl = 1;pl<=seq.Length();pl++)
-      (*(*SF)[seq])[pl] += prob * n->GetOutcome()->GetPayoff<gbtRational>(pl);
+      (*(*SF)[seq])[pl] += prob * n->GetOutcome()->GetPayoff<Gambit::Rational>(pl);
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
@@ -131,7 +131,7 @@ MakeSequenceForm(const Gambit::GameNode &n, gbtRational prob,gbtArray<int>seq,
 	if(isetRow(pl,i)) 
 	  snew[pl]+=efsupp.NumActions(pl,i);
 
-      (*(*E)[pl])(isetRow(pl,isetnum),seq[pl]) = (gbtRational)1;
+      (*(*E)[pl])(isetRow(pl,isetnum),seq[pl]) = (Gambit::Rational)1;
       Sequence *myparent(parent[pl]);
 
       bool flag = false;
@@ -152,7 +152,7 @@ MakeSequenceForm(const Gambit::GameNode &n, gbtRational prob,gbtArray<int>seq,
 	    
 	  }
 
-	  (*(*E)[pl])(isetRow(pl,isetnum),snew[pl]) = -(gbtRational)1;
+	  (*(*E)[pl])(isetRow(pl,isetnum),snew[pl]) = -(Gambit::Rational)1;
 	  MakeSequenceForm(n->GetChild(i),prob,snew,iset,parent);
 	}
       }
@@ -240,11 +240,11 @@ Gambit::MixedBehavProfile<double> Sfg::ToBehav(const gbtPVector<double> &x) cons
 {
   Gambit::MixedBehavProfile<double> b(efsupp);
 
-  b = (gbtRational) 0;
+  b = (Gambit::Rational) 0;
 
   Sequence *sij;
   const Sequence *parent;
-  gbtRational value;
+  Gambit::Rational value;
 
   int i,j;
   for(i=1;i<=EF->NumPlayers();i++)
@@ -266,10 +266,10 @@ Gambit::MixedBehavProfile<double> Sfg::ToBehav(const gbtPVector<double> &x) cons
   return b;
 }
 
-gbtRational Sfg::Payoff(const gbtArray<int> & index,int pl) const 
+Gambit::Rational Sfg::Payoff(const gbtArray<int> & index,int pl) const 
 {
   return Payoffs(index)[pl];
 }
 
 
-template class gNArray<gbtArray<gbtRational> *>;
+template class gNArray<gbtArray<Gambit::Rational> *>;

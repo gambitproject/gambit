@@ -41,18 +41,18 @@ template <class T> Gambit::Matrix<T> Make_A1(const Gambit::StrategySupport &S,
 
   Gambit::PureStrategyProfile profile(S.GetGame());
 
-  gbtRational min = S.GetGame()->GetMinPayoff();
-  if (min > gbtRational(0)) {
-    min = gbtRational(0);
+  Gambit::Rational min = S.GetGame()->GetMinPayoff();
+  if (min > Gambit::Rational(0)) {
+    min = Gambit::Rational(0);
   }
-  min -= gbtRational(1);
+  min -= Gambit::Rational(1);
 
-  gbtRational max = S.GetGame()->GetMaxPayoff();
-  if (max < gbtRational(0)) {
-    max = gbtRational(0);
+  Gambit::Rational max = S.GetGame()->GetMaxPayoff();
+  if (max < Gambit::Rational(0)) {
+    max = Gambit::Rational(0);
   }
 
-  gbtRational fac(1, max - min);
+  Gambit::Rational fac(1, max - min);
 
   for (i = 1; i <= n1; i++)  {
     profile.SetStrategy(S.GetStrategy(1, i));
@@ -74,18 +74,18 @@ template <class T> Gambit::Matrix<T> Make_A2(const Gambit::StrategySupport &S,
 
   Gambit::PureStrategyProfile profile(S.GetGame());
   
-  gbtRational min = S.GetGame()->GetMinPayoff();
-  if (min > gbtRational(0)) {
-    min = gbtRational(0);
+  Gambit::Rational min = S.GetGame()->GetMinPayoff();
+  if (min > Gambit::Rational(0)) {
+    min = Gambit::Rational(0);
   }
-  min -= gbtRational(1);
+  min -= Gambit::Rational(1);
 
-  gbtRational max = S.GetGame()->GetMaxPayoff();
-  if (max < gbtRational(0)) {
-    max = gbtRational(0);
+  Gambit::Rational max = S.GetGame()->GetMaxPayoff();
+  if (max < Gambit::Rational(0)) {
+    max = Gambit::Rational(0);
   }
 
-  gbtRational fac(1, max - min);
+  Gambit::Rational fac(1, max - min);
 
   for (i = 1; i <= n1; i++)  {
     profile.SetStrategy(S.GetStrategy(1, i));

@@ -135,7 +135,7 @@ void gbtNodeEntry::DrawIncomingBranch(wxDC &p_dc) const
     p_dc.DrawLine(xStart, yStart, xEnd, yEnd);
 
     // Draw in the highlight indicating action probabilities
-    if (m_actionProb >= gbtRational(0)) {
+    if (m_actionProb >= Gambit::Rational(0)) {
       p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 4, wxSOLID));
       p_dc.DrawLine(xStart, yStart, 
 		    xStart +
@@ -223,7 +223,7 @@ void gbtNodeEntry::DrawIncomingBranch(wxDC &p_dc) const
     p_dc.DrawLine(xStart + m_branchLength, yEnd, xEnd, yEnd);
     
     // Draw in the highlight indicating action probabilities
-    if (m_actionProb >= gbtRational(0)) {
+    if (m_actionProb >= Gambit::Rational(0)) {
       p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxSOLID));
       p_dc.DrawLine(xStart, yStart, 
 		    xStart + 
@@ -252,7 +252,7 @@ void gbtNodeEntry::DrawIncomingBranch(wxDC &p_dc) const
 }
 
 static wxPoint DrawFraction(wxDC &p_dc, wxPoint p_point,
-			    const gbtRational &p_value)
+			    const Gambit::Rational &p_value)
 {
   p_dc.SetFont(wxFont(7, wxSWISS, wxNORMAL, wxBOLD));
   
@@ -310,7 +310,7 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
     if (payoff.find('/') != -1) {
       p_dc.SetPen(wxPen(m_style->GetPlayerColor(pl), 1, wxSOLID));
       int oldX = point.x;
-      point = DrawFraction(p_dc, point, outcome->GetPayoff<gbtRational>(pl));
+      point = DrawFraction(p_dc, point, outcome->GetPayoff<Gambit::Rational>(pl));
       m_payoffRect.Append(wxRect(oldX - 5, point.y - height / 2,
 				 point.x - oldX + 10, height));
     }

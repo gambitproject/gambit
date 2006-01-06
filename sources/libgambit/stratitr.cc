@@ -118,7 +118,7 @@ void StrategyIterator::SetOutcome(GameOutcome outcome)
   profile.SetOutcome(outcome);
 }
 
-gbtRational StrategyIterator::GetPayoff(int pl) const
+Rational StrategyIterator::GetPayoff(int pl) const
 {
   return profile.GetPayoff(pl);
 }

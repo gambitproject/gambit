@@ -76,7 +76,7 @@ public:
   /// Set the outcome assigned to the current contingency
   void SetOutcome(GameOutcome);
   /// Get the payoff to player 'pl' at the current contingency
-  gbtRational GetPayoff(int pl) const;
+  Rational GetPayoff(int pl) const;
   //@}
 };
 

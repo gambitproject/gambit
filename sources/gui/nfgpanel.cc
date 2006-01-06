@@ -192,8 +192,8 @@ void gbtTablePlayerPanel::OnUpdate(void)
     const Gambit::MixedStrategyProfile<double> &profile =
       m_doc->GetProfiles().GetMixed(m_doc->GetCurrentProfile());
 
-    std::string pay = ToText(profile.GetPayoff(m_player),
-			     m_doc->GetStyle().NumDecimals());
+    std::string pay = Gambit::ToText(profile.GetPayoff(m_player),
+				     m_doc->GetStyle().NumDecimals());
     m_payoff->SetLabel(wxT("Payoff: ") + 
 		       wxString(pay.c_str(), *wxConvCurrent));
     GetSizer()->Show(m_payoff, true);
@@ -223,7 +223,7 @@ void gbtTablePlayerPanel::OnNewStrategy(wxCommandEvent &)
 
   Gambit::GameStrategy strategy = 
     m_doc->GetGame()->GetPlayer(m_player)->NewStrategy();
-  strategy->SetLabel(ToText(strategy->GetNumber()));
+  strategy->SetLabel(Gambit::ToText(strategy->GetNumber()));
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 

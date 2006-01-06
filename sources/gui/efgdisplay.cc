@@ -180,7 +180,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       }
       else if (node->GetPlayer() == player) {
 	Gambit::GameAction action = node->GetInfoset()->InsertAction();
-	action->SetLabel(ToText(action->GetNumber()));
+	action->SetLabel(Gambit::ToText(action->GetNumber()));
       }
       else if (!player->IsChance() && !node->GetPlayer()->IsChance()) {
 	// Currently don't support switching nodes to/from chance player
@@ -286,7 +286,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       }
   
       Gambit::GameOutcome outcome = srcNode->GetGame()->NewOutcome();
-      outcome->SetLabel("Outcome" + ToText(outcome->GetNumber()));
+      outcome->SetLabel("Outcome" + Gambit::ToText(outcome->GetNumber()));
       for (int pl = 1; pl <= srcNode->GetGame()->NumPlayers(); pl++) {
 	outcome->SetPayoff(pl, srcNode->GetOutcome()->GetPayoff<std::string>(pl));
       }

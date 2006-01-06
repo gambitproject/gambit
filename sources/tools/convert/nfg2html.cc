@@ -47,9 +47,9 @@ void WriteHtmlFile(std::ostream &p_file, const Gambit::Game &p_nfg,
 	}
 
 	theHtml += "<center><b>Player ";
-	theHtml += ToText(pl);
+	theHtml += Gambit::ToText(pl);
 	theHtml += " Strategy ";
-	theHtml += ToText(iter.GetProfile().GetStrategy(pl)->GetNumber());
+	theHtml += Gambit::ToText(iter.GetProfile().GetStrategy(pl)->GetNumber());
 	theHtml += "</b></center>";
       }
     }

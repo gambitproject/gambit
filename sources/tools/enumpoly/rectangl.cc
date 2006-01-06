@@ -28,8 +28,8 @@
 #include "double.h"
 #include "rectangl.imp"
 
-template class gRectangle<gbtRational>;
-template gRectangle<gDouble> TogDouble(const gRectangle<gbtRational>&);
+template class gRectangle<Gambit::Rational>;
+template gRectangle<gDouble> TogDouble(const gRectangle<Gambit::Rational>&);
 
 template class gRectangle<double>;
 template gRectangle<gDouble> TogDouble(const gRectangle<double>&);

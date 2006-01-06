@@ -607,7 +607,7 @@ std::string gbtGameDocument::GetRealizProb(const Gambit::GameNode &p_node) const
   if (GetCurrentProfile() == 0 || !p_node) {
     return "";
   }
-  return ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetRealizProb(p_node),
+  return Gambit::ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetRealizProb(p_node),
 		m_style.NumDecimals());
 }
 
@@ -617,8 +617,8 @@ std::string gbtGameDocument::GetBeliefProb(const Gambit::GameNode &p_node) const
     return "";
   }
 
-  if (m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetProb(p_node->GetInfoset()) > gbtRational(0)) {
-    return ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetBeliefProb(p_node),
+  if (m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetProb(p_node->GetInfoset()) > Gambit::Rational(0)) {
+    return Gambit::ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetBeliefProb(p_node),
 		  m_style.NumDecimals());
   }
   else {
@@ -634,7 +634,7 @@ std::string gbtGameDocument::GetNodeValue(const Gambit::GameNode &p_node,
     return "";
   }
 
-  return ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetNodeValue(p_node)[p_player], 
+  return Gambit::ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetNodeValue(p_node)[p_player], 
 		m_style.NumDecimals());
 }
 
@@ -643,7 +643,7 @@ std::string gbtGameDocument::GetInfosetProb(const Gambit::GameNode &p_node) cons
   if (GetCurrentProfile() == 0 || !p_node || !p_node->GetPlayer()) {
     return "";
   }
-  return ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetProb(p_node->GetInfoset()),
+  return Gambit::ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetProb(p_node->GetInfoset()),
 		m_style.NumDecimals());
 }
 
@@ -653,8 +653,8 @@ std::string gbtGameDocument::GetInfosetValue(const Gambit::GameNode &p_node) con
       p_node->GetPlayer()->IsChance()) {
     return "";
   }
-  if (m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetProb(p_node->GetInfoset()) > gbtRational(0)) {
-    return ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetValue(p_node->GetInfoset()),
+  if (m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetProb(p_node->GetInfoset()) > Gambit::Rational(0)) {
+    return Gambit::ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetValue(p_node->GetInfoset()),
 		  m_style.NumDecimals());
   }
   else {
@@ -679,7 +679,7 @@ std::string gbtGameDocument::GetActionProb(const Gambit::GameNode &p_node, int p
     return "*";
   }
   
-  return ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetActionProb(p_node->GetInfoset()->GetAction(p_act)),
+  return Gambit::ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetActionProb(p_node->GetInfoset()->GetAction(p_act)),
 		m_style.NumDecimals());
 }
 
@@ -690,8 +690,8 @@ std::string gbtGameDocument::GetActionValue(const Gambit::GameNode &p_node, int 
     return "";
   }
 
-  if (m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetProb(p_node->GetInfoset()) > gbtRational(0)) {
-    return ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetActionValue(p_node->GetInfoset()->GetAction(p_act)),
+  if (m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetProb(p_node->GetInfoset()) > Gambit::Rational(0)) {
+    return Gambit::ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetActionValue(p_node->GetInfoset()->GetAction(p_act)),
 		  m_style.NumDecimals());
   }
   else  {

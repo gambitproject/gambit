@@ -50,6 +50,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <math.h>
 #include <assert.h>
 
+namespace Gambit {
+
 long lg(unsigned long x)
 {
   long l = 0;
@@ -88,19 +90,19 @@ long lg(unsigned long x)
 #define CHAR_PER_LONG   ((unsigned)sizeof(long))
 
 /*
-  minimum and maximum sizes for an gbtIntegerRep
+  minimum and maximum sizes for an IntegerRep
 */
 
-#define MINgbtIntegerRep_SIZE   16
-#define MAXgbtIntegerRep_SIZE   I_MAXNUM
+#define MIN_INTREP_SIZE   16
+#define MAX_INTREP_SIZE   I_MAXNUM
 
 #ifndef MALLOC_MIN_OVERHEAD
 #define MALLOC_MIN_OVERHEAD 4
 #endif
 
-gbtIntegerRep _ZeroRep = {1, 0, 1, {0}};
-gbtIntegerRep _OneRep = {1, 0, 1, {1}};
-gbtIntegerRep _MinusOneRep = {1, 0, 0, {1}};
+IntegerRep _ZeroRep = {1, 0, 1, {0}};
+IntegerRep _OneRep = {1, 0, 1, {1}};
+IntegerRep _MinusOneRep = {1, 0, 0, {1}};
 
 
 // utilities to extract and transfer bits
@@ -146,7 +148,7 @@ inline static int calc_len(int len1, int len2, int pad)
 
 // ensure len & sgn are correct
 
-static void Icheck(gbtIntegerRep* rep)
+static void Icheck(IntegerRep* rep)
 {
   int l = rep->len;
   const unsigned short* p = &(rep->s[l]);
@@ -157,7 +159,7 @@ static void Icheck(gbtIntegerRep* rep)
 
 // zero out the end of a rep
 
-static void Iclear_from(gbtIntegerRep* rep, int p)
+static void Iclear_from(IntegerRep* rep, int p)
 {
   unsigned short* cp = &(rep->s[p]);
   const unsigned short* cf = &(rep->s[rep->len]);
@@ -173,33 +175,33 @@ void scpy(const unsigned short* src, unsigned short* dest,int nb)
 
 // make sure an argument is valid
 
-static inline void nonnil(const gbtIntegerRep* rep)
+static inline void nonnil(const IntegerRep* rep)
 {
   assert(rep != 0);
 }
 
 // allocate a new Irep. Pad to something close to a power of two.
 
-static gbtIntegerRep* Inew(int newlen)
+static IntegerRep* Inew(int newlen)
 {
-  unsigned int siz = sizeof(gbtIntegerRep) + newlen * sizeof(short) + 
+  unsigned int siz = sizeof(IntegerRep) + newlen * sizeof(short) + 
     MALLOC_MIN_OVERHEAD;
-  unsigned int allocsiz = MINgbtIntegerRep_SIZE;
+  unsigned int allocsiz = MIN_INTREP_SIZE;
   while (allocsiz < siz) allocsiz <<= 1;  // find a power of 2
   allocsiz -= MALLOC_MIN_OVERHEAD;
-  assert((unsigned long) allocsiz < MAXgbtIntegerRep_SIZE * sizeof(short));
+  assert((unsigned long) allocsiz < MAX_INTREP_SIZE * sizeof(short));
     
-  gbtIntegerRep* rep = (gbtIntegerRep *) new char[allocsiz];
-  rep->sz = (allocsiz - sizeof(gbtIntegerRep) + sizeof(short)) / sizeof(short);
+  IntegerRep* rep = (IntegerRep *) new char[allocsiz];
+  rep->sz = (allocsiz - sizeof(IntegerRep) + sizeof(short)) / sizeof(short);
   return rep;
 }
 
 // allocate: use the bits in src if non-null, clear the rest
 
-gbtIntegerRep* Ialloc(gbtIntegerRep* old, const unsigned short* src, int srclen, int newsgn,
+IntegerRep* Ialloc(IntegerRep* old, const unsigned short* src, int srclen, int newsgn,
               int newlen)
 {
-  gbtIntegerRep* rep;
+  IntegerRep* rep;
   if (old == 0 || newlen > old->sz)
     rep = Inew(newlen);
   else
@@ -211,18 +213,18 @@ gbtIntegerRep* Ialloc(gbtIntegerRep* old, const unsigned short* src, int srclen,
   scpy(src, rep->s, srclen);
   Iclear_from(rep, srclen);
 
-  if (old != rep && old != 0 && !STATIC_gbtIntegerRep(old)) delete old;
+  if (old != rep && old != 0 && !STATIC_IntegerRep(old)) delete old;
   return rep;
 }
 
 // allocate and clear
 
-gbtIntegerRep* Icalloc(gbtIntegerRep* old, int newlen)
+IntegerRep* Icalloc(IntegerRep* old, int newlen)
 {
-  gbtIntegerRep* rep;
+  IntegerRep* rep;
   if (old == 0 || newlen > old->sz)
   {
-    if (old != 0 && !STATIC_gbtIntegerRep(old)) delete old;
+    if (old != 0 && !STATIC_IntegerRep(old)) delete old;
     rep = Inew(newlen);
   }
   else
@@ -237,9 +239,9 @@ gbtIntegerRep* Icalloc(gbtIntegerRep* old, int newlen)
 
 // reallocate
 
-gbtIntegerRep* Iresize(gbtIntegerRep* old, int newlen)
+IntegerRep* Iresize(IntegerRep* old, int newlen)
 {
-  gbtIntegerRep* rep;
+  IntegerRep* rep;
   unsigned short oldlen;
   if (old == 0)
   {
@@ -255,7 +257,7 @@ gbtIntegerRep* Iresize(gbtIntegerRep* old, int newlen)
       rep = Inew(newlen);
       scpy(old->s, rep->s, oldlen);
       rep->sgn = old->sgn;
-      if (!STATIC_gbtIntegerRep(old)) delete old;
+      if (!STATIC_IntegerRep(old)) delete old;
     }
     else
       rep = old;
@@ -270,10 +272,10 @@ gbtIntegerRep* Iresize(gbtIntegerRep* old, int newlen)
 
 // same, for straight copy
 
-gbtIntegerRep* Icopy(gbtIntegerRep* old, const gbtIntegerRep* src)
+IntegerRep* Icopy(IntegerRep* old, const IntegerRep* src)
 {
   if (old == src) return old; 
-  gbtIntegerRep* rep;
+  IntegerRep* rep;
   if (src == 0)
   {
     if (old == 0)
@@ -291,7 +293,7 @@ gbtIntegerRep* Icopy(gbtIntegerRep* old, const gbtIntegerRep* src)
     int newlen = src->len;
     if (old == 0 || newlen > old->sz)
     {
-      if (old != 0 && !STATIC_gbtIntegerRep(old)) delete old;
+      if (old != 0 && !STATIC_IntegerRep(old)) delete old;
       rep = Inew(newlen);
     }
     else
@@ -308,15 +310,15 @@ gbtIntegerRep* Icopy(gbtIntegerRep* old, const gbtIntegerRep* src)
 
 // allocate & copy space for a long
 
-gbtIntegerRep* Icopy_long(gbtIntegerRep* old, long x)
+IntegerRep* Icopy_long(IntegerRep* old, long x)
 {
   int newsgn = (x >= 0);
-  gbtIntegerRep* rep = Icopy_ulong(old, newsgn ? x : -x);
+  IntegerRep* rep = Icopy_ulong(old, newsgn ? x : -x);
   rep->sgn = newsgn;
   return rep;
 }
 
-gbtIntegerRep* Icopy_ulong(gbtIntegerRep* old, unsigned long x)
+IntegerRep* Icopy_ulong(IntegerRep* old, unsigned long x)
 {
   unsigned short src[SHORT_PER_LONG];
   
@@ -327,10 +329,10 @@ gbtIntegerRep* Icopy_ulong(gbtIntegerRep* old, unsigned long x)
     x = down(x);
   }
 
-  gbtIntegerRep* rep;
+  IntegerRep* rep;
   if (old == 0 || srclen > old->sz)
   {
-    if (old != 0 && !STATIC_gbtIntegerRep(old)) delete old;
+    if (old != 0 && !STATIC_IntegerRep(old)) delete old;
     rep = Inew(srclen);
   }
   else
@@ -346,9 +348,9 @@ gbtIntegerRep* Icopy_ulong(gbtIntegerRep* old, unsigned long x)
 
 // special case for zero -- it's worth it!
 
-gbtIntegerRep* Icopy_zero(gbtIntegerRep* old)
+IntegerRep* Icopy_zero(IntegerRep* old)
 {
-  if (old == 0 || STATIC_gbtIntegerRep(old))
+  if (old == 0 || STATIC_IntegerRep(old))
     return &_ZeroRep;
 
   old->len = 0;
@@ -359,11 +361,11 @@ gbtIntegerRep* Icopy_zero(gbtIntegerRep* old)
 
 // special case for 1 or -1
 
-gbtIntegerRep* Icopy_one(gbtIntegerRep* old, int newsgn)
+IntegerRep* Icopy_one(IntegerRep* old, int newsgn)
 {
   if (old == 0 || 1 > old->sz)
   {
-    if (old != 0 && !STATIC_gbtIntegerRep(old)) delete old;
+    if (old != 0 && !STATIC_IntegerRep(old)) delete old;
     return newsgn==I_NEGATIVE ? &_MinusOneRep : &_OneRep;
   }
 
@@ -377,7 +379,7 @@ gbtIntegerRep* Icopy_one(gbtIntegerRep* old, int newsgn)
 // convert to a legal two's complement long if possible
 // if too big, return most negative/positive value
 
-long Itolong(const gbtIntegerRep* rep)
+long Itolong(const IntegerRep* rep)
 { 
   if ((unsigned)(rep->len) > (unsigned)(SHORT_PER_LONG))
     return (rep->sgn == I_POSITIVE) ? LONG_MAX : LONG_MIN;
@@ -420,7 +422,7 @@ long Itolong(const gbtIntegerRep* rep)
 // test whether op long() will work.
 // careful about asymmetry between LONG_MIN & LONG_MAX
 
-int Iislong(const gbtIntegerRep* rep)
+int Iislong(const IntegerRep* rep)
 {
   unsigned int l = rep->len;
   if (l < SHORT_PER_LONG)
@@ -442,7 +444,7 @@ int Iislong(const gbtIntegerRep* rep)
 
 // convert to a double 
 
-double Itodouble(const gbtIntegerRep* rep)
+double Itodouble(const IntegerRep* rep)
 { 
   double d = 0.0;
   double bound = DBL_MAX / 2.0;
@@ -469,7 +471,7 @@ double Itodouble(const gbtIntegerRep* rep)
 // have to actually try it in order to find out
 // since otherwise might trigger fp exception
 
-int Iisdouble(const gbtIntegerRep* rep)
+int Iisdouble(const IntegerRep* rep)
 {
   double d = 0.0;
   double bound = DBL_MAX / 2.0;
@@ -491,9 +493,9 @@ int Iisdouble(const gbtIntegerRep* rep)
 
 // real division of num / den
 
-double ratio(const gbtInteger& num, const gbtInteger& den)
+double ratio(const Integer& num, const Integer& den)
 {
-  gbtInteger q, r;
+  Integer q, r;
   divide(num, den, q, r);
   double d1 = q.as_double();
  
@@ -538,7 +540,7 @@ double ratio(const gbtInteger& num, const gbtInteger& den)
 
 // comparison functions
   
-int compare(const gbtIntegerRep* x, const gbtIntegerRep* y)
+int compare(const IntegerRep* x, const IntegerRep* y)
 {
   int diff  = x->sgn - y->sgn;
   if (diff == 0)
@@ -552,7 +554,7 @@ int compare(const gbtIntegerRep* x, const gbtIntegerRep* y)
   return diff;
 }
 
-int ucompare(const gbtIntegerRep* x, const gbtIntegerRep* y)
+int ucompare(const IntegerRep* x, const IntegerRep* y)
 {
   int diff = x->len - y->len;
   if (diff == 0)
@@ -565,7 +567,7 @@ int ucompare(const gbtIntegerRep* x, const gbtIntegerRep* y)
   return diff;
 }
 
-int compare(const gbtIntegerRep* x, long  y)
+int compare(const IntegerRep* x, long  y)
 {
   int xl = x->len;
   int xsgn = x->sgn;
@@ -606,7 +608,7 @@ int compare(const gbtIntegerRep* x, long  y)
   }
 }
 
-int ucompare(const gbtIntegerRep* x, long  y)
+int ucompare(const IntegerRep* x, long  y)
 {
   int xl = x->len;
   if (y == 0)
@@ -636,8 +638,8 @@ int ucompare(const gbtIntegerRep* x, long  y)
 
 // arithmetic functions
 
-gbtIntegerRep* add(const gbtIntegerRep* x, int negatex, 
-            const gbtIntegerRep* y, int negatey, gbtIntegerRep* r)
+IntegerRep* add(const IntegerRep* x, int negatex, 
+            const IntegerRep* y, int negatey, IntegerRep* r)
 {
   nonnil(x);
   nonnil(y);
@@ -755,7 +757,7 @@ gbtIntegerRep* add(const gbtIntegerRep* x, int negatex,
 }
 
 
-gbtIntegerRep* add(const gbtIntegerRep* x, int negatex, long y, gbtIntegerRep* r)
+IntegerRep* add(const IntegerRep* x, int negatex, long y, IntegerRep* r)
 {
   nonnil(x);
   int xl = x->len;
@@ -864,7 +866,7 @@ gbtIntegerRep* add(const gbtIntegerRep* x, int negatex, long y, gbtIntegerRep* r
 }
 
 
-gbtIntegerRep* multiply(const gbtIntegerRep* x, const gbtIntegerRep* y, gbtIntegerRep* r)
+IntegerRep* multiply(const IntegerRep* x, const IntegerRep* y, IntegerRep* r)
 {
   nonnil(x);
   nonnil(y);
@@ -1016,7 +1018,7 @@ gbtIntegerRep* multiply(const gbtIntegerRep* x, const gbtIntegerRep* y, gbtInteg
 }
 
 
-gbtIntegerRep* multiply(const gbtIntegerRep* x, long y, gbtIntegerRep* r)
+IntegerRep* multiply(const IntegerRep* x, long y, IntegerRep* r)
 {
   nonnil(x);
   int xl = x->len;
@@ -1224,13 +1226,13 @@ static int unscale(const unsigned short* x, int xl, unsigned short y,
 }
 
 
-gbtIntegerRep* div(const gbtIntegerRep* x, const gbtIntegerRep* y, gbtIntegerRep* q)
+IntegerRep* div(const IntegerRep* x, const IntegerRep* y, IntegerRep* q)
 {
   nonnil(x);
   nonnil(y);
   int xl = x->len;
   int yl = y->len;
-  // if (yl == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
+  // if (yl == 0) (*lib_error_handler)("Integer", "attempted division by zero");
   assert(yl != 0);
 
   int comp = ucompare(x, y);
@@ -1250,8 +1252,8 @@ gbtIntegerRep* div(const gbtIntegerRep* x, const gbtIntegerRep* y, gbtIntegerRep
   }
   else
   {
-    gbtIntegerRep* yy = 0;
-    gbtIntegerRep* r  = 0;
+    IntegerRep* yy = 0;
+    IntegerRep* r  = 0;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == q)
     {
@@ -1260,7 +1262,7 @@ gbtIntegerRep* div(const gbtIntegerRep* x, const gbtIntegerRep* y, gbtIntegerRep
     }
     else
     {
-      yy = (gbtIntegerRep*)y;
+      yy = (IntegerRep*)y;
       r = Icalloc(r, xl + 1);
       scpy(x->s, r->s, xl);
     }
@@ -1270,19 +1272,19 @@ gbtIntegerRep* div(const gbtIntegerRep* x, const gbtIntegerRep* y, gbtIntegerRep
     q = Icalloc(q, ql);
     do_divide(r->s, yy->s, yl, q->s, ql);
 
-    if (yy != y && !STATIC_gbtIntegerRep(yy)) delete yy;
-    if (!STATIC_gbtIntegerRep(r)) delete r;
+    if (yy != y && !STATIC_IntegerRep(yy)) delete yy;
+    if (!STATIC_IntegerRep(r)) delete r;
   }
   q->sgn = samesign;
   Icheck(q);
   return q;
 }
 
-gbtIntegerRep* div(const gbtIntegerRep* x, long y, gbtIntegerRep* q)
+IntegerRep* div(const IntegerRep* x, long y, IntegerRep* q)
 {
   nonnil(x);
   int xl = x->len;
-  // if (y == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
+  // if (y == 0) (*lib_error_handler)("Integer", "attempted division by zero");
   assert(y != 0);
 
   unsigned short ys[SHORT_PER_LONG];
@@ -1318,7 +1320,7 @@ gbtIntegerRep* div(const gbtIntegerRep* x, long y, gbtIntegerRep* q)
   }
   else
   {
-    gbtIntegerRep* r  = 0;
+    IntegerRep* r  = 0;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1)
     {
@@ -1339,7 +1341,7 @@ gbtIntegerRep* div(const gbtIntegerRep* x, long y, gbtIntegerRep* q)
     q = Icalloc(q, ql);
     do_divide(r->s, ys, yl, q->s, ql);
 
-    if (!STATIC_gbtIntegerRep(r)) delete r;
+    if (!STATIC_IntegerRep(r)) delete r;
   }
   q->sgn = samesign;
   Icheck(q);
@@ -1347,13 +1349,13 @@ gbtIntegerRep* div(const gbtIntegerRep* x, long y, gbtIntegerRep* q)
 }
 
 
-void divide(const gbtInteger& Ix, long y, gbtInteger& Iq, long& rem)
+void divide(const Integer& Ix, long y, Integer& Iq, long& rem)
 {
-  const gbtIntegerRep* x = Ix.rep;
+  const IntegerRep* x = Ix.rep;
   nonnil(x);
-  gbtIntegerRep* q = Iq.rep;
+  IntegerRep* q = Iq.rep;
   int xl = x->len;
-  // if (y == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
+  // if (y == 0) (*lib_error_handler)("Integer", "attempted division by zero");
   assert(y != 0);
 
   unsigned short ys[SHORT_PER_LONG];
@@ -1393,7 +1395,7 @@ void divide(const gbtInteger& Ix, long y, gbtInteger& Iq, long& rem)
   }
   else
   {
-    gbtIntegerRep* r  = 0;
+    IntegerRep* r  = 0;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1)
     {
@@ -1422,9 +1424,9 @@ void divide(const gbtInteger& Ix, long y, gbtInteger& Iq, long& rem)
     }
     Icheck(r);
     rem = Itolong(r);
-    if (!STATIC_gbtIntegerRep(r)) delete r;
+    if (!STATIC_IntegerRep(r)) delete r;
   }
-  rem = abs(rem);
+  rem = abs(rem).as_long();
   if (xsgn == I_NEGATIVE) rem = -rem;
   q->sgn = samesign;
   Icheck(q);
@@ -1432,19 +1434,19 @@ void divide(const gbtInteger& Ix, long y, gbtInteger& Iq, long& rem)
 }
 
 
-void divide(const gbtInteger& Ix, const gbtInteger& Iy, gbtInteger& Iq, gbtInteger& Ir)
+void divide(const Integer& Ix, const Integer& Iy, Integer& Iq, Integer& Ir)
 {
-  const gbtIntegerRep* x = Ix.rep;
+  const IntegerRep* x = Ix.rep;
   nonnil(x);
-  const gbtIntegerRep* y = Iy.rep;
+  const IntegerRep* y = Iy.rep;
   nonnil(y);
-  gbtIntegerRep* q = Iq.rep;
-  gbtIntegerRep* r = Ir.rep;
+  IntegerRep* q = Iq.rep;
+  IntegerRep* r = Ir.rep;
 
   int xl = x->len;
   int yl = y->len;
   /* if (yl == 0)
-    (*lib_error_handler)("gbtInteger", "attempted division by zero");
+    (*lib_error_handler)("Integer", "attempted division by zero");
   */
   assert(yl != 0);
 
@@ -1474,7 +1476,7 @@ void divide(const gbtInteger& Ix, const gbtInteger& Iy, gbtInteger& Iq, gbtInteg
   }
   else
   {
-    gbtIntegerRep* yy = 0;
+    IntegerRep* yy = 0;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == q || y == r)
     {
@@ -1483,7 +1485,7 @@ void divide(const gbtInteger& Ix, const gbtInteger& Iy, gbtInteger& Iq, gbtInteg
     }
     else
     {
-      yy = (gbtIntegerRep*)y;
+      yy = (IntegerRep*)y;
       r = Icalloc(r, xl + 1);
       scpy(x->s, r->s, xl);
     }
@@ -1493,7 +1495,7 @@ void divide(const gbtInteger& Ix, const gbtInteger& Iy, gbtInteger& Iq, gbtInteg
     q = Icalloc(q, ql);
     do_divide(r->s, yy->s, yl, q->s, ql);
 
-    if (yy != y && !STATIC_gbtIntegerRep(yy)) delete yy;
+    if (yy != y && !STATIC_IntegerRep(yy)) delete yy;
     if (prescale != 1)
     {
       Icheck(r);
@@ -1507,13 +1509,13 @@ void divide(const gbtInteger& Ix, const gbtInteger& Iy, gbtInteger& Iq, gbtInteg
   Ir.rep = r;
 }
 
-gbtIntegerRep* mod(const gbtIntegerRep* x, const gbtIntegerRep* y, gbtIntegerRep* r)
+IntegerRep* mod(const IntegerRep* x, const IntegerRep* y, IntegerRep* r)
 {
   nonnil(x);
   nonnil(y);
   int xl = x->len;
   int yl = y->len;
-  // if (yl == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
+  // if (yl == 0) (*lib_error_handler)("Integer", "attempted division by zero");
   assert(yl != 0);
 
   int comp = ucompare(x, y);
@@ -1532,7 +1534,7 @@ gbtIntegerRep* mod(const gbtIntegerRep* x, const gbtIntegerRep* y, gbtIntegerRep
   }
   else
   {
-    gbtIntegerRep* yy = 0;
+    IntegerRep* yy = 0;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == r)
     {
@@ -1541,14 +1543,14 @@ gbtIntegerRep* mod(const gbtIntegerRep* x, const gbtIntegerRep* y, gbtIntegerRep
     }
     else
     {
-      yy = (gbtIntegerRep*)y;
+      yy = (IntegerRep*)y;
       r = Icalloc(r, xl + 1);
       scpy(x->s, r->s, xl);
     }
       
     do_divide(r->s, yy->s, yl, 0, xl - yl + 1);
 
-    if (yy != y && !STATIC_gbtIntegerRep(yy)) delete yy;
+    if (yy != y && !STATIC_IntegerRep(yy)) delete yy;
 
     if (prescale != 1)
     {
@@ -1560,11 +1562,11 @@ gbtIntegerRep* mod(const gbtIntegerRep* x, const gbtIntegerRep* y, gbtIntegerRep
   return r;
 }
 
-gbtIntegerRep* mod(const gbtIntegerRep* x, long y, gbtIntegerRep* r)
+IntegerRep* mod(const IntegerRep* x, long y, IntegerRep* r)
 {
   nonnil(x);
   int xl = x->len;
-  // if (y == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
+  // if (y == 0) (*lib_error_handler)("Integer", "attempted division by zero");
   assert(y != 0);
 
   unsigned short ys[SHORT_PER_LONG];
@@ -1626,7 +1628,7 @@ gbtIntegerRep* mod(const gbtIntegerRep* x, long y, gbtIntegerRep* r)
   return r;
 }
 
-gbtIntegerRep* lshift(const gbtIntegerRep* x, long y, gbtIntegerRep* r)
+IntegerRep* lshift(const IntegerRep* x, long y, IntegerRep* r)
 {
   nonnil(x);
   int xl = x->len;
@@ -1700,7 +1702,7 @@ gbtIntegerRep* lshift(const gbtIntegerRep* x, long y, gbtIntegerRep* r)
   return r;
 }
 
-gbtIntegerRep* lshift(const gbtIntegerRep* x, const gbtIntegerRep* yy, int negatey, gbtIntegerRep* r)
+IntegerRep* lshift(const IntegerRep* x, const IntegerRep* yy, int negatey, IntegerRep* r)
 {
   long y = Itolong(yy);
   if (negatey)
@@ -1709,7 +1711,7 @@ gbtIntegerRep* lshift(const gbtIntegerRep* x, const gbtIntegerRep* yy, int negat
   return lshift(x, y, r);
 }
 
-gbtIntegerRep* bitop(const gbtIntegerRep* x, const gbtIntegerRep* y, gbtIntegerRep* r, char op)
+IntegerRep* bitop(const IntegerRep* x, const IntegerRep* y, IntegerRep* r, char op)
 {
   nonnil(x);
   nonnil(y);
@@ -1760,7 +1762,7 @@ gbtIntegerRep* bitop(const gbtIntegerRep* x, const gbtIntegerRep* y, gbtIntegerR
   return r;
 }
 
-gbtIntegerRep* bitop(const gbtIntegerRep* x, long y, gbtIntegerRep* r, char op)
+IntegerRep* bitop(const IntegerRep* x, long y, IntegerRep* r, char op)
 {
   nonnil(x);
   unsigned short tmp[SHORT_PER_LONG];
@@ -1826,7 +1828,7 @@ gbtIntegerRep* bitop(const gbtIntegerRep* x, long y, gbtIntegerRep* r, char op)
 
 
 
-gbtIntegerRep*  Compl(const gbtIntegerRep* src, gbtIntegerRep* r)
+IntegerRep*  Compl(const IntegerRep* src, IntegerRep* r)
 {
   nonnil(src);
   r = Icopy(r, src);
@@ -1850,7 +1852,7 @@ gbtIntegerRep*  Compl(const gbtIntegerRep* src, gbtIntegerRep* r)
   return r;
 }
 
-void (setbit)(gbtInteger& x, long b)
+void (setbit)(Integer& x, long b)
 {
   if (b >= 0)
   {
@@ -1864,7 +1866,7 @@ void (setbit)(gbtInteger& x, long b)
   }
 }
 
-void clearbit(gbtInteger& x, long b)
+void clearbit(Integer& x, long b)
 {
   if (b >= 0)
     {
@@ -1881,7 +1883,7 @@ void clearbit(gbtInteger& x, long b)
   }
 }
 
-int testbit(const gbtInteger& x, long b)
+int testbit(const Integer& x, long b)
 {
   if (x.rep != 0 && b >= 0)
   {
@@ -1896,7 +1898,7 @@ int testbit(const gbtInteger& x, long b)
 // A  version of knuth's algorithm B / ex. 4.5.3.34
 // A better version that doesn't bother shifting all of `t' forthcoming
 
-gbtIntegerRep* gcd(const gbtIntegerRep* x, const gbtIntegerRep* y)
+IntegerRep* gcd(const IntegerRep* x, const IntegerRep* y)
 {
   nonnil(x);
   nonnil(y);
@@ -1908,8 +1910,8 @@ gbtIntegerRep* gcd(const gbtIntegerRep* x, const gbtIntegerRep* y)
   else if (ul == 0)
     return Ialloc(0, y->s, vl, I_POSITIVE, vl);
 
-  gbtIntegerRep* u = Ialloc(0, x->s, ul, I_POSITIVE, ul);
-  gbtIntegerRep* v = Ialloc(0, y->s, vl, I_POSITIVE, vl);
+  IntegerRep* u = Ialloc(0, x->s, ul, I_POSITIVE, ul);
+  IntegerRep* v = Ialloc(0, y->s, vl, I_POSITIVE, vl);
 
 // find shift so that both not even
 
@@ -1942,7 +1944,7 @@ gbtIntegerRep* gcd(const gbtIntegerRep* x, const gbtIntegerRep* y)
     v = lshift(v, -k, v);
   }
 
-  gbtIntegerRep* t;
+  IntegerRep* t;
   if (u->s[0] & 01)
     t = Ialloc(0, v->s, v->len, !v->sgn, v->len);
   else
@@ -1984,15 +1986,15 @@ gbtIntegerRep* gcd(const gbtIntegerRep* x, const gbtIntegerRep* y)
       t = add(t, 0, u, 0, t);
     }
   }
-  if (!STATIC_gbtIntegerRep(t)) delete t;
-  if (!STATIC_gbtIntegerRep(v)) delete v;
+  if (!STATIC_IntegerRep(t)) delete t;
+  if (!STATIC_IntegerRep(v)) delete v;
   if (k != 0) u = lshift(u, k, u);
   return u;
 }
 
 
 
-long lg(const gbtIntegerRep* x)
+long lg(const IntegerRep* x)
 {
   nonnil(x);
   int xl = x->len;
@@ -2010,7 +2012,7 @@ long lg(const gbtIntegerRep* x)
   return l;
 }
   
-gbtIntegerRep* power(const gbtIntegerRep* x, long y, gbtIntegerRep* r)
+IntegerRep* power(const IntegerRep* x, long y, IntegerRep* r)
 {
   nonnil(x);
   int sgn;
@@ -2030,7 +2032,7 @@ gbtIntegerRep* power(const gbtIntegerRep* x, long y, gbtIntegerRep* r)
   else
   {
 	 int maxsize = (int) (((lg(x) + 1) * y) / I_SHIFT + 2);     // pre-allocate space
-    gbtIntegerRep* b = Ialloc(0, x->s, xl, I_POSITIVE, maxsize);
+    IntegerRep* b = Ialloc(0, x->s, xl, I_POSITIVE, maxsize);
     b->len = xl;
     r = Icalloc(r, maxsize);
     r = Icopy_one(r, I_POSITIVE);
@@ -2043,14 +2045,14 @@ gbtIntegerRep* power(const gbtIntegerRep* x, long y, gbtIntegerRep* r)
       else
         b = multiply(b, b, b);
     }
-    if (!STATIC_gbtIntegerRep(b)) delete b;
+    if (!STATIC_IntegerRep(b)) delete b;
   }
   r->sgn = sgn;
   Icheck(r);
   return r;
 }
 
-gbtIntegerRep* abs(const gbtIntegerRep* src, gbtIntegerRep* dest)
+IntegerRep* abs(const IntegerRep* src, IntegerRep* dest)
 {
   nonnil(src);
   if (src != dest)
@@ -2059,7 +2061,7 @@ gbtIntegerRep* abs(const gbtIntegerRep* src, gbtIntegerRep* dest)
   return dest;
 }
 
-gbtIntegerRep* negate(const gbtIntegerRep* src, gbtIntegerRep* dest)
+IntegerRep* negate(const IntegerRep* src, IntegerRep* dest)
 {
   nonnil(src);
   if (src != dest)
@@ -2071,15 +2073,15 @@ gbtIntegerRep* negate(const gbtIntegerRep* src, gbtIntegerRep* dest)
 
 #if defined(__GNUG__) && !defined(NO_NRV)
 
-gbtInteger sqrt(const gbtInteger& x)
+Integer sqrt(const Integer& x)
 {
-  gbtInteger r;
+  Integer r;
   int s = sign(x);
-  if (s < 0) x.error("Attempted square root of negative gbtInteger");
+  if (s < 0) x.error("Attempted square root of negative Integer");
   if (s != 0)
   {
     r >>= (lg(x) / 2); // get close
-    gbtInteger q;
+    Integer q;
     div(x, r, q);
     while (q < r)
     {
@@ -2091,12 +2093,12 @@ gbtInteger sqrt(const gbtInteger& x)
   return r;
 }
 
-gbtInteger lcm(const gbtInteger& x, const gbtInteger& y)
+Integer lcm(const Integer& x, const Integer& y)
 {
-  gbtInteger r;
+  Integer r;
   if (!x.initialized() || !y.initialized())
-    x.error("operation on uninitialized gbtInteger");
-  gbtInteger g;
+    x.error("operation on uninitialized Integer");
+  Integer g;
   if (sign(x) == 0 || sign(y) == 0)
     g = 1;
   else 
@@ -2107,15 +2109,15 @@ gbtInteger lcm(const gbtInteger& x, const gbtInteger& y)
 }
 
 #else 
-gbtInteger sqrt(const gbtInteger& x) 
+Integer sqrt(const Integer& x) 
 {
-  gbtInteger r(x);
+  Integer r(x);
   int s = sign(x);
-  if (s < 0) x.error("Attempted square root of negative gbtInteger");
+  if (s < 0) x.error("Attempted square root of negative Integer");
   if (s != 0)
   {
     r >>= (lg(x) / 2); // get close
-    gbtInteger q;
+    Integer q;
     div(x, r, q);
     while (q < r)
     {
@@ -2127,12 +2129,12 @@ gbtInteger sqrt(const gbtInteger& x)
   return r;
 }
 
-gbtInteger lcm(const gbtInteger& x, const gbtInteger& y) 
+Integer lcm(const Integer& x, const Integer& y) 
 {
-  gbtInteger r;
+  Integer r;
   if (!x.initialized() || !y.initialized())
-    x.error("operation on uninitialized gbtInteger");
-  gbtInteger g;
+    x.error("operation on uninitialized Integer");
+  Integer g;
   if (sign(x) == 0 || sign(y) == 0)
     g = 1;
   else 
@@ -2146,10 +2148,10 @@ gbtInteger lcm(const gbtInteger& x, const gbtInteger& y)
 
 
 
-gbtIntegerRep* atogbtIntegerRep(const char* s, int base)
+IntegerRep* atoIntegerRep(const char* s, int base)
 {
   int sl = strlen(s);
-  gbtIntegerRep* r = Icalloc(0, (int) (sl * (lg(base) + 1) / I_SHIFT + 1));
+  IntegerRep* r = Icalloc(0, (int) (sl * (lg(base) + 1) / I_SHIFT + 1));
   if (s != 0)
   {
     char sgn;
@@ -2184,7 +2186,7 @@ gbtIntegerRep* atogbtIntegerRep(const char* s, int base)
 }
 
 
-std::string Itoa(const gbtIntegerRep *x, int base, int width)
+std::string Itoa(const IntegerRep *x, int base, int width)
 {
   int fmtlen = (int) ((x->len + 1) * I_SHIFT / lg(base) + 4 + width);
   std::string fmtbase;
@@ -2194,12 +2196,12 @@ std::string Itoa(const gbtIntegerRep *x, int base, int width)
   return cvtItoa(x, fmtbase, fmtlen, base, 0, width, 0, ' ', 'X', 0);
 }
 
-std::ostream &operator<<(std::ostream &s, const gbtInteger &y)
+std::ostream &operator<<(std::ostream &s, const Integer &y)
 {
   return s << Itoa(y.rep);
 }
 
-std::string cvtItoa(const gbtIntegerRep *x, std::string fmt, int& fmtlen, int base, int showbase,
+std::string cvtItoa(const IntegerRep *x, std::string fmt, int& fmtlen, int base, int showbase,
               int width, int align_right, char fillchar, char Xcase, 
               int showpos)
 {
@@ -2211,7 +2213,7 @@ std::string cvtItoa(const gbtIntegerRep *x, std::string fmt, int& fmtlen, int ba
     *--s = '0';
   else
   {
-    gbtIntegerRep* z = Icopy(0, x);
+    IntegerRep* z = Icopy(0, x);
 
     // split division by base into two parts: 
     // first divide by biggest power of base that fits in an unsigned short,
@@ -2242,7 +2244,7 @@ std::string cvtItoa(const gbtIntegerRep *x, std::string fmt, int& fmtlen, int ba
             ch += '0';
           *--s = ch;
         }
-	if (!STATIC_gbtIntegerRep(z)) delete z;
+	if (!STATIC_IntegerRep(z)) delete z;
         break;
       }
       else
@@ -2291,27 +2293,7 @@ std::string cvtItoa(const gbtIntegerRep *x, std::string fmt, int& fmtlen, int ba
   }
 }
 
-std::string dec(const gbtInteger& x, int width)
-{
-  return Itoa(x, 10, width);
-}
-
-std::string oct(const gbtInteger& x, int width)
-{
-  return Itoa(x, 8, width);
-}
-
-std::string hex(const gbtInteger& x, int width)
-{
-  return Itoa(x, 16, width);
-}
-
-//
-// The >> operator is currently commented out... should be modified to
-// work with the input/output classes later...
-//
-
-std::istream &operator>>(std::istream &s, gbtInteger& y)
+std::istream &operator>>(std::istream &s, Integer& y)
 {
   char sgn = 0;
   char ch;
@@ -2352,13 +2334,13 @@ std::istream &operator>>(std::istream &s, gbtInteger& y)
   return s;
 }
 
-int gbtInteger::OK() const
+int Integer::OK() const
 {
   if (rep != 0)
 	 {
       int l = rep->len;
       int s = rep->sgn;
-      int v = l <= rep->sz || STATIC_gbtIntegerRep(rep);    // length within bounds
+      int v = l <= rep->sz || STATIC_IntegerRep(rep);    // length within bounds
       v &= s == 0 || s == 1;        // legal sign
       Icheck(rep);                  // and correctly adjusted
       v &= rep->len == l;
@@ -2370,9 +2352,9 @@ int gbtInteger::OK() const
   return 0;
 }
 
-void gbtInteger::error(const char* msg) const
+void Integer::error(const char* msg) const
 {
-  // (*lib_error_handler)("gbtInteger", msg);
+  // (*lib_error_handler)("Integer", msg);
   //  gerr << msg << '\n';
 }
 
@@ -2381,884 +2363,548 @@ void gbtInteger::error(const char* msg) const
 // The following were moved from the header file to stop BC from squealing
 // endless quantities of warnings
 
-gbtInteger::gbtInteger() :rep(&_ZeroRep) {}
+Integer::Integer() :rep(&_ZeroRep) {}
 
-gbtInteger::gbtInteger(gbtIntegerRep* r) :rep(r) {}
+Integer::Integer(IntegerRep* r) :rep(r) {}
 
-gbtInteger::gbtInteger(int y) :rep(Icopy_long(0, (long)y)) {}
+Integer::Integer(int y) :rep(Icopy_long(0, (long)y)) {}
 
-gbtInteger::gbtInteger(long y) :rep(Icopy_long(0, y)) {}
+Integer::Integer(long y) :rep(Icopy_long(0, y)) {}
 
-gbtInteger::gbtInteger(unsigned long y) :rep(Icopy_ulong(0, y)) {}
+Integer::Integer(unsigned long y) :rep(Icopy_ulong(0, y)) {}
 
-gbtInteger::gbtInteger(const gbtInteger&  y) :rep(Icopy(0, y.rep)) {}
+Integer::Integer(const Integer&  y) :rep(Icopy(0, y.rep)) {}
 
-gbtInteger::~gbtInteger() { if (rep && !STATIC_gbtIntegerRep(rep)) delete rep; }
+Integer::~Integer() { if (rep && !STATIC_IntegerRep(rep)) delete rep; }
 
-void  gbtInteger::operator = (const gbtInteger&  y)
+Integer &Integer::operator=(const Integer &y)
 {
   rep = Icopy(rep, y.rep);
+  return *this;
 }
 
-void gbtInteger::operator = (long y)
+Integer &Integer::operator=(long y)
 {
   rep = Icopy_long(rep, y); 
+  return *this;
 }
 
-int gbtInteger::initialized() const
+int Integer::initialized() const
 {
   return rep != 0;
 }
 
 // procedural versions
 
-int compare(const gbtInteger& x, const gbtInteger& y)
+int compare(const Integer& x, const Integer& y)
 {
   return compare(x.rep, y.rep);
 }
 
-int ucompare(const gbtInteger& x, const gbtInteger& y)
+int ucompare(const Integer& x, const Integer& y)
 {
   return ucompare(x.rep, y.rep);
 }
 
-int compare(const gbtInteger& x, long y)
+int compare(const Integer& x, long y)
 {
   return compare(x.rep, y);
 }
 
-int ucompare(const gbtInteger& x, long y)
+int ucompare(const Integer& x, long y)
 {
   return ucompare(x.rep, y);
 }
 
-int compare(long x, const gbtInteger& y)
+int compare(long x, const Integer& y)
 {
   return -compare(y.rep, x);
 }
 
-int ucompare(long x, const gbtInteger& y)
+int ucompare(long x, const Integer& y)
 {
   return -ucompare(y.rep, x);
 }
 
-void  add(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest)
+void  add(const Integer& x, const Integer& y, Integer& dest)
 {
   dest.rep = add(x.rep, 0, y.rep, 0, dest.rep);
 }
 
-void  sub(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest)
+void  sub(const Integer& x, const Integer& y, Integer& dest)
 {
   dest.rep = add(x.rep, 0, y.rep, 1, dest.rep);
 }
 
-void  mul(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest)
+void  mul(const Integer& x, const Integer& y, Integer& dest)
 {
   dest.rep = multiply(x.rep, y.rep, dest.rep);
 }
 
-void  div(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest)
+void  div(const Integer& x, const Integer& y, Integer& dest)
 {
   dest.rep = div(x.rep, y.rep, dest.rep);
 }
 
-void  mod(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest)
+void  mod(const Integer& x, const Integer& y, Integer& dest)
 {
   dest.rep = mod(x.rep, y.rep, dest.rep);
 }
 
-void  And(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest)
-{
-  dest.rep = bitop(x.rep, y.rep, dest.rep, '&');
-}
-
-void  Or(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest)
-{
-  dest.rep = bitop(x.rep, y.rep, dest.rep, '|');
-}
-
-void  Xor(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest)
-{
-  dest.rep = bitop(x.rep, y.rep, dest.rep, '^');
-}
-
-void  lshift(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest)
+void  lshift(const Integer& x, const Integer& y, Integer& dest)
 {
   dest.rep = lshift(x.rep, y.rep, 0, dest.rep);
 }
 
-void  rshift(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest)
+void  rshift(const Integer& x, const Integer& y, Integer& dest)
 {
   dest.rep = lshift(x.rep, y.rep, 1, dest.rep);
 }
 
-void  pow(const gbtInteger& x, const gbtInteger& y, gbtInteger& dest)
+void  pow(const Integer& x, const Integer& y, Integer& dest)
 {
   dest.rep = power(x.rep, Itolong(y.rep), dest.rep); // not incorrect
 }
 
-void  add(const gbtInteger& x, long y, gbtInteger& dest)
+void  add(const Integer& x, long y, Integer& dest)
 {
   dest.rep = add(x.rep, 0, y, dest.rep);
 }
 
-void  sub(const gbtInteger& x, long y, gbtInteger& dest)
+void  sub(const Integer& x, long y, Integer& dest)
 {
   dest.rep = add(x.rep, 0, -y, dest.rep);
 }
 
-void  mul(const gbtInteger& x, long y, gbtInteger& dest)
+void  mul(const Integer& x, long y, Integer& dest)
 {
   dest.rep = multiply(x.rep, y, dest.rep);
 }
 
-void  div(const gbtInteger& x, long y, gbtInteger& dest)
+void  div(const Integer& x, long y, Integer& dest)
 {
   dest.rep = div(x.rep, y, dest.rep);
 }
 
-void  mod(const gbtInteger& x, long y, gbtInteger& dest)
+void  mod(const Integer& x, long y, Integer& dest)
 {
   dest.rep = mod(x.rep, y, dest.rep);
 }
 
-void  And(const gbtInteger& x, long y, gbtInteger& dest)
-{
-  dest.rep = bitop(x.rep, y, dest.rep, '&');
-}
 
-void  Or(const gbtInteger& x, long y, gbtInteger& dest)
-{
-  dest.rep = bitop(x.rep, y, dest.rep, '|');
-}
-
-void  Xor(const gbtInteger& x, long y, gbtInteger& dest)
-{
-  dest.rep = bitop(x.rep, y, dest.rep, '^');
-}
-
-void  lshift(const gbtInteger& x, long y, gbtInteger& dest)
+void  lshift(const Integer& x, long y, Integer& dest)
 {
   dest.rep = lshift(x.rep, y, dest.rep);
 }
 
-void  rshift(const gbtInteger& x, long y, gbtInteger& dest)
+void  rshift(const Integer& x, long y, Integer& dest)
 {
   dest.rep = lshift(x.rep, -y, dest.rep);
 }
 
-void  pow(const gbtInteger& x, long y, gbtInteger& dest)
+void  pow(const Integer& x, long y, Integer& dest)
 {
   dest.rep = power(x.rep, y, dest.rep);
 }
 
-void abs(const gbtInteger& x, gbtInteger& dest)
+void abs(const Integer& x, Integer& dest)
 {
   dest.rep = abs(x.rep, dest.rep);
 }
 
-void negate(const gbtInteger& x, gbtInteger& dest)
+void negate(const Integer& x, Integer& dest)
 {
   dest.rep = negate(x.rep, dest.rep);
 }
 
-void complement(const gbtInteger& x, gbtInteger& dest)
+void complement(const Integer& x, Integer& dest)
 {
   dest.rep = Compl(x.rep, dest.rep);
 }
 
-void  add(long x, const gbtInteger& y, gbtInteger& dest)
+void  add(long x, const Integer& y, Integer& dest)
 {
   dest.rep = add(y.rep, 0, x, dest.rep);
 }
 
-void  sub(long x, const gbtInteger& y, gbtInteger& dest)
+void  sub(long x, const Integer& y, Integer& dest)
 {
   dest.rep = add(y.rep, 1, x, dest.rep);
 }
 
-void  mul(long x, const gbtInteger& y, gbtInteger& dest)
+void  mul(long x, const Integer& y, Integer& dest)
 {
   dest.rep = multiply(y.rep, x, dest.rep);
 }
 
-void  And(long x, const gbtInteger& y, gbtInteger& dest)
-{
-  dest.rep = bitop(y.rep, x, dest.rep, '&');
-}
-
-void  Or(long x, const gbtInteger& y, gbtInteger& dest)
-{
-  dest.rep = bitop(y.rep, x, dest.rep, '|');
-}
-
-void  Xor(long x, const gbtInteger& y, gbtInteger& dest)
-{
-  dest.rep = bitop(y.rep, x, dest.rep, '^');
-}
-
-
 // operator versions
 
-int operator == (const gbtInteger&  x, const gbtInteger&  y)
+bool Integer::operator==(const Integer &y) const
 {
-  return compare(x, y) == 0; 
+  return compare(*this, y) == 0; 
 }
 
-int operator == (const gbtInteger&  x, long y)
+bool Integer::operator==(long y) const
 {
-  return compare(x, y) == 0; 
+  return compare(*this, y) == 0; 
 }
 
-int operator != (const gbtInteger&  x, const gbtInteger&  y)
+bool Integer::operator!=(const Integer &y) const
 {
-  return compare(x, y) != 0; 
+  return compare(*this, y) != 0; 
 }
 
-int operator != (const gbtInteger&  x, long y)
+bool Integer::operator!=(long y) const
 {
-  return compare(x, y) != 0; 
+  return compare(*this, y) != 0; 
 }
 
-int operator <  (const gbtInteger&  x, const gbtInteger&  y)
+bool Integer::operator<(const Integer &y) const
 {
-  return compare(x, y) <  0; 
+  return compare(*this, y) <  0; 
 }
 
-int operator <  (const gbtInteger&  x, long y)
+bool Integer::operator<(long y) const
 {
-  return compare(x, y) <  0; 
+  return compare(*this, y) <  0; 
 }
 
-int operator <= (const gbtInteger&  x, const gbtInteger&  y)
+bool Integer::operator<=(const Integer &y) const
 {
-  return compare(x, y) <= 0; 
+  return compare(*this, y) <= 0; 
 }
 
-int operator <= (const gbtInteger&  x, long y)
+bool Integer::operator<=(long y) const
 {
-  return compare(x, y) <= 0; 
+  return compare(*this, y) <= 0; 
 }
 
-int operator >  (const gbtInteger&  x, const gbtInteger&  y)
+bool Integer::operator>(const Integer &y) const
 {
-  return compare(x, y) >  0; 
+  return compare(*this, y) >  0; 
 }
 
-int operator >  (const gbtInteger&  x, long y)
+bool Integer::operator>(long y) const
 {
-  return compare(x, y) >  0; 
+  return compare(*this, y) >  0; 
 }
 
-int operator >= (const gbtInteger&  x, const gbtInteger&  y)
+bool Integer::operator>=(const Integer &y) const
 {
-  return compare(x, y) >= 0; 
+  return compare(*this, y) >= 0; 
 }
 
-int operator >= (const gbtInteger&  x, long y)
+bool Integer::operator>=(long y) const
 {
-  return compare(x, y) >= 0; 
+  return compare(*this, y) >= 0; 
 }
 
 
-void  gbtInteger::operator += (const gbtInteger& y)
-{
-  add(*this, y, *this);
-}
-
-void  gbtInteger::operator += (long y)
+Integer &Integer::operator+=(const Integer &y)
 {
   add(*this, y, *this);
+  return *this;
 }
 
-void gbtInteger::operator ++ ()
+Integer &Integer::operator+=(long y)
+{
+  add(*this, y, *this);
+  return *this;
+}
+
+void Integer::operator ++ ()
 {
   add(*this, 1, *this);
 }
 
 
-void  gbtInteger::operator -= (const gbtInteger& y)
+Integer &Integer::operator-=(const Integer &y)
 {
+  sub(*this, y, *this);
+  return *this;
+}
+
+Integer &Integer::operator-=(long y)
+{
+  return *this;
   sub(*this, y, *this);
 }
 
-void  gbtInteger::operator -= (long y)
-{
-  sub(*this, y, *this);
-}
-
-void gbtInteger::operator -- ()
+void Integer::operator -- ()
 {
   add(*this, -1, *this);
 }
 
 
 
-void gbtInteger::operator *= (const gbtInteger& y)
+Integer &Integer::operator*=(const Integer &y)
 {
   mul(*this, y, *this);
+  return *this;
 }
 
-void gbtInteger::operator *= (long y)
+Integer &Integer::operator*=(long y)
 {
   mul(*this, y, *this);
+  return *this;
 }
 
 
-void  gbtInteger::operator &= (const gbtInteger& y)
-{
-  And(*this, y, *this);
-}
-
-void  gbtInteger::operator &= (long y)
-{
-  And(*this, y, *this);
-}
-
-void  gbtInteger::operator |= (const gbtInteger& y)
-{
-  Or(*this, y, *this);
-}
-
-void  gbtInteger::operator |= (long y)
-{
-  Or(*this, y, *this);
-}
-
-
-void  gbtInteger::operator ^= (const gbtInteger& y)
-{
-  Xor(*this, y, *this);
-}
-
-void  gbtInteger::operator ^= (long y)
-{
-  Xor(*this, y, *this);
-}
-
-
-
-void gbtInteger::operator /= (const gbtInteger& y)
+Integer &Integer::operator/=(const Integer &y)
 {
   div(*this, y, *this);
+  return *this;
 }
 
-void gbtInteger::operator /= (long y)
+Integer &Integer::operator/=(long y)
 {
   div(*this, y, *this);
+  return *this;
 }
 
-
-void gbtInteger::operator <<= (const gbtInteger&  y)
+Integer &Integer::operator<<=(const Integer &y)
 {
   lshift(*this, y, *this);
+  return *this;
 }
 
-void gbtInteger::operator <<= (long  y)
+Integer &Integer::operator<<=(long y)
 {
   lshift(*this, y, *this);
+  return *this;
 }
 
-
-void gbtInteger::operator >>= (const gbtInteger&  y)
+Integer &Integer::operator>>=(const Integer &y)
 {
   rshift(*this, y, *this);
+  return *this;
 }
 
-void  gbtInteger::operator >>= (long y)
+Integer &Integer::operator>>=(long y)
 {
   rshift(*this, y, *this);
+  return *this;
 }
 
 
-void gbtInteger::abs()
+void Integer::abs()
 {
-  ::abs(*this, *this);
+  Gambit::abs(*this, *this);
 }
 
-void gbtInteger::negate()
+void Integer::negate()
 {
-  ::negate(*this, *this);
+  Gambit::negate(*this, *this);
 }
 
 
-void gbtInteger::complement()
-{
-  ::complement(*this, *this);
-}
-
-
-int sign(const gbtInteger& x)
+int sign(const Integer& x)
 {
   return (x.rep->len == 0) ? 0 : ( (x.rep->sgn == 1) ? 1 : -1 );
 }
 
-int even(const gbtInteger& y)
+int even(const Integer& y)
 {
   return y.rep->len == 0 || !(y.rep->s[0] & 1);
 }
 
-int odd(const gbtInteger& y)
+int odd(const Integer& y)
 {
   return y.rep->len > 0 && (y.rep->s[0] & 1);
 }
 
-std::string Itoa(const gbtInteger& y, int base, int width)
+std::string Itoa(const Integer& y, int base, int width)
 {
   return Itoa(y.rep, base, width);
 }
 
 
 
-long lg(const gbtInteger& x) 
+long lg(const Integer& x) 
 {
   return lg(x.rep);
 }
 
 // constructive operations 
 
-#if defined(__GNUG__) && !defined(NO_NRV)
-
-gbtInteger  operator +  (const gbtInteger& x, const gbtInteger& y)
+Integer Integer::operator+(const Integer &y) const
 {
-  gbtInteger r;
-  add(x, y, r);
+  Integer r;
+  add(*this, y, r);
   return r;
 }
 
-gbtInteger  operator +  (const gbtInteger& x, long y)
+Integer Integer::operator+(long y) const
 {
-  gbtInteger r;
-  add(x, y, r);
+  Integer r;
+  add(*this, y, r);
   return r;
 }
 
-gbtInteger  operator +  (long  x, const gbtInteger& y)
+Integer Integer::operator-(const Integer &y) const
 {
-  gbtInteger r;
-  add(x, y, r);
+  Integer r;
+  sub(*this, y, r);
   return r;
 }
 
-gbtInteger  operator -  (const gbtInteger& x, const gbtInteger& y)
+Integer Integer::operator-(long y) const
 {
-  gbtInteger r;
-  sub(x, y, r);
+  Integer r;
+  sub(*this, y, r);
   return r;
 }
 
-gbtInteger  operator -  (const gbtInteger& x, long y)
+Integer Integer::operator*(const Integer &y) const
 {
-  gbtInteger r;
-  sub(x, y, r);
+  Integer r;
+  mul(*this, y, r);
   return r;
 }
 
-gbtInteger  operator -  (long  x, const gbtInteger& y)
+Integer Integer::operator*(long y) const
 {
-  gbtInteger r;
-  sub(x, y, r);
+  Integer r;
+  mul(*this, y, r);
   return r;
 }
 
-gbtInteger  operator *  (const gbtInteger& x, const gbtInteger& y)
+Integer sqr(const Integer& x) 
 {
-  gbtInteger r;
-  mul(x, y, r);
-  return r;
-}
-
-gbtInteger  operator *  (const gbtInteger& x, long y)
-{
-  gbtInteger r;
-  mul(x, y, r);
-  return r;
-}
-
-gbtInteger  operator *  (long  x, const gbtInteger& y)
-{
-  gbtInteger r;
-  mul(x, y, r);
-  return r;
-}
-
-gbtInteger sqr(const gbtInteger& x) 
-{
-  gbtInteger r;
+  Integer r;
   mul(x, x, r);
   return r;
 }
 
-gbtInteger  operator &  (const gbtInteger& x, const gbtInteger& y)
+Integer Integer::operator/(const Integer &y) const
 {
-  gbtInteger r;
-  And(x, y, r);
+  Integer r;
+  div(*this, y, r);
   return r;
 }
 
-gbtInteger  operator &  (const gbtInteger& x, long y)
+Integer Integer::operator/(long y) const
 {
-  gbtInteger r;
-  And(x, y, r);
+  Integer r;
+  div(*this, y, r);
   return r;
 }
 
-gbtInteger  operator &  (long  x, const gbtInteger& y)
+Integer Integer::operator%(const Integer &y) const 
 {
-  gbtInteger r; 
-  And(x, y, r);
+  Integer r;
+  mod(*this, y, r);
   return r;
 }
 
-gbtInteger  operator |  (const gbtInteger& x, const gbtInteger& y)
+Integer Integer::operator%(long y) const
 {
-  gbtInteger r;
-  Or(x, y, r);
+  Integer r;
+  mod(*this, y, r);
   return r;
 }
 
-gbtInteger  operator |  (const gbtInteger& x, long y)
+Integer Integer::operator<<(const Integer &y) const
 {
-  gbtInteger r;
-  Or(x, y, r);
+  Integer r;
+  lshift(*this, y, r);
   return r;
 }
 
-gbtInteger  operator |  (long  x, const gbtInteger& y)
+Integer Integer::operator<<(long y) const
 {
-  gbtInteger r;
-  Or(x, y, r);
+  Integer r;
+  lshift(*this, y, r);
   return r;
 }
 
-gbtInteger  operator ^  (const gbtInteger& x, const gbtInteger& y)
+Integer Integer::operator>>(const Integer &y) const 
 {
-  gbtInteger r;
-  Xor(x, y, r);
+  Integer r;
+  rshift(*this, y, r);
   return r;
 }
 
-gbtInteger  operator ^  (const gbtInteger& x, long y)
+Integer Integer::operator>>(long y) const
 {
-  gbtInteger r;
-  Xor(x, y, r);
+  Integer r;
+  rshift(*this, y, r);
   return r;
 }
 
-gbtInteger  operator ^  (long  x, const gbtInteger& y)
+Integer pow(const Integer& x, long y)
 {
-  gbtInteger r;
-  Xor(x, y, r);
-  return r;
-}
-
-gbtInteger  operator /  (const gbtInteger& x, const gbtInteger& y)
-{
-  gbtInteger r;
-  div(x, y, r);
-  return r;
-}
-
-gbtInteger operator /  (const gbtInteger& x, long y)
-{
-  gbtInteger r;
-  div(x, y, r);
-  return r;
-}
-
-gbtInteger operator %  (const gbtInteger& x, const gbtInteger& y) 
-{
-  gbtInteger r;
-  mod(x, y, r);
-  return r;
-}
-
-gbtInteger operator %  (const gbtInteger& x, long y)
-{
-  gbtInteger r;
-  mod(x, y, r);
-  return r;
-}
-
-gbtInteger operator <<  (const gbtInteger& x, const gbtInteger& y)
-{
-  gbtInteger r;
-  lshift(x, y, r);
-  return r;
-}
-
-gbtInteger operator <<  (const gbtInteger& x, long y)
-{
-  gbtInteger r;
-  lshift(x, y, r);
-  return r;
-}
-
-gbtInteger operator >>  (const gbtInteger& x, const gbtInteger& y) 
-{
-  gbtInteger r;
-  rshift(x, y, r);
-  return r;
-}
-
-gbtInteger operator >>  (const gbtInteger& x, long y)
-{
-  gbtInteger r;
-  rshift(x, y, r);
-  return r;
-}
-
-gbtInteger pow(const gbtInteger& x, long y)
-{
-  gbtInteger r;
+  Integer r;
   pow(x, y, r);
   return r;
 }
 
-gbtInteger Ipow(long x, long y)
+Integer Ipow(long x, long y)
 {
-  gbtInteger r(x);
+  Integer r(x);
   pow(r, y, r);
   return r;
 }
 
-gbtInteger pow(const gbtInteger& x, const gbtInteger& y) 
+Integer pow(const Integer& x, const Integer& y) 
 {
-  gbtInteger r;
+  Integer r;
   pow(x, y, r);
   return r;
 }
 
 
 
-gbtInteger abs(const gbtInteger& x) 
+Integer abs(const Integer& x) 
 {
-  gbtInteger r;
+  Integer r;
   abs(x, r);
   return r;
 }
 
-gbtInteger operator - (const gbtInteger& x)
+Integer Integer::operator-(void) const
 {
-  gbtInteger r;
-  negate(x, r);
+  Integer r;
+  Gambit::negate(*this, r);
   return r;
 }
 
-gbtInteger operator ~ (const gbtInteger& x) 
+
+Integer  atoI(const char* s, int base) 
 {
-  gbtInteger r;
-  complement(x, r);
+  Integer r;
+  r.rep = atoIntegerRep(s, base);
   return r;
 }
 
-gbtInteger  atoI(const char* s, int base) 
+Integer  gcd(const Integer& x, const Integer& y)
 {
-  gbtInteger r;
-  r.rep = atogbtIntegerRep(s, base);
-  return r;
-}
-
-gbtInteger  gcd(const gbtInteger& x, const gbtInteger& y)
-{
-  gbtInteger r;
+  Integer r;
   r.rep = gcd(x.rep, y.rep);
   return r;
 }
 
-#else /* NO_NRV */
-
-gbtInteger  operator +  (const gbtInteger& x, const gbtInteger& y) 
-{
-  gbtInteger r; add(x, y, r); return r;
-}
-
-gbtInteger  operator +  (const gbtInteger& x, long y) 
-{
-  gbtInteger r; add(x, y, r); return r;
-}
-
-gbtInteger  operator +  (long  x, const gbtInteger& y) 
-{
-  gbtInteger r; add(x, y, r); return r;
-}
-
-gbtInteger  operator -  (const gbtInteger& x, const gbtInteger& y) 
-{
-  gbtInteger r; sub(x, y, r); return r;
-}
-
-gbtInteger  operator -  (const gbtInteger& x, long y) 
-{
-  gbtInteger r; sub(x, y, r); return r;
-}
-
-gbtInteger  operator -  (long  x, const gbtInteger& y) 
-{
-  gbtInteger r; sub(x, y, r); return r;
-}
-
-gbtInteger  operator *  (const gbtInteger& x, const gbtInteger& y) 
-{
-  gbtInteger r; mul(x, y, r); return r;
-}
-
-gbtInteger  operator *  (const gbtInteger& x, long y) 
-{
-  gbtInteger r; mul(x, y, r); return r;
-}
-
-gbtInteger  operator *  (long  x, const gbtInteger& y) 
-{
-  gbtInteger r; mul(x, y, r); return r;
-}
-
-gbtInteger sqr(const gbtInteger& x) 
-{
-  gbtInteger r; mul(x, x, r); return r;
-}
-
-gbtInteger  operator &  (const gbtInteger& x, const gbtInteger& y) 
-{
-  gbtInteger r; And(x, y, r); return r;
-}
-
-gbtInteger  operator &  (const gbtInteger& x, long y) 
-{
-  gbtInteger r; And(x, y, r); return r;
-}
-
-gbtInteger  operator &  (long  x, const gbtInteger& y) 
-{
-  gbtInteger r; And(x, y, r); return r;
-}
-
-gbtInteger  operator |  (const gbtInteger& x, const gbtInteger& y) 
-{
-  gbtInteger r; Or(x, y, r); return r;
-}
-
-gbtInteger  operator |  (const gbtInteger& x, long y) 
-{
-  gbtInteger r; Or(x, y, r); return r;
-}
-
-gbtInteger  operator |  (long  x, const gbtInteger& y) 
-{
-  gbtInteger r; Or(x, y, r); return r;
-}
-
-gbtInteger  operator ^  (const gbtInteger& x, const gbtInteger& y) 
-{
-  gbtInteger r; Xor(x, y, r); return r;
-}
-
-gbtInteger  operator ^  (const gbtInteger& x, long y) 
-{
-  gbtInteger r; Xor(x, y, r); return r;
-}
-
-gbtInteger  operator ^  (long  x, const gbtInteger& y) 
-{
-  gbtInteger r; Xor(x, y, r); return r;
-}
-
-gbtInteger  operator /  (const gbtInteger& x, const gbtInteger& y) 
-{
-  gbtInteger r; div(x, y, r); return r;
-}
-
-gbtInteger operator /  (const gbtInteger& x, long y) 
-{
-  gbtInteger r; div(x, y, r); return r;
-}
-
-gbtInteger operator %  (const gbtInteger& x, const gbtInteger& y) 
-{
-  gbtInteger r; mod(x, y, r); return r;
-}
-
-gbtInteger operator %  (const gbtInteger& x, long y) 
-{
-  gbtInteger r; mod(x, y, r); return r;
-}
-
-gbtInteger operator <<  (const gbtInteger& x, const gbtInteger& y) 
-{
-  gbtInteger r; lshift(x, y, r); return r;
-}
-
-gbtInteger operator <<  (const gbtInteger& x, long y) 
-{
-  gbtInteger r; lshift(x, y, r); return r;
-}
-
-gbtInteger operator >>  (const gbtInteger& x, const gbtInteger& y) 
-{
-  gbtInteger r; rshift(x, y, r); return r;
-}
-
-gbtInteger operator >>  (const gbtInteger& x, long y) 
-{
-  gbtInteger r; rshift(x, y, r); return r;
-}
-
-gbtInteger pow(const gbtInteger& x, long y) 
-{
-  gbtInteger r; pow(x, y, r); return r;
-}
-
-gbtInteger Ipow(long x, long y) 
-{
-  gbtInteger r(x); pow(r, y, r); return r;
-}
-
-gbtInteger pow(const gbtInteger& x, const gbtInteger& y) 
-{
-  gbtInteger r; pow(x, y, r); return r;
-}
 
 
 
-gbtInteger abs(const gbtInteger& x) 
-{
-  gbtInteger r; abs(x, r); return r;
-}
 
-gbtInteger operator - (const gbtInteger& x) 
-{
-  gbtInteger r; negate(x, r); return r;
-}
 
-gbtInteger operator ~ (const gbtInteger& x) 
-{
-  gbtInteger r; complement(x, r); return r;
-}
 
-gbtInteger  atoI(const char* s, int base) 
-{
-  gbtInteger r; r.rep = atogbtIntegerRep(s, base); return r;
-}
-
-gbtInteger  gcd(const gbtInteger& x, const gbtInteger& y) 
-{
-  gbtInteger r; r.rep = gcd(x.rep, y.rep); return r;
-}
-
-#endif  /* NO_NRV */
-
-void gbtInteger::operator %= (const gbtInteger& y)
+Integer &Integer::operator%=(const Integer &y)
 {
   *this = *this % y; // mod(*this, y, *this) doesn't work.
+  return *this;
 }
 
-void gbtInteger::operator %= (long y)
+Integer &Integer::operator%=(long y)
 {
   *this = *this % y; // mod(*this, y, *this) doesn't work.
+  return *this;
 }
 
-std::string ToText(const gbtInteger &i)
+std::string ToText(const Integer &i)
 {
   return Itoa(i);
 }
 
+}

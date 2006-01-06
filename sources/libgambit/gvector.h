@@ -27,8 +27,6 @@
 #ifndef GVECTOR_H
 #define GVECTOR_H
 
-#include "base.h"
-
 namespace Gambit {
   template <class T> class Matrix;
 }

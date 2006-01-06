@@ -28,6 +28,6 @@
 #include "rational.h"
 
 template class Gambit::SquareMatrix<double>;
-template class Gambit::SquareMatrix<gbtRational>;
+template class Gambit::SquareMatrix<Gambit::Rational>;
 
 

@@ -40,9 +40,9 @@ void WriteOsborneFile(std::ostream &p_file, const Gambit::Game &p_nfg,
     Gambit::PureStrategyProfile profile(iter.GetProfile());
 
     theHtml += "\\begin{game}{";
-    theHtml += ToText(p_nfg->GetPlayer(p_rowPlayer)->NumStrategies());
+    theHtml += Gambit::ToText(p_nfg->GetPlayer(p_rowPlayer)->NumStrategies());
     theHtml += "}{";
-    theHtml += ToText(p_nfg->GetPlayer(p_colPlayer)->NumStrategies());
+    theHtml += Gambit::ToText(p_nfg->GetPlayer(p_colPlayer)->NumStrategies());
     theHtml += "}[";
     theHtml += p_nfg->GetPlayer(p_rowPlayer)->GetLabel();
     theHtml += "][";
@@ -57,9 +57,9 @@ void WriteOsborneFile(std::ostream &p_file, const Gambit::Game &p_nfg,
 	}
 
 	theHtml += "Player ";
-	theHtml += ToText(pl);
+	theHtml += Gambit::ToText(pl);
 	theHtml += " Strategy ";
-	theHtml += ToText(profile.GetStrategy(pl)->GetNumber());
+	theHtml += Gambit::ToText(profile.GetStrategy(pl)->GetNumber());
 	theHtml += " ";
       }
       theHtml += "]";

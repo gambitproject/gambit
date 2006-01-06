@@ -27,10 +27,44 @@
 #ifndef LIBGAMBIT_H
 #define LIBGAMBIT_H
 
-#include "base.h"
-#include "garray.h"
-#include "glist.h"
-#include "recarray.h"
+#include <string>
+#include <sstream>
+#include <iomanip>
+#include <math.h>
+
+class gbtException   {
+public:
+  virtual ~gbtException() { }
+  virtual std::string GetDescription(void) const = 0;
+};
+
+class gbtIndexException : public gbtException {
+public:
+  virtual ~gbtIndexException() { }
+  std::string GetDescription(void) const { return "Index out of range"; }
+};
+
+class gbtRangeException : public gbtException  {
+public:
+  virtual ~gbtRangeException() { }
+  std::string GetDescription(void) const { return "Invalid index range"; }
+};
+
+class gbtDimensionException : public gbtException  {
+public:
+  virtual ~gbtDimensionException() { }
+  std::string GetDescription(void) const { return "Mismatched dimensions"; }
+};
+
+class gbtZeroDivideException : public gbtException {
+public:
+  virtual ~gbtZeroDivideException() { }
+  std::string GetDescription(void) const 
+    { return "Attmpted division by zero"; }
+};
+
+inline void gEpsilon(double &v, int i = 8)
+{ v = pow(10.0, (double) -i); }
 
 template <class T> T gmin(const T &a, const T &b)
 { if (a < b) return a; else return b; }
@@ -38,8 +72,23 @@ template <class T> T gmin(const T &a, const T &b)
 template <class T> T gmax(const T &a, const T &b)
 { if (a > b) return a; else return b; }
 
+namespace Gambit {
+
+template <class T> std::string ToText(const T &p_value)
+{ std::ostringstream s; s << p_value; return s.str(); }
+
+inline std::string ToText(double p_value, int p_prec)
+{ 
+  std::ostringstream s; 
+  s.setf(std::ios::fixed);
+  s << std::setprecision(p_prec) << p_value;
+  return s.str();
+}
+
 inline double abs(double a)
 { return (a >= 0.0) ? a : -a; }
+
+} // end namespace Gambit
 
 inline int sign(const double &a)
 {
@@ -51,10 +100,16 @@ inline int sign(const double &a)
 inline double pow(double x, long y)
 { return pow(x, (double) y); }
 
-#include "rational.h"
 
+#include "garray.h"
+#include "glist.h"
+#include "recarray.h"
 #include "gvector.h"
 #include "matrix.h"
+#include "gmap.h"
+
+#include "rational.h"
+
 
 #include "game.h"
 

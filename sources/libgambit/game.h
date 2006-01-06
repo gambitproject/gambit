@@ -161,7 +161,7 @@ private:
   int m_number;
   std::string m_label;
   gbtArray<std::string> m_textPayoffs;
-  gbtArray<gbtRational> m_ratPayoffs;
+  gbtArray<Rational> m_ratPayoffs;
 
   /// @name Lifecycle
   //@{
@@ -200,7 +200,7 @@ inline double GameOutcomeRep::GetPayoff(int pl) const
 { return (double) m_ratPayoffs[pl]; }
 
 template<>
-inline gbtRational GameOutcomeRep::GetPayoff(int pl) const
+inline Rational GameOutcomeRep::GetPayoff(int pl) const
 { return m_ratPayoffs[pl]; }
 
 template<>
@@ -252,7 +252,7 @@ protected:
   gbtArray<GameNodeRep *> m_members;
   int flag, whichbranch;
   gbtArray<std::string> m_textProbs;
-  gbtArray<gbtRational> m_ratProbs;
+  gbtArray<Rational> m_ratProbs;
   
   GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_player, 
 		 int p_actions);
@@ -287,7 +287,7 @@ public:
   bool Precedes(GameNode) const;
 
   void SetActionProb(int i, const std::string &p_value);
-  const gbtRational &GetActionProb(int i) const { return m_ratProbs[i]; }
+  const Rational &GetActionProb(int i) const { return m_ratProbs[i]; }
   const std::string &GetActionProbText(int i) const { return m_textProbs[i]; }
 
   void Reveal(GamePlayer);
@@ -482,7 +482,7 @@ public:
   void SetOutcome(GameOutcome p_outcome); 
 
   /// Get the payoff to player pl that results from the profile
-  gbtRational GetPayoff(int pl) const;
+  Rational GetPayoff(int pl) const;
   /// Get the payoff to player pl that results from the profile
   std::string GetPayoffText(int pl) const;
   //@}
@@ -510,8 +510,8 @@ public:
   /// Set the action played at an information set
   void SetAction(const GameAction &);
    
-  gbtRational GetPayoff(int pl) const;
-  gbtRational GetNodeValue(const GameNode &, int pl) const;
+  Rational GetPayoff(int pl) const;
+  Rational GetNodeValue(const GameNode &, int pl) const;
   //@}
 };
 
@@ -575,9 +575,9 @@ public:
   /// Returns true if the game is constant-sum
   bool IsConstSum(void) const; 
   /// Returns the smallest payoff in any outcome of the game
-  gbtRational GetMinPayoff(int pl = 0) const;
+  Rational GetMinPayoff(int pl = 0) const;
   /// Returns the largest payoff in any outcome of the game
-  gbtRational GetMaxPayoff(int pl = 0) const;
+  Rational GetMaxPayoff(int pl = 0) const;
 
   /// Returns true if the game is perfect recall.  If not, the specified
   /// a pair of violating information sets is returned in the parameters.  
@@ -690,7 +690,7 @@ typedef GameObjectPtr<GameRep> Game;
 inline bool GameInfosetRep::IsChanceInfoset(void) const
 { return m_player->IsChance(); }
 
-inline gbtRational PureBehavProfile::GetPayoff(int pl) const
+inline Rational PureBehavProfile::GetPayoff(int pl) const
 { return GetNodeValue(m_efg->GetRoot(), pl); }
 
 //=======================================================================

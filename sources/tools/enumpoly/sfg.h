@@ -37,13 +37,13 @@ private:
   Gambit::Game EF;
   const Gambit::BehavSupport &efsupp;
   gbtArray<SFSequenceSet *> *sequences;
-  gNArray<gbtArray<gbtRational> *> *SF;  // sequence form
-  gbtArray<Gambit::RectArray<gbtRational> *> *E;   // constraint matrices for sequence form.  
+  gNArray<gbtArray<Gambit::Rational> *> *SF;  // sequence form
+  gbtArray<Gambit::RectArray<Gambit::Rational> *> *E;   // constraint matrices for sequence form.  
   gbtArray<int> seq;
   gbtPVector<int> isetFlag,isetRow;
   gbtArray<gbtList<Gambit::GameInfoset> > infosets;
 
-  void MakeSequenceForm(const Gambit::GameNode &, gbtRational,gbtArray<int>, gbtArray<Gambit::GameInfoset>,
+  void MakeSequenceForm(const Gambit::GameNode &, Gambit::Rational,gbtArray<int>, gbtArray<Gambit::GameInfoset>,
 		      gbtArray<Sequence *>);
   void GetSequenceDims(const Gambit::GameNode &);
 
@@ -58,10 +58,10 @@ public:
   int NumPlayerInfosets() const;
   inline int NumPlayers() const {return EF->NumPlayers();}
   
-  inline gbtArray<gbtRational> Payoffs(const gbtArray<int> & index) const {return *((*SF)[index]);}
-  gbtRational Payoff(const gbtArray<int> & index,int pl) const;
+  inline gbtArray<Gambit::Rational> Payoffs(const gbtArray<int> & index) const {return *((*SF)[index]);}
+  Gambit::Rational Payoff(const gbtArray<int> & index,int pl) const;
 
-  Gambit::RectArray<gbtRational> Constraints(int player) const {return *((*E)[player]);};
+  Gambit::RectArray<Gambit::Rational> Constraints(int player) const {return *((*E)[player]);};
   int InfosetRowNumber(int pl, int sequence) const;
   int ActionNumber(int pl, int sequence) const;
   Gambit::GameInfoset GetInfoset(int pl, int sequence) const;

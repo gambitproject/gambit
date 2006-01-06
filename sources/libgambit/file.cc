@@ -385,7 +385,7 @@ static void ReadStrategies(GameParserState &p_state, TableFileGame &p_data)
       }
 
       for (int st = 1; st <= atoi(p_state.GetLastText().c_str()); st++) {
-	player->m_strategies.Append(ToText(gbtInteger(st)));
+	player->m_strategies.Append(ToText(Gambit::Integer(st)));
       }
 
       p_state.GetNextToken();

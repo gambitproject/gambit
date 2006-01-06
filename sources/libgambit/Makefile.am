@@ -3,7 +3,6 @@
 lib_LTLIBRARIES = libgambit.la
 
 libgambit_la_SOURCES = \
-	base.h \
 	behav.cc behav.h behav.imp \
 	behavitr.cc behavitr.h \
 	behavspt.cc behavspt.h \
@@ -27,7 +26,6 @@ libgambit_la_SOURCES = \
 
 libgambitincludedir = $(includedir)/libgambit
 libgambitinclude_HEADERS = \
-	base.h \
 	behav.h behav.imp \
 	behavitr.h \
 	behavspt.h \

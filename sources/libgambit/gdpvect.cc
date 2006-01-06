@@ -28,5 +28,5 @@
 #include "gdpvect.imp"
 
 template class gbtDPVector<double>;
-template class gbtDPVector<gbtRational>;
+template class gbtDPVector<Gambit::Rational>;
 

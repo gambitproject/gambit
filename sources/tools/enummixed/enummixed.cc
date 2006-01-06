@@ -59,7 +59,7 @@ void PrintProfile(std::ostream &p_stream,
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const Gambit::MixedStrategyProfile<gbtRational> &p_profile)
+		  const Gambit::MixedStrategyProfile<Gambit::Rational> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -76,18 +76,18 @@ template <class T> void Solve(Gambit::Game p_nfg, const T &)
 
   Gambit::PureStrategyProfile profile(p_nfg);
 
-  gbtRational min = p_nfg->GetMinPayoff();
-  if (min > gbtRational(0)) {
-    min = gbtRational(0);
+  Gambit::Rational min = p_nfg->GetMinPayoff();
+  if (min > Gambit::Rational(0)) {
+    min = Gambit::Rational(0);
   }
-  min -= gbtRational(1);
+  min -= Gambit::Rational(1);
 
-  gbtRational max = p_nfg->GetMaxPayoff();
-  if (max < gbtRational(0)) {
-    max = gbtRational(0);
+  Gambit::Rational max = p_nfg->GetMaxPayoff();
+  if (max < Gambit::Rational(0)) {
+    max = Gambit::Rational(0);
   }
 
-  gbtRational fac(1, max - min);
+  Gambit::Rational fac(1, max - min);
 
   // Construct matrices A1, A2
   Gambit::Matrix<T> A1(1, p_nfg->GetPlayer(1)->NumStrategies(), 
@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
       Solve(nfg, 0.0);
     }
     else {
-      Solve(nfg, gbtRational(0));
+      Solve(nfg, Gambit::Rational(0));
     }
     return 0;
   }

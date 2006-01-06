@@ -29,5 +29,5 @@
 
 template class gbtPVector<int>;
 template class gbtPVector<double>;
-template class gbtPVector<gbtRational>;
+template class gbtPVector<Gambit::Rational>;
 

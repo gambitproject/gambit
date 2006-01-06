@@ -26,8 +26,8 @@
 
 #include "ludecomp.imp"
 
-template class EtaMatrix< double >;
-template class LUdecomp< double >;
+template class EtaMatrix<double>;
+template class LUdecomp<double>;
 
-template class EtaMatrix< gbtRational >;
-template class LUdecomp< gbtRational >;
+template class EtaMatrix<Gambit::Rational>;
+template class LUdecomp<Gambit::Rational>;

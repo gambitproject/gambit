@@ -322,7 +322,7 @@ NashExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 					    acts_for_iset[j])) {
 		  if (terminal_nodes[n]->GetOutcome()) {
 		    node_prob *= 
-		      (gDouble) terminal_nodes[n]->GetOutcome()->GetPayoff<gbtRational>(pl);
+		      (gDouble) terminal_nodes[n]->GetOutcome()->GetPayoff<Gambit::Rational>(pl);
 		  }
 		  next_poly += node_prob;
 		}
@@ -506,7 +506,7 @@ ANFExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 					 pl,i,j)) {
 		if (terminal_nodes[n]->GetOutcome()) {
 		  node_prob *= 
-		    (gDouble) terminal_nodes[n]->GetOutcome()->GetPayoff<gbtRational>(pl);
+		    (gDouble) terminal_nodes[n]->GetOutcome()->GetPayoff<Gambit::Rational>(pl);
 		}
 		next_poly += node_prob;
 	      }

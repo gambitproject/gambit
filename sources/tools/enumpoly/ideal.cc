@@ -30,7 +30,7 @@
 //template class gBasis<int>;
 //template gOutput &operator<<(gOutput &f, const gBasis<int> &y);
 
-template class gIdeal<gbtRational>;
+template class gIdeal<Gambit::Rational>;
 //template class gBasis<gbtRational>;
 //template gOutput &operator<<(gOutput &f, const gBasis<gbtRational> &y);
 

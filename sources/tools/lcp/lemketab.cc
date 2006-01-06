@@ -27,4 +27,4 @@
 #include "lemketab.imp"
 
 template class LTableau<double>;
-template class LTableau<gbtRational>;
+template class LTableau<Gambit::Rational>;

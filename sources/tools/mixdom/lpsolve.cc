@@ -29,8 +29,8 @@
 
 
 template class LPSolve<double>;
-template class LPSolve<gbtRational>;
+template class LPSolve<Gambit::Rational>;
 
 template gbtArray<int> Artificials(const gbtVector<double> &);
-template gbtArray<int> Artificials(const gbtVector<gbtRational> &);
+template gbtArray<int> Artificials(const gbtVector<Gambit::Rational> &);
 

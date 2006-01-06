@@ -47,7 +47,7 @@ void PrintProfile(std::ostream &p_stream,
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const Gambit::MixedBehavProfile<gbtRational> &p_profile)
+		  const Gambit::MixedBehavProfile<Gambit::Rational> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -146,8 +146,8 @@ void efgLp<T>::Solve(const Gambit::BehavSupport &p_support)
   gbtVector<T> b(1,ns1+ni2);
   gbtVector<T> c(1,ns2+ni1);
 
-  maxpay = p_support.GetGame()->GetMaxPayoff() + gbtRational(1);
-  minpay = p_support.GetGame()->GetMinPayoff() - gbtRational(1);
+  maxpay = p_support.GetGame()->GetMaxPayoff() + Gambit::Rational(1);
+  minpay = p_support.GetGame()->GetMinPayoff() - Gambit::Rational(1);
 
   A = (T)0;
   T prob = (T)1;
@@ -248,14 +248,14 @@ void efgLp<T>::FillTableau(const Gambit::BehavSupport &p_support,
   int i,snew;
   Gambit::GameOutcome outcome = n->GetOutcome();
   if (outcome) {
-    A(s1,s2) = gbtRational(A(s1,s2)) +
-      gbtRational(prob) * outcome->GetPayoff<gbtRational>(1) - gbtRational(minpay);
+    A(s1,s2) = Gambit::Rational(A(s1,s2)) +
+      Gambit::Rational(prob) * outcome->GetPayoff<Gambit::Rational>(1) - Gambit::Rational(minpay);
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
 	FillTableau(p_support, A, n->GetChild(i),
-		    gbtRational(prob) * n->GetInfoset()->GetActionProb(i),
+		    Gambit::Rational(prob) * n->GetInfoset()->GetActionProb(i),
 		    s1,s2,i1,i2);
     }
     int pl = n->GetPlayer()->GetNumber();
@@ -372,7 +372,7 @@ int main(int argc, char *argv[])
     algorithm.Solve(efg);
   }
   else {
-    efgLp<gbtRational> algorithm;
+    efgLp<Gambit::Rational> algorithm;
     algorithm.Solve(efg);
   }
 
