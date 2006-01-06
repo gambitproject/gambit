@@ -5282,7 +5282,7 @@ int qh_pointid (pointT *point) {
   id= ((unsigned) point - (unsigned) qh first_point)/qh normal_size;
   if ((int)id >= qh num_points) {
     if (point == qh interior_point)
-      id= -2;
+      id= (unsigned int) -2;
     else if ((int)(id= qh_setindex (qh other_points, point)) != -1)
       id += qh num_points;
   }
@@ -8113,8 +8113,8 @@ void qh_initqhull_start (FILE *infile, FILE *outfile, FILE *errfile) {
   qh DROPdim= -1;
   qh TRACEdist= REALmax;
   qh TRACEpoint= -1;
-  qh tracefacet_id= -1;  /* stderr set these to id for tracefacet/tracevertex */
-  qh tracevertex_id= -1;
+  qh tracefacet_id= (unsigned int) -1;  /* stderr set these to id for tracefacet/tracevertex */
+  qh tracevertex_id= (unsigned int) -1;
 } /* initqhull_start */
 
 /*---------------------------------------------

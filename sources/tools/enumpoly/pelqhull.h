@@ -466,7 +466,7 @@ struct qhT {
 
 #define otherfacet_(ridge, facet) \
                         (((ridge)->top == (facet)) ? (ridge)->bottom : (ridge)->top)
-#define getid_(p)       ((p) ? (p)->id : -1)
+#define getid_(p)       ((p) ? (p)->id : (unsigned int) -1)
 
 /* ---------------------------------------------
 -FORALL and FOREACH macros
