@@ -50,8 +50,8 @@ private:
   gbtGameDocument *m_doc;
   wxString m_label, m_description, m_command;
   int m_current;
-  gbtList<Gambit::MixedBehavProfile<gbtNumber> > m_behavProfiles;
-  gbtList<Gambit::MixedStrategyProfile<gbtNumber> > m_mixedProfiles;
+  gbtList<Gambit::MixedBehavProfile<double> > m_behavProfiles;
+  gbtList<Gambit::MixedStrategyProfile<double> > m_mixedProfiles;
 
 public:
   //!
@@ -71,11 +71,11 @@ public:
   int NumProfiles(void) const;
 
   /// Return the p_index'th profile in the list, in behavior representation
-  const Gambit::MixedBehavProfile<gbtNumber> &GetBehav(int p_index) const
+  const Gambit::MixedBehavProfile<double> &GetBehav(int p_index) const
   { return m_behavProfiles[p_index]; }
 
   /// Return the p_index'th profile in the list, in mixed representation
-  const Gambit::MixedStrategyProfile<gbtNumber> &GetMixed(int p_index) const
+  const Gambit::MixedStrategyProfile<double> &GetMixed(int p_index) const
   { return m_mixedProfiles[p_index]; }
 
   /// Get the index of the currently selected profile
@@ -108,9 +108,9 @@ public:
   //!
   //@{
   /// Add a behavior profile to the list
-  void Append(const Gambit::MixedBehavProfile<gbtNumber> &p_profile);
+  void Append(const Gambit::MixedBehavProfile<double> &p_profile);
   /// Add a mixed profile to the list
-  void Append(const Gambit::MixedStrategyProfile<gbtNumber> &p_profile);
+  void Append(const Gambit::MixedStrategyProfile<double> &p_profile);
   /// Map all behavior profiles to corresponding mixed profiles
   void BuildNfg(void);
 

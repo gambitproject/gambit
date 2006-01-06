@@ -45,10 +45,11 @@ public:
   { return "Output line does not contain a Nash equilibrium"; }
 };
 
-static Gambit::MixedStrategyProfile<gbtNumber> TextToMixedProfile(gbtGameDocument *p_doc,
-						     const wxString &p_text)
+static Gambit::MixedStrategyProfile<double> 
+TextToMixedProfile(gbtGameDocument *p_doc,
+		   const wxString &p_text)
 {
-  Gambit::MixedStrategyProfile<gbtNumber> profile(p_doc->GetGame());
+  Gambit::MixedStrategyProfile<double> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
 
@@ -64,10 +65,10 @@ static Gambit::MixedStrategyProfile<gbtNumber> TextToMixedProfile(gbtGameDocumen
   throw gbtNotNashException();
 }
 
-static Gambit::MixedBehavProfile<gbtNumber> TextToBehavProfile(gbtGameDocument *p_doc,
+static Gambit::MixedBehavProfile<double> TextToBehavProfile(gbtGameDocument *p_doc,
 						     const wxString &p_text)
 {
-  Gambit::MixedBehavProfile<gbtNumber> profile(p_doc->GetGame());
+  Gambit::MixedBehavProfile<double> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
 

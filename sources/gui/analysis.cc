@@ -41,25 +41,25 @@
 //=========================================================================
 
 void 
-gbtAnalysisProfileList::Append(const Gambit::MixedBehavProfile<gbtNumber> &p_profile)
+gbtAnalysisProfileList::Append(const Gambit::MixedBehavProfile<double> &p_profile)
 {
   m_behavProfiles.Append(p_profile);
-  m_mixedProfiles.Append(Gambit::MixedStrategyProfile<gbtNumber>(p_profile));
+  m_mixedProfiles.Append(Gambit::MixedStrategyProfile<double>(p_profile));
 }
 
 void
-gbtAnalysisProfileList::Append(const Gambit::MixedStrategyProfile<gbtNumber> &p_profile)
+gbtAnalysisProfileList::Append(const Gambit::MixedStrategyProfile<double> &p_profile)
 {
   m_mixedProfiles.Append(p_profile);
   if (m_doc->IsTree()) {
-    m_behavProfiles.Append(Gambit::MixedBehavProfile<gbtNumber>(p_profile));
+    m_behavProfiles.Append(Gambit::MixedBehavProfile<double>(p_profile));
   }
 }
 
 void gbtAnalysisProfileList::BuildNfg(void)
 {
   for (int i = 1; i <= m_behavProfiles.Length(); i++) {
-    m_mixedProfiles.Append(Gambit::MixedStrategyProfile<gbtNumber>(m_behavProfiles[i]));
+    m_mixedProfiles.Append(Gambit::MixedStrategyProfile<double>(m_behavProfiles[i]));
   }
 }
 
@@ -75,8 +75,8 @@ int gbtAnalysisProfileList::NumProfiles(void) const
 
 void gbtAnalysisProfileList::Clear(void)
 {
-  m_behavProfiles = gbtList<Gambit::MixedBehavProfile<gbtNumber> >();
-  m_mixedProfiles = gbtList<Gambit::MixedStrategyProfile<gbtNumber> >();
+  m_behavProfiles = gbtList<Gambit::MixedBehavProfile<double> >();
+  m_mixedProfiles = gbtList<Gambit::MixedStrategyProfile<double> >();
   m_current = 0;
 }
 
@@ -86,10 +86,10 @@ void gbtAnalysisProfileList::Clear(void)
 
 #include <wx/tokenzr.h>
 
-static Gambit::MixedStrategyProfile<gbtNumber> 
+static Gambit::MixedStrategyProfile<double> 
 TextToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
 {
-  Gambit::MixedStrategyProfile<gbtNumber> profile(p_doc->GetGame());
+  Gambit::MixedStrategyProfile<double> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
 
@@ -100,10 +100,10 @@ TextToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
   return profile;
 }
 
-static Gambit::MixedBehavProfile<gbtNumber> 
+static Gambit::MixedBehavProfile<double> 
 TextToBehavProfile(gbtGameDocument *p_doc, const wxString &p_text)
 {
-  Gambit::MixedBehavProfile<gbtNumber> profile(p_doc->GetGame());
+  Gambit::MixedBehavProfile<double> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
   for (int i = 1; i <= profile.Length(); i++) {

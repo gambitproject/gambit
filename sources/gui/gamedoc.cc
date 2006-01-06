@@ -314,7 +314,7 @@ void gbtGameDocument::SaveDocument(std::ostream &p_file) const
       p_file << "</description>\n";
 
       for (int j = 1; j <= m_profiles[i].NumProfiles(); j++) {
-	const Gambit::MixedBehavProfile<gbtNumber> &behav = m_profiles[i].GetBehav(j);
+	const Gambit::MixedBehavProfile<double> &behav = m_profiles[i].GetBehav(j);
 	p_file << "<profile type=\"behav\">\n";
 	for (int k = 1; k <= behav.Length(); k++) {
 	  p_file << behav[k];
@@ -343,7 +343,7 @@ void gbtGameDocument::SaveDocument(std::ostream &p_file) const
       p_file << "</description>\n";
 
       for (int j = 1; j <= m_profiles[i].NumProfiles(); j++) {
-	const Gambit::MixedStrategyProfile<gbtNumber> &mixed = m_profiles[i].GetMixed(j);
+	const Gambit::MixedStrategyProfile<double> &mixed = m_profiles[i].GetMixed(j);
 	p_file << "<profile type=\"mixed\">\n";
 	for (int k = 1; k <= mixed.Length(); k++) {
 	  p_file << mixed[k];
@@ -485,7 +485,7 @@ void gbtGameDocument::SetProfileList(int p_index)
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfiles(const gbtList<Gambit::MixedBehavProfile<gbtNumber> > &p_profiles)
+void gbtGameDocument::AddProfiles(const gbtList<Gambit::MixedBehavProfile<double> > &p_profiles)
 {
   for (int i = 1; i <= p_profiles.Length(); i++) {
     m_profiles[m_currentProfileList].Append(p_profiles[i]);
@@ -495,14 +495,14 @@ void gbtGameDocument::AddProfiles(const gbtList<Gambit::MixedBehavProfile<gbtNum
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfile(const Gambit::MixedBehavProfile<gbtNumber> &p_profile)
+void gbtGameDocument::AddProfile(const Gambit::MixedBehavProfile<double> &p_profile)
 {
   m_profiles[m_currentProfileList].Append(p_profile);
   m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfiles(const gbtList<Gambit::MixedStrategyProfile<gbtNumber> > &p_profiles)
+void gbtGameDocument::AddProfiles(const gbtList<Gambit::MixedStrategyProfile<double> > &p_profiles)
 {
   for (int i = 1; i <= p_profiles.Length(); i++) {
     m_profiles[m_currentProfileList].Append(p_profiles[i]);
@@ -512,7 +512,7 @@ void gbtGameDocument::AddProfiles(const gbtList<Gambit::MixedStrategyProfile<gbt
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfile(const Gambit::MixedStrategyProfile<gbtNumber> &p_profile)
+void gbtGameDocument::AddProfile(const Gambit::MixedStrategyProfile<double> &p_profile)
 {
   m_profiles[m_currentProfileList].Append(p_profile);
   m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
@@ -617,7 +617,7 @@ std::string gbtGameDocument::GetBeliefProb(const Gambit::GameNode &p_node) const
     return "";
   }
 
-  if (m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetProb(p_node->GetInfoset()) > gbtNumber(0)) {
+  if (m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetProb(p_node->GetInfoset()) > gbtRational(0)) {
     return ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetBeliefProb(p_node),
 		  m_style.NumDecimals());
   }
@@ -653,7 +653,7 @@ std::string gbtGameDocument::GetInfosetValue(const Gambit::GameNode &p_node) con
       p_node->GetPlayer()->IsChance()) {
     return "";
   }
-  if (m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetProb(p_node->GetInfoset()) > gbtNumber(0)) {
+  if (m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetProb(p_node->GetInfoset()) > gbtRational(0)) {
     return ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetValue(p_node->GetInfoset()),
 		  m_style.NumDecimals());
   }
@@ -673,7 +673,7 @@ std::string gbtGameDocument::GetActionProb(const Gambit::GameNode &p_node, int p
     return "";
   }
   
-  const Gambit::MixedBehavProfile<gbtNumber> &profile = m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile());
+  const Gambit::MixedBehavProfile<double> &profile = m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile());
 
   if (!profile.IsDefinedAt(p_node->GetInfoset())) {
     return "*";
@@ -690,7 +690,7 @@ std::string gbtGameDocument::GetActionValue(const Gambit::GameNode &p_node, int 
     return "";
   }
 
-  if (m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetProb(p_node->GetInfoset()) > gbtNumber(0)) {
+  if (m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetIsetProb(p_node->GetInfoset()) > gbtRational(0)) {
     return ToText(m_profiles[m_currentProfileList].GetBehav(GetCurrentProfile()).GetActionValue(p_node->GetInfoset()->GetAction(p_act)),
 		  m_style.NumDecimals());
   }
@@ -700,7 +700,7 @@ std::string gbtGameDocument::GetActionValue(const Gambit::GameNode &p_node, int 
   }
 }
 
-gbtNumber gbtGameDocument::ActionProb(const Gambit::GameNode &p_node, int p_action) const
+double gbtGameDocument::ActionProb(const Gambit::GameNode &p_node, int p_action) const
 {
   if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
     return p_node->GetInfoset()->GetActionProb(p_action);

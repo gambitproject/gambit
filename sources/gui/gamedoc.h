@@ -298,10 +298,10 @@ public:
   int GetCurrentProfile(void) const 
   { return (m_profiles.Length() == 0) ? 0 : GetProfiles().GetCurrent(); }
   void SetCurrentProfile(int p_profile);
-  void AddProfiles(const gbtList<Gambit::MixedBehavProfile<gbtNumber> > &);
-  void AddProfile(const Gambit::MixedBehavProfile<gbtNumber> &);
-  void AddProfiles(const gbtList<Gambit::MixedStrategyProfile<gbtNumber> > &);
-  void AddProfile(const Gambit::MixedStrategyProfile<gbtNumber> &);
+  void AddProfiles(const gbtList<Gambit::MixedBehavProfile<double> > &);
+  void AddProfile(const Gambit::MixedBehavProfile<double> &);
+  void AddProfiles(const gbtList<Gambit::MixedStrategyProfile<double> > &);
+  void AddProfile(const Gambit::MixedStrategyProfile<double> &);
   //@}
 
   //!
@@ -343,7 +343,7 @@ public:
   std::string GetInfosetValue(const Gambit::GameNode &) const;
   std::string GetActionValue(const Gambit::GameNode &, int act) const;
   std::string GetActionProb(const Gambit::GameNode &, int act) const;
-  gbtNumber ActionProb(const Gambit::GameNode &n, int br) const;
+  double ActionProb(const Gambit::GameNode &n, int br) const;
 
   void UpdateViews(gbtGameModificationType p_modifications);
 
