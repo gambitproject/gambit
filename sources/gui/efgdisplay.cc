@@ -56,7 +56,7 @@ void gbtPayoffEditor::BeginEdit(gbtNodeEntry *p_entry, int p_player)
   m_entry = p_entry;
   m_outcome = p_entry->GetNode()->GetOutcome();
   m_player = p_player;
-  SetValue(wxString(m_outcome->GetPayoffText(p_player).c_str(),
+  SetValue(wxString(m_outcome->GetPayoff<std::string>(p_player).c_str(),
 		    *wxConvCurrent));
   SetSelection(-1, -1);
   Show(true);
@@ -179,12 +179,12 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
 	infoset->GetAction(2)->SetLabel("2");
       }
       else if (node->GetPlayer() == player) {
-	Gambit::GameAction action = efg->InsertAction(node->GetInfoset());
+	Gambit::GameAction action = node->GetInfoset()->InsertAction();
 	action->SetLabel(ToText(action->GetNumber()));
       }
       else if (!player->IsChance() && !node->GetPlayer()->IsChance()) {
 	// Currently don't support switching nodes to/from chance player
-	efg->SwitchPlayer(node->GetInfoset(), player);
+	node->GetInfoset()->SetPlayer(player);
       }
       else {
 	return false;
@@ -202,7 +202,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       }
       
       if (node->NumChildren() == 0 && srcNode->NumChildren() > 0) {
-	efg->CopyTree(srcNode, node);
+	node->CopyTree(srcNode);
 	m_owner->GetDocument()->UpdateViews(GBT_DOC_MODIFIED_GAME);
 	return true;
       }
@@ -219,7 +219,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       }
       
       if (node->NumChildren() == 0 && srcNode->NumChildren() > 0) {
-	efg->MoveTree(srcNode, node);
+	node->MoveTree(srcNode);
 	m_owner->GetDocument()->UpdateViews(GBT_DOC_MODIFIED_GAME);
 	return true;
       }
@@ -237,7 +237,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
 
       if (node->NumChildren() > 0 &&
 	  node->NumChildren() == srcNode->NumChildren()) {
-	efg->JoinInfoset(srcNode->GetInfoset(), node);
+	node->SetInfoset(srcNode->GetInfoset());
 	m_owner->GetDocument()->UpdateViews(GBT_DOC_MODIFIED_GAME);
 	return true;
       }
@@ -288,7 +288,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       Gambit::GameOutcome outcome = srcNode->GetGame()->NewOutcome();
       outcome->SetLabel("Outcome" + ToText(outcome->GetNumber()));
       for (int pl = 1; pl <= srcNode->GetGame()->NumPlayers(); pl++) {
-	outcome->SetPayoff(pl, srcNode->GetOutcome()->GetPayoffText(pl));
+	outcome->SetPayoff(pl, srcNode->GetOutcome()->GetPayoff<std::string>(pl));
       }
       node->SetOutcome(outcome);
       m_owner->GetDocument()->UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);

@@ -323,7 +323,7 @@ void MixedBehavProfile<T>::Payoff(GameNodeRep *node, T prob, int player, T &valu
   GameInfosetRep *iset = node->infoset;
 
   if (node->outcome) {
-    value += prob * node->outcome->GetPayoff(player);
+    value += prob * node->outcome->GetPayoff<T>(player);
   }
 
   if (node->children.Length())  {
@@ -445,7 +445,7 @@ void MixedBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
 {
   if (node->outcome) {
     for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) { 
-      m_nodeValues(node->number, pl) += node->outcome->GetPayoff(pl);
+      m_nodeValues(node->number, pl) += node->outcome->GetPayoff<T>(pl);
     }
   }
 

@@ -30,14 +30,7 @@
 
 #include "gdpvect.h"
 
-class gbtNumber;
-
 namespace Gambit {
-
-// Forward declarations of some friends
-template <class T> class MixedStrategyProfile;
-template <class T> class MixedBehavProfile;
-
 
 /// This is a base class for all game-related objects.  Primary among
 /// its responsibility is maintaining a reference count.  Calling code
@@ -148,6 +141,12 @@ typedef GameObjectPtr<GameNodeRep> GameNode;
 class GameRep;
 typedef GameObjectPtr<GameRep> Game;
 
+// 
+// Forward declarations of classes defined elsewhere.
+//
+template <class T> class MixedStrategyProfile;
+template <class T> class MixedBehavProfile;
+
 
 /// This class represents an outcome in a game.  An outcome
 /// specifies a vector of payoffs to players.  Payoffs are specified
@@ -185,9 +184,7 @@ public:
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
   /// Gets the payoff associated with the outcome to player 'pl'
-  const gbtRational &GetPayoff(int pl) const { return m_ratPayoffs[pl]; }
-  /// Gets the text representation of the payoff to player 'pl'
-  const std::string &GetPayoffText(int pl) const { return m_textPayoffs[pl]; }
+  template <class T> T GetPayoff(int pl) const;
   /// Sets the payoff to player 'pl'
   void SetPayoff(int pl, const std::string &p_value)
   {
@@ -196,19 +193,33 @@ public:
     //m_game->ClearComputedValues();
   }
   //@}
-
 };
+
+template<>
+inline double GameOutcomeRep::GetPayoff(int pl) const
+{ return (double) m_ratPayoffs[pl]; }
+
+template<>
+inline gbtRational GameOutcomeRep::GetPayoff(int pl) const
+{ return m_ratPayoffs[pl]; }
+
+template<>
+inline gbtNumber GameOutcomeRep::GetPayoff(int pl) const
+{ return m_ratPayoffs[pl]; }
+
+template<>
+inline std::string GameOutcomeRep::GetPayoff(int pl) const
+{ return m_textPayoffs[pl]; }
+
 
 typedef GameObjectPtr<GameOutcomeRep> GameOutcome;
 
 
 class GameActionRep : public GameObject {
   friend class GameRep;
-  friend class GameTreeRep;
-  friend class MixedBehavProfile<double>;
-  friend class MixedBehavProfile<gbtRational>;
-  friend class MixedBehavProfile<gbtNumber>;
   friend class GameInfosetRep;
+  template <class T> friend class MixedBehavProfile;
+
 private:
   int m_number;
   std::string m_label;
@@ -232,14 +243,9 @@ public:
 
 class GameInfosetRep : public GameObject {
   friend class GameRep;
-  friend class GameTreeRep;
   friend class GamePlayerRep;
   friend class GameNodeRep;
-  friend class MixedBehavProfile<double>;
-  friend class MixedBehavProfile<gbtRational>;
-  friend class MixedBehavProfile<gbtNumber>;
-  friend void MakeStrategy(GamePlayerRep *);
-  friend void MakeReducedStrats(GamePlayerRep *p, GameNodeRep *n, GameNodeRep *nn);
+  template <class T> friend class MixedBehavProfile;
 
 protected:
   GameRep *m_efg;
@@ -256,17 +262,24 @@ protected:
 		 int p_actions);
   ~GameInfosetRep();  
 
+  /// Adds the node to the information set
+  void AddMember(GameNodeRep *p_node) { m_members.Append(p_node); }
+  /// Removes the node from the information set, invalidating if emptied
+  void RemoveMember(GameNodeRep *);
+
 public:
   Game GetGame(void) const { return m_efg; }
   int GetNumber(void) const { return m_number; }
   
   GamePlayer GetPlayer(void) const { return m_player; }
+  void SetPlayer(GamePlayer p);
+
   bool IsChanceInfoset(void) const;
 
   void SetLabel(const std::string &p_label) { m_label = p_label; }
   const std::string &GetLabel(void) const { return m_label; }
   
-  GameAction InsertAction(int where);
+  GameAction InsertAction(GameAction p_where = 0);
   void RemoveAction(int which);
 
   int NumActions(void) const { return m_actions.Length(); }
@@ -280,6 +293,8 @@ public:
   void SetActionProb(int i, const std::string &p_value);
   const gbtRational &GetActionProb(int i) const { return m_ratProbs[i]; }
   const std::string &GetActionProbText(int i) const { return m_textProbs[i]; }
+
+  void Reveal(GamePlayer);
 };
 
 /// This class represents a strategy in a strategic game.
@@ -292,18 +307,14 @@ class GameStrategyRep : public GameObject  {
   friend class GameRep;
   friend class GamePlayerRep;
   friend class PureStrategyProfile;
-  friend class MixedStrategyProfile<double>;
-  friend class MixedStrategyProfile<gbtRational>;
-  friend class MixedStrategyProfile<gbtNumber>;
-  friend class MixedBehavProfile<double>;
-  friend class MixedBehavProfile<gbtRational>;
-  friend class MixedBehavProfile<gbtNumber>;
-  friend void MakeStrategy(GamePlayerRep *);
+  template <class T> friend class MixedStrategyProfile;
+  template <class T> friend class MixedBehavProfile;
+
 private:
   int m_number;
   GamePlayerRep *m_player;
   long m_index;
-  std::string m_name;
+  std::string m_label;
   gbtArray<int> m_behav;
 
   /// @name Lifecycle
@@ -317,9 +328,9 @@ public:
   /// @name Data access
   //@{
   /// Returns the text label associated with the strategy
-  const std::string &GetName(void) const { return m_name; }
+  const std::string &GetLabel(void) const { return m_label; }
   /// Sets the text label associated with the strategy
-  void SetName(const std::string &s) { m_name = s; }
+  void SetLabel(const std::string &p_label) { m_label = p_label; }
   
   // Returns the player for whom this is a strategy
   GamePlayer GetPlayer(void) const;
@@ -332,17 +343,20 @@ public:
 };
 
 
-class GamePlayerRep : public GameObject  {
+class GamePlayerRep : public GameObject {
   friend class GameRep;
+  friend class GameInfosetRep;
   friend class GameStrategyRep;
-  friend class MixedBehavProfile<double>;
-  friend class MixedBehavProfile<gbtRational>;
-  friend class MixedBehavProfile<gbtNumber>;
-  friend class MixedStrategyProfile<double>;
-  friend class MixedStrategyProfile<gbtRational>;
-  friend class MixedStrategyProfile<gbtNumber>;
-  friend void MakeStrategy(GamePlayerRep *);
+  friend class GameNodeRep;
+  template <class T> friend class MixedBehavProfile;
+  template <class T> friend class MixedStrategyProfile;
 
+  /// @name Building reduced form strategies
+  //@{
+  void MakeStrategy(void);
+  void MakeReducedStrats(GameNodeRep *, GameNodeRep *);
+  //@}
+  
 private:
   GameRep *m_game;
   int m_number;
@@ -380,19 +394,17 @@ public:
 
 class GameNodeRep : public GameObject {
   friend class GameRep;
+  friend class GameInfosetRep;
+  friend class GamePlayerRep;
   friend class PureBehavProfile;
-  friend class MixedBehavProfile<double>;
-  friend class MixedBehavProfile<gbtRational>;
-  friend class MixedBehavProfile<gbtNumber>;
-  friend void MakeReducedStrats(GamePlayerRep *p, GameNodeRep *n, GameNodeRep *nn);
+  template <class T> friend class MixedBehavProfile;
   
 protected:
-  bool mark;
   int number; 
   GameRep *m_efg;
   std::string m_label;
   GameInfosetRep *infoset;
-  GameNodeRep *parent;
+  GameNodeRep *m_parent;
   GameOutcomeRep *outcome;
   gbtArray<GameNodeRep *> children;
   GameNodeRep *whichbranch, *ptr;
@@ -415,12 +427,15 @@ public:
   int NumChildren(void) const    { return children.Length(); }
 
   GameInfoset GetInfoset(void) const   { return infoset; }
+  void SetInfoset(GameInfoset);
+  GameInfoset LeaveInfoset(void);
+
   bool IsTerminal(void) const { return (children.Length() == 0); }
   GamePlayer GetPlayer(void) const
     { return (infoset) ? infoset->GetPlayer() : 0; }
   GameAction GetPriorAction(void) const; // returns null if root node
   GameNode GetChild(int i) const    { return children[i]; }
-  GameNode GetParent(void) const    { return parent; }
+  GameNode GetParent(void) const    { return m_parent; }
   GameNode GetNextSibling(void) const;
   GameNode GetPriorSibling(void) const;
 
@@ -429,6 +444,12 @@ public:
 
   bool IsSuccessorOf(GameNode from) const;
   bool IsSubgameRoot(void) const;
+
+  void DeleteParent(void);
+  void DeleteTree(void);
+
+  void CopyTree(GameNode src);
+  void MoveTree(GameNode src);
 };
 
 
@@ -439,6 +460,7 @@ public:
 /// a strategic game, this is not a reference-counted object.
 class PureStrategyProfile  {
   friend class GameRep;
+
 private:
   long m_index;
   Gambit::Game m_nfg;
@@ -502,14 +524,13 @@ public:
 /// This is the class for representing an arbitrary finite game.
 ///
 class GameRep : public GameObject {
+  friend class GameInfosetRep;
+  friend class GamePlayerRep;
   friend class GameNodeRep;
   friend class PureStrategyProfile;
-  friend class MixedBehavProfile<double>;
-  friend class MixedBehavProfile<gbtRational>;
-  friend class MixedBehavProfile<gbtNumber>;
-  friend class MixedStrategyProfile<double>;
-  friend class MixedStrategyProfile<gbtRational>;
-  friend class MixedStrategyProfile<gbtNumber>;
+  template <class T> friend class MixedBehavProfile;
+  template <class T> friend class MixedStrategyProfile;
+
 protected:
   std::string m_title, m_comment;
   gbtArray<GamePlayerRep *> m_players;
@@ -520,16 +541,11 @@ protected:
   GameNodeRep *m_root;
   gbtArray<GameOutcomeRep *> m_results;
 
-  void NumberNodes(GameNodeRep *, int &);
-
-  // These are used in Reveal (and only reveal?)
-  void MarkSubtree(GameNodeRep *);
-  void UnmarkSubtree(GameNodeRep *);
-
   void CopySubtree(GameNodeRep *, GameNodeRep *, GameNodeRep *);
 
   /// @name Private auxiliary functions
   //@{
+  void NumberNodes(GameNodeRep *, int &);
   void IndexStrategies(void);
   void RebuildTable(void);
   //@}
@@ -657,25 +673,11 @@ public:
   //@{
   GameInfoset AppendNode(GameNode n, GamePlayer p, int br);
   GameInfoset AppendNode(GameNode n, GameInfoset s);
-  GameNode DeleteParent(GameNode n);
   GameInfoset InsertNode(GameNode n, GamePlayer p, int br);
   GameInfoset InsertNode(GameNode n, GameInfoset s);
 
-  GameInfoset JoinInfoset(GameInfoset s, GameNode n);
-  GameInfoset JoinInfoset(GameInfoset to, GameInfoset from);
-  GameInfoset LeaveInfoset(GameNode n);
-
-  GameInfoset SwitchPlayer(GameInfoset s, GamePlayer p);
-  
-  GameNode CopyTree(GameNode src, GameNode dest);
-  GameNode MoveTree(GameNode src, GameNode dest);
-  GameNode DeleteTree(GameNode n);
-
-  GameAction InsertAction(GameInfoset s);
-  GameAction InsertAction(GameInfoset s, const GameAction &at);
   GameInfoset DeleteAction(GameInfoset s, const GameAction &a);
 
-  void Reveal(GameInfoset, const gbtArray<GamePlayer> &);
   //@}
 };
 
@@ -683,19 +685,14 @@ typedef GameObjectPtr<GameRep> Game;
 
 
 //=======================================================================
+//          Inline members of game representation classes
+//=======================================================================
 
-// Here are some functions which are inlined, but cannot be defined until
-// all classes have appeared.
+// These must be postponed to here in the file because they require
+// all classes to be defined.
 
-inline GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number)
-  : m_game(p_game), m_number(p_number),
-    m_textPayoffs(m_game->NumPlayers()),
-    m_ratPayoffs(m_game->NumPlayers())
-{
-  for (int pl = 1; pl <= m_textPayoffs.Length(); pl++) {
-    m_textPayoffs[pl] = "0";
-  }
-}
+inline bool GameInfosetRep::IsChanceInfoset(void) const
+{ return m_player->IsChance(); }
 
 inline gbtRational PureBehavProfile::GetPayoff(int pl) const
 { return GetNodeValue(m_efg->GetRoot(), pl); }
@@ -703,15 +700,11 @@ inline gbtRational PureBehavProfile::GetPayoff(int pl) const
 //=======================================================================
 
 
+//=======================================================================
+//         Exceptions thrown from game representation classes
+//=======================================================================
 
-
-class gbtEfgException : public gbtException   {
-public:
-  virtual ~gbtEfgException()   { }
-  std::string GetDescription(void) const  
-    { return "Internal error in extensive form representation"; }
-};
-
+/// Exception thrown when an operation that is undefined is attempted
 class UndefinedException : public gbtException {
 public:
   virtual ~UndefinedException() { }
@@ -719,6 +712,15 @@ public:
     { return "Undefined operation on game"; }
 };
 
+/// Exception thrown on an operation between incompatible objects
+class MismatchException : public gbtException {
+public:
+  virtual ~MismatchException() { }
+  std::string GetDescription(void) const
+    { return "Operation between objects in different games"; }
+};
+
+/// Exception thrown on a parse error when reading a game savefile
 class InvalidFileException : public gbtException {
 public:
   virtual ~InvalidFileException() { }

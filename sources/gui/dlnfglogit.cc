@@ -110,7 +110,7 @@ wxString gbtLogitMixedList::GetCellValue(const wxSheetCoords &p_coords)
 	for (int st = 1; st <= player->NumStrategies(); st++) {
 	  if (index++ == p_coords.GetCol()) {
 	    return (wxString::Format(wxT("%d: "), pl) +
-		    wxString(player->GetStrategy(st)->GetName().c_str(),
+		    wxString(player->GetStrategy(st)->GetLabel().c_str(),
 			    *wxConvCurrent));
 	  }
 	}

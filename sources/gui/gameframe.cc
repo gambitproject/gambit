@@ -1076,7 +1076,7 @@ void gbtGameFrame::OnEditInsertAction(wxCommandEvent &)
   Gambit::GameNode node = m_doc->GetSelectNode();
   if (!node || !node->GetInfoset())  return;
 
-  Gambit::GameAction action = m_doc->GetGame()->InsertAction(node->GetInfoset());
+  Gambit::GameAction action = node->GetInfoset()->InsertAction();
   action->SetLabel(ToText(action->GetNumber()));
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
@@ -1085,7 +1085,7 @@ void gbtGameFrame::OnEditDeleteTree(wxCommandEvent &)
 {
   if (!m_doc->GetSelectNode())  return;
 
-  m_doc->GetGame()->DeleteTree(m_doc->GetSelectNode());
+  m_doc->GetSelectNode()->DeleteTree();
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -1093,7 +1093,7 @@ void gbtGameFrame::OnEditDeleteParent(wxCommandEvent &)
 {
   if (!m_doc->GetSelectNode() || !m_doc->GetSelectNode()->GetParent())  return;
 
-  m_doc->GetGame()->DeleteParent(m_doc->GetSelectNode());
+  m_doc->GetSelectNode()->DeleteParent();
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -1110,8 +1110,9 @@ void gbtGameFrame::OnEditReveal(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_doc->GetGame()->Reveal(m_doc->GetSelectNode()->GetInfoset(), 
-			       dialog.GetPlayers());
+      for (int pl = 1; pl <= dialog.GetPlayers().Length(); pl++) {
+	m_doc->GetSelectNode()->GetInfoset()->Reveal(dialog.GetPlayers()[pl]);
+      }
       m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
     }
     catch (gbtException &ex) {
@@ -1135,11 +1136,10 @@ void gbtGameFrame::OnEditNode(wxCommandEvent &)
     if (m_doc->GetSelectNode()->NumChildren() > 0 &&
 	dialog.GetInfoset() != m_doc->GetSelectNode()->GetInfoset()) {
       if (dialog.GetInfoset() == 0) {
-	m_doc->GetGame()->LeaveInfoset(m_doc->GetSelectNode());
+	m_doc->GetSelectNode()->LeaveInfoset();
       }
       else {
-	m_doc->GetGame()->JoinInfoset(dialog.GetInfoset(), 
-				      m_doc->GetSelectNode());
+	m_doc->GetSelectNode()->SetInfoset(dialog.GetInfoset());	
       }
     }
     m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
@@ -1157,8 +1157,7 @@ void gbtGameFrame::OnEditMove(wxCommandEvent &)
     
     if (!infoset->IsChanceInfoset() && 
 	dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
-      m_doc->GetGame()->SwitchPlayer(infoset, 
-				     m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
+      infoset->SetPlayer(m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
     }
 
     for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -1189,7 +1188,7 @@ void gbtGameFrame::OnEditNewPlayer(wxCommandEvent &)
   Gambit::GamePlayer player = m_doc->GetGame()->NewPlayer();
   player->SetLabel("Player " + ToText(player->GetNumber()));
   if (!m_doc->IsTree()) {
-    player->GetStrategy(1)->SetName("1");
+    player->GetStrategy(1)->SetLabel("1");
   }
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }

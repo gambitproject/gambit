@@ -314,11 +314,12 @@ void efgLcp<T>::FillTableau(const Gambit::BehavSupport &p_support, Gambit::Matri
 			    int s1, int s2, int i1, int i2)
 {
   int snew;
-  if (n->GetOutcome()) {
+  Gambit::GameOutcome outcome = n->GetOutcome();
+  if (outcome) {
     A(s1,ns1+s2) = gbtRational(A(s1,ns1+s2)) +
-      gbtRational(prob) * (n->GetOutcome()->GetPayoff(1) - gbtRational(maxpay));
+      gbtRational(prob) * (outcome->GetPayoff<gbtRational>(1) - gbtRational(maxpay));
     A(ns1+s2,s1) = gbtRational(A(ns1+s2,s1)) +
-      gbtRational(prob) * (n->GetOutcome()->GetPayoff(2) - gbtRational(maxpay));
+      gbtRational(prob) * (outcome->GetPayoff<gbtRational>(2) - gbtRational(maxpay));
   }
   if (n->GetInfoset()) {
     if (n->GetPlayer()->IsChance()) {

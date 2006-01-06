@@ -68,7 +68,7 @@ void WriteOsborneFile(std::ostream &p_file, const Gambit::Game &p_nfg,
     theHtml += "\n&";
 
     for (int st = 1; st <= p_nfg->GetPlayer(p_colPlayer)->NumStrategies(); st++) {
-      theHtml += p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st)->GetName();
+      theHtml += p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st)->GetLabel();
       if (st < p_nfg->GetPlayer(p_colPlayer)->NumStrategies()) {
 	theHtml += " & ";
       }
@@ -77,14 +77,14 @@ void WriteOsborneFile(std::ostream &p_file, const Gambit::Game &p_nfg,
 
     for (int st1 = 1; st1 <= p_nfg->GetPlayer(p_rowPlayer)->NumStrategies(); st1++) {
       profile.SetStrategy(p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1));
-      theHtml += p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1)->GetName();
+      theHtml += p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1)->GetLabel();
       theHtml += " & ";
       for (int st2 = 1; st2 <= p_nfg->GetPlayer(p_colPlayer)->NumStrategies(); st2++) {
 	profile.SetStrategy(p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st2));
 	theHtml += " $";
 	for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
 	  if (profile.GetOutcome()) {
-	    theHtml += ToText(profile.GetOutcome()->GetPayoff(pl));
+	    theHtml += profile.GetOutcome()->GetPayoff<std::string>(pl);
 	  }
 	  else {
 	    theHtml += "0";

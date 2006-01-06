@@ -113,7 +113,7 @@ MakeSequenceForm(const Gambit::GameNode &n, gbtRational prob,gbtArray<int>seq,
 
   if (n->GetOutcome()) {
     for(pl = 1;pl<=seq.Length();pl++)
-      (*(*SF)[seq])[pl] += prob * n->GetOutcome()->GetPayoff(pl);
+      (*(*SF)[seq])[pl] += prob * n->GetOutcome()->GetPayoff<gbtRational>(pl);
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {

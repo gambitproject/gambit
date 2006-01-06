@@ -59,7 +59,7 @@ void WriteHtmlFile(std::ostream &p_file, const Gambit::Game &p_nfg,
     theHtml += "<td></td>";
     for (int st = 1; st <= p_nfg->GetPlayer(p_colPlayer)->NumStrategies(); st++) {
       theHtml += "<td align=center><b>";
-      theHtml += p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st)->GetName();
+      theHtml += p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st)->GetLabel();
       theHtml += "</b></td>";
     } 
     theHtml += "</tr>";
@@ -68,14 +68,14 @@ void WriteHtmlFile(std::ostream &p_file, const Gambit::Game &p_nfg,
       profile.SetStrategy(p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1));
       theHtml += "<tr>";
       theHtml += "<td align=center><b>";
-      theHtml += p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1)->GetName();
+      theHtml += p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1)->GetLabel();
       theHtml += "</b></td>";
       for (int st2 = 1; st2 <= p_nfg->GetPlayer(p_colPlayer)->NumStrategies(); st2++) {
 	profile.SetStrategy(p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st2));
 	theHtml += "<td align=center>";
 	for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
 	  if (profile.GetOutcome()) {
-	    theHtml += ToText(profile.GetOutcome()->GetPayoff(pl));
+	    theHtml += profile.GetOutcome()->GetPayoff<std::string>(pl);
 	  }
 	  else {
 	    theHtml += "0";

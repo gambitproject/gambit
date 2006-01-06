@@ -246,9 +246,10 @@ void efgLp<T>::FillTableau(const Gambit::BehavSupport &p_support,
 			   int s1, int s2, int i1, int i2)
 {
   int i,snew;
-  if (n->GetOutcome()) {
+  Gambit::GameOutcome outcome = n->GetOutcome();
+  if (outcome) {
     A(s1,s2) = gbtRational(A(s1,s2)) +
-      gbtRational(prob) * n->GetOutcome()->GetPayoff(1) - gbtRational(minpay);
+      gbtRational(prob) * outcome->GetPayoff<gbtRational>(1) - gbtRational(minpay);
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {

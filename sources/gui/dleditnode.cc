@@ -126,10 +126,10 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
     }
 
     item += (" (" + 
-	     ToText(outcome->GetPayoff(1)) + ", " +
-	     ToText(outcome->GetPayoff(2)));
+	     ToText(outcome->GetPayoff<std::string>(1)) + ", " +
+	     ToText(outcome->GetPayoff<std::string>(2)));
     if (efg->NumPlayers() > 2) {
-      item += ", " + ToText(outcome->GetPayoff(3));
+      item += ", " + ToText(outcome->GetPayoff<std::string>(3));
       if (efg->NumPlayers() > 3) {
 	item += ",...)";
       }

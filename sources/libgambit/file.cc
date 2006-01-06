@@ -554,7 +554,7 @@ static Game BuildNfg(GameParserState &p_parser,
   for (int pl = 1; pl <= dim.Length(); pl++) {
     nfg->GetPlayer(pl)->SetLabel(p_data.GetPlayer(pl));
     for (int st = 1; st <= dim[pl]; st++) {
-      nfg->GetPlayer(pl)->GetStrategy(st)->SetName(p_data.GetStrategy(pl,st));
+      nfg->GetPlayer(pl)->GetStrategy(st)->SetLabel(p_data.GetStrategy(pl,st));
     }
   }
   

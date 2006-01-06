@@ -31,6 +31,18 @@
 namespace Gambit {
 
 //========================================================================
+//                       class GameOutcomeRep
+//========================================================================
+
+GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number)
+  : m_game(p_game), m_number(p_number),
+    m_textPayoffs(m_game->NumPlayers()),
+    m_ratPayoffs(m_game->NumPlayers())
+{
+  for (int pl = 1; pl <= m_textPayoffs.Length(); m_textPayoffs[pl++] = "0");
+}
+
+//========================================================================
 //                       class GameActionRep
 //========================================================================
 
@@ -63,6 +75,8 @@ GameInfosetRep::GameInfosetRep(GameRep *p_efg, int p_number,
     p_actions--; 
   }
 
+  m_player->m_infosets.Append(this);
+
   if (p_player->IsChance()) {
     for (int act = 1; act <= m_actions.Length(); act++) {
       m_ratProbs.Append(gbtRational(1, m_actions.Length()));
@@ -76,8 +90,18 @@ GameInfosetRep::~GameInfosetRep()
   for (int act = 1; act <= m_actions.Length(); m_actions[act++]->Invalidate());
 }
 
-bool GameInfosetRep::IsChanceInfoset(void) const
-{ return m_player->IsChance(); }
+void GameInfosetRep::SetPlayer(GamePlayer p_player)
+{
+  if (p_player->GetGame() != m_efg) throw MismatchException();
+  if (m_player->IsChance() || p_player->IsChance()) throw UndefinedException();
+  if (m_player == p_player) return;
+
+  m_player->m_infosets.Remove(m_player->m_infosets.Find(this));
+  m_player = p_player;
+  p_player->m_infosets.Append(this);
+
+  m_efg->ClearComputedValues();
+}
 
 bool GameInfosetRep::Precedes(GameNode p_node) const
 {
@@ -92,19 +116,35 @@ bool GameInfosetRep::Precedes(GameNode p_node) const
   return false;
 }
 
-GameAction GameInfosetRep::InsertAction(int where)
+GameAction GameInfosetRep::InsertAction(GameAction p_action /* =0 */)
 {
+  if (p_action && p_action->GetInfoset() != this) throw MismatchException();
+  
+  int where = m_actions.Length() + 1;
+  if (p_action) {
+    for (where = 1; m_actions[where] != p_action; where++); 
+  }
+
   GameActionRep *action = new GameActionRep(where, "", this);
   m_actions.Insert(action, where);
-  for (; where <= m_actions.Length(); where++)
-    m_actions[where]->m_number = where;
-
   if (m_player->IsChance()) {
     m_textProbs.Insert("0", where);
     m_ratProbs.Insert(gbtRational(0), where);
   }
+
+  for (int act = 1; act <= m_actions.Length(); act++) {
+    m_actions[act]->m_number = act;
+  }
+
+  for (int i = 1; i <= m_members.Length(); i++) {
+    m_members[i]->children.Insert(new GameNodeRep(m_efg, m_members[i]), 
+				  where);
+  }
+
+  m_efg->ClearComputedValues();
   return action;
 }
+
 
 void GameInfosetRep::RemoveAction(int which)
 {
@@ -122,6 +162,47 @@ void GameInfosetRep::SetActionProb(int act, const std::string &p_value)
 {
   m_textProbs[act] = p_value;
   m_ratProbs[act] = ToRational(p_value);
+  m_efg->ClearComputedValues();
+}
+
+void GameInfosetRep::RemoveMember(GameNodeRep *p_node)
+{
+  m_members.Remove(m_members.Find(p_node));
+  if (m_members.Length() == 0) {
+    m_player->m_infosets.Remove(m_player->m_infosets.Find(this));
+    for (int i = 1; i <= m_player->m_infosets.Length(); i++) {
+      m_player->m_infosets[i]->m_number = i;
+    }
+    Invalidate();
+  }
+}
+
+void GameInfosetRep::Reveal(GamePlayer p_player)
+{
+  for (int act = 1; act <= m_actions.Length(); act++) {
+    GameActionRep *action = m_actions[act];
+    for (int iset = 1; iset <= p_player->m_infosets.Length(); iset++) {
+      // make copy of members to iterate correctly 
+      // (since the information set may be changed in the process)
+      gbtArray<GameNodeRep *> members = p_player->m_infosets[iset]->m_members;
+
+      // This information set holds all members of information set
+      // which follow 'action'.
+      GameInfoset newiset = 0;
+
+      for (int m = 1; m <= members.Length(); m++) {
+	if (action->Precedes(members[m])) {
+	  if (!newiset) {
+	    newiset = members[m]->LeaveInfoset();
+	  }
+	  else {
+	    members[m]->SetInfoset(newiset);
+	  }
+	} 
+      }
+    }
+  }
+
   m_efg->ClearComputedValues();
 }
 
@@ -171,8 +252,96 @@ GameStrategy GamePlayerRep::NewStrategy(void)
   m_strategies.Append(strategy);
   strategy->m_number = m_strategies.Length();
   strategy->m_index = -1;   // this flags this action as new
-  //m_nfg->RebuildTable();
+  if (!m_game->IsTree()) {
+    m_game->RebuildTable();
+  }
   return strategy;
+}
+
+void GamePlayerRep::MakeStrategy(void)
+{
+  gbtArray<int> c(NumInfosets());
+  
+  for (int i = 1; i <= NumInfosets(); i++)  {
+    if (GetInfoset(i)->flag == 1)
+      c[i] = GetInfoset(i)->whichbranch;
+    else
+      c[i] = 0;
+  }
+  
+  GameStrategyRep *strategy = NewStrategy();
+  strategy->m_behav = c;
+  strategy->m_label = "";
+
+  // We generate a default labeling -- probably should be changed in future
+  if (strategy->m_behav.Length() > 0) {
+    for (int iset = 1; iset <= strategy->m_behav.Length(); iset++) {
+      if (strategy->m_behav[iset] > 0) {
+	strategy->m_label += ToText(strategy->m_behav[iset]);
+      }
+      else {
+	strategy->m_label += "*";
+      }
+    }
+  }
+  else {
+    strategy->m_label = "*";
+  }
+}
+
+void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn)
+{
+  int i;
+  GameNodeRep *m, *mm;
+
+  if (!n->GetParent())  n->ptr = 0;
+
+  if (n->NumChildren() > 0)  {
+    if (n->infoset->m_player == this)  {
+      if (n->infoset->flag == 0)  {
+	// we haven't visited this infoset before
+	n->infoset->flag = 1;
+	for (i = 1; i <= n->NumChildren(); i++)   {
+	  GameNodeRep *m = n->GetChild(i);
+	  n->whichbranch = m;
+	  n->infoset->whichbranch = i;
+	  MakeReducedStrats(m, nn);
+	}
+	n->infoset->flag = 0;
+      }
+      else  {
+	// we have visited this infoset, take same action
+	MakeReducedStrats(n->children[n->infoset->whichbranch], nn);
+      }
+    }
+    else  {
+      n->ptr = NULL;
+      if (nn != NULL)
+	n->ptr = nn->m_parent;
+      n->whichbranch = n->children[1];
+      if (n->infoset)
+	n->infoset->whichbranch = 0;
+      MakeReducedStrats(n->children[1], n->children[1]);
+    }
+  }
+  else if (nn)  {
+    for (; ; nn = nn->m_parent->ptr->whichbranch)  {
+      m = nn->GetNextSibling();
+      if (m || nn->m_parent->ptr == NULL)   break;
+    }
+    if (m)  {
+      mm = m->m_parent->whichbranch;
+      m->m_parent->whichbranch = m;
+      MakeReducedStrats(m, m);
+      m->m_parent->whichbranch = mm;
+    }
+    else {
+      MakeStrategy();
+    }
+  }
+  else {
+    MakeStrategy();
+  }
 }
 
 //========================================================================
@@ -180,7 +349,7 @@ GameStrategy GamePlayerRep::NewStrategy(void)
 //========================================================================
 
 GameNodeRep::GameNodeRep(GameRep *e, GameNodeRep *p)
-  : mark(false), number(0), m_efg(e), infoset(0), parent(p), outcome(0)
+  : number(0), m_efg(e), infoset(0), m_parent(p), outcome(0)
 { }
 
 GameNodeRep::~GameNodeRep()
@@ -191,27 +360,27 @@ GameNodeRep::~GameNodeRep()
 
 GameNode GameNodeRep::GetNextSibling(void) const  
 {
-  if (!parent)   return 0;
-  if (parent->children.Find(const_cast<GameNodeRep *>(this)) == 
-      parent->children.Length())
+  if (!m_parent)   return 0;
+  if (m_parent->children.Find(const_cast<GameNodeRep *>(this)) == 
+      m_parent->children.Length())
     return 0;
   else
-    return parent->children[parent->children.Find(const_cast<GameNodeRep *>(this)) + 1];
+    return m_parent->children[m_parent->children.Find(const_cast<GameNodeRep *>(this)) + 1];
 }
 
 GameNode GameNodeRep::GetPriorSibling(void) const
 { 
-  if (!parent)   return 0;
-  if (parent->children.Find(const_cast<GameNodeRep *>(this)) == 1)
+  if (!m_parent)   return 0;
+  if (m_parent->children.Find(const_cast<GameNodeRep *>(this)) == 1)
     return 0;
   else
-    return parent->children[parent->children.Find(const_cast<GameNodeRep *>(this)) - 1];
+    return m_parent->children[m_parent->children.Find(const_cast<GameNodeRep *>(this)) - 1];
 
 }
 
 GameAction GameNodeRep::GetPriorAction(void) const
 {
-  if (!parent) {
+  if (!m_parent) {
     return 0;
   }
   
@@ -243,7 +412,7 @@ void GameNodeRep::SetOutcome(const GameOutcome &p_outcome)
 bool GameNodeRep::IsSuccessorOf(GameNode p_node) const
 {
   GameNode n = const_cast<GameNodeRep *>(this);
-  while (n && n != p_node) n = n->parent;
+  while (n && n != p_node) n = n->m_parent;
   return (n == p_node);
 }
 
@@ -251,7 +420,7 @@ bool GameNodeRep::IsSubgameRoot(void) const
 {
   // First take care of a couple easy cases
   if (children.Length() == 0 || infoset->NumMembers() > 1) return false;
-  if (!parent) return true;
+  if (!m_parent) return true;
 
   // A node is a subgame root if and only if in every information set,
   // either all members succeed the node in the tree,
@@ -273,6 +442,120 @@ bool GameNodeRep::IsSubgameRoot(void) const
   }
 
   return true;
+}
+
+void GameNodeRep::DeleteParent(void)
+{
+  if (!m_parent) return;
+  GameNodeRep *oldParent = m_parent;
+
+  oldParent->children.Remove(oldParent->children.Find(this));
+  oldParent->DeleteTree();
+  m_parent = oldParent->m_parent;
+  if (m_parent) {
+    m_parent->children[m_parent->children.Find(oldParent)] = this;
+  }
+  else {
+    m_efg->m_root = this;
+  }
+
+  oldParent->Invalidate();
+  m_efg->ClearComputedValues();
+}
+
+void GameNodeRep::DeleteTree(void)
+{
+  for (int i = 1; i <= children.Length(); i++) {
+    children[i]->DeleteTree();
+    children[i]->Invalidate();
+  }
+  children = gbtArray<GameNodeRep *>();
+
+  if (infoset) {
+    infoset->RemoveMember(this);
+    infoset = 0;
+  }
+
+  outcome = 0;
+  m_label = "";
+
+  m_efg->ClearComputedValues();
+}
+
+void GameNodeRep::CopyTree(GameNode p_src)
+{
+  if (p_src->GetGame() != m_efg) throw MismatchException();
+  if (p_src == this || children.Length() > 0) return;
+
+  if (p_src->children.Length())  {
+    m_efg->AppendNode(this, p_src->infoset);
+    for (int i = 1; i <= p_src->children.Length(); i++) {
+      m_efg->CopySubtree(p_src->children[i], children[i], this);
+    }
+
+    m_efg->ClearComputedValues();
+  }
+}
+
+void GameNodeRep::MoveTree(GameNode p_src)
+{
+  if (p_src->GetGame() != m_efg) throw MismatchException();
+  if (p_src == this || children.Length() > 0 || IsSuccessorOf(p_src)) {
+    return;
+  }
+
+  if (p_src->m_parent == m_parent) {
+    int srcChild = p_src->m_parent->children.Find(p_src);
+    int destChild = p_src->m_parent->children.Find(this);
+    p_src->m_parent->children[srcChild] = this;
+    p_src->m_parent->children[destChild] = p_src;
+  }
+  else {
+    GameNodeRep *parent = p_src->m_parent; 
+    parent->children[parent->children.Find(p_src)] = this;
+    m_parent->children[m_parent->children.Find(this)] = p_src;
+    p_src->m_parent = m_parent;
+    m_parent = parent;
+  }
+
+  m_label = "";
+  outcome = 0;
+  
+  m_efg->ClearComputedValues();
+}
+
+void GameNodeRep::SetInfoset(GameInfoset p_infoset)
+{
+  if (p_infoset->GetGame() != m_efg) throw MismatchException();
+  if (!infoset || infoset == p_infoset) return;
+  if (p_infoset->m_actions.Length() != children.Length()) 
+    throw MismatchException();
+
+  infoset->RemoveMember(this);
+  p_infoset->AddMember(this);
+  infoset = p_infoset;
+
+  m_efg->ClearComputedValues();
+}
+
+GameInfoset GameNodeRep::LeaveInfoset(void)
+{
+  if (!infoset) return 0;
+
+  GameInfosetRep *oldInfoset = infoset;
+  if (oldInfoset->m_members.Length() == 1) return oldInfoset;
+
+  GamePlayerRep *player = oldInfoset->m_player;
+  oldInfoset->RemoveMember(this);
+  infoset = new GameInfosetRep(m_efg, player->m_infosets.Length() + 1, player,
+			       children.Length());
+  infoset->AddMember(this);
+  for (int i = 1; i <= oldInfoset->m_actions.Length(); i++) {
+    infoset->m_actions[i]->SetLabel(oldInfoset->m_actions[i]->GetLabel());
+  }
+
+  m_efg->ClearComputedValues();
+  return infoset;
 }
 
 //========================================================================
@@ -337,7 +620,7 @@ gbtRational PureStrategyProfile::GetPayoff(int pl) const
   else {
     GameOutcome outcome = GetOutcome();
     if (outcome) {
-      return outcome->GetPayoff(pl);
+      return outcome->GetPayoff<gbtRational>(pl);
     }
     else {
       return gbtRational(0);
@@ -360,7 +643,7 @@ std::string PureStrategyProfile::GetPayoffText(int pl) const
   else {
     GameOutcome outcome = GetOutcome();
     if (outcome) {
-      return outcome->GetPayoffText(pl);
+      return outcome->GetPayoff<std::string>(pl);
     }
     else {
       return "0";
@@ -409,7 +692,7 @@ gbtRational PureBehavProfile::GetNodeValue(const GameNode &p_node,
   gbtRational payoff(0);
 
   if (p_node->outcome) {
-    payoff += p_node->outcome->GetPayoff(pl);
+    payoff += p_node->outcome->GetPayoff<gbtRational>(pl);
   }
 
   if (!p_node->IsTerminal()) {
@@ -460,7 +743,7 @@ GameRep::GameRep(const gbtArray<int> &dim)
     m_players.Append(new GamePlayerRep(this, pl, dim[pl]));
     m_players[pl]->m_label = ToText(pl);
     for (int st = 1; st <= m_players[pl]->NumStrategies(); st++) {
-      m_players[pl]->m_strategies[st]->m_name = ToText(st);
+      m_players[pl]->m_strategies[st]->m_label = ToText(st);
     }
   }
   IndexStrategies();
@@ -545,11 +828,11 @@ gbtRational GameRep::GetMinPayoff(int player) const
     p2 = NumPlayers();
   }
   
-  gbtRational minpay = m_outcomes[1]->GetPayoff(p1);
+  gbtRational minpay = m_outcomes[1]->GetPayoff<gbtRational>(p1);
   for (index = 1; index <= m_outcomes.Length(); index++)  {
     for (p = p1; p <= p2; p++) {
-      if (m_outcomes[index]->GetPayoff(p) < minpay) {
-	minpay = m_outcomes[index]->GetPayoff(p);
+      if (m_outcomes[index]->GetPayoff<gbtRational>(p) < minpay) {
+	minpay = m_outcomes[index]->GetPayoff<gbtRational>(p);
       }
     }
   }
@@ -570,11 +853,11 @@ gbtRational GameRep::GetMaxPayoff(int player) const
     p2 = NumPlayers();
   }
 
-  gbtRational maxpay = m_outcomes[1]->GetPayoff(p1);
+  gbtRational maxpay = m_outcomes[1]->GetPayoff<gbtRational>(p1);
   for (index = 1; index <= m_outcomes.Length(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (m_outcomes[index]->GetPayoff(p) > maxpay)
-	maxpay = m_outcomes[index]->GetPayoff(p);
+      if (m_outcomes[index]->GetPayoff<gbtRational>(p) > maxpay)
+	maxpay = m_outcomes[index]->GetPayoff<gbtRational>(p);
   }
   return maxpay;
 }
@@ -706,74 +989,6 @@ void GameRep::ClearComputedValues(void) const
   }
 }
 
-void MakeStrategy(GamePlayerRep *p)
-{
-  gbtArray<int> c(p->NumInfosets());
-  
-  for (int i = 1; i <= p->NumInfosets(); i++)  {
-    if (p->GetInfoset(i)->flag == 1)
-      c[i] = p->GetInfoset(i)->whichbranch;
-    else
-      c[i] = 0;
-  }
-  
-  GameStrategyRep *strategy = p->NewStrategy();
-  strategy->m_behav = c;
-}
-
-void MakeReducedStrats(GamePlayerRep *p, GameNodeRep *n, GameNodeRep *nn)
-{
-  int i;
-  GameNodeRep *m, *mm;
-
-  if (!n->GetParent())  n->ptr = 0;
-
-  if (n->NumChildren() > 0)  {
-    if (n->infoset->m_player == p)  {
-      if (n->infoset->flag == 0)  {
-	// we haven't visited this infoset before
-	n->infoset->flag = 1;
-	for (i = 1; i <= n->NumChildren(); i++)   {
-	  GameNodeRep *m = n->GetChild(i);
-	  n->whichbranch = m;
-	  n->infoset->whichbranch = i;
-	  MakeReducedStrats(p, m, nn);
-	}
-	n->infoset->flag = 0;
-      }
-      else  {
-	// we have visited this infoset, take same action
-	MakeReducedStrats(p, n->children[n->infoset->whichbranch], nn);
-      }
-    }
-    else  {
-      n->ptr = NULL;
-      if (nn != NULL)
-	n->ptr = nn->parent;
-      n->whichbranch = n->children[1];
-      if (n->infoset)
-	n->infoset->whichbranch = 0;
-      MakeReducedStrats(p, n->children[1], n->children[1]);
-    }
-  }
-  else if (nn)  {
-    for (; ; nn = nn->parent->ptr->whichbranch)  {
-      m = nn->GetNextSibling();
-      if (m || nn->parent->ptr == NULL)   break;
-    }
-    if (m)  {
-      mm = m->parent->whichbranch;
-      m->parent->whichbranch = m;
-      MakeReducedStrats(p, m, m);
-      m->parent->whichbranch = mm;
-    }
-    else
-      MakeStrategy(p);
-  }
-  else
-    MakeStrategy(p);
-}
-
 void GameRep::BuildComputedValues(void)
 {
   ClearComputedValues();
@@ -781,28 +996,7 @@ void GameRep::BuildComputedValues(void)
   if (!IsTree()) return;
 
   for (int i = 1; i <= m_players.Length(); i++) {
-    MakeReducedStrats(m_players[i], m_root, NULL);
-  }
-
-  gbtArray<int> dim(m_players.Length());
-  for (int i = 1; i <= m_players.Length(); i++)
-    dim[i] = (m_players[i]->m_strategies.Length()) ? m_players[i]->m_strategies.Length() : 1;
-
-  for (int i = 1; i <= NumPlayers(); i++)   {
-    for (int j = 1; j <= m_players[i]->m_strategies.Length(); j++)   {
-      std::string name;
-      if (m_players[i]->m_strategies[j]->m_behav.Length() > 0) {
-	for (int k = 1; k <= m_players[i]->m_strategies[j]->m_behav.Length(); k++)
-	  if (m_players[i]->m_strategies[j]->m_behav[k] > 0)
-	    name += ToText(m_players[i]->m_strategies[j]->m_behav[k]);
-	  else
-	    name += "*";
-      }
-      else {
-	name = "*";
-      }
-      GetPlayer(i)->GetStrategy(j)->SetName(name);
-    }
+    m_players[i]->MakeReducedStrats(m_root, 0);
   }
 }
 
@@ -849,7 +1043,7 @@ static void WriteEfgFile(std::ostream &f, GameNodeRep *n)
 	EscapeQuotes(n->GetOutcome()->GetLabel()) << "\" ";
       f << "{ ";
       for (int pl = 1; pl <= n->GetGame()->NumPlayers(); pl++)  {
-	f << n->GetOutcome()->GetPayoffText(pl);
+	f << n->GetOutcome()->GetPayoff<std::string>(pl);
 
 	if (pl < n->GetGame()->NumPlayers()) {
 	  f << ", ";
@@ -883,7 +1077,7 @@ static void WriteEfgFile(std::ostream &f, GameNodeRep *n)
       EscapeQuotes(n->GetOutcome()->GetLabel()) << "\" ";
     f << "{ ";
     for (int pl = 1; pl <= n->GetGame()->NumPlayers(); pl++)  {
-      f << n->GetOutcome()->GetPayoffText(pl);
+      f << n->GetOutcome()->GetPayoff<std::string>(pl);
       
       if (pl < n->GetGame()->NumPlayers())
 	f << ", ";
@@ -923,7 +1117,7 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
     GamePlayerRep *player = GetPlayer(i);
     p_file << "{ ";
     for (int j = 1; j <= player->NumStrategies(); j++)
-      p_file << '"' << EscapeQuotes(player->GetStrategy(j)->GetName()) << "\" ";
+      p_file << '"' << EscapeQuotes(player->GetStrategy(j)->GetLabel()) << "\" ";
     p_file << "}\n";
   }
   
@@ -1181,11 +1375,10 @@ int GameRep::NumNodes(void) const
 GameInfoset GameRep::AppendNode(GameNode n, GamePlayer p, int count)
 {
   if (!n || !p || count == 0)
-    throw gbtEfgException();
+    throw UndefinedException();
 
   if (n->children.Length() == 0)   {
     n->infoset = new GameInfosetRep(this, p->m_infosets.Length() + 1, p, count);
-    p->m_infosets.Append(n->infoset);
     n->infoset->m_members.Append(n);
     while (count--)
       n->children.Append(new GameNodeRep(this, n));
@@ -1197,7 +1390,7 @@ GameInfoset GameRep::AppendNode(GameNode n, GamePlayer p, int count)
 
 GameInfoset GameRep::AppendNode(GameNode n, GameInfoset s)
 {
-  if (!n || !s)   throw gbtEfgException();
+  if (!n || !s)   throw UndefinedException();
   
   if (n->children.Length() == 0)   {
     n->infoset = s;
@@ -1210,41 +1403,19 @@ GameInfoset GameRep::AppendNode(GameNode n, GameInfoset s)
   return s;
 }
   
-GameNode GameRep::DeleteParent(GameNode p_keep)
-{
-  GameNodeRep *parent = p_keep->parent;
-  if (!parent) return p_keep;
-
-  parent->children.Remove(parent->children.Find(p_keep));
-  DeleteTree(parent);
-  p_keep->parent = parent->parent;
-  if (parent->parent) {
-    parent->parent->children[parent->parent->children.Find(parent)] = p_keep;
-  }
-  else {
-    m_root = p_keep;
-  }
-
-  parent->Invalidate();
-  ClearComputedValues();
-
-  return p_keep;
-}
-
 GameInfoset GameRep::InsertNode(GameNode n, GamePlayer p, int count)
 {
-  if (!n || !p || count <= 0)  throw gbtEfgException();
+  if (!n || !p || count <= 0)  throw UndefinedException();
 
-  GameNodeRep *m = new GameNodeRep(this, n->parent);
+  GameNodeRep *m = new GameNodeRep(this, n->m_parent);
   m->infoset = new GameInfosetRep(this, p->m_infosets.Length() + 1, p, count);
-  p->m_infosets.Append(m->infoset);
   m->infoset->m_members.Append(m);
-  if (n->parent)
-    n->parent->children[n->parent->children.Find(n)] = m;
+  if (n->m_parent)
+    n->m_parent->children[n->m_parent->children.Find(n)] = m;
   else
     m_root = m;
   m->children.Append(n);
-  n->parent = m;
+  n->m_parent = m;
   while (--count)
     m->children.Append(new GameNodeRep(this, m));
 
@@ -1254,108 +1425,23 @@ GameInfoset GameRep::InsertNode(GameNode n, GamePlayer p, int count)
 
 GameInfoset GameRep::InsertNode(GameNode n, GameInfoset s)
 {
-  if (!n || !s)  throw gbtEfgException();
+  if (!n || !s)  throw UndefinedException();
 
-  GameNodeRep *m = new GameNodeRep(this, n->parent);
+  GameNodeRep *m = new GameNodeRep(this, n->m_parent);
   m->infoset = s;
   s->m_members.Append(m);
-  if (n->parent)
-    n->parent->children[n->parent->children.Find(n)] = m;
+  if (n->m_parent)
+    n->m_parent->children[n->m_parent->children.Find(n)] = m;
   else
     m_root = m;
   m->children.Append(n);
-  n->parent = m;
+  n->m_parent = m;
   int count = s->m_actions.Length();
   while (--count)
     m->children.Append(new GameNodeRep(this, m));
 
   ClearComputedValues();
   return m->infoset;
-}
-
-GameInfoset GameRep::JoinInfoset(GameInfoset s, GameNode n)
-{
-  if (!n || !s)  throw gbtEfgException();
-
-  if (!n->infoset)   return 0; 
-  if (n->infoset == s)   return s;
-  if (s->m_actions.Length() != n->children.Length())  return n->infoset;
-
-  GameInfosetRep *t = n->infoset;
-
-  t->m_members.Remove(t->m_members.Find(n));
-  s->m_members.Append(n);
-
-  n->infoset = s;
-
-  if (t->m_members.Length() == 0) {
-    t->m_player->m_infosets.Remove(t->m_player->m_infosets.Find(t));
-    for (int i = 1; i <= t->m_player->m_infosets.Length(); i++) {
-      t->m_player->m_infosets[i]->m_number = i;
-    }
-    t->Invalidate();
-  }
-
-  ClearComputedValues();
-  return s;
-}
-
-GameInfoset GameRep::JoinInfoset(GameInfoset to, GameInfoset from)
-{
-  if (!to || !from)  throw gbtEfgException();
-
-  if (to == from ||
-      to->m_actions.Length() != from->m_actions.Length())   return from;
-
-  for (int i = 1; i <= from->m_members.Length(); i++) {
-    to->m_members.Append(from->m_members[i]);
-  }
-
-  for (int i = 1; i <= from->m_members.Length(); i++)
-    from->m_members[i]->infoset = to;
-
-  from->m_members = gbtArray<GameNodeRep *>();
-
-  ClearComputedValues();
-  return to;
-}
-
-GameInfoset GameRep::LeaveInfoset(GameNode n)
-{
-  if (!n)  throw gbtEfgException();
-
-  if (!n->infoset)   return 0;
-
-  GameInfosetRep *s = n->infoset;
-  if (s->m_members.Length() == 1)   return s;
-
-  GamePlayerRep *p = s->m_player;
-  s->m_members.Remove(s->m_members.Find(n));
-  n->infoset = new GameInfosetRep(this, p->m_infosets.Length() + 1, p,
-				  n->children.Length());
-  p->m_infosets.Append(n->infoset);
-  n->infoset->m_label = s->m_label;
-  n->infoset->m_members.Append(n);
-  for (int i = 1; i <= s->m_actions.Length(); i++)
-    n->infoset->m_actions[i]->m_label = s->m_actions[i]->m_label;
-
-  ClearComputedValues();
-  return n->infoset;
-}
-
-GameInfoset GameRep::SwitchPlayer(GameInfoset s, GamePlayer p)
-{
-  if (!s || !p)  throw gbtEfgException();
-  if (s->GetPlayer()->IsChance() || p->IsChance())  throw gbtEfgException();
-  
-  if (s->m_player == p)   return s;
-
-  s->m_player->m_infosets.Remove(s->m_player->m_infosets.Find(s));
-  s->m_player = p;
-  p->m_infosets.Append(s);
-
-  ClearComputedValues();
-  return s;
 }
 
 void GameRep::CopySubtree(GameNodeRep *src, GameNodeRep *dest, 
@@ -1376,150 +1462,9 @@ void GameRep::CopySubtree(GameNodeRep *src, GameNodeRep *dest,
   dest->outcome = src->outcome;
 }
 
-void GameRep::Reveal(GameInfoset where, 
-		     const gbtArray<GamePlayer> &who)
-{
-  UnmarkSubtree(m_root);  // start with a clean tree
-  
-  for (int i = 1; i <= where->m_actions.Length(); i++) {
-    for (int j = 1; j <= where->m_members.Length(); j++) { 
-      MarkSubtree(where->m_members[j]->children[i]);
-    }
-
-    for (int j = who.First(); j <= who.Last(); j++) {
-      // iterate over each information set of player 'j' in the list
-      for (int k = 1; k <= who[j]->m_infosets.Length(); k++) {
-	// iterate over each member of information set 'k'
-	// make copy of members to iterate correctly 
-	// (since the information set may be changed in the process)
-	gbtArray<GameNodeRep *> members = who[j]->m_infosets[k]->m_members;
-	GameInfoset newiset;
-
-	for (int m = 1; m <= members.Length(); m++) {
-	  GameNodeRep *n = members[m];
-	  if (n->mark) {
-	    // If node is marked, is descendant of action 'i'
-	    n->mark = false;   // unmark so tree is clean at end
-	    if (!newiset) {
-	      newiset = LeaveInfoset(n);
-	    }
-	    else {
-	      JoinInfoset(newiset, n);
-	    }
-	  } 
-	}
-      }
-    }
-  }
-
-  ClearComputedValues();
-}
-
-GameNode GameRep::CopyTree(GameNode src, GameNode dest)
-{
-  if (!src || !dest)  throw gbtEfgException();
-  if (src == dest || dest->children.Length())   return src;
-
-  if (src->children.Length())  {
-
-    AppendNode(dest, src->infoset);
-    for (int i = 1; i <= src->children.Length(); i++)
-      CopySubtree(src->children[i], dest->children[i], dest);
-
-    ClearComputedValues();
-  }
-
-  return dest;
-}
-
-GameNode GameRep::MoveTree(GameNode src, GameNode dest)
-{
-  if (!src || !dest)  throw gbtEfgException();
-  if (src == dest || dest->children.Length() || dest->IsSuccessorOf(src)) {
-    return src;
-  }
-  if (src->parent == dest->parent) {
-    int srcChild = src->parent->children.Find(src);
-    int destChild = src->parent->children.Find(dest);
-    src->parent->children[srcChild] = dest;
-    src->parent->children[destChild] = src;
-  }
-  else {
-    GameNodeRep *parent = src->parent; 
-    parent->children[parent->children.Find(src)] = dest;
-    dest->parent->children[dest->parent->children.Find(dest)] = src;
-    src->parent = dest->parent;
-    dest->parent = parent;
-  }
-
-  dest->m_label = "";
-  dest->outcome = 0;
-  
-  ClearComputedValues();
-  return dest;
-}
-
-GameNode GameRep::DeleteTree(GameNode n)
-{
-  if (!n)  throw gbtEfgException();
-
-  while (n->NumChildren() > 0)   {
-    DeleteTree(n->children[1]);
-    n->children.Remove(1)->Invalidate();
-  }
-  
-  if (n->infoset)  {
-    GameInfosetRep *infoset = n->infoset;
-    GamePlayerRep *player = infoset->m_player;
-
-    infoset->m_members.Remove(infoset->m_members.Find(n));
-    if (infoset->m_members.Length() == 0) {
-      player->m_infosets.Remove(player->m_infosets.Find(infoset));
-      for (int i = 1; i <= player->m_infosets.Length(); i++) {
-	player->m_infosets[i]->m_number = i;
-      }
-      infoset->Invalidate();
-    }
-    n->infoset = 0;
-  }
-  n->outcome = 0;
-  n->m_label = "";
-
-  ClearComputedValues();
-  return n;
-}
-
-GameAction GameRep::InsertAction(GameInfoset s)
-{
-  if (!s)  throw gbtEfgException();
-
-  GameActionRep *action = s->InsertAction(s->NumActions() + 1);
-  for (int i = 1; i <= s->m_members.Length(); i++) {
-    s->m_members[i]->children.Append(new GameNodeRep(this, s->m_members[i]));
-  }
-  ClearComputedValues();
-  return action;
-}
-
-GameAction GameRep::InsertAction(GameInfoset s, const GameAction &a)
-{
-  if (!a || !s)  throw gbtEfgException();
-
-  int where;
-  for (where = 1; where <= s->m_actions.Length() && s->m_actions[where] != a;
-       where++);
-  if (where > s->m_actions.Length())   return 0;
-  GameActionRep *action = s->InsertAction(where);
-  for (int i = 1; i <= s->m_members.Length(); i++)
-    s->m_members[i]->children.Insert(new GameNodeRep(this, s->m_members[i]), where);
-
-  ClearComputedValues();
-  return action;
-}
-
 GameInfoset GameRep::DeleteAction(GameInfoset s, const GameAction &a)
 {
-  if (!a || !s)  throw gbtEfgException();
+  if (!a || !s)  throw UndefinedException();
 
   int where;
   for (where = 1; where <= s->m_actions.Length() && s->m_actions[where] != a;
@@ -1527,7 +1472,7 @@ GameInfoset GameRep::DeleteAction(GameInfoset s, const GameAction &a)
   if (where > s->m_actions.Length() || s->m_actions.Length() == 1)   return s;
   s->RemoveAction(where);
   for (int i = 1; i <= s->m_members.Length(); i++)   {
-    DeleteTree(s->m_members[i]->children[where]);
+    s->m_members[i]->children[where]->DeleteTree();
     s->m_members[i]->children.Remove(where)->Invalidate();
   }
   ClearComputedValues();
@@ -1538,28 +1483,6 @@ GameInfoset GameRep::DeleteAction(GameInfoset s, const GameAction &a)
 //------------------------------------------------------------------------
 //                  GameRep: Private auxiliary functions
 //------------------------------------------------------------------------
-
-//
-// MarkSubtree: sets the Node::mark flag on all children of p_node
-//
-void GameRep::MarkSubtree(GameNodeRep *p_node)
-{
-  p_node->mark = true;
-  for (int i = 1; i <= p_node->children.Length(); i++) {
-    MarkSubtree(p_node->children[i]);
-  }
-}
-
-//
-// UnmarkSubtree: clears the Node::mark flag on all children of p_node
-//
-void GameRep::UnmarkSubtree(GameNodeRep *p_node)
-{
-  p_node->mark = false;
-  for (int i = 1; i <= p_node->children.Length(); i++) {
-    UnmarkSubtree(p_node->children[i]);
-  }
-}
 
 void GameRep::IndexStrategies(void)
 {

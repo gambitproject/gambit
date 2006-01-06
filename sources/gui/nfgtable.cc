@@ -234,7 +234,7 @@ wxString gbtRowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
   int player = m_table->GetRowPlayer(p_coords.GetCol() + 1);
   int strat = m_table->RowToStrategy(p_coords.GetCol() + 1, p_coords.GetRow());
 
-  return wxString(support.GetStrategy(player, strat)->GetName().c_str(), 
+  return wxString(support.GetStrategy(player, strat)->GetLabel().c_str(), 
 		  *wxConvCurrent);
 }
 
@@ -246,7 +246,7 @@ void gbtRowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords,
   int player = m_table->GetRowPlayer(p_coords.GetCol() + 1);
   int strat = m_table->RowToStrategy(p_coords.GetCol() + 1, p_coords.GetRow());
 
-  support.GetStrategy(player, strat)->SetName((const char *) p_value.mb_str());
+  support.GetStrategy(player, strat)->SetLabel((const char *) p_value.mb_str());
   m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
@@ -452,7 +452,7 @@ wxString gbtColPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
   int player = m_table->GetColPlayer(p_coords.GetRow() + 1);
   int strat = m_table->ColToStrategy(p_coords.GetRow() + 1, p_coords.GetCol());
 
-  return wxString(support.GetStrategy(player, strat)->GetName().c_str(), 
+  return wxString(support.GetStrategy(player, strat)->GetLabel().c_str(), 
 		  *wxConvCurrent);
 }
 
@@ -464,7 +464,7 @@ void gbtColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords,
   int player = m_table->GetColPlayer(p_coords.GetRow() + 1);
   int strat = m_table->ColToStrategy(p_coords.GetRow() + 1, p_coords.GetCol());
 
-  support.GetStrategy(player, strat)->SetName((const char *) p_value.mb_str());
+  support.GetStrategy(player, strat)->SetLabel((const char *) p_value.mb_str());
   m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
