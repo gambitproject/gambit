@@ -204,10 +204,6 @@ inline gbtRational GameOutcomeRep::GetPayoff(int pl) const
 { return m_ratPayoffs[pl]; }
 
 template<>
-inline gbtNumber GameOutcomeRep::GetPayoff(int pl) const
-{ return m_ratPayoffs[pl]; }
-
-template<>
 inline std::string GameOutcomeRep::GetPayoff(int pl) const
 { return m_textPayoffs[pl]; }
 

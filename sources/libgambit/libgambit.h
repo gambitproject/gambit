@@ -52,7 +52,6 @@ inline double pow(double x, long y)
 { return pow(x, (double) y); }
 
 #include "rational.h"
-#include "gnumber.h"
 
 #include "gvector.h"
 #include "matrix.h"

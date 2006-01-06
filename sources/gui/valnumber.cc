@@ -77,14 +77,14 @@ gbtNumberValidator::gbtNumberValidator(wxString *p_value)
 { }
 
 gbtNumberValidator::gbtNumberValidator(wxString *p_value,
-				   const gbtNumber &p_minValue)
+				       const gbtRational &p_minValue)
   : m_stringValue(p_value), m_hasMin(true), m_hasMax(false),
     m_minValue(p_minValue)
 { }
 
 gbtNumberValidator::gbtNumberValidator(wxString *p_value,
-				   const gbtNumber &p_minValue,
-				   const gbtNumber &p_maxValue)
+				       const gbtRational &p_minValue,
+				       const gbtRational &p_maxValue)
   : m_stringValue(p_value), m_hasMin(true), m_hasMax(true),
     m_minValue(p_minValue), m_maxValue(p_maxValue)
 { }

@@ -31,7 +31,6 @@ template class Gambit::Matrix<double>;
 template class Gambit::Matrix<gbtRational>;
 template class Gambit::Matrix<gbtInteger>;
 template class Gambit::Matrix<int>;
-template class Gambit::Matrix<gbtNumber>;
 
 template gbtVector<double> Gambit::operator*(const gbtVector<double> &,
 					     const Gambit::Matrix<double> &);
@@ -41,6 +40,3 @@ template gbtVector<gbtInteger> Gambit::operator*(const gbtVector<gbtInteger> &,
 						 const Gambit::Matrix<gbtInteger> &);
 template gbtVector<int> Gambit::operator*(const gbtVector<int> &,
 					  const Gambit::Matrix<int> &);
-template gbtVector<gbtNumber> Gambit::operator*(const gbtVector<gbtNumber> &,
-						const Gambit::Matrix<gbtNumber> &);
-

@@ -29,5 +29,4 @@
 
 template class Gambit::MixedStrategyProfile<double>;
 template class Gambit::MixedStrategyProfile<gbtRational>;
-template class Gambit::MixedStrategyProfile<gbtNumber>;
 

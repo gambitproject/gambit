@@ -26,7 +26,6 @@
 
 #include "gpolylst.imp"
 #include "double.h"
-#include "libgambit/gnumber.h"
 #include "libgambit/matrix.imp"
 
 //template class gPolyList<int>;

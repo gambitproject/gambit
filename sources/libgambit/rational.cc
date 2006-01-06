@@ -29,6 +29,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <iostream>
+#include <sstream>
 
 #if defined(__GNUG__) && !defined(__APPLE_CC__)
 #pragma implementation
@@ -568,4 +569,17 @@ gbtRational ToRational(const std::string &f)
 void gEpsilon(gbtRational &v, int /* i */)
 { v = (gbtRational)0;}
 
+
+gbtRational ToNumber(const std::string &p_string)
+{
+  if (p_string.find('.') != -1 || p_string.find('e') != -1) {
+    std::istringstream st(p_string);
+    double d;
+    st >> d;
+    return gbtRational(d);
+  }
+  else {
+    return ToRational(p_string);
+  }
+}
 

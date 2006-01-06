@@ -141,5 +141,7 @@ inline double ToDouble(const std::string &s)
   return (double) ToRational(s);
 }
 
+gbtRational ToNumber(const std::string &p_string);
+
 #endif
 

@@ -32,5 +32,4 @@ template class polynomial<gbtRational>;
 template class polynomial<int>;
 template class polynomial<double>;
 template class polynomial<gDouble>;
-template class polynomial<gbtNumber>;
 

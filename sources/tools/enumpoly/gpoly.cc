@@ -69,20 +69,6 @@ template<> gbtRational gPoly<gbtRational>::String_Coeff(gbtRational nega)
   else return (nega * ToRational(Coeff));
 }
 
-template<> gbtNumber gPoly<gbtNumber>::String_Coeff(gbtNumber nega)
-{
-  gbtNumber num;
-  std::string Coeff = "";
-  while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
-    Coeff += charc;
-    charnum++;
-    GetChar();
-  }
-
-  if (Coeff == "") return (nega);
-  else return (nega * ToNumber(Coeff));
-}
-
 template class gPoly<gbtRational>;
 template gPoly<gbtRational> operator*(const gbtRational val, const gPoly<gbtRational> &poly);
 template gPoly<gbtRational> operator*(const gPoly<gbtRational> &poly, const gbtRational val);
@@ -91,15 +77,6 @@ template gPoly<gDouble> TogDouble(const gPoly<gbtRational>&);
 template gPoly<gDouble> NormalizationOfPoly(const gPoly<gbtRational>&);
 
 template std::string &operator<<(std::string &, const gPoly<gbtRational> &);
-
-template class gPoly<gbtNumber>;
-template gPoly<gbtNumber> operator*(const gbtNumber val, const gPoly<gbtNumber> &poly);
-template gPoly<gbtNumber> operator*(const gPoly<gbtNumber> &poly, const gbtNumber val);
-
-template gPoly<gDouble> TogDouble(const gPoly<gbtNumber>&);
-template gPoly<gDouble> NormalizationOfPoly(const gPoly<gbtNumber>&);
-
-template std::string &operator<<(std::string &, const gPoly<gbtNumber> &);
 
 template class gPoly<gDouble>;
 template gPoly<gDouble> operator*(const gDouble val, const gPoly<gDouble> &poly);
@@ -110,15 +87,6 @@ template gPoly<gDouble> operator+(const gPoly<gDouble> &poly, const gDouble val)
 template gPoly<gDouble> TogDouble(const gPoly<gDouble>&);
 template gPoly<gDouble> NormalizationOfPoly(const gPoly<gDouble>&);
 template std::string &operator<<(std::string &, const gPoly<gDouble> &);
-
-std::string ToText(const gPoly<gbtNumber> &p)
-{
-  std::string t;
-  t << p;
-  return t;
-}
-
-
 
 
 

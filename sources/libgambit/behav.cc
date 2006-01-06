@@ -29,7 +29,6 @@
 
 template class Gambit::MixedBehavProfile<double>;
 template class Gambit::MixedBehavProfile<gbtRational>;
-template class Gambit::MixedBehavProfile<gbtNumber>;
 
 
 

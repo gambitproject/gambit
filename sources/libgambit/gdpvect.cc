@@ -29,5 +29,4 @@
 
 template class gbtDPVector<double>;
 template class gbtDPVector<gbtRational>;
-template class gbtDPVector<gbtNumber>;
 

@@ -27,10 +27,8 @@
 #include <assert.h>
 #include "interval.imp"
 #include "double.h"
-#include "libgambit/gnumber.h"
 
 template class gInterval<gbtRational>;
 template class gInterval<int>;
 template class gInterval<double>;
 template class gInterval<gDouble>;
-template class gInterval<gbtNumber>;

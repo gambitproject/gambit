@@ -26,11 +26,9 @@
 
 #include "monomial.imp"
 #include "double.h"
-#include "libgambit/gnumber.h"
 
 template class gMono<int>;
 template class gMono<double>;
 template class gMono<gbtRational>;
-template class gMono<gbtNumber>;
 template class gMono<gDouble>;
 

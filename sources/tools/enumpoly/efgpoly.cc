@@ -93,8 +93,7 @@ public:
   // Passing between variables of polynomials and sequence form probs
   gbtPVector<double> SeqFormProbsFromSolVars(const gbtVector<gDouble> &) const;
   gbtVector<gDouble> SolVarsFromSeqFormProbs(const gbtPVector<double> &) const;
-  gbtVector<gDouble> SolVarsFromBehavProfile(const Gambit::MixedBehavProfile<gbtNumber> &) 
-                                                                     const;
+  //  gbtVector<gDouble> SolVarsFromBehavProfile(const Gambit::MixedBehavProfile<gbtNumber> &) const;
 
   const int PolishKnownRoot(gbtVector<gDouble> &) const;
 
@@ -418,6 +417,7 @@ EfgPolEnumModule<T>::SeqFormProbsFromSolVars(const gbtVector<gDouble> &v) const
   return x;
 }
 
+/*
 template <class T> gbtVector<gDouble> 
 EfgPolEnumModule<T>::SolVarsFromBehavProfile(const Gambit::MixedBehavProfile<gbtNumber> &sol)
   const
@@ -452,6 +452,7 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const Gambit::MixedBehavProfile<gbt
 
   return answer;
 }
+*/
 
 template <class T> gbtVector<gDouble> 
 EfgPolEnumModule<T>::SolVarsFromSeqFormProbs(const gbtPVector<double> &x) const
