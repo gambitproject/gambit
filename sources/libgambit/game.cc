@@ -36,11 +36,8 @@ namespace Gambit {
 
 GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number)
   : m_game(p_game), m_number(p_number),
-    m_textPayoffs(m_game->NumPlayers()),
-    m_ratPayoffs(m_game->NumPlayers())
-{
-  for (int pl = 1; pl <= m_textPayoffs.Length(); m_textPayoffs[pl++] = "0");
-}
+    m_payoffs(m_game->NumPlayers())
+{ }
 
 //========================================================================
 //                       class GameActionRep
@@ -79,8 +76,7 @@ GameInfosetRep::GameInfosetRep(GameRep *p_efg, int p_number,
 
   if (p_player->IsChance()) {
     for (int act = 1; act <= m_actions.Length(); act++) {
-      m_ratProbs.Append(Rational(1, m_actions.Length()));
-      m_textProbs.Append(ToText(m_ratProbs[act]));
+      m_probs.Append(ToText(Rational(1, m_actions.Length())));
     }
   }
 }
@@ -128,8 +124,7 @@ GameAction GameInfosetRep::InsertAction(GameAction p_action /* =0 */)
   GameActionRep *action = new GameActionRep(where, "", this);
   m_actions.Insert(action, where);
   if (m_player->IsChance()) {
-    m_textProbs.Insert("0", where);
-    m_ratProbs.Insert(Rational(0), where);
+    m_probs.Insert(Number("0"), where);
   }
 
   for (int act = 1; act <= m_actions.Length(); act++) {
@@ -153,15 +148,13 @@ void GameInfosetRep::RemoveAction(int which)
     m_actions[which]->m_number = which;
 
   if (m_player->IsChance()) {
-    m_textProbs.Remove(which);
-    m_ratProbs.Remove(which);
+    m_probs.Remove(which);
   }
 }
 
 void GameInfosetRep::SetActionProb(int act, const std::string &p_value)
 {
-  m_textProbs[act] = p_value;
-  m_ratProbs[act] = ToRational(p_value);
+  m_probs[act] = p_value;
   m_efg->ClearComputedValues();
 }
 
@@ -698,7 +691,7 @@ Rational PureBehavProfile::GetNodeValue(const GameNode &p_node,
   if (!p_node->IsTerminal()) {
     if (p_node->GetInfoset()->IsChanceInfoset()) {
       for (int i = 1; i <= p_node->NumChildren(); i++) {
-	payoff += (p_node->GetInfoset()->GetActionProb(i) *
+	payoff += (p_node->GetInfoset()->GetActionProb<Rational>(i) *
 		   GetNodeValue(p_node->children[i], pl));
       }
     }
@@ -1028,7 +1021,7 @@ static void PrintActions(std::ostream &p_stream, GameInfosetRep *p_infoset)
   for (int act = 1; act <= p_infoset->NumActions(); act++) {
     p_stream << '"' << EscapeQuotes(p_infoset->GetAction(act)->GetLabel()) << "\" ";
     if (p_infoset->IsChanceInfoset()) {
-      p_stream << p_infoset->GetActionProb(act) << ' ';
+      p_stream << p_infoset->GetActionProb<std::string>(act) << ' ';
     }
   }
   p_stream << "}";
@@ -1149,7 +1142,7 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
     for (int outc = 1; outc <= m_outcomes.Length(); outc++)   {
       p_file << "{ \"" << EscapeQuotes(m_outcomes[outc]->m_label) << "\" ";
       for (int pl = 1; pl <= m_players.Length(); pl++)  {
-	p_file << m_outcomes[outc]->m_textPayoffs[pl];
+	p_file << (const std::string &) m_outcomes[outc]->m_payoffs[pl];
 
 	if (pl < m_players.Length()) {
 	  p_file << ", ";
@@ -1253,8 +1246,7 @@ GamePlayer GameRep::NewPlayer(void)
     m_players.Append(player);
     
     for (int outc = 1; outc <= m_outcomes.Last(); outc++) {
-      m_outcomes[outc]->m_textPayoffs.Append("0");
-      m_outcomes[outc]->m_ratPayoffs.Append(0);
+      m_outcomes[outc]->m_payoffs.Append(Number());
     }
 
     ClearComputedValues();
@@ -1265,8 +1257,7 @@ GamePlayer GameRep::NewPlayer(void)
     m_players.Append(player);
 
     for (int outc = 1; outc <= m_outcomes.Length(); outc++) {
-      m_outcomes[outc]->m_textPayoffs.Append("0");
-      m_outcomes[outc]->m_ratPayoffs.Append(0);
+      m_outcomes[outc]->m_payoffs.Append(Number());
     }
 
     return player;

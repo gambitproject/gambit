@@ -119,7 +119,7 @@ MakeSequenceForm(const Gambit::GameNode &n, Gambit::Rational prob,gbtArray<int>s
     if(n->GetPlayer()->IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
 	MakeSequenceForm(n->GetChild(i),
-		     prob * n->GetInfoset()->GetActionProb(i), seq,iset,parent);
+			 prob * n->GetInfoset()->GetActionProb<Gambit::Rational>(i), seq,iset,parent);
     }
     else {
       int pl = n->GetPlayer()->GetNumber();

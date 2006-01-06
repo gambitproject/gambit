@@ -12,6 +12,7 @@ libgambit_la_SOURCES = \
 	glist.h \
 	gmap.h \
 	matrix.cc matrix.h matrix.imp \
+	number.h \
 	gpvector.cc gpvector.h gpvector.imp \
 	recarray.h \
 	sqmatrix.cc sqmatrix.h sqmatrix.imp \
@@ -35,6 +36,7 @@ libgambitinclude_HEADERS = \
 	glist.h \
 	gmap.h \
 	matrix.h matrix.imp \
+	number.h \
 	gpvector.h gpvector.imp \
 	recarray.h
 	sqmatrix.h sqmatrix.imp \

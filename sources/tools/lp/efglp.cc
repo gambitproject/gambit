@@ -253,9 +253,10 @@ void efgLp<T>::FillTableau(const Gambit::BehavSupport &p_support,
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
+      Gambit::GameInfoset infoset = n->GetInfoset();
       for(i=1;i<=n->NumChildren();i++)
 	FillTableau(p_support, A, n->GetChild(i),
-		    Gambit::Rational(prob) * n->GetInfoset()->GetActionProb(i),
+		    Gambit::Rational(prob) * infoset->GetActionProb<Gambit::Rational>(i),
 		    s1,s2,i1,i2);
     }
     int pl = n->GetPlayer()->GetNumber();

@@ -29,6 +29,7 @@
 #define LIBGAMBIT_GAME_H
 
 #include "gdpvect.h"
+#include "number.h"
 
 namespace Gambit {
 
@@ -160,8 +161,7 @@ private:
   GameRep *m_game;
   int m_number;
   std::string m_label;
-  gbtArray<std::string> m_textPayoffs;
-  gbtArray<Rational> m_ratPayoffs;
+  gbtArray<Number> m_payoffs;
 
   /// @name Lifecycle
   //@{
@@ -184,29 +184,16 @@ public:
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
   /// Gets the payoff associated with the outcome to player 'pl'
-  template <class T> T GetPayoff(int pl) const;
+  template <class T> const T &GetPayoff(int pl) const 
+    { return (const T &) m_payoffs[pl]; }
   /// Sets the payoff to player 'pl'
   void SetPayoff(int pl, const std::string &p_value)
   {
-    m_textPayoffs[pl] = p_value;
-    m_ratPayoffs[pl] = ToRational(p_value);
+    m_payoffs[pl] = p_value;
     //m_game->ClearComputedValues();
   }
   //@}
 };
-
-template<>
-inline double GameOutcomeRep::GetPayoff(int pl) const
-{ return (double) m_ratPayoffs[pl]; }
-
-template<>
-inline Rational GameOutcomeRep::GetPayoff(int pl) const
-{ return m_ratPayoffs[pl]; }
-
-template<>
-inline std::string GameOutcomeRep::GetPayoff(int pl) const
-{ return m_textPayoffs[pl]; }
-
 
 typedef GameObjectPtr<GameOutcomeRep> GameOutcome;
 
@@ -251,8 +238,7 @@ protected:
   gbtArray<GameActionRep *> m_actions;
   gbtArray<GameNodeRep *> m_members;
   int flag, whichbranch;
-  gbtArray<std::string> m_textProbs;
-  gbtArray<Rational> m_ratProbs;
+  gbtArray<Number> m_probs;
   
   GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_player, 
 		 int p_actions);
@@ -287,8 +273,8 @@ public:
   bool Precedes(GameNode) const;
 
   void SetActionProb(int i, const std::string &p_value);
-  const Rational &GetActionProb(int i) const { return m_ratProbs[i]; }
-  const std::string &GetActionProbText(int i) const { return m_textProbs[i]; }
+  template <class T> const T &GetActionProb(int pl) const 
+    { return (const T &) m_probs[pl]; }
 
   void Reveal(GamePlayer);
 };

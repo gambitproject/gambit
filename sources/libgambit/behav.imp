@@ -174,7 +174,8 @@ template <class T>
 T MixedBehavProfile<T>::ActionProb(const GameAction &action) const
 {
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
-    return action->GetInfoset()->GetActionProb(action->GetNumber());
+    GameInfosetRep *infoset = action->GetInfoset();
+    return infoset->GetActionProb<T>(action->GetNumber());
   }
   else if (!m_support.Find(action)) {
     return (T) 0.0;
@@ -585,7 +586,8 @@ void MixedBehavProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp,
 	prob = (T) 0;
     }
     else  {   // n.GetPlayer() == 0
-      prob = node->GetInfoset()->GetActionProb(i);
+      GameInfosetRep *infoset = node->GetInfoset();
+      prob = infoset->GetActionProb<T>(i);
     }
 
     GameNode child = node->children[i];

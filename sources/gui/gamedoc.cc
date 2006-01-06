@@ -666,7 +666,8 @@ std::string gbtGameDocument::GetInfosetValue(const Gambit::GameNode &p_node) con
 std::string gbtGameDocument::GetActionProb(const Gambit::GameNode &p_node, int p_act) const
 {
   if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
-    return p_node->GetInfoset()->GetActionProbText(p_act);
+    Gambit::GameInfoset infoset = p_node->GetInfoset();
+    return infoset->GetActionProb<std::string>(p_act);
   }
 
   if (GetCurrentProfile() == 0 || !p_node->GetPlayer()) {
@@ -703,7 +704,7 @@ std::string gbtGameDocument::GetActionValue(const Gambit::GameNode &p_node, int 
 double gbtGameDocument::ActionProb(const Gambit::GameNode &p_node, int p_action) const
 {
   if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
-    return p_node->GetInfoset()->GetActionProb(p_action);
+    return p_node->GetInfoset()->GetActionProb<double>(p_action);
   }
 
   if (GetCurrentProfile() && p_node->GetInfoset()) {
