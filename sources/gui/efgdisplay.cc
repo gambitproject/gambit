@@ -174,7 +174,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       }
     
       if (node->NumChildren() == 0) {
-	Gambit::GameInfoset infoset = efg->AppendNode(node, player, 2);
+	Gambit::GameInfoset infoset = node->AppendMove(player, 2);
 	infoset->GetAction(1)->SetLabel("1");
 	infoset->GetAction(2)->SetLabel("2");
       }
@@ -242,7 +242,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
 	return true;
       }
       else if (node->NumChildren() == 0 && srcNode->NumChildren() > 0) {
-	efg->AppendNode(node, srcNode->GetInfoset());
+	node->AppendMove(srcNode->GetInfoset());
 	m_owner->GetDocument()->UpdateViews(GBT_DOC_MODIFIED_GAME);
 	return true;
       }

@@ -1052,16 +1052,15 @@ void gbtGameFrame::OnEditInsertMove(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK)  {
     try {
       if (!dialog.GetInfoset()) {
-	Gambit::GameInfoset infoset = m_doc->GetGame()->InsertNode(m_doc->GetSelectNode(), 
-						       dialog.GetPlayer(),
-						       dialog.GetActions());
+	Gambit::GameInfoset infoset = 
+	  m_doc->GetSelectNode()->InsertMove(dialog.GetPlayer(),
+					     dialog.GetActions());
 	for (int act = 1; act <= infoset->NumActions(); act++) {
 	  infoset->GetAction(act)->SetLabel(Gambit::ToText(act));
 	}
       }
       else {
-	m_doc->GetGame()->InsertNode(m_doc->GetSelectNode(), 
-				    dialog.GetInfoset());
+	m_doc->GetSelectNode()->InsertMove(dialog.GetInfoset());
       }
       m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
     }

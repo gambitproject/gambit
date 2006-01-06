@@ -221,11 +221,14 @@ public:
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
   bool Precedes(const GameNode &) const;
+
+  void DeleteAction(void);
 };
 
 
 class GameInfosetRep : public GameObject {
   friend class GameRep;
+  friend class GameActionRep;
   friend class GamePlayerRep;
   friend class GameNodeRep;
   template <class T> friend class MixedBehavProfile;
@@ -249,6 +252,8 @@ protected:
   /// Removes the node from the information set, invalidating if emptied
   void RemoveMember(GameNodeRep *);
 
+  void RemoveAction(int which);
+
 public:
   Game GetGame(void) const { return m_efg; }
   int GetNumber(void) const { return m_number; }
@@ -262,7 +267,6 @@ public:
   const std::string &GetLabel(void) const { return m_label; }
   
   GameAction InsertAction(GameAction p_where = 0);
-  void RemoveAction(int which);
 
   int NumActions(void) const { return m_actions.Length(); }
   GameAction GetAction(int p_index) const { return m_actions[p_index]; }
@@ -376,6 +380,7 @@ public:
 
 class GameNodeRep : public GameObject {
   friend class GameRep;
+  friend class GameActionRep;
   friend class GameInfosetRep;
   friend class GamePlayerRep;
   friend class PureBehavProfile;
@@ -395,6 +400,7 @@ protected:
   ~GameNodeRep();
 
   void DeleteOutcome(GameOutcomeRep *outc);
+  void CopySubtree(GameNodeRep *, GameNodeRep *);
 
 public:
   Game GetGame(void) const { return m_efg; }
@@ -432,6 +438,11 @@ public:
 
   void CopyTree(GameNode src);
   void MoveTree(GameNode src);
+
+  GameInfoset AppendMove(GamePlayer p_player, int p_actions);
+  GameInfoset AppendMove(GameInfoset p_infoset);
+  GameInfoset InsertMove(GamePlayer p_player, int p_actions);
+  GameInfoset InsertMove(GameInfoset p_infoset);
 };
 
 
@@ -522,8 +533,6 @@ protected:
 
   GameNodeRep *m_root;
   gbtArray<GameOutcomeRep *> m_results;
-
-  void CopySubtree(GameNodeRep *, GameNodeRep *, GameNodeRep *);
 
   /// @name Private auxiliary functions
   //@{
@@ -649,17 +658,6 @@ public:
   GameNode GetRoot(void) const { return m_root; }
   /// Returns the number of nodes in the game
   int NumNodes(void) const;
-  //@}
-
-  /// @name Editing game trees
-  //@{
-  GameInfoset AppendNode(GameNode n, GamePlayer p, int br);
-  GameInfoset AppendNode(GameNode n, GameInfoset s);
-  GameInfoset InsertNode(GameNode n, GamePlayer p, int br);
-  GameInfoset InsertNode(GameNode n, GameInfoset s);
-
-  GameInfoset DeleteAction(GameInfoset s, const GameAction &a);
-
   //@}
 };
 

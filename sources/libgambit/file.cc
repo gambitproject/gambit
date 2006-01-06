@@ -1048,12 +1048,12 @@ static void BuildSubtree(Game p_efg, GameNode p_node,
 
     if (player->GetInfoset((*p_nodeData)->m_infoset)) {
       GameInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
-      p_efg->AppendNode(p_node, infoset);
+      p_node->AppendMove(infoset);
     }
     else {
       GameInfoset infoset =
-	p_efg->AppendNode(p_node, p_efg->GetPlayer((*p_nodeData)->m_player),
-			  (*p_nodeData)->m_infosetData->m_actions.Length());
+	p_node->AppendMove(p_efg->GetPlayer((*p_nodeData)->m_player),
+			   (*p_nodeData)->m_infosetData->m_actions.Length());
 
       infoset->SetLabel((*p_nodeData)->m_infosetData->m_name);
       for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -1072,11 +1072,11 @@ static void BuildSubtree(Game p_efg, GameNode p_node,
 
     if (player->GetInfoset((*p_nodeData)->m_infoset)) {
       GameInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
-      p_efg->AppendNode(p_node, infoset);
+      p_node->AppendMove(infoset);
     }
     else {
-      GameInfoset infoset = p_efg->AppendNode(p_node, p_efg->GetChance(),
-					   (*p_nodeData)->m_infosetData->m_actions.Length());
+      GameInfoset infoset = p_node->AppendMove(p_efg->GetChance(),
+					       (*p_nodeData)->m_infosetData->m_actions.Length());
 
       infoset->SetLabel((*p_nodeData)->m_infosetData->m_name);
       for (int act = 1; act <= infoset->NumActions(); act++) {

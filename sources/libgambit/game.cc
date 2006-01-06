@@ -58,6 +58,24 @@ bool GameActionRep::Precedes(const GameNode &n) const
   return false;
 }
 
+void GameActionRep::DeleteAction(void)
+{
+  if (m_infoset->NumActions() == 1) throw UndefinedException();
+
+  int where;
+  for (where = 1;
+       where <= m_infoset->m_actions.Length() && 
+	 m_infoset->m_actions[where] != this;
+       where++);
+
+  m_infoset->RemoveAction(where);
+  for (int i = 1; i <= m_infoset->m_members.Length(); i++)   {
+    m_infoset->m_members[i]->children[where]->DeleteTree();
+    m_infoset->m_members[i]->children.Remove(where)->Invalidate();
+  }
+  m_infoset->m_efg->ClearComputedValues();
+}
+
 //========================================================================
 //                       class GameInfosetRep
 //========================================================================
@@ -475,15 +493,33 @@ void GameNodeRep::DeleteTree(void)
   m_efg->ClearComputedValues();
 }
 
+void GameNodeRep::CopySubtree(GameNodeRep *src, GameNodeRep *stop)
+{
+  if (src == stop) {
+    outcome = src->outcome;
+    return;
+  }
+
+  if (src->children.Length())  {
+    AppendMove(src->infoset);
+    for (int i = 1; i <= src->children.Length(); i++) {
+      children[i]->CopySubtree(src->children[i], stop);
+    }
+  }
+
+  m_label = src->m_label;
+  outcome = src->outcome;
+}
+
 void GameNodeRep::CopyTree(GameNode p_src)
 {
   if (p_src->GetGame() != m_efg) throw MismatchException();
   if (p_src == this || children.Length() > 0) return;
 
   if (p_src->children.Length())  {
-    m_efg->AppendNode(this, p_src->infoset);
+    AppendMove(p_src->infoset);
     for (int i = 1; i <= p_src->children.Length(); i++) {
-      m_efg->CopySubtree(p_src->children[i], children[i], this);
+      children[i]->CopySubtree(p_src->children[i], this);
     }
 
     m_efg->ClearComputedValues();
@@ -549,6 +585,67 @@ GameInfoset GameNodeRep::LeaveInfoset(void)
 
   m_efg->ClearComputedValues();
   return infoset;
+}
+
+GameInfoset GameNodeRep::AppendMove(GamePlayer p_player, int p_actions)
+{
+  if (p_actions <= 0 || children.Length() > 0) throw UndefinedException();
+  if (p_player->GetGame() != m_efg) throw MismatchException();
+
+  return AppendMove(new GameInfosetRep(m_efg, 
+				       p_player->m_infosets.Length() + 1, 
+				       p_player, p_actions));
+}  
+
+GameInfoset GameNodeRep::AppendMove(GameInfoset p_infoset)
+{
+  if (children.Length() > 0) throw UndefinedException();
+  if (p_infoset->GetGame() != m_efg) throw MismatchException();
+  
+  infoset = p_infoset;
+  infoset->AddMember(this);
+  for (int i = 1; i <= p_infoset->NumActions(); i++) {
+    children.Append(new GameNodeRep(m_efg, this));
+  }
+
+  m_efg->ClearComputedValues();
+  return infoset;
+}
+  
+GameInfoset GameNodeRep::InsertMove(GamePlayer p_player, int p_actions)
+{
+  if (p_actions <= 0) throw UndefinedException();
+  if (p_player->GetGame() != m_efg) throw MismatchException();
+
+  return InsertMove(new GameInfosetRep(m_efg, 
+				       p_player->m_infosets.Length() + 1, 
+				       p_player, p_actions));
+}
+
+GameInfoset GameNodeRep::InsertMove(GameInfoset p_infoset)
+{
+  if (p_infoset->GetGame() != m_efg) throw MismatchException();
+
+  GameNodeRep *newNode = new GameNodeRep(m_efg, m_parent);
+  newNode->infoset = p_infoset;
+  p_infoset->AddMember(newNode);
+
+  if (m_parent) {
+    m_parent->children[m_parent->children.Find(this)] = newNode;
+  }
+  else {
+    m_efg->m_root = newNode;
+  }
+
+  newNode->children.Append(this);
+  m_parent = newNode;
+
+  for (int i = 1; i < p_infoset->NumActions(); i++) {
+    newNode->children.Append(new GameNodeRep(m_efg, newNode));
+  }
+
+  m_efg->ClearComputedValues();
+  return p_infoset;
 }
 
 //========================================================================
@@ -1358,118 +1455,6 @@ int GameRep::NumNodes(void) const
 {
   return CountNodes(m_root);
 }
-
-//------------------------------------------------------------------------
-//                    GameRep: Editing game trees
-//------------------------------------------------------------------------
-
-GameInfoset GameRep::AppendNode(GameNode n, GamePlayer p, int count)
-{
-  if (!n || !p || count == 0)
-    throw UndefinedException();
-
-  if (n->children.Length() == 0)   {
-    n->infoset = new GameInfosetRep(this, p->m_infosets.Length() + 1, p, count);
-    n->infoset->m_members.Append(n);
-    while (count--)
-      n->children.Append(new GameNodeRep(this, n));
-  }
-
-  ClearComputedValues();
-  return n->infoset;
-}  
-
-GameInfoset GameRep::AppendNode(GameNode n, GameInfoset s)
-{
-  if (!n || !s)   throw UndefinedException();
-  
-  if (n->children.Length() == 0)   {
-    n->infoset = s;
-    s->m_members.Append(n);
-    for (int i = 1; i <= s->m_actions.Length(); i++)
-      n->children.Append(new GameNodeRep(this, n));
-  }
-
-  ClearComputedValues();
-  return s;
-}
-  
-GameInfoset GameRep::InsertNode(GameNode n, GamePlayer p, int count)
-{
-  if (!n || !p || count <= 0)  throw UndefinedException();
-
-  GameNodeRep *m = new GameNodeRep(this, n->m_parent);
-  m->infoset = new GameInfosetRep(this, p->m_infosets.Length() + 1, p, count);
-  m->infoset->m_members.Append(m);
-  if (n->m_parent)
-    n->m_parent->children[n->m_parent->children.Find(n)] = m;
-  else
-    m_root = m;
-  m->children.Append(n);
-  n->m_parent = m;
-  while (--count)
-    m->children.Append(new GameNodeRep(this, m));
-
-  ClearComputedValues();
-  return m->infoset;
-}
-
-GameInfoset GameRep::InsertNode(GameNode n, GameInfoset s)
-{
-  if (!n || !s)  throw UndefinedException();
-
-  GameNodeRep *m = new GameNodeRep(this, n->m_parent);
-  m->infoset = s;
-  s->m_members.Append(m);
-  if (n->m_parent)
-    n->m_parent->children[n->m_parent->children.Find(n)] = m;
-  else
-    m_root = m;
-  m->children.Append(n);
-  n->m_parent = m;
-  int count = s->m_actions.Length();
-  while (--count)
-    m->children.Append(new GameNodeRep(this, m));
-
-  ClearComputedValues();
-  return m->infoset;
-}
-
-void GameRep::CopySubtree(GameNodeRep *src, GameNodeRep *dest, 
-			  GameNodeRep *stop)
-{
-  if (src == stop) {
-    dest->outcome = src->outcome;
-    return;
-  }
-
-  if (src->children.Length())  {
-    AppendNode(dest, src->infoset);
-    for (int i = 1; i <= src->children.Length(); i++)
-      CopySubtree(src->children[i], dest->children[i], stop);
-  }
-
-  dest->m_label = src->m_label;
-  dest->outcome = src->outcome;
-}
-
-GameInfoset GameRep::DeleteAction(GameInfoset s, const GameAction &a)
-{
-  if (!a || !s)  throw UndefinedException();
-
-  int where;
-  for (where = 1; where <= s->m_actions.Length() && s->m_actions[where] != a;
-       where++);
-  if (where > s->m_actions.Length() || s->m_actions.Length() == 1)   return s;
-  s->RemoveAction(where);
-  for (int i = 1; i <= s->m_members.Length(); i++)   {
-    s->m_members[i]->children[where]->DeleteTree();
-    s->m_members[i]->children.Remove(where)->Invalidate();
-  }
-  ClearComputedValues();
-  return s;
-}
-
 
 //------------------------------------------------------------------------
 //                  GameRep: Private auxiliary functions
