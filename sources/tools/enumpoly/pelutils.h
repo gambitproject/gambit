@@ -190,18 +190,6 @@ node node_print(node);
 /************************ definitions from error.h ************************/
 /**************************************************************************/
 
-#define GAMBIT_EXCEPTIONS
-#ifdef GAMBIT_EXCEPTIONS
-#include "libgambit/libgambit.h"
-
-class ErrorInPelican : public gbtException {
-public:
-  virtual ~ErrorInPelican();
-  std::string GetDescription(void) const;
-};
-
-#endif
-
 void bad_error(char *);
 void warning(char *);
 

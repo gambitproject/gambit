@@ -588,18 +588,6 @@ void    qh_scaleinput (void);
 
 /***** -global.c prototypes (alphabetical) ***********************/
 
-#define GAMBIT_EXCEPTIONS
-#ifdef GAMBIT_EXCEPTIONS
-#include "libgambit/libgambit.h"
-
-class ErrorInQhull : public gbtException {
-public:
-  virtual ~ErrorInQhull();
-  std::string GetDescription(void) const;
-};
-
-#endif
-
 void    qhull_fatal(int); 
 void 	qh_freebuffers (void);
 void    qh_freeqhull (boolT allmem);

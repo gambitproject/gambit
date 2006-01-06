@@ -25,7 +25,6 @@
 //
 
 #include "pelclass.h"
-#include "libgambit/libgambit.h"
 
 /*
 #include "glist.h"

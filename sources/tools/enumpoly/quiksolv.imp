@@ -110,12 +110,17 @@ bool QuikSolv<T>::AllRealRootsFromPelican(const gPolyList<gDouble> & sys,
     return false;
   ans = pel.RealRoots();
   }
+  catch (...) {
+    return false;
+  }
+  /*
   catch (ErrorInPelican) {
     return false;
   }
   catch (ErrorInQhull) {
     return false;
   }
+  */
 
   return true;
 }
