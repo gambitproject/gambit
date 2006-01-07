@@ -38,7 +38,7 @@ LPTableau<T>::LPTableau(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b)
 { };
 
 template <class T>
-LPTableau<T>::LPTableau(const Gambit::Matrix<T> &A, const gbtArray<int> &art, 
+LPTableau<T>::LPTableau(const Gambit::Matrix<T> &A, const Gambit::Array<int> &art, 
 			const Gambit::Vector<T> &b)
   : Tableau<T>(A,art,b), dual(A.MinRow(),A.MaxRow()),
     unitcost(A.MinRow(),A.MaxRow()), cost(A.MinCol(),A.MaxCol()+art.Length())
@@ -242,7 +242,7 @@ void LPTableau<T>::Pivot(int outrow,int col)
 }
 
 template <class T>
-void LPTableau<T>::ReversePivots(gbtList<gbtArray<int> > &PivotList)
+void LPTableau<T>::ReversePivots(gbtList<Gambit::Array<int> > &PivotList)
 {
   Gambit::Vector<T> tmpcol(this->MinRow(),this->MaxRow());
   // gout << "\nIn LPTableau<T>::ReversePivots";
@@ -250,7 +250,7 @@ void LPTableau<T>::ReversePivots(gbtList<gbtArray<int> > &PivotList)
   int i,j,k,enter;
   T ratio,a_ij,a_ik,b_i,b_k,c_j,c_k,c_jo,x;
   gbtList<int> BestSet;
-  gbtArray<int> pivot(2);
+  Gambit::Array<int> pivot(2);
   Gambit::Vector<T> tmpdual(this->MinRow(),this->MaxRow());
 
   Gambit::Vector<T> solution(tmpcol);  //$$
@@ -528,7 +528,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
 }
 
 template <class T>
-void LPTableau<T>::DualReversePivots(gbtList<gbtArray<int> > &/*list*/)
+void LPTableau<T>::DualReversePivots(gbtList<Gambit::Array<int> > &/*list*/)
 {
 }
 
@@ -699,7 +699,7 @@ int LPTableau<T>::LastLabel( void )
 }
 
 template <class T>
-void LPTableau<T>::BasisSelect(const gbtArray<T> &rowv, Gambit::Vector<T> &colv) const
+void LPTableau<T>::BasisSelect(const Gambit::Array<T> &rowv, Gambit::Vector<T> &colv) const
 {
   for(int i=this->basis.First(); i<=this->basis.Last(); i++) {
     if(this->basis.Label(i)<0)
@@ -710,8 +710,8 @@ void LPTableau<T>::BasisSelect(const gbtArray<T> &rowv, Gambit::Vector<T> &colv)
 }
 
 template <class T>
-void LPTableau<T>::BasisSelect(const gbtArray<T> &unitv,
-			   const gbtArray<T> &rowv,
+void LPTableau<T>::BasisSelect(const Gambit::Array<T> &unitv,
+			   const Gambit::Array<T> &rowv,
 			   Gambit::Vector<T> &colv ) const
 {
   for(int i=this->basis.First(); i<=this->basis.Last(); i++) {

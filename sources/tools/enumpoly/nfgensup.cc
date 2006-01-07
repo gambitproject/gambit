@@ -247,11 +247,11 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
 
 gbtList<Gambit::StrategySupport> SortSupportsBySize(gbtList<Gambit::StrategySupport> &p_list) 
 {
-  gbtArray<int> sizes(p_list.Length());
+  Gambit::Array<int> sizes(p_list.Length());
   for (int i = 1; i <= p_list.Length(); i++)
     sizes[i] = p_list[i].ProfileLength();
 
-  gbtArray<int> listproxy(p_list.Length());
+  Gambit::Array<int> listproxy(p_list.Length());
   for (int i = 1; i <= p_list.Length(); i++)
     listproxy[i] = i;
 

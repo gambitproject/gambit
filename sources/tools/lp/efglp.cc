@@ -70,7 +70,7 @@ private:
   void GetSolutions(const Gambit::BehavSupport &) const;
   int Add_BFS(/*const*/ LPSolve<T> &B);
   
-  void GetProfile(const Gambit::BehavSupport &, gbtDPVector<T> &v, const BFS<T> &sol,
+  void GetProfile(const Gambit::BehavSupport &, Gambit::DVector<T> &v, const BFS<T> &sol,
 		  const Gambit::GameNode &n, int s1,int s2) const;
 
 public:
@@ -185,7 +185,7 @@ template <class T> int efgLp<T>::Add_BFS(/*const*/ LPSolve<T> &lp)
 
 
 template <class T> void efgLp<T>::GetProfile(const Gambit::BehavSupport &p_support,
-					     gbtDPVector<T> &v,
+					     Gambit::DVector<T> &v,
 					     const BFS<T> &sol,
 					     const Gambit::GameNode &n,
 					     int s1,int s2) const

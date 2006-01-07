@@ -37,11 +37,11 @@ template <class T> class gNArray   {
   protected:
     long storage_size;
     T *storage;
-    gbtArray<int> dim;
+    Gambit::Array<int> dim;
 
   public:
     gNArray(void);
-    gNArray(const gbtArray<int> &d);
+    gNArray(const Gambit::Array<int> &d);
     gNArray(const gNArray<T>& a);
     ~gNArray();
 
@@ -52,13 +52,13 @@ template <class T> class gNArray   {
     T &operator[](const Gambit::Vector<int> &);
     */
 
-    T operator[](const gbtArray<int> &) const;
-    T &operator[](const gbtArray<int> &);
+    T operator[](const Gambit::Array<int> &) const;
+    T &operator[](const Gambit::Array<int> &);
 
     const T &operator[](long l) const;
     T &operator[](long l);
 
-    const gbtArray<int> &Dimensionality(void) const;
+    const Gambit::Array<int> &Dimensionality(void) const;
 };
 
 #endif    // GNARRAY_H

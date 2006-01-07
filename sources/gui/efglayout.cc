@@ -295,12 +295,12 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
     p_dc.DrawText(wxT("(u)"), point.x, point.y - height / 2);
     m_outcomeRect = wxRect(point.x, point.y - height / 2,
 			   width, height);
-    m_payoffRect = gbtArray<wxRect>();
+    m_payoffRect = Gambit::Array<wxRect>();
     return;
   }
 
   int width, height = 25;
-  m_payoffRect = gbtArray<wxRect>();
+  m_payoffRect = Gambit::Array<wxRect>();
   for (int pl = 1; pl <= m_node->GetGame()->NumPlayers(); pl++) {
     Gambit::GamePlayer player = m_node->GetGame()->GetPlayer(pl);
     p_dc.SetTextForeground(m_style->GetPlayerColor(pl));
@@ -734,7 +734,7 @@ void gbtTreeLayout::UpdateTableInfosets(void)
 {
   // Note that levels are numbered from 0, not 1.
   // create an array to hold max num for each level
-  gbtArray<int> nums(0, m_maxLevel + 1); 
+  Gambit::Array<int> nums(0, m_maxLevel + 1); 
     
   for (int i = 0; i <= m_maxLevel + 1; nums[i++] = 0);
   // find the max e->num for each level

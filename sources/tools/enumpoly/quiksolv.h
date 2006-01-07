@@ -92,7 +92,7 @@ template <class T> class QuikSolv {
 
   // Check whether roots are impossible
 
-   bool SystemHasNoRootsIn(const gRectangle<gDouble>& r, gbtArray<int>&)   const;
+   bool SystemHasNoRootsIn(const gRectangle<gDouble>& r, Gambit::Array<int>&)   const;
 
 
   // Ask whether Newton's method leads to a root 
@@ -127,7 +127,7 @@ template <class T> class QuikSolv {
   void               FindRootsRecursion(      gbtList<Gambit::Vector<gDouble> >*,
 					const gRectangle<gDouble>&, 
 					const int&,
-					      gbtArray<int>&,
+					      Gambit::Array<int>&,
 					      int &iterations,
 					      int depth,
 					const int&,
@@ -136,7 +136,7 @@ template <class T> class QuikSolv {
   const bool         ARootExistsRecursion(const gRectangle<gDouble>&, 
 					        Gambit::Vector<gDouble>&,
 					  const gRectangle<gDouble>&, 
-					        gbtArray<int>&)        const;
+					        Gambit::Array<int>&)        const;
 
  public:
   class NewtonError : public gbtException  {

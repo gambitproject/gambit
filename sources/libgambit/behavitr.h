@@ -46,9 +46,9 @@ private:
   Game _efg;
   BehavSupport _support;
   PureBehavProfile _profile;
-  gbtPVector<int> _current;
-  gbtArray<gbtArray<bool> > _is_active;
-  gbtArray<int> _num_active_infosets;
+  PVector<int> _current;
+  Array<Array<bool> > _is_active;
+  Array<int> _num_active_infosets;
   mutable Vector<Rational> _payoff;
 
 public:

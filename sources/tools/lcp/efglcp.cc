@@ -76,7 +76,7 @@ private:
 		int depth, Gambit::Matrix<T> &);
   
   void GetProfile(const Gambit::BehavSupport &, const LTableau<T> &tab, 
-		  gbtDPVector<T> &, const Gambit::Vector<T> &, 
+		  Gambit::DVector<T> &, const Gambit::Vector<T> &, 
 		  const Gambit::GameNode &n, int,int);
 
 public:
@@ -367,7 +367,7 @@ void efgLcp<T>::FillTableau(const Gambit::BehavSupport &p_support, Gambit::Matri
 template <class T>
 void efgLcp<T>::GetProfile(const Gambit::BehavSupport &p_support,
 				  const LTableau<T> &tab, 
-				  gbtDPVector<T> &v, const Gambit::Vector<T> &sol,
+				  Gambit::DVector<T> &v, const Gambit::Vector<T> &sol,
 				  const Gambit::GameNode &n, int s1,int s2)
 {
   int i,pl,inf,snew,ind,ind2;

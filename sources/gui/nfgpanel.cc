@@ -270,7 +270,7 @@ void gbtTablePlayerPanel::PostPendingChanges(void)
 class gbtTablePlayerToolbar : public wxPanel, public gbtGameView {
 private:
   gbtNfgPanel *m_nfgPanel;
-  gbtArray<gbtTablePlayerPanel *> m_playerPanels;
+  Gambit::Array<gbtTablePlayerPanel *> m_playerPanels;
 
   /// @name Implementation of gbtGameView members
   //@{

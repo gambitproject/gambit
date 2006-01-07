@@ -582,7 +582,7 @@ void gbtTreeChancePanel::OnSetColor(wxCommandEvent &)
 class gbtTreePlayerToolbar : public wxPanel, public gbtGameView {
 private:
   gbtTreeChancePanel *m_chancePanel;
-  gbtArray<gbtTreePlayerPanel *> m_playerPanels;
+  Gambit::Array<gbtTreePlayerPanel *> m_playerPanels;
 
   // @name Implementation of gbtGameView members
   //@{

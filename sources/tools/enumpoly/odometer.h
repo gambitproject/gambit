@@ -45,13 +45,13 @@ significant index is the first ("leftmost").
 
 class gIndexOdometer {
  private:
-  gbtArray<int> MinIndices;
-  gbtArray<int> MaxIndices;
-  gbtArray<int> CurIndices;
+  Gambit::Array<int> MinIndices;
+  Gambit::Array<int> MaxIndices;
+  Gambit::Array<int> CurIndices;
    
  public:
-   gIndexOdometer(const gbtArray<int>);  
-   gIndexOdometer(const gbtArray<int>, const gbtArray<int>);  
+   gIndexOdometer(const Gambit::Array<int>);  
+   gIndexOdometer(const Gambit::Array<int>, const Gambit::Array<int>);  
    gIndexOdometer(const int*, const int);
    gIndexOdometer(const gIndexOdometer &);
 
@@ -72,7 +72,7 @@ class gIndexOdometer {
    // Information
   int             NoIndices()           const;
   int             LinearIndex()         const;
-  gbtArray<int>     CurrentIndices()      const;
+  Gambit::Array<int>     CurrentIndices()      const;
   gIndexOdometer  AfterExcisionOf(int&) const;
 
 };  
@@ -85,7 +85,7 @@ class gIndexOdometer {
 class gPermutationOdometer {
  private:
   const int   n;
-  gbtArray<int> CurIndices;
+  Gambit::Array<int> CurIndices;
   int         CurSign;
 
   // Declared but not defined to prohibit assignment
@@ -108,7 +108,7 @@ class gPermutationOdometer {
 
    // Information
   int             NoIndices()           const;
-  gbtArray<int>     CurrentIndices()      const;
+  Gambit::Array<int>     CurrentIndices()      const;
   int             CurrentSign()         const;
 
 };  

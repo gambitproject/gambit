@@ -95,7 +95,7 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
 // vector perpendicular to the plane, then subtracting to compute the
 // component parallel to the plane.)
 //
-static void Project(Gambit::Vector<double> &x, const gbtArray<int> &lengths)
+static void Project(Gambit::Vector<double> &x, const Gambit::Array<int> &lengths)
 {
   int index = 1;
   for (int part = 1; part <= lengths.Length(); part++)  {
@@ -137,7 +137,7 @@ double NFLiapFunc::Value(const Gambit::Vector<double> &v) const
   ((Gambit::Vector<double> &) _p).operator=(v);
   
   Gambit::MixedStrategyProfile<double> tmp(_p);
-  gbtPVector<double> payoff(_p);
+  Gambit::PVector<double> payoff(_p);
 
   double x, result = 0.0, avg, sum;
   payoff = 0.0;

@@ -207,7 +207,7 @@ GameFileToken GameParserState::GetNextToken(void)
 class TableFilePlayer {
 public:
   std::string m_name;
-  gbtArray<std::string> m_strategies;
+  Gambit::Array<std::string> m_strategies;
   TableFilePlayer *m_next;
 
   TableFilePlayer(void);
@@ -447,7 +447,7 @@ static void ReadOutcomeList(GameParserState &p_parser, Game p_nfg)
   }
 
   while (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
-    gbtArray<std::string> payoffs(p_nfg->NumPlayers());
+    Gambit::Array<std::string> payoffs(p_nfg->NumPlayers());
     int pl = 1;
 
     if (p_parser.GetNextToken() != TOKEN_TEXT) {
@@ -542,7 +542,7 @@ static void ParsePayoffBody(GameParserState &p_parser,
 static Game BuildNfg(GameParserState &p_parser, 
 			   TableFileGame &p_data)
 {
-  gbtArray<int> dim(p_data.NumPlayers());
+  Gambit::Array<int> dim(p_data.NumPlayers());
   for (int pl = 1; pl <= dim.Length(); pl++) {
     dim[pl] = p_data.NumStrategies(pl);
   }
@@ -591,8 +591,8 @@ class InfosetData {
 public:
   int m_number;
   std::string m_name;
-  gbtArray<std::string> m_actions;
-  gbtArray<std::string> m_probs;
+  Gambit::Array<std::string> m_actions;
+  Gambit::Array<std::string> m_probs;
 
   InfosetData(void)
     : m_number(0), m_name("") { }
@@ -603,7 +603,7 @@ public:
 class OutcomeData {
 public:
   std::string m_name;
-  gbtArray<std::string> m_payoffs;
+  Gambit::Array<std::string> m_payoffs;
   
   OutcomeData(const std::string &p_name) : m_name(p_name) { }
 };
@@ -719,7 +719,7 @@ public:
   std::string m_comment;
   PlayerData *m_firstPlayer, *m_lastPlayer, m_chancePlayer;
   NodeData *m_firstNode, *m_lastNode;
-  gbtArray<DefinedOutcomeData *> m_outcomes;
+  Gambit::Array<DefinedOutcomeData *> m_outcomes;
 
   TreeData(void);
   ~TreeData();

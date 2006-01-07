@@ -298,8 +298,8 @@ TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const gRectangle<T>& r) const
   else
     sign = -1;
   
-  gbtArray<int> zeros(Dmnsn());
-  gbtArray<int> ones(Dmnsn());
+  Gambit::Array<int> zeros(Dmnsn());
+  Gambit::Array<int> ones(Dmnsn());
   for (int j = 1; j <= Dmnsn(); j++) {
     zeros[j] = 0; 
     if (this->RootNode()->GetData().DegreeOfVar(j) > 0) ones[j] = 1;
@@ -336,8 +336,8 @@ TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(
       return true;
   }
 
-  gbtArray<int> zeros(Dmnsn());
-  gbtArray<int> ones(Dmnsn());
+  Gambit::Array<int> zeros(Dmnsn());
+  Gambit::Array<int> ones(Dmnsn());
   for (int j = 1; j <= Dmnsn(); j++) {
     zeros[j] = 0; 
     if (this->RootNode()->GetData().DegreeOfVar(j) > 0) ones[j] = 1; 

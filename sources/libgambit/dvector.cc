@@ -25,8 +25,8 @@
 //
 
 #include "libgambit.h"
-#include "gdpvect.imp"
+#include "dvector.imp"
 
-template class gbtDPVector<double>;
-template class gbtDPVector<Gambit::Rational>;
+template class Gambit::DVector<double>;
+template class Gambit::DVector<Gambit::Rational>;
 

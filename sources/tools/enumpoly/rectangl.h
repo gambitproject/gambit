@@ -66,7 +66,7 @@ public:
     const gInterval<T>       CartesianFactor(const int&)        const;
     const gRectangle<T>      SameCenterDoubleSideLengths()      const;
     const gRectangle<T>      CubeContainingCrcmscrbngSphere()   const;
-    const gRectangle<T>      Orthant(const gbtArray<int>&)        const;
+    const gRectangle<T>      Orthant(const Gambit::Array<int>&)        const;
     const Gambit::Vector<T>         SideLengths()                      const;
     const T                  MaximalSideLength()                const;
     bool                     Contains(const Gambit::Vector<T> &)       const;

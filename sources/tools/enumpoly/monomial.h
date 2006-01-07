@@ -67,7 +67,7 @@ public:
     bool            IsConstant()                const;
     bool            IsMultiaffine()             const;
     const exp_vect& ExpV()                      const;
-    T               Evaluate(const gbtArray<T>&)  const;
+    T               Evaluate(const Gambit::Array<T>&)  const;
     T               Evaluate(const Gambit::Vector<T>&) const;
 };
 

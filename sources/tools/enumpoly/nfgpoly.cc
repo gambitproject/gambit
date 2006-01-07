@@ -323,7 +323,7 @@ Gambit::MixedStrategyProfile<double> PolishEquilibrium(const Gambit::StrategySup
   Gambit::Vector<gDouble> vec = module.SolVarsFromMixedProfile(sol);
 
   /* //DEBUG
-  gbtPVector<double> xx = module.SeqFormProbsFromSolVars(vec);
+  Gambit::PVector<double> xx = module.SeqFormProbsFromSolVars(vec);
   Gambit::MixedStrategyProfile<gbtNumber> newsol = module.SequenceForm().ToMixed(xx);
 
   gout << "sol.Profile = " << *(sol.Profile()) << "\n";

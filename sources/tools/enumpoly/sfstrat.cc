@@ -133,7 +133,7 @@ int SFSequenceSet::NumSequences(void) const
 }
 
 // Return the entire sequence set
-const gbtArray<Sequence *> &SFSequenceSet::GetSFSequenceSet(void) const
+const Gambit::Array<Sequence *> &SFSequenceSet::GetSFSequenceSet(void) const
 {
   return sequences;
 }
@@ -190,7 +190,7 @@ bool SFSupport::operator!=(const SFSupport &s) const
 // SFSupport: Members
 //------------------------
 
-const gbtArray<Sequence *> &SFSupport::Sequences(int pl) const
+const Gambit::Array<Sequence *> &SFSupport::Sequences(int pl) const
 {
   return (sups[pl]->GetSFSequenceSet());
 }
@@ -200,9 +200,9 @@ int SFSupport::NumSequences(int pl) const
   return sups[pl]->NumSequences();
 }
 
-const gbtArray<int> SFSupport::NumSequences(void) const
+const Gambit::Array<int> SFSupport::NumSequences(void) const
 {
-  gbtArray<int> a(sups.Length());
+  Gambit::Array<int> a(sups.Length());
 
   for (int i = 1 ; i <= a.Length(); i++)
     a[i] = sups[i]->NumSequences();
@@ -241,7 +241,7 @@ bool SFSupport::IsSubset(const SFSupport &s) const
     if (NumSequences(i) > s.NumSequences(i))
       return false;
     else  {
-      const gbtArray<Sequence *> &strats =
+      const Gambit::Array<Sequence *> &strats =
         sups[i]->GetSFSequenceSet();
 
       for (int j = 1; j <= NumSequences(i); j++)

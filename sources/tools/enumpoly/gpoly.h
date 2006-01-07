@@ -82,7 +82,7 @@ private:
   void      String_Term(T          nega);
   T         String_Coeff(T       nega);
   int       String_GetPow(void);
-  void      String_VarAndPow(gbtArray<int> &PowArray);
+  void      String_VarAndPow(Gambit::Array<int> &PowArray);
   void      GetChar();
   // Is the string a valid polynomial?
   bool      Check_String(const std::string &Hold);
@@ -149,7 +149,7 @@ public:
   bool                IsZero()                             const;
   int                 DegreeOfVar(int var_no)              const;
   int                 Degree()                             const;
-  T                   GetCoef(const gbtArray<int> &Powers)   const;
+  T                   GetCoef(const Gambit::Array<int> &Powers)   const;
   T                   GetCoef(const exp_vect &Powers)      const;
   gPoly<T>            LeadingCoefficient(int varnumber)    const;
   T                   NumLeadCoeff()                       const; // deg == 0
@@ -159,7 +159,7 @@ public:
                       // returns 0 if constant, -1 if truly multivariate
   polynomial<T>       UnivariateEquivalent(int activar)    const;
                       // assumes UniqueActiveVariable() is true
-  T                   Evaluate(const gbtArray<T> &values)    const;
+  T                   Evaluate(const Gambit::Array<T> &values)    const;
   gPoly<T>           EvaluateOneVar(int varnumber, T val)  const;
   gPoly<T>           PartialDerivative(int varnumber)      const;
   int                No_Monomials()                        const;

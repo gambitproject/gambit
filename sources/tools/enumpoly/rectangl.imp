@@ -163,7 +163,7 @@ const gRectangle<T> gRectangle<T>::CubeContainingCrcmscrbngSphere() const
 
 template<class T> 
 const gRectangle<T> 
-gRectangle<T>::Orthant(const gbtArray<int>& top_or_bot) const 
+gRectangle<T>::Orthant(const Gambit::Array<int>& top_or_bot) const 
 { 
   gbtList<gInterval<T> > new_sides;
   for (int i = 1; i <= Dmnsn(); i++)
@@ -237,7 +237,7 @@ template<class T> const gbtList<Gambit::Vector<T> > gRectangle<T>::VertexList() 
 { 
   gbtList<Gambit::Vector<T> > answer;
 
-  gbtArray<int> ListOfTwos(Dmnsn());
+  Gambit::Array<int> ListOfTwos(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) ListOfTwos[i] = 2;
   gIndexOdometer ListOfTopBottoms(ListOfTwos);
 
@@ -266,7 +266,7 @@ template<class T>
 const gRectangle<T> gRectangle<T>::SubdivisionCell(const int& index) const 
 { 
   int tmp = index;
-  gbtArray<int> updowns(Dmnsn());
+  Gambit::Array<int> updowns(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) {
     if (tmp % 2 == 1) {
       updowns[i] = 1; tmp--;

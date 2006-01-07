@@ -75,8 +75,8 @@ void SubgameSolver::FindSubgames(const gbtEfgSupport &p_support,
   gbtList<gbtEfgNode> subroots;
   ChildSubgames(n, subroots);
   
-  gbtList<gbtArray<gbtEfgOutcome> > subrootvalues;
-  subrootvalues.Append(gbtArray<gbtEfgOutcome>(subroots.Length()));
+  gbtList<Gambit::Array<gbtEfgOutcome> > subrootvalues;
+  subrootvalues.Append(Gambit::Array<gbtEfgOutcome>(subroots.Length()));
   
   for (i = 1; i <= subroots.Length(); i++)  {
     gbtList<gbtBehavProfile<gbtNumber> > subsolns;
@@ -92,7 +92,7 @@ void SubgameSolver::FindSubgames(const gbtEfgSupport &p_support,
     assert(subvalues.Length() == subsolns.Length());
     
     gbtList<gbtBehavProfile<gbtNumber> > newsolns;
-    gbtList<gbtArray<gbtEfgOutcome> > newsubrootvalues;
+    gbtList<Gambit::Array<gbtEfgOutcome> > newsubrootvalues;
     
     for (int soln = 1; soln <= thissolns.Length(); soln++) {
       for (int subsoln = 1; subsoln <= subsolns.Length(); subsoln++) {
@@ -280,10 +280,10 @@ gbtList<gbtBehavProfile<gbtNumber> > SubgameSolver::Solve(const gbtEfgSupport &p
   ((gbtVector<gbtNumber> &) *solution).operator=(gbtNumber(0));
 
   gbtEfgGame efg((const gbtEfgGame &) p_support.GetGame());
-  infosets = gbtArray<gbtArray<gbtEfgInfoset> *>(efg.NumPlayers());
+  infosets = Gambit::Array<Gambit::Array<gbtEfgInfoset> *>(efg.NumPlayers());
 
   for (int i = 1; i <= efg.NumPlayers(); i++) {
-    infosets[i] = new gbtArray<gbtEfgInfoset>;
+    infosets[i] = new Gambit::Array<gbtEfgInfoset>;
     for (int iset = 1; iset <= efg.GetPlayer(i)->NumInfosets(); iset++) {
       infosets[i]->Append(efg.GetPlayer(i)->GetInfoset(iset)); 
     }

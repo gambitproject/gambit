@@ -32,14 +32,14 @@
 class gbtRevealMoveDialog : public wxDialog {
 private:
   gbtGameDocument *m_doc;
-  gbtArray<wxCheckBox *> m_players;
+  Gambit::Array<wxCheckBox *> m_players;
 
 public:
   // Lifecycle
   gbtRevealMoveDialog(wxWindow *, gbtGameDocument *);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  gbtArray<Gambit::GamePlayer> GetPlayers(void) const;
+  Gambit::Array<Gambit::GamePlayer> GetPlayers(void) const;
 };
 
 #endif  // DLEFGREVEAL_H

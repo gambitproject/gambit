@@ -7,13 +7,13 @@ libgambit_la_SOURCES = \
 	behavitr.cc behavitr.h \
 	behavspt.cc behavspt.h \
 	game.cc game.h \
-	garray.h \
-	gdpvect.cc gdpvect.h gdpvect.imp \
+	array.h \
+	dvector.cc dvector.h dvector.imp \
 	glist.h \
 	gmap.h \
 	matrix.cc matrix.h matrix.imp \
 	number.h \
-	gpvector.cc gpvector.h gpvector.imp \
+	pvector.cc pvector.h pvector.imp \
 	recarray.h \
 	sqmatrix.cc sqmatrix.h sqmatrix.imp \
 	vector.cc vector.h vector.imp \
@@ -31,13 +31,13 @@ libgambitinclude_HEADERS = \
 	behavitr.h \
 	behavspt.h \
 	game.h \
-	garray.h \
-	gdpvect.h gdpvect.imp \
+	array.h \
+	dvector.h dvector.imp \
 	glist.h \
 	gmap.h \
 	matrix.h matrix.imp \
 	number.h \
-	gpvector.h gpvector.imp \
+	pvector.h pvector.imp \
 	recarray.h
 	sqmatrix.h sqmatrix.imp \
 	vector.h vector.imp \

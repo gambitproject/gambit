@@ -35,7 +35,7 @@
 // Constructors / Destructors
 //---------------------------
 
-gIndexOdometer::gIndexOdometer(const gbtArray<int> IndexUpperBounds) 
+gIndexOdometer::gIndexOdometer(const Gambit::Array<int> IndexUpperBounds) 
 : MinIndices(IndexUpperBounds.Length()), 
   MaxIndices(IndexUpperBounds), 
   CurIndices(IndexUpperBounds.Length())
@@ -46,8 +46,8 @@ gIndexOdometer::gIndexOdometer(const gbtArray<int> IndexUpperBounds)
   for (i = 2; i <= NoIndices(); i++) CurIndices[i] = 1;
 }
 
-gIndexOdometer::gIndexOdometer(const gbtArray<int> IndexLowerBounds,
-                               const gbtArray<int> IndexUpperBounds) 
+gIndexOdometer::gIndexOdometer(const Gambit::Array<int> IndexLowerBounds,
+                               const Gambit::Array<int> IndexUpperBounds) 
 : MinIndices(IndexLowerBounds), 
   MaxIndices(IndexUpperBounds), 
   CurIndices(IndexUpperBounds.Length())
@@ -163,14 +163,14 @@ int gIndexOdometer::LinearIndex() const
   return index;
 }
 
-gbtArray<int> gIndexOdometer::CurrentIndices() const
+Gambit::Array<int> gIndexOdometer::CurrentIndices() const
 {
   return CurIndices;
 }
 
 gIndexOdometer gIndexOdometer::AfterExcisionOf(int& to_be_zapped) const
 {
-  gbtArray<int> NewMins, NewMaxs;
+  Gambit::Array<int> NewMins, NewMaxs;
   int i;
   for (i = 1;              i < to_be_zapped; i++)
     { NewMins.Append(MinIndices[i]); NewMaxs.Append(MaxIndices[i]); }
@@ -288,7 +288,7 @@ int gPermutationOdometer::NoIndices() const
   return n;
 }
 
-gbtArray<int> gPermutationOdometer::CurrentIndices() const
+Gambit::Array<int> gPermutationOdometer::CurrentIndices() const
 {
   return CurIndices;
 }

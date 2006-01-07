@@ -25,8 +25,6 @@
 //
 
 #include "game.h"
-
-#include "gpvector.h"
 #include "mixed.h"
 
 namespace Gambit {
@@ -36,13 +34,13 @@ namespace Gambit {
 //---------------------------------------------------------------------------
 
 template <class T> MixedStrategyProfile<T>::MixedStrategyProfile(const StrategySupport &s)
-  : gbtPVector<T>(s.NumStrats()), support(s)
+  : PVector<T>(s.NumStrats()), support(s)
 {
   SetCentroid();
 }
 
 template <class T> MixedStrategyProfile<T>::MixedStrategyProfile(const MixedStrategyProfile<T> &p)
-  : gbtPVector<T>(p), support(p.support)
+  : PVector<T>(p), support(p.support)
 { }
 
 template <class T>
@@ -50,9 +48,9 @@ MixedStrategyProfile<T> &MixedStrategyProfile<T>::operator=(const MixedStrategyP
 {
   if (this != &p && support == p.support)   {
     // note that a dimensionality change will trigger a failed assertion
-    // in the gbtPVector assignment operator
+    // in the PVector assignment operator
     support = p.support;
-    gbtPVector<T>::operator=(p);
+    PVector<T>::operator=(p);
   }
   return *this;
 }
@@ -76,7 +74,7 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue(void) const
   MixedStrategyProfile<T> p(*this);
   ((Vector<T> &) p).operator=(*this);
   MixedStrategyProfile<T> tmp(p);
-  gbtPVector<T> payoff(p);
+  PVector<T> payoff(p);
   T x, result((T) 0), avg, sum;
   payoff = (T) 0;
 
@@ -186,7 +184,7 @@ template <class T>
 bool MixedStrategyProfile<T>::operator==(const MixedStrategyProfile<T> &mp) const
 {
   return (support == mp.support && 
-	  (const gbtPVector<T> &) *this == (const gbtPVector<T> &) mp);
+	  (const PVector<T> &) *this == (const PVector<T> &) mp);
 }
 
 //-------------------------------------- 
@@ -303,7 +301,7 @@ void MixedStrategyProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long ind
 
 template <class T>
 MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehavProfile<T> &p_profile)
-  : gbtPVector<T>(p_profile.GetGame()->NumStrategies()),
+  : PVector<T>(p_profile.GetGame()->NumStrategies()),
     support(p_profile.GetGame())
 {
   Game efg = p_profile.GetGame();

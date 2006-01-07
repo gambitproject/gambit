@@ -27,7 +27,7 @@
 #ifndef LIBGAMBIT_STRATITR_H
 #define LIBGAMBIT_STRATITR_H
 
-template <class T> class gbtArray;
+template <class T> class Array;
 
 #include "game.h"
 
@@ -42,7 +42,7 @@ class StrategyIterator {
   friend class GameRep;
 private:
   StrategySupport support;
-  gbtArray<int> m_currentStrat;
+  Array<int> m_currentStrat;
   PureStrategyProfile profile;
   int m_frozen1, m_frozen2;
   

@@ -68,7 +68,7 @@ gPolyArray<T> &gPolyArray<T>::operator=(const gPolyArray<T> &a)
   if (this != &a) {
     // We only reallocate if necessary.  This should be somewhat faster
     // if many objects are of the same length.  Furthermore, it is
-    // _essential_ for the correctness of the gbtPVector and gbtDPVector
+    // _essential_ for the correctness of the Gambit::PVector and Gambit::DVector
     // assignment operator, since it assumes the value of data does
     // not change.
     if (!data || (data && (mindex != a.mindex || maxdex != a.maxdex)))  {

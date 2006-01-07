@@ -119,8 +119,8 @@ template <class T> void Solve(Gambit::Game p_nfg, const T &)
   int v1 = verts1.Length();
   int v2 = verts2.Length();
 
-  gbtArray<int> vert1id(v1);
-  gbtArray<int> vert2id(v2);
+  Gambit::Array<int> vert1id(v1);
+  Gambit::Array<int> vert2id(v2);
   for (int i = 1; i <= vert1id.Length(); vert1id[i++] = 0);
   for (int i = 1; i <= vert2id.Length(); vert2id[i++] = 0);
 
@@ -214,7 +214,7 @@ template <class T> void EnumModule<T>::GetCliques(gOutput &p_stream) const
   int n = node1.Length();
   assert(node2.Length() == n);
 
-  gbtArray<edge> edgelist(n);
+  Gambit::Array<edge> edgelist(n);
 
   p_stream << "\nKey:\nPlayer 1:";
   for (int i = 1; i <= key1.Length(); i++) {

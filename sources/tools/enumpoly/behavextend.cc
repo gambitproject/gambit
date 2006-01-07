@@ -144,7 +144,7 @@ DeviationSupports(const Gambit::BehavSupport & big_supp,
 {
   gbtList<Gambit::BehavSupport> answer;
 
-  gbtArray<int> active_act_no(isetlist.Length());
+  Gambit::Array<int> active_act_no(isetlist.Length());
 
   for (int k = 1; k <= active_act_no.Length(); k++)
     active_act_no[k] = 0;
@@ -278,14 +278,14 @@ NashExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
   gbtList<Gambit::GameNode> terminal_nodes = TerminalNodes(p_solution.GetGame());
 
   for (int pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++) {
-    gbtArray<Gambit::GameInfoset> isets_for_pl;
+    Gambit::Array<Gambit::GameInfoset> isets_for_pl;
     for (int iset = 1; iset <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
       isets_for_pl.Append(p_solution.GetGame()->GetPlayer(pl)->GetInfoset(iset));
     }
 			  
     for (int i = 1; i <= isets_for_pl.Length(); i++) {
       if (little_supp.MayReach(isets_for_pl[i])) {
-	gbtArray<Gambit::GameAction> acts_for_iset;
+	Gambit::Array<Gambit::GameAction> acts_for_iset;
 	for (int act = 1; act <= isets_for_pl[i]->NumActions(); act++) {
 	  acts_for_iset.Append(isets_for_pl[i]->GetAction(act));
 	}

@@ -71,7 +71,7 @@ double EFLiapFunc::Value(const Gambit::Vector<double> &v) const
 // vector perpendicular to the plane, then subtracting to compute the
 // component parallel to the plane.)
 //
-static void Project(Gambit::Vector<double> &x, const gbtArray<int> &lengths)
+static void Project(Gambit::Vector<double> &x, const Gambit::Array<int> &lengths)
 {
   int index = 1;
   for (int part = 1; part <= lengths.Length(); part++)  {

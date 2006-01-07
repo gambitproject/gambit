@@ -41,7 +41,7 @@ private:
   gbtNfgPanel *m_nfgPanel;
   wxSheet *m_payoffSheet, *m_rowSheet, *m_colSheet;
 
-  gbtArray<int> m_rowPlayers, m_colPlayers;
+  Gambit::Array<int> m_rowPlayers, m_colPlayers;
 
   /// @name Event handlers
   //@{

@@ -710,7 +710,7 @@ void gbtGameFrame::OnFileNewEfg(wxCommandEvent &)
 
 void gbtGameFrame::OnFileNewNfg(wxCommandEvent &)
 {
-  gbtArray<int> dim(2);
+  Gambit::Array<int> dim(2);
   dim[1] = 2;
   dim[2] = 2;
   Gambit::Game nfg = new Gambit::GameRep(dim);

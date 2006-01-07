@@ -40,7 +40,7 @@ StrategySupport::StrategySupport(const Game &p_nfg)
   : m_nfg(p_nfg)
 { 
   for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
-    m_support.Append(gbtArray<GameStrategy>());
+    m_support.Append(Array<GameStrategy>());
     for (int st = 1; st <= p_nfg->GetPlayer(pl)->NumStrategies(); st++) {
       m_support[pl].Append(p_nfg->GetPlayer(pl)->GetStrategy(st));
     }
@@ -51,9 +51,9 @@ StrategySupport::StrategySupport(const Game &p_nfg)
 //                          General information
 //---------------------------------------------------------------------------
 
-gbtArray<int> StrategySupport::NumStrats(void) const
+Array<int> StrategySupport::NumStrats(void) const
 {
-  gbtArray<int> a(m_support.Length());
+  Array<int> a(m_support.Length());
 
   for (int pl = 1; pl <= a.Length(); pl++) {
     a[pl] = m_support[pl].Length();
@@ -93,7 +93,7 @@ bool StrategySupport::IsSubsetOf(const StrategySupport &p_support) const
 
 void StrategySupport::AddStrategy(GameStrategy s)
 { 
-  gbtArray<GameStrategy> &sup = m_support[s->GetPlayer()->GetNumber()];
+  Array<GameStrategy> &sup = m_support[s->GetPlayer()->GetNumber()];
   if (sup.Contains(s))  return;
 
   int index;
@@ -105,7 +105,7 @@ void StrategySupport::AddStrategy(GameStrategy s)
 
 bool StrategySupport::RemoveStrategy(GameStrategy s) 
 { 
-  gbtArray<GameStrategy> &sup = m_support[s->GetPlayer()->GetNumber()];
+  Array<GameStrategy> &sup = m_support[s->GetPlayer()->GetNumber()];
   if (!sup.Contains(s)) return false;
   if (sup.Contains(s) && sup.Length() == 1)  return false;
   sup.Remove(sup.Find(s));
@@ -177,7 +177,7 @@ bool StrategySupport::IsDominated(GameStrategy s, bool strong) const
 bool StrategySupport::Undominated(StrategySupport &newS, int pl, bool strong,
 				  std::ostream &tracefile) const
 {
-  gbtArray<int> set(NumStrats(pl));
+  Array<int> set(NumStrats(pl));
   int i;
   for (i = 1; i <= set.Length(); i++)
     set[i] = i;
@@ -236,7 +236,7 @@ bool StrategySupport::Undominated(StrategySupport &newS, int pl, bool strong,
 }
 
 StrategySupport 
-StrategySupport::Undominated(bool strong, const gbtArray<int> &players,
+StrategySupport::Undominated(bool strong, const Array<int> &players,
 			     std::ostream &tracefile) const
 {
   StrategySupport newS(*this);

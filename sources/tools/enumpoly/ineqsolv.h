@@ -69,11 +69,11 @@ template <class T> class IneqSolv {
 
   bool IsASolution(const Gambit::Vector<T>&)                              const;
 
-  bool SystemHasNoSolutionIn(const gRectangle<T>& r, gbtArray<int>&) const;
+  bool SystemHasNoSolutionIn(const gRectangle<T>& r, Gambit::Array<int>&) const;
 
   const bool ASolutionExistsRecursion(const gRectangle<T>&, 
 				            Gambit::Vector<T>&,
-				            gbtArray<int>&)          const;
+				            Gambit::Array<int>&)          const;
 
  public:
    IneqSolv(const gPolyList<T> &);  

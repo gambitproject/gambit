@@ -111,7 +111,7 @@ template <class T> gPoly<T>& gPoly<T>::operator=(const std::string &Hold)
   charnum = 0;
   int contflag = 1;
   T nega = 1;
-  gbtArray<int> PowArray(Space->Dmnsn());
+  Gambit::Array<int> PowArray(Space->Dmnsn());
   TheString = Hold + " +";
 
   charc = TheString[charnum];
@@ -257,7 +257,7 @@ template<class T> bool gPoly<T>::operator!=(const gPoly<T> &p) const
 
 template <class T> void gPoly<T>::String_Term(T nega)
 {
-  gbtArray<int> PowArray(Dmnsn());
+  Gambit::Array<int> PowArray(Dmnsn());
   for (int a=1; a<= Dmnsn(); a++) PowArray[a] = 0;
   T val;
   val = String_Coeff(nega);
@@ -287,7 +287,7 @@ template <class T> int gPoly<T>::String_GetPow(void)
   return (atoi(Pow.c_str()));
 }
 
-template <class T> void gPoly<T>::String_VarAndPow(gbtArray<int> &PowArray)
+template <class T> void gPoly<T>::String_VarAndPow(Gambit::Array<int> &PowArray)
 {
   std::string VarName = "";
   int pow, varname;
@@ -431,7 +431,7 @@ template <class T> int gPoly<T>::Degree() const
   return max;
 }
 
-template <class T> T gPoly<T>::GetCoef(const gbtArray<int> &Powers) const
+template <class T> T gPoly<T>::GetCoef(const Gambit::Array<int> &Powers) const
 {
   return GetCoef(exp_vect(Space,Powers));
 }
@@ -468,7 +468,7 @@ template <class T> bool gPoly<T>::IsMultiaffine() const
   return true;
 }
 
-template <class T> T gPoly<T>::Evaluate(const gbtArray<T> &values) const
+template <class T> T gPoly<T>::Evaluate(const Gambit::Array<T> &values) const
 {
   T answer=0;
   for (int j = 1; j <= Terms.Length(); j++)

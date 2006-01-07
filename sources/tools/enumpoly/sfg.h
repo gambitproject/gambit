@@ -36,15 +36,15 @@ class Sfg  {
 private:
   Gambit::Game EF;
   const Gambit::BehavSupport &efsupp;
-  gbtArray<SFSequenceSet *> *sequences;
-  gNArray<gbtArray<Gambit::Rational> *> *SF;  // sequence form
-  gbtArray<Gambit::RectArray<Gambit::Rational> *> *E;   // constraint matrices for sequence form.  
-  gbtArray<int> seq;
-  gbtPVector<int> isetFlag,isetRow;
-  gbtArray<gbtList<Gambit::GameInfoset> > infosets;
+  Gambit::Array<SFSequenceSet *> *sequences;
+  gNArray<Gambit::Array<Gambit::Rational> *> *SF;  // sequence form
+  Gambit::Array<Gambit::RectArray<Gambit::Rational> *> *E;   // constraint matrices for sequence form.  
+  Gambit::Array<int> seq;
+  Gambit::PVector<int> isetFlag,isetRow;
+  Gambit::Array<gbtList<Gambit::GameInfoset> > infosets;
 
-  void MakeSequenceForm(const Gambit::GameNode &, Gambit::Rational,gbtArray<int>, gbtArray<Gambit::GameInfoset>,
-		      gbtArray<Sequence *>);
+  void MakeSequenceForm(const Gambit::GameNode &, Gambit::Rational,Gambit::Array<int>, Gambit::Array<Gambit::GameInfoset>,
+		      Gambit::Array<Sequence *>);
   void GetSequenceDims(const Gambit::GameNode &);
 
 public:
@@ -53,13 +53,13 @@ public:
 
   inline int NumSequences(int pl) const {return seq[pl];}
   inline int NumInfosets(int pl) const {return infosets[pl].Length();}
-  inline gbtArray<int> NumSequences() const {return seq;}
+  inline Gambit::Array<int> NumSequences() const {return seq;}
   int TotalNumSequences() const;
   int NumPlayerInfosets() const;
   inline int NumPlayers() const {return EF->NumPlayers();}
   
-  inline gbtArray<Gambit::Rational> Payoffs(const gbtArray<int> & index) const {return *((*SF)[index]);}
-  Gambit::Rational Payoff(const gbtArray<int> & index,int pl) const;
+  inline Gambit::Array<Gambit::Rational> Payoffs(const Gambit::Array<int> & index) const {return *((*SF)[index]);}
+  Gambit::Rational Payoff(const Gambit::Array<int> & index,int pl) const;
 
   Gambit::RectArray<Gambit::Rational> Constraints(int player) const {return *((*E)[player]);};
   int InfosetRowNumber(int pl, int sequence) const;
@@ -67,7 +67,7 @@ public:
   Gambit::GameInfoset GetInfoset(int pl, int sequence) const;
   Gambit::GameAction GetAction(int pl, int sequence) const;
   const Gambit::Game &GetEfg(void) const {return EF;}
-  Gambit::MixedBehavProfile<double> ToBehav(const gbtPVector<double> &x) const;
+  Gambit::MixedBehavProfile<double> ToBehav(const Gambit::PVector<double> &x) const;
   const Sequence* GetSequence(int pl, int seq) const {return ((*sequences)[pl])->Find(seq);}
 
 };

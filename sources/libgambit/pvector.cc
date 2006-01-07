@@ -25,9 +25,9 @@
 //
 
 #include "libgambit.h"
-#include "gpvector.imp"
+#include "pvector.imp"
 
-template class gbtPVector<int>;
-template class gbtPVector<double>;
-template class gbtPVector<Gambit::Rational>;
+template class Gambit::PVector<int>;
+template class Gambit::PVector<double>;
+template class Gambit::PVector<Gambit::Rational>;
 

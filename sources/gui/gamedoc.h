@@ -42,7 +42,7 @@ class gbtBehavDominanceStack {
 private:
   gbtGameDocument *m_doc;
   bool m_strict;
-  gbtArray<Gambit::BehavSupport *> m_supports;
+  Gambit::Array<Gambit::BehavSupport *> m_supports;
   int m_current;
   bool m_noFurther;
 
@@ -114,7 +114,7 @@ class gbtStrategyDominanceStack {
 private:
   gbtGameDocument *m_doc;
   bool m_strict;
-  gbtArray<Gambit::StrategySupport *> m_supports;
+  Gambit::Array<Gambit::StrategySupport *> m_supports;
   int m_current;
   bool m_noFurther;
 
@@ -216,7 +216,7 @@ typedef enum {
 class gbtGameDocument {
 friend class gbtGameView;
 private:
-  gbtArray<gbtGameView *> m_views;
+  Gambit::Array<gbtGameView *> m_views;
 
   void AddView(gbtGameView *p_view)  { m_views.Append(p_view); }
   void RemoveView(gbtGameView *p_view)

@@ -38,7 +38,7 @@ BehavIterator::BehavIterator(const BehavSupport &s)
 {
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
     _num_active_infosets[pl] = 0;
-    gbtArray<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
+    Array<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
     for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
       active_for_pl[iset] = s.MayReach(_efg->GetPlayer(pl)->GetInfoset(iset));
       _num_active_infosets[pl]++;
@@ -58,7 +58,7 @@ BehavIterator::BehavIterator(const BehavSupport &s, const gbtList<GameInfoset>& 
 {
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
     _num_active_infosets[pl] = 0;
-    gbtArray<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
+    Array<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
     for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
       if ( active.Contains(_efg->GetPlayer(pl)->GetInfoset(iset)) ) {
 	active_for_pl[iset] = true;
@@ -108,7 +108,7 @@ int BehavIterator::Next(int pl, int iset)
 {
   if (pl != _frozen_pl || iset != _frozen_iset)   return 1;
 
-  const gbtArray<GameAction> &actions = _support.Actions(pl, iset);
+  const Array<GameAction> &actions = _support.Actions(pl, iset);
   
   if (_current(pl, iset) == actions.Length())   {
     _current(pl, iset) = 1;

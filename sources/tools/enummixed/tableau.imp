@@ -38,7 +38,7 @@ Tableau<double>::Tableau(const Gambit::Matrix<double> &A, const Gambit::Vector<d
   Solve(b, solution);
 };
 
-Tableau<double>::Tableau(const Gambit::Matrix<double> &A, const gbtArray<int> &art, 
+Tableau<double>::Tableau(const Gambit::Matrix<double> &A, const Gambit::Array<int> &art, 
 			 const Gambit::Vector<double> &b)
   : TableauInterface<double>(A,art,b), B(*this), tmpcol(b.First(),b.Last())
 {
@@ -226,7 +226,7 @@ Tableau<Gambit::Rational>::Tableau(const Gambit::Matrix<Gambit::Rational> &A,
 }
 
 Tableau<Gambit::Rational>::Tableau(const Gambit::Matrix<Gambit::Rational> &A, 
-			    const gbtArray<int> &art, 
+			    const Gambit::Array<int> &art, 
 			    const Gambit::Vector<Gambit::Rational> &b) 
   : TableauInterface<Gambit::Rational>(A,art,b), 
     Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()+art.Length()),

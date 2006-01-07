@@ -72,7 +72,7 @@ TableauInterface<T>::TableauInterface(const Gambit::Matrix<T> &A, const Gambit::
 
 template <class T> 
 TableauInterface<T>::TableauInterface(const Gambit::Matrix<T> &A, 
-				      const gbtArray<int> &art, const Gambit::Vector<T> &b)
+				      const Gambit::Array<int> &art, const Gambit::Vector<T> &b)
   : A(&A), b(&b), 
     basis(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()+art.Length()), 
     solution(A.MinRow(),A.MaxRow()), npivots(0),

@@ -64,7 +64,7 @@ void gbtBehavDominanceStack::SetStrict(bool p_strict)
 void gbtBehavDominanceStack::Reset(void)
 {
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
-  m_supports = gbtArray<Gambit::BehavSupport *>();
+  m_supports = Gambit::Array<Gambit::BehavSupport *>();
   if (m_doc->IsTree()) {
     m_supports.Append(new Gambit::BehavSupport(m_doc->GetGame()));
     m_current = 1;
@@ -82,7 +82,7 @@ bool gbtBehavDominanceStack::NextLevel(void)
     return false;
   }
 
-  gbtArray<int> players;
+  Gambit::Array<int> players;
   for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
     players.Append(pl);
   }
@@ -138,7 +138,7 @@ void gbtStrategyDominanceStack::SetStrict(bool p_strict)
 void gbtStrategyDominanceStack::Reset(void)
 {
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
-  m_supports = gbtArray<Gambit::StrategySupport *>();
+  m_supports = Gambit::Array<Gambit::StrategySupport *>();
   m_supports.Append(new Gambit::StrategySupport(m_doc->GetGame()));
   m_current = 1;
   m_noFurther = false;
@@ -155,7 +155,7 @@ bool gbtStrategyDominanceStack::NextLevel(void)
     return false;
   }
 
-  gbtArray<int> players;
+  Gambit::Array<int> players;
   for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
     players.Append(pl);
   }

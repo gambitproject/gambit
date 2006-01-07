@@ -45,7 +45,7 @@ void PrintProfile(std::ostream &p_stream,
 void SolveBehav(Gambit::Game p_efg)
 {
   Gambit::BehavIterator citer(p_efg);
-  gbtPVector<Gambit::Rational> probs(p_efg->NumInfosets());
+  Gambit::PVector<Gambit::Rational> probs(p_efg->NumInfosets());
 
   int contNumber = 1;
   try {

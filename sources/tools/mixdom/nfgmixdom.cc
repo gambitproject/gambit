@@ -35,7 +35,7 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
 {
   Gambit::Game nfg = S.GetGame();
   
-  gbtArray<bool> dom(S.NumStrats(pl));
+  Gambit::Array<bool> dom(S.NumStrats(pl));
   
   T eps;
   gEpsilon(eps);

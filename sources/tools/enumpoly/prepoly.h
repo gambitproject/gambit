@@ -57,7 +57,7 @@ struct Variable  {
 
 class gSpace {
 private:  
-  gbtArray < Variable * > Variables;
+  Gambit::Array < Variable * > Variables;
 
 public:
   gSpace(int nvars = 0);
@@ -104,7 +104,7 @@ public:
   exp_vect(const gSpace*, const int&, const int&);   // x_i^j
   exp_vect(const gSpace*, int*);
   exp_vect(const gSpace*, Gambit::Vector<int>);
-  exp_vect(const gSpace*, gbtArray<int>);
+  exp_vect(const gSpace*, Gambit::Array<int>);
   exp_vect(const exp_vect*);
   exp_vect(const exp_vect&);
   ~exp_vect();

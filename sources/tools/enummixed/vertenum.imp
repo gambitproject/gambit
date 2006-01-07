@@ -131,8 +131,8 @@ template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
 {
   int k;
   Deeper();
-  gbtList<gbtArray<int> > PivotList;
-  gbtArray<int> pivot(2);
+  gbtList<Gambit::Array<int> > PivotList;
+  Gambit::Array<int> pivot(2);
   if(tab.IsLexMin()) {
     List.Append(tab.GetBFS1());
     DualList.Append(tab.DualBFS());
@@ -161,8 +161,8 @@ template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
   Deeper();
   branches[depth]+=1;
 
-//  gbtList<gbtArray<int> > PivotList;
-//  gbtArray<int> pivot(2);
+//  gbtList<Gambit::Array<int> > PivotList;
+//  Gambit::Array<int> pivot(2);
 
   // gout << "\nin DualSearch";
   if(mult_opt) {

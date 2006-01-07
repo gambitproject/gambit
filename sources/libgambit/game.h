@@ -28,7 +28,7 @@
 #ifndef LIBGAMBIT_GAME_H
 #define LIBGAMBIT_GAME_H
 
-#include "gdpvect.h"
+#include "dvector.h"
 #include "number.h"
 
 namespace Gambit {
@@ -161,7 +161,7 @@ private:
   GameRep *m_game;
   int m_number;
   std::string m_label;
-  gbtArray<Number> m_payoffs;
+  Array<Number> m_payoffs;
 
   /// @name Lifecycle
   //@{
@@ -238,10 +238,10 @@ protected:
   int m_number;
   std::string m_label;
   GamePlayerRep *m_player;
-  gbtArray<GameActionRep *> m_actions;
-  gbtArray<GameNodeRep *> m_members;
+  Array<GameActionRep *> m_actions;
+  Array<GameNodeRep *> m_members;
   int flag, whichbranch;
-  gbtArray<Number> m_probs;
+  Array<Number> m_probs;
   
   GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_player, 
 		 int p_actions);
@@ -301,7 +301,7 @@ private:
   GamePlayerRep *m_player;
   long m_index;
   std::string m_label;
-  gbtArray<int> m_behav;
+  Array<int> m_behav;
 
   /// @name Lifecycle
   //@{
@@ -347,8 +347,8 @@ private:
   GameRep *m_game;
   int m_number;
   std::string m_label;
-  gbtArray<GameInfosetRep *> m_infosets;
-  gbtArray<GameStrategyRep *> m_strategies;
+  Array<GameInfosetRep *> m_infosets;
+  Array<GameStrategyRep *> m_strategies;
 
   GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id)
     { }
@@ -393,7 +393,7 @@ protected:
   GameInfosetRep *infoset;
   GameNodeRep *m_parent;
   GameOutcomeRep *outcome;
-  gbtArray<GameNodeRep *> children;
+  Array<GameNodeRep *> children;
   GameNodeRep *whichbranch, *ptr;
 
   GameNodeRep(GameRep *e, GameNodeRep *p);
@@ -457,7 +457,7 @@ class PureStrategyProfile  {
 private:
   long m_index;
   Gambit::Game m_nfg;
-  gbtArray<Gambit::GameStrategy> m_profile;
+  Array<Gambit::GameStrategy> m_profile;
   
 public:
   /// @name Lifecycle
@@ -491,7 +491,7 @@ public:
 class PureBehavProfile {
 private:
   Game m_efg;
-  gbtArray<gbtArray<GameAction> > m_profile;
+  Array<Array<GameAction> > m_profile;
 
 public:
   /// @name Lifecycle
@@ -526,13 +526,13 @@ class GameRep : public GameObject {
 
 protected:
   std::string m_title, m_comment;
-  gbtArray<GamePlayerRep *> m_players;
+  Array<GamePlayerRep *> m_players;
   GamePlayerRep *m_chance;
 
-  gbtArray<GameOutcomeRep *> m_outcomes;
+  Array<GameOutcomeRep *> m_outcomes;
 
   GameNodeRep *m_root;
-  gbtArray<GameOutcomeRep *> m_results;
+  Array<GameOutcomeRep *> m_results;
 
   /// @name Private auxiliary functions
   //@{
@@ -547,7 +547,7 @@ public:
   /// Construct a new trivial game
   GameRep(void);
   /// Construct a new table game with the given dimension
-  GameRep(const gbtArray<int> &p_dim);
+  GameRep(const Array<int> &p_dim);
   /// Clean up the game
   virtual ~GameRep();
   //@}
@@ -605,11 +605,11 @@ public:
   /// @name Dimensions of the game
   //@{
   /// The number of actions in each information set
-  gbtPVector<int> NumActions(void) const;
+  PVector<int> NumActions(void) const;
   /// The number of members in each information set
-  gbtPVector<int> NumMembers(void) const;
+  PVector<int> NumMembers(void) const;
   /// The number of strategies for each player
-  gbtArray<int> NumStrategies(void) const;
+  Array<int> NumStrategies(void) const;
   /// Returns the total number of actions in the game
   int BehavProfileLength(void) const;
   /// Returns the total number of strategies in the game
@@ -634,7 +634,7 @@ public:
   /// Returns the iset'th information set in the game (numbered globally)
   GameInfoset GetInfoset(int iset) const;
   /// Returns an array with the number of information sets per personal player
-  gbtArray<int> NumInfosets(void) const;
+  Array<int> NumInfosets(void) const;
   /// Returns the act'th action in the game (numbered globally)
   GameAction GetAction(int act) const;
   //@}

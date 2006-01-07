@@ -53,7 +53,7 @@ private:
   efgNashAlgorithm *m_efgAlgorithm;
   nfgNashAlgorithm *m_nfgAlgorithm;
 
-  gbtArray<gbtArray<gbtEfgInfoset> *> infosets;
+  Gambit::Array<Gambit::Array<gbtEfgInfoset> *> infosets;
 
   void FindSubgames(const gbtEfgSupport &,
 		    gbtEfgNode , gbtList<gbtBehavProfile<gbtNumber> > &, gbtList<gbtEfgOutcome> &);

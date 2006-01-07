@@ -76,7 +76,7 @@ template <class T> int LTableau<T>::PivotIn(int inlabel)
 
 template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
 {
-  gbtArray<int> BestSet;
+  Gambit::Array<int> BestSet;
   int i, c;
   T ratio, tempmax;
   Gambit::Vector<T> incol(this->MinRow(), this->MaxRow());
@@ -151,7 +151,7 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
 
 template <class T> int LTableau<T>::ExitIndex(int inlabel)
 {
-  gbtArray<int> BestSet;
+  Gambit::Array<int> BestSet;
   int i, c;
   T ratio, tempmax;
   Gambit::Vector<T> incol(this->MinRow(), this->MaxRow());

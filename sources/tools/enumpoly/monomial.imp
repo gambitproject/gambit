@@ -140,7 +140,7 @@ template<class T> bool gMono<T>::IsMultiaffine() const
   return exps.IsMultiaffine(); 
 }
 
-template<class T> T gMono<T>::Evaluate(const gbtArray<T>& vals) const 
+template<class T> T gMono<T>::Evaluate(const Gambit::Array<T>& vals) const 
 { 
   T answer = Coef();
 

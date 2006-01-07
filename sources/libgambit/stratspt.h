@@ -43,7 +43,7 @@ namespace Gambit {
 class StrategySupport {
 protected:
   Game m_nfg;
-  gbtArray<gbtArray<GameStrategy> > m_support;
+  Array<Array<GameStrategy> > m_support;
   
   bool Undominated(StrategySupport &newS, int pl, bool strong,
 		   std::ostream &tracefile) const;
@@ -74,7 +74,7 @@ public:
   int NumStrats(int pl) const  { return m_support[pl].Length(); }
 
   /// Returns the number of strategies in the support for all players.
-  gbtArray<int> NumStrats(void) const;
+  Array<int> NumStrats(void) const;
 
   /// Returns the total number of strategies in the support.
   int ProfileLength(void) const;
@@ -115,7 +115,7 @@ public:
   bool Dominates(GameStrategy s, GameStrategy t, bool strong) const;
   bool IsDominated(GameStrategy s, bool strong) const; 
 
-  StrategySupport Undominated(bool strong, const gbtArray<int> &players,
+  StrategySupport Undominated(bool strong, const Array<int> &players,
 			    std::ostream &tracefile) const;
   //@}
 };

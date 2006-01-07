@@ -52,7 +52,7 @@ private:
 public:
       // constructors and destructors
   Tableau(const Gambit::Matrix<double> &A, const Gambit::Vector<double> &b); 
-  Tableau(const Gambit::Matrix<double> &A, const gbtArray<int> &art, 
+  Tableau(const Gambit::Matrix<double> &A, const Gambit::Array<int> &art, 
 	  const Gambit::Vector<double> &b); 
   Tableau(const Tableau<double>&);
   virtual ~Tableau();
@@ -99,7 +99,7 @@ private:
   void MySolveColumn(int, Gambit::Vector<Gambit::Rational> &);  // column in new basis 
 
 protected:
-  gbtArray<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
+  Gambit::Array<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
 
 public:
   class BadDenom : public gbtException  {
@@ -109,7 +109,7 @@ public:
   };
       // constructors and destructors
   Tableau(const Gambit::Matrix<Gambit::Rational> &A, const Gambit::Vector<Gambit::Rational> &b); 
-  Tableau(const Gambit::Matrix<Gambit::Rational> &A, const gbtArray<int> &art, 
+  Tableau(const Gambit::Matrix<Gambit::Rational> &A, const Gambit::Array<int> &art, 
 	  const Gambit::Vector<Gambit::Rational> &b); 
   Tableau(const Tableau<Gambit::Rational>&);
   virtual ~Tableau();

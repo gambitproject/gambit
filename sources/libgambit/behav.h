@@ -29,7 +29,7 @@
 
 #include "game.h"
 
-template <class T> class gbtPVector;
+template <class T> class PVector;
 
 namespace Gambit {
 
@@ -37,7 +37,7 @@ namespace Gambit {
 /// MixedBehavProfile<T> implements a randomized behavior profile on
 /// an extensive game.
 ///
-template <class T> class MixedBehavProfile : private gbtDPVector<T>  {
+template <class T> class MixedBehavProfile : private DVector<T>  {
 protected:
   Game m_efg;
   BehavSupport m_support;
@@ -48,11 +48,11 @@ protected:
   mutable Matrix<T> m_nodeValues;
 
   // structures for storing cached data: information sets
-  mutable gbtPVector<T> m_infosetValues;
+  mutable PVector<T> m_infosetValues;
 
   // structures for storing cached data: actions
-  mutable gbtDPVector<T> m_actionValues;   // aka conditional payoffs
-  mutable gbtDPVector<T> m_gripe;
+  mutable DVector<T> m_actionValues;   // aka conditional payoffs
+  mutable DVector<T> m_gripe;
 
   void InitProfile(void);
 
@@ -105,7 +105,7 @@ protected:
 
   void BehaviorStrat(const Game &, int, GameNode &);
   void RealizationProbs(const MixedStrategyProfile<T> &, const Game &,
-			int pl, const gbtArray<int> &, GameNode);
+			int pl, const Array<int> &, GameNode);
 
 public:
   /// @name Lifecycle
@@ -152,7 +152,7 @@ public:
   /// @name Computation of interesting quantities
   //@{
   T GetPayoff(int p_player) const;
-  gbtDPVector<T> GetBeliefs(void);
+  DVector<T> GetBeliefs(void);
   T GetLiapValue(void) const;
   T GetLiapValueOnDefined(void) const;
   //T MaxRegret(void);
@@ -173,41 +173,41 @@ public:
   // of cached information.)
   //@{
   const T &operator()(int a, int b, int c) const
-    { return gbtDPVector<T>::operator()(a, b, c); }
+    { return DVector<T>::operator()(a, b, c); }
   T &operator()(int a, int b, int c) 
-    { Invalidate();  return gbtDPVector<T>::operator()(a, b, c); }
+    { Invalidate();  return DVector<T>::operator()(a, b, c); }
   const T &operator[](int a) const
-    { return gbtArray<T>::operator[](a); }
+    { return Array<T>::operator[](a); }
   T &operator[](int a)
-    { Invalidate();  return gbtArray<T>::operator[](a); }
+    { Invalidate();  return Array<T>::operator[](a); }
 
   MixedBehavProfile<T> &operator=(const T &x)  
-    { Invalidate();  gbtDPVector<T>::operator=(x);  return *this; }
+    { Invalidate();  DVector<T>::operator=(x);  return *this; }
 
-  bool operator==(const gbtDPVector<T> &x) const
-    { return gbtDPVector<T>::operator==(x); }
-  bool operator!=(const gbtDPVector<T> &x) const
-    { return gbtDPVector<T>::operator!=(x); }
+  bool operator==(const DVector<T> &x) const
+    { return DVector<T>::operator==(x); }
+  bool operator!=(const DVector<T> &x) const
+    { return DVector<T>::operator!=(x); }
 
   MixedBehavProfile<T> &operator+=(const MixedBehavProfile<T> &x)
-    { Invalidate();  gbtDPVector<T>::operator+=(x);  return *this; }
-  MixedBehavProfile<T> &operator+=(const gbtDPVector<T> &x)
-    { Invalidate();  gbtDPVector<T>::operator+=(x);  return *this; }
+    { Invalidate();  DVector<T>::operator+=(x);  return *this; }
+  MixedBehavProfile<T> &operator+=(const DVector<T> &x)
+    { Invalidate();  DVector<T>::operator+=(x);  return *this; }
   MixedBehavProfile<T> &operator-=(const MixedBehavProfile<T> &x)
-    { Invalidate();  gbtDPVector<T>::operator-=(x);  return *this; }
+    { Invalidate();  DVector<T>::operator-=(x);  return *this; }
   MixedBehavProfile<T> &operator*=(const T &x)
-    { Invalidate();  gbtDPVector<T>::operator*=(x);  return *this; }
+    { Invalidate();  DVector<T>::operator*=(x);  return *this; }
 
   int Length(void) const
-    { return gbtArray<T>::Length(); }
-  const gbtArray<int> &Lengths(void) const
-    { return gbtPVector<T>::Lengths(); }
-  int First(void) const { return gbtArray<T>::First(); }
-  int Last(void) const { return gbtArray<T>::Last(); }
+    { return Array<T>::Length(); }
+  const Array<int> &Lengths(void) const
+    { return PVector<T>::Lengths(); }
+  int First(void) const { return Array<T>::First(); }
+  int Last(void) const { return Array<T>::Last(); }
 
-  const gbtPVector<T> &GetPVector(void) const { return *this; }
-  const gbtDPVector<T> &GetDPVector(void) const { return *this; }
-  gbtDPVector<T> &GetDPVector(void) { Invalidate(); return *this; }
+  const PVector<T> &GetPVector(void) const { return *this; }
+  const DVector<T> &GetDPVector(void) const { return *this; }
+  DVector<T> &GetDPVector(void) { Invalidate(); return *this; }
   //@}
 };
 

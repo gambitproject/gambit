@@ -32,7 +32,7 @@ private:
   Gambit::GameNode m_node;
   wxTextCtrl *m_nodeName;
   wxChoice *m_outcome, *m_infoset;
-  gbtArray<Gambit::GameInfoset> m_infosetList;
+  Gambit::Array<Gambit::GameInfoset> m_infosetList;
 
 public:
   // Lifecycle

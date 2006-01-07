@@ -89,7 +89,7 @@ private:
 
   // Colors for nodes
   wxColour m_chanceColor, m_terminalColor;
-  mutable gbtArray<wxColour> m_playerColors;
+  mutable Gambit::Array<wxColour> m_playerColors;
 
   // Decimal places to display
   int m_numDecimals;

@@ -39,7 +39,7 @@ template <class T> class Matrix;
  * type, the operators binary +, binary -, binary *, /, ==, and = must
  * be defined for the type.
  */
-template <class T> class Vector : public gbtArray<T>   {
+template <class T> class Vector : public Array<T>   {
   friend class Matrix<T>;
 public:
   /** Create a vector of length len, starting at 1 */

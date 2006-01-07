@@ -40,7 +40,7 @@ private:
   bool m_inSupport;    // true if node reachable in current support
   int m_size;         // horizontal size of the node
   mutable wxRect m_outcomeRect;
-  mutable gbtArray<wxRect> m_payoffRect;
+  mutable Gambit::Array<wxRect> m_payoffRect;
   mutable wxRect m_branchAboveRect, m_branchBelowRect;
   int m_token;        // token to draw for node
   wxColour m_color;   // color of node
@@ -162,7 +162,7 @@ class gbtEfgDisplay;
 class gbtTreeLayout : public gbtGameView {
 private:
   gbtEfgDisplay *m_parent;
-  gbtArray<gbtNodeEntry *> m_nodeList;
+  Gambit::Array<gbtNodeEntry *> m_nodeList;
   mutable int m_maxX, m_maxY, m_maxLevel;
   int m_infosetSpacing;
 

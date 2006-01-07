@@ -82,11 +82,11 @@ protected:
   Gambit::Vector<T> solution;  // current solution vector. should this be private?
   long npivots;
   T eps1,eps2;
-  gbtArray<int> artificial;  // artificial variables
+  Gambit::Array<int> artificial;  // artificial variables
 
 public:
   TableauInterface(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b); 
-  TableauInterface(const Gambit::Matrix<T> &A, const gbtArray<int> &art, 
+  TableauInterface(const Gambit::Matrix<T> &A, const Gambit::Array<int> &art, 
 		   const Gambit::Vector<T> &b); 
   TableauInterface(const TableauInterface<T>&);
   virtual ~TableauInterface();

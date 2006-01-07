@@ -24,13 +24,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GARRAY_H
-#define GARRAY_H
+#ifndef LIBGAMBIT_ARRAY_H
+#define LIBGAMBIT_ARRAY_H
 
-#include <stdlib.h>
-#include <assert.h>
+namespace Gambit {
 
-template <class T> class gbtArray  {
+template <class T> class Array  {
 protected:
   int mindex, maxdex;
   T *data;
@@ -56,14 +55,14 @@ protected:
   }
 public:
 //
-// Constructs a gbtArray of length 'len', starting at '1'
+// Constructs a Array of length 'len', starting at '1'
 //
-  gbtArray(unsigned int len = 0)
+  Array(unsigned int len = 0)
     : mindex(1), maxdex(len), data((len) ? new T[len] - 1 : 0) { } 
 //
-// Constructs a gbtArray starting at lo and ending at hi
+// Constructs a Array starting at lo and ending at hi
 //
-  gbtArray(int lo, int hi)
+  Array(int lo, int hi)
     : mindex(lo), maxdex(hi)
   {
     if (maxdex + 1 < mindex)   throw gbtRangeException();
@@ -72,27 +71,27 @@ public:
 //
 // Copy the contents of another array
 //
-  gbtArray(const gbtArray<T> &a)
+  Array(const Array<T> &a)
     : mindex(a.mindex), maxdex(a.maxdex),
       data((maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : 0)
   {
     for (int i = mindex; i <= maxdex; i++)  data[i] = a.data[i];
   }
 //
-// Destruct and deallocates gbtArray
+// Destruct and deallocates Array
 //
-  virtual ~gbtArray()
+  virtual ~Array()
   { if (maxdex >= mindex)  delete [] (data + mindex); }
 
 //
 // Copy the contents of another array
 //
-  gbtArray<T> &operator=(const gbtArray<T> &a)
+  Array<T> &operator=(const Array<T> &a)
   {
     if (this != &a) {
       // We only reallocate if necessary.  This should be somewhat faster
       // if many objects are of the same length.  Furthermore, it is
-      // _essential_ for the correctness of the gbtPVector and gbtDPVector
+      // _essential_ for the correctness of the PVector and DVector
       // assignment operator, since it assumes the value of data does
       // not change.
       if (!data || (data && (mindex != a.mindex || maxdex != a.maxdex)))  {
@@ -194,7 +193,7 @@ public:
   { return Find(t) != 0; }
 };
 
-template <class T> bool operator==(const gbtArray<T> &a, const gbtArray<T> &b)
+template <class T> bool operator==(const Array<T> &a, const Array<T> &b)
 {
   if (a.First() != b.First() || a.Last() != b.Last())   return false;
   for (int i = a.First(); i <= a.Last(); i++)
@@ -202,9 +201,11 @@ template <class T> bool operator==(const gbtArray<T> &a, const gbtArray<T> &b)
   return true;
 }
 
-template <class T> bool operator!=(const gbtArray<T> &a, const gbtArray<T> &b)
+template <class T> bool operator!=(const Array<T> &a, const Array<T> &b)
 {
   return !(a == b);
 }
 
-#endif	// GARRAY_H
+} // end namespace Gambit
+
+#endif	// LIBGAMBIT_ARRAY_H

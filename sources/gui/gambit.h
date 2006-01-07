@@ -31,7 +31,7 @@ class gbtApplication : public wxApp {
 private:
   wxString m_currentDir; /* Current position in directory tree. */
   wxFileHistory m_fileHistory;
-  gbtArray<gbtGameDocument *> m_documents;
+  Gambit::Array<gbtGameDocument *> m_documents;
 
   bool OnInit(void);
 

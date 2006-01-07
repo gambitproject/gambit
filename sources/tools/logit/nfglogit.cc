@@ -117,7 +117,7 @@ static void NewtonStep(Gambit::Matrix<double> &q, Gambit::Matrix<double> &b,
 
 void QreLHS(const Gambit::StrategySupport &p_support, 
 	    const Gambit::Vector<double> &p_point,
-	    const gbtArray<bool> &p_isLog,
+	    const Gambit::Array<bool> &p_isLog,
 	    Gambit::Vector<double> &p_lhs)
 {
   Gambit::MixedStrategyProfile<double> profile(p_support), logprofile(p_support);
@@ -159,7 +159,7 @@ void QreLHS(const Gambit::StrategySupport &p_support,
 
 void QreJacobian(const Gambit::StrategySupport &p_support,
 		 const Gambit::Vector<double> &p_point,
-		 const gbtArray<bool> &p_isLog,
+		 const Gambit::Array<bool> &p_isLog,
 		 Gambit::Matrix<double> &p_matrix)
 {
   Gambit::MixedStrategyProfile<double> profile(p_support), logprofile(p_support);
@@ -258,9 +258,9 @@ void QreJacobian(const Gambit::StrategySupport &p_support,
 // For maximum likelihood estimation
 //
 bool g_maxLike = false;
-gbtArray<double> g_obsProbs;
+Gambit::Array<double> g_obsProbs;
 
-double LogLike(const gbtArray<double> &p_point)
+double LogLike(const Gambit::Array<double> &p_point)
 {
   double ret = 0.0;
   
@@ -271,9 +271,9 @@ double LogLike(const gbtArray<double> &p_point)
   return ret;
 }
 
-double DiffLogLike(const gbtArray<double> &p_point,
-		   const gbtArray<bool> &p_isLog,
-		   const gbtArray<double> &p_tangent)
+double DiffLogLike(const Gambit::Array<double> &p_point,
+		   const Gambit::Array<bool> &p_isLog,
+		   const Gambit::Array<double> &p_tangent)
 {
   double ret = 0.0;
 
@@ -294,7 +294,7 @@ int g_numDecimals = 6;
 
 void PrintProfile(std::ostream &p_stream,
 		  const Gambit::StrategySupport &p_support, const Gambit::Vector<double> &x,
-		  const gbtArray<bool> &p_isLog,
+		  const Gambit::Array<bool> &p_isLog,
 		  bool p_terminal = false)
 {
   p_stream.setf(std::ios::fixed);
@@ -375,7 +375,7 @@ static void TracePath(const Gambit::MixedStrategyProfile<double> &p_start,
 
   bool newton = false;          // using Newton steplength (for MLE)
   bool restarting = false;      // flag for first restart step after MLE
-  gbtArray<bool> isLog(p_start.Length());
+  Gambit::Array<bool> isLog(p_start.Length());
   for (int i = 1; i <= p_start.Length(); i++) {
     isLog[i] = (p_start[i] < .001);
   }
@@ -384,7 +384,7 @@ static void TracePath(const Gambit::MixedStrategyProfile<double> &p_start,
   // here, and resume once we've found the local extremum.
   Gambit::Vector<double> pushX(p_start.Length() + 1);
   double pushH = h;
-  gbtArray<bool> pushLog(p_start.Length());
+  Gambit::Array<bool> pushLog(p_start.Length());
 
   Gambit::Vector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
   for (int i = 1; i <= p_start.Length(); i++) {
@@ -614,7 +614,7 @@ void PrintHelp(char *progname)
 //
 // Read in a comma-separated values list of observed data values
 //
-bool ReadProfile(std::istream &p_stream, gbtArray<double> &p_profile)
+bool ReadProfile(std::istream &p_stream, Gambit::Array<double> &p_profile)
 {
   for (int i = 1; i <= p_profile.Length(); i++) {
     if (p_stream.eof() || p_stream.bad()) {
@@ -696,7 +696,7 @@ int main(int argc, char *argv[])
   }
 
   if (mleFile != "") {
-    g_obsProbs = gbtArray<double>(nfg->MixedProfileLength());
+    g_obsProbs = Gambit::Array<double>(nfg->MixedProfileLength());
     std::ifstream mleData(mleFile.c_str());
     ReadProfile(mleData, g_obsProbs);
     g_maxLike = true;

@@ -49,8 +49,8 @@ private:
   T total_cost,eps1,eps2,eps3,tmin;
   BFS<T> opt_bfs,dual_bfs;
   LPTableau<T> tab;
-  gbtArray<bool> *UB, *LB;
-  gbtArray<T> *ub, *lb;
+  Gambit::Array<bool> *UB, *LB;
+  Gambit::Array<T> *ub, *lb;
   Gambit::Vector<T> *xx, *cost; 
   Gambit::Vector<T> y, x, d;
 

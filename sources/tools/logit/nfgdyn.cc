@@ -55,7 +55,7 @@ void LogitBR(const Gambit::MixedStrategyProfile<double> &p_profile, double p_lam
   Gambit::Game nfg = p_profile.GetGame();
 
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-    gbtArray<double> lval(nfg->GetPlayer(pl)->NumStrategies());
+    Gambit::Array<double> lval(nfg->GetPlayer(pl)->NumStrategies());
     double sum = 0.0;
 
     for (int st = 1; st <= nfg->GetPlayer(pl)->NumStrategies(); st++) {

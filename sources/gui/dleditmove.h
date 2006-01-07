@@ -45,7 +45,7 @@ public:
   int GetPlayer(void) const { return (m_player->GetSelection() + 1); }
 
   int NumActions(void) const { return m_actionSheet->GetNumberRows(); }
-  //  const gbtArray<gbtEfgAction *> &GetActions(void) const 
+  //  const Gambit::Array<gbtEfgAction *> &GetActions(void) const 
   //  { return m_infoset->Actions(); }
   std::string GetActionName(int p_act) const;
   std::string GetActionProb(int p_act) const; 

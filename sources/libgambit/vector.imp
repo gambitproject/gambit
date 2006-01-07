@@ -32,15 +32,15 @@ namespace Gambit {
 //     Vector<T>: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
-template <class T> Vector<T>::Vector(unsigned int len) : gbtArray<T>(len) 
+template <class T> Vector<T>::Vector(unsigned int len) : Array<T>(len) 
 { }
 
 template <class T> Vector<T>::Vector(int low, int high) 
-  : gbtArray<T>(low, high)
+  : Array<T>(low, high)
 { }
 
 template <class T> Vector<T>::Vector(const Vector<T> &V) 
-  : gbtArray<T>(V) 
+  : Array<T>(V) 
 { }
 
 template <class T> Vector<T>::~Vector()   { }
@@ -48,7 +48,7 @@ template <class T> Vector<T>::~Vector()   { }
 template <class T> Vector<T>& Vector<T>::operator=(const Vector<T>& V)
 {
   if (!Check(V))   throw gbtDimensionException();
-  gbtArray<T>::operator=(V);
+  Array<T>::operator=(V);
   return *this;
 }
 

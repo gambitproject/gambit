@@ -26,9 +26,9 @@
 
 #include "lpsolve.h"
 
-template <class T> gbtArray<int> Artificials(const Gambit::Vector<T> &b) 
+template <class T> Gambit::Array<int> Artificials(const Gambit::Vector<T> &b) 
 {
-  gbtArray<int> ret;
+  Gambit::Array<int> ret;
   for(int i=b.First();i<=b.Last();i++)
     if(b[i]<(T)0) ret.Append(i);
   return ret;
@@ -66,10 +66,10 @@ LPSolve<T>::LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b,
   
   // gout << "\n--- Begin Phase I ---\n";
   
-  UB = new gbtArray<bool>(nvars+neqns);
-  LB = new gbtArray<bool>(nvars+neqns);
-  ub = new gbtArray<T>(nvars+neqns);
-  lb = new gbtArray<T>(nvars+neqns);
+  UB = new Gambit::Array<bool>(nvars+neqns);
+  LB = new Gambit::Array<bool>(nvars+neqns);
+  ub = new Gambit::Array<T>(nvars+neqns);
+  lb = new Gambit::Array<T>(nvars+neqns);
   xx = new Gambit::Vector<T>(nvars+neqns);
   cost = new Gambit::Vector<T>(nvars+neqns);
 

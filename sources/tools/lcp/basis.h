@@ -36,11 +36,11 @@
 class Basis {
 
 private:
-  gbtArray<int> basis;        // current members of basis (neg for slacks)
-  gbtArray<int> cols;         // location of col in basis (0 if not in basis)
-  gbtArray<int> slacks;       // location of slacks in basis
-  gbtArray<bool> colBlocked;  
-  gbtArray<bool> rowBlocked;
+  Gambit::Array<int> basis;        // current members of basis (neg for slacks)
+  Gambit::Array<int> cols;         // location of col in basis (0 if not in basis)
+  Gambit::Array<int> slacks;       // location of slacks in basis
+  Gambit::Array<bool> colBlocked;  
+  Gambit::Array<bool> rowBlocked;
   bool IsBasisIdent;
 
 public:

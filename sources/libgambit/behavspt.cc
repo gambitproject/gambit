@@ -45,7 +45,7 @@ template <class T> void RemoveRedundancies(gbtList<T> &p_list)
 class BehavSupportInfoset   {
   friend class BehavSupportPlayer;
 protected:
-  gbtArray<GameAction> acts;
+  Array<GameAction> acts;
 
 public:
   BehavSupportInfoset(GameInfoset);
@@ -92,7 +92,7 @@ class BehavSupportPlayer{
 
 protected:
   GamePlayer efp;
-  gbtArray < BehavSupportInfoset *> infosets;
+  Array < BehavSupportInfoset *> infosets;
 public:
   
   //----------------------------------------
@@ -126,7 +126,7 @@ public:
   bool RemoveAction(int iset, GameAction);
 
   // Get a garray of the actions in an Infoset
-  const gbtArray<GameAction> &ActionList(int iset) const
+  const Array<GameAction> &ActionList(int iset) const
      { return infosets[iset]->acts; }
 
   // Get the BehavSupportInfoset of an iset
@@ -373,15 +373,15 @@ int BehavSupport::NumActions(const GameInfoset &i) const
     return m_players[i->GetPlayer()->GetNumber()]->NumActions(i->GetNumber());
 }
 
-const gbtArray<GameAction> &BehavSupport::Actions(int pl, int iset) const
+const Array<GameAction> &BehavSupport::Actions(int pl, int iset) const
 {
   return m_players[pl]->ActionList(iset);
 }
 
-gbtArray<GameAction> BehavSupport::Actions(const GameInfoset &i) const
+Array<GameAction> BehavSupport::Actions(const GameInfoset &i) const
 {
   if (i->GetPlayer()->IsChance()) {
-    gbtArray<GameAction> actions;
+    Array<GameAction> actions;
     for (int act = 1; act <= i->NumActions(); act++) {
       actions.Append(i->GetAction(act));
     }
@@ -393,7 +393,7 @@ gbtArray<GameAction> BehavSupport::Actions(const GameInfoset &i) const
 
 gbtList<GameAction> BehavSupport::ListOfActions(const GameInfoset &i) const
 {
-  gbtArray<GameAction> actions = Actions(i);
+  Array<GameAction> actions = Actions(i);
   gbtList<GameAction> answer;
   for (int i = 1; i <= actions.Length(); i++)
     answer.Append(actions[i]);
@@ -445,7 +445,7 @@ bool
 BehavSupport::AllActionsInSupportAtInfosetAreActive(const BehavSupport &S,
 						 const GameInfoset &infset) const
 {
-  gbtArray<GameAction> support_actions = S.Actions(infset);
+  Array<GameAction> support_actions = S.Actions(infset);
   for (int i = 1; i <= support_actions.Length(); i++) {
     if (!ActionIsActive(support_actions[i]))
       return false;
@@ -483,14 +483,14 @@ bool BehavSupport::HasActiveActionsAtAllInfosets(void) const
   return true;
 }
 
-gbtPVector<int> BehavSupport::NumActions(void) const
+PVector<int> BehavSupport::NumActions(void) const
 {
-  gbtArray<int> foo(m_efg->NumPlayers());
+  Array<int> foo(m_efg->NumPlayers());
   int i;
   for (i = 1; i <= m_efg->NumPlayers(); i++)
     foo[i] = m_players[i]->GetPlayer()->NumInfosets();
 
-  gbtPVector<int> bar(foo);
+  PVector<int> bar(foo);
   for (i = 1; i <= m_efg->NumPlayers(); i++)
     for (int j = 1; j <= m_players[i]->GetPlayer()->NumInfosets(); j++)
       bar(i, j) = NumActions(i,j);
@@ -537,7 +537,7 @@ gbtList<GameNode> BehavSupport::ReachableNonterminalNodes(const GameNode &n) con
 {
   gbtList<GameNode> answer;
   if (!n->IsTerminal()) {
-    const gbtArray<GameAction> &actions = Actions(n->GetInfoset());
+    const Array<GameAction> &actions = Actions(n->GetInfoset());
     for (int i = 1; i <= actions.Length(); i++) {
       GameNode nn = n->GetChild(actions[i]->GetNumber());
       if (!nn->IsTerminal()) {
@@ -565,7 +565,7 @@ BehavSupport::ReachableNonterminalNodes(const GameNode &n,
 gbtList<GameInfoset> 
 BehavSupport::ReachableInfosets(const GamePlayer &p) const
 { 
-  gbtArray<GameInfoset> isets;
+  Array<GameInfoset> isets;
   for (int iset = 1; iset <= p->NumInfosets(); iset++) {
     isets.Append(p->GetInfoset(iset));
   }
@@ -610,7 +610,7 @@ bool BehavSupport::AlwaysReachesFrom(const GameInfoset &i, const GameNode &n) co
   else
     if (n->GetInfoset() == i) return true;
     else {
-      gbtArray<GameAction> actions = Actions(n->GetInfoset());
+      Array<GameAction> actions = Actions(n->GetInfoset());
       for (int j = 1; j <= actions.Length(); j++)
 	if (!AlwaysReachesFrom(i,n->GetChild(actions[j]->GetNumber()))) 
 	  return false;
@@ -646,9 +646,9 @@ private:
   Game _efg;
   BehavSupport _support;
   PureBehavProfile _profile;
-  gbtPVector<int> _current;
-  gbtArray<gbtArray<bool> > _is_active;
-  gbtArray<int> _num_active_infosets;
+  PVector<int> _current;
+  Array<Array<bool> > _is_active;
+  Array<int> _num_active_infosets;
   mutable Vector<Rational> _payoff;
 
 public:
@@ -680,7 +680,7 @@ BehavConditionalIterator::BehavConditionalIterator(const BehavSupport &s)
 {
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
     _num_active_infosets[pl] = 0;
-    gbtArray<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
+    Array<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
     for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
       active_for_pl[iset] = true;
       _num_active_infosets[pl]++;
@@ -700,7 +700,7 @@ BehavConditionalIterator::BehavConditionalIterator(const BehavSupport &s,
 {
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
     _num_active_infosets[pl] = 0;
-    gbtArray<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
+    Array<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
     for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
       if ( active.Contains(_efg->GetPlayer(pl)->GetInfoset(iset)) ) {
 	active_for_pl[iset] = true;
@@ -742,7 +742,7 @@ void BehavConditionalIterator::Set(const GameAction &a)
 
 int BehavConditionalIterator::Next(int pl, int iset)
 {
-  const gbtArray<GameAction> &actions = _support.Actions(pl, iset);
+  const Array<GameAction> &actions = _support.Actions(pl, iset);
   
   if (_current(pl, iset) == actions.Length())   {
     _current(pl, iset) = 1;
@@ -875,7 +875,7 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
 }
 
 bool SomeElementDominates(const BehavSupport &S, 
-			  const gbtArray<GameAction> &array,
+			  const Array<GameAction> &array,
 			  const GameAction &a, 
 			  const bool strong,
 			  const bool conditional)
@@ -891,7 +891,7 @@ bool SomeElementDominates(const BehavSupport &S,
 bool BehavSupport::IsDominated(const GameAction &a, 
 				bool strong, bool conditional) const
 {
-  gbtArray<GameAction> array(Actions(a->GetInfoset()));
+  Array<GameAction> array(Actions(a->GetInfoset()));
   return SomeElementDominates(*this,array,a,strong,conditional);
 }
 
@@ -900,7 +900,7 @@ bool InfosetHasDominatedElement(const BehavSupport &S,
 				bool strong,
 				bool conditional)
 {
-  gbtArray<GameAction> actions = S.Actions(i);
+  Array<GameAction> actions = S.Actions(i);
   for (int i = 1; i <= actions.Length(); i++)
     if (SomeElementDominates(S,actions,actions[i],
 			     strong,conditional))
@@ -915,9 +915,9 @@ bool ElimDominatedInInfoset(const BehavSupport &S, BehavSupport &T,
 			    const bool strong,
 			    const bool conditional)
 {
-  const gbtArray<GameAction> &actions = S.Actions(pl, iset);
+  const Array<GameAction> &actions = S.Actions(pl, iset);
 
-  gbtArray<bool> is_dominated(actions.Length());
+  Array<bool> is_dominated(actions.Length());
   for (int k = 1; k <= actions.Length(); k++)
     is_dominated[k] = false;
 
@@ -960,7 +960,7 @@ bool ElimDominatedForPlayer(const BehavSupport &S, BehavSupport &T,
 }
 
 BehavSupport BehavSupport::Undominated(bool strong, bool conditional,
-				       const gbtArray<int> &players,
+				       const Array<int> &players,
 				       std::ostream &) const
 {
   BehavSupport T(*this);
@@ -1043,7 +1043,7 @@ void BehavSupportWithActiveInfo::activate_this_and_lower_nodes(const GameNode &n
   if (!n->IsTerminal()) {
     activate(n); 
     activate(n->GetInfoset());
-    gbtArray<GameAction> actions(Actions(n->GetInfoset()));
+    Array<GameAction> actions(Actions(n->GetInfoset()));
     for (int i = 1; i <= actions.Length(); i++) 
       activate_this_and_lower_nodes(n->GetChild(actions[i]->GetNumber()));    
   }
@@ -1055,7 +1055,7 @@ void BehavSupportWithActiveInfo::deactivate_this_and_lower_nodes(const GameNode 
     deactivate(n); 
     if ( !infoset_has_active_nodes(n->GetInfoset()) )
       deactivate(n->GetInfoset());
-    gbtArray<GameAction> actions(Actions(n->GetInfoset()));
+    Array<GameAction> actions(Actions(n->GetInfoset()));
       for (int i = 1; i <= actions.Length(); i++) 
 	deactivate_this_and_lower_nodes(n->GetChild(actions[i]->GetNumber()));    
   }
@@ -1078,7 +1078,7 @@ deactivate_this_and_lower_nodes_returning_deactivated_infosets(const GameNode &n
       list->Append(n->GetInfoset()); 
       deactivate(n->GetInfoset());
     }
-    gbtArray<GameAction> actions(Actions(n->GetInfoset()));
+    Array<GameAction> actions(Actions(n->GetInfoset()));
       for (int i = 1; i <= actions.Length(); i++) 
 	deactivate_this_and_lower_nodes_returning_deactivated_infosets(
 			     n->GetChild(actions[i]->GetNumber()),list);    

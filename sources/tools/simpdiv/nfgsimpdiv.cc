@@ -84,16 +84,16 @@ private:
   Gambit::Rational d,pay,maxz,bestz;
 
   Gambit::Rational Simplex(Gambit::MixedStrategyProfile<Gambit::Rational> &);
-  Gambit::Rational getlabel(Gambit::MixedStrategyProfile<Gambit::Rational> &yy, gbtArray<int> &, gbtPVector<Gambit::Rational> &);
-  void update(Gambit::RectArray<int> &, Gambit::RectArray<int> &, gbtPVector<Gambit::Rational> &,
-	      const gbtPVector<int> &, int j, int i);
-  void getY(Gambit::MixedStrategyProfile<Gambit::Rational> &x, gbtPVector<Gambit::Rational> &, 
-	    const gbtPVector<int> &, const gbtPVector<int> &, 
-	    const gbtPVector<Gambit::Rational> &, const Gambit::RectArray<int> &, int k);
+  Gambit::Rational getlabel(Gambit::MixedStrategyProfile<Gambit::Rational> &yy, Gambit::Array<int> &, Gambit::PVector<Gambit::Rational> &);
+  void update(Gambit::RectArray<int> &, Gambit::RectArray<int> &, Gambit::PVector<Gambit::Rational> &,
+	      const Gambit::PVector<int> &, int j, int i);
+  void getY(Gambit::MixedStrategyProfile<Gambit::Rational> &x, Gambit::PVector<Gambit::Rational> &, 
+	    const Gambit::PVector<int> &, const Gambit::PVector<int> &, 
+	    const Gambit::PVector<Gambit::Rational> &, const Gambit::RectArray<int> &, int k);
   void getnexty(Gambit::MixedStrategyProfile<Gambit::Rational> &x, const Gambit::RectArray<int> &,
-		const gbtPVector<int> &, int i);
-  int get_c(int j, int h, int nstrats, const gbtPVector<int> &);
-  int get_b(int j, int h, int nstrats, const gbtPVector<int> &);
+		const Gambit::PVector<int> &, int i);
+  int get_c(int j, int h, int nstrats, const Gambit::PVector<int> &);
+  int get_b(int j, int h, int nstrats, const Gambit::PVector<int> &);
   
 public:
   nfgSimpdiv(void);
@@ -130,12 +130,12 @@ nfgSimpdiv::~nfgSimpdiv()
 
 Gambit::Rational nfgSimpdiv::Simplex(Gambit::MixedStrategyProfile<Gambit::Rational> &y)
 {
-  gbtArray<int> ylabel(2);
+  Gambit::Array<int> ylabel(2);
   Gambit::RectArray<int> labels(y.Length(), 2), pi(y.Length(), 2);
-  gbtPVector<int> U(y.GetSupport().NumStrats()), TT(y.GetSupport().NumStrats());
-  gbtPVector<Gambit::Rational> ab(y.GetSupport().NumStrats());
-  gbtPVector<Gambit::Rational> besty(y.GetSupport().NumStrats());
-  gbtPVector<Gambit::Rational> v(y);
+  Gambit::PVector<int> U(y.GetSupport().NumStrats()), TT(y.GetSupport().NumStrats());
+  Gambit::PVector<Gambit::Rational> ab(y.GetSupport().NumStrats());
+  Gambit::PVector<Gambit::Rational> besty(y.GetSupport().NumStrats());
+  Gambit::PVector<Gambit::Rational> v(y);
   besty = y;
 
   int i = 0;
@@ -320,8 +320,8 @@ Gambit::Rational nfgSimpdiv::Simplex(Gambit::MixedStrategyProfile<Gambit::Ration
 
 void nfgSimpdiv::update(Gambit::RectArray<int> &pi,
 			Gambit::RectArray<int> &labels,
-			gbtPVector<Gambit::Rational> &ab,
-			const gbtPVector<int> &U,
+			Gambit::PVector<Gambit::Rational> &ab,
+			const Gambit::PVector<int> &U,
 			int j, int i)
 {
   int jj, hh, k,f;
@@ -366,10 +366,10 @@ void nfgSimpdiv::update(Gambit::RectArray<int> &pi,
 }
 
 void nfgSimpdiv::getY(Gambit::MixedStrategyProfile<Gambit::Rational> &x,
-		      gbtPVector<Gambit::Rational> &v, 
-		      const gbtPVector<int> &U,
-		      const gbtPVector<int> &TT,
-		      const gbtPVector<Gambit::Rational> &ab,
+		      Gambit::PVector<Gambit::Rational> &v, 
+		      const Gambit::PVector<int> &U,
+		      const Gambit::PVector<int> &TT,
+		      const Gambit::PVector<Gambit::Rational> &ab,
 		      const Gambit::RectArray<int> &pi,
 		      int k)
 {
@@ -395,7 +395,7 @@ void nfgSimpdiv::getY(Gambit::MixedStrategyProfile<Gambit::Rational> &x,
 
 void nfgSimpdiv::getnexty(Gambit::MixedStrategyProfile<Gambit::Rational> &x,
 			  const Gambit::RectArray<int> &pi, 
-			  const gbtPVector<int> &U,
+			  const Gambit::PVector<int> &U,
 			  int i)
 {
   int j,h,hh;
@@ -409,7 +409,7 @@ void nfgSimpdiv::getnexty(Gambit::MixedStrategyProfile<Gambit::Rational> &x,
 }
 
 int nfgSimpdiv::get_b(int j, int h, int nstrats,
-		      const gbtPVector<int> &U)
+		      const Gambit::PVector<int> &U)
 {
   int hh;
   
@@ -423,7 +423,7 @@ int nfgSimpdiv::get_b(int j, int h, int nstrats,
 }
 
 int nfgSimpdiv::get_c(int j, int h, int nstrats,
-		      const gbtPVector<int> &U)
+		      const Gambit::PVector<int> &U)
 {
   int hh;
   
@@ -434,8 +434,8 @@ int nfgSimpdiv::get_c(int j, int h, int nstrats,
 }
 
 Gambit::Rational nfgSimpdiv::getlabel(Gambit::MixedStrategyProfile<Gambit::Rational> &yy,
-			       gbtArray<int> &ylabel,
-			       gbtPVector<Gambit::Rational> &besty)
+			       Gambit::Array<int> &ylabel,
+			       Gambit::PVector<Gambit::Rational> &besty)
 {
   int i,j,jj;
   Gambit::Rational maxz,payoff,maxval;

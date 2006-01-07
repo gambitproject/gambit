@@ -195,7 +195,7 @@ void GameInfosetRep::Reveal(GamePlayer p_player)
     for (int iset = 1; iset <= p_player->m_infosets.Length(); iset++) {
       // make copy of members to iterate correctly 
       // (since the information set may be changed in the process)
-      gbtArray<GameNodeRep *> members = p_player->m_infosets[iset]->m_members;
+      Array<GameNodeRep *> members = p_player->m_infosets[iset]->m_members;
 
       // This information set holds all members of information set
       // which follow 'action'.
@@ -271,7 +271,7 @@ GameStrategy GamePlayerRep::NewStrategy(void)
 
 void GamePlayerRep::MakeStrategy(void)
 {
-  gbtArray<int> c(NumInfosets());
+  Array<int> c(NumInfosets());
   
   for (int i = 1; i <= NumInfosets(); i++)  {
     if (GetInfoset(i)->flag == 1)
@@ -480,7 +480,7 @@ void GameNodeRep::DeleteTree(void)
     children[i]->DeleteTree();
     children[i]->Invalidate();
   }
-  children = gbtArray<GameNodeRep *>();
+  children = Array<GameNodeRep *>();
 
   if (infoset) {
     infoset->RemoveMember(this);
@@ -754,7 +754,7 @@ PureBehavProfile::PureBehavProfile(Game p_efg)
 {
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
     GamePlayerRep *player = m_efg->GetPlayer(pl);
-    m_profile[pl] = gbtArray<GameAction>(player->NumInfosets());
+    m_profile[pl] = Array<GameAction>(player->NumInfosets());
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       m_profile[pl][iset] = player->GetInfoset(iset)->GetAction(1);
     }
@@ -818,17 +818,17 @@ GameRep::GameRep(void)
 
 /// This convenience function computes the Cartesian product of the
 /// elements in dim.
-static int Product(const gbtArray<int> &dim)
+static int Product(const Array<int> &dim)
 {
   int accum = 1;
   for (int i = 1; i <= dim.Length(); accum *= dim[i++]);
   return accum;
 }
   
-GameRep::GameRep(const gbtArray<int> &dim)
+GameRep::GameRep(const Array<int> &dim)
   : m_root(0), m_chance(0)
 {
-  m_results = gbtArray<GameOutcomeRep *>(Product(dim));
+  m_results = Array<GameOutcomeRep *>(Product(dim));
   for (int pl = 1; pl <= dim.Length(); pl++)  {
     m_players.Append(new GamePlayerRep(this, pl, dim[pl]));
     m_players[pl]->m_label = ToText(pl);
@@ -1268,14 +1268,14 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
 //                   GameRep: Dimensions of the game
 //------------------------------------------------------------------------
 
-gbtPVector<int> GameRep::NumActions(void) const
+PVector<int> GameRep::NumActions(void) const
 {
-  gbtArray<int> foo(m_players.Length());
+  Array<int> foo(m_players.Length());
   int i;
   for (i = 1; i <= m_players.Length(); i++)
     foo[i] = m_players[i]->m_infosets.Length();
 
-  gbtPVector<int> bar(foo);
+  PVector<int> bar(foo);
   for (i = 1; i <= m_players.Length(); i++) {
     for (int j = 1; j <= m_players[i]->m_infosets.Length(); j++) {
       bar(i, j) = m_players[i]->m_infosets[j]->NumActions();
@@ -1285,15 +1285,15 @@ gbtPVector<int> GameRep::NumActions(void) const
   return bar;
 }  
 
-gbtPVector<int> GameRep::NumMembers(void) const
+PVector<int> GameRep::NumMembers(void) const
 {
-  gbtArray<int> foo(m_players.Length());
+  Array<int> foo(m_players.Length());
 
   for (int i = 1; i <= m_players.Length(); i++) {
     foo[i] = m_players[i]->NumInfosets();
   }
 
-  gbtPVector<int> bar(foo);
+  PVector<int> bar(foo);
   for (int i = 1; i <= m_players.Length(); i++) {
     for (int j = 1; j <= m_players[i]->NumInfosets(); j++) {
       bar(i, j) = m_players[i]->m_infosets[j]->NumMembers();
@@ -1303,9 +1303,9 @@ gbtPVector<int> GameRep::NumMembers(void) const
   return bar;
 }
 
-gbtArray<int> GameRep::NumStrategies(void) const
+Array<int> GameRep::NumStrategies(void) const
 {
-  gbtArray<int> dim(m_players.Length());
+  Array<int> dim(m_players.Length());
   for (int pl = 1; pl <= m_players.Length(); pl++) {
     dim[pl] = m_players[pl]->m_strategies.Length();
   }
@@ -1379,9 +1379,9 @@ GameInfoset GameRep::GetInfoset(int p_index) const
   throw gbtIndexException();
 }
 
-gbtArray<int> GameRep::NumInfosets(void) const
+Array<int> GameRep::NumInfosets(void) const
 {
-  gbtArray<int> foo(m_players.Length());
+  Array<int> foo(m_players.Length());
   
   for (int i = 1; i <= foo.Length(); i++) {
     foo[i] = m_players[i]->NumInfosets();
@@ -1481,13 +1481,13 @@ void GameRep::IndexStrategies(void)
 void GameRep::RebuildTable(void)
 {
   long size = 1L;
-  gbtArray<long> offsets(m_players.Length());
+  Array<long> offsets(m_players.Length());
   for (int pl = 1; pl <= m_players.Length(); pl++) {
     offsets[pl] = size;
     size *= m_players[pl]->NumStrategies();
   }
 
-  gbtArray<GameOutcomeRep *> newResults(size);
+  Array<GameOutcomeRep *> newResults(size);
   for (int i = 1; i <= newResults.Length(); newResults[i++] = 0);
 
   StrategyIterator iter(StrategySupport(const_cast<GameRep *>(this)));

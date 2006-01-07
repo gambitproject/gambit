@@ -152,7 +152,7 @@ template<class T> gbtList<exp_vect> gIdeal<T>::MonomialBasis() const
 {
   gbtList<exp_vect> answer;
 
-  gbtArray<int> MinIndices(Dmnsn()), MaxIndices(Dmnsn());
+  Gambit::Array<int> MinIndices(Dmnsn()), MaxIndices(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) MinIndices[i] = 0;
 
   for (int j = 1; j <= basis.Length(); j++) {
@@ -184,7 +184,7 @@ template<class T> bool gIdeal<T>::ZeroDimensional() const
 {
   if (Dmnsn() == 0) return true;
 
-  gbtArray<bool> HasLeadingTermThatIsPowerOfVariable(Dmnsn());
+  Gambit::Array<bool> HasLeadingTermThatIsPowerOfVariable(Dmnsn());
   int i;
   for (i = 1; i <= Dmnsn(); i++)
     HasLeadingTermThatIsPowerOfVariable[i] = false;

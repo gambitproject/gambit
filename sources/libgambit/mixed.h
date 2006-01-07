@@ -27,11 +27,11 @@
 #ifndef LIBGAMBIT_MIXED_H
 #define LIBGAMBIT_MIXED_H
 
-#include "gpvector.h"
+#include "pvector.h"
 
 namespace Gambit {
 
-template <class T> class MixedStrategyProfile : public gbtPVector<T>  {
+template <class T> class MixedStrategyProfile : public PVector<T>  {
 private:
   StrategySupport support;
 

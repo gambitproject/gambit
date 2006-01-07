@@ -70,7 +70,7 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-void Solve(const Gambit::Game &p_game, const gbtArray<double> &p_pert)
+void Solve(const Gambit::Game &p_game, const Gambit::Array<double> &p_pert)
 {
   int i;
 
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  gbtArray<double> pert(nfg->MixedProfileLength());
+  Gambit::Array<double> pert(nfg->MixedProfileLength());
   for (int i = 1; i <= pert.Length(); i++) {
     pert[i] = 1.0;
   }

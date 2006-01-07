@@ -101,7 +101,7 @@ inline double pow(double x, long y)
 { return pow(x, (double) y); }
 
 
-#include "garray.h"
+#include "array.h"
 #include "glist.h"
 #include "recarray.h"
 #include "vector.h"

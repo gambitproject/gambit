@@ -36,10 +36,10 @@
 template <class T> class LPTableau : public Tableau<T> {
 private:
   Gambit::Vector<T> dual;
-  gbtArray<T> unitcost;
-  gbtArray<T> cost;
-  gbtArray<bool> UB,LB;  // does col have upper/lower bound?
-  gbtArray<T> ub,lb;   // upper/lower bound
+  Gambit::Array<T> unitcost;
+  Gambit::Array<T> cost;
+  Gambit::Array<bool> UB,LB;  // does col have upper/lower bound?
+  Gambit::Array<T> ub,lb;   // upper/lower bound
   
   void SolveDual();
 public:
@@ -49,7 +49,7 @@ public:
     std::string GetDescription(void) const;
   };
   LPTableau(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b); 
-  LPTableau(const Gambit::Matrix<T> &A, const gbtArray<int> &art, const Gambit::Vector<T> &b); 
+  LPTableau(const Gambit::Matrix<T> &A, const Gambit::Array<int> &art, const Gambit::Vector<T> &b); 
   LPTableau(const LPTableau<T>&);
   virtual ~LPTableau();
   
@@ -67,9 +67,9 @@ public:
       // Redefined functions
   void Refactor();
   void Pivot(int outrow,int col);
-  void ReversePivots(gbtList<gbtArray<int> > &);
+  void ReversePivots(gbtList<Gambit::Array<int> > &);
   bool IsReversePivot(int i, int j);
-  void DualReversePivots(gbtList<gbtArray<int> > &);
+  void DualReversePivots(gbtList<Gambit::Array<int> > &);
   bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS(void) const;
 
@@ -77,10 +77,10 @@ public:
   int LastLabel( void );
 
   // select Basis elements according to Tableau rows and cols
-  void BasisSelect(const gbtArray<T>&rowv, Gambit::Vector<T> &colv) const;
+  void BasisSelect(const Gambit::Array<T>&rowv, Gambit::Vector<T> &colv) const;
 
   // as above, but unit column elements nonzero
-  void BasisSelect(const gbtArray<T>&unitv, const gbtArray<T>&rowv,
+  void BasisSelect(const Gambit::Array<T>&unitv, const Gambit::Array<T>&rowv,
 		   Gambit::Vector<T>&colv) const; 
 };
 

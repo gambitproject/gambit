@@ -290,11 +290,11 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
 
 gbtList<Gambit::BehavSupport> SortSupportsBySize(gbtList<Gambit::BehavSupport> &list) 
 {
-  gbtArray<int> sizes(list.Length());
+  Gambit::Array<int> sizes(list.Length());
   for (int i = 1; i <= list.Length(); i++)
     sizes[i] = list[i].NumDegreesOfFreedom();
 
-  gbtArray<int> listproxy(list.Length());
+  Gambit::Array<int> listproxy(list.Length());
   for (int i = 1; i <= list.Length(); i++)
     listproxy[i] = i;
 

@@ -37,7 +37,7 @@ class BehavSupport {
 protected:
   std::string m_name;
   Game m_efg;
-  gbtArray<BehavSupportPlayer *> m_players;
+  Array<BehavSupportPlayer *> m_players;
 
 public:
   BehavSupport(const Game &);
@@ -55,7 +55,7 @@ public:
 
   int NumActions(int pl, int iset) const;
   int NumActions(const GameInfoset &) const;
-  gbtPVector<int> NumActions(void) const;
+  PVector<int> NumActions(void) const;
   int NumDegreesOfFreedom(void) const;
 
   // Checks to see that every infoset in the support has at least one
@@ -74,8 +74,8 @@ public:
 					     const GameInfoset &) const;
 
   // Find the active actions at an infoset
-  const gbtArray<GameAction> &Actions(int pl, int iset) const;
-  gbtArray<GameAction> Actions(const GameInfoset &) const;
+  const Array<GameAction> &Actions(int pl, int iset) const;
+  Array<GameAction> Actions(const GameInfoset &) const;
   gbtList<GameAction> ListOfActions(const GameInfoset &) const;
 
   // Action editing functions
@@ -105,7 +105,7 @@ public:
   bool IsDominated(const GameAction &a, 
 		   bool strong, bool conditional) const;
   BehavSupport Undominated(bool strong, bool conditional,
-			 const gbtArray<int> &players,
+			 const Array<int> &players,
 			std::ostream &) const;
 };
 
@@ -118,8 +118,8 @@ public:
 
 class BehavSupportWithActiveInfo : public BehavSupport {
 protected:
-  gbtArray<gbtList<bool> >         is_infoset_active;
-  gbtArray<gbtList<gbtList<bool> > > is_nonterminal_node_active;
+  Array<gbtList<bool> >         is_infoset_active;
+  Array<gbtList<gbtList<bool> > > is_nonterminal_node_active;
 
   void InitializeActiveListsToAllActive();
   void InitializeActiveListsToAllInactive();

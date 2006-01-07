@@ -51,7 +51,7 @@ private:
   gbtList<Gambit::MixedBehavProfile<double> > solutions;
   const Sfg SF;
   bool is_singular;
-  gbtArray<gbtArray<int> * > var;
+  Gambit::Array<Gambit::Array<int> * > var;
 
   // The strategy is to develop the polynomial for each agent's expected
   // payoff as a function of the behavior strategies on the support,
@@ -70,7 +70,7 @@ private:
 
   // Pass to the sequence form variables from the solution variables
   double NumProbOfSequence(int pl,int seq, const Gambit::Vector<gDouble> &x) const;
-  gbtPVector<double> SeqFormVectorFromSolFormVector(const Gambit::Vector<gDouble> &x)
+  Gambit::PVector<double> SeqFormVectorFromSolFormVector(const Gambit::Vector<gDouble> &x)
                                                                       const;
 
   bool ExtendsToANFNash(const Gambit::MixedBehavProfile<double> &)             const;
@@ -91,8 +91,8 @@ public:
   const gbtList<Gambit::MixedBehavProfile<double> > &GetSolutions(void) const;
 
   // Passing between variables of polynomials and sequence form probs
-  gbtPVector<double> SeqFormProbsFromSolVars(const Gambit::Vector<gDouble> &) const;
-  Gambit::Vector<gDouble> SolVarsFromSeqFormProbs(const gbtPVector<double> &) const;
+  Gambit::PVector<double> SeqFormProbsFromSolVars(const Gambit::Vector<gDouble> &) const;
+  Gambit::Vector<gDouble> SolVarsFromSeqFormProbs(const Gambit::PVector<double> &) const;
   //  Gambit::Vector<gDouble> SolVarsFromBehavProfile(const Gambit::MixedBehavProfile<gbtNumber> &) const;
 
   const int PolishKnownRoot(Gambit::Vector<gDouble> &) const;
@@ -120,7 +120,7 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const Gambit::BehavSupport &S)
   int tnv = 0;
 
   for(int i=1;i<=EF->NumPlayers();i++) {
-    var[i] = new gbtArray<int>(SF.NumSequences(i));
+    var[i] = new Gambit::Array<int>(SF.NumSequences(i));
     (*(var[i]))[1] = 0;
     for(int seq = 2;seq<=SF.NumSequences(i);seq++) {
       int act  = SF.ActionNumber(i,seq);
@@ -295,11 +295,11 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
   return index;	 
 }
 
-template <class T> gbtPVector<double> 
+template <class T> Gambit::PVector<double> 
 EfgPolEnumModule<T>::SeqFormVectorFromSolFormVector(const Gambit::Vector<gDouble> &v)
                                                                       const
 {
-  gbtPVector<double> x(SF.NumSequences());
+  Gambit::PVector<double> x(SF.NumSequences());
 
   for (int i = 1; i <= EF->NumPlayers(); i++) 
     for (int j = 1; j <= SF.NumSequences()[i]; j++)
@@ -322,7 +322,7 @@ EfgPolEnumModule<T>::SaveANFNashSolutions(const gbtList<Gambit::Vector<gDouble> 
 {
   int index=0;
   for (int k = 1; k <= list.Length(); k++) {
-    gbtPVector<double> y = SeqFormVectorFromSolFormVector(list[k]);
+    Gambit::PVector<double> y = SeqFormVectorFromSolFormVector(list[k]);
 
     Gambit::MixedBehavProfile<double> sol(SF.ToBehav(y));
 
@@ -347,7 +347,7 @@ EfgPolEnumModule<T>::SaveNashSolutions(const gbtList<Gambit::Vector<gDouble> > &
 {
   int index=0;
   for (int k = 1; k <= list.Length(); k++) {
-    gbtPVector<double> y = SeqFormVectorFromSolFormVector(list[k]);
+    Gambit::PVector<double> y = SeqFormVectorFromSolFormVector(list[k]);
 
     Gambit::MixedBehavProfile<double> sol(SF.ToBehav(y));
 
@@ -405,10 +405,10 @@ NumProbOfSequence(int p,int seq, const Gambit::Vector<gDouble> &x) const
   }
 }
 
-template <class T> gbtPVector<double> 
+template <class T> Gambit::PVector<double> 
 EfgPolEnumModule<T>::SeqFormProbsFromSolVars(const Gambit::Vector<gDouble> &v) const
 {
-  gbtPVector<double> x(SF.NumSequences());
+  Gambit::PVector<double> x(SF.NumSequences());
 
   for(int pl=1;pl<=EF->NumPlayers();pl++) 
     for(int seq=1;seq<=SF.NumSequences()[pl];seq++)
@@ -441,7 +441,7 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const Gambit::MixedBehavProfile<gbt
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       const Gambit::GameInfoset *infoset = player->GetInfoset(iset);
       if ( support.MayReach(infoset) ) {
-	const gbtArray<Gambit::GameAction *> acts = support.Actions(infoset);
+	const Gambit::Array<Gambit::GameAction *> acts = support.Actions(infoset);
 	for (int act = 1; act <= acts.Length() - 1; act++) {
 	  count++;
 	  answer[count] = (gDouble)sol.GetActionProb(acts[act]);
@@ -455,7 +455,7 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const Gambit::MixedBehavProfile<gbt
 */
 
 template <class T> Gambit::Vector<gDouble> 
-EfgPolEnumModule<T>::SolVarsFromSeqFormProbs(const gbtPVector<double> &x) const
+EfgPolEnumModule<T>::SolVarsFromSeqFormProbs(const Gambit::PVector<double> &x) const
 {
   
 
@@ -535,7 +535,7 @@ const int EfgPolEnumModule<T>::PolishKnownRoot(Gambit::Vector<gDouble> &point) c
 template <class T> Gambit::MixedBehavProfile<double> 
 EfgPolEnumModule<T>::ReturnPolishedSolution(const Gambit::Vector<gDouble> &root) const
 {
-  gbtPVector<double> x(SF.NumSequences());
+  Gambit::PVector<double> x(SF.NumSequences());
 
   for(int i=1;i<=EF->NumPlayers();i++) 
     for(int j=1;j<=SF.NumSequences()[i];j++) 

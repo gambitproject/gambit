@@ -57,7 +57,7 @@ public:
 class SFSequenceSet {
 protected:
   Gambit::GamePlayer efp;
-  gbtArray <Sequence *> sequences;
+  Gambit::Array <Sequence *> sequences;
   
 public:
   SFSequenceSet(const SFSequenceSet &s); 
@@ -79,8 +79,8 @@ public:
   // Number of sequences in the SFSequenceSet
   int NumSequences(void) const;
 
-  //  return the entire sequence set in a const gbtArray
-  const gbtArray<Sequence *> &GetSFSequenceSet(void) const;
+  //  return the entire sequence set in a const Gambit::Array
+  const Gambit::Array<Sequence *> &GetSFSequenceSet(void) const;
 };
 
 
@@ -89,7 +89,7 @@ class Sfg;
 class SFSupport {
 protected:
   const Sfg *bsfg;
-  gbtArray <SFSequenceSet *> sups;
+  Gambit::Array <SFSequenceSet *> sups;
   
 public:
   SFSupport(const Sfg &);
@@ -102,10 +102,10 @@ public:
 
   const Sfg &Game(void) const   { return *bsfg; }
   
-  const gbtArray<Sequence *> &Sequences(int pl) const;
+  const Gambit::Array<Sequence *> &Sequences(int pl) const;
 
   int NumSequences(int pl) const;
-  const gbtArray<int> NumSequences(void) const;
+  const Gambit::Array<int> NumSequences(void) const;
   int TotalNumSequences(void) const;
 
   void AddSequence(Sequence *);
@@ -122,7 +122,7 @@ class SequenceProfile   {
   friend class Sfg;
 private:
   long index;
-  gbtArray<Sequence *> profile;
+  Gambit::Array<Sequence *> profile;
   
 public:
   SequenceProfile(const Sfg &);
