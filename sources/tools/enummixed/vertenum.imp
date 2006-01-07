@@ -27,7 +27,7 @@
 #include "vertenum.h"
 
 template <class T>
-VertEnum<T>::VertEnum(const Gambit::Matrix<T> &_A, const gbtVector<T> &_b) 
+VertEnum<T>::VertEnum(const Gambit::Matrix<T> &_A, const Gambit::Vector<T> &_b) 
   : mult_opt(0), depth(0), A(_A), b(_b), btemp(_b), 
     c(_A.MinCol(),_A.MaxCol()), npivots(0), nodes(0)
 {
@@ -53,7 +53,7 @@ VertEnum<T>::VertEnum(LPTableau<T> &tab)
   // Is this stuff right?
   btemp = -(T)1;
 
-  gbtVector<T> uc(tab.MinRow(),tab.MaxRow());
+  Gambit::Vector<T> uc(tab.MinRow(),tab.MaxRow());
   c = (T)1;
   uc = (T)1;
   
@@ -197,10 +197,10 @@ template <class T> const gbtList<BFS<T> > &VertEnum<T>::DualVertexList() const
   return DualList;
 }
 
-template <class T> void VertEnum<T>::Vertices(gbtList<gbtVector<T> > &verts) const
+template <class T> void VertEnum<T>::Vertices(gbtList<Gambit::Vector<T> > &verts) const
 { 
   for(int i=1;i<=List.Length();i++) {
-    gbtVector<T> vert(A.NumColumns());
+    Gambit::Vector<T> vert(A.NumColumns());
     vert = (T)0;
     for(int j=1;j<=vert.Length();j++) 
       if(List[i].IsDefined(j)) vert[j]=-List[i](j);

@@ -51,23 +51,23 @@ private:
   LPTableau<T> tab;
   gbtArray<bool> *UB, *LB;
   gbtArray<T> *ub, *lb;
-  gbtVector<T> *xx, *cost; 
-  gbtVector<T> y, x, d;
+  Gambit::Vector<T> *xx, *cost; 
+  Gambit::Vector<T> y, x, d;
 
   void Solve(int phase = 0);
   int Enter(void);
   int Exit(int);
 public:
-  LPSolve(const Gambit::Matrix<T> &A, const gbtVector<T> &B, const gbtVector<T> &C,
+  LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &B, const Gambit::Vector<T> &C,
 	  int nequals);   // nequals = number of equalities (last nequals rows)
-//  LPSolve(const Gambit::Matrix<T> &A, const gbtVector<T> &B, 
-//	  const gbtVector<T> &C,  const gbtVector<int> &sense, 
-//	  const gbtVector<int> &LB,  const gbtVector<T> &lb, 
-//	  const gbtVector<int> &UB, const gbtVector<T> &ub);
+//  LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &B, 
+//	  const Gambit::Vector<T> &C,  const Gambit::Vector<int> &sense, 
+//	  const Gambit::Vector<int> &LB,  const Gambit::Vector<T> &lb, 
+//	  const Gambit::Vector<int> &UB, const Gambit::Vector<T> &ub);
   ~LPSolve();
   
   T OptimumCost(void) const;
-  const gbtVector<T> &OptimumVector(void) const;
+  const Gambit::Vector<T> &OptimumVector(void) const;
   const gbtList< BFS<T> > &GetAll(void);
   const LPTableau<T> &GetTableau();
   

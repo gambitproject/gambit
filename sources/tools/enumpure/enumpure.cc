@@ -77,7 +77,7 @@ void SolveBehav(Gambit::Game p_efg)
       if (flag)  {
 	Gambit::MixedBehavProfile<Gambit::Rational> temp(p_efg);
 	// zero out all the entries, since any equilibria are pure
-	((gbtVector<Gambit::Rational> &) temp).operator=(Gambit::Rational(0));
+	((Gambit::Vector<Gambit::Rational> &) temp).operator=(Gambit::Rational(0));
 	const Gambit::PureBehavProfile &profile = citer.GetProfile();
 	for (int pl = 1; pl <= p_efg->NumPlayers(); pl++)  {
 	  for (int iset = 1;
@@ -140,7 +140,7 @@ void SolveMixed(Gambit::Game p_nfg)
     
     if (flag)  {
       Gambit::MixedStrategyProfile<Gambit::Rational> temp(p_nfg);
-      ((gbtVector<Gambit::Rational> &) temp).operator=(Gambit::Rational(0));
+      ((Gambit::Vector<Gambit::Rational> &) temp).operator=(Gambit::Rational(0));
       Gambit::PureStrategyProfile profile = citer.GetProfile();
       for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
 	temp(pl, profile.GetStrategy(pl)->GetNumber()) = 1;

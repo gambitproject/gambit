@@ -29,7 +29,7 @@
 
 #include "double.h"
 #include "interval.h"
-#include "libgambit/gvector.h"
+#include "libgambit/vector.h"
 
 /* This file provides the template class
 
@@ -48,7 +48,7 @@ public:
     // constructors
     gRectangle(const gRectangle<T>&);
     gRectangle(const gbtList<gInterval<T> >&);
-    gRectangle(const gbtVector<T>, const gbtVector<T>);
+    gRectangle(const Gambit::Vector<T>, const Gambit::Vector<T>);
     ~gRectangle();
 
     // operators
@@ -58,8 +58,8 @@ public:
 
     // information
     const int                Dmnsn()                            const;
-    gbtVector<T>         LowerBound()                       const;
-    gbtVector<T>         UpperBound()                       const;
+    Gambit::Vector<T>         LowerBound()                       const;
+    Gambit::Vector<T>         UpperBound()                       const;
     const T                  LowerBoundOfCoord(const int&)      const;
     const T                  UpperBoundOfCoord(const int&)      const;
     const T                  HeightInCoord(const int&)          const;
@@ -67,14 +67,14 @@ public:
     const gRectangle<T>      SameCenterDoubleSideLengths()      const;
     const gRectangle<T>      CubeContainingCrcmscrbngSphere()   const;
     const gRectangle<T>      Orthant(const gbtArray<int>&)        const;
-    const gbtVector<T>         SideLengths()                      const;
+    const Gambit::Vector<T>         SideLengths()                      const;
     const T                  MaximalSideLength()                const;
-    bool                     Contains(const gbtVector<T> &)       const;
+    bool                     Contains(const Gambit::Vector<T> &)       const;
     bool                     Contains(const gRectangle<T> &)    const;
     const T                  Volume()                           const;
-    const gbtVector<T>         Center()                           const;
+    const Gambit::Vector<T>         Center()                           const;
     const gRectangle<T>      BoundingRectangle()                const;
-    const gbtList<gbtVector<T> > VertexList()                       const;
+    const gbtList<Gambit::Vector<T> > VertexList()                       const;
     const int                NumberOfCellsInSubdivision()       const;
     const gRectangle<T>      SubdivisionCell(const int&)        const;
     const T                  DiameterSquared()                  const;

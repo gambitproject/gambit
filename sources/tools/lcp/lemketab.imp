@@ -31,7 +31,7 @@
 //---------------------------------------------------------------------------
 
 template <class T> LTableau<T>::LTableau(const Gambit::Matrix<T> &A, 
-					 const gbtVector<T> &b)
+					 const Gambit::Vector<T> &b)
   : Tableau<T>(A,b)
 { } 
 
@@ -79,8 +79,8 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
   gbtArray<int> BestSet;
   int i, c;
   T ratio, tempmax;
-  gbtVector<T> incol(this->MinRow(), this->MaxRow());
-  gbtVector<T> col(this->MinRow(), this->MaxRow());
+  Gambit::Vector<T> incol(this->MinRow(), this->MaxRow());
+  Gambit::Vector<T> col(this->MinRow(), this->MaxRow());
   
   SolveColumn(inlabel,incol);
   //* gout << "\nincol = " << incol;
@@ -154,8 +154,8 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
   gbtArray<int> BestSet;
   int i, c;
   T ratio, tempmax;
-  gbtVector<T> incol(this->MinRow(), this->MaxRow());
-  gbtVector<T> col(this->MinRow(), this->MaxRow());
+  Gambit::Vector<T> incol(this->MinRow(), this->MaxRow());
+  Gambit::Vector<T> col(this->MinRow(), this->MaxRow());
   
   SolveColumn(inlabel,incol);
   //   gout << "\nincol = " << incol;

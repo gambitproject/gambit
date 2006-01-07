@@ -41,8 +41,8 @@ template<class T> gRectangle<T>::gRectangle(const gbtList< gInterval<T> >& given
 {
 }
 
-template<class T> gRectangle<T>::gRectangle(const gbtVector<T> lower_bd, 
-                                            const gbtVector<T> upper_bd) 
+template<class T> gRectangle<T>::gRectangle(const Gambit::Vector<T> lower_bd, 
+                                            const Gambit::Vector<T> upper_bd) 
 : sides()
 { 
   assert (lower_bd.Check(upper_bd));
@@ -94,16 +94,16 @@ template<class T> const int gRectangle<T>::Dmnsn() const
   return sides.Length();
 }
 
-template <class T> gbtVector<T> gRectangle<T>::LowerBound(void) const
+template <class T> Gambit::Vector<T> gRectangle<T>::LowerBound(void) const
 { 
-  gbtVector<T> answer(Dmnsn());
+  Gambit::Vector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].LowerBound();
   return answer;
 }
 
-template <class T> gbtVector<T> gRectangle<T>::UpperBound(void) const
+template <class T> Gambit::Vector<T> gRectangle<T>::UpperBound(void) const
 { 
-  gbtVector<T> answer(Dmnsn());
+  Gambit::Vector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].UpperBound();
   return answer;
 }
@@ -174,9 +174,9 @@ gRectangle<T>::Orthant(const gbtArray<int>& top_or_bot) const
   return gRectangle<T>(new_sides);
 }
 
-template<class T> const gbtVector<T> gRectangle<T>::SideLengths() const 
+template<class T> const Gambit::Vector<T> gRectangle<T>::SideLengths() const 
 { 
-  gbtVector<T> answer(Dmnsn());
+  Gambit::Vector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) 
     answer[i] = sides[i].UpperBound() - sides[i].LowerBound();
   return answer;
@@ -191,7 +191,7 @@ template<class T> const T gRectangle<T>::MaximalSideLength() const
   return answer;
 }
 
-template<class T> bool gRectangle<T>::Contains(const gbtVector<T>& point) const 
+template<class T> bool gRectangle<T>::Contains(const Gambit::Vector<T>& point) const 
 { 
   assert (point.Length() == Dmnsn());
 
@@ -219,9 +219,9 @@ template<class T> const T gRectangle<T>::Volume() const
   return answer;
 }
 
-template<class T> const gbtVector<T> gRectangle<T>::Center() const 
+template<class T> const Gambit::Vector<T> gRectangle<T>::Center() const 
 { 
-  gbtVector<T> answer(Dmnsn());
+  Gambit::Vector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) 
     answer[i] = (sides[i].UpperBound() + sides[i].LowerBound())
 		                     / ((T)2);
@@ -233,16 +233,16 @@ template<class T> const gRectangle<T> gRectangle<T>::BoundingRectangle() const
   return *this;
 }
 
-template<class T> const gbtList<gbtVector<T> > gRectangle<T>::VertexList() const 
+template<class T> const gbtList<Gambit::Vector<T> > gRectangle<T>::VertexList() const 
 { 
-  gbtList<gbtVector<T> > answer;
+  gbtList<Gambit::Vector<T> > answer;
 
   gbtArray<int> ListOfTwos(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) ListOfTwos[i] = 2;
   gIndexOdometer ListOfTopBottoms(ListOfTwos);
 
   while (ListOfTopBottoms.Turn()) {
-    gbtVector<T> next(Dmnsn());
+    Gambit::Vector<T> next(Dmnsn());
     for (int i = 1; i <= Dmnsn(); i++)
       if (ListOfTopBottoms[i] == 1)
 	next[i] = LowerBoundOfCoord(i);

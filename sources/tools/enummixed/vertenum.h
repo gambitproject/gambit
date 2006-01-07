@@ -52,11 +52,11 @@ private:
   int k;  // K is the number of inequalities given.
     // Removed const on A and b (Geoff)
   const Gambit::Matrix<T> &A;   
-  const gbtVector<T> &b;
-  gbtVector<T> btemp,c;
+  const Gambit::Vector<T> &b;
+  Gambit::Vector<T> btemp,c;
   gbtList<BFS<T> > List;
   gbtList<BFS<T> > DualList;
-  gbtList<gbtVector<T> > Verts;
+  gbtList<Gambit::Vector<T> > Verts;
   long npivots,nodes;
   gbtList<long> visits,branches;
 
@@ -66,13 +66,13 @@ private:
   void Search(LPTableau<T> &tab);
   void DualSearch(LPTableau<T> &tab);
 public:
-  VertEnum(const Gambit::Matrix<T> &, const gbtVector<T> &);
+  VertEnum(const Gambit::Matrix<T> &, const Gambit::Vector<T> &);
   VertEnum(LPTableau<T> &);
   virtual ~VertEnum();
 
   const gbtList<BFS<T> > &VertexList() const;
   const gbtList<BFS<T> > &DualVertexList() const;
-  void Vertices(gbtList<gbtVector<T> > &verts) const;
+  void Vertices(gbtList<Gambit::Vector<T> > &verts) const;
   long NumPivots() const;
 };
 #ifdef _A

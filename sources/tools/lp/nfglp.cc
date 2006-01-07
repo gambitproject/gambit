@@ -92,8 +92,8 @@ void nfgLp<T>::Solve(const Gambit::StrategySupport &p_support)
   m = p_support.NumStrats(1);
   k = p_support.NumStrats(2);
   Gambit::Matrix<T> A(1,k+1,1,m+1);
-  gbtVector<T> b(1,k+1);
-  gbtVector<T> c(1,m+1);
+  Gambit::Vector<T> b(1,k+1);
+  Gambit::Vector<T> c(1,m+1);
   Gambit::PureStrategyProfile profile(p_support.GetGame());
 
   T minpay = p_support.GetGame()->GetMinPayoff() - Gambit::Rational(1);

@@ -44,7 +44,7 @@ protected:
   mutable bool m_cached_data;
 
   // structures for storing cached data: nodes
-  mutable gbtVector<T> m_realizProbs, m_beliefs, m_nvals, m_bvals;
+  mutable Vector<T> m_realizProbs, m_beliefs, m_nvals, m_bvals;
   mutable Matrix<T> m_nodeValues;
 
   // structures for storing cached data: information sets
@@ -69,7 +69,7 @@ protected:
   const T &BeliefProb(const GameNode &node) const;
   T &BeliefProb(const GameNode &node);
   
-  gbtVector<T> NodeValues(const GameNode &node) const
+  Vector<T> NodeValues(const GameNode &node) const
     { return m_nodeValues.Row(node->number); }
   const T &NodeValue(const GameNode &node, int pl) const
     { return m_nodeValues(node->number, pl); }
@@ -116,8 +116,8 @@ public:
   virtual ~MixedBehavProfile();
 
   MixedBehavProfile<T> &operator=(const MixedBehavProfile<T> &);
-  MixedBehavProfile<T> &operator=(const gbtVector<T> &p)
-    { Invalidate(); gbtVector<T>::operator=(p); return *this;}
+  MixedBehavProfile<T> &operator=(const Vector<T> &p)
+    { Invalidate(); Vector<T>::operator=(p); return *this;}
 
   //@}
   
@@ -141,7 +141,7 @@ public:
   
   const T &GetRealizProb(const GameNode &node) const;
   const T &GetBeliefProb(const GameNode &node) const;
-  gbtVector<T> GetNodeValue(const GameNode &node) const;
+  Vector<T> GetNodeValue(const GameNode &node) const;
   T GetIsetProb(const GameInfoset &iset) const;
   const T &GetIsetValue(const GameInfoset &iset) const;
   T GetActionProb(const GameAction &act) const;

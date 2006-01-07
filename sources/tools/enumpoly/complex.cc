@@ -210,6 +210,6 @@ gComplex TOgComplex(const std::string & /* s */)
   return gComplex(0, 0);
 }
 
-#include "libgambit/gvector.imp"
+#include "libgambit/vector.imp"
 
-template class gbtVector<gComplex>;
+template class Gambit::Vector<gComplex>;

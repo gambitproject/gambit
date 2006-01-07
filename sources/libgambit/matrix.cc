@@ -27,16 +27,18 @@
 #include "libgambit.h"
 #include "matrix.imp"
 
-template class Gambit::Matrix<double>;
-template class Gambit::Matrix<Gambit::Rational>;
-template class Gambit::Matrix<Gambit::Integer>;
-template class Gambit::Matrix<int>;
+using namespace Gambit;
 
-template gbtVector<double> Gambit::operator*(const gbtVector<double> &,
-					     const Gambit::Matrix<double> &);
-template gbtVector<Gambit::Rational> Gambit::operator*(const gbtVector<Gambit::Rational> &,
-						  const Gambit::Matrix<Gambit::Rational> &);
-template gbtVector<Gambit::Integer> Gambit::operator*(const gbtVector<Gambit::Integer> &,
-						 const Gambit::Matrix<Gambit::Integer> &);
-template gbtVector<int> Gambit::operator*(const gbtVector<int> &,
-					  const Gambit::Matrix<int> &);
+template class Matrix<double>;
+template class Matrix<Rational>;
+template class Matrix<Integer>;
+template class Matrix<int>;
+
+template Vector<double> Gambit::operator*(const Vector<double> &,
+					  const Matrix<double> &);
+template Vector<Rational> Gambit::operator*(const Vector<Rational> &,
+					    const Matrix<Rational> &);
+template Vector<Integer> Gambit::operator*(const Vector<Integer> &,
+					   const Matrix<Integer> &);
+template Vector<int> Gambit::operator*(const Vector<int> &,
+				       const Matrix<int> &);

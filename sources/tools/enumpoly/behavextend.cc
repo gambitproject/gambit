@@ -401,14 +401,14 @@ bool algExtendsToNash::ExtendsToNash(const Gambit::MixedBehavProfile<double> &p_
 						       big_supp,
 						       var_index);
   // set up the rectangle of search
-  gbtVector<gDouble> bottoms(num_vars), tops(num_vars);
+  Gambit::Vector<gDouble> bottoms(num_vars), tops(num_vars);
   bottoms = (gDouble)0;
   tops = (gDouble)1;
   gRectangle<gDouble> Cube(bottoms, tops); 
 
   // Set up the test and do it
   IneqSolv<gDouble> extension_tester(inequalities);
-  gbtVector<gDouble> sample(num_vars);
+  Gambit::Vector<gDouble> sample(num_vars);
   bool answer = extension_tester.ASolutionExists(Cube,sample); 
   
   //  assert (answer == m_profile->ExtendsToNash(little_supp, big_supp, m_status));
@@ -579,14 +579,14 @@ bool algExtendsToAgentNash::ExtendsToAgentNash(const Gambit::MixedBehavProfile<d
 							  var_index);
 
   // set up the rectangle of search
-  gbtVector<gDouble> bottoms(num_vars), tops(num_vars);
+  Gambit::Vector<gDouble> bottoms(num_vars), tops(num_vars);
   bottoms = (gDouble)0;
   tops = (gDouble)1;
   gRectangle<gDouble> Cube(bottoms, tops); 
 
   // Set up the test and do it
   IneqSolv<gDouble> extension_tester(inequalities);
-  gbtVector<gDouble> sample(num_vars);
+  Gambit::Vector<gDouble> sample(num_vars);
 
   // Temporarily, we check the old set up vs. the new
   bool ANFanswer = extension_tester.ASolutionExists(Cube,sample); 

@@ -73,7 +73,7 @@ void Randomize(Gambit::MixedStrategyProfile<double> &p_profile)
 {
   Gambit::Game nfg = p_profile.GetGame();
 
-  ((gbtVector<double> &) p_profile) = 0.0;
+  ((Gambit::Vector<double> &) p_profile) = 0.0;
 
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
     double sum = 0.0;
@@ -173,9 +173,9 @@ int main(int argc, char *argv[])
 
     do {
       LogitBR(profile, lambda, br);
-      (gbtVector<double> &) profile =
-	(((gbtVector<double> &) profile) * (1.0 - c_delta) + 
-	 ((gbtVector<double> &) br) * c_delta);
+      (Gambit::Vector<double> &) profile =
+	(((Gambit::Vector<double> &) profile) * (1.0 - c_delta) + 
+	 ((Gambit::Vector<double> &) br) * c_delta);
     } while (Distance(profile, br) > tol);
     
     PrintProfile(std::cout, "QRE", profile);

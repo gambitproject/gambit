@@ -80,7 +80,7 @@ template <class T> gbtDPVector<T>::gbtDPVector(const gbtPVector<int> &sig)
   setindex();
 }
 
-template <class T> gbtDPVector<T>::gbtDPVector(const gbtVector<T> &val,
+template <class T> gbtDPVector<T>::gbtDPVector(const Gambit::Vector<T> &val,
 					   const gbtPVector<int> &sig)
   : gbtPVector<T>(val, sig), dvlen(sig.Lengths().Length()),
     dvidx(sig.Lengths().Length())
@@ -124,7 +124,7 @@ template <class T> gbtDPVector<T> &gbtDPVector<T>::operator=(const gbtPVector<T>
   return *this;
 }
 
-template <class T> gbtDPVector<T> &gbtDPVector<T>::operator=(const gbtVector<T> &v)
+template <class T> gbtDPVector<T> &gbtDPVector<T>::operator=(const Gambit::Vector<T> &v)
 {
   gbtPVector<T>::operator=(v);
   return *this;

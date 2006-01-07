@@ -39,10 +39,10 @@ template <class T> class Tableau;
 template <class T> class EtaMatrix {
   public:
   int col;
-  gbtVector<T> etadata;
+  Gambit::Vector<T> etadata;
   
   
-  EtaMatrix(int c, gbtVector<T> &v) : col(c), etadata(v) {};
+  EtaMatrix(int c, Gambit::Vector<T> &v) : col(c), etadata(v) {};
 
 // required for list class
 bool operator==(const EtaMatrix<T> &) const;
@@ -66,8 +66,8 @@ private:
   gbtList< EtaMatrix<T> > E;
   gbtList< int > P;
 
-  gbtVector<T> scratch1; // scratch vectors so we don't reallocate them
-  gbtVector<T> scratch2; // everytime we do something.
+  Gambit::Vector<T> scratch1; // scratch vectors so we don't reallocate them
+  Gambit::Vector<T> scratch2; // everytime we do something.
 
   int refactor_number;
   int iterations;
@@ -126,10 +126,10 @@ public:
   void refactor();
   
   // solve: Bk d = a
-  void solve (const gbtVector<T> &, gbtVector<T> & ) const;
+  void solve (const Gambit::Vector<T> &, Gambit::Vector<T> & ) const;
 
   // solve: y Bk = c
-  void solveT( const gbtVector<T> &, gbtVector <T> & ) const;
+  void solveT( const Gambit::Vector<T> &, Gambit::Vector <T> & ) const;
 
   // set number of etamatrices added before refactoring;
   // if number is set to zero, refactoring is done automatically.
@@ -149,24 +149,24 @@ private:
   bool CheckBasis();
   bool RefactorCheck();
 
-  void BTransE( gbtVector<T> & ) const;
-  void FTransE( gbtVector<T> & ) const;
-  void BTransU( gbtVector<T> & ) const;
-  void FTransU( gbtVector<T> & ) const;
-  void LPd_Trans( gbtVector<T> & ) const;
-  void yLP_Trans( gbtVector<T> & ) const;
+  void BTransE( Gambit::Vector<T> & ) const;
+  void FTransE( Gambit::Vector<T> & ) const;
+  void BTransU( Gambit::Vector<T> & ) const;
+  void FTransU( Gambit::Vector<T> & ) const;
+  void LPd_Trans( Gambit::Vector<T> & ) const;
+  void yLP_Trans( Gambit::Vector<T> & ) const;
 
-  void VectorEtaSolve( const gbtVector<T> &v,  
+  void VectorEtaSolve( const Gambit::Vector<T> &v,  
 		      const EtaMatrix<T> &, 
-		      gbtVector<T> &y ) const;
+		      Gambit::Vector<T> &y ) const;
 
-  void EtaVectorSolve( const gbtVector<T> &v, 
+  void EtaVectorSolve( const Gambit::Vector<T> &v, 
 		      const EtaMatrix<T> &,
-		      gbtVector<T> &d ) const;
+		      Gambit::Vector<T> &d ) const;
 
-  void yLP_mult( const gbtVector<T> &y, int j, gbtVector<T> &) const;
+  void yLP_mult( const Gambit::Vector<T> &y, int j, Gambit::Vector<T> &) const;
 
-  void LPd_mult( gbtVector<T> &d, int j, gbtVector<T> &) const;
+  void LPd_mult( Gambit::Vector<T> &d, int j, Gambit::Vector<T> &) const;
 
 
 };  // end of class LUdecomp

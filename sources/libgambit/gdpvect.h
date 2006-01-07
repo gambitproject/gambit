@@ -43,7 +43,7 @@ template <class T> class gbtDPVector : public gbtPVector<T>  {
   public:
     gbtDPVector(void);
     gbtDPVector(const gbtPVector<int> &sig);
-    gbtDPVector(const gbtVector<T> &val, const gbtPVector<int> &sig);
+    gbtDPVector(const Gambit::Vector<T> &val, const gbtPVector<int> &sig);
     gbtDPVector(const gbtDPVector<T> &v);
     virtual ~gbtDPVector();
 
@@ -55,7 +55,7 @@ template <class T> class gbtDPVector : public gbtPVector<T>  {
 
     gbtDPVector<T> &operator=(const gbtDPVector<T> &v);
     gbtDPVector<T> &operator=(const gbtPVector<T> &v);
-    gbtDPVector<T> &operator=(const gbtVector<T> &v);
+    gbtDPVector<T> &operator=(const Gambit::Vector<T> &v);
     gbtDPVector<T> &operator=(T c);
 
     gbtDPVector<T> operator+(const gbtDPVector<T> &v) const;

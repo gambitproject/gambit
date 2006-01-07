@@ -76,7 +76,7 @@ private:
 		int depth, Gambit::Matrix<T> &);
   
   void GetProfile(const Gambit::BehavSupport &, const LTableau<T> &tab, 
-		  gbtDPVector<T> &, const gbtVector<T> &, 
+		  gbtDPVector<T> &, const Gambit::Vector<T> &, 
 		  const Gambit::GameNode &n, int,int);
 
 public:
@@ -169,7 +169,7 @@ void efgLcp<T>::Solve(const Gambit::BehavSupport &p_support)
   ntot = ns1+ns2+ni1+ni2;
 
   Gambit::Matrix<T> A(1,ntot,0,ntot);
-  gbtVector<T> b(1,ntot);
+  Gambit::Vector<T> b(1,ntot);
 
   maxpay = p_support.GetGame()->GetMaxPayoff() + Gambit::Rational(1);
 
@@ -196,7 +196,7 @@ void efgLcp<T>::Solve(const Gambit::BehavSupport &p_support)
   eps = tab.Epsilon();
   
   Gambit::MixedBehavProfile<T> profile(p_support);
-  gbtVector<T> sol(tab.MinRow(),tab.MaxRow());
+  Gambit::Vector<T> sol(tab.MinRow(),tab.MaxRow());
     
   try {
     if (m_stopAfter != 1) {
@@ -223,7 +223,7 @@ void efgLcp<T>::Solve(const Gambit::BehavSupport &p_support)
 template <class T> int efgLcp<T>::Add_BFS(const LTableau<T> &tableau)
 {
   BFS<T> cbfs((T) 0);
-  gbtVector<T> v(tableau.MinRow(), tableau.MaxRow());
+  Gambit::Vector<T> v(tableau.MinRow(), tableau.MaxRow());
   tableau.BasisVector(v);
 
   for (int i = tableau.MinCol(); i <= tableau.MaxCol(); i++)
@@ -256,7 +256,7 @@ efgLcp<T>::All_Lemke(const Gambit::BehavSupport &p_support,
   T p1,p2,aa;
   T small_num = (T)1/(T)1000;
 
-  gbtVector<T> sol(B.MinRow(),B.MaxRow());
+  Gambit::Vector<T> sol(B.MinRow(),B.MaxRow());
   Gambit::MixedBehavProfile<T> profile(p_support);
 
   newsol =0;
@@ -367,7 +367,7 @@ void efgLcp<T>::FillTableau(const Gambit::BehavSupport &p_support, Gambit::Matri
 template <class T>
 void efgLcp<T>::GetProfile(const Gambit::BehavSupport &p_support,
 				  const LTableau<T> &tab, 
-				  gbtDPVector<T> &v, const gbtVector<T> &sol,
+				  gbtDPVector<T> &v, const Gambit::Vector<T> &sol,
 				  const Gambit::GameNode &n, int s1,int s2)
 {
   int i,pl,inf,snew,ind,ind2;

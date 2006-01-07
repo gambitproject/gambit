@@ -61,11 +61,11 @@ private:
   gPolyList<gDouble>   IndifferenceEquations()                 const;
   gPolyList<gDouble>   LastActionProbPositiveInequalities()    const;
   gPolyList<gDouble>   NashOnSupportEquationsAndInequalities() const;
-  gbtList<gbtVector<gDouble> > 
+  gbtList<Gambit::Vector<gDouble> > 
                NashOnSupportSolnVectors(const gPolyList<gDouble> &equations,
 					const gRectangle<gDouble> &Cube);
 
-  int SaveSolutions(const gbtList<gbtVector<gDouble> > &list);
+  int SaveSolutions(const gbtList<Gambit::Vector<gDouble> > &list);
 public:
   PolEnumModule(const Gambit::StrategySupport &);
   
@@ -75,11 +75,11 @@ public:
   double Time(void) const;
   
   const gbtList<Gambit::MixedStrategyProfile<double> > &GetSolutions(void) const;
-  gbtVector<gDouble> SolVarsFromMixedProfile(const Gambit::MixedStrategyProfile<double> &) const;
+  Gambit::Vector<gDouble> SolVarsFromMixedProfile(const Gambit::MixedStrategyProfile<double> &) const;
 
-  const int PolishKnownRoot(gbtVector<gDouble> &) const;
+  const int PolishKnownRoot(Gambit::Vector<gDouble> &) const;
 
-  Gambit::MixedStrategyProfile<double> ReturnPolishedSolution(const gbtVector<gDouble> &) const;
+  Gambit::MixedStrategyProfile<double> ReturnPolishedSolution(const Gambit::Vector<gDouble> &) const;
 
   bool IsSingular() const;
 };
@@ -114,21 +114,21 @@ int PolEnumModule::PolEnum(void)
   */
 
   // set up the rectangle of search
-  gbtVector<gDouble> bottoms(num_vars), tops(num_vars);
+  Gambit::Vector<gDouble> bottoms(num_vars), tops(num_vars);
   bottoms = (gDouble)0;
   tops = (gDouble)1;
  
   gRectangle<gDouble> Cube(bottoms, tops); 
 
   // start QuikSolv
-  gbtList<gbtVector<gDouble> > solutionlist = NashOnSupportSolnVectors(equations,
+  gbtList<Gambit::Vector<gDouble> > solutionlist = NashOnSupportSolnVectors(equations,
 								   Cube);
 
   int index = SaveSolutions(solutionlist);
   return index;	 
 }
 
-int PolEnumModule::SaveSolutions(const gbtList<gbtVector<gDouble> > &list)
+int PolEnumModule::SaveSolutions(const gbtList<Gambit::Vector<gDouble> > &list)
 {
   Gambit::MixedStrategyProfile<double> profile(support);
   int i,j,k,kk,index=0;
@@ -174,7 +174,7 @@ const gbtList<Gambit::MixedStrategyProfile<double> > &PolEnumModule::GetSolution
 gPoly<gDouble> PolEnumModule::Prob(int p, int strat) const
 {
   gPoly<gDouble> equation(&Space,&Lex);
-  gbtVector<int> exps(num_vars);
+  Gambit::Vector<int> exps(num_vars);
   int i,j,kk = 0;
   
   for(i=1;i<p;i++) 
@@ -267,7 +267,7 @@ gPolyList<gDouble> PolEnumModule::NashOnSupportEquationsAndInequalities() const
 }
 
 
-gbtList<gbtVector<gDouble> > 
+gbtList<Gambit::Vector<gDouble> > 
 PolEnumModule::NashOnSupportSolnVectors(const gPolyList<gDouble> &equations,
 					const gRectangle<gDouble> &Cube)
 {  
@@ -320,7 +320,7 @@ Gambit::MixedStrategyProfile<double> PolishEquilibrium(const Gambit::StrategySup
 				       bool &is_singular)
 {
   PolEnumModule module(support);
-  gbtVector<gDouble> vec = module.SolVarsFromMixedProfile(sol);
+  Gambit::Vector<gDouble> vec = module.SolVarsFromMixedProfile(sol);
 
   /* //DEBUG
   gbtPVector<double> xx = module.SeqFormProbsFromSolVars(vec);
@@ -350,7 +350,7 @@ Gambit::MixedStrategyProfile<double> PolishEquilibrium(const Gambit::StrategySup
 }
 
 
-gbtVector<gDouble> 
+Gambit::Vector<gDouble> 
 PolEnumModule::SolVarsFromMixedProfile(const Gambit::MixedStrategyProfile<double> &sol) const
 {
   int numvars(0);
@@ -358,7 +358,7 @@ PolEnumModule::SolVarsFromMixedProfile(const Gambit::MixedStrategyProfile<double
   for (int pl = 1; pl <= NF->NumPlayers(); pl++) 
     numvars += support.NumStrats(pl) - 1;
 
-  gbtVector<gDouble> answer(numvars);
+  Gambit::Vector<gDouble> answer(numvars);
   int count(0);
 
   for (int pl = 1; pl <= NF->NumPlayers(); pl++) 
@@ -370,7 +370,7 @@ PolEnumModule::SolVarsFromMixedProfile(const Gambit::MixedStrategyProfile<double
   return answer;
 }
 
-const int PolEnumModule::PolishKnownRoot(gbtVector<gDouble> &point) const
+const int PolEnumModule::PolishKnownRoot(Gambit::Vector<gDouble> &point) const
 {
   //DEBUG
   //  gout << "Prior to Polishing point is " << point << ".\n";
@@ -407,7 +407,7 @@ const int PolEnumModule::PolishKnownRoot(gbtVector<gDouble> &point) const
 }
 
 Gambit::MixedStrategyProfile<double>
-PolEnumModule::ReturnPolishedSolution(const gbtVector<gDouble> &root) const
+PolEnumModule::ReturnPolishedSolution(const Gambit::Vector<gDouble> &root) const
 {
   Gambit::MixedStrategyProfile<double> profile(support);
 

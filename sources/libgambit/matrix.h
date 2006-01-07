@@ -28,15 +28,15 @@
 #define LIBGAMBIT_MATRIX_H
 
 #include "recarray.h"
-#include "gvector.h"
+#include "vector.h"
 
 namespace Gambit {
 
 template <class T> 
-gbtVector<T> operator*(const gbtVector<T> &, const Matrix<T> &);
+Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
 
 template <class T> class Matrix : public RectArray<T> {
-friend gbtVector<T> operator*<>(const gbtVector<T> &, const Matrix<T> &);
+friend Vector<T> operator*<>(const Vector<T> &, const Matrix<T> &);
 public:
   /// @name Lifecycle
   //@{
@@ -53,8 +53,8 @@ public:
 
   /// @name Extracting rows and columns
   //@{
-  gbtVector<T> Row(int) const;
-  gbtVector<T> Column(int) const;
+  Vector<T> Row(int) const;
+  Vector<T> Column(int) const;
   //@}
 
   /// @name Comparison operators
@@ -79,11 +79,11 @@ public:
   /// @name Multiplicative operators
   //@{
   /// "in-place" column multiply
-  void CMultiply(const gbtVector<T> &, gbtVector<T> &) const;
+  void CMultiply(const Vector<T> &, Vector<T> &) const;
   /// "in-place" row (transposed) multiply
-  void RMultiply(const gbtVector<T> &, gbtVector<T> &) const;
+  void RMultiply(const Vector<T> &, Vector<T> &) const;
   Matrix<T> operator*(const Matrix<T> &) const;
-  gbtVector<T> operator*(const gbtVector<T> &) const;
+  Vector<T> operator*(const Vector<T> &) const;
   Matrix<T> operator*(const T &) const;
   Matrix<T> &operator*=(const Matrix<T> &);
   Matrix<T> &operator*=(const T &);
@@ -105,7 +105,7 @@ public:
 };
 
 template <class T> 
-gbtVector<T> operator*(const gbtVector<T> &, const Matrix<T> &);
+Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
 
 } // end namespace Gambit
 

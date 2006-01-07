@@ -40,8 +40,8 @@ class PelView {
  private:
   gPolyList<gDouble>        input;
 
-  gbtList<gbtVector<gComplex> > complexroots;
-  gbtList<gbtVector<gDouble> >  realroots;
+  gbtList<Gambit::Vector<gComplex> > complexroots;
+  gbtList<Gambit::Vector<gDouble> >  realroots;
   int                       mixedvolume;
   bool                      solutionsarecorrect;
 
@@ -78,9 +78,9 @@ class PelView {
 				      const Gen_node &Qtrig,
 				      const Gen_node &pel_system)            ;
 
-  gbtList<gbtVector<gComplex> > GambitRootsFromPelRoots(const Gen_node g)   const;
-  void        DisplayComplexRootList(const gbtList<gbtVector<gComplex> > &) const;
-  gbtList<gbtVector<gDouble> > RealRoots(const gbtList<gbtVector<gComplex> > &) const;
+  gbtList<Gambit::Vector<gComplex> > GambitRootsFromPelRoots(const Gen_node g)   const;
+  void        DisplayComplexRootList(const gbtList<Gambit::Vector<gComplex> > &) const;
+  gbtList<Gambit::Vector<gDouble> > RealRoots(const gbtList<Gambit::Vector<gComplex> > &) const;
   bool        CheckSolutions(const Gen_node g)                          const;
 
  public:
@@ -93,8 +93,8 @@ class PelView {
   bool     operator != (const PelView &) const;
 
   int                       Dmnsn()           const;
-  gbtList<gbtVector<gComplex> > ComplexRoots()    const;
-  gbtList<gbtVector<gDouble> >  RealRoots()       const;
+  gbtList<Gambit::Vector<gComplex> > ComplexRoots()    const;
+  gbtList<Gambit::Vector<gDouble> >  RealRoots()       const;
   int                       MixedVolume()     const;
   int                       NumComplexRoots() const;
   bool                      FoundAllRoots()   const;

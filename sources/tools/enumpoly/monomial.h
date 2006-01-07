@@ -68,7 +68,7 @@ public:
     bool            IsMultiaffine()             const;
     const exp_vect& ExpV()                      const;
     T               Evaluate(const gbtArray<T>&)  const;
-    T               Evaluate(const gbtVector<T>&) const;
+    T               Evaluate(const Gambit::Vector<T>&) const;
 };
 
 

@@ -16,7 +16,7 @@ libgambit_la_SOURCES = \
 	gpvector.cc gpvector.h gpvector.imp \
 	recarray.h \
 	sqmatrix.cc sqmatrix.h sqmatrix.imp \
-	gvector.cc gvector.h gvector.imp \
+	vector.cc vector.h vector.imp \
 	integer.cc integer.h \
 	libgambit.h \
 	mixed.cc mixed.h mixed.imp \
@@ -40,7 +40,7 @@ libgambitinclude_HEADERS = \
 	gpvector.h gpvector.imp \
 	recarray.h
 	sqmatrix.h sqmatrix.imp \
-	gvector.h gvector.imp \
+	vector.h vector.imp \
 	integer.h \
 	libgambit.h \
 	mixed.h mixed.imp \

@@ -55,7 +55,7 @@ polynomial<T>::polynomial(const gbtList<T>& coefficientlist)
 }
 
 template <class T> 
-polynomial<T>::polynomial(const gbtVector<T>& coefficientvector) 
+polynomial<T>::polynomial(const Gambit::Vector<T>& coefficientvector) 
 : coeflist()
 { 
   for (int i = 1; i <= coefficientvector.Length(); i++)

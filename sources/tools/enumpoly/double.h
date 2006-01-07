@@ -108,9 +108,9 @@ gDouble TOgDouble(const std::string &);
 
 #include "libgambit/libgambit.h"
 
-template <class T> gbtVector<gDouble> TogDouble(const gbtVector<T>& V)
+template <class T> Gambit::Vector<gDouble> TogDouble(const Gambit::Vector<T>& V)
 {
-  gbtVector<gDouble> answer(V.Length());
+  Gambit::Vector<gDouble> answer(V.Length());
   for (int i = 1; i <= V.Length(); i++)
     answer[i] = (gDouble)V[i];
   return answer;

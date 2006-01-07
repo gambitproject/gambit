@@ -49,7 +49,7 @@ private:
   gbtPVector<int> _current;
   gbtArray<gbtArray<bool> > _is_active;
   gbtArray<int> _num_active_infosets;
-  mutable gbtVector<Rational> _payoff;
+  mutable Vector<Rational> _payoff;
 
 public:
   BehavIterator(const BehavSupport &);

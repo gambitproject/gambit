@@ -26,7 +26,7 @@
 
 #include <assert.h>
 #include "libgambit/rational.h"
-#include "libgambit/gvector.h"
+#include "libgambit/vector.h"
 #include "interval.h"
 #include "double.h"
 #include "complex.h"
@@ -51,7 +51,7 @@ public:
   polynomial(const int=-1);
   polynomial(const polynomial<T> &);
   polynomial(const gbtList<T> &);
-  polynomial(const gbtVector<T> &);
+  polynomial(const Gambit::Vector<T> &);
   polynomial(const T&, const int&);
   ~polynomial();
 

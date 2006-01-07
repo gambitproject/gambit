@@ -41,7 +41,7 @@
 //========================================================================
 
 static void
-AlphaXPlusY(double alpha, const gbtVector<double> &x, gbtVector<double> &y)
+AlphaXPlusY(double alpha, const Gambit::Vector<double> &x, Gambit::Vector<double> &y)
 {
   for (int i = 1; i <= y.Length(); i++) {
     y[i] += alpha * x[i];
@@ -52,8 +52,8 @@ AlphaXPlusY(double alpha, const gbtVector<double> &x, gbtVector<double> &y)
 // multimin/directional_minimize.c in GSL.
 
 static void
-TakeStep(const gbtVector<double> &x, const gbtVector<double> &p,
-	 double step, double lambda, gbtVector<double> &x1, gbtVector<double> &dx)
+TakeStep(const Gambit::Vector<double> &x, const Gambit::Vector<double> &p,
+	 double step, double lambda, Gambit::Vector<double> &x1, Gambit::Vector<double> &dx)
 {
   dx = 0.0;
   AlphaXPlusY(-step * lambda, p, dx);
@@ -63,13 +63,13 @@ TakeStep(const gbtVector<double> &x, const gbtVector<double> &p,
 
 static void 
 IntermediatePoint(const gC1Function<double> &fdf,
-		  const gbtVector<double> &x, const gbtVector<double> &p,
+		  const Gambit::Vector<double> &x, const Gambit::Vector<double> &p,
 		  double lambda, 
 		  double pg,
 		  double stepa, double stepc,
 		  double fa, double fc,
-		  gbtVector<double> &x1, gbtVector<double> &dx,
-		  gbtVector<double> &gradient,
+		  Gambit::Vector<double> &x1, Gambit::Vector<double> &dx,
+		  Gambit::Vector<double> &gradient,
 		  double &step, double &f)
 {
   double stepb, fb;
@@ -101,12 +101,12 @@ trial:
 
 static void
 Minimize(const gC1Function<double> &fdf,
-	 const gbtVector<double> &x, const gbtVector<double> &p,
+	 const Gambit::Vector<double> &x, const Gambit::Vector<double> &p,
 	 double lambda,
 	 double stepa, double stepb, double stepc,
 	 double fa, double fb, double fc, double tol,
-	 gbtVector<double> &x1, gbtVector<double> &dx1, 
-	 gbtVector<double> &x2, gbtVector<double> &dx2, gbtVector<double> &gradient,
+	 Gambit::Vector<double> &x1, Gambit::Vector<double> &dx1, 
+	 Gambit::Vector<double> &x2, Gambit::Vector<double> &dx2, Gambit::Vector<double> &gradient,
 	 double &step, double &f, double &gnorm)
 {
   /* Starting at (x0, f0) move along the direction p to find a minimum
@@ -249,8 +249,8 @@ gConjugatePR::gConjugatePR(int n)
 { }
 
 void gConjugatePR::Set(const gC1Function<double> &fdf,
-		       const gbtVector<double> &x, double &f,
-		       gbtVector<double> &gradient, double step_size,
+		       const Gambit::Vector<double> &x, double &f,
+		       Gambit::Vector<double> &gradient, double step_size,
 		       double p_tol)
 {
   iter = 0;
@@ -276,8 +276,8 @@ void gConjugatePR::Restart(void)
 }
 
 bool gConjugatePR::Iterate(const gC1Function<double> &fdf,
-			   gbtVector<double> &x, double &f,
-			   gbtVector<double> &gradient, gbtVector<double> &dx)
+			   Gambit::Vector<double> &x, double &f,
+			   Gambit::Vector<double> &gradient, Gambit::Vector<double> &dx)
 {
   double fa = f, fb, fc;
   double dir;

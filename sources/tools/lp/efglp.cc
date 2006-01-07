@@ -143,8 +143,8 @@ void efgLp<T>::Solve(const Gambit::BehavSupport &p_support)
   List = gbtList<BFS<T> >();
   
   Gambit::Matrix<T> A(1,ns1+ni2,1,ns2+ni1);
-  gbtVector<T> b(1,ns1+ni2);
-  gbtVector<T> c(1,ns2+ni1);
+  Gambit::Vector<T> b(1,ns1+ni2);
+  Gambit::Vector<T> c(1,ns2+ni1);
 
   maxpay = p_support.GetGame()->GetMaxPayoff() + Gambit::Rational(1);
   minpay = p_support.GetGame()->GetMinPayoff() - Gambit::Rational(1);

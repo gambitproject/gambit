@@ -32,14 +32,14 @@
 
 // Constructors and Destructor
  
-Tableau<double>::Tableau(const Gambit::Matrix<double> &A, const gbtVector<double> &b)
+Tableau<double>::Tableau(const Gambit::Matrix<double> &A, const Gambit::Vector<double> &b)
   : TableauInterface<double>(A,b), B(*this), tmpcol(b.First(),b.Last())
 {
   Solve(b, solution);
 };
 
 Tableau<double>::Tableau(const Gambit::Matrix<double> &A, const gbtArray<int> &art, 
-			 const gbtVector<double> &b)
+			 const Gambit::Vector<double> &b)
   : TableauInterface<double>(A,art,b), B(*this), tmpcol(b.First(),b.Last())
 {
   Solve(b, solution);
@@ -92,15 +92,15 @@ void Tableau<double>::Pivot(int outrow,int col)
   // BigDump(gout);
 }
 
-void Tableau<double>::SolveColumn(int col, gbtVector<double> &out)
+void Tableau<double>::SolveColumn(int col, Gambit::Vector<double> &out)
 {
   //** can we use tmpcol here, instead of allocating new vector?
-  gbtVector<double> tmpcol2(MinRow(),MaxRow());
+  Gambit::Vector<double> tmpcol2(MinRow(),MaxRow());
   GetColumn(col,tmpcol2);
   Solve(tmpcol2,out);
 }
 
-void Tableau<double>::BasisVector(gbtVector<double> &out) const
+void Tableau<double>::BasisVector(Gambit::Vector<double> &out) const
 {
   out= solution;
 }
@@ -121,7 +121,7 @@ void Tableau<double>::SetRefactor(int n)
   B.SetRefactor(n);
 }
 
-void Tableau<double>::SetConst(const gbtVector<double> &bnew)
+void Tableau<double>::SetConst(const Gambit::Vector<double> &bnew)
 {
   if(bnew.First()!=b->First() || bnew.Last()!=b->Last())
     throw gbtDimensionException();
@@ -137,12 +137,12 @@ void Tableau<double>::SetBasis(const Basis &in)
   Solve(*b, solution);
 }
 
-void Tableau<double>::Solve(const gbtVector<double> &b, gbtVector<double> &x)
+void Tableau<double>::Solve(const Gambit::Vector<double> &b, Gambit::Vector<double> &x)
 {
   B.solve(b,x);
 }
 
-void Tableau<double>::SolveT(const gbtVector<double> &c, gbtVector<double> &y)
+void Tableau<double>::SolveT(const Gambit::Vector<double> &c, Gambit::Vector<double> &y)
 {
   B.solveT(c,y);
   //** gout << "\nTableau<double>::SolveT(), y: " << y;
@@ -186,7 +186,7 @@ Gambit::Integer find_lcd(const Gambit::Matrix<Gambit::Rational> &mat)
   return lcd;
 }
 
-Gambit::Integer find_lcd(const gbtVector<Gambit::Rational> &vec)
+Gambit::Integer find_lcd(const Gambit::Vector<Gambit::Rational> &vec)
 {
   Gambit::Integer lcd(1);
   for(int i=vec.First();i<=vec.Last();i++)
@@ -197,7 +197,7 @@ Gambit::Integer find_lcd(const gbtVector<Gambit::Rational> &vec)
 // Constructors and Destructor
  
 Tableau<Gambit::Rational>::Tableau(const Gambit::Matrix<Gambit::Rational> &A, 
-			    const gbtVector<Gambit::Rational> &b) 
+			    const Gambit::Vector<Gambit::Rational> &b) 
   : TableauInterface<Gambit::Rational>(A,b), 
     Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()),
     Coeff(b.First(),b.Last()), denom(1), tmpcol(b.First(),b.Last()), 
@@ -227,7 +227,7 @@ Tableau<Gambit::Rational>::Tableau(const Gambit::Matrix<Gambit::Rational> &A,
 
 Tableau<Gambit::Rational>::Tableau(const Gambit::Matrix<Gambit::Rational> &A, 
 			    const gbtArray<int> &art, 
-			    const gbtVector<Gambit::Rational> &b) 
+			    const Gambit::Vector<Gambit::Rational> &b) 
   : TableauInterface<Gambit::Rational>(A,art,b), 
     Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()+art.Length()),
     Coeff(b.First(),b.Last()), denom(1), tmpcol(b.First(),b.Last()), 
@@ -294,7 +294,7 @@ int Tableau<Gambit::Rational>::remap(int col_index) const
 
 Gambit::Matrix<Gambit::Rational> Tableau<Gambit::Rational>::GetInverse()
 {
-  gbtVector<Gambit::Rational> mytmpcol(tmpcol.First(),tmpcol.Last());
+  Gambit::Vector<Gambit::Rational> mytmpcol(tmpcol.First(),tmpcol.Last());
   Gambit::Matrix<Gambit::Rational> inv(MinRow(),MaxRow(),MinRow(),MaxRow());
   for(int i=inv.MinCol();i<=inv.MaxCol();i++){
     MySolveColumn(-i,mytmpcol);
@@ -394,9 +394,9 @@ void Tableau<Gambit::Rational>::Pivot(int outrow,int in_col)
   // Refactor();
 }
 
-void Tableau<Gambit::Rational>::SolveColumn(int in_col, gbtVector<Gambit::Rational> &out)
+void Tableau<Gambit::Rational>::SolveColumn(int in_col, Gambit::Vector<Gambit::Rational> &out)
 {
-  gbtVector<Gambit::Integer> tempcol(tmpcol.First(),tmpcol.Last());
+  Gambit::Vector<Gambit::Integer> tempcol(tmpcol.First(),tmpcol.Last());
   if(Member(in_col)) {
     out = (Gambit::Rational)0;
     out[Find(in_col)] = Gambit::Rational(abs(denom));
@@ -413,9 +413,9 @@ void Tableau<Gambit::Rational>::SolveColumn(int in_col, gbtVector<Gambit::Ration
     if(Label(i)<0) out[i]=(Gambit::Rational)out[i]/(Gambit::Rational)totdenom;
 }
 
-void Tableau<Gambit::Rational>::MySolveColumn(int in_col, gbtVector<Gambit::Rational> &out)
+void Tableau<Gambit::Rational>::MySolveColumn(int in_col, Gambit::Vector<Gambit::Rational> &out)
 {
-  gbtVector<Gambit::Integer> tempcol(tmpcol.First(),tmpcol.Last());
+  Gambit::Vector<Gambit::Integer> tempcol(tmpcol.First(),tmpcol.Last());
   if(Member(in_col)) {
     out = (Gambit::Rational)0;
     out[Find(in_col)] = Gambit::Rational(abs(denom));
@@ -428,7 +428,7 @@ void Tableau<Gambit::Rational>::MySolveColumn(int in_col, gbtVector<Gambit::Rati
   }
 }
 
-void Tableau<Gambit::Rational>::GetColumn(int col, gbtVector<Gambit::Rational> &out) const
+void Tableau<Gambit::Rational>::GetColumn(int col, Gambit::Vector<Gambit::Rational> &out) const
 {
   TableauInterface<Gambit::Rational>::GetColumn(col,out);
   if(col>=0) out*=Gambit::Rational(totdenom);
@@ -437,7 +437,7 @@ void Tableau<Gambit::Rational>::GetColumn(int col, gbtVector<Gambit::Rational> &
 
 void Tableau<Gambit::Rational>::Refactor()
 { 
-  gbtVector<Gambit::Rational> mytmpcol(tmpcol);
+  Gambit::Vector<Gambit::Rational> mytmpcol(tmpcol);
   //BigDump(gout);
   //** Note -- we may need to recompute totdenom here, if A and b have changed. 
   //gout << "\ndenom: " << denom << " totdenom: " << totdenom;
@@ -459,7 +459,7 @@ void Tableau<Gambit::Rational>::Refactor()
   //gout << "\nTabdat:\n" << Tabdat;
   //gout << "\nTabnew:\n" << Tabnew;
 
-  gbtVector<Gambit::Rational> Coeffnew(Coeff.First(),Coeff.Last());
+  Gambit::Vector<Gambit::Rational> Coeffnew(Coeff.First(),Coeff.Last());
   Coeffnew = inv * (*b) * totdenom * (Gambit::Rational)sign(denom*totdenom);
 
   //gout << "\nCoeff:\n" << Coeff;
@@ -479,7 +479,7 @@ void Tableau<Gambit::Rational>::Refactor()
 void Tableau<Gambit::Rational>::SetRefactor(int)
 { }
 
-void Tableau<Gambit::Rational>::SetConst(const gbtVector<Gambit::Rational> &bnew)
+void Tableau<Gambit::Rational>::SetConst(const Gambit::Vector<Gambit::Rational> &bnew)
 {
   b=&bnew;
   Refactor();
@@ -496,14 +496,14 @@ void Tableau<Gambit::Rational>::SetBasis(const Basis &in)
 }
 
  // solve M x = b
-void Tableau<Gambit::Rational>::Solve(const gbtVector<Gambit::Rational> &b, gbtVector<Gambit::Rational> &x)
+void Tableau<Gambit::Rational>::Solve(const Gambit::Vector<Gambit::Rational> &b, Gambit::Vector<Gambit::Rational> &x)
 {
   // Here, we do x = V * b, where V = M inverse
   x = (GetInverse() * b )/(Gambit::Rational)abs(denom);
 }
 
  // solve y M = c
-void Tableau<Gambit::Rational>::SolveT(const gbtVector<Gambit::Rational> &c, gbtVector<Gambit::Rational> &y)
+void Tableau<Gambit::Rational>::SolveT(const Gambit::Vector<Gambit::Rational> &c, Gambit::Vector<Gambit::Rational> &y)
 {
   // Here we do y = c * V, where V = M inverse
   y = (c * GetInverse()) /(Gambit::Rational)abs(denom);
@@ -529,7 +529,7 @@ bool Tableau<Gambit::Rational>::IsLexMin()
   return 1;
 }
 
-void Tableau<Gambit::Rational>::BasisVector(gbtVector<Gambit::Rational> &out) const
+void Tableau<Gambit::Rational>::BasisVector(Gambit::Vector<Gambit::Rational> &out) const
 {
   out = solution;
   out= out/(Gambit::Rational)abs(denom) ;

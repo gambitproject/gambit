@@ -159,7 +159,7 @@ template <class T> Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &M)
 //-------------------------------------------------------------------------
 
 template <class T>
-void Matrix<T>::CMultiply(const gbtVector<T> &in, gbtVector<T> &out) const
+void Matrix<T>::CMultiply(const Vector<T> &in, Vector<T> &out) const
 {
   if (!CheckRow(in) || !CheckColumn(out))  {
     throw gbtDimensionException();
@@ -184,8 +184,8 @@ template <class T> Matrix<T> Matrix<T>::operator*(const Matrix<T> &M) const
   }
 
   Matrix<T> tmp(this->minrow, this->maxrow, M.mincol, M.maxcol);
-  gbtVector<T> column(M.minrow, M.maxrow);
-  gbtVector<T> result(this->minrow, this->maxrow);
+  Vector<T> column(M.minrow, M.maxrow);
+  Vector<T> result(this->minrow, this->maxrow);
   for (int j = M.mincol; j <= M.maxcol; j++)  {
     M.GetColumn(j, column);
     CMultiply(column, result);
@@ -194,19 +194,19 @@ template <class T> Matrix<T> Matrix<T>::operator*(const Matrix<T> &M) const
   return tmp;
 }
 
-template <class T> gbtVector<T> Matrix<T>::operator*(const gbtVector<T> &v) const
+template <class T> Vector<T> Matrix<T>::operator*(const Vector<T> &v) const
 {
   if (!CheckRow(v))  {
     throw gbtDimensionException();
   }
 
-  gbtVector<T> tmp(this->minrow, this->maxrow);
+  Vector<T> tmp(this->minrow, this->maxrow);
   CMultiply(v, tmp);
   return tmp;
 }
 
 template <class T>
-void Matrix<T>::RMultiply(const gbtVector<T> &in, gbtVector<T> &out) const
+void Matrix<T>::RMultiply(const Vector<T> &in, Vector<T> &out) const
 {
   if (!CheckColumn(in) || !CheckRow(out)) {
     throw gbtDimensionException();
@@ -228,12 +228,12 @@ void Matrix<T>::RMultiply(const gbtVector<T> &in, gbtVector<T> &out) const
 // transposed (row) vector*matrix multiplication operator
 // a friend function of Matrix
 template <class T>
-gbtVector<T> operator*(const gbtVector<T> &v, const Matrix<T> &M)
+Vector<T> operator*(const Vector<T> &v, const Matrix<T> &M)
 {
   if (!M.CheckColumn(v)) {
     throw gbtDimensionException();
   }
-  gbtVector<T> tmp(M.MinCol(), M.MaxCol());
+  Vector<T> tmp(M.MinCol(), M.MaxCol());
   M.RMultiply(v, tmp);
   return tmp;
 }
@@ -262,8 +262,8 @@ template <class T> Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &M)
     throw gbtDimensionException();
   }
 
-  gbtVector<T> row(this->mincol, this->maxcol);
-  gbtVector<T> result(this->mincol, this->maxcol);
+  Vector<T> row(this->mincol, this->maxcol);
+  Vector<T> result(this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++)  {
     GetRow(i, row);
     M.RMultiply(row, result);
@@ -391,17 +391,17 @@ template <class T> bool Matrix<T>::operator!=(const T &s) const
 
 // Information
 
-template <class T> gbtVector<T> Matrix<T>::Row(int i) const
+template <class T> Vector<T> Matrix<T>::Row(int i) const
 {
-  gbtVector<T> answer(this->mincol, this->maxcol);
+  Vector<T> answer(this->mincol, this->maxcol);
   for (int j = this->mincol; j <= this->maxcol; j++)
     answer[j] = (*this)(i,j);
   return answer;
 }
 
-template <class T> gbtVector<T> Matrix<T>::Column(int j) const
+template <class T> Vector<T> Matrix<T>::Column(int j) const
 {
-  gbtVector<T> answer(this->minrow, this->maxrow);
+  Vector<T> answer(this->minrow, this->maxrow);
   for (int i = this->minrow; i <= this->maxrow; i++)
     answer[i] = (*this)(i,j);
   return answer;

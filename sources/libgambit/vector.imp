@@ -24,26 +24,28 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gvector.h"
+#include "vector.h"
+
+namespace Gambit {
 
 //------------------------------------------------------------------------
-//     gbtVector<T>: Constructors, destructor, constructive operators
+//     Vector<T>: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
-template <class T> gbtVector<T>::gbtVector(unsigned int len) : gbtArray<T>(len) 
+template <class T> Vector<T>::Vector(unsigned int len) : gbtArray<T>(len) 
 { }
 
-template <class T> gbtVector<T>::gbtVector(int low, int high) 
+template <class T> Vector<T>::Vector(int low, int high) 
   : gbtArray<T>(low, high)
 { }
 
-template <class T> gbtVector<T>::gbtVector(const gbtVector<T> &V) 
+template <class T> Vector<T>::Vector(const Vector<T> &V) 
   : gbtArray<T>(V) 
 { }
 
-template <class T> gbtVector<T>::~gbtVector()   { }
+template <class T> Vector<T>::~Vector()   { }
 
-template <class T> gbtVector<T>& gbtVector<T>::operator=(const gbtVector<T>& V)
+template <class T> Vector<T>& Vector<T>::operator=(const Vector<T>& V)
 {
   if (!Check(V))   throw gbtDimensionException();
   gbtArray<T>::operator=(V);
@@ -55,10 +57,10 @@ template <class T> gbtVector<T>& gbtVector<T>::operator=(const gbtVector<T>& V)
 // inline arithmetic operators
 //------------------------------------------------------------------------
 
-template <class T> bool gbtVector<T>::operator!=(const gbtVector<T> &V) const
+template <class T> bool Vector<T>::operator!=(const Vector<T> &V) const
 { return !(*this == V); }
 
-template <class T> bool gbtVector<T>::operator!=(T c) const
+template <class T> bool Vector<T>::operator!=(T c) const
 { return !(*this == c); }
 
 
@@ -66,15 +68,15 @@ template <class T> bool gbtVector<T>::operator!=(T c) const
 // inline internal functions
 //------------------------------------------------------------------------
 
-template <class T> bool gbtVector<T>::Check(const gbtVector<T> &v) const
+template <class T> bool Vector<T>::Check(const Vector<T> &v) const
 { return (v.mindex == this->mindex && v.maxdex == this->maxdex ); }
 
 
 //------------------------------------------------------------------------
-//	gbtVector: arithmetic operators
+//	Vector: arithmetic operators
 //------------------------------------------------------------------------
 
-template<class T> gbtVector<T>& gbtVector<T>::operator=(T c)
+template<class T> Vector<T>& Vector<T>::operator=(T c)
 {
   for(int i=this->mindex; i<=this->maxdex; i++)
     (*this)[i]= c;
@@ -82,30 +84,30 @@ template<class T> gbtVector<T>& gbtVector<T>::operator=(T c)
 }
 
 // arithmetic operators
-template <class T> gbtVector<T>
-gbtVector<T>::operator+(const gbtVector<T>& V) const
+template <class T> Vector<T>
+Vector<T>::operator+(const Vector<T>& V) const
 {
   if (!Check(V))   throw gbtDimensionException();
 
-  gbtVector<T> tmp(this->mindex,this->maxdex);
+  Vector<T> tmp(this->mindex,this->maxdex);
   for(int i=this->mindex; i<=this->maxdex; i++)
     tmp[i]= (*this)[i] + V[i];
   return tmp;
 }
 
-template <class T> gbtVector<T>
-gbtVector<T>::operator-(const gbtVector<T>& V) const
+template <class T> Vector<T>
+Vector<T>::operator-(const Vector<T>& V) const
 {
   if (!Check(V))   throw gbtDimensionException();
 
-  gbtVector<T> tmp(this->mindex,this->maxdex);
+  Vector<T> tmp(this->mindex,this->maxdex);
   for(int i=this->mindex; i<=this->maxdex; i++)
     tmp[i]= (*this)[i] - V[i];
   return tmp;
 }
 
-template <class T> gbtVector<T>&
-gbtVector<T>::operator+=(const gbtVector<T>& V)
+template <class T> Vector<T>&
+Vector<T>::operator+=(const Vector<T>& V)
 {
   if (!Check(V))   throw gbtDimensionException();
 
@@ -114,8 +116,8 @@ gbtVector<T>::operator+=(const gbtVector<T>& V)
   return (*this);
 }
 
-template <class T> gbtVector<T>&
-gbtVector<T>::operator-=(const gbtVector<T>& V)
+template <class T> Vector<T>&
+Vector<T>::operator-=(const Vector<T>& V)
 {
   if (!Check(V))    throw gbtDimensionException();
 
@@ -124,30 +126,30 @@ gbtVector<T>::operator-=(const gbtVector<T>& V)
   return (*this);
 }
 
-template <class T> gbtVector<T> gbtVector<T>::operator-(void)
+template <class T> Vector<T> Vector<T>::operator-(void)
 {
-  gbtVector<T> tmp(this->mindex,this->maxdex);
+  Vector<T> tmp(this->mindex,this->maxdex);
   for(int i=this->mindex; i<=this->maxdex; i++)
     tmp[i]= -(*this)[i];
   return tmp;
 }
 
-template <class T> gbtVector<T> gbtVector<T>::operator*(T c) const
+template <class T> Vector<T> Vector<T>::operator*(T c) const
 {
-  gbtVector<T> tmp(this->mindex,this->maxdex);
+  Vector<T> tmp(this->mindex,this->maxdex);
   for(int i=this->mindex; i<=this->maxdex; i++)
     tmp[i]= (*this)[i]*c;
   return tmp;
 }
 
-template <class T> gbtVector<T> &gbtVector<T>::operator*=(T c)
+template <class T> Vector<T> &Vector<T>::operator*=(T c)
 {
   for(int i=this->mindex; i<=this->maxdex; i++)
     (*this)[i] *= c;
   return (*this);
 }
 
-template <class T> T gbtVector<T>::operator*(const gbtVector<T>& V) const
+template <class T> T Vector<T>::operator*(const Vector<T>& V) const
 {
   if (!Check(V))   throw gbtDimensionException();
 
@@ -158,16 +160,16 @@ template <class T> T gbtVector<T>::operator*(const gbtVector<T>& V) const
 }
 
 
-template <class T> gbtVector<T> gbtVector<T>::operator/(T c) const
+template <class T> Vector<T> Vector<T>::operator/(T c) const
 {
-  gbtVector<T> tmp(this->mindex,this->maxdex);
+  Vector<T> tmp(this->mindex,this->maxdex);
   for(int i=this->mindex; i<=this->maxdex; i++)
     tmp[i]= (*this)[i]/c;
   return tmp;
 }
 
 
-template <class T> bool gbtVector<T>::operator==(const gbtVector<T>& V) const
+template <class T> bool Vector<T>::operator==(const Vector<T>& V) const
 {
   if (!Check(V))   throw gbtDimensionException();
 
@@ -177,7 +179,7 @@ template <class T> bool gbtVector<T>::operator==(const gbtVector<T>& V) const
   return true;
 }
 
-template <class T> bool gbtVector<T>::operator==(T c) const
+template <class T> bool Vector<T>::operator==(T c) const
 {
   for(int i=this->mindex; i<=this->maxdex; i++)
     if( (*this)[i] != c )
@@ -185,7 +187,7 @@ template <class T> bool gbtVector<T>::operator==(T c) const
   return true;
 }
 
-template <class T> T gbtVector<T>::NormSquared(void) const
+template <class T> T Vector<T>::NormSquared(void) const
 {
   T answer = (T)0;
   for (int i = 1; i <= this->Length(); i++)
@@ -193,3 +195,4 @@ template <class T> T gbtVector<T>::NormSquared(void) const
   return answer;
 }
 
+} // end namespace Gambit

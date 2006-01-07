@@ -44,9 +44,9 @@ LinearCombination<T>::LinearCombination(const Gambit::Matrix<T> &M)
       if (i == j) B(i,j) = 1;
       else        B(i,j) = 0;
 
-  gbtVector<int> PivotRow(K);
+  Gambit::Vector<int> PivotRow(K);
   for (i = 1; i <= K; i++) PivotRow[i] = i;
-  gbtVector<int> PivotColumn(K);
+  Gambit::Vector<int> PivotColumn(K);
 
   int c = 1;
   for (i = 1; i <= K-1; i++) { // Each iteration is a
@@ -103,7 +103,7 @@ LinearCombination<T>::LinearCombination(const Gambit::Matrix<T> &M)
     }
   }
 
-  gbtVector<T> xBinverse(K);
+  Gambit::Vector<T> xBinverse(K);
   for (int i3 = 1; i3 <= K; i3++) { // Each i3 is a row operation on last row.
     T factor = scrambled(K+1,PivotColumn[i3])
                             /
@@ -111,7 +111,7 @@ LinearCombination<T>::LinearCombination(const Gambit::Matrix<T> &M)
     xBinverse[PivotRow[i3]] = factor;
     AddMultipleOfRowiToRowj(PivotRow[i3],K+1,-factor);
   }
-  gbtVector<T> x(xBinverse * B);
+  Gambit::Vector<T> x(xBinverse * B);
 
   for (j = 1; j <= M.NumColumns(); j++)
     if (scrambled(K+1,j) != (T)0) last_row_is_spanned = false;
@@ -159,7 +159,7 @@ template <class T> bool LinearCombination<T>::LastRowIsSpanned() const
   return last_row_is_spanned;
 }
 
-template <class T> gbtVector<T> LinearCombination<T>::LinearDependence() const
+template <class T> Gambit::Vector<T> LinearCombination<T>::LinearDependence() const
 {
   return weights;
 }

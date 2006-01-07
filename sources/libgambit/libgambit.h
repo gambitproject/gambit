@@ -104,7 +104,7 @@ inline double pow(double x, long y)
 #include "garray.h"
 #include "glist.h"
 #include "recarray.h"
-#include "gvector.h"
+#include "vector.h"
 #include "matrix.h"
 #include "gmap.h"
 

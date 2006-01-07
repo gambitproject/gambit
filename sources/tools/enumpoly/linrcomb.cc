@@ -25,11 +25,11 @@
 //
 
 #include "linrcomb.imp"
-#include "libgambit/gvector.imp"
+#include <libgambit/vector.imp>
 #include <libgambit/matrix.imp>
 #include "double.h"
 
-template gbtVector<gDouble> Gambit::operator*(const gbtVector<gDouble>&,
+template Gambit::Vector<gDouble> Gambit::operator*(const Gambit::Vector<gDouble>&,
 					      const Gambit::Matrix<gDouble>&);
 
 template class LinearCombination<double>;

@@ -97,23 +97,23 @@ template <class T> Gambit::Matrix<T> Make_A2(const Gambit::StrategySupport &S,
   return A2;
 }
 
-template <class T> gbtVector<T> Make_b1(const Gambit::StrategySupport &S,
+template <class T> Gambit::Vector<T> Make_b1(const Gambit::StrategySupport &S,
 				      const T &)
 {
   int n1 = S.NumStrats(1);
-  gbtVector<T> b1(1,n1);
+  Gambit::Vector<T> b1(1,n1);
 
   for (int i = 1; i <= n1; i++) 
     b1[i]=-(T)1;
   return b1;
 }
 
-template <class T> gbtVector<T> Make_b2(const Gambit::StrategySupport &S, const T &)
+template <class T> Gambit::Vector<T> Make_b2(const Gambit::StrategySupport &S, const T &)
 {
   int n1, n2, i;
   n1=S.NumStrats(1);
   n2=S.NumStrats(2);
-  gbtVector<T> b2(n1+1,n1+n2);
+  Gambit::Vector<T> b2(n1+1,n1+n2);
 
   for (i = n1+1; i <= n1+n2; i++) 
     b2[i]=-(T)1;
@@ -122,7 +122,7 @@ template <class T> gbtVector<T> Make_b2(const Gambit::StrategySupport &S, const 
 
 template <class T>
 LHTableau<T>::LHTableau(const Gambit::Matrix<T> &A1, const Gambit::Matrix<T> &A2, 
-			const gbtVector<T> &b1, const gbtVector<T> &b2)
+			const Gambit::Vector<T> &b1, const Gambit::Vector<T> &b2)
   : T1(A1,b1), T2(A2,b2), 
 //    tmpcol(b1.First(),b2.Last()), 
     tmp1(b1.First(),b1.Last()),tmp2(b2.First(),b2.Last()),

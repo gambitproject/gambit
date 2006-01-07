@@ -77,17 +77,17 @@ public:
 template <class T> class TableauInterface : public BaseTableau<T>{
 protected:
   const Gambit::Matrix<T> *A;  // should this be private?
-  const gbtVector<T> *b;  // should this be private?
+  const Gambit::Vector<T> *b;  // should this be private?
   Basis basis; 
-  gbtVector<T> solution;  // current solution vector. should this be private?
+  Gambit::Vector<T> solution;  // current solution vector. should this be private?
   long npivots;
   T eps1,eps2;
   gbtArray<int> artificial;  // artificial variables
 
 public:
-  TableauInterface(const Gambit::Matrix<T> &A, const gbtVector<T> &b); 
+  TableauInterface(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b); 
   TableauInterface(const Gambit::Matrix<T> &A, const gbtArray<int> &art, 
-		   const gbtVector<T> &b); 
+		   const Gambit::Vector<T> &b); 
   TableauInterface(const TableauInterface<T>&);
   virtual ~TableauInterface();
 
@@ -102,7 +102,7 @@ public:
 
   Basis & GetBasis(void);
   const Gambit::Matrix<T> & Get_A(void) const;
-  const gbtVector<T> & Get_b(void) const;
+  const Gambit::Vector<T> & Get_b(void) const;
   
   bool Member(int i) const;
   int Label(int i) const;   // return variable in i'th position of Tableau
@@ -115,8 +115,8 @@ public:
   void UnMark(int label);   // unmarks label
   bool IsBlocked(int label) const;   // returns true if label is blocked
   
-  virtual void BasisVector(gbtVector<T> &x) const = 0; // solve M x = (*b)
-  void GetColumn( int , gbtVector<T> &) const;  // raw column
+  virtual void BasisVector(Gambit::Vector<T> &x) const = 0; // solve M x = (*b)
+  void GetColumn( int , Gambit::Vector<T> &) const;  // raw column
   void GetBasis( Basis & ) const; // return Basis for current Tableau
 
   BFS<T> GetBFS1(void) const; 
@@ -124,9 +124,9 @@ public:
 
   virtual int CanPivot(int outgoing,int incoming) = 0;
   virtual void Pivot(int outrow,int col) = 0; // pivot -- outgoing is row, incoming is column
-  virtual void SolveColumn(int, gbtVector<T> &) = 0;  // column in new basis 
-  virtual void Solve(const gbtVector<T> &b, gbtVector<T> &x) = 0;  // solve M x = b
-  virtual void SolveT(const gbtVector<T> &c, gbtVector<T> &y) = 0;  // solve y M = c
+  virtual void SolveColumn(int, Gambit::Vector<T> &) = 0;  // column in new basis 
+  virtual void Solve(const Gambit::Vector<T> &b, Gambit::Vector<T> &x) = 0;  // solve M x = b
+  virtual void SolveT(const Gambit::Vector<T> &c, Gambit::Vector<T> &y) = 0;  // solve y M = c
 
   virtual void Refactor() = 0;
   virtual void SetRefactor(int) = 0;

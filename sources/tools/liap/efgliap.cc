@@ -37,8 +37,8 @@ private:
   Gambit::Game _efg;
   mutable Gambit::MixedBehavProfile<double> _p;
 
-  double Value(const gbtVector<double> &x) const;
-  bool Gradient(const gbtVector<double> &, gbtVector<double> &) const;
+  double Value(const Gambit::Vector<double> &x) const;
+  bool Gradient(const Gambit::Vector<double> &, Gambit::Vector<double> &) const;
 
 public:
   EFLiapFunc(Gambit::Game, const Gambit::MixedBehavProfile<double> &);
@@ -57,10 +57,10 @@ EFLiapFunc::~EFLiapFunc()
 { }
 
 
-double EFLiapFunc::Value(const gbtVector<double> &v) const
+double EFLiapFunc::Value(const Gambit::Vector<double> &v) const
 {
   _nevals++;
-  ((gbtVector<double> &) _p).operator=(v);
+  ((Gambit::Vector<double> &) _p).operator=(v);
     //_p = v;
   return _p.GetLiapValue();
 }
@@ -71,7 +71,7 @@ double EFLiapFunc::Value(const gbtVector<double> &v) const
 // vector perpendicular to the plane, then subtracting to compute the
 // component parallel to the plane.)
 //
-static void Project(gbtVector<double> &x, const gbtArray<int> &lengths)
+static void Project(Gambit::Vector<double> &x, const gbtArray<int> &lengths)
 {
   int index = 1;
   for (int part = 1; part <= lengths.Length(); part++)  {
@@ -88,12 +88,12 @@ static void Project(gbtVector<double> &x, const gbtArray<int> &lengths)
   }
 }
 
-bool EFLiapFunc::Gradient(const gbtVector<double> &x,
-			  gbtVector<double> &grad) const
+bool EFLiapFunc::Gradient(const Gambit::Vector<double> &x,
+			  Gambit::Vector<double> &grad) const
 {
   const double DELTA = .00001;
 
-  ((gbtVector<double> &) _p).operator=(x);
+  ((Gambit::Vector<double> &) _p).operator=(x);
   for (int i = 1; i <= x.Length(); i++) {
     _p[i] += DELTA;
     double value = Value(_p.GetDPVector());
@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
       Gambit::Matrix<double> xi(p.Length(), p.Length());
   
       gConjugatePR minimizer(p.Length());
-      gbtVector<double> gradient(p.Length()), dx(p.Length());
+      Gambit::Vector<double> gradient(p.Length()), dx(p.Length());
       double fval;
       minimizer.Set(F, p.GetDPVector(), fval, gradient, .01, .0001);
 

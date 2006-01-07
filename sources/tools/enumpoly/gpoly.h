@@ -69,7 +69,7 @@ private:
   gPoly<T>         DivideByPolynomial(const gPoly<T> &den) const; 
 
   // The following is used to construct the translate of *this.
-  gPoly<T> TranslateOfMono(const gMono<T>&, const gbtVector<T>&) const;
+  gPoly<T> TranslateOfMono(const gMono<T>&, const Gambit::Vector<T>&) const;
   gPoly<T> MonoInNewCoordinates(const gMono<T>&, 
 				const Gambit::SquareMatrix<T>&)       const;
 
@@ -166,7 +166,7 @@ public:
   gbtList<exp_vect>    ExponentVectors()                     const;
   gbtList<gMono<T> >   MonomialList()                        const;
 
-  gPoly<T>           TranslateOfPoly(const gbtVector<T>&)    const;
+  gPoly<T>           TranslateOfPoly(const Gambit::Vector<T>&)    const;
   gPoly<T>   PolyInNewCoordinates(const Gambit::SquareMatrix<T>&) const;
   T                  MaximalValueOfNonlinearPart(const T&) const;
 

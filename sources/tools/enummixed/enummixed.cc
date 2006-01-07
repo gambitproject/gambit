@@ -71,7 +71,7 @@ void PrintProfile(std::ostream &p_stream,
 
 template <class T> void Solve(Gambit::Game p_nfg, const T &)
 {
-  gbtList<gbtVector<T> > key1, key2;  
+  gbtList<Gambit::Vector<T> > key1, key2;  
   gbtList<int> node1, node2;   // IDs of each component of the extreme equilibria
 
   Gambit::PureStrategyProfile profile(p_nfg);
@@ -105,8 +105,8 @@ template <class T> void Solve(Gambit::Game p_nfg, const T &)
   }
 
   // Construct vectors b1, b2
-  gbtVector<T> b1(1, p_nfg->GetPlayer(1)->NumStrategies());
-  gbtVector<T> b2(1, p_nfg->GetPlayer(2)->NumStrategies());
+  Gambit::Vector<T> b1(1, p_nfg->GetPlayer(1)->NumStrategies());
+  Gambit::Vector<T> b2(1, p_nfg->GetPlayer(2)->NumStrategies());
   b1 = (T) -1;
   b2 = (T) -1;
 

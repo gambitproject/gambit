@@ -74,7 +74,7 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue(void) const
   static const T BIG2 = (T) 100;
 
   MixedStrategyProfile<T> p(*this);
-  ((gbtVector<T> &) p).operator=(*this);
+  ((Vector<T> &) p).operator=(*this);
   MixedStrategyProfile<T> tmp(p);
   gbtPVector<T> payoff(p);
   T x, result((T) 0), avg, sum;
@@ -275,7 +275,7 @@ void MixedStrategyProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
 
 template <class T>
 void MixedStrategyProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index, 
-			   T prob, gbtVector<T> &value) const
+			   T prob, Vector<T> &value) const
 {
   GameStrategyRep *s;
 

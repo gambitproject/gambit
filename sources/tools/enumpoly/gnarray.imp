@@ -80,7 +80,7 @@ gNArray<T> &gNArray<T>::operator=(const gNArray<T> &a)
 }
 
 /*
-template <class T> T gNArray<T>::operator[](const gbtVector<int> &v) const
+template <class T> T gNArray<T>::operator[](const Gambit::Vector<int> &v) const
 {
   assert(dim.Length() > 0 && dim.Length() == v.Length());
   int i,location,offset;
@@ -94,7 +94,7 @@ template <class T> T gNArray<T>::operator[](const gbtVector<int> &v) const
   return storage[location];
 }
 
-template <class T> T &gNArray<T>::operator[](const gbtVector<int> &v)
+template <class T> T &gNArray<T>::operator[](const Gambit::Vector<int> &v)
 {
   assert(dim.Length() > 0 && dim.Length() == v.Length());
   int i, location, offset;

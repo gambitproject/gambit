@@ -42,7 +42,7 @@ private:
   void PPayoff(int pl, int const_pl1, int const_st1, int const_pl2, 
 	       int const_st2, int cur_pl, long index, T prob, T &value) const;
   void PPayoff(int pl, int const_pl, int cur_pl, long index, T prob,
-	       gbtVector<T> &value) const;
+	       Vector<T> &value) const;
 
 public:
   /// @name Lifecycle

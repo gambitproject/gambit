@@ -473,10 +473,10 @@ Gen_node PelView::SolveCheckMaybeTryAgain(const Pring &ring,
 // Solve doesn't seem to exist at this point, yet this is very ambiguous.  
 }
 
-gbtList<gbtVector<gComplex> > 
+gbtList<Gambit::Vector<gComplex> > 
 PelView::GambitRootsFromPelRoots(const Gen_node g) const
 {
-  gbtList<gbtVector<gComplex> > alist;
+  gbtList<Gambit::Vector<gComplex> > alist;
 
   node ptr;
   ptr = Gen_to_Dvector_list(Gen_lval(copy_Gen_node(g)));
@@ -490,7 +490,7 @@ PelView::GambitRootsFromPelRoots(const Gen_node g) const
     int numbervar;
     numbervar= (int)(DVlength(P)-3)/2;  
     
-    gbtVector<gComplex> vector(1, numbervar);
+    Gambit::Vector<gComplex> vector(1, numbervar);
 
     int j = 1;
     for(i=3; i<DVlength(P);i++) {
@@ -511,7 +511,7 @@ PelView::GambitRootsFromPelRoots(const Gen_node g) const
   return alist;
 }
 
-void PelView::DisplayComplexRootList(const gbtList<gbtVector<gComplex> > 
+void PelView::DisplayComplexRootList(const gbtList<Gambit::Vector<gComplex> > 
 				                       &complexroots) const
 {
 #ifdef UNUSED
@@ -535,10 +535,10 @@ int PelView::Dmnsn() const
   return input.Dmnsn();
 }
 
-gbtList<gbtVector<gDouble> > 
-PelView::RealRoots(const gbtList<gbtVector<gComplex> > &clist) const
+gbtList<Gambit::Vector<gDouble> > 
+PelView::RealRoots(const gbtList<Gambit::Vector<gComplex> > &clist) const
 {
-  gbtList<gbtVector<gDouble> > answer;
+  gbtList<Gambit::Vector<gDouble> > answer;
 
   for (int i = 1; i <= clist.Length(); i++) {
 
@@ -548,7 +548,7 @@ PelView::RealRoots(const gbtList<gbtVector<gComplex> > &clist) const
 	is_real = false;
 
     if (is_real) {
-      gbtVector<gDouble> next(Dmnsn());
+      Gambit::Vector<gDouble> next(Dmnsn());
       for (int j = 1; j <= Dmnsn(); j++) 
 	next[j] = (gDouble)clist[i][j].RealPart();
       answer.Append(next);
@@ -730,12 +730,12 @@ bool PelView::operator !=(const PelView &rhs) const
   return !(*this == rhs);
 }
 
-gbtList<gbtVector<gComplex> > PelView::ComplexRoots() const
+gbtList<Gambit::Vector<gComplex> > PelView::ComplexRoots() const
 {
   return complexroots;
 }
 
-gbtList<gbtVector<gDouble> > PelView::RealRoots() const
+gbtList<Gambit::Vector<gDouble> > PelView::RealRoots() const
 {
   return realroots;
 }

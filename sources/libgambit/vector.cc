@@ -25,11 +25,11 @@
 //
 
 #include "libgambit.h"
-#include "gvector.imp"
+#include "vector.imp"
 
-template class gbtVector<int>;
-template class gbtVector<long>;
-template class gbtVector<double>;
-template class gbtVector<Gambit::Integer>;
-template class gbtVector<Gambit::Rational>;
+template class Gambit::Vector<int>;
+template class Gambit::Vector<long>;
+template class Gambit::Vector<double>;
+template class Gambit::Vector<Gambit::Integer>;
+template class Gambit::Vector<Gambit::Rational>;
 

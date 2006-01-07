@@ -517,7 +517,7 @@ bool ReadProfile(std::istream &p_stream,
   return true;
 }
 
-Gambit::Integer find_lcd(const gbtVector<Gambit::Rational> &vec)
+Gambit::Integer find_lcd(const Gambit::Vector<Gambit::Rational> &vec)
 {
   Gambit::Integer lcd(1);
   for (int i = vec.First(); i <= vec.Last(); i++) {
@@ -567,7 +567,7 @@ void Randomize(Gambit::MixedStrategyProfile<Gambit::Rational> &p_profile, int p_
 {
   Gambit::Game nfg = p_profile.GetGame();
 
-  ((gbtVector<Gambit::Rational> &) p_profile) = Gambit::Rational(0);
+  ((Gambit::Vector<Gambit::Rational> &) p_profile) = Gambit::Rational(0);
 
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
     int sum = 0;

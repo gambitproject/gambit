@@ -64,19 +64,19 @@ private:
   gPolyList<T> IndifferenceEquations()                 const;
   gPolyList<T> LastActionProbPositiveInequalities()    const;
   gPolyList<T> NashOnSupportEquationsAndInequalities() const;
-  gbtList<gbtVector<gDouble> > 
+  gbtList<Gambit::Vector<gDouble> > 
                NashOnSupportSolnVectors(const gPolyList<T> &equations,
 					const gRectangle<T> &Cube);
 
   // Pass to the sequence form variables from the solution variables
-  double NumProbOfSequence(int pl,int seq, const gbtVector<gDouble> &x) const;
-  gbtPVector<double> SeqFormVectorFromSolFormVector(const gbtVector<gDouble> &x)
+  double NumProbOfSequence(int pl,int seq, const Gambit::Vector<gDouble> &x) const;
+  gbtPVector<double> SeqFormVectorFromSolFormVector(const Gambit::Vector<gDouble> &x)
                                                                       const;
 
   bool ExtendsToANFNash(const Gambit::MixedBehavProfile<double> &)             const;
-  int SaveANFNashSolutions(const gbtList<gbtVector<gDouble> > &list);
+  int SaveANFNashSolutions(const gbtList<Gambit::Vector<gDouble> > &list);
   bool ExtendsToNash(const Gambit::MixedBehavProfile<double> &)                const;
-  int SaveNashSolutions(const gbtList<gbtVector<gDouble> > &list);
+  int SaveNashSolutions(const gbtList<Gambit::Vector<gDouble> > &list);
 
 public:
   EfgPolEnumModule(const Gambit::BehavSupport &);
@@ -91,13 +91,13 @@ public:
   const gbtList<Gambit::MixedBehavProfile<double> > &GetSolutions(void) const;
 
   // Passing between variables of polynomials and sequence form probs
-  gbtPVector<double> SeqFormProbsFromSolVars(const gbtVector<gDouble> &) const;
-  gbtVector<gDouble> SolVarsFromSeqFormProbs(const gbtPVector<double> &) const;
-  //  gbtVector<gDouble> SolVarsFromBehavProfile(const Gambit::MixedBehavProfile<gbtNumber> &) const;
+  gbtPVector<double> SeqFormProbsFromSolVars(const Gambit::Vector<gDouble> &) const;
+  Gambit::Vector<gDouble> SolVarsFromSeqFormProbs(const gbtPVector<double> &) const;
+  //  Gambit::Vector<gDouble> SolVarsFromBehavProfile(const Gambit::MixedBehavProfile<gbtNumber> &) const;
 
-  const int PolishKnownRoot(gbtVector<gDouble> &) const;
+  const int PolishKnownRoot(Gambit::Vector<gDouble> &) const;
 
-  Gambit::MixedBehavProfile<double> ReturnPolishedSolution(const gbtVector<gDouble> &) const;
+  Gambit::MixedBehavProfile<double> ReturnPolishedSolution(const Gambit::Vector<gDouble> &) const;
 };
 
 //-------------------------------------------------------------------------
@@ -148,7 +148,7 @@ template <class T>
 gPoly<T> EfgPolEnumModule<T>::ProbOfSequence(int p, int seq) const
 {
   gPoly<T> equation(Space,Lex);
-  gbtVector<int> exps(num_vars);
+  Gambit::Vector<int> exps(num_vars);
   int j = 0;
   
   int isetrow = SF.InfosetRowNumber(p,seq);
@@ -247,7 +247,7 @@ gPolyList<T> EfgPolEnumModule<T>::NashOnSupportEquationsAndInequalities() const
 }
 
 
-template <class T> gbtList<gbtVector<gDouble> > 
+template <class T> gbtList<Gambit::Vector<gDouble> > 
 EfgPolEnumModule<T>::NashOnSupportSolnVectors(const gPolyList<T> &equations,
 					      const gRectangle<T> &Cube)
 {
@@ -283,12 +283,12 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
   gPolyList<T> equations = NashOnSupportEquationsAndInequalities();
 
   // set up the rectangle of search
-  gbtVector<T> bottoms(num_vars), tops(num_vars);
+  Gambit::Vector<T> bottoms(num_vars), tops(num_vars);
   bottoms = (T)0;
   tops = (T)1;
   gRectangle<T> Cube(bottoms, tops); 
 
-  gbtList<gbtVector<gDouble> > solutionlist = NashOnSupportSolnVectors(equations,
+  gbtList<Gambit::Vector<gDouble> > solutionlist = NashOnSupportSolnVectors(equations,
 								   Cube);
 
   int index = SaveNashSolutions(solutionlist);
@@ -296,7 +296,7 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
 }
 
 template <class T> gbtPVector<double> 
-EfgPolEnumModule<T>::SeqFormVectorFromSolFormVector(const gbtVector<gDouble> &v)
+EfgPolEnumModule<T>::SeqFormVectorFromSolFormVector(const Gambit::Vector<gDouble> &v)
                                                                       const
 {
   gbtPVector<double> x(SF.NumSequences());
@@ -318,7 +318,7 @@ EfgPolEnumModule<T>::ExtendsToANFNash(const Gambit::MixedBehavProfile<double> &b
 }
 
 template <class T> int 
-EfgPolEnumModule<T>::SaveANFNashSolutions(const gbtList<gbtVector<gDouble> > &list)
+EfgPolEnumModule<T>::SaveANFNashSolutions(const gbtList<Gambit::Vector<gDouble> > &list)
 {
   int index=0;
   for (int k = 1; k <= list.Length(); k++) {
@@ -343,7 +343,7 @@ EfgPolEnumModule<T>::ExtendsToNash(const Gambit::MixedBehavProfile<double> &bs) 
 }
 
 template <class T> int 
-EfgPolEnumModule<T>::SaveNashSolutions(const gbtList<gbtVector<gDouble> > &list)
+EfgPolEnumModule<T>::SaveNashSolutions(const gbtList<Gambit::Vector<gDouble> > &list)
 {
   int index=0;
   for (int k = 1; k <= list.Length(); k++) {
@@ -381,7 +381,7 @@ const gbtList<Gambit::MixedBehavProfile<double> > &EfgPolEnumModule<T>::GetSolut
 }
 
 template <class T> double EfgPolEnumModule<T>::
-NumProbOfSequence(int p,int seq, const gbtVector<gDouble> &x) const
+NumProbOfSequence(int p,int seq, const Gambit::Vector<gDouble> &x) const
 {
   int j = 0;
   double value=0;
@@ -406,7 +406,7 @@ NumProbOfSequence(int p,int seq, const gbtVector<gDouble> &x) const
 }
 
 template <class T> gbtPVector<double> 
-EfgPolEnumModule<T>::SeqFormProbsFromSolVars(const gbtVector<gDouble> &v) const
+EfgPolEnumModule<T>::SeqFormProbsFromSolVars(const Gambit::Vector<gDouble> &v) const
 {
   gbtPVector<double> x(SF.NumSequences());
 
@@ -418,7 +418,7 @@ EfgPolEnumModule<T>::SeqFormProbsFromSolVars(const gbtVector<gDouble> &v) const
 }
 
 /*
-template <class T> gbtVector<gDouble> 
+template <class T> Gambit::Vector<gDouble> 
 EfgPolEnumModule<T>::SolVarsFromBehavProfile(const Gambit::MixedBehavProfile<gbtNumber> &sol)
   const
 {
@@ -433,7 +433,7 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const Gambit::MixedBehavProfile<gbt
     }
   }
 
-  gbtVector<gDouble> answer(numvars);
+  Gambit::Vector<gDouble> answer(numvars);
   int count(0);
 
   for (int pl = 1; pl <= EF->NumPlayers(); pl++) {
@@ -454,7 +454,7 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const Gambit::MixedBehavProfile<gbt
 }
 */
 
-template <class T> gbtVector<gDouble> 
+template <class T> Gambit::Vector<gDouble> 
 EfgPolEnumModule<T>::SolVarsFromSeqFormProbs(const gbtPVector<double> &x) const
 {
   
@@ -467,8 +467,8 @@ EfgPolEnumModule<T>::SolVarsFromSeqFormProbs(const gbtPVector<double> &x) const
       if(act<support.NumActions(SF.GetInfoset(pl,seq))) 
 	numvars++;
     }
-  gbtVector<gDouble> v(numvars);
-  //  gbtVector<gDouble> v(SF.NumIndepVars());
+  Gambit::Vector<gDouble> v(numvars);
+  //  Gambit::Vector<gDouble> v(SF.NumIndepVars());
 
   int count = 0;
   for(int pl=1;pl<=EF->NumPlayers();pl++) 
@@ -485,7 +485,7 @@ EfgPolEnumModule<T>::SolVarsFromSeqFormProbs(const gbtPVector<double> &x) const
 }
 
 template <class T> 
-const int EfgPolEnumModule<T>::PolishKnownRoot(gbtVector<gDouble> &point) const
+const int EfgPolEnumModule<T>::PolishKnownRoot(Gambit::Vector<gDouble> &point) const
 {
   //DEBUG
   //  gout << "Prior to Polishing point is " << point << ".\n";
@@ -533,7 +533,7 @@ const int EfgPolEnumModule<T>::PolishKnownRoot(gbtVector<gDouble> &point) const
 }
 
 template <class T> Gambit::MixedBehavProfile<double> 
-EfgPolEnumModule<T>::ReturnPolishedSolution(const gbtVector<gDouble> &root) const
+EfgPolEnumModule<T>::ReturnPolishedSolution(const Gambit::Vector<gDouble> &root) const
 {
   gbtPVector<double> x(SF.NumSequences());
 

@@ -35,7 +35,7 @@
 
 template <class T> class LPTableau : public Tableau<T> {
 private:
-  gbtVector<T> dual;
+  Gambit::Vector<T> dual;
   gbtArray<T> unitcost;
   gbtArray<T> cost;
   gbtArray<bool> UB,LB;  // does col have upper/lower bound?
@@ -48,22 +48,22 @@ public:
     virtual ~BadPivot();
     std::string GetDescription(void) const;
   };
-  LPTableau(const Gambit::Matrix<T> &A, const gbtVector<T> &b); 
-  LPTableau(const Gambit::Matrix<T> &A, const gbtArray<int> &art, const gbtVector<T> &b); 
+  LPTableau(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b); 
+  LPTableau(const Gambit::Matrix<T> &A, const gbtArray<int> &art, const Gambit::Vector<T> &b); 
   LPTableau(const LPTableau<T>&);
   virtual ~LPTableau();
   
   LPTableau<T>& operator=(const LPTableau<T>&);
   
       // cost information
-  void SetCost(const gbtVector<T>& ); // unit column cost := 0
-  void SetCost(const gbtVector<T>&, const gbtVector<T>& );
-  gbtVector<T> GetCost() const;
-  gbtVector<T> GetUnitCost() const;
+  void SetCost(const Gambit::Vector<T>& ); // unit column cost := 0
+  void SetCost(const Gambit::Vector<T>&, const Gambit::Vector<T>& );
+  Gambit::Vector<T> GetCost() const;
+  Gambit::Vector<T> GetUnitCost() const;
   T TotalCost(); // cost of current solution
   T RelativeCost(int) const; // negative index convention
-  void RelativeCostVector(gbtVector<T> &, gbtVector<T> &); 
-  void DualVector(gbtVector<T> &) const; // column vector
+  void RelativeCostVector(Gambit::Vector<T> &, Gambit::Vector<T> &); 
+  void DualVector(Gambit::Vector<T> &) const; // column vector
       // Redefined functions
   void Refactor();
   void Pivot(int outrow,int col);
@@ -77,11 +77,11 @@ public:
   int LastLabel( void );
 
   // select Basis elements according to Tableau rows and cols
-  void BasisSelect(const gbtArray<T>&rowv, gbtVector<T> &colv) const;
+  void BasisSelect(const gbtArray<T>&rowv, Gambit::Vector<T> &colv) const;
 
   // as above, but unit column elements nonzero
   void BasisSelect(const gbtArray<T>&unitv, const gbtArray<T>&rowv,
-		   gbtVector<T>&colv) const; 
+		   Gambit::Vector<T>&colv) const; 
 };
 
 #endif     // LPTAB_H

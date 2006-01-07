@@ -84,7 +84,7 @@ MixedBehavProfile<T>::MixedBehavProfile(const MixedStrategyProfile<T> &p_profile
 {
   InitProfile();
 
-  ((gbtVector<T> &) *this).operator=((T)0); 
+  ((Vector<T> &) *this).operator=((T)0); 
 
   GameNode n = m_efg->GetRoot();
   const StrategySupport &support = p_profile.GetSupport();
@@ -268,7 +268,7 @@ const T &MixedBehavProfile<T>::GetBeliefProb(const GameNode &node) const
 }
 
 template <class T>
-gbtVector<T> MixedBehavProfile<T>::GetNodeValue(const GameNode &node) const
+Vector<T> MixedBehavProfile<T>::GetNodeValue(const GameNode &node) const
 { 
   ComputeSolutionData();
   return NodeValues(node);

@@ -41,8 +41,8 @@ private:
   Gambit::Game _nfg;
   mutable Gambit::MixedStrategyProfile<double> _p;
 
-  double Value(const gbtVector<double> &) const;
-  bool Gradient(const gbtVector<double> &, gbtVector<double> &) const;
+  double Value(const Gambit::Vector<double> &) const;
+  bool Gradient(const Gambit::Vector<double> &, Gambit::Vector<double> &) const;
 
   double LiapDerivValue(int, int, const Gambit::MixedStrategyProfile<double> &) const;
     
@@ -95,7 +95,7 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
 // vector perpendicular to the plane, then subtracting to compute the
 // component parallel to the plane.)
 //
-static void Project(gbtVector<double> &x, const gbtArray<int> &lengths)
+static void Project(Gambit::Vector<double> &x, const gbtArray<int> &lengths)
 {
   int index = 1;
   for (int part = 1; part <= lengths.Length(); part++)  {
@@ -112,9 +112,9 @@ static void Project(gbtVector<double> &x, const gbtArray<int> &lengths)
   }
 }
 
-bool NFLiapFunc::Gradient(const gbtVector<double> &v, gbtVector<double> &d) const
+bool NFLiapFunc::Gradient(const Gambit::Vector<double> &v, Gambit::Vector<double> &d) const
 {
-  ((gbtVector<double> &) _p).operator=(v);
+  ((Gambit::Vector<double> &) _p).operator=(v);
   int i1, j1, ii;
   
   for (i1 = 1, ii = 1; i1 <= _nfg->NumPlayers(); i1++) {
@@ -127,14 +127,14 @@ bool NFLiapFunc::Gradient(const gbtVector<double> &v, gbtVector<double> &d) cons
   return true;
 }
   
-double NFLiapFunc::Value(const gbtVector<double> &v) const
+double NFLiapFunc::Value(const Gambit::Vector<double> &v) const
 {
   static const double BIG1 = 100.0;
   static const double BIG2 = 100.0;
 
   _nevals++;
 
-  ((gbtVector<double> &) _p).operator=(v);
+  ((Gambit::Vector<double> &) _p).operator=(v);
   
   Gambit::MixedStrategyProfile<double> tmp(_p);
   gbtPVector<double> payoff(_p);
@@ -359,7 +359,7 @@ int main(int argc, char *argv[])
       }
 
       gConjugatePR minimizer(p.Length());
-      gbtVector<double> gradient(p.Length()), dx(p.Length());
+      Gambit::Vector<double> gradient(p.Length()), dx(p.Length());
       double fval;
       minimizer.Set(F, p, fval, gradient, .01, .0001);
 

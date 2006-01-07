@@ -807,7 +807,7 @@ gPoly<T> gPoly<T>::S_Polynomial(const term_order& order,
 
 template<class T> gPoly<T> 
 gPoly<T>::TranslateOfMono(const gMono<T>& m, 
-				      const gbtVector<T>& new_origin) const
+			  const Gambit::Vector<T>& new_origin) const
 {
   gPoly<T> answer(GetSpace(), (T)1, GetOrder());
 
@@ -826,7 +826,7 @@ gPoly<T>::TranslateOfMono(const gMono<T>& m,
 }
 
 template<class T> gPoly<T> 
-gPoly<T>::TranslateOfPoly(const gbtVector<T>& new_origin) const
+gPoly<T>::TranslateOfPoly(const Gambit::Vector<T>& new_origin) const
 {
   gPoly<T> answer(GetSpace(), GetOrder());
   for (int i = 1; i <= this->MonomialList().Length(); i++) 

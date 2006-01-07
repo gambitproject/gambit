@@ -42,11 +42,11 @@ private:
   gbtList<gPoly<gDouble> > BasisTogDouble() const;
 
 // Recursive Call in Solver
-  gbtList<gbtVector<gDouble> >  
+  gbtList<Gambit::Vector<gDouble> >  
     ContinuationSolutions(const gbtList<gPoly<gDouble> >& list,
 			  const int dmnsn,
 			  const int curvar,
-			  const gbtVector<gDouble>& knownvals);
+			  const Gambit::Vector<gDouble>& knownvals);
 
 public:
 
@@ -56,7 +56,7 @@ public:
   ~gSolver();
 
   bool                     IsZeroDimensional();
-  gbtList<gbtVector<gDouble> > Roots();
+  gbtList<Gambit::Vector<gDouble> > Roots();
 };
 
 #endif // GSOLVER_H

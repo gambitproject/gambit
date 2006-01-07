@@ -92,7 +92,7 @@ bool IneqSolv<T>::operator!=(const IneqSolv<T> & rhs) const
 //---------------------------
 
 template<class T> 
-bool IneqSolv<T>::IsASolution(const gbtVector<T>& v) const
+bool IneqSolv<T>::IsASolution(const Gambit::Vector<T>& v) const
 {
   bool answer(true);
   for (int i = 1; i <= System.Length() && answer; i++)
@@ -132,7 +132,7 @@ bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T>& r,
 
 template <class T> const bool
 IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T>& r, 
-				            gbtVector<T>& sample,
+				            Gambit::Vector<T>& sample,
 				            gbtArray<int>& precedence) const
 {
   /*
@@ -161,7 +161,7 @@ IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T>& r,
 }
 
 template <class T> const bool
-IneqSolv<T>::ASolutionExists (const gRectangle<T>& r, gbtVector<T>& sample)
+IneqSolv<T>::ASolutionExists (const gRectangle<T>& r, Gambit::Vector<T>& sample)
 {
      // precedence orders search for everywhere negative poly
   gbtArray<int> precedence(System.Length());  

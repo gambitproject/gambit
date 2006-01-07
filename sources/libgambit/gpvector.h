@@ -27,9 +27,9 @@
 #ifndef GPVECTOR_H
 #define GPVECTOR_H
 
-#include "gvector.h"
+#include "vector.h"
 
-template <class T> class gbtPVector : public gbtVector<T> {
+template <class T> class gbtPVector : public Gambit::Vector<T> {
  private:
   int sum(const gbtArray<int> &V) const;
   void setindex(void);
@@ -46,7 +46,7 @@ template <class T> class gbtPVector : public gbtVector<T> {
 
   gbtPVector(void);
   gbtPVector(const gbtArray<int> &sig);
-  gbtPVector(const gbtVector<T> &val, const gbtArray<int> &sig);
+  gbtPVector(const Gambit::Vector<T> &val, const gbtArray<int> &sig);
   gbtPVector(const gbtPVector<T> &v);
   virtual ~gbtPVector();
 
@@ -56,15 +56,15 @@ template <class T> class gbtPVector : public gbtVector<T> {
   const T& operator()(int a, int b) const;
 
   // extract a subvector
-  gbtVector<T> GetRow(int row) const;
-  void GetRow(int row, gbtVector<T> &v) const;
-  void SetRow(int row, const gbtVector<T> &v);
+  Gambit::Vector<T> GetRow(int row) const;
+  void GetRow(int row, Gambit::Vector<T> &v) const;
+  void SetRow(int row, const Gambit::Vector<T> &v);
   void CopyRow(int row, const gbtPVector<T> &v);
 
   // more operators
 
   gbtPVector<T>& operator=(const gbtPVector<T> &v);
-  gbtPVector<T>& operator=(const gbtVector<T> &v);
+  gbtPVector<T>& operator=(const Gambit::Vector<T> &v);
   gbtPVector<T>& operator=(T c);
 
   gbtPVector<T> operator+(const gbtPVector<T> &v) const;

@@ -27,19 +27,19 @@
 #ifndef GFUNCMIN_H
 #define GFUNCMIN_H
 
-#include "libgambit/gvector.h"
+#include "libgambit/vector.h"
 
 template <class T> class gFunction   {
   public:
     virtual ~gFunction()    { }
-    virtual T Value(const gbtVector<T> &) const = 0;
+    virtual T Value(const Gambit::Vector<T> &) const = 0;
 };
 
 template <class T> class gC1Function : public gFunction<T> {
 public:
   virtual ~gC1Function() { }
 
-  virtual bool Gradient(const gbtVector<T> &, gbtVector<T> &) const = 0;
+  virtual bool Gradient(const Gambit::Vector<T> &, Gambit::Vector<T> &) const = 0;
 };
 
 class gbtFuncMinError : public gbtException {
@@ -57,14 +57,14 @@ public:
   virtual ~gFunctionMinimizer() { }
 
   virtual void Set(const gC1Function<double> &fdf,
-		   const gbtVector<double> &x, double &f,
-		   gbtVector<double> &gradient, double step_size,
+		   const Gambit::Vector<double> &x, double &f,
+		   Gambit::Vector<double> &gradient, double step_size,
 		   double p_tol) = 0;
   virtual void Restart(void) = 0;
 
   virtual bool Iterate(const gC1Function<double> &fdf,
-		       gbtVector<double> &x, double &f,
-		       gbtVector<double> &gradient, gbtVector<double> &dx) = 0;
+		       Gambit::Vector<double> &x, double &f,
+		       Gambit::Vector<double> &gradient, Gambit::Vector<double> &dx) = 0;
 };
 
 //
@@ -76,27 +76,27 @@ private:
   double step;
   double max_step;
   double tol;
-  gbtVector<double> x1;
-  gbtVector<double> dx1;
-  gbtVector<double> x2;
+  Gambit::Vector<double> x1;
+  Gambit::Vector<double> dx1;
+  Gambit::Vector<double> x2;
   double pnorm;
-  gbtVector<double> p;
+  Gambit::Vector<double> p;
   double g0norm;
-  gbtVector<double> g0;
+  Gambit::Vector<double> g0;
 
 public:
   gConjugatePR(int n);
   virtual ~gConjugatePR() { }
 
   void Set(const gC1Function<double> &fdf,
-	   const gbtVector<double> &x, double &f,
-	   gbtVector<double> &gradient, double step_size,
+	   const Gambit::Vector<double> &x, double &f,
+	   Gambit::Vector<double> &gradient, double step_size,
 	   double p_tol);
   void Restart(void);
 
   bool Iterate(const gC1Function<double> &fdf,
-	       gbtVector<double> &x, double &f,
-	       gbtVector<double> &gradient, gbtVector<double> &dx);
+	       Gambit::Vector<double> &x, double &f,
+	       Gambit::Vector<double> &gradient, Gambit::Vector<double> &dx);
 };
 
 class gFuncMinException { };

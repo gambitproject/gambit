@@ -48,8 +48,8 @@ template <class T> class gNArray   {
     gNArray<T> &operator=(const gNArray<T> &);
 
     /* not used for now
-    T operator[](const gbtVector<int> &) const;
-    T &operator[](const gbtVector<int> &);
+    T operator[](const Gambit::Vector<int> &) const;
+    T &operator[](const Gambit::Vector<int> &);
     */
 
     T operator[](const gbtArray<int> &) const;

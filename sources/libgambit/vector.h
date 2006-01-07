@@ -24,12 +24,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GVECTOR_H
-#define GVECTOR_H
+#ifndef LIBGAMBIT_VECTOR_H
+#define LIBGAMBIT_VECTOR_H
 
 namespace Gambit {
-  template <class T> class Matrix;
-}
+
+template <class T> class Matrix;
+
 
 /** 
  * General purpose vector representation and calculation class.
@@ -38,38 +39,38 @@ namespace Gambit {
  * type, the operators binary +, binary -, binary *, /, ==, and = must
  * be defined for the type.
  */
-template <class T> class gbtVector : public gbtArray<T>   {
-  friend class Gambit::Matrix<T>;
+template <class T> class Vector : public gbtArray<T>   {
+  friend class Matrix<T>;
 public:
   /** Create a vector of length len, starting at 1 */
-  gbtVector(unsigned int len = 0);
+  Vector(unsigned int len = 0);
   /** Create a vector indexed from low to high */
-  gbtVector(int low, int high);
+  Vector(int low, int high);
   /** Copy constructor */
-  gbtVector(const gbtVector<T>& V);
+  Vector(const Vector<T>& V);
   /** Destructor */
-  virtual ~gbtVector();
+  virtual ~Vector();
   
   /** Assignment operator: requires vectors to be of same length */
-  gbtVector<T>& operator=(const gbtVector<T>& V);
+  Vector<T>& operator=(const Vector<T>& V);
   /** Assigns the value c to all components of the vector */
-  gbtVector<T>& operator=(T c);
+  Vector<T>& operator=(T c);
   
-  gbtVector<T> operator+(const gbtVector<T>& V) const;
-  gbtVector<T>& operator+=(const gbtVector<T>& V);
+  Vector<T> operator+(const Vector<T>& V) const;
+  Vector<T>& operator+=(const Vector<T>& V);
   
-  gbtVector<T> operator-(void);
-  gbtVector<T> operator-(const gbtVector<T>& V) const;
-  gbtVector<T>& operator-=(const gbtVector<T>& V);
+  Vector<T> operator-(void);
+  Vector<T> operator-(const Vector<T>& V) const;
+  Vector<T>& operator-=(const Vector<T>& V);
   
-  gbtVector<T> operator*(T c) const;
-  gbtVector<T>& operator*=(T c);
-  T operator*(const gbtVector<T>& V) const;
+  Vector<T> operator*(T c) const;
+  Vector<T>& operator*=(T c);
+  T operator*(const Vector<T>& V) const;
   
-  gbtVector<T> operator/(T c) const;
+  Vector<T> operator/(T c) const;
   
-  bool operator==(const gbtVector<T>& V) const;
-  bool operator!=(const gbtVector<T>& V) const;
+  bool operator==(const Vector<T>& V) const;
+  bool operator!=(const Vector<T>& V) const;
   
   /** Tests if all components of the vector are equal to a constant c */
   bool operator==(T c) const;
@@ -79,10 +80,12 @@ public:
   T NormSquared() const;
   
   // check vector for identical boundaries
-  bool Check(const gbtVector<T> &v) const;
+  bool Check(const Vector<T> &v) const;
 };
 
-#endif   //# GVECTOR_H
+} // end namespace Gambit
+
+#endif // LIBGAMBIT_VECTOR_H
 
 
 

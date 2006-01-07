@@ -93,7 +93,7 @@ static void QRDecomp(Gambit::Matrix<double> &b, Gambit::Matrix<double> &q)
 }
 
 static void NewtonStep(Gambit::Matrix<double> &q, Gambit::Matrix<double> &b,
-		       gbtVector<double> &u, gbtVector<double> &y,
+		       Gambit::Vector<double> &u, Gambit::Vector<double> &y,
 		       double &d)
 {
   for (int k = 1; k <= b.NumColumns(); k++) {
@@ -116,8 +116,8 @@ static void NewtonStep(Gambit::Matrix<double> &q, Gambit::Matrix<double> &b,
 }
 
 static void QreLHS(const Gambit::BehavSupport &p_support, 
-		   const gbtVector<double> &p_point,
-		   gbtVector<double> &p_lhs)
+		   const Gambit::Vector<double> &p_point,
+		   Gambit::Vector<double> &p_lhs)
 {
   Gambit::MixedBehavProfile<double> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
@@ -149,7 +149,7 @@ static void QreLHS(const Gambit::BehavSupport &p_support,
 }
 
 static void QreJacobian(const Gambit::BehavSupport &p_support,
-			const gbtVector<double> &p_point,
+			const Gambit::Vector<double> &p_point,
 			Gambit::Matrix<double> &p_matrix)
 {
   Gambit::Game efg = p_support.GetGame();
@@ -226,7 +226,7 @@ static void QreJacobian(const Gambit::BehavSupport &p_support,
 int g_numDecimals = 6;
 
 void PrintProfile(std::ostream &p_stream,
-		  const Gambit::BehavSupport &p_support, const gbtVector<double> &x,
+		  const Gambit::BehavSupport &p_support, const Gambit::Vector<double> &x,
 		  bool p_terminal = false)
 {
   // By convention, we output lambda first
@@ -271,7 +271,7 @@ static void TracePath(const Gambit::MixedBehavProfile<double> &p_start,
   double h = g_hStart;             // initial stepsize
   const double c_hmin = 1.0e-5;    // minimal stepsize
 
-  gbtVector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
+  Gambit::Vector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
   for (int i = 1; i <= p_start.Length(); i++) {
     x[i] = p_start[i];
   }
@@ -281,8 +281,8 @@ static void TracePath(const Gambit::MixedBehavProfile<double> &p_start,
     PrintProfile(std::cout, p_start.GetSupport(), x);
   }
 
-  gbtVector<double> t(p_start.Length() + 1);
-  gbtVector<double> y(p_start.Length());
+  Gambit::Vector<double> t(p_start.Length() + 1);
+  Gambit::Vector<double> y(p_start.Length());
 
   Gambit::Matrix<double> b(p_start.Length() + 1, p_start.Length());
   Gambit::SquareMatrix<double> q(p_start.Length() + 1);
@@ -446,7 +446,7 @@ static void TracePath(const Gambit::MixedBehavProfile<double> &p_start,
       PrintProfile(std::cout, p_start.GetSupport(), x);
     }
     
-    gbtVector<double> newT(t);
+    Gambit::Vector<double> newT(t);
     q.GetRow(q.NumRows(), newT);  // new tangent
     if (t * newT < 0.0) {
       // Bifurcation detected; for now, just "jump over" and continue,

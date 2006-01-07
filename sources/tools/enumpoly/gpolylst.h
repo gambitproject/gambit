@@ -105,7 +105,7 @@ template <class T> class gPolyList
    gPolyList<T>&  ToSortedReducedGrobner(const term_order &);
 
   // New Coordinate Systems
-   gPolyList<T> TranslateOfSystem(const gbtVector<T>&)            const;
+   gPolyList<T> TranslateOfSystem(const Gambit::Vector<T>&)            const;
    gPolyList<T> SystemInNewCoordinates(const Gambit::SquareMatrix<T>&) const;
 
   // Truncations
@@ -118,12 +118,12 @@ template <class T> class gPolyList
    const int                Dmnsn()                                   const;
    const bool               IsMultiaffine()                           const;
    gbtList<gPoly<T> >         UnderlyingbtList()                          const;
-   const gbtVector<T>         Evaluate(const gbtVector<T>&)               const;
-   const bool               IsRoot(const gbtVector<T>&)                 const;
+   const Gambit::Vector<T>         Evaluate(const Gambit::Vector<T>&)               const;
+   const bool               IsRoot(const Gambit::Vector<T>&)                 const;
    const Gambit::RectArray<gPoly<T>*> DerivativeMatrix()                     const;
    const gPoly<T>           DetOfDerivativeMatrix()                   const;
-   const Gambit::Matrix<T>         DerivativeMatrix(const gbtVector<T>&)       const;
-   const Gambit::SquareMatrix<T>   SquareDerivativeMatrix(const gbtVector<T>&) const;
+   const Gambit::Matrix<T>         DerivativeMatrix(const Gambit::Vector<T>&)       const;
+   const Gambit::SquareMatrix<T>   SquareDerivativeMatrix(const Gambit::Vector<T>&) const;
 
 //  inline int static Count() { return Counted<gPolyList<T> >::objCount(); }
 

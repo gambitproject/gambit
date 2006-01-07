@@ -40,7 +40,7 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
   T eps;
   gEpsilon(eps);
   
-  gbtVector<T> dominator(S.NumStrats(pl));
+  Gambit::Vector<T> dominator(S.NumStrats(pl));
   
   int st,i,k,n;
   
@@ -53,8 +53,8 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
       if(k!=pl) contingencies*=S.NumStrats(k);
     
     Gambit::Matrix<T> A(1,contingencies+1,1,strats);
-    gbtVector<T> B(1,contingencies+1);
-    gbtVector<T> C(1,strats);
+    Gambit::Vector<T> B(1,contingencies+1);
+    Gambit::Vector<T> C(1,strats);
     
     n = contingencies + 1;
     for (k = 1; k < strats; k++) {
@@ -96,7 +96,7 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
       
       if (Tab.IsFeasible() && COpt > eps) {
 	tracefile << " Strongly Dominated by ";
-	gbtVector<T> xx(Tab.OptimumVector());
+	Gambit::Vector<T> xx(Tab.OptimumVector());
 	for(i=1,st=1;st<=strats;st++) {
 	  if(st==k) dominator[st] = (T)0;
 	  else {
@@ -133,8 +133,8 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
       if(k!=pl) contingencies*=S.NumStrats(k);
     
     Gambit::Matrix<T> A(1,contingencies+1,1,strats-1);
-    gbtVector<T> B(1,contingencies+1);
-    gbtVector<T> C(1,strats-1);
+    Gambit::Vector<T> B(1,contingencies+1);
+    Gambit::Vector<T> C(1,strats-1);
     
     n=contingencies+1;
     for(k=1;k<strats;k++) {
@@ -177,7 +177,7 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
 	tracefile << " Duplicated strategy? ";
       else if (Tab.IsFeasible() && COpt > C0+eps) {
 	tracefile << " Weakly Dominated by ";
-	gbtVector<T> xx(Tab.OptimumVector());
+	Gambit::Vector<T> xx(Tab.OptimumVector());
 	for(i=1,st=1;st<=strats;st++) {
 	  if(st==k) dominator[st] = (T)0;
 	  else {
@@ -225,7 +225,7 @@ bool IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy str
   T eps;
   gEpsilon(eps);
   
-  gbtVector<T> dominator(S.NumStrats(pl));
+  Gambit::Vector<T> dominator(S.NumStrats(pl));
   
   int st,i,k,n;
   bool ret = false;
@@ -237,8 +237,8 @@ bool IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy str
   if (strong)   {
     T COpt;
     Gambit::Matrix<T> A(1,contingencies+1,1,strats);
-    gbtVector<T> B(1,contingencies+1);
-    gbtVector<T> C(1,strats);
+    Gambit::Vector<T> B(1,contingencies+1);
+    Gambit::Vector<T> C(1,strats);
     
     n = contingencies + 1;
     for (k = 1; k < strats; k++) {
@@ -280,7 +280,7 @@ bool IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy str
     
     if (Tab.IsFeasible() && COpt > eps) {
       tracefile << " Strongly Dominated by ";
-      gbtVector<T> xx(Tab.OptimumVector());
+      Gambit::Vector<T> xx(Tab.OptimumVector());
       for(i=1,st=1;st<=strats;st++) {
 	if(st==whichstrat) dominator[st] = (T)0;
 	else {
@@ -304,8 +304,8 @@ bool IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy str
     T C0 = (T) 0, COpt;
 
     Gambit::Matrix<T> A(1,contingencies+1,1,strats-1);
-    gbtVector<T> B(1,contingencies+1);
-    gbtVector<T> C(1,strats-1);
+    Gambit::Vector<T> B(1,contingencies+1);
+    Gambit::Vector<T> C(1,strats-1);
     
     n=contingencies+1;
     for(k=1;k<strats;k++) {
@@ -350,7 +350,7 @@ bool IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy str
       tracefile << " Duplicated strategy? ";
     else if (Tab.IsFeasible() && COpt > C0+eps) {
       tracefile << " Weakly Dominated by ";
-      gbtVector<T> xx(Tab.OptimumVector());
+      Gambit::Vector<T> xx(Tab.OptimumVector());
       for(i=1,st=1;st<=strats;st++) {
 	if(st==whichstrat) dominator[st] = (T)0;
 	else {
@@ -381,13 +381,13 @@ bool IsMixedDominated(const Gambit::MixedStrategyProfile<T> &pr, int pl,
   Gambit::StrategySupport S = pr.GetSupport();
   Gambit::Game nfg = pr.GetGame();
   int strats = S.NumStrats(pl);
-  gbtVector<T> prob = pr.GetRow(pl);
+  Gambit::Vector<T> prob = pr.GetRow(pl);
   assert( prob.Length() == strats);
 
   T eps,x;
   gEpsilon(eps);
   
-  gbtVector<T> dominator(S.NumStrats(pl));
+  Gambit::Vector<T> dominator(S.NumStrats(pl));
   
   int st,i,k,n;
   bool ret = false;
@@ -398,8 +398,8 @@ bool IsMixedDominated(const Gambit::MixedStrategyProfile<T> &pr, int pl,
   if (strong)   {
     T COpt;
     Gambit::Matrix<T> A(1,contingencies+1,1,strats+1);
-    gbtVector<T> B(1,contingencies+1);
-    gbtVector<T> C(1,strats+1);
+    Gambit::Vector<T> B(1,contingencies+1);
+    Gambit::Vector<T> C(1,strats+1);
     
     n = contingencies + 1;
     for (k = 1; k <= strats; k++) {
@@ -438,7 +438,7 @@ bool IsMixedDominated(const Gambit::MixedStrategyProfile<T> &pr, int pl,
     
     if (Tab.IsFeasible() && COpt > eps) {
       tracefile << " Strongly Dominated by ";
-      gbtVector<T> xx(Tab.OptimumVector());
+      Gambit::Vector<T> xx(Tab.OptimumVector());
       for(i=1,st=1;st<=strats;st++) {
 	dominator[st] = xx[i];
 	i++;
@@ -459,8 +459,8 @@ bool IsMixedDominated(const Gambit::MixedStrategyProfile<T> &pr, int pl,
     T C0 = (T) 0, COpt;
 
     Gambit::Matrix<T> A(1,contingencies+1,1,strats);
-    gbtVector<T> B(1,contingencies+1);
-    gbtVector<T> C(1,strats);
+    Gambit::Vector<T> B(1,contingencies+1);
+    Gambit::Vector<T> C(1,strats);
     
     n=contingencies+1;
     for(k=1;k<=strats;k++) {
@@ -510,7 +510,7 @@ bool IsMixedDominated(const Gambit::MixedStrategyProfile<T> &pr, int pl,
     // else 
     if (Tab.IsFeasible() && COpt > C0+eps) {
       tracefile << " Weakly Dominated by ";
-      gbtVector<T> xx(Tab.OptimumVector());
+      Gambit::Vector<T> xx(Tab.OptimumVector());
       for(i=1,st=1;st<=strats;st++) {
 	dominator[st] = xx[i];
 	i++;

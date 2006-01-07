@@ -399,7 +399,7 @@ gPolyList<T>& gPolyList<T>::ToSortedReducedGrobner(const term_order & order)
 //------------------------------------------
 
 template<class T> gPolyList<T> 
-gPolyList<T>::TranslateOfSystem(const gbtVector<T>& new_origin) const
+gPolyList<T>::TranslateOfSystem(const Gambit::Vector<T>& new_origin) const
 {
   gbtList<gPoly<T> > new_polys;
   for (int i = 1; i <= Length(); i++) {
@@ -456,9 +456,9 @@ template <class T> const bool gPolyList<T>::IsMultiaffine() const
 }
   
 template<class T> 
-const gbtVector<T> gPolyList<T>::Evaluate(const gbtVector<T>& v) const
+const Gambit::Vector<T> gPolyList<T>::Evaluate(const Gambit::Vector<T>& v) const
 {
-  gbtVector<T> answer(Length());
+  Gambit::Vector<T> answer(Length());
   int ii;
   for (ii = 1; ii <= List.Length(); ii++)
     answer[ii] = List[ii]->Evaluate(v);
@@ -466,7 +466,7 @@ const gbtVector<T> gPolyList<T>::Evaluate(const gbtVector<T>& v) const
   return answer;
 }
   
-template<class T> const bool gPolyList<T>::IsRoot(const gbtVector<T>& v) const
+template<class T> const bool gPolyList<T>::IsRoot(const Gambit::Vector<T>& v) const
 {
   for (int ii = 1; ii <= List.Length(); ii++) 
     if (List[ii]->Evaluate(v) != (T)0) 
@@ -509,7 +509,7 @@ const gPoly<T> gPolyList<T>::DetOfDerivativeMatrix() const
 }
   
 template<class T> 
-const Gambit::Matrix<T> gPolyList<T>::DerivativeMatrix(const gbtVector<T>& p) const
+const Gambit::Matrix<T> gPolyList<T>::DerivativeMatrix(const Gambit::Vector<T>& p) const
 {
   Gambit::Matrix<T> answer(Length(),Dmnsn());
   gbtList<gPoly<T> > list = UnderlyingbtList();
@@ -522,7 +522,7 @@ const Gambit::Matrix<T> gPolyList<T>::DerivativeMatrix(const gbtVector<T>& p) co
 }
   
 template<class T> const Gambit::SquareMatrix<T> 
-gPolyList<T>::SquareDerivativeMatrix(const gbtVector<T>& p) const
+gPolyList<T>::SquareDerivativeMatrix(const Gambit::Vector<T>& p) const
 {
   assert (Length() == Dmnsn());
 

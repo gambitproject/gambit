@@ -44,7 +44,7 @@ independent.
 template <class T> class LinearCombination  {
   private:
     Gambit::Matrix<T> scrambled;
-    gbtVector<T> weights;
+    Gambit::Vector<T> weights;
     bool       last_row_is_spanned;
 
     void AddMultipleOfRowiToRowj(const int& i, 
@@ -72,7 +72,7 @@ template <class T> class LinearCombination  {
 
        // Information
     bool       LastRowIsSpanned() const;
-    gbtVector<T> LinearDependence() const;
+    Gambit::Vector<T> LinearDependence() const;
 };
 
 #endif     // LinearCombination_H
