@@ -49,7 +49,7 @@ template <class T> polynomial<T>::polynomial(const T& coeff, const int& deg)
 }
 
 template <class T> 
-polynomial<T>::polynomial(const gbtList<T>& coefficientlist) 
+polynomial<T>::polynomial(const Gambit::List<T>& coefficientlist) 
 : coeflist(coefficientlist)
 { 
 }
@@ -251,7 +251,7 @@ template <class T>  void polynomial<T>::ToMonic()
 template<class T>  
 polynomial<gDouble>  polynomial<T>::TogDouble() const
 {
-  gbtList<gDouble> newcoefs;
+  Gambit::List<gDouble> newcoefs;
   for (int i = 1; i <= coeflist.Length(); i++) {
     newcoefs.Append((gDouble)coeflist[i]);
   }
@@ -295,7 +295,7 @@ template <class T> T polynomial<T>::LeadingCoefficient() const
   else              return coeflist[Degree() + 1];
 }
 
-template <class T> gbtList<T> polynomial<T>::CoefficientList() const
+template <class T> Gambit::List<T> polynomial<T>::CoefficientList() const
 {
   return coeflist;
 }
@@ -339,7 +339,7 @@ bool polynomial<T>::CannotHaveRootsIn(const gInterval<T>& I) const
   else if (EvaluationAt(I.LowerBound()) == (T)0) return false;
 
   // generate list of derivatives
-  gbtList< polynomial<T> > derivs;
+  Gambit::List< polynomial<T> > derivs;
   derivs.Append(Derivative());
   int i;
   for (i = 2; i <= Degree(); i++) derivs.Append(derivs[i-1].Derivative());
@@ -375,15 +375,15 @@ bool polynomial<T>::CannotHaveRootsIn(const gInterval<T>& I) const
 }
 
 
-template <class T> gbtList< gInterval<T> >
+template <class T> Gambit::List< gInterval<T> >
 polynomial<T>::RootSubintervals(const gInterval<T>& I) const
 { assert ( Degree() >= 0 && IsQuadratfrei() );
 
   polynomial<T> Df = Derivative();
 
-  gbtList< gInterval<T> > answer;
+  Gambit::List< gInterval<T> > answer;
 
-  gbtList< gInterval<T> > to_be_processed; to_be_processed.Append(I);
+  Gambit::List< gInterval<T> > to_be_processed; to_be_processed.Append(I);
   while (to_be_processed.Length() > 0) {
 
     gInterval<T> in_process = to_be_processed.Remove(to_be_processed.Length());
@@ -434,7 +434,7 @@ polynomial<T>::RootSubintervals(const gInterval<T>& I) const
 template <class T> gInterval<T>
 polynomial<T>::NeighborhoodOfRoot(const gInterval<T>& I, T& error) const
 {
-  gbtList< gInterval<T> > intrvls; intrvls.Append(I);
+  Gambit::List< gInterval<T> > intrvls; intrvls.Append(I);
   while (intrvls[intrvls.Length()].Length() >= error) {
     if      (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) == (T)0) 
       intrvls.Append(gInterval<T>(intrvls[intrvls.Length()].LowerBound(),
@@ -459,11 +459,11 @@ polynomial<T>::NeighborhoodOfRoot(const gInterval<T>& I, T& error) const
   // by introducing Newton's method.
 }
 
-template <class T> gbtList< gInterval<T> >
+template <class T> Gambit::List< gInterval<T> >
 polynomial<T>::PreciseRootIntervals(const gInterval<T>& I, T& error) const
 {
-  gbtList< gInterval<T> > coarse = RootSubintervals(I);
-  gbtList< gInterval<T> > fine;
+  Gambit::List< gInterval<T> > coarse = RootSubintervals(I);
+  Gambit::List< gInterval<T> > fine;
 
   for (int i = 1; i <= coarse.Length(); i++) 
     fine.Append(NeighborhoodOfRoot(coarse[i],error));
@@ -471,10 +471,10 @@ polynomial<T>::PreciseRootIntervals(const gInterval<T>& I, T& error) const
   return fine;
 }
 
-template <class T> gbtList<T>
+template <class T> Gambit::List<T>
 polynomial<T>::PreciseRoots(const gInterval<T>& I, T& error) const
 {
-  gbtList<T> roots;
+  Gambit::List<T> roots;
 
   polynomial<T> p(*this), factor(*this);
 
@@ -491,7 +491,7 @@ polynomial<T>::PreciseRoots(const gInterval<T>& I, T& error) const
     }
 
     for (int i = 1; i <= depth; i++) p = p/factor;
-    gbtList< gInterval<T> > fine = factor.PreciseRootIntervals(I,error);
+    Gambit::List< gInterval<T> > fine = factor.PreciseRootIntervals(I,error);
     for (int j = 1; j <= fine.Length(); j++) {
       T approx = fine[j].LowerBound();
       for (int h = 1; h <= 2; h++) {
@@ -531,7 +531,7 @@ complexpoly::complexpoly(const gComplex& coeff, const int& deg)
 }
 
  
-complexpoly::complexpoly(const gbtList<gComplex>& coefficientlist) 
+complexpoly::complexpoly(const Gambit::List<gComplex>& coefficientlist) 
 : coeflist(coefficientlist)
 { 
 }
@@ -776,11 +776,11 @@ bool complexpoly::IsQuadratfrei() const
 }
 
 
-gbtList<gComplex> complexpoly::Roots() const 
+Gambit::List<gComplex> complexpoly::Roots() const 
 {
   assert (!IsZero());
 
-  gbtList<gComplex> answer;
+  Gambit::List<gComplex> answer;
 
   if (Degree() == 0) 
     return answer;
@@ -811,7 +811,7 @@ gbtList<gComplex> complexpoly::Roots() const
 
   answer.Append(guess);
 
-  gbtList<gComplex> lin_form_coeffs;
+  Gambit::List<gComplex> lin_form_coeffs;
   lin_form_coeffs.Append(guess);
   lin_form_coeffs.Append(gComplex(-1.0,0.0));
   complexpoly linear_form(lin_form_coeffs);

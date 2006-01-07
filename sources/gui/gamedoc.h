@@ -235,10 +235,10 @@ private:
   gbtBehavDominanceStack m_behavSupports;
   gbtStrategyDominanceStack m_stratSupports;
 
-  gbtList<gbtAnalysisProfileList> m_profiles;
+  Gambit::List<gbtAnalysisProfileList> m_profiles;
   int m_currentProfileList;
 
-  gbtList<std::string> m_undoList, m_redoList;
+  Gambit::List<std::string> m_undoList, m_redoList;
 
 public:
   gbtGameDocument(Gambit::Game p_game);
@@ -298,9 +298,9 @@ public:
   int GetCurrentProfile(void) const 
   { return (m_profiles.Length() == 0) ? 0 : GetProfiles().GetCurrent(); }
   void SetCurrentProfile(int p_profile);
-  void AddProfiles(const gbtList<Gambit::MixedBehavProfile<double> > &);
+  void AddProfiles(const Gambit::List<Gambit::MixedBehavProfile<double> > &);
   void AddProfile(const Gambit::MixedBehavProfile<double> &);
-  void AddProfiles(const gbtList<Gambit::MixedStrategyProfile<double> > &);
+  void AddProfiles(const Gambit::List<Gambit::MixedStrategyProfile<double> > &);
   void AddProfile(const Gambit::MixedStrategyProfile<double> &);
   //@}
 

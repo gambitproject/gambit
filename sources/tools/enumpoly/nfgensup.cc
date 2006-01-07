@@ -33,7 +33,7 @@
 void AllSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
 			     Gambit::StrategySupport *sact,
 			     StrategyCursorForSupport *c,
-			     gbtList<Gambit::StrategySupport> &p_list)
+			     Gambit::List<Gambit::StrategySupport> &p_list)
 { 
   p_list.Append(*sact);
 
@@ -49,9 +49,9 @@ void AllSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
   } while (c_copy.GoToNext()) ;
 }
 
-gbtList<Gambit::StrategySupport> AllSubsupports(const Gambit::StrategySupport &S)
+Gambit::List<Gambit::StrategySupport> AllSubsupports(const Gambit::StrategySupport &S)
 {
-  gbtList<Gambit::StrategySupport> answer;
+  Gambit::List<Gambit::StrategySupport> answer;
   Gambit::StrategySupport SAct(S);
   StrategyCursorForSupport cursor(S);
 
@@ -66,7 +66,7 @@ gbtList<Gambit::StrategySupport> AllSubsupports(const Gambit::StrategySupport &S
 void AllValidSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
 				  Gambit::StrategySupport *sact,
 				  StrategyCursorForSupport *c,
-				  gbtList<Gambit::StrategySupport> &p_list)
+				  Gambit::List<Gambit::StrategySupport> &p_list)
 { 
   p_list.Append(*sact);
 
@@ -82,9 +82,9 @@ void AllValidSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
   } while (c_copy.GoToNext()) ;
 }
 
-gbtList<Gambit::StrategySupport> AllValidSubsupports(const Gambit::StrategySupport &S)
+Gambit::List<Gambit::StrategySupport> AllValidSubsupports(const Gambit::StrategySupport &S)
 {
-  gbtList<Gambit::StrategySupport> answer;
+  Gambit::List<Gambit::StrategySupport> answer;
   Gambit::StrategySupport SAct(S);
   StrategyCursorForSupport cursor(S);
 
@@ -98,13 +98,13 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
 					StrategyCursorForSupport *c,
 					const bool strong,
 					const bool conditional,
-					gbtList<Gambit::StrategySupport> &p_list)
+					Gambit::List<Gambit::StrategySupport> &p_list)
 { 
   bool abort = false;
   bool no_deletions = true;
 
 
-  gbtList<Gambit::GameStrategy> deletion_list;
+  Gambit::List<Gambit::GameStrategy> deletion_list;
   StrategyCursorForSupport scanner(s);
 
   // First we collect all the strategies that can be deleted.
@@ -126,7 +126,7 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
 
   // Now we delete them, recurse, then restore
   if (!abort && !no_deletions) {
-    gbtList<Gambit::GameStrategy> actual_deletions;
+    Gambit::List<Gambit::GameStrategy> actual_deletions;
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
       actual_deletions.Append(deletion_list[i]);
 
@@ -170,11 +170,11 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
   }
 }
   
-gbtList<Gambit::StrategySupport> AllUndominatedSubsupports(const Gambit::StrategySupport &S,
+Gambit::List<Gambit::StrategySupport> AllUndominatedSubsupports(const Gambit::StrategySupport &S,
 					       bool strong,
 					       bool conditional)
 {
-  gbtList<Gambit::StrategySupport> answer;
+  Gambit::List<Gambit::StrategySupport> answer;
   Gambit::StrategySupport sact(S);
   StrategyCursorForSupport cursor(S);
 
@@ -192,12 +192,12 @@ gbtList<Gambit::StrategySupport> AllUndominatedSubsupports(const Gambit::Strateg
 void PossibleNashSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
 				      Gambit::StrategySupport *sact,
 				      StrategyCursorForSupport *c,
-				      gbtList<Gambit::StrategySupport> &p_list)
+				      Gambit::List<Gambit::StrategySupport> &p_list)
 { 
   bool abort = false;
   bool no_deletions = true;
 
-  gbtList<Gambit::GameStrategy> deletion_list;
+  Gambit::List<Gambit::GameStrategy> deletion_list;
   StrategyCursorForSupport scanner(s);
 
   do {
@@ -217,7 +217,7 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
   } while (!abort && scanner.GoToNext());
   
   if (!abort) {
-    gbtList<Gambit::GameStrategy> actual_deletions;
+    Gambit::List<Gambit::GameStrategy> actual_deletions;
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
       actual_deletions.Append(deletion_list[i]);
       sact->RemoveStrategy(deletion_list[i]); 
@@ -245,7 +245,7 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
   }
 }
 
-gbtList<Gambit::StrategySupport> SortSupportsBySize(gbtList<Gambit::StrategySupport> &p_list) 
+Gambit::List<Gambit::StrategySupport> SortSupportsBySize(Gambit::List<Gambit::StrategySupport> &p_list) 
 {
   Gambit::Array<int> sizes(p_list.Length());
   for (int i = 1; i <= p_list.Length(); i++)
@@ -282,16 +282,16 @@ gbtList<Gambit::StrategySupport> SortSupportsBySize(gbtList<Gambit::StrategySupp
       }
   }
 
-  gbtList<Gambit::StrategySupport> answer;
+  Gambit::List<Gambit::StrategySupport> answer;
   for (int i = 1; i <= p_list.Length(); i++)
     answer.Append(p_list[listproxy[i]]);
 
   return answer;
 }
   
-gbtList<Gambit::StrategySupport> PossibleNashSubsupports(const Gambit::StrategySupport &S)
+Gambit::List<Gambit::StrategySupport> PossibleNashSubsupports(const Gambit::StrategySupport &S)
 {
-  gbtList<Gambit::StrategySupport> answer;
+  Gambit::List<Gambit::StrategySupport> answer;
   Gambit::StrategySupport sact(S);
   StrategyCursorForSupport cursor(S);
   PossibleNashSubsupportsRECURSIVE(S, &sact, &cursor, answer);

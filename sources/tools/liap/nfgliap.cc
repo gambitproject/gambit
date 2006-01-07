@@ -315,7 +315,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  gbtList<Gambit::MixedStrategyProfile<double> > starts;
+  Gambit::List<Gambit::MixedStrategyProfile<double> > starts;
 
   if (startFile != "") {
     std::ifstream startPoints(startFile.c_str());

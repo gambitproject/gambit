@@ -34,14 +34,14 @@ class efgNashAlgorithm {
 public:
   virtual ~efgNashAlgorithm() { }
 
-  virtual gbtList<gbtBehavProfile<gbtNumber> > Solve(const gbtEfgSupport &) = 0;
+  virtual Gambit::List<gbtBehavProfile<gbtNumber> > Solve(const gbtEfgSupport &) = 0;
 };
 
 class nfgNashAlgorithm {
 public:
   virtual ~nfgNashAlgorithm() { }
 
-  virtual gbtList<gbtMixedProfile<gbtNumber> > Solve(const gbtNfgSupport &) = 0;
+  virtual Gambit::List<gbtMixedProfile<gbtNumber> > Solve(const gbtNfgSupport &) = 0;
 };
 
 
@@ -49,20 +49,20 @@ class SubgameSolver : public efgNashAlgorithm  {
 private:
   bool m_isPerfectRecall;
   gbtBehavProfile<gbtNumber> *solution;
-  gbtList<gbtBehavProfile<gbtNumber> > solutions;
+  Gambit::List<gbtBehavProfile<gbtNumber> > solutions;
   efgNashAlgorithm *m_efgAlgorithm;
   nfgNashAlgorithm *m_nfgAlgorithm;
 
   Gambit::Array<Gambit::Array<gbtEfgInfoset> *> infosets;
 
   void FindSubgames(const gbtEfgSupport &,
-		    gbtEfgNode , gbtList<gbtBehavProfile<gbtNumber> > &, gbtList<gbtEfgOutcome> &);
+		    gbtEfgNode , Gambit::List<gbtBehavProfile<gbtNumber> > &, Gambit::List<gbtEfgOutcome> &);
   
 public:
   SubgameSolver(void) : m_efgAlgorithm(0), m_nfgAlgorithm(0) { }
   virtual ~SubgameSolver();
     
-  gbtList<gbtBehavProfile<gbtNumber> > Solve(const gbtEfgSupport &);
+  Gambit::List<gbtBehavProfile<gbtNumber> > Solve(const gbtEfgSupport &);
 
   void SetAlgorithm(efgNashAlgorithm *p_algorithm)
     { m_efgAlgorithm = p_algorithm; m_nfgAlgorithm = 0; }

@@ -76,7 +76,7 @@ public:
   // Find the active actions at an infoset
   const Array<GameAction> &Actions(int pl, int iset) const;
   Array<GameAction> Actions(const GameInfoset &) const;
-  gbtList<GameAction> ListOfActions(const GameInfoset &) const;
+  List<GameAction> ListOfActions(const GameInfoset &) const;
 
   // Action editing functions
   virtual void AddAction(const GameAction &);
@@ -87,13 +87,13 @@ public:
   int TotalNumSequences(void) const;
 
   // Reachable Nodes and Information Sets
-  gbtList<GameNode> ReachableNonterminalNodes(const GameNode &) const;
-  gbtList<GameNode> ReachableNonterminalNodes(const GameNode &, 
+  List<GameNode> ReachableNonterminalNodes(const GameNode &) const;
+  List<GameNode> ReachableNonterminalNodes(const GameNode &, 
 						const GameAction &) const;
-  gbtList<GameInfoset> ReachableInfosets(const GameNode &) const;
-  gbtList<GameInfoset> ReachableInfosets(const GameNode &, 
+  List<GameInfoset> ReachableInfosets(const GameNode &) const;
+  List<GameInfoset> ReachableInfosets(const GameNode &, 
 					   const GameAction &) const;
-  gbtList<GameInfoset> ReachableInfosets(const GamePlayer &) const;
+  List<GameInfoset> ReachableInfosets(const GamePlayer &) const;
 
   bool AlwaysReaches(const GameInfoset &) const;
   bool AlwaysReachesFrom(const GameInfoset &, const GameNode &) const;
@@ -118,8 +118,8 @@ public:
 
 class BehavSupportWithActiveInfo : public BehavSupport {
 protected:
-  Array<gbtList<bool> >         is_infoset_active;
-  Array<gbtList<gbtList<bool> > > is_nonterminal_node_active;
+  Array<List<bool> >         is_infoset_active;
+  Array<List<List<bool> > > is_nonterminal_node_active;
 
   void InitializeActiveListsToAllActive();
   void InitializeActiveListsToAllInactive();
@@ -135,7 +135,7 @@ protected:
   void deactivate_this_and_lower_nodes(const GameNode &);
   void deactivate_this_and_lower_nodes_returning_deactivated_infosets(
                                                  const GameNode &,
-						 gbtList<GameInfoset> *);
+						 List<GameInfoset> *);
 
 public:
   BehavSupportWithActiveInfo ( const Game &);
@@ -149,14 +149,14 @@ public:
   bool operator!=(const BehavSupportWithActiveInfo &) const;
 
   // Find the reachable nodes at an infoset
-  gbtList<GameNode> ReachableNodesInInfoset(const GameInfoset &) const;
-  gbtList<GameNode> ReachableNonterminalNodes() const;
+  List<GameNode> ReachableNodesInInfoset(const GameInfoset &) const;
+  List<GameNode> ReachableNonterminalNodes() const;
 
   // Action editing functions
   void AddAction(const GameAction &);
   bool RemoveAction(const GameAction &);
   bool RemoveActionReturningDeletedInfosets(const GameAction &, 
-					    gbtList<GameInfoset> *);
+					    List<GameInfoset> *);
   //  void GoToNextSubsupportOf(const BehavSupport &);
 
   // Information

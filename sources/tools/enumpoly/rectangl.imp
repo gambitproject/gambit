@@ -36,7 +36,7 @@ template<class T> gRectangle<T>::gRectangle(const gRectangle<T>& given)
 {
 }
 
-template<class T> gRectangle<T>::gRectangle(const gbtList< gInterval<T> >& given)
+template<class T> gRectangle<T>::gRectangle(const Gambit::List< gInterval<T> >& given)
 : sides(given)
 {
 }
@@ -135,7 +135,7 @@ const gInterval<T> gRectangle<T>::CartesianFactor(const int& i) const
 template<class T> 
 const gRectangle<T> gRectangle<T>::SameCenterDoubleSideLengths() const 
 { 
-  gbtList<gInterval<T> > new_sides;
+  Gambit::List<gInterval<T> > new_sides;
   for (int i = 1; i <= Dmnsn(); i++)
     new_sides.Append(CartesianFactor(i).SameCenterTwiceLength());
   return gRectangle<T>(new_sides);
@@ -155,7 +155,7 @@ const gRectangle<T> gRectangle<T>::CubeContainingCrcmscrbngSphere() const
   T diameter((T)0);
   while (diameter * diameter < sumsquares) diameter += maxlength;
   
-  gbtList<gInterval<T> > new_sides;
+  Gambit::List<gInterval<T> > new_sides;
   for (i = 1; i <= Dmnsn(); i++)
     new_sides.Append(CartesianFactor(i).SameCenterWithNewLength(diameter));
   return gRectangle<T>(new_sides);
@@ -165,7 +165,7 @@ template<class T>
 const gRectangle<T> 
 gRectangle<T>::Orthant(const Gambit::Array<int>& top_or_bot) const 
 { 
-  gbtList<gInterval<T> > new_sides;
+  Gambit::List<gInterval<T> > new_sides;
   for (int i = 1; i <= Dmnsn(); i++)
     if (top_or_bot[i] == 0)
     new_sides.Append(CartesianFactor(i).LeftHalf());
@@ -233,9 +233,9 @@ template<class T> const gRectangle<T> gRectangle<T>::BoundingRectangle() const
   return *this;
 }
 
-template<class T> const gbtList<Gambit::Vector<T> > gRectangle<T>::VertexList() const 
+template<class T> const Gambit::List<Gambit::Vector<T> > gRectangle<T>::VertexList() const 
 { 
-  gbtList<Gambit::Vector<T> > answer;
+  Gambit::List<Gambit::Vector<T> > answer;
 
   Gambit::Array<int> ListOfTwos(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) ListOfTwos[i] = 2;
@@ -294,7 +294,7 @@ const T gRectangle<T>::DiameterSquared() const
 template<class T>  
 gRectangle<gDouble>  TogDouble(const gRectangle<T>& given) 
 {
-  gbtList<gInterval<gDouble> > cartesian_factors;
+  Gambit::List<gInterval<gDouble> > cartesian_factors;
   for (int i = 1; i <= given.Dmnsn(); i++) 
     cartesian_factors.Append(gInterval<gDouble>((gDouble)given.LowerBound()[i],
 						(gDouble)given.UpperBound()[i]));

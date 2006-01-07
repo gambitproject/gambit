@@ -129,7 +129,8 @@ public:
 
 std::string ToText(const Rational &);
 Rational ToRational(const std::string &);
-void gEpsilon(Rational &v, int i = 8);
+
+inline void Epsilon(Rational &v, int /*i*/ = 8) { v = (Rational) 0;}
 
 //
 // This is implemented so as to convert rational numbers to their

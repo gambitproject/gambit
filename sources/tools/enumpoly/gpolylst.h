@@ -61,12 +61,12 @@ template <class T> class gPolyList
  private:
    const gSpace*      Space;
    const term_order*  Order;
-   gbtList< gPoly<T> *> List;
+   Gambit::List< gPoly<T> *> List;
    
    // SubProcedures of ToSortedReducedGrobner   
    void        Sort(const term_order &);
-   void        CriterionTwo(      gbtList<index_pair>&, 
-			    const gbtList<index_pair>&, 
+   void        CriterionTwo(      Gambit::List<index_pair>&, 
+			    const Gambit::List<index_pair>&, 
 			    const int&,
 			    const term_order&) const;
                      // See Adams and Loustaunau, p. 130
@@ -76,8 +76,8 @@ template <class T> class gPolyList
 
  public:
    gPolyList(const gSpace *, const term_order*);  
-   gPolyList(const gSpace *, const term_order*, const gbtList< gPoly<T> *> &);
-   gPolyList(const gSpace *, const term_order*, const gbtList< gPoly<T> > &);
+   gPolyList(const gSpace *, const term_order*, const Gambit::List< gPoly<T> *> &);
+   gPolyList(const gSpace *, const term_order*, const Gambit::List< gPoly<T> > &);
    gPolyList(const gPolyList<T> &);
 
    ~gPolyList();                 // Deletes all pointees
@@ -117,7 +117,7 @@ template <class T> class gPolyList
    const int                Length()                                  const;
    const int                Dmnsn()                                   const;
    const bool               IsMultiaffine()                           const;
-   gbtList<gPoly<T> >         UnderlyingbtList()                          const;
+   Gambit::List<gPoly<T> >         UnderlyingList()                          const;
    const Gambit::Vector<T>         Evaluate(const Gambit::Vector<T>&)               const;
    const bool               IsRoot(const Gambit::Vector<T>&)                 const;
    const Gambit::RectArray<gPoly<T>*> DerivativeMatrix()                     const;
@@ -128,8 +128,8 @@ template <class T> class gPolyList
 //  inline int static Count() { return Counted<gPolyList<T> >::objCount(); }
 
    // Conversion
-   gbtList<gPoly<gDouble> > ListTogDouble()  const;
-   gbtList<gPoly<gDouble> > NormalizedList() const;
+   Gambit::List<gPoly<gDouble> > ListTogDouble()  const;
+   Gambit::List<gPoly<gDouble> > NormalizedList() const;
 };  
 
 #endif // GPOLYLST_H

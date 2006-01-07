@@ -222,4 +222,4 @@ template class gPolyBlock<gbtNumber>;
 
 #include "base/glist.imp"
 
-template class gbtList<gPoly<gbtNumber> >;
+template class Gambit::List<gPoly<gbtNumber> >;

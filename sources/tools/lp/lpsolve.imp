@@ -45,9 +45,9 @@ LPSolve<T>::LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b,
 {
     // These are the values recommended by Murtagh (1981) for 15 digit 
     // accuracy in LP problems 
-  gEpsilon(eps1,5);
-  gEpsilon(eps2,8);
-  gEpsilon(eps3,6);
+  Gambit::Epsilon(eps1,5);
+  Gambit::Epsilon(eps2,8);
+  Gambit::Epsilon(eps3,6);
   
   // Check dimensions
   if (A.NumRows() != b.Length() || A.NumColumns() != c.Length()) {
@@ -390,7 +390,7 @@ template <class T> const LPTableau<T> &LPSolve<T>::GetTableau(void)
 //
 // This method does not work correctly, so is disabled
 //
-template <class T> const gbtList<BFS <T> > &LPSolve<T>::GetAll(void)
+template <class T> const Gambit::List<BFS <T> > &LPSolve<T>::GetAll(void)
 {
   Gambit::Vector<T> c(tab.GetCost());
   Gambit::Vector<T> uc(tab.GetUnitCost());
@@ -420,10 +420,10 @@ template <class T> const gbtList<BFS <T> > &LPSolve<T>::GetAll(void)
   }
 
   VertEnum<T> AllSolutions(tab);
-  gbtList<Gambit::Vector<T> > verts;
+  Gambit::List<Gambit::Vector<T> > verts;
 
-  gbtList<BFS<T> > *bfs = new gbtList<BFS<T> >(AllSolutions.VertexList());
-  gbtList<BFS<T> > *dual_bfs = new gbtList<BFS<T> >(AllSolutions.DualVertexList());
+  Gambit::List<BFS<T> > *bfs = new Gambit::List<BFS<T> >(AllSolutions.VertexList());
+  Gambit::List<BFS<T> > *dual_bfs = new Gambit::List<BFS<T> >(AllSolutions.DualVertexList());
   AllSolutions.Vertices(verts);
 
   //  gout << "\nHere are the BFSs: \n";

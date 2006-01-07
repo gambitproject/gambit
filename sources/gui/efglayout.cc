@@ -632,8 +632,8 @@ int gbtTreeLayout::LayoutSubtree(Gambit::GameNode p_node, const Gambit::BehavSup
   }
   entry->SetBranchLength(settings.BranchLength());
 
-  p_maxy = gmax(entry->Y(), p_maxy);
-  p_miny = gmin(entry->Y(), p_miny);
+  p_maxy = Gambit::max(entry->Y(), p_maxy);
+  p_miny = Gambit::min(entry->Y(), p_miny);
     
   return entry->Y();
 }
@@ -700,7 +700,7 @@ void gbtTreeLayout::CheckInfosetEntry(gbtNodeEntry *e)
     e1 = m_nodeList[pos];
     // Find the max num for this level
     if (e->GetLevel() == e1->GetLevel())  {
-      num = gmax(e1->GetSublevel(), num);
+      num = Gambit::max(e1->GetSublevel(), num);
     }
   }
   num++;
@@ -740,8 +740,8 @@ void gbtTreeLayout::UpdateTableInfosets(void)
   // find the max e->num for each level
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
     gbtNodeEntry *entry = m_nodeList[pos];
-    nums[entry->GetLevel()] = gmax(entry->GetSublevel() + 1,
-				   nums[entry->GetLevel()]);
+    nums[entry->GetLevel()] = Gambit::max(entry->GetSublevel() + 1,
+					  nums[entry->GetLevel()]);
   }
     
   for (int i = 0; i <= m_maxLevel; i++) {
@@ -757,7 +757,7 @@ void gbtTreeLayout::UpdateTableInfosets(void)
 		  (nums[entry->GetLevel()-1] +
 		   entry->GetSublevel()) * m_infosetSpacing);
     }
-    m_maxX = gmax(m_maxX, entry->X() + entry->GetSize());
+    m_maxX = Gambit::max(m_maxX, entry->X() + entry->GetSize());
   }
 }
 
@@ -825,7 +825,7 @@ void gbtTreeLayout::BuildNodeList(Gambit::GameNode p_node, const Gambit::BehavSu
       BuildNodeList(p_node->GetChild(i), p_support, p_level + 1);
     }
   }
-  m_maxLevel = gmax(p_level, m_maxLevel);
+  m_maxLevel = Gambit::max(p_level, m_maxLevel);
 }
 
 void gbtTreeLayout::BuildNodeList(const Gambit::BehavSupport &p_support)

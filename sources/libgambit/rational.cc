@@ -568,10 +568,6 @@ Rational ToRational(const std::string &f)
   }
 }
 
-void gEpsilon(Rational &v, int /* i */)
-{ v = (Rational)0;}
-
-
 Rational ToNumber(const std::string &p_string)
 {
   if (p_string.find('.') != -1 || p_string.find('e') != -1) {

@@ -66,8 +66,8 @@ private:
 
   int ns1,ns2,ni1,ni2;
   T maxpay,eps;
-  gbtList<BFS<T> > List;
-  gbtList<Gambit::GameInfoset> isets1, isets2;
+  Gambit::List<BFS<T> > List;
+  Gambit::List<Gambit::GameInfoset> isets1, isets2;
 
   void FillTableau(const Gambit::BehavSupport &, Gambit::Matrix<T> &, const Gambit::GameNode &, T,
 		   int, int, int, int);
@@ -158,7 +158,7 @@ void efgLcp<T>::Solve(const Gambit::BehavSupport &p_support)
   isets1 = p_support.ReachableInfosets(p_support.GetGame()->GetPlayer(1));
   isets2 = p_support.ReachableInfosets(p_support.GetGame()->GetPlayer(2));
 
-  List = gbtList<BFS<T> >();
+  List = Gambit::List<BFS<T> >();
 
   int ntot;
   ns1 = p_support.NumSequences(1);

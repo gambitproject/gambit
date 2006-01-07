@@ -72,10 +72,10 @@ template <class T> class nfgLcp {
 private:
   int m_stopAfter, m_maxDepth;
 
-  int AddBfs(LHTableau<T> &, gbtList<BFS<T> > &);
+  int AddBfs(LHTableau<T> &, Gambit::List<BFS<T> > &);
   void AddSolutions(const Gambit::StrategySupport &,
-		    const gbtList<BFS<T> > &, const T &);
-  void AllLemke(const Gambit::StrategySupport &, int, LHTableau<T> &B, gbtList<BFS<T> > &,
+		    const Gambit::List<BFS<T> > &, const T &);
+  void AllLemke(const Gambit::StrategySupport &, int, LHTableau<T> &B, Gambit::List<BFS<T> > &,
 		int depth);
   
 public:
@@ -104,7 +104,7 @@ void nfgLcp<T>::Solve(const Gambit::StrategySupport &p_support)
     return;
   }
 
-  gbtList<BFS<T> > bfsList;
+  Gambit::List<BFS<T> > bfsList;
 
   try {
     Gambit::Matrix<T> A1 = Make_A1(p_support, (T) 0);
@@ -131,7 +131,7 @@ void nfgLcp<T>::Solve(const Gambit::StrategySupport &p_support)
 }
 
 template <class T> int nfgLcp<T>::AddBfs(LHTableau<T> &p_tableau,
-					      gbtList<BFS<T> > &p_list)
+					      Gambit::List<BFS<T> > &p_list)
 {
   BFS<T> cbfs((T) 0);
   cbfs = p_tableau.GetBFS();
@@ -152,7 +152,7 @@ template <class T> int nfgLcp<T>::AddBfs(LHTableau<T> &p_tableau,
 //
 template <class T> void nfgLcp<T>::AllLemke(const Gambit::StrategySupport &p_support,
 					    int j, LHTableau<T> &B,
-					    gbtList<BFS<T> > &p_list,
+					    Gambit::List<BFS<T> > &p_list,
 					    int depth)
 {
   if (m_maxDepth != 0 && depth > m_maxDepth) {
@@ -182,7 +182,7 @@ template <class T> void nfgLcp<T>::AllLemke(const Gambit::StrategySupport &p_sup
 
 template <class T>
 void nfgLcp<T>::AddSolutions(const Gambit::StrategySupport &p_support,
-			     const gbtList<BFS<T> > &p_list,
+			     const Gambit::List<BFS<T> > &p_list,
 			     const T &epsilon)
 {
   int i,j;

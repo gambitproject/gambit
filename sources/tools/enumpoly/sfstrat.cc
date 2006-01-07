@@ -31,9 +31,9 @@
 // Sequence:  Member functions
 //--------------------------------------
 
-gbtList<Gambit::GameAction> Sequence::History(void) const 
+Gambit::List<Gambit::GameAction> Sequence::History(void) const 
 { 
-  gbtList<Gambit::GameAction> h;
+  Gambit::List<Gambit::GameAction> h;
   Gambit::GameAction a = action;
   const Sequence * s = (this);
   while(a) {

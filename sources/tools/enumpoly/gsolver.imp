@@ -55,9 +55,9 @@ template<class T>  gSolver<T>::~gSolver()
 //        Utilities
 //---------------------------
 
-template <class T> gbtList<gPoly<gDouble> > gSolver<T>::BasisTogDouble() const
+template <class T> Gambit::List<gPoly<gDouble> > gSolver<T>::BasisTogDouble() const
 {
-  gbtList<gPoly<gDouble> > newlist;
+  Gambit::List<gPoly<gDouble> > newlist;
   gPolyList<T> oldlist = TheIdeal.CanonicalBasis();
   for (int i = 1; i <= oldlist.Length(); i++) {
     
@@ -66,13 +66,13 @@ template <class T> gbtList<gPoly<gDouble> > gSolver<T>::BasisTogDouble() const
   return newlist;
 }
 
-template <class T> gbtList<Gambit::Vector<gDouble> >  
-    gSolver<T>::ContinuationSolutions(const gbtList<gPoly<gDouble> >& list,
+template <class T> Gambit::List<Gambit::Vector<gDouble> >  
+    gSolver<T>::ContinuationSolutions(const Gambit::List<gPoly<gDouble> >& list,
 				      const int dmnsn,
 				      const int curvar,
 				      const Gambit::Vector<gDouble>& knownvals)
 {
-  gbtList<Gambit::Vector<gDouble> > answer;
+  Gambit::List<Gambit::Vector<gDouble> > answer;
 
   if (!list[1].IsZero()) {
     polynomial<gDouble> rootpoly = list[1].UnivariateEquivalent(curvar);
@@ -83,7 +83,7 @@ template <class T> gbtList<Gambit::Vector<gDouble> >
 //DEBUG
 //gout << "About to enter PreciseRoots ... \n";
 
-    gbtList<gDouble> rootlist = rootpoly.PreciseRoots(root_interval,error);
+    Gambit::List<gDouble> rootlist = rootpoly.PreciseRoots(root_interval,error);
 
 //DEBUG
 //gout << "Just left PreciseRoots ... \n";
@@ -94,7 +94,7 @@ template <class T> gbtList<Gambit::Vector<gDouble> >
       newvec[curvar] = rootlist[i];
       if (curvar == dmnsn) answer.Append(newvec);
       else {
-	gbtList<gPoly<gDouble> > newlist;
+	Gambit::List<gPoly<gDouble> > newlist;
 	for (int j = 2; j <= list.Length(); j++) 
 	  newlist.Append(list[j].EvaluateOneVar(curvar,rootlist[i]));
 	answer += ContinuationSolutions(newlist,dmnsn,curvar+1,newvec);
@@ -103,7 +103,7 @@ template <class T> gbtList<Gambit::Vector<gDouble> >
   }
   
   else {   // (list[1].IsZero())
-    gbtList<gPoly<gDouble> > newlist;
+    Gambit::List<gPoly<gDouble> > newlist;
     for (int j = 2; j <= list.Length(); j++) 
       newlist.Append(list[j]);
     answer += ContinuationSolutions(newlist,dmnsn,curvar,knownvals);
@@ -122,16 +122,16 @@ template<class T> bool gSolver<T>::IsZeroDimensional()
 }
 
 /* - Old Implementation of Roots
-template<class T> gbtList<Gambit::Vector<gDouble> > gSolver<T>::Roots()
+template<class T> Gambit::List<Gambit::Vector<gDouble> > gSolver<T>::Roots()
 {
-  gbtList<gPoly<gDouble> >   dlist = BasisTogDouble();
+  Gambit::List<gPoly<gDouble> >   dlist = BasisTogDouble();
 
   int dmnsn = InputList.AmbientSpace()->Dmnsn();
 
   Gambit::Vector<gDouble> origin(dmnsn);
   for (int i = 1; i <= dmnsn; i++) origin[i] = (gDouble)0; // Needless!
 
-  gbtList<Gambit::Vector<gDouble> > rootlist = ContinuationSolutions(dlist,
+  Gambit::List<Gambit::Vector<gDouble> > rootlist = ContinuationSolutions(dlist,
 							    dmnsn,
 							    1,
 							    origin);
@@ -139,11 +139,11 @@ template<class T> gbtList<Gambit::Vector<gDouble> > gSolver<T>::Roots()
 }
 */
 
-template<class T> gbtList<Gambit::Vector<gDouble> > gSolver<T>::Roots()
+template<class T> Gambit::List<Gambit::Vector<gDouble> > gSolver<T>::Roots()
 {
-  gbtList<exp_vect> mon_bss = TheIdeal.MonomialBasis();
+  Gambit::List<exp_vect> mon_bss = TheIdeal.MonomialBasis();
 
-  gbtList<polynomial<T> > UnivariateRootEquations;
+  Gambit::List<polynomial<T> > UnivariateRootEquations;
   int i;
   for (i = 1; i <= TheIdeal.Dmnsn(); i++) {
     Gambit::Matrix<T> CoefficientMatrix(mon_bss.Length()+1, mon_bss.Length());
@@ -180,12 +180,12 @@ template<class T> gbtList<Gambit::Vector<gDouble> > gSolver<T>::Roots()
     }
   }
 
-  gbtList<polynomial<gDouble> > ConvertedUnivariateRootEquations;
+  Gambit::List<polynomial<gDouble> > ConvertedUnivariateRootEquations;
   for (i = 1; i <= UnivariateRootEquations.Length(); i++)
     ConvertedUnivariateRootEquations.Append(UnivariateRootEquations[i].TogDouble());
 
-  gbtList<Gambit::Vector<gDouble> > original;
-  gbtList<Gambit::Vector<gDouble> > revised;
+  Gambit::List<Gambit::Vector<gDouble> > original;
+  Gambit::List<Gambit::Vector<gDouble> > revised;
   Gambit::Vector<gDouble> zero(TheIdeal.Dmnsn());
   original.Append(zero);
 
@@ -193,7 +193,7 @@ template<class T> gbtList<Gambit::Vector<gDouble> > gSolver<T>::Roots()
     gDouble error = (gDouble) 0.0001;                           // Ditto!!
 
   for (i = 1; i <= TheIdeal.Dmnsn(); i++) {
-    gbtList<gDouble> roots_of_eqn_i =
+    Gambit::List<gDouble> roots_of_eqn_i =
       ConvertedUnivariateRootEquations[i].PreciseRoots(root_interval,error);
     for (int j = 1; j <= original.Length(); j++)
       for (int k = 1; k <= roots_of_eqn_i.Length(); k++) {
@@ -202,11 +202,11 @@ template<class T> gbtList<Gambit::Vector<gDouble> > gSolver<T>::Roots()
       revised.Append(new_vec);
     }
     original = revised;
-    revised = gbtList<Gambit::Vector<gDouble> >();
+    revised = Gambit::List<Gambit::Vector<gDouble> >();
   }
 
-  gbtList<Gambit::Vector<gDouble> > finished;
-  gbtList<gPoly<gDouble> > gDoublePolys = InputList.ListTogDouble();
+  Gambit::List<Gambit::Vector<gDouble> > finished;
+  Gambit::List<gPoly<gDouble> > gDoublePolys = InputList.ListTogDouble();
   gPolyList<gDouble> InputListTogDouble(TheIdeal.TheSpace(),
 					TheIdeal.Order(),
 					gDoublePolys);

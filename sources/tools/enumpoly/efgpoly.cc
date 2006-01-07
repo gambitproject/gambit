@@ -48,7 +48,7 @@ private:
   int num_vars;
   long count,nevals;
   double time;
-  gbtList<Gambit::MixedBehavProfile<double> > solutions;
+  Gambit::List<Gambit::MixedBehavProfile<double> > solutions;
   const Sfg SF;
   bool is_singular;
   Gambit::Array<Gambit::Array<int> * > var;
@@ -64,7 +64,7 @@ private:
   gPolyList<T> IndifferenceEquations()                 const;
   gPolyList<T> LastActionProbPositiveInequalities()    const;
   gPolyList<T> NashOnSupportEquationsAndInequalities() const;
-  gbtList<Gambit::Vector<gDouble> > 
+  Gambit::List<Gambit::Vector<gDouble> > 
                NashOnSupportSolnVectors(const gPolyList<T> &equations,
 					const gRectangle<T> &Cube);
 
@@ -74,9 +74,9 @@ private:
                                                                       const;
 
   bool ExtendsToANFNash(const Gambit::MixedBehavProfile<double> &)             const;
-  int SaveANFNashSolutions(const gbtList<Gambit::Vector<gDouble> > &list);
+  int SaveANFNashSolutions(const Gambit::List<Gambit::Vector<gDouble> > &list);
   bool ExtendsToNash(const Gambit::MixedBehavProfile<double> &)                const;
-  int SaveNashSolutions(const gbtList<Gambit::Vector<gDouble> > &list);
+  int SaveNashSolutions(const Gambit::List<Gambit::Vector<gDouble> > &list);
 
 public:
   EfgPolEnumModule(const Gambit::BehavSupport &);
@@ -88,7 +88,7 @@ public:
   double           Time(void)       const;
   bool             IsSingular(void) const;
 
-  const gbtList<Gambit::MixedBehavProfile<double> > &GetSolutions(void) const;
+  const Gambit::List<Gambit::MixedBehavProfile<double> > &GetSolutions(void) const;
 
   // Passing between variables of polynomials and sequence form probs
   Gambit::PVector<double> SeqFormProbsFromSolVars(const Gambit::Vector<gDouble> &) const;
@@ -109,7 +109,7 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const Gambit::BehavSupport &S)
   : EF(S.GetGame()), support(S), count(0), nevals(0), SF(S),
     is_singular(false), var(S.GetGame()->NumPlayers())
 { 
-//  gEpsilon(eps,12);
+//  Gambit::Epsilon(eps,12);
 
   num_vars = SF.TotalNumSequences()-SF.NumPlayerInfosets()-SF.NumPlayers();
 
@@ -247,7 +247,7 @@ gPolyList<T> EfgPolEnumModule<T>::NashOnSupportEquationsAndInequalities() const
 }
 
 
-template <class T> gbtList<Gambit::Vector<gDouble> > 
+template <class T> Gambit::List<Gambit::Vector<gDouble> > 
 EfgPolEnumModule<T>::NashOnSupportSolnVectors(const gPolyList<T> &equations,
 					      const gRectangle<T> &Cube)
 {
@@ -288,7 +288,7 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
   tops = (T)1;
   gRectangle<T> Cube(bottoms, tops); 
 
-  gbtList<Gambit::Vector<gDouble> > solutionlist = NashOnSupportSolnVectors(equations,
+  Gambit::List<Gambit::Vector<gDouble> > solutionlist = NashOnSupportSolnVectors(equations,
 								   Cube);
 
   int index = SaveNashSolutions(solutionlist);
@@ -318,7 +318,7 @@ EfgPolEnumModule<T>::ExtendsToANFNash(const Gambit::MixedBehavProfile<double> &b
 }
 
 template <class T> int 
-EfgPolEnumModule<T>::SaveANFNashSolutions(const gbtList<Gambit::Vector<gDouble> > &list)
+EfgPolEnumModule<T>::SaveANFNashSolutions(const Gambit::List<Gambit::Vector<gDouble> > &list)
 {
   int index=0;
   for (int k = 1; k <= list.Length(); k++) {
@@ -343,7 +343,7 @@ EfgPolEnumModule<T>::ExtendsToNash(const Gambit::MixedBehavProfile<double> &bs) 
 }
 
 template <class T> int 
-EfgPolEnumModule<T>::SaveNashSolutions(const gbtList<Gambit::Vector<gDouble> > &list)
+EfgPolEnumModule<T>::SaveNashSolutions(const Gambit::List<Gambit::Vector<gDouble> > &list)
 {
   int index=0;
   for (int k = 1; k <= list.Length(); k++) {
@@ -375,7 +375,7 @@ template <class T> bool EfgPolEnumModule<T>::IsSingular(void) const
 }
 
 template <class T>
-const gbtList<Gambit::MixedBehavProfile<double> > &EfgPolEnumModule<T>::GetSolutions(void) const
+const Gambit::List<Gambit::MixedBehavProfile<double> > &EfgPolEnumModule<T>::GetSolutions(void) const
 {
   return solutions;
 }
@@ -583,7 +583,7 @@ Gambit::MixedBehavProfile<double> ToFullSupport(const Gambit::MixedBehavProfile<
 }
 
 int EfgPolEnum(const Gambit::BehavSupport &support, 
-	       gbtList<Gambit::MixedBehavProfile<double> > &solutions,
+	       Gambit::List<Gambit::MixedBehavProfile<double> > &solutions,
 	       long &nevals, double &time, bool &is_singular)
 {
   EfgPolEnumModule<gDouble> module(support);
@@ -624,13 +624,13 @@ void PrintSupport(std::ostream &p_stream,
 
 void Solve(const Gambit::Game &p_game)
 {
-  gbtList<Gambit::BehavSupport> supports = PossibleNashSubsupports(p_game);
+  Gambit::List<Gambit::BehavSupport> supports = PossibleNashSubsupports(p_game);
 
   try {
     for (int i = 1; i <= supports.Length(); i++) {
       long newevals = 0;
       double newtime = 0.0;
-      gbtList<Gambit::MixedBehavProfile<double> > newsolns;
+      Gambit::List<Gambit::MixedBehavProfile<double> > newsolns;
       bool is_singular = false;
 
       if (g_verbose) {

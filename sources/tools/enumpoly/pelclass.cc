@@ -407,7 +407,7 @@ Gen_node PelView::SolutionsDerivedFromContinuation(const Pring &ring,
   return sols;
 }
 
-template <class T> bool HasARedundancy(const gbtList<T> &p_list)
+template <class T> bool HasARedundancy(const Gambit::List<T> &p_list)
 {
   int i = 1; int j = 2;		
   while (i < p_list.Length()) {
@@ -473,10 +473,10 @@ Gen_node PelView::SolveCheckMaybeTryAgain(const Pring &ring,
 // Solve doesn't seem to exist at this point, yet this is very ambiguous.  
 }
 
-gbtList<Gambit::Vector<gComplex> > 
+Gambit::List<Gambit::Vector<gComplex> > 
 PelView::GambitRootsFromPelRoots(const Gen_node g) const
 {
-  gbtList<Gambit::Vector<gComplex> > alist;
+  Gambit::List<Gambit::Vector<gComplex> > alist;
 
   node ptr;
   ptr = Gen_to_Dvector_list(Gen_lval(copy_Gen_node(g)));
@@ -511,7 +511,7 @@ PelView::GambitRootsFromPelRoots(const Gen_node g) const
   return alist;
 }
 
-void PelView::DisplayComplexRootList(const gbtList<Gambit::Vector<gComplex> > 
+void PelView::DisplayComplexRootList(const Gambit::List<Gambit::Vector<gComplex> > 
 				                       &complexroots) const
 {
 #ifdef UNUSED
@@ -535,10 +535,10 @@ int PelView::Dmnsn() const
   return input.Dmnsn();
 }
 
-gbtList<Gambit::Vector<gDouble> > 
-PelView::RealRoots(const gbtList<Gambit::Vector<gComplex> > &clist) const
+Gambit::List<Gambit::Vector<gDouble> > 
+PelView::RealRoots(const Gambit::List<Gambit::Vector<gComplex> > &clist) const
 {
-  gbtList<Gambit::Vector<gDouble> > answer;
+  Gambit::List<Gambit::Vector<gDouble> > answer;
 
   for (int i = 1; i <= clist.Length(); i++) {
 
@@ -730,12 +730,12 @@ bool PelView::operator !=(const PelView &rhs) const
   return !(*this == rhs);
 }
 
-gbtList<Gambit::Vector<gComplex> > PelView::ComplexRoots() const
+Gambit::List<Gambit::Vector<gComplex> > PelView::ComplexRoots() const
 {
   return complexroots;
 }
 
-gbtList<Gambit::Vector<gDouble> > PelView::RealRoots() const
+Gambit::List<Gambit::Vector<gDouble> > PelView::RealRoots() const
 {
   return realroots;
 }

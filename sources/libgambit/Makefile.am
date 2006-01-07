@@ -3,49 +3,42 @@
 lib_LTLIBRARIES = libgambit.la
 
 libgambit_la_SOURCES = \
+	integer.cc integer.h \
+	rational.cc rational.h \
+	array.h list.h map.h \
+	vector.cc vector.h vector.imp \
+	pvector.cc pvector.h pvector.imp \
+	dvector.cc dvector.h dvector.imp \
+	recarray.h \
+	matrix.cc matrix.h matrix.imp \
+	sqmatrix.cc sqmatrix.h sqmatrix.imp \
+	number.h \
+	game.cc game.h \
 	behav.cc behav.h behav.imp \
 	behavitr.cc behavitr.h \
 	behavspt.cc behavspt.h \
-	game.cc game.h \
-	array.h \
-	dvector.cc dvector.h dvector.imp \
-	glist.h \
-	gmap.h \
-	matrix.cc matrix.h matrix.imp \
-	number.h \
-	pvector.cc pvector.h pvector.imp \
-	recarray.h \
-	sqmatrix.cc sqmatrix.h sqmatrix.imp \
-	vector.cc vector.h vector.imp \
-	integer.cc integer.h \
-	libgambit.h \
 	mixed.cc mixed.h mixed.imp \
 	stratitr.cc stratitr.h \
 	stratspt.cc stratspt.h \
-	rational.cc rational.h \
-	file.cc
+	file.cc \
+	libgambit.h
 
 libgambitincludedir = $(includedir)/libgambit
 libgambitinclude_HEADERS = \
-	behav.h behav.imp \
-	behavitr.h \
-	behavspt.h \
-	game.h \
-	array.h \
-	dvector.h dvector.imp \
-	glist.h \
-	gmap.h \
-	matrix.h matrix.imp \
-	number.h \
-	pvector.h pvector.imp \
-	recarray.h
-	sqmatrix.h sqmatrix.imp \
+	integer.h rational.h \
+	array.h list.h map.h \
 	vector.h vector.imp \
-	integer.h \
-	libgambit.h \
+	pvector.h pvector.imp \
+	dvector.h dvector.imp \
+	recarray.h
+	matrix.h matrix.imp \
+	sqmatrix.h sqmatrix.imp \
+	number.h \
+	game.h \
+	behav.h behav.imp \
+	behavitr.h behavspt.h \
 	mixed.h mixed.imp \
-	stratitr.h \
-	stratspt.h \
-	rational.h	
+	stratitr.h stratspt.h \
+	libgambit.h
 
 libgambit_la_LDFLAGS = -no-undefined -version-info 0:0:0

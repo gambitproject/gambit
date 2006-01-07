@@ -37,7 +37,7 @@
 #include "efgprofile.h"
 #include "nfgprofile.h"
 
-class gbtNotNashException : public gbtException {
+class gbtNotNashException : public Gambit::Exception {
 public:
   virtual ~gbtNotNashException() { }
 

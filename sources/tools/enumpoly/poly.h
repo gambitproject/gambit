@@ -36,7 +36,7 @@
     polynomial
 
 These are univariate polynomials with coefficients of class T.
-Polynomials are implemented as gbtList's of coefficients.  There is no 
+Polynomials are implemented as Gambit::List's of coefficients.  There is no 
 attempt to maintain sparseness.
 
 */
@@ -44,13 +44,13 @@ attempt to maintain sparseness.
 template <class T> class polynomial {
 
 private:
-  gbtList<T> coeflist; 
+  Gambit::List<T> coeflist; 
 
 public: 
     // constructors and destructor
   polynomial(const int=-1);
   polynomial(const polynomial<T> &);
-  polynomial(const gbtList<T> &);
+  polynomial(const Gambit::List<T> &);
   polynomial(const Gambit::Vector<T> &);
   polynomial(const T&, const int&);
   ~polynomial();
@@ -85,14 +85,14 @@ public:
   T                      EvaluationAt(const T& arg)                   const;  
   int                    Degree()                                     const;
   T                      LeadingCoefficient()                         const;
-  gbtList<T>               CoefficientList()                            const;
+  Gambit::List<T>               CoefficientList()                            const;
   polynomial<T>          GcdWith(const polynomial<T>&)                const;
   bool                   IsQuadratfrei()                              const;
   bool                   CannotHaveRootsIn(const gInterval<T>&)       const;
-  gbtList< gInterval<T> >  RootSubintervals(const gInterval<T>&)        const;
+  Gambit::List< gInterval<T> >  RootSubintervals(const gInterval<T>&)        const;
   gInterval<T>           NeighborhoodOfRoot(const gInterval<T>&, T&)  const;
-  gbtList< gInterval<T> >  PreciseRootIntervals(const gInterval<T>&,T&) const;
-  gbtList<T>               PreciseRoots(const gInterval<T>&, T&)        const;
+  Gambit::List< gInterval<T> >  PreciseRootIntervals(const gInterval<T>&,T&) const;
+  Gambit::List<T>               PreciseRoots(const gInterval<T>&, T&)        const;
 };
 
 
@@ -115,13 +115,13 @@ and the RHS will be positive whenever
 class complexpoly {
 
 private:
-  gbtList<gComplex> coeflist; 
+  Gambit::List<gComplex> coeflist; 
 
 public: 
     // constructors and destructor
   complexpoly(const int=-1);
   complexpoly(const complexpoly &);
-  complexpoly(const gbtList<gComplex> &);
+  complexpoly(const Gambit::List<gComplex> &);
   complexpoly(const gComplex&, const int&);
   ~complexpoly();
 
@@ -154,7 +154,7 @@ public:
   gComplex               LeadingCoefficient()                         const;
   complexpoly            GcdWith(const complexpoly&)                  const;
   bool                   IsQuadratfrei()                              const;
-  gbtList<gComplex>        Roots()                                      const;
+  Gambit::List<gComplex>        Roots()                                      const;
 
 };
 

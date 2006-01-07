@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
   }
 
 
-  gbtList<Gambit::MixedBehavProfile<double> > starts;
+  Gambit::List<Gambit::MixedBehavProfile<double> > starts;
 
   if (startFile != "") {
     std::ifstream startPoints(startFile.c_str());

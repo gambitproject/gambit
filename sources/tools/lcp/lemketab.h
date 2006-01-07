@@ -34,12 +34,12 @@ protected:
 //  T eps2;
 public:
 //   LTableau(void);
-  class BadPivot : public gbtException  {
+  class BadPivot : public Gambit::Exception  {
   public:
     virtual ~BadPivot();
     std::string GetDescription(void) const;
   };
-  class BadExitIndex : public gbtException  {
+  class BadExitIndex : public Gambit::Exception  {
   public:
     virtual ~BadExitIndex();
     std::string GetDescription(void) const;

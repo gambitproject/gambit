@@ -66,8 +66,8 @@ TableauInterface<T>::TableauInterface(const Gambit::Matrix<T> &A, const Gambit::
   // These are the values recommended by Murtagh (1981) for 15 digit 
   // accuracy in LP problems 
   // Note: for gRational, eps1 and eps2 resolve to 0
-  gEpsilon(eps1,5);
-  gEpsilon(eps2);
+  Gambit::Epsilon(eps1,5);
+  Gambit::Epsilon(eps2);
 }
 
 template <class T> 
@@ -78,8 +78,8 @@ TableauInterface<T>::TableauInterface(const Gambit::Matrix<T> &A,
     solution(A.MinRow(),A.MaxRow()), npivots(0),
     artificial(A.MaxCol()+1,A.MaxCol()+art.Length())
 { 
-  gEpsilon(eps1,5);
-  gEpsilon(eps2);
+  Gambit::Epsilon(eps1,5);
+  Gambit::Epsilon(eps2);
   for(int i = 0;i<art.Length();i++)
     artificial[A.MaxCol()+1+i] = art[art.First()+i];
 }
@@ -255,7 +255,7 @@ template <class T>
 T TableauInterface<T>::Epsilon(int i) const
 {
   if(i!=1 && i!=2) {
-    throw gbtIndexException();
+    throw Gambit::IndexException();
   }
   if(i==1) return eps1;
   return eps2;

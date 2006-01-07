@@ -38,7 +38,7 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
   Gambit::Array<bool> dom(S.NumStrats(pl));
   
   T eps;
-  gEpsilon(eps);
+  Gambit::Epsilon(eps);
   
   Gambit::Vector<T> dominator(S.NumStrats(pl));
   
@@ -223,7 +223,7 @@ bool IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy str
   int strats = S.NumStrats(pl);
 
   T eps;
-  gEpsilon(eps);
+  Gambit::Epsilon(eps);
   
   Gambit::Vector<T> dominator(S.NumStrats(pl));
   
@@ -385,7 +385,7 @@ bool IsMixedDominated(const Gambit::MixedStrategyProfile<T> &pr, int pl,
   assert( prob.Length() == strats);
 
   T eps,x;
-  gEpsilon(eps);
+  Gambit::Epsilon(eps);
   
   Gambit::Vector<T> dominator(S.NumStrats(pl));
   

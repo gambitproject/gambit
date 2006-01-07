@@ -68,7 +68,7 @@ public:
   
   T OptimumCost(void) const;
   const Gambit::Vector<T> &OptimumVector(void) const;
-  const gbtList< BFS<T> > &GetAll(void);
+  const Gambit::List< BFS<T> > &GetAll(void);
   const LPTableau<T> &GetTableau();
   
   int IsAborted(void) const;

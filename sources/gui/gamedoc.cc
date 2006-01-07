@@ -246,7 +246,7 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
   m_behavSupports.Reset();
   m_stratSupports.Reset();
 
-  m_profiles = gbtList<gbtAnalysisProfileList>();
+  m_profiles = Gambit::List<gbtAnalysisProfileList>();
 
   for (TiXmlNode *analysis = game->FirstChild("analysis");
        analysis; analysis = analysis->NextSibling()) {
@@ -370,7 +370,7 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
     m_modified = true;
     m_game->Canonicalize();
     m_game->BuildComputedValues();
-    m_redoList = gbtList<std::string>();
+    m_redoList = Gambit::List<std::string>();
 
     std::ostringstream s;
     SaveDocument(s);
@@ -386,7 +386,7 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
     // computed profiles invalid for the edited game, it does mean
     // that, in general, they won't be Nash.  For now, to avoid confusion,
     // we will wipe them out.
-    m_profiles = gbtList<gbtAnalysisProfileList>();
+    m_profiles = Gambit::List<gbtAnalysisProfileList>();
     m_currentProfileList = 0;
   }
 
@@ -423,7 +423,7 @@ void gbtGameDocument::Undo(void)
 
   m_game = 0;
 
-  m_profiles = gbtList<gbtAnalysisProfileList>();
+  m_profiles = Gambit::List<gbtAnalysisProfileList>();
   m_currentProfileList = 0;
 
   wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
@@ -444,7 +444,7 @@ void gbtGameDocument::Redo(void)
 
   m_game = 0;
 
-  m_profiles = gbtList<gbtAnalysisProfileList>();
+  m_profiles = Gambit::List<gbtAnalysisProfileList>();
   m_currentProfileList = 0;
 
   wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
@@ -485,7 +485,7 @@ void gbtGameDocument::SetProfileList(int p_index)
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfiles(const gbtList<Gambit::MixedBehavProfile<double> > &p_profiles)
+void gbtGameDocument::AddProfiles(const Gambit::List<Gambit::MixedBehavProfile<double> > &p_profiles)
 {
   for (int i = 1; i <= p_profiles.Length(); i++) {
     m_profiles[m_currentProfileList].Append(p_profiles[i]);
@@ -502,7 +502,7 @@ void gbtGameDocument::AddProfile(const Gambit::MixedBehavProfile<double> &p_prof
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfiles(const gbtList<Gambit::MixedStrategyProfile<double> > &p_profiles)
+void gbtGameDocument::AddProfiles(const Gambit::List<Gambit::MixedStrategyProfile<double> > &p_profiles)
 {
   for (int i = 1; i <= p_profiles.Length(); i++) {
     m_profiles[m_currentProfileList].Append(p_profiles[i]);

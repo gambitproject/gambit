@@ -41,7 +41,7 @@ private:
   Gambit::Array<Gambit::RectArray<Gambit::Rational> *> *E;   // constraint matrices for sequence form.  
   Gambit::Array<int> seq;
   Gambit::PVector<int> isetFlag,isetRow;
-  Gambit::Array<gbtList<Gambit::GameInfoset> > infosets;
+  Gambit::Array<Gambit::List<Gambit::GameInfoset> > infosets;
 
   void MakeSequenceForm(const Gambit::GameNode &, Gambit::Rational,Gambit::Array<int>, Gambit::Array<Gambit::GameInfoset>,
 		      Gambit::Array<Sequence *>);

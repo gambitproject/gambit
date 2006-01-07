@@ -80,8 +80,8 @@ void LPTableau<Gambit::Rational>::SetCost(const Gambit::Vector<Gambit::Rational>
     SolveDual();
     return;
   }
-  if(c.First()!=cost.First()) throw gbtDimensionException();
-  if(c.Last()!=(cost.Last()+unitcost.Length())) throw gbtDimensionException();
+  if(c.First()!=cost.First()) throw Gambit::DimensionException();
+  if(c.Last()!=(cost.Last()+unitcost.Length())) throw Gambit::DimensionException();
   for(i=c.First();i<=cost.Last();i++)
     cost[i]=c[i]*(Gambit::Rational)Tableau<Gambit::Rational>::TotDenom();
   for(i=unitcost.First();i<=unitcost.Last();i++)
@@ -105,8 +105,8 @@ void LPTableau<double>::SetCost(const Gambit::Vector<double>& c)
     SolveDual();
     return;
   }
-  if(c.First()!=cost.First()) throw gbtDimensionException();
-  if(c.Last()!=(cost.Last()+unitcost.Length())) throw gbtDimensionException();
+  if(c.First()!=cost.First()) throw Gambit::DimensionException();
+  if(c.Last()!=(cost.Last()+unitcost.Length())) throw Gambit::DimensionException();
   for(i=c.First();i<=cost.Last();i++)
     cost[i]=c[i];
   for(i=unitcost.First();i<=unitcost.Last();i++)
@@ -123,9 +123,9 @@ template <class T>
 void LPTableau<T>::SetCost(const Gambit::Vector<T> &uc, const Gambit::Vector<T> &c)
 {
   if(cost.First()!=c.First() || cost.Last()!=c.Last()) 
-    throw gbtDimensionException();
+    throw Gambit::DimensionException();
   if(unitcost.First()!=uc.First() || unitcost.Last()!=uc.Last()) 
-    throw gbtDimensionException();
+    throw Gambit::DimensionException();
   int i;
   for(i=cost.First();i<=cost.Last();i++) cost[i]=c[i];
   for(i=unitcost.First();i<=unitcost.Last();i++) unitcost[i]=uc[i];
@@ -204,8 +204,8 @@ void LPTableau<T>::RelativeCostVector(Gambit::Vector<T> &relunitcost,
 				      Gambit::Vector<T> &relcost) const
 {
 
-  if(!A->CheckColumn(relunitcost)) throw gbtDimensionException();
-  if(!A->CheckRow(relcost)) throw gbtDimensionException();
+  if(!A->CheckColumn(relunitcost)) throw Gambit::DimensionException();
+  if(!A->CheckRow(relcost)) throw Gambit::DimensionException();
   
   relunitcost= unitcost - dual;
   relcost= cost - dual*A;  // pre multiplication not defined?  
@@ -242,14 +242,14 @@ void LPTableau<T>::Pivot(int outrow,int col)
 }
 
 template <class T>
-void LPTableau<T>::ReversePivots(gbtList<Gambit::Array<int> > &PivotList)
+void LPTableau<T>::ReversePivots(Gambit::List<Gambit::Array<int> > &PivotList)
 {
   Gambit::Vector<T> tmpcol(this->MinRow(),this->MaxRow());
   // gout << "\nIn LPTableau<T>::ReversePivots";
   bool flag;
   int i,j,k,enter;
   T ratio,a_ij,a_ik,b_i,b_k,c_j,c_k,c_jo,x;
-  gbtList<int> BestSet;
+  Gambit::List<int> BestSet;
   Gambit::Array<int> pivot(2);
   Gambit::Vector<T> tmpdual(this->MinRow(),this->MaxRow());
 
@@ -270,7 +270,7 @@ void LPTableau<T>::ReversePivots(gbtList<Gambit::Array<int> > &PivotList)
     
     // find all i where prior tableau is primal feasible
     
-    BestSet = gbtList<int>();
+    BestSet = Gambit::List<int>();
     for(i=this->MinRow();i<=this->MaxRow();i++)
       if(GtZero(tmpcol[i])) BestSet.Append(i);
     if(BestSet.Length()>0) {
@@ -528,7 +528,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
 }
 
 template <class T>
-void LPTableau<T>::DualReversePivots(gbtList<Gambit::Array<int> > &/*list*/)
+void LPTableau<T>::DualReversePivots(Gambit::List<Gambit::Array<int> > &/*list*/)
 {
 }
 

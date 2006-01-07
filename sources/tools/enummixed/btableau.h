@@ -37,7 +37,7 @@
 
 template <class T> class BaseTableau {
 public:
-  class BadPivot : public gbtException  {
+  class BadPivot : public Gambit::Exception  {
   public:
     virtual ~BadPivot() { }
     std::string GetDescription(void) const { return "Bad Pivot in BaseTableau"; }

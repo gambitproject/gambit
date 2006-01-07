@@ -62,8 +62,8 @@ template <class T> class efgLp {
 private:
   T maxpay, minpay;
   int ns1,ns2,ni1,ni2;
-  gbtList<BFS<T> > List;
-  gbtList<Gambit::GameInfoset> isets1, isets2;
+  Gambit::List<BFS<T> > List;
+  Gambit::List<Gambit::GameInfoset> isets1, isets2;
 
   void FillTableau(const Gambit::BehavSupport &,
 		   Gambit::Matrix<T> &, const Gambit::GameNode &, T ,int ,int , int ,int );
@@ -140,7 +140,7 @@ void efgLp<T>::Solve(const Gambit::BehavSupport &p_support)
     return;
   }
   
-  List = gbtList<BFS<T> >();
+  List = Gambit::List<BFS<T> >();
   
   Gambit::Matrix<T> A(1,ns1+ni2,1,ns2+ni1);
   Gambit::Vector<T> b(1,ns1+ni2);

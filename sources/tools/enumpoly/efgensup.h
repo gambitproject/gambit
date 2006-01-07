@@ -35,9 +35,9 @@ class ActionCursorForSupport;
 void AllSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
 			     Gambit::BehavSupportWithActiveInfo *sact,
 			     ActionCursorForSupport *c,
-			     gbtList<Gambit::BehavSupport> &list);
+			     Gambit::List<Gambit::BehavSupport> &list);
 
-gbtList<Gambit::BehavSupport> AllSubsupports(const Gambit::BehavSupport &S);
+Gambit::List<Gambit::BehavSupport> AllSubsupports(const Gambit::BehavSupport &S);
 
 
 // Subsupports of a given support are _path equivalent_ if they
@@ -49,9 +49,9 @@ gbtList<Gambit::BehavSupport> AllSubsupports(const Gambit::BehavSupport &S);
 void AllInequivalentSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
 					 Gambit::BehavSupportWithActiveInfo *sact,
 					 ActionCursorForSupport *c,
-					 gbtList<Gambit::BehavSupport> &list);
+					 Gambit::List<Gambit::BehavSupport> &list);
 
-gbtList<Gambit::BehavSupport> AllInequivalentSubsupports(const Gambit::BehavSupport &S);
+Gambit::List<Gambit::BehavSupport> AllInequivalentSubsupports(const Gambit::BehavSupport &S);
 
 // The following routines combine to return all supports that do not 
 // exhibit particular type of domination.  This was a prototype for 
@@ -66,9 +66,9 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
 					Gambit::BehavSupportWithActiveInfo *sact,
 					ActionCursorForSupport *c,
 					bool strong, bool conditional,
-					gbtList<Gambit::BehavSupport> &list);
+					Gambit::List<Gambit::BehavSupport> &list);
   
-gbtList<Gambit::BehavSupport> AllUndominatedSubsupports(const Gambit::BehavSupport &S,
+Gambit::List<Gambit::BehavSupport> AllUndominatedSubsupports(const Gambit::BehavSupport &S,
 					       bool strong, bool conditional);
 
 // The following two routines combine to produce all subsupports that could
@@ -85,11 +85,11 @@ gbtList<Gambit::BehavSupport> AllUndominatedSubsupports(const Gambit::BehavSuppo
 void PossibleNashSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
 				      Gambit::BehavSupportWithActiveInfo *sact,
 				      ActionCursorForSupport *c,
-				      gbtList<Gambit::BehavSupport> &list);
+				      Gambit::List<Gambit::BehavSupport> &list);
 
-gbtList<Gambit::BehavSupport> SortSupportsBySize(gbtList<Gambit::BehavSupport> &);
+Gambit::List<Gambit::BehavSupport> SortSupportsBySize(Gambit::List<Gambit::BehavSupport> &);
   
-gbtList<Gambit::BehavSupport> PossibleNashSubsupports(const Gambit::BehavSupport &S);
+Gambit::List<Gambit::BehavSupport> PossibleNashSubsupports(const Gambit::BehavSupport &S);
 
 ///////////////// Utility Cursor Class /////////////////////
 
@@ -130,7 +130,7 @@ public:
 						     Gambit::BehavSupportWithActiveInfo *,
 						 const Gambit::GameInfoset &);
   bool DeletionsViolateActiveCommitments(const Gambit::BehavSupportWithActiveInfo *,
-					 const gbtList<Gambit::GameInfoset> *);
+					 const Gambit::List<Gambit::GameInfoset> *);
 };
 
 

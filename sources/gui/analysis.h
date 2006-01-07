@@ -50,8 +50,8 @@ private:
   gbtGameDocument *m_doc;
   wxString m_label, m_description, m_command;
   int m_current;
-  gbtList<Gambit::MixedBehavProfile<double> > m_behavProfiles;
-  gbtList<Gambit::MixedStrategyProfile<double> > m_mixedProfiles;
+  Gambit::List<Gambit::MixedBehavProfile<double> > m_behavProfiles;
+  Gambit::List<Gambit::MixedStrategyProfile<double> > m_mixedProfiles;
 
 public:
   //!

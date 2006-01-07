@@ -231,14 +231,14 @@ template <class T> int RectArray<T>::MaxCol(void) const { return maxcol; }
 
 template <class T> T &RectArray<T>::operator()(int r, int c)
 {
-  if (!Check(r, c))  throw gbtIndexException();
+  if (!Check(r, c))  throw IndexException();
 
   return data[r][c];
 }
 
 template <class T> const T &RectArray<T>::operator()(int r, int c) const
 {
-  if (!Check(r, c))  throw gbtIndexException();
+  if (!Check(r, c))  throw IndexException();
 
   return data[r][c];
 }
@@ -249,7 +249,7 @@ template <class T> const T &RectArray<T>::operator()(int r, int c) const
 
 template <class T> void RectArray<T>::RotateUp(int lo, int hi)
 {
-  if (lo < minrow || hi < lo || maxrow < hi)  throw gbtIndexException();
+  if (lo < minrow || hi < lo || maxrow < hi)  throw IndexException();
 
   T *temp = data[lo];
   for (int k = lo; k < hi; k++)
@@ -259,7 +259,7 @@ template <class T> void RectArray<T>::RotateUp(int lo, int hi)
 
 template <class T> void RectArray<T>::RotateDown(int lo, int hi)
 {
-  if (lo < minrow || hi < lo || maxrow < hi)  throw gbtIndexException();
+  if (lo < minrow || hi < lo || maxrow < hi)  throw IndexException();
 
   T *temp = data[hi];
   for (int k = hi; k > lo; k--)
@@ -269,7 +269,7 @@ template <class T> void RectArray<T>::RotateDown(int lo, int hi)
 
 template <class T> void RectArray<T>::RotateLeft(int lo, int hi)
 {
-  if (lo < mincol || hi < lo || maxcol < hi)   throw gbtIndexException();
+  if (lo < mincol || hi < lo || maxcol < hi)   throw IndexException();
   
   T temp;
   for (int i = minrow; i <= maxrow; i++)  {
@@ -283,7 +283,7 @@ template <class T> void RectArray<T>::RotateLeft(int lo, int hi)
 
 template <class T> void RectArray<T>::RotateRight(int lo, int hi)
 {
-  if (lo < mincol || hi < lo || maxcol < hi)   throw gbtIndexException();
+  if (lo < mincol || hi < lo || maxcol < hi)   throw IndexException();
 
   for (int i = minrow; i <= maxrow; i++)  {
     T *row = data[i];
@@ -300,8 +300,8 @@ template <class T> void RectArray<T>::RotateRight(int lo, int hi)
 
 template <class T> void RectArray<T>::SwitchRow(int row, Array<T> &v)
 {
-  if (!CheckRow(row))  throw gbtIndexException();
-  if (!CheckRow(v))    throw gbtDimensionException();
+  if (!CheckRow(row))  throw IndexException();
+  if (!CheckRow(v))    throw DimensionException();
 
   T *rowptr = data[row];
   T tmp;
@@ -314,7 +314,7 @@ template <class T> void RectArray<T>::SwitchRow(int row, Array<T> &v)
 
 template <class T> void RectArray<T>::SwitchRows(int i, int j)
 {
-  if (!CheckRow(i) || !CheckRow(j))   throw gbtIndexException();
+  if (!CheckRow(i) || !CheckRow(j))   throw IndexException();
   T *temp = data[j];
   data[j] = data[i];
   data[i] = temp;
@@ -322,8 +322,8 @@ template <class T> void RectArray<T>::SwitchRows(int i, int j)
 
 template <class T> void RectArray<T>::GetRow(int row, Array<T> &v) const
 {
-  if (!CheckRow(row))   throw gbtIndexException();
-  if (!CheckRow(v))     throw gbtDimensionException();
+  if (!CheckRow(row))   throw IndexException();
+  if (!CheckRow(v))     throw DimensionException();
 
   T *rowptr = data[row];
   for (int i = mincol; i <= maxcol; i++)
@@ -332,8 +332,8 @@ template <class T> void RectArray<T>::GetRow(int row, Array<T> &v) const
 
 template <class T> void RectArray<T>::SetRow(int row, const Array<T> &v)
 {
-  if (!CheckRow(row))   throw gbtIndexException();
-  if (!CheckRow(v))     throw gbtDimensionException();
+  if (!CheckRow(row))   throw IndexException();
+  if (!CheckRow(v))     throw DimensionException();
 
   T *rowptr = data[row];
   for (int i = mincol; i <= maxcol; i++)
@@ -346,8 +346,8 @@ template <class T> void RectArray<T>::SetRow(int row, const Array<T> &v)
 
 template <class T> void RectArray<T>::SwitchColumn(int col, Array<T> &v)
 {
-  if (!CheckColumn(col))   throw gbtIndexException();
-  if (!CheckColumn(v))     throw gbtDimensionException();
+  if (!CheckColumn(col))   throw IndexException();
+  if (!CheckColumn(v))     throw DimensionException();
 
   for (int i = minrow; i <= maxrow; i++)   {
     T tmp = data[i][col];
@@ -358,7 +358,7 @@ template <class T> void RectArray<T>::SwitchColumn(int col, Array<T> &v)
 
 template <class T> void RectArray<T>::SwitchColumns(int a, int b)
 {
-  if (!CheckColumn(a) || !CheckColumn(b))   throw gbtIndexException();
+  if (!CheckColumn(a) || !CheckColumn(b))   throw IndexException();
 
   for (int i = minrow; i <= maxrow; i++)   {
     T tmp = data[i][a];
@@ -369,8 +369,8 @@ template <class T> void RectArray<T>::SwitchColumns(int a, int b)
 
 template <class T> void RectArray<T>::GetColumn(int col, Array<T> &v) const
 {
-  if (!CheckColumn(col))  throw gbtIndexException();
-  if (!CheckColumn(v))    throw gbtDimensionException();
+  if (!CheckColumn(col))  throw IndexException();
+  if (!CheckColumn(v))    throw DimensionException();
 
   for (int i = minrow; i <= maxrow; i++)
     v[i] = data[i][col];
@@ -378,8 +378,8 @@ template <class T> void RectArray<T>::GetColumn(int col, Array<T> &v) const
 
 template <class T> void RectArray<T>::SetColumn(int col, const Array<T> &v)
 {
-  if (!CheckColumn(col))   throw gbtIndexException();
-  if (!CheckColumn(v))     throw gbtDimensionException();
+  if (!CheckColumn(col))   throw IndexException();
+  if (!CheckColumn(v))     throw DimensionException();
 
   for (int i = minrow; i <= maxrow; i++)
     data[i][col] = v[i];

@@ -623,9 +623,9 @@ void gbtEfgDisplay::FitZoom(void)
   double zoomx = (double) width / (double) m_layout.MaxX();
   double zoomy = (double) height / (double) m_layout.MaxY();
 
-  zoomx = gmin(zoomx, 1.0); 
-  zoomy = gmin(zoomy, 1.0);  // never zoom in (only out)
-  m_zoom = int(100.0 * (gmin(zoomx, zoomy) * .9));
+  zoomx = Gambit::min(zoomx, 1.0); 
+  zoomy = Gambit::min(zoomy, 1.0);  // never zoom in (only out)
+  m_zoom = int(100.0 * (Gambit::min(zoomx, zoomy) * .9));
   AdjustScrollbarSteps();
   Refresh();
 }

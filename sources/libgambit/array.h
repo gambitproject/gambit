@@ -39,7 +39,7 @@ protected:
   //
   int InsertAt(const T &t, int n)
   {
-    if (this->mindex > n || n > this->maxdex + 1)  throw gbtIndexException();
+    if (this->mindex > n || n > this->maxdex + 1)  throw IndexException();
 
     T *new_data = new T[++this->maxdex - this->mindex + 1] - this->mindex;
 
@@ -65,7 +65,7 @@ public:
   Array(int lo, int hi)
     : mindex(lo), maxdex(hi)
   {
-    if (maxdex + 1 < mindex)   throw gbtRangeException();
+    if (maxdex + 1 < mindex)   throw RangeException();
     data = (maxdex >= mindex) ? new T[maxdex -mindex + 1] - mindex : 0;
   }
 //
@@ -126,13 +126,13 @@ public:
 //
   const T &operator[](int index) const 
   {
-    if (index < mindex || index > maxdex)  throw gbtIndexException();
+    if (index < mindex || index > maxdex)  throw IndexException();
     return data[index];
   }
 
   T &operator[](int index)
   {
-    if (index < mindex || index > maxdex)  throw gbtIndexException();
+    if (index < mindex || index > maxdex)  throw IndexException();
     return data[index];
   }
 
@@ -161,7 +161,7 @@ public:
 //
   T Remove(int n)
   {
-    if (n < this->mindex || n > this->maxdex) throw gbtIndexException();
+    if (n < this->mindex || n > this->maxdex) throw IndexException();
 
     T ret(this->data[n]);
     T *new_data = (--this->maxdex>=this->mindex) ? new T[this->maxdex-this->mindex+1] - this->mindex : 0;

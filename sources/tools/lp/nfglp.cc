@@ -57,8 +57,8 @@ void PrintProfile(std::ostream &p_stream,
 template <class T> class nfgLp {
 private:
   int Add_BFS(const Gambit::StrategySupport &, /*const*/ LPSolve<T> &B,
-	      gbtList<BFS<T> > &);
-  void GetSolutions(const Gambit::StrategySupport &, const gbtList<BFS<T> > &,
+	      Gambit::List<BFS<T> > &);
+  void GetSolutions(const Gambit::StrategySupport &, const Gambit::List<BFS<T> > &,
 		    const T &) const;
 
 public:
@@ -85,7 +85,7 @@ void nfgLp<T>::Solve(const Gambit::StrategySupport &p_support)
     return; 
   }
   
-  gbtList<BFS<T> > bfsList;
+  Gambit::List<BFS<T> > bfsList;
   
   int i,j,m,k;
   
@@ -127,7 +127,7 @@ void nfgLp<T>::Solve(const Gambit::StrategySupport &p_support)
 
 template <class T> int nfgLp<T>::Add_BFS(const Gambit::StrategySupport &p_support,
 					 /*const*/ LPSolve<T> &lp,
-					 gbtList<BFS<T> > &p_list)
+					 Gambit::List<BFS<T> > &p_list)
 {
   BFS<T> cbfs((T) 0);
 
@@ -143,7 +143,7 @@ template <class T> int nfgLp<T>::Add_BFS(const Gambit::StrategySupport &p_suppor
 
 template <class T>
 void nfgLp<T>::GetSolutions(const Gambit::StrategySupport &p_support,
-			    const gbtList<BFS<T> > &p_list,
+			    const Gambit::List<BFS<T> > &p_list,
 			    const T &p_epsilon) const
 {
   int index;

@@ -101,7 +101,7 @@ template <class T> PVector<T>::~PVector()
 template <class T> PVector<T>& PVector<T>::operator=(const PVector<T> &v)
 {
   if (!Check(v)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
   Vector<T>::operator=(v);
   return (*this);
@@ -126,10 +126,10 @@ template <class T> PVector<T>& PVector<T>::operator=(T c)
 template <class T> T& PVector<T>::operator()(int a, int b)
 {
   if (svlen.First() > a || a > svlen.Last()) {
-    throw gbtIndexException();
+    throw IndexException();
   }
   if (1 > b || b > svlen[a]) {
-    throw gbtIndexException();
+    throw IndexException();
   }
 
   return svptr[a][b];
@@ -138,10 +138,10 @@ template <class T> T& PVector<T>::operator()(int a, int b)
 template <class T> const T& PVector<T>::operator()(int a, int b) const
 {
   if (svlen.First() > a || a > svlen.Last()) {
-    throw gbtIndexException();
+    throw IndexException();
   }
   if (1 > b || b > svlen[a])  {
-    throw gbtIndexException();
+    throw IndexException();
   }
   return svptr[a][b];
 }
@@ -150,7 +150,7 @@ template <class T>
 PVector<T> PVector<T>::operator+(const PVector<T> &v) const
 {
   if (!Check(v)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
   PVector<T> tmp(*this);
   tmp.Vector<T>::operator+=(v);
@@ -160,7 +160,7 @@ PVector<T> PVector<T>::operator+(const PVector<T> &v) const
 template <class T> PVector<T>& PVector<T>::operator+=(const PVector<T> &v)
 {
   if (!Check(v)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
   Vector<T>::operator+=(v);
   return (*this);
@@ -178,7 +178,7 @@ template <class T>
 PVector<T> PVector<T>::operator-(const PVector<T> &v) const
 {
   if (!Check(v)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
   PVector<T> tmp(*this);
   tmp.Vector<T>::operator-=(v);
@@ -188,7 +188,7 @@ PVector<T> PVector<T>::operator-(const PVector<T> &v) const
 template <class T> PVector<T>& PVector<T>::operator-=(const PVector<T> &v)
 {
   if (!Check(v)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
   Vector<T>::operator-=(v);
   return (*this);
@@ -197,7 +197,7 @@ template <class T> PVector<T>& PVector<T>::operator-=(const PVector<T> &v)
 template <class T> T PVector<T>::operator*(const PVector<T> &v) const
 {
   if (!Check(v)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
   return (*this).Vector<T>::operator*(v);
 }
@@ -225,7 +225,7 @@ template <class T> PVector<T> PVector<T>::operator/(T c)
 template <class T> bool PVector<T>::operator==(const PVector<T> &v) const
 {
   if (!Check(v)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
   return (*this).Vector<T>::operator==(v);
 }
@@ -240,7 +240,7 @@ template <class T> bool PVector<T>::operator!=(const PVector<T> &v) const
 template <class T> Vector<T> PVector<T>::GetRow(int row) const
 {
   if (svlen.First() > row || row > svlen.Last())  {
-    throw gbtIndexException();
+    throw IndexException();
   }
 
   Vector<T> v(1, svlen[row]);
@@ -253,10 +253,10 @@ template <class T> Vector<T> PVector<T>::GetRow(int row) const
 template <class T> void PVector<T>::GetRow(int row, Vector<T> &v) const
 {
   if (svlen.First() > row || row > svlen.Last()) {
-    throw gbtIndexException();
+    throw IndexException();
   }
   if (v.First() != 1 || v.Last() != svlen[row]) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
 
   for(int i=v.First(); i<=v.Last(); i++)
@@ -266,10 +266,10 @@ template <class T> void PVector<T>::GetRow(int row, Vector<T> &v) const
 template <class T> void PVector<T>::SetRow(int row, const Vector<T> &v)
 {
   if (svlen.First() > row || row > svlen.Last()) {
-    throw gbtIndexException();
+    throw IndexException();
   }
   if (v.First() != 1 || v.Last() != svlen[row]) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
 
   for(int i=v.First(); i<=v.Last(); i++)
@@ -279,11 +279,11 @@ template <class T> void PVector<T>::SetRow(int row, const Vector<T> &v)
 template <class T> void PVector<T>::CopyRow(int row, const PVector<T> &v)
 {
   if (!Check(v)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
 
   if (svlen.First() > row || row > svlen.Last()) {
-    throw gbtIndexException(); 
+    throw IndexException(); 
   }
 
   for (int i = 1; i <= svlen[row]; i++)

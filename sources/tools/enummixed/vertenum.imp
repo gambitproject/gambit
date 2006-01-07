@@ -77,7 +77,7 @@ template <class T> VertEnum<T>::~VertEnum()
 template <class T> void VertEnum<T>::Enum()
 {
       // Check dimensions
-  if(A.NumRows() != b.Length() || A.NumColumns() != c.Length()) throw gbtDimensionException();
+  if(A.NumRows() != b.Length() || A.NumColumns() != c.Length()) throw Gambit::DimensionException();
   //  assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
 
       // Initialize the tableau
@@ -131,13 +131,13 @@ template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
 {
   int k;
   Deeper();
-  gbtList<Gambit::Array<int> > PivotList;
+  Gambit::List<Gambit::Array<int> > PivotList;
   Gambit::Array<int> pivot(2);
   if(tab.IsLexMin()) {
     List.Append(tab.GetBFS1());
     DualList.Append(tab.DualBFS());
   }
-  if(PivotList.Length()!=0) throw gbtDimensionException();
+  if(PivotList.Length()!=0) throw Gambit::DimensionException();
   //  assert(PivotList.Length()==0);
   tab.ReversePivots(PivotList);  // get list of reverse pivots
   if(PivotList.Length()) {
@@ -161,7 +161,7 @@ template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
   Deeper();
   branches[depth]+=1;
 
-//  gbtList<Gambit::Array<int> > PivotList;
+//  Gambit::List<Gambit::Array<int> > PivotList;
 //  Gambit::Array<int> pivot(2);
 
   // gout << "\nin DualSearch";
@@ -187,17 +187,17 @@ template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
   depth--;
 }
   
-template <class T> const gbtList<BFS<T> > &VertEnum<T>::VertexList() const
+template <class T> const Gambit::List<BFS<T> > &VertEnum<T>::VertexList() const
 { 
   return List;
 }
 
-template <class T> const gbtList<BFS<T> > &VertEnum<T>::DualVertexList() const
+template <class T> const Gambit::List<BFS<T> > &VertEnum<T>::DualVertexList() const
 { 
   return DualList;
 }
 
-template <class T> void VertEnum<T>::Vertices(gbtList<Gambit::Vector<T> > &verts) const
+template <class T> void VertEnum<T>::Vertices(Gambit::List<Gambit::Vector<T> > &verts) const
 { 
   for(int i=1;i<=List.Length();i++) {
     Gambit::Vector<T> vert(A.NumColumns());

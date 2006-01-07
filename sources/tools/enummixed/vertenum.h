@@ -54,11 +54,11 @@ private:
   const Gambit::Matrix<T> &A;   
   const Gambit::Vector<T> &b;
   Gambit::Vector<T> btemp,c;
-  gbtList<BFS<T> > List;
-  gbtList<BFS<T> > DualList;
-  gbtList<Gambit::Vector<T> > Verts;
+  Gambit::List<BFS<T> > List;
+  Gambit::List<BFS<T> > DualList;
+  Gambit::List<Gambit::Vector<T> > Verts;
   long npivots,nodes;
-  gbtList<long> visits,branches;
+  Gambit::List<long> visits,branches;
 
   void Enum();
   void Deeper();
@@ -70,9 +70,9 @@ public:
   VertEnum(LPTableau<T> &);
   virtual ~VertEnum();
 
-  const gbtList<BFS<T> > &VertexList() const;
-  const gbtList<BFS<T> > &DualVertexList() const;
-  void Vertices(gbtList<Gambit::Vector<T> > &verts) const;
+  const Gambit::List<BFS<T> > &VertexList() const;
+  const Gambit::List<BFS<T> > &DualVertexList() const;
+  void Vertices(Gambit::List<Gambit::Vector<T> > &verts) const;
   long NumPivots() const;
 };
 #ifdef _A

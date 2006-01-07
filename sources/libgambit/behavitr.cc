@@ -48,7 +48,7 @@ BehavIterator::BehavIterator(const BehavSupport &s)
   First();
 }
 
-BehavIterator::BehavIterator(const BehavSupport &s, const gbtList<GameInfoset>& active)
+BehavIterator::BehavIterator(const BehavSupport &s, const List<GameInfoset>& active)
   : _frozen_pl(0), _frozen_iset(0),
     _efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),

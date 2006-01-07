@@ -42,12 +42,12 @@ open (bounded) intervals can be effected, but less directly.
 
 template <class T> class gRectangle {
 private:
-    gbtList<gInterval<T> > sides;
+    Gambit::List<gInterval<T> > sides;
 
 public:
     // constructors
     gRectangle(const gRectangle<T>&);
-    gRectangle(const gbtList<gInterval<T> >&);
+    gRectangle(const Gambit::List<gInterval<T> >&);
     gRectangle(const Gambit::Vector<T>, const Gambit::Vector<T>);
     ~gRectangle();
 
@@ -74,7 +74,7 @@ public:
     const T                  Volume()                           const;
     const Gambit::Vector<T>         Center()                           const;
     const gRectangle<T>      BoundingRectangle()                const;
-    const gbtList<Gambit::Vector<T> > VertexList()                       const;
+    const Gambit::List<Gambit::Vector<T> > VertexList()                       const;
     const int                NumberOfCellsInSubdivision()       const;
     const gRectangle<T>      SubdivisionCell(const int&)        const;
     const T                  DiameterSquared()                  const;

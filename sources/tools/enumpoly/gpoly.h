@@ -49,7 +49,7 @@ template <class T> class gPoly {
 private:
   const gSpace*        Space;    // pointer to variable Space of space
   const term_order*    Order;
-  gbtList<gMono<T> >     Terms;    // alternative implementation
+  Gambit::List<gMono<T> >     Terms;    // alternative implementation
 
   // used for gText parsing;
   unsigned int charnum;   char charc;   std::string TheString;
@@ -62,10 +62,10 @@ private:
   exp_vect  OrderMaxMonomialDivisibleBy(const term_order& order,
 					const exp_vect& expv);
     // Arithmetic
-  gbtList<gMono<T> > Adder(const gbtList<gMono<T> >&, 
-			 const gbtList<gMono<T> >&)          const;
-  gbtList<gMono<T> > Mult(const gbtList<gMono<T> >&, 
-			const gbtList<gMono<T> >&)           const;
+  Gambit::List<gMono<T> > Adder(const Gambit::List<gMono<T> >&, 
+			 const Gambit::List<gMono<T> >&)          const;
+  Gambit::List<gMono<T> > Mult(const Gambit::List<gMono<T> >&, 
+			const Gambit::List<gMono<T> >&)           const;
   gPoly<T>         DivideByPolynomial(const gPoly<T> &den) const; 
 
   // The following is used to construct the translate of *this.
@@ -163,8 +163,8 @@ public:
   gPoly<T>           EvaluateOneVar(int varnumber, T val)  const;
   gPoly<T>           PartialDerivative(int varnumber)      const;
   int                No_Monomials()                        const;
-  gbtList<exp_vect>    ExponentVectors()                     const;
-  gbtList<gMono<T> >   MonomialList()                        const;
+  Gambit::List<exp_vect>    ExponentVectors()                     const;
+  Gambit::List<gMono<T> >   MonomialList()                        const;
 
   gPoly<T>           TranslateOfPoly(const Gambit::Vector<T>&)    const;
   gPoly<T>   PolyInNewCoordinates(const Gambit::SquareMatrix<T>&) const;

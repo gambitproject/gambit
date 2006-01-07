@@ -73,7 +73,7 @@ public:
 };
 
 
-class NullException : public gbtException {
+class NullException : public Exception {
 public:
   virtual ~NullException() { }
   std::string GetDescription(void) const
@@ -685,7 +685,7 @@ inline Rational PureBehavProfile::GetPayoff(int pl) const
 //=======================================================================
 
 /// Exception thrown when an operation that is undefined is attempted
-class UndefinedException : public gbtException {
+class UndefinedException : public Exception {
 public:
   virtual ~UndefinedException() { }
   std::string GetDescription(void) const
@@ -693,7 +693,7 @@ public:
 };
 
 /// Exception thrown on an operation between incompatible objects
-class MismatchException : public gbtException {
+class MismatchException : public Exception {
 public:
   virtual ~MismatchException() { }
   std::string GetDescription(void) const
@@ -701,7 +701,7 @@ public:
 };
 
 /// Exception thrown on a parse error when reading a game savefile
-class InvalidFileException : public gbtException {
+class InvalidFileException : public Exception {
 public:
   virtual ~InvalidFileException() { }
   std::string GetDescription(void) const

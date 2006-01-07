@@ -46,7 +46,7 @@ public:
   const std::string &GetName(void) const   { return name; }
   void SetName(const std::string &s)       { name = s; }
   
-  gbtList<Gambit::GameAction> History(void) const;
+  Gambit::List<Gambit::GameAction> History(void) const;
   int GetNumber(void) const        { return number; }
   Gambit::GameAction GetAction(void) const  {return action; }
   Gambit::GameInfoset GetInfoset(void) const   { if(action) return action->GetInfoset();return 0; }

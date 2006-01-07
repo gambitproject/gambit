@@ -27,9 +27,9 @@
 #ifndef BFS_H
 #define BFS_H
 
-#include "libgambit/gmap.h"
+#include "libgambit/map.h"
 
-template <class T> class BFS : public gbtOrdMap<int, T>  {
+template <class T> class BFS : public Gambit::Map<int, T>  {
   public:
     BFS(void);
     BFS(const T &d);

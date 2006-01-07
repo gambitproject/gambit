@@ -34,12 +34,14 @@
 // Constructors / Destructors
 //---------------------------
 
+using namespace Gambit;
+
 template <class T> QuikSolv<T>::QuikSolv(const gPolyList<T>& given)
   : System(given), 
     gDoubleSystem(given.AmbientSpace(),given.TermOrder(),
 		  given.NormalizedList()),
-    NoEquations( gmin(System.Dmnsn(),System.Length()) ),
-    NoInequalities( gmax(System.Length() - System.Dmnsn(),0) ),
+    NoEquations( min(System.Dmnsn(),System.Length()) ),
+    NoInequalities( max(System.Length() - System.Dmnsn(),0) ),
     TreesOfPartials(gDoubleSystem),
     HasBeenSolved(false), 
     Roots(),
@@ -101,7 +103,7 @@ Gambit::RectArray<bool> QuikSolv<T>::Eq_i_Uses_j(void) const
 
 template<class T> 
 bool QuikSolv<T>::AllRealRootsFromPelican(const gPolyList<gDouble> & sys, 
-					  gbtList<Gambit::Vector<gDouble> > &ans) const
+					  Gambit::List<Gambit::Vector<gDouble> > &ans) const
 {
   try {
   PelView pel(sys);
@@ -127,9 +129,9 @@ bool QuikSolv<T>::AllRealRootsFromPelican(const gPolyList<gDouble> & sys,
 
 template<class T> bool
 QuikSolv<T>::PelicanRoots(const gRectangle<T>& r, 
-			        gbtList<Gambit::Vector<gDouble> > &answer) const
+			        Gambit::List<Gambit::Vector<gDouble> > &answer) const
 {
-  gbtList<Gambit::Vector<gDouble> > firstcut;
+  Gambit::List<Gambit::Vector<gDouble> > firstcut;
   bool pelworked = 
     AllRealRootsFromPelican(gDoubleSystem.InteriorSegment(1,Dmnsn()), 
 			    firstcut);
@@ -439,7 +441,7 @@ QuikSolv<T>::SlowNewtonPolishOnce(const Gambit::Vector<gDouble>& point) const
 template<class T>   Gambit::Vector<gDouble> 
 QuikSolv<T>::NewtonPolishedRoot(const Gambit::Vector<gDouble> &initial) const
 {
-  gbtList<gInterval<gDouble> > interval_list;
+  Gambit::List<gInterval<gDouble> > interval_list;
   for (int i = 1; i <= Dmnsn(); i++) 
     interval_list.Append(gInterval<gDouble>(initial[i] - (gDouble)1, 
 					    initial[i] + (gDouble)1));
@@ -467,7 +469,7 @@ QuikSolv<T>::MightHaveSingularRoots() const
 
   if (newpoly.IsZero()) return true;
 
-  gbtList<gPoly<gDouble> > newlist(gDoubleSystem.UnderlyingbtList());
+  Gambit::List<gPoly<gDouble> > newlist(gDoubleSystem.UnderlyingList());
 
   newlist.Append(newpoly);
   gPolyList<gDouble> larger_system(gDoubleSystem.AmbientSpace(),
@@ -498,7 +500,7 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
 {
   assert (NoEquations == System.Dmnsn());
 
-  gbtList<Gambit::Vector<gDouble> >* rootlistptr = new gbtList<Gambit::Vector<gDouble> >();
+  Gambit::List<Gambit::Vector<gDouble> >* rootlistptr = new Gambit::List<Gambit::Vector<gDouble> >();
 
   if (NoEquations == 0) {
     Gambit::Vector<gDouble> answer(0);
@@ -509,7 +511,7 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
   }
 
   /* - Commmented out 7/11/00 because g3.nfg does not work
-  gbtList<Gambit::Vector<gDouble> > answer;
+  Gambit::List<Gambit::Vector<gDouble> > answer;
   bool done = PelicanRoots(r, answer);
   if (done) {
     Roots = answer;
@@ -548,9 +550,9 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
 
   if ( !bigsolver.IsZeroDimensional() ) return false;
   else {
-    gbtList<Gambit::Vector<gDouble> > rootlist;
+    Gambit::List<Gambit::Vector<gDouble> > rootlist;
     rootlist = bigsolver.Roots();
-    gbtList<Gambit::Vector<gDouble> > roots;
+    Gambit::List<Gambit::Vector<gDouble> > roots;
     for (int j = 1; j <= rootlist.Length(); j++)
       if (TogDouble(r).Contains(rootlist[j])) roots += rootlist[j];
     Roots = roots;
@@ -573,8 +575,8 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
 //
 #define MAX_DEPTH  32
 
-template <class T> void // gbtList<Gambit::Vector<gDouble> >  
-QuikSolv<T>::FindRootsRecursion(      gbtList<Gambit::Vector<gDouble> >* rootlistptr,
+template <class T> void // Gambit::List<Gambit::Vector<gDouble> >  
+QuikSolv<T>::FindRootsRecursion(      Gambit::List<Gambit::Vector<gDouble> >* rootlistptr,
 				const gRectangle<gDouble>& r, 
 				const int& max_iterations,
 				      Gambit::Array<int>& precedence,

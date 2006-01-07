@@ -56,7 +56,7 @@ template <class T> class gIdeal {
  public:
   gIdeal(const gSpace *, const term_order *); // Null gIdeal constructor
   gIdeal(const gSpace *, const term_order *,
-	      const gbtList< gPoly<T> *> &);
+	      const Gambit::List< gPoly<T> *> &);
   gIdeal(const term_order *, const gPolyList<T> &);
   gIdeal(const gIdeal<T> &);
 
@@ -77,7 +77,7 @@ template <class T> class gIdeal {
    inline const term_order* Order()            const { return order; }
    inline gPolyList<T>      CanonicalBasis()   const { return basis; }
           gIdeal<T>         MonomialIdeal()    const;
-          gbtList<exp_vect>   MonomialBasis()    const;
+          Gambit::List<exp_vect>   MonomialBasis()    const;
                 // This returns a monomial basis of the ring of polynomial
                 // functions on the variety V(I), where I is the given ideal.
                 // It fails if the variety is not zero dimensional.

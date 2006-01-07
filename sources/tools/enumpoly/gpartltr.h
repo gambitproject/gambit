@@ -101,13 +101,13 @@ public:
 
 template <class T> class ListOfPartialTrees {
 private:
-  gbtList<TreeOfPartials<T> >     PartialTreeList;
+  Gambit::List<TreeOfPartials<T> >     PartialTreeList;
 
   // Disabling this operator -- we don't want it called
   ListOfPartialTrees<T> &operator=(const ListOfPartialTrees<T> &);
 
 public:
-   ListOfPartialTrees(const gbtList<gPoly<T> >&);  
+   ListOfPartialTrees(const Gambit::List<gPoly<T> >&);  
    ListOfPartialTrees(const gPolyList<T>&);  
    ListOfPartialTrees(const ListOfPartialTrees<T> &);
    ~ListOfPartialTrees();

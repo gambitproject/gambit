@@ -43,7 +43,7 @@ private:
   
   void SolveDual();
 public:
-  class BadPivot : public gbtException  {
+  class BadPivot : public Gambit::Exception  {
   public:
     virtual ~BadPivot();
     std::string GetDescription(void) const;
@@ -67,9 +67,9 @@ public:
       // Redefined functions
   void Refactor();
   void Pivot(int outrow,int col);
-  void ReversePivots(gbtList<Gambit::Array<int> > &);
+  void ReversePivots(Gambit::List<Gambit::Array<int> > &);
   bool IsReversePivot(int i, int j);
-  void DualReversePivots(gbtList<Gambit::Array<int> > &);
+  void DualReversePivots(Gambit::List<Gambit::Array<int> > &);
   bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS(void) const;
 

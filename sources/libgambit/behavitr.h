@@ -54,7 +54,7 @@ private:
 public:
   BehavIterator(const BehavSupport &);
   BehavIterator(const BehavSupport &, 
-		const gbtList<GameInfoset> &);
+		const List<GameInfoset> &);
   ~BehavIterator();
 
   Game GetGame(void) const { return _efg; }

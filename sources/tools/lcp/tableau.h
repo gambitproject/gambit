@@ -102,7 +102,7 @@ protected:
   Gambit::Array<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
 
 public:
-  class BadDenom : public gbtException  {
+  class BadDenom : public Gambit::Exception  {
   public:
     virtual ~BadDenom();
     std::string GetDescription(void) const;

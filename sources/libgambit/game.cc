@@ -1376,7 +1376,7 @@ GameInfoset GameRep::GetInfoset(int p_index) const
       }
     }
   }
-  throw gbtIndexException();
+  throw IndexException();
 }
 
 Array<int> GameRep::NumInfosets(void) const
@@ -1404,7 +1404,7 @@ GameAction GameRep::GetAction(int p_index) const
       }
     }
   }
-  throw gbtIndexException();
+  throw IndexException();
 }
 
 //------------------------------------------------------------------------

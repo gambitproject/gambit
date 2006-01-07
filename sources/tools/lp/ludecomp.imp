@@ -104,10 +104,10 @@ void LUdecomp<T>::Copy(const LUdecomp<T> &orig, Tableau<T> &t)
     tab = t;
     basis = t.GetBasis();
     
-    L = gbtList<EtaMatrix<T> >();
-    P = gbtList<int>();
-    E = gbtList<EtaMatrix<T> >();
-    U = gbtList<EtaMatrix<T> >();
+    L = Gambit::List<EtaMatrix<T> >();
+    P = Gambit::List<int>();
+    E = Gambit::List<EtaMatrix<T> >();
+    U = Gambit::List<EtaMatrix<T> >();
 
     refactor_number = orig.refactor_number;
     iterations = orig.iterations;
@@ -145,10 +145,10 @@ template <class T>
 void LUdecomp<T>::refactor( ) 
 {
 
-  L = gbtList<EtaMatrix<T> >();
-  U = gbtList<EtaMatrix<T> >();
-  E = gbtList<EtaMatrix<T> >();
-  P = gbtList<int>();
+  L = Gambit::List<EtaMatrix<T> >();
+  U = Gambit::List<EtaMatrix<T> >();
+  E = Gambit::List<EtaMatrix<T> >();
+  P = Gambit::List<int>();
 
   if ( !basis.IsIdent() ) FactorBasis();
 
@@ -164,8 +164,8 @@ template <class T>
 void LUdecomp<T>::solveT( const Gambit::Vector<T> &c, Gambit::Vector<T> &y ) const  
 {
 
-  if ( c.First() != y.First() || c.Last() != y.Last() ) throw gbtDimensionException();
-  if ( c.First() != basis.First() || c.Last() != basis.Last()) throw gbtDimensionException();
+  if ( c.First() != y.First() || c.Last() != y.Last() ) throw Gambit::DimensionException();
+  if ( c.First() != basis.First() || c.Last() != basis.Last()) throw Gambit::DimensionException();
 
   y = c;
   if ( basis.IsIdent() != true ) {
@@ -183,8 +183,8 @@ template <class T>
 void LUdecomp<T>::solve( const Gambit::Vector<T> &a, Gambit::Vector<T> &d ) const
 {
 
-  if ( a.First() != d.First() || a.Last() != d.Last() ) throw gbtDimensionException();
-  if ( a.First() != basis.First() || a.Last() != basis.Last()) throw gbtDimensionException();
+  if ( a.First() != d.First() || a.Last() != d.Last() ) throw Gambit::DimensionException();
+  if ( a.First() != basis.First() || a.Last() != basis.Last()) throw Gambit::DimensionException();
   
   d = a;
   if ( basis.IsIdent() != true ) {
@@ -304,7 +304,7 @@ void LUdecomp<T>::VectorEtaSolve( const Gambit::Vector<T> &v,
 
   int i, j;
 
-  if ( v.First() != y.First() || v.Last() != y.Last() ) throw gbtDimensionException();
+  if ( v.First() != y.First() || v.Last() != y.Last() ) throw Gambit::DimensionException();
 
   for ( i = v.First(); i <= v.Last(); i++ ) {
     y[i] = v[i];
@@ -346,7 +346,7 @@ void LUdecomp<T>::EtaVectorSolve( const Gambit::Vector<T> &v,
   int i;
   T temp;
 
-  if ( v.First() != d.First() || v.Last() != d.Last() ) throw gbtDimensionException();
+  if ( v.First() != d.First() || v.Last() != d.Last() ) throw Gambit::DimensionException();
   if ( eta.etadata[eta.col] == (T)0 )
     throw BadPivot(); // or we would have a singular matrix
   
@@ -376,7 +376,7 @@ template<class T>
 void LUdecomp<T>::yLP_mult( const Gambit::Vector<T> &y, int j, Gambit::Vector<T> &ans ) const
 {
     
-  if ( ans.First() != y.First() || ans.Last() != y.Last() ) throw gbtDimensionException();
+  if ( ans.First() != y.First() || ans.Last() != y.Last() ) throw Gambit::DimensionException();
   T temp;
   int i, k, l;
   
@@ -412,7 +412,7 @@ template<class T>
 void LUdecomp<T>::LPd_mult( Gambit::Vector<T> &d, int j, Gambit::Vector<T> &ans ) const
 {
   
-  if ( d.First() != ans.First() || d.Last() != ans.Last() ) throw gbtDimensionException();
+  if ( d.First() != ans.First() || d.Last() != ans.Last() ) throw Gambit::DimensionException();
 
   T temp;
 

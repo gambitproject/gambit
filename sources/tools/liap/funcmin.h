@@ -42,7 +42,7 @@ public:
   virtual bool Gradient(const Gambit::Vector<T> &, Gambit::Vector<T> &) const = 0;
 };
 
-class gbtFuncMinError : public gbtException {
+class gbtFuncMinError : public Gambit::Exception {
 public:
   virtual ~gbtFuncMinError() { }
   std::string GetDescription(void) const 

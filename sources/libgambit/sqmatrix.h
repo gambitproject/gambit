@@ -32,7 +32,7 @@
 
 namespace Gambit {
 
-class SingularMatrixException : public ::gbtException {
+class SingularMatrixException : public Exception {
 public:
   virtual ~SingularMatrixException() { }
   std::string GetDescription(void) const

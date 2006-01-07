@@ -101,7 +101,7 @@ TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
   T answer = (T)0;
 
   if (n->GetEldest() != NULL) {
-    gbtList<gTreeNode<gPoly<T> >*> children = PartialTree.Children(n);
+    Gambit::List<gTreeNode<gPoly<T> >*> children = PartialTree.Children(n);
     for (int i = 1; i <= children.Length(); i++) {
       wrtos[i]++;
 
@@ -139,8 +139,8 @@ TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
   T answer = (T)0;
 
   if (n1->GetEldest() != NULL && n2->GetEldest() != NULL) {
-    gbtList<gTreeNode<gPoly<T> >*> children1 = PartialTree.Children(n1);
-    gbtList<gTreeNode<gPoly<T> >*> children2 = PartialTree.Children(n2);
+    Gambit::List<gTreeNode<gPoly<T> >*> children1 = PartialTree.Children(n1);
+    Gambit::List<gTreeNode<gPoly<T> >*> children2 = PartialTree.Children(n2);
     for (int i = 1; i <= children1.Length(); i++) {
       wrtos[i]++;
 
@@ -167,7 +167,7 @@ TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
   }
 
   else if (n1->GetEldest() != NULL && n2->GetEldest() == NULL) {
-    gbtList<gTreeNode<gPoly<T> >*> children1 = PartialTree.Children(n1);
+    Gambit::List<gTreeNode<gPoly<T> >*> children1 = PartialTree.Children(n1);
     for (int i = 1; i <= children1.Length(); i++) {
       wrtos[i]++;
 
@@ -192,7 +192,7 @@ TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
   }
 
   else if (n1->GetEldest() == NULL && n2->GetEldest() != NULL) {
-    gbtList<gTreeNode<gPoly<T> >*> children2 = PartialTree.Children(n2);
+    Gambit::List<gTreeNode<gPoly<T> >*> children2 = PartialTree.Children(n2);
     for (int i = 1; i <= children2.Length(); i++) {
       wrtos[i]++;
 
@@ -393,7 +393,7 @@ TreeOfPartials <T>::PolyEverywhereNegativeIn(const gRectangle<T>& r) const
 //---------------------------
 
 template <class T> 
-ListOfPartialTrees<T>::ListOfPartialTrees(const gbtList<gPoly<T> >& given) 
+ListOfPartialTrees<T>::ListOfPartialTrees(const Gambit::List<gPoly<T> >& given) 
 : PartialTreeList()
 {
   for (int i = 1; i <= given.Length(); i++) 

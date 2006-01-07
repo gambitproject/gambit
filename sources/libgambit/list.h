@@ -24,43 +24,45 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GLIST_H
-#define GLIST_H
+#ifndef LIBGAMBIT_LIST_H
+#define LIBGAMBIT_LIST_H
 
-template <class T> class gbtList  {
+namespace Gambit {
+
+template <class T> class List {
 protected:
-  class gNode   {
+  class Node {
   public:
     T m_data;
-    gNode *m_prev, *m_next;
+    Node *m_prev, *m_next;
     
     // CONSTRUCTOR
-    gNode(const T &p_data, gNode *p_prev, gNode *p_next);
+    Node(const T &p_data, Node *p_prev, Node *p_next);
   };
 
   int m_length;
-  gNode *m_head, *m_tail;
+  Node *m_head, *m_tail;
 
   int m_currentIndex;
-  gNode *m_currentNode;
+  Node *m_currentNode;
 
   int InsertAt(const T &t, int where);
 
 public:
-  gbtList(void);
-  gbtList(const gbtList<T> &);
-  virtual ~gbtList();
+  List(void);
+  List(const List<T> &);
+  virtual ~List();
   
-  gbtList<T> &operator=(const gbtList<T> &);
+  List<T> &operator=(const List<T> &);
   
-  bool operator==(const gbtList<T> &b) const;
-  bool operator!=(const gbtList<T> &b) const;
+  bool operator==(const List<T> &b) const;
+  bool operator!=(const List<T> &b) const;
   
   const T &operator[](int) const;
   T &operator[](int);
 
-  gbtList<T> operator+(const gbtList<T>& b) const;
-  gbtList<T>& operator+=(const gbtList<T>& b);
+  List<T> operator+(const List<T>& b) const;
+  List<T>& operator+=(const List<T>& b);
 
   virtual int Append(const T &);
   int Insert(const T &, int);
@@ -73,33 +75,33 @@ public:
 
 
 //--------------------------------------------------------------------------
-//                 gNode: Member function implementations
+//                 Node: Member function implementations
 //--------------------------------------------------------------------------
 
 template <class T> 
-gbtList<T>::gNode::gNode(const T &p_data,
-		       gbtList<T>::gNode *p_prev, gbtList<T>::gNode *p_next)
+List<T>::Node::Node(const T &p_data,
+			 List<T>::Node *p_prev, List<T>::Node *p_next)
   : m_data(p_data), m_prev(p_prev), m_next(p_next)
 { }
 
 //--------------------------------------------------------------------------
-//                 gbtList<T>: Member function implementations
+//                 List<T>: Member function implementations
 //--------------------------------------------------------------------------
 
-template <class T> gbtList<T>::gbtList(void) 
-: m_length(0), m_head(0), m_tail(0), m_currentIndex(0), m_currentNode(0)
+template <class T> List<T>::List(void) 
+  : m_length(0), m_head(0), m_tail(0), m_currentIndex(0), m_currentNode(0)
 { }
 
-template <class T> gbtList<T>::gbtList(const gbtList<T> &b)
- : m_length(b.m_length)
+template <class T> List<T>::List(const List<T> &b)
+  : m_length(b.m_length)
 {
   if (m_length)  {  
-    gNode *n = b.m_head;
-    m_head = new gNode(n->m_data, 0, 0);
+    Node *n = b.m_head;
+    m_head = new Node(n->m_data, 0, 0);
     n = n->m_next;
     m_tail = m_head;
     while (n)  { 
-      m_tail->m_next = new gNode(n->m_data, m_tail, 0);
+      m_tail->m_next = new Node(n->m_data, m_tail, 0);
       n = n->m_next;
       m_tail = m_tail->m_next;
     }
@@ -113,39 +115,39 @@ template <class T> gbtList<T>::gbtList(const gbtList<T> &b)
   }
 }
 
-template <class T> gbtList<T>::~gbtList()
+template <class T> List<T>::~List()
 {
-  gNode *n = m_head;
+  Node *n = m_head;
   while (n)  {
-    gNode *m_next = n->m_next;
+    Node *m_next = n->m_next;
     delete n;
     n = m_next;
   }
 }
 
-template <class T> int gbtList<T>::InsertAt(const T &t, int num)
+template <class T> int List<T>::InsertAt(const T &t, int num)
 {
-  if (num < 1 || num > m_length + 1)   throw gbtIndexException();
+  if (num < 1 || num > m_length + 1)   throw IndexException();
   
   if (!m_length)  {
-    m_head = m_tail = new gNode(t, 0, 0);
+    m_head = m_tail = new Node(t, 0, 0);
     m_length = 1;
     m_currentIndex = 1;
     m_currentNode = m_head;
     return m_length;
   }
 
-  gNode *n;
+  Node *n;
   int i;
   
   if( num <= 1 )  {
-    n = new gNode(t, 0, m_head);
+    n = new Node(t, 0, m_head);
     m_head->m_prev = n;
     m_currentNode = m_head = n;
     m_currentIndex = 1;
   }
   else if( num >= m_length + 1)  {
-    n = new gNode(t, m_tail, 0);
+    n = new Node(t, m_tail, 0);
     m_tail->m_next = n;
     m_currentNode = m_tail = n;
     m_currentIndex = m_length + 1;
@@ -154,9 +156,9 @@ template <class T> int gbtList<T>::InsertAt(const T &t, int num)
     assert( m_currentIndex >= 1 && m_currentIndex <= m_length );
     if( num < m_currentIndex )
       for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev);
-		else
+    else
       for (i = m_currentIndex, n = m_currentNode; i < num; i++, n = n->m_next);
-    n = new gNode(t, n->m_prev, n);
+    n = new Node(t, n->m_prev, n);
     m_currentNode = n->m_prev->m_next = n->m_next->m_prev = n;
     m_currentIndex = num;
   }
@@ -167,12 +169,12 @@ template <class T> int gbtList<T>::InsertAt(const T &t, int num)
 
 //--------------------- visible functions ------------------------
 
-template <class T> gbtList<T> &gbtList<T>::operator=(const gbtList<T> &b)
+template <class T> List<T> &List<T>::operator=(const List<T> &b)
 {
   if (this != &b)   {
-    gNode *n = m_head;
+    Node *n = m_head;
     while (n) {
-      gNode *m_next = n->m_next;
+      Node *m_next = n->m_next;
       delete n;
       n = m_next;
     }
@@ -180,13 +182,13 @@ template <class T> gbtList<T> &gbtList<T>::operator=(const gbtList<T> &b)
     m_length = b.m_length;
     m_currentIndex = b.m_currentIndex;
     if (m_length)   {
-      gNode *n = b.m_head;
-      m_head = new gNode(n->m_data, 0, 0);
+      Node *n = b.m_head;
+      m_head = new Node(n->m_data, 0, 0);
       if (b.m_currentNode == n) m_currentNode = m_head;
       n = n->m_next;
       m_tail = m_head;
       while (n)  {
-	m_tail->m_next = new gNode(n->m_data, m_tail, 0);
+	m_tail->m_next = new Node(n->m_data, m_tail, 0);
 	if (b.m_currentNode == n) m_currentNode = m_tail->m_next;
 	n = n->m_next;
 	m_tail = m_tail->m_next;
@@ -198,25 +200,25 @@ template <class T> gbtList<T> &gbtList<T>::operator=(const gbtList<T> &b)
   return *this;
 }
 
-template <class T> bool gbtList<T>::operator==(const gbtList<T> &b) const
+template <class T> bool List<T>::operator==(const List<T> &b) const
 {
   if (m_length != b.m_length) return false;
-  for (gNode *m = m_head, *n = b.m_head; m; m = m->m_next, n = n->m_next)
+  for (Node *m = m_head, *n = b.m_head; m; m = m->m_next, n = n->m_next)
     if (m->m_data != n->m_data)  return false;
   return true;
 }
 
-template <class T> bool gbtList<T>::operator!=(const gbtList<T> &b) const
+template <class T> bool List<T>::operator!=(const List<T> &b) const
 {
   return !(*this == b);
 }
 
-template <class T> const T &gbtList<T>::operator[](int num) const
+template <class T> const T &List<T>::operator[](int num) const
 {
-  if (num < 1 || num > m_length)    throw gbtIndexException();
+  if (num < 1 || num > m_length)    throw IndexException();
 
   int i;
-  gNode *n;
+  Node *n;
   if( num < m_currentIndex )
     for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev);
   else
@@ -224,10 +226,10 @@ template <class T> const T &gbtList<T>::operator[](int num) const
   return n->m_data;
 }
 
-template <class T> T &gbtList<T>::operator[](int num)
+template <class T> T &List<T>::operator[](int num)
 {
-  if (num < 1 || num > m_length)   throw gbtIndexException();
-  gNode *n;
+  if (num < 1 || num > m_length)   throw IndexException();
+  Node *n;
   int i;
   if( num < m_currentIndex )
     for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev);
@@ -238,10 +240,10 @@ template <class T> T &gbtList<T>::operator[](int num)
   return n->m_data;
 }
 
-template <class T> gbtList<T> gbtList<T>::operator+(const gbtList<T> &b) const
+template <class T> List<T> List<T>::operator+(const List<T> &b) const
 {
-  gbtList<T> result(*this);
-  gNode *n = b.m_head;
+  List<T> result(*this);
+  Node *n = b.m_head;
   while (n)  {
     result.Append(n->data);
     n = n->m_next;
@@ -249,9 +251,9 @@ template <class T> gbtList<T> gbtList<T>::operator+(const gbtList<T> &b) const
   return result;
 }
 
-template <class T> gbtList<T> &gbtList<T>::operator+=(const gbtList<T> &b)
+template <class T> List<T> &List<T>::operator+=(const List<T> &b)
 {
-  gNode *n = b.m_head;
+  Node *n = b.m_head;
   
   while (n)  {
     Append(n->m_data);
@@ -260,20 +262,20 @@ template <class T> gbtList<T> &gbtList<T>::operator+=(const gbtList<T> &b)
   return *this;
 }
 
-template <class T> int gbtList<T>::Append(const T &t)
+template <class T> int List<T>::Append(const T &t)
 {
   return InsertAt(t, m_length + 1);
 }
 
-template <class T> int gbtList<T>::Insert(const T &t, int n)
+template <class T> int List<T>::Insert(const T &t, int n)
 {
   return InsertAt(t, (n < 1) ? 1 : ((n > m_length + 1) ? m_length + 1 : n));
 }
 
-template <class T> T gbtList<T>::Remove(int num)
+template <class T> T List<T>::Remove(int num)
 {
-  if (num < 1 || num > m_length)   throw gbtIndexException();
-  gNode *n;
+  if (num < 1 || num > m_length)   throw IndexException();
+  Node *n;
   int i;
 
   if( num < m_currentIndex )
@@ -302,19 +304,21 @@ template <class T> T gbtList<T>::Remove(int num)
   return ret;
 }
 
-template <class T> int gbtList<T>::Find(const T &t) const
+template <class T> int List<T>::Find(const T &t) const
 {
   if (m_length == 0)  return 0;
-  gNode *n = m_head;
+  Node *n = m_head;
   for (int i = 1; n; i++, n = n->m_next)
     if (n->m_data == t)   return i;
   return 0;
 }
 
-template <class T> bool gbtList<T>::Contains(const T &t) const
+template <class T> bool List<T>::Contains(const T &t) const
 {
   return (Find(t) != 0);
 }
 
-#endif    // GLIST_H
+}
+
+#endif // LIBGAMBIT_LIST_H
 

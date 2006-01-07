@@ -105,7 +105,7 @@ template<class T> gPoly<T> &gPoly<T>::operator=(const gPoly<T> &p)
 
 template <class T> gPoly<T>& gPoly<T>::operator=(const std::string &Hold)
 {
-  gbtList<gMono<T> > nullTerms;
+  Gambit::List<gMono<T> > nullTerms;
   Terms = nullTerms;           // get rid of old Terms
 
   charnum = 0;
@@ -138,7 +138,7 @@ template <class T> gPoly<T>& gPoly<T>::operator=(const std::string &Hold)
     }
   }
 
-  gbtList<gMono<T> > newTerms;
+  Gambit::List<gMono<T> > newTerms;
   for (int j = 1; j <= Terms.Length(); j++) {
     int low = 0; int high = newTerms.Length() + 1;
     while (low +1 < high) {
@@ -477,15 +477,15 @@ template <class T> T gPoly<T>::Evaluate(const Gambit::Array<T> &values) const
 }
 
 
-template <class T> gbtList<exp_vect> gPoly<T>::ExponentVectors() const
+template <class T> Gambit::List<exp_vect> gPoly<T>::ExponentVectors() const
 {
-  gbtList<exp_vect> result;
+  Gambit::List<exp_vect> result;
   for (int j = 1; j <= Terms.Length(); j++)
     result.Append(exp_vect(Terms[j].ExpV()));
   return result;
 }
 
-template <class T> gbtList<gMono<T> > gPoly<T>::MonomialList() const
+template <class T> Gambit::List<gMono<T> > gPoly<T>::MonomialList() const
 {
   return Terms;
 }
@@ -499,7 +499,7 @@ template <class T> int gPoly<T>::No_Monomials() const
 
 template <class T> int gPoly<T>::UniqueActiveVariable() const
 {
-  gbtList<exp_vect> ExpVecs = ExponentVectors();
+  Gambit::List<exp_vect> ExpVecs = ExponentVectors();
   int activar = 0;
   for (int i = 1; i <= ExpVecs.Length(); i++) {
     for (int j = 1; j <= Dmnsn(); j++) {
@@ -516,7 +516,7 @@ polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
 {
   assert(UniqueActiveVariable() >= 0);
 
-  gbtList<T> coefs;
+  Gambit::List<T> coefs;
 
   if (!IsZero()) {
     for (int h = 0; h <= DegreeOfVar(activar); h++) coefs.Append((T)0);
@@ -533,12 +533,12 @@ polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
 //-------------------------------------------------------------
 
 template <class T> 
-gbtList< gMono<T> > gPoly<T>::Adder(const gbtList<gMono<T> >& One, 
-				   const gbtList<gMono<T> >& Two) const
+Gambit::List< gMono<T> > gPoly<T>::Adder(const Gambit::List<gMono<T> >& One, 
+				   const Gambit::List<gMono<T> >& Two) const
 {
   if (One.Length() == 0) return Two; if (Two.Length() == 0) return One;
 
-  gbtList<gMono<T> > answer;
+  Gambit::List<gMono<T> > answer;
 
   int i = 1; int j = 1;
   while (i <= One.Length() || j <= Two.Length()) {
@@ -561,10 +561,10 @@ gbtList< gMono<T> > gPoly<T>::Adder(const gbtList<gMono<T> >& One,
 }
 
 template <class T> 
-gbtList< gMono<T> > gPoly<T>::Mult(const gbtList<gMono<T> >& One, 
-				  const gbtList<gMono<T> >& Two) const
+Gambit::List< gMono<T> > gPoly<T>::Mult(const Gambit::List<gMono<T> >& One, 
+				  const Gambit::List<gMono<T> >& Two) const
 {
-  gbtList<gMono<T> > answer;
+  Gambit::List<gMono<T> > answer;
 
   if (One.Length() == 0 || Two.Length() == 0) return answer;
 
@@ -694,7 +694,7 @@ gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
 
   int degree = DegreeOfVar(varnumber);
 
-  newPoly.Terms = gbtList<gMono<T> >();
+  newPoly.Terms = Gambit::List<gMono<T> >();
   for (int j = 1; j <= Terms.Length(); j++) {
     if (Terms[j].ExpV()[varnumber] == degree)
       newPoly.Terms.Append(gMono<T>(Terms[j].Coef(),
@@ -965,7 +965,7 @@ template<class T>
 gPoly<gDouble>  TogDouble(const gPoly<T>& given) 
 {
   gPoly<gDouble>   answer(given.GetSpace(),given.GetOrder());
-  gbtList<gMono<T> > list = given.MonomialList();
+  Gambit::List<gMono<T> > list = given.MonomialList();
   for (int i =1; i <= list.Length(); i++) {
     gDouble nextcoef = (gDouble)list[i].Coef();
     gPoly<gDouble> next(given.GetSpace(),
@@ -981,10 +981,10 @@ gPoly<gDouble>  TogDouble(const gPoly<T>& given)
 template<class T>  
 gPoly<gDouble>  NormalizationOfPoly(const gPoly<T>& given) 
 {
-  gbtList<gMono<T> > list = given.MonomialList();
+  Gambit::List<gMono<T> > list = given.MonomialList();
   gDouble maxcoeff = (gDouble)0;
   for (int i =1; i <= list.Length(); i++) {
-    maxcoeff = gmax(maxcoeff,abs((gDouble)list[i].Coef()));
+    maxcoeff = Gambit::max(maxcoeff,abs((gDouble)list[i].Coef()));
   }
 
   if (maxcoeff < 0.000000001) return TogDouble(given);

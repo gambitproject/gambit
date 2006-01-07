@@ -43,7 +43,7 @@ template<class T>  gIdeal<T>::gIdeal(const gSpace * ls,
 
 template<class T>  gIdeal<T>::gIdeal(const gSpace * ls, 
 				     const term_order * ordr,
-				     const gbtList< gPoly<T> *> & polys)
+				     const Gambit::List< gPoly<T> *> & polys)
 : Space(ls), order(ordr), basis(ls,ordr,polys)
 {
 }
@@ -108,7 +108,7 @@ template<class T>  bool gIdeal<T>::operator!=(const gIdeal<T> & rhs) const
 
 template<class T>  gIdeal<T> gIdeal<T>::operator+ (const gIdeal<T> & rhs) const
 {
-  gbtList<gPoly<T> *> combined;
+  Gambit::List<gPoly<T> *> combined;
 
   for (int i = 1; i <= basis.Length(); i++) {
     gPoly<T>* temp = new gPoly<T>(basis[i]);
@@ -124,7 +124,7 @@ template<class T>  gIdeal<T> gIdeal<T>::operator+ (const gIdeal<T> & rhs) const
 
 template<class T>  gIdeal<T> gIdeal<T>::operator* (const gIdeal<T> & rhs) const
 {
-  gbtList<gPoly<T> *> basis_products;
+  Gambit::List<gPoly<T> *> basis_products;
 
   for (int i = 1; i <= basis.Length(); i++) 
     for (int j = 1; j <= rhs.basis.Length(); j++) {
@@ -148,9 +148,9 @@ template<class T> gIdeal<T> gIdeal<T>::MonomialIdeal() const
   return gIdeal<T>(order,mon_bss);
 }
   
-template<class T> gbtList<exp_vect> gIdeal<T>::MonomialBasis() const
+template<class T> Gambit::List<exp_vect> gIdeal<T>::MonomialBasis() const
 {
-  gbtList<exp_vect> answer;
+  Gambit::List<exp_vect> answer;
 
   Gambit::Array<int> MinIndices(Dmnsn()), MaxIndices(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) MinIndices[i] = 0;

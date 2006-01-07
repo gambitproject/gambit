@@ -124,7 +124,7 @@ void Tableau<double>::SetRefactor(int n)
 void Tableau<double>::SetConst(const Gambit::Vector<double> &bnew)
 {
   if(bnew.First()!=b->First() || bnew.Last()!=b->Last())
-    throw gbtDimensionException();
+    throw Gambit::DimensionException();
   b=&bnew;
   Solve(*b, solution);
 }
@@ -288,7 +288,7 @@ int Tableau<Gambit::Rational>::remap(int col_index) const
 {
   int i = nonbasic.First(); 
   while(i <= nonbasic.Last() && nonbasic[i] !=col_index) { i++;}
-  if(i > nonbasic.Last()) throw gbtDimensionException();
+  if(i > nonbasic.Last()) throw Gambit::DimensionException();
   return i;
 }
 

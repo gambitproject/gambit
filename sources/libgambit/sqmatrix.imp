@@ -62,7 +62,7 @@ SquareMatrix<T> &SquareMatrix<T>::operator=(const SquareMatrix<T> &M)
 template <class T> SquareMatrix<T> SquareMatrix<T>::Inverse(void) const
 {
   if (this->mincol != this->minrow || this->maxcol != this->maxrow) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
 
   SquareMatrix<T> copy(*this);

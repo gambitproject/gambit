@@ -89,7 +89,7 @@ template <class T> class gTree  {
     void InsertAt(const T&, gTreeNode<T>*);
 
   // Information
-    gbtList<gTreeNode<T>*> Children(const gTreeNode<T>*)              const;
+    Gambit::List<gTreeNode<T>*> Children(const gTreeNode<T>*)              const;
     gTreeNode<T>*        RootNode()                                 const;
     gTreeNode<T>*        Find(const T&)                             const;
     bool                 Contains(const T& t)                       const;

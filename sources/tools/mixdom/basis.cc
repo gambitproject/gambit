@@ -104,13 +104,13 @@ int Basis::Pivot(int outindex, int col)
  
   if (IsSlackColumn(col)) slacks[-col] = outindex;
   else if (IsRegColumn(col)) cols[col] = outindex;
-  else throw gbtIndexException(); // not a valid column to pivot in.
+  else throw Gambit::IndexException(); // not a valid column to pivot in.
   
   if (IsSlackColumn(outlabel)) slacks[-outlabel] = 0;
   else if (IsRegColumn(outlabel)) cols[outlabel] = 0;
   else {
     // Note: here, should back out outindex.    
-    throw gbtIndexException(); // not a valid column to pivot out. 
+    throw Gambit::IndexException(); // not a valid column to pivot out. 
   }
   
   basis[outindex] = col;
@@ -137,7 +137,7 @@ int Basis::Find( int col ) const
 
   if ( IsSlackColumn(col)) ret = slacks[-col];
   else if (IsRegColumn(col)) ret = cols[col];
-  else throw gbtIndexException();
+  else throw Gambit::IndexException();
   
   return ret;
 }

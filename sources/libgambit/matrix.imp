@@ -86,7 +86,7 @@ template <class T> Matrix<T> Matrix<T>::operator-(void)
 template <class T> Matrix<T> Matrix<T>::operator+(const Matrix<T> &M) const
 {
   if (!CheckBounds(M)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
 
   Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
@@ -105,7 +105,7 @@ template <class T> Matrix<T> Matrix<T>::operator+(const Matrix<T> &M) const
 template <class T> Matrix<T> Matrix<T>::operator-(const Matrix<T> &M) const
 {
   if (!CheckBounds(M)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
 
   Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
@@ -124,7 +124,7 @@ template <class T> Matrix<T> Matrix<T>::operator-(const Matrix<T> &M) const
 template <class T> Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &M)
 {
   if (!CheckBounds(M)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
 
   for (int i = this->minrow; i <= this->maxrow; i++)   {
@@ -140,7 +140,7 @@ template <class T> Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &M)
 template <class T> Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &M)
 {
   if (!CheckBounds(M)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
 
   for (int i = this->minrow; i <= this->maxrow; i++)  {
@@ -162,7 +162,7 @@ template <class T>
 void Matrix<T>::CMultiply(const Vector<T> &in, Vector<T> &out) const
 {
   if (!CheckRow(in) || !CheckColumn(out))  {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
 
   for (int i = this->minrow; i <= this->maxrow; i++)   {
@@ -180,7 +180,7 @@ void Matrix<T>::CMultiply(const Vector<T> &in, Vector<T> &out) const
 template <class T> Matrix<T> Matrix<T>::operator*(const Matrix<T> &M) const
 {
   if (this->mincol != M.minrow || this->maxcol != M.maxrow) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
 
   Matrix<T> tmp(this->minrow, this->maxrow, M.mincol, M.maxcol);
@@ -197,7 +197,7 @@ template <class T> Matrix<T> Matrix<T>::operator*(const Matrix<T> &M) const
 template <class T> Vector<T> Matrix<T>::operator*(const Vector<T> &v) const
 {
   if (!CheckRow(v))  {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
 
   Vector<T> tmp(this->minrow, this->maxrow);
@@ -209,7 +209,7 @@ template <class T>
 void Matrix<T>::RMultiply(const Vector<T> &in, Vector<T> &out) const
 {
   if (!CheckColumn(in) || !CheckRow(out)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
 
   out= (T)0;
@@ -231,7 +231,7 @@ template <class T>
 Vector<T> operator*(const Vector<T> &v, const Matrix<T> &M)
 {
   if (!M.CheckColumn(v)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
   Vector<T> tmp(M.MinCol(), M.MaxCol());
   M.RMultiply(v, tmp);
@@ -256,10 +256,10 @@ template <class T> Matrix<T> Matrix<T>::operator*(const T &s) const
 template <class T> Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &M)
 {
   if (this->mincol != M.minrow || this->maxcol != M.maxrow) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
   if (M.minrow != M.mincol || M.maxrow != M.maxcol) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
 
   Vector<T> row(this->mincol, this->maxcol);
@@ -286,7 +286,7 @@ template <class T> Matrix<T> &Matrix<T>::operator*=(const T &s)
 
 template <class T> Matrix<T> Matrix<T>::operator/(const T &s) const
 {
-  if (s == (T) 0)   throw gbtZeroDivideException();
+  if (s == (T) 0)   throw ZeroDivideException();
 
   Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++)   {
@@ -302,7 +302,7 @@ template <class T> Matrix<T> Matrix<T>::operator/(const T &s) const
 
 template <class T> Matrix<T> &Matrix<T>::operator/=(const T &s)
 {
-  if (s == (T) 0)   throw gbtZeroDivideException();
+  if (s == (T) 0)   throw ZeroDivideException();
 
   for (int i = this->minrow; i <= this->maxrow; i++)  {
     T *dst = this->data[i] + this->mincol;
@@ -356,7 +356,7 @@ template <class T> Matrix<T> Matrix<T>::Transpose() const
 template <class T> bool Matrix<T>::operator==(const Matrix<T> &M) const
 {
   if (!CheckBounds(M)) {
-    throw gbtDimensionException();
+    throw DimensionException();
   }
 
   for (int i = this->minrow; i <= this->maxrow; i++)   {
@@ -422,9 +422,9 @@ template <class T> void Matrix<T>::MakeIdent(void)
 template <class T> void Matrix<T>::Pivot(int row, int col)
 {
   if (!this->CheckRow(row) || !this->CheckColumn(col)) {
-    throw gbtIndexException();
+    throw IndexException();
   }
-  if (this->data[row][col] == (T) 0)  throw gbtZeroDivideException();
+  if (this->data[row][col] == (T) 0)  throw ZeroDivideException();
 
   T mult= (T)1/this->data[row][col];
   for(int j=this->mincol; j<=this->maxcol; j++)

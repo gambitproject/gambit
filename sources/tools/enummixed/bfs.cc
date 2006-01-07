@@ -30,11 +30,11 @@
 //                     class BFS<T>: member functions
 //--------------------------------------------------------------------------
 
-template <class T> BFS<T>::BFS(void) : gbtOrdMap<int, T>((T) 0)  { }
+template <class T> BFS<T>::BFS(void) : Gambit::Map<int, T>((T) 0)  { }
 
-template <class T> BFS<T>::BFS(const T &d) : gbtOrdMap<int, T>((T) d)  { }
+template <class T> BFS<T>::BFS(const T &d) : Gambit::Map<int, T>((T) d)  { }
 
-template <class T> BFS<T>::BFS(const BFS<T> &m) : gbtOrdMap<int, T>(m)  { }
+template <class T> BFS<T>::BFS(const BFS<T> &m) : Gambit::Map<int, T>(m)  { }
 
 template <class T> int BFS<T>::operator==(const BFS<T> &M) const
 {

@@ -27,9 +27,9 @@
 #include "gpolylst.h"
 
 template <class T> 
-gbtList<T> InteriorSegment(const gbtList<T> &p_list, int first, int last)
+Gambit::List<T> InteriorSegment(const Gambit::List<T> &p_list, int first, int last)
 {
-  gbtList<T> answer;
+  Gambit::List<T> answer;
 
   for (int i = first; i <= last; i++)
     answer.Append(p_list[i]);
@@ -53,7 +53,7 @@ template <class T> gPolyList<T>::gPolyList(const gSpace* sp,
 
 template<class T> gPolyList<T>::gPolyList(const gSpace * sp,
 					  const term_order* to,
-					  const gbtList< gPoly<T> *> & plist)
+					  const Gambit::List< gPoly<T> *> & plist)
 : Space(sp), Order(to), List()
 {
   int ii;
@@ -63,7 +63,7 @@ template<class T> gPolyList<T>::gPolyList(const gSpace * sp,
 
 template<class T> gPolyList<T>::gPolyList(const gSpace * sp,
 					  const term_order* to,
-					  const gbtList< gPoly<T> > & list)
+					  const Gambit::List< gPoly<T> > & list)
 : Space(sp), Order(to), List()
 {
   int ii;
@@ -131,7 +131,7 @@ template<class T>  void gPolyList<T>::operator+=(const gPoly<T> & new_poly)
 
 template<class T>  void gPolyList<T>::operator+=(const gPolyList<T> & new_list)
 {
-  gbtList<gPoly<T>*> temp;
+  Gambit::List<gPoly<T>*> temp;
   for (int i = 1; i <= new_list.Length(); i++)
     temp.Append(new gPoly<T>(new_list[i]));
   List+=temp;
@@ -247,8 +247,8 @@ template<class T> void gPolyList<T>::Sort(const term_order& order)
 }
 
 template <class T> 
-void gPolyList<T>::CriterionTwo(      gbtList<index_pair>& uncomputed, 
-				const gbtList<index_pair>& computed, 
+void gPolyList<T>::CriterionTwo(      Gambit::List<index_pair>& uncomputed, 
+				const Gambit::List<index_pair>& computed, 
 				const int&               no_polys,
 				const term_order & order)           const
 {
@@ -301,8 +301,8 @@ template<class T> void gPolyList<T>::Grobnerize(const term_order & order)
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) List[ii]->ToMonic(order);
 
-  gbtList<index_pair> uncomputed;
-  gbtList<index_pair>   computed;
+  Gambit::List<index_pair> uncomputed;
+  Gambit::List<index_pair>   computed;
 
   for (ii = 2; ii <= List.Length(); ii++) {
     for (int j = 1; j < ii; j++) 
@@ -401,7 +401,7 @@ gPolyList<T>& gPolyList<T>::ToSortedReducedGrobner(const term_order & order)
 template<class T> gPolyList<T> 
 gPolyList<T>::TranslateOfSystem(const Gambit::Vector<T>& new_origin) const
 {
-  gbtList<gPoly<T> > new_polys;
+  Gambit::List<gPoly<T> > new_polys;
   for (int i = 1; i <= Length(); i++) {
     new_polys.Append((*this)[i].TranslateOfPoly(new_origin));
     //    assert (TranslateOfPoly((*this)[i],new_origin) == 
@@ -413,7 +413,7 @@ gPolyList<T>::TranslateOfSystem(const Gambit::Vector<T>& new_origin) const
 template<class T> gPolyList<T> 
 gPolyList<T>::SystemInNewCoordinates(const Gambit::SquareMatrix<T>& M) const
 {
-  gbtList<gPoly<T> > new_polys;
+  Gambit::List<gPoly<T> > new_polys;
   for (int i = 1; i <= Length(); i++) {
     //    assert ( (*this)[i].PolyInNewCoordinates(M) == 
     //     	     gPoly<T>( PolyInNewCoordinates((*this)[i],M) ) );
@@ -438,9 +438,9 @@ gPolyList<T>::InteriorSegment(int first, int last) const
 //           Information
 //----------------------------------
 
-template <class T> gbtList<gPoly<T> > gPolyList<T>::UnderlyingbtList(void) const
+template <class T> Gambit::List<gPoly<T> > gPolyList<T>::UnderlyingList(void) const
 {
-  gbtList<gPoly<T> > NewList;
+  Gambit::List<gPoly<T> > NewList;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) 
     NewList.Append(*List[ii]);
@@ -482,7 +482,7 @@ const Gambit::RectArray<gPoly<T>*> gPolyList<T>::DerivativeMatrix() const
   int ii;
   for (ii = 1; ii <= Length(); ii++)
     for (int j = 1; j <= Dmnsn(); j++)
-      answer(ii,j) = new gPoly<T>(UnderlyingbtList()[ii].PartialDerivative(j));
+      answer(ii,j) = new gPoly<T>(UnderlyingList()[ii].PartialDerivative(j));
   
   return answer;
 }
@@ -512,7 +512,7 @@ template<class T>
 const Gambit::Matrix<T> gPolyList<T>::DerivativeMatrix(const Gambit::Vector<T>& p) const
 {
   Gambit::Matrix<T> answer(Length(),Dmnsn());
-  gbtList<gPoly<T> > list = UnderlyingbtList();
+  Gambit::List<gPoly<T> > list = UnderlyingList();
   int ii;
   for (ii = 1; ii <= Length(); ii++)
     for (int j = 1; j <= Dmnsn(); j++)
@@ -527,7 +527,7 @@ gPolyList<T>::SquareDerivativeMatrix(const Gambit::Vector<T>& p) const
   assert (Length() == Dmnsn());
 
   Gambit::SquareMatrix<T> answer(Length());
-  gbtList<gPoly<T> > list = UnderlyingbtList();
+  Gambit::List<gPoly<T> > list = UnderlyingList();
   int ii;
   for (ii = 1; ii <= Length(); ii++)
     for (int j = 1; j <= Dmnsn(); j++)
@@ -541,9 +541,9 @@ gPolyList<T>::SquareDerivativeMatrix(const Gambit::Vector<T>& p) const
 //----------------------------------
 
 template<class T> 
-gbtList<gPoly<gDouble> > gPolyList<T>::ListTogDouble() const
+Gambit::List<gPoly<gDouble> > gPolyList<T>::ListTogDouble() const
 {
-  gbtList<gPoly<gDouble> > newlist;
+  Gambit::List<gPoly<gDouble> > newlist;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) {
     newlist.Append(gPoly<gDouble>(TogDouble(*List[ii])));
@@ -552,9 +552,9 @@ gbtList<gPoly<gDouble> > gPolyList<T>::ListTogDouble() const
 }
 
 template<class T> 
-gbtList<gPoly<gDouble> > gPolyList<T>::NormalizedList() const
+Gambit::List<gPoly<gDouble> > gPolyList<T>::NormalizedList() const
 {
-  gbtList<gPoly<gDouble> > newlist;
+  Gambit::List<gPoly<gDouble> > newlist;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) {
     newlist.Append(gPoly<gDouble>(NormalizationOfPoly(*List[ii])));

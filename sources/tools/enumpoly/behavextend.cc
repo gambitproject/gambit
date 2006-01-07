@@ -30,7 +30,7 @@
 #include "rectangl.h"
 #include "ineqsolv.h"
 
-void TerminalDescendants(Gambit::GameNode p_node, gbtList<Gambit::GameNode> &current)
+void TerminalDescendants(Gambit::GameNode p_node, Gambit::List<Gambit::GameNode> &current)
 {
   if (p_node->IsTerminal()) { 
     current.Append(p_node);
@@ -42,9 +42,9 @@ void TerminalDescendants(Gambit::GameNode p_node, gbtList<Gambit::GameNode> &cur
   }
 }
 
-gbtList<Gambit::GameNode> TerminalNodes(Gambit::Game p_efg)
+Gambit::List<Gambit::GameNode> TerminalNodes(Gambit::Game p_efg)
 {
-  gbtList<Gambit::GameNode> ret;
+  Gambit::List<Gambit::GameNode> ret;
   TerminalDescendants(p_efg->GetRoot(), ret);
   return ret;
 }
@@ -62,7 +62,7 @@ gbtList<Gambit::GameNode> TerminalNodes(Gambit::Game p_efg)
 //                      class algExtendsToNash
 //=========================================================================
 
-static void DeviationInfosets(gbtList<Gambit::GameInfoset> &answer,
+static void DeviationInfosets(Gambit::List<Gambit::GameInfoset> &answer,
 			      const Gambit::BehavSupport & big_supp,
 			      const Gambit::GamePlayer &pl,
 			      const Gambit::GameNode &node,
@@ -83,7 +83,7 @@ static void DeviationInfosets(gbtList<Gambit::GameInfoset> &answer,
       answer.Insert(iset,insert);
     }
 
-    gbtList<Gambit::GameAction> action_list;
+    Gambit::List<Gambit::GameAction> action_list;
     for (int j = 1; j <= iset->NumActions(); j++) {
       action_list.Append(iset->GetAction(j));
     }
@@ -93,14 +93,14 @@ static void DeviationInfosets(gbtList<Gambit::GameInfoset> &answer,
   }
 }
 
-static gbtList<Gambit::GameInfoset> DeviationInfosets(const Gambit::BehavSupport &big_supp,
+static Gambit::List<Gambit::GameInfoset> DeviationInfosets(const Gambit::BehavSupport &big_supp,
 					  const Gambit::GamePlayer &pl,
 					  const Gambit::GameInfoset &iset,
 					  const Gambit::GameAction &act)
 {
-  gbtList<Gambit::GameInfoset> answer;
+  Gambit::List<Gambit::GameInfoset> answer;
   
-  gbtList<Gambit::GameNode> node_list;
+  Gambit::List<Gambit::GameNode> node_list;
   for (int i = 1; i <= iset->NumMembers(); i++) {
     node_list.Append(iset->GetMember(i));
   }
@@ -117,7 +117,7 @@ ActionProbsSumToOneIneqs(const Gambit::MixedBehavProfile<double> &p_solution,
 			 const gSpace &BehavStratSpace, 
 			 const term_order &Lex,
 			 const Gambit::BehavSupport &big_supp,
-			 const gbtList<gbtList<int> > &var_index) 
+			 const Gambit::List<Gambit::List<int> > &var_index) 
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
@@ -135,14 +135,14 @@ ActionProbsSumToOneIneqs(const Gambit::MixedBehavProfile<double> &p_solution,
   return answer;
 }
 
-static gbtList<Gambit::BehavSupport> 
+static Gambit::List<Gambit::BehavSupport> 
 DeviationSupports(const Gambit::BehavSupport & big_supp,
-		  const gbtList<Gambit::GameInfoset> & isetlist,
+		  const Gambit::List<Gambit::GameInfoset> & isetlist,
 		  const Gambit::GamePlayer &/*pl*/,
 		  const Gambit::GameInfoset &/*iset*/,
 		  const Gambit::GameAction &/*act*/)
 {
-  gbtList<Gambit::BehavSupport> answer;
+  Gambit::List<Gambit::BehavSupport> answer;
 
   Gambit::Array<int> active_act_no(isetlist.Length());
 
@@ -213,7 +213,7 @@ NashNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_solution,
 			const gSpace &BehavStratSpace, 
 			const term_order &Lex,
 			const Gambit::BehavSupport &dsupp,
-			const gbtList<gbtList<int> > &var_index,
+			const Gambit::List<Gambit::List<int> > &var_index,
 			Gambit::GameNode tempnode,
 			const Gambit::GamePlayer &/*pl*/,
 			const Gambit::GameInfoset &iset,
@@ -271,11 +271,11 @@ NashExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 			    const term_order &Lex,
 			    const Gambit::BehavSupport &little_supp,
 			    const Gambit::BehavSupport &big_supp,
-			    const gbtList<gbtList<int> > &var_index) 
+			    const Gambit::List<Gambit::List<int> > &var_index) 
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
-  gbtList<Gambit::GameNode> terminal_nodes = TerminalNodes(p_solution.GetGame());
+  Gambit::List<Gambit::GameNode> terminal_nodes = TerminalNodes(p_solution.GetGame());
 
   for (int pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++) {
     Gambit::Array<Gambit::GameInfoset> isets_for_pl;
@@ -292,11 +292,11 @@ NashExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 
 	for (int j = 1; j <= acts_for_iset.Length(); j++)
 	  if ( !little_supp.ActionIsActive(acts_for_iset[j]) ) {
-	    gbtList<Gambit::GameInfoset> isetlist = DeviationInfosets(big_supp, 
+	    Gambit::List<Gambit::GameInfoset> isetlist = DeviationInfosets(big_supp, 
 								p_solution.GetGame()->GetPlayer(pl),
 							  isets_for_pl[i],
 							  acts_for_iset[j]);
-	    gbtList<Gambit::BehavSupport> dsupps = DeviationSupports(big_supp, 
+	    Gambit::List<Gambit::BehavSupport> dsupps = DeviationSupports(big_supp, 
 							isetlist, 
 							p_solution.GetGame()->GetPlayer(pl),
 							isets_for_pl[i],
@@ -342,7 +342,7 @@ ExtendsToNashIneqs(const Gambit::MixedBehavProfile<double> &p_solution,
 		   const term_order &Lex,
 		   const Gambit::BehavSupport &little_supp,
 		   const Gambit::BehavSupport &big_supp,
-		   const gbtList<gbtList<int> > &var_index)
+		   const Gambit::List<Gambit::List<int> > &var_index)
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
   answer += ActionProbsSumToOneIneqs(p_solution, BehavStratSpace, 
@@ -372,11 +372,11 @@ bool algExtendsToNash::ExtendsToNash(const Gambit::MixedBehavProfile<double> &p_
   
   // First we compute the number of variables, and indexing information
   int num_vars(0);
-  gbtList<gbtList<int> > var_index;
+  Gambit::List<Gambit::List<int> > var_index;
   int pl;
   for (pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++) {
 
-    gbtList<int> list_for_pl;
+    Gambit::List<int> list_for_pl;
 
     for (int i = 1; i <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); i++) {
       list_for_pl.Append(num_vars);
@@ -426,7 +426,7 @@ static bool ANFNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_so
 				   const gSpace &BehavStratSpace, 
 				   const term_order &Lex,
 				   const Gambit::BehavSupport &big_supp,
-				   const gbtList<gbtList<int> > &var_index,
+				   const Gambit::List<Gambit::List<int> > &var_index,
 				   Gambit::GameNode tempnode,
 				   const int &pl,
 				   const int &i,
@@ -477,11 +477,11 @@ ANFExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 			   const term_order &Lex,
 			   const Gambit::BehavSupport &little_supp,
 			   const Gambit::BehavSupport &big_supp,
-			   const gbtList<gbtList<int> > &var_index)
+			   const Gambit::List<Gambit::List<int> > &var_index)
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
-  gbtList<Gambit::GameNode> terminal_nodes = TerminalNodes(p_solution.GetGame());
+  Gambit::List<Gambit::GameNode> terminal_nodes = TerminalNodes(p_solution.GetGame());
 
   for (int pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++)
     for (int i = 1; i <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); i++) {
@@ -523,7 +523,7 @@ ExtendsToANFNashIneqs(const Gambit::MixedBehavProfile<double> &p_solution,
 		      const term_order &Lex,
 		      const Gambit::BehavSupport &little_supp,
 		      const Gambit::BehavSupport &big_supp,
-		      const gbtList<gbtList<int> > &var_index)
+		      const Gambit::List<Gambit::List<int> > &var_index)
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
   answer += ActionProbsSumToOneIneqs(p_solution, BehavStratSpace, 
@@ -550,11 +550,11 @@ bool algExtendsToAgentNash::ExtendsToAgentNash(const Gambit::MixedBehavProfile<d
   
   // First we compute the number of variables, and indexing information
   int num_vars(0);
-  gbtList<gbtList<int> > var_index;
+  Gambit::List<Gambit::List<int> > var_index;
   int pl;
   for (pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++) {
 
-    gbtList<int> list_for_pl;
+    Gambit::List<int> list_for_pl;
 
     for (int i = 1; i <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); i++) {
       list_for_pl.Append(num_vars);

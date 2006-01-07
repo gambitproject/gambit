@@ -28,7 +28,7 @@
 
 namespace Gambit {
 
-template <class T> void RemoveRedundancies(gbtList<T> &p_list)
+template <class T> void RemoveRedundancies(List<T> &p_list)
 {
   int i = 1; int j = 2;		
   while (i < p_list.Length()) {
@@ -391,10 +391,10 @@ Array<GameAction> BehavSupport::Actions(const GameInfoset &i) const
     return m_players[i->GetPlayer()->GetNumber()]->ActionList(i->GetNumber());
 }
 
-gbtList<GameAction> BehavSupport::ListOfActions(const GameInfoset &i) const
+List<GameAction> BehavSupport::ListOfActions(const GameInfoset &i) const
 {
   Array<GameAction> actions = Actions(i);
-  gbtList<GameAction> answer;
+  List<GameAction> answer;
   for (int i = 1; i <= actions.Length(); i++)
     answer.Append(actions[i]);
   return answer;
@@ -467,7 +467,7 @@ int BehavSupport::NumDegreesOfFreedom(void) const
 {
   int answer(0);
 
-  gbtList<GameInfoset> active_infosets = ReachableInfosets(GetGame()->GetRoot());
+  List<GameInfoset> active_infosets = ReachableInfosets(GetGame()->GetRoot());
   for (int i = 1; i <= active_infosets.Length(); i++)
     answer += NumActions(active_infosets[i]) - 1;
 
@@ -518,7 +518,7 @@ void BehavSupport::AddAction(const GameAction &s)
 int BehavSupport::NumSequences(int j) const
 {
   if (j < 1 || j > m_efg->NumPlayers()) return 1;
-  gbtList<GameInfoset> isets = ReachableInfosets(m_efg->GetPlayer(j));
+  List<GameInfoset> isets = ReachableInfosets(m_efg->GetPlayer(j));
   int num = 1;
   for(int i = 1; i <= isets.Length(); i++)
     num+=NumActions(isets[i]);
@@ -533,9 +533,9 @@ int BehavSupport::TotalNumSequences(void) const
   return total;
 }
 
-gbtList<GameNode> BehavSupport::ReachableNonterminalNodes(const GameNode &n) const
+List<GameNode> BehavSupport::ReachableNonterminalNodes(const GameNode &n) const
 {
-  gbtList<GameNode> answer;
+  List<GameNode> answer;
   if (!n->IsTerminal()) {
     const Array<GameAction> &actions = Actions(n->GetInfoset());
     for (int i = 1; i <= actions.Length(); i++) {
@@ -549,11 +549,11 @@ gbtList<GameNode> BehavSupport::ReachableNonterminalNodes(const GameNode &n) con
   return answer;
 }
 
-gbtList<GameNode> 
+List<GameNode> 
 BehavSupport::ReachableNonterminalNodes(const GameNode &n,
 					 const GameAction &a) const
 {
-  gbtList<GameNode> answer;
+  List<GameNode> answer;
   GameNode nn = n->GetChild(a->GetNumber());
   if (!nn->IsTerminal()) {
     answer.Append(nn);
@@ -562,14 +562,14 @@ BehavSupport::ReachableNonterminalNodes(const GameNode &n,
   return answer;
 }
 
-gbtList<GameInfoset> 
+List<GameInfoset> 
 BehavSupport::ReachableInfosets(const GamePlayer &p) const
 { 
   Array<GameInfoset> isets;
   for (int iset = 1; iset <= p->NumInfosets(); iset++) {
     isets.Append(p->GetInfoset(iset));
   }
-  gbtList<GameInfoset> answer;
+  List<GameInfoset> answer;
 
   for (int i = isets.First(); i <= isets.Last(); i++)
     if (MayReach(isets[i]))
@@ -577,22 +577,22 @@ BehavSupport::ReachableInfosets(const GamePlayer &p) const
   return answer;
 }
 
-gbtList<GameInfoset> BehavSupport::ReachableInfosets(const GameNode &n) const
+List<GameInfoset> BehavSupport::ReachableInfosets(const GameNode &n) const
 {
-  gbtList<GameInfoset> answer;
-  gbtList<GameNode> nodelist = ReachableNonterminalNodes(n);
+  List<GameInfoset> answer;
+  List<GameNode> nodelist = ReachableNonterminalNodes(n);
   for (int i = 1; i <= nodelist.Length(); i++)
     answer.Append(nodelist[i]->GetInfoset());
   RemoveRedundancies(answer);
   return answer;
 }
 
-gbtList<GameInfoset> 
+List<GameInfoset> 
 BehavSupport::ReachableInfosets(const GameNode &n, 
 				 const GameAction &a) const
 {
-  gbtList<GameInfoset> answer;
-  gbtList<GameNode> nodelist = ReachableNonterminalNodes(n,a);
+  List<GameInfoset> answer;
+  List<GameNode> nodelist = ReachableNonterminalNodes(n,a);
   for (int i = 1; i <= nodelist.Length(); i++)
     answer.Append(nodelist[i]->GetInfoset());
   RemoveRedundancies(answer);
@@ -653,7 +653,7 @@ private:
 
 public:
   BehavConditionalIterator(const BehavSupport &);
-  BehavConditionalIterator(const BehavSupport &, const gbtList<GameInfoset> &);
+  BehavConditionalIterator(const BehavSupport &, const List<GameInfoset> &);
   ~BehavConditionalIterator();
   
   void First(void); // Sets each infoset's action to the first in the support
@@ -691,7 +691,7 @@ BehavConditionalIterator::BehavConditionalIterator(const BehavSupport &s)
 }
 
 BehavConditionalIterator::BehavConditionalIterator(const BehavSupport &s, 
-					       const gbtList<GameInfoset>& active)
+					       const List<GameInfoset>& active)
   : _efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
     _is_active(),
@@ -832,7 +832,7 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
   }
 
   else {
-    gbtList<GameNode> nodelist = SAct.ReachableNodesInInfoset(infoset);  
+    List<GameNode> nodelist = SAct.ReachableNodesInInfoset(infoset);  
     if (nodelist.Length() == 0) {
       // This may not be a good idea; I suggest checking for this
       // prior to entry
@@ -843,7 +843,7 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
     
     for (int n = 1; n <= nodelist.Length(); n++) {
       
-      gbtList<GameInfoset> L;
+      List<GameInfoset> L;
       L += ReachableInfosets(nodelist[n], a);
       L += ReachableInfosets(nodelist[n], b);
       RemoveRedundancies(L);
@@ -1063,7 +1063,7 @@ void BehavSupportWithActiveInfo::deactivate_this_and_lower_nodes(const GameNode 
 
 void BehavSupportWithActiveInfo::
 deactivate_this_and_lower_nodes_returning_deactivated_infosets(const GameNode &n, 
-                                                gbtList<GameInfoset> *list)
+                                                List<GameInfoset> *list)
 {
   if (!n->IsTerminal()) {
     deactivate(n); 
@@ -1089,12 +1089,12 @@ void BehavSupportWithActiveInfo::InitializeActiveListsToAllActive()
 {
   for (int pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
     GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl); 
-    gbtList<bool>         is_players_infoset_active;
-    gbtList<gbtList<bool> > is_players_node_active;
+    List<bool>         is_players_infoset_active;
+    List<List<bool> > is_players_node_active;
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       is_players_infoset_active.Append(true);
 
-      gbtList<bool> is_infosets_node_active;
+      List<bool> is_infosets_node_active;
       for (int n = 1; n <= player->GetInfoset(iset)->NumMembers(); n++)
 	is_infosets_node_active.Append(true);
       is_players_node_active.Append(is_infosets_node_active);
@@ -1108,13 +1108,13 @@ void BehavSupportWithActiveInfo::InitializeActiveListsToAllInactive()
 {
   for (int pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
     GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl);
-    gbtList<bool>         is_players_infoset_active;
-    gbtList<gbtList<bool> > is_players_node_active;
+    List<bool>         is_players_infoset_active;
+    List<List<bool> > is_players_node_active;
 
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       is_players_infoset_active.Append(false);
 
-      gbtList<bool> is_infosets_node_active;
+      List<bool> is_infosets_node_active;
       for (int n = 1; n <= player->GetInfoset(iset)->NumMembers()
 ; n++)
 	is_infosets_node_active.Append(false);
@@ -1206,10 +1206,10 @@ BehavSupportWithActiveInfo::operator!=(const BehavSupportWithActiveInfo &s) cons
   return !(*this == s);
 }
 
-gbtList<GameNode> 
+List<GameNode> 
 BehavSupportWithActiveInfo::ReachableNodesInInfoset(const GameInfoset &i) const
 {
-  gbtList<GameNode> answer;
+  List<GameNode> answer;
   int pl = i->GetPlayer()->GetNumber();
   int iset = i->GetNumber();
   for (int j = 1; j <= i->NumMembers(); j++)
@@ -1218,10 +1218,10 @@ BehavSupportWithActiveInfo::ReachableNodesInInfoset(const GameInfoset &i) const
   return answer;
 }
 
-gbtList<GameNode>
+List<GameNode>
 BehavSupportWithActiveInfo::ReachableNonterminalNodes() const
 {
-  gbtList<GameNode> answer;
+  List<GameNode> answer;
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
     GamePlayer p = GetGame()->GetPlayer(pl);
     for (int iset = 1; iset <= p->NumInfosets(); iset++)
@@ -1235,14 +1235,14 @@ void BehavSupportWithActiveInfo::AddAction(const GameAction &s)
 {
   BehavSupport::AddAction(s);
 
-  gbtList<GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
+  List<GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     activate_this_and_lower_nodes(startlist[i]);
 }
 
 bool BehavSupportWithActiveInfo::RemoveAction(const GameAction &s)
 {
-  gbtList<GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
+  List<GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     deactivate_this_and_lower_nodes(startlist[i]->GetChild(s->GetNumber()));
 
@@ -1252,10 +1252,10 @@ bool BehavSupportWithActiveInfo::RemoveAction(const GameAction &s)
 
 bool 
 BehavSupportWithActiveInfo::RemoveActionReturningDeletedInfosets(const GameAction &s,
-					   gbtList<GameInfoset> *list)
+					   List<GameInfoset> *list)
 {
 
-  gbtList<GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
+  List<GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     deactivate_this_and_lower_nodes_returning_deactivated_infosets(
                            startlist[i]->GetChild(s->GetNumber()),list);

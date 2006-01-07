@@ -371,14 +371,14 @@ static void TracePath(const Gambit::MixedBehavProfile<double> &p_start,
 	break;
       }
       
-      decel = gmax(decel, sqrt(dist / c_maxDist) * g_maxDecel);
+      decel = Gambit::max(decel, sqrt(dist / c_maxDist) * g_maxDecel);
       if (iter >= 2) {
 	double contr = dist / (disto + c_tol * c_eta);
 	if (contr > c_maxContr) {
 	  accept = false;
 	  break;
 	}
-	decel = gmax(decel, sqrt(contr / c_maxContr) * g_maxDecel);
+	decel = Gambit::max(decel, sqrt(contr / c_maxContr) * g_maxDecel);
       }
 
       if (dist <= c_tol) {

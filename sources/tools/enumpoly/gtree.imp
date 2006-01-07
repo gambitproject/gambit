@@ -100,11 +100,11 @@ template <class T> void gTree<T>::InsertAt(const T& t, gTreeNode<T>* n)
 template <class T> void gTree<T>::RecursiveCopy(      gTreeNode<T>* copyn,
 						const gTreeNode<T>* orign)
 {
-  gbtList<gTreeNode<T>*> oldchildren = Children(orign);
+  Gambit::List<gTreeNode<T>*> oldchildren = Children(orign);
   int i;
   for (i = 1; i <= oldchildren.Length(); i++)
     InsertAt(oldchildren[i]->data,copyn);
-  gbtList<gTreeNode<T>*> newchildren = Children(copyn);
+  Gambit::List<gTreeNode<T>*> newchildren = Children(copyn);
   for (i = 1; i <= newchildren.Length(); i++)
     RecursiveCopy(newchildren[i],oldchildren[i]);
 }
@@ -138,10 +138,10 @@ template <class T> bool gTree<T>::operator!=(const gTree<T>& b) const
 }
 
 template <class T> 
-gbtList<gTreeNode<T>*> gTree<T>::Children(const gTreeNode<T>* n) const
+Gambit::List<gTreeNode<T>*> gTree<T>::Children(const gTreeNode<T>* n) const
 {
   assert(n != NULL);
-  gbtList<gTreeNode<T>*> answer;
+  Gambit::List<gTreeNode<T>*> answer;
   for (gTreeNode<T>* child = n->eldest; child != NULL; child = child->next)
     answer.Append(child);
   return answer;
@@ -182,8 +182,8 @@ bool gTree<T>::SubtreesAreIsomorphic(const gTreeNode<T>* lhs,
 				     const gTreeNode<T>* rhs) const
 {
   if (lhs->data != rhs->data) return false;
-  gbtList<gTreeNode<T>*> lchildren = Children(lhs);
-  gbtList<gTreeNode<T>*> rchildren = Children(rhs);
+  Gambit::List<gTreeNode<T>*> lchildren = Children(lhs);
+  Gambit::List<gTreeNode<T>*> rchildren = Children(rhs);
   if (lchildren.Length() != rchildren.Length()) return false;
   for (int i = 1; i <= lchildren.Length(); i++)
     if ( !SubtreesAreIsomorphic(lchildren[i],rchildren[i]) ) return false;
@@ -192,7 +192,7 @@ bool gTree<T>::SubtreesAreIsomorphic(const gTreeNode<T>* lhs,
 
 template <class T> void gTree<T>::RecursiveFlush(const gTreeNode<T>* n)
 {
-  gbtList<gTreeNode<T>*> children = Children(n);
+  Gambit::List<gTreeNode<T>*> children = Children(n);
   for (int i = 1; i <= children.Length(); i++)
     RecursiveFlush(children[i]);
   delete n;

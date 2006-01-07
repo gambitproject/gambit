@@ -75,8 +75,8 @@ int gbtAnalysisProfileList::NumProfiles(void) const
 
 void gbtAnalysisProfileList::Clear(void)
 {
-  m_behavProfiles = gbtList<Gambit::MixedBehavProfile<double> >();
-  m_mixedProfiles = gbtList<Gambit::MixedStrategyProfile<double> >();
+  m_behavProfiles = Gambit::List<Gambit::MixedBehavProfile<double> >();
+  m_mixedProfiles = Gambit::List<Gambit::MixedStrategyProfile<double> >();
   m_current = 0;
 }
 

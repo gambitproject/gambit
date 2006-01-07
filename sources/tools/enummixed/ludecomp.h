@@ -61,10 +61,10 @@ private:
   Tableau<T> &tab;
   Basis &basis;
 
-  gbtList< EtaMatrix<T> > L;
-  gbtList< EtaMatrix<T> > U;
-  gbtList< EtaMatrix<T> > E;
-  gbtList< int > P;
+  Gambit::List< EtaMatrix<T> > L;
+  Gambit::List< EtaMatrix<T> > U;
+  Gambit::List< EtaMatrix<T> > E;
+  Gambit::List< int > P;
 
   Gambit::Vector<T> scratch1; // scratch vectors so we don't reallocate them
   Gambit::Vector<T> scratch2; // everytime we do something.
@@ -77,12 +77,12 @@ private:
   int copycount;
 
 public:
-  class BadPivot : public gbtException  {
+  class BadPivot : public Gambit::Exception  {
   public:
     virtual ~BadPivot();
     std::string GetDescription(void) const;
   };
-  class BadCount : public gbtException  {
+  class BadCount : public Gambit::Exception  {
   public:
     virtual ~BadCount();
     std::string GetDescription(void) const;

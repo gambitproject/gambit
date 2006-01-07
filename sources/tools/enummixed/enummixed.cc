@@ -38,7 +38,7 @@ int g_numDecimals = 6;
 template <class T> bool EqZero(const T &x)
 {
   T eps;
-  gEpsilon(eps, 12);
+  Gambit::Epsilon(eps, 12);
   return (x <= eps && x >= -eps);
 }     
 
@@ -71,8 +71,8 @@ void PrintProfile(std::ostream &p_stream,
 
 template <class T> void Solve(Gambit::Game p_nfg, const T &)
 {
-  gbtList<Gambit::Vector<T> > key1, key2;  
-  gbtList<int> node1, node2;   // IDs of each component of the extreme equilibria
+  Gambit::List<Gambit::Vector<T> > key1, key2;  
+  Gambit::List<int> node1, node2;   // IDs of each component of the extreme equilibria
 
   Gambit::PureStrategyProfile profile(p_nfg);
 
@@ -114,8 +114,8 @@ template <class T> void Solve(Gambit::Game p_nfg, const T &)
   VertEnum<T> poly1(A1, b1);
   VertEnum<T> poly2(A2, b2);
 
-  const gbtList<BFS<T> > &verts1(poly1.VertexList());
-  const gbtList<BFS<T> > &verts2(poly2.VertexList());
+  const Gambit::List<BFS<T> > &verts1(poly1.VertexList());
+  const Gambit::List<BFS<T> > &verts2(poly2.VertexList());
   int v1 = verts1.Length();
   int v2 = verts2.Length();
 

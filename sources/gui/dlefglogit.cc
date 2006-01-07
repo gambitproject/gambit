@@ -39,8 +39,8 @@
 class gbtLogitBehavList : public wxSheet {
 private:
   gbtGameDocument *m_doc;
-  gbtList<double> m_lambdas;
-  gbtList<Gambit::MixedBehavProfile<double> > m_profiles;
+  Gambit::List<double> m_lambdas;
+  Gambit::List<Gambit::MixedBehavProfile<double> > m_profiles;
 
   // Overriding wxSheet members for data access
   wxString GetCellValue(const wxSheetCoords &);

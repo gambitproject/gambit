@@ -1064,7 +1064,7 @@ void gbtGameFrame::OnEditInsertMove(wxCommandEvent &)
       }
       m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
     }
-    catch (gbtException &ex) {
+    catch (Gambit::Exception &ex) {
       gbtExceptionDialog(ex.GetDescription(), this);
     }
   }
@@ -1114,7 +1114,7 @@ void gbtGameFrame::OnEditReveal(wxCommandEvent &)
       }
       m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
     }
-    catch (gbtException &ex) {
+    catch (Gambit::Exception &ex) {
       gbtExceptionDialog(ex.GetDescription(), this);
     }
   }

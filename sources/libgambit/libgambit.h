@@ -32,47 +32,16 @@
 #include <iomanip>
 #include <math.h>
 
-class gbtException   {
-public:
-  virtual ~gbtException() { }
-  virtual std::string GetDescription(void) const = 0;
-};
+namespace Gambit {
 
-class gbtIndexException : public gbtException {
-public:
-  virtual ~gbtIndexException() { }
-  std::string GetDescription(void) const { return "Index out of range"; }
-};
+inline void Epsilon(double &v, int i = 8)
+  { v = ::pow(10.0, (double) -i); }
 
-class gbtRangeException : public gbtException  {
-public:
-  virtual ~gbtRangeException() { }
-  std::string GetDescription(void) const { return "Invalid index range"; }
-};
-
-class gbtDimensionException : public gbtException  {
-public:
-  virtual ~gbtDimensionException() { }
-  std::string GetDescription(void) const { return "Mismatched dimensions"; }
-};
-
-class gbtZeroDivideException : public gbtException {
-public:
-  virtual ~gbtZeroDivideException() { }
-  std::string GetDescription(void) const 
-    { return "Attmpted division by zero"; }
-};
-
-inline void gEpsilon(double &v, int i = 8)
-{ v = pow(10.0, (double) -i); }
-
-template <class T> T gmin(const T &a, const T &b)
+template <class T> T min(const T &a, const T &b)
 { if (a < b) return a; else return b; }
 
-template <class T> T gmax(const T &a, const T &b)
+template <class T> T max(const T &a, const T &b)
 { if (a > b) return a; else return b; }
-
-namespace Gambit {
 
 template <class T> std::string ToText(const T &p_value)
 { std::ostringstream s; s << p_value; return s.str(); }
@@ -88,7 +57,48 @@ inline std::string ToText(double p_value, int p_prec)
 inline double abs(double a)
 { return (a >= 0.0) ? a : -a; }
 
+//========================================================================
+//                        Exception classes
+//========================================================================
+
+/// A base class for all exceptions
+class Exception {
+public:
+  virtual ~Exception() { }
+  virtual std::string GetDescription(void) const = 0;
+};
+
+/// Exception thrown on out-of-range index
+class IndexException : public Exception {
+public:
+  virtual ~IndexException() { }
+  std::string GetDescription(void) const { return "Index out of range"; }
+};
+
+/// Exception thrown on invalid index ranges
+class RangeException : public Exception {
+public:
+  virtual ~RangeException() { }
+  std::string GetDescription(void) const { return "Invalid index range"; }
+};
+
+/// Exception thrown on dimension mismatches
+class DimensionException : public Exception {
+public:
+  virtual ~DimensionException() { }
+  std::string GetDescription(void) const { return "Mismatched dimensions"; }
+};
+
+/// Exception thrown on attempted division by zero
+class ZeroDivideException : public Exception {
+public:
+  virtual ~ZeroDivideException() { }
+  std::string GetDescription(void) const 
+    { return "Attmpted division by zero"; }
+};
+
 } // end namespace Gambit
+
 
 inline int sign(const double &a)
 {
@@ -102,11 +112,11 @@ inline double pow(double x, long y)
 
 
 #include "array.h"
-#include "glist.h"
+#include "list.h"
 #include "recarray.h"
 #include "vector.h"
 #include "matrix.h"
-#include "gmap.h"
+#include "map.h"
 
 #include "rational.h"
 

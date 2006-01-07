@@ -44,8 +44,8 @@
 class gbtLogitMixedList : public wxSheet {
 private:
   gbtGameDocument *m_doc;
-  gbtList<double> m_lambdas;
-  gbtList<Gambit::MixedStrategyProfile<double> > m_profiles;
+  Gambit::List<double> m_lambdas;
+  Gambit::List<Gambit::MixedStrategyProfile<double> > m_profiles;
 
   // Overriding wxSheet members for data access
   wxString GetCellValue(const wxSheetCoords &);
@@ -75,8 +75,8 @@ public:
 
   void AddProfile(const wxString &p_text, bool p_forceShow);
 
-  const gbtList<double> &GetLambdas(void) const { return m_lambdas; }
-  const gbtList<Gambit::MixedStrategyProfile<double> > &GetProfiles(void) const 
+  const Gambit::List<double> &GetLambdas(void) const { return m_lambdas; }
+  const Gambit::List<Gambit::MixedStrategyProfile<double> > &GetProfiles(void) const 
   { return m_profiles; }
 };
 
@@ -232,8 +232,8 @@ private:
 public:
   gbtLogitPlotCtrl(wxWindow *p_parent, gbtGameDocument *p_doc);
 
-  void SetProfiles(const gbtList<double> &,
-		   const gbtList<Gambit::MixedStrategyProfile<double> > &);
+  void SetProfiles(const Gambit::List<double> &,
+		   const Gambit::List<Gambit::MixedStrategyProfile<double> > &);
 };
 
 gbtLogitPlotCtrl::gbtLogitPlotCtrl(wxWindow *p_parent, 
@@ -288,8 +288,8 @@ void gbtLogitPlotCtrl::CalcXAxisTickPositions(void)
   }
 }
 
-void gbtLogitPlotCtrl::SetProfiles(const gbtList<double> &p_lambdas,
-				   const gbtList<Gambit::MixedStrategyProfile<double> > &p_profiles)
+void gbtLogitPlotCtrl::SetProfiles(const Gambit::List<double> &p_lambdas,
+				   const Gambit::List<Gambit::MixedStrategyProfile<double> > &p_profiles)
 {
   if (p_lambdas.Length() == 0)  return;
 

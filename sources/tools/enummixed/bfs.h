@@ -29,7 +29,7 @@
 
 #include "libgambit/libgambit.h"
 
-template <class T> class BFS : public gbtOrdMap<int, T>  {
+template <class T> class BFS : public Gambit::Map<int, T>  {
   public:
     BFS(void);
     BFS(const T &d);

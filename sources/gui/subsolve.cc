@@ -25,7 +25,7 @@
 #include "libgambit/libgambit.h"
 #include "subsolve.h"
 
-void ChildSubgames(gbtEfgNode n, gbtList<gbtEfgNode> &p_list)
+void ChildSubgames(gbtEfgNode n, Gambit::List<gbtEfgNode> &p_list)
 {
   if (n->IsSubgameRoot()) {
     p_list.Append(n);
@@ -37,22 +37,22 @@ void ChildSubgames(gbtEfgNode n, gbtList<gbtEfgNode> &p_list)
   }
 }
 
-static void NDoChild(const gbtEfgGame &e, gbtEfgNode n, gbtList<gbtEfgNode> &list)
+static void NDoChild(const gbtEfgGame &e, gbtEfgNode n, Gambit::List<gbtEfgNode> &list)
 { 
   list.Append(n);
   for (int i = 1; i <= n->NumChildren(); i++)
     NDoChild (e, n->GetChild(i), list);
 }
 
-static void Nodes (const gbtEfgGame &befg, gbtList <gbtEfgNode> &list)
+static void Nodes (const gbtEfgGame &befg, Gambit::List <gbtEfgNode> &list)
 {
-  list = gbtList<gbtEfgNode>();
+  list = Gambit::List<gbtEfgNode>();
   NDoChild(befg, befg->GetRoot(), list); 
 }
 
-static void Nodes (const gbtEfgGame &efg, gbtEfgNode n, gbtList <gbtEfgNode> &list)
+static void Nodes (const gbtEfgGame &efg, gbtEfgNode n, Gambit::List <gbtEfgNode> &list)
 {
-  list = gbtList<gbtEfgNode>();
+  list = Gambit::List<gbtEfgNode>();
   NDoChild(efg,n, list);
 }
 
@@ -62,37 +62,37 @@ static void Nodes (const gbtEfgGame &efg, gbtEfgNode n, gbtList <gbtEfgNode> &li
 
 void SubgameSolver::FindSubgames(const gbtEfgSupport &p_support,
 				 gbtEfgNode n,
-				 gbtList<gbtBehavProfile<gbtNumber> > &solns,
-				 gbtList<gbtEfgOutcome> &values)
+				 Gambit::List<gbtBehavProfile<gbtNumber> > &solns,
+				 Gambit::List<gbtEfgOutcome> &values)
 {
   int i;
   gbtEfgGame efg = p_support.GetGame();
   
-  gbtList<gbtBehavProfile<gbtNumber> > thissolns;
+  Gambit::List<gbtBehavProfile<gbtNumber> > thissolns;
   thissolns.Append(*solution);
   ((gbtVector<gbtNumber> &) thissolns[1]).operator=(gbtNumber(0));
   
-  gbtList<gbtEfgNode> subroots;
+  Gambit::List<gbtEfgNode> subroots;
   ChildSubgames(n, subroots);
   
-  gbtList<Gambit::Array<gbtEfgOutcome> > subrootvalues;
+  Gambit::List<Gambit::Array<gbtEfgOutcome> > subrootvalues;
   subrootvalues.Append(Gambit::Array<gbtEfgOutcome>(subroots.Length()));
   
   for (i = 1; i <= subroots.Length(); i++)  {
-    gbtList<gbtBehavProfile<gbtNumber> > subsolns;
-    gbtList<gbtEfgOutcome> subvalues;
+    Gambit::List<gbtBehavProfile<gbtNumber> > subsolns;
+    Gambit::List<gbtEfgOutcome> subvalues;
     
     FindSubgames(p_support, subroots[i], subsolns, subvalues);
     
     if (subsolns.Length() == 0)  {
-      solns = gbtList<gbtBehavProfile<gbtNumber> >();
+      solns = Gambit::List<gbtBehavProfile<gbtNumber> >();
       return;
     }
     
     assert(subvalues.Length() == subsolns.Length());
     
-    gbtList<gbtBehavProfile<gbtNumber> > newsolns;
-    gbtList<Gambit::Array<gbtEfgOutcome> > newsubrootvalues;
+    Gambit::List<gbtBehavProfile<gbtNumber> > newsolns;
+    Gambit::List<Gambit::Array<gbtEfgOutcome> > newsubrootvalues;
     
     for (int soln = 1; soln <= thissolns.Length(); soln++) {
       for (int subsoln = 1; subsoln <= subsolns.Length(); subsoln++) {
@@ -122,7 +122,7 @@ void SubgameSolver::FindSubgames(const gbtEfgSupport &p_support,
     // by convention, we will just put the payoffs in the parent subgame
     foo.GetRoot()->SetOutcome(0);
 
-    gbtList<gbtEfgNode> nodes;
+    Gambit::List<gbtEfgNode> nodes;
     Nodes(efg, n, nodes);
     
     gbtEfgSupport subsupport(foo);
@@ -158,7 +158,7 @@ void SubgameSolver::FindSubgames(const gbtEfgSupport &p_support,
       }
     }
 
-    gbtList<gbtBehavProfile<gbtNumber> > sol;
+    Gambit::List<gbtBehavProfile<gbtNumber> > sol;
 
     bool interrupted = false;
 
@@ -170,7 +170,7 @@ void SubgameSolver::FindSubgames(const gbtEfgSupport &p_support,
 	gbtNfgGame *nfg = subsupport.GetGame().MakeReducedNfg();
 	gbtNfgSupport support(nfg);
 
-	gbtList<gbtMixedProfile<gbtNumber> > nfgSolutions;
+	Gambit::List<gbtMixedProfile<gbtNumber> > nfgSolutions;
 
 	try {
 	  nfgSolutions = m_nfgAlgorithm->Solve(support);
@@ -195,7 +195,7 @@ void SubgameSolver::FindSubgames(const gbtEfgSupport &p_support,
     
     // put behav profile in "total" solution here...
     if (sol.Length() == 0)  {
-      solns = gbtList<gbtBehavProfile<gbtNumber> >();
+      solns = Gambit::List<gbtBehavProfile<gbtNumber> >();
       return;
     }
     
@@ -271,10 +271,10 @@ SubgameSolver::~SubgameSolver()
 //               SubgameSolver: Public member functions
 //-----------------------------------------------------------------------
 
-gbtList<gbtBehavProfile<gbtNumber> > SubgameSolver::Solve(const gbtEfgSupport &p_support)
+Gambit::List<gbtBehavProfile<gbtNumber> > SubgameSolver::Solve(const gbtEfgSupport &p_support)
 {
-  solutions = gbtList<gbtBehavProfile<gbtNumber> >();
-  gbtList<gbtEfgOutcome> values;
+  solutions = Gambit::List<gbtBehavProfile<gbtNumber> >();
+  Gambit::List<gbtEfgOutcome> values;
 
   solution = new gbtBehavProfile<gbtNumber>(p_support);
   ((gbtVector<gbtNumber> &) *solution).operator=(gbtNumber(0));

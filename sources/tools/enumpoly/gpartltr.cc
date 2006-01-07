@@ -35,13 +35,13 @@ template class ListOfPartialTrees<Gambit::Rational>;
 
 //template class TreeOfPartials<double>;
 //template gOutput &operator<<(gOutput &f, const TreeOfPartials<double> &y);
-//template class gbtList<TreeOfPartials<double> >;
+//template class Gambit::List<TreeOfPartials<double> >;
 //template gOutput &operator<<(gOutput &f, 
-//			     const gbtList<TreeOfPartials<double> > &y);
-//template class gbtList<gbtList<TreeOfPartials<double> > >;
+//			     const Gambit::List<TreeOfPartials<double> > &y);
+//template class Gambit::List<Gambit::List<TreeOfPartials<double> > >;
 //template gOutput &operator<<(gOutput &f, 
-//			     const gbtList<gbtList<TreeOfPartials<double> > > &y);
-//template class gbtList<gbtList<gbtList<TreeOfPartials<double> > > >;
+//			     const Gambit::List<Gambit::List<TreeOfPartials<double> > > &y);
+//template class Gambit::List<Gambit::List<Gambit::List<TreeOfPartials<double> > > >;
 //template class ListOfPartialTrees<double>;
 //template gOutput &operator<<(gOutput &f, 
 //			     const ListOfPartialTrees<double> &y);

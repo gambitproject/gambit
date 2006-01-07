@@ -75,7 +75,7 @@ template <class T> class QuikSolv {
   const int                          NoInequalities;
   const ListOfPartialTrees<gDouble>  TreesOfPartials;
         bool                         HasBeenSolved;
-        gbtList<Gambit::Vector<gDouble> >     Roots;
+        Gambit::List<Gambit::Vector<gDouble> >     Roots;
   const bool                         isMultiaffine;
   const Gambit::RectArray<bool>             Equation_i_uses_var_j;
 
@@ -86,9 +86,9 @@ template <class T> class QuikSolv {
   // Get Roots Using Pelican
 
   bool AllRealRootsFromPelican(const gPolyList<gDouble> &, 
-			             gbtList<Gambit::Vector<gDouble> > &)         const;
+			             Gambit::List<Gambit::Vector<gDouble> > &)         const;
   bool PelicanRoots(const gRectangle<T> &, 
-		          gbtList<Gambit::Vector<gDouble> > &)                    const;
+		          Gambit::List<Gambit::Vector<gDouble> > &)                    const;
 
   // Check whether roots are impossible
 
@@ -124,7 +124,7 @@ template <class T> class QuikSolv {
 
   // Recursive parts of recursive methods
 
-  void               FindRootsRecursion(      gbtList<Gambit::Vector<gDouble> >*,
+  void               FindRootsRecursion(      Gambit::List<Gambit::Vector<gDouble> >*,
 					const gRectangle<gDouble>&, 
 					const int&,
 					      Gambit::Array<int>&,
@@ -139,7 +139,7 @@ template <class T> class QuikSolv {
 					        Gambit::Array<int>&)        const;
 
  public:
-  class NewtonError : public gbtException  {
+  class NewtonError : public Gambit::Exception  {
   public:
     virtual ~NewtonError();
     std::string GetDescription(void) const;   
@@ -165,7 +165,7 @@ template <class T> class QuikSolv {
      { return System; }
    inline const bool                     WasSolved()                 const
      { return HasBeenSolved; }
-   inline const gbtList<Gambit::Vector<gDouble> > RootList()                  const
+   inline const Gambit::List<Gambit::Vector<gDouble> > RootList()                  const
      { return Roots; }
    inline const bool                     IsMultiaffine()             const
      { return isMultiaffine; }

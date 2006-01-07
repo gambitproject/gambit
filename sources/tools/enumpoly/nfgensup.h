@@ -35,18 +35,18 @@ class StrategyCursorForSupport;
 void AllSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
 			     Gambit::StrategySupport *sact,
 			     StrategyCursorForSupport *c,
-			     gbtList<Gambit::StrategySupport> &list);
+			     Gambit::List<Gambit::StrategySupport> &list);
 
-gbtList<Gambit::StrategySupport> AllSubsupports(const Gambit::StrategySupport &S);
+Gambit::List<Gambit::StrategySupport> AllSubsupports(const Gambit::StrategySupport &S);
 
 // Subsupports of a given support are _valid_ if each agent has an action.
 
 void AllValidSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
 				  Gambit::StrategySupport *sact,
 				  StrategyCursorForSupport *c,
-				  gbtList<Gambit::StrategySupport> &list);
+				  Gambit::List<Gambit::StrategySupport> &list);
 
-gbtList<Gambit::StrategySupport> AllValidSubsupports(const Gambit::StrategySupport &S);
+Gambit::List<Gambit::StrategySupport> AllValidSubsupports(const Gambit::StrategySupport &S);
 
 // The following routines combine to return all supports that do not 
 // exhibit particular type of domination.  This was a prototype for 
@@ -61,9 +61,9 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
 					Gambit::StrategySupport *sact,
 					StrategyCursorForSupport *c,
 					bool strong,
-					gbtList<Gambit::StrategySupport> &list);
+					Gambit::List<Gambit::StrategySupport> &list);
   
-gbtList<Gambit::StrategySupport> AllUndominatedSubsupports(const Gambit::StrategySupport &S,
+Gambit::List<Gambit::StrategySupport> AllUndominatedSubsupports(const Gambit::StrategySupport &S,
 					       bool strong,
 					       bool conditional);
 
@@ -81,11 +81,11 @@ gbtList<Gambit::StrategySupport> AllUndominatedSubsupports(const Gambit::Strateg
 void PossibleNashSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
 				      Gambit::StrategySupport *sact,
 				      StrategyCursorForSupport *c,
-				      gbtList<Gambit::StrategySupport> &list);
+				      Gambit::List<Gambit::StrategySupport> &list);
 
-gbtList<Gambit::StrategySupport> SortSupportsBySize(gbtList<Gambit::StrategySupport> &);
+Gambit::List<Gambit::StrategySupport> SortSupportsBySize(Gambit::List<Gambit::StrategySupport> &);
   
-gbtList<Gambit::StrategySupport> PossibleNashSubsupports(const Gambit::StrategySupport &S);
+Gambit::List<Gambit::StrategySupport> PossibleNashSubsupports(const Gambit::StrategySupport &S);
 
 ///////////////// Utility Cursor Class /////////////////////
 
