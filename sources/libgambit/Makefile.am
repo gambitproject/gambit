@@ -30,7 +30,7 @@ libgambitinclude_HEADERS = \
 	vector.h vector.imp \
 	pvector.h pvector.imp \
 	dvector.h dvector.imp \
-	recarray.h
+	recarray.h \
 	matrix.h matrix.imp \
 	sqmatrix.h sqmatrix.imp \
 	number.h \
