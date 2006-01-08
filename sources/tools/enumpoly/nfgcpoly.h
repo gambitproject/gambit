@@ -1,0 +1,89 @@
+//
+// $Source$
+// $Date$
+// $Revision$
+//
+// DESCRIPTION:
+// Compute Nash equilibria via heuristic search on game supports
+// (Porter, Nudelman & Shoham, 2004)
+// Implemented by Litao Wei
+//
+// This file is part of Gambit
+// Copyright (c) 2006, Litao Wei and The Gambit Project
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+
+#ifndef NFGCPOLY_H
+#define NFGCPOLY_H
+
+#include "libgambit/libgambit.h"
+#include "nfgensup.h"
+#include "gpoly.h"
+#include "gpolylst.h"
+#include "rectangl.h"
+#include "quiksolv.h"
+
+using namespace Gambit;
+
+class HeuristicPolEnumModule  {
+private:
+  int m_stopAfter;
+  gDouble eps;
+  Game NF;
+  const StrategySupport &support;
+  gSpace Space;
+  term_order Lex;
+  int num_vars;
+  long count,nevals;
+  double time;
+  Gambit::List<MixedStrategyProfile<double> > solutions;
+  bool is_singular;
+
+  bool EqZero(gDouble x) const;
+  
+  // p_i_j as a gPoly, with last prob in terms of previous probs
+  gPoly<gDouble> Prob(int i,int j) const;
+
+  // equation for when player i sets strat1 = strat2
+  // with last probs for each player substituted out.  
+  gPoly<gDouble> IndifferenceEquation(int i, int strat1, int strat2) const;
+  gPolyList<gDouble>   IndifferenceEquations()                 const;
+  gPolyList<gDouble>   LastActionProbPositiveInequalities()    const;
+  gPolyList<gDouble>   NashOnSupportEquationsAndInequalities() const;
+  Gambit::List<Vector<gDouble> > 
+               NashOnSupportSolnVectors(const gPolyList<gDouble> &equations,
+					const gRectangle<gDouble> &Cube);
+
+  int SaveSolutions(const Gambit::List<Vector<gDouble> > &list);
+public:
+  HeuristicPolEnumModule(const StrategySupport &, int p_stopAfter);
+  
+  int PolEnum(void);
+  
+  long NumEvals(void) const;
+  double Time(void) const;
+  
+  const Gambit::List<MixedStrategyProfile<double> > &GetSolutions(void) const;
+  Vector<gDouble> SolVarsFromMixedStrategyProfile(const MixedStrategyProfile<double> &) const;
+
+  const int PolishKnownRoot(Vector<gDouble> &) const;
+
+  MixedStrategyProfile<double> ReturnPolishedSolution(const Vector<gDouble> &) const;
+
+  bool IsSingular() const;
+};
+
+#endif // NFGCPOLY_H

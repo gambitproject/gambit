@@ -33,6 +33,7 @@
 #include "gpolylst.h"
 #include "rectangl.h"
 #include "quiksolv.h"
+#include "nfghs.h"
 
 int g_numDecimals = 6;
 bool g_verbose = false;
@@ -315,6 +316,7 @@ int PolEnum(const Gambit::StrategySupport &support,
 //                        Polish Equilibrum for Nfg
 //---------------------------------------------------------------------------
 
+static
 Gambit::MixedStrategyProfile<double> PolishEquilibrium(const Gambit::StrategySupport &support, 
 				       const Gambit::MixedStrategyProfile<double> &sol, 
 				       bool &is_singular)
@@ -519,6 +521,7 @@ void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by solving polynomial systems\n";
   p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
+  p_stream << "Heuristic search implementation Copyright (C) 2006, Litao Wei\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
@@ -532,6 +535,8 @@ void PrintHelp(char *progname)
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibrium probabilities with DECIMALS digits\n";
   std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -H               use heuristic search method to optimize time\n";
+  std::cerr << "                   to find first equilibrium\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -v               verbose mode (shows supports investigated)\n";
   std::cerr << "                   (default is only to show equilibria)\n";
@@ -543,15 +548,19 @@ int main(int argc, char *argv[])
   opterr = 0;
 
   bool quiet = false;
+  bool useHeuristic = false;
 
   int c;
-  while ((c = getopt(argc, argv, "d:hqv")) != -1) {
+  while ((c = getopt(argc, argv, "d:hHqv")) != -1) {
     switch (c) {
     case 'd':
       g_numDecimals = atoi(optarg);
       break;
     case 'h':
       PrintHelp(argv[0]);
+      break;
+    case 'H':
+      useHeuristic = true;
       break;
     case 'q':
       quiet = true;
@@ -585,7 +594,13 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  Solve(nfg);
+  if (useHeuristic) {
+    gbtNfgHs algorithm(0);
+    algorithm.Solve(nfg);
+  }
+  else {
+    Solve(nfg);
+  }
   
   return 0;
 }

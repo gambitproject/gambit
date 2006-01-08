@@ -87,6 +87,7 @@ gambit_nfg_enumpoly_SOURCES = \
 	linrcomb.cc linrcomb.h linrcomb.imp \
 	nfgensup.cc nfgensup.h \
 	odometer.cc odometer.h \
+	nfgcpoly.cc nfgcpoly.h nfghs.cc nfghs.h \
 	nfgpoly.cc
 
 gambit_nfg_enumpoly_LDADD = \
@@ -108,4 +109,5 @@ gambit_efg_enumpoly_SOURCES = \
 gambit_efg_enumpoly_LDADD = \
 	libpoly.a libpelican.a \
 	$(top_builddir)/sources/libgambit/libgambit.la
+
 

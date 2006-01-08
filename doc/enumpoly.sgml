@@ -178,6 +178,7 @@ Computes Nash equilibria in a strategic game by solving polynomial systems
 <command>gambit-nfg-enumpoly</command>
 <arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
 <arg><option>-h</option></arg>
+<arg><option>-H</option></arg>
 <arg><option>-q</option></arg>
 <arg><option>-v</option></arg>
 </cmdsynopsis>
@@ -248,6 +249,20 @@ Prints a help message listing the available options.
 </varlistentry>
 
 <varlistentry>
+<term><option>-H</option></term>
+<listitem>
+<para>
+By default, the program uses an enumeration method designed to visit
+as few supports as possible in searching for all equilibria.
+With this switch, the program uses a heuristic search method based 
+on Porter, Nudelman, and Shoham
+(2004), which is designed to minimize the time until the first equilibrium
+is found.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term><option>-q</option></term>
 <listitem>
 <para>
@@ -293,6 +308,10 @@ None known.
 <surname>McLennan</surname>
 <contrib>Original author</contrib>
 </author>
+<author>
+<firstname>Litao</firstname>
+<surname>Wei</surname>
+<contrib>Heuristic search implementation</contrib>
 </para>
 </refsect1>
 </refentry>
