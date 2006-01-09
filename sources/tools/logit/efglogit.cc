@@ -223,7 +223,7 @@ static void QreJacobian(const Gambit::BehavSupport &p_support,
   }
 }
 
-int g_numDecimals = 6;
+extern int g_numDecimals;
 
 void PrintProfile(std::ostream &p_stream,
 		  const Gambit::BehavSupport &p_support, const Gambit::Vector<double> &x,
@@ -256,12 +256,12 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-double g_maxDecel = 1.1;
-double g_hStart = .03;
-bool g_fullGraph = true;
+extern double g_maxDecel;
+extern double g_hStart;
+extern bool g_fullGraph;
 
-static void TracePath(const Gambit::MixedBehavProfile<double> &p_start,
-		      double p_startLambda, double p_maxLambda, double p_omega)
+void TraceAgentPath(const Gambit::MixedBehavProfile<double> &p_start,
+		    double p_startLambda, double p_maxLambda, double p_omega)
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
   const double c_maxDist = 0.4;    // maximal distance to curve
@@ -319,7 +319,7 @@ static void TracePath(const Gambit::MixedBehavProfile<double> &p_start,
 	}
       }
 
-      TracePath(newProfile, x[x.Length()], p_maxLambda, p_omega);
+      TraceAgentPath(newProfile, x[x.Length()], p_maxLambda, p_omega);
       return;
     }
   }
@@ -432,7 +432,7 @@ static void TracePath(const Gambit::MixedBehavProfile<double> &p_start,
 	  }
 	}
 
-	TracePath(newProfile, u[u.Length()], p_maxLambda, p_omega);
+	TraceAgentPath(newProfile, u[u.Length()], p_maxLambda, p_omega);
 	return;
       }
       else {
@@ -462,95 +462,3 @@ static void TracePath(const Gambit::MixedBehavProfile<double> &p_start,
   }
 }
 
-void PrintBanner(std::ostream &p_stream)
-{
-  p_stream << "Compute a branch of the logit equilibrium correspondence\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
-  p_stream << "This is free software, distributed under the GNU GPL\n\n";
-}
-
-void PrintHelp(char *progname)
-{
-  PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts extensive game on standard input.\n";
-
-  std::cerr << "Options:\n";
-  std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
-  std::cerr << "  -s STEP          initial stepsize (default is .03)\n";
-  std::cerr << "  -a ACCEL         maximum acceleration (default is 1.1)\n";
-  std::cerr << "  -m MAXLAMBDA     stop when reaching MAXLAMBDA (default is 1000000)\n";
-  std::cerr << "  -h               print this help message\n";
-  std::cerr << "  -q               quiet mode (suppresses banner)\n";
-  std::cerr << "  -e               print only the terminal equilibrium\n";
-  std::cerr << "                   (default is to print the entire branch)\n";
-  exit(1);
-}
-
-int main(int argc, char *argv[])
-{
-  opterr = 0;
-
-  bool quiet = false;
-  double maxLambda = 1000000.0;
-
-  int c;
-  while ((c = getopt(argc, argv, "d:s:a:m:qeh")) != -1) {
-    switch (c) {
-    case 'q':
-      quiet = true;
-      break;
-    case 'd':
-      g_numDecimals = atoi(optarg);
-      break;
-    case 's':
-      g_hStart = atof(optarg);
-      break;
-    case 'a':
-      g_maxDecel = atof(optarg);
-      break;
-    case 'm':
-      maxLambda = atof(optarg);
-      break;
-    case 'e':
-      g_fullGraph = false;
-      break;
-    case 'h':
-      PrintHelp(argv[0]);
-      break;
-    case '?':
-      if (isprint(optopt)) {
-	std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
-      }
-      else {
-	std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
-      }
-      return 1;
-    default:
-      abort();
-    }
-  }
-
-  if (!quiet) {
-    PrintBanner(std::cerr);
-  }
-
-  Gambit::Game efg;
-
-  try {
-    efg = Gambit::ReadGame(std::cin);
-  }
-  catch (...) {
-    return 1;
-  }
-
-  Gambit::MixedBehavProfile<double> start(efg);
-
-  try {
-    TracePath(start, 0.0, maxLambda, 1.0);
-    return 0;
-  }
-  catch (...) {
-    return 1;
-  }
-}

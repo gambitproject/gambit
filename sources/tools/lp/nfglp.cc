@@ -7,6 +7,9 @@
 // Implementation of algorithm to compute mixed strategy equilibria
 // of constant sum normal form games via linear programming
 //
+// This file is part of Gambit
+// Copyright (c) 2006, The Gambit Project
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -27,7 +30,7 @@
 #include "libgambit/libgambit.h"
 #include "lpsolve.h"
 
-int g_numDecimals = 6;
+extern int g_numDecimals;
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
@@ -168,86 +171,12 @@ void nfgLp<T>::GetSolutions(const Gambit::StrategySupport &p_support,
   }
 }
 
-void PrintBanner(std::ostream &p_stream)
+template <class T>
+void SolveStrategic(const Gambit::Game &p_game)
 {
-  p_stream << "Compute Nash equilibria by solving a linear program\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
-  p_stream << "This is free software, distributed under the GNU GPL\n\n";
+  nfgLp<T> algorithm;
+  algorithm.Solve(p_game);
 }
 
-void PrintHelp(char *progname)
-{
-  PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts strategic game on standard input.\n";
-  std::cerr << "With no options, reports all Nash equilibria found.\n\n";
-
-  std::cerr << "Options:\n";
-  std::cerr << "  -d DECIMALS      compute using floating-point arithmetic;\n";
-  std::cerr << "                   display results with DECIMALS digits\n";
-  std::cerr << "  -h               print this help message\n";
-  std::cerr << "  -q               quiet mode (suppresses banner)\n";
-  exit(1);
-}
-
-
-int main(int argc, char *argv[])
-{
-  int c;
-  bool useFloat = false, quiet = false;
-
-  while ((c = getopt(argc, argv, "d:hq")) != -1) {
-    switch (c) {
-    case 'd':
-      useFloat = true;
-      g_numDecimals = atoi(optarg);
-      break;
-    case 'h':
-      PrintHelp(argv[0]);
-      break;
-    case 'q':
-      quiet = true;
-      break;
-    case '?':
-      if (isprint(optopt)) {
-	std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
-      }
-      else {
-	std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
-      }
-      return 1;
-    default:
-      abort();
-    }
-  }
-
-  if (!quiet) {
-    PrintBanner(std::cerr);
-  }
-
-  Gambit::Game nfg;
-
-  try {
-    nfg = Gambit::ReadGame(std::cin);
-  }
-  catch (...) {
-    return 1;
-  }
-
-  if (nfg->NumPlayers() != 2 || !nfg->IsConstSum()) {
-    return 1;
-  }
-
-  if (useFloat) {
-    nfgLp<double> algorithm;
-    algorithm.Solve(nfg);
-  }
-  else {
-    nfgLp<Gambit::Rational> algorithm;
-    algorithm.Solve(nfg);
-  }
-
-  return 0;
-
-}
-
+template void SolveStrategic<double>(const Gambit::Game &);
+template void SolveStrategic<Gambit::Rational>(const Gambit::Game &);

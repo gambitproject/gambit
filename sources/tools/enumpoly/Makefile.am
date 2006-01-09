@@ -76,25 +76,11 @@ libpoly_a_SOURCES = \
 	rectangl.h \
 	rectangl.imp
 
-bin_PROGRAMS = gambit-efg-enumpoly gambit-nfg-enumpoly
+bin_PROGRAMS = gambit-enumpoly gambit-enumpoly
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
-gambit_nfg_enumpoly_SOURCES = \
-	complex.cc complex.h \
-	double.cc double.h \
-	gtree.h gtree.imp \
-	linrcomb.cc linrcomb.h linrcomb.imp \
-	nfgensup.cc nfgensup.h \
-	odometer.cc odometer.h \
-	nfgcpoly.cc nfgcpoly.h nfghs.cc nfghs.h \
-	nfgpoly.cc
-
-gambit_nfg_enumpoly_LDADD = \
-	libpoly.a libpelican.a \
-	$(top_builddir)/sources/libgambit/libgambit.la
-
-gambit_efg_enumpoly_SOURCES = \
+gambit_enumpoly_SOURCES = \
 	behavextend.cc behavextend.h \
 	complex.cc complex.h \
 	double.cc double.h \
@@ -103,11 +89,11 @@ gambit_efg_enumpoly_SOURCES = \
 	efgensup.cc efgensup.h \
 	gnarray.h gnarray.imp \
 	sfg.cc sfg.h sfstrat.cc sfstrat.h \
+	nfgensup.cc nfgensup.h \
 	odometer.cc odometer.h \
-	efgpoly.cc
+	nfgcpoly.cc nfgcpoly.h nfghs.cc nfghs.h \
+	efgpoly.cc nfgpoly.cc enumpoly.cc
 
-gambit_efg_enumpoly_LDADD = \
+gambit_enumpoly_LDADD = \
 	libpoly.a libpelican.a \
 	$(top_builddir)/sources/libgambit/libgambit.la
-
-

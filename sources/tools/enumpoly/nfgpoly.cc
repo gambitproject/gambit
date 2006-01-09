@@ -33,10 +33,9 @@
 #include "gpolylst.h"
 #include "rectangl.h"
 #include "quiksolv.h"
-#include "nfghs.h"
 
-int g_numDecimals = 6;
-bool g_verbose = false;
+extern int g_numDecimals;
+extern bool g_verbose; 
 
 class PolEnumModule  {
 private:
@@ -483,126 +482,33 @@ void PrintSupport(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-void Solve(const Gambit::Game &p_nfg)
+void SolveStrategic(const Gambit::Game &p_nfg)
 {
   Gambit::List<Gambit::StrategySupport> supports = PossibleNashSubsupports(p_nfg);
 
-  try {
-    for (int i = 1; i <= supports.Length(); i++) {
-      long newevals = 0;
-      double newtime = 0.0;
-      Gambit::List<Gambit::MixedStrategyProfile<double> > newsolns;
-      bool is_singular = false;
+  for (int i = 1; i <= supports.Length(); i++) {
+    long newevals = 0;
+    double newtime = 0.0;
+    Gambit::List<Gambit::MixedStrategyProfile<double> > newsolns;
+    bool is_singular = false;
     
-      if (g_verbose) {
-	PrintSupport(std::cout, "candidate", supports[i]);
-      }
+    if (g_verbose) {
+      PrintSupport(std::cout, "candidate", supports[i]);
+    }
 
-      PolEnum(supports[i], newsolns, newevals, newtime, is_singular);
+    PolEnum(supports[i], newsolns, newevals, newtime, is_singular);
       
-      for (int j = 1; j <= newsolns.Length(); j++) {
-	Gambit::MixedStrategyProfile<double> fullProfile = ToFullSupport(newsolns[j]);
-	if (fullProfile.GetLiapValue() < 1.0e-6) {
-	  PrintProfile(std::cout, "NE", fullProfile);
-	}
-      }
-
-      if (is_singular && g_verbose) {
-	PrintSupport(std::cout, "singular", supports[i]);
+    for (int j = 1; j <= newsolns.Length(); j++) {
+      Gambit::MixedStrategyProfile<double> fullProfile = ToFullSupport(newsolns[j]);
+      if (fullProfile.GetLiapValue() < 1.0e-6) {
+	PrintProfile(std::cout, "NE", fullProfile);
       }
     }
-  }
-  catch (...) {
-    return;
-  }
-}
 
-void PrintBanner(std::ostream &p_stream)
-{
-  p_stream << "Compute Nash equilibria by solving polynomial systems\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
-  p_stream << "Heuristic search implementation Copyright (C) 2006, Litao Wei\n";
-  p_stream << "This is free software, distributed under the GNU GPL\n\n";
-}
-
-void PrintHelp(char *progname)
-{
-  PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts strategic game on standard input.\n";
-  std::cerr << "With no options, reports all Nash equilibria found.\n\n";
-
-  std::cerr << "Options:\n";
-  std::cerr << "  -d DECIMALS      show equilibrium probabilities with DECIMALS digits\n";
-  std::cerr << "  -h               print this help message\n";
-  std::cerr << "  -H               use heuristic search method to optimize time\n";
-  std::cerr << "                   to find first equilibrium\n";
-  std::cerr << "  -q               quiet mode (suppresses banner)\n";
-  std::cerr << "  -v               verbose mode (shows supports investigated)\n";
-  std::cerr << "                   (default is only to show equilibria)\n";
-  exit(1);
-}
-
-int main(int argc, char *argv[])
-{
-  opterr = 0;
-
-  bool quiet = false;
-  bool useHeuristic = false;
-
-  int c;
-  while ((c = getopt(argc, argv, "d:hHqv")) != -1) {
-    switch (c) {
-    case 'd':
-      g_numDecimals = atoi(optarg);
-      break;
-    case 'h':
-      PrintHelp(argv[0]);
-      break;
-    case 'H':
-      useHeuristic = true;
-      break;
-    case 'q':
-      quiet = true;
-      break;
-    case 'v':
-      g_verbose = true;
-      break;
-    case '?':
-      if (isprint(optopt)) {
-	std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
-      }
-      else {
-	std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
-      }
-      return 1;
-    default:
-      abort();
+    if (is_singular && g_verbose) {
+      PrintSupport(std::cout, "singular", supports[i]);
     }
   }
-
-  if (!quiet) {
-    PrintBanner(std::cerr);
-  }
-
-  Gambit::Game nfg;
-
-  try {
-    nfg = Gambit::ReadGame(std::cin);
-  }
-  catch (...) {
-    return 1;
-  }
-
-  if (useHeuristic) {
-    gbtNfgHs algorithm(0);
-    algorithm.Solve(nfg);
-  }
-  else {
-    Solve(nfg);
-  }
-  
-  return 0;
 }
 
 

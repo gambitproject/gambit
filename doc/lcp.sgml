@@ -1,11 +1,11 @@
-<refentry id="nash.efg.lcp">
+<refentry id="nash.lcp">
 <refentryinfo>
 <date>2005-08-15</date>
 </refentryinfo>
 
 <refmeta>
 <refentrytitle>
-<application>gambit-efg-lcp</application>
+<application>gambit-lcp</application>
 </refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo>Gambit 1.0</refmiscinfo>
@@ -13,11 +13,11 @@
 
 <refnamediv>
 <refname>
-<application>gambit-efg-lcp</application>
+<application>gambit-lcp</application>
 </refname>
 <refpurpose>
-Computes Nash equilibria in a two-player extensive game using the
-algorithm of Lemke applied to the sequence form
+Computes Nash equilibria in a two-player game by solving a
+linear complementarity program
 </refpurpose>
 </refnamediv>
 
@@ -26,8 +26,9 @@ algorithm of Lemke applied to the sequence form
 <date>2005-08-15</date>
 </refsynopsisdivinfo>
 <cmdsynopsis>
-<command>gambit-efg-lcp</command>
+<command>gambit-lcp</command>
 <arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
+<arg><option>-S</option></arg>
 <arg><option>-h</option></arg>
 <arg><option>-q</option></arg>
 </cmdsynopsis>
@@ -39,11 +40,13 @@ algorithm of Lemke applied to the sequence form
 </refsect1info>
 <title>DESCRIPTION</title>
 <para>
-<command>gambit-efg-lcp</command> reads a two-player extensive game on
+<command>gambit-lcp</command> reads a two-playergame on
 standard input and computes Nash equilibria 
-using the method proposed by Lemke to solve linear complementarity problems.
-This method uses the sequence form representation of the extensive game,
-as defined by Koller, Megiddo, and von Stengel.
+by finding solutions to a linear complementarity problem.
+For extensive games, the program uses the sequence form representation 
+of the extensive game, as defined by Koller, Megiddo, and von Stengel,
+and applies the algorithm developed by Lemke.
+For strategic games, the program using the method of Lemke and Howson.
 </para>
 
 <para>
@@ -76,124 +79,13 @@ expresses all output using decimal representations with
 </varlistentry>
 
 <varlistentry>
-<term><option>-h</option></term>
+<term><option>-S</option></term>
 <listitem>
 <para>
-Prints a help message listing the available options.
-</para>
-</listitem>
-</varlistentry>
-
-<varlistentry>
-<term><option>-q</option></term>
-<listitem>
-<para>
-Suppresses printing of the banner at program launch.
-</para>
-</listitem>
-</varlistentry>
-
-</variablelist>
-</refsect1>
-
-<refsect1>
-<title>USAGE</title>
-<para>
-<command>gambit-efg-lcp</command> [OPTIONS] < file.efg
-</para>
-</refsect1>
-
-<refsect1>
-<title>BUGS</title>
-<para>
-None known.
-</para>
-</refsect1>
-
-<refsect1>
-<title>AUTHOR</title>
-<para>
-<author>
-<firstname>Theodore</firstname>
-<surname>Turocy</surname>
-<contrib>Original author</contrib>
-</author>
-</para>
-</refsect1>
-</refentry>
-
-<refentry id="nash.nfg.lcp">
-<refentryinfo>
-<date>2005-08-15</date>
-</refentryinfo>
-
-<refmeta>
-<refentrytitle>
-<application>gambit-nfg-lcp</application>
-</refentrytitle>
-<manvolnum>1</manvolnum>
-<refmiscinfo>Gambit 1.0</refmiscinfo>
-</refmeta>
-
-<refnamediv>
-<refname>
-<application>gambit-nfg-lcp</application>
-</refname>
-<refpurpose>
-Computes Nash equilibria in a two-player strategic game using the
-algorithm of Lemke and Howson
-</refpurpose>
-</refnamediv>
-
-<refsynopsisdiv>
-<refsynopsisdivinfo>
-<date>2005-08-15</date>
-</refsynopsisdivinfo>
-<cmdsynopsis>
-<command>gambit-nfg-lcp</command>
-<arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
-<arg><option>-h</option></arg>
-<arg><option>-q</option></arg>
-</cmdsynopsis>
-</refsynopsisdiv>
-
-<refsect1>
-<refsect1info>
-<date>2005-08-15</date>
-</refsect1info>
-<title>DESCRIPTION</title>
-<para>
-<command>gambit-nfg-lcp</command> reads a two-player strategic game on
-standard input and computes Nash equilibria 
-using the method proposed by Lemke and Howson
-to solve linear complementarity problems.
-</para>
-
-<para>
-It is known that this method may not locate all equilibria in a game.
-Some equilibria in some games 
-are not accessible using the path-following procedure
-implemented in this program.
-</para>
-
-</refsect1>
-
-<refsect1>
-<title>OPTIONS</title>
-<variablelist>
-<varlistentry>
-<term><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></term>
-<listitem>
-<para>
-By default, this program computes using exact rational arithmetic.  Since
-the extreme points computed by this method are guaranteed to be rational
-when the payoffs in the game are rational, this permits exact computation
-of the equilibrium set.  Computation using rational arithmetic is in
-general slow, however.  For most games, acceptable results can be obtained
-by computing using the computer's native floating-point arithmetic.
-Using this flag enables computation in floating-point, and
-expresses all output using decimal representations with 
-<replaceable class="parameter">DECIMALS</replaceable> digits.  
+By default, the program uses behavior strategies for extensive games;
+this switch instructs the program to use reduced strategic game strategies
+for extensive games.  (This has no effect for strategic games, since
+a strategic game is its own reduced strategic game.)
 </para>
 </listitem>
 </varlistentry>
@@ -222,7 +114,7 @@ Suppresses printing of the banner at program launch.
 <refsect1>
 <title>USAGE</title>
 <para>
-<command>gambit-nfg-lcp</command> [OPTIONS] < file.nfg
+<command>gambit-lcp</command> [OPTIONS] < file.[en]fg
 </para>
 </refsect1>
 

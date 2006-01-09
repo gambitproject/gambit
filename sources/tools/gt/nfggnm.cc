@@ -68,7 +68,7 @@ void PrintHelp(char *progname)
 {
   PrintBanner(std::cerr);
   std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts strategic game on standard input.\n";
+  std::cerr << "Accepts game on standard input.\n";
 
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
@@ -164,16 +164,18 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::Game nfg;
-
   try {
-    nfg = Gambit::ReadGame(std::cin);
+    Gambit::Game game = Gambit::ReadGame(std::cin);
+
+    Solve(game);
+    return 0;
   }
-  catch (...) {
+  catch (Gambit::InvalidFileException) {
+    std::cerr << "Error: Game not in a recognized format.\n";
     return 1;
   }
-
-  Solve(nfg);
-  
-  return 0;
+  catch (...) {
+    std::cerr << "Error: An internal error occurred.\n";
+    return 1;
+  }
 }

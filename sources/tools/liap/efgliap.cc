@@ -31,6 +31,17 @@
 #include "libgambit/libgambit.h"
 #include "funcmin.h"
 
+extern int m_stopAfter;
+extern int m_numTries;
+extern int m_maxits1;
+extern int m_maxitsN;
+extern double m_tol1;
+extern double m_tolN;
+extern std::string startFile;
+extern bool useRandom;
+extern int g_numDecimals;
+extern bool verbose;
+
 class EFLiapFunc : public gC1Function<double>  {
 private:
   mutable long _nevals;
@@ -132,8 +143,6 @@ static void PickRandomProfile(Gambit::MixedBehavProfile<double> &p)
   }
 }
 
-int g_numDecimals = 6;
-
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
 		  const Gambit::MixedBehavProfile<double> &p_profile)
@@ -168,100 +177,15 @@ bool ReadProfile(std::istream &p_stream,
   return true;
 }
 
-void PrintBanner(std::ostream &p_stream)
+void SolveExtensive(const Gambit::Game &p_game)
 {
-  p_stream << "Compute Nash equilibria by minimizing the Lyapunov function\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
-  p_stream << "This is free software, distributed under the GNU GPL\n\n";
-}
-
-void PrintHelp(char *progname)
-{
-  PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts strategic game on standard input.\n";
-  std::cerr << "With no options, attempts to compute one equilibrium starting at centroid.\n";
-
-  std::cerr << "Options:\n";
-  std::cerr << "  -d DECIMALS      print probabilities with DECIMALS digits\n";
-  std::cerr << "  -h               print this help message\n";
-  std::cerr << "  -n COUNT         number of starting points to generate\n";
-  std::cerr << "  -s FILE          file containing starting points\n";
-  std::cerr << "  -q               quiet mode (suppresses banner)\n";
-  std::cerr << "  -v               verbose mode (shows intermediate output)\n";
-  std::cerr << "                   (default is to only show equilibria)\n";
-  exit(1);
-}
-
-int m_stopAfter = 0;
-int m_numTries = 10;
-int m_maxits1 = 100;
-int m_maxitsN = 20;
-double m_tol1 = 2.0e-10;
-double m_tolN = 1.0e-10;
-
-int main(int argc, char *argv[])
-{
-  opterr = 0;
-  std::string startFile;
-  bool useRandom = false;
-  bool quiet = false, verbose = false;
-
-  int c;
-  while ((c = getopt(argc, argv, "d:n:s:hqv")) != -1) {
-    switch (c) {
-    case 'd':
-      g_numDecimals = atoi(optarg);
-      break;
-    case 'n':
-      m_numTries = atoi(optarg);
-      break;
-    case 's':
-      startFile = optarg;
-      break;
-    case 'h':
-      PrintHelp(argv[0]);
-      break;
-    case 'q':
-      quiet = true;
-      break;
-    case 'v':
-      verbose = true;
-      break;
-    case '?':
-      if (isprint(optopt)) {
-	std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
-      }
-      else {
-	std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
-      }
-      return 1;
-    default:
-      abort();
-    }
-  }
-
-  if (!quiet) {
-    PrintBanner(std::cerr);
-  }
-
-  Gambit::Game efg;
-
-  try {
-    efg = Gambit::ReadGame(std::cin);
-  }
-  catch (...) {
-    return 1;
-  }
-
-
   Gambit::List<Gambit::MixedBehavProfile<double> > starts;
 
   if (startFile != "") {
     std::ifstream startPoints(startFile.c_str());
 
     while (!startPoints.eof() && !startPoints.bad()) {
-      Gambit::MixedBehavProfile<double> start(efg);
+      Gambit::MixedBehavProfile<double> start(p_game);
       if (ReadProfile(startPoints, start)) {
 	starts.Append(start);
       }
@@ -270,7 +194,7 @@ int main(int argc, char *argv[])
   else {
     // Generate the desired number of points randomly
     for (int i = 1; i <= m_numTries; i++) {
-      Gambit::MixedBehavProfile<double> start(efg);
+      Gambit::MixedBehavProfile<double> start(p_game);
       PickRandomProfile(start);
       starts.Append(start);
     }
@@ -278,56 +202,49 @@ int main(int argc, char *argv[])
 
   static const double ALPHA = .00000001;
 
-  try {
-    for (int i = 1; i <= starts.Length(); i++) {
-      Gambit::MixedBehavProfile<double> p(starts[i]);
+  for (int i = 1; i <= starts.Length(); i++) {
+    Gambit::MixedBehavProfile<double> p(starts[i]);
 
-      if (verbose) {
-	PrintProfile(std::cout, "start", p);
-      }
-
-      EFLiapFunc F(efg, p);
-
-      // if starting vector not interior, perturb it towards centroid
-      int kk;
-      for (int kk = 1; kk <= p.Length() && p[kk] > ALPHA; kk++);
-      if (kk <= p.Length()) {
-	Gambit::MixedBehavProfile<double> c(efg);
-	for (int k = 1; k <= p.Length(); k++) {
-	  p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
-	}
-      }
-
-      Gambit::Matrix<double> xi(p.Length(), p.Length());
-  
-      gConjugatePR minimizer(p.Length());
-      Gambit::Vector<double> gradient(p.Length()), dx(p.Length());
-      double fval;
-      minimizer.Set(F, p.GetDPVector(), fval, gradient, .01, .0001);
-
-      try {
-	for (int iter = 1; iter <= m_maxitsN; iter++) {
-	  if (!minimizer.Iterate(F, p.GetDPVector(), fval, gradient, dx)) {
-	    break;
-	  }
-
-	  if (sqrt(gradient.NormSquared()) < .001) {
-	    PrintProfile(std::cout, "NE", p);
-	    break;
-	  }
-	}
-
-	if (verbose && sqrt(gradient.NormSquared()) >= .001) {
-	  PrintProfile(std::cout, "end", p);
-	}
-      }
-      catch (gFuncMinException &) { }
+    if (verbose) {
+      PrintProfile(std::cout, "start", p);
     }
-  }
-  catch (...) {
-    return 1;
-  }
 
-  return 0;
+    EFLiapFunc F(p_game, p);
+
+    // if starting vector not interior, perturb it towards centroid
+    int kk;
+    for (int kk = 1; kk <= p.Length() && p[kk] > ALPHA; kk++);
+    if (kk <= p.Length()) {
+      Gambit::MixedBehavProfile<double> c(p_game);
+      for (int k = 1; k <= p.Length(); k++) {
+	p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
+      }
+    }
+
+    Gambit::Matrix<double> xi(p.Length(), p.Length());
+  
+    gConjugatePR minimizer(p.Length());
+    Gambit::Vector<double> gradient(p.Length()), dx(p.Length());
+    double fval;
+    minimizer.Set(F, p.GetDPVector(), fval, gradient, .01, .0001);
+
+    try {
+      for (int iter = 1; iter <= m_maxitsN; iter++) {
+	if (!minimizer.Iterate(F, p.GetDPVector(), fval, gradient, dx)) {
+	  break;
+	}
+
+	if (sqrt(gradient.NormSquared()) < .001) {
+	  PrintProfile(std::cout, "NE", p);
+	  break;
+	}
+      }
+
+      if (verbose && sqrt(gradient.NormSquared()) >= .001) {
+	PrintProfile(std::cout, "end", p);
+      }
+    }
+    catch (gFuncMinException &) { }
+  }
 }
 

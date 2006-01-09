@@ -31,7 +31,7 @@
 #include "tableau.h"
 #include "lpsolve.h"
 
-int g_numDecimals = 6;
+extern int g_numDecimals;
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
@@ -299,83 +299,12 @@ void efgLp<T>::GetSolutions(const Gambit::BehavSupport &p_support) const
 
 }
 
-void PrintBanner(std::ostream &p_stream)
+template <class T>
+void SolveExtensive(const Gambit::Game &p_game)
 {
-  p_stream << "Compute Nash equilibria by solving a linear program\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
-  p_stream << "This is free software, distributed under the GNU GPL\n\n";
+  efgLp<T> algorithm;
+  algorithm.Solve(p_game);
 }
 
-void PrintHelp(char *progname)
-{
-  PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts extensive game on standard input.\n";
-  std::cerr << "With no options, reports all Nash equilibria found.\n\n";
-
-  std::cerr << "Options:\n";
-  std::cerr << "  -d DECIMALS      compute using floating-point arithmetic;\n";
-  std::cerr << "                   display results with DECIMALS digits\n";
-  std::cerr << "  -h               print this help message\n";
-  std::cerr << "  -q               quiet mode (suppresses banner)\n";
-  exit(1);
-}
-
-int main(int argc, char *argv[])
-{
-  int c;
-  bool useFloat = false, quiet = false;
-
-  while ((c = getopt(argc, argv, "d:hq")) != -1) {
-    switch (c) {
-    case 'd':
-      useFloat = true;
-      g_numDecimals = atoi(optarg);
-      break;
-    case 'h':
-      PrintHelp(argv[0]);
-      break;
-    case 'q':
-      quiet = true;
-      break;
-    case '?':
-      if (isprint(optopt)) {
-	std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
-      }
-      else {
-	std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
-      }
-      return 1;
-    default:
-      abort();
-    }
-  }
-
-  if (!quiet) {
-    PrintBanner(std::cerr);
-  }
-
-  Gambit::Game efg;
-
-  try {
-    efg = Gambit::ReadGame(std::cin);
-  }
-  catch (...) {
-    return 1;
-  }
-
-  if (efg->NumPlayers() != 2 || !efg->IsConstSum()) {
-    return 1;
-  }
-
-  if (useFloat) {
-    efgLp<double> algorithm;
-    algorithm.Solve(efg);
-  }
-  else {
-    efgLp<Gambit::Rational> algorithm;
-    algorithm.Solve(efg);
-  }
-
-  return 0;
-}
+template void SolveExtensive<double>(const Gambit::Game &);
+template void SolveExtensive<Gambit::Rational>(const Gambit::Game &);

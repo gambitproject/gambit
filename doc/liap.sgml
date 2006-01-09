@@ -1,11 +1,11 @@
-<refentry id="nash.efg.liap">
+<refentry id="nash.liap">
 <refentryinfo>
 <date>2005-08-15</date>
 </refentryinfo>
 
 <refmeta>
 <refentrytitle>
-<application>gambit-efg-liap</application>
+<application>gambit-liap</application>
 </refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo>Gambit 1.0</refmiscinfo>
@@ -13,10 +13,10 @@
 
 <refnamediv>
 <refname>
-<application>gambit-efg-liap</application>
+<application>gambit-liap</application>
 </refname>
 <refpurpose>
-Computes Nash equilibria in an extensive game using a function minimization
+Computes Nash equilibria in a game using a function minimization
 approach
 </refpurpose>
 </refnamediv>
@@ -31,6 +31,7 @@ approach
 <arg><option>-h</option></arg>
 <arg><option>-n </option><replaceable class="parameter">COUNT</replaceable></arg>
 <arg><option>-s </option><replaceable class="parameter">FILE</replaceable></arg>
+<arg><option>-S</option></arg>
 <arg><option>-q</option></arg>
 <arg><option>-v</option></arg>
 </cmdsynopsis>
@@ -42,7 +43,7 @@ approach
 </refsect1info>
 <title>DESCRIPTION</title>
 <para>
-<command>gambit-efg-liap</command> reads an extensive game on standard
+<command>gambit-liap</command> reads a game on standard
 input and computes approximate Nash equilibria using a function minimization approach.
 </para>
 
@@ -114,6 +115,18 @@ profile per line, in the same format used for output of equilibria
 </varlistentry>
 
 <varlistentry>
+<term><option>-S</option></term>
+<listitem>
+<para>
+By default, the program uses behavior strategies for extensive games;
+this switch instructs the program to use reduced strategic game strategies
+for extensive games.  (This has no effect for strategic games, since
+a strategic game is its own reduced strategic game.)
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term><option>-v</option></term>
 <listitem>
 <para>
@@ -130,7 +143,7 @@ is not a Nash equilibrium, are all output, in addition to any equilibria found.
 <refsect1>
 <title>USAGE</title>
 <para>
-<command>gambit-efg-liap</command> [OPTIONS] < file.efg
+<command>gambit-liap</command> [OPTIONS] < file.[en]fg
 </para>
 </refsect1>
 
@@ -154,159 +167,4 @@ None known.
 </refentry>
 
 
-<refentry id="nash.nfg.liap">
-<refentryinfo>
-<date>2005-08-15</date>
-</refentryinfo>
-
-<refmeta>
-<refentrytitle>
-<application>gambit-nfg-liap</application>
-</refentrytitle>
-<manvolnum>1</manvolnum>
-<refmiscinfo>Gambit 1.0</refmiscinfo>
-</refmeta>
-
-<refnamediv>
-<refname>
-<application>gambit-nfg-liap</application>
-</refname>
-<refpurpose>
-Computes Nash equilibria in a strategic game using a function minimization
-approach
-</refpurpose>
-</refnamediv>
-
-<refsynopsisdiv>
-<refsynopsisdivinfo>
-<date>2005-08-15</date>
-</refsynopsisdivinfo>
-<cmdsynopsis>
-<command>gambit-nfg-liap</command>
-<arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
-<arg><option>-h</option></arg>
-<arg><option>-n </option><replaceable class="parameter">COUNT</replaceable></arg>
-<arg><option>-s </option><replaceable class="parameter">FILE</replaceable></arg>
-<arg><option>-q</option></arg>
-<arg><option>-v</option></arg>
-</cmdsynopsis>
-</refsynopsisdiv>
-
-<refsect1>
-<refsect1info>
-<date>2005-08-15</date>
-</refsect1info>
-<title>DESCRIPTION</title>
-<para>
-<command>gambit-nfg-liap</command> reads a strategic game on standard
-input and computes approximate
-Nash equilibria using a function minimization approach.
-</para>
-
-<para>
-This procedure searches for equilibria by generating random starting
-points and using conjugate gradient descent to minimize the Lyapunov
-function of the game.  This function is a nonnegative function which
-is zero exactly at strategy profiles which are Nash equilibria.
-</para>
-
-<para>
-Note that this procedure is not globally convergent.  That is, it is
-not guaranteed to find all, or even any, Nash equilibria.
-</para>
-
-</refsect1>
-
-<refsect1>
-<title>OPTIONS</title>
-<variablelist>
-<varlistentry>
-<term><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></term>
-<listitem>
-<para>
-Express all output using decimal representations with 
-<replaceable class="parameter">DECIMALS</replaceable> digits.  
-</para>
-</listitem>
-</varlistentry>
-
-<varlistentry>
-<term><option>-h</option></term>
-<listitem>
-<para>
-Prints a help message listing the available options.
-</para>
-</listitem>
-</varlistentry>
-
-<varlistentry>
-<term><option>-n </option><replaceable class="parameter">COUNT</replaceable></term>
-<listitem>
-<para>
-Randomly generate
-<replaceable class="parameter">COUNT</replaceable> starting points.
-</para>
-</listitem>
-</varlistentry>
-
-<varlistentry>
-<term><option>-q</option></term>
-<listitem>
-<para>
-Suppresses printing of the banner at program launch.
-</para>
-</listitem>
-</varlistentry>
-
-<varlistentry>
-<term><option>-s </option><replaceable class="parameter">FILE</replaceable></term>
-<listitem>
-<para>
-Specifies a file containing a list of starting points for the algorithm.
-The format of the file is comma-separated values, one mixed strategy
-profile per line, in the same format used for output of equilibria
-(excluding the initial NE tag).
-</para>
-</listitem>
-</varlistentry>
-
-<varlistentry>
-<term><option>-v</option></term>
-<listitem>
-<para>
-Sets verbose mode.  In verbose mode, initial points, as well as points
-at which the minimization fails at a constrained local minimum that
-is not a Nash equilibrium, are all output, in addition to any equilibria found.
-</para>
-</listitem>
-</varlistentry>
-
-</variablelist>
-</refsect1>
-
-<refsect1>
-<title>USAGE</title>
-<para>
-<command>gambit-nfg-liap</command> [OPTIONS] < file.nfg
-</para>
-</refsect1>
-
-<refsect1>
-<title>BUGS</title>
-<para>
-None known.
-</para>
-</refsect1>
-
-<refsect1>
-<title>AUTHOR</title>
-<para>
-<author>
-<firstname>Theodore</firstname>
-<surname>Turocy</surname>
-<contrib>Original author</contrib>
-</author>
-</para>
-</refsect1>
-</refentry>
 

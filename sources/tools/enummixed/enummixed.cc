@@ -246,7 +246,7 @@ void PrintHelp(char *progname)
 {
   PrintBanner(std::cerr);
   std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts strategic game on standard input.\n";
+  std::cerr << "Accepts game on standard input.\n";
   std::cerr << "With no options, reports all Nash equilibria found.\n\n";
 
   std::cerr << "Options:\n";

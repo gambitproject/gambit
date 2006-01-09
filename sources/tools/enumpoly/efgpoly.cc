@@ -35,8 +35,8 @@
 #include "quiksolv.h"
 #include "behavextend.h"
 
-int g_numDecimals = 6;
-bool g_verbose = false;
+extern int g_numDecimals;
+extern bool g_verbose;
 
 template <class T> class EfgPolEnumModule  {
 private:
@@ -622,110 +622,31 @@ void PrintSupport(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-void Solve(const Gambit::Game &p_game)
+void SolveExtensive(const Gambit::Game &p_game)
 {
   Gambit::List<Gambit::BehavSupport> supports = PossibleNashSubsupports(p_game);
 
-  try {
-    for (int i = 1; i <= supports.Length(); i++) {
-      long newevals = 0;
-      double newtime = 0.0;
-      Gambit::List<Gambit::MixedBehavProfile<double> > newsolns;
-      bool is_singular = false;
+  for (int i = 1; i <= supports.Length(); i++) {
+    long newevals = 0;
+    double newtime = 0.0;
+    Gambit::List<Gambit::MixedBehavProfile<double> > newsolns;
+    bool is_singular = false;
 
-      if (g_verbose) {
-	PrintSupport(std::cout, "candidate", supports[i]);
-      }
+    if (g_verbose) {
+      PrintSupport(std::cout, "candidate", supports[i]);
+    }
       
-      EfgPolEnum(supports[i], newsolns, newevals, newtime, is_singular);
-      for (int j = 1; j <= newsolns.Length(); j++) {
-	Gambit::MixedBehavProfile<double> fullProfile = ToFullSupport(newsolns[j]);
-	if (fullProfile.GetLiapValueOnDefined() < 1.0e-6) {
-	  PrintProfile(std::cout, "NE", fullProfile);
-	}
-      }
-      
-      if (is_singular && g_verbose) {
-	PrintSupport(std::cout, "singular", supports[i]);
+    EfgPolEnum(supports[i], newsolns, newevals, newtime, is_singular);
+    for (int j = 1; j <= newsolns.Length(); j++) {
+      Gambit::MixedBehavProfile<double> fullProfile = ToFullSupport(newsolns[j]);
+      if (fullProfile.GetLiapValueOnDefined() < 1.0e-6) {
+	PrintProfile(std::cout, "NE", fullProfile);
       }
     }
-  }
-  catch (...) {
-    return;
-  }
-}
-
-void PrintBanner(std::ostream &p_stream)
-{
-  p_stream << "Compute Nash equilibria by solving polynomial systems\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
-  p_stream << "This is free software, distributed under the GNU GPL\n\n";
-}
-
-void PrintHelp(char *progname)
-{
-  PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts extensive game on standard input.\n";
-  std::cerr << "With no options, reports all Nash equilibria found.\n\n";
-
-  std::cerr << "Options:\n";
-  std::cerr << "  -d DECIMALS      show equilibrium probabilities with DECIMALS digits\n";
-  std::cerr << "  -h               print this help message\n";
-  std::cerr << "  -q               quiet mode (suppresses banner)\n";
-  std::cerr << "  -v               verbose mode (shows supports investigated)\n";
-  std::cerr << "                   (default is only to show equilibria)\n";
-  exit(1);
-}
-
-int main(int argc, char *argv[])
-{
-  opterr = 0;
-
-  bool quiet = false;
-
-  int c;
-  while ((c = getopt(argc, argv, "d:hqv")) != -1) {
-    switch (c) {
-    case 'd':
-      g_numDecimals = atoi(optarg);
-      break;
-    case 'h':
-      PrintHelp(argv[0]);
-      break;
-    case 'q':
-      quiet = true;
-      break;
-    case 'v':
-      g_verbose = true;
-      break;
-    case '?':
-      if (isprint(optopt)) {
-	std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
-      }
-      else {
-	std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
-      }
-      return 1;
-    default:
-      abort();
+      
+    if (is_singular && g_verbose) {
+      PrintSupport(std::cout, "singular", supports[i]);
     }
   }
-
-  if (!quiet) {
-    PrintBanner(std::cerr);
-  }
-
-  Gambit::Game efg;
-
-  try {
-    efg = Gambit::ReadGame(std::cin);
-  }
-  catch (...) {
-    return 1;
-  }
-
-  Solve(efg);
-
-  return 0;
 }
+
