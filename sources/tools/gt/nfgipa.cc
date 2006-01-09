@@ -123,13 +123,15 @@ int main(int argc, char *argv[])
   bool quiet = false;
 
   int c;
-  while ((c = getopt(argc, argv, "d:qh")) != -1) {
+  while ((c = getopt(argc, argv, "d:qhS")) != -1) {
     switch (c) {
     case 'q':
       quiet = true;
       break;
     case 'd':
       g_numDecimals = atoi(optarg);
+      break;
+    case 'S':
       break;
     case 'h':
       PrintHelp(argv[0]);

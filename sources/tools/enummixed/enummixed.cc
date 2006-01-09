@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
   int c;
   bool useFloat = false, quiet = false;
 
-  while ((c = getopt(argc, argv, "d:hq")) != -1) {
+  while ((c = getopt(argc, argv, "d:hqS")) != -1) {
     switch (c) {
     case 'd':
       useFloat = true;
@@ -270,6 +270,8 @@ int main(int argc, char *argv[])
       break;
     case 'h':
       PrintHelp(argv[0]);
+      break;
+    case 'S':
       break;
     case 'q':
       quiet = true;

@@ -622,7 +622,7 @@ int main(int argc, char *argv[])
   bool quiet = false;
 
   int c;
-  while ((c = getopt(argc, argv, "g:hvn:r:s:d:q")) != -1) {
+  while ((c = getopt(argc, argv, "g:hvn:r:s:d:qS")) != -1) {
     switch (c) {
     case 'd':
       g_numDecimals = atoi(optarg);
@@ -649,6 +649,8 @@ int main(int argc, char *argv[])
       break;
     case 'v':
       g_verbose = true;
+      break;
+    case 'S':
       break;
     case '?':
       if (isprint(optopt)) {

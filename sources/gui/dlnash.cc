@@ -155,13 +155,13 @@ gbtAnalysisProfileList gbtNashChoiceDialog::GetCommand(void) const
   wxString method = m_methodChoice->GetStringSelection();
   bool useEfg = m_repChoice && m_repChoice->GetSelection() == 0;
 
-  wxString prefix, game, count;
+  wxString prefix, options, game, count;
+  prefix = wxT("gambit-");
   if (useEfg) {
-    prefix = wxT("gambit-efg-");
     game = wxT("in extensive game");
   }
   else {
-    prefix = wxT("gambit-nfg-");
+    options = wxT(" -S ");
     game = wxT("in strategic game");
   }
 
@@ -178,75 +178,75 @@ gbtAnalysisProfileList gbtNashChoiceDialog::GetCommand(void) const
   if (method == s_recommended) {
     if (m_countChoice->GetSelection() == 0) {
       if (m_doc->NumPlayers() == 2 && m_doc->IsConstSum()) {
-	cmd.SetCommand(prefix + wxT("lp"));
+	cmd.SetCommand(prefix + wxT("lp") + options);
 	cmd.SetDescription(wxT("One equilibrium by solving a linear program ")
 			   + game);
       }
       else {
-	cmd.SetCommand(wxT("gambit-nfg-logit -e -d 10"));
+	cmd.SetCommand(wxT("gambit-logit -e -d 10"));
 	cmd.SetDescription(wxT("One equilibrium by logit tracing in "
 			       "strategic game"));
       }
     }
     else if (m_countChoice->GetSelection() == 1) {
       if (m_doc->NumPlayers() == 2) {
-	cmd.SetCommand(prefix + wxT("lcp"));
+	cmd.SetCommand(prefix + wxT("lcp") + options);
 	cmd.SetDescription(wxT("Some equilibria by solving a linear "
 			       "complementarity program ") + game);
       }
       else {
-	cmd.SetCommand(prefix + wxT("enumpoly -d 10"));
+	cmd.SetCommand(prefix + wxT("enumpoly -d 10") + options);
 	cmd.SetDescription(wxT("Some equilibria by solving polynomial "
 			       "systems ") + game);
       }
     }
     else {
       if (m_doc->NumPlayers() == 2){
-	cmd.SetCommand(wxT("gambit-nfg-enummixed"));
+	cmd.SetCommand(wxT("gambit-enummixed"));
 	cmd.SetDescription(wxT("All equilibria by enumeration of mixed "
 			       "strategies in strategic game"));
 
       }
       else {
-	cmd.SetCommand(prefix + wxT("enumpoly -d 10"));
+	cmd.SetCommand(prefix + wxT("enumpoly -d 10") + options);
 	cmd.SetDescription(wxT("All equilibria by solving polynomial "
 			       "systems ") + game);
       }
     }
   }
   else if (method == s_enumpure) {
-    cmd.SetCommand(prefix + wxT("enumpure"));
+    cmd.SetCommand(prefix + wxT("enumpure") + options);
     cmd.SetDescription(count + wxT(" in pure strategies ") + game);
   }
   else if (method == s_enummixed) {
-    cmd.SetCommand(prefix + wxT("enummixed"));
+    cmd.SetCommand(prefix + wxT("enummixed") + options);
     cmd.SetDescription(count + wxT(" by enumeration of mixed strategies ") +
 		       game);
   }
   else if (method == s_enumpoly) {
-    cmd.SetCommand(prefix + wxT("enumpoly -d 10"));
+    cmd.SetCommand(prefix + wxT("enumpoly -d 10") + options);
     cmd.SetDescription(count + wxT(" by solving polynomial systems ") +
 		       game);
   }
   else if (method == s_lp) {
-    cmd.SetCommand(prefix + wxT("lp"));
+    cmd.SetCommand(prefix + wxT("lp") + options);
     cmd.SetDescription(count + wxT(" by solving a linear program ") + game);
   }
   else if (method == s_lcp) {
-    cmd.SetCommand(prefix + wxT("lcp"));
+    cmd.SetCommand(prefix + wxT("lcp") + options);
     cmd.SetDescription(count + wxT(" by solving a linear complementarity "
 				   "program ") + game);
   }
   else if (method == s_liap) {
-    cmd.SetCommand(prefix + wxT("liap -d 10"));
+    cmd.SetCommand(prefix + wxT("liap -d 10") + options);
     cmd.SetDescription(count + wxT(" by function minimization ") + game);
   }
   else if (method == s_logit) {
-    cmd.SetCommand(prefix + wxT("logit -e -d 10"));
+    cmd.SetCommand(prefix + wxT("logit -e -d 10") + options);
     cmd.SetDescription(count + wxT(" by logit tracing ") + game); 
   }
   else if (method == s_simpdiv) {
-    cmd.SetCommand(prefix + wxT("simpdiv"));
+    cmd.SetCommand(prefix + wxT("simpdiv") + options);
     cmd.SetDescription(count + wxT(" by simplicial subdivision ") + game);
   }
   else {
