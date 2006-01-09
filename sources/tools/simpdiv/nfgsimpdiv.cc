@@ -667,48 +667,51 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-
-
-  Gambit::Game nfg;
-
   try {
-    nfg = Gambit::ReadGame(std::cin);
+    Gambit::Game game = Gambit::ReadGame(std::cin);
+
+    if (startFile != "") {
+      std::ifstream startPoints(startFile.c_str());
+      
+      while (!startPoints.eof() && !startPoints.bad()) {
+	Gambit::MixedStrategyProfile<Gambit::Rational> start(game);
+	if (ReadProfile(startPoints, start)) {
+	  nfgSimpdiv algorithm;
+	  algorithm.Solve(game, start);
+	}
+      }
+    }
+    else if (useRandom) {
+      for (int i = 1; i <= stopAfter; i++) {
+	Gambit::MixedStrategyProfile<Gambit::Rational> start(game);
+	Randomize(start, randDenom);
+	
+	nfgSimpdiv algorithm;
+	algorithm.Solve(game, start);
+      }
+    }
+    else {
+      Gambit::MixedStrategyProfile<Gambit::Rational> start(game);
+  
+      for (int pl = 1; pl <= game->NumPlayers(); pl++) {
+	start(pl, 1) = Gambit::Rational(1);
+	for (int st = 2; st <= game->GetPlayer(pl)->NumStrategies(); st++) {
+	  start(pl, st) = Gambit::Rational(0);
+	}
+      }
+      
+      nfgSimpdiv algorithm;
+      algorithm.Solve(game, start);
+    }
+   
+    return 0;
   }
-  catch (...) {
+  catch (Gambit::InvalidFileException) {
+    std::cerr << "Error: Game not in a recognized format.\n";
     return 1;
   }
-
-  if (startFile != "") {
-    std::ifstream startPoints(startFile.c_str());
-
-    while (!startPoints.eof() && !startPoints.bad()) {
-      Gambit::MixedStrategyProfile<Gambit::Rational> start(nfg);
-      if (ReadProfile(startPoints, start)) {
-	nfgSimpdiv algorithm;
-	algorithm.Solve(nfg, start);
-      }
-    }
-  }
-  else if (useRandom) {
-    for (int i = 1; i <= stopAfter; i++) {
-      Gambit::MixedStrategyProfile<Gambit::Rational> start(nfg);
-      Randomize(start, randDenom);
-
-      nfgSimpdiv algorithm;
-      algorithm.Solve(nfg, start);
-    }
-  }
-  else {
-    Gambit::MixedStrategyProfile<Gambit::Rational> start(nfg);
-  
-    for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-      start(pl, 1) = Gambit::Rational(1);
-      for (int st = 2; st <= nfg->GetPlayer(pl)->NumStrategies(); st++) {
-	start(pl, st) = Gambit::Rational(0);
-      }
-    }
-
-    nfgSimpdiv algorithm;
-    algorithm.Solve(nfg, start);
+  catch (...) {
+    std::cerr << "Error: An internal error occurred.\n";
+    return 1;
   }
 }

@@ -1,11 +1,11 @@
-<refentry id="nash.nfg.simpdiv">
+<refentry id="nash.simpdiv">
 <refentryinfo>
 <date>2006-07-11</date>
 </refentryinfo>
 
 <refmeta>
 <refentrytitle>
-<application>gambit-nfg-simpdiv</application>
+<application>gambit-simpdiv</application>
 </refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo>Gambit 1.0</refmiscinfo>
@@ -13,7 +13,7 @@
 
 <refnamediv>
 <refname>
-<application>gambit-nfg-simpdiv</application>
+<application>gambit-simpdiv</application>
 </refname>
 <refpurpose>
 Computes approximations to Nash equilibria in a strategic game using
@@ -26,7 +26,7 @@ a simplicial subdivision approach
 <date>2006-07-11</date>
 </refsynopsisdivinfo>
 <cmdsynopsis>
-<command>gambit-nfg-simpdiv</command>
+<command>gambit-simpdiv</command>
 <arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
 <arg><option>-g </option><replaceable class="parameter">MULT</replaceable></arg>
 <arg><option>-h</option></arg>
@@ -44,7 +44,7 @@ a simplicial subdivision approach
 </refsect1info>
 <title>DESCRIPTION</title>
 <para>
-<command>gambit-nfg-simpdiv</command> reads a strategic game on standard
+<command>gambit-simpdiv</command> reads a game on standard
 input and computes approximations to Nash equilibria using a simplicial
 subdivision approach.
 </para>
@@ -174,7 +174,7 @@ addition to the approximate equilibrium profile found.
 <refsect1>
 <title>USAGE</title>
 <para>
-<command>gambit-nfg-simpdiv</command> [OPTIONS] < file.nfg
+<command>gambit-simpdiv</command> [OPTIONS] < file.[en]fg
 </para>
 </refsect1>
 

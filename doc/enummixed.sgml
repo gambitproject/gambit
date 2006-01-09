@@ -1,11 +1,11 @@
-<refentry id="nash.nfg.enummixed">
+<refentry id="nash.enummixed">
 <refentryinfo>
 <date>2005-08-15</date>
 </refentryinfo>
 
 <refmeta>
 <refentrytitle>
-<application>gambit-nfg-enummixed</application>
+<application>gambit-enummixed</application>
 </refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo>Gambit 1.0</refmiscinfo>
@@ -13,7 +13,7 @@
 
 <refnamediv>
 <refname>
-<application>gambit-nfg-enummixed</application>
+<application>gambit-enummixed</application>
 </refname>
 <refpurpose>
 Computes Nash equilibria in a two-player strategic game using extreme
@@ -26,7 +26,7 @@ point enumeration
 <date>2005-08-15</date>
 </refsynopsisdivinfo>
 <cmdsynopsis>
-<command>gambit-nfg-enummixed</command>
+<command>gambit-enummixed</command>
 <arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
 <arg><option>-h</option></arg>
 <arg><option>-q</option></arg>
@@ -39,7 +39,7 @@ point enumeration
 </refsect1info>
 <title>DESCRIPTION</title>
 <para>
-<command>gambit-nfg-enummixed</command> reads a two-player strategic
+<command>gambit-enummixed</command> reads a two-player 
 game on standard input and computes Nash equilibria 
 using extreme point enumeration.
 </para>
@@ -105,7 +105,7 @@ Suppresses printing of the banner at program launch.
 <refsect1>
 <title>USAGE</title>
 <para>
-<command>gambit-nfg-enummixed</command> [OPTIONS] < file.nfg
+<command>gambit-enummixed</command> [OPTIONS] < file.[en]fg
 </para>
 </refsect1>
 

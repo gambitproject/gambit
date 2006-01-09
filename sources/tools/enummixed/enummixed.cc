@@ -291,29 +291,28 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  Gambit::Game nfg;
-
   try {
-    nfg = Gambit::ReadGame(std::cin);
-  }
-  catch (...) {
-    return 1;
-  }
+    Gambit::Game game = Gambit::ReadGame(std::cin);
 
-  if (nfg->NumPlayers() != 2) {
-    return 1;
-  }
+    if (game->NumPlayers() != 2) {
+      std::cerr << "Error: Game does not have two players.\n";
+      return 1;
+    }
 
-  try {
     if (useFloat) {
-      Solve(nfg, 0.0);
+      Solve(game, 0.0);
     }
     else {
-      Solve(nfg, Gambit::Rational(0));
+      Solve(game, Gambit::Rational(0));
     }
     return 0;
   }
+  catch (Gambit::InvalidFileException) {
+    std::cerr << "Error: Game not in a recognized format.\n";
+    return 1;
+  }
   catch (...) {
+    std::cerr << "Error: An internal error occurred.\n";
     return 1;
   }
 }

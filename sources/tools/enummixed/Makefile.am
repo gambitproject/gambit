@@ -1,10 +1,10 @@
 ## Process this file with automake to create Makefile.in
 
-bin_PROGRAMS = gambit-nfg-enummixed
+bin_PROGRAMS = gambit-enummixed
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
-gambit_nfg_enummixed_SOURCES = \
+gambit_enummixed_SOURCES = \
 	basis.cc \
 	basis.h \
 	bfs.cc \
@@ -26,6 +26,6 @@ gambit_nfg_enummixed_SOURCES = \
 	clique.h \
 	enummixed.cc
 
-gambit_nfg_enummixed_LDADD = \
+gambit_enummixed_LDADD = \
 	$(top_builddir)/sources/libgambit/libgambit.la
 
