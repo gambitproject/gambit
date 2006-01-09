@@ -1082,6 +1082,7 @@ void GameRep::ClearComputedValues(void) const
 void GameRep::BuildComputedValues(void)
 {
   ClearComputedValues();
+  Canonicalize();
 
   if (!IsTree()) return;
 

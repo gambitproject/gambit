@@ -1122,7 +1122,7 @@ namespace Gambit {
 //    ReadGame: Global visible function to read an .efg or .nfg file
 //=========================================================================
 
-  Game ReadGame(std::istream &p_file) throw (InvalidFileException)
+Game ReadGame(std::istream &p_file) throw (InvalidFileException)
 {
   GameParserState parser(p_file);
 
@@ -1141,6 +1141,7 @@ namespace Gambit {
       TreeData treeData;
       ParseEfg(parser, treeData);
       BuildEfg(efg, treeData);
+      efg->Canonicalize();
       return efg;
     }
     else {
