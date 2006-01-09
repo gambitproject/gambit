@@ -156,6 +156,8 @@ int main(int argc, char *argv[])
     }
   
 
+    game->BuildComputedValues();
+
     if (!game->IsTree() || useStrategic) {
       Gambit::MixedStrategyProfile<double> start(game);
       TraceStrategicPath(start, 0.0, maxLambda, 1.0);

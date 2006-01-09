@@ -301,6 +301,8 @@ int main(int argc, char *argv[])
       return 1;
     }
 
+    game->BuildComputedValues();
+
     if (useFloat) {
       Solve(game, 0.0);
     }

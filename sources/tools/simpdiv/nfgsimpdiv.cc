@@ -672,6 +672,8 @@ int main(int argc, char *argv[])
   try {
     Gambit::Game game = Gambit::ReadGame(std::cin);
 
+    game->BuildComputedValues();
+
     if (startFile != "") {
       std::ifstream startPoints(startFile.c_str());
       
