@@ -75,7 +75,6 @@ extern IntegerRep*  mod(const IntegerRep*, long, IntegerRep*);
 extern IntegerRep*  Compl(const IntegerRep*, IntegerRep*);
 extern IntegerRep*  abs(const IntegerRep*, IntegerRep*);
 extern IntegerRep*  negate(const IntegerRep*, IntegerRep*);
-extern IntegerRep*  pow(const IntegerRep*, long);
 extern IntegerRep*  gcd(const IntegerRep*, const IntegerRep* y);
 extern int      compare(const IntegerRep*, const IntegerRep*);
 extern int      compare(const IntegerRep*, long);

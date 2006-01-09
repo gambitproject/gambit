@@ -77,7 +77,7 @@ public:
 
 } // end namespace Gambit
 
-#endif   // GDPVECTOR_H
+#endif // LIBGAMBIT_DVECTOR_H
 
 
 

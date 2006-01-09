@@ -29,8 +29,6 @@
 
 #include "libgambit.h"
 
-template <class T> class Array;
-
 namespace Gambit {
 
 /// This implements a rectangular (two-dimensional) array

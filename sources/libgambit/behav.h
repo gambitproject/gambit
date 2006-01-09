@@ -29,8 +29,6 @@
 
 #include "game.h"
 
-template <class T> class PVector;
-
 namespace Gambit {
 
 ///

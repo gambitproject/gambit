@@ -27,8 +27,6 @@
 #ifndef LIBGAMBIT_STRATITR_H
 #define LIBGAMBIT_STRATITR_H
 
-template <class T> class Array;
-
 #include "game.h"
 
 namespace Gambit {
