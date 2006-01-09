@@ -793,8 +793,9 @@ Rational PureBehavProfile::GetNodeValue(const GameNode &p_node,
       }
     }
     else {
+      int player = p_node->GetPlayer()->GetNumber();
       int iset = p_node->GetInfoset()->GetNumber();
-      payoff += GetNodeValue(p_node->children[m_profile[pl][iset]->GetNumber()], 
+      payoff += GetNodeValue(p_node->children[m_profile[player][iset]->GetNumber()], 
 			     pl);
     }
   }
