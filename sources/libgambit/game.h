@@ -105,7 +105,8 @@ public:
       return *this;
     }
 
-  T *operator->(void) const { if (!rep) throw NullException(); return rep; }
+  T *operator->(void) const 
+    { if (!rep || !rep->IsValid()) throw NullException(); return rep; }
 
   bool operator==(const GameObjectPtr<T> &r) const
   { return (rep == r.rep); }
@@ -148,6 +149,38 @@ typedef GameObjectPtr<GameRep> Game;
 template <class T> class MixedStrategyProfile;
 template <class T> class MixedBehavProfile;
 
+
+//=======================================================================
+//         Exceptions thrown from game representation classes
+//=======================================================================
+
+/// Exception thrown when an operation that is undefined is attempted
+class UndefinedException : public Exception {
+public:
+  virtual ~UndefinedException() { }
+  std::string GetDescription(void) const
+    { return "Undefined operation on game"; }
+};
+
+/// Exception thrown on an operation between incompatible objects
+class MismatchException : public Exception {
+public:
+  virtual ~MismatchException() { }
+  std::string GetDescription(void) const
+    { return "Operation between objects in different games"; }
+};
+
+/// Exception thrown on a parse error when reading a game savefile
+class InvalidFileException : public Exception {
+public:
+  virtual ~InvalidFileException() { }
+  std::string GetDescription(void) const
+    { return "File not in a recognized format"; }
+};
+
+//=======================================================================
+//             Classes representing objects in a game
+//=======================================================================
 
 /// This class represents an outcome in a game.  An outcome
 /// specifies a vector of payoffs to players.  Payoffs are specified
@@ -319,7 +352,7 @@ public:
   void SetLabel(const std::string &p_label) { m_label = p_label; }
   
   // Returns the player for whom this is a strategy
-  GamePlayer GetPlayer(void) const;
+  GamePlayer GetPlayer(void) const { return m_player; }
   /// Returns the index of the strategy for its player
   int GetNumber(void) const { return m_number; }
 
@@ -655,7 +688,8 @@ public:
   /// @name Nodes
   //@{
   /// Returns the root node of the game
-  GameNode GetRoot(void) const { return m_root; }
+  GameNode GetRoot(void) const 
+  { if (m_root) return m_root; else throw UndefinedException(); }
   /// Returns the number of nodes in the game
   int NumNodes(void) const;
   //@}
@@ -683,34 +717,6 @@ inline Rational PureBehavProfile::GetPayoff(int pl) const
 
 //=======================================================================
 
-
-//=======================================================================
-//         Exceptions thrown from game representation classes
-//=======================================================================
-
-/// Exception thrown when an operation that is undefined is attempted
-class UndefinedException : public Exception {
-public:
-  virtual ~UndefinedException() { }
-  std::string GetDescription(void) const
-    { return "Undefined operation on game"; }
-};
-
-/// Exception thrown on an operation between incompatible objects
-class MismatchException : public Exception {
-public:
-  virtual ~MismatchException() { }
-  std::string GetDescription(void) const
-    { return "Operation between objects in different games"; }
-};
-
-/// Exception thrown on a parse error when reading a game savefile
-class InvalidFileException : public Exception {
-public:
-  virtual ~InvalidFileException() { }
-  std::string GetDescription(void) const
-    { return "File not in a recognized format"; }
-};
 
 /// Reads a game in .efg or .nfg format from the input stream
 Game ReadGame(std::istream &) throw (InvalidFileException);

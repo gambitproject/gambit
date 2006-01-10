@@ -223,6 +223,7 @@ void GameInfosetRep::Reveal(GamePlayer p_player)
 
 void GameStrategyRep::DeleteStrategy(void)
 {
+  if (m_player->GetGame()->IsTree())  throw UndefinedException();
   if (m_player->NumStrategies() == 1)  return;
 
   m_player->m_strategies.Remove(m_player->m_strategies.Find(this));
@@ -232,10 +233,6 @@ void GameStrategyRep::DeleteStrategy(void)
   //m_player->m_game->RebuildTable();
   this->Invalidate();
 }
-
-GamePlayer GameStrategyRep::GetPlayer(void) const
-{ return m_player; }
-
 
 //========================================================================
 //                       class GamePlayerRep
@@ -259,13 +256,13 @@ GamePlayerRep::~GamePlayerRep()
 
 GameStrategy GamePlayerRep::NewStrategy(void)
 {
+  if (m_game->IsTree())  throw UndefinedException();
+
   GameStrategyRep *strategy = new GameStrategyRep(this);
   m_strategies.Append(strategy);
   strategy->m_number = m_strategies.Length();
   strategy->m_index = -1;   // this flags this action as new
-  if (!m_game->IsTree()) {
-    m_game->RebuildTable();
-  }
+  m_game->RebuildTable();
   return strategy;
 }
 
@@ -955,6 +952,8 @@ Rational GameRep::GetMaxPayoff(int player) const
 
 bool GameRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
 {
+  if (!IsTree()) return true;
+
   for (int pl = 1; pl <= m_players.Length(); pl++)   {
     GamePlayerRep *player = m_players[pl];
     
@@ -1185,6 +1184,8 @@ static void WriteEfgFile(std::ostream &f, GameNodeRep *n)
 
 void GameRep::WriteEfgFile(std::ostream &p_file) const
 {
+  if (!IsTree())  throw UndefinedException();
+
   p_file << "EFG 2 R";
   p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
   for (int i = 1; i <= m_players.Length(); i++)
@@ -1272,6 +1273,8 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
 
 PVector<int> GameRep::NumActions(void) const
 {
+  if (!IsTree()) throw UndefinedException();
+
   Array<int> foo(m_players.Length());
   int i;
   for (i = 1; i <= m_players.Length(); i++)
@@ -1289,6 +1292,8 @@ PVector<int> GameRep::NumActions(void) const
 
 PVector<int> GameRep::NumMembers(void) const
 {
+  if (!IsTree()) throw UndefinedException();
+
   Array<int> foo(m_players.Length());
 
   for (int i = 1; i <= m_players.Length(); i++) {
@@ -1316,6 +1321,8 @@ Array<int> GameRep::NumStrategies(void) const
 
 int GameRep::BehavProfileLength(void) const
 {
+  if (!IsTree()) throw UndefinedException();
+
   int sum = 0;
 
   for (int i = 1; i <= m_players.Length(); i++)
@@ -1369,6 +1376,8 @@ GamePlayer GameRep::NewPlayer(void)
 
 GameInfoset GameRep::GetInfoset(int p_index) const
 {
+  if (!IsTree()) throw UndefinedException();
+
   int index = 1;
   for (int pl = 1; pl <= m_players.Length(); pl++) {
     GamePlayerRep *player = m_players[pl];
@@ -1383,6 +1392,8 @@ GameInfoset GameRep::GetInfoset(int p_index) const
 
 Array<int> GameRep::NumInfosets(void) const
 {
+  if (!IsTree()) throw UndefinedException();
+
   Array<int> foo(m_players.Length());
   
   for (int i = 1; i <= foo.Length(); i++) {
