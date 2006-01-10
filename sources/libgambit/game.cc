@@ -277,7 +277,9 @@ void GamePlayerRep::MakeStrategy(void)
       c[i] = 0;
   }
   
-  GameStrategyRep *strategy = NewStrategy();
+  GameStrategyRep *strategy = new GameStrategyRep(this);
+  m_strategies.Append(strategy);
+  strategy->m_number = m_strategies.Length();
   strategy->m_behav = c;
   strategy->m_label = "";
 
@@ -809,10 +811,9 @@ Rational PureBehavProfile::GetNodeValue(const GameNode &p_node,
 //------------------------------------------------------------------------
 
 GameRep::GameRep(void)
-{
-  m_root = new GameNodeRep(this, 0);
-  m_chance = new GamePlayerRep(this, 0);
-}
+  : m_computedValues(false),
+    m_root(new GameNodeRep(this, 0)), m_chance(new GamePlayerRep(this, 0))
+{ }
 
 /// This convenience function computes the Cartesian product of the
 /// elements in dim.
@@ -824,7 +825,7 @@ static int Product(const Array<int> &dim)
 }
   
 GameRep::GameRep(const Array<int> &dim)
-  : m_root(0), m_chance(0)
+  : m_computedValues(true), m_root(0), m_chance(0)
 {
   m_results = Array<GameOutcomeRep *>(Product(dim));
   for (int pl = 1; pl <= dim.Length(); pl++)  {
@@ -1077,11 +1078,14 @@ void GameRep::ClearComputedValues(void) const
       m_players[pl]->m_strategies.Remove(1)->Invalidate();
     }
   }
+
+  m_computedValues = false;
 }
 
 void GameRep::BuildComputedValues(void)
 {
-  ClearComputedValues();
+  if (m_computedValues) return;
+
   Canonicalize();
 
   if (!IsTree()) return;
@@ -1089,13 +1093,9 @@ void GameRep::BuildComputedValues(void)
   for (int i = 1; i <= m_players.Length(); i++) {
     m_players[i]->MakeReducedStrats(m_root, 0);
   }
-}
 
-bool GameRep::HasComputedValues(void) const
-{
-  return (!m_root || m_players[1]->m_strategies.Length() > 0);
+  m_computedValues = true;
 }
-
 
 //------------------------------------------------------------------------
 //                     GameRep: Writing data files
@@ -1157,8 +1157,10 @@ static void WriteEfgFile(std::ostream &f, GameNodeRep *n)
     f << "p \"";
   }
 
-  f << EscapeQuotes(n->GetLabel()) << "\" " <<
-    n->GetInfoset()->GetPlayer()->GetNumber() << ' ';
+  f << EscapeQuotes(n->GetLabel()) << "\" ";
+  if (!n->GetInfoset()->IsChanceInfoset()) {
+    f << n->GetInfoset()->GetPlayer()->GetNumber() << ' ';
+  }
   f << n->GetInfoset()->GetNumber() << " \"" <<
     EscapeQuotes(n->GetInfoset()->GetLabel()) << "\" ";
   PrintActions(f, n->GetInfoset());

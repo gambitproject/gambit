@@ -558,6 +558,7 @@ class GameRep : public GameObject {
   template <class T> friend class MixedStrategyProfile;
 
 protected:
+  mutable bool m_computedValues;
   std::string m_title, m_comment;
   Array<GamePlayerRep *> m_players;
   GamePlayerRep *m_chance;
@@ -624,7 +625,7 @@ public:
   /// Build any computed values anew
   void BuildComputedValues(void);
   /// Have computed values been built?
-  bool HasComputedValues(void) const;
+  bool HasComputedValues(void) const { return m_computedValues; }
   //@}
 
   /// @name Writing data files
