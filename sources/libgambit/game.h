@@ -663,6 +663,10 @@ public:
 
 typedef GameObjectPtr<GameRep> Game;
 
+/// Convenience function to create new game tree
+inline Game NewTree(void) { return new GameRep; }
+/// Convenience function to create new game table
+inline Game NewTable(const Array<int> &p_dim) { return new GameRep(p_dim); }
 
 //=======================================================================
 //          Inline members of game representation classes
