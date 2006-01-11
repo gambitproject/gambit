@@ -200,10 +200,25 @@ void gbtNumberValidator::OnChar(wxKeyEvent &p_event)
       return;
     }
 
-    if (keyCode == '-' && control->GetInsertionPoint() != 0) {
+    if (keyCode == '-') {
       // Only permit minus signs at the start of the text
-      if (!wxValidator::IsSilent())  wxBell();
-      return;
+      long start, end;
+      control->GetSelection(&start, &end);
+      
+      if (start == end) {
+	// No selection; just see if inserting is OK
+	if (control->GetInsertionPoint() != 0) {
+	  if (!wxValidator::IsSilent())  wxBell();
+	  return;
+	}
+      }
+      else {
+	// There is a selection; is selection at beginning?
+	if (start != 0) {
+	  if (!wxValidator::IsSilent())  wxBell();
+	  return;
+	}	
+      }
     }
   }
 
