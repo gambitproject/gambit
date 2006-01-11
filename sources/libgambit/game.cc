@@ -723,7 +723,12 @@ template <class T> T PureStrategyProfile::GetPayoff(int pl) const
 // Explicit instantiations
 template double PureStrategyProfile::GetPayoff(int pl) const;
 template Rational PureStrategyProfile::GetPayoff(int pl) const;
-template std::string PureStrategyProfile::GetPayoff(int pl) const;
+
+template<> 
+std::string PureStrategyProfile::GetPayoff(int pl) const
+{
+  return ToText(GetPayoff<Rational>(pl));
+}
 
 //========================================================================
 //                       class PureBehavProfile
