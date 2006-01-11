@@ -74,6 +74,8 @@ static inline bool wxRectIsEmpty(const wxRect& rect)
 // conditional compilation
 // ----------------------------------------------------------------------------
 
+// Gambit modification for custom border drawing
+#define WXSHEET_DRAW_LINES 0
 #ifndef WXSHEET_DRAW_LINES
     #define WXSHEET_DRAW_LINES 1
 #endif
@@ -3791,7 +3793,7 @@ void wxSheet::DrawCell( wxDC& dc, const wxSheetCoords& coords )
 
     // we draw the cell border ourselves
 #if !WXSHEET_DRAW_LINES
-    if ( GetGridLinesEnabled() != 0 )
+    if ( GridLinesEnabled() != 0 )
         DrawCellBorder( dc, coords );
 #endif
 

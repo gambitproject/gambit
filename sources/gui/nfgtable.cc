@@ -788,6 +788,7 @@ gbtTableWidget::gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id,
   m_colPlayers.Append(2);
 
   m_payoffSheet = new gbtPayoffsWidget(this, p_doc);
+  m_payoffSheet->SetGridLineColour(*wxWHITE);
   m_rowSheet = new gbtRowPlayerWidget(this, p_doc);
   m_colSheet = new gbtColPlayerWidget(this, p_doc);
 
