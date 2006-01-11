@@ -120,7 +120,7 @@ void StrategyIterator::SetOutcome(GameOutcome outcome)
 
 Rational StrategyIterator::GetPayoff(int pl) const
 {
-  return profile.GetPayoff(pl);
+  return profile.GetPayoff<Rational>(pl);
 }
 
 } // end namespace Gambit

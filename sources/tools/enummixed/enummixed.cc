@@ -162,8 +162,8 @@ template <class T> void Solve(Game p_nfg, const T &)
     profile.SetStrategy(p_nfg->GetPlayer(1)->GetStrategy(i));
     for (int j = 1; j <= p_nfg->GetPlayer(2)->NumStrategies(); j++) {
       profile.SetStrategy(p_nfg->GetPlayer(2)->GetStrategy(j));
-      A1(i, j) = fac * (profile.GetPayoff(1) - min);
-      A2(j, i) = fac * (profile.GetPayoff(2) - min);
+      A1(i, j) = fac * (profile.GetPayoff<Rational>(1) - min);
+      A2(j, i) = fac * (profile.GetPayoff<Rational>(2) - min);
     }
   }
 

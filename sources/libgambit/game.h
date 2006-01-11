@@ -512,9 +512,7 @@ public:
   void SetOutcome(GameOutcome p_outcome); 
 
   /// Get the payoff to player pl that results from the profile
-  Rational GetPayoff(int pl) const;
-  /// Get the payoff to player pl that results from the profile
-  std::string GetPayoffText(int pl) const;
+  template <class T> T GetPayoff(int pl) const;
   //@}
 };
 
@@ -540,8 +538,10 @@ public:
   /// Set the action played at an information set
   void SetAction(const GameAction &);
    
-  Rational GetPayoff(int pl) const;
-  Rational GetNodeValue(const GameNode &, int pl) const;
+  /// Get the payoff to player pl that results from the profile
+  template <class T> T GetPayoff(int pl) const;
+  /// Get the payoff to player pl conditional on reaching a node
+  template <class T> T GetNodeValue(const GameNode &, int pl) const;
   //@}
 };
 
@@ -713,8 +713,14 @@ inline Game NewTable(const Array<int> &p_dim) { return new GameRep(p_dim); }
 inline bool GameInfosetRep::IsChanceInfoset(void) const
 { return m_player->IsChance(); }
 
-inline Rational PureBehavProfile::GetPayoff(int pl) const
-{ return GetNodeValue(m_efg->GetRoot(), pl); }
+template<> inline double PureBehavProfile::GetPayoff(int pl) const
+{ return GetNodeValue<double>(m_efg->GetRoot(), pl); }
+
+template<> inline Rational PureBehavProfile::GetPayoff(int pl) const
+{ return GetNodeValue<Rational>(m_efg->GetRoot(), pl); }
+
+template<> inline std::string PureBehavProfile::GetPayoff(int pl) const
+{ return ToText(GetNodeValue<Rational>(m_efg->GetRoot(), pl)); }
 
 //=======================================================================
 

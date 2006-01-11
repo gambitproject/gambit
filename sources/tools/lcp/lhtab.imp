@@ -58,7 +58,7 @@ template <class T> Gambit::Matrix<T> Make_A1(const Gambit::StrategySupport &S,
     profile.SetStrategy(S.GetStrategy(1, i));
     for (j = 1; j <= n2; j++)  {
       profile.SetStrategy(S.GetStrategy(2, j));
-      A1(i, n1 + j) = fac * (profile.GetPayoff(1) - min);
+      A1(i, n1 + j) = fac * (profile.GetPayoff<Gambit::Rational>(1) - min);
     }
   }
   return A1;
@@ -91,7 +91,7 @@ template <class T> Gambit::Matrix<T> Make_A2(const Gambit::StrategySupport &S,
     profile.SetStrategy(S.GetStrategy(1, i));
     for (j = 1; j <= n2; j++)  {
       profile.SetStrategy(S.GetStrategy(2, j));
-      A2(n1 + j, i) = fac * (profile.GetPayoff(2) - min);
+      A2(n1 + j, i) = fac * (profile.GetPayoff<Gambit::Rational>(2) - min);
     }
   }
   return A2;

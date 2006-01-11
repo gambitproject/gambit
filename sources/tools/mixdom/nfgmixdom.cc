@@ -70,10 +70,10 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
     for (n = 1; n <= contingencies; n++) {
       Gambit::PureStrategyProfile profile(s.GetProfile());
       profile.SetStrategy(S.GetStrategy(pl, 1));
-      B[n] = -profile.GetPayoff(pl);
+      B[n] = -profile.GetPayoff<Gambit::Rational>(pl);
       for (k = 2; k <= strats; k++) {
 	profile.SetStrategy(S.GetStrategy(pl, k));
-	A(n, k - 1) = -profile.GetPayoff(pl);
+	A(n, k - 1) = -profile.GetPayoff<Gambit::Rational>(pl);
       }
       A(n, strats) = (T) 1;
       s.NextContingency();
@@ -148,11 +148,11 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
     for(n=1;n<=contingencies;n++) {
       Gambit::PureStrategyProfile profile(s.GetProfile());
       profile.SetStrategy(S.GetStrategy(pl, 1));
-      B[n]=-profile.GetPayoff(pl);
+      B[n]=-profile.GetPayoff<Gambit::Rational>(pl);
       C0 -= B[n];
       for(k=2;k<=strats;k++) {
 	profile.SetStrategy(S.GetStrategy(pl, k));
-	A(n,k-1)=-profile.GetPayoff(pl);
+	A(n,k-1)=-profile.GetPayoff<Gambit::Rational>(pl);
 	C[k-1]-=A(n,k-1);
       }
       s.NextContingency();
@@ -416,14 +416,14 @@ bool IsMixedDominated(const Gambit::MixedStrategyProfile<T> &pr, int pl,
       B[n]=(T)0;
       for(int j=1;j<=strats;j++) {
 	profile.SetStrategy(S.GetStrategy(pl, j));
-	T x1 = profile.GetPayoff(pl);
+	T x1 = profile.GetPayoff<Gambit::Rational>(pl);
 	T x2 = prob[j];
 	x = -x1*x2;
-	B[n] += -profile.GetPayoff(pl);
+	B[n] += -profile.GetPayoff<Gambit::Rational>(pl);
       }
       for (k = 1; k <= strats; k++) {
 	profile.SetStrategy(S.GetStrategy(pl, k));
-	A(n, k) = -profile.GetPayoff(pl);
+	A(n, k) = -profile.GetPayoff<Gambit::Rational>(pl);
       }
       A(n, strats+1) = (T) 1;
       s.NextContingency();
@@ -476,7 +476,7 @@ bool IsMixedDominated(const Gambit::MixedStrategyProfile<T> &pr, int pl,
       B[n]=(T)0;
       for(int j=1;j<=strats;j++) {
 	profile.SetStrategy(S.GetStrategy(pl, j));
-	T x1 = profile.GetPayoff(pl);
+	T x1 = profile.GetPayoff<Gambit::Rational>(pl);
 	T x2 = prob[j];
 	x = - x1 * x2;
 	B[n]+=x;
@@ -484,7 +484,7 @@ bool IsMixedDominated(const Gambit::MixedStrategyProfile<T> &pr, int pl,
       }
       for(k=1;k<=strats;k++) {
 	profile.SetStrategy(S.GetStrategy(pl, k));
-	x=-profile.GetPayoff(pl);
+	x=-profile.GetPayoff<Gambit::Rational>(pl);
 	A(n,k)=x;
 	C[k]-=x;
       }

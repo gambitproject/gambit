@@ -638,7 +638,7 @@ wxString gbtPayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
 
   Gambit::PureStrategyProfile profile = m_table->CellToProfile(p_coords);
   int player = ColToPlayer(p_coords.GetCol());
-  return wxString(profile.GetPayoffText(player).c_str(), *wxConvCurrent);
+  return wxString(profile.GetPayoff<std::string>(player).c_str(), *wxConvCurrent);
 }
 
 void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords,

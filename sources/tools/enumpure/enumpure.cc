@@ -66,7 +66,7 @@ void SolveBehav(Gambit::Game p_efg)
 
 	  for (int act = 1; act <= infoset->NumActions(); act++)  {
 	    p.SetAction(infoset->GetAction(act));
-	    if (p.GetPayoff(pl) > current)  {
+	    if (p.GetPayoff<Gambit::Rational>(pl) > current)  {
 	      flag = false;
 	      break;
 	    }
@@ -131,7 +131,7 @@ void SolveMixed(Gambit::Game p_nfg)
       Gambit::PureStrategyProfile p = citer.GetProfile();
       for (int i = 1; i <= p_nfg->GetPlayer(pl)->NumStrategies(); i++)  {
 	p.SetStrategy(p_nfg->GetPlayer(pl)->GetStrategy(i));
-	if (p.GetPayoff(pl) > current)  {
+	if (p.GetPayoff<Gambit::Rational>(pl) > current)  {
 	  flag = false;
 	  break;
 	}

@@ -163,7 +163,7 @@ int BehavIterator::NextContingency(void)
 
 Rational BehavIterator::GetPayoff(int pl) const
 {
-  return _profile.GetPayoff(pl);
+  return _profile.GetPayoff<Rational>(pl);
 }
 
 

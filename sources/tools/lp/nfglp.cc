@@ -105,7 +105,7 @@ void nfgLp<T>::Solve(const Gambit::StrategySupport &p_support)
     profile.SetStrategy(p_support.GetStrategy(2, i));
     for (j = 1; j <= m; j++)  {
       profile.SetStrategy(p_support.GetStrategy(1, j));
-      A(i, j) = Gambit::Rational(minpay) - profile.GetPayoff(1);
+      A(i, j) = Gambit::Rational(minpay) - profile.GetPayoff<Gambit::Rational>(1);
     }
     A(i,m+1) = (T)1;
   }

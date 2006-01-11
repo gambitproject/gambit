@@ -790,12 +790,12 @@ int BehavConditionalIterator::NextContingency(void)
 
 Rational BehavConditionalIterator::GetPayoff(int pl) const
 {
-  return _profile.GetPayoff(pl);
+  return _profile.GetPayoff<Rational>(pl);
 }
 
 Rational BehavConditionalIterator::GetPayoff(const GameNode &n, int pl) const
 {
-  return _profile.GetNodeValue(n, pl);
+  return _profile.GetNodeValue<Rational>(n, pl);
 }
 
 

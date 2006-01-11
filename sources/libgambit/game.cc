@@ -694,51 +694,36 @@ void PureStrategyProfile::SetOutcome(GameOutcome p_outcome)
   }
 }
 
-Rational PureStrategyProfile::GetPayoff(int pl) const
+template <class T> T PureStrategyProfile::GetPayoff(int pl) const
 {
   if (m_nfg->IsTree()) {
     PureBehavProfile behav(m_nfg);
     for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
       GamePlayer player = m_nfg->GetPlayer(i);
       for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	behav.SetAction(player->GetInfoset(iset)->GetAction(m_profile[i]->m_behav[iset]));
+	int act = m_profile[i]->m_behav[iset];
+	if (act) {
+	  behav.SetAction(player->GetInfoset(iset)->GetAction(act));
+	}
       }
     }
-    return behav.GetPayoff(pl);
+    return behav.GetPayoff<T>(pl);
   }
   else {
     GameOutcome outcome = GetOutcome();
     if (outcome) {
-      return outcome->GetPayoff<Rational>(pl);
+      return outcome->GetPayoff<T>(pl);
     }
     else {
-      return Rational(0);
+      return (T) 0;
     }
   }
 }
 
-std::string PureStrategyProfile::GetPayoffText(int pl) const
-{
-  if (m_nfg->IsTree()) {
-    PureBehavProfile behav(m_nfg);
-    for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
-      GamePlayer player = m_nfg->GetPlayer(i);
-      for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	behav.SetAction(player->GetInfoset(iset)->GetAction(m_profile[i]->m_behav[iset]));
-      }
-    }
-    return ToText(behav.GetPayoff(pl));
-  }
-  else {
-    GameOutcome outcome = GetOutcome();
-    if (outcome) {
-      return outcome->GetPayoff<std::string>(pl);
-    }
-    else {
-      return "0";
-    }
-  }
-}
+// Explicit instantiations
+template double PureStrategyProfile::GetPayoff(int pl) const;
+template Rational PureStrategyProfile::GetPayoff(int pl) const;
+template std::string PureStrategyProfile::GetPayoff(int pl) const;
 
 //========================================================================
 //                       class PureBehavProfile
@@ -775,32 +760,38 @@ void PureBehavProfile::SetAction(const GameAction &action)
     [action->GetInfoset()->GetNumber()] = action;
 }
 
-Rational PureBehavProfile::GetNodeValue(const GameNode &p_node, 
-					   int pl) const
+template <class T> 
+T PureBehavProfile::GetNodeValue(const GameNode &p_node, 
+				 int pl) const
 {
-  Rational payoff(0);
+  T payoff(0);
 
   if (p_node->outcome) {
-    payoff += p_node->outcome->GetPayoff<Rational>(pl);
+    payoff += p_node->outcome->GetPayoff<T>(pl);
   }
 
   if (!p_node->IsTerminal()) {
     if (p_node->GetInfoset()->IsChanceInfoset()) {
       for (int i = 1; i <= p_node->NumChildren(); i++) {
-	payoff += (p_node->GetInfoset()->GetActionProb<Rational>(i) *
-		   GetNodeValue(p_node->children[i], pl));
+	GameInfosetRep *infoset = p_node->GetInfoset();
+	payoff += (infoset->GetActionProb<T>(i) *
+		   GetNodeValue<T>(p_node->children[i], pl));
       }
     }
     else {
       int player = p_node->GetPlayer()->GetNumber();
       int iset = p_node->GetInfoset()->GetNumber();
-      payoff += GetNodeValue(p_node->children[m_profile[player][iset]->GetNumber()], 
-			     pl);
+      payoff += GetNodeValue<T>(p_node->children[m_profile[player][iset]->GetNumber()], 
+				pl);
     }
   }
 
   return payoff;
 }
+
+// Explicit instantiations
+template double PureBehavProfile::GetNodeValue(const GameNode &, int pl) const;
+template Rational PureBehavProfile::GetNodeValue(const GameNode &, int pl) const;
 
 //========================================================================
 //                           class GameRep
