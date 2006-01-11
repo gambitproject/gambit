@@ -28,6 +28,7 @@ point enumeration
 <cmdsynopsis>
 <command>gambit-enummixed</command>
 <arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
+<arg><option>-c </option></arg>
 <arg><option>-h</option></arg>
 <arg><option>-q</option></arg>
 </cmdsynopsis>
@@ -82,6 +83,21 @@ expresses all output using decimal representations with
 </varlistentry>
 
 <varlistentry>
+<term><option>-c</option></term>
+<listitem>
+<para>
+The program outputs the extreme equilibria as it finds them, prefixed by
+the tag <literal>NE</literal>.  If this option is specified, once all
+extreme equilbria are identified, the program computes the convex
+sets which make up the set of equilibria.  The program then additionally
+outputs each convex set, prefixed by <literal>convex-N</literal>, where N
+indexes the set.  The set of all equilibria, then, is the union of these
+convex sets.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term><option>-h</option></term>
 <listitem>
 <para>
@@ -112,8 +128,7 @@ Suppresses printing of the banner at program launch.
 <refsect1>
 <title>BUGS</title>
 <para>
-This program does not currently output any information to indicate if
-and where connected components of equilibria exist.
+None known.
 </para>
 </refsect1>
 
@@ -124,6 +139,11 @@ and where connected components of equilibria exist.
 <firstname>Theodore</firstname>
 <surname>Turocy</surname>
 <contrib>Original author</contrib>
+</author>
+<author>
+<firstname>Bernhard</firstname>
+<surname>von Stengel</surname>
+<contrib>Identification of connectedness</contrib>
 </author>
 </para>
 </refsect1>

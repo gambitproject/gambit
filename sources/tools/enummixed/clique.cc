@@ -7,7 +7,7 @@
 // Maximal cliques and solution components via von Stengel's algorithm
 //
 // This file is part of Gambit
-// Copyright (c) 2002, The Gambit Project
+// Copyright (c) 2002, Bernhard von Stengel and The Gambit Project
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -545,19 +545,26 @@ void EnumCliques::outCLIQUE(int clique1[], int cliqsize1,
 {
   if (cliqsize1>0 && cliqsize2>0) {
     int i;
-    printf("{") ;
+    //printf("{") ;
+    Array<int> cliq1;
     for (i=0; i<cliqsize1; i++) {
-      printf("%d", orignode1[clique1[i]]);
-      if (i<cliqsize1-1) printf(", "); 
+      cliq1.Append(orignode1[clique1[i]]);
+      //printf("%d", orignode1[clique1[i]]);
+      //if (i<cliqsize1-1) printf(", "); 
     }
-    printf("}  x  {") ;
+    m_cliques1.Append(cliq1);
+
+    //printf("}  x  {") ;
     //  the  "x"  in the output symbolizes the product set 
-    
+
+    Array<int> cliq2;
     for (i=0; i<cliqsize2; i++) {
-      printf("%d", orignode2[clique2[i]]);
-      if (i<cliqsize2-1) printf(", "); 
+      cliq2.Append(orignode2[clique2[i]]);
+      //printf("%d", orignode2[clique2[i]]);
+      //if (i<cliqsize2-1) printf(", "); 
     }
-    printf("}\n");
+    m_cliques2.Append(cliq2);
+    //    printf("}\n");
   }
 }
 
@@ -590,7 +597,7 @@ void EnumCliques::workonco(int numco,
     if (firstedge[co]) {
       // found a nonzero component list 
       countco ++ ;
-      printf("\nConnected component %d:\n", countco) ;
+      //printf("\nConnected component %d:\n", countco) ;
       
       genincidence(firstedge[co], edgelist,
 		   orignode1, orignode2, connected, &m, &n);

@@ -7,7 +7,7 @@
 // Maximal cliques and connected components via von Stengel's algorithm
 //
 // This file is part of Gambit
-// Copyright (c) 2002, The Gambit Project
+// Copyright (c) 2002, Bernhard von Stengel and The Gambit Project
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -185,6 +185,8 @@
 #include <stdio.h>
 #include "libgambit/libgambit.h"
 
+using namespace Gambit;
+
 #define MAX(A,B)  ((A) > (B) ? (A) : (B))
 #define MIN(A,B)  ((A) < (B) ? (A) : (B))
 
@@ -216,8 +218,10 @@ public:
 
 class EnumCliques {
 private:
-  Gambit::Array<int> firstedge;
+  Array<int> firstedge;
   int maxinp1,maxinp2;
+  List<Array<int> > m_cliques1, m_cliques2;
+
   void candtry1 (int stk[], // stack 
 	 bool connected[MAXM][MAXN],
 	 int cand,  // the candidate from NODES1  to be added to CLIQUE	 
@@ -260,25 +264,28 @@ private:
 	    int *fixp,     // the new fixpoint, if *bfound = true  
 	    int *posfix);    // position of fixpoint on the stack, if *bfound 
 public:
-  EnumCliques(Gambit::Array<edge> &, int, int);
+  EnumCliques(Array<edge> &, int, int);
   ~EnumCliques();
 
+  const List<Array<int> > &GetCliques1(void) const { return m_cliques1; }
+  const List<Array<int> > &GetCliques2(void) const { return m_cliques2; }
+
   void genincidence(int e,
-		    Gambit::Array<edge> &edgelist,
+		    Array<edge> &edgelist,
 		    int orignode1[MAXM],
 		    int orignode2[MAXN],
 		    bool connected[MAXM][MAXN],
 		    int *m,
 		    int *n);
-  int getconnco(Gambit::Array<int> &firstedge,
-		Gambit::Array<edge> &edgelist);
+  int getconnco(Array<int> &firstedge,
+		Array<edge> &edgelist);
   void outCLIQUE(int clique1[], int cliqsize1, 
 		 int clique2[], int cliqsize2,
 		 int orignode1[MAXM],
 		 int orignode2[MAXN]);
   void workonco(int numco,
-		Gambit::Array<int> &firstedge,
-		Gambit::Array<edge> &edgelist);
+		Array<int> &firstedge,
+		Array<edge> &edgelist);
 
 /* --- the following are unused TEST ROUTINES --- */
   void getgraph(bool connected[MAXM][MAXN], int *m, int *n);
