@@ -30,6 +30,10 @@
 #include <libgambit/libgambit.h>
 #include <libgambit/sqmatrix.h>
 
+using namespace Gambit;
+
+
+
 //=========================================================================
 //             QRE Correspondence Computation via Homotopy
 //=========================================================================
@@ -47,7 +51,7 @@
 
 inline double sqr(double x) { return x*x; }
 
-static void Givens(Gambit::Matrix<double> &b, Gambit::Matrix<double> &q,
+static void Givens(Matrix<double> &b, Matrix<double> &q,
 		   double &c1, double &c2, int l1, int l2, int l3)
 {
   if (fabs(c1) + fabs(c2) == 0.0) {
@@ -82,7 +86,7 @@ static void Givens(Gambit::Matrix<double> &b, Gambit::Matrix<double> &q,
   c2 = 0.0;
 }
 
-static void QRDecomp(Gambit::Matrix<double> &b, Gambit::Matrix<double> &q)
+static void QRDecomp(Matrix<double> &b, Matrix<double> &q)
 {
   q.MakeIdent();
   for (int m = 1; m <= b.NumColumns(); m++) {
@@ -92,8 +96,8 @@ static void QRDecomp(Gambit::Matrix<double> &b, Gambit::Matrix<double> &q)
   }
 }
 
-static void NewtonStep(Gambit::Matrix<double> &q, Gambit::Matrix<double> &b,
-		       Gambit::Vector<double> &u, Gambit::Vector<double> &y,
+static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
+		       Vector<double> &u, Vector<double> &y,
 		       double &d)
 {
   for (int k = 1; k <= b.NumColumns(); k++) {
@@ -115,144 +119,234 @@ static void NewtonStep(Gambit::Matrix<double> &q, Gambit::Matrix<double> &b,
   d = sqrt(d);
 }
 
-static void QreLHS(const Gambit::BehavSupport &p_support, 
-		   const Gambit::Vector<double> &p_point,
-		   Gambit::Vector<double> &p_lhs)
+//
+// This abstract base class represents an equation
+//
+class Equation {
+public:
+  virtual ~Equation() { }
+
+  virtual double Value(const MixedBehavProfile<double> &p_point, 
+		       double p_lambda,
+		       const Array<bool> &p_isLog) = 0;
+  virtual void Gradient(const MixedBehavProfile<double> &p_point, 
+			double p_lambda,
+			const Array<bool> &p_isLog,
+			Vector<double> &p_gradient) = 0;
+};
+
+
+//
+// This class represents the equation that the probabilities of actions
+// in information set (pl,iset) sums to one
+//
+class SumToOneEquation : public Equation {
+private:
+  Game m_game;
+  int m_pl, m_iset;
+  GameInfoset m_infoset;
+
+public:
+  SumToOneEquation(Game p_game, int p_player, int p_infoset)
+    : m_game(p_game), m_pl(p_player), m_iset(p_infoset),
+      m_infoset(p_game->GetPlayer(p_player)->GetInfoset(p_infoset))
+  { }
+
+  double Value(const MixedBehavProfile<double> &p_profile, double p_lambda,
+	       const Array<bool> &p_isLog);
+  void Gradient(const MixedBehavProfile<double> &p_profile, double p_lambda,
+		const Array<bool> &p_isLog,
+		Vector<double> &p_gradient);
+};
+
+double SumToOneEquation::Value(const MixedBehavProfile<double> &p_profile,
+			       double p_lambda,
+			       const Array<bool> &p_isLog)
 {
-  Gambit::MixedBehavProfile<double> profile(p_support);
+  double value = -1.0;
+  for (int act = 1; act <= m_infoset->NumActions(); act++) {
+    value += p_profile(m_pl, m_iset, act);
+  }
+  return value;
+}
+
+void SumToOneEquation::Gradient(const MixedBehavProfile<double> &p_profile,
+				double p_lambda,
+				const Array<bool> &p_isLog,
+				Vector<double> &p_gradient)
+{
+  int i = 1;
+  for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
+    GamePlayer player = m_game->GetPlayer(pl);
+
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+
+      for (int act = 1; act <= infoset->NumActions(); act++, i++) {
+	if (pl == m_pl && iset == m_iset) {
+	  p_gradient[i] = (p_isLog[i]) ? p_profile(pl, iset, act) : 1.0;
+	}
+	else {
+	  p_gradient[i] = 0.0;
+	}
+      }
+    }
+  }
+
+  // Derivative wrt lambda is zero
+  p_gradient[i] = 0.0;
+}
+			       
+
+//
+// This class represents the equation relating the probability of 
+// playing action (pl,iset,act) to the probability of playing action
+// (pl,iset,1)
+//
+class RatioEquation : public Equation {
+private:
+  Game m_game;
+  int m_pl, m_iset, m_act;
+  GameInfoset m_infoset;
+
+public:
+  RatioEquation(Game p_game, int p_player, int p_infoset, int p_action)
+    : m_game(p_game), m_pl(p_player), m_iset(p_infoset), m_act(p_action),
+      m_infoset(p_game->GetPlayer(p_player)->GetInfoset(p_infoset))
+  { }
+
+  double Value(const MixedBehavProfile<double> &p_profile, double p_lambda,
+	       const Array<bool> &p_isLog);
+  void Gradient(const MixedBehavProfile<double> &p_profile, double p_lambda,
+		const Array<bool> &p_isLog,
+		Vector<double> &p_gradient);
+};
+
+double RatioEquation::Value(const MixedBehavProfile<double> &p_profile,
+			    double p_lambda,
+			    const Array<bool> &p_isLog)
+{
+  return (log(p_profile(m_pl, m_iset, m_act)) - 
+	  log(p_profile(m_pl, m_iset, 1)) -
+	  p_lambda *
+	  (p_profile.GetActionValue(m_infoset->GetAction(m_act)) -
+	   p_profile.GetActionValue(m_infoset->GetAction(1))));
+}
+
+void RatioEquation::Gradient(const MixedBehavProfile<double> &p_profile,
+			     double p_lambda,
+			     const Array<bool> &p_isLog,
+			     Vector<double> &p_gradient)
+{
+  int i = 1;
+  for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
+    GamePlayer player = m_game->GetPlayer(pl);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+      for (int act = 1; act <= infoset->NumActions(); act++, i++) {
+	if (infoset == m_infoset) {
+	  if (act == 1) {
+	    p_gradient[i] = (p_isLog[i]) ? -1.0 : -1.0/p_profile(m_pl, m_iset, m_act);
+	  }
+	  else if (act == m_act) {
+	    p_gradient[i] = (p_isLog[i]) ? 1.0 : 1.0/p_profile(m_pl, m_iset, 1);
+	  }
+	  else {
+	    p_gradient[i] = 0.0;
+	  }
+	}
+	else {   // infoset1 != infoset2
+	  p_gradient[i] = 
+	    -p_lambda * 
+	    (p_profile.DiffActionValue(m_infoset->GetAction(m_act),
+				       infoset->GetAction(act)) -
+	     p_profile.DiffActionValue(m_infoset->GetAction(1),
+				       infoset->GetAction(act)));
+	  if (p_isLog[i]) {
+	    p_gradient[i] *= p_profile(pl, iset, act);
+	  }
+	}
+      }
+    }
+  }
+
+  p_gradient[i] = (p_profile.GetActionValue(m_infoset->GetAction(1)) -
+		   p_profile.GetActionValue(m_infoset->GetAction(m_act)));
+}
+
+
+static void QreLHS(const Game &p_game,
+		   const Array<Equation *> &p_equations,
+		   const Vector<double> &p_point,
+		   const Array<bool> &p_isLog,
+		   Vector<double> &p_lhs)
+{
+  MixedBehavProfile<double> profile(p_game);
   for (int i = 1; i <= profile.Length(); i++) {
-    profile[i] = p_point[i];
+    if (p_isLog[i]) {
+      profile[i] = exp(p_point[i]);
+    }
+    else {
+      profile[i] = p_point[i];
+    }
   }
   double lambda = p_point[p_point.Length()];
 
-  p_lhs = 0.0;
-  int rowno = 0;
-
-  for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = p_support.GetGame()->GetPlayer(pl);
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      rowno++;
-      for (int act = 1; act <= p_support.NumActions(pl, iset); act++) {
-	p_lhs[rowno] += profile(pl, iset, act);
-      }
-      p_lhs[rowno] -= 1.0;
-
-      for (int act = 2; act <= p_support.NumActions(pl, iset); act++) {
-	p_lhs[++rowno] = log(profile(pl, iset, act) / profile(pl, iset, 1));
-	p_lhs[rowno] -= (lambda *
-			 (profile.GetActionValue(p_support.Actions(pl, iset)[act]) -
-			  profile.GetActionValue(p_support.Actions(pl, iset)[1])));
-	p_lhs[rowno] *= profile(pl, iset, 1) * profile(pl, iset, act);
-      }
-    }
+  for (int i = 1; i <= p_lhs.Length(); i++) {
+    p_lhs[i] = p_equations[i]->Value(profile, lambda, p_isLog);
   }
 }
 
-static void QreJacobian(const Gambit::BehavSupport &p_support,
-			const Gambit::Vector<double> &p_point,
-			Gambit::Matrix<double> &p_matrix)
+static void QreJacobian(const Game &p_game,
+			const Array<Equation *> &p_equations,
+			const Vector<double> &p_point,
+			const Array<bool> &p_isLog,
+			Matrix<double> &p_matrix)
 {
-  Gambit::Game efg = p_support.GetGame();
-  Gambit::MixedBehavProfile<double> profile(p_support);
+  MixedBehavProfile<double> profile(p_game);
   for (int i = 1; i <= profile.Length(); i++) {
-    profile[i] = p_point[i];
+    if (p_isLog[i]) {
+      profile[i] = exp(p_point[i]);
+    }
+    else {
+      profile[i] = p_point[i];
+    }
   }
   double lambda = p_point[p_point.Length()];
 
-  int rowno = 0; 
-  for (int pl1 = 1; pl1 <= efg->NumPlayers(); pl1++) {
-    Gambit::GamePlayer player1 = efg->GetPlayer(pl1);
-    for (int iset1 = 1; iset1 <= player1->NumInfosets(); iset1++) {
-      Gambit::GameInfoset infoset1 = player1->GetInfoset(iset1);
-      rowno++;
-      // First, do the "sum to one" equation
-      int colno = 0;
-      for (int pl2 = 1; pl2 <= efg->NumPlayers(); pl2++) {
-	Gambit::GamePlayer player2 = efg->GetPlayer(pl2);
-	for (int iset2 = 1; iset2 <= player2->NumInfosets(); iset2++) {
-	  for (int act2 = 1; act2 <= p_support.NumActions(pl2, iset2); act2++) {
-	    colno++;
-	    if (pl1 == pl2 && iset1 == iset2) {
-	      p_matrix(colno, rowno) = 1.0;
-	    }
-	    else {
-	      p_matrix(colno, rowno) = 0.0;
-	    }
-	  }
-	}
-      }
-      p_matrix(p_matrix.NumRows(), rowno) = 0.0;
-					    
-      for (int act1 = 2; act1 <= p_support.NumActions(pl1, iset1); act1++) {
-	rowno++;
-	int colno = 0;
-
-	for (int pl2 = 1; pl2 <= efg->NumPlayers(); pl2++) {
-	  Gambit::GamePlayer player2 = efg->GetPlayer(pl2);
-	  for (int iset2 = 1; iset2 <= player2->NumInfosets(); iset2++) {
-	    Gambit::GameInfoset infoset2 = player2->GetInfoset(iset2);
-
-	    for (int act2 = 1; act2 <= p_support.NumActions(pl2, iset2); act2++) {
-	      colno++;
-	      if (infoset1 == infoset2) {
-		if (act2 == 1) {
-		  p_matrix(colno, rowno) = -profile(pl1, iset1, act1);
-		}
-		else if (act1 == act2) {
-		  p_matrix(colno, rowno) = profile(pl1, iset1, 1);
-		}
-		else {
-		  p_matrix(colno, rowno) = 0.0;
-		}
-	      }
-	      else {   // infoset1 != infoset2
-		if (profile.GetIsetProb(infoset1) < 1.0e-10) {
-		  p_matrix(colno, rowno) = 0;
-		}
-		else {
-		  p_matrix(colno, rowno) = -lambda * profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile.DiffActionValue(p_support.Actions(pl1, iset1)[act1], p_support.Actions(pl2, iset2)[act2]) - profile.DiffActionValue(p_support.Actions(pl1, iset1)[1], p_support.Actions(pl2, iset2)[act2]));
-		}
-	      }
-	    }
-	  }
-	}
-
-	p_matrix(p_matrix.NumRows(), rowno) = -profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile.GetActionValue(p_support.Actions(pl1, iset1)[act1]) - profile.GetActionValue(p_support.Actions(pl1, iset1)[1]));
-      }
-    }
+  for (int i = 1; i <= p_equations.Length(); i++) {
+    Vector<double> column(p_point.Length());
+    p_equations[i]->Gradient(profile, lambda, p_isLog, column);
+    p_matrix.SetColumn(i, column);
   }
 }
 
 extern int g_numDecimals;
 
 void PrintProfile(std::ostream &p_stream,
-		  const Gambit::BehavSupport &p_support, const Gambit::Vector<double> &x,
+		  const BehavSupport &p_support, const Vector<double> &x,
+		  const Array<bool> &p_isLog,
 		  bool p_terminal = false)
 {
+  p_stream.setf(std::ios::fixed);
   // By convention, we output lambda first
   if (!p_terminal) {
-    p_stream << x[x.Length()];
+    p_stream << std::setprecision(g_numDecimals) << x[x.Length()];
   }
   else {
     p_stream << "NE";
   }
-  Gambit::Game efg = p_support.GetGame();
+  p_stream.unsetf(std::ios::fixed);
 
-  int index = 1;
-  for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = efg->GetPlayer(pl);
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      Gambit::GameInfoset infoset = player->GetInfoset(iset);
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-	if (p_support.Find(infoset->GetAction(act))) {
-	  p_stream << "," << x[index++];
-	}
-	else {
-	  p_stream << "," << 0.0;
-	}
-      }
+  for (int i = 1; i < x.Length(); i++) {
+    if (p_isLog[i]) {
+      p_stream << "," << std::setprecision(g_numDecimals) << exp(x[i]);
+    }
+    else {
+      p_stream << "," << std::setprecision(g_numDecimals) << x[i];
     }
   }
+
   p_stream << std::endl;
 }
 
@@ -260,7 +354,7 @@ extern double g_maxDecel;
 extern double g_hStart;
 extern bool g_fullGraph;
 
-void TraceAgentPath(const Gambit::MixedBehavProfile<double> &p_start,
+void TraceAgentPath(const MixedBehavProfile<double> &p_start,
 		    double p_startLambda, double p_maxLambda, double p_omega)
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
@@ -271,58 +365,47 @@ void TraceAgentPath(const Gambit::MixedBehavProfile<double> &p_start,
   double h = g_hStart;             // initial stepsize
   const double c_hmin = 1.0e-5;    // minimal stepsize
 
-  Gambit::Vector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
+  Array<bool> isLog(p_start.Length());
   for (int i = 1; i <= p_start.Length(); i++) {
-    x[i] = p_start[i];
+    isLog[i] = (p_start[i] < .001);
+  }
+
+  Array<Equation *> equations;
+  for (int pl = 1; pl <= p_start.GetGame()->NumPlayers(); pl++) {
+    GamePlayer player = p_start.GetGame()->GetPlayer(pl);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      equations.Append(new SumToOneEquation(p_start.GetGame(), pl, iset));
+      for (int act = 2; act <= player->GetInfoset(iset)->NumActions(); act++) {
+	equations.Append(new RatioEquation(p_start.GetGame(), pl, iset, act));
+      }
+    }
+  }
+
+  Vector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
+  for (int i = 1; i <= p_start.Length(); i++) {
+    if (isLog[i]) {
+      x[i] = log(p_start[i]);
+    }
+    else {
+      x[i] = p_start[i];
+    }
   }
   x[x.Length()] = p_startLambda;
 
   if (g_fullGraph) {
-    PrintProfile(std::cout, p_start.GetSupport(), x);
+    PrintProfile(std::cout, p_start.GetSupport(), x, isLog);
   }
 
-  Gambit::Vector<double> t(p_start.Length() + 1);
-  Gambit::Vector<double> y(p_start.Length());
+  Vector<double> t(p_start.Length() + 1);
+  Vector<double> y(p_start.Length());
 
-  Gambit::Matrix<double> b(p_start.Length() + 1, p_start.Length());
-  Gambit::SquareMatrix<double> q(p_start.Length() + 1);
-  QreJacobian(p_start.GetSupport(), x, b);
+  Matrix<double> b(p_start.Length() + 1, p_start.Length());
+  SquareMatrix<double> q(p_start.Length() + 1);
+  QreJacobian(p_start.GetGame(), equations, x, isLog, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
   int niters = 0;
-
-  for (int i = 1; i < x.Length(); i++) {
-    if (x[i] < 1.0e-10) {
-      // Drop this strategy from the support, then recursively call
-      // to continue tracing
-      Gambit::BehavSupport newSupport(p_start.GetSupport());
-      int index = 1;
-      for (int pl = 1; pl <= newSupport.GetGame()->NumPlayers(); pl++) {
-	Gambit::GamePlayer player = newSupport.GetGame()->GetPlayer(pl);
-	for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	  for (int act = 1; act <= newSupport.NumActions(pl, iset); act++) {
-	    if (index++ == i) {
-	      newSupport.RemoveAction(newSupport.Actions(pl, iset)[act]);
-	    }
-	  }
-	}
-      }
-      
-      Gambit::MixedBehavProfile<double> newProfile(newSupport);
-      for (int j = 1; j <= newProfile.Length(); j++) {
-	if (j < i) {
-	  newProfile[j] = x[j];
-	}
-	else if (j >= i) {
-	  newProfile[j] = x[j+1];
-	}
-      }
-
-      TraceAgentPath(newProfile, x[x.Length()], p_maxLambda, p_omega);
-      return;
-    }
-  }
 
   while (x[x.Length()] >= 0.0 && x[x.Length()] < p_maxLambda) {
     bool accept = true;
@@ -334,19 +417,10 @@ void TraceAgentPath(const Gambit::MixedBehavProfile<double> &p_start,
     // Predictor step
     for (int k = 1; k <= x.Length(); k++) {
       u[k] = x[k] + h * p_omega * t[k];
-      if (k < x.Length() && u[k] < 0.0) {
-	accept = false;
-	break;
-      }
-    }
-
-    if (!accept) {
-      h *= 0.5;
-      continue;
     }
 
     double decel = 1.0 / g_maxDecel;  // initialize deceleration factor
-    QreJacobian(p_start.GetSupport(), u, b);
+    QreJacobian(p_start.GetGame(), equations, u, isLog, b);
     QRDecomp(b, q);
 
     int iter = 1;
@@ -354,31 +428,21 @@ void TraceAgentPath(const Gambit::MixedBehavProfile<double> &p_start,
     while (true) {
       double dist;
 
-      QreLHS(p_start.GetSupport(), u, y);
+      QreLHS(p_start.GetGame(), equations, u, isLog, y);
       NewtonStep(q, b, u, y, dist); 
       if (dist >= c_maxDist) {
 	accept = false;
 	break;
       }
-      for (int i = 1; i < u.Length(); i++) {
-	if (u[i] < 0.0) {
-	  // don't go negative
-	  accept = false;
-	  break;
-	}
-      }
-      if (!accept) {
-	break;
-      }
       
-      decel = Gambit::max(decel, sqrt(dist / c_maxDist) * g_maxDecel);
+      decel = max(decel, sqrt(dist / c_maxDist) * g_maxDecel);
       if (iter >= 2) {
 	double contr = dist / (disto + c_tol * c_eta);
 	if (contr > c_maxContr) {
 	  accept = false;
 	  break;
 	}
-	decel = Gambit::max(decel, sqrt(contr / c_maxContr) * g_maxDecel);
+	decel = max(decel, sqrt(contr / c_maxContr) * g_maxDecel);
       }
 
       if (dist <= c_tol) {
@@ -405,48 +469,35 @@ void TraceAgentPath(const Gambit::MixedBehavProfile<double> &p_start,
     h = fabs(h / decel);
 
     // PC step was successful; update and iterate
-    for (int i = 1; i < x.Length(); i++) {
-      if (u[i] < 1.0e-10) {
-	// Drop this strategy from the support, then recursively call
-	// to continue tracing
-	Gambit::BehavSupport newSupport(p_start.GetSupport());
-	int index = 1;
-	for (int pl = 1; pl <= newSupport.GetGame()->NumPlayers(); pl++) {
-	  Gambit::GamePlayer player = newSupport.GetGame()->GetPlayer(pl);
-	  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	    for (int act = 1; act <= newSupport.NumActions(pl, iset); act++) {
-	      if (index++ == i) {
-		newSupport.RemoveAction(newSupport.Actions(pl, iset)[act]);
-	      }
-	    }
-	  }
-	}
-
-	Gambit::MixedBehavProfile<double> newProfile(newSupport);
-	for (int j = 1; j <= newProfile.Length(); j++) {
-	  if (j < i) {
-	    newProfile[j] = u[j];
-	  }
-	  else if (j >= i) {
-	    newProfile[j] = u[j+1];
-	  }
-	}
-
-	TraceAgentPath(newProfile, u[u.Length()], p_maxLambda, p_omega);
-	return;
-      }
-      else {
-	x[i] = u[i];
-      }
-    }
-
-    x[x.Length()] = u[u.Length()];
+    x = u;
 
     if (g_fullGraph) {
-      PrintProfile(std::cout, p_start.GetSupport(), x);
+      PrintProfile(std::cout, p_start.GetSupport(), x, isLog);
     }
-    
-    Gambit::Vector<double> newT(t);
+
+    // Update isLog: any strategy below 10^-3 should switch to log rep
+    bool recompute = false;
+
+    for (int i = 1; i < x.Length(); i++) {
+      if (!isLog[i] && x[i] < .001) {
+	x[i] = log(x[i]);
+	isLog[i] = true;
+	recompute = true;
+      }
+      else if (isLog[i] && exp(x[i]) > .001) {
+	x[i] = exp(x[i]);
+	isLog[i] = false;
+	recompute = true;
+      }
+    }
+
+    if (recompute) {
+      // If we switch representations, make sure to get the new Jacobian
+      QreJacobian(p_start.GetGame(), equations, x, isLog, b);
+      QRDecomp(b, q);
+    }
+
+    Vector<double> newT(t);
     q.GetRow(q.NumRows(), newT);  // new tangent
     if (t * newT < 0.0) {
       // Bifurcation detected; for now, just "jump over" and continue,
@@ -458,7 +509,7 @@ void TraceAgentPath(const Gambit::MixedBehavProfile<double> &p_start,
   }
 
   if (!g_fullGraph) {
-    PrintProfile(std::cout, p_start.GetSupport(), x, true);
+    PrintProfile(std::cout, p_start.GetSupport(), x, isLog, true);
   }
 }
 

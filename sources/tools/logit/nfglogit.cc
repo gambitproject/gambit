@@ -32,6 +32,9 @@
 #include <libgambit/libgambit.h>
 #include <libgambit/sqmatrix.h>
 
+using namespace Gambit;
+
+
 //=========================================================================
 //             QRE Correspondence Computation via Homotopy
 //=========================================================================
@@ -46,7 +49,7 @@
 
 inline double sqr(double x) { return x*x; }
 
-static void Givens(Gambit::Matrix<double> &b, Gambit::Matrix<double> &q,
+static void Givens(Matrix<double> &b, Matrix<double> &q,
 		   double &c1, double &c2, int l1, int l2, int l3)
 {
   if (fabs(c1) + fabs(c2) == 0.0) {
@@ -81,7 +84,7 @@ static void Givens(Gambit::Matrix<double> &b, Gambit::Matrix<double> &q,
   c2 = 0.0;
 }
 
-static void QRDecomp(Gambit::Matrix<double> &b, Gambit::Matrix<double> &q)
+static void QRDecomp(Matrix<double> &b, Matrix<double> &q)
 {
   q.MakeIdent();
   for (int m = 1; m <= b.NumColumns(); m++) {
@@ -91,8 +94,8 @@ static void QRDecomp(Gambit::Matrix<double> &b, Gambit::Matrix<double> &q)
   }
 }
 
-static void NewtonStep(Gambit::Matrix<double> &q, Gambit::Matrix<double> &b,
-		       Gambit::Vector<double> &u, Gambit::Vector<double> &y,
+static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
+		       Vector<double> &u, Vector<double> &y,
 		       double &d)
 {
   for (int k = 1; k <= b.NumColumns(); k++) {
@@ -115,12 +118,12 @@ static void NewtonStep(Gambit::Matrix<double> &q, Gambit::Matrix<double> &b,
 }
 
 
-void QreLHS(const Gambit::StrategySupport &p_support, 
-	    const Gambit::Vector<double> &p_point,
-	    const Gambit::Array<bool> &p_isLog,
-	    Gambit::Vector<double> &p_lhs)
+void QreLHS(const StrategySupport &p_support, 
+	    const Vector<double> &p_point,
+	    const Array<bool> &p_isLog,
+	    Vector<double> &p_lhs)
 {
-  Gambit::MixedStrategyProfile<double> profile(p_support), logprofile(p_support);
+  MixedStrategyProfile<double> profile(p_support), logprofile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     if (p_isLog[i]) {
       profile[i] = exp(p_point[i]);
@@ -137,7 +140,7 @@ void QreLHS(const Gambit::StrategySupport &p_support,
 
   int rowno = 0;
   for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = p_support.GetGame()->GetPlayer(pl);
+    GamePlayer player = p_support.GetGame()->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrategies(); st++) {
       rowno++;
       if (st == 1) {
@@ -157,12 +160,12 @@ void QreLHS(const Gambit::StrategySupport &p_support,
   }
 }
 
-void QreJacobian(const Gambit::StrategySupport &p_support,
-		 const Gambit::Vector<double> &p_point,
-		 const Gambit::Array<bool> &p_isLog,
-		 Gambit::Matrix<double> &p_matrix)
+void QreJacobian(const StrategySupport &p_support,
+		 const Vector<double> &p_point,
+		 const Array<bool> &p_isLog,
+		 Matrix<double> &p_matrix)
 {
-  Gambit::MixedStrategyProfile<double> profile(p_support), logprofile(p_support);
+  MixedStrategyProfile<double> profile(p_support), logprofile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     if (p_isLog[i]) {
       profile[i] = exp(p_point[i]);
@@ -179,7 +182,7 @@ void QreJacobian(const Gambit::StrategySupport &p_support,
 
   int rowno = 0;
   for (int i = 1; i <= p_support.GetGame()->NumPlayers(); i++) {
-    Gambit::GamePlayer player = p_support.GetGame()->GetPlayer(i);
+    GamePlayer player = p_support.GetGame()->GetPlayer(i);
 
     for (int j = 1; j <= player->NumStrategies(); j++) {
       rowno++;
@@ -188,7 +191,7 @@ void QreJacobian(const Gambit::StrategySupport &p_support,
 	
 	int colno = 0;
 	for (int ell = 1; ell <= p_support.GetGame()->NumPlayers(); ell++) {
-	  Gambit::GamePlayer player2 = p_support.GetGame()->GetPlayer(ell);
+	  GamePlayer player2 = p_support.GetGame()->GetPlayer(ell);
 
 	  for (int m = 1; m <= player2->NumStrategies(); m++) {
 	    colno++;
@@ -210,7 +213,7 @@ void QreJacobian(const Gambit::StrategySupport &p_support,
 
 	int colno = 0;
 	for (int ell = 1; ell <= p_support.GetGame()->NumPlayers(); ell++) {
-	  Gambit::GamePlayer player2 = p_support.GetGame()->GetPlayer(ell);
+	  GamePlayer player2 = p_support.GetGame()->GetPlayer(ell);
 
 	  for (int m = 1; m <= player2->NumStrategies(); m++) {
 	    colno++;
@@ -258,9 +261,9 @@ void QreJacobian(const Gambit::StrategySupport &p_support,
 // For maximum likelihood estimation
 //
 extern bool g_maxLike;
-extern Gambit::Array<double> g_obsProbs;
+extern Array<double> g_obsProbs;
 
-double LogLike(const Gambit::Array<double> &p_point)
+double LogLike(const Array<double> &p_point)
 {
   double ret = 0.0;
   
@@ -271,9 +274,9 @@ double LogLike(const Gambit::Array<double> &p_point)
   return ret;
 }
 
-double DiffLogLike(const Gambit::Array<double> &p_point,
-		   const Gambit::Array<bool> &p_isLog,
-		   const Gambit::Array<double> &p_tangent)
+double DiffLogLike(const Array<double> &p_point,
+		   const Array<bool> &p_isLog,
+		   const Array<double> &p_tangent)
 {
   double ret = 0.0;
 
@@ -293,8 +296,8 @@ double DiffLogLike(const Gambit::Array<double> &p_point,
 extern int g_numDecimals;
 
 void PrintProfile(std::ostream &p_stream,
-		  const Gambit::StrategySupport &p_support, const Gambit::Vector<double> &x,
-		  const Gambit::Array<bool> &p_isLog,
+		  const StrategySupport &p_support, const Vector<double> &x,
+		  const Array<bool> &p_isLog,
 		  bool p_terminal = false)
 {
   p_stream.setf(std::ios::fixed);
@@ -317,7 +320,7 @@ void PrintProfile(std::ostream &p_stream,
   }
 
   if (g_maxLike) {
-    Gambit::MixedStrategyProfile<double> profile(p_support);
+    MixedStrategyProfile<double> profile(p_support);
     for (int i = 1; i <= profile.Length(); i++) {
       if (p_isLog[i]) {
 	profile[i] = exp(x[i]);
@@ -363,7 +366,7 @@ extern double g_hStart;
 extern bool g_fullGraph;
 
 void 
-TraceStrategicPath(const Gambit::MixedStrategyProfile<double> &p_start,
+TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
 		   double p_startLambda, double p_maxLambda, double p_omega)
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
@@ -376,18 +379,18 @@ TraceStrategicPath(const Gambit::MixedStrategyProfile<double> &p_start,
 
   bool newton = false;          // using Newton steplength (for MLE)
   bool restarting = false;      // flag for first restart step after MLE
-  Gambit::Array<bool> isLog(p_start.Length());
+  Array<bool> isLog(p_start.Length());
   for (int i = 1; i <= p_start.Length(); i++) {
     isLog[i] = (p_start[i] < .001);
   }
 
   // When doing MLE finding, we push the data from the original path-following
   // here, and resume once we've found the local extremum.
-  Gambit::Vector<double> pushX(p_start.Length() + 1);
+  Vector<double> pushX(p_start.Length() + 1);
   double pushH = h;
-  Gambit::Array<bool> pushLog(p_start.Length());
+  Array<bool> pushLog(p_start.Length());
 
-  Gambit::Vector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
+  Vector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
   for (int i = 1; i <= p_start.Length(); i++) {
     if (isLog[i]) {
       x[i] = log(p_start[i]);
@@ -402,11 +405,11 @@ TraceStrategicPath(const Gambit::MixedStrategyProfile<double> &p_start,
     PrintProfile(std::cout, p_start.GetSupport(), x, isLog);
   }
 
-  Gambit::Vector<double> t(p_start.Length() + 1);
-  Gambit::Vector<double> y(p_start.Length());
+  Vector<double> t(p_start.Length() + 1);
+  Vector<double> y(p_start.Length());
 
-  Gambit::Matrix<double> b(p_start.Length() + 1, p_start.Length());
-  Gambit::SquareMatrix<double> q(p_start.Length() + 1);
+  Matrix<double> b(p_start.Length() + 1, p_start.Length());
+  SquareMatrix<double> q(p_start.Length() + 1);
   QreJacobian(p_start.GetSupport(), x, isLog, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
@@ -458,14 +461,14 @@ TraceStrategicPath(const Gambit::MixedStrategyProfile<double> &p_start,
 	break;
       }
       
-      decel = Gambit::max(decel, sqrt(dist / c_maxDist) * g_maxDecel);
+      decel = max(decel, sqrt(dist / c_maxDist) * g_maxDecel);
       if (iter >= 2) {
 	double contr = dist / (disto + c_tol * c_eta);
 	if (contr > c_maxContr) {
 	  accept = false;
 	  break;
 	}
-	decel = Gambit::max(decel, sqrt(contr / c_maxContr) * g_maxDecel);
+	decel = max(decel, sqrt(contr / c_maxContr) * g_maxDecel);
       }
 
       if (dist <= c_tol) {
@@ -510,7 +513,7 @@ TraceStrategicPath(const Gambit::MixedStrategyProfile<double> &p_start,
     if (g_maxLike) {
       // Currently, 't' is the tangent at 'x'.  We also need the
       // tangent at 'u'.
-      Gambit::Vector<double> newT(t);
+      Vector<double> newT(t);
       q.GetRow(q.NumRows(), newT); 
 
       if (!restarting && 
@@ -526,7 +529,7 @@ TraceStrategicPath(const Gambit::MixedStrategyProfile<double> &p_start,
 
     if (newton) {
       // Newton-type steplength adaptation, secant method
-      Gambit::Vector<double> newT(t);
+      Vector<double> newT(t);
       q.GetRow(q.NumRows(), newT); 
 
       h *= -DiffLogLike(u, isLog, newT) / (DiffLogLike(u, isLog, newT) - 
@@ -547,7 +550,7 @@ TraceStrategicPath(const Gambit::MixedStrategyProfile<double> &p_start,
     }
     
 
-    // Update isLog: any strategy below 10^-10 should switch to log rep
+    // Update isLog: any strategy below 10^-3 should switch to log rep
     bool recompute = false;
 
     for (int i = 1; i < x.Length(); i++) {
@@ -569,7 +572,7 @@ TraceStrategicPath(const Gambit::MixedStrategyProfile<double> &p_start,
       QRDecomp(b, q);
     }
 
-    Gambit::Vector<double> newT(t);
+    Vector<double> newT(t);
     q.GetRow(q.NumRows(), newT);  // new tangent
     if (t * newT < 0.0) {
       //printf("Bifurcation! at %f\n", x[x.Length()]);
