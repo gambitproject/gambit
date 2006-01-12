@@ -234,7 +234,7 @@ void QreJacobian(const StrategySupport &p_support,
 	      // 1 == lead
 	      if (p_isLog[colno]) {
 		p_matrix(colno, rowno) =
-		  -lambda * profile(ell, m) * logprofile(ell, m) *
+		  -lambda * profile(ell, m) *
 		  (profile.GetPayoff(i, i, j, ell, m) -
 		   profile.GetPayoff(i, i, 1, ell, m));
 	      }
@@ -375,7 +375,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
   const double c_eta = 0.1;        // perturbation to avoid cancellation
                                    // in calculating contraction rate
   double h = g_hStart;             // initial stepsize
-  const double c_hmin = 1.0e-5;    // minimal stepsize
+  const double c_hmin = 1.0e-8;    // minimal stepsize
 
   bool newton = false;          // using Newton steplength (for MLE)
   bool restarting = false;      // flag for first restart step after MLE
