@@ -30,20 +30,20 @@
 #include <wx/process.h>
 #include "gamedoc.h"
 
-class gbtLogitMixedList;
-class gbtLogitPlotCtrl;
+class gbtLogitMixedSheet;
+class gbtLogitPlotPanel;
 
 class gbtLogitMixedDialog : public wxDialog {
 private:
   gbtGameDocument *m_doc;
   int m_pid;
   wxProcess *m_process;
-  gbtLogitMixedList *m_mixedList;
+  gbtLogitPlotPanel *m_plot;
+  //  gbtLogitMixedSheet *m_mixedList;
   wxStaticText *m_statusText;
   wxButton *m_stopButton, *m_okButton, *m_saveButton;
   wxTimer m_timer;
   wxString m_output;
-  gbtLogitPlotCtrl *m_plot;
 
   void OnStop(wxCommandEvent &);
   void OnTimer(wxTimerEvent &);

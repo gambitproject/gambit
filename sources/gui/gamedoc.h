@@ -31,6 +31,10 @@
 #include "style.h"
 #include "analysis.h"
 
+// This declaration essentially means the entire interface
+// can use the namespace unqualified
+using namespace Gambit;
+
 class gbtGameView;
 class gbtGameDocument;
 

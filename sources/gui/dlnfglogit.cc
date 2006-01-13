@@ -37,15 +37,56 @@
 #include "wx/plotctrl/plotctrl.h"
 #include "dlnfglogit.h"
 
+using namespace Gambit;
+
 //========================================================================
-//                      class gbtLogitMixedList
+//                    class gbtLogitMixedBranch
 //========================================================================
 
-class gbtLogitMixedList : public wxSheet {
+/// Represents one branch of a logit equilibrium correspondence
+class gbtLogitMixedBranch {
 private:
   gbtGameDocument *m_doc;
-  Gambit::List<double> m_lambdas;
-  Gambit::List<Gambit::MixedStrategyProfile<double> > m_profiles;
+  List<double> m_lambdas;
+  List<MixedStrategyProfile<double> > m_profiles;
+
+public:
+  gbtLogitMixedBranch(gbtGameDocument *p_doc) : m_doc(p_doc) { }
+
+  void AddProfile(const wxString &p_text);
+
+  int NumPoints(void) const { return m_lambdas.Length(); }
+  double GetLambda(int p_index) const { return m_lambdas[p_index]; }
+  const List<double> &GetLambdas(void) const { return m_lambdas; }
+  const MixedStrategyProfile<double> &GetProfile(int p_index)
+  { return m_profiles[p_index]; }
+  const List<MixedStrategyProfile<double> > &GetProfiles(void) const 
+  { return m_profiles; }
+};
+  
+void gbtLogitMixedBranch::AddProfile(const wxString &p_text)
+{
+  MixedStrategyProfile<double> profile(m_doc->GetGame());
+
+  wxStringTokenizer tok(p_text, wxT(","));
+
+  m_lambdas.Append((double) ToNumber(std::string((const char *) tok.GetNextToken().mb_str())));
+
+  for (int i = 1; i <= profile.Length(); i++) {
+    profile[i] = ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
+  }
+
+  m_profiles.Append(profile);
+}
+
+//========================================================================
+//                      class gbtLogitMixedSheet
+//========================================================================
+
+class gbtLogitMixedSheet : public wxSheet {
+private:
+  gbtGameDocument *m_doc;
+  gbtLogitMixedBranch &m_branch;
 
   // Overriding wxSheet members for data access
   wxString GetCellValue(const wxSheetCoords &);
@@ -70,29 +111,27 @@ private:
   void DrawCursorCellHighlight(wxDC&, const wxSheetCellAttr &) { }
 
 public:
-  gbtLogitMixedList(wxWindow *p_parent, gbtGameDocument *p_doc);
-  virtual ~gbtLogitMixedList();
+  gbtLogitMixedSheet(wxWindow *p_parent, gbtGameDocument *p_doc,
+		     gbtLogitMixedBranch &p_branch);
+  virtual ~gbtLogitMixedSheet();
 
   void AddProfile(const wxString &p_text, bool p_forceShow);
-
-  const Gambit::List<double> &GetLambdas(void) const { return m_lambdas; }
-  const Gambit::List<Gambit::MixedStrategyProfile<double> > &GetProfiles(void) const 
-  { return m_profiles; }
 };
 
-gbtLogitMixedList::gbtLogitMixedList(wxWindow *p_parent, 
-				     gbtGameDocument *p_doc) 
-  : wxSheet(p_parent, -1), m_doc(p_doc)
+gbtLogitMixedSheet::gbtLogitMixedSheet(wxWindow *p_parent, 
+				       gbtGameDocument *p_doc,
+				       gbtLogitMixedBranch &p_branch) 
+  : wxSheet(p_parent, -1), m_doc(p_doc), m_branch(p_branch)
 {
   CreateGrid(0, 0);
   SetRowLabelWidth(40);
   SetColLabelHeight(25);
 }
 
-gbtLogitMixedList::~gbtLogitMixedList()
+gbtLogitMixedSheet::~gbtLogitMixedSheet()
 { }
 
-wxString gbtLogitMixedList::GetCellValue(const wxSheetCoords &p_coords)
+wxString gbtLogitMixedSheet::GetCellValue(const wxSheetCoords &p_coords)
 {
   if (!m_doc->GetGame())  return wxT("");
 
@@ -106,7 +145,7 @@ wxString gbtLogitMixedList::GetCellValue(const wxSheetCoords &p_coords)
     else {
       int index = 1;
       for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
-	Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
+	GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
 	for (int st = 1; st <= player->NumStrategies(); st++) {
 	  if (index++ == p_coords.GetCol()) {
 	    return (wxString::Format(wxT("%d: "), pl) +
@@ -123,13 +162,14 @@ wxString gbtLogitMixedList::GetCellValue(const wxSheetCoords &p_coords)
   }
 
   if (p_coords.GetCol() == 0) {
-    return wxString(Gambit::ToText(m_lambdas[p_coords.GetRow()+1],
-				   m_doc->GetStyle().NumDecimals()).c_str(),
+    return wxString(ToText(m_branch.GetLambda(p_coords.GetRow()+1),
+			   m_doc->GetStyle().NumDecimals()).c_str(),
 		    *wxConvCurrent);
   }
   else {
-    const Gambit::MixedStrategyProfile<double> &profile = m_profiles[p_coords.GetRow()+1];
-    return wxString(Gambit::ToText(profile[p_coords.GetCol()],
+    const MixedStrategyProfile<double> &profile = 
+      m_branch.GetProfile(p_coords.GetRow()+1);
+    return wxString(ToText(profile[p_coords.GetCol()],
 				   m_doc->GetStyle().NumDecimals()).c_str(), 
 		    *wxConvCurrent);
   }
@@ -142,7 +182,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 
   int index = 1;
   for (int pl = 1; pl <= p_doc->GetGame()->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = p_doc->GetGame()->GetPlayer(pl);
+    GamePlayer player = p_doc->GetGame()->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrategies(); st++) {
       if (index++ == p_index) {
 	return p_doc->GetStyle().GetPlayerColor(pl);
@@ -152,7 +192,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
   return *wxBLACK;
 }
 
-wxSheetCellAttr gbtLogitMixedList::GetAttr(const wxSheetCoords &p_coords, 
+wxSheetCellAttr gbtLogitMixedSheet::GetAttr(const wxSheetCoords &p_coords, 
 					     wxSheetAttr_Type) const
 {
   if (IsRowLabelCell(p_coords)) {
@@ -186,26 +226,15 @@ wxSheetCellAttr gbtLogitMixedList::GetAttr(const wxSheetCoords &p_coords,
 }
 
 
-void gbtLogitMixedList::AddProfile(const wxString &p_text,
-				   bool p_forceShow)
+void gbtLogitMixedSheet::AddProfile(const wxString &p_text,
+				    bool p_forceShow)
 {
   if (GetNumberCols() == 0) {
     AppendCols(m_doc->GetGame()->MixedProfileLength() + 1);
   }
 
-  Gambit::MixedStrategyProfile<double> profile(m_doc->GetGame());
-
-  wxStringTokenizer tok(p_text, wxT(","));
-
-  m_lambdas.Append((double) Gambit::ToNumber(std::string((const char *) tok.GetNextToken().mb_str())));
-
-  for (int i = 1; i <= profile.Length(); i++) {
-    profile[i] = Gambit::ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
-  }
-
-  m_profiles.Append(profile);
-  if (p_forceShow || m_profiles.Length() - GetNumberRows() > 20) {
-    AppendRows(m_profiles.Length() - GetNumberRows());
+  if (p_forceShow || m_branch.NumPoints() - GetNumberRows() > 20) {
+    AppendRows(m_branch.NumPoints() - GetNumberRows());
     MakeCellVisible(wxSheetCoords(GetNumberRows() - 1, 0));
   }
 
@@ -224,16 +253,14 @@ private:
 
   /// Overriding x (lambda) axis labeling
   void CalcXAxisTickPositions(void);
-  double LambdaToX(double p_lambda)
-  { return p_lambda / (1.0 + p_lambda); }
-  double XToLambda(double p_x)
-  { return p_x / (1.0 - p_x); }
   
 public:
   gbtLogitPlotCtrl(wxWindow *p_parent, gbtGameDocument *p_doc);
 
-  void SetProfiles(const Gambit::List<double> &,
-		   const Gambit::List<Gambit::MixedStrategyProfile<double> > &);
+  double LambdaToX(double p_lambda)
+  { return p_lambda / (1.0 + p_lambda); }
+  double XToLambda(double p_x)
+  { return p_x / (1.0 - p_x); }
 };
 
 gbtLogitPlotCtrl::gbtLogitPlotCtrl(wxWindow *p_parent, 
@@ -288,30 +315,195 @@ void gbtLogitPlotCtrl::CalcXAxisTickPositions(void)
   }
 }
 
-void gbtLogitPlotCtrl::SetProfiles(const Gambit::List<double> &p_lambdas,
-				   const Gambit::List<Gambit::MixedStrategyProfile<double> > &p_profiles)
+
+//========================================================================
+//                     class gbtLogitPlotStrategyList
+//========================================================================
+
+class gbtLogitPlotStrategyList : public wxSheet {
+private:
+  gbtGameDocument *m_doc;
+
+  //!
+  //! @name Overriding wxSheet members to disable selection behavior
+  //!
+  //@{
+  bool SelectRow(int, bool = false, bool = false)
+    { return false; }
+  bool SelectRows(int, int, bool = false, bool = false)
+    { return false; }
+  bool SelectCol(int, bool = false, bool = false)
+    { return false; }
+  bool SelectCols(int, int, bool = false, bool = false)
+    { return false; }
+  bool SelectCell(const wxSheetCoords&, bool = false, bool = false)
+    { return false; }
+  bool SelectBlock(const wxSheetBlock&, bool = false, bool = false)
+    { return false; }
+  bool SelectAll(bool = false) { return false; }
+
+  bool HasSelection(bool = true) const { return false; }
+  bool IsCellSelected(const wxSheetCoords &) const { return false; }
+  bool IsRowSelected(int) const { return false; }
+  bool IsColSelected(int) const { return false; }
+  bool DeselectBlock(const wxSheetBlock &, bool = false) { return false; }
+  bool ClearSelection(bool = false) { return false; }
+  //@}
+
+  /// Overriding wxSheet member to suppress drawing of cursor
+  void DrawCursorCellHighlight(wxDC&, const wxSheetCellAttr &) { }
+
+  // Event handlers
+  // This disables moving the (unseen) cursor
+  void OnLeftDown(wxSheetEvent &) { }
+  void OnLeftUp(wxSheetEvent &);
+
+public:
+  gbtLogitPlotStrategyList(wxWindow *p_parent, gbtGameDocument *p_doc);
+
+  bool IsShown(int p_index)
+  { return GetCellValue(wxSheetCoords(p_index-1, 2)) == wxT("1"); }
+};
+
+gbtLogitPlotStrategyList::gbtLogitPlotStrategyList(wxWindow *p_parent,
+						   gbtGameDocument *p_doc)
+  : wxSheet(p_parent, wxID_ANY), m_doc(p_doc)
 {
-  if (p_lambdas.Length() == 0)  return;
+  CreateGrid(m_doc->GetGame()->MixedProfileLength(), 3);
+
+  SetRowLabelWidth(0);
+  SetColLabelHeight(0);
+  SetGridLineColour(*wxWHITE);
+
+  for (int st = 1; st <= m_doc->GetGame()->MixedProfileLength(); st++) {
+    GameStrategy strategy = m_doc->GetGame()->GetStrategy(st);
+    GamePlayer player = strategy->GetPlayer();
+    wxColour color = m_doc->GetStyle().GetPlayerColor(player->GetNumber());
+
+    if (strategy->GetNumber() == 1) {
+      SetCellSpan(wxSheetCoords(st-1, 0),
+		  wxSheetCoords(player->NumStrategies(), 1));
+      SetCellValue(wxSheetCoords(st-1, 0),
+		   wxString(player->GetLabel().c_str(), *wxConvCurrent));
+      SetAttrForegroundColour(wxSheetCoords(st-1, 0), color);
+      SetAttrAlignment(wxSheetCoords(st-1, 0),
+		       wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL);
+    }
+    
+
+    SetCellValue(wxSheetCoords(st-1, 1),
+		 wxString(strategy->GetLabel().c_str(), *wxConvCurrent));
+    SetAttrForegroundColour(wxSheetCoords(st-1, 1), color);
+
+    SetCellValue(wxSheetCoords(st-1, 2), wxT("1"));
+    SetAttrForegroundColour(wxSheetCoords(st-1, 2), color);
+    SetAttrRenderer(wxSheetCoords(st-1, 2),
+		    wxSheetCellRenderer(new wxSheetCellBoolRendererRefData()));
+    SetAttrEditor(wxSheetCoords(st-1, 2),
+		  wxSheetCellEditor(new wxSheetCellBoolEditorRefData()));
+  }
+
+  AutoSizeCols();
+
+  Connect(GetId(), wxEVT_SHEET_CELL_LEFT_DOWN,
+	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtLogitPlotStrategyList::OnLeftDown)));
+
+  Connect(GetId(), wxEVT_SHEET_CELL_LEFT_UP,
+	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtLogitPlotStrategyList::OnLeftUp)));
+}
+
+void gbtLogitPlotStrategyList::OnLeftUp(wxSheetEvent &p_event)
+{
+  if (p_event.GetCoords().GetCol() != 2) {
+    return;
+  }
+
+  if (GetCellValue(p_event.GetCoords()) == wxT("1")) {
+    SetCellValue(p_event.GetCoords(), wxT("0"));
+  }
+  else {
+    SetCellValue(p_event.GetCoords(), wxT("1"));
+  }
+
+  // Allow normal processing -- parent window will want to update
+  p_event.Skip();
+}
+
+
+//========================================================================
+//                       class gbtLogitPlotPanel
+//========================================================================
+
+class gbtLogitPlotPanel : public wxPanel {
+private:
+  gbtGameDocument *m_doc;
+  gbtLogitMixedBranch m_branch;
+  gbtLogitPlotStrategyList *m_plotStrategies;
+  gbtLogitPlotCtrl *m_plotCtrl;
+
+  // Event handlers
+  void OnChangeStrategies(wxSheetEvent &) { Plot(); }
+
+public:
+  gbtLogitPlotPanel(wxWindow *p_parent, gbtGameDocument *p_doc);
+
+  void AddProfile(const wxString &p_text)
+  { m_branch.AddProfile(p_text); }
+
+  void Plot(void);
+};
+
+gbtLogitPlotPanel::gbtLogitPlotPanel(wxWindow *p_parent,
+				     gbtGameDocument *p_doc)
+  : wxPanel(p_parent, wxID_ANY), m_doc(p_doc), m_branch(p_doc)
+{
+  m_plotCtrl = new gbtLogitPlotCtrl(this, p_doc);
+  m_plotCtrl->SetSizeHints(wxSize(600, 400));
+
+  m_plotStrategies = new gbtLogitPlotStrategyList(this, p_doc);
+
+  wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
+  sizer->Add(m_plotStrategies, 0, wxALL | wxEXPAND, 5);
+  sizer->Add(m_plotCtrl, 0, wxALL, 5);
+
+  Connect(m_plotStrategies->GetId(), wxEVT_SHEET_CELL_LEFT_UP,
+	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtLogitPlotPanel::OnChangeStrategies)));
+
+  SetSizer(sizer);
+  Layout();
+}
+				    
+void gbtLogitPlotPanel::Plot(void)
+{
+  if (m_branch.NumPoints() == 0)  return;
 
   wxBitmap bitmap(1, 1);
   
-  for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
-    for (int st = 1; st <= player->NumStrategies(); st++) {
-      wxPlotData *curve = new wxPlotData(p_lambdas.Length());
-      curve->SetFilename(wxString::Format(wxT("%d:%d"), pl, st));
+  m_plotCtrl->DeleteCurve(-1);
+
+  for (int st = 1; st <= m_doc->GetGame()->MixedProfileLength(); st++) {
+    if (!m_plotStrategies->IsShown(st)) continue;
+
+    wxPlotData *curve = new wxPlotData(m_branch.NumPoints());
+
+    GameStrategy strategy = m_doc->GetGame()->GetStrategy(st);
+    GamePlayer player = strategy->GetPlayer();
+
+    curve->SetFilename(wxString(player->GetLabel().c_str(), *wxConvCurrent) +
+		       wxT(":") +
+		       wxString(strategy->GetLabel().c_str(), *wxConvCurrent));
     
-      for (int i = 0; i < p_lambdas.Length(); i++) {
-	curve->SetValue(i, LambdaToX(p_lambdas[i+1]), 
-			p_profiles[i+1](pl, st));
-      }
-
-      curve->SetPen(wxPLOTPEN_NORMAL, 
-		    wxPen(m_doc->GetStyle().GetPlayerColor(pl), 1, wxSOLID));
-      curve->SetSymbol(bitmap);
-
-      AddCurve(curve);
+    for (int i = 0; i < m_branch.NumPoints(); i++) {
+      curve->SetValue(i, m_plotCtrl->LambdaToX(m_branch.GetLambda(i+1)), 
+		      m_branch.GetProfile(i+1)[st]);
     }
+
+    curve->SetPen(wxPLOTPEN_NORMAL, 
+		  wxPen(m_doc->GetStyle().GetPlayerColor(player->GetNumber()),
+			1, wxSOLID));
+    curve->SetSymbol(bitmap);
+
+    m_plotCtrl->AddCurve(curve, false);
   }
 }
 
@@ -330,6 +522,7 @@ BEGIN_EVENT_TABLE(gbtLogitMixedDialog, wxDialog)
 END_EVENT_TABLE()
 
 #include "bitmaps/stop.xpm"
+#include "bitmaps/print.xpm"
 
 gbtLogitMixedDialog::gbtLogitMixedDialog(wxWindow *p_parent, 
 					 gbtGameDocument *p_doc)
@@ -354,13 +547,23 @@ gbtLogitMixedDialog::gbtLogitMixedDialog(wxWindow *p_parent,
 
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
+  wxToolBar *toolBar = new wxToolBar(this, wxID_ANY);
+  toolBar->SetWindowStyle(wxTB_HORIZONTAL | wxTB_FLAT);
+  toolBar->SetMargins(4, 4);
+  toolBar->SetToolBitmapSize(wxSize(24, 24));
+
+  toolBar->AddTool(wxID_PRINT, wxBitmap(print_xpm), wxNullBitmap, false,
+		   -1, -1, 0, _("Print the graph"), _("Print the graph"));
+
+  sizer->Add(toolBar, 0, wxALL | wxEXPAND, 5);
+
   wxBoxSizer *midSizer = new wxBoxSizer(wxHORIZONTAL);
-  m_mixedList = new gbtLogitMixedList(this, m_doc);
+  /*
+  m_mixedList = new gbtLogitMixedSheet(this, m_doc, m_branch);
   m_mixedList->SetSizeHints(wxSize(300, 400));
   midSizer->Add(m_mixedList, 0, wxALL | wxALIGN_CENTER, 5);
-  
-  m_plot = new gbtLogitPlotCtrl(this, m_doc);
-  m_plot->SetSizeHints(wxSize(400, 400));
+  */
+  m_plot = new gbtLogitPlotPanel(this, m_doc);
   midSizer->Add(m_plot, 0, wxALL | wxALIGN_CENTER, 5);
 
   sizer->Add(midSizer, 0, wxALL | wxALIGN_CENTER, 5);
@@ -391,7 +594,7 @@ void gbtLogitMixedDialog::Start(void)
   m_process = new wxProcess(this, GBT_ID_PROCESS);
   m_process->Redirect();
 
-  m_pid = wxExecute(wxT("gambit-nfg-logit"), wxEXEC_ASYNC, m_process);
+  m_pid = wxExecute(wxT("gambit-logit -S"), wxEXEC_ASYNC, m_process);
   
   std::ostringstream s;
   m_doc->GetGame()->WriteNfgFile(s);
@@ -429,7 +632,8 @@ void gbtLogitMixedDialog::OnIdle(wxIdleEvent &p_event)
 
     wxString msg;
     msg << tis.ReadLine();
-    m_mixedList->AddProfile(msg, false);
+    m_plot->AddProfile(msg);
+    //m_mixedList->AddProfile(msg, false);
     m_output += msg;
     m_output += wxT("\n");
 
@@ -457,7 +661,8 @@ void gbtLogitMixedDialog::OnEndProcess(wxProcessEvent &p_event)
     msg << tis.ReadLine();
 
     if (msg != wxT("")) {
-      m_mixedList->AddProfile(msg, true);
+      m_plot->AddProfile(msg);
+      //m_mixedList->AddProfile(msg, true);
       m_output += msg;
       m_output += wxT("\n");
     }
@@ -474,7 +679,7 @@ void gbtLogitMixedDialog::OnEndProcess(wxProcessEvent &p_event)
 
   m_okButton->Enable(true);
   m_saveButton->Enable(true);
-  m_plot->SetProfiles(m_mixedList->GetLambdas(), m_mixedList->GetProfiles());
+  m_plot->Plot();
 }
 
 void gbtLogitMixedDialog::OnStop(wxCommandEvent &)

@@ -263,7 +263,7 @@ void gbtLogitBehavDialog::Start(void)
   m_process = new wxProcess(this, GBT_ID_PROCESS);
   m_process->Redirect();
 
-  m_pid = wxExecute(wxT("gambit-efg-logit"), wxEXEC_ASYNC, m_process);
+  m_pid = wxExecute(wxT("gambit-logit"), wxEXEC_ASYNC, m_process);
   
   std::ostringstream s;
   m_doc->GetGame()->WriteEfgFile(s);
