@@ -644,6 +644,8 @@ public:
   PVector<int> NumMembers(void) const;
   /// The number of strategies for each player
   Array<int> NumStrategies(void) const;
+  /// Gets the i'th strategy in the game, numbered globally
+  GameStrategy GetStrategy(int p_index) const;
   /// Returns the total number of actions in the game
   int BehavProfileLength(void) const;
   /// Returns the total number of strategies in the game

@@ -1317,6 +1317,18 @@ Array<int> GameRep::NumStrategies(void) const
   return dim;
 }
 
+GameStrategy GameRep::GetStrategy(int p_index) const
+{
+  for (int pl = 1, i = 1; pl <= m_players.Length(); pl++) {
+    for (int st = 1; st <= m_players[pl]->m_strategies.Length(); st++, i++) {
+      if (p_index == i) {
+	return m_players[pl]->m_strategies[st];
+      }
+    }
+  }
+  throw IndexException();
+}
+
 int GameRep::BehavProfileLength(void) const
 {
   if (!IsTree()) throw UndefinedException();
