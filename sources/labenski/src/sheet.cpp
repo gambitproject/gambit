@@ -1832,7 +1832,7 @@ void wxSheet::SetAttrBackgroundColour( const wxSheetCoords& coords, const wxColo
     GetOrCreateAttr(coords, type).SetBackgroundColour(colour);
     RefreshAttrChange(coords, type);
 }
-void wxSheet::SetAttrForegoundColour( const wxSheetCoords& coords, const wxColour& colour, wxSheetAttr_Type type )
+void wxSheet::SetAttrForegroundColour( const wxSheetCoords& coords, const wxColour& colour, wxSheetAttr_Type type )
 {
     GetOrCreateAttr(coords, type).SetForegroundColour(colour);
     RefreshAttrChange(coords, type);

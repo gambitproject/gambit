@@ -581,7 +581,7 @@ public:
     //  after setting the particular value.
     //  The type may be only be wxSHEET_AttrDefault/Cell/Row/Col 
     void SetAttrBackgroundColour( const wxSheetCoords& coords, const wxColour& colour, wxSheetAttr_Type type = wxSHEET_AttrCell );
-    void SetAttrForegoundColour( const wxSheetCoords& coords, const wxColour& colour, wxSheetAttr_Type type = wxSHEET_AttrCell );
+    void SetAttrForegroundColour( const wxSheetCoords& coords, const wxColour& colour, wxSheetAttr_Type type = wxSHEET_AttrCell );
     void SetAttrFont( const wxSheetCoords& coords, const wxFont& font, wxSheetAttr_Type type = wxSHEET_AttrCell );
     void SetAttrAlignment( const wxSheetCoords& coords, int align, wxSheetAttr_Type type = wxSHEET_AttrCell );
     void SetAttrOrientation( const wxSheetCoords& coords, int orientation, wxSheetAttr_Type type = wxSHEET_AttrCell );
