@@ -32,6 +32,7 @@
 #include <wx/image.h>         // for creating drag-and-drop cursor
 #include <wx/colordlg.h>      // for picking player colors
 
+#include "gamedoc.h"
 #include "nfgpanel.h"
 #include "nfgtable.h"
 #include "menuconst.h"
@@ -330,49 +331,6 @@ void gbtTablePlayerToolbar::PostPendingChanges(void)
   }
 }
 
-
-//--------------------------------------------------------------------------
-//                 class gbtPlayerLabelDropTarget
-//--------------------------------------------------------------------------
-
-class gbtPlayerLabelDropTarget : public wxTextDropTarget {
-private:
-  gbtPlayerLabelCtrl *m_owner;
-
-public:
-  gbtPlayerLabelDropTarget(gbtPlayerLabelCtrl *p_owner) 
-    : m_owner(p_owner) { }
-
-  bool OnDropText(wxCoord x, wxCoord y, const wxString &p_text);
-};
-
-bool gbtPlayerLabelDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
-					  const wxString &p_text)
-{
-  if (p_text[0] == 'P') {
-    long pl;
-    p_text.Right(p_text.Length() - 1).ToLong(&pl);
-    
-    if (pl == m_owner->GetPlayer()) {
-      return false;
-    }
-
-    /*
-    if (m_owner->IsRowPlayer()) {
-      wxCommandEvent event(GBT_ROW_PLAYER_CHANGE);
-      event.SetInt(pl);
-      wxPostEvent(m_owner, event);
-    }
-    else {
-      wxCommandEvent event(GBT_COL_PLAYER_CHANGE);
-      event.SetInt(pl);
-      wxPostEvent(m_owner, event);
-    }
-    */
-    return true;
-  }
-  return false;
-}
 
 //=====================================================================
 //               class gbtStrategyDominanceToolbar

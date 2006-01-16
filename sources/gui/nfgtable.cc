@@ -36,6 +36,7 @@
 
 #include "renratio.h"    // special renderer for rational numbers
 
+#include "gamedoc.h"
 #include "nfgpanel.h"
 #include "nfgtable.h"
 

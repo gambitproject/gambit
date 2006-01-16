@@ -9,8 +9,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/sources -I$(top_srcdir)/sources/labenski/include $
 gambit_SOURCES = \
 	analysis.cc \
 	analysis.h \
-	ctrlplay.cc \
-	ctrlplay.h \
 	edittext.cc edittext.h \
 	dlabout.cc \
 	dlabout.h \
