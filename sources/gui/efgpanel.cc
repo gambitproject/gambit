@@ -364,32 +364,32 @@ void gbtTreePlayerPanel::OnUpdate(void)
 
     if (node) {
       m_nodeValue->SetForegroundColour(color);
-      std::string value = m_doc->GetNodeValue(node, m_player);
+      std::string value = m_doc->GetProfiles().GetNodeValue(node, m_player);
       m_nodeValue->SetLabel(wxT("Node value: ") +
 			    wxString(value.c_str(), *wxConvCurrent));
       GetSizer()->Show(m_nodeValue, true);
 
       if (node->GetInfoset() && node->GetPlayer()->GetNumber() == m_player) {
 	m_nodeProb->SetForegroundColour(color);
-	std::string value = m_doc->GetRealizProb(node);
+	std::string value = m_doc->GetProfiles().GetRealizProb(node);
 	m_nodeProb->SetLabel(wxT("Node reached: ") +
 			     wxString(value.c_str(), *wxConvCurrent));
 	GetSizer()->Show(m_nodeProb, true);
 
 	m_infosetValue->SetForegroundColour(color);
-	value = m_doc->GetInfosetValue(node);
+	value = m_doc->GetProfiles().GetInfosetValue(node);
 	m_infosetValue->SetLabel(wxT("Infoset value: ") +
 				 wxString(value.c_str(), *wxConvCurrent));
 	GetSizer()->Show(m_infosetValue, true);
 
 	m_infosetProb->SetForegroundColour(color);
-	value = m_doc->GetInfosetProb(node);
+	value = m_doc->GetProfiles().GetInfosetProb(node);
 	m_infosetProb->SetLabel(wxT("Infoset reached: ") +
 				wxString(value.c_str(), *wxConvCurrent));
 	GetSizer()->Show(m_infosetProb, true);
 	
 	m_belief->SetForegroundColour(color);
-	value = m_doc->GetBeliefProb(node);
+	value = m_doc->GetProfiles().GetBeliefProb(node);
 	m_belief->SetLabel(wxT("Belief: ") +
 			   wxString(value.c_str(), *wxConvCurrent));
 	GetSizer()->Show(m_belief, true);

@@ -425,52 +425,59 @@ wxString gbtTreeLayout::CreateNodeLabel(const gbtNodeEntry *p_entry,
 {
   Gambit::GameNode n = p_entry->GetNode();
 
-  switch (p_which) {
-  case GBT_NODE_LABEL_NOTHING:
-    return wxT("");
-  case GBT_NODE_LABEL_LABEL:
-    return wxString(n->GetLabel().c_str(), *wxConvCurrent);
-  case GBT_NODE_LABEL_PLAYER:
-    if (n->GetPlayer()) {
-      return wxString(n->GetPlayer()->GetLabel().c_str(), *wxConvCurrent);
-    }
-    else {
+  try {
+    switch (p_which) {
+    case GBT_NODE_LABEL_NOTHING:
       return wxT("");
-    }
-  case GBT_NODE_LABEL_ISETLABEL:
-    if (n->GetInfoset()) {
-      return wxString(n->GetInfoset()->GetLabel().c_str(), 
-		      *wxConvCurrent);
-    }
-    else {
-      return wxT("");
-    }
-  case GBT_NODE_LABEL_ISETID:
-    if (n->GetInfoset()) {
-      if (n->GetInfoset()->IsChanceInfoset()) {
-	return wxString::Format(wxT("C:%d"), n->GetInfoset()->GetNumber());
+    case GBT_NODE_LABEL_LABEL:
+      return wxString(n->GetLabel().c_str(), *wxConvCurrent);
+    case GBT_NODE_LABEL_PLAYER:
+      if (n->GetPlayer()) {
+	return wxString(n->GetPlayer()->GetLabel().c_str(), *wxConvCurrent);
       }
       else {
-	return wxString::Format(wxT("%d:%d"),
-				n->GetPlayer()->GetNumber(),
-				n->GetInfoset()->GetNumber());
+	return wxT("");
       }
-    }
-    else {
-      return _T("");
-    }
-  case GBT_NODE_LABEL_REALIZPROB:
-    return wxString(m_doc->GetRealizProb(n).c_str(), *wxConvCurrent);
-  case GBT_NODE_LABEL_BELIEFPROB:
-    return wxString(m_doc->GetBeliefProb(n).c_str(), *wxConvCurrent);
-  case GBT_NODE_LABEL_VALUE:
-    if (n->GetInfoset() && n->GetPlayer()->GetNumber() > 0) {
-      return wxString(m_doc->GetNodeValue(n, n->GetPlayer()->GetNumber()).c_str(), *wxConvCurrent);
-    }
-    else {
+    case GBT_NODE_LABEL_ISETLABEL:
+      if (n->GetInfoset()) {
+	return wxString(n->GetInfoset()->GetLabel().c_str(), 
+			*wxConvCurrent);
+      }
+      else {
+	return wxT("");
+      }
+    case GBT_NODE_LABEL_ISETID:
+      if (n->GetInfoset()) {
+	if (n->GetInfoset()->IsChanceInfoset()) {
+	  return wxString::Format(wxT("C:%d"), n->GetInfoset()->GetNumber());
+	}
+	else {
+	  return wxString::Format(wxT("%d:%d"),
+				  n->GetPlayer()->GetNumber(),
+				  n->GetInfoset()->GetNumber());
+	}
+      }
+      else {
+	return _T("");
+      }
+    case GBT_NODE_LABEL_REALIZPROB:
+      return wxString(m_doc->GetProfiles().GetRealizProb(n).c_str(), 
+		      *wxConvCurrent);
+    case GBT_NODE_LABEL_BELIEFPROB:
+      return wxString(m_doc->GetProfiles().GetBeliefProb(n).c_str(), 
+		      *wxConvCurrent);
+    case GBT_NODE_LABEL_VALUE:
+      if (n->GetInfoset() && n->GetPlayer()->GetNumber() > 0) {
+	return wxString(m_doc->GetProfiles().GetNodeValue(n, n->GetPlayer()->GetNumber()).c_str(), *wxConvCurrent);
+      }
+      else {
+	return wxT("");
+      }
+    default:
       return wxT("");
     }
-  default:
+  }
+  catch (...) {
     return wxT("");
   }
 }    
@@ -480,21 +487,32 @@ wxString gbtTreeLayout::CreateBranchLabel(const gbtNodeEntry *p_entry,
 {
   Gambit::GameNode parent = p_entry->GetParent()->GetNode();
 
-  switch (p_which) {
-  case GBT_BRANCH_LABEL_NOTHING:
-    return wxT("");
-  case GBT_BRANCH_LABEL_LABEL:
-    return wxString(parent->GetInfoset()->GetAction(p_entry->GetChildNumber())->GetLabel().c_str(),
-		    *wxConvCurrent);
-  case GBT_BRANCH_LABEL_PROBS:
-    return wxString(m_doc->GetActionProb(parent, 
-					 p_entry->GetChildNumber()).c_str(),
-		    *wxConvCurrent);
-  case GBT_BRANCH_LABEL_VALUE:
-    return wxString(m_doc->GetActionValue(parent,
-					  p_entry->GetChildNumber()).c_str(),
-		    *wxConvCurrent);
-  default:
+  try {
+    switch (p_which) {
+    case GBT_BRANCH_LABEL_NOTHING:
+      return wxT("");
+    case GBT_BRANCH_LABEL_LABEL:
+      return wxString(parent->GetInfoset()->GetAction(p_entry->GetChildNumber())->GetLabel().c_str(),
+		      *wxConvCurrent);
+    case GBT_BRANCH_LABEL_PROBS:
+      if (parent->GetPlayer() && parent->GetPlayer()->IsChance()) {
+	return wxString(parent->GetInfoset()->GetActionProb<std::string>(p_entry->GetChildNumber()).c_str(),
+			*wxConvCurrent);
+      }
+      else {
+	return wxString(m_doc->GetProfiles().GetActionProb(parent, 
+							   p_entry->GetChildNumber()).c_str(),
+			*wxConvCurrent);
+      }
+    case GBT_BRANCH_LABEL_VALUE:
+      return wxString(m_doc->GetProfiles().GetActionValue(parent,
+							  p_entry->GetChildNumber()).c_str(),
+		      *wxConvCurrent);
+    default:
+      return wxT("");
+    }
+  }
+  catch (...) {
     return wxT("");
   }
 }
@@ -857,8 +875,17 @@ void gbtTreeLayout::GenerateLabels(void)
       entry->SetBranchBelowLabel(CreateBranchLabel(entry,
 						   settings.BranchBelowLabel()));
       entry->SetBranchBelowFont(settings.GetFont());
-      entry->SetActionProb(m_doc->ActionProb(entry->GetNode()->GetParent(),
-					     entry->GetChildNumber()));
+
+      Gambit::GameNode parent = entry->GetNode()->GetParent();
+      if (parent->GetPlayer()->IsChance()) {
+	entry->SetActionProb(parent->GetInfoset()->GetActionProb<double>(entry->GetChildNumber()));
+      }
+      else {
+	int profile = m_doc->GetCurrentProfile();
+	if (profile > 0) {
+	  entry->SetActionProb((double) Gambit::ToNumber(m_doc->GetProfiles().GetActionProb(parent, entry->GetChildNumber())));
+	}
+      }
     }
   }
 }

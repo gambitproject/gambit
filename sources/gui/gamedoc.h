@@ -340,15 +340,6 @@ public:
   Gambit::GameNode GetSelectNode(void) const { return m_selectNode; }
   void SetSelectNode(Gambit::GameNode);
 
-  std::string GetRealizProb(const Gambit::GameNode &) const;
-  std::string GetBeliefProb(const Gambit::GameNode &) const;
-  std::string GetNodeValue(const Gambit::GameNode &, int pl) const;
-  std::string GetInfosetProb(const Gambit::GameNode &) const;
-  std::string GetInfosetValue(const Gambit::GameNode &) const;
-  std::string GetActionValue(const Gambit::GameNode &, int act) const;
-  std::string GetActionProb(const Gambit::GameNode &, int act) const;
-  double ActionProb(const Gambit::GameNode &n, int br) const;
-
   void UpdateViews(gbtGameModificationType p_modifications);
 
   /// Call to ask viewers to post any pending changes

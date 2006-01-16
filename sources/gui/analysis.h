@@ -78,6 +78,20 @@ public:
   const Gambit::MixedStrategyProfile<double> &GetMixed(int p_index) const
   { return m_mixedProfiles[p_index]; }
 
+  /// Return the realization probability of the node for the given 
+  /// profile.  (index == -1 for currently selected profile)
+  std::string GetRealizProb(const Gambit::GameNode &, int p_index = -1) const;
+  std::string GetBeliefProb(const Gambit::GameNode &, int p_index = -1) const;
+  std::string GetNodeValue(const Gambit::GameNode &, int pl, 
+			   int p_index = -1) const;
+  std::string GetInfosetProb(const Gambit::GameNode &, int p_index = -1) const;
+  std::string GetInfosetValue(const Gambit::GameNode &, 
+			      int p_index = -1) const;
+  std::string GetActionValue(const Gambit::GameNode &, int act,
+			     int p_index = -1) const;
+  std::string GetActionProb(const Gambit::GameNode &, int act,
+			    int p_index = -1) const;
+
   /// Get the index of the currently selected profile
   int GetCurrent(void) const { return m_current; }
 

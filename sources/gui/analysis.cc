@@ -36,30 +36,34 @@
 #include "analysis.h"
 #include "gamedoc.h"
 
+using namespace Gambit;
+
+
+
 //=========================================================================
 //                     class gbtAnalysisProfileList
 //=========================================================================
 
 void 
-gbtAnalysisProfileList::Append(const Gambit::MixedBehavProfile<double> &p_profile)
+gbtAnalysisProfileList::Append(const MixedBehavProfile<double> &p_profile)
 {
   m_behavProfiles.Append(p_profile);
-  m_mixedProfiles.Append(Gambit::MixedStrategyProfile<double>(p_profile));
+  m_mixedProfiles.Append(MixedStrategyProfile<double>(p_profile));
 }
 
 void
-gbtAnalysisProfileList::Append(const Gambit::MixedStrategyProfile<double> &p_profile)
+gbtAnalysisProfileList::Append(const MixedStrategyProfile<double> &p_profile)
 {
   m_mixedProfiles.Append(p_profile);
   if (m_doc->IsTree()) {
-    m_behavProfiles.Append(Gambit::MixedBehavProfile<double>(p_profile));
+    m_behavProfiles.Append(MixedBehavProfile<double>(p_profile));
   }
 }
 
 void gbtAnalysisProfileList::BuildNfg(void)
 {
   for (int i = 1; i <= m_behavProfiles.Length(); i++) {
-    m_mixedProfiles.Append(Gambit::MixedStrategyProfile<double>(m_behavProfiles[i]));
+    m_mixedProfiles.Append(MixedStrategyProfile<double>(m_behavProfiles[i]));
   }
 }
 
@@ -75,8 +79,8 @@ int gbtAnalysisProfileList::NumProfiles(void) const
 
 void gbtAnalysisProfileList::Clear(void)
 {
-  m_behavProfiles = Gambit::List<Gambit::MixedBehavProfile<double> >();
-  m_mixedProfiles = Gambit::List<Gambit::MixedStrategyProfile<double> >();
+  m_behavProfiles = List<MixedBehavProfile<double> >();
+  m_mixedProfiles = List<MixedStrategyProfile<double> >();
   m_current = 0;
 }
 
@@ -86,28 +90,28 @@ void gbtAnalysisProfileList::Clear(void)
 
 #include <wx/tokenzr.h>
 
-static Gambit::MixedStrategyProfile<double> 
+static MixedStrategyProfile<double> 
 TextToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
 {
-  Gambit::MixedStrategyProfile<double> profile(p_doc->GetGame());
+  MixedStrategyProfile<double> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
 
   for (int i = 1; i <= profile.Length(); i++) {
-    profile[i] = Gambit::ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
+    profile[i] = ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
   }
 
   return profile;
 }
 
-static Gambit::MixedBehavProfile<double> 
+static MixedBehavProfile<double> 
 TextToBehavProfile(gbtGameDocument *p_doc, const wxString &p_text)
 {
-  Gambit::MixedBehavProfile<double> profile(p_doc->GetGame());
+  MixedBehavProfile<double> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
   for (int i = 1; i <= profile.Length(); i++) {
-    profile[i] = Gambit::ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
+    profile[i] = ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
   }
 
   return profile;
@@ -144,3 +148,120 @@ void gbtAnalysisProfileList::Load(TiXmlNode *p_analysis)
     }
   }
 }
+
+std::string 
+gbtAnalysisProfileList::GetRealizProb(const GameNode &p_node,
+				      int p_index) const
+{
+  int index = (p_index == -1) ? m_current : p_index;
+
+  return ToText(m_behavProfiles[index].GetRealizProb(p_node),
+			m_doc->GetStyle().NumDecimals());
+}
+
+std::string 
+gbtAnalysisProfileList::GetBeliefProb(const GameNode &p_node,
+				      int p_index) const
+{
+  int index = (p_index == -1) ? m_current : p_index;
+
+  if (!p_node->GetPlayer()) return "";
+
+  if (m_behavProfiles[index].GetIsetProb(p_node->GetInfoset()) > Rational(0)) {
+    return ToText(m_behavProfiles[index].GetBeliefProb(p_node),
+		  m_doc->GetStyle().NumDecimals());
+  }
+  else {
+    // We don't compute assessments yet!
+    return "*";
+  }
+}
+
+std::string 
+gbtAnalysisProfileList::GetNodeValue(const GameNode &p_node,
+				     int p_player, int p_index) const
+{
+  int index = (p_index == -1) ? m_current : p_index;
+
+  return ToText(m_behavProfiles[index].GetNodeValue(p_node)[p_player], 
+		m_doc->GetStyle().NumDecimals());
+}
+
+std::string 
+gbtAnalysisProfileList::GetInfosetProb(const Gambit::GameNode &p_node,
+				       int p_index) const
+{
+  int index = (p_index == -1) ? m_current : p_index;
+
+  if (!p_node->GetPlayer()) return "";
+
+  return ToText(m_behavProfiles[index].GetIsetProb(p_node->GetInfoset()),
+		m_doc->GetStyle().NumDecimals());
+}
+
+std::string 
+gbtAnalysisProfileList::GetInfosetValue(const Gambit::GameNode &p_node,
+					int p_index) const
+{
+  int index = (p_index == -1) ? m_current : p_index;
+
+  if (!p_node->GetPlayer() || p_node->GetPlayer()->IsChance())  return "";
+
+  if (m_behavProfiles[index].GetIsetProb(p_node->GetInfoset()) > Rational(0)) {
+    return ToText(m_behavProfiles[index].GetIsetValue(p_node->GetInfoset()),
+		  m_doc->GetStyle().NumDecimals());
+  }
+  else {
+    // In the absence of beliefs, this is not well-defined in general
+    return "*";
+  }
+}
+
+std::string 
+gbtAnalysisProfileList::GetActionProb(const GameNode &p_node, int p_act,
+				      int p_index) const
+{
+  int index = (p_index == -1) ? m_current : p_index;
+
+  if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
+    GameInfoset infoset = p_node->GetInfoset();
+    return infoset->GetActionProb<std::string>(p_act);
+  }
+
+  if (!p_node->GetPlayer())  return "";
+  
+  const MixedBehavProfile<double> &profile = m_behavProfiles[index];
+
+  if (!profile.IsDefinedAt(p_node->GetInfoset())) {
+    return "*";
+  }
+  
+  return ToText(profile.GetActionProb(p_node->GetInfoset()->GetAction(p_act)),
+		m_doc->GetStyle().NumDecimals());
+}
+
+std::string 
+gbtAnalysisProfileList::GetActionValue(const GameNode &p_node, int p_act,
+				       int p_index) const
+{
+  int index = (p_index == -1) ? m_current : p_index;
+
+  if (!p_node->GetPlayer() || p_node->GetPlayer()->IsChance()) return "";
+
+  if (m_behavProfiles[index].GetIsetProb(p_node->GetInfoset()) > Rational(0)) {
+    return ToText(m_behavProfiles[index].GetActionValue(p_node->GetInfoset()->GetAction(p_act)),
+		  m_doc->GetStyle().NumDecimals());
+  }
+  else  {
+    // In the absence of beliefs, this is not well-defined
+    return "*";
+  }
+}
+
+
+
+
+
+
+
+
