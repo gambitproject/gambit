@@ -53,7 +53,6 @@
 #include "dlgameprop.h"
 #include "dlnash.h"
 #include "dlnashmon.h"
-#include "dlnfglogit.h"
 #include "dlefglogit.h"
 #include "dlabout.h"
 
@@ -1359,13 +1358,15 @@ void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
   m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
+extern void LogitStrategic(wxWindow *, gbtGameDocument *);
+
 void gbtGameFrame::OnToolsQre(wxCommandEvent &)
 {
   if (m_efgPanel && m_splitter->GetWindow1() == m_efgPanel) {
     gbtLogitBehavDialog(this, m_doc).ShowModal();
   }
   else {
-    gbtLogitMixedDialog(this, m_doc).ShowModal();
+    LogitStrategic(this, m_doc);
   }
 }
 

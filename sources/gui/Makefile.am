@@ -33,7 +33,6 @@ gambit_SOURCES = \
 	dlnashmon.cc \
 	dlnashmon.h \
 	dlnfglogit.cc \
-	dlnfglogit.h \
 	efgdisplay.cc \
 	efgdisplay.h \
 	efglayout.cc \

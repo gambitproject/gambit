@@ -6,6 +6,7 @@ EXTRA_DIST = \
 	calc.xpm \
 	close.xpm \
 	color.xpm \
+	datasrc.xpm \
 	deldecimal.xpm \
 	dice.xpm \
 	efg.ico \
@@ -34,6 +35,7 @@ EXTRA_DIST = \
 	profiles.xpm \
 	redo.xpm \
 	saveas.xpm \
+	savedata.xpm \
 	save.xpm \
 	stop.xpm \
 	table.xpm \
