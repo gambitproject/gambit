@@ -6,6 +6,7 @@
 <!ENTITY enumpure SYSTEM "enumpure.sgml">
 <!ENTITY enumpoly SYSTEM "enumpoly.sgml">
 <!ENTITY enummixed SYSTEM "enummixed.sgml">
+<!ENTITY gt SYSTEM "gt.sgml">
 <!ENTITY lcp SYSTEM "lcp.sgml">
 <!ENTITY liap SYSTEM "liap.sgml">
 <!ENTITY lp SYSTEM "lp.sgml">

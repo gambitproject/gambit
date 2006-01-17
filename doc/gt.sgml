@@ -1,0 +1,240 @@
+<refentry id="nash.gnm">
+<refentryinfo>
+<date>2005-08-15</date>
+</refentryinfo>
+
+<refmeta>
+<refentrytitle>
+<application>gambit-gnm</application>
+</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo>Gambit 1.0</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>
+<application>gambit-lcp</application>
+</refname>
+<refpurpose>
+Computes Nash equilibria in a strategic game using a global Newton method
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<refsynopsisdivinfo>
+<date>2005-08-15</date>
+</refsynopsisdivinfo>
+<cmdsynopsis>
+<command>gambit-gnm</command>
+<arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
+<arg><option>-h</option></arg>
+<arg><option>-q</option></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<refsect1info>
+<date>2005-08-15</date>
+</refsect1info>
+<title>DESCRIPTION</title>
+<para>
+<command>gambit-gnm</command> reads a game on standard input
+and computes Nash equilibria using a global Newton method approach
+developed by Govindan and Wilson.
+This program is a wrapper around the Gametracer 0.2 implementation by
+Ben Blum and Christian Shelton.
+</para>
+
+</refsect1>
+
+<refsect1>
+<title>OPTIONS</title>
+<variablelist>
+<varlistentry>
+<term><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></term>
+<listitem>
+<para>
+Express all output using decimal representations with
+<replaceable class="parameter">DECIMALS</replaceable> digits.  
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-h</option></term>
+<listitem>
+<para>
+Prints a help message listing the available options.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-q</option></term>
+<listitem>
+<para>
+Suppresses printing of the banner at program launch.
+</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect1>
+
+<refsect1>
+<title>USAGE</title>
+<para>
+<command>gambit-gnm</command> [OPTIONS] < file.[en]fg
+</para>
+</refsect1>
+
+<refsect1>
+<title>CAVEATS</title>
+<para>
+This is an experimental program and has not been extensively tested.
+</para>
+</refsect1>
+
+<refsect1>
+<title>AUTHOR</title>
+<para>
+<author>
+<firstname>Ben</firstname>
+<surname>Blum</surname>
+<contrib>Original author</contrib>
+</author>
+<author>
+<firstname>Christian</firstname>
+<surname>Shelton</surname>
+<contrib>Original author</contrib>
+</author>
+<author>
+<firstname>Theodore</firstname>
+<surname>Turocy</surname>
+<contrib>Gambit interface</contrib>
+</author>
+</para>
+</refsect1>
+</refentry>
+
+
+
+<refentry id="nash.ipa">
+<refentryinfo>
+<date>2005-08-15</date>
+</refentryinfo>
+
+<refmeta>
+<refentrytitle>
+<application>gambit-ipa</application>
+</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo>Gambit 1.0</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>
+<application>gambit-lcp</application>
+</refname>
+<refpurpose>
+Computes Nash equilibria in a strategic game using iterated polymatrix approximation
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<refsynopsisdivinfo>
+<date>2005-08-15</date>
+</refsynopsisdivinfo>
+<cmdsynopsis>
+<command>gambit-ipa</command>
+<arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
+<arg><option>-h</option></arg>
+<arg><option>-q</option></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<refsect1info>
+<date>2005-08-15</date>
+</refsect1info>
+<title>DESCRIPTION</title>
+<para>
+<command>gambit-ipa</command> reads a game on standard input
+and computes Nash equilibria using an iterated polymatrix approximation
+approach developed by Govindan and Wilson.
+This program is a wrapper around the Gametracer 0.2 implementation by
+Ben Blum and Christian Shelton.
+</para>
+
+</refsect1>
+
+<refsect1>
+<title>OPTIONS</title>
+<variablelist>
+<varlistentry>
+<term><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></term>
+<listitem>
+<para>
+Express all output using decimal representations with
+<replaceable class="parameter">DECIMALS</replaceable> digits.  
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-h</option></term>
+<listitem>
+<para>
+Prints a help message listing the available options.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-q</option></term>
+<listitem>
+<para>
+Suppresses printing of the banner at program launch.
+</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect1>
+
+<refsect1>
+<title>USAGE</title>
+<para>
+<command>gambit-ipa</command> [OPTIONS] < file.[en]fg
+</para>
+</refsect1>
+
+<refsect1>
+<title>CAVEATS</title>
+<para>
+This is an experimental program and has not been extensively tested.
+</para>
+</refsect1>
+
+<refsect1>
+<title>AUTHOR</title>
+<para>
+<author>
+<firstname>Ben</firstname>
+<surname>Blum</surname>
+<contrib>Original author</contrib>
+</author>
+<author>
+<firstname>Christian</firstname>
+<surname>Shelton</surname>
+<contrib>Original author</contrib>
+</author>
+<author>
+<firstname>Theodore</firstname>
+<surname>Turocy</surname>
+<contrib>Gambit interface</contrib>
+</author>
+</para>
+</refsect1>
+</refentry>
+
