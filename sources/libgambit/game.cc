@@ -1516,7 +1516,7 @@ void GameRep::RebuildTable(void)
   StrategyIterator iter(StrategySupport(const_cast<GameRep *>(this)));
 
   do {
-    long newindex = 0L;
+    long newindex = 1L;
     for (int pl = 1; pl <= m_players.Length(); pl++) {
       if (iter.profile.GetStrategy(pl)->m_index < 0) {
 	// This is a contingency involving a new strategy... skip
@@ -1528,8 +1528,8 @@ void GameRep::RebuildTable(void)
       }
     }
 
-    if (newindex >= 0) {
-      newResults[newindex+1] = m_results[iter.profile.m_index+1];
+    if (newindex >= 1) {
+      newResults[newindex] = m_results[iter.profile.m_index];
     }
   } while (iter.NextContingency());
 
