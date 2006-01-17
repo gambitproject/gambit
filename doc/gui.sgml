@@ -1428,6 +1428,66 @@ The computed correspondence values can be saved to a CSV
 is suitable for reading by a spreadsheet or graphing application.
 </para>
 
+<sect2 id="gui.qre.experimental">
+<title>Quantal response equilibria in strategic games (experimental)</title>
+
+<para>
+There is an experimental graphing interface for quantal response equilibria
+in strategic games.  Figure <xref linkend="figure.qre.experimental">
+illustrates the layout of this interface.
+</para>
+
+<figure id="figure.qre.experimental">
+<title>Agent quantal response equilibria in the poker example</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="../screens/logit.png">
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>
+The graph by default plots the probabilities of all strategies,
+color-coded by player, as a function of the lambda parameter.
+The lambda values on the horizontal axis are plotted using a
+sigmoid transformation; the <guilabel>Graph scaling</guilabel> value
+controls the shape of this transformation. Lower values of the scaling
+give more graph space to lower values of lambda; higher values of
+the scaling give more space to higher values of lambda.
+</para>
+
+<para>
+The strategies graphed are indicated in the panel at the left of the
+window.  Clicking on the checkbox next to a strategy toggles whether
+it is displayed in the graph.
+</para>
+
+<para>
+The data points computed in the correspondence can be viewed 
+(as in the extensive game example above) by clicking on the
+show data icon
+<guiicon><inlinegraphic fileref="../icons/datasrc.gif"></guiicon>
+on the toolbar.  The data points can be saved to a CSV file by
+clicking on the
+<guiicon><inlinegraphic fileref="../icons/savedata.gif"></guiicon>.
+</para>
+
+<para>
+To zoom in on a portion of the graph of interest, hold down the left
+mouse button and drag a rectangle on the graph.  The plot window
+zooms in on the portion of the graph selected by that rectangle.
+To restore the graph view to the full graph, click on the
+zoom to fit icon
+<guiicon><inlinegraphic fileref="../icons/zoomfit.gif"></guiicon>.
+</para>
+
+<para>
+To print the graph as shown, click on the print icon
+<guiicon><inlinegraphic fileref="../icons/print.gif"></guiicon>.
+Note that this is very experimental, and the output may not be very
+satisfactory yet.
+</para>
+
 </sect1>
 
 <sect1 id="gui.output">
