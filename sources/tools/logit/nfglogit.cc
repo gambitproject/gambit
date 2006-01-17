@@ -355,7 +355,7 @@ void PrintProfile(std::ostream &p_stream,
 // as lambda changes in this region is closer to linear than exponential.
 //
 // The compromise is this: we represent probabilities below a certain
-// cutoff (here set to .001) as logarithms, and probabilities above that
+// cutoff (here set to .05) as logarithms, and probabilities above that
 // as the actual probability.  Thus, we can take advantage of the
 // exponential decay of small probabilities.
 //
@@ -381,7 +381,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
   bool restarting = false;      // flag for first restart step after MLE
   Array<bool> isLog(p_start.Length());
   for (int i = 1; i <= p_start.Length(); i++) {
-    isLog[i] = (p_start[i] < .001);
+    isLog[i] = (p_start[i] < .05);
   }
 
   // When doing MLE finding, we push the data from the original path-following
@@ -554,12 +554,12 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
     bool recompute = false;
 
     for (int i = 1; i < x.Length(); i++) {
-      if (!isLog[i] && x[i] < .001) {
+      if (!isLog[i] && x[i] < .05) {
 	x[i] = log(x[i]);
 	isLog[i] = true;
 	recompute = true;
       }
-      else if (isLog[i] && exp(x[i]) > .001) {
+      else if (isLog[i] && exp(x[i]) > .05) {
 	x[i] = exp(x[i]);
 	isLog[i] = false;
 	recompute = true;
