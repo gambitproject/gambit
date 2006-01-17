@@ -246,7 +246,8 @@ public:
 LogitBranchDialog::LogitBranchDialog(wxWindow *p_parent,
 					   gbtGameDocument *p_doc,
 					   LogitMixedBranch &p_branch)
-  : wxDialog(p_parent, wxID_ANY, wxT("Logit equilibrium correspondence"))
+  : wxDialog(p_parent, wxID_ANY, wxT("Logit equilibrium correspondence"),
+	     wxDefaultPosition)
 {
   m_sheet = new LogitMixedSheet(this, p_doc, p_branch);
   m_sheet->AutoSizeCol(0);

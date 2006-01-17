@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <unistd.h>
 #include "libgambit/libgambit.h"
 
 double g_maxDecel = 1.1;
