@@ -128,6 +128,8 @@ public:
 };
 
 std::string ToText(const Rational &);
+inline std::string ToText(const Rational &r, int) { return ToText(r); }
+
 Rational ToRational(const std::string &);
 
 inline void Epsilon(Rational &v, int /*i*/ = 8) { v = (Rational) 0;}
