@@ -351,11 +351,7 @@ void gbtTreePlayerPanel::OnUpdate(void)
 
   m_payoff->SetForegroundColour(color);
   if (m_doc->GetCurrentProfile() > 0) {
-    const Gambit::MixedBehavProfile<double> &profile = 
-      m_doc->GetProfiles().GetBehav(m_doc->GetCurrentProfile());
-
-    std::string pay = Gambit::ToText(profile.GetPayoff(m_player),
-				     m_doc->GetStyle().NumDecimals());
+    std::string pay = m_doc->GetProfiles().GetPayoff(m_player);
     m_payoff->SetLabel(wxT("Payoff: ") + 
 		       wxString(pay.c_str(), *wxConvCurrent));
     GetSizer()->Show(m_payoff, true);

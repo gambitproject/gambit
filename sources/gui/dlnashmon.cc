@@ -29,61 +29,12 @@
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
 #include <wx/txtstrm.h>
-#include <wx/tokenzr.h>
 
 #include "dlnashmon.h"
 #include "gamedoc.h"
 
 #include "efgprofile.h"
 #include "nfgprofile.h"
-
-class gbtNotNashException : public Gambit::Exception {
-public:
-  virtual ~gbtNotNashException() { }
-
-  std::string GetDescription(void) const
-  { return "Output line does not contain a Nash equilibrium"; }
-};
-
-static Gambit::MixedStrategyProfile<double> 
-TextToMixedProfile(gbtGameDocument *p_doc,
-		   const wxString &p_text)
-{
-  Gambit::MixedStrategyProfile<double> profile(p_doc->GetGame());
-
-  wxStringTokenizer tok(p_text, wxT(","));
-
-  if (tok.GetNextToken() == wxT("NE")) {
-    if (tok.CountTokens() == profile.Length()) {
-      for (int i = 1; i <= profile.Length(); i++) {
-	profile[i] = Gambit::ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
-      }
-      return profile;
-    }
-  }
-
-  throw gbtNotNashException();
-}
-
-static Gambit::MixedBehavProfile<double> TextToBehavProfile(gbtGameDocument *p_doc,
-						     const wxString &p_text)
-{
-  Gambit::MixedBehavProfile<double> profile(p_doc->GetGame());
-
-  wxStringTokenizer tok(p_text, wxT(","));
-
-  if (tok.GetNextToken() == wxT("NE")) {
-    if (tok.CountTokens() == profile.Length()) {
-      for (int i = 1; i <= profile.Length(); i++) {
-	profile[i] = Gambit::ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
-      }
-      return profile;
-    }
-  }
-
-  throw gbtNotNashException();
-}
-
 
 const int GBT_ID_TIMER = 1000;
 const int GBT_ID_PROCESS = 1001;
@@ -98,11 +49,12 @@ END_EVENT_TABLE()
 
 gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
 					   gbtGameDocument *p_doc,
-					   const gbtAnalysisProfileList &p_command)
+					   gbtAnalysisOutput *p_command)
   : wxDialog(p_parent, -1, wxT("Computing Nash equilibria"),
 	     wxDefaultPosition),
-    m_doc(p_doc), m_useBehav(p_command.GetCommand().Find(wxT("-efg-")) != -1),
-    m_foundCount(0), m_process(0), m_timer(this, GBT_ID_TIMER)
+    m_doc(p_doc), 
+    m_process(0), m_timer(this, GBT_ID_TIMER),
+    m_output(p_command)
 {
   wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -127,7 +79,7 @@ gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
 
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
-  if (m_useBehav) {
+  if (p_command->IsBehavior()) {
     m_profileList = new gbtBehavProfileList(this, m_doc);
   }
   else {
@@ -149,9 +101,9 @@ gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
   Start(p_command);
 }
 
-void gbtNashMonitorDialog::Start(const gbtAnalysisProfileList &p_command)
+void gbtNashMonitorDialog::Start(gbtAnalysisOutput *p_command)
 {
-  if (!m_useBehav) {
+  if (!p_command->IsBehavior()) {
     // Make sure we have a normal form representation
     m_doc->BuildNfg();
   }
@@ -161,10 +113,10 @@ void gbtNashMonitorDialog::Start(const gbtAnalysisProfileList &p_command)
   m_process = new wxProcess(this, GBT_ID_PROCESS);
   m_process->Redirect();
 
-  m_pid = wxExecute(p_command.GetCommand(), wxEXEC_ASYNC, m_process);
+  m_pid = wxExecute(p_command->GetCommand(), wxEXEC_ASYNC, m_process);
   
   std::ostringstream s;
-  if (m_useBehav) {
+  if (p_command->IsBehavior()) {
     m_doc->GetGame()->WriteEfgFile(s);
   }
   else {
@@ -207,18 +159,9 @@ void gbtNashMonitorDialog::OnIdle(wxIdleEvent &p_event)
     wxString msg;
     msg << tis.ReadLine();
 
-    try {
-      if (m_useBehav) {
-	m_doc->AddProfile(TextToBehavProfile(m_doc, msg));
-      }
-      else {
-	m_doc->AddProfile(TextToMixedProfile(m_doc, msg));
-      }
-
-      m_countText->SetLabel(wxString::Format(wxT("Number of equilibria found so far: %d"), ++m_foundCount));
-
-    }
-    catch (gbtNotNashException &) { }
+    m_output->AddOutput(msg);
+    m_countText->SetLabel(wxString::Format(wxT("Number of equilibria found so far: %d"), m_output->NumProfiles()));
+    m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 
     p_event.RequestMore();
   }
@@ -244,17 +187,9 @@ void gbtNashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
     msg << tis.ReadLine();
 
     if (msg != wxT("")) {
-      try {
-	if (m_useBehav) {
-	  m_doc->AddProfile(TextToBehavProfile(m_doc, msg));
-	}
-	else {
-	  m_doc->AddProfile(TextToMixedProfile(m_doc, msg));
-	}
-	
-	m_countText->SetLabel(wxString::Format(wxT("Number of equilibria found so far: %d"), ++m_foundCount));
-      }
-      catch (gbtNotNashException &) { }
+      m_output->AddOutput(msg);
+      m_countText->SetLabel(wxString::Format(wxT("Number of equilibria found so far: %d"), m_output->NumProfiles()));
+      m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
     }
   }
 

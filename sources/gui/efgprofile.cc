@@ -88,16 +88,9 @@ wxString gbtBehavProfileList::GetCellValue(const wxSheetCoords &p_coords)
     return wxT("#");
   }
 
-  const Gambit::MixedBehavProfile<double> &profile = m_doc->GetProfiles().GetBehav(p_coords.GetRow()+1);
 
-  if (profile.IsDefinedAt(m_doc->GetGame()->GetAction(p_coords.GetCol()+1)->GetInfoset())) {
-    return wxString(Gambit::ToText(profile[p_coords.GetCol()+1],
-				   m_doc->GetStyle().NumDecimals()).c_str(), 
-		    *wxConvCurrent);
-  }
-  else {
-    return wxT("*");
-  }
+  return wxString(m_doc->GetProfiles().GetActionProb(p_coords.GetCol()+1).c_str(),
+		  *wxConvCurrent);
 }
 
 static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
@@ -169,7 +162,7 @@ void gbtBehavProfileList::OnUpdate(void)
     return;
   }
 
-  const gbtAnalysisProfileList &profiles = m_doc->GetProfiles();
+  const gbtAnalysisOutput &profiles = m_doc->GetProfiles();
   int profileLength = m_doc->GetGame()->BehavProfileLength();
 
   BeginBatch();

@@ -255,16 +255,37 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
   m_behavSupports.Reset();
   m_stratSupports.Reset();
 
-  m_profiles = Gambit::List<gbtAnalysisProfileList>();
+  m_profiles = Gambit::List<gbtAnalysisOutput *>();
 
   for (TiXmlNode *analysis = game->FirstChild("analysis");
        analysis; analysis = analysis->NextSibling()) {
     const char *type = analysis->ToElement()->Attribute("type");
+    const char *rep = analysis->ToElement()->Attribute("rep");
     if (type && !strcmp(type, "list")) {
       // Read in a list of profiles
-      gbtAnalysisProfileList plist(this);
-      plist.Load(analysis);
-      m_profiles.Append(plist);
+      // We need to try to guess whether the profiles are float or rational
+      bool isFloat = false;
+      for (TiXmlNode *profile = analysis->FirstChild("profile");
+	   profile; profile = profile->NextSiblingElement()) {
+	if (std::string(profile->FirstChild()->Value()).find('.') != -1 or
+	    std::string(profile->FirstChild()->Value()).find('e') != -1) {
+	  isFloat = true;
+	  break;
+	}
+      }
+      
+      if (isFloat) {
+	gbtAnalysisProfileList<double> *plist = 
+	  new gbtAnalysisProfileList<double>(this, false);
+	plist->Load(analysis);
+	m_profiles.Append(plist);
+      }
+      else {
+	gbtAnalysisProfileList<Rational> *plist =
+	  new gbtAnalysisProfileList<Rational>(this, false);
+	plist->Load(analysis);
+	m_profiles.Append(plist);
+      }
     }
   }
 
@@ -315,58 +336,15 @@ void gbtGameDocument::SaveDocument(std::ostream &p_file) const
     m_game->WriteEfgFile(p_file);
     p_file << "</efgfile>\n";
 
-    for (int i = 1; i <= m_profiles.Length(); i++) {
-      p_file << "<analysis type=\"list\">\n";
-
-      p_file << "<description>\n";
-      p_file << (const char *) m_profiles[i].GetDescription().mb_str() << "\n";
-      p_file << "</description>\n";
-
-      for (int j = 1; j <= m_profiles[i].NumProfiles(); j++) {
-	const Gambit::MixedBehavProfile<double> &behav = m_profiles[i].GetBehav(j);
-	p_file << "<profile type=\"behav\">\n";
-	for (int k = 1; k <= behav.Length(); k++) {
-	  p_file << behav[k];
-	  if (k < behav.Length()) {
-	    p_file << ",";
-	  }
-	  else {
-	    p_file << "\n";
-	  }
-	}
-	p_file << "</profile>\n";
-      }
-      p_file << "</analysis>\n";
-    }
   }
   else {
     p_file << "<nfgfile>\n";
     m_game->WriteNfgFile(p_file);
     p_file << "</nfgfile>\n";
+  }
 
-    for (int i = 1; i <= m_profiles.Length(); i++) {
-      p_file << "<analysis type=\"list\">\n";
-
-      p_file << "<description>\n";
-      p_file << (const char *) m_profiles[i].GetDescription().mb_str() << "\n";
-      p_file << "</description>\n";
-
-      for (int j = 1; j <= m_profiles[i].NumProfiles(); j++) {
-	const Gambit::MixedStrategyProfile<double> &mixed = m_profiles[i].GetMixed(j);
-	p_file << "<profile type=\"mixed\">\n";
-	for (int k = 1; k <= mixed.Length(); k++) {
-	  p_file << mixed[k];
-	  if (k < mixed.Length()) {
-	    p_file << ",";
-	  }
-	  else {
-	    p_file << "\n";
-	  }
-	}
-	p_file << "</profile>\n";
-      }
-      p_file << "</analysis>\n";
-    }
+  for (int i = 1; i <= m_profiles.Length(); i++) {
+    m_profiles[i]->Save(p_file);
   }
 
   p_file << "</game>\n";
@@ -395,7 +373,9 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
     // computed profiles invalid for the edited game, it does mean
     // that, in general, they won't be Nash.  For now, to avoid confusion,
     // we will wipe them out.
-    m_profiles = Gambit::List<gbtAnalysisProfileList>();
+    while (m_profiles.Length() > 0) {
+      delete m_profiles.Remove(1);
+    }
     m_currentProfileList = 0;
   }
 
@@ -412,7 +392,7 @@ void gbtGameDocument::BuildNfg(void)
   if (m_game->IsTree()) {
     m_game->BuildComputedValues();
     m_stratSupports.Reset();
-    for (int i = 1; i <= m_profiles.Length(); m_profiles[i++].BuildNfg());
+    for (int i = 1; i <= m_profiles.Length(); m_profiles[i++]->BuildNfg());
   }
 }
 
@@ -432,7 +412,9 @@ void gbtGameDocument::Undo(void)
 
   m_game = 0;
 
-  m_profiles = Gambit::List<gbtAnalysisProfileList>();
+  while (m_profiles.Length() > 0) {
+    delete m_profiles.Remove(1);
+  }
   m_currentProfileList = 0;
 
   wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
@@ -453,7 +435,9 @@ void gbtGameDocument::Redo(void)
 
   m_game = 0;
 
-  m_profiles = Gambit::List<gbtAnalysisProfileList>();
+  while (m_profiles.Length() > 0) {
+    delete m_profiles.Remove(1);
+  }
   m_currentProfileList = 0;
 
   wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
@@ -470,18 +454,11 @@ void gbtGameDocument::Redo(void)
 
 void gbtGameDocument::SetCurrentProfile(int p_profile)
 {
-  m_profiles[m_currentProfileList].SetCurrent(p_profile);
+  m_profiles[m_currentProfileList]->SetCurrent(p_profile);
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfileList(void)
-{
-  m_profiles.Append(gbtAnalysisProfileList(this));
-  m_currentProfileList = m_profiles.Length();
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-
-void gbtGameDocument::AddProfileList(const gbtAnalysisProfileList &p_profs)
+void gbtGameDocument::AddProfileList(gbtAnalysisOutput *p_profs)
 {
   m_profiles.Append(p_profs);
   m_currentProfileList = m_profiles.Length();
@@ -494,6 +471,7 @@ void gbtGameDocument::SetProfileList(int p_index)
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
+/*
 void gbtGameDocument::AddProfiles(const Gambit::List<Gambit::MixedBehavProfile<double> > &p_profiles)
 {
   for (int i = 1; i <= p_profiles.Length(); i++) {
@@ -527,6 +505,7 @@ void gbtGameDocument::AddProfile(const Gambit::MixedStrategyProfile<double> &p_p
   m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
+*/
 
 void gbtGameDocument::SetBehavElimStrength(bool p_strict)
 {

@@ -1337,7 +1337,7 @@ void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
   gbtNashChoiceDialog dialog(this, m_doc);
 
   if (dialog.ShowModal() == wxID_OK) {
-    gbtAnalysisProfileList command = dialog.GetCommand();
+    gbtAnalysisOutput *command = dialog.GetCommand();
 
     gbtNashMonitorDialog dialog(this, m_doc, command);
 

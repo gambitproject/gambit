@@ -39,65 +39,23 @@ class gbtGameDocument;
 
 class TiXmlNode;
 
-//!
-//! This class manages a list of profiles, computed, e.g., by an
-//! algorithm for finding Nash equilibria.  It maintains two lists
-//! of profiles, one with the behavior representation and the other
-//! with the mixed representation.
-//!
-class gbtAnalysisProfileList {
-private:
+
+class gbtAnalysisOutput {
+protected:
   gbtGameDocument *m_doc;
   wxString m_label, m_description, m_command;
-  int m_current;
-  Gambit::List<Gambit::MixedBehavProfile<double> > m_behavProfiles;
-  Gambit::List<Gambit::MixedStrategyProfile<double> > m_mixedProfiles;
 
 public:
-  //!
-  //! @name Lifecycle
-  //!
+  /// @name Lifecycle
   //@{
-  /// Construct a new profile list for the specified document
-  gbtAnalysisProfileList(gbtGameDocument *p_doc)
-    : m_doc(p_doc), m_current(0) { }
+  /// Construct a new output group
+  gbtAnalysisOutput(gbtGameDocument *p_doc) : m_doc(p_doc) { }
+  /// Clean up an output group
+  virtual ~gbtAnalysisOutput() { }
   //@}
 
-  //!
-  //! @name General data access
-  //!
+  /// @name General data access
   //@{
-  /// The number of profiles in the list
-  int NumProfiles(void) const;
-
-  /// Return the p_index'th profile in the list, in behavior representation
-  const Gambit::MixedBehavProfile<double> &GetBehav(int p_index) const
-  { return m_behavProfiles[p_index]; }
-
-  /// Return the p_index'th profile in the list, in mixed representation
-  const Gambit::MixedStrategyProfile<double> &GetMixed(int p_index) const
-  { return m_mixedProfiles[p_index]; }
-
-  /// Return the realization probability of the node for the given 
-  /// profile.  (index == -1 for currently selected profile)
-  std::string GetRealizProb(const Gambit::GameNode &, int p_index = -1) const;
-  std::string GetBeliefProb(const Gambit::GameNode &, int p_index = -1) const;
-  std::string GetNodeValue(const Gambit::GameNode &, int pl, 
-			   int p_index = -1) const;
-  std::string GetInfosetProb(const Gambit::GameNode &, int p_index = -1) const;
-  std::string GetInfosetValue(const Gambit::GameNode &, 
-			      int p_index = -1) const;
-  std::string GetActionValue(const Gambit::GameNode &, int act,
-			     int p_index = -1) const;
-  std::string GetActionProb(const Gambit::GameNode &, int act,
-			    int p_index = -1) const;
-
-  /// Get the index of the currently selected profile
-  int GetCurrent(void) const { return m_current; }
-
-  /// Set the index of the currently selected profile
-  void SetCurrent(int p_index) { m_current = p_index; }
-
   /// Get the label (short description) of the list
   const wxString &GetLabel(void) const { return m_label; }
 
@@ -115,16 +73,121 @@ public:
 
   /// Set the command used to generate the list
   void SetCommand(const wxString &p_command) { m_command = p_command; }
+
+  /// The number of profiles in the list
+  virtual int NumProfiles(void) const = 0;
+
+  /// Get the index of the currently selected profile
+  virtual int GetCurrent(void) const = 0;
+
+  /// Set the index of the currently selected profile
+  virtual void SetCurrent(int p_index) = 0;
+
+  /// Are these behavior or strategy profiles natively?
+  virtual bool IsBehavior(void) const = 0;
+
+  //@}
+
+  virtual std::string GetPayoff(int pl, int p_index = -1) const = 0;
+
+  virtual std::string GetRealizProb(const Gambit::GameNode &, 
+				    int p_index = -1) const = 0;
+  virtual std::string GetBeliefProb(const Gambit::GameNode &, 
+				    int p_index = -1) const = 0;
+  virtual std::string GetNodeValue(const Gambit::GameNode &, int pl, 
+				   int p_index = -1) const = 0;
+  virtual std::string GetInfosetProb(const Gambit::GameNode &, 
+				     int p_index = -1) const = 0;
+  virtual std::string GetInfosetValue(const Gambit::GameNode &, 
+				      int p_index = -1) const = 0;
+  virtual std::string GetActionValue(const Gambit::GameNode &, int act,
+				     int p_index = -1) const = 0;
+  virtual std::string GetActionProb(const Gambit::GameNode &, int act,
+				    int p_index = -1) const = 0;
+  virtual std::string GetActionProb(int p_action, int p_index = -1) const = 0;
+  virtual std::string GetStrategyProb(int p_strategy,
+				      int p_index = -1) const = 0;
+  virtual std::string GetStrategyValue(int p_strategy,
+				       int p_index = -1) const = 0;
+
+
+  virtual void AddOutput(const wxString &) = 0;
+
+  /// Map all behavior profiles to corresponding mixed profiles
+  virtual void BuildNfg(void) = 0;
+
+  /// Write a profile list to XML savefile
+  virtual void Save(std::ostream &) const = 0;
+};
+
+//!
+//! This class manages a list of profiles, computed, e.g., by an
+//! algorithm for finding Nash equilibria.  It maintains two lists
+//! of profiles, one with the behavior representation and the other
+//! with the mixed representation.
+//!
+template <class T> class gbtAnalysisProfileList : public gbtAnalysisOutput {
+private:
+  bool m_isBehav;
+  int m_current;
+  Gambit::List<Gambit::MixedBehavProfile<T> > m_behavProfiles;
+  Gambit::List<Gambit::MixedStrategyProfile<T> > m_mixedProfiles;
+
+public:
+  //!
+  //! @name Lifecycle
+  //!
+  //@{
+  /// Construct a new profile list for the specified document
+  gbtAnalysisProfileList(gbtGameDocument *p_doc, bool p_isBehav)
+    : gbtAnalysisOutput(p_doc), m_isBehav(p_isBehav), m_current(0) { }
+  /// Cleanup the profile list
+  virtual ~gbtAnalysisProfileList() { }
+  //@}
+
+  //!
+  //! @name General data access
+  //!
+  //@{
+  /// Are these behavior or strategy profiles natively?
+  bool IsBehavior(void) const { return m_isBehav; }
+
+  /// The number of profiles in the list
+  int NumProfiles(void) const;
+
+  std::string GetPayoff(int pl, int p_index = -1) const;
+  /// Return the realization probability of the node for the given 
+  /// profile.  (index == -1 for currently selected profile)
+  std::string GetRealizProb(const Gambit::GameNode &, int p_index = -1) const;
+  std::string GetBeliefProb(const Gambit::GameNode &, int p_index = -1) const;
+  std::string GetNodeValue(const Gambit::GameNode &, int pl, 
+			   int p_index = -1) const;
+  std::string GetInfosetProb(const Gambit::GameNode &, int p_index = -1) const;
+  std::string GetInfosetValue(const Gambit::GameNode &, 
+			      int p_index = -1) const;
+  std::string GetActionValue(const Gambit::GameNode &, int act,
+			     int p_index = -1) const;
+  std::string GetActionProb(const Gambit::GameNode &, int act,
+			    int p_index = -1) const;
+  std::string GetActionProb(int p_action, int p_index = -1) const;
+  std::string GetStrategyProb(int p_strategy,
+			      int p_index = -1) const;
+  std::string GetStrategyValue(int p_strategy,
+			       int p_index = -1) const;
+
+  /// Get the index of the currently selected profile
+  int GetCurrent(void) const { return m_current; }
+
+  /// Set the index of the currently selected profile
+  void SetCurrent(int p_index) { m_current = p_index; }
+
   //@}
 
   //!
   //! @name Adding profiles to the list
   //!
   //@{
-  /// Add a behavior profile to the list
-  void Append(const Gambit::MixedBehavProfile<double> &p_profile);
-  /// Add a mixed profile to the list
-  void Append(const Gambit::MixedStrategyProfile<double> &p_profile);
+  void AddOutput(const wxString &);
   /// Map all behavior profiles to corresponding mixed profiles
   void BuildNfg(void);
 
@@ -138,6 +201,8 @@ public:
   //@{
   /// Build a profile list from XML savefile 
   void Load(TiXmlNode *analysis);
+  /// Write a profile list to XML savefile
+  void Save(std::ostream &) const;
   //@}
 };
 

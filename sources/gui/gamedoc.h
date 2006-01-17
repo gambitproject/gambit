@@ -239,7 +239,7 @@ private:
   gbtBehavDominanceStack m_behavSupports;
   gbtStrategyDominanceStack m_stratSupports;
 
-  Gambit::List<gbtAnalysisProfileList> m_profiles;
+  Gambit::List<gbtAnalysisOutput *> m_profiles;
   int m_currentProfileList;
 
   Gambit::List<std::string> m_undoList, m_redoList;
@@ -289,12 +289,11 @@ public:
   //! @name Handling of list of computed profiles
   //!
   //@{
-  const gbtAnalysisProfileList &GetProfiles(void) const
-    { return m_profiles[m_currentProfileList]; }
-  const gbtAnalysisProfileList &GetProfiles(int p_index) const
-    { return m_profiles[p_index]; }
-  void AddProfileList(void);
-  void AddProfileList(const gbtAnalysisProfileList &);
+  const gbtAnalysisOutput &GetProfiles(void) const
+    { return *m_profiles[m_currentProfileList]; }
+  const gbtAnalysisOutput &GetProfiles(int p_index) const
+    { return *m_profiles[p_index]; }
+  void AddProfileList(gbtAnalysisOutput *);
   void SetProfileList(int p_index);
   int NumProfileLists(void) const { return m_profiles.Length(); }
   int GetCurrentProfileList(void) const { return m_currentProfileList; }
@@ -302,10 +301,12 @@ public:
   int GetCurrentProfile(void) const 
   { return (m_profiles.Length() == 0) ? 0 : GetProfiles().GetCurrent(); }
   void SetCurrentProfile(int p_profile);
+  /*
   void AddProfiles(const Gambit::List<Gambit::MixedBehavProfile<double> > &);
   void AddProfile(const Gambit::MixedBehavProfile<double> &);
   void AddProfiles(const Gambit::List<Gambit::MixedStrategyProfile<double> > &);
   void AddProfile(const Gambit::MixedStrategyProfile<double> &);
+  */
   //@}
 
   //!

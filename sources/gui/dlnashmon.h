@@ -34,15 +34,15 @@
 class gbtNashMonitorDialog : public wxDialog {
 private:
   gbtGameDocument *m_doc;
-  bool m_useBehav;
-  int m_pid, m_foundCount;
+  int m_pid;
   wxProcess *m_process;
   wxWindow *m_profileList;
   wxStaticText *m_statusText, *m_countText;
   wxButton *m_stopButton, *m_okButton;
   wxTimer m_timer;
+  gbtAnalysisOutput *m_output;
   
-  void Start(const gbtAnalysisProfileList &);
+  void Start(gbtAnalysisOutput *);
 
   void OnStop(wxCommandEvent &);
   void OnTimer(wxTimerEvent &);
@@ -51,7 +51,7 @@ private:
 
 public:
   gbtNashMonitorDialog(wxWindow *p_parent, gbtGameDocument *p_doc,
-		       const gbtAnalysisProfileList &p_command);
+		       gbtAnalysisOutput *p_command);
 
   DECLARE_EVENT_TABLE()
 };

@@ -41,7 +41,7 @@ private:
 public:
   gbtNashChoiceDialog(wxWindow *, gbtGameDocument *);
 
-  gbtAnalysisProfileList GetCommand(void) const;
+  gbtAnalysisOutput *GetCommand(void) const;
 };
 
 

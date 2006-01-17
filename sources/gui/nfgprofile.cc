@@ -102,19 +102,16 @@ wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
     return wxT("#");
   }
 
-  const Gambit::MixedStrategyProfile<double> &profile = 
-    m_doc->GetProfiles().GetMixed(RowToProfile(p_coords.GetRow()));
+  int profile = RowToProfile(p_coords.GetRow());
 
   if (IsProbabilityRow(p_coords.GetRow())) {
-    return wxString(Gambit::ToText(profile[p_coords.GetCol()+1],
-				   m_doc->GetStyle().NumDecimals()).c_str(), 
+    return wxString(m_doc->GetProfiles().GetStrategyProb(p_coords.GetCol()+1,
+							 profile).c_str(),
 		    *wxConvCurrent);
   }
   else {
-    Gambit::GameStrategy strategy = GetStrategy(m_doc, p_coords.GetCol());
-    return wxString(Gambit::ToText(profile.GetPayoff(strategy->GetPlayer()->GetNumber(),
-						     strategy),
-			   m_doc->GetStyle().NumDecimals()).c_str(), 
+    return wxString(m_doc->GetProfiles().GetStrategyValue(p_coords.GetCol()+1,
+							  profile).c_str(),
 		    *wxConvCurrent);
   }
 }
@@ -189,7 +186,7 @@ void gbtMixedProfileList::OnUpdate(void)
     return;
   }
 
-  const gbtAnalysisProfileList &profiles = m_doc->GetProfiles();
+  const gbtAnalysisOutput &profiles = m_doc->GetProfiles();
 
   BeginBatch();
 
