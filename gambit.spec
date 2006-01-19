@@ -1,6 +1,6 @@
 Summary: Gambit Game Theory Tools
 Name: gambit
-Version: 0.2005.12.12
+Version: 0.2006.01.20
 Release: 1
 License: GPL
 Group: Applications
@@ -13,7 +13,7 @@ Gambit is a collection of tools for interactively building and
 analyzing finite games.
 
 %prep
-%setup -q
+%setup -q 
 %configure
 
 %build
@@ -34,6 +34,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc AUTHORS ChangeLog COPYING INSTALL NEWS README
 %{_bindir}/gambit*
 %{_libdir}/libgambit*
+%{_libdir}/liblab*
+%{_includedir}/libgambit*
 %{_datadir}/gambit
 
 
