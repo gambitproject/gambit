@@ -575,22 +575,6 @@ void gbtTreeChancePanel::OnSetColor(wxCommandEvent &)
 //                  class gbtTreePlayerToolbar
 //=====================================================================
 
-class gbtTreePlayerToolbar : public wxPanel, public gbtGameView {
-private:
-  gbtTreeChancePanel *m_chancePanel;
-  Gambit::Array<gbtTreePlayerPanel *> m_playerPanels;
-
-  // @name Implementation of gbtGameView members
-  //@{
-  void OnUpdate(void);
-  void PostPendingChanges(void);
-  //@}
-
-public:
-  gbtTreePlayerToolbar(wxWindow *p_parent, gbtGameDocument *p_doc);
-};
-
-
 gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent, 
 					   gbtGameDocument *p_doc)
   : wxPanel(p_parent, -1, wxDefaultPosition, wxSize(110, -1)), 
@@ -655,7 +639,7 @@ gbtEfgPanel::gbtEfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   : wxPanel(p_parent, -1), gbtGameView(p_doc)
 {
   m_treeWindow = new gbtEfgDisplay(this, m_doc);
-  m_playerToolbar = new gbtTreePlayerToolbar(this, m_doc);
+  //  m_playerToolbar = new gbtTreePlayerToolbar(this, m_doc);
   m_dominanceToolbar = new gbtBehavDominanceToolbar(this, m_doc);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -663,7 +647,7 @@ gbtEfgPanel::gbtEfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   topSizer->Show(m_dominanceToolbar, false);
 
   wxBoxSizer *treeSizer = new wxBoxSizer(wxHORIZONTAL);
-  treeSizer->Add(m_playerToolbar, 0, wxEXPAND, 0);
+  //  treeSizer->Add(m_playerToolbar, 0, wxEXPAND, 0);
   treeSizer->Add(m_treeWindow, 1, wxEXPAND, 0);
   
   topSizer->Add(treeSizer, 1, wxEXPAND, 0);

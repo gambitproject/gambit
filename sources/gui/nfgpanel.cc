@@ -470,10 +470,8 @@ gbtNfgPanel::gbtNfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
 {
   m_dominanceToolbar = new gbtStrategyDominanceToolbar(this, m_doc);
   m_tableWidget = new gbtTableWidget(this, -1, m_doc);
-  m_playerToolbar = new gbtTablePlayerToolbar(this, m_doc);
 
   wxBoxSizer *playerSizer = new wxBoxSizer(wxHORIZONTAL);
-  playerSizer->Add(m_playerToolbar, 0, wxEXPAND, 0);
   playerSizer->Add(m_tableWidget, 1, wxEXPAND, 0);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);

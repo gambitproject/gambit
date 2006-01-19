@@ -34,7 +34,7 @@ class gbtTableWidget;
 
 class gbtNfgPanel : public wxPanel, public gbtGameView {
 private:
-  wxWindow *m_dominanceToolbar, *m_playerToolbar;
+  wxWindow *m_dominanceToolbar;
   gbtTableWidget *m_tableWidget;
 
   void OnToolsDominance(wxCommandEvent &);

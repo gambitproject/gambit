@@ -32,6 +32,25 @@
 class wxPrintout;
 class gbtEfgDisplay;
 
+class gbtTreeChancePanel;
+class gbtTreePlayerPanel;
+
+class gbtTreePlayerToolbar : public wxPanel, public gbtGameView {
+private:
+  gbtTreeChancePanel *m_chancePanel;
+  Gambit::Array<gbtTreePlayerPanel *> m_playerPanels;
+
+  // @name Implementation of gbtGameView members
+  //@{
+  void OnUpdate(void);
+  void PostPendingChanges(void);
+  //@}
+
+public:
+  gbtTreePlayerToolbar(wxWindow *p_parent, gbtGameDocument *p_doc);
+};
+
+
 class gbtEfgPanel : public wxPanel, public gbtGameView {
 private:
   gbtEfgDisplay *m_treeWindow;
