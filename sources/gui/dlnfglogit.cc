@@ -688,6 +688,7 @@ LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent,
   Connect(m_scaler->GetId(), wxEVT_COMMAND_SPINCTRL_UPDATED,
 	  wxSpinEventHandler(LogitMixedDialog::OnChangeScale));
 
+  m_toolBar->Realize();
   sizer->Add(m_toolBar, 0, wxALL | wxEXPAND, 5);
 
 
