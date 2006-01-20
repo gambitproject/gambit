@@ -120,6 +120,8 @@ public:
   virtual void Save(std::ostream &) const = 0;
 };
 
+
+
 //!
 //! This class manages a list of profiles, computed, e.g., by an
 //! algorithm for finding Nash equilibria.  It maintains two lists

@@ -39,19 +39,18 @@
 const int GBT_ID_TIMER = 1000;
 const int GBT_ID_PROCESS = 1001;
 
-BEGIN_EVENT_TABLE(gbtNashMonitorDialog, wxDialog)
-  EVT_END_PROCESS(GBT_ID_PROCESS, gbtNashMonitorDialog::OnEndProcess)
-  EVT_IDLE(gbtNashMonitorDialog::OnIdle)
-  EVT_TIMER(GBT_ID_TIMER, gbtNashMonitorDialog::OnTimer)
+BEGIN_EVENT_TABLE(gbtNashMonitorPanel, wxPanel)
+  EVT_END_PROCESS(GBT_ID_PROCESS, gbtNashMonitorPanel::OnEndProcess)
+  EVT_IDLE(gbtNashMonitorPanel::OnIdle)
+  EVT_TIMER(GBT_ID_TIMER, gbtNashMonitorPanel::OnTimer)
 END_EVENT_TABLE()
 
 #include "bitmaps/stop.xpm"
 
-gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
-					   gbtGameDocument *p_doc,
-					   gbtAnalysisOutput *p_command)
-  : wxDialog(p_parent, -1, wxT("Computing Nash equilibria"),
-	     wxDefaultPosition),
+gbtNashMonitorPanel::gbtNashMonitorPanel(wxWindow *p_parent,
+					 gbtGameDocument *p_doc,
+					 gbtAnalysisOutput *p_command)
+  : wxPanel(p_parent, wxID_ANY),
     m_doc(p_doc), 
     m_process(0), m_timer(this, GBT_ID_TIMER),
     m_output(p_command)
@@ -75,7 +74,7 @@ gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
 
   Connect(wxID_CANCEL, wxEVT_COMMAND_BUTTON_CLICKED,
-	  wxCommandEventHandler(gbtNashMonitorDialog::OnStop));
+	  wxCommandEventHandler(gbtNashMonitorPanel::OnStop));
 
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
@@ -88,20 +87,13 @@ gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
   m_profileList->SetSizeHints(wxSize(500, 300));
   sizer->Add(m_profileList, 1, wxALL | wxEXPAND, 5);
   
-  m_okButton = new wxButton(this, wxID_OK, wxT("OK"));
-  sizer->Add(m_okButton, 0, wxALL | wxALIGN_RIGHT, 5);
-  m_okButton->Enable(false);
-
   SetSizer(sizer);
-  sizer->Fit(this);
-  sizer->SetSizeHints(this);
   Layout();
-  CenterOnParent();
 
   Start(p_command);
 }
 
-void gbtNashMonitorDialog::Start(gbtAnalysisOutput *p_command)
+void gbtNashMonitorPanel::Start(gbtAnalysisOutput *p_command)
 {
   if (!p_command->IsBehavior()) {
     // Make sure we have a normal form representation
@@ -149,7 +141,7 @@ void gbtNashMonitorDialog::Start(gbtAnalysisOutput *p_command)
   m_timer.Start(1000, false);
 }
 
-void gbtNashMonitorDialog::OnIdle(wxIdleEvent &p_event)
+void gbtNashMonitorPanel::OnIdle(wxIdleEvent &p_event)
 {
   if (!m_process)  return;
 
@@ -170,12 +162,12 @@ void gbtNashMonitorDialog::OnIdle(wxIdleEvent &p_event)
   }
 }
 
-void gbtNashMonitorDialog::OnTimer(wxTimerEvent &p_event)
+void gbtNashMonitorPanel::OnTimer(wxTimerEvent &p_event)
 {
   wxWakeUpIdle();
 }
 
-void gbtNashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
+void gbtNashMonitorPanel::OnEndProcess(wxProcessEvent &p_event)
 {
   m_stopButton->Enable(false);
   m_timer.Stop();
@@ -201,11 +193,9 @@ void gbtNashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
     m_statusText->SetLabel(wxT("The computation ended abnormally."));
     m_statusText->SetForegroundColour(*wxRED);
   }
-
-  m_okButton->Enable(true);
 }
 
-void gbtNashMonitorDialog::OnStop(wxCommandEvent &p_event)
+void gbtNashMonitorPanel::OnStop(wxCommandEvent &p_event)
 {
   // Per the wxWidgets wiki, under Windows, programs that run
   // without a console window don't respond to the more polite

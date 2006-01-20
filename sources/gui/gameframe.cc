@@ -1302,22 +1302,11 @@ void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     gbtAnalysisOutput *command = dialog.GetCommand();
 
-    gbtNashMonitorDialog dialog(this, m_doc, command);
-
-    dialog.ShowModal();
-
-    /*
-    if (!m_splitter->IsSplit()) {
-      if (m_efgPanel && m_efgPanel->IsShown()) {
-	m_analysisPanel->ShowMixed(false);
-    	m_splitter->SplitHorizontally(m_efgPanel, m_analysisPanel);
-      }
-      else {
-	m_analysisPanel->ShowMixed(true);
-	m_splitter->SplitHorizontally(m_nfgPanel, m_analysisPanel);
-      }
-    }
-    */
+    gbtNashMonitorPanel *panel = new gbtNashMonitorPanel(this, m_doc, 
+							 command);
+    m_manager.AddPane(panel, wxBOTTOM,
+		      panel->GetOutput().GetDescription());
+    m_manager.Update();
   }
 
   m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);

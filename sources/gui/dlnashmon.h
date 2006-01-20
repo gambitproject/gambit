@@ -31,14 +31,14 @@
 #include "wx/sheet/sheet.h"
 #include "gamedoc.h"
 
-class gbtNashMonitorDialog : public wxDialog {
+class gbtNashMonitorPanel : public wxPanel {
 private:
   gbtGameDocument *m_doc;
   int m_pid;
   wxProcess *m_process;
   wxWindow *m_profileList;
   wxStaticText *m_statusText, *m_countText;
-  wxButton *m_stopButton, *m_okButton;
+  wxButton *m_stopButton;
   wxTimer m_timer;
   gbtAnalysisOutput *m_output;
   
@@ -50,8 +50,11 @@ private:
   void OnEndProcess(wxProcessEvent &);
 
 public:
-  gbtNashMonitorDialog(wxWindow *p_parent, gbtGameDocument *p_doc,
-		       gbtAnalysisOutput *p_command);
+  gbtNashMonitorPanel(wxWindow *p_parent, gbtGameDocument *p_doc,
+		      gbtAnalysisOutput *p_command);
+
+
+  const gbtAnalysisOutput &GetOutput(void) const { return *m_output; }
 
   DECLARE_EVENT_TABLE()
 };
