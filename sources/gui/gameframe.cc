@@ -44,6 +44,8 @@
 
 #include "menuconst.h"
 
+#include "players.h"
+
 #include "efgpanel.h"
 #include "efgprofile.h"
 
@@ -305,9 +307,11 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
 		    wxT("Computed strategy profiles"));
   m_manager.GetPane(m_analysisPanel).Show(false);
 
-  wxWindow *playerToolbar = new gbtTreePlayerToolbar(this, p_doc);
+  wxWindow *playerToolbar = new gbtPlayerToolbar(this, p_doc);
   playerToolbar->SetSize(110, -1);
   m_manager.AddPane(playerToolbar, wxLEFT, wxT("Players"));
+  m_manager.GetPane(playerToolbar).TopDockable(false);
+  m_manager.GetPane(playerToolbar).BottomDockable(false);
 
   m_manager.Update();
 

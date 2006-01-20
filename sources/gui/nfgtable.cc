@@ -333,6 +333,8 @@ bool gbtRowPlayerWidget::DropText(wxCoord p_x, wxCoord p_y,
   if (p_text[0] == 'P') {
     long pl;
     p_text.Right(p_text.Length() - 1).ToLong(&pl);
+
+    if (pl == 0) { return false; }
     
     if (m_table->NumRowPlayers() == 0) {
       m_table->SetRowPlayer(1, pl);
@@ -522,6 +524,8 @@ bool gbtColPlayerWidget::DropText(wxCoord p_x, wxCoord p_y,
     long pl;
     p_text.Right(p_text.Length() - 1).ToLong(&pl);
 
+    if (pl == 0) { return false; }
+    
     if (m_table->NumColPlayers() == 0) {
       m_table->SetColPlayer(1, pl);
       return true;

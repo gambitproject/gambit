@@ -54,6 +54,7 @@ gambit_SOURCES = \
 	nfgprofile.h \
 	nfgtable.cc \
 	nfgtable.h \
+	players.cc players.h \
 	renratio.cc \
 	renratio.h \
 	style.cc \
