@@ -51,7 +51,7 @@ StrategySupport::StrategySupport(const Game &p_nfg)
 //                          General information
 //---------------------------------------------------------------------------
 
-Array<int> StrategySupport::NumStrats(void) const
+Array<int> StrategySupport::NumStrategies(void) const
 {
   Array<int> a(m_support.Length());
 
@@ -61,7 +61,7 @@ Array<int> StrategySupport::NumStrats(void) const
   return a;
 }
 
-int StrategySupport::ProfileLength(void) const
+int StrategySupport::MixedProfileLength(void) const
 {
   int total = 0;
   for (int pl = 1; pl <= m_nfg->NumPlayers();
@@ -165,7 +165,7 @@ bool StrategySupport::Dominates(GameStrategy s,
 
 bool StrategySupport::IsDominated(GameStrategy s, bool strong) const
 {
-  for (int i = 1; i <= NumStrats(s->GetPlayer()->GetNumber()); i++) {
+  for (int i = 1; i <= NumStrategies(s->GetPlayer()->GetNumber()); i++) {
     if (GetStrategy(s->GetPlayer()->GetNumber(), i) != s &&
 	Dominates(GetStrategy(s->GetPlayer()->GetNumber(), i), s, strong)) {
       return true;
@@ -177,7 +177,7 @@ bool StrategySupport::IsDominated(GameStrategy s, bool strong) const
 bool StrategySupport::Undominated(StrategySupport &newS, int pl, bool strong,
 				  std::ostream &tracefile) const
 {
-  Array<int> set(NumStrats(pl));
+  Array<int> set(NumStrategies(pl));
   int i;
   for (i = 1; i <= set.Length(); i++)
     set[i] = i;
@@ -186,7 +186,7 @@ bool StrategySupport::Undominated(StrategySupport &newS, int pl, bool strong,
   double d1,d2;
   d1 = (double)(pl-1) / (double) GetGame()->NumPlayers();
   d2 = (double)pl / (double) GetGame()->NumPlayers();
-  for (min = 0, dis = NumStrats(pl) - 1; min <= dis; )  {
+  for (min = 0, dis = NumStrategies(pl) - 1; min <= dis; )  {
     int pp;
     double s1 = (double)min/(double)(dis+1);
     for (pp = 0;
@@ -225,8 +225,8 @@ bool StrategySupport::Undominated(StrategySupport &newS, int pl, bool strong,
     }
   }
     
-  if (min + 1 <= NumStrats(pl))   {
-    for (i = min + 1; i <= NumStrats(pl); i++)
+  if (min + 1 <= NumStrategies(pl))   {
+    for (i = min + 1; i <= NumStrategies(pl); i++)
       newS.RemoveStrategy(GetStrategy(pl, set[i]));
     
     return true;

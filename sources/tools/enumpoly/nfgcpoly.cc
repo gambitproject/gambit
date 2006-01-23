@@ -34,8 +34,8 @@
 
 HeuristicPolEnumModule::HeuristicPolEnumModule(const StrategySupport &S, int p_stopAfter)
   : m_stopAfter(p_stopAfter), NF(S.GetGame()), support(S),
-    Space(support.ProfileLength()-NF->NumPlayers()), 
-    Lex(&Space, lex), num_vars(support.ProfileLength()-NF->NumPlayers()), 
+    Space(support.MixedProfileLength()-NF->NumPlayers()), 
+    Lex(&Space, lex), num_vars(support.MixedProfileLength()-NF->NumPlayers()), 
     count(0), nevals(0), is_singular(false)
 { 
 //  gEpsilon(eps,12);
@@ -82,12 +82,12 @@ int HeuristicPolEnumModule::SaveSolutions(const Gambit::List<Vector<gDouble> > &
     kk=0;
     for(i=1;i<=NF->NumPlayers();i++) {
       sum=0;
-      for(j=1;j<support.NumStrats(i);j++) {
+      for(j=1;j<support.NumStrategies(i);j++) {
 	profile(i,j) = (list[k][j+kk]).ToDouble();
 	sum+=profile(i,j);
       }
       profile(i,j) = (double)1.0 - sum;
-      kk+=(support.NumStrats(i)-1);
+      kk+=(support.NumStrategies(i)-1);
     }
     index = solutions.Append(profile);
   }
@@ -122,9 +122,9 @@ gPoly<gDouble> HeuristicPolEnumModule::Prob(int p, int strat) const
   int i,j,kk = 0;
   
   for(i=1;i<p;i++) 
-    kk+=(support.NumStrats(i)-1);
+    kk+=(support.NumStrategies(i)-1);
 
-  if(strat<support.NumStrats(p)) {
+  if(strat<support.NumStrategies(p)) {
     exps=0;
     exps[strat+kk]=1;
     exp_vect const_exp(&Space,exps);
@@ -133,7 +133,7 @@ gPoly<gDouble> HeuristicPolEnumModule::Prob(int p, int strat) const
     equation+=new_term;
   }
   else {
-    for(j=1;j<support.NumStrats(p);j++) {
+    for(j=1;j<support.NumStrategies(p);j++) {
       exps=0;
       exps[j+kk]=1;
       exp_vect exponent(&Space,exps);
@@ -183,7 +183,7 @@ gPolyList<gDouble>   HeuristicPolEnumModule::IndifferenceEquations()  const
   gPolyList<gDouble> equations(&Space,&Lex);
 
   for(int pl=1;pl<=NF->NumPlayers();pl++) 
-    for(int j=1;j<support.NumStrats(pl);j++) 
+    for(int j=1;j<support.NumStrategies(pl);j++) 
       equations+=IndifferenceEquation(pl,j,j+1);
 
   return equations;
@@ -194,8 +194,8 @@ gPolyList<gDouble> HeuristicPolEnumModule::LastActionProbPositiveInequalities() 
   gPolyList<gDouble> equations(&Space,&Lex);
 
   for(int pl=1;pl<=NF->NumPlayers();pl++)
-    if(support.NumStrats(pl)>2) 
-      equations+=Prob(pl,support.NumStrats(pl));
+    if(support.NumStrategies(pl)>2) 
+      equations+=Prob(pl,support.NumStrategies(pl));
 
   return equations;
 }
@@ -301,13 +301,13 @@ HeuristicPolEnumModule::SolVarsFromMixedStrategyProfile(const MixedStrategyProfi
   int numvars(0);
 
   for (int pl = 1; pl <= NF->NumPlayers(); pl++) 
-    numvars += support.NumStrats(pl) - 1;
+    numvars += support.NumStrategies(pl) - 1;
 
   Vector<gDouble> answer(numvars);
   int count(0);
 
   for (int pl = 1; pl <= NF->NumPlayers(); pl++) 
-    for (int j = 1; j < support.NumStrats(pl); j++) {
+    for (int j = 1; j < support.NumStrategies(pl); j++) {
       count ++;
       answer[count] = (gDouble)sol(pl,j);
     }
@@ -360,12 +360,12 @@ HeuristicPolEnumModule::ReturnPolishedSolution(const Vector<gDouble> &root) cons
   int kk=0;
   for(int pl=1;pl<=NF->NumPlayers();pl++) {
     double sum=0;
-    for(j=1;j<support.NumStrats(pl);j++) {
+    for(j=1;j<support.NumStrategies(pl);j++) {
       profile(pl,j) = (root[j+kk]).ToDouble();
       sum+=profile(pl,j);
     }
     profile(pl,j) = (double)1.0 - sum;
-    kk+=(support.NumStrats(pl)-1);
+    kk+=(support.NumStrategies(pl)-1);
   }
        
   return profile;

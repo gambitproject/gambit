@@ -82,7 +82,7 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
   x = 0.0;
   for (i = 1; i <= _nfg->NumPlayers(); i++)  {
     psum = 0.0;
-    for (j = 1; j <= p.GetSupport().NumStrats(i); j++)  {
+    for (j = 1; j <= p.GetSupport().NumStrategies(i); j++)  {
       psum += p(i,j);
       x1 = p.GetPayoff(i, i, j) - p.GetPayoff(i);
       if (i1 == i) {
@@ -129,7 +129,7 @@ bool NFLiapFunc::Gradient(const Gambit::Vector<double> &v, Gambit::Vector<double
   int i1, j1, ii;
   
   for (i1 = 1, ii = 1; i1 <= _nfg->NumPlayers(); i1++) {
-    for (j1 = 1; j1 <= _p.GetSupport().NumStrats(i1); j1++) {
+    for (j1 = 1; j1 <= _p.GetSupport().NumStrategies(i1); j1++) {
       d[ii++] = LiapDerivValue(i1, j1, _p);
     }
   }
@@ -161,7 +161,7 @@ double NFLiapFunc::Value(const Gambit::Vector<double> &v) const
     // deviating to that strategy
 
     int j;
-    for (j = 1; j <= _p.GetSupport().NumStrats(i); j++)  {
+    for (j = 1; j <= _p.GetSupport().NumStrategies(i); j++)  {
       tmp(i, j) = 1.0;
       x = _p(i, j);
       payoff(i, j) = tmp.GetPayoff(i);
@@ -173,7 +173,7 @@ double NFLiapFunc::Value(const Gambit::Vector<double> &v) const
     }
 
     tmp.CopyRow(i, _p);
-    for (j = 1; j <= _p.GetSupport().NumStrats(i); j++)  {
+    for (j = 1; j <= _p.GetSupport().NumStrategies(i); j++)  {
       x = payoff(i, j) - avg;
       if (x < 0.0)  x = 0.0;
       result += x * x;        // penalty for not best response
@@ -193,7 +193,7 @@ static void PickRandomProfile(Gambit::MixedStrategyProfile<double> &p)
     sum = 0.0;
     int st;
     
-    for (st = 1; st < p.GetSupport().NumStrats(pl); st++)  {
+    for (st = 1; st < p.GetSupport().NumStrategies(pl); st++)  {
       do
 	tmp = ((double) rand()) / ((double) RAND_MAX);
       while (tmp + sum > 1.0);

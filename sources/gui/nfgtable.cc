@@ -1026,7 +1026,7 @@ int gbtTableWidget::NumRowContingencies(void) const
   int ncont = 1;
   const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
   for (int i = 1; i <= NumRowPlayers(); 
-       ncont *= support.NumStrats(GetRowPlayer(i++)));
+       ncont *= support.NumStrategies(GetRowPlayer(i++)));
   return ncont;
 }
 
@@ -1035,14 +1035,14 @@ int gbtTableWidget::NumRowsSpanned(int index) const
   int ncont = 1;
   const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
   for (int i = index + 1; i <= NumRowPlayers(); 
-       ncont *= support.NumStrats(GetRowPlayer(i++)));
+       ncont *= support.NumStrategies(GetRowPlayer(i++)));
   return ncont;
 }
 
 int gbtTableWidget::RowToStrategy(int player, int row) const
 {
   int strat = row / NumRowsSpanned(player);
-  return (strat % m_doc->GetNfgSupport().NumStrats(GetRowPlayer(player)) + 1);
+  return (strat % m_doc->GetNfgSupport().NumStrategies(GetRowPlayer(player)) + 1);
 }
 
 void gbtTableWidget::SetColPlayer(int index, int pl)
@@ -1069,7 +1069,7 @@ int gbtTableWidget::NumColContingencies(void) const
   int ncont = 1;
   const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
   for (int i = 1; i <= NumColPlayers(); 
-       ncont *= support.NumStrats(GetColPlayer(i++)));
+       ncont *= support.NumStrategies(GetColPlayer(i++)));
   return ncont;
 }
 
@@ -1078,14 +1078,14 @@ int gbtTableWidget::NumColsSpanned(int index) const
   int ncont = 1;
   const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
   for (int i = index + 1; i <= NumColPlayers(); 
-       ncont *= support.NumStrats(GetColPlayer(i++)));
+       ncont *= support.NumStrategies(GetColPlayer(i++)));
   return ncont;
 }
 
 int gbtTableWidget::ColToStrategy(int player, int col) const
 {
   int strat = col / m_doc->NumPlayers() / NumColsSpanned(player);
-  return (strat % m_doc->GetNfgSupport().NumStrats(GetColPlayer(player)) + 1);
+  return (strat % m_doc->GetNfgSupport().NumStrategies(GetColPlayer(player)) + 1);
 }
 
 Gambit::PureStrategyProfile 

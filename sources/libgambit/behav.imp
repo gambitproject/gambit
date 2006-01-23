@@ -94,7 +94,7 @@ MixedBehavProfile<T>::MixedBehavProfile(const MixedStrategyProfile<T> &p_profile
     m_nvals = (T) 0;
     m_bvals = (T) 0;
 
-    for (int st = 1; st <= support.NumStrats(pl); st++)  {
+    for (int st = 1; st <= support.NumStrategies(pl); st++)  {
       int snum = support.GetStrategy(pl, st)->GetNumber();
       if (p_profile(pl, st) > (T) 0)  {
 	const Array<int> &actions = m_efg->m_players[pl]->m_strategies[snum]->m_behav;

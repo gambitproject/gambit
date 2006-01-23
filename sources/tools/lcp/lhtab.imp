@@ -35,8 +35,8 @@ template <class T> Gambit::Matrix<T> Make_A1(const Gambit::StrategySupport &S,
                                       const T &)
 {
   int n1, n2, i,j;
-  n1=S.NumStrats(1);
-  n2=S.NumStrats(2);
+  n1=S.NumStrategies(1);
+  n2=S.NumStrategies(2);
   Gambit::Matrix<T> A1(1,n1,n1+1,n1+n2);
 
   Gambit::PureStrategyProfile profile(S.GetGame());
@@ -68,8 +68,8 @@ template <class T> Gambit::Matrix<T> Make_A2(const Gambit::StrategySupport &S,
                                       const T &)
 {
   int n1, n2, i,j;
-  n1=S.NumStrats(1);
-  n2=S.NumStrats(2);
+  n1=S.NumStrategies(1);
+  n2=S.NumStrategies(2);
   Gambit::Matrix<T> A2(n1+1,n1+n2,1,n1);
 
   Gambit::PureStrategyProfile profile(S.GetGame());
@@ -100,7 +100,7 @@ template <class T> Gambit::Matrix<T> Make_A2(const Gambit::StrategySupport &S,
 template <class T> Gambit::Vector<T> Make_b1(const Gambit::StrategySupport &S,
 				      const T &)
 {
-  int n1 = S.NumStrats(1);
+  int n1 = S.NumStrategies(1);
   Gambit::Vector<T> b1(1,n1);
 
   for (int i = 1; i <= n1; i++) 
@@ -111,8 +111,8 @@ template <class T> Gambit::Vector<T> Make_b1(const Gambit::StrategySupport &S,
 template <class T> Gambit::Vector<T> Make_b2(const Gambit::StrategySupport &S, const T &)
 {
   int n1, n2, i;
-  n1=S.NumStrats(1);
-  n2=S.NumStrats(2);
+  n1=S.NumStrategies(1);
+  n2=S.NumStrategies(2);
   Gambit::Vector<T> b2(n1+1,n1+n2);
 
   for (i = n1+1; i <= n1+n2; i++) 

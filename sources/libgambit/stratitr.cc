@@ -93,7 +93,7 @@ bool StrategyIterator::NextContingency(void)
       continue;
     }
 
-    if (m_currentStrat[pl] < support.NumStrats(pl)) {
+    if (m_currentStrat[pl] < support.NumStrategies(pl)) {
       profile.SetStrategy(support.GetStrategy(pl, ++(m_currentStrat[pl])));
       return true;
     }

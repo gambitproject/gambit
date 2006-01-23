@@ -186,8 +186,8 @@ void nfgLcp<T>::AddSolutions(const Gambit::StrategySupport &p_support,
 			     const T &epsilon)
 {
   int i,j;
-  int n1 = p_support.NumStrats(1);
-  int n2 = p_support.NumStrats(2);
+  int n1 = p_support.NumStrategies(1);
+  int n2 = p_support.NumStrategies(2);
 
   for (i = 1; i <= p_list.Length(); i++)    {
     Gambit::MixedStrategyProfile<T> profile(p_support);

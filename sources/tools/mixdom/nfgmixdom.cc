@@ -35,22 +35,22 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
 {
   Gambit::Game nfg = S.GetGame();
   
-  Gambit::Array<bool> dom(S.NumStrats(pl));
+  Gambit::Array<bool> dom(S.NumStrategies(pl));
   
   T eps;
   Gambit::Epsilon(eps);
   
-  Gambit::Vector<T> dominator(S.NumStrats(pl));
+  Gambit::Vector<T> dominator(S.NumStrategies(pl));
   
   int st,i,k,n;
   
   if (strong)   {
     T COpt;
     bool ret = false;
-    int strats = S.NumStrats(pl);
+    int strats = S.NumStrategies(pl);
     int contingencies = 1;
     for(k=1;k<=nfg->NumPlayers();k++)
-      if(k!=pl) contingencies*=S.NumStrats(k);
+      if(k!=pl) contingencies*=S.NumStrategies(k);
     
     Gambit::Matrix<T> A(1,contingencies+1,1,strats);
     Gambit::Vector<T> B(1,contingencies+1);
@@ -127,10 +127,10 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
   else  {    // look for weak domination
     T C0 = (T) 0, COpt, TmpC;
     bool ret = false;
-    int strats = S.NumStrats(pl);
+    int strats = S.NumStrategies(pl);
     int contingencies = 1;
     for(k=1;k<=nfg->NumPlayers();k++)
-      if(k!=pl) contingencies*=S.NumStrats(k);
+      if(k!=pl) contingencies*=S.NumStrategies(k);
     
     Gambit::Matrix<T> A(1,contingencies+1,1,strats-1);
     Gambit::Vector<T> B(1,contingencies+1);
@@ -220,18 +220,18 @@ bool IsMixedDominated(const Gambit::StrategySupport &S, Gambit::GameStrategy str
   int pl = str->GetPlayer()->GetNumber();
   Gambit::Game nfg = S.GetGame();
   int whichstrat = str->GetNumber();
-  int strats = S.NumStrats(pl);
+  int strats = S.NumStrategies(pl);
 
   T eps;
   Gambit::Epsilon(eps);
   
-  Gambit::Vector<T> dominator(S.NumStrats(pl));
+  Gambit::Vector<T> dominator(S.NumStrategies(pl));
   
   int st,i,k,n;
   bool ret = false;
   int contingencies = 1;
   for(k=1;k<=nfg->NumPlayers();k++)
-    if(k!=pl) contingencies*=S.NumStrats(k);
+    if(k!=pl) contingencies*=S.NumStrategies(k);
   
   
   if (strong)   {
@@ -380,20 +380,20 @@ bool IsMixedDominated(const Gambit::MixedStrategyProfile<T> &pr, int pl,
 {
   Gambit::StrategySupport S = pr.GetSupport();
   Gambit::Game nfg = pr.GetGame();
-  int strats = S.NumStrats(pl);
+  int strats = S.NumStrategies(pl);
   Gambit::Vector<T> prob = pr.GetRow(pl);
   assert( prob.Length() == strats);
 
   T eps,x;
   Gambit::Epsilon(eps);
   
-  Gambit::Vector<T> dominator(S.NumStrats(pl));
+  Gambit::Vector<T> dominator(S.NumStrategies(pl));
   
   int st,i,k,n;
   bool ret = false;
   int contingencies = 1;
   for(k=1;k<=nfg->NumPlayers();k++)
-    if(k!=pl) contingencies*=S.NumStrats(k);
+    if(k!=pl) contingencies*=S.NumStrategies(k);
   
   if (strong)   {
     T COpt;

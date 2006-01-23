@@ -92,8 +92,8 @@ void nfgLp<T>::Solve(const Gambit::StrategySupport &p_support)
   
   int i,j,m,k;
   
-  m = p_support.NumStrats(1);
-  k = p_support.NumStrats(2);
+  m = p_support.NumStrategies(1);
+  k = p_support.NumStrategies(2);
   Gambit::Matrix<T> A(1,k+1,1,m+1);
   Gambit::Vector<T> b(1,k+1);
   Gambit::Vector<T> c(1,m+1);
@@ -150,8 +150,8 @@ void nfgLp<T>::GetSolutions(const Gambit::StrategySupport &p_support,
 			    const T &p_epsilon) const
 {
   int index;
-  int n1 = p_support.NumStrats(1);
-  int n2=p_support.NumStrats(2);
+  int n1 = p_support.NumStrategies(1);
+  int n2 = p_support.NumStrategies(2);
 
   for (int i = 1; i <= p_list.Length(); i++)    {
     Gambit::MixedStrategyProfile<T> profile(p_support);

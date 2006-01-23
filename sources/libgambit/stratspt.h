@@ -71,13 +71,13 @@ public:
   Game GetGame(void) const { return m_nfg; }
 
   /// Returns the number of strategies in the support for player pl.
-  int NumStrats(int pl) const  { return m_support[pl].Length(); }
+  int NumStrategies(int pl) const  { return m_support[pl].Length(); }
 
   /// Returns the number of strategies in the support for all players.
-  Array<int> NumStrats(void) const;
+  Array<int> NumStrategies(void) const;
 
   /// Returns the total number of strategies in the support.
-  int ProfileLength(void) const;
+  int MixedProfileLength(void) const;
 
   /// Returns the strategy in the st'th position for player pl.
   GameStrategy GetStrategy(int pl, int st) const 
@@ -100,8 +100,6 @@ public:
   //@{
   /// Add a strategy to the support.
   void AddStrategy(GameStrategy);
-
-  /// Remove a strategy from the support; return true if successful.
 
   /// Removes a strategy from the support.  If the strategy is
   /// not present, or if the strategy is the only strategy for that

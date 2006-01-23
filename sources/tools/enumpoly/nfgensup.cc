@@ -73,7 +73,7 @@ void AllValidSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
   StrategyCursorForSupport c_copy(*c);
 
   do {
-    if ( sact->NumStrats(c_copy.PlayerIndex()) > 1 ) {
+    if (sact->NumStrategies(c_copy.PlayerIndex()) > 1) {
       Gambit::GameStrategy str_ptr = c_copy.GetStrategy();
       sact->RemoveStrategy(str_ptr); 
       AllValidSubsupportsRECURSIVE(s,sact,&c_copy,p_list);
@@ -153,7 +153,7 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
     
     do {
       if (sact->Contains(c_copy.GetStrategy()) &&
-	  sact->NumStrats(c_copy.PlayerIndex()) > 1 ) {
+	  sact->NumStrategies(c_copy.PlayerIndex()) > 1 ) {
 
 	Gambit::GameStrategy str_ptr = c_copy.GetStrategy();
 	sact->RemoveStrategy(str_ptr); 
@@ -236,7 +236,7 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
     do {
       Gambit::GameStrategy str_ptr = c_copy.GetStrategy();
       if (sact->Contains(str_ptr) &&
-	  sact->NumStrats(str_ptr->GetPlayer()->GetNumber()) > 1 ) {
+	  sact->NumStrategies(str_ptr->GetPlayer()->GetNumber()) > 1 ) {
 	sact->RemoveStrategy(str_ptr); 
 	PossibleNashSubsupportsRECURSIVE(s,sact,&c_copy,p_list);
 	sact->AddStrategy(str_ptr);
@@ -249,7 +249,7 @@ Gambit::List<Gambit::StrategySupport> SortSupportsBySize(Gambit::List<Gambit::St
 {
   Gambit::Array<int> sizes(p_list.Length());
   for (int i = 1; i <= p_list.Length(); i++)
-    sizes[i] = p_list[i].ProfileLength();
+    sizes[i] = p_list[i].MixedProfileLength();
 
   Gambit::Array<int> listproxy(p_list.Length());
   for (int i = 1; i <= p_list.Length(); i++)
@@ -379,7 +379,7 @@ StrategyCursorForSupport::operator!=(const StrategyCursorForSupport &rhs) const
 bool
 StrategyCursorForSupport::GoToNext()
 {
-  if (strat != support->NumStrats(pl))
+  if (strat != support->NumStrategies(pl))
     { strat++; return true; }
   else if (pl != support->GetGame()->NumPlayers())
     { pl++; strat = 1; return true; }
@@ -410,7 +410,7 @@ bool
 StrategyCursorForSupport::IsLast() const
 {
   if (pl == support->GetGame()->NumPlayers())
-    if (strat == support->NumStrats(pl))
+    if (strat == support->NumStrategies(pl))
       return true;
   return false;
 }

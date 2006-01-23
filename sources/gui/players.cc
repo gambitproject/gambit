@@ -130,7 +130,7 @@ void gbtPlayerToolbar::OnMouseEvents(wxMouseEvent &p_event)
   if (p_event.LeftIsDown() && p_event.Dragging()) {
     wxSheetCoords coords = XYToGridCell(p_event.GetX(), p_event.GetY());
 
-    int player = coords.GetRow() - ((m_doc->IsTree()) ? 0 : 1);
+    int player = coords.GetRow() + ((m_doc->IsTree()) ? 0 : 1);
     wxBitmap bitmap;
     if (player == 0) {
       bitmap = wxBitmap(dice_xpm);
