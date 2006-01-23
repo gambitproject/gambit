@@ -727,7 +727,18 @@ template Rational PureStrategyProfile::GetPayoff(int pl) const;
 template<> 
 std::string PureStrategyProfile::GetPayoff(int pl) const
 {
-  return ToText(GetPayoff<Rational>(pl));
+  if (m_nfg->IsTree()) {
+    return ToText(GetPayoff<Rational>(pl));
+  }
+  else {
+    GameOutcome outcome = GetOutcome();
+    if (outcome) {
+      return outcome->GetPayoff<std::string>(pl);
+    }
+    else {
+      return "0";
+    }
+  }
 }
 
 //========================================================================
