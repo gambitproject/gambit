@@ -177,13 +177,13 @@ T MixedBehavProfile<T>::ActionProb(const GameAction &action) const
     GameInfosetRep *infoset = action->GetInfoset();
     return infoset->GetActionProb<T>(action->GetNumber());
   }
-  else if (!m_support.Find(action)) {
+  else if (!m_support.Contains(action)) {
     return (T) 0.0;
   }
   else {
     return (*this)(action->GetInfoset()->GetPlayer()->GetNumber(),
 		   action->GetInfoset()->GetNumber(),
-		   m_support.Find(action));
+		   m_support.GetIndex(action));
   }
 }
 
@@ -555,7 +555,7 @@ void MixedBehavProfile<T>::BehaviorStrat(const Game &E, int pl,
 	  m_nvals[child->number] > (T) 0)  {
 	(*this)(n->GetPlayer()->GetNumber(),
 		n->GetInfoset()->GetNumber(), 
-		GetSupport().Find(n->GetInfoset()->GetAction(i))) =
+		GetSupport().GetIndex(n->GetInfoset()->GetAction(i))) =
 	  m_nvals[child->number] / m_nvals[n->number];
       }
     BehaviorStrat(E, pl, child);
@@ -579,7 +579,7 @@ void MixedBehavProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp,
 	else
 	  prob = tremble / (T) node->NumChildren();
       }
-      else if (GetSupport().Find(node->GetInfoset()->GetAction(i)))
+      else if (GetSupport().Contains(node->GetInfoset()->GetAction(i)))
 	prob = (T) 1 / (T) GetSupport().NumActions(node->GetPlayer()->GetNumber(),
 						   node->GetInfoset()->GetNumber());
       else

@@ -140,7 +140,7 @@ MakeSequenceForm(const Gambit::GameNode &n, Gambit::Rational prob,Gambit::Array<
 	flag =true;
       }
       for(i=1;i<=n->NumChildren();i++) {
-	if(efsupp.Find(n->GetInfoset()->GetAction(i))) {
+	if(efsupp.Contains(n->GetInfoset()->GetAction(i))) {
 	  snew[pl]+=1;
 	  if(flag) {
 	    Sequence* child;
@@ -183,7 +183,7 @@ GetSequenceDims(const Gambit::GameNode &n)
 	flag =true;
       }
       for(i=1;i<=n->NumChildren();i++) {
-	if(efsupp.Find(n->GetInfoset()->GetAction(i))) {
+	if(efsupp.Contains(n->GetInfoset()->GetAction(i))) {
 	  if(flag) {
 	    seq[pl]++;
 	  }
@@ -221,7 +221,7 @@ int Sfg::ActionNumber(int pl, int j) const
 {
   if(j==1) return 0;
   int isetnum = (*sequences)[pl]->Find(j)->GetInfoset()->GetNumber();
-  return efsupp.Find(pl,isetnum,GetAction(pl,j));
+  return efsupp.Contains(GetAction(pl,j));
 }
 
 Gambit::GameInfoset Sfg::GetInfoset(int pl, int j) const 
@@ -261,7 +261,7 @@ Gambit::MixedBehavProfile<double> Sfg::ToBehav(const Gambit::PVector<double> &x)
       else
 	value = 0;
 
-      b(i,sij->GetInfoset()->GetNumber(),efsupp.Find(sij->GetAction()))= value;
+      b(i,sij->GetInfoset()->GetNumber(),efsupp.GetIndex(sij->GetAction()))= value;
     }
   return b;
 }

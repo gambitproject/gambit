@@ -26,6 +26,7 @@
 
 #include "libgambit/libgambit.h"
 
+
 class ActionCursorForSupport;
 
 // We build a series of functions of increasing complexity.  The
@@ -127,7 +128,7 @@ public:
 
   // Special
   bool InfosetGuaranteedActiveByPriorCommitments(const 
-						     Gambit::BehavSupportWithActiveInfo *,
+						 Gambit::BehavSupportWithActiveInfo *,
 						 const Gambit::GameInfoset &);
   bool DeletionsViolateActiveCommitments(const Gambit::BehavSupportWithActiveInfo *,
 					 const Gambit::List<Gambit::GameInfoset> *);

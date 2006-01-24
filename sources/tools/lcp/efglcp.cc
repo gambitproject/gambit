@@ -335,11 +335,12 @@ void efgLcp<T>::FillTableau(const Gambit::BehavSupport &p_support, Gambit::Matri
       i1=isets1.Find(n->GetInfoset());
       snew=1;
       for (int i = 1; i < i1; i++) {
-	snew+=p_support.NumActions(isets1[i]);
+	snew+=p_support.NumActions(isets1[i]->GetPlayer()->GetNumber(),
+				   isets1[i]->GetNumber());
       }
       A(s1,ns1+ns2+i1+1) = -(T)1;
       A(ns1+ns2+i1+1,s1) = (T)1;
-      for (int i = 1; i <= p_support.NumActions(n->GetInfoset()); i++) {
+      for (int i = 1; i <= p_support.NumActions(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber()); i++) {
 	A(snew+i,ns1+ns2+i1+1) = (T)1;
 	A(ns1+ns2+i1+1,snew+i) = -(T)1;
 	FillTableau(p_support, A, n->GetChild(p_support.Actions(n->GetInfoset())[i]->GetNumber()),prob,snew+i,s2,i1,i2);
@@ -349,11 +350,12 @@ void efgLcp<T>::FillTableau(const Gambit::BehavSupport &p_support, Gambit::Matri
       i2=isets2.Find(n->GetInfoset());
       snew=1;
       for (int i = 1; i < i2; i++) {
-	snew+=p_support.NumActions(isets2[i]);
+	snew+=p_support.NumActions(isets2[i]->GetPlayer()->GetNumber(),
+				   isets2[i]->GetNumber());
       }
       A(ns1+s2,ns1+ns2+ni1+i2+1) = -(T)1;
       A(ns1+ns2+ni1+i2+1,ns1+s2) = (T)1;
-      for (int i = 1; i <= p_support.NumActions(n->GetInfoset()); i++) {
+      for (int i = 1; i <= p_support.NumActions(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber()); i++) {
 	A(ns1+snew+i,ns1+ns2+ni1+i2+1) = (T)1;
 	A(ns1+ns2+ni1+i2+1,ns1+snew+i) = -(T)1;
 	FillTableau(p_support, A, n->GetChild(p_support.Actions(n->GetInfoset())[i]->GetNumber()),prob,s1,snew+i,i1,i2);
@@ -381,8 +383,9 @@ void efgLcp<T>::GetProfile(const Gambit::BehavSupport &p_support,
       inf= isets1.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=p_support.NumActions(isets1[i]); 
-      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
+	snew+=p_support.NumActions(isets1[i]->GetPlayer()->GetNumber(),
+				   isets1[i]->GetNumber()); 
+      for(i=1;i<=p_support.NumActions(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber());i++) {
 	v(pl,inf,i) = (T)0;
 	if(tab.Member(s1)) {
 	  ind = tab.Find(s1);
@@ -401,8 +404,8 @@ void efgLcp<T>::GetProfile(const Gambit::BehavSupport &p_support,
       inf= isets2.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=p_support.NumActions(isets2[i]); 
-      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
+	snew+=p_support.NumActions(isets2[i]->GetPlayer()->GetNumber(), isets2[i]->GetNumber()); 
+      for(i=1;i<=p_support.NumActions(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber());i++) {
 	v(pl,inf,i) = (T)0;
 	if(tab.Member(ns1+s2)) {
 	  ind = tab.Find(ns1+s2);

@@ -589,7 +589,7 @@ int gbtTreeLayout::LayoutSubtree(Gambit::GameNode p_node, const Gambit::BehavSup
   if (m_doc->GetStyle().RootReachable() &&
       p_node->GetInfoset() && !p_node->GetInfoset()->GetPlayer()->IsChance()) {
     Gambit::GameInfoset infoset = p_node->GetInfoset();
-    for (int i = 1; i <= p_support.NumActions(infoset); i++) {
+    for (int i = 1; i <= p_support.NumActions(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()); i++) {
       yn = LayoutSubtree(p_node->GetChild(p_support.Actions(infoset)[i]->GetNumber()),
 			 p_support, p_maxy, p_miny, p_ycoord);
       if (y1 == -1) {
@@ -608,7 +608,7 @@ int gbtTreeLayout::LayoutSubtree(Gambit::GameNode p_node, const Gambit::BehavSup
 	}
 	
 	if (!p_node->GetPlayer()->IsChance() &&
-	    p_support.Find(p_node->GetInfoset()->GetAction(i)) <= 0) {
+	    !p_support.Contains(p_node->GetInfoset()->GetAction(i))) {
 	  m_nodeList[p_node->GetChild(i)->GetNumber()]->SetInSupport(false);
 	}
       }
@@ -734,7 +734,7 @@ void gbtTreeLayout::FillInfosetTable(Gambit::GameNode n, const Gambit::BehavSupp
     for (int i = 1; i <= n->NumChildren(); i++) {
       bool in_sup = true;
       if (n->GetPlayer()->GetNumber()) {
-	in_sup = cur_sup.Find(n->GetInfoset()->GetAction(i));
+	in_sup = cur_sup.Contains(n->GetInfoset()->GetAction(i));
       }
             
       if (in_sup || !draw_settings.RootReachable()) {
@@ -831,7 +831,7 @@ void gbtTreeLayout::BuildNodeList(Gambit::GameNode p_node, const Gambit::BehavSu
 	}
       }
       else {
-	for (int i = 1; i <= p_support.NumActions(infoset); i++) {
+	for (int i = 1; i <= p_support.NumActions(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()); i++) {
 	  BuildNodeList(p_node->GetChild(p_support.Actions(infoset)[i]->GetNumber()),
 			p_support, p_level + 1);
 	}

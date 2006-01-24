@@ -315,7 +315,7 @@ BehavSupport::BehavSupport(const Game &p_efg)
 }
 
 BehavSupport::BehavSupport(const BehavSupport &p_support)
-  : m_name(p_support.m_name), m_efg(p_support.m_efg),
+  : m_efg(p_support.m_efg),
     m_players(p_support.m_players.Length())
 {
   for (int pl = 1; pl <= m_players.Length(); pl++)
@@ -331,7 +331,6 @@ BehavSupport::~BehavSupport()
 BehavSupport &BehavSupport::operator=(const BehavSupport &p_support)
 {
   if (this != &p_support && m_efg == p_support.m_efg) {
-    m_name = p_support.m_name;
     for (int pl = 1; pl <= m_players.Length(); pl++)  {
       delete m_players[pl];
       m_players[pl] = new BehavSupportPlayer(*(p_support.m_players[pl]));
@@ -351,11 +350,6 @@ bool BehavSupport::operator==(const BehavSupport &p_support) const
   return (pl > m_players.Length());
 }
 
-bool BehavSupport::operator!=(const BehavSupport &p_support) const
-{
-  return !(*this == p_support);
-}
-
 //-----------------------------
 // BehavSupport: Member Functions 
 //-----------------------------
@@ -363,14 +357,6 @@ bool BehavSupport::operator!=(const BehavSupport &p_support) const
 int BehavSupport::NumActions(int pl, int iset) const
 {
   return m_players[pl]->NumActions(iset);
-}
-
-int BehavSupport::NumActions(const GameInfoset &i) const
-{
-  if (i->GetPlayer()->IsChance())
-    return i->NumActions();
-  else
-    return m_players[i->GetPlayer()->GetNumber()]->NumActions(i->GetNumber());
 }
 
 const Array<GameAction> &BehavSupport::Actions(int pl, int iset) const
@@ -391,27 +377,12 @@ Array<GameAction> BehavSupport::Actions(const GameInfoset &i) const
     return m_players[i->GetPlayer()->GetNumber()]->ActionList(i->GetNumber());
 }
 
-List<GameAction> BehavSupport::ListOfActions(const GameInfoset &i) const
+int BehavSupport::GetIndex(const GameAction &a) const
 {
-  Array<GameAction> actions = Actions(i);
-  List<GameAction> answer;
-  for (int i = 1; i <= actions.Length(); i++)
-    answer.Append(actions[i]);
-  return answer;
-}
-
-int BehavSupport::Find(const GameAction &a) const
-{
-  if (a->GetInfoset()->GetGame() != m_efg)  assert(0);
+  if (a->GetInfoset()->GetGame() != m_efg)  throw MismatchException();
 
   int pl = a->GetInfoset()->GetPlayer()->GetNumber();
-
   return m_players[pl]->Find(a);
-}
-
-int BehavSupport::Find(int p_player, int p_infoset, GameAction p_action) const
-{
-  return m_players[p_player]->Find(p_infoset, p_action);
 }
 
 bool BehavSupport::ActionIsActive(GameAction a) const
@@ -469,7 +440,8 @@ int BehavSupport::NumDegreesOfFreedom(void) const
 
   List<GameInfoset> active_infosets = ReachableInfosets(GetGame()->GetRoot());
   for (int i = 1; i <= active_infosets.Length(); i++)
-    answer += NumActions(active_infosets[i]) - 1;
+    answer += NumActions(active_infosets[i]->GetPlayer()->GetNumber(),
+			 active_infosets[i]->GetNumber()) - 1;
 
   return answer;  
 }
@@ -521,11 +493,12 @@ int BehavSupport::NumSequences(int j) const
   List<GameInfoset> isets = ReachableInfosets(m_efg->GetPlayer(j));
   int num = 1;
   for(int i = 1; i <= isets.Length(); i++)
-    num+=NumActions(isets[i]);
+    num+=NumActions(isets[i]->GetPlayer()->GetNumber(),
+		    isets[i]->GetNumber());
   return num;
 }
 
-int BehavSupport::TotalNumSequences(void) const
+int BehavSupport::NumSequences(void) const
 {
   int total = 0;
   for (int i = 1 ; i <= m_efg->NumPlayers(); i++)
@@ -1309,7 +1282,7 @@ bool BehavSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++)
     for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) 
       if (InfosetIsActive(pl,iset))
-        if ( NumActions(GetGame()->GetPlayer(pl)->GetInfoset(iset)) == 0 )
+        if ( NumActions(pl, iset) == 0 )
           return false;
   return true;
 }
@@ -1319,10 +1292,10 @@ bool BehavSupportWithActiveInfo::HasActiveActionsAtActiveInfosetsAndNoOthers()
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++)
     for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
       if (InfosetIsActive(pl,iset))
-        if ( NumActions(GetGame()->GetPlayer(pl)->GetInfoset(iset)) == 0 )
+        if ( NumActions(pl, iset) == 0 )
           return false;
       if (!InfosetIsActive(pl,iset))
-        if ( NumActions(GetGame()->GetPlayer(pl)->GetInfoset(iset)) > 0 )
+        if ( NumActions(pl, iset) > 0 )
           return false;
       }
   return true;

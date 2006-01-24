@@ -26,6 +26,7 @@
 
 #include "efgensup.h"
 
+
 // We build a series of functions of increasing complexity.  The
 // final one, which is our goal, is the undominated support function.
 // We begin by simply enumerating all subsupports.
@@ -535,7 +536,8 @@ DeletionsViolateActiveCommitments(const Gambit::BehavSupportWithActiveInfo *S,
     if (infoset->GetPlayer()->GetNumber() < PlayerIndex() ||
 	( infoset->GetPlayer()->GetNumber() == PlayerIndex() &&
 	  infoset->GetNumber() < InfosetIndex()) )
-      if (S->NumActions(infoset) > 0)
+      if (S->NumActions(infoset->GetPlayer()->GetNumber(),
+			infoset->GetNumber()) > 0)
 	return true;
     if (infoset->GetPlayer()->GetNumber() == PlayerIndex() &&
 	infoset->GetNumber() == InfosetIndex() )

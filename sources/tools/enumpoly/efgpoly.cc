@@ -124,7 +124,9 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const Gambit::BehavSupport &S)
     (*(var[i]))[1] = 0;
     for(int seq = 2;seq<=SF.NumSequences(i);seq++) {
       int act  = SF.ActionNumber(i,seq);
-      if(act < support.NumActions(SF.GetInfoset(i,seq)))
+      Gambit::GameInfoset infoset = SF.GetInfoset(i, seq); 
+      if(act < support.NumActions(infoset->GetPlayer()->GetNumber(),
+				  infoset->GetNumber()))
 	(*(var[i]))[seq] = ++tnv;
       else
 	(*(var[i]))[seq] = 0;
@@ -154,6 +156,7 @@ gPoly<T> EfgPolEnumModule<T>::ProbOfSequence(int p, int seq) const
   int isetrow = SF.InfosetRowNumber(p,seq);
   int act  = SF.ActionNumber(p,seq);
   int varno = (*(var[p]))[seq];
+  Gambit::GameInfoset infoset = SF.GetInfoset(p, seq);
 
   if(seq==1) {
     exps=0;
@@ -162,7 +165,8 @@ gPoly<T> EfgPolEnumModule<T>::ProbOfSequence(int p, int seq) const
     gPoly<T> new_term(Space,const_term,Lex);
     equation+=new_term;
   }
-  else if(act<support.NumActions(SF.GetInfoset(p,seq))) { 
+  else if(act<support.NumActions(infoset->GetPlayer()->GetNumber(),
+				 infoset->GetNumber())) { 
     assert (varno>=exps.First());
     assert (varno<=exps.Last());
     exps=0;
@@ -228,7 +232,9 @@ gPolyList<T> EfgPolEnumModule<T>::LastActionProbPositiveInequalities() const
   for (int i = 1; i <= SF.NumPlayers(); i++) 
     for (int j = 2; j <= SF.NumSequences(i); j++) {
       int act_num = SF.ActionNumber(i,j);
-      if ( act_num == support.NumActions(SF.GetInfoset(i,j)) && act_num > 1 ) 
+      Gambit::GameInfoset infoset = SF.GetInfoset(i, j);
+      if ( act_num == support.NumActions(infoset->GetPlayer()->GetNumber(),
+					 infoset->GetNumber()) && act_num > 1 ) 
 	equations += ProbOfSequence(i,j);
     }
 
@@ -389,10 +395,12 @@ NumProbOfSequence(int p,int seq, const Gambit::Vector<gDouble> &x) const
   int isetrow = SF.InfosetRowNumber(p,seq);
   int act  = SF.ActionNumber(p,seq);
   int varno = (*(var[p]))[seq];
+  Gambit::GameInfoset infoset = SF.GetInfoset(p, seq);
 
   if(seq==1)
     return (double)1;
-  else if(act<support.NumActions(SF.GetInfoset(p,seq)))
+  else if(act<support.NumActions(infoset->GetPlayer()->GetNumber(),
+				 infoset->GetNumber()))
     return x[varno].ToDouble();
   else {    
     for(j=1;j<seq;j++) {
@@ -572,7 +580,7 @@ Gambit::MixedBehavProfile<double> ToFullSupport(const Gambit::MixedBehavProfile<
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       Gambit::GameInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	if (support.Find(infoset->GetAction(act))) {
+	if (support.Contains(infoset->GetAction(act))) {
 	  fullProfile(pl, iset, act) = p_profile[index++];
 	}
       }
@@ -610,7 +618,7 @@ void PrintSupport(std::ostream &p_stream,
       p_stream << ",";
 
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	if (p_support.Find(infoset->GetAction(act))) {
+	if (p_support.Contains(infoset->GetAction(act))) {
 	  p_stream << "1";
 	}
 	else {
