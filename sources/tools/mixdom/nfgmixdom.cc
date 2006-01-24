@@ -80,7 +80,6 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
     }
     
     for (k = 1; k <= strats; k++) {
-      double s1 = (double)k/(double)(strats);
       // tracefile << '\n' << (gbtRectArray<T> &)A << '\n';
       // tracefile << B << '\n';
       // tracefile << C << '\n';
@@ -159,7 +158,6 @@ bool ComputeMixedDominated(const Gambit::StrategySupport &S, Gambit::StrategySup
     }
     
     for (k = 1; k <= strats; k++) {
-      double s1 = (double)k/(double)(strats);
       // tracefile << '\n' << (gbtRectArray<T> &)A << '\n';
       // tracefile << B << '\n';
       // tracefile << C << '\n';

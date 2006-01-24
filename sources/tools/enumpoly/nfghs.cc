@@ -119,7 +119,9 @@ void gbtNfgHs::Initialize(Game p_game) {
   numPlayers = p_game->NumPlayers();
   numActions = p_game->NumStrategies();
 
-  int i, j; minActions = numActions[1]; maxActions = numActions[1];
+  int i; 
+  minActions = numActions[1]; 
+  maxActions = numActions[1];
 
   for (i = 2; i <= numPlayers; i++) {
     if (minActions > numActions[i]) {

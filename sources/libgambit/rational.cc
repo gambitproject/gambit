@@ -380,6 +380,9 @@ Rational::fits_in_double() const
 // These were moved from the header file to eliminate warnings
 //
 
+static IntegerRep _ZeroRep = {1, 0, 1, {0}};
+static IntegerRep _OneRep = {1, 0, 1, {1}};
+
 Rational::Rational() : num(&_ZeroRep), den(&_OneRep) {}
 Rational::~Rational() {}
 
@@ -570,7 +573,8 @@ Rational ToRational(const std::string &f)
 
 Rational ToNumber(const std::string &p_string)
 {
-  if (p_string.find('.') != -1 || p_string.find('e') != -1) {
+  if (p_string.find('.') != (unsigned int) -1 || 
+      p_string.find('e') != (unsigned int) -1) {
     std::istringstream st(p_string);
     double d;
     st >> d;

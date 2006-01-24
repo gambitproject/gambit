@@ -819,7 +819,7 @@ template Rational PureBehavProfile::GetNodeValue(const GameNode &, int pl) const
 
 GameRep::GameRep(void)
   : m_computedValues(false),
-    m_root(new GameNodeRep(this, 0)), m_chance(new GamePlayerRep(this, 0))
+    m_chance(new GamePlayerRep(this, 0)), m_root(new GameNodeRep(this, 0))
 { }
 
 /// This convenience function computes the Cartesian product of the
@@ -832,7 +832,7 @@ static int Product(const Array<int> &dim)
 }
   
 GameRep::GameRep(const Array<int> &dim)
-  : m_computedValues(true), m_root(0), m_chance(0)
+  : m_computedValues(true), m_chance(0), m_root(0)
 {
   m_results = Array<GameOutcomeRep *>(Product(dim));
   for (int pl = 1; pl <= dim.Length(); pl++)  {

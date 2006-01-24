@@ -44,6 +44,8 @@ public:
     std::string GetDescription(void) const { return "Bad Pivot in BaseTableau"; }
   };
 
+  virtual ~BaseTableau() { }
+
   bool ColIndex(int) const;
   bool RowIndex(int) const;
   bool ValidIndex(int) const;

@@ -529,8 +529,6 @@ Gambit::Integer find_lcd(const Gambit::Vector<Gambit::Rational> &vec)
 void nfgSimpdiv::Solve(const Gambit::Game &p_nfg, 
 		       const Gambit::MixedStrategyProfile<Gambit::Rational> &p_start)
 {
-  int qf,i,j,ii;
-
   // A raft of initializations moved here from the former constructor.
   // This algorithm is in need of some serious reorganization!
   t = 0;

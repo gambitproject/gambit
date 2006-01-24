@@ -149,7 +149,6 @@ void nfgLp<T>::GetSolutions(const Gambit::StrategySupport &p_support,
 			    const Gambit::List<BFS<T> > &p_list,
 			    const T &p_epsilon) const
 {
-  int index;
   int n1 = p_support.NumStrategies(1);
   int n2 = p_support.NumStrategies(2);
 

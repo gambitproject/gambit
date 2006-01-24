@@ -315,6 +315,7 @@ int PolEnum(const Gambit::StrategySupport &support,
 //                        Polish Equilibrum for Nfg
 //---------------------------------------------------------------------------
 
+#ifdef UNUSED
 static
 Gambit::MixedStrategyProfile<double> PolishEquilibrium(const Gambit::StrategySupport &support, 
 				       const Gambit::MixedStrategyProfile<double> &sol, 
@@ -349,7 +350,7 @@ Gambit::MixedStrategyProfile<double> PolishEquilibrium(const Gambit::StrategySup
 
   return module.ReturnPolishedSolution(vec);
 }
-
+#endif  // UNUSED
 
 Gambit::Vector<gDouble> 
 PolEnumModule::SolVarsFromMixedProfile(const Gambit::MixedStrategyProfile<double> &sol) const

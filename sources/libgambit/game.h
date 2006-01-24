@@ -69,6 +69,8 @@ public:
   void IncRef(void) { m_refCount++; }
   /// Decrement the reference count; delete if reference count is zero.
   void DecRef(void) { if (!--m_refCount && !m_valid) delete this; }
+  /// Returns the reference count
+  int RefCount(void) const { return m_refCount; }
   //@}
 };
 
@@ -207,7 +209,7 @@ public:
   /// @name Data access
   //@{
   /// Returns the strategic game on which the outcome is defined.
-  Game GetGame(void) const { return m_game; }
+  Game GetGame(void) const;
   /// Returns the index number of the outcome
   int GetNumber(void) const { return m_number; }
 
@@ -248,7 +250,7 @@ private:
 
 public:
   int GetNumber(void) const { return m_number; }
-  GameInfoset GetInfoset(void) const { return m_infoset; }
+  GameInfoset GetInfoset(void) const;
 
   const std::string &GetLabel(void) const { return m_label; }
   void SetLabel(const std::string &p_label) { m_label = p_label; }
@@ -288,10 +290,10 @@ protected:
   void RemoveAction(int which);
 
 public:
-  Game GetGame(void) const { return m_efg; }
+  Game GetGame(void) const;
   int GetNumber(void) const { return m_number; }
   
-  GamePlayer GetPlayer(void) const { return m_player; }
+  GamePlayer GetPlayer(void) const;
   void SetPlayer(GamePlayer p);
 
   bool IsChanceInfoset(void) const;
@@ -352,7 +354,7 @@ public:
   void SetLabel(const std::string &p_label) { m_label = p_label; }
   
   // Returns the player for whom this is a strategy
-  GamePlayer GetPlayer(void) const { return m_player; }
+  GamePlayer GetPlayer(void) const;
   /// Returns the index of the strategy for its player
   int GetNumber(void) const { return m_number; }
 
@@ -390,7 +392,7 @@ private:
 
 public:
   int GetNumber(void) const { return m_number; }
-  Game GetGame(void) const { return m_game; }
+  Game GetGame(void) const;
   
   const std::string &GetLabel(void) const { return m_label; }
   void SetLabel(const std::string &p_label) { m_label = p_label; }
@@ -436,7 +438,7 @@ protected:
   void CopySubtree(GameNodeRep *, GameNodeRep *);
 
 public:
-  Game GetGame(void) const { return m_efg; }
+  Game GetGame(void) const; 
 
   const std::string &GetLabel(void) const { return m_label; } 
   void SetLabel(const std::string &p_label) { m_label = p_label; }
@@ -712,8 +714,20 @@ inline Game NewTable(const Array<int> &p_dim) { return new GameRep(p_dim); }
 // These must be postponed to here in the file because they require
 // all classes to be defined.
 
+inline Game GameOutcomeRep::GetGame(void) const { return m_game; }
+
+inline GameInfoset GameActionRep::GetInfoset(void) const { return m_infoset; }
+
+inline Game GameInfosetRep::GetGame(void) const { return m_efg; }
+inline GamePlayer GameInfosetRep::GetPlayer(void) const { return m_player; }
 inline bool GameInfosetRep::IsChanceInfoset(void) const
 { return m_player->IsChance(); }
+
+inline GamePlayer GameStrategyRep::GetPlayer(void) const { return m_player; }
+
+inline Game GamePlayerRep::GetGame(void) const { return m_game; }
+
+inline Game GameNodeRep::GetGame(void) const { return m_efg; }
 
 template<> inline double PureBehavProfile::GetPayoff(int pl) const
 { return GetNodeValue<double>(m_efg->GetRoot(), pl); }

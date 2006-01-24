@@ -414,8 +414,6 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
-  int niters = 0;
-
   while (x[x.Length()] >= 0.0 && x[x.Length()] < p_maxLambda) {
     bool accept = true;
 

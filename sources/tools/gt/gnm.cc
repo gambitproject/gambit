@@ -72,7 +72,6 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
     del, // amount of time required to reach the next support boundary, 
     // assuming linear cvector field
     delta, // the actual amount of time we will step forward (smaller than del)
-    x0,
     ee,
     V = 0.0; // scale factor for perturbation
 

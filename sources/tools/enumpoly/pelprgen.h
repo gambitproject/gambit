@@ -38,7 +38,6 @@ that file to here.
 #include "pelgennd.h"
 #include "pelclyal.h"
 
-static int time0 = 0; /* initialized to 0 to get rid of warning - AMM */
 /* node MSD(aset Ast, Ivector T); IN pelutils.h */
 
 Gen_node G_Re(Gen_node g);

@@ -7690,8 +7690,10 @@ void qh_initflags(char *command) {
 	switch(*s++) {
 	case 'd': case 'D':
 	  qh_strtol (s, &s);
-	  if (*s == ':')
-	    qh_strtod (++s, &s);
+	  if (*s == ':') {
+	    ++s;
+	    qh_strtod (s, &s);
+	  }
 	  break;
         case 'g':
           qh PRINTgood= True;
@@ -7991,7 +7993,7 @@ void qh_initqhull_globals (coordT *points, int numpoints, int dim, boolT ismallo
   }
   if (randr/1000 < qh_RANDOMmax/10)
     fprintf (qh ferr, "qhull configuration warning (initqhull_globals): average of 1000 randoms %.2g much less than expected (%.2g).  Is qh_RANDOMmax wrong?\n",
-	     randr/1000, qh_RANDOMmax/2);
+	     randr/1000, (double) (qh_RANDOMmax/2));
   qh RANDOMa= 2.0 * qh RANDOMfactor/qh_RANDOMmax;
   qh RANDOMb= 1.0 - qh RANDOMfactor;
 
@@ -8151,7 +8153,8 @@ void qh_initthresholds(char *command) {
 	    continue;
 	  }
 	  if (*s == ':') {
-	    value= qh_strtod(++s, &s);
+	    ++s;
+	    value= qh_strtod(s, &s);
 	    if (fabs((double)value) > 1.0) {
 	      fprintf(qh ferr, "qhull warning: value %2.4g for Print option %c is > +1 or < -1.  Ignored\n", 
 	              value, key);
@@ -8186,8 +8189,10 @@ void qh_initthresholds(char *command) {
 	        index, key, maxdim);
 	    continue;
 	  }
-	  if (*s == ':')
-	    value= qh_strtod(++s, &s);
+	  if (*s == ':') {
+	    ++s;
+	    value= qh_strtod(s, &s);
+	  }
 	  else if (key == 'b')
 	    value= -qh_DEFAULTbox;
 	  else
@@ -8568,7 +8573,7 @@ At %d:%d:%d & %2.5g CPU secs, qhull has created %d facets and merged %d.\n\
   }
 #ifndef __BCC55__
   // This condition is always false under BCC55
-  if (qh visit_id > (unsigned) INT_MAX) {
+  if (qh visit_id > INT_MAX) {
     qh visit_id= 0;
     FORALLfacets
       facet->visitid= qh visit_id;
@@ -8576,7 +8581,7 @@ At %d:%d:%d & %2.5g CPU secs, qhull has created %d facets and merged %d.\n\
 #endif  // __BCC55__
 #ifndef __BCC55__
   // This condition is always false under BCC55
-  if (qh vertex_visit > (unsigned) INT_MAX) {
+  if (qh vertex_visit > INT_MAX) {
     qh vertex_visit= 0;
     FORALLvertices
       vertex->visitid= qh vertex_visit;

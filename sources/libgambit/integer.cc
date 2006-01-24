@@ -100,9 +100,9 @@ long lg(unsigned long x)
 #define MALLOC_MIN_OVERHEAD 4
 #endif
 
-IntegerRep _ZeroRep = {1, 0, 1, {0}};
-IntegerRep _OneRep = {1, 0, 1, {1}};
-IntegerRep _MinusOneRep = {1, 0, 0, {1}};
+static IntegerRep _ZeroRep = {1, 0, 1, {0}};
+static IntegerRep _OneRep = {1, 0, 1, {1}};
+static IntegerRep _MinusOneRep = {1, 0, 0, {1}};
 
 
 // utilities to extract and transfer bits

@@ -403,7 +403,7 @@ void gbtGameFrame::OnUpdate(void)
 #include "bitmaps/font.xpm"
 #include "bitmaps/label.xpm"
 #include "bitmaps/layout.xpm"
-#include "bitmaps/new.xpm"
+//#include "bitmaps/new.xpm"
 #include "bitmaps/newplayer.xpm"
 #include "bitmaps/newtable.xpm"
 #include "bitmaps/newtree.xpm"

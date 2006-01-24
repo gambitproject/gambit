@@ -168,10 +168,6 @@ template <class T> void nfgLcp<T>::AllLemke(const Gambit::StrategySupport &p_sup
        (m_stopAfter==0 || (p_list.Length()-1) < m_stopAfter);
        i++) {
     if (i != j)  {
-      int len = p_list.Length() - 1;
-      double p1 = (double) len / (double) (len+1);
-      double p2 = (double) (len+1) / (double) (len+2);
-      double aa = (double) i / (double) (B.MaxCol() - B.MinCol());
       LHTableau<T> Bcopy(B);
       Bcopy.LemkePath(i);
       AllLemke(p_support,i,Bcopy, p_list, depth+1);

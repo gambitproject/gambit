@@ -9,6 +9,8 @@
 
 #include "pelprgen.h"
 
+static int time0 = 0; /* initialized to 0 to get rid of warning - AMM */
+
 /* --------------------------------------------------------------
  Install_Command(Gen_node (*G)(),char *s)
    takes a pointer to a Shell Procedure and a string s, installs

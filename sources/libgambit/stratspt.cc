@@ -188,7 +188,6 @@ bool StrategySupport::Undominated(StrategySupport &newS, int pl, bool strong,
   d2 = (double)pl / (double) GetGame()->NumPlayers();
   for (min = 0, dis = NumStrategies(pl) - 1; min <= dis; )  {
     int pp;
-    double s1 = (double)min/(double)(dis+1);
     for (pp = 0;
 	 pp < min && !Dominates(GetStrategy(pl, set[pp+1]),
 				GetStrategy(pl, set[dis+1]), strong); 

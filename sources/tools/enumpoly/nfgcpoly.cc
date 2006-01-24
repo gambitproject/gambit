@@ -259,6 +259,7 @@ int PolEnum(const StrategySupport &support, int p_stopAfter,
 //                        Polish Equilibrum for Nfg
 //---------------------------------------------------------------------------
 
+#ifdef UNUSED
 static
 MixedStrategyProfile<double> PolishEquilibrium(const StrategySupport &support, 
 				       const MixedStrategyProfile<double> &sol, 
@@ -294,6 +295,7 @@ MixedStrategyProfile<double> PolishEquilibrium(const StrategySupport &support,
   return module.ReturnPolishedSolution(vec);
 }
 
+#endif // UNUSED
 
 Vector<gDouble> 
 HeuristicPolEnumModule::SolVarsFromMixedStrategyProfile(const MixedStrategyProfile<double> &sol) const

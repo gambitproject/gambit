@@ -91,8 +91,6 @@ extern int      Iislong(const IntegerRep*);
 extern int      Iisdouble(const IntegerRep*);
 extern long     lg(const IntegerRep*);
 
-extern IntegerRep _ZeroRep, _OneRep, _MinusOneRep;
-
 class Integer {
 protected:
   IntegerRep *rep;

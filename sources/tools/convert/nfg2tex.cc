@@ -137,7 +137,6 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   int c;
-  bool useFloat = false;
   int rowPlayer = 1, colPlayer = 2;
   bool quiet = false;
 
