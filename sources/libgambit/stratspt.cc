@@ -119,45 +119,26 @@ bool StrategySupport::RemoveStrategy(GameStrategy s)
 
 bool StrategySupport::Dominates(GameStrategy s, 
 				GameStrategy t, 
-				bool strong) const
+				bool p_strict) const
 {
   Game n = GetGame();
+  int player = s->GetPlayer()->GetNumber();
 
-  StrategyIterator A(*this, s->GetPlayer()->GetNumber(), GetIndex(s));
-  StrategyIterator B(*this, t->GetPlayer()->GetNumber(), GetIndex(t));
-
-  if (strong)  {
-    do  {
-      Rational ap = ((A.GetOutcome()) ? 
-			A.GetOutcome()->GetPayoff<Rational>(s->GetPlayer()->GetNumber()) : Rational(0));
-      Rational bp = ((B.GetOutcome()) ? 
-			B.GetOutcome()->GetPayoff<Rational>(s->GetPlayer()->GetNumber()) : Rational(0));
-
-      if (ap <= bp)  {
-	return false;
-      }
-      A.NextContingency();
-    } while (B.NextContingency());
-	
-    return true;
-  }
+  StrategyIterator A(*this, player, GetIndex(s));
+  StrategyIterator B(*this, player, GetIndex(t));
 
   bool equal = true;
   
-  do   {
-    Rational ap = ((A.GetOutcome()) ? 
-		      A.GetOutcome()->GetPayoff<Rational>(s->GetPlayer()->GetNumber()) : Rational(0));
-    Rational bp = ((B.GetOutcome()) ? 
-		      B.GetOutcome()->GetPayoff<Rational>(s->GetPlayer()->GetNumber()) : Rational(0));
-
-    if (ap < bp) { 
+  do  {
+    Rational ap = A.GetPayoff(player), bp = B.GetPayoff(player);
+    if (p_strict && ap <= bp) {
       return false;
     }
-    else if (ap > bp) {
-      equal = false;
+    else if (!p_strict) {
+      if (ap < bp) return false;
+      else if (ap > bp) equal = false;
     }
-    A.NextContingency();
-  } while (B.NextContingency());
+  } while (A.NextContingency() && B.NextContingency());
 
   return (!equal);
 }
