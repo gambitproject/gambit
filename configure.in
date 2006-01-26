@@ -133,7 +133,6 @@ AC_OUTPUT(Makefile sources/Makefile \
 	  sources/tools/liap/Makefile \
 	  sources/tools/logit/Makefile \
 	  sources/tools/lp/Makefile \
-	  sources/tools/mixdom/Makefile \
 	  sources/tools/simpdiv/Makefile \
           sources/labenski/Makefile \
           sources/labenski/art/Makefile \

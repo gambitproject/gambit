@@ -9,7 +9,6 @@ SUBDIRS = convert \
 	liap \
 	logit \
 	lp \
-	mixdom \
 	simpdiv
 
 
