@@ -66,6 +66,24 @@ template <class T> void MixedStrategyProfile<T>::SetCentroid(void)
   }
 }
 
+template <class T> 
+MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport(void) const
+{
+  MixedStrategyProfile<T> full(support.GetGame());
+  static_cast<Vector<T> &>(full) = (T) 0;
+
+  for (int pl = 1; pl <= support.GetGame()->NumPlayers(); pl++) {
+    GamePlayer player = support.GetGame()->GetPlayer(pl);
+    for (int st = 1; st <= player->NumStrategies(); st++) {
+      if (support.Contains(player->GetStrategy(st))) {
+	full(pl, st) = (*this)(pl, support.GetIndex(player->GetStrategy(st)));
+      }
+    }
+  }
+
+  return full;
+}
+
 template <class T> T MixedStrategyProfile<T>::GetLiapValue(void) const
 {
   static const T BIG1 = (T) 100;

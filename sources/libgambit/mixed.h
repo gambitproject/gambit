@@ -67,6 +67,8 @@ public:
   Game GetGame(void) const { return support.GetGame(); }
   const StrategySupport &GetSupport(void) const { return support; }
   void SetCentroid(void);
+
+  MixedStrategyProfile<T> ToFullSupport(void) const;
   //@}
 
   /// @name Computation of interesting quantities
