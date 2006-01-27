@@ -45,8 +45,8 @@ protected:
   Game m_nfg;
   Array<Array<GameStrategy> > m_support;
   
-  bool Undominated(StrategySupport &newS, int pl, bool strong,
-		   std::ostream &tracefile) const;
+  bool Undominated(StrategySupport &newS, int p_player, 
+		   bool p_strict, bool p_external = false) const;
 
 public:
   /// @name Lifecycle
@@ -110,12 +110,13 @@ public:
 
   /// @name Identification of dominated strategies
   //@{
-  bool Dominates(GameStrategy s, GameStrategy t, bool strong) const;
-  bool IsDominated(GameStrategy s, bool strong) const; 
+  bool Dominates(const GameStrategy &s, const GameStrategy &t,
+		 bool p_strict) const;
+  bool IsDominated(const GameStrategy &s, bool strong) const; 
 
-  StrategySupport Undominated(bool strong) const;
-  StrategySupport Undominated(bool strong, const Array<int> &players,
-			      std::ostream &tracefile) const;
+  /// Returns a copy of the support with dominated strategies eliminated
+  StrategySupport Undominated(bool p_strict, bool p_external = false) const;
+  StrategySupport Undominated(bool strong, const Array<int> &players) const;
   //@}
 };
 

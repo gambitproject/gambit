@@ -44,8 +44,7 @@ StrategyIterator::StrategyIterator(const StrategySupport &s)
   First();
 }
 
-StrategyIterator::StrategyIterator(const StrategySupport &s,
-						     int pl, int st)
+StrategyIterator::StrategyIterator(const StrategySupport &s, int pl, int st)
   : support(s), 
     m_currentStrat(s.GetGame()->NumPlayers()),
     profile(s.GetGame()), m_frozen1(pl), m_frozen2(0)
@@ -55,9 +54,23 @@ StrategyIterator::StrategyIterator(const StrategySupport &s,
   First();
 }
 
+StrategyIterator::StrategyIterator(const StrategySupport &p_support,
+				   const GameStrategy &p_strategy)
+  : support(p_support),
+    m_currentStrat(p_support.GetGame()->NumPlayers()),
+    profile(p_support.GetGame()), 
+    m_frozen1(p_strategy->GetPlayer()->GetNumber()),
+    m_frozen2(0)
+{
+  m_currentStrat[m_frozen1] = p_strategy->GetNumber();
+  profile.SetStrategy(p_strategy);
+  First();
+}
+
+
 StrategyIterator::StrategyIterator(const StrategySupport &s,
-						     int pl1, int st1,
-						     int pl2, int st2)
+				   int pl1, int st1,
+				   int pl2, int st2)
   : support(s), 
     m_currentStrat(s.GetGame()->NumPlayers()),
     profile(s.GetGame()), m_frozen1(pl1), m_frozen2(pl2)

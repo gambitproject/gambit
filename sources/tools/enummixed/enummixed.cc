@@ -74,7 +74,7 @@ void PrintProfile(std::ostream &p_stream,
 }
 
 template <class T> void GetCliques(std::ostream &p_stream,
-				   Game p_game,
+				   const StrategySupport &p_support,
 				   const List<int> &p_node1,
 				   const List<Vector<T> > &p_key1,
 				   int p_v1,
@@ -116,7 +116,7 @@ template <class T> void GetCliques(std::ostream &p_stream,
   for (int cl = 1; cl <= cliques1.Length(); cl++) {
     for (int i = 1; i <= cliques1[cl].Length(); i++) {
       for (int j = 1; j <= cliques2[cl].Length(); j++) {
-	MixedStrategyProfile<T> profile(p_game);
+	MixedStrategyProfile<T> profile(p_support);
 
 	for (int k = 1; k <= p_key1[cliques1[cl][i]].Length(); k++) {
 	  profile[k] = p_key1[cliques1[cl][i]][k];
@@ -126,26 +126,26 @@ template <class T> void GetCliques(std::ostream &p_stream,
 	    p_key2[cliques2[cl][j]][k];
 	}
 
-	PrintProfile(p_stream, "convex-" + ToText(cl), profile);
+	PrintProfile(p_stream, "convex-" + ToText(cl), profile.ToFullSupport());
       }
     }
   }
 }
 
-template <class T> void Solve(Game p_nfg, const T &)
+template <class T> void Solve(const StrategySupport &p_support)
 {
   List<Vector<T> > key1, key2;  
   List<int> node1, node2;   // IDs of each component of the extreme equilibria
 
-  PureStrategyProfile profile(p_nfg);
+  PureStrategyProfile profile(p_support.GetGame());
 
-  Rational min = p_nfg->GetMinPayoff();
+  Rational min = p_support.GetGame()->GetMinPayoff();
   if (min > Rational(0)) {
     min = Rational(0);
   }
   min -= Rational(1);
 
-  Rational max = p_nfg->GetMaxPayoff();
+  Rational max = p_support.GetGame()->GetMaxPayoff();
   if (max < Rational(0)) {
     max = Rational(0);
   }
@@ -153,23 +153,23 @@ template <class T> void Solve(Game p_nfg, const T &)
   Rational fac(1, max - min);
 
   // Construct matrices A1, A2
-  Matrix<T> A1(1, p_nfg->GetPlayer(1)->NumStrategies(), 
-		  1, p_nfg->GetPlayer(2)->NumStrategies());
-  Matrix<T> A2(1, p_nfg->GetPlayer(2)->NumStrategies(),
-		  1, p_nfg->GetPlayer(1)->NumStrategies());
+  Matrix<T> A1(1, p_support.NumStrategies(1),
+	       1, p_support.NumStrategies(2));
+  Matrix<T> A2(1, p_support.NumStrategies(2),
+	       1, p_support.NumStrategies(1));
 
-  for (int i = 1; i <= p_nfg->GetPlayer(1)->NumStrategies(); i++) {
-    profile.SetStrategy(p_nfg->GetPlayer(1)->GetStrategy(i));
-    for (int j = 1; j <= p_nfg->GetPlayer(2)->NumStrategies(); j++) {
-      profile.SetStrategy(p_nfg->GetPlayer(2)->GetStrategy(j));
+  for (int i = 1; i <= p_support.NumStrategies(1); i++) {
+    profile.SetStrategy(p_support.GetStrategy(1, i));
+    for (int j = 1; j <= p_support.NumStrategies(2); j++) {
+      profile.SetStrategy(p_support.GetStrategy(2, j));
       A1(i, j) = fac * (profile.GetPayoff<Rational>(1) - min);
       A2(j, i) = fac * (profile.GetPayoff<Rational>(2) - min);
     }
   }
 
   // Construct vectors b1, b2
-  Vector<T> b1(1, p_nfg->GetPlayer(1)->NumStrategies());
-  Vector<T> b2(1, p_nfg->GetPlayer(2)->NumStrategies());
+  Vector<T> b1(1, p_support.NumStrategies(1));
+  Vector<T> b2(1, p_support.NumStrategies(2));
   b1 = (T) -1;
   b2 = (T) -1;
 
@@ -200,22 +200,22 @@ template <class T> void Solve(Game p_nfg, const T &)
 	// check if solution is nash 
 	// need only check complementarity, since it is feasible
 	bool nash = true;
-	for (int k = 1; nash && k <= p_nfg->GetPlayer(1)->NumStrategies(); k++) {
+	for (int k = 1; nash && k <= p_support.NumStrategies(1); k++) {
 	  if (bfs1.IsDefined(k) && bfs2.IsDefined(-k)) {
 	    nash = nash && EqZero(bfs1(k) * bfs2(-k));
 	  }
 	}
 
-	for (int k = 1; nash && k <= p_nfg->GetPlayer(2)->NumStrategies(); k++) {
+	for (int k = 1; nash && k <= p_support.NumStrategies(2); k++) {
 	  if (bfs2.IsDefined(k) && bfs1.IsDefined(-k)) {
 	    nash = nash && EqZero(bfs2(k) * bfs1(-k));
 	  }
 	}
 
 	if (nash) {
-	  MixedStrategyProfile<T> profile(p_nfg);
+	  MixedStrategyProfile<T> profile(p_support);
 	  T sum = (T) 0;
-	  for (int k = 1; k <= p_nfg->GetPlayer(1)->NumStrategies(); k++) {
+	  for (int k = 1; k <= p_support.NumStrategies(1); k++) {
 	    profile(1, k) = (T) 0;
 	    if (bfs1.IsDefined(k)) {
 	      profile(1,k) = -bfs1(k);
@@ -223,14 +223,14 @@ template <class T> void Solve(Game p_nfg, const T &)
 	    }
 	  } 
 	  
-	  for (int k = 1; k <= p_nfg->GetPlayer(1)->NumStrategies(); k++) {
+	  for (int k = 1; k <= p_support.NumStrategies(1); k++) {
 	    if (bfs1.IsDefined(k)) { 
 	      profile(1,k) /= sum;
 	    }
 	  }
 	  
 	  sum = (T) 0;
-	  for (int k = 1; k <= p_nfg->GetPlayer(2)->NumStrategies(); k++) {
+	  for (int k = 1; k <= p_support.NumStrategies(2); k++) {
 	    profile(2,k) = (T) 0;
 	    if (bfs2.IsDefined(k)) {
 	      profile(2,k) =-bfs2(k);
@@ -238,13 +238,13 @@ template <class T> void Solve(Game p_nfg, const T &)
 	    }
 	  } 
 	  
-	  for (int k = 1; k <= p_nfg->GetPlayer(2)->NumStrategies(); k++) {
+	  for (int k = 1; k <= p_support.NumStrategies(2); k++) {
 	    if (bfs2.IsDefined(k)) { 
 	      profile(2,k) /= sum;
 	    }
 	  }
 
-	  PrintProfile(std::cout, "NE", profile);
+	  PrintProfile(std::cout, "NE", profile.ToFullSupport());
 	  
 	  // note: The keys give the mixed strategy associated with each node. 
 	  //       The keys should also keep track of the basis
@@ -266,7 +266,7 @@ template <class T> void Solve(Game p_nfg, const T &)
       }
     }
     if (g_showConnect) {
-      GetCliques(std::cout, p_nfg, node1, key1, v1, node2, key2, v2);
+      GetCliques(std::cout, p_support, node1, key1, v1, node2, key2, v2);
     }
   }
   catch (...) {
@@ -291,6 +291,7 @@ void PrintHelp(char *progname)
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      compute using floating-point arithmetic;\n";
   std::cerr << "                   display results with DECIMALS digits\n";
+  std::cerr << "  -D               don't eliminate dominated strategies first\n";
   std::cerr << "  -c               output connectedness information\n";
   std::cerr << "  -h               print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
@@ -300,13 +301,16 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   int c;
-  bool useFloat = false, quiet = false;
+  bool useFloat = false, quiet = false, eliminate = true;
 
-  while ((c = getopt(argc, argv, "d:hqcS")) != -1) {
+  while ((c = getopt(argc, argv, "d:DhqcS")) != -1) {
     switch (c) {
     case 'd':
       useFloat = true;
       g_numDecimals = atoi(optarg);
+      break;
+    case 'D':
+      eliminate = false;
       break;
     case 'h':
       PrintHelp(argv[0]);
@@ -346,11 +350,20 @@ int main(int argc, char *argv[])
 
     game->BuildComputedValues();
 
+    StrategySupport support(game);
+    if (eliminate) {
+      while (true) {
+	StrategySupport newSupport = support.Undominated(true);
+	if (newSupport == support) break;
+	support = newSupport;
+      }
+    }
+
     if (useFloat) {
-      Solve(game, 0.0);
+      Solve<double>(support);
     }
     else {
-      Solve(game, Rational(0));
+      Solve<Rational>(support);
     }
     return 0;
   }

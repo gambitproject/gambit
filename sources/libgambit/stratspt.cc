@@ -117,15 +117,13 @@ bool StrategySupport::RemoveStrategy(GameStrategy s)
 //                 Identification of dominated strategies
 //---------------------------------------------------------------------------
 
-bool StrategySupport::Dominates(GameStrategy s, 
-				GameStrategy t, 
+bool StrategySupport::Dominates(const GameStrategy &s, 
+				const GameStrategy &t, 
 				bool p_strict) const
 {
-  Game n = GetGame();
   int player = s->GetPlayer()->GetNumber();
 
-  StrategyIterator A(*this, player, GetIndex(s));
-  StrategyIterator B(*this, player, GetIndex(t));
+  StrategyIterator A(*this, s), B(*this, t);
 
   bool equal = true;
   
@@ -144,51 +142,57 @@ bool StrategySupport::Dominates(GameStrategy s,
 }
 
 
-bool StrategySupport::IsDominated(GameStrategy s, bool strong) const
+bool StrategySupport::IsDominated(const GameStrategy &s, 
+				  bool p_strict) const
 {
   for (int i = 1; i <= NumStrategies(s->GetPlayer()->GetNumber()); i++) {
     if (GetStrategy(s->GetPlayer()->GetNumber(), i) != s &&
-	Dominates(GetStrategy(s->GetPlayer()->GetNumber(), i), s, strong)) {
+	Dominates(GetStrategy(s->GetPlayer()->GetNumber(), i), s, p_strict)) {
       return true;
     }
   }
   return false;
 }
 
-bool StrategySupport::Undominated(StrategySupport &newS, int pl, bool strong,
-				  std::ostream &tracefile) const
+bool StrategySupport::Undominated(StrategySupport &newS, int p_player, 
+				  bool p_strict, bool p_external) const
 {
-  Array<int> set(NumStrategies(pl));
-  int i;
-  for (i = 1; i <= set.Length(); i++)
-    set[i] = i;
+  Array<GameStrategy> set((p_external) ? 
+			  m_nfg->GetPlayer(p_player)->NumStrategies() :
+			  NumStrategies(p_player));
 
-  int min, dis;
-  double d1,d2;
-  d1 = (double)(pl-1) / (double) GetGame()->NumPlayers();
-  d2 = (double)pl / (double) GetGame()->NumPlayers();
-  for (min = 0, dis = NumStrategies(pl) - 1; min <= dis; )  {
+  if (p_external) {
+    for (int st = 1; st <= set.Length(); st++) {
+      set[st] = m_nfg->GetPlayer(p_player)->GetStrategy(st);
+    }
+  }
+  else {
+    for (int st = 1; st <= set.Length(); st++) {
+      set[st] = GetStrategy(p_player, st);
+    }
+  }
+
+  int min = 0, dis = set.Length() - 1;
+
+  while (min <= dis) {
     int pp;
     for (pp = 0;
-	 pp < min && !Dominates(GetStrategy(pl, set[pp+1]),
-				GetStrategy(pl, set[dis+1]), strong); 
+	 pp < min && !Dominates(set[pp+1], set[dis+1], p_strict);
 	 pp++);
     if (pp < min)
       dis--;
     else  {
-      int foo = set[dis+1];
+      GameStrategy foo = set[dis+1];
       set[dis+1] = set[min+1];
       set[min+1] = foo;
 
       for (int inc = min + 1; inc <= dis; )  {
-	if (Dominates(GetStrategy(pl, set[min+1]),
-		      GetStrategy(pl, set[dis+1]), strong)) { 
-	  tracefile << GetStrategy(pl, set[dis+1])->GetNumber() << " dominated by " << GetStrategy(pl, set[min+1])->GetNumber() << '\n';
+	if (Dominates(set[min+1], set[dis+1], p_strict)) {
+	  //p_tracefile << GetStrategy(p_player, set[dis+1])->GetNumber() << " dominated by " << GetStrategy(p_player, set[min+1])->GetNumber() << '\n';
 	  dis--;
 	}
-	else if (Dominates(GetStrategy(pl, set[dis+1]),
-			   GetStrategy(pl, set[min+1]), strong)) { 
-	  tracefile << GetStrategy(pl, set[min+1])->GetNumber() << " dominated by " << GetStrategy(pl, set[dis+1])->GetNumber() << '\n';
+	else if (Dominates(set[dis+1], set[min+1], p_strict)) {
+	  //p_tracefile << GetStrategy(p_player, set[min+1])->GetNumber() << " dominated by " << GetStrategy(p_player, set[dis+1])->GetNumber() << '\n';
 	  foo = set[dis+1];
 	  set[dis+1] = set[min+1];
 	  set[min+1] = foo;
@@ -205,38 +209,38 @@ bool StrategySupport::Undominated(StrategySupport &newS, int pl, bool strong,
     }
   }
     
-  if (min + 1 <= NumStrategies(pl))   {
-    for (i = min + 1; i <= NumStrategies(pl); i++)
-      newS.RemoveStrategy(GetStrategy(pl, set[i]));
+  if (min + 1 <= set.Length()) {
+    for (int i = min + 1; i <= set.Length(); i++) {
+      newS.RemoveStrategy(set[i]);
+    }
     
     return true;
   }
-  else
+  else {
     return false;
+  }
 }
 
-StrategySupport StrategySupport::Undominated(bool p_strict) const
+StrategySupport StrategySupport::Undominated(bool p_strict,
+					     bool p_external) const
 {
   StrategySupport newS(*this);
-  std::ostringstream null;
 
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
-    Undominated(newS, pl, p_strict, null);
+    Undominated(newS, pl, p_strict, p_external);
   }
 
   return newS;
 }
 
 StrategySupport 
-StrategySupport::Undominated(bool strong, const Array<int> &players,
-			     std::ostream &tracefile) const
+StrategySupport::Undominated(bool p_strict, const Array<int> &players) const
 {
   StrategySupport newS(*this);
   
   for (int i = 1; i <= players.Length(); i++)   {
-    int pl = players[i];
-    tracefile << "Dominated strategies for player " << pl << ":\n";
-    Undominated(newS, pl, strong, tracefile);
+    //tracefile << "Dominated strategies for player " << pl << ":\n";
+    Undominated(newS, players[i], p_strict);
   }
 
   return newS;

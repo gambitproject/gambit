@@ -51,6 +51,8 @@ public:
   StrategyIterator(const StrategySupport &);
   /// Construct a new iterator on the support, fixing player pl's strategy
   StrategyIterator(const StrategySupport &s, int pl, int st);
+  /// Construct a new iterator on the support, fixing the given strategy
+  StrategyIterator(const StrategySupport &, const GameStrategy &);
   /// Construct a new iterator on the support, fixing two players' strategies
   StrategyIterator(const StrategySupport &s, 
 		   int pl1, int st1, int pl2, int st2);

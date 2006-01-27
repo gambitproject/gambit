@@ -155,14 +155,8 @@ bool gbtStrategyDominanceStack::NextLevel(void)
     return false;
   }
 
-  Gambit::Array<int> players;
-  for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
-    players.Append(pl);
-  }
-
-  std::ostringstream gnull;
   Gambit::StrategySupport newSupport = 
-    m_supports[m_current]->Undominated(m_strict, players, gnull);
+    m_supports[m_current]->Undominated(m_strict);
 
   if (newSupport != *m_supports[m_current]) {
     m_supports.Append(new Gambit::StrategySupport(newSupport));
