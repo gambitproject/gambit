@@ -138,7 +138,7 @@ bool StrategySupport::Dominates(const GameStrategy &s,
     }
   } while (A.NextContingency() && B.NextContingency());
 
-  return (!equal);
+  return (p_strict || !equal);
 }
 
 
