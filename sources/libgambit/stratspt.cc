@@ -215,6 +215,18 @@ bool StrategySupport::Undominated(StrategySupport &newS, int pl, bool strong,
     return false;
 }
 
+StrategySupport StrategySupport::Undominated(bool p_strict) const
+{
+  StrategySupport newS(*this);
+  std::ostringstream null;
+
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
+    Undominated(newS, pl, p_strict, null);
+  }
+
+  return newS;
+}
+
 StrategySupport 
 StrategySupport::Undominated(bool strong, const Array<int> &players,
 			     std::ostream &tracefile) const

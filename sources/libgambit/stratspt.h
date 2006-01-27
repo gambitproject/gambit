@@ -113,8 +113,9 @@ public:
   bool Dominates(GameStrategy s, GameStrategy t, bool strong) const;
   bool IsDominated(GameStrategy s, bool strong) const; 
 
+  StrategySupport Undominated(bool strong) const;
   StrategySupport Undominated(bool strong, const Array<int> &players,
-			    std::ostream &tracefile) const;
+			      std::ostream &tracefile) const;
   //@}
 };
 
