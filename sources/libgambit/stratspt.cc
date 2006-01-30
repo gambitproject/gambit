@@ -143,15 +143,29 @@ bool StrategySupport::Dominates(const GameStrategy &s,
 
 
 bool StrategySupport::IsDominated(const GameStrategy &s, 
-				  bool p_strict) const
+				  bool p_strict,
+				  bool p_external) const
 {
-  for (int i = 1; i <= NumStrategies(s->GetPlayer()->GetNumber()); i++) {
-    if (GetStrategy(s->GetPlayer()->GetNumber(), i) != s &&
-	Dominates(GetStrategy(s->GetPlayer()->GetNumber(), i), s, p_strict)) {
-      return true;
+  if (p_external) {
+    GamePlayer player = s->GetPlayer();
+    for (int st = 1; st <= player->NumStrategies(); st++) {
+      if (player->GetStrategy(st) != s &&
+	  Dominates(player->GetStrategy(st), s, p_strict)) {
+	return true;
+      }
     }
+    return false;
   }
-  return false;
+  else {
+    for (int i = 1; i <= NumStrategies(s->GetPlayer()->GetNumber()); i++) {
+      if (GetStrategy(s->GetPlayer()->GetNumber(), i) != s &&
+	  Dominates(GetStrategy(s->GetPlayer()->GetNumber(), i), s, 
+		    p_strict)) {
+	return true;
+      }
+    }
+    return false;
+  }
 }
 
 bool StrategySupport::Undominated(StrategySupport &newS, int p_player, 

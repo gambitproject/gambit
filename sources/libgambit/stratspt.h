@@ -112,7 +112,8 @@ public:
   //@{
   bool Dominates(const GameStrategy &s, const GameStrategy &t,
 		 bool p_strict) const;
-  bool IsDominated(const GameStrategy &s, bool strong) const; 
+  bool IsDominated(const GameStrategy &s, bool p_strict, 
+		   bool p_external = false) const; 
 
   /// Returns a copy of the support with dominated strategies eliminated
   StrategySupport Undominated(bool p_strict, bool p_external = false) const;
