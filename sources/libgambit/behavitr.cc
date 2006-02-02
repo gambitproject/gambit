@@ -28,141 +28,104 @@
 
 namespace Gambit {
 
-BehavIterator::BehavIterator(const BehavSupport &s)
-  : _frozen_pl(0), _frozen_iset(0),
-    _efg(s.GetGame()), _support(s),
-    _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
-    _is_active(),
-    _num_active_infosets(_efg->NumPlayers()),
-    _payoff(_efg->NumPlayers())
+BehavIterator::BehavIterator(const BehavSupport &p_support)
+  : m_atEnd(false), m_support(p_support),
+    m_currentBehav(p_support.GetGame()->NumInfosets()),
+    m_profile(p_support.GetGame()), 
+    m_frozenPlayer(0), m_frozenInfoset(0),
+    m_numActiveInfosets(m_support.GetGame()->NumPlayers())
 {
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
-    _num_active_infosets[pl] = 0;
-    Array<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
-    for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      active_for_pl[iset] = s.MayReach(_efg->GetPlayer(pl)->GetInfoset(iset));
-      _num_active_infosets[pl]++;
+  for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
+    GamePlayer player = m_support.GetGame()->GetPlayer(pl);
+    m_numActiveInfosets[pl] = 0;
+    Array<bool> activeForPl(player->NumInfosets());
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      activeForPl[iset] = m_support.MayReach(player->GetInfoset(iset));
+      m_numActiveInfosets[pl]++;
     }
-    _is_active.Append(active_for_pl);
+    m_isActive.Append(activeForPl);
   }
   First();
 }
 
-BehavIterator::BehavIterator(const BehavSupport &s, const List<GameInfoset>& active)
-  : _frozen_pl(0), _frozen_iset(0),
-    _efg(s.GetGame()), _support(s),
-    _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
-    _is_active(),
-    _num_active_infosets(_efg->NumPlayers()),
-    _payoff(_efg->NumPlayers())
+BehavIterator::BehavIterator(const BehavSupport &p_support,
+			     const GameAction &p_action)
+  : m_atEnd(false), m_support(p_support),
+    m_currentBehav(p_support.GetGame()->NumInfosets()),
+    m_profile(p_support.GetGame()), 
+    m_frozenPlayer(p_action->GetInfoset()->GetPlayer()->GetNumber()), 
+    m_frozenInfoset(p_action->GetInfoset()->GetNumber()),
+    m_numActiveInfosets(m_support.GetGame()->NumPlayers())
 {
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
-    _num_active_infosets[pl] = 0;
-    Array<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
-    for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      if ( active.Contains(_efg->GetPlayer(pl)->GetInfoset(iset)) ) {
-	active_for_pl[iset] = true;
-	_num_active_infosets[pl]++;
-      }
-      else
-	active_for_pl[iset] = false;
+  for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
+    GamePlayer player = m_support.GetGame()->GetPlayer(pl);
+    m_numActiveInfosets[pl] = 0;
+    Array<bool> activeForPl(player->NumInfosets());
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      activeForPl[iset] = p_support.MayReach(player->GetInfoset(iset));
+      m_numActiveInfosets[pl]++;
     }
-    _is_active.Append(active_for_pl);
+    m_isActive.Append(activeForPl);
   }
+
+  m_currentBehav(p_action->GetInfoset()->GetPlayer()->GetNumber(), 
+		 p_action->GetNumber()) = p_support.GetIndex(p_action);
+  m_profile.SetAction(p_action);
   First();
 }
-
-BehavIterator::~BehavIterator()
-{ }
-
 
 void BehavIterator::First(void)
 {
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++)
-      if (pl != _frozen_pl && iset != _frozen_iset)   {
-	_current(pl, iset) = 1;
-	if (_is_active[pl][iset])      
-	  _profile.SetAction(_support.GetAction(pl, iset, 1));
+  for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= m_support.GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
+      if (pl != m_frozenPlayer && iset != m_frozenInfoset) {
+	m_currentBehav(pl, iset) = 1;
+	if (m_isActive[pl][iset]) {
+	  m_profile.SetAction(m_support.GetAction(pl, iset, 1));
+	}
       }
+    }
   }
 }
 
-void BehavIterator::Set(int pl, int iset, int act)
+void BehavIterator::operator++(void)
 {
-  if (pl != _frozen_pl || iset != _frozen_iset)   return;
-
-  _current(pl, iset) = act;
-  _profile.SetAction(_support.GetAction(pl, iset, act));
-}
-
-
-void BehavIterator::Set(const GameAction &a) 
-{
-  if (a->GetInfoset()->GetPlayer()->GetNumber() != _frozen_pl ||
-      a->GetInfoset()->GetNumber() != _frozen_iset) return;
-  _profile.SetAction(a);
-}
-
-int BehavIterator::Next(int pl, int iset)
-{
-  if (pl != _frozen_pl || iset != _frozen_iset)   return 1;
-
-  if (_current(pl, iset) == _support.NumActions(pl, iset)) {
-    _current(pl, iset) = 1;
-    _profile.SetAction(_support.GetAction(pl, iset, 1));
-    return 0;
-  }
-
-  _current(pl, iset)++;
-  _profile.SetAction(_support.GetAction(pl, iset, _current(pl, iset)));
-  return 1;
-}
-  
-
-void BehavIterator::Freeze(int pl, int iset)
-{
-  _frozen_pl = pl;
-  _frozen_iset = iset;
-  First();
-}
-
-int BehavIterator::NextContingency(void)
-{
-  int pl = _efg->NumPlayers();
-  while (pl > 0 && _num_active_infosets[pl] == 0)
+  int pl = m_support.GetGame()->NumPlayers();
+  while (pl > 0 && m_numActiveInfosets[pl] == 0)
     --pl;
-  if (pl == 0)   return 0;
-  int iset = _efg->GetPlayer(pl)->NumInfosets();
+  if (pl == 0) {
+    m_atEnd = true; 
+    return;
+  }
+
+  int iset = m_support.GetGame()->GetPlayer(pl)->NumInfosets();
     
   while (true) {
-    if (_is_active[pl][iset] && (pl != _frozen_pl || iset != _frozen_iset))
-      if (_current(pl, iset) < _support.NumActions(pl, iset))  {
-	_current(pl, iset) += 1;
-	_profile.SetAction(_support.GetAction(pl, iset, _current(pl, iset)));
-	return 1;
+    if (m_isActive[pl][iset] && 
+	(pl != m_frozenPlayer || iset != m_frozenInfoset))
+      if (m_currentBehav(pl, iset) < m_support.NumActions(pl, iset))  {
+	m_profile.SetAction(m_support.GetAction(pl, iset, 
+						++m_currentBehav(pl, iset)));
+	return;
       }
       else {
-	_current(pl, iset) = 1;
-	_profile.SetAction(_support.GetAction(pl, iset, 1));
+	m_currentBehav(pl, iset) = 1;
+	m_profile.SetAction(m_support.GetAction(pl, iset, 1));
       }
     
     iset--;
     if (iset == 0)  {
       do  {
 	--pl;
-      }  while (pl > 0 && _num_active_infosets[pl] == 0);
+      }  while (pl > 0 && m_numActiveInfosets[pl] == 0);
       
-      if (pl == 0)   return 0;
-      iset = _efg->GetPlayer(pl)->NumInfosets();
+      if (pl == 0) {
+	m_atEnd = true;
+	return;
+      }
+      iset = m_support.GetGame()->GetPlayer(pl)->NumInfosets();
     }
   }
 }
-
-Rational BehavIterator::GetPayoff(int pl) const
-{
-  return _profile.GetPayoff<Rational>(pl);
-}
-
 
 } // end namespace Gambit

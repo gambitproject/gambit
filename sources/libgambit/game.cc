@@ -741,6 +741,18 @@ std::string PureStrategyProfile::GetPayoff(int pl) const
   }
 }
 
+template <class T>
+T PureStrategyProfile::GetStrategyValue(const GameStrategy &p_strategy) const
+{
+  PureStrategyProfile copy(*this);
+  copy.SetStrategy(p_strategy);
+  return copy.GetPayoff<T>(p_strategy->GetPlayer()->GetNumber());
+}
+
+// Explicit instantiations
+template double PureStrategyProfile::GetStrategyValue(const GameStrategy &) const;
+template Rational PureStrategyProfile::GetStrategyValue(const GameStrategy &) const;
+
 //========================================================================
 //                       class PureBehavProfile
 //========================================================================
@@ -809,6 +821,18 @@ T PureBehavProfile::GetNodeValue(const GameNode &p_node,
 template double PureBehavProfile::GetNodeValue(const GameNode &, int pl) const;
 template Rational PureBehavProfile::GetNodeValue(const GameNode &, int pl) const;
 
+template <class T>
+T PureBehavProfile::GetActionValue(const GameAction &p_action) const
+{
+  PureBehavProfile copy(*this);
+  copy.SetAction(p_action);
+  return copy.GetPayoff<T>(p_action->GetInfoset()->GetPlayer()->GetNumber());
+}
+
+// Explicit instantiations
+template double PureBehavProfile::GetActionValue(const GameAction &) const;
+template Rational PureBehavProfile::GetActionValue(const GameAction &) const;
+
 //========================================================================
 //                           class GameRep
 //========================================================================
@@ -867,17 +891,18 @@ GameRep::~GameRep()
 bool GameRep::IsConstSum(void) const
 {
   if (m_root) {
-    BehavIterator iter(BehavSupport(const_cast<GameRep *>(this)));
+    PureBehavProfile profile(const_cast<GameRep *>(this));
 
     Rational sum(0);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
-      sum += iter.GetPayoff(pl);
+      sum += profile.GetPayoff<Rational>(pl);
     }
 
-    while (iter.NextContingency()) {
+    for (BehavIterator iter(BehavSupport(const_cast<GameRep *>(this)));
+	 !iter.AtEnd(); ++iter) {
       Rational newsum(0);
       for (int pl = 1; pl <= m_players.Length(); pl++) {
-	newsum += iter.GetPayoff(pl);
+	newsum += iter->GetPayoff<Rational>(pl);
       }
       
       if (newsum != sum) {
@@ -888,17 +913,18 @@ bool GameRep::IsConstSum(void) const
     return true;
   }
   else {
-    StrategyIterator iter(StrategySupport(const_cast<GameRep *>(this)));
+    PureStrategyProfile profile(const_cast<GameRep *>(this));
 
     Rational sum(0);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
-      sum += iter.GetPayoff(pl);
+      sum += profile.GetPayoff<Rational>(pl);
     }
 
-    while (iter.NextContingency()) {
+    for (StrategyIterator iter(StrategySupport(const_cast<GameRep *>(this)));
+	 !iter.AtEnd(); iter++) {
       Rational newsum(0);
       for (int pl = 1; pl <= m_players.Length(); pl++) {
-	newsum += iter.GetPayoff(pl);
+	newsum += iter->GetPayoff<Rational>(pl);
       }
 
       if (newsum != sum) {
@@ -1233,12 +1259,13 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
     // are chance moves.
     StrategyIterator iter(Game(const_cast<GameRep *>(this)));
     
-    do {
+    for (iter = StrategyIterator(Game(const_cast<GameRep *>(this)));
+	 !iter.AtEnd(); iter++) {
       for (int pl = 1; pl <= NumPlayers(); pl++) {
-	p_file << iter.GetPayoff(pl) << " ";
+	p_file << iter->GetPayoff<Rational>(pl) << " ";
       }
       p_file << "\n";
-    } while (iter.NextContingency());
+    }
     
   }
   else {
@@ -1524,25 +1551,24 @@ void GameRep::RebuildTable(void)
   Array<GameOutcomeRep *> newResults(size);
   for (int i = 1; i <= newResults.Length(); newResults[i++] = 0);
 
-  StrategyIterator iter(StrategySupport(const_cast<GameRep *>(this)));
-
-  do {
+  for (StrategyIterator iter(StrategySupport(const_cast<GameRep *>(this)));
+       !iter.AtEnd(); iter++) {
     long newindex = 1L;
     for (int pl = 1; pl <= m_players.Length(); pl++) {
-      if (iter.profile.GetStrategy(pl)->m_index < 0) {
+      if (iter.m_profile.GetStrategy(pl)->m_index < 0) {
 	// This is a contingency involving a new strategy... skip
 	newindex = -1L;
 	break;
       }
       else {
-	newindex += (iter.profile.GetStrategy(pl)->m_number - 1) * offsets[pl];
+	newindex += (iter.m_profile.GetStrategy(pl)->m_number - 1) * offsets[pl];
       }
     }
 
     if (newindex >= 1) {
-      newResults[newindex] = m_results[iter.profile.m_index];
+      newResults[newindex] = m_results[iter.m_profile.m_index];
     }
-  } while (iter.NextContingency());
+  }
 
   m_results = newResults;
 

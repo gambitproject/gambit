@@ -209,27 +209,22 @@ gPoly<gDouble> PolEnumModule::Prob(int p, int strat) const
 gPoly<gDouble> 
 PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 {
-  Gambit::PureStrategyProfile profile(NF);
-
-  Gambit::StrategyIterator A(support, i, strat1);
-  Gambit::StrategyIterator B(support, i, strat2);
-
   gPoly<gDouble> equation(&Space,&Lex);
-  do {
+
+  for (Gambit::StrategyIterator A(support, i, strat1), B(support, i, strat2);
+       !A.AtEnd(); A++, B++) {
     gPoly<gDouble> term(&Space,(gDouble)1,&Lex);
-    profile = A.GetProfile();
     int k;
     for(k=1;k<=NF->NumPlayers();k++) 
       if(i!=k) 
-	term*=Prob(k,support.GetIndex(profile.GetStrategy(k)));
+	term*=Prob(k,support.GetIndex(A->GetStrategy(k)));
     gDouble coeff,ap,bp;
-    ap = (double) A.GetPayoff(i);
-    bp = (double) B.GetPayoff(i);
+    ap = A->GetPayoff<double>(i);
+    bp = B->GetPayoff<double>(i);
     coeff = ap - bp;
     term*=coeff;
     equation+=term;
-    A.NextContingency();
-  } while (B.NextContingency());
+  }
   return equation;
 }
 

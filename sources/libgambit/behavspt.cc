@@ -467,22 +467,16 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
   bool equal = true;
 
   if (!conditional) {
-    BehavIterator A(*this), B(*this);
-    A.Freeze(player->GetNumber(), infoset->GetNumber()); 
-    B.Freeze(player->GetNumber(), infoset->GetNumber());
-    A.Set(a);
-    B.Set(b);
-
-    do  {
-      Rational ap = A.GetPayoff(pl);  
-      Rational bp = B.GetPayoff(pl);
+    for (BehavIterator iter(*this, a); !iter.AtEnd(); iter++) {
+      Rational ap = iter->GetActionValue<Rational>(a);  
+      Rational bp = iter->GetActionValue<Rational>(b);
 
       if (strong)
 	{ if (ap <= bp)  return false; }
       else
 	if (ap < bp)   return false; 
 	else if (ap > bp)  equal = false;
-    } while (A.NextContingency() && B.NextContingency());
+    }
   }
 
   else {

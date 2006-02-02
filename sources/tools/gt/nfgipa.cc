@@ -85,17 +85,15 @@ void Solve(const Gambit::Game &p_game, const Gambit::Array<double> &p_pert)
   gnmgame *A = new nfgame(p_game->NumPlayers(), actions, payoffs);
   
   int *profile = new int[p_game->NumPlayers()];
-  Gambit::StrategyIterator iter(p_game);
-  do {
+  for (Gambit::StrategyIterator iter(p_game); !iter.AtEnd(); iter++) {
     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      profile[pl-1] = iter.GetProfile().GetStrategy(pl)->GetNumber() - 1;
+      profile[pl-1] = iter->GetStrategy(pl)->GetNumber() - 1;
     }
 
     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      A->setPurePayoff(pl-1, profile,
-		       (double) iter.GetPayoff(pl));
+      A->setPurePayoff(pl-1, profile, iter->GetPayoff<double>(pl));
     }
-  } while (iter.NextContingency());
+  }
 
   cvector g(A->getNumActions()); // perturbation ray
   int numEq;

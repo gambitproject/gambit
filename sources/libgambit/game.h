@@ -519,6 +519,8 @@ public:
 
   /// Get the payoff to player pl that results from the profile
   template <class T> T GetPayoff(int pl) const;
+  /// Get the value of playing strategy against the profile
+  template <class T> T GetStrategyValue(const GameStrategy &) const;
   //@}
 };
 
@@ -548,6 +550,8 @@ public:
   template <class T> T GetPayoff(int pl) const;
   /// Get the payoff to player pl conditional on reaching a node
   template <class T> T GetNodeValue(const GameNode &, int pl) const;
+  /// Get the payoff to playing the action, conditional on the profile
+  template <class T> T GetActionValue(const GameAction &) const;
   //@}
 };
 

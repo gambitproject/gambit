@@ -503,13 +503,13 @@ void ParseOutcomeBody(GameParserState &p_parser, Game p_nfg)
 
     int outcomeId = atoi(p_parser.GetLastText().c_str());
     if (outcomeId > 0)  {
-      iter.SetOutcome(p_nfg->GetOutcome(outcomeId));
+      iter->SetOutcome(p_nfg->GetOutcome(outcomeId));
     }
     else {
-      iter.SetOutcome(0);
+      iter->SetOutcome(0);
     }
     p_parser.GetNextToken();
-    iter.NextContingency();
+    iter++;
   }
 }
 
@@ -521,18 +521,18 @@ static void ParsePayoffBody(GameParserState &p_parser,
 
   while (p_parser.GetCurrentToken() != TOKEN_EOF) {
     if (pl == 1) {
-      iter.SetOutcome(p_nfg->NewOutcome());
+      iter->SetOutcome(p_nfg->NewOutcome());
     }
 
     if (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
-      iter.GetOutcome()->SetPayoff(pl, p_parser.GetLastText());
+      iter->GetOutcome()->SetPayoff(pl, p_parser.GetLastText());
     }
     else {
       throw InvalidFileException();
     }
 
     if (++pl > p_nfg->NumPlayers()) {
-      iter.NextContingency();
+      iter++;
       pl = 1;
     }
     p_parser.GetNextToken();

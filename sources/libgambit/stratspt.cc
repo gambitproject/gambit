@@ -121,14 +121,11 @@ bool StrategySupport::Dominates(const GameStrategy &s,
 				const GameStrategy &t, 
 				bool p_strict) const
 {
-  int player = s->GetPlayer()->GetNumber();
-
-  StrategyIterator A(*this, s), B(*this, t);
-
   bool equal = true;
   
-  do  {
-    Rational ap = A.GetPayoff(player), bp = B.GetPayoff(player);
+  for (StrategyIterator iter(*this); !iter.AtEnd(); iter++) {
+    Rational ap = iter->GetStrategyValue<Rational>(s);
+    Rational bp = iter->GetStrategyValue<Rational>(t);
     if (p_strict && ap <= bp) {
       return false;
     }
@@ -136,7 +133,7 @@ bool StrategySupport::Dominates(const GameStrategy &s,
       if (ap < bp) return false;
       else if (ap > bp) equal = false;
     }
-  } while (A.NextContingency() && B.NextContingency());
+  }
 
   return (p_strict || !equal);
 }

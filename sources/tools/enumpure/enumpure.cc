@@ -44,20 +44,19 @@ void PrintProfile(std::ostream &p_stream,
 
 void SolveBehav(Gambit::Game p_efg)
 {
-  Gambit::BehavIterator citer(p_efg);
   Gambit::PVector<Gambit::Rational> probs(p_efg->NumInfosets());
 
   int contNumber = 1;
   try {
-    do {
+    for (Gambit::BehavIterator citer(p_efg); !citer.AtEnd(); citer++) {
       bool flag = true;
       // Commenting this out means we don't take advantage of reachability
       // information; fix this in future.
       //citer.GetProfile().InfosetProbs(probs);
 
       for (int pl = 1; flag && pl <= p_efg->NumPlayers(); pl++)  {
-	Gambit::Rational current = citer.GetPayoff(pl);
-	Gambit::PureBehavProfile p = citer.GetProfile();
+	Gambit::Rational current = citer->GetPayoff<Gambit::Rational>(pl);
+	Gambit::PureBehavProfile p(*citer);
 	
 	Gambit::GamePlayer player = p_efg->GetPlayer(pl);
 
@@ -78,7 +77,7 @@ void SolveBehav(Gambit::Game p_efg)
 	Gambit::MixedBehavProfile<Gambit::Rational> temp(p_efg);
 	// zero out all the entries, since any equilibria are pure
 	((Gambit::Vector<Gambit::Rational> &) temp).operator=(Gambit::Rational(0));
-	const Gambit::PureBehavProfile &profile = citer.GetProfile();
+	Gambit::PureBehavProfile profile(*citer);
 	for (int pl = 1; pl <= p_efg->NumPlayers(); pl++)  {
 	  for (int iset = 1;
 	       iset <= p_efg->GetPlayer(pl)->NumInfosets();
@@ -91,7 +90,7 @@ void SolveBehav(Gambit::Game p_efg)
 	PrintProfile(std::cout, temp);
       }
       contNumber++;
-    }  while (citer.NextContingency());
+    }
   }
   catch (...) {
     // catch exception; return solutions computed (if any)
@@ -115,20 +114,18 @@ void PrintProfile(std::ostream &p_stream,
 
 void SolveMixed(Gambit::Game p_nfg)
 {
-  Gambit::StrategyIterator citer(p_nfg);
-
   int ncont = 1;
   for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
     ncont *= p_nfg->GetPlayer(pl)->NumStrategies();
   }
 
   int contNumber = 1;
-  do  {
+  for (Gambit::StrategyIterator citer(p_nfg); !citer.AtEnd(); citer++) {
     bool flag = true;
 
     for (int pl = 1; flag && pl <= p_nfg->NumPlayers(); pl++)  {
-      Gambit::Rational current = citer.GetPayoff(pl);
-      Gambit::PureStrategyProfile p = citer.GetProfile();
+      Gambit::Rational current = citer->GetPayoff<Gambit::Rational>(pl);
+      Gambit::PureStrategyProfile p(*citer); 
       for (int i = 1; i <= p_nfg->GetPlayer(pl)->NumStrategies(); i++)  {
 	p.SetStrategy(p_nfg->GetPlayer(pl)->GetStrategy(i));
 	if (p.GetPayoff<Gambit::Rational>(pl) > current)  {
@@ -141,7 +138,7 @@ void SolveMixed(Gambit::Game p_nfg)
     if (flag)  {
       Gambit::MixedStrategyProfile<Gambit::Rational> temp(p_nfg);
       ((Gambit::Vector<Gambit::Rational> &) temp).operator=(Gambit::Rational(0));
-      Gambit::PureStrategyProfile profile = citer.GetProfile();
+      Gambit::PureStrategyProfile profile(*citer);
       for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
 	temp(pl, profile.GetStrategy(pl)->GetNumber()) = 1;
       }
@@ -149,7 +146,7 @@ void SolveMixed(Gambit::Game p_nfg)
       PrintProfile(std::cout, temp);
     }
     contNumber++;
-  }  while (citer.NextContingency());
+  }
 }
 
 

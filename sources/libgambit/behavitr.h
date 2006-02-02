@@ -42,38 +42,39 @@ namespace Gambit {
 //
 class BehavIterator {
 private:
-  int _frozen_pl, _frozen_iset;
-  Game _efg;
-  BehavSupport _support;
-  PureBehavProfile _profile;
-  PVector<int> _current;
-  Array<Array<bool> > _is_active;
-  Array<int> _num_active_infosets;
-  mutable Vector<Rational> _payoff;
+  bool m_atEnd;
+  BehavSupport m_support;
+  PVector<int> m_currentBehav;
+  PureBehavProfile m_profile;
+  int m_frozenPlayer, m_frozenInfoset;
+  Array<Array<bool> > m_isActive;
+  Array<int> m_numActiveInfosets;
+
+  /// Reset the iterator to the first contingency (this is called by ctors)
+  void First(void);
 
 public:
+  /// @name Lifecycle
+  //@{
+  /// Construct a new iterator on the support, with no actions held fixed
   BehavIterator(const BehavSupport &);
-  BehavIterator(const BehavSupport &, 
-		const List<GameInfoset> &);
-  ~BehavIterator();
-
-  Game GetGame(void) const { return _efg; }
-  const BehavSupport &GetSupport(void) const { return _support; }
+  /// Construct a new iterator on the support, holding the action fixed
+  BehavIterator(const BehavSupport &, const GameAction &);
+  //@}
   
-  void First(void);
-  
-  void Freeze(int pl, int iset);
-  
-  // These next two only work on frozen infosets
-  void Set(int pl, int iset, int act);
-  void Set(const GameAction &a);
-  int Next(int pl, int iset);
-  
-  const PureBehavProfile &GetProfile(void) const  { return _profile; }
-
-  int NextContingency(void);
-  
-  Rational GetPayoff(int pl) const;
+  /// @name Iteration and data access
+  //@{
+  /// Advance to the next contingency (prefix version) 
+  void operator++(void);
+  /// Advance to the next contingency (postfix version) 
+  void operator++(int) { ++(*this); }
+  /// Has iterator gone past the end?
+  bool AtEnd(void) const { return m_atEnd; }
+  /// Get the current behavior profile
+  const PureBehavProfile &operator*(void) const { return m_profile; }
+  /// Get the current behavior profile
+  const PureBehavProfile *const operator->(void) const { return &m_profile; }
+  //@}
 };
 
 } // end namespace Gambit

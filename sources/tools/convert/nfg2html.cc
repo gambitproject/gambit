@@ -36,9 +36,8 @@ void WriteHtmlFile(std::ostream &p_file, const Gambit::Game &p_nfg,
   std::string theHtml;
   theHtml += "<center><h1>" + p_nfg->GetTitle() + "</h1></center>\n";
 
-  Gambit::StrategyIterator iter(p_nfg, p_rowPlayer, 1, p_colPlayer, 1);
-
-  do {
+  for (Gambit::StrategyIterator iter(p_nfg, p_rowPlayer, 1, p_colPlayer, 1);
+       !iter.AtEnd(); iter++) {
     if (p_nfg->NumPlayers() > 2) {
       theHtml += "<center><b>Subtable with strategies:</b></center>";
       for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
@@ -49,7 +48,7 @@ void WriteHtmlFile(std::ostream &p_file, const Gambit::Game &p_nfg,
 	theHtml += "<center><b>Player ";
 	theHtml += Gambit::ToText(pl);
 	theHtml += " Strategy ";
-	theHtml += Gambit::ToText(iter.GetProfile().GetStrategy(pl)->GetNumber());
+	theHtml += Gambit::ToText(iter->GetStrategy(pl)->GetNumber());
 	theHtml += "</b></center>";
       }
     }
@@ -64,7 +63,7 @@ void WriteHtmlFile(std::ostream &p_file, const Gambit::Game &p_nfg,
     } 
     theHtml += "</tr>";
     for (int st1 = 1; st1 <= p_nfg->GetPlayer(p_rowPlayer)->NumStrategies(); st1++) {
-      Gambit::PureStrategyProfile profile(iter.GetProfile());
+      Gambit::PureStrategyProfile profile(*iter);
       profile.SetStrategy(p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1));
       theHtml += "<tr>";
       theHtml += "<td align=center><b>";
@@ -90,7 +89,7 @@ void WriteHtmlFile(std::ostream &p_file, const Gambit::Game &p_nfg,
     } 
 
     theHtml += "</table>";
-  } while (iter.NextContingency());
+  }
 
   theHtml += "\n";
 

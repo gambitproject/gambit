@@ -39,11 +39,15 @@ namespace Gambit {
 class StrategyIterator {
   friend class GameRep;
 private:
-  StrategySupport support;
+  bool m_atEnd;
+  StrategySupport m_support;
   Array<int> m_currentStrat;
-  PureStrategyProfile profile;
+  PureStrategyProfile m_profile;
   int m_frozen1, m_frozen2;
   
+  /// Reset the iterator to the first contingency (this is called by ctors)
+  void First(void);
+
 public:
   /// @name Lifecycle
   //@{
@@ -58,25 +62,21 @@ public:
 		   int pl1, int st1, int pl2, int st2);
   //@}
 
-  /// @name Iteration
+  /// @name Iteration and data access
   //@{
-  /// Reset the iterator to the first contingency (this is called by ctors)
-  void First(void);
-  /// Advance to the next contingency.  Returns false if already at last one.
-  bool NextContingency(void);
-  //@}  
-  
-  /// @name Data access
-  //@{
+  /// Advance to the next contingency (prefix version)
+  void operator++(void);
+  /// Advance to the next contingency (postfix version)
+  void operator++(int) { ++(*this); }
+  /// Has iterator gone past the end?
+  bool AtEnd(void) const { return m_atEnd; }
+
   /// Get the current strategy profile
-  const PureStrategyProfile &GetProfile(void) const { return profile; }
-  
-  /// Get the outcome assigned to the current contingency
-  GameOutcome GetOutcome(void) const;
-  /// Set the outcome assigned to the current contingency
-  void SetOutcome(GameOutcome);
-  /// Get the payoff to player 'pl' at the current contingency
-  Rational GetPayoff(int pl) const;
+  PureStrategyProfile &operator*(void) { return m_profile; }
+  /// Get the current strategy profile
+  const PureStrategyProfile &operator*(void) const { return m_profile; }
+  /// Get the current strategy profile
+  PureStrategyProfile *const operator->(void) { return &m_profile; }
   //@}
 };
 
