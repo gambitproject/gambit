@@ -83,7 +83,7 @@ void BehavIterator::First(void)
       if (pl != _frozen_pl && iset != _frozen_iset)   {
 	_current(pl, iset) = 1;
 	if (_is_active[pl][iset])      
-	  _profile.SetAction(_support.Actions(pl, iset)[1]);
+	  _profile.SetAction(_support.GetAction(pl, iset, 1));
       }
   }
 }
@@ -93,7 +93,7 @@ void BehavIterator::Set(int pl, int iset, int act)
   if (pl != _frozen_pl || iset != _frozen_iset)   return;
 
   _current(pl, iset) = act;
-  _profile.SetAction(_support.Actions(pl, iset)[act]);
+  _profile.SetAction(_support.GetAction(pl, iset, act));
 }
 
 
@@ -108,16 +108,14 @@ int BehavIterator::Next(int pl, int iset)
 {
   if (pl != _frozen_pl || iset != _frozen_iset)   return 1;
 
-  const Array<GameAction> &actions = _support.Actions(pl, iset);
-  
-  if (_current(pl, iset) == actions.Length())   {
+  if (_current(pl, iset) == _support.NumActions(pl, iset)) {
     _current(pl, iset) = 1;
-    _profile.SetAction(actions[1]);
+    _profile.SetAction(_support.GetAction(pl, iset, 1));
     return 0;
   }
 
   _current(pl, iset)++;
-  _profile.SetAction(actions[_current(pl, iset)]);
+  _profile.SetAction(_support.GetAction(pl, iset, _current(pl, iset)));
   return 1;
 }
   
@@ -141,12 +139,12 @@ int BehavIterator::NextContingency(void)
     if (_is_active[pl][iset] && (pl != _frozen_pl || iset != _frozen_iset))
       if (_current(pl, iset) < _support.NumActions(pl, iset))  {
 	_current(pl, iset) += 1;
-	_profile.SetAction(_support.Actions(pl, iset)[_current(pl, iset)]);
+	_profile.SetAction(_support.GetAction(pl, iset, _current(pl, iset)));
 	return 1;
       }
       else {
 	_current(pl, iset) = 1;
-	_profile.SetAction(_support.Actions(pl, iset)[1]);
+	_profile.SetAction(_support.GetAction(pl, iset, 1));
       }
     
     iset--;

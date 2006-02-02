@@ -234,7 +234,7 @@ NashNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_solution,
 	  }
 	}
 	else
-	  if (dsupp.ActionIsActive(last_action)) {
+	  if (dsupp.Contains(last_action)) {
 	    if ( last_action->GetInfoset()->GetPlayer() !=
 		         act->GetInfoset()->GetPlayer()     ||
 		 !act->Precedes(tempnode) )
@@ -291,7 +291,7 @@ NashExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 	}
 
 	for (int j = 1; j <= acts_for_iset.Length(); j++)
-	  if ( !little_supp.ActionIsActive(acts_for_iset[j]) ) {
+	  if ( !little_supp.Contains(acts_for_iset[j]) ) {
 	    Gambit::List<Gambit::GameInfoset> isetlist = DeviationInfosets(big_supp, 
 								p_solution.GetGame()->GetPlayer(pl),
 							  isets_for_pl[i],
@@ -445,7 +445,7 @@ static bool ANFNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_so
 	    return false;
 	}
 	else
-	  if (big_supp.ActionIsActive(last_action))
+	  if (big_supp.Contains(last_action))
 	    node_prob *= (gDouble) p_solution.GetActionProb(last_action);
 	  else 
 	    return false;
@@ -488,7 +488,7 @@ ANFExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
       Gambit::GameInfoset infoset = p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i);
       if (little_supp.MayReach(infoset)) 
 	for (int j = 1; j <= infoset->NumActions(); j++)
-	  if (!little_supp.ActionIsActive(pl,i,j)) {
+	  if (!little_supp.Contains(infoset->GetAction(j))) {
 	
 	    // This will be the utility difference between the
 	    // payoff resulting from the profile and deviation to 

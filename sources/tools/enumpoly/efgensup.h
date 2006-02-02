@@ -34,7 +34,7 @@ class ActionCursorForSupport;
 // We begin by simply enumerating all subsupports.
 
 void AllSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
-			     Gambit::BehavSupportWithActiveInfo *sact,
+			     Gambit::BehavSupport *sact,
 			     ActionCursorForSupport *c,
 			     Gambit::List<Gambit::BehavSupport> &list);
 
@@ -48,7 +48,7 @@ Gambit::List<Gambit::BehavSupport> AllSubsupports(const Gambit::BehavSupport &S)
 // actions at each unreached infoset.  
 
 void AllInequivalentSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
-					 Gambit::BehavSupportWithActiveInfo *sact,
+					 Gambit::BehavSupport *sact,
 					 ActionCursorForSupport *c,
 					 Gambit::List<Gambit::BehavSupport> &list);
 
@@ -64,7 +64,7 @@ Gambit::List<Gambit::BehavSupport> AllInequivalentSubsupports(const Gambit::Beha
 // dominated, and thus part of an allowed subsupport.
 
 void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
-					Gambit::BehavSupportWithActiveInfo *sact,
+					Gambit::BehavSupport *sact,
 					ActionCursorForSupport *c,
 					bool strong, bool conditional,
 					Gambit::List<Gambit::BehavSupport> &list);
@@ -84,7 +84,7 @@ Gambit::List<Gambit::BehavSupport> AllUndominatedSubsupports(const Gambit::Behav
 // infosets.
 
 void PossibleNashSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
-				      Gambit::BehavSupportWithActiveInfo *sact,
+				      Gambit::BehavSupport *sact,
 				      ActionCursorForSupport *c,
 				      Gambit::List<Gambit::BehavSupport> &list);
 
@@ -128,9 +128,9 @@ public:
 
   // Special
   bool InfosetGuaranteedActiveByPriorCommitments(const 
-						 Gambit::BehavSupportWithActiveInfo *,
+						 Gambit::BehavSupport *,
 						 const Gambit::GameInfoset &);
-  bool DeletionsViolateActiveCommitments(const Gambit::BehavSupportWithActiveInfo *,
+  bool DeletionsViolateActiveCommitments(const Gambit::BehavSupport *,
 					 const Gambit::List<Gambit::GameInfoset> *);
 };
 

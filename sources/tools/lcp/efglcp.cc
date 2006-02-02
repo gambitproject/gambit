@@ -343,7 +343,7 @@ void efgLcp<T>::FillTableau(const Gambit::BehavSupport &p_support, Gambit::Matri
       for (int i = 1; i <= p_support.NumActions(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber()); i++) {
 	A(snew+i,ns1+ns2+i1+1) = (T)1;
 	A(ns1+ns2+i1+1,snew+i) = -(T)1;
-	FillTableau(p_support, A, n->GetChild(p_support.Actions(n->GetInfoset())[i]->GetNumber()),prob,snew+i,s2,i1,i2);
+	FillTableau(p_support, A, n->GetChild(p_support.GetAction(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber(), i)->GetNumber()),prob,snew+i,s2,i1,i2);
       }
     }
     if(pl==2) {
@@ -358,7 +358,7 @@ void efgLcp<T>::FillTableau(const Gambit::BehavSupport &p_support, Gambit::Matri
       for (int i = 1; i <= p_support.NumActions(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber()); i++) {
 	A(ns1+snew+i,ns1+ns2+ni1+i2+1) = (T)1;
 	A(ns1+ns2+ni1+i2+1,ns1+snew+i) = -(T)1;
-	FillTableau(p_support, A, n->GetChild(p_support.Actions(n->GetInfoset())[i]->GetNumber()),prob,s1,snew+i,i1,i2);
+	FillTableau(p_support, A, n->GetChild(p_support.GetAction(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber(), i)->GetNumber()),prob,s1,snew+i,i1,i2);
       }
     }
     
@@ -397,7 +397,7 @@ void efgLcp<T>::GetProfile(const Gambit::BehavSupport &p_support,
 	    }
 	  } 
 	} 
-	GetProfile(p_support, tab, v,sol,n->GetChild(p_support.Actions(n->GetInfoset())[i]->GetNumber()),snew+i,s2);
+	GetProfile(p_support, tab, v,sol,n->GetChild(p_support.GetAction(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber(), i)->GetNumber()),snew+i,s2);
       }
     }
     if(pl==2) {
@@ -417,7 +417,7 @@ void efgLcp<T>::GetProfile(const Gambit::BehavSupport &p_support,
 	    }
 	  } 
 	} 
-	GetProfile(p_support, tab, v,sol,n->GetChild(p_support.Actions(n->GetInfoset())[i]->GetNumber()),s1,snew+i);
+	GetProfile(p_support, tab, v,sol,n->GetChild(p_support.GetAction(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber(), i)->GetNumber()),s1,snew+i);
       }
     }
   }

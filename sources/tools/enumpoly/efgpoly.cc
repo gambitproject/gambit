@@ -647,7 +647,7 @@ void SolveExtensive(const Gambit::Game &p_game)
     EfgPolEnum(supports[i], newsolns, newevals, newtime, is_singular);
     for (int j = 1; j <= newsolns.Length(); j++) {
       Gambit::MixedBehavProfile<double> fullProfile = ToFullSupport(newsolns[j]);
-      if (fullProfile.GetLiapValueOnDefined() < 1.0e-6) {
+      if (fullProfile.GetLiapValue(true) < 1.0e-6) {
 	PrintProfile(std::cout, "NE", fullProfile);
       }
     }

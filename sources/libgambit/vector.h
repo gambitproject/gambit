@@ -31,14 +31,7 @@ namespace Gambit {
 
 template <class T> class Matrix;
 
-
-/** 
- * General purpose vector representation and calculation class.
- *
- * This is a general vector class.  In order to instantiate this for a
- * type, the operators binary +, binary -, binary *, /, ==, and = must
- * be defined for the type.
- */
+/// A mathematical vector: a list of numbers with the standard math operators
 template <class T> class Vector : public Array<T>   {
   friend class Matrix<T>;
 public:

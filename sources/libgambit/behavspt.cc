@@ -41,402 +41,85 @@ template <class T> void RemoveRedundancies(List<T> &p_list)
 }
 
 
-
-class BehavSupportInfoset   {
-  friend class BehavSupportPlayer;
-protected:
-  Array<GameAction> acts;
-
-public:
-  BehavSupportInfoset(GameInfoset);
-  BehavSupportInfoset ( const BehavSupportInfoset &a);
-  virtual ~BehavSupportInfoset();
-  BehavSupportInfoset &operator=( const BehavSupportInfoset &a);
-  bool operator==( const BehavSupportInfoset &a) const;
-  inline const GameAction operator[](const int &i) const { return acts[i]; }
-
-  // Information
-  inline const int Length() const { return acts.Length(); }
-};
-
-//----------------------------------------------------
-// BehavSupportInfoset: Constructors, Destructor, operators
-// ---------------------------------------------------
-
-BehavSupportInfoset::BehavSupportInfoset(GameInfoset p_infoset)
-{
-  for (int i = 1; i <= p_infoset->NumActions(); i++) {
-    acts.Append(p_infoset->GetAction(i));
-  }
- }
-
-BehavSupportInfoset::BehavSupportInfoset(const BehavSupportInfoset &a)
-  : acts(a.acts)
-{ }
-
-BehavSupportInfoset::~BehavSupportInfoset ()
-{ }
-
-BehavSupportInfoset &BehavSupportInfoset::operator=( const BehavSupportInfoset &a)
-{
-  acts = a.acts; 
-  return *this;
-}
-
-bool BehavSupportInfoset::operator==(const BehavSupportInfoset &a) const
-{
-  return (acts == a.acts);
-}
-
-class BehavSupportPlayer{
-
-protected:
-  GamePlayer efp;
-  Array < BehavSupportInfoset *> infosets;
-public:
-  
-  //----------------------------------------
-  // Constructors, Destructor, operators
-  //----------------------------------------
-
-//  BehavSupportPlayer();
-  BehavSupportPlayer(const BehavSupportPlayer &);
-  BehavSupportPlayer(GamePlayer);
-  virtual ~BehavSupportPlayer();
-
-  BehavSupportPlayer &operator=(const BehavSupportPlayer &);
-  bool operator==(const BehavSupportPlayer &s) const;
-
-  //--------------------
-  // Member Functions
-  //--------------------
-
-  // Append an action to an infoset;
-  void AddAction(int iset, const GameAction &);
-
-  // Insert an action in a particular place in an infoset;
-  void AddAction(int iset, const GameAction &, int index);
-
-
-  // Remove an action at int i, returns the removed action pointer
-  GameAction RemoveAction(int iset, int i);
-
-  // Remove an action from an infoset . 
-  // Returns true if the action was successfully removed, false otherwise.
-  bool RemoveAction(int iset, GameAction);
-
-  // Get a garray of the actions in an Infoset
-  const Array<GameAction> &ActionList(int iset) const
-     { return infosets[iset]->acts; }
-
-  // Get the BehavSupportInfoset of an iset
-  const BehavSupportInfoset *ActionArray(int iset) const
-     { return infosets[iset]; }
-
-  // Get the BehavSupportInfoset of an Infoset
-  const BehavSupportInfoset *ActionArray(const GameInfoset &i) const
-     { return infosets[i->GetNumber()]; }
-  
-  // Get an Action
-  GameAction GetAction(int iset, int index);
-
-  // returns the index of the action if it is in the ActionSet
-  int Find(const GameAction &) const;
-  int Find(int, GameAction) const;
-
-  // Number of Actions in a particular infoset
-  int NumActions(int iset) const;
-
-  // return the GamePlayer of the BehavSupportPlayer
-  GamePlayer GetPlayer(void) const;
-
-  // checks for a valid BehavSupportPlayer
-  bool HasActiveActionsAtAllInfosets(void) const;
-  bool HasActiveActionAt(const int &iset) const;
-
-};
-
-//--------------------------------------------------
-// BehavSupportPlayer: Constructors, Destructor, operators
-//--------------------------------------------------
-
-BehavSupportPlayer::BehavSupportPlayer(GamePlayer p)
-  : infosets(p->NumInfosets())
-{
-  efp = p;
-  for (int i = 1; i <= p->NumInfosets(); i++) {
-    infosets[i] = new BehavSupportInfoset(p->GetInfoset(i));
-  }
-}
-
-BehavSupportPlayer::BehavSupportPlayer( const BehavSupportPlayer &s )
-: infosets(s.infosets.Length())
-{
-  efp = s.efp;
-  for (int i = 1; i <= s.infosets.Length(); i++){
-    infosets[i] = new BehavSupportInfoset(*(s.infosets[i]));
-  }
-}
-
-BehavSupportPlayer::~BehavSupportPlayer()
-{ 
-  for (int i = 1; i <= infosets.Length(); i++)
-    delete infosets[i];
-}
-
-BehavSupportPlayer &BehavSupportPlayer::operator=(const BehavSupportPlayer &s)
-{
-  if (this != &s && efp == s.efp) {
-    for (int i = 1; i<= infosets.Length(); i++)  {
-      delete infosets[i];
-      infosets[i] = new BehavSupportInfoset(*(s.infosets[i]));
-    }
-  }    
-  return *this;
-}
-
-bool BehavSupportPlayer::operator==(const BehavSupportPlayer &s) const
-{
-  if (infosets.Length() != s.infosets.Length() ||
-      efp != s.efp)
-    return false;
-  
-  int i;
-  for (i = 1; i <= infosets.Length() && 
-       *(infosets[i]) == *(s.infosets[i]);  i++);
-  return (i > infosets.Length());
-}
-
-//------------------------------------------
-// BehavSupportPlayer: Member functions 
-//------------------------------------------
-
-// Append an action to a particular infoset;
-void BehavSupportPlayer::AddAction(int iset, const GameAction &s)
-{ 
-  if (infosets[iset]->acts.Find(s))
-    return;
-
-  if (infosets[iset]->acts.Length() == 0) {
-    infosets[iset]->acts.Append(s); 
-  }
-  else {
-    int index = 1;
-    while (index <= infosets[iset]->acts.Length() &&
-	   infosets[iset]->acts[index]->GetNumber() < s->GetNumber()) 
-      index++;
-    infosets[iset]->acts.Insert(s,index);
-  }
-}
-
-// Insert an action  to a particular infoset at a particular place;
-void BehavSupportPlayer::AddAction(int iset, const GameAction &s, int index)
-{ 
-  if (!infosets[iset]->acts.Find(s))
-    infosets[iset]->acts.Insert(s,index); 
-}
-
-// Remove an action from infoset iset at int i, 
-// returns the removed Infoset pointer
-GameAction BehavSupportPlayer::RemoveAction(int iset, int i) 
-{ 
-  return (infosets[iset]->acts.Remove(i)); 
-}
-
-// Removes an action from infoset iset . Returns true if the 
-//Action was successfully removed, false otherwise.
-bool BehavSupportPlayer::RemoveAction(int  iset, GameAction s )
-{ 
-  int t = infosets[iset]->acts.Find(s); 
-  if (t>0) infosets[iset]->acts.Remove(t); 
-  return (t>0); 
-} 
-
-// Get an action
-GameAction BehavSupportPlayer::GetAction(int iset, int index)
-{
-  return (infosets[iset]->acts)[index];
-}
-
-// Number of Actions in a particular infoset
-int BehavSupportPlayer::NumActions(int iset) const
-{
-  return (infosets[iset]->acts.Length());
-}
-
-// Return the GamePlayer of this BehavSupportPlayer
-GamePlayer BehavSupportPlayer::GetPlayer(void) const
-{
-  return efp;
-}
-
-int BehavSupportPlayer::Find(const GameAction &a) const
-{
-  return (infosets[a->GetInfoset()->GetNumber()]->acts.Find(a));
-}
-
-int BehavSupportPlayer::Find(int p_infoset, GameAction a) const
-{
-  return (infosets[p_infoset]->acts.Find(a));
-}
-
-// checks for a valid BehavSupportPlayer
-bool BehavSupportPlayer::HasActiveActionsAtAllInfosets(void) const
-{
-  if (infosets.Length() != efp->NumInfosets())   return false;
-
-  for (int i = 1; i <= infosets.Length(); i++)
-    if (infosets[i]->acts.Length() == 0)   return false;
-
-  return true;
-}
-
-// checks for a valid BehavSupportPlayer
-bool BehavSupportPlayer::HasActiveActionAt(const int &iset) const
-{
-  if (iset > efp->NumInfosets())   return false;
-
-  if (infosets[iset]->acts.Length() == 0)   return false;
-
-  return true;
-}
-
-
-//--------------------------------------------------
-// BehavSupport: Constructors, Destructors, Operators
-//--------------------------------------------------
+//========================================================================
+//                      BehavSupport: Lifecycle
+//========================================================================
 
 BehavSupport::BehavSupport(const Game &p_efg) 
-  : m_efg(p_efg), m_players(p_efg->NumPlayers())
+  : m_efg(p_efg),
+    m_infosetActive(0, p_efg->NumPlayers()), 
+    m_nonterminalActive(0, p_efg->NumPlayers())
 {
-  for (int pl = 1; pl <= m_players.Length(); pl++) {
-    m_players[pl] = new BehavSupportPlayer(p_efg->GetPlayer(pl));
-  }
-}
-
-BehavSupport::BehavSupport(const BehavSupport &p_support)
-  : m_efg(p_support.m_efg),
-    m_players(p_support.m_players.Length())
-{
-  for (int pl = 1; pl <= m_players.Length(); pl++)
-    m_players[pl] = new BehavSupportPlayer(*(p_support.m_players[pl]));
-}
-
-BehavSupport::~BehavSupport()
-{
-  for (int pl = 1; pl <= m_players.Length(); pl++)
-    delete m_players[pl];
-}
-
-BehavSupport &BehavSupport::operator=(const BehavSupport &p_support)
-{
-  if (this != &p_support && m_efg == p_support.m_efg) {
-    for (int pl = 1; pl <= m_players.Length(); pl++)  {
-      delete m_players[pl];
-      m_players[pl] = new BehavSupportPlayer(*(p_support.m_players[pl]));
+  for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
+    m_actions.Append(Array<Array<GameAction> >());
+    GamePlayer player = p_efg->GetPlayer(pl);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+      m_actions[pl].Append(Array<GameAction>());
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	m_actions[pl][iset].Append(infoset->GetAction(act));
+      }
     }
   }
-  return *this;
+
+  // Initialize the list of reachable information sets and nodes
+  for (int pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
+    GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl);
+    List<bool> is_players_infoset_active;
+    List<List<bool> > is_players_node_active;
+
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      is_players_infoset_active.Append(false);
+
+      List<bool> is_infosets_node_active;
+      for (int n = 1; n <= player->GetInfoset(iset)->NumMembers()
+; n++)
+	is_infosets_node_active.Append(false);
+      is_players_node_active.Append(is_infosets_node_active);
+    }
+    m_infosetActive[pl] = is_players_infoset_active;
+    m_nonterminalActive[pl] = is_players_node_active;
+  }
+
+  ActivateSubtree(GetGame()->GetRoot());
 }
+
+//========================================================================
+//                 BehavSupport: Operator overloading
+//========================================================================
 
 bool BehavSupport::operator==(const BehavSupport &p_support) const
 {
-  if (m_players.Length() != p_support.m_players.Length())
-    return false;
-
-  int pl;
-  for (pl = 1; (pl <= m_players.Length() &&
-		*(m_players[pl]) == *(p_support.m_players[pl])); pl++);
-  return (pl > m_players.Length());
+  return (m_actions == p_support.m_actions);
 }
 
-//-----------------------------
-// BehavSupport: Member Functions 
-//-----------------------------
+//========================================================================
+//                 BehavSupport: General information
+//========================================================================
 
-int BehavSupport::NumActions(int pl, int iset) const
+PVector<int> BehavSupport::NumActions(void) const
 {
-  return m_players[pl]->NumActions(iset);
-}
-
-const Array<GameAction> &BehavSupport::Actions(int pl, int iset) const
-{
-  return m_players[pl]->ActionList(iset);
-}
-
-Array<GameAction> BehavSupport::Actions(const GameInfoset &i) const
-{
-  if (i->GetPlayer()->IsChance()) {
-    Array<GameAction> actions;
-    for (int act = 1; act <= i->NumActions(); act++) {
-      actions.Append(i->GetAction(act));
+  PVector<int> answer(m_efg->NumInfosets());
+  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
+    for (int iset = 1; iset <= m_efg->GetPlayer(pl)->NumInfosets(); iset++) {
+      answer(pl, iset) = NumActions(pl, iset);
     }
-    return actions;
   }
-  else
-    return m_players[i->GetPlayer()->GetNumber()]->ActionList(i->GetNumber());
-}
+
+  return answer;
+}  
 
 int BehavSupport::GetIndex(const GameAction &a) const
 {
   if (a->GetInfoset()->GetGame() != m_efg)  throw MismatchException();
 
   int pl = a->GetInfoset()->GetPlayer()->GetNumber();
-  return m_players[pl]->Find(a);
-}
-
-bool BehavSupport::ActionIsActive(GameAction a) const
-{
-  //DEBUG
-  //  if (a == NULL) { gout << "Action* is null.\n"; exit(0); }
-
-  if (a->GetInfoset()->GetGame() != m_efg)   
-    return false;
-
-  int pl = a->GetInfoset()->GetPlayer()->GetNumber();
-
-  if (pl == 0) return true; // Chance
-
-  int act = m_players[pl]->Find(a);
-  if (act == 0) 
-    return false;
-  else
-    return true;
-}
-
-bool BehavSupport::ActionIsActive(const int pl,
-			       const int iset, 
-			       const int act) const
-{
-  return 
-    ActionIsActive(GetGame()->GetPlayer(pl)->GetInfoset(iset)->GetAction(act));
-}
-
-bool 
-BehavSupport::AllActionsInSupportAtInfosetAreActive(const BehavSupport &S,
-						 const GameInfoset &infset) const
-{
-  Array<GameAction> support_actions = S.Actions(infset);
-  for (int i = 1; i <= support_actions.Length(); i++) {
-    if (!ActionIsActive(support_actions[i]))
-      return false;
-  }
-  return true;
-}
-
-bool BehavSupport::HasActiveActionAt(const GameInfoset &infoset) const
-{
-  if 
-    ( !m_players[infoset->GetPlayer()->GetNumber()]->
-      HasActiveActionAt(infoset->GetNumber()) )
-    return false;
-
-  return true;
+  return m_actions[pl][a->GetInfoset()->GetNumber()].Find(a);
 }
 
 int BehavSupport::NumDegreesOfFreedom(void) const
 {
-  int answer(0);
+  int answer = 0;
 
   List<GameInfoset> active_infosets = ReachableInfosets(GetGame()->GetRoot());
   for (int i = 1; i <= active_infosets.Length(); i++)
@@ -446,45 +129,77 @@ int BehavSupport::NumDegreesOfFreedom(void) const
   return answer;  
 }
 
+bool BehavSupport::HasActiveActionAt(const GameInfoset &infoset) const
+{
+  return (m_actions[infoset->GetPlayer()->GetNumber()][infoset->GetNumber()].Length() > 0);
+}
+
 bool BehavSupport::HasActiveActionsAtAllInfosets(void) const
 {
-  if (m_players.Length() != m_efg->NumPlayers())   return false;
-  for (int i = 1; i <= m_players.Length(); i++)
-    if (!m_players[i]->HasActiveActionsAtAllInfosets())  return false;
+  for (int pl = 1; pl <= m_actions.Length(); pl++) {
+    for (int iset = 1; iset <= m_actions[pl].Length(); iset++) {
+      if (m_actions[pl][iset].Length() == 0) return false;
+    }
+  }
 
   return true;
 }
 
-PVector<int> BehavSupport::NumActions(void) const
-{
-  Array<int> foo(m_efg->NumPlayers());
-  int i;
-  for (i = 1; i <= m_efg->NumPlayers(); i++)
-    foo[i] = m_players[i]->GetPlayer()->NumInfosets();
-
-  PVector<int> bar(foo);
-  for (i = 1; i <= m_efg->NumPlayers(); i++)
-    for (int j = 1; j <= m_players[i]->GetPlayer()->NumInfosets(); j++)
-      bar(i, j) = NumActions(i,j);
-
-  return bar;
-}  
-
 bool BehavSupport::RemoveAction(const GameAction &s)
 {
+  List<GameNode> startlist(ReachableMembers(s->GetInfoset()));
+  for (int i = 1; i <= startlist.Length(); i++)
+    DeactivateSubtree(startlist[i]->GetChild(s->GetNumber()));
+
   GameInfoset infoset = s->GetInfoset();
   GamePlayer player = infoset->GetPlayer();
- 
-  return m_players[player->GetNumber()]->RemoveAction(infoset->GetNumber(), s);
+  Array<GameAction> &actions = m_actions[player->GetNumber()][infoset->GetNumber()];
+
+  if (!actions.Contains(s) || actions.Length() == 1) {
+    return false;
+  }
+  else {
+    actions.Remove(actions.Find(s));
+    return true;
+  }
+}
+
+bool BehavSupport::RemoveAction(const GameAction &s, List<GameInfoset> &list)
+{
+  List<GameNode> startlist(ReachableMembers(s->GetInfoset()));
+  for (int i = 1; i <= startlist.Length(); i++) {
+    DeactivateSubtree(startlist[i]->GetChild(s->GetNumber()), list);
+  }
+
+  // the following returns false if s was not in the support
+  return RemoveAction(s);
 }
 
 void BehavSupport::AddAction(const GameAction &s)
 {
   GameInfoset infoset = s->GetInfoset();
   GamePlayer player = infoset->GetPlayer();
+  Array<GameAction> &actions = m_actions[player->GetNumber()][infoset->GetNumber()];
 
-  m_players[player->GetNumber()]->AddAction(infoset->GetNumber(), s);
-				      
+  int act = 1;
+  while (act <= actions.Length()) {
+    if (actions[act] == s) {
+      break;
+    }
+    else if (actions[act]->GetNumber() > s->GetNumber()) {
+      actions.Insert(s, act);
+      break;
+    }
+    act++;
+  }
+
+  if (act > actions.Length()) {
+    actions.Append(s);
+  }
+
+  List<GameNode> startlist(ReachableMembers(s->GetInfoset()));
+  for (int i = 1; i <= startlist.Length(); i++)
+    DeactivateSubtree(startlist[i]);
 }
 
 int BehavSupport::NumSequences(int j) const
@@ -510,9 +225,10 @@ List<GameNode> BehavSupport::ReachableNonterminalNodes(const GameNode &n) const
 {
   List<GameNode> answer;
   if (!n->IsTerminal()) {
-    const Array<GameAction> &actions = Actions(n->GetInfoset());
-    for (int i = 1; i <= actions.Length(); i++) {
-      GameNode nn = n->GetChild(actions[i]->GetNumber());
+    int pl = n->GetInfoset()->GetPlayer()->GetNumber();
+    int iset = n->GetInfoset()->GetNumber();
+    for (int i = 1; i <= NumActions(pl, iset); i++) {
+      GameNode nn = n->GetChild(GetAction(pl, iset, i)->GetNumber());
       if (!nn->IsTerminal()) {
 	answer.Append(nn);
 	answer += ReachableNonterminalNodes(nn);
@@ -572,25 +288,6 @@ BehavSupport::ReachableInfosets(const GameNode &n,
   return answer;
 }
 
-bool BehavSupport::AlwaysReaches(const GameInfoset &i) const
-{
-  return AlwaysReachesFrom(i, m_efg->GetRoot());
-}
-
-bool BehavSupport::AlwaysReachesFrom(const GameInfoset &i, const GameNode &n) const
-{
-  if (n->IsTerminal()) return false;
-  else
-    if (n->GetInfoset() == i) return true;
-    else {
-      Array<GameAction> actions = Actions(n->GetInfoset());
-      for (int j = 1; j <= actions.Length(); j++)
-	if (!AlwaysReachesFrom(i,n->GetChild(actions[j]->GetNumber()))) 
-	  return false;
-    }
-  return true;
-}
-
 bool BehavSupport::MayReach(const GameInfoset &i) const
 {
   for (int j = 1; j <= i->NumMembers(); j++)
@@ -604,7 +301,7 @@ bool BehavSupport::MayReach(const GameNode &n) const
   if (n == m_efg->GetRoot())
     return true;
   else {
-    if (!ActionIsActive(n->GetPriorAction()))
+    if (!Contains(n->GetPriorAction()))
       return false;
     else 
       return MayReach(n->GetParent());
@@ -633,7 +330,6 @@ public:
   
   void Set(int pl, int iset, int act);
   void Set(const GameAction &a);
-  int Next(int pl, int iset); 
   
   const PureBehavProfile &GetProfile(void) const   { return _profile; }
 
@@ -697,7 +393,7 @@ void BehavConditionalIterator::First(void)
     for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
       _current(pl, iset) = 1;
       if (_is_active[pl][iset])
-	_profile.SetAction(_support.Actions(pl, iset)[1]);
+	_profile.SetAction(_support.GetAction(pl, iset, 1));
     }
   }
 }
@@ -705,27 +401,12 @@ void BehavConditionalIterator::First(void)
 void BehavConditionalIterator::Set(int pl, int iset, int act)
 {
   _current(pl, iset) = act;
-  _profile.SetAction(_support.Actions(pl, iset)[act]);
+  _profile.SetAction(_support.GetAction(pl, iset, act));
 }
 
 void BehavConditionalIterator::Set(const GameAction &a) 
 {
   _profile.SetAction(a);
-}
-
-int BehavConditionalIterator::Next(int pl, int iset)
-{
-  const Array<GameAction> &actions = _support.Actions(pl, iset);
-  
-  if (_current(pl, iset) == actions.Length())   {
-    _current(pl, iset) = 1;
-    _profile.SetAction(actions[1]);
-    return 0;
-  }
-
-  _current(pl, iset)++;
-  _profile.SetAction(actions[_current(pl, iset)]);
-  return 1;
 }
 
 int BehavConditionalIterator::NextContingency(void)
@@ -741,12 +422,12 @@ int BehavConditionalIterator::NextContingency(void)
     if (_is_active[pl][iset]) 
       if (_current(pl, iset) < _support.NumActions(pl, iset))  {
 	_current(pl, iset) += 1;
-	_profile.SetAction(_support.Actions(pl, iset)[_current(pl, iset)]);
+	_profile.SetAction(_support.GetAction(pl, iset, _current(pl, iset)));
 	return 1;
       }
       else {
 	_current(pl, iset) = 1;
-	_profile.SetAction(_support.Actions(pl, iset)[1]);
+	_profile.SetAction(_support.GetAction(pl, iset, 1));
       }
     
     iset--;
@@ -780,7 +461,7 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
     throw UndefinedException();
   }
 
-  const BehavSupportWithActiveInfo SAct(*this);
+  const BehavSupport SAct(*this);
   GamePlayer player = infoset->GetPlayer();
   int pl = player->GetNumber();
   bool equal = true;
@@ -805,7 +486,7 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
   }
 
   else {
-    List<GameNode> nodelist = SAct.ReachableNodesInInfoset(infoset);  
+    List<GameNode> nodelist = SAct.ReachableMembers(infoset);  
     if (nodelist.Length() == 0) {
       // This may not be a good idea; I suggest checking for this
       // prior to entry
@@ -862,18 +543,25 @@ bool SomeElementDominates(const BehavSupport &S,
 }
 
 bool BehavSupport::IsDominated(const GameAction &a, 
-				bool strong, bool conditional) const
+			       bool strong, bool conditional) const
 {
-  Array<GameAction> array(Actions(a->GetInfoset()));
+  int pl = a->GetInfoset()->GetPlayer()->GetNumber();
+  int iset = a->GetInfoset()->GetNumber();
+  Array<GameAction> array(m_actions[pl][iset]);
   return SomeElementDominates(*this,array,a,strong,conditional);
 }
 
 bool InfosetHasDominatedElement(const BehavSupport &S, 
-				const GameInfoset &i,
+				const GameInfoset &p_infoset,
 				bool strong,
 				bool conditional)
 {
-  Array<GameAction> actions = S.Actions(i);
+  int pl = p_infoset->GetPlayer()->GetNumber();
+  int iset = p_infoset->GetNumber();
+  Array<GameAction> actions;
+  for (int act = 1; act <= S.NumActions(pl, iset); act++) {
+    actions.Append(S.GetAction(pl, iset, act));
+  }
   for (int i = 1; i <= actions.Length(); i++)
     if (SomeElementDominates(S,actions,actions[i],
 			     strong,conditional))
@@ -883,13 +571,13 @@ bool InfosetHasDominatedElement(const BehavSupport &S,
 }
 
 bool ElimDominatedInInfoset(const BehavSupport &S, BehavSupport &T,
-			    const int pl, 
-			    const int iset, 
-			    const bool strong,
-			    const bool conditional)
+			    int pl, int iset, 
+			    bool strong, bool conditional)
 {
-  const Array<GameAction> &actions = S.Actions(pl, iset);
-
+  Array<GameAction> actions;
+  for (int act = 1; act <= S.NumActions(pl, iset); act++) {
+    actions.Append(S.GetAction(pl, iset, act));
+  }
   Array<bool> is_dominated(actions.Length());
   for (int k = 1; k <= actions.Length(); k++)
     is_dominated[k] = false;
@@ -948,356 +636,161 @@ BehavSupport BehavSupport::Undominated(bool strong, bool conditional,
   return T;
 }
 
-//----------------------------------------------------
-//                BehavSupportWithActiveInfo
-// ---------------------------------------------------
 
 // Utilities 
-bool BehavSupportWithActiveInfo::infoset_has_active_nodes(const int pl,
-						       const int iset) const
+bool BehavSupport::HasActiveMembers(int pl, int iset) const
 {
-  //DEBUG
-  /*
-  gout << "Got in with pl = " << pl << " and iset = " << iset << ".\n";
-  if (InfosetIsActive(pl,iset))
-    gout << "Apparently the infoset is active??\n";
-  else
-    gout << "Somehow it got deactivated.\n";
-  */
-
-  for (int i = 1; i <= is_nonterminal_node_active[pl][iset].Length(); i++)
-    { //DEBUG
-      /*
-      gout << "With pl = " << pl << ", iset = " << iset
-	   << ", and i = " << i << " the node is supposedly ";
-      if (NodeIsActive(pl,iset,i))
-	gout << "active.\n";
-      else
-	gout << "inactive.\n";
-      */
-
-    if (is_nonterminal_node_active[pl][iset][i])
+  for (int i = 1; i <= m_nonterminalActive[pl][iset].Length(); i++) {
+    if (m_nonterminalActive[pl][iset][i]) {
       return true;
     }
+  }
   return false;
 }
 
-bool BehavSupportWithActiveInfo::infoset_has_active_nodes(const GameInfoset &i) const
+void BehavSupport::activate(const GameNode &n)
 {
-  return infoset_has_active_nodes(i->GetPlayer()->GetNumber(), i->GetNumber());
-}
-
-void BehavSupportWithActiveInfo::activate(const GameNode &n)
-{
-  is_nonterminal_node_active[n->GetPlayer()->GetNumber()]
+  m_nonterminalActive[n->GetPlayer()->GetNumber()]
                             [n->GetInfoset()->GetNumber()]
                             [n->NumberInInfoset()] = true;
 }
 
-void BehavSupportWithActiveInfo::deactivate(const GameNode &n)
+void BehavSupport::deactivate(const GameNode &n)
 {
-  is_nonterminal_node_active[n->GetPlayer()->GetNumber()]
+  m_nonterminalActive[n->GetPlayer()->GetNumber()]
                             [n->GetInfoset()->GetNumber()]
                             [n->NumberInInfoset()] = false;
 }
 
-void BehavSupportWithActiveInfo::activate(const GameInfoset &i)
+void BehavSupport::activate(const GameInfoset &i)
 {
-  is_infoset_active[i->GetPlayer()->GetNumber()][i->GetNumber()] = true;
+  m_infosetActive[i->GetPlayer()->GetNumber()][i->GetNumber()] = true;
 }
 
-void BehavSupportWithActiveInfo::deactivate(const GameInfoset &i)
+void BehavSupport::deactivate(const GameInfoset &i)
 {
-  is_infoset_active[i->GetPlayer()->GetNumber()][i->GetNumber()] = false;
+  m_infosetActive[i->GetPlayer()->GetNumber()][i->GetNumber()] = false;
 }
 
-void BehavSupportWithActiveInfo::activate_this_and_lower_nodes(const GameNode &n)
+void BehavSupport::ActivateSubtree(const GameNode &n)
 {
   if (!n->IsTerminal()) {
     activate(n); 
     activate(n->GetInfoset());
-    Array<GameAction> actions(Actions(n->GetInfoset()));
-    for (int i = 1; i <= actions.Length(); i++) 
-      activate_this_and_lower_nodes(n->GetChild(actions[i]->GetNumber()));    
+    Array<GameAction> actions(m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetInfoset()->GetNumber()]);
+    for (int i = 1; i <= actions.Length(); i++) {
+      ActivateSubtree(n->GetChild(actions[i]->GetNumber()));    
+    }
   }
 }
 
-void BehavSupportWithActiveInfo::deactivate_this_and_lower_nodes(const GameNode &n)
+  void BehavSupport::DeactivateSubtree(const GameNode &n)
 {
   if (!n->IsTerminal()) {  // THIS ALL LOOKS FISHY
     deactivate(n); 
-    if ( !infoset_has_active_nodes(n->GetInfoset()) )
+    if ( !HasActiveMembers(n->GetInfoset()->GetPlayer()->GetNumber(),
+			   n->GetInfoset()->GetNumber())) {
       deactivate(n->GetInfoset());
-    Array<GameAction> actions(Actions(n->GetInfoset()));
-      for (int i = 1; i <= actions.Length(); i++) 
-	deactivate_this_and_lower_nodes(n->GetChild(actions[i]->GetNumber()));    
+    }
+    Array<GameAction> actions(m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetPlayer()->GetNumber()]);
+    for (int i = 1; i <= actions.Length(); i++) {
+      DeactivateSubtree(n->GetChild(actions[i]->GetNumber()));    
+    }
   }
 }
 
-void BehavSupportWithActiveInfo::
-deactivate_this_and_lower_nodes_returning_deactivated_infosets(const GameNode &n, 
-                                                List<GameInfoset> *list)
+void 
+BehavSupport::DeactivateSubtree(const GameNode &n, List<GameInfoset> &list)
 {
   if (!n->IsTerminal()) {
     deactivate(n); 
-    if ( !infoset_has_active_nodes(n->GetInfoset()) ) {
-
-      //DEBUG
-      /*
-      gout << "We are deactivating infoset " << n->GetInfoset()->GetNumber()
-	   << " with support \n" << *this << "\n";
-      */
-
-      list->Append(n->GetInfoset()); 
+    if (!HasActiveMembers(n->GetInfoset()->GetPlayer()->GetNumber(),
+			  n->GetInfoset()->GetNumber())) {
+      list.Append(n->GetInfoset()); 
       deactivate(n->GetInfoset());
     }
-    Array<GameAction> actions(Actions(n->GetInfoset()));
-      for (int i = 1; i <= actions.Length(); i++) 
-	deactivate_this_and_lower_nodes_returning_deactivated_infosets(
-			     n->GetChild(actions[i]->GetNumber()),list);    
-  }
-}
-
-void BehavSupportWithActiveInfo::InitializeActiveListsToAllActive()
-{
-  for (int pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
-    GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl); 
-    List<bool>         is_players_infoset_active;
-    List<List<bool> > is_players_node_active;
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      is_players_infoset_active.Append(true);
-
-      List<bool> is_infosets_node_active;
-      for (int n = 1; n <= player->GetInfoset(iset)->NumMembers(); n++)
-	is_infosets_node_active.Append(true);
-      is_players_node_active.Append(is_infosets_node_active);
+    Array<GameAction> actions(m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetInfoset()->GetNumber()]);
+    for (int i = 1; i <= actions.Length(); i++) {
+      DeactivateSubtree(n->GetChild(actions[i]->GetNumber()), list);    
     }
-    is_infoset_active[pl] = is_players_infoset_active;
-    is_nonterminal_node_active[pl] = is_players_node_active;
   }
-}
-
-void BehavSupportWithActiveInfo::InitializeActiveListsToAllInactive()
-{
-  for (int pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
-    GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl);
-    List<bool>         is_players_infoset_active;
-    List<List<bool> > is_players_node_active;
-
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      is_players_infoset_active.Append(false);
-
-      List<bool> is_infosets_node_active;
-      for (int n = 1; n <= player->GetInfoset(iset)->NumMembers()
-; n++)
-	is_infosets_node_active.Append(false);
-      is_players_node_active.Append(is_infosets_node_active);
-    }
-    is_infoset_active[pl] = is_players_infoset_active;
-    is_nonterminal_node_active[pl] = is_players_node_active;
-  }
-}
-
-void BehavSupportWithActiveInfo::InitializeActiveLists()
-{
-  InitializeActiveListsToAllInactive();
-
-  activate_this_and_lower_nodes(GetGame()->GetRoot());
-}
-
-// Constructors and Destructor
-BehavSupportWithActiveInfo::BehavSupportWithActiveInfo(const Game &E) 
-  : BehavSupport(E), 
-    is_infoset_active(0,E->NumPlayers()), 
-    is_nonterminal_node_active(0,E->NumPlayers())
-{
-  InitializeActiveLists();
-}
-
-BehavSupportWithActiveInfo::BehavSupportWithActiveInfo(const BehavSupport& given)
-  : BehavSupport(given), 
-    is_infoset_active(0,given.GetGame()->NumPlayers()), 
-    is_nonterminal_node_active(0,given.GetGame()->NumPlayers())
-{
-  InitializeActiveLists();
-}
-
-BehavSupportWithActiveInfo::BehavSupportWithActiveInfo(
-				  const BehavSupportWithActiveInfo& given)
-  : BehavSupport(given),
-    //is_infoset_active(0,given.GetGame()->NumPlayers()), 
-        is_infoset_active(is_infoset_active), 
-    is_nonterminal_node_active(given.is_nonterminal_node_active)
-{
-  //  InitializeActiveLists();
-}
-
-BehavSupportWithActiveInfo::~BehavSupportWithActiveInfo()
-{}
-
-// Operators
-BehavSupportWithActiveInfo &
-BehavSupportWithActiveInfo::operator=(const BehavSupportWithActiveInfo &s)
-{
-  if (this != &s) {
-    ((BehavSupport&) *this) = s;
-    is_infoset_active = s.is_infoset_active;
-    is_nonterminal_node_active = s.is_nonterminal_node_active;
-  }
-  return *this;
-}
-
-bool 
-BehavSupportWithActiveInfo::operator==(const BehavSupportWithActiveInfo &s) const
-{
-  if ((BehavSupport&) *this != (BehavSupport&) s) {
-    //  gout << "Underlying supports differ.\n"; 
-    return false; 
-  }
-  
-  if (is_infoset_active != s.is_infoset_active) {
-    //    gout<< "Active infosets differ:\n"; 
-   
-    //  for(int i = 0; i < is_infoset_active.Length(); i++)
-    //  gout << "is_infoset_active[" << i << "] = " << is_infoset_active[i];
-
-    //for(int i = 0; i < s.is_infoset_active.Length(); i++)
-    //  gout << "s.is_infoset_active[" << i << "] = " << s.is_infoset_active[i];
-
-    return false;
-  }
-  if (is_nonterminal_node_active != s.is_nonterminal_node_active) {
-    // gout << "Active nodes differ.\n";
-    return false;
-  }
-  return true;
-}
-
-bool 
-BehavSupportWithActiveInfo::operator!=(const BehavSupportWithActiveInfo &s) const
-{
-  return !(*this == s);
 }
 
 List<GameNode> 
-BehavSupportWithActiveInfo::ReachableNodesInInfoset(const GameInfoset &i) const
+BehavSupport::ReachableMembers(const GameInfoset &i) const
 {
   List<GameNode> answer;
   int pl = i->GetPlayer()->GetNumber();
   int iset = i->GetNumber();
   for (int j = 1; j <= i->NumMembers(); j++)
-    if (is_nonterminal_node_active[pl][iset][j])
+    if (m_nonterminalActive[pl][iset][j])
       answer.Append(i->GetMember(j));
   return answer;
 }
 
 List<GameNode>
-BehavSupportWithActiveInfo::ReachableNonterminalNodes() const
+BehavSupport::ReachableNonterminalNodes(void) const
 {
   List<GameNode> answer;
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
     GamePlayer p = GetGame()->GetPlayer(pl);
     for (int iset = 1; iset <= p->NumInfosets(); iset++)
-      answer += ReachableNodesInInfoset(p->GetInfoset(iset));
+      answer += ReachableMembers(p->GetInfoset(iset));
   }
   return answer;
 }
 
-// Editing functions
-void BehavSupportWithActiveInfo::AddAction(const GameAction &s)
-{
-  BehavSupport::AddAction(s);
-
-  List<GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
-  for (int i = 1; i <= startlist.Length(); i++)
-    activate_this_and_lower_nodes(startlist[i]);
-}
-
-bool BehavSupportWithActiveInfo::RemoveAction(const GameAction &s)
-{
-  List<GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
-  for (int i = 1; i <= startlist.Length(); i++)
-    deactivate_this_and_lower_nodes(startlist[i]->GetChild(s->GetNumber()));
-
-  // the following returns false if s was not active
-  return BehavSupport::RemoveAction(s);
-}
-
-bool 
-BehavSupportWithActiveInfo::RemoveActionReturningDeletedInfosets(const GameAction &s,
-					   List<GameInfoset> *list)
-{
-
-  List<GameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
-  for (int i = 1; i <= startlist.Length(); i++)
-    deactivate_this_and_lower_nodes_returning_deactivated_infosets(
-                           startlist[i]->GetChild(s->GetNumber()),list);
-
-  // the following returns false if s was not active
-  return BehavSupport::RemoveAction(s);
-}
-
-int BehavSupportWithActiveInfo::NumActiveNodes(const int pl,
-					     const int iset) const
+int BehavSupport::NumActiveMembers(const GameInfoset &p_infoset) const
 {
   int answer = 0;
-  for (int i = 1; i <= is_nonterminal_node_active[pl][iset].Length(); i++)
-    if (is_nonterminal_node_active[pl][iset][i])
+  int pl = p_infoset->GetPlayer()->GetNumber();
+  int iset = p_infoset->GetNumber();
+
+  for (int i = 1; i <= m_nonterminalActive[pl][iset].Length(); i++) {
+    if (m_nonterminalActive[pl][iset][i]) {
       answer++;
+    }
+  }
   return answer;
 }
 
-int BehavSupportWithActiveInfo::NumActiveNodes(const GameInfoset &i) const
+bool BehavSupport::IsActive(const GameInfoset &i) const
 {
-  return NumActiveNodes(i->GetPlayer()->GetNumber(),i->GetNumber());
+  return m_infosetActive[i->GetPlayer()->GetNumber()][i->GetNumber()];
 }
 
-bool BehavSupportWithActiveInfo::InfosetIsActive(const int pl,
-					      const int iset) const
+
+bool BehavSupport::IsActive(const GameNode &n) const
 {
-  return is_infoset_active[pl][iset];
+  return m_nonterminalActive[n->GetInfoset()->GetPlayer()->GetNumber()]
+    [n->GetInfoset()->GetNumber()][n->NumberInInfoset()];
 }
 
-bool BehavSupportWithActiveInfo::InfosetIsActive(const GameInfoset &i) const
+bool BehavSupport::HasActiveActionsAtActiveInfosets(void) const
 {
-  return InfosetIsActive(i->GetPlayer()->GetNumber(),i->GetNumber());
-}
-
-bool BehavSupportWithActiveInfo::NodeIsActive(const int pl,
-					   const int iset,
-					   const int node) const
-{
-  return is_nonterminal_node_active[pl][iset][node];
-}
-
-bool BehavSupportWithActiveInfo::NodeIsActive(const GameNode &n) const
-{
-  return NodeIsActive(n->GetInfoset()->GetPlayer()->GetNumber(),
-		      n->GetInfoset()->GetNumber(),
-		      n->NumberInInfoset());
-}
-
-bool BehavSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()
-{
-  for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++)
-    for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) 
-      if (InfosetIsActive(pl,iset))
-        if ( NumActions(pl, iset) == 0 )
-          return false;
+  for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
+    for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
+      if (m_infosetActive[pl][iset] && NumActions(pl, iset) == 0) {
+	return false;
+      }
+    }
+  }
   return true;
 }
 
-bool BehavSupportWithActiveInfo::HasActiveActionsAtActiveInfosetsAndNoOthers()
+bool BehavSupport::HasActiveActionsAtActiveInfosetsAndNoOthers(void) const
 {
-  for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++)
+  for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
     for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
-      if (InfosetIsActive(pl,iset))
-        if ( NumActions(pl, iset) == 0 )
-          return false;
-      if (!InfosetIsActive(pl,iset))
-        if ( NumActions(pl, iset) > 0 )
-          return false;
+      if (m_infosetActive[pl][iset] && NumActions(pl, iset) == 0) {
+	return false;
       }
+
+      if (!m_infosetActive[pl][iset] && NumActions(pl, iset) > 0) {
+	return false;
+      }
+    }
+  }
   return true;
 }
 

@@ -321,17 +321,17 @@ const T &MixedBehavProfile<T>::GetRegret(const GameAction &act) const
 template <class T>
 void MixedBehavProfile<T>::Payoff(GameNodeRep *node, T prob, int player, T &value) const
 {
-  GameInfosetRep *iset = node->infoset;
-
   if (node->outcome) {
     value += prob * node->outcome->GetPayoff<T>(player);
   }
 
   if (node->children.Length())  {
-    const Array<GameAction> &acts = m_support.Actions(iset);
-    for (int act = 1; act <= acts.Length(); act++) 
-      Payoff(node->GetChild(acts[act]->GetNumber()), 
-	     prob * ActionProb(acts[act]), player, value);
+    int pl = node->infoset->m_player->m_number, iset = node->infoset->m_number;
+    for (int act = 1; act <= m_support.NumActions(pl, iset); act++) {
+      GameActionRep *action = m_support.GetAction(pl, iset, act);
+      Payoff(node->GetChild(action->GetNumber()), 
+	     prob * ActionProb(action), player, value);
+    }
   }
 }
 
@@ -617,44 +617,8 @@ template <class T> DVector<T> MixedBehavProfile<T>::GetBeliefs(void)
   return bprobs;
 }
 
-template <class T> T MixedBehavProfile<T>::GetLiapValue(void) const
-{
-  static const T BIG1 = (T) 10000;
-  static const T BIG2 = (T) 100;
-
-  T x, result = ((T) 0), avg, sum;
-  
-  // HACK: force it to recompute data.  FIX THIS.
-  m_cached_data = false;
-  ComputeSolutionData();
-
-  for (int i = 1; i <= m_efg->NumPlayers(); i++) {
-    for (int iset = 1; iset <= m_efg->GetPlayer(i)->NumInfosets(); iset++) {
-      const Array<GameAction> &acts = m_support.Actions(m_efg->GetPlayer(i)->GetInfoset(iset));
-      avg = sum = (T)0;
-
-      for (int act = 1; act <= acts.Length(); act++) {
-	x = ActionProb(acts[act]);
-	avg += x * ActionValue(acts[act]);
-	sum += x;
-	if (x > (T)0)  x = (T)0;
-	result += BIG1 * x * x;         // add penalty for neg probabilities
-      }
-
-      for (int act = 1; act <= acts.Length(); act++) {
-	x = ActionValue(acts[act]) - avg;
-	if (x < (T)0) x = (T)0;
-	result += x * x;          // add penalty if not best response
-      }
-      x = sum - (T)1;
-      result += BIG2 * x * x;       // add penalty for sum not equal to 1
-    }
-  }
-  return result;
-}
-
 //
-// This variation allows us to compute the LiapValue for profiles
+// The p_definedOnly parameter allows us to compute the LiapValue for profiles
 // which are incomplete.  Some methods -- such as the sequence form
 // methods -- return all zeroes for all action probabilities at
 // information sets sufficiently far off the equilibrium path.
@@ -663,7 +627,8 @@ template <class T> T MixedBehavProfile<T>::GetLiapValue(void) const
 // This is really a hack because we don't have a proper way yet of
 // indicating this.
 // 
-template <class T> T MixedBehavProfile<T>::GetLiapValueOnDefined(void) const
+template <class T> 
+T MixedBehavProfile<T>::GetLiapValue(bool p_definedOnly) const
 {
   static const T BIG1 = (T) 10000;
   static const T BIG2 = (T) 100;
@@ -676,46 +641,30 @@ template <class T> T MixedBehavProfile<T>::GetLiapValueOnDefined(void) const
 
   for (int i = 1; i <= m_efg->NumPlayers(); i++) {
     for (int iset = 1; iset <= m_efg->GetPlayer(i)->NumInfosets(); iset++) {
-      const Array<GameAction> &acts = m_support.Actions(m_efg->GetPlayer(i)->GetInfoset(iset));
       avg = sum = (T)0;
 
-      for (int act = 1; act <= acts.Length(); act++) {
-	x = ActionProb(acts[act]);
-	avg += x * ActionValue(acts[act]);
+      for (int act = 1; act <= m_support.NumActions(i, iset); act++) {
+	GameActionRep *action = m_support.GetAction(i, iset, act);
+	x = ActionProb(action);
+	avg += x * ActionValue(action);
 	sum += x;
 	if (x > (T)0)  x = (T)0;
 	result += BIG1 * x * x;         // add penalty for neg probabilities
       }
 
-      for (int act = 1; act <= acts.Length(); act++) {
-	x = ActionValue(acts[act]) - avg;
+      for (int act = 1; act <= m_support.NumActions(i, iset); act++) {
+	x = ActionValue(m_support.GetAction(i, iset, act)) - avg;
 	if (x < (T)0) x = (T)0;
 	result += x * x;          // add penalty if not best response
       }
       x = sum - (T)1;
-      // Here's the one line that's different from the regular LiapValue
-      if (sum >= (T) 1.0e-4) {
+      if (!p_definedOnly || sum >= (T) 1.0e-4) {
 	result += BIG2 * x * x;       // add penalty for sum not equal to 1
       }
     }
   }
   return result;
 }
-
-  /*
-template <class T>
-T MixedBehavProfile<T>::MaxRegret(void)
-{ 
-  ComputeSolutionData();
-  T ret = (T) 0;
-  for (int act = 1; act <= m_gripe.Length(); act++) {
-    if (m_gripe[act] > ret) {
-      ret = m_gripe[act];
-    }
-  }
-  return ret;
-}
-  */
 
 template <class T>
 bool MixedBehavProfile<T>::IsDefinedAt(GameInfoset p_infoset) const

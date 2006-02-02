@@ -590,7 +590,7 @@ int gbtTreeLayout::LayoutSubtree(Gambit::GameNode p_node, const Gambit::BehavSup
       p_node->GetInfoset() && !p_node->GetInfoset()->GetPlayer()->IsChance()) {
     Gambit::GameInfoset infoset = p_node->GetInfoset();
     for (int i = 1; i <= p_support.NumActions(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()); i++) {
-      yn = LayoutSubtree(p_node->GetChild(p_support.Actions(infoset)[i]->GetNumber()),
+      yn = LayoutSubtree(p_node->GetChild(p_support.GetAction(infoset->GetPlayer()->GetNumber(), infoset->GetNumber(), i)->GetNumber()),
 			 p_support, p_maxy, p_miny, p_ycoord);
       if (y1 == -1) {
 	y1 = yn;
@@ -832,7 +832,7 @@ void gbtTreeLayout::BuildNodeList(Gambit::GameNode p_node, const Gambit::BehavSu
       }
       else {
 	for (int i = 1; i <= p_support.NumActions(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()); i++) {
-	  BuildNodeList(p_node->GetChild(p_support.Actions(infoset)[i]->GetNumber()),
+	  BuildNodeList(p_node->GetChild(p_support.GetAction(infoset->GetPlayer()->GetNumber(), infoset->GetNumber(), i)->GetNumber()),
 			p_support, p_level + 1);
 	}
       }

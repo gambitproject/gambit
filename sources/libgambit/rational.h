@@ -41,6 +41,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 namespace Gambit {
 
+/// A representation of an arbitrary-precision rational number
 class Rational {
 protected:
   Integer num, den;

@@ -151,9 +151,7 @@ public:
   //@{
   T GetPayoff(int p_player) const;
   DVector<T> GetBeliefs(void);
-  T GetLiapValue(void) const;
-  T GetLiapValueOnDefined(void) const;
-  //T MaxRegret(void);
+  T GetLiapValue(bool p_definedOnly = false) const;
 
   bool IsDefinedAt(GameInfoset p_infoset) const;
 

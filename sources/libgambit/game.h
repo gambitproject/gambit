@@ -74,7 +74,7 @@ public:
   //@}
 };
 
-
+/// An exception thrown when attempting to dereference a null pointer
 class NullException : public Exception {
 public:
   virtual ~NullException() { }
@@ -232,7 +232,7 @@ public:
 
 typedef GameObjectPtr<GameOutcomeRep> GameOutcome;
 
-
+/// An action at an information set in an extensive game
 class GameActionRep : public GameObject {
   friend class GameRep;
   friend class GameInfosetRep;
@@ -260,7 +260,7 @@ public:
   void DeleteAction(void);
 };
 
-
+/// An information set in an extensive game
 class GameInfosetRep : public GameObject {
   friend class GameRep;
   friend class GameActionRep;
@@ -318,8 +318,11 @@ public:
   void Reveal(GamePlayer);
 };
 
-/// This class represents a strategy in a strategic game.
-/// Internally, this strategy stores an 'index'.  This index has the
+/// \brief A strategy in a game.
+///
+/// This class represents a strategy in a game.
+/// For strategic games, this object internally stores an 'index'.  
+/// This index has the
 /// property that, for a strategy profile, adding the indices of the
 /// strategies gives the index into the strategic game's table to
 /// find the outcome for that strategy profile, making payoff computation
@@ -363,7 +366,7 @@ public:
   //@}
 };
 
-
+/// A player in a game
 class GamePlayerRep : public GameObject {
   friend class GameRep;
   friend class GameInfosetRep;
@@ -413,6 +416,7 @@ public:
   //@}
 };
 
+/// A node in an extensive game
 class GameNodeRep : public GameObject {
   friend class GameRep;
   friend class GameActionRep;
@@ -548,9 +552,7 @@ public:
 };
 
 
-///
 /// This is the class for representing an arbitrary finite game.
-///
 class GameRep : public GameObject {
   friend class GameInfosetRep;
   friend class GamePlayerRep;

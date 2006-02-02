@@ -31,8 +31,6 @@
 
 namespace Gambit {
 
-class BehavSupportPlayer;
-
 /// This class represents a subset of the actions in an extensive game.
 /// It is enforced that each player has at least one action at each
 /// information set; thus, the actions in a support can be viewed as
@@ -43,17 +41,26 @@ class BehavSupportPlayer;
 class BehavSupport {
 protected:
   Game m_efg;
-  Array<BehavSupportPlayer *> m_players;
+  Array<Array<Array<GameAction> > > m_actions;
+
+  Array<List<bool> > m_infosetActive;
+  Array<List<List<bool> > > m_nonterminalActive;
+
+  void activate(const GameNode &);
+  void deactivate(const GameNode &);
+  void activate(const GameInfoset &);
+  void deactivate(const GameInfoset &);
+  bool HasActiveMembers(int pl, int iset) const;
+  void ActivateSubtree(const GameNode &);
+  void DeactivateSubtree(const GameNode &);
+  void DeactivateSubtree(const GameNode &, List<GameInfoset> &);
 
 public:
   /// @name Lifecycle
   //@{
   /// Constructor.  By default, a support contains all strategies. 
   BehavSupport(const Game &);
-  /// Copy constructor 
-  BehavSupport(const BehavSupport &);
-  virtual ~BehavSupport();
-  BehavSupport &operator=(const BehavSupport &);
+  ~BehavSupport() { }
 
   //@}
 
@@ -70,124 +77,90 @@ public:
   Game GetGame(void) const { return m_efg; }
 
   /// Returns the number of actions in the information set
-  int NumActions(int pl, int iset) const;
+  int NumActions(int pl, int iset) const
+  { return m_actions[pl][iset].Length(); }
 
   /// Returns the number of actions in the support for all information sets
   PVector<int> NumActions(void) const;
 
+  /// Returns the action at the specified position in the support
+  GameAction GetAction(int pl, int iset, int act) const
+  { return m_actions[pl][iset][act]; }
 
-  int NumDegreesOfFreedom(void) const;
-
-  // Checks to see that every infoset in the support has at least one
-  // action in it.
-  bool HasActiveActionAt(const GameInfoset &) const;
-  bool HasActiveActionsAtAllInfosets(void) const;
-
-  // Returns the position of the action in the support. 
-  // Returns zero if the action is not contained in the support
+  /// Returns the position of the action in the support. 
   int GetIndex(const GameAction &) const;
+
+  /// Returns whether the action is in the support.
   bool Contains(const GameAction &p_action) const
   { return (GetIndex(p_action) != 0); }
 
-  bool ActionIsActive(const int pl, const int iset, const int act) const;
-  bool ActionIsActive(GameAction) const;
-  bool AllActionsInSupportAtInfosetAreActive(const BehavSupport &,
-					     const GameInfoset &) const;
+  /// The dimension of a behavior strategy at reachable information sets
+  int NumDegreesOfFreedom(void) const;
 
-  // Find the active actions at an infoset
-  const Array<GameAction> &Actions(int pl, int iset) const;
-  Array<GameAction> Actions(const GameInfoset &) const;
-
-  // Action editing functions
-  virtual void AddAction(const GameAction &);
-  virtual bool RemoveAction(const GameAction &);
+  /// Does the information set have at least one active action?
+  bool HasActiveActionAt(const GameInfoset &) const;
+  /// Do all information sets have at least one active action?
+  bool HasActiveActionsAtAllInfosets(void) const;
 
   /// Total number of sequences 
   int NumSequences(void) const;
   /// Number of sequences for a player
   int NumSequences(int pl) const;
 
-  // Reachable Nodes and Information Sets
+  /// Is the information set active (i.e., reachable)?
+  bool IsActive(const GameInfoset &) const;
+  /// How many active members are there in the information set?
+  int NumActiveMembers(const GameInfoset &) const;
+  /// Is the node active (i.e., reachable)?
+  bool IsActive(const GameNode &) const;
+
+  /// Do all active information sets have actions in the support?
+  bool HasActiveActionsAtActiveInfosets(void) const;
+  /// Do only active information sets have actions in the support?
+  bool HasActiveActionsAtActiveInfosetsAndNoOthers(void) const;
+  //@}
+
+  /// @name Editing the support
+  //@{
+  /// Adds the action to the support; no effect if action is present already
+  void AddAction(const GameAction &);
+  /// Removes the action from the support; returns true if successful.
+  bool RemoveAction(const GameAction &);
+  /// Removes the action and returns the list of information sets
+  /// made unreachable by the action's removal
+  bool RemoveAction(const GameAction &, List<GameInfoset> &);
+  //@}
+
+  /// @name Reachability of nodes and information sets
+  //@{
+  List<GameNode> ReachableNonterminalNodes(void) const;
   List<GameNode> ReachableNonterminalNodes(const GameNode &) const;
   List<GameNode> ReachableNonterminalNodes(const GameNode &, 
-						const GameAction &) const;
+					   const GameAction &) const;
   List<GameInfoset> ReachableInfosets(const GameNode &) const;
   List<GameInfoset> ReachableInfosets(const GameNode &, 
-					   const GameAction &) const;
+				      const GameAction &) const;
   List<GameInfoset> ReachableInfosets(const GamePlayer &) const;
 
-  bool AlwaysReaches(const GameInfoset &) const;
-  bool AlwaysReachesFrom(const GameInfoset &, const GameNode &) const;
   bool MayReach(const GameNode &) const;
   bool MayReach(const GameInfoset &) const;
 
+  List<GameNode> ReachableMembers(const GameInfoset &) const;
+  //@}
+
+  /// @name Identification of dominated actions
+  //@{
+  /// Returns true if action a is dominated by action b
   bool Dominates(const GameAction &a, const GameAction &b,
 		 bool strong, bool conditional) const;
+  /// Returns true if the action is dominated by some other action
   bool IsDominated(const GameAction &a, 
 		   bool strong, bool conditional) const;
+  /// Returns a copy of the support with dominated actions eliminated
   BehavSupport Undominated(bool strong, bool conditional,
-			 const Array<int> &players,
-			std::ostream &) const;
-};
-
-// The following class keeps a record of which nodes and infosets are 
-// reached by sequences of actions in the support.  This record is
-// updated as actions are added and removed.
-// BUG - The interface in BehavSupport does not entirely agree with the one
-// below vis-a-vis common elements.
-
-class BehavSupportWithActiveInfo : public BehavSupport {
-protected:
-  Array<List<bool> >         is_infoset_active;
-  Array<List<List<bool> > > is_nonterminal_node_active;
-
-  void InitializeActiveListsToAllActive();
-  void InitializeActiveListsToAllInactive();
-  void InitializeActiveLists();
-
-  void activate(const GameNode &);
-  void deactivate(const GameNode &);
-  void activate(const GameInfoset &);
-  void deactivate(const GameInfoset &);
-  bool infoset_has_active_nodes(const int pl, const int iset) const;
-  bool infoset_has_active_nodes(const GameInfoset &i) const;
-  void activate_this_and_lower_nodes(const GameNode &);
-  void deactivate_this_and_lower_nodes(const GameNode &);
-  void deactivate_this_and_lower_nodes_returning_deactivated_infosets(
-                                                 const GameNode &,
-						 List<GameInfoset> *);
-
-public:
-  BehavSupportWithActiveInfo ( const Game &);
-  BehavSupportWithActiveInfo ( const BehavSupport &);
-  BehavSupportWithActiveInfo ( const BehavSupportWithActiveInfo &);
-  virtual ~BehavSupportWithActiveInfo();
-
-  // Operators
-  BehavSupportWithActiveInfo &operator=(const BehavSupportWithActiveInfo &);
-  bool operator==(const BehavSupportWithActiveInfo &) const;
-  bool operator!=(const BehavSupportWithActiveInfo &) const;
-
-  // Find the reachable nodes at an infoset
-  List<GameNode> ReachableNodesInInfoset(const GameInfoset &) const;
-  List<GameNode> ReachableNonterminalNodes() const;
-
-  // Action editing functions
-  void AddAction(const GameAction &);
-  bool RemoveAction(const GameAction &);
-  bool RemoveActionReturningDeletedInfosets(const GameAction &, 
-					    List<GameInfoset> *);
-
-  // Information
-  bool InfosetIsActive(const int pl, const int iset) const;
-  bool InfosetIsActive(const GameInfoset &) const;
-  int  NumActiveNodes(const int pl, const int iset) const;
-  int  NumActiveNodes(const GameInfoset &) const;
-  bool NodeIsActive(const int pl, const int iset, const int node) const;
-  bool NodeIsActive(const GameNode &) const;
-
-  bool HasActiveActionsAtActiveInfosets();
-  bool HasActiveActionsAtActiveInfosetsAndNoOthers();
+			   const Array<int> &players,
+			   std::ostream &) const;
+  //@}
 };
 
 } // end namespace Gambit

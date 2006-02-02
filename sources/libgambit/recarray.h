@@ -31,7 +31,7 @@
 
 namespace Gambit {
 
-/// This implements a rectangular (two-dimensional) array
+/// This class implements a rectangular (two-dimensional) array
 template <class T> class RectArray {
 protected:
   int minrow, maxrow, mincol, maxcol;

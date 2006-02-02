@@ -32,7 +32,7 @@
 // We begin by simply enumerating all subsupports.
 
 void AllSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
-			     Gambit::BehavSupportWithActiveInfo *sact,
+			     Gambit::BehavSupport *sact,
 			     ActionCursorForSupport *c,
 			     Gambit::List<Gambit::BehavSupport> &list)
 { 
@@ -41,7 +41,7 @@ void AllSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
   ActionCursorForSupport c_copy(*c);
 
   do {
-    if ( sact->ActionIsActive(c_copy.GetAction()) ) {
+    if ( sact->Contains(c_copy.GetAction()) ) {
       sact->RemoveAction(c_copy.GetAction());
       AllSubsupportsRECURSIVE(s,sact,&c_copy,list);
       sact->AddAction(c_copy.GetAction());
@@ -52,7 +52,7 @@ void AllSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
 Gambit::List<Gambit::BehavSupport> AllSubsupports(const Gambit::BehavSupport &S)
 {
   Gambit::List<Gambit::BehavSupport> answer;
-  Gambit::BehavSupportWithActiveInfo SAct(S);
+  Gambit::BehavSupport SAct(S);
   ActionCursorForSupport cursor(S);
 
   AllSubsupportsRECURSIVE(S, &SAct, &cursor, answer);
@@ -69,7 +69,7 @@ Gambit::List<Gambit::BehavSupport> AllSubsupports(const Gambit::BehavSupport &S)
 // dominance elimination.
 
 void AllInequivalentSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
-					 Gambit::BehavSupportWithActiveInfo *sact,
+					 Gambit::BehavSupport *sact,
 					 ActionCursorForSupport *c,
 					 Gambit::List<Gambit::BehavSupport> &list)
 { 
@@ -79,11 +79,10 @@ void AllInequivalentSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
   ActionCursorForSupport c_copy(*c);
 
   do {
-    if ( sact->ActionIsActive(c_copy.GetAction()) ) {
+    if ( sact->Contains(c_copy.GetAction()) ) {
 
       Gambit::List<Gambit::GameInfoset> deactivated_infosets;
-      sact->RemoveActionReturningDeletedInfosets(c_copy.GetAction(),
-						 &deactivated_infosets); 
+      sact->RemoveAction(c_copy.GetAction(), deactivated_infosets); 
 
       if (!c_copy.DeletionsViolateActiveCommitments(sact,
 						    &deactivated_infosets))
@@ -96,7 +95,7 @@ void AllInequivalentSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
 Gambit::List<Gambit::BehavSupport> AllInequivalentSubsupports(const Gambit::BehavSupport &S)
 {
   Gambit::List<Gambit::BehavSupport> answer;
-  Gambit::BehavSupportWithActiveInfo SAct(S);
+  Gambit::BehavSupport SAct(S);
   ActionCursorForSupport cursor(S);
 
   AllInequivalentSubsupportsRECURSIVE(S, &SAct, &cursor, answer);
@@ -105,7 +104,7 @@ Gambit::List<Gambit::BehavSupport> AllInequivalentSubsupports(const Gambit::Beha
 }
 
 void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
-					Gambit::BehavSupportWithActiveInfo *sact,
+					Gambit::BehavSupport *sact,
 					ActionCursorForSupport *c,
 					bool strong, bool conditional,
 					Gambit::List<Gambit::BehavSupport> &list)
@@ -123,8 +122,8 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
     Gambit::GameAction this_action = scanner.GetAction();
     bool delete_this_action = false;
 
-    if ( sact->ActionIsActive(this_action) ) 
-      if ( !sact->InfosetIsActive(this_action->GetInfoset()) ) 
+    if ( sact->Contains(this_action) ) 
+      if ( !sact->IsActive(this_action->GetInfoset()) ) 
 	delete_this_action = true;  
       else 
 	if (check_domination) 
@@ -147,8 +146,7 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
       actual_deletions.Append(deletion_list[i]);
       Gambit::List<Gambit::GameInfoset> deactivated_infosets;
       
-      sact->RemoveActionReturningDeletedInfosets(deletion_list[i],
-						   &deactivated_infosets); 
+      sact->RemoveAction(deletion_list[i], deactivated_infosets); 
 	
       if (c->DeletionsViolateActiveCommitments(sact,&deactivated_infosets))
 	abort = true;
@@ -174,11 +172,10 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
     ActionCursorForSupport c_copy(*c);
     
     do {
-      if ( sact->ActionIsActive(c_copy.GetAction()) ) {
+      if ( sact->Contains(c_copy.GetAction()) ) {
 	
 	Gambit::List<Gambit::GameInfoset> deactivated_infosets;
-	sact->RemoveActionReturningDeletedInfosets(c_copy.GetAction(),
-						   &deactivated_infosets); 
+	sact->RemoveAction(c_copy.GetAction(), deactivated_infosets); 
 	
 	if (!c_copy.DeletionsViolateActiveCommitments(sact,
 						      &deactivated_infosets))
@@ -199,7 +196,7 @@ Gambit::List<Gambit::BehavSupport> AllUndominatedSubsupports(const Gambit::Behav
 					       bool strong, bool conditional)
 {
   Gambit::List<Gambit::BehavSupport> answer;
-  Gambit::BehavSupportWithActiveInfo sact(S);
+  Gambit::BehavSupport sact(S);
   ActionCursorForSupport cursor(S);
 
   AllUndominatedSubsupportsRECURSIVE(S,
@@ -213,7 +210,7 @@ Gambit::List<Gambit::BehavSupport> AllUndominatedSubsupports(const Gambit::Behav
 }
 
 void PossibleNashSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
-				      Gambit::BehavSupportWithActiveInfo *sact,
+				      Gambit::BehavSupport *sact,
 				      ActionCursorForSupport *c,
 				      Gambit::List<Gambit::BehavSupport> &list)
 { 
@@ -230,8 +227,8 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
     Gambit::GameAction this_action = scanner.GetAction();
     bool delete_this_action = false;
 
-    if ( sact->ActionIsActive(this_action) ) 
-      if ( !sact->InfosetIsActive(this_action->GetInfoset()) )
+    if ( sact->Contains(this_action) ) 
+      if ( !sact->IsActive(this_action->GetInfoset()) )
 	delete_this_action = true;  
       else
 	if (check_domination) 
@@ -255,8 +252,7 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
       actual_deletions.Append(deletion_list[i]);
       Gambit::List<Gambit::GameInfoset> deactivated_infosets;
-      sact->RemoveActionReturningDeletedInfosets(deletion_list[i],
-						   &deactivated_infosets); 
+      sact->RemoveAction(deletion_list[i], deactivated_infosets); 
       if (c->DeletionsViolateActiveCommitments(sact,&deactivated_infosets))
 	abort = true;
     }
@@ -275,10 +271,9 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
       list.Append(*sact);
     ActionCursorForSupport c_copy(*c);
     do {
-      if ( sact->ActionIsActive(c_copy.GetAction()) ) {
+      if ( sact->Contains(c_copy.GetAction()) ) {
 	Gambit::List<Gambit::GameInfoset> deactivated_infosets;
-	sact->RemoveActionReturningDeletedInfosets(c_copy.GetAction(),
-						   &deactivated_infosets); 
+	sact->RemoveAction(c_copy.GetAction(), deactivated_infosets); 
 	if (!c_copy.DeletionsViolateActiveCommitments(sact,
 						      &deactivated_infosets))
 	  PossibleNashSubsupportsRECURSIVE(s,sact,&c_copy,list);
@@ -336,7 +331,7 @@ Gambit::List<Gambit::BehavSupport> SortSupportsBySize(Gambit::List<Gambit::Behav
 Gambit::List<Gambit::BehavSupport> PossibleNashSubsupports(const Gambit::BehavSupport &S)
 {
   Gambit::List<Gambit::BehavSupport> answer;
-  Gambit::BehavSupportWithActiveInfo sact(S);
+  Gambit::BehavSupport sact(S);
   ActionCursorForSupport cursor(S);
 
   PossibleNashSubsupportsRECURSIVE(S, &sact, &cursor, answer);
@@ -347,16 +342,16 @@ Gambit::List<Gambit::BehavSupport> PossibleNashSubsupports(const Gambit::BehavSu
   // subsupports exhibiting domination by currently inactive actions.
 
   for (int i = answer.Length(); i >= 1; i--) {
-    Gambit::BehavSupportWithActiveInfo current(answer[i]);
+    Gambit::BehavSupport current(answer[i]);
     ActionCursorForSupport crsr(S);
     bool remove = false;
     do {
       Gambit::GameAction act = crsr.GetAction();
-      if (current.ActionIsActive(act)) 
+      if (current.Contains(act)) 
 	for (int j = 1; j <= act->GetInfoset()->NumActions(); j++) {
 	  Gambit::GameAction other_act = act->GetInfoset()->GetAction(j);
 	  if (other_act != act)
-	    if (current.ActionIsActive(other_act)) {
+	    if (current.Contains(other_act)) {
 	      if (current.Dominates(other_act,act,false,true) ||
 		  current.Dominates(other_act,act,false,false)) 
 		remove = true;
@@ -468,7 +463,7 @@ ActionCursorForSupport::GoToNext()
 
 Gambit::GameAction ActionCursorForSupport::GetAction() const
 {
-  return support->Actions(pl,iset)[act];
+  return support->GetAction(pl, iset, act);
 }
 
 int ActionCursorForSupport::ActionIndex() const
@@ -528,7 +523,7 @@ ActionCursorForSupport::IsSubsequentTo(const Gambit::GameAction &a) const
 
 
 bool ActionCursorForSupport::
-DeletionsViolateActiveCommitments(const Gambit::BehavSupportWithActiveInfo *S,
+DeletionsViolateActiveCommitments(const Gambit::BehavSupport *S,
 				   const Gambit::List<Gambit::GameInfoset> *infosetlist)
 {
   for (int i = 1; i <= infosetlist->Length(); i++) {
@@ -542,9 +537,7 @@ DeletionsViolateActiveCommitments(const Gambit::BehavSupportWithActiveInfo *S,
     if (infoset->GetPlayer()->GetNumber() == PlayerIndex() &&
 	infoset->GetNumber() == InfosetIndex() )
       for (int act = 1; act < ActionIndex(); act++)
-	if ( S->ActionIsActive(infoset->GetPlayer()->GetNumber(),
-			       infoset->GetNumber(),
-			       act) )
+	if ( S->Contains(infoset->GetAction(act)))
 	  return true;
   }
   return false;
@@ -552,7 +545,7 @@ DeletionsViolateActiveCommitments(const Gambit::BehavSupportWithActiveInfo *S,
 
 
 bool ActionCursorForSupport::
-InfosetGuaranteedActiveByPriorCommitments(const Gambit::BehavSupportWithActiveInfo *S,
+InfosetGuaranteedActiveByPriorCommitments(const Gambit::BehavSupport *S,
 					  const Gambit::GameInfoset &infoset)
 {
   Gambit::List<Gambit::GameNode> members;
@@ -565,7 +558,7 @@ InfosetGuaranteedActiveByPriorCommitments(const Gambit::BehavSupportWithActiveIn
     if ( current == S->GetGame()->GetRoot() )
       return true;
     else
-      while ( S->ActionIsActive(current->GetPriorAction()) &&
+      while ( S->Contains(current->GetPriorAction()) &&
 	      IsSubsequentTo(current->GetPriorAction()) ) {
 	current = current->GetParent();
 	if ( current == S->GetGame()->GetRoot() )
