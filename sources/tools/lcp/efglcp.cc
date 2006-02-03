@@ -76,7 +76,7 @@ private:
 		int depth, Gambit::Matrix<T> &);
   
   void GetProfile(const Gambit::BehavSupport &, const LTableau<T> &tab, 
-		  Gambit::DVector<T> &, const Gambit::Vector<T> &, 
+		  Gambit::MixedBehavProfile<T> &, const Gambit::Vector<T> &, 
 		  const Gambit::GameNode &n, int,int);
 
 public:
@@ -120,7 +120,7 @@ void UndefinedToCentroid(Gambit::MixedBehavProfile<T> &p_profile)
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       Gambit::GameInfoset infoset = player->GetInfoset(iset);
       
-      if (p_profile.GetIsetProb(infoset) > (T) 0) {
+      if (p_profile.GetInfosetProb(infoset) > (T) 0) {
 	continue;
       }
 	  
@@ -209,7 +209,7 @@ void efgLcp<T>::Solve(const Gambit::BehavSupport &p_support)
       Add_BFS(tab);
       tab.BasisVector(sol);
       GetProfile(p_support, tab, 
-		 profile.GetDPVector(),sol,p_support.GetGame()->GetRoot(),1,1);
+		 profile,sol,p_support.GetGame()->GetRoot(),1,1);
       UndefinedToCentroid(profile);
 
       PrintProfile(std::cout, "NE", profile);
@@ -287,7 +287,7 @@ efgLcp<T>::All_Lemke(const Gambit::BehavSupport &p_support,
       if(BCopy.SF_LCPPath(-missing)==1) {
 	newsol = Add_BFS(BCopy);
 	BCopy.BasisVector(sol);
-	GetProfile(p_support, BCopy, profile.GetDPVector(),sol,p_support.GetGame()->GetRoot(),1,1);
+	GetProfile(p_support, BCopy, profile,sol,p_support.GetGame()->GetRoot(),1,1);
 	UndefinedToCentroid(profile);
 	if (newsol) {
 	  PrintProfile(std::cout, "NE", profile);
@@ -368,9 +368,10 @@ void efgLcp<T>::FillTableau(const Gambit::BehavSupport &p_support, Gambit::Matri
 
 template <class T>
 void efgLcp<T>::GetProfile(const Gambit::BehavSupport &p_support,
-				  const LTableau<T> &tab, 
-				  Gambit::DVector<T> &v, const Gambit::Vector<T> &sol,
-				  const Gambit::GameNode &n, int s1,int s2)
+			   const LTableau<T> &tab, 
+			   Gambit::MixedBehavProfile<T> &v, 
+			   const Gambit::Vector<T> &sol,
+			   const Gambit::GameNode &n, int s1,int s2)
 {
   int i,pl,inf,snew,ind,ind2;
   if(n->GetInfoset()) {

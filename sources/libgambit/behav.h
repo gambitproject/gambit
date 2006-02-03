@@ -35,11 +35,11 @@ namespace Gambit {
 /// MixedBehavProfile<T> implements a randomized behavior profile on
 /// an extensive game.
 ///
-template <class T> class MixedBehavProfile : private DVector<T>  {
+template <class T> class MixedBehavProfile : public DVector<T>  {
 protected:
-  Game m_efg;
   BehavSupport m_support;
-  mutable bool m_cached_data;
+
+  mutable bool m_cacheValid;
 
   // structures for storing cached data: nodes
   mutable Vector<T> m_realizProbs, m_beliefs, m_nvals, m_bvals;
@@ -52,33 +52,6 @@ protected:
   mutable DVector<T> m_actionValues;   // aka conditional payoffs
   mutable DVector<T> m_gripe;
 
-  void InitProfile(void);
-
-  //
-  // FUNCTIONS FOR DATA ACCESS
-  //
-  // NOTE: These functions all assume that profile is installed, and that relevant 
-  // data has been computed.  
-  // Use public versions (GetNodeValue, GetIsetProb, etc) if this is not known.
-
-  const T &RealizProb(const GameNode &node) const;
-  T &RealizProb(const GameNode &node);
-
-  const T &BeliefProb(const GameNode &node) const;
-  T &BeliefProb(const GameNode &node);
-  
-  Vector<T> NodeValues(const GameNode &node) const
-    { return m_nodeValues.Row(node->number); }
-  const T &NodeValue(const GameNode &node, int pl) const
-    { return m_nodeValues(node->number, pl); }
-  T &NodeValue(const GameNode &node, int pl)
-    { return m_nodeValues(node->number, pl); }
-
-  T IsetProb(const GameInfoset &iset) const;
-
-  const T &IsetValue(const GameInfoset &iset) const;
-  T &IsetValue(const GameInfoset &iset);
-
   const T &ActionValue(const GameAction &act) const 
     { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			    act->GetInfoset()->GetNumber(),
@@ -88,22 +61,21 @@ protected:
 			    act->GetInfoset()->GetNumber(),
 			    act->m_number); }
   
-  T ActionProb(const GameAction &act) const;
-
-  const T &Regret(const GameAction &act) const;
-  T &Regret(const GameAction &);
-
-  // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
-
-  void Payoff(GameNodeRep *, T, int, T &) const;
+  /// @name Auxiliary functions for computation of interesting values
+  //@{
+  void GetPayoff(GameNodeRep *, const T &, int, T &) const;
   
   void ComputeSolutionDataPass2(const GameNode &node) const;
   void ComputeSolutionDataPass1(const GameNode &node) const;
   void ComputeSolutionData(void) const;
+  //@}
 
-  void BehaviorStrat(const Game &, int, GameNode &);
-  void RealizationProbs(const MixedStrategyProfile<T> &, const Game &,
-			int pl, const Array<int> &, GameNode);
+  /// @name Converting mixed strategies to behavior
+  //@{
+  void BehaviorStrat(int, GameNodeRep *);
+  void RealizationProbs(const MixedStrategyProfile<T> &,
+			int pl, const Array<int> &, GameNodeRep *);
+  //@}
 
 public:
   /// @name Lifecycle
@@ -111,11 +83,13 @@ public:
   MixedBehavProfile(const BehavSupport &);
   MixedBehavProfile(const MixedBehavProfile<T> &);
   MixedBehavProfile(const MixedStrategyProfile<T> &);
-  virtual ~MixedBehavProfile();
+  ~MixedBehavProfile() { }
 
   MixedBehavProfile<T> &operator=(const MixedBehavProfile<T> &);
   MixedBehavProfile<T> &operator=(const Vector<T> &p)
     { Invalidate(); Vector<T>::operator=(p); return *this;}
+  MixedBehavProfile<T> &operator=(const T &x)  
+    { Invalidate(); DVector<T>::operator=(x); return *this; }
 
   //@}
   
@@ -124,50 +98,12 @@ public:
   bool operator==(const MixedBehavProfile<T> &) const;
   bool operator!=(const MixedBehavProfile<T> &x) const 
   { return !(*this == x); }
-  //@}
 
-  /// @name Initialization, validation
-  //@{
-  inline void Invalidate(void) const {m_cached_data=false;}
-  void Centroid(void) const;
-  //@}
+  bool operator==(const DVector<T> &x) const
+  { return DVector<T>::operator==(x); }
+  bool operator!=(const DVector<T> &x) const
+  { return DVector<T>::operator!=(x); }
 
-  /// @name General data access
-  //@{
-  Game GetGame(void) const { return m_efg; }
-  const BehavSupport &GetSupport(void) const { return m_support; }
-  
-  const T &GetRealizProb(const GameNode &node) const;
-  const T &GetBeliefProb(const GameNode &node) const;
-  Vector<T> GetNodeValue(const GameNode &node) const;
-  T GetIsetProb(const GameInfoset &iset) const;
-  const T &GetIsetValue(const GameInfoset &iset) const;
-  T GetActionProb(const GameAction &act) const;
-  const T &GetActionValue(const GameAction &act) const;
-  const T &GetRegret(const GameAction &act) const;
-  //@}
-
-  /// @name Computation of interesting quantities
-  //@{
-  T GetPayoff(int p_player) const;
-  DVector<T> GetBeliefs(void);
-  T GetLiapValue(bool p_definedOnly = false) const;
-
-  bool IsDefinedAt(GameInfoset p_infoset) const;
-
-  T DiffActionValue(const GameAction &action, 
-		    const GameAction &oppAction) const;
-  T DiffRealizProb(const GameNode &node, 
-		   const GameAction &oppAction) const;
-  T DiffNodeValue(const GameNode &node, const GamePlayer &player,
-		  const GameAction &oppAction) const;
-
-  //@}
-
-  /// @name Implementation of gDPVector opreations
-  // (These are reimplemented here to correctly handle invalidation
-  // of cached information.)
-  //@{
   const T &operator()(int a, int b, int c) const
     { return DVector<T>::operator()(a, b, c); }
   T &operator()(int a, int b, int c) 
@@ -177,14 +113,6 @@ public:
   T &operator[](int a)
     { Invalidate();  return Array<T>::operator[](a); }
 
-  MixedBehavProfile<T> &operator=(const T &x)  
-    { Invalidate();  DVector<T>::operator=(x);  return *this; }
-
-  bool operator==(const DVector<T> &x) const
-    { return DVector<T>::operator==(x); }
-  bool operator!=(const DVector<T> &x) const
-    { return DVector<T>::operator!=(x); }
-
   MixedBehavProfile<T> &operator+=(const MixedBehavProfile<T> &x)
     { Invalidate();  DVector<T>::operator+=(x);  return *this; }
   MixedBehavProfile<T> &operator+=(const DVector<T> &x)
@@ -193,17 +121,47 @@ public:
     { Invalidate();  DVector<T>::operator-=(x);  return *this; }
   MixedBehavProfile<T> &operator*=(const T &x)
     { Invalidate();  DVector<T>::operator*=(x);  return *this; }
+  //@}
 
-  int Length(void) const
-    { return Array<T>::Length(); }
-  const Array<int> &Lengths(void) const
-    { return PVector<T>::Lengths(); }
-  int First(void) const { return Array<T>::First(); }
-  int Last(void) const { return Array<T>::Last(); }
+  /// @name Initialization, validation
+  //@{
+  /// Force recomputation of stored quantities
+  void Invalidate(void) const { m_cacheValid = false; }
+  /// Set the profile to the centroid
+  void Centroid(void);
+  //@}
 
-  const PVector<T> &GetPVector(void) const { return *this; }
-  const DVector<T> &GetDPVector(void) const { return *this; }
-  DVector<T> &GetDPVector(void) { Invalidate(); return *this; }
+  /// @name General data access
+  //@{
+  int Length(void) const { return Array<T>::Length(); }
+  Game GetGame(void) const { return m_support.GetGame(); }
+  const BehavSupport &GetSupport(void) const { return m_support; }
+  
+  bool IsDefinedAt(GameInfoset p_infoset) const;
+  //@}
+
+  /// @name Computation of interesting quantities
+  //@{
+  T GetPayoff(int p_player) const;
+  T GetLiapValue(bool p_definedOnly = false) const;
+
+  const T &GetRealizProb(const GameNode &node) const;
+  const T &GetBeliefProb(const GameNode &node) const;
+  Vector<T> GetNodeValue(const GameNode &node) const;
+  T GetInfosetProb(const GameInfoset &iset) const;
+  const T &GetInfosetValue(const GameInfoset &iset) const;
+  T GetActionProb(const GameAction &act) const;
+  const T &GetActionValue(const GameAction &act) const;
+  const T &GetRegret(const GameAction &act) const;
+  T GetBelief(const GameNode &p_node) const;
+
+  T DiffActionValue(const GameAction &action, 
+		    const GameAction &oppAction) const;
+  T DiffRealizProb(const GameNode &node, 
+		   const GameAction &oppAction) const;
+  T DiffNodeValue(const GameNode &node, const GamePlayer &player,
+		  const GameAction &oppAction) const;
+
   //@}
 };
 

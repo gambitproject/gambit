@@ -107,14 +107,14 @@ bool EFLiapFunc::Gradient(const Gambit::Vector<double> &x,
   ((Gambit::Vector<double> &) _p).operator=(x);
   for (int i = 1; i <= x.Length(); i++) {
     _p[i] += DELTA;
-    double value = Value(_p.GetDPVector());
+    double value = _p.GetLiapValue();
     _p[i] -= 2.0 * DELTA;
-    value -= Value(_p.GetDPVector());
+    value -= _p.GetLiapValue();
     _p[i] += DELTA;
     grad[i] = value / (2.0 * DELTA);
   }
 
-  Project(grad, _p.GetPVector().Lengths());
+  Project(grad, _p.GetGame()->NumInfosets());
 
   return true;
 }
@@ -226,11 +226,11 @@ void SolveExtensive(const Gambit::Game &p_game)
     gConjugatePR minimizer(p.Length());
     Gambit::Vector<double> gradient(p.Length()), dx(p.Length());
     double fval;
-    minimizer.Set(F, p.GetDPVector(), fval, gradient, .01, .0001);
+    minimizer.Set(F, p, fval, gradient, .01, .0001);
 
     try {
       for (int iter = 1; iter <= m_maxitsN; iter++) {
-	if (!minimizer.Iterate(F, p.GetDPVector(), fval, gradient, dx)) {
+	if (!minimizer.Iterate(F, p, fval, gradient, dx)) {
 	  break;
 	}
 

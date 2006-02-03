@@ -104,7 +104,7 @@ void UndefinedToCentroid(Gambit::MixedBehavProfile<T> &p_profile)
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       Gambit::GameInfoset infoset = player->GetInfoset(iset);
       
-      if (p_profile.GetIsetProb(infoset) > (T) 0) {
+      if (p_profile.GetInfosetProb(infoset) > (T) 0) {
 	continue;
       }
 	  
@@ -291,7 +291,7 @@ void efgLp<T>::GetSolutions(const Gambit::BehavSupport &p_support) const
   for (int i = 1; i <= List.Length(); i++)    {
     Gambit::MixedBehavProfile<T> profile(p_support);
     GetProfile(p_support,
-	       profile.GetDPVector(), List[i],
+	       profile, List[i],
 	       p_support.GetGame()->GetRoot(), 1, 1);
     UndefinedToCentroid(profile);
     PrintProfile(std::cout, "NE", profile);

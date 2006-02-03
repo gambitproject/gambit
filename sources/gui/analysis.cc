@@ -266,7 +266,7 @@ gbtAnalysisProfileList<T>::GetBeliefProb(const GameNode &p_node,
   if (!p_node->GetPlayer()) return "";
 
   try {
-    if (m_behavProfiles[index].GetIsetProb(p_node->GetInfoset()) > Rational(0)) {
+    if (m_behavProfiles[index].GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
       return ToText(m_behavProfiles[index].GetBeliefProb(p_node),
 		    m_doc->GetStyle().NumDecimals());
     }
@@ -304,7 +304,7 @@ gbtAnalysisProfileList<T>::GetInfosetProb(const GameNode &p_node,
   if (!p_node->GetPlayer()) return "";
 
   try {
-    return ToText(m_behavProfiles[index].GetIsetProb(p_node->GetInfoset()),
+    return ToText(m_behavProfiles[index].GetInfosetProb(p_node->GetInfoset()),
 		  m_doc->GetStyle().NumDecimals());
   }
   catch (IndexException &) {
@@ -321,8 +321,8 @@ gbtAnalysisProfileList<T>::GetInfosetValue(const GameNode &p_node,
   if (!p_node->GetPlayer() || p_node->GetPlayer()->IsChance())  return "";
 
   try {
-    if (m_behavProfiles[index].GetIsetProb(p_node->GetInfoset()) > Rational(0)) {
-      return ToText(m_behavProfiles[index].GetIsetValue(p_node->GetInfoset()),
+    if (m_behavProfiles[index].GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
+      return ToText(m_behavProfiles[index].GetInfosetValue(p_node->GetInfoset()),
 		    m_doc->GetStyle().NumDecimals());
     }
     else {
@@ -391,7 +391,7 @@ gbtAnalysisProfileList<T>::GetActionValue(const GameNode &p_node, int p_act,
   if (!p_node->GetPlayer() || p_node->GetPlayer()->IsChance()) return "";
   
   try {
-    if (m_behavProfiles[index].GetIsetProb(p_node->GetInfoset()) > Rational(0)) {
+    if (m_behavProfiles[index].GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
       return ToText(m_behavProfiles[index].GetActionValue(p_node->GetInfoset()->GetAction(p_act)),
 		    m_doc->GetStyle().NumDecimals());
     }
