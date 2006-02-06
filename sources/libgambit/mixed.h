@@ -60,6 +60,18 @@ public:
   bool operator==(const MixedStrategyProfile<T> &) const;
   bool operator!=(const MixedStrategyProfile<T> &x) const
   { return !(*this == x); }
+  
+  const T &operator()(int pl, int st) const
+    { return PVector<T>::operator()(pl, st); }
+  T &operator()(int pl, int st)
+    { return PVector<T>::operator()(pl, st); }
+
+  const T &operator()(const GameStrategy &p_strategy) const
+    { return (*this)(p_strategy->GetPlayer()->GetNumber(),
+		     support.GetIndex(p_strategy)); }
+  T &operator()(const GameStrategy &p_strategy)
+    { return (*this)(p_strategy->GetPlayer()->GetNumber(),
+		     support.GetIndex(p_strategy)); }
   //@}
 
   /// @name General data access

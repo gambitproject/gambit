@@ -129,15 +129,19 @@ public:
 
 class GameActionRep;
 typedef GameObjectPtr<GameActionRep> GameAction;
+typedef ArrayPtrConstIterator<GameActionRep> GameActionIterator;
 
 class GameInfosetRep;
 typedef GameObjectPtr<GameInfosetRep> GameInfoset;
+typedef ArrayPtrConstIterator<GameInfosetRep> GameInfosetIterator;
 
 class GameStrategyRep;
 typedef GameObjectPtr<GameStrategyRep> GameStrategy;
+typedef ArrayPtrConstIterator<GameStrategyRep> GameStrategyIterator;
 
 class GamePlayerRep;
 typedef GameObjectPtr<GamePlayerRep> GamePlayer;
+typedef ArrayPtrConstIterator<GamePlayerRep> GamePlayerIterator;
 
 class GameNodeRep;
 typedef GameObjectPtr<GameNodeRep> GameNode;
@@ -303,8 +307,16 @@ public:
   
   GameAction InsertAction(GameAction p_where = 0);
 
+  /// @name Actions
+  //@{
+  /// Returns the number of actions available at the information set
   int NumActions(void) const { return m_actions.Length(); }
+  /// Returns the p_index'th action at the information set
   GameAction GetAction(int p_index) const { return m_actions[p_index]; }
+  /// Returns a forward iterator over the available actions
+  GameActionIterator Actions(void) const 
+    { return GameActionIterator(m_actions); }
+  //@}
 
   int NumMembers(void) const { return m_members.Length(); }
   GameNode GetMember(int p_index) const { return m_members[p_index]; }
@@ -402,15 +414,25 @@ public:
   
   bool IsChance(void) const { return (m_number == 0); }
 
+  /// @name Information sets
+  //@{
+  /// Returns the number of information sets at which the player makes a choice
   int NumInfosets(void) const { return m_infosets.Length(); }
+  /// Returns the p_index'th information set
   GameInfoset GetInfoset(int p_index) const { return m_infosets[p_index]; }
+  /// Returns a forward iterator over the information sets
+  GameInfosetIterator Infosets(void) const 
+    { return GameInfosetIterator(m_infosets); }
 
   /// @name Strategies
   //@{
   /// Returns the number of strategies available to the player
   int NumStrategies(void) const { return m_strategies.Length(); }
   /// Returns the st'th strategy for the player
-  GameStrategy GetStrategy(int st) { return m_strategies[st]; }
+  GameStrategy GetStrategy(int st) const { return m_strategies[st]; }
+  /// Returns a forward iterator over the strategies
+  GameStrategyIterator Strategies(void) const 
+    { return GameStrategyIterator(m_strategies); }
   /// Creates a new strategy for the player
   GameStrategy NewStrategy(void);
   //@}
@@ -495,8 +517,8 @@ class PureStrategyProfile  {
 
 private:
   long m_index;
-  Gambit::Game m_nfg;
-  Array<Gambit::GameStrategy> m_profile;
+  Game m_nfg;
+  Array<GameStrategy> m_profile;
   
 public:
   /// @name Lifecycle
@@ -508,7 +530,10 @@ public:
   /// @name Data access and manipulation
   //@{
   /// Get the strategy played by player pl  
-  GameStrategy GetStrategy(int pl) const { return m_profile[pl]; }
+  const GameStrategy &GetStrategy(int pl) const { return m_profile[pl]; }
+  /// Get the strategy played by the player
+  const GameStrategy &GetStrategy(const GamePlayer &p_player) const
+    { return m_profile[p_player->GetNumber()]; }
   /// Set the strategy for a player
   void SetStrategy(const GameStrategy &);
 
@@ -519,6 +544,9 @@ public:
 
   /// Get the payoff to player pl that results from the profile
   template <class T> T GetPayoff(int pl) const;
+  /// Get the payoff to the player resulting from the profile
+  template <class T> T GetPayoff(const GamePlayer &p_player) const
+    { return GetPayoff<T>(p_player->GetNumber()); }
   /// Get the value of playing strategy against the profile
   template <class T> T GetStrategyValue(const GameStrategy &) const;
   //@}
@@ -548,6 +576,9 @@ public:
    
   /// Get the payoff to player pl that results from the profile
   template <class T> T GetPayoff(int pl) const;
+  /// Get the payoff to the player that results from the profile
+  template <class T> T GetPayoff(const GamePlayer &p_player) const
+    { return GetPayoff<T>(p_player->GetNumber()); }
   /// Get the payoff to player pl conditional on reaching a node
   template <class T> T GetNodeValue(const GameNode &, int pl) const;
   /// Get the payoff to playing the action, conditional on the profile
@@ -667,6 +698,9 @@ public:
   int NumPlayers(void) const { return m_players.Length(); }
   /// Returns the pl'th player in the game
   GamePlayer GetPlayer(int pl) const { return m_players[pl]; }
+  /// Returns an iterator over the players
+  GamePlayerIterator Players(void) const
+    { return GamePlayerIterator(m_players); }
   /// Returns the chance (nature) player
   GamePlayer GetChance(void) const { return m_chance; }
   /// Creates a new player in the game, with no moves

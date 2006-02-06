@@ -104,6 +104,15 @@ public:
   bool operator!=(const DVector<T> &x) const
   { return DVector<T>::operator!=(x); }
 
+  const T &operator()(const GameAction &p_action) const
+    { return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+		     p_action->GetInfoset()->GetNumber(),
+		     m_support.GetIndex(p_action)); }
+  T &operator()(const GameAction &p_action)
+    { return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+		     p_action->GetInfoset()->GetNumber(),
+		     m_support.GetIndex(p_action)); }
+
   const T &operator()(int a, int b, int c) const
     { return DVector<T>::operator()(a, b, c); }
   T &operator()(int a, int b, int c) 
@@ -153,7 +162,6 @@ public:
   T GetActionProb(const GameAction &act) const;
   const T &GetActionValue(const GameAction &act) const;
   const T &GetRegret(const GameAction &act) const;
-  T GetBelief(const GameNode &p_node) const;
 
   T DiffActionValue(const GameAction &action, 
 		    const GameAction &oppAction) const;
