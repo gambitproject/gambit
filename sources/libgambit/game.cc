@@ -710,7 +710,7 @@ template <class T> T PureStrategyProfile::GetPayoff(int pl) const
     return behav.GetPayoff<T>(pl);
   }
   else {
-    GameOutcome outcome = GetOutcome();
+    GameOutcomeRep *outcome = m_nfg->m_results[m_index];
     if (outcome) {
       return outcome->GetPayoff<T>(pl);
     }
@@ -731,7 +731,7 @@ std::string PureStrategyProfile::GetPayoff(int pl) const
     return ToText(GetPayoff<Rational>(pl));
   }
   else {
-    GameOutcome outcome = GetOutcome();
+    GameOutcomeRep *outcome = m_nfg->m_results[m_index]; 
     if (outcome) {
       return outcome->GetPayoff<std::string>(pl);
     }
@@ -744,9 +744,21 @@ std::string PureStrategyProfile::GetPayoff(int pl) const
 template <class T>
 T PureStrategyProfile::GetStrategyValue(const GameStrategy &p_strategy) const
 {
-  PureStrategyProfile copy(*this);
-  copy.SetStrategy(p_strategy);
-  return copy.GetPayoff<T>(p_strategy->GetPlayer()->GetNumber());
+  if (m_nfg->IsTree()) {
+    PureStrategyProfile copy(*this);
+    copy.SetStrategy(p_strategy);
+    return copy.GetPayoff<T>(p_strategy->GetPlayer()->GetNumber());
+  }
+  else {
+    int player = p_strategy->GetPlayer()->GetNumber();
+    GameOutcomeRep *outcome = m_nfg->m_results[m_index - m_profile[player]->m_index + p_strategy->m_index];
+    if (outcome) {
+      return outcome->GetPayoff<T>(player);
+    }
+    else {
+      return 0;
+    }
+  }
 }
 
 // Explicit instantiations
