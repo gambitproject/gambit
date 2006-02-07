@@ -114,7 +114,13 @@ int BehavSupport::GetIndex(const GameAction &a) const
   if (a->GetInfoset()->GetGame() != m_efg)  throw MismatchException();
 
   int pl = a->GetInfoset()->GetPlayer()->GetNumber();
-  return m_actions[pl][a->GetInfoset()->GetNumber()].Find(a);
+  if (pl == 0) {
+    // chance action; all chance actions are always in the support
+    return a->GetNumber();
+  }
+  else {
+    return m_actions[pl][a->GetInfoset()->GetNumber()].Find(a);
+  }
 }
 
 int BehavSupport::NumDegreesOfFreedom(void) const
