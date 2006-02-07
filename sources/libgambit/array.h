@@ -196,38 +196,6 @@ public:
   //@}
 };
 
-/// A constant forward iterator on an array, assuming T is a pointer type
-template <class T> class ArrayPtrConstIterator {
-private:
-  const Array<T *> &m_array;
-  int m_index;
-
-public:
-  /// @name Lifecycle
-  //@{
-  /// Constructor
-  ArrayPtrConstIterator(const Array<T *> &p_array)
-    : m_array(p_array), m_index(m_array.First()) { }
-  //@}
-
-  /// @name Iteration and data access
-  //@{
-  /// Advance to the next element (prefix version)
-  void operator++(void) { m_index++; }
-  /// Advance to the next element (postfix version)
-  void operator++(int) { m_index++; }
-  /// Has iterator gone past the end?
-  bool AtEnd(void) const { return m_index > m_array.Last(); }
-
-  /// Get the current element
-  T &operator*(void) const { return *(m_array[m_index]); }
-  /// Get the current element
-  const T *operator->(void) const { return m_array[m_index]; }
-  /// Get the current element
-  operator T *(void) const { return m_array[m_index]; }
-  //@}
-};
-
 } // end namespace Gambit
 
 #endif	// LIBGAMBIT_ARRAY_H

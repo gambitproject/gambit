@@ -31,6 +31,37 @@
 
 namespace Gambit {
 
+/// A forward iterator on a strategy support 
+class SupportStrategyIterator {
+private:
+  const Array<GameStrategy> &m_support;
+  int m_index;
+
+public:
+  /// @name Lifecycle
+  //@{
+  /// Constructor
+  SupportStrategyIterator(const Array<GameStrategy> &p_support)
+    : m_support(p_support), m_index(1) { }
+  //@}
+
+  /// @name Iteration and data access
+  //@{
+  /// Advance to the next element (prefix version)
+  void operator++(void) { m_index++; }
+  /// Advance to the next element (postfix version)
+  void operator++(int) { m_index++; }
+  /// Has iterator gone past the end?
+  bool AtEnd(void) const { return m_index > m_support.Length(); }
+
+  /// Get the current element
+  const GameStrategy &operator*(void) const { return m_support[m_index]; }
+  /// Get the current element
+  const GameStrategy &operator->(void) const { return m_support[m_index]; }
+  /// Get the current element
+  operator const GameStrategy &(void) const { return m_support[m_index]; }
+};
+
 /// This class represents a subset of the strategies in strategic game.
 /// It is enforced that each player has at least one strategy; thus,
 /// the strategies in a support can be viewed as a restriction of a game
@@ -82,6 +113,10 @@ public:
   /// Returns the strategy in the st'th position for player pl.
   GameStrategy GetStrategy(int pl, int st) const 
     { return m_support[pl][st]; }
+
+  /// Returns an iterator over the strategies for the player
+  SupportStrategyIterator Strategies(const GamePlayer &p_player) const
+    { return m_support[p_player->GetNumber()]; }
 
   /// Retuns the index of the strategy in the support.
   int GetIndex(const GameStrategy &s) const

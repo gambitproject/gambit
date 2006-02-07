@@ -122,6 +122,38 @@ public:
   bool operator!(void) const { return !rep; }
 };
 
+/// A constant forward iterator on an array of GameObjects
+template <class R, class T> class GameObjectIterator {
+private:
+  const Array<R *> &m_array;
+  int m_index;
+
+public:
+  /// @name Lifecycle
+  //@{
+  /// Constructor
+  GameObjectIterator(const Array<R *> &p_array)
+    : m_array(p_array), m_index(m_array.First()) { }
+  //@}
+
+  /// @name Iteration and data access
+  //@{
+  /// Advance to the next element (prefix version)
+  void operator++(void) { m_index++; }
+  /// Advance to the next element (postfix version)
+  void operator++(int) { m_index++; }
+  /// Has iterator gone past the end?
+  bool AtEnd(void) const { return m_index > m_array.Last(); }
+
+  /// Get the current element
+    ///T operator*(void) const { return m_array[m_index]; }
+  /// Get the current element
+  T operator->(void) const { return m_array[m_index]; }
+  /// Get the current element
+  operator T(void) const { return m_array[m_index]; }
+  //@}
+};
+
 
 //
 // Forward declarations of classes defined in this file.
@@ -129,19 +161,19 @@ public:
 
 class GameActionRep;
 typedef GameObjectPtr<GameActionRep> GameAction;
-typedef ArrayPtrConstIterator<GameActionRep> GameActionIterator;
+typedef GameObjectIterator<GameActionRep, GameAction> GameActionIterator;
 
 class GameInfosetRep;
 typedef GameObjectPtr<GameInfosetRep> GameInfoset;
-typedef ArrayPtrConstIterator<GameInfosetRep> GameInfosetIterator;
+typedef GameObjectIterator<GameInfosetRep, GameInfoset> GameInfosetIterator;
 
 class GameStrategyRep;
 typedef GameObjectPtr<GameStrategyRep> GameStrategy;
-typedef ArrayPtrConstIterator<GameStrategyRep> GameStrategyIterator;
+typedef GameObjectIterator<GameStrategyRep, GameStrategy> GameStrategyIterator;
 
 class GamePlayerRep;
 typedef GameObjectPtr<GamePlayerRep> GamePlayer;
-typedef ArrayPtrConstIterator<GamePlayerRep> GamePlayerIterator;
+typedef GameObjectIterator<GamePlayerRep, GamePlayer> GamePlayerIterator;
 
 class GameNodeRep;
 typedef GameObjectPtr<GameNodeRep> GameNode;

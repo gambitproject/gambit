@@ -86,6 +86,8 @@ public:
   /// @name Computation of interesting quantities
   //@{
   T GetPayoff(int pl) const;
+  T GetPayoff(const GamePlayer &p_player) const
+  { return GetPayoff(p_player->GetNumber()); }
   T GetPayoff(int pl, int player1, int strat1) const;
   T GetPayoff(int pl, const GameStrategy &) const;
   T GetPayoff(int pl, int player1, int strat1, int player2, int strat2) const;
