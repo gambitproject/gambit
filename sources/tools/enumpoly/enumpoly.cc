@@ -117,7 +117,9 @@ int main(int argc, char *argv[])
 	gbtNfgHs algorithm(0);
 	algorithm.Solve(game);
       }
-      SolveStrategic(game);
+      else {
+	SolveStrategic(game);
+      }
     }
     else {
       SolveExtensive(game);
