@@ -671,14 +671,21 @@ void BehavSupport::ActivateSubtree(const GameNode &n)
   if (!n->IsTerminal()) {
     activate(n); 
     activate(n->GetInfoset());
-    Array<GameAction> actions(m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetInfoset()->GetNumber()]);
-    for (int i = 1; i <= actions.Length(); i++) {
-      ActivateSubtree(n->GetChild(actions[i]->GetNumber()));    
+    if (n->GetInfoset()->GetPlayer()->IsChance()) {
+      for (int i = 1; i <= n->NumChildren(); i++) {
+	ActivateSubtree(n->GetChild(i));
+      }
+    }
+    else {
+      const Array<GameAction> &actions(m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetInfoset()->GetNumber()]);
+      for (int i = 1; i <= actions.Length(); i++) {
+	ActivateSubtree(n->GetChild(actions[i]->GetNumber()));    
+      }
     }
   }
 }
 
-  void BehavSupport::DeactivateSubtree(const GameNode &n)
+void BehavSupport::DeactivateSubtree(const GameNode &n)
 {
   if (!n->IsTerminal()) {  // THIS ALL LOOKS FISHY
     deactivate(n); 
