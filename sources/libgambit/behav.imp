@@ -159,21 +159,22 @@ MixedBehavProfile<T>::MixedBehavProfile(const MixedStrategyProfile<T> &p_profile
   const StrategySupport &support = p_profile.GetSupport();
   GameRep *game = m_support.GetGame();
 
-  for (int pl = 1; pl <= game->NumPlayers(); pl++)   {
+  for (GamePlayerIterator player = game->Players(); 
+       !player.AtEnd(); player++) {
     m_nvals = (T) 0;
     m_bvals = (T) 0;
 
-    for (int st = 1; st <= support.NumStrategies(pl); st++)  {
-      if (p_profile(pl, st) > (T) 0)  {
-	GameStrategyRep *strategy = support.GetStrategy(pl, st);
+    for (SupportStrategyIterator strategy = support.Strategies(player);
+	 !strategy.AtEnd(); strategy++) {
+      if (p_profile[strategy] > (T) 0) {
 	const Array<int> &actions = strategy->m_behav;
-	m_bvals[root->GetNumber()] = p_profile(pl, st);
-	RealizationProbs(p_profile, pl, actions, root);
+	m_bvals[root->GetNumber()] = p_profile[strategy];
+	RealizationProbs(p_profile, player->GetNumber(), actions, root);
       }
     }
  
     m_nvals[1] = (T) 1;   // set the root nval
-    BehaviorStrat(pl, root);
+    BehaviorStrat(player->GetNumber(), root);
   }
 }
 

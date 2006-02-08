@@ -27,7 +27,7 @@
 #ifndef LIBGAMBIT_MIXED_H
 #define LIBGAMBIT_MIXED_H
 
-#include "pvector.h"
+#include "vector.h"
 
 namespace Gambit {
 
@@ -36,7 +36,7 @@ namespace Gambit {
 /// A probability distribution over strategies, such that each player
 /// independently chooses from among his strategies with specified
 /// probabilities.
-template <class T> class MixedStrategyProfile : public PVector<T>  {
+template <class T> class MixedStrategyProfile : public Vector<T>  {
 private:
   StrategySupport support;
 
@@ -57,13 +57,8 @@ public:
   //@{
   /// Construct a mixed strategy profile at the centroid on the support
   MixedStrategyProfile(const StrategySupport &);
-  /// Copy a mixed strategy profile
-  MixedStrategyProfile(const MixedStrategyProfile<T> &);
   /// Convert a behavior strategy profile to a mixed strategy profile
   MixedStrategyProfile(const MixedBehavProfile<T> &);
-
-  /// Copy a mixed strategy profile
-  MixedStrategyProfile<T> &operator=(const MixedStrategyProfile<T> &);
   //@}
 
   /// @name Operator overloading
@@ -71,11 +66,11 @@ public:
   /// Test for the equality of two profiles
   bool operator==(const MixedStrategyProfile<T> &p_profile) const
   { return (support == p_profile.support &&
-	    PVector<T>::operator==(p_profile)); }
+	    Vector<T>::operator==(p_profile)); }
   /// Test for the inequality of two profiles
   bool operator!=(const MixedStrategyProfile<T> &p_profile) const
   { return (support != p_profile.support ||
-	    PVector<T>::operator!=(p_profile)); }
+	    Vector<T>::operator!=(p_profile)); }
 
   /// Vector-style access to probabilities
   const T &operator[](int i) const { return Array<T>::operator[](i); }
@@ -88,6 +83,7 @@ public:
   /// Returns the probability the strategy is played
   T &operator[](const GameStrategy &p_strategy)
     { return Array<T>::operator[](support.m_profileIndex[p_strategy->GetId()]); }
+
   //@}
 
   /// @name General data access

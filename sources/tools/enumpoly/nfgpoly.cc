@@ -139,10 +139,10 @@ int PolEnumModule::SaveSolutions(const Gambit::List<Gambit::Vector<gDouble> > &l
     for(i=1;i<=NF->NumPlayers();i++) {
       sum=0;
       for(j=1;j<support.NumStrategies(i);j++) {
-	profile(i,j) = (list[k][j+kk]).ToDouble();
-	sum+=profile(i,j);
+	profile[support.GetStrategy(i,j)] = (list[k][j+kk]).ToDouble();
+	sum+=profile[support.GetStrategy(i,j)];
       }
-      profile(i,j) = (double)1.0 - sum;
+      profile[support.GetStrategy(i,j)] = (double)1.0 - sum;
       kk+=(support.NumStrategies(i)-1);
     }
     index = solutions.Append(profile);
@@ -361,7 +361,7 @@ PolEnumModule::SolVarsFromMixedProfile(const Gambit::MixedStrategyProfile<double
   for (int pl = 1; pl <= NF->NumPlayers(); pl++) 
     for (int j = 1; j < support.NumStrategies(pl); j++) {
       count ++;
-      answer[count] = (gDouble)sol(pl,j);
+      answer[count] = (gDouble)sol[support.GetStrategy(pl,j)];
     }
 
   return answer;
@@ -413,10 +413,10 @@ PolEnumModule::ReturnPolishedSolution(const Gambit::Vector<gDouble> &root) const
   for(int pl=1;pl<=NF->NumPlayers();pl++) {
     double sum=0;
     for(j=1;j<support.NumStrategies(pl);j++) {
-      profile(pl,j) = (root[j+kk]).ToDouble();
-      sum+=profile(pl,j);
+      profile[support.GetStrategy(pl,j)] = (root[j+kk]).ToDouble();
+      sum+=profile[support.GetStrategy(pl,j)];
     }
-    profile(pl,j) = (double)1.0 - sum;
+    profile[support.GetStrategy(pl,j)] = (double)1.0 - sum;
     kk+=(support.NumStrategies(pl)-1);
   }
        
@@ -449,7 +449,7 @@ Gambit::MixedStrategyProfile<double> ToFullSupport(const Gambit::MixedStrategyPr
     Gambit::GamePlayer player = nfg->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrategies(); st++) {
       if (support.Contains(player->GetStrategy(st))) {
-	fullProfile(pl, st) = p_profile[index++];
+	fullProfile[player->GetStrategy(st)] = p_profile[index++];
       }
     }
   }

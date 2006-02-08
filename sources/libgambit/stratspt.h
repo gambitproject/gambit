@@ -53,6 +53,8 @@ public:
   void operator++(int) { m_index++; }
   /// Has iterator gone past the end?
   bool AtEnd(void) const { return m_index > m_support.Length(); }
+  /// Get the current index into the array
+  int GetIndex(void) const { return m_index; }
 
   /// Get the current element
   const GameStrategy &operator*(void) const { return m_support[m_index]; }

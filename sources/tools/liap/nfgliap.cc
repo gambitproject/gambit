@@ -83,7 +83,7 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
   for (i = 1; i <= _nfg->NumPlayers(); i++)  {
     psum = 0.0;
     for (j = 1; j <= p.GetSupport().NumStrategies(i); j++)  {
-      psum += p(i,j);
+      psum += p[p.GetSupport().GetStrategy(i,j)];
       x1 = p.GetStrategyValue(p.GetSupport().GetStrategy(i, j)) - p.GetPayoff(i);
       if (i1 == i) {
 	if (x1 > 0.0)
@@ -100,7 +100,9 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
     }
     if (i == i1)  x += 100.0 * (psum - 1.0);
   }
-  if (p(i1, j1) < 0.0)   x += p(i1, j1);
+  if (p[p.GetSupport().GetStrategy(i1, j1)] < 0.0) {
+    x += p[p.GetSupport().GetStrategy(i1, j1)];
+  }
   return 2.0 * x;
 }
 
@@ -138,55 +140,16 @@ bool NFLiapFunc::Gradient(const Gambit::Vector<double> &v, Gambit::Vector<double
     }
   }
 
-  Project(d, _p.Lengths());
+  Project(d, _p.GetSupport().NumStrategies());
   return true;
 }
   
 double NFLiapFunc::Value(const Gambit::Vector<double> &v) const
 {
-  static const double BIG1 = 100.0;
-  static const double BIG2 = 100.0;
-
   _nevals++;
 
   ((Gambit::Vector<double> &) _p).operator=(v);
-  
-  Gambit::MixedStrategyProfile<double> tmp(_p);
-  Gambit::PVector<double> payoff(_p);
-
-  double x, result = 0.0, avg, sum;
-  payoff = 0.0;
-  
-  for (int i = 1; i <= _nfg->NumPlayers(); i++)  {
-    tmp.CopyRow(i, payoff);
-    avg = sum = 0.0;
-
-    // then for each strategy for player i, consider the value of
-    // deviating to that strategy
-
-    int j;
-    for (j = 1; j <= _p.GetSupport().NumStrategies(i); j++)  {
-      tmp(i, j) = 1.0;
-      x = _p(i, j);
-      payoff(i, j) = tmp.GetPayoff(i);
-      avg += x * payoff(i, j);
-      sum += x;
-      if (x > 0.0)  x = 0.0;
-      result += BIG1 * x * x;   // penalty for neg probabilities
-      tmp(i, j) = 0.0;
-    }
-
-    tmp.CopyRow(i, _p);
-    for (j = 1; j <= _p.GetSupport().NumStrategies(i); j++)  {
-      x = payoff(i, j) - avg;
-      if (x < 0.0)  x = 0.0;
-      result += x * x;        // penalty for not best response
-    }
-    
-    x = sum - 1.0;
-    result += BIG2 * x * x;   // penalty for not summing to 1
-  }
-  return result;
+  return _p.GetLiapValue();
 }
 
 static void PickRandomProfile(Gambit::MixedStrategyProfile<double> &p)
@@ -201,10 +164,10 @@ static void PickRandomProfile(Gambit::MixedStrategyProfile<double> &p)
       do
 	tmp = ((double) rand()) / ((double) RAND_MAX);
       while (tmp + sum > 1.0);
-      p(pl, st) = tmp;
+      p[p.GetSupport().GetStrategy(pl, st)] = tmp;
       sum += tmp;
     }
-    p(pl, st) = 1.0 - sum;
+    p[p.GetSupport().GetStrategy(pl, st)] = 1.0 - sum;
   }
 }
 

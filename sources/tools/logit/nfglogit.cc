@@ -147,11 +147,12 @@ void QreLHS(const StrategySupport &p_support,
 	// should be st==lead: sum-to-one equation
 	p_lhs[rowno] = -1.0;
 	for (int j = 1; j <= player->NumStrategies(); j++) {
-	  p_lhs[rowno] += profile(pl, j);
+	  p_lhs[rowno] += profile[player->GetStrategy(j)];
 	}
       }
       else {
-	p_lhs[rowno] = (logprofile(pl, st) - logprofile(pl, 1) -
+	p_lhs[rowno] = (logprofile[player->GetStrategy(st)] - 
+			logprofile[player->GetStrategy(1)] -
 			lambda * (profile.GetStrategyValue(player->GetStrategy(st)) -
 				  profile.GetStrategyValue(player->GetStrategy(1))));
 
@@ -197,7 +198,7 @@ void QreJacobian(const StrategySupport &p_support,
 	    colno++;
 	    
 	    if (i == ell) {
-	      p_matrix(colno, rowno) = (p_isLog[colno]) ? profile(ell, m) : 1.0;
+	      p_matrix(colno, rowno) = (p_isLog[colno]) ? profile[player2->GetStrategy(m)] : 1.0;
 	    }
 	    else {
 	      p_matrix(colno, rowno) = 0.0;
@@ -221,10 +222,10 @@ void QreJacobian(const StrategySupport &p_support,
 	    if (i == ell) {
 	      if (m == 1) {
 		// should be m==lead
-		p_matrix(colno, rowno) = (p_isLog[colno]) ? -1.0 : -1.0/profile(ell, m);
+		p_matrix(colno, rowno) = (p_isLog[colno]) ? -1.0 : -1.0/profile[player2->GetStrategy(m)];
 	      }
 	      else if (m == j) {
-		p_matrix(colno, rowno) = (p_isLog[colno]) ? 1.0 : 1.0/profile(ell, m);
+		p_matrix(colno, rowno) = (p_isLog[colno]) ? 1.0 : 1.0/profile[player2->GetStrategy(m)];
 	      }
 	      else {
 		p_matrix(colno, rowno) = 0.0;
@@ -234,7 +235,7 @@ void QreJacobian(const StrategySupport &p_support,
 	      // 1 == lead
 	      if (p_isLog[colno]) {
 		p_matrix(colno, rowno) =
-		  -lambda * profile(ell, m) *
+		  -lambda * profile[player2->GetStrategy(m)] *
 		  (profile.GetPayoffDeriv(i, 
 					  p_support.GetStrategy(i, j),
 					  p_support.GetStrategy(ell, m)) -

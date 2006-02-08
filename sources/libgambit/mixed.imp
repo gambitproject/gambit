@@ -34,20 +34,15 @@ namespace Gambit {
 //========================================================================
 
 template <class T> 
-MixedStrategyProfile<T>::MixedStrategyProfile(const StrategySupport &s)
-  : PVector<T>(s.NumStrategies()), support(s)
+MixedStrategyProfile<T>::MixedStrategyProfile(const StrategySupport &p_support)
+  : Vector<T>(p_support.MixedProfileLength()), support(p_support)
 {
   SetCentroid();
 }
 
-template <class T> 
-MixedStrategyProfile<T>::MixedStrategyProfile(const MixedStrategyProfile<T> &p)
-  : PVector<T>(p), support(p.support)
-{ }
-
 template <class T>
 MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehavProfile<T> &p_profile)
-  : PVector<T>(p_profile.GetGame()->NumStrategies()),
+  : Vector<T>(p_profile.GetGame()->MixedProfileLength()),
     support(p_profile.GetGame())
 {
   Game efg = p_profile.GetGame();
@@ -59,18 +54,9 @@ MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehavProfile<T> &p_prof
 	if (efg->m_players[pl]->m_strategies[st]->m_behav[iset] > 0)
 	  prob *= p_profile(pl, iset, efg->m_players[pl]->m_strategies[st]->m_behav[iset]);
       }
-      (*this)(pl, st) = prob;
+      (*this)[support.GetGame()->GetPlayer(pl)->GetStrategy(st)] = prob;
     }
   }
-}
-
-template <class T> MixedStrategyProfile<T> &
-MixedStrategyProfile<T>::operator=(const MixedStrategyProfile<T> &p)
-{
-  if (this != &p && support == p.support)   {
-    PVector<T>::operator=(p);
-  }
-  return *this;
 }
 
 //========================================================================
@@ -99,7 +85,7 @@ MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport(void) const
     GamePlayer player = support.GetGame()->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrategies(); st++) {
       if (support.Contains(player->GetStrategy(st))) {
-	full(pl, st) = (*this)(pl, support.GetIndex(player->GetStrategy(st)));
+	full[player->GetStrategy(st)] = (*this)[player->GetStrategy(st)];
       }
     }
   }
@@ -127,8 +113,8 @@ T MixedStrategyProfile<T>::GetPayoff(int pl, int index, int current) const
   T sum = (T) 0;
   for (int j = 1; j <= support.NumStrategies(current); j++) {
     GameStrategyRep *s = support.GetStrategy(current, j);
-    if ((*this)(current, j) != (T) 0) {
-      sum += ((*this)(current, j) * 
+    if ((*this)[s] != (T) 0) {
+      sum += ((*this)[s] * 
 	      GetPayoff(pl, index + s->m_offset, current + 1));
     }
   }
@@ -162,9 +148,9 @@ void MixedStrategyProfile<T>::GetPayoffDeriv(int pl, int const_pl,
   else   {
     for (int j = 1; j <= support.NumStrategies(cur_pl); j++)  {
       GameStrategyRep *s = support.GetStrategy(cur_pl, j);
-      if ((*this)(cur_pl, j) > (T) 0)
+      if ((*this)[s] > (T) 0)
 	GetPayoffDeriv(pl, const_pl, cur_pl + 1,
-		       index + s->m_offset, prob * (*this)(cur_pl, j), value);
+		       index + s->m_offset, prob * (*this)[s], value);
     }
   }
 }
@@ -177,9 +163,9 @@ MixedStrategyProfile<T>::GetPayoffDeriv(int pl,
     MixedStrategyProfile<T> foo(*this);
     int player1 = strategy->GetPlayer()->GetNumber();
     for (int st = 1; st <= support.NumStrategies(player1); st++) {
-      foo(player1, st) = (T) 0;
+      foo[support.GetStrategy(player1, st)] = (T) 0;
     }
-    foo(player1, support.GetIndex(strategy)) = (T) 1;
+    foo[strategy] = (T) 1;
     return foo.GetPayoff(pl);
   }
   else {
@@ -207,11 +193,11 @@ void MixedStrategyProfile<T>::GetPayoffDeriv(int pl, int const_pl1,
   }
   else   {
     for (int j = 1; j <= support.NumStrategies(cur_pl); j++ ) {
-      if ((*this)(cur_pl, j) > (T) 0) {
-	GameStrategyRep *s = support.GetStrategy(cur_pl, j);
+      GameStrategyRep *s = support.GetStrategy(cur_pl, j);
+      if ((*this)[s] > (T) 0) {
 	GetPayoffDeriv(pl, const_pl1, const_pl2,
 		       cur_pl + 1, index + s->m_offset, 
-		       prob * (*this)(cur_pl, j),
+		       prob * (*this)[s],
 		       value);
       }
     }
@@ -257,39 +243,37 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue(void) const
   static const T BIG1 = (T) 100;
   static const T BIG2 = (T) 100;
 
-  MixedStrategyProfile<T> p(*this);
-  ((Vector<T> &) p).operator=(*this);
-  MixedStrategyProfile<T> tmp(p);
-  PVector<T> payoff(p);
-  T x, result((T) 0), avg, sum;
-  payoff = (T) 0;
+  T liapValue = (T) 0;
+ 
+  for (GamePlayerIterator player = support.Players();
+       !player.AtEnd(); player++) {
+    // values of the player's strategies
+    Array<T> values(support.NumStrategies(player->GetNumber()));
+    
+    T avg = (T) 0, sum = (T) 0;
+    for (SupportStrategyIterator strategy = support.Strategies(player);
+	 !strategy.AtEnd(); strategy++) {
+      const T &prob = (*this)[strategy];
+      values[strategy.GetIndex()] = GetStrategyValue(strategy);
+      avg += prob * values[strategy.GetIndex()];
+      sum += prob;
+      if (prob < (T) 0) {
+	liapValue += BIG1*avg*avg;  // penalty for negative probabilities
+      }
+    }
+		    
+    for (int st = 1; st <= values.Length(); st++) {
+      T regret = values[st] - avg;
+      if (regret > (T) 0) {
+	liapValue += regret*regret;  // penalty if not best response
+      }
+    }
 
-  for(int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-    tmp.CopyRow(i, payoff);
-    avg = sum = (T) 0;
-    // then for each strategy for that player set it to 1 and evaluate
-    int j;
-    for (j = 1; j <= p.GetSupport().NumStrategies(i); j++) {
-      tmp(i, j) = (T) 1;
-      x = p(i, j);
-      payoff(i, j) = tmp.GetPayoff(i);
-      avg += x * payoff(i, j);
-      sum += x;
-      if (x>(T)0) x=0;
-      result += BIG1*x*x;         // add penalty for neg probabilities
-      tmp(i,j) = (T) 0;
-    }
-    tmp.CopyRow(i, p);
-    for(j=1;j<=p.GetSupport().NumStrategies(i);j++) {
-      x=payoff(i,j)-avg;
-      if (x<=(T)0) x=(T)0;
-      result += x*x;          // add penalty if not best response
-    }
-    x=sum - ((T) 1);
-    result += BIG2*x*x ;          // add penalty for sum not equal to 1
+    // penalty if sum does not equal to one
+    liapValue += BIG2*(sum - (T) 1.0)*(sum - (T) 1.0); 
   }
-  return result;
-}
 
+  return liapValue;
+}
 
 } // end namespace Gambit

@@ -216,31 +216,31 @@ template <class T> void Solve(const StrategySupport &p_support)
 	  MixedStrategyProfile<T> profile(p_support);
 	  T sum = (T) 0;
 	  for (int k = 1; k <= p_support.NumStrategies(1); k++) {
-	    profile(1, k) = (T) 0;
+	    profile[p_support.GetStrategy(1, k)] = (T) 0;
 	    if (bfs1.IsDefined(k)) {
-	      profile(1,k) = -bfs1(k);
-	      sum += profile(1,k);
+	      profile[p_support.GetStrategy(1, k)] = -bfs1(k);
+	      sum += profile[p_support.GetStrategy(1, k)];
 	    }
 	  } 
 	  
 	  for (int k = 1; k <= p_support.NumStrategies(1); k++) {
 	    if (bfs1.IsDefined(k)) { 
-	      profile(1,k) /= sum;
+	      profile[p_support.GetStrategy(1, k)] /= sum;
 	    }
 	  }
 	  
 	  sum = (T) 0;
 	  for (int k = 1; k <= p_support.NumStrategies(2); k++) {
-	    profile(2,k) = (T) 0;
+	    profile[p_support.GetStrategy(2, k)] = (T) 0;
 	    if (bfs2.IsDefined(k)) {
-	      profile(2,k) =-bfs2(k);
-	      sum += profile(2,k);
+	      profile[p_support.GetStrategy(2, k)] =-bfs2(k);
+	      sum += profile[p_support.GetStrategy(2, k)];
 	    }
 	  } 
 	  
 	  for (int k = 1; k <= p_support.NumStrategies(2); k++) {
 	    if (bfs2.IsDefined(k)) { 
-	      profile(2,k) /= sum;
+	      profile[p_support.GetStrategy(2, k)] /= sum;
 	    }
 	  }
 
@@ -253,12 +253,24 @@ template <class T> void Solve(const StrategySupport &p_support)
 	  if (vert1id[i1] == 0) {
 	    id1++;
 	    vert1id[i1] = id1;
-	    key2.Append(profile.GetRow(2));
+
+	    Vector<T> probs(profile.GetSupport().NumStrategies(2));
+	    for (SupportStrategyIterator strategy = profile.GetSupport().Strategies(profile.GetGame()->GetPlayer(2));
+		 !strategy.AtEnd(); strategy++) {
+	      probs[strategy.GetIndex()] = profile[strategy];
+	    }
+	    key2.Append(probs);
 	  }
 	  if (vert2id[i2] == 0) {
 	    id2++;
 	    vert2id[i2] = id2;
-	    key1.Append(profile.GetRow(1));
+
+	    Vector<T> probs(profile.GetSupport().NumStrategies(1));
+	    for (SupportStrategyIterator strategy = profile.GetSupport().Strategies(profile.GetGame()->GetPlayer(1));
+		 !strategy.AtEnd(); strategy++) {
+	      probs[strategy.GetIndex()] = profile[strategy];
+	    }
+	    key1.Append(probs);
 	  }
 	  node1.Append(vert2id[i2]);
 	  node2.Append(vert1id[i1]);

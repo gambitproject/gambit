@@ -64,7 +64,7 @@ void LogitBR(const Gambit::MixedStrategyProfile<double> &p_profile, double p_lam
     }
 
     for (int st = 1; st <= nfg->GetPlayer(pl)->NumStrategies(); st++) {
-      p_br(pl, st) = lval[st] / sum;
+      p_br[nfg->GetPlayer(pl)->GetStrategy(st)] = lval[st] / sum;
     }
   }
 }
@@ -78,11 +78,11 @@ void Randomize(Gambit::MixedStrategyProfile<double> &p_profile)
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
     double sum = 0.0;
     for (int st = 1; st < nfg->GetPlayer(pl)->NumStrategies(); st++) {
-      p_profile(pl, st) = (1.0 - sum) * (double) rand() / (double) RAND_MAX;
-      sum += p_profile(pl, st);
+      p_profile[nfg->GetPlayer(pl)->GetStrategy(st)] = (1.0 - sum) * (double) rand() / (double) RAND_MAX;
+      sum += p_profile[nfg->GetPlayer(pl)->GetStrategy(st)];
     }
 
-    p_profile(pl, nfg->GetPlayer(pl)->NumStrategies()) = 1.0 - sum;
+    p_profile[nfg->GetPlayer(pl)->GetStrategy(nfg->GetPlayer(pl)->NumStrategies())] = 1.0 - sum;
   }
 }
 

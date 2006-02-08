@@ -194,9 +194,14 @@ void nfgLcp<T>::AddSolutions(const Gambit::StrategySupport &p_support,
 
     if (sum == (T) 0)  continue;
 
-    for (j = 1; j <= n1; j++) 
-      if (p_list[i].IsDefined(j))   profile(1, j) = p_list[i](j) / sum;
-      else  profile(1, j) = (T) 0;
+    for (j = 1; j <= n1; j++) {
+      if (p_list[i].IsDefined(j)) {
+	profile[p_support.GetStrategy(1, j)] = p_list[i](j) / sum;
+      }
+      else {
+	profile[p_support.GetStrategy(1, j)] = (T) 0;
+      }
+    }
 
     sum = (T) 0;
 
@@ -206,12 +211,14 @@ void nfgLcp<T>::AddSolutions(const Gambit::StrategySupport &p_support,
 
     if (sum == (T) 0)  continue;
 
-    for (j = 1; j <= n2; j++)
-      if (p_list[i].IsDefined(n1 + j))
-	profile(2, j) = p_list[i](n1 + j) / sum;
-      else
-	profile(2, j) = (T) 0;
-
+    for (j = 1; j <= n2; j++) {
+      if (p_list[i].IsDefined(n1 + j)) {
+	profile[p_support.GetStrategy(2, j)] = p_list[i](n1 + j) / sum;
+      }
+      else {
+	profile[p_support.GetStrategy(2, j)] = (T) 0;
+      }
+    }
     PrintProfile(std::cout, "NE", profile);
   }
 }

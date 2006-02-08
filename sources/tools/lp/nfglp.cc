@@ -155,16 +155,23 @@ void nfgLp<T>::GetSolutions(const Gambit::StrategySupport &p_support,
   for (int i = 1; i <= p_list.Length(); i++)    {
     Gambit::MixedStrategyProfile<T> profile(p_support);
     int j;
-    for (j = 1; j <= n1; j++) 
-      if (p_list[i].IsDefined(j))   
-	profile(1, j) = p_list[i](j);
-      else  profile(1, j) = (T) 0;
+    for (j = 1; j <= n1; j++) {
+      if (p_list[i].IsDefined(j)) {
+	profile[p_support.GetStrategy(1, j)] = p_list[i](j);
+      }
+      else {
+	profile[p_support.GetStrategy(1, j)] = (T) 0;
+      }
+    }
 
-    for (j = 1; j <= n2; j++)
-      if (p_list[i].IsDefined(-j))
-	profile(2, j) = p_list[i](-j);
-      else
-	profile(2, j) = (T) 0;
+    for (j = 1; j <= n2; j++) {
+      if (p_list[i].IsDefined(-j)) {
+	profile[p_support.GetStrategy(2, j)] = p_list[i](-j);
+      }
+      else {
+	profile[p_support.GetStrategy(2, j)] = (T) 0;
+      }
+    }
 
     PrintProfile(std::cout, "NE", profile);
   }
