@@ -144,6 +144,8 @@ public:
   void operator++(int) { m_index++; }
   /// Has iterator gone past the end?
   bool AtEnd(void) const { return m_index > m_array.Last(); }
+  /// Get the current index into the array
+  int GetIndex(void) const { return m_index; }
 
   /// Get the current element
     ///T operator*(void) const { return m_array[m_index]; }
@@ -365,9 +367,9 @@ public:
 /// \brief A strategy in a game.
 ///
 /// This class represents a strategy in a game.
-/// For strategic games, this object internally stores an 'index'.  
-/// This index has the
-/// property that, for a strategy profile, adding the indices of the
+/// For strategic games, this object internally stores an offset.  
+/// This offset has the
+/// property that, for a strategy profile, adding the offsets of the
 /// strategies gives the index into the strategic game's table to
 /// find the outcome for that strategy profile, making payoff computation
 /// relatively efficient.
@@ -379,9 +381,9 @@ class GameStrategyRep : public GameObject  {
   template <class T> friend class MixedBehavProfile;
 
 private:
-  int m_number;
+  int m_number, m_id;
   GamePlayerRep *m_player;
-  long m_index;
+  long m_offset;
   std::string m_label;
   Array<int> m_behav;
 
@@ -389,7 +391,7 @@ private:
   //@{
   /// Creates a new strategy for the given player.
   GameStrategyRep(GamePlayerRep *p_player)
-    : m_number(0), m_player(p_player), m_index(0L) { }
+    : m_number(0), m_id(0), m_player(p_player), m_offset(0L) { }
   //@}
 
 public:
@@ -400,10 +402,12 @@ public:
   /// Sets the text label associated with the strategy
   void SetLabel(const std::string &p_label) { m_label = p_label; }
   
-  // Returns the player for whom this is a strategy
+  /// Returns the player for whom this is a strategy
   GamePlayer GetPlayer(void) const;
   /// Returns the index of the strategy for its player
   int GetNumber(void) const { return m_number; }
+  /// Returns the global number of the strategy in the game
+  int GetId(void) const { return m_id; }
 
   /// Remove this strategy from the game
   void DeleteStrategy(void);

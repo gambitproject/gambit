@@ -62,6 +62,8 @@ public:
   operator const GameStrategy &(void) const { return m_support[m_index]; }
 };
 
+/// \brief A support on a strategic game
+///
 /// This class represents a subset of the strategies in strategic game.
 /// It is enforced that each player has at least one strategy; thus,
 /// the strategies in a support can be viewed as a restriction of a game
@@ -72,9 +74,13 @@ public:
 /// Within the support, strategies are maintained in the same order
 /// in which they appear in the underlying game.
 class StrategySupport {
+  template <class T> friend class MixedStrategyProfile;
 protected:
   Game m_nfg;
   Array<Array<GameStrategy> > m_support;
+
+  /// The index into a strategy profile for a strategy (-1 if not in support)
+  Array<int> m_profileIndex;
   
   bool Undominated(StrategySupport &newS, int p_player, 
 		   bool p_strict, bool p_external = false) const;
@@ -120,13 +126,13 @@ public:
   SupportStrategyIterator Strategies(const GamePlayer &p_player) const
     { return m_support[p_player->GetNumber()]; }
 
-  /// Retuns the index of the strategy in the support.
+  /// Returns the index of the strategy in the support.
   int GetIndex(const GameStrategy &s) const
     { return m_support[s->GetPlayer()->GetNumber()].Find(s); }
 
   /// Returns true exactly when the strategy is in the support.
   bool Contains(const GameStrategy &s) const
-    { return m_support[s->GetPlayer()->GetNumber()].Contains(s); }
+    { return m_profileIndex[s->GetId()] >= 0; }
 
   /// Returns true iff this support is a (weak) subset of the specified support
   bool IsSubsetOf(const StrategySupport &) const;
@@ -136,13 +142,15 @@ public:
   /// @name Modifying the support
   //@{
   /// Add a strategy to the support.
-  void AddStrategy(GameStrategy);
+  void AddStrategy(const GameStrategy &);
 
+  /// \brief Removes a strategy from the support
+  ///
   /// Removes a strategy from the support.  If the strategy is
   /// not present, or if the strategy is the only strategy for that
   /// player, it is not removed.  Returns true if the removal was
   /// executed, and false if not.
-  bool RemoveStrategy(GameStrategy);
+  bool RemoveStrategy(const GameStrategy &);
   //@}
 
   /// @name Identification of dominated strategies

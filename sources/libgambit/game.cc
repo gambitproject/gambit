@@ -261,7 +261,7 @@ GameStrategy GamePlayerRep::NewStrategy(void)
   GameStrategyRep *strategy = new GameStrategyRep(this);
   m_strategies.Append(strategy);
   strategy->m_number = m_strategies.Length();
-  strategy->m_index = -1;   // this flags this action as new
+  strategy->m_offset = -1;   // this flags this action as new
   m_game->RebuildTable();
   return strategy;
 }
@@ -660,7 +660,7 @@ PureStrategyProfile::PureStrategyProfile(const Game &p_nfg)
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
     m_profile[pl] = m_nfg->GetPlayer(pl)->GetStrategy(1);
-    m_index += m_profile[pl]->m_index;
+    m_index += m_profile[pl]->m_offset;
   }
 }
 
@@ -670,7 +670,7 @@ PureStrategyProfile::PureStrategyProfile(const Game &p_nfg)
 
 void PureStrategyProfile::SetStrategy(const GameStrategy &s)
 {
-  m_index += s->m_index - m_profile[s->GetPlayer()->GetNumber()]->m_index;
+  m_index += s->m_offset - m_profile[s->GetPlayer()->GetNumber()]->m_offset;
   m_profile[s->GetPlayer()->GetNumber()] = s;
 }
 
@@ -751,7 +751,7 @@ T PureStrategyProfile::GetStrategyValue(const GameStrategy &p_strategy) const
   }
   else {
     int player = p_strategy->GetPlayer()->GetNumber();
-    GameOutcomeRep *outcome = m_nfg->m_results[m_index - m_profile[player]->m_index + p_strategy->m_index];
+    GameOutcomeRep *outcome = m_nfg->m_results[m_index - m_profile[player]->m_offset + p_strategy->m_offset];
     if (outcome) {
       return outcome->GetPayoff<T>(player);
     }
@@ -1135,8 +1135,13 @@ void GameRep::BuildComputedValues(void)
 
   if (!IsTree()) return;
 
-  for (int i = 1; i <= m_players.Length(); i++) {
-    m_players[i]->MakeReducedStrats(m_root, 0);
+  for (int pl = 1; pl <= m_players.Length(); pl++) {
+    m_players[pl]->MakeReducedStrats(m_root, 0);
+  }
+
+  for (int pl = 1, id = 1; pl <= m_players.Length(); pl++) {
+    for (int st = 1; st <= m_players[pl]->m_strategies.Length(); 
+	 m_players[pl]->m_strategies[st++]->m_id = id++);
   }
 
   m_computedValues = true;
@@ -1537,14 +1542,18 @@ void GameRep::IndexStrategies(void)
 {
   long offset = 1L;
 
-  for (int i = 1; i <= NumPlayers(); i++)  {
-    int j;
-    for (j = 1; j <= m_players[i]->NumStrategies(); j++)  {
-      GameStrategyRep *s = m_players[i]->m_strategies[j];
-      s->m_number = j;
-      s->m_index = (j - 1) * offset;
+  for (int pl = 1; pl <= m_players.Length(); pl++)  {
+    for (GameStrategyIterator strategy(m_players[pl]->m_strategies);
+	 !strategy.AtEnd(); strategy++) {
+      strategy->m_number = strategy.GetIndex();
+      strategy->m_offset = (strategy.GetIndex() - 1) * offset;
     }
-    offset *= (j - 1);
+    offset *= m_players[pl]->NumStrategies();
+  }
+
+  for (int pl = 1, id = 1; pl <= m_players.Length(); pl++) {
+    for (int st = 1; st <= m_players[pl]->m_strategies.Length(); 
+	 m_players[pl]->m_strategies[st++]->m_id = id++);
   }
 }
 
@@ -1567,7 +1576,7 @@ void GameRep::RebuildTable(void)
        !iter.AtEnd(); iter++) {
     long newindex = 1L;
     for (int pl = 1; pl <= m_players.Length(); pl++) {
-      if (iter.m_profile.GetStrategy(pl)->m_index < 0) {
+      if (iter.m_profile.GetStrategy(pl)->m_offset < 0) {
 	// This is a contingency involving a new strategy... skip
 	newindex = -1L;
 	break;

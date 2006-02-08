@@ -122,7 +122,7 @@ void SolveMixed(Game p_nfg)
       PureStrategyProfile profile(*citer);
       for (GamePlayerIterator player = p_nfg->Players();
 	   !player.AtEnd(); player++) {
-	temp(profile.GetStrategy(player)) = 1;
+	temp[profile.GetStrategy(player)] = 1;
       }
       
       PrintProfile(std::cout, temp);

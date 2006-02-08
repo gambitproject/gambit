@@ -77,21 +77,17 @@ public:
   { return (support != p_profile.support ||
 	    PVector<T>::operator!=(p_profile)); }
 
-  /// Partitioned access to strategy probability (deprecated)
-  const T &operator()(int pl, int st) const
-    { return PVector<T>::operator()(pl, st); }
-  /// Partitioned access to strategy probability (deprecated)
-  T &operator()(int pl, int st)
-    { return PVector<T>::operator()(pl, st); }
+  /// Vector-style access to probabilities
+  const T &operator[](int i) const { return Array<T>::operator[](i); }
+  /// Vector-style access to probabilities
+  T &operator[](int i)             { return Array<T>::operator[](i); }
 
   /// Returns the probability the strategy is played
-  const T &operator()(const GameStrategy &p_strategy) const
-    { return (*this)(p_strategy->GetPlayer()->GetNumber(),
-		     support.GetIndex(p_strategy)); }
+  const T &operator[](const GameStrategy &p_strategy) const
+    { return Array<T>::operator[](support.m_profileIndex[p_strategy->GetId()]); }
   /// Returns the probability the strategy is played
-  T &operator()(const GameStrategy &p_strategy)
-    { return (*this)(p_strategy->GetPlayer()->GetNumber(),
-		     support.GetIndex(p_strategy)); }
+  T &operator[](const GameStrategy &p_strategy)
+    { return Array<T>::operator[](support.m_profileIndex[p_strategy->GetId()]); }
   //@}
 
   /// @name General data access

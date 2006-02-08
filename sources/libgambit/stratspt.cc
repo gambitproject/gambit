@@ -37,12 +37,14 @@ namespace Gambit {
 //---------------------------------------------------------------------------
 
 StrategySupport::StrategySupport(const Game &p_nfg) 
-  : m_nfg(p_nfg)
+  : m_nfg(p_nfg), m_profileIndex(p_nfg->MixedProfileLength())
 { 
-  for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
+  for (int pl = 1, index = 1; pl <= p_nfg->NumPlayers(); pl++) {
     m_support.Append(Array<GameStrategy>());
-    for (int st = 1; st <= p_nfg->GetPlayer(pl)->NumStrategies(); st++) {
+    for (int st = 1; st <= p_nfg->GetPlayer(pl)->NumStrategies(); 
+	 st++, index++) {
       m_support[pl].Append(p_nfg->GetPlayer(pl)->GetStrategy(st));
+      m_profileIndex[index] = index;
     }
   }
 }
@@ -91,25 +93,63 @@ bool StrategySupport::IsSubsetOf(const StrategySupport &p_support) const
 //                        Modifying the support
 //---------------------------------------------------------------------------
 
-void StrategySupport::AddStrategy(GameStrategy s)
+void StrategySupport::AddStrategy(const GameStrategy &p_strategy)
 { 
-  Array<GameStrategy> &sup = m_support[s->GetPlayer()->GetNumber()];
-  if (sup.Contains(s))  return;
+  // Get the null-pointer checking out of the way once and for all
+  GameStrategyRep *strategy = p_strategy;
+  Array<GameStrategy> &support = 
+    m_support[strategy->GetPlayer()->GetNumber()];
+  
 
-  int index;
-  for (index = 1; 
-       index <= sup.Length() && sup[index]->GetNumber() < s->GetNumber(); 
-       index++);
-  sup.Insert(s, index);
+  for (int i = 1; i <= support.Length(); i++) {
+    GameStrategyRep *s = support[i];
+    if (s->GetNumber() == strategy->GetNumber()) {
+      // Strategy already in support; no change
+      return;
+    }
+    if (s->GetNumber() < strategy->GetNumber()) {
+      // Shift all higher-id strategies by one in the profile
+      m_profileIndex[strategy->GetId()] = m_profileIndex[s->GetId()];
+      for (int id = s->GetId(); id <= m_profileIndex.Length(); id++) {
+	if (m_profileIndex[id] >= 0)  m_profileIndex[id]++;
+      }
+      // Insert here
+      support.Insert(strategy, i);
+      return;
+    }
+  }
+
+  // If we get here, p_strategy has a higher number than anything in the
+  // support for this player; append.
+  GameStrategyRep *last = support[support.Last()];
+  m_profileIndex[strategy->GetId()] = m_profileIndex[last->GetId()] + 1;
+  for (int id = strategy->GetId()+1; id <= m_profileIndex.Length(); id++) {
+    if (m_profileIndex[id] >= 0)  m_profileIndex[id]++;
+  }
+  support.Append(strategy);
 }
 
-bool StrategySupport::RemoveStrategy(GameStrategy s) 
+bool StrategySupport::RemoveStrategy(const GameStrategy &p_strategy) 
 { 
-  Array<GameStrategy> &sup = m_support[s->GetPlayer()->GetNumber()];
-  if (!sup.Contains(s)) return false;
-  if (sup.Contains(s) && sup.Length() == 1)  return false;
-  sup.Remove(sup.Find(s));
-  return true;
+  GameStrategyRep *strategy = p_strategy;
+  Array<GameStrategy> &support = m_support[strategy->GetPlayer()->GetNumber()];
+
+  if (support.Length() == 1) return false;
+
+  for (int i = 1; i <= support.Length(); i++) {
+    GameStrategyRep *s = support[i];
+    if (s == strategy) {
+      support.Remove(i);
+      m_profileIndex[strategy->GetId()] = -1;
+      // Shift strategies left in the profile
+      for (int id = strategy->GetId()+1; id <= m_profileIndex.Length(); id++) {
+	if (m_profileIndex[id] >= 0)  m_profileIndex[id]--;
+      }
+      return true;
+    }
+  }
+
+  return false;
 } 
 
 
