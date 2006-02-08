@@ -356,10 +356,19 @@ void MixedBehavProfile<T>::GetPayoff(GameNodeRep *node,
 
   if (node->children.Length())  {
     int pl = node->infoset->m_player->m_number, iset = node->infoset->m_number;
-    for (int act = 1; act <= m_support.NumActions(pl, iset); act++) {
-      GameActionRep *action = m_support.GetAction(pl, iset, act);
-      GetPayoff(node->GetChild(action->GetNumber()), 
-		prob * GetActionProb(action), player, value);
+    if (pl == 0) {
+      // chance player
+      for (int act = 1; act <= node->NumChildren(); act++) {
+	GetPayoff(node->GetChild(act),
+		  prob * node->infoset->GetActionProb<T>(act), player, value);
+      }
+    }
+    else {
+      for (int act = 1; act <= m_support.NumActions(pl, iset); act++) {
+	GameActionRep *action = m_support.GetAction(pl, iset, act);
+	GetPayoff(node->GetChild(action->GetNumber()), 
+		  prob * GetActionProb(action), player, value);
+      }
     }
   }
 }
