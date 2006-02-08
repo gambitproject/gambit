@@ -427,8 +427,7 @@ gbtAnalysisProfileList<T>::GetStrategyValue(int p_strategy, int p_index) const
   try {
     const MixedStrategyProfile<T> &profile = m_mixedProfiles[index];
     GameStrategy strategy = profile.GetGame()->GetStrategy(p_strategy);
-    return ToText(profile.GetPayoff(strategy->GetPlayer()->GetNumber(),
-				    strategy),
+    return ToText(profile.GetStrategyValue(strategy),
 		  m_doc->GetStyle().NumDecimals());
   }
   catch (IndexException &) {

@@ -84,14 +84,18 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
     psum = 0.0;
     for (j = 1; j <= p.GetSupport().NumStrategies(i); j++)  {
       psum += p(i,j);
-      x1 = p.GetPayoff(i, i, j) - p.GetPayoff(i);
+      x1 = p.GetStrategyValue(p.GetSupport().GetStrategy(i, j)) - p.GetPayoff(i);
       if (i1 == i) {
 	if (x1 > 0.0)
-	  x -= x1 * p.GetPayoff(i, i1, j1);
+	  x -= x1 * p.GetPayoffDeriv(i, p.GetSupport().GetStrategy(i1, j1));
       }
       else {
 	if (x1> 0.0)
-	  x += x1 * (p.GetPayoff(i, i, j, i1, j1) - p.GetPayoff(i, i1, j1));
+	  x += x1 * (p.GetPayoffDeriv(i, 
+				      p.GetSupport().GetStrategy(i, j),
+				      p.GetSupport().GetStrategy(i1, j1)) - 
+		     p.GetPayoffDeriv(i,
+				      p.GetSupport().GetStrategy(i1, j1)));
       }
     }
     if (i == i1)  x += 100.0 * (psum - 1.0);

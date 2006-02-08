@@ -152,8 +152,8 @@ void QreLHS(const StrategySupport &p_support,
       }
       else {
 	p_lhs[rowno] = (logprofile(pl, st) - logprofile(pl, 1) -
-			lambda * (profile.GetPayoff(pl, pl, st) -
-				  profile.GetPayoff(pl, pl, 1)));
+			lambda * (profile.GetStrategyValue(player->GetStrategy(st)) -
+				  profile.GetStrategyValue(player->GetStrategy(1))));
 
       }
     }
@@ -235,13 +235,22 @@ void QreJacobian(const StrategySupport &p_support,
 	      if (p_isLog[colno]) {
 		p_matrix(colno, rowno) =
 		  -lambda * profile(ell, m) *
-		  (profile.GetPayoff(i, i, j, ell, m) -
-		   profile.GetPayoff(i, i, 1, ell, m));
+		  (profile.GetPayoffDeriv(i, 
+					  p_support.GetStrategy(i, j),
+					  p_support.GetStrategy(ell, m)) -
+		   profile.GetPayoffDeriv(i, 
+					  p_support.GetStrategy(i, 1),
+					  p_support.GetStrategy(ell, m)));
 	      }
 	      else {
 		p_matrix(colno, rowno) =
-		  -lambda * (profile.GetPayoff(i, i, j, ell, m) -
-			     profile.GetPayoff(i, i, 1, ell, m));
+		  -lambda * 
+		  (profile.GetPayoffDeriv(i, 
+					  p_support.GetStrategy(i, j),
+					  p_support.GetStrategy(ell, m)) -
+		   profile.GetPayoffDeriv(i,
+					  p_support.GetStrategy(i, 1),
+					  p_support.GetStrategy(ell, m)));
 	      }
 	    }
 	  }
@@ -251,7 +260,8 @@ void QreJacobian(const StrategySupport &p_support,
 	// column wrt lambda
 	// 1 == lead
 	p_matrix(p_matrix.NumRows(), rowno) =
-	  profile.GetPayoff(i, i, 1) - profile.GetPayoff(i, i, j);
+	  (profile.GetStrategyValue(p_support.GetStrategy(i, 1)) - 
+	   profile.GetStrategyValue(p_support.GetStrategy(i, j)));
       }
     }
   }

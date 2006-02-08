@@ -450,7 +450,7 @@ Gambit::Rational nfgSimpdiv::getlabel(Gambit::MixedStrategyProfile<Gambit::Ratio
     maxval=(Gambit::Rational(-1000000));
     jj=0;
     for(j=1;j<=yy.GetSupport().NumStrategies(i);j++) {
-      pay=yy.GetPayoff(i,i,j);
+      pay=yy.GetStrategyValue(yy.GetSupport().GetStrategy(i,j));
       payoff+=(yy(i,j)*pay);
       if(pay>maxval) {
 	maxval=pay;

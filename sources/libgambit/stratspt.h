@@ -114,6 +114,8 @@ public:
   GameStrategy GetStrategy(int pl, int st) const 
     { return m_support[pl][st]; }
 
+  /// Returns an iterator over the players in the game
+  GamePlayerIterator Players(void) const  { return m_nfg->Players(); }
   /// Returns an iterator over the strategies for the player
   SupportStrategyIterator Strategies(const GamePlayer &p_player) const
     { return m_support[p_player->GetNumber()]; }
