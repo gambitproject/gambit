@@ -107,7 +107,7 @@ void StrategySupport::AddStrategy(const GameStrategy &p_strategy)
       // Strategy already in support; no change
       return;
     }
-    if (s->GetNumber() < strategy->GetNumber()) {
+    if (s->GetNumber() > strategy->GetNumber()) {
       // Shift all higher-id strategies by one in the profile
       m_profileIndex[strategy->GetId()] = m_profileIndex[s->GetId()];
       for (int id = s->GetId(); id <= m_profileIndex.Length(); id++) {
