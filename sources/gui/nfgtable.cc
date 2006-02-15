@@ -1004,6 +1004,14 @@ void gbtTableWidget::SetRowPlayer(int index, int pl)
 {
   if (m_rowPlayers.Contains(pl)) {
     int oldIndex = m_rowPlayers.Find(pl);
+    if ((oldIndex == index || oldIndex == index - 1) && !m_doc->IsTree()) {
+      // Define this as adding a strategy for the player
+      GameStrategy strategy = m_doc->GetGame()->GetPlayer(pl)->NewStrategy();
+      strategy->SetLabel(ToText(strategy->GetNumber()));
+      m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
+      return;
+    }
+
     m_rowPlayers.Remove(oldIndex);
     if (index > oldIndex) {
       m_rowPlayers.Insert(pl, index-1);
@@ -1047,6 +1055,14 @@ void gbtTableWidget::SetColPlayer(int index, int pl)
 {
   if (m_colPlayers.Contains(pl)) {
     int oldIndex = m_colPlayers.Find(pl);
+    if ((oldIndex == index || oldIndex == index - 1) && !m_doc->IsTree()) {
+      // Define this as adding a strategy for the player
+      GameStrategy strategy = m_doc->GetGame()->GetPlayer(pl)->NewStrategy();
+      strategy->SetLabel(ToText(strategy->GetNumber()));
+      m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
+      return;
+    }
+
     m_colPlayers.Remove(oldIndex);
     if (index > oldIndex) {
       m_colPlayers.Insert(pl, index-1);
