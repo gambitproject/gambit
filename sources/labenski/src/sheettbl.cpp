@@ -973,9 +973,9 @@ void wxSheetTable::SetCellSpan( const wxSheetBlock& block )
     
     wxSheetBlock bounds(block);
     const wxArraySheetBlock &arrBlock = GetSpannedBlocks()->GetBlockArray();
-    //int n, index = wxNOT_FOUND, intersections = 0, count = arrBlock.GetCount();
-    int index = wxNOT_FOUND;
-/*       
+    int n, index = wxNOT_FOUND, intersections = 0, count = arrBlock.GetCount();
+    //int index = wxNOT_FOUND;
+
     // Check for multiple intersections, one is fine, but topleft corners must match
     for (n=0; n<count; n++)
     {
@@ -989,7 +989,7 @@ void wxSheetTable::SetCellSpan( const wxSheetBlock& block )
     wxCHECK_RET( (intersections < 2) && 
                 ((intersections == 0) || (arrBlock[index].GetLeftTop() == block.GetLeftTop())), 
                  wxT("Setting cell span for cells already spanned"));
-*/    
+
     wxSheetSelection *sel = (wxSheetSelection*)GetSpannedBlocks();
     
     // delete old block and expand refresh bounds 
