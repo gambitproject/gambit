@@ -81,6 +81,10 @@ void Solve(const Gambit::Game &p_game)
 {
   int i;
 
+  Gambit::Rational maxPay = p_game->GetMaxPayoff();
+  Gambit::Rational minPay = p_game->GetMinPayoff();
+  double scale = 1.0 / (maxPay - minPay);
+
   int *actions = new int[p_game->NumPlayers()];
   int veclength = p_game->NumPlayers();
   for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
@@ -98,32 +102,40 @@ void Solve(const Gambit::Game &p_game)
     }
 
     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      A->setPurePayoff(pl-1, profile, iter->GetPayoff<double>(pl));
+      A->setPurePayoff(pl-1, profile, 
+		       (double) (iter->GetPayoff<Gambit::Rational>(pl) - minPay) *
+		       scale);
     }
   }
 
   cvector g(A->getNumActions()); // choose a random perturbation ray
   int numEq;
 
-  cvector **answers;
-  do {
+  for (int iter = 0; iter < 10; iter++) {
+    cvector **answers;
     for(i = 0; i < A->getNumActions(); i++) {
-#if !defined(HAVE_DRAND48)
+ #if !defined(HAVE_DRAND48)
       g[i] = rand();
 #else
       g[i] = drand48();
 #endif  // HAVE_DRAND48
+      /*
+      if (i == iter) {
+	g[i] = 1.0;
+      }
+      else {
+	g[i] = 0.0;
+      }
+      */
     }
     g /= g.norm(); // normalized
     numEq = GNM(*A, g, answers, STEPS, FUZZ, LNMFREQ, LNMMAX, LAMBDAMIN, WOBBLE, THRESHOLD);
-  } while(numEq == 0);
-
-  for (i = 0; i < numEq; i++) {
-    PrintProfile(std::cout, p_game, answers[i]);
-    free(answers[i]);
+    for (i = 0; i < numEq; i++) {
+      PrintProfile(std::cout, p_game, answers[i]);
+      free(answers[i]);
+    }
+    free(answers);
   }
-
-  free(answers);
 
   delete A;
 }

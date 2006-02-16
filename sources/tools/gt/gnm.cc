@@ -121,8 +121,12 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 
   // initialize sigma to be the pure strategy profile
   // that is the lone equilibrium of the perturbed game
-  for(i = 0; i < M; i++)
+  printf("start");
+  for(i = 0; i < M; i++) {
     sigma[i] = (double)B[i];
+    printf(",%f", sigma[i]);
+  }
+  printf("\n");
 
   A.payoffMatrix(DG, sigma, fuzz);
   DG.multiply(sigma, v);
@@ -253,7 +257,8 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
       
       // each step covers 1.0/steps of the distance to the boundary
       delta = del / stepsLeft;
-         
+
+      //printf("delta = %f\n", delta);
       // test whether lambda will become 0 in the course of this
       // step, which means there's an equilibrium there
       if(Index*(lambda+dlambda*delta) <= 0.0) {
@@ -288,6 +293,11 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 	    Eq = (cvector **)realloc(Eq, (numEq+2)*sizeof(cvector *));	
 	    Eq[numEq] = new cvector(M);
 	    *(Eq[numEq++]) = sigma;
+	    printf("NE");
+	    for(i = 0; i < M; i++) {
+	      printf(",%f", sigma[i]);
+	    }
+	    printf("\n");
 	  }
 	  Index = -Index;
 	  s_hat_old = -1;
@@ -370,6 +380,13 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
     sigma.support(B);
     sigma.unfuzz(fuzz);
     A.normalizeStrategy(sigma);
+
+    printf("%f", lambda);
+    for(i = 0; i < M; i++) {
+      printf(",%f", sigma[i]);
+    }
+    printf("\n");
+
     z -= ym1;
     z += sigma;
     // z = (z-x)+sigma;
