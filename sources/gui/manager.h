@@ -187,6 +187,7 @@ public:
     bool HasMaximizeButton() const { return HasFlag(buttonMaximize); }
     bool HasMinimizeButton() const { return HasFlag(buttonMinimize); }
     bool HasPinButton() const { return HasFlag(buttonPin); }
+    bool HasGripperTop() const { return HasFlag(optionGripperTop); }
     
     wxPaneInfo& Window(wxWindow* w) { window = w; return *this; }
     wxPaneInfo& Name(const wxString& n) { name = n; return *this; }
@@ -220,6 +221,7 @@ public:
     wxPaneInfo& CaptionVisible(bool visible = true) { return SetFlag(optionCaption, visible); }
     wxPaneInfo& PaneBorder(bool visible = true) { return SetFlag(optionPaneBorder, visible); }
     wxPaneInfo& Gripper(bool visible = true) { return SetFlag(optionGripper, visible); }
+    wxPaneInfo& GripperTop(bool attop = true) { return SetFlag(optionGripperTop, attop); }
     wxPaneInfo& CloseButton(bool visible = true) { return SetFlag(buttonClose, visible); }  
     wxPaneInfo& MaximizeButton(bool visible = true) { return SetFlag(buttonMaximize, visible); }
     wxPaneInfo& MinimizeButton(bool visible = true) { return SetFlag(buttonMinimize, visible); }
@@ -295,6 +297,7 @@ public:
         optionDestroyOnClose  = 1 << 12,
         optionToolbar         = 1 << 13,
         optionActive          = 1 << 14,
+	optionGripperTop      = 1 << 15,
 
         buttonClose           = 1 << 24,
         buttonMaximize        = 1 << 25,
