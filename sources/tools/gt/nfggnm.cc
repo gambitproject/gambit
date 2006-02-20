@@ -35,26 +35,41 @@
 #include "gnm.h"
 
 // GNM CONSTANTS
-#define STEPS 100
-#define FUZZ 1e-12
-#define LNMFREQ 3
-#define LNMMAX 10
-#define LAMBDAMIN -10.0
-#define WOBBLE 0
-#define THRESHOLD 1e-2
+const int STEPS = 100;
+const double FUZZ = 1e-12;
+const int LNMFREQ = 3;
+const int LNMMAX = 10;
+const double LAMBDAMIN = -10.0;
+const bool WOBBLE = false;
+const double THRESHOLD = 1e-2;
 
 int g_numDecimals = 6;
+bool g_verbose = false;
+int g_numVectors = 1;
+std::string g_startFile;
 
-void PrintProfile(std::ostream &p_stream,
-		  const Gambit::Game &p_game, cvector *p_profile)
+bool ReadProfile(std::istream &p_stream, cvector &p_profile)
 {
-  p_stream.setf(std::ios::fixed);
-  p_stream << "NE";
-  for (int i = 0; i < p_game->MixedProfileLength(); i++) {
-    p_stream << "," << std::setprecision(g_numDecimals) << (*p_profile)[i];
+  for (int i = 0; i < p_profile.getm(); i++) {
+    if (p_stream.eof() || p_stream.bad()) {
+      return false;
+    }
+
+    p_stream >> p_profile[i];
+    if (i < p_profile.getm() - 1) {
+      char comma;
+      p_stream >> comma;
+    }
   }
-  p_stream << std::endl;
+
+  // Read in the rest of the line and discard
+  std::string foo;
+  std::getline(p_stream, foo);
+  return true;
 }
+
+extern void PrintProfile(std::ostream &, const std::string &,
+			 const cvector &);
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -73,7 +88,11 @@ void PrintHelp(char *progname)
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
   std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -n COUNT         number of perturbation vectors to generate\n";
+  std::cerr << "  -s FILE          file containing perturbation vectors\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  std::cerr << "  -v               verbose mode (shows intermediate output)\n";
+  std::cerr << "                   (default is to only show equilibria)\n";
   exit(1);
 }
 
@@ -111,30 +130,45 @@ void Solve(const Gambit::Game &p_game)
   cvector g(A->getNumActions()); // choose a random perturbation ray
   int numEq;
 
-  for (int iter = 0; iter < 10; iter++) {
-    cvector **answers;
-    for(i = 0; i < A->getNumActions(); i++) {
- #if !defined(HAVE_DRAND48)
-      g[i] = rand();
+  if (g_startFile != "") {
+    std::ifstream startVectors(g_startFile.c_str());
+
+    while (!startVectors.eof() && !startVectors.bad()) {
+      cvector **answers;
+      if (ReadProfile(startVectors, g)) {
+	g /= g.norm(); // normalized
+	if (g_verbose) {
+	  PrintProfile(std::cout, "pert", g);
+	}
+
+	numEq = GNM(*A, g, answers, STEPS, FUZZ, LNMFREQ, LNMMAX, LAMBDAMIN, WOBBLE, THRESHOLD);
+	for (i = 0; i < numEq; i++) {
+	  free(answers[i]);
+	}
+	free(answers);
+      }
+    }
+  }
+  else {
+    for (int iter = 0; iter < g_numVectors; iter++) {
+      cvector **answers;
+      for(i = 0; i < A->getNumActions(); i++) {
+#if !defined(HAVE_DRAND48)
+	g[i] = rand();
 #else
-      g[i] = drand48();
+	g[i] = drand48();
 #endif  // HAVE_DRAND48
-      /*
-      if (i == iter) {
-	g[i] = 1.0;
       }
-      else {
-	g[i] = 0.0;
+      g /= g.norm(); // normalized
+      if (g_verbose) {
+	PrintProfile(std::cout, "pert", g);
       }
-      */
+      numEq = GNM(*A, g, answers, STEPS, FUZZ, LNMFREQ, LNMMAX, LAMBDAMIN, WOBBLE, THRESHOLD);
+      for (i = 0; i < numEq; i++) {
+	free(answers[i]);
+      }
+      free(answers);
     }
-    g /= g.norm(); // normalized
-    numEq = GNM(*A, g, answers, STEPS, FUZZ, LNMFREQ, LNMMAX, LAMBDAMIN, WOBBLE, THRESHOLD);
-    for (i = 0; i < numEq; i++) {
-      PrintProfile(std::cout, p_game, answers[i]);
-      free(answers[i]);
-    }
-    free(answers);
   }
 
   delete A;
@@ -146,13 +180,22 @@ int main(int argc, char *argv[])
   bool quiet = false;
 
   int c;
-  while ((c = getopt(argc, argv, "d:qhS")) != -1) {
+  while ((c = getopt(argc, argv, "d:n:s:qvhS")) != -1) {
     switch (c) {
     case 'q':
       quiet = true;
       break;
+    case 'v':
+      g_verbose = true;
+      break;
     case 'd':
       g_numDecimals = atoi(optarg);
+      break;
+    case 'n':
+      g_numVectors = atoi(optarg);
+      break;
+    case 's':
+      g_startFile = optarg;
       break;
     case 'S':
       break;

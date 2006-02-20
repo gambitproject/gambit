@@ -23,6 +23,6 @@
 #include "cmatrix.h"
 #include "gnmgame.h"
 
-int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFreq, int LNMMax, double LambdaMin, int wobble, double threshold);
+int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFreq, int LNMMax, double LambdaMin, bool wobble, double threshold);
 
 #endif

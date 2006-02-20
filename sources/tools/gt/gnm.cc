@@ -17,9 +17,24 @@
  * Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <libgambit/libgambit.h>
+
 #include "cmatrix.h"
 #include "gnm.h"
 #include "gnmgame.h"
+
+extern bool g_verbose;
+
+void PrintProfile(std::ostream &p_stream, 
+		  const std::string &p_label,
+		  const cvector &p_profile) 
+{
+  p_stream << p_label;
+  for (int i = 0; i < p_profile.getm(); i++) {
+    p_stream << "," << p_profile[i];
+  }
+  p_stream << std::endl;
+}
 
 // gnm(A,g,Eq,steps,fuzz,LNMFreq,LNMMax,LambdaMin,wobble,threshold)
 // ----------------------------------------------------------------
@@ -47,7 +62,7 @@
 //            wobbles are disabled, GNM will terminate if the error
 //            reaches this threshold.
 
-int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFreq, int LNMMax, double LambdaMin, int wobble, double threshold) {
+int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFreq, int LNMMax, double LambdaMin, bool wobble, double threshold) {
   int i, // utility variables
     bestAction,  
     k, 
@@ -121,12 +136,13 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 
   // initialize sigma to be the pure strategy profile
   // that is the lone equilibrium of the perturbed game
-  printf("start");
   for(i = 0; i < M; i++) {
     sigma[i] = (double)B[i];
-    printf(",%f", sigma[i]);
   }
-  printf("\n");
+
+  if (g_verbose) {
+    PrintProfile(std::cout, "start", sigma);
+  }
 
   A.payoffMatrix(DG, sigma, fuzz);
   DG.multiply(sigma, v);
@@ -258,7 +274,6 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
       // each step covers 1.0/steps of the distance to the boundary
       delta = del / stepsLeft;
 
-      //printf("delta = %f\n", delta);
       // test whether lambda will become 0 in the course of this
       // step, which means there's an equilibrium there
       if(Index*(lambda+dlambda*delta) <= 0.0) {
@@ -293,11 +308,8 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 	    Eq = (cvector **)realloc(Eq, (numEq+2)*sizeof(cvector *));	
 	    Eq[numEq] = new cvector(M);
 	    *(Eq[numEq++]) = sigma;
-	    printf("NE");
-	    for(i = 0; i < M; i++) {
-	      printf(",%f", sigma[i]);
-	    }
-	    printf("\n");
+
+	    PrintProfile(std::cout, "NE", sigma);
 	  }
 	  Index = -Index;
 	  s_hat_old = -1;
@@ -381,11 +393,9 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
     sigma.unfuzz(fuzz);
     A.normalizeStrategy(sigma);
 
-    printf("%f", lambda);
-    for(i = 0; i < M; i++) {
-      printf(",%f", sigma[i]);
+    if (g_verbose) {
+      PrintProfile(std::cout, Gambit::ToText(lambda), sigma);
     }
-    printf("\n");
 
     z -= ym1;
     z += sigma;
