@@ -48,6 +48,7 @@ gambit_SOURCES = \
 	gameframe.cc \
 	gameframe.h \
 	menuconst.h \
+	monitor.cc monitor.h \
 	nfgpanel.cc \
 	nfgpanel.h \
 	nfgprofile.cc \
@@ -66,7 +67,7 @@ gambit_SOURCES = \
 	tinyxmlerror.cc \
 	tinyxmlparser.cc \
 	dcsvg.cc dcsvg.h \
-	manager.cpp manager.h
+	manager.cpp manager.h wxled.cc wxled.h
 
 
 gambit_LDADD = \
