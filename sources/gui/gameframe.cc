@@ -308,10 +308,10 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   m_manager.GetPane(m_analysisPanel).Show(false);
 
   wxWindow *playerToolbar = new gbtPlayerToolbar(this, p_doc);
-  playerToolbar->SetSize(110, -1);
-  m_manager.AddPane(playerToolbar, wxLEFT, wxT("Players"));
-  m_manager.GetPane(playerToolbar).TopDockable(false);
-  m_manager.GetPane(playerToolbar).BottomDockable(false);
+  m_manager.AddPane(playerToolbar, wxTOP, wxT("Players"));
+  m_manager.GetPane(playerToolbar).CaptionVisible(false);
+  m_manager.GetPane(playerToolbar).LeftDockable(false);
+  m_manager.GetPane(playerToolbar).RightDockable(false);
 
   m_manager.Update();
 

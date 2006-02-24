@@ -31,6 +31,8 @@
 
 class gbtPlayerToolbar : public wxSheet, public gbtGameView {
 private:
+  bool m_isHorizontal;
+
   // @name Overriding wxSheet members
   //@{
   /// Gets the value in a cell
@@ -83,8 +85,6 @@ private:
 
 public:
   gbtPlayerToolbar(wxWindow *p_parent, gbtGameDocument *p_doc);
-
-  DECLARE_EVENT_TABLE()
 };
 
 

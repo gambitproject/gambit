@@ -42,21 +42,22 @@
 //                    class gbtPlayerToolbar
 //=====================================================================
 
-BEGIN_EVENT_TABLE(gbtPlayerToolbar, wxSheet)
-  EVT_SIZE(gbtPlayerToolbar::OnSize)
-  EVT_MOUSE_EVENTS(gbtPlayerToolbar::OnMouseEvents)
-END_EVENT_TABLE()
-
 gbtPlayerToolbar::gbtPlayerToolbar(wxWindow *p_parent,
 				   gbtGameDocument *p_doc)
-  : wxSheet(p_parent, wxID_ANY), gbtGameView(p_doc)
+  : wxSheet(p_parent, wxID_ANY), gbtGameView(p_doc),
+    m_isHorizontal(true)
 {
-  CreateGrid(0, 1);
+  SetSize(-1, 35);
+  CreateGrid(1, 0);
   SetRowLabelWidth(0);
   SetColLabelHeight(0);
+  SetRowHeight(0, 35);
   DisableDragGridSize();
   EnableGridLines(false);
 
+  Connect(wxEVT_SIZE, wxSizeEventHandler(gbtPlayerToolbar::OnSize));
+  Connect(wxEVT_MOTION,
+	  wxMouseEventHandler(gbtPlayerToolbar::OnMouseEvents));
   Connect(GetId(), wxEVT_SHEET_CELL_RIGHT_DOWN,
 	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtPlayerToolbar::OnCellRightClick)));
 }
@@ -64,7 +65,7 @@ gbtPlayerToolbar::gbtPlayerToolbar(wxWindow *p_parent,
 wxString gbtPlayerToolbar::GetCellValue(const wxSheetCoords &p_coords)
 {
   try {
-    int player = p_coords.GetRow() + ((m_doc->IsTree()) ? 0 : 1);
+    int player = p_coords.GetCol() + ((m_doc->IsTree()) ? 0 : 1);
     if (player == 0) {
       return wxT("Chance");
     }
@@ -79,43 +80,46 @@ wxString gbtPlayerToolbar::GetCellValue(const wxSheetCoords &p_coords)
 void gbtPlayerToolbar::SetCellValue(const wxSheetCoords &p_coords,
 				    const wxString &p_value)
 {
-  int player = p_coords.GetRow() + ((m_doc->IsTree()) ? 0 : 1);
+  int player = p_coords.GetCol() + ((m_doc->IsTree()) ? 0 : 1);
   m_doc->GetGame()->GetPlayer(player)->SetLabel((const char *) p_value.mb_str());
   m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
+  AutoSizeCols();
 }
 
 void gbtPlayerToolbar::OnUpdate(void)
 {
-  int needRows = m_doc->NumPlayers() + ((m_doc->IsTree()) ? 1 : 0);
-  if (GetNumberRows() < needRows) {
-    InsertRows(0, needRows - GetNumberRows());
+  int needCols = m_doc->NumPlayers() + ((m_doc->IsTree()) ? 1 : 0);
+  if (GetNumberCols() < needCols) {
+    InsertCols(0, needCols - GetNumberCols());
   }
-  else if (GetNumberRows() > needRows) {
-    DeleteRows(0, GetNumberRows() - needRows);
+  else if (GetNumberCols() > needCols) {
+    DeleteCols(0, GetNumberCols() - needCols);
   }
 
-  for (int row = 0; row < GetNumberRows(); row++) {
-    if (m_doc->IsTree() && row == 0) {
-      SetAttrRenderer(wxSheetCoords(row, 0),
+  for (int col = 0; col < GetNumberCols(); col++) {
+    if (m_doc->IsTree() && col == 0) {
+      SetAttrRenderer(wxSheetCoords(0, col),
 		      wxSheetCellRenderer(new wxSheetCellBitmapRendererRefData(wxBitmap(dice_xpm), wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL)));
-      SetAttrBackgroundColour(wxSheetCoords(row, 0),
+      SetAttrBackgroundColour(wxSheetCoords(0, col),
 			      m_doc->GetStyle().ChanceColor());
-      SetAttrReadOnly(wxSheetCoords(row, 0), true);
+      SetAttrReadOnly(wxSheetCoords(0, col), true);
     }
     else {
-      SetAttrRenderer(wxSheetCoords(row, 0),
+      SetAttrRenderer(wxSheetCoords(0, col),
 		      wxSheetCellRenderer(new wxSheetCellBitmapRendererRefData(wxBitmap(person_xpm), wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL)));
-      int player = row + ((m_doc->IsTree()) ? 0 : 1); 
-      SetAttrBackgroundColour(wxSheetCoords(row, 0),
+      int player = col + ((m_doc->IsTree()) ? 0 : 1); 
+      SetAttrBackgroundColour(wxSheetCoords(0, col),
 			      m_doc->GetStyle().GetPlayerColor(player));
     }
 
-    SetAttrForegroundColour(wxSheetCoords(row, 0), *wxWHITE);
-    SetAttrFont(wxSheetCoords(row, 0),
+    SetAttrForegroundColour(wxSheetCoords(0, col), *wxWHITE);
+    SetAttrFont(wxSheetCoords(0, col),
 		wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
-    SetAttrAlignment(wxSheetCoords(row, 0),
+    SetAttrAlignment(wxSheetCoords(0, col),
 		     wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL);
   }
+
+  AutoSizeCols();
 }
 
 void gbtPlayerToolbar::PostPendingChanges(void)
@@ -130,7 +134,7 @@ void gbtPlayerToolbar::OnMouseEvents(wxMouseEvent &p_event)
   if (p_event.LeftIsDown() && p_event.Dragging()) {
     wxSheetCoords coords = XYToGridCell(p_event.GetX(), p_event.GetY());
 
-    int player = coords.GetRow() + ((m_doc->IsTree()) ? 0 : 1);
+    int player = coords.GetCol() + ((m_doc->IsTree()) ? 0 : 1);
     wxBitmap bitmap;
     if (player == 0) {
       bitmap = wxBitmap(dice_xpm);
@@ -159,7 +163,7 @@ void gbtPlayerToolbar::OnMouseEvents(wxMouseEvent &p_event)
 
 void gbtPlayerToolbar::OnCellRightClick(wxSheetEvent &p_event)
 {
-  int player = p_event.GetRow() + ((m_doc->IsTree()) ? 0 : 1);
+  int player = p_event.GetCol() + ((m_doc->IsTree()) ? 0 : 1);
   wxColourData data;
   if (player == 0) {
     data.SetColour(m_doc->GetStyle().ChanceColor());
@@ -191,5 +195,5 @@ void gbtPlayerToolbar::OnCellRightClick(wxSheetEvent &p_event)
 void gbtPlayerToolbar::OnSize(wxSizeEvent &p_event)
 {
   wxSheet::OnSize(p_event);
-  SetColWidth(0, GetClientSize().GetWidth());
+  SetRowHeight(0, GetClientSize().GetHeight());
 }
