@@ -401,18 +401,6 @@ Rational::Rational(int n) :num(n), den(&_OneRep) { }
 
 Rational::Rational(long n, long d) :num(n), den(d) { normalize(); }
 Rational::Rational(int n, int d) :num(n), den(d) { normalize(); }
-Rational::Rational(long n, unsigned long d) :num(n), den(d)
-{
-  normalize();
-}
-Rational::Rational(unsigned long n, long d) :num(n), den(d)
-{
-  normalize();
-}
-Rational::Rational(unsigned long n, unsigned long d) :num(n), den(d)
-{
-  normalize();
-}
 
 Rational &Rational::operator =  (const Rational& y)
 {
@@ -486,7 +474,18 @@ Rational &Rational::operator/=(const Rational& y)
 
 const Integer& Rational::numerator() const { return num; }
 const Integer& Rational::denominator() const { return den; }
-Rational::operator double() const { return ratio(num, den); }
+
+Rational::operator double(void) const 
+{
+  // We approach this in terms of absolute values because there is
+  // (apparently) a bug in ratio() which yields incorrect results
+  // for some negative numbers (TLT, 27 Feb 2006).
+  Integer x(num), y(den);
+  x.abs();
+  y.abs();
+  
+  return sign(*this) * ratio(x, y);
+}
 
 Rational Rational::operator+(const Rational &y) const
 {

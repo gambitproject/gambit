@@ -51,13 +51,10 @@ protected:
 public:
   Rational(void);
   Rational(double);
-  Rational(int n);
+  Rational(int);
   Rational(long n);
   Rational(int n, int d);
   Rational(long n, long d);
-  Rational(long n, unsigned long d);
-  Rational(unsigned long n, long d);
-  Rational(unsigned long n, unsigned long d);
   Rational(const Integer& n);
   Rational(const Integer& n, const Integer& d);
   Rational(const Rational&);
