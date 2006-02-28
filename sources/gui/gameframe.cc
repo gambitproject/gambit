@@ -295,7 +295,7 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
 
   if (p_doc->IsTree()) {
     m_doc->BuildNfg();
-    m_manager.AddPane(m_nfgPanel, wxRIGHT, wxT("Strategic representation"));
+    m_manager.AddPane(m_nfgPanel, wxCENTER, wxT("Strategic representation"));
     m_manager.GetPane(m_nfgPanel).Show(false);
   }
   else {
@@ -1218,13 +1218,11 @@ void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
 {
   m_doc->BuildNfg();
 
-  wxPaneInfo &pane = m_manager.GetPane(m_nfgPanel);
-  pane.Show(!pane.IsShown());
+  m_manager.GetPane(m_nfgPanel).Show(p_event.IsChecked());
+  m_manager.GetPane(m_efgPanel).Show(!p_event.IsChecked());
 
   GetToolBar()->ToggleTool(GBT_MENU_VIEW_STRATEGIC, p_event.IsChecked());
-
   m_manager.Update();
-
   m_doc->UpdateViews(GBT_DOC_MODIFIED_NONE);
 }
 
