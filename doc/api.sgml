@@ -1,0 +1,162 @@
+<chapter id="api">
+<title>Overview of the Gambit API</title>
+
+<para>
+Gambit is written in C++.  This chapter gives an overview of the underlying 
+library of classes which represent and manipulate games.
+</para>
+
+<para>
+This chapter does not go into exhaustive detail about all functions and
+classes implemented in libgambit.  Programmers interested in using the
+library in their own applications should consult the Doxygen-generated
+source documentation available from the Documentation page of the
+Gambit website, as well as the sample programs.
+</para>
+
+<para>
+Gambit also provides an interface to the library for scripting languages
+by the use of SWIG (http://www.swig.org).  Currently, only an interface
+for Python (http://www.python.org) is available.  The SWIG wrapper should
+be easily modifiable to create interfaces for the other languages
+SWIG supports.
+</para>
+
+<sect1 id="api.concepts">
+<title>General concepts and terminology</title>
+
+<para>
+The file <literal>libgambit/libgambit.h</literal> includes all the
+header files for all classes and functions.
+To help play nice with other libraries, all classes and functions
+in libgambit are contained in the namespace <literal>Gambit</literal>.
+</para>
+
+<para>
+The development of much of Gambit occurred during 1994 and 1995.
+As this predates the formal standardization of the Standard Template
+Library (and, in fact, C++ itself), as well as other standard libraries
+for reusable container and similar classes, Gambit has its own implementation
+of some of these classes.  This section outlines those facilities.
+In the longer term, the goal is to evolve these classes to be more
+compatible with STL and/or with another standard library, and to possibly
+migrate fully to such a library.
+<xref linkend="table.containers"> lists the generic container
+classes provided by the library.
+</para>
+
+<table id="table.containers">
+<title>Container classes in libgambit</title>
+<tgroup cols="2">
+<colspec colname="Class">
+<colspec colname="Description">
+<thead>
+<row>
+<entry>Class</entry>
+<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+<entry>Array</entry>
+<entry>A basic bounds-checked array</entry>
+</row>
+<row>
+<entry>List</entry>
+<entry>A doubly-linked list</entry>
+</row>
+<row>
+<entry>Map</entry>
+<entry>A sorted associative container</entry>
+</row>
+<row>
+<entry>Vector</entry>
+<entry>A mathematical vector</entry>
+</row>
+<row>
+<entry>PVector</entry>
+<entry>A singly-partitioned vector</entry>
+</row>
+<row>
+<entry>DVector</entry>
+<entry>A doubly-partitioned vector</entry>
+</row>
+<row>
+<entry>RectArray</entry>
+<entry>A basic bounds-checked rectangular array</entry>
+</row>
+<row>
+<entry>Matrix</entry>
+<entry>A mathematical matrix</entry>
+</row>
+<row>
+<entry>SquareMatrix</entry>
+<entry>A mathematical square matrix</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>
+The <classname>Array</classname> and <classname>List</classname> classes
+are the basic generic one-dimensional containers; they have identical
+interfaces, and as such may be used interchangeably.  Thus,
+<classname>List</classname> is similar to the STL's <classname>list</classname>.
+<classname>Array</classname> is parallel to STL's 
+<classname>vector</classname>; note that Gambit reserves 
+<classname>Vector</classname> to represent mathematical objects of
+that name (i.e., they are <classname>Array</classname>s which have
+the standard mathematical operations defined on them).  The third
+generic container is <classname>Map</classname>, which is similar to
+STL's <classname>map</classname>, which associates a key to a value.
+</para>
+
+<note>
+<para>
+For historical reasons, and in contrast to STL and indexing conventions
+in C, C++, Python, and most languages, the <classname>List</classname>
+class starts indexing the first element at one, not zero.  The
+<classname>Array</classname> class defaults to this behavior, but allows
+any index to be used as the first index.  It is planned to migrate the
+library to using zero-based indexing; therefore, it is recommended to
+write code as generically as possible, especially using the iterator
+idioms provided, to make this migration easier. 
+</para>
+</note>
+
+</sect1>
+
+<sect1 id="api.games">
+<title>Games</title>
+
+<para>
+
+</para>
+</sect1>
+
+<sect1 id="api.supports">
+<title>Supports</title>
+
+<para>
+
+</para>
+</sect1>
+
+<sect1 id="api.profiles">
+<title>Behavior and strategy profiles</title>
+
+<para>
+
+</para>
+</sect1>
+
+<sect1 id="api.iterators">
+<title>Profile iterators</title>
+
+<para>
+
+</para>
+</sect1>
+
+</chapter>
+

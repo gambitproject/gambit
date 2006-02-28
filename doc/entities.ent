@@ -1,6 +1,7 @@
 <!ENTITY intro SYSTEM "intro.sgml">
 <!ENTITY gui SYSTEM "gui.sgml">
 <!ENTITY utils SYSTEM "utils.sgml">
+<!ENTITY api SYSTEM "api.sgml">
 <!ENTITY file SYSTEM "file.sgml">
 <!ENTITY biblio SYSTEM "biblio.sgml">
 <!ENTITY enumpure SYSTEM "enumpure.sgml">
