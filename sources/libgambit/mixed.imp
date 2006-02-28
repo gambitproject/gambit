@@ -254,11 +254,11 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue(void) const
     for (SupportStrategyIterator strategy = support.Strategies(player);
 	 !strategy.AtEnd(); strategy++) {
       const T &prob = (*this)[strategy];
-      values[strategy.GetIndex()] = GetStrategyValue(strategy);
-      avg += prob * values[strategy.GetIndex()];
+      values[support.GetIndex(strategy)] = GetStrategyValue(strategy);
+      avg += prob * values[support.GetIndex(strategy)];
       sum += prob;
       if (prob < (T) 0) {
-	liapValue += BIG1*avg*avg;  // penalty for negative probabilities
+	liapValue += BIG1*prob*prob;  // penalty for negative probabilities
       }
     }
 		    
