@@ -112,6 +112,20 @@ GameFileToken GameParserState::GetNextToken(void)
       	m_file.get(c);
       }
 
+      if (c == 'e' || c == 'E') {
+	buf += c;
+	m_file.get(c);
+	if (c == '+' && c == '-' && !isdigit(c)) {
+	  throw InvalidFileException();
+	}
+	buf += c;
+	m_file.get(c);
+	while (isdigit(c)) {
+	  buf += c;
+	  m_file.get(c);
+	}
+      }
+
       m_file.unget();
       m_lastText = buf;
 
@@ -128,7 +142,22 @@ GameFileToken GameParserState::GetNextToken(void)
       m_lastText = buf;
       return (m_lastToken = TOKEN_NUMBER);
     }
-      
+    else if (c == 'e' || c == 'E') {
+      buf += c;
+      m_file.get(c);
+      if (c == '+' && c == '-' && !isdigit(c)) {
+	throw InvalidFileException();
+      }
+      buf += c;
+      m_file.get(c);
+      while (isdigit(c)) {
+	buf += c;
+	m_file.get(c);
+      }
+      m_file.unget();
+      m_lastText = buf;
+      return (m_lastToken = TOKEN_NUMBER);
+    }
     else {
       m_file.unget();
       m_lastText = buf;

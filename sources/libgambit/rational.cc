@@ -560,6 +560,55 @@ Rational ToRational(const std::string &f)
       num += (int) (ch - '0');
       ch=f[index++];
     }
+    
+    if (ch == 'e' || ch == 'E') {
+      int expsign = 1;
+      Integer exponent = 0;
+      ch = f[index++];
+      if (ch == '-')  expsign = -1;
+      ch = f[index++];
+      while (ch >= '0' && ch <= '9' && index <= length) {
+	exponent *= 10;
+	exponent += (int) (ch - '0');
+	ch = f[index++];
+      }
+      if (exponent * expsign > 0) {
+	while (exponent > 0) {
+	  num *= 10;
+	  exponent -= 1;
+	}
+      }
+      else if (exponent * expsign < 0) {
+	while (exponent > 0) {
+	  denom *= 10;
+	  exponent -= 1;
+	}
+      }
+    }
+  }
+  else if (ch == 'e' || ch == 'E') {
+    int expsign = 1;
+    Integer exponent = 0;
+    ch = f[index++];
+    if (ch == '-')  expsign = -1;
+    ch = f[index++];
+    while (ch >= '0' && ch <= '9' && index <= length) {
+      exponent *= 10;
+      exponent += (int) (ch - '0');
+      ch = f[index++];
+    }
+    if (exponent * expsign > 0) {
+      while (exponent > 0) {
+	num *= 10;
+	exponent -= 1;
+      }
+    }
+    else if (exponent * expsign < 0) {
+      while (exponent > 0) {
+	denom *= 10;
+	exponent -= 1;
+      }
+    }
   }
 
   if (denom != 0) {
