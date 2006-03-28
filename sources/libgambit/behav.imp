@@ -485,9 +485,15 @@ void MixedBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
 
   GameInfoset iset = node->infoset;
 
-  if(iset) {
-    if (GetInfosetProb(iset) != GetInfosetProb(iset) * (T) 0)
-      m_beliefs[node->number] = m_realizProbs[node->number] / GetInfosetProb(iset);
+  if (iset) {
+    T infosetProb = (T) 0;
+    for (int i = 1; i <= iset->NumMembers(); i++) {
+      infosetProb += m_realizProbs[iset->GetMember(i)->number];
+    }
+
+    if (infosetProb != infosetProb * (T) 0) {
+      m_beliefs[node->number] = m_realizProbs[node->number] / infosetProb;
+    }
     
     // push down payoffs from outcomes attached to non-terminal nodes 
     for (int child = 1; child <= node->NumChildren(); child++) { 
@@ -514,7 +520,7 @@ void MixedBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
 	T &cpay = m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 				 act->GetInfoset()->GetNumber(),
 				 act->m_number);
-	if (GetInfosetProb(iset) != GetInfosetProb(iset) * (T) 0) {
+	if (infosetProb != infosetProb * (T) 0) {
 	  cpay += m_beliefs[node->number] * m_nodeValues(childNode->number, iset->GetPlayer()->GetNumber());
 	}
 	else {
@@ -554,6 +560,10 @@ void MixedBehavProfile<T>::ComputeSolutionData(void) const
     ComputeSolutionDataPass1(m_support.GetGame()->GetRoot());
     ComputeSolutionDataPass2(m_support.GetGame()->GetRoot());
 
+    // At this point, mark the cache as value, so calls to GetInfosetValue()
+    // don't create a loop.
+    m_cacheValid = true;
+
     for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
       for (int iset = 1; iset <= m_support.GetGame()->NumInfosets()[pl]; iset++) {
 	GameInfoset infoset = m_support.GetGame()->GetPlayer(pl)->GetInfoset(iset);
@@ -573,7 +583,6 @@ void MixedBehavProfile<T>::ComputeSolutionData(void) const
 	}
       }
     }
-    m_cacheValid = true;
   }
 }
 
