@@ -126,7 +126,8 @@ class Equation {
 public:
   virtual ~Equation() { }
 
-  virtual double Value(const MixedBehavProfile<double> &p_point, 
+  virtual double Value(const MixedBehavProfile<double> &p_point,
+		       const MixedBehavProfile<double> &p_logpoint,
 		       double p_lambda,
 		       const Array<bool> &p_isLog) = 0;
   virtual void Gradient(const MixedBehavProfile<double> &p_point, 
@@ -152,7 +153,9 @@ public:
       m_infoset(p_game->GetPlayer(p_player)->GetInfoset(p_infoset))
   { }
 
-  double Value(const MixedBehavProfile<double> &p_profile, double p_lambda,
+  double Value(const MixedBehavProfile<double> &p_profile,
+	       const MixedBehavProfile<double> &p_logprofile,
+	       double p_lambda,
 	       const Array<bool> &p_isLog);
   void Gradient(const MixedBehavProfile<double> &p_profile, double p_lambda,
 		const Array<bool> &p_isLog,
@@ -160,6 +163,7 @@ public:
 };
 
 double SumToOneEquation::Value(const MixedBehavProfile<double> &p_profile,
+			       const MixedBehavProfile<double> &p_logprofile,
 			       double p_lambda,
 			       const Array<bool> &p_isLog)
 {
@@ -215,7 +219,9 @@ public:
       m_infoset(p_game->GetPlayer(p_player)->GetInfoset(p_infoset))
   { }
 
-  double Value(const MixedBehavProfile<double> &p_profile, double p_lambda,
+  double Value(const MixedBehavProfile<double> &p_profile, 
+	       const MixedBehavProfile<double> &p_logprofile,
+	       double p_lambda,
 	       const Array<bool> &p_isLog);
   void Gradient(const MixedBehavProfile<double> &p_profile, double p_lambda,
 		const Array<bool> &p_isLog,
@@ -223,11 +229,12 @@ public:
 };
 
 double RatioEquation::Value(const MixedBehavProfile<double> &p_profile,
+			    const MixedBehavProfile<double> &p_logprofile,
 			    double p_lambda,
 			    const Array<bool> &p_isLog)
 {
-  return (log(p_profile(m_pl, m_iset, m_act)) - 
-	  log(p_profile(m_pl, m_iset, 1)) -
+  return (p_logprofile(m_pl, m_iset, m_act) - 
+	  p_logprofile(m_pl, m_iset, 1) -
 	  p_lambda *
 	  (p_profile.GetActionValue(m_infoset->GetAction(m_act)) -
 	   p_profile.GetActionValue(m_infoset->GetAction(1))));
@@ -246,10 +253,10 @@ void RatioEquation::Gradient(const MixedBehavProfile<double> &p_profile,
       for (int act = 1; act <= infoset->NumActions(); act++, i++) {
 	if (infoset == m_infoset) {
 	  if (act == 1) {
-	    p_gradient[i] = (p_isLog[i]) ? -1.0 : -1.0/p_profile(m_pl, m_iset, m_act);
+	    p_gradient[i] = (p_isLog[i]) ? -1.0 : -1.0/p_profile(m_pl, m_iset, 1);
 	  }
 	  else if (act == m_act) {
-	    p_gradient[i] = (p_isLog[i]) ? 1.0 : 1.0/p_profile(m_pl, m_iset, 1);
+	    p_gradient[i] = (p_isLog[i]) ? 1.0 : 1.0/p_profile(m_pl, m_iset, m_act);
 	  }
 	  else {
 	    p_gradient[i] = 0.0;
@@ -282,18 +289,21 @@ static void QreLHS(const Game &p_game,
 		   Vector<double> &p_lhs)
 {
   MixedBehavProfile<double> profile(p_game);
+  MixedBehavProfile<double> logprofile(p_game);
   for (int i = 1; i <= profile.Length(); i++) {
     if (p_isLog[i]) {
       profile[i] = exp(p_point[i]);
+      logprofile[i] = p_point[i];
     }
     else {
       profile[i] = p_point[i];
+      logprofile[i] = log(p_point[i]);
     }
   }
   double lambda = p_point[p_point.Length()];
 
   for (int i = 1; i <= p_lhs.Length(); i++) {
-    p_lhs[i] = p_equations[i]->Value(profile, lambda, p_isLog);
+    p_lhs[i] = p_equations[i]->Value(profile, logprofile, lambda, p_isLog);
   }
 }
 
@@ -416,7 +426,7 @@ void TraceAgentPath(const MixedBehavProfile<double> &p_start,
     for (int k = 1; k <= x.Length(); k++) {
       u[k] = x[k] + h * p_omega * t[k];
     }
-
+    
     double decel = 1.0 / g_maxDecel;  // initialize deceleration factor
     QreJacobian(p_start.GetGame(), equations, u, isLog, b);
     QRDecomp(b, q);
@@ -453,6 +463,7 @@ void TraceAgentPath(const MixedBehavProfile<double> &p_start,
 
     if (!accept) {
       h /= g_maxDecel;   // PC not accepted; change stepsize and retry
+      printf("retry with new stepsize %f\n", h);
       if (fabs(h) <= c_hmin) {
 	return;
       }
