@@ -1079,7 +1079,7 @@ void GameRep::Canonicalize(void)
     for (int iset = 1; iset <= player->m_infosets.Length(); iset++) {
       GameInfosetRep *infoset = player->m_infosets[iset];
       for (int i = 1; i < infoset->m_members.Length(); i++) {
-	for (int j = 1; j < infoset->m_members.Length() - i - 1; j++) {
+	for (int j = 1; j < infoset->m_members.Length() - i; j++) {
 	  if (infoset->m_members[j+1]->number < infoset->m_members[j]->number) {
 	    GameNodeRep *tmp = infoset->m_members[j];
 	    infoset->m_members[j] = infoset->m_members[j+1];
@@ -1093,7 +1093,7 @@ void GameRep::Canonicalize(void)
     // Coded using a bubble sort for simplicity; large games might
     // find a quicksort worthwhile.
     for (int i = 1; i < player->m_infosets.Length(); i++) {
-      for (int j = 1; j < player->m_infosets.Length() - i - 1; j++) {
+      for (int j = 1; j < player->m_infosets.Length() - i; j++) {
 	int a = ((player->m_infosets[j+1]->m_members.Length()) ?
 		 player->m_infosets[j+1]->m_members[1]->number : 0);
 	int b = ((player->m_infosets[j]->m_members.Length()) ?
