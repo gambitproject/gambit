@@ -116,6 +116,8 @@ gbtAnalysisProfileList<T>::AddOutput(const wxString &p_output)
       }
       m_current = m_mixedProfiles.Length();
     }
+
+    m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
   }
   catch (gbtNotNashException &) { }
 }
