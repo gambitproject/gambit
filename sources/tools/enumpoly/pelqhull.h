@@ -942,7 +942,7 @@ struct setT {
 -SETempty_(set) - return true (1) if set is empty
       set may be NULL
 */
-#define SETreturnsize_(set, size) (((size)= (int)((set)->e[(set)->maxsize]))?(--(size)):((size)= (set)->maxsize))
+#define SETreturnsize_(set, size) (((size)= (long)((set)->e[(set)->maxsize]))?(--(size)):((size)= (set)->maxsize))
 #define SETempty_(set) 	          (!set || (SETfirst_(set) ? 0:1))
 
 /* ======= -functions =========== 

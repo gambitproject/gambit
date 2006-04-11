@@ -3215,7 +3215,7 @@ node node_print(node N)
         }
         level--;
 	break;
-    case PROC: printf("%d",(int)node_get_ptr(N,LEFT));
+    case PROC: printf("%ld",(long)node_get_ptr(N,LEFT));
         break;
     default:
 	printf("Unknown type %d in Node_Print\n",

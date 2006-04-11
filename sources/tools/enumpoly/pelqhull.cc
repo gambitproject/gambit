@@ -121,7 +121,7 @@ void *qh_memalloc(int insize) {
     if (!(object= malloc(outsize))) qhull_fatal(3);
 
     if (qhmem.IStracing >= 5)
-      fprintf (qhmem.ferr, "qh_memalloc long: %d bytes at %x\n", outsize, (int)object);
+      fprintf (qhmem.ferr, "qh_memalloc long: %d bytes at %p\n", outsize, object);
   }
   return (object);
 } /* memalloc */
@@ -148,7 +148,7 @@ void qh_memfree(void *object, int size) {
     qhmem .totlong -= size;
     free (object);
     if (qhmem.IStracing >= 5)
-      fprintf (qhmem.ferr, "qh_memfree long: %d bytes at %x\n", size, (int)object);
+      fprintf (qhmem.ferr, "qh_memfree long: %d bytes at %p\n", size, object);
   }
 } /* memfree */
 
@@ -519,10 +519,10 @@ void *qh_setdellast(setT *set) {
   
   if (!set || !(set->e[0]))
     return NULL;
-  if ((setsize= (int)*(last= &(set->e[set->maxsize])))) {
+  if ((setsize= (long)*(last= &(set->e[set->maxsize])))) {
     returnvalue= set->e[setsize - 2];
     set->e[setsize - 2]= NULL;
-    *last= (void *)((int)*last - 1);
+    *last= (void *)((long)*last - 1);
   }else {
     returnvalue= set->e[set->maxsize - 1];
     set->e[set->maxsize - 1]= NULL;
@@ -939,11 +939,11 @@ void qh_setprint(FILE *fp, char* string, setT *set) {
   else {
     SETreturnsize_(set, size);
     fprintf (fp, "%s set=%x maxsize=%d size=%d elems=",
-	     string, (unsigned int)set, set->maxsize, size);
+	     string, (unsigned long)set, set->maxsize, size);
     if (size > (int)set->maxsize)
       size= set->maxsize+1;
     for (k=0; k<size; k++)
-      fprintf(fp, " %x", (unsigned int)(set->e[k]));
+      fprintf(fp, " %p", set->e[k]);
     fprintf(fp, "\n");
   }
 } /* setprint */
@@ -998,8 +998,8 @@ setT *qh_settemp(int setsize) {
   newset= qh_setnew (setsize);
   qh_setappend ((setT **)&qhmem.tempstack, newset);
   if (qhmem.IStracing >= 5)
-    fprintf (qhmem.ferr, "qh_settemp: temp set %x of %d elements, depth %d\n",
-       (int)newset, newset->maxsize, qh_setsize ((setT *)qhmem.tempstack));
+    fprintf (qhmem.ferr, "qh_settemp: temp set %p of %d elements, depth %d\n",
+       newset, newset->maxsize, qh_setsize ((setT *)qhmem.tempstack));
   return newset;
 } /* settemp */
 
@@ -1043,8 +1043,8 @@ setT *qh_settemppop(void) {
   if (!stackedset) qhull_fatal(18);
 
   if (qhmem.IStracing >= 5)
-    fprintf (qhmem.ferr, "qh_settemppop: depth %d temp set %x of %d elements\n",
-       qh_setsize((setT *)qhmem.tempstack)+1, (int)stackedset, qh_setsize(stackedset));
+    fprintf (qhmem.ferr, "qh_settemppop: depth %d temp set %p of %d elements\n",
+       qh_setsize((setT *)qhmem.tempstack)+1, stackedset, qh_setsize(stackedset));
   return stackedset;
 } /* settemppop */
 
@@ -1056,8 +1056,8 @@ void qh_settemppush(setT *set) {
   
   qh_setappend ((setT**)&qhmem.tempstack, set);
   if (qhmem.IStracing >= 5)
-    fprintf (qhmem.ferr, "qh_settemppush: depth %d temp set %x of %d elements\n",
-    qh_setsize((setT *)qhmem.tempstack), (int)set, qh_setsize(set));
+    fprintf (qhmem.ferr, "qh_settemppush: depth %d temp set %p of %d elements\n",
+    qh_setsize((setT *)qhmem.tempstack), set, qh_setsize(set));
 } /* settemppush */
 
  
@@ -4088,8 +4088,8 @@ void qh_checkpolygon(facetT *facetlist) {
 	vertex->seen= True;
 	numvertices++;
 	if (qh_pointid (vertex->point) == -1) {
-	  fprintf (qh ferr, "qhull internal error (checkpolygon): unknown point %x for vertex v%d first_point %x\n",
-		   (int) vertex->point, vertex->id, (int) qh first_point);
+	  fprintf (qh ferr, "qhull internal error (checkpolygon): unknown point %p for vertex v%d first_point %p\n",
+		   vertex->point, vertex->id, qh first_point);
 	  waserror= True;
 	}
       }
@@ -4152,7 +4152,7 @@ void qh_checkvertex (vertexT *vertex) {
   facetT *neighbor, **neighborp, *errfacet=NULL;
 
   if (qh_pointid (vertex->point) == -1) {
-    fprintf (qh ferr, "qhull internal error (checkvertex): unknown point id %x\n", (int) vertex->point);
+    fprintf (qh ferr, "qhull internal error (checkvertex): unknown point id %p\n", vertex->point);
     waserror= True;
   }
   if (vertex->id >= qh vertex_id) {
@@ -4461,33 +4461,33 @@ unsigned qh_gethash (int hashsize, setT *set, int size, int firstindex, void *sk
 
   switch (size-firstindex) {
   case 1:
-    hash= (unsigned)(*elemp) - (unsigned) skipelem;
+    hash= (unsigned long)(*elemp) - (unsigned long) skipelem;
     break;
   case 2:
-    hash= (unsigned)(*elemp) + (unsigned)elemp[1] - (unsigned) skipelem;
+    hash= (unsigned long)(*elemp) + (unsigned long)elemp[1] - (unsigned long) skipelem;
     break;
   case 3:
-    hash= (unsigned)(*elemp) + (unsigned)elemp[1] + (unsigned)elemp[2]
-      - (unsigned) skipelem;
+    hash= (unsigned long)(*elemp) + (unsigned long)elemp[1] + (unsigned long)elemp[2]
+      - (unsigned long) skipelem;
     break;
   case 4:
-    hash= (unsigned)(*elemp) + (unsigned)elemp[1] + (unsigned)elemp[2]
-      + (unsigned)elemp[3] - (unsigned) skipelem;
+    hash= (unsigned long)(*elemp) + (unsigned long)elemp[1] + (unsigned long)elemp[2]
+      + (unsigned long)elemp[3] - (unsigned long) skipelem;
     break;
   case 5:
-    hash= (unsigned)(*elemp) + (unsigned)elemp[1] + (unsigned)elemp[2]
-      + (unsigned)elemp[3] + (unsigned)elemp[4] - (unsigned) skipelem;
+    hash= (unsigned long)(*elemp) + (unsigned long)elemp[1] + (unsigned long)elemp[2]
+      + (unsigned long)elemp[3] + (unsigned long)elemp[4] - (unsigned long) skipelem;
     break;
   case 6:
-    hash= (unsigned)(*elemp) + (unsigned)elemp[1] + (unsigned)elemp[2]
-      + (unsigned)elemp[3] + (unsigned)elemp[4]+ (unsigned)elemp[5]
-      - (unsigned) skipelem;
+    hash= (unsigned long)(*elemp) + (unsigned long)elemp[1] + (unsigned long)elemp[2]
+      + (unsigned long)elemp[3] + (unsigned long)elemp[4]+ (unsigned long)elemp[5]
+      - (unsigned long) skipelem;
     break;
   default:
     hash= 0;
     i= 3;
     do {     /* this is about 10% in 10-d */
-      if ((elem= (unsigned)*elemp++) != (unsigned)skipelem) {
+      if ((elem= (unsigned long)*elemp++) != (unsigned long)skipelem) {
         hash ^= (elem << i) + (elem >> (32-i));
 	i += 3;
 	if (i >= 32)
@@ -5218,7 +5218,7 @@ pointT *qh_point (int id) {
   if (id < 0)
     return NULL;
   if (id < qh num_points)
-    return ((pointT *)((unsigned)qh first_point+(unsigned)((id)*qh normal_size)));
+    return ((pointT *)((unsigned long)qh first_point+(unsigned long)((id)*qh normal_size)));
   id -= qh num_points;
   if (id < qh_setsize (qh other_points))
     return (pointT *)SETelem_(qh other_points, id);
@@ -5232,8 +5232,8 @@ void qh_point_add (setT *set, pointT *point, void *elem) {
   int id;
   
   if ((id= qh_pointid(point)) == -1)
-    fprintf (qh ferr, "qhull internal warning (pointfacet,pointvertex): unknown point %ux\n", 
-      (unsigned) point);
+    fprintf (qh ferr, "qhull internal warning (pointfacet,pointvertex): unknown point %p\n", 
+      point);
   else 
     SETelem_(set, id)= elem;
 } /* point_add */
@@ -5279,7 +5279,7 @@ int qh_pointid (pointT *point) {
 
   if (!point)
     return -3;
-  id= ((unsigned) point - (unsigned) qh first_point)/qh normal_size;
+  id= ((unsigned long) point - (unsigned long) qh first_point)/qh normal_size;
   if ((int)id >= qh num_points) {
     if (point == qh interior_point)
       id= (unsigned int) -2;
@@ -6774,8 +6774,8 @@ void qh_mergevertex_neighbors(facetT *facet1, facetT *facet2) {
   trace4((qh ferr, "qh_mergevertex_neighbors: merge vertex neighbors of f%d and f%d\n",
 	  facet1->id, facet2->id));
   if (qh tracevertex) {
-    fprintf (qh ferr, "qh_mergevertex_neighbors: of f%d and f%d at furthest p%d f0= %x\n",
-	     facet1->id, facet2->id, qh furthest_id, (int)qh tracevertex->neighbors->e[0]);
+    fprintf (qh ferr, "qh_mergevertex_neighbors: of f%d and f%d at furthest p%d f0= %p\n",
+	     facet1->id, facet2->id, qh furthest_id, qh tracevertex->neighbors->e[0]);
 
     /*
     qh_errprint ("TRACE", NULL, NULL, NULL, qh tracevertex);
