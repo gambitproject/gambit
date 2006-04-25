@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     2005-05-17
 // RCS-ID:      
-// Copyright:   (C) Copyright 2005, Kirix Corporation, All Rights Reserved.
+// Copyright:   (C) Copyright 2005-2006, Kirix Corporation, All Rights Reserved
 // Licence:     wxWindows Library Licence, Version 3.1
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -14,19 +14,6 @@
 #include <wx/image.h>
 #include "manager.h"
 
-//#define WXAUI_USE_WXGETMOUSESTATE 0
-#define HAVE_WXGETMOUSESTATE 0
-
-#ifdef WXAUI_USE_WXGETMOUSESTATE
-#ifndef HAVE_WXGETMOUSESTATE
-// We want to use WXGETMOUSESTATE but we haven't got it in the wx library - presume there is an include file
-#include "wxmousestate.h"
-#endif // HAVE_WXGETMOUSESTATE
-#else
-#ifdef __WXGTK__
-extern "C" { void* gdk_window_get_pointer(void*, int*, int*, unsigned int*); }
-#endif // __WXGTK__
-#endif // WXAUI_USE_WXGETMOUSESTATE
 
 // -- various array and event implementations --
 
@@ -465,45 +452,22 @@ void wxDefaultDockArt::DrawGripper(wxDC& dc,
 
     dc.DrawRectangle(rect.x, rect.y, rect.width,rect.height);
 
-    if (!pane.HasGripperTop())
+    int y = 5;
+    while (1)
     {
-        int y = 5;
-        while (1)
-        {
-            dc.SetPen(m_gripper_pen1);
-            dc.DrawPoint(rect.x+3, rect.y+y);
-            dc.SetPen(m_gripper_pen2);
-            dc.DrawPoint(rect.x+3, rect.y+y+1);
-            dc.DrawPoint(rect.x+4, rect.y+y);
-            dc.SetPen(m_gripper_pen3);
-            dc.DrawPoint(rect.x+5, rect.y+y+1);
-            dc.DrawPoint(rect.x+5, rect.y+y+2);
-            dc.DrawPoint(rect.x+4, rect.y+y+2);
-
-            y += 4;
-            if (y > rect.GetHeight()-5)
-                break;
-        }
-    }
-    else
-    {
-        int x = 5;
-        while (1)
-        {
-            dc.SetPen(m_gripper_pen1);
-            dc.DrawPoint(rect.x+x, rect.y+3);
-            dc.SetPen(m_gripper_pen2);
-            dc.DrawPoint(rect.x+x+1, rect.y+3);
-            dc.DrawPoint(rect.x+x, rect.y+4);
-            dc.SetPen(m_gripper_pen3);
-            dc.DrawPoint(rect.x+x+1, rect.y+5);
-            dc.DrawPoint(rect.x+x+2, rect.y+5);
-            dc.DrawPoint(rect.x+x+2, rect.y+4);
-
-            x += 4;
-            if (x > rect.GetWidth()-5)
-                break;
-        }
+        dc.SetPen(m_gripper_pen1);
+        dc.DrawPoint(rect.x+3, rect.y+y);
+        dc.SetPen(m_gripper_pen2);
+        dc.DrawPoint(rect.x+3, rect.y+y+1);
+        dc.DrawPoint(rect.x+4, rect.y+y);        
+        dc.SetPen(m_gripper_pen3);
+        dc.DrawPoint(rect.x+5, rect.y+y+1);
+        dc.DrawPoint(rect.x+5, rect.y+y+2);        
+        dc.DrawPoint(rect.x+4, rect.y+y+2);        
+        
+        y += 4;
+        if (y > rect.GetHeight()-5)
+            break;
     }
 }
 
@@ -577,6 +541,10 @@ void wxDefaultDockArt::DrawPaneButton(wxDC& dc,
 #define wxFloatingPaneBaseClass wxFrame
 #endif
 
+#ifdef __WXGTK__
+extern "C" { void* gdk_window_get_pointer(void*, int*, int*, unsigned int*); }
+#endif
+
 class wxFloatingPane : public wxFloatingPaneBaseClass
 {
 public:
@@ -594,6 +562,7 @@ public:
         m_moving = false;
         m_last_rect = wxRect();
         m_mgr.SetFrame(this);
+        SetExtraStyle(wxWS_EX_PROCESS_IDLE);
     }
 
     ~wxFloatingPane()
@@ -642,12 +611,7 @@ public:
             if (size == wxDefaultSize)
                 size = m_pane_window->GetSize();
             if (pane.HasGripper())
-            {
-                if (pane.HasGripperTop())
-                    size.y += m_owner_mgr->m_art->GetMetric(wxAUI_ART_GRIPPER_SIZE);
-                else
-                    size.x += m_owner_mgr->m_art->GetMetric(wxAUI_ART_GRIPPER_SIZE);
-            }
+                size.x += m_owner_mgr->m_art->GetMetric(wxAUI_ART_GRIPPER_SIZE);
                 
             SetClientSize(size);
         }
@@ -746,9 +710,6 @@ private:
     // functionality to wxWidgets itself)
     static bool isMouseDown()
     {
-#ifdef WXAUI_USE_WXGETMOUSESTATE
-        return wxGetMouseState().LeftDown();
-#else
         #ifdef __WXMSW__
         return (GetKeyState( VK_LBUTTON ) & (1<<15)) ? true : false;
         #endif
@@ -762,9 +723,8 @@ private:
         #endif
         
         #ifdef __WXMAC__
-        return GetCurrentButtonState() & 0x01 ;
+        return GetCurrentEventButtonState() & 0x01 ;
         #endif
-#endif
     }
 
 private:
@@ -789,105 +749,7 @@ BEGIN_EVENT_TABLE(wxFloatingPane, wxFloatingPaneBaseClass)
 END_EVENT_TABLE()
 
 
-class wxPseudoTransparentFrame : public wxFrame
-{
-public:
-    wxPseudoTransparentFrame(wxWindow* parent = NULL,
-                wxWindowID id = -1,
-                const wxString& title = wxT(""),
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = wxDEFAULT_FRAME_STYLE,
-                const wxString &name = wxT("frame"))
-                    : wxFrame(parent, id, title, pos, size, style | wxFRAME_SHAPED, name)
-    {
-        SetBackgroundStyle(wxBG_STYLE_CUSTOM);
-        m_Amount=0;
-        m_MaxWidth=0;
-        m_MaxHeight=0;
-#ifdef __WXGTK
-        m_CanSetShape = false; // have to wait for window create event on GTK
-#else
-        m_CanSetShape = true;
-#endif
-        SetTransparency(0);
-    }
 
-    void SetTransparency(int amount)
-    {
-        if (m_CanSetShape)
-        {
-            int w=100; // some defaults
-            int h=100;
-            GetClientSize(&w, &h);
-            if ((amount != m_Amount) || (m_MaxWidth<w) | (m_MaxHeight<h))
-            {
-                // Make the region at least double the height and width so we don't have
-                // to rebuild if the size changes.
-                m_MaxWidth=w*2;
-                m_MaxHeight=h*2;
-                m_Amount = amount;
-                m_Region.Clear();
-//				m_Region.Union(0, 0, 1, m_MaxWidth);
-                if (m_Amount)
-                {
-                    for (int y=0; y<m_MaxHeight; y++)
-                    {
-                        // Reverse the order of the bottom 4 bits
-                        int j=((y&8)?1:0)|((y&4)?2:0)|((y&2)?4:0)|((y&1)?8:0);
-                        if ((j*16+8)<m_Amount)
-                            m_Region.Union(0, y, m_MaxWidth, 1);
-                    }
-                }
-                SetShape(m_Region);
-                Refresh();
-            }
-        }
-    }
-
-    void OnPaint(wxPaintEvent & event)
-    {
-        wxPaintDC dc(this);
-        
-        dc.SetBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_ACTIVECAPTION));
-        dc.SetPen(*wxTRANSPARENT_PEN);
-        
-        wxRegionIterator upd(GetUpdateRegion()); // get the update rect list
-        
-        while (upd)
-        {
-            wxRect rect(upd.GetRect());
-            dc.DrawRectangle(rect.x, rect.y, rect.width, rect.height);
-
-            upd++;
-        }
-    }
-
-#ifdef __WXGTK__
-    void wxPseudoTransparentFrame::OnWindowCreate(wxWindowCreateEvent& WXUNUSED(event)) {m_CanSetShape=true; SetTransparency(0);}
-#endif
-
-private:
-    int m_Amount;
-    int m_MaxWidth;
-    int m_MaxHeight;
-    bool m_CanSetShape;
-
-    wxRegion m_Region;
-
-    DECLARE_DYNAMIC_CLASS(wxPseudoTransparentFrame);
-    DECLARE_EVENT_TABLE();
-};
-
-
-IMPLEMENT_DYNAMIC_CLASS( wxPseudoTransparentFrame, wxFrame )
-
-BEGIN_EVENT_TABLE(wxPseudoTransparentFrame, wxFrame)
-    EVT_PAINT(wxPseudoTransparentFrame::OnPaint)
-#ifdef __WXGTK__
-    EVT_WINDOW_CREATE(wxPseudoTransparentFrame::OnWindowCreate)
-#endif
-END_EVENT_TABLE()
 
 
 // -- static utility functions --
@@ -910,52 +772,39 @@ static void DrawResizeHint(wxDC& dc, const wxRect& rect)
     dc.DrawRectangle(rect);
 }
 
+#ifdef __WXMSW__
 
 // on supported windows systems (Win2000 and greater), this function
 // will make a frame window transparent by a certain amount
 static void MakeWindowTransparent(wxWindow* wnd, int amount)
 {
-    bool realtransparency = !(wnd && wnd->IsKindOf(CLASSINFO(wxPseudoTransparentFrame)));
-    if (realtransparency)
-    {
-#ifdef __WXMSW__
-        // this API call is not in all SDKs, only the newer ones, so
-        // we will runtime bind this
-        typedef DWORD (WINAPI *PSETLAYEREDWINDOWATTR)(HWND, DWORD, BYTE, DWORD);
-        static PSETLAYEREDWINDOWATTR pSetLayeredWindowAttributes = NULL;
-        static HMODULE h = NULL;
-        HWND hwnd = (HWND)wnd->GetHWND();
+    // this API call is not in all SDKs, only the newer ones, so
+    // we will runtime bind this
+    typedef DWORD (WINAPI *PSETLAYEREDWINDOWATTR)(HWND, DWORD, BYTE, DWORD);
+    static PSETLAYEREDWINDOWATTR pSetLayeredWindowAttributes = NULL;
+    static HMODULE h = NULL;
+    HWND hwnd = (HWND)wnd->GetHWND();
     
-        if (!h)
-            h = LoadLibrary(_T("user32"));
+    if (!h)
+        h = LoadLibrary(_T("user32"));
         
-        if (!pSetLayeredWindowAttributes)
-        {
-            pSetLayeredWindowAttributes =
-            (PSETLAYEREDWINDOWATTR)GetProcAddress(h,"SetLayeredWindowAttributes");
-        }
-    
-        if (pSetLayeredWindowAttributes == NULL)
-            return;
-        
-        LONG exstyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-        if (0 == (exstyle & 0x80000) /*WS_EX_LAYERED*/)
-            SetWindowLong(hwnd, GWL_EXSTYLE, exstyle | 0x80000 /*WS_EX_LAYERED*/);   
-            
-        pSetLayeredWindowAttributes(hwnd, 0, amount, 2 /*LWA_ALPHA*/);
-#endif
-    }
-    else
+    if (!pSetLayeredWindowAttributes)
     {
-        if (wnd)
-        {
-            ((wxPseudoTransparentFrame *)wnd)->SetTransparency(amount);
-            wnd->Refresh();
-        }
+        pSetLayeredWindowAttributes =
+         (PSETLAYEREDWINDOWATTR)GetProcAddress(h,"SetLayeredWindowAttributes");
     }
+    
+    if (pSetLayeredWindowAttributes == NULL)
+        return;
+        
+    LONG exstyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+    if (0 == (exstyle & 0x80000) /*WS_EX_LAYERED*/)
+        SetWindowLong(hwnd, GWL_EXSTYLE, exstyle | 0x80000 /*WS_EX_LAYERED*/);   
+             
+    pSetLayeredWindowAttributes(hwnd, 0, amount, 2 /*LWA_ALPHA*/);
 }
 
-
+#endif
 
 
 // CopyDocksAndPanes() - this utility function creates copies of
@@ -964,9 +813,9 @@ static void MakeWindowTransparent(wxWindow* wnd, int amount)
 // reconstruct that relationship in the new dock info and pane info arrays
 
 static void CopyDocksAndPanes(wxDockInfoArray& dest_docks,
-                            wxPaneInfoArray& dest_panes,
-                            const wxDockInfoArray& src_docks,
-                            const wxPaneInfoArray& src_panes)
+                              wxPaneInfoArray& dest_panes,
+                              const wxDockInfoArray& src_docks,
+                              const wxPaneInfoArray& src_panes)
 {
     dest_docks = src_docks;
     dest_panes = src_panes;
@@ -1217,9 +1066,13 @@ wxFrameManager::wxFrameManager(wxFrame* frame, unsigned int flags)
     m_last_mouse_move = wxPoint();
     m_hover_button = NULL;
     m_art = new wxDefaultDockArt;
-    m_frame = frame;
     m_hint_wnd = NULL;
     m_flags = flags;
+
+    if (frame)
+    {
+        SetFrame(frame);
+    }
 }
 
 wxFrameManager::~wxFrameManager()
@@ -1326,6 +1179,7 @@ void wxFrameManager::SetFrame(wxFrame* frame)
     m_frame = frame;
     m_frame->PushEventHandler(this);
 
+#if wxUSE_MDI
     // if the owner is going to manage an MDI parent frame,
     // we need to add the MDI client window as the default
     // center pane
@@ -1341,6 +1195,7 @@ void wxFrameManager::SetFrame(wxFrame* frame)
                 wxPaneInfo().Name(wxT("mdiclient")).
                 CenterPane().PaneBorder(false));
     }
+#endif
 }
 
 
@@ -1349,8 +1204,7 @@ void wxFrameManager::SetFrame(wxFrame* frame)
 // will result in a crash upon program exit
 void wxFrameManager::UnInit()
 {
-    if (m_frame->GetEventHandler() == this)
-        m_frame->PopEventHandler();
+    m_frame->RemoveEventHandler(this);
 }
 
 // GetFrame() returns the frame pointer being managed by wxFrameManager
@@ -1409,7 +1263,8 @@ bool wxFrameManager::AddPane(wxWindow* window, const wxPaneInfo& pane_info)
     if (pinfo.name.IsEmpty())
     {
         pinfo.name.Printf(wxT("%08x%08x%08x%08x"),
-             (unsigned int)pinfo.window, (unsigned int)time(NULL),
+             ((unsigned long)pinfo.window) & 0xffffffff,
+             (unsigned int)time(NULL),
              (unsigned int)clock(), m_panes.GetCount());
     }
     
@@ -1424,11 +1279,26 @@ bool wxFrameManager::AddPane(wxWindow* window, const wxPaneInfo& pane_info)
         button.button_id = wxPaneInfo::buttonClose;
         pinfo.buttons.Add(button);
     }
-
+    
     if (pinfo.best_size == wxDefaultSize &&
         pinfo.window)
     {
         pinfo.best_size = pinfo.window->GetClientSize();
+
+        if (pinfo.window->IsKindOf(CLASSINFO(wxToolBar)))
+        {
+            // GetClientSize() doesn't get the best size for
+            // a toolbar under some newer versions of wxWidgets,
+            // so use GetBestSize()
+            pinfo.best_size = pinfo.window->GetBestSize();
+                    
+            // for some reason, wxToolBar::GetBestSize() is returning
+            // a size that is a pixel shy of the correct amount.
+            // I believe this to be the correct action, until
+            // wxToolBar::GetBestSize() is fixed.  Is this assumption
+            // correct?
+            pinfo.best_size.y++;
+        }
         
         if (pinfo.min_size != wxDefaultSize)
         {
@@ -1520,8 +1390,24 @@ bool wxFrameManager::DetachPane(wxWindow* window)
     int i, count;
     for (i = 0, count = m_panes.GetCount(); i < count; ++i)
     {
-        if (m_panes.Item(i).window == window)
+        wxPaneInfo& p = m_panes.Item(i);    
+        if (p.window == window)
         {
+            if (p.frame)
+            {
+                // we have a floating frame which is being detached. We need to
+                // reparent it to m_frame and destroy the floating frame
+
+                // reduce flicker
+                p.window->SetSize(1,1);
+                p.frame->Show(false);
+
+                // reparent to m_frame and destroy the pane
+                p.window->Reparent(m_frame);
+                p.frame->SetSizer(NULL);
+                p.frame->Destroy();
+                p.frame = NULL;
+            }
             m_panes.RemoveAt(i);
             return true;
         }
@@ -1792,18 +1678,15 @@ void wxFrameManager::GetPanePositionsAndSizes(wxDockInfo& dock,
         
         if (pane.HasBorder())
             size += (pane_border_size*2);
+        if (pane.HasGripper())
+            size += gripper_size;
                 
         if (dock.IsHorizontal())
         {
-            if (pane.HasGripper() && !pane.HasGripperTop())
-                size += gripper_size;
             size += pane.best_size.x;
         }
          else
         {
-            if (pane.HasGripper() && pane.HasGripperTop())
-                size += gripper_size;
-
             if (pane.HasCaption())
                 size += caption_size; 
             size += pane.best_size.y;
@@ -1877,10 +1760,7 @@ void wxFrameManager::LayoutAddPane(wxSizer* cont,
 
     if (pane.HasGripper())
     {
-        if (pane.HasGripperTop())
-            sizer_item = vert_pane_sizer ->Add(1, gripper_size, 0, wxEXPAND);
-	else
-            sizer_item = horz_pane_sizer ->Add(gripper_size, 1, 0, wxEXPAND);
+        sizer_item = horz_pane_sizer->Add(gripper_size, 1, 0, wxEXPAND);
 
         part.type = wxDockUIPart::typeGripper;
         part.dock = &dock;
@@ -2541,7 +2421,6 @@ void wxFrameManager::Update()
             // reparent it to m_frame and destroy the floating frame
             
             // reduce flicker
-
             p.window->SetSize(1,1);
             p.frame->Show(false);
                        
@@ -2949,9 +2828,14 @@ bool wxFrameManager::DoDrop(wxDockInfoArray& docks,
         // should float if being dragged over center pane windows
         if (!part->dock->fixed || part->dock->dock_direction == wxAUI_DOCK_CENTER)
         {
-            if ((m_flags & wxAUI_MGR_ALLOW_FLOATING) && (drop.IsFloatable() || (part->dock->dock_direction != wxAUI_DOCK_CENTER
-																			    && part->dock->dock_direction != wxAUI_DOCK_NONE)))
+            if ((m_flags & wxAUI_MGR_ALLOW_FLOATING) &&
+                   (drop.IsFloatable() ||
+                    (part->dock->dock_direction != wxAUI_DOCK_CENTER &&
+                     part->dock->dock_direction != wxAUI_DOCK_NONE)))
+            {
                 drop.Float();
+            }
+            
             return ProcessDockResult(target, drop);
         }
         
@@ -2961,10 +2845,8 @@ bool wxFrameManager::DoDrop(wxDockInfoArray& docks,
              Row(part->dock->dock_row).
              Position(dock_drop_offset);
 
-        if ((
-            ((pt.y < part->dock->rect.y + 2) && part->dock->IsHorizontal()) ||
-            ((pt.x < part->dock->rect.x + 2) && part->dock->IsVertical())
-            ) && part->dock->panes.GetCount() > 1)
+        if (pt.y < part->dock->rect.y + 2 &&
+            part->dock->panes.GetCount() > 1)
         {
             int row = drop.dock_row;
             DoInsertDockRow(panes, part->dock->dock_direction,
@@ -2973,10 +2855,8 @@ bool wxFrameManager::DoDrop(wxDockInfoArray& docks,
             drop.dock_row = row;
         }
         
-        if ((
-            ((pt.y > part->dock->rect.y + part->dock->rect.height - 2 ) && part->dock->IsHorizontal()) ||
-            ((pt.x > part->dock->rect.x + part->dock->rect.width - 2 ) && part->dock->IsVertical())
-            ) && part->dock->panes.GetCount() > 1)
+        if (pt.y > part->dock->rect.y + part->dock->rect.height - 2 &&
+            part->dock->panes.GetCount() > 1)
         {
             DoInsertDockRow(panes, part->dock->dock_direction,
                             part->dock->dock_layer,
@@ -3196,8 +3076,8 @@ bool wxFrameManager::DoDrop(wxDockInfoArray& docks,
 
 void wxFrameManager::OnHintFadeTimer(wxTimerEvent& event)
 {
-    bool realtransparency = !(m_hint_wnd && m_hint_wnd->IsKindOf(CLASSINFO(wxPseudoTransparentFrame)));
-    if (!m_hint_wnd || m_hint_fadeamt >= (realtransparency?50:128))
+#ifdef __WXMSW__
+    if (!m_hint_wnd || m_hint_fadeamt >= 50)
     {
         m_hint_fadetimer.Stop();
         return;
@@ -3205,104 +3085,140 @@ void wxFrameManager::OnHintFadeTimer(wxTimerEvent& event)
     
     m_hint_fadeamt += 5;
     MakeWindowTransparent(m_hint_wnd, m_hint_fadeamt);
+#endif
 }
 
 void wxFrameManager::ShowHint(const wxRect& rect)
 {
-
-    static bool realtransparency = false;
-#ifdef __WXMSW__
+    #ifdef __WXMSW__
+    
     // First, determine if the operating system can handle transparency.
     // Transparency is available on Win2000 and above
-
+    
     static int os_type = -1;
     static int ver_major = -1;
     
     if (os_type == -1)
         os_type = ::wxGetOsVersion(&ver_major);
 
-    realtransparency = (m_flags & wxAUI_MGR_TRANSPARENT_HINT) && os_type == wxWINDOWS_NT && ver_major >= 5;
-#endif
-
     // If the transparent flag is set, and the OS supports it,
     // go ahead and use a transparent hint
-
-    if (m_last_hint == rect)
-        return;
-    m_last_hint = rect;
-
-    int initial_fade = realtransparency?50:128;
-    if (m_flags & wxAUI_MGR_TRANSPARENT_HINT_FADE)
-        initial_fade = 0;
-
-    if (m_hint_wnd == NULL)
+    
+    if ((m_flags & wxAUI_MGR_TRANSPARENT_HINT) != 0 &&
+        os_type == wxWINDOWS_NT && ver_major >= 5)
     {
-        wxPoint pt = rect.GetPosition();
-        wxSize size = rect.GetSize();
-
-        if (realtransparency)
+        if (m_last_hint == rect)
+            return;
+        m_last_hint = rect;
+        
+        int initial_fade = 50;
+        if (m_flags & wxAUI_MGR_TRANSPARENT_HINT_FADE)
+            initial_fade = 0;
+            
+        if (m_hint_wnd == NULL)
         {
-#ifdef __WXMSW__
+            wxPoint pt = rect.GetPosition();
+            wxSize size = rect.GetSize();
             m_hint_wnd = new wxFrame(m_frame, -1, wxEmptyString, pt, size,
-                                        wxFRAME_FLOAT_ON_PARENT |
-                                        wxFRAME_NO_TASKBAR |
-                                        wxNO_BORDER);
+                                     wxFRAME_TOOL_WINDOW |
+                                     wxFRAME_FLOAT_ON_PARENT |
+                                     wxFRAME_NO_TASKBAR |
+                                     wxNO_BORDER);
+
+            MakeWindowTransparent(m_hint_wnd, initial_fade);
             m_hint_wnd->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_ACTIVECAPTION));
-#endif
+            m_hint_wnd->Show();
+
+            // if we are dragging a floating pane, set the focus
+            // back to that floating pane (otherwise it becomes unfocused)
+            if (m_action == actionDragFloatingPane && m_action_window)
+                m_action_window->SetFocus();
+
         }
-        else
+         else
         {
-            m_hint_wnd = new wxPseudoTransparentFrame (m_frame, -1, wxEmptyString, pt, size,
-                                        wxFRAME_FLOAT_ON_PARENT |
-                                        wxFRAME_NO_TASKBAR |
-                                        wxNO_BORDER);
+            wxPoint pt = rect.GetPosition();
+            wxSize size = rect.GetSize();
+            MakeWindowTransparent(m_hint_wnd, initial_fade);
+            m_hint_wnd->SetSize(pt.x, pt.y, rect.width, rect.height);
         }
-        MakeWindowTransparent(m_hint_wnd, initial_fade);
-        m_hint_wnd->Show();
-
-        // if we are dragging a floating pane, set the focus
-        // back to that floating pane (otherwise it becomes unfocused)
-        if (m_action == actionDragFloatingPane && m_action_window)
-            m_action_window->SetFocus();
-
+        
+        if (m_flags & wxAUI_MGR_TRANSPARENT_HINT_FADE)
+        {
+            // start fade in timer
+            m_hint_fadeamt = 0;
+            m_hint_fadetimer.SetOwner(this, 101);
+            m_hint_fadetimer.Start(5);
+        }
+        
+        return;
     }
-    else
+    #endif
+
+    if (m_last_hint != rect)
     {
-        wxPoint pt = rect.GetPosition();
-        wxSize size = rect.GetSize();
-        MakeWindowTransparent(m_hint_wnd, initial_fade);
-        m_hint_wnd->SetSize(pt.x, pt.y, rect.width, rect.height);
-        m_hint_wnd->Show();
-        if (m_action == actionDragFloatingPane && m_action_window)
-            m_action_window->SetFocus();
+        // remove the last hint rectangle
+        m_last_hint = rect;
+        m_frame->Refresh();
+        m_frame->Update();
     }
     
-    if (m_flags & wxAUI_MGR_TRANSPARENT_HINT_FADE)
+    wxScreenDC screendc;
+    wxRegion clip(1, 1, 10000, 10000);
+
+    // clip all floating windows, so we don't draw over them
+    int i, pane_count;
+    for (i = 0, pane_count = m_panes.GetCount(); i < pane_count; ++i)
     {
-        // start fade in timer
-        m_hint_fadeamt = 0;
-        m_hint_fadetimer.SetOwner(this, 101);
-        m_hint_fadetimer.Start(5);
+        wxPaneInfo& pane = m_panes.Item(i);
+
+        if (pane.IsFloating() &&
+            pane.frame->IsShown())
+        {
+            wxRect rect = pane.frame->GetRect();
+            #ifdef __WXGTK__
+            // wxGTK returns the client size, not the whole frame size
+            rect.width += 15;
+            rect.height += 35;
+            rect.Inflate(5);
+            #endif
+
+            clip.Subtract(rect);
+        }
     }
-    
-    return;
+
+    screendc.SetClippingRegion(clip);
+
+    wxBitmap stipple = wxPaneCreateStippleBitmap();
+    wxBrush brush(stipple);
+    screendc.SetBrush(brush);
+    screendc.SetPen(*wxTRANSPARENT_PEN);
+
+    screendc.DrawRectangle(rect.x, rect.y, 5, rect.height);
+    screendc.DrawRectangle(rect.x+5, rect.y, rect.width-10, 5);
+    screendc.DrawRectangle(rect.x+rect.width-5, rect.y, 5, rect.height);
+    screendc.DrawRectangle(rect.x+5, rect.y+rect.height-5, rect.width-10, 5);
 }
 
 void wxFrameManager::HideHint()
 {   
     // hides a transparent window hint (currently wxMSW only)
+    #ifdef __WXMSW__
     if (m_hint_wnd)
     {
         MakeWindowTransparent(m_hint_wnd, 0);
         m_hint_fadetimer.Stop();
         m_last_hint = wxRect();
-        m_hint_wnd->Hide();
-
-        // We don't need to destroy the hint window here, as it gets reused, but let's try.
-        m_hint_wnd->Destroy();
-        m_hint_wnd=NULL;
-
         return;
+    }
+    #endif
+    
+    // hides a painted hint by redrawing the frame window
+    if (!m_last_hint.IsEmpty())
+    {
+        m_frame->Refresh();
+        m_frame->Update();
+        m_last_hint = wxRect();
     }
 }
 
@@ -3447,7 +3363,7 @@ void wxFrameManager::OnFloatingPaneMoving(wxWindow* wnd)
 
     // if a key modifier is pressed while dragging the frame,
     // don't dock the window
-    if (wxGetKeyState(WXK_ALT))
+    if (wxGetKeyState(WXK_CONTROL) || wxGetKeyState(WXK_ALT))
     {
         HideHint();
         return;
@@ -3485,7 +3401,7 @@ void wxFrameManager::OnFloatingPaneMoved(wxWindow* wnd)
 
     // if a key modifier is pressed while dragging the frame,
     // don't dock the window
-    if (wxGetKeyState(WXK_ALT))
+    if (wxGetKeyState(WXK_CONTROL) || wxGetKeyState(WXK_ALT))
     {
         HideHint();
         return;
@@ -3997,11 +3913,15 @@ void wxFrameManager::OnLeftUp(wxMouseEvent& event)
         m_frame->ReleaseMouse();     
         UpdateButtonOnScreen(m_action_part, event);
 
-        // fire button-click event
-        wxFrameManagerEvent e(wxEVT_AUI_PANEBUTTON);
-        e.SetPane(m_action_part->pane);
-        e.SetButton(m_action_part->button->button_id);
-        ProcessMgrEvent(e);
+        // make sure we're still over the item that was originally clicked
+        if (m_action_part == HitTest(event.GetX(), event.GetY()))
+        { 
+            // fire button-click event
+            wxFrameManagerEvent e(wxEVT_AUI_PANEBUTTON);
+            e.SetPane(m_action_part->pane);
+            e.SetButton(m_action_part->button->button_id);
+            ProcessMgrEvent(e);
+        }
     }
      else if (m_action == actionClickCaption)
     {
@@ -4036,6 +3956,10 @@ void wxFrameManager::OnLeftUp(wxMouseEvent& event)
         
         pane.state &= ~wxPaneInfo::actionPane;
         Update();
+    }
+     else
+    {
+        event.Skip();
     }
 
     m_action = actionNone;
@@ -4185,6 +4109,10 @@ void wxFrameManager::OnMotion(wxMouseEvent& event)
             {
                 m_hover_button = NULL;
                 Repaint();
+            }
+             else
+            {
+                event.Skip();
             }
         }
     }
