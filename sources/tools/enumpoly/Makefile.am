@@ -76,7 +76,7 @@ libpoly_a_SOURCES = \
 	rectangl.h \
 	rectangl.imp
 
-bin_PROGRAMS = gambit-enumpoly gambit-enumpoly
+bin_PROGRAMS = gambit-enumpoly
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
