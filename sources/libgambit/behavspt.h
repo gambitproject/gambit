@@ -77,6 +77,8 @@ public:
   Game GetGame(void) const { return m_efg; }
 
   /// Returns the number of actions in the information set
+  int NumActions(const GameInfoset &p_infoset) const
+  { return m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()].Length(); }
   int NumActions(int pl, int iset) const
   { return m_actions[pl][iset].Length(); }
 
