@@ -153,7 +153,6 @@ template <class T> int List<T>::InsertAt(const T &t, int num)
     m_currentIndex = m_length + 1;
   }
   else  {
-    assert( m_currentIndex >= 1 && m_currentIndex <= m_length );
     if( num < m_currentIndex )
       for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev);
     else
