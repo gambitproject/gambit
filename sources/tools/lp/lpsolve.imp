@@ -138,7 +138,7 @@ LPSolve<T>::LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b,
   if(!bounded) {
     // gout << "\nPhase 1 Unbounded\n";
   }
-  assert(bounded);
+  //assert(bounded);
   
   // which eps should be used here?  
   if(total_cost < -eps1) {   

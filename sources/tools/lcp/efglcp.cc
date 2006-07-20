@@ -281,7 +281,7 @@ efgLcp<T>::All_Lemke(const Gambit::BehavSupport &p_support,
       else
 	missing = BCopy.SF_PivotIn(0);
 
-      assert(missing);
+      //assert(missing);
       newsol=0;
 
       if(BCopy.SF_LCPPath(-missing)==1) {

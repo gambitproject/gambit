@@ -78,19 +78,19 @@ template<class T> gMono<T> gMono<T>::operator * (const gMono<T> & y) const
 
 template<class T> gMono<T> gMono<T>::operator / (const gMono<T>& y) const
 {
-  assert ( y.coef != (T)0);
+  //assert ( y.coef != (T)0);
   return gMono<T>(coef / y.coef,exps - y.exps);
 }
 
 template<class T> gMono<T> gMono<T>::operator + (const gMono<T> & y) const
 {
-  assert (exps == y.exps);
+  //assert (exps == y.exps);
   return gMono<T>(coef + y.coef,exps);
 }
 
 template<class T> gMono<T>& gMono<T>::operator += (const gMono<T> & y) 
 {
-  assert (exps == y.exps);
+  //assert (exps == y.exps);
   coef += y.coef;
   return *this;
 }

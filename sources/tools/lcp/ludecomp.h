@@ -76,6 +76,12 @@ private:
   const LUdecomp<T> *parent;
   int copycount;
 
+  // don't use this copy constructor
+  LUdecomp( const LUdecomp<T> &a);
+  // don't use the equals operator, use the Copy function instead
+  LUdecomp<T>& operator=(const LUdecomp<T>&);
+
+
 public:
   class BadPivot : public Gambit::Exception  {
   public:
@@ -92,10 +98,6 @@ public:
   // Constructors, Destructor
   // ------------------------
     
-
-  // don't use this copy constructor
-  LUdecomp( const LUdecomp<T> &a) : tab(a.tab), basis(a.basis) { assert(0); };
-
   // copy constructor
   // note:  Copying will fail an assertion if you try to update or delete
   //        the original before the copy has been deleted, refactored
@@ -107,9 +109,6 @@ public:
 
   // Destructor
   ~LUdecomp();
-
-  // don't use the equals operator, use the Copy function instead
-  LUdecomp<T>& operator=(const LUdecomp<T>&) { assert(0); return *this; };
 
 
   // --------------------

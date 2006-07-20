@@ -97,7 +97,7 @@ template <class T> Matrix<T> Matrix<T>::operator+(const Matrix<T> &M) const
     int j = this->maxcol - this->mincol + 1;
     while (j--)
       *(dst++)= *(src1++) + *(src2++);
-    assert((dst - 1) == tmp.data[i] + this->maxcol );
+    //assert((dst - 1) == tmp.data[i] + this->maxcol );
   }
   return tmp;
 }
@@ -116,7 +116,7 @@ template <class T> Matrix<T> Matrix<T>::operator-(const Matrix<T> &M) const
     int j = this->maxcol - this->mincol + 1;
     while (j--)
       *(dst++)= *(src1++) - *(src2++);
-    assert((dst - 1) == tmp.data[i] + this->maxcol);
+    //assert((dst - 1) == tmp.data[i] + this->maxcol);
   }
   return tmp;
 }
@@ -149,7 +149,7 @@ template <class T> Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &M)
     int j = this->maxcol - this->mincol + 1;
     while (j--)
       *(dst++) -= *(src++);
-    assert((dst - 1) == this->data[i] + this->maxcol); 
+    //assert((dst - 1) == this->data[i] + this->maxcol); 
   }
   return (*this);
 }
@@ -221,7 +221,7 @@ void Matrix<T>::RMultiply(const Vector<T> &in, Vector<T> &out) const
     int j = this->maxcol - this->mincol + 1;
     while (j--)
       *(dst++) += *(src++) * k;
-    assert(src - 1 == this->data[i] + this->maxcol);
+    //assert(src - 1 == this->data[i] + this->maxcol);
   }
 }
 
@@ -247,7 +247,7 @@ template <class T> Matrix<T> Matrix<T>::operator*(const T &s) const
     int j = this->maxcol - this->mincol + 1;
     while (j--)
       *(dst++) = *(src++) * s;
-    assert((src - 1) == this->data[i] + this->maxcol);
+    //assert((src - 1) == this->data[i] + this->maxcol);
   }
   return tmp;
 }
@@ -279,7 +279,7 @@ template <class T> Matrix<T> &Matrix<T>::operator*=(const T &s)
     int j = this->maxcol - this->mincol + 1;
     while (j--)
       *(dst++) *= s;
-    assert((dst - 1) == this->data[i] + this->maxcol);
+    //assert((dst - 1) == this->data[i] + this->maxcol);
   }
   return (*this);
 }
@@ -295,7 +295,7 @@ template <class T> Matrix<T> Matrix<T>::operator/(const T &s) const
     int j = this->maxcol - this->mincol + 1;
     while (j--)
       *(dst++) = *(src++) / s;
-    assert((src - 1) == this->data[i] + this->maxcol);
+    //assert((src - 1) == this->data[i] + this->maxcol);
   }
   return tmp;
 }
@@ -309,7 +309,7 @@ template <class T> Matrix<T> &Matrix<T>::operator/=(const T &s)
     int j = this->maxcol - this->mincol + 1;
     while (j--)
       *(dst++) /= s;
-    assert((dst - 1) == this->data[i] + this->maxcol);
+    //assert((dst - 1) == this->data[i] + this->maxcol);
   }
   return (*this);
 }
@@ -366,7 +366,7 @@ template <class T> bool Matrix<T>::operator==(const Matrix<T> &M) const
     int j = this->maxcol - this->mincol + 1;
     while (j--)
       if(*(src1++) != *(src2++))   return false;
-    assert(src1 - 1 == M.data[i] + this->maxcol);
+    //assert(src1 - 1 == M.data[i] + this->maxcol);
   }
   return true;
 }
@@ -381,7 +381,7 @@ template <class T> bool Matrix<T>::operator==(const T &s) const
     int j = this->maxcol - this->mincol + 1;
     while (j--) 
       if (*(src++) != s)   return false;
-    assert(src - 1 == this->data[i] + this->maxcol);
+    //assert(src - 1 == this->data[i] + this->maxcol);
   }
   return true;
 }
@@ -441,7 +441,7 @@ template <class T> void Matrix<T>::Pivot(int row, int col)
 	  int j= this->maxcol-this->mincol+1;
 	  while( j-- )
 	    *(dst++)-= *(src++) * mult;
-	  assert( dst-1 == this->data[i] + this->maxcol ); // debug
+	  //assert( dst-1 == this->data[i] + this->maxcol ); // debug
 	  // end inner loop
 	}
     }

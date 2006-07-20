@@ -46,7 +46,7 @@ template <class T> void PVector<T>::setindex(void)
     svptr[i] = this->data + index - 1;
     index += svlen[i];
   }
-  assert(index == this->Last() + 1);
+  //assert(index == this->Last() + 1);
 }
 
 
@@ -79,7 +79,7 @@ template <class T> PVector<T>::PVector(const Vector<T> &val,
 					 const Array<int> &sig)
   : Vector<T>(val), svlen(sig)
 {
-  assert(sum(svlen) == val.Length());
+  //assert(sum(svlen) == val.Length());
   svptr = new T *[sig.Last() - sig.First() + 1];
   svptr -= 1;
   setindex();

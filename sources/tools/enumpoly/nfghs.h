@@ -56,7 +56,7 @@ private:
   void Initialize(Game game);
   void Cleanup(Game game);
 
-  void gbtNfgHs::SolveSizeDiff(Game game, Gambit::List < MixedStrategyProfile < double > > & solutions,
+  void SolveSizeDiff(Game game, Gambit::List < MixedStrategyProfile < double > > & solutions,
 			       int size, int diff);
 
   bool SolveSupportSizeProfile(Game game, Gambit::List < MixedStrategyProfile < double > > & solutions,

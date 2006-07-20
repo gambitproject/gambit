@@ -41,7 +41,7 @@ gSpace::gSpace(int nvars)
 : Variables()
 {
   Variable *newvar;
-  assert (nvars >= 0);
+  //assert (nvars >= 0);
 
   for (int i = 1; i <= nvars; i++){
     newvar = new Variable;
@@ -248,7 +248,7 @@ int exp_vect::operator[](int index) const
 
 bool exp_vect::operator==(const exp_vect & RHS) const
 {
-  assert (Space == RHS.Space);
+  //assert (Space == RHS.Space);
 
   if (components == RHS.components)
     return true;
@@ -263,7 +263,7 @@ bool exp_vect::operator!=(const exp_vect & RHS) const
 
 bool exp_vect::operator<=(const exp_vect & RHS) const
 {
-  assert (Space == RHS.Space);
+  //assert (Space == RHS.Space);
 
   for (int i = 1; i <= Dmnsn(); i++)
     if (components[i] > RHS.components[i])
@@ -274,7 +274,7 @@ bool exp_vect::operator<=(const exp_vect & RHS) const
  
 bool exp_vect::operator>=(const exp_vect & RHS) const
 {
-  assert (Space == RHS.Space);
+  //assert (Space == RHS.Space);
 
   for (int i = 1; i <= Dmnsn(); i++)
     if (components[i] < RHS.components[i])
@@ -304,7 +304,7 @@ exp_vect exp_vect::operator- () const
 
 exp_vect  exp_vect::operator+ (const exp_vect & credit) const
 {
-  assert (Space == credit.Space);
+  //assert (Space == credit.Space);
 
   exp_vect tmp(Space);
   for (int i = 1; i <= Dmnsn(); i++)
@@ -315,7 +315,7 @@ exp_vect  exp_vect::operator+ (const exp_vect & credit) const
 
 exp_vect  exp_vect::operator- (const exp_vect & debit) const
 {
-  assert (Space == debit.Space);
+  //assert (Space == debit.Space);
 
   exp_vect tmp(Space);
   for (int i = 1; i <= Dmnsn(); i++)
@@ -327,7 +327,7 @@ exp_vect  exp_vect::operator- (const exp_vect & debit) const
 void exp_vect::operator+=(const exp_vect & credit) 
 {
 
-  assert (Space == credit.Space);
+  //assert (Space == credit.Space);
 
   for (int i = 1; i <= Dmnsn(); i++)
     components[i] += credit.components[i];
@@ -335,7 +335,7 @@ void exp_vect::operator+=(const exp_vect & credit)
 
 void exp_vect::operator-=(const exp_vect & debit) 
 {
-  assert (Space == debit.Space);
+  //assert (Space == debit.Space);
 
   for (int i = 1; i <= Dmnsn(); i++)
     components[i] -= debit.components[i];
@@ -348,7 +348,7 @@ void exp_vect::operator-=(const exp_vect & debit)
 
 exp_vect  exp_vect::LCM(const exp_vect & arg2) const
 {
-  assert (Space == arg2.Space);
+  //assert (Space == arg2.Space);
 
   exp_vect tmp(Space);
   for (int i = 1; i <= Dmnsn(); i++)
@@ -448,11 +448,11 @@ int  exp_vect::SoleActiveVariable() const
 
   for (int i = 1; i <= Dmnsn(); i++)
     if ((*this)[i] > 0) {
-      assert(sole_active_variable == 0);
+      //assert(sole_active_variable == 0);
       sole_active_variable = i;
     }
 
-  assert (sole_active_variable > 0);
+  //assert (sole_active_variable > 0);
   return sole_active_variable;
 }
 
@@ -486,7 +486,7 @@ bool  exp_vect::UsesDifferentVariablesThan(const exp_vect& n) const
 
 void  exp_vect::SetExp(int varno, int pow)
 {
-  assert (1 <= varno && varno <= Dmnsn() && 0 <= pow);
+  //assert (1 <= varno && varno <= Dmnsn() && 0 <= pow);
 
   components[varno] = pow;
 }

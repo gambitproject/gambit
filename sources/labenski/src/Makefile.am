@@ -23,7 +23,7 @@ liblabenski_la_SOURCES = \
 	range.cpp \
 	spinctld.cpp \
 	toggle.cpp \
-	fparser.hh fourier.c \
+	fparser.cpp fparser.hh fourier.c \
 	lm_lsqr.cpp \
 	plotctrl.cpp \
 	plotcurv.cpp \

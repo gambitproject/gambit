@@ -403,7 +403,7 @@ void nfgSimpdiv::getnexty(Gambit::MixedStrategyProfile<Gambit::Rational> &x,
 {
   int j,h,hh;
   
-  assert(i>=1);
+  //assert(i>=1);
   j=pi(i,1);
   h=pi(i,2);
   x[x.GetSupport().GetStrategy(j,h)]+=d;
@@ -460,7 +460,7 @@ Gambit::Rational nfgSimpdiv::getlabel(Gambit::MixedStrategyProfile<Gambit::Ratio
 	jj=j;
       }
     }
-    assert(jj>0);
+    //assert(jj>0);
     if((maxval-payoff)>maxz) {
       maxz=maxval-payoff;
       ylabel[1]=i;

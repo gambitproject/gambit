@@ -2386,8 +2386,8 @@ private:
             {
                 //bool didsomething = true;
 
-                pit poslogpos = NULL; bool foundposlog = false;
-                pit neglogpos = NULL; bool foundneglog = false;
+	      pit poslogpos /*= NULL*/; bool foundposlog = false;
+	      pit neglogpos /*= NULL*/; bool foundneglog = false;
 
                 ConstList cl = p1->BuildConstList();
 

@@ -111,7 +111,7 @@ bool gIndexOdometer::operator!=(const gIndexOdometer & rhs) const
 
 int gIndexOdometer::operator[](const int place) const
 {
-  assert(1 <= place && place <= NoIndices());
+  //assert(1 <= place && place <= NoIndices());
   return CurIndices[place];
 }
 
@@ -236,7 +236,7 @@ bool gPermutationOdometer::operator!=(const gPermutationOdometer & rhs) const
 
 int gPermutationOdometer::operator[](const int place) const
 {
-  assert(1 <= place && place <= n);
+  //assert(1 <= place && place <= n);
   return CurIndices[place];
 }
 

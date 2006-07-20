@@ -40,7 +40,7 @@ template <class T> SquareMatrix<T>::SquareMatrix(int size)
 
 template <class T> SquareMatrix<T>::SquareMatrix(const Matrix<T> &M)
   : Matrix<T>(M)
-{ assert ( M.NumRows() == M.NumColumns() ); }
+{ }
 
 template <class T> SquareMatrix<T>::SquareMatrix(const SquareMatrix<T> &M)
   : Matrix<T>(M)
