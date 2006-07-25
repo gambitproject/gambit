@@ -431,7 +431,7 @@ of 1, and player 2 receives a payoff of 1.
 
 <para>
 Next, the strategy of the <emphasis>first</emphasis> player is incremented.  Thus,
-player 2's strategy is incremented to his second strategy.  In this
+player 1's strategy is incremented to his second strategy.  In this
 case, when player 1 plays his second strategy and player 2 his first
 strategy, the payoffs are <literal>0 2</literal>: a payoff of 0 to
 player 1 and a payoff of 2 to player 2.
