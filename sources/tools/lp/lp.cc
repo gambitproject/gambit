@@ -102,14 +102,14 @@ int main(int argc, char *argv[])
       return 1;
     }
 
-    game->BuildComputedValues();
-
     if (!game->IsConstSum()) {
       std::cerr << "Error: Game is not constant-sum.\n";
       return 1;
     }
 
     if (!game->IsTree() || useStrategic) {
+      game->BuildComputedValues();
+    
       if (useFloat) {
 	SolveStrategic<double>(game);
       }

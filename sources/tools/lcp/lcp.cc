@@ -101,9 +101,9 @@ int main(int argc, char *argv[])
       return 1;
     }
 
-    game->BuildComputedValues();
-
     if (!game->IsTree() || useStrategic) {
+      game->BuildComputedValues();
+
       if (useFloat) {
 	SolveStrategic<double>(game);
       }

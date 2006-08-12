@@ -190,8 +190,8 @@ int main(int argc, char *argv[])
   try {
     Game game = ReadGame(std::cin);
 
-    game->BuildComputedValues();
     if (!game->IsTree() || useStrategic) {
+      game->BuildComputedValues();
       SolveMixed(game);
     }
     else {

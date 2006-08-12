@@ -110,9 +110,9 @@ int main(int argc, char *argv[])
   try {
     Gambit::Game game = Gambit::ReadGame(std::cin);
 
-    game->BuildComputedValues();
-    
     if (!game->IsTree() || useStrategic) {
+      game->BuildComputedValues();
+    
       if (useHeuristic) {
 	gbtNfgHs algorithm(0);
 	algorithm.Solve(game);
