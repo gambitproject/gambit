@@ -900,29 +900,47 @@ GameRep::~GameRep()
 //                     GameRep: General data access
 //------------------------------------------------------------------------
 
+namespace {
+
+class NotZeroSumException : public Exception {
+public:
+  virtual ~NotZeroSumException() { }
+  std::string GetDescription(void) const { return "Game is not constant sum"; }
+};
+
+Rational SubtreeSum(const GameNode &p_node)
+{
+  Rational sum(0);
+
+  if (p_node->NumChildren() > 0) {
+    sum = SubtreeSum(p_node->GetChild(1));
+    for (int i = 2; i <= p_node->NumChildren(); i++) {
+      if (SubtreeSum(p_node->GetChild(i)) != sum) {
+	throw NotZeroSumException();
+      }
+    }
+  }
+
+  if (p_node->GetOutcome()) {
+    for (int pl = 1; pl <= p_node->GetGame()->NumPlayers(); pl++) {
+      sum += p_node->GetOutcome()->GetPayoff<Rational>(pl);
+    }
+    return sum;
+  }
+}
+
+}
+
 bool GameRep::IsConstSum(void) const
 {
   if (m_root) {
-    PureBehavProfile profile(const_cast<GameRep *>(this));
-
-    Rational sum(0);
-    for (int pl = 1; pl <= m_players.Length(); pl++) {
-      sum += profile.GetPayoff<Rational>(pl);
+    try {
+      SubtreeSum(m_root);
+      return true;
     }
-
-    for (BehavIterator iter(BehavSupport(const_cast<GameRep *>(this)));
-	 !iter.AtEnd(); ++iter) {
-      Rational newsum(0);
-      for (int pl = 1; pl <= m_players.Length(); pl++) {
-	newsum += iter->GetPayoff<Rational>(pl);
-      }
-      
-      if (newsum != sum) {
-	return false;
-      }
+    catch (NotZeroSumException) {
+      return false;
     }
-
-    return true;
   }
   else {
     PureStrategyProfile profile(const_cast<GameRep *>(this));
