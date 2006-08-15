@@ -86,6 +86,8 @@ public:
   PVector<int> NumActions(void) const;
 
   /// Returns the action at the specified position in the support
+  GameAction GetAction(const GameInfoset &p_infoset, int p_act) const
+  { return m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()][p_act]; }
   GameAction GetAction(int pl, int iset, int act) const
   { return m_actions[pl][iset][act]; }
 
