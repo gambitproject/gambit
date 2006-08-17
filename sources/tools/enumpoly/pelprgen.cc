@@ -125,7 +125,7 @@ Gen_node G_Ctrig(Gen_node g){
      ptr=(g=Imatrix_to_Gen((Imatrix)Car(Car(CP))));
      while((CP=Cdr(CP))!=0) ptr=Gen_set_next(ptr,
                               Imatrix_to_Gen((Imatrix)Car(Car(CP))));
-     g=List(g);
+     g=Gen_node_to_List(g);
   }
   else g=IDND("");
 
@@ -182,7 +182,7 @@ fprintf(stdout /* was Pel_Out */,"\ntime used %d,\n",read_mark(time0))
 #endif
 ;
   free_Gen_list(g);
-  g=List(Link(Gen_from_psys(Sys),Xpl_to_Gen(Sols))); 
+  g=Gen_node_to_List(Link(Gen_from_psys(Sys),Xpl_to_Gen(Sols))); 
   if (T!=0) Imatrix_free(T);
   psys_free(Sys);
   POP_LOCS();
@@ -228,7 +228,7 @@ Gen_node G_MSD(Gen_node g){
      ptr=(g=Imatrix_to_Gen((Imatrix)Car(Car(CP))));
      while((CP=Cdr(CP))!=0) ptr=Gen_set_next(ptr,
                               Imatrix_to_Gen((Imatrix)Car(Car(CP))));
-     g=List(g);
+     g=Gen_node_to_List(g);
   }
   else g=IDND("");
   if (T!=0) Imatrix_free(T);
@@ -281,7 +281,7 @@ if (CP!=0){
     while((CP=Cdr(CP))!=0){
       ptr=Gen_set_next(ptr,Imatrix_to_Gen((Imatrix)Car(Car(CP))));
     }
-    g=List(g);
+    g=Gen_node_to_List(g);
   }
   else g=IDND("");
   if (T!=0) Imatrix_free(T);
@@ -802,7 +802,7 @@ Gen_node G_Verify(Gen_node g){
   /*
   free_Gen_list(g);
   */ 
- g=List(Gen_next(res));
+ g=Gen_node_to_List(Gen_next(res));
   free_Gen_node(res);
   return g;
 }
@@ -844,7 +844,7 @@ Gen_node G_Eval(Gen_node g){
   free_Gen_list(g);
   Dmatrix_free(Y);
   if (xp==TRUE) g=Gen_next(res);
-  else  g=List(Gen_next(res));
+  else  g=Gen_node_to_List(Gen_next(res));
   free_Gen_node(res);
   return g;
 }
@@ -1044,7 +1044,7 @@ Gen_node G_Normalize(Gen_node g){
   ptr=Gen_next(ptr);
  }
  free_Gen_list(g);
- g=List(Gen_next(res));
+ g=Gen_node_to_List(Gen_next(res));
  free_Gen_node(res);
  return g;
 }

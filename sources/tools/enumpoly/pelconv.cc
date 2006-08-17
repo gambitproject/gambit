@@ -185,7 +185,7 @@ Gen_node Dvector_list_to_Gen(node DL){
      ptc=Gen_next(ptc);
      DL=Cdr(DL);
    }
-   ptc=List(Gen_next(res));
+   ptc=Gen_node_to_List(Gen_next(res));
    free_Gen_node(res);
    return ptc;
 }
@@ -222,7 +222,7 @@ Gen_node Ivector_list_to_Gen(node DL){
      ptc=Gen_next(ptc);
      DL=Cdr(DL);
    }
-   ptc=List(Gen_next(res));
+   ptc=Gen_node_to_List(Gen_next(res));
    free_Gen_node(res);
    return ptc;
 }

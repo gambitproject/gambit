@@ -220,7 +220,7 @@ int Sfg::InfosetRowNumber(int pl, int j) const
 int Sfg::ActionNumber(int pl, int j) const
 {
   if(j==1) return 0;
-  return efsupp.Contains(GetAction(pl,j));
+  return efsupp.GetIndex(GetAction(pl,j));
 }
 
 Gambit::GameInfoset Sfg::GetInfoset(int pl, int j) const 

@@ -96,7 +96,7 @@ Gambit::List<Gambit::BehavSupport> PossibleNashSubsupports(const Gambit::BehavSu
 
 class ActionCursorForSupport {
 protected:
-  const Gambit::BehavSupport *support;
+  Gambit::BehavSupport support;
         int pl;
         int iset;
         int act;

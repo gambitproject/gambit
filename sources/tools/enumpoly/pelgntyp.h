@@ -113,7 +113,7 @@ int      Gen_type(Gen_node);
 /* operations on Gen_Lists */
 int Gen_length(Gen_node g);
 Gen_node Gen_elt(Gen_node g, int idx);
-Gen_node List(Gen_node);       /*enclose a Gen_node in a list */
+Gen_node Gen_node_to_List(Gen_node);       /*enclose a Gen_node in a list */
 Gen_node Link();       /*link two gen nodes by their next pointers*/ 
 Gen_node Cat();        
 

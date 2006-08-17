@@ -24,6 +24,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <iostream>
 #include "efgensup.h"
 
 
@@ -247,14 +248,16 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
     }
   } while (!abort && scanner.GoToNext());
   
+  std::cout << "length of deletion list = " << deletion_list.Length() << std::endl;
   if (!abort) {
     Gambit::List<Gambit::GameAction> actual_deletions;
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
-      actual_deletions.Append(deletion_list[i]);
       Gambit::List<Gambit::GameInfoset> deactivated_infosets;
-      sact->RemoveAction(deletion_list[i], deactivated_infosets); 
-      if (c->DeletionsViolateActiveCommitments(sact,&deactivated_infosets))
+      sact->RemoveAction(deletion_list[i], deactivated_infosets);
+      if (c->DeletionsViolateActiveCommitments(sact,&deactivated_infosets)) {
 	abort = true;
+      }
+      actual_deletions.Append(deletion_list[i]);
     }
 
     if (!abort && deletion_list.Length() > 0) 
@@ -273,7 +276,7 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
     do {
       if ( sact->Contains(c_copy.GetAction()) ) {
 	Gambit::List<Gambit::GameInfoset> deactivated_infosets;
-	sact->RemoveAction(c_copy.GetAction(), deactivated_infosets); 
+	sact->RemoveAction(c_copy.GetAction(), deactivated_infosets);
 	if (!c_copy.DeletionsViolateActiveCommitments(sact,
 						      &deactivated_infosets))
 	  PossibleNashSubsupportsRECURSIVE(s,sact,&c_copy,list);
@@ -327,7 +330,87 @@ Gambit::List<Gambit::BehavSupport> SortSupportsBySize(Gambit::List<Gambit::Behav
 
   return answer;
 }
-  
+
+namespace { // to keep the recursive function private
+
+  using namespace Gambit;
+
+void PrintSupport(std::ostream &p_stream,
+		  const std::string &p_label, const Gambit::BehavSupport &p_support)
+{
+  p_stream << p_label;
+
+  for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
+    GamePlayer player = p_support.GetGame()->GetPlayer(pl);
+
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+
+      p_stream << ",";
+
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	if (p_support.Contains(infoset->GetAction(act))) {
+	  p_stream << "1";
+	}
+	else {
+	  p_stream << "0";
+	}
+      }
+    }
+  }
+  p_stream << std::endl;
+}
+
+
+void
+PossibleNashSubsupports(const Gambit::BehavSupport &p_support,
+			const ActionCursorForSupport &p_cursor,
+			Gambit::List<Gambit::BehavSupport> &p_list)
+{
+  ActionCursorForSupport copy(p_cursor);
+  if (!copy.GoToNext()) {
+    if (p_support.HasActiveActionsAtActiveInfosetsAndNoOthers()) {
+      p_list.Append(p_support);
+    }
+
+    Gambit::BehavSupport copySupport(p_support);
+    copySupport.RemoveAction(p_cursor.GetAction());
+    if (copySupport.HasActiveActionsAtActiveInfosetsAndNoOthers()) {
+      p_list.Append(copySupport);
+    }
+    return;
+  }
+  PossibleNashSubsupports(p_support, copy, p_list);
+ 
+  Gambit::BehavSupport copySupport(p_support);
+  copySupport.RemoveAction(p_cursor.GetAction());
+  PossibleNashSubsupports(copySupport, copy, p_list);
+}
+
+}
+
+
+//
+// This is a naive version of the real thing.  The original one
+// (see below, commented out) no longer works after underlying API
+// changes.  I suspect the problem is that the behavior support class
+// was hacked to make this work, and recent refactorings have undone
+// the hacks it depended on.  So, for now, we do a really simple
+// implementation that works (but may be inefficient), and we will
+// go from there later.
+//
+Gambit::List<Gambit::BehavSupport> 
+PossibleNashSubsupports(const Gambit::BehavSupport &p_support)
+{
+  ActionCursorForSupport cursor(p_support);
+  Gambit::List<Gambit::BehavSupport> supports;
+  Gambit::BehavSupport support(p_support);
+
+  PossibleNashSubsupports(support, cursor, supports);
+  return supports;
+}
+ 
+/* 
 Gambit::List<Gambit::BehavSupport> PossibleNashSubsupports(const Gambit::BehavSupport &S)
 {
   Gambit::List<Gambit::BehavSupport> answer;
@@ -373,13 +456,15 @@ Gambit::List<Gambit::BehavSupport> PossibleNashSubsupports(const Gambit::BehavSu
 
   return SortSupportsBySize(answer);
 }
+*/
+
 
 //----------------------------------------------------
 //                ActionCursorForSupport
 // ---------------------------------------------------
 
 ActionCursorForSupport::ActionCursorForSupport(const Gambit::BehavSupport &S)
-  : support(&S), pl(1), iset(1), act(1)
+  : support(S), pl(1), iset(1), act(1)
 {
   Gambit::Game efg = S.GetGame();
 
@@ -437,16 +522,16 @@ ActionCursorForSupport::operator!=(const ActionCursorForSupport &rhs) const
 bool
 ActionCursorForSupport::GoToNext()
 {
-  if (act != support->NumActions(pl,iset))
+  if (act != support.NumActions(pl,iset))
     { act++; return true; }
   
   int temppl(pl);
   int tempiset(iset);
   tempiset ++; 
 
-  while (temppl <= support->GetGame()->NumPlayers()) {
-    while (tempiset <= support->GetGame()->GetPlayer(temppl)->NumInfosets()) {
-      if (support->NumActions(temppl,tempiset) > 0) {
+  while (temppl <= support.GetGame()->NumPlayers()) {
+    while (tempiset <= support.GetGame()->GetPlayer(temppl)->NumInfosets()) {
+      if (support.NumActions(temppl,tempiset) > 0) {
 	pl = temppl;
 	iset = tempiset;
 	act = 1;
@@ -463,7 +548,7 @@ ActionCursorForSupport::GoToNext()
 
 Gambit::GameAction ActionCursorForSupport::GetAction() const
 {
-  return support->GetAction(pl, iset, act);
+  return support.GetAction(pl, iset, act);
 }
 
 int ActionCursorForSupport::ActionIndex() const
@@ -474,7 +559,7 @@ int ActionCursorForSupport::ActionIndex() const
 
 Gambit::GameInfoset ActionCursorForSupport::GetInfoset() const
 {
-  return support->GetGame()->GetPlayer(pl)->GetInfoset(iset);
+  return support.GetGame()->GetPlayer(pl)->GetInfoset(iset);
 }
 
 int ActionCursorForSupport::InfosetIndex() const
@@ -484,7 +569,7 @@ int ActionCursorForSupport::InfosetIndex() const
 
 Gambit::GamePlayer ActionCursorForSupport::GetPlayer() const
 {
-  return support->GetGame()->GetPlayer(pl);
+  return support.GetGame()->GetPlayer(pl);
 }
 
 int ActionCursorForSupport::PlayerIndex() const
@@ -495,9 +580,9 @@ int ActionCursorForSupport::PlayerIndex() const
 bool 
 ActionCursorForSupport::IsLast() const
 {
-  if (pl == support->GetGame()->NumPlayers())
-    if (iset == support->GetGame()->GetPlayer(pl)->NumInfosets())
-      if (act == support->NumActions(pl,iset))
+  if (pl == support.GetGame()->NumPlayers())
+    if (iset == support.GetGame()->GetPlayer(pl)->NumInfosets())
+      if (act == support.NumActions(pl,iset))
 	return true;
   return false;
 }

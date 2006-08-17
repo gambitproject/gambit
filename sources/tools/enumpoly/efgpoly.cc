@@ -26,6 +26,9 @@
 
 #include <iostream>
 #include <iomanip>
+#include "libgambit/libgambit.h"
+
+using namespace Gambit;
 
 #include "efgensup.h"
 #include "sfg.h"
@@ -38,226 +41,233 @@
 extern int g_numDecimals;
 extern bool g_verbose;
 
-template <class T> class EfgPolEnumModule  {
-private:
-  T eps;
-  const Gambit::Game &EF;
-  const Gambit::BehavSupport &support;
+//
+// A class to organize the data needed to build the polynomials
+//
+class ProblemData {
+public:
+  const BehavSupport &support;
+  Sfg SF;
   gSpace *Space;
   term_order *Lex;
-  int num_vars;
-  long count,nevals;
-  double time;
-  Gambit::List<Gambit::MixedBehavProfile<double> > solutions;
-  const Sfg SF;
-  bool is_singular;
-  Gambit::Array<Gambit::Array<int> * > var;
+  int nVars;
+  Array<Array<int> > var;
 
-  // The strategy is to develop the polynomial for each agent's expected
-  // payoff as a function of the behavior strategies on the support,
-  // eliminating the last last action probability for each information set.
-  // The system is obtained by requiring that all of the partial
-  // derivatives vanish, and that the sum of action probabilities at
-  // each information set be less than one.
-  gPoly<T>     ProbOfSequence(int pl,int seq)          const;
-  gPoly<T>     Payoff(int pl)                          const;
-  gPolyList<T> IndifferenceEquations()                 const;
-  gPolyList<T> LastActionProbPositiveInequalities()    const;
-  gPolyList<T> NashOnSupportEquationsAndInequalities() const;
-  Gambit::List<Gambit::Vector<gDouble> > 
-               NashOnSupportSolnVectors(const gPolyList<T> &equations,
-					const gRectangle<T> &Cube);
-
-  // Pass to the sequence form variables from the solution variables
-  double NumProbOfSequence(int pl,int seq, const Gambit::Vector<gDouble> &x) const;
-  Gambit::PVector<double> SeqFormVectorFromSolFormVector(const Gambit::Vector<gDouble> &x)
-                                                                      const;
-
-  bool ExtendsToANFNash(const Gambit::MixedBehavProfile<double> &)             const;
-  int SaveANFNashSolutions(const Gambit::List<Gambit::Vector<gDouble> > &list);
-  bool ExtendsToNash(const Gambit::MixedBehavProfile<double> &)                const;
-  int SaveNashSolutions(const Gambit::List<Gambit::Vector<gDouble> > &list);
-
-public:
-  EfgPolEnumModule(const Gambit::BehavSupport &);
-  ~EfgPolEnumModule();
-
-  int EfgPolEnum(void);
-
-  long             NumEvals(void)   const;
-  double           Time(void)       const;
-  bool             IsSingular(void) const;
-
-  const Gambit::List<Gambit::MixedBehavProfile<double> > &GetSolutions(void) const;
-
-  // Passing between variables of polynomials and sequence form probs
-  Gambit::PVector<double> SeqFormProbsFromSolVars(const Gambit::Vector<gDouble> &) const;
-  Gambit::Vector<gDouble> SolVarsFromSeqFormProbs(const Gambit::PVector<double> &) const;
-  //  Gambit::Vector<gDouble> SolVarsFromBehavProfile(const Gambit::MixedBehavProfile<gbtNumber> &) const;
-
-  const int PolishKnownRoot(Gambit::Vector<gDouble> &) const;
-
-  Gambit::MixedBehavProfile<double> ReturnPolishedSolution(const Gambit::Vector<gDouble> &) const;
+  ProblemData(const BehavSupport &p_support)
+    : support(p_support), SF(p_support) { }
 };
 
-//-------------------------------------------------------------------------
-//                    EfgPolEnumModule<T>: Member functions
-//-------------------------------------------------------------------------
 
-template <class T>
-EfgPolEnumModule<T>::EfgPolEnumModule(const Gambit::BehavSupport &S)
-  : EF(S.GetGame()), support(S), count(0), nevals(0), SF(S),
-    is_singular(false), var(S.GetGame()->NumPlayers())
-{ 
-//  Gambit::Epsilon(eps,12);
+//=======================================================================
+//               Constructing the equilibrium conditions
+//=======================================================================
 
-  num_vars = SF.TotalNumSequences()-SF.NumPlayerInfosets()-SF.NumPlayers();
+// The strategy is to develop the polynomial for each agent's expected
+// payoff as a function of the behavior strategies on the support,
+// eliminating the last last action probability for each information set.
+// The system is obtained by requiring that all of the partial
+// derivatives vanish, and that the sum of action probabilities at
+// each information set be less than one.
 
-  Space = new gSpace(num_vars);
-  Lex = new term_order(Space, lex);
-
-  int kk=0;
-  int tnv = 0;
-
-  for(int i=1;i<=EF->NumPlayers();i++) {
-    var[i] = new Gambit::Array<int>(SF.NumSequences(i));
-    (*(var[i]))[1] = 0;
-    for(int seq = 2;seq<=SF.NumSequences(i);seq++) {
-      int act  = SF.ActionNumber(i,seq);
-      Gambit::GameInfoset infoset = SF.GetInfoset(i, seq); 
-      if(act < support.NumActions(infoset->GetPlayer()->GetNumber(),
-				  infoset->GetNumber()))
-	(*(var[i]))[seq] = ++tnv;
-      else
-	(*(var[i]))[seq] = 0;
-
-    }
-    kk+=(SF.NumSequences(i)-SF.NumInfosets(i)-1);
-  }
-  assert(tnv==num_vars);
-}
-
-template <class T>
-EfgPolEnumModule<T>::~EfgPolEnumModule()
-{ 
-  for(int i=1;i<=EF->NumPlayers();i++)
-    delete var[i];
-  delete Lex;
-  delete Space;
-}
-
-template <class T> 
-gPoly<T> EfgPolEnumModule<T>::ProbOfSequence(int p, int seq) const
+gPoly<gDouble> ProbOfSequence(const ProblemData &p_data,
+			      int p, int seq)
 {
-  gPoly<T> equation(Space,Lex);
-  Gambit::Vector<int> exps(num_vars);
+  gPoly<gDouble> equation(p_data.Space, p_data.Lex);
+  Vector<int> exps(p_data.nVars);
   int j = 0;
   
-  int isetrow = SF.InfosetRowNumber(p,seq);
-  int act  = SF.ActionNumber(p,seq);
-  int varno = (*(var[p]))[seq];
-  Gambit::GameInfoset infoset = SF.GetInfoset(p, seq);
+  int isetrow = p_data.SF.InfosetRowNumber(p,seq);
+  int act  = p_data.SF.ActionNumber(p,seq);
+  int varno = p_data.var[p][seq];
+  GameInfoset infoset = p_data.SF.GetInfoset(p, seq);
 
   if(seq==1) {
     exps=0;
-    exp_vect const_exp(Space,exps);
-    gMono<T> const_term((T)1,const_exp);
-    gPoly<T> new_term(Space,const_term,Lex);
+    exp_vect const_exp(p_data.Space,exps);
+    gMono<gDouble> const_term(1.0, const_exp);
+    gPoly<gDouble> new_term(p_data.Space,const_term,p_data.Lex);
     equation+=new_term;
   }
-  else if(act<support.NumActions(infoset->GetPlayer()->GetNumber(),
-				 infoset->GetNumber())) { 
-    assert (varno>=exps.First());
-    assert (varno<=exps.Last());
+  else if(act<p_data.support.NumActions(infoset)) {
     exps=0;
     exps[varno]=1;
-    exp_vect const_exp(Space,exps);
-    gMono<T> const_term((T)1,const_exp);
-    gPoly<T> new_term(Space,const_term,Lex);
+    exp_vect const_exp(p_data.Space,exps);
+    gMono<gDouble> const_term(1.0, const_exp);
+    gPoly<gDouble> new_term(p_data.Space,const_term,p_data.Lex);
     equation+=new_term;
   }
   else {
     for(j=1;j<seq;j++) {
-      if((SF.Constraints(p))(isetrow,j)==Gambit::Rational(-1))
-	equation-=ProbOfSequence(p,j);
-      if((SF.Constraints(p))(isetrow,j)==Gambit::Rational(1))
-	equation+=ProbOfSequence(p,j);
+      if (p_data.SF.Constraints(p)(isetrow, j) == Rational(-1)) {
+	equation -= ProbOfSequence(p_data, p, j);
+      }
+      else if (p_data.SF.Constraints(p)(isetrow,j) == Rational(1)) {
+	equation += ProbOfSequence(p_data, p, j);
+      }
     }
   }
   return equation;
 }
 
-template <class T> gPoly<T> 
-EfgPolEnumModule<T>::Payoff(int pl) const
+gPoly<gDouble> GetPayoff(const ProblemData &p_data, int pl)
 {
-  gIndexOdometer index(SF.NumSequences());
-  Gambit::Rational pay;
+  gIndexOdometer index(p_data.SF.NumSequences());
+  Rational pay;
 
-  gPoly<T> equation(Space,Lex);
+  gPoly<gDouble> equation(p_data.Space, p_data.Lex);
   while (index.Turn()) {
-    pay=SF.Payoff(index.CurrentIndices(),pl);
-    if( pay != Gambit::Rational(0)) {
-      gPoly<T> term(Space,(T)pay,Lex);
+    pay=p_data.SF.Payoff(index.CurrentIndices(),pl);
+    if( pay != Rational(0)) {
+      gPoly<gDouble> term(p_data.Space,(double) pay, p_data.Lex);
       int k;
-      for(k=1;k<=EF->NumPlayers();k++) 
-	term*=ProbOfSequence(k,(index.CurrentIndices())[k]);
+      for(k=1;k<=p_data.support.GetGame()->NumPlayers();k++) 
+	term*=ProbOfSequence(p_data, k,(index.CurrentIndices())[k]);
       equation+=term;
     }
   }
   return equation;
 }
 
-template <class T>  
-gPolyList<T> EfgPolEnumModule<T>::IndifferenceEquations() const
+gPolyList<gDouble>
+IndifferenceEquations(const ProblemData &p_data)
 {
-  gPolyList<T> equations(Space,Lex);
+  gPolyList<gDouble> equations(p_data.Space, p_data.Lex);
 
   int kk = 0;
-  for (int pl = 1; pl <= SF.NumPlayers(); pl++) {
-    gPoly<T> payoff = Payoff(pl);
-    int n_vars = SF.NumSequences(pl) - SF.NumInfosets(pl) - 1; 
-    for (int j = 1; j <= n_vars; j++) 
+  for (int pl = 1; pl <= p_data.SF.NumPlayers(); pl++) {
+    gPoly<gDouble> payoff = GetPayoff(p_data, pl);
+    int n_vars = p_data.SF.NumSequences(pl) - p_data.SF.NumInfosets(pl) - 1; 
+    for (int j = 1; j <= n_vars; j++) {
       equations += payoff.PartialDerivative(kk+j);
+    }
     kk+=n_vars;
   }
 
   return equations;
 }
 
-template <class T>  
-gPolyList<T> EfgPolEnumModule<T>::LastActionProbPositiveInequalities() const
+gPolyList<gDouble> 
+LastActionProbPositiveInequalities(const ProblemData &p_data) 
 {
-  gPolyList<T> equations(Space,Lex);
+  gPolyList<gDouble> equations(p_data.Space, p_data.Lex);
 
-  for (int i = 1; i <= SF.NumPlayers(); i++) 
-    for (int j = 2; j <= SF.NumSequences(i); j++) {
-      int act_num = SF.ActionNumber(i,j);
-      Gambit::GameInfoset infoset = SF.GetInfoset(i, j);
-      if ( act_num == support.NumActions(infoset->GetPlayer()->GetNumber(),
-					 infoset->GetNumber()) && act_num > 1 ) 
-	equations += ProbOfSequence(i,j);
+  for (int i = 1; i <= p_data.SF.NumPlayers(); i++) 
+    for (int j = 2; j <= p_data.SF.NumSequences(i); j++) {
+      int act_num = p_data.SF.ActionNumber(i,j);
+      GameInfoset infoset = p_data.SF.GetInfoset(i, j);
+      if ( act_num == p_data.support.NumActions(infoset) && act_num > 1 ) 
+	equations += ProbOfSequence(p_data, i,j);
     }
 
   return equations;
 }
 
-template <class T>  
-gPolyList<T> EfgPolEnumModule<T>::NashOnSupportEquationsAndInequalities() const
+gPolyList<gDouble>
+NashOnSupportEquationsAndInequalities(const ProblemData &p_data)
 {
-  gPolyList<T> equations(Space,Lex);
+  gPolyList<gDouble> equations(p_data.Space, p_data.Lex);
   
-  equations += IndifferenceEquations();
-  equations += LastActionProbPositiveInequalities();
+  equations += IndifferenceEquations(p_data);
+  equations += LastActionProbPositiveInequalities(p_data);
 
   return equations;
 }
 
+//=======================================================================
+//               Mapping solution vectors to sequences
+//=======================================================================
 
-template <class T> Gambit::List<Gambit::Vector<gDouble> > 
-EfgPolEnumModule<T>::NashOnSupportSolnVectors(const gPolyList<T> &equations,
-					      const gRectangle<T> &Cube)
+double
+NumProbOfSequence(const ProblemData &p_data, int p,
+		  int seq, const Vector<gDouble> &x)
 {
-  QuikSolv<T> quickie(equations);
+  int isetrow = p_data.SF.InfosetRowNumber(p,seq);
+  int act  = p_data.SF.ActionNumber(p,seq);
+  int varno = p_data.var[p][seq];
+  GameInfoset infoset = p_data.SF.GetInfoset(p, seq);
+
+  if (seq == 1) {
+    return 1.0;
+  }
+  else if (act < p_data.support.NumActions(infoset)) {
+    return x[varno].ToDouble();
+  }
+  else {    
+    double value = 0.0;
+    for (int j = 1; j < seq; j++) {
+      if (p_data.SF.Constraints(p)(isetrow,j) == Rational(-1)) {
+	value -= NumProbOfSequence(p_data, p, j, x);
+      }
+      else if (p_data.SF.Constraints(p)(isetrow,j) == Rational(1)) {
+	value += NumProbOfSequence(p_data, p, j, x);
+      }
+    }
+    return value;
+  }
+}
+
+PVector<double> 
+SeqFormVectorFromSolFormVector(const ProblemData &p_data, 
+			       const Vector<gDouble> &v)
+{
+  PVector<double> x(p_data.SF.NumSequences());
+
+  for (int i = 1; i <= p_data.support.GetGame()->NumPlayers(); i++) {
+    for (int j = 1; j <= p_data.SF.NumSequences()[i]; j++) {
+      x(i,j) = NumProbOfSequence(p_data, i, j, v);
+    }
+  }
+  
+  return x;
+}
+
+bool ExtendsToNash(const MixedBehavProfile<double> &bs) 
+{
+  algExtendsToNash algorithm;
+  return algorithm.ExtendsToNash(bs, 
+				 BehavSupport(bs.GetGame()),
+				 BehavSupport(bs.GetGame()));
+}
+
+
+List<MixedBehavProfile<double> > 
+SolveSupport(const BehavSupport &p_support, bool &p_isSingular)
+{
+  ProblemData data(p_support);
+  data.nVars = (data.SF.TotalNumSequences() -
+		data.SF.NumPlayerInfosets() - 
+		data.SF.NumPlayers());
+  data.Space = new gSpace(data.nVars);
+  data.Lex = new term_order(data.Space, lex);
+
+  int tnv = 0;
+  
+  data.var = p_support.GetGame()->NumPlayers();
+  
+  for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
+    data.var[pl] = Array<int>(data.SF.NumSequences(pl));
+    data.var[pl][1] = 0;
+    for (int seq = 2; seq <= data.SF.NumSequences(pl); seq++) {
+      int act = data.SF.ActionNumber(pl, seq);
+      GameInfoset infoset = data.SF.GetInfoset(pl, seq); 
+      if (act < p_support.NumActions(infoset)) {
+	data.var[pl][seq] = ++tnv;
+      }
+      else {
+	data.var[pl][seq] = 0;
+      }
+    }
+  }
+
+  gPolyList<gDouble> equations = NashOnSupportEquationsAndInequalities(data);
+
+  // set up the rectangle of search
+  Vector<gDouble> bottoms(data.nVars), tops(data.nVars);
+  bottoms = (gDouble) 0;
+  tops = (gDouble) 1;
+  gRectangle<gDouble> Cube(bottoms, tops); 
+
+  QuikSolv<gDouble> quickie(equations);
 #ifdef UNUSED
   if(params.trace>0) {
     (*params.tracefile) << "\nThe equilibrium equations are \n" 
@@ -277,285 +287,42 @@ EfgPolEnumModule<T>::NashOnSupportSolnVectors(const gPolyList<T> &equations,
 #endif  // UNUSED
     }
   }
-  catch (Gambit::SingularMatrixException) {
-    is_singular = true;
+  catch (SingularMatrixException) {
+    p_isSingular = true;
   }
   
-  return quickie.RootList();
-}
+  List<Vector<gDouble> > solutionlist = quickie.RootList();
 
-template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
-{
-  gPolyList<T> equations = NashOnSupportEquationsAndInequalities();
-
-  // set up the rectangle of search
-  Gambit::Vector<T> bottoms(num_vars), tops(num_vars);
-  bottoms = (T)0;
-  tops = (T)1;
-  gRectangle<T> Cube(bottoms, tops); 
-
-  Gambit::List<Gambit::Vector<gDouble> > solutionlist = NashOnSupportSolnVectors(equations,
-								   Cube);
-
-  int index = SaveNashSolutions(solutionlist);
-  return index;	 
-}
-
-template <class T> Gambit::PVector<double> 
-EfgPolEnumModule<T>::SeqFormVectorFromSolFormVector(const Gambit::Vector<gDouble> &v)
-                                                                      const
-{
-  Gambit::PVector<double> x(SF.NumSequences());
-
-  for (int i = 1; i <= EF->NumPlayers(); i++) 
-    for (int j = 1; j <= SF.NumSequences()[i]; j++)
-      x(i,j) = NumProbOfSequence(i,j,v);
-  
-  return x;
-}
-
-template <class T> bool 
-EfgPolEnumModule<T>::ExtendsToANFNash(const Gambit::MixedBehavProfile<double> &bs) const 
-{
-  algExtendsToAgentNash algorithm;
-  return algorithm.ExtendsToAgentNash(bs, 
-				      Gambit::BehavSupport(bs.GetGame()),
-				      Gambit::BehavSupport(bs.GetGame()));
-}
-
-template <class T> int 
-EfgPolEnumModule<T>::SaveANFNashSolutions(const Gambit::List<Gambit::Vector<gDouble> > &list)
-{
-  int index=0;
-  for (int k = 1; k <= list.Length(); k++) {
-    Gambit::PVector<double> y = SeqFormVectorFromSolFormVector(list[k]);
-
-    Gambit::MixedBehavProfile<double> sol(SF.ToBehav(y));
-
+  List<MixedBehavProfile<double> > solutions;
+  for (int k = 1; k <= solutionlist.Length(); k++) {
+    PVector<double> y = SeqFormVectorFromSolFormVector(data, solutionlist[k]);
+    MixedBehavProfile<double> sol(data.SF.ToBehav(y));
     if (ExtendsToNash(sol)) { 
-      index = solutions.Append(sol);
+      solutions.Append(sol);
     }
   }
-  return index;
-}
 
-template <class T> bool 
-EfgPolEnumModule<T>::ExtendsToNash(const Gambit::MixedBehavProfile<double> &bs) const 
-{
-  algExtendsToNash algorithm;
-  return algorithm.ExtendsToNash(bs, 
-				 Gambit::BehavSupport(bs.GetGame()),
-				 Gambit::BehavSupport(bs.GetGame()));
-}
-
-template <class T> int 
-EfgPolEnumModule<T>::SaveNashSolutions(const Gambit::List<Gambit::Vector<gDouble> > &list)
-{
-  int index=0;
-  for (int k = 1; k <= list.Length(); k++) {
-    Gambit::PVector<double> y = SeqFormVectorFromSolFormVector(list[k]);
-
-    Gambit::MixedBehavProfile<double> sol(SF.ToBehav(y));
-
-    if(ExtendsToNash(sol)) { 
-      index = solutions.Append(sol);
-    }
-  }
-  return index;
-}
-
-
-template <class T> long EfgPolEnumModule<T>::NumEvals(void) const
-{
-  return nevals;
-}
-
-template <class T> double EfgPolEnumModule<T>::Time(void) const
-{
-  return time;
-}
-
-template <class T> bool EfgPolEnumModule<T>::IsSingular(void) const
-{
-  return is_singular;
-}
-
-template <class T>
-const Gambit::List<Gambit::MixedBehavProfile<double> > &EfgPolEnumModule<T>::GetSolutions(void) const
-{
+  delete data.Lex;
+  delete data.Space;
   return solutions;
 }
 
-template <class T> double EfgPolEnumModule<T>::
-NumProbOfSequence(int p,int seq, const Gambit::Vector<gDouble> &x) const
+
+PVector<double> 
+SeqFormProbsFromSolVars(const ProblemData &p_data, const Vector<gDouble> &v)
 {
-  int j = 0;
-  double value=0;
+  PVector<double> x(p_data.SF.NumSequences());
 
-  int isetrow = SF.InfosetRowNumber(p,seq);
-  int act  = SF.ActionNumber(p,seq);
-  int varno = (*(var[p]))[seq];
-  Gambit::GameInfoset infoset = SF.GetInfoset(p, seq);
-
-  if(seq==1)
-    return (double)1;
-  else if(act<support.NumActions(infoset->GetPlayer()->GetNumber(),
-				 infoset->GetNumber()))
-    return x[varno].ToDouble();
-  else {    
-    for(j=1;j<seq;j++) {
-      if((SF.Constraints(p))(isetrow,j)==Gambit::Rational(-1))
-	value-=NumProbOfSequence(p,j,x);
-      if((SF.Constraints(p))(isetrow,j)==Gambit::Rational(1))
-	value+=NumProbOfSequence(p,j,x);
-    }
-    return value;
-  }
-}
-
-template <class T> Gambit::PVector<double> 
-EfgPolEnumModule<T>::SeqFormProbsFromSolVars(const Gambit::Vector<gDouble> &v) const
-{
-  Gambit::PVector<double> x(SF.NumSequences());
-
-  for(int pl=1;pl<=EF->NumPlayers();pl++) 
-    for(int seq=1;seq<=SF.NumSequences()[pl];seq++)
-      x(pl,seq) = NumProbOfSequence(pl,seq,v);
+  for(int pl=1;pl<=p_data.support.GetGame()->NumPlayers();pl++) 
+    for(int seq=1;seq<=p_data.SF.NumSequences()[pl];seq++)
+      x(pl,seq) = NumProbOfSequence(p_data, pl,seq,v);
 
   return x;
-}
-
-/*
-template <class T> Gambit::Vector<gDouble> 
-EfgPolEnumModule<T>::SolVarsFromBehavProfile(const Gambit::MixedBehavProfile<gbtNumber> &sol)
-  const
-{
-  int numvars(0);
-
-  for (int pl = 1; pl <= EF->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = EF->GetPlayer(pl);
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      const Gambit::GameInfoset *infoset = player->GetInfoset(iset);
-      if ( support.MayReach(infoset) )
-	numvars += support.Actions(infoset).Length() - 1;
-    }
-  }
-
-  Gambit::Vector<gDouble> answer(numvars);
-  int count(0);
-
-  for (int pl = 1; pl <= EF->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = EF->GetPlayer(pl);
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      const Gambit::GameInfoset *infoset = player->GetInfoset(iset);
-      if ( support.MayReach(infoset) ) {
-	const Gambit::Array<Gambit::GameAction *> acts = support.Actions(infoset);
-	for (int act = 1; act <= acts.Length() - 1; act++) {
-	  count++;
-	  answer[count] = (gDouble)sol.GetActionProb(acts[act]);
-	}
-      }
-    }
-  }
-
-  return answer;
-}
-*/
-
-template <class T> Gambit::Vector<gDouble> 
-EfgPolEnumModule<T>::SolVarsFromSeqFormProbs(const Gambit::PVector<double> &x) const
-{
-  
-
-  // Old version that doesn't work 
-  int numvars = 0;
-  for(int pl=1;pl<=EF->NumPlayers();pl++) 
-    for(int seq=2;seq<=SF.NumSequences()[pl];seq++) {
-      int act  = SF.ActionNumber(pl,seq);
-      if(act<support.NumActions(SF.GetInfoset(pl,seq))) 
-	numvars++;
-    }
-  Gambit::Vector<gDouble> v(numvars);
-  //  Gambit::Vector<gDouble> v(SF.NumIndepVars());
-
-  int count = 0;
-  for(int pl=1;pl<=EF->NumPlayers();pl++) 
-    for(int seq=2;seq<=SF.NumSequences()[pl];seq++) {
-      int act  = SF.ActionNumber(pl,seq);
-      if(act<support.NumActions(SF.GetInfoset(pl,seq))) {
-	count++;
-	int varno = (*(var[pl]))[seq];
-	v[count] = (gDouble)x[varno];
-      }
-    }
-
-  return v;
-}
-
-template <class T> 
-const int EfgPolEnumModule<T>::PolishKnownRoot(Gambit::Vector<gDouble> &point) const
-{
-  //DEBUG
-  //  gout << "Prior to Polishing point is " << point << ".\n";
-
-  if (point.Length() > 0) {
-    int i,j;
-    
-    
-    gPolyList<T> equations(Space,Lex);
-    
-    // equations for equality of strat j to strat j+1
-    
-    int kk=0;
-    for( i=1;i<=SF.NumPlayers();i++) {
-      int n_vars=SF.NumSequences(i)-SF.NumInfosets(i)-1; 
-      for(j=1;j<=n_vars;j++) 
-	equations+=(Payoff(i)).PartialDerivative(kk+j);
-      kk+=n_vars;
-    }
-
-    //DEBUG
-    //    gout << "We are about to construct quickie with Dmnsn() = "
-    //  << Space->Dmnsn() << " and equations = \n"
-    //	 << equations << "\n";
-    
-    // start QuikSolv
-    QuikSolv<T> quickie(equations);
-    
-    //DEBUG
-    //    gout << "We constructed quickie.\n";
-    
-    try { 
-      point = quickie.NewtonPolishedRoot(point);
-    }
-    catch (Gambit::SingularMatrixException &) {
-      return 0;
-    }
-
-    //DEBUG
-    //    gout << "After Polishing point = " << point << ".\n";
-
-  }
-
-  return 1;	 
-}
-
-template <class T> Gambit::MixedBehavProfile<double> 
-EfgPolEnumModule<T>::ReturnPolishedSolution(const Gambit::Vector<gDouble> &root) const
-{
-  Gambit::PVector<double> x(SF.NumSequences());
-
-  for(int i=1;i<=EF->NumPlayers();i++) 
-    for(int j=1;j<=SF.NumSequences()[i];j++) 
-      x(i,j) = NumProbOfSequence(i,j,root);
-
-  Gambit::MixedBehavProfile<double> sol(SF.ToBehav(x));
-  return sol;
 }
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const Gambit::MixedBehavProfile<double> &p_profile)
+		  const MixedBehavProfile<double> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -566,19 +333,19 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-Gambit::MixedBehavProfile<double> ToFullSupport(const Gambit::MixedBehavProfile<double> &p_profile)
+MixedBehavProfile<double> ToFullSupport(const MixedBehavProfile<double> &p_profile)
 {
-  Gambit::Game efg = p_profile.GetGame();
-  const Gambit::BehavSupport &support = p_profile.GetSupport();
+  Game efg = p_profile.GetGame();
+  const BehavSupport &support = p_profile.GetSupport();
 
-  Gambit::MixedBehavProfile<double> fullProfile(efg);
+  MixedBehavProfile<double> fullProfile(efg);
   for (int i = 1; i <= fullProfile.Length(); fullProfile[i++] = 0.0);
 
   int index = 1;
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = efg->GetPlayer(pl);
+    GamePlayer player = efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      Gambit::GameInfoset infoset = player->GetInfoset(iset);
+      GameInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
 	if (support.Contains(infoset->GetAction(act))) {
 	  fullProfile(pl, iset, act) = p_profile[index++];
@@ -590,30 +357,16 @@ Gambit::MixedBehavProfile<double> ToFullSupport(const Gambit::MixedBehavProfile<
   return fullProfile;
 }
 
-int EfgPolEnum(const Gambit::BehavSupport &support, 
-	       Gambit::List<Gambit::MixedBehavProfile<double> > &solutions,
-	       long &nevals, double &time, bool &is_singular)
-{
-  EfgPolEnumModule<gDouble> module(support);
-  module.EfgPolEnum();
-  nevals = module.NumEvals();
-  time = module.Time();
-  solutions = module.GetSolutions();
-  is_singular = module.IsSingular();
-
-  return 1;
-}
-
 void PrintSupport(std::ostream &p_stream,
-		  const std::string &p_label, const Gambit::BehavSupport &p_support)
+		  const std::string &p_label, const BehavSupport &p_support)
 {
   p_stream << p_label;
 
   for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = p_support.GetGame()->GetPlayer(pl);
+    GamePlayer player = p_support.GetGame()->GetPlayer(pl);
 
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      Gambit::GameInfoset infoset = player->GetInfoset(iset);
+      GameInfoset infoset = player->GetInfoset(iset);
 
       p_stream << ",";
 
@@ -630,29 +383,27 @@ void PrintSupport(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-void SolveExtensive(const Gambit::Game &p_game)
+void SolveExtensive(const Game &p_game)
 {
-  Gambit::List<Gambit::BehavSupport> supports = PossibleNashSubsupports(p_game);
+  List<BehavSupport> supports = PossibleNashSubsupports(p_game);
 
   for (int i = 1; i <= supports.Length(); i++) {
-    long newevals = 0;
-    double newtime = 0.0;
-    Gambit::List<Gambit::MixedBehavProfile<double> > newsolns;
-    bool is_singular = false;
-
     if (g_verbose) {
       PrintSupport(std::cout, "candidate", supports[i]);
     }
       
-    EfgPolEnum(supports[i], newsolns, newevals, newtime, is_singular);
+    bool isSingular = false;
+    List<MixedBehavProfile<double> > newsolns = 
+      SolveSupport(supports[i], isSingular);
+
     for (int j = 1; j <= newsolns.Length(); j++) {
-      Gambit::MixedBehavProfile<double> fullProfile = ToFullSupport(newsolns[j]);
+      MixedBehavProfile<double> fullProfile = ToFullSupport(newsolns[j]);
       if (fullProfile.GetLiapValue(true) < 1.0e-6) {
 	PrintProfile(std::cout, "NE", fullProfile);
       }
     }
       
-    if (is_singular && g_verbose) {
+    if (isSingular && g_verbose) {
       PrintSupport(std::cout, "singular", supports[i]);
     }
   }

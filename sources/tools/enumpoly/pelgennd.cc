@@ -216,7 +216,7 @@ void silent_print_Gen_list(Gen_node g)
     g=g->next;
 }
 
-Gen_node List(Gen_node g)
+Gen_node Gen_node_to_List(Gen_node g)
  {Gen_node a;
   a=gen_node();
   a->type=Lst_T;
