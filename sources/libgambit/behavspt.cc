@@ -161,7 +161,11 @@ bool BehavSupport::RemoveAction(const GameAction &s)
   GamePlayer player = infoset->GetPlayer();
   Array<GameAction> &actions = m_actions[player->GetNumber()][infoset->GetNumber()];
 
-  if (!actions.Contains(s) || actions.Length() == 1) {
+  if (!actions.Contains(s)) {
+    return false;
+  }
+  else if (actions.Length() == 1) {
+    actions.Remove(actions.Find(s));
     return false;
   }
   else {
@@ -699,7 +703,7 @@ void BehavSupport::DeactivateSubtree(const GameNode &n)
 			   n->GetInfoset()->GetNumber())) {
       deactivate(n->GetInfoset());
     }
-    Array<GameAction> actions(m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetPlayer()->GetNumber()]);
+    Array<GameAction> actions(m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetInfoset()->GetNumber()]);
     for (int i = 1; i <= actions.Length(); i++) {
       DeactivateSubtree(n->GetChild(actions[i]->GetNumber()));    
     }
