@@ -83,7 +83,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/sources
 gambit_enumpoly_SOURCES = \
 	behavextend.cc behavextend.h \
 	complex.cc complex.h \
-	double.cc double.h \
 	gtree.h gtree.imp \
 	linrcomb.cc linrcomb.h linrcomb.imp \
 	efgensup.cc efgensup.h \

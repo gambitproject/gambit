@@ -292,12 +292,12 @@ const T gRectangle<T>::DiameterSquared() const
 //----------------------------------
 
 template<class T>  
-gRectangle<gDouble>  TogDouble(const gRectangle<T>& given) 
+gRectangle<double>  TogDouble(const gRectangle<T>& given) 
 {
-  Gambit::List<gInterval<gDouble> > cartesian_factors;
+  Gambit::List<gInterval<double> > cartesian_factors;
   for (int i = 1; i <= given.Dmnsn(); i++) 
-    cartesian_factors.Append(gInterval<gDouble>((gDouble)given.LowerBound()[i],
-						(gDouble)given.UpperBound()[i]));
-  return gRectangle<gDouble>(cartesian_factors);
+    cartesian_factors.Append(gInterval<double>((double)given.LowerBound()[i],
+					       (double)given.UpperBound()[i]));
+  return gRectangle<double>(cartesian_factors);
 }
 

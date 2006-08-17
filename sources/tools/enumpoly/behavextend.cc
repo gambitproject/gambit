@@ -112,23 +112,23 @@ static Gambit::List<Gambit::GameInfoset> DeviationInfosets(const Gambit::BehavSu
   return answer;
 }
 
-static gPolyList<gDouble> 
+static gPolyList<double> 
 ActionProbsSumToOneIneqs(const Gambit::MixedBehavProfile<double> &p_solution,
 			 const gSpace &BehavStratSpace, 
 			 const term_order &Lex,
 			 const Gambit::BehavSupport &big_supp,
 			 const Gambit::List<Gambit::List<int> > &var_index) 
 {
-  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+  gPolyList<double> answer(&BehavStratSpace, &Lex);
 
   for (int pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++) 
     for (int i = 1; i <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); i++) {
       Gambit::GameInfoset current_infoset = p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i);
       if ( !big_supp.HasActiveActionAt(current_infoset) ) {
 	int index_base = var_index[pl][i];
-	gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
+	gPoly<double> factor(&BehavStratSpace, (double)1.0, &Lex);
 	for (int k = 1; k < current_infoset->NumActions(); k++)
-	  factor -= gPoly<gDouble>(&BehavStratSpace, index_base + k, 1, &Lex);
+	  factor -= gPoly<double>(&BehavStratSpace, index_base + k, 1, &Lex);
 	answer += factor;
       }
     }
@@ -209,7 +209,7 @@ DeviationSupports(const Gambit::BehavSupport & big_supp,
 
 static bool 
 NashNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_solution,
-			gPoly<gDouble> & node_prob,
+			gPoly<double> & node_prob,
 			const gSpace &BehavStratSpace, 
 			const term_order &Lex,
 			const Gambit::BehavSupport &dsupp,
@@ -225,7 +225,7 @@ NashNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_solution,
     Gambit::GameInfoset last_infoset = last_action->GetInfoset();
     
     if (last_infoset->IsChanceInfoset()) 
-      node_prob *= (gDouble) last_infoset->GetActionProb<Gambit::Rational>(last_action->GetNumber());
+      node_prob *= (double) last_infoset->GetActionProb<Gambit::Rational>(last_action->GetNumber());
     else 
       if (dsupp.HasActiveActionAt(last_infoset)) {
 	if (last_infoset == iset) {
@@ -238,7 +238,7 @@ NashNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_solution,
 	    if ( last_action->GetInfoset()->GetPlayer() !=
 		         act->GetInfoset()->GetPlayer()     ||
 		 !act->Precedes(tempnode) )
-	    node_prob *= (gDouble) p_solution.GetActionProb(last_action);
+	    node_prob *= (double) p_solution.GetActionProb(last_action);
 	  }
 	  else {
 	    return false;
@@ -249,13 +249,13 @@ NashNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_solution,
  var_index[last_infoset->GetPlayer()->GetNumber()][last_infoset->GetNumber()];
 	if (last_action->GetNumber() < last_infoset->NumActions()){
 	  int varno = initial_var_no + last_action->GetNumber();
-	  node_prob *= gPoly<gDouble>(&BehavStratSpace, varno, 1, &Lex);
+	  node_prob *= gPoly<double>(&BehavStratSpace, varno, 1, &Lex);
 	}
 	else {
-	  gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
+	  gPoly<double> factor(&BehavStratSpace, (double)1.0, &Lex);
 	  int k;
 	  for (k = 1; k < last_infoset->NumActions(); k++)
-	    factor -= gPoly<gDouble>(&BehavStratSpace,
+	    factor -= gPoly<double>(&BehavStratSpace,
 				     initial_var_no + k, 1, &Lex);
 	  node_prob *= factor;
 	}
@@ -265,7 +265,7 @@ NashNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_solution,
   return true;
 }
 
-static gPolyList<gDouble> 
+static gPolyList<double> 
 NashExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 			    const gSpace &BehavStratSpace, 
 			    const term_order &Lex,
@@ -273,7 +273,7 @@ NashExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 			    const Gambit::BehavSupport &big_supp,
 			    const Gambit::List<Gambit::List<int> > &var_index) 
 {
-  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+  gPolyList<double> answer(&BehavStratSpace, &Lex);
 
   Gambit::List<Gambit::GameNode> terminal_nodes = TerminalNodes(p_solution.GetGame());
 
@@ -307,10 +307,10 @@ NashExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 	    // payoff resulting from the profile and deviation to 
 	    // the strategy for pl specified by dsupp[k]
 
-	      gPoly<gDouble> next_poly(&BehavStratSpace, &Lex);
+	      gPoly<double> next_poly(&BehavStratSpace, &Lex);
 
 	      for (int n = 1; n <= terminal_nodes.Length(); n++) {
-		gPoly<gDouble> node_prob(&BehavStratSpace, (gDouble)1.0, &Lex);
+		gPoly<double> node_prob(&BehavStratSpace, (double)1.0, &Lex);
 		if (NashNodeProbabilityPoly(p_solution, node_prob,
 					    BehavStratSpace,
 					    Lex,
@@ -322,12 +322,12 @@ NashExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 					    acts_for_iset[j])) {
 		  if (terminal_nodes[n]->GetOutcome()) {
 		    node_prob *= 
-		      (gDouble) terminal_nodes[n]->GetOutcome()->GetPayoff<Gambit::Rational>(pl);
+		      (double) terminal_nodes[n]->GetOutcome()->GetPayoff<Gambit::Rational>(pl);
 		  }
 		  next_poly += node_prob;
 		}
 	      }
-	      answer += -next_poly + (gDouble) p_solution.GetPayoff(pl);
+	      answer += -next_poly + (double) p_solution.GetPayoff(pl);
 	    }
 	  }
       }
@@ -336,7 +336,7 @@ NashExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
   return answer;
 }
 
-static gPolyList<gDouble> 
+static gPolyList<double> 
 ExtendsToNashIneqs(const Gambit::MixedBehavProfile<double> &p_solution,
 		   const gSpace &BehavStratSpace, 
 		   const term_order &Lex,
@@ -344,7 +344,7 @@ ExtendsToNashIneqs(const Gambit::MixedBehavProfile<double> &p_solution,
 		   const Gambit::BehavSupport &big_supp,
 		   const Gambit::List<Gambit::List<int> > &var_index)
 {
-  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+  gPolyList<double> answer(&BehavStratSpace, &Lex);
   answer += ActionProbsSumToOneIneqs(p_solution, BehavStratSpace, 
 				     Lex, 
 				     big_supp, 
@@ -394,21 +394,21 @@ bool algExtendsToNash::ExtendsToNash(const Gambit::MixedBehavProfile<double> &p_
 
   num_vars = BehavStratSpace.Dmnsn();
 
-  gPolyList<gDouble> inequalities = ExtendsToNashIneqs(p_solution,
+  gPolyList<double> inequalities = ExtendsToNashIneqs(p_solution,
 						       BehavStratSpace,
 						       Lex,
 						       little_supp,
 						       big_supp,
 						       var_index);
   // set up the rectangle of search
-  Gambit::Vector<gDouble> bottoms(num_vars), tops(num_vars);
-  bottoms = (gDouble)0;
-  tops = (gDouble)1;
-  gRectangle<gDouble> Cube(bottoms, tops); 
+  Gambit::Vector<double> bottoms(num_vars), tops(num_vars);
+  bottoms = (double)0;
+  tops = (double)1;
+  gRectangle<double> Cube(bottoms, tops); 
 
   // Set up the test and do it
-  IneqSolv<gDouble> extension_tester(inequalities);
-  Gambit::Vector<gDouble> sample(num_vars);
+  IneqSolv<double> extension_tester(inequalities);
+  Gambit::Vector<double> sample(num_vars);
   bool answer = extension_tester.ASolutionExists(Cube,sample); 
   
   //  assert (answer == m_profile->ExtendsToNash(little_supp, big_supp, m_status));
@@ -422,7 +422,7 @@ bool algExtendsToNash::ExtendsToNash(const Gambit::MixedBehavProfile<double> &p_
 //=========================================================================
 
 static bool ANFNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_solution,
-				   gPoly<gDouble> & node_prob,
+				   gPoly<double> & node_prob,
 				   const gSpace &BehavStratSpace, 
 				   const term_order &Lex,
 				   const Gambit::BehavSupport &big_supp,
@@ -437,7 +437,7 @@ static bool ANFNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_so
     Gambit::GameInfoset last_infoset = last_action->GetInfoset();
     
     if (last_infoset->IsChanceInfoset()) 
-      node_prob *= (gDouble) last_infoset->GetActionProb<Gambit::Rational>(last_action->GetNumber());
+      node_prob *= (double) last_infoset->GetActionProb<Gambit::Rational>(last_action->GetNumber());
     else 
       if (big_supp.HasActiveActionAt(last_infoset)) {
 	if (last_infoset == p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)) {
@@ -446,7 +446,7 @@ static bool ANFNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_so
 	}
 	else
 	  if (big_supp.Contains(last_action))
-	    node_prob *= (gDouble) p_solution.GetActionProb(last_action);
+	    node_prob *= (double) p_solution.GetActionProb(last_action);
 	  else 
 	    return false;
       }
@@ -455,13 +455,13 @@ static bool ANFNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_so
  var_index[last_infoset->GetPlayer()->GetNumber()][last_infoset->GetNumber()];
 	if (last_action->GetNumber() < last_infoset->NumActions()){
 	  int varno = initial_var_no + last_action->GetNumber();
-	  node_prob *= gPoly<gDouble>(&BehavStratSpace, varno, 1, &Lex);
+	  node_prob *= gPoly<double>(&BehavStratSpace, varno, 1, &Lex);
 	}
 	else {
-	  gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
+	  gPoly<double> factor(&BehavStratSpace, (double)1.0, &Lex);
 	  int k;
 	  for (k = 1; k < last_infoset->NumActions(); k++)
-	    factor -= gPoly<gDouble>(&BehavStratSpace,
+	    factor -= gPoly<double>(&BehavStratSpace,
 				     initial_var_no + k, 1, &Lex);
 	  node_prob *= factor;
 	}
@@ -471,7 +471,7 @@ static bool ANFNodeProbabilityPoly(const Gambit::MixedBehavProfile<double> &p_so
   return true;
 }
 
-static gPolyList<gDouble> 
+static gPolyList<double> 
 ANFExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 			   const gSpace &BehavStratSpace, 
 			   const term_order &Lex,
@@ -479,7 +479,7 @@ ANFExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 			   const Gambit::BehavSupport &big_supp,
 			   const Gambit::List<Gambit::List<int> > &var_index)
 {
-  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+  gPolyList<double> answer(&BehavStratSpace, &Lex);
 
   Gambit::List<Gambit::GameNode> terminal_nodes = TerminalNodes(p_solution.GetGame());
 
@@ -493,10 +493,10 @@ ANFExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 	    // This will be the utility difference between the
 	    // payoff resulting from the profile and deviation to 
 	    // action j
-	    gPoly<gDouble> next_poly(&BehavStratSpace, &Lex);
+	    gPoly<double> next_poly(&BehavStratSpace, &Lex);
 
 	    for (int n = 1; n <= terminal_nodes.Length(); n++) {
-	      gPoly<gDouble> node_prob(&BehavStratSpace, (gDouble)1.0, &Lex);
+	      gPoly<double> node_prob(&BehavStratSpace, (double)1.0, &Lex);
 	      if (ANFNodeProbabilityPoly(p_solution, node_prob,
 					 BehavStratSpace,
 					 Lex,
@@ -506,18 +506,18 @@ ANFExpectedPayoffDiffPolys(const Gambit::MixedBehavProfile<double> &p_solution,
 					 pl,i,j)) {
 		if (terminal_nodes[n]->GetOutcome()) {
 		  node_prob *= 
-		    (gDouble) terminal_nodes[n]->GetOutcome()->GetPayoff<Gambit::Rational>(pl);
+		    (double) terminal_nodes[n]->GetOutcome()->GetPayoff<Gambit::Rational>(pl);
 		}
 		next_poly += node_prob;
 	      }
 	    }
-	    answer += -next_poly + (gDouble) p_solution.GetPayoff(pl);
+	    answer += -next_poly + (double) p_solution.GetPayoff(pl);
 	  }
     }
   return answer;
 }
 
-static gPolyList<gDouble> 
+static gPolyList<double> 
 ExtendsToANFNashIneqs(const Gambit::MixedBehavProfile<double> &p_solution,
 		      const gSpace &BehavStratSpace, 
 		      const term_order &Lex,
@@ -525,7 +525,7 @@ ExtendsToANFNashIneqs(const Gambit::MixedBehavProfile<double> &p_solution,
 		      const Gambit::BehavSupport &big_supp,
 		      const Gambit::List<Gambit::List<int> > &var_index)
 {
-  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+  gPolyList<double> answer(&BehavStratSpace, &Lex);
   answer += ActionProbsSumToOneIneqs(p_solution, BehavStratSpace, 
 				     Lex, 
 				     big_supp, 
@@ -571,7 +571,7 @@ bool algExtendsToAgentNash::ExtendsToAgentNash(const Gambit::MixedBehavProfile<d
   term_order Lex(&BehavStratSpace, ptr);
 
   num_vars = BehavStratSpace.Dmnsn();
-  gPolyList<gDouble> inequalities = ExtendsToANFNashIneqs(p_solution,
+  gPolyList<double> inequalities = ExtendsToANFNashIneqs(p_solution,
 							  BehavStratSpace,
 							  Lex,
 							  little_supp,
@@ -579,14 +579,14 @@ bool algExtendsToAgentNash::ExtendsToAgentNash(const Gambit::MixedBehavProfile<d
 							  var_index);
 
   // set up the rectangle of search
-  Gambit::Vector<gDouble> bottoms(num_vars), tops(num_vars);
-  bottoms = (gDouble)0;
-  tops = (gDouble)1;
-  gRectangle<gDouble> Cube(bottoms, tops); 
+  Gambit::Vector<double> bottoms(num_vars), tops(num_vars);
+  bottoms = (double)0;
+  tops = (double)1;
+  gRectangle<double> Cube(bottoms, tops); 
 
   // Set up the test and do it
-  IneqSolv<gDouble> extension_tester(inequalities);
-  Gambit::Vector<gDouble> sample(num_vars);
+  IneqSolv<double> extension_tester(inequalities);
+  Gambit::Vector<double> sample(num_vars);
 
   // Temporarily, we check the old set up vs. the new
   bool ANFanswer = extension_tester.ASolutionExists(Cube,sample); 

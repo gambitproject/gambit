@@ -69,10 +69,10 @@ public:
 // derivatives vanish, and that the sum of action probabilities at
 // each information set be less than one.
 
-gPoly<gDouble> ProbOfSequence(const ProblemData &p_data,
+gPoly<double> ProbOfSequence(const ProblemData &p_data,
 			      int p, int seq)
 {
-  gPoly<gDouble> equation(p_data.Space, p_data.Lex);
+  gPoly<double> equation(p_data.Space, p_data.Lex);
   Vector<int> exps(p_data.nVars);
   int j = 0;
   
@@ -84,16 +84,16 @@ gPoly<gDouble> ProbOfSequence(const ProblemData &p_data,
   if(seq==1) {
     exps=0;
     exp_vect const_exp(p_data.Space,exps);
-    gMono<gDouble> const_term(1.0, const_exp);
-    gPoly<gDouble> new_term(p_data.Space,const_term,p_data.Lex);
+    gMono<double> const_term(1.0, const_exp);
+    gPoly<double> new_term(p_data.Space,const_term,p_data.Lex);
     equation+=new_term;
   }
   else if(act<p_data.support.NumActions(infoset)) {
     exps=0;
     exps[varno]=1;
     exp_vect const_exp(p_data.Space,exps);
-    gMono<gDouble> const_term(1.0, const_exp);
-    gPoly<gDouble> new_term(p_data.Space,const_term,p_data.Lex);
+    gMono<double> const_term(1.0, const_exp);
+    gPoly<double> new_term(p_data.Space,const_term,p_data.Lex);
     equation+=new_term;
   }
   else {
@@ -109,16 +109,16 @@ gPoly<gDouble> ProbOfSequence(const ProblemData &p_data,
   return equation;
 }
 
-gPoly<gDouble> GetPayoff(const ProblemData &p_data, int pl)
+gPoly<double> GetPayoff(const ProblemData &p_data, int pl)
 {
   gIndexOdometer index(p_data.SF.NumSequences());
   Rational pay;
 
-  gPoly<gDouble> equation(p_data.Space, p_data.Lex);
+  gPoly<double> equation(p_data.Space, p_data.Lex);
   while (index.Turn()) {
     pay=p_data.SF.Payoff(index.CurrentIndices(),pl);
     if( pay != Rational(0)) {
-      gPoly<gDouble> term(p_data.Space,(double) pay, p_data.Lex);
+      gPoly<double> term(p_data.Space,(double) pay, p_data.Lex);
       int k;
       for(k=1;k<=p_data.support.GetGame()->NumPlayers();k++) 
 	term*=ProbOfSequence(p_data, k,(index.CurrentIndices())[k]);
@@ -128,14 +128,14 @@ gPoly<gDouble> GetPayoff(const ProblemData &p_data, int pl)
   return equation;
 }
 
-gPolyList<gDouble>
+gPolyList<double>
 IndifferenceEquations(const ProblemData &p_data)
 {
-  gPolyList<gDouble> equations(p_data.Space, p_data.Lex);
+  gPolyList<double> equations(p_data.Space, p_data.Lex);
 
   int kk = 0;
   for (int pl = 1; pl <= p_data.SF.NumPlayers(); pl++) {
-    gPoly<gDouble> payoff = GetPayoff(p_data, pl);
+    gPoly<double> payoff = GetPayoff(p_data, pl);
     int n_vars = p_data.SF.NumSequences(pl) - p_data.SF.NumInfosets(pl) - 1; 
     for (int j = 1; j <= n_vars; j++) {
       equations += payoff.PartialDerivative(kk+j);
@@ -146,10 +146,10 @@ IndifferenceEquations(const ProblemData &p_data)
   return equations;
 }
 
-gPolyList<gDouble> 
+gPolyList<double> 
 LastActionProbPositiveInequalities(const ProblemData &p_data) 
 {
-  gPolyList<gDouble> equations(p_data.Space, p_data.Lex);
+  gPolyList<double> equations(p_data.Space, p_data.Lex);
 
   for (int i = 1; i <= p_data.SF.NumPlayers(); i++) 
     for (int j = 2; j <= p_data.SF.NumSequences(i); j++) {
@@ -162,10 +162,10 @@ LastActionProbPositiveInequalities(const ProblemData &p_data)
   return equations;
 }
 
-gPolyList<gDouble>
+gPolyList<double>
 NashOnSupportEquationsAndInequalities(const ProblemData &p_data)
 {
-  gPolyList<gDouble> equations(p_data.Space, p_data.Lex);
+  gPolyList<double> equations(p_data.Space, p_data.Lex);
   
   equations += IndifferenceEquations(p_data);
   equations += LastActionProbPositiveInequalities(p_data);
@@ -179,7 +179,7 @@ NashOnSupportEquationsAndInequalities(const ProblemData &p_data)
 
 double
 NumProbOfSequence(const ProblemData &p_data, int p,
-		  int seq, const Vector<gDouble> &x)
+		  int seq, const Vector<double> &x)
 {
   int isetrow = p_data.SF.InfosetRowNumber(p,seq);
   int act  = p_data.SF.ActionNumber(p,seq);
@@ -190,7 +190,7 @@ NumProbOfSequence(const ProblemData &p_data, int p,
     return 1.0;
   }
   else if (act < p_data.support.NumActions(infoset)) {
-    return x[varno].ToDouble();
+    return x[varno];
   }
   else {    
     double value = 0.0;
@@ -208,7 +208,7 @@ NumProbOfSequence(const ProblemData &p_data, int p,
 
 PVector<double> 
 SeqFormVectorFromSolFormVector(const ProblemData &p_data, 
-			       const Vector<gDouble> &v)
+			       const Vector<double> &v)
 {
   PVector<double> x(p_data.SF.NumSequences());
 
@@ -259,15 +259,15 @@ SolveSupport(const BehavSupport &p_support, bool &p_isSingular)
     }
   }
 
-  gPolyList<gDouble> equations = NashOnSupportEquationsAndInequalities(data);
+  gPolyList<double> equations = NashOnSupportEquationsAndInequalities(data);
 
   // set up the rectangle of search
-  Vector<gDouble> bottoms(data.nVars), tops(data.nVars);
-  bottoms = (gDouble) 0;
-  tops = (gDouble) 1;
-  gRectangle<gDouble> Cube(bottoms, tops); 
+  Vector<double> bottoms(data.nVars), tops(data.nVars);
+  bottoms = (double) 0;
+  tops = (double) 1;
+  gRectangle<double> Cube(bottoms, tops); 
 
-  QuikSolv<gDouble> quickie(equations);
+  QuikSolv<double> quickie(equations);
 #ifdef UNUSED
   if(params.trace>0) {
     (*params.tracefile) << "\nThe equilibrium equations are \n" 
@@ -291,7 +291,7 @@ SolveSupport(const BehavSupport &p_support, bool &p_isSingular)
     p_isSingular = true;
   }
   
-  List<Vector<gDouble> > solutionlist = quickie.RootList();
+  List<Vector<double> > solutionlist = quickie.RootList();
 
   List<MixedBehavProfile<double> > solutions;
   for (int k = 1; k <= solutionlist.Length(); k++) {
@@ -309,7 +309,7 @@ SolveSupport(const BehavSupport &p_support, bool &p_isSingular)
 
 
 PVector<double> 
-SeqFormProbsFromSolVars(const ProblemData &p_data, const Vector<gDouble> &v)
+SeqFormProbsFromSolVars(const ProblemData &p_data, const Vector<double> &v)
 {
   PVector<double> x(p_data.SF.NumSequences());
 

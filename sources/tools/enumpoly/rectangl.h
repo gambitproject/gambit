@@ -27,7 +27,6 @@
 #ifndef RECTANGL_H
 #define RECTANGL_H
 
-#include "double.h"
 #include "interval.h"
 #include "libgambit/vector.h"
 
@@ -85,6 +84,6 @@ public:
   // Conversion:
   //-------------
 
-template <class T> gRectangle<gDouble> TogDouble(const gRectangle<T>&);
+template <class T> gRectangle<double> TogDouble(const gRectangle<T>&);
 
 #endif // RECTANGL_H

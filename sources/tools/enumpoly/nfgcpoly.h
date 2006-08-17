@@ -41,7 +41,7 @@ using namespace Gambit;
 class HeuristicPolEnumModule  {
 private:
   int m_stopAfter;
-  gDouble eps;
+  double eps;
   Game NF;
   const StrategySupport &support;
   gSpace Space;
@@ -52,22 +52,22 @@ private:
   Gambit::List<MixedStrategyProfile<double> > solutions;
   bool is_singular;
 
-  bool EqZero(gDouble x) const;
+  bool EqZero(double x) const;
   
   // p_i_j as a gPoly, with last prob in terms of previous probs
-  gPoly<gDouble> Prob(int i,int j) const;
+  gPoly<double> Prob(int i,int j) const;
 
   // equation for when player i sets strat1 = strat2
   // with last probs for each player substituted out.  
-  gPoly<gDouble> IndifferenceEquation(int i, int strat1, int strat2) const;
-  gPolyList<gDouble>   IndifferenceEquations()                 const;
-  gPolyList<gDouble>   LastActionProbPositiveInequalities()    const;
-  gPolyList<gDouble>   NashOnSupportEquationsAndInequalities() const;
-  Gambit::List<Vector<gDouble> > 
-               NashOnSupportSolnVectors(const gPolyList<gDouble> &equations,
-					const gRectangle<gDouble> &Cube);
+  gPoly<double> IndifferenceEquation(int i, int strat1, int strat2) const;
+  gPolyList<double>   IndifferenceEquations()                 const;
+  gPolyList<double>   LastActionProbPositiveInequalities()    const;
+  gPolyList<double>   NashOnSupportEquationsAndInequalities() const;
+  Gambit::List<Vector<double> > 
+               NashOnSupportSolnVectors(const gPolyList<double> &equations,
+					const gRectangle<double> &Cube);
 
-  int SaveSolutions(const Gambit::List<Vector<gDouble> > &list);
+  int SaveSolutions(const Gambit::List<Vector<double> > &list);
 public:
   HeuristicPolEnumModule(const StrategySupport &, int p_stopAfter);
   
@@ -77,11 +77,11 @@ public:
   double Time(void) const;
   
   const Gambit::List<MixedStrategyProfile<double> > &GetSolutions(void) const;
-  Vector<gDouble> SolVarsFromMixedStrategyProfile(const MixedStrategyProfile<double> &) const;
+  Vector<double> SolVarsFromMixedStrategyProfile(const MixedStrategyProfile<double> &) const;
 
-  const int PolishKnownRoot(Vector<gDouble> &) const;
+  const int PolishKnownRoot(Vector<double> &) const;
 
-  MixedStrategyProfile<double> ReturnPolishedSolution(const Vector<gDouble> &) const;
+  MixedStrategyProfile<double> ReturnPolishedSolution(const Vector<double> &) const;
 
   bool IsSingular() const;
 };

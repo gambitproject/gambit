@@ -25,10 +25,8 @@
 //
 
 #include "monomial.imp"
-#include "double.h"
 
 template class gMono<int>;
 template class gMono<double>;
-template class gMono<Gambit::Rational>;
-template class gMono<gDouble>;
+//template class gMono<Gambit::Rational>;
 

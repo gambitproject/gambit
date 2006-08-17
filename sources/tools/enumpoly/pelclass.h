@@ -38,10 +38,10 @@
 
 class PelView {
  private:
-  gPolyList<gDouble>        input;
+  gPolyList<double>        input;
 
   Gambit::List<Gambit::Vector<gComplex> > complexroots;
-  Gambit::List<Gambit::Vector<gDouble> >  realroots;
+  Gambit::List<Gambit::Vector<double> >  realroots;
   int                       mixedvolume;
   bool                      solutionsarecorrect;
 
@@ -52,10 +52,10 @@ class PelView {
   void        Initialize_Idf_T_Gen_node(const Gen_node &node, 
 					const char * label)             const;
   Gen_node    CreateRing(const int numvar)                              const;
-  polynomial1 GamPolyToPelPoly(const gPoly<gDouble> &p, 
+  polynomial1 GamPolyToPelPoly(const gPoly<double> &p, 
 			       const int n, 
 			       const Pring ring)                        const;
-  Gen_node    CreatePelicanVersionOfSystem(const gPolyList<gDouble> &input,
+  Gen_node    CreatePelicanVersionOfSystem(const gPolyList<double> &input,
 					   const Pring ring)            const;
   int         GutsOfGetMixedVolume(      node A, 
 		   	                 node norms, 
@@ -80,11 +80,11 @@ class PelView {
 
   Gambit::List<Gambit::Vector<gComplex> > GambitRootsFromPelRoots(const Gen_node g)   const;
   void        DisplayComplexRootList(const Gambit::List<Gambit::Vector<gComplex> > &) const;
-  Gambit::List<Gambit::Vector<gDouble> > RealRoots(const Gambit::List<Gambit::Vector<gComplex> > &) const;
+  Gambit::List<Gambit::Vector<double> > RealRoots(const Gambit::List<Gambit::Vector<gComplex> > &) const;
   bool        CheckSolutions(const Gen_node g)                          const;
 
  public:
-  PelView(const gPolyList<gDouble> &mylist);
+  PelView(const gPolyList<double> &mylist);
   PelView(const PelView &);
   ~PelView();
 
@@ -94,7 +94,7 @@ class PelView {
 
   int                       Dmnsn()           const;
   Gambit::List<Gambit::Vector<gComplex> > ComplexRoots()    const;
-  Gambit::List<Gambit::Vector<gDouble> >  RealRoots()       const;
+  Gambit::List<Gambit::Vector<double> >  RealRoots()       const;
   int                       MixedVolume()     const;
   int                       NumComplexRoots() const;
   bool                      FoundAllRoots()   const;

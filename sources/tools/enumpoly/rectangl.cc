@@ -25,17 +25,15 @@
 //
 
 #include <assert.h>
-#include "double.h"
+#include "libgambit/libgambit.h"
 #include "rectangl.imp"
 
-template class gRectangle<Gambit::Rational>;
-template gRectangle<gDouble> TogDouble(const gRectangle<Gambit::Rational>&);
+//template class gRectangle<Gambit::Rational>;
+//template gRectangle<double> TogDouble(const gRectangle<Gambit::Rational>&);
 
 template class gRectangle<double>;
-template gRectangle<gDouble> TogDouble(const gRectangle<double>&);
+template gRectangle<double> TogDouble(const gRectangle<double>&);
 
-template class gRectangle<gDouble>;
-template gRectangle<gDouble> TogDouble(const gRectangle<gDouble>&);
 
 
 

@@ -28,7 +28,6 @@
 #define GSOLVER_H
 
 #include "ideal.h"
-#include "double.h"
 #include "linrcomb.h"
 #include "gpolylst.h"
 
@@ -39,14 +38,14 @@ private:
   const gIdeal<T>     TheIdeal;
 
 // Conversion
-  Gambit::List<gPoly<gDouble> > BasisTogDouble() const;
+  Gambit::List<gPoly<double> > BasisTogDouble() const;
 
 // Recursive Call in Solver
-  Gambit::List<Gambit::Vector<gDouble> >  
-    ContinuationSolutions(const Gambit::List<gPoly<gDouble> >& list,
+  Gambit::List<Gambit::Vector<double> >  
+    ContinuationSolutions(const Gambit::List<gPoly<double> >& list,
 			  const int dmnsn,
 			  const int curvar,
-			  const Gambit::Vector<gDouble>& knownvals);
+			  const Gambit::Vector<double>& knownvals);
 
 public:
 
@@ -56,7 +55,7 @@ public:
   ~gSolver();
 
   bool                     IsZeroDimensional();
-  Gambit::List<Gambit::Vector<gDouble> > Roots();
+  Gambit::List<Gambit::Vector<double> > Roots();
 };
 
 #endif // GSOLVER_H

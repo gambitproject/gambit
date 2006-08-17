@@ -25,19 +25,18 @@
 //
 
 #include "gpolylst.imp"
-#include "double.h"
 #include "libgambit/matrix.imp"
 
 //template class gPolyList<int>;
 //template gOutput &operator<<(gOutput &f, const gPolyList<int> &y);
 
-template class gPolyList<Gambit::Rational>;
+//template class gPolyList<Gambit::Rational>;
 
 //template class gPolyList<double>;
 //template gOutput &operator<<(gOutput &f, const gPolyList<double> &y);
 
-template class gPolyList<gDouble>;
+template class gPolyList<double>;
 
-template class Gambit::RectArray<gPoly<gDouble>*>;
-template class Gambit::RectArray<gPoly<Gambit::Rational>*>;
+template class Gambit::RectArray<gPoly<double>*>;
+//template class Gambit::RectArray<gPoly<Gambit::Rational>*>;
 

@@ -26,10 +26,9 @@
 
 #include "libgambit/libgambit.h"
 #include "quiksolv.imp"
-#include "double.h"
 
-template class QuikSolv<Gambit::Rational>;
-template class QuikSolv<gDouble>;
+//template class QuikSolv<Gambit::Rational>;
+template class QuikSolv<double>;
 
 
 

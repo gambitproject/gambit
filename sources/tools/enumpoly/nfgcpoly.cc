@@ -44,7 +44,7 @@ HeuristicPolEnumModule::HeuristicPolEnumModule(const StrategySupport &S, int p_s
 
 int HeuristicPolEnumModule::PolEnum(void)
 {
-  gPolyList<gDouble> equations = NashOnSupportEquationsAndInequalities();
+  gPolyList<double> equations = NashOnSupportEquationsAndInequalities();
 
   /*
   // equations for equality of strat j to strat j+1
@@ -58,21 +58,21 @@ int HeuristicPolEnumModule::PolEnum(void)
   */
 
   // set up the rectangle of search
-  Vector<gDouble> bottoms(num_vars), tops(num_vars);
-  bottoms = (gDouble)0;
-  tops = (gDouble)1;
+  Vector<double> bottoms(num_vars), tops(num_vars);
+  bottoms = (double)0;
+  tops = (double)1;
  
-  gRectangle<gDouble> Cube(bottoms, tops); 
+  gRectangle<double> Cube(bottoms, tops); 
 
   // start QuikSolv
-  Gambit::List<Vector<gDouble> > solutionlist = NashOnSupportSolnVectors(equations,
+  Gambit::List<Vector<double> > solutionlist = NashOnSupportSolnVectors(equations,
 								   Cube);
 
   int index = SaveSolutions(solutionlist);
   return index;	 
 }
 
-int HeuristicPolEnumModule::SaveSolutions(const Gambit::List<Vector<gDouble> > &list)
+int HeuristicPolEnumModule::SaveSolutions(const Gambit::List<Vector<double> > &list)
 {
   MixedStrategyProfile<double> profile(support);
   int i,j,k,kk,index=0;
@@ -83,7 +83,7 @@ int HeuristicPolEnumModule::SaveSolutions(const Gambit::List<Vector<gDouble> > &
     for(i=1;i<=NF->NumPlayers();i++) {
       sum=0;
       for(j=1;j<support.NumStrategies(i);j++) {
-	profile[support.GetStrategy(i,j)] = (list[k][j+kk]).ToDouble();
+	profile[support.GetStrategy(i,j)] = list[k][j+kk];
 	sum+=profile[support.GetStrategy(i,j)];
       }
       profile[support.GetStrategy(i,j)] = (double)1.0 - sum;
@@ -94,7 +94,7 @@ int HeuristicPolEnumModule::SaveSolutions(const Gambit::List<Vector<gDouble> > &
   return index;
 }
 
-bool HeuristicPolEnumModule::EqZero(gDouble x) const
+bool HeuristicPolEnumModule::EqZero(double x) const
 {
   if(x <= eps && x >= -eps) return 1;
   return 0;
@@ -115,9 +115,9 @@ const Gambit::List<MixedStrategyProfile<double> > &HeuristicPolEnumModule::GetSo
   return solutions;
 }
 
-gPoly<gDouble> HeuristicPolEnumModule::Prob(int p, int strat) const
+gPoly<double> HeuristicPolEnumModule::Prob(int p, int strat) const
 {
-  gPoly<gDouble> equation(&Space,&Lex);
+  gPoly<double> equation(&Space,&Lex);
   Vector<int> exps(num_vars);
   int i,j,kk = 0;
   
@@ -128,8 +128,8 @@ gPoly<gDouble> HeuristicPolEnumModule::Prob(int p, int strat) const
     exps=0;
     exps[strat+kk]=1;
     exp_vect const_exp(&Space,exps);
-    gMono<gDouble> const_term((gDouble)1,const_exp);
-    gPoly<gDouble> new_term(&Space,const_term,&Lex);
+    gMono<double> const_term((double)1,const_exp);
+    gPoly<double> new_term(&Space,const_term,&Lex);
     equation+=new_term;
   }
   else {
@@ -137,32 +137,32 @@ gPoly<gDouble> HeuristicPolEnumModule::Prob(int p, int strat) const
       exps=0;
       exps[j+kk]=1;
       exp_vect exponent(&Space,exps);
-      gMono<gDouble> term((gDouble)(-1),exponent);
-      gPoly<gDouble> new_term(&Space,term,&Lex);
+      gMono<double> term((double)(-1),exponent);
+      gPoly<double> new_term(&Space,term,&Lex);
       equation+=new_term;
     }
     exps=0;
     exp_vect const_exp(&Space,exps);
-    gMono<gDouble> const_term((gDouble)1,const_exp);
-    gPoly<gDouble> new_term(&Space,const_term,&Lex);
+    gMono<double> const_term((double)1,const_exp);
+    gPoly<double> new_term(&Space,const_term,&Lex);
     equation+=new_term;
   }
   return equation;
 }
 
-gPoly<gDouble> 
+gPoly<double> 
 HeuristicPolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 {
-  gPoly<gDouble> equation(&Space,&Lex);
+  gPoly<double> equation(&Space,&Lex);
 
   for (StrategyIterator A(support, i, strat1), B(support, i, strat2);
        !A.AtEnd(); A++, B++) {
-    gPoly<gDouble> term(&Space,(gDouble)1,&Lex);
+    gPoly<double> term(&Space,(double)1,&Lex);
     int k;
     for(k=1;k<=NF->NumPlayers();k++) 
       if(i!=k) 
 	term*=Prob(k,support.GetIndex(A->GetStrategy(k)));
-    gDouble coeff,ap,bp;
+    double coeff,ap,bp;
     ap = A->GetPayoff<double>(i);
     bp = B->GetPayoff<double>(i);
     coeff = ap - bp;
@@ -173,9 +173,9 @@ HeuristicPolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) cons
 }
 
 
-gPolyList<gDouble>   HeuristicPolEnumModule::IndifferenceEquations()  const
+gPolyList<double>   HeuristicPolEnumModule::IndifferenceEquations()  const
 {
-  gPolyList<gDouble> equations(&Space,&Lex);
+  gPolyList<double> equations(&Space,&Lex);
 
   for(int pl=1;pl<=NF->NumPlayers();pl++) 
     for(int j=1;j<support.NumStrategies(pl);j++) 
@@ -184,9 +184,9 @@ gPolyList<gDouble>   HeuristicPolEnumModule::IndifferenceEquations()  const
   return equations;
 }
  
-gPolyList<gDouble> HeuristicPolEnumModule::LastActionProbPositiveInequalities() const
+gPolyList<double> HeuristicPolEnumModule::LastActionProbPositiveInequalities() const
 {
-  gPolyList<gDouble> equations(&Space,&Lex);
+  gPolyList<double> equations(&Space,&Lex);
 
   for(int pl=1;pl<=NF->NumPlayers();pl++)
     if(support.NumStrategies(pl)>2) 
@@ -195,9 +195,9 @@ gPolyList<gDouble> HeuristicPolEnumModule::LastActionProbPositiveInequalities() 
   return equations;
 }
 
-gPolyList<gDouble> HeuristicPolEnumModule::NashOnSupportEquationsAndInequalities() const
+gPolyList<double> HeuristicPolEnumModule::NashOnSupportEquationsAndInequalities() const
 {
-  gPolyList<gDouble> equations(&Space,&Lex);
+  gPolyList<double> equations(&Space,&Lex);
   
   equations += IndifferenceEquations();
   equations += LastActionProbPositiveInequalities();
@@ -206,11 +206,11 @@ gPolyList<gDouble> HeuristicPolEnumModule::NashOnSupportEquationsAndInequalities
 }
 
 
-Gambit::List<Vector<gDouble> > 
-HeuristicPolEnumModule::NashOnSupportSolnVectors(const gPolyList<gDouble> &equations,
-					const gRectangle<gDouble> &Cube)
+Gambit::List<Vector<double> > 
+HeuristicPolEnumModule::NashOnSupportSolnVectors(const gPolyList<double> &equations,
+					const gRectangle<double> &Cube)
 {  
-  QuikSolv<gDouble> quickie(equations);
+  QuikSolv<double> quickie(equations);
   //  p_status.SetProgress(0);
 
   try {
@@ -261,7 +261,7 @@ MixedStrategyProfile<double> PolishEquilibrium(const StrategySupport &support,
 				       bool &is_singular)
 {
   HeuristicPolEnumModule module(support, 0);
-  Vector<gDouble> vec = module.SolVarsFromMixedStrategyProfile(sol);
+  Vector<double> vec = module.SolVarsFromMixedStrategyProfile(sol);
 
   /* //DEBUG
   gbtPVector<double> xx = module.SeqFormProbsFromSolVars(vec);
@@ -292,7 +292,7 @@ MixedStrategyProfile<double> PolishEquilibrium(const StrategySupport &support,
 
 #endif // UNUSED
 
-Vector<gDouble> 
+Vector<double> 
 HeuristicPolEnumModule::SolVarsFromMixedStrategyProfile(const MixedStrategyProfile<double> &sol) const
 {
   int numvars(0);
@@ -300,26 +300,26 @@ HeuristicPolEnumModule::SolVarsFromMixedStrategyProfile(const MixedStrategyProfi
   for (int pl = 1; pl <= NF->NumPlayers(); pl++) 
     numvars += support.NumStrategies(pl) - 1;
 
-  Vector<gDouble> answer(numvars);
+  Vector<double> answer(numvars);
   int count(0);
 
   for (int pl = 1; pl <= NF->NumPlayers(); pl++) 
     for (int j = 1; j < support.NumStrategies(pl); j++) {
       count ++;
-      answer[count] = (gDouble)sol[support.GetStrategy(pl,j)];
+      answer[count] = (double)sol[support.GetStrategy(pl,j)];
     }
 
   return answer;
 }
 
-const int HeuristicPolEnumModule::PolishKnownRoot(Vector<gDouble> &point) const
+const int HeuristicPolEnumModule::PolishKnownRoot(Vector<double> &point) const
 {
   //DEBUG
   //  gout << "Prior to Polishing point is " << point << ".\n";
 
   if (point.Length() > 0) {
     // equations for equality of strat j to strat j+1
-    gPolyList<gDouble> equations(&Space,&Lex);
+    gPolyList<double> equations(&Space,&Lex);
     equations += IndifferenceEquations();
 
     //DEBUG
@@ -328,7 +328,7 @@ const int HeuristicPolEnumModule::PolishKnownRoot(Vector<gDouble> &point) const
     //	 << equations << "\n";
     
     // start QuikSolv
-    QuikSolv<gDouble> quickie(equations);
+    QuikSolv<double> quickie(equations);
     
     //DEBUG
     //    gout << "We constructed quickie.\n";
@@ -349,7 +349,7 @@ const int HeuristicPolEnumModule::PolishKnownRoot(Vector<gDouble> &point) const
 }
 
 MixedStrategyProfile<double>
-HeuristicPolEnumModule::ReturnPolishedSolution(const Vector<gDouble> &root) const
+HeuristicPolEnumModule::ReturnPolishedSolution(const Vector<double> &root) const
 {
   MixedStrategyProfile<double> profile(support);
 
@@ -358,7 +358,7 @@ HeuristicPolEnumModule::ReturnPolishedSolution(const Vector<gDouble> &root) cons
   for(int pl=1;pl<=NF->NumPlayers();pl++) {
     double sum=0;
     for(j=1;j<support.NumStrategies(pl);j++) {
-      profile[support.GetStrategy(pl,j)] = (root[j+kk]).ToDouble();
+      profile[support.GetStrategy(pl,j)] = root[j+kk];
       sum+=profile[support.GetStrategy(pl,j)];
     }
     profile[support.GetStrategy(pl,j)] = (double)1.0 - sum;

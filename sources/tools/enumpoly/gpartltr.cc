@@ -26,11 +26,11 @@
 
 #include "gpartltr.imp"
 
-template class TreeOfPartials<gDouble>;
-template class ListOfPartialTrees<gDouble>;
+template class TreeOfPartials<double>;
+template class ListOfPartialTrees<double>;
 
-template class TreeOfPartials<Gambit::Rational>;
-template class ListOfPartialTrees<Gambit::Rational>;
+//template class TreeOfPartials<Gambit::Rational>;
+//template class ListOfPartialTrees<Gambit::Rational>;
 
 
 //template class TreeOfPartials<double>;
@@ -48,8 +48,8 @@ template class ListOfPartialTrees<Gambit::Rational>;
 
 #include "gtree.imp"
 
-template class gTreeNode<gPoly<Gambit::Rational> >;
-template class gTree<gPoly<Gambit::Rational> >;
+//template class gTreeNode<gPoly<Gambit::Rational> >;
+//template class gTree<gPoly<Gambit::Rational> >;
 
-template class gTreeNode<gPoly<gDouble> >;
-template class gTree<gPoly<gDouble> >;
+template class gTreeNode<gPoly<double> >;
+template class gTree<gPoly<double> >;

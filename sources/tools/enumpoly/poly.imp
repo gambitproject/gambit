@@ -249,13 +249,13 @@ template <class T>  void polynomial<T>::ToMonic()
 }
 
 template<class T>  
-polynomial<gDouble>  polynomial<T>::TogDouble() const
+polynomial<double>  polynomial<T>::TogDouble() const
 {
-  Gambit::List<gDouble> newcoefs;
+  Gambit::List<double> newcoefs;
   for (int i = 1; i <= coeflist.Length(); i++) {
-    newcoefs.Append((gDouble)coeflist[i]);
+    newcoefs.Append((double)coeflist[i]);
   }
-  return polynomial<gDouble>(newcoefs);
+  return polynomial<double>(newcoefs);
 }
 
 //--------------------------------------------------------------------------

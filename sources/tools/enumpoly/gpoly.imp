@@ -925,10 +925,10 @@ template <class T> void gPoly<T>::Output(std::string &t) const
       if ((Terms[j].Coef() != (T)1 && -Terms[j].Coef() != (T)1) ||
 	   Terms[j].IsConstant() ) 
 	if (Terms[j].Coef() < (T)0) { 
-	  s += ToText(-Terms[j].Coef());
+	  s += Gambit::ToText(-Terms[j].Coef());
 	}
 	else {                        
-	  s += ToText( Terms[j].Coef());
+	  s += Gambit::ToText( Terms[j].Coef());
 	}
 	
 	for (int k = 1; k <= Space->Dmnsn(); k++) {
@@ -938,7 +938,7 @@ template <class T> void gPoly<T>::Output(std::string &t) const
 	    s += (*Space)[k]->Name;
 	    if (exp != 1) {
 	      s += '^';
-	      s += ToText(exp);
+	      s += Gambit::ToText(exp);
 	    }
 	  }
 	}
@@ -962,16 +962,16 @@ template <class T> std::string &operator<<(std::string &p_text, const gPoly<T> &
 //----------------------------------
 
 template<class T>  
-gPoly<gDouble>  TogDouble(const gPoly<T>& given) 
+gPoly<double>  TogDouble(const gPoly<T>& given) 
 {
-  gPoly<gDouble>   answer(given.GetSpace(),given.GetOrder());
+  gPoly<double>   answer(given.GetSpace(),given.GetOrder());
   Gambit::List<gMono<T> > list = given.MonomialList();
   for (int i =1; i <= list.Length(); i++) {
-    gDouble nextcoef = (gDouble)list[i].Coef();
-    gPoly<gDouble> next(given.GetSpace(),
-			list[i].ExpV(),
-			nextcoef,
-			given.GetOrder());
+    double nextcoef = (double)list[i].Coef();
+    gPoly<double> next(given.GetSpace(),
+		       list[i].ExpV(),
+		       nextcoef,
+		       given.GetOrder());
     answer += next;
   }
   
@@ -979,23 +979,23 @@ gPoly<gDouble>  TogDouble(const gPoly<T>& given)
 }
 
 template<class T>  
-gPoly<gDouble>  NormalizationOfPoly(const gPoly<T>& given) 
+gPoly<double>  NormalizationOfPoly(const gPoly<T>& given) 
 {
   Gambit::List<gMono<T> > list = given.MonomialList();
-  gDouble maxcoeff = (gDouble)0;
+  double maxcoeff = 0.0;
   for (int i =1; i <= list.Length(); i++) {
-    maxcoeff = Gambit::max(maxcoeff,abs((gDouble)list[i].Coef()));
+    maxcoeff = Gambit::max(maxcoeff, (double) Gambit::abs((double) list[i].Coef()));
   }
 
   if (maxcoeff < 0.000000001) return TogDouble(given);
 
-  gPoly<gDouble>   answer(given.GetSpace(),given.GetOrder());
+  gPoly<double>   answer(given.GetSpace(),given.GetOrder());
   for (int i =1; i <= list.Length(); i++) {
-    gDouble nextcoef = (gDouble)list[i].Coef()/maxcoeff;
-    gPoly<gDouble> next(given.GetSpace(),
-			list[i].ExpV(),
-			nextcoef,
-			given.GetOrder());
+    double nextcoef = (double)list[i].Coef()/maxcoeff;
+    gPoly<double> next(given.GetSpace(),
+		       list[i].ExpV(),
+		       nextcoef,
+		       given.GetOrder());
     answer += next;
   }
   

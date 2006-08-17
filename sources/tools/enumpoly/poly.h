@@ -28,7 +28,6 @@
 #include "libgambit/rational.h"
 #include "libgambit/vector.h"
 #include "interval.h"
-#include "double.h"
 #include "complex.h"
 
 /*  This file supplies the template class
@@ -78,7 +77,7 @@ public:
   void                   ToMonic()                                         ;
 //  polynomial<gDouble>    Togdouble()                                  const;
 
-  polynomial<gDouble>         TogDouble()                       const;
+  polynomial<double>         TogDouble()                       const;
 
   // information
   bool                   IsZero()                                     const;

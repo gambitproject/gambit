@@ -128,8 +128,8 @@ template <class T> class gPolyList
 //  inline int static Count() { return Counted<gPolyList<T> >::objCount(); }
 
    // Conversion
-   Gambit::List<gPoly<gDouble> > ListTogDouble()  const;
-   Gambit::List<gPoly<gDouble> > NormalizedList() const;
+   Gambit::List<gPoly<double> > ListTogDouble()  const;
+   Gambit::List<gPoly<double> > NormalizedList() const;
 };  
 
 #endif // GPOLYLST_H

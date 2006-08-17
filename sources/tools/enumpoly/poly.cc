@@ -26,10 +26,8 @@
 
 #include "libgambit/libgambit.h"
 #include "poly.imp"
-#include "double.h"
 
-template class polynomial<Gambit::Rational>;
+//template class polynomial<Gambit::Rational>;
 template class polynomial<int>;
 template class polynomial<double>;
-template class polynomial<gDouble>;
 

@@ -541,23 +541,23 @@ gPolyList<T>::SquareDerivativeMatrix(const Gambit::Vector<T>& p) const
 //----------------------------------
 
 template<class T> 
-Gambit::List<gPoly<gDouble> > gPolyList<T>::ListTogDouble() const
+Gambit::List<gPoly<double> > gPolyList<T>::ListTogDouble() const
 {
-  Gambit::List<gPoly<gDouble> > newlist;
+  Gambit::List<gPoly<double> > newlist;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) {
-    newlist.Append(gPoly<gDouble>(TogDouble(*List[ii])));
+    newlist.Append(gPoly<double>(TogDouble(*List[ii])));
   }
   return newlist;
 }
 
 template<class T> 
-Gambit::List<gPoly<gDouble> > gPolyList<T>::NormalizedList() const
+Gambit::List<gPoly<double> > gPolyList<T>::NormalizedList() const
 {
-  Gambit::List<gPoly<gDouble> > newlist;
+  Gambit::List<gPoly<double> > newlist;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) {
-    newlist.Append(gPoly<gDouble>(NormalizationOfPoly(*List[ii])));
+    newlist.Append(gPoly<double>(NormalizationOfPoly(*List[ii])));
   }
   return newlist;
 }

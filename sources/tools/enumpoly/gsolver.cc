@@ -26,5 +26,5 @@
 
 #include "gsolver.imp"
 
-template class gSolver<gDouble>;
+template class gSolver<double>;
 template class gSolver<Gambit::Rational>;

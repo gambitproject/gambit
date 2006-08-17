@@ -25,26 +25,11 @@
 //
 
 #include "gpoly.imp"
-#include "double.h"
 #include "libgambit/libgambit.h"
 
-#ifdef UNUSED
-double gPoly<double>::String_Coeff(double nega)
+template<> double gPoly<double>::String_Coeff(double nega)
 {
   double doub;
-  gText Coeff = "";
-  while (charc >= '0' && charc <= '9' || charc == '.'){
-    Coeff += charc;
-    charnum++;
-    GetChar();
-  }
-  if (Coeff == "") return (nega);
-  else return (nega * FromText(Coeff,doub));  
-}
-#endif  // UNUSED
-
-template<> gDouble gPoly<gDouble>::String_Coeff(gDouble nega)
-{
   std::string Coeff = "";
   while (charc >= '0' && charc <= '9' || charc == '.'){
     Coeff += charc;
@@ -52,9 +37,20 @@ template<> gDouble gPoly<gDouble>::String_Coeff(gDouble nega)
     GetChar();
   }
   if (Coeff == "") return (nega);
-  else return (nega * (gDouble) Gambit::ToDouble(Coeff));
+  else return (nega * strtod(Coeff.c_str(), NULL));
 }
 
+template class gPoly<double>;
+template gPoly<double> operator+(const gPoly<double> &poly, const double val);
+template gPoly<double> operator*(const double val, const gPoly<double> &poly);
+template gPoly<double> operator*(const gPoly<double> &poly, const double val);
+
+template gPoly<double> TogDouble(const gPoly<double>&);
+template gPoly<double> NormalizationOfPoly(const gPoly<double>&);
+
+template std::string &operator<<(std::string &, const gPoly<double> &);
+
+/*
 template<> Gambit::Rational gPoly<Gambit::Rational>::String_Coeff(Gambit::Rational nega)
 {
   Gambit::Rational rat;
@@ -72,20 +68,12 @@ template class gPoly<Gambit::Rational>;
 template gPoly<Gambit::Rational> operator*(const Gambit::Rational val, const gPoly<Gambit::Rational> &poly);
 template gPoly<Gambit::Rational> operator*(const gPoly<Gambit::Rational> &poly, const Gambit::Rational val);
 
-template gPoly<gDouble> TogDouble(const gPoly<Gambit::Rational>&);
-template gPoly<gDouble> NormalizationOfPoly(const gPoly<Gambit::Rational>&);
+template gPoly<double> TogDouble(const gPoly<Gambit::Rational>&);
+template gPoly<double> NormalizationOfPoly(const gPoly<Gambit::Rational>&);
 
 template std::string &operator<<(std::string &, const gPoly<Gambit::Rational> &);
+*/
 
-template class gPoly<gDouble>;
-template gPoly<gDouble> operator*(const gDouble val, const gPoly<gDouble> &poly);
-template gPoly<gDouble> operator*(const gPoly<gDouble> &poly, const gDouble val);
-template gPoly<gDouble> operator+(const gDouble val, const gPoly<gDouble> &poly);
-template gPoly<gDouble> operator+(const gPoly<gDouble> &poly, const gDouble val);
-
-template gPoly<gDouble> TogDouble(const gPoly<gDouble>&);
-template gPoly<gDouble> NormalizationOfPoly(const gPoly<gDouble>&);
-template std::string &operator<<(std::string &, const gPoly<gDouble> &);
 
 
 

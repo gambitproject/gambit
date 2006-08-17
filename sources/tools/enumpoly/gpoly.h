@@ -199,8 +199,8 @@ template <class T> std::string &operator<< (std::string &, const gPoly<T> &);
   // Conversion:
   //-------------
 
-template <class T> gPoly<gDouble> TogDouble(const gPoly<T>&);
-template <class T> gPoly<gDouble> NormalizationOfPoly(const gPoly<T>&);
+template <class T> gPoly<double> TogDouble(const gPoly<T>&);
+template <class T> gPoly<double> NormalizationOfPoly(const gPoly<T>&);
 
 // global multiply by scalar operators
 template <class T> gPoly<T> operator*(const T val, const gPoly<T> &poly);

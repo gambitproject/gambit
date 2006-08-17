@@ -119,7 +119,7 @@ Gen_node PelView::CreateRing(const int numvar) const
   return a1;
 }
 
-polynomial1 PelView::GamPolyToPelPoly(const gPoly<gDouble> &p, 
+polynomial1 PelView::GamPolyToPelPoly(const gPoly<double> &p, 
 				      const int n, 
 				      const Pring ring) const
 {
@@ -143,7 +143,7 @@ polynomial1 PelView::GamPolyToPelPoly(const gPoly<gDouble> &p,
     Ptemp= P;
     
     if (p.MonomialList()[1].IsConstant()) {
-      Ptemp->coef.r= p.MonomialList()[1].Coef().ToDouble();
+      Ptemp->coef.r= p.MonomialList()[1].Coef();
       Ptemp->coef.i= 0;
       
       for (int i=0;i<Ptemp->R->n;i++)
@@ -152,7 +152,7 @@ polynomial1 PelView::GamPolyToPelPoly(const gPoly<gDouble> &p,
     }
     
     else {
-      Ptemp->coef.r= p.MonomialList()[1].Coef().ToDouble();
+      Ptemp->coef.r= p.MonomialList()[1].Coef();
       Ptemp->coef.i= 0;
       
       for (int i=0;i<Ptemp->R->n;i++)
@@ -164,7 +164,7 @@ polynomial1 PelView::GamPolyToPelPoly(const gPoly<gDouble> &p,
       polynomial1 a;
       a = makeP(ring);
       if (p.MonomialList()[j].IsConstant()) {
-	a->coef.r= p.MonomialList()[j].Coef().ToDouble();
+	a->coef.r= p.MonomialList()[j].Coef();
 	a->coef.i= 0;
 	
 	for (int i=0;i<a->R->n;i++)
@@ -176,7 +176,7 @@ polynomial1 PelView::GamPolyToPelPoly(const gPoly<gDouble> &p,
       }
       
       else {
-	a->coef.r= p.MonomialList()[j].Coef().ToDouble();
+	a->coef.r= p.MonomialList()[j].Coef();
 	a->coef.i= 0;
 	
 	
@@ -197,7 +197,7 @@ polynomial1 PelView::GamPolyToPelPoly(const gPoly<gDouble> &p,
 }  
 
 Gen_node 
-PelView::CreatePelicanVersionOfSystem(const gPolyList<gDouble> &input, 
+PelView::CreatePelicanVersionOfSystem(const gPolyList<double> &input, 
 				      const Pring ring) const
 {
   Gen_node a;
@@ -535,10 +535,10 @@ int PelView::Dmnsn() const
   return input.Dmnsn();
 }
 
-Gambit::List<Gambit::Vector<gDouble> > 
+Gambit::List<Gambit::Vector<double> > 
 PelView::RealRoots(const Gambit::List<Gambit::Vector<gComplex> > &clist) const
 {
-  Gambit::List<Gambit::Vector<gDouble> > answer;
+  Gambit::List<Gambit::Vector<double> > answer;
 
   for (int i = 1; i <= clist.Length(); i++) {
 
@@ -548,9 +548,9 @@ PelView::RealRoots(const Gambit::List<Gambit::Vector<gComplex> > &clist) const
 	is_real = false;
 
     if (is_real) {
-      Gambit::Vector<gDouble> next(Dmnsn());
+      Gambit::Vector<double> next(Dmnsn());
       for (int j = 1; j <= Dmnsn(); j++) 
-	next[j] = (gDouble)clist[i][j].RealPart();
+	next[j] = (double)clist[i][j].RealPart();
       answer.Append(next);
     }
 
@@ -573,7 +573,7 @@ bool PelView::CheckSolutions(const Gen_node g) const
   return 1;
 }
 
-PelView::PelView(const gPolyList<gDouble> &mylist):input(mylist)
+PelView::PelView(const gPolyList<double> &mylist):input(mylist)
 {
   InitializePelicanMemory();
   
@@ -735,7 +735,7 @@ Gambit::List<Gambit::Vector<gComplex> > PelView::ComplexRoots() const
   return complexroots;
 }
 
-Gambit::List<Gambit::Vector<gDouble> > PelView::RealRoots() const
+Gambit::List<Gambit::Vector<double> > PelView::RealRoots() const
 {
   return realroots;
 }
@@ -781,11 +781,11 @@ int old_main()
   std::string gy = " 1 + 78 * n1 + 2 * n2  + n4 * n1^2";
   std::string gz = " 3 + n3 + n4";
   std::string gu = " 4 * n1 - n2 * n3 + 6 * n1 * n4^3";
-  gPoly<gDouble> px(&Space,gx,&Lex);
-  gPoly<gDouble> py(&Space,gy,&Lex); 
-  gPoly<gDouble> pz(&Space,gz,&Lex);
-  gPoly<gDouble> pu(&Space,gu,&Lex);
-  gPolyList<gDouble> mylist(&Space, &ReverseDegLex);
+  gPoly<double> px(&Space,gx,&Lex);
+  gPoly<double> py(&Space,gy,&Lex); 
+  gPoly<double> pz(&Space,gz,&Lex);
+  gPoly<double> pu(&Space,gu,&Lex);
+  gPolyList<double> mylist(&Space, &ReverseDegLex);
   mylist += px;
   mylist += py;
   mylist += pz;
@@ -806,10 +806,10 @@ int old_main()
   std::string newgx = " 2 + n2 ";
   std::string newgy = " 1 + 78 * n1 + 2 * n2  + n3 * n1^2";
   std::string newgz = " 3 + n3";
-  gPoly<gDouble> newpx(&NewSpace,newgx,&NewLex);
-  gPoly<gDouble> newpy(&NewSpace,newgy,&NewLex); 
-  gPoly<gDouble> newpz(&NewSpace,newgz,&NewLex);
-  gPolyList<gDouble> mynewlist(&NewSpace, &NewReverseDegLex);
+  gPoly<double> newpx(&NewSpace,newgx,&NewLex);
+  gPoly<double> newpy(&NewSpace,newgy,&NewLex); 
+  gPoly<double> newpz(&NewSpace,newgz,&NewLex);
+  gPolyList<double> mynewlist(&NewSpace, &NewReverseDegLex);
   mynewlist += newpx;
   mynewlist += newpy;
   mynewlist += newpz;
