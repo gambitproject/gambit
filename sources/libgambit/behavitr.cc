@@ -69,7 +69,7 @@ BehavIterator::BehavIterator(const BehavSupport &p_support,
   }
 
   m_currentBehav(p_action->GetInfoset()->GetPlayer()->GetNumber(), 
-		 p_action->GetNumber()) = p_support.GetIndex(p_action);
+		 p_action->GetInfoset()->GetNumber()) = p_support.GetIndex(p_action);
   m_profile.SetAction(p_action);
   First();
 }
