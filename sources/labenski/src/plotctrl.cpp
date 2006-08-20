@@ -2785,10 +2785,10 @@ void wxPlotCtrl::RedrawDataCurve(int index, int min_index, int max_index)
     wxCHECK_RET((index>=0)&&(index<(int)m_curves.GetCount()), wxT("invalid curve index"));
 
     wxPlotData *plotData = GetDataCurve(index);
-    wxCHECK_RET(plotData, wxT("not a data curve"))
+    wxCHECK_RET(plotData, wxT("not a data curve"));
 
     int count = plotData->GetCount();
-    wxCHECK_RET((min_index<=max_index)&&(min_index>=0)&&(max_index>=0)&&(min_index<count)&&(max_index<count), wxT("invalid data index"))
+    wxCHECK_RET((min_index<=max_index)&&(min_index>=0)&&(max_index>=0)&&(min_index<count)&&(max_index<count), wxT("invalid data index"));
 
     wxRect rect(m_areaClientRect);
     int cursor_size = GetCursorSize();
@@ -2830,7 +2830,7 @@ void wxPlotCtrl::RedrawCurve(int index, double min_x, double max_x)
     if (m_batch_count) return;
 
     wxCHECK_RET((min_x<=max_x)&&(index>=0)&&(index<(int)m_curves.GetCount()), wxT("invalid curve index"));
-    wxCHECK_RET(!GetDataCurve(index), wxT("invalid curve"))
+    wxCHECK_RET(!GetDataCurve(index), wxT("invalid curve"));
     wxRect rect(m_areaClientRect);
 
     if (min_x > m_viewRect.GetRight())

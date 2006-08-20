@@ -2991,7 +2991,7 @@ wxPlotData wxClipboardGetPlotData()
 }
 bool wxClipboardSetPlotData(const wxPlotData& plotData)
 {
-    wxCHECK_MSG(plotData.Ok(), false, wxT("Invalid wxPlotData to copy to clipboard"))
+  wxCHECK_MSG(plotData.Ok(), false, wxT("Invalid wxPlotData to copy to clipboard"));
     bool is_opened = wxTheClipboard->IsOpened();
 
     if (is_opened || wxTheClipboard->Open())

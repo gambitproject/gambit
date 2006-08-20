@@ -47,7 +47,11 @@ BEGIN_EVENT_TABLE( wxSheetSplitter, wxWindow )
     WX_EVENT_TABLE_CONTROL_CONTAINER(wxSheetSplitter)
 END_EVENT_TABLE()
 
+#if wxCHECK_VERSION(2, 7, 0)
+WX_DELEGATE_TO_CONTROL_CONTAINER(wxSheetSplitter, wxWindow);
+#else
 WX_DELEGATE_TO_CONTROL_CONTAINER(wxSheetSplitter);
+#endif  // wxCHECK_VERSION
 
 void wxSheetSplitter::Init()
 {

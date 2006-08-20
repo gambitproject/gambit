@@ -360,7 +360,7 @@ double LM_LeastSquare::GetVariable(int n)
 
 void LM_LeastSquare::fcn(int m, int n, double x[], double fvec[], int *iflag)
 {
-    wxCHECK_RET(m_plotData && m_plotFunc, wxT("invalid functions"))
+  wxCHECK_RET(m_plotData && m_plotFunc, wxT("invalid functions"));
 
     if (*iflag == 0)
     {

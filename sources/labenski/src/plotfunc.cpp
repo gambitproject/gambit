@@ -193,7 +193,7 @@ wxPlotFunction wxClipboardGetPlotFunction()
 }
 bool wxClipboardSetPlotFunction(const wxPlotFunction& plotFunc)
 {
-    wxCHECK_MSG(plotFunc.Ok(), false, wxT("Invalid wxPlotFunction to copy to clipboard"))
+  wxCHECK_MSG(plotFunc.Ok(), false, wxT("Invalid wxPlotFunction to copy to clipboard"));
     bool is_opened = wxTheClipboard->IsOpened();
 
     if (is_opened || wxTheClipboard->Open())

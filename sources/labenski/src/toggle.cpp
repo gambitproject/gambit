@@ -90,7 +90,7 @@ bool wxCustomButton::Create(wxWindow* parent, wxWindowID id,
 
 void wxCustomButton::SetValue(bool depressed)
 {
-    wxCHECK_RET(!(m_button_style & wxCUSTBUT_NOTOGGLE), wxT("can't set button state"))
+  wxCHECK_RET(!(m_button_style & wxCUSTBUT_NOTOGGLE), wxT("can't set button state"));
     m_down = depressed ? 1 : 0;
     Refresh(false);
 }
@@ -102,7 +102,7 @@ bool wxCustomButton::SetButtonStyle(long style)
     if ((style & wxCUSTBUT_RIGHT) != 0)  n_styles++;
     if ((style & wxCUSTBUT_TOP) != 0)    n_styles++;
     if ((style & wxCUSTBUT_BOTTOM) != 0) n_styles++;
-    wxCHECK_MSG(n_styles < 2, false, wxT("Only one wxCustomButton label position allowed"))
+    wxCHECK_MSG(n_styles < 2, false, wxT("Only one wxCustomButton label position allowed"));
 
     n_styles = 0;
     if ((style & wxCUSTBUT_NOTOGGLE) != 0)       n_styles++;
@@ -110,7 +110,7 @@ bool wxCustomButton::SetButtonStyle(long style)
     if ((style & wxCUSTBUT_TOGGLE) != 0)         n_styles++;
     if ((style & wxCUSTBUT_BUT_DCLICK_TOG) != 0) n_styles++;
     if ((style & wxCUSTBUT_TOG_DCLICK_BUT) != 0) n_styles++;
-    wxCHECK_MSG(n_styles < 2, false, wxT("Only one wxCustomButton style allowed"))
+    wxCHECK_MSG(n_styles < 2, false, wxT("Only one wxCustomButton style allowed"));
 
     m_button_style = style;
 

@@ -271,7 +271,7 @@ bool wxBitmapComboBox::SetButtonStyle(long style)
     int n_styles = 0;
     if (style & wxBMPCOMBO_LEFT) n_styles++;
     if (style & wxBMPCOMBO_RIGHT) n_styles++;
-    wxCHECK_MSG(n_styles < 2, false, wxT("Only one wxBitmapComboBox label position allowed"))
+    wxCHECK_MSG(n_styles < 2, false, wxT("Only one wxBitmapComboBox label position allowed"));
     if (n_styles < 1) style |= (m_label_style & BMPCOMBO_LABEL_MASK);
 
     m_label_style = style;
