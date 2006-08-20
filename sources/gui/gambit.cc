@@ -55,7 +55,7 @@ bool gbtApplication::OnInit(void)
   config.Read(_T("/General/CurrentDirectory"), &m_currentDir, _T(""));
 
   wxBitmap bitmap(gambitbig_xpm);
-  wxSplashScreen *splash =
+  /*wxSplashScreen *splash =*/
     new wxSplashScreen(bitmap,
 		       wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
 		       2000, NULL, -1, wxDefaultPosition, wxDefaultSize,

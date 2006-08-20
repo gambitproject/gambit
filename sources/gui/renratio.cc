@@ -175,14 +175,14 @@ void gbtRationalRendererRefData::DoDraw(wxSheet& grid,
   int align = attr.GetAlignment();
   
   wxString value = grid.GetCellValue(coords);
-  int best_width = DoGetBestSize(grid, attr, dc, value).GetWidth();
+  //int best_width = DoGetBestSize(grid, attr, dc, value).GetWidth();
   wxSheetCoords cellSpan(grid.GetCellSpan(coords)); // shouldn't get here if <=0
-  int cell_rows = cellSpan.m_row;
-  int cell_cols = cellSpan.m_col;
+  //int cell_rows = cellSpan.m_row;
+  //int cell_cols = cellSpan.m_col;
   
-  bool is_grid_cell = wxSheet::IsGridCell(coords);
+  //bool is_grid_cell = wxSheet::IsGridCell(coords);
   // no overflow for row/col/corner labels
-  int num_cols = grid.GetNumberCols();
+  //int num_cols = grid.GetNumberCols();
 
   // Draw the text 
   if (value.Find('/') != -1) {

@@ -939,7 +939,7 @@ void qh_setprint(FILE *fp, char* string, setT *set) {
   else {
     SETreturnsize_(set, size);
     fprintf (fp, "%s set=%x maxsize=%d size=%d elems=",
-	     string, (unsigned long)set, set->maxsize, size);
+	     string, (unsigned int) set, set->maxsize, size);
     if (size > (int)set->maxsize)
       size= set->maxsize+1;
     for (k=0; k<size; k++)

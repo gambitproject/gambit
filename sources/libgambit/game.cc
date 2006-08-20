@@ -925,8 +925,8 @@ Rational SubtreeSum(const GameNode &p_node)
     for (int pl = 1; pl <= p_node->GetGame()->NumPlayers(); pl++) {
       sum += p_node->GetOutcome()->GetPayoff<Rational>(pl);
     }
-    return sum;
   }
+  return sum;
 }
 
 }

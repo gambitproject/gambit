@@ -64,7 +64,7 @@ OutputToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
   wxStringTokenizer tok(p_text, wxT(","));
 
   if (tok.GetNextToken() == wxT("NE")) {
-    if (tok.CountTokens() == profile.Length()) {
+    if (tok.CountTokens() == (unsigned int) profile.Length()) {
       for (int i = 1; i <= profile.Length(); i++) {
 	profile[i] = ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
       }
@@ -83,7 +83,7 @@ OutputToBehavProfile(gbtGameDocument *p_doc, const wxString &p_text)
   wxStringTokenizer tok(p_text, wxT(","));
 
   if (tok.GetNextToken() == wxT("NE")) {
-    if (tok.CountTokens() == profile.Length()) {
+    if (tok.CountTokens() == (unsigned int) profile.Length()) {
       for (int i = 1; i <= profile.Length(); i++) {
 	profile[i] = ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
       }

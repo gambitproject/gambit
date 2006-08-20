@@ -869,7 +869,7 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
 
 	wxTextDataObject textData(wxString::Format(wxT("C%d"), node->GetNumber()));
 	wxDropSource source(textData, this, image, image, image);
-	wxDragResult result = source.DoDragDrop(true);
+	/*wxDragResult result =*/ source.DoDragDrop(true);
       }
       else if (p_event.ShiftDown()) {
 	// Copy move (information set)
@@ -885,7 +885,7 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
 	wxTextDataObject textData(wxString::Format(wxT("I%d"), node->GetNumber()));
 
 	wxDropSource source(textData, this, image, image, image);
-	wxDragResult result = source.DoDragDrop(wxDrag_DefaultMove);
+	/*wxDragResult result =*/ source.DoDragDrop(wxDrag_DefaultMove);
       }
       else {
 	// Move subtree
@@ -900,7 +900,7 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
 	wxTextDataObject textData(wxString::Format(wxT("M%d"), node->GetNumber()));
 
 	wxDropSource source(textData, this, image, image, image);
-	wxDragResult result = source.DoDragDrop(wxDrag_DefaultMove);
+	/*wxDragResult result =*/ source.DoDragDrop(wxDrag_DefaultMove);
       }
       return;
     }
@@ -919,17 +919,17 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
       if (p_event.ControlDown()) {
 	wxTextDataObject textData(wxString::Format(wxT("O%d"), node->GetNumber()));
 	wxDropSource source(textData, this, image, image, image);
-	wxDragResult result = source.DoDragDrop(true);
+	/*wxDragResult result =*/ source.DoDragDrop(true);
       }
       else if (p_event.ShiftDown()) {
 	wxTextDataObject textData(wxString::Format(wxT("p%d"), node->GetNumber()));
 	wxDropSource source(textData, this, image, image, image);
-	wxDragResult result = source.DoDragDrop(true);
+	/*wxDragResult result =*/ source.DoDragDrop(true);
       }
       else {
 	wxTextDataObject textData(wxString::Format(wxT("o%d"), node->GetNumber()));
 	wxDropSource source(textData, this, image, image, image);
-	wxDragResult result = source.DoDragDrop(wxDrag_DefaultMove);
+	/*wxDragResult result =*/ source.DoDragDrop(wxDrag_DefaultMove);
       }
     }
   }

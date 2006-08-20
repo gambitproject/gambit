@@ -309,8 +309,6 @@ void gbtRowPlayerWidget::OnUpdate(void)
   if (newCols < GetNumberCols())  DeleteCols(0, GetNumberCols() - newCols);
   if (newCols == 0)  InsertCols(0, 1);
 
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
-
   for (int col = 0; col < GetNumberCols(); col++) {
     for (int row = 0; row < GetNumberRows(); 
 	 SetCellSpan(wxSheetCoords(row++, col), wxSheetCoords(1, 1)));

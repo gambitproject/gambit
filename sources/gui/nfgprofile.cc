@@ -65,6 +65,7 @@ void gbtMixedProfileList::OnCellClick(wxSheetEvent &p_event)
   m_doc->SetCurrentProfile(RowToProfile(p_event.GetRow()));
 }
 
+#ifdef UNUSED
 static Gambit::GameStrategy GetStrategy(gbtGameDocument *p_doc, int p_index)
 {
   int index = 0;
@@ -78,6 +79,7 @@ static Gambit::GameStrategy GetStrategy(gbtGameDocument *p_doc, int p_index)
   }
   return 0;
 }
+#endif
 
 wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
 {

@@ -259,15 +259,15 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
   for (TiXmlNode *analysis = game->FirstChild("analysis");
        analysis; analysis = analysis->NextSibling()) {
     const char *type = analysis->ToElement()->Attribute("type");
-    const char *rep = analysis->ToElement()->Attribute("rep");
+    // const char *rep = analysis->ToElement()->Attribute("rep");
     if (type && !strcmp(type, "list")) {
       // Read in a list of profiles
       // We need to try to guess whether the profiles are float or rational
       bool isFloat = false;
       for (TiXmlNode *profile = analysis->FirstChild("profile");
 	   profile; profile = profile->NextSiblingElement()) {
-	if (std::string(profile->FirstChild()->Value()).find('.') != -1 or
-	    std::string(profile->FirstChild()->Value()).find('e') != -1) {
+	if (std::string(profile->FirstChild()->Value()).find('.') != (unsigned int) -1 ||
+	    std::string(profile->FirstChild()->Value()).find('e') != (unsigned int) -1) {
 	  isFloat = true;
 	  break;
 	}
