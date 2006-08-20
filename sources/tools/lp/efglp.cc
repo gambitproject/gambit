@@ -199,21 +199,84 @@ SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c,
   }
 }
 
-void PrintProfile(std::ostream &p_stream,
-		  const std::string &p_label,
-		  const MixedBehavProfile<double> &p_profile)
+template <class T>
+void PrintProfileDetail(std::ostream &p_stream,
+			const MixedBehavProfile<T> &p_profile)
 {
-  p_stream << p_label;
-  for (int i = 1; i <= p_profile.Length(); i++) {
-    p_stream << "," << p_profile[i];
-  }
+  char buffer[256];
 
-  p_stream << std::endl;
+  for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
+    GamePlayer player = p_profile.GetGame()->GetPlayer(pl);
+    p_stream << "Behavior profile for player " << pl << ":\n";
+    
+    p_stream << "Infoset    Action     Prob          Value\n";
+    p_stream << "-------    -------    -----------   -----------\n";
+
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	GameAction action = infoset->GetAction(act);
+
+	if (infoset->GetLabel() != "") {
+	  sprintf(buffer, "%7s    ", infoset->GetLabel().c_str());
+	}
+	else {
+	  sprintf(buffer, "%7d    ", iset);
+	}
+	p_stream << buffer;
+	
+	if (action->GetLabel() != "") {
+	  sprintf(buffer, "%7s    ", action->GetLabel().c_str());
+	}
+	else {
+	  sprintf(buffer, "%7d   ", act);
+	}
+	p_stream << buffer;
+	
+	sprintf(buffer, "%11s   ", ToText(p_profile(pl, iset, act), g_numDecimals).c_str());
+	p_stream << buffer;
+
+	sprintf(buffer, "%11s   ", ToText(p_profile.GetActionValue(infoset->GetAction(act)), g_numDecimals).c_str());
+	p_stream << buffer;
+
+	p_stream << "\n";
+      }
+    }
+
+    p_stream << "\n";
+ 
+    p_stream << "Infoset    Node       Belief        Prob\n";
+    p_stream << "-------    -------    -----------   -----------\n";
+
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+      
+      for (int n = 1; n <= infoset->NumMembers(); n++) {
+	sprintf(buffer, "%7d    ", iset);
+	p_stream << buffer;
+
+	sprintf(buffer, "%7d    ", n);
+	p_stream << buffer;
+
+	sprintf(buffer, "%11s   ", ToText(p_profile.GetBeliefProb(infoset->GetMember(n)), g_numDecimals).c_str());
+	p_stream << buffer;
+
+	sprintf(buffer, "%11s    ", ToText(p_profile.GetRealizProb(infoset->GetMember(n)), g_numDecimals).c_str());
+	p_stream << buffer;
+
+	p_stream << "\n";
+      }
+    }
+
+    p_stream << "\n";
+  }
 }
 
+template <class T>
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const MixedBehavProfile<Rational> &p_profile)
+		  const MixedBehavProfile<T> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -345,6 +408,7 @@ void SequenceToBehavior(const GameData &p_data,
 	      p_support.GetGame()->GetRoot(), 1, 1);
   UndefinedToCentroid(profile);
   PrintProfile(std::cout, "NE", profile);
+  //PrintProfileDetail(std::cout, profile);
 }
 
 
