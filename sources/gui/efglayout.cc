@@ -307,7 +307,7 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
 
     std::string payoff = outcome->GetPayoff<std::string>(pl);
 
-    if (payoff.find('/') != (unsigned int) -1) {
+    if (payoff.find('/') != -1) {
       p_dc.SetPen(wxPen(m_style->GetPlayerColor(pl), 1, wxSOLID));
       int oldX = point.x;
       point = DrawFraction(p_dc, point, outcome->GetPayoff<Gambit::Rational>(pl));
@@ -589,8 +589,8 @@ int gbtTreeLayout::LayoutSubtree(Gambit::GameNode p_node, const Gambit::BehavSup
   if (m_doc->GetStyle().RootReachable() &&
       p_node->GetInfoset() && !p_node->GetInfoset()->GetPlayer()->IsChance()) {
     Gambit::GameInfoset infoset = p_node->GetInfoset();
-    for (int i = 1; i <= p_support.NumActions(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()); i++) {
-      yn = LayoutSubtree(p_node->GetChild(p_support.GetAction(infoset->GetPlayer()->GetNumber(), infoset->GetNumber(), i)->GetNumber()),
+    for (int i = 1; i <= p_support.NumActions(infoset); i++) {
+      yn = LayoutSubtree(p_node->GetChild(p_support.GetAction(infoset, i)->GetNumber()),
 			 p_support, p_maxy, p_miny, p_ycoord);
       if (y1 == -1) {
 	y1 = yn;
@@ -831,8 +831,8 @@ void gbtTreeLayout::BuildNodeList(Gambit::GameNode p_node, const Gambit::BehavSu
 	}
       }
       else {
-	for (int i = 1; i <= p_support.NumActions(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()); i++) {
-	  BuildNodeList(p_node->GetChild(p_support.GetAction(infoset->GetPlayer()->GetNumber(), infoset->GetNumber(), i)->GetNumber()),
+	for (int i = 1; i <= p_support.NumActions(infoset); i++) {
+	  BuildNodeList(p_node->GetChild(p_support.GetAction(infoset, i)->GetNumber()),
 			p_support, p_level + 1);
 	}
       }

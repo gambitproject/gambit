@@ -35,7 +35,7 @@ class gbtEfgDisplay;
 class gbtEfgPanel : public wxPanel, public gbtGameView {
 private:
   gbtEfgDisplay *m_treeWindow;
-  wxWindow *m_dominanceToolbar;
+  wxWindow *m_dominanceToolbar, *m_playerToolbar;
 
   // Overriding gbtGameView members
   void OnUpdate(void) { }

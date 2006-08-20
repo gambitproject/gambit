@@ -309,6 +309,8 @@ void gbtRowPlayerWidget::OnUpdate(void)
   if (newCols < GetNumberCols())  DeleteCols(0, GetNumberCols() - newCols);
   if (newCols == 0)  InsertCols(0, 1);
 
+  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+
   for (int col = 0; col < GetNumberCols(); col++) {
     for (int row = 0; row < GetNumberRows(); 
 	 SetCellSpan(wxSheetCoords(row++, col), wxSheetCoords(1, 1)));
@@ -331,8 +333,6 @@ bool gbtRowPlayerWidget::DropText(wxCoord p_x, wxCoord p_y,
   if (p_text[0] == 'P') {
     long pl;
     p_text.Right(p_text.Length() - 1).ToLong(&pl);
-
-    if (pl == 0) { return false; }
     
     if (m_table->NumRowPlayers() == 0) {
       m_table->SetRowPlayer(1, pl);
@@ -522,8 +522,6 @@ bool gbtColPlayerWidget::DropText(wxCoord p_x, wxCoord p_y,
     long pl;
     p_text.Right(p_text.Length() - 1).ToLong(&pl);
 
-    if (pl == 0) { return false; }
-    
     if (m_table->NumColPlayers() == 0) {
       m_table->SetColPlayer(1, pl);
       return true;
@@ -1004,14 +1002,6 @@ void gbtTableWidget::SetRowPlayer(int index, int pl)
 {
   if (m_rowPlayers.Contains(pl)) {
     int oldIndex = m_rowPlayers.Find(pl);
-    if ((oldIndex == index || oldIndex == index - 1) && !m_doc->IsTree()) {
-      // Define this as adding a strategy for the player
-      GameStrategy strategy = m_doc->GetGame()->GetPlayer(pl)->NewStrategy();
-      strategy->SetLabel(ToText(strategy->GetNumber()));
-      m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
-      return;
-    }
-
     m_rowPlayers.Remove(oldIndex);
     if (index > oldIndex) {
       m_rowPlayers.Insert(pl, index-1);
@@ -1055,14 +1045,6 @@ void gbtTableWidget::SetColPlayer(int index, int pl)
 {
   if (m_colPlayers.Contains(pl)) {
     int oldIndex = m_colPlayers.Find(pl);
-    if ((oldIndex == index || oldIndex == index - 1) && !m_doc->IsTree()) {
-      // Define this as adding a strategy for the player
-      GameStrategy strategy = m_doc->GetGame()->GetPlayer(pl)->NewStrategy();
-      strategy->SetLabel(ToText(strategy->GetNumber()));
-      m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
-      return;
-    }
-
     m_colPlayers.Remove(oldIndex);
     if (index > oldIndex) {
       m_colPlayers.Insert(pl, index-1);

@@ -30,29 +30,30 @@
 #include <wx/process.h>
 #include "wx/sheet/sheet.h"
 #include "gamedoc.h"
-#include "monitor.h"
 
-class wxLed;
-
-class gbtNashMonitorPanel : public wxPanel {
+class gbtNashMonitorDialog : public wxDialog {
 private:
   gbtGameDocument *m_doc;
+  int m_pid;
+  wxProcess *m_process;
   wxWindow *m_profileList;
-  wxLed *m_statusLed;
-  wxButton *m_stopButton;
+  wxStaticText *m_statusText, *m_countText;
+  wxButton *m_stopButton, *m_okButton;
+  wxTimer m_timer;
   gbtAnalysisOutput *m_output;
-  Monitor *m_monitor;
   
   void Start(gbtAnalysisOutput *);
+
   void OnStop(wxCommandEvent &);
+  void OnTimer(wxTimerEvent &);
+  void OnIdle(wxIdleEvent &);
+  void OnEndProcess(wxProcessEvent &);
 
 public:
-  gbtNashMonitorPanel(wxWindow *p_parent, gbtGameDocument *p_doc,
-		      gbtAnalysisOutput *p_command);
+  gbtNashMonitorDialog(wxWindow *p_parent, gbtGameDocument *p_doc,
+		       gbtAnalysisOutput *p_command);
 
-  virtual ~gbtNashMonitorPanel() { delete m_monitor; }
-  
-  const gbtAnalysisOutput &GetOutput(void) const { return *m_output; }
+  DECLARE_EVENT_TABLE()
 };
 
 #endif  // DLNASHMON_H

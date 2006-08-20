@@ -29,7 +29,6 @@
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
 #include <wx/txtstrm.h>
-#include "wxled.h"
 
 #include "dlnashmon.h"
 #include "gamedoc.h"
@@ -37,32 +36,48 @@
 #include "efgprofile.h"
 #include "nfgprofile.h"
 
+const int GBT_ID_TIMER = 1000;
+const int GBT_ID_PROCESS = 1001;
+
+BEGIN_EVENT_TABLE(gbtNashMonitorDialog, wxDialog)
+  EVT_END_PROCESS(GBT_ID_PROCESS, gbtNashMonitorDialog::OnEndProcess)
+  EVT_IDLE(gbtNashMonitorDialog::OnIdle)
+  EVT_TIMER(GBT_ID_TIMER, gbtNashMonitorDialog::OnTimer)
+END_EVENT_TABLE()
+
 #include "bitmaps/stop.xpm"
 
-gbtNashMonitorPanel::gbtNashMonitorPanel(wxWindow *p_parent,
-					 gbtGameDocument *p_doc,
-					 gbtAnalysisOutput *p_command)
-  : wxPanel(p_parent, wxID_ANY), m_doc(p_doc), 
+gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
+					   gbtGameDocument *p_doc,
+					   gbtAnalysisOutput *p_command)
+  : wxDialog(p_parent, -1, wxT("Computing Nash equilibria"),
+	     wxDefaultPosition),
+    m_doc(p_doc), 
+    m_process(0), m_timer(this, GBT_ID_TIMER),
     m_output(p_command)
 {
   wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
 
   wxBoxSizer *startSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  m_statusLed = new wxLed(this, wxID_ANY);
-  m_statusLed->SetColor("0000FF");
-  m_statusLed->Enable(true);
-  startSizer->Add(m_statusLed, 0, wxALL | wxALIGN_CENTER, 5);
+  m_statusText = new wxStaticText(this, wxID_STATIC,
+				  wxT("The computation is currently in progress."));
+  m_statusText->SetForegroundColour(*wxBLUE);
+  startSizer->Add(m_statusText, 0, wxALL | wxALIGN_CENTER, 5);
 
-  sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
-
+  m_countText = new wxStaticText(this, wxID_STATIC, 
+				 wxT("Number of equilibria found so far: 0  "));
+  startSizer->Add(m_countText, 0, wxALL | wxALIGN_CENTER, 5);
+  
   m_stopButton = new wxBitmapButton(this, wxID_CANCEL, wxBitmap(stop_xpm));
   m_stopButton->Enable(false);
   m_stopButton->SetToolTip(_("Stop the computation"));
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
 
   Connect(wxID_CANCEL, wxEVT_COMMAND_BUTTON_CLICKED,
-	  wxCommandEventHandler(gbtNashMonitorPanel::OnStop));
+	  wxCommandEventHandler(gbtNashMonitorDialog::OnStop));
+
+  sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
   if (p_command->IsBehavior()) {
     m_profileList = new gbtBehavProfileList(this, m_doc);
@@ -73,13 +88,20 @@ gbtNashMonitorPanel::gbtNashMonitorPanel(wxWindow *p_parent,
   m_profileList->SetSizeHints(wxSize(500, 300));
   sizer->Add(m_profileList, 1, wxALL | wxEXPAND, 5);
   
+  m_okButton = new wxButton(this, wxID_OK, wxT("OK"));
+  sizer->Add(m_okButton, 0, wxALL | wxALIGN_RIGHT, 5);
+  m_okButton->Enable(false);
+
   SetSizer(sizer);
+  sizer->Fit(this);
+  sizer->SetSizeHints(this);
   Layout();
+  CenterOnParent();
 
   Start(p_command);
 }
 
-void gbtNashMonitorPanel::Start(gbtAnalysisOutput *p_command)
+void gbtNashMonitorDialog::Start(gbtAnalysisOutput *p_command)
 {
   if (!p_command->IsBehavior()) {
     // Make sure we have a normal form representation
@@ -88,6 +110,11 @@ void gbtNashMonitorPanel::Start(gbtAnalysisOutput *p_command)
 
   m_doc->AddProfileList(p_command);
 
+  m_process = new wxProcess(this, GBT_ID_PROCESS);
+  m_process->Redirect();
+
+  m_pid = wxExecute(p_command->GetCommand(), wxEXEC_ASYNC, m_process);
+  
   std::ostringstream s;
   if (p_command->IsBehavior()) {
     m_doc->GetGame()->WriteEfgFile(s);
@@ -97,13 +124,98 @@ void gbtNashMonitorPanel::Start(gbtAnalysisOutput *p_command)
   }
   wxString str(wxString(s.str().c_str(), *wxConvCurrent));
   
-  m_monitor = new Monitor(*m_output, str);
+  // It is possible that the whole string won't write on one go, so
+  // we should take this possibility into account.  If the write doesn't
+  // complete the whole way, we take a 100-millisecond siesta and try
+  // again.  (This seems to primarily be an issue with -- you guessed it --
+  // Windows!)
+  while (str.length() > 0) {
+    wxTextOutputStream os(*m_process->GetOutputStream());
+
+    // It appears that (at least with mingw) the string itself contains
+    // only '\n' for newlines.  If we don't SetMode here, these get
+    // converted to '\r\n' sequences, and so the number of characters
+    // LastWrite() returns does not match the number of characters in
+    // our string.  Setting this explicitly solves this problem.
+    os.SetMode(wxEOL_UNIX);
+    os.WriteString(str);
+    str.Remove(0, m_process->GetOutputStream()->LastWrite());
+    wxMilliSleep(100);
+  }
+  m_process->CloseOutput();
+
   m_stopButton->Enable(true);
-  m_statusLed->SetToolTip(wxT("The computation is in progress"));
+
+  m_timer.Start(1000, false);
 }
 
-void gbtNashMonitorPanel::OnStop(wxCommandEvent &p_event)
+void gbtNashMonitorDialog::OnIdle(wxIdleEvent &p_event)
 {
-  m_monitor->Stop();
+  if (!m_process)  return;
+
+  if (m_process->IsInputAvailable()) {
+    wxTextInputStream tis(*m_process->GetInputStream());
+
+    wxString msg;
+    msg << tis.ReadLine();
+
+    m_output->AddOutput(msg);
+    m_countText->SetLabel(wxString::Format(wxT("Number of equilibria found so far: %d"), m_output->NumProfiles()));
+    m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+
+    p_event.RequestMore();
+  }
+  else {
+    m_timer.Start(1000, false);
+  }
+}
+
+void gbtNashMonitorDialog::OnTimer(wxTimerEvent &p_event)
+{
+  wxWakeUpIdle();
+}
+
+void gbtNashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
+{
+  m_stopButton->Enable(false);
+  m_timer.Stop();
+
+  while (m_process->IsInputAvailable()) {
+    wxTextInputStream tis(*m_process->GetInputStream());
+
+    wxString msg;
+    msg << tis.ReadLine();
+
+    if (msg != wxT("")) {
+      m_output->AddOutput(msg);
+      m_countText->SetLabel(wxString::Format(wxT("Number of equilibria found so far: %d"), m_output->NumProfiles()));
+      m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+    }
+  }
+
+  if (p_event.GetExitCode() == 0) {
+    m_statusText->SetLabel(wxT("The computation has completed."));
+    m_statusText->SetForegroundColour(wxColour(0, 192, 0));
+  }
+  else {
+    m_statusText->SetLabel(wxT("The computation ended abnormally."));
+    m_statusText->SetForegroundColour(*wxRED);
+  }
+
+  m_okButton->Enable(true);
+}
+
+void gbtNashMonitorDialog::OnStop(wxCommandEvent &p_event)
+{
+  // Per the wxWidgets wiki, under Windows, programs that run
+  // without a console window don't respond to the more polite
+  // SIGTERM, so instead we must be rude and SIGKILL it.
+  m_stopButton->Enable(false);
+
+#ifdef __WXMSW__
+  wxProcess::Kill(m_pid, wxSIGKILL);
+#else
+  wxProcess::Kill(m_pid, wxSIGTERM);
+#endif  // __WXMSW__
 }
 

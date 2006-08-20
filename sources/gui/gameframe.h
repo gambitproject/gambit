@@ -29,7 +29,6 @@
 
 #include <wx/printdlg.h>
 
-#include "manager.h"
 #include "gamedoc.h"
 
 class wxSplitterWindow;
@@ -41,8 +40,7 @@ class gbtNfgPanel;
 
 class gbtGameFrame : public wxFrame, public gbtGameView {
 private:
-  wxFrameManager m_manager;
-
+  wxSplitterWindow *m_splitter;
   gbtEfgPanel *m_efgPanel;
   gbtNfgPanel *m_nfgPanel;
   gbtAnalysisNotebook *m_analysisPanel;
@@ -106,7 +104,6 @@ private:
 
   void OnHelpAbout(wxCommandEvent &);
 
-  void OnPaneButton(wxFrameManagerEvent &);
   void OnUnsplit(wxSplitterEvent &);
 
   /// @name Overriding wxWindow behavior

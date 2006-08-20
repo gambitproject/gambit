@@ -155,8 +155,13 @@ bool gbtStrategyDominanceStack::NextLevel(void)
     return false;
   }
 
+  Gambit::Array<int> players;
+  for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
+    players.Append(pl);
+  }
+
   Gambit::StrategySupport newSupport = 
-    m_supports[m_current]->Undominated(m_strict);
+    m_supports[m_current]->Undominated(m_strict, players);
 
   if (newSupport != *m_supports[m_current]) {
     m_supports.Append(new Gambit::StrategySupport(newSupport));
@@ -254,15 +259,15 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
   for (TiXmlNode *analysis = game->FirstChild("analysis");
        analysis; analysis = analysis->NextSibling()) {
     const char *type = analysis->ToElement()->Attribute("type");
-    //const char *rep = analysis->ToElement()->Attribute("rep");
+    const char *rep = analysis->ToElement()->Attribute("rep");
     if (type && !strcmp(type, "list")) {
       // Read in a list of profiles
       // We need to try to guess whether the profiles are float or rational
       bool isFloat = false;
       for (TiXmlNode *profile = analysis->FirstChild("profile");
 	   profile; profile = profile->NextSiblingElement()) {
-	if (std::string(profile->FirstChild()->Value()).find('.') != (unsigned int) -1 ||
-	    std::string(profile->FirstChild()->Value()).find('e') != (unsigned int) -1) {
+	if (std::string(profile->FirstChild()->Value()).find('.') != -1 or
+	    std::string(profile->FirstChild()->Value()).find('e') != -1) {
 	  isFloat = true;
 	  break;
 	}

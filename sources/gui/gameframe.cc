@@ -44,8 +44,6 @@
 
 #include "menuconst.h"
 
-#include "players.h"
-
 #include "efgpanel.h"
 #include "efgprofile.h"
 
@@ -242,7 +240,6 @@ BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(GBT_MENU_TOOLS_QRE, gbtGameFrame::OnToolsQre)
   EVT_MENU(wxID_ABOUT, gbtGameFrame::OnHelpAbout)
   EVT_CLOSE(gbtGameFrame::OnCloseWindow)
-  EVT_AUI_PANEBUTTON(gbtGameFrame::OnPaneButton)
 END_EVENT_TABLE()
 
 //---------------------------------------------------------------------
@@ -253,8 +250,6 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   : wxFrame(p_parent, -1, _T(""), wxPoint(0, 0), wxSize(800, 600)),
     gbtGameView(p_doc)    
 {
-  m_manager.SetFrame(this);
-
 #if defined( __WXMSW__)
   SetIcon(wxIcon("efg_icn"));
 #else
@@ -282,38 +277,45 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   wxAcceleratorTable accel(10, entries);
   SetAcceleratorTable(accel);
 
+  m_splitter = new wxSplitterWindow(this, -1);
   if (p_doc->IsTree()) {
-    m_efgPanel = new gbtEfgPanel(this, p_doc);
-    m_manager.AddPane(m_efgPanel, wxCENTER);
+    m_efgPanel = new gbtEfgPanel(m_splitter, p_doc);
   }
   else {
     m_efgPanel = 0;
   }
 
-  m_nfgPanel = new gbtNfgPanel(this, p_doc);
-  m_nfgPanel->SetSize(250, -1);
+  m_nfgPanel = new gbtNfgPanel(m_splitter, p_doc);
+  if (p_doc->IsTree()) {
+    m_nfgPanel->Show(false);
+  }
+
+  m_analysisPanel = new gbtAnalysisNotebook(m_splitter, p_doc);
+  m_analysisPanel->Show(false);
 
   if (p_doc->IsTree()) {
-    m_doc->BuildNfg();
-    m_manager.AddPane(m_nfgPanel, wxCENTER, wxT("Strategic representation"));
-    m_manager.GetPane(m_nfgPanel).Show(false);
+    m_splitter->Initialize(m_efgPanel);
   }
   else {
-    m_manager.AddPane(m_nfgPanel, wxCENTER);
+    m_splitter->Initialize(m_nfgPanel);
   }
+  m_splitter->SetSashGravity(0.5);
+  m_splitter->SetMinimumPaneSize(200);
 
-  m_analysisPanel = new gbtAnalysisNotebook(this, p_doc);
-  m_manager.AddPane(m_analysisPanel, wxBOTTOM, 
-		    wxT("Computed strategy profiles"));
-  m_manager.GetPane(m_analysisPanel).Show(false);
+  Connect(m_splitter->GetId(), wxEVT_COMMAND_SPLITTER_UNSPLIT,
+	  wxSplitterEventHandler(gbtGameFrame::OnUnsplit));
 
-  wxWindow *playerToolbar = new gbtPlayerToolbar(this, p_doc);
-  m_manager.AddPane(playerToolbar, wxTOP, wxT("Players"));
-  m_manager.GetPane(playerToolbar).CaptionVisible(false);
-  m_manager.GetPane(playerToolbar).LeftDockable(false);
-  m_manager.GetPane(playerToolbar).RightDockable(false);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(m_splitter, 1, wxEXPAND, 0);
+  SetSizer(topSizer);
+  Layout();
 
-  m_manager.Update();
+  if (p_doc->IsTree()) {
+    m_efgPanel->SetFocus();
+  }
+  else {
+    m_nfgPanel->SetFocus();
+  }
 
   Show(true);
 
@@ -322,7 +324,6 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
 
 gbtGameFrame::~gbtGameFrame()
 {
-  m_manager.UnInit();
   wxGetApp().RemoveMenu(GetMenuBar()->GetMenu(0));
 }
 
@@ -379,13 +380,11 @@ void gbtGameFrame::OnUpdate(void)
   GetToolBar()->EnableTool(GBT_MENU_FORMAT_DECIMALS_DELETE,
 			   m_doc->GetStyle().NumDecimals() > 1);
 
-  /*
   if (m_doc->NumProfileLists() == 0 && m_splitter->IsSplit()) {
     m_splitter->Unsplit(m_analysisPanel);
   }
   menuBar->Check(GBT_MENU_VIEW_PROFILES, m_splitter->IsSplit());
   GetToolBar()->ToggleTool(GBT_MENU_VIEW_PROFILES, m_splitter->IsSplit());
-  */
   menuBar->Enable(GBT_MENU_VIEW_ZOOMIN, m_efgPanel && m_efgPanel->IsShown());
   menuBar->Enable(GBT_MENU_VIEW_ZOOMOUT, m_efgPanel && m_efgPanel->IsShown());
 }
@@ -403,7 +402,7 @@ void gbtGameFrame::OnUpdate(void)
 #include "bitmaps/font.xpm"
 #include "bitmaps/label.xpm"
 #include "bitmaps/layout.xpm"
-//#include "bitmaps/new.xpm"
+#include "bitmaps/new.xpm"
 #include "bitmaps/newplayer.xpm"
 #include "bitmaps/newtable.xpm"
 #include "bitmaps/newtree.xpm"
@@ -799,7 +798,6 @@ void gbtGameFrame::OnFilePageSetup(wxCommandEvent &)
 
 void gbtGameFrame::OnFilePrintPreview(wxCommandEvent &)
 {
-  /*
   wxPrintDialogData data(m_printData);
 
   wxPrintPreview *preview = 0;
@@ -825,12 +823,10 @@ void gbtGameFrame::OnFilePrintPreview(wxCommandEvent &)
 					     wxSize(600, 650));
   frame->Initialize();
   frame->Show(true);
-  */
 }
 
 void gbtGameFrame::OnFilePrint(wxCommandEvent &)
 {
-  /*
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
 
@@ -852,7 +848,6 @@ void gbtGameFrame::OnFilePrint(wxCommandEvent &)
   else {
     m_printData = printer.GetPrintDialogData().GetPrintData();
   }
-  */
 }
 
 void gbtGameFrame::OnFileExportEfg(wxCommandEvent &)
@@ -1202,10 +1197,20 @@ void gbtGameFrame::OnEditNewPlayer(wxCommandEvent &)
 
 void gbtGameFrame::OnViewProfiles(wxCommandEvent &p_event)
 {
-  wxPaneInfo &pane = m_manager.GetPane(m_analysisPanel);
-  pane.Show(!pane.IsShown());
-  m_manager.Update();
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_NONE);
+  if (m_splitter->IsSplit()) {
+    m_splitter->Unsplit(m_analysisPanel);
+  }
+  else if (m_efgPanel && m_efgPanel->IsShown()) {
+    m_analysisPanel->ShowMixed(false);
+    m_splitter->SplitHorizontally(m_efgPanel, m_analysisPanel);
+  }
+  else {
+    m_analysisPanel->ShowMixed(true);
+    m_splitter->SplitHorizontally(m_nfgPanel, m_analysisPanel);
+  }
+
+  GetMenuBar()->Check(GBT_MENU_VIEW_PROFILES, p_event.IsChecked());
+  GetToolBar()->ToggleTool(GBT_MENU_VIEW_PROFILES, p_event.IsChecked());
 }
 
 void gbtGameFrame::OnViewZoom(wxCommandEvent &p_event)
@@ -1216,13 +1221,47 @@ void gbtGameFrame::OnViewZoom(wxCommandEvent &p_event)
 
 void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
 {
-  m_doc->BuildNfg();
+  if (m_efgPanel->IsShown()) {
+    // We are switching to strategic view
 
-  m_manager.GetPane(m_nfgPanel).Show(p_event.IsChecked());
-  m_manager.GetPane(m_efgPanel).Show(!p_event.IsChecked());
+    if (!m_doc->GetGame()->IsPerfectRecall()) {
+      if (wxMessageBox(_("This is not a game of perfect recall\n"
+			 "Do you wish to continue?"), 
+		       _("Strategic game"), 
+		       wxOK | wxCANCEL | wxALIGN_CENTER, this) != wxOK) {
+	return;
+      }
+    }
+    
+    m_doc->BuildNfg();
+
+    m_splitter->ReplaceWindow(m_efgPanel, m_nfgPanel);
+    m_efgPanel->Show(false);
+    m_nfgPanel->Show(true);
+    if (m_splitter->IsSplit()) {
+      m_analysisPanel->ShowMixed(true);
+    }
+    m_nfgPanel->SetFocus();
+  }
+  else {
+    m_splitter->ReplaceWindow(m_nfgPanel, m_efgPanel);
+    m_nfgPanel->Show(false);
+    m_efgPanel->Show(true);
+    if (m_splitter->IsSplit()) {
+      m_analysisPanel->ShowMixed(false);
+    }
+    m_efgPanel->SetFocus();
+  }
+
+  GetMenuBar()->Check(GBT_MENU_VIEW_STRATEGIC, m_nfgPanel->IsShown());
+  GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMIN, !p_event.IsChecked());
+  GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMOUT, !p_event.IsChecked());
 
   GetToolBar()->ToggleTool(GBT_MENU_VIEW_STRATEGIC, p_event.IsChecked());
-  m_manager.Update();
+  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMIN, !p_event.IsChecked());
+  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMOUT, !p_event.IsChecked());
+  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMFIT, !p_event.IsChecked());
+
   m_doc->UpdateViews(GBT_DOC_MODIFIED_NONE);
 }
 
@@ -1300,11 +1339,20 @@ void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     gbtAnalysisOutput *command = dialog.GetCommand();
 
-    gbtNashMonitorPanel *panel = new gbtNashMonitorPanel(this, m_doc, 
-							 command);
-    m_manager.AddPane(panel, wxBOTTOM,
-		      panel->GetOutput().GetDescription());
-    m_manager.Update();
+    gbtNashMonitorDialog dialog(this, m_doc, command);
+
+    dialog.ShowModal();
+
+    if (!m_splitter->IsSplit()) {
+      if (m_efgPanel && m_efgPanel->IsShown()) {
+	m_analysisPanel->ShowMixed(false);
+    	m_splitter->SplitHorizontally(m_efgPanel, m_analysisPanel);
+      }
+      else {
+	m_analysisPanel->ShowMixed(true);
+	m_splitter->SplitHorizontally(m_nfgPanel, m_analysisPanel);
+      }
+    }
   }
 
   m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
@@ -1314,7 +1362,7 @@ extern void LogitStrategic(wxWindow *, gbtGameDocument *);
 
 void gbtGameFrame::OnToolsQre(wxCommandEvent &)
 {
-  if (m_efgPanel) {
+  if (m_efgPanel && m_splitter->GetWindow1() == m_efgPanel) {
     gbtLogitBehavDialog(this, m_doc).ShowModal();
   }
   else {
@@ -1334,19 +1382,6 @@ void gbtGameFrame::OnHelpAbout(wxCommandEvent &)
 //----------------------------------------------------------------------
 //                  gbtGameFrame: Non-menu event handlers
 //----------------------------------------------------------------------
-
-void gbtGameFrame::OnPaneButton(wxFrameManagerEvent &p_event)
-{
-  if (p_event.GetPane()->window == m_nfgPanel) {
-    GetMenuBar()->Check(GBT_MENU_VIEW_STRATEGIC, false);
-    GetToolBar()->ToggleTool(GBT_MENU_VIEW_STRATEGIC, false);
-  }
-  else if (p_event.GetPane()->window == m_analysisPanel) {
-    GetMenuBar()->Check(GBT_MENU_VIEW_PROFILES, false);
-  }
-  p_event.Skip();
-}
-
 
 void gbtGameFrame::OnUnsplit(wxSplitterEvent &)
 {

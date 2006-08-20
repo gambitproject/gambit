@@ -64,7 +64,7 @@ OutputToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
   wxStringTokenizer tok(p_text, wxT(","));
 
   if (tok.GetNextToken() == wxT("NE")) {
-    if (tok.CountTokens() == (unsigned int) profile.Length()) {
+    if (tok.CountTokens() == profile.Length()) {
       for (int i = 1; i <= profile.Length(); i++) {
 	profile[i] = ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
       }
@@ -83,7 +83,7 @@ OutputToBehavProfile(gbtGameDocument *p_doc, const wxString &p_text)
   wxStringTokenizer tok(p_text, wxT(","));
 
   if (tok.GetNextToken() == wxT("NE")) {
-    if (tok.CountTokens() == (unsigned int) profile.Length()) {
+    if (tok.CountTokens() == profile.Length()) {
       for (int i = 1; i <= profile.Length(); i++) {
 	profile[i] = ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
       }
@@ -116,8 +116,6 @@ gbtAnalysisProfileList<T>::AddOutput(const wxString &p_output)
       }
       m_current = m_mixedProfiles.Length();
     }
-
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
   }
   catch (gbtNotNashException &) { }
 }

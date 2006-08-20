@@ -55,10 +55,11 @@ bool gbtApplication::OnInit(void)
   config.Read(_T("/General/CurrentDirectory"), &m_currentDir, _T(""));
 
   wxBitmap bitmap(gambitbig_xpm);
-  (void) new wxSplashScreen(bitmap,
-			    wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
-			    2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
-			    wxSIMPLE_BORDER | wxSTAY_ON_TOP);
+  wxSplashScreen *splash =
+    new wxSplashScreen(bitmap,
+		       wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
+		       2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
+		       wxSIMPLE_BORDER | wxSTAY_ON_TOP);
   wxYield();
 
   // The number of game files successfully opened

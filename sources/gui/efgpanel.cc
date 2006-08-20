@@ -186,6 +186,458 @@ void gbtBehavDominanceToolbar::OnUpdate(void)
   GetSizer()->Layout();
 }
 
+#include "bitmaps/color.xpm"
+#include "bitmaps/person.xpm"
+
+class gbtTreePlayerIcon : public wxStaticBitmap {
+private:
+  int m_player;
+
+  // Event handlers
+  void OnLeftClick(wxMouseEvent &);
+
+public:
+  gbtTreePlayerIcon(wxWindow *p_parent, int p_player);
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(gbtTreePlayerIcon, wxStaticBitmap)
+  EVT_LEFT_DOWN(gbtTreePlayerIcon::OnLeftClick)
+END_EVENT_TABLE()
+
+gbtTreePlayerIcon::gbtTreePlayerIcon(wxWindow *p_parent, int p_player)
+  : wxStaticBitmap(p_parent, -1, wxBitmap(person_xpm)), m_player(p_player)
+{ }
+
+void gbtTreePlayerIcon::OnLeftClick(wxMouseEvent &)
+{
+  wxBitmap bitmap(person_xpm);
+
+#if defined( __WXMSW__) or defined(__WXMAC__)
+  wxImage image = bitmap.ConvertToImage();
+#else
+  wxIcon image;
+  image.CopyFromBitmap(bitmap);
+#endif // _WXMSW__
+      
+  wxTextDataObject textData(wxString::Format(wxT("P%d"), m_player));
+  wxDropSource source(textData, this, image, image, image);
+  source.DoDragDrop(wxDrag_DefaultMove);
+}
+
+class gbtTreePlayerPanel : public wxPanel {
+private:
+  gbtGameDocument *m_doc;
+  int m_player;
+  gbtEditableText *m_playerLabel;
+  wxStaticText *m_payoff, *m_nodeValue, *m_nodeProb;
+  wxStaticText *m_infosetValue, *m_infosetProb, *m_belief;
+  
+  /// @name Event handlers
+  //@{
+  /// The set color icon is clicked
+  void OnSetColor(wxCommandEvent &);
+  /// Start the editing of the player label
+  void OnEditPlayerLabel(wxCommandEvent &);
+  /// End the editing of the player label after enter is pressed
+  void OnAcceptPlayerLabel(wxCommandEvent &);
+  /// Process a keypress event
+  void OnChar(wxKeyEvent &);
+  //@}
+
+public:
+  gbtTreePlayerPanel(wxWindow *, gbtGameDocument *, int p_player);
+
+  void OnUpdate(void);
+  void PostPendingChanges(void);
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(gbtTreePlayerPanel, wxPanel)
+  EVT_CHAR(gbtTreePlayerPanel::OnChar)
+END_EVENT_TABLE()
+
+gbtTreePlayerPanel::gbtTreePlayerPanel(wxWindow *p_parent,
+				       gbtGameDocument *p_doc,
+				       int p_player)
+  : wxPanel(p_parent, -1), m_doc(p_doc), m_player(p_player)
+{
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  wxBoxSizer *labelSizer = new wxBoxSizer(wxHORIZONTAL);
+
+  wxStaticBitmap *playerIcon = new gbtTreePlayerIcon(this, m_player);
+  labelSizer->Add(playerIcon, 0, wxALL | wxALIGN_CENTER, 0);
+
+  wxBitmapButton *setColorIcon =
+    new wxBitmapButton(this, -1, wxBitmap(color_xpm),
+		       wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+  setColorIcon->SetToolTip(_("Change the color for this player"));
+
+  labelSizer->Add(setColorIcon, 0, wxALL | wxALIGN_CENTER, 0);
+  Connect(setColorIcon->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
+	  wxCommandEventHandler(gbtTreePlayerPanel::OnSetColor));
+
+  m_playerLabel = new gbtEditableText(this, -1, wxT(""),
+				      wxDefaultPosition, wxSize(125, -1));
+  m_playerLabel->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+  labelSizer->Add(m_playerLabel, 1, wxLEFT | wxEXPAND, 10);
+  Connect(m_playerLabel->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
+	  wxCommandEventHandler(gbtTreePlayerPanel::OnEditPlayerLabel));
+  Connect(m_playerLabel->GetId(), wxEVT_COMMAND_TEXT_ENTER,
+	  wxCommandEventHandler(gbtTreePlayerPanel::OnAcceptPlayerLabel));
+
+  topSizer->Add(labelSizer, 0, wxALL, 0);
+
+  m_payoff = new wxStaticText(this, wxID_STATIC, wxT("Payoff:"),
+			      wxDefaultPosition, wxDefaultSize,
+			      wxALIGN_CENTER | wxST_NO_AUTORESIZE);
+  m_payoff->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+  topSizer->Add(m_payoff, 0, wxALL | wxEXPAND, 0);
+  topSizer->Show(m_payoff, false);
+
+  m_nodeValue = new wxStaticText(this, wxID_STATIC, wxT("Node value:"),
+				 wxDefaultPosition, wxDefaultSize,
+				 wxALIGN_CENTER | wxST_NO_AUTORESIZE);
+  m_nodeValue->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+  topSizer->Add(m_nodeValue, 0, wxALL | wxEXPAND, 0);
+  topSizer->Show(m_nodeValue, false);
+
+  m_nodeProb = new wxStaticText(this, wxID_STATIC, wxT("Node reached:"),
+				wxDefaultPosition, wxDefaultSize,
+				wxALIGN_CENTER | wxST_NO_AUTORESIZE);
+  m_nodeProb->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+  topSizer->Add(m_nodeProb, 0, wxALL | wxEXPAND, 0);
+  topSizer->Show(m_nodeProb, false);
+
+  m_infosetValue = new wxStaticText(this, wxID_STATIC, wxT("Infoset value:"),
+				    wxDefaultPosition, wxDefaultSize,
+				    wxALIGN_CENTER | wxST_NO_AUTORESIZE);
+  m_infosetValue->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+  topSizer->Add(m_infosetValue, 0, wxALL | wxEXPAND, 0);
+  topSizer->Show(m_infosetValue, false);
+
+  m_infosetProb = new wxStaticText(this, wxID_STATIC, wxT("Infoset reached:"),
+				    wxDefaultPosition, wxDefaultSize,
+				    wxALIGN_CENTER | wxST_NO_AUTORESIZE);
+  m_infosetProb->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+  topSizer->Add(m_infosetProb, 0, wxALL | wxEXPAND, 0);
+  topSizer->Show(m_infosetProb, false);
+
+  m_belief = new wxStaticText(this, wxID_STATIC, wxT("Belief:"),
+			      wxDefaultPosition, wxDefaultSize,
+			      wxALIGN_CENTER | wxST_NO_AUTORESIZE);
+  m_belief->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+  topSizer->Add(m_belief, 0, wxALL | wxEXPAND, 0);
+  topSizer->Show(m_belief, false);
+
+  SetSizer(topSizer);
+  topSizer->SetSizeHints(this);
+  topSizer->Fit(this);
+  Layout();
+}
+
+void gbtTreePlayerPanel::OnUpdate(void)
+{
+  if (!m_doc->IsTree())  return;
+
+  wxColour color = m_doc->GetStyle().GetPlayerColor(m_player);
+
+  m_playerLabel->SetForegroundColour(color);
+  m_playerLabel->SetValue(wxString(m_doc->GetGame()->GetPlayer(m_player)->GetLabel().c_str(),
+				   *wxConvCurrent));
+
+  m_payoff->SetForegroundColour(color);
+  if (m_doc->GetCurrentProfile() > 0) {
+    std::string pay = m_doc->GetProfiles().GetPayoff(m_player);
+    m_payoff->SetLabel(wxT("Payoff: ") + 
+		       wxString(pay.c_str(), *wxConvCurrent));
+    GetSizer()->Show(m_payoff, true);
+
+    Gambit::GameNode node = m_doc->GetSelectNode();
+
+    if (node) {
+      m_nodeValue->SetForegroundColour(color);
+      std::string value = m_doc->GetProfiles().GetNodeValue(node, m_player);
+      m_nodeValue->SetLabel(wxT("Node value: ") +
+			    wxString(value.c_str(), *wxConvCurrent));
+      GetSizer()->Show(m_nodeValue, true);
+
+      if (node->GetInfoset() && node->GetPlayer()->GetNumber() == m_player) {
+	m_nodeProb->SetForegroundColour(color);
+	std::string value = m_doc->GetProfiles().GetRealizProb(node);
+	m_nodeProb->SetLabel(wxT("Node reached: ") +
+			     wxString(value.c_str(), *wxConvCurrent));
+	GetSizer()->Show(m_nodeProb, true);
+
+	m_infosetValue->SetForegroundColour(color);
+	value = m_doc->GetProfiles().GetInfosetValue(node);
+	m_infosetValue->SetLabel(wxT("Infoset value: ") +
+				 wxString(value.c_str(), *wxConvCurrent));
+	GetSizer()->Show(m_infosetValue, true);
+
+	m_infosetProb->SetForegroundColour(color);
+	value = m_doc->GetProfiles().GetInfosetProb(node);
+	m_infosetProb->SetLabel(wxT("Infoset reached: ") +
+				wxString(value.c_str(), *wxConvCurrent));
+	GetSizer()->Show(m_infosetProb, true);
+	
+	m_belief->SetForegroundColour(color);
+	value = m_doc->GetProfiles().GetBeliefProb(node);
+	m_belief->SetLabel(wxT("Belief: ") +
+			   wxString(value.c_str(), *wxConvCurrent));
+	GetSizer()->Show(m_belief, true);
+      }
+      else {
+	GetSizer()->Show(m_nodeProb, false);
+	GetSizer()->Show(m_infosetValue, false);
+	GetSizer()->Show(m_infosetProb, false);
+	GetSizer()->Show(m_belief, false);
+      }
+    }
+    else {
+      GetSizer()->Show(m_nodeValue, false);
+    }
+  }
+  else {
+    GetSizer()->Show(m_payoff, false);
+    GetSizer()->Show(m_nodeValue, false);
+    GetSizer()->Show(m_nodeProb, false);
+    GetSizer()->Show(m_infosetValue, false);
+    GetSizer()->Show(m_infosetProb, false);
+    GetSizer()->Show(m_belief, false);
+  }
+
+  GetSizer()->Layout();
+  GetSizer()->SetSizeHints(this);
+  GetSizer()->Fit(this);
+}
+
+void gbtTreePlayerPanel::OnChar(wxKeyEvent &p_event)
+{
+  if (p_event.GetKeyCode() == WXK_ESCAPE) {
+    m_playerLabel->EndEdit(false);
+  }
+  else {
+    p_event.Skip();
+  }
+}
+
+void gbtTreePlayerPanel::OnSetColor(wxCommandEvent &)
+{
+  wxColourData data;
+  data.SetColour(m_doc->GetStyle().GetPlayerColor(m_player));
+  wxColourDialog dialog(this, &data);
+  dialog.SetTitle(wxString::Format(_("Choose color for player %d"),
+				   m_player));
+
+  if (dialog.ShowModal() == wxID_OK) {
+    wxColour color = dialog.GetColourData().GetColour();
+    m_doc->GetStyle().SetPlayerColor(m_player, color);
+    m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+  }
+}
+
+void gbtTreePlayerPanel::OnEditPlayerLabel(wxCommandEvent &)
+{
+  m_doc->PostPendingChanges();
+  m_playerLabel->BeginEdit();
+}
+
+void gbtTreePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
+{
+  m_doc->GetGame()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
+  m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
+}
+
+void gbtTreePlayerPanel::PostPendingChanges(void)
+{
+  if (m_playerLabel->IsEditing()) {
+    m_playerLabel->EndEdit(true);
+    m_doc->GetGame()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
+    m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
+  }
+}
+
+#include "bitmaps/dice.xpm"
+
+class gbtTreeChanceIcon : public wxStaticBitmap {
+private:
+  // Event handlers
+  void OnLeftClick(wxMouseEvent &);
+
+public:
+  gbtTreeChanceIcon(wxWindow *p_parent);
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(gbtTreeChanceIcon, wxStaticBitmap)
+  EVT_LEFT_DOWN(gbtTreeChanceIcon::OnLeftClick)
+END_EVENT_TABLE()
+
+gbtTreeChanceIcon::gbtTreeChanceIcon(wxWindow *p_parent)
+  : wxStaticBitmap(p_parent, -1, wxBitmap(dice_xpm))
+{ }
+
+void gbtTreeChanceIcon::OnLeftClick(wxMouseEvent &)
+{
+  wxBitmap bitmap(dice_xpm);
+
+#if defined( __WXMSW__) or defined(__WXMAC__)
+  wxImage image = bitmap.ConvertToImage();
+#else
+  wxIcon image;
+  image.CopyFromBitmap(bitmap);
+#endif // _WXMSW__
+      
+  wxTextDataObject textData(wxT("P0"));
+  wxDropSource source(textData, this, image, image, image);
+  source.DoDragDrop(wxDrag_DefaultMove);
+}
+
+class gbtTreeChancePanel : public wxPanel, public gbtGameView {
+private:
+  wxStaticText *m_playerLabel;
+
+  // Implementation of gbtGameView members
+  void OnUpdate(void);
+
+  /// @name Event handlers
+  //@{
+  /// The set color icon is clicked
+  void OnSetColor(wxCommandEvent &);
+  //@}
+
+public:
+  gbtTreeChancePanel(wxWindow *, gbtGameDocument *);
+};
+
+gbtTreeChancePanel::gbtTreeChancePanel(wxWindow *p_parent,
+				       gbtGameDocument *p_doc)
+  : wxPanel(p_parent, -1), gbtGameView(p_doc)
+{
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  wxBoxSizer *labelSizer = new wxBoxSizer(wxHORIZONTAL);
+
+  wxStaticBitmap *playerIcon = new gbtTreeChanceIcon(this);
+  labelSizer->Add(playerIcon, 0, wxALL | wxALIGN_CENTER, 0);
+
+  wxBitmapButton *setColorIcon =
+    new wxBitmapButton(this, -1, wxBitmap(color_xpm),
+		       wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+  setColorIcon->SetToolTip(_("Change the color for this player"));
+
+  labelSizer->Add(setColorIcon, 0, wxALL | wxALIGN_CENTER, 0);
+  Connect(setColorIcon->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
+	  wxCommandEventHandler(gbtTreeChancePanel::OnSetColor));
+
+  m_playerLabel = new wxStaticText(this, wxID_STATIC, wxT("Chance"),
+				   wxDefaultPosition, wxSize(125, -1),
+				   wxALIGN_LEFT);
+  m_playerLabel->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+  labelSizer->Add(m_playerLabel, 1, wxLEFT | wxALIGN_CENTER, 10);
+
+  topSizer->Add(labelSizer, 0, wxALL, 0);
+
+  SetSizer(topSizer);
+  topSizer->SetSizeHints(this);
+  topSizer->Fit(this);
+  Layout();
+}
+
+void gbtTreeChancePanel::OnUpdate(void)
+{
+  if (!m_doc->GetGame())  return;
+
+  m_playerLabel->SetForegroundColour(m_doc->GetStyle().ChanceColor());
+  GetSizer()->Layout();
+}
+
+void gbtTreeChancePanel::OnSetColor(wxCommandEvent &)
+{
+  wxColourData data;
+  data.SetColour(m_doc->GetStyle().ChanceColor());
+  wxColourDialog dialog(this, &data);
+  dialog.SetTitle(wxT("Choose color for chance player"));
+
+  if (dialog.ShowModal() == wxID_OK) {
+    wxColour color = dialog.GetColourData().GetColour();
+    m_doc->GetStyle().SetChanceColor(color);
+    m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+  }
+}
+
+//=====================================================================
+//                  class gbtTreePlayerToolbar
+//=====================================================================
+
+class gbtTreePlayerToolbar : public wxPanel, public gbtGameView {
+private:
+  gbtTreeChancePanel *m_chancePanel;
+  Gambit::Array<gbtTreePlayerPanel *> m_playerPanels;
+
+  // @name Implementation of gbtGameView members
+  //@{
+  void OnUpdate(void);
+  void PostPendingChanges(void);
+  //@}
+
+public:
+  gbtTreePlayerToolbar(wxWindow *p_parent, gbtGameDocument *p_doc);
+};
+
+
+gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent, 
+					   gbtGameDocument *p_doc)
+  : wxPanel(p_parent, -1, wxDefaultPosition, wxSize(110, -1)), 
+    gbtGameView(p_doc)
+{ 
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  m_chancePanel = new gbtTreeChancePanel(this, m_doc);
+  topSizer->Add(m_chancePanel, 0, wxALL | wxEXPAND, 5);
+
+  for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+    m_playerPanels.Append(new gbtTreePlayerPanel(this, m_doc, pl));
+    topSizer->Add(m_playerPanels[pl], 0, wxALL | wxEXPAND, 5);
+  }
+
+  SetSizer(topSizer);
+  Layout();
+}
+
+void gbtTreePlayerToolbar::OnUpdate(void)
+{
+  while (m_playerPanels.Length() < m_doc->NumPlayers()) {
+    gbtTreePlayerPanel *panel = new gbtTreePlayerPanel(this, m_doc,
+						       m_playerPanels.Length()+1);
+    m_playerPanels.Append(panel);
+    GetSizer()->Add(panel, 0, wxALL | wxEXPAND, 5);
+  }
+
+  while (m_playerPanels.Length() > m_doc->NumPlayers()) {
+    gbtTreePlayerPanel *panel = m_playerPanels.Remove(m_playerPanels.Length());
+    GetSizer()->Remove(panel);
+    panel->Destroy();
+  }
+  
+  for (int pl = 1; pl <= m_playerPanels.Length(); pl++) {
+    m_playerPanels[pl]->OnUpdate();
+  }
+
+  GetSizer()->Layout();
+}
+
+void gbtTreePlayerToolbar::PostPendingChanges(void)
+{
+  for (int pl = 1; pl <= m_playerPanels.Length(); pl++) {
+    m_playerPanels[pl]->PostPendingChanges();
+  }
+}
 
 //=====================================================================
 //              Implementation of class gbtEfgPanel
@@ -203,7 +655,7 @@ gbtEfgPanel::gbtEfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   : wxPanel(p_parent, -1), gbtGameView(p_doc)
 {
   m_treeWindow = new gbtEfgDisplay(this, m_doc);
-  //  m_playerToolbar = new gbtTreePlayerToolbar(this, m_doc);
+  m_playerToolbar = new gbtTreePlayerToolbar(this, m_doc);
   m_dominanceToolbar = new gbtBehavDominanceToolbar(this, m_doc);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -211,7 +663,7 @@ gbtEfgPanel::gbtEfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   topSizer->Show(m_dominanceToolbar, false);
 
   wxBoxSizer *treeSizer = new wxBoxSizer(wxHORIZONTAL);
-  //  treeSizer->Add(m_playerToolbar, 0, wxEXPAND, 0);
+  treeSizer->Add(m_playerToolbar, 0, wxEXPAND, 0);
   treeSizer->Add(m_treeWindow, 1, wxEXPAND, 0);
   
   topSizer->Add(treeSizer, 1, wxEXPAND, 0);
