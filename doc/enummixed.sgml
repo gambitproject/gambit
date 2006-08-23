@@ -36,7 +36,7 @@ point enumeration
 
 <refsect1>
 <refsect1info>
-<date>2005-08-15</date>
+<date>2006-08-23</date>
 </refsect1info>
 <title>DESCRIPTION</title>
 <para>
@@ -126,6 +126,14 @@ Suppresses printing of the banner at program launch.
 </refsect1>
 
 <refsect1>
+<title>THANKS</title>
+<para>
+This program is based on lrslib 4.2b by David Avis (avis@cs.mcgill.ca,
+http://cgm.cs.mcgill.ca/~avis/C/lrs.html).
+</para>
+</refsect1>
+
+<refsect1>
 <title>BUGS</title>
 <para>
 None known.
@@ -144,6 +152,11 @@ None known.
 <firstname>Bernhard</firstname>
 <surname>von Stengel</surname>
 <contrib>Identification of connectedness</contrib>
+</author>
+<author>
+<firstname>David</firstname>
+<surname>Avis</surname>
+<contrib>Implementation of extreme point enumeration</contrib>
 </author>
 </para>
 </refsect1>

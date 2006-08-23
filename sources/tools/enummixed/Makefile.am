@@ -5,6 +5,7 @@ bin_PROGRAMS = gambit-enummixed
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
 gambit_enummixed_SOURCES = \
+	lrsmp.h lrsmp.c lrslib.h lrslib.c lrsnash.cc \
 	basis.cc \
 	basis.h \
 	bfs.cc \

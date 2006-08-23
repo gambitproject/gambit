@@ -286,10 +286,14 @@ template <class T> void Solve(const StrategySupport &p_support)
   }
 }
 
+extern void LrsSolve(const StrategySupport &);
+
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by enumerating extreme points\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 2006, The Gambit Project\n";
+  p_stream << "Enumeration code based on lrslib 4.2b,\n";
+  p_stream << "Copyright (C) 1995-2005 by David Avis (avis@cs.mcgill.ca)\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
@@ -375,7 +379,8 @@ int main(int argc, char *argv[])
       Solve<double>(support);
     }
     else {
-      Solve<Rational>(support);
+      //Solve<Rational>(support);
+      LrsSolve(support);
     }
     return 0;
   }
