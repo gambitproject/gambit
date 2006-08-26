@@ -1,0 +1,545 @@
+//
+// $Source$
+// $Date$
+// $Revision$
+//
+// DESCRIPTION:
+// Implementation of behavior profile classes
+//
+// This file is part of Gambit
+// Copyright (c) 2002, The Gambit Project
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+
+
+#include "logbehav.h"
+
+//========================================================================
+//                  LogBehavProfile<T>: Lifecycle
+//========================================================================
+
+template <class T>
+LogBehavProfile<T>::LogBehavProfile(const LogBehavProfile<T> &p_profile)
+  : DVector<T>(p_profile),
+    m_logProbs(p_profile.m_logProbs),
+    m_support(p_profile.m_support),
+    m_cacheValid(false),
+    m_realizProbs(p_profile.m_realizProbs), 
+    m_logRealizProbs(p_profile.m_logRealizProbs),
+    m_beliefs(p_profile.m_beliefs),
+    m_nvals(p_profile.m_nvals), m_bvals(p_profile.m_bvals),
+    m_nodeValues(p_profile.m_nodeValues),
+    m_infosetValues(p_profile.m_infosetValues),
+    m_actionValues(p_profile.m_actionValues),
+    m_gripe(p_profile.m_gripe)
+{
+  m_realizProbs = (T) 0.0;
+  m_logRealizProbs = (T) 0.0;
+  m_beliefs = (T) 0.0;
+  m_nodeValues = (T) 0.0;
+  m_infosetValues = (T) 0.0;
+  m_actionValues = (T) 0.0;
+  m_gripe = (T) 0.0;
+}
+
+template <class T> 
+LogBehavProfile<T>::LogBehavProfile(const BehavSupport &p_support) 
+  : DVector<T>(p_support.NumActions()), 
+    m_logProbs(p_support.NumActions()),
+    m_support(p_support),
+    m_cacheValid(false),
+    m_realizProbs(p_support.GetGame()->NumNodes()),
+    m_logRealizProbs(p_support.GetGame()->NumNodes()),
+    m_beliefs(p_support.GetGame()->NumNodes()),
+    m_nvals(p_support.GetGame()->NumNodes()), 
+    m_bvals(p_support.GetGame()->NumNodes()),
+    m_nodeValues(p_support.GetGame()->NumNodes(),
+		 p_support.GetGame()->NumPlayers()),
+    m_infosetValues(p_support.GetGame()->NumInfosets()),
+    m_actionValues(p_support.GetGame()->NumActions()),
+    m_gripe(p_support.GetGame()->NumActions())
+{
+  m_realizProbs = (T) 0.0;
+  m_logRealizProbs = (T) 0.0;
+  m_beliefs = (T) 0.0;
+  m_nodeValues = (T) 0.0;
+  m_infosetValues = (T) 0.0;
+  m_actionValues = (T) 0.0;
+  m_gripe = (T) 0.0;
+  Centroid();
+}
+
+template <class T>
+LogBehavProfile<T> &LogBehavProfile<T>::operator=(const LogBehavProfile<T> &p_profile)
+{
+  if (this != &p_profile && m_support == p_profile.m_support) {
+    Invalidate();
+    DVector<T>::operator=(p_profile);
+    m_support = p_profile.m_support;
+  }
+  return *this;
+}
+
+//========================================================================
+//               LogBehavProfile<T>: Operator overloading
+//========================================================================
+
+template <class T>
+bool LogBehavProfile<T>::operator==(const LogBehavProfile<T> &p_profile) const
+{
+  return (m_support == p_profile.m_support &&
+	  (DVector<T> &) *this == (DVector<T> &) p_profile);
+}
+
+//========================================================================
+//              LogBehavProfile<T>: General data access
+//========================================================================
+
+template <class T> void LogBehavProfile<T>::Centroid(void)
+{
+  T center;
+
+  for (int pl = 1; pl <= this->dvlen.Length(); pl++)
+    for (int iset = 1; iset <= this->dvlen[pl]; iset++)
+      if (m_support.NumActions(pl,iset) > 0) {
+	center = ((T) 1 / (T) m_support.NumActions(pl, iset));
+	int act;
+	for (act = 1; act <= this->svlen[this->dvidx[pl] + iset - 1]; act++)
+	  this->dvptr[pl][iset][act] = center;
+      }
+}
+
+//========================================================================
+//              LogBehavProfile<T>: Interesting quantities
+//========================================================================
+
+//
+// The p_definedOnly parameter allows us to compute the LiapValue for profiles
+// which are incomplete.  Some methods -- such as the sequence form
+// methods -- return all zeroes for all action probabilities at
+// information sets sufficiently far off the equilibrium path.
+// In such cases, *any* completion is Nash.
+//
+// This is really a hack because we don't have a proper way yet of
+// indicating this.
+// 
+template <class T> 
+T LogBehavProfile<T>::GetLiapValue(bool p_definedOnly) const
+{
+  static const T BIG1 = (T) 10000;
+  static const T BIG2 = (T) 100;
+
+  T x, result = ((T) 0), avg, sum;
+  
+  // HACK: force it to recompute data.  FIX THIS.
+  m_cacheValid = false;
+  ComputeSolutionData();
+
+  for (int i = 1; i <= m_support.GetGame()->NumPlayers(); i++) {
+    for (int iset = 1; iset <= m_support.GetGame()->GetPlayer(i)->NumInfosets(); iset++) {
+      avg = sum = (T)0;
+
+      for (int act = 1; act <= m_support.NumActions(i, iset); act++) {
+	GameActionRep *action = m_support.GetAction(i, iset, act);
+	x = GetActionProb(action);
+	avg += x * m_actionValues(action->GetInfoset()->GetPlayer()->GetNumber(),
+				  action->GetInfoset()->GetNumber(),
+				  action->m_number);
+	sum += x;
+	if (x > (T)0)  x = (T)0;
+	result += BIG1 * x * x;         // add penalty for neg probabilities
+      }
+
+      for (int act = 1; act <= m_support.NumActions(i, iset); act++) {
+	x = ActionValue(m_support.GetAction(i, iset, act)) - avg;
+	if (x < (T)0) x = (T)0;
+	result += x * x;          // add penalty if not best response
+      }
+      x = sum - (T)1;
+      if (!p_definedOnly || sum >= (T) 1.0e-4) {
+	result += BIG2 * x * x;       // add penalty for sum not equal to 1
+      }
+    }
+  }
+  return result;
+}
+
+template <class T>
+const T &LogBehavProfile<T>::GetRealizProb(const GameNode &node) const
+{ 
+  ComputeSolutionData();
+  return m_realizProbs[node->number];
+}
+
+template <class T>
+const T &LogBehavProfile<T>::GetBeliefProb(const GameNode &node) const
+{ 
+  ComputeSolutionData();
+  return m_beliefs[node->GetNumber()];
+}
+
+template <class T>
+Vector<T> LogBehavProfile<T>::GetNodeValue(const GameNode &node) const
+{ 
+  ComputeSolutionData();
+  return m_nodeValues.Row(node->number);
+}
+
+template <class T>
+T LogBehavProfile<T>::GetInfosetProb(const GameInfoset &iset) const
+{ 
+  ComputeSolutionData();
+  T prob = (T) 0;
+  for (int i = 1; i <= iset->NumMembers(); i++) {
+    prob += m_realizProbs[iset->GetMember(i)->GetNumber()];
+  }
+  return prob;
+}
+
+template <class T>
+const T &LogBehavProfile<T>::GetInfosetValue(const GameInfoset &iset) const
+{ 
+  ComputeSolutionData();
+  return m_infosetValues(iset->GetPlayer()->GetNumber(), iset->GetNumber());
+}
+
+template <class T>
+T LogBehavProfile<T>::GetActionProb(const GameAction &action) const
+{ 
+  if (action->GetInfoset()->GetPlayer()->IsChance()) {
+    GameInfosetRep *infoset = action->GetInfoset();
+    return infoset->GetActionProb<T>(action->GetNumber());
+  }
+  else if (!m_support.Contains(action)) {
+    return (T) 0.0;
+  }
+  else {
+    return (*this)(action->GetInfoset()->GetPlayer()->GetNumber(),
+		   action->GetInfoset()->GetNumber(),
+		   m_support.GetIndex(action));
+  }
+}
+
+template <class T>
+T LogBehavProfile<T>::GetLogActionProb(const GameAction &action) const
+{ 
+  if (action->GetInfoset()->GetPlayer()->IsChance()) {
+    GameInfosetRep *infoset = action->GetInfoset();
+    return log(infoset->GetActionProb<T>(action->GetNumber()));
+  }
+  else {
+    return m_logProbs(action->GetInfoset()->GetPlayer()->GetNumber(),
+		      action->GetInfoset()->GetNumber(),
+		      m_support.GetIndex(action));
+  }
+}
+
+template <class T>
+const T &LogBehavProfile<T>::GetActionValue(const GameAction &act) const
+{ 
+  ComputeSolutionData();
+  return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
+			act->GetInfoset()->GetNumber(),
+			act->GetNumber());
+}
+
+template <class T>
+const T &LogBehavProfile<T>::GetRegret(const GameAction &act) const
+{ 
+  ComputeSolutionData();
+  return m_gripe(act->GetInfoset()->GetPlayer()->GetNumber(),
+		 act->GetInfoset()->GetNumber(), act->GetNumber());
+}
+
+template <class T>
+void LogBehavProfile<T>::GetPayoff(GameNodeRep *node, 
+				     const T &prob, int player, T &value) const
+{
+  if (node->outcome) {
+    value += prob * node->outcome->GetPayoff<T>(player);
+  }
+
+  if (node->children.Length())  {
+    int pl = node->infoset->m_player->m_number, iset = node->infoset->m_number;
+    if (pl == 0) {
+      // chance player
+      for (int act = 1; act <= node->NumChildren(); act++) {
+	GetPayoff(node->GetChild(act),
+		  prob * node->infoset->GetActionProb<T>(act), player, value);
+      }
+    }
+    else {
+      for (int act = 1; act <= m_support.NumActions(pl, iset); act++) {
+	GameActionRep *action = m_support.GetAction(pl, iset, act);
+	GetPayoff(node->GetChild(action->GetNumber()), 
+		  prob * GetActionProb(action), player, value);
+      }
+    }
+  }
+}
+
+template <class T> T LogBehavProfile<T>::GetPayoff(int player) const
+{
+  T value = (T) 0;
+  GetPayoff(m_support.GetGame()->GetRoot(), (T) 1, player, value);
+  return value;
+}
+
+//
+// The following routines compute the derivatives of quantities as
+// the probability of the action 'p_oppAction' is changed.
+// See Turocy (2001), "Computing the Quantal Response Equilibrium
+// Correspondence" for details.
+// These assume that the profile is interior (totally mixed),
+// and that the game is of perfect recall
+//
+
+template <class T>
+T LogBehavProfile<T>::DiffActionValue(const GameAction &p_action,
+				      const GameAction &p_oppAction) const
+{
+  ComputeSolutionData();
+  T deriv = (T) 0;
+  GameInfoset infoset = p_action->GetInfoset();
+  GamePlayer player = p_action->GetInfoset()->GetPlayer();
+
+  int mostLikelyNode = 1;
+  T maxLogProb = m_logRealizProbs[infoset->GetMember(1)->GetNumber()];
+
+  for (int i = 2; i <= infoset->NumMembers(); i++) {
+    if (m_logRealizProbs[infoset->GetMember(i)->GetNumber()] > maxLogProb) {
+      mostLikelyNode = i;
+      maxLogProb = m_logRealizProbs[infoset->GetMember(i)->GetNumber()];
+    }
+  }
+
+  for (int i = 1; i <= infoset->NumMembers(); i++) {
+    GameNode member = infoset->GetMember(i);
+    GameNode child = member->GetChild(p_action->GetNumber());
+
+    deriv += DiffRealizProb(member, p_oppAction) *
+      (m_nodeValues(child->GetNumber(), player->GetNumber()) -
+       m_actionValues(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+		      p_action->GetInfoset()->GetNumber(),
+		      p_action->GetNumber()));
+
+    T ratio = exp(m_logRealizProbs[member->GetNumber()] - maxLogProb);
+    deriv += ratio *
+      DiffNodeValue(member->GetChild(p_action->GetNumber()), player, p_oppAction);
+  }
+
+  T factor = 0.0;
+  for (int i = 1; i <= infoset->NumMembers(); i++) {
+    factor += exp(m_logRealizProbs[infoset->GetMember(i)->GetNumber()] - maxLogProb);
+  }
+
+  return deriv * factor;
+}
+
+template <class T>
+T LogBehavProfile<T>::DiffRealizProb(const GameNode &p_node,
+				     const GameAction &p_oppAction) const
+{
+  ComputeSolutionData();
+  T deriv = (T) 1;
+  bool isPrec = false;
+  GameNode node = p_node;
+  while (node->GetParent()) {
+    GameAction prevAction = node->GetPriorAction();
+    if (prevAction != p_oppAction) {
+      deriv *= GetActionProb(prevAction);
+    }
+    else {
+      isPrec = true;
+    }
+    node = node->GetParent();
+  }
+ 
+  return (isPrec) ? deriv : (T) 0.0;
+}
+
+template <class T>
+T LogBehavProfile<T>::DiffNodeValue(const GameNode &p_node, 
+				    const GamePlayer &p_player,
+				    const GameAction &p_oppAction) const
+{
+  ComputeSolutionData();
+
+  if (p_node->NumChildren() > 0) {
+    GameInfoset infoset = p_node->GetInfoset();
+
+    if (infoset == p_oppAction->GetInfoset()) {
+      // We've encountered the action; since we assume perfect recall,
+      // we won't encounter it again, and the downtree value must
+      // be the same.
+      return m_nodeValues(p_node->GetChild(p_oppAction->GetNumber())->GetNumber(),
+			  p_player->GetNumber());
+    }
+    else {
+      T deriv = (T) 0;
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	deriv += (DiffNodeValue(p_node->GetChild(act), p_player, p_oppAction) *
+		  GetActionProb(infoset->GetAction(act)));
+      }
+      return deriv;
+    }
+  }
+  else {
+    // If we reach a terminal node and haven't encountered p_oppAction,
+    // derivative wrt this path is zero.
+    return (T) 0;
+  }
+}
+
+//========================================================================
+//             LogBehavProfile<T>: Cached profile information
+//========================================================================
+
+template <class T>
+void LogBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
+{
+  if (node->GetOutcome()) {
+    for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) { 
+      m_nodeValues(node->GetNumber(), pl) += node->GetOutcome()->GetPayoff<T>(pl);
+    }
+  }
+
+  GameInfoset iset = node->GetInfoset();
+
+  if (iset) {
+    T infosetProb = (T) 0;
+    for (int i = 1; i <= iset->NumMembers(); i++) {
+      infosetProb += m_realizProbs[iset->GetMember(i)->GetNumber()];
+    }
+    
+    // push down payoffs from outcomes attached to non-terminal nodes 
+    for (int child = 1; child <= node->NumChildren(); child++) { 
+      m_nodeValues.SetRow(node->GetChild(child)->GetNumber(), 
+			  m_nodeValues.Row(node->GetNumber()));
+    }    
+
+    for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
+      m_nodeValues(node->GetNumber(), pl) = (T) 0;
+    }
+
+    for (int child = 1; child <= node->NumChildren(); child++)  {
+      GameNode childNode = node->GetChild(child);
+      ComputeSolutionDataPass2(childNode);
+
+      GameAction act = childNode->GetPriorAction();
+
+      for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
+	m_nodeValues(node->GetNumber(), pl) +=
+	  GetActionProb(act) * m_nodeValues(childNode->GetNumber(), pl);
+      }
+
+      if (!iset->IsChanceInfoset()) {
+	T &cpay = m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
+				 act->GetInfoset()->GetNumber(),
+				 act->GetNumber());
+	cpay += m_beliefs[node->GetNumber()] * m_nodeValues(childNode->GetNumber(), iset->GetPlayer()->GetNumber());
+      }
+    }
+  }
+}
+
+// compute realization probabilities for nodes and isets.  
+template <class T>
+void LogBehavProfile<T>::ComputeSolutionDataPass1(const GameNode &node) const
+{
+  if (node->GetParent()) {
+    m_realizProbs[node->GetNumber()] = m_realizProbs[node->GetParent()->GetNumber()] * GetActionProb(node->GetPriorAction());
+    m_logRealizProbs[node->GetNumber()] = m_logRealizProbs[node->GetParent()->GetNumber()] + GetLogActionProb(node->GetPriorAction());
+  }
+  else {
+    m_realizProbs[node->GetNumber()] = (T) 1;
+    m_logRealizProbs[node->GetNumber()] = (T) 0.0;
+  }
+  
+  if (node->GetInfoset()) {
+    for (int i = 1; i <= node->NumChildren(); i++) {
+      ComputeSolutionDataPass1(node->GetChild(i));
+    }
+  }
+}
+
+template <class T>
+void LogBehavProfile<T>::ComputeSolutionData(void) const
+{
+  if (!m_cacheValid) {
+    m_actionValues = (T) 0;
+    m_nodeValues = (T) 0;
+    m_infosetValues = (T) 0;
+    m_gripe = (T) 0;
+    ComputeSolutionDataPass1(m_support.GetGame()->GetRoot());
+
+    // This is moved from ComputeSolutionData2 relative to original
+    // behavior profile, to use new-style log-based computation
+    for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
+      GamePlayer player = m_support.GetGame()->GetPlayer(pl);
+      for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	GameInfoset infoset = player->GetInfoset(iset);
+      
+	for (int i = 1; i <= infoset->NumMembers(); i++) {
+	  T total = 0.0;
+	  for (int j = 1; j <= infoset->NumMembers(); j++) {
+	    total += exp(m_logRealizProbs[infoset->GetMember(j)->GetNumber()] -
+			 m_logRealizProbs[infoset->GetMember(i)->GetNumber()]);
+	  }
+	  m_beliefs[infoset->GetMember(i)->GetNumber()] = 1.0 / total;
+	}
+      }
+    }
+
+    ComputeSolutionDataPass2(m_support.GetGame()->GetRoot());
+
+    // At this point, mark the cache as value, so calls to GetInfosetValue()
+    // don't create a loop.
+    m_cacheValid = true;
+
+    for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
+      for (int iset = 1; iset <= m_support.GetGame()->NumInfosets()[pl]; iset++) {
+	GameInfoset infoset = m_support.GetGame()->GetPlayer(pl)->GetInfoset(iset);
+
+	m_infosetValues(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()) = (T) 0;
+	for (int act = 1; act <= infoset->NumActions(); act++) {
+	  GameAction action = infoset->GetAction(act);
+	  m_infosetValues(infoset->GetPlayer()->GetNumber(),
+			  infoset->GetNumber()) += GetActionProb(action) * ActionValue(action);
+	}
+
+	for (int act = 1; act <= infoset->NumActions(); act++) {
+	  GameAction action = infoset->GetAction(act);
+	  m_gripe(action->GetInfoset()->GetPlayer()->GetNumber(),
+		  action->GetInfoset()->GetNumber(), 
+		  action->GetNumber()) = 
+	    (ActionValue(action) - GetInfosetValue(infoset)) * GetInfosetProb(infoset);
+	}
+      }
+    }
+  }
+}
+
+template <class T>
+bool LogBehavProfile<T>::IsDefinedAt(GameInfoset p_infoset) const
+{
+  for (int act = 1; act <= p_infoset->NumActions(); act++) {
+    if (GetActionProb(p_infoset->GetAction(act)) > (T) 0) {
+      return true;
+    }
+  }
+  return false;
+}

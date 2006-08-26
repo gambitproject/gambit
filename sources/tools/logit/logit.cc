@@ -28,6 +28,7 @@
 #include <fstream>
 #include <unistd.h>
 #include "libgambit/libgambit.h"
+#include "logbehav.h"
 
 double g_maxDecel = 1.1;
 double g_hStart = .03;
@@ -87,7 +88,7 @@ extern void
 TraceStrategicPath(const Gambit::MixedStrategyProfile<double> &p_start,
 		   double p_startLambda, double p_maxLambda, double p_omega);
 extern void 
-TraceAgentPath(const Gambit::MixedBehavProfile<double> &p_start,
+TraceAgentPath(const LogBehavProfile<double> &p_start,
 	       double p_startLambda, double p_maxLambda, double p_omega);
 
 
@@ -164,7 +165,7 @@ int main(int argc, char *argv[])
       TraceStrategicPath(start, 0.0, maxLambda, 1.0);
     }
     else {
-      Gambit::MixedBehavProfile<double> start(game);
+      LogBehavProfile<double> start(game);
       TraceAgentPath(start, 0.0, maxLambda, 1.0);
     }
     return 0;

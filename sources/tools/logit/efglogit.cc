@@ -29,6 +29,7 @@
 #include <iostream>
 #include <libgambit/libgambit.h>
 #include <libgambit/sqmatrix.h>
+#include "logbehav.imp"
 
 using namespace Gambit;
 
@@ -54,6 +55,7 @@ inline double sqr(double x) { return x*x; }
 static void Givens(Matrix<double> &b, Matrix<double> &q,
 		   double &c1, double &c2, int l1, int l2, int l3)
 {
+  //std::cout << "c1=" << c1 << " c2=" << c2 << std::endl;
   if (fabs(c1) + fabs(c2) == 0.0) {
     return;
   }
@@ -67,6 +69,7 @@ static void Givens(Matrix<double> &b, Matrix<double> &q,
   }
   double s1 = c1/sn;
   double s2 = c2/sn;
+  //std::cout << "s1=" << s1 << " s2=" << s2 << std::endl;
 
   for (int k = 1; k <= q.NumColumns(); k++) {
     double sv1 = q(l1, k);
@@ -98,14 +101,19 @@ static void QRDecomp(Matrix<double> &b, Matrix<double> &q)
 
 static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
 		       Vector<double> &u, Vector<double> &y,
-		       double &d)
+		       double &d,
+		       const Array<bool> &p_isLog,
+		       double p_omega)
 {
+  //std::cout << "b: ";
   for (int k = 1; k <= b.NumColumns(); k++) {
     for (int l = 1; l <= k - 1; l++) {
       y[k] -= b(l, k) * y[l];
     }
     y[k] /= b(k, k);
+    //std::cout << b(k,k) << " ";
   }
+  //std::cout << std::endl;
 
   d = 0.0;
   for (int k = 1; k <= b.NumRows(); k++) {
@@ -113,9 +121,19 @@ static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
     for (int l = 1; l <= b.NumColumns(); l++) {
       s += q(l, k) * y[l];
     }
-    u[k] -= s;
-    d += s * s;
+    u[k] -= p_omega*s;
+
+    if (k < p_isLog.Length() && p_isLog[k]) {
+      double probDist = exp(u[k] + p_omega*s) - exp(u[k]);
+      d += probDist * probDist;
+    }
+    else {
+      d += p_omega*p_omega*s * s;
+    }
+
+    //d += (p_omega*p_omega*s*s);
   }
+  //std::cout << "d^2: " << d << std::endl;
   d = sqrt(d);
 }
 
@@ -126,11 +144,10 @@ class Equation {
 public:
   virtual ~Equation() { }
 
-  virtual double Value(const MixedBehavProfile<double> &p_point,
-		       const MixedBehavProfile<double> &p_logpoint,
+  virtual double Value(const LogBehavProfile<double> &p_point,
 		       double p_lambda,
 		       const Array<bool> &p_isLog) = 0;
-  virtual void Gradient(const MixedBehavProfile<double> &p_point, 
+  virtual void Gradient(const LogBehavProfile<double> &p_point, 
 			double p_lambda,
 			const Array<bool> &p_isLog,
 			Vector<double> &p_gradient) = 0;
@@ -153,17 +170,15 @@ public:
       m_infoset(p_game->GetPlayer(p_player)->GetInfoset(p_infoset))
   { }
 
-  double Value(const MixedBehavProfile<double> &p_profile,
-	       const MixedBehavProfile<double> &p_logprofile,
+  double Value(const LogBehavProfile<double> &p_profile,
 	       double p_lambda,
 	       const Array<bool> &p_isLog);
-  void Gradient(const MixedBehavProfile<double> &p_profile, double p_lambda,
+  void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
 		const Array<bool> &p_isLog,
 		Vector<double> &p_gradient);
 };
 
-double SumToOneEquation::Value(const MixedBehavProfile<double> &p_profile,
-			       const MixedBehavProfile<double> &p_logprofile,
+double SumToOneEquation::Value(const LogBehavProfile<double> &p_profile,
 			       double p_lambda,
 			       const Array<bool> &p_isLog)
 {
@@ -174,7 +189,7 @@ double SumToOneEquation::Value(const MixedBehavProfile<double> &p_profile,
   return value;
 }
 
-void SumToOneEquation::Gradient(const MixedBehavProfile<double> &p_profile,
+void SumToOneEquation::Gradient(const LogBehavProfile<double> &p_profile,
 				double p_lambda,
 				const Array<bool> &p_isLog,
 				Vector<double> &p_gradient)
@@ -219,28 +234,26 @@ public:
       m_infoset(p_game->GetPlayer(p_player)->GetInfoset(p_infoset))
   { }
 
-  double Value(const MixedBehavProfile<double> &p_profile, 
-	       const MixedBehavProfile<double> &p_logprofile,
+  double Value(const LogBehavProfile<double> &p_profile, 
 	       double p_lambda,
 	       const Array<bool> &p_isLog);
-  void Gradient(const MixedBehavProfile<double> &p_profile, double p_lambda,
+  void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
 		const Array<bool> &p_isLog,
 		Vector<double> &p_gradient);
 };
 
-double RatioEquation::Value(const MixedBehavProfile<double> &p_profile,
-			    const MixedBehavProfile<double> &p_logprofile,
+double RatioEquation::Value(const LogBehavProfile<double> &p_profile,
 			    double p_lambda,
 			    const Array<bool> &p_isLog)
 {
-  return (p_logprofile(m_pl, m_iset, m_act) - 
-	  p_logprofile(m_pl, m_iset, 1) -
+  return (p_profile.GetLogProb(m_pl, m_iset, m_act) - 
+	  p_profile.GetLogProb(m_pl, m_iset, 1) -
 	  p_lambda *
 	  (p_profile.GetActionValue(m_infoset->GetAction(m_act)) -
 	   p_profile.GetActionValue(m_infoset->GetAction(1))));
 }
 
-void RatioEquation::Gradient(const MixedBehavProfile<double> &p_profile,
+void RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
 			     double p_lambda,
 			     const Array<bool> &p_isLog,
 			     Vector<double> &p_gradient)
@@ -269,6 +282,7 @@ void RatioEquation::Gradient(const MixedBehavProfile<double> &p_profile,
 				       infoset->GetAction(act)) -
 	     p_profile.DiffActionValue(m_infoset->GetAction(1),
 				       infoset->GetAction(act)));
+	  //std::cout << "offending: " << p_gradient[i] << std::endl;
 	  if (p_isLog[i]) {
 	    p_gradient[i] *= p_profile(pl, iset, act);
 	  }
@@ -288,22 +302,45 @@ static void QreLHS(const Game &p_game,
 		   const Array<bool> &p_isLog,
 		   Vector<double> &p_lhs)
 {
-  MixedBehavProfile<double> profile(p_game);
-  MixedBehavProfile<double> logprofile(p_game);
+  LogBehavProfile<double> profile(p_game);
   for (int i = 1; i <= profile.Length(); i++) {
     if (p_isLog[i]) {
-      profile[i] = exp(p_point[i]);
-      logprofile[i] = p_point[i];
+      profile.SetLogProb(i, p_point[i]);
     }
     else {
-      profile[i] = p_point[i];
-      logprofile[i] = log(p_point[i]);
+      profile.SetProb(i, p_point[i]);
     }
   }
+
+  /*
+  // Print beliefs
+  std::cout << "Bel: ";
+  GameInfoset infoset = p_game->GetPlayer(3)->GetInfoset(1);
+  for (int i = 1; i <= infoset->NumMembers(); i++) {
+    std::cout << profile.GetBeliefProb(infoset->GetMember(i)) << " ";
+  }
+  std::cout << std::endl;
+  */
+
+  /*
+  std::cout << "P: ";
+  for (int i = 1; i <= profile.Length(); i++) {
+    std::cout << profile[i] << " ";
+  }
+  std::cout << std::endl;
+
+  std::cout << "L: ";
+  for (int i = 1; i <= profile.Length(); i++) {
+    std::cout << logprofile[i] << " ";
+  }
+  std::cout << std::endl;
+  */
+
+
   double lambda = p_point[p_point.Length()];
 
   for (int i = 1; i <= p_lhs.Length(); i++) {
-    p_lhs[i] = p_equations[i]->Value(profile, logprofile, lambda, p_isLog);
+    p_lhs[i] = p_equations[i]->Value(profile, lambda, p_isLog);
   }
 }
 
@@ -313,13 +350,13 @@ static void QreJacobian(const Game &p_game,
 			const Array<bool> &p_isLog,
 			Matrix<double> &p_matrix)
 {
-  MixedBehavProfile<double> profile(p_game);
+  LogBehavProfile<double> profile(p_game);
   for (int i = 1; i <= profile.Length(); i++) {
     if (p_isLog[i]) {
-      profile[i] = exp(p_point[i]);
+      profile.SetLogProb(i, p_point[i]);
     }
     else {
-      profile[i] = p_point[i];
+      profile.SetProb(i, p_point[i]);
     }
   }
   double lambda = p_point[p_point.Length()];
@@ -329,6 +366,16 @@ static void QreJacobian(const Game &p_game,
     p_equations[i]->Gradient(profile, lambda, p_isLog, column);
     p_matrix.SetColumn(i, column);
   }
+
+  /*
+  std::cout << "Jac:\n";
+  for (int i = 1; i <= p_equations.Length(); i++) {
+    for (int j = 1; j <= p_point.Length(); j++) {
+      std::cout << p_matrix(j, i) << " ";
+    }
+    std::cout << std::endl;
+  }
+  */
 }
 
 extern int g_numDecimals;
@@ -364,7 +411,7 @@ extern double g_maxDecel;
 extern double g_hStart;
 extern bool g_fullGraph;
 
-void TraceAgentPath(const MixedBehavProfile<double> &p_start,
+void TraceAgentPath(const LogBehavProfile<double> &p_start,
 		    double p_startLambda, double p_maxLambda, double p_omega)
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
@@ -374,6 +421,7 @@ void TraceAgentPath(const MixedBehavProfile<double> &p_start,
                                    // in calculating contraction rate
   double h = g_hStart;             // initial stepsize
   const double c_hmin = 1.0e-5;    // minimal stepsize
+  double omega = 1.0;              // deceleration factor for Newton step
 
   Array<bool> isLog(p_start.Length());
   for (int i = 1; i <= p_start.Length(); i++) {
@@ -437,7 +485,30 @@ void TraceAgentPath(const MixedBehavProfile<double> &p_start,
       double dist;
 
       QreLHS(p_start.GetGame(), equations, u, isLog, y);
-      NewtonStep(q, b, u, y, dist); 
+      /*
+      std::cout << "LHS: ";
+      for (int i = 1; i <= y.Length(); i++) {
+	std::cout << y[i] << " ";
+      }
+      std::cout << std::endl;
+      */
+
+      NewtonStep(q, b, u, y, dist, isLog, omega);
+      /*
+      std::cout << "Newt: ";
+      std::cout << u[u.Length()] << " ";
+      for (int i = 1; i < u.Length(); i++) {
+	if (isLog[i]) {
+	  std::cout << exp(u[i]) << " ";
+	}
+	else {
+	  std::cout << u[i] << " ";
+	}
+      }
+      std::cout << std::endl;
+      */
+
+      //std::cout << "dist: " << dist << std::endl;
       if (dist >= c_maxDist) {
 	accept = false;
 	break;
@@ -463,7 +534,12 @@ void TraceAgentPath(const MixedBehavProfile<double> &p_start,
 
     if (!accept) {
       h /= g_maxDecel;   // PC not accepted; change stepsize and retry
-      printf("retry with new stepsize %f\n", h);
+      //printf("retry with new stepsize %f\n", h);
+      omega *= 0.5;
+      //printf("rescaling omega to %f\n", omega);
+      if (omega < 1.0e-8) {
+	return;
+      }
       if (fabs(h) <= c_hmin) {
 	return;
       }
@@ -479,6 +555,7 @@ void TraceAgentPath(const MixedBehavProfile<double> &p_start,
 
     // PC step was successful; update and iterate
     x = u;
+    omega = 1.0;
 
     if (g_fullGraph) {
       PrintProfile(std::cout, p_start.GetSupport(), x, isLog);
@@ -489,6 +566,7 @@ void TraceAgentPath(const MixedBehavProfile<double> &p_start,
 
     for (int i = 1; i < x.Length(); i++) {
       if (!isLog[i] && x[i] < .05) {
+	std::cout << "switching " << i << " to log\n";
 	x[i] = log(x[i]);
 	isLog[i] = true;
 	recompute = true;
