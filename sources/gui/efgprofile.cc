@@ -143,13 +143,19 @@ wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords,
   attr.SetOrientation(wxHORIZONTAL);
   attr.SetRenderer(wxSheetCellRenderer(new gbtRationalRendererRefData()));
 
-  Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol()+1);
-  attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber()));
-  if (action->GetInfoset()->GetNumber() % 2 == 0) {
-    attr.SetBackgroundColour(wxColour(250, 250, 250));
+  try {
+    Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol()+1);
+    attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber()));
+    if (action->GetInfoset()->GetNumber() % 2 == 0) {
+      attr.SetBackgroundColour(wxColour(250, 250, 250));
+    }
+    else {
+      attr.SetBackgroundColour(wxColour(225, 225, 225));
+    }
   }
-  else {
-    attr.SetBackgroundColour(wxColour(225, 225, 225));
+  catch (Gambit::IndexException) {
+    // If GetAction() throws this, just handle it silently; can occur
+    // when solving a trivial game via the strategic form
   }
   attr.SetReadOnly(true);
   return attr;
