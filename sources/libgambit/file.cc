@@ -89,7 +89,7 @@ GameFileToken GameParserState::GetNextToken(void)
   else if (c == ',') {
     return (m_lastToken = TOKEN_COMMA);
   }
-  else if (isdigit(c) || c == '-') {
+  else if (isdigit(c) || c == '-' || c == '+') {
     std::string buf;
     buf += c;
     m_file.get(c);
