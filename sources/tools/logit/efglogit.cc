@@ -426,7 +426,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
 
   Array<bool> isLog(p_start.Length());
   for (int i = 1; i <= p_start.Length(); i++) {
-    isLog[i] = (p_start.GetProb(i) < .05);
+    isLog[i] = (p_start.GetProb(i) < 2.0);
   }
 
   Array<Equation *> equations;
@@ -565,19 +565,21 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
     // Update isLog: any strategy below 10^-3 should switch to log rep
     bool recompute = false;
 
+    /*
     for (int i = 1; i < x.Length(); i++) {
-      if (!isLog[i] && x[i] < .05) {
+      if (!isLog[i] && x[i] < .01) {
 	std::cout << "switching " << i << " to log\n";
 	x[i] = log(x[i]);
 	isLog[i] = true;
 	recompute = true;
       }
-      else if (isLog[i] && exp(x[i]) > .05) {
+      else if (isLog[i] && exp(x[i]) > .01) {
 	x[i] = exp(x[i]);
 	isLog[i] = false;
 	recompute = true;
       }
     }
+    */
 
     if (recompute) {
       // If we switch representations, make sure to get the new Jacobian

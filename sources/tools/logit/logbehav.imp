@@ -114,8 +114,10 @@ template <class T> void LogBehavProfile<T>::Centroid(void)
       if (m_support.NumActions(pl,iset) > 0) {
 	center = ((T) 1 / (T) m_support.NumActions(pl, iset));
 	int act;
-	for (act = 1; act <= this->svlen[this->dvidx[pl] + iset - 1]; act++)
+	for (act = 1; act <= this->svlen[this->dvidx[pl] + iset - 1]; act++) {
 	  this->dvptr[pl][iset][act] = center;
+	  m_logProbs(pl, iset, act) = log(center);
+	}
       }
 }
 
@@ -327,11 +329,15 @@ T LogBehavProfile<T>::DiffActionValue(const GameAction &p_action,
     GameNode member = infoset->GetMember(i);
     GameNode child = member->GetChild(p_action->GetNumber());
 
-    deriv += DiffRealizProb(member, p_oppAction) *
-      (m_nodeValues(child->GetNumber(), player->GetNumber()) -
-       m_actionValues(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-		      p_action->GetInfoset()->GetNumber(),
-		      p_action->GetNumber()));
+    if (p_oppAction->Precedes(member)) {
+      T diffProb = exp(m_logRealizProbs[i] - maxLogProb -
+		       GetLogProb(p_oppAction));
+      deriv += diffProb * 
+	(m_nodeValues(child->GetNumber(), player->GetNumber()) -
+	 m_actionValues(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+			p_action->GetInfoset()->GetNumber(),
+			p_action->GetNumber()));
+    }
 
     T ratio = exp(m_logRealizProbs[member->GetNumber()] - maxLogProb);
     deriv += ratio *
@@ -343,7 +349,7 @@ T LogBehavProfile<T>::DiffActionValue(const GameAction &p_action,
     factor += exp(m_logRealizProbs[infoset->GetMember(i)->GetNumber()] - maxLogProb);
   }
 
-  return deriv * factor;
+  return deriv / factor;
 }
 
 template <class T>
@@ -490,13 +496,28 @@ void LogBehavProfile<T>::ComputeSolutionData(void) const
       for (int iset = 1; iset <= player->NumInfosets(); iset++) {
 	GameInfoset infoset = player->GetInfoset(iset);
       
-	for (int i = 1; i <= infoset->NumMembers(); i++) {
-	  T total = 0.0;
-	  for (int j = 1; j <= infoset->NumMembers(); j++) {
-	    total += exp(m_logRealizProbs[infoset->GetMember(j)->GetNumber()] -
-			 m_logRealizProbs[infoset->GetMember(i)->GetNumber()]);
+	int mostLikelyNode = 1;
+	T maxLogProb = m_logRealizProbs[infoset->GetMember(1)->GetNumber()];
+
+	for (int i = 2; i <= infoset->NumMembers(); i++) {
+	  if (m_logRealizProbs[infoset->GetMember(i)->GetNumber()] > maxLogProb) {
+	    mostLikelyNode = i;
+	    maxLogProb = m_logRealizProbs[infoset->GetMember(i)->GetNumber()];
 	  }
-	  m_beliefs[infoset->GetMember(i)->GetNumber()] = 1.0 / total;
+	}
+
+	T total = 0.0;
+
+	for (int i = 1; i <= infoset->NumMembers(); i++) {
+	  total += exp(m_logRealizProbs[infoset->GetMember(i)->GetNumber()] -
+		       maxLogProb);
+	}
+	
+	// The belief for the most likely node
+	T mostLikelyBelief = 1.0 / total;
+							      
+	for (int i = 1; i <= infoset->NumMembers(); i++) {
+	  m_beliefs[infoset->GetMember(i)->GetNumber()] = mostLikelyBelief * exp(m_logRealizProbs[infoset->GetMember(i)->GetNumber()] - maxLogProb);
 	}
       }
     }
