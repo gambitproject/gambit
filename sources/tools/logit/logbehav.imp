@@ -40,7 +40,6 @@ LogBehavProfile<T>::LogBehavProfile(const LogBehavProfile<T> &p_profile)
     m_realizProbs(p_profile.m_realizProbs), 
     m_logRealizProbs(p_profile.m_logRealizProbs),
     m_beliefs(p_profile.m_beliefs),
-    m_nvals(p_profile.m_nvals), m_bvals(p_profile.m_bvals),
     m_nodeValues(p_profile.m_nodeValues),
     m_infosetValues(p_profile.m_infosetValues),
     m_actionValues(p_profile.m_actionValues),
@@ -64,8 +63,6 @@ LogBehavProfile<T>::LogBehavProfile(const BehavSupport &p_support)
     m_realizProbs(p_support.GetGame()->NumNodes()),
     m_logRealizProbs(p_support.GetGame()->NumNodes()),
     m_beliefs(p_support.GetGame()->NumNodes()),
-    m_nvals(p_support.GetGame()->NumNodes()), 
-    m_bvals(p_support.GetGame()->NumNodes()),
     m_nodeValues(p_support.GetGame()->NumNodes(),
 		 p_support.GetGame()->NumPlayers()),
     m_infosetValues(p_support.GetGame()->NumInfosets()),
@@ -531,15 +528,4 @@ void LogBehavProfile<T>::ComputeSolutionData(void) const
       }
     }
   }
-}
-
-template <class T>
-bool LogBehavProfile<T>::IsDefinedAt(GameInfoset p_infoset) const
-{
-  for (int act = 1; act <= p_infoset->NumActions(); act++) {
-    if (GetActionProb(p_infoset->GetAction(act)) > (T) 0) {
-      return true;
-    }
-  }
-  return false;
 }

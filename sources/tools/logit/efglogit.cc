@@ -123,6 +123,7 @@ static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
     }
     u[k] -= p_omega*s;
 
+    /*
     if (k < p_isLog.Length() && p_isLog[k]) {
       double probDist = exp(u[k] + p_omega*s) - exp(u[k]);
       d += probDist * probDist;
@@ -130,8 +131,9 @@ static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
     else {
       d += p_omega*p_omega*s * s;
     }
+    */
 
-    //d += (p_omega*p_omega*s*s);
+    d += s*s;
   }
   //std::cout << "d^2: " << d << std::endl;
   d = sqrt(d);
@@ -184,7 +186,7 @@ double SumToOneEquation::Value(const LogBehavProfile<double> &p_profile,
 {
   double value = -1.0;
   for (int act = 1; act <= m_infoset->NumActions(); act++) {
-    value += p_profile(m_pl, m_iset, act);
+    value += p_profile.GetProb(m_pl, m_iset, act);
   }
   return value;
 }
@@ -203,7 +205,7 @@ void SumToOneEquation::Gradient(const LogBehavProfile<double> &p_profile,
 
       for (int act = 1; act <= infoset->NumActions(); act++, i++) {
 	if (pl == m_pl && iset == m_iset) {
-	  p_gradient[i] = (p_isLog[i]) ? p_profile(pl, iset, act) : 1.0;
+	  p_gradient[i] = (p_isLog[i]) ? p_profile.GetProb(pl, iset, act) : 1.0;
 	}
 	else {
 	  p_gradient[i] = 0.0;
@@ -266,10 +268,10 @@ void RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
       for (int act = 1; act <= infoset->NumActions(); act++, i++) {
 	if (infoset == m_infoset) {
 	  if (act == 1) {
-	    p_gradient[i] = (p_isLog[i]) ? -1.0 : -1.0/p_profile(m_pl, m_iset, 1);
+	    p_gradient[i] = (p_isLog[i]) ? -1.0 : -1.0/p_profile.GetProb(m_pl, m_iset, 1);
 	  }
 	  else if (act == m_act) {
-	    p_gradient[i] = (p_isLog[i]) ? 1.0 : 1.0/p_profile(m_pl, m_iset, m_act);
+	    p_gradient[i] = (p_isLog[i]) ? 1.0 : 1.0/p_profile.GetProb(m_pl, m_iset, m_act);
 	  }
 	  else {
 	    p_gradient[i] = 0.0;
@@ -284,7 +286,7 @@ void RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
 				       infoset->GetAction(act)));
 	  //std::cout << "offending: " << p_gradient[i] << std::endl;
 	  if (p_isLog[i]) {
-	    p_gradient[i] *= p_profile(pl, iset, act);
+	    p_gradient[i] *= p_profile.GetProb(pl, iset, act);
 	  }
 	}
       }
@@ -421,11 +423,10 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
                                    // in calculating contraction rate
   double h = g_hStart;             // initial stepsize
   const double c_hmin = 1.0e-5;    // minimal stepsize
-  double omega = 1.0;              // deceleration factor for Newton step
 
   Array<bool> isLog(p_start.Length());
   for (int i = 1; i <= p_start.Length(); i++) {
-    isLog[i] = (p_start[i] < .05);
+    isLog[i] = (p_start.GetProb(i) < .05);
   }
 
   Array<Equation *> equations;
@@ -442,10 +443,10 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
   Vector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
   for (int i = 1; i <= p_start.Length(); i++) {
     if (isLog[i]) {
-      x[i] = log(p_start[i]);
+      x[i] = p_start.GetLogProb(i);
     }
     else {
-      x[i] = p_start[i];
+      x[i] = p_start.GetProb(i);
     }
   }
   x[x.Length()] = p_startLambda;
@@ -493,7 +494,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
       std::cout << std::endl;
       */
 
-      NewtonStep(q, b, u, y, dist, isLog, omega);
+      NewtonStep(q, b, u, y, dist, isLog, 1.0);
       /*
       std::cout << "Newt: ";
       std::cout << u[u.Length()] << " ";
@@ -535,11 +536,11 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
     if (!accept) {
       h /= g_maxDecel;   // PC not accepted; change stepsize and retry
       //printf("retry with new stepsize %f\n", h);
-      omega *= 0.5;
+      //omega *= 0.5;
       //printf("rescaling omega to %f\n", omega);
-      if (omega < 1.0e-8) {
-	return;
-      }
+      //if (omega < 1.0e-8) {
+      //return;
+      //}
       if (fabs(h) <= c_hmin) {
 	return;
       }
@@ -555,7 +556,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
 
     // PC step was successful; update and iterate
     x = u;
-    omega = 1.0;
+    //omega = 1.0;
 
     if (g_fullGraph) {
       PrintProfile(std::cout, p_start.GetSupport(), x, isLog);

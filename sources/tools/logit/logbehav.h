@@ -61,7 +61,7 @@ protected:
 
   // structures for storing cached data: nodes
   mutable Vector<T> m_realizProbs, m_logRealizProbs;
-  mutable Vector<T> m_beliefs, m_nvals, m_bvals;
+  mutable Vector<T> m_beliefs;
   mutable Matrix<T> m_nodeValues;
 
   // structures for storing cached data: information sets
@@ -115,16 +115,15 @@ public:
   bool operator!=(const DVector<T> &x) const
   { return DVector<T>::operator!=(x); }
 
-  const T &operator()(const GameAction &p_action) const
+  const T &GetProb(const GameAction &p_action) const
     { return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
 		     p_action->GetInfoset()->GetNumber(),
 		     m_support.GetIndex(p_action)); }
-  const T &operator()(int a, int b, int c) const
-    { return DVector<T>::operator()(a, b, c); }
-
-  const T &operator[](int a) const
+  const T &GetProb(int a) const
     { return Array<T>::operator[](a); }
 
+  const T &GetLogProb(int a) const
+    { return m_logProbs[a]; }
   const T &GetLogProb(int a, int b, int c) const
     { return m_logProbs(a, b, c); }
   const T &GetProb(int a, int b, int c) const
@@ -165,8 +164,6 @@ public:
   int Length(void) const { return Array<T>::Length(); }
   Game GetGame(void) const { return m_support.GetGame(); }
   const BehavSupport &GetSupport(void) const { return m_support; }
-  
-  bool IsDefinedAt(GameInfoset p_infoset) const;
   //@}
 
   /// @name Computation of interesting quantities
