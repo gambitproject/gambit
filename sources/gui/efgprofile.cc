@@ -89,7 +89,8 @@ wxString gbtBehavProfileList::GetCellValue(const wxSheetCoords &p_coords)
   }
 
 
-  return wxString(m_doc->GetProfiles().GetActionProb(p_coords.GetCol()+1).c_str(),
+  return wxString(m_doc->GetProfiles().GetActionProb(p_coords.GetCol()+1,
+						     p_coords.GetRow()+1).c_str(),
 		  *wxConvCurrent);
 }
 
