@@ -267,6 +267,7 @@ void QreJacobian(const StrategySupport &p_support,
     }
   }
 
+  /*
   std::cout << "Jac:\n";
   for (int i = 1; i <= p_matrix.NumColumns(); i++) {
     for (int j = 1; j <= p_matrix.NumRows(); j++) {
@@ -274,6 +275,7 @@ void QreJacobian(const StrategySupport &p_support,
     }
     std::cout << std::endl;
   }
+  */
 }
 
 //
