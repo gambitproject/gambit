@@ -156,7 +156,7 @@ T LogBehavProfile<T>::GetLiapValue(bool p_definedOnly) const
 	x = GetActionProb(action);
 	avg += x * m_actionValues(action->GetInfoset()->GetPlayer()->GetNumber(),
 				  action->GetInfoset()->GetNumber(),
-				  action->m_number);
+				  action->GetNumber());
 	sum += x;
 	if (x > (T)0)  x = (T)0;
 	result += BIG1 * x * x;         // add penalty for neg probabilities
@@ -180,7 +180,7 @@ template <class T>
 const T &LogBehavProfile<T>::GetRealizProb(const GameNode &node) const
 { 
   ComputeSolutionData();
-  return m_realizProbs[node->number];
+  return m_realizProbs[node->GetNumber()];
 }
 
 template <class T>
@@ -307,14 +307,108 @@ template <class T> T LogBehavProfile<T>::GetPayoff(int player) const
 //
 
 template <class T>
+T LogBehavProfile<T>::DiffRealizProb(const GameNode &p_node,
+				     const GameAction &p_oppAction) const
+{
+  ComputeSolutionData();
+  T deriv = (T) 0.0;
+  bool isPrec = false;
+  GameNode node = p_node;
+  while (node->GetParent()) {
+    GameAction prevAction = node->GetPriorAction();
+    if (prevAction != p_oppAction) {
+      if (prevAction->GetInfoset() != p_oppAction->GetInfoset()) {
+	deriv += GetLogProb(prevAction);
+      }
+      else {
+	// Same information set, different action -- return a bogus value
+	deriv -= log(1.0 / (double) (p_oppAction->GetInfoset()->NumActions() - 1));
+      }
+    }
+    else {
+      isPrec = true;
+    }
+    node = node->GetParent();
+  }
+ 
+  return deriv;
+}
+
+GameAction GetPrecedingAction(const GameNode &p_node,
+			      const GameInfoset &p_infoset)
+{
+  GameNode node = p_node;
+  while (node->GetParent()) {
+    GameAction prevAction = node->GetPriorAction();
+    if (prevAction->GetInfoset() == p_infoset) {
+      return prevAction;
+    }
+    node = node->GetParent();
+  }
+  return 0;
+}
+
+template <class T>
 T LogBehavProfile<T>::DiffActionValue(const GameAction &p_action,
 				      const GameAction &p_oppAction) const
 {
   ComputeSolutionData();
-  T deriv = (T) 0;
+
+  T deriv = (T) 0, total = (T) 0;
   GameInfoset infoset = p_action->GetInfoset();
   GamePlayer player = p_action->GetInfoset()->GetPlayer();
 
+  Array<T> derivs(infoset->NumMembers());
+  
+  for (int i = 1; i <= infoset->NumMembers(); i++) {
+    derivs[i] = 0.0;
+    GameAction act = GetPrecedingAction(infoset->GetMember(i), 
+					p_oppAction->GetInfoset());
+    if (act == p_oppAction) {
+      T factor = 0.0;
+      for (int j = 1; j <= infoset->NumMembers(); j++) {
+	factor += exp(m_logRealizProbs[infoset->GetMember(j)->GetNumber()] -
+		      m_logRealizProbs[infoset->GetMember(i)->GetNumber()] +
+		      GetLogProb(p_oppAction));
+      }
+      derivs[i] = 1.0 / factor;
+    }
+    else if (act != 0) {
+      T factor = 0.0;
+      for (int j = 1; j <= infoset->NumMembers(); j++) {
+	factor += exp(m_logRealizProbs[infoset->GetMember(j)->GetNumber()] -
+		      m_logRealizProbs[infoset->GetMember(i)->GetNumber()] +
+		      GetLogProb(act));
+      }
+      derivs[i] = -1.0 / factor / (double) (p_oppAction->GetInfoset()->NumActions() - 1);
+    }
+  }
+
+  for (int i = 1; i <= infoset->NumMembers(); i++) {
+    GameNode member = infoset->GetMember(i);
+    GameNode child = member->GetChild(p_action->GetNumber());
+
+    deriv += derivs[i] * m_nodeValues(child->GetNumber(), player->GetNumber());
+    for (int j = 1; j <= infoset->NumMembers(); j++) {
+      deriv -= m_beliefs[member->GetNumber()] * derivs[j] *
+	m_nodeValues(child->GetNumber(), player->GetNumber());
+    }
+
+    deriv += m_beliefs[member->GetNumber()] * DiffNodeValue(child, player, p_oppAction);
+  }
+
+  /*
+  printf("(%d,%d,%d)/(%d,%d,%d): ",
+	 player->GetNumber(), 
+	 p_action->GetInfoset()->GetNumber(), p_action->GetNumber(),
+	 p_oppAction->GetInfoset()->GetPlayer()->GetNumber(),
+	 p_oppAction->GetInfoset()->GetNumber(), p_oppAction->GetNumber());
+  std::cout << deriv << std::endl;
+  if (derivs.Length() == 2) {
+    printf("%f %f\n", derivs[1], derivs[2]);
+  }
+  */
+#ifdef UNUSED
   int mostLikelyNode = 1;
   T maxLogProb = m_logRealizProbs[infoset->GetMember(1)->GetNumber()];
 
@@ -325,53 +419,36 @@ T LogBehavProfile<T>::DiffActionValue(const GameAction &p_action,
     }
   }
 
+  std::cout << player->GetNumber() << " " << p_action->GetNumber() << " " << p_oppAction->GetNumber() << ": " << std::endl;
   for (int i = 1; i <= infoset->NumMembers(); i++) {
     GameNode member = infoset->GetMember(i);
     GameNode child = member->GetChild(p_action->GetNumber());
 
+    T factor = 0.0;
     if (p_oppAction->Precedes(member)) {
-      T diffProb = exp(m_logRealizProbs[i] - maxLogProb -
-		       GetLogProb(p_oppAction));
-      deriv += diffProb * 
-	(m_nodeValues(child->GetNumber(), player->GetNumber()) -
-	 m_actionValues(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-			p_action->GetInfoset()->GetNumber(),
-			p_action->GetNumber()));
+      factor = 1.0;
     }
+    for (int j = 1; j <= infoset->NumMembers(); j++) {
+      if (p_oppAction->Precedes(infoset->GetMember(j))) {
+	factor -= m_beliefs[infoset->GetMember(j)->GetNumber()];
+      }
+    }
+    factor *= m_beliefs[member->GetNumber()] / GetProb(p_oppAction);
 
-    T ratio = exp(m_logRealizProbs[member->GetNumber()] - maxLogProb);
-    deriv += ratio *
+    std::cout << factor << " ";
+    std::cout << m_nodeValues(child->GetNumber(), player->GetNumber()) << " -- ";
+
+    deriv += factor * m_nodeValues(child->GetNumber(), player->GetNumber());
+
+    std::cout << deriv << " ";
+    deriv += m_beliefs[member->GetNumber()] *
       DiffNodeValue(member->GetChild(p_action->GetNumber()), player, p_oppAction);
+    std::cout << deriv << " ";
   }
+  std::cout << std::endl;
+#endif  // UNUSED
 
-  T factor = 0.0;
-  for (int i = 1; i <= infoset->NumMembers(); i++) {
-    factor += exp(m_logRealizProbs[infoset->GetMember(i)->GetNumber()] - maxLogProb);
-  }
-
-  return deriv / factor;
-}
-
-template <class T>
-T LogBehavProfile<T>::DiffRealizProb(const GameNode &p_node,
-				     const GameAction &p_oppAction) const
-{
-  ComputeSolutionData();
-  T deriv = (T) 1;
-  bool isPrec = false;
-  GameNode node = p_node;
-  while (node->GetParent()) {
-    GameAction prevAction = node->GetPriorAction();
-    if (prevAction != p_oppAction) {
-      deriv *= GetActionProb(prevAction);
-    }
-    else {
-      isPrec = true;
-    }
-    node = node->GetParent();
-  }
- 
-  return (isPrec) ? deriv : (T) 0.0;
+  return deriv;
 }
 
 template <class T>
@@ -404,6 +481,7 @@ T LogBehavProfile<T>::DiffNodeValue(const GameNode &p_node,
     // If we reach a terminal node and haven't encountered p_oppAction,
     // derivative wrt this path is zero.
     return (T) 0;
+    //return m_nodeValues(p_node->GetNumber(), p_player->GetNumber());
   }
 }
 

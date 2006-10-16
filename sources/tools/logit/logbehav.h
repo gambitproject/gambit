@@ -124,10 +124,16 @@ public:
 
   const T &GetLogProb(int a) const
     { return m_logProbs[a]; }
-  const T &GetLogProb(const GameAction &p_action) const
-    { return m_logProbs(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-			p_action->GetInfoset()->GetNumber(),
-			m_support.GetIndex(p_action)); }
+  T GetLogProb(const GameAction &p_action) const
+    { if (p_action->GetInfoset()->GetPlayer()->GetNumber() == 0) {
+	return log(p_action->GetInfoset()->GetActionProb<T>(p_action->GetNumber()));
+      }
+      else {
+	return m_logProbs(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+			  p_action->GetInfoset()->GetNumber(),
+			  m_support.GetIndex(p_action)); 
+      }
+    }
   const T &GetLogProb(int a, int b, int c) const
     { return m_logProbs(a, b, c); }
   const T &GetProb(int a, int b, int c) const

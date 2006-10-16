@@ -123,7 +123,6 @@ static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
     }
     u[k] -= p_omega*s;
 
-    /*
     if (k < p_isLog.Length() && p_isLog[k]) {
       double probDist = exp(u[k] + p_omega*s) - exp(u[k]);
       d += probDist * probDist;
@@ -131,9 +130,8 @@ static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
     else {
       d += p_omega*p_omega*s * s;
     }
-    */
 
-    d += s*s;
+    //d += s*s;
   }
   //std::cout << "d^2: " << d << std::endl;
   d = sqrt(d);
@@ -370,6 +368,11 @@ static void QreJacobian(const Game &p_game,
   }
 
   /*
+  std::cout << "Jacvector: ";
+  for (int i = 1; i <= p_point.Length(); i++) {
+    std::cout << p_point[i] << " ";
+  }
+  std::cout << std::endl;
   std::cout << "Jac:\n";
   for (int i = 1; i <= p_equations.Length(); i++) {
     for (int j = 1; j <= p_point.Length(); j++) {
@@ -381,6 +384,90 @@ static void QreJacobian(const Game &p_game,
 }
 
 extern int g_numDecimals;
+
+template <class T>
+void PrintProfileDetail(std::ostream &p_stream,
+			const LogBehavProfile<T> &p_profile)
+{
+  char buffer[256];
+
+  for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
+    GamePlayer player = p_profile.GetGame()->GetPlayer(pl);
+    p_stream << "Behavior profile for player " << pl << ":\n";
+    
+    p_stream << "Infoset    Action     Prob          Value\n";
+    p_stream << "-------    -------    -----------   -----------\n";
+
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	GameAction action = infoset->GetAction(act);
+
+	if (infoset->GetLabel() != "") {
+	  sprintf(buffer, "%7s    ", infoset->GetLabel().c_str());
+	}
+	else {
+	  sprintf(buffer, "%7d    ", iset);
+	}
+	p_stream << buffer;
+	
+	if (action->GetLabel() != "") {
+	  sprintf(buffer, "%7s    ", action->GetLabel().c_str());
+	}
+	else {
+	  sprintf(buffer, "%7d   ", act);
+	}
+	p_stream << buffer;
+	
+	if (p_profile.GetProb(pl, iset, act) > .01) {
+	  sprintf(buffer, "%11s   ", ToText(p_profile.GetProb(pl, iset, act), g_numDecimals).c_str());
+	}
+	else {
+	  sprintf(buffer, "%11.3e   ", p_profile.GetProb(pl, iset, act));
+	}
+	p_stream << buffer;
+
+	sprintf(buffer, "%11s   ", ToText(p_profile.GetActionValue(infoset->GetAction(act)), g_numDecimals).c_str());
+	p_stream << buffer;
+
+	p_stream << "\n";
+      }
+    }
+
+    p_stream << "\n";
+ 
+    p_stream << "Infoset    Node       Belief        Prob\n";
+    p_stream << "-------    -------    -----------   -----------\n";
+
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+      
+      for (int n = 1; n <= infoset->NumMembers(); n++) {
+	sprintf(buffer, "%7d    ", iset);
+	p_stream << buffer;
+
+	sprintf(buffer, "%7d    ", n);
+	p_stream << buffer;
+
+	sprintf(buffer, "%11s   ", ToText(p_profile.GetBeliefProb(infoset->GetMember(n)), g_numDecimals).c_str());
+	p_stream << buffer;
+
+	if (p_profile.GetRealizProb(infoset->GetMember(n)) > .01) {
+	  sprintf(buffer, "%11s    ", ToText(p_profile.GetRealizProb(infoset->GetMember(n)), g_numDecimals).c_str());
+	}
+	else {
+	  sprintf(buffer, "%11.3e    ", p_profile.GetRealizProb(infoset->GetMember(n)));
+	}
+	p_stream << buffer;
+
+	p_stream << "\n";
+      }
+    }
+
+    p_stream << "\n";
+  }
+}
 
 void PrintProfile(std::ostream &p_stream,
 		  const BehavSupport &p_support, const Vector<double> &x,
@@ -407,6 +494,17 @@ void PrintProfile(std::ostream &p_stream,
   }
 
   p_stream << std::endl;
+
+  LogBehavProfile<double> profile(p_support);
+  for (int i = 1; i <= p_isLog.Length(); i++) {
+    if (p_isLog[i]) {
+      profile.SetLogProb(i, x[i]);
+    }
+    else {
+      profile.SetProb(i, x[i]);
+    }
+  }
+  //p_stream << "LiapValue: " << profile.GetLiapValue() << std::endl;
 }
 
 extern double g_maxDecel;
@@ -426,7 +524,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
 
   Array<bool> isLog(p_start.Length());
   for (int i = 1; i <= p_start.Length(); i++) {
-    isLog[i] = (p_start.GetProb(i) < 2.0);
+    isLog[i] = (p_start.GetProb(i) < 0.1);
   }
 
   Array<Equation *> equations;
@@ -453,6 +551,17 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
 
   if (g_fullGraph) {
     PrintProfile(std::cout, p_start.GetSupport(), x, isLog);
+
+    LogBehavProfile<double> current(p_start);
+    for (int i = 1; i <= p_start.Length(); i++) {
+      if (isLog[i]) {
+	current.SetLogProb(i, x[i]);
+      }
+      else {
+	current.SetProb(i, x[i]);
+      }
+    }
+    PrintProfileDetail(std::cout, current);
   }
 
   Vector<double> t(p_start.Length() + 1);
@@ -475,7 +584,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
     for (int k = 1; k <= x.Length(); k++) {
       u[k] = x[k] + h * p_omega * t[k];
     }
-    
+
     double decel = 1.0 / g_maxDecel;  // initialize deceleration factor
     QreJacobian(p_start.GetGame(), equations, u, isLog, b);
     QRDecomp(b, q);
@@ -486,6 +595,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
       double dist;
 
       QreLHS(p_start.GetGame(), equations, u, isLog, y);
+
       /*
       std::cout << "LHS: ";
       for (int i = 1; i <= y.Length(); i++) {
@@ -507,9 +617,10 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
 	}
       }
       std::cout << std::endl;
+
+      std::cout << "dist: " << dist << std::endl;
       */
 
-      //std::cout << "dist: " << dist << std::endl;
       if (dist >= c_maxDist) {
 	accept = false;
 	break;
@@ -553,6 +664,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
       decel = g_maxDecel;
     }
     h = fabs(h / decel);
+    //printf("New stepsize %f\n", h);
 
     // PC step was successful; update and iterate
     x = u;
@@ -560,26 +672,38 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
 
     if (g_fullGraph) {
       PrintProfile(std::cout, p_start.GetSupport(), x, isLog);
+
+      /*
+      LogBehavProfile<double> current(p_start);
+      for (int i = 1; i <= p_start.Length(); i++) {
+	if (isLog[i]) {
+	  current.SetLogProb(i, x[i]);
+	}
+	else {
+	  current.SetProb(i, x[i]);
+	}
+      }
+      PrintProfileDetail(std::cout, current);
+      */
     }
 
     // Update isLog: any strategy below 10^-3 should switch to log rep
     bool recompute = false;
 
-    /*
     for (int i = 1; i < x.Length(); i++) {
-      if (!isLog[i] && x[i] < .01) {
+      if (!isLog[i] && x[i] < .1) {
 	std::cout << "switching " << i << " to log\n";
 	x[i] = log(x[i]);
 	isLog[i] = true;
 	recompute = true;
       }
-      else if (isLog[i] && exp(x[i]) > .01) {
+      else if (isLog[i] && exp(x[i]) > .1) {
+	std::cout << "switching " << i << " from log\n";
 	x[i] = exp(x[i]);
 	isLog[i] = false;
 	recompute = true;
       }
     }
-    */
 
     if (recompute) {
       // If we switch representations, make sure to get the new Jacobian
@@ -593,6 +717,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
       // Bifurcation detected; for now, just "jump over" and continue,
       // taking into account the change in orientation of the curve.
       // Someday, we need to do more here! :)
+      printf("bifurcation detected!\n");
       p_omega = -p_omega;
     }
     t = newT;
