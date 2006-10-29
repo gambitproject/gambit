@@ -123,6 +123,7 @@ static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
     }
     u[k] -= p_omega*s;
 
+    /*
     if (k < p_isLog.Length() && p_isLog[k]) {
       double probDist = exp(u[k] + p_omega*s) - exp(u[k]);
       d += probDist * probDist;
@@ -130,8 +131,8 @@ static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
     else {
       d += p_omega*p_omega*s * s;
     }
-
-    //d += s*s;
+    */
+    d += s*s;
   }
   //std::cout << "d^2: " << d << std::endl;
   d = sqrt(d);
@@ -283,9 +284,11 @@ void RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
 	     p_profile.DiffActionValue(m_infoset->GetAction(1),
 				       infoset->GetAction(act)));
 	  //std::cout << "offending: " << p_gradient[i] << std::endl;
+	  /*
 	  if (p_isLog[i]) {
 	    p_gradient[i] *= p_profile.GetProb(pl, iset, act);
 	  }
+	  */
 	}
       }
     }
@@ -524,7 +527,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
 
   Array<bool> isLog(p_start.Length());
   for (int i = 1; i <= p_start.Length(); i++) {
-    isLog[i] = (p_start.GetProb(i) < 0.1);
+    isLog[i] = true;
   }
 
   Array<Equation *> equations;
@@ -552,6 +555,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
   if (g_fullGraph) {
     PrintProfile(std::cout, p_start.GetSupport(), x, isLog);
 
+    /*
     LogBehavProfile<double> current(p_start);
     for (int i = 1; i <= p_start.Length(); i++) {
       if (isLog[i]) {
@@ -562,6 +566,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
       }
     }
     PrintProfileDetail(std::cout, current);
+    */
   }
 
   Vector<double> t(p_start.Length() + 1);
@@ -690,6 +695,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
     // Update isLog: any strategy below 10^-3 should switch to log rep
     bool recompute = false;
 
+    /*
     for (int i = 1; i < x.Length(); i++) {
       if (!isLog[i] && x[i] < .1) {
 	std::cout << "switching " << i << " to log\n";
@@ -704,6 +710,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
 	recompute = true;
       }
     }
+    */
 
     if (recompute) {
       // If we switch representations, make sure to get the new Jacobian
