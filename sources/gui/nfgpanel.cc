@@ -488,6 +488,15 @@ void gbtNfgPanel::OnToolsDominance(wxCommandEvent &p_event)
 {
   GetSizer()->Show(m_dominanceToolbar, p_event.IsChecked(), true);
   GetSizer()->Layout();
+  
+  // Redraw the table with/without dominance markings
+  m_tableWidget->OnUpdate();
+
+  // This call is necessary on MSW to clear out a ghost of the
+  // dominance toolbar's strength control, under certain circumstances.
+  // (I think it is because of the empty upper-left panel in the
+  // table widget, but I'm not sure.)
+  Refresh();
 }
 
 void gbtNfgPanel::OnUpdate(void)
