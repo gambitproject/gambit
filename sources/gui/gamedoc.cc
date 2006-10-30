@@ -69,6 +69,7 @@ void gbtBehavDominanceStack::Reset(void)
     m_supports.Append(new Gambit::BehavSupport(m_doc->GetGame()));
     m_current = 1;
   }
+  m_noFurther = false;
 }
 
 bool gbtBehavDominanceStack::NextLevel(void)
