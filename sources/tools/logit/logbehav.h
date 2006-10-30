@@ -126,7 +126,8 @@ public:
     { return m_logProbs[a]; }
   T GetLogProb(const GameAction &p_action) const
     { if (p_action->GetInfoset()->GetPlayer()->GetNumber() == 0) {
-	return log(p_action->GetInfoset()->GetActionProb<T>(p_action->GetNumber()));
+	GameInfoset infoset = p_action->GetInfoset();
+	return log(infoset->GetActionProb<T>(p_action->GetNumber()));
       }
       else {
 	return m_logProbs(p_action->GetInfoset()->GetPlayer()->GetNumber(),
