@@ -30,6 +30,61 @@
 
 #include "libgambit.h"
 
+namespace Gambit {
+
+
+/// This extension to the game representation classes allows for efficient
+/// mass creation of outcomes.  For large strategic games, sequentially
+/// creating outcomes as you find them (in the outcome version of the
+/// .nfg format) is brutally inefficient.  For one 21x21x21x21 game,
+/// the naive code took about 97s to read the game; with this version,
+/// it takes about 5s on the same system.
+class TableFileGameRep : public GameRep {
+public:
+  /// @name Lifecycle
+  //@{
+  /// Construct a new table game with the given dimension, plus enough
+  /// outcomes to fill the table
+  TableFileGameRep(const Array<int> &p_dim);
+  //@}
+
+  /// @name Extensions
+  //@{
+  /// Delete all outcomes numbered above 'p_nOutcomes'
+  void TruncateOutcomes(int p_nOutcomes);
+  //@}
+};
+
+TableFileGameRep::TableFileGameRep(const Array<int> &p_dim)
+  : GameRep(p_dim)
+{
+  m_outcomes = Array<GameOutcomeRep *>(m_results.Length());
+  for (int i = 1; i <= m_outcomes.Length(); i++) {
+    m_outcomes[i] = new GameOutcomeRep(this, i);
+  }
+}
+
+void TableFileGameRep::TruncateOutcomes(int p_nOutcomes)
+{
+  if (p_nOutcomes >= m_outcomes.Length()) {
+    return;
+  }
+
+  Array<GameOutcomeRep *> outcomes(m_outcomes);
+
+  m_outcomes = Array<GameOutcomeRep *>(p_nOutcomes);
+  for (int i = 1; i <= p_nOutcomes; i++) {
+    m_outcomes[i] = outcomes[i];
+  }
+
+  // We just use 'delete' here, instead of Invalidate(), because this
+  // code is only intended to be called in the file reader, and therefore
+  // there should be no other references to these outcomes elsewhere
+  for (int i = p_nOutcomes + 1; i <= outcomes.Length(); delete outcomes[i++]);
+}
+
+}
+
 namespace {
 // This anonymous namespace encapsulates the file-parsing code
 
@@ -463,7 +518,8 @@ static void ParseNfgHeader(GameParserState &p_state, TableFileGame &p_data)
   }
 }
 
-static void ReadOutcomeList(GameParserState &p_parser, Game p_nfg)
+
+static void ReadOutcomeList(GameParserState &p_parser, TableFileGameRep *p_nfg)
 {
   if (p_parser.GetNextToken() == TOKEN_RBRACE) {
     // Special case: empty outcome list
@@ -475,43 +531,50 @@ static void ReadOutcomeList(GameParserState &p_parser, Game p_nfg)
     throw InvalidFileException();
   }
 
-  while (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
-    Gambit::Array<std::string> payoffs(p_nfg->NumPlayers());
-    int pl = 1;
+  int nOutcomes = 0;
 
+  while (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
+    nOutcomes++;
+    int pl = 1;
+    
     if (p_parser.GetNextToken() != TOKEN_TEXT) {
       throw InvalidFileException();
     }
-    std::string label = p_parser.GetLastText();
+
+    GameOutcome outcome;
+    try {
+      outcome = p_nfg->GetOutcome(nOutcomes);
+    }
+    catch (IndexException &) {
+      // It might happen that the file contains more outcomes than
+      // contingencies.  If so, just create them on the fly.
+      outcome = p_nfg->NewOutcome();
+    }
+    outcome->SetLabel(p_parser.GetLastText());
     p_parser.GetNextToken();
 
-    while (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
-      if (pl > p_nfg->NumPlayers()) {
-	throw InvalidFileException();
-      }
-
-      payoffs[pl++] = p_parser.GetLastText();
-      if (p_parser.GetNextToken() == TOKEN_COMMA) {
-	p_parser.GetNextToken();
+    try {
+      while (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
+	outcome->SetPayoff(pl++, p_parser.GetLastText());
+	if (p_parser.GetNextToken() == TOKEN_COMMA) {
+	  p_parser.GetNextToken();
+	}
       }
     }
-
-    if (pl <= p_nfg->NumPlayers()) {
+    catch (IndexException &) {
+      // This would be triggered by too many payoffs
       throw InvalidFileException();
     }
 
-    if (p_parser.GetCurrentToken() != TOKEN_RBRACE) {
+    if (pl <= p_nfg->NumPlayers() ||
+	p_parser.GetCurrentToken() != TOKEN_RBRACE) {
       throw InvalidFileException();
-    }
-
-    GameOutcome outcome = p_nfg->NewOutcome();
-    outcome->SetLabel(label);
-    for (pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
-      outcome->SetPayoff(pl, payoffs[pl]);
     }
 
     p_parser.GetNextToken();
   }
+
+  p_nfg->TruncateOutcomes(nOutcomes);
 
   if (p_parser.GetCurrentToken() != TOKEN_RBRACE) {
     throw InvalidFileException();
@@ -519,11 +582,11 @@ static void ReadOutcomeList(GameParserState &p_parser, Game p_nfg)
   p_parser.GetNextToken();
 }
 
-void ParseOutcomeBody(GameParserState &p_parser, Game p_nfg)
+void ParseOutcomeBody(GameParserState &p_parser, TableFileGameRep *p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
 
-  StrategyIterator iter(p_nfg);
+  StrategyIterator iter(StrategySupport(static_cast<GameRep *>(p_nfg)));
 
   while (p_parser.GetCurrentToken() != TOKEN_EOF) {
     if (p_parser.GetCurrentToken() != TOKEN_NUMBER) {
@@ -543,9 +606,9 @@ void ParseOutcomeBody(GameParserState &p_parser, Game p_nfg)
 }
 
 static void ParsePayoffBody(GameParserState &p_parser, 
-			    Game p_nfg)
+			    TableFileGameRep *p_nfg)
 {
-  StrategyIterator iter(p_nfg);
+  StrategyIterator iter(StrategySupport(static_cast<GameRep *>(p_nfg)));
   int pl = 1;
 
   while (p_parser.GetCurrentToken() != TOKEN_EOF) {
@@ -568,14 +631,17 @@ static void ParsePayoffBody(GameParserState &p_parser,
   }
 }
 
-static Game BuildNfg(GameParserState &p_parser, 
-			   TableFileGame &p_data)
+static Game BuildNfg(GameParserState &p_parser, TableFileGame &p_data)
 {
   Gambit::Array<int> dim(p_data.NumPlayers());
   for (int pl = 1; pl <= dim.Length(); pl++) {
     dim[pl] = p_data.NumStrategies(pl);
   }
-  Game nfg = new GameRep(dim);
+
+  TableFileGameRep *nfg = new TableFileGameRep(dim);
+  // Assigning this to the container assures that, if something goes
+  // wrong, the class will automatically be cleaned up
+  Game game = nfg;
 
   nfg->SetTitle(p_data.m_title);
   nfg->SetComment(p_data.m_comment);
@@ -597,7 +663,7 @@ static Game BuildNfg(GameParserState &p_parser,
     throw InvalidFileException();
   }
 
-  return nfg;
+  return game;
 }
 
 

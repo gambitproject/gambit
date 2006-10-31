@@ -229,6 +229,7 @@ public:
 /// point is done).
 class GameOutcomeRep : public GameObject  {
   friend class GameRep;
+  friend class TableFileGameRep;
 
 private:
   GameRep *m_game;
