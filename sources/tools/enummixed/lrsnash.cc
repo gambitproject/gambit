@@ -166,7 +166,8 @@ void BuildRep(lrs_dic *P, lrs_dat *Q, const StrategySupport &p_support,
 /* lrs driver, argv[2]= 2nd input file for nash equilibria */
 long nash2_main (lrs_dic *P1, lrs_dat *Q1, lrs_dic *P2orig,
 		 lrs_dat *Q2, long *numequilib, 
-		 lrs_mp_vector output1, lrs_mp_vector output2);
+		 lrs_mp_vector output1, lrs_mp_vector output2,
+		 const StrategySupport &p_support);
 
 long lrs_getfirstbasis2 (lrs_dic ** D_p, lrs_dat * Q, lrs_dic *P2orig,
 			 lrs_mp_matrix * Lin, long no_output);
@@ -176,7 +177,8 @@ long getabasis2 (lrs_dic * P, lrs_dat * Q, lrs_dic * P2orig, long order[]);
 // This is a modified version of lrs_output from the original, in which
 // we output the equilibria found in Gambit format.
 void nashoutput(lrs_dat *Q1, lrs_mp_vector output1,
-		lrs_dat *Q2, lrs_mp_vector output2);
+		lrs_dat *Q2, lrs_mp_vector output2,
+		const StrategySupport &p_support);
 
 
 
@@ -311,7 +313,7 @@ void LrsSolve(const StrategySupport &p_support)
       if (!prune && lrs_getsolution (P1, Q1, output1, col))
 	{ 
            oldnum=numequilib;
-           nash2_main(P1,Q1,P2orig,Q2,&numequilib,output1,output2);
+           nash2_main(P1,Q1,P2orig,Q2,&numequilib,output1,output2,p_support);
 	   if (numequilib > oldnum || Q1->verbose)
 	      {
                 if(Q1->verbose)
@@ -348,7 +350,9 @@ void LrsSolve(const StrategySupport &p_support)
 /**********************************************************/
 
 long nash2_main (lrs_dic *P1, lrs_dat *Q1, lrs_dic *P2orig, 
-		 lrs_dat *Q2, long *numequilib, lrs_mp_vector output1, lrs_mp_vector output2)
+		 lrs_dat *Q2, long *numequilib, 
+		 lrs_mp_vector output1, lrs_mp_vector output2,
+		 const StrategySupport &p_support)
 
 
 {
@@ -472,7 +476,7 @@ long nash2_main (lrs_dic *P1, lrs_dat *Q1, lrs_dic *P2orig,
 	    (*numequilib)++;
              if (Q2->verbose)
                   prat(" \np1's obj value: ",P2->objnum,P2->objden);
-	     nashoutput(Q1, output1, Q2, output2);
+	     nashoutput(Q1, output1, Q2, output2, p_support);
 	}
     }
   while (lrs_getnextbasis (&P2, Q2, prune));
@@ -982,18 +986,35 @@ printrat (char name[], lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/Din  */
 
 void
 nashoutput(lrs_dat *Q1, lrs_mp_vector output1,
-	   lrs_dat *Q2, lrs_mp_vector output2)
+	   lrs_dat *Q2, lrs_mp_vector output2,
+	   const StrategySupport &p_support)
 {
   std::cout << "NE";
   // The -1 is because the last entry in the vector is the payoff
   // of the other player
-  for (long i = 1; i < Q1->n - 1; i++) {
-    std::cout << ",";
-    printrat("", output1[i], output1[0]);
+  long i = 1;
+
+  GamePlayer player1 = p_support.GetGame()->GetPlayer(1);
+  for (int j = 1; j <= player1->NumStrategies(); j++) {
+    if (p_support.Contains(player1->GetStrategy(j))) {
+      std::cout << ",";
+      printrat("", output1[i++], output1[0]);
+    }
+    else {
+      std::cout << ",0";
+    }
   }
-  for (long i = 1; i < Q2->n - 1; i++) {
-    std::cout << ",";
-    printrat("", output2[i], output2[0]);
+
+  i = 1;
+  GamePlayer player2 = p_support.GetGame()->GetPlayer(2);
+  for (int j = 1; j <= player2->NumStrategies(); j++) {
+    if (p_support.Contains(player2->GetStrategy(j))) {
+      std::cout << ",";
+      printrat("", output2[i++], output2[0]);
+    }
+    else {
+      std::cout << ",0";
+    }
   }
   std::cout << std::endl;
   fflush(stdout);
