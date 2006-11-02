@@ -27,6 +27,18 @@ executables to a directory in your path!
 Note that if you install to a different location than the default, on
 some systems (especially linux) you may have to run ldconfig manually.
 
+Supported compilers
+-------------------
+
+Currently, gcc is the only compiler supported.  The version of gcc needs
+to be new enough to handle templates correctly.  The oldest versions
+of gcc known to compile Gambit are 3.4.6 (Linux) and 3.4.2 (MinGW for
+Windows).
+
+If you wish to use another compiler, the most likely stumbling block is
+that Gambit uses templated member functions for classes, so the compiler
+must support these.  (Version of gcc prior to 3.4 do not, for example.)
+
 For Windows users
 -----------------
 
