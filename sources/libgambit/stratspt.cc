@@ -297,4 +297,35 @@ StrategySupport::Undominated(bool p_strict, const Array<int> &players) const
   return newS;
 }
 
+//---------------------------------------------------------------------------
+//                Identification of overwhelmed strategies
+//---------------------------------------------------------------------------
+
+bool StrategySupport::Overwhelms(const GameStrategy &s, 
+				 const GameStrategy &t, 
+				 bool p_strict) const
+{
+  StrategyIterator iter(*this);
+  Rational sMin = iter->GetStrategyValue<Rational>(s);
+  Rational tMax = iter->GetStrategyValue<Rational>(t);
+
+  for (; !iter.AtEnd(); iter++) {
+    if (iter->GetStrategyValue<Rational>(s) < sMin) {
+      sMin = iter->GetStrategyValue<Rational>(s);
+    }
+    
+    if (iter->GetStrategyValue<Rational>(t) > tMax) { 
+      tMax = iter->GetStrategyValue<Rational>(t);
+    }
+
+    if (sMin < tMax || (sMin == tMax && !p_strict)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+
 } // end namespace Gambit

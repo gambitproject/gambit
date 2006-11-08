@@ -166,6 +166,12 @@ public:
   StrategySupport Undominated(bool p_strict, bool p_external = false) const;
   StrategySupport Undominated(bool strong, const Array<int> &players) const;
   //@}
+
+  /// @name Identification of overwhelmed strategies
+  //@(
+  bool Overwhelms(const GameStrategy &s, const GameStrategy &t, 
+                  bool p_strict) const;
+  //@}
 };
 
 } // end namespace Gambit
