@@ -318,7 +318,7 @@ bool StrategySupport::Overwhelms(const GameStrategy &s,
       tMax = iter->GetStrategyValue<Rational>(t);
     }
 
-    if (sMin < tMax || (sMin == tMax && !p_strict)) {
+    if (sMin < tMax || (sMin == tMax && p_strict)) {
       return false;
     }
   }
