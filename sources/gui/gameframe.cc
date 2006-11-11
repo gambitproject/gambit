@@ -884,15 +884,16 @@ void gbtGameFrame::OnFileExportNfg(wxCommandEvent &)
 void gbtGameFrame::OnFileExportGraphic(wxCommandEvent &p_event)
 {
   wxBitmap bitmap = wxNullBitmap;
+  bool bitmapOK = false;
 
   if (m_efgPanel && m_efgPanel->IsShown()) {
-    bitmap = m_efgPanel->GetBitmap(50, 50);
+    bitmapOK = m_efgPanel->GetBitmap(bitmap, 50, 50);
   }
   else {
-    bitmap = m_nfgPanel->GetBitmap(50, 50);
+    bitmapOK = m_nfgPanel->GetBitmap(bitmap, 50, 50);
   }
 
-  if (bitmap == wxNullBitmap) {
+  if (!bitmapOK) {
     wxMessageBox(_("Game image too large to export to graphics file"),
 		 _("Error"), wxOK, this);
     return;
@@ -1298,7 +1299,7 @@ void gbtGameFrame::OnFormatFonts(wxCommandEvent &)
 {
   wxFontData data;
   data.SetInitialFont(m_doc->GetStyle().GetFont());
-  wxFontDialog dialog(this, &data);
+  wxFontDialog dialog(this, data);
   
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->GetStyle().SetFont(dialog.GetFontData().GetChosenFont());

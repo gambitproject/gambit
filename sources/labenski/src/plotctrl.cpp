@@ -446,8 +446,13 @@ void wxPlotArea::OnPaint( wxPaintEvent &WXUNUSED(event) )
     if (m_bitmap.Ok())
         dc.DrawBitmap(m_bitmap, 0, 0, false);
 
+#if wxCHECK_VERSION(2,7,0)
+    if (m_owner->GetCrossHairCursor() && m_owner->GetPlotAreaRect().Contains(m_mousePt))
+#else
     if (m_owner->GetCrossHairCursor() && m_owner->GetPlotAreaRect().Inside(m_mousePt))
+#endif
         m_owner->DrawCrosshairCursor( &dc, m_mousePt );
+
 
     m_owner->DrawMouseMarker(&dc, m_owner->GetAreaMouseMarker(), m_mouseRect);
 }
@@ -843,9 +848,15 @@ void wxPlotCtrl::OnMouse( wxMouseEvent &event )
     wxSize size(GetClientSize());
     wxPoint mousePt(event.GetPosition());
 
+#if wxCHECK_VERSION(2,7,0)
+    if ((m_show_title  && m_titleRect.Contains(mousePt)) ||
+        (m_show_xlabel && m_xLabelRect.Contains(mousePt)) ||
+        (m_show_ylabel && m_yLabelRect.Contains(mousePt)))
+#else
     if ((m_show_title  && m_titleRect.Inside(mousePt)) ||
         (m_show_xlabel && m_xLabelRect.Inside(mousePt)) ||
         (m_show_ylabel && m_yLabelRect.Inside(mousePt)))
+#endif
     {
         SetPlotWinMouseCursor(wxCURSOR_IBEAM);
     }
@@ -854,12 +865,21 @@ void wxPlotCtrl::OnMouse( wxMouseEvent &event )
 
     if (event.ButtonDClick(1) && !IsTextCtrlShown())
     {
+#if wxCHECK_VERSION(2,7,0)
+        if (m_show_title && m_titleRect.Contains(mousePt))
+            ShowTextCtrl(wxPLOT_EDIT_TITLE, true);
+        else if (m_show_xlabel && m_xLabelRect.Contains(mousePt))
+            ShowTextCtrl(wxPLOT_EDIT_XAXIS, true);
+        else if (m_show_ylabel && m_yLabelRect.Contains(mousePt))
+            ShowTextCtrl(wxPLOT_EDIT_YAXIS, true);
+#else
         if (m_show_title && m_titleRect.Inside(mousePt))
             ShowTextCtrl(wxPLOT_EDIT_TITLE, true);
         else if (m_show_xlabel && m_xLabelRect.Inside(mousePt))
             ShowTextCtrl(wxPLOT_EDIT_XAXIS, true);
         else if (m_show_ylabel && m_yLabelRect.Inside(mousePt))
             ShowTextCtrl(wxPLOT_EDIT_YAXIS, true);
+#endif
     }
 }
 
@@ -3459,7 +3479,11 @@ void wxPlotCtrl::ProcessAreaEVT_MOUSE_EVENTS( wxMouseEvent &event )
         // Move the origin
         if (m_area_mouse_func == wxPLOT_MOUSE_PAN)
         {
+#if wxCHECK_VERSION(2,7,0)
+            if (!m_areaClientRect.Contains(event.GetPosition()))
+#else
             if (!m_areaClientRect.Inside(event.GetPosition()))
+#endif
             {
                 StartMouseTimer(ID_AREA_TIMER);
             }

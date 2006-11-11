@@ -54,7 +54,7 @@ public:
   /// Creates a printout object of the game as currently displayed
   wxPrintout *GetPrintout(void);
   /// Creates a bitmap of the game as currently displayed
-  wxBitmap GetBitmap(int marginX, int marginY);
+  bool GetBitmap(wxBitmap &, int marginX, int marginY);
   /// Outputs the game as currently displayed to a SVG file
   void GetSVG(const wxString &p_filename, int marginX, int marginY);
   /// Prints the game as currently displayed, centered on the DC

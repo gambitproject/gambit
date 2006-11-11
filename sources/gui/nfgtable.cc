@@ -1127,7 +1127,8 @@ wxPrintout *gbtTableWidget::GetPrintout(void)
 				     *wxConvCurrent));
 }
 
-wxBitmap gbtTableWidget::GetBitmap(int p_marginX, int p_marginY)
+bool gbtTableWidget::GetBitmap(wxBitmap &p_bitmap, 
+			       int p_marginX, int p_marginY)
 {
   int width = (m_rowSheet->CellToRect(wxSheetCoords(0, m_rowSheet->GetNumberCols() - 1)).GetRight() +
 	       m_colSheet->CellToRect(wxSheetCoords(0, m_colSheet->GetNumberCols() - 1)).GetRight() +
@@ -1138,15 +1139,15 @@ wxBitmap gbtTableWidget::GetBitmap(int p_marginX, int p_marginY)
 
   if (width > 65000 || height > 65000) {
     // This is just too huge to export to graphics
-    return wxNullBitmap;
+    return false;
   }
 
   wxMemoryDC dc;
-  wxBitmap bitmap(width, height);
-  dc.SelectObject(bitmap);
+  p_bitmap = wxBitmap(width, height);
+  dc.SelectObject(p_bitmap);
   dc.Clear();
   RenderGame(dc, p_marginX, p_marginY);
-  return bitmap;
+  return true;
 }
 
 void gbtTableWidget::GetSVG(const wxString &p_filename,

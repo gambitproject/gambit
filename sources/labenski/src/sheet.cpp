@@ -646,8 +646,10 @@ bool wxSheet::Create( wxWindow *parent, wxWindowID id,
 
     GetSheetRefData()->AddSheet(this);
 
-#if wxCHECK_VERSION(2,5,2)
-	SetBestFittingSize(size);
+#if wxCHECK_VERSION(2,7,2)
+    SetInitialSize(size);
+#elif wxCHECK_VERSION(2,5,2)
+    SetBestFittingSize(size);
 #endif // wxCHECK_VERSION(2,5,2)
 
     return true;
@@ -5075,7 +5077,11 @@ void wxSheet::ProcessSheetMouseEvent( wxMouseEvent& event )
     
     if (event.LeftDown())
     {
+#if wxCHECK_VERSION(2,7,0)
+        if (m_vertSplitRect.Contains(mousePos) || m_horizSplitRect.Contains(mousePos))
+#else
         if (m_vertSplitRect.Inside(mousePos) || m_horizSplitRect.Inside(mousePos))
+#endif
             SetCaptureWindow(this);
     }
     else if (event.LeftUp())
@@ -5098,12 +5104,21 @@ void wxSheet::ProcessSheetMouseEvent( wxMouseEvent& event )
     }
     else if (event.Moving() && !HasCapture())
     {
+#if wxCHECK_VERSION(2,7,0)
+        if (m_vertSplitRect.Contains(mousePos))
+            SetMouseCursorMode(WXSHEET_CURSOR_SPLIT_VERTICAL, this);
+        else if (m_horizSplitRect.Contains(mousePos))
+            SetMouseCursorMode(WXSHEET_CURSOR_SPLIT_HORIZONTAL, this);
+        else
+            SetMouseCursorMode(WXSHEET_CURSOR_SELECT_CELL, this);
+#else
         if (m_vertSplitRect.Inside(mousePos))
             SetMouseCursorMode(WXSHEET_CURSOR_SPLIT_VERTICAL, this);
         else if (m_horizSplitRect.Inside(mousePos))
             SetMouseCursorMode(WXSHEET_CURSOR_SPLIT_HORIZONTAL, this);
         else
             SetMouseCursorMode(WXSHEET_CURSOR_SELECT_CELL, this);
+#endif
     }
 }
 
@@ -5755,7 +5770,11 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
         }
 
         if (can_scroll && 
+#if wxCHECK_VERSION(2,7,0)
+            !wxRect(wxPoint(0,0), m_gridWin->GetClientSize()).Contains(m_mousePos))
+#else
             !wxRect(wxPoint(0,0), m_gridWin->GetClientSize()).Inside(m_mousePos))
+#endif
         {
             if (!m_mouseTimer)
                 StartMouseTimer();

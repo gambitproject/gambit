@@ -1161,8 +1161,12 @@ public:
         Copy(data);
     }
 
+#if wxCHECK_VERSION(2,7,0)
+    virtual ~wxSheetVariant() { m_data->DecRef(); }
+#else
     virtual ~wxSheetVariant() { delete m_data; }
-    
+#endif
+
     void Copy(const wxSheetVariant& other);
     void Copy(const wxVariant& other);
     void Copy(const wxVariantData& other);
@@ -1189,13 +1193,25 @@ void wxSheetVariant::Copy(const wxVariant& other)
 }
 void wxSheetVariant::Copy(const wxVariantData& other)
 {
+#if wxCHECK_VERSION(2,7,0)
+    m_data->DecRef();
+    m_data = const_cast<wxVariantData *>(&other);
+    m_data->IncRef();
+#else
     delete m_data;
     m_data = (wxVariantData*) other.GetClassInfo()->CreateObject();
     m_data->Copy(*(wxVariantData*)&other);
+#endif 
+
 }
+
 void wxSheetVariant::Copy(const wxVariantData* other)
 {
+#if wxCHECK_VERSION(2,7,0)
+    m_data->DecRef();
+#else
     delete m_data;
+#endif
     
     if (other)
         Copy(*other);

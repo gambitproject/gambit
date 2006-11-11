@@ -168,6 +168,7 @@ bool wxPlotFunction::AddConstant(const wxString& name, double value)
 //-----------------------------------------------------------------------------
 
 #include "wx/clipbrd.h"
+#include "wx/dataobj.h"
 #if wxUSE_DATAOBJ && wxUSE_CLIPBOARD
 
 wxPlotFunction wxClipboardGetPlotFunction()

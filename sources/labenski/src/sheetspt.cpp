@@ -697,14 +697,22 @@ int wxSheetSplitter::SashHitTest(const wxPoint& pt) const
     if (m_trSheet && (m_splitPos.x > 0))
     {
         wxRect rect(m_splitPos.x, border_size, sash_size, clientSize.y-2*border_size);
+#if wxCHECK_VERSION(2,7,0)
+        if (rect.Contains(pt))
+#else
         if (rect.Inside(pt))
+#endif
             return wxSHEET_SPLIT_HORIZONTAL;
     }
 
     if (m_blSheet && (m_splitPos.y > 0))
     {
         wxRect rect(border_size, m_splitPos.y, clientSize.x-2*border_size, sash_size);
+#if wxCHECK_VERSION(2,7,0)
+        if (rect.Contains(pt))
+#else
         if (rect.Inside(pt))
+#endif
             return wxSHEET_SPLIT_VERTICAL;
     }
 

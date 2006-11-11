@@ -641,11 +641,15 @@ void gbtEfgDisplay::SetZoom(int p_zoom)
 void gbtEfgDisplay::OnDraw(wxDC &p_dc)
 {
   p_dc.SetUserScale(.01 * m_zoom, .01 * m_zoom);
+#if !wxCHECK_VERSION(2,7,0)
   p_dc.BeginDrawing();
+#endif
   p_dc.Clear();
   int maxX = m_layout.MaxX();
   m_layout.Render(p_dc, false);
+#if !wxCHECK_VERSION(2,7,0)
   p_dc.EndDrawing();
+#endif
   // When we draw, we might change the location of the right margin
   // (because of the outcome labels).  Make sure scrollbars are adjusted
   // to reflect this.
@@ -661,7 +665,9 @@ void gbtEfgDisplay::OnDraw(wxDC &p_dc, double p_zoom)
   m_zoom = int(100.0 * p_zoom);
 
   p_dc.SetUserScale(.01 * m_zoom, .01 * m_zoom);
+#if !wxCHECK_VERSION(2,7,0)
   p_dc.BeginDrawing();
+#endif
   p_dc.Clear();
   int maxX = m_layout.MaxX();
   // A second hack: this is usually only called by functions for hardcopy
@@ -669,7 +675,9 @@ void gbtEfgDisplay::OnDraw(wxDC &p_dc, double p_zoom)
   // use of the "hints" for these.
   // FIXME: Of course, this hack implies some useful refactor is called for!
   m_layout.Render(p_dc, true);
+#if !wxCHECK_VERSION(2,7,0)
   p_dc.EndDrawing();
+#endif
   // When we draw, we might change the location of the right margin
   // (because of the outcome labels).  Make sure scrollbars are adjusted
   // to reflect this.
@@ -796,7 +804,11 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
     gbtNodeEntry *entry = m_layout.GetNodeEntry(node);
     for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
       wxRect rect = entry->GetPayoffExtent(pl);
+#if wxCHECK_VERSION(2,7,0)
+      if (rect.Contains(x, y)) {
+#else
       if (rect.Inside(x, y)) {
+#endif
 	int xx, yy;
 	CalcScrolledPosition((int) (.01 * (rect.x - 3) * m_zoom),
 			     (int) (.01 * (rect.y - 3) * m_zoom), &xx, &yy);

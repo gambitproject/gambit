@@ -515,9 +515,9 @@ wxPrintout *gbtNfgPanel::GetPrintout(void)
   return m_tableWidget->GetPrintout();
 }
 
-wxBitmap gbtNfgPanel::GetBitmap(int p_marginX, int p_marginY)
+bool gbtNfgPanel::GetBitmap(wxBitmap &p_bitmap, int p_marginX, int p_marginY)
 {
-  return m_tableWidget->GetBitmap(p_marginX, p_marginY);
+  return m_tableWidget->GetBitmap(p_bitmap, p_marginX, p_marginY);
 }
 
 void gbtNfgPanel::GetSVG(const wxString &p_filename,

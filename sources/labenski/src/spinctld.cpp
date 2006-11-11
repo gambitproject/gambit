@@ -188,7 +188,11 @@ bool wxSpinCtrlDbl::Create( wxWindow *parent, wxWindowID id,
                       wxTE_NOHIDESEL|wxTE_PROCESS_ENTER, validator);
 
     DoSetSize( pos.x, pos.y, width, height );
+#if wxCHECK_VERSION(2,7,0)
+    SetInitialSize(wxSize(width, height));
+#else
     SetBestSize(wxSize(width, height));
+#endif
 
     m_min = min;
     m_max = max;

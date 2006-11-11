@@ -558,6 +558,8 @@ bool wxGenericPen::ReadString(const wxString& str)
 */
 
 
+#include "wx/bitmap.h"
+
 //----------------------------------------------------------------------------
 // wxGenericBrush
 //----------------------------------------------------------------------------
@@ -699,9 +701,15 @@ bool wxGenericBrush::IsSameAs(const wxGenericBrush& brush) const
 {
     wxCHECK_MSG(Ok() && brush.Ok(), 1, wxT("Invalid generic brush"));
     wxGenericBrushRefData *bData = (wxGenericBrushRefData*)brush.GetRefData();
+#if wxCHECK_VERSION(2,7,0)
+    // FIXME: Hack for wx2.7; how do we test wxBitmap for equality now?
+    return (M_GBRUSHDATA->m_colour  == bData->m_colour) &&
+           (M_GBRUSHDATA->m_style   == bData->m_style);
+#else
     return (M_GBRUSHDATA->m_colour  == bData->m_colour) &&
            (M_GBRUSHDATA->m_style   == bData->m_style) &&
            (M_GBRUSHDATA->m_stipple == bData->m_stipple);
+#endif 
 }
 bool wxGenericBrush::IsSameAs(const wxBrush& brush) const
 {

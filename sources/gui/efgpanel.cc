@@ -725,20 +725,20 @@ wxPrintout *gbtEfgPanel::GetPrintout(void)
 				     *wxConvCurrent));
 }
 
-wxBitmap gbtEfgPanel::GetBitmap(int p_marginX, int p_marginY)
+bool gbtEfgPanel::GetBitmap(wxBitmap &p_bitmap, int p_marginX, int p_marginY)
 {
   if (m_treeWindow->GetLayout().MaxX() > 65000 ||
       m_treeWindow->GetLayout().MaxY() > 65000) {
     // This is just too huge to export to graphics
-    return wxNullBitmap;
+    return false;
   }
 
   wxMemoryDC dc;
-  wxBitmap bitmap(m_treeWindow->GetLayout().MaxX() + 2 * p_marginX,
-		  m_treeWindow->GetLayout().MaxY() + 2 * p_marginY);
-  dc.SelectObject(bitmap);
+  p_bitmap = wxBitmap(m_treeWindow->GetLayout().MaxX() + 2 * p_marginX,
+		      m_treeWindow->GetLayout().MaxY() + 2 * p_marginY);
+  dc.SelectObject(p_bitmap);
   RenderGame(dc, p_marginX, p_marginY);
-  return bitmap;
+  return true;
 }
 
 void gbtEfgPanel::GetSVG(const wxString &p_filename,

@@ -82,7 +82,11 @@ bool wxCustomButton::Create(wxWindow* parent, wxWindowID id,
 
     wxSize bestSize = DoGetBestSize();
     SetSize(wxSize(size.x<0 ? bestSize.x:size.x, size.y<0 ? bestSize.y:size.y));
+#if wxCHECK_VERSION(2,7,0)
+    SetInitialSize(GetSize());
+#else
     SetBestSize(GetSize());
+#endif
 
     CalcLayout(true);
     return true;
@@ -153,7 +157,11 @@ void wxCustomButton::OnMouseEvents(wxMouseEvent& event)
 
         m_eventType = wxEVT_LEFT_UP;
 
+#if wxCHECK_VERSION(2,7,0)
+        if (wxRect(wxPoint(0,0), GetSize()).Contains(event.GetPosition()))
+#else
         if (wxRect(wxPoint(0,0), GetSize()).Inside(event.GetPosition()))
+#endif
         {
             if ((m_button_style & wxCUSTBUT_BUTTON) && (m_down > 0))
             {
@@ -188,7 +196,11 @@ void wxCustomButton::OnMouseEvents(wxMouseEvent& event)
 
         m_eventType = wxEVT_RIGHT_UP;
 
+#if wxCHECK_VERSION(2,7,0)
+        if (wxRect(wxPoint(0,0), GetSize()).Contains(event.GetPosition()))
+#else
         if (wxRect(wxPoint(0,0), GetSize()).Inside(event.GetPosition()))
+#endif
         {
             if ((m_button_style & wxCUSTBUT_BUTTON) && (m_down > 0))
             {
@@ -372,7 +384,9 @@ void wxCustomButton::Redraw()
 
 void wxCustomButton::Paint( wxDC &dc )
 {
+#if !wxCHECK_VERSION(2,7,0)
     dc.BeginDrawing();
+#endif
 
     int w, h;
     GetSize(&w,&h);
@@ -452,7 +466,9 @@ void wxCustomButton::Paint( wxDC &dc )
     dc.SetBackground(wxNullBrush);
     dc.SetBrush(wxNullBrush);
     dc.SetPen(wxNullPen);
+#if !wxCHECK_VERSION(2,7,0)
     dc.EndDrawing();
+#endif
 }
 
 void wxCustomButton::OnSize( wxSizeEvent &event )
