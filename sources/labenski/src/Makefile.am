@@ -14,8 +14,6 @@ liblabenski_la_SOURCES = \
 	sheetspt.cpp \
 	sheettbl.cpp \
 	block.cpp \
-	bmpcombo.cpp \
-	dropdown.cpp \
 	genergdi.cpp \
 	geometry.cpp \
 	menubtn.cpp \

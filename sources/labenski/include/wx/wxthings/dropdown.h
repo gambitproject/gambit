@@ -117,6 +117,7 @@ private:
 // DropDownPopup generic popup window, call SetChild
 //-----------------------------------------------------------------------------
 
+#ifdef GAMBIT_UNUSED
 class WXDLLIMPEXP_THINGS DropDownPopup : public wxPopupTransientWindow
 {
 public:
@@ -163,5 +164,6 @@ private:
     DECLARE_DYNAMIC_CLASS(DropDownPopup)
     DECLARE_EVENT_TABLE()
 };
+#endif  // GAMBIT_UNUSED
 
 #endif  // _WX_DROPDOWNBASE_H_
