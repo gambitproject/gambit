@@ -708,6 +708,8 @@ public:
   //@{
   /// Write the game in .efg format to the specified stream
   void WriteEfgFile(std::ostream &) const;
+  /// Write the subtree starting at node in .efg format to the specified stream
+  void WriteEfgFile(std::ostream &, const GameNode &p_node) const;
   /// Write the game in .nfg format to the specified stream
   void WriteNfgFile(std::ostream &) const;
   //@}

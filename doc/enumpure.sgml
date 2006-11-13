@@ -26,6 +26,7 @@ Searches for pure-strategy Nash equilibria in a game.
 <cmdsynopsis>
 <command>gambit-enumpure</command>
 <arg><option>-S</option></arg>
+<arg><option>-P</option></arg>
 <arg><option>-h</option></arg>
 <arg><option>-q</option></arg>
 </cmdsynopsis>
@@ -53,6 +54,19 @@ By default, the program uses behavior strategies for extensive games;
 this switch instructs the program to use reduced strategic game strategies
 for extensive games.  (This has no effect for strategic games, since
 a strategic game is its own reduced strategic game.)
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-P</option></term>
+<listitem>
+<para>
+By default, the program computes all pure-strategy Nash equilibria in
+an extensive game.  This switch instructs the program to find only
+pure-strategy Nash equilibria which are subgame perfect.
+(This has no effect for strategic games, since there are no proper
+subgames of a strategic game.)
 </para>
 </listitem>
 </varlistentry>

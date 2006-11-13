@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <iostream>
 #include "libgambit/libgambit.h"
+#include "libgambit/subgame.h"
 
 using namespace Gambit;
 
@@ -34,6 +35,7 @@ template <class T>
 void PrintProfile(std::ostream &p_stream,
 		  const MixedBehavProfile<T> &p_profile)
 {
+  p_stream << "NE,";
   for (int i = 1; i <= p_profile.Length(); i++) {
     p_stream << p_profile[i];
     if (i < p_profile.Length()) {
@@ -44,12 +46,17 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-void SolveBehav(Game p_efg)
+List<MixedBehavProfile<Rational> > SolveBehav(const BehavSupport &p_support,
+					      bool p_print = false)
 {
-  for (BehavIterator citer(p_efg); !citer.AtEnd(); citer++) {
+  List<MixedBehavProfile<Rational> > solutions;
+
+  Game efg = p_support.GetGame();
+
+  for (BehavIterator citer(p_support); !citer.AtEnd(); citer++) {
     bool isNash = true;
 
-    for (GamePlayerIterator player = p_efg->Players(); 
+    for (GamePlayerIterator player = efg->Players(); 
 	 isNash && !player.AtEnd(); player++)  {
       Rational current = citer->GetPayoff<Rational>(player);
 	
@@ -66,11 +73,11 @@ void SolveBehav(Game p_efg)
     }
       
     if (isNash)  {
-      MixedBehavProfile<Rational> temp(p_efg);
+      MixedBehavProfile<Rational> temp(efg);
       // zero out all the entries, since any equilibria are pure
       ((Vector<Rational> &) temp).operator=(Rational(0));
 
-      for (GamePlayerIterator player = p_efg->Players();
+      for (GamePlayerIterator player = efg->Players();
 	   !player.AtEnd(); player++) {
 	for (GameInfosetIterator infoset = player->Infosets();
 	     !infoset.AtEnd(); infoset++) {
@@ -78,9 +85,20 @@ void SolveBehav(Game p_efg)
 	}
       }
 
-      PrintProfile(std::cout, temp);
+      if (p_print) {
+	PrintProfile(std::cout, temp);
+      }
+      solutions.Append(temp);
     }
   }
+
+  return solutions;
+}
+
+List<MixedBehavProfile<Rational> > 
+SubsolveBehav(const BehavSupport &p_support)
+{
+  return SolveBehav(p_support, false);
 }
 
 template <class T>
@@ -147,6 +165,7 @@ void PrintHelp(char *progname)
 
   std::cerr << "Options:\n";
   std::cerr << "  -S               use strategic game\n";
+  std::cerr << "  -P               find only subgame-perfect equilibria\n";
   std::cerr << "  -h               print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   exit(1);
@@ -156,13 +175,16 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false, useStrategic = false;
+  bool quiet = false, useStrategic = false, bySubgames = false;
 
   int c;
-  while ((c = getopt(argc, argv, "hqS")) != -1) {
+  while ((c = getopt(argc, argv, "hqSP")) != -1) {
     switch (c) {
     case 'S':
       useStrategic = true;
+      break;
+    case 'P':
+      bySubgames = true;
       break;
     case 'h':
       PrintHelp(argv[0]);
@@ -195,7 +217,17 @@ int main(int argc, char *argv[])
       SolveMixed(game);
     }
     else {
-      SolveBehav(game);
+      if (bySubgames) {
+	List<MixedBehavProfile<Rational> > solutions;
+	solutions = SolveBySubgames<Rational>(BehavSupport(game), 
+					      &SubsolveBehav);
+	for (int i = 1; i <= solutions.Length(); i++) {
+	  PrintProfile(std::cout, solutions[i]);
+	}
+      }
+      else {
+	SolveBehav(game, true);
+      }
     }
     return 0;
   }

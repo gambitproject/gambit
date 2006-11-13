@@ -1266,6 +1266,20 @@ void GameRep::WriteEfgFile(std::ostream &p_file) const
   Gambit::WriteEfgFile(p_file, m_root);
 }
 
+void GameRep::WriteEfgFile(std::ostream &p_file, const GameNode &p_root) const
+{
+  if (!IsTree())  throw UndefinedException();
+
+  p_file << "EFG 2 R";
+  p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
+  for (int i = 1; i <= m_players.Length(); i++)
+    p_file << '"' << EscapeQuotes(m_players[i]->m_label) << "\" ";
+  p_file << "}\n";
+  p_file << "\"" << EscapeQuotes(GetComment()) << "\"\n\n";
+
+  Gambit::WriteEfgFile(p_file, p_root);
+}
+
 void GameRep::WriteNfgFile(std::ostream &p_file) const
 { 
   p_file << "NFG 1 R";

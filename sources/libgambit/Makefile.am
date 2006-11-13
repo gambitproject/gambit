@@ -20,6 +20,7 @@ libgambit_la_SOURCES = \
 	mixed.cc mixed.h mixed.imp \
 	stratitr.cc stratitr.h \
 	stratspt.cc stratspt.h \
+	subgame.cc subgame.h \
 	file.cc \
 	libgambit.h
 
