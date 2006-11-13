@@ -438,8 +438,9 @@ template <class T>
 void LogBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
 {
   if (node->GetOutcome()) {
+    GameOutcome outcome = node->GetOutcome();
     for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) { 
-      m_nodeValues(node->GetNumber(), pl) += node->GetOutcome()->GetPayoff<T>(pl);
+      m_nodeValues(node->GetNumber(), pl) += outcome->GetPayoff<T>(pl);
     }
   }
 
