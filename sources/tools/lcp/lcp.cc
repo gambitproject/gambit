@@ -27,9 +27,15 @@
 #include <iostream>
 #include <unistd.h>
 #include "libgambit/libgambit.h"
+#include "libgambit/subgame.h"
 
-template <class T> void SolveExtensive(const Gambit::Game &p_game);
-template <class T> void SolveStrategic(const Gambit::Game &p_game);
+using namespace Gambit;
+
+template <class T>
+List<MixedBehavProfile<T> > SolveExtensive(const BehavSupport &p);
+template <class T>
+List<MixedBehavProfile<T> > SolveExtensiveSilent(const BehavSupport &p);
+template <class T> void SolveStrategic(const Game &p_game);
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -49,6 +55,7 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      compute using floating-point arithmetic;\n";
   std::cerr << "                   display results with DECIMALS digits\n";
   std::cerr << "  -S               use strategic game\n";
+  std::cerr << "  -P               find only subgame-perfect equilibria\n";
   std::cerr << "  -h               print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   exit(1);
@@ -56,12 +63,18 @@ void PrintHelp(char *progname)
 
 int g_numDecimals = 6;
 
+extern void PrintProfile(std::ostream &, const std::string &,
+			 const MixedBehavProfile<double> &);
+extern void PrintProfile(std::ostream &, const std::string &,
+			 const MixedBehavProfile<Rational> &);
+
+
 int main(int argc, char *argv[])
 {
   int c;
-  bool useFloat = false, useStrategic = false, quiet = false;
+  bool useFloat = false, useStrategic = false, bySubgames = false, quiet = false;
 
-  while ((c = getopt(argc, argv, "d:hqS")) != -1) {
+  while ((c = getopt(argc, argv, "d:hqSP")) != -1) {
     switch (c) {
     case 'd':
       useFloat = true;
@@ -75,6 +88,9 @@ int main(int argc, char *argv[])
       break;
     case 'S':
       useStrategic = true;
+      break;
+    case 'P':
+      bySubgames = true;
       break;
     case '?':
       if (isprint(optopt)) {
@@ -94,7 +110,7 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Gambit::Game game = Gambit::ReadGame(std::cin);
+    Game game = ReadGame(std::cin);
 
     if (game->NumPlayers() != 2) {
       std::cerr << "Error: Game does not have two players.\n";
@@ -108,20 +124,40 @@ int main(int argc, char *argv[])
 	SolveStrategic<double>(game);
       }
       else {
-	SolveStrategic<Gambit::Rational>(game);
+	SolveStrategic<Rational>(game);
       }
     }
     else {
-      if (useFloat) {
-	SolveExtensive<double>(game);
+      if (!bySubgames) {
+	if (useFloat) {
+	  SolveExtensive<double>(game);
+	}
+	else {
+	  SolveExtensive<Rational>(game);
+	}
       }
       else {
-	SolveExtensive<Gambit::Rational>(game);
+	if (useFloat) {
+	  List<MixedBehavProfile<double> > solutions;
+	  solutions = SolveBySubgames<double>(BehavSupport(game),
+					      &SolveExtensiveSilent<double>);
+	  for (int i = 1; i <= solutions.Length(); i++) {
+	    PrintProfile(std::cout, "NE", solutions[i]);
+	  }
+	}
+	else {
+	  List<MixedBehavProfile<Rational> > solutions;
+	  solutions = SolveBySubgames<Rational>(BehavSupport(game),
+						&SolveExtensiveSilent<Rational>);
+	  for (int i = 1; i <= solutions.Length(); i++) {
+	    PrintProfile(std::cout, "NE", solutions[i]);
+	  }
+	}
       }
     }
     return 0;
   }
-  catch (Gambit::InvalidFileException) {
+  catch (InvalidFileException) {
     std::cerr << "Error: Game not in a recognized format.\n";
     return 1;
   }

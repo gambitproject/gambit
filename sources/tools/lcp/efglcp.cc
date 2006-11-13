@@ -29,15 +29,17 @@
 #include <iostream>
 #include "libgambit/libgambit.h"
 
-#include "lhtab.h"
+using namespace Gambit;
 
+#include "lhtab.h"
 #include "lemketab.h"
+
 
 extern int g_numDecimals;
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const Gambit::MixedBehavProfile<double> &p_profile)
+		  const MixedBehavProfile<double> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -49,7 +51,7 @@ void PrintProfile(std::ostream &p_stream,
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const Gambit::MixedBehavProfile<Gambit::Rational> &p_profile)
+		  const MixedBehavProfile<Rational> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -60,28 +62,28 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-template <class T> class efgLcp {
+template <class T> class SolveEfgLcp {
 private:
   int m_stopAfter, m_maxDepth;
 
   int ns1,ns2,ni1,ni2;
   T maxpay,eps;
-  Gambit::List<BFS<T> > List;
-  Gambit::List<Gambit::GameInfoset> isets1, isets2;
+  List<BFS<T> > m_list;
+  List<GameInfoset> isets1, isets2;
 
-  void FillTableau(const Gambit::BehavSupport &, Gambit::Matrix<T> &, const Gambit::GameNode &, T,
+  void FillTableau(const BehavSupport &, Matrix<T> &, const GameNode &, T,
 		   int, int, int, int);
-  int Add_BFS(const LTableau<T> &tab);
-  int All_Lemke(const Gambit::BehavSupport &, int dup, LTableau<T> &B,
-		int depth, Gambit::Matrix<T> &);
+  int AddBFS(const LTableau<T> &tab);
+  int AllLemke(const BehavSupport &, int dup, LTableau<T> &B,
+	       int depth, Matrix<T> &,
+	       bool p_print, List<MixedBehavProfile<T> > &);
   
-  void GetProfile(const Gambit::BehavSupport &, const LTableau<T> &tab, 
-		  Gambit::MixedBehavProfile<T> &, const Gambit::Vector<T> &, 
-		  const Gambit::GameNode &n, int,int);
+  void GetProfile(const BehavSupport &, const LTableau<T> &tab, 
+		  MixedBehavProfile<T> &, const Vector<T> &, 
+		  const GameNode &n, int,int);
 
 public:
-  efgLcp(void);
-  virtual ~efgLcp();
+  SolveEfgLcp(void) : m_stopAfter(0), m_maxDepth(0) { }
   
   int StopAfter(void) const { return m_stopAfter; }
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
@@ -89,21 +91,14 @@ public:
   int MaxDepth(void) const { return m_maxDepth; }
   void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
 
-  void Solve(const Gambit::BehavSupport &);
+  List<MixedBehavProfile<T> > Solve(const BehavSupport &,
+				    bool p_print = true);
 };
 
 
 //---------------------------------------------------------------------------
-//                        efgLcp: member functions
+//                        SolveEfgLcp: member functions
 //---------------------------------------------------------------------------
-
-template <class T>
-efgLcp<T>::efgLcp(void)
-  : m_stopAfter(0), m_maxDepth(0)
-{ } 
-
-template <class T> efgLcp<T>::~efgLcp()
-{ }
 
 //
 // Sets the action probabilities at unreached information sets
@@ -111,14 +106,14 @@ template <class T> efgLcp<T>::~efgLcp()
 // the centroid.  This helps IsNash and LiapValue work correctly.
 //
 template <class T>
-void UndefinedToCentroid(Gambit::MixedBehavProfile<T> &p_profile)
+void UndefinedToCentroid(MixedBehavProfile<T> &p_profile)
 {
-  Gambit::Game efg = p_profile.GetGame();
+  Game efg = p_profile.GetGame();
 
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = efg->GetPlayer(pl);
+    GamePlayer player = efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      Gambit::GameInfoset infoset = player->GetInfoset(iset);
+      GameInfoset infoset = player->GetInfoset(iset);
       
       if (p_profile.GetInfosetProb(infoset) > (T) 0) {
 	continue;
@@ -145,20 +140,16 @@ void UndefinedToCentroid(Gambit::MixedBehavProfile<T> &p_profile)
 // problems, starting from the primary ray.  
 //
 
-template <class T> 
-void efgLcp<T>::Solve(const Gambit::BehavSupport &p_support)
+template <class T> List<MixedBehavProfile<T> > 
+SolveEfgLcp<T>::Solve(const BehavSupport &p_support, bool p_print /*= true*/)
 {
   BFS<T> cbfs((T) 0);
   int i, j;
-  
-  if (p_support.GetGame()->NumPlayers() != 2) {
-    return;
-  }
-  
+
   isets1 = p_support.ReachableInfosets(p_support.GetGame()->GetPlayer(1));
   isets2 = p_support.ReachableInfosets(p_support.GetGame()->GetPlayer(2));
 
-  List = Gambit::List<BFS<T> >();
+  m_list = List<BFS<T> >();
 
   int ntot;
   ns1 = p_support.NumSequences(1);
@@ -168,10 +159,10 @@ void efgLcp<T>::Solve(const Gambit::BehavSupport &p_support)
 
   ntot = ns1+ns2+ni1+ni2;
 
-  Gambit::Matrix<T> A(1,ntot,0,ntot);
-  Gambit::Vector<T> b(1,ntot);
+  Matrix<T> A(1,ntot,0,ntot);
+  Vector<T> b(1,ntot);
 
-  maxpay = p_support.GetGame()->GetMaxPayoff() + Gambit::Rational(1);
+  maxpay = p_support.GetGame()->GetMaxPayoff() + Rational(1);
 
   T prob = (T)1;
   for (i = A.MinRow(); i <= A.MaxRow(); i++) {
@@ -195,18 +186,19 @@ void efgLcp<T>::Solve(const Gambit::BehavSupport &p_support)
   LTableau<T> tab(A,b);
   eps = tab.Epsilon();
   
-  Gambit::MixedBehavProfile<T> profile(p_support);
-  Gambit::Vector<T> sol(tab.MinRow(),tab.MaxRow());
-    
+  MixedBehavProfile<T> profile(p_support);
+  Vector<T> sol(tab.MinRow(),tab.MaxRow());
+  List<MixedBehavProfile<T> > solutions;
+  
   try {
     if (m_stopAfter != 1) {
-      All_Lemke(p_support, ns1+ns2+1, tab, 0, A);
+      AllLemke(p_support, ns1+ns2+1, tab, 0, A, p_print, solutions);
     }
     else {
       tab.Pivot(ns1+ns2+1,0);
       tab.SF_LCPPath(ns1+ns2+1);
       
-      Add_BFS(tab);
+      AddBFS(tab);
       tab.BasisVector(sol);
       GetProfile(p_support, tab, 
 		 profile,sol,p_support.GetGame()->GetRoot(),1,1);
@@ -218,12 +210,14 @@ void efgLcp<T>::Solve(const Gambit::BehavSupport &p_support)
   catch (...) {
     // catch exception; return solutions computed (if any)
   }
+
+  return solutions;
 }
 
-template <class T> int efgLcp<T>::Add_BFS(const LTableau<T> &tableau)
+template <class T> int SolveEfgLcp<T>::AddBFS(const LTableau<T> &tableau)
 {
   BFS<T> cbfs((T) 0);
-  Gambit::Vector<T> v(tableau.MinRow(), tableau.MaxRow());
+  Vector<T> v(tableau.MinRow(), tableau.MaxRow());
   tableau.BasisVector(v);
 
   for (int i = tableau.MinCol(); i <= tableau.MaxCol(); i++)
@@ -231,8 +225,8 @@ template <class T> int efgLcp<T>::Add_BFS(const LTableau<T> &tableau)
       cbfs.Define(i, v[tableau.Find(i)]);
     }
 
-  if (List.Contains(cbfs))  return 0;
-  List.Append(cbfs);
+  if (m_list.Contains(cbfs))  return 0;
+  m_list.Append(cbfs);
   return 1;
 }
 
@@ -244,63 +238,62 @@ template <class T> int efgLcp<T>::Add_BFS(const LTableau<T> &tableau)
 // all possible paths, adding any new equilibria to the List.  
 //
 template <class T> int 
-efgLcp<T>::All_Lemke(const Gambit::BehavSupport &p_support,
-		     int j, LTableau<T> &B, int depth,
-		     Gambit::Matrix<T> &A)
+SolveEfgLcp<T>::AllLemke(const BehavSupport &p_support,
+			 int j, LTableau<T> &B, int depth,
+			 Matrix<T> &A,
+			 bool p_print,
+			 List<MixedBehavProfile<T> > &p_solutions)
 {
   if (m_maxDepth != 0 && depth > m_maxDepth) {
     return 1;
   }
 
-  int i,len,newsol,missing;
-  T p1,p2,aa;
+  int i,newsol,missing;
   T small_num = (T)1/(T)1000;
 
-  Gambit::Vector<T> sol(B.MinRow(),B.MaxRow());
-  Gambit::MixedBehavProfile<T> profile(p_support);
+  Vector<T> sol(B.MinRow(),B.MaxRow());
+  MixedBehavProfile<T> profile(p_support);
 
   newsol =0;
   for (i = B.MinRow(); 
        i <= B.MaxRow()  && newsol == 0;
        i++) {
     if (i != j)  {
-      len=List.Length();  
-      p1=(double)len/(double)(len+1);
-      p2=(double)(len+1)/(double)(len+2);
-      int num_strats = B.MaxCol()-B.MinCol()-1;
-      aa=(double)(i)/(double)num_strats;
-      
       LTableau<T> BCopy(B);
-      A(i,0)=-small_num;
+      A(i,0) = -small_num;
       BCopy.Refactor();
 
-      if(depth==0) {
-	BCopy.Pivot(j,0);
+      if (depth == 0) {
+	BCopy.Pivot(j, 0);
 	missing = -j;
       }
-      else
+      else {
 	missing = BCopy.SF_PivotIn(0);
+      }
 
-      //assert(missing);
-      newsol=0;
+      newsol = 0;
 
-      if(BCopy.SF_LCPPath(-missing)==1) {
-	newsol = Add_BFS(BCopy);
+      if (BCopy.SF_LCPPath(-missing) == 1) {
+	newsol = AddBFS(BCopy);
 	BCopy.BasisVector(sol);
-	GetProfile(p_support, BCopy, profile,sol,p_support.GetGame()->GetRoot(),1,1);
+	GetProfile(p_support, BCopy, profile, sol,
+		   p_support.GetGame()->GetRoot(), 1, 1);
 	UndefinedToCentroid(profile);
 	if (newsol) {
-	  PrintProfile(std::cout, "NE", profile);
+	  if (p_print) {
+	    PrintProfile(std::cout, "NE", profile);
+	  }
+	  p_solutions.Append(profile);
 	}
       }
       else {
 	// gout << ": Dead End";
       }
       
-      A(i,0)=-(T)1;
-      if(newsol) {
+      A(i,0) = (T) -1;
+      if (newsol) {
 	BCopy.Refactor();
-	All_Lemke(p_support,i,BCopy,depth+1, A);
+	AllLemke(p_support, i, BCopy, depth+1, A, p_print, p_solutions);
       }
     }
   }
@@ -309,24 +302,24 @@ efgLcp<T>::All_Lemke(const Gambit::BehavSupport &p_support,
 }
 
 template <class T>
-void efgLcp<T>::FillTableau(const Gambit::BehavSupport &p_support, Gambit::Matrix<T> &A,
-			    const Gambit::GameNode &n, T prob,
-			    int s1, int s2, int i1, int i2)
+void SolveEfgLcp<T>::FillTableau(const BehavSupport &p_support, Matrix<T> &A,
+				 const GameNode &n, T prob,
+				 int s1, int s2, int i1, int i2)
 {
   int snew;
-  Gambit::GameOutcome outcome = n->GetOutcome();
+  GameOutcome outcome = n->GetOutcome();
   if (outcome) {
-    A(s1,ns1+s2) = Gambit::Rational(A(s1,ns1+s2)) +
-      Gambit::Rational(prob) * (outcome->GetPayoff<Gambit::Rational>(1) - Gambit::Rational(maxpay));
-    A(ns1+s2,s1) = Gambit::Rational(A(ns1+s2,s1)) +
-      Gambit::Rational(prob) * (outcome->GetPayoff<Gambit::Rational>(2) - Gambit::Rational(maxpay));
+    A(s1,ns1+s2) = Rational(A(s1,ns1+s2)) +
+      Rational(prob) * (outcome->GetPayoff<Rational>(1) - Rational(maxpay));
+    A(ns1+s2,s1) = Rational(A(ns1+s2,s1)) +
+      Rational(prob) * (outcome->GetPayoff<Rational>(2) - Rational(maxpay));
   }
   if (n->GetInfoset()) {
     if (n->GetPlayer()->IsChance()) {
-      Gambit::GameInfoset infoset = n->GetInfoset();
+      GameInfoset infoset = n->GetInfoset();
       for (int i = 1; i <= n->NumChildren(); i++) {
 	FillTableau(p_support, A, n->GetChild(i),
-		    Gambit::Rational(prob) * infoset->GetActionProb<Gambit::Rational>(i),
+		    Rational(prob) * infoset->GetActionProb<Rational>(i),
 		    s1,s2,i1,i2);
       }
     }
@@ -367,71 +360,97 @@ void efgLcp<T>::FillTableau(const Gambit::BehavSupport &p_support, Gambit::Matri
 
 
 template <class T>
-void efgLcp<T>::GetProfile(const Gambit::BehavSupport &p_support,
-			   const LTableau<T> &tab, 
-			   Gambit::MixedBehavProfile<T> &v, 
-			   const Gambit::Vector<T> &sol,
-			   const Gambit::GameNode &n, int s1,int s2)
+void SolveEfgLcp<T>::GetProfile(const BehavSupport &p_support,
+				const LTableau<T> &tab, 
+				MixedBehavProfile<T> &v, 
+				const Vector<T> &sol,
+				const GameNode &n, int s1,int s2)
 {
-  int i,pl,inf,snew,ind,ind2;
-  if(n->GetInfoset()) {
-    if(n->GetPlayer()->IsChance()) {
-      for (i = 1; i <= n->NumChildren();i++)
-	GetProfile(p_support, tab, v,sol,n->GetChild(i),s1,s2);
-    }
-    pl = n->GetPlayer()->GetNumber();
-    if(pl==1) {
-      inf= isets1.Find(n->GetInfoset());
-      snew=1;
-      for(i=1;i<inf;i++)
-	snew+=p_support.NumActions(isets1[i]->GetPlayer()->GetNumber(),
-				   isets1[i]->GetNumber()); 
-      for(i=1;i<=p_support.NumActions(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber());i++) {
-	v(pl,inf,i) = (T)0;
-	if(tab.Member(s1)) {
-	  ind = tab.Find(s1);
-	  if(sol[ind]>eps) {
-	    if(tab.Member(snew+i)) {
-	      ind2 = tab.Find(snew+i);
-	      if(sol[ind2]>eps)
-		v(pl,inf,i) = sol[ind2]/sol[ind];
-	    }
-	  } 
-	} 
-	GetProfile(p_support, tab, v,sol,n->GetChild(p_support.GetAction(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber(), i)->GetNumber()),snew+i,s2);
+  if (n->GetInfoset()) {
+    int pl = n->GetPlayer()->GetNumber();
+    int iset = n->GetInfoset()->GetNumber();
+
+    if (n->GetPlayer()->IsChance()) {
+      for (int i = 1; i <= n->NumChildren(); i++) {
+	GetProfile(p_support, tab, v, sol, n->GetChild(i), s1, s2);
       }
     }
-    if(pl==2) {
-      inf= isets2.Find(n->GetInfoset());
-      snew=1;
-      for(i=1;i<inf;i++)
-	snew+=p_support.NumActions(isets2[i]->GetPlayer()->GetNumber(), isets2[i]->GetNumber()); 
-      for(i=1;i<=p_support.NumActions(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber());i++) {
-	v(pl,inf,i) = (T)0;
-	if(tab.Member(ns1+s2)) {
-	  ind = tab.Find(ns1+s2);
-	  if(sol[ind]>eps) {
-	    if(tab.Member(ns1+snew+i)) {
-	      ind2 = tab.Find(ns1+snew+i);
-	      if(sol[ind2]>eps)
-		v(pl,inf,i) = sol[ind2]/sol[ind];
+    else if (pl == 1) {
+      int inf = isets1.Find(n->GetInfoset());
+      int snew = 1;
+      for (int i = 1; i < inf; i++) {
+	snew += p_support.NumActions(1, isets1[i]->GetNumber()); 
+      }
+      
+      for (int i = 1; i <= p_support.NumActions(pl, iset); i++) {
+	v(pl,inf,i) = (T) 0;
+	if (tab.Member(s1)) {
+	  int ind = tab.Find(s1);
+	  if (sol[ind] > eps) {
+	    if (tab.Member(snew+i)) {
+	      int ind2 = tab.Find(snew+i);
+	      if (sol[ind2] > eps) {
+		v(pl,inf,i) = sol[ind2] / sol[ind];
+	      }
 	    }
 	  } 
 	} 
-	GetProfile(p_support, tab, v,sol,n->GetChild(p_support.GetAction(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber(), i)->GetNumber()),s1,snew+i);
+	GetProfile(p_support, tab, v, sol,
+		   n->GetChild(p_support.GetAction(pl, iset, i)->GetNumber()),
+		   snew+i, s2);
+      }
+    }
+    else if (pl == 2) { 
+      int inf = isets2.Find(n->GetInfoset());
+      int snew = 1;
+      for (int i = 1; i < inf; i++) {
+	snew += p_support.NumActions(2, isets2[i]->GetNumber()); 
+      }
+
+      for (int i = 1; i<= p_support.NumActions(pl, iset); i++) {
+	v(pl,inf,i) = (T) 0;
+	if (tab.Member(ns1+s2)) {
+	  int ind = tab.Find(ns1+s2);
+	  if (sol[ind] > eps) {
+	    if (tab.Member(ns1+snew+i)) {
+	      int ind2 = tab.Find(ns1+snew+i);
+	      if (sol[ind2] > eps) {
+		v(pl,inf,i) = sol[ind2] / sol[ind];
+	      }
+	    }
+	  } 
+	} 
+	GetProfile(p_support, tab, v, sol,
+		   n->GetChild(p_support.GetAction(pl, iset, i)->GetNumber()),
+		   s1, snew+i);
       }
     }
   }
 }
 
 template <class T>
-void SolveExtensive(const Gambit::Game &p_game)
+List<MixedBehavProfile<T> > SolveExtensive(const BehavSupport &p_support)
 {
-  efgLcp<T> algorithm;
-  algorithm.Solve(p_game);
+  SolveEfgLcp<T> algorithm;
+  return algorithm.Solve(p_support);
 }
 
-template void SolveExtensive<double>(const Gambit::Game &);
-template void SolveExtensive<Gambit::Rational>(const Gambit::Game &);
+template List<MixedBehavProfile<double> > 
+SolveExtensive(const BehavSupport &);
+template List<MixedBehavProfile<Rational> > 
+SolveExtensive(const BehavSupport &);
+
+
+template <class T>
+List<MixedBehavProfile<T> > SolveExtensiveSilent(const BehavSupport &p_support)
+{
+  SolveEfgLcp<T> algorithm;
+  return algorithm.Solve(p_support, false);
+}
+
+template List<MixedBehavProfile<double> > 
+SolveExtensiveSilent(const BehavSupport &);
+template List<MixedBehavProfile<Rational> > 
+SolveExtensiveSilent(const BehavSupport &);
 
 
