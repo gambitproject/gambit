@@ -193,7 +193,7 @@ void SolveSubgames(const BehavSupport &p_support,
     }
     
     for (int solno = 1; solno <= sol.Length(); solno++)  {
-      int ii = solns.Append(thissolns[soln]);
+      solns.Append(thissolns[soln]);
       
       for (int pl = 1; pl <= foo->NumPlayers(); pl++)  {
 	GamePlayer p = foo->GetPlayer(pl);
@@ -221,8 +221,6 @@ void SolveSubgames(const BehavSupport &p_support,
 	}
       }
       
-      int j = solns.Length();
-
       Vector<T> subval(foo->NumPlayers());
       for (int pl = 1; pl <= foo->NumPlayers(); pl++)  {
 	subval[pl] = sol[solno].GetPayoff(pl);

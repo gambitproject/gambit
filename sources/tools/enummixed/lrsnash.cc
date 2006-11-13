@@ -139,10 +139,6 @@ void FillLinearityRow(lrs_dic *P, lrs_dat *Q, int m, int n)
 void BuildRep(lrs_dic *P, lrs_dat *Q, const StrategySupport &p_support,
 	      int p1, int p2)
 {
-  const int MAXCOL = 1000;     /* maximum number of columns */
-  
-  long num[MAXCOL];
-  long den[MAXCOL];
   long m=Q->m;       /* number of inequalities      */
   long n=Q->n;       
 
@@ -970,8 +966,8 @@ printrat (char name[], lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/Din  */
 /* print out       */
   if (sign (Nin) * sign (Din) == NEG)
     fprintf (stdout, "-");
-  else
-    fprintf (stdout, "");
+  //  else
+  //  fprintf (stdout, "");
   fprintf (stdout, "%lu", Nt[length (Nt) - 1]);
   for (i = length (Nt) - 2; i >= 1; i--)
     fprintf (stdout, FORMAT, Nt[i]);

@@ -57,8 +57,8 @@ LogBehavProfile<T>::LogBehavProfile(const LogBehavProfile<T> &p_profile)
 template <class T> 
 LogBehavProfile<T>::LogBehavProfile(const BehavSupport &p_support) 
   : DVector<T>(p_support.NumActions()), 
-    m_logProbs(p_support.NumActions()),
     m_support(p_support),
+    m_logProbs(p_support.NumActions()),
     m_cacheValid(false),
     m_realizProbs(p_support.GetGame()->NumNodes()),
     m_logRealizProbs(p_support.GetGame()->NumNodes()),
@@ -354,7 +354,7 @@ T LogBehavProfile<T>::DiffActionValue(const GameAction &p_action,
 {
   ComputeSolutionData();
 
-  T deriv = (T) 0, total = (T) 0;
+  T deriv = (T) 0;
   GameInfoset infoset = p_action->GetInfoset();
   GamePlayer player = p_action->GetInfoset()->GetPlayer();
 
