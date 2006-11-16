@@ -222,10 +222,11 @@ void SolveSubgames(const BehavSupport &p_support,
       }
       
       Vector<T> subval(foo->NumPlayers());
+      GameOutcome outcome = n->GetOutcome();
       for (int pl = 1; pl <= foo->NumPlayers(); pl++)  {
 	subval[pl] = sol[solno].GetPayoff(pl);
-	if (n->GetOutcome())  {
-	  subval[pl] += n->GetOutcome()->GetPayoff<T>(pl);
+	if (outcome) {
+	  subval[pl] += outcome->GetPayoff<T>(pl);
         }
       }
 
