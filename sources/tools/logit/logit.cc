@@ -98,10 +98,10 @@ int main(int argc, char *argv[])
 
   bool quiet = false, useStrategic = false;
   double maxLambda = 1000000.0;
-  std::string mleFile = "";
+  std::string mleFile = "", startFile = "";
 
   int c;
-  while ((c = getopt(argc, argv, "d:s:a:m:qehSL:")) != -1) {
+  while ((c = getopt(argc, argv, "d:s:a:m:qehSL:p:")) != -1) {
     switch (c) {
     case 'q':
       quiet = true;
@@ -129,6 +129,9 @@ int main(int argc, char *argv[])
       break;
     case 'L':
       mleFile = optarg;
+      break;
+    case 'p':
+      startFile = optarg;
       break;
     case '?':
       if (isprint(optopt)) {
@@ -161,8 +164,23 @@ int main(int argc, char *argv[])
     if (!game->IsTree() || useStrategic) {
       game->BuildComputedValues();
 
-      Gambit::MixedStrategyProfile<double> start(game);
-      TraceStrategicPath(start, 0.0, maxLambda, 1.0);
+      if (startFile == "") {
+	Gambit::MixedStrategyProfile<double> start(game);
+	TraceStrategicPath(start, 0.0, maxLambda, 1.0);
+      }
+      else {
+	Gambit::Array<double> profile(game->MixedProfileLength() + 1);
+	std::ifstream startData(startFile.c_str());
+	ReadProfile(startData, profile);
+	Gambit::MixedStrategyProfile<double> start(game);
+	for (int i = 1; i <= start.Length(); i++) {
+	  start[i] = profile[i+1];
+	}
+	TraceStrategicPath(start, profile[1], maxLambda, 1.0);
+	std::cout << std::endl;
+	TraceStrategicPath(start, profile[1], maxLambda, -1.0);
+      }
+
     }
     else {
       LogBehavProfile<double> start(game);
