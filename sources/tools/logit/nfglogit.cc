@@ -402,7 +402,8 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
   bool restarting = false;      // flag for first restart step after MLE
   Array<bool> isLog(p_start.Length());
   for (int i = 1; i <= p_start.Length(); i++) {
-    isLog[i] = (p_start[i] < .05);
+    //isLog[i] = (p_start[i] < .05);
+    isLog[i] = true;
   }
 
   // When doing MLE finding, we push the data from the original path-following
@@ -464,6 +465,14 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
       u[k] = x[k] + h * p_omega * t[k];
     }
 
+    /*
+    std::cout << "pred";
+    for (int k = 1; k <= y.Length(); k++) {
+      std::cout << "," << u[k];
+    }
+    std::cout << std::endl;
+    */
+
     double decel = 1.0 / g_maxDecel;  // initialize deceleration factor
     QreJacobian(p_start.GetSupport(), u, isLog, b);
     QRDecomp(b, q);
@@ -474,7 +483,24 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
       double dist;
 
       QreLHS(p_start.GetSupport(), u, isLog, y);
+      /*
+      std::cout << "LHS";
+      for (int k = 1; k <= y.Length(); k++) {
+	std::cout << "," << y[k];
+      }
+      std::cout << std::endl;
+      */
+      
       NewtonStep(q, b, u, y, dist); 
+
+      /*
+      std::cout << "step";
+      for (int k = 1; k <= u.Length(); k++) {
+	std::cout << "," << u[k];
+      }
+      std::cout << std::endl;
+      */
+
       if (dist >= c_maxDist) {
 	accept = false;
 	break;
@@ -571,7 +597,8 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
 
     // Update isLog: any strategy below 10^-3 should switch to log rep
     bool recompute = false;
-
+    
+    /*
     for (int i = 1; i < x.Length(); i++) {
       if (!isLog[i] && x[i] < .05) {
 	x[i] = log(x[i]);
@@ -584,6 +611,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
 	recompute = true;
       }
     }
+    */
 
     if (recompute) {
       // If we switch representations, make sure to get the new Jacobian
@@ -594,7 +622,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
     Vector<double> newT(t);
     q.GetRow(q.NumRows(), newT);  // new tangent
     if (t * newT < 0.0) {
-      //printf("Bifurcation! at %f\n", x[x.Length()]);
+      printf("Bifurcation! at %f\n", x[x.Length()]);
       // Bifurcation detected; for now, just "jump over" and continue,
       // taking into account the change in orientation of the curve.
       // Someday, we need to do more here! :)
