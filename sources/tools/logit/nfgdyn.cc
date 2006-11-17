@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include "libgambit/libgambit.h"
 
@@ -111,15 +112,35 @@ double Distance(const Gambit::MixedStrategyProfile<double> &a, const Gambit::Mix
   return dist;
 } 
 
+bool ReadProfile(std::istream &p_stream, Gambit::Array<double> &p_profile)
+{
+  for (int i = 1; i <= p_profile.Length(); i++) {
+    if (p_stream.eof() || p_stream.bad()) {
+      return false;
+    }
+
+    p_stream >> p_profile[i];
+    if (i < p_profile.Length()) {
+      char comma;
+      p_stream >> comma;
+    }
+  }
+  // Read in the rest of the line and discard
+  std::string foo;
+  std::getline(p_stream, foo);
+  return true;
+}
+
 int main(int argc, char *argv[])
 {
   int stopAfter = 100;
   double lambda;
   bool lambdaSpec = false;
   double tol = 1.0e-6;
+  std::string startFile = "";
 
   int c;
-  while ((c = getopt(argc, argv, "f:n:l:t:")) != -1) {
+  while ((c = getopt(argc, argv, "f:n:l:t:p:")) != -1) {
     switch (c) {
     case 'f':
       g_numDecimals = atoi(optarg);
@@ -133,6 +154,9 @@ int main(int argc, char *argv[])
       break;
     case 't':
       tol = pow(10.0, (double) -atoi(optarg));
+      break;
+    case 'p':
+      startFile = optarg;
       break;
     case '?':
       if (isprint(optopt)) {
@@ -161,23 +185,51 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  for (int i = 1; i <= stopAfter; i++) {
-    Gambit::MixedStrategyProfile<double> profile(nfg);
-    Randomize(profile);
+  if (startFile == "") {
+    for (int i = 1; i <= stopAfter; i++) {
+      Gambit::MixedStrategyProfile<double> profile(nfg);
+      Randomize(profile);
+      
+      PrintProfile(std::cout, "start", profile);
 
-    PrintProfile(std::cout, "start", profile);
+      Gambit::MixedStrategyProfile<double> br(nfg);
+    
+      double c_delta = .001;
+      
+      do {
+	LogitBR(profile, lambda, br);
+	(Gambit::Vector<double> &) profile =
+	  (((Gambit::Vector<double> &) profile) * (1.0 - c_delta) + 
+	   ((Gambit::Vector<double> &) br) * c_delta);
+      } while (Distance(profile, br) > tol);
+    
+      PrintProfile(std::cout, "QRE", profile);
+    }
+  }
+  else {
+    Gambit::Array<double> x(nfg->MixedProfileLength() + 1);
+    std::ifstream startData(startFile.c_str());
+    ReadProfile(startData, x);
+    Gambit::MixedStrategyProfile<double> profile(nfg);
+    for (int i = 1; i <= profile.Length(); i++) {
+      profile[i] = x[i+1];
+      if (profile[i] == 0.0) {
+	profile[i] = 0.0001;
+      }
+    }
+    lambda = x[1];
+    double c_delta = .001;
 
     Gambit::MixedStrategyProfile<double> br(nfg);
     
-    double c_delta = .001;
-
     do {
+      PrintProfile(std::cout, "step", profile);
       LogitBR(profile, lambda, br);
       (Gambit::Vector<double> &) profile =
 	(((Gambit::Vector<double> &) profile) * (1.0 - c_delta) + 
 	 ((Gambit::Vector<double> &) br) * c_delta);
     } while (Distance(profile, br) > tol);
-    
+
     PrintProfile(std::cout, "QRE", profile);
   }
 }
