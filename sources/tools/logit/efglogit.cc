@@ -101,19 +101,14 @@ static void QRDecomp(Matrix<double> &b, Matrix<double> &q)
 
 static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
 		       Vector<double> &u, Vector<double> &y,
-		       double &d,
-		       const Array<bool> &p_isLog,
-		       double p_omega)
+		       double &d)
 {
-  //std::cout << "b: ";
   for (int k = 1; k <= b.NumColumns(); k++) {
     for (int l = 1; l <= k - 1; l++) {
       y[k] -= b(l, k) * y[l];
     }
     y[k] /= b(k, k);
-    //std::cout << b(k,k) << " ";
   }
-  //std::cout << std::endl;
 
   d = 0.0;
   for (int k = 1; k <= b.NumRows(); k++) {
@@ -121,20 +116,9 @@ static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
     for (int l = 1; l <= b.NumColumns(); l++) {
       s += q(l, k) * y[l];
     }
-    u[k] -= p_omega*s;
-
-    /*
-    if (k < p_isLog.Length() && p_isLog[k]) {
-      double probDist = exp(u[k] + p_omega*s) - exp(u[k]);
-      d += probDist * probDist;
-    }
-    else {
-      d += p_omega*p_omega*s * s;
-    }
-    */
+    u[k] -= s;
     d += s*s;
   }
-  //std::cout << "d^2: " << d << std::endl;
   d = sqrt(d);
 }
 
@@ -146,11 +130,9 @@ public:
   virtual ~Equation() { }
 
   virtual double Value(const LogBehavProfile<double> &p_point,
-		       double p_lambda,
-		       const Array<bool> &p_isLog) = 0;
+		       double p_lambda) = 0;
   virtual void Gradient(const LogBehavProfile<double> &p_point, 
 			double p_lambda,
-			const Array<bool> &p_isLog,
 			Vector<double> &p_gradient) = 0;
 };
 
@@ -172,16 +154,13 @@ public:
   { }
 
   double Value(const LogBehavProfile<double> &p_profile,
-	       double p_lambda,
-	       const Array<bool> &p_isLog);
+	       double p_lambda);
   void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
-		const Array<bool> &p_isLog,
 		Vector<double> &p_gradient);
 };
 
 double SumToOneEquation::Value(const LogBehavProfile<double> &p_profile,
-			       double p_lambda,
-			       const Array<bool> &p_isLog)
+			       double p_lambda)
 {
   double value = -1.0;
   for (int act = 1; act <= m_infoset->NumActions(); act++) {
@@ -192,7 +171,6 @@ double SumToOneEquation::Value(const LogBehavProfile<double> &p_profile,
 
 void SumToOneEquation::Gradient(const LogBehavProfile<double> &p_profile,
 				double p_lambda,
-				const Array<bool> &p_isLog,
 				Vector<double> &p_gradient)
 {
   int i = 1;
@@ -204,7 +182,7 @@ void SumToOneEquation::Gradient(const LogBehavProfile<double> &p_profile,
 
       for (int act = 1; act <= infoset->NumActions(); act++, i++) {
 	if (pl == m_pl && iset == m_iset) {
-	  p_gradient[i] = (p_isLog[i]) ? p_profile.GetProb(pl, iset, act) : 1.0;
+	  p_gradient[i] = p_profile.GetProb(pl, iset, act);
 	}
 	else {
 	  p_gradient[i] = 0.0;
@@ -236,16 +214,13 @@ public:
   { }
 
   double Value(const LogBehavProfile<double> &p_profile, 
-	       double p_lambda,
-	       const Array<bool> &p_isLog);
+	       double p_lambda);
   void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
-		const Array<bool> &p_isLog,
 		Vector<double> &p_gradient);
 };
 
 double RatioEquation::Value(const LogBehavProfile<double> &p_profile,
-			    double p_lambda,
-			    const Array<bool> &p_isLog)
+			    double p_lambda)
 {
   return (p_profile.GetLogProb(m_pl, m_iset, m_act) - 
 	  p_profile.GetLogProb(m_pl, m_iset, 1) -
@@ -256,7 +231,6 @@ double RatioEquation::Value(const LogBehavProfile<double> &p_profile,
 
 void RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
 			     double p_lambda,
-			     const Array<bool> &p_isLog,
 			     Vector<double> &p_gradient)
 {
   int i = 1;
@@ -267,10 +241,10 @@ void RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
       for (int act = 1; act <= infoset->NumActions(); act++, i++) {
 	if (infoset == m_infoset) {
 	  if (act == 1) {
-	    p_gradient[i] = (p_isLog[i]) ? -1.0 : -1.0/p_profile.GetProb(m_pl, m_iset, 1);
+	    p_gradient[i] = -1.0;
 	  }
 	  else if (act == m_act) {
-	    p_gradient[i] = (p_isLog[i]) ? 1.0 : 1.0/p_profile.GetProb(m_pl, m_iset, m_act);
+	    p_gradient[i] = 1.0; 
 	  }
 	  else {
 	    p_gradient[i] = 0.0;
@@ -283,12 +257,6 @@ void RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
 				       infoset->GetAction(act)) -
 	     p_profile.DiffActionValue(m_infoset->GetAction(1),
 				       infoset->GetAction(act)));
-	  //std::cout << "offending: " << p_gradient[i] << std::endl;
-	  /*
-	  if (p_isLog[i]) {
-	    p_gradient[i] *= p_profile.GetProb(pl, iset, act);
-	  }
-	  */
 	}
       }
     }
@@ -302,88 +270,36 @@ void RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
 static void QreLHS(const Game &p_game,
 		   const Array<Equation *> &p_equations,
 		   const Vector<double> &p_point,
-		   const Array<bool> &p_isLog,
 		   Vector<double> &p_lhs)
 {
   LogBehavProfile<double> profile(p_game);
   for (int i = 1; i <= profile.Length(); i++) {
-    if (p_isLog[i]) {
-      profile.SetLogProb(i, p_point[i]);
-    }
-    else {
-      profile.SetProb(i, p_point[i]);
-    }
+    profile.SetLogProb(i, p_point[i]);
   }
-
-  /*
-  // Print beliefs
-  std::cout << "Bel: ";
-  GameInfoset infoset = p_game->GetPlayer(3)->GetInfoset(1);
-  for (int i = 1; i <= infoset->NumMembers(); i++) {
-    std::cout << profile.GetBeliefProb(infoset->GetMember(i)) << " ";
-  }
-  std::cout << std::endl;
-  */
-
-  /*
-  std::cout << "P: ";
-  for (int i = 1; i <= profile.Length(); i++) {
-    std::cout << profile[i] << " ";
-  }
-  std::cout << std::endl;
-
-  std::cout << "L: ";
-  for (int i = 1; i <= profile.Length(); i++) {
-    std::cout << logprofile[i] << " ";
-  }
-  std::cout << std::endl;
-  */
-
 
   double lambda = p_point[p_point.Length()];
 
   for (int i = 1; i <= p_lhs.Length(); i++) {
-    p_lhs[i] = p_equations[i]->Value(profile, lambda, p_isLog);
+    p_lhs[i] = p_equations[i]->Value(profile, lambda);
   }
 }
 
 static void QreJacobian(const Game &p_game,
 			const Array<Equation *> &p_equations,
 			const Vector<double> &p_point,
-			const Array<bool> &p_isLog,
 			Matrix<double> &p_matrix)
 {
   LogBehavProfile<double> profile(p_game);
   for (int i = 1; i <= profile.Length(); i++) {
-    if (p_isLog[i]) {
-      profile.SetLogProb(i, p_point[i]);
-    }
-    else {
-      profile.SetProb(i, p_point[i]);
-    }
+    profile.SetLogProb(i, p_point[i]);
   }
   double lambda = p_point[p_point.Length()];
 
   for (int i = 1; i <= p_equations.Length(); i++) {
     Vector<double> column(p_point.Length());
-    p_equations[i]->Gradient(profile, lambda, p_isLog, column);
+    p_equations[i]->Gradient(profile, lambda, column);
     p_matrix.SetColumn(i, column);
   }
-
-  /*
-  std::cout << "Jacvector: ";
-  for (int i = 1; i <= p_point.Length(); i++) {
-    std::cout << p_point[i] << " ";
-  }
-  std::cout << std::endl;
-  std::cout << "Jac:\n";
-  for (int i = 1; i <= p_equations.Length(); i++) {
-    for (int j = 1; j <= p_point.Length(); j++) {
-      std::cout << p_matrix(j, i) << " ";
-    }
-    std::cout << std::endl;
-  }
-  */
 }
 
 extern int g_numDecimals;
@@ -474,7 +390,6 @@ void PrintProfileDetail(std::ostream &p_stream,
 
 void PrintProfile(std::ostream &p_stream,
 		  const BehavSupport &p_support, const Vector<double> &x,
-		  const Array<bool> &p_isLog,
 		  bool p_terminal = false)
 {
   p_stream.setf(std::ios::fixed);
@@ -488,24 +403,14 @@ void PrintProfile(std::ostream &p_stream,
   p_stream.unsetf(std::ios::fixed);
 
   for (int i = 1; i < x.Length(); i++) {
-    if (p_isLog[i]) {
-      p_stream << "," << std::setprecision(g_numDecimals) << exp(x[i]);
-    }
-    else {
-      p_stream << "," << std::setprecision(g_numDecimals) << x[i];
-    }
+    p_stream << "," << std::setprecision(g_numDecimals) << exp(x[i]);
   }
 
   p_stream << std::endl;
 
   LogBehavProfile<double> profile(p_support);
-  for (int i = 1; i <= p_isLog.Length(); i++) {
-    if (p_isLog[i]) {
-      profile.SetLogProb(i, x[i]);
-    }
-    else {
-      profile.SetProb(i, x[i]);
-    }
+  for (int i = 1; i <= profile.Length(); i++) {
+    profile.SetLogProb(i, x[i]);
   }
   //p_stream << "LiapValue: " << profile.GetLiapValue() << std::endl;
 }
@@ -525,11 +430,6 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
   double h = g_hStart;             // initial stepsize
   const double c_hmin = 1.0e-5;    // minimal stepsize
 
-  Array<bool> isLog(p_start.Length());
-  for (int i = 1; i <= p_start.Length(); i++) {
-    isLog[i] = true;
-  }
-
   Array<Equation *> equations;
   for (int pl = 1; pl <= p_start.GetGame()->NumPlayers(); pl++) {
     GamePlayer player = p_start.GetGame()->GetPlayer(pl);
@@ -543,17 +443,12 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
 
   Vector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
   for (int i = 1; i <= p_start.Length(); i++) {
-    if (isLog[i]) {
-      x[i] = p_start.GetLogProb(i);
-    }
-    else {
-      x[i] = p_start.GetProb(i);
-    }
+    x[i] = p_start.GetLogProb(i);
   }
   x[x.Length()] = p_startLambda;
 
   if (g_fullGraph) {
-    PrintProfile(std::cout, p_start.GetSupport(), x, isLog);
+    PrintProfile(std::cout, p_start.GetSupport(), x);
 
     /*
     LogBehavProfile<double> current(p_start);
@@ -574,7 +469,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
 
   Matrix<double> b(p_start.Length() + 1, p_start.Length());
   SquareMatrix<double> q(p_start.Length() + 1);
-  QreJacobian(p_start.GetGame(), equations, x, isLog, b);
+  QreJacobian(p_start.GetGame(), equations, x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
@@ -591,7 +486,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
     }
 
     double decel = 1.0 / g_maxDecel;  // initialize deceleration factor
-    QreJacobian(p_start.GetGame(), equations, u, isLog, b);
+    QreJacobian(p_start.GetGame(), equations, u, b);
     QRDecomp(b, q);
 
     int iter = 1;
@@ -599,7 +494,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
     while (true) {
       double dist;
 
-      QreLHS(p_start.GetGame(), equations, u, isLog, y);
+      QreLHS(p_start.GetGame(), equations, u, y);
 
       /*
       std::cout << "LHS: ";
@@ -609,7 +504,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
       std::cout << std::endl;
       */
 
-      NewtonStep(q, b, u, y, dist, isLog, 1.0);
+      NewtonStep(q, b, u, y, dist);
       /*
       std::cout << "Newt: ";
       std::cout << u[u.Length()] << " ";
@@ -676,7 +571,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
     //omega = 1.0;
 
     if (g_fullGraph) {
-      PrintProfile(std::cout, p_start.GetSupport(), x, isLog);
+      PrintProfile(std::cout, p_start.GetSupport(), x);
 
       /*
       LogBehavProfile<double> current(p_start);
@@ -692,32 +587,6 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
       */
     }
 
-    // Update isLog: any strategy below 10^-3 should switch to log rep
-    bool recompute = false;
-
-    /*
-    for (int i = 1; i < x.Length(); i++) {
-      if (!isLog[i] && x[i] < .1) {
-	std::cout << "switching " << i << " to log\n";
-	x[i] = log(x[i]);
-	isLog[i] = true;
-	recompute = true;
-      }
-      else if (isLog[i] && exp(x[i]) > .1) {
-	std::cout << "switching " << i << " from log\n";
-	x[i] = exp(x[i]);
-	isLog[i] = false;
-	recompute = true;
-      }
-    }
-    */
-
-    if (recompute) {
-      // If we switch representations, make sure to get the new Jacobian
-      QreJacobian(p_start.GetGame(), equations, x, isLog, b);
-      QRDecomp(b, q);
-    }
-
     Vector<double> newT(t);
     q.GetRow(q.NumRows(), newT);  // new tangent
     if (t * newT < 0.0) {
@@ -731,7 +600,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
   }
 
   if (!g_fullGraph) {
-    PrintProfile(std::cout, p_start.GetSupport(), x, isLog, true);
+    PrintProfile(std::cout, p_start.GetSupport(), x, true);
   }
 }
 

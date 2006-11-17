@@ -120,19 +120,12 @@ static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
 
 void QreLHS(const StrategySupport &p_support, 
 	    const Vector<double> &p_point,
-	    const Array<bool> &p_isLog,
 	    Vector<double> &p_lhs)
 {
   MixedStrategyProfile<double> profile(p_support), logprofile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
-    if (p_isLog[i]) {
-      profile[i] = exp(p_point[i]);
-      logprofile[i] = p_point[i];
-    }
-    else {
-      profile[i] = p_point[i];
-      logprofile[i] = log(p_point[i]);
-    }
+    profile[i] = exp(p_point[i]);
+    logprofile[i] = p_point[i];
   }
   double lambda = p_point[p_point.Length()];
   
@@ -163,19 +156,12 @@ void QreLHS(const StrategySupport &p_support,
 
 void QreJacobian(const StrategySupport &p_support,
 		 const Vector<double> &p_point,
-		 const Array<bool> &p_isLog,
 		 Matrix<double> &p_matrix)
 {
   MixedStrategyProfile<double> profile(p_support), logprofile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
-    if (p_isLog[i]) {
-      profile[i] = exp(p_point[i]);
-      logprofile[i] = p_point[i];
-    }
-    else {
-      profile[i] = p_point[i];
-      logprofile[i] = log(p_point[i]);
-    }
+    profile[i] = exp(p_point[i]);
+    logprofile[i] = p_point[i];
   }
   double lambda = p_point[p_point.Length()];
 
@@ -198,7 +184,7 @@ void QreJacobian(const StrategySupport &p_support,
 	    colno++;
 	    
 	    if (i == ell) {
-	      p_matrix(colno, rowno) = (p_isLog[colno]) ? profile[player2->GetStrategy(m)] : 1.0;
+	      p_matrix(colno, rowno) = profile[player2->GetStrategy(m)];
 	    }
 	    else {
 	      p_matrix(colno, rowno) = 0.0;
@@ -222,10 +208,10 @@ void QreJacobian(const StrategySupport &p_support,
 	    if (i == ell) {
 	      if (m == 1) {
 		// should be m==lead
-		p_matrix(colno, rowno) = (p_isLog[colno]) ? -1.0 : -1.0/profile[player2->GetStrategy(m)];
+		p_matrix(colno, rowno) = -1.0;
 	      }
 	      else if (m == j) {
-		p_matrix(colno, rowno) = (p_isLog[colno]) ? 1.0 : 1.0/profile[player2->GetStrategy(m)];
+		p_matrix(colno, rowno) = 1.0;
 	      }
 	      else {
 		p_matrix(colno, rowno) = 0.0;
@@ -233,26 +219,14 @@ void QreJacobian(const StrategySupport &p_support,
 	    }
 	    else {
 	      // 1 == lead
-	      if (p_isLog[colno]) {
-		p_matrix(colno, rowno) =
-		  -lambda * profile[player2->GetStrategy(m)] *
-		  (profile.GetPayoffDeriv(i, 
-					  p_support.GetStrategy(i, j),
-					  p_support.GetStrategy(ell, m)) -
-		   profile.GetPayoffDeriv(i, 
-					  p_support.GetStrategy(i, 1),
-					  p_support.GetStrategy(ell, m)));
-	      }
-	      else {
-		p_matrix(colno, rowno) =
-		  -lambda * 
-		  (profile.GetPayoffDeriv(i, 
-					  p_support.GetStrategy(i, j),
-					  p_support.GetStrategy(ell, m)) -
-		   profile.GetPayoffDeriv(i,
-					  p_support.GetStrategy(i, 1),
-					  p_support.GetStrategy(ell, m)));
-	      }
+	      p_matrix(colno, rowno) =
+		-lambda * profile[player2->GetStrategy(m)] *
+		(profile.GetPayoffDeriv(i, 
+					p_support.GetStrategy(i, j),
+					p_support.GetStrategy(ell, m)) -
+		 profile.GetPayoffDeriv(i, 
+					p_support.GetStrategy(i, 1),
+					p_support.GetStrategy(ell, m)));
 	    }
 	  }
 
@@ -296,18 +270,12 @@ double LogLike(const Array<double> &p_point)
 }
 
 double DiffLogLike(const Array<double> &p_point,
-		   const Array<bool> &p_isLog,
 		   const Array<double> &p_tangent)
 {
   double ret = 0.0;
 
   for (int i = 1; i <= g_obsProbs.Length(); i++) {
-    if (p_isLog[i]) {
-      ret += g_obsProbs[i] * p_tangent[i];
-    }
-    else {
-      ret += g_obsProbs[i] * p_tangent[i] / p_point[i];
-    }
+    ret += g_obsProbs[i] * p_tangent[i];
   }
 
   return ret;
@@ -318,7 +286,6 @@ extern int g_numDecimals;
 
 void PrintProfile(std::ostream &p_stream,
 		  const StrategySupport &p_support, const Vector<double> &x,
-		  const Array<bool> &p_isLog,
 		  bool p_terminal = false)
 {
   p_stream.setf(std::ios::fixed);
@@ -332,23 +299,13 @@ void PrintProfile(std::ostream &p_stream,
   p_stream.unsetf(std::ios::fixed);
 
   for (int i = 1; i <  x.Length(); i++) {
-    if (p_isLog[i]) {
-      p_stream << "," << std::setprecision(g_numDecimals) << exp(x[i]);
-    }
-    else {
-      p_stream << "," << std::setprecision(g_numDecimals) << x[i];
-    }
+    p_stream << "," << std::setprecision(g_numDecimals) << exp(x[i]);
   }
 
   if (g_maxLike) {
     MixedStrategyProfile<double> profile(p_support);
     for (int i = 1; i <= profile.Length(); i++) {
-      if (p_isLog[i]) {
-	profile[i] = exp(x[i]);
-      }
-      else {
-	profile[i] = x[i];
-      }
+      profile[i] = exp(x[i]);
     }
 
     p_stream.setf(std::ios::fixed);
@@ -400,31 +357,20 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
 
   bool newton = false;          // using Newton steplength (for MLE)
   bool restarting = false;      // flag for first restart step after MLE
-  Array<bool> isLog(p_start.Length());
-  for (int i = 1; i <= p_start.Length(); i++) {
-    //isLog[i] = (p_start[i] < .05);
-    isLog[i] = true;
-  }
 
   // When doing MLE finding, we push the data from the original path-following
   // here, and resume once we've found the local extremum.
   Vector<double> pushX(p_start.Length() + 1);
   double pushH = h;
-  Array<bool> pushLog(p_start.Length());
 
   Vector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
   for (int i = 1; i <= p_start.Length(); i++) {
-    if (isLog[i]) {
-      x[i] = log(p_start[i]);
-    }
-    else {
-      x[i] = p_start[i];
-    }
+    x[i] = log(p_start[i]);
   }
   x[x.Length()] = p_startLambda;
 
   if (g_fullGraph) {
-    PrintProfile(std::cout, p_start.GetSupport(), x, isLog);
+    PrintProfile(std::cout, p_start.GetSupport(), x);
   }
 
   Vector<double> t(p_start.Length() + 1);
@@ -432,7 +378,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
 
   Matrix<double> b(p_start.Length() + 1, p_start.Length());
   SquareMatrix<double> q(p_start.Length() + 1);
-  QreJacobian(p_start.GetSupport(), x, isLog, b);
+  QreJacobian(p_start.GetSupport(), x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
@@ -446,8 +392,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
 	//printf("popping! %f\n", pushH);
 	x = pushX;
 	h = pushH;
-	isLog = pushLog;
-	QreJacobian(p_start.GetSupport(), x, isLog, b);
+	QreJacobian(p_start.GetSupport(), x, b);
 	QRDecomp(b, q);
 	q.GetRow(q.NumRows(), t);
 	newton = false;
@@ -474,7 +419,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
     */
 
     double decel = 1.0 / g_maxDecel;  // initialize deceleration factor
-    QreJacobian(p_start.GetSupport(), u, isLog, b);
+    QreJacobian(p_start.GetSupport(), u, b);
     QRDecomp(b, q);
 
     int iter = 1;
@@ -482,7 +427,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
     while (true) {
       double dist;
 
-      QreLHS(p_start.GetSupport(), u, isLog, y);
+      QreLHS(p_start.GetSupport(), u, y);
       /*
       std::cout << "LHS";
       for (int k = 1; k <= y.Length(); k++) {
@@ -533,10 +478,9 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
 	  //printf("popping! %f\n", pushH);
 	  x = pushX;
 	  h = pushH;
-	  isLog = pushLog;
 	  newton = false;
 	  restarting = true;
-	  QreJacobian(p_start.GetSupport(), x, isLog, b);
+	  QreJacobian(p_start.GetSupport(), x, b);
 	  QRDecomp(b, q);
 	  q.GetRow(q.NumRows(), t);
 	  continue;
@@ -562,11 +506,10 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
       q.GetRow(q.NumRows(), newT); 
 
       if (!restarting && 
-	  DiffLogLike(x, isLog, t) * DiffLogLike(u, isLog, newT) < 0.0) {
+	  DiffLogLike(x, t) * DiffLogLike(u, newT) < 0.0) {
 	// Store the current state, to resume later
 	pushX = x;
 	pushH = h;
-	pushLog = isLog;
 	newton = true;
 	//printf("entering newton mode\n");
       }
@@ -577,8 +520,8 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
       Vector<double> newT(t);
       q.GetRow(q.NumRows(), newT); 
 
-      h *= -DiffLogLike(u, isLog, newT) / (DiffLogLike(u, isLog, newT) - 
-					   DiffLogLike(x, isLog, t));
+      h *= -DiffLogLike(u, newT) / (DiffLogLike(u, newT) - 
+				    DiffLogLike(x, t));
     }
     else {
       // Standard steplength adaptation
@@ -591,33 +534,9 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
     x = u;
 
     if (g_fullGraph) {
-      PrintProfile(std::cout, p_start.GetSupport(), x, isLog);
+      PrintProfile(std::cout, p_start.GetSupport(), x);
     }
     
-
-    // Update isLog: any strategy below 10^-3 should switch to log rep
-    bool recompute = false;
-    
-    /*
-    for (int i = 1; i < x.Length(); i++) {
-      if (!isLog[i] && x[i] < .05) {
-	x[i] = log(x[i]);
-	isLog[i] = true;
-	recompute = true;
-      }
-      else if (isLog[i] && exp(x[i]) > .05) {
-	x[i] = exp(x[i]);
-	isLog[i] = false;
-	recompute = true;
-      }
-    }
-    */
-
-    if (recompute) {
-      // If we switch representations, make sure to get the new Jacobian
-      QreJacobian(p_start.GetSupport(), x, isLog, b);
-      QRDecomp(b, q);
-    }
 
     Vector<double> newT(t);
     q.GetRow(q.NumRows(), newT);  // new tangent
@@ -633,7 +552,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
   }
 
   if (!g_fullGraph) {
-    PrintProfile(std::cout, p_start.GetSupport(), x, isLog, true);
+    PrintProfile(std::cout, p_start.GetSupport(), x, true);
   }
 }
 
