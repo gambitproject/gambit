@@ -258,6 +258,8 @@ void QreJacobian(const StrategySupport &p_support,
 extern bool g_maxLike;
 extern Array<double> g_obsProbs;
 
+extern double g_targetLambda;
+
 double LogLike(const Array<double> &p_point)
 {
   double ret = 0.0;
@@ -499,7 +501,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
       decel = g_maxDecel;
     }
 
-    if (g_maxLike) {
+    if (!newton && g_maxLike) {
       // Currently, 't' is the tangent at 'x'.  We also need the
       // tangent at 'u'.
       Vector<double> newT(t);
@@ -514,14 +516,28 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
 	//printf("entering newton mode\n");
       }
     }
+    else if (!newton && g_targetLambda > 0.0) {
+      if (!restarting &&
+	  ((x[x.Length()] - g_targetLambda) *
+	   (u[u.Length()] - g_targetLambda)) < 0.0) {
+	// Store the current state, to resume later
+	pushX = x;
+	pushH = h;
+	newton = true;
+	//printf("entering newton mode\n");
+      }
+    }
 
-    if (newton) {
+    if (newton && g_maxLike) {
       // Newton-type steplength adaptation, secant method
       Vector<double> newT(t);
       q.GetRow(q.NumRows(), newT); 
 
       h *= -DiffLogLike(u, newT) / (DiffLogLike(u, newT) - 
 				    DiffLogLike(x, t));
+    }
+    else if (newton && g_targetLambda > 0.0) {
+      h *= -(u[u.Length()] - g_targetLambda) / (u[u.Length()] - x[x.Length()]);
     }
     else {
       // Standard steplength adaptation

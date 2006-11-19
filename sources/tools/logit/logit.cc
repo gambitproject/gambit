@@ -36,6 +36,8 @@ bool g_fullGraph = true;
 int g_numDecimals = 6;
 bool g_maxLike = false;
 Gambit::Array<double> g_obsProbs;
+double g_targetLambda = -1.0;
+
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -55,6 +57,7 @@ void PrintHelp(char *progname)
   std::cerr << "  -s STEP          initial stepsize (default is .03)\n";
   std::cerr << "  -a ACCEL         maximum acceleration (default is 1.1)\n";
   std::cerr << "  -m MAXLAMBDA     stop when reaching MAXLAMBDA (default is 1000000)\n";
+  std::cerr << "  -l LAMBDA        compute QRE at `lambda` accurately\n";
   std::cerr << "  -h               print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -e               print only the terminal equilibrium\n";
@@ -101,7 +104,7 @@ int main(int argc, char *argv[])
   std::string mleFile = "", startFile = "";
 
   int c;
-  while ((c = getopt(argc, argv, "d:s:a:m:qehSL:p:")) != -1) {
+  while ((c = getopt(argc, argv, "d:s:a:m:qehSL:p:l:")) != -1) {
     switch (c) {
     case 'q':
       quiet = true;
@@ -132,6 +135,9 @@ int main(int argc, char *argv[])
       break;
     case 'p':
       startFile = optarg;
+      break;
+    case 'l':
+      g_targetLambda = atof(optarg);
       break;
     case '?':
       if (isprint(optopt)) {
