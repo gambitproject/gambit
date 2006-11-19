@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=Gambit Game Analysis
+Comment=Construction and analysis of finite extensive and strategic games
+Exec=gambit
+Icon=gambit
+Type=Application
+Categories=Math;Science;

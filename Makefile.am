@@ -2,4 +2,4 @@
 
 SUBDIRS = doc efg nfg sources
 
-EXTRA_DIST = gambit.spec
+EXTRA_DIST = gambit.spec gambit.desktop
