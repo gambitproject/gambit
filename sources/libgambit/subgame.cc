@@ -61,31 +61,37 @@ void ChildSubgames(const GameNode &p_node, List<GameNode> &p_list)
   }
 }
 
-///
-/// Returns a list of all nodes in the subtree rooted at 'p_subtree'.
-///
-void Nodes(const GameNode &p_subtree, List<GameNode> &p_list)
-{ 
-  p_list.Append(p_subtree);
-  for (int i = 1; i <= p_subtree->NumChildren(); 
-       Nodes(p_subtree->GetChild(i++), p_list));
-}
-
 } // end nested anonymous namespace
 
 
+//
+// Some general notes on the strategy for solving by subgames:
+//
+// * We work with a *copy* of the original game, which is destroyed
+//   as we go.
+// * Before solving, information set labels on the copy game are
+//   set to unique IDs.  These are used to match up information
+//   sets in the subgames (which are themselves copies) to the
+//   original game.
+// * We only carry around DVectors instead of full MixedBehavProfiles,
+//   because MixedBehavProfiles allocate space several times the
+//   size of the tree to carry around useful quantities.  These
+//   quantities are irrelevant for this calculation, so we only
+//   store the probabilities, and convert to MixedBehavProfiles
+//   at the end of the computation
+//
 
 template <class T, class SolverType>
 void SolveSubgames(const BehavSupport &p_support,
-		   const MixedBehavProfile<T> &p_templateSolution,
+		   const DVector<T> &p_templateSolution,
 		   SolverType p_solver,
 		   GameNode n,
-		   List<MixedBehavProfile<T> > &solns,
+		   List<DVector<T> > &solns,
 		   List<GameOutcome> &values)
 {
   Game efg = p_support.GetGame();
   
-  List<MixedBehavProfile<T> > thissolns;
+  List<DVector<T> > thissolns;
   thissolns.Append(p_templateSolution);
   ((Vector<T> &) thissolns[1]).operator=(T(0));
   
@@ -99,29 +105,29 @@ void SolveSubgames(const BehavSupport &p_support,
   
   for (int i = 1; i <= subroots.Length(); i++)  {
     //printf("Looking at subgame %d of %d\n", i, subroots.Length());
-    List<MixedBehavProfile<T> > subsolns;
+    List<DVector<T> > subsolns;
     List<GameOutcome> subvalues;
     
     SolveSubgames(p_support, p_templateSolution, p_solver,
 		  subroots[i], subsolns, subvalues);
     
     if (subsolns.Length() == 0)  {
-      solns = List<MixedBehavProfile<T> >();
+      solns = List<DVector<T> >();
       return;
     }
 
     //printf("Found %d subsolutions for subgame %d of %d\n", 
     //subsolns.Length(), i, subroots.Length());
     
-    List<MixedBehavProfile<T> > newsolns;
+    List<DVector<T> > newsolns;
     List<Array<GameOutcome> > newsubrootvalues;
     
     //printf("Merging with %d existing solutions\n", thissolns.Length());
     for (int soln = 1; soln <= thissolns.Length(); soln++) {
       for (int subsoln = 1; subsoln <= subsolns.Length(); subsoln++) {
 	//printf("Merging existing %d with new %d\n", soln, subsoln);
-	MixedBehavProfile<T> bp(thissolns[soln]);
-	MixedBehavProfile<T> tmp(subsolns[subsoln]);
+	DVector<T> bp(thissolns[soln]);
+	DVector<T> tmp(subsolns[subsoln]);
 	for (int j = 1; j <= bp.Length(); j++) {
 	  bp[j] += tmp[j];
 	}
@@ -148,11 +154,9 @@ void SolveSubgames(const BehavSupport &p_support,
     // by convention, we will just put the payoffs in the parent subgame
     subgame->GetRoot()->SetOutcome(0);
 
-    List<GameNode> nodes;
-    Nodes(n, nodes);
-    
     BehavSupport subsupport(subgame);
     // Here, we build the support for the subgame
+    /*
     for (int pl = 1; pl <= subgame->NumPlayers(); pl++)  {
       GamePlayer subplayer = subgame->GetPlayer(pl);
       GamePlayer player = p_support.GetGame()->GetPlayer(pl);
@@ -168,16 +172,17 @@ void SolveSubgames(const BehavSupport &p_support,
 		subsupport.RemoveAction(subinfoset->GetAction(act));
 	      }
 	    }
+	    break;
 	  }
-	  break;
 	}
       }
     }
+    */
 
     List<MixedBehavProfile<T> > sol = (*p_solver)(subsupport);
     
     if (sol.Length() == 0)  {
-      solns = List<MixedBehavProfile<T> >();
+      solns = List<DVector<T> >();
       //printf("No solutions found\n");
       return;
     }
@@ -195,9 +200,10 @@ void SolveSubgames(const BehavSupport &p_support,
 
 	  for (int j = 1; j <= player->NumInfosets(); j++) {
 	    if (subinfoset->GetLabel() == player->GetInfoset(j)->GetLabel()) {
+	      int id = atoi(subinfoset->GetLabel().c_str());
 	      for (int act = 1; act <= subsupport.NumActions(pl, iset); act++) {
 		int actno = subsupport.GetAction(pl, iset, act)->GetNumber();
-		solns[solns.Length()](pl, j, actno) = sol[solno](pl, iset, act);	  
+		solns[solns.Length()](pl, id, actno) = sol[solno](pl, iset, act);	  
 	      }
 	      break;
 	    }
@@ -255,10 +261,18 @@ SolveBySubgames(const BehavSupport &p_support,
     }
   }
 
-  List<MixedBehavProfile<T> > solutions;
+  List<DVector<T> > vectors;
   List<GameOutcome> values;
-  SolveSubgames(support, MixedBehavProfile<T>(support),
-		p_solver, efg->GetRoot(), solutions, values);
+  SolveSubgames(support, DVector<T>(support.NumActions()),
+		p_solver, efg->GetRoot(), vectors, values);
+
+  List<MixedBehavProfile<T> > solutions;
+  for (int i = 1; i <= vectors.Length(); i++) {
+    solutions.Append(MixedBehavProfile<T>(p_support));
+    for (int j = 1; j <= vectors[i].Length(); j++) {
+      solutions[i][j] = vectors[i][j];
+    }
+  }
   return solutions;
 }
 
