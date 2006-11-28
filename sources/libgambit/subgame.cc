@@ -77,8 +77,8 @@ void Nodes(const GameNode &p_subtree, List<GameNode> &p_list)
 
 template <class T, class SolverType>
 void SolveSubgames(const BehavSupport &p_support,
+		   const MixedBehavProfile<T> &p_templateSolution,
 		   SolverType p_solver,
-		   const Array<Array<GameInfoset > > &p_infosets,
 		   GameNode n,
 		   List<MixedBehavProfile<T> > &solns,
 		   List<GameOutcome> &values)
@@ -86,7 +86,7 @@ void SolveSubgames(const BehavSupport &p_support,
   Game efg = p_support.GetGame();
   
   List<MixedBehavProfile<T> > thissolns;
-  thissolns.Append(MixedBehavProfile<T>(p_support));
+  thissolns.Append(p_templateSolution);
   ((Vector<T> &) thissolns[1]).operator=(T(0));
   
   List<GameNode> subroots;
@@ -98,22 +98,28 @@ void SolveSubgames(const BehavSupport &p_support,
   subrootvalues.Append(Array<GameOutcome>(subroots.Length()));
   
   for (int i = 1; i <= subroots.Length(); i++)  {
+    //printf("Looking at subgame %d of %d\n", i, subroots.Length());
     List<MixedBehavProfile<T> > subsolns;
     List<GameOutcome> subvalues;
     
-    SolveSubgames(p_support, p_solver, p_infosets,
+    SolveSubgames(p_support, p_templateSolution, p_solver,
 		  subroots[i], subsolns, subvalues);
     
     if (subsolns.Length() == 0)  {
       solns = List<MixedBehavProfile<T> >();
       return;
     }
+
+    //printf("Found %d subsolutions for subgame %d of %d\n", 
+    //subsolns.Length(), i, subroots.Length());
     
     List<MixedBehavProfile<T> > newsolns;
     List<Array<GameOutcome> > newsubrootvalues;
     
+    //printf("Merging with %d existing solutions\n", thissolns.Length());
     for (int soln = 1; soln <= thissolns.Length(); soln++) {
       for (int subsoln = 1; subsoln <= subsolns.Length(); subsoln++) {
+	//printf("Merging existing %d with new %d\n", soln, subsoln);
 	MixedBehavProfile<T> bp(thissolns[soln]);
 	MixedBehavProfile<T> tmp(subsolns[subsoln]);
 	for (int j = 1; j <= bp.Length(); j++) {
@@ -128,102 +134,80 @@ void SolveSubgames(const BehavSupport &p_support,
     
     thissolns = newsolns;
     subrootvalues = newsubrootvalues;
+    //printf("Finished solving subgame %d\n", i);
   }
   
   for (int soln = 1; soln <= thissolns.Length(); soln++)   {
+    //printf("Analyzing scenario %d of %d\n", soln, thissolns.Length());
     for (int i = 1; i <= subroots.Length(); i++) {
       subroots[i]->SetOutcome(subrootvalues[soln][i]);
     }
     
-    Game foo = CopyGame(efg, n);
+    Game subgame = CopyGame(efg, n);
     // this prevents double-counting of outcomes at roots of subgames
     // by convention, we will just put the payoffs in the parent subgame
-    foo->GetRoot()->SetOutcome(0);
+    subgame->GetRoot()->SetOutcome(0);
 
     List<GameNode> nodes;
     Nodes(n, nodes);
     
-    BehavSupport subsupport(foo);
-    // here, we build the support for the subgame
-    for (int pl = 1; pl <= foo->NumPlayers(); pl++)  {
-      GamePlayer p = foo->GetPlayer(pl);
-      int index;
+    BehavSupport subsupport(subgame);
+    // Here, we build the support for the subgame
+    for (int pl = 1; pl <= subgame->NumPlayers(); pl++)  {
+      GamePlayer subplayer = subgame->GetPlayer(pl);
+      GamePlayer player = p_support.GetGame()->GetPlayer(pl);
 
-      for (index = 1; index <= nodes.Length() &&
-	   nodes[index]->GetPlayer() != efg->GetPlayer(pl); index++);
-	
-      if (index > nodes.Length())  continue;
+      for (int iset = 1; iset <= subplayer->NumInfosets(); iset++) {
+	GameInfoset subinfoset = subplayer->GetInfoset(iset);
 
-      int base;
-	
-      for (base = 1; base <= efg->GetPlayer(pl)->NumInfosets(); base++)
-	if (efg->GetPlayer(pl)->GetInfoset(base) ==
-	    nodes[index]->GetInfoset())  break;
-	
-      for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
-	for (index = 1; index <= p_infosets[pl].Length(); index++)
-	  if (p_infosets[pl][index] == efg->GetPlayer(pl)->GetInfoset(iset + base - 1))
-	    break;
-	  
-	for (int act = 1; act <= p->GetInfoset(iset)->NumActions();
-	     act++)  {
-          if (!p_support.Contains(p_infosets[pl][index]->GetAction(act))) {
-            subsupport.RemoveAction(p->GetInfoset(iset)->GetAction(act));
+	for (int j = 1; j <= player->NumInfosets(); j++) {
+	  GameInfoset infoset = player->GetInfoset(j);
+	  if (subinfoset->GetLabel() == infoset->GetLabel()) {
+	    for (int act = 1; act <= infoset->NumActions(); act++)  {
+	      if (!p_support.Contains(infoset->GetAction(act))) {
+		subsupport.RemoveAction(subinfoset->GetAction(act));
+	      }
+	    }
 	  }
+	  break;
 	}
       }
     }
 
-    List<MixedBehavProfile<T> > sol;
-
-    bool interrupted = false;
-
-    try {
-      sol = (*p_solver)(subsupport);
-    }
-    catch (...) {
-      interrupted = true;
-      throw;
-    }
+    List<MixedBehavProfile<T> > sol = (*p_solver)(subsupport);
     
-    // put behav profile in "total" solution here...
     if (sol.Length() == 0)  {
       solns = List<MixedBehavProfile<T> >();
+      //printf("No solutions found\n");
       return;
     }
     
+    // Put behavior profile in "total" solution here...
     for (int solno = 1; solno <= sol.Length(); solno++)  {
       solns.Append(thissolns[soln]);
       
-      for (int pl = 1; pl <= foo->NumPlayers(); pl++)  {
-	GamePlayer p = foo->GetPlayer(pl);
-	int index;
+      for (int pl = 1; pl <= subgame->NumPlayers(); pl++)  {
+	GamePlayer subplayer = subgame->GetPlayer(pl);
+	GamePlayer player = p_support.GetGame()->GetPlayer(pl);
 
-	for (index = 1; index <= nodes.Length() &&
-	     nodes[index]->GetPlayer() != efg->GetPlayer(pl); index++);
-	
-	if (index > nodes.Length())  continue;
+	for (int iset = 1; iset <= subplayer->NumInfosets(); iset++) {
+	  GameInfoset subinfoset = subplayer->GetInfoset(iset);
 
-	int base;
-	
-	for (base = 1; base <= efg->GetPlayer(pl)->NumInfosets(); base++)
-	  if (efg->GetPlayer(pl)->GetInfoset(base) ==
-	      nodes[index]->GetInfoset())  break;
-	
-	for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
-	  for (index = 1; index <= p_infosets[pl].Length(); index++)
-	    if (p_infosets[pl][index] == efg->GetPlayer(pl)->GetInfoset(iset + base - 1))
+	  for (int j = 1; j <= player->NumInfosets(); j++) {
+	    if (subinfoset->GetLabel() == player->GetInfoset(j)->GetLabel()) {
+	      for (int act = 1; act <= subsupport.NumActions(pl, iset); act++) {
+		int actno = subsupport.GetAction(pl, iset, act)->GetNumber();
+		solns[solns.Length()](pl, j, actno) = sol[solno](pl, iset, act);	  
+	      }
 	      break;
-	  
-	  for (int act = 1; act <= subsupport.NumActions(pl, iset); act++) {
-	    int actno = subsupport.GetAction(pl, iset, act)->GetNumber();
-	    solns[solns.Length()](pl, index, actno) = sol[solno](pl, iset, act);	  }
+	    }
+	  }
 	}
       }
       
-      Vector<T> subval(foo->NumPlayers());
+      Vector<T> subval(subgame->NumPlayers());
       GameOutcome outcome = n->GetOutcome();
-      for (int pl = 1; pl <= foo->NumPlayers(); pl++)  {
+      for (int pl = 1; pl <= subgame->NumPlayers(); pl++)  {
 	subval[pl] = sol[solno].GetPayoff(pl);
 	if (outcome) {
 	  subval[pl] += outcome->GetPayoff<T>(pl);
@@ -237,6 +221,8 @@ void SolveSubgames(const BehavSupport &p_support,
  
       values.Append(ov);
     }
+    //printf("Finished with scenario %d of %d; total solutions so far = %d\n",
+    //soln, thissolns.Length(), solns.Length());
   }
 
   n->DeleteTree();
@@ -249,11 +235,9 @@ SolveBySubgames(const BehavSupport &p_support,
 {
   Game efg = CopyGame(p_support.GetGame(), p_support.GetGame()->GetRoot());
 
-  Array<Array<GameInfoset> > infosets(efg->NumPlayers());
-
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
     for (int iset = 1; iset <= efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      infosets[pl].Append(efg->GetPlayer(pl)->GetInfoset(iset)); 
+      efg->GetPlayer(pl)->GetInfoset(iset)->SetLabel(ToText(iset));
     }
   }
 
@@ -273,7 +257,8 @@ SolveBySubgames(const BehavSupport &p_support,
 
   List<MixedBehavProfile<T> > solutions;
   List<GameOutcome> values;
-  SolveSubgames(support, p_solver, infosets, efg->GetRoot(), solutions, values);
+  SolveSubgames(support, MixedBehavProfile<T>(support),
+		p_solver, efg->GetRoot(), solutions, values);
   return solutions;
 }
 
