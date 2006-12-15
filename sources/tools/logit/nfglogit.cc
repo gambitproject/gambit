@@ -390,7 +390,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
     if (fabs(h) <= c_hmin) {
       // Stop.  If this occurs because we are in MLE-finding mode,
       // resume tracing the original branch
-      if (newton) {
+      if (newton && g_maxLike) {
 	//printf("popping! %f\n", pushH);
 	x = pushX;
 	h = pushH;
@@ -412,14 +412,6 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
       u[k] = x[k] + h * p_omega * t[k];
     }
 
-    /*
-    std::cout << "pred";
-    for (int k = 1; k <= y.Length(); k++) {
-      std::cout << "," << u[k];
-    }
-    std::cout << std::endl;
-    */
-
     double decel = 1.0 / g_maxDecel;  // initialize deceleration factor
     QreJacobian(p_start.GetSupport(), u, b);
     QRDecomp(b, q);
@@ -430,23 +422,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
       double dist;
 
       QreLHS(p_start.GetSupport(), u, y);
-      /*
-      std::cout << "LHS";
-      for (int k = 1; k <= y.Length(); k++) {
-	std::cout << "," << y[k];
-      }
-      std::cout << std::endl;
-      */
-      
       NewtonStep(q, b, u, y, dist); 
-
-      /*
-      std::cout << "step";
-      for (int k = 1; k <= u.Length(); k++) {
-	std::cout << "," << u[k];
-      }
-      std::cout << std::endl;
-      */
 
       if (dist >= c_maxDist) {
 	accept = false;
@@ -476,7 +452,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
       if (fabs(h) <= c_hmin) {
 	// Stop.  If this occurs because we are in MLE-finding mode,
 	// resume tracing the original branch
-	if (newton) {
+	if (newton && g_maxLike) {
 	  //printf("popping! %f\n", pushH);
 	  x = pushX;
 	  h = pushH;

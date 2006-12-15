@@ -303,6 +303,7 @@ static void QreJacobian(const Game &p_game,
 }
 
 extern int g_numDecimals;
+extern double g_targetLambda;
 
 template <class T>
 void PrintProfileDetail(std::ostream &p_stream,
@@ -428,7 +429,9 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
   const double c_eta = 0.1;        // perturbation to avoid cancellation
                                    // in calculating contraction rate
   double h = g_hStart;             // initial stepsize
-  const double c_hmin = 1.0e-5;    // minimal stepsize
+  const double c_hmin = 1.0e-8;    // minimal stepsize
+
+  bool newton = false;             // using Newton steplength
 
   Array<Equation *> equations;
   for (int pl = 1; pl <= p_start.GetGame()->NumPlayers(); pl++) {
@@ -546,12 +549,6 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
 
     if (!accept) {
       h /= g_maxDecel;   // PC not accepted; change stepsize and retry
-      //printf("retry with new stepsize %f\n", h);
-      //omega *= 0.5;
-      //printf("rescaling omega to %f\n", omega);
-      //if (omega < 1.0e-8) {
-      //return;
-      //}
       if (fabs(h) <= c_hmin) {
 	return;
       }
@@ -563,12 +560,22 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
     if (decel > g_maxDecel) {
       decel = g_maxDecel;
     }
-    h = fabs(h / decel);
-    //printf("New stepsize %f\n", h);
+
+    if ((!newton && g_targetLambda > 0.0) &&
+	((x[x.Length()] - g_targetLambda) * 
+	 (u[u.Length()] - g_targetLambda)) < 0.0) {
+      newton = true;
+    }
+
+    if (newton) {
+      h *= -(u[u.Length()] - g_targetLambda) / (u[u.Length()] - x[x.Length()]);
+    }
+    else {
+      h = fabs(h / decel);
+    }
 
     // PC step was successful; update and iterate
     x = u;
-    //omega = 1.0;
 
     if (g_fullGraph) {
       PrintProfile(std::cout, p_start.GetSupport(), x);
