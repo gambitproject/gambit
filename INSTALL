@@ -32,8 +32,8 @@ Supported compilers
 
 Currently, gcc is the only compiler supported.  The version of gcc needs
 to be new enough to handle templates correctly.  The oldest versions
-of gcc known to compile Gambit are 3.4.6 (Linux) and 3.4.2 (MinGW for
-Windows).
+of gcc known to compile Gambit are 3.4.6 (Linux, Ubuntu) and 3.4.2 (MinGW for
+Windows, Debian stable).
 
 If you wish to use another compiler, the most likely stumbling block is
 that Gambit uses templated member functions for classes, so the compiler
