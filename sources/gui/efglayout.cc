@@ -499,15 +499,23 @@ wxString gbtTreeLayout::CreateBranchLabel(const gbtNodeEntry *p_entry,
 	return wxString(parent->GetInfoset()->GetActionProb<std::string>(p_entry->GetChildNumber()).c_str(),
 			*wxConvCurrent);
       }
+      else if (m_doc->NumProfileLists() == 0) {
+	return wxT("");
+      }
       else {
 	return wxString(m_doc->GetProfiles().GetActionProb(parent, 
 							   p_entry->GetChildNumber()).c_str(),
 			*wxConvCurrent);
       }
     case GBT_BRANCH_LABEL_VALUE:
-      return wxString(m_doc->GetProfiles().GetActionValue(parent,
-							  p_entry->GetChildNumber()).c_str(),
-		      *wxConvCurrent);
+      if (m_doc->NumProfileLists() == 0) {
+	return wxT("");
+      }
+      else {
+	return wxString(m_doc->GetProfiles().GetActionValue(parent,
+							    p_entry->GetChildNumber()).c_str(),
+			*wxConvCurrent);
+      }
     default:
       return wxT("");
     }

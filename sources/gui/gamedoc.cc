@@ -139,10 +139,12 @@ void gbtStrategyDominanceStack::SetStrict(bool p_strict)
 void gbtStrategyDominanceStack::Reset(void)
 {
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
-  m_supports = Gambit::Array<Gambit::StrategySupport *>();
-  m_supports.Append(new Gambit::StrategySupport(m_doc->GetGame()));
-  m_current = 1;
-  m_noFurther = false;
+  if (m_doc->GetGame()->HasComputedValues()) {
+    m_supports = Gambit::Array<Gambit::StrategySupport *>();
+    m_supports.Append(new Gambit::StrategySupport(m_doc->GetGame()));
+    m_current = 1;
+    m_noFurther = false;
+  }
 }
 
 bool gbtStrategyDominanceStack::NextLevel(void)
@@ -197,7 +199,6 @@ gbtGameDocument::gbtGameDocument(Gambit::Game p_game)
     m_currentProfileList(0)
 {
   m_game->Canonicalize();
-  m_game->BuildComputedValues();
   wxGetApp().AddDocument(this);
 
   std::ostringstream s;
@@ -356,7 +357,6 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
   if (p_modifications != GBT_DOC_MODIFIED_NONE) {
     m_modified = true;
     m_game->Canonicalize();
-    m_game->BuildComputedValues();
     m_redoList = Gambit::List<std::string>();
 
     std::ostringstream s;
