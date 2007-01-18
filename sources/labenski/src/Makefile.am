@@ -2,7 +2,7 @@
 
 lib_LTLIBRARIES = liblabenski.la
 
-AM_CPPFLAGS = -I../include ${WX_CXXFLAGS} -DwxPLOT_FAST_GRAPHICS=0
+AM_CPPFLAGS = -I$(top_srcdir)/sources/labenski/include ${WX_CXXFLAGS} -DwxPLOT_FAST_GRAPHICS=0
 
 liblabenski_la_SOURCES = \
 	sheetatr.cpp \
