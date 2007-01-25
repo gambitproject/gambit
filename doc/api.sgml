@@ -137,6 +137,12 @@ and parts thereof uses the pointer-to-implementation (pimpl) idiom.
 Client code will generally refer to objects of type
 <classname>Game</classname>.  This is a smart-pointer class containing
 a pointer to the representation class <classname>GameRep</classname>.
+</para>
+
+<sect2 id="api.games.lifecycle">
+<title>Building, loading, and saving games</title>
+
+<para>
 For example, to create a new game with
 an extensive (tree) representation in C++, set its title, and print
 out that title:
@@ -256,7 +262,134 @@ except RuntimeError:
   # handle here
 </programlisting>
 
+<function>ReadGame</function> reads files in the <filename>.efg</filename>
+and <filename>.nfg</filename> formats described in <xref linkend="file">.
+It does not (yet) handle the XML-based <filename>.gbt</filename> workbook
+format recently introduced in the graphical user interface.
+However, note that the game structure itself is stored in the
+<filename>.gbt</filename> file using these formats, so it can be extracted
+with a little preprocessing.
 </para>
+
+<para>
+Writing games to these file formats is accomplished by the members
+<function>WriteEfgFile</function> and <function>WriteNfgFile</function>,
+respectively.  This fragment reads in an extensive game, and writes both
+a copy of the game in extensive form, as well as its reduced strategic
+form, to separate files.
+
+<programlisting>
+std::ifstream f1("mygame.efg");
+Gambit::Game myGame = Gambit::ReadGame(f1);
+
+std::ofstream f2("mygamecopy.efg");
+myGame->WriteEfgFile(f2);
+
+myGame->BuildComputedValues();   /* constructs the reduced strategic form */
+std::ofstream f3("mygamecopy.nfg");
+myGame->WriteNfgFile(f3);
+</programlisting>
+
+Use in Python again varies slightly. In Python, the members
+<function>AsEfgFile</function> and <function>AsNfgFile</function>
+create a string representation of the game, which can be written to a
+file:
+
+<programlisting>
+myGame = gambit.ReadGame(file("mygame.efg").read())
+file("mygamecopy.efg", "w").write(myGame.AsEfgFile())
+file("mygamecopy.nfg", "w").write(myGame.AsNfgFile())
+</programlisting>
+
+</para>
+
+</sect2>
+
+<sect2 id="api.games.parts">
+<title>Objects representing components of a game</title>
+
+<table id="table.game.objects">
+<title>Classes representing parts of games</title>
+<tgroup cols="2">
+<colspec colname="Class">
+<colspec colname="Description">
+<thead>
+<row>
+<entry>Class</entry>
+<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+<entry>GamePlayer</entry>
+<entry>A player in the game (including the chance player)</entry>
+</row>
+<row>
+<entry>GameOutcome</entry>
+<entry>An outcome, assigning payoffs to all players</entry>
+</row>
+<row>
+<entry>GameNode</entry>
+<entry>A node in an extensive game</entry>
+</row>
+<row>
+<entry>GameInfoset</entry>
+<entry>An information set in an extensive game</entry>
+</row>
+<row>
+<entry>GameStrategy</entry>
+<entry>A strategy for a player in a strategic game</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>
+<xref linkend="table.game.objects"> lists the classes which represent
+objects defined within a game. As with <classname>Game</classname>,
+each of these classes is a smart-pointer class, which references an
+internal representation class ending in <classname>Rep</classname>;
+e.g., <classname>GamePlayer</classname> is a smart pointer pointing to
+an object of class <classname>GamePlayerRep</classname>.
+</para>
+
+<para>
+In addition to serving the usual purposes of a smart pointer, these classes
+also guard against attempting to access objects within a game which no
+longer exist.  Consider this example in Python:
+
+<programlisting>
+>>> import gambit
+>>> myGame = gambit.NewTree()
+>>> outcome = myGame.NewOutcome()
+>>> myGame.DeleteOutcome(outcome)
+>>> outcome.GetLabel()
+Traceback (most recent call last):
+  File "&lt;stdin>", line 1, in ?
+  File "/usr/lib/python2.4/site-packages/gambit.py", line 1096, in GetLabel
+    def GetLabel(*args): return _gambit.GameOutcome_GetLabel(*args)
+RuntimeError: operating on null object
+</programlisting>
+
+Here, we create a variable <varname>outcome</varname> which refers to
+an outcome in the game.  This outcome is subsequently deleted from the
+game.  After that point, further attempts to reference the object
+<varname>outcome</varname> result in an exception.  The C++ equivalent code
+fragment would be
+
+<programlisting>
+Gambit::Game myGame = Gambit::NewTree();
+Gambit::GameOutcome outcome = myGame->NewOutcome();
+myGame->DeleteOutcome(outcome);
+std::string label = outcome->GetLabel();
+</programlisting>
+
+The last line would raise an exception of type
+<classname>Gambit::NullException</classname>.
+</para>
+
+
+</sect2>
 
 </sect1>
 
