@@ -130,8 +130,134 @@ idioms provided, to make this migration easier.
 <title>Games</title>
 
 <para>
+All games, whether represented in extensive or strategic form, are
+handled by the C++ classes <classname>Game</classname> and
+<classname>GameRep</classname>.  The classes which represent games
+and parts thereof uses the pointer-to-implementation (pimpl) idiom.
+Client code will generally refer to objects of type
+<classname>Game</classname>.  This is a smart-pointer class containing
+a pointer to the representation class <classname>GameRep</classname>.
+For example, to create a new game with
+an extensive (tree) representation in C++, set its title, and print
+out that title:
+
+<programlisting>
+#include &lt;iostream>
+#include "libgambit/libgambit.h"
+
+main()
+{
+  Gambit::Game myGame = Gambit::NewTree();
+  myGame->SetTitle("Hello, World!");
+  std::cout << myGame->GetTitle() << std::endl;
+}
+</programlisting>
+
+Note that the object myGame has pointer semantics.  If it points to
+a null or invalid pointer, attempting to dereference it will throw
+a C++ exception of class <classname>Gambit::NullException</classname>.
+Assignment of one <classname>Game</classname> to another also has
+pointer semantics; both objects will refer to the same physical game.
+Also, objects of class <classname>Game</classname> handle reference-counting,
+which is decremented when the object goes out of scope.  Thus, in the
+above example, the game created is automatically deallocated when the
+last <classname>Game</classname> referencing it goes away at the end
+of main().
+</para>
+
+<para>
+The parallel code for Python users is
+
+<programlisting>
+import gambit
+
+myGame = gambit.NewTree()
+myGame.SetTitle("Hello, World!")
+print myGame.GetTitle()
+</programlisting>
+</para>
+
+<para>
+Constructing a game in strategic form requires specifying an initial
+dimension for the game.  In C++, this is done using an 
+<classname>Array</classname> of type <classname>int</classname>. For
+a two-player game where the first player has 2 strategies and the second
+player 3 strategies, 
+
+<programlisting>
+Gambit::Array&lt;int> dim(2);
+dim[1] = 2;
+dim[2] = 3;
+Gambit::Game myGame = Gambit::NewTable(dim);
+</programlisting>
+
+In Python, it's a little simpler, since a Python list can be used
+directly:
+
+<programlisting>
+myGame = gambit.NewTable([2,3])
+</programlisting>
 
 </para>
+
+<para>
+As just noted, Gambit games can be expressed in either extensive or
+strategic representation.  Games in extensive representation can only
+be built or modified using functions appropriate to game trees, and
+games in strategic representation can only use functions appropriate
+to setting the payoffs associated with each strategy vector.
+For games in extensive representation, Gambit
+can compute the reduced strategic representation.  This is done
+by calling <function>BuildComputedValues</function> on the
+game object.  The computed reduced strategy sets are cached internally
+until any structural changes in the game tree are made, at which point
+the cached values are cleared and <function>BuildComputedValues</function>
+must be called again to compute the revised reduced strategic
+representation.
+Note that the size of the reduced strategic representation
+of a game may increase very rapidly, so think carefully about building
+the reduced strategic representation for games of nontrivial size; 
+it is generally recommended to analyze extensive games directly
+in the extensive form where possible.
+</para>
+
+<para>
+After building a game, it is generally recommended to call
+<function>Canonicalize</function> on the game.  This function
+renumbers the nodes and information sets in the game in a regular way,
+such that two identical games will always have their elements numbered
+the same way, irrespective of the order of operations used to construct
+them.
+</para>
+
+<para>
+Games can also be read from a file.  A typical C++ usage might be
+
+<programlisting>
+Gambit::Game myGame;
+
+try {
+  std::ifstream f("mygame.efg");
+  myGame = Gambit::ReadGame(f);
+}
+except (Gambit::InvalidFileException) {
+  // report the error condition here
+}
+</programlisting>
+
+In the Python version, <function>ReadGame</function> takes a 
+string with the file contents, not the file object itself, and (currently)
+failure results in an <classname>RuntimeError</classname>:
+
+<programlisting>
+try:
+  myGame = gambit.ReadGame(file("mygame.efg").read())
+except RuntimeError:
+  # handle here
+</programlisting>
+
+</para>
+
 </sect1>
 
 <sect1 id="api.supports">
