@@ -1,7 +1,7 @@
 from distutils.core import setup, Extension
 
 setup(name="_gambit",
-      version="0.2007.01.21",
+      version="0.2007.01.30",
       py_modules=["gambit"],
       description="Software tools for game theory",
       author="The Gambit Project",
