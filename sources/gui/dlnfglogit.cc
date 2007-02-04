@@ -720,7 +720,12 @@ void LogitMixedDialog::Start(void)
   m_process = new wxProcess(this, GBT_ID_PROCESS);
   m_process->Redirect();
 
+#ifdef __WXMAC__
+  m_pid = wxExecute(wxT("/usr/local/bin/gambit-logit -S"),
+                    wxEXEC_ASYNC, m_process);
+#else
   m_pid = wxExecute(wxT("gambit-logit -S"), wxEXEC_ASYNC, m_process);
+#endif // __WXMAC__
   
   std::ostringstream s;
   m_doc->GetGame()->WriteNfgFile(s);

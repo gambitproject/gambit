@@ -155,7 +155,13 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand(void) const
   wxString method = m_methodChoice->GetStringSelection();
 
   wxString prefix, options, game, count;
+#ifdef __WXMAC__
+  // For the moment, Mac assumes the command-line tools are in /usr/local
+  prefix = wxT("/usr/local/bin/gambit-");
+#else
   prefix = wxT("gambit-");
+#endif  // __WXMAC__
+
   if (useEfg) {
     game = wxT("in extensive game");
   }
