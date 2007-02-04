@@ -247,7 +247,7 @@ END_EVENT_TABLE()
 //---------------------------------------------------------------------
 
 gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxFrame(p_parent, -1, _T(""), wxPoint(0, 0), wxSize(800, 600)),
+  : wxFrame(p_parent, -1, _T(""), wxDefaultPosition, wxSize(800, 600)),
     gbtGameView(p_doc)    
 {
 #if defined( __WXMSW__)
