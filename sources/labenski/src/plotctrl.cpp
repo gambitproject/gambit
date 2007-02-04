@@ -2251,6 +2251,43 @@ void wxPlotCtrl::SetFixAspectRatio(bool fix, double ratio)
     m_aspectratio = ratio;
 }
 
+#ifdef __WXMAC__
+// When building on Mac with wx 2.8.0, both double and wxDouble versions
+// appear to be needed.
+void wxPlotCtrl::FixAspectRatio( double *zoom_x, double *zoom_y, wxDouble *origin_x, wxDouble *origin_y )
+{
+    wxCHECK_RET(zoom_x && zoom_y && origin_x && origin_y, wxT("Invalid parameters"));
+
+    //get the width and height of the view in plot coordinates
+    double viewWidth = m_areaClientRect.width / (*zoom_x);
+    double viewHeight = m_areaClientRect.height / (*zoom_y);
+
+    //get the centre of the visible area in plot coordinates
+    double xCentre = (*origin_x) + viewWidth / 2;
+    double yCentre = (*origin_y) + viewHeight / 2;
+
+    //if zoom in one direction is more than in the other, reduce both to the lower value
+    if( (*zoom_x) * m_aspectratio > (*zoom_y) )
+    {
+        (*zoom_x) = (*zoom_y) * m_aspectratio;
+        (*zoom_y) = (*zoom_y);
+    }
+    else
+    {
+        (*zoom_x) = (*zoom_x);
+        (*zoom_y) = (*zoom_x) / m_aspectratio;
+    }
+
+    //update the plot coordinate view width and height based on the new zooms
+    viewWidth = m_areaClientRect.width / (*zoom_x);
+    viewHeight = m_areaClientRect.height / (*zoom_y);
+
+    //create the new bottom-left corner of the view in plot coordinates
+    *origin_x = xCentre - (viewWidth / 2);
+    *origin_y = yCentre - (viewHeight / 2);
+}
+#endif // __WXMAC__
+
 void wxPlotCtrl::FixAspectRatio( double *zoom_x, double *zoom_y, double *origin_x, double *origin_y )
 {
     wxCHECK_RET(zoom_x && zoom_y && origin_x && origin_y, wxT("Invalid parameters"));

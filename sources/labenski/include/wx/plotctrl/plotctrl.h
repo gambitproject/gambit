@@ -490,6 +490,9 @@ public:
     //  to calculate the other.
     void SetFixAspectRatio(bool fix, double ratio = 1.0);
     void FixAspectRatio( double *zoom_x, double *zoom_y, double *origin_x, double *origin_y );
+#ifdef __WXMAC__
+    void FixAspectRatio( double *zoom_x, double *zoom_y, wxDouble *origin_x, wxDouble *origin_y );
+#endif // __WXMAC__
 
     // ------------------------------------------------------------------------
     // Mouse Functions for the area window
