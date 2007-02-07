@@ -220,7 +220,14 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
     return false;
   }
 
-  TiXmlNode *game = doc.FirstChild("game");
+  TiXmlNode *docroot = doc.FirstChild("gambit:document");
+
+  if (!docroot) {
+    // This is an "old-style" file that didn't have a proper root.
+    docroot = &doc;
+  }
+
+  TiXmlNode *game = docroot->FirstChild("game");
   if (!game) {
     // There ought to be at least one game child.  If not... umm...
     return false;
@@ -292,15 +299,15 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
 
   m_currentProfileList = m_profiles.Length();
 
-  TiXmlNode *colors = doc.FirstChild("colors");
+  TiXmlNode *colors = docroot->FirstChild("colors");
   if (colors)  m_style.SetColorXML(colors);
-  TiXmlNode *font = doc.FirstChild("font");
+  TiXmlNode *font = docroot->FirstChild("font");
   if (font)    m_style.SetFontXML(font);
-  TiXmlNode *layout = doc.FirstChild("autolayout");
+  TiXmlNode *layout = docroot->FirstChild("autolayout");
   if (layout)  m_style.SetLayoutXML(layout);
-  TiXmlNode *labels = doc.FirstChild("labels");
+  TiXmlNode *labels = docroot->FirstChild("labels");
   if (labels)  m_style.SetLabelXML(labels);
-  TiXmlNode *numbers = doc.FirstChild("numbers");
+  TiXmlNode *numbers = docroot->FirstChild("numbers");
   if (numbers) {
     int numDecimals = 4;
     numbers->ToElement()->QueryIntAttribute("decimals", &numDecimals);
@@ -318,7 +325,9 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
 
 void gbtGameDocument::SaveDocument(std::ostream &p_file) const
 {
-  p_file << "<?xml version=\"1.0\" standalone=no>\n";
+  p_file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+
+  p_file << "<gambit:document xmlns:gambit=\"http://gambit.sourceforge.net/\" version=\"0.1\">\n";
 
   p_file << m_style.GetColorXML();
   p_file << m_style.GetFontXML();
@@ -350,6 +359,7 @@ void gbtGameDocument::SaveDocument(std::ostream &p_file) const
 
   p_file << "</game>\n";
 
+  p_file << "</gambit:document>\n";
 }
 
 void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
