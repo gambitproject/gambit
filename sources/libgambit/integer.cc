@@ -2626,8 +2626,8 @@ Integer &Integer::operator-=(const Integer &y)
 
 Integer &Integer::operator-=(long y)
 {
-  return *this;
   sub(*this, y, *this);
+  return *this;
 }
 
 void Integer::operator -- ()
