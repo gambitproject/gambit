@@ -121,30 +121,30 @@ AC_SUBST(WX_LIBS)
 REZFLAGS=`echo $CXXFLAGS $WX_CXXFLAGS | sed 's/-mthreads//g' | sed 's/-g//g' | sed 's/-O. / /g' | sed 's/-I/--include-dir /g'`
 AC_SUBST(REZFLAGS)
 
-AC_OUTPUT(Makefile sources/Makefile \
-          sources/libgambit/Makefile \
-	  sources/tools/Makefile \
-	  sources/tools/convert/Makefile \
-	  sources/tools/enummixed/Makefile \
-	  sources/tools/enumpoly/Makefile \
-	  sources/tools/enumpure/Makefile \
-          sources/tools/gt/Makefile \
-	  sources/tools/lcp/Makefile \
-	  sources/tools/liap/Makefile \
-	  sources/tools/logit/Makefile \
-	  sources/tools/lp/Makefile \
-	  sources/tools/simpdiv/Makefile \
-          sources/labenski/Makefile \
-          sources/labenski/art/Makefile \
-          sources/labenski/include/Makefile \
-          sources/labenski/include/wx/Makefile \
-          sources/labenski/include/wx/wxthings/bitmaps/Makefile \
-          sources/labenski/include/wx/wxthings/Makefile \
-          sources/labenski/include/wx/sheet/Makefile \
-          sources/labenski/include/wx/plotctrl/Makefile \
-          sources/labenski/src/Makefile \
-          sources/labenski/doc/Makefile \
-	  sources/gui/bitmaps/Makefile \
-          sources/gui/Makefile \
-          doc/Makefile efg/Makefile nfg/Makefile)
+AC_OUTPUT(Makefile sources/Makefile
+	sources/libgambit/Makefile
+	sources/tools/Makefile
+	sources/tools/convert/Makefile
+	sources/tools/enummixed/Makefile
+	sources/tools/enumpoly/Makefile
+	sources/tools/enumpure/Makefile
+	sources/tools/gt/Makefile
+	sources/tools/lcp/Makefile
+	sources/tools/liap/Makefile
+	sources/tools/logit/Makefile
+	sources/tools/lp/Makefile
+	sources/tools/simpdiv/Makefile
+	sources/labenski/Makefile
+	sources/labenski/art/Makefile
+	sources/labenski/include/Makefile
+	sources/labenski/include/wx/Makefile
+	sources/labenski/include/wx/wxthings/bitmaps/Makefile
+	sources/labenski/include/wx/wxthings/Makefile
+	sources/labenski/include/wx/sheet/Makefile
+	sources/labenski/include/wx/plotctrl/Makefile
+	sources/labenski/src/Makefile
+	sources/labenski/doc/Makefile
+	sources/gui/bitmaps/Makefile
+	sources/gui/Makefile
+	doc/Makefile efg/Makefile nfg/Makefile)
 
