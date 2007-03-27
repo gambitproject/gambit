@@ -251,13 +251,16 @@ except (Gambit::InvalidFileException) {
 }
 </programlisting>
 
-In the Python version, <function>ReadGame</function> takes a 
-string with the file contents, not the file object itself, and (currently)
-failure results in an <classname>RuntimeError</classname>:
+In the Python version, <function>ReadGame</function> can be called two ways.
+It accepts a string object in either game file format, or, alternately,
+any object with a <function>.read()</function> member.  Thus, it can be
+called with a Python file object, or any other Python object that acts
+&quot;like a file.&quot;
+If the contents of the string or file are invalid, a <classname>RuntimeError</classname> occurs, so handling errors should be done via the recipe
 
 <programlisting>
 try:
-  myGame = gambit.ReadGame(file("mygame.efg").read())
+  myGame = gambit.ReadGame(file("mygame.efg"))
 except RuntimeError:
   # handle here
 </programlisting>

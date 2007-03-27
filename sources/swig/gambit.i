@@ -189,8 +189,6 @@ using namespace Gambit;
 
 %ignore *::operator!;
 
-%ignore Gambit::ReadGame(std::istream &) throw(InvalidFileException);
-
 %include <libgambit/game.h>
 
 %ignore Gambit::GameObjectPtr<Gambit::GameOutcomeRep>::operator Gambit::GameOutcomeRep *;
@@ -284,16 +282,46 @@ using namespace Gambit;
 %template(Game) Gambit::GameObjectPtr<Gambit::GameRep>;
 
 
+//========================================================================
+//                             Reading games
+//========================================================================
+
+//
+// We strive here to be a bit Pythonic, and to deal with some SWIG
+// complications.
+// 
+// First, there's no convenient way to get an std::istream from a Python
+// file object.  Thus, we disable the wrapping of the ReadGame() function
+// from the C++ API, and replace it with a ReadGame() function that
+// acts Pythonic.  It accepts either a string object, in which case it
+// simply parses that as if it were the contents of the file, or any
+// object that has a .read() member, in which case it assumes that
+// .read() returns the contents of the object as a game file.
+//
+
+%ignore Gambit::ReadGame(std::istream &) throw(InvalidFileException);
+
 %{
-Gambit::Game ReadGame(const std::string &p_string)
+Gambit::Game ReadGameString(const std::string &p_string)
 {
   std::istringstream s(p_string);
   return Gambit::ReadGame(s);
 }
-
 %}
 
-Gambit::Game ReadGame(const std::string &);
+Gambit::Game ReadGameString(const std::string &p_string);
+
+%pythoncode %{
+def ReadGame(x):
+  if isinstance(x, str):
+    return ReadGameString(x)
+  else:
+    return ReadGameString(x.read())
+%}
+
+//========================================================================
+//                            Strategy profiles
+//========================================================================
 
 %include <libgambit/mixed.h>
 
