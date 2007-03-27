@@ -25,6 +25,7 @@
 //
 
 #include <iostream>
+#include <sstream>
 
 #include "libgambit.h"
 
@@ -895,6 +896,28 @@ GameRep::~GameRep()
        m_outcomes[outc++]->Invalidate());
 }
 
+///
+/// Creates a copy of the game as a new, separate GameRep object.
+/// 
+/// NOTE: For now, this takes the "easy" way of writing the game out
+/// in text representation, and reading it back in.  For most applications,
+/// this would be adequate performance.  However, it might be nice someday
+/// to directly do the copying without going through the text translation.
+///
+Game GameRep::Copy(void) const
+{
+  std::ostringstream os;
+
+  if (m_root) {
+    WriteEfgFile(os);
+  }
+  else {
+    WriteNfgFile(os);
+  }
+
+  std::istringstream is(os.str());
+  return ReadGame(is);
+}
 
 //------------------------------------------------------------------------
 //                     GameRep: General data access

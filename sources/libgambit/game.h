@@ -660,6 +660,8 @@ public:
   GameRep(const Array<int> &p_dim);
   /// Clean up the game
   virtual ~GameRep();
+  /// Create a copy of the game, as a new game
+  Game Copy(void) const;
   //@}
 
   /// @name General data access

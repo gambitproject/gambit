@@ -303,6 +303,22 @@ file("mygamecopy.nfg", "w").write(myGame.AsNfgFile())
 
 </para>
 
+<para>
+Finally, remember that assignment semantics for games are reference
+semantics.  That is, if <varname>g</varname> is a game, then the assignment
+<literal>h = g</literal> results in <varname>g</varname> and
+<varname>h</varname> pointing to the same physical game object in memory.
+To make a copy of a game, use the member <function>Copy</function>:
+
+<programlisting>
+std::ifstream f("mygame.efg");
+Gambit::Game g = Gambit::ReadGame(f);
+Gambit::Game h = g;               // 'h' now points to the same game as 'g'
+Gambit::Game gCopy = g->Copy();   // 'gCopy' points to a true copy of 'g'
+</programlisting>
+
+</para>
+
 </sect2>
 
 <sect2 id="api.games.parts">
