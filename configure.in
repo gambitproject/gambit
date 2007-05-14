@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(sources/libgambit/libgambit.h)
-AM_INIT_AUTOMAKE(gambit, 0.2007.01.30)
+AM_INIT_AUTOMAKE(gambit, 0.2007.05.14)
 dnl AM_CONFIG_HEADER(config.h)
 
 dnl User-specified options
@@ -48,7 +48,7 @@ if test "${WITH_GUI}" == 1; then
   WX_PATH_WXCONFIG(2.6.0, WXCONFIG=1)
   if test "$WXCONFIG" != 1; then
       AC_MSG_WARN([
-            Did not find a version of wxWidgets; disabling build of
+            Did not find a new enough version of wxWidgets; disabling build of
             graphical interface.  If you want to build the graphical interface,
             please check that wx-config is in path, the directory
             where wxWidgets libraries are installed (returned by
@@ -56,7 +56,14 @@ if test "${WITH_GUI}" == 1; then
             equivalent variable and wxWidgets is version 2.6.0 or above.
       ])
       GUI_DIRS=""
+      WITH_GUI=0
   fi
+fi
+
+if test "${WITH_GUI}" == 1; then
+  dnl-----------------------------
+  dnl Checking for wxWidgets port
+  dnl-----------------------------
 
   AC_MSG_CHECKING(for wxWidgets port)
   if test `echo ${WX_CXXFLAGS} | grep -c __WXX11__` -eq 1; then
