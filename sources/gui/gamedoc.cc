@@ -139,8 +139,9 @@ void gbtStrategyDominanceStack::SetStrict(bool p_strict)
 void gbtStrategyDominanceStack::Reset(void)
 {
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
+  m_supports = Gambit::Array<Gambit::StrategySupport *>();
+
   if (m_doc->GetGame()->HasComputedValues()) {
-    m_supports = Gambit::Array<Gambit::StrategySupport *>();
     m_supports.Append(new Gambit::StrategySupport(m_doc->GetGame()));
     m_current = 1;
     m_noFurther = false;
