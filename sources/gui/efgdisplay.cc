@@ -114,7 +114,6 @@ private:
 public:
   gbtPlayerDropTarget(gbtEfgDisplay *p_owner) { m_owner = p_owner; }
 
-  wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
   bool OnDropText(wxCoord x, wxCoord y, const wxString &p_text);
 };
 
@@ -139,35 +138,6 @@ static Gambit::GameNode GetNode(Gambit::GameNode p_node, int p_id)
   }
 }
 
-wxDragResult 
-gbtPlayerDropTarget::OnDragOver(wxCoord p_x, wxCoord p_y, wxDragResult p_def)
-{
-  Gambit::Game efg = m_owner->GetDocument()->GetGame();
-
-  int x, y;
-#if defined( __WXMSW__)
-  // The +12 here is designed to effectively make the hot spot on
-  // the cursor the center of the cursor image (they're currently
-  // 24 pixels wide).
-  m_owner->CalcUnscrolledPosition(p_x + 12, p_y + 12, &x, &y);
-#else
-  // Under GTK, there is an angle in the upper left-hand corner which
-  // serves to identify the hot spot.  Thus, no adjustment is used
-  m_owner->CalcUnscrolledPosition(p_x, p_y, &x, &y);
-#endif  // __WXMSW__ or defined(__WXMAC__)
-
-  x = (int) ((float) x / (.01 * m_owner->GetZoom()));
-  y = (int) ((float) y / (.01 * m_owner->GetZoom()));
-
-  Gambit::GameNode node = m_owner->GetLayout().NodeHitTest(x, y);
-
-  if (node) {
-    printf("We are over a node at (%d,%d)\n", p_x, p_y);
-  }
-
-  return p_def;
-}
-
 bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
 				     const wxString &p_text)
 {
@@ -189,10 +159,6 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
   y = (int) ((float) y / (.01 * m_owner->GetZoom()));
 
   Gambit::GameNode node = m_owner->GetLayout().NodeHitTest(x, y);
-
-  if (node) {
-    printf("Dropped something on node at (%d,%d)\n", p_x, p_y);
-  }
 
   if (node) {
     switch (p_text[0]) {
