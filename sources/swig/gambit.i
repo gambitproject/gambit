@@ -277,6 +277,15 @@ using namespace Gambit;
 
   MixedStrategyProfile<double> NewMixedStrategyDouble(void)
   { return MixedStrategyProfile<double>(StrategySupport(self)); }
+
+  MixedStrategyProfile<Gambit::Rational> NewMixedStrategyRational(void)
+  { return MixedStrategyProfile<Gambit::Rational>(StrategySupport(self)); }
+
+  MixedBehavProfile<double> NewMixedBehavDouble(void)
+  { return MixedBehavProfile<double>(BehavSupport(self)); }
+
+  MixedBehavProfile<Gambit::Rational> NewMixedBehavRational(void)
+  { return MixedBehavProfile<Gambit::Rational>(BehavSupport(self)); }
 }
 
 %template(Game) Gambit::GameObjectPtr<Gambit::GameRep>;
@@ -361,6 +370,12 @@ public:
 
 %include <libgambit/behav.h>
 
+%extend Gambit::MixedBehavProfile {
+  T __getitem__(int i) const { return (*self)[i]; }
+  T __getitem__(const GameAction &s) const { return (*self)(s); }
+  void __setitem__(int i, const T &value) { (*self)[i] = value; }
+  void __setitem__(const GameAction &s, const T &value) { (*self)(s) = value; }
+};
 
 %template(MixedBehavDouble) Gambit::MixedBehavProfile<double>;
 %template(MixedBehavRational) Gambit::MixedBehavProfile<Gambit::Rational>;
