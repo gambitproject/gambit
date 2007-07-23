@@ -34,6 +34,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #if defined(__GNUG__) && !defined(__APPLE_CC__)
 #pragma implementation
 #endif
+#include "libgambit.h"
 #include "rational.h"
 #include <math.h>
 #include <float.h>
@@ -520,7 +521,7 @@ std::string ToText(const Rational &r)
   return ret;
 }
 
-Rational ToRational(const std::string &f)
+Rational ToRational(const std::string &f) 
 {
   char ch = ' ';
   int sign = 1;
@@ -613,6 +614,10 @@ Rational ToRational(const std::string &f)
 	exponent -= 1;
       }
     }
+  }
+
+  if (ch != '\0') {
+    throw ValueException();
   }
 
   if (denom != 0) {

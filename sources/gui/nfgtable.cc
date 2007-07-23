@@ -650,7 +650,14 @@ void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords,
     profile.SetOutcome(outcome);
   }
   int player = ColToPlayer(p_coords.GetCol());
-  outcome->SetPayoff(player, (const char *) p_value.mb_str());
+  try {
+    outcome->SetPayoff(player, (const char *) p_value.mb_str());
+  }
+  catch (ValueException &) {
+    // For the moment, we will just silently discard edits which 
+    // give payoffs that are not valid numbers
+    return;
+  }
   m_doc->UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 

@@ -89,6 +89,13 @@ public:
   std::string GetDescription(void) const { return "Mismatched dimensions"; }
 };
 
+/// Exception thrown on invalid value
+class ValueException : public Exception {
+public:
+  virtual ~ValueException() { }
+  std::string GetDescription(void) const { return "Invalid value"; }
+};
+
 /// Exception thrown on attempted division by zero
 class ZeroDivideException : public Exception {
 public:

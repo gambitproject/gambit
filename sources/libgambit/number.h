@@ -46,8 +46,10 @@ public:
   
   Number &operator=(const std::string &p_text)
   {
-    m_text = p_text;
+    // We call ToRational() first because it throws a ValueException
+    // if the conversion of the text fails
     m_rational = ToRational(p_text);
+    m_text = p_text;
     m_double = (double) m_rational;
     return *this; 
   }

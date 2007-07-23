@@ -27,6 +27,7 @@
 #ifndef INTERVAL_H
 #define INTERVAL_H
 
+#include "libgambit/libgambit.h"
 #include "libgambit/rational.h"
 
 /* This file provides the template class

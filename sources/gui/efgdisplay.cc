@@ -436,8 +436,15 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
       
       Gambit::GameOutcome outcome = m_payoffEditor->GetOutcome();
       int player = m_payoffEditor->GetPlayer();
-      outcome->SetPayoff(player, 
-			 (const char *) m_payoffEditor->GetValue().mb_str());
+      try {
+	outcome->SetPayoff(player, 
+			   (const char *) m_payoffEditor->GetValue().mb_str());
+      }
+      catch (ValueException &) {
+	// For the moment, we will just silently discard edits which 
+	// give payoffs that are not valid numbers
+	return;
+      }
 
       // When we update views, the node entries get redone...
       Gambit::GameNode node = m_payoffEditor->GetEntry()->GetNode();
@@ -542,8 +549,15 @@ void gbtEfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
   m_payoffEditor->EndEdit();
   Gambit::GameOutcome outcome = m_payoffEditor->GetOutcome();
   int player = m_payoffEditor->GetPlayer();
-  outcome->SetPayoff(player, 
-		     (const char *) m_payoffEditor->GetValue().mb_str());
+  try {
+    outcome->SetPayoff(player, 
+		       (const char *) m_payoffEditor->GetValue().mb_str());
+  }
+  catch (ValueException &) {
+    // For the moment, we will just silently discard edits which 
+    // give payoffs that are not valid numbers
+    return;
+  }
   m_doc->UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
