@@ -174,7 +174,7 @@ private:
 public:
   /// @name Lifecycle
   //@{
-  /// Constructor
+  /// Constructorw
   gbtRowPlayerWidget(gbtTableWidget *p_parent, gbtGameDocument *p_doc);
   //@}
 
@@ -209,7 +209,7 @@ gbtRowPlayerWidget::gbtRowPlayerWidget(gbtTableWidget *p_parent,
 
 void gbtRowPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
 {
-  if (m_table->NumRowPlayers() == 0) {
+  if (m_table->NumRowPlayers() == 0 || m_doc->GetGame()->IsTree()) {
     p_event.Skip();
     return;
   }
@@ -380,6 +380,8 @@ private:
   void DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords);
   //@}  
 
+  void OnCellRightClick(wxSheetEvent &);
+
 public:
   /// @name Lifecycle
   //@{
@@ -411,6 +413,27 @@ gbtColPlayerWidget::gbtColPlayerWidget(gbtTableWidget *p_parent,
   SetBackgroundColour(*wxLIGHT_GREY);
 
   SetDropTarget(new gbtTableWidgetDropTarget(this));
+
+  Connect(GetId(), wxEVT_SHEET_CELL_RIGHT_DOWN,
+	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtColPlayerWidget::OnCellRightClick)));
+
+}
+
+void gbtColPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
+{
+  if (m_table->NumColPlayers() == 0 || m_doc->GetGame()->IsTree()) {
+    p_event.Skip();
+    return;
+  }
+
+  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  wxSheetCoords coords = p_event.GetCoords();
+
+  int player = m_table->GetColPlayer(coords.GetRow() + 1);
+  int strat = m_table->RowToStrategy(coords.GetRow() + 1, coords.GetCol());
+
+  support.GetStrategy(player, strat)->DeleteStrategy();
+  m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtColPlayerWidget::OnUpdate(void)
