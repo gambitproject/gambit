@@ -308,6 +308,7 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      compute using floating-point arithmetic;\n";
   std::cerr << "                   display results with DECIMALS digits\n";
   std::cerr << "  -D               don't eliminate dominated strategies first\n";
+  std::cerr << "  -L               use lrslib for enumeration (experimental!)\n";
   std::cerr << "  -c               output connectedness information\n";
   std::cerr << "  -h               print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
@@ -317,7 +318,7 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   int c;
-  bool useFloat = false, quiet = false, eliminate = true;
+  bool useFloat = false, uselrs = false, quiet = false, eliminate = true;
 
   while ((c = getopt(argc, argv, "d:DhqcS")) != -1) {
     switch (c) {
@@ -327,6 +328,9 @@ int main(int argc, char *argv[])
       break;
     case 'D':
       eliminate = false;
+      break;
+    case 'L':
+      uselrs = true;
       break;
     case 'h':
       PrintHelp(argv[0]);
@@ -375,12 +379,14 @@ int main(int argc, char *argv[])
       }
     }
 
-    if (useFloat) {
+    if (uselrs) {
+      LrsSolve(support);
+    }
+    else if (useFloat) {
       Solve<double>(support);
     }
     else {
-      //Solve<Rational>(support);
-      LrsSolve(support);
+      Solve<Rational>(support);
     }
     return 0;
   }
