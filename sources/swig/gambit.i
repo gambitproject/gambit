@@ -49,6 +49,9 @@ using namespace Gambit;
   catch (Gambit::NullException &) {
     SWIG_exception(SWIG_RuntimeError, "operating on null object");
   }
+  catch (Gambit::ValueException &) {
+    SWIG_exception(SWIG_ValueError, "invalid value");
+  }
   catch (...) {
     SWIG_exception(SWIG_RuntimeError, "uncaught runtime error");
   }
@@ -167,6 +170,13 @@ using namespace Gambit;
   Rational operator-=(double y)   { return *self -= Rational(y); }
   Rational operator*=(double y)   { return *self *= Rational(y); }
   Rational operator/=(double y)   { return *self /= Rational(y); }
+
+  bool operator==(int y) const    { return *self == Rational(y); }
+  bool operator!=(int y) const    { return *self != Rational(y); }
+  bool operator> (int y) const    { return *self >  Rational(y); }
+  bool operator>=(int y) const    { return *self >= Rational(y); }
+  bool operator< (int y) const    { return *self <  Rational(y); }
+  bool operator<=(int y) const    { return *self <= Rational(y); }
 
 
   // Additional Python operators
