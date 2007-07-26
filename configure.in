@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(sources/libgambit/libgambit.h)
+AC_INIT(src/libgambit/libgambit.h)
 AM_INIT_AUTOMAKE(gambit, 0.2007.06.16)
 dnl AM_CONFIG_HEADER(config.h)
 
@@ -128,31 +128,31 @@ AC_SUBST(WX_LIBS)
 REZFLAGS=`echo $CXXFLAGS $WX_CXXFLAGS | sed 's/-mthreads//g' | sed 's/-g//g' | sed 's/-O. / /g' | sed 's/-I/--include-dir /g'`
 AC_SUBST(REZFLAGS)
 
-AC_OUTPUT(Makefile sources/Makefile
-	sources/libgambit/Makefile
-	sources/tools/Makefile
-	sources/tools/convert/Makefile
-	sources/tools/enummixed/Makefile
-	sources/tools/enumpoly/Makefile
-	sources/tools/enumpure/Makefile
-	sources/tools/gt/Makefile
-	sources/tools/lcp/Makefile
-	sources/tools/liap/Makefile
-	sources/tools/logit/Makefile
-	sources/tools/lp/Makefile
-	sources/tools/simpdiv/Makefile
-	sources/labenski/Makefile
-	sources/labenski/art/Makefile
-	sources/labenski/include/Makefile
-	sources/labenski/include/wx/Makefile
-	sources/labenski/include/wx/wxthings/bitmaps/Makefile
-	sources/labenski/include/wx/wxthings/Makefile
-	sources/labenski/include/wx/sheet/Makefile
-	sources/labenski/include/wx/plotctrl/Makefile
-	sources/labenski/src/Makefile
-	sources/labenski/doc/Makefile
-	sources/gui/bitmaps/Makefile
-	sources/gui/Makefile
+AC_OUTPUT(Makefile src/Makefile
+	src/libgambit/Makefile
+	src/tools/Makefile
+	src/tools/convert/Makefile
+	src/tools/enummixed/Makefile
+	src/tools/enumpoly/Makefile
+	src/tools/enumpure/Makefile
+	src/tools/gt/Makefile
+	src/tools/lcp/Makefile
+	src/tools/liap/Makefile
+	src/tools/logit/Makefile
+	src/tools/lp/Makefile
+	src/tools/simpdiv/Makefile
+	src/labenski/Makefile
+	src/labenski/art/Makefile
+	src/labenski/include/Makefile
+	src/labenski/include/wx/Makefile
+	src/labenski/include/wx/wxthings/bitmaps/Makefile
+	src/labenski/include/wx/wxthings/Makefile
+	src/labenski/include/wx/sheet/Makefile
+	src/labenski/include/wx/plotctrl/Makefile
+	src/labenski/src/Makefile
+	src/labenski/doc/Makefile
+	src/gui/bitmaps/Makefile
+	src/gui/Makefile
 	doc/Makefile 
         contrib/Makefile 
         contrib/games/Makefile 

@@ -4,7 +4,7 @@ SUBDIRS = bitmaps
 
 bin_PROGRAMS = gambit
 
-AM_CPPFLAGS = -I$(top_srcdir)/sources -I$(top_srcdir)/sources/labenski/include ${WX_CXXFLAGS}
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/labenski/include ${WX_CXXFLAGS}
 
 gambit_SOURCES = \
 	analysis.cc \
@@ -69,9 +69,9 @@ gambit_SOURCES = \
 
 gambit_LDADD = \
         $(RC_OBJECT_PATH) \
-	$(top_builddir)/sources/labenski/src/liblabenski.la \
+	$(top_builddir)/src/labenski/src/liblabenski.la \
 	$(WX_LIBS) \
-	$(top_builddir)/sources/libgambit/libgambit.la
+	$(top_builddir)/src/libgambit/libgambit.la
 
 
 
