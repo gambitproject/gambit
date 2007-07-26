@@ -7,6 +7,10 @@
 # automake input for sample scripts directory
 #
 
-SUBDIRS = enumpoly
+EXTRA_DIST = \
+	countsupport.py	\
+	enumphc.py \
+	phc.py \
+	setup.py \
+	README
 
-EXTRA_DIST = 

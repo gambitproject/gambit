@@ -1,0 +1,113 @@
+gambit-enumphc version 0.2007.03.12
+===================================
+
+This is the README for gambit-enumphc, which attempts to compute all
+(isolated) Nash equilibria of a strategic game by enumerating possible supports
+and solving the corresponding systems of polynomial equations.
+
+This program is similar in principle to the gambit-enumpoly program in
+the Gambit distribution.  It differs in practice in two (useful) ways:
+
+(1) The support enumeration method is slightly different (although it
+appears to produce identical output, just in a different order).
+The correctness of the implementation here has been established
+formally, in that it will (a) visit any support at most once, and 
+(b) visit any support that may harbor a Nash equilibrium.  It is somewhat
+more efficient than the implementation in gambit-enumpoly, although
+the support enumeration process is typically a small portion of the
+overall running time of this method.  Also, this implementation solves
+on each support as it is generated, as opposed to gambit-enumpoly, which
+first generates the list of candidate supports, and then solves them.
+
+(2) The backend is the PHCPACK solver of Jan Verschelde.  This program
+has been tested with version 2.3.24 of PHCPACK.  PHCPACK source, and
+binaries for several systems, can be obtained either from the main
+PHCPACK site at
+
+http://www.math.uic.edu/~jan/download.html
+
+or from the Gambit website
+
+http://econweb.tamu.edu/gambit/download.html
+
+The version of PHCPACK mirrored on the Gambit site has been tested with
+this program.  Newer versions of PHCPACK may be available from the
+main site; these should also work with this program, but there is always
+the possibility of incompatible changes in PHCPACK's output.
+
+The PHCPACK "black-box" solver for computing solutions to a system of
+polynomial equations, which is called by this program, is much more
+reliable than the polynomial system solver used in gambit-enumpoly.
+
+The program is written in Python, and has been tested with Python 2.4.
+It requires that the Gambit Python extension (available from the
+Gambit website) has been installed.  The program is invoked as
+
+python enumphc.py [options] < game.nfg
+
+Consult the gambit-enumpoly documentation for general information about
+the method; this program can be thought of as a "drop-in" replacement
+for that program (at least for strategic games).  What follows
+documents some differences and usage notes for this program.  Note that
+this program is still young, and may require some care and feeding in
+terms of the tolerances below.
+
+Additional options available:
+-p: Specify a prefix for the files used to communicate with PHCPACK.
+    In calling the PHCPACK executable, this program creates a file
+    with the polynomial system that is passed to PHCPACK, and PHCPACK
+    communicates the solutions back via another file.  If you run
+    multiple instances of this program at once, you will want to specify
+    different prefixes for these files to use.
+
+-t: Payoff tolerance.  There are typically many solutions to the system
+    of equations for a support that are not Nash equilibria.  Some of
+    these solutions fail to be Nash because a strategy not in the support
+    has a higher payoff than the strategies in the support.  This
+    parameter adjusts the tolerance for strategies with superior payoffs
+    outside the support; it defaults to 1.0e-6, meaning that a profile
+    is reported to be Nash even if there exists strategies with superior
+    payoffs outside the support, so long as the regret is no more than
+    1.0e-6.  Note that if your payoff scales are large, you will almost
+    certainly want to modify this (1.0e-6 seems about appropriate for
+    games whose payoffs are on [0, 10] or so).
+
+-n: Negative probability tolerance.  By default, any solution with a
+    negative probability, no matter how small, is not regarded as Nash.
+    Giving a number greater than zero for this parameter allows solutions
+    with negative probabilities no greater in magnitude than the parameter
+    to be considered Nash.
+
+Both the -t and -n parameters attempt to address situations in which the
+game being solved is "almost non-generic", in the sense that there is a
+nearby game that is degenerate.
+
+By default the program only reports equilibria found.  Using the -v
+command-line switch adds three additional pieces of information to the
+output:
+(1) candidate supports: as each support is visited, its contents are
+    output with the tag "candidate"
+(2) singular supports: If for any reason PHCPACK returns with an error
+    on a system, that support is flagged as "singular".  This might
+    indicate a bug in PHCPACK; more often, it may indicate that a game
+    is not generic, in that this support (or a closely related one) might
+    harbor a positive-dimensional continuum of equilibria.  The
+    program currently does not attempt to further characterize equilibria
+    on such supports (but hopes to do so in the future).
+(3) non-equilibrium profiles: All solutions to the system of equations
+    which are not Nash equilibria are reported, prefixed by the tag
+    "noneqm".  In addition, to these lines is appended the Lyapunov value
+    of the profile.  This is a nonnegative value which is zero exactly
+    at Nash equilibria.  Small values of the Lyapunov value might indicate
+    that the profile is in fact an approximate Nash equilibrium, i.e., 
+    there is in fact an equilibrium nearby, but the profile fails the
+    equilibrium test for numerical reasons.  This value can thus be used
+    as a diagnostic for setting the -t and -n parameters (above) appropriately.
+
+This program is described in "Towards a Black-Box Solver for Finte
+Games: Finding All Nash Equilibria with Gambit and PHCpack," which is
+available at
+
+http://econweb.tamu.edu/turocy/papers/enumpoly.html
+
+
