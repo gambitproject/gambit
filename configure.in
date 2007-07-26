@@ -153,5 +153,6 @@ AC_OUTPUT(Makefile sources/Makefile
 	sources/labenski/doc/Makefile
 	sources/gui/bitmaps/Makefile
 	sources/gui/Makefile
-	doc/Makefile efg/Makefile nfg/Makefile)
+	doc/Makefile 
+        contrib/Makefile contrib/games/Makefile contrib/scripts/Makefile)
 
