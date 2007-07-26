@@ -1,0 +1,9 @@
+This is a preliminary implementation of the tracing procedure to compute
+one proper equilibrium, described in Yamamoto's 1993 IJGT article.
+
+The tracing implementation needs redone to a predictor-corrector method,
+using Newton's approach to finding the points at which the path is not
+differentiable.
+
+The included Makefile assumes that libgambit has been installed in a
+standard place (e.g., /usr/local).
