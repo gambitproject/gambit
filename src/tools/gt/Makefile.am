@@ -2,7 +2,7 @@
 
 bin_PROGRAMS = gambit-gnm gambit-ipa
 
-AM_CPPFLAGS = -I$(top_srcdir)/sources
+AM_CPPFLAGS = -I$(top_srcdir)/src
 
 gambit_gnm_SOURCES = \
 	cmatrix.cc cmatrix.h \
@@ -12,7 +12,7 @@ gambit_gnm_SOURCES = \
 	nfggnm.cc
 
 gambit_gnm_LDADD = \
-	$(top_builddir)/sources/libgambit/libgambit.la
+	$(top_builddir)/src/libgambit/libgambit.la
 
 
 gambit_ipa_SOURCES = \
@@ -23,7 +23,7 @@ gambit_ipa_SOURCES = \
 	nfgipa.cc
 
 gambit_ipa_LDADD = \
-	$(top_builddir)/sources/libgambit/libgambit.la
+	$(top_builddir)/src/libgambit/libgambit.la
 
 EXTRA_DIST = README
 

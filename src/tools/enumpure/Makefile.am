@@ -2,9 +2,9 @@
 
 bin_PROGRAMS = gambit-enumpure
 
-AM_CPPFLAGS = -I$(top_srcdir)/sources
+AM_CPPFLAGS = -I$(top_srcdir)/src
 
 gambit_enumpure_SOURCES = enumpure.cc
 
 gambit_enumpure_LDADD = \
-	$(top_builddir)/sources/libgambit/libgambit.la
+	$(top_builddir)/src/libgambit/libgambit.la

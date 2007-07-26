@@ -2,11 +2,11 @@
 
 bin_PROGRAMS = gambit-liap
 
-AM_CPPFLAGS = -I$(top_srcdir)/sources
+AM_CPPFLAGS = -I$(top_srcdir)/src
 
 gambit_liap_SOURCES = \
 	funcmin.cc funcmin.h \
 	efgliap.cc nfgliap.cc liap.cc
 
 gambit_liap_LDADD = \
-	$(top_builddir)/sources/libgambit/libgambit.la
+	$(top_builddir)/src/libgambit/libgambit.la

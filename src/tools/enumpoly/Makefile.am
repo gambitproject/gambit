@@ -78,7 +78,7 @@ libpoly_a_SOURCES = \
 
 bin_PROGRAMS = gambit-enumpoly
 
-AM_CPPFLAGS = -I$(top_srcdir)/sources
+AM_CPPFLAGS = -I$(top_srcdir)/src
 
 gambit_enumpoly_SOURCES = \
 	behavextend.cc behavextend.h \
@@ -95,4 +95,4 @@ gambit_enumpoly_SOURCES = \
 
 gambit_enumpoly_LDADD = \
 	libpoly.a libpelican.a \
-	$(top_builddir)/sources/libgambit/libgambit.la
+	$(top_builddir)/src/libgambit/libgambit.la

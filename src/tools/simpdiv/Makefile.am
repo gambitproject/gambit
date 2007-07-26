@@ -2,11 +2,11 @@
 
 bin_PROGRAMS = gambit-simpdiv
 
-AM_CPPFLAGS = -I$(top_srcdir)/sources
+AM_CPPFLAGS = -I$(top_srcdir)/src
 
 gambit_simpdiv_SOURCES = nfgsimpdiv.cc
 
 gambit_simpdiv_LDADD = \
-	$(top_builddir)/sources/libgambit/libgambit.la
+	$(top_builddir)/src/libgambit/libgambit.la
 
 

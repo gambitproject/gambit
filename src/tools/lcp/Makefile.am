@@ -2,7 +2,7 @@
 
 bin_PROGRAMS = gambit-lcp
 
-AM_CPPFLAGS = -I$(top_srcdir)/sources
+AM_CPPFLAGS = -I$(top_srcdir)/src
 
 gambit_lcp_SOURCES = \
 	basis.cc basis.h \
@@ -15,6 +15,6 @@ gambit_lcp_SOURCES = \
 	efglcp.cc nfglcp.cc lcp.cc
 
 gambit_lcp_LDADD = \
-	$(top_builddir)/sources/libgambit/libgambit.la
+	$(top_builddir)/src/libgambit/libgambit.la
 
 

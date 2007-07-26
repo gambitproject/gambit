@@ -2,7 +2,7 @@
 
 bin_PROGRAMS = gambit-enummixed
 
-AM_CPPFLAGS = -I$(top_srcdir)/sources
+AM_CPPFLAGS = -I$(top_srcdir)/src
 
 gambit_enummixed_SOURCES = \
 	lrsmp.h lrsmp.c lrslib.h lrslib.c lrsnash.cc \
@@ -28,5 +28,5 @@ gambit_enummixed_SOURCES = \
 	enummixed.cc
 
 gambit_enummixed_LDADD = \
-	$(top_builddir)/sources/libgambit/libgambit.la
+	$(top_builddir)/src/libgambit/libgambit.la
 
