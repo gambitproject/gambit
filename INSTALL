@@ -59,6 +59,28 @@ the C++ it accepts with that accepted by modern versions of gcc
 other compilers in Gambit if there are volunteers willing to contribute
 and maintain build systems for them.
 
+For OS X users
+--------------
+
+OS X users should follow the standard build instructions at the top
+of this file, with one exception.  At the last step, issue
+
+sudo make install-osx
+
+instead of 'sudo make install'.  This command does some extra steps to
+build the Gambit application framework and place it in /Applications, so
+it will play correctly with the OS X user interface.
+
+Note that while wxWidgets does come bundled with OS X, the version may
+not be new enough.  If you need to build wxWidgets yourself (see below),
+be sure to tell the ./configure step where to find the version you built
+by using the --with-wx-prefix parameter.  For example, if you install
+wxWidgets into /usr/local (the default when you build it), configure
+Gambit with
+
+./configure --with-wx-prefix=/usr/local
+
+
 The graphical interface and wxWidgets
 -------------------------------------
 
