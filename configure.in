@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(src/libgambit/libgambit.h)
-AM_INIT_AUTOMAKE(gambit, 0.2007.06.16)
+AM_INIT_AUTOMAKE(gambit, 0.2007.08.09)
 dnl AM_CONFIG_HEADER(config.h)
 
 dnl User-specified options
@@ -153,9 +153,9 @@ AC_OUTPUT(Makefile src/Makefile
 	src/labenski/doc/Makefile
 	src/gui/bitmaps/Makefile
 	src/gui/Makefile
-	doc/Makefile 
-        contrib/Makefile 
-        contrib/games/Makefile 
+	doc/Makefile
+        contrib/Makefile
+        contrib/games/Makefile
         contrib/scripts/Makefile
-        contrib/scripts/enumpoly/Makefile)
+	contrib/scripts/enumpoly/Makefile)
 

@@ -251,7 +251,7 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
     gbtGameView(p_doc)    
 {
 #if defined( __WXMSW__)
-  SetIcon(wxIcon("efg_icn"));
+  SetIcon(wxIcon(wxT("efg_icn")));
 #else
 #include "bitmaps/gambit.xpm"
   SetIcon(wxIcon(gambit_xpm));
