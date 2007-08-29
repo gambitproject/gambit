@@ -1,4 +1,6 @@
 ## Process this file with automake to create Makefile.in
 
-SUBDIRS = games mac scripts
+SUBDIRS = MacOS Resources
+
+EXTRA_DIST = Info.plist PkgInfo
 
