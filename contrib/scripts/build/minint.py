@@ -4,10 +4,10 @@
 #
 
 
-import gambit
+import gambit, sys
 
-K = 3
-N = 3
+K = int(sys.argv[2])
+N = int(sys.argv[1])
 nfg = gambit.NewTable([K for i in range(N)])
 
 # Pre-create outcomes.  Outcome 'i' is the outcome where player 'i' wins.

@@ -2,7 +2,7 @@
 
 SUBDIRS = convert \
 	enummixed \
-	enumpoly \
+	@ENUMPOLY_DIRS@ \
 	enumpure \
 	gt \
 	lcp \
