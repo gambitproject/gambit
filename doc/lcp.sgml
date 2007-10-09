@@ -80,6 +80,20 @@ expresses all output using decimal representations with
 </varlistentry>
 
 <varlistentry>
+<term><option>-D</option></term>
+<listitem>
+<para>
+Turn on output of detailed profile information.  For each equilibrium
+found, give a tabular listing of all action or strategy labels, the
+probability the action or strategy is played in equilibria, and the
+expected payoff to playing that action or strategy.  For behavior strategy
+profiles, also output information about beliefs at nodes where beliefs
+are well=defined.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term><option>-S</option></term>
 <listitem>
 <para>
