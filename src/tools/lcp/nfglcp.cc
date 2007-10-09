@@ -30,11 +30,14 @@
 #include "libgambit/libgambit.h"
 #include "lhtab.h"
 
+using namespace Gambit;
+
 extern int g_numDecimals;
+extern bool g_printDetail;
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const Gambit::MixedStrategyProfile<double> &p_profile)
+		  const MixedStrategyProfile<double> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -46,7 +49,7 @@ void PrintProfile(std::ostream &p_stream,
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const Gambit::MixedStrategyProfile<Gambit::Rational> &p_profile)
+		  const MixedStrategyProfile<Rational> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -57,14 +60,49 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
+template <class T>
+void PrintProfileDetail(std::ostream &p_stream,
+			const MixedStrategyProfile<T> &p_profile)
+{
+  char buffer[256];
 
-template <class T> Gambit::Matrix<T> Make_A1(const Gambit::StrategySupport &, 
+  for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
+    GamePlayer player = p_profile.GetGame()->GetPlayer(pl);
+    p_stream << "Strategy profile for player " << pl << ":\n";
+    
+    p_stream << "Strategy   Prob          Value\n";
+    p_stream << "-------    -----------   -----------\n";
+
+    for (int st = 1; st <= player->NumStrategies(); st++) {
+      GameStrategy strategy = player->GetStrategy(st);
+
+      if (strategy->GetLabel() != "") {
+	sprintf(buffer, "%7s    ", strategy->GetLabel().c_str());
+      }
+      else {
+	sprintf(buffer, "%7d   ", st);
+      }
+      p_stream << buffer;
+	
+      sprintf(buffer, "%11s   ", ToText(p_profile[strategy], g_numDecimals).c_str());
+      p_stream << buffer;
+
+      sprintf(buffer, "%11s   ", ToText(p_profile.GetStrategyValue(strategy), g_numDecimals).c_str());
+      p_stream << buffer;
+
+      p_stream << "\n";
+    }
+  }
+}
+
+
+template <class T> Matrix<T> Make_A1(const StrategySupport &, 
 				      const T &);
-template <class T> Gambit::Vector<T> Make_b1(const Gambit::StrategySupport &, 
+template <class T> Vector<T> Make_b1(const StrategySupport &, 
 				      const T &);
-template <class T> Gambit::Matrix<T> Make_A2(const Gambit::StrategySupport &,
+template <class T> Matrix<T> Make_A2(const StrategySupport &,
 				      const T &);
-template <class T> Gambit::Vector<T> Make_b2(const Gambit::StrategySupport &,
+template <class T> Vector<T> Make_b2(const StrategySupport &,
 				      const T &);
 
 
@@ -72,10 +110,10 @@ template <class T> class nfgLcp {
 private:
   int m_stopAfter, m_maxDepth;
 
-  int AddBfs(LHTableau<T> &, Gambit::List<BFS<T> > &);
-  void AddSolutions(const Gambit::StrategySupport &,
-		    const Gambit::List<BFS<T> > &, const T &);
-  void AllLemke(const Gambit::StrategySupport &, int, LHTableau<T> &B, Gambit::List<BFS<T> > &,
+  int AddBfs(LHTableau<T> &, List<BFS<T> > &);
+  void AddSolutions(const StrategySupport &,
+		    const List<BFS<T> > &, const T &);
+  void AllLemke(const StrategySupport &, int, LHTableau<T> &B, List<BFS<T> > &,
 		int depth);
   
 public:
@@ -88,7 +126,7 @@ public:
   int MaxDepth(void) const { return m_maxDepth; }
   void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
 
-  void Solve(const Gambit::StrategySupport &);
+  void Solve(const StrategySupport &);
 };
 
 //---------------------------------------------------------------------------
@@ -96,7 +134,7 @@ public:
 //---------------------------------------------------------------------------
 
 template <class T> 
-void nfgLcp<T>::Solve(const Gambit::StrategySupport &p_support)
+void nfgLcp<T>::Solve(const StrategySupport &p_support)
 {
   BFS<T> cbfs((T) 0);
 
@@ -104,13 +142,13 @@ void nfgLcp<T>::Solve(const Gambit::StrategySupport &p_support)
     return;
   }
 
-  Gambit::List<BFS<T> > bfsList;
+  List<BFS<T> > bfsList;
 
   try {
-    Gambit::Matrix<T> A1 = Make_A1(p_support, (T) 0);
-    Gambit::Vector<T> b1 = Make_b1(p_support, (T) 0);
-    Gambit::Matrix<T> A2 = Make_A2(p_support, (T) 0);
-    Gambit::Vector<T> b2 = Make_b2(p_support, (T) 0);
+    Matrix<T> A1 = Make_A1(p_support, (T) 0);
+    Vector<T> b1 = Make_b1(p_support, (T) 0);
+    Matrix<T> A2 = Make_A2(p_support, (T) 0);
+    Vector<T> b2 = Make_b2(p_support, (T) 0);
     LHTableau<T> B(A1,A2,b1,b2);
     if (m_stopAfter != 1) {
       AllLemke(p_support,0,B,bfsList,m_maxDepth);
@@ -131,7 +169,7 @@ void nfgLcp<T>::Solve(const Gambit::StrategySupport &p_support)
 }
 
 template <class T> int nfgLcp<T>::AddBfs(LHTableau<T> &p_tableau,
-					      Gambit::List<BFS<T> > &p_list)
+					      List<BFS<T> > &p_list)
 {
   BFS<T> cbfs((T) 0);
   cbfs = p_tableau.GetBFS();
@@ -150,9 +188,9 @@ template <class T> int nfgLcp<T>::AddBfs(LHTableau<T> &p_tableau,
 // From each new accessible equilibrium, it follows
 // all possible paths, adding any new equilibria to the List.  
 //
-template <class T> void nfgLcp<T>::AllLemke(const Gambit::StrategySupport &p_support,
+template <class T> void nfgLcp<T>::AllLemke(const StrategySupport &p_support,
 					    int j, LHTableau<T> &B,
-					    Gambit::List<BFS<T> > &p_list,
+					    List<BFS<T> > &p_list,
 					    int depth)
 {
   if (m_maxDepth != 0 && depth > m_maxDepth) {
@@ -177,8 +215,8 @@ template <class T> void nfgLcp<T>::AllLemke(const Gambit::StrategySupport &p_sup
 }
 
 template <class T>
-void nfgLcp<T>::AddSolutions(const Gambit::StrategySupport &p_support,
-			     const Gambit::List<BFS<T> > &p_list,
+void nfgLcp<T>::AddSolutions(const StrategySupport &p_support,
+			     const List<BFS<T> > &p_list,
 			     const T &epsilon)
 {
   int i,j;
@@ -186,7 +224,7 @@ void nfgLcp<T>::AddSolutions(const Gambit::StrategySupport &p_support,
   int n2 = p_support.NumStrategies(2);
 
   for (i = 1; i <= p_list.Length(); i++)    {
-    Gambit::MixedStrategyProfile<T> profile(p_support);
+    MixedStrategyProfile<T> profile(p_support);
     T sum = (T) 0;
 
     for (j = 1; j <= n1; j++)
@@ -220,6 +258,9 @@ void nfgLcp<T>::AddSolutions(const Gambit::StrategySupport &p_support,
       }
     }
     PrintProfile(std::cout, "NE", profile);
+    if (g_printDetail) {
+      PrintProfileDetail(std::cout, profile);
+    }
   }
 }
 
@@ -234,13 +275,13 @@ nfgLcp<T>::nfgLcp(void)
 
 
 template <class T>
-void SolveStrategic(const Gambit::Game &p_game)
+void SolveStrategic(const Game &p_game)
 {
   nfgLcp<T> algorithm;
   algorithm.Solve(p_game);
 }
 
-template void SolveStrategic<double>(const Gambit::Game &);
-template void SolveStrategic<Gambit::Rational>(const Gambit::Game &);
+template void SolveStrategic<double>(const Game &);
+template void SolveStrategic<Rational>(const Game &);
 
 
