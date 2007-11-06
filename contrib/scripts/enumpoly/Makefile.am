@@ -9,7 +9,7 @@
 
 EXTRA_DIST = \
 	countsupport.py	\
-	enumphc.py \
+	enumpoly.py \
 	phc.py \
 	setup.py \
 	README
