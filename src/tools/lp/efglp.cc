@@ -41,7 +41,14 @@ extern int g_numDecimals;
 struct GameData {
   int ns1, ns2, ni1, ni2;
   Rational minpay;
-  List<GameInfoset> isets1, isets2;
+  PVector<int> infosetIndex, infosetOffset;
+  
+  GameData(const Game &p_game)
+    : infosetIndex(p_game->NumInfosets()), infosetOffset(p_game->NumInfosets())
+  {
+    infosetIndex = 0;
+    infosetOffset = 0;
+  }
 };
 
 
@@ -74,11 +81,8 @@ void BuildConstraintMatrix(GameData &p_data,
     }
   }
   else if (n->GetPlayer()->GetNumber() == 1) {
-    i1 = p_data.isets1.Find(n->GetInfoset());
-    int snew = 1;
-    for (int i = 1; i < i1; i++) {
-      snew += p_support.NumActions(p_data.isets1[i]);
-    }
+    i1 = p_data.infosetIndex(1, n->GetInfoset()->GetNumber());
+    int snew = p_data.infosetOffset(1, n->GetInfoset()->GetNumber());
     A(s1, p_data.ns2+i1+1) = (T) 1;
     for (int i = 1; i <= p_support.NumActions(n->GetInfoset()); i++) {
       A(snew+i, p_data.ns2+i1+1) = (T) -1;
@@ -88,11 +92,8 @@ void BuildConstraintMatrix(GameData &p_data,
     }
   }
   else {  // Must be player 2
-    i2 = p_data.isets2.Find(n->GetInfoset());
-    int snew = 1;
-    for (int i = 1; i < i2; i++) {
-      snew += p_support.NumActions(p_data.isets2[i]);
-    }
+    i2 = p_data.infosetIndex(2, n->GetInfoset()->GetNumber());
+    int snew = p_data.infosetOffset(2, n->GetInfoset()->GetNumber());
     A(p_data.ns1+i2+1, s2) = (T) -1;
     for (int i = 1; i <= p_support.NumActions(n->GetInfoset()); i++) {
       A(p_data.ns1+i2+1, snew+i) = (T) 1;
@@ -354,11 +355,8 @@ void GetBehavior(const GameData &p_data,
     }
   }
   else if (n->GetPlayer()->GetNumber() == 2) {
-    int inf = p_data.isets2.Find(n->GetInfoset());
-    int snew = 1;
-    for (int i = 1; i < inf; i++) {
-      snew += p_support.NumActions(p_data.isets2[i]);
-    }
+    int inf = p_data.infosetIndex(2, n->GetInfoset()->GetNumber());
+    int snew = p_data.infosetOffset(2, n->GetInfoset()->GetNumber());
     for (int i = 1; i <= p_support.NumActions(n->GetInfoset()); i++) {
       if (p_primal[s1] > (T) 0) {
 	v(2,inf,i) = p_primal[snew+i] / p_primal[s1];
@@ -372,11 +370,8 @@ void GetBehavior(const GameData &p_data,
     }
   }
   else {  // Must be player 1
-    int inf = p_data.isets1.Find(n->GetInfoset());
-    int snew = 1;
-    for (int i = 1; i < inf; i++) {
-      snew += p_support.NumActions(p_data.isets1[i]);
-    }
+    int inf = p_data.infosetIndex(1, n->GetInfoset()->GetNumber());
+    int snew = p_data.infosetOffset(1, n->GetInfoset()->GetNumber());
     for (int i = 1; i <= p_support.NumActions(n->GetInfoset()); i++) {
       if (p_dual[s2] > (T) 0) {
 	v(1,inf,i) = p_dual[snew+i] / p_dual[s2];
@@ -424,13 +419,26 @@ void SolveExtensive(const Game &p_game)
   BehavSupport support(p_game);
 
   // Cache some data for convenience
-  GameData data;
+  GameData data(p_game);
   data.ns1 = support.NumSequences(1);
   data.ns2 = support.NumSequences(2);
   data.ni1 = support.GetGame()->GetPlayer(1)->NumInfosets()+1;  
   data.ni2 = support.GetGame()->GetPlayer(2)->NumInfosets()+1; 
-  data.isets1 = support.ReachableInfosets(p_game->GetPlayer(1));
-  data.isets2 = support.ReachableInfosets(p_game->GetPlayer(2));
+  support.ReachableInfosets(p_game->GetRoot(), data.infosetIndex);
+  for (int iset = 1, offset = 1, index = 1; iset < data.ni1; iset++) {
+    if (data.infosetIndex(1, iset) > 0) {
+      data.infosetOffset(1, iset) = offset;
+      data.infosetIndex(1, iset) = index++;
+      offset += support.NumActions(1, iset);
+    }
+  }
+  for (int iset = 1, offset = 1, index = 1; iset < data.ni2; iset++) {
+    if (data.infosetIndex(2, iset) > 0) {
+      data.infosetOffset(2, iset) = offset;
+      data.infosetIndex(2, iset) = index++;
+      offset += support.NumActions(2, iset);
+    }
+  }
   data.minpay = p_game->GetMinPayoff();
 
   Matrix<T> A(1, data.ns1 + data.ni2, 1, data.ns2 + data.ni1);
