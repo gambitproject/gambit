@@ -156,12 +156,12 @@ public:
   //@{
   /// Returns true if action a is dominated by action b
   bool Dominates(const GameAction &a, const GameAction &b,
-		 bool strong, bool conditional) const;
+		 bool p_strict, bool p_conditional) const;
   /// Returns true if the action is dominated by some other action
   bool IsDominated(const GameAction &a, 
-		   bool strong, bool conditional) const;
+		   bool p_strict, bool p_conditional) const;
   /// Returns a copy of the support with dominated actions eliminated
-  BehavSupport Undominated(bool strong, bool conditional,
+  BehavSupport Undominated(bool p_strict, bool p_conditional,
 			   const Array<int> &players,
 			   std::ostream &) const;
   //@}

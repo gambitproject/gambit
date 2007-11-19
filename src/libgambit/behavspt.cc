@@ -323,148 +323,117 @@ bool BehavSupport::MayReach(const GameNode &n) const
 // has been reached.
 class BehavConditionalIterator    {
 private:
-  Game _efg;
-  BehavSupport _support;
-  PureBehavProfile _profile;
-  PVector<int> _current;
-  Array<Array<bool> > _is_active;
-  Array<int> _num_active_infosets;
-  mutable Vector<Rational> _payoff;
+  bool m_atEnd;
+  BehavSupport m_support;
+  PVector<int> m_currentBehav;
+  PureBehavProfile m_profile;
+  PVector<int> > m_isActive;
+  Array<int> m_numActiveInfosets;
+
+  /// Reset the iterator to the first contingency (this is called by ctors)
+  void First(void); 
 
 public:
-  BehavConditionalIterator(const BehavSupport &);
+  /// @name Lifecycle
+  //@{
   BehavConditionalIterator(const BehavSupport &, const List<GameInfoset> &);
-  ~BehavConditionalIterator();
-  
-  void First(void); // Sets each infoset's action to the first in the support
-  
-  void Set(int pl, int iset, int act);
-  void Set(const GameAction &a);
-  
-  const PureBehavProfile &GetProfile(void) const   { return _profile; }
+  //@}
 
-  int NextContingency(void);   // Needs rewriting
-  
-  Rational GetPayoff(int pl) const;
-  Rational GetPayoff(const GameNode &, int pl) const;
+  /// @name Iteration and data access
+  //@{
+  /// Advance to the next contingency (prefix version) 
+  void operator++(void);
+  /// Advance to the next contingency (postfix version) 
+  void operator++(int) { ++(*this); }
+  /// Has iterator gone past the end?
+  bool AtEnd(void) const { return m_atEnd; }
+  /// Get the current behavior profile
+  const PureBehavProfile &operator*(void) const { return m_profile; }
+  /// Get the current behavior profile
+  const PureBehavProfile *const operator->(void) const { return &m_profile; }
+  //@}
 };
 
 
-BehavConditionalIterator::BehavConditionalIterator(const BehavSupport &s)
-  : _efg(s.GetGame()), _support(s),
-    _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
-    _is_active(),
-    _num_active_infosets(_efg->NumPlayers()),
-    _payoff(_efg->NumPlayers())
+BehavConditionalIterator::BehavConditionalIterator(const BehavSupport &p_support, 
+						   const List<GameInfoset>& p_active)
+  : m_atEnd(false), m_support(p_support),
+    m_profile(m_support.GetGame()), 
+    m_currentBehav(m_support.GetGame()->NumInfosets()),
+    m_isActive(m_support.GetGame()->NumInfosets()),
+    m_numActiveInfosets(m_support.GetGame()->NumPlayers())
 {
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
-    _num_active_infosets[pl] = 0;
-    Array<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
-    for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      active_for_pl[iset] = true;
-      _num_active_infosets[pl]++;
-    }
-    _is_active.Append(active_for_pl);
-  }
-  First();
-}
-
-BehavConditionalIterator::BehavConditionalIterator(const BehavSupport &s, 
-					       const List<GameInfoset>& active)
-  : _efg(s.GetGame()), _support(s),
-    _profile(s.GetGame()), _current(s.GetGame()->NumInfosets()),
-    _is_active(),
-    _num_active_infosets(_efg->NumPlayers()),
-    _payoff(_efg->NumPlayers())
-{
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
-    _num_active_infosets[pl] = 0;
-    Array<bool> active_for_pl(_efg->GetPlayer(pl)->NumInfosets());
-    for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      if ( active.Contains(_efg->GetPlayer(pl)->GetInfoset(iset)) ) {
+  for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
+    m_numActiveInfosets[pl] = 0;
+    GamePlayer player = m_support.GetGame()->GetPlayer(pl);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      if (p_active.Contains(player->GetInfoset(iset)) ) {
 	active_for_pl[iset] = true;
-	_num_active_infosets[pl]++;
+	m_numActiveInfosets[pl]++;
       }
-      else
+      else {
 	active_for_pl[iset] = false;
+      }
     }
-    _is_active.Append(active_for_pl);
+    m_isActive.Append(active_for_pl);
   }
   First();
 }
-
-BehavConditionalIterator::~BehavConditionalIterator()
-{ }
-
 
 void BehavConditionalIterator::First(void)
 {
-  for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= _efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      _current(pl, iset) = 1;
-      if (_is_active[pl][iset])
-	_profile.SetAction(_support.GetAction(pl, iset, 1));
+  for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= m_support.GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
+      m_currentBehav(pl, iset) = 1;
+      if (m_isActive[pl][iset]) {
+	m_profile.SetAction(m_support.GetAction(pl, iset, 1));
+      }
     }
   }
 }
 
-void BehavConditionalIterator::Set(int pl, int iset, int act)
+void BehavConditionalIterator::operator++(void)
 {
-  _current(pl, iset) = act;
-  _profile.SetAction(_support.GetAction(pl, iset, act));
-}
-
-void BehavConditionalIterator::Set(const GameAction &a) 
-{
-  _profile.SetAction(a);
-}
-
-int BehavConditionalIterator::NextContingency(void)
-{
-  int pl = _efg->NumPlayers();
-  while (pl > 0 && _num_active_infosets[pl] == 0)
+  int pl = m_support.GetGame()->NumPlayers();
+  while (pl > 0 && m_numActiveInfosets[pl] == 0)
     --pl;
-  if (pl == 0)   return 0;
-  int iset = _efg->GetPlayer(pl)->NumInfosets();
+  if (pl == 0) {
+    m_atEnd = true;
+    return;
+  }
+
+  int iset = m_support.GetGame()->GetPlayer(pl)->NumInfosets();
     
   while (true) {
-
-    if (_is_active[pl][iset]) 
-      if (_current(pl, iset) < _support.NumActions(pl, iset))  {
-	_current(pl, iset) += 1;
-	_profile.SetAction(_support.GetAction(pl, iset, _current(pl, iset)));
-	return 1;
+    if (m_isActive[pl][iset]) {
+      if (m_currentBehav(pl, iset) < m_support.NumActions(pl, iset))  {
+	m_profile.SetAction(m_support.GetAction(pl, iset, 
+						++m_currentBehav(pl, iset)));
+	return;
       }
       else {
-	_current(pl, iset) = 1;
-	_profile.SetAction(_support.GetAction(pl, iset, 1));
+	m_currentBehav(pl, iset) = 1;
+	m_profile.SetAction(m_support.GetAction(pl, iset, 1));
       }
+    }
     
     iset--;
     if (iset == 0)  {
       do  {
 	--pl;
-      }  while (pl > 0 && _num_active_infosets[pl] == 0);
+      }  while (pl > 0 && m_numActiveInfosets[pl] == 0);
       
-      if (pl == 0)   return 0;
-      iset = _efg->GetPlayer(pl)->NumInfosets();
+      if (pl == 0) {
+	m_atEnd = true;
+	return;
+      }
+      iset = m_support.GetGame()->GetPlayer(pl)->NumInfosets();
     }
   }
 }
 
-Rational BehavConditionalIterator::GetPayoff(int pl) const
-{
-  return _profile.GetPayoff<Rational>(pl);
-}
-
-Rational BehavConditionalIterator::GetPayoff(const GameNode &n, int pl) const
-{
-  return _profile.GetNodeValue<Rational>(n, pl);
-}
-
-
 bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
-			      bool strong, bool conditional) const
+			     bool p_strict, bool p_conditional) const
 {
   GameInfoset infoset = a->GetInfoset();
   if (infoset != b->GetInfoset()) {
@@ -476,16 +445,24 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
   int pl = player->GetNumber();
   bool equal = true;
 
-  if (!conditional) {
+  if (!p_conditional) {
     for (BehavIterator iter(*this, a); !iter.AtEnd(); iter++) {
       Rational ap = iter->GetActionValue<Rational>(a);  
       Rational bp = iter->GetActionValue<Rational>(b);
 
-      if (strong)
-	{ if (ap <= bp)  return false; }
-      else
-	if (ap < bp)   return false; 
-	else if (ap > bp)  equal = false;
+      if (p_strict) {
+	if (ap <= bp) {
+	  return false;
+	}
+      }
+      else {
+	if (ap < bp) {
+	  return false; 
+	}
+	else if (ap > bp) {
+	  equal = false;
+	}
+      }
     }
   }
 
@@ -500,36 +477,38 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
     }
     
     for (int n = 1; n <= nodelist.Length(); n++) {
-      
       List<GameInfoset> L;
       L += ReachableInfosets(nodelist[n], a);
       L += ReachableInfosets(nodelist[n], b);
       RemoveRedundancies(L);
       
-      BehavConditionalIterator A(*this,L), B(*this,L);
-      A.Set(a);
-      B.Set(b);
-      
-      do  {
-	Rational ap = A.GetPayoff(nodelist[n],pl);  
-	Rational bp = B.GetPayoff(nodelist[n],pl);
+      for (BehavConditionalIterator iter(*this, L); !iter.AtEnd(); iter++) {
+	Rational ap = iter->GetNodeValue<Rational>(nodelist[n]->GetChild(a->GetNumber()), pl);
+	Rational bp = iter->GetNodeValue<Rational>(nodelist[n]->GetChild(b->GetNumber()), pl);
 	
-	if (strong)
-	  { if (ap <= bp)  return false; }
-	else
-	  if (ap < bp)   return false; 
-	  else if (ap > bp)  equal = false;
-      } while (A.NextContingency() && B.NextContingency());
+	if (p_strict) {
+	  if (ap <= bp) {
+	    return false;
+	  }
+	}
+	else {
+	  if (ap < bp) { 
+	    return false;
+	  } 
+	  else if (ap > bp) {
+	    equal = false;
+	  }
+	}
+      }
     }
   }
   
-  if (strong) return true;
-  else  return (!equal); 
-  /*
-  return ::Dominates(*this,player->GetNumber(),infoset->GetNumber(),
-		   a->GetNumber(),b->GetNumber(),
-		   strong, conditional);
-  */
+  if (p_strict) {
+    return true;
+  }
+  else {
+    return !equal; 
+  }
 }
 
 bool SomeElementDominates(const BehavSupport &S, 
