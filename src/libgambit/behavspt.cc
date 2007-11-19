@@ -28,19 +28,6 @@
 
 namespace Gambit {
 
-template <class T> void RemoveRedundancies(List<T> &p_list)
-{
-  int i = 1; int j = 2;		
-  while (i < p_list.Length()) {
-    if (p_list[i] == p_list[j])
-      p_list.Remove(j);
-    else 
-      j++;
-    if (j > p_list.Length()) { i++; j = i+1; }
-  }
-}
-
-
 //========================================================================
 //                      BehavSupport: Lifecycle
 //========================================================================
@@ -126,11 +113,13 @@ int BehavSupport::GetIndex(const GameAction &a) const
 int BehavSupport::NumDegreesOfFreedom(void) const
 {
   int answer = 0;
+  PVector<int> reachable(GetGame()->NumInfosets());
+  reachable = 0;
 
-  List<GameInfoset> active_infosets = ReachableInfosets(GetGame()->GetRoot());
-  for (int i = 1; i <= active_infosets.Length(); i++)
-    answer += NumActions(active_infosets[i]->GetPlayer()->GetNumber(),
-			 active_infosets[i]->GetNumber()) - 1;
+  ReachableInfosets(GetGame()->GetRoot(), reachable);
+  for (int i = 1; i <= reachable.Length(); i++) {
+    answer += reachable[i];
+  }
 
   return answer;  
 }
@@ -248,19 +237,6 @@ List<GameNode> BehavSupport::ReachableNonterminalNodes(const GameNode &n) const
   return answer;
 }
 
-List<GameNode> 
-BehavSupport::ReachableNonterminalNodes(const GameNode &n,
-					 const GameAction &a) const
-{
-  List<GameNode> answer;
-  GameNode nn = n->GetChild(a->GetNumber());
-  if (!nn->IsTerminal()) {
-    answer.Append(nn);
-    answer += ReachableNonterminalNodes(nn);
-  }
-  return answer;
-}
-
 List<GameInfoset> 
 BehavSupport::ReachableInfosets(const GamePlayer &p) const
 { 
@@ -276,26 +252,26 @@ BehavSupport::ReachableInfosets(const GamePlayer &p) const
   return answer;
 }
 
-List<GameInfoset> BehavSupport::ReachableInfosets(const GameNode &n) const
+void
+BehavSupport::ReachableInfosets(const GameNode &p_node,
+				PVector<int> &p_reached) const
 {
-  List<GameInfoset> answer;
-  List<GameNode> nodelist = ReachableNonterminalNodes(n);
-  for (int i = 1; i <= nodelist.Length(); i++)
-    answer.Append(nodelist[i]->GetInfoset());
-  RemoveRedundancies(answer);
-  return answer;
-}
+  if (p_node->NumChildren() == 0)  return;
 
-List<GameInfoset> 
-BehavSupport::ReachableInfosets(const GameNode &n, 
-				 const GameAction &a) const
-{
-  List<GameInfoset> answer;
-  List<GameNode> nodelist = ReachableNonterminalNodes(n,a);
-  for (int i = 1; i <= nodelist.Length(); i++)
-    answer.Append(nodelist[i]->GetInfoset());
-  RemoveRedundancies(answer);
-  return answer;
+  GameInfoset infoset = p_node->GetInfoset();
+  if (!infoset->GetPlayer()->IsChance()) {
+    p_reached(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()) = 1;
+
+    for (int act = 1; act <= NumActions(infoset); act++) {
+      ReachableInfosets(p_node->GetChild(GetAction(infoset, act)->GetNumber()),
+			p_reached);
+    }
+  }
+  else {
+    for (int act = 1; act <= infoset->NumActions(); act++) {
+      ReachableInfosets(p_node->GetChild(act), p_reached);
+    }
+  }
 }
 
 bool BehavSupport::MayReach(const GameInfoset &i) const
@@ -321,13 +297,13 @@ bool BehavSupport::MayReach(const GameNode &n) const
 // This class iterates
 // over contingencies that are relevant once a particular node 
 // has been reached.
-class BehavConditionalIterator    {
+class BehavConditionalIterator  {
 private:
   bool m_atEnd;
   BehavSupport m_support;
   PVector<int> m_currentBehav;
   PureBehavProfile m_profile;
-  PVector<int> > m_isActive;
+  PVector<int> m_isActive;
   Array<int> m_numActiveInfosets;
 
   /// Reset the iterator to the first contingency (this is called by ctors)
@@ -336,7 +312,7 @@ private:
 public:
   /// @name Lifecycle
   //@{
-  BehavConditionalIterator(const BehavSupport &, const List<GameInfoset> &);
+  BehavConditionalIterator(const BehavSupport &, const PVector<int> &);
   //@}
 
   /// @name Iteration and data access
@@ -356,26 +332,22 @@ public:
 
 
 BehavConditionalIterator::BehavConditionalIterator(const BehavSupport &p_support, 
-						   const List<GameInfoset>& p_active)
+						   const PVector<int> &p_active)
   : m_atEnd(false), m_support(p_support),
     m_profile(m_support.GetGame()), 
     m_currentBehav(m_support.GetGame()->NumInfosets()),
-    m_isActive(m_support.GetGame()->NumInfosets()),
+    m_isActive(p_active),
     m_numActiveInfosets(m_support.GetGame()->NumPlayers())
 {
+  m_numActiveInfosets = 0;
+
   for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
-    m_numActiveInfosets[pl] = 0;
     GamePlayer player = m_support.GetGame()->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      if (p_active.Contains(player->GetInfoset(iset)) ) {
-	active_for_pl[iset] = true;
+      if (m_isActive(pl, iset)) {
 	m_numActiveInfosets[pl]++;
       }
-      else {
-	active_for_pl[iset] = false;
-      }
     }
-    m_isActive.Append(active_for_pl);
   }
   First();
 }
@@ -385,7 +357,7 @@ void BehavConditionalIterator::First(void)
   for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++)  {
     for (int iset = 1; iset <= m_support.GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
       m_currentBehav(pl, iset) = 1;
-      if (m_isActive[pl][iset]) {
+      if (m_isActive(pl, iset)) {
 	m_profile.SetAction(m_support.GetAction(pl, iset, 1));
       }
     }
@@ -405,7 +377,7 @@ void BehavConditionalIterator::operator++(void)
   int iset = m_support.GetGame()->GetPlayer(pl)->NumInfosets();
     
   while (true) {
-    if (m_isActive[pl][iset]) {
+    if (m_isActive(pl, iset)) {
       if (m_currentBehav(pl, iset) < m_support.NumActions(pl, iset))  {
 	m_profile.SetAction(m_support.GetAction(pl, iset, 
 						++m_currentBehav(pl, iset)));
@@ -440,7 +412,6 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
     throw UndefinedException();
   }
 
-  const BehavSupport SAct(*this);
   GamePlayer player = infoset->GetPlayer();
   int pl = player->GetNumber();
   bool equal = true;
@@ -467,7 +438,7 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
   }
 
   else {
-    List<GameNode> nodelist = SAct.ReachableMembers(infoset);  
+    List<GameNode> nodelist = ReachableMembers(infoset);  
     if (nodelist.Length() == 0) {
       // This may not be a good idea; I suggest checking for this
       // prior to entry
@@ -477,12 +448,13 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
     }
     
     for (int n = 1; n <= nodelist.Length(); n++) {
-      List<GameInfoset> L;
-      L += ReachableInfosets(nodelist[n], a);
-      L += ReachableInfosets(nodelist[n], b);
-      RemoveRedundancies(L);
+      PVector<int> reachable(GetGame()->NumInfosets());
+      reachable = 0;
+      ReachableInfosets(nodelist[n]->GetChild(a->GetNumber()), reachable);
+      ReachableInfosets(nodelist[n]->GetChild(b->GetNumber()), reachable);
       
-      for (BehavConditionalIterator iter(*this, L); !iter.AtEnd(); iter++) {
+      for (BehavConditionalIterator iter(*this, reachable); 
+	   !iter.AtEnd(); iter++) {
 	Rational ap = iter->GetNodeValue<Rational>(nodelist[n]->GetChild(a->GetNumber()), pl);
 	Rational bp = iter->GetNodeValue<Rational>(nodelist[n]->GetChild(b->GetNumber()), pl);
 	

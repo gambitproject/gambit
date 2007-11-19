@@ -139,11 +139,9 @@ public:
   //@{
   List<GameNode> ReachableNonterminalNodes(void) const;
   List<GameNode> ReachableNonterminalNodes(const GameNode &) const;
-  List<GameNode> ReachableNonterminalNodes(const GameNode &, 
-					   const GameAction &) const;
-  List<GameInfoset> ReachableInfosets(const GameNode &) const;
-  List<GameInfoset> ReachableInfosets(const GameNode &, 
-				      const GameAction &) const;
+  /// Sets p_reachable(pl,iset) to 1 if infoset (pl,iset) reachable after p_node
+  void ReachableInfosets(const GameNode &p_node, 
+			 PVector<int> &p_reachable) const;
   List<GameInfoset> ReachableInfosets(const GamePlayer &) const;
 
   bool MayReach(const GameNode &) const;
