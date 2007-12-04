@@ -1,12 +1,12 @@
 from distutils.core import setup, Extension
 
 setup(name="_gambit",
-      version="0.2007.01.30",
+      version="0.2007.12.04",
       py_modules=["gambit"],
       description="Software tools for game theory",
       author="The Gambit Project",
       author_email="gambit@econmail.tamu.edu",
-      url="http://econweb.tamu.edu/gambit",
+      url="http://gambit.sourceforge.net",
       ext_modules=[Extension("_gambit",
                              [ "gambit_wrap.cxx",
                                "libgambit/behav.cc",
