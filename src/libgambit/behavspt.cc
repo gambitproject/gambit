@@ -339,9 +339,8 @@ BehavConditionalIterator::BehavConditionalIterator(const BehavSupport &p_support
     m_isActive(p_active),
     m_numActiveInfosets(m_support.GetGame()->NumPlayers())
 {
-  m_numActiveInfosets = 0;
-
   for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
+    m_numActiveInfosets[pl] = 0;
     GamePlayer player = m_support.GetGame()->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       if (m_isActive(pl, iset)) {
