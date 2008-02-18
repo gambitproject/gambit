@@ -891,7 +891,13 @@ void gbtTreeLayout::GenerateLabels(void)
       else {
 	int profile = m_doc->GetCurrentProfile();
 	if (profile > 0) {
-	  entry->SetActionProb((double) Gambit::ToNumber(m_doc->GetProfiles().GetActionProb(parent, entry->GetChildNumber())));
+	  try {
+	    entry->SetActionProb((double) Gambit::ToNumber(m_doc->GetProfiles().GetActionProb(parent, entry->GetChildNumber())));
+	  }
+	  catch (ValueException &) {
+	    // This occurs when the probability is undefined
+	    entry->SetActionProb(0.0);
+	  }
 	}
       }
     }
