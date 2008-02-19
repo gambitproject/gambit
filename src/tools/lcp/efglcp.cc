@@ -35,7 +35,25 @@ using namespace Gambit;
 #include "lemketab.h"
 
 extern int g_numDecimals;
+extern int g_stopAfter;
+extern int g_maxDepth;
 extern bool g_printDetail;
+
+namespace {
+//
+// Pseudo-exception raised when maximum number of equilibria to compute
+// has been reached.  A convenience for unraveling a potentially
+// deep recursion.
+//
+class EquilibriumLimitReached : public Exception {
+public:
+  virtual ~EquilibriumLimitReached() { }
+  std::string GetDescription(void) const 
+  { return "Reached target number of equilibria"; }
+};
+
+} // end anonymous namespace
+
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
@@ -138,8 +156,6 @@ void PrintProfileDetail(std::ostream &p_stream,
 
 template <class T> class SolveEfgLcp {
 private:
-  int m_stopAfter, m_maxDepth;
-
   int ns1,ns2,ni1,ni2;
   T maxpay,eps;
   List<BFS<T> > m_list;
@@ -157,14 +173,8 @@ private:
 		  const GameNode &n, int,int);
 
 public:
-  SolveEfgLcp(void) : m_stopAfter(0), m_maxDepth(0) { }
+  SolveEfgLcp(void) { }
   
-  int StopAfter(void) const { return m_stopAfter; }
-  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
-
-  int MaxDepth(void) const { return m_maxDepth; }
-  void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
-
   List<MixedBehavProfile<T> > Solve(const BehavSupport &,
 				    bool p_print = true);
 };
@@ -265,8 +275,14 @@ SolveEfgLcp<T>::Solve(const BehavSupport &p_support, bool p_print /*= true*/)
   List<MixedBehavProfile<T> > solutions;
   
   try {
-    if (m_stopAfter != 1) {
-      AllLemke(p_support, ns1+ns2+1, tab, 0, A, p_print, solutions);
+    if (g_stopAfter != 1) {
+      try {
+	AllLemke(p_support, ns1+ns2+1, tab, 0, A, p_print, solutions);
+      }
+      catch (EquilibriumLimitReached &) {
+	// Just handle this silently; equilibria are already printed
+	// as they are found.
+      }
     }
     else {
       tab.Pivot(ns1+ns2+1,0);
@@ -321,7 +337,7 @@ SolveEfgLcp<T>::AllLemke(const BehavSupport &p_support,
 			 bool p_print,
 			 List<MixedBehavProfile<T> > &p_solutions)
 {
-  if (m_maxDepth != 0 && depth > m_maxDepth) {
+  if (g_maxDepth != 0 && depth > g_maxDepth) {
     return 1;
   }
 
@@ -332,9 +348,7 @@ SolveEfgLcp<T>::AllLemke(const BehavSupport &p_support,
   MixedBehavProfile<T> profile(p_support);
 
   newsol =0;
-  for (i = B.MinRow(); 
-       i <= B.MaxRow()  && newsol == 0;
-       i++) {
+  for (i = B.MinRow(); i <= B.MaxRow() && newsol == 0; i++) {
     if (i != j)  {
       LTableau<T> BCopy(B);
       A(i,0) = -small_num;
@@ -364,6 +378,9 @@ SolveEfgLcp<T>::AllLemke(const BehavSupport &p_support,
 	    }
 	  }
 	  p_solutions.Append(profile);
+	  if (g_stopAfter > 0 && p_solutions.Length() >= g_stopAfter) {
+	    throw EquilibriumLimitReached();
+	  }
 	}
       }
       else {

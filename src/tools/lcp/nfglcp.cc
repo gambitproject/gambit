@@ -32,8 +32,24 @@
 
 using namespace Gambit;
 
-extern int g_numDecimals;
+extern int g_numDecimals, g_stopAfter, g_maxDepth;
 extern bool g_printDetail;
+
+namespace {
+//
+// Pseudo-exception raised when maximum number of equilibria to compute
+// has been reached.  A convenience for unraveling a potentially
+// deep recursion.
+//
+class EquilibriumLimitReached : public Exception {
+public:
+  virtual ~EquilibriumLimitReached() { }
+  std::string GetDescription(void) const 
+  { return "Reached target number of equilibria"; }
+};
+
+} // end anonymous namespace
+
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
@@ -96,128 +112,109 @@ void PrintProfileDetail(std::ostream &p_stream,
 }
 
 
-template <class T> Matrix<T> Make_A1(const StrategySupport &, 
-				      const T &);
-template <class T> Vector<T> Make_b1(const StrategySupport &, 
-				      const T &);
-template <class T> Matrix<T> Make_A2(const StrategySupport &,
-				      const T &);
-template <class T> Vector<T> Make_b2(const StrategySupport &,
-				      const T &);
+template <class T> Matrix<T> Make_A1(const StrategySupport &); 
+template <class T> Vector<T> Make_b1(const StrategySupport &);
+template <class T> Matrix<T> Make_A2(const StrategySupport &);
+template <class T> Vector<T> Make_b2(const StrategySupport &);
 
 
-template <class T> class nfgLcp {
-private:
-  int m_stopAfter, m_maxDepth;
-
-  int AddBfs(LHTableau<T> &, List<BFS<T> > &);
-  void AddSolutions(const StrategySupport &,
-		    const List<BFS<T> > &, const T &);
-  void AllLemke(const StrategySupport &, int, LHTableau<T> &B, List<BFS<T> > &,
-		int depth);
-  
-public:
-  nfgLcp(void);
-  virtual ~nfgLcp() { }
-  
-  int StopAfter(void) const { return m_stopAfter; }
-  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
-
-  int MaxDepth(void) const { return m_maxDepth; }
-  void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
-
-  void Solve(const StrategySupport &);
-};
-
-//---------------------------------------------------------------------------
-//                        nfgLcp: member functions
-//---------------------------------------------------------------------------
-
-template <class T> 
-void nfgLcp<T>::Solve(const StrategySupport &p_support)
+//
+// Function called when a CBFS is encountered.
+// If it is not already in the list p_list, it is added.
+// The corresponding equilibrium is computed and output.
+// Returns 'true' if the CBFS is new; 'false' if it already appears in the
+// list.
+//
+template <class T>
+bool OnBFS(const StrategySupport &p_support,
+	   List<BFS<T> > &p_list, LHTableau<T> &p_tableau)
 {
-  BFS<T> cbfs((T) 0);
-
-  if (p_support.GetGame()->NumPlayers() != 2) {
-    return;
+  BFS<T> cbfs(p_tableau.GetBFS());
+  if (p_list.Contains(cbfs)) {
+    return false;
   }
 
-  List<BFS<T> > bfsList;
-
-  try {
-    Matrix<T> A1 = Make_A1(p_support, (T) 0);
-    Vector<T> b1 = Make_b1(p_support, (T) 0);
-    Matrix<T> A2 = Make_A2(p_support, (T) 0);
-    Vector<T> b2 = Make_b2(p_support, (T) 0);
-    LHTableau<T> B(A1,A2,b1,b2);
-    if (m_stopAfter != 1) {
-      AllLemke(p_support,0,B,bfsList,m_maxDepth);
-    }
-    else  {
-      B.LemkePath(1);
-      AddBfs(B, bfsList);
-    }
-
-    return AddSolutions(p_support, bfsList, B.Epsilon());
-  }
-  catch (...) {
-    // for now, we won't give *any* solutions -- but we should list
-    // any solutions found!
-    throw;
-  }
-  // any other exceptions will propagate out.
-}
-
-template <class T> int nfgLcp<T>::AddBfs(LHTableau<T> &p_tableau,
-					      List<BFS<T> > &p_list)
-{
-  BFS<T> cbfs((T) 0);
-  cbfs = p_tableau.GetBFS();
-  if ((m_stopAfter > 0 && p_list.Length() > m_stopAfter) ||
-      p_list.Contains(cbfs)) {  
-    return 0;
-  }
   p_list.Append(cbfs);
-  return 1;
+
+  MixedStrategyProfile<T> profile(p_support);
+  int n1 = p_support.NumStrategies(1);
+  int n2 = p_support.NumStrategies(2);
+  T sum = (T) 0;
+
+  for (int j = 1; j <= n1; j++) {
+    if (cbfs.IsDefined(j))   sum += cbfs(j);
+  }
+
+  for (int j = 1; j <= n1; j++) {
+    if (cbfs.IsDefined(j)) {
+      profile[p_support.GetStrategy(1, j)] = cbfs(j) / sum;
+    }
+    else {
+      profile[p_support.GetStrategy(1, j)] = (T) 0;
+    }
+  }
+
+  sum = (T) 0;
+
+  for (int j = 1; j <= n2; j++) {
+    if (cbfs.IsDefined(n1 + j))  sum += cbfs(n1 + j);
+  }
+
+  for (int j = 1; j <= n2; j++) {
+    if (cbfs.IsDefined(n1 + j)) {
+      profile[p_support.GetStrategy(2, j)] = cbfs(n1 + j) / sum;
+    }
+    else {
+      profile[p_support.GetStrategy(2, j)] = (T) 0;
+    }
+  }
+  
+  PrintProfile(std::cout, "NE", profile);
+  if (g_printDetail) {
+    PrintProfileDetail(std::cout, profile);
+  }
+
+  if (g_stopAfter > 0 && p_list.Length() >= g_stopAfter) {
+    throw EquilibriumLimitReached();
+  }
+
+  return true;
 }
 
 //
 // AllLemke finds all accessible Nash equilibria by recursively 
-// calling itself.  List maintains the list of basic variables 
+// calling itself.  p_list maintains the list of basic variables 
 // for the equilibria that have already been found.  
 // From each new accessible equilibrium, it follows
 // all possible paths, adding any new equilibria to the List.  
 //
-template <class T> void nfgLcp<T>::AllLemke(const StrategySupport &p_support,
-					    int j, LHTableau<T> &B,
-					    List<BFS<T> > &p_list,
-					    int depth)
+template <class T> void AllLemke(const StrategySupport &p_support,
+				 int j, LHTableau<T> &B,
+				 List<BFS<T> > &p_list,
+				 int depth)
 {
-  if (m_maxDepth != 0 && depth > m_maxDepth) {
+  if (g_maxDepth != 0 && depth > g_maxDepth) {
     return;
   }
 
-  if (!AddBfs(B, p_list)) {
+  // On the initial depth=0 call, the CBFS we are at is the extraneous
+  // solution.
+  if (depth > 0 && !OnBFS(p_support, p_list, B)) {
     return;
   }
   
-  for (int i = B.MinCol(); 
-       i <= B.MaxCol() &&
-       (m_stopAfter==0 || (p_list.Length()-1) < m_stopAfter);
-       i++) {
+  for (int i = B.MinCol(); i <= B.MaxCol(); i++) {
     if (i != j)  {
       LHTableau<T> Bcopy(B);
       Bcopy.LemkePath(i);
-      AllLemke(p_support,i,Bcopy, p_list, depth+1);
+      AllLemke(p_support, i, Bcopy, p_list, depth+1);
     }
   }
-  return;
 }
 
 template <class T>
-void nfgLcp<T>::AddSolutions(const StrategySupport &p_support,
-			     const List<BFS<T> > &p_list,
-			     const T &epsilon)
+void AddSolutions(const StrategySupport &p_support,
+		  const List<BFS<T> > &p_list)
 {
   int i,j;
   int n1 = p_support.NumStrategies(1);
@@ -264,21 +261,40 @@ void nfgLcp<T>::AddSolutions(const StrategySupport &p_support,
   }
 }
 
-//-------------------------------------------------------------------------
-//                    nfgLcp<T>: Member functions
-//-------------------------------------------------------------------------
-
-template <class T>
-nfgLcp<T>::nfgLcp(void)
-  : m_stopAfter(0), m_maxDepth(0)
-{ }
-
-
 template <class T>
 void SolveStrategic(const Game &p_game)
 {
-  nfgLcp<T> algorithm;
-  algorithm.Solve(p_game);
+  StrategySupport support(p_game);
+  List<BFS<T> > bfsList;
+
+  try {
+    Matrix<T> A1 = Make_A1<T>(support);
+    Vector<T> b1 = Make_b1<T>(support);
+    Matrix<T> A2 = Make_A2<T>(support);
+    Vector<T> b2 = Make_b2<T>(support);
+    LHTableau<T> B(A1, A2, b1, b2);
+
+    if (g_stopAfter != 1) {
+      try {
+	AllLemke(support, 0, B, bfsList, 0);
+      }
+      catch (EquilibriumLimitReached &) {
+	// This pseudo-exception requires no additional action;
+	// bfsList will contain the list of equilibria found
+      }
+    }
+    else  {
+      B.LemkePath(1);
+      OnBFS(support, bfsList, B);
+    }
+
+    return AddSolutions(support, bfsList);
+  }
+  catch (...) {
+    // for now, we won't give *any* solutions -- but we should list
+    // any solutions found!
+    throw;
+  }
 }
 
 template void SolveStrategic<double>(const Game &);

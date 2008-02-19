@@ -28,6 +28,8 @@ linear complementarity program
 <cmdsynopsis>
 <command>gambit-lcp</command>
 <arg><option>-d </option><replaceable class="parameter">DECIMALS</replaceable></arg>
+<arg><option>-e </option><replaceable class="parameter">EQA</replaceable></arg>
+<arg><option>-r </option><replaceable class="parameter">DEPTH</replaceable></arg>
 <arg><option>-S</option></arg>
 <arg><option>-P</option></arg>
 <arg><option>-h</option></arg>
@@ -41,7 +43,7 @@ linear complementarity program
 </refsect1info>
 <title>DESCRIPTION</title>
 <para>
-<command>gambit-lcp</command> reads a two-playergame on
+<command>gambit-lcp</command> reads a two-player game on
 standard input and computes Nash equilibria 
 by finding solutions to a linear complementarity problem.
 For extensive games, the program uses the sequence form representation 
@@ -89,6 +91,33 @@ probability the action or strategy is played in equilibria, and the
 expected payoff to playing that action or strategy.  For behavior strategy
 profiles, also output information about beliefs at nodes where beliefs
 are well=defined.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-e </option><replaceable class="parameter">EQA</replaceable></term>
+<listitem>
+<para>
+By default, this program computes all equilibria which are accessible
+from the extraneous solution of the linear complementarity program.
+Note that this may be all equilibria, but need not be.  Setting this
+parameter terminates the program after the specified number of equilibria
+are found, if that many exist and are accessible.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-r </option><replaceable class="parameter">DEPTH</replaceable></term>
+<listitem>
+<para>
+When computing more than one equilibrium, the program searches recursively,
+starting anew at the complementary basic feasible solution corresponding
+to each equilibrium found.  Specifying this parameter restricts the
+maximum depth of this recursive process.  Note that restircting the
+depth of the search may result in the program terminating without finding
+all accessible equilibria.
 </para>
 </listitem>
 </varlistentry>

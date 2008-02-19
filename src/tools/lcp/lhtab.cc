@@ -27,15 +27,19 @@
 #include "lhtab.imp"
 
 template class LHTableau<double>;
-template class LHTableau<Gambit::Rational>;
-template Gambit::Matrix<double> Make_A1(const Gambit::StrategySupport &, const double &);
-template Gambit::Matrix<Gambit::Rational> Make_A1(const Gambit::StrategySupport &, const Gambit::Rational &);
-template Gambit::Vector<double> Make_b1(const Gambit::StrategySupport &, const double &);
-template Gambit::Vector<Gambit::Rational> Make_b1(const Gambit::StrategySupport &, const Gambit::Rational &);
-template Gambit::Matrix<double> Make_A2(const Gambit::StrategySupport &, const double &);
-template Gambit::Matrix<Gambit::Rational> Make_A2(const Gambit::StrategySupport &, const Gambit::Rational &);
-template Gambit::Vector<double> Make_b2(const Gambit::StrategySupport &, const double &);
-template Gambit::Vector<Gambit::Rational> Make_b2(const Gambit::StrategySupport &, const Gambit::Rational &);
+template class LHTableau<Rational>;
+
+template Matrix<double> Make_A1<double>(const StrategySupport &);
+template Matrix<Rational> Make_A1<Rational>(const StrategySupport &);
+
+template Vector<double> Make_b1<double>(const StrategySupport &);
+template Vector<Rational> Make_b1<Rational>(const StrategySupport &);
+
+template Matrix<double> Make_A2<double>(const StrategySupport &);
+template Matrix<Rational> Make_A2<Rational>(const StrategySupport &);
+
+template Vector<double> Make_b2<double>(const StrategySupport &);
+template Vector<Rational> Make_b2<Rational>(const StrategySupport &);
 
 
 

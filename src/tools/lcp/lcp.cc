@@ -56,6 +56,10 @@ void PrintHelp(char *progname)
   std::cerr << "                   display results with DECIMALS digits\n";
   std::cerr << "  -S               use strategic game\n";
   std::cerr << "  -P               find only subgame-perfect equilibria\n";
+  std::cerr << "  -e EQA           terminate after finding EQA equilibria\n";
+  std::cerr << "                   (default is to find all accessible equilbria\n";
+  std::cerr << "  -r DEPTH         terminate recursion at DEPTH\n";
+  std::cerr << "                   (only if number of equilibria sought is not 1)\n";
   std::cerr << "  -D               print detailed information about equilibria\n";
   std::cerr << "  -h               print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
@@ -64,6 +68,8 @@ void PrintHelp(char *progname)
 
 int g_numDecimals = 6;
 bool g_printDetail = false;
+int g_stopAfter = 0;
+int g_maxDepth = 0;
 
 extern void PrintProfile(std::ostream &, const std::string &,
 			 const MixedBehavProfile<double> &);
@@ -76,7 +82,7 @@ int main(int argc, char *argv[])
   int c;
   bool useFloat = false, useStrategic = false, bySubgames = false, quiet = false;
 
-  while ((c = getopt(argc, argv, "d:DhqSP")) != -1) {
+  while ((c = getopt(argc, argv, "d:DhqSPe:r:")) != -1) {
     switch (c) {
     case 'd':
       useFloat = true;
@@ -85,11 +91,17 @@ int main(int argc, char *argv[])
     case 'D':
       g_printDetail = true;
       break;
+    case 'e':
+      g_stopAfter = atoi(optarg);
+      break;
     case 'h':
       PrintHelp(argv[0]);
       break;
     case 'q':
       quiet = true;
+      break;
+    case 'r':
+      g_maxDepth = atoi(optarg);
       break;
     case 'S':
       useStrategic = true;

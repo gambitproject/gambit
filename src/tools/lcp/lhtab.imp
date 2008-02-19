@@ -27,93 +27,92 @@
 #include "lhtab.h"
 #include "libgambit/libgambit.h"
 
+using namespace Gambit;
+
 //---------------------------------------------------------------------------
-//                        LemkeHowson Tableau: member functions
+//                   LemkeHowson Tableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> Gambit::Matrix<T> Make_A1(const Gambit::StrategySupport &S,
-                                      const T &)
+template <class T> Matrix<T> Make_A1(const StrategySupport &S)
 {
   int n1, n2, i,j;
   n1=S.NumStrategies(1);
   n2=S.NumStrategies(2);
-  Gambit::Matrix<T> A1(1,n1,n1+1,n1+n2);
+  Matrix<T> A1(1,n1,n1+1,n1+n2);
 
-  Gambit::PureStrategyProfile profile(S.GetGame());
+  PureStrategyProfile profile(S.GetGame());
 
-  Gambit::Rational min = S.GetGame()->GetMinPayoff();
-  if (min > Gambit::Rational(0)) {
-    min = Gambit::Rational(0);
+  Rational min = S.GetGame()->GetMinPayoff();
+  if (min > Rational(0)) {
+    min = Rational(0);
   }
-  min -= Gambit::Rational(1);
+  min -= Rational(1);
 
-  Gambit::Rational max = S.GetGame()->GetMaxPayoff();
-  if (max < Gambit::Rational(0)) {
-    max = Gambit::Rational(0);
+  Rational max = S.GetGame()->GetMaxPayoff();
+  if (max < Rational(0)) {
+    max = Rational(0);
   }
 
-  Gambit::Rational fac(1, max - min);
+  Rational fac(1, max - min);
 
   for (i = 1; i <= n1; i++)  {
     profile.SetStrategy(S.GetStrategy(1, i));
     for (j = 1; j <= n2; j++)  {
       profile.SetStrategy(S.GetStrategy(2, j));
-      A1(i, n1 + j) = fac * (profile.GetPayoff<Gambit::Rational>(1) - min);
+      A1(i, n1 + j) = fac * (profile.GetPayoff<Rational>(1) - min);
     }
   }
   return A1;
 }
 
-template <class T> Gambit::Matrix<T> Make_A2(const Gambit::StrategySupport &S,
-                                      const T &)
+template <class T> Matrix<T> Make_A2(const StrategySupport &S)
 {
   int n1, n2, i,j;
   n1=S.NumStrategies(1);
   n2=S.NumStrategies(2);
-  Gambit::Matrix<T> A2(n1+1,n1+n2,1,n1);
+  Matrix<T> A2(n1+1,n1+n2,1,n1);
 
-  Gambit::PureStrategyProfile profile(S.GetGame());
+  PureStrategyProfile profile(S.GetGame());
   
-  Gambit::Rational min = S.GetGame()->GetMinPayoff();
-  if (min > Gambit::Rational(0)) {
-    min = Gambit::Rational(0);
+  Rational min = S.GetGame()->GetMinPayoff();
+  if (min > Rational(0)) {
+    min = Rational(0);
   }
-  min -= Gambit::Rational(1);
+  min -= Rational(1);
 
-  Gambit::Rational max = S.GetGame()->GetMaxPayoff();
-  if (max < Gambit::Rational(0)) {
-    max = Gambit::Rational(0);
+  Rational max = S.GetGame()->GetMaxPayoff();
+  if (max < Rational(0)) {
+    max = Rational(0);
   }
 
-  Gambit::Rational fac(1, max - min);
+  Rational fac(1, max - min);
 
   for (i = 1; i <= n1; i++)  {
     profile.SetStrategy(S.GetStrategy(1, i));
     for (j = 1; j <= n2; j++)  {
       profile.SetStrategy(S.GetStrategy(2, j));
-      A2(n1 + j, i) = fac * (profile.GetPayoff<Gambit::Rational>(2) - min);
+      A2(n1 + j, i) = fac * (profile.GetPayoff<Rational>(2) - min);
     }
   }
   return A2;
 }
 
-template <class T> Gambit::Vector<T> Make_b1(const Gambit::StrategySupport &S,
-				      const T &)
+template <class T> Vector<T> Make_b1(const StrategySupport &S)
 {
   int n1 = S.NumStrategies(1);
-  Gambit::Vector<T> b1(1,n1);
+  Vector<T> b1(1,n1);
 
   for (int i = 1; i <= n1; i++) 
     b1[i]=-(T)1;
   return b1;
 }
 
-template <class T> Gambit::Vector<T> Make_b2(const Gambit::StrategySupport &S, const T &)
+template <class T> Vector<T> Make_b2(const StrategySupport &S)
 {
   int n1, n2, i;
   n1=S.NumStrategies(1);
   n2=S.NumStrategies(2);
-  Gambit::Vector<T> b2(n1+1,n1+n2);
+  Vector<T> b2(n1+1,n1+n2);
 
   for (i = n1+1; i <= n1+n2; i++) 
     b2[i]=-(T)1;
@@ -121,8 +120,8 @@ template <class T> Gambit::Vector<T> Make_b2(const Gambit::StrategySupport &S, c
 }
 
 template <class T>
-LHTableau<T>::LHTableau(const Gambit::Matrix<T> &A1, const Gambit::Matrix<T> &A2, 
-			const Gambit::Vector<T> &b1, const Gambit::Vector<T> &b2)
+LHTableau<T>::LHTableau(const Matrix<T> &A1, const Matrix<T> &A2, 
+			const Vector<T> &b1, const Vector<T> &b2)
   : T1(A1,b1), T2(A2,b2), 
 //    tmpcol(b1.First(),b2.Last()), 
     tmp1(b1.First(),b1.Last()),tmp2(b2.First(),b2.Last()),
