@@ -32,6 +32,7 @@ correspondence in a game
 <arg><option>-a </option><replaceable class="parameter">ACCEL</replaceable></arg>
 <arg><option>-m </option><replaceable class="parameter">MAXLAMBDA</replaceable></arg>
 <arg><option>-l </option><replaceable class="parameter">LAMBDA</replaceable></arg>
+<arg><option>-L </option><replaceable class="parameter">FILE</replaceable></arg>
 <arg><option>-S</option></arg>
 <arg><option>-h</option></arg>
 <arg><option>-q</option></arg>
@@ -47,7 +48,10 @@ correspondence in a game
 <para>
 <command>gambit-logit</command> reads a game on standard
 input and computes the principal branch of the
-(logit) quantal response correspondence.
+(logit) quantal response correspondence.  For strategic games,
+given a vector of observed strategy choices, 
+it optionally locates extrema of the likelihood function along the
+path.
 </para>
 
 <para>
@@ -151,6 +155,26 @@ of the correspondence for small values of lambda is of interest and the
 asymptotic behavior is not relevant, setting 
 <replaceable class="parameter">MAXLAMBDA</replaceable> to a much smaller value 
 may be indicated.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-L </option><replaceable class="parameter">FILE</replaceable></term>
+<listitem>
+<para>
+Compute maximum likelihood estimates (only implemented for
+strategic games).  The file
+<replaceable class="parameter">FILE</replaceable> should contain one
+line of comma-separated values, one per strategy in the game.
+The output of the program is augmented by an additional column reporting
+the log-likelihood of the outcome at each quantal response equilibrium
+computed.  When the program identifies that a local extremum of the
+log-likelihood function has been bracketed, the program switches to
+a Newton search method to more accurately identify the local extremum.
+After the extremum is located, the program continues tracing the
+original path; therefore, if there are multiple local extrema along
+a path, the program will locate all of them.
 </para>
 </listitem>
 </varlistentry>

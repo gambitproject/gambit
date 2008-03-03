@@ -58,6 +58,8 @@ void PrintHelp(char *progname)
   std::cerr << "  -a ACCEL         maximum acceleration (default is 1.1)\n";
   std::cerr << "  -m MAXLAMBDA     stop when reaching MAXLAMBDA (default is 1000000)\n";
   std::cerr << "  -l LAMBDA        compute QRE at `lambda` accurately\n";
+  std::cerr << "  -L FILE          compute maximum likelihood estimates;\n";
+  std::cerr << "                   read strategy frequencies from FILE\n";
   std::cerr << "  -h               print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -e               print only the terminal equilibrium\n";
