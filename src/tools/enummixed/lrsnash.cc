@@ -850,7 +850,7 @@ getabasis2 (lrs_dic * P, lrs_dat * Q, lrs_dic * P2orig, long order[])
 	      if (zero (A[Row[i]][0]))
 		{
 #ifndef LRS_QUIET
-		  fprintf (lrs_ofp, "\n*Input linearity in row %ld is redundant--skipped", order[j]);
+		  fprintf (lrs_ofp, "\n*Input linearity in row %ld is redundant--skipped\n", order[j]);
 #endif
 		  linearity[j] = 0;
 		}

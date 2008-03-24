@@ -2547,7 +2547,7 @@ getabasis (lrs_dic * P, lrs_dat * Q, long order[])
 	      if (zero (A[Row[i]][0]))
 		{
 #ifndef LRS_QUIET
-		  fprintf (lrs_ofp, "\n*Input linearity in row %ld is redundant--skipped", order[j]);
+		  fprintf (lrs_ofp, "\n*Input linearity in row %ld is redundant--skipped\n", order[j]);
 #endif
 		  linearity[j] = 0;
 		}
@@ -2557,7 +2557,7 @@ getabasis (lrs_dic * P, lrs_dat * Q, long order[])
 		    printA (P, Q);
 #ifndef LRS_QUIET
 		  fprintf (lrs_ofp, "\n*Input linearity in row %ld is inconsistent with earlier linearities", order[j]);
-		  fprintf (lrs_ofp, "\n*No feasible solution");
+		  fprintf (lrs_ofp, "\n*No feasible solution\n");
 #endif
 		  return FALSE;
 		}
