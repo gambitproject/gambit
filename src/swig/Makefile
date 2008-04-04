@@ -1,11 +1,12 @@
-SWIGFILES = gambit.i
+SWIGFILES = libgambit.i
 
 #
 # Build the Python wrapper.  Use this as a template for building for
 # other languages.
 #
-all:  gambit_python.cc
+all:  gambit/libgambit_wrap.cxx
+	python setup.py build
 
-gambit_python.cc:	${SWIGFILES}
-	swig -c++ -python -I.. gambit.i
-
+gambit/libgambit_wrap.cxx:	${SWIGFILES}
+	swig -c++ -python -I.. libgambit.i
+	mv libgambit_wrap.cxx libgambit.py gambit

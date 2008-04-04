@@ -1,5 +1,13 @@
-%module gambit
+%module libgambit
 %include file.i
+
+// Globally turn on the autodoc feature
+//%feature("autodoc", "1");  // 0 == no param types, 1 == show param types
+
+// Borrowed from the wxPython distribution
+%define DocStr(decl, docstr)
+  %feature("docstring") decl docstr;
+%enddef
 
 //========================================================================
 //                         Our custom typemaps
@@ -48,9 +56,6 @@ using namespace Gambit;
   }
   catch (Gambit::NullException &) {
     SWIG_exception(SWIG_RuntimeError, "operating on null object");
-  }
-  catch (Gambit::ValueException &) {
-    SWIG_exception(SWIG_ValueError, "invalid value");
   }
   catch (...) {
     SWIG_exception(SWIG_RuntimeError, "uncaught runtime error");
@@ -171,13 +176,6 @@ using namespace Gambit;
   Rational operator*=(double y)   { return *self *= Rational(y); }
   Rational operator/=(double y)   { return *self /= Rational(y); }
 
-  bool operator==(int y) const    { return *self == Rational(y); }
-  bool operator!=(int y) const    { return *self != Rational(y); }
-  bool operator> (int y) const    { return *self >  Rational(y); }
-  bool operator>=(int y) const    { return *self >= Rational(y); }
-  bool operator< (int y) const    { return *self <  Rational(y); }
-  bool operator<=(int y) const    { return *self <= Rational(y); }
-
 
   // Additional Python operators
   Rational __pos__(void)  { return *self; }
@@ -271,14 +269,14 @@ using namespace Gambit;
 %ignore Gambit::GameRep::WriteNfgFile(std::ostream &);
 
 %extend Gambit::GameRep {
-  std::string AsEfgFile(void) const 
+  std::string efg_file(void) const
   {
     std::ostringstream s;
     self->WriteEfgFile(s);
     return s.str();
   }
 
-  std::string AsNfgFile(void) const
+  std::string nfg_file(void) const
   {
     std::ostringstream s;
     self->WriteNfgFile(s);
@@ -300,6 +298,29 @@ using namespace Gambit;
 
 %template(Game) Gambit::GameObjectPtr<Gambit::GameRep>;
 
+%extend Gambit::GameObjectPtr<Gambit::GameRep> {
+%pythoncode %{
+  def mixed_strategy(self, rational=False):
+    if rational:
+      return self.NewMixedStrategyRational()
+    else:
+      return self.NewMixedStrategyDouble()
+
+  def behavior_strategy(self, rational=False):
+    if rational:
+      return self.NewMixedBehavRational()
+    else:
+      return self.NewMixedBehavDouble()
+
+  def __str__(self):
+    if self.IsTree():
+      return "Gambit extensive game '%s'" % self.GetTitle()
+    else:
+      return "Gambit strategic game '%s'" % self.GetTitle()
+
+  def __repr__(self):  return str(self)
+%}
+}
 
 //========================================================================
 //                             Reading games
@@ -333,9 +354,17 @@ Gambit::Game ReadGameString(const std::string &p_string);
 %pythoncode %{
 def ReadGame(x):
   if isinstance(x, str):
-    return ReadGameString(x)
-  else:
-    return ReadGameString(x.read())
+    try:
+      return ReadGameString(x)
+    except RuntimeError:
+      pass
+
+    try:
+      return ReadGameString(file(x).read())
+    except:
+      raise RuntimeError
+
+  return ReadGameString(x.read())
 %}
 
 //========================================================================
@@ -349,10 +378,22 @@ def ReadGame(x):
 %ignore MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehavProfile<T> &);
 
 %extend Gambit::MixedStrategyProfile {
-  T __getitem__(int i) const { return (*self)[i]; }
+  MixedBehavProfile<T> behavior(void) const { return MixedBehavProfile<T>(*self); }
+
+  int __len__(void) const { return self->MixedProfileLength(); }
+  T __getitem__(int i) const { return (*self)[i+1]; }
   T __getitem__(const GameStrategy &s) const { return (*self)[s]; }
-  void __setitem__(int i, const T &value) { (*self)[i] = value; }
+  void __setitem__(int i, const T &value) { (*self)[i+1] = value; }
   void __setitem__(const GameStrategy &s, const T &value) { (*self)[s] = value; }
+
+%pythoncode %{
+  def __repr__(self):
+    return "Mixed strategy profile on '%s': [%s]" % \
+           (self.GetGame().GetTitle(),
+	    ", ".join([ str(self[i]) for i in xrange(len(self)) ]))	
+
+  def __str__(self):   return repr(self)
+%}
 };
 
 %template(MixedStrategyDouble) Gambit::MixedStrategyProfile<double>;
@@ -381,10 +422,20 @@ public:
 %include <libgambit/behav.h>
 
 %extend Gambit::MixedBehavProfile {
-  T __getitem__(int i) const { return (*self)[i]; }
+  int __len__(void) const { return self->Length(); }
+  T __getitem__(int i) const { return (*self)[i+1]; }
   T __getitem__(const GameAction &s) const { return (*self)(s); }
-  void __setitem__(int i, const T &value) { (*self)[i] = value; }
+  void __setitem__(int i, const T &value) { (*self)[i+1] = value; }
   void __setitem__(const GameAction &s, const T &value) { (*self)(s) = value; }
+
+%pythoncode %{
+  def __repr__(self):
+    return "Behavior strategy profile on '%s': [%s]" % \
+           (self.GetGame().GetTitle(),
+	    ", ".join([ str(self[i]) for i in xrange(len(self)) ]))	
+
+  def __str__(self):   return repr(self)
+%}
 };
 
 %template(MixedBehavDouble) Gambit::MixedBehavProfile<double>;
