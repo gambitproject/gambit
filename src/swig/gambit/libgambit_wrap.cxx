@@ -2583,8 +2583,9 @@ SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int argnum, int flags)
 #define SWIGTYPE_p_unsigned_long swig_types[112]
 #define SWIGTYPE_p_unsigned_long_long swig_types[113]
 #define SWIGTYPE_p_unsigned_short swig_types[114]
-static swig_type_info *swig_types[116];
-static swig_module_info swig_module = {swig_types, 115, 0, 0, 0, 0};
+#define SWIGTYPE_p_void swig_types[115]
+static swig_type_info *swig_types[117];
+static swig_module_info swig_module = {swig_types, 116, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -58391,9 +58392,9 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_iostream", _wrap_new_iostream, METH_VARARGS, NULL},
 	 { (char *)"delete_iostream", _wrap_delete_iostream, METH_VARARGS, NULL},
 	 { (char *)"iostream_swigregister", iostream_swigregister, METH_VARARGS, NULL},
-	 { (char *)"endl", _wrap_endl, METH_VARARGS, (char *)"swig_ptr: endl_cb_ptr"},
-	 { (char *)"ends", _wrap_ends, METH_VARARGS, (char *)"swig_ptr: ends_cb_ptr"},
-	 { (char *)"flush", _wrap_flush, METH_VARARGS, (char *)"swig_ptr: flush_cb_ptr"},
+	 { (char *)"endl", _wrap_endl, METH_VARARGS, (char *)"endl(ostream ?) -> ostream\nswig_ptr: endl_cb_ptr"},
+	 { (char *)"ends", _wrap_ends, METH_VARARGS, (char *)"ends(ostream ?) -> ostream\nswig_ptr: ends_cb_ptr"},
+	 { (char *)"flush", _wrap_flush, METH_VARARGS, (char *)"flush(ostream ?) -> ostream\nswig_ptr: flush_cb_ptr"},
 	 { (char *)"delete_IndexException", _wrap_delete_IndexException, METH_VARARGS, NULL},
 	 { (char *)"IndexException_GetDescription", _wrap_IndexException_GetDescription, METH_VARARGS, NULL},
 	 { (char *)"new_IndexException", _wrap_new_IndexException, METH_VARARGS, NULL},
@@ -59565,6 +59566,7 @@ static swig_type_info _swigt__p_unsigned_int = {"_p_unsigned_int", "unsigned int
 static swig_type_info _swigt__p_unsigned_long = {"_p_unsigned_long", "unsigned long *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_unsigned_long_long = {"_p_unsigned_long_long", "unsigned long long *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_unsigned_short = {"_p_unsigned_short", "unsigned short *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_BehavSupport,
@@ -59682,6 +59684,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_unsigned_long,
   &_swigt__p_unsigned_long_long,
   &_swigt__p_unsigned_short,
+  &_swigt__p_void,
 };
 
 static swig_cast_info _swigc__p_BehavSupport[] = {  {&_swigt__p_BehavSupport, 0, 0, 0},{0, 0, 0, 0}};
@@ -59799,6 +59802,7 @@ static swig_cast_info _swigc__p_unsigned_int[] = {  {&_swigt__p_unsigned_int, 0,
 static swig_cast_info _swigc__p_unsigned_long[] = {  {&_swigt__p_unsigned_long, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned_long_long[] = {  {&_swigt__p_unsigned_long_long, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned_short[] = {  {&_swigt__p_unsigned_short, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_BehavSupport,
@@ -59916,6 +59920,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_unsigned_long,
   _swigc__p_unsigned_long_long,
   _swigc__p_unsigned_short,
+  _swigc__p_void,
 };
 
 

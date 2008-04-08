@@ -2,7 +2,7 @@
 %include file.i
 
 // Globally turn on the autodoc feature
-//%feature("autodoc", "1");  // 0 == no param types, 1 == show param types
+%feature("autodoc", "1");  // 0 == no param types, 1 == show param types
 
 // Borrowed from the wxPython distribution
 %define DocStr(decl, docstr)
@@ -300,6 +300,9 @@ using namespace Gambit;
 
 %extend Gambit::GameObjectPtr<Gambit::GameRep> {
 %pythoncode %{
+  def contingencies(self):
+    return StrategyIterator(StrategySupport(self))
+
   def mixed_strategy(self, rational=False):
     if rational:
       return self.NewMixedStrategyRational()

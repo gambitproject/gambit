@@ -10,3 +10,7 @@ all:  gambit/libgambit_wrap.cxx
 gambit/libgambit_wrap.cxx:	${SWIGFILES}
 	swig -c++ -python -I.. libgambit.i
 	mv libgambit_wrap.cxx libgambit.py gambit
+
+
+install:	all
+	python setup.py install
