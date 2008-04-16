@@ -46,6 +46,7 @@ class MeanStatisticGame(object):
 
     def nfg(self):
         game = libgambit.NewTable([ len(self.choices) for i in xrange(self.N) ])
+        game.SetTitle(self.title())
 
         # Label each strategy by its contribution
         for (pl, player) in enumerate(game.Players()):
@@ -66,6 +67,10 @@ class MeanStatisticGame(object):
                                               sum(choices)-choices[pl]))
 
         return game
+
+    def is_tree(self):      return False
+    def efg_file(self):     raise NotImplemented
+    def nfg_file(self):     return self.nfg().nfg_file()
 
     def __getitem__(self, key):
         if len(key) != 2:

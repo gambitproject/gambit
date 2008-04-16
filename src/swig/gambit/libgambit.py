@@ -1556,21 +1556,6 @@ class Rational(_object):
     __setattr__ = lambda self, name, value: _swig_setattr(self, Rational, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, Rational, name)
-    def __init__(self, *args): 
-        """
-        __init__(self) -> Rational
-        __init__(self, double ?) -> Rational
-        __init__(self, int ?) -> Rational
-        __init__(self, long n) -> Rational
-        __init__(self, int n, int d) -> Rational
-        __init__(self, long n, long d) -> Rational
-        __init__(self, Integer n) -> Rational
-        __init__(self, Integer n, Integer d) -> Rational
-        __init__(self, Rational ?) -> Rational
-        """
-        this = _libgambit.new_Rational(*args)
-        try: self.this.append(this)
-        except: self.this = this
     __swig_destroy__ = _libgambit.delete_Rational
     __del__ = lambda self : None;
     def __eq__(*args):
@@ -1633,6 +1618,22 @@ class Rational(_object):
         """OK(self) -> int"""
         return _libgambit.Rational_OK(*args)
 
+    def __init__(self, *args): 
+        """
+        __init__(self) -> Rational
+        __init__(self, double ?) -> Rational
+        __init__(self, int ?) -> Rational
+        __init__(self, long n) -> Rational
+        __init__(self, int n, int d) -> Rational
+        __init__(self, long n, long d) -> Rational
+        __init__(self, Integer n) -> Rational
+        __init__(self, Integer n, Integer d) -> Rational
+        __init__(self, Rational ?) -> Rational
+        __init__(self, string p_string) -> Rational
+        """
+        this = _libgambit.new_Rational(*args)
+        try: self.this.append(this)
+        except: self.this = this
     def __str__(*args):
         """__str__(self, void ?) -> string"""
         return _libgambit.Rational___str__(*args)
@@ -2352,9 +2353,9 @@ class GameRep(GameObject):
         """Copy(self) -> Game"""
         return _libgambit.GameRep_Copy(*args)
 
-    def IsTree(*args):
-        """IsTree(self) -> bool"""
-        return _libgambit.GameRep_IsTree(*args)
+    def is_tree(*args):
+        """is_tree(self) -> bool"""
+        return _libgambit.GameRep_is_tree(*args)
 
     def GetTitle(*args):
         """GetTitle(self) -> string"""
@@ -3653,6 +3654,9 @@ class Game(_object):
       return StrategyIterator(StrategySupport(self))
 
     def mixed_strategy(self, rational=False):
+      if self.is_tree():
+        self.BuildComputedValues()
+
       if rational:
         return self.NewMixedStrategyRational()
       else:
@@ -3665,7 +3669,7 @@ class Game(_object):
         return self.NewMixedBehavDouble()
 
     def __str__(self):
-      if self.IsTree():
+      if self.is_tree():
         return "Gambit extensive game '%s'" % self.GetTitle()
       else:
         return "Gambit strategic game '%s'" % self.GetTitle()
@@ -3676,9 +3680,9 @@ class Game(_object):
         """Copy(self) -> Game"""
         return _libgambit.Game_Copy(*args)
 
-    def IsTree(*args):
-        """IsTree(self) -> bool"""
-        return _libgambit.Game_IsTree(*args)
+    def is_tree(*args):
+        """is_tree(self) -> bool"""
+        return _libgambit.Game_is_tree(*args)
 
     def GetTitle(*args):
         """GetTitle(self) -> string"""

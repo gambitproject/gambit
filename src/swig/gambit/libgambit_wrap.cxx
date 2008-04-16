@@ -3309,6 +3309,9 @@ SWIGINTERN Gambit::Integer Gambit_Integer___rsub__(Gambit::Integer const *self,l
 SWIGINTERN Gambit::Integer Gambit_Integer___rmul__(Gambit::Integer const *self,long lhs){ return Integer(lhs) * *self; }
 SWIGINTERN Gambit::Integer Gambit_Integer___rdiv__(Gambit::Integer const *self,long lhs){ return Integer(lhs) / *self; }
 SWIGINTERN long Gambit_Integer___int__(Gambit::Integer *self){ return self->as_long(); }
+SWIGINTERN Gambit::Rational *new_Gambit_Rational__SWIG_9(std::string const &p_string){ Rational *r = new Rational;
+      *r = Gambit::ToRational(p_string);
+      return r; }
 SWIGINTERN std::string Gambit_Rational___str__(Gambit::Rational *self){ return ToText(*self); }
 SWIGINTERN std::string Gambit_Rational___repr__(Gambit::Rational *self){ return ToText(*self); }
 SWIGINTERN double Gambit_Rational_operator_Sa___SWIG_1(Gambit::Rational const *self,double y){ return (double) *self + y; }
@@ -3338,6 +3341,9 @@ SWIGINTERN std::string Gambit_GameRep_efg_file(Gambit::GameRep const *self){
   }
 SWIGINTERN std::string Gambit_GameRep_nfg_file(Gambit::GameRep const *self){
     std::ostringstream s;
+    if (self->IsTree()) {
+      const_cast<Gambit::GameRep *>(self)->BuildComputedValues();
+    }
     self->WriteNfgFile(s);
     return s.str();
   }
@@ -22985,116 +22991,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_Rational(PyObject *self, PyObject *args) {
-  int argc;
-  PyObject *argv[3];
-  int ii;
-  
-  if (!PyTuple_Check(args)) SWIG_fail;
-  argc = PyObject_Length(args);
-  for (ii = 0; (ii < argc) && (ii < 2); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
-  }
-  if (argc == 0) {
-    return _wrap_new_Rational__SWIG_0(self, args);
-  }
-  if (argc == 1) {
-    int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Gambit__Integer, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      return _wrap_new_Rational__SWIG_6(self, args);
-    }
-  }
-  if (argc == 1) {
-    int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Gambit__Rational, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      return _wrap_new_Rational__SWIG_8(self, args);
-    }
-  }
-  if (argc == 1) {
-    int _v;
-    {
-      int res = SWIG_AsVal_int(argv[0], NULL);
-      _v = SWIG_CheckState(res);
-    }
-    if (_v) {
-      return _wrap_new_Rational__SWIG_2(self, args);
-    }
-  }
-  if (argc == 1) {
-    int _v;
-    {
-      int res = SWIG_AsVal_long(argv[0], NULL);
-      _v = SWIG_CheckState(res);
-    }
-    if (_v) {
-      return _wrap_new_Rational__SWIG_3(self, args);
-    }
-  }
-  if (argc == 1) {
-    int _v;
-    {
-      int res = SWIG_AsVal_double(argv[0], NULL);
-      _v = SWIG_CheckState(res);
-    }
-    if (_v) {
-      return _wrap_new_Rational__SWIG_1(self, args);
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Gambit__Integer, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Gambit__Integer, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_new_Rational__SWIG_7(self, args);
-      }
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    {
-      int res = SWIG_AsVal_int(argv[0], NULL);
-      _v = SWIG_CheckState(res);
-    }
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        return _wrap_new_Rational__SWIG_4(self, args);
-      }
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    {
-      int res = SWIG_AsVal_long(argv[0], NULL);
-      _v = SWIG_CheckState(res);
-    }
-    if (_v) {
-      {
-        int res = SWIG_AsVal_long(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        return _wrap_new_Rational__SWIG_5(self, args);
-      }
-    }
-  }
-  
-fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_Rational'.\n  Possible C/C++ prototypes are:\n    Gambit::Rational()\n    Gambit::Rational(double)\n    Gambit::Rational(int)\n    Gambit::Rational(long)\n    Gambit::Rational(int,int)\n    Gambit::Rational(long,long)\n    Gambit::Rational(Gambit::Integer const &)\n    Gambit::Rational(Gambit::Integer const &,Gambit::Integer const &)\n    Gambit::Rational(Gambit::Rational const &)\n");
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_delete_Rational(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Gambit::Rational *arg1 = (Gambit::Rational *) 0 ;
@@ -24126,6 +24022,166 @@ SWIGINTERN PyObject *_wrap_Rational_OK(PyObject *SWIGUNUSEDPARM(self), PyObject 
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_Rational__SWIG_9(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::string *arg1 = 0 ;
+  Gambit::Rational *result = 0 ;
+  int res1 = SWIG_OLDOBJ ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:new_Rational",&obj0)) SWIG_fail;
+  {
+    std::string *ptr = (std::string *)0;
+    res1 = SWIG_AsPtr_std_string(obj0, &ptr);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Rational" "', argument " "1"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Rational" "', argument " "1"" of type '" "std::string const &""'"); 
+    }
+    arg1 = ptr;
+  }
+  {
+    try {
+      result = (Gambit::Rational *)new_Gambit_Rational__SWIG_9((std::string const &)*arg1);
+    }
+    catch (Gambit::IndexException &) {
+      SWIG_exception(SWIG_IndexError, "index out of range");
+    }
+    catch (Gambit::NullException &) {
+      SWIG_exception(SWIG_RuntimeError, "operating on null object");
+    }
+    catch (...) {
+      SWIG_exception(SWIG_RuntimeError, "uncaught runtime error");
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Gambit__Rational, SWIG_POINTER_NEW |  0 );
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_Rational(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[3];
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = PyObject_Length(args);
+  for (ii = 0; (ii < argc) && (ii < 2); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 0) {
+    return _wrap_new_Rational__SWIG_0(self, args);
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Gambit__Integer, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_Rational__SWIG_6(self, args);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Gambit__Rational, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_Rational__SWIG_8(self, args);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    {
+      int res = SWIG_AsVal_int(argv[0], NULL);
+      _v = SWIG_CheckState(res);
+    }
+    if (_v) {
+      return _wrap_new_Rational__SWIG_2(self, args);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    {
+      int res = SWIG_AsVal_long(argv[0], NULL);
+      _v = SWIG_CheckState(res);
+    }
+    if (_v) {
+      return _wrap_new_Rational__SWIG_3(self, args);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    {
+      int res = SWIG_AsVal_double(argv[0], NULL);
+      _v = SWIG_CheckState(res);
+    }
+    if (_v) {
+      return _wrap_new_Rational__SWIG_1(self, args);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_AsPtr_std_string(argv[0], (std::string**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_Rational__SWIG_9(self, args);
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Gambit__Integer, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Gambit__Integer, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_new_Rational__SWIG_7(self, args);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    {
+      int res = SWIG_AsVal_int(argv[0], NULL);
+      _v = SWIG_CheckState(res);
+    }
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_new_Rational__SWIG_4(self, args);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    {
+      int res = SWIG_AsVal_long(argv[0], NULL);
+      _v = SWIG_CheckState(res);
+    }
+    if (_v) {
+      {
+        int res = SWIG_AsVal_long(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_new_Rational__SWIG_5(self, args);
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_Rational'.\n  Possible C/C++ prototypes are:\n    Gambit::Rational()\n    Gambit::Rational(double)\n    Gambit::Rational(int)\n    Gambit::Rational(long)\n    Gambit::Rational(int,int)\n    Gambit::Rational(long,long)\n    Gambit::Rational(Gambit::Integer const &)\n    Gambit::Rational(Gambit::Integer const &,Gambit::Integer const &)\n    Gambit::Rational(Gambit::Rational const &)\n    Gambit::Rational(std::string const &)\n");
   return NULL;
 }
 
@@ -30538,7 +30594,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_GameRep_IsTree(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_GameRep_is_tree(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Gambit::GameRep *arg1 = (Gambit::GameRep *) 0 ;
   bool result;
@@ -30546,10 +30602,10 @@ SWIGINTERN PyObject *_wrap_GameRep_IsTree(PyObject *SWIGUNUSEDPARM(self), PyObje
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:GameRep_IsTree",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:GameRep_is_tree",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Gambit__GameRep, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GameRep_IsTree" "', argument " "1"" of type '" "Gambit::GameRep const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GameRep_is_tree" "', argument " "1"" of type '" "Gambit::GameRep const *""'"); 
   }
   arg1 = reinterpret_cast< Gambit::GameRep * >(argp1);
   {
@@ -44002,7 +44058,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Game_IsTree(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Game_is_tree(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Gambit::GameObjectPtr<Gambit::GameRep > *arg1 = (Gambit::GameObjectPtr<Gambit::GameRep > *) 0 ;
   bool result;
@@ -44010,10 +44066,10 @@ SWIGINTERN PyObject *_wrap_Game_IsTree(PyObject *SWIGUNUSEDPARM(self), PyObject 
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Game_IsTree",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:Game_is_tree",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Gambit__GameObjectPtrTGambit__GameRep_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Game_IsTree" "', argument " "1"" of type '" "Gambit::GameObjectPtr<Gambit::GameRep > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Game_is_tree" "', argument " "1"" of type '" "Gambit::GameObjectPtr<Gambit::GameRep > const *""'"); 
   }
   arg1 = reinterpret_cast< Gambit::GameObjectPtr<Gambit::GameRep > * >(argp1);
   {
@@ -58609,7 +58665,6 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Ipow", _wrap_Ipow, METH_VARARGS, NULL},
 	 { (char *)"sqrt", _wrap_sqrt, METH_VARARGS, NULL},
 	 { (char *)"lcm", _wrap_lcm, METH_VARARGS, NULL},
-	 { (char *)"new_Rational", _wrap_new_Rational, METH_VARARGS, NULL},
 	 { (char *)"delete_Rational", _wrap_delete_Rational, METH_VARARGS, NULL},
 	 { (char *)"Rational___eq__", _wrap_Rational___eq__, METH_VARARGS, NULL},
 	 { (char *)"Rational___ne__", _wrap_Rational___ne__, METH_VARARGS, NULL},
@@ -58626,6 +58681,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Rational_fits_in_double", _wrap_Rational_fits_in_double, METH_VARARGS, NULL},
 	 { (char *)"Rational_error", _wrap_Rational_error, METH_VARARGS, NULL},
 	 { (char *)"Rational_OK", _wrap_Rational_OK, METH_VARARGS, NULL},
+	 { (char *)"new_Rational", _wrap_new_Rational, METH_VARARGS, NULL},
 	 { (char *)"Rational___str__", _wrap_Rational___str__, METH_VARARGS, NULL},
 	 { (char *)"Rational___repr__", _wrap_Rational___repr__, METH_VARARGS, NULL},
 	 { (char *)"Rational___add__", _wrap_Rational___add__, METH_VARARGS, NULL},
@@ -58769,7 +58825,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_GameRep", _wrap_new_GameRep, METH_VARARGS, NULL},
 	 { (char *)"delete_GameRep", _wrap_delete_GameRep, METH_VARARGS, NULL},
 	 { (char *)"GameRep_Copy", _wrap_GameRep_Copy, METH_VARARGS, NULL},
-	 { (char *)"GameRep_IsTree", _wrap_GameRep_IsTree, METH_VARARGS, NULL},
+	 { (char *)"GameRep_is_tree", _wrap_GameRep_is_tree, METH_VARARGS, NULL},
 	 { (char *)"GameRep_GetTitle", _wrap_GameRep_GetTitle, METH_VARARGS, NULL},
 	 { (char *)"GameRep_SetTitle", _wrap_GameRep_SetTitle, METH_VARARGS, NULL},
 	 { (char *)"GameRep_GetComment", _wrap_GameRep_GetComment, METH_VARARGS, NULL},
@@ -59046,7 +59102,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Game___eq__", _wrap_Game___eq__, METH_VARARGS, NULL},
 	 { (char *)"Game___ne__", _wrap_Game___ne__, METH_VARARGS, NULL},
 	 { (char *)"Game_Copy", _wrap_Game_Copy, METH_VARARGS, NULL},
-	 { (char *)"Game_IsTree", _wrap_Game_IsTree, METH_VARARGS, NULL},
+	 { (char *)"Game_is_tree", _wrap_Game_is_tree, METH_VARARGS, NULL},
 	 { (char *)"Game_GetTitle", _wrap_Game_GetTitle, METH_VARARGS, NULL},
 	 { (char *)"Game_SetTitle", _wrap_Game_SetTitle, METH_VARARGS, NULL},
 	 { (char *)"Game_GetComment", _wrap_Game_GetComment, METH_VARARGS, NULL},

@@ -13,7 +13,7 @@ def launch_external_program(prog, game):
     Returns the object referencing standard output of the external program.
     """
     child_stdin, child_stdout = os.popen2("%s -q" % prog)
-    if game.IsTree():
+    if game.is_tree():
         child_stdin.write(game.efg_file())
     else:
         child_stdin.write(game.nfg_file())
@@ -24,6 +24,57 @@ def launch_external_program(prog, game):
     return child_stdout
 
 
+def lp(game, rational=False):
+    """
+    Compute an equilibrium of a two-player constant-sum game by solving
+    a linear programming problem.
+    """
+    profiles = [ ]
+
+    commandLine = "gambit-lp"
+    if not rational:
+        commandLine += " -d 10"
+    
+    for line in launch_external_program(commandLine, game):
+        entries = line.strip().split(",")
+        if entries[0] != "NE":  continue
+        
+        profile = game.mixed_strategy(rational=rational)
+        for (i, p) in enumerate(entries[1:]):
+            if rational:
+                profile[i] = libgambit.Rational(p)
+            else:
+                profile[i] = float(p)
+                
+        profiles.append(profile)
+
+    return profiles
+
+def lcp(game, rational=False):
+    """
+    Compute equilibria of a two-player game by solving
+    a linear complementarity programming problem.
+    """
+    profiles = [ ]
+
+    commandLine = "gambit-lcp"
+    if not rational:
+        commandLine += " -d 10"
+    
+    for line in launch_external_program(commandLine, game):
+        entries = line.strip().split(",")
+        if entries[0] != "NE":  continue
+        
+        profile = game.mixed_strategy(rational=rational)
+        for (i, p) in enumerate(entries[1:]):
+            if rational:
+                profile[i] = libgambit.Rational(p)
+            else:
+                profile[i] = float(p)
+                
+        profiles.append(profile)
+
+    return profiles
 
 def enummixed(game, rational=False):
     """
@@ -31,14 +82,14 @@ def enummixed(game, rational=False):
     points of the equilibrium set.
     """
     profiles = [ ]
-    game.BuildComputedValues()
 
     commandLine = "gambit-enummixed"
     if not rational:
         commandLine += " -d 10"
     
     for line in launch_external_program(commandLine, game):
-        entries = line.split(",")
+        entries = line.strip().split(",")
+        if entries[0] != "NE":  continue
         
         profile = game.mixed_strategy(rational=rational)
         for (i, p) in enumerate(entries[1:]):
@@ -56,12 +107,12 @@ def simpdiv(game):
     Compute one equilibrium of an N-player game using simplicial subdivision.
     """
     profiles = [ ]
-    game.BuildComputedValues()
 
     commandLine = "gambit-simpdiv"
     
     for line in launch_external_program(commandLine, game):
-        entries = line.split(",")
+        entries = line.strip().split(",")
+        if entries[0] != "NE":  continue
         
         profile = game.mixed_strategy(rational=True)
         for (i, p) in enumerate(entries[1:]):

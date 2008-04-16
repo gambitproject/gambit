@@ -160,6 +160,10 @@ using namespace Gambit;
 %include <libgambit/rational.h>
 
 %extend Gambit::Rational {
+  Rational(const std::string &p_string)
+    { Rational *r = new Rational;
+      *r = Gambit::ToRational(p_string);
+      return r; }
   std::string __str__(void)   { return ToText(*self); }  
   std::string __repr__(void)  { return ToText(*self); }   
 
@@ -196,6 +200,8 @@ using namespace Gambit;
 //========================================================================
 
 %ignore *::operator!;
+
+%rename(is_tree) Gambit::GameRep::IsTree;
 
 %include <libgambit/game.h>
 
@@ -279,6 +285,9 @@ using namespace Gambit;
   std::string nfg_file(void) const
   {
     std::ostringstream s;
+    if (self->IsTree()) {
+      const_cast<Gambit::GameRep *>(self)->BuildComputedValues();
+    }
     self->WriteNfgFile(s);
     return s.str();
   }
@@ -304,6 +313,9 @@ using namespace Gambit;
     return StrategyIterator(StrategySupport(self))
 
   def mixed_strategy(self, rational=False):
+    if self.is_tree():
+      self.BuildComputedValues()
+
     if rational:
       return self.NewMixedStrategyRational()
     else:
@@ -316,7 +328,7 @@ using namespace Gambit;
       return self.NewMixedBehavDouble()
 
   def __str__(self):
-    if self.IsTree():
+    if self.is_tree():
       return "Gambit extensive game '%s'" % self.GetTitle()
     else:
       return "Gambit strategic game '%s'" % self.GetTitle()
