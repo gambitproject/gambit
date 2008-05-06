@@ -430,6 +430,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
                                    // in calculating contraction rate
   double h = g_hStart;             // initial stepsize
   const double c_hmin = 1.0e-8;    // minimal stepsize
+  const int c_maxIter = 100;       // maximum iterations in corrector
 
   bool newton = false;             // using Newton steplength
 
@@ -545,6 +546,9 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
       }
       disto = dist;
       iter++;
+      if (iter > c_maxIter) {
+	return;
+      }
     }
 
     if (!accept) {
