@@ -211,6 +211,14 @@ class MSMixedProfile:
                      enumerate(self.sum_dist(self.game.N-1,
                                              self.profile)) ])
 
+    def strategy_values(self):
+        oprob = self.sum_dist(self.game.N-1, self.profile)
+        
+        return [ sum([ prob * self.game.payoff(st,
+                                               i+(self.game.N-1)*min(self.game.choices))
+                       for (i, prob) in enumerate(oprob) ])
+                 for st in self.game.choices ]
+
     def strategy_value_deriv(self, st, stOpp):
         return sum([ prob * self.game.payoff(st,
                                              i+stOpp+
@@ -218,6 +226,16 @@ class MSMixedProfile:
                      for (i, prob) in
                      enumerate(self.sum_dist(self.game.N-2,
                                              self.profile)) ])
+
+    def strategy_values_deriv(self):
+        oprob = self.sum_dist(self.game.N-2, self.profile)
+        
+        return [ [ sum([ prob * self.game.payoff(st,
+                                                 i+stOpp+
+                                                 (self.game.N-2)*min(self.game.choices))
+                         for (i, prob) in enumerate(oprob) ])
+                   for stOpp in self.game.choices ]
+                 for st in self.game.choices ]
 
     def sum_dist(self, K, prob):
         """
