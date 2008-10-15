@@ -13,7 +13,7 @@ def launch_external_program(prog, game):
     Returns the object referencing standard output of the external program.
     """
     child_stdin, child_stdout = os.popen2("%s -q" % prog)
-    if game.IsTree():
+    if game.is_tree():
         child_stdin.write(game.efg_file())
     else:
         child_stdin.write(game.nfg_file())
@@ -75,7 +75,7 @@ class AgentQRE(object):
 def compute_principal_branch(game, strategic=False):
     profiles = [ ]
 
-    if strategic or not game.IsTree():
+    if strategic or not game.is_tree():
         game.BuildComputedValues()
         for line in launch_external_program("gambit-logit -S", game):
             if "Bifurcation" in line: continue
@@ -106,7 +106,7 @@ def compute_at_lambda(game, lam, strategic=False):
     Compute a good approximation to the QRE on the principal branch
     with parameter lambda.
     """
-    if strategic or not game.IsTree():
+    if strategic or not game.is_tree():
         game.BuildComputedValues()
 
         for line in launch_external_program("gambit-logit -S -l %f" % lam,

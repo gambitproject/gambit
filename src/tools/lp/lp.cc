@@ -27,6 +27,7 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <stdlib.h>
 #include "libgambit/libgambit.h"
 
 template <class T> void SolveExtensive(const Gambit::Game &p_game);

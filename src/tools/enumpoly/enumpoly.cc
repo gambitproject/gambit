@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <stdlib.h>
 #include "libgambit/libgambit.h"
 #include "nfghs.h"
 

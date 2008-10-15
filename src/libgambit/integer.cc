@@ -49,6 +49,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <limits.h>
 #include <math.h>
 #include <assert.h>
+#include <string.h>
 
 namespace Gambit {
 

@@ -27,6 +27,8 @@
 #include "libgambit.h"
 #include "subgame.h"
 
+#include <stdlib.h>
+
 namespace Gambit {
 
 

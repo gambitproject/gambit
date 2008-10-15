@@ -27,6 +27,7 @@
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
+#include <stdlib.h>
 #include "libgambit/libgambit.h"
 #include "logbehav.h"
 

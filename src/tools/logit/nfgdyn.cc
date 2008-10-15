@@ -26,6 +26,7 @@
 //
 
 #include <unistd.h>
+#include <stdlib.h>
 #include <math.h>
 #include <iostream>
 #include <fstream>

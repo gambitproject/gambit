@@ -27,6 +27,7 @@
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include <strings.h>
 #include <string>
