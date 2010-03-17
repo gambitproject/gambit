@@ -1,0 +1,14 @@
+*.o
+*.lo
+Makefile
+Makefile.in
+.deps
+.libs
+*.m4
+*.cache
+config.log
+config.status
+configure
+libtool
+*.la
+gambit-*
