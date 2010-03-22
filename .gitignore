@@ -19,4 +19,7 @@ _build
 .DS_Store
 .dirstamp
 *~
+build
+*.egg-info
+*.pyc
 
