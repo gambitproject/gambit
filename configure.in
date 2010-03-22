@@ -1,25 +1,30 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(src/libgambit/libgambit.h)
-AM_INIT_AUTOMAKE(gambit, 0.2007.12.04)
+AC_INIT([gambit], [0.2010.03.21])
+AC_CONFIG_SRCDIR([src/libgambit/libgambit.h])
+AM_INIT_AUTOMAKE([subdir-objects])
+AM_OPTIONS_WXCONFIG
 dnl AM_CONFIG_HEADER(config.h)
 
 dnl User-specified options
 dnl By default, we build the GUI
-WITH_GUI=1
 AC_ARG_ENABLE(gui,
 [  --disable-gui           don't build graphical interface ],
-  WITH_GUI=0
-  GUI_DIRS=""
-)
+[ case "${enableval}" in
+  yes) with_gui=true ;;
+  no)  with_gui=false ;;
+  *)  AC_MSG_ERROR(bad value ${enableval} for --enable-gui) ;;
+ esac], [with_gui=true])
+AM_CONDITIONAL(WITH_GUI, test x$with_gui = xtrue)
 
 dnl Disable building enumpoly -- isn't supported on 64-bit platforms
-WITH_ENUMPOLY=1
-ENUMPOLY_DIRS="enumpoly"
 AC_ARG_ENABLE(enumpoly,
 [  --disable-enumpoly      don't build gambit-enumpoly (not supported on 64bit) ],
-  WITH_ENUMPOLY=0
-  ENUMPOLY_DIRS=""
-)
+[ case "${enableval}" in
+  yes) with_enumpoly=true ;;
+  no)  with_enumpoly=false ;;
+  *)  AC_MSG_ERROR(bad value ${enableval} for --enable-enumpoly) ;;
+ esac], [with_enumpoly=true])
+AM_CONDITIONAL(WITH_ENUMPOLY, test x$with_enumpoly = xtrue)
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -48,13 +53,13 @@ dnl AC_CHECK_FUNCS(ftime putenv strdup strstr strtod strtol)
 AC_CHECK_FUNCS(bcmp srand48 drand48)
 
 
-if test "${WITH_GUI}" == 1; then
+if test x$with_gui = xtrue; then
   dnl------------------------
   dnl Checking for wxWidgets
   dnl------------------------
 
   dnl check for wx-config
-  WX_PATH_WXCONFIG(2.6.0, WXCONFIG=1)
+  AM_PATH_WXCONFIG(2.6.0, WXCONFIG=1)
   if test "$WXCONFIG" != 1; then
       AC_MSG_WARN([
             Did not find a new enough version of wxWidgets; disabling build of
@@ -64,7 +69,7 @@ if test "${WITH_GUI}" == 1; then
             'wx-config --libs' command) is in LD_LIBRARY_PATH or
             equivalent variable and wxWidgets is version 2.6.0 or above.
       ])
-      GUI_DIRS=""
+      GUI_PROGS=""
       WITH_GUI=0
   fi
 fi
@@ -83,7 +88,7 @@ if test "${WITH_GUI}" == 1; then
             port because this port does not implement drag-and-drop capability.
             Gambit recommends the GTK port of wxWidgets for best results.
     ])
-    GUI_DIRS=""
+    GUI_PROGS=""
   fi
 
   if test `echo ${WX_CXXFLAGS} | grep -c __WXMOTIF__` -eq 1; then
@@ -94,19 +99,19 @@ if test "${WITH_GUI}" == 1; then
             port because this port does not implement drag-and-drop capability.
             Gambit recommends the GTK port of wxWidgets for best results.
     ])
-    GUI_DIRS=""
+    GUI_PROGS=""
   fi
 
   if test `echo ${WX_CXXFLAGS} | grep -c __WXGTK__` -eq 1; then
     AC_MSG_RESULT(GTK)
     WXPORT="GTK"
-    GUI_DIRS="labenski gui"
+    GUI_PROGS="gambit"
   fi
 
   if test `echo ${WX_CXXFLAGS} | grep -c __WXMSW__` -eq 1; then
     AC_MSG_RESULT(Windows)
     WXPORT="MSW"
-    GUI_DIRS="labenski gui"
+    GUI_PROGS="gambit"
     dnl Windows uses the resources file
     RC_OBJECT="gambitrc.o"
     RC_OBJECT_PATH="bitmaps/gambitrc.o"
@@ -117,7 +122,7 @@ if test "${WITH_GUI}" == 1; then
   if test `echo ${WX_CXXFLAGS} | grep -c __WXMAC__` -eq 1; then
     AC_MSG_RESULT(Macintosh)
     WXPORT="MAC"
-    GUI_DIRS="labenski gui"
+    GUI_PROGS="gambit"
   fi
 
   if test -z "$WXPORT"; then
@@ -125,52 +130,21 @@ if test "${WITH_GUI}" == 1; then
             Could not identify wxWidgets port.  Disabling build
             of Gambit graphical interface.
     ])
-    GUI_DIRS=""
+    GUI_PROGS=""
   fi	
 fi
 
-AC_SUBST(GUI_DIRS)
+AC_SUBST(GUI_PROGS)
 AC_SUBST(WX_CXXFLAGS)
 AC_SUBST(WX_LIBS)
 
-AC_SUBST(ENUMPOLY_DIRS)
+AC_SUBST(ENUMPOLY_PROGS)
 
 REZFLAGS=`echo $CXXFLAGS $WX_CXXFLAGS | sed 's/-mthreads//g' | sed 's/-g//g' | sed 's/-O. / /g' | sed 's/-I/--include-dir /g'`
 AC_SUBST(REZFLAGS)
 
-AC_OUTPUT(Makefile src/Makefile
-	src/libgambit/Makefile
-	src/tools/Makefile
-	src/tools/convert/Makefile
-	src/tools/enummixed/Makefile
-	src/tools/enumpoly/Makefile
-	src/tools/enumpure/Makefile
-	src/tools/gt/Makefile
-	src/tools/lcp/Makefile
-	src/tools/liap/Makefile
-	src/tools/logit/Makefile
-	src/tools/lp/Makefile
-	src/tools/simpdiv/Makefile
-	src/labenski/Makefile
-	src/labenski/art/Makefile
-	src/labenski/include/Makefile
-	src/labenski/include/wx/Makefile
-	src/labenski/include/wx/wxthings/bitmaps/Makefile
-	src/labenski/include/wx/wxthings/Makefile
-	src/labenski/include/wx/sheet/Makefile
-	src/labenski/include/wx/plotctrl/Makefile
-	src/labenski/src/Makefile
-	src/labenski/doc/Makefile
-	src/gui/bitmaps/Makefile
-	src/gui/Makefile
-	doc/Makefile
+AC_OUTPUT(Makefile
         contrib/Makefile
-        contrib/games/Makefile
-	contrib/mac/Makefile
-	contrib/mac/Gambit.app/Makefile
-	contrib/mac/Gambit.app/Contents/Makefile
-	contrib/mac/Gambit.app/Contents/MacOS/Makefile
-	contrib/mac/Gambit.app/Contents/Resources/Makefile
         contrib/scripts/Makefile
 	contrib/scripts/enumpoly/Makefile)
 
