@@ -11,4 +11,9 @@ config.status
 configure
 libtool
 *.la
+*.a
 gambit-*
+game.wrap.cpp
+_build
+.DS_Store
+
