@@ -9,8 +9,11 @@ cdef extern from "string":
 
 cdef extern from "libgambit/game.h":
     ctypedef struct c_GameRep "GameRep":
+        int IsTree()
+        
         cxx_string GetTitle()
         void SetTitle(cxx_string)
+
         int NumNodes()
 
     ctypedef struct c_Game "GameObjectPtr<GameRep>":
@@ -20,15 +23,20 @@ cdef extern from "libgambit/game.h":
 
 cdef extern from "game.wrap.h":
     c_Game ReadGame(char *) except +IOError
+    cxx_string WriteGame(c_Game, int) except +IOError
 
 cdef class Game:
     cdef c_Game game
 
-    def __repr__(self):
-        return "<This is a Game!>"
+    def __str__(self):
+        return "<Game '%s'>" % self.title
 
-    def num_nodes(self):
-        return self.game.deref().NumNodes()
+    def __repr__(self):
+        return self.write()
+
+    property is_tree:
+        def __get__(self):
+            return True if self.game.deref().IsTree() != 0 else False
 
     property title:
         def __get__(self):
@@ -37,6 +45,15 @@ cdef class Game:
             cdef cxx_string s
             s.assign(value)
             self.game.deref().SetTitle(s)
+
+    def num_nodes(self):
+        return self.game.deref().NumNodes()
+
+    def write(self, strategic=False):
+        if strategic or not self.is_tree:
+            return WriteGame(self.game, 1).c_str()
+        else:
+            return WriteGame(self.game, 0).c_str()
 
 
 def new_tree():

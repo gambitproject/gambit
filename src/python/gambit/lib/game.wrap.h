@@ -6,6 +6,7 @@
 
 #include <string>
 #include <fstream>
+#include <sstream>
 #include "libgambit/libgambit.h"
 
 using namespace std;
@@ -16,5 +17,16 @@ Game ReadGame(char *fn) throw (InvalidFileException)
   std::ifstream f(fn);
   return Gambit::ReadGame(f);
 }
-        
-    
+
+std::string WriteGame(const Game &p_game, bool strategic)
+{
+  std::ostringstream f;
+  if (strategic) {
+    p_game->WriteNfgFile(f);
+  }
+  else {
+    p_game->WriteEfgFile(f);
+  }
+  return f.str();
+}        
+
