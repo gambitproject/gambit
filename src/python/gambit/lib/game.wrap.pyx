@@ -1,11 +1,6 @@
 cdef extern from "libgambit/libgambit.h":
     pass
 
-cdef extern from "game.wrap.h":
-    # This is a dummy header file which does nothing but include the
-    # Gambit namespace.
-    pass
-
 cdef extern from "string":
     ctypedef struct cxx_string "string":
         char *c_str()
@@ -22,7 +17,9 @@ cdef extern from "libgambit/game.h":
         c_GameRep *deref "operator->"()
 
     c_Game NewTree()
-    
+
+cdef extern from "game.wrap.h":
+    c_Game ReadGame(char *) except +IOError
 
 cdef class Game:
     cdef c_Game game
@@ -48,5 +45,12 @@ def new_tree():
     g.game = NewTree()
     return g
 
+def read_game(char *fn):
+    cdef Game g
+    g = Game()
+    try:
+        g.game = ReadGame(fn)
+    except IOError:
+        raise IOError("Unable to read game from file '%s'" % fn)
+    return g
         
-    
