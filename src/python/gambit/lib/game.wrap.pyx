@@ -6,8 +6,16 @@ cdef extern from "game.wrap.h":
     # Gambit namespace.
     pass
 
+cdef extern from "string":
+    ctypedef struct cxx_string "string":
+        char *c_str()
+        cxx_string assign(char *)
+
+
 cdef extern from "libgambit/game.h":
     ctypedef struct c_GameRep "GameRep":
+        cxx_string GetTitle()
+        void SetTitle(cxx_string)
         int NumNodes()
 
     ctypedef struct c_Game "GameObjectPtr<GameRep>":
@@ -24,6 +32,14 @@ cdef class Game:
 
     def num_nodes(self):
         return self.game.deref().NumNodes()
+
+    property title:
+        def __get__(self):
+            return self.game.deref().GetTitle().c_str()
+        def __set__(self, char *value):
+            cdef cxx_string s
+            s.assign(value)
+            self.game.deref().SetTitle(s)
 
 
 def new_tree():
