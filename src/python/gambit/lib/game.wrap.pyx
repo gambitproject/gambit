@@ -10,6 +10,7 @@ cdef extern from "string":
 cdef extern from "libgambit/game.h":
     ctypedef struct c_GameRep
     ctypedef struct c_GamePlayerRep
+    ctypedef struct c_GameOutcomeRep
     
     ctypedef struct c_Game "GameObjectPtr<GameRep>":
         c_GameRep *deref "operator->"()
@@ -17,11 +18,20 @@ cdef extern from "libgambit/game.h":
     ctypedef struct c_GamePlayer "GameObjectPtr<GamePlayerRep>":
         c_GamePlayerRep *deref "operator->"()
 
+    ctypedef struct c_GameOutcome "GameObjectPtr<GameOutcomeRep>":
+        c_GameOutcomeRep *deref "operator->"()
 
     ctypedef struct c_GamePlayerRep "GamePlayerRep":
         c_Game GetGame()
         int GetNumber()
         int IsChance()
+        
+        cxx_string GetLabel()
+        void SetLabel(cxx_string)
+
+    ctypedef struct c_GameOutcomeRep "GameOutcomeRep":
+        c_Game GetGame()
+        int GetNumber()
         
         cxx_string GetLabel()
         void SetLabel(cxx_string)
@@ -35,6 +45,9 @@ cdef extern from "libgambit/game.h":
         int NumPlayers()
         c_GamePlayer GetPlayer(int)
         c_GamePlayer GetChance()
+
+        int NumOutcomes()
+        c_GameOutcome GetOutcome(int)
         
         int NumNodes()
 
@@ -92,6 +105,40 @@ cdef class Players:
             p.player = self.game.deref().GetChance()
             return p
 
+cdef class Outcome:
+    cdef c_GameOutcome outcome
+
+    def __repr__(self):
+        return "<Outcome [%d] '%s' in game '%s'>" % (self.outcome.deref().GetNumber()-1,
+                                                     self.label,
+                                                     self.outcome.deref().GetGame().deref().GetTitle().c_str())
+    
+    property label:
+        def __get__(self):
+            return self.outcome.deref().GetLabel().c_str()
+        def __set__(self, char *value):
+            cdef cxx_string s
+            s.assign(value)
+            self.outcome.deref().SetLabel(s)
+
+
+cdef class Outcomes:
+    cdef c_Game game
+
+    def __repr__(self):
+        return "<Outcomes of game '%s'>" % self.game.deref().GetTitle().c_str()
+
+    def __len__(self):
+        return self.game.deref().NumOutcomes()
+
+    def __getitem__(self, outc):
+        cdef Outcome c
+        if outc < 0 or outc >= len(self):
+            raise IndexError("no outcome with index '%s'" % outc)
+        c = Outcome()
+        c.outcome = self.game.deref().GetOutcome(outc+1)
+        return c
+
 cdef class Game:
     cdef c_Game game
 
@@ -119,6 +166,14 @@ cdef class Game:
             p = Players()
             p.game = self.game
             return p
+
+    property outcomes:
+        def __get__(self):
+            cdef Outcomes c
+            c = Outcomes()
+            c.game = self.game
+            return c
+
 
     def num_nodes(self):
         return self.game.deref().NumNodes()
