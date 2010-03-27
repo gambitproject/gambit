@@ -6,6 +6,21 @@ cdef extern from "string":
         char *c_str()
         cxx_string assign(char *)
 
+cdef extern from "libgambit/rational.h":
+    ctypedef struct c_Rational "Rational":
+        pass
+
+    cxx_string ToText(c_Rational)
+
+
+cdef extern from "libgambit/number.h":
+    ctypedef struct c_Number "Number":
+        c_Rational as_rational "operator const Rational &"()
+        cxx_string as_string "operator const string &"()
+    c_Number *new_Number "new Number"(cxx_string)
+    void del_Number "delete"(c_Number *)
+
+     
 
 cdef extern from "libgambit/game.h":
     ctypedef struct c_GameRep
@@ -57,6 +72,22 @@ cdef extern from "game.wrap.h":
     c_Game ReadGame(char *) except +IOError
     cxx_string WriteGame(c_Game, int) except +IOError
 
+
+cdef class Number:
+    cdef c_Number *thisptr
+
+    def __cinit__(self, value):
+        cdef cxx_string s
+        x = str(value)
+        s.assign(x)
+        self.thisptr = new_Number(s)
+    def __dealloc__(self):
+        del_Number(self.thisptr)
+
+    def __repr__(self):
+        cdef cxx_string s
+        s = self.thisptr.as_string()
+        return s.c_str()
 
 cdef class Player:
     cdef c_GamePlayer player
