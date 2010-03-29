@@ -30,3 +30,5 @@ std::string WriteGame(const Game &p_game, bool strategic)
   return f.str();
 }        
 
+inline Number add_Number(const Number *x, const Number *y)
+{ return Number(ToText((const Rational &) *x + (const Rational &) *y)); }
