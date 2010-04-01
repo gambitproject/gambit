@@ -389,39 +389,15 @@ void PrintProfileDetail(std::ostream &p_stream,
   }
 }
 
-void PrintProfile(std::ostream &p_stream,
-		  const BehavSupport &p_support, const Vector<double> &x,
-		  bool p_terminal = false)
-{
-  p_stream.setf(std::ios::fixed);
-  // By convention, we output lambda first
-  if (!p_terminal) {
-    p_stream << std::setprecision(g_numDecimals) << x[x.Length()];
-  }
-  else {
-    p_stream << "NE";
-  }
-  p_stream.unsetf(std::ios::fixed);
-
-  for (int i = 1; i < x.Length(); i++) {
-    p_stream << "," << std::setprecision(g_numDecimals) << exp(x[i]);
-  }
-
-  p_stream << std::endl;
-
-  LogBehavProfile<double> profile(p_support);
-  for (int i = 1; i <= profile.Length(); i++) {
-    profile.SetLogProb(i, x[i]);
-  }
-  //p_stream << "LiapValue: " << profile.GetLiapValue() << std::endl;
-}
 
 extern double g_maxDecel;
 extern double g_hStart;
 extern bool g_fullGraph;
 
 void TraceAgentPath(const LogBehavProfile<double> &p_start,
-		    double p_startLambda, double p_maxLambda, double p_omega)
+		    double p_startLambda, double p_maxLambda, double p_omega,
+		    void (*p_onStep)(const BehavSupport &,
+				     const Vector<double> &, bool) = 0)
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
   const double c_maxDist = 0.4;    // maximal distance to curve
@@ -450,22 +426,9 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
     x[i] = p_start.GetLogProb(i);
   }
   x[x.Length()] = p_startLambda;
-
-  if (g_fullGraph) {
-    PrintProfile(std::cout, p_start.GetSupport(), x);
-
-    /*
-    LogBehavProfile<double> current(p_start);
-    for (int i = 1; i <= p_start.Length(); i++) {
-      if (isLog[i]) {
-	current.SetLogProb(i, x[i]);
-      }
-      else {
-	current.SetProb(i, x[i]);
-      }
-    }
-    PrintProfileDetail(std::cout, current);
-    */
+  
+  if (p_onStep) {
+    p_onStep(p_start.GetSupport(), x, false);
   }
 
   Vector<double> t(p_start.Length() + 1);
@@ -499,32 +462,7 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
       double dist;
 
       QreLHS(p_start.GetGame(), equations, u, y);
-
-      /*
-      std::cout << "LHS: ";
-      for (int i = 1; i <= y.Length(); i++) {
-	std::cout << y[i] << " ";
-      }
-      std::cout << std::endl;
-      */
-
       NewtonStep(q, b, u, y, dist);
-      /*
-      std::cout << "Newt: ";
-      std::cout << u[u.Length()] << " ";
-      for (int i = 1; i < u.Length(); i++) {
-	if (isLog[i]) {
-	  std::cout << exp(u[i]) << " ";
-	}
-	else {
-	  std::cout << u[i] << " ";
-	}
-      }
-      std::cout << std::endl;
-
-      std::cout << "dist: " << dist << std::endl;
-      */
-
       if (dist >= c_maxDist) {
 	accept = false;
 	break;
@@ -581,21 +519,8 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
     // PC step was successful; update and iterate
     x = u;
 
-    if (g_fullGraph) {
-      PrintProfile(std::cout, p_start.GetSupport(), x);
-
-      /*
-      LogBehavProfile<double> current(p_start);
-      for (int i = 1; i <= p_start.Length(); i++) {
-	if (isLog[i]) {
-	  current.SetLogProb(i, x[i]);
-	}
-	else {
-	  current.SetProb(i, x[i]);
-	}
-      }
-      PrintProfileDetail(std::cout, current);
-      */
+    if (p_onStep) {
+      p_onStep(p_start.GetSupport(), x, false);
     }
 
     Vector<double> newT(t);
@@ -610,8 +535,8 @@ void TraceAgentPath(const LogBehavProfile<double> &p_start,
     t = newT;
   }
 
-  if (!g_fullGraph) {
-    PrintProfile(std::cout, p_start.GetSupport(), x, true);
+  if (p_onStep) {
+    p_onStep(p_start.GetSupport(), x, true);
   }
 }
 

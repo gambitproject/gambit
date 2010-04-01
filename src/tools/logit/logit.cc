@@ -90,12 +90,93 @@ bool ReadProfile(std::istream &p_stream, Gambit::Array<double> &p_profile)
   return true;
 }
 
+extern double LogLike(const Array<double> &p_point);
+
+void PrintProfile(std::ostream &p_stream,
+		  const StrategySupport &p_support, const Vector<double> &x,
+		  bool p_terminal = false)
+{
+  p_stream.setf(std::ios::fixed);
+  // By convention, we output lambda first
+  if (!p_terminal) {
+    p_stream << std::setprecision(g_numDecimals) << x[x.Length()];
+  }
+  else {
+    p_stream << "NE";
+  }
+  p_stream.unsetf(std::ios::fixed);
+
+  for (int i = 1; i <  x.Length(); i++) {
+    p_stream << "," << std::setprecision(g_numDecimals) << exp(x[i]);
+  }
+
+  if (g_maxLike) {
+    MixedStrategyProfile<double> profile(p_support);
+    for (int i = 1; i <= profile.Length(); i++) {
+      profile[i] = exp(x[i]);
+    }
+
+    p_stream.setf(std::ios::fixed);
+    p_stream << "," << std::setprecision(g_numDecimals) << LogLike(profile);
+    p_stream.unsetf(std::ios::fixed);
+  }
+
+  p_stream << std::endl;
+}
+
+void OnStepStrategic(const StrategySupport &p_support, const Vector<double> &x,
+		     bool p_isTerminal = false)
+{
+  if ((g_fullGraph && !p_isTerminal) || (!g_fullGraph && p_isTerminal)) {
+    PrintProfile(std::cout, p_support, x);
+  }
+}
+
+void PrintProfile(std::ostream &p_stream,
+		  const BehavSupport &p_support, const Vector<double> &x,
+		  bool p_terminal = false)
+{
+  p_stream.setf(std::ios::fixed);
+  // By convention, we output lambda first
+  if (!p_terminal) {
+    p_stream << std::setprecision(g_numDecimals) << x[x.Length()];
+  }
+  else {
+    p_stream << "NE";
+  }
+  p_stream.unsetf(std::ios::fixed);
+
+  for (int i = 1; i < x.Length(); i++) {
+    p_stream << "," << std::setprecision(g_numDecimals) << exp(x[i]);
+  }
+
+  p_stream << std::endl;
+
+  LogBehavProfile<double> profile(p_support);
+  for (int i = 1; i <= profile.Length(); i++) {
+    profile.SetLogProb(i, x[i]);
+  }
+}
+
+void OnStepAgent(const BehavSupport &p_support, const Vector<double> &x,
+		 bool p_isTerminal = false)
+{
+  if ((g_fullGraph && !p_isTerminal) || (!g_fullGraph && p_isTerminal)) {
+    PrintProfile(std::cout, p_support, x);
+  }
+}
+
+
 extern void 
 TraceStrategicPath(const Gambit::MixedStrategyProfile<double> &p_start,
-		   double p_startLambda, double p_maxLambda, double p_omega);
+		   double p_startLambda, double p_maxLambda, double p_omega,
+		   void (*p_onStep)(const StrategySupport &,
+				    const Vector<double> &, bool) = 0);
 extern void 
 TraceAgentPath(const LogBehavProfile<double> &p_start,
-	       double p_startLambda, double p_maxLambda, double p_omega);
+	       double p_startLambda, double p_maxLambda, double p_omega,
+	       void (*p_onStep)(const BehavSupport &,
+				const Vector<double> &, bool) = 0);
 
 
 int main(int argc, char *argv[])
@@ -175,7 +256,8 @@ int main(int argc, char *argv[])
 
       if (startFile == "") {
 	Gambit::MixedStrategyProfile<double> start(game);
-	TraceStrategicPath(start, 0.0, maxLambda, 1.0);
+	TraceStrategicPath(start, 0.0, maxLambda, 1.0,
+			   OnStepStrategic);
       }
       else {
 	Gambit::Array<double> profile(game->MixedProfileLength() + 1);
@@ -185,15 +267,17 @@ int main(int argc, char *argv[])
 	for (int i = 1; i <= start.Length(); i++) {
 	  start[i] = profile[i+1];
 	}
-	TraceStrategicPath(start, profile[1], maxLambda, 1.0);
+	TraceStrategicPath(start, profile[1], maxLambda, 1.0,
+			   OnStepStrategic);
 	std::cout << std::endl;
-	TraceStrategicPath(start, profile[1], maxLambda, -1.0);
+	TraceStrategicPath(start, profile[1], maxLambda, -1.0,
+			   OnStepStrategic);
       }
 
     }
     else {
       LogBehavProfile<double> start(game);
-      TraceAgentPath(start, 0.0, maxLambda, 1.0);
+      TraceAgentPath(start, 0.0, maxLambda, 1.0, OnStepAgent);
     }
     return 0;
   }

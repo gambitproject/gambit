@@ -286,40 +286,8 @@ double DiffLogLike(const Array<double> &p_point,
 
 extern int g_numDecimals;
 
-void PrintProfile(std::ostream &p_stream,
-		  const StrategySupport &p_support, const Vector<double> &x,
-		  bool p_terminal = false)
-{
-  p_stream.setf(std::ios::fixed);
-  // By convention, we output lambda first
-  if (!p_terminal) {
-    p_stream << std::setprecision(g_numDecimals) << x[x.Length()];
-  }
-  else {
-    p_stream << "NE";
-  }
-  p_stream.unsetf(std::ios::fixed);
-
-  for (int i = 1; i <  x.Length(); i++) {
-    p_stream << "," << std::setprecision(g_numDecimals) << exp(x[i]);
-  }
-
-  if (g_maxLike) {
-    MixedStrategyProfile<double> profile(p_support);
-    for (int i = 1; i <= profile.Length(); i++) {
-      profile[i] = exp(x[i]);
-    }
-
-    p_stream.setf(std::ios::fixed);
-    p_stream << "," << std::setprecision(g_numDecimals) << LogLike(profile);
-    p_stream.unsetf(std::ios::fixed);
-  }
-
-  p_stream << std::endl;
-}
-
 //
-// TracePath does the real work of tracing a branch of the correspondence
+// TraceStrategicPath does the real work of tracing a branch of the correspondence
 //
 // Strategy:
 // This is the standard simple PC continuation method outlined in
@@ -347,7 +315,9 @@ extern bool g_fullGraph;
 
 void 
 TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
-		   double p_startLambda, double p_maxLambda, double p_omega)
+		   double p_startLambda, double p_maxLambda, double p_omega,
+		   void (*p_onStep)(const StrategySupport &,
+		                    const Vector<double> &, bool) = 0)
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
   const double c_maxDist = 0.4;    // maximal distance to curve
@@ -372,8 +342,8 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
   }
   x[x.Length()] = p_startLambda;
 
-  if (g_fullGraph) {
-    PrintProfile(std::cout, p_start.GetSupport(), x);
+  if (p_onStep) {
+    p_onStep(p_start.GetSupport(), x, false);
   }
 
   Vector<double> t(p_start.Length() + 1);
@@ -529,10 +499,9 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
     // PC step was successful; update and iterate
     x = u;
 
-    if (g_fullGraph) {
-      PrintProfile(std::cout, p_start.GetSupport(), x);
+    if (p_onStep) {
+      p_onStep(p_start.GetSupport(), x, false);
     }
-    
 
     Vector<double> newT(t);
     q.GetRow(q.NumRows(), newT);  // new tangent
@@ -547,8 +516,8 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
 
   }
 
-  if (!g_fullGraph) {
-    PrintProfile(std::cout, p_start.GetSupport(), x, true);
+  if (p_onStep) {
+    p_onStep(p_start.GetSupport(), x, true);
   }
 }
 
