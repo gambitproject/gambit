@@ -539,6 +539,8 @@ gambit_logit_SOURCES = \
 	${libgambit_la_SOURCES} \
 	src/tools/logit/logbehav.h \
 	src/tools/logit/logbehav.imp \
+	src/tools/logit/path.cc \
+	src/tools/logit/path.h \
 	src/tools/logit/efglogit.cc \
 	src/tools/logit/nfglogit.cc \
 	src/tools/logit/logit.cc

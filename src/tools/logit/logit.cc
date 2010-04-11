@@ -1,13 +1,10 @@
 //
-// $Source$
-// $Date$
-// $Revision$
-//
-// DESCRIPTION:
-// Computation of quantal response equilibrium correspondence
-//
 // This file is part of Gambit
-// Copyright (c) 2002, The Gambit Project
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: logit.cc
+// Command-line driver program for quantal response equilibrium tracing and
+// maximum likelihood estimation.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,21 +26,15 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "libgambit/libgambit.h"
-#include "logbehav.h"
-
-double g_maxDecel = 1.1;
-double g_hStart = .03;
-bool g_fullGraph = true;
-int g_numDecimals = 6;
-bool g_maxLike = false;
-Gambit::Array<double> g_obsProbs;
-double g_targetLambda = -1.0;
+#include "efglogit.h"
+#include "nfglogit.h"
 
 
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute a branch of the logit equilibrium correspondence\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", ";
+  p_stream << "Copyright (C) 1994-2010, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
@@ -90,94 +81,6 @@ bool ReadProfile(std::istream &p_stream, Gambit::Array<double> &p_profile)
   return true;
 }
 
-extern double LogLike(const Array<double> &p_point);
-
-void PrintProfile(std::ostream &p_stream,
-		  const StrategySupport &p_support, const Vector<double> &x,
-		  bool p_terminal = false)
-{
-  p_stream.setf(std::ios::fixed);
-  // By convention, we output lambda first
-  if (!p_terminal) {
-    p_stream << std::setprecision(g_numDecimals) << x[x.Length()];
-  }
-  else {
-    p_stream << "NE";
-  }
-  p_stream.unsetf(std::ios::fixed);
-
-  for (int i = 1; i <  x.Length(); i++) {
-    p_stream << "," << std::setprecision(g_numDecimals) << exp(x[i]);
-  }
-
-  if (g_maxLike) {
-    MixedStrategyProfile<double> profile(p_support);
-    for (int i = 1; i <= profile.Length(); i++) {
-      profile[i] = exp(x[i]);
-    }
-
-    p_stream.setf(std::ios::fixed);
-    p_stream << "," << std::setprecision(g_numDecimals) << LogLike(profile);
-    p_stream.unsetf(std::ios::fixed);
-  }
-
-  p_stream << std::endl;
-}
-
-void OnStepStrategic(const StrategySupport &p_support, const Vector<double> &x,
-		     bool p_isTerminal = false)
-{
-  if ((g_fullGraph && !p_isTerminal) || (!g_fullGraph && p_isTerminal)) {
-    PrintProfile(std::cout, p_support, x);
-  }
-}
-
-void PrintProfile(std::ostream &p_stream,
-		  const BehavSupport &p_support, const Vector<double> &x,
-		  bool p_terminal = false)
-{
-  p_stream.setf(std::ios::fixed);
-  // By convention, we output lambda first
-  if (!p_terminal) {
-    p_stream << std::setprecision(g_numDecimals) << x[x.Length()];
-  }
-  else {
-    p_stream << "NE";
-  }
-  p_stream.unsetf(std::ios::fixed);
-
-  for (int i = 1; i < x.Length(); i++) {
-    p_stream << "," << std::setprecision(g_numDecimals) << exp(x[i]);
-  }
-
-  p_stream << std::endl;
-
-  LogBehavProfile<double> profile(p_support);
-  for (int i = 1; i <= profile.Length(); i++) {
-    profile.SetLogProb(i, x[i]);
-  }
-}
-
-void OnStepAgent(const BehavSupport &p_support, const Vector<double> &x,
-		 bool p_isTerminal = false)
-{
-  if ((g_fullGraph && !p_isTerminal) || (!g_fullGraph && p_isTerminal)) {
-    PrintProfile(std::cout, p_support, x);
-  }
-}
-
-
-extern void 
-TraceStrategicPath(const Gambit::MixedStrategyProfile<double> &p_start,
-		   double p_startLambda, double p_maxLambda, double p_omega,
-		   void (*p_onStep)(const StrategySupport &,
-				    const Vector<double> &, bool) = 0);
-extern void 
-TraceAgentPath(const LogBehavProfile<double> &p_start,
-	       double p_startLambda, double p_maxLambda, double p_omega,
-	       void (*p_onStep)(const BehavSupport &,
-				const Vector<double> &, bool) = 0);
-
 
 int main(int argc, char *argv[])
 {
@@ -186,6 +89,11 @@ int main(int argc, char *argv[])
   bool quiet = false, useStrategic = false;
   double maxLambda = 1000000.0;
   std::string mleFile = "", startFile = "";
+  double maxDecel = 1.1;
+  double hStart = 0.03;
+  double targetLambda = -1.0;
+  bool fullGraph = true;
+  int decimals = 6;
 
   int c;
   while ((c = getopt(argc, argv, "d:s:a:m:qehSL:p:l:")) != -1) {
@@ -194,19 +102,19 @@ int main(int argc, char *argv[])
       quiet = true;
       break;
     case 'd':
-      g_numDecimals = atoi(optarg);
+      decimals = atoi(optarg);
       break;
     case 's':
-      g_hStart = atof(optarg);
+      hStart = atof(optarg);
       break;
     case 'a':
-      g_maxDecel = atof(optarg);
+      maxDecel = atof(optarg);
       break;
     case 'm':
       maxLambda = atof(optarg);
       break;
     case 'e':
-      g_fullGraph = false;
+      fullGraph = false;
       break;
     case 'h':
       PrintHelp(argv[0]);
@@ -221,7 +129,7 @@ int main(int argc, char *argv[])
       startFile = optarg;
       break;
     case 'l':
-      g_targetLambda = atof(optarg);
+      targetLambda = atof(optarg);
       break;
     case '?':
       if (isprint(optopt)) {
@@ -241,13 +149,13 @@ int main(int argc, char *argv[])
   }
 
   try {
+    Gambit::Array<double> frequencies;
     Gambit::Game game = Gambit::ReadGame(std::cin);
 
     if (mleFile != "" && (!game->IsTree() || useStrategic)) {
-      g_obsProbs = Gambit::Array<double>(game->MixedProfileLength());
+      frequencies = Gambit::Array<double>(game->MixedProfileLength());
       std::ifstream mleData(mleFile.c_str());
-      ReadProfile(mleData, g_obsProbs);
-      g_maxLike = true;
+      ReadProfile(mleData, frequencies);
     }
   
 
@@ -256,8 +164,14 @@ int main(int argc, char *argv[])
 
       if (startFile == "") {
 	Gambit::MixedStrategyProfile<double> start(game);
-	TraceStrategicPath(start, 0.0, maxLambda, 1.0,
-			   OnStepStrategic);
+	StrategicQREPathTracer tracer(start);
+	tracer.SetMaxDecel(maxDecel);
+	tracer.SetStepsize(hStart);
+	tracer.SetFullGraph(fullGraph);
+	tracer.SetTargetParam(targetLambda);
+	tracer.SetDecimals(decimals);
+	tracer.SetMLEFrequencies(frequencies);
+	tracer.TraceStrategicPath(start, 0.0, maxLambda, 1.0);
       }
       else {
 	Gambit::Array<double> profile(game->MixedProfileLength() + 1);
@@ -267,17 +181,33 @@ int main(int argc, char *argv[])
 	for (int i = 1; i <= start.Length(); i++) {
 	  start[i] = profile[i+1];
 	}
-	TraceStrategicPath(start, profile[1], maxLambda, 1.0,
-			   OnStepStrategic);
+	StrategicQREPathTracer tracer1(start);
+	tracer1.SetMaxDecel(maxDecel);
+	tracer1.SetStepsize(hStart);
+	tracer1.SetFullGraph(fullGraph);
+	tracer1.SetTargetParam(targetLambda);
+	tracer1.SetDecimals(decimals);
+	tracer1.TraceStrategicPath(start, profile[1], maxLambda, 1.0);
 	std::cout << std::endl;
-	TraceStrategicPath(start, profile[1], maxLambda, -1.0,
-			   OnStepStrategic);
+	StrategicQREPathTracer tracer2(start);
+	tracer2.SetMaxDecel(maxDecel);
+	tracer2.SetStepsize(hStart);
+	tracer2.SetFullGraph(fullGraph);
+	tracer2.SetTargetParam(targetLambda);
+	tracer2.SetDecimals(decimals);
+	tracer2.TraceStrategicPath(start, profile[1], maxLambda, -1.0);
       }
 
     }
     else {
-      LogBehavProfile<double> start(game);
-      TraceAgentPath(start, 0.0, maxLambda, 1.0, OnStepAgent);
+      MixedBehavProfile<double> start(game);
+      AgentQREPathTracer tracer(start);
+      tracer.SetMaxDecel(maxDecel);
+      tracer.SetStepsize(hStart);
+      tracer.SetFullGraph(fullGraph);
+      tracer.SetTargetParam(targetLambda);
+      tracer.SetDecimals(decimals);
+      tracer.TraceAgentPath(start, 0.0, maxLambda, 1.0);
     }
     return 0;
   }
