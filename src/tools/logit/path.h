@@ -42,7 +42,7 @@ public:
   double GetTargetParam(void) const { return m_targetParam; }
 
 protected:
-  PathTracer::PathTracer(void) : m_maxDecel(1.1), m_hStart(0.03), m_targetParam(0.0) 
+  PathTracer(void) : m_maxDecel(1.1), m_hStart(0.03), m_targetParam(0.0) 
     { } 
   virtual ~PathTracer() { }
 
