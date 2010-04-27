@@ -86,28 +86,35 @@ class LogitQRE(object):
         return "<LogitQRE at lam=%f: %s>" % (self.lam, self.profile)
 
 
-def trace_path(game, max_lambda=1000000.0, h_start=0.03, max_decel=1.1,
-               callback=None):
+class StrategicQREPathTracer(object):
     """
     Compute the principal branch of the logit QRE correspondence of 'game'.
     """
-    if game.is_symmetric():
-        p = game.mixed_strategy()
+    def __init__(self, game):
+        self.game = game
+        self.h_start = 0.03
+        self.max_decel = 1.1
+        
+    def on_step(self, x): pass
+    
+    def trace_strategic_path(self, max_lambda=1000000.0):
+        if self.game.is_symmetric():
+            p = self.game.mixed_strategy()
 
-        point = pctrace.trace_path([ math.log(x) for x in p.profile ],
-                                   0.0, max_lambda,
-                                   lambda x: sym_compute_lhs(game, x),
-                                   lambda x: sym_compute_jac(game, x),
-                                   hStart=h_start,
-                                   maxDecel=max_decel,
-                                   callback=callback,
-                                   crit=None,
-                                   maxIter=100)
+            point = pctrace.trace_path([ math.log(x) for x in p.profile ],
+                                       0.0, max_lambda,
+                                       lambda x: sym_compute_lhs(self.game, x),
+                                       lambda x: sym_compute_jac(self.game, x),
+                                       hStart=self.h_start,
+                                       maxDecel=self.max_decel,
+                                       callback=self.on_step,
+                                       crit=None,
+                                       maxIter=100)
 
-        return LogitQRE(point[-1],
-                        game.mixed_strategy(point=[math.exp(x) for x in point[:-1]]))
-    else:
-        raise NotImplementedError
+            return LogitQRE(point[-1],
+                            self.game.mixed_strategy(point=[math.exp(x) for x in point[:-1]]))
+        else:
+            raise NotImplementedError
 
 def compute_at_lambda(game, lam):
     if game.is_symmetric():

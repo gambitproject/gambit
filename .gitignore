@@ -13,7 +13,6 @@ libtool
 *.la
 *.a
 gambit-*
-gambit
 game.wrap.cpp
 _build
 .DS_Store

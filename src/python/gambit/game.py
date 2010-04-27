@@ -13,4 +13,5 @@ class Game(object):
 
     def mixed_profile(self):  raise NotImplementedError
 
+    def qre(self):   raise NotImplementedError
     

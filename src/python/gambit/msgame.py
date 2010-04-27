@@ -4,6 +4,7 @@ Implementation of mean statistic games for Gambit
 
 import math
 import game
+import qre
 
 def cartesian(L, *lists):
     """
@@ -61,6 +62,9 @@ class MeanStatisticGame(game.Game):
 
     def mixed_strategy(self, point=None):
         return MSMixedProfile(self, point)
+
+    def qre(self):
+        return qre.StrategicQREPathTracer(self)
             
 
 class MeanStatisticTableGame(MeanStatisticGame):
