@@ -94,11 +94,15 @@ class StrategicQREPathTracer(object):
         self.game = game
         self.h_start = 0.03
         self.max_decel = 1.1
+        self._points =  [ ]
         
-    def on_step(self, x): pass
+    def on_step(self, point):
+        self._points.append(LogitQRE(point[-1],
+                                     self.game.mixed_strategy(point=[math.exp(x) for x in point[:-1]])))
     
     def trace_strategic_path(self, max_lambda=1000000.0):
         if self.game.is_symmetric():
+            self._points = [ ]
             p = self.game.mixed_strategy()
 
             point = pctrace.trace_path([ math.log(x) for x in p.profile ],
@@ -111,48 +115,48 @@ class StrategicQREPathTracer(object):
                                        crit=None,
                                        maxIter=100)
 
+            return self._points
+        else:
+            raise NotImplementedError
+
+    def compute_at_lambda(self, lam):
+        if self.game.is_symmetric():
+            p = self.game.mixed_strategy()
+
+            point = pctrace.trace_path([ math.log(x) for x in p.profile ],
+                                       0.0, 1000000.0,
+                                       lambda x: sym_compute_lhs(self.game, x),
+                                       lambda x: sym_compute_jac(self.game, x),
+                                       callback=self.on_step,
+                                       crit=lambda x,t: x[-1] - lam,
+                                       maxIter=100)
+
             return LogitQRE(point[-1],
                             self.game.mixed_strategy(point=[math.exp(x) for x in point[:-1]]))
         else:
             raise NotImplementedError
 
-def compute_at_lambda(game, lam):
-    if game.is_symmetric():
-        p = game.mixed_strategy()
+    def compute_max_like(self, data):
+        diff_log_like = lambda data, point, tangent: \
+                        sum([ x*y for (x, y) in zip(data, tangent[:-1]) ])
 
-        point = pctrace.trace_path([ math.log(x) for x in p.profile ],
-                                   0.0, 1000000.0,
-                                   lambda x: sym_compute_lhs(game, x),
-                                   lambda x: sym_compute_jac(game, x),
-                                   callback=None,
-                                   crit=lambda x,t: x[-1] - lam,
-                                   maxIter=100)
+        if self.game.is_symmetric():
+            p = self.game.mixed_strategy()
 
-        return LogitQRE(point[-1],
-                        game.mixed_strategy(point=[math.exp(x) for x in point[:-1]]))
-    else:
-        raise NotImplementedError
+            point = pctrace.trace_path([ math.log(x) for x in p.profile ],
+                                       0.0, 1000000.0,
+                                       lambda x: sym_compute_lhs(self.game, x),
+                                       lambda x: sym_compute_jac(self.game, x),
+                                       callback=self.on_step,
+                                       hStart=1.0,
+                                       crit=lambda x,t: diff_log_like(data,x,t),
+                                       maxIter=100)
 
+            return LogitQRE(point[-1],
+                            self.game.mixed_strategy(point=[math.exp(x) for x in point[:-1]]))
+        else:
+            raise NotImplementedError
     
-def diff_log_like(data, point, tangent):
-    return sum([ x*y for (x, y) in zip(data, tangent[:-1]) ])
 
 
-def compute_max_like(game, data):
-    if game.is_symmetric():
-        p = game.mixed_strategy()
-
-        point = pctrace.trace_path([ math.log(x) for x in p.profile ],
-                                   0.0, 1000000.0,
-                                   lambda x: sym_compute_lhs(game, x),
-                                   lambda x: sym_compute_jac(game, x),
-                                   callback=None,
-                                   hStart=1.0,
-                                   crit=lambda x,t: diff_log_like(data,x,t),
-                                   maxIter=100)
-
-        return LogitQRE(point[-1],
-                        game.mixed_strategy(point=[math.exp(x) for x in point[:-1]]))
-    else:
-        raise NotImplementedError
     
