@@ -80,7 +80,7 @@ public:
 
 template <class T> 
 List<T>::Node::Node(const T &p_data,
-			 List<T>::Node *p_prev, List<T>::Node *p_next)
+		    typename List<T>::Node *p_prev, typename List<T>::Node *p_next)
   : m_data(p_data), m_prev(p_prev), m_next(p_next)
 { }
 
