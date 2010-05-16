@@ -5,7 +5,7 @@ SUBDIRS = contrib
 EXTRA_DIST = \
 	gambit.spec \
 	gambit.desktop \
-	src/contrib/mac/Info.plist \
+	contrib/mac/Info.plist \
 	src/labenski/README.txt \
 	src/labenski/art/grab.xpm \
 	src/labenski/art/hand.xpm \
