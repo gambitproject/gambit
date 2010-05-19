@@ -37,22 +37,6 @@ protected:
   int minrow, maxrow, mincol, maxcol;
   T **data;
 
-  /// @name Range checking functions; returns true only if valid index/size
-  //@{
-  /// check for correct row index
-  bool CheckRow(int row) const;
-  /// check row vector for correct column boundaries
-  bool CheckRow(const Array<T> &) const;
-  /// check for correct column index
-  bool CheckColumn(int col) const;
-  /// check column vector for correct row boundaries
-  bool CheckColumn(const Array<T> &) const;
-  /// check row and column indices
-  bool Check(int row, int col) const;
-  /// check matrix for same row and column boundaries
-  bool CheckBounds(const RectArray<T> &) const;
-  //@
-
 public:
   /// @name Lifecycle
   //@{
@@ -103,11 +87,27 @@ public:
 
   /// Returns the transpose of the rectangular array
   RectArray<T> Transpose(void) const;
+
+  /// @name Range checking functions; returns true only if valid index/size
+  //@{
+  /// check for correct row index
+  bool CheckRow(int row) const;
+  /// check row vector for correct column boundaries
+  bool CheckRow(const Array<T> &) const;
+  /// check for correct column index
+  bool CheckColumn(int col) const;
+  /// check column vector for correct row boundaries
+  bool CheckColumn(const Array<T> &) const;
+  /// check row and column indices
+  bool Check(int row, int col) const;
+  /// check matrix for same row and column boundaries
+  bool CheckBounds(const RectArray<T> &) const;
+  //@
 };
 
 
 //------------------------------------------------------------------------
-//            RectArray<T>: Private/protected member functions
+//            RectArray<T>: Bounds-checking member functions
 //------------------------------------------------------------------------
 
 template <class T> bool RectArray<T>::CheckRow(int row) const
