@@ -156,7 +156,33 @@ class StrategicQREPathTracer(object):
                             self.game.mixed_strategy(point=[math.exp(x) for x in point[:-1]]))
         else:
             raise NotImplementedError
-    
+
+    def compute_criterion(self, f):
+        def criterion_wrap(x, t):
+            """
+            This translates the internal representation of the tracer
+            into a QRE object.
+            """
+            return f(LogitQRE(x[-1],
+                              self.game.mixed_strategy(point=[math.exp(z) for z in x[:-1]])))
+            
+        if self.game.is_symmetric():
+            p = self.game.mixed_strategy()
+
+            point = pctrace.trace_path([ math.log(x) for x in p.profile ],
+                                       0.0, 1000000.0,
+                                       lambda x: sym_compute_lhs(self.game, x),
+                                       lambda x: sym_compute_jac(self.game, x),
+                                       callback=self.on_step,
+                                       hStart=1.0,
+                                       crit=criterion_wrap,
+                                       maxIter=100)
+
+            return LogitQRE(point[-1],
+                            self.game.mixed_strategy(point=[math.exp(x) for x in point[:-1]]))
+        else:
+            raise NotImplementedError
+        
 
 
     
