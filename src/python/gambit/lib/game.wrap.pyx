@@ -65,6 +65,7 @@ cdef extern from "libgambit/game.h":
         int NumPlayers()
         c_GamePlayer GetPlayer(int)
         c_GamePlayer GetChance()
+        c_GamePlayer NewPlayer()
 
         int NumOutcomes()
         c_GameOutcome GetOutcome(int)
@@ -150,6 +151,12 @@ cdef class Players:
             raise IndexError("no player with index '%s'" % pl)
         p = Player()
         p.player = self.game.deref().GetPlayer(pl+1)
+        return p
+
+    def add(self):
+        cdef Player p
+        p = Player()
+        p.player = self.game.deref().NewPlayer()
         return p
 
     property chance:
