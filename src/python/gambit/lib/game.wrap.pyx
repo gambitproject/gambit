@@ -140,7 +140,7 @@ cdef class Players:
     cdef c_Game game
 
     def __repr__(self):
-        return "<Players of game '%s'>" % self.game.deref().GetTitle().c_str()
+        return str(list(self))
 
     def __len__(self):
         return self.game.deref().NumPlayers()
@@ -153,10 +153,11 @@ cdef class Players:
         p.player = self.game.deref().GetPlayer(pl+1)
         return p
 
-    def add(self):
+    def add(self, label=""):
         cdef Player p
         p = Player()
         p.player = self.game.deref().NewPlayer()
+        p.label = str(label)
         return p
 
     property chance:

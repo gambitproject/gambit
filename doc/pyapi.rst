@@ -1,6 +1,9 @@
 Python interface to Gambit library
 ==================================
 
+A tutorial introduction
+-----------------------
+
 Building an extensive game
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -33,18 +36,87 @@ players.  As seen above, calling :py:meth:`len` on the set of players
 gives the number of players in the game.  Adding a player is done
 with the :py:meth:`add` member of :py:attr:`players`::
 
-  In [7]: p = g.players.add()
+  In [7]: p = g.players.add("Alice")
 
   In [8]: p
-  Out[8]: <Player [0] '' in game 'A simple poker example'>
+  Out[8]: <Player [0] 'Alice' in game 'A simple poker example'>
 
-Players can be given meaningful text labels using the :py:attr:`label` attribute::
+Each player has a text string stored in the :py:attr:`label` attribute,
+which is useful for human identification of players::
 
-  In [9]: p.label = "Alice"
+  In [9]: p.label
+  Out[9]: 'Alice'
 
-  In [10]: p
-  Out[10]: <Player [0] 'Alice' in game 'A simple poker example'>
+The :py:attr:`players` can be accessed like a Python list::
+
+  In [10]: len(g.players)
+  Out[10]: 1
+
+  In [11]: g.players[0]
+  Out[11]: <Player [0] 'Alice' in game 'A simple poker example'>
+
+  In [12]: g.players
+  Out[12]: [<Player [0] 'Alice' in game 'A simple poker example'>]
 
 
 
+API documentation
+-----------------
 
+.. py:module:: gambit
+
+.. py:function:: new_tree()
+
+   Creates a new :py:class:`gambit.Game`
+   consisting of a trivial game tree, with one
+   node, which is both root and terminal, and no players.
+
+
+.. py:class:: Game
+
+   An object representing a game, in extensive or strategic form.
+
+   .. py:attribute:: is_tree
+
+      Returns ``True`` if the game has a tree representation.
+
+   .. py:attribute:: title
+
+      Accesses the text string of the game's title.
+
+   .. py:attribute:: players
+ 
+      Returns a :py:class:`gambit.Players` collection object
+      representing the players defined in the game.
+
+
+.. py:class:: Players
+   
+   A collection object representing the players in a game.
+
+   .. py:method:: len()
+
+      Returns the number of players in the game.
+
+   .. py:method:: __getitem__(i)
+
+      Returns player number ``i`` in the game.  Players are numbered
+      starting with ``0``.
+
+   .. py:attribute:: chance
+
+      Returns the player representing all chance moves in the game.
+
+   .. py:method:: add([label=""])
+
+      Add a :py:class:`gambit.Player` to the game.  If label
+      is specified, sets the text label for the player.
+
+.. py:class:: Player
+
+   Represents a player in a :py:class:`gambit.Game`.
+
+   .. py:attribute:: label
+
+      A text label useful for identification of the player.
+      
