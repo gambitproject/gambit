@@ -59,6 +59,39 @@ The :py:attr:`players` can be accessed like a Python list::
   Out[12]: [<Player [0] 'Alice' in game 'A simple poker example'>]
 
 
+Building a strategic game
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Games in strategic form are created using :func:`new_table`, which
+takes a list of integers specifying the number of strategies for
+each player::
+
+  In [1]: g = gambit.new_table([2,2])
+
+  In [2]: g.players
+  Out[2]: [<Player [0] '1' in game ''>, <Player [1] '2' in game ''>]
+
+  In [3]: g.title
+  Out[3]: ''
+
+  In [4]: g.title = "A prisoner's dilemma game"
+
+  In [5]: g
+  Out[5]: 
+  NFG 1 R "A prisoner's dilemma game" { "1" "2" }
+
+  { { "1" "2" }
+  { "1" "2" }
+  }
+  ""
+
+  {
+  }
+  0 0 0 0 
+
+
+
+
 
 API documentation
 -----------------
@@ -70,6 +103,12 @@ API documentation
    Creates a new :py:class:`gambit.Game`
    consisting of a trivial game tree, with one
    node, which is both root and terminal, and no players.
+
+.. py:function:: new_table(dim)
+
+   Creates a new :py:class:`gambit.Game` with a strategic
+   representation.  The parameter dim is a list of the number of
+   strategies for each player.
 
 
 .. py:class:: Game

@@ -26,6 +26,11 @@ cdef extern from "libgambit/number.h":
 
     c_Number add_Number(c_Number *, c_Number *)
      
+cdef extern from "libgambit/array.h":
+    ctypedef struct c_ArrayInt "Array<int>":
+        int getitem "operator[]"(int)
+    c_ArrayInt *new_ArrayInt "new Array<int>"(int)
+    void del_ArrayInt "delete"(c_ArrayInt *)
 
 cdef extern from "libgambit/game.h":
     ctypedef struct c_GameRep
@@ -85,11 +90,13 @@ cdef extern from "libgambit/game.h":
         c_GameNode GetRoot()
 
     c_Game NewTree()
+    c_Game NewTable(c_ArrayInt *)
 
 cdef extern from "game.wrap.h":
     c_Game ReadGame(char *) except +IOError
     cxx_string WriteGame(c_Game, int) except +IOError
 
+    void setitem_ArrayInt(c_ArrayInt *, int, int)
 
 cdef class Number:
     cdef c_Number *thisptr
@@ -286,6 +293,17 @@ def new_tree():
     cdef Game g
     g = Game()
     g.game = NewTree()
+    return g
+
+def new_table(dim):
+    cdef Game g
+    cdef c_ArrayInt *d
+    d = new_ArrayInt(len(dim))
+    for i in range(1, len(dim)+1):
+        setitem_ArrayInt(d, i, dim[i-1])
+    g = Game()
+    g.game = NewTable(d)
+    del_ArrayInt(d)
     return g
 
 def read_game(char *fn):
