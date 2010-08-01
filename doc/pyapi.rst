@@ -89,6 +89,10 @@ API documentation
       Returns a :py:class:`gambit.Players` collection object
       representing the players defined in the game.
 
+   .. py:attribute:: root
+
+      Returns the :py:class:`gambit.Node` representing the root
+      node of the game.
 
 .. py:class:: Players
    
@@ -119,4 +123,13 @@ API documentation
    .. py:attribute:: label
 
       A text label useful for identification of the player.
+
+.. py:class:: Node
+
+   Represents a node in a :py:class:`gambit.Game`.
+
+   .. py:attribute:: label
+
+      A text label useful for identification of the node.
+
       

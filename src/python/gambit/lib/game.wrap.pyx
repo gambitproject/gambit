@@ -31,6 +31,7 @@ cdef extern from "libgambit/game.h":
     ctypedef struct c_GameRep
     ctypedef struct c_GamePlayerRep
     ctypedef struct c_GameOutcomeRep
+    ctypedef struct c_GameNodeRep
     
     ctypedef struct c_Game "GameObjectPtr<GameRep>":
         c_GameRep *deref "operator->"()
@@ -40,6 +41,9 @@ cdef extern from "libgambit/game.h":
 
     ctypedef struct c_GameOutcome "GameObjectPtr<GameOutcomeRep>":
         c_GameOutcomeRep *deref "operator->"()
+ 
+    ctypedef struct c_GameNode "GameObjectPtr<GameNodeRep>":
+        c_GameNodeRep *deref "operator->"()
 
     ctypedef struct c_GamePlayerRep "GamePlayerRep":
         c_Game GetGame()
@@ -53,6 +57,13 @@ cdef extern from "libgambit/game.h":
         c_Game GetGame()
         int GetNumber()
         
+        cxx_string GetLabel()
+        void SetLabel(cxx_string)
+
+    ctypedef struct c_GameNodeRep "GameNodeRep":
+        c_Game GetGame()
+        int GetNumber()
+
         cxx_string GetLabel()
         void SetLabel(cxx_string)
 
@@ -71,6 +82,7 @@ cdef extern from "libgambit/game.h":
         c_GameOutcome GetOutcome(int)
         
         int NumNodes()
+        c_GameNode GetRoot()
 
     c_Game NewTree()
 
@@ -201,6 +213,23 @@ cdef class Outcomes:
         c.outcome = self.game.deref().GetOutcome(outc+1)
         return c
 
+
+cdef class Node:
+    cdef c_GameNode node
+
+    def __repr__(self):
+        return "<Node [%d] '%s' in game '%s'>" % (self.node.deref().GetNumber(),
+                                                  self.label,
+                                                  self.node.deref().GetGame().deref().GetTitle().c_str())
+    
+    property label:
+        def __get__(self):
+            return self.node.deref().GetLabel().c_str()
+        def __set__(self, char *value):
+            cdef cxx_string s
+            s.assign(value)
+            self.node.deref().SetLabel(s)
+
 cdef class Game:
     cdef c_Game game
 
@@ -236,6 +265,12 @@ cdef class Game:
             c.game = self.game
             return c
 
+    property root:
+        def __get__(self):
+            cdef Node n
+            n = Node()
+            n.node = self.game.deref().GetRoot()
+            return n
 
     def num_nodes(self):
         return self.game.deref().NumNodes()
