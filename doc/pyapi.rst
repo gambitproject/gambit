@@ -68,17 +68,15 @@ each player::
 
   In [1]: g = gambit.new_table([2,2])
 
-  In [2]: g.players
-  Out[2]: [<Player [0] '1' in game ''>, <Player [1] '2' in game ''>]
+  In [2]: g.title = "A prisoner's dilemma game"
 
-  In [3]: g.title
-  Out[3]: ''
+  In [3]: g.players[0].label = "Alphonse"
 
-  In [4]: g.title = "A prisoner's dilemma game"
+  In [4]: g.players[1].label = "Gaston"
 
   In [5]: g
   Out[5]: 
-  NFG 1 R "A prisoner's dilemma game" { "1" "2" }
+  NFG 1 R "A prisoner's dilemma game" { "Alphonse" "Gaston" }
 
   { { "1" "2" }
   { "1" "2" }
@@ -89,6 +87,25 @@ each player::
   }
   0 0 0 0 
 
+The :attr:`strategies` collection for a player lists all the
+strategies available for that player::
+
+  In [6]: g.players[0].strategies
+  Out[6]: [<Strategy [0] '1' for player 'Alphonse' in game 'A
+  prisoner's dilemma game'>, 
+           <Strategy [1] '2' for player 'Alphonse' in game 'A prisoner's dilemma game'>]
+
+  In [7]: len(g.players[0].strategies)
+  Out[7]: 2
+
+  In [8]: g.players[0].strategies[0].label = "Cooperate"
+
+  In [9]: g.players[0].strategies[1].label = "Defect"
+
+  In [10]: g.players[0].strategies
+  Out[10]: [<Strategy [0] 'Cooperate' for player 'Alphonse' in game 'A
+  prisoner's dilemma game'>,
+            <Strategy [1] 'Defect' for player 'Alphonse' in game 'A prisoner's dilemma game'>]
 
 
 
@@ -170,5 +187,37 @@ API documentation
    .. py:attribute:: label
 
       A text label useful for identification of the node.
+
+
+.. py:class:: Strategies
+   
+   A collection object representing the strategies available to a
+   player in a game.
+
+   .. py:method:: len()
+
+      Returns the number of strategies for the player.
+
+   .. py:method:: __getitem__(i)
+
+      Returns strategy number ``i``.  Strategies are numbered
+      starting with ``0``.
+
+.. py:class:: Strategy
+
+   Represents a strategy available to a :py:class:`gambit.Player`.
+
+   .. py:attribute:: label
+
+      A text label useful for identification of the strategy.
+
+.. py:class:: Node
+
+   Represents a node in a :py:class:`gambit.Game`.
+
+   .. py:attribute:: label
+
+      A text label useful for identification of the node.
+
 
       

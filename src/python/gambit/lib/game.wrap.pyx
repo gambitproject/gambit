@@ -34,6 +34,7 @@ cdef extern from "libgambit/array.h":
 
 cdef extern from "libgambit/game.h":
     ctypedef struct c_GameRep
+    ctypedef struct c_GameStrategyRep
     ctypedef struct c_GamePlayerRep
     ctypedef struct c_GameOutcomeRep
     ctypedef struct c_GameNodeRep
@@ -50,6 +51,16 @@ cdef extern from "libgambit/game.h":
     ctypedef struct c_GameNode "GameObjectPtr<GameNodeRep>":
         c_GameNodeRep *deref "operator->"()
 
+    ctypedef struct c_GameStrategy "GameObjectPtr<GameStrategyRep>":
+        c_GameStrategyRep *deref "operator->"()
+
+    ctypedef struct c_GameStrategyRep "GameStrategyRep":
+        int GetNumber()
+        c_GamePlayer GetPlayer()
+
+        cxx_string GetLabel()
+        void SetLabel(cxx_string)
+
     ctypedef struct c_GamePlayerRep "GamePlayerRep":
         c_Game GetGame()
         int GetNumber()
@@ -57,6 +68,9 @@ cdef extern from "libgambit/game.h":
         
         cxx_string GetLabel()
         void SetLabel(cxx_string)
+        
+        int NumStrategies()
+        c_GameStrategy GetStrategy(int)  
 
     ctypedef struct c_GameOutcomeRep "GameOutcomeRep":
         c_Game GetGame()
@@ -131,6 +145,40 @@ cdef class Number:
         return ret
         
 
+cdef class Strategy:
+    cdef c_GameStrategy strategy
+
+    def __repr__(self):
+        return "<Strategy [%d] '%s' for player '%s' in game '%s'>" % \
+                (self.strategy.deref().GetNumber()-1, self.label,
+                 self.strategy.deref().GetPlayer().deref().GetLabel().c_str(),
+                 self.strategy.deref().GetPlayer().deref().GetGame().deref().GetTitle().c_str())
+    
+    property label:
+        def __get__(self):
+            return self.strategy.deref().GetLabel().c_str()
+        def __set__(self, char *value):
+            cdef cxx_string s
+            s.assign(value)
+            self.strategy.deref().SetLabel(s)
+
+    
+cdef class Strategies:
+    cdef c_GamePlayer player
+
+    def __repr__(self):
+        return str(list(self))
+
+    def __len__(self):
+        return self.player.deref().NumStrategies()
+
+    def __getitem__(self, st):
+        cdef Strategy s
+        if st < 0 or st >= len(self):
+            raise IndexError("no strategy with index '%s'" % st)
+        s = Strategy()
+        s.strategy = self.player.deref().GetStrategy(st+1)
+        return s
 
 cdef class Player:
     cdef c_GamePlayer player
@@ -154,6 +202,12 @@ cdef class Player:
         def __get__(self):
             return True if self.player.deref().IsChance() != 0 else False
 
+    property strategies:
+        def __get__(self):
+            cdef Strategies s
+            s = Strategies()
+            s.player = self.player
+            return s
     
 cdef class Players:
     cdef c_Game game
