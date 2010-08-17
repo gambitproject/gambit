@@ -1308,6 +1308,11 @@ void GameRep::WriteEfgFile(std::ostream &p_file, const GameNode &p_root) const
 
 void GameRep::WriteNfgFile(std::ostream &p_file) const
 { 
+  if (IsTree()) {
+    // FIXME: Building computed values is logically const.
+    const_cast<GameRep *>(this)->BuildComputedValues();
+  }
+
   p_file << "NFG 1 R";
   p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
 
@@ -1334,8 +1339,7 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
     // are chance moves.
     StrategyIterator iter(Game(const_cast<GameRep *>(this)));
     
-    for (iter = StrategyIterator(Game(const_cast<GameRep *>(this)));
-	 !iter.AtEnd(); iter++) {
+    for (; !iter.AtEnd(); iter++) {
       for (int pl = 1; pl <= NumPlayers(); pl++) {
 	p_file << iter->GetPayoff<Rational>(pl) << " ";
       }
