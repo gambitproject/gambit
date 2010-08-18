@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: efglogit.h
+// FILE: src/tools/logit/efglogit.h
 // Computation of agent quantal response equilibrium correspondence for
 // extensive games.
 //

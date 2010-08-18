@@ -1,13 +1,9 @@
 //
-// $Source$
-// $Date$
-// $Revision$
-//
-// DESCRIPTION:
-// Compute Nash equilibria by minimizing Liapunov function
-//
 // This file is part of Gambit
-// Copyright (c) 2002, The Gambit Project
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: src/tools/liap/liap.cc
+// Compute Nash equilibria by minimizing Liapunov function
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

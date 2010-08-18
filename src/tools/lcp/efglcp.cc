@@ -1,14 +1,10 @@
 //
-// $Source$
-// $Date$
-// $Revision$
+// This file is part of Gambit
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// DESCRIPTION:
+// FILE: src/tools/lcp/efglcp.cc
 // Implementation of algorithm to solve extensive forms using linear
 // complementarity program from sequence form
-//
-// This file is part of Gambit
-// Copyright (c) 2002, The Gambit Project
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

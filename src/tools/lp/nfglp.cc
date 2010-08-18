@@ -1,14 +1,10 @@
 //
-// $Source$
-// $Date$
-// $Revision$
+// This file is part of Gambit
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// DESCRIPTION:
+// FILE: src/tools/lp/nfglp.cc
 // Implementation of algorithm to compute mixed strategy equilibria
 // of constant sum normal form games via linear programming
-//
-// This file is part of Gambit
-// Copyright (c) 2006, The Gambit Project
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

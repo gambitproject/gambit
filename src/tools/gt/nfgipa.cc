@@ -1,13 +1,9 @@
 //
-// $Source$
-// $Date$
-// $Revision$
-//
-// DESCRIPTION:
-// Gambit frontend to Gametracer IPA
-//
 // This file is part of Gambit
-// Copyright (c) 2005, The Gambit Project
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: src/tools/gt/nfgipa.cc
+// Gambit frontend to Gametracer IPA
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

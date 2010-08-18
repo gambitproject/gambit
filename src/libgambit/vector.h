@@ -1,13 +1,9 @@
 //
-// $Source$
-// $Date$
-// $Revision$
-//
-// DESCRIPTION:
-// A vector class
-//
 // This file is part of Gambit
-// Copyright (c) 2002, The Gambit Project
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: src/libgambit/vector.h
+// A vector class
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

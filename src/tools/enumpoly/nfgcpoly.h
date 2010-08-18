@@ -1,15 +1,11 @@
 //
-// $Source$
-// $Date$
-// $Revision$
+// This file is part of Gambit
+// Copyright (c) 1994-2010, Litao Wei and The Gambit Project (http://www.gambit-project.org)
 //
-// DESCRIPTION:
+// FILE: src/tools/enumpoly/nfgcpoly.h
 // Compute Nash equilibria via heuristic search on game supports
 // (Porter, Nudelman & Shoham, 2004)
 // Implemented by Litao Wei
-//
-// This file is part of Gambit
-// Copyright (c) 2006, Litao Wei and The Gambit Project
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

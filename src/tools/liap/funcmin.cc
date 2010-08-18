@@ -1,13 +1,9 @@
 //
-// $Source$
-// $Date$
-// $Revision$
-//
-// DESCRIPTION:
-// Implementation of N-dimensional function minimization routines
-//
 // This file is part of Gambit
-// Modifications copyright (c) 2002, The Gambit Project
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: src/tools/liap/funcmin.cc
+// Implementation of N-dimensional function minimization routines
 //
 // These routines derive from the N-dimensional function minimization
 // routines in the GNU Scientific Library, version 1.2, which is
