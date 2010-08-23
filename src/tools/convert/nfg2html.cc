@@ -96,7 +96,7 @@ void WriteHtmlFile(std::ostream &p_file, const Gambit::Game &p_nfg,
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Convert a Gambit .nfg file to HTML tables\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2010, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 

@@ -149,7 +149,7 @@ void SolveMixed(Game p_nfg)
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Search for Nash equilibria in pure strategies\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2010, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 

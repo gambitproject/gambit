@@ -37,7 +37,7 @@ template <class T> void SolveStrategic(const Game &p_game);
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by solving a linear complementarity program\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2010, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
