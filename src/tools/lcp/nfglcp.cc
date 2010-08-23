@@ -37,9 +37,12 @@ namespace {
 // has been reached.  A convenience for unraveling a potentially
 // deep recursion.
 //
-class EquilibriumLimitReached : public Exception {
+// FIXME: There is an identical twin of this in efglcp.cc.  This should be
+// refactored into a more generally-useful and generally-visible location.
+//
+class EquilibriumLimitReachedNfg : public Exception {
 public:
-  virtual ~EquilibriumLimitReached() { }
+  virtual ~EquilibriumLimitReachedNfg() { }
   std::string GetDescription(void) const 
   { return "Reached target number of equilibria"; }
 };
@@ -171,7 +174,7 @@ bool OnBFS(const StrategySupport &p_support,
   }
 
   if (g_stopAfter > 0 && p_list.Length() >= g_stopAfter) {
-    throw EquilibriumLimitReached();
+    throw EquilibriumLimitReachedNfg();
   }
 
   return true;
@@ -274,7 +277,7 @@ void SolveStrategic(const Game &p_game)
       try {
 	AllLemke(support, 0, B, bfsList, 0);
       }
-      catch (EquilibriumLimitReached &) {
+      catch (EquilibriumLimitReachedNfg &) {
 	// This pseudo-exception requires no additional action;
 	// bfsList will contain the list of equilibria found
       }
