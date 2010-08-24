@@ -46,15 +46,11 @@ This section gives an overview of the graphical interface.
 General layout of the main window
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:ref:`This figure <overview-screenshot>` shows the typical
-configuration of a window after the graphical interface is launched.
-
-.. _overview-screenshot:
-.. figure::  screens/overview.*
-
-   A typical appearance of the graphical interface, showing
-   a simple poker game.
-
+.. image::  screens/overview.*
+            :width: 33%
+ 	    :alt: the default extensive game at launch
+	    :align: right
+	    :target: _images/overview.png
 
 The frame presenting a game consists of two principal panels. The main
 panel, to the right, displays the game graphically; in this case,
@@ -201,9 +197,15 @@ and the :guilabel:`Insert move` dialog.
    actions can be added by dragging the same player's icon to the move
    node; this will add one action to the move each time this is done.
 
-#. Click on any terminal node in
+.. image:: screens/insertmove.*
+           :width: 33%
+	   :alt: insert move dialog
+	   :align: right
+	   :target: _images/insertmove.png
+
+2. Click on any terminal node in
    the tree, and select :menuselection:`Edit --> Insert move`
-   to display the Insert move dialog (see :ref:`insert-move-dialog`).
+   to display the :guilabel:`insert move` dialog.
    The dialog is intended to read like a sentence:
 
    + The first control specifies the player who will make the move. The
@@ -217,12 +219,6 @@ and the :guilabel:`Insert move` dialog.
      :guilabel:`at a new information set`. 
      Otherwise, it is set automatically to the number of actions at
      the selected information set.
-
-.. _insert-move-dialog:
-.. figure:: /screens/insertmove.*
-  
-   The insert move dialog.
-
 
 The two methods can be useful in different contexts. 
 The drag-and-drop approach
@@ -302,24 +298,24 @@ cursor changes to the move icon . Dropping the move icon on another
 node places the target node in the same information set as the node
 where the drag operation began.
 
+.. image::  screens/editnode.*
+            :width: 33%
+            :alt: node properties dialog
+  	    :align: right
+     	    :target:  _images/editnode.png
+
 The information set to which a node belongs can also be set by
-selecting :menuselection:`Edit --> Node`. 
-This displays the :ref:`node properties dialog <node-properties>`.
+selecting :menuselection:`Edit --> Node`.  This displays the 
+:guilabel:`node properties` dialog.  
+The :guilabel:`Information set` dropdown defaults
+to the current information set to which the node belongs, and contains
+a list of all other information sets in the game which are compatible
+with the node, that is, which have the same number of
+actions. Additionally, the node can be moved to a new, singleton
+information set by setting this dropdown to the :guilabel:`New
+information set` entry.
 
-.. _node-properties:
-.. figure::  screens/editnode.*
 
-   The node properties dialog for setting information about a 
-   given node. 
-
-
-The :guilabel:`Information set` dropdown 
-defaults to the current information set to
-which the node belongs, and contains a list of all other information
-sets in the game which are compatible with the node, that is, which
-have the same number of actions. Additionally, the node can be moved
-to a new, singleton information set by setting this dropdown to the
-:guilabel:`New information set` entry.
 
 When building out a game tree using the :ref:`drag-and-drop approach
 <copying-trees>` to copying portions of the tree,
@@ -421,13 +417,13 @@ Labels on nodes and branches
 
 The information displayed at the nodes and on the branches of the tree
 can be configured by selecting :menuselection:`Format --> Labels`, 
-which displays :ref:`dialog-labels`.
+which displays the :guilabel:`tree labels` dialog.
 
-.. _dialog-labels:
-.. figure::  screens/labels.*
-
-   The dialog box for configuring labeling of parts of a game tree.
-
+.. image::  screens/labels.*
+            :width: 33%
+	    :alt: tree labels dialog
+	    :align: right
+	    :target: _images/labels.png
 
 Above and below each node, the following information can be displayed:
 
@@ -507,7 +503,13 @@ provides generally good results for most games. These can be adjusted
 by selecting :menuselection:`Format --> Layout`. 
 The layout parameters are organized on three tabs.
 
-The :ref:`first tab <dialog-layout-nodes>`, 
+.. image::  screens/layoutnodes.*
+            :width: 33%
+	    :alt: layout options dialog, nodes tab
+	    :align: right
+	    :target: _images/layoutnodes.png
+
+The first tab,
 labeled :guilabel:`Nodes`, controls the size, location, and
 rendering of nodes in the tree.
 Nodes can be indicated using one
@@ -516,23 +518,23 @@ previous versions), a box, a diamond, an unfilled circle, and a filled
 circle). These can be set independently to distinguish chance and
 terminal nodes from player nodes.
 
-.. _dialog-layout-nodes:
-.. figure::  screens/layoutnodes.*
-
-   The dialog box for configuring the rendering of nodes in a tree.
-
-
 The sizing of nodes can be configured for best results. Gambit styling
 from previous versions used the horizontal line tokens with relatively
 long lines; when using the other tokens, smaller node sizes often look
 better.
+
+.. image::  screens/layoutbranches.*
+            :width: 33%
+	    :alt: layout options dialog, branches tab
+	    :align: right
+	    :target: _images/layoutbranches.png
 
 The layout algorithm is based upon identifying the location of
 terminal nodes. The vertical spacing between these nodes can be set;
 making this value larger will tend to give the tree a larger vertical
 extent.
 
-The :ref:`second tab <dialog-layout-branches>`, 
+The second tab,
 labeled :guilabel:`Branches`, controls the display of the branches
 of the tree.
 The traditional Gambit way of drawing branches is a "fork-tine"
@@ -548,19 +550,19 @@ branches by setting :guilabel:`Draw labels` to rotated.
 The rotated label drawing is experimental, and does not always look
 good on screen.
 
-.. _dialog-layout-branches:
-.. figure::  screens/layoutbranches.*
-
-   The dialog box for configuring the rendering of branches in a tree.
-
+.. image::  screens/layoutinfosets.*
+            :width: 33%
+	    :alt: layout options dialog, information sets tab
+	    :align: right
+	    :target: _images/layoutinfosets.png
+ 
 The length used for branches and their tines, if drawn, can be
 configured. Longer branch and tine lengths give more space for longer
 labels to be drawn, at the cost of giving the tree a larger horizontal
 extent.
 
 Finally, display of the information sets in the game is configured
-under :ref:`the tab <dialog-layout-infosets>` 
-labeled :guilabel:`Information sets`.
+under the tab labeled :guilabel:`Information sets`.
 Members of information sets are
 by default connected using a "bubble" similar to that drawn in
 textbook diagrams of games. The can be modified to use a single line
@@ -569,28 +571,24 @@ using lines for nodes, this can sometimes lead to a more compact
 representation of a tree where there are many information sets at the
 same horizontal location.
 
-.. _dialog-layout-infosets:
-.. figure::  screens/layoutinfosets.*
-
-   The dialog box for configuring the rendering of information sets
-   in a tree.
-
 The layout of the tree may be such that members of the same
 information set appear at different horizontal locations in the tree.
 In such a case, by default, Gambit draws a horizontal arrow pointing
 rightward or leftward to indicate the continuation of the information
-set, as in :ref:`this example <example-connect-infosets>`.
+set, as illustrated in the diagram nearby.
+
+.. image::  screens/connectinfoset.*
+            :width: 33%
+	    :alt: information sets spanning multiple levels
+	    :align: right
+	    :target: _images/connectinfoset.png
+ 
 These connections can be disabled by setting 
 :guilabel:`Connect members of information
 sets` to :guilabel:`only when on the same level`. 
 In addition, drawing information
 set indicators can be disabled entirely by setting this to invisibly
 (don't draw indicators).
-
-.. _example-connect-infosets:
-.. figure::  screens/connectinfoset.*
-
-   Showing information sets spanning multiple levels.
 
 
 Selecting fonts and colors
@@ -644,6 +642,12 @@ corresponding to the situation in which all the row players play the
 strategy specified on that row for them, and all the column players
 play the strategy specified on that column for them.
 
+.. image::  screens/pd1.*
+            :width: 33%
+            :alt: a prisoner's dilemma game
+            :align: right
+            :target: _images/pd1.png
+
 For games with two players, this presentation is by default configured
 to be similar to the standard presenation of strategic games as
 tables, in which one player is assigned to be the "row" player and the
@@ -658,19 +662,10 @@ more players on both rows and columns.
 
 The hierarchical presentation of the table is similar to that of a
 contingency table in a spreadsheet application.
-
-
-:ref:`This screenshot <example-prisoners-dilemma>`
-shows a typical Gambit display
-of an instance of the famous Prisoner's Dilemma game. Here, Alice,
+Here, Alice,
 shown in red, has her strategies listed on the rows of the table, and
 Bob, shown in blue, has his strategies listed on the columns of the
 table.
-
-.. _example-prisoners-dilemma:
-.. figure::  screens/pd1.*
-
-   A prisoner's dilemma game.
 
 The assignment of players to row and column roles is fully
 customizable. To change the assignment of a player, drag the person
@@ -678,31 +673,25 @@ icon appearing to the left of the player's name on the player toolbar
 to either of the areas in the payoff table displaying the strategy
 labels.
 
+.. image::  screens/pd2.*
+            :width: 33%
+            :alt: a prisoner's dilemma game, with contingencies in
+                  list style
+            :align: right
+            :target: _images/pd2.png
+
 For example, dragging the player icon from the left of Bob's name in
 the list of players and dropping it on the right side of Alice's
 strategy label column changes the display of the game as in 
-:ref:`this screenshot <example-prisoners-dilemma-2>`.
 Here, the strategies are shown in a
 hierarchical format, enumerating the outcomes of the game first by
 Alice's (red) strategy choice, then by Bob's (blue) strategy choice.
 
-.. _example-prisoners-dilemma-2:
-.. figure::  screens/pd2.*
-
-   A prisoner's dilemma game, with contingencies shown in list style.
-
-
 Alternatively, the game can be displayed by listing the outcomes with
 Bob's strategy choice first, then Alice's. Drag Bob's player icon and
 drop it on the left side of Alice's strategy choices, and the game
-display changes to look like that in 
-:ref:`this screenshot <example-prisoners-dilemma-3>`.
-
-.. _example-prisoners-dilemma-3:
-.. figure::  screens/pd3.*
-
-   Another view of the same prisoner's dilemma game.
-
+display changes to organize the outcomes first by Bob's action, then
+by Alice's.
 
 The same dragging operation can be used to assign players to the
 columns. Assigning multiple players to the columns gives the same
@@ -712,7 +701,13 @@ level of the column player hierarchy; dropping a player below another
 player's strategy labels assigns him to a lower level of the column
 player hierarchy.
 
-Note that as the assignment of players in the row and column
+.. image::  screens/pd3.*
+            :width: 33%
+            :alt: another view of the same prisoner's dilemma game.
+            :align: right
+            :target: _images/pd3.png
+
+As the assignment of players in the row and column
 hierarchies changes, the ordering of the payoffs in each cell of the
 table also changes. In all cases, the color-coding of the entries
 identifies the player to whom each payoff corresponds. The ordering
@@ -783,10 +778,11 @@ In extensive games, the
 :ref:`dominance toolbar <toolbar-dominance>` controls the elimination of
 actions which are conditionally dominated.
 
-.. _toolbar-dominance:
-.. figure::  screens/pokerdom1.*
-
-   The poker game, with the dominance toolbar shown.
+.. image::  screens/pokerdom1.*
+            :width: 33%
+            :alt: the poker game, with the dominance toolbar shown
+            :align: right
+            :target: _images/pokerdom1.png
 
 Actions may be eliminated based on two criteria:
 
@@ -799,35 +795,33 @@ Actions may be eliminated based on two criteria:
   set that is always at least as good as the action, and strictly better
   in some cases.
 
+.. image::  screens/pokerdom2.*
+            :width: 33%
+            :alt: the poker game, with the dominated action eliminated
+            :align: right
+            :target: _images/pokerdom2.png
+
 For example, in the poker game, it is strictly dominated for Fred to
 choose Fold after Red. Clicking the next level icon 
-:ref:`removes the
-dominated action <toolbar-dominance-2>`
-from the game display.
-
-.. _toolbar-dominance-2:
-.. figure::  screens/pokerdom2.*
-
-   The poker game, with the dominated action eliminated.
+removes the dominated action from the game display.
 
 The tree layout remains unchanged, including nodes which can only be
 reached using actions which have been eliminated. To compress the tree
 to remove the unreachable nodes, check the box labeled
 :guilabel:`Show only
-reachable nodes`. The tree is redisplayed as in
-:ref:`this screenshot <toolbar-dominance-3>`.
-
-.. _toolbar-dominance-3:
-.. figure::  screens/pokerdom3.*
-
-   The poker game, showing only nodes reachable via uneliminated actions.
-
+reachable nodes`. 
 
 For this game, no further actions can be eliminated. In general,
 further steps of elimination can be done by again clicking the next
 level icon. The toolbar keeps track of the number of levels of
 elimination currently shown; the previous level icon moves up one
 level of elimination.
+
+.. image::  screens/pokerdom3.*
+            :width: 33%
+            :alt: the poker game, with only reachable actions shown
+            :align: right
+            :target: _images/pokerdom3.png
 
 The elimination of multiple levels can be automated using the fast
 forward icon , which iteratively eliminates dominated actions until no
@@ -843,17 +837,15 @@ The dominance toolbar operates in strategic games in the same way as
 the in the extensive game. Strategies can be eliminated iteratively
 based on whether they are strictly or weakly dominated.
 
+.. image::  screens/pddom1.*
+            :width: 33%
+            :alt: the prisoner's dilemma example, with dominated
+                  strategies indicated
+            :align: right
+            :target: _images/pddom1.png
+
 When the dominance toolbar is shown, the strategic game table contains
-indicators of strategies that are dominated. For example,
-:ref:`this screenshot <toolbar-dominance-4>`
-shows the prisoner's dilemma example with
-the dominance toolbar shown.
-
-.. _toolbar-dominance-4:
-.. figure::  screens/pddom1.*
-
-   The prisoner's dilemma example, with dominated strategies indicated.
-
+indicators of strategies that are dominated. 
 In the prisoner's dilemma, the Cooperate strategy is strictly
 dominated for both players. This strict dominance is indicated by the
 solid "X" drawn across the corresponding strategy labels for both
@@ -863,18 +855,20 @@ contingency in the table containing at least one "X" is a contingency
 that can only be reached by at least one player playing a strategy
 that is dominated.
 
+
 Strategies that are weakly dominated are similarly indicated, except
 the "X" shape is drawn using a thinner, dashed line instead of the
 thick, solid line.
 
+.. image::  screens/pddom2.*
+            :width: 33%
+            :alt: the prisoner's dilemma example, with dominated
+                  strategies removed
+            :align: right
+            :target: _images/pddom2.png
+
 Clicking the next level icon removes the strictly dominated strategies
-from the display, and presents the prisoner's dilemma as in 
-:ref:`this screenshot <toolbar-dominance-5>`.
-
-.. _toolbar-dominance-5:
-.. figure::  screens/pddom2.*
-
-   The prisoner's dilemma example, with dominated strategies removed.
+from the display.
 
 
 .. _computing-equilibria:
@@ -889,7 +883,6 @@ or click on the
 calculate icon on the toolbar.
 
 
-
 Selecting the method of computing equilibria
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -899,19 +892,19 @@ the process for strategic games is analogous, except the extensive
 game-specific features, such as displaying the profiles on the game
 tree, are not applicable.
 
-Gambit presents options for computing Nash equilibrium
-:ref:`in a dialog <dialog-equilibria>`.
-
-.. _dialog-equilbria:
-.. figure::  screens/nash.*
-
-   Dialog to select method for computing Nash equilibria.
-
+Gambit provides guidance on the options for computing Nash equilibria
+in a dialog.
 The methods applicable to a particular game depend on three criteria:
 the number of equilibria to compute, whether the computation is to be
 done on the extensive or strategic games, and on details of the game,
 such as whether the game has two players or more, and whether the game
 is constant-sum.
+
+.. image::  screens/nash.*
+            :width: 33%
+            :alt: dialog for computing Nash equilibria
+            :align: right
+            :target: _images/nash.png
 
 The first step in finding equilibria is to specify how many equilibria
 are to be found. Some algorithms for computing equilibria are adapted
@@ -935,6 +928,12 @@ which are appropriate for the game, given the selection of how many
 equilibria to compute. More details on these methods are contained
 in :ref:`command-line`.
 
+.. image::  screens/computing.*
+            :width: 33%
+            :alt: dialog for monitoring computation of equilibria
+            :align: right
+            :target: _images/computing.png
+
 Finally, for extensive games, there is an option of whether to use the
 extensive or strategic game for computation. In general, computation
 using the extensive game is preferred, since it is often a
@@ -943,16 +942,11 @@ characeteristics of the game than the reduced strategic game is.
 
 For even moderate sized games, computation of equilibrium can be a
 time-intensive process. Gambit runs all computations in the
-background, and :ref:`displays a dialog <dialog-computing>`, 
+background, and displays a dialog
 showing all equilibria computed so
 far. The computation can be cancelled at any time by clicking on the
 cancel icon , which terminates the computation but keeps any
 equilibria computed.
-
-.. _dialog-computing:
-.. figure::  screens/computing.*
-
-   Monitoring the equilibria computed in a larger game.
 
 
 
@@ -963,14 +957,13 @@ After computing equilibria, a panel showing the list of equilibria
 computed is displayed automatically. The display of this panel can be
 toggled by selecting :menuselection:`View --> Profiles`,
 or clicking on the playing card
-icon on the toolbar. For example, after computing all equilibria in
-the poker example, the game window looks like 
-:ref:`this screenshot <screenshot-equilibrium>`.
+icon on the toolbar. 
 
-.. _screenshot-equilibrium:
-.. figure::  screens/profiles.*
-
-   The poker game with the unique equilibrium displayed.
+.. image::  screens/profiles.*
+            :width: 33%
+            :alt: poker game with the unique equilibrium displayed
+            :align: right
+            :target: _images/profiles.png
 
 This game has a unique equilibrium in which Fred raises after Red with
 probability one, and raises with probability one-third after Black.
@@ -997,20 +990,18 @@ for configuring the labeling of trees.)
 Each branch of the tree also shows a black line, the length of which
 is proportional to the probability with which the action is played.
 
+.. image::  screens/beliefs.*
+            :width: 33%
+            :alt: poker game with the beliefs at Alice's top node
+            :align: right
+            :target: _images/beliefs.png
+
 Clicking on any node in the tree displays additional information about
-the profile at that node. For example, :ref:`screenshot-beliefs`
-shows the display after clicking on the
-first (top) node in Alice's information set. The player panel displays
-information relevant to this node, including the payoff to all players
+the profile at that node. 
+The player panel displays
+information relevant to the selected node, including the payoff to all players
 conditional on reaching the node, as well as information about Alice's
 beliefs at the node.
-
-.. _screenshot-beliefs:
-.. figure::  screens/beliefs.*
-
-   More information about the equilibrium in the poker game.
-
-
 
 The computed profiles can also be viewed in the reduced strategic
 game. Clicking on the strategic game icon changes the view to the
@@ -1027,22 +1018,19 @@ equilibrium correspondence for extensive games [McKPal98]_
 and strategic games [McKPal95]_, 
 using the tracing method of [Tur05]_.
 
+.. image::  screens/qre.*
+            :width: 33%
+            :alt: quantal response equilibria
+            :align: right
+            :target: _images/qre.png
+
+
 To compute the correspondence, select :menuselection:`Tools --> Qre`.
 If viewing an
 extensive game, the agent quantal response equilibrium correspondence
 is computed; if viewing a strategic game (including the reduced
 strategic game derived from an extensive game), the correspondence is
 computed in mixed strategies.
-
-For example, the output of tracing the correspondence for the
-extensive game of the poker example is shown in
-:ref:`this screenshot <screenshot-qre-agent>`.
-
-.. _screenshot-qre-agent:
-.. figure::  screens/qre.*
-
-   Agent quantal response equilibria in the poker example.
-
 
 The computed correspondence values can be saved to a CSV (comma-
 separated values) file by clicking the button labeled
@@ -1057,14 +1045,6 @@ Quantal response equilibria in strategic games (experimental)
 
 There is an experimental graphing interface for quantal response
 equilibria in strategic games. 
-:ref:`This screenshot <screenshot-qre-graph>`
-illustrates the layout of this interface.
-
-.. _screenshot-qre-graph:
-.. figure::  screens/logit.*
-
-   Graph of QRE in strategic form of poker example.
-
 The graph by default plots the probabilities of all strategies, color-
 coded by player, as a function of the lambda parameter. The lambda
 values on the horizontal axis are plotted using a sigmoid
@@ -1072,6 +1052,12 @@ transformation; the Graph scaling value controls the shape of this
 transformation. Lower values of the scaling give more graph space to
 lower values of lambda; higher values of the scaling give more space
 to higher values of lambda.
+
+.. image::  screens/logit.*
+            :width: 33%
+            :alt: quantal response equilibria graphing
+            :align: right
+            :target: _images/logit.png
 
 The strategies graphed are indicated in the panel at the left of the
 window. Clicking on the checkbox next to a strategy toggles whether it
