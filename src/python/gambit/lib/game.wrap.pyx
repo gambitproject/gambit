@@ -70,7 +70,7 @@ cdef extern from "libgambit/game.h":
         void SetLabel(cxx_string)
         
         int NumStrategies()
-        c_GameStrategy GetStrategy(int)  
+        c_GameStrategy GetStrategy(int) except +IndexError
 
     ctypedef struct c_GameOutcomeRep "GameOutcomeRep":
         c_Game GetGame()
@@ -78,6 +78,9 @@ cdef extern from "libgambit/game.h":
         
         cxx_string GetLabel()
         void SetLabel(cxx_string)
+     
+        c_Number GetPayoffNumber "GetPayoff<Number>"(int) except +IndexError
+        void SetPayoff(int, cxx_string) except +IndexError
 
     ctypedef struct c_GameNodeRep "GameNodeRep":
         c_Game GetGame()
@@ -93,7 +96,7 @@ cdef extern from "libgambit/game.h":
         void SetTitle(cxx_string)
 
         int NumPlayers()
-        c_GamePlayer GetPlayer(int)
+        c_GamePlayer GetPlayer(int) except +IndexError
         c_GamePlayer GetChance()
         c_GamePlayer NewPlayer()
 
@@ -102,6 +105,16 @@ cdef extern from "libgambit/game.h":
         
         int NumNodes()
         c_GameNode GetRoot()
+
+    ctypedef struct c_PureStrategyProfile "PureStrategyProfile":
+        c_GameStrategy GetStrategy(c_GamePlayer)
+        void SetStrategy(c_GameStrategy)
+
+        c_GameOutcome GetOutcome()
+        void SetOutcome(c_GameOutcome)
+
+    c_PureStrategyProfile *new_PureStrategyProfile "new PureStrategyProfile"(c_Game)
+    void del_PureStrategyProfile "delete"(c_PureStrategyProfile *)
 
     c_Game NewTree()
     c_Game NewTable(c_ArrayInt *)
@@ -256,7 +269,19 @@ cdef class Outcome:
             s.assign(value)
             self.outcome.deref().SetLabel(s)
 
+    def __getitem__(self, pl):
+        cdef Number number
+        number = Number()
+        number.thisptr = new_Number_copy(self.outcome.deref().GetPayoffNumber(pl+1))
+        return number
 
+    def __setitem__(self, pl, value):
+        cdef cxx_string s
+        v = str(value)
+        s.assign(v)
+        self.outcome.deref().SetPayoff(pl+1, s)
+        
+       
 cdef class Outcomes:
     cdef c_Game game
 
@@ -332,6 +357,25 @@ cdef class Game:
             n = Node()
             n.node = self.game.deref().GetRoot()
             return n
+
+    def _get_contingency(self, *args):
+        cdef c_PureStrategyProfile *psp
+        cdef Outcome outcome
+        psp = new_PureStrategyProfile(self.game)
+
+        for (pl, st) in enumerate(args):
+            psp.SetStrategy(self.game.deref().GetPlayer(pl+1).deref().GetStrategy(st+1))
+
+        outcome = Outcome()
+        outcome.outcome = psp.GetOutcome()
+        del_PureStrategyProfile(psp)
+        return outcome
+
+    # As of Cython 0.11.2, cython does not support the * notation for the argument
+    # to __getitem__, which is required for multidimensional slicing to work. 
+    # We work around this by providing a shim.
+    def __getitem__(self, i):
+        return self._get_contingency(*i)
 
     def num_nodes(self):
         return self.game.deref().NumNodes()

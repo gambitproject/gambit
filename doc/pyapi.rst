@@ -107,6 +107,35 @@ strategies available for that player::
   prisoner's dilemma game'>,
             <Strategy [1] 'Defect' for player 'Alphonse' in game 'A prisoner's dilemma game'>]
 
+The outcome associated with a particular combination of strategies is
+accessed by treating the game like an array. For a game :literal:`g`,
+:literal:`g[i,j]` is the outcome where the first player plays his
+:literal:`i` th strategy, and the second player plays his
+:literal:`j` th strategy.  Payoffs associated with an outcome are set
+or obtained by indexing the outcome by the player number.  For a
+prisoner's dilemma game where the cooperative payoff is 8, the
+betrayal payoff is 10, the sucker payoff is 2, and the noncooperative
+(equilibrium) payoff is 5::
+
+  In [11]: g[0,0][0] = 8
+
+  In [12]: g[0,0][1] = 8
+
+  In [13]: g[0,1][0] = 2
+
+  In [14]: g[0,1][1] = 10
+
+  In [15]: g[1,0][0] = 10
+
+  In [16]: g[1,1][1] = 2
+
+  In [17]: g[1,0][1] = 2
+
+  In [18]: g[1,1][0] = 5
+
+  In [19]: g[1,1][1] = 5
+
+
 
 Reading a game from a file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -184,6 +213,13 @@ API documentation
       Returns the :py:class:`gambit.Node` representing the root
       node of the game.
 
+   .. py:method:: __getitem__(profile)
+
+      Returns the :py:class:`gambit.Outcome` associated with a
+      profile of pure strategies.  :literal:`profile` is a list
+      of integers specifying the strategy number each player plays
+      in the profile.
+
 .. py:class:: Players
    
    A collection object representing the players in a game.
@@ -253,5 +289,20 @@ API documentation
 
       A text label useful for identification of the node.
 
+.. py:class:: Outcome
 
+   Represents an outcome in a :py:class:`gambit.Game`.
+
+   .. py:attribute:: label
+
+      A text label useful for identification of the outcome.
+
+   .. py:method:: __getitem__(pl)
+
+      Returns the payoff to the ``pl`` th player at the outcome.
+
+   .. py:method:: __setitem__(pl, payoff)
+
+      Sets the payoff to the ``pl`` th player at the outcome to the
+      specified ``payoff``.
       
