@@ -1,14 +1,10 @@
 //
-// $Source$
-// $Date$
-// $Revision$
+// This file is part of Gambit
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// DESCRIPTION:
+// FILE: src/tools/logit/nfgdyn.cc
 // Computation of stable quantal response equilibria via perturbed
 // best-reply dynamics
-//
-// This file is part of Gambit
-// Copyright (c) 2005, The Gambit Project
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

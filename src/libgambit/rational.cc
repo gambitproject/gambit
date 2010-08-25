@@ -1,16 +1,13 @@
 //
-// $Source$
-// $Date$
-// $Revision$
+// This file is part of Gambit
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// DESCRIPTION;
+// FILE: src/libgambit/rational.cc
 // Implementation of a rational number class
 //
-// This file is part of Gambit
-// Modifications copyright (c) 2002, The Gambit Project
 //
 // The original copyright and license are included below.
-
+//
 /* 
 Copyright (C) 1988 Free Software Foundation
     written by Doug Lea (dl@rocky.oswego.edu)

@@ -1,13 +1,9 @@
 //
-// $Source$
-// $Date$
-// $Revision$
-//
-// DESCRIPTION;
-// Implementation of an arbitrary-length integer class
-//
 // This file is part of Gambit
-// Modifications copyright (c) 2002, The Gambit Project
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: src/libgambit/integer.cc
+// Implementation of an arbitrary-length integer class
 //
 // The original copyright and license are included below.
 

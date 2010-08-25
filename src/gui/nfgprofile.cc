@@ -1,9 +1,8 @@
 //
-// $Source$
-// $Date$
-// $Revision$
+// This file is part of Gambit
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// DESCRIPTION:
+// FILE: src/gui/nfgprofile.cc
 // Normal form mixed profile window
 //
 // This program is free software; you can redistribute it and/or modify

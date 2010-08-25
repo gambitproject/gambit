@@ -1,14 +1,10 @@
 //
-// $Source$
-// $Date$
-// $Revision$
+// This file is part of Gambit
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// DESCRIPTION:
+// FILE: src/tools/lp/lp.cc
 // Implementation of algorithm to compute mixed strategy equilibria
 // of constant sum normal form games via linear programming
-//
-// This file is part of Gambit
-// Copyright (c) 2006, The Gambit Project
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,7 +32,7 @@ template <class T> void SolveStrategic(const Gambit::Game &p_game);
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by solving a linear program\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2010, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 

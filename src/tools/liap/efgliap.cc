@@ -1,9 +1,8 @@
 //
-// $Source$
-// $Date$
-// $Revision$
+// This file is part of Gambit
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// DESCRIPTION:
+// FILE: src/tools/liap/efgliap.cc
 // Compute Nash equilibria via Lyapunov function minimization
 //
 // This file is part of Gambit

@@ -1,13 +1,9 @@
 //
-// $Source$
-// $Date$
-// $Revision$
-//
-// DESCRIPTION:
-// Declaration of base class for representing games
-//
 // This file is part of Gambit
-// Copyright (c) 2005, The Gambit Project
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: src/libgambit/game.h
+// Declaration of base class for representing games
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -657,7 +653,8 @@ public:
   /// Construct a new trivial game
   GameRep(void);
   /// Construct a new table game with the given dimension
-  GameRep(const Array<int> &p_dim);
+  /// If p_sparseOutcomes = true, outcomes for all contingencies are left null
+  GameRep(const Array<int> &p_dim, bool p_sparseOutcomes = false);
   /// Clean up the game
   virtual ~GameRep();
   /// Create a copy of the game, as a new game
@@ -786,7 +783,8 @@ typedef GameObjectPtr<GameRep> Game;
 /// Convenience function to create new game tree
 inline Game NewTree(void) { return new GameRep; }
 /// Convenience function to create new game table
-inline Game NewTable(const Array<int> &p_dim) { return new GameRep(p_dim); }
+inline Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes = false) 
+{ return new GameRep(p_dim, p_sparseOutcomes); }
 
 //=======================================================================
 //          Inline members of game representation classes

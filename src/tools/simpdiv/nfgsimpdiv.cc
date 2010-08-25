@@ -1,13 +1,9 @@
 //
-// $Source$
-// $Date$
-// $Revision$
-//
-// DESCRIPTION:
-// Compute Nash equilibria via simplicial subdivision on the normal form
-//
 // This file is part of Gambit
-// Copyright (c) 2002, The Gambit Project
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: src/tools/simpdiv/nfgsimpdiv.cc
+// Compute Nash equilibria via simplicial subdivision on the normal form
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -589,7 +585,7 @@ void Randomize(Gambit::MixedStrategyProfile<Gambit::Rational> &p_profile, int p_
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria using simplicial subdivision\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2010, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 

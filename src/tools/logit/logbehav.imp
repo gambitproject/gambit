@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: logbehav.imp
+// FILE: src/tools/logit/logbehav.imp
 // Behavior strategy profile where action probabilities are represented using
 // logarithms.
 //

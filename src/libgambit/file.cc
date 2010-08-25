@@ -1,13 +1,9 @@
 //
-// $Source$
-// $Date$
-// $Revision$
-//
-// DESCRIPTION:
-// Parser for reading game savefiles
-//
 // This file is part of Gambit
-// Copyright (c) 2002, The Gambit Project
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: src/libgambit/file.cc
+// Parser for reading game savefiles
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,61 +27,6 @@
 
 
 #include "libgambit.h"
-
-namespace Gambit {
-
-
-/// This extension to the game representation classes allows for efficient
-/// mass creation of outcomes.  For large strategic games, sequentially
-/// creating outcomes as you find them (in the outcome version of the
-/// .nfg format) is brutally inefficient.  For one 21x21x21x21 game,
-/// the naive code took about 97s to read the game; with this version,
-/// it takes about 5s on the same system.
-class TableFileGameRep : public GameRep {
-public:
-  /// @name Lifecycle
-  //@{
-  /// Construct a new table game with the given dimension, plus enough
-  /// outcomes to fill the table
-  TableFileGameRep(const Array<int> &p_dim);
-  //@}
-
-  /// @name Extensions
-  //@{
-  /// Delete all outcomes numbered above 'p_nOutcomes'
-  void TruncateOutcomes(int p_nOutcomes);
-  //@}
-};
-
-TableFileGameRep::TableFileGameRep(const Array<int> &p_dim)
-  : GameRep(p_dim)
-{
-  m_outcomes = Array<GameOutcomeRep *>(m_results.Length());
-  for (int i = 1; i <= m_outcomes.Length(); i++) {
-    m_outcomes[i] = new GameOutcomeRep(this, i);
-  }
-}
-
-void TableFileGameRep::TruncateOutcomes(int p_nOutcomes)
-{
-  if (p_nOutcomes >= m_outcomes.Length()) {
-    return;
-  }
-
-  Array<GameOutcomeRep *> outcomes(m_outcomes);
-
-  m_outcomes = Array<GameOutcomeRep *>(p_nOutcomes);
-  for (int i = 1; i <= p_nOutcomes; i++) {
-    m_outcomes[i] = outcomes[i];
-  }
-
-  // We just use 'delete' here, instead of Invalidate(), because this
-  // code is only intended to be called in the file reader, and therefore
-  // there should be no other references to these outcomes elsewhere
-  for (int i = p_nOutcomes + 1; i <= outcomes.Length(); delete outcomes[i++]);
-}
-
-}
 
 namespace {
 // This anonymous namespace encapsulates the file-parsing code
@@ -521,7 +462,7 @@ void ParseNfgHeader(GameParserState &p_state, TableFileGame &p_data)
 }
 
 
-void ReadOutcomeList(GameParserState &p_parser, TableFileGameRep *p_nfg)
+void ReadOutcomeList(GameParserState &p_parser, GameRep *p_nfg)
 {
   if (p_parser.GetNextToken() == TOKEN_RBRACE) {
     // Special case: empty outcome list
@@ -576,15 +517,13 @@ void ReadOutcomeList(GameParserState &p_parser, TableFileGameRep *p_nfg)
     p_parser.GetNextToken();
   }
 
-  p_nfg->TruncateOutcomes(nOutcomes);
-
   if (p_parser.GetCurrentToken() != TOKEN_RBRACE) {
     throw InvalidFileException();
   }
   p_parser.GetNextToken();
 }
 
-void ParseOutcomeBody(GameParserState &p_parser, TableFileGameRep *p_nfg)
+void ParseOutcomeBody(GameParserState &p_parser, GameRep *p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
 
@@ -607,17 +546,12 @@ void ParseOutcomeBody(GameParserState &p_parser, TableFileGameRep *p_nfg)
   }
 }
 
-void ParsePayoffBody(GameParserState &p_parser, 
-			    TableFileGameRep *p_nfg)
+void ParsePayoffBody(GameParserState &p_parser, GameRep *p_nfg)
 {
   StrategyIterator iter(StrategySupport(static_cast<GameRep *>(p_nfg)));
   int pl = 1;
 
   while (p_parser.GetCurrentToken() != TOKEN_EOF) {
-    if (pl == 1) {
-      iter->SetOutcome(p_nfg->NewOutcome());
-    }
-
     if (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
       iter->GetOutcome()->SetPayoff(pl, p_parser.GetLastText());
     }
@@ -640,7 +574,7 @@ Game BuildNfg(GameParserState &p_parser, TableFileGame &p_data)
     dim[pl] = p_data.NumStrategies(pl);
   }
 
-  TableFileGameRep *nfg = new TableFileGameRep(dim);
+  GameRep *nfg = new GameRep(dim);
   // Assigning this to the container assures that, if something goes
   // wrong, the class will automatically be cleaned up
   Game game = nfg;
@@ -1029,6 +963,5 @@ Game ReadGame(std::istream &p_file) throw (InvalidFileException)
     throw InvalidFileException();
   }
 }
-
 
 } // end namespace Gambit

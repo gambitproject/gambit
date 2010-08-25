@@ -1,14 +1,10 @@
 //
-// $Source$
-// $Date$
-// $Revision$
+// This file is part of Gambit
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// DESCRIPTION:
+// FILE: src/tools/lcp/efglcp.cc
 // Implementation of algorithm to solve extensive forms using linear
 // complementarity program from sequence form
-//
-// This file is part of Gambit
-// Copyright (c) 2002, The Gambit Project
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -45,9 +41,12 @@ namespace {
 // has been reached.  A convenience for unraveling a potentially
 // deep recursion.
 //
-class EquilibriumLimitReached : public Exception {
+// FIXME: There is an identical twin of this in nfglcp.cc.  This should be
+// refactored into a more generally-useful and generally-visible location.
+//
+class EquilibriumLimitReachedEfg : public Exception {
 public:
-  virtual ~EquilibriumLimitReached() { }
+  virtual ~EquilibriumLimitReachedEfg() { }
   std::string GetDescription(void) const 
   { return "Reached target number of equilibria"; }
 };
@@ -279,7 +278,7 @@ SolveEfgLcp<T>::Solve(const BehavSupport &p_support, bool p_print /*= true*/)
       try {
 	AllLemke(p_support, ns1+ns2+1, tab, 0, A, p_print, solutions);
       }
-      catch (EquilibriumLimitReached &) {
+      catch (EquilibriumLimitReachedEfg &) {
 	// Just handle this silently; equilibria are already printed
 	// as they are found.
       }
@@ -379,7 +378,7 @@ SolveEfgLcp<T>::AllLemke(const BehavSupport &p_support,
 	  }
 	  p_solutions.Append(profile);
 	  if (g_stopAfter > 0 && p_solutions.Length() >= g_stopAfter) {
-	    throw EquilibriumLimitReached();
+	    throw EquilibriumLimitReachedEfg();
 	  }
 	}
       }

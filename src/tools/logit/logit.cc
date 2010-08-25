@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: logit.cc
+// FILE: src/tools/logit/logit.cc
 // Command-line driver program for quantal response equilibrium tracing and
 // maximum likelihood estimation.
 //

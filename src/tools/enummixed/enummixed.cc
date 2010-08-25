@@ -1,13 +1,9 @@
 //
-// $Source$
-// $Date$
-// $Revision$
-//
-// DESCRIPTION:
-// Compute Nash equilibria via Mangasarian's algorithm
-//
 // This file is part of Gambit
-// Copyright (c) 2002, The Gambit Project
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: src/tools/enummixed/enummixed.cc
+// Compute Nash equilibria via Mangasarian's algorithm
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -292,7 +288,7 @@ extern void LrsSolve(const StrategySupport &);
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by enumerating extreme points\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2006, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2010, The Gambit Project\n";
   p_stream << "Enumeration code based on lrslib 4.2b,\n";
   p_stream << "Copyright (C) 1995-2005 by David Avis (avis@cs.mcgill.ca)\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";

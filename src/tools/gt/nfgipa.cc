@@ -1,13 +1,9 @@
 //
-// $Source$
-// $Date$
-// $Revision$
-//
-// DESCRIPTION:
-// Gambit frontend to Gametracer IPA
-//
 // This file is part of Gambit
-// Copyright (c) 2005, The Gambit Project
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: src/tools/gt/nfgipa.cc
+// Gambit frontend to Gametracer IPA
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -53,7 +49,7 @@ void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria using iterated polymatrix approximation\n";
   p_stream << "Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Christian Shelton\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 2005, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2010, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 

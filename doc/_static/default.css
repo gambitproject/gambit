@@ -459,6 +459,14 @@ img.inheritance {
     border: 0px
 }
 
+img.align-right {
+    float: right;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    margin-right: 0px;
+}
+
 form.pfform {
     margin: 10px 0 20px 0;
 }
