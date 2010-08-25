@@ -864,7 +864,7 @@ static int Product(const Array<int> &dim)
   return accum;
 }
   
-GameRep::GameRep(const Array<int> &dim)
+GameRep::GameRep(const Array<int> &dim, bool p_sparseOutcomes /* = false */)
   : m_computedValues(true), m_chance(0), m_root(0)
 {
   m_results = Array<GameOutcomeRep *>(Product(dim));
@@ -877,10 +877,18 @@ GameRep::GameRep(const Array<int> &dim)
   }
   IndexStrategies();
 
-  for (int cont = 1; cont <= m_results.Length();
-       m_results[cont++] = 0);
+  if (p_sparseOutcomes) {
+    for (int cont = 1; cont <= m_results.Length();
+	 m_results[cont++] = 0);
+  }
+  else {
+    m_outcomes = Array<GameOutcomeRep *>(m_results.Length());
+    for (int i = 1; i <= m_outcomes.Length(); i++) {
+      m_outcomes[i] = new GameOutcomeRep(this, i);
+    }
+    m_results = m_outcomes;
+  }
 }
-
 
 GameRep::~GameRep()
 {
