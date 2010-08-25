@@ -7,7 +7,7 @@ A tutorial introduction
 Building an extensive game
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The function :func:`new_tree` creates a new, trivial extensive game,
+The function :func:`gambit.new_tree` creates a new, trivial extensive game,
 with no players, and only a root node::
 
   $ gambit-shell
@@ -62,7 +62,7 @@ The :py:attr:`players` can be accessed like a Python list::
 Building a strategic game
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Games in strategic form are created using :func:`new_table`, which
+Games in strategic form are created using :func:`gambit.new_table`, which
 takes a list of integers specifying the number of strategies for
 each player::
 
@@ -108,6 +108,36 @@ strategies available for that player::
             <Strategy [1] 'Defect' for player 'Alphonse' in game 'A prisoner's dilemma game'>]
 
 
+Reading a game from a file
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Games stored in existing Gambit savefiles in either the .efg or .nfg
+formats can be loaded using :func:`gambit.read_game`::
+
+  In [1]: g = gambit.read_game("e02.nfg")
+
+  In [2]: g
+  Out[2]: 
+  NFG 1 R "Selten (IJGT, 75), Figure 2, normal form" { "Player 1" "Player 2" }
+
+  { { "1" "2" "3" }
+  { "1" "2" }
+  }
+  ""
+
+  {
+  { "" 1, 1 }
+  { "" 0, 2 }
+  { "" 0, 2 }
+  { "" 1, 1 }
+  { "" 0, 3 }
+  { "" 2, 0 }
+  }
+  1 2 3 4 5 6
+
+
+
+
 
 
 API documentation
@@ -124,9 +154,13 @@ API documentation
 .. py:function:: new_table(dim)
 
    Creates a new :py:class:`gambit.Game` with a strategic
-   representation.  The parameter dim is a list of the number of
+   representation.  The parameter `dim` is a list of the number of
    strategies for each player.
 
+.. py:function:: read_game(fn)
+
+   Creates a new :py:class:`gambit.Game` by reading in the
+   contents of the file named `fn`.
 
 .. py:class:: Game
 
