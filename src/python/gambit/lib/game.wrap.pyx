@@ -119,11 +119,24 @@ cdef extern from "libgambit/game.h":
     c_Game NewTree()
     c_Game NewTable(c_ArrayInt *)
 
+cdef extern from "libgambit/mixed.h":
+    ctypedef struct c_MixedStrategyProfileDouble "MixedStrategyProfile<double>":
+        int MixedProfileLength()
+        double getitem_int "operator[]"(int) except +IndexError
+        double getitem_Strategy "operator[]"(c_GameStrategy)
+        double GetPayoff(c_GamePlayer)
+        double GetStrategyValue(c_GameStrategy)
+        double GetLiapValue()
+    c_MixedStrategyProfileDouble *new_MixedStrategyProfileDouble "new MixedStrategyProfile<double>"(c_Game)
+    void del_MixedStrategyProfileDouble "delete"(c_MixedStrategyProfileDouble *)
+
 cdef extern from "game.wrap.h":
     c_Game ReadGame(char *) except +IOError
     cxx_string WriteGame(c_Game, int) except +IOError
 
     void setitem_ArrayInt(c_ArrayInt *, int, int)
+    void setitem_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble *, 
+                                            c_GameStrategy, double)
 
 cdef class Number:
     cdef c_Number *thisptr
@@ -316,6 +329,38 @@ cdef class Node:
             s.assign(value)
             self.node.deref().SetLabel(s)
 
+cdef class MixedStrategyProfileDouble:
+    cdef c_MixedStrategyProfileDouble *profile
+
+    def __dealloc__(self):
+        del_MixedStrategyProfileDouble(self.profile)
+
+    def __len__(self):
+        return self.profile.MixedProfileLength()
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            return self.profile.getitem_int(index+1)
+        elif isinstance(index, Strategy):
+            return self.profile.getitem_Strategy((<Strategy>index).strategy)
+        elif isinstance(index, Player):
+            return [ self[s] for s in index.strategies ]
+        else:
+            raise TypeError, "unexpected type passed to __getitem__ on strategy profile"
+
+    def __setitem__(self, Strategy strategy, value):
+        setitem_MixedStrategyProfileDouble(self.profile, strategy.strategy, value)
+
+    def payoff(self, Player player):
+        return self.profile.GetPayoff(player.player)
+
+    def strategy_value(self, Strategy strategy):
+        return self.profile.GetStrategyValue(strategy.strategy)
+
+    def liap_value(self):
+        return self.profile.GetLiapValue()
+
+
 cdef class Game:
     cdef c_Game game
 
@@ -377,6 +422,12 @@ cdef class Game:
     def __getitem__(self, i):
         return self._get_contingency(*i)
 
+    def mixed_profile(self):
+        cdef MixedStrategyProfileDouble msp
+        msp = MixedStrategyProfileDouble()
+        msp.profile = new_MixedStrategyProfileDouble(self.game)
+        return msp
+ 
     def num_nodes(self):
         return self.game.deref().NumNodes()
 

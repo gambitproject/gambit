@@ -165,6 +165,50 @@ formats can be loaded using :func:`gambit.read_game`::
   1 2 3 4 5 6
 
 
+Mixed strategies
+~~~~~~~~~~~~~~~~
+
+A mixed strategy object, which represents a probability distribution
+over the pure strategies of a player, can be obtained using the
+:meth:`gambit.Game.mixed_profile` method on a :class:`gambit.Game`
+object.  Mixed strategies are initialized to uniform randomization
+over all strategies for all players.
+
+Mixed strategies can be indexed in three ways. Specifying a strategy
+returns the probability of that strategy being played in the profile.
+Specifying a player returns a list of probabilities, one for each
+strategy available to the player.  Finally, mixed strategies can be
+treated as a list indexed from 0 up to the number of total strategies
+in the game minus one.  This latter behavior allows :py:func:`list` to
+work as expected on a mixed strategy object::
+
+  In [1]: g = gambit.read_game("e02.nfg")
+
+  In [2]: p = g.mixed_profile()
+
+  In [3]: list(p)
+  Out[3]: [0.33333333333333331, 0.33333333333333331, 0.33333333333333331, 0.5, 0.5]
+
+  In [4]: p[g.players[0]]
+  Out[4]: [0.33333333333333331, 0.33333333333333331, 0.33333333333333331]
+
+  In [5]: p[g.players[1].strategies[0]]
+  Out[5]: 0.5
+
+The expected payoff to a player is obtained using
+:meth:`gambit.MixedProfile.payoff`::
+
+  In [6]: p.payoff(g.players[0])
+  Out[6]: 0.66666666666666663
+
+The standalone expected payoff to playing a given strategy, assuming
+all other players play according to the profile, is obtained using
+:meth:`gambit.MixedProfile.strategy_value`::
+
+  In [7]: p.strategy_value(g.players[0].strategies[2])
+  Out[7]: 1.0
+
+
 
 
 
@@ -219,6 +263,12 @@ API documentation
       profile of pure strategies.  :literal:`profile` is a list
       of integers specifying the strategy number each player plays
       in the profile.
+
+   .. py:method:: mixed_profile()
+
+      Returns a mixed strategy profile :py:class:`gambit.MixedProfile`
+      over the game, initialized to
+      uniform randomization for each player over his strategies.
 
 .. py:class:: Players
    
@@ -306,3 +356,38 @@ API documentation
       Sets the payoff to the ``pl`` th player at the outcome to the
       specified ``payoff``.
       
+
+.. py:class:: MixedProfile
+
+   Represents a mixed strategy profile over a :py:class:`gambit.Game`.
+
+   .. py:method:: __getitem__(index)
+
+      Returns a slice of the profile based on the parameter
+      ``index``.  If ``index`` is a :py:class:`gambit.Strategy`,
+      returns the probability with which that strategy is played in
+      the profile.  If ``index`` is a :py:class:`gambit.Player`,
+      returns a list of probabilities, one for each strategy belonging
+      to that player.  If ``index`` is an integer, returns the
+      ``index`` th entry in the profile, treating the profile as a
+      flat list of probabilities.
+
+   .. py:method:: __setitem__(strategy, prob)
+
+      Sets the probability ``strategy`` is played in the profile to ``prob``. 
+         
+   .. py:method:: payoff(player)
+
+      Returns the expected payoff to ``player`` if all players play
+      according to the profile.
+
+   .. py:method:: strategy_value(strategy)
+
+      Returns the expected payoff to choosing ``strategy`` if all
+      other players play according to the profile.
+
+   .. py:method:: liap_value()
+
+      Returns the Lyapunov value (see [McK91]_) of the strategy profile.  The
+      Lyapunov value is a non-negative number which is zero exactly at
+      Nash equilibria.
