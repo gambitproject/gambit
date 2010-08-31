@@ -135,8 +135,10 @@ cdef extern from "game.wrap.h":
     cxx_string WriteGame(c_Game, int) except +IOError
 
     void setitem_ArrayInt(c_ArrayInt *, int, int)
-    void setitem_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble *, 
-                                            c_GameStrategy, double)
+    void setitem_MixedStrategyProfileDouble_int(c_MixedStrategyProfileDouble *, 
+                                                int, double)
+    void setitem_MixedStrategyProfileDouble_Strategy(c_MixedStrategyProfileDouble *, 
+                                                     c_GameStrategy, double)
 
 cdef class Number:
     cdef c_Number *thisptr
@@ -338,6 +340,9 @@ cdef class MixedStrategyProfileDouble:
     def __len__(self):
         return self.profile.MixedProfileLength()
 
+    def __repr__(self):
+        return str(list(self))
+
     def __getitem__(self, index):
         if isinstance(index, int):
             return self.profile.getitem_int(index+1)
@@ -348,8 +353,14 @@ cdef class MixedStrategyProfileDouble:
         else:
             raise TypeError, "unexpected type passed to __getitem__ on strategy profile"
 
-    def __setitem__(self, Strategy strategy, value):
-        setitem_MixedStrategyProfileDouble(self.profile, strategy.strategy, value)
+    def __setitem__(self, index, value):
+        if isinstance(index, int):
+            setitem_MixedStrategyProfileDouble_int(self.profile, index+1, value)
+        elif isinstance(index, Strategy):
+            setitem_MixedStrategyProfileDouble_Strategy(self.profile, 
+                                                        (<Strategy>index).strategy, value)
+        else:
+            raise TypeError, "unexpected type passed to __getitem__ on strategy profile"
 
     def payoff(self, Player player):
         return self.profile.GetPayoff(player.player)
