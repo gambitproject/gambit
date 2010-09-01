@@ -185,7 +185,6 @@ void gbtBehavProfileList::OnUpdate(void)
 
   AutoSizeRows();
   AutoSizeCols();
-  AutoSizeCol(-1);
 
   EndBatch();
 }
