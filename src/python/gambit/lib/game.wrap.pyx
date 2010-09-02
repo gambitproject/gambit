@@ -140,6 +140,9 @@ cdef extern from "game.wrap.h":
     void setitem_MixedStrategyProfileDouble_Strategy(c_MixedStrategyProfileDouble *, 
                                                      c_GameStrategy, double)
 
+
+import gambit.gameiter
+
 cdef class Number:
     cdef c_Number *thisptr
 
@@ -516,6 +519,10 @@ cdef class Game:
             c = Outcomes()
             c.game = self.game
             return c
+
+    property contingencies:
+        def __get__(self):
+            return gambit.gameiter.Contingencies(self)
 
     property root:
         def __get__(self):

@@ -164,6 +164,39 @@ formats can be loaded using :func:`gambit.read_game`::
   }
   1 2 3 4 5 6
 
+Iterating the pure strategy profiles in a game
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Each entry in a strategic game corresponds to the outcome arising from
+a particular combination fo pure strategies played by the players.
+The property :attr:`gambit.Gambit.contingencies` is the collection of
+all such combinations.  Iterating over the contingencies collection
+visits each pure strategy profile possible in the game::
+
+   In [1]: g = gambit.read_game("e02.nfg")
+
+   In [2]: list(g.contingencies)
+   Out[2]: [[0, 0], [0, 1], [1, 0], [1, 1], [2, 0], [2, 1]]
+
+Each pure strategy profile can then be used to access individual
+outcomes and payoffs in the game::
+
+   In [3]: for profile in g.contingencies:
+      ...:     print profile, g[profile][0], g[profile][1]
+      ...:     
+   [0, 0] 1 1
+   [0, 1] 1 1
+   [1, 0] 0 2
+   [1, 1] 0 3
+   [2, 0] 0 2
+   [2, 1] 2 0
+
+
+
+
+
+
+
 
 Mixed strategies
 ~~~~~~~~~~~~~~~~
@@ -251,6 +284,11 @@ API documentation
  
       Returns a :py:class:`gambit.Players` collection object
       representing the players defined in the game.
+
+   .. py:attribute:: contingencies
+
+      Returns a collection object representing the collection of all
+      possible pure strategy profiles in the game.
 
    .. py:attribute:: root
 
