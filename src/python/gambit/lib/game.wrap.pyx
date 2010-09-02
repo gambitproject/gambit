@@ -182,6 +182,25 @@ cdef class Strategy:
                  self.strategy.deref().GetPlayer().deref().GetLabel().c_str(),
                  self.strategy.deref().GetPlayer().deref().GetGame().deref().GetTitle().c_str())
     
+    def __richcmp__(Strategy self, other, whichop):
+        if isinstance(other, Strategy):
+            if whichop == 2:
+                return self.strategy.deref() == ((<Strategy>other).strategy).deref()
+            elif whichop == 3:
+                return self.strategy.deref() != ((<Strategy>other).strategy).deref()
+            else:
+                raise NotImplementedError
+        else:
+            if whichop == 2:
+                return False
+            elif whichop == 3:
+                return True
+            else:
+                raise NotImplementedError
+
+    def __hash__(self):
+        return long(<long>self.strategy.deref())
+
     property label:
         def __get__(self):
             return self.strategy.deref().GetLabel().c_str()
@@ -218,6 +237,25 @@ cdef class Player:
                                                     self.label,
                                                     self.player.deref().GetGame().deref().GetTitle().c_str())
     
+    def __richcmp__(Player self, other, whichop):
+        if isinstance(other, Player):
+            if whichop == 2:
+                return self.player.deref() == ((<Player>other).player).deref()
+            elif whichop == 3:
+                return self.player.deref() != ((<Player>other).player).deref()
+            else:
+                raise NotImplementedError
+        else:
+            if whichop == 2:
+                return False
+            elif whichop == 3:
+                return True
+            else:
+                raise NotImplementedError
+
+    def __hash__(self):
+        return long(<long>self.player.deref())
+
     property label:
         def __get__(self):
             return self.player.deref().GetLabel().c_str()
@@ -276,6 +314,25 @@ cdef class Outcome:
                                                      self.label,
                                                      self.outcome.deref().GetGame().deref().GetTitle().c_str())
     
+    def __richcmp__(Outcome self, other, whichop):
+        if isinstance(other, Outcome):
+            if whichop == 2:
+                return self.outcome.deref() == ((<Outcome>other).outcome).deref()
+            elif whichop == 3:
+                return self.outcome.deref() != ((<Outcome>other).outcome).deref()
+            else:
+                raise NotImplementedError
+        else:
+            if whichop == 2:
+                return False
+            elif whichop == 3:
+                return True
+            else:
+                raise NotImplementedError
+
+    def __hash__(self):
+        return long(<long>self.outcome.deref())
+
     property label:
         def __get__(self):
             return self.outcome.deref().GetLabel().c_str()
@@ -323,6 +380,26 @@ cdef class Node:
                                                   self.label,
                                                   self.node.deref().GetGame().deref().GetTitle().c_str())
     
+    def __richcmp__(Node self, other, whichop):
+        if isinstance(other, Node):
+            if whichop == 2:
+                return self.node.deref() == ((<Node>other).node).deref()
+            elif whichop == 3:
+                return self.node.deref() != ((<Node>other).node).deref()
+            else:
+                raise NotImplementedError
+        else:
+            if whichop == 2:
+                return False
+            elif whichop == 3:
+                return True
+            else:
+                raise NotImplementedError
+
+    def __hash__(self):
+        return long(<long>self.node.deref())
+
+
     property label:
         def __get__(self):
             return self.node.deref().GetLabel().c_str()
@@ -362,6 +439,20 @@ cdef class MixedStrategyProfileDouble:
         else:
             raise TypeError, "unexpected type passed to __getitem__ on strategy profile"
 
+    def __richcmp__(MixedStrategyProfileDouble self, other, whichop):
+        if whichop == 0:
+            return list(self) < list(other)
+        elif whichop == 1:
+            return list(self) <= list(other)
+        elif whichop == 2:
+            return list(self) == list(other)
+        elif whichop == 3:
+            return list(self) != list(other)
+        elif whichop == 4:
+            return list(self) > list(other)
+        else:
+            return list(self) >= list(other)
+
     def payoff(self, Player player):
         return self.profile.GetPayoff(player.player)
 
@@ -380,6 +471,25 @@ cdef class Game:
 
     def __repr__(self):
         return self.write()
+
+    def __richcmp__(Game self, other, whichop):
+        if isinstance(other, Game):
+            if whichop == 2:
+                return self.game.deref() == ((<Game>other).game).deref()
+            elif whichop == 3:
+                return self.game.deref() != ((<Game>other).game).deref()
+            else:
+                raise NotImplementedError
+        else:
+            if whichop == 2:
+                return False
+            elif whichop == 3:
+                return True
+            else:
+                raise NotImplementedError
+
+    def __hash__(self):
+        return long(<long>self.game.deref())
 
     property is_tree:
         def __get__(self):
