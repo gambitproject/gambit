@@ -1,0 +1,258 @@
+EFG 2 R "Feddersen-Pesendorfer, three person Condorcet jury game" { "Player 1" "Player 2" "Player 3" }
+""
+
+c "" 1 "" { "Guilty" 1/2 "Innocent" 1/2 } 0
+c "" 2 "" { "Signal Guilty" 3/4 "Signal Innocent" 1/4 } 0
+c "" 3 "" { "Signal Guilty" 3/4 "Signal Innocent" 1/4 } 0
+c "" 4 "" { "Signal Guilty" 3/4 "Signal Innocent" 1/4 } 0
+p "" 1 1 "" { "Convict" "Acquit" } 0
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 1 1 "" { "Convict" "Acquit" } 0
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+c "" 5 "" { "Signal Guilty" 3/4 "Signal Innocent" 1/4 } 0
+p "" 1 1 "" { "Convict" "Acquit" } 0
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 1 1 "" { "Convict" "Acquit" } 0
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+c "" 6 "" { "Signal Guilty" 3/4 "Signal Innocent" 1/4 } 0
+c "" 7 "" { "Signal Guilty" 3/4 "Signal Innocent" 1/4 } 0
+p "" 1 2 "" { "Convict" "Acquit" } 0
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 1 2 "" { "Convict" "Acquit" } 0
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+c "" 8 "" { "Signal Guilty" 3/4 "Signal Innocent" 1/4 } 0
+p "" 1 2 "" { "Convict" "Acquit" } 0
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 1 2 "" { "Convict" "Acquit" } 0
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+c "" 9 "" { "Signal Guilty" 1/4 "Signal Innocent" 3/4 } 0
+c "" 10 "" { "Signal Guilty" 1/4 "Signal Innocent" 3/4 } 0
+c "" 11 "" { "Signal Guilty" 1/4 "Signal Innocent" 3/4 } 0
+p "" 1 1 "" { "Convict" "Acquit" } 0
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 1 1 "" { "Convict" "Acquit" } 0
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+c "" 12 "" { "Signal Guilty" 1/4 "Signal Innocent" 3/4 } 0
+p "" 1 1 "" { "Convict" "Acquit" } 0
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 1 1 "" { "Convict" "Acquit" } 0
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+c "" 13 "" { "Signal Guilty" 1/4 "Signal Innocent" 3/4 } 0
+c "" 14 "" { "Signal Guilty" 1/4 "Signal Innocent" 3/4 } 0
+p "" 1 2 "" { "Convict" "Acquit" } 0
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 1 2 "" { "Convict" "Acquit" } 0
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 2 1 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+c "" 15 "" { "Signal Guilty" 1/4 "Signal Innocent" 3/4 } 0
+p "" 1 2 "" { "Convict" "Acquit" } 0
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 3 1 "" { "Convict" "Acquit" } 0
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 1 2 "" { "Convict" "Acquit" } 0
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 2 2 "" { "Convict" "Acquit" } 0
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+p "" 3 2 "" { "Convict" "Acquit" } 0
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
