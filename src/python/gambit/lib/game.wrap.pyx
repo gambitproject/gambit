@@ -24,7 +24,16 @@ cdef extern from "libgambit/number.h":
     c_Number *new_Number_string "new Number"(cxx_string)
     void del_Number "delete"(c_Number *)
 
+    int eq_Number(c_Number *, c_Number *)
+    int ne_Number(c_Number *, c_Number *)
+    int lt_Number(c_Number *, c_Number *)
+    int le_Number(c_Number *, c_Number *)
+    int gt_Number(c_Number *, c_Number *)
+    int ge_Number(c_Number *, c_Number *)
     c_Number add_Number(c_Number *, c_Number *)
+    c_Number sub_Number(c_Number *, c_Number *)
+    c_Number mul_Number(c_Number *, c_Number *)
+    c_Number div_Number(c_Number *, c_Number *)
      
 cdef extern from "libgambit/array.h":
     ctypedef struct c_ArrayInt "Array<int>":
@@ -166,10 +175,69 @@ cdef class Number:
     def __float__(self):
         return self.thisptr.as_double()        
 
-    def __add__(Number x, Number y):
+    def __richcmp__(Number self, other, whichop):
+        cdef Number othernum
+        othernum = Number(other)
+        if whichop == 0:
+            return bool(lt_Number(self.thisptr, othernum.thisptr))
+        elif whichop == 1:
+            return bool(le_Number(self.thisptr, othernum.thisptr))
+        elif whichop == 2:
+            return bool(eq_Number(self.thisptr, othernum.thisptr))
+        elif whichop == 3:
+            return bool(ne_Number(self.thisptr, othernum.thisptr))
+        elif whichop == 4:
+            return bool(gt_Number(self.thisptr, othernum.thisptr))
+        else:
+            return bool(ge_Number(self.thisptr, othernum.thisptr))
+
+    def __add__(self, other):
         cdef c_Number result
         cdef Number ret
-        result = add_Number(x.thisptr, y.thisptr)
+        cdef Number selfnum
+        cdef Number othernum
+        selfnum = Number(self)
+        othernum = Number(other)
+        result = add_Number(selfnum.thisptr, othernum.thisptr)
+        ret = Number()
+        del_Number(ret.thisptr)
+        ret.thisptr = new_Number_copy(result)
+        return ret
+        
+    def __sub__(self, other):
+        cdef c_Number result
+        cdef Number ret
+        cdef Number selfnum
+        cdef Number othernum
+        selfnum = Number(self)
+        othernum = Number(other)
+        result = sub_Number(selfnum.thisptr, othernum.thisptr)
+        ret = Number()
+        del_Number(ret.thisptr)
+        ret.thisptr = new_Number_copy(result)
+        return ret
+        
+    def __mul__(self, other):
+        cdef c_Number result
+        cdef Number ret
+        cdef Number selfnum
+        cdef Number othernum
+        selfnum = Number(self)
+        othernum = Number(other)
+        result = mul_Number(selfnum.thisptr, othernum.thisptr)
+        ret = Number()
+        del_Number(ret.thisptr)
+        ret.thisptr = new_Number_copy(result)
+        return ret
+        
+    def __div__(self, other):
+        cdef c_Number result
+        cdef Number ret
+        cdef Number selfnum
+        cdef Number othernum
+        selfnum = Number(self)
+        othernum = Number(other)
+        result = div_Number(selfnum.thisptr, othernum.thisptr)
         ret = Number()
         del_Number(ret.thisptr)
         ret.thisptr = new_Number_copy(result)

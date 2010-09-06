@@ -33,8 +33,37 @@ std::string WriteGame(const Game &p_game, bool strategic)
   return f.str();
 }        
 
+inline bool lt_Number(const Number *x, const Number *y)
+{ return (static_cast<const Rational &>(*x) < 
+	  static_cast<const Rational &>(*y)); }
+inline bool le_Number(const Number *x, const Number *y)
+{ return (static_cast<const Rational &>(*x) <= 
+	  static_cast<const Rational &>(*y)); }
+inline bool eq_Number(const Number *x, const Number *y)
+{ return (static_cast<const Rational &>(*x) == 
+	  static_cast<const Rational &>(*y)); }
+inline bool ne_Number(const Number *x, const Number *y)
+{ return (static_cast<const Rational &>(*x) != 
+	  static_cast<const Rational &>(*y)); }
+inline bool gt_Number(const Number *x, const Number *y)
+{ return (static_cast<const Rational &>(*x) > 
+	  static_cast<const Rational &>(*y)); }
+inline bool ge_Number(const Number *x, const Number *y)
+{ return (static_cast<const Rational &>(*x) >= 
+	  static_cast<const Rational &>(*y)); }
 inline Number add_Number(const Number *x, const Number *y)
-{ return Number(ToText((const Rational &) *x + (const Rational &) *y)); }
+{ return Number(ToText(static_cast<const Rational &>(*x) + 
+		       static_cast<const Rational &>(*y))); }
+inline Number sub_Number(const Number *x, const Number *y)
+{ return Number(ToText(static_cast<const Rational &>(*x) - 
+		       static_cast<const Rational &>(*y))); }
+inline Number mul_Number(const Number *x, const Number *y)
+{ return Number(ToText(static_cast<const Rational &>(*x) * 
+		       static_cast<const Rational &>(*y))); }
+inline Number div_Number(const Number *x, const Number *y)
+{ return Number(ToText(static_cast<const Rational &>(*x) / 
+		       static_cast<const Rational &>(*y))); }
+
 
 inline void setitem_ArrayInt(Array<int> *array, int index, int value)
 { (*array)[index] = value; }
