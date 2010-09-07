@@ -24,6 +24,7 @@
 #include "gnmgame.h"
 
 extern bool g_verbose;
+extern int g_numDecimals;
 
 void PrintProfile(std::ostream &p_stream, 
 		  const std::string &p_label,
@@ -31,7 +32,8 @@ void PrintProfile(std::ostream &p_stream,
 {
   p_stream << p_label;
   for (int i = 0; i < p_profile.getm(); i++) {
-    p_stream << "," << p_profile[i];
+    p_stream.setf(std::ios::fixed);
+    p_stream << ',' << std::setprecision(g_numDecimals) << p_profile[i];
   }
   p_stream << std::endl;
 }

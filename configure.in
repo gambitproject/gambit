@@ -20,9 +20,10 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 dnl
 
-AC_INIT([gambit], [0.2010.09.01-rc1])
+AC_INIT([gambit], [0.2010.09.01])
 AC_CONFIG_SRCDIR([src/libgambit/libgambit.h])
 AM_INIT_AUTOMAKE([subdir-objects])
+AC_CONFIG_MACRO_DIR([m4])
 AM_OPTIONS_WXCONFIG
 dnl AM_CONFIG_HEADER(config.h)
 
@@ -51,6 +52,7 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_LIBTOOL
+AM_PROG_CC_C_O
 
 dnl A number of the following checks are currently commented out.
 dnl These are checks for functions and headers we do actually use,

@@ -505,32 +505,30 @@ void gbtGameFrame::MakeMenus(void)
   AppendBitmapItem(editMenu, GBT_MENU_EDIT_NEWPLAYER, _("Add p&layer"),
 		   _("Add a new player to the game"), wxBitmap(newplayer_xpm));
 
-  if (m_doc->IsTree()) {
-    editMenu->AppendSeparator();
-    editMenu->Append(GBT_MENU_EDIT_INSERT_MOVE, _("&Insert move"), 
-		     _("Insert a move"));
-    editMenu->Append(GBT_MENU_EDIT_INSERT_ACTION, _("Insert &action"),
-		     _("Insert an action at the current move"));
-    editMenu->Append(GBT_MENU_EDIT_REVEAL, _("&Reveal"), 
-		     _("Reveal choice at node"));
-    editMenu->AppendSeparator();
+  editMenu->AppendSeparator();
+  editMenu->Append(GBT_MENU_EDIT_INSERT_MOVE, _("&Insert move"), 
+		   _("Insert a move"));
+  editMenu->Append(GBT_MENU_EDIT_INSERT_ACTION, _("Insert &action"),
+		   _("Insert an action at the current move"));
+  editMenu->Append(GBT_MENU_EDIT_REVEAL, _("&Reveal"), 
+		   _("Reveal choice at node"));
+  editMenu->AppendSeparator();
 
-    editMenu->Append(GBT_MENU_EDIT_DELETE_TREE, 
-		     _("&Delete subtree"), 
-		     _("Delete the subtree starting at the selected node"));
-    editMenu->Append(GBT_MENU_EDIT_DELETE_PARENT, 
-		     _("Delete &parent"), 
-		     _("Delete the node directly before the selected node"));
-    editMenu->Append(GBT_MENU_EDIT_REMOVE_OUTCOME,
-		     _("Remove &outcome"),
-		     _("Remove the outcome from the selected node"));
-    editMenu->AppendSeparator();
+  editMenu->Append(GBT_MENU_EDIT_DELETE_TREE, 
+		   _("&Delete subtree"), 
+		   _("Delete the subtree starting at the selected node"));
+  editMenu->Append(GBT_MENU_EDIT_DELETE_PARENT, 
+		   _("Delete &parent"), 
+		   _("Delete the node directly before the selected node"));
+  editMenu->Append(GBT_MENU_EDIT_REMOVE_OUTCOME,
+		   _("Remove &outcome"),
+		   _("Remove the outcome from the selected node"));
+  editMenu->AppendSeparator();
 
-    editMenu->Append(GBT_MENU_EDIT_NODE, _("&Node"),
-		     _("Edit properties of the node"));
-    editMenu->Append(GBT_MENU_EDIT_MOVE, _("&Move"),
-		     _("Edit properties of the move"));
-  }
+  editMenu->Append(GBT_MENU_EDIT_NODE, _("&Node"),
+		   _("Edit properties of the node"));
+  editMenu->Append(GBT_MENU_EDIT_MOVE, _("&Move"),
+		   _("Edit properties of the move"));
 
   editMenu->AppendSeparator();
   editMenu->Append(GBT_MENU_EDIT_GAME, _("&Game"),
@@ -553,13 +551,11 @@ void gbtGameFrame::MakeMenus(void)
 		   _("Rescale to show entire tree in window"),
 		   wxBitmap(zoomfit_xpm));
 
-  if (m_doc->IsTree()) {
-    viewMenu->AppendSeparator();
+  viewMenu->AppendSeparator();
     
-    viewMenu->Append(GBT_MENU_VIEW_STRATEGIC, _("&Strategic game"),
-		     _("Display the reduced strategic representation "
-		       "of the game"), true);
-  }
+  viewMenu->Append(GBT_MENU_VIEW_STRATEGIC, _("&Strategic game"),
+		   _("Display the reduced strategic representation "
+		     "of the game"), true);
   
   wxMenu *formatMenu = new wxMenu;
   AppendBitmapItem(formatMenu, GBT_MENU_FORMAT_LAYOUT, _("&Layout"),

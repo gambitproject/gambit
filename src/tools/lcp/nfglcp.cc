@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <stdio.h>
 #include <unistd.h>
 #include <iostream>
 
@@ -56,7 +57,8 @@ void PrintProfile(std::ostream &p_stream,
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
-    p_stream << "," << p_profile[i];
+    p_stream.setf(std::ios::fixed);
+    p_stream << "," << std::setprecision(g_numDecimals) << p_profile[i];
   }
 
   p_stream << std::endl;
@@ -68,8 +70,7 @@ void PrintProfile(std::ostream &p_stream,
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
-    p_stream.setf(std::ios::fixed);
-    p_stream << "," << std::setprecision(g_numDecimals) << p_profile[i];
+    p_stream << "," << p_profile[i];
   }
 
   p_stream << std::endl;
@@ -144,6 +145,11 @@ bool OnBFS(const StrategySupport &p_support,
     if (cbfs.IsDefined(j))   sum += cbfs(j);
   }
 
+  if (sum == (T) 0)  {
+    // This is the trivial CBFS.
+    return false;
+  }
+
   for (int j = 1; j <= n1; j++) {
     if (cbfs.IsDefined(j)) {
       profile[p_support.GetStrategy(1, j)] = cbfs(j) / sum;
@@ -212,55 +218,6 @@ template <class T> void AllLemke(const StrategySupport &p_support,
 }
 
 template <class T>
-void AddSolutions(const StrategySupport &p_support,
-		  const List<BFS<T> > &p_list)
-{
-  int i,j;
-  int n1 = p_support.NumStrategies(1);
-  int n2 = p_support.NumStrategies(2);
-
-  for (i = 1; i <= p_list.Length(); i++)    {
-    MixedStrategyProfile<T> profile(p_support);
-    T sum = (T) 0;
-
-    for (j = 1; j <= n1; j++)
-      if (p_list[i].IsDefined(j))   sum += p_list[i](j);
-
-    if (sum == (T) 0)  continue;
-
-    for (j = 1; j <= n1; j++) {
-      if (p_list[i].IsDefined(j)) {
-	profile[p_support.GetStrategy(1, j)] = p_list[i](j) / sum;
-      }
-      else {
-	profile[p_support.GetStrategy(1, j)] = (T) 0;
-      }
-    }
-
-    sum = (T) 0;
-
-    for (j = 1; j <= n2; j++)
-      if (p_list[i].IsDefined(n1 + j))  
-	sum += p_list[i](n1 + j);
-
-    if (sum == (T) 0)  continue;
-
-    for (j = 1; j <= n2; j++) {
-      if (p_list[i].IsDefined(n1 + j)) {
-	profile[p_support.GetStrategy(2, j)] = p_list[i](n1 + j) / sum;
-      }
-      else {
-	profile[p_support.GetStrategy(2, j)] = (T) 0;
-      }
-    }
-    PrintProfile(std::cout, "NE", profile);
-    if (g_printDetail) {
-      PrintProfileDetail(std::cout, profile);
-    }
-  }
-}
-
-template <class T>
 void SolveStrategic(const Game &p_game)
 {
   StrategySupport support(p_game);
@@ -287,7 +244,7 @@ void SolveStrategic(const Game &p_game)
       OnBFS(support, bfsList, B);
     }
 
-    return AddSolutions(support, bfsList);
+    return;
   }
   catch (...) {
     // for now, we won't give *any* solutions -- but we should list

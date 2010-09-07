@@ -22,6 +22,8 @@
 
 SUBDIRS = contrib
 
+ACLOCAL_AMFLAGS = -I m4
+
 EXTRA_DIST = \
 	gambit.spec \
 	gambit.desktop \
