@@ -1,0 +1,18 @@
+EFG 2 R "Princess Bride signaling game (from Watson)" { "Wesley" "Prince" }
+""
+
+c "" 1 "" { "Strong" 1/2 "Weak" 1/2 } 0
+p "" 1 1 "" { "Up" "Stay" } 0
+p "" 2 1 "" { "Surrender" "Fight" } 0
+t "" 1 "Outcome1" { 1, 0 }
+t "" 2 "Outcome2" { 0, -2 }
+p "" 2 2 "" { "Surrender" "Fight" } 0
+t "" 3 "Outcome3" { 1, 0 }
+t "" 4 "Outcome4" { 0, -2 }
+p "" 1 2 "" { "Up" "Stay" } 0
+p "" 2 1 "" { "Surrender" "Fight" } 0
+t "" 5 "Outcome5" { -1, 0 }
+t "" 6 "Outcome6" { -3, 1 }
+p "" 2 2 "" { "Surrender" "Fight" } 0
+t "" 7 "Outcome7" { 1, 0 }
+t "" 8 "Outcome8" { -1, 1 }

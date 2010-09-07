@@ -1165,9 +1165,6 @@ void GameRep::ClearComputedValues(void) const
 
   for (int pl = 1; pl <= m_players.Length(); pl++) {
     while (m_players[pl]->m_strategies.Length() > 0) {
-      printf("Invalidating strategy %p; refCount = %d\n",
-	     m_players[pl]->m_strategies[1],
-	     m_players[pl]->m_strategies[1]->RefCount());
       m_players[pl]->m_strategies.Remove(1)->Invalidate();
     }
   }

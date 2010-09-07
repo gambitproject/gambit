@@ -1,0 +1,18 @@
+EFG 2 R "Bagwell Commitment and Unobservability Example" { "Player 1" "Player 2" }
+"Stackelberg game with imperfectly observed commitment, from Bagwell (1993)"
+
+p "" 1 1 "" { "S" "C" } 0
+c "" 1 "" { "s" 99/100 "c" 1/100 } 0
+p "" 2 1 "" { "S" "C" } 0
+t "" 1 "SS" { 5, 2 }
+t "" 2 "SC" { 3, 1 }
+p "" 2 2 "" { "S" "C" } 0
+t "" 1 "SS" { 5, 2 }
+t "" 2 "SC" { 3, 1 }
+c "" 2 "" { "s" 1/100 "c" 99/100 } 0
+p "" 2 1 "" { "S" "C" } 0
+t "" 3 "CS" { 6, 3 }
+t "" 4 "CC" { 4, 4 }
+p "" 2 2 "" { "S" "C" } 0
+t "" 3 "CS" { 6, 3 }
+t "" 4 "CC" { 4, 4 }

@@ -24,8 +24,21 @@ Getting started: Tutorials
 
 The documentation of the graphical interface focuses on detailing the
 concepts and features of the program. To get started using the
-program, recommend viewing the selection of tutorials available on the
-"Documentation" page of the Gambit website. These tutorials illustrate
+program, a few tutorials are available:
+
+* Building and analyzing a coordination game:
+
+  - `Coordination game tutorial in PDF <_static/tutorial/coord.pdf>`_ 
+
+  - `Coordination game tutorial in SWF <_static/tutorial/coord.swf>`_
+
+* Building and analyzing a one-card poker game
+
+  - `Poker game tutorial in PDF <_static/tutorial/poker.pdf>`_ 
+
+  - `Poker game tutorial in SWF <_static/tutorial/poker.swf>`_
+
+These tutorials illustrate
 the use of the graphical interface in analyzing some common types of
 games, and are suitable for users with any level of experience with
 game theory. Students, in particular, may find some of the examples

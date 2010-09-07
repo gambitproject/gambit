@@ -186,7 +186,7 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand(void) const
       }
       else {
 	cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
-	cmd->SetCommand(wxT("gambit-logit -e -d 10"));
+	cmd->SetCommand(prefix + wxT("logit -e -d 10"));
 	cmd->SetDescription(wxT("One equilibrium by logit tracing ") + game);
       }
     }
@@ -205,14 +205,14 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand(void) const
       }
     }
     else {
-      if (m_doc->NumPlayers() == 2){
+      if (m_doc->NumPlayers() == 2) {
 	cmd = new gbtAnalysisProfileList<Rational>(m_doc, false);
-	cmd->SetCommand(wxT("gambit-enummixed"));
+	cmd->SetCommand(prefix + wxT("enummixed"));
 	cmd->SetDescription(wxT("All equilibria by enumeration of mixed "
 			       "strategies in strategic game"));
       }
       else {
-	cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg),
+	cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
 	cmd->SetCommand(prefix + wxT("enumpoly -d 10") + options);
 	cmd->SetDescription(wxT("All equilibria by solving polynomial "
 			       "systems ") + game);

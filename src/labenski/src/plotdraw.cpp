@@ -66,7 +66,7 @@
 // Skip the wxWidgets drawing routines since they calc an unnecessary bounding rect
 // You may turn this off by defining wxPLOT_FAST_GRAPHICS=0 to the compilier
 #ifndef wxPLOT_FAST_GRAPHICS
-    #define wxPLOT_FAST_GRAPHICS 1
+    #define wxPLOT_FAST_GRAPHICS 0
 #endif // wxPLOT_FAST_GRAPHICS
 
 #if defined(__WXGTK__) && wxPLOT_FAST_GRAPHICS

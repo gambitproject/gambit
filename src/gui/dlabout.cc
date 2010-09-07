@@ -56,12 +56,9 @@ gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
 		0, wxALIGN_CENTER, 5);
 
   topSizer->Add(FormattedText(this, 
-			      _T("http://econweb.tamu.edu/gambit"),
+			      _T("http://www.gambit-project.org"),
 			      wxFont(12, wxMODERN, wxNORMAL, wxNORMAL)),
 		0, wxTOP | wxALIGN_CENTER, 10);
-  topSizer->Add(FormattedText(this, _T("gambit@econmail.tamu.edu"),
-			      wxFont(12, wxMODERN, wxNORMAL, wxNORMAL)),
-		0, wxALIGN_CENTER, 5);
 
   topSizer->Add(FormattedText(this, _("Built with " wxVERSION_STRING),
 			      wxFont(12, wxROMAN, wxNORMAL, wxNORMAL)),
@@ -71,12 +68,16 @@ gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
 		0, wxALIGN_CENTER, 5);
 
   topSizer->Add(FormattedText(this, 
-			      _T("Copyright (C) 2005, The Gambit Project"),
+			      _T("Copyright (C) 1994-2010, The Gambit Project"),
 			      wxFont(12, wxROMAN, wxNORMAL, wxNORMAL)),
 		0, wxTOP | wxALIGN_CENTER, 20);
   topSizer->Add(FormattedText(this, 
 			      _("Theodore Turocy, Project Maintainer"),
 			      wxFont(12, wxROMAN, wxNORMAL, wxNORMAL)),
+		0, wxALIGN_CENTER, 5);
+  topSizer->Add(FormattedText(this, 
+			      _T("T.Turocy@uea.ac.uk"),
+			      wxFont(12, wxMODERN, wxNORMAL, wxNORMAL)),
 		0, wxALIGN_CENTER, 5);
 
   topSizer->Add(FormattedText(this, _("This program is free software,"),

@@ -21,6 +21,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <stdio.h>
 #include <unistd.h>
 #include <iostream>
 #include "libgambit/libgambit.h"
@@ -60,7 +61,8 @@ void PrintProfile(std::ostream &p_stream,
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
-    p_stream << "," << p_profile[i];
+    p_stream.setf(std::ios::fixed);
+    p_stream << "," << std::setprecision(g_numDecimals) << p_profile[i];
   }
 
   p_stream << std::endl;
@@ -72,8 +74,7 @@ void PrintProfile(std::ostream &p_stream,
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
-    p_stream.setf(std::ios::fixed);
-    p_stream << "," << std::setprecision(g_numDecimals) << p_profile[i];
+    p_stream << "," << p_profile[i];
   }
 
   p_stream << std::endl;
