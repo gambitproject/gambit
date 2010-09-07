@@ -173,21 +173,27 @@ include:
 Downloading Gambit
 ------------------
 
-The current stable version of Gambit is 0.2007.12.04, released
-on December 4, 2007.
+Versions of Gambit are available for download from
+`http://sourceforge.net/projects/gambit/files <http://sourceforge.net/projects/gambit/files>`_.
 
-* `gambit-0.2007.12.04.tar.gz
-  <http://downloads.sourceforge.net/gambit/gambit-0.2007.12.04.tar.gz?use_mirror=osdn>`_
-  (source tarball, for Linux/Windows/Mac OS X)
+The current stable version is 0.2010.09.01. 
 
-* `gambit-0.2007.12.04.exe
-  <http://downloads.sourceforge.net/gambit/gambit-0.2007.12.04.exe?use_mirror=osdn>`_
-  (binary installer distribution for Microsoft Windows).
+* `gambit-0.2010.09.01.tar.gz <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2010.09.01/gambit-0.2010.09.01.tar.gz/download>`_ (source tarball, for Linux/Windows/Mac OSX)
 
+The previous stable version of Gambit was 0.2007.12.04.  
 
-For Linux users, there is a Debian package of Gambit, so if you are
-using a distribution derived from Debian, you should be able to
-install Gambit using the package management system for your distribution.
+* `gambit-0.2007.12.04.tar.gz <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2007.12.04/gambit-0.2007.12.04.tar.gz/download>`_ (source tarball, for Linux/Windows/Mac OSX)
+
+* `gambit-0.2007.12.04.exe <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2007.12.04/gambit-0.2007.12.04.exe/download>`_ (binary installer distribution for Microsoft Windows).
+
+.. note::
+   There is no Windows installer yet available for the latest stable
+   version.  The previous stable version contains all the essential
+   functionality and is adequate for most users.  There is a known bug
+   involving viewing dominated actions in extensive games in the
+   0.2007.12.04 version of the graphical interface.  Users are advised
+   to avoid using this feature.  The error is entirely cosmetic and
+   does not affect the correctness of equilibria calculated.
 
 
 Community
