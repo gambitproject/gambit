@@ -20,6 +20,8 @@
 #include "cmatrix.h"
 #include "math.h"
 #include "float.h"
+#include "libgambit/matrix.h"
+
 cvector::~cvector() { delete []x; }
 // adopted from NRiC, pg 45
 
@@ -396,14 +398,14 @@ void cmatrix::svd(cmatrix &u, cmatrix &v, double *w) {
 double cmatrix::adjoint() {
   int i, j, i0, j0, maxi, lastj = -1;
   double max, pivot;
-  int r[m];
-  int r2[m];
-  int c[m];
+  std::vector<int> r(m);
+  std::vector<int> r2(m);
+  std::vector<int> c(m);
   double D = 1.0;
-  double retval[m][m];
+  Gambit::Matrix<double> retval(0, m-1, 0, m-1);
   for(i = 0; i < m; i++)
     for(j = 0; j < m; j++)
-      retval[i][j] = x[i*n+j];
+      retval(i, j) = x[i*n+j];
 
   for(i= 0; i < m; i++) {
     r[i] = -1;
@@ -414,8 +416,8 @@ double cmatrix::adjoint() {
     max = -1.0;
     maxi = -1;
     for(i = 0; i < m; i++) {
-      if(r[i] < 0 && fabs(retval[i][j]) > max) {
-	max = fabs(retval[i][j]);
+      if(r[i] < 0 && fabs(retval(i,j)) > max) {
+	max = fabs(retval(i,j));
 	maxi = i;
       }
     }
@@ -432,22 +434,22 @@ double cmatrix::adjoint() {
     }
 
     i = maxi;
-    pivot = retval[i][j];
+    pivot = retval(i,j);
     for(i0 = 0; i0 < m; i0++) {
       if(i0 != i) {
 	for(j0 = 0; j0 < m; j0++) {
 	  if(j0 != j) {
-	    retval[i0][j0] *= pivot;
-	    retval[i0][j0] -= retval[i0][j] * retval[i][j0];
-	    retval[i0][j0] /= D;
+	    retval(i0,j0) *= pivot;
+	    retval(i0,j0) -= retval(i0,j) * retval(i,j0);
+	    retval(i0,j0) /= D;
 	  }
 	}
       }
     }
     for(i0 = 0; i0 < m; i0++) {
-      retval[i0][j] = -retval[i0][j];
+      retval(i0,j) = -retval(i0,j);
     }
-    retval[i][j] = D;
+    retval(i,j) = D;
     D = pivot;
     r[i] = j;
     c[j] = i;
@@ -459,7 +461,7 @@ double cmatrix::adjoint() {
   //  cout << retval << endl << endl;
   int s=0;
   i = 0;
-  memcpy(r2, r, m * sizeof(int));
+  r2 = r;
   while(i < m-1) {
     j = r2[i];
     if(i != j) {
@@ -471,7 +473,7 @@ double cmatrix::adjoint() {
   }
   for(i = 0; i < m; i++)
     for(j = 0; j < m; j++)
-      x[i*n+j] = retval[c[i]][r[j]];
+      x[i*n+j] = retval(c[i],r[j]);
   if(s%2 == 1) {
     negate();
     D = -D;

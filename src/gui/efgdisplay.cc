@@ -372,28 +372,36 @@ void gbtEfgDisplay::MakeMenus(void)
 
 static Gambit::GameNode PriorSameIset(const Gambit::GameNode &n)
 {
-    Gambit::GameInfoset iset = n->GetInfoset();
-    if (!iset) return 0;
-    for (int i = 1; i <= iset->NumMembers(); i++)
-        if (iset->GetMember(i) == n)
-            if (i > 1)
-	      return iset->GetMember(i-1);
-            else 
-                return 0;
-    return 0;
+  Gambit::GameInfoset iset = n->GetInfoset();
+  if (!iset) return 0;
+  for (int i = 1; i <= iset->NumMembers(); i++) {
+    if (iset->GetMember(i) == n) {
+      if (i > 1) {
+	return iset->GetMember(i-1);
+      } 
+      else {
+	return 0;
+      }
+    }
+  }
+  return 0;
 }
 
 static Gambit::GameNode NextSameIset(const Gambit::GameNode &n)
 {
-    Gambit::GameInfoset iset = n->GetInfoset();
-    if (!iset) return 0;
-    for (int i = 1; i <= iset->NumMembers(); i++)
-        if (iset->GetMember(i) == n)
-            if (i < iset->NumMembers()) 
-                return iset->GetMember(i+1); 
-            else
-                return 0;
-    return 0;
+  Gambit::GameInfoset iset = n->GetInfoset();
+  if (!iset) return 0;
+  for (int i = 1; i <= iset->NumMembers(); i++) {
+    if (iset->GetMember(i) == n) {
+      if (i < iset->NumMembers()) {
+	return iset->GetMember(i+1); 
+      }
+      else {
+	return 0;
+      }
+    }
+  }
+  return 0;
 }
 
 //

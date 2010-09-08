@@ -1,5 +1,5 @@
 /* XPM */
-static char * font_xpm[] = {
+static const char * font_xpm[] = {
 "24 24 61 1",
 " 	c None",
 ".	c #8F814C",

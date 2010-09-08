@@ -96,9 +96,9 @@ Gen_node CPXND(fcomplex);
 Gen_node PLYND(polynomial1);
 /* Gen_node SYSND(GMatrix); */
 Gen_node XPLND();
-Gen_node IDND(char *s);
+Gen_node IDND(const char *s);
 Gen_node PND(Gen_node p(Gen_node));
-Gen_node Rerror(char *s, Gen_node g);
+Gen_node Rerror(const char *s, Gen_node g);
 
 /* accessors for Gen_nodes*/
 Gen_node Gen_next(Gen_node); 
@@ -119,7 +119,7 @@ Gen_node Cat();
 
 
 /* miscalaneous */
-char *Copy_String(char *);
+char *Copy_String(const char *);
 char *Copy_String_NQ(char *);
 
 Gen_node ASTND(node n); 

@@ -190,8 +190,8 @@ node node_print(node);
 /************************ definitions from error.h ************************/
 /**************************************************************************/
 
-void bad_error(char *);
-void warning(char *);
+void bad_error(const char *);
+void warning(const char *);
 
 
 /**************************************************************************/
@@ -231,8 +231,6 @@ void warning(char *);
 void rand_seed(long int seedval);
 int rand_int(int low, int high);
 double rand_double(int low, int high);
-double drand48();
-void srand48(long int seedval);
 
 /**************************************************************************/
 /************************ definitions from Dlist.h ************************/
@@ -556,9 +554,9 @@ void printC(fcomplex);
 #define RING_VAR_L 10
 
 struct Pring_tag {
-            int n;
-            char **vars;
-            char *def;};
+  int n;
+  char **vars;
+  char *def;};
 
 typedef struct Pring_tag *Pring;
  

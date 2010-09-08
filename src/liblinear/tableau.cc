@@ -32,14 +32,14 @@ Tableau<double>::Tableau(const Gambit::Matrix<double> &A, const Gambit::Vector<d
   : TableauInterface<double>(A,b), B(*this), tmpcol(b.First(),b.Last())
 {
   Solve(b, solution);
-};
+}
 
 Tableau<double>::Tableau(const Gambit::Matrix<double> &A, const Gambit::Array<int> &art, 
 			 const Gambit::Vector<double> &b)
   : TableauInterface<double>(A,art,b), B(*this), tmpcol(b.First(),b.Last())
 {
   Solve(b, solution);
-};
+}
 
 
 Tableau<double>::Tableau(const Tableau<double> &orig)

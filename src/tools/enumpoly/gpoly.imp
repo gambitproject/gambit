@@ -501,9 +501,14 @@ template <class T> int gPoly<T>::UniqueActiveVariable() const
   int activar = 0;
   for (int i = 1; i <= ExpVecs.Length(); i++) {
     for (int j = 1; j <= Dmnsn(); j++) {
-      if (ExpVecs[i][j] > 0)
-	if (activar > 0 && activar != j) return -1;// multivariate!
-	else activar = j;
+      if (ExpVecs[i][j] > 0) {
+	if (activar > 0 && activar != j) {
+	  return -1;// multivariate!
+	}
+	else {
+	  activar = j;
+	}
+      }
     }
   }
   return activar;
@@ -921,7 +926,7 @@ template <class T> void gPoly<T>::Output(std::string &t) const
       else if (j > 1) s += "+ ";
 	
       if ((Terms[j].Coef() != (T)1 && -Terms[j].Coef() != (T)1) ||
-	   Terms[j].IsConstant() ) 
+	  Terms[j].IsConstant() ) {
 	if (Terms[j].Coef() < (T)0) { 
 	  s += Gambit::lexical_cast<std::string>(-Terms[j].Coef());
 	}
@@ -943,6 +948,7 @@ template <class T> void gPoly<T>::Output(std::string &t) const
 	
 	if (j < Terms.Length()) s += " ";
       }
+    }
   }
   if (s == "") s = " 0";
   

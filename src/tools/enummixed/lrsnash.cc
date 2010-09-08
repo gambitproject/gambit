@@ -954,7 +954,7 @@ hotstart:
 
 // This is just a modified 'prat' from lrsmp.c
 void 
-printrat (char name[], lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/Din  */
+printrat (const char *name, lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/Din  */
 {
   lrs_mp Nt, Dt;
   long i;

@@ -49,16 +49,16 @@ void PelView::InitializePelicanMemory() const
 
 Pring PelView::MakePring(const int num) const
 {
-  char* q[] = {"","n1","n2" , "n3", "n4", "n5", "n6", "n7", "n8", 
-	       "n9", "n10", "n11", "n12", "n13", "n14", "n15", "n16", 
-	       "n17", "n18","n19", "n20", "n21", "n22", "n23", "n24", 
-	       "n25", "n26", "n27", "n28","n29", "n30"};
-
+  const char* q[] = {"","n1","n2" , "n3", "n4", "n5", "n6", "n7", "n8", 
+		     "n9", "n10", "n11", "n12", "n13", "n14", "n15", "n16", 
+		     "n17", "n18","n19", "n20", "n21", "n22", "n23", "n24", 
+		     "n25", "n26", "n27", "n28","n29", "n30"};
+  
   Pring R = makePR(num);    // makePR is a memory malloc routine
 
   for(int j=1; j<=R->n; j++) 
-    R->vars[j-1] = q[j];
-  R->def = "t";
+    R->vars[j-1] = const_cast<char *>(q[j]);
+  R->def = const_cast<char *>("t");
   R->n = num;
   return R;
 }
@@ -86,10 +86,10 @@ void PelView::Initialize_Idf_T_Gen_node(const Gen_node &node,
 
 Gen_node PelView::CreateRing(const int numvar) const
 {
-  char* q[] = {" ", "","n1","n2" , "n3", "n4", "n5", "n6", "n7", "n8", 
-	       "n9", "n10", "n11", "n12", "n13", "n14", "n15", "n16", 
-	       "n17", "n18","n19", "n20", "n21", "n22", "n23", "n24", 
-	       "n25", "n26", "n27", "n28","n29", "n30"};
+  const char* q[] = {" ", "","n1","n2" , "n3", "n4", "n5", "n6", "n7", "n8", 
+		     "n9", "n10", "n11", "n12", "n13", "n14", "n15", "n16", 
+		     "n17", "n18","n19", "n20", "n21", "n22", "n23", "n24", 
+		     "n25", "n26", "n27", "n28","n29", "n30"};
 
   Gen_node a1 = gen_node();
   Initialize_Idf_T_Gen_node(a1,"n1");
@@ -306,8 +306,8 @@ Gen_node PelView::Make_scl_Gen_node() const
 
   g->type= Idf_T;
   g->next= NULL;
-  g->Genval.gval= "scl";
-  g->Genval.idval= "scl";
+  g->Genval.gval= const_cast<char *>("scl");
+  g->Genval.idval= const_cast<char *>("scl");
 
   return g;
 }

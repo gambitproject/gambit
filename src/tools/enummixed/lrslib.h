@@ -217,7 +217,7 @@ extern lrs_dic *PBnew;    /* we will save Bob's dictionary in getabasis */
 long lrs_main (int argc, char *argv[]);    /* lrs driver, argv[1]=input file, [argc-1]=output file */
 long redund_main (int argc, char *argv[]); /* redund driver, argv[1]=input file, [2]=output file */
 
-lrs_dat *lrs_alloc_dat (char *name);	/* allocate for lrs_dat structure "name"       */
+lrs_dat *lrs_alloc_dat (const char *name);/* allocate for lrs_dat structure "name"       */
 lrs_dic *lrs_alloc_dic (lrs_dat * Q);	/* allocate for lrs_dic structure corr. to Q   */
 
 void lrs_estimate (lrs_dic * P, lrs_dat * Q);	/* get estimates only                          */
@@ -241,8 +241,8 @@ long lrs_getsolution (lrs_dic * P, lrs_dat * Q, lrs_mp_vector output, long col);
 long lrs_getray (lrs_dic * P, lrs_dat * Q, long col, long comment, lrs_mp_vector output);
 long lrs_getvertex (lrs_dic * P, lrs_dat * Q, lrs_mp_vector output);
 
-void lrs_close (char *name);	/* close lrs lib program "name"                 */
-long lrs_init (char *name);	/* initialize lrslib and arithmetic package for prog "name" */
+void lrs_close (const char *name);	/* close lrs lib program "name"                 */
+long lrs_init (const char *name); /* initialize lrslib and arithmetic package for prog "name" */
 
 
 void lrs_lpoutput(lrs_dic * P,lrs_dat * Q, lrs_mp_vector output); /* print LP primal and dual solutions */

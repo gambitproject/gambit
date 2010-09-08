@@ -1,5 +1,5 @@
 /* XPM */
-static char * layout_xpm[] = {
+static const char * layout_xpm[] = {
 "24 24 143 2",
 "  	c None",
 ". 	c #000000",

@@ -330,8 +330,8 @@ public:
 BehavConditionalIterator::BehavConditionalIterator(const BehavSupport &p_support, 
 						   const PVector<int> &p_active)
   : m_atEnd(false), m_support(p_support),
-    m_profile(m_support.GetGame()), 
     m_currentBehav(m_support.GetGame()->NumInfosets()),
+    m_profile(m_support.GetGame()), 
     m_isActive(p_active),
     m_numActiveInfosets(m_support.GetGame()->NumPlayers())
 {

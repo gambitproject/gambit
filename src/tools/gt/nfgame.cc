@@ -40,41 +40,58 @@ int nfgame::findIndex(int player, int *s) {
 }
 
 double nfgame::getMixedPayoff(int player, cvector &s) {
-  double m[blockSize[numPlayers]];
-  memcpy(m, payoffs.values() + player * blockSize[numPlayers], blockSize[numPlayers]*sizeof(double));
-  return localPayoff(s, m, numPlayers);
+  double *m = new double[blockSize[numPlayers]];
+  try {
+    memcpy(m, payoffs.values() + player * blockSize[numPlayers], blockSize[numPlayers]*sizeof(double));
+    double p = localPayoff(s, m, numPlayers);
+    delete [] m;
+    return p;
+  }
+  catch (...) {
+    delete [] m;
+    throw;
+  }
 }
 
 void nfgame::payoffMatrix(cmatrix &dest, cvector &s, double fuzz) {
   int rown, coln, rowi, coli;
   double fuzzcount;
-  double m[blockSize[numPlayers]];
-  double local[maxActions*maxActions];
-  for(rown = 0; rown < numPlayers; rown++) {
-    for(coln = 0; coln < numPlayers; coln++) {
-      if(rown == coln) {
-	fuzzcount = fuzz;
-	for(rowi=firstAction(rown); rowi < lastAction(rown); rowi++) {
-	  for(coli=firstAction(coln); coli < lastAction(coln); coli++) {
-	    dest[rowi][coli]=fuzzcount;
-	    fuzzcount += fuzz;
+  double *m = new double[blockSize[numPlayers]];
+  double *local = new double[maxActions*maxActions];
+  try {
+    for(rown = 0; rown < numPlayers; rown++) {
+      for(coln = 0; coln < numPlayers; coln++) {
+	if(rown == coln) {
+	  fuzzcount = fuzz;
+	  for(rowi=firstAction(rown); rowi < lastAction(rown); rowi++) {
+	    for(coli=firstAction(coln); coli < lastAction(coln); coli++) {
+	      dest[rowi][coli]=fuzzcount;
+	      fuzzcount += fuzz;
+	    }
 	  }
-	}
-      } else {
-	// set m to be the payoffs for player rown
-	memcpy(m, payoffs.values() + rown * blockSize[numPlayers], blockSize[numPlayers] * sizeof(double));
-	localPayoffMatrix(local, rown, coln, s, m, numPlayers-1);
-	for(rowi = firstAction(rown); rowi < lastAction(rown); rowi++) {
-	  for(coli = firstAction(coln); coli < lastAction(coln); coli++) {
-	    if(rown > coln) {
-	      dest[rowi][coli] = *(local + (rowi - firstAction(rown))*actions[coln] + (coli - firstAction(coln)));
-	    } else {
-	      dest[rowi][coli] = *(local + (coli - firstAction(coln))*actions[rown] + (rowi - firstAction(rown)));
+	} else {
+	  // set m to be the payoffs for player rown
+	  memcpy(m, payoffs.values() + rown * blockSize[numPlayers], blockSize[numPlayers] * sizeof(double));
+	  localPayoffMatrix(local, rown, coln, s, m, numPlayers-1);
+	  for(rowi = firstAction(rown); rowi < lastAction(rown); rowi++) {
+	    for(coli = firstAction(coln); coli < lastAction(coln); coli++) {
+	      if(rown > coln) {
+		dest[rowi][coli] = *(local + (rowi - firstAction(rown))*actions[coln] + (coli - firstAction(coln)));
+	      } else {
+		dest[rowi][coli] = *(local + (coli - firstAction(coln))*actions[rown] + (rowi - firstAction(rown)));
+	      }
 	    }
 	  }
 	}
       }
     }
+    delete [] local;
+    delete [] m;
+  }
+  catch (...) {
+    delete [] local;
+    delete [] m;
+    throw;
   }
 }
 

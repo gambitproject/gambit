@@ -49,7 +49,7 @@ gnmgame::~gnmgame() {
 
 
 
-void gnmgame::retractJac(cmatrix &dest, int *support) {
+void gnmgame::retractJac(cmatrix &dest, std::vector<int> &support) {
   int n, i, j;  
   double totalk;
   for(n = 0; n < numPlayers; n++) {
@@ -83,22 +83,37 @@ int compareDouble(const void *d1, const void *d2) {
 void gnmgame::retract(cvector &dest, cvector &z) {
   int n, i;
   double v, sumz;
-  double y[numActions];
-  memcpy(y,z.values(),numActions*sizeof(double));
-  for(n = 0; n < numPlayers; n++) {  
-    qsort(y+firstAction(n),actions[n],sizeof(double),compareDouble);
-    sumz = y[firstAction(n)];
-    for(i=firstAction(n)+1; i < lastAction(n); i++) {
-      if(sumz - (i-firstAction(n)) * y[i] > 1)
-	break;
-      sumz += y[i];
+  // FIXME: The original Gametracer code had a variable-sized array for 'y', which is
+  // not permitted by ISO C++.  However, the implementation of this function is
+  // not well-encapsulated, in particular, it uses pointer manipulation to segregate
+  // out the probabilities for each player, and uses qsort() directly on those pointers.
+  // So, it is not straightforward to translate this to use, e.g., std::vector.
+  // 
+  // The immediate solution is to allocate dynamically, and use try..catch to ensure
+  // deallocation.  Encapsulation is of course a superior solution eventually.
+  double *y = new double[numActions];
+  try {
+    memcpy(y,z.values(),numActions*sizeof(double));
+    for(n = 0; n < numPlayers; n++) {  
+      qsort(y+firstAction(n),actions[n],sizeof(double),compareDouble);
+      sumz = y[firstAction(n)];
+      for(i=firstAction(n)+1; i < lastAction(n); i++) {
+	if(sumz - (i-firstAction(n)) * y[i] > 1)
+	  break;
+	sumz += y[i];
+      }
+      v = (sumz - 1) / (double)(i-firstAction(n));
+      for(i = firstAction(n); i < lastAction(n); i++) {
+	dest[i] = z[i] - v;
+	if(dest[i] < 0.0)
+	  dest[i] = 0.0;
+      }
     }
-    v = (sumz - 1) / (double)(i-firstAction(n));
-    for(i = firstAction(n); i < lastAction(n); i++) {
-      dest[i] = z[i] - v;
-      if(dest[i] < 0.0)
-	dest[i] = 0.0;
-    }
+    delete y;
+  }
+  catch (...) {
+    delete y;
+    throw;
   }
 }
 
@@ -157,7 +172,7 @@ void gnmgame::normalizeStrategy(cvector &s) {
   }
 }
 
-int indexOf(int *list, int target, int length) {
+int indexOf(const std::vector<int> &list, int target, int length) {
   for(int i = 0; i < length; i++) {
     if(list[i] == target)
       return i;
@@ -165,13 +180,14 @@ int indexOf(int *list, int target, int length) {
   return -1;
 }
 
-void gnmgame::LemkeHowson(cvector &dest, cmatrix &T, int *Im) {
+void gnmgame::LemkeHowson(cvector &dest, cmatrix &T, std::vector<int> &Im) {
   double D = 1;
   int cg = numActions + numPlayers ;
   int K = cg+1;
   int n, pc, pr, p;
   double m;
-  int col[numActions+numPlayers+2], row[numActions+numPlayers];
+  std::vector<int> col(numActions+numPlayers+2);
+  std::vector<int> row(numActions+numPlayers);
   for(n = 0; n < numActions+numPlayers+2; n++)
     col[n] = n+1;
   for(n = 0; n < numActions+numPlayers; n++)
@@ -222,7 +238,8 @@ void gnmgame::LemkeHowson(cvector &dest, cmatrix &T, int *Im) {
   }
 }
 
-int gnmgame::Pivot(cmatrix &T, int pr, int pc, int *row, int *col, double &D) {
+int gnmgame::Pivot(cmatrix &T, int pr, int pc, std::vector<int> &row, 
+		   std::vector<int> &col, double &D) {
   double pivot = T[pr][pc];
   int i0,j0,p,sgn = pivot < 0 ? -1 : 1;
   

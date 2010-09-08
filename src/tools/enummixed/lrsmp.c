@@ -599,7 +599,7 @@ mptoi (lrs_mp a)		/* convert lrs_mp to long integer */
 }
 
 void 
-pmp (char name[], lrs_mp a)	/*print the long precision integer a */
+pmp (const char *name, lrs_mp a)	/*print the long precision integer a */
 {
   long i;
   fprintf (lrs_ofp, "%s", name);
@@ -615,7 +615,7 @@ pmp (char name[], lrs_mp a)	/*print the long precision integer a */
 
 
 void 
-prat (char name[], lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/Din  */
+prat (const char *name, lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/Din  */
 {
   lrs_mp Nt, Dt;
   long i;
@@ -647,7 +647,9 @@ readmp (lrs_mp a)
       /* read an integer and convert to lrs_mp with base BASE */
 {
   char in[MAXINPUT];
-  fscanf (lrs_ifp, "%s", in);
+  if (fscanf (lrs_ifp, "%s", in) != 1) {
+    exit(1);
+  }
   atomp (in, a);
 }
 
@@ -657,7 +659,9 @@ readrat (lrs_mp Na, lrs_mp Da)
  /* returns true if denominator is not one                      */
 {
   char in[MAXINPUT], num[MAXINPUT], den[MAXINPUT];
-  fscanf (lrs_ifp, "%s", in);
+  if (fscanf (lrs_ifp, "%s", in) != 1) {
+    exit(1);
+  }
   atoaa (in, num, den);		/*convert rational to num/dem strings */
   atomp (num, Na);
   if (den[0] == '\0')

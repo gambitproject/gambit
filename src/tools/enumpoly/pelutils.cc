@@ -481,7 +481,7 @@ std::string ErrorInPelican::GetDescription(void) const
 }
 #endif
 
-void bad_error(char *m)     /* generates an error message and aborts*/
+void bad_error(const char *m)     /* generates an error message and aborts*/
 {
 #ifdef GAMBIT_EXCEPTIONS
   throw ErrorInPelican();
@@ -494,7 +494,7 @@ void bad_error(char *m)     /* generates an error message and aborts*/
         exit(1);
 }
 
-void warning(char *m){
+void warning(const char *m){
 #ifdef LOG_PRINT
 fprintf(stderr /* was Pel_Err */,"Warning:%s\n",m)
 #endif
@@ -505,7 +505,7 @@ fprintf(stderr /* was Pel_Err */,"Warning:%s\n",m)
 /*********************** implementations from Rand.c **********************/
 /**************************************************************************/
 
-void srand48(long int seedval);
+//void srand48(long int seedval);
 
 // WARNING: RDM added the following just to get to compile under BCC
 //            I have no idea if this is correct!!!  
@@ -2306,9 +2306,9 @@ int *poly_homog(polynomial1 p){
 }
 
 void ring_set_var(Pring R, int n, char *lable){
-   strncpy(R->vars[n],lable,RING_VAR_L);
+  strncpy(const_cast<char *>(R->vars[n]),lable,RING_VAR_L);
 }
-char *ring_var(Pring R,int i){return R->vars[i];}
+char *ring_var(Pring R,int i){return const_cast<char *>(R->vars[i]);}
 void ring_set_def(Pring R,  char *lable){
    strncpy(R->def,lable,RING_VAR_L);
 }
@@ -3253,7 +3253,7 @@ node atom_proc(node (*prc)(node))
 {
     node R;
     R = node_new();
-    node_set_ptr(R, (void *)prc, PROC, LEFT);
+    node_set_ptr(R, reinterpret_cast<void *>(prc), PROC, LEFT);
     return R;
 }
 

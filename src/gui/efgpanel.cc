@@ -617,7 +617,7 @@ void gbtTreePlayerToolbar::OnUpdate(void)
 
   while (m_playerPanels.Length() > m_doc->NumPlayers()) {
     gbtTreePlayerPanel *panel = m_playerPanels.Remove(m_playerPanels.Length());
-    GetSizer()->Remove(panel);
+    GetSizer()->Detach(panel);
     panel->Destroy();
   }
   

@@ -70,7 +70,7 @@ private:
   int iter;
   double step;
   double max_step;
-  double tol;
+  double m_tol;
   Gambit::Vector<double> x1;
   Gambit::Vector<double> dx1;
   Gambit::Vector<double> x2;

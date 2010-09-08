@@ -65,9 +65,9 @@ node pcfg_facets(node PC, Imatrix Controll)
 	    else
 		Imatrix_free(Norm);
 	} else {
-	    bad_error("point config is low dim in pcfg_facets");
-	    printf("point config is low dim \n");
-	    Imatrix_free(Norm);
+	  bad_error("point config is low dim in pcfg_facets");
+	  printf("point config is low dim \n");
+	  Imatrix_free(Norm);
 	}
 	Imatrix_free(M);
 	POP_LOCS();

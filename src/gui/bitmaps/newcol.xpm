@@ -1,5 +1,5 @@
 /* XPM */
-static char * newcol_xpm[] = {
+static const char * newcol_xpm[] = {
 "24 24 50 1",
 " 	c None",
 ".	c #000000",

@@ -32,6 +32,7 @@
 #include <strings.h>
 #include <string>
 #include <iomanip>
+#include <vector>
 
 using namespace std;
 class cmatrix;
@@ -268,7 +269,7 @@ public:
 	  return total;
 	}
 
-	inline void support(int *s) {
+	inline void support(std::vector<int> &s) {
 	  for(int i = 0; i < m; i++)
 	    if(!s[i])
 	      x[i] = 0.0;
@@ -665,7 +666,7 @@ public:
 			assert(0);
 		}
 		int i,j,k,c=0;
-		double newrow[n];
+		std::vector<double> newrow(n);
 		for(i=0;i<m;i++) {
 		  for(j=0;j<n;j++) {
 		    newrow[j] = 0;

@@ -58,11 +58,11 @@ EnumCliques::EnumCliques(Gambit::Array<edge> &edgelist,int maxinp1,int maxinp2 )
   int numco = getconnco(firstedge, edgelist);
   workonco(numco, firstedge, edgelist) ;
   
-};
+}
 
 EnumCliques::~EnumCliques()
 {
-};
+}
 
 void EnumCliques::
 candtry1 (int stk[], // stack 

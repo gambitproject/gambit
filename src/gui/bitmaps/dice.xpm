@@ -1,5 +1,5 @@
 /* XPM */
-static char * dice_xpm[] = {
+static const char * dice_xpm[] = {
 "24 24 257 2",
 "  	c None",
 ". 	c #000000",

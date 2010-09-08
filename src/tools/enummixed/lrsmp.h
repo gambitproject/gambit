@@ -176,8 +176,8 @@ void mptodouble (lrs_mp a, double *x);	/* convert lrs_mp to double              
 long mptoi (lrs_mp a);		/* convert lrs_mp to long integer */
 void mulint (lrs_mp a, lrs_mp b, lrs_mp c);	/* multiply two integers a*b --> c                */
 void normalize (lrs_mp a);	/* normalize lrs_mp after computation             */
-void pmp (char name[], lrs_mp a);	/* print the long precision integer a             */
-void prat (char name[], lrs_mp Nt, lrs_mp Dt);	/* reduce and print  Nt/Dt                        */
+void pmp (const char *name, lrs_mp a);	/* print the long precision integer a             */
+void prat (const char *name, lrs_mp Nt, lrs_mp Dt);	/* reduce and print  Nt/Dt                        */
 void readmp (lrs_mp a);		/* read an integer and convert to lrs_mp          */
 long readrat (lrs_mp Na, lrs_mp Da);	/* read a rational or int and convert to lrs_mp   */
 void reduce (lrs_mp Na, lrs_mp Da);	/* reduces Na Da by gcd(Na,Da)                    */
@@ -210,8 +210,6 @@ void subint (lrs_mp a, lrs_mp b, lrs_mp c);	/* compute c=a-b                    
 /**********************************/
 /* Miscellaneous functions        */
 /******************************** */
-
-void free (void *);
 
 void lrs_getdigits (long *a, long *b);	/* send digit information to user                         */
 

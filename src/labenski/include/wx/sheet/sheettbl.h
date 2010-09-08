@@ -109,7 +109,7 @@ public:
 protected:
     int m_numRows, m_numCols;
     int m_options;
-    DECLARE_ABSTRACT_CLASS(wxSheetValueProviderBase);
+    DECLARE_ABSTRACT_CLASS(wxSheetValueProviderBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -148,7 +148,7 @@ protected:
     bool DoUpdateRows( size_t row, int numRows );
     bool DoUpdateCols( size_t col, int numCols );
     wxSheetStringArray m_data;
-    DECLARE_ABSTRACT_CLASS(wxSheetValueProviderString);
+    DECLARE_ABSTRACT_CLASS(wxSheetValueProviderString)
 };
 
 // ----------------------------------------------------------------------------
@@ -207,7 +207,7 @@ protected:
     bool DoUpdateRows( size_t row, int numRows );
     bool DoUpdateCols( size_t col, int numCols );
     wxPairArrayIntPairArraySheetString m_data;
-    DECLARE_ABSTRACT_CLASS(wxSheetValueProviderSparseString);
+    DECLARE_ABSTRACT_CLASS(wxSheetValueProviderSparseString)
 };
 
 // The wxSheetValueProviderHashString is probably not for everyone 
@@ -255,7 +255,7 @@ protected:
     bool DoUpdateRows( size_t row, int numRows );
     bool DoUpdateCols( size_t col, int numCols );
     wxSheetStringHashStringHash m_data;
-    DECLARE_ABSTRACT_CLASS(wxSheetValueProviderHashString);
+    DECLARE_ABSTRACT_CLASS(wxSheetValueProviderHashString)
 };
 #endif // wxSHEET_USE_VALUE_PROVIDER_HASH
 
@@ -450,7 +450,7 @@ protected:
     wxSheetSelection* m_spannedCells;           // spanned blocks
     bool m_own_spanned_cells;
 
-    DECLARE_ABSTRACT_CLASS(wxSheetTable);
+    DECLARE_ABSTRACT_CLASS(wxSheetTable)
     DECLARE_NO_COPY_CLASS(wxSheetTable)
 };
 

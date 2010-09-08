@@ -1,5 +1,5 @@
 /* XPM */
-static char * ledgreen_xpm[] = {
+static const char * ledgreen_xpm[] = {
 "15 15 99 2",
 "  	c None",
 ". 	c #012B00",

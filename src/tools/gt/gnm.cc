@@ -92,10 +92,10 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
     ee,
     V = 0.0; // scale factor for perturbation
 
-  int s[M]; // current best responses
-  int B[M]; // current support
+  std::vector<int> s(M); // current best responses
+  std::vector<int> B(M); // current support
 
-  memset(B, 0, M * sizeof(int));
+  for (int i = 0; i < M; B[i++] = 0);
 
   cmatrix DG(M,M), // jacobian of the payoff function
     R(M,M), // jacobian of the retraction operator

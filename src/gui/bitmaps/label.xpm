@@ -1,5 +1,5 @@
 /* XPM */
-static char * label_xpm[] = {
+static const char * label_xpm[] = {
 "24 24 59 1",
 " 	c None",
 ".	c #FAFAFA",
