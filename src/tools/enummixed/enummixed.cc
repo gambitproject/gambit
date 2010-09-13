@@ -25,11 +25,10 @@
 #include <iostream>
 #include <iomanip>
 
-#include "vertenum.imp"
-#include "tableau.imp"
-
 #include "libgambit/libgambit.h"
 #include "clique.h"
+#include "vertenum.imp"
+
 
 using namespace Gambit;
 

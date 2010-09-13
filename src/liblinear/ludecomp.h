@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/enummixed/ludecomp.h
+// FILE: src/liblinear/ludecomp.h
 // Interface to LU decomposition classes
 //
 // This program is free software; you can redistribute it and/or modify

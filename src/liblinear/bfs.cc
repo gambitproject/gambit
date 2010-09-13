@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/bfs.cc
+// FILE: src/liblinear/bfs.cc
 // Implementation of basic feasible solution class
 //
 // This program is free software; you can redistribute it and/or modify
@@ -19,9 +19,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-
-#include "libgambit/libgambit.h"
-#include "libgambit/rational.h"
 
 #include "bfs.h"
 

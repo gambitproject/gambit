@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/tableau.h
+// FILE: src/liblinear/tableau.h
 // Interface to tableau class
 //
 // This program is free software; you can redistribute it and/or modify

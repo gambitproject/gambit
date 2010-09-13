@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/btableau.h
+// FILE: src/liblinear/btableau.h
 // Interface to base tableau classes
 //
 // This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,6 @@
 #ifndef BTABLEAU_H  
 #define BTABLEAU_H
 
-#include "libgambit/rational.h"
 #include "bfs.h"
 #include "basis.h"
 

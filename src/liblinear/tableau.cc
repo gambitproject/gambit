@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/lp/tableau.imp
+// FILE: src/liblinear/tableau.imp
 // Implementation of tableau class
 //
 // This program is free software; you can redistribute it and/or modify
@@ -169,7 +169,7 @@ bool Tableau<double>::IsLexMin()
 
 
 // ---------------------------------------------------------------------------
-//                   Tableau<Gambit::Rational> method definitions
+//                   Tableau<gbtRational> method definitions
 // ---------------------------------------------------------------------------
 
 

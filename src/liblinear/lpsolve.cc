@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/enummixed/ludecomp.cc
-// Instantiation of LU decomposition
+// FILE: src/liblinear/lpsolve.cc
+// Instantiation of common LP solvers
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,10 +20,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "ludecomp.imp"
+#include "lpsolve.imp"
+#include "libgambit/rational.h"
 
-template class EtaMatrix<double>;
-template class LUdecomp<double>;
 
-template class EtaMatrix<Gambit::Rational>;
-template class LUdecomp<Gambit::Rational>;
+template class LPSolve<double>;
+template class LPSolve<Gambit::Rational>;
+
+template Gambit::Array<int> Artificials(const Gambit::Vector<double> &);
+template Gambit::Array<int> Artificials(const Gambit::Vector<Gambit::Rational> &);
+

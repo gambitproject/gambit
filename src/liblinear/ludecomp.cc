@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/lp/ludecomp.cc
+// FILE: src/liblinear/ludecomp.cc
 // Instantiation of LU decomposition
 //
 // This program is free software; you can redistribute it and/or modify
@@ -21,10 +21,9 @@
 //
 
 #include "ludecomp.imp"
-#include "libgambit/rational.h"
 
-template class EtaMatrix< double >;
-template class LUdecomp< double >;
+template class EtaMatrix<double>;
+template class LUdecomp<double>;
 
-template class EtaMatrix< Gambit::Rational >;
-template class LUdecomp< Gambit::Rational >;
+template class EtaMatrix<Gambit::Rational>;
+template class LUdecomp<Gambit::Rational>;

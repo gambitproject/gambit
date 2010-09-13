@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/lp/lpsolve.h
+// FILE: src/liblinear/lpsolve.h
 // Interface to LP solvers
 //
 // This program is free software; you can redistribute it and/or modify
@@ -24,8 +24,8 @@
 #define LPSOLVE_H
 
 #include "libgambit/libgambit.h"
-#include "lptab.h"
-#include "bfs.h"
+#include "liblinear/lptab.h"
+#include "liblinear/bfs.h"
 
 //
 // This class implements a LP solver.  Its constructor takes as input a

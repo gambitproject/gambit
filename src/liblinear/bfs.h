@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/lp/tableau.cc
-// Instantiation of tableau classes
+// FILE: src/liblinear/bfs.h
+// Interface to basic feasible solution class
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,10 +20,22 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "libgambit/rational.h"
-#include "tableau.imp"
-#include <libgambit/matrix.imp>
+#ifndef BFS_H
+#define BFS_H
 
+#include "libgambit/libgambit.h"
+
+template <class T> class BFS : public Gambit::Map<int, T>  {
+  public:
+    BFS(void);
+    BFS(const T &d);
+    BFS(const BFS<T> &m);
+           // define two BFS's to be equal if their bases are equal
+    int operator==(const BFS &M) const;
+    int operator!=(const BFS &M) const;
+};
+
+#endif   // BFS_H
 
 
 

@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/lp/basis.cc
+// FILE: src/liblinear/basis.cc
 // Implementation of Basis class
 //
 // This program is free software; you can redistribute it and/or modify
@@ -176,3 +176,6 @@ bool Basis::IsIdent()
 {
   return IsBasisIdent;
 }
+
+
+

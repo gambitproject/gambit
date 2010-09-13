@@ -24,9 +24,7 @@
 #include <unistd.h>
 #include <iostream>
 #include "libgambit/libgambit.h"
-
-#include "tableau.h"
-#include "lpsolve.h"
+#include "liblinear/lpsolve.h"
 
 using namespace Gambit;
 
