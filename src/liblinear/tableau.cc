@@ -538,11 +538,4 @@ Gambit::Integer Tableau<Gambit::Rational>::TotDenom() const
 return totdenom;
 }
 
-Tableau<Gambit::Rational>::BadDenom::~BadDenom()
-{ }
-
-std::string Tableau<Gambit::Rational>::BadDenom::GetDescription(void) const
-{
-  return "Bad Denominator in Tableau";
-}
 

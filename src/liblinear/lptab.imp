@@ -718,11 +718,3 @@ void LPTableau<T>::BasisSelect(const Gambit::Array<T> &unitv,
   }
 }
 
-template <class T> LPTableau<T>::BadPivot::~BadPivot()
-{ }
-
-template <class T> std::string LPTableau<T>::BadPivot::GetDescription(void) const
-{
-  return "Bad Pivot in LPTableau";
-}
-

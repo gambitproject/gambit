@@ -41,8 +41,8 @@ private:
 public:
   class BadPivot : public Gambit::Exception  {
   public:
-    virtual ~BadPivot();
-    std::string GetDescription(void) const;
+    virtual ~BadPivot() throw() { }
+    const char *what(void) const throw() { return "Bad pivot in LPTableau."; }
   };
   LPTableau(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b); 
   LPTableau(const Gambit::Matrix<T> &A, const Gambit::Array<int> &art, const Gambit::Vector<T> &b); 

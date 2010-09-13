@@ -82,13 +82,13 @@ private:
 public:
   class BadPivot : public Gambit::Exception  {
   public:
-    virtual ~BadPivot();
-    std::string GetDescription(void) const;
+    virtual ~BadPivot() throw() { }
+    const char *what(void) const throw() { return "Bad pivot in LUdecomp"; }
   };
   class BadCount : public Gambit::Exception  {
   public:
-    virtual ~BadCount();
-    std::string GetDescription(void) const;
+    virtual ~BadCount() throw() { }
+    const char *what(void) const throw() { return "Bad reference count in LUdecomp"; }
   };
 
   // ------------------------

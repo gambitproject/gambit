@@ -58,46 +58,45 @@ inline double abs(double a)
 //========================================================================
 
 /// A base class for all exceptions
-class Exception {
+class Exception : public std::exception {
 public:
-  virtual ~Exception() { }
-  virtual std::string GetDescription(void) const = 0;
+  virtual ~Exception() throw() { }
+  virtual const char *what(void) const throw() = 0;
 };
 
 /// Exception thrown on out-of-range index
 class IndexException : public Exception {
 public:
-  virtual ~IndexException() { }
-  std::string GetDescription(void) const { return "Index out of range"; }
+  virtual ~IndexException() throw() { }
+  const char *what(void) const throw() { return "Index out of range"; }
 };
 
 /// Exception thrown on invalid index ranges
 class RangeException : public Exception {
 public:
-  virtual ~RangeException() { }
-  std::string GetDescription(void) const { return "Invalid index range"; }
+  virtual ~RangeException() throw() { }
+  const char *what(void) const throw() { return "Invalid index range"; }
 };
 
 /// Exception thrown on dimension mismatches
 class DimensionException : public Exception {
 public:
-  virtual ~DimensionException() { }
-  std::string GetDescription(void) const { return "Mismatched dimensions"; }
+  virtual ~DimensionException() throw() { }
+  const char *what(void) const throw() { return "Mismatched dimensions"; }
 };
 
 /// Exception thrown on invalid value
 class ValueException : public Exception {
 public:
-  virtual ~ValueException() { }
-  std::string GetDescription(void) const { return "Invalid value"; }
+  virtual ~ValueException() throw() { }
+  const char *what(void) const throw() { return "Invalid value"; }
 };
 
 /// Exception thrown on attempted division by zero
 class ZeroDivideException : public Exception {
 public:
-  virtual ~ZeroDivideException() { }
-  std::string GetDescription(void) const 
-    { return "Attmpted division by zero"; }
+  virtual ~ZeroDivideException() throw() { }
+  const char *what(void) const throw()  { return "Attmpted division by zero"; }
 };
 
 } // end namespace Gambit

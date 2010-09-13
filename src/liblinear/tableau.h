@@ -100,8 +100,8 @@ protected:
 public:
   class BadDenom : public Gambit::Exception  {
   public:
-    virtual ~BadDenom();
-    std::string GetDescription(void) const;
+    virtual ~BadDenom() throw() { }
+    const char *what(void) const throw() { return "Bad denominator in Tableau"; } 
   };
       // constructors and destructors
   Tableau(const Gambit::Matrix<Gambit::Rational> &A, const Gambit::Vector<Gambit::Rational> &b); 

@@ -43,9 +43,8 @@ namespace {
 //
 class EquilibriumLimitReachedNfg : public Exception {
 public:
-  virtual ~EquilibriumLimitReachedNfg() { }
-  std::string GetDescription(void) const 
-  { return "Reached target number of equilibria"; }
+  virtual ~EquilibriumLimitReachedNfg() throw() { }
+  const char *what(void) const throw() { return "Reached target number of equilibria"; }
 };
 
 } // end anonymous namespace

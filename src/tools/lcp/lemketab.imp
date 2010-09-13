@@ -268,19 +268,3 @@ template <class T> int LTableau<T>::LemkePath(int dup)
   return 1;
 }
 
-template <class T> LTableau<T>::BadPivot::~BadPivot()
-{ }
-
-template <class T> std::string LTableau<T>::BadPivot::GetDescription(void) const
-{
-  return "Bad Pivot in LTableau";
-}
-
-template <class T> LTableau<T>::BadExitIndex::~BadExitIndex()
-{ }
-
-template <class T> std::string LTableau<T>::BadExitIndex::GetDescription(void) const
-{
-  return "Bad Exit Index in LTableau";
-}
-

@@ -457,19 +457,3 @@ bool LUdecomp<T>::RefactorCheck()
   return tmp;
 }
   
-template <class T> LUdecomp<T>::BadCount::~BadCount()
-{ }
-
-template <class T> std::string LUdecomp<T>::BadCount::GetDescription(void) const
-{
-  return "Bad Reference count in LUdecomp";
-}
-
-template <class T> LUdecomp<T>::BadPivot::~BadPivot()
-{ }
-
-template <class T> std::string LUdecomp<T>::BadPivot::GetDescription(void) const
-{
-  return "Bad Pivot in LUdecomp";
-}
-

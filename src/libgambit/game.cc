@@ -931,8 +931,8 @@ namespace {
 
 class NotZeroSumException : public Exception {
 public:
-  virtual ~NotZeroSumException() { }
-  std::string GetDescription(void) const { return "Game is not constant sum"; }
+  virtual ~NotZeroSumException() throw() { }
+  const char *what(void) const throw() { return "Game is not constant sum"; }
 };
 
 Rational SubtreeSum(const GameNode &p_node)

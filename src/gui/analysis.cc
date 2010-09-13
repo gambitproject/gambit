@@ -46,9 +46,8 @@ namespace {
 
 class gbtNotNashException : public Exception {
 public:
-  virtual ~gbtNotNashException() { }
-
-  std::string GetDescription(void) const
+  virtual ~gbtNotNashException() throw() { }
+  const char *what(void) const throw() 
   { return "Output line does not contain a Nash equilibrium"; }
 };
 
