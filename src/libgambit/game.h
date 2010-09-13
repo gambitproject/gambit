@@ -812,7 +812,7 @@ template<> inline Rational PureBehavProfile::GetPayoff(int pl) const
 { return GetNodeValue<Rational>(m_efg->GetRoot(), pl); }
 
 template<> inline std::string PureBehavProfile::GetPayoff(int pl) const
-{ return ToText(GetNodeValue<Rational>(m_efg->GetRoot(), pl)); }
+{ return lexical_cast<std::string>(GetNodeValue<Rational>(m_efg->GetRoot(), pl)); }
 
 //=======================================================================
 

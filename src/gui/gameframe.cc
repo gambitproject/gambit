@@ -1047,7 +1047,7 @@ void gbtGameFrame::OnEditInsertMove(wxCommandEvent &)
 	  m_doc->GetSelectNode()->InsertMove(dialog.GetPlayer(),
 					     dialog.GetActions());
 	for (int act = 1; act <= infoset->NumActions(); act++) {
-	  infoset->GetAction(act)->SetLabel(Gambit::ToText(act));
+	  infoset->GetAction(act)->SetLabel(Gambit::lexical_cast<std::string>(act));
 	}
       }
       else {
@@ -1067,7 +1067,7 @@ void gbtGameFrame::OnEditInsertAction(wxCommandEvent &)
   if (!node || !node->GetInfoset())  return;
 
   Gambit::GameAction action = node->GetInfoset()->InsertAction();
-  action->SetLabel(Gambit::ToText(action->GetNumber()));
+  action->SetLabel(Gambit::lexical_cast<std::string>(action->GetNumber()));
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -1176,7 +1176,7 @@ void gbtGameFrame::OnEditGame(wxCommandEvent &)
 void gbtGameFrame::OnEditNewPlayer(wxCommandEvent &)
 {
   Gambit::GamePlayer player = m_doc->GetGame()->NewPlayer();
-  player->SetLabel("Player " + Gambit::ToText(player->GetNumber()));
+  player->SetLabel("Player " + Gambit::lexical_cast<std::string>(player->GetNumber()));
   if (!m_doc->IsTree()) {
     player->GetStrategy(1)->SetLabel("1");
   }

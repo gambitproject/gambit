@@ -216,7 +216,7 @@ void gbtTablePlayerPanel::OnNewStrategy(wxCommandEvent &)
 
   Gambit::GameStrategy strategy = 
     m_doc->GetGame()->GetPlayer(m_player)->NewStrategy();
-  strategy->SetLabel(Gambit::ToText(strategy->GetNumber()));
+  strategy->SetLabel(Gambit::lexical_cast<std::string>(strategy->GetNumber()));
   m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 

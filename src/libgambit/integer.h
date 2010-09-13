@@ -254,8 +254,6 @@ Integer  Ipow(long x, long y); // x to the y as Integer
 extern Integer  sqrt(const Integer&); // floor of square root
 extern Integer  lcm(const Integer& x, const Integer& y); // least common mult
 
-std::string ToText(const Integer &);
-
 } // end namespace Gambit
 
 #endif // LIBGAMBIT_INTEGER_H

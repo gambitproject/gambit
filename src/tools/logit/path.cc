@@ -21,6 +21,7 @@
 //
 
 #include <math.h>
+#include <algorithm>   // for std::max
 
 #include <libgambit/libgambit.h>
 #include <libgambit/sqmatrix.h>
@@ -164,14 +165,14 @@ PathTracer::TracePath(const Vector<double> &p_start,
 	break;
       }
       
-      decel = max(decel, sqrt(dist / c_maxDist) * m_maxDecel);
+      decel = std::max(decel, sqrt(dist / c_maxDist) * m_maxDecel);
       if (iter >= 2) {
 	double contr = dist / (disto + c_tol * c_eta);
 	if (contr > c_maxContr) {
 	  accept = false;
 	  break;
 	}
-	decel = max(decel, sqrt(contr / c_maxContr) * m_maxDecel);
+	decel = std::max(decel, sqrt(contr / c_maxContr) * m_maxDecel);
       }
 
       if (dist <= c_tol) {

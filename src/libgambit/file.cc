@@ -412,7 +412,7 @@ void ReadStrategies(GameParserState &p_state, TableFileGame &p_data)
       }
 
       for (int st = 1; st <= atoi(p_state.GetLastText().c_str()); st++) {
-	player->m_strategies.Append(ToText(Integer(st)));
+	player->m_strategies.Append(lexical_cast<std::string>(st));
       }
 
       p_state.GetNextToken();

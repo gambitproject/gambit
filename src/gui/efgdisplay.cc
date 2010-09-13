@@ -20,6 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>    // for std::min
+
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
@@ -176,7 +178,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       }
       else if (node->GetPlayer() == player) {
 	Gambit::GameAction action = node->GetInfoset()->InsertAction();
-	action->SetLabel(Gambit::ToText(action->GetNumber()));
+	action->SetLabel(Gambit::lexical_cast<std::string>(action->GetNumber()));
       }
       else if (!player->IsChance() && !node->GetPlayer()->IsChance()) {
 	// Currently don't support switching nodes to/from chance player
@@ -282,7 +284,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
       }
   
       Gambit::GameOutcome outcome = srcNode->GetGame()->NewOutcome();
-      outcome->SetLabel("Outcome" + Gambit::ToText(outcome->GetNumber()));
+      outcome->SetLabel("Outcome" + Gambit::lexical_cast<std::string>(outcome->GetNumber()));
       for (int pl = 1; pl <= srcNode->GetGame()->NumPlayers(); pl++) {
 	outcome->SetPayoff(pl, srcNode->GetOutcome()->GetPayoff<std::string>(pl));
       }
@@ -633,9 +635,9 @@ void gbtEfgDisplay::FitZoom(void)
   double zoomx = (double) width / (double) m_layout.MaxX();
   double zoomy = (double) height / (double) m_layout.MaxY();
 
-  zoomx = Gambit::min(zoomx, 1.0); 
-  zoomy = Gambit::min(zoomy, 1.0);  // never zoom in (only out)
-  m_zoom = int(100.0 * (Gambit::min(zoomx, zoomy) * .9));
+  zoomx = std::min(zoomx, 1.0); 
+  zoomy = std::min(zoomy, 1.0);  // never zoom in (only out)
+  m_zoom = int(100.0 * (std::min(zoomx, zoomy) * .9));
   AdjustScrollbarSteps();
   Refresh();
 }

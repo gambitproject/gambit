@@ -193,7 +193,7 @@ Gambit::GamePlayer gbtInsertMoveDialog::GetPlayer(void) const
   }
   else {
     Gambit::GamePlayer player = m_doc->GetGame()->NewPlayer();
-    player->SetLabel("Player " + Gambit::ToText(m_doc->NumPlayers()));
+    player->SetLabel("Player " + Gambit::lexical_cast<std::string>(m_doc->NumPlayers()));
     return player;
   }
 }

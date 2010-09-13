@@ -42,7 +42,7 @@ gSpace::gSpace(int nvars)
   for (int i = 1; i <= nvars; i++){
     newvar = new Variable;
     newvar->Name = 'n';
-    newvar->Name += Gambit::ToText(i);
+    newvar->Name += Gambit::lexical_cast<std::string>(i);
     newvar->number = i;
     Variables.Append(newvar);
   }
@@ -112,7 +112,7 @@ void gSpace::CreateVariables (int nvars )
 
     var = new Variable;
     var->Name = 'n';
-    var->Name += Gambit::ToText(n + i);
+    var->Name += Gambit::lexical_cast<std::string>(n + i);
     Variables.Append(var);
   }
 }

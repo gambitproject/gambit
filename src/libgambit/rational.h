@@ -120,23 +120,8 @@ public:
 
 };
 
-std::string ToText(const Rational &);
-inline std::string ToText(const Rational &r, int) { return ToText(r); }
-
-Rational ToRational(const std::string &);
-
-inline void Epsilon(Rational &v, int /*i*/ = 8) { v = (Rational) 0;}
-
-//
-// This is implemented so as to convert rational numbers to their
-// floating point equivalent.
-//
-inline double ToDouble(const std::string &s)
-{
-  return (double) ToRational(s);
-}
-
-Rational ToNumber(const std::string &p_string);
+// Naming compatible with Boost's lexical_cast concept for potential future compatibility.
+template<> Rational lexical_cast(const std::string &);
 
 } // end namespace Gambit
 

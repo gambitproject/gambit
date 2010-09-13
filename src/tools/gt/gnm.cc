@@ -396,7 +396,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
     A.normalizeStrategy(sigma);
 
     if (g_verbose) {
-      PrintProfile(std::cout, Gambit::ToText(lambda), sigma);
+      PrintProfile(std::cout, Gambit::lexical_cast<std::string>(lambda), sigma);
     }
 
     z -= ym1;

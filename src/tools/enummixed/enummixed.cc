@@ -35,12 +35,16 @@ using namespace Gambit;
 bool g_showConnect = false;
 int g_numDecimals = 6;
 
-template <class T> bool EqZero(const T &x)
+bool EqZero(const double &x)
 {
-  T eps;
-  Epsilon(eps, 12);
+  double eps = ::pow(10.0, -15.0);
   return (x <= eps && x >= -eps);
 }     
+
+bool EqZero(const Rational &x)
+{
+  return (x == Gambit::Rational(0));
+}
 
 int m_stopAfter = 0;
 
@@ -122,7 +126,8 @@ template <class T> void GetCliques(std::ostream &p_stream,
 	    p_key2[cliques2[cl][j]][k];
 	}
 
-	PrintProfile(p_stream, "convex-" + ToText(cl), profile.ToFullSupport());
+	PrintProfile(p_stream, "convex-" + lexical_cast<std::string>(cl), 
+		     profile.ToFullSupport());
       }
     }
   }

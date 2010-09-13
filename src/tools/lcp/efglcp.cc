@@ -114,10 +114,10 @@ void PrintProfileDetail(std::ostream &p_stream,
 	}
 	p_stream << buffer;
 	
-	sprintf(buffer, "%11s   ", ToText(p_profile(pl, iset, act), g_numDecimals).c_str());
+	sprintf(buffer, "%11s   ", lexical_cast<std::string>(p_profile(pl, iset, act), g_numDecimals).c_str());
 	p_stream << buffer;
 
-	sprintf(buffer, "%11s   ", ToText(p_profile.GetActionValue(infoset->GetAction(act)), g_numDecimals).c_str());
+	sprintf(buffer, "%11s   ", lexical_cast<std::string>(p_profile.GetActionValue(infoset->GetAction(act)), g_numDecimals).c_str());
 	p_stream << buffer;
 
 	p_stream << "\n";
@@ -139,10 +139,10 @@ void PrintProfileDetail(std::ostream &p_stream,
 	sprintf(buffer, "%7d    ", n);
 	p_stream << buffer;
 
-	sprintf(buffer, "%11s   ", ToText(p_profile.GetBeliefProb(infoset->GetMember(n)), g_numDecimals).c_str());
+	sprintf(buffer, "%11s   ", lexical_cast<std::string>(p_profile.GetBeliefProb(infoset->GetMember(n)), g_numDecimals).c_str());
 	p_stream << buffer;
 
-	sprintf(buffer, "%11s    ", ToText(p_profile.GetRealizProb(infoset->GetMember(n)), g_numDecimals).c_str());
+	sprintf(buffer, "%11s    ", lexical_cast<std::string>(p_profile.GetRealizProb(infoset->GetMember(n)), g_numDecimals).c_str());
 	p_stream << buffer;
 
 	p_stream << "\n";

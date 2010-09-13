@@ -30,6 +30,11 @@ template <class T> Gambit::Array<int> Artificials(const Gambit::Vector<T> &b)
   return ret;
 }
 
+inline void Epsilon(double &v, int i = 8)
+{ v = ::pow(10.0, (double) -i); }
+
+inline void Epsilon(Gambit::Rational &v, int /*i*/ = 8) { v = Gambit::Rational(0); }
+
 template <class T> 
 LPSolve<T>::LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b,
 		    const Gambit::Vector<T> &c, int nequals)
@@ -41,9 +46,9 @@ LPSolve<T>::LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b,
 {
     // These are the values recommended by Murtagh (1981) for 15 digit 
     // accuracy in LP problems 
-  Gambit::Epsilon(eps1,5);
-  Gambit::Epsilon(eps2,8);
-  Gambit::Epsilon(eps3,6);
+  ::Epsilon(eps1,5);
+  ::Epsilon(eps2,8);
+  ::Epsilon(eps3,6);
   
   // Check dimensions
   if (A.NumRows() != b.Length() || A.NumColumns() != c.Length()) {

@@ -553,7 +553,7 @@ void nfgSimpdiv::Solve(const Gambit::Game &p_nfg,
     maxz = Simplex(y);
     
     if (g_verbose) {
-      PrintProfile(std::cout, ToText(d), y);
+      PrintProfile(std::cout, Gambit::lexical_cast<std::string>(d), y);
     }
     if (maxz < Gambit::Rational(TOL)) break;
   }

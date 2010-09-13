@@ -220,7 +220,7 @@ void SolveSubgames(const BehavSupport &p_support,
 
       GameOutcome ov = efg->NewOutcome();
       for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-	ov->SetPayoff(pl, ToText(subval[pl]));
+	ov->SetPayoff(pl, lexical_cast<std::string>(subval[pl]));
       }
  
       values.Append(ov);
@@ -241,7 +241,7 @@ SolveBySubgames(const BehavSupport &p_support,
 
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
     for (int iset = 1; iset <= efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      efg->GetPlayer(pl)->GetInfoset(iset)->SetLabel(ToText(iset));
+      efg->GetPlayer(pl)->GetInfoset(iset)->SetLabel(lexical_cast<std::string>(iset));
     }
   }
 

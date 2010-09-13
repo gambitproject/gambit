@@ -123,12 +123,12 @@ bool gbtNumberValidator::Validate(wxWindow *p_parent)
     return false;
   }
 
-  if ((m_hasMin && Gambit::ToNumber((const char *) value.mb_str()) < m_minValue) ||
-      (m_hasMax && Gambit::ToNumber((const char *) value.mb_str()) > m_maxValue)) {
+  if ((m_hasMin && Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) value.mb_str())) < m_minValue) ||
+      (m_hasMax && Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) value.mb_str())) > m_maxValue)) {
     wxMessageBox(_T("The value ") + value + _T(" in ") +
 		 m_validatorWindow->GetName() + _T(" is out of the range [") +
-		 wxString(ToText(m_minValue).c_str(), *wxConvCurrent) + _T(", ") + 
-		 wxString(ToText(m_maxValue).c_str(), *wxConvCurrent) + _T("]."),
+		 wxString(Gambit::lexical_cast<std::string>(m_minValue).c_str(), *wxConvCurrent) + _T(", ") + 
+		 wxString(Gambit::lexical_cast<std::string>(m_maxValue).c_str(), *wxConvCurrent) + _T("]."),
 		 _("Error"), wxOK | wxICON_EXCLAMATION, p_parent);
     m_validatorWindow->SetFocus();
     return false;

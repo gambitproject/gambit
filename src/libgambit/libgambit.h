@@ -26,32 +26,21 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-#include <math.h>
 
 namespace Gambit {
 
-inline void Epsilon(double &v, int i = 8)
-  { v = ::pow(10.0, (double) -i); }
+// Naming compatible with Boost's lexical_cast concept for potential future compatibility.
 
-template <class T> T min(const T &a, const T &b)
-{ if (a < b) return a; else return b; }
-
-template <class T> T max(const T &a, const T &b)
-{ if (a > b) return a; else return b; }
-
-template <class T> std::string ToText(const T &p_value)
+template <class D, class S> D lexical_cast(const S &p_value)
 { std::ostringstream s; s << p_value; return s.str(); }
 
-inline std::string ToText(double p_value, int p_prec)
+template <class D, class S> D lexical_cast(const S &p_value, int p_prec)
 { 
   std::ostringstream s; 
   s.setf(std::ios::fixed);
   s << std::setprecision(p_prec) << p_value;
   return s.str();
 }
-
-inline double abs(double a)
-{ return (a >= 0.0) ? a : -a; }
 
 //========================================================================
 //                        Exception classes
@@ -100,18 +89,6 @@ public:
 };
 
 } // end namespace Gambit
-
-
-inline int sign(const double &a)
-{
-  if (a > 0.0)   return 1;
-  if (a < 0.0)   return -1;
-  return 0;
-}
-
-inline double pow(double x, long y)
-{ return pow(x, (double) y); }
-
 
 #include "array.h"
 #include "list.h"
