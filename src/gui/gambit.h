@@ -27,11 +27,6 @@
 #include <wx/config.h>    // for wxConfig
 #include <wx/docview.h>   // for wxFileHistory
 
-extern void gbtExceptionDialog(const std::string &p_message,
-			       wxWindow *p_parent,
-                               long p_style = wxOK | wxCENTRE);
-
-
 class gbtGameDocument;
 
 typedef enum {

@@ -159,8 +159,9 @@ void gbtBehavDominanceToolbar::OnLastLevel(wxCommandEvent &)
 
 void gbtBehavDominanceToolbar::OnShowReachable(wxCommandEvent &)
 {
-  m_doc->GetStyle().SetRootReachable(!m_doc->GetStyle().RootReachable());
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_NONE);
+  gbtStyle style = m_doc->GetStyle();
+  style.SetRootReachable(!style.RootReachable());
+  m_doc->SetStyle(style);
 }
 
 void gbtBehavDominanceToolbar::OnUpdate(void)
@@ -431,8 +432,9 @@ void gbtTreePlayerPanel::OnSetColor(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     wxColour color = dialog.GetColourData().GetColour();
-    m_doc->GetStyle().SetPlayerColor(m_player, color);
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+    gbtStyle style = m_doc->GetStyle();
+    style.SetPlayerColor(m_player, color);
+    m_doc->SetStyle(style);
   }
 }
 
@@ -444,16 +446,16 @@ void gbtTreePlayerPanel::OnEditPlayerLabel(wxCommandEvent &)
 
 void gbtTreePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
 {
-  m_doc->GetGame()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
+  m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player),
+			  m_playerLabel->GetValue());
 }
 
 void gbtTreePlayerPanel::PostPendingChanges(void)
 {
   if (m_playerLabel->IsEditing()) {
     m_playerLabel->EndEdit(true);
-    m_doc->GetGame()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
+    m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), 
+			    m_playerLabel->GetValue());
   }
 }
 
@@ -562,8 +564,9 @@ void gbtTreeChancePanel::OnSetColor(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     wxColour color = dialog.GetColourData().GetColour();
-    m_doc->GetStyle().SetChanceColor(color);
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+    gbtStyle style = m_doc->GetStyle();
+    style.SetChanceColor(color);
+    m_doc->SetStyle(style);
   }
 }
 
