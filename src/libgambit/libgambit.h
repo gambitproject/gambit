@@ -95,7 +95,6 @@ public:
 #include "recarray.h"
 #include "vector.h"
 #include "matrix.h"
-#include "map.h"
 
 #include "rational.h"
 

@@ -141,7 +141,7 @@ bool OnBFS(const StrategySupport &p_support,
   T sum = (T) 0;
 
   for (int j = 1; j <= n1; j++) {
-    if (cbfs.IsDefined(j))   sum += cbfs(j);
+    if (cbfs.count(j))   sum += cbfs[j];
   }
 
   if (sum == (T) 0)  {
@@ -150,8 +150,8 @@ bool OnBFS(const StrategySupport &p_support,
   }
 
   for (int j = 1; j <= n1; j++) {
-    if (cbfs.IsDefined(j)) {
-      profile[p_support.GetStrategy(1, j)] = cbfs(j) / sum;
+    if (cbfs.count(j)) {
+      profile[p_support.GetStrategy(1, j)] = cbfs[j] / sum;
     }
     else {
       profile[p_support.GetStrategy(1, j)] = (T) 0;
@@ -161,12 +161,12 @@ bool OnBFS(const StrategySupport &p_support,
   sum = (T) 0;
 
   for (int j = 1; j <= n2; j++) {
-    if (cbfs.IsDefined(n1 + j))  sum += cbfs(n1 + j);
+    if (cbfs.count(n1 + j))  sum += cbfs[n1 + j];
   }
 
   for (int j = 1; j <= n2; j++) {
-    if (cbfs.IsDefined(n1 + j)) {
-      profile[p_support.GetStrategy(2, j)] = cbfs(n1 + j) / sum;
+    if (cbfs.count(n1 + j)) {
+      profile[p_support.GetStrategy(2, j)] = cbfs[n1 + j] / sum;
     }
     else {
       profile[p_support.GetStrategy(2, j)] = (T) 0;

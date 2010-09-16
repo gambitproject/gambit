@@ -676,13 +676,14 @@ BFS<T> LPTableau<T>::DualBFS() const
 template <class T>
 BFS<T> LPTableau<T>::DualBFS() const
 {
-  BFS<T> cbfs((T) 0);
+  BFS<T> cbfs;
   Gambit::Vector<T> d(this->MinRow(),this->MaxRow());
   DualVector(d);
 
-  for(int i=this->MinRow();i<=this->MaxRow();i++) {
-    if(!this->Member(-i)) 
-      cbfs.Define(-i,d[i]);
+  for(int i=this->MinRow();i<=this->MaxRow();i++) { 
+    if(!this->Member(-i)) {
+      cbfs.insert(-i,d[i]);
+    }
   }
   // gout << "\ndual: " << d;
   return cbfs;

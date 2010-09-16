@@ -226,7 +226,7 @@ void UndefinedToCentroid(MixedBehavProfile<T> &p_profile)
 template <class T> List<MixedBehavProfile<T> > 
 SolveEfgLcp<T>::Solve(const BehavSupport &p_support, bool p_print /*= true*/)
 {
-  BFS<T> cbfs((T) 0);
+  BFS<T> cbfs;
   int i, j;
 
   isets1 = p_support.ReachableInfosets(p_support.GetGame()->GetPlayer(1));
@@ -308,14 +308,15 @@ SolveEfgLcp<T>::Solve(const BehavSupport &p_support, bool p_print /*= true*/)
 
 template <class T> int SolveEfgLcp<T>::AddBFS(const LTableau<T> &tableau)
 {
-  BFS<T> cbfs((T) 0);
+  BFS<T> cbfs;
   Vector<T> v(tableau.MinRow(), tableau.MaxRow());
   tableau.BasisVector(v);
 
-  for (int i = tableau.MinCol(); i <= tableau.MaxCol(); i++)
+  for (int i = tableau.MinCol(); i <= tableau.MaxCol(); i++) {
     if (tableau.Member(i)) {
-      cbfs.Define(i, v[tableau.Find(i)]);
+      cbfs.insert(i, v[tableau.Find(i)]);
     }
+  }
 
   if (m_list.Contains(cbfs))  return 0;
   m_list.Append(cbfs);

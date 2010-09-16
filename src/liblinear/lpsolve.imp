@@ -40,7 +40,7 @@ LPSolve<T>::LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b,
 		    const Gambit::Vector<T> &c, int nequals)
   : well_formed(1), feasible(1), bounded(1), aborted(0), 
     nvars(c.Length()),neqns(b.Length()), nequals(nequals),
-    total_cost(0),tmin(0), opt_bfs((T)0),  dual_bfs((T)0) , 
+    total_cost(0),tmin(0), 
     tab(A,Artificials(b),b), UB(0),LB(0),ub(0),lb(0),xx(0), cost(0),
     y(b.Length()),x(b.Length()),d(b.Length())
 {
@@ -197,10 +197,11 @@ LPSolve<T>::LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b,
   // gout << "\n";
   // dual_bfs.Dump(gout);
 
-  for(i=1;i<=neqns;i++)
-    if(dual_bfs.IsDefined(-i))
-      opt_bfs.Define(-i,dual_bfs(-i));
-
+  for(i=1;i<=neqns;i++) {
+    if(dual_bfs.count(-i)) {
+      opt_bfs.insert(-i,dual_bfs[-i]);
+    }     
+  }     
   // gout << "\n--- End LPSolve ---\n";
 }
 
