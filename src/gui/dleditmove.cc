@@ -166,16 +166,16 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
   CenterOnParent();
 }
 
-std::string gbtEditMoveDialog::GetActionName(int p_act) const 
+wxString gbtEditMoveDialog::GetActionName(int p_act) const 
 { 
   m_actionSheet->SaveEditControlValue();
-  return (const char *) m_actionSheet->GetCellValue(wxSheetCoords(p_act-1, 0)).mb_str(); 
+  return m_actionSheet->GetCellValue(wxSheetCoords(p_act-1, 0));
 }
 
-std::string gbtEditMoveDialog::GetActionProb(int p_act) const 
+wxString gbtEditMoveDialog::GetActionProb(int p_act) const 
 { 
   m_actionSheet->SaveEditControlValue();
-  return (const char *) m_actionSheet->GetCellValue(wxSheetCoords(p_act-1, 1)).mb_str(); 
+  return m_actionSheet->GetCellValue(wxSheetCoords(p_act-1, 1));
 }
 
 

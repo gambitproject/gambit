@@ -213,11 +213,7 @@ void gbtTablePlayerPanel::OnChar(wxKeyEvent &p_event)
 void gbtTablePlayerPanel::OnNewStrategy(wxCommandEvent &)
 {
   m_doc->PostPendingChanges();
-
-  Gambit::GameStrategy strategy = 
-    m_doc->GetGame()->GetPlayer(m_player)->NewStrategy();
-  strategy->SetLabel(Gambit::lexical_cast<std::string>(strategy->GetNumber()));
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
+  m_doc->DoNewStrategy(m_doc->GetGame()->GetPlayer(m_player));
 }
 
 void gbtTablePlayerPanel::OnSetColor(wxCommandEvent &)
@@ -230,8 +226,9 @@ void gbtTablePlayerPanel::OnSetColor(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     wxColour color = dialog.GetColourData().GetColour();
-    m_doc->GetStyle().SetPlayerColor(m_player, color);
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+    gbtStyle style = m_doc->GetStyle();
+    style.SetPlayerColor(m_player, color);
+    m_doc->SetStyle(style);
   }
 }
 
@@ -243,16 +240,16 @@ void gbtTablePlayerPanel::OnEditPlayerLabel(wxCommandEvent &)
 
 void gbtTablePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
 {
-  m_doc->GetGame()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
+  m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player),
+			  m_playerLabel->GetValue());
 }
 
 void gbtTablePlayerPanel::PostPendingChanges(void)
 {
   if (m_playerLabel->IsEditing()) {
     m_playerLabel->EndEdit(true);
-    m_doc->GetGame()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
+    m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player),
+			    m_playerLabel->GetValue());
   }
 }
 

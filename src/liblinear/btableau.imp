@@ -194,10 +194,12 @@ BFS<T> TableauInterface<T>::GetBFS()
   Gambit::Vector<T> sol(basis.First(),basis.Last());
   BasisVector(sol);
 
-  BFS<T> cbfs((T) 0);
-  for(int i=MinCol();i<=MaxCol();i++) 
-    if(Member(i)) 
-      cbfs.Define(i,sol[basis.Find(i)]);
+  BFS<T> cbfs;
+  for(int i=MinCol();i<=MaxCol();i++)  {
+    if(Member(i)) {
+      cbfs.insert(i,sol[basis.Find(i)]);
+    }
+  }
   return cbfs;
 }
 
@@ -207,14 +209,18 @@ BFS<T> TableauInterface<T>::GetBFS1() const
   Gambit::Vector<T> sol(basis.First(),basis.Last());
   BasisVector(sol);
 
-  BFS<T> cbfs((T) 0);
+  BFS<T> cbfs;
   int i;
-  for(i=-MaxRow();i<=-MinRow();i++) 
-    if(Member(i)) 
-      cbfs.Define(i,sol[basis.Find(i)]);
-  for(i=MinCol();i<=MaxCol();i++) 
-    if(Member(i)) 
-      cbfs.Define(i,sol[basis.Find(i)]);
+  for(i=-MaxRow();i<=-MinRow();i++)  {
+    if(Member(i)) {
+      cbfs.insert(i,sol[basis.Find(i)]);
+    }
+  }
+  for(i=MinCol();i<=MaxCol();i++)  {
+    if(Member(i)) {
+      cbfs.insert(i,sol[basis.Find(i)]);
+    }
+  }
   return cbfs;
 }
 

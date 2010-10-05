@@ -155,9 +155,8 @@ void gbtNashMonitorDialog::OnIdle(wxIdleEvent &p_event)
     wxString msg;
     msg << tis.ReadLine();
 
-    m_output->AddOutput(msg);
+    m_doc->DoAddOutput(*m_output, msg);
     m_countText->SetLabel(wxString::Format(wxT("Number of equilibria found so far: %d"), m_output->NumProfiles()));
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 
     p_event.RequestMore();
   }
@@ -183,9 +182,8 @@ void gbtNashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
     msg << tis.ReadLine();
 
     if (msg != wxT("")) {
-      m_output->AddOutput(msg);
+      m_doc->DoAddOutput(*m_output, msg);
       m_countText->SetLabel(wxString::Format(wxT("Number of equilibria found so far: %d"), m_output->NumProfiles()));
-      m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
     }
   }
 

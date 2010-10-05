@@ -403,6 +403,12 @@ void gbtGameDocument::BuildNfg(void)
   }
 }
 
+void gbtGameDocument::SetStyle(const gbtStyle &p_style)
+{
+  m_style = p_style;
+  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+}
+
 //
 // A word about the undo and redo features:
 // We store a list of the textual representation of games.  We don't
@@ -597,3 +603,248 @@ void gbtGameDocument::SetSelectNode(Gambit::GameNode p_node)
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
+//======================================================================
+// Commands for model part of MVC architecture start here.
+//======================================================================
+
+void gbtGameDocument::DoSave(const wxString &p_filename)
+{
+  std::ofstream file(static_cast<const char *>(p_filename.mb_str()));
+  SaveDocument(file);
+  m_filename = p_filename;
+  SetModified(false);
+  UpdateViews(GBT_DOC_MODIFIED_NONE);
+}
+
+void gbtGameDocument::DoExportEfg(const wxString &p_filename)
+{
+  std::ofstream file(static_cast<const char *>(p_filename.mb_str()));
+  m_game->WriteEfgFile(file);
+  UpdateViews(GBT_DOC_MODIFIED_NONE);
+}
+
+void gbtGameDocument::DoExportNfg(const wxString &p_filename)
+{
+  std::ofstream file(static_cast<const char *>(p_filename.mb_str()));
+  BuildNfg();
+  m_game->WriteNfgFile(file);
+  UpdateViews(GBT_DOC_MODIFIED_NONE);
+}
+
+
+void gbtGameDocument::DoSetTitle(const wxString &p_title, 
+				 const wxString &p_comment)
+{
+  m_game->SetTitle(static_cast<const char *>(p_title.mb_str()));
+  m_game->SetComment(static_cast<const char *>(p_comment.mb_str()));
+  UpdateViews(GBT_DOC_MODIFIED_LABELS);
+}
+
+void gbtGameDocument::DoNewPlayer(void)
+{
+  GamePlayer player = m_game->NewPlayer();
+  player->SetLabel("Player " + 
+		   lexical_cast<std::string>(player->GetNumber()));
+  if (!m_game->IsTree()) {
+    player->GetStrategy(1)->SetLabel("1");
+  }
+  UpdateViews(GBT_DOC_MODIFIED_GAME);
+}
+
+void gbtGameDocument::DoSetPlayerLabel(GamePlayer p_player,
+				       const wxString &p_label)
+{
+  p_player->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  UpdateViews(GBT_DOC_MODIFIED_LABELS);
+}
+
+void gbtGameDocument::DoNewStrategy(GamePlayer p_player)
+{
+  GameStrategy strategy = p_player->NewStrategy();
+  strategy->SetLabel(lexical_cast<std::string>(strategy->GetNumber()));
+  UpdateViews(GBT_DOC_MODIFIED_GAME);
+}
+
+void gbtGameDocument::DoDeleteStrategy(GameStrategy p_strategy)
+{
+  p_strategy->DeleteStrategy();
+  UpdateViews(GBT_DOC_MODIFIED_GAME);
+}
+
+void gbtGameDocument::DoSetStrategyLabel(GameStrategy p_strategy,
+					 const wxString &p_label)
+{
+  p_strategy->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  UpdateViews(GBT_DOC_MODIFIED_LABELS);
+}
+
+void gbtGameDocument::DoSetInfosetLabel(GameInfoset p_infoset,
+					const wxString &p_label)
+{
+  p_infoset->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  UpdateViews(GBT_DOC_MODIFIED_LABELS);
+}
+
+void gbtGameDocument::DoSetActionLabel(GameAction p_action,
+				       const wxString &p_label)
+{
+  p_action->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  UpdateViews(GBT_DOC_MODIFIED_LABELS);
+}
+
+void gbtGameDocument::DoSetActionProb(GameInfoset p_infoset,
+				      unsigned int p_action,
+				      const wxString &p_prob)
+{
+  p_infoset->SetActionProb(p_action, static_cast<const char *>(p_prob.mb_str()));
+  UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
+}
+
+void gbtGameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
+{
+  p_node->SetInfoset(p_infoset);
+  UpdateViews(GBT_DOC_MODIFIED_GAME);
+}
+
+void gbtGameDocument::DoLeaveInfoset(GameNode p_node)
+{
+  p_node->LeaveInfoset();
+  UpdateViews(GBT_DOC_MODIFIED_GAME);
+}
+
+void gbtGameDocument::DoRevealAction(GameInfoset p_infoset, GamePlayer p_player)
+{
+  p_infoset->Reveal(p_player);
+  UpdateViews(GBT_DOC_MODIFIED_GAME);
+}
+
+void gbtGameDocument::DoInsertAction(GameNode p_node)
+{
+  if (!p_node || !p_node->GetInfoset())  return;
+  GameAction action = p_node->GetInfoset()->InsertAction();
+  action->SetLabel(lexical_cast<std::string>(action->GetNumber()));
+  UpdateViews(GBT_DOC_MODIFIED_GAME);
+}
+
+void gbtGameDocument::DoSetNodeLabel(GameNode p_node, const wxString &p_label)
+{
+  p_node->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  UpdateViews(GBT_DOC_MODIFIED_LABELS);
+}
+
+
+void gbtGameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
+{
+  p_node->AppendMove(p_infoset);
+  UpdateViews(GBT_DOC_MODIFIED_GAME);
+}
+
+void gbtGameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player,
+				   unsigned int p_actions)
+{
+  GameInfoset infoset = p_node->InsertMove(p_player, p_actions);
+  for (int act = 1; act <= infoset->NumActions(); act++) {
+    infoset->GetAction(act)->SetLabel(lexical_cast<std::string>(act));
+  }
+  UpdateViews(GBT_DOC_MODIFIED_GAME);
+}
+
+void gbtGameDocument::DoInsertMove(GameNode p_node, GameInfoset p_infoset)
+{
+  p_node->InsertMove(p_infoset);
+  UpdateViews(GBT_DOC_MODIFIED_GAME);
+}
+
+void gbtGameDocument::DoCopyTree(GameNode p_destNode, GameNode p_srcNode)
+{
+  p_destNode->CopyTree(p_srcNode);
+  UpdateViews(GBT_DOC_MODIFIED_GAME);
+}
+
+void gbtGameDocument::DoMoveTree(GameNode p_destNode, GameNode p_srcNode)
+{
+  p_destNode->MoveTree(p_srcNode);
+  UpdateViews(GBT_DOC_MODIFIED_GAME);
+}
+
+void gbtGameDocument::DoDeleteParent(GameNode p_node)
+{
+  if (!p_node || !p_node->GetParent()) return;
+  p_node->DeleteParent();
+  UpdateViews(GBT_DOC_MODIFIED_GAME);
+}
+
+void gbtGameDocument::DoDeleteTree(GameNode p_node)
+{
+  p_node->DeleteTree();
+  UpdateViews(GBT_DOC_MODIFIED_GAME);
+}
+
+void gbtGameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
+{
+  if (!p_player->IsChance() && !p_infoset->GetPlayer()->IsChance()) {
+    // Currently don't support switching nodes to/from chance player
+    p_infoset->SetPlayer(p_player);
+    UpdateViews(GBT_DOC_MODIFIED_GAME);
+  }
+}
+
+void gbtGameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
+{
+  if (!p_player->IsChance() && !p_node->GetPlayer()->IsChance()) {
+    // Currently don't support switching nodes to/from chance player
+    p_node->GetInfoset()->SetPlayer(p_player);
+    UpdateViews(GBT_DOC_MODIFIED_GAME);
+  }
+}
+
+void gbtGameDocument::DoNewOutcome(GameNode p_node)
+{
+  p_node->SetOutcome(m_game->NewOutcome());
+  UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
+}
+
+void gbtGameDocument::DoNewOutcome(PureStrategyProfile p_profile)
+{
+  p_profile.SetOutcome(m_game->NewOutcome());
+  UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
+}
+
+void gbtGameDocument::DoSetOutcome(GameNode p_node, GameOutcome p_outcome)
+{
+  p_node->SetOutcome(p_outcome);
+  UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
+}
+
+void gbtGameDocument::DoRemoveOutcome(GameNode p_node)
+{
+  if (!p_node || !p_node->GetOutcome()) return;
+  p_node->SetOutcome(0);
+  UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
+}
+
+void gbtGameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
+{
+  GameOutcome outcome = m_game->NewOutcome();
+  outcome->SetLabel("Outcome" + lexical_cast<std::string>(outcome->GetNumber()));
+  for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
+    outcome->SetPayoff(pl, p_outcome->GetPayoff<std::string>(pl));
+  }
+  p_node->SetOutcome(outcome);
+  UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
+}
+
+void gbtGameDocument::DoSetPayoff(GameOutcome p_outcome, int p_player,
+				  const wxString &p_value)
+{
+  p_outcome->SetPayoff(p_player, 
+		       static_cast<const char *>(p_value.mb_str()));
+  UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
+}
+
+void gbtGameDocument::DoAddOutput(gbtAnalysisOutput &p_list,
+				  const wxString &p_output)
+{
+  p_list.AddOutput(p_output);
+  UpdateViews(GBT_DOC_MODIFIED_NONE);
+}

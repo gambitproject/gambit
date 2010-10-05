@@ -254,7 +254,6 @@ libgambit_la_SOURCES = \
 	src/libgambit/rational.h \
 	src/libgambit/array.h \
 	src/libgambit/list.h \
-	src/libgambit/map.h \
 	src/libgambit/vector.cc \
 	src/libgambit/vector.h \
 	src/libgambit/vector.imp \
@@ -299,7 +298,6 @@ libgambitinclude_HEADERS = \
 	src/libgambit/rational.h \
 	src/libgambit/array.h \
 	src/libgambit/list.h \
-	src/libgambit/map.h \
 	src/libgambit/vector.h \
 	src/libgambit/vector.imp \
 	src/libgambit/pvector.h \
@@ -367,7 +365,6 @@ gambit_nfg2tex_SOURCES = \
 liblinear_la_SOURCES = \
 	src/liblinear/basis.cc \
 	src/liblinear/basis.h \
-	src/liblinear/bfs.cc \
 	src/liblinear/bfs.h \
 	src/liblinear/btableau.cc \
 	src/liblinear/btableau.h \
@@ -663,6 +660,7 @@ gambit_SOURCES = \
 	src/gui/dlefglogit.h \
 	src/gui/dlefgreveal.cc \
 	src/gui/dlefgreveal.h \
+	src/gui/dlexcept.h \
 	src/gui/dlgameprop.cc \
 	src/gui/dlgameprop.h \
 	src/gui/dlinsertmove.cc \

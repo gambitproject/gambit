@@ -24,15 +24,48 @@
 #define BFS_H
 
 #include "libgambit/libgambit.h"
+#include <map>
 
-template <class T> class BFS : public Gambit::Map<int, T>  {
-  public:
-    BFS(void);
-    BFS(const T &d);
-    BFS(const BFS<T> &m);
-           // define two BFS's to be equal if their bases are equal
-    int operator==(const BFS &M) const;
-    int operator!=(const BFS &M) const;
+template <class T> class BFS {
+private:
+  std::map<int, T> m_map;
+  T m_default;
+
+public:
+  // Lifecycle
+  BFS(void) : m_default(0) { }
+  ~BFS()  { }
+
+  // define two BFS's to be equal if their bases are equal
+  bool operator==(const BFS &M) const {
+    if (m_map.size() != M.m_map.size())  return false;
+
+    for (typename std::map<int, T>::const_iterator iter = m_map.begin();
+	 iter != m_map.end(); iter++) {
+      if (M.m_map.count((*iter).first) == 0) {
+	return false;
+      }
+    }
+    return true;
+  }
+  bool operator!=(const BFS &M) const  { return !(*this == M); }
+
+  // Provide map-like operations
+  int count(int key) const { return (m_map.count(key) > 0); }
+
+  void insert(int key, const T &value) {
+    m_map.erase(key);
+    m_map.insert(std::pair<int, T>(key, value));
+  }
+
+  const T &operator[](int key) {
+    if (m_map.count(key) == 1) {
+      return m_map[key];
+    }
+    else {
+      return m_default;
+    }
+  }
 };
 
 #endif   // BFS_H

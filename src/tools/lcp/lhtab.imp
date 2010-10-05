@@ -234,10 +234,11 @@ BFS<T> LHTableau<T>::GetBFS()
     solution[i] = tmp1[i];
   for(i=tmp2.First();i<=tmp2.Last();i++)
     solution[i] = tmp2[i];
-  BFS<T> cbfs((T) 0);
+  BFS<T> cbfs;
   for(i=MinCol();i<=MaxCol();i++) {
-    if(Member(i)) 
-      cbfs.Define(i,solution[Find(i)]);
+    if(Member(i)) { 
+      cbfs.insert(i,solution[Find(i)]);
+    }
   }
   return cbfs;
 }
