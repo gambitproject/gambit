@@ -93,7 +93,7 @@ if test x$with_gui = xtrue; then
             equivalent variable and wxWidgets is version 2.6.0 or above.
       ])
       GUI_PROGS=""
-      WITH_GUI=0
+      AM_CONDITIONAL(WITH_GUI, test x0 = x1)
   fi
 fi
 
@@ -112,6 +112,7 @@ if test "${WITH_GUI}" == 1; then
             Gambit recommends the GTK port of wxWidgets for best results.
     ])
     GUI_PROGS=""
+    AM_CONDITIONAL(WITH_GUI, test x0 = x1)
   fi
 
   if test `echo ${WX_CXXFLAGS} | grep -c __WXMOTIF__` -eq 1; then
@@ -123,6 +124,7 @@ if test "${WITH_GUI}" == 1; then
             Gambit recommends the GTK port of wxWidgets for best results.
     ])
     GUI_PROGS=""
+    AM_CONDITIONAL(WITH_GUI, test x0 = x1)
   fi
 
   if test `echo ${WX_CXXFLAGS} | grep -c __WXGTK__` -eq 1; then
@@ -154,6 +156,7 @@ if test "${WITH_GUI}" == 1; then
             of Gambit graphical interface.
     ])
     GUI_PROGS=""
+    AM_CONDITIONAL(WITH_GUI, test x0 = x1)
   fi	
 fi
 
