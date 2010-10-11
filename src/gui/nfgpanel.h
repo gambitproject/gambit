@@ -27,17 +27,15 @@
 
 class wxPrintout;
 class gbtTableWidget;
+class gbtTablePlayerToolbar;
 
 class gbtNfgPanel : public wxPanel, public gbtGameView {
 private:
-  wxWindow *m_dominanceToolbar, *m_playerToolbar;
+  wxWindow *m_dominanceToolbar;
+  gbtTablePlayerToolbar *m_playerToolbar;
   gbtTableWidget *m_tableWidget;
 
   void OnToolsDominance(wxCommandEvent &);
-
-  // Overriding gbtGameView members
-  void OnUpdate(void);
-  void PostPendingChanges(void);
 
 public:
   gbtNfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc);
@@ -56,6 +54,10 @@ public:
   /// Prints the game as currently displayed, centered on the DC
   void RenderGame(wxDC &p_dc, int marginX, int marginY);
   //@}
+
+  // Overriding gbtGameView members
+  void OnUpdate(void);
+  void PostPendingChanges(void);
 
   DECLARE_EVENT_TABLE()
 };

@@ -317,6 +317,7 @@ gbtEfgDisplay::gbtEfgDisplay(wxWindow *p_parent, gbtGameDocument *p_doc)
 
   Connect(m_payoffEditor->GetId(), wxEVT_COMMAND_TEXT_ENTER,
 	  wxCommandEventHandler(gbtEfgDisplay::OnAcceptPayoffEdit));
+  OnUpdate();
 }
 
 void gbtEfgDisplay::MakeMenus(void)

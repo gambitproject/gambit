@@ -173,6 +173,7 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
   topSizer->SetSizeHints(this);
   topSizer->Fit(this);
   Layout();
+  OnUpdate();
 }
 
 void gbtTablePlayerPanel::OnUpdate(void)
@@ -262,14 +263,14 @@ private:
   gbtNfgPanel *m_nfgPanel;
   Gambit::Array<gbtTablePlayerPanel *> m_playerPanels;
 
+public:
+  gbtTablePlayerToolbar(gbtNfgPanel *p_parent, gbtGameDocument *p_doc);
+
   /// @name Implementation of gbtGameView members
   //@{
   void OnUpdate(void);
   void PostPendingChanges(void);
   //@}
-
-public:
-  gbtTablePlayerToolbar(gbtNfgPanel *p_parent, gbtGameDocument *p_doc);
 };
 
 
@@ -475,6 +476,7 @@ gbtNfgPanel::gbtNfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   topSizer->Add(playerSizer, 1, wxEXPAND, 0);
   SetSizer(topSizer);
   Layout();
+  OnUpdate();
 }
 
 void gbtNfgPanel::OnToolsDominance(wxCommandEvent &p_event)
@@ -494,6 +496,7 @@ void gbtNfgPanel::OnToolsDominance(wxCommandEvent &p_event)
 
 void gbtNfgPanel::OnUpdate(void)
 { 
+  m_playerToolbar->OnUpdate();
   m_tableWidget->OnUpdate();
   GetSizer()->Layout();
 }

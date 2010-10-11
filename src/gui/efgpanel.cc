@@ -334,6 +334,7 @@ gbtTreePlayerPanel::gbtTreePlayerPanel(wxWindow *p_parent,
   topSizer->SetSizeHints(this);
   topSizer->Fit(this);
   Layout();
+  OnUpdate();
 }
 
 void gbtTreePlayerPanel::OnUpdate(void)

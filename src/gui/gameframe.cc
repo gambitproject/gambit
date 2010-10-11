@@ -313,7 +313,8 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   else {
     m_nfgPanel->SetFocus();
   }
-
+  
+  OnUpdate();
   Show(true);
 }
 
@@ -1241,6 +1242,7 @@ void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
       m_analysisPanel->ShowMixed(true);
     }
     m_nfgPanel->SetFocus();
+    m_nfgPanel->OnUpdate();
   }
   else {
     m_splitter->ReplaceWindow(m_nfgPanel, m_efgPanel);
