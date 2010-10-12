@@ -11,7 +11,7 @@ def sym_compute_lhs(game, point):
     Compute the LHS for the set of equations for a symmetric logit QRE
     of a symmetric game.
     """
-    profile = game.mixed_strategy(point=[math.exp(x) for x in point[:-1]])
+    profile = game.mixed_profile(point=[math.exp(x) for x in point[:-1]])
     logprofile = point[:-1]
     lam = point[-1]
 
@@ -33,7 +33,7 @@ def sym_compute_jac(game, point):
     Compute the Jacobian for the set of equations for a symmetric logit QRE
     of a symmetric game.
     """
-    profile = game.mixed_strategy(point=[math.exp(x) for x in point[:-1]])
+    profile = game.mixed_profile(point=[math.exp(x) for x in point[:-1]])
     logprofile = point[:-1]
     lam = point[-1]
 
@@ -66,7 +66,7 @@ def sym_compute_jac(game, point):
             
 
 def printer(game, point):
-    profile = game.mixed_strategy(point=[math.exp(x) for x in point[:-1]])
+    profile = game.mixed_profile(point=[math.exp(x) for x in point[:-1]])
     lam = point[-1]
     print lam, profile
 
@@ -90,96 +90,90 @@ class StrategicQREPathTracer(object):
     """
     Compute the principal branch of the logit QRE correspondence of 'game'.
     """
-    def __init__(self, game):
-        self.game = game
+    def __init__(self):
         self.h_start = 0.03
         self.max_decel = 1.1
-        self._points =  [ ]
-        
-    def on_step(self, point):
-        self._points.append(LogitQRE(point[-1],
-                                     self.game.mixed_strategy(point=[math.exp(x) for x in point[:-1]])))
     
-    def trace_strategic_path(self, max_lambda=1000000.0):
-        if self.game.is_symmetric():
-            self._points = [ ]
-            p = self.game.mixed_strategy()
+    def trace_strategic_path(self, game, max_lambda=1000000.0):
+        points = [ ]
+        on_step = lambda p: points.append(LogitQRE(p[-1],
+                                                   game.mixed_profile(point=[math.exp(x) for x in p[:-1]])))
+
+        if game.is_symmetric:
+            p = game.mixed_profile()
 
             point = pctrace.trace_path([ math.log(x) for x in p.profile ],
                                        0.0, max_lambda,
-                                       lambda x: sym_compute_lhs(self.game, x),
-                                       lambda x: sym_compute_jac(self.game, x),
+                                       lambda x: sym_compute_lhs(game, x),
+                                       lambda x: sym_compute_jac(game, x),
                                        hStart=self.h_start,
                                        maxDecel=self.max_decel,
-                                       callback=self.on_step,
+                                       callback=on_step,
                                        crit=None,
                                        maxIter=100)
 
-            return self._points
+            return points
         else:
             raise NotImplementedError
 
-    def compute_at_lambda(self, lam):
-        if self.game.is_symmetric():
-            p = self.game.mixed_strategy()
+    def compute_at_lambda(self, game, lam):
+        if game.is_symmetric:
+            p = game.mixed_profile()
 
             point = pctrace.trace_path([ math.log(x) for x in p.profile ],
                                        0.0, 1000000.0,
-                                       lambda x: sym_compute_lhs(self.game, x),
-                                       lambda x: sym_compute_jac(self.game, x),
-                                       callback=self.on_step,
+                                       lambda x: sym_compute_lhs(game, x),
+                                       lambda x: sym_compute_jac(game, x),
                                        crit=lambda x,t: x[-1] - lam,
                                        maxIter=100)
 
             return LogitQRE(point[-1],
-                            self.game.mixed_strategy(point=[math.exp(x) for x in point[:-1]]))
+                            game.mixed_profile(point=[math.exp(x) for x in point[:-1]]))
         else:
             raise NotImplementedError
 
-    def compute_max_like(self, data):
+    def compute_max_like(self, game, data):
         diff_log_like = lambda data, point, tangent: \
                         sum([ x*y for (x, y) in zip(data, tangent[:-1]) ])
 
-        if self.game.is_symmetric():
-            p = self.game.mixed_strategy()
+        if game.is_symmetric:
+            p = game.mixed_profile()
 
             point = pctrace.trace_path([ math.log(x) for x in p.profile ],
                                        0.0, 1000000.0,
-                                       lambda x: sym_compute_lhs(self.game, x),
-                                       lambda x: sym_compute_jac(self.game, x),
-                                       callback=self.on_step,
+                                       lambda x: sym_compute_lhs(game, x),
+                                       lambda x: sym_compute_jac(game, x),
                                        hStart=1.0,
                                        crit=lambda x,t: diff_log_like(data,x,t),
                                        maxIter=100)
 
             return LogitQRE(point[-1],
-                            self.game.mixed_strategy(point=[math.exp(x) for x in point[:-1]]))
+                            game.mixed_profile(point=[math.exp(x) for x in point[:-1]]))
         else:
             raise NotImplementedError
 
-    def compute_criterion(self, f):
+    def compute_criterion(self, game, f):
         def criterion_wrap(x, t):
             """
             This translates the internal representation of the tracer
             into a QRE object.
             """
             return f(LogitQRE(x[-1],
-                              self.game.mixed_strategy(point=[math.exp(z) for z in x[:-1]])))
+                              game.mixed_profile(point=[math.exp(z) for z in x[:-1]])))
             
-        if self.game.is_symmetric():
-            p = self.game.mixed_strategy()
+        if game.is_symmetric:
+            p = game.mixed_profile()
 
             point = pctrace.trace_path([ math.log(x) for x in p.profile ],
                                        0.0, 1000000.0,
-                                       lambda x: sym_compute_lhs(self.game, x),
-                                       lambda x: sym_compute_jac(self.game, x),
-                                       callback=self.on_step,
+                                       lambda x: sym_compute_lhs(game, x),
+                                       lambda x: sym_compute_jac(game, x),
                                        hStart=1.0,
                                        crit=criterion_wrap,
                                        maxIter=100)
 
             return LogitQRE(point[-1],
-                            self.game.mixed_strategy(point=[math.exp(x) for x in point[:-1]]))
+                            game.mixed_profile(point=[math.exp(x) for x in point[:-1]]))
         else:
             raise NotImplementedError
         
