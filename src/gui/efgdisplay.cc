@@ -154,7 +154,7 @@ bool gbtPlayerDropTarget::OnDropPlayer(Gambit::GameNode p_node,
   long pl;
   p_text.Right(p_text.Length() - 1).ToLong(&pl);
   Gambit::Game efg = m_model->GetGame();
-  Gambit::GamePlayer player = ((pl = 0) ? efg->GetChance() : efg->GetPlayer(pl));
+  Gambit::GamePlayer player = ((pl == 0) ? efg->GetChance() : efg->GetPlayer(pl));
   if (p_node->NumChildren() == 0) {
     m_model->DoInsertMove(p_node, player, 2);
   }
