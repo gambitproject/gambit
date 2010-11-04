@@ -9,8 +9,9 @@ class CobbDouglasVCGame(meanstat.MeanStatisticGame):
     A symmetric public goods game with a Cobb-Douglas payoff specification,
     following, e.g., Andreoni (1993)
     """
-    def __init__(self, N, choices, omega, alpha, tax=0):
-        meanstat.MeanStatisticGame.__init__(self, N, choices)
+    def __init__(self, N, min_choice, max_choice, step_choice, omega, alpha, tax=0):
+        meanstat.MeanStatisticGame.__init__(self, N,
+                                            min_choice, max_choice, step_choice)
         self.omega = omega
         self.alpha = alpha
         self.tax = tax
@@ -28,8 +29,9 @@ class QuadraticVCGame(meanstat.MeanStatisticGame):
     """
     A symmetric public goods game with a quadratic payoff specification.
     """
-    def __init__(self, N, choices, omega, m, c, tax=0):
-        meanstat.MeanStatisticGame.__init__(self, N, choices)
+    def __init__(self, N, min_choice, max_choice, step_choice, omega, m, c, tax=0):
+        meanstat.MeanStatisticGame.__init__(self, N,
+                                            min_choice, max_choice, step_choice)
         self.omega = omega
         self.m = m
         self.c = c

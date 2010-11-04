@@ -24,12 +24,12 @@ class MeanStatisticGame(object):
     the method payoff(own, others), which provides the payoff for
     any given vector of own choice and sum of others' choices.
     """
-    def __init__(self, N, choices):
+    def __init__(self, N, min_choice, max_choice, step_choice=1):
         self.N = N
-        self.choices = choices
+        self.choices = xrange(min_choice, max_choice+1, step_choice)
         self.statistics = xrange((self.N-1)*min(self.choices),
-                                 (self.N-1)*max(self.choices)+1)
-
+                                 (self.N-1)*max(self.choices)+1,
+                                 step_choice)
 
     @property
     def is_tree(self):   return False
@@ -63,8 +63,9 @@ class MeanStatisticTableGame(MeanStatisticGame):
     A mean statistic game implemented as a table, indexed by
     (own choice, sum of others' choices).
     """
-    def __init__(self, N, choices, table=None, matrix=None):
-        MeanStatisticGame.__init__(self, N, choices)
+    def __init__(self, N, min_choice, max_choice, step_choice=1,
+                 table=None, matrix=None):
+        MeanStatisticGame.__init__(self, N, min_choice, max_choice, step_choice)
         self.payoffs = { }
         if table is not None:
             for row in table:
@@ -116,8 +117,8 @@ class MixedProfile(object):
 
     
     def strategy_value(self, st):
-        return sum([ prob * self.game.payoff(st,
-                                             i+(self.game.N-1)*min(self.game.choices))
+        return sum([ prob * self.game.payoff(self.game.choices[st],
+                                             self.game.statistics[i])
                      for (i, prob) in
                      enumerate(self.sum_dist(self.game.N-1,
                                              self.profile)) ])
@@ -125,15 +126,14 @@ class MixedProfile(object):
     def strategy_values(self):
         oprob = self.sum_dist(self.game.N-1, self.profile)
         
-        return [ sum([ prob * self.game.payoff(st,
-                                               i+(self.game.N-1)*min(self.game.choices))
+        return [ sum([ prob * self.game.payoff(st, self.game.statistics[i])
                        for (i, prob) in enumerate(oprob) ])
                  for st in self.game.choices ]
 
     def strategy_value_deriv(self, st, stOpp):
-        return sum([ prob * self.game.payoff(st,
-                                             i+stOpp+
-                                             (self.game.N-2)*min(self.game.choices))
+        return sum([ prob * self.game.payoff(self.game.choices[st],
+                                             self.game.statistics[i]+
+                                             self.game.choices[stOpp])
                      for (i, prob) in
                      enumerate(self.sum_dist(self.game.N-2,
                                              self.profile)) ])
@@ -143,9 +143,9 @@ class MixedProfile(object):
     def strategy_values_deriv(self):
         oprob = self.sum_dist(self.game.N-2, self.profile)
         
-        return [ [ sum([ prob * self.game.payoff(st,
-                                                 i+stOpp+
-                                                 (self.game.N-2)*min(self.game.choices))
+        return [ [ sum([ prob * self.game.payoff(self.game.choices[st],
+                                                 self.game.statistics[i]+
+                                                 self.game.choices[stOpp])
                          for (i, prob) in enumerate(oprob) ])
                    for stOpp in self.game.choices ]
                  for st in self.game.choices ]

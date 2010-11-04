@@ -8,10 +8,13 @@ class TullockGame(meanstat.MeanStatisticGame):
     """
     A Tullock contest game.
     """
-    def __init__(self, N, choices, prize, omega):
-        meanstat.MeanStatisticGame.__init__(self, N, choices)
+    def __init__(self, N, min_choice, max_choice, step_choice,
+                 prize, omega, cost=lambda e: e):
+        meanstat.MeanStatisticGame.__init__(self, N,
+                                            min_choice, max_choice, step_choice)
         self.prize = prize
         self.omega = omega
+        self.cost = cost
 
     @property
     def title(self):
@@ -21,8 +24,8 @@ class TullockGame(meanstat.MeanStatisticGame):
     def payoff(self, own, others):
         try:
             p_win = 1.0 * own / (own+others)
-            return p_win * (self.omega - own + self.prize) + \
-                   (1.0-p_win) * (self.omega - own)
+            return p_win * (self.omega - self.cost(own) + self.prize) + \
+                   (1.0-p_win) * (self.omega - self.cost(own))
         except ZeroDivisionError:
             return self.omega
 
