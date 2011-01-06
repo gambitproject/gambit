@@ -718,5 +718,14 @@ osx-bundle:
 	-mkdir Gambit.app/Contents/MacOS
 	-mkdir Gambit.app/Contents/Resources
 	cp contrib/mac/Info.plist Gambit.app/Contents
+	cp contrib/mac/gambit.icns Gambit.app/Contents/Resources/gambit.icns
 	echo -n 'APPL????' > Gambit.app/Contents/PkgInfo
 	cp gambit Gambit.app/Contents/MacOS/gambit
+	cp gambit-* Gambit.app/Contents/MacOS
+
+osx-dmg:  osx-bundle
+	-rm -rf .dmg
+	-mkdir .dmg
+	cp -r Gambit.app .dmg
+	hdiutil create Gambit.dmg -volname Gambit -srcfolder .dmg -format UDZO -imagekey zlib-level=9
+	rm -rf .dmg

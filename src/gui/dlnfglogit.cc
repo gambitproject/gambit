@@ -26,6 +26,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
+#include <wx/stdpaths.h>
 #include <wx/txtstrm.h>
 #include <wx/tokenzr.h>
 #include <wx/process.h>
@@ -717,7 +718,8 @@ void LogitMixedDialog::Start(void)
   m_process->Redirect();
 
 #ifdef __WXMAC__
-  m_pid = wxExecute(wxT("/usr/local/bin/gambit-logit -S"),
+  m_pid = wxExecute(wxStandardPaths::Get().GetExecutablePath() + 
+		    wxT("-logit -S"),
                     wxEXEC_ASYNC, m_process);
 #else
   m_pid = wxExecute(wxT("gambit-logit -S"), wxEXEC_ASYNC, m_process);

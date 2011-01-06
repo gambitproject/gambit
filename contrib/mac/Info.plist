@@ -11,7 +11,7 @@
 	<key>CFBundleExecutable</key>
 	<string>gambit</string>
 	<key>CFBundleIconFile</key>
-	<string>wxmac.icns</string>
+	<string>gambit</string>
 	<key>CFBundleName</key>
 	<string>Gambit</string>
 	<key>CFBundlePackageType</key>

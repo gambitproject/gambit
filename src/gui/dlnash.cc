@@ -26,6 +26,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
+#include <wx/stdpaths.h>
 
 #include "dlnash.h"
 
@@ -152,8 +153,11 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand(void) const
 
   wxString prefix, options, game, count;
 #ifdef __WXMAC__
-  // For the moment, Mac assumes the command-line tools are in /usr/local
-  prefix = wxT("/usr/local/bin/gambit-");
+  // Look in the app bundle.  The command-line tools should be placed
+  // in the same folder inside the app bundle as the GUI executable.
+  // GetExecutablePath() returns the full path to the GUI executable,
+  // including the 'gambit', so all we need is the dash to form the prefix.
+  prefix = wxStandardPaths::Get().GetExecutablePath() + wxT("-");
 #else
   prefix = wxT("gambit-");
 #endif  // __WXMAC__
