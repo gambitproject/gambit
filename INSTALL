@@ -103,7 +103,7 @@ Gambit with
 The graphical interface and wxWidgets
 -------------------------------------
 
-Gambit requires wxWidgets version 2.6.0 or higher for the
+Gambit requires wxWidgets version 2.8.0 or higher for the
 graphical interface.  See their website at
 
 http://www.wxwidgets.org

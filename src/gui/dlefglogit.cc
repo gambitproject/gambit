@@ -368,7 +368,7 @@ void gbtLogitBehavDialog::OnSave(wxCommandEvent &)
   wxFileDialog dialog(this, _("Choose file"), wxT(""), wxT(""),
 		      wxT("CSV files (*.csv)|*.csv|"
 			  "All files (*.*)|*.*"),
-		      wxSAVE | wxOVERWRITE_PROMPT);
+		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
     std::ofstream file((const char *) dialog.GetPath().mb_str());

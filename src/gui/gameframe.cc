@@ -761,7 +761,7 @@ void gbtGameFrame::OnFileSave(wxCommandEvent &p_event)
 			wxFileNameFromPath(m_doc->GetFilename()),
 			wxT("Gambit workbooks (*.gbt)|*.gbt|"
 			    "All files (*.*)|*.*"),
-			wxSAVE | wxOVERWRITE_PROMPT);
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
     if (dialog.ShowModal() == wxID_OK) {
       try {
@@ -852,7 +852,7 @@ void gbtGameFrame::OnFileExportEfg(wxCommandEvent &)
 		      wxGetApp().GetCurrentDir(), _T(""),
 		      _T("Gambit extensive games (*.efg)|*.efg|"
 			 "All files (*.*)|*.*"), 
-		      wxSAVE | wxOVERWRITE_PROMPT);
+		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->DoExportEfg(dialog.GetPath());
@@ -865,7 +865,7 @@ void gbtGameFrame::OnFileExportNfg(wxCommandEvent &)
 		      wxGetApp().GetCurrentDir(), _T(""),
 		      _T("Gambit strategic games (*.nfg)|*.nfg|"
 			 "All files (*.*)|*.*"),
-		      wxSAVE | wxOVERWRITE_PROMPT);
+		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->DoExportNfg(dialog.GetPath());
@@ -908,7 +908,7 @@ void gbtGameFrame::OnFileExportGraphic(wxCommandEvent &p_event)
 
   wxFileDialog dialog(this, _("Choose output file"), 
 		      wxGetApp().GetCurrentDir(), _T(""), filter,
-		      wxSAVE | wxOVERWRITE_PROMPT);
+		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
     wxBitmapType code;
@@ -934,7 +934,7 @@ void gbtGameFrame::OnFileExportPS(wxCommandEvent &)
   wxFileDialog dialog(this, _("Choose output file"),
 		      wxGetApp().GetCurrentDir(), _T(""),
 		      _T("PostScript files (*.ps)|*.ps"), 
-		      wxSAVE | wxOVERWRITE_PROMPT);
+		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
     printData.SetFilename(dialog.GetPath());
@@ -970,7 +970,7 @@ void gbtGameFrame::OnFileExportSVG(wxCommandEvent &)
 		      wxGetApp().GetCurrentDir(), _T(""),
 		      wxT("SVG files (*.svg)|*.svg|"
 			  "All files (*.*)|*.*"),
-		      wxSAVE | wxOVERWRITE_PROMPT);
+		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
     if (m_efgPanel && m_efgPanel->IsShown()) {

@@ -6271,12 +6271,12 @@ void wxSheet::OnChar( wxKeyEvent& event )
             
             break;
         }
-        case WXK_PRIOR:
+        case WXK_PAGEUP:
         {
             MoveCursorUpPage( event.ShiftDown() );
             break;
         }
-        case WXK_NEXT:
+        case WXK_PAGEDOWN:
         {
             MoveCursorDownPage( event.ShiftDown() );
             break;
