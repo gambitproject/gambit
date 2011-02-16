@@ -796,7 +796,7 @@ wxString wxSheetTable::GetDefaultColLabelValue( int col ) const
  
     // new method using log function so you don't have to reverse the string
     wxCHECK_MSG(col >= 0, wxEmptyString, wxT("Invalid col"));
-    const size_t chars = size_t(log(col)/3.2580965380); // log_26(x) = log(x)/log(26.0)
+    const size_t chars = size_t(log((double) col)/3.2580965380); // log_26(x) = log(x)/log(26.0)
     wxString s(wxT('A'), chars+1);
     for ( size_t n = 0; n <= chars; n++ )
     {

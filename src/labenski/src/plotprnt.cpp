@@ -154,8 +154,8 @@ bool wxPlotPrintout::ShowPrintDialog()
     if (!printer.Print(GetPlotCtrl(), this, true))
     {
         if (wxPrinter::GetLastError() == wxPRINTER_ERROR)
-            wxMessageBox(_("There was a problem printing.\n"
-                           "Perhaps your printer is not setup correctly?"),
+            wxMessageBox(wxT("There was a problem printing.\n")
+                           wxT("Perhaps your printer is not setup correctly?"),
                          _("Printing"), wxOK, GetPlotCtrl());
     }
 
@@ -175,8 +175,8 @@ bool wxPlotPrintout::ShowPrintPreviewDialog(const wxString& frameTitle)
     if (!preview->Ok())
     {
         delete preview;
-        wxMessageBox(_("There was a problem previewing.\n"
-                       "Perhaps your printer is not setup correctly?"),
+        wxMessageBox(wxT("There was a problem previewing.\n")
+                       wxT("Perhaps your printer is not setup correctly?"),
                      _("Previewing"), wxOK, GetPlotCtrl());
         return false;
     }

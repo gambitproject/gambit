@@ -352,7 +352,7 @@ void gbtGameFrame::OnUpdate(void)
   GetToolBar()->EnableTool(wxID_UNDO, m_doc->CanUndo());
   menuBar->Enable(wxID_REDO, m_doc->CanRedo());
   GetToolBar()->EnableTool(wxID_REDO, m_doc->CanRedo());
-  menuBar->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode);
+  menuBar->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode != 0);
   menuBar->Enable(GBT_MENU_EDIT_INSERT_ACTION,
 		  selectNode && selectNode->GetInfoset());
   menuBar->Enable(GBT_MENU_EDIT_REVEAL,
@@ -363,7 +363,7 @@ void gbtGameFrame::OnUpdate(void)
 		  selectNode && selectNode->GetParent());
   menuBar->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME,
 		  selectNode && selectNode->GetOutcome());
-  menuBar->Enable(GBT_MENU_EDIT_NODE, selectNode);
+  menuBar->Enable(GBT_MENU_EDIT_NODE, selectNode != 0);
   menuBar->Enable(GBT_MENU_EDIT_MOVE, 
 		     selectNode && selectNode->GetInfoset());
 
@@ -554,8 +554,8 @@ void gbtGameFrame::MakeMenus(void)
   viewMenu->AppendSeparator();
     
   viewMenu->Append(GBT_MENU_VIEW_STRATEGIC, _("&Strategic game"),
-		   _("Display the reduced strategic representation "
-		     "of the game"), true);
+		   wxT("Display the reduced strategic representation ")
+		     wxT("of the game"), true);
   
   wxMenu *formatMenu = new wxMenu;
   AppendBitmapItem(formatMenu, GBT_MENU_FORMAT_LAYOUT, _("&Layout"),
@@ -662,10 +662,10 @@ void gbtGameFrame::MakeToolbar(void)
   if (m_doc->IsTree()) {
     toolBar->AddTool(GBT_MENU_VIEW_STRATEGIC, wxBitmap(table_xpm),
 		     wxNullBitmap, true, -1, -1, 0, 
-		     _("Display the reduced strategic representation "
-		       "of the game"),
-		     _("Display the reduced strategic representation "
-		       "of the game"));
+		     wxT("Display the reduced strategic representation ")
+		       wxT("of the game"),
+		     wxT("Display the reduced strategic representation ")
+		       wxT("of the game"));
   }
   toolBar->AddTool(GBT_MENU_VIEW_PROFILES, wxBitmap(profiles_xpm),
 		   wxNullBitmap, true, -1, -1, 0, 
@@ -715,10 +715,10 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose file to open"), 
 		      wxGetApp().GetCurrentDir(), _T(""), 
-		      _("Gambit workbooks (*.gbt)|*.gbt|"
-			"Gambit extensive games (*.efg)|*.efg|"
-			"Gambit strategic games (*.nfg)|*.nfg|"
-			"All files (*.*)|*.*"));
+		      wxT("Gambit workbooks (*.gbt)|*.gbt|")
+			wxT("Gambit extensive games (*.efg)|*.efg|")
+			wxT("Gambit strategic games (*.nfg)|*.nfg|")
+			wxT("All files (*.*)|*.*"));
 
   if (dialog.ShowModal() == wxID_OK) {
     wxString filename = dialog.GetPath();
@@ -759,8 +759,8 @@ void gbtGameFrame::OnFileSave(wxCommandEvent &p_event)
     wxFileDialog dialog(this, _("Choose file"),
 			wxPathOnly(m_doc->GetFilename()),
 			wxFileNameFromPath(m_doc->GetFilename()),
-			wxT("Gambit workbooks (*.gbt)|*.gbt|"
-			    "All files (*.*)|*.*"),
+			wxT("Gambit workbooks (*.gbt)|*.gbt|")
+			wxT("All files (*.*)|*.*"),
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
     if (dialog.ShowModal() == wxID_OK) {
@@ -850,8 +850,8 @@ void gbtGameFrame::OnFileExportEfg(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose file"), 
 		      wxGetApp().GetCurrentDir(), _T(""),
-		      _T("Gambit extensive games (*.efg)|*.efg|"
-			 "All files (*.*)|*.*"), 
+		      wxT("Gambit extensive games (*.efg)|*.efg|")
+			 wxT("All files (*.*)|*.*"), 
 		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
@@ -863,8 +863,8 @@ void gbtGameFrame::OnFileExportNfg(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose file"), 
 		      wxGetApp().GetCurrentDir(), _T(""),
-		      _T("Gambit strategic games (*.nfg)|*.nfg|"
-			 "All files (*.*)|*.*"),
+		      wxT("Gambit strategic games (*.nfg)|*.nfg|")
+			 wxT("All files (*.*)|*.*"),
 		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
@@ -896,8 +896,8 @@ void gbtGameFrame::OnFileExportGraphic(wxCommandEvent &p_event)
     filter = wxT("Windows bitmap files (*.bmp)|*.bmp") + filter;
     break;
   case GBT_MENU_FILE_EXPORT_JPEG:
-    filter = wxT("JPEG files (*.jpeg)|*.jpeg|"
-		 "JPG files (*.jpg)|*.jpg") + filter;
+    filter = wxT("JPEG files (*.jpeg)|*.jpeg|")
+		 wxT("JPG files (*.jpg)|*.jpg") + filter;
     break;
   case GBT_MENU_FILE_EXPORT_PNG:
     filter = wxT("PNG files (*.png)|*.png") + filter;
@@ -968,8 +968,8 @@ void gbtGameFrame::OnFileExportSVG(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose output file"), 
 		      wxGetApp().GetCurrentDir(), _T(""),
-		      wxT("SVG files (*.svg)|*.svg|"
-			  "All files (*.*)|*.*"),
+		      wxT("SVG files (*.svg)|*.svg|")
+			  wxT("All files (*.*)|*.*"),
 		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
@@ -985,9 +985,9 @@ void gbtGameFrame::OnFileExportSVG(wxCommandEvent &)
 void gbtGameFrame::OnFileExit(wxCommandEvent &p_event)
 {
   if (wxGetApp().AreDocumentsModified()) {
-    if (wxMessageBox(_("There are modified games.\n"
-		       "Any unsaved changes will be lost!\n"
-		       "Close anyway?"), 
+    if (wxMessageBox(wxT("There are modified games.\n")
+		       wxT("Any unsaved changes will be lost!\n")
+		       wxT("Close anyway?"), 
 		     _("Warning"),
 		     wxOK | wxCANCEL) == wxCANCEL) {
       return;
@@ -1225,8 +1225,8 @@ void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
     // We are switching to strategic view
 
     if (!m_doc->GetGame()->IsPerfectRecall()) {
-      if (wxMessageBox(_("This is not a game of perfect recall\n"
-			 "Do you wish to continue?"), 
+      if (wxMessageBox(wxT("This is not a game of perfect recall\n")
+			 wxT("Do you wish to continue?"), 
 		       _("Strategic game"), 
 		       wxOK | wxCANCEL | wxALIGN_CENTER, this) != wxOK) {
 	return;
@@ -1392,9 +1392,9 @@ void gbtGameFrame::OnUnsplit(wxSplitterEvent &)
 void gbtGameFrame::OnCloseWindow(wxCloseEvent &p_event)
 {
   if (p_event.CanVeto() && m_doc->IsModified()) {
-    if (wxMessageBox(_("Game has been modified.\n"
-		       "Unsaved changes will be lost!\n"
-		       "Close anyway?"), 
+    if (wxMessageBox(wxT("Game has been modified.\n")
+		       wxT("Unsaved changes will be lost!\n")
+		       wxT("Close anyway?"), 
 		     _("Warning"),
 		     wxOK | wxCANCEL) == wxCANCEL) {
       p_event.Veto();

@@ -367,8 +367,8 @@ void gbtLogitBehavDialog::OnStop(wxCommandEvent &)
 void gbtLogitBehavDialog::OnSave(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose file"), wxT(""), wxT(""),
-		      wxT("CSV files (*.csv)|*.csv|"
-			  "All files (*.*)|*.*"),
+		      wxT("CSV files (*.csv)|*.csv|")
+			  wxT("All files (*.*)|*.*"),
 		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {

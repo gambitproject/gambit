@@ -632,7 +632,6 @@ gambit_SOURCES = \
 	src/labenski/include/wx/wxthings/block.h \
 	src/labenski/include/wx/wxthings/bmpcombo.h \
 	src/labenski/include/wx/wxthings/dropdown.h \
-	src/labenski/include/wx/wxthings/filebrws.h \
 	src/labenski/include/wx/wxthings/genergdi.h \
 	src/labenski/include/wx/wxthings/geometry.h \
 	src/labenski/include/wx/wxthings/medsort.h \
