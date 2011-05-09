@@ -52,7 +52,7 @@ gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
   topSizer->Add(new wxStaticText(this, wxID_STATIC,
 				 _T("Graphical Interface")),
 		0, wxLEFT | wxRIGHT | wxALIGN_CENTER, 5);
-  topSizer->Add(new wxStaticText(this, wxID_STATIC, _T("Version " VERSION)),
+  topSizer->Add(new wxStaticText(this, wxID_STATIC, _T("Version " wxT(VERSION))),
 		0, wxALIGN_CENTER, 5);
 
   topSizer->Add(FormattedText(this, 

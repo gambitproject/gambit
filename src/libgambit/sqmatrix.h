@@ -30,9 +30,8 @@ namespace Gambit {
 
 class SingularMatrixException : public Exception {
 public:
-  virtual ~SingularMatrixException() { }
-  std::string GetDescription(void) const
-    { return "Attempted to invert a singular matrix"; }
+  virtual ~SingularMatrixException() throw() { }
+  const char *what(void) const throw() { return "Attempted to invert a singular matrix"; }
 };
 
 template <class T> class SquareMatrix : public Matrix<T>   {

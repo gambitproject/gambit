@@ -23,7 +23,7 @@
 #ifndef LEMKETAB_H
 #define LEMKETAB_H
 
-#include "tableau.h"
+#include "liblinear/tableau.h"
 
 template <class T> class LTableau : public Tableau<T> {
 protected:
@@ -32,13 +32,13 @@ public:
 //   LTableau(void);
   class BadPivot : public Gambit::Exception  {
   public:
-    virtual ~BadPivot();
-    std::string GetDescription(void) const;
+    virtual ~BadPivot() throw() { }
+    const char *what(void) const throw() { return "Bad Pivot in LTableau"; }
   };
   class BadExitIndex : public Gambit::Exception  {
   public:
-    virtual ~BadExitIndex();
-    std::string GetDescription(void) const;
+    virtual ~BadExitIndex() throw() { }
+    const char *what(void) const throw() { return "Bad Exit Index in LTableau"; }
   };
   LTableau(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b);
   LTableau(Tableau<T> &);

@@ -25,23 +25,26 @@
 #include <iostream>
 #include <iomanip>
 
-#include "vertenum.imp"
-#include "tableau.imp"
-
 #include "libgambit/libgambit.h"
 #include "clique.h"
+#include "vertenum.imp"
+
 
 using namespace Gambit;
 
 bool g_showConnect = false;
 int g_numDecimals = 6;
 
-template <class T> bool EqZero(const T &x)
+bool EqZero(const double &x)
 {
-  T eps;
-  Epsilon(eps, 12);
+  double eps = ::pow(10.0, -15.0);
   return (x <= eps && x >= -eps);
 }     
+
+bool EqZero(const Rational &x)
+{
+  return (x == Gambit::Rational(0));
+}
 
 int m_stopAfter = 0;
 
@@ -123,7 +126,8 @@ template <class T> void GetCliques(std::ostream &p_stream,
 	    p_key2[cliques2[cl][j]][k];
 	}
 
-	PrintProfile(p_stream, "convex-" + ToText(cl), profile.ToFullSupport());
+	PrintProfile(p_stream, "convex-" + lexical_cast<std::string>(cl), 
+		     profile.ToFullSupport());
       }
     }
   }
@@ -198,14 +202,14 @@ template <class T> void Solve(const StrategySupport &p_support)
 	// need only check complementarity, since it is feasible
 	bool nash = true;
 	for (int k = 1; nash && k <= p_support.NumStrategies(1); k++) {
-	  if (bfs1.IsDefined(k) && bfs2.IsDefined(-k)) {
-	    nash = nash && EqZero(bfs1(k) * bfs2(-k));
+	  if (bfs1.count(k) && bfs2.count(-k)) {
+	    nash = nash && EqZero(bfs1[k] * bfs2[-k]);
 	  }
 	}
 
 	for (int k = 1; nash && k <= p_support.NumStrategies(2); k++) {
-	  if (bfs2.IsDefined(k) && bfs1.IsDefined(-k)) {
-	    nash = nash && EqZero(bfs2(k) * bfs1(-k));
+	  if (bfs2.count(k) && bfs1.count(-k)) {
+	    nash = nash && EqZero(bfs2[k] * bfs1[-k]);
 	  }
 	}
 
@@ -214,14 +218,14 @@ template <class T> void Solve(const StrategySupport &p_support)
 	  T sum = (T) 0;
 	  for (int k = 1; k <= p_support.NumStrategies(1); k++) {
 	    profile[p_support.GetStrategy(1, k)] = (T) 0;
-	    if (bfs1.IsDefined(k)) {
-	      profile[p_support.GetStrategy(1, k)] = -bfs1(k);
+	    if (bfs1.count(k)) {
+	      profile[p_support.GetStrategy(1, k)] = -bfs1[k];
 	      sum += profile[p_support.GetStrategy(1, k)];
 	    }
 	  } 
 	  
 	  for (int k = 1; k <= p_support.NumStrategies(1); k++) {
-	    if (bfs1.IsDefined(k)) { 
+	    if (bfs1.count(k)) { 
 	      profile[p_support.GetStrategy(1, k)] /= sum;
 	    }
 	  }
@@ -229,14 +233,14 @@ template <class T> void Solve(const StrategySupport &p_support)
 	  sum = (T) 0;
 	  for (int k = 1; k <= p_support.NumStrategies(2); k++) {
 	    profile[p_support.GetStrategy(2, k)] = (T) 0;
-	    if (bfs2.IsDefined(k)) {
-	      profile[p_support.GetStrategy(2, k)] =-bfs2(k);
+	    if (bfs2.count(k)) {
+	      profile[p_support.GetStrategy(2, k)] = -bfs2[k];
 	      sum += profile[p_support.GetStrategy(2, k)];
 	    }
 	  } 
 	  
 	  for (int k = 1; k <= p_support.NumStrategies(2); k++) {
-	    if (bfs2.IsDefined(k)) { 
+	    if (bfs2.count(k)) { 
 	      profile[p_support.GetStrategy(2, k)] /= sum;
 	    }
 	  }

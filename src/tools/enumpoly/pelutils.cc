@@ -481,7 +481,7 @@ std::string ErrorInPelican::GetDescription(void) const
 }
 #endif
 
-void bad_error(char *m)     /* generates an error message and aborts*/
+void bad_error(const char *m)     /* generates an error message and aborts*/
 {
 #ifdef GAMBIT_EXCEPTIONS
   throw ErrorInPelican();
@@ -494,7 +494,7 @@ void bad_error(char *m)     /* generates an error message and aborts*/
         exit(1);
 }
 
-void warning(char *m){
+void warning(const char *m){
 #ifdef LOG_PRINT
 fprintf(stderr /* was Pel_Err */,"Warning:%s\n",m)
 #endif
@@ -505,20 +505,17 @@ fprintf(stderr /* was Pel_Err */,"Warning:%s\n",m)
 /*********************** implementations from Rand.c **********************/
 /**************************************************************************/
 
-void srand48(long int seedval);
-
-// WARNING: RDM added the following just to get to compile under BCC
-//            I have no idea if this is correct!!!  
-#if !defined(HAVE_SRAND48)
-void srand48(long int seedval)
-{
-  srand(seedval);
-}
-#endif // HAVE_SRAND48
 /*
 ** rand_seed  -- seed the random number generator with seedval.
 */
-void rand_seed(long int seedval){ srand48(seedval);}
+void rand_seed(long int seedval)
+{
+#if defined(HAVE_SRAND48)
+srand48(seedval);
+#else
+srand(seedval);
+#endif  /* defined(HAVE_SRAND48) */
+}
 
 /*
 **rand_int  -- return a random integer r with low<=r<=high
@@ -527,17 +524,25 @@ void rand_seed(long int seedval){ srand48(seedval);}
 **              .5 then there is a slight chance we could end up with
 **              high+1.)
 */
-int rand_int(int low, int high){
-      return (int)(low+drand48()*(high-low)+.499999999999); 
+int rand_int(int low, int high)
+{
+#if defined(HAVE_DRAND48)
+  return (int)(low+drand48()*(high-low)+.499999999999); 
+#else
+  return (int)(low+rand()*(high-low)+.499999999999); 
+#endif  /* defined(HAVE_DRAND48) */
 }
-
-
 
 /*
 **rand_double  -- return a random integer r with low<=r<=high
 */
-double rand_double(int low, int high){
-      return (drand48()*(high-low)+low);
+double rand_double(int low, int high)
+{
+#if defined(HAVE_DRAND48)
+  return (drand48()*(high-low)+low);
+#else
+  return (rand()*(high-low)+low);
+#endif  /* defined(HAVE_DRAND48) */
 }
 
 
@@ -2306,9 +2311,9 @@ int *poly_homog(polynomial1 p){
 }
 
 void ring_set_var(Pring R, int n, char *lable){
-   strncpy(R->vars[n],lable,RING_VAR_L);
+  strncpy(const_cast<char *>(R->vars[n]),lable,RING_VAR_L);
 }
-char *ring_var(Pring R,int i){return R->vars[i];}
+char *ring_var(Pring R,int i){return const_cast<char *>(R->vars[i]);}
 void ring_set_def(Pring R,  char *lable){
    strncpy(R->def,lable,RING_VAR_L);
 }
@@ -3253,7 +3258,7 @@ node atom_proc(node (*prc)(node))
 {
     node R;
     R = node_new();
-    node_set_ptr(R, (void *)prc, PROC, LEFT);
+    node_set_ptr(R, reinterpret_cast<void *>(prc), PROC, LEFT);
     return R;
 }
 

@@ -73,9 +73,8 @@ public:
 /// An exception thrown when attempting to dereference a null pointer
 class NullException : public Exception {
 public:
-  virtual ~NullException() { }
-  std::string GetDescription(void) const
-    { return "Dereferencing null pointer"; }
+  virtual ~NullException() throw() { }
+  const char *what(void) const throw()  { return "Dereferencing null pointer"; }
 };
 
 //
@@ -193,25 +192,23 @@ template <class T> class MixedBehavProfile;
 /// Exception thrown when an operation that is undefined is attempted
 class UndefinedException : public Exception {
 public:
-  virtual ~UndefinedException() { }
-  std::string GetDescription(void) const
-    { return "Undefined operation on game"; }
+  virtual ~UndefinedException() throw() { }
+  const char *what(void) const throw()   { return "Undefined operation on game"; }
 };
 
 /// Exception thrown on an operation between incompatible objects
 class MismatchException : public Exception {
 public:
-  virtual ~MismatchException() { }
-  std::string GetDescription(void) const
-    { return "Operation between objects in different games"; }
+  virtual ~MismatchException() throw() { }
+  const char *what(void) const throw()  
+  { return "Operation between objects in different games"; }
 };
 
 /// Exception thrown on a parse error when reading a game savefile
 class InvalidFileException : public Exception {
 public:
-  virtual ~InvalidFileException() { }
-  std::string GetDescription(void) const
-    { return "File not in a recognized format"; }
+  virtual ~InvalidFileException() throw() { }
+  const char *what(void) const throw()  { return "File not in a recognized format"; }
 };
 
 //=======================================================================
@@ -815,7 +812,7 @@ template<> inline Rational PureBehavProfile::GetPayoff(int pl) const
 { return GetNodeValue<Rational>(m_efg->GetRoot(), pl); }
 
 template<> inline std::string PureBehavProfile::GetPayoff(int pl) const
-{ return ToText(GetNodeValue<Rational>(m_efg->GetRoot(), pl)); }
+{ return lexical_cast<std::string>(GetNodeValue<Rational>(m_efg->GetRoot(), pl)); }
 
 //=======================================================================
 

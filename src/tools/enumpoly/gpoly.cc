@@ -27,7 +27,7 @@
 template<> double gPoly<double>::String_Coeff(double nega)
 {
   std::string Coeff = "";
-  while (charc >= '0' && charc <= '9' || charc == '.'){
+  while ((charc >= '0' && charc <= '9') || charc == '.'){
     Coeff += charc;
     charnum++;
     GetChar();

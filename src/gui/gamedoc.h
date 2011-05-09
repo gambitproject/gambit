@@ -240,6 +240,9 @@ private:
 
   Gambit::List<std::string> m_undoList, m_redoList;
 
+
+  void UpdateViews(gbtGameModificationType p_modifications);
+
 public:
   gbtGameDocument(Gambit::Game p_game);
   ~gbtGameDocument();
@@ -263,7 +266,8 @@ public:
   bool IsModified(void) const { return m_modified; }
   void SetModified(bool p_modified) { m_modified = p_modified; }
 
-  gbtStyle &GetStyle(void) { return m_style; }
+  const gbtStyle &GetStyle(void) const { return m_style; }
+  void SetStyle(const gbtStyle &p_style);
 
   int NumPlayers(void) const { return m_game->NumPlayers(); }
   bool IsConstSum(void) const { return m_game->IsConstSum(); }
@@ -337,10 +341,46 @@ public:
   Gambit::GameNode GetSelectNode(void) const { return m_selectNode; }
   void SetSelectNode(Gambit::GameNode);
 
-  void UpdateViews(gbtGameModificationType p_modifications);
-
   /// Call to ask viewers to post any pending changes
   void PostPendingChanges(void);
+
+  /// Operations on game model
+  void DoSave(const wxString &p_filename);
+  void DoExportEfg(const wxString &p_filename);
+  void DoExportNfg(const wxString &p_filename);
+  void DoSetTitle(const wxString &p_title, const wxString &p_comment);
+  void DoNewPlayer(void);
+  void DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label);
+  void DoNewStrategy(GamePlayer p_player);
+  void DoDeleteStrategy(GameStrategy p_strategy);
+  void DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label);
+  void DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label);
+  void DoSetActionLabel(GameAction p_action, const wxString &p_label);
+  void DoSetActionProb(GameInfoset p_infoset, unsigned int p_action,
+		       const wxString &p_prob);
+  void DoSetInfoset(GameNode p_node, GameInfoset p_infoset);
+  void DoLeaveInfoset(GameNode p_node);
+  void DoRevealAction(GameInfoset p_infoset, GamePlayer p_player);
+  void DoInsertAction(GameNode p_node);
+  void DoSetNodeLabel(GameNode p_node, const wxString &p_label);
+  void DoAppendMove(GameNode p_node, GameInfoset p_infoset);
+  void DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions);
+  void DoInsertMove(GameNode p_node, GameInfoset p_infoset);
+  void DoCopyTree(GameNode p_destNode, GameNode p_srcNode);
+  void DoMoveTree(GameNode p_destNode, GameNode p_srcNode);
+  void DoDeleteParent(GameNode p_node);
+  void DoDeleteTree(GameNode p_node);
+  void DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player);
+  void DoSetPlayer(GameNode p_node, GamePlayer p_player);
+  void DoNewOutcome(GameNode p_node);
+  void DoNewOutcome(PureStrategyProfile p_profile);
+  void DoSetOutcome(GameNode p_node, GameOutcome p_outcome);
+  void DoRemoveOutcome(GameNode p_node);
+  void DoCopyOutcome(GameNode p_node, GameOutcome p_outcome);
+  void DoSetPayoff(GameOutcome p_outcome, int p_player,
+		   const wxString &p_value);
+
+  void DoAddOutput(gbtAnalysisOutput &p_list, const wxString &p_output);
 };
 
 class gbtGameView {

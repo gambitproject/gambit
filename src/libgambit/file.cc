@@ -24,7 +24,7 @@
 #include <ctype.h>
 #include <iostream>
 #include <sstream>
-
+#include <map>
 
 #include "libgambit.h"
 
@@ -412,7 +412,7 @@ void ReadStrategies(GameParserState &p_state, TableFileGame &p_data)
       }
 
       for (int st = 1; st <= atoi(p_state.GetLastText().c_str()); st++) {
-	player->m_strategies.Append(ToText(Integer(st)));
+	player->m_strategies.Append(lexical_cast<std::string>(st));
       }
 
       p_state.GetNextToken();
@@ -608,16 +608,13 @@ Game BuildNfg(GameParserState &p_parser, TableFileGame &p_data)
 //                  Temporary representation classes
 //=========================================================================
 
-#include "map.h"
-
 class TreeData {
 public:
-  Map<int, GameOutcome> m_outcomeMap;
-  Map<int, GameInfoset> m_chanceInfosetMap;
-  List<Map<int, GameInfoset> > m_infosetMap;
+  std::map<int, GameOutcome> m_outcomeMap;
+  std::map<int, GameInfoset> m_chanceInfosetMap;
+  List<std::map<int, GameInfoset> > m_infosetMap;
 
-  TreeData(void) 
-    : m_outcomeMap(0), m_chanceInfosetMap(0) { }
+  TreeData(void)  { }
   ~TreeData() { }
 };
 
@@ -630,7 +627,7 @@ void ReadPlayers(GameParserState &p_state,
 
   while (p_state.GetNextToken() == TOKEN_TEXT) {
     p_game->NewPlayer()->SetLabel(p_state.GetLastText());
-    p_treeData.m_infosetMap.Append(Map<int, GameInfoset>(0));
+    p_treeData.m_infosetMap.Append(std::map<int, GameInfoset>());
   }
 
   if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
@@ -660,12 +657,12 @@ void ParseOutcome(GameParserState &p_state,
   if (p_state.GetCurrentToken() == TOKEN_TEXT) {
     // This node entry contains information about the outcome
     GameOutcome outcome;
-    if (p_treeData.m_outcomeMap.IsDefined(outcomeId)) {
-      outcome = p_treeData.m_outcomeMap.Lookup(outcomeId);
+    if (p_treeData.m_outcomeMap.count(outcomeId)) {
+      outcome = p_treeData.m_outcomeMap[outcomeId];
     }
     else {
       outcome = p_game->NewOutcome();
-      p_treeData.m_outcomeMap.Define(outcomeId, outcome);
+      p_treeData.m_outcomeMap[outcomeId] = outcome;
     }
 
     outcome->SetLabel(p_state.GetLastText());
@@ -699,8 +696,8 @@ void ParseOutcome(GameParserState &p_state,
     // The node entry does not contain information about the outcome.
     // This means the outcome better have been defined already;
     // if not, raise an error.
-    if (p_treeData.m_outcomeMap.IsDefined(outcomeId)) {
-      p_node->SetOutcome(p_treeData.m_outcomeMap.Lookup(outcomeId));
+    if (p_treeData.m_outcomeMap.count(outcomeId)) {
+      p_node->SetOutcome(p_treeData.m_outcomeMap[outcomeId]);
     }
     else {
       throw InvalidFileException();
@@ -731,8 +728,8 @@ void ParseChanceNode(GameParserState &p_state,
 
   int infosetId = atoi(p_state.GetLastText().c_str());
   GameInfoset infoset;
-  if (p_treeData.m_chanceInfosetMap.IsDefined(infosetId)) {
-    infoset = p_treeData.m_chanceInfosetMap.Lookup(infosetId);
+  if (p_treeData.m_chanceInfosetMap.count(infosetId)) {
+    infoset = p_treeData.m_chanceInfosetMap[infosetId];
   }
 
   p_state.GetNextToken();
@@ -767,7 +764,7 @@ void ParseChanceNode(GameParserState &p_state,
 
     if (!infoset) {
       infoset = p_node->AppendMove(p_game->GetChance(), actions.Length());
-      p_treeData.m_chanceInfosetMap.Define(infosetId, infoset);
+      p_treeData.m_chanceInfosetMap[infosetId] = infoset;
       infoset->SetLabel(label);
       for (int act = 1; act <= actions.Length(); act++) {
 	infoset->GetAction(act)->SetLabel(actions[act]);
@@ -808,15 +805,15 @@ void ParsePersonalNode(GameParserState &p_state,
   int playerId = atoi(p_state.GetLastText().c_str());
   // This will throw an exception if the player ID is not valid
   GamePlayer player = p_game->GetPlayer(playerId);
-  Map<int, GameInfoset> &infosetMap = p_treeData.m_infosetMap[playerId];
+  std::map<int, GameInfoset> &infosetMap = p_treeData.m_infosetMap[playerId];
 
   if (p_state.GetNextToken() != TOKEN_NUMBER) {
     throw InvalidFileException();
   }
   int infosetId = atoi(p_state.GetLastText().c_str());
   GameInfoset infoset;
-  if (infosetMap.IsDefined(infosetId)) {
-    infoset = infosetMap.Lookup(infosetId);
+  if (infosetMap.count(infosetId)) {
+    infoset = infosetMap[infosetId];
   }
   
   p_state.GetNextToken();
@@ -842,7 +839,7 @@ void ParsePersonalNode(GameParserState &p_state,
 
     if (!infoset) {
       infoset = p_node->AppendMove(player, actions.Length());
-      infosetMap.Define(infosetId, infoset);
+      infosetMap[infosetId] = infoset;
       infoset->SetLabel(label);
       for (int act = 1; act <= actions.Length(); act++) {
 	infoset->GetAction(act)->SetLabel(actions[act]);

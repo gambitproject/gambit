@@ -24,9 +24,7 @@
 #include <unistd.h>
 #include <iostream>
 #include "libgambit/libgambit.h"
-
-#include "tableau.h"
-#include "lpsolve.h"
+#include "liblinear/lpsolve.h"
 
 using namespace Gambit;
 
@@ -170,12 +168,12 @@ SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c,
 {
   LPSolve<T> LP(A, b, c, nequals);
   if (!LP.IsAborted()) {
-    BFS<T> cbfs((T) 0);
+    BFS<T> cbfs;
     LP.OptBFS(cbfs);
 
     for (int i = 1; i <= A.NumColumns(); i++) {
-      if (cbfs.IsDefined(i)) {
-	p_primal[i] = cbfs(i);
+      if (cbfs.count(i)) {
+	p_primal[i] = cbfs[i];
       }
       else {
 	p_primal[i] = (T) 0;
@@ -183,8 +181,8 @@ SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c,
     }
 
     for (int i = 1; i <= A.NumRows(); i++) {
-      if (cbfs.IsDefined(-i)) {
-	p_dual[i] = cbfs(-i);
+      if (cbfs.count(-i)) {
+	p_dual[i] = cbfs[-i];
       }
       else {
 	p_dual[i] = (T) 0;
@@ -421,7 +419,7 @@ void SequenceToBehavior(const GameData &p_data,
 template <class T>
 void SolveExtensive(const Game &p_game)
 {
-  BFS<T> cbfs((T) 0);
+  BFS<T> cbfs;
   
   BehavSupport support(p_game);
 

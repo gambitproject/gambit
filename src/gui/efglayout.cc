@@ -21,6 +21,8 @@
 //
 
 #include <math.h>
+#include <algorithm>    // for std::min, std::max
+
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
@@ -253,12 +255,12 @@ static wxPoint DrawFraction(wxDC &p_dc, wxPoint p_point,
   p_dc.SetFont(wxFont(7, wxSWISS, wxNORMAL, wxBOLD));
   
   int numWidth, numHeight;
-  wxString num = wxString(ToText(p_value.numerator()).c_str(),
+  wxString num = wxString(lexical_cast<std::string>(p_value.numerator()).c_str(),
 			  *wxConvCurrent);
   p_dc.GetTextExtent(num, &numWidth, &numHeight);
 
   int denWidth, denHeight;
-  wxString den = wxString(ToText(p_value.denominator()).c_str(),
+  wxString den = wxString(lexical_cast<std::string>(p_value.denominator()).c_str(),
 			  *wxConvCurrent);
   p_dc.GetTextExtent(den, &denWidth, &denHeight);
 
@@ -654,8 +656,8 @@ int gbtTreeLayout::LayoutSubtree(Gambit::GameNode p_node, const Gambit::BehavSup
   }
   entry->SetBranchLength(settings.BranchLength());
 
-  p_maxy = Gambit::max(entry->Y(), p_maxy);
-  p_miny = Gambit::min(entry->Y(), p_miny);
+  p_maxy = std::max(entry->Y(), p_maxy);
+  p_miny = std::min(entry->Y(), p_miny);
     
   return entry->Y();
 }
@@ -722,7 +724,7 @@ void gbtTreeLayout::CheckInfosetEntry(gbtNodeEntry *e)
     e1 = m_nodeList[pos];
     // Find the max num for this level
     if (e->GetLevel() == e1->GetLevel())  {
-      num = Gambit::max(e1->GetSublevel(), num);
+      num = std::max(e1->GetSublevel(), num);
     }
   }
   num++;
@@ -762,7 +764,7 @@ void gbtTreeLayout::UpdateTableInfosets(void)
   // find the max e->num for each level
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
     gbtNodeEntry *entry = m_nodeList[pos];
-    nums[entry->GetLevel()] = Gambit::max(entry->GetSublevel() + 1,
+    nums[entry->GetLevel()] = std::max(entry->GetSublevel() + 1,
 					  nums[entry->GetLevel()]);
   }
     
@@ -779,7 +781,7 @@ void gbtTreeLayout::UpdateTableInfosets(void)
 		  (nums[entry->GetLevel()-1] +
 		   entry->GetSublevel()) * m_infosetSpacing);
     }
-    m_maxX = Gambit::max(m_maxX, entry->X() + entry->GetSize());
+    m_maxX = std::max(m_maxX, entry->X() + entry->GetSize());
   }
 }
 
@@ -847,7 +849,7 @@ void gbtTreeLayout::BuildNodeList(Gambit::GameNode p_node, const Gambit::BehavSu
       BuildNodeList(p_node->GetChild(i), p_support, p_level + 1);
     }
   }
-  m_maxLevel = Gambit::max(p_level, m_maxLevel);
+  m_maxLevel = std::max(p_level, m_maxLevel);
 }
 
 void gbtTreeLayout::BuildNodeList(const Gambit::BehavSupport &p_support)
@@ -888,7 +890,7 @@ void gbtTreeLayout::GenerateLabels(void)
 	int profile = m_doc->GetCurrentProfile();
 	if (profile > 0) {
 	  try {
-	    entry->SetActionProb((double) Gambit::ToNumber(m_doc->GetProfiles().GetActionProb(parent, entry->GetChildNumber())));
+	    entry->SetActionProb((double) Gambit::lexical_cast<Gambit::Rational>(m_doc->GetProfiles().GetActionProb(parent, entry->GetChildNumber())));
 	  }
 	  catch (ValueException &) {
 	    // This occurs when the probability is undefined

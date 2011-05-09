@@ -358,14 +358,14 @@ bool polynomial<T>::CannotHaveRootsIn(const gInterval<T>& I) const
 
       if (base_of_max_index == (T)0)
 	{ max_index = i; base_of_max_index = base; }
-      else if ( pow((T)base,(long)max_index) < pow((T)base_of_max_index,(long)i))
+      else if ( pow((T)base, max_index) < pow((T)base_of_max_index, i))
 	{ max_index = i; base_of_max_index = base; }
     }
 
   }
-                             assert(base_of_max_index != (T)0);
+	assert(base_of_max_index != (T)0);
 
-  if ( (T)pow((T)I.Length(),(long)max_index) < (T)base_of_max_index ) 
+  if ( (T)pow((T)I.Length(), max_index) < (T)base_of_max_index ) 
     return true;
   else 
     return false;

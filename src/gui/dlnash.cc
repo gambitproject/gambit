@@ -26,6 +26,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
+#include <wx/stdpaths.h>
 
 #include "dlnash.h"
 
@@ -152,8 +153,11 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand(void) const
 
   wxString prefix, options, game, count;
 #ifdef __WXMAC__
-  // For the moment, Mac assumes the command-line tools are in /usr/local
-  prefix = wxT("/usr/local/bin/gambit-");
+  // Look in the app bundle.  The command-line tools should be placed
+  // in the same folder inside the app bundle as the GUI executable.
+  // GetExecutablePath() returns the full path to the GUI executable,
+  // including the 'gambit', so all we need is the dash to form the prefix.
+  prefix = wxStandardPaths::Get().GetExecutablePath() + wxT("-");
 #else
   prefix = wxT("gambit-");
 #endif  // __WXMAC__
@@ -194,28 +198,28 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand(void) const
       if (m_doc->NumPlayers() == 2) {
 	cmd = new gbtAnalysisProfileList<Rational>(m_doc, useEfg);
 	cmd->SetCommand(prefix + wxT("lcp") + options);
-	cmd->SetDescription(wxT("Some equilibria by solving a linear "
-			       "complementarity program ") + game);
+	cmd->SetDescription(wxT("Some equilibria by solving a linear ")
+			       wxT("complementarity program ") + game);
       }
       else {
 	cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
 	cmd->SetCommand(prefix + wxT("enumpoly -d 10") + options);
-	cmd->SetDescription(wxT("Some equilibria by solving polynomial "
-				"systems ") + game);
+	cmd->SetDescription(wxT("Some equilibria by solving polynomial ")
+				wxT("systems ") + game);
       }
     }
     else {
       if (m_doc->NumPlayers() == 2) {
 	cmd = new gbtAnalysisProfileList<Rational>(m_doc, false);
 	cmd->SetCommand(prefix + wxT("enummixed"));
-	cmd->SetDescription(wxT("All equilibria by enumeration of mixed "
-			       "strategies in strategic game"));
+	cmd->SetDescription(wxT("All equilibria by enumeration of mixed ")
+			       wxT("strategies in strategic game"));
       }
       else {
 	cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
 	cmd->SetCommand(prefix + wxT("enumpoly -d 10") + options);
-	cmd->SetDescription(wxT("All equilibria by solving polynomial "
-			       "systems ") + game);
+	cmd->SetDescription(wxT("All equilibria by solving polynomial ")
+			       wxT("systems ") + game);
       }
     }
   }
@@ -228,8 +232,8 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand(void) const
     cmd = new gbtAnalysisProfileList<Rational>(m_doc, false);
     cmd->SetCommand(prefix + wxT("enummixed") + options);
     cmd->SetDescription(count + 
-			wxT(" by enumeration of mixed strategies "
-			    "in strategic game"));
+			wxT(" by enumeration of mixed strategies ")
+			    wxT("in strategic game"));
   }
   else if (method == s_enumpoly) {
     cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
@@ -245,8 +249,8 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand(void) const
   else if (method == s_lcp) {
     cmd = new gbtAnalysisProfileList<Rational>(m_doc, useEfg);
     cmd->SetCommand(prefix + wxT("lcp") + options);
-    cmd->SetDescription(count + wxT(" by solving a linear complementarity "
-				   "program ") + game);
+    cmd->SetDescription(count + wxT(" by solving a linear complementarity ")
+				   wxT("program ") + game);
   }
   else if (method == s_liap) {
     cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
@@ -261,8 +265,8 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand(void) const
   else if (method == s_simpdiv) {
     cmd = new gbtAnalysisProfileList<double>(m_doc, false);
     cmd->SetCommand(prefix + wxT("simpdiv") + options);
-    cmd->SetDescription(count + wxT(" by simplicial subdivision "
-				    "in strategic game"));
+    cmd->SetDescription(count + wxT(" by simplicial subdivision ")
+				    wxT("in strategic game"));
   }
   else {
     // Shouldn't happen!

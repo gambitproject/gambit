@@ -3372,15 +3372,6 @@ Pvector psys_to_Pvec(psys sys){
  return PV;
 }
 
-// WARNING: RDM added the following just to get to compile under BCC
-//            I have no idea if this is correct!!!  
-#if !defined(HAVE_DRAND48)
-double drand48()
-{
-  return rand();
-}
-#endif // HAVE_DRAND48
-
 /*-------------------------------------------------------------------
  init_hom  takes a Pvector and loads the above data structures 
            to hold a representation of the system.
@@ -3390,7 +3381,6 @@ Pvector P;
 polynomial1 ptr;
 int i,j,k;
 double t;
-/* double drand48(); CANT DECLARE BUILTINS UNDER C++ */
 int seed=12;
 
 P=psys_to_Pvec(PS);
@@ -3431,7 +3421,11 @@ Hdegree=Ires(M);
 Edegree=Ires(NV);
 Proj_Trans=Dres(2*NV+2);
 
+#if defined(HAVE_SRAND48)
 srand48(seed);
+#else
+srand(seed);
+#endif  /* defined(HAVE_SRAND48) */
 
 for(i=1;i<=NV;i++){                             
     j=1; ptr=*PMref(P,1,i); Edeg(i)=0;
@@ -3452,9 +3446,13 @@ for(i=1;i<=NV;i++){
 
 /*Define Projective transformation */
 for(j=1;j<=NV+1;j++){
-                  t=drand48()*2*PI;
-                  RPtrans(j)=cos(t);
-                  IPtrans(j)=sin(t); 
+#if defined(HAVE_DRAND48)
+  t=drand48()*2*PI;
+#else
+  t=rand()*2*PI;
+#endif  /* defined(HAVE_DRAND48) */
+  RPtrans(j)=cos(t);
+  IPtrans(j)=sin(t); 
  }
 Hom_defd=1;   
 Pvector_free(P);

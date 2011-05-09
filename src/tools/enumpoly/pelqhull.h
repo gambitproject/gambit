@@ -1003,7 +1003,7 @@ void  qh_setaddnth(setT **setp, int nth, void *newelem);
 void  qh_setappend(setT **setp, void *elem);
 void  qh_setappend_set(setT **setp, setT *setA);
 void  qh_setappend2ndlast(setT **setp, void *elem);
-void  qh_setcheck(setT *set, char */* typename: GIVES ERROR */, int id);
+void  qh_setcheck(setT *set, const char */* typename: GIVES ERROR */, int id);
 setT *qh_setcopy(setT *set, int extra);
 void *qh_setdel(setT *set, void *elem);
 void *qh_setdellast(setT *set);
@@ -1021,7 +1021,7 @@ void  qh_setlarger(setT **setp);
 void *qh_setlast(setT *set);
 setT *qh_setnew(int size);
 setT *qh_setnew_delnthsorted(setT *set, int size, int nth, int prepend);
-void  qh_setprint(FILE *fp, char* string, setT *set);
+void  qh_setprint(FILE *fp, const char* string, setT *set);
 void  qh_setreplace(setT *set, void *oldelem, void *newelem);
 int   qh_setsize(setT *set);
 setT *qh_settemp(int setsize);
@@ -1145,8 +1145,8 @@ realT   qh_minabsval (realT *normal, int dim);
 void    qh_normalize (coordT *normal, int dim, boolT toporient);
 boolT   qh_orientoutside (facetT *facet);
 coordT  qh_pointdist(pointT *point1, pointT *point2, int dim);
-void    qh_printmatrix (FILE *fp, char *string, realT **rows, int numrow, int numcol);
-void    qh_printpoints (FILE *fp, char *string, setT *points);
+void    qh_printmatrix (FILE *fp, const char *string, realT **rows, int numrow, int numcol);
+void    qh_printpoints (FILE *fp, const char *string, setT *points);
 void    qh_projectinput (void);
 pointT *qh_projectpoint(pointT *point, facetT *facet, realT dist);
 void 	qh_projectpoints (signed char *project, int n, realT *points, 
@@ -1314,7 +1314,7 @@ void	qh_renameridgevertex(ridgeT *ridge, vertexT *oldvertex, vertexT *newvertex)
 void    qh_renamevertex(vertexT *oldvertex, vertexT *newvertex, setT *ridges,
 			facetT *oldfacet, facetT *neighborA);
 boolT 	qh_test_appendmerge (facetT *facet, facetT *neighbor);
-void    qh_tracemerging (char *string);
+void    qh_tracemerging (const char *string);
 setT   *qh_vertexridges (vertexT *vertex);
 void    qh_vertexridges_facet (vertexT *vertex, facetT *facet, setT **ridges);
 
@@ -1728,7 +1728,7 @@ macros:
 #define zzval_(id) ((qhstat stats[id]).i)
 #define wwval_(id) ((qhstat stats[id]).r)
 #define zzdef_(stype,name,string,cnt) qhstat id[qhstat next++]=name; \
-   qhstat doc[name]= string; qhstat count[name]= cnt; qhstat type[name]= stype
+  qhstat doc[name]= const_cast<char *>(string); qhstat count[name]= cnt; qhstat type[name]= stype
 
 #if qh_KEEPstatistics
 #define zinc_(id) {MAYdebugx; qhstat stats[id].i++;}
@@ -1742,7 +1742,7 @@ macros:
 #define wval_(id) ((qhstat stats[id]).r)
 
 #define zdef_(stype,name,string,cnt) qhstat id[qhstat next++]=name; \
-   qhstat doc[name]= string; qhstat count[name]= cnt; qhstat type[name]= stype
+  qhstat doc[name]= const_cast<char *>(string); qhstat count[name]= cnt; qhstat type[name]= stype
 
 
 #else  /* !qh_KEEPstatistics */

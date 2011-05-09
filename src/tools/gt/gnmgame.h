@@ -58,7 +58,7 @@ class gnmgame {
   virtual void payoffMatrix(cmatrix &dest, cvector &s, double fuzz) = 0;
 
   // this stores the Jacobian of the retraction function in dest.  
-  void retractJac(cmatrix &dest, int *support);
+  void retractJac(cmatrix &dest, std::vector<int> &support);
 
   // This retracts z onto the nearest normalized strategy profile, according
   // to the Euclidean metric
@@ -74,7 +74,7 @@ class gnmgame {
   // This normalizes a strategy profile by scaling appropriately.
   void normalizeStrategy(cvector &s);
 
-  void LemkeHowson(cvector &dest, cmatrix &T, int *Im);
+  void LemkeHowson(cvector &dest, cmatrix &T, std::vector<int> &Im);
 
 
   inline int getNumPlayers() { return numPlayers; }
@@ -84,7 +84,8 @@ class gnmgame {
 
  protected:
   
-  int Pivot(cmatrix &T, int pr, int pc, int *row, int *col, double &D);
+  int Pivot(cmatrix &T, int pr, int pc, std::vector<int> &row, std::vector<int> &col, 
+	    double &D);
 
   int *strategyOffset;
   int numPlayers, numStrategies, numActions;

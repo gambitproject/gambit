@@ -40,9 +40,8 @@ public:
 
 class gbtFuncMinError : public Gambit::Exception {
 public:
-  virtual ~gbtFuncMinError() { }
-  std::string GetDescription(void) const 
-    { return "Internal error in minimization code"; }
+  virtual ~gbtFuncMinError() throw() { }
+  const char *what(void) const throw() { return "Internal error in minimization code"; }
 };
 
 //
@@ -71,7 +70,7 @@ private:
   int iter;
   double step;
   double max_step;
-  double tol;
+  double m_tol;
   Gambit::Vector<double> x1;
   Gambit::Vector<double> dx1;
   Gambit::Vector<double> x2;

@@ -43,9 +43,8 @@ namespace {
 //
 class EquilibriumLimitReachedNfg : public Exception {
 public:
-  virtual ~EquilibriumLimitReachedNfg() { }
-  std::string GetDescription(void) const 
-  { return "Reached target number of equilibria"; }
+  virtual ~EquilibriumLimitReachedNfg() throw() { }
+  const char *what(void) const throw() { return "Reached target number of equilibria"; }
 };
 
 } // end anonymous namespace
@@ -100,10 +99,10 @@ void PrintProfileDetail(std::ostream &p_stream,
       }
       p_stream << buffer;
 	
-      sprintf(buffer, "%11s   ", ToText(p_profile[strategy], g_numDecimals).c_str());
+      sprintf(buffer, "%11s   ", lexical_cast<std::string>(p_profile[strategy], g_numDecimals).c_str());
       p_stream << buffer;
 
-      sprintf(buffer, "%11s   ", ToText(p_profile.GetStrategyValue(strategy), g_numDecimals).c_str());
+      sprintf(buffer, "%11s   ", lexical_cast<std::string>(p_profile.GetStrategyValue(strategy), g_numDecimals).c_str());
       p_stream << buffer;
 
       p_stream << "\n";
@@ -142,7 +141,7 @@ bool OnBFS(const StrategySupport &p_support,
   T sum = (T) 0;
 
   for (int j = 1; j <= n1; j++) {
-    if (cbfs.IsDefined(j))   sum += cbfs(j);
+    if (cbfs.count(j))   sum += cbfs[j];
   }
 
   if (sum == (T) 0)  {
@@ -151,8 +150,8 @@ bool OnBFS(const StrategySupport &p_support,
   }
 
   for (int j = 1; j <= n1; j++) {
-    if (cbfs.IsDefined(j)) {
-      profile[p_support.GetStrategy(1, j)] = cbfs(j) / sum;
+    if (cbfs.count(j)) {
+      profile[p_support.GetStrategy(1, j)] = cbfs[j] / sum;
     }
     else {
       profile[p_support.GetStrategy(1, j)] = (T) 0;
@@ -162,12 +161,12 @@ bool OnBFS(const StrategySupport &p_support,
   sum = (T) 0;
 
   for (int j = 1; j <= n2; j++) {
-    if (cbfs.IsDefined(n1 + j))  sum += cbfs(n1 + j);
+    if (cbfs.count(n1 + j))  sum += cbfs[n1 + j];
   }
 
   for (int j = 1; j <= n2; j++) {
-    if (cbfs.IsDefined(n1 + j)) {
-      profile[p_support.GetStrategy(2, j)] = cbfs(n1 + j) / sum;
+    if (cbfs.count(n1 + j)) {
+      profile[p_support.GetStrategy(2, j)] = cbfs[n1 + j] / sum;
     }
     else {
       profile[p_support.GetStrategy(2, j)] = (T) 0;

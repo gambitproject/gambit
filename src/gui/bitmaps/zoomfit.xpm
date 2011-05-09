@@ -1,5 +1,5 @@
 /* XPM */
-static char * zoomfit_xpm[] = {
+static const char * zoomfit_xpm[] = {
 "24 24 172 2",
 "  	c None",
 ". 	c #343434",

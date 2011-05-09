@@ -116,7 +116,7 @@ void BehavIterator::operator++(void)
     
   while (true) {
     if (m_isActive[pl][iset] && 
-	(pl != m_frozenPlayer || iset != m_frozenInfoset))
+	(pl != m_frozenPlayer || iset != m_frozenInfoset)) {
       if (m_currentBehav(pl, iset) < m_support.NumActions(pl, iset))  {
 	m_profile.SetAction(m_support.GetAction(pl, iset, 
 						++m_currentBehav(pl, iset)));
@@ -126,6 +126,7 @@ void BehavIterator::operator++(void)
 	m_currentBehav(pl, iset) = 1;
 	m_profile.SetAction(m_support.GetAction(pl, iset, 1));
       }
+    }
     
     iset--;
     if (iset == 0)  {

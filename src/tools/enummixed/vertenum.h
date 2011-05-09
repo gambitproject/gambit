@@ -24,8 +24,8 @@
 #define VERTENUM_H
 
 #include "libgambit/libgambit.h"
-#include "lptab.h"
-#include "bfs.h"
+#include "liblinear/lptab.h"
+#include "liblinear/bfs.h"
 
 
 //

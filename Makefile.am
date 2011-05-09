@@ -254,7 +254,6 @@ libgambit_la_SOURCES = \
 	src/libgambit/rational.h \
 	src/libgambit/array.h \
 	src/libgambit/list.h \
-	src/libgambit/map.h \
 	src/libgambit/vector.cc \
 	src/libgambit/vector.h \
 	src/libgambit/vector.imp \
@@ -299,7 +298,6 @@ libgambitinclude_HEADERS = \
 	src/libgambit/rational.h \
 	src/libgambit/array.h \
 	src/libgambit/list.h \
-	src/libgambit/map.h \
 	src/libgambit/vector.h \
 	src/libgambit/vector.imp \
 	src/libgambit/pvector.h \
@@ -364,28 +362,33 @@ gambit_nfg2tex_SOURCES = \
 	${libgambit_la_SOURCES} \
 	src/tools/convert/nfg2tex.cc
 
+liblinear_la_SOURCES = \
+	src/liblinear/basis.cc \
+	src/liblinear/basis.h \
+	src/liblinear/bfs.h \
+	src/liblinear/btableau.cc \
+	src/liblinear/btableau.h \
+	src/liblinear/btableau.imp \
+	src/liblinear/lpsolve.cc \
+	src/liblinear/lpsolve.h \
+	src/liblinear/lpsolve.imp \
+	src/liblinear/lptab.cc \
+	src/liblinear/lptab.h \
+	src/liblinear/lptab.imp \
+	src/liblinear/ludecomp.cc \
+	src/liblinear/ludecomp.h \
+	src/liblinear/ludecomp.imp \
+	src/liblinear/tableau.h \
+	src/liblinear/tableau.cc
+
 gambit_enummixed_SOURCES = \
 	${libgambit_la_SOURCES} \
+	${liblinear_la_SOURCES} \
 	src/tools/enummixed/lrsmp.h \
 	src/tools/enummixed/lrsmp.c \
 	src/tools/enummixed/lrslib.h \
 	src/tools/enummixed/lrslib.c \
 	src/tools/enummixed/lrsnash.cc \
-	src/tools/enummixed/basis.cc \
-	src/tools/enummixed/basis.h \
-	src/tools/enummixed/bfs.cc \
-	src/tools/enummixed/bfs.h \
-	src/tools/enummixed/btableau.cc \
-	src/tools/enummixed/btableau.h \
-	src/tools/enummixed/btableau.imp \
-	src/tools/enummixed/lptab.cc \
-	src/tools/enummixed/lptab.h \
-	src/tools/enummixed/lptab.imp \
-	src/tools/enummixed/ludecomp.cc \
-	src/tools/enummixed/ludecomp.h \
-	src/tools/enummixed/ludecomp.imp \
-	src/tools/enummixed/tableau.h \
-	src/tools/enummixed/tableau.imp \
 	src/tools/enummixed/vertenum.h \
 	src/tools/enummixed/vertenum.imp \
 	src/tools/enummixed/clique.cc \
@@ -526,25 +529,13 @@ gambit_ipa_SOURCES = \
 
 gambit_lcp_SOURCES = \
 	${libgambit_la_SOURCES} \
-	src/tools/lcp/basis.cc \
-	src/tools/lcp/basis.h \
-	src/tools/lcp/bfs.cc \
-	src/tools/lcp/bfs.h \
-	src/tools/lcp/btableau.cc \
-	src/tools/lcp/btableau.h \
-	src/tools/lcp/btableau.imp \
+	${liblinear_la_SOURCES} \
 	src/tools/lcp/lemketab.cc \
 	src/tools/lcp/lemketab.h \
 	src/tools/lcp/lemketab.imp \
 	src/tools/lcp/lhtab.cc \
 	src/tools/lcp/lhtab.h \
 	src/tools/lcp/lhtab.imp \
-	src/tools/lcp/ludecomp.cc \
-	src/tools/lcp/ludecomp.h \
-	src/tools/lcp/ludecomp.imp \
-	src/tools/lcp/tableau.cc \
-	src/tools/lcp/tableau.h \
-	src/tools/lcp/tableau.imp \
 	src/tools/lcp/efglcp.cc \
 	src/tools/lcp/nfglcp.cc \
 	src/tools/lcp/lcp.cc
@@ -576,25 +567,7 @@ gambit_nfg_logitdyn_SOURCES = \
 
 gambit_lp_SOURCES = \
 	${libgambit_la_SOURCES} \
-	src/tools/lp/basis.cc \
-	src/tools/lp/basis.h \
-	src/tools/lp/bfs.cc \
-	src/tools/lp/bfs.h \
-	src/tools/lp/btableau.cc \
-	src/tools/lp/btableau.h \
-	src/tools/lp/btableau.imp \
-	src/tools/lp/lpsolve.cc \
-	src/tools/lp/lpsolve.h \
-	src/tools/lp/lpsolve.imp \
-	src/tools/lp/lptab.cc \
-	src/tools/lp/lptab.h \
-	src/tools/lp/lptab.imp \
-	src/tools/lp/ludecomp.cc \
-	src/tools/lp/ludecomp.h \
-	src/tools/lp/ludecomp.imp \
-	src/tools/lp/tableau.cc \
-	src/tools/lp/tableau.h \
-	src/tools/lp/tableau.imp \
+	${liblinear_la_SOURCES} \
 	src/tools/lp/efglp.cc \
 	src/tools/lp/nfglp.cc \
 	src/tools/lp/lp.cc
@@ -659,7 +632,6 @@ gambit_SOURCES = \
 	src/labenski/include/wx/wxthings/block.h \
 	src/labenski/include/wx/wxthings/bmpcombo.h \
 	src/labenski/include/wx/wxthings/dropdown.h \
-	src/labenski/include/wx/wxthings/filebrws.h \
 	src/labenski/include/wx/wxthings/genergdi.h \
 	src/labenski/include/wx/wxthings/geometry.h \
 	src/labenski/include/wx/wxthings/medsort.h \
@@ -687,6 +659,7 @@ gambit_SOURCES = \
 	src/gui/dlefglogit.h \
 	src/gui/dlefgreveal.cc \
 	src/gui/dlefgreveal.h \
+	src/gui/dlexcept.h \
 	src/gui/dlgameprop.cc \
 	src/gui/dlgameprop.h \
 	src/gui/dlinsertmove.cc \
@@ -744,5 +717,14 @@ osx-bundle:
 	-mkdir Gambit.app/Contents/MacOS
 	-mkdir Gambit.app/Contents/Resources
 	cp contrib/mac/Info.plist Gambit.app/Contents
+	cp contrib/mac/gambit.icns Gambit.app/Contents/Resources/gambit.icns
 	echo -n 'APPL????' > Gambit.app/Contents/PkgInfo
 	cp gambit Gambit.app/Contents/MacOS/gambit
+	cp gambit-* Gambit.app/Contents/MacOS
+
+osx-dmg:  osx-bundle
+	-rm -rf .dmg
+	-mkdir .dmg
+	cp -r Gambit.app .dmg
+	hdiutil create Gambit.dmg -volname Gambit -srcfolder .dmg -format UDZO -imagekey zlib-level=9
+	rm -rf .dmg

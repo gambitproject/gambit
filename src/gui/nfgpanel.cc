@@ -173,6 +173,7 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
   topSizer->SetSizeHints(this);
   topSizer->Fit(this);
   Layout();
+  OnUpdate();
 }
 
 void gbtTablePlayerPanel::OnUpdate(void)
@@ -213,11 +214,7 @@ void gbtTablePlayerPanel::OnChar(wxKeyEvent &p_event)
 void gbtTablePlayerPanel::OnNewStrategy(wxCommandEvent &)
 {
   m_doc->PostPendingChanges();
-
-  Gambit::GameStrategy strategy = 
-    m_doc->GetGame()->GetPlayer(m_player)->NewStrategy();
-  strategy->SetLabel(Gambit::ToText(strategy->GetNumber()));
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
+  m_doc->DoNewStrategy(m_doc->GetGame()->GetPlayer(m_player));
 }
 
 void gbtTablePlayerPanel::OnSetColor(wxCommandEvent &)
@@ -230,8 +227,9 @@ void gbtTablePlayerPanel::OnSetColor(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     wxColour color = dialog.GetColourData().GetColour();
-    m_doc->GetStyle().SetPlayerColor(m_player, color);
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+    gbtStyle style = m_doc->GetStyle();
+    style.SetPlayerColor(m_player, color);
+    m_doc->SetStyle(style);
   }
 }
 
@@ -243,16 +241,16 @@ void gbtTablePlayerPanel::OnEditPlayerLabel(wxCommandEvent &)
 
 void gbtTablePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
 {
-  m_doc->GetGame()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
+  m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player),
+			  m_playerLabel->GetValue());
 }
 
 void gbtTablePlayerPanel::PostPendingChanges(void)
 {
   if (m_playerLabel->IsEditing()) {
     m_playerLabel->EndEdit(true);
-    m_doc->GetGame()->GetPlayer(m_player)->SetLabel((const char *) m_playerLabel->GetValue().mb_str());
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
+    m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player),
+			    m_playerLabel->GetValue());
   }
 }
 
@@ -265,14 +263,14 @@ private:
   gbtNfgPanel *m_nfgPanel;
   Gambit::Array<gbtTablePlayerPanel *> m_playerPanels;
 
+public:
+  gbtTablePlayerToolbar(gbtNfgPanel *p_parent, gbtGameDocument *p_doc);
+
   /// @name Implementation of gbtGameView members
   //@{
   void OnUpdate(void);
   void PostPendingChanges(void);
   //@}
-
-public:
-  gbtTablePlayerToolbar(gbtNfgPanel *p_parent, gbtGameDocument *p_doc);
 };
 
 
@@ -305,7 +303,7 @@ void gbtTablePlayerToolbar::OnUpdate(void)
 
   while (m_playerPanels.Length() > m_doc->NumPlayers()) {
     gbtTablePlayerPanel *panel = m_playerPanels.Remove(m_playerPanels.Length());
-    GetSizer()->Remove(panel);
+    GetSizer()->Detach(panel);
     panel->Destroy();
   }
   
@@ -478,6 +476,7 @@ gbtNfgPanel::gbtNfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   topSizer->Add(playerSizer, 1, wxEXPAND, 0);
   SetSizer(topSizer);
   Layout();
+  OnUpdate();
 }
 
 void gbtNfgPanel::OnToolsDominance(wxCommandEvent &p_event)
@@ -497,6 +496,7 @@ void gbtNfgPanel::OnToolsDominance(wxCommandEvent &p_event)
 
 void gbtNfgPanel::OnUpdate(void)
 { 
+  m_playerToolbar->OnUpdate();
   m_tableWidget->OnUpdate();
   GetSizer()->Layout();
 }

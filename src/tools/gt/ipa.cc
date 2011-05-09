@@ -37,8 +37,8 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
   int N = A.getNumPlayers(),
     M = A.getNumActions(), // For easy reference
     i,j,n,bestAction,B, // utility vars
-    Im[N], // best actions in perturbed game
     firstIteration = 1; 
+  std::vector<int> Im(N);   // best actions in perturbed game
 
   double bestPayoff,l; // utility vars
 

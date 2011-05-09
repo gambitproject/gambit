@@ -20,7 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <stdlib.h>
+#include <cstdlib>     // for abs()
+#include <algorithm>   // for std::max()
 #include "gpoly.h"
 #include "libgambit/libgambit.h"
 
@@ -500,9 +501,14 @@ template <class T> int gPoly<T>::UniqueActiveVariable() const
   int activar = 0;
   for (int i = 1; i <= ExpVecs.Length(); i++) {
     for (int j = 1; j <= Dmnsn(); j++) {
-      if (ExpVecs[i][j] > 0)
-	if (activar > 0 && activar != j) return -1;// multivariate!
-	else activar = j;
+      if (ExpVecs[i][j] > 0) {
+	if (activar > 0 && activar != j) {
+	  return -1;// multivariate!
+	}
+	else {
+	  activar = j;
+	}
+      }
     }
   }
   return activar;
@@ -646,9 +652,9 @@ gPoly<T> gPoly<T>::EvaluateOneVar( int varnumber, T val) const
 
   for (int i = 1; i <= Terms.Length(); i++) 
     answer += gPoly<T>(Space,
-	       Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber),
-	       ((T) Terms[i].Coef())* ((T) pow(val,(long int)Terms[i].ExpV()[varnumber])), 
-		       Order);
+	          Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber),
+	   	      ((T) Terms[i].Coef())* ((T) pow(val, (double) Terms[i].ExpV()[varnumber])), 
+		      	   Order);
   return answer;
 }
 
@@ -871,8 +877,8 @@ T gPoly<T>::MaximalValueOfNonlinearPart(const T& radius)  const
   T maxcon = (T)0;
   for (int i = 1; i <= MonomialList().Length(); i++) 
     if (MonomialList()[i].TotalDegree() > 1) 
-      maxcon += MonomialList()[i].Coef() * 
-	            pow(radius,(long)MonomialList()[i].TotalDegree());
+          maxcon += MonomialList()[i].Coef() * 
+	              pow(radius, MonomialList()[i].TotalDegree());
 
   return maxcon;
 }
@@ -920,12 +926,12 @@ template <class T> void gPoly<T>::Output(std::string &t) const
       else if (j > 1) s += "+ ";
 	
       if ((Terms[j].Coef() != (T)1 && -Terms[j].Coef() != (T)1) ||
-	   Terms[j].IsConstant() ) 
+	  Terms[j].IsConstant() ) {
 	if (Terms[j].Coef() < (T)0) { 
-	  s += Gambit::ToText(-Terms[j].Coef());
+	  s += Gambit::lexical_cast<std::string>(-Terms[j].Coef());
 	}
 	else {                        
-	  s += Gambit::ToText( Terms[j].Coef());
+	  s += Gambit::lexical_cast<std::string>( Terms[j].Coef());
 	}
 	
 	for (int k = 1; k <= Space->Dmnsn(); k++) {
@@ -935,13 +941,14 @@ template <class T> void gPoly<T>::Output(std::string &t) const
 	    s += (*Space)[k]->Name;
 	    if (exp != 1) {
 	      s += '^';
-	      s += Gambit::ToText(exp);
+	      s += Gambit::lexical_cast<std::string>(exp);
 	    }
 	  }
 	}
 	
 	if (j < Terms.Length()) s += " ";
       }
+    }
   }
   if (s == "") s = " 0";
   
@@ -981,7 +988,7 @@ gPoly<double>  NormalizationOfPoly(const gPoly<T>& given)
   Gambit::List<gMono<T> > list = given.MonomialList();
   double maxcoeff = 0.0;
   for (int i =1; i <= list.Length(); i++) {
-    maxcoeff = Gambit::max(maxcoeff, (double) Gambit::abs((double) list[i].Coef()));
+    maxcoeff = std::max(maxcoeff, (double) abs((double) list[i].Coef()));
   }
 
   if (maxcoeff < 0.000000001) return TogDouble(given);

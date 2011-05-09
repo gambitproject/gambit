@@ -1,5 +1,5 @@
 /* XPM */
-static char * tree_xpm[] = {
+static const char * tree_xpm[] = {
 "24 24 73 1",
 " 	c None",
 ".	c #FF0000",

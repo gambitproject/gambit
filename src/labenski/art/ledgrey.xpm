@@ -1,5 +1,5 @@
 /* XPM */
-static char *ledgrey_xpm[]={
+static const char *ledgrey_xpm[]={
 "15 15 75 2",
 "Qt c None",
 ".# c #000000",

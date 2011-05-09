@@ -1,5 +1,5 @@
 /* XPM */
-static char * gambitbig_xpm[] = {
+static const char * gambitbig_xpm[] = {
 "300 150 257 2",
 "  	c None",
 ". 	c #000000",

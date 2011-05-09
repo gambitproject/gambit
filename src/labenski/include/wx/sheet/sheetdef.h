@@ -187,7 +187,7 @@ enum wxSheetSelectionMode_Type
                                   // direct calls to the selections work however
     wxSHEET_SelectCells = 0x0002, // single cells, blocks, rows, and cols
     wxSHEET_SelectRows  = 0x0004, // only rows can be selected
-    wxSHEET_SelectCols  = 0x0008, // only cols can be selected
+    wxSHEET_SelectCols  = 0x0008 // only cols can be selected
 };
 
 // ----------------------------------------------------------------------------

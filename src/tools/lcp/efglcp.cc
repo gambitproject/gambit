@@ -47,9 +47,8 @@ namespace {
 //
 class EquilibriumLimitReachedEfg : public Exception {
 public:
-  virtual ~EquilibriumLimitReachedEfg() { }
-  std::string GetDescription(void) const 
-  { return "Reached target number of equilibria"; }
+  virtual ~EquilibriumLimitReachedEfg() throw() { }
+  const char *what(void) const throw() { return "Reached target number of equilibria"; }
 };
 
 } // end anonymous namespace
@@ -115,10 +114,10 @@ void PrintProfileDetail(std::ostream &p_stream,
 	}
 	p_stream << buffer;
 	
-	sprintf(buffer, "%11s   ", ToText(p_profile(pl, iset, act), g_numDecimals).c_str());
+	sprintf(buffer, "%11s   ", lexical_cast<std::string>(p_profile(pl, iset, act), g_numDecimals).c_str());
 	p_stream << buffer;
 
-	sprintf(buffer, "%11s   ", ToText(p_profile.GetActionValue(infoset->GetAction(act)), g_numDecimals).c_str());
+	sprintf(buffer, "%11s   ", lexical_cast<std::string>(p_profile.GetActionValue(infoset->GetAction(act)), g_numDecimals).c_str());
 	p_stream << buffer;
 
 	p_stream << "\n";
@@ -140,10 +139,10 @@ void PrintProfileDetail(std::ostream &p_stream,
 	sprintf(buffer, "%7d    ", n);
 	p_stream << buffer;
 
-	sprintf(buffer, "%11s   ", ToText(p_profile.GetBeliefProb(infoset->GetMember(n)), g_numDecimals).c_str());
+	sprintf(buffer, "%11s   ", lexical_cast<std::string>(p_profile.GetBeliefProb(infoset->GetMember(n)), g_numDecimals).c_str());
 	p_stream << buffer;
 
-	sprintf(buffer, "%11s    ", ToText(p_profile.GetRealizProb(infoset->GetMember(n)), g_numDecimals).c_str());
+	sprintf(buffer, "%11s    ", lexical_cast<std::string>(p_profile.GetRealizProb(infoset->GetMember(n)), g_numDecimals).c_str());
 	p_stream << buffer;
 
 	p_stream << "\n";
@@ -227,7 +226,7 @@ void UndefinedToCentroid(MixedBehavProfile<T> &p_profile)
 template <class T> List<MixedBehavProfile<T> > 
 SolveEfgLcp<T>::Solve(const BehavSupport &p_support, bool p_print /*= true*/)
 {
-  BFS<T> cbfs((T) 0);
+  BFS<T> cbfs;
   int i, j;
 
   isets1 = p_support.ReachableInfosets(p_support.GetGame()->GetPlayer(1));
@@ -309,14 +308,15 @@ SolveEfgLcp<T>::Solve(const BehavSupport &p_support, bool p_print /*= true*/)
 
 template <class T> int SolveEfgLcp<T>::AddBFS(const LTableau<T> &tableau)
 {
-  BFS<T> cbfs((T) 0);
+  BFS<T> cbfs;
   Vector<T> v(tableau.MinRow(), tableau.MaxRow());
   tableau.BasisVector(v);
 
-  for (int i = tableau.MinCol(); i <= tableau.MaxCol(); i++)
+  for (int i = tableau.MinCol(); i <= tableau.MaxCol(); i++) {
     if (tableau.Member(i)) {
-      cbfs.Define(i, v[tableau.Find(i)]);
+      cbfs.insert(i, v[tableau.Find(i)]);
     }
+  }
 
   if (m_list.Contains(cbfs))  return 0;
   m_list.Append(cbfs);

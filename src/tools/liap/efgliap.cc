@@ -212,8 +212,8 @@ void SolveExtensive(const Gambit::Game &p_game)
     EFLiapFunc F(p_game, p);
 
     // if starting vector not interior, perturb it towards centroid
-    int kk;
-    for (int kk = 1; kk <= p.Length() && p[kk] > ALPHA; kk++);
+    int kk = 1;
+    for (; kk <= p.Length() && p[kk] > ALPHA; kk++);
     if (kk <= p.Length()) {
       Gambit::MixedBehavProfile<double> c(p_game);
       for (int k = 1; k <= p.Length(); k++) {

@@ -91,7 +91,7 @@ GameInfosetRep::GameInfosetRep(GameRep *p_efg, int p_number,
 
   if (p_player->IsChance()) {
     for (int act = 1; act <= m_actions.Length(); act++) {
-      m_probs.Append(ToText(Rational(1, m_actions.Length())));
+      m_probs.Append(lexical_cast<std::string>(Rational(1, m_actions.Length())));
     }
   }
 }
@@ -284,7 +284,7 @@ void GamePlayerRep::MakeStrategy(void)
   if (strategy->m_behav.Length() > 0) {
     for (int iset = 1; iset <= strategy->m_behav.Length(); iset++) {
       if (strategy->m_behav[iset] > 0) {
-	strategy->m_label += ToText(strategy->m_behav[iset]);
+	strategy->m_label += lexical_cast<std::string>(strategy->m_behav[iset]);
       }
       else {
 	strategy->m_label += "*";
@@ -725,7 +725,7 @@ template<>
 std::string PureStrategyProfile::GetPayoff(int pl) const
 {
   if (m_nfg->IsTree()) {
-    return ToText(GetPayoff<Rational>(pl));
+    return lexical_cast<std::string>(GetPayoff<Rational>(pl));
   }
   else {
     GameOutcomeRep *outcome = m_nfg->m_results[m_index]; 
@@ -870,9 +870,9 @@ GameRep::GameRep(const Array<int> &dim, bool p_sparseOutcomes /* = false */)
   m_results = Array<GameOutcomeRep *>(Product(dim));
   for (int pl = 1; pl <= dim.Length(); pl++)  {
     m_players.Append(new GamePlayerRep(this, pl, dim[pl]));
-    m_players[pl]->m_label = ToText(pl);
+    m_players[pl]->m_label = lexical_cast<std::string>(pl);
     for (int st = 1; st <= m_players[pl]->NumStrategies(); st++) {
-      m_players[pl]->m_strategies[st]->m_label = ToText(st);
+      m_players[pl]->m_strategies[st]->m_label = lexical_cast<std::string>(st);
     }
   }
   IndexStrategies();
@@ -931,8 +931,8 @@ namespace {
 
 class NotZeroSumException : public Exception {
 public:
-  virtual ~NotZeroSumException() { }
-  std::string GetDescription(void) const { return "Game is not constant sum"; }
+  virtual ~NotZeroSumException() throw() { }
+  const char *what(void) const throw() { return "Game is not constant sum"; }
 };
 
 Rational SubtreeSum(const GameNode &p_node)

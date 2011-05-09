@@ -157,15 +157,3 @@ bool gbtApplication::AreDocumentsModified(void) const
 
 IMPLEMENT_APP(gbtApplication)
 
-
-//
-// A general-purpose dialog box to display the description of the exception
-//
-void gbtExceptionDialog(const std::string &p_message, wxWindow *p_parent,
-			long p_style /*= wxOK | wxCENTRE*/)
-{
-  std::string message = "An internal error occurred in Gambit:\n" + p_message;
-  wxMessageBox(wxString(message.c_str(), *wxConvCurrent), 
-	       _("Gambit Error"), p_style, p_parent);
-}
-

@@ -765,9 +765,9 @@ bool wxPlotData::LoadFile( const wxString &filename, int x_col, int y_col, int o
                 while (select_cols && !stop_load )
                 {
                     wxString colStr = wxGetTextFromUser(
-                        wxString::Format(wxT("%d columns found.\n"
-                                             "Enter x and y cols separated by a space starting from 1.\n"
-                                             "If x = y then x values are 0,1,2... and y is that col."), n),
+                        wxString::Format(wxT("%d columns found.\n")
+                                             wxT("Enter x and y cols separated by a space starting from 1.\n")
+                                             wxT("If x = y then x values are 0,1,2... and y is that col."), n),
                                              wxT("Enter columns of data file to use"));
 
                     if (colStr.IsEmpty())
@@ -809,11 +809,11 @@ bool wxPlotData::LoadFile( const wxString &filename, int x_col, int y_col, int o
                 }
 
                 wxMessageBox(
-                    wxString::Format(wxT("Loading cols (%d,%d) aborted after %d points\n\n"
-                                         "First 100 characters of offending line number: %d\n"
-                                         "\"%s\"\n\n"
-                                         "# for comments, blank lines Ok, comma, tab, space for separators\n"
-                                         "7   4\n33  2.5e-2\n...\n"),
+                    wxString::Format(wxT("Loading cols (%d,%d) aborted after %d points\n\n")
+                                         wxT("First 100 characters of offending line number: %d\n")
+                                         wxT("\"%s\"\n\n")
+                                         wxT("# for comments, blank lines Ok, comma, tab, space for separators\n")
+                                         wxT("7   4\n33  2.5e-2\n...\n"),
                                          x_col, y_col, points, line_number, wxstr.Left(100).c_str()),
                                          wxT("Error loading ")+filename, wxOK|wxICON_ERROR);
                 stop_load = true;

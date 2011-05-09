@@ -1391,7 +1391,7 @@ void wxSheetCellChoiceEditorRefData::BeginEdit(const wxSheetCoords& coords, wxSh
         int pos = GetComboBox()->FindString(m_startValue);
         if (pos == -1)
             pos = 0;
-        if (GetComboBox()->GetCount() > pos)
+        if (static_cast<int>(GetComboBox()->GetCount()) > pos)
             GetComboBox()->SetSelection(pos);
     }
     GetComboBox()->SetInsertionPointEnd();

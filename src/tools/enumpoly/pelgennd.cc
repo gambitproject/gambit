@@ -2,6 +2,7 @@
 **    copyright (c) 1995  Birk Huber
 */
 
+#include <iostream>
 #include "pelgennd.h"
 
 extern node SaveList;
@@ -350,9 +351,8 @@ node Gen_aset(Gen_node g){
 void print_Proc(Gen_node (*p)(Gen_node))
 {
 #ifdef LOG_PRINT
- fprintf(stdout /* was Pel_Out */,"%p",p)
+  std::cout << p;
 #endif
-;
 }
 				     
 
@@ -367,12 +367,13 @@ char *Copy_String_NQ(char *s)
   return res;
 }
 
-char *Copy_String(char *s)
+char *Copy_String(const char *s)
 { /* char *strdup(); CANT DECLARE BUILTINS UNDER C++ */
-  return mem_strdup(s);}
+  return mem_strdup(const_cast<char *>(s))
+;}
 
 
-Gen_node IDND(char *s){
+Gen_node IDND(const char *s){
      Gen_node a;
 
 
@@ -452,7 +453,7 @@ Gen_node PND(Gen_node p(Gen_node)) {
      return a;
 }
 
-Gen_node Rerror(char *s,Gen_node g)
+Gen_node Rerror(const char *s,Gen_node g)
 { 
   bad_error("We had an Rerror");
 

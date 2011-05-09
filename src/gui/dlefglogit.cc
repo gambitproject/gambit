@@ -26,6 +26,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
+#include <wx/stdpaths.h>
 #include <wx/txtstrm.h>
 #include <wx/tokenzr.h>
 
@@ -101,13 +102,13 @@ wxString gbtLogitBehavList::GetCellValue(const wxSheetCoords &p_coords)
 
 
   if (p_coords.GetCol() == 0) {
-    return wxString(Gambit::ToText(m_lambdas[p_coords.GetRow()+1],
+    return wxString(Gambit::lexical_cast<std::string>(m_lambdas[p_coords.GetRow()+1],
 				   m_doc->GetStyle().NumDecimals()).c_str(),
 		    *wxConvCurrent);
   }
   else {
     const Gambit::MixedBehavProfile<double> &profile = m_profiles[p_coords.GetRow()+1];
-    return wxString(Gambit::ToText(profile[p_coords.GetCol()],
+    return wxString(Gambit::lexical_cast<std::string>(profile[p_coords.GetCol()],
 				   m_doc->GetStyle().NumDecimals()).c_str(), 
 		    *wxConvCurrent);
   }
@@ -179,10 +180,10 @@ void gbtLogitBehavList::AddProfile(const wxString &p_text,
 
   wxStringTokenizer tok(p_text, wxT(","));
 
-  m_lambdas.Append((double) Gambit::ToNumber(std::string((const char *) tok.GetNextToken().mb_str())));
+  m_lambdas.Append((double) Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) tok.GetNextToken().mb_str())));
 
   for (int i = 1; i <= profile.Length(); i++) {
-    profile[i] = Gambit::ToNumber(std::string((const char *) tok.GetNextToken().mb_str()));
+    profile[i] = Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) tok.GetNextToken().mb_str()));
   }
 
   m_profiles.Append(profile);
@@ -260,7 +261,7 @@ void gbtLogitBehavDialog::Start(void)
   m_process->Redirect();
 
 #ifdef __WXMAC__
-  m_pid = wxExecute(wxT("/usr/local/bin/gambit-logit"),
+  m_pid = wxExecute(wxStandardPaths::Get().GetExecutablePath() + wxT("-logit"),
 		    wxEXEC_ASYNC, m_process);
 #else	
   m_pid = wxExecute(wxT("gambit-logit"), wxEXEC_ASYNC, m_process);
@@ -366,9 +367,9 @@ void gbtLogitBehavDialog::OnStop(wxCommandEvent &)
 void gbtLogitBehavDialog::OnSave(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose file"), wxT(""), wxT(""),
-		      wxT("CSV files (*.csv)|*.csv|"
-			  "All files (*.*)|*.*"),
-		      wxSAVE | wxOVERWRITE_PROMPT);
+		      wxT("CSV files (*.csv)|*.csv|")
+			  wxT("All files (*.*)|*.*"),
+		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
     std::ofstream file((const char *) dialog.GetPath().mb_str());

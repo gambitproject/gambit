@@ -1,0 +1,507 @@
+//
+// This file is part of Gambit
+// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: src/liblinear/lpsolve.imp
+// Implementation of LP solver
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+
+#include "lpsolve.h"
+
+template <class T> Gambit::Array<int> Artificials(const Gambit::Vector<T> &b) 
+{
+  Gambit::Array<int> ret;
+  for(int i=b.First();i<=b.Last();i++)
+    if(b[i]<(T)0) ret.Append(i);
+  return ret;
+}
+
+inline void Epsilon(double &v, int i = 8)
+{ v = ::pow(10.0, (double) -i); }
+
+inline void Epsilon(Gambit::Rational &v, int /*i*/ = 8) { v = Gambit::Rational(0); }
+
+template <class T> 
+LPSolve<T>::LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b,
+		    const Gambit::Vector<T> &c, int nequals)
+  : well_formed(1), feasible(1), bounded(1), aborted(0), 
+    nvars(c.Length()),neqns(b.Length()), nequals(nequals),
+    total_cost(0),tmin(0), 
+    tab(A,Artificials(b),b), UB(0),LB(0),ub(0),lb(0),xx(0), cost(0),
+    y(b.Length()),x(b.Length()),d(b.Length())
+{
+    // These are the values recommended by Murtagh (1981) for 15 digit 
+    // accuracy in LP problems 
+  ::Epsilon(eps1,5);
+  ::Epsilon(eps2,8);
+  ::Epsilon(eps3,6);
+  
+  // Check dimensions
+  if (A.NumRows() != b.Length() || A.NumColumns() != c.Length()) {
+    well_formed = 0;
+    return;
+  }
+  // gout << "\n--- Begin LPSolve ---\n";
+  // tab.BigDump(gout);
+
+  // initialize data
+  int i,j,num_inequals,xlab,num_artific;
+  
+  num_inequals = A.NumRows() - nequals;
+  num_artific=Artificials(b).Length();
+  nvars+=num_artific;
+  
+  // gout << "\n--- Begin Phase I ---\n";
+  
+  UB = new Gambit::Array<bool>(nvars+neqns);
+  LB = new Gambit::Array<bool>(nvars+neqns);
+  ub = new Gambit::Array<T>(nvars+neqns);
+  lb = new Gambit::Array<T>(nvars+neqns);
+  xx = new Gambit::Vector<T>(nvars+neqns);
+  cost = new Gambit::Vector<T>(nvars+neqns);
+
+  for(j=(*UB).First();j<=(*UB).Last();j++) {
+    (*UB)[j] = false; (*LB)[j] = false;
+    (*ub)[j] = (T)0; (*lb)[j] = (T)0;
+  }
+  
+  // Define Phase I upper and lower bounds
+  for(i=1;i<=nvars;i++) {
+    (*LB)[i]=true;              // original and artificial variables 
+//    (*lb)[i]=(T)0;         // have lower bounds of 0
+  }
+  // for slack variables
+  for(i = 1;i<= neqns;i++) {
+    if(b[i] >= (T)0) (*LB)[nvars+i] = true;  
+    else (*UB)[nvars+i] = true;
+  }
+  // define Phase 1 unit cost vector
+  (*cost) = (T)0;
+  for (i = 1; i <= neqns; i++)  {
+    (*cost)[nvars+i] = (T)0;
+    if ((*UB)[nvars+i]) {
+      (*cost)[nvars+i] = (T)1;
+    }
+    else 
+      if(i > num_inequals) (*cost)[nvars+i] = -(T)1;
+  }
+  
+  // gout << "\nUB = " <<  *UB << " " << "\nLB = " << *LB;
+  // gout << "\nub = " <<  *ub << " " << "\nlb = " << *lb;
+  // gout << "\ncost = " <<  (*cost);
+  
+  // Initialize the tableau
+  
+  tab.SetCost((*cost));
+  
+  // gout << "\nInitial Tableau = \n";
+  // tab.Dump(gout);
+  
+  // set xx to be initial feasible solution to phase II  
+  for(i=1;i<=(*xx).Length();i++) {
+    if((*LB)[i]) (*xx)[i]=(*lb)[i];
+    else if((*UB)[i]) (*xx)[i]=(*ub)[i];
+    else (*xx)[i]=(T)0;
+  }
+  tab.BasisVector(x);
+  for(i=1;i<=x.Length();i++) {
+    xlab = tab.Label(i);
+    if(xlab<0) xlab=nvars-xlab;
+    (*xx)[xlab]=x[i];
+  }
+  // gout << "\nxx: " << (*xx);
+
+  
+  Solve(1);
+  
+  total_cost = tab.TotalCost();
+
+  // gout << "\nFinal Phase I tableau: ";
+  // tab.Dump(gout); 
+  // gout << ", cost: " << total_cost;
+
+  // gout << "\n--- End Phase I ---\n";
+  
+  if(!bounded) {
+    // gout << "\nPhase 1 Unbounded\n";
+  }
+  //assert(bounded);
+  
+  // which eps should be used here?  
+  if(total_cost < -eps1) {   
+    feasible = 0;
+    // gout << "\nProblem Infeasible\n\n";
+    return;
+  }
+  
+  // gout << "\n--- Begin Phase II ---\n";
+  
+  // Define Phase II upper and lower bounds for slack variables
+  
+  // gout << "\nxx: " << (*xx);
+
+  for(i=num_inequals+1;i<=neqns;i++) 
+    (*UB)[nvars+i] = true;
+  for(i=1;i<=neqns;i++) {
+    if(b[i] < (T)0) (*LB)[nvars+i] = true;
+  }
+  
+  // install Phase II unit cost vector
+  
+  for(i=c.First();i<=c.Last();i++)
+    (*cost)[i] = c[i];
+  for(i=c.Last()+1;i<=nvars+neqns;i++)
+    (*cost)[i] = (T)0;
+  
+  // gout << "\nUB = " <<  *UB << " " << " LB = " << *LB;
+  // gout << "\nub = " <<  *ub << " " << " lb = " << *lb;
+  // gout << "\nc = " <<  (*cost);
+  
+  tab.SetCost((*cost));
+  
+  // gout << "\nInitial basis: ";
+  // tab.Dump(gout);   gout << '\n';
+  
+  Solve(2);
+  
+  // gout << "\n--- End Phase II ---\n";
+
+  if(!bounded) {
+    // gout << "\nPhase II Unbounded\n";
+  }
+  total_cost = tab.TotalCost();
+  tab.DualVector(y);
+  opt_bfs = tab.GetBFS();
+  dual_bfs = tab.DualBFS();
+
+  // gout << "\nFinal basis: ";
+  // tab.Dump(gout);   gout << '\n';
+  // gout << "\ncost: " << total_cost;
+  // gout << "DualVector = " << y << "\n";
+  // gout << "\nopt_bfs:\n";
+  // opt_bfs.Dump(gout);
+  // gout << "\n";
+  // dual_bfs.Dump(gout);
+
+  for(i=1;i<=neqns;i++) {
+    if(dual_bfs.count(-i)) {
+      opt_bfs.insert(-i,dual_bfs[-i]);
+    }     
+  }     
+  // gout << "\n--- End LPSolve ---\n";
+}
+
+//template <class T> LPSolve<T>::
+//LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &/*B*/, 
+//	const Gambit::Vector<T> &/*C*/,  const Gambit::Vector<int> &/*sense*/, 
+//	const Gambit::Vector<int> &/*LB*/,  const Gambit::Vector<T> &/*lb*/, 
+//	const Gambit::Vector<int> &/*UB*/, const Gambit::Vector<T> &/*ub*/)
+// : well_formed(1), feasible(1), bounded(1),  
+//    nvars(c.Length()),neqns(b.Length()), total_cost(0), 
+//    opt_bfs((T)0),  dual_bfs((T)0),  A(A), b(b), c(c), tab(0), 
+//    UB(c.Length()+b.Length()), LB(b.Length()+c.Length()), 
+//    ub(c.Length()+b.Length()),lb(c.Length()+b.Length()),
+//    xx(c.Length()+b.Length()),
+//    y(b.Length()),x(b.Length()),d(b.Length()),
+//    cost(c.Length()+b.Length())
+//{ 
+//  gout << "\n This constructor not implemented yet";
+//  assert(0);
+//}
+
+template <class T> void LPSolve<T>::Solve(int phase)
+{
+  int i, in,xlab;
+  int outlab = 0;
+  int out = 0;
+  Gambit::Vector<T> a(neqns);
+  double npiv;
+  
+  do { 
+    // step 1: Solve y B = c_B
+    // tab.DualVector(y);         // step 1: Solve y B = c_B
+    // gout << "\nstep 1, y: " << y;
+    do {
+      in = Enter();            // step 2: Choose entering variable 
+      // gout << "\nstep 2, in: " << in;
+      if(in) {
+	// tab.GetColumn(in,a);
+	// tab.Solve(a,d);    // step 3: Solve B d = a
+	tab.SolveColumn(in,d);    // step 3: Solve B d = a, where a col #in of A
+	out = Exit(in);          // step 4: Choose leaving variable
+	if(out==0) {
+	  bounded=0;
+	  return;
+	}
+	else if (out<0)
+	  outlab = in;
+	else {
+	  // gout << "\nstep 4, in: " << in << " out: " << out;
+	  outlab = tab.Label(out);
+	}
+                                // update xx
+	for(i=1;i<=x.Length();i++) {   // step 5a:
+	  // gout << "\nstep 5a, i: " << i;
+	  xlab=tab.Label(i);
+	  if(xlab<0)xlab=nvars-xlab;
+	  (*xx)[xlab]=(*xx)[xlab]+(T)flag*tmin*d[i];
+	}
+	if(in>0)
+	  (*xx)[in] -= (T)flag*tmin;
+	if(in<0)
+	  (*xx)[nvars-in] -= (T)flag*tmin;
+	// gout << "\nstep 5a, xx: " << (*xx);
+      }
+    } while(outlab==in && outlab !=0); 
+    if(in) {
+      // gout << "\nstep 5b, Pivot in: " << in << " out: " << out;
+      tab.Pivot(out,in);       // step5b: Pivot new variable into basis
+      
+      npiv=(double)tab.NumPivots();
+      tab.BasisVector(x);
+      // gout << "\n tab = ";
+      // tab.Dump(gout);
+      // gout << "\nxx: " << (*xx);
+      // gout << ", Cost = " << tab.TotalCost() << "\n";
+      if(phase ==1 && tab.TotalCost() >= -eps1) return;
+//      gout << "\nAfter pivot tab = \n";
+    }
+  }
+  while(in);
+}
+  
+template <class T> int LPSolve<T>::Enter()
+{ 
+  // gout << "\nIn LPSolve<T>::Enter()";
+  int i,in;
+  T rc;
+  in = 0;
+  
+  T test = (T)0;
+  for(i=1;i<=nvars+neqns;i++) {
+    int lab = i;
+    if(i>nvars)lab=nvars-i;
+    if(!tab.Member(lab)) {
+      rc = tab.RelativeCost(lab);
+      //      gout << "\nCost: " << tab.GetCost();
+      // gout << "\n i = " << i << " cost: " << (*cost)[i] << " rc: " << rc << " test: " << test;
+      if(rc > test+eps1) 
+	if((*UB)[i]==false || ((*UB)[i]==true && (*xx)[i] - (*ub)[i] < -eps1)) {
+	  {test=rc;in = lab;flag = -1;}
+	  // gout << "\nflag: -1  in: " << in << " test: " << test;
+	}
+      if(-rc > test+eps1) 
+	if((*LB)[i]==false || ((*LB)[i]==true && (*xx)[i] - (*lb)[i] > eps1)) {
+	  {test=-rc;in=lab;flag = 1;}
+	  // gout << "\nflag: +1  in: " << in << " test: " << test;
+	}
+    }
+  }
+  return in;
+}
+
+template <class T> int LPSolve<T>::Exit(int in)
+{
+  int j,out,lab,col;
+  T t;
+
+  // gout << "\nin Exit(), flag: " << flag;
+  out=0;
+  tmin = (T)100000000;
+  for (j=1; j<=neqns; j++)  {
+    lab=tab.Label(j);
+    col=lab;
+    if(lab<0)col=nvars-lab;
+    if(flag == -1) {
+      t = (T)1000000000;
+      if (d[j] > eps2 && (*LB)[col]==true) {
+	t = ((*xx)[col]-(*lb)[col])/d[j];
+      }
+      if (d[j] < -eps2 && (*UB)[col]==true) { 
+	t = ((*xx)[col]-(*ub)[col])/d[j];
+      }
+      if(t>=-eps2 && t < tmin-eps2) {
+	tmin = t;
+	out = j;
+      }
+      // gout << "\nd[" << j << "]: " << d[j] << " col: " << col << " xx: " << (*xx)[col];
+      // gout << " t: " << t << " tmin: " << tmin; 
+    }
+    if(flag == 1) {
+      t = (T)1000000000;
+      if (d[j] > eps2 && (*UB)[col]==true) { 
+	t = ((*ub)[col]-(*xx)[col])/d[j];
+      }
+      if (d[j] < -eps2 && (*LB)[col]==true) { 
+	t = ((*lb)[col]-(*xx)[col])/d[j];
+      }
+      if(t >= -eps2 && t < tmin-eps2) {
+	tmin = t;
+	out = j;
+      }
+      // gout << "\nd[" << j << "]: " << d[j] << " col: " << col << " xx: " << (*xx)[col]; 
+      // gout << " t: " << t << " tmin: " << tmin; 
+    }
+  }
+  col=in;
+    if(in<0)col=nvars-in;
+  t = (T)1000000000;
+  if(flag == -1 && (*UB)[col]) 
+    t = (*ub)[col]-(*xx)[col];
+  if(flag == 1 && (*LB)[col]) 
+    t = (*xx)[col]-(*lb)[col];
+  if(t > eps2 && t < tmin-eps2) {
+    tmin = t;
+    out = -1;
+  }
+
+  return out;
+}
+
+template <class T> T LPSolve<T>::OptimumCost(void) const
+{
+  return total_cost;
+}
+
+template <class T> const Gambit::Vector<T> &LPSolve<T>::OptimumVector(void) const
+{
+  return (*xx);
+}
+
+template <class T> const LPTableau<T> &LPSolve<T>::GetTableau(void)
+{
+  return tab;
+}
+
+#ifdef UNUSED
+
+//
+// This method does not work correctly, so is disabled
+//
+template <class T> const Gambit::List<BFS <T> > &LPSolve<T>::GetAll(void)
+{
+  Gambit::Vector<T> c(tab.GetCost());
+  Gambit::Vector<T> uc(tab.GetUnitCost());
+
+  //  gout << "\nc: " << c;
+  //  gout << "\nuc: " << uc;
+
+  Gambit::Vector<T> x(tab.MinRow(),tab.MaxRow());
+  tab.BasisVector(x);
+
+  int i;
+  for(i=c.First();i<=c.Last();i++) {
+    //   gout << "\ncol: " << i << " cost: " << tab.RelativeCost(i);
+    //   gout  << " label: " << tab.Label(i) << " x: " << x[tab.Label(i)];
+    if(tab.RelativeCost(i) < -eps2 && x[tab.Label(i)]>eps2) {
+      //    gout << " mark";
+      tab.Mark(i);
+    }
+  }
+  for(i=uc.First();i<=uc.Last();i++) {
+    //    gout << "\nrow: " << i << " cost: " << tab.RelativeCost(-i);
+    //   gout << " label: " << tab.Label(-i) << " x: " << x[tab.Label(-i)];
+    if(tab.RelativeCost(-i) < -eps2 && x[tab.Label(-i)]>eps2) {
+      //     gout << " mark";
+      tab.Mark(-i);
+    }
+  }
+
+  VertEnum<T> AllSolutions(tab);
+  Gambit::List<Gambit::Vector<T> > verts;
+
+  Gambit::List<BFS<T> > *bfs = new Gambit::List<BFS<T> >(AllSolutions.VertexList());
+  Gambit::List<BFS<T> > *dual_bfs = new Gambit::List<BFS<T> >(AllSolutions.DualVertexList());
+  AllSolutions.Vertices(verts);
+
+  //  gout << "\nHere are the BFSs: \n";
+  for( i=1;i<=(*bfs).Length();i++) {
+    //    gout << "\n" << i << ": ";
+    //  (*bfs)[i].Dump(gout);
+  }
+  //  gout << "\nHere are the Dual BFSs: \n";
+  for( i=1;i<=(*dual_bfs).Length();i++) {
+    //    gout << "\n" << i << ": ";
+    //n   (*dual_bfs)[i].Dump(gout);
+  }
+  //  gout << "\nHere are the vertices:\n";
+
+  //  for( i=1;i<=verts.Length();i++)
+    //   gout << "\n" << i << ": " << verts[i];
+  
+  for( i=1;i<=(*bfs).Length();i++)
+    for(int j=1;j<=neqns;j++)
+      if((*dual_bfs)[i].IsDefined(-j))
+	(*bfs)[i].Define(-j,(*dual_bfs)[i](-j));
+
+  //  gout << "\nHere are the BFSs: \n";
+  for( i=1;i<=(*bfs).Length();i++) {
+    //  gout << "\n" << i << ": ";
+    //  (*bfs)[i].Dump(gout);
+  }
+
+  return *bfs;
+}
+#endif  // UNUSED
+
+template <class T> int LPSolve<T>::IsFeasible(void) const
+{
+  return feasible;
+}
+
+template <class T> int LPSolve<T>::IsBounded(void) const
+{
+  return bounded;
+}
+
+template <class T> int LPSolve<T>::IsWellFormed(void) const
+{
+  return well_formed;
+}
+
+template <class T> int LPSolve<T>::IsAborted(void) const
+{
+  return aborted;
+}
+
+template <class T> long LPSolve<T>::NumPivots(void) const
+{
+  return tab.NumPivots();
+}
+
+template <class T> void LPSolve<T>::OptBFS(BFS<T> &b) const
+{
+  b = opt_bfs;
+}
+
+template <class T> LPSolve<T>::~LPSolve()
+{ 
+  if(UB) delete UB; 
+  if(LB) delete LB; 
+  if(ub) delete ub; 
+  if(lb) delete lb; 
+  if(xx) delete xx; 
+  if(cost) delete cost; 
+}
+
+template <class T> T LPSolve<T>::Epsilon(int i/* = 2*/) const
+{
+if(i == 1) return eps1;
+if(i == 3)return eps3;
+return eps2;
+}
+

@@ -46,6 +46,7 @@
 #include "nfgpanel.h"
 #include "nfgprofile.h"
 
+#include "dlexcept.h"
 #include "dlgameprop.h"
 #include "dlnash.h"
 #include "dlnashmon.h"
@@ -312,10 +313,9 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   else {
     m_nfgPanel->SetFocus();
   }
-
+  
+  OnUpdate();
   Show(true);
-
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_NONE);
 }
 
 gbtGameFrame::~gbtGameFrame()
@@ -352,7 +352,7 @@ void gbtGameFrame::OnUpdate(void)
   GetToolBar()->EnableTool(wxID_UNDO, m_doc->CanUndo());
   menuBar->Enable(wxID_REDO, m_doc->CanRedo());
   GetToolBar()->EnableTool(wxID_REDO, m_doc->CanRedo());
-  menuBar->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode);
+  menuBar->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode != 0);
   menuBar->Enable(GBT_MENU_EDIT_INSERT_ACTION,
 		  selectNode && selectNode->GetInfoset());
   menuBar->Enable(GBT_MENU_EDIT_REVEAL,
@@ -363,7 +363,7 @@ void gbtGameFrame::OnUpdate(void)
 		  selectNode && selectNode->GetParent());
   menuBar->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME,
 		  selectNode && selectNode->GetOutcome());
-  menuBar->Enable(GBT_MENU_EDIT_NODE, selectNode);
+  menuBar->Enable(GBT_MENU_EDIT_NODE, selectNode != 0);
   menuBar->Enable(GBT_MENU_EDIT_MOVE, 
 		     selectNode && selectNode->GetInfoset());
 
@@ -554,8 +554,8 @@ void gbtGameFrame::MakeMenus(void)
   viewMenu->AppendSeparator();
     
   viewMenu->Append(GBT_MENU_VIEW_STRATEGIC, _("&Strategic game"),
-		   _("Display the reduced strategic representation "
-		     "of the game"), true);
+		   wxT("Display the reduced strategic representation ")
+		     wxT("of the game"), true);
   
   wxMenu *formatMenu = new wxMenu;
   AppendBitmapItem(formatMenu, GBT_MENU_FORMAT_LAYOUT, _("&Layout"),
@@ -662,10 +662,10 @@ void gbtGameFrame::MakeToolbar(void)
   if (m_doc->IsTree()) {
     toolBar->AddTool(GBT_MENU_VIEW_STRATEGIC, wxBitmap(table_xpm),
 		     wxNullBitmap, true, -1, -1, 0, 
-		     _("Display the reduced strategic representation "
-		       "of the game"),
-		     _("Display the reduced strategic representation "
-		       "of the game"));
+		     wxT("Display the reduced strategic representation ")
+		       wxT("of the game"),
+		     wxT("Display the reduced strategic representation ")
+		       wxT("of the game"));
   }
   toolBar->AddTool(GBT_MENU_VIEW_PROFILES, wxBitmap(profiles_xpm),
 		   wxNullBitmap, true, -1, -1, 0, 
@@ -715,10 +715,10 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose file to open"), 
 		      wxGetApp().GetCurrentDir(), _T(""), 
-		      _("Gambit workbooks (*.gbt)|*.gbt|"
-			"Gambit extensive games (*.efg)|*.efg|"
-			"Gambit strategic games (*.nfg)|*.nfg|"
-			"All files (*.*)|*.*"));
+		      wxT("Gambit workbooks (*.gbt)|*.gbt|")
+			wxT("Gambit extensive games (*.efg)|*.efg|")
+			wxT("Gambit strategic games (*.nfg)|*.nfg|")
+			wxT("All files (*.*)|*.*"));
 
   if (dialog.ShowModal() == wxID_OK) {
     wxString filename = dialog.GetPath();
@@ -759,22 +759,27 @@ void gbtGameFrame::OnFileSave(wxCommandEvent &p_event)
     wxFileDialog dialog(this, _("Choose file"),
 			wxPathOnly(m_doc->GetFilename()),
 			wxFileNameFromPath(m_doc->GetFilename()),
-			wxT("Gambit workbooks (*.gbt)|*.gbt|"
-			    "All files (*.*)|*.*"),
-			wxSAVE | wxOVERWRITE_PROMPT);
+			wxT("Gambit workbooks (*.gbt)|*.gbt|")
+			wxT("All files (*.*)|*.*"),
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
     if (dialog.ShowModal() == wxID_OK) {
-      m_doc->SetFilename(dialog.GetPath());
-    }
-    else {
-      return;
+      try {
+	m_doc->DoSave(dialog.GetPath());
+      }
+      catch (std::exception &ex) {
+	gbtExceptionDialog(this, ex.what()).ShowModal();
+      }
     }
   }
-
-  std::ofstream file((const char *) m_doc->GetFilename().mb_str());
-  m_doc->SaveDocument(file);
-  m_doc->SetModified(false);
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_NONE);
+  else {
+    try {
+      m_doc->DoSave(m_doc->GetFilename());
+    }
+    catch (std::exception &ex) {
+      gbtExceptionDialog(this, ex.what()).ShowModal();
+    }
+  }
 }
 
 void gbtGameFrame::OnFilePageSetup(wxCommandEvent &)
@@ -845,14 +850,12 @@ void gbtGameFrame::OnFileExportEfg(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose file"), 
 		      wxGetApp().GetCurrentDir(), _T(""),
-		      _T("Gambit extensive games (*.efg)|*.efg|"
-			 "All files (*.*)|*.*"), 
-		      wxSAVE | wxOVERWRITE_PROMPT);
+		      wxT("Gambit extensive games (*.efg)|*.efg|")
+			 wxT("All files (*.*)|*.*"), 
+		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
-    std::ofstream file((const char *) dialog.GetPath().mb_str());
-    m_doc->GetGame()->WriteEfgFile(file);
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_NONE);
+    m_doc->DoExportEfg(dialog.GetPath());
   }
 }
 
@@ -860,15 +863,12 @@ void gbtGameFrame::OnFileExportNfg(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose file"), 
 		      wxGetApp().GetCurrentDir(), _T(""),
-		      _T("Gambit strategic games (*.nfg)|*.nfg|"
-			 "All files (*.*)|*.*"),
-		      wxSAVE | wxOVERWRITE_PROMPT);
+		      wxT("Gambit strategic games (*.nfg)|*.nfg|")
+			 wxT("All files (*.*)|*.*"),
+		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
-    std::ofstream file((const char *) dialog.GetPath().mb_str());
-    m_doc->BuildNfg();
-    m_doc->GetGame()->WriteNfgFile(file);
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_NONE);
+    m_doc->DoExportNfg(dialog.GetPath());
   }
 }
 
@@ -896,8 +896,8 @@ void gbtGameFrame::OnFileExportGraphic(wxCommandEvent &p_event)
     filter = wxT("Windows bitmap files (*.bmp)|*.bmp") + filter;
     break;
   case GBT_MENU_FILE_EXPORT_JPEG:
-    filter = wxT("JPEG files (*.jpeg)|*.jpeg|"
-		 "JPG files (*.jpg)|*.jpg") + filter;
+    filter = wxT("JPEG files (*.jpeg)|*.jpeg|")
+		 wxT("JPG files (*.jpg)|*.jpg") + filter;
     break;
   case GBT_MENU_FILE_EXPORT_PNG:
     filter = wxT("PNG files (*.png)|*.png") + filter;
@@ -908,7 +908,7 @@ void gbtGameFrame::OnFileExportGraphic(wxCommandEvent &p_event)
 
   wxFileDialog dialog(this, _("Choose output file"), 
 		      wxGetApp().GetCurrentDir(), _T(""), filter,
-		      wxSAVE | wxOVERWRITE_PROMPT);
+		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
     wxBitmapType code;
@@ -934,7 +934,7 @@ void gbtGameFrame::OnFileExportPS(wxCommandEvent &)
   wxFileDialog dialog(this, _("Choose output file"),
 		      wxGetApp().GetCurrentDir(), _T(""),
 		      _T("PostScript files (*.ps)|*.ps"), 
-		      wxSAVE | wxOVERWRITE_PROMPT);
+		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
     printData.SetFilename(dialog.GetPath());
@@ -968,9 +968,9 @@ void gbtGameFrame::OnFileExportSVG(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose output file"), 
 		      wxGetApp().GetCurrentDir(), _T(""),
-		      wxT("SVG files (*.svg)|*.svg|"
-			  "All files (*.*)|*.*"),
-		      wxSAVE | wxOVERWRITE_PROMPT);
+		      wxT("SVG files (*.svg)|*.svg|")
+			  wxT("All files (*.*)|*.*"),
+		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
     if (m_efgPanel && m_efgPanel->IsShown()) {
@@ -985,9 +985,9 @@ void gbtGameFrame::OnFileExportSVG(wxCommandEvent &)
 void gbtGameFrame::OnFileExit(wxCommandEvent &p_event)
 {
   if (wxGetApp().AreDocumentsModified()) {
-    if (wxMessageBox(_("There are modified games.\n"
-		       "Any unsaved changes will be lost!\n"
-		       "Close anyway?"), 
+    if (wxMessageBox(wxT("There are modified games.\n")
+		       wxT("Any unsaved changes will be lost!\n")
+		       wxT("Close anyway?"), 
 		     _("Warning"),
 		     wxOK | wxCANCEL) == wxCANCEL) {
       return;
@@ -1039,59 +1039,60 @@ void gbtGameFrame::OnEditRedo(wxCommandEvent &)
 void gbtGameFrame::OnEditInsertMove(wxCommandEvent &)
 { 
   gbtInsertMoveDialog dialog(this, m_doc);
-
   if (dialog.ShowModal() == wxID_OK)  {
     try {
-      if (!dialog.GetInfoset()) {
-	Gambit::GameInfoset infoset = 
-	  m_doc->GetSelectNode()->InsertMove(dialog.GetPlayer(),
-					     dialog.GetActions());
-	for (int act = 1; act <= infoset->NumActions(); act++) {
-	  infoset->GetAction(act)->SetLabel(Gambit::ToText(act));
-	}
+      if (dialog.GetInfoset()) {
+	m_doc->DoInsertMove(m_doc->GetSelectNode(), dialog.GetInfoset());
       }
       else {
-	m_doc->GetSelectNode()->InsertMove(dialog.GetInfoset());
+	m_doc->DoInsertMove(m_doc->GetSelectNode(), 
+			    dialog.GetPlayer(), dialog.GetActions());
       }
-      m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
     }
-    catch (Gambit::Exception &ex) {
-      gbtExceptionDialog(ex.GetDescription(), this);
+    catch (std::exception &ex) {
+      gbtExceptionDialog(this, ex.what()).ShowModal();
     }
   }
 }
 
 void gbtGameFrame::OnEditInsertAction(wxCommandEvent &)
 {
-  Gambit::GameNode node = m_doc->GetSelectNode();
-  if (!node || !node->GetInfoset())  return;
-
-  Gambit::GameAction action = node->GetInfoset()->InsertAction();
-  action->SetLabel(Gambit::ToText(action->GetNumber()));
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
+  try {
+    m_doc->DoInsertAction(m_doc->GetSelectNode());
+  }
+  catch (std::exception &ex) {
+    gbtExceptionDialog(this, ex.what()).ShowModal();
+  }
 }
 
 void gbtGameFrame::OnEditDeleteTree(wxCommandEvent &)
 {
-  if (!m_doc->GetSelectNode())  return;
-
-  m_doc->GetSelectNode()->DeleteTree();
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
+  try {
+    m_doc->DoDeleteTree(m_doc->GetSelectNode());
+  }
+  catch (std::exception &ex) {
+    gbtExceptionDialog(this, ex.what()).ShowModal();
+  }
 }
 
 void gbtGameFrame::OnEditDeleteParent(wxCommandEvent &)
 {
-  if (!m_doc->GetSelectNode() || !m_doc->GetSelectNode()->GetParent())  return;
-
-  m_doc->GetSelectNode()->DeleteParent();
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
+  try {
+    m_doc->DoDeleteParent(m_doc->GetSelectNode());
+  }
+  catch (std::exception &ex) {
+    gbtExceptionDialog(this, ex.what()).ShowModal();
+  }
 }
 
 void gbtGameFrame::OnEditRemoveOutcome(wxCommandEvent &)
 {
-  if (!m_doc->GetSelectNode() || !m_doc->GetSelectNode()->GetOutcome()) return;
-  m_doc->GetSelectNode()->SetOutcome(0);
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
+  try {
+    m_doc->DoRemoveOutcome(m_doc->GetSelectNode());
+  }
+  catch (std::exception &ex) {
+    gbtExceptionDialog(this, ex.what()).ShowModal();
+  }
 }
 
 void gbtGameFrame::OnEditReveal(wxCommandEvent &)
@@ -1101,12 +1102,12 @@ void gbtGameFrame::OnEditReveal(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       for (int pl = 1; pl <= dialog.GetPlayers().Length(); pl++) {
-	m_doc->GetSelectNode()->GetInfoset()->Reveal(dialog.GetPlayers()[pl]);
+	m_doc->DoRevealAction(m_doc->GetSelectNode()->GetInfoset(),
+			      dialog.GetPlayers()[pl]);
       }
-      m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
     }
-    catch (Gambit::Exception &ex) {
-      gbtExceptionDialog(ex.GetDescription(), this);
+    catch (std::exception &ex) {
+      gbtExceptionDialog(this, ex.what()).ShowModal();
     }
   }
 }
@@ -1115,24 +1116,29 @@ void gbtGameFrame::OnEditNode(wxCommandEvent &)
 {
   dialogEditNode dialog(this, m_doc->GetSelectNode());
   if (dialog.ShowModal() == wxID_OK) {
-    m_doc->GetSelectNode()->SetLabel((const char *) dialog.GetNodeName().mb_str());
-    if (dialog.GetOutcome() > 0) {
-      m_doc->GetSelectNode()->SetOutcome(m_doc->GetGame()->GetOutcome(dialog.GetOutcome()));
-    }
-    else {
-      m_doc->GetSelectNode()->SetOutcome(0);
-    }
-
-    if (m_doc->GetSelectNode()->NumChildren() > 0 &&
-	dialog.GetInfoset() != m_doc->GetSelectNode()->GetInfoset()) {
-      if (dialog.GetInfoset() == 0) {
-	m_doc->GetSelectNode()->LeaveInfoset();
+    try {
+      m_doc->DoSetNodeLabel(m_doc->GetSelectNode(), dialog.GetNodeName());
+      if (dialog.GetOutcome() > 0) {
+	m_doc->DoSetOutcome(m_doc->GetSelectNode(),
+			    m_doc->GetGame()->GetOutcome(dialog.GetOutcome()));
       }
       else {
-	m_doc->GetSelectNode()->SetInfoset(dialog.GetInfoset());	
+	m_doc->DoSetOutcome(m_doc->GetSelectNode(), 0);
+      }
+
+      if (m_doc->GetSelectNode()->NumChildren() > 0 &&
+	  dialog.GetInfoset() != m_doc->GetSelectNode()->GetInfoset()) {
+	if (dialog.GetInfoset() == 0) {
+	  m_doc->DoLeaveInfoset(m_doc->GetSelectNode());
+	}
+	else {
+	  m_doc->DoSetInfoset(m_doc->GetSelectNode(), dialog.GetInfoset());
+	}
       }
     }
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
+    catch (std::exception &ex) {
+      gbtExceptionDialog(this, ex.what()).ShowModal();
+    }
   }
 }
 
@@ -1143,44 +1149,46 @@ void gbtGameFrame::OnEditMove(wxCommandEvent &)
 
   gbtEditMoveDialog dialog(this, infoset);
   if (dialog.ShowModal() == wxID_OK) {
-    infoset->SetLabel((const char *) dialog.GetInfosetName().mb_str());
-    
-    if (!infoset->IsChanceInfoset() && 
-	dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
-      infoset->SetPlayer(m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
-    }
+    try {
+      m_doc->DoSetInfosetLabel(infoset, dialog.GetInfosetName());
 
-    for (int act = 1; act <= infoset->NumActions(); act++) {
-      infoset->GetAction(act)->SetLabel(dialog.GetActionName(act));
-      if (infoset->IsChanceInfoset()) {
-	infoset->SetActionProb(infoset->GetAction(act)->GetNumber(),
-			       dialog.GetActionProb(act));
+      if (!infoset->IsChanceInfoset() && 
+	  dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
+	m_doc->DoSetPlayer(infoset, 
+			   m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
+      }
+
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	m_doc->DoSetActionLabel(infoset->GetAction(act), 
+				dialog.GetActionName(act));
+	if (infoset->IsChanceInfoset()) {
+	  m_doc->DoSetActionProb(infoset, infoset->GetAction(act)->GetNumber(),
+				 dialog.GetActionProb(act));
+	}
       }
     }
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
+    catch (std::exception &ex) {
+      gbtExceptionDialog(this, ex.what()).ShowModal();
+    }
   }
 }
 
 void gbtGameFrame::OnEditGame(wxCommandEvent &)
 {
   gbtGamePropertiesDialog dialog(this, m_doc);
-
   if (dialog.ShowModal() == wxID_OK) {
-    Gambit::Game game = m_doc->GetGame();
-    game->SetTitle((const char *) dialog.GetTitle().mb_str());
-    game->SetComment((const char *) dialog.GetComment().mb_str());
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
+    m_doc->DoSetTitle(dialog.GetTitle(), dialog.GetComment());
   }
 }
 
 void gbtGameFrame::OnEditNewPlayer(wxCommandEvent &)
 {
-  Gambit::GamePlayer player = m_doc->GetGame()->NewPlayer();
-  player->SetLabel("Player " + Gambit::ToText(player->GetNumber()));
-  if (!m_doc->IsTree()) {
-    player->GetStrategy(1)->SetLabel("1");
+  try {
+    m_doc->DoNewPlayer();
   }
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
+  catch (std::exception &ex) {
+    gbtExceptionDialog(this, ex.what()).ShowModal();
+  }
 }
 
 //----------------------------------------------------------------------
@@ -1217,8 +1225,8 @@ void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
     // We are switching to strategic view
 
     if (!m_doc->GetGame()->IsPerfectRecall()) {
-      if (wxMessageBox(_("This is not a game of perfect recall\n"
-			 "Do you wish to continue?"), 
+      if (wxMessageBox(wxT("This is not a game of perfect recall\n")
+			 wxT("Do you wish to continue?"), 
 		       _("Strategic game"), 
 		       wxOK | wxCANCEL | wxALIGN_CENTER, this) != wxOK) {
 	return;
@@ -1234,6 +1242,7 @@ void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
       m_analysisPanel->ShowMixed(true);
     }
     m_nfgPanel->SetFocus();
+    m_nfgPanel->OnUpdate();
   }
   else {
     m_splitter->ReplaceWindow(m_nfgPanel, m_efgPanel);
@@ -1253,8 +1262,6 @@ void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
   GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMIN, !p_event.IsChecked());
   GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMOUT, !p_event.IsChecked());
   GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMFIT, !p_event.IsChecked());
-
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_NONE);
 }
 
 //----------------------------------------------------------------------
@@ -1263,13 +1270,12 @@ void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
 
 void gbtGameFrame::OnFormatLayout(wxCommandEvent &)
 {
-  gbtStyle &settings = m_doc->GetStyle();
-
-  gbtLayoutDialog dialog(this, settings);
+  gbtStyle style = m_doc->GetStyle();
+  gbtLayoutDialog dialog(this, style);
 
   if (dialog.ShowModal() == wxID_OK) {
-    dialog.GetSettings(settings);
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+    dialog.GetSettings(style);
+    m_doc->SetStyle(style);
   }
 }
 
@@ -1278,11 +1284,12 @@ void gbtGameFrame::OnFormatLabels(wxCommandEvent &)
   gbtLegendDialog dialog(this, m_doc->GetStyle());
 
   if (dialog.ShowModal() == wxID_OK) {
-    m_doc->GetStyle().SetNodeAboveLabel(dialog.GetNodeAbove());
-    m_doc->GetStyle().SetNodeBelowLabel(dialog.GetNodeBelow());
-    m_doc->GetStyle().SetBranchAboveLabel(dialog.GetBranchAbove());
-    m_doc->GetStyle().SetBranchBelowLabel(dialog.GetBranchBelow());
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+    gbtStyle style = m_doc->GetStyle();
+    style.SetNodeAboveLabel(dialog.GetNodeAbove());
+    style.SetNodeBelowLabel(dialog.GetNodeBelow());
+    style.SetBranchAboveLabel(dialog.GetBranchAbove());
+    style.SetBranchBelowLabel(dialog.GetBranchBelow());
+    m_doc->SetStyle(style);
   }
 }
 
@@ -1293,21 +1300,24 @@ void gbtGameFrame::OnFormatFonts(wxCommandEvent &)
   wxFontDialog dialog(this, data);
   
   if (dialog.ShowModal() == wxID_OK) {
-    m_doc->GetStyle().SetFont(dialog.GetFontData().GetChosenFont());
-    m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+    gbtStyle style = m_doc->GetStyle();
+    style.SetFont(dialog.GetFontData().GetChosenFont());
+    m_doc->SetStyle(style);
   }
 }
 
 void gbtGameFrame::OnFormatDecimalsAdd(wxCommandEvent &)
 {
-  m_doc->GetStyle().SetNumDecimals(m_doc->GetStyle().NumDecimals()+1);
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+  gbtStyle style = m_doc->GetStyle();
+  style.SetNumDecimals(style.NumDecimals()+1);
+  m_doc->SetStyle(style);
 }
 
 void gbtGameFrame::OnFormatDecimalsDelete(wxCommandEvent &)
 {
-  m_doc->GetStyle().SetNumDecimals(m_doc->GetStyle().NumDecimals()-1);
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+  gbtStyle style = m_doc->GetStyle();
+  style.SetNumDecimals(style.NumDecimals()-1);
+  m_doc->SetStyle(style);
 }
 
 //----------------------------------------------------------------------
@@ -1346,8 +1356,6 @@ void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
       }
     }
   }
-
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
 extern void LogitStrategic(wxWindow *, gbtGameDocument *);
@@ -1384,9 +1392,9 @@ void gbtGameFrame::OnUnsplit(wxSplitterEvent &)
 void gbtGameFrame::OnCloseWindow(wxCloseEvent &p_event)
 {
   if (p_event.CanVeto() && m_doc->IsModified()) {
-    if (wxMessageBox(_("Game has been modified.\n"
-		       "Unsaved changes will be lost!\n"
-		       "Close anyway?"), 
+    if (wxMessageBox(wxT("Game has been modified.\n")
+		       wxT("Unsaved changes will be lost!\n")
+		       wxT("Close anyway?"), 
 		     _("Warning"),
 		     wxOK | wxCANCEL) == wxCANCEL) {
       p_event.Veto();

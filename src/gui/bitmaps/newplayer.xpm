@@ -1,5 +1,5 @@
 /* XPM */
-static char * newplayer_xpm[] = {
+static const char * newplayer_xpm[] = {
 "24 24 204 2",
 "  	c None",
 ". 	c #E5D087",

@@ -437,7 +437,7 @@ void qh_setappend2ndlast(setT **setp, void *newelem) {
 /*----------------------------------------
 -setcheck- check set for validity
 */
-void qh_setcheck(setT *set, char *typenameNEW, int id) {
+void qh_setcheck(setT *set, const char *typenameNEW, int id) {
   int maxsize, size;
   int waserr= 0;
 
@@ -931,7 +931,7 @@ setT *qh_setnew_delnthsorted(setT *set, int size, int nth, int prepend) {
 notes:
   never errors
 */
-void qh_setprint(FILE *fp, char* string, setT *set) {
+void qh_setprint(FILE *fp, const char* string, setT *set) {
   int size, k;
 
   if (!set)
@@ -940,8 +940,8 @@ void qh_setprint(FILE *fp, char* string, setT *set) {
     SETreturnsize_(set, size);
     //fprintf (fp, "%s set=%x maxsize=%d size=%d elems=",
 	  //   string, (unsigned int) set, set->maxsize, size);
-    fprintf (fp, "%s set=%x maxsize=%d size=%d elems=",
-	     string, set, set->maxsize, size);
+    fprintf (fp, "%s set=%p maxsize=%d size=%d elems=",
+	     string, static_cast<void *>(set), set->maxsize, size);
     if (size > (int)set->maxsize)
       size= set->maxsize+1;
     for (k=0; k<size; k++)
@@ -1001,7 +1001,8 @@ setT *qh_settemp(int setsize) {
   qh_setappend ((setT **)&qhmem.tempstack, newset);
   if (qhmem.IStracing >= 5)
     fprintf (qhmem.ferr, "qh_settemp: temp set %p of %d elements, depth %d\n",
-       newset, newset->maxsize, qh_setsize ((setT *)qhmem.tempstack));
+	     static_cast<void *>(newset), 
+	     newset->maxsize, qh_setsize ((setT *)qhmem.tempstack));
   return newset;
 } /* settemp */
 
@@ -1046,7 +1047,8 @@ setT *qh_settemppop(void) {
 
   if (qhmem.IStracing >= 5)
     fprintf (qhmem.ferr, "qh_settemppop: depth %d temp set %p of %d elements\n",
-       qh_setsize((setT *)qhmem.tempstack)+1, stackedset, qh_setsize(stackedset));
+	     qh_setsize((setT *)qhmem.tempstack)+1, static_cast<void *>(stackedset), 
+	     qh_setsize(stackedset));
   return stackedset;
 } /* settemppop */
 
@@ -1059,7 +1061,7 @@ void qh_settemppush(setT *set) {
   qh_setappend ((setT**)&qhmem.tempstack, set);
   if (qhmem.IStracing >= 5)
     fprintf (qhmem.ferr, "qh_settemppush: depth %d temp set %p of %d elements\n",
-    qh_setsize((setT *)qhmem.tempstack), set, qh_setsize(set));
+	     qh_setsize((setT *)qhmem.tempstack), static_cast<void *>(set), qh_setsize(set));
 } /* settemppush */
 
  
@@ -2117,7 +2119,7 @@ coordT qh_pointdist(pointT *point1, pointT *point2, int dim) {
 -printmatrix- print matrix given by row vectors
   print a vector by (fp, "", &vect, 1, len)
 */
-void qh_printmatrix (FILE *fp, char *string, realT **rows, int numrow, int numcol) {
+void qh_printmatrix (FILE *fp, const char *string, realT **rows, int numrow, int numcol) {
   realT *rowp;
   int i,k;
 
@@ -2135,7 +2137,7 @@ void qh_printmatrix (FILE *fp, char *string, realT **rows, int numrow, int numco
 -printpoints- print pointids for a set of points starting at index 
   prints string and 'p' if defined
 */
-void qh_printpoints (FILE *fp, char *string, setT *points) {
+void qh_printpoints (FILE *fp, const char *string, setT *points) {
   pointT *point, **pointp;
 
   if (string) {
@@ -2771,7 +2773,7 @@ pointT *qh_voronoi_center (int dim, setT *points) {
 #if qh_QHpointer
 qhstatT *qh_qhstat=NULL;  /* global data structure */
 #else
-qhstatT qh_qhstat ={0};   /* remove "={0}" if this causes a compiler error */
+qhstatT qh_qhstat;   /* remove "={0}" if this causes a compiler error */
 #endif
 
 
@@ -2784,7 +2786,7 @@ void qh_allstatA (void) {
   
    /* zdef_(type,name,doc,average) */
   zzdef_(zdoc, Zdoc2, "precision statistics", -1);
-  zdef_(zinc, Znewvertex, NULL, -1);
+  zdef_(zinc, Znewvertex, reinterpret_cast<const char *>(NULL), -1);
   zdef_(wadd, Wnewvertex, "ave. distance of a new vertex to a facet (not 0s)", Znewvertex);
   zdef_(wmax, Wnewvertexmax, "max. distance of a new vertex to a facet", -1);
   zdef_(wmax, Wvertexmax, "max. distance of an output vertex to a facet", -1);
@@ -2823,7 +2825,7 @@ void qh_allstatB (void) {
   zzdef_(zinc, Zsetplane, "facets created altogether", -1);
   zdef_(zinc, Ztotridges, "ridges created altogether", -1);
   zdef_(zinc, Zpostfacets, "facets before post merge", -1);
-  zdef_(zinc, Zangle, NULL, -1);
+  zdef_(zinc, Zangle, reinterpret_cast<const char *>(NULL), -1);
   zdef_(wadd, Wangle, "average angle (cosine) for all ridges", Zangle);
   zdef_(wmax, Wanglemax, "maximum angle (cosine) of a ridge", -1);
   zdef_(wmin, Wanglemin, "minimum angle (cosine) of a ridge", -1);
@@ -2938,7 +2940,7 @@ void qh_allstatF(void) {
   zdef_(zinc, Zintersect, "intersections found redundant vertices", -1);
   zdef_(zadd, Zintersecttot, "   ave. number found per vertex", Zintersect);
   zdef_(zmax, Zintersectmax, "   max. found for a vertex", -1);
-  zdef_(zinc, Zvertexridge, NULL, -1);
+  zdef_(zinc, Zvertexridge, reinterpret_cast<const char *>(NULL), -1);
   zdef_(zadd, Zvertexridgetot, "  ave. number of ridges per tested vertex", Zvertexridge);
   zdef_(zmax, Zvertexridgemax, "  max. number of ridges per tested vertex", -1);
 
@@ -4091,7 +4093,8 @@ void qh_checkpolygon(facetT *facetlist) {
 	numvertices++;
 	if (qh_pointid (vertex->point) == -1) {
 	  fprintf (qh ferr, "qhull internal error (checkpolygon): unknown point %p for vertex v%d first_point %p\n",
-		   vertex->point, vertex->id, qh first_point);
+		   static_cast<void *>(vertex->point), vertex->id, 
+		   static_cast<void *>(qh first_point));
 	  waserror= True;
 	}
       }
@@ -4154,7 +4157,8 @@ void qh_checkvertex (vertexT *vertex) {
   facetT *neighbor, **neighborp, *errfacet=NULL;
 
   if (qh_pointid (vertex->point) == -1) {
-    fprintf (qh ferr, "qhull internal error (checkvertex): unknown point id %p\n", vertex->point);
+    fprintf (qh ferr, "qhull internal error (checkvertex): unknown point id %p\n", 
+	     static_cast<void *>(vertex->point));
     waserror= True;
   }
   if (vertex->id >= qh vertex_id) {
@@ -5234,8 +5238,9 @@ void qh_point_add (setT *set, pointT *point, void *elem) {
   int id;
   
   if ((id= qh_pointid(point)) == -1)
-    fprintf (qh ferr, "qhull internal warning (pointfacet,pointvertex): unknown point %p\n", 
-      point);
+    fprintf (qh ferr, 
+	     "qhull internal warning (pointfacet,pointvertex): unknown point %p\n", 
+	     static_cast<void *>(point));
   else 
     SETelem_(set, id)= elem;
 } /* point_add */
@@ -7270,7 +7275,7 @@ boolT qh_test_appendmerge (facetT *facet, facetT *neighbor) {
 /*------------------------------------------
 -tracemerging- print trace message if active
 */
-void qh_tracemerging (char *string) {
+void qh_tracemerging (const char *string) {
   realT cpu;
   time_t timedata;
   struct tm *tp;

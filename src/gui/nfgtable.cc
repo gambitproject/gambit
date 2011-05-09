@@ -35,6 +35,7 @@
 #include "gamedoc.h"
 #include "nfgpanel.h"
 #include "nfgtable.h"
+#include "dlexcept.h"
 
 //=========================================================================
 //                       class gbtTableWidgetBase
@@ -216,8 +217,7 @@ void gbtRowPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
   int player = m_table->GetRowPlayer(coords.GetCol() + 1);
   int strat = m_table->RowToStrategy(coords.GetCol() + 1, coords.GetRow());
 
-  support.GetStrategy(player, strat)->DeleteStrategy();
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
+  m_doc->DoDeleteStrategy(support.GetStrategy(player, strat));
 }
 
 wxString gbtRowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
@@ -243,8 +243,7 @@ void gbtRowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords,
   int player = m_table->GetRowPlayer(p_coords.GetCol() + 1);
   int strat = m_table->RowToStrategy(p_coords.GetCol() + 1, p_coords.GetRow());
 
-  support.GetStrategy(player, strat)->SetLabel((const char *) p_value.mb_str());
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
+  m_doc->DoSetStrategyLabel(support.GetStrategy(player, strat), p_value);
 }
 
 wxSheetCellAttr gbtRowPlayerWidget::GetAttr(const wxSheetCoords &p_coords,
@@ -428,8 +427,7 @@ void gbtColPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
   int player = m_table->GetColPlayer(coords.GetRow() + 1);
   int strat = m_table->RowToStrategy(coords.GetRow() + 1, coords.GetCol());
 
-  support.GetStrategy(player, strat)->DeleteStrategy();
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_GAME);
+  m_doc->DoDeleteStrategy(support.GetStrategy(player, strat));
 }
 
 void gbtColPlayerWidget::OnUpdate(void)
@@ -482,8 +480,7 @@ void gbtColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords,
   int player = m_table->GetColPlayer(p_coords.GetRow() + 1);
   int strat = m_table->ColToStrategy(p_coords.GetRow() + 1, p_coords.GetCol());
 
-  support.GetStrategy(player, strat)->SetLabel((const char *) p_value.mb_str());
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_LABELS);
+  m_doc->DoSetStrategyLabel(support.GetStrategy(player, strat), p_value);
 }
 
 wxSheetCellAttr gbtColPlayerWidget::GetAttr(const wxSheetCoords &p_coords,
@@ -665,19 +662,21 @@ void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords,
   Gambit::PureStrategyProfile profile = m_table->CellToProfile(p_coords);
   Gambit::GameOutcome outcome = profile.GetOutcome();
   if (!outcome) {
-    outcome = m_doc->GetGame()->NewOutcome();
-    profile.SetOutcome(outcome);
+    m_doc->DoNewOutcome(profile);
+    outcome = profile.GetOutcome();
   }
   int player = ColToPlayer(p_coords.GetCol());
   try {
-    outcome->SetPayoff(player, (const char *) p_value.mb_str());
+    m_doc->DoSetPayoff(outcome, player, p_value);
   }
   catch (ValueException &) {
     // For the moment, we will just silently discard edits which 
     // give payoffs that are not valid numbers
     return;
   }
-  m_doc->UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
+  catch (std::exception &ex) {
+    gbtExceptionDialog(this, ex.what()).ShowModal();
+  }
 }
 
 wxSheetCellAttr gbtPayoffsWidget::GetAttr(const wxSheetCoords &p_coords,

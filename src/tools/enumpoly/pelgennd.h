@@ -73,9 +73,9 @@ void print_Proc(Gen_node (*p)(Gen_node));
 takes a string in quotes and removes outside quotes*/
 char *Copy_String_NQ(char *s);
 
-char *Copy_String(char *s);
+char *Copy_String(const char *s);
 
-Gen_node IDND(char *s);
+Gen_node IDND(const char *s);
 
 Gen_node ASTND(node n);
 
@@ -87,6 +87,6 @@ Gen_node CPXND(fcomplex c);
 
 Gen_node PLYND(polynomial1 p);
 
-Gen_node Rerror(char *s,Gen_node g);
+Gen_node Rerror(const char *s,Gen_node g);
 
 Gen_node G_Print(Gen_node g);

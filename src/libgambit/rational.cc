@@ -506,19 +506,8 @@ Rational Rational::operator/(const Rational &y) const
 }
 
 
-std::string ToText(const Rational &r)
-{
-  std::string ret;
-  ret += Itoa(r.numerator());
-  if (r.denominator() != Integer(1)) {
-    ret += "/";
-    ret += Itoa(r.denominator());
-  }
-  
-  return ret;
-}
-
-Rational ToRational(const std::string &f) 
+template<>
+Rational lexical_cast(const std::string &f)
 {
   char ch = ' ';
   int sign = 1;
@@ -622,20 +611,6 @@ Rational ToRational(const std::string &f)
   }
   else {
     return Rational(num * sign);
-  }
-}
-
-Rational ToNumber(const std::string &p_string)
-{
-  if (p_string.find('.') != (unsigned int) -1 || 
-      p_string.find('e') != (unsigned int) -1) {
-    std::istringstream st(p_string);
-    double d;
-    st >> d;
-    return Rational(d);
-  }
-  else {
-    return ToRational(p_string);
   }
 }
 

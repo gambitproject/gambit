@@ -55,7 +55,7 @@ private:
   wxFont m_nodeAboveFont, m_nodeBelowFont;
   wxFont m_branchAboveFont, m_branchBelowFont;
 
-  gbtStyle *m_style;
+  const gbtStyle *m_style;
 
 public:
   gbtNodeEntry(Gambit::GameNode p_parent);
@@ -135,7 +135,7 @@ public:
   const double &GetActionProb(void) const { return m_actionProb; }
   void SetActionProb(const double &p_prob) { m_actionProb = p_prob; }
 
-  void SetStyle(gbtStyle *p_style) { m_style = p_style; }
+  void SetStyle(const gbtStyle *p_style) { m_style = p_style; }
 
   bool NodeHitTest(int p_x, int p_y) const;
 #if wxCHECK_VERSION(2,7,0)

@@ -728,14 +728,3 @@ QuikSolv<T>::ARootExists (const gRectangle<T>& r,
 
   return ARootExistsRecursion(r_double, sample, r_double, precedence);
 }
-
-
-template <class T> QuikSolv<T>::NewtonError::~NewtonError()
-{ }
-
-template <class T> 
-std::string QuikSolv<T>::NewtonError::GetDescription(void) const 
-{
-  return "Newton method failed to polish approximate root";
-}
-

@@ -2899,9 +2899,4 @@ Integer &Integer::operator%=(long y)
   return *this;
 }
 
-std::string ToText(const Integer &i)
-{
-  return Itoa(i);
-}
-
 }

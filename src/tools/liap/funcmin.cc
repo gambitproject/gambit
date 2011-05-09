@@ -252,7 +252,7 @@ void gConjugatePR::Set(const gC1Function<double> &fdf,
   iter = 0;
   step = step_size;
   max_step = step_size;
-  tol = p_tol;
+  m_tol = p_tol;
 
   f = fdf.Value(x);
   fdf.Gradient(x, gradient);
@@ -277,7 +277,7 @@ bool gConjugatePR::Iterate(const gC1Function<double> &fdf,
 {
   double fa = f, fb, fc;
   double dir;
-  double stepa = 0.0, stepb, stepc = step, tol = tol;
+  double stepa = 0.0, stepb, stepc = step, tol = m_tol;
 
   double g1norm;
   double pg;

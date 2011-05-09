@@ -35,9 +35,9 @@ void WriteOsborneFile(std::ostream &p_file, const Gambit::Game &p_nfg,
   for (Gambit::StrategyIterator iter(p_nfg, p_rowPlayer, 1, p_colPlayer, 1);
        !iter.AtEnd(); iter++) {
     theHtml += "\\begin{game}{";
-    theHtml += Gambit::ToText(p_nfg->GetPlayer(p_rowPlayer)->NumStrategies());
+    theHtml += Gambit::lexical_cast<std::string>(p_nfg->GetPlayer(p_rowPlayer)->NumStrategies());
     theHtml += "}{";
-    theHtml += Gambit::ToText(p_nfg->GetPlayer(p_colPlayer)->NumStrategies());
+    theHtml += Gambit::lexical_cast<std::string>(p_nfg->GetPlayer(p_colPlayer)->NumStrategies());
     theHtml += "}[";
     theHtml += p_nfg->GetPlayer(p_rowPlayer)->GetLabel();
     theHtml += "][";
@@ -52,9 +52,9 @@ void WriteOsborneFile(std::ostream &p_file, const Gambit::Game &p_nfg,
 	}
 
 	theHtml += "Player ";
-	theHtml += Gambit::ToText(pl);
+	theHtml += Gambit::lexical_cast<std::string>(pl);
 	theHtml += " Strategy ";
-	theHtml += Gambit::ToText(iter->GetStrategy(pl)->GetNumber());
+	theHtml += Gambit::lexical_cast<std::string>(iter->GetStrategy(pl)->GetNumber());
 	theHtml += " ";
       }
       theHtml += "]";
