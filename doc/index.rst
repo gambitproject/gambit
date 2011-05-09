@@ -49,6 +49,7 @@ Table of Contents
    gui
    tools
    samples
+   ideas
    build
    formats
    biblio
