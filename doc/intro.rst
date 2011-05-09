@@ -179,6 +179,7 @@ Versions of Gambit are available for download from
 The current stable version is 0.2010.09.01. 
 
 * `gambit-0.2010.09.01.tar.gz <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2010.09.01/gambit-0.2010.09.01.tar.gz/download>`_ (source tarball, for Linux/Windows/Mac OSX)
+* `gambit-0.2010.09.01.dmg <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2010.09.01/gambit-0.2010.09.01.dmg/download>`_ (application binary for Mac OSX 10.6)
 
 The previous stable version of Gambit was 0.2007.12.04.  
 

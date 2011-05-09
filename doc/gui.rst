@@ -787,9 +787,7 @@ actions.
 Dominated actions in extensive game
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In extensive games, the 
-:ref:`dominance toolbar <toolbar-dominance>` controls the elimination of
-actions which are conditionally dominated.
+In extensive games, the dominance toolbar controls the elimination of actions which are conditionally dominated.
 
 .. image::  screens/pokerdom1.*
             :width: 33%
@@ -989,7 +987,7 @@ found. Equilibria computed are grouped by separate computational runs;
 computing equilibria using a different method (or different settings)
 will add a second list of profiles. The list of profiles displayed is
 selected using the drop-down at the top left of the profiles panel; in
-:ref:`the screenshot <screenshot-equilibrium>`, it is set to
+the screenshot, it is set to
 :guilabel:`Profiles 1`. A
 brief description of the method used to compute the equilibria is
 listed across the top of the profiles panel.
