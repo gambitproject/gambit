@@ -52,17 +52,17 @@ inline bool ge_Number(const Number *x, const Number *y)
 { return (static_cast<const Rational &>(*x) >= 
 	  static_cast<const Rational &>(*y)); }
 inline Number add_Number(const Number *x, const Number *y)
-{ return Number(ToText(static_cast<const Rational &>(*x) + 
-		       static_cast<const Rational &>(*y))); }
+{ return Number(lexical_cast<std::string>(static_cast<const Rational &>(*x) + 
+					  static_cast<const Rational &>(*y))); }
 inline Number sub_Number(const Number *x, const Number *y)
-{ return Number(ToText(static_cast<const Rational &>(*x) - 
-		       static_cast<const Rational &>(*y))); }
+{ return Number(lexical_cast<std::string>(static_cast<const Rational &>(*x) - 
+					  static_cast<const Rational &>(*y))); }
 inline Number mul_Number(const Number *x, const Number *y)
-{ return Number(ToText(static_cast<const Rational &>(*x) * 
-		       static_cast<const Rational &>(*y))); }
+{ return Number(lexical_cast<std::string>(static_cast<const Rational &>(*x) * 
+					  static_cast<const Rational &>(*y))); }
 inline Number div_Number(const Number *x, const Number *y)
-{ return Number(ToText(static_cast<const Rational &>(*x) / 
-		       static_cast<const Rational &>(*y))); }
+{ return Number(lexical_cast<std::string>(static_cast<const Rational &>(*x) / 
+					  static_cast<const Rational &>(*y))); }
 
 
 inline void setitem_ArrayInt(Array<int> *array, int index, int value)

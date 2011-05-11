@@ -1,18 +1,18 @@
-cdef extern from "libgambit/libgambit.h":
-    pass
-
 cdef extern from "string":
     ctypedef struct cxx_string "string":
         char *c_str()
         cxx_string assign(char *)
+
+cdef extern from "libgambit/libgambit.h":
+    cxx_string ToText "lexical_cast<>"(c_Rational)
 
 cdef extern from "libgambit/rational.h":
     ctypedef struct c_Rational "Rational":
         c_Rational add "operator+="(c_Rational)
         pass
 
-    cxx_string ToText(c_Rational)
-    c_Rational ToRational(cxx_string)
+    c_Rational ToRational "lexical_cast<Rational>"(cxx_string)
+
 
 cdef extern from "libgambit/number.h":
     ctypedef struct c_Number "Number":
