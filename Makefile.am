@@ -417,8 +417,7 @@ AM_LDFLAGS = -static-libgcc -static-libstdc++
 endif
 
 bin_PROGRAMS = \
-	gambit-nfg2html \
-	gambit-nfg2tex \
+	gambit-convert \
 	gambit-enummixed
 
 if WITH_ENUMPOLY
@@ -448,13 +447,11 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/labenski/include ${WX_CXXF
 
 ## Command-line tools
 
-gambit_nfg2html_SOURCES = \
+gambit_convert_SOURCES = \
 	${libgambit_la_SOURCES} \
-	src/tools/convert/nfg2html.cc
-
-gambit_nfg2tex_SOURCES = \
-	${libgambit_la_SOURCES} \
-	src/tools/convert/nfg2tex.cc
+	src/tools/convert/convert.cc \
+	src/tools/convert/tohtml.cc \
+	src/tools/convert/tosgame.cc
 
 liblinear_la_SOURCES = \
 	src/liblinear/basis.cc \
