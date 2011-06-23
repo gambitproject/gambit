@@ -392,7 +392,8 @@ API documentation
    .. py:method:: __setitem__(pl, payoff)
 
       Sets the payoff to the ``pl`` th player at the outcome to the
-      specified ``payoff``.
+      specified ``payoff``.  Payoffs may be specified as integers
+      or instances of ``decimal.Decimal`` or ``fractions.Fraction``.
       
 
 .. py:class:: MixedProfile

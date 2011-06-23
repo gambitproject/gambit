@@ -1,39 +1,17 @@
+import decimal
+import fractions
+
+cdef extern from "libgambit/libgambit.h":
+    pass
+
 cdef extern from "string":
     ctypedef struct cxx_string "string":
         char *c_str()
         cxx_string assign(char *)
 
-cdef extern from "libgambit/libgambit.h":
-    cxx_string ToText "lexical_cast<>"(c_Rational)
-
-cdef extern from "libgambit/rational.h":
-    ctypedef struct c_Rational "Rational":
-        c_Rational add "operator+="(c_Rational)
-        pass
-
-    c_Rational ToRational "lexical_cast<Rational>"(cxx_string)
-
-
 cdef extern from "libgambit/number.h":
     ctypedef struct c_Number "Number":
-        double as_double "operator const double &"()
-        c_Rational as_rational "operator const Rational &"()
         cxx_string as_string "operator const string &"()
-    c_Number *new_Number "new Number"()
-    c_Number *new_Number_copy "new Number"(c_Number)
-    c_Number *new_Number_string "new Number"(cxx_string)
-    void del_Number "delete"(c_Number *)
-
-    int eq_Number(c_Number *, c_Number *)
-    int ne_Number(c_Number *, c_Number *)
-    int lt_Number(c_Number *, c_Number *)
-    int le_Number(c_Number *, c_Number *)
-    int gt_Number(c_Number *, c_Number *)
-    int ge_Number(c_Number *, c_Number *)
-    c_Number add_Number(c_Number *, c_Number *)
-    c_Number sub_Number(c_Number *, c_Number *)
-    c_Number mul_Number(c_Number *, c_Number *)
-    c_Number div_Number(c_Number *, c_Number *)
      
 cdef extern from "libgambit/array.h":
     ctypedef struct c_ArrayInt "Array<int>":
@@ -152,97 +130,6 @@ cdef extern from "game.wrap.h":
 
 import gambit.gameiter
 
-cdef class Number:
-    cdef c_Number *thisptr
-
-    def __cinit__(self, value=None):
-        cdef cxx_string s
-        if value is not None:
-            x = str(value)
-            s.assign(x)
-            self.thisptr = new_Number_string(s)
-        else: 
-            self.thisptr = new_Number()
-
-    def __dealloc__(self):
-        del_Number(self.thisptr)
-
-    def __repr__(self):
-        cdef cxx_string s
-        s = self.thisptr.as_string()
-        return s.c_str()
-
-    def __float__(self):
-        return self.thisptr.as_double()        
-
-    def __richcmp__(Number self, other, whichop):
-        cdef Number othernum
-        othernum = Number(other)
-        if whichop == 0:
-            return bool(lt_Number(self.thisptr, othernum.thisptr))
-        elif whichop == 1:
-            return bool(le_Number(self.thisptr, othernum.thisptr))
-        elif whichop == 2:
-            return bool(eq_Number(self.thisptr, othernum.thisptr))
-        elif whichop == 3:
-            return bool(ne_Number(self.thisptr, othernum.thisptr))
-        elif whichop == 4:
-            return bool(gt_Number(self.thisptr, othernum.thisptr))
-        else:
-            return bool(ge_Number(self.thisptr, othernum.thisptr))
-
-    def __add__(self, other):
-        cdef c_Number result
-        cdef Number ret
-        cdef Number selfnum
-        cdef Number othernum
-        selfnum = Number(self)
-        othernum = Number(other)
-        result = add_Number(selfnum.thisptr, othernum.thisptr)
-        ret = Number()
-        del_Number(ret.thisptr)
-        ret.thisptr = new_Number_copy(result)
-        return ret
-        
-    def __sub__(self, other):
-        cdef c_Number result
-        cdef Number ret
-        cdef Number selfnum
-        cdef Number othernum
-        selfnum = Number(self)
-        othernum = Number(other)
-        result = sub_Number(selfnum.thisptr, othernum.thisptr)
-        ret = Number()
-        del_Number(ret.thisptr)
-        ret.thisptr = new_Number_copy(result)
-        return ret
-        
-    def __mul__(self, other):
-        cdef c_Number result
-        cdef Number ret
-        cdef Number selfnum
-        cdef Number othernum
-        selfnum = Number(self)
-        othernum = Number(other)
-        result = mul_Number(selfnum.thisptr, othernum.thisptr)
-        ret = Number()
-        del_Number(ret.thisptr)
-        ret.thisptr = new_Number_copy(result)
-        return ret
-        
-    def __div__(self, other):
-        cdef c_Number result
-        cdef Number ret
-        cdef Number selfnum
-        cdef Number othernum
-        selfnum = Number(self)
-        othernum = Number(other)
-        result = div_Number(selfnum.thisptr, othernum.thisptr)
-        ret = Number()
-        del_Number(ret.thisptr)
-        ret.thisptr = new_Number_copy(result)
-        return ret
-        
 
 cdef class Strategy:
     cdef c_GameStrategy strategy
@@ -413,17 +300,22 @@ cdef class Outcome:
             self.outcome.deref().SetLabel(s)
 
     def __getitem__(self, pl):
-        cdef Number number
-        number = Number()
-        number.thisptr = new_Number_copy(self.outcome.deref().GetPayoffNumber(pl+1))
-        return number
+        cdef bytes py_string
+        py_string = self.outcome.deref().GetPayoffNumber(pl+1).as_string().c_str()
+        if "." in py_string:
+            return decimal.Decimal(py_string)
+        else:
+            return fractions.Fraction(py_string)
 
     def __setitem__(self, pl, value):
         cdef cxx_string s
-        v = str(value)
-        s.assign(v)
-        self.outcome.deref().SetPayoff(pl+1, s)
-        
+        if isinstance(value, int) or isinstance(value, decimal.Decimal) or \
+           isinstance(value, fractions.Fraction):
+            v = str(value)
+            s.assign(v)
+            self.outcome.deref().SetPayoff(pl+1, s)
+        else:
+            raise TypeError, "numeric argument required for payoff"
        
 cdef class Outcomes:
     cdef c_Game game
