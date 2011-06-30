@@ -46,7 +46,7 @@ protected:
     { } 
   virtual ~PathTracer() { }
 
-  void TracePath(const Vector<double> &p_start, double p_maxLambda, double p_omega);
+  void TracePath(Vector<double> &p_x, double p_maxLambda, double &p_omega);
 
   // Criterion function: path tracer attempts to compute a zero of this function.
   virtual double Criterion(const Vector<double> &p_point, 
