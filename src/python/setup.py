@@ -10,8 +10,9 @@ if 'setuptools.extension' in sys.modules:
     m.Extension.__dict__ = m._Extension.__dict__
     
 import glob
-libgame = Extension("gambit.lib.game",
-                    sources=[ "gambit/lib/game.wrap.pyx" ] +
+libgame = Extension("gambit.lib.libgambit",
+                    sources=[ "gambit/lib/libgambit.pyx" ] +
+                            glob.glob("gambit/lib/*.pxi") +
                             glob.glob("../libgambit/*.cc"),
                     language="c++",
                     include_dirs=[ ".." ] )
@@ -21,7 +22,7 @@ setup(name="gambit",
       author="Theodore Turocy",
       author_email="ted.turocy@gmail.com",
       url="http://www.gambit-project.org",
-      packages=['gambit', 'gambit.games'],
+      packages=['gambit', 'gambit.games', 'gambit.lib'],
       ext_modules=[libgame],
       cmdclass = {'build_ext': build_ext},
       entry_points="""

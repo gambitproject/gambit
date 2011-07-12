@@ -117,7 +117,7 @@ cdef extern from "libgambit/mixed.h":
     c_MixedStrategyProfileDouble *new_MixedStrategyProfileDouble "new MixedStrategyProfile<double>"(c_Game)
     void del_MixedStrategyProfileDouble "delete"(c_MixedStrategyProfileDouble *)
 
-cdef extern from "game.wrap.h":
+cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError
     cxx_string WriteGame(c_Game, int) except +IOError
 
@@ -135,20 +135,21 @@ import gambit.gameiter
 # Includes
 ######################
 
-include "strategy.pyx"
-include "strategies.pyx"
+include "strategy.pxi"
+include "strategies.pxi"
     
-include "player.pyx"
-include "players.pyx"
+
+include "player.pxi"
+include "players.pxi"
     
-include "outcome.pyx"
-include "outcomes.pyx"
+include "outcome.pxi"
+include "outcomes.pxi"
 
-include "node.pyx"
+include "node.pxi"
 
-include "mixed.pyx"
+include "mixed.pxi"
 
-include "game.pyx"
+include "game.pxi"
 
 
 def new_tree():
