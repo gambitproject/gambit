@@ -1,4 +1,4 @@
-import gambit.lib.game
+import gambit
 
 class TestGambitExtensiveGame(object):
 	def setUp(self):

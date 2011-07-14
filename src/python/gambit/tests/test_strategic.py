@@ -1,5 +1,4 @@
-import gambit.lib.game
-import nose.tools
+import gambit
 
 class TestGambitStrategicGame(object):
 	def setUp(self):

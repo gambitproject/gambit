@@ -1,5 +1,5 @@
-import lib.libgambit
+import gambit.lib.libgambit
 
-new_tree = lib.libgambit.new_tree
-new_table = lib.libgambit.new_table
-read_game = lib.libgambit.read_game
+new_tree = gambit.lib.libgambit.new_tree
+new_table = gambit.lib.libgambit.new_table
+read_game = gambit.lib.libgambit.read_game
