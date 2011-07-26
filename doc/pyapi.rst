@@ -242,6 +242,65 @@ all other players play according to the profile, is obtained using
   Out[7]: 1.0
 
 
+Computing Nash equilibria
+-------------------------
+
+Interfaces to algorithms for computing Nash equilibria are collected
+in the module :mod:`gambit.nash`.  Each algorithm is encapsulated in
+its own class.
+
+Algorithms with the word "External" in the class name operate by
+creating a subprocess, which calls the corresponding Gambit
+:ref:`command-line tool <command-line>`.  Therefore, a working
+Gambit installation needs to be in place, with the command-line tools
+located in the executable search path.
+
+======================    ========================
+Method                    Python class
+======================    ========================
+gambit-enumpure           ExternalEnumPureSolver
+gambit-enummixed          ExternalEnumMixedSolver
+gambit-lp                 ExternalLPSolver
+gambit-lcp                ExternalLCPSolver
+gambit-simpdiv            ExternalSimpdivSolver
+gambit-gnm                ExternalGlobalNewtonSolver
+gambit-enumpoly           ExternalEnumPolySolver
+gambit-liap               ExternalLyapunovSolver
+gambit-ipa                ExternalIteratedPolymatrixSolver
+gambit-logit              ExternalLogitSolver
+======================    ========================
+
+For example, consider the game e02.nfg from the set of standard
+Gambit examples.  This game has a continuum of equilibria, in which
+the first player plays his first strategty with probability one,
+and the second player plays a mixed strategy, placing at least
+probability one-half on her first strategy::
+
+  In [1]: g = gambit.read_game("e02.nfg")
+
+  In [2]: solver = gambit.nash.ExternalEnumPureSolver()
+
+  In [3]: solver.solve(g)
+  Out[3]: [[1.0, 0.0, 0.0, 1.0, 0.0]]
+
+  In [4]: solver = gambit.nash.ExternalEnumMixedSolver()
+
+  In [5]: solver.solve(g)
+  Out[5]: [[1.0, 0.0, 0.0, 1.0, 0.0], [1.0, 0.0, 0.0, 0.5, 0.5]]
+
+  In [6]: solver = gambit.nash.ExternalLogitSolver()
+
+  In [7]: solver.solve(g)
+  Out[7]: [[0.99999999997881173, 0.0, 2.1188267679986399e-11, 0.50001141005647654, 0.49998858994352352]]
+
+In this example, the pure strategy solver returns the unique
+equilibrium in pure strategies.  Solving using
+:program:`gambit-enummixed` gives two equilibria, which are the
+extreme points of the set of equilibria.  Solving by tracing the
+quantal response equilibrium correspondence produces a close numerical
+approximation to one equilibrium; in fact, the equilibrium which is
+the limit of the principal branch is the one in which the second
+player randomizes with equal probability on both strategies.
 
 
 
