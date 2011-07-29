@@ -72,6 +72,8 @@ cdef extern from "libgambit/game.h":
 
         int NumActions()
         c_GameAction GetAction(int) except +IndexError
+        int NumMembers()
+        c_GameNode GetMember(int) except +IndexError
 
     ctypedef struct c_GamePlayerRep "GamePlayerRep":
         c_Game GetGame()
@@ -168,7 +170,7 @@ include "strategies.pxi"
     
 include "action.pxi"
 include "actions.pxi"
-
+include "members.pxi"
 include "infoset.pxi"
 include "infosets.pxi"
 

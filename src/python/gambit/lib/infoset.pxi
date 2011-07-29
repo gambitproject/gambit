@@ -40,3 +40,10 @@ cdef class Infoset:
             a = Actions()
             a.infoset = self.infoset
             return a
+
+    property members:
+        def __get__(self):
+            cdef Members m
+            m = Members()
+            m.infoset = self.infoset
+            return m
