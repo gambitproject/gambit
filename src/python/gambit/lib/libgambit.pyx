@@ -22,6 +22,8 @@ cdef extern from "libgambit/array.h":
 cdef extern from "libgambit/game.h":
     ctypedef struct c_GameRep
     ctypedef struct c_GameStrategyRep
+    ctypedef struct c_GameActionRep
+    ctypedef struct c_GameInfosetRep
     ctypedef struct c_GamePlayerRep
     ctypedef struct c_GameOutcomeRep
     ctypedef struct c_GameNodeRep
@@ -38,6 +40,12 @@ cdef extern from "libgambit/game.h":
     ctypedef struct c_GameNode "GameObjectPtr<GameNodeRep>":
         c_GameNodeRep *deref "operator->"()
 
+    ctypedef struct c_GameAction "GameObjectPtr<GameActionRep>":
+        c_GameActionRep *deref "operator->"()
+
+    ctypedef struct c_GameInfoset "GameObjectPtr<GameInfosetRep>":
+        c_GameInfosetRep *deref "operator->"()
+
     ctypedef struct c_GameStrategy "GameObjectPtr<GameStrategyRep>":
         c_GameStrategyRep *deref "operator->"()
 
@@ -47,6 +55,23 @@ cdef extern from "libgambit/game.h":
 
         cxx_string GetLabel()
         void SetLabel(cxx_string)
+
+    ctypedef struct c_GameActionRep "GameActionRep":
+        int GetNumber()
+        c_GameInfoset GetInfoset()
+
+        cxx_string GetLabel()
+        void SetLabel(cxx_string)
+
+    ctypedef struct c_GameInfosetRep "GameInfosetRep":
+        int GetNumber()
+        c_GamePlayer GetPlayer()
+
+        cxx_string GetLabel()
+        void SetLabel(cxx_string)
+
+        int NumActions()
+        c_GameAction GetAction(int) except +IndexError
 
     ctypedef struct c_GamePlayerRep "GamePlayerRep":
         c_Game GetGame()
@@ -58,6 +83,9 @@ cdef extern from "libgambit/game.h":
         
         int NumStrategies()
         c_GameStrategy GetStrategy(int) except +IndexError
+
+        int NumInfosets()
+        c_GameInfoset GetInfoset(int) except +IndexError
 
     ctypedef struct c_GameOutcomeRep "GameOutcomeRep":
         c_Game GetGame()
@@ -138,6 +166,11 @@ import gambit.gameiter
 include "strategy.pxi"
 include "strategies.pxi"
     
+include "action.pxi"
+include "actions.pxi"
+
+include "infoset.pxi"
+include "infosets.pxi"
 
 include "player.pxi"
 include "players.pxi"

@@ -45,3 +45,10 @@ cdef class Player:
             s = Strategies()
             s.player = self.player
             return s
+
+    property infosets:
+        def __get__(self):
+            cdef Infosets s
+            s = Infosets()
+            s.player = self.player
+            return s
