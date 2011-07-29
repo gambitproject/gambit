@@ -106,6 +106,9 @@ cdef extern from "libgambit/game.h":
         cxx_string GetLabel()
         void SetLabel(cxx_string)
 
+        int NumChildren()
+        c_GameNode GetChild(int) except +IndexError
+
     ctypedef struct c_GameRep "GameRep":
         int IsTree()
         
