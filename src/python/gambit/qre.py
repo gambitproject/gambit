@@ -79,6 +79,7 @@ class LogitQRE(object):
     def __init__(self, lam, profile):
         self.lam = lam
         self.profile = profile
+    def __len__(self):         return len(self.profile)
     def __getitem__(self, i):   return self.profile[i]
     def __getattr__(self, attr):  return getattr(self.profile, attr)
     def __repr__(self):

@@ -115,6 +115,19 @@ class MixedProfile(object):
                (self.game.title,
                 ", ".join([ str(self[i]) for i in xrange(len(self)) ]))
 
+    def __rmul__(self, fac):
+        p = self.game.mixed_profile()
+        for i in xrange(len(self)):
+            p[i] = fac * self[i]
+        return p
+
+    def __add__(self, other):
+        if not hasattr(other, "game") or other.game != self.game:
+            raise ValueError, "adding a non-MixedProfile to a MixedProfile"
+        p = self.game.mixed_profile()
+        for i in xrange(len(self)):
+            p[i] = self[i] + other[i]
+        return p
     
     def strategy_value(self, st):
         return sum([ prob * self.game.payoff(self.game.choices[st],
