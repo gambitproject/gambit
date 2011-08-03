@@ -3,6 +3,7 @@ Implementation of contest games.
 """
 
 import meanstat
+import fractions
 
 class TullockGame(meanstat.MeanStatisticGame):
     """
@@ -23,9 +24,10 @@ class TullockGame(meanstat.MeanStatisticGame):
 
     def payoff(self, own, others):
         try:
-            p_win = 1.0 * own / (own+others)
+            p_win = fractions.Fraction(own, own+others)
+            p_lose = fractions.Fraction(others, own+others)
             return p_win * (self.omega - self.cost(own) + self.prize) + \
-                   (1.0-p_win) * (self.omega - self.cost(own))
+                   p_lose * (self.omega - self.cost(own))
         except ZeroDivisionError:
             return self.omega
 

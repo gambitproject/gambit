@@ -2,17 +2,84 @@
 Representation of mean-statistic games.
 """
 
-def cartesian(L, *lists):
-    """
-    Generates the Cartesian product of an arbitrary number of lists.
-    """
-    if not lists:
-        for x in L:
-            yield (x,)
-    else:
-        for x in L:
-            for y in cartesian(lists[0], *lists[1:]):
-                yield (x,)+y
+import gambit
+
+class Strategy(object):
+    def __init__(self, player, st):
+        self.player = player
+        self.st = st
+    def __repr__(self):
+        return "<Strategy [%d] '%s' for player [%d] '%s' in game '%s'>" % \
+            (self.st, self.label, self.player.pl, self.player.label,
+             self.player.game.title)
+    def __eq__(self, other):
+        if not isinstance(other, Strategy):  return False
+        return self.player == other.player and self.st == other.st
+    def __ne__(self, other):
+        if not isinstance(other, Strategy):  return True
+        return self.player != other.player or self.st != other.st
+    @property
+    def label(self):   return self.player.game.labels[self.st]
+        
+class Strategies(object):
+    def __init__(self, player):
+        self.player = player
+    def __repr__(self):
+        return "<Strategies for player [%d] '%s' in game '%s'>" % \
+            (self.player.pl, self.player.label, self.player.game.title)
+    def __len__(self):    return len(self.player.game.choices)
+    def __getitem__(self, i):
+        if not isinstance(i, int) or i < 0 or i >= len(self):
+            raise IndexError
+        return Strategy(self.player, i)
+    
+class Player(object):
+    def __init__(self, game, pl):
+        self.game = game
+        self.pl = pl
+    def __repr__(self):
+        return "<Player [%d] '%s' in game '%s'>" % \
+            (self.pl, self.label, self.game.title)
+    def __eq__(self, other):
+        if not isinstance(other, Player):  return False
+        return self.game == other.game and self.pl == other.pl
+    def __ne__(self, other):
+        if not isinstance(other, Player):  return True
+        return self.game != other.game or self.pl != other.pl
+    @property
+    def strategies(self):    return Strategies(self)
+    @property
+    def label(self):   return str(self.pl)
+    
+class Players(object):
+    def __init__(self, game):    self.game = game
+    def __repr__(self):
+        return "<Players in game '%s'>" % self.game.title
+    def __len__(self):           return self.game.N
+    def __getitem__(self, i):
+        if not isinstance(i, int) or i < 0 or i >= self.game.N:
+            raise IndexError
+        return Player(self.game, i)
+
+class Outcome(object):
+    def __init__(self, game, index):
+        self.game = game
+        self.index = index
+    def __repr__(self):
+        return "<Strategy profile %s in game '%s'>" % (self.index,
+                                                       self.game.title)
+    def __eq__(self, other):
+        if not isinstance(other, Outcome):  return False
+        return self.game == other.game and self.index == other.index
+    def __ne__(self, other):
+        if not isinstance(other, Outcome):  return True
+        return self.game != other.game or self.index != other.index
+    def __getitem__(self, pl):
+        if not isinstance(pl, int) or pl < 0 or pl >= self.game.N:
+            raise IndexError
+        total = sum([ self.game.choices[c] for c in self.index ])
+        own = self.game.choices[self.index[pl]]
+        return self.game.payoff(own, total-own)
 
 class MeanStatisticGame(object):
     """
@@ -24,9 +91,11 @@ class MeanStatisticGame(object):
     the method payoff(own, others), which provides the payoff for
     any given vector of own choice and sum of others' choices.
     """
-    def __init__(self, N, min_choice, max_choice, step_choice=1):
+    def __init__(self, N, min_choice, max_choice, step_choice=1,
+                 label_prefix="S"):
         self.N = N
         self.choices = xrange(min_choice, max_choice+1, step_choice)
+        self.labels = [ label_prefix+str(c) for c in self.choices ]
         self.statistics = xrange((self.N-1)*min(self.choices),
                                  (self.N-1)*max(self.choices)+1,
                                  step_choice)
@@ -35,22 +104,29 @@ class MeanStatisticGame(object):
     def is_tree(self):   return False
     @property
     def is_symmetric(self):  return True
+    @property
+    def players(self):    return Players(self)
     
-    def table(self):
-        return [ [ own, others, self.payoff(own, others) ]
-                 for (own, others) in cartesian(self.choices,
-                                                self.statistics) ]
-    
-    def matrix(self):
-        return [ [ "" ] + [ other for other in self.statistics ] ] + \
-               [ [ own ] + [ self.payoff(own, other)
-                             for other in self.statistics ]
-                 for own in self.choices ]
-
     def __getitem__(self, key):
-        if len(key) != 2:
-            raise KeyError
-        return self.payoff(key[0], key[1])
+        key = list(key)
+        if len(key) != self.N:
+            raise KeyError, "number of strategies != number of players"
+        for i in xrange(len(key)):
+            if isinstance(key[i], int):
+                if key[i] < 0 or key[i] >= len(self.choices):
+                    raise IndexError, "index %d out of range" % i
+            elif isinstance(key[i], str):
+                try:
+                    key[i] = [ x.label for x in self.players[i].strategies ].index(key[i])
+                except ValueError:
+                    raise IndexError, "index %d not found" % i
+            elif isinstance(key[i], Strategy):
+                if key[i].player != self.players[i]:
+                    raise IndexError, "strategy %d for wrong player" % i
+                key[i] = key[i].st
+            else:
+                raise TypeError, "unknown index type for index %d" % i
+        return Outcome(self, tuple(key))
 
     def __setitem__(self, key, value):
         raise NotImplementedError
@@ -58,42 +134,18 @@ class MeanStatisticGame(object):
     def mixed_profile(self, point=None):
         return MixedProfile(self, point)
 
-class MeanStatisticTableGame(MeanStatisticGame):
-    """
-    A mean statistic game implemented as a table, indexed by
-    (own choice, sum of others' choices).
-    """
-    def __init__(self, N, min_choice, max_choice, step_choice=1,
-                 table=None, matrix=None):
-        MeanStatisticGame.__init__(self, N, min_choice, max_choice, step_choice)
-        self.payoffs = { }
-        if table is not None:
-            for row in table:
-                self.payoffs[(int(row[0]), int(row[1]))] = float(row[2])
-        elif matrix is not None:
-            for row in matrix[1:]:
-                for (col, payoff) in zip(matrix[0][1:], row[1:]):
-                    self.payoffs[(int(row[0]), int(col))] = float(payoff)
+    def to_table(self):
+        g = gambit.new_table([ len(self.choices) ] * self.N)
+        for pl in xrange(self.N):
+            for (st, label) in enumerate(self.labels):
+                g.players[pl].strategies[st].label = label
+        for cont in g.contingencies:
+            g_outc = g[cont]
+            t_outc = self[cont]
+            for pl in xrange(self.N):
+                g_outc[pl] = t_outc[pl]
+        return g
 
-    def __setitem__(self, key, value):
-        if len(key) != 2 or \
-               key[0] not in self.choices or key[1] not in self.statistics:
-            raise IndexError
-        self.payoffs[(key[0], key[1])] = value
-
-    @property
-    def title(self):
-        return "Mean statistic table game"
-
-    def payoff(self, own, others):
-        if own not in self.choices or others not in self.statistics:
-            raise KeyError
-
-        try:
-            return self.payoffs[(own, others)]
-        except KeyError:
-            return 0.0
-        
 
 class MixedProfile(object):
     """
