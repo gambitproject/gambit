@@ -3,7 +3,16 @@ A set of utilities for computing Nash equilibria
 """
 
 import subprocess
+from gambit.profiles import Solution
 
+class NashSolution(Solution):
+    def __init__(self, profile):
+        Solution.__init__(self, profile)
+    def __repr__(self):
+        return "<NashProfile for '%s': %s>" % (self._profile.game.title,
+                                               self._profile)
+    
+    
 class ExternalSolver(object):
     """
     Base class for managing calls to external programs.
@@ -28,22 +37,26 @@ class ExternalSolver(object):
         child_stdin.close()
         return child_stdout
 
+    def _parse_output(self, stream, game, rational):
+        profiles = [ ]
+        for line in stream:
+            entries = line.strip().split(",")
+            if entries[0] != "NE":  continue
+            profile = game.mixed_profile()
+            for (i, p) in enumerate(entries[1:]):
+                profile[i] = float(p)
+            profiles.append(NashSolution(profile))
+        return profiles
+
 class ExternalEnumPureSolver(ExternalSolver):
     """
     Algorithm class to manage calls to external gambit-enumpure solver
     for computing pure-strategy equilibria.
     """
     def solve(self, game, rational=False):
-        profiles = [ ]
         command_line = "gambit-enumpure"
-        for line in self.launch(command_line, game):
-            entries = line.strip().split(",")
-            if entries[0] != "NE":  continue
-            profile = game.mixed_profile()
-            for (i, p) in enumerate(entries[1:]):
-                profile[i] = float(p)
-            profiles.append(profile)
-        return profiles
+        return self._parse_output(self.launch(command_line, game),
+                                  game, rational)
 
 class ExternalLPSolver(ExternalSolver):
     """
@@ -51,16 +64,9 @@ class ExternalLPSolver(ExternalSolver):
     for computing equilibria in two-player games using linear programming.
     """
     def solve(self, game, rational=False):
-        profiles = [ ]
         command_line = "gambit-lp -d 10"
-        for line in self.launch(command_line, game):
-            entries = line.strip().split(",")
-            if entries[0] != "NE":  continue
-            profile = game.mixed_profile()
-            for (i, p) in enumerate(entries[1:]):
-                profile[i] = float(p)
-            profiles.append(profile)
-        return profiles
+        return self._parse_output(self.launch(command_line, game),
+                                  game, rational)
 
 class ExternalLCPSolver(ExternalSolver):
     """
@@ -69,16 +75,9 @@ class ExternalLCPSolver(ExternalSolver):
     programming.
     """
     def solve(self, game, rational=False):
-        profiles = [ ]
         command_line = "gambit-lcp -d 10"
-        for line in self.launch(command_line, game):
-            entries = line.strip().split(",")
-            if entries[0] != "NE":  continue
-            profile = game.mixed_profile()
-            for (i, p) in enumerate(entries[1:]):
-                profile[i] = float(p)
-            profiles.append(profile)
-        return profiles
+        return self._parse_output(self.launch(command_line, game),
+                                  game, rational)
 
 class ExternalEnumMixedSolver(ExternalSolver):
     """
@@ -86,16 +85,9 @@ class ExternalEnumMixedSolver(ExternalSolver):
     for computing equilibria in two-player games using enumeration of extreme points.
     """
     def solve(self, game, rational=False):
-        profiles = [ ]
         command_line = "gambit-enummixed -d 10"
-        for line in self.launch(command_line, game):
-            entries = line.strip().split(",")
-            if entries[0] != "NE":  continue
-            profile = game.mixed_profile()
-            for (i, p) in enumerate(entries[1:]):
-                profile[i] = float(p)
-            profiles.append(profile)
-        return profiles
+        return self._parse_output(self.launch(command_line, game),
+                                  game, rational)
 
 class ExternalSimpdivSolver(ExternalSolver):
     """
@@ -103,33 +95,19 @@ class ExternalSimpdivSolver(ExternalSolver):
     for computing equilibria in N-player games using simpicial subdivision.
     """
     def solve(self, game):
-        profiles = [ ]
         command_line = "gambit-simpdiv -d 10"
-        for line in self.launch(command_line, game):
-            entries = line.strip().split(",")
-            if entries[0] != "NE":  continue
-            profile = game.mixed_profile()
-            for (i, p) in enumerate(entries[1:]):
-                profile[i] = float(p)
-            profiles.append(profile)
-        return profiles
-
+        return self._parse_output(self.launch(command_line, game),
+                                  game, rational)
+    
 class ExternalGlobalNewtonSolver(ExternalSolver):
     """
     Algorithm class to manage calls to external gambit-gnm solver
     for computing equilibria in N-player games using the global Newton method.
     """
     def solve(self, game):
-        profiles = [ ]
         command_line = "gambit-gnm -d 10"
-        for line in self.launch(command_line, game):
-            entries = line.strip().split(",")
-            if entries[0] != "NE":  continue
-            profile = game.mixed_profile()
-            for (i, p) in enumerate(entries[1:]):
-                profile[i] = float(p)
-            profiles.append(profile)
-        return profiles
+        return self._parse_output(self.launch(command_line, game),
+                                  game, rational)
 
 class ExternalEnumPolySolver(ExternalSolver):
     """
@@ -137,16 +115,9 @@ class ExternalEnumPolySolver(ExternalSolver):
     for computing equilibria in N-player games systems of polynomial equations.
     """
     def solve(self, game):
-        profiles = [ ]
         command_line = "gambit-enumpoly -d 10"
-        for line in self.launch(command_line, game):
-            entries = line.strip().split(",")
-            if entries[0] != "NE":  continue
-            profile = game.mixed_profile()
-            for (i, p) in enumerate(entries[1:]):
-                profile[i] = float(p)
-            profiles.append(profile)
-        return profiles
+        return self._parse_output(self.launch(command_line, game),
+                                  game, rational)
 
 class ExternalLyapunovSolver(ExternalSolver):
     """
@@ -154,16 +125,9 @@ class ExternalLyapunovSolver(ExternalSolver):
     for computing equilibria in N-player games using Lyapunov function minimization.
     """
     def solve(self, game):
-        profiles = [ ]
         command_line = "gambit-liap -d 10"
-        for line in self.launch(command_line, game):
-            entries = line.strip().split(",")
-            if entries[0] != "NE":  continue
-            profile = game.mixed_profile()
-            for (i, p) in enumerate(entries[1:]):
-                profile[i] = float(p)
-            profiles.append(profile)
-        return profiles
+        return self._parse_output(self.launch(command_line, game),
+                                  game, rational)
 
 class ExternalIteratedPolymatrixSolver(ExternalSolver):
     """
@@ -171,17 +135,9 @@ class ExternalIteratedPolymatrixSolver(ExternalSolver):
     for computing equilibria in N-player games using iterated polymatrix approximation.
     """
     def solve(self, game):
-        profiles = [ ]
         command_line = "gambit-ipa -d 10"
-        for line in self.launch(command_line, game):
-            entries = line.strip().split(",")
-            if entries[0] != "NE":  continue
-            profile = game.mixed_profile()
-            for (i, p) in enumerate(entries[1:]):
-                profile[i] = float(p)
-            profiles.append(profile)
-        return profiles
-
+        return self._parse_output(self.launch(command_line, game),
+                                  game, rational)
 
 class ExternalLogitSolver(ExternalSolver):
     """
@@ -191,12 +147,5 @@ class ExternalLogitSolver(ExternalSolver):
     def solve(self, game):
         profiles = [ ]
         command_line = "gambit-logit -d 20 -e"
-        for line in self.launch(command_line, game):
-            entries = line.strip().split(",")
-            if entries[0] != "NE":  continue
-            profile = game.mixed_profile()
-            for (i, p) in enumerate(entries[1:]):
-                profile[i] = float(p)
-            profiles.append(profile)
-        return profiles
-
+        return self._parse_output(self.launch(command_line, game),
+                                  game, rational)

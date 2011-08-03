@@ -6,6 +6,8 @@ import math
 import numpy
 import pctrace
 
+from gambit.profiles import Solution
+
 def sym_compute_lhs(game, point):
     """
     Compute the LHS for the set of equations for a symmetric logit QRE
@@ -72,18 +74,19 @@ def printer(game, point):
 
 
 
-class LogitQRE(object):
+class LogitQRE(Solution):
     """
     Container class representing a logit QRE
     """
     def __init__(self, lam, profile):
-        self.lam = lam
-        self.profile = profile
-    def __len__(self):         return len(self.profile)
-    def __getitem__(self, i):   return self.profile[i]
-    def __getattr__(self, attr):  return getattr(self.profile, attr)
+        Solution.__init__(self, profile)
+        self._lam = lam
     def __repr__(self):
-        return "<LogitQRE at lam=%f: %s>" % (self.lam, self.profile)
+        return "<LogitQRE at lam=%f: %s>" % (self._lam, self._profile)
+    @property
+    def lam(self):      return self._lam
+    @property
+    def mu(self):       return 1.0 / self._lam
 
 class StrategicQREPathTracer(object):
     """

@@ -141,6 +141,7 @@ cdef extern from "libgambit/game.h":
 
 cdef extern from "libgambit/mixed.h":
     ctypedef struct c_MixedStrategyProfileDouble "MixedStrategyProfile<double>":
+        c_Game GetGame()
         int MixedProfileLength()
         double getitem_int "operator[]"(int) except +IndexError
         double getitem_Strategy "operator[]"(c_GameStrategy)

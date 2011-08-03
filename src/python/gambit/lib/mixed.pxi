@@ -43,6 +43,13 @@ cdef class MixedStrategyProfileDouble:
         else:
             return list(self) >= list(other)
 
+    property game:
+        def __get__(self):
+            cdef Game g
+            g = Game()
+            g.game = self.profile.GetGame()
+            return g
+
     def payoff(self, Player player):
         return self.profile.GetPayoff(player.player)
 

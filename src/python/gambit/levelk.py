@@ -4,6 +4,7 @@ Provides support for level-k/cognitive hierarchy modeling
 
 import math
 import scipy.stats
+from gambit.profiles import Solution
 
 def logit_br(game, profile, lam):
     br = game.mixed_profile()
@@ -13,21 +14,21 @@ def logit_br(game, profile, lam):
         br[i] = payoffs[i] / s
     return br
 
-
-class CognitiveHierarchyProfile(object):
+class CognitiveHierarchyProfile(Solution):
     """
     Container class representing a CH solution.
     """
     def __init__(self, tau, lam, profile):
-        self.tau = tau
-        self.lam = lam
-        self.profile = profile
-    def __len__(self):    return len(self.profile)
-    def __getitem__(self, i):   return self.profile[i]
-    def __getattr__(self, attr):  return getattr(self.profile, attr)
+        Solution.__init__(self, profile)
+        self._tau = tau
+        self._lam = lam
     def __repr__(self):
         return "<CognitiveHierarchyProfile for tau=%f, lam=%f: %s>" % \
-            (self.tau, self.lam, self.profile)
+            (self._tau, self._lam, self._profile)
+    @property
+    def tau(self):       return self._tau
+    @property
+    def lam(self):       return self._lam
 
 def compute_coghier(game, tau, lam):
     """
