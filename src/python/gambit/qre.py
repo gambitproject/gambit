@@ -145,6 +145,8 @@ class StrategicQREPathTracer(object):
             raise NotImplementedError
 
     def compute_max_like(self, game, data):
+        log_like = lambda data, profile: \
+                   sum([ x*math.log(y) for (x, y) in zip(data, profile) ])
         diff_log_like = lambda data, point, tangent: \
                         sum([ x*y for (x, y) in zip(data, tangent[:-1]) ])
 
@@ -159,8 +161,10 @@ class StrategicQREPathTracer(object):
                                        crit=lambda x,t: diff_log_like(data,x,t),
                                        maxIter=100)
 
-            return LogitQRE(point[-1],
-                            game.mixed_profile(point=[math.exp(x) for x in point[:-1]]))
+            qre = LogitQRE(point[-1],
+                           game.mixed_profile(point=[math.exp(x) for x in point[:-1]]))
+            qre.logL = log_like(data, qre)
+            return qre
         else:
             raise NotImplementedError
 

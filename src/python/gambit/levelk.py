@@ -3,15 +3,22 @@ Provides support for level-k/cognitive hierarchy modeling
 """
 
 import math
+import scipy.optimize
 import scipy.stats
 from gambit.profiles import Solution
 
 def logit_br(game, profile, lam):
+    def do_sum(maxi, logpi, lam, values):
+        logp = [ logpi + lam * (values[j] - values[maxi])
+                for j in xrange(len(values)) ]
+        return sum([ math.exp(p) for p in logp ]) - 1.0
+    values = profile.strategy_values()
+    maxi = values.index(max(values))
+    logp0 = scipy.optimize.newton(lambda x: do_sum(maxi, x, lam, values),
+                                  0.0)
     br = game.mixed_profile()
-    payoffs = [ math.exp(lam*v) for v in profile.strategy_values() ]
-    s = sum(payoffs)
-    for i in xrange(len(br)):
-        br[i] = payoffs[i] / s
+    for i in xrange(len(profile)):
+        br[i] = math.exp(logp0 + lam*(values[i]-values[maxi]))
     return br
 
 class CognitiveHierarchyProfile(Solution):
@@ -37,6 +44,8 @@ def compute_coghier(game, tau, lam):
     best responses 'lam'.
     """
     p = game.mixed_profile()
+    if tau <= 0.0 or lam <= 0.0:
+        return CognitiveHierarchyProfile(tau, lam, p)
     accum = float(scipy.stats.poisson(tau).pmf(0))
     for k in xrange(1, max(3, int(5*tau))):
         br = logit_br(game, p, lam=lam)
@@ -44,3 +53,61 @@ def compute_coghier(game, tau, lam):
         p = (1.0/(prob+accum)) * (prob*br + accum*p)
         accum += prob
     return CognitiveHierarchyProfile(tau, lam, p)
+
+def fit_coghier(game, data, min_tau, max_tau, min_lam, max_lam,
+                grid_size=10, sample_cands=20, verbose=False):
+    """
+    Compute maximum likelihood estimate of (tau, lambda) parameters
+    for cognitive hierarchy model.  Operates with initial grid
+    search over [ min_tau, max_tau ] x [ min_lam, max_lam ],
+    with 'grid_size' points in each direction.  Then, uses
+    Newton function minimization starting at the top 'sample_cands'
+    points, to polish the maximizer.
+    """
+    def log_like(profile, data):
+        return sum([ math.log(p) * d for (p, d) in zip(profile, data) ])
+
+    def objective(params, game, data):
+        penalty = 0.0
+        tau, lam = params
+        if lam < 0.0:
+            penalty += lam*lam
+            lam = 0.0
+        if tau < 0.0:
+            penalty += tau*tau
+            tau = 0.0
+        profile = compute_coghier(game, tau, lam)
+        logL = log_like(profile, data)
+        return penalty - logL
+
+    results = [ ]
+    for lam in scipy.linspace(min_lam, max_lam, grid_size):
+        if verbose:
+            print "Searching lambda=%.3f" % lam
+        for tau in scipy.linspace(min_tau, max_tau, grid_size):
+            profile = compute_coghier(game, tau, lam)
+            profile.logL = log_like(profile, data)
+            results.append(profile)
+        results.sort(lambda x, y: cmp(y.logL, x.logL))
+        results = results[:sample_cands]
+        if verbose:
+            print "tau,lam,logL"
+            for profile in results:
+                print "%f,%f,%f" % (profile.tau, profile.lam, profile.logL)
+            print
+
+    if verbose: print
+    for start in results[:sample_cands]:
+        params = scipy.optimize.fmin(lambda x: objective(x, game, data),
+                                     (start.tau, start.lam),
+                                     disp=0)
+        end_tau, end_lam = list(params)
+        profile = compute_coghier(game, end_tau, end_lam)
+        profile.logL = log_like(profile, data)
+        results.append(profile)
+        if verbose:
+            print "%f,%f,%f" % (profile.tau, profile.lam, profile.logL)
+    results.sort(lambda x, y: cmp(y.logL, x.logL))
+    return results[0]
+                            
+            
