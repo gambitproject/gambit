@@ -9,11 +9,19 @@ cdef class Players:
 
     def __getitem__(self, pl):
         cdef Player p
-        if pl < 0 or pl >= len(self):
-            raise IndexError("no player with index '%s'" % pl)
-        p = Player()
-        p.player = self.game.deref().GetPlayer(pl+1)
-        return p
+        if isinstance(pl, int):
+            if pl < 0 or pl >= len(self):
+                raise IndexError("no player with index '%s'" % pl)
+            p = Player()
+            p.player = self.game.deref().GetPlayer(pl+1)
+            return p
+        elif isinstance(pl, str):
+            try:
+                return self[ [ x.label for x in self ].index(pl) ]
+            except ValueError:
+                raise IndexError("no player with label '%s'" % pl)
+        else:
+            raise TypeError("players indexable by int or str")
 
     def add(self, label=""):
         cdef Player p

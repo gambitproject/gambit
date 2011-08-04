@@ -1,5 +1,6 @@
 import decimal
 import fractions
+import warnings
 
 cdef extern from "libgambit/libgambit.h":
     pass

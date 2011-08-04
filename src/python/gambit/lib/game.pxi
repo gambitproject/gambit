@@ -67,7 +67,8 @@ cdef class Game:
         cdef c_PureStrategyProfile *psp
         cdef Outcome outcome
         psp = new_PureStrategyProfile(self.game)
-
+        
+        
         for (pl, st) in enumerate(args):
             psp.SetStrategy(self.game.deref().GetPlayer(pl+1).deref().GetStrategy(st+1))
 
@@ -76,11 +77,38 @@ cdef class Game:
         del_PureStrategyProfile(psp)
         return outcome
 
+
+
     # As of Cython 0.11.2, cython does not support the * notation for the argument
     # to __getitem__, which is required for multidimensional slicing to work. 
     # We work around this by providing a shim.
     def __getitem__(self, i):
-        return self._get_contingency(*i)
+        try:
+            if len(i) != len(self.players):
+                raise KeyError, "Number of strategies is not equal to the number of players"
+        except TypeError:
+            raise TypeError, "contingency must be a tuple-like object"
+        cont = [ 0 ] * len(self.players)
+        for (pl, st) in enumerate(i):
+            if isinstance(st, int):
+                if st < 0 or st >= len(self.players[st].strategies):
+                    raise IndexError, "Provided strategy index %d out of range" % st
+                cont[pl] = st
+            elif isinstance(st, str):
+                try:
+                    cont[pl] = [ s.label for s in self.players[pl].strategies ].index(st)
+                except ValueError:
+                    raise IndexError, "Provided strategy label '%s' not defined" % st
+            elif isinstance(st, Strategy):
+                try:
+                    cont[pl] = list(self.players[pl].strategies).index(st)
+                except ValueError:
+                    raise IndexError, "Provided strategy '%s' not available to player" % st
+            else:
+                raise TypeError("Must use a tuple of ints, strategy labels, or strategies")
+        return self._get_contingency(*tuple(cont))
+
+
 
     def mixed_profile(self):
         cdef MixedStrategyProfileDouble msp

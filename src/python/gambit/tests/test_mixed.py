@@ -22,8 +22,8 @@ class TestGambitMixedStrategyGame(object):
 		
 	def test_payoff_labels(self):
 		"Test to ensure that payoffs are correctly labeled"
-		print self.p.payoff(self.game.players[0])
-		print self.p
+		#print self.p.payoff(self.game.players[0])
+		#print self.p
 		assert self.p.payoff(self.game.players[0]) == 0.66666666666666663
 
 	def test_strategy_value(self):

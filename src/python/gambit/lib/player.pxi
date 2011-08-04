@@ -27,10 +27,21 @@ cdef class Player:
     def __hash__(self):
         return long(<long>self.player.deref())
 
+    property game:
+        def __get__(self):
+            cdef Game g
+            g = Game()
+            g.game = self.player.deref().GetGame()
+            return g
+
     property label:
         def __get__(self):
             return self.player.deref().GetLabel().c_str()
+
         def __set__(self, char *value):
+            # check to see if the player's name has been used elsewhere
+            if value in [ i.label for i in self.game.players ]:
+                warnings.warn("Another player with an identical label exists")
             cdef cxx_string s
             s.assign(value)
             self.player.deref().SetLabel(s)
