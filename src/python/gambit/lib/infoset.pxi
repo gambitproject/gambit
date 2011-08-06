@@ -1,3 +1,25 @@
+cdef class Members(Collection):
+    "Represents a collection of members of an infoset."
+    cdef c_GameInfoset infoset
+    def __len__(self):     return self.infoset.deref().NumMembers()
+    def __getitem__(self, i):
+        if not isinstance(i, int):  return Collection.__getitem__(self, i)
+        cdef Node n
+        n = Node()
+        n.node = self.infoset.deref().GetMember(i+1)
+        return n
+
+cdef class Actions(Collection):
+    "Represents a collection of actions at an infoset."
+    cdef c_GameInfoset infoset
+    def __len__(self):     return self.infoset.deref().NumActions()
+    def __getitem__(self, act):
+        if not isinstance(act, int):  return Collection.__getitem__(self, act)
+        cdef Action a
+        a = Action()
+        a.action = self.infoset.deref().GetAction(act+1)
+        return a
+
 cdef class Infoset:
     cdef c_GameInfoset infoset
 

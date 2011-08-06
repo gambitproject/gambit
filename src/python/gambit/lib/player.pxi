@@ -1,3 +1,25 @@
+cdef class Infosets(Collection):
+    "Represents a collection of infosets for a player."
+    cdef c_GamePlayer player
+    def __len__(self):    return self.player.deref().NumInfosets()
+    def __getitem__(self, iset):
+        if not isinstance(iset, int):  return Collection.__getitem__(self, iset)
+        cdef Infoset s
+        s = Infoset()
+        s.infoset = self.player.deref().GetInfoset(iset+1)
+        return s
+
+cdef class Strategies(Collection):
+    "Represents a collection of strategies for a player."
+    cdef c_GamePlayer player
+    def __len__(self):    return self.player.deref().NumStrategies()
+    def __getitem__(self, st):
+        if not isinstance(st, int):  return Collection.__getitem__(self, st)
+        cdef Strategy s
+        s = Strategy()
+        s.strategy = self.player.deref().GetStrategy(st+1)
+        return s
+
 cdef class Player:
     cdef c_GamePlayer player
 

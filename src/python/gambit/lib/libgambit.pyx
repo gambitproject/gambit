@@ -122,7 +122,7 @@ cdef extern from "libgambit/game.h":
         c_GamePlayer NewPlayer()
 
         int NumOutcomes()
-        c_GameOutcome GetOutcome(int)
+        c_GameOutcome GetOutcome(int) except +IndexError
         
         int NumNodes()
         c_GameNode GetRoot()
@@ -166,29 +166,32 @@ cdef extern from "util.h":
 import gambit.gameiter
 
 
+cdef class Collection(object):
+    "Represents a collection of related objects in a game."
+    def __repr__(self):   return str(list(self))
+
+    def __getitem__(self, i):
+        if isinstance(i, str):
+            try:
+                return self[ [ x.label for x in self ].index(i) ]
+            except ValueError:
+                raise IndexError("no object with label '%s'" % i)
+        else:
+            raise TypeError("collection indexes must be int or str, not %s" %
+                             i.__class__.__name__)
+
+
 ######################
 # Includes
 ######################
 
-include "strategy.pxi"
-include "strategies.pxi"
-    
 include "action.pxi"
-include "actions.pxi"
-include "members.pxi"
 include "infoset.pxi"
-include "infosets.pxi"
-
+include "strategy.pxi"
 include "player.pxi"
-include "players.pxi"
-    
 include "outcome.pxi"
-include "outcomes.pxi"
-
 include "node.pxi"
-
 include "mixed.pxi"
-
 include "game.pxi"
 
 

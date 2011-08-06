@@ -1,3 +1,39 @@
+cdef class Outcomes(Collection):
+    "Represents a collection of outcomes in a game."
+    cdef c_Game game
+    def __len__(self):    return self.game.deref().NumOutcomes()
+    def __getitem__(self, outc):
+        if not isinstance(outc, int):  return Collection.__getitem__(self, outc)
+        cdef Outcome c
+        c = Outcome()
+        c.outcome = self.game.deref().GetOutcome(outc+1)
+        return c
+
+cdef class Players(Collection):
+    "Represents a collection of players in a game."
+    cdef c_Game game
+    def __len__(self):       return self.game.deref().NumPlayers()
+    def __getitem__(self, pl):
+        if not isinstance(pl, int):  return Collection.__getitem__(self, pl)
+        cdef Player p
+        p = Player()
+        p.player = self.game.deref().GetPlayer(pl+1)
+        return p
+
+    def add(self, label=""):
+        cdef Player p
+        p = Player()
+        p.player = self.game.deref().NewPlayer()
+        p.label = str(label)
+        return p
+
+    property chance:
+        def __get__(self):
+            cdef Player p
+            p = Player()
+            p.player = self.game.deref().GetChance()
+            return p
+
 cdef class Game:
     cdef c_Game game
 
