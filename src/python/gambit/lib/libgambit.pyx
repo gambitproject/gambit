@@ -10,6 +10,12 @@ cdef extern from "string":
         char *c_str()
         cxx_string assign(char *)
 
+cdef extern from "libgambit/rational.h":
+    ctypedef struct c_Rational "Rational":
+        pass
+    cxx_string rat_str "lexical_cast<std::string>"(c_Rational)
+    c_Rational str_rat "lexical_cast<Rational>"(cxx_string)
+
 cdef extern from "libgambit/number.h":
     ctypedef struct c_Number "Number":
         cxx_string as_string "operator const string &"()
@@ -52,6 +58,7 @@ cdef extern from "libgambit/game.h":
 
     ctypedef struct c_GameStrategyRep "GameStrategyRep":
         int GetNumber()
+        int GetId()
         c_GamePlayer GetPlayer()
 
         cxx_string GetLabel()
@@ -170,24 +177,35 @@ cdef extern from "libgambit/mixed.h":
     ctypedef struct c_MixedStrategyProfileDouble "MixedStrategyProfile<double>":
         c_Game GetGame()
         int MixedProfileLength()
-        double getitem_int "operator[]"(int) except +IndexError
-        double getitem_Strategy "operator[]"(c_GameStrategy)
+        double getitem "operator[]"(int) except +IndexError
         double GetPayoff(c_GamePlayer)
         double GetStrategyValue(c_GameStrategy)
+        double GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy)
         double GetLiapValue()
     c_MixedStrategyProfileDouble *new_MixedStrategyProfileDouble "new MixedStrategyProfile<double>"(c_Game)
     void del_MixedStrategyProfileDouble "delete"(c_MixedStrategyProfileDouble *)
+
+    ctypedef struct c_MixedStrategyProfileRational "MixedStrategyProfile<Rational>":
+        c_Game GetGame()
+        int MixedProfileLength()
+        c_Rational getitem "operator[]"(int) except +IndexError
+        c_Rational GetPayoff(c_GamePlayer)
+        c_Rational GetStrategyValue(c_GameStrategy)
+        c_Rational GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy)
+        c_Rational GetLiapValue()
+    c_MixedStrategyProfileRational *new_MixedStrategyProfileRational "new MixedStrategyProfile<Rational>"(c_Game)
+    void del_MixedStrategyProfileRational "delete"(c_MixedStrategyProfileRational *)
+
 
 cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError
     cxx_string WriteGame(c_Game, int) except +IOError
 
     void setitem_ArrayInt(c_ArrayInt *, int, int)
-    void setitem_MixedStrategyProfileDouble_int(c_MixedStrategyProfileDouble *, 
-                                                int, double)
-    void setitem_MixedStrategyProfileDouble_Strategy(c_MixedStrategyProfileDouble *, 
-                                                     c_GameStrategy, double)
-
+    void setitem_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble *, 
+                                            int, double)
+    void setitem_MixedStrategyProfileRational(c_MixedStrategyProfileRational *, 
+                                            int, char *)
 
 import gambit.gameiter
 

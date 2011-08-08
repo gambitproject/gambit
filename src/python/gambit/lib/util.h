@@ -36,10 +36,14 @@ std::string WriteGame(const Game &p_game, bool strategic)
 inline void setitem_ArrayInt(Array<int> *array, int index, int value)
 { (*array)[index] = value; }
 
-inline void setitem_MixedStrategyProfileDouble_int(MixedStrategyProfile<double> *profile,
-						   int index, double value)
+inline void 
+setitem_MixedStrategyProfileDouble(MixedStrategyProfile<double> *profile,
+				   int index, double value)
 { (*profile)[index] = value; }
 
-inline void setitem_MixedStrategyProfileDouble_Strategy(MixedStrategyProfile<double> *profile,
-							GameStrategy index, double value)
-{ (*profile)[index] = value; }
+
+inline void 
+setitem_MixedStrategyProfileRational(MixedStrategyProfile<Rational> *profile,
+				   int index, const char *value)
+{ (*profile)[index] = lexical_cast<Rational>(std::string(value)); }
+

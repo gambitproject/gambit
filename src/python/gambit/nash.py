@@ -3,6 +3,7 @@ A set of utilities for computing Nash equilibria
 """
 
 import subprocess
+from fractions import Fraction
 from gambit.profiles import Solution
 
 class NashSolution(Solution):
@@ -42,9 +43,12 @@ class ExternalSolver(object):
         for line in stream:
             entries = line.strip().split(",")
             if entries[0] != "NE":  continue
-            profile = game.mixed_profile()
+            profile = game.mixed_profile(rational=rational)
             for (i, p) in enumerate(entries[1:]):
-                profile[i] = float(p)
+                if rational:
+                    profile[i] = Fraction(p)
+                else:
+                    profile[i] = float(p)
             profiles.append(NashSolution(profile))
         return profiles
 
@@ -53,10 +57,10 @@ class ExternalEnumPureSolver(ExternalSolver):
     Algorithm class to manage calls to external gambit-enumpure solver
     for computing pure-strategy equilibria.
     """
-    def solve(self, game, rational=False):
+    def solve(self, game):
         command_line = "gambit-enumpure"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational)
+                                  game, rational=True)
 
 class ExternalLPSolver(ExternalSolver):
     """
@@ -64,7 +68,10 @@ class ExternalLPSolver(ExternalSolver):
     for computing equilibria in two-player games using linear programming.
     """
     def solve(self, game, rational=False):
-        command_line = "gambit-lp -d 10"
+        if rational:
+            command_line = "gambit-lp"
+        else:
+            command_line = "gambit-lp -d 10"
         return self._parse_output(self.launch(command_line, game),
                                   game, rational)
 
@@ -75,7 +82,10 @@ class ExternalLCPSolver(ExternalSolver):
     programming.
     """
     def solve(self, game, rational=False):
-        command_line = "gambit-lcp -d 10"
+        if rational:
+            command_line = "gambit-lcp"
+        else:
+            command_line = "gambit-lcp -d 10"
         return self._parse_output(self.launch(command_line, game),
                                   game, rational)
 
@@ -85,7 +95,10 @@ class ExternalEnumMixedSolver(ExternalSolver):
     for computing equilibria in two-player games using enumeration of extreme points.
     """
     def solve(self, game, rational=False):
-        command_line = "gambit-enummixed -d 10"
+        if rational:
+            command_line = "gambit-enummixed"
+        else:
+            command_line = "gambit-enummixed -d 10"
         return self._parse_output(self.launch(command_line, game),
                                   game, rational)
 
@@ -95,9 +108,9 @@ class ExternalSimpdivSolver(ExternalSolver):
     for computing equilibria in N-player games using simpicial subdivision.
     """
     def solve(self, game):
-        command_line = "gambit-simpdiv -d 10"
+        command_line = "gambit-simpdiv"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational)
+                                  game, rational=True)
     
 class ExternalGlobalNewtonSolver(ExternalSolver):
     """

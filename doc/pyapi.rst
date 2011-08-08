@@ -586,6 +586,13 @@ API documentation
       Returns the expected payoff to choosing ``strategy`` if all
       other players play according to the profile.
 
+   .. py:method:: strategy_values(player)
+
+      Returns the expected payoffs for a player's set of strategies 
+      to choosing ``strategy`` if all other players play according to 
+      the profile.
+
+
    .. py:method:: liap_value()
 
       Returns the Lyapunov value (see [McK91]_) of the strategy profile.  The
