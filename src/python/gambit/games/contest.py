@@ -24,8 +24,12 @@ class TullockGame(meanstat.MeanStatisticGame):
 
     def payoff(self, own, others):
         try:
-            p_win = fractions.Fraction(own, own+others)
-            p_lose = fractions.Fraction(others, own+others)
+            if isinstance(own, int):
+                p_win = fractions.Fraction(own, own+others)
+                p_lose = fractions.Fraction(others, own+others)
+            else:
+                p_win = 1.0 * own / (own+others)
+                p_lose = 1.0 * others / (own+others)
             return p_win * (self.omega - self.cost(own) + self.prize) + \
                    p_lose * (self.omega - self.cost(own))
         except ZeroDivisionError:
