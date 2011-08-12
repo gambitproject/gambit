@@ -98,8 +98,11 @@ class StrategicQREPathTracer(object):
     
     def trace_strategic_path(self, game, max_lambda=1000000.0, callback=None):
         points = [ ]
-        on_step = lambda p: points.append(LogitQRE(p[-1],
-                                                   game.mixed_profile(point=[math.exp(x) for x in p[:-1]]))) or not callback or callback(points[-1])
+        def on_step(game, points, p, callback):
+            qre = LogitQRE(p[-1],
+                           game.mixed_profile(point=[math.exp(x) for x in p[:-1]]))
+            points.append(qre)
+            if callback:  callback(qre)
 
         if game.is_symmetric:
             p = game.mixed_profile()
@@ -111,7 +114,7 @@ class StrategicQREPathTracer(object):
                                    lambda x: sym_compute_jac(game, x),
                                    hStart=self.h_start,
                                    maxDecel=self.max_decel,
-                                   callback=on_step,
+                                   callback=lambda p: on_step(game, points, p, callback),
                                    crit=None,
                                    maxIter=100)
             except KeyboardInterrupt:
@@ -167,6 +170,34 @@ class StrategicQREPathTracer(object):
             return qre
         else:
             raise NotImplementedError
+
+    def compute_fit_sshist(self, game, data, callback=None):
+        """
+        Find lambda parameter for which QRE best fits the data
+        using the sum of squares of distances in the histogram of
+        the data.
+        """
+        def diff_dist(data, point, tangent):
+            return 2.0 * sum([ (math.exp(p)-d) * t * math.exp(p)
+                               for (p, t, d) in zip(point, tangent, data) ])
+
+        if game.is_symmetric:
+            p = game.mixed_profile()
+            point = pctrace.trace_path([ math.log(x) for x in p.profile ],
+                                       0.0, 1000000.0,
+                                       lambda x: sym_compute_lhs(game, x),
+                                       lambda x: sym_compute_jac(game, x),
+                                       hStart=1.0,
+                                       crit=lambda x,t: diff_dist(data,x,t),
+                                       maxIter=100,
+                                       callback=callback)
+
+            qre = LogitQRE(point[-1],
+                           game.mixed_profile(point=[math.exp(x) for x in point[:-1]]))
+            return qre
+        else:
+            raise NotImplementedError
+
 
     def compute_criterion(self, game, f):
         def criterion_wrap(x, t):
