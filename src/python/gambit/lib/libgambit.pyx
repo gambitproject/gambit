@@ -89,6 +89,7 @@ cdef extern from "libgambit/game.h":
 
         int NumInfosets()
         c_GameInfoset GetInfoset(int) except +IndexError
+        c_GameStrategy NewStrategy()
 
     ctypedef struct c_GameOutcomeRep "GameOutcomeRep":
         c_Game GetGame()

@@ -80,3 +80,18 @@ class TestGambitPlayers(object):
         assert self.extensive_game.players[0].label == "new player"
         assert self.extensive_game.players[1].label == "new player 2"
 
+    def test_game_add_strategies_to_player_strategic_game(self):
+        "Test to add a strategy to a player in a strategic game"
+        assert len(self.strategic_game.players[0].strategies) == 2
+        self.strategic_game.players[0].strategies.add("1st new strategy")
+        assert len(self.strategic_game.players[0].strategies) == 3
+
+        with warnings.catch_warnings(True) as w:
+            self.strategic_game.players[0].strategies.add("1st new strategy")
+            assert str(w[0].message) == "This player has another strategy with an identical label"
+        assert len(self.strategic_game.players[0].strategies) == 4
+
+    def test_game_add_strategies_to_player_extensive_game(self):
+        "Test to ensure that an exception is raised when attempting to add a strategy to a player in an extensive game"
+        self.extensive_game.players.add("Alice")
+        assert_raises(TypeError, self.extensive_game.players[0].strategies.add, "Test")

@@ -424,6 +424,13 @@ API documentation
       Returns strategy number ``i``.  Strategies are numbered
       starting with ``0``.
 
+   .. py:method:: add_strategy([label=""])
+
+      Add a :py:class:`gambit.Strategy` to the player's list of strategies.
+      This method is only applicable to games in a strategic form. When
+      this method is applied to a player in an extensive form it will raise
+      a type error.
+
 .. py:class:: Strategy
 
    Represents a strategy available to a :py:class:`gambit.Player`.

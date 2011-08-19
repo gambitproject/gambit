@@ -12,6 +12,19 @@ cdef class Infosets(Collection):
 cdef class Strategies(Collection):
     "Represents a collection of strategies for a player."
     cdef c_GamePlayer player
+
+    def add(self, label=""):
+        cdef Game g
+        g = Game()
+        g.game = self.player.deref().GetGame()
+        if g.is_tree:
+            raise TypeError, "Adding strategies is only applicable to games in strategic form"
+        cdef Strategy s
+        s = Strategy()
+        s.strategy = self.player.deref().NewStrategy()
+        s.label = str(label)
+        return s
+
     def __len__(self):    return self.player.deref().NumStrategies()
     def __getitem__(self, st):
         if not isinstance(st, int):  return Collection.__getitem__(self, st)
@@ -19,6 +32,7 @@ cdef class Strategies(Collection):
         s = Strategy()
         s.strategy = self.player.deref().GetStrategy(st+1)
         return s
+    
 
 cdef class Player:
     cdef c_GamePlayer player
@@ -78,7 +92,7 @@ cdef class Player:
             s = Strategies()
             s.player = self.player
             return s
-
+        
     property infosets:
         def __get__(self):
             cdef Infosets s
