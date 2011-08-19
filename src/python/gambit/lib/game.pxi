@@ -24,7 +24,7 @@ cdef class Players(Collection):
         cdef Player p
         p = Player()
         p.player = self.game.deref().NewPlayer()
-        p.label = str(label)
+        if label != "": p.label = str(label)
         return p
 
     property chance:

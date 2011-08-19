@@ -387,7 +387,11 @@ API documentation
    .. py:method:: add([label=""])
 
       Add a :py:class:`gambit.Player` to the game.  If label
-      is specified, sets the text label for the player.
+      is specified, sets the text label for the player. In the case
+      of extensive games this will create a new player with no 
+      moves. In the case of strategic form games it creates a player
+      with one strategy. If the provided player label is shared by
+	  another player a warning will be returned.
 
 .. py:class:: Player
 
