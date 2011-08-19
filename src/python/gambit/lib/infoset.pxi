@@ -48,6 +48,12 @@ cdef class Infoset:
     def __hash__(self):
         return long(<long>self.infoset.deref())
 
+    def precedes(self, node):
+        if isinstance(node, Node):
+            return self.infoset.deref().Precedes(((<Node>node).node))
+        else:
+            raise TypeError, "Precedes takes a Node object as its input"
+            
     property label:
         def __get__(self):
             return self.infoset.deref().GetLabel().c_str()
@@ -69,3 +75,9 @@ cdef class Infoset:
             m = Members()
             m.infoset = self.infoset
             return m
+
+    property player:
+        def __get__(self):
+            p = Player()
+            p.player = self.infoset.deref().GetPlayer()
+            return p

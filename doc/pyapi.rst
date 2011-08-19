@@ -367,6 +367,31 @@ API documentation
       over the game, initialized to
       uniform randomization for each player over his strategies.
 
+.. py:class:: Infoset
+
+   An information set for an extensive form game.
+
+   .. py:method:: precedes(node)
+
+      Returns true or false depending on whether the specified node
+	  precedes the information set in the extensive game. 
+
+   .. py:attribute:: actions
+
+      Returns the set of actions associated with this information set.
+
+   .. py:attribute:: label
+
+      A text label used to identify the information set.
+
+   .. py:attribute:: members
+
+      Returns the set of nodes associated with this information set.
+
+   .. py:attribute:: player
+
+      Returns the player object associated with this information set.
+
 .. py:class:: Players
    
    A collection object representing the players in a game.
@@ -391,7 +416,7 @@ API documentation
       of extensive games this will create a new player with no 
       moves. In the case of strategic form games it creates a player
       with one strategy. If the provided player label is shared by
-	  another player a warning will be returned.
+      another player a warning will be returned.
 
 .. py:class:: Player
 
