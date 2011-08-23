@@ -36,6 +36,15 @@ cdef class Node:
     def __hash__(self):
         return long(<long>self.node.deref())
 
+    def is_successor_of(self, node):
+        if isinstance(node, Node):
+            return self.node.deref().IsSuccessorOf(((<Node>node).node))
+        else:
+            raise TypeError, "is_successor_of takes a Node object as its input"
+
+    def is_subgame_root(self):
+        return self.node.deref().IsSubgameRoot()
+
 
     property label:
         def __get__(self):
@@ -51,3 +60,71 @@ cdef class Node:
             c = Children()
             c.parent = self.node
             return c
+
+    property infoset:
+        def __get__(self):
+            cdef Infoset i
+            if self.node.deref().GetInfoset() != <c_GameInfoset>NULL:
+                i = Infoset()
+                i.infoset = self.node.deref().GetInfoset()
+                return i
+            return None
+
+    property player:
+        def __get__(self):
+            cdef Player p
+            if self.node.deref().GetPlayer() != <c_GamePlayer>NULL:
+                p = Player()
+                p.player = self.node.deref().GetPlayer()
+                return p
+            return None
+
+    property parent:
+        def __get__(self):
+            cdef Node n
+            if self.node.deref().GetParent() != <c_GameNode>NULL:
+                n = Node()
+                n.node = self.node.deref().GetParent()
+                return n
+            return None
+            
+    property prior_action:
+        def __get__(self):
+            cdef Action a
+            if self.node.deref().GetPriorAction() != <c_GameAction>NULL:
+                a = Action()
+                a.action = self.node.deref().GetPriorAction()
+                return a
+            return None
+
+    property prior_sibling:
+        def __get__(self):
+            cdef Node n
+            if self.node.deref().GetPriorSibling() != <c_GameNode>NULL:
+                n = Node()
+                n.node = self.node.deref().GetPriorSibling()
+                return n
+            return None
+
+    property next_sibling:
+        def __get__(self):
+            cdef Node n
+            if self.node.deref().GetNextSibling() != <c_GameNode>NULL:
+                n = Node()
+                n.node = self.node.deref().GetNextSibling()
+                return n
+            return None
+            
+    property is_terminal:
+        def __get__(self):
+            return self.node.deref().IsTerminal()
+
+    property outcome:
+        def __get__(self):
+            cdef Outcome o
+            if self.node.deref().GetOutcome() != <c_GameOutcome>NULL:
+                o = Outcome()
+                o.outcome = self.node.deref().GetOutcome()
+                return o
+            return None
+        

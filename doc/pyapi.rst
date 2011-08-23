@@ -374,7 +374,7 @@ API documentation
    .. py:method:: precedes(node)
 
       Returns true or false depending on whether the specified node
-	  precedes the information set in the extensive game. 
+      precedes the information set in the extensive game. 
 
    .. py:attribute:: actions
 
@@ -430,10 +430,61 @@ API documentation
 
    Represents a node in a :py:class:`gambit.Game`.
 
+   .. py:method:: is_successor_of(node)
+
+      Returns true if the current node is a successor of the
+      node provided in the argument list.
+
+   .. py:method:: is_subgame_root(node)
+
+      Returns true if the current node is a marked subgame root.
+
    .. py:attribute:: label
 
       A text label useful for identification of the node.
 
+   .. py:attribute:: is_terminal
+
+      Returns True if the node is a terminal node in the game tree.
+      Returns False otherwise.
+
+   .. py:attribute:: children
+
+      Returns a collection of the current node's children.
+
+   .. py:attribute:: infoset
+
+      Returns the :py:class:`gambit.Infoset` associated with the 
+      current node.
+
+   .. py:attribute:: player
+
+      Returns the :py:class:`gambit.Player` associated with the 
+      current node.
+
+   .. py:attribute:: parent
+
+      Returns the :py:class:`gambit.Node` that is the parent of 
+      the current node.
+
+   .. py:attribute:: prior_action
+
+      Returns the action prior to the current node.
+
+   .. py:attribute:: prior_sibling
+
+      Returns the :py:class:`gambit.Node` that is prior to the 
+      current node at the same level of the game tree.
+
+   .. py:attribute:: next_sibling
+
+      Returns the :py:class:`gambit.Node` that is prior to the 
+      current node at the same level of the game tree.
+
+   .. py:attribute:: outcome
+
+      Returns the :py:class:`gambit.Outcome` that is associated 
+      with the current node.
 
 .. py:class:: Strategies
    
