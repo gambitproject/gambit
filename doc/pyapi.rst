@@ -392,6 +392,21 @@ API documentation
 
       Returns the player object associated with this information set.
 
+.. py:class:: Action
+
+   An action associated with an information set.
+
+   .. py:attribute:: label
+
+      A text label used to identify the action.
+
+   .. py:attribute:: prob
+
+      A settable property that represents the probability associated 
+      with the action. It can be a value stored as an int, 
+      decimal.Decimal, or Fraction.fraction. 
+
+
 .. py:class:: Players
    
    A collection object representing the players in a game.

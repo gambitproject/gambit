@@ -73,9 +73,14 @@ cdef extern from "libgambit/game.h":
 
         int NumActions()
         c_GameAction GetAction(int) except +IndexError
+        
+        c_Number GetActionProb "GetActionProb<Number>"(int) except +IndexError
+        void SetActionProb(int, cxx_string) except +IndexError 
+
         int NumMembers()
         c_GameNode GetMember(int) except +IndexError
         
+
         bint Precedes(c_GameNode)
 
     ctypedef struct c_GamePlayerRep "GamePlayerRep":
