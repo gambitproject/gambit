@@ -157,7 +157,8 @@ follows the convention found elsewhere in the file of being surrounded
 by curly braces and delimited by whitespace (but not commas,
 semicolons, or any other character). The order of the players is
 significant; the first entry in the list will be numbered as player 1,
-the second entry as player 2, and so forth.
+the second entry as player 2, and so forth.  At the end of the prologue
+is an optional text comment field.
 
 
 
@@ -245,6 +246,7 @@ are:
 + (optional) the name of the information set
 + (optional) a list of action names for the information set
 + a nonnegative integer specifying the outcome
++ (optional) the name of the outcome
 + the payoffs to each player for the outcome
 
 
@@ -256,6 +258,7 @@ the character t . Following this, in order, are:
 
 + a text string, giving the name of the node
 + a nonnegative integer specifying the outcome
++ (optional) the name of the outcome
 + the payoffs to each player for the outcome
 
 
@@ -315,6 +318,7 @@ list specifies the number of strategies available to each player,
 given in the same order as the players are listed in the list of
 players.
 
+The prologue concludes with an optional text comment field.
 
 
 Structure of the body (list of payoffs)
@@ -423,13 +427,15 @@ Following the list of players is a list of strategies. This is a
 nested list; each player's strategies are given as a list of text
 labels, surrounded by curly braces.
 
+The nested strategy list is followed by an optional text comment 
+field.
+
 The prologue closes with a list of outcomes. This is also a nested
 list. Each outcome is specified by a text string, followed by a list
 of numerical payoffs, one for each player defined. The payoffs may
 optionally be separated by commas, as in the example file. The
 outcomes are implicitly numbered in the order they appear; the first
 outcome is given the number 1, the second 2, and so forth.
-
 
 
 Structure of the body (list of outcomes)
