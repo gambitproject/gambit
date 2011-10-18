@@ -82,7 +82,7 @@ void PrintProfile(std::ostream &p_stream,
 		  const MixedStrategyProfile<double> &p_profile)
 {
   p_stream << p_label;
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
     p_stream.setf(std::ios::fixed);
     p_stream << "," << std::setprecision(g_numDecimals) << p_profile[i];
   }
@@ -95,7 +95,7 @@ void PrintProfile(std::ostream &p_stream,
 		  const MixedStrategyProfile<Rational> &p_profile)
 {
   p_stream << p_label;
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
     p_stream << "," << p_profile[i];
   }
 
@@ -118,7 +118,7 @@ void PrintSolution(const StrategySupport &p_support,
   int n1 = p_support.NumStrategies(1);
   int n2 = p_support.NumStrategies(2);
 
-  MixedStrategyProfile<T> profile(p_support);
+  MixedStrategyProfile<T> profile(p_support.NewMixedStrategyProfile<T>());
 
   for (int j = 1; j <= n1; j++) {
     profile[p_support.GetStrategy(1, j)] = p_primal[j];
@@ -147,15 +147,15 @@ void SolveStrategic(const Game &p_game)
   Matrix<T> A(1,k+1,1,m+1);
   Vector<T> b(1,k+1);
   Vector<T> c(1,m+1);
-  PureStrategyProfile profile(support.GetGame());
+  PureStrategyProfile profile = support.GetGame()->NewPureStrategyProfile();
 
   T minpay = p_game->GetMinPayoff() - Rational(1);
 
   for (int i = 1; i <= k; i++)  {
-    profile.SetStrategy(support.GetStrategy(2, i));
+    profile->SetStrategy(support.GetStrategy(2, i));
     for (int j = 1; j <= m; j++)  {
-      profile.SetStrategy(support.GetStrategy(1, j));
-      A(i, j) = Rational(minpay) - profile.GetPayoff<Rational>(1);
+      profile->SetStrategy(support.GetStrategy(1, j));
+      A(i, j) = Rational(minpay) - profile->GetPayoff(1);
     }
     A(i,m+1) = (T) 1;
   }

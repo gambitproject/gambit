@@ -806,7 +806,7 @@ void gbtGameDocument::DoNewOutcome(GameNode p_node)
 
 void gbtGameDocument::DoNewOutcome(PureStrategyProfile p_profile)
 {
-  p_profile.SetOutcome(m_game->NewOutcome());
+  p_profile->SetOutcome(m_game->NewOutcome());
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 

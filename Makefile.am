@@ -273,6 +273,10 @@ libgambit_la_SOURCES = \
 	src/libgambit/number.h \
 	src/libgambit/game.cc \
 	src/libgambit/game.h \
+	src/libgambit/gametable.cc \
+	src/libgambit/gametable.h \
+	src/libgambit/gametree.cc \
+	src/libgambit/gametree.h \
 	src/libgambit/behav.cc \
 	src/libgambit/behav.h \
 	src/libgambit/behav.imp \

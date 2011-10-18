@@ -73,13 +73,13 @@ public:
   
 void LogitMixedBranch::AddProfile(const wxString &p_text)
 {
-  MixedStrategyProfile<double> profile(m_doc->GetGame());
+  MixedStrategyProfile<double> profile(m_doc->GetGame()->NewMixedStrategyProfile(0.0));
 
   wxStringTokenizer tok(p_text, wxT(","));
 
   m_lambdas.Append((double) lexical_cast<Rational>(std::string((const char *) tok.GetNextToken().mb_str())));
 
-  for (int i = 1; i <= profile.Length(); i++) {
+  for (int i = 1; i <= profile.MixedProfileLength(); i++) {
     profile[i] = lexical_cast<Rational>(std::string((const char *) tok.GetNextToken().mb_str()));
   }
 

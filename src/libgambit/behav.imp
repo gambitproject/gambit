@@ -592,5 +592,11 @@ bool MixedBehavProfile<T>::IsDefinedAt(GameInfoset p_infoset) const
   return false;
 }
 
+template <class T>
+MixedStrategyProfile<T> MixedBehavProfile<T>::ToMixedProfile(void) const
+{
+  return MixedStrategyProfile<T>(*this);
+}
+
 
 }  // end namespace Gambit

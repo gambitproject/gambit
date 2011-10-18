@@ -53,7 +53,7 @@ void PrintProfile(std::ostream &p_stream,
 		  const MixedStrategyProfile<double> &p_profile)
 {
   p_stream << p_label;
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
     p_stream.setf(std::ios::fixed);
     p_stream << ',' << std::setprecision(g_numDecimals) << p_profile[i];
   }
@@ -66,7 +66,7 @@ void PrintProfile(std::ostream &p_stream,
 		  const MixedStrategyProfile<Rational> &p_profile)
 {
   p_stream << p_label;
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
     p_stream << ',' << p_profile[i];
   }
 
@@ -116,7 +116,7 @@ template <class T> void GetCliques(std::ostream &p_stream,
   for (int cl = 1; cl <= cliques1.Length(); cl++) {
     for (int i = 1; i <= cliques1[cl].Length(); i++) {
       for (int j = 1; j <= cliques2[cl].Length(); j++) {
-	MixedStrategyProfile<T> profile(p_support);
+	MixedStrategyProfile<T> profile(p_support.NewMixedStrategyProfile<T>());
 
 	for (int k = 1; k <= p_key1[cliques1[cl][i]].Length(); k++) {
 	  profile[k] = p_key1[cliques1[cl][i]][k];
@@ -138,7 +138,7 @@ template <class T> void Solve(const StrategySupport &p_support)
   List<Vector<T> > key1, key2;  
   List<int> node1, node2;   // IDs of each component of the extreme equilibria
 
-  PureStrategyProfile profile(p_support.GetGame());
+  PureStrategyProfile profile = p_support.GetGame()->NewPureStrategyProfile();
 
   Rational min = p_support.GetGame()->GetMinPayoff();
   if (min > Rational(0)) {
@@ -160,11 +160,11 @@ template <class T> void Solve(const StrategySupport &p_support)
 	       1, p_support.NumStrategies(1));
 
   for (int i = 1; i <= p_support.NumStrategies(1); i++) {
-    profile.SetStrategy(p_support.GetStrategy(1, i));
+    profile->SetStrategy(p_support.GetStrategy(1, i));
     for (int j = 1; j <= p_support.NumStrategies(2); j++) {
-      profile.SetStrategy(p_support.GetStrategy(2, j));
-      A1(i, j) = fac * (profile.GetPayoff<Rational>(1) - min);
-      A2(j, i) = fac * (profile.GetPayoff<Rational>(2) - min);
+      profile->SetStrategy(p_support.GetStrategy(2, j));
+      A1(i, j) = fac * (profile->GetPayoff(1) - min);
+      A2(j, i) = fac * (profile->GetPayoff(2) - min);
     }
   }
 
@@ -214,7 +214,7 @@ template <class T> void Solve(const StrategySupport &p_support)
 	}
 
 	if (nash) {
-	  MixedStrategyProfile<T> profile(p_support);
+	  MixedStrategyProfile<T> profile(p_support.NewMixedStrategyProfile<T>());
 	  T sum = (T) 0;
 	  for (int k = 1; k <= p_support.NumStrategies(1); k++) {
 	    profile[p_support.GetStrategy(1, k)] = (T) 0;

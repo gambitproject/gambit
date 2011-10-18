@@ -89,7 +89,7 @@ void PrintProfile(std::ostream &p_stream,
 		  const Gambit::MixedStrategyProfile<double> &p_profile)
 {
   p_stream << p_label;
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
     p_stream.setf(std::ios::fixed);
     p_stream << "," << std::setprecision(g_numDecimals) << p_profile[i];
   }
@@ -100,7 +100,7 @@ void PrintProfile(std::ostream &p_stream,
 double Distance(const Gambit::MixedStrategyProfile<double> &a, const Gambit::MixedStrategyProfile<double> &b)
 {
   double dist = 0.0;
-  for (int i = 1; i <= a.Length(); i++) {
+  for (int i = 1; i <= a.MixedProfileLength(); i++) {
     if (fabs(a[i] - b[i]) > dist) {
       dist = fabs(a[i] - b[i]);
     }
@@ -184,12 +184,12 @@ int main(int argc, char *argv[])
 
   if (startFile == "") {
     for (int i = 1; i <= stopAfter; i++) {
-      Gambit::MixedStrategyProfile<double> profile(nfg);
+      Gambit::MixedStrategyProfile<double> profile(nfg->NewMixedStrategyProfile(0.0));
       Randomize(profile);
       
       PrintProfile(std::cout, "start", profile);
 
-      Gambit::MixedStrategyProfile<double> br(nfg);
+      Gambit::MixedStrategyProfile<double> br(nfg->NewMixedStrategyProfile(0.0));
     
       double c_delta = .001;
       
@@ -207,8 +207,8 @@ int main(int argc, char *argv[])
     Gambit::Array<double> x(nfg->MixedProfileLength() + 1);
     std::ifstream startData(startFile.c_str());
     ReadProfile(startData, x);
-    Gambit::MixedStrategyProfile<double> profile(nfg);
-    for (int i = 1; i <= profile.Length(); i++) {
+    Gambit::MixedStrategyProfile<double> profile(nfg->NewMixedStrategyProfile(0.0));
+    for (int i = 1; i <= profile.MixedProfileLength(); i++) {
       profile[i] = x[i+1];
       if (profile[i] == 0.0) {
 	profile[i] = 0.0001;
@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
     lambda = x[1];
     double c_delta = .001;
 
-    Gambit::MixedStrategyProfile<double> br(nfg);
+    Gambit::MixedStrategyProfile<double> br(nfg->NewMixedStrategyProfile(0.0));
     
     do {
       PrintProfile(std::cout, "step", profile);

@@ -34,6 +34,7 @@ namespace Gambit {
 /// second constructor).
 class StrategyIterator {
   friend class GameRep;
+  friend class GameTableRep;
 private:
   bool m_atEnd;
   StrategySupport m_support;
@@ -71,8 +72,6 @@ public:
   PureStrategyProfile &operator*(void) { return m_profile; }
   /// Get the current strategy profile
   const PureStrategyProfile &operator*(void) const { return m_profile; }
-  /// Get the current strategy profile
-  PureStrategyProfile *const operator->(void) { return &m_profile; }
   //@}
 };
 

@@ -91,7 +91,7 @@ bool gbtApplication::OnInit(void)
     // If we don't have any game files -- whether because none were
     // specified on the command line, or because those specified couldn't
     // be read -- create a default document.
-    Gambit::Game efg = new Gambit::GameRep;
+    Gambit::Game efg = Gambit::NewTree();
     efg->NewPlayer()->SetLabel("Player 1");
     efg->NewPlayer()->SetLabel("Player 2");
     efg->SetTitle("Untitled Extensive Game");
@@ -119,7 +119,7 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
     return GBT_APP_OPEN_FAILED;
   }
 
-  gbtGameDocument *doc = new gbtGameDocument(new Gambit::GameRep);
+  gbtGameDocument *doc = new gbtGameDocument(Gambit::NewTree());
   if (doc->LoadDocument(p_filename)) {
     doc->SetFilename(p_filename);
     m_fileHistory.AddFileToHistory(p_filename);

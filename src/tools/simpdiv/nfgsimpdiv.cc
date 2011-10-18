@@ -128,7 +128,7 @@ nfgSimpdiv::~nfgSimpdiv()
 Gambit::Rational nfgSimpdiv::Simplex(Gambit::MixedStrategyProfile<Gambit::Rational> &y)
 {
   Gambit::Array<int> ylabel(2);
-  Gambit::RectArray<int> labels(y.Length(), 2), pi(y.Length(), 2);
+  Gambit::RectArray<int> labels(y.MixedProfileLength(), 2), pi(y.MixedProfileLength(), 2);
   Gambit::PVector<int> U(y.GetSupport().NumStrategies()), TT(y.GetSupport().NumStrategies());
   Gambit::PVector<Gambit::Rational> ab(y.GetSupport().NumStrategies());
   Gambit::PVector<Gambit::Rational> besty(y.GetSupport().NumStrategies());
@@ -136,7 +136,7 @@ Gambit::Rational nfgSimpdiv::Simplex(Gambit::MixedStrategyProfile<Gambit::Ration
   for (int i = 1; i <= v.Length(); i++) {
     v[i] = y[i];
   }
-  besty = y;
+  besty = (const Gambit::Vector<Gambit::Rational> &) y;
 
   int i = 0;
   int j, k, h, jj, hh,ii, kk,tot;
@@ -483,7 +483,7 @@ void PrintProfile(std::ostream &p_stream,
 		  const Gambit::MixedStrategyProfile<Gambit::Rational> &p_profile)
 {
   p_stream << p_label;
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
     if (g_useFloat) {
       p_stream.setf(std::ios::fixed);
       p_stream << "," << std::setprecision(g_numDecimals) << ((double) p_profile[i]);
@@ -499,13 +499,13 @@ void PrintProfile(std::ostream &p_stream,
 bool ReadProfile(std::istream &p_stream,
 		 Gambit::MixedStrategyProfile<Gambit::Rational> &p_profile)
 {
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
     if (p_stream.eof() || p_stream.bad()) {
       return false;
     }
 
     p_stream >> p_profile[i];
-    if (i < p_profile.Length()) {
+    if (i < p_profile.MixedProfileLength()) {
       char comma;
       p_stream >> comma;
     }
@@ -539,7 +539,7 @@ void nfgSimpdiv::Solve(const Gambit::Game &p_nfg,
   }
   bestz = 1.0e30;          // ditto
 
-  Gambit::Integer k = find_lcd(p_start);
+  Gambit::Integer k = find_lcd((const Gambit::Vector<Gambit::Rational> &) p_start);
   d = Gambit::Rational(1, k);
     
   Gambit::MixedStrategyProfile<Gambit::Rational> y(p_start);
@@ -676,7 +676,7 @@ int main(int argc, char *argv[])
       std::ifstream startPoints(startFile.c_str());
       
       while (!startPoints.eof() && !startPoints.bad()) {
-	Gambit::MixedStrategyProfile<Gambit::Rational> start(game);
+	Gambit::MixedStrategyProfile<Gambit::Rational> start(game->NewMixedStrategyProfile(Gambit::Rational(0)));
 	if (ReadProfile(startPoints, start)) {
 	  nfgSimpdiv algorithm;
 	  algorithm.Solve(game, start);
@@ -685,7 +685,7 @@ int main(int argc, char *argv[])
     }
     else if (useRandom) {
       for (int i = 1; i <= stopAfter; i++) {
-	Gambit::MixedStrategyProfile<Gambit::Rational> start(game);
+	Gambit::MixedStrategyProfile<Gambit::Rational> start(game->NewMixedStrategyProfile(Gambit::Rational(0)));
 	Randomize(start, randDenom);
 	
 	nfgSimpdiv algorithm;
@@ -693,7 +693,7 @@ int main(int argc, char *argv[])
       }
     }
     else {
-      Gambit::MixedStrategyProfile<Gambit::Rational> start(game);
+      Gambit::MixedStrategyProfile<Gambit::Rational> start(game->NewMixedStrategyProfile(Gambit::Rational(0)));
   
       for (int pl = 1; pl <= game->NumPlayers(); pl++) {
 	start[start.GetSupport().GetStrategy(pl, 1)] = Gambit::Rational(1);

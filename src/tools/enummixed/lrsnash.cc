@@ -91,18 +91,18 @@ void FillConstraintRows(lrs_dic *P, lrs_dat *Q,
 
   Game game = p_support.GetGame();
   Rational min = game->GetMinPayoff() - Rational(1);
-  PureStrategyProfile cont(game);
+  PureStrategyProfile cont = game->NewPureStrategyProfile();
 
   for (long row = firstRow; row < firstRow + p_support.NumStrategies(p1); 
        row++) {
     num[0] = 0;
     den[0] = 1;
 
-    cont.SetStrategy(p_support.GetStrategy(p1, row - firstRow + 1));
+    cont->SetStrategy(p_support.GetStrategy(p1, row - firstRow + 1));
 
     for (long st = 1; st <= p_support.NumStrategies(p2); st++) {
-      cont.SetStrategy(p_support.GetStrategy(p2, st));
-      Rational x = cont.GetPayoff<Rational>(p1) - min;
+      cont->SetStrategy(p_support.GetStrategy(p2, st));
+      Rational x = cont->GetPayoff(p1) - min;
 
       num[st] = -x.numerator().as_long();
       den[st] = x.denominator().as_long();

@@ -690,7 +690,7 @@ void gbtGameFrame::MakeToolbar(void)
 
 void gbtGameFrame::OnFileNewEfg(wxCommandEvent &)
 {
-  Gambit::Game efg = new Gambit::GameRep;
+  Gambit::Game efg = Gambit::NewTree();
   efg->SetTitle("Untitled Extensive Game");
   efg->NewPlayer()->SetLabel("Player 1");
   efg->NewPlayer()->SetLabel("Player 2");
@@ -703,7 +703,7 @@ void gbtGameFrame::OnFileNewNfg(wxCommandEvent &)
   Gambit::Array<int> dim(2);
   dim[1] = 2;
   dim[2] = 2;
-  Gambit::Game nfg = new Gambit::GameRep(dim);
+  Gambit::Game nfg = Gambit::NewTable(dim);
   nfg->SetTitle("Untitled Strategic Game");
   nfg->GetPlayer(1)->SetLabel("Player 1");
   nfg->GetPlayer(2)->SetLabel("Player 2");

@@ -166,6 +166,8 @@ public:
   T DiffNodeValue(const GameNode &node, const GamePlayer &player,
 		  const GameAction &oppAction) const;
 
+  MixedStrategyProfile<T> ToMixedProfile(void) const;
+
   //@}
 };
 

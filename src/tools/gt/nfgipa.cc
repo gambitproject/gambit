@@ -83,11 +83,11 @@ void Solve(const Gambit::Game &p_game, const Gambit::Array<double> &p_pert)
   int *profile = new int[p_game->NumPlayers()];
   for (Gambit::StrategyIterator iter(p_game); !iter.AtEnd(); iter++) {
     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      profile[pl-1] = iter->GetStrategy(pl)->GetNumber() - 1;
+      profile[pl-1] = (*iter)->GetStrategy(pl)->GetNumber() - 1;
     }
 
     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      A->setPurePayoff(pl-1, profile, iter->GetPayoff<double>(pl));
+      A->setPurePayoff(pl-1, profile, (*iter)->GetPayoff(pl));
     }
   }
 

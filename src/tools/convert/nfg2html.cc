@@ -45,7 +45,7 @@ void WriteHtmlFile(std::ostream &p_file, const Gambit::Game &p_nfg,
 	theHtml += "<center><b>Player ";
 	theHtml += Gambit::lexical_cast<std::string>(pl);
 	theHtml += " Strategy ";
-	theHtml += Gambit::lexical_cast<std::string>(iter->GetStrategy(pl)->GetNumber());
+	theHtml += Gambit::lexical_cast<std::string>((*iter)->GetStrategy(pl)->GetNumber());
 	theHtml += "</b></center>";
       }
     }
@@ -60,18 +60,18 @@ void WriteHtmlFile(std::ostream &p_file, const Gambit::Game &p_nfg,
     } 
     theHtml += "</tr>";
     for (int st1 = 1; st1 <= p_nfg->GetPlayer(p_rowPlayer)->NumStrategies(); st1++) {
-      Gambit::PureStrategyProfile profile(*iter);
-      profile.SetStrategy(p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1));
+      Gambit::PureStrategyProfile profile = (*iter)->Copy();
+      profile->SetStrategy(p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1));
       theHtml += "<tr>";
       theHtml += "<td align=center><b>";
       theHtml += p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1)->GetLabel();
       theHtml += "</b></td>";
       for (int st2 = 1; st2 <= p_nfg->GetPlayer(p_colPlayer)->NumStrategies(); st2++) {
-	profile.SetStrategy(p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st2));
+	profile->SetStrategy(p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st2));
 	theHtml += "<td align=center>";
 	for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
-	  if (profile.GetOutcome()) {
-	    theHtml += profile.GetOutcome()->GetPayoff<std::string>(pl);
+	  if (profile->GetOutcome()) {
+	    theHtml += profile->GetOutcome()->GetPayoff<std::string>(pl);
 	  }
 	  else {
 	    theHtml += "0";

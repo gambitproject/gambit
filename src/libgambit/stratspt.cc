@@ -67,6 +67,28 @@ int StrategySupport::MixedProfileLength(void) const
   return total;
 }
 
+template<>
+MixedStrategyProfile<double> StrategySupport::NewMixedStrategyProfile(void) const
+{
+  if (m_nfg->IsTree()) {
+    return MixedStrategyProfile<double>(new TreeMixedStrategyProfileRep<double>(*this));
+  }
+  else {
+    return MixedStrategyProfile<double>(new TableMixedStrategyProfileRep<double>(*this));
+  }
+}
+
+template<>
+MixedStrategyProfile<Rational> StrategySupport::NewMixedStrategyProfile(void) const
+{
+  if (m_nfg->IsTree()) {
+    return MixedStrategyProfile<Rational>(new TreeMixedStrategyProfileRep<Rational>(*this));
+  }
+  else {
+    return MixedStrategyProfile<Rational>(new TableMixedStrategyProfileRep<Rational>(*this));
+  }
+}
+
 bool StrategySupport::IsSubsetOf(const StrategySupport &p_support) const
 {
   if (m_nfg != p_support.m_nfg)  return false;
@@ -160,8 +182,8 @@ bool StrategySupport::Dominates(const GameStrategy &s,
   bool equal = true;
   
   for (StrategyIterator iter(*this); !iter.AtEnd(); iter++) {
-    Rational ap = iter->GetStrategyValue<Rational>(s);
-    Rational bp = iter->GetStrategyValue<Rational>(t);
+    Rational ap = (*iter)->GetStrategyValue(s);
+    Rational bp = (*iter)->GetStrategyValue(t);
     if (p_strict && ap <= bp) {
       return false;
     }
@@ -302,16 +324,16 @@ bool StrategySupport::Overwhelms(const GameStrategy &s,
 				 bool p_strict) const
 {
   StrategyIterator iter(*this);
-  Rational sMin = iter->GetStrategyValue<Rational>(s);
-  Rational tMax = iter->GetStrategyValue<Rational>(t);
+  Rational sMin = (*iter)->GetStrategyValue(s);
+  Rational tMax = (*iter)->GetStrategyValue(t);
 
   for (; !iter.AtEnd(); iter++) {
-    if (iter->GetStrategyValue<Rational>(s) < sMin) {
-      sMin = iter->GetStrategyValue<Rational>(s);
+    if ((*iter)->GetStrategyValue(s) < sMin) {
+      sMin = (*iter)->GetStrategyValue(s);
     }
     
-    if (iter->GetStrategyValue<Rational>(t) > tMax) { 
-      tMax = iter->GetStrategyValue<Rational>(t);
+    if ((*iter)->GetStrategyValue(t) > tMax) { 
+      tMax = (*iter)->GetStrategyValue(t);
     }
 
     if (sMin < tMax || (sMin == tMax && p_strict)) {
