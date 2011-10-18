@@ -27,17 +27,85 @@
 
 namespace Gambit {
 
+class GameTreeNodeRep : public GameNodeRep {
+  friend class GameTreeRep;
+  friend class GameActionRep;
+  friend class GameInfosetRep;
+  friend class GamePlayerRep;
+  friend class PureBehavProfile;
+  template <class T> friend class MixedBehavProfile;
+  
+protected:
+  int number; 
+  GameTreeRep *m_efg;
+  std::string m_label;
+  GameInfosetRep *infoset;
+  GameTreeNodeRep *m_parent;
+  GameOutcomeRep *outcome;
+  Array<GameTreeNodeRep *> children;
+  GameTreeNodeRep *whichbranch, *ptr;
+
+  GameTreeNodeRep(GameTreeRep *e, GameTreeNodeRep *p);
+  virtual ~GameTreeNodeRep();
+
+  void DeleteOutcome(GameOutcomeRep *outc);
+  void CopySubtree(GameTreeNodeRep *, GameTreeNodeRep *);
+
+public:
+  virtual Game GetGame(void) const; 
+
+  virtual const std::string &GetLabel(void) const { return m_label; } 
+  virtual void SetLabel(const std::string &p_label) { m_label = p_label; }
+
+  virtual int GetNumber(void) const { return number; }
+  virtual int NumberInInfoset(void) const
+  { return infoset->m_members.Find(const_cast<GameTreeNodeRep *>(this)); }
+
+  virtual int NumChildren(void) const    { return children.Length(); }
+
+  virtual GameInfoset GetInfoset(void) const   { return infoset; }
+  virtual void SetInfoset(GameInfoset);
+  virtual GameInfoset LeaveInfoset(void);
+
+  virtual bool IsTerminal(void) const { return (children.Length() == 0); }
+  virtual GamePlayer GetPlayer(void) const
+    { return (infoset) ? infoset->GetPlayer() : 0; }
+  virtual GameAction GetPriorAction(void) const; // returns null if root node
+  virtual GameNode GetChild(int i) const    { return children[i]; }
+  virtual GameNode GetParent(void) const    { return m_parent; }
+  virtual GameNode GetNextSibling(void) const;
+  virtual GameNode GetPriorSibling(void) const;
+
+  virtual GameOutcome GetOutcome(void) const { return outcome; }
+  virtual void SetOutcome(const GameOutcome &p_outcome);
+
+  virtual bool IsSuccessorOf(GameNode from) const;
+  virtual bool IsSubgameRoot(void) const;
+
+  virtual void DeleteParent(void);
+  virtual void DeleteTree(void);
+
+  virtual void CopyTree(GameNode src);
+  virtual void MoveTree(GameNode src);
+
+  virtual GameInfoset AppendMove(GamePlayer p_player, int p_actions);
+  virtual GameInfoset AppendMove(GameInfoset p_infoset);
+  virtual GameInfoset InsertMove(GamePlayer p_player, int p_actions);
+  virtual GameInfoset InsertMove(GameInfoset p_infoset);
+};
+
+
 class GameTreeRep : public GameExplicitRep {
-  friend class GameNodeRep;
+  friend class GameTreeNodeRep;
   friend class GameInfosetRep;
 protected:
   mutable bool m_computedValues;
-  GameNodeRep *m_root;
+  GameTreeNodeRep *m_root;
   GamePlayerRep *m_chance;
 
   /// @name Private auxiliary functions
   //@{
-  void NumberNodes(GameNodeRep *, int &);
+  void NumberNodes(GameTreeNodeRep *, int &);
   //@}
 
 public: 

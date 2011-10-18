@@ -36,7 +36,7 @@ GameTreeRep::GameTreeRep(void)
 {
   m_computedValues = false;
   m_chance = new GamePlayerRep(this, 0);
-  m_root = new GameNodeRep(this, 0);
+  m_root = new GameTreeNodeRep(this, 0);
 }
 
 GameTreeRep::~GameTreeRep()
@@ -159,7 +159,7 @@ bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
 //               GameTreeRep: Managing the representation
 //------------------------------------------------------------------------
 
-void GameTreeRep::NumberNodes(GameNodeRep *n, int &index)
+void GameTreeRep::NumberNodes(GameTreeNodeRep *n, int &index)
 {
   n->number = index++;
   for (int child = 1; child <= n->children.Length();
@@ -182,7 +182,7 @@ void GameTreeRep::Canonicalize(void)
       for (int i = 1; i < infoset->m_members.Length(); i++) {
 	for (int j = 1; j < infoset->m_members.Length() - i; j++) {
 	  if (infoset->m_members[j+1]->number < infoset->m_members[j]->number) {
-	    GameNodeRep *tmp = infoset->m_members[j];
+	    GameTreeNodeRep *tmp = infoset->m_members[j];
 	    infoset->m_members[j] = infoset->m_members[j+1];
 	    infoset->m_members[j+1] = tmp;
 	  }
@@ -274,7 +274,7 @@ void PrintActions(std::ostream &p_stream, GameInfosetRep *p_infoset)
   p_stream << "}";
 }
 
-void WriteEfgFile(std::ostream &f, GameNodeRep *n)
+void WriteEfgFile(std::ostream &f, GameTreeNodeRep *n)
 {
   if (n->NumChildren() == 0)   {
     f << "t \"" << EscapeQuotes(n->GetLabel()) << "\" ";
@@ -330,7 +330,8 @@ void WriteEfgFile(std::ostream &f, GameNodeRep *n)
   else
     f << "0\n";
 
-  for (int i = 1; i <= n->NumChildren(); WriteEfgFile(f, n->GetChild(i++)));
+  for (int i = 1; i <= n->NumChildren(); 
+       WriteEfgFile(f, dynamic_cast<GameTreeNodeRep *>(n->GetChild(i++).operator->())));
 }
 
 } // end anonymous namespace
@@ -356,7 +357,8 @@ void GameTreeRep::WriteEfgFile(std::ostream &p_file, const GameNode &p_root) con
   p_file << "}\n";
   p_file << "\"" << EscapeQuotes(GetComment()) << "\"\n\n";
 
-  Gambit::WriteEfgFile(p_file, p_root);
+  Gambit::WriteEfgFile(p_file, 
+		       dynamic_cast<GameTreeNodeRep *>(p_root.operator->()));
 }
 
 void GameTreeRep::WriteNfgFile(std::ostream &p_file) const
@@ -527,7 +529,7 @@ void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
 //------------------------------------------------------------------------
 
 namespace {
-int CountNodes(GameNodeRep *p_node)
+int CountNodes(GameNode p_node)
 {
   int num = 1;
   for (int i = 1; i <= p_node->NumChildren(); 

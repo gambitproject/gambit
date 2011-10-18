@@ -301,7 +301,7 @@ class GameInfosetRep : public GameObject {
   friend class GameTreeRep;
   friend class GameActionRep;
   friend class GamePlayerRep;
-  friend class GameNodeRep;
+  friend class GameTreeNodeRep;
   template <class T> friend class MixedBehavProfile;
 
 protected:
@@ -310,7 +310,7 @@ protected:
   std::string m_label;
   GamePlayerRep *m_player;
   Array<GameActionRep *> m_actions;
-  Array<GameNodeRep *> m_members;
+  Array<GameTreeNodeRep *> m_members;
   int flag, whichbranch;
   Array<Number> m_probs;
   
@@ -319,9 +319,9 @@ protected:
   ~GameInfosetRep();  
 
   /// Adds the node to the information set
-  void AddMember(GameNodeRep *p_node) { m_members.Append(p_node); }
+  void AddMember(GameTreeNodeRep *p_node) { m_members.Append(p_node); }
   /// Removes the node from the information set, invalidating if emptied
-  void RemoveMember(GameNodeRep *);
+  void RemoveMember(GameTreeNodeRep *);
 
   void RemoveAction(int which);
 
@@ -351,7 +351,7 @@ public:
   //@}
 
   int NumMembers(void) const { return m_members.Length(); }
-  GameNode GetMember(int p_index) const { return m_members[p_index]; }
+  GameNode GetMember(int p_index) const;
 
   bool Precedes(GameNode) const;
 
@@ -424,14 +424,14 @@ class GamePlayerRep : public GameObject {
   friend class GameTableRep;
   friend class GameInfosetRep;
   friend class GameStrategyRep;
-  friend class GameNodeRep;
+  friend class GameTreeNodeRep;
   template <class T> friend class MixedBehavProfile;
   template <class T> friend class MixedStrategyProfile;
 
   /// @name Building reduced form strategies
   //@{
   void MakeStrategy(void);
-  void MakeReducedStrats(GameNodeRep *, GameNodeRep *);
+  void MakeReducedStrats(GameTreeNodeRep *, GameTreeNodeRep *);
   //@}
   
 private:
@@ -481,70 +481,48 @@ public:
 
 /// A node in an extensive game
 class GameNodeRep : public GameObject {
-  friend class GameTreeRep;
-  friend class GameActionRep;
-  friend class GameInfosetRep;
-  friend class GamePlayerRep;
-  friend class PureBehavProfile;
-  template <class T> friend class MixedBehavProfile;
-  
 protected:
-  int number; 
-  GameTreeRep *m_efg;
-  std::string m_label;
-  GameInfosetRep *infoset;
-  GameNodeRep *m_parent;
-  GameOutcomeRep *outcome;
-  Array<GameNodeRep *> children;
-  GameNodeRep *whichbranch, *ptr;
-
-  GameNodeRep(GameTreeRep *e, GameNodeRep *p);
-  ~GameNodeRep();
-
-  void DeleteOutcome(GameOutcomeRep *outc);
-  void CopySubtree(GameNodeRep *, GameNodeRep *);
+  virtual ~GameNodeRep() { }
 
 public:
-  Game GetGame(void) const; 
+  virtual Game GetGame(void) const = 0; 
 
-  const std::string &GetLabel(void) const { return m_label; } 
-  void SetLabel(const std::string &p_label) { m_label = p_label; }
+  virtual const std::string &GetLabel(void) const = 0;
+  virtual void SetLabel(const std::string &p_label) = 0;
 
-  int GetNumber(void) const { return number; }
-  int NumberInInfoset(void) const
-  { return infoset->m_members.Find(const_cast<GameNodeRep *>(this)); }
+  virtual int GetNumber(void) const = 0;
+  virtual int NumberInInfoset(void) const = 0;
 
-  int NumChildren(void) const    { return children.Length(); }
+  virtual int NumChildren(void) const = 0;
 
-  GameInfoset GetInfoset(void) const   { return infoset; }
-  void SetInfoset(GameInfoset);
-  GameInfoset LeaveInfoset(void);
+  virtual GameInfoset GetInfoset(void) const = 0;
+  virtual void SetInfoset(GameInfoset) = 0;
+  virtual GameInfoset LeaveInfoset(void) = 0;
 
-  bool IsTerminal(void) const { return (children.Length() == 0); }
-  GamePlayer GetPlayer(void) const
-    { return (infoset) ? infoset->GetPlayer() : 0; }
-  GameAction GetPriorAction(void) const; // returns null if root node
-  GameNode GetChild(int i) const    { return children[i]; }
-  GameNode GetParent(void) const    { return m_parent; }
-  GameNode GetNextSibling(void) const;
-  GameNode GetPriorSibling(void) const;
+  virtual bool IsTerminal(void) const = 0;
+  virtual GamePlayer GetPlayer(void) const = 0;
+  virtual GameAction GetPriorAction(void) const = 0;
+  virtual GameNode GetChild(int i) const = 0;
+  virtual GameNode GetParent(void) const = 0;
+  virtual GameNode GetNextSibling(void) const = 0;
+  virtual GameNode GetPriorSibling(void) const = 0;
 
-  GameOutcome GetOutcome(void) const { return outcome; }
-  void SetOutcome(const GameOutcome &p_outcome);
+  virtual GameOutcome GetOutcome(void) const = 0;
+  virtual void SetOutcome(const GameOutcome &p_outcome) = 0;
 
-  bool IsSuccessorOf(GameNode from) const;
-  bool IsSubgameRoot(void) const;
+  virtual bool IsSuccessorOf(GameNode from) const = 0;
+  virtual bool IsSubgameRoot(void) const = 0;
 
-  void DeleteParent(void);
-  void DeleteTree(void);
+  virtual void DeleteParent(void) = 0;
+  virtual void DeleteTree(void) = 0;
 
-  void CopyTree(GameNode src);
-  void MoveTree(GameNode src);
+  virtual void CopyTree(GameNode src) = 0;
+  virtual void MoveTree(GameNode src) = 0;
 
-  GameInfoset AppendMove(GamePlayer p_player, int p_actions);
-  GameInfoset AppendMove(GameInfoset p_infoset);
-  GameInfoset InsertMove(GamePlayer p_player, int p_actions);
-  GameInfoset InsertMove(GameInfoset p_infoset);
+  virtual GameInfoset AppendMove(GamePlayer p_player, int p_actions) = 0;
+  virtual GameInfoset AppendMove(GameInfoset p_infoset) = 0;
+  virtual GameInfoset InsertMove(GamePlayer p_player, int p_actions) = 0;
+  virtual GameInfoset InsertMove(GameInfoset p_infoset) = 0;
 };
 
 
@@ -632,7 +610,7 @@ public:
 class GameRep : public GameObject {
   friend class GameInfosetRep;
   friend class GamePlayerRep;
-  friend class GameNodeRep;
+  friend class GameTreeNodeRep;
   friend class PureStrategyProfileRep;
   friend class TablePureStrategyProfileRep;
   template <class T> friend class MixedBehavProfile;

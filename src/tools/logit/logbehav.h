@@ -79,7 +79,7 @@ protected:
   
   /// @name Auxiliary functions for computation of interesting values
   //@{
-  void GetPayoff(GameNodeRep *, const T &, int, T &) const;
+  void GetPayoff(GameTreeNodeRep *, const T &, int, T &) const;
   
   void ComputeSolutionDataPass2(const GameNode &node) const;
   void ComputeSolutionDataPass1(const GameNode &node) const;
