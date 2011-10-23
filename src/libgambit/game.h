@@ -271,16 +271,16 @@ typedef GameObjectPtr<GameOutcomeRep> GameOutcome;
 
 /// An action at an information set in an extensive game
 class GameActionRep : public GameObject {
-  friend class GameInfosetRep;
+  friend class GameTreeInfosetRep;
   template <class T> friend class MixedBehavProfile;
 
 private:
   int m_number;
   std::string m_label;
-  GameInfosetRep *m_infoset;
+  GameTreeInfosetRep *m_infoset;
 
   GameActionRep(int p_number, const std::string &p_label, 
-		  GameInfosetRep *p_infoset)
+		  GameTreeInfosetRep *p_infoset)
     : m_number(p_number), m_label(p_label), m_infoset(p_infoset) { }
   ~GameActionRep()   { }
 
@@ -298,68 +298,43 @@ public:
 
 /// An information set in an extensive game
 class GameInfosetRep : public GameObject {
-  friend class GameTreeRep;
-  friend class GameActionRep;
-  friend class GamePlayerRep;
-  friend class GameTreeNodeRep;
-  template <class T> friend class MixedBehavProfile;
-
 protected:
-  GameTreeRep *m_efg;
-  int m_number;
-  std::string m_label;
-  GamePlayerRep *m_player;
-  Array<GameActionRep *> m_actions;
-  Array<GameTreeNodeRep *> m_members;
-  int flag, whichbranch;
-  Array<Number> m_probs;
-  
-  GameInfosetRep(GameTreeRep *p_efg, int p_number, GamePlayerRep *p_player, 
-		 int p_actions);
-  ~GameInfosetRep();  
-
-  /// Adds the node to the information set
-  void AddMember(GameTreeNodeRep *p_node) { m_members.Append(p_node); }
-  /// Removes the node from the information set, invalidating if emptied
-  void RemoveMember(GameTreeNodeRep *);
-
-  void RemoveAction(int which);
+  virtual ~GameInfosetRep() { }
 
 public:
-  Game GetGame(void) const;
-  int GetNumber(void) const { return m_number; }
+  virtual Game GetGame(void) const = 0;
+  virtual int GetNumber(void) const = 0;
   
-  GamePlayer GetPlayer(void) const;
-  void SetPlayer(GamePlayer p);
+  virtual GamePlayer GetPlayer(void) const = 0;
+  virtual void SetPlayer(GamePlayer p) = 0;
 
-  bool IsChanceInfoset(void) const;
+  virtual bool IsChanceInfoset(void) const = 0;
 
-  void SetLabel(const std::string &p_label) { m_label = p_label; }
-  const std::string &GetLabel(void) const { return m_label; }
+  virtual void SetLabel(const std::string &p_label) = 0;
+  virtual const std::string &GetLabel(void) const = 0;
   
-  GameAction InsertAction(GameAction p_where = 0);
+  virtual GameAction InsertAction(GameAction p_where = 0) = 0;
 
   /// @name Actions
   //@{
   /// Returns the number of actions available at the information set
-  int NumActions(void) const { return m_actions.Length(); }
+  virtual int NumActions(void) const = 0;
   /// Returns the p_index'th action at the information set
-  GameAction GetAction(int p_index) const { return m_actions[p_index]; }
+  virtual GameAction GetAction(int p_index) const = 0;
   /// Returns a forward iterator over the available actions
-  GameActionIterator Actions(void) const 
-    { return GameActionIterator(m_actions); }
+  virtual GameActionIterator Actions(void) const = 0; 
   //@}
 
-  int NumMembers(void) const { return m_members.Length(); }
-  GameNode GetMember(int p_index) const;
+  virtual int NumMembers(void) const = 0;
+  virtual GameNode GetMember(int p_index) const = 0;
 
-  bool Precedes(GameNode) const;
+  virtual bool Precedes(GameNode) const = 0;
 
-  void SetActionProb(int i, const std::string &p_value);
-  template <class T> const T &GetActionProb(int pl) const 
-    { return (const T &) m_probs[pl]; }
-
-  void Reveal(GamePlayer);
+  virtual void SetActionProb(int i, const std::string &p_value) = 0;
+  virtual double GetActionProb(int pl, double) const = 0;
+  virtual Rational GetActionProb(int pl, const Rational &) const = 0;
+  virtual std::string GetActionProb(int pl, const std::string &) const = 0;
+  virtual void Reveal(GamePlayer) = 0;
 };
 
 /// \brief A strategy in a game.
@@ -422,7 +397,7 @@ class GamePlayerRep : public GameObject {
   friend class GameExplicitRep;
   friend class GameTreeRep;
   friend class GameTableRep;
-  friend class GameInfosetRep;
+  friend class GameTreeInfosetRep;
   friend class GameStrategyRep;
   friend class GameTreeNodeRep;
   template <class T> friend class MixedBehavProfile;
@@ -438,7 +413,7 @@ private:
   GameRep *m_game;
   int m_number;
   std::string m_label;
-  Array<GameInfosetRep *> m_infosets;
+  Array<GameTreeInfosetRep *> m_infosets;
   Array<GameStrategyRep *> m_strategies;
 
   GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id)
@@ -460,10 +435,7 @@ public:
   /// Returns the number of information sets at which the player makes a choice
   int NumInfosets(void) const { return m_infosets.Length(); }
   /// Returns the p_index'th information set
-  GameInfoset GetInfoset(int p_index) const { return m_infosets[p_index]; }
-  /// Returns a forward iterator over the information sets
-  GameInfosetIterator Infosets(void) const 
-    { return GameInfosetIterator(m_infosets); }
+  GameInfoset GetInfoset(int p_index) const;
 
   /// @name Strategies
   //@{
@@ -608,7 +580,7 @@ public:
 
 /// This is the class for representing an arbitrary finite game.
 class GameRep : public GameObject {
-  friend class GameInfosetRep;
+  friend class GameTreeInfosetRep;
   friend class GamePlayerRep;
   friend class GameTreeNodeRep;
   friend class PureStrategyProfileRep;
@@ -766,12 +738,6 @@ Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes = false);
 // all classes to be defined.
 
 inline Game GameOutcomeRep::GetGame(void) const { return m_game; }
-
-inline GameInfoset GameActionRep::GetInfoset(void) const { return m_infoset; }
-
-inline GamePlayer GameInfosetRep::GetPlayer(void) const { return m_player; }
-inline bool GameInfosetRep::IsChanceInfoset(void) const
-{ return m_player->IsChance(); }
 
 inline GamePlayer GameStrategyRep::GetPlayer(void) const { return m_player; }
 

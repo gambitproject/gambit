@@ -115,7 +115,7 @@ void MixedBehavProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp,
       }
     }
     else  {   // n.GetPlayer() == 0
-      prob = node->infoset->GetActionProb<T>(i);
+      prob = node->infoset->GetActionProb(i, (T) 0);
     }
 
     GameTreeNodeRep *child = node->children[i];
@@ -312,8 +312,8 @@ template <class T>
 T MixedBehavProfile<T>::GetActionProb(const GameAction &action) const
 { 
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
-    GameInfosetRep *infoset = action->GetInfoset();
-    return infoset->GetActionProb<T>(action->GetNumber());
+    GameTreeInfosetRep *infoset = dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
+    return infoset->GetActionProb(action->GetNumber(), (T) 0);
   }
   else if (!m_support.Contains(action)) {
     return (T) 0.0;
@@ -356,7 +356,7 @@ void MixedBehavProfile<T>::GetPayoff(GameTreeNodeRep *node,
       // chance player
       for (int act = 1; act <= node->NumChildren(); act++) {
 	GetPayoff(node->children[act],
-		  prob * node->infoset->GetActionProb<T>(act), player, value);
+		  prob * node->infoset->GetActionProb(act, (T) 0), player, value);
       }
     }
     else {

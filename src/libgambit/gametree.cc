@@ -108,9 +108,9 @@ bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
     GamePlayerRep *player = m_players[pl];
     
     for (int i = 1; i <= player->NumInfosets(); i++)  {
-      GameInfosetRep *iset1 = player->GetInfoset(i);
+      GameTreeInfosetRep *iset1 = player->m_infosets[i];
       for (int j = 1; j <= player->NumInfosets(); j++)   {
-	GameInfosetRep *iset2 = player->GetInfoset(j);
+	GameTreeInfosetRep *iset2 = player->m_infosets[j];
 
 	bool precedes = false;
 	int action = 0;
@@ -178,7 +178,7 @@ void GameTreeRep::Canonicalize(void)
     // Coded using a bubble sort for simplicity; large games might
     // find a quicksort worthwhile.
     for (int iset = 1; iset <= player->m_infosets.Length(); iset++) {
-      GameInfosetRep *infoset = player->m_infosets[iset];
+      GameTreeInfosetRep *infoset = player->m_infosets[iset];
       for (int i = 1; i < infoset->m_members.Length(); i++) {
 	for (int j = 1; j < infoset->m_members.Length() - i; j++) {
 	  if (infoset->m_members[j+1]->number < infoset->m_members[j]->number) {
@@ -201,7 +201,7 @@ void GameTreeRep::Canonicalize(void)
 		 player->m_infosets[j]->m_members[1]->number : 0);
 
 	if (a < b || b == 0) {
-	  GameInfosetRep *tmp = player->m_infosets[j];
+	  GameTreeInfosetRep *tmp = player->m_infosets[j];
 	  player->m_infosets[j] = player->m_infosets[j+1];
 	  player->m_infosets[j+1] = tmp;
 	}
@@ -262,13 +262,13 @@ std::string EscapeQuotes(const std::string &s)
   return ret;
 }
 
-void PrintActions(std::ostream &p_stream, GameInfosetRep *p_infoset)
+void PrintActions(std::ostream &p_stream, GameTreeInfosetRep *p_infoset)
 { 
   p_stream << "{ ";
   for (int act = 1; act <= p_infoset->NumActions(); act++) {
     p_stream << '"' << EscapeQuotes(p_infoset->GetAction(act)->GetLabel()) << "\" ";
     if (p_infoset->IsChanceInfoset()) {
-      p_stream << p_infoset->GetActionProb<std::string>(act) << ' ';
+      p_stream << p_infoset->GetActionProb(act, "") << ' ';
     }
   }
   p_stream << "}";
@@ -312,7 +312,7 @@ void WriteEfgFile(std::ostream &f, GameTreeNodeRep *n)
   }
   f << n->GetInfoset()->GetNumber() << " \"" <<
     EscapeQuotes(n->GetInfoset()->GetLabel()) << "\" ";
-  PrintActions(f, n->GetInfoset());
+  PrintActions(f, dynamic_cast<GameTreeInfosetRep *>(n->GetInfoset().operator->()));
   f << " ";
   if (n->GetOutcome())  {
     f << n->GetOutcome()->GetNumber() << " \"" <<
@@ -498,7 +498,7 @@ GameAction GameTreeRep::GetAction(int p_index) const
   for (int pl = 1; pl <= m_players.Length(); pl++) {
     GamePlayerRep *player = m_players[pl];
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      GameInfosetRep *infoset = player->GetInfoset(iset);
+      GameTreeInfosetRep *infoset = player->m_infosets[iset];
       for (int act = 1; act <= infoset->NumActions(); act++) {
 	if (index++ == p_index) {
 	  return infoset->GetAction(act);

@@ -142,7 +142,7 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
 					 *wxConvCurrent));
     if (p_infoset->IsChanceInfoset()) {
       m_actionSheet->SetCellValue(wxSheetCoords(act-1, 1),
-				  wxString(p_infoset->GetActionProb<std::string>(act).c_str(),
+				  wxString(p_infoset->GetActionProb(act, "").c_str(),
 					   *wxConvCurrent));
     }
   }

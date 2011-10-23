@@ -71,7 +71,7 @@ void BuildConstraintMatrix(GameData &p_data,
     GameInfoset infoset = n->GetInfoset();
     for (int i = 1; i <= n->NumChildren(); i++) {
       BuildConstraintMatrix(p_data, p_support, A, n->GetChild(i),
-			    prob * infoset->GetActionProb<T>(i),
+			    prob * infoset->GetActionProb(i, (T) 0),
 			    s1, s2, i1, i2);
     }
   }

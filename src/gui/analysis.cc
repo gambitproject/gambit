@@ -338,7 +338,7 @@ gbtAnalysisProfileList<T>::GetActionProb(const GameNode &p_node, int p_act,
 
   if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
     GameInfoset infoset = p_node->GetInfoset();
-    return infoset->GetActionProb<std::string>(p_act);
+    return infoset->GetActionProb(p_act, "");
   }
 
   if (!p_node->GetPlayer())  return "";
