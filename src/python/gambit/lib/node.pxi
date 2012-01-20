@@ -1,7 +1,7 @@
 cdef class Children(Collection):
     "Represents the collection of direct children of a node."
     cdef c_GameNode parent
-    def __len__(self):    return self.node.deref().NumChildren()
+    def __len__(self):    return self.parent.deref().NumChildren()
     def __getitem__(self, i):
         if not isinstance(i, int):  return Collection.__getitem__(self, i)
         cdef Node n
@@ -45,7 +45,45 @@ cdef class Node:
     def is_subgame_root(self):
         return self.node.deref().IsSubgameRoot()
 
+    def append_move(self, player, actions=None):
+        cdef Infoset i
+        if len(self.children) > 0:
+            raise ValueError, "append_move can only be applied at a terminal node"
+        if isinstance(player, Player):
+            if actions is None:
+                raise ValueError, "append_move with a Player requires actions to be specified"
+            if actions < 1:
+                raise ValueError, "append_move requires actions >= 1"
+            i = Infoset()
+            i.infoset = self.node.deref().AppendMovePlayer(((<Player>player).player), actions)
+            return i
+        elif isinstance(player, Infoset):
+            if actions is not None:
+                raise ValueError, "append_move with an Infoset cannot specify number of actions"
+            i = Infoset()
+            i.infoset = self.node.deref().AppendMoveInfoset(((<Infoset>player).infoset))
+            return i
+        raise TypeError, "append_move accepts either a Player or Infoset to specify information"
 
+    def insert_move(self, player, actions=None):
+        cdef Infoset i
+        if isinstance(player, Player):
+            if actions is None:
+                raise ValueError, "insert_move with a Player requires actions to be specified"
+            if actions < 1:
+                raise ValueError, "insert_move requires actions >= 1"
+            i = Infoset()
+            i.infoset = self.node.deref().InsertMovePlayer(((<Player>player).player), actions)
+            return i
+        elif isinstance(player, Infoset):
+            if actions is not None:
+                raise ValueError, "insert_move with an Infoset cannot specify number of actions"
+            i = Infoset()
+            i.infoset = self.node.deref().InsertMoveInfoset(((<Infoset>player).infoset))
+            return i
+        raise TypeError, "insert_move accepts either a Player or Infoset to specify information"
+
+ 
     property label:
         def __get__(self):
             return self.node.deref().GetLabel().c_str()

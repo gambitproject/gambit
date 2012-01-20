@@ -501,6 +501,24 @@ API documentation
       Returns the :py:class:`gambit.Outcome` that is associated 
       with the current node.
 
+   .. py:method:: append_move(infoset[ , actions])
+
+      Add a move to a terminal node, at the :py:class:`gambit.Infoset`
+      ``infoset``.  Alternatively, a :py:class:`gambit.Player` can be
+      passed as the information set, in which case the move is placed
+      in a new information set for that player; in this instance, the
+      number of ``actions`` at the new information set must be specified.
+
+   .. py:method:: insert_move(infoset[ , actions])
+
+      Insert a move at a node, at the :py:class:`gambit.Infoset`
+      ``infoset``.  Alternatively, a :py:class:`gambit.Player` can be
+      passed as the information set, in which case the move is placed
+      in a new information set for that player; in this instance, the
+      number of ``actions`` at the new information set must be specified.
+      The newly-inserted node takes the place of the node in the game
+      tree, and the existing node becomes the first child of the new node.
+
 .. py:class:: Strategies
    
    A collection object representing the strategies available to a

@@ -123,25 +123,21 @@ cdef extern from "libgambit/game.h":
         void SetLabel(cxx_string)
 
         c_GameInfoset GetInfoset()
-
         c_GamePlayer GetPlayer()
-
         c_GameNode GetParent()
-
         int NumChildren()
         c_GameNode GetChild(int) except +IndexError
-        
         c_GameOutcome GetOutcome()
-
         c_GameNode GetPriorSibling()
         c_GameNode GetNextSibling() 
-        
         bint IsTerminal()
         bint IsSuccessorOf(c_GameNode)
         bint IsSubgameRoot()
-        
         c_GameAction GetPriorAction()
-        
+        c_GameInfoset AppendMovePlayer "AppendMove"(c_GamePlayer, int)  
+        c_GameInfoset AppendMoveInfoset "AppendMove"(c_GameInfoset)       
+        c_GameInfoset InsertMovePlayer "InsertMove"(c_GamePlayer, int)  
+        c_GameInfoset InsertMoveInfoset "InsertMove"(c_GameInfoset)       
 
     ctypedef struct c_GameRep "GameRep":
         int IsTree()
