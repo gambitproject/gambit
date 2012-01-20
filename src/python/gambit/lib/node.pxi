@@ -166,3 +166,11 @@ cdef class Node:
                 return o
             return None
         
+        def __set__(self, outcome):
+            if outcome is None:
+                self.node.deref().SetOutcome(<c_GameOutcome>NULL)
+            elif isinstance(outcome, Outcome):
+                self.node.deref().SetOutcome((<Outcome>outcome).outcome)
+            else:
+                raise TypeError, "type Outcome required for setting outcome at a node"
+             

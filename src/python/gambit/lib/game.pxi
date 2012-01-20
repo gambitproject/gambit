@@ -9,6 +9,13 @@ cdef class Outcomes(Collection):
         c.outcome = self.game.deref().GetOutcome(outc+1)
         return c
 
+    def add(self, label=""):
+        cdef Outcome c
+        c = Outcome()
+        c.outcome = self.game.deref().NewOutcome()
+        if label != "": c.label = str(label)
+        return c
+
 cdef class Players(Collection):
     "Represents a collection of players in a game."
     cdef c_Game game
