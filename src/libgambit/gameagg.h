@@ -25,6 +25,8 @@
 
 #include "game.h"
 
+#include "agg.h"
+
 namespace Gambit {
 
 class GameAGGRep : public GameRep {
@@ -38,8 +40,25 @@ private:
 public:
   /// @name Lifecycle
   //@{
+  /// Constructor
+  GameAGGRep(agg* _aggPtr)
+  :aggPtr(_aggPtr)
+  {
+	  for (int pl=1; pl <= aggPtr->getNumPlayers(); pl++){
+		  m_players.Append(new GamePlayerRep(this,pl,aggPtr->getNumActions(pl-1)));
+		  m_players[pl]->m_label = lexical_cast<std::string>(pl);
+		  for (int st = 1; st <= m_players[pl]->NumStrategies(); st++) {
+		      m_players[pl]->m_strategies[st]->SetLabel(lexical_cast<std::string>(st));
+		  }
+	  }
+	  for (int pl = 1, id = 1; pl <= m_players.Length(); pl++) {
+	    for (int st = 1; st <= m_players[pl]->m_strategies.Length();
+		 m_players[pl]->m_strategies[st++]->m_id = id++);
+	  }
+  }
   /// Destructor
-  virtual ~GameAGGRep();
+  virtual ~GameAGGRep() { }
+
   /// Create a copy of the game, as a new game
   virtual Game Copy(void) const
   { throw UndefinedException(); }
@@ -55,14 +74,31 @@ public:
   virtual PVector<int> NumMembers(void) const
   { throw UndefinedException(); }
   /// The number of strategies for each player
-  virtual Array<int> NumStrategies(void) const;
+  virtual Array<int> NumStrategies(void) const{
+	  Arrary<int> ns;
+	  for (int pl=1;pl<=aggPtr->getNumPlayers();pl++){
+		  ns.Append(m_players[pl]->NumStrategies());
+	  }
+	  return ns;
+  }
   /// Gets the i'th strategy in the game, numbered globally
-  virtual GameStrategy GetStrategy(int p_index) const;
+  virtual GameStrategy GetStrategy(int p_index) const{
+	  for (int pl=1;pl<=aggPtr->getNumPlayers();pl++){
+		  if (m_players[pl]->NumStrategies()>=p_index){
+			  return m_players[pl]->GetStrategy(p_index);
+		  }
+		  else{
+			  p_index -= m_players[pl]->NumStrategies();
+		  }
+	  }
+  }
   /// Returns the total number of actions in the game
   virtual int BehavProfileLength(void) const
   { throw UndefinedException(); }
   /// Returns the total number of strategies in the game
-  virtual int MixedProfileLength(void) const;
+  virtual int MixedProfileLength(void) const {
+	  return aggPtr->getNumActions();
+  }
   //@}
 
   virtual PureStrategyProfile NewPureStrategyProfile(void) const;
@@ -76,9 +112,13 @@ public:
 	  return aggPtr->getNumPlayers();
   }
   /// Returns the pl'th player in the game
-  virtual GamePlayer GetPlayer(int pl) const;
+  virtual GamePlayer GetPlayer(int pl) const{
+	  return m_players[pl];
+  }
   /// Returns an iterator over the players
-  virtual GamePlayerIterator Players(void) const;
+  virtual GamePlayerIterator Players(void) const{
+	  return m_players;
+  }
   /// Returns the chance (nature) player
   virtual GamePlayer GetChance(void) const
   { throw UndefinedException(); }
@@ -104,9 +144,11 @@ public:
   /// @name Outcomes
   //@{
   /// Returns the number of outcomes defined in the game
-  virtual int NumOutcomes(void) const;
+  virtual int NumOutcomes(void) const
+  { throw UndefinedException(); }
   /// Returns the index'th outcome defined in the game
-  virtual GameOutcome GetOutcome(int index) const;
+  virtual GameOutcome GetOutcome(int index) const
+  { throw UndefinedException(); }
   /// Creates a new outcome in the game
   virtual GameOutcome NewOutcome(void)
   { throw UndefinedException(); }
@@ -128,12 +170,12 @@ public:
   /// @name General data access
   //@{
   /// Returns the smallest payoff in any outcome of the game
-  virtual Rational GetMinPayoff(int pl = 0) const {
-	  //return aggPtr->getMinPayoff(pl);
+  virtual Rational GetMinPayoff() const {
+	  return aggPtr->getMinPayoff();
   }
   /// Returns the largest payoff in any outcome of the game
-  virtual Rational GetMaxPayoff(int pl = 0) const {
-	  //return aggPtr->getMaxPayoff(pl);
+  virtual Rational GetMaxPayoff() const {
+	  return aggPtr->getMaxPayoff();
   }
   //@}
 
