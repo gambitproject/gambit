@@ -1,0 +1,204 @@
+
+using namespace std;
+
+template <class V>
+inline pair<typename trie_map<V>::iterator, bool>
+trie_map<V>::insert(const trie_map<V>::value_type& x) {
+
+  static size_t ind;
+  static vector<int>::const_iterator p;//,s;
+  //s=x.first.end();
+  TrieNode<V>* ptr = root;
+   
+  for (p=x.first.begin();p!=x.first.end(); ){
+    //ind=x.first[i];
+    ind=*(p++);
+    if (ind>=ptr->children.size())
+      ptr->children.resize(ind+1, (TrieNode<V>*)NULL);
+    if (ptr->children[ind]==NULL) 
+      ptr->children[ind] = new TrieNode<V>(initBranches,data.end());
+    ptr=ptr->children[ind];
+  }
+  if (ptr->val!=data.end()) return pair<typename trie_map<V>::iterator,bool>(ptr->val, false);
+
+  //now insert the item
+  leaves.push_back(ptr);
+  return pair<typename trie_map<V>::iterator,bool>((ptr->val=data.insert_after(data.before_begin(),x)),true);
+}
+
+
+template <class V>
+inline __attribute__((always_inline))  typename trie_map<V>::iterator&
+trie_map<V>::find(const trie_map<V>::key_type& k) const
+{
+  size_t i=0;
+  TrieNode<V>* ptr=root;
+  for(;i<k.size()&&k[i]<(int)ptr->children.size()&&  ptr->children[k[i]]; ptr=ptr->children[k[i++]]) ;
+      
+  return ptr->val;
+}
+
+
+template <class V>
+inline typename trie_map<V>::iterator
+trie_map<V>::findExact(const trie_map<V>::key_type& k)
+{
+    size_t i=0;
+    TrieNode<V>* ptr=root;
+    for (;i<k.size()&&k[i]<(int)ptr->children.size()&&  ptr->children[k[i]];ptr=ptr->children[k[i++]]) ;
+    
+    if (i>=k.size()&&ptr->val!=data.end()) return ptr->val;
+    else return data.end();
+}
+
+
+template <class V>
+trie_map<V>::trie_map (const trie_map<V>& other) :
+initBranches(other.initBranches),
+root(new TrieNode<V>(other.initBranches, data.end()))
+{
+  typename trie_map<V>::const_iterator p;
+  for (p=other.begin(); p!=other.end();++p){
+    insert(*p);
+  }
+}
+
+template <class V>
+inline trie_map<V>&
+trie_map<V>::operator= (const trie_map<V>& other) 
+{
+  if (this!=&other){
+    reset();
+    //initBranches = other.initBranches;
+    for (typename trie_map<V>::const_iterator p=other.begin(); p!=other.end(); ++p) insert(*p);
+  }
+  return *this;
+}
+
+template <class V>
+inline void trie_map<V>::swap( trie_map<V>& other )
+{
+  if (this != &other) {
+    data.swap (other.data);
+    leaves.swap(other.leaves);
+    std::swap (this->root, other.root);
+    std::swap (this->initBranches, other.initBranches);
+  }
+}
+
+
+template <class V>
+void trie_map<V>::multiply (const trie_map<V>& other,size_t keylen, vector<proj_func*>& f)
+{
+//#ifdef AGGDEBUG
+//  cout<< "multiplying "<<endl<<*this<<endl <<"(in order): "<<endl;
+//  print_in_order();
+//  cout<<"and "<<endl
+//      <<other <<endl;
+//#endif
+  static typename slist<typename trie_map<V>::value_type>::iterator p1;
+  static size_t i;
+
+  if(&other == this){
+    cerr<<"Error: (in-place) multiply: other should not be the same object as self"<<endl;
+    exit(1);
+  }
+  slist<typename trie_map<V>::value_type> data2;
+  data.swap(data2);
+  reset();
+
+  static pair<vector<int>, V> v;
+  v.first.resize(keylen);
+  TrieNode<V>* ptr;
+
+  for (p1=data2.begin(); p1!=data2.end(); ++p1)if((*p1).second>(V)0.0){
+      for(typename trie_map<V>::const_iterator p2=other.begin(); p2!=other.end(); ++p2)if((*p2).second>(V)0.0){
+	//assert((*p1).first.size()==keylen&& (*p2).first.size()==keylen);
+//#ifdef AGGDEBUG
+//        cout<<"applying [";
+//        copy(p1->first.begin(),p1->first.end(),ostream_iterator<int>(cout," ") );
+//        cout<<"]\n  to [";
+//        copy(p2->first.begin(),p2->first.end(),ostream_iterator<int>(cout," ") );
+//        cout<<"]"<<endl;
+//#endif
+	ptr=root;
+	for (i=0;i<keylen;++i){
+	  v.first[i]= (*(f[i])) ((*p1).first[i], (*p2).first[i]);
+	  if (v.first[i]>=(int)ptr->children.size())
+	    ptr->children.resize(v.first[i]+1, (TrieNode<V>*)NULL);
+	  if (ptr->children[v.first[i]]==NULL) 
+	    ptr->children[v.first[i]] = new TrieNode<V>(initBranches,data.end());
+	  ptr=ptr->children[v.first[i]];
+	}
+	v.second = (V)((*p1).second * (*p2).second);
+	if (ptr->val != data.end()) {
+	  ptr->val->second +=v.second;
+	} else {
+	  // insert the item
+	  leaves.push_back(ptr);
+	  ptr->val=data.insert_after(data.before_begin(),v);
+	}	  
+      }//end for(p2
+  }//end for(p1 
+//#ifdef AGGDEBUG
+//  cout<<" the result of multiplication is "<<endl
+//      <<*this<<endl;
+//  cout<< " in-order:"<<endl;
+//  print_in_order();
+//#endif
+
+}
+
+template <class V>
+inline trie_map<V>& 
+trie_map<V>::operator/= (const vector<V>& denom){
+  //first, find the pivot: the first nonzero element of denom
+  V th(sqrt(THRESH));
+  int piv=-1;
+  for(size_t i=0;i<denom.size(); ++i) if (denom[i]>th) {
+    piv=(int)i;
+    break;
+  }
+  if (piv==-1) return *this;
+
+  //get rid of 0th order terms at the pivot level
+  slist<typename trie_map<V>::value_type> data2;
+  data.swap(data2);
+  clear();
+  typename slist<typename trie_map<V>::value_type>::iterator itr;
+  for (itr=data2.begin(); itr!=data2.end(); ++itr){
+    if (itr->first[piv] > 0) insert(*itr);
+  }
+
+  div(denom, root,0, piv);
+  return *this;
+}
+
+template <class V>
+void trie_map<V>:: div(const vector<V>& denom,TrieNode<V>* n, int current, int pivot){
+  int i;
+  if ( pivot != current) { 
+    int s=n->children.size();
+    for (i=0;i<s;i++)if(n->children[i]) 
+	div(denom,n->children[i], current+1, pivot);
+    return;
+  }
+
+
+
+  for(i=0;i<(int)(n->children.size())-1; i++) n->children[i]=n->children[i+1];
+  n->children.pop_back();
+
+  typename trie_map<V>::div_helper f(denom,pivot,data.end());
+  for (i=n->children.size()-1;i>=0;i--){
+    if(i<(int)(n->children.size())-1 && n->children[i+1]){
+      //if(!n->children[i])n->children[i]=new TrieNode<V>(initBranches, data.end());
+      typename trie_map<V>::div_helper_mul  g(denom,pivot, n->children[i],data.end());
+      in_order_subtree(g, n->children[i+1]);
+    }
+    in_order_subtree (f, n->children[i]); 
+  }
+  //return pivot;
+}
+
+
