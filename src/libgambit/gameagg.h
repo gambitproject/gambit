@@ -29,9 +29,10 @@
 
 namespace Gambit {
 
-class GameAGGRep : public GameRep {
+class GameAggRep : public GameRep {
   template <class T> friend class MixedStrategyProfile;
-  friend class agg;
+  template <class T> friend class AggMixedStrategyProfileRep;
+  friend class AggPureStrategyProfileRep;
 
 private:
   agg *aggPtr;
@@ -41,7 +42,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructor
-  GameAGGRep(agg* _aggPtr)
+  GameAggRep(agg* _aggPtr)
   :aggPtr(_aggPtr)
   {
 	  for (int pl=1; pl <= aggPtr->getNumPlayers(); pl++){
@@ -57,7 +58,7 @@ public:
 	  }
   }
   /// Destructor
-  virtual ~GameAGGRep() { }
+  virtual ~GameAggRep() { }
 
   /// Create a copy of the game, as a new game
   virtual Game Copy(void) const
@@ -75,7 +76,7 @@ public:
   { throw UndefinedException(); }
   /// The number of strategies for each player
   virtual Array<int> NumStrategies(void) const{
-	  Arrary<int> ns;
+	  Array<int> ns;
 	  for (int pl=1;pl<=aggPtr->getNumPlayers();pl++){
 		  ns.Append(m_players[pl]->NumStrategies());
 	  }

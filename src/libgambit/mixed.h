@@ -24,6 +24,7 @@
 #define LIBGAMBIT_MIXED_H
 
 #include "vector.h"
+#include "gameagg.h"
 
 namespace Gambit {
 
@@ -91,6 +92,25 @@ public:
   virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const;
 };
 
+template <class T> class AggMixedStrategyProfileRep
+    : public MixedStrategyProfileRep<T> {
+
+public:
+    AggMixedStrategyProfileRep(const StrategySupport &p_support)
+      : MixedStrategyProfileRep<T>(p_support)
+    { }
+    virtual ~AggMixedStrategyProfileRep() { }
+
+    virtual MixedStrategyProfileRep<T> *Copy(void) const{
+  	  return new AggMixedStrategyProfileRep(*this);
+    }
+    virtual T GetPayoff(int pl) const;
+    virtual T GetPayoffDeriv(int pl, const GameStrategy &) const
+    { throw UndefinedException(); }
+    virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const
+    { throw UndefinedException(); }
+};
+
 /// \brief A probability distribution over strategies in a game
 ///
 /// A probability distribution over strategies, such that each player
@@ -99,6 +119,8 @@ public:
 template <class T> class MixedStrategyProfile {
   friend class StrategySupport;
   friend class TreeMixedStrategyProfileRep<T>;
+  friend class AggMixedStrategyProfileRep<T>;
+  friend class GameAggRep;
   friend class MixedBehavProfile<T>;
 private:
   MixedStrategyProfileRep<T> *m_rep;
