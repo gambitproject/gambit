@@ -49,7 +49,7 @@ public:
 };
 
 //------------------------------------------------------------------------
-//               TablePureStrategyProfileRep: Lifecycle
+//               AggPureStrategyProfileRep: Lifecycle
 //------------------------------------------------------------------------
 
 AggPureStrategyProfileRep::AggPureStrategyProfileRep(const Game &p_game)
@@ -136,6 +136,17 @@ MixedStrategyProfile<Rational> GameAggRep::NewMixedStrategyProfile(const Rationa
 }
 
 //------------------------------------------------------------------------
+//                   GameAGGRep: Lifecycle
+//------------------------------------------------------------------------
+Game GameAggRep::Copy(void) const
+{
+  std::ostringstream os;
+  WriteAggFile(os);
+  std::istringstream is(os.str());
+  return ReadAggFile(is);
+}
+
+//------------------------------------------------------------------------
 //                   GameAGGRep: Writing data files
 //------------------------------------------------------------------------
 
@@ -178,6 +189,14 @@ void GameAggRep::WriteAggFile(std::ostream &s) const{
 	    aggPtr->printPayoffs(s,i);
 	    s<<endl;
 	  }
+}
+
+GameAggRep* GameAggRep::ReadAggFile(istream& in){
+	agg* aggPtr=agg::makeAGG(in);
+	if(!aggPtr){
+		throw InvalidFileException();
+	}
+	return new GameAggRep(aggPtr);
 }
 
 }  // end namespace Gambit
