@@ -39,6 +39,8 @@ private:
   Array<GamePlayerRep *> m_players;
 
 public:
+  static GameAggRep* ReadAggFile(istream& in);
+
   /// @name Lifecycle
   //@{
   /// Constructor
@@ -61,8 +63,7 @@ public:
   virtual ~GameAggRep() { }
 
   /// Create a copy of the game, as a new game
-  virtual Game Copy(void) const
-  { throw UndefinedException(); }
+  virtual Game Copy(void) const;
   //@}
 
   /// @name Dimensions of the game
@@ -170,12 +171,15 @@ public:
 
   /// @name General data access
   //@{
+  virtual bool IsTree(void) const { return false; }
+  virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const { return true; }
+  virtual bool IsConstSum(void) const { throw UndefinedException(); }
   /// Returns the smallest payoff in any outcome of the game
-  virtual Rational GetMinPayoff() const {
+  virtual Rational GetMinPayoff(int) const {
 	  return aggPtr->getMinPayoff();
   }
   /// Returns the largest payoff in any outcome of the game
-  virtual Rational GetMaxPayoff() const {
+  virtual Rational GetMaxPayoff(int) const {
 	  return aggPtr->getMaxPayoff();
   }
   //@}
