@@ -27,6 +27,8 @@
 
 namespace Gambit {
 
+class GameTreeRep;
+
 class GameTreeInfosetRep : public GameInfosetRep {
   friend class GameTreeRep;
   friend class GameActionRep;
