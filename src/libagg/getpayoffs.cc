@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <cstdlib>
-#include "libgambit.h"
+#include "libgambit/libgambit.h"
 using namespace std;
 
 void usage(char *name) {
