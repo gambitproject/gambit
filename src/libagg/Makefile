@@ -8,9 +8,13 @@ default: getpayoffs gampayoffs
 
 
 getpayoffs: getpayoffs.o agg.o ../libgambit/*.o
+	cd ../libgambit 
+	$(CXX) $(CXXFLAGS) -c *.cc
+	cd ../libagg
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 gampayoffs: getpayoffs.o agg.o ../libgambit/*.o
+	cd ../libgambit && $(CXX) $(CXXFLAGS) -c *.cc
 	$(CXX) $(CXXFLAGS) -o gampayoffs $^
 
 agg.o: agg.h trie_map.h trie_map.template GrayComposition.h proj_func.h
