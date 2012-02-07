@@ -45,7 +45,17 @@ StrategicQREPathTracer::TraceStrategicPath(const MixedStrategyProfile<double> &p
   }
   x[x.Length()] = p_startLambda;
 
-  TracePath(x, p_maxLambda, p_omega);
+  if (IsMLEMode()) {
+    while (x[x.Length()] < p_maxLambda) {
+      TracePath(x, p_maxLambda, p_omega);
+      if (x[x.Length()] < p_maxLambda) {
+	std::cout << std::endl;
+      }
+    }
+  }
+  else {
+    TracePath(x, p_maxLambda, p_omega);
+  }
 }
 
 //----------------------------------------------------------------------------

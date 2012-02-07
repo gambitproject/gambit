@@ -22,6 +22,7 @@
 
 #include <math.h>
 #include <algorithm>   // for std::max
+#include <iostream>
 
 #include <libgambit/libgambit.h>
 #include <libgambit/sqmatrix.h>
@@ -109,8 +110,8 @@ static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
 //----------------------------------------------------------------------------
 
 void 
-PathTracer::TracePath(const Vector<double> &p_start,
-		      double p_maxLambda, double p_omega)
+PathTracer::TracePath(Vector<double> &x,
+		      double p_maxLambda, double &p_omega)
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
   const double c_maxDist = 0.4;    // maximal distance to curve
@@ -123,13 +124,12 @@ PathTracer::TracePath(const Vector<double> &p_start,
   
   bool newton = false;             // using Newton steplength (for zero-finding)
 
-  Vector<double> x(p_start);
-  Vector<double> u(p_start.Length());
+  Vector<double> u(x.Length()), restart(x.Length());
   // t is current tangent at x; newT is tangent at u, which is the next point.
-  Vector<double> t(p_start.Length()), newT(p_start.Length());
-  Vector<double> y(p_start.Length() - 1);
-  Matrix<double> b(p_start.Length(), p_start.Length() - 1);
-  SquareMatrix<double> q(p_start.Length());
+  Vector<double> t(x.Length()), newT(x.Length());
+  Vector<double> y(x.Length() - 1);
+  Matrix<double> b(x.Length(), x.Length() - 1);
+  SquareMatrix<double> q(x.Length());
 
   OnStep(x, false);
   GetJacobian(x, b);
@@ -140,6 +140,10 @@ PathTracer::TracePath(const Vector<double> &p_start,
     bool accept = true;
 
     if (fabs(h) <= c_hmin) {
+      if (newton) {
+	// Restore the place to restart if desired
+	x = restart;
+      }
       return;
     }
 
@@ -182,6 +186,11 @@ PathTracer::TracePath(const Vector<double> &p_start,
       disto = dist;
       iter++;
       if (iter > c_maxIter) {
+	OnStep(x, true);
+	if (newton) {
+	  // Restore the place to restart if desired
+	  x = restart;
+	}
 	return;
       }
     }
@@ -189,6 +198,11 @@ PathTracer::TracePath(const Vector<double> &p_start,
     if (!accept) {
       h /= m_maxDecel;   // PC not accepted; change stepsize and retry
       if (fabs(h) <= c_hmin) {
+	OnStep(x, true);
+	if (newton) {
+	  // Restore the place to restart if desired
+	  x = restart;
+	}
 	return;
       }
 
@@ -206,6 +220,7 @@ PathTracer::TracePath(const Vector<double> &p_start,
     if (!newton &&
 	Criterion(x, t) * Criterion(u, newT) < 0.0) {
       newton = true;
+      restart = u;
     }
 
     if (newton) {
@@ -231,5 +246,8 @@ PathTracer::TracePath(const Vector<double> &p_start,
   }
 
   OnStep(x, true);
+  if (newton) {
+    x = restart;
+  }
 }
 
