@@ -163,6 +163,7 @@ typedef GameObjectIterator<GameActionRep, GameAction> GameActionIterator;
 class GameInfosetRep;
 typedef GameObjectPtr<GameInfosetRep> GameInfoset;
 typedef GameObjectIterator<GameInfosetRep, GameInfoset> GameInfosetIterator;
+class GameTreeInfosetRep;
 
 class GameStrategyRep;
 typedef GameObjectPtr<GameStrategyRep> GameStrategy;
@@ -174,6 +175,7 @@ typedef GameObjectIterator<GamePlayerRep, GamePlayer> GamePlayerIterator;
 
 class GameNodeRep;
 typedef GameObjectPtr<GameNodeRep> GameNode;
+class GameTreeNodeRep;
 
 class GameRep;
 typedef GameObjectPtr<GameRep> Game;

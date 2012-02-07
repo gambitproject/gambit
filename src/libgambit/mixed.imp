@@ -243,16 +243,18 @@ TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl,
 //                   AggMixedStrategyProfileRep<T>
 //========================================================================
 template <class T>
-T AggMixedStrategyProfileRep<T>::GetPayoff(int pl) const{
-  	  agg* aggPtr = dynamic_cast<GameAggRep &>(* (this->m_support.GetGame())).aggPtr;
-  	  std::vector<double> s (aggPtr->getNumActions());
-  	  for (int i=0;i<aggPtr->getNumPlayers();++i)
-  		  for (int j=0;j<aggPtr->getNumActions(i);++j){
-  			  GameStrategy strategy = this->m_support.GetGame()->GetPlayer(i+1)->GetStrategy(j+1);
-  			  const int &ind=this->m_support.m_profileIndex[strategy->GetId()];
-  			  s[aggPtr->firstAction(i)+j]= (ind==-1)?(T)0:this->m_probs[ind];
-  		  }
-  	  return aggPtr->getMixedPayoff(pl-1, s);
+T AggMixedStrategyProfileRep<T>::GetPayoff(int pl) const
+{
+  GameAggRep &g = dynamic_cast<GameAggRep &>(*(this->m_support.GetGame()));
+  agg *aggPtr = g.aggPtr;
+  std::vector<double> s (aggPtr->getNumActions());
+  for (int i=0;i<aggPtr->getNumPlayers();++i)
+    for (int j=0;j<aggPtr->getNumActions(i);++j){
+      GameStrategy strategy = this->m_support.GetGame()->GetPlayer(i+1)->GetStrategy(j+1);
+      const int &ind=this->m_support.m_profileIndex[strategy->GetId()];
+      s[aggPtr->firstAction(i)+j]= (ind==-1)?(T)0:this->m_probs[ind];
+    }
+  return aggPtr->getMixedPayoff(pl-1, s);
 }
 
 //========================================================================

@@ -25,6 +25,8 @@
 #include "gpoly.h"
 #include "libgambit/libgambit.h"
 
+inline double abs(double x) { return fabs(x); }
+
 //---------------------------------------------------------------
 //                      gPoly
 //---------------------------------------------------------------

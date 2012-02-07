@@ -23,9 +23,7 @@
 #ifndef GAMEAGG_H
 #define GAMEAGG_H
 
-#include "game.h"
-
-#include "agg.h"
+#include "libagg/agg.h"
 
 namespace Gambit {
 
