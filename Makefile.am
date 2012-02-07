@@ -294,7 +294,8 @@ libgambit_la_SOURCES = \
 	src/libgambit/subgame.cc \
 	src/libgambit/subgame.h \
 	src/libgambit/file.cc \
-	src/libgambit/libgambit.h
+	src/libgambit/libgambit.h \
+	${libagg_la_SOURCES}
 
 libgambitincludedir = $(includedir)/libgambit
 libgambitinclude_HEADERS = \
@@ -323,7 +324,25 @@ libgambitinclude_HEADERS = \
 	src/libgambit/mixed.imp \
 	src/libgambit/stratitr.h \
 	src/libgambit/stratspt.h \
-	src/libgambit/libgambit.h
+	src/libgambit/libgambit.h \
+	${libagginclude_HEADERS}
+
+libagg_la_SOURCES = \
+	src/libgambit/gameagg.cc \
+	src/libgambit/gameagg.h \
+	src/libagg/GrayComposition.h \
+	src/libagg/agg.cc \
+	src/libagg/agg.h \
+	src/libagg/proj_func.h \
+	src/libagg/trie_map.h
+
+libaggincludedir = $(includedir)/libagg
+libagginclude_HEADERS = \
+	src/libgambit/gameagg.h \
+	src/libagg/GrayComposition.h \
+	src/libagg/agg.h \
+	src/libagg/proj_func.h \
+	src/libagg/trie_map.h
 
 # libgambit_la_LDFLAGS = -no-undefined -version-info 0:0:0
 
@@ -347,6 +366,8 @@ bin_PROGRAMS += \
 	gambit-nfg-logitdyn \
 	gambit-lp \
 	gambit-simpdiv
+
+bin_PROGRAMS += gambit-testagg
 
 if WITH_GUI
 bin_PROGRAMS += gambit
@@ -581,6 +602,9 @@ gambit_simpdiv_SOURCES = \
 	${libgambit_la_SOURCES} \
 	src/tools/simpdiv/nfgsimpdiv.cc
 
+gambit_testagg_SOURCES = \
+	${libgambit_la_SOURCES} \
+	src/libagg/getpayoffs.cc
 
 gambit_SOURCES = \
 	${libgambit_la_SOURCES} \
