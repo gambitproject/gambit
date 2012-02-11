@@ -24,6 +24,8 @@
 #ifndef LIBGAMBIT_GAME_H
 #define LIBGAMBIT_GAME_H
 
+#include <memory>
+
 #include "dvector.h"
 #include "number.h"
 
