@@ -21,7 +21,7 @@
 //
 
 #include <unistd.h>
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <fstream>
 #include "libgambit/libgambit.h"

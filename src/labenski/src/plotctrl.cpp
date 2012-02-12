@@ -39,9 +39,9 @@
 
 #include "wx/plotctrl/plotctrl.h"
 
-#include <math.h>
-#include <float.h>
-#include <limits.h>
+#include <cmath>
+#include <cfloat>
+#include <climits>
 
 // MSVC hogs global namespace with these min/max macros - remove them
 #ifdef max

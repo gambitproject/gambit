@@ -31,11 +31,11 @@ dependencies on the rest of the code.
 #ifndef PELUTILS
 #define PELUTILS
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <time.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <ctime>
 #ifdef __GNUG__
 #include <unistd.h>
 #endif  // __GNUG__
