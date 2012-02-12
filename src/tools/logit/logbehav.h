@@ -79,7 +79,7 @@ protected:
   
   /// @name Auxiliary functions for computation of interesting values
   //@{
-  void GetPayoff(GameNodeRep *, const T &, int, T &) const;
+  void GetPayoff(GameTreeNodeRep *, const T &, int, T &) const;
   
   void ComputeSolutionDataPass2(const GameNode &node) const;
   void ComputeSolutionDataPass1(const GameNode &node) const;
@@ -124,7 +124,7 @@ public:
   T GetLogProb(const GameAction &p_action) const
     { if (p_action->GetInfoset()->GetPlayer()->GetNumber() == 0) {
 	GameInfoset infoset = p_action->GetInfoset();
-	return log(infoset->GetActionProb<T>(p_action->GetNumber()));
+	return log(infoset->GetActionProb(p_action->GetNumber(), (T) 0));
       }
       else {
 	return m_logProbs(p_action->GetInfoset()->GetPlayer()->GetNumber(),

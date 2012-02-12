@@ -59,7 +59,7 @@ protected:
   
   /// @name Auxiliary functions for computation of interesting values
   //@{
-  void GetPayoff(GameNodeRep *, const T &, int, T &) const;
+  void GetPayoff(GameTreeNodeRep *, const T &, int, T &) const;
   
   void ComputeSolutionDataPass2(const GameNode &node) const;
   void ComputeSolutionDataPass1(const GameNode &node) const;
@@ -68,9 +68,9 @@ protected:
 
   /// @name Converting mixed strategies to behavior
   //@{
-  void BehaviorStrat(int, GameNodeRep *);
+  void BehaviorStrat(int, GameTreeNodeRep *);
   void RealizationProbs(const MixedStrategyProfile<T> &,
-			int pl, const Array<int> &, GameNodeRep *);
+			int pl, const Array<int> &, GameTreeNodeRep *);
   //@}
 
 public:
