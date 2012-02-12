@@ -29,6 +29,7 @@
 #include "complex.h"
 */
 
+inline double abs(double x) { return fabs(x); }
 
 /*************************************************************/
 /************** Implementation of class Pelview **************/
