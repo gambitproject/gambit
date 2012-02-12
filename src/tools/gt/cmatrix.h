@@ -20,16 +20,15 @@
 #ifndef _CMATRIX_H_
 #define _CMATRIX_H_
 
-#include <math.h>
+#include <cmath>
 #ifdef SOLARIS
 #include <ieeefp.h>
 #endif
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <strings.h>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
 #include <string>
 #include <iomanip>
 #include <vector>

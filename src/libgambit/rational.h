@@ -32,7 +32,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #define LIBGAMBIT_RATIONAL_H
 
 #include "integer.h"
-#include <math.h>
+#include <cmath>
 
 namespace Gambit {
 
