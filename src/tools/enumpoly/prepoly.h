@@ -23,7 +23,7 @@
 #ifndef PREPOLY_H
 #define PREPOLY_H
 
-#include <math.h>
+#include <cmath>
 #include "libgambit/libgambit.h"
 
 /*
