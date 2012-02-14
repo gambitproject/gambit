@@ -22,7 +22,7 @@
 
 #include "wx/sheet/sheettbl.h"
 #include "wx/sheet/sheet.h"
-#include <math.h>                 // used in GetDefaultColLabelValue
+#include <cmath>                 // used in GetDefaultColLabelValue
 
 #ifndef WX_PRECOMP
 #endif // WX_PRECOMP

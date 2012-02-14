@@ -25,8 +25,8 @@ http://netlib2.cs.utk.edu/hompack/
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 
 #include "pelgntyp.h"
 

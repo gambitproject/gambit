@@ -178,7 +178,7 @@
 #ifndef CLIQUE_H
 #define CLIQUE_H
 
-#include <stdio.h>
+#include <cstdio>
 #include "libgambit/libgambit.h"
 
 using namespace Gambit;

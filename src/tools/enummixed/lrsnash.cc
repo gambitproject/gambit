@@ -37,8 +37,8 @@
 //
 
 #include <iostream>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 // The order of these next includes is important, because of macro definitions
 #include "libgambit/libgambit.h"
