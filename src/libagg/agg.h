@@ -4,7 +4,6 @@
 #ifndef __AGG_H
 #define __AGG_H
 
-//using namespace std;
 
 
 #include <iostream>
