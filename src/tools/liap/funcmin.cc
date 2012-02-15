@@ -28,7 +28,7 @@
 //
 
 
-#include <math.h>
+#include <cmath>
 #include "libgambit/libgambit.h"
 #include "funcmin.h"
 

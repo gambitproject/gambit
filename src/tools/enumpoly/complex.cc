@@ -24,12 +24,12 @@
 #pragma implementation
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <float.h>
-#include <assert.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <cfloat>
+#include <cassert>
+#include <cctype>
 
 #include "libgambit/libgambit.h"
 #include "complex.h"

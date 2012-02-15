@@ -25,8 +25,8 @@ http://netlib2.cs.utk.edu/hompack/
 #ifndef CONV_H
 #define CONV_H
 
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
 
 #include "pelpred.h"
 

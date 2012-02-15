@@ -40,12 +40,12 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma implementation
 #endif
 #include "integer.h"
-#include <ctype.h>
-#include <float.h>
-#include <limits.h>
-#include <math.h>
-#include <assert.h>
-#include <string.h>
+#include <cctype>
+#include <cfloat>
+#include <climits>
+#include <cmath>
+#include <cassert>
+#include <cstring>
 
 namespace Gambit {
 

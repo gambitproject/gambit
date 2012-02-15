@@ -35,7 +35,7 @@
 #include "wx/plotctrl/fourier.h"
 #include "wx/wxthings/medsort.h"
 #include "wx/wxthings/range.h"
-#include <math.h>
+#include <cmath>
 
 #define wxPLOT_MAX_DATA_COLUMNS 64
 

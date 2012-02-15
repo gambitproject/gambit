@@ -26,7 +26,7 @@
 #endif
 #define _Complex_h 1
 
-#include <math.h>
+#include <cmath>
 
 class gComplex
 {

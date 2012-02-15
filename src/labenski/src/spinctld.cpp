@@ -23,13 +23,13 @@
 #endif // WX_PRECOMP
 
 #include "wx/wxthings/spinctld.h"
-#include <math.h>
+#include <cmath>
 
 #if wxCHECK_VERSION(2,5,0)
     #include "wx/math.h"
 #else
     #if defined(__VISUALC__) || defined(__BORLANDC__) || defined(__WATCOMC__)
-        #include <float.h>
+        #include <cfloat>
         #define wxFinite(x) _finite(x)
     #elif defined(__GNUG__)||defined(__GNUWIN32__)||defined(__DJGPP__)|| \
           defined(__SGI_CC__)||defined(__SUNCC__)||defined(__XLC__)|| \

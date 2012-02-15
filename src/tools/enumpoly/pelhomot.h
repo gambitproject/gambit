@@ -28,7 +28,7 @@ subdirectory of the source directory of the original Pelican 0.80
 #ifndef HOMOTOPIES_H
 #define HOMOTOPIES_H
 
-#include <math.h>
+#include <cmath>
 #include "pelpsys.h"
 
 /************************************************************************/

@@ -21,8 +21,8 @@
 //
 
 #include <iostream>
+#include <cstdlib>
 #include <unistd.h>
-#include <stdlib.h>
 #include "libgambit/libgambit.h"
 #include "libgambit/subgame.h"
 

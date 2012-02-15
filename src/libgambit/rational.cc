@@ -33,10 +33,10 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "libgambit.h"
 #include "rational.h"
-#include <math.h>
-#include <float.h>
-#include <assert.h>
-#include <ctype.h>
+#include <cmath>
+#include <cfloat>
+#include <cassert>
+#include <cctype>
 
 namespace Gambit {
 
