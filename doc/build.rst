@@ -15,7 +15,9 @@ General information
 -------------------
 
 Gambit uses the standard autotools mechanism for configuring and building.
-This should be familiar to most users of Un*ces and MacOS X.  In general,
+This should be familiar to most users of Un*ces and MacOS X.  
+
+If you are building from a source tarball, 
 you just need to unpack the sources, change directory to the top level
 of the sources (typically of the form gambit-0.yyyy.mm.dd), and do the
 usual ::
@@ -37,6 +39,30 @@ by replacing configure step with one of the form
   programs built in this process, especially for the computation of
   equilibria.  It is strongly recommended that you install the Gambit
   executables to a directory in your path!
+
+
+Building from git repository
+----------------------------
+
+If you want to live on the bleeding edge, you can get the latest
+version of the Gambit sources from the Gambit repository on
+github.com, via ::
+
+  git clone git://github.com/gambitproject/gambit.git
+  cd gambit
+
+After this, you will need to set up the build scripts by executing ::
+
+  aclocal
+  libtoolize
+  automake --add-missing
+  autoconf
+
+For this, you will need to have automake, autoconf, and libtool2
+installed on your system.
+
+At this point, you can then continue with the configuration and build
+stages as in the previous section.
 
 
 Supported compilers
