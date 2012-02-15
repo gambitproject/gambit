@@ -39,15 +39,15 @@ GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number)
 { }
 
 //========================================================================
-//                       class GameActionRep
+//                     class GameTreeActionRep
 //========================================================================
 
-bool GameActionRep::Precedes(const GameNode &n) const
+bool GameTreeActionRep::Precedes(const GameNode &n) const
 {
   GameNode node = n;
 
   while (node != node->GetGame()->GetRoot()) {
-    if (node->GetPriorAction() == this) {
+    if (node->GetPriorAction() == GameAction(const_cast<GameTreeActionRep *>(this))) {
       return true;
     }
     else {
@@ -57,7 +57,7 @@ bool GameActionRep::Precedes(const GameNode &n) const
   return false;
 }
 
-void GameActionRep::DeleteAction(void)
+void GameTreeActionRep::DeleteAction(void)
 {
   if (m_infoset->NumActions() == 1) throw UndefinedException();
 
@@ -75,19 +75,20 @@ void GameActionRep::DeleteAction(void)
   m_infoset->m_efg->ClearComputedValues();
 }
 
-GameInfoset GameActionRep::GetInfoset(void) const { return m_infoset; }
+GameInfoset GameTreeActionRep::GetInfoset(void) const { return m_infoset; }
 
 //========================================================================
 //                       class GameTreeInfosetRep
 //========================================================================
 
 GameTreeInfosetRep::GameTreeInfosetRep(GameTreeRep *p_efg, int p_number,
-			       GamePlayerRep *p_player, int p_actions)
+				       GamePlayerRep *p_player,
+				       int p_actions)
   : m_efg(p_efg), m_number(p_number), m_player(p_player), 
     m_actions(p_actions), flag(0) 
 {
   while (p_actions)   {
-    m_actions[p_actions] = new GameActionRep(p_actions, "", this);
+    m_actions[p_actions] = new GameTreeActionRep(p_actions, "", this);
     p_actions--; 
   }
 
@@ -141,7 +142,7 @@ GameAction GameTreeInfosetRep::InsertAction(GameAction p_action /* =0 */)
     for (where = 1; m_actions[where] != p_action; where++); 
   }
 
-  GameActionRep *action = new GameActionRep(where, "", this);
+  GameTreeActionRep *action = new GameTreeActionRep(where, "", this);
   m_actions.Insert(action, where);
   if (m_player->IsChance()) {
     m_probs.Insert(Number("0"), where);

@@ -249,7 +249,7 @@ T MixedBehavProfile<T>::GetLiapValue(bool p_definedOnly) const
 	x = GetActionProb(action);
 	avg += x * m_actionValues(action->GetInfoset()->GetPlayer()->GetNumber(),
 				  action->GetInfoset()->GetNumber(),
-				  action->m_number);
+				  action->GetNumber());
 	sum += x;
 	if (x > (T)0)  x = (T)0;
 	result += BIG1 * x * x;         // add penalty for neg probabilities
@@ -331,7 +331,7 @@ const T &MixedBehavProfile<T>::GetActionValue(const GameAction &act) const
   ComputeSolutionData();
   return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			act->GetInfoset()->GetNumber(),
-			act->m_number);
+			act->GetNumber());
 }
 
 template <class T>
@@ -339,7 +339,7 @@ const T &MixedBehavProfile<T>::GetRegret(const GameAction &act) const
 { 
   ComputeSolutionData();
   return m_gripe(act->GetInfoset()->GetPlayer()->GetNumber(),
-		 act->GetInfoset()->GetNumber(), act->m_number);
+		 act->GetInfoset()->GetNumber(), act->GetNumber());
 }
 
 template <class T>
@@ -397,16 +397,16 @@ T MixedBehavProfile<T>::DiffActionValue(const GameAction &p_action,
 
   for (int i = 1; i <= infoset->NumMembers(); i++) {
     GameNode member = infoset->GetMember(i);
-    GameNode child = member->GetChild(p_action->m_number);
+    GameNode child = member->GetChild(p_action->GetNumber());
 
     deriv += DiffRealizProb(member, p_oppAction) *
       (m_nodeValues(child->GetNumber(), player->GetNumber()) -
        m_actionValues(p_action->GetInfoset()->GetPlayer()->GetNumber(),
 		      p_action->GetInfoset()->GetNumber(),
-		      p_action->m_number));
+		      p_action->GetNumber()));
 
     deriv += m_realizProbs[member->GetNumber()] *
-      DiffNodeValue(member->GetChild(p_action->m_number), player, p_oppAction);
+      DiffNodeValue(member->GetChild(p_action->GetNumber()), player, p_oppAction);
   }
 
   return deriv / GetInfosetProb(p_action->GetInfoset());
@@ -517,7 +517,7 @@ void MixedBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
       if (!iset->IsChanceInfoset()) {
 	T &cpay = m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 				 act->GetInfoset()->GetNumber(),
-				 act->m_number);
+				 act->GetNumber());
 	if (infosetProb != infosetProb * (T) 0) {
 	  cpay += m_beliefs[node->GetNumber()] * m_nodeValues(childNode->GetNumber(), iset->GetPlayer()->GetNumber());
 	}
@@ -576,7 +576,8 @@ void MixedBehavProfile<T>::ComputeSolutionData(void) const
 	for (int act = 1; act <= infoset->NumActions(); act++) {
 	  GameAction action = infoset->GetAction(act);
 	  m_gripe(action->GetInfoset()->GetPlayer()->GetNumber(),
-		  action->GetInfoset()->GetNumber(), action->m_number) = 
+		  action->GetInfoset()->GetNumber(),
+                  action->GetNumber()) = 
 	    (ActionValue(action) - GetInfosetValue(infoset)) * GetInfosetProb(infoset);
 	}
       }

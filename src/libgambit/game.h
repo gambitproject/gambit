@@ -273,29 +273,19 @@ typedef GameObjectPtr<GameOutcomeRep> GameOutcome;
 
 /// An action at an information set in an extensive game
 class GameActionRep : public GameObject {
-  friend class GameTreeInfosetRep;
-  template <class T> friend class MixedBehavProfile;
-
-private:
-  int m_number;
-  std::string m_label;
-  GameTreeInfosetRep *m_infoset;
-
-  GameActionRep(int p_number, const std::string &p_label, 
-		  GameTreeInfosetRep *p_infoset)
-    : m_number(p_number), m_label(p_label), m_infoset(p_infoset) { }
-  ~GameActionRep()   { }
+protected:
+  virtual ~GameActionRep() { }
 
 public:
-  int GetNumber(void) const { return m_number; }
-  GameInfoset GetInfoset(void) const;
+  virtual int GetNumber(void) const = 0;
+  virtual GameInfoset GetInfoset(void) const = 0;
 
-  const std::string &GetLabel(void) const { return m_label; }
-  void SetLabel(const std::string &p_label) { m_label = p_label; }
+  virtual const std::string &GetLabel(void) const = 0;
+  virtual void SetLabel(const std::string &p_label) = 0;
 
-  bool Precedes(const GameNode &) const;
+  virtual bool Precedes(const GameNode &) const = 0;
 
-  void DeleteAction(void);
+  virtual void DeleteAction(void) = 0;
 };
 
 /// An information set in an extensive game
@@ -324,7 +314,7 @@ public:
   /// Returns the p_index'th action at the information set
   virtual GameAction GetAction(int p_index) const = 0;
   /// Returns a forward iterator over the available actions
-  virtual GameActionIterator Actions(void) const = 0; 
+  //virtual GameActionIterator Actions(void) const = 0; 
   //@}
 
   virtual int NumMembers(void) const = 0;
