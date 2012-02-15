@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <cstring>
 #include "libgambit/libgambit.h"
 using namespace std;
 
@@ -39,7 +40,7 @@ int main(int argc, char **argv) {
       exit(1);
   }
   bool useGambit=false;
-  if (argv[0]=="gampayoffs")useGambit=true;
+  if (strstr(argv[0],"gambit"))useGambit=true;
 
   Gambit::Game g= new Gambit::GameAggRep(aggPtr);
 
