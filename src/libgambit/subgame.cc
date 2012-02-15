@@ -23,7 +23,7 @@
 #include "libgambit.h"
 #include "subgame.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 namespace Gambit {
 

@@ -28,7 +28,7 @@
 
 #include "wx/plotctrl/plotfunc.h"
 #include "wx/plotctrl/fparser.h"
-#include <math.h>
+#include <cmath>
 
 //----------------------------------------------------------------------------
 // wxPlotFuncRefData

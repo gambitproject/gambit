@@ -2804,7 +2804,7 @@ SWIG_AsVal_double (PyObject *obj, double *val)
 }
 
 
-#include <float.h>
+#include <cfloat>
 
 
 #include <math.h>

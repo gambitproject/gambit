@@ -23,8 +23,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 #include <unistd.h>
-#include <stdlib.h>
 #include "libgambit/libgambit.h"
 #include "efglogit.h"
 #include "nfglogit.h"

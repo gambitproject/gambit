@@ -23,7 +23,7 @@
 #endif // WX_PRECOMP
 
 #include "wx/wxthings/range.h"
-#include <stdio.h>
+#include <cstdio>
 
 const wxRangeInt wxEmptyRangeInt(0, -1);
 const wxRangeDouble wxEmptyRangeDouble(0, -1);
