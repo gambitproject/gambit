@@ -2,7 +2,7 @@
 #define __GRAYCOMPOSITION_H
 
 #include <vector>
-using namespace std;
+//using namespace std;
 
 class GrayComposition {
 friend class agg;
@@ -72,7 +72,7 @@ private:
   int p; // idx to first positive
   int i,d;
   bool finished;
-  vector<int> current;
+  std::vector<int> current;
 
 };
 

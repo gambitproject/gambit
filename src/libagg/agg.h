@@ -4,9 +4,8 @@
 #ifndef __AGG_H
 #define __AGG_H
 
-using namespace std;
+//using namespace std;
 
-/* #include "gnmgame.h" */
 
 #include <iostream>
 #include <vector>
@@ -23,7 +22,7 @@ using namespace std;
 
 
 //data structure for mixed strategy profile:
-//alternatively: typedef vector<Number> ....
+//alternatively: typedef std::vector<Number> ....
 #ifdef USE_CVECTOR
   #include "../cmatrix.h"
   typedef cvector StrategyProfile;
@@ -31,12 +30,12 @@ using namespace std;
 #else
   //typedef  Number*  StrategyProfile;
   typedef double Number;
-  typedef vector<Number> StrategyProfile;
-  typedef vector<Number> NumberVector;
+  typedef std::vector<Number> StrategyProfile;
+  typedef std::vector<Number> NumberVector;
 #endif
 
 //data structure for payoff function:
-//alternatively: typedef map<vector<int> , Number> aggpayoff;
+//alternatively: typedef map<std::vector<int> , Number> aggpayoff;
 typedef trie_map<Number> aggpayoff;
 
 
@@ -51,9 +50,9 @@ typedef enum{COMPLETE,MAPPING,ADDITIVE} payofftype;
 class agg {
 
 public:
-  typedef vector<int> config;
-  typedef vector<int> ActionSet;
-  typedef vector<int> PlayerSet;
+  typedef std::vector<int> config;
+  typedef std::vector<int> ActionSet;
+  typedef std::vector<int> PlayerSet;
 
   static const char COMMENT_CHAR= '#';
   static const char LBRACKET='[';
@@ -72,20 +71,20 @@ public:
   
   //make AGG with random payoffs
   static agg* makeRandomAGG(int n, int* actions, int S, int P, 
-vector<vector<int> >& ASets, vector<vector<int> >& neighb,
-vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_factor=100);
+std::vector<std::vector<int> >& ASets, std::vector<std::vector<int> >& neighb,
+std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_factor=100);
 
 
   //constructor
   agg(int numPlayers, int * actions, int numANodes, int numPNodes,
-   vector<vector<int> >& actionSets, vector<vector<int> >& neighbors,
-   vector<projtype>& projTypes,
-   vector<vector<aggdistrib > >& projS,
-   vector<vector<vector<config> > >& proj,
-   vector<vector<proj_func*> > & projF,
-   vector<vector<vector<int> > >& Po,
-   vector<aggdistrib> &P,
-      vector<aggpayoff>& payoffs); 
+   std::vector<std::vector<int> >& actionSets, std::vector<std::vector<int> >& neighbors,
+   std::vector<projtype>& projTypes,
+   std::vector<std::vector<aggdistrib > >& projS,
+   std::vector<std::vector<std::vector<config> > >& proj,
+   std::vector<std::vector<proj_func*> > & projF,
+   std::vector<std::vector<std::vector<int> > >& Po,
+   std::vector<aggdistrib> &P,
+      std::vector<aggpayoff>& payoffs);
 
 
   //agg(const agg& other, bool completeGraph = false);
@@ -166,9 +165,9 @@ vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_factor=10
   Number getSymMixedPayoff( StrategyProfile &s);
   Number getSymMixedPayoff(int actnode, StrategyProfile &s);
   void getSymPayoffVector(NumberVector& dest, StrategyProfile &s);
-  Number getKSymMixedPayoff( int playerClass,vector<StrategyProfile> &s);
+  Number getKSymMixedPayoff( int playerClass,std::vector<StrategyProfile> &s);
   Number getKSymMixedPayoff( int playerClass,StrategyProfile &s);
-  Number getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfile> &s);
+  Number getKSymMixedPayoff(int playerClass, int act, std::vector<StrategyProfile> &s);
   Number getKSymMixedPayoff(const StrategyProfile &s,int pClass1,int act1,int pClass2=-1,int act2=-1);
   void getKSymPayoffVector(NumberVector& dest, int playerClass, StrategyProfile &s);
 
@@ -190,10 +189,10 @@ vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_factor=10
 	  return res;
   }
 
-  vector<proj_func*>& getProjFunctions(int node){return projFunctions.at(node);}
-  const vector<int>& getPorder(int player, int action){return Porder.at(player).at(action);}
-  const vector<vector<config> >& getProjection(int node){return projection.at(node);}
-  const vector<int>& getActionSet(int player){return actionSets.at(player);}
+  std::vector<proj_func*>& getProjFunctions(int node){return projFunctions.at(node);}
+  const std::vector<int>& getPorder(int player, int action){return Porder.at(player).at(action);}
+  const std::vector<std::vector<config> >& getProjection(int node){return projection.at(node);}
+  const std::vector<int>& getActionSet(int player){return actionSets.at(player);}
   const aggpayoff& getPayoffMap(int node){return payoffs.at(node);}
 
   Number getMaxPayoff();
@@ -215,42 +214,42 @@ private:
   int numPNodes;        // |P|
 
   //action sets: for each player i \in N
-  vector<vector<int> > actionSets;
+  std::vector<std::vector<int> > actionSets;
 
   //neighbor lists: for each node \in S&P
-  vector<vector<int> > neighbors; 
+  std::vector<std::vector<int> > neighbors;
 
   //Projection signature for each projected node \in P
-  vector<projtype> projectionTypes;
+  std::vector<projtype> projectionTypes;
 
   //payoff function for each action node \in S
-  vector<aggpayoff> payoffs; 
+  std::vector<aggpayoff> payoffs;
 
   //auxillary data strucutres
 
   //originally:
   //foreach s \in S, foreach i \in N, foreach s_i \in S_i,
   //the 'contribution' of s_i to D^(s)
-  vector< vector<vector<config> > > projection;
+  std::vector< std::vector<std::vector<config> > > projection;
 
   //a more compact way:
   //foreach s \in S, foreach s' \in S, 
   // the contribution of s' to D^(s)
-  //vector<vector<config> > projection;
+  //std::vector<std::vector<config> > projection;
 
   //foreach s \in S, foreach i \in N, the projected mixed strat
   //which is a prob distribution over the set of 'contributions'
-  vector< vector<aggdistrib > > projectedStrat;
+  std::vector< std::vector<aggdistrib > > projectedStrat;
 
   // foreach s in S, i in N, the full set of projected actions.
-  vector<vector<aggdistrib> >fullProjectedStrat;
+  std::vector<std::vector<aggdistrib> >fullProjectedStrat;
 
   //foreach s in S, foreach neighbor of s, its projection function 
-  vector<vector<proj_func*> > projFunctions;
+  std::vector<std::vector<proj_func*> > projFunctions;
 
   //foreach i \in N, foreach s_i in S_i, the order of agents o_1.. o_{n-1}
   // in which we apply the DP algorithm
-  vector< vector< vector<int> > > Porder;
+  std::vector< std::vector< std::vector<int> > > Porder;
 
   //when computing the induced distribution via ComputeP():
   //foreach k<= n-1,  
@@ -259,35 +258,35 @@ private:
   //when computing the partial distributions for the payoff jacobian:
   //  foreach  j \in N,
   // the partial distribution induced by all agents except j. 
-  vector<aggdistrib>  Pr;
+  std::vector<aggdistrib>  Pr;
 
   //foreach s in S, whether s's neighbors are all action nodes
-  vector<bool> isPure;
+  std::vector<bool> isPure;
 
   //foreach s in S, j in N, the index of s in j's action set, or -1 if N/A
-  vector<vector<int> > node2Action;
+  std::vector<std::vector<int> > node2Action;
 
   //cache of jacobian entries.
   trie_map<Number> cache;
 
   //the unique action sets
-  vector<ActionSet> uniqueActionSets;
+  std::vector<ActionSet> uniqueActionSets;
 
   //equivalent classes of players
-  vector<PlayerSet> playerClasses;
+  std::vector<PlayerSet> playerClasses;
 
   //the class index for each player
-  vector<int> player2Class;
+  std::vector<int> player2Class;
 
   //sum of the sizes of uniqueActionSets
   int numKSymActions;
 
   //strategyOffset for kSymmetric strategy profile
-  vector<int> kSymStrategyOffset;
+  std::vector<int> kSymStrategyOffset;
 
 
   //input functor 
-  struct input : public unary_function<aggpayoff::iterator , void>{
+  struct input : public std::unary_function<aggpayoff::iterator , void>{
     input(istream& i): in(i) {}
     void operator() (aggpayoff::iterator p) {
 	in >> (*p).second;
@@ -295,7 +294,7 @@ private:
     istream& in;
   };
 
-  struct inputRand : public unary_function<aggpayoff::iterator, void>{
+  struct inputRand : public std::unary_function<aggpayoff::iterator, void>{
     inputRand(bool int_payoffs=false, int int_factor=100):int_payoffs(int_payoffs),int_factor(int_factor) {}
     void operator() (aggpayoff::iterator p){
       p->second = drand48();
@@ -315,14 +314,14 @@ private:
 
   static void stripComment(istream& in);
 
-  static void setProjections(vector<vector<aggdistrib > >& projS, 
-  vector<vector<vector<config> > >& proj, int N,int S,int P, vector<vector<int> >& AS, vector<vector<int> >& neighb, vector<projtype>& projTypes);
+  static void setProjections(std::vector<std::vector<aggdistrib > >& projS,
+  std::vector<std::vector<std::vector<config> > >& proj, int N,int S,int P, std::vector<std::vector<int> >& AS, std::vector<std::vector<int> >& neighb, std::vector<projtype>& projTypes);
 
-  static void getAn(multiset<int>& dest, vector<vector<int> >& neighb, vector<projtype>& projTypes,int S,int Node, vector<int>& path);
+  static void getAn(std::multiset<int>& dest, std::vector<std::vector<int> >& neighb, std::vector<projtype>& projTypes,int S,int Node, std::vector<int>& path);
 
-  static  void initPorder(vector<int>& Po,
+  static  void initPorder(std::vector<int>& Po,
 		     int i,  int N,
-		     vector<aggdistrib>& projS);
+		     std::vector<aggdistrib>& projS);
 
 
   //private methods:
@@ -332,9 +331,9 @@ private:
 
 #ifdef USE_CVECTOR
   //helper functions for computing jacobian
-  void computePartialP_PureNode(int player,int act,vector<int>& tasks);
-  void computePartialP_bisect(int player,int act, vector<int>::iterator f,vector<int>::iterator l,aggdistrib& temp);
-  void computePartialP(int player1, int act1, vector<int>& tasks,vector<int>& nontasks);
+  void computePartialP_PureNode(int player,int act,std::vector<int>& tasks);
+  void computePartialP_bisect(int player,int act, std::vector<int>::iterator f,std::vector<int>::iterator l,aggdistrib& temp);
+  void computePartialP(int player1, int act1, std::vector<int>& tasks,std::vector<int>& nontasks);
   void computePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,trie_map<Number>& cache);
   void savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,Number result,
 	trie_map<Number>& cache, bool partial=false );
