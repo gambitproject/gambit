@@ -8,8 +8,7 @@
 #include <vector>
 #include <cstdlib>
 
-//using namespace std;
-using std::multiset;
+
 using std::ostream;
 using std::endl;
 using std::istream;
@@ -69,7 +68,7 @@ struct proj_func{
 	  return Type!=v.Type || Default!=v.Default || weights !=v.weights;
 	}
 	virtual int operator()(int x,int y)   =0;
-	virtual int operator()(multiset<int>& s) =0;
+	virtual int operator()(std::multiset<int>& s) =0;
 	virtual void print (std::ostream& out){
 	  out<< Type;
 	  out<<" "<<Default<<" ";
@@ -88,9 +87,9 @@ struct proj_func_SUM: public proj_func {
 struct proj_func_SUM2: public proj_func{
     proj_func_SUM2(istream& in, int S):proj_func(P_SUM2,in,S){ }
     inline int operator()(int x, int y){return x+y;}
-    inline int operator()(multiset<int>& s){
+    inline int operator()(std::multiset<int>& s){
       int res=Default;
-      for(multiset<int>::iterator it=s.begin();it!=s.end();it++){
+      for(std::multiset<int>::iterator it=s.begin();it!=s.end();it++){
         res+=weights.at(*it);
       }
       return res;
@@ -116,9 +115,9 @@ struct proj_func_EXIST2: public proj_func{
       }
     }
     inline int operator()(int x, int y){return (x+y>0);}
-    inline int operator()(multiset<int>& s){
+    inline int operator()(std::multiset<int>& s){
       int res=Default;
-      for(multiset<int>::iterator it=s.begin();it!=s.end();it++){
+      for(std::multiset<int>::iterator it=s.begin();it!=s.end();it++){
         res+=weights.at(*it);
       }
       return (res>0);
@@ -131,7 +130,7 @@ struct proj_func_HIGH:public proj_func{
 	if (y==Default)return x;
 	return ( (x>y)?x:y );
     }
-    inline int operator()(multiset<int>& s){
+    inline int operator()(std::multiset<int>& s){
 	if (s.empty()) return Default;
 	return *(s.rbegin());
     }
@@ -144,9 +143,9 @@ struct proj_func_HIGH2: public proj_func{
       if (y==Default)return x;
       return ( (x>y)?x:y );
     }
-    inline int operator()(multiset<int>& s){
+    inline int operator()(std::multiset<int>& s){
       if (s.empty()) return Default;
-      multiset<int>::iterator it=s.begin();
+      std::multiset<int>::iterator it=s.begin();
       int res=weights.at(*it);
       for(;it!=s.end();it++){
         res=(res>weights.at(*it))?res:weights[*it];
@@ -161,7 +160,7 @@ struct proj_func_LOW: public proj_func{
 	if (y==Default )return x;
 	return ( (x<y)?x:y);
     }
-    inline int operator()(multiset<int>& s){
+    inline int operator()(std::multiset<int>& s){
 	if (s.empty() ) return Default;
 	return *(s.begin());
     }
@@ -174,9 +173,9 @@ struct proj_func_LOW2: public proj_func{
       if (y==Default)return x;
       return ( (x<y)?x:y );
     }
-    inline int operator()(multiset<int>& s){
+    inline int operator()(std::multiset<int>& s){
       if (s.empty()) return Default;
-      multiset<int>::iterator it=s.begin();
+      std::multiset<int>::iterator it=s.begin();
       int res=weights.at(*it);
       for(;it!=s.end();it++){
         res=(res<weights.at(*it))?res:weights[*it];

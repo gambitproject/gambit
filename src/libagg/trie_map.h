@@ -9,9 +9,7 @@
 #include <math.h>
 #include <ext/slist>
 #include <iterator>
-//using namespace std;
-using std::vector;
-using std::pair;
+
 using std::ostream;
 using std::endl;
 using std::cout;
@@ -32,14 +30,14 @@ template <class V>
 struct TrieNode
 {
   //members:
-  vector<TrieNode*> children;
-  typename slist<pair<vector<int>,V> >::iterator val;
+  std::vector<TrieNode*> children;
+  typename slist<std::pair<std::vector<int>,V> >::iterator val;
 
 
   //methods:
 
   //constructor  
-  TrieNode(size_t branches, typename slist<pair<vector<int>,V> >::iterator v):children(branches,(TrieNode*)NULL),val(v) {}
+  TrieNode(size_t branches, typename slist<std::pair<std::vector<int>,V> >::iterator v):children(branches,(TrieNode*)NULL),val(v) {}
   
 
   inline TrieNode*& operator[](size_t i){
@@ -53,8 +51,8 @@ class trie_map {
 
 public:
   //typedefs
-  typedef vector<int>          key_type;
-  typedef pair<vector<int>, V> value_type;
+  typedef std::vector<int>          key_type;
+  typedef std::pair<std::vector<int>, V> value_type;
 
   typedef V* 		pointer;
   typedef V&		reference;
@@ -94,7 +92,7 @@ public:
   inline const_iterator end() const {return data.end();}
 
   //insert: same interface as in STL map
-  inline pair<iterator,bool> insert (const value_type& x);
+  inline std::pair<iterator,bool> insert (const value_type& x);
 
   template <class InputIterator>
   inline void insert(InputIterator f, InputIterator l){
@@ -105,7 +103,7 @@ public:
 
   //insert or add
   inline trie_map<V>& operator+=(const value_type& x){
-    pair<typename trie_map<V>::iterator ,bool> r=insert(x);
+    std::pair<typename trie_map<V>::iterator ,bool> r=insert(x);
     if (!r.second) (*r.first).second += x.second;
     return (*this);
   }
@@ -170,10 +168,10 @@ public:
 
   //polynomial multiplication of t1 and t2, store the result in self
   void multiply (const trie_map<V>& t1,const trie_map<V>& t2,size_t keylen,
-	 vector<proj_func*>& f)
+	 std::vector<proj_func*>& f)
   {
     static size_t i;
-    static pair<vector<int>, V> v;
+    static std::pair<std::vector<int>, V> v;
     const_iterator p1,p2;
     assert(this!=&t1 && this != &t2);
     v.first.resize(keylen);
@@ -195,9 +193,9 @@ public:
   //Do simplification when V is a class of symbolic expressions and there is strict independence
   //However, wouldn't it be sufficient to check if projectedStrat is a singleton?
   void multiply_smart (const trie_map<V>& P_k_minus_1,const trie_map<V>& projectedStrat,size_t keylen,
-                        vector<proj_func*>& f)
+                        std::vector<proj_func*>& f)
         {
-                static pair<vector<int>, V> v;
+                static std::pair<std::vector<int>, V> v;
                 v.first.resize(keylen);
                 reset();
 
@@ -248,11 +246,11 @@ public:
         }
 
   //multiply in-place. other should not be the same object as self.
-  void multiply (const trie_map<V>& other,size_t keylen, vector<proj_func*>& f);
+  void multiply (const trie_map<V>& other,size_t keylen, std::vector<proj_func*>& f);
 
   //squaring
-  void square(trie_map<V>& dest, size_t keylen, vector<proj_func*>& f) const{
-    static pair<vector<int>, V> v;
+  void square(trie_map<V>& dest, size_t keylen, std::vector<proj_func*>& f) const{
+    static std::pair<std::vector<int>, V> v;
     v.first.resize(keylen);
     assert(this!=&dest);
     dest.reset();
@@ -270,9 +268,9 @@ public:
   }
 
   //squaring in-place
-  void square(size_t keylen, vector<proj_func*>& f){
+  void square(size_t keylen, std::vector<proj_func*>& f){
     static typename slist<typename trie_map<V>::value_type>::iterator p1,p2;
-    static pair<vector<int>, V> v;
+    static std::pair<std::vector<int>, V> v;
     v.first.resize(keylen);
     slist<typename trie_map<V>::value_type> data2;
     data.swap(data2);
@@ -293,7 +291,7 @@ public:
   //take power of self using repeated squaring. result stored in dest.
   //this is actually slower than power by straight multiplication, if the # of configurations grow polynomially
   //in the # of players.
-  void power_repsq (size_t p, trie_map<V>& dest, size_t keylen, vector<proj_func*>& f) const{
+  void power_repsq (size_t p, trie_map<V>& dest, size_t keylen, std::vector<proj_func*>& f) const{
     assert(p>0 && this!=&dest );
     if(p==1){
       dest=*this;
@@ -315,7 +313,7 @@ public:
     }
   }
 
-  void power(size_t p, trie_map<V> &dest,trie_map<V> &scratch, size_t keylen, vector<proj_func*> &f){
+  void power(size_t p, trie_map<V> &dest,trie_map<V> &scratch, size_t keylen, std::vector<proj_func*> &f){
     assert(p>0 && this!=&dest );
     if (p==1) {
       dest = *this;
@@ -357,7 +355,7 @@ public:
   }
 
   //first apply the action x, then inner prod
-  V inner_prod(const vector<int>& x, size_t keylen, vector<proj_func*>& f,
+  V inner_prod(const std::vector<int>& x, size_t keylen, std::vector<proj_func*>& f,
 	trie_map<V>& other, V init=(V)(0) ) const
   { 
     V result(init);
@@ -394,7 +392,7 @@ public:
 
   
   //polynomial division
-  inline trie_map<V>& operator/= (const vector<V>& denom);
+  inline trie_map<V>& operator/= (const std::vector<V>& denom);
 
   
 private:
@@ -403,7 +401,7 @@ private:
   size_type initBranches; //default branching factor
   TrieNode<V> *root;
 
-  vector<TrieNode<V>*> leaves;
+  std::vector<TrieNode<V>*> leaves;
 
   static const double  THRESH = 1e-12;
   
@@ -423,7 +421,7 @@ private:
 
   //private methods:
   //div: helper for operator/=()
-  void  div(const vector<V>& denom, TrieNode<V>* n, int current, int pivot);
+  void  div(const std::vector<V>& denom, TrieNode<V>* n, int current, int pivot);
 
 
 
@@ -480,7 +478,7 @@ private:
   //private helper functor classes:
 
   struct div_helper :public std::unary_function<void, iterator>{
-    div_helper(const vector<V>& den, int piv,iterator en)
+    div_helper(const std::vector<V>& den, int piv,iterator en)
 	:pivot(piv), denom(den),endp(en){}
     inline void operator()(iterator p){
 	if (p==endp) return;
@@ -488,15 +486,15 @@ private:
 	p->second /= denom[pivot];
     } 
     int pivot;
-    const vector<V>& denom;
+    const std::vector<V>& denom;
     iterator endp;
   };
 
   struct div_helper_mul: public std::unary_function<void,iterator>{
-    div_helper_mul(const vector<V>& den, int piv, TrieNode<V>* des,iterator en)
+    div_helper_mul(const std::vector<V>& den, int piv, TrieNode<V>* des,iterator en)
 	:pivot(piv),denom(den), dest(des),endp(en) {}
 
-    void add(const vector<int>& conf, V y){
+    void add(const std::vector<int>& conf, V y){
       size_t i,keylen=conf.size();
       double th(THRESH/(double)denom[pivot]);
       //if (y<=th&&y>=-th) return;
@@ -543,7 +541,7 @@ private:
 
     
     int pivot;
-    const vector<V>& denom;
+    const std::vector<V>& denom;
     TrieNode<V>* dest;
     iterator endp;
   };  //end struct div_helper_mul

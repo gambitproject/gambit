@@ -1,12 +1,12 @@
 
-using namespace std;
+//using namespace std;
 
 template <class V>
-inline pair<typename trie_map<V>::iterator, bool>
+inline std::pair<typename trie_map<V>::iterator, bool>
 trie_map<V>::insert(const trie_map<V>::value_type& x) {
 
   static size_t ind;
-  static vector<int>::const_iterator p;//,s;
+  static std::vector<int>::const_iterator p;//,s;
   //s=x.first.end();
   TrieNode<V>* ptr = root;
    
@@ -19,11 +19,11 @@ trie_map<V>::insert(const trie_map<V>::value_type& x) {
       ptr->children[ind] = new TrieNode<V>(initBranches,data.end());
     ptr=ptr->children[ind];
   }
-  if (ptr->val!=data.end()) return pair<typename trie_map<V>::iterator,bool>(ptr->val, false);
+  if (ptr->val!=data.end()) return std::pair<typename trie_map<V>::iterator,bool>(ptr->val, false);
 
   //now insert the item
   leaves.push_back(ptr);
-  return pair<typename trie_map<V>::iterator,bool>((ptr->val=data.insert_after(data.before_begin(),x)),true);
+  return std::pair<typename trie_map<V>::iterator,bool>((ptr->val=data.insert_after(data.before_begin(),x)),true);
 }
 
 
@@ -88,7 +88,7 @@ inline void trie_map<V>::swap( trie_map<V>& other )
 
 
 template <class V>
-void trie_map<V>::multiply (const trie_map<V>& other,size_t keylen, vector<proj_func*>& f)
+void trie_map<V>::multiply (const trie_map<V>& other,size_t keylen, std::vector<proj_func*>& f)
 {
 //#ifdef AGGDEBUG
 //  cout<< "multiplying "<<endl<<*this<<endl <<"(in order): "<<endl;
@@ -100,14 +100,14 @@ void trie_map<V>::multiply (const trie_map<V>& other,size_t keylen, vector<proj_
   static size_t i;
 
   if(&other == this){
-    cerr<<"Error: (in-place) multiply: other should not be the same object as self"<<endl;
+    std::cerr<<"Error: (in-place) multiply: other should not be the same object as self"<<endl;
     exit(1);
   }
   slist<typename trie_map<V>::value_type> data2;
   data.swap(data2);
   reset();
 
-  static pair<vector<int>, V> v;
+  static std::pair<std::vector<int>, V> v;
   v.first.resize(keylen);
   TrieNode<V>* ptr;
 
@@ -151,7 +151,7 @@ void trie_map<V>::multiply (const trie_map<V>& other,size_t keylen, vector<proj_
 
 template <class V>
 inline trie_map<V>& 
-trie_map<V>::operator/= (const vector<V>& denom){
+trie_map<V>::operator/= (const std::vector<V>& denom){
   //first, find the pivot: the first nonzero element of denom
   V th(sqrt(THRESH));
   int piv=-1;
@@ -175,7 +175,7 @@ trie_map<V>::operator/= (const vector<V>& denom){
 }
 
 template <class V>
-void trie_map<V>:: div(const vector<V>& denom,TrieNode<V>* n, int current, int pivot){
+void trie_map<V>:: div(const std::vector<V>& denom,TrieNode<V>* n, int current, int pivot){
   int i;
   if ( pivot != current) { 
     int s=n->children.size();
