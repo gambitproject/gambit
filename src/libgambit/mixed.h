@@ -105,8 +105,7 @@ public:
   	  return new AggMixedStrategyProfileRep(*this);
     }
     virtual T GetPayoff(int pl) const;
-    virtual T GetPayoffDeriv(int pl, const GameStrategy &) const
-    { throw UndefinedException(); }
+    virtual T GetPayoffDeriv(int pl, const GameStrategy &) const;
     virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const
     { throw UndefinedException(); }
 };

@@ -34,8 +34,6 @@ namespace Gambit {
 
 class AggPureStrategyProfileRep : public PureStrategyProfileRep {
 
-protected:
-  long m_index;
 
 public:
   AggPureStrategyProfileRep(const Game &p_game);
@@ -54,12 +52,11 @@ public:
 
 AggPureStrategyProfileRep::AggPureStrategyProfileRep(const Game &p_game)
 {
-  m_index = 1L;
+
   m_nfg = p_game;
   m_profile = Array<GameStrategy>(p_game->NumPlayers());
   for (int pl = 1; pl <= p_game->NumPlayers(); pl++)   {
     m_profile[pl] = p_game->GetPlayer(pl)->GetStrategy(1);
-    //m_index += m_profile[pl]->m_offset;
   }
 }
 
