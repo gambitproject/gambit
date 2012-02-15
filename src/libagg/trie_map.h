@@ -9,7 +9,13 @@
 #include <math.h>
 #include <ext/slist>
 #include <iterator>
-using namespace std;
+//using namespace std;
+using std::vector;
+using std::pair;
+using std::ostream;
+using std::endl;
+using std::cout;
+using std::ostream_iterator;
 using __gnu_cxx::slist;
 
 //forward declarations
@@ -473,7 +479,7 @@ private:
 
   //private helper functor classes:
 
-  struct div_helper :public unary_function<void, iterator>{
+  struct div_helper :public std::unary_function<void, iterator>{
     div_helper(const vector<V>& den, int piv,iterator en)
 	:pivot(piv), denom(den),endp(en){}
     inline void operator()(iterator p){
@@ -486,7 +492,7 @@ private:
     iterator endp;
   };
 
-  struct div_helper_mul: public unary_function<void,iterator>{
+  struct div_helper_mul: public std::unary_function<void,iterator>{
     div_helper_mul(const vector<V>& den, int piv, TrieNode<V>* des,iterator en)
 	:pivot(piv),denom(den), dest(des),endp(en) {}
 

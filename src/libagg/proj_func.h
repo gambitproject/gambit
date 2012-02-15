@@ -8,7 +8,11 @@
 #include <vector>
 #include <cstdlib>
 
-using namespace std;
+//using namespace std;
+using std::multiset;
+using std::ostream;
+using std::endl;
+using std::istream;
 
 //types of contribution-independent function:
 //sum, existence, highest, lowest and their extended versions
@@ -27,33 +31,33 @@ typedef enum{
 struct proj_func{
         TypeEnum Type;
 	int Default;      //default value
-	vector<int> weights;
-	proj_func(TypeEnum tp,int def,vector<int>& wts):Type(tp),Default(def),weights(wts) {}
+	std::vector<int> weights;
+	proj_func(TypeEnum tp,int def,std::vector<int>& wts):Type(tp),Default(def),weights(wts) {}
 	proj_func(TypeEnum tp,int def): Type(tp),Default(def) {}
-	proj_func(TypeEnum tp,istream& in,int S) : Type(tp){
+	proj_func(TypeEnum tp,std::istream& in,int S) : Type(tp){
 	      in>>Default;
 	      if(in.eof()||in.bad()) {
-	                        cout << "proj_func() error: bad input.\n";
+	                        std::cout << "proj_func() error: bad input.\n";
 	                        exit(1);
 	      }
 	      int w;
 	      char c;
-	      in >>ws>>c;
+	      in >>std::ws>>c;
 	      if (in.eof()||in.bad()||c!='['){
-	        cout<<"proj_func() error: [ expected.\n";
+	        std::cout<<"proj_func() error: [ expected.\n";
 	        exit(1);
 	      }
 	      for (int i=0;i<S;i++) {
 	        if(in.eof()||in.bad()) {
-	                cout << "proj_func() error: bad input.\n";
+	                std::cout << "proj_func() error: bad input.\n";
 	                exit(1);
 	        }
 	        in >> w;
 	        weights.push_back(w);
 	      }
-	      in>>ws>>c;
+	      in>>std::ws>>c;
 	      if(in.eof()||in.bad()||c!=']'){
-	        cout<<"proj_func() error: ] expected.\n";
+	        std::cout<<"proj_func() error: ] expected.\n";
 	        exit(1);
 	      }
 	}
@@ -66,18 +70,18 @@ struct proj_func{
 	}
 	virtual int operator()(int x,int y)   =0;
 	virtual int operator()(multiset<int>& s) =0;
-	virtual void print (ostream& out){
+	virtual void print (std::ostream& out){
 	  out<< Type;
 	  out<<" "<<Default<<" ";
-	  copy(weights.begin(),weights.end(),ostream_iterator<int>(out," "));
-	  cout<<endl;
+	  copy(weights.begin(),weights.end(),std::ostream_iterator<int>(out," "));
+	  out<<endl;
 	}
 };
 
 struct proj_func_SUM: public proj_func {
     proj_func_SUM():proj_func(P_SUM,0) {}
     inline int operator() (int x,int y){return x+y;}
-    inline int operator()(multiset<int>& s){return s.size();}
+    inline int operator()(std::multiset<int>& s){return s.size();}
     void print (ostream& out){ out<<P_SUM<<endl;}
 };
 
@@ -95,18 +99,18 @@ struct proj_func_SUM2: public proj_func{
 struct proj_func_EXIST: public proj_func{
     proj_func_EXIST() :proj_func(P_EXIST,0) {}
     inline int operator() (int x, int y) {return (x+y>0);}
-    inline int operator() (multiset<int>& s){ return (s.size()>0);}
+    inline int operator() (std::multiset<int>& s){ return (s.size()>0);}
     void print(ostream& out){out<<P_EXIST<<endl;}
 };
 struct proj_func_EXIST2: public proj_func{
     proj_func_EXIST2(istream& in, int S):proj_func(P_EXIST2,in,S){
       if (Default<0){
-        cout<<"proj_func_EXIST2() error: default value should be nonnegative.\n";
+        std::cout<<"proj_func_EXIST2() error: default value should be nonnegative.\n";
         exit(1);
       }
       for (size_t i=0;i<weights.size();i++){
         if(weights[i]<0){
-          cout<<"proj_func_EXIST2() error: weights should be nonnegative.\n";
+          std::cout<<"proj_func_EXIST2() error: weights should be nonnegative.\n";
           exit(1);
         }
       }
@@ -195,7 +199,7 @@ inline proj_func* make_proj_func(TypeEnum type, istream& in,int S,int P){
 	case P_HIGH2: return (new proj_func_HIGH2(in,S));
 	case P_LOW2: return (new proj_func_LOW2(in,S));
 	default:
-	  cout<<"error: function type is not recognized."<<endl;
+	  std::cout<<"error: function type is not recognized."<<endl;
 	  return NULL;
   }
 }
