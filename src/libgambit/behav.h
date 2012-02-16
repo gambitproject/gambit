@@ -51,11 +51,11 @@ protected:
   const T &ActionValue(const GameAction &act) const 
     { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			    act->GetInfoset()->GetNumber(),
-			    act->m_number); }
+			    act->GetNumber()); }
   T &ActionValue(const GameAction &act)
     { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			    act->GetInfoset()->GetNumber(),
-			    act->m_number); }
+			    act->GetNumber()); }
   
   /// @name Auxiliary functions for computation of interesting values
   //@{

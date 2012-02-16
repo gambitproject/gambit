@@ -29,9 +29,36 @@ namespace Gambit {
 
 class GameTreeRep;
 
+class GameTreeActionRep : public GameActionRep {
+  friend class GameTreeRep;
+  friend class GameTreeInfosetRep;
+  template <class T> friend class MixedBehavProfile;
+
+private:
+  int m_number;
+  std::string m_label;
+  GameTreeInfosetRep *m_infoset;
+
+  GameTreeActionRep(int p_number, const std::string &p_label, 
+		    GameTreeInfosetRep *p_infoset)
+    : m_number(p_number), m_label(p_label), m_infoset(p_infoset) { }
+  ~GameTreeActionRep()   { }
+
+public:
+  int GetNumber(void) const { return m_number; }
+  GameInfoset GetInfoset(void) const;
+
+  const std::string &GetLabel(void) const { return m_label; }
+  void SetLabel(const std::string &p_label) { m_label = p_label; }
+
+  bool Precedes(const GameNode &) const;
+
+  void DeleteAction(void);
+};
+
 class GameTreeInfosetRep : public GameInfosetRep {
   friend class GameTreeRep;
-  friend class GameActionRep;
+  friend class GameTreeActionRep;
   friend class GamePlayerRep;
   friend class GameTreeNodeRep;
   template <class T> friend class MixedBehavProfile;
@@ -41,7 +68,7 @@ protected:
   int m_number;
   std::string m_label;
   GamePlayerRep *m_player;
-  Array<GameActionRep *> m_actions;
+  Array<GameTreeActionRep *> m_actions;
   Array<GameTreeNodeRep *> m_members;
   int flag, whichbranch;
   Array<Number> m_probs;
@@ -78,8 +105,8 @@ public:
   /// Returns the p_index'th action at the information set
   virtual GameAction GetAction(int p_index) const { return m_actions[p_index]; }
   /// Returns a forward iterator over the available actions
-  virtual GameActionIterator Actions(void) const 
-    { return GameActionIterator(m_actions); }
+  //virtual GameActionIterator Actions(void) const 
+  //  { return GameActionIterator(m_actions); }
   //@}
 
   virtual int NumMembers(void) const { return m_members.Length(); }
@@ -101,7 +128,7 @@ public:
 
 class GameTreeNodeRep : public GameNodeRep {
   friend class GameTreeRep;
-  friend class GameActionRep;
+  friend class GameTreeActionRep;
   friend class GameTreeInfosetRep;
   friend class GamePlayerRep;
   friend class PureBehavProfile;
