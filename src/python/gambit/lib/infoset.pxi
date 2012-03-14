@@ -88,3 +88,10 @@ cdef class Infoset:
             p = Player()
             p.player = self.infoset.deref().GetPlayer()
             return p
+        def __set__(self, player):
+            if not isinstance(player, Player):
+                raise ValueError, "type Player required for setting player at an infoset"
+            elif player.game != self.game:
+                raise ValueError, "player at an infoset must belong to the same game"
+            else:
+                self.infoset.deref().SetPlayer((<Player>player).player)

@@ -130,7 +130,7 @@ cdef extern from "libgambit/game.h":
         int NumChildren()
         c_GameNode GetChild(int) except +IndexError
         c_GameOutcome GetOutcome()
-        void SetOutcome(c_GameOutcome)
+        void SetOutcome(c_GameOutcome) 
         c_GameNode GetPriorSibling()
         c_GameNode GetNextSibling() 
         bint IsTerminal()
