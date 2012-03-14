@@ -54,6 +54,13 @@ cdef class Infoset:
         else:
             raise TypeError, "Precedes takes a Node object as its input"
             
+    property game:
+        def __get__(self):
+            cdef Game g
+            g = Game()
+            g.game = self.infoset.deref().GetGame()
+            return g
+        
     property label:
         def __get__(self):
             return self.infoset.deref().GetLabel().c_str()

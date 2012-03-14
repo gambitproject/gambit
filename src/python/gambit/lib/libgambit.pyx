@@ -73,7 +73,9 @@ cdef extern from "libgambit/game.h":
 
     ctypedef struct c_GameInfosetRep "GameInfosetRep":
         int GetNumber()
+        c_Game GetGame()
         c_GamePlayer GetPlayer()
+        void SetPlayer(c_GamePlayer) except +
 
         cxx_string GetLabel()
         void SetLabel(cxx_string)
