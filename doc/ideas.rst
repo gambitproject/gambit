@@ -7,43 +7,86 @@ research.  There are a number of opportunities for programmers of all
 skill levels and backgrounds to contribute to improving and extending
 Gambit.
 
-A number of such ideas are outlined in this section.  They are grouped
-by the areas of focus:
-
-* :ref:`Interfaces (graphical and API) <contribute-interfaces>`
-* :ref:`Testing and performance comparison <contribute-testing>`
-* :ref:`Implementation of algorithms <contribute-algorithms>`
-
-Each project includes a recommended/preferred
-implementation language, and a summary of the background prerequisites
+A number of such ideas are outlined in this section.
+Each project includes the required implementation environment,
+and a summary of the background prerequisites
 someone should have in order to take on the project successfully, in
 terms of mathematics, game theory, and software engineering.
+
+For beginning contibutors - especially those who are interested
+in potentially applying to work on Gambit projects in future
+Google Summer of Code editions - there are a number of
+`issues in the Gambit issue tracker tagged as "easy"
+<https://github.com/gambitproject/gambit/issues?labels=easy&sort=created&direction=desc&state=open&page=1>`_.
+These are excellent ways to get familiar with the Gambit codebase.
+Contributors who have completed one or more such easy tasks will have
+a significantly greater chance of being considered for possible
+GSoC work.
 
 The `Gambit source tree <http://gambit.git.sourceforge.net/git/gitweb-index.cgi>`_
 is managed using `git <http://www.git-scm.com>`_.  It is recommended to have some familiarity with how git works, or to be willing to learn.  (It's not that hard, and once you do learn it, you'll wonder how you ever lived without it.)
 
+Here is the main system architecture and some terminology, useful for
+understanding how the various projects fit into the greater whole:
 
+* Gambit is a collection of algorithms for manipulating and analysing games.
+* A user-friendly front end is GTE (game theory explorer), run as a
+  web-client in a browser, which provides a GUI to enter games in 
+  extensive and strategic (normal) form.
+* GTE-generated games are stored in a file format (for 
+  extensive and strategic form games), and are processed by 
+  algorithms for finding their Nash equilibria. These algorithms
+  are executed on the web server, which can also be locally installed.
+* Gambit provides also a command-line tool where games can 
+  be defined and the equilibrium-finding algorithms called.
+  This program is invoked in a command shell with standard
+  input or reading text files. These allow for the
+  systematic generation of larger games with parameters.
 
-.. _contribute-interfaces:
+Interfacing GTE with equilibrium-finding modules
+------------------------------------------------
 
-Creating interfaces for game representations
---------------------------------------------
+GTE is implemented in Java on the server and Flash
+(Action Script) on the client side.
+So far, all equilibrium-finding algorithms have been ported
+into Java. These should be replaced by better performing
+original algorithms, such as lrs in C, by invoking them via
+system calls. These should be the same modules that are
+invoked from the Gambit command line.
 
-Implementing GUIs for user-friendly input, editing, and storage of game trees
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Improving the GTE graphical interface
+-------------------------------------
 
-This is a core project about the manipulation of game trees
-with imperfect information, also called games in extensive
-form.  It should extend the existing prototype
-`<http://gametheoryexplorer.appspot.com/builder/>`_.
+There are a number of outstanding issues in the GTE interface,
+including:
 
-* **Languages:** Java and ActionScript (for Flex/Flashplayer)
-* **Prerequisites:** Strong interest in expanding an existing code base for GUIs.
-  Basic game theory.
+* Improved input of games in strategic form
+* Input of games with more than two players
+
+Porting GTE to JavaScript
+-------------------------
+
+The initial implementation of GTE is in Flash.  There is interest in
+porting this implementation to JavaScript for greater portability.
+
+Enhancing the web interface with online storage of games
+--------------------------------------------------------
+
+Web frameworks offer standard functionality of storage of
+user data, including user identification via login. 
+The project is to create such a framework and webpages to retrieve
+typically used games, and store games created by the user. 
+
+Possible extension: Record-keeping and display of results
+for computational experiments.
+If games are generated systematically with various
+parameters, running times and computational results
+should be recorded systematically.
 
 
 Python API for manipulating games
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
+
 Gambit's main API for representing games is written in C++.
 There is a partial, experimental interface written using
 `Cython <http://www.cython.org>`_ to allow games to be defined and manipulated using
@@ -51,157 +94,16 @@ Python.  Build out this interface to completion, and create
 a test suite to exercise the interface, with special
 emphasis on proper handling of error conditions.
 
-* **Languages:** C++, Python via `Cython <http://www.cython.org>`_
-* **Prerequisites:** Very rudimentary knowledge of game theory (which
-  can be picked up as one goes along); some experience with
-  creating Python extensions, preferably with Cython.
-
-GUI for the input and manipulation of game models
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This new project applies to other models of games, for example games on networks such as congestion games, and Parity games and stochastic games on graphs.
-
-* **Languages:** Java and ActionScript (for Flex/Flashplayer),
-  others if experience is there
-* **Prerequisites:** Interest in game theory or logic, senior-level computer
-  science or mathematics.
-
-
-Conversion modules between game representations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
-
-Complex game representations such as game trees have different
-serialization formats in Gambit such as the 
-:ref:`.efg (extensive form game) format <file-formats>`
-and a more recent XML format.  Utilities are to be written that convert one
-format to the other in order to compare existing algorithms.  This can
-be expanded from read-in methods for an internal representation of
-existing algorithms.
-
-* **Languages:** Python and Java
-* **Prerequisites:** Some game theory, junior-level or higher background in
-  computer science (data structures).
-
-**Fuller details:**
-
-In addition to the .efg file format, there is a .xml format
-used by a new interactive program for drawing extensive form
-games.  The program that accesses and generates this format,
-under development as part of the Gambit project, is at
-
-http://gametheoryexplorer.appspot.com/builder/
-
-and a sample file reads::
-
-    <extensiveForm>
-      <node>
-        <node player="1" prob="9/10">
-          <node iset="2" player="2" move="B">
-            <outcome move="N">
-              <payoff player="1" value="3"/>
-              <payoff player="2" value="1"/>
-            </outcome>
-            <outcome move="F">
-              <payoff player="1" value="1"/>
-              <payoff player="2" value="0"/>
-            </outcome>
-          </node>
-          <node iset="4" player="2" move="Q">
-            <outcome move="N">
-              <payoff player="1" value="2"/>
-              <payoff player="2" value="0"/>
-            </outcome>
-            <outcome move="F">
-              <payoff player="1" value="1"/>
-              <payoff player="2" value="0"/>
-            </outcome>
-          </node>
-        </node>
-        <node player="1" prob="1/10">
-          <node iset="2" move="B">
-            <outcome move="N">
-              <payoff player="1" value="2"/>
-              <payoff player="2" value="0"/>
-            </outcome>
-            <outcome move="F">
-              <payoff player="1" value="0"/>
-              <payoff player="2" value="1"/>
-            </outcome>
-          </node>
-          <node iset="4" move="Q">
-            <outcome move="N">
-              <payoff player="1" value="3"/>
-              <payoff player="2" value="1"/>
-            </outcome>
-            <outcome move="F">
-              <payoff player="1" value="1"/>
-              <payoff player="2" value="0"/>
-            </outcome>
-          </node>
-        </node>
-      </node>
-    </extensiveForm>
-
-which generates the game tree shown in this figure.
-
-.. figure:: figures/beerquiche.*
-            :figwidth: 33%
-            :alt: a beer-quiche signaling game
-            :align: right
-            :target: _images/beerquiche.png
-
-The project is about conversion between the  .xml  and .efg
-formats, and should expand the existing read-in routines
-that exist in the programs for the respective formats.  
-
-
-.. _contribute-testing:
-
-Creating testbeds for algorithms
---------------------------------
-
-Create a regression-testing framework for Nash equilibrium solvers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-There are a number of different methods for computing Nash
-equilibria in games.  Create a framework for exercising
-algorithms on a set of games, and compare the output and
-performance of the methods.  Some potential complications
-include rounding problems with floating-point numbers, and
-that some methods only promise to return a subset of the
-equilibria.  The framework should accommodate the ability
-both to compare different methods, and to do regression
-testing.
-
-* **Languages:** Open; Python is likely the best option
-* **Prerequisites:** Interest in testing frameworks
-
-
-Creating interfaces to cloud computing
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Algorithms with long running times can be tested fast only
-with cloud computing.  Recording the computational
-experiments requires scripting and output data management, 
-and interfacing the cloud computing environment.
-
-* **Languages:** Python
-* **Prerequisites:** Experience with cloud computing desirable.
-
-
-Record-keeping and display of results for computational experiments
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Developing a systematic way of organizing and maintaining the results of computational experiments in a database.  This requires book-keeping of programs together with their versions, and of corresponding possibly randomly generated data.  Creating modules for graphical and tabular representation of results from the database.  There may be existing packages of this sort around that are to be found, configured and adapted.
-
-* **Languages:** Python, SQL in suitable variant, possibly via 
-  `SQLAlchemy <http://www.sqlalchemy.org>`_.
-* **Prerequisites:**  Experience with scripting and data
-  representation desirable.
-
-
-.. _contribute-algorithms:
 
 Implementing algorithms for finding equilibria in games
 -------------------------------------------------------
+
+Each of the following are separate ideas for open projects on
+computing equilibria and other interesting quantities on games.
+Each of these is a single project  For GSoC applications, you should
+select exactly one of these, as each is easily a full summer's worth
+of work (no matter how easy some of them may seem at first read!)
+
 
 Improve integration and testing of Gametracer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -223,6 +125,23 @@ of the algorithms.
 * **Languages:** C++
 * **Prerequisites:** Some level of comfort with linear algebra;
   enjoyment of refactoring code.
+
+
+Interface with lrslib
+^^^^^^^^^^^^^^^^^^^^^
+
+Gambit's :ref:`gambit-enummixed <gambit-enummixed>` tool computes all
+extreme Nash equilibria of a two-player game.  There is another
+package, `lrslib by David Avis
+<http://cgm.cs.mcgill.ca/~avis/C/lrs.html>`_, which implements the
+same algorithm more efficiently and robustly.  There is a partial
+interface with an older version of lrslib in the Gambit source tree,
+which has proven not to be very reliable.  The project is to complete
+the integration and testing of the lrslib integration.
+
+* **Languages:** C/C++
+* **Prerequisites:** Some level of comfort with linear algebra.
+
  
 Finding all equilibria reachable by Lemke-Howson
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
