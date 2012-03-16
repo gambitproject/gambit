@@ -49,7 +49,11 @@ cdef class Node:
         cdef Infoset i
         if len(self.children) > 0:
             raise ValueError, "append_move can only be applied at a terminal node"
-        if isinstance(player, Player):
+        if not isinstance(player, Player):
+            raise ValueError, ""type Player required for setting player at an infoset"
+        elif  player.game != self.game:
++                raise ValueError, "player at an infoset must belong to the same game"
+        elif isinstance(player, Player):
             if actions is None:
                 raise ValueError, "append_move with a Player requires actions to be specified"
             if actions < 1:
@@ -67,7 +71,11 @@ cdef class Node:
 
     def insert_move(self, player, actions=None):
         cdef Infoset i
-        if isinstance(player, Player):
+         if not isinstance(player, Player):
+            raise ValueError, ""type Player required for setting player at an infoset"
+        elif  player.game != self.game:
++                raise ValueError, "player at an infoset must belong to the same game"
+        elif isinstance(player, Player):
             if actions is None:
                 raise ValueError, "insert_move with a Player requires actions to be specified"
             if actions < 1:
