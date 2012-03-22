@@ -1,6 +1,7 @@
 import decimal
 import fractions
 import warnings
+from libcpp cimport bool
 
 cdef extern from "libgambit/libgambit.h":
     pass
@@ -159,6 +160,8 @@ cdef extern from "libgambit/game.h":
         
         int NumNodes()
         c_GameNode GetRoot()
+
+        bool IsConstSum()
 
     ctypedef struct c_PureStrategyProfile "PureStrategyProfile":
         c_GameStrategy GetStrategy(c_GamePlayer)
