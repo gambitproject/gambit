@@ -54,4 +54,10 @@ class TestGambitGame(object):
 
     def test_game_is_const_sum(self):
         "To test checking if the game is constant sum"
-        assert self.game.is_const_sum == True
+        self.game_2 = gambit.read_game("test_games/const_sum_game.nfg")
+        assert self.game_2.is_const_sum == True
+
+    def test_game_is_not_const_sum(self):
+        "To test checking if the game is not constant sum"
+        self.game_2 = gambit.read_game("test_games/non_const_sum_game.nfg")
+        assert self.game_2.is_const_sum == False
