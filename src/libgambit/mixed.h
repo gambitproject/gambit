@@ -51,6 +51,8 @@ private:
 public:
   /// @name Lifecycle
   //@{
+  /// Construct a mixed strategy profile at the centroid on the game
+  MixedStrategyProfile(const Game &);
   /// Construct a mixed strategy profile at the centroid on the support
   MixedStrategyProfile(const StrategySupport &);
   /// Convert a behavior strategy profile to a mixed strategy profile
