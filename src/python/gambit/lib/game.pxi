@@ -1,3 +1,5 @@
+from libcpp cimport bool
+
 cdef class Outcomes(Collection):
     "Represents a collection of outcomes in a game."
     cdef c_Game game
@@ -105,6 +107,10 @@ cdef class Game:
             n = Node()
             n.node = self.game.deref().GetRoot()
             return n
+                         
+    property is_const_sum:
+        def __get__(self):
+            return self.game.deref().IsConstSum()
 
     def _get_contingency(self, *args):
         cdef c_PureStrategyProfile *psp
