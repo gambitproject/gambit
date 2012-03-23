@@ -1,0 +1,14 @@
+EFG 2 R "" { "Player 1" "Player 2" }
+""
+
+c "" 1 "(0,1)" { "RED" 0.500000 "BLACK" 0.500000 } 1 "Outcome 3" { -1, 1 }
+p "" 1 1 "(1,1)" { "RAISE" "FOLD" } 0
+p "" 2 1 "(2,1)" { "MEET" "PASS" } 0
+t "" 2 "Outcome 2" { 2, -2 }
+t "" 3 "Outcome 1" { 1, -1 }
+t "" 1 "Outcome 3" { -1, 1 }
+p "" 1 2 "(1,2)" { "RAISE" "FOLD" } 0
+p "" 2 1 "(2,1)" { "MEET" "PASS" } 0
+t "" 4 "Outcome 4" { -2, 2 }
+t "" 3 "Outcome 1" { 1, -1 }
+t "" 1 "Outcome 3" { -1, 1 }

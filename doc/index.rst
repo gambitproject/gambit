@@ -52,6 +52,7 @@ Table of Contents
    ideas
    build
    formats
+   pyapi
    biblio
    
 .. Indices and tables

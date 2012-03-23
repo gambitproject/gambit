@@ -4,7 +4,7 @@ Trace a smooth parameterized curve using a predictor-corrector method.
 
 import math
 import numpy
-import scipy.linalg.decomp    # for QR decomposition (TODO: use it!)
+#import scipy.linalg.decomp    # for QR decomposition (TODO: use it!)
 
 def ynorm(y):
     s = 0.0
@@ -191,7 +191,7 @@ def estimate_jac(x, compute_lhs):
 
 def trace_path_nojac(start, startLam, maxLam, compute_lhs, 
                      omega=1.0, hStart=0.03, maxDecel=1.1, maxIter=1000,
-                     crit=None, printer=None):
+                     crit=None, callback=None):
     """
     Trace a differentiable path starting at the vector 'start' with
     parameter 'startLam', until 'maxLam' is reached.  lhs() returns the
@@ -224,8 +224,8 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
     newton = False            # using Newton steplength (for zero-finding)
 
     x = numpy.array([x for x in start] + [startLam])
-    if printer is not None:
-        printer(x)
+    if callback is not None:
+        callback(x)
 
     y = numpy.zeros(len(start))
     q = numpy.zeros((len(start)+1, len(start)+1)) 
@@ -249,7 +249,7 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
         # Predictor step
         u = x + h*omega*t
         print "PREDICTOR"
-        printer(u)
+        callback(u)
 
         w = compute_lhs(u)
         test = upd(q, b, x, u, y, w, t, h, angmax)
@@ -279,8 +279,8 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
         x = v[:]
         y = r[:]
         
-        if printer is not None:
-            printer(x)
+        if callback is not None:
+            callback(x)
 
     return x
 
@@ -288,7 +288,7 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
 
 def trace_path(start, startLam, maxLam, compute_lhs, compute_jac,
                omega=1.0, hStart=0.03, maxDecel=1.1, maxIter=1000,
-               crit=None, printer=None):
+               crit=None, callback=None):
     """
     Trace a differentiable path starting at the vector 'start' with
     parameter 'startLam', until 'maxLam' is reached.  lhs() returns the
@@ -309,8 +309,8 @@ def trace_path(start, startLam, maxLam, compute_lhs, compute_jac,
     newton = False            # using Newton steplength (for zero-finding)
 
     x = numpy.array([x for x in start] + [startLam])
-    if printer is not None:
-        printer(x)
+    if callback is not None:
+        callback(x)
 
     y = numpy.zeros(len(start))
     q = numpy.zeros((len(start)+1, len(start)+1)) 
@@ -394,8 +394,8 @@ def trace_path(start, startLam, maxLam, compute_lhs, compute_jac,
         # PC step was successful; update and iterate
         x = u[:]
 
-        if printer is not None:
-            printer(x)
+        if callback is not None:
+            callback(x)
 
         newT = q[-1]    # new tangent
         if sum(t * newT) < 0.0:

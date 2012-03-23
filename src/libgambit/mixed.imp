@@ -30,6 +30,13 @@ namespace Gambit {
 //========================================================================
 
 template <class T> 
+MixedStrategyProfile<T>::MixedStrategyProfile(const Game &p_game)
+  : Vector<T>(p_game->MixedProfileLength()), support(StrategySupport(p_game))
+{
+  SetCentroid();
+}
+
+template <class T> 
 MixedStrategyProfile<T>::MixedStrategyProfile(const StrategySupport &p_support)
   : Vector<T>(p_support.MixedProfileLength()), support(p_support)
 {
