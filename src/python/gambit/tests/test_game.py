@@ -9,6 +9,9 @@ class TestGambitGame(object):
     def tearDown(self):
         del self.game
 
+    def test_game_get_is_constant_sum(self):
+        "To test whether the game is a constant sum"
+	 assert self.game.is_constant_sum == True
     def test_game_get_ouctome_with_ints(self):
         "To test getting the first outcome"
         assert self.game.outcomes[0] == self.game[0,0]

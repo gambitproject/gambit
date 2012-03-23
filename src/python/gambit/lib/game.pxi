@@ -1,3 +1,4 @@
+from libcpp cimport bool 
 cdef class Outcomes(Collection):
     "Represents a collection of outcomes in a game."
     cdef c_Game game
@@ -80,6 +81,11 @@ cdef class Game:
             cdef cxx_string s
             s.assign(value)
             self.game.deref().SetTitle(s)
+
+   property is_const_sum:
+         def __get__(self):
+	     cdef bool result = self.game.deref().IsConstSum() 
+	     return result
 
     property players:
         def __get__(self):

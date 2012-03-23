@@ -144,7 +144,7 @@ cdef extern from "libgambit/game.h":
 
     ctypedef struct c_GameRep "GameRep":
         int IsTree()
-        
+ 	int IsConstantSum()       
         cxx_string GetTitle()
         void SetTitle(cxx_string)
 
@@ -152,7 +152,6 @@ cdef extern from "libgambit/game.h":
         c_GamePlayer GetPlayer(int) except +IndexError
         c_GamePlayer GetChance()
         c_GamePlayer NewPlayer()
-
         int NumOutcomes()
         c_GameOutcome GetOutcome(int) except +IndexError
         c_GameOutcome NewOutcome()
