@@ -158,7 +158,6 @@ equilibria reachable in that way should be recorded and is a
 (normally) fast way to find many equilibria when the game is
 large.
 
-* **Languages:** Java
 * **Prerequisites:**
   Theoretical understanding of the Lemke-Howson
   method or of the Simplex algorithm for Linear Programming.
@@ -233,7 +232,6 @@ called the "covering vector".  That parameter can serve a
 randomly selected starting point of the computation and
 potentially reach many more equilibria.
 
-* **Languages:** Java
 * **Prerequisites:** Theoretical understanding of the Lemke-Howson
   method or of the Simplex algorithm for Linear Programming.
   Literature exists that is accessible for students with at
@@ -250,7 +248,7 @@ the so-called index of an equilibrium component in a
 bimatrix game.  This component is the output to an existing
 enumeration algorithm.
 
-* **Languages:** Java and C
+* **Languages:** C
 * **Prerequisites:**  Senior-level mathematics, interest in game theory
   and some basic topology.
 
@@ -395,9 +393,8 @@ equilibria of a bimatrix game to game trees with imperfect
 information using the so-called "sequence form".  The method
 is described in abstract form but not implemented.  
 
-* **Languages:** Java
 * **Prerequisites:** Background in game theory and basic linear
-  algebra.  Experience with Java programs of at least
+  algebra.  Experience with programs of at least
   medium complexity so that existing code can be expanded.
 
 
@@ -450,7 +447,7 @@ polytope. For a two-player game, the set of its payoffs is
 a two-dimensional polygon.  This is useful information to
 draw as a first picture of which equilibrium payoffs can be expected.
 
-* **Languages:** Python, Java, or C/C++
+* **Languages:** Python or C/C++
 * **Prerequisites:** Some knowledge of game theory and linear programming.
 
 **Fuller details:**
