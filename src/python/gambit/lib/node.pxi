@@ -50,6 +50,8 @@ cdef class Node:
         if len(self.children) > 0:
             raise ValueError, "append_move can only be applied at a terminal node"
         if isinstance(player, Player):
+            if player.game is not self.player.game:
+                raise ValueError, "Game element doesnot match between the player and the node"
             if actions is None:
                 raise ValueError, "append_move with a Player requires actions to be specified"
             if actions < 1:
@@ -58,6 +60,8 @@ cdef class Node:
             i.infoset = self.node.deref().AppendMovePlayer(((<Player>player).player), actions)
             return i
         elif isinstance(player, Infoset):
+            if Infoset.game is not self.infoset.game:
+                raise ValueError, "Game element doesnot match between the Infoset and the node"
             if actions is not None:
                 raise ValueError, "append_move with an Infoset cannot specify number of actions"
             i = Infoset()
@@ -68,6 +72,8 @@ cdef class Node:
     def insert_move(self, player, actions=None):
         cdef Infoset i
         if isinstance(player, Player):
+            if player.game is not self.player.game:
+                raise ValueError, "Game element doesnot match between the player and the node"
             if actions is None:
                 raise ValueError, "insert_move with a Player requires actions to be specified"
             if actions < 1:
@@ -76,6 +82,8 @@ cdef class Node:
             i.infoset = self.node.deref().InsertMovePlayer(((<Player>player).player), actions)
             return i
         elif isinstance(player, Infoset):
+            if  Infoset.game is not self.infoset.game:
+                raise ValueError, "Game element doesnot match between the Infoset and the node"
             if actions is not None:
                 raise ValueError, "insert_move with an Infoset cannot specify number of actions"
             i = Infoset()
