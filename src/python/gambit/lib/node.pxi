@@ -50,6 +50,8 @@ cdef class Node:
         if len(self.children) > 0:
             raise ValueError, "append_move can only be applied at a terminal node"
         if isinstance(player, Player):
+            if player.game != self.game:
+                raise ValueError, "player should belong to the same game as that of node"
             if actions is None:
                 raise ValueError, "append_move with a Player requires actions to be specified"
             if actions < 1:
@@ -58,6 +60,8 @@ cdef class Node:
             i.infoset = self.node.deref().AppendMovePlayer(((<Player>player).player), actions)
             return i
         elif isinstance(player, Infoset):
+            if Infoset.game != self.game:
+                raise ValueError, "Information set should belong to the same game as the node"
             if actions is not None:
                 raise ValueError, "append_move with an Infoset cannot specify number of actions"
             i = Infoset()
@@ -68,6 +72,8 @@ cdef class Node:
     def insert_move(self, player, actions=None):
         cdef Infoset i
         if isinstance(player, Player):
+            if player.game != self.game:
+                raise ValueError, "player should belong to the same game as that of the node"
             if actions is None:
                 raise ValueError, "insert_move with a Player requires actions to be specified"
             if actions < 1:
@@ -76,6 +82,8 @@ cdef class Node:
             i.infoset = self.node.deref().InsertMovePlayer(((<Player>player).player), actions)
             return i
         elif isinstance(player, Infoset):
+            if  Infoset.game != self.game: 
+                raise ValueError, "Information set should belong to the same game as the node"
             if actions is not None:
                 raise ValueError, "insert_move with an Infoset cannot specify number of actions"
             i = Infoset()
@@ -116,7 +124,16 @@ cdef class Node:
                 p.player = self.node.deref().GetPlayer()
                 return p
             return None
-
+    
+    property game:
+        def __get__(self):
+           cdef Game g
+           if self.node.deref().GetGame() != <c_Game>NULL:
+               g = Game()
+               g.game = self.node.deref().GetGame()
+               return g
+           return None
+           
     property parent:
         def __get__(self):
             cdef Node n
