@@ -24,7 +24,7 @@ class TestGambitNode(object):
         "Test to ensure that we can retrieve a player for a given node"
         assert self.extensive_game.root.player == self.extensive_game.players[0]
         assert self.extensive_game.root.children[0].children[1].children[0].player == None
-        
+             
     def test_get_parent(self):
         "Test to ensure that we can retrieve a parent node for a given node"
         assert self.extensive_game.root.children[0].parent == self.extensive_game.root
@@ -42,8 +42,10 @@ class TestGambitNode(object):
     
     def test_append_move(self):
         "Test for appending the move"
-        assert self.extensive_game.root.append_move(self.extensive_game.root.children[1].player) == None
-    
+        assert_raises(ValueError, self.extensive_game.root.append_move,self.extensive_game.root.children[1])
+    def test_insert_move(self):
+        "Test for appending the move"
+        assert_raises(ValueError, self.extensive_game.root.insert_move,self.extensive_game.root.children[1])
     
     def test_get_next_sibling(self):
         "Test to ensure that we can retrieve a next sibling of a given node"
