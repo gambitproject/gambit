@@ -61,3 +61,9 @@ class TestGambitGame(object):
         "To test checking if the game is not constant sum"
         game = gambit.read_game("test_games/non_const_sum_game.nfg")
         assert not game.is_const_sum
+        
+    def test_game_is_not_perfect_recall(self):
+         "To test if the game is not a perfect recall"
+         game = gambit.read_game("test_games/const_sum_game.nfg")
+         assert not game.is_perfect_recall    
+            
