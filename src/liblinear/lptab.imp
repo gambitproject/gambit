@@ -188,7 +188,7 @@ T LPTableau<T>::RelativeCost(int col) const
     return unitcost[-col] - dual[-col];
   }
   else {
-    GetColumn(col, (Gambit::Vector<T> &)tmpcol);
+    this->GetColumn(col, (Gambit::Vector<T> &)tmpcol);
     return cost[col] - dual*tmpcol;
   }
 }
@@ -214,7 +214,7 @@ void LPTableau<T>::SolveDual()
 {
   Gambit::Vector<T> tmpcol1(this->MinRow(),this->MaxRow());
   BasisSelect(unitcost,cost,tmpcol1);
-  SolveT(tmpcol1,dual);
+  this->SolveT(tmpcol1,dual);
 }
 
 // Redefined functions
@@ -250,7 +250,7 @@ void LPTableau<T>::ReversePivots(Gambit::List<Gambit::Array<int> > &PivotList)
   Gambit::Vector<T> tmpdual(this->MinRow(),this->MaxRow());
 
   Gambit::Vector<T> solution(tmpcol);  //$$
-  BasisVector(solution);        //$$
+  this->BasisVector(solution);        //$$
 
   // BigDump(gout);
   // gout << "\ncost: " << GetCost();
@@ -259,7 +259,7 @@ void LPTableau<T>::ReversePivots(Gambit::List<Gambit::Array<int> > &PivotList)
   // for(i=MinRow();i<=MaxRow();i++) gout << " " << RelativeCost(-i);
 
   for(j=-this->MaxRow();j<=this->MaxCol();j++) if(j && !this->Member(j)  && !this->IsBlocked(j)) {
-    SolveColumn(j,tmpcol);
+    this->SolveColumn(j,tmpcol);
     // gout << "\nColumn " << j;
     // gout << "\nPivCol = " << tmpcol;
     // gout << "\ncurrentSolCol = " << solution;
@@ -268,18 +268,18 @@ void LPTableau<T>::ReversePivots(Gambit::List<Gambit::Array<int> > &PivotList)
     
     BestSet = Gambit::List<int>();
     for(i=this->MinRow();i<=this->MaxRow();i++)
-      if(GtZero(tmpcol[i])) BestSet.Append(i);
+      if(this->GtZero(tmpcol[i])) BestSet.Append(i);
     if(BestSet.Length()>0) {
       ratio = solution[BestSet[1]]/tmpcol[BestSet[1]];
       // find max ratio
       for(i=2;i<=BestSet.Length();i++) {
 	x = solution[BestSet[i]]/tmpcol[BestSet[i]];
-	if(GtZero(x-ratio)) ratio = x;
+	if(this->GtZero(x-ratio)) ratio = x;
       }
       // eliminate nonmaximizers
       for(i=BestSet.Length();i>=1;i--) {
 	x = solution[BestSet[i]]/tmpcol[BestSet[i]];
-	if(LtZero(x-ratio)) BestSet.Remove(i);
+	if(this->LtZero(x-ratio)) BestSet.Remove(i);
       }	
 
       // check that j would be the row to exit in prior tableau
@@ -287,7 +287,7 @@ void LPTableau<T>::ReversePivots(Gambit::List<Gambit::Array<int> > &PivotList)
       // first check that prior pivot entry > 0 
       for(i=BestSet.Length();i>=1;i--) {
 	a_ij = (T)1/tmpcol[BestSet[i]];
-	if(LeZero(a_ij)) {
+	if(this->LeZero(a_ij)) {
 	  // gout << "\nj not row to exit in prior tableau: a_ij <= 0";
 	  BestSet.Remove(i);
 	}
@@ -301,13 +301,13 @@ void LPTableau<T>::ReversePivots(Gambit::List<Gambit::Array<int> > &PivotList)
 	    if(k!=BestSet[i]) {
 	      a_ik = - a_ij * tmpcol[k];
 	      b_k = solution[k] - b_i*tmpcol[k];
-	      if(GtZero(a_ik) && GtZero(b_k/a_ik -ratio)) {
+	      if(this->GtZero(a_ik) && this->GtZero(b_k/a_ik -ratio)) {
 		// gout << "\nj not row to exit in prior tableau: ";
 		// gout << "higher ratio at row= " << k;
 		BestSet.Remove(i);
 		flag = 1;
 	      }
-	      else if(GtZero(a_ik) && EqZero(b_k/a_ik-ratio) && this->Label(k)<j) {
+	      else if(this->GtZero(a_ik) && this->EqZero(b_k/a_ik-ratio) && this->Label(k)<j) {
 		// gout << "\nj not row to exit in prior tableau: ";
 		// gout << "same ratio,lower lex at k= " << k;
 		BestSet.Remove(i);
@@ -329,7 +329,7 @@ void LPTableau<T>::ReversePivots(Gambit::List<Gambit::Array<int> > &PivotList)
       tmpcol = (T)0;
       tmpcol[BestSet[i]]=(T)1;
       // gout << "\ntmpcol, loc 1: " << tmpcol;
-      SolveT(tmpcol,tmpdual);
+      this->SolveT(tmpcol,tmpdual);
       // gout << "\ntmpcol, loc 2: " << tmpcol;
       // gout << "\ntmpdual, loc 1: " << tmpdual;
       
@@ -338,11 +338,11 @@ void LPTableau<T>::ReversePivots(Gambit::List<Gambit::Array<int> > &PivotList)
       else
 	A->GetColumn(j,tmpcol);
 */
-      GetColumn(j,tmpcol);      
+      this->GetColumn(j,tmpcol);      
       // gout << "\ncol " << j << ": " << tmpcol;
       a_ij = tmpdual*tmpcol;
       c_j = RelativeCost(j);
-      if(EqZero(a_ij)) {
+      if(this->EqZero(a_ij)) {
 	// gout << "\ni not col to enter in prior tableau: ";
 	// gout << "a_ij=0";
 	BestSet.Remove(i);
@@ -353,7 +353,7 @@ void LPTableau<T>::ReversePivots(Gambit::List<Gambit::Array<int> > &PivotList)
 	if(enter<0) 
 	  a_ik = tmpdual[-enter];
 	else {
-	  GetColumn(enter,tmpcol);
+	  this->GetColumn(enter,tmpcol);
 //	  A->GetColumn(enter,tmpcol);
 	  a_ik = tmpdual*tmpcol;
 	}
@@ -365,7 +365,7 @@ void LPTableau<T>::ReversePivots(Gambit::List<Gambit::Array<int> > &PivotList)
 	// gout << " c_jo:" << c_jo; 
 	// gout << " a_ij:" << a_ij; 
 	// gout << " a_ik:" << a_ik; 
-	if(GeZero(c_jo)) {
+	if(this->GeZero(c_jo)) {
 	  // gout << "\ni not col to enter in prior tableau: ";
 	  // gout << "c_jo<0";
 	  BestSet.Remove(i);
@@ -377,13 +377,13 @@ void LPTableau<T>::ReversePivots(Gambit::List<Gambit::Array<int> > &PivotList)
 	      a_ik=tmpdual[-k];
 	    else {
 //	      A->GetColumn(k,tmpcol);
-	      GetColumn(k,tmpcol);
+	      this->GetColumn(k,tmpcol);
 	      a_ik = tmpdual*tmpcol;
 	    }
 	    c_k = RelativeCost(k);
 	    c_jo = c_k - a_ik * ratio; 
 	    
-	    if(LtZero(c_jo)) { 
+	    if(this->LtZero(c_jo)) { 
 	      // gout << "\ni not col to enter in prior tableau: ";
 	      // gout << "c_jo < 0 for k = " << k;
 	      BestSet.Remove(i);
@@ -413,12 +413,12 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   // first check that pivot preserves primal feasibility
   
   // gout << "\nin IsReversePivot, i= " << i << " j = "<< j;
-  SolveColumn(j,tmpcol);
+  this->SolveColumn(j,tmpcol);
   Gambit::Vector<T> solution(tmpcol);  //$$
-  BasisVector(solution);        //$$
+  this->BasisVector(solution);        //$$
   // gout << "\ncurrentPivCol = " << tmpcol;
   // gout << "\ncurrentSolCol = " << solution;
-  if(LeZero(tmpcol[i])) { 
+  if(this->LeZero(tmpcol[i])) { 
     // gout << "\nPrior tableau not primal feasible: currentPivCol[i] <= 0";
     return 0;
   }
@@ -427,7 +427,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   // gout << "\nratio = " << ratio;
   
   for(k=tmpcol.First();k<=tmpcol.Last();k++)
-    if(GtZero(tmpcol[k]) && GtZero(solution[k]/tmpcol[k]-ratio)) {
+    if(this->GtZero(tmpcol[k]) && this->GtZero(solution[k]/tmpcol[k]-ratio)) {
       // gout << "\nPrior tableau not primal feasible: i not min ratio";
       return 0;
     }
@@ -436,7 +436,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   T a_ij,a_ik,b_i,b_k,c_j,c_k,c_jo;
 
   a_ij = (T)1/tmpcol[i];
-  if(LeZero(a_ij)) {
+  if(this->LeZero(a_ij)) {
     // gout << "\nj not row to exit in prior tableau: a_ij <= 0";
     return 0;
   }
@@ -447,12 +447,12 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
     if(k!=i) {
       a_ik = - a_ij * tmpcol[k];
       b_k = solution[k] - b_i*tmpcol[k];
-      if(GtZero(a_ik) && GtZero(b_k/a_ik -ratio)) {
+      if(this->GtZero(a_ik) && this->GtZero(b_k/a_ik -ratio)) {
 	// gout << "\nj not row to exit in prior tableau: ";
 	// gout << "higher ratio at row= " << k;
 	return 0;
       }
-      if(GtZero(a_ik) && EqZero(b_k/a_ik-ratio) && this->Label(k)<j) {
+      if(this->GtZero(a_ik) && this->EqZero(b_k/a_ik-ratio) && this->Label(k)<j) {
 	// gout << "\nj not row to exit in prior tableau: ";
 	// gout << "same ratio,lower lex at k= " << k;
 	return 0;
@@ -467,7 +467,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   Gambit::Vector<T> tmpdual(this->MinRow(),this->MaxRow());
   tmpcol = (T)0;
   tmpcol[i]=(T)1;
-  SolveT(tmpcol,tmpdual);
+  this->SolveT(tmpcol,tmpdual);
 
 /*
   if( j<0 )
@@ -475,12 +475,12 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   else
     A->GetColumn(j,tmpcol);
 */
-    GetColumn(j,tmpcol);
+    this->GetColumn(j,tmpcol);
   
   // gout << "\ncol j = " << tmpcol;
   a_ij = tmpdual*tmpcol;
   c_j = RelativeCost(j);
-  if(EqZero(a_ij)) {
+  if(this->EqZero(a_ij)) {
     // gout << "\ni not col to enter in prior tableau: ";
     // gout << "a_ij=0";
     return 0;
@@ -491,12 +491,12 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
     a_ik = tmpdual[-enter];
   else {
 //    A->GetColumn(enter,tmpcol);
-    GetColumn(enter,tmpcol);
+    this->GetColumn(enter,tmpcol);
     a_ik = tmpdual*tmpcol;
   }
   c_k = RelativeCost(enter);
   c_jo = c_k - a_ik * ratio; 
-  if(GeZero(c_jo)) {
+  if(this->GeZero(c_jo)) {
     // gout << "\ni not col to enter in prior tableau: ";
     // gout << "c_jo<0";
     return 0;
@@ -507,13 +507,13 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
       a_ik=tmpdual[-k];
     else {
 //      A->GetColumn(k,tmpcol);
-      GetColumn(k,tmpcol);
+      this->GetColumn(k,tmpcol);
       a_ik = tmpdual*tmpcol;
     }
     c_k = RelativeCost(k);
     c_jo = c_k - a_ik * ratio; 
     
-    if(LtZero(c_jo)) { 
+    if(this->LtZero(c_jo)) { 
       // gout << "\ni not col to enter in prior tableau: ";
       // gout << "c_jo < 0 for k = " << k;
       return 0;
@@ -541,10 +541,10 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
   Gambit::Vector<T> tmpdual(this->MinRow(),this->MaxRow());
   tmpcol = (T)0;
   tmpcol[i]=(T)1;
-  SolveT(tmpcol,tmpdual);
+  this->SolveT(tmpcol,tmpdual);
 
   Gambit::Vector<T> solution(tmpcol);  //$$
-  BasisVector(solution);        //$$
+  this->BasisVector(solution);        //$$
 
   // gout << "\ncurrentPivCol = " << tmpcol;
   // gout << "\ncurrentSolCol = " << solution;
@@ -557,11 +557,11 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
     A->GetColumn(j,tmpcol);
   */
 
-    GetColumn(j,tmpcol);
+    this->GetColumn(j,tmpcol);
   
   a_ij = tmpdual*tmpcol;
   c_j = RelativeCost(j);
-  if(GeZero(a_ij)) {
+  if(this->GeZero(a_ij)) {
     // gout << "\nPrior tableau not dual feasible: ";
     // gout << "a_ij>=0";
     return 0;
@@ -573,12 +573,12 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
       a_ik=tmpdual[-k];
     else {
 //      A->GetColumn(k,tmpcol);
-      GetColumn(k,tmpcol);
+      this->GetColumn(k,tmpcol);
       a_ik = tmpdual*tmpcol;
     }
     c_k = RelativeCost(k);
     
-    if(LtZero(a_ik) && GtZero(c_k/a_ik-ratio)) { 
+    if(this->LtZero(a_ik) && this->GtZero(c_k/a_ik-ratio)) { 
       // gout << "\nPrior tableau not dual feasible: ";
       // gout << "\nhigher ratio for k = " << k;
       return 0;
@@ -594,14 +594,14 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
     a_ik = tmpdual[-enter];
   else {
 //    A->GetColumn(enter,tmpcol);
-    GetColumn(enter,tmpcol);
+    this->GetColumn(enter,tmpcol);
     a_ik = tmpdual*tmpcol;
   }
   a_ik = a_ik/a_ij;
   c_k = RelativeCost(enter);
   c_k -= a_ik * c_j; 
 
-  if(GeZero(a_ik)) {
+  if(this->GeZero(a_ik)) {
     // gout << "\ni not col to enter in prior tableau: ";
     // gout << "a_ik>=0";
     return 0;
@@ -613,19 +613,19 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
       a_ik=tmpdual[-k];
     else {
 //    A->GetColumn(k,tmpcol);
-    GetColumn(k,tmpcol);
+    this->GetColumn(k,tmpcol);
     a_ik = tmpdual*tmpcol;
     }
     a_ik = a_ik/a_ij;
     c_k = RelativeCost(k);
     c_k -= a_ik * c_j; 
     
-    if(LtZero(a_ik) && GtZero(c_k/a_ik- ratio)) { 
+    if(this->LtZero(a_ik) && this->GtZero(c_k/a_ik- ratio)) { 
       // gout << "\ni not col to enter in prior tableau: ";
       // gout << "\nhigher ratio for k = " << k;
       return 0;
     }
-    if(k<enter && LtZero(a_ik) && EqZero(c_k/a_ik - ratio)) { 
+    if(k<enter && this->LtZero(a_ik) && this->EqZero(c_k/a_ik - ratio)) { 
       // gout << "\ni not col to enter in prior tableau: ";
       // gout << "\nsame ratio and lower lex for k = " << k;
       return 0;
@@ -634,13 +634,13 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
 
   // check that j would be the row to exit in prior tableau
 
-  SolveColumn(j,tmpcol);
+  this->SolveColumn(j,tmpcol);
   // gout << "\ncurrentPivCol = " << tmpcol;
   // gout << "\ncurrentSolCol = " << solution;
 
   T b_k,b_i;
   b_i= solution[i]/tmpcol[i];
-  if(LeZero(b_i)) {
+  if(this->LeZero(b_i)) {
     // gout << "\nj not row to exit in prior tableau: ";
     // gout << "b_i<=0";
     return 0;
@@ -650,7 +650,7 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
   for(k=this->b->First();k<=this->b->Last();k++) 
     if(k!=i) {
       b_k = solution[k] -  b_i * tmpcol[k];
-      if(GtZero(b_k) && this->Label(k)<j) {
+      if(this->GtZero(b_k) && this->Label(k)<j) {
 	// gout << "\nj not row to exit in prior tableau: ";
 	// gout << "same ratio,lower lex at k= " << k;
 	return 0;

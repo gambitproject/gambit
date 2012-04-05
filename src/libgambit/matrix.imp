@@ -81,7 +81,7 @@ template <class T> Matrix<T> Matrix<T>::operator-(void)
 
 template <class T> Matrix<T> Matrix<T>::operator+(const Matrix<T> &M) const
 {
-  if (!CheckBounds(M)) {
+  if (!this->CheckBounds(M)) {
     throw DimensionException();
   }
 
@@ -100,7 +100,7 @@ template <class T> Matrix<T> Matrix<T>::operator+(const Matrix<T> &M) const
 
 template <class T> Matrix<T> Matrix<T>::operator-(const Matrix<T> &M) const
 {
-  if (!CheckBounds(M)) {
+  if (!this->CheckBounds(M)) {
     throw DimensionException();
   }
 
@@ -119,7 +119,7 @@ template <class T> Matrix<T> Matrix<T>::operator-(const Matrix<T> &M) const
 
 template <class T> Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &M)
 {
-  if (!CheckBounds(M)) {
+  if (!this->CheckBounds(M)) {
     throw DimensionException();
   }
 
@@ -135,7 +135,7 @@ template <class T> Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &M)
 
 template <class T> Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &M)
 {
-  if (!CheckBounds(M)) {
+  if (!this->CheckBounds(M)) {
     throw DimensionException();
   }
 
@@ -157,7 +157,7 @@ template <class T> Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &M)
 template <class T>
 void Matrix<T>::CMultiply(const Vector<T> &in, Vector<T> &out) const
 {
-  if (!CheckRow(in) || !CheckColumn(out))  {
+  if (!this->CheckRow(in) || !this->CheckColumn(out))  {
     throw DimensionException();
   }
 
@@ -192,7 +192,7 @@ template <class T> Matrix<T> Matrix<T>::operator*(const Matrix<T> &M) const
 
 template <class T> Vector<T> Matrix<T>::operator*(const Vector<T> &v) const
 {
-  if (!CheckRow(v))  {
+  if (!this->CheckRow(v))  {
     throw DimensionException();
   }
 
@@ -204,7 +204,7 @@ template <class T> Vector<T> Matrix<T>::operator*(const Vector<T> &v) const
 template <class T>
 void Matrix<T>::RMultiply(const Vector<T> &in, Vector<T> &out) const
 {
-  if (!CheckColumn(in) || !CheckRow(out)) {
+  if (!this->CheckColumn(in) || !this->CheckRow(out)) {
     throw DimensionException();
   }
 
@@ -261,9 +261,9 @@ template <class T> Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &M)
   Vector<T> row(this->mincol, this->maxcol);
   Vector<T> result(this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++)  {
-    GetRow(i, row);
+    this->GetRow(i, row);
     M.RMultiply(row, result);
-    SetRow(i, result);
+    this->SetRow(i, result);
   }
   return (*this);
 }
@@ -351,7 +351,7 @@ template <class T> Matrix<T> Matrix<T>::Transpose() const
 
 template <class T> bool Matrix<T>::operator==(const Matrix<T> &M) const
 {
-  if (!CheckBounds(M)) {
+  if (!this->CheckBounds(M)) {
     throw DimensionException();
   }
 
