@@ -241,8 +241,42 @@ EXTRA_DIST = \
 	contrib/games/wink3.nfg \
 	contrib/games/winkels.nfg \
 	contrib/games/yamamoto.nfg \
-	contrib/games/zero.nfg
-
+	contrib/games/zero.nfg \
+	src/python/setup.py \
+	src/python/gambit/__init__.py \
+	src/python/gambit/cmdline.py \
+	src/python/gambit/gameiter.py \
+	src/python/gambit/levelk.py \
+	src/python/gambit/nash.py \
+	src/python/gambit/pctrace.py \
+	src/python/gambit/profiles.py \
+	src/python/gambit/qre.py \
+	src/python/gambit/games/__init__.py \
+	src/python/gambit/games/contest.py \
+	src/python/gambit/games/meanstat.py \
+	src/python/gambit/games/public.py \
+	src/python/gambit/lib/__init__.py \
+	src/python/gambit/lib/action.pxi \
+	src/python/gambit/lib/game.pxi \
+	src/python/gambit/lib/infoset.pxi \
+	src/python/gambit/lib/libgambit.cpp \
+	src/python/gambit/lib/libgambit.pyx \
+	src/python/gambit/lib/mixed.pxi \
+	src/python/gambit/lib/node.pxi \
+	src/python/gambit/lib/outcome.pxi \
+	src/python/gambit/lib/player.pxi \
+	src/python/gambit/lib/strategy.pxi \
+	src/python/gambit/lib/util.h \
+	src/python/gambit/tests/test_actions.py \
+	src/python/gambit/tests/test_extensive.py \
+	src/python/gambit/tests/test_game.py \
+	src/python/gambit/tests/test_infosets.py \
+	src/python/gambit/tests/test_mixed.py \
+	src/python/gambit/tests/test_node.py \
+	src/python/gambit/tests/test_outcomes.py \
+	src/python/gambit/tests/test_players.py \
+	src/python/gambit/tests/test_strategic.py \
+	src/python/gambit/tests/test_strategies.py
 
 
 # lib_LTLIBRARIES = libgambit.la
