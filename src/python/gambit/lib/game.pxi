@@ -107,7 +107,11 @@ cdef class Game:
             n = Node()
             n.node = self.game.deref().GetRoot()
             return n
-                         
+    
+    property is_perfect_recall:
+        def __get__(self):
+             return self.game.deref().IsPerfectRecall()
+    
     property is_const_sum:
         def __get__(self):
             return self.game.deref().IsConstSum()
@@ -125,7 +129,7 @@ cdef class Game:
         outcome.outcome = psp.GetOutcome()
         del_PureStrategyProfile(psp)
         return outcome
-
+	
 
 
     # As of Cython 0.11.2, cython does not support the * notation for the argument
