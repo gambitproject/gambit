@@ -1,6 +1,7 @@
 import gambit
 from nose.tools import assert_raises
 import warnings
+import fractions
 
 class TestGambitGame(object):
     def setUp(self):
@@ -61,3 +62,13 @@ class TestGambitGame(object):
         "To test checking if the game is not constant sum"
         game = gambit.read_game("test_games/non_const_sum_game.nfg")
         assert not game.is_const_sum
+
+    def test_game_get_min_payoff(self):
+        "To test getting the minimum payoff for player 1"
+        game = gambit.read_game("test_games/payoff_game.nfg")
+        assert game.get_min_payoff(1) == fractions.Fraction(4,1)
+
+    def test_game_get_max_payoff(self):
+        "To test getting the maximum payoff for player 1"
+        game = gambit.read_game("test_games/payoff_game.nfg")
+        assert game.get_max_payoff(1) == fractions.Fraction(10,1)
