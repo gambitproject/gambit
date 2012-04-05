@@ -112,6 +112,14 @@ cdef class Game:
         def __get__(self):
             return self.game.deref().IsConstSum()
 
+    property min_payoff:
+        def __get__(self):
+            return fractions.Fraction(rat_str(self.game.deref().GetMinPayoff(0)).c_str())
+
+    property max_payoff:
+        def __get__(self):
+            return fractions.Fraction(rat_str(self.game.deref().GetMaxPayoff(0)).c_str())
+
     def _get_contingency(self, *args):
         cdef c_PureStrategyProfile *psp
         cdef Outcome outcome
