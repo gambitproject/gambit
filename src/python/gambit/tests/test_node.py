@@ -44,7 +44,13 @@ class TestGambitNode(object):
         "Test to ensure that we can retrieve a next sibling of a given node"
         assert self.extensive_game.root.children[0].next_sibling == self.extensive_game.root.children[1]
         assert self.extensive_game.root.children[1].next_sibling == None
-
+    def test_append_move(self):
+        "Test for appending the move"
+        assert_raises(ValueError, self.extensive_game.root.append_move,self.extensive_game.root.children[1])	
+    def test_insert_move(self):
+        "Test for inserting the move"
+        assert_raises(ValueError, self.extensive_game.root.insert_move,self.extensive_game.root.children[1])
+	
     def test_is_terminal(self):
         "Test to ensure that we can check if a given node is a terminal node"
         assert self.extensive_game.root.is_terminal == False
