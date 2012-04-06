@@ -1549,7 +1549,7 @@ int Imatrix_is_zero(Imatrix M){
 /********************** implementations from Lists.c **********************/
 /**************************************************************************/
 
-void bad_error(char *);
+void bad_error(const char *);
 void mem_free(void *);
 
 node list_push(node item,node *stack){
@@ -2284,7 +2284,7 @@ fcomplex Croot(fcomplex z, int n)
 /*********************** implementations from Poly.c **********************/
 /**************************************************************************/
 
-void bad_error(char *);   
+void bad_error(const char *);
 
 int *poly_exp(monomial m, int i){
   if (m==0 || i<1 || m->R->n < i ) {

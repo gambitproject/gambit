@@ -3094,7 +3094,7 @@ struct Pmatrix_t {
    **      mem_alloc,
    **      mem_free -- call malloc and free with some extra book-keeping.
  */
-void bad_error(char *);
+void bad_error(const char *);
 
 
 /* WEIRD - The first pair of declarations below are the global one,
