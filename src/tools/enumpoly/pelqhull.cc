@@ -2321,7 +2321,7 @@ void qh_randommatrix (realT *buffer, int dim, realT **row) {
     *(rowi++)= coord;
     for (k=0; k<dim; k++) {
       realr= qh_RANDOMint;
-      *(coord++)= 2.0 * realr/(qh_RANDOMmax+1) - 1.0;
+      *(coord++)= 2.0 * realr/(qh_RANDOMmax+1.0) - 1.0;
     }
   }
   *rowi= coord;
@@ -8927,7 +8927,7 @@ setT *qh_initialvertices(int dim, setT *maxpoints, pointT *points, int numpoints
   else if (qh RANDOMoutside) {
     while (qh_setsize (simplex) != dim+1) {
       randr= qh_RANDOMint;
-      randr= randr/(qh_RANDOMmax+1);
+      randr= randr/(qh_RANDOMmax+1.0);
       index= (int)floor(qh num_points * randr);
       point= qh_point (index);
       qh_setunique (&simplex, point);
