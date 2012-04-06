@@ -50,7 +50,9 @@ cdef class Node:
         if len(self.children) > 0:
             raise ValueError, "append_move can only be applied at a terminal node"
         if isinstance(player, Player):
-            if actions is None:
+            if self.game != player.game:
+	            raise ValueError, "player should belong to the same game as that of node"
+	        if actions is None:
                 raise ValueError, "append_move with a Player requires actions to be specified"
             if actions < 1:
                 raise ValueError, "append_move requires actions >= 1"
@@ -58,7 +60,9 @@ cdef class Node:
             i.infoset = self.node.deref().AppendMovePlayer(((<Player>player).player), actions)
             return i
         elif isinstance(player, Infoset):
-            if actions is not None:
+            if self.game != Infoset.game:
+                raise ValueError, "Infoset should belong to the same game as that of node"
+	        if actions is not None:
                 raise ValueError, "append_move with an Infoset cannot specify number of actions"
             i = Infoset()
             i.infoset = self.node.deref().AppendMoveInfoset(((<Infoset>player).infoset))
@@ -68,7 +72,9 @@ cdef class Node:
     def insert_move(self, player, actions=None):
         cdef Infoset i
         if isinstance(player, Player):
-            if actions is None:
+            if self.game != player.game:
+                raise ValueError, "player should belong to the same as that of node"
+	        if actions is None:
                 raise ValueError, "insert_move with a Player requires actions to be specified"
             if actions < 1:
                 raise ValueError, "insert_move requires actions >= 1"
@@ -76,6 +82,8 @@ cdef class Node:
             i.infoset = self.node.deref().InsertMovePlayer(((<Player>player).player), actions)
             return i
         elif isinstance(player, Infoset):
+            if self.game != Infoset.game:
+                raise ValueError, "infoset should belong to the same game as that of node"
             if actions is not None:
                 raise ValueError, "insert_move with an Infoset cannot specify number of actions"
             i = Infoset()
@@ -117,6 +125,15 @@ cdef class Node:
                 return p
             return None
 
+    property game:
+        def __get__(self):
+	        cdef Game g
+            if self.node.deref().GetGame() != <c_Game>NULL:
+                g = Game()
+                g.game = self.node.deref().GetGame()
+                return g
+            return None
+			
     property parent:
         def __get__(self):
             cdef Node n
