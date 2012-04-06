@@ -23,6 +23,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
+#include <getopt.h>
 #include "libgambit/libgambit.h"
 
 void PrintBanner(std::ostream &p_stream)
@@ -69,9 +70,18 @@ int main(int argc, char *argv[])
   opterr = 0;
   bool quiet = false, useStrategic = false;
 
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { "verbose", 0, NULL, 'V'  },
+    { 0,    0,    0,    0   }
+  };
   int c;
-  while ((c = getopt(argc, argv, "d:n:s:hqvS")) != -1) {
+  while ((c = getopt_long(argc, argv, "d:n:s:hqVvS", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'd':
       g_numDecimals = atoi(optarg);
       break;
@@ -90,7 +100,7 @@ int main(int argc, char *argv[])
     case 'q':
       quiet = true;
       break;
-    case 'v':
+    case 'V':
       verbose = true;
       break;
     case '?':

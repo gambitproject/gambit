@@ -21,6 +21,7 @@
 //
 
 #include <cstdlib>
+#include <getopt.h>
 #include <unistd.h>
 #include <iostream>
 #include "libgambit/libgambit.h"
@@ -174,9 +175,17 @@ int main(int argc, char *argv[])
   opterr = 0;
   bool quiet = false, useStrategic = false, bySubgames = false;
 
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { 0,    0,    0,    0   }
+  };
   int c;
-  while ((c = getopt(argc, argv, "hqSP")) != -1) {
+  while ((c = getopt_long(argc, argv, "vhqSP", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'S':
       useStrategic = true;
       break;

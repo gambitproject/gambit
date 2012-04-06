@@ -21,6 +21,7 @@
 //
 
 #include <unistd.h>
+#include <getopt.h>
 #include <cmath>
 #include <iostream>
 #include <fstream>
@@ -175,13 +176,22 @@ int main(int argc, char *argv[])
   opterr = 0;
   bool quiet = false;
 
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { "verbose", 0, NULL, 'V'  },
+    { 0,    0,    0,    0   }
+  };
   int c;
-  while ((c = getopt(argc, argv, "d:n:s:qvhS")) != -1) {
+  while ((c = getopt_long(argc, argv, "d:n:s:qvVhS", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'q':
       quiet = true;
       break;
-    case 'v':
+    case 'V':
       g_verbose = true;
       break;
     case 'd':

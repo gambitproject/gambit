@@ -23,6 +23,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
+#include <getopt.h>
 #include "libgambit/libgambit.h"
 #include "libgambit/subgame.h"
 
@@ -79,8 +80,16 @@ int main(int argc, char *argv[])
   int c;
   bool useFloat = false, useStrategic = false, bySubgames = false, quiet = false;
 
-  while ((c = getopt(argc, argv, "d:DhqSPe:r:")) != -1) {
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { 0,    0,    0,    0   }
+  };
+  while ((c = getopt_long(argc, argv, "d:DvhqSPe:r:", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'd':
       useFloat = true;
       g_numDecimals = atoi(optarg);

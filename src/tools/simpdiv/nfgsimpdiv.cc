@@ -21,6 +21,7 @@
 //
 
 #include <unistd.h>
+#include <getopt.h>
 #include <cstdlib>
 #include <iostream>
 #include <iomanip>
@@ -619,9 +620,18 @@ int main(int argc, char *argv[])
   int randDenom = 1, stopAfter = 1;
   bool quiet = false;
 
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { "verbose", 0, NULL, 'V'  },
+    { 0,    0,    0,    0   }
+  };
   int c;
-  while ((c = getopt(argc, argv, "g:hvn:r:s:d:qS")) != -1) {
+  while ((c = getopt_long(argc, argv, "g:hVvn:r:s:d:qS", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'd':
       g_numDecimals = atoi(optarg);
       g_useFloat = true;
@@ -645,7 +655,7 @@ int main(int argc, char *argv[])
     case 'q':
       quiet = true;
       break;
-    case 'v':
+    case 'V':
       g_verbose = true;
       break;
     case 'S':
