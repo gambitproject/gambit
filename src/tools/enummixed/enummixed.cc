@@ -22,6 +22,7 @@
 
 #include <cstdlib>
 #include <unistd.h>
+#include <getopt.h>
 #include <iostream>
 #include <iomanip>
 
@@ -311,8 +312,9 @@ void PrintHelp(char *progname)
   std::cerr << "  -D               don't eliminate dominated strategies first\n";
   std::cerr << "  -L               use lrslib for enumeration (experimental!)\n";
   std::cerr << "  -c               output connectedness information\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 
@@ -321,8 +323,16 @@ int main(int argc, char *argv[])
   int c;
   bool useFloat = false, uselrs = false, quiet = false, eliminate = true;
 
-  while ((c = getopt(argc, argv, "d:DhqcS")) != -1) {
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { 0,    0,    0,    0   }
+  };
+  while ((c = getopt_long(argc, argv, "d:DvhqcS", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'd':
       useFloat = true;
       g_numDecimals = atoi(optarg);

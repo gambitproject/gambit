@@ -23,6 +23,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
+#include <getopt.h>
 #include "libgambit/libgambit.h"
 #include "nfghs.h"
 
@@ -46,12 +47,13 @@ void PrintHelp(char *progname)
 
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibrium probabilities with DECIMALS digits\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -S               use strategic game\n";
   std::cerr << "  -H               use heuristic search method to optimize time\n";
   std::cerr << "                   to find first equilibrium (strategic games only)\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
-  std::cerr << "  -v               verbose mode (shows supports investigated)\n";
+  std::cerr << "  -V, --verbose    verbose mode (shows supports investigated)\n";
+  std::cerr << "  -v, --version    print version information\n";
   std::cerr << "                   (default is only to show equilibria)\n";
   exit(1);
 }
@@ -66,9 +68,18 @@ int main(int argc, char *argv[])
   bool quiet = false;
   bool useHeuristic = false, useStrategic = false;
 
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { "verbose", 0, NULL, 'V'  },
+    { 0,    0,    0,    0   }
+  };
   int c;
-  while ((c = getopt(argc, argv, "d:hHSqv")) != -1) {
+  while ((c = getopt_long(argc, argv, "d:hHSqvV", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'd':
       g_numDecimals = atoi(optarg);
       break;
@@ -84,7 +95,7 @@ int main(int argc, char *argv[])
     case 'q':
       quiet = true;
       break;
-    case 'v':
+    case 'V':
       g_verbose = true;
       break;
     case '?':

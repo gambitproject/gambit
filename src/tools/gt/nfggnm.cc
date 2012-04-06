@@ -21,6 +21,7 @@
 //
 
 #include <unistd.h>
+#include <getopt.h>
 #include <cmath>
 #include <iostream>
 #include <fstream>
@@ -83,11 +84,12 @@ void PrintHelp(char *progname)
 
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -n COUNT         number of perturbation vectors to generate\n";
   std::cerr << "  -s FILE          file containing perturbation vectors\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
-  std::cerr << "  -v               verbose mode (shows intermediate output)\n";
+  std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
+  std::cerr << "  -v, --version    print version information\n";
   std::cerr << "                   (default is to only show equilibria)\n";
   exit(1);
 }
@@ -175,13 +177,22 @@ int main(int argc, char *argv[])
   opterr = 0;
   bool quiet = false;
 
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { "verbose", 0, NULL, 'V'  },
+    { 0,    0,    0,    0   }
+  };
   int c;
-  while ((c = getopt(argc, argv, "d:n:s:qvhS")) != -1) {
+  while ((c = getopt_long(argc, argv, "d:n:s:qvVhS", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'q':
       quiet = true;
       break;
-    case 'v':
+    case 'V':
       g_verbose = true;
       break;
     case 'd':

@@ -78,7 +78,7 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
   Gambit::Vector<T> incol(this->MinRow(), this->MaxRow());
   Gambit::Vector<T> col(this->MinRow(), this->MaxRow());
   
-  SolveColumn(inlabel,incol);
+  this->SolveColumn(inlabel,incol);
   //* gout << "\nincol = " << incol;
       // Find all row indices for which column col has positive entries.
   for (i = this->MinRow(); i <= this->MaxRow(); i++)
@@ -101,13 +101,13 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
       // eliminating nonmaximizers of 
       // a similar ratio, until only one candidate remains.
   c = this->MinRow()-1;
-  BasisVector(col);
+  this->BasisVector(col);
   // gout << "\nLength = " <<  BestSet.Length();
   //* gout << "\n x =     " << col << "\n";
   while (BestSet.Length() > 1)   {
     if(c > this->MaxRow()) throw BadExitIndex();
     if(c>=this->MinRow()) {
-      SolveColumn(-c,col);
+      this->SolveColumn(-c,col);
       // gout << "\n-c = " << -c << " col = " << col;
     }
 	// Initialize tempmax.
@@ -153,7 +153,7 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
   Gambit::Vector<T> incol(this->MinRow(), this->MaxRow());
   Gambit::Vector<T> col(this->MinRow(), this->MaxRow());
   
-  SolveColumn(inlabel,incol);
+  this->SolveColumn(inlabel,incol);
   //   gout << "\nincol = " << incol;
       // Find all row indices for which column col has positive entries.
   for (i = this->MinRow(); i <= this->MaxRow(); i++)
@@ -172,14 +172,14 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
       // eliminating nonmaximizers of 
       // a similar ratio, until only one candidate remains.
   c = this->MinRow()-1;
-  BasisVector(col);
+  this->BasisVector(col);
   // gout << "\nLength = " <<  BestSet.Length();
   //   gout << "\n x =     " << col << "\n";
   while (BestSet.Length() > 1)   {
     // this is where ITEM 001 is failing
     if(c > this->MaxRow()) throw BadExitIndex();
     if(c>=this->MinRow()) {
-      SolveColumn(-c,col);
+      this->SolveColumn(-c,col);
       // gout << "\n-c = " << -c << " col = " << col;
     }
 	// Initialize tempmax.
