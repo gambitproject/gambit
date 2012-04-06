@@ -602,12 +602,13 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      show equilibria as floating point, with DECIMALS digits\n";
   std::cerr << "                   (default is to show as rational numbers)\n";
   std::cerr << "  -g MULT          granularity of grid refinement at each step (default is 2)\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -r DENOM         generate random starting points with denominator DENOM\n";
   std::cerr << "  -n COUNT         number of starting points to generate (requires -r)\n";
   std::cerr << "  -s FILE          file containing starting points\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
-  std::cerr << "  -v               verbose mode (shows intermediate output)\n";
+  std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
+  std::cerr << "  -v, --version    print version information\n";
   std::cerr << "                   (default is to only show equilibria)\n";
   exit(1);
 }

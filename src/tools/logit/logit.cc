@@ -53,9 +53,10 @@ void PrintHelp(char *progname)
   std::cerr << "  -l LAMBDA        compute QRE at `lambda` accurately\n";
   std::cerr << "  -L FILE          compute maximum likelihood estimates;\n";
   std::cerr << "                   read strategy frequencies from FILE\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -e               print only the terminal equilibrium\n";
+  std::cerr << "  -v, --version    print version information\n";
   std::cerr << "                   (default is to print the entire branch)\n";
   exit(1);
 }

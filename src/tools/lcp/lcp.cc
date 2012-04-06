@@ -59,8 +59,9 @@ void PrintHelp(char *progname)
   std::cerr << "  -r DEPTH         terminate recursion at DEPTH\n";
   std::cerr << "                   (only if number of equilibria sought is not 1)\n";
   std::cerr << "  -D               print detailed information about equilibria\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 

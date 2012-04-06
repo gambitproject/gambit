@@ -48,8 +48,9 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      compute using floating-point arithmetic;\n";
   std::cerr << "                   display results with DECIMALS digits\n";
   std::cerr << "  -S               use strategic game\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 

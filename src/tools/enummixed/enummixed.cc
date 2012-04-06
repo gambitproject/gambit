@@ -312,8 +312,9 @@ void PrintHelp(char *progname)
   std::cerr << "  -D               don't eliminate dominated strategies first\n";
   std::cerr << "  -L               use lrslib for enumeration (experimental!)\n";
   std::cerr << "  -c               output connectedness information\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 

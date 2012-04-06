@@ -47,12 +47,13 @@ void PrintHelp(char *progname)
 
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibrium probabilities with DECIMALS digits\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -S               use strategic game\n";
   std::cerr << "  -H               use heuristic search method to optimize time\n";
   std::cerr << "                   to find first equilibrium (strategic games only)\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
-  std::cerr << "  -v               verbose mode (shows supports investigated)\n";
+  std::cerr << "  -V, --verbose    verbose mode (shows supports investigated)\n";
+  std::cerr << "  -v, --version    print version information\n";
   std::cerr << "                   (default is only to show equilibria)\n";
   exit(1);
 }
