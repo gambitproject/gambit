@@ -32,7 +32,7 @@ switch(rt){
  case Mtx_T: if ((Gen_type(g1)==Sys_T || Gen_type(g1)==Mtx_T)&&
                  (Gen_type(g2)==Sys_T || Gen_type(g2)==Mtx_T))
                   M=Gmatrix_Dop(Gen_Mtx(g1),Gen_Mtx(g2),PROC_ADD);
-             if (M==0) return Rerror("Matrices not compatable",g);
+             if (M==0) return Rerror("Matrices not compatible",g);
              if (rt==Sys_T) res=SYSND(M);
              else res=GMND(M);
              break;
@@ -71,7 +71,7 @@ case Sys_T:
 case Mtx_T: if ((Gen_type(g1)==Sys_T || Gen_type(g1)==Mtx_T)&&
                  (Gen_type(g2)==Sys_T || Gen_type(g2)==Mtx_T))
                   M=Gmatrix_Dop(Gen_Mtx(g1),Gen_Mtx(g2),PROC_SUB);
-             if (M==0) return Rerror("Matrices not compatable",g);
+             if (M==0) return Rerror("Matrices not compatible",g);
              if (rt==Sys_T) res=SYSND(M);
              else res=GMND(M);
              break;
