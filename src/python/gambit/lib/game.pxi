@@ -181,7 +181,11 @@ cdef class Game:
             return WriteGame(self.game, 0).c_str()
 
     def get_min_payoff(self, player=0):
+        if player < 0 or player > len(self.players):
+            raise IndexError, "Provided player index %d out of range" % player
         return fractions.Fraction(rat_str(self.game.deref().GetMinPayoff(player)).c_str())
 
     def get_max_payoff(self, player=0):
+        if player < 0 or player > len(self.players):
+            raise IndexError, "Provided player index %d out of range" % player
         return fractions.Fraction(rat_str(self.game.deref().GetMaxPayoff(player)).c_str())
