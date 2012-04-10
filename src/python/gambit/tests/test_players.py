@@ -1,5 +1,6 @@
 import gambit
 import warnings
+import fractions
 from nose.tools import assert_raises
 
 class TestGambitPlayers(object):
@@ -95,3 +96,19 @@ class TestGambitPlayers(object):
         "Test to ensure that an exception is raised when attempting to add a strategy to a player in an extensive game"
         self.extensive_game.players.add("Alice")
         assert_raises(TypeError, self.extensive_game.players[0].strategies.add, "Test")
+
+    def test_player_get_min_payoff(self):
+        "To test getting the minimum payoff for the players"
+        game = gambit.read_game("test_games/payoff_game.nfg")
+        assert game.players[0].min_payoff == fractions.Fraction(4,1)
+        assert game.players["Player 1"].min_payoff == fractions.Fraction(4,1)
+        assert game.players[1].min_payoff == fractions.Fraction(1,1)
+        assert game.players["Player 2"].min_payoff == fractions.Fraction(1,1)
+
+    def test_player_get_max_payoff(self):
+        "To test getting the maximum payoff for the players"
+        game = gambit.read_game("test_games/payoff_game.nfg")
+        assert game.players[0].max_payoff == fractions.Fraction(10,1)
+        assert game.players["Player 1"].max_payoff == fractions.Fraction(10,1)
+        assert game.players[1].max_payoff == fractions.Fraction(8,1)
+        assert game.players["Player 2"].max_payoff == fractions.Fraction(8,1)

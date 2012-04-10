@@ -40,7 +40,7 @@ cdef class Player:
     def __repr__(self):
         if self.is_chance:
             return "<Player [CHANCE] in game '%s'>" % self.player.deref().GetGame().deref().GetTitle().c_str()
-        return "<Player [%d] '%s' in game '%s'>" % (self.player.deref().GetNumber()-1,
+        return "<Player [%d] '%s' in game '%s'>" % (self.number,
                                                     self.label,
                                                     self.player.deref().GetGame().deref().GetTitle().c_str())
     
@@ -82,6 +82,10 @@ cdef class Player:
             s.assign(value)
             self.player.deref().SetLabel(s)
 
+    property number:
+        def __get__(self):
+            return self.player.deref().GetNumber() - 1;
+
     property is_chance:
         def __get__(self):
             return True if self.player.deref().IsChance() != 0 else False
@@ -99,3 +103,21 @@ cdef class Player:
             s = Infosets()
             s.player = self.player
             return s
+
+    property min_payoff:
+        def __get__(self):
+            cdef Game g
+            cdef cxx_string s
+            g = Game()
+            g.game = self.player.deref().GetGame()
+            s = rat_str(g.game.deref().GetMinPayoff(self.number + 1))
+            return fractions.Fraction(s.c_str())
+
+    property max_payoff:
+        def __get__(self):
+            cdef Game g
+            cdef cxx_string s
+            g = Game()
+            g.game = self.player.deref().GetGame()
+            s = rat_str(g.game.deref().GetMaxPayoff(self.number + 1))
+            return fractions.Fraction(s.c_str())

@@ -1,6 +1,5 @@
 import gambit
 from nose.tools import assert_raises
-from nose.tools import raises
 import warnings
 import fractions
 
@@ -65,22 +64,11 @@ class TestGambitGame(object):
         assert not game.is_const_sum
 
     def test_game_get_min_payoff(self):
-        "To test getting the minimum payoff for player 1"
+        "To test getting the minimum payoff of the game"
         game = gambit.read_game("test_games/payoff_game.nfg")
-        assert game.get_min_payoff(1) == fractions.Fraction(4,1)
+        assert game.min_payoff == fractions.Fraction(1,1)
 
     def test_game_get_max_payoff(self):
-        "To test getting the maximum payoff for player 1"
+        "To test getting the maximum payoff of the game"
         game = gambit.read_game("test_games/payoff_game.nfg")
-        assert game.get_max_payoff(1) == fractions.Fraction(10,1)
-
-    def test_game_get_min_payoff_index_error(self):
-        "To test getting an index error with a non-existent player while getting the minimum payoff"
-        game = gambit.read_game("test_games/payoff_game.nfg")
-        assert_raises(IndexError,game.get_min_payoff, 3)
-
-    def test_game_get_max_payoff_index_error(self):
-        "To test getting an index error with a non-existent player while getting the maximum payoff"
-        game = gambit.read_game("test_games/payoff_game.nfg")
-        assert_raises(IndexError,game.get_max_payoff, 3)
-
+        assert game.max_payoff == fractions.Fraction(10,1)
