@@ -168,16 +168,28 @@ cdef class Game:
 
 
     def mixed_profile(self, rational=False):
+        cdef MixedBehavProfileDouble mbpd
+        cdef MixedBehavProfileRational mbpr
         cdef MixedStrategyProfileDouble mspd
         cdef MixedStrategyProfileRational mspr
-        if not rational:
-            mspd = MixedStrategyProfileDouble()
-            mspd.profile = new_MixedStrategyProfileDouble(self.game)
-            return mspd
+        if self.is_tree:
+            if not rational:
+                mbpd = MixedBehavProfileDouble()
+                mbpd.profile = new_MixedBehavProfileDouble(self.game)
+                return mbpd
+            else:
+                mbpr = MixedBehavProfileRational()
+                mbpr.profile = new_MixedBehavProfileRational(self.game)
+                return mbpr
         else:
-            mspr = MixedStrategyProfileRational()
-            mspr.profile = new_MixedStrategyProfileRational(self.game)
-            return mspr
+            if not rational:
+                mspd = MixedStrategyProfileDouble()
+                mspd.profile = new_MixedStrategyProfileDouble(self.game)
+                return mspd
+            else:
+                mspr = MixedStrategyProfileRational()
+                mspr.profile = new_MixedStrategyProfileRational(self.game)
+                return mspr
  
     def num_nodes(self):
         return self.game.deref().NumNodes()

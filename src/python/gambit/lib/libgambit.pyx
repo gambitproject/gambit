@@ -165,6 +165,8 @@ cdef extern from "libgambit/game.h":
         c_Rational GetMinPayoff(int)
         c_Rational GetMaxPayoff(int)
 
+
+
     ctypedef struct c_PureStrategyProfile "PureStrategyProfile":
         c_GameStrategy GetStrategy(c_GamePlayer)
         void SetStrategy(c_GameStrategy)
@@ -201,6 +203,39 @@ cdef extern from "libgambit/mixed.h":
     c_MixedStrategyProfileRational *new_MixedStrategyProfileRational "new MixedStrategyProfile<Rational>"(c_Game)
     void del_MixedStrategyProfileRational "delete"(c_MixedStrategyProfileRational *)
 
+cdef extern from "libgambit/behav.h":
+    ctypedef struct c_MixedBehavProfileDouble "MixedBehavProfile<double>":
+        c_Game GetGame()
+        int Length()
+        bool IsDefinedAt(c_GameInfoset)
+        double getitem "operator[]"(int) except +IndexError
+        double getaction "operator()"(c_GameAction) except +IndexError
+        double GetPayoff(int)
+        double GetInfosetProb(c_GameInfoset)
+        double GetInfosetValue(c_GameInfoset)
+        double GetActionProb(c_GameAction)
+        double GetActionValue(c_GameAction)
+        double GetRegret(c_GameAction)
+        double GetLiapValue()
+    c_MixedBehavProfileDouble *new_MixedBehavProfileDouble "new MixedBehavProfile<double>"(c_Game)
+    void del_MixedBehavProfileDouble "delete"(c_MixedBehavProfileDouble *)
+
+    ctypedef struct c_MixedBehavProfileRational "MixedBehavProfile<Rational>":
+        c_Game GetGame()
+        int Length()
+        bool IsDefinedAt(c_GameInfoset)
+        c_Rational getitem "operator[]"(int) except +IndexError
+        c_Rational getaction "operator()"(c_GameAction) except +IndexError
+        c_Rational GetPayoff(int)
+        c_Rational GetInfosetProb(c_GameInfoset)
+        c_Rational GetInfosetValue(c_GameInfoset)
+        c_Rational GetActionProb(c_GameAction)
+        c_Rational GetActionValue(c_GameAction)
+        c_Rational GetRegret(c_GameAction)
+        c_Rational GetLiapValue()
+    c_MixedBehavProfileRational *new_MixedBehavProfileRational "new MixedBehavProfile<Rational>"(c_Game)
+    void del_MixedBehavProfileRational "delete"(c_MixedBehavProfileRational *)
+
 
 cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError
@@ -211,6 +246,14 @@ cdef extern from "util.h":
                                             int, double)
     void setitem_MixedStrategyProfileRational(c_MixedStrategyProfileRational *, 
                                             int, char *)
+    void setitem_MixedBehavProfileDouble(c_MixedBehavProfileDouble *, 
+                                            int, double)
+    void setitem_MixedBehavProfileRational(c_MixedBehavProfileRational *, 
+                                            int, char *)
+    void setaction_MixedBehavProfileDouble(c_MixedBehavProfileDouble *, 
+                                            c_GameAction, double)
+    void setaction_MixedBehavProfileRational(c_MixedBehavProfileRational *, 
+                                            c_GameAction, char *)
 
 import gambit.gameiter
 
@@ -241,6 +284,7 @@ include "player.pxi"
 include "outcome.pxi"
 include "node.pxi"
 include "mixed.pxi"
+include "behav.pxi"
 include "game.pxi"
 
 
