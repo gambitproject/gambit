@@ -361,11 +361,25 @@ API documentation
       of integers specifying the strategy number each player plays
       in the profile.
 
-   .. py:method:: mixed_profile()
+   .. py:method:: mixed_profile(rational=False)
 
       Returns a mixed strategy profile :py:class:`gambit.MixedProfile`
-      over the game, initialized to
-      uniform randomization for each player over his strategies.
+      over the game, initialized to uniform randomization for each
+      player over his strategies.  If the game has a tree
+      representation, the mixed strategy profile is defined over the
+      reduced strategic form representation.
+      
+      :param rational: If :literal:`True`, probabilities are represented using rational numbers; otherwise double-precision floating point numbers are used.  
+
+   .. py:method:: behav_profile(rational=False)
+
+      Returns a behavior strategy profile
+      :py:class:`gambit.BehavProfile` over the game, initialized to
+      uniform randomization for each player over his actions at each
+      information set. 
+
+      :param rational: If :literal:`True`, probabilities are represented using rational numbers; otherwise double-precision floating point numbers are used.  
+      :raises: :literal:`NotImplementedError` if the game does not have a tree representation.
 
 .. py:class:: Infoset
 
@@ -610,6 +624,54 @@ API documentation
       to choosing ``strategy`` if all other players play according to 
       the profile.
 
+
+   .. py:method:: liap_value()
+
+      Returns the Lyapunov value (see [McK91]_) of the strategy profile.  The
+      Lyapunov value is a non-negative number which is zero exactly at
+      Nash equilibria.
+
+.. py:class:: BehavProfile
+
+   Represents a behavior strategy profile over a :py:class:`gambit.Game`.
+
+   .. py:method:: __getitem__(index)
+
+      Returns a slice of the profile based on the parameter
+      ``index``.  If ``index`` is a :py:class:`gambit.Action`,
+      returns the probability with which that action is played in
+      the profile. 
+      If ``index`` is an :py:class:`gambit.Infoset`,
+      returns a list of probabilities, one for each action belonging
+      to that information set.  If ``index`` is an integer, returns the
+      ``index`` th entry in the profile, treating the profile as a
+      flat list of probabilities.
+
+   .. py:method:: __setitem__(action, prob)
+
+      Sets the probability ``action`` is played in the profile to ``prob``. 
+         
+   .. py:method:: payoff(player)
+
+      Returns the expected payoff to ``player`` if all players play
+      according to the profile.
+
+   .. py:method:: action_value(action)
+
+      Returns the expected payoff to choosing ``action``, conditional
+      on having reached the information set, if all
+      other players play according to the profile.
+
+   .. py:method:: infoset_prob(infoset)
+
+      Returns the probability with which information set ``infoset``
+      is reached, if all players play according to the profile.
+
+   .. py:method:: infoset_value(infoset)
+
+      Returns the expected payoff to the player who has the move at
+      ``infoset``, conditional on the information set being reached,
+      if all players play according to the profile.
 
    .. py:method:: liap_value()
 
