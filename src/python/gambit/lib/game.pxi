@@ -166,12 +166,21 @@ cdef class Game:
         return self._get_contingency(*tuple(cont))
 
 
-
     def mixed_profile(self, rational=False):
-        cdef MixedBehavProfileDouble mbpd
-        cdef MixedBehavProfileRational mbpr
         cdef MixedStrategyProfileDouble mspd
         cdef MixedStrategyProfileRational mspr
+        if not rational:
+            mspd = MixedStrategyProfileDouble()
+            mspd.profile = new_MixedStrategyProfileDouble(self.game)
+            return mspd
+        else:
+            mspr = MixedStrategyProfileRational()
+            mspr.profile = new_MixedStrategyProfileRational(self.game)
+            return mspr
+
+    def behav_profile(self, rational=False):
+        cdef MixedBehavProfileDouble mbpd
+        cdef MixedBehavProfileRational mbpr
         if self.is_tree:
             if not rational:
                 mbpd = MixedBehavProfileDouble()
@@ -182,14 +191,8 @@ cdef class Game:
                 mbpr.profile = new_MixedBehavProfileRational(self.game)
                 return mbpr
         else:
-            if not rational:
-                mspd = MixedStrategyProfileDouble()
-                mspd.profile = new_MixedStrategyProfileDouble(self.game)
-                return mspd
-            else:
-                mspr = MixedStrategyProfileRational()
-                mspr.profile = new_MixedStrategyProfileRational(self.game)
-                return mspr
+            raise NotImplementedError("Game must have a tree representation"\
+                                      " to create a mixed behavior profile")
  
     def num_nodes(self):
         return self.game.deref().NumNodes()
