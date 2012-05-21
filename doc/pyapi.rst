@@ -302,7 +302,28 @@ approximation to one equilibrium; in fact, the equilibrium which is
 the limit of the principal branch is the one in which the second
 player randomizes with equal probability on both strategies.
 
+When a game's representation is in extensive form, these solvers
+default to using the version of the algorithm which operates on the
+extensive game, where available, and returns a list of
+:py:class:`gambit.BehavProfile` objects.  This can be overridden when
+calling :py:meth:`solve` via the ``use_strategic`` parameter::
 
+  In [1]: g = gambit.read_game("e02.efg")
+
+  In [2]: solver = gambit.nash.ExternalLCPSolver()
+
+  In [3]: solver.solve(g)
+  Out[3]: [<NashProfile for 'Selten (IJGT, 75), Figure 2': [1.0, 0.0, 0.5, 0.5, 0.5, 0.5]>]
+
+  In [4]: solver.solve(g, use_strategic=True)
+  Out[4]: [<NashProfile for 'Selten (IJGT, 75), Figure 2': [1.0, 0.0, 0.0, 1.0, 0.0]>]
+
+As this game is in extensive form, in the first call, the returned
+profile is a :py:class:`gambit.BehavProfile`, while in the second, it
+is a :py:class:`gambit.MixedProfile`.  While the set of equilibria is
+not affected by whether behavior or mixed strategies are used, the
+equilibria returned by specific solution methods may differ, when
+using a call which does not necessarily return all equilibria.
 
 
 API documentation

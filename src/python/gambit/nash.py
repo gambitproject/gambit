@@ -38,12 +38,15 @@ class ExternalSolver(object):
         child_stdin.close()
         return child_stdout
 
-    def _parse_output(self, stream, game, rational):
+    def _parse_output(self, stream, game, rational, extensive=False):
         profiles = [ ]
         for line in stream:
             entries = line.strip().split(",")
             if entries[0] != "NE":  continue
-            profile = game.mixed_profile(rational=rational)
+            if extensive:
+                profile = game.behav_profile(rational=rational)
+            else:
+                profile = game.mixed_profile(rational=rational)
             for (i, p) in enumerate(entries[1:]):
                 if rational:
                     profile[i] = Fraction(p)
@@ -57,23 +60,29 @@ class ExternalEnumPureSolver(ExternalSolver):
     Algorithm class to manage calls to external gambit-enumpure solver
     for computing pure-strategy equilibria.
     """
-    def solve(self, game):
+    def solve(self, game, use_strategic=False):
         command_line = "gambit-enumpure"
+        if use_strategic and game.is_tree:
+            command_line += " -S"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational=True)
+                                  game, rational=True,
+                                  extensive=game.is_tree and not use_strategic)
 
 class ExternalLPSolver(ExternalSolver):
     """
     Algorithm class to manage calls to external gambit-lp solver
     for computing equilibria in two-player games using linear programming.
     """
-    def solve(self, game, rational=False):
+    def solve(self, game, rational=False, use_strategic=False):
         if rational:
             command_line = "gambit-lp"
         else:
             command_line = "gambit-lp -d 10"
+        if use_strategic and game.is_tree:
+            command_line += " -S"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational)
+                                  game, rational,
+                                  extensive=game.is_tree and not use_strategic)
 
 class ExternalLCPSolver(ExternalSolver):
     """
@@ -81,13 +90,16 @@ class ExternalLCPSolver(ExternalSolver):
     for computing equilibria in two-player games using linear complementarity
     programming.
     """
-    def solve(self, game, rational=False):
+    def solve(self, game, rational=False, use_strategic=False):
         if rational:
             command_line = "gambit-lcp"
         else:
             command_line = "gambit-lcp -d 10"
+        if use_strategic and game.is_tree:
+            command_line += " -S"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational)
+                                  game, rational,
+                                  extensive=game.is_tree and not use_strategic)
 
 class ExternalEnumMixedSolver(ExternalSolver):
     """
@@ -127,20 +139,26 @@ class ExternalEnumPolySolver(ExternalSolver):
     Algorithm class to manage calls to external gambit-enumpoly solver
     for computing equilibria in N-player games systems of polynomial equations.
     """
-    def solve(self, game):
+    def solve(self, game, use_strategic=False):
         command_line = "gambit-enumpoly -d 10"
+        if use_strategic and game.is_tree:
+            command_line += " -S"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational)
+                                  game, rational,
+                                  extensive=game.is_tree and not use_strategic)
 
 class ExternalLyapunovSolver(ExternalSolver):
     """
     Algorithm class to manage calls to external gambit-liap solver
     for computing equilibria in N-player games using Lyapunov function minimization.
     """
-    def solve(self, game):
+    def solve(self, game, use_strategic=False):
         command_line = "gambit-liap -d 10"
+        if use_strategic and game.is_tree:
+            command_line += " -S"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational)
+                                  game, rational,
+                                  extensive=game.is_tree and not use_strategic)
 
 class ExternalIteratedPolymatrixSolver(ExternalSolver):
     """
@@ -157,8 +175,11 @@ class ExternalLogitSolver(ExternalSolver):
     Algorithm class to manage calls to external gambit-logit solver
     for computing equilibria in N-player games using quantal response equilibrium.
     """
-    def solve(self, game):
+    def solve(self, game, use_strategic=False):
         profiles = [ ]
         command_line = "gambit-logit -d 20 -e"
+        if use_strategic and game.is_tree:
+            command_line += " -S"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational)
+                                  game, rational,
+                                  extensive=game.is_tree and not use_strategic)
