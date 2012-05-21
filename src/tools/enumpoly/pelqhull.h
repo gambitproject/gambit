@@ -623,8 +623,8 @@ setT   *qh_pointvertex (void /*qh.facet_list*/);
 void    qh_collectstatistics (void);
 void 	qh_freestatistics (void);
 void    qh_initstatistics (void);
-void    qh_printallstatistics (FILE *fp, char *string);
-void    qh_printstatistics (FILE *fp, char *string);
+void    qh_printallstatistics (FILE *fp, const char *string);
+void    qh_printstatistics (FILE *fp, const char *string);
 
 
 /* ======= -constants- ====================== 
@@ -1812,8 +1812,8 @@ void	qh_freestatistics (void);
 void    qh_initstatistics (void);
 boolT 	qh_newstats (int index, int *nextindex);
 boolT 	qh_nostatistic (int i);
-void    qh_printallstatistics (FILE *fp, char *string);
-void    qh_printstatistics (FILE *fp, char *string);
+void    qh_printallstatistics (FILE *fp, const char *string);
+void    qh_printstatistics (FILE *fp, const char *string);
 void  	qh_printstatlevel (FILE *fp, int id, int start);
 void  	qh_printstats (FILE *fp, int index, int *nextindex);
 realT   qh_stddev (int num, realT tot, realT tot2, realT *ave);

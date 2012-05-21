@@ -781,7 +781,7 @@ Dmatrix Dmatrix_add(Dmatrix M1, Dmatrix M2, Dmatrix * M3)
 
     if (M1 == 0 || M2 == 0 || Mrows(M1) != Mrows(M2) || Mcols(M1) != Mcols(M2)) {
 #ifdef LOG_PRINT
-	fprintf(stderr, "matrix_add: dimensions dont match\n")
+	fprintf(stderr, "matrix_add: dimensions don't match\n")
 #endif
 ;
 	return 0;
@@ -1192,7 +1192,7 @@ Imatrix Imatrix_add(int i1,Imatrix M1,int i2, Imatrix M2, Imatrix M3)
 
     if (M1 == 0 || M2 == 0 || ImatrixMrows(M1) != ImatrixMrows(M2) || ImatrixMcols(M1) != ImatrixMcols(M2)) {
 #ifdef LOG_PRINT
-	fprintf(stderr, "matrix_add: dimensions dont match\n")
+	fprintf(stderr, "matrix_add: dimensions don't match\n")
 #endif
 ;
 	return 0;
@@ -1460,7 +1460,7 @@ int Imatrix_hermite(Imatrix S, Imatrix U){
   n=ImatrixMrows(S);
 
   if (S==0 || U==0 || ImatrixMrows(U)!=n || ImatrixMrows(U)!=n)
-     bad_error("Incompatable matrices in Imatrix_hermite");
+     bad_error("Incompatible matrices in Imatrix_hermite");
 
   /* Initialize U to nxn identity */
   U=Imatrix_resize(U,n,n);
@@ -1549,7 +1549,7 @@ int Imatrix_is_zero(Imatrix M){
 /********************** implementations from Lists.c **********************/
 /**************************************************************************/
 
-void bad_error(char *);
+void bad_error(const char *);
 void mem_free(void *);
 
 node list_push(node item,node *stack){
@@ -2284,7 +2284,7 @@ fcomplex Croot(fcomplex z, int n)
 /*********************** implementations from Poly.c **********************/
 /**************************************************************************/
 
-void bad_error(char *);   
+void bad_error(const char *);
 
 int *poly_exp(monomial m, int i){
   if (m==0 || i<1 || m->R->n < i ) {

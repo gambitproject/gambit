@@ -21,6 +21,7 @@
 //
 
 #include <unistd.h>
+#include <getopt.h>
 #include <cstdlib>
 #include <iostream>
 #include <iomanip>
@@ -110,8 +111,9 @@ void PrintHelp(char *progname)
   std::cerr << "Options:\n";
   std::cerr << "  -c PLAYER        the player to show on columns (default is 2)\n";
   std::cerr << "  -r PLAYER        the player to show on rows (default is 1)\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 
@@ -122,8 +124,16 @@ int main(int argc, char *argv[])
   int rowPlayer = 1, colPlayer = 2;
   bool quiet = false;
 
-  while ((c = getopt(argc, argv, "r:c:hq")) != -1) {
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { 0,    0,    0,    0   }
+  };
+  while ((c = getopt_long(argc, argv, "r:c:hvq", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'r':
       rowPlayer = atoi(optarg);
       break;

@@ -186,7 +186,7 @@ Gmatrix Gmatrix_Dop(Gmatrix M1, Gmatrix M2, Gen_node (*op)(Gen_node))
 
     if (M1 == 0||M2 == 0||Mrows(M1)!=Mrows(M2)||
                           Mcols(M1)!= Mcols(M2)) {
-	bad_error("matrix_add: dimensions dont match\n");
+	bad_error("matrix_add: dimensions don't match\n");
     }
     R=Gmatrix_new(Mrows(M1), Mcols(M1));
     for (i = 1; i <= Mrows(M1); i++)
