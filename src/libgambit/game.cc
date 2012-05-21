@@ -1174,11 +1174,9 @@ void GameRep::ClearComputedValues(void) const
 
 void GameRep::BuildComputedValues(void)
 {
-  if (m_computedValues) return;
+  if (!IsTree() || m_computedValues) return;
 
   Canonicalize();
-
-  if (!IsTree()) return;
 
   for (int pl = 1; pl <= m_players.Length(); pl++) {
     m_players[pl]->MakeReducedStrats(m_root, 0);
@@ -1462,6 +1460,7 @@ int GameRep::BehavProfileLength(void) const
 
 int GameRep::MixedProfileLength(void) const
 {
+  const_cast<GameRep *>(this)->BuildComputedValues();
   int strats = 0;
   for (int i = 1; i <= m_players.Length();
        strats += m_players[i++]->m_strategies.Length());
