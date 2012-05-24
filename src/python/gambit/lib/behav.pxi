@@ -1,4 +1,5 @@
 from libcpp cimport bool
+from cython.operator cimport dereference as deref
 
 cdef class MixedBehavProfile(object):
     def __repr__(self):    return str(list(self))
@@ -220,6 +221,12 @@ cdef class MixedBehavProfileDouble(MixedBehavProfile):
         return self.profile.GetActionValue(action.action)
     def _regret(self, Action action):
         return self.profile.GetRegret(action.action)
+
+    def as_mixed(self):
+        cdef MixedStrategyProfileDouble mixed
+        mixed = MixedStrategyProfileDouble()
+        mixed.profile = new_MixedFromBehavDouble(deref(self.profile))
+        return mixed
     
     property liap_value:
         def __get__(self):
@@ -275,6 +282,12 @@ cdef class MixedBehavProfileRational(MixedBehavProfile):
     def _regret(self, Action action):
         return fractions.Fraction(rat_str(self.profile.GetRegret(action.action)).c_str())
     
+    def as_mixed(self):
+        cdef MixedStrategyProfileRational mixed
+        mixed = MixedStrategyProfileRational()
+        mixed.profile = new_MixedFromBehavRational(deref(self.profile))
+        return mixed
+
     property liap_value:
         def __get__(self):
             return fractions.Fraction(rat_str(self.profile.GetLiapValue()).c_str())

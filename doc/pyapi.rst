@@ -325,6 +325,10 @@ not affected by whether behavior or mixed strategies are used, the
 equilibria returned by specific solution methods may differ, when
 using a call which does not necessarily return all equilibria.
 
+It is also possible to convert between mixed and behavior strategic
+profiles using :meth:`gambit.MixedProfile.as_behav` and 
+:meth:`gambit.BehavProfile.as_mixed`.
+
 
 API documentation
 -----------------
@@ -628,6 +632,13 @@ API documentation
    .. py:method:: __setitem__(strategy, prob)
 
       Sets the probability ``strategy`` is played in the profile to ``prob``. 
+
+   .. py:method:: as_behav()
+
+      Returns a behavior strategy profile :py:class:`BehavProfile` associated
+      to the profile.
+
+      :raises: :literal:`NotImplementedError` if the game does not have a tree representation.
          
    .. py:method:: payoff(player)
 
@@ -644,7 +655,6 @@ API documentation
       Returns the expected payoffs for a player's set of strategies 
       to choosing ``strategy`` if all other players play according to 
       the profile.
-
 
    .. py:method:: liap_value()
 
@@ -671,6 +681,11 @@ API documentation
    .. py:method:: __setitem__(action, prob)
 
       Sets the probability ``action`` is played in the profile to ``prob``. 
+
+   .. py:method:: as_mixed()
+
+      Returns a behavior strategy profile as a :py:class:`BehavProfile` 
+      object associated to the profile.
          
    .. py:method:: payoff(player)
 

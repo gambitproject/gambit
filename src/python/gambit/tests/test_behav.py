@@ -360,3 +360,22 @@ class TestGambitMixedBehavGame(object):
         "Test to retrieve Lyapunov values"
         assert self.profile_double.liap_value == 0.0625
         assert self.profile_rational.liap_value == fractions.Fraction("1/16")
+
+    def test_as_mixed(self):
+        "Test converting the profile to a mixed strategy one"
+        mixed_double = self.profile_double.as_mixed()
+        mixed_rational = self.profile_rational.as_mixed()
+
+        assert mixed_double[0] == self.profile_double[0]
+        assert mixed_double[1] == self.profile_double[1]
+        assert mixed_double[2] == self.profile_double[2]
+        assert mixed_double[3] == self.profile_double[3]
+        assert mixed_double[4] == self.profile_double[4]
+        assert mixed_double[5] == self.profile_double[5]
+
+        assert mixed_rational[0] == self.profile_rational[0]
+        assert mixed_rational[1] == self.profile_rational[1]
+        assert mixed_rational[2] == self.profile_rational[2]
+        assert mixed_rational[3] == self.profile_rational[3]
+        assert mixed_rational[4] == self.profile_rational[4]
+        assert mixed_rational[5] == self.profile_rational[5]

@@ -1,3 +1,5 @@
+from cython.operator cimport dereference as deref
+
 cdef class MixedStrategyProfile(object):
     def __repr__(self):    return str(list(self))
     def __richcmp__(MixedStrategyProfile self, other, whichop):
@@ -138,6 +140,15 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
     def liap_value(self):
         return self.profile.GetLiapValue()
 
+    def as_behav(self):
+        cdef MixedBehavProfileDouble behav
+        if not self.game.is_tree:
+            raise NotImplementedError("Mixed behavior profiles are not "\
+                                          "defined for strategic games")
+        behav = MixedBehavProfileDouble()
+        behav.profile = new_BehavFromMixedDouble(deref(self.profile))
+        return behav
+
     property game:
         def __get__(self):
             cdef Game g
@@ -173,6 +184,15 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
         return fractions.Fraction(rat_str(self.profile.GetPayoffDeriv(pl, s1.strategy, s2.strategy)).c_str())
     def liap_value(self):
         return fractions.Fraction(rat_str(self.profile.GetLiapValue()).c_str())
+
+    def as_behav(self):
+        cdef MixedBehavProfileRational behav
+        if not self.game.is_tree:
+            raise NotImplementedError("Mixed behavior profiles are not "\
+                                          "defined for strategic games")
+        behav = MixedBehavProfileRational()
+        behav.profile = new_BehavFromMixedRational(deref(self.profile))
+        return behav
     
     property game:
         def __get__(self):

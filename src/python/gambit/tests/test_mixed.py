@@ -1,5 +1,6 @@
 import gambit
 import fractions
+from nose.tools import assert_raises
 
 class TestGambitMixedStrategyGame(object):
     def setUp(self):
@@ -12,11 +13,19 @@ class TestGambitMixedStrategyGame(object):
         self.profile_double = self.game.mixed_profile()
         self.profile_rational = self.game.mixed_profile(True)
 
+        self.tree_game = gambit.read_game("test_games/mixed_behavior_game.efg")
+
+        self.tree_profile_double = self.tree_game.mixed_profile()
+        self.tree_profile_rational = self.tree_game.mixed_profile(True)
+
         
     def tearDown(self):
         del self.game
+        del self.tree_game
         del self.profile_double
         del self.profile_rational
+        del self.tree_profile_double
+        del self.tree_profile_rational
             
 
     def test_getting_profile(self):
@@ -70,8 +79,6 @@ class TestGambitMixedStrategyGame(object):
 
         assert self.profile_double[self.game.players[0]]["cooperate"] == 0.5
         assert self.profile_rational[self.game.players[0]]["cooperate"] == fractions.Fraction("1/2")
-
-
         
     def test_set_probabilities(self):
         "Test setting probabilities"
@@ -89,4 +96,28 @@ class TestGambitMixedStrategyGame(object):
         "Test retrieving Lyapunov values"
         assert self.profile_double.liap_value() == 0.0
         assert self.profile_rational.liap_value() == fractions.Fraction("0")
+
+    def test_as_behav_tree(self):
+        "Test converting the profile to a behavior one"
+        behav_double = self.tree_profile_double.as_behav()
+        behav_rational = self.tree_profile_rational.as_behav()
+
+        assert behav_double[0] == self.tree_profile_double[0]
+        assert behav_double[1] == self.tree_profile_double[1]
+        assert behav_double[2] == self.tree_profile_double[2]
+        assert behav_double[3] == self.tree_profile_double[3]
+        assert behav_double[4] == self.tree_profile_double[4]
+        assert behav_double[5] == self.tree_profile_double[5]
+
+        assert behav_rational[0] == self.tree_profile_rational[0]
+        assert behav_rational[1] == self.tree_profile_rational[1]
+        assert behav_rational[2] == self.tree_profile_rational[2]
+        assert behav_rational[3] == self.tree_profile_rational[3]
+        assert behav_rational[4] == self.tree_profile_rational[4]
+        assert behav_rational[5] == self.tree_profile_rational[5]
+
+    def test_as_behav_error(self):  
+        "Test raising an error when trying to convert a profile from a strategic game"
+        assert_raises(NotImplementedError, self.profile_double.as_behav)
+        assert_raises(NotImplementedError, self.profile_rational.as_behav)
 
