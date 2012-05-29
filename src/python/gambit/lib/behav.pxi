@@ -227,10 +227,9 @@ cdef class MixedBehavProfileDouble(MixedBehavProfile):
         mixed = MixedStrategyProfileDouble()
         mixed.profile = new_MixedFromBehavDouble(deref(self.profile))
         return mixed
-    
-    property liap_value:
-        def __get__(self):
-            return self.profile.GetLiapValue()
+    def liap_value(self):
+        return self.profile.GetLiapValue()
+
     property game:
         def __get__(self):
             cdef Game g
@@ -287,10 +286,9 @@ cdef class MixedBehavProfileRational(MixedBehavProfile):
         mixed = MixedStrategyProfileRational()
         mixed.profile = new_MixedFromBehavRational(deref(self.profile))
         return mixed
+    def liap_value(self):
+        return fractions.Fraction(rat_str(self.profile.GetLiapValue()).c_str())
 
-    property liap_value:
-        def __get__(self):
-            return fractions.Fraction(rat_str(self.profile.GetLiapValue()).c_str())
     property game:
         def __get__(self):
             cdef Game g
