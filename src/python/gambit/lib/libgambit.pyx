@@ -138,10 +138,10 @@ cdef extern from "libgambit/game.h":
         bint IsSuccessorOf(c_GameNode)
         bint IsSubgameRoot()
         c_GameAction GetPriorAction()
-        c_GameInfoset AppendMovePlayer "AppendMove"(c_GamePlayer, int)  
-        c_GameInfoset AppendMoveInfoset "AppendMove"(c_GameInfoset)       
-        c_GameInfoset InsertMovePlayer "InsertMove"(c_GamePlayer, int)  
-        c_GameInfoset InsertMoveInfoset "InsertMove"(c_GameInfoset)       
+        c_GameInfoset AppendMovePlayer "AppendMove"(c_GamePlayer, int) except +ValueError
+        c_GameInfoset AppendMoveInfoset "AppendMove"(c_GameInfoset) except +ValueError   
+        c_GameInfoset InsertMovePlayer "InsertMove"(c_GamePlayer, int) except +ValueError
+        c_GameInfoset InsertMoveInfoset "InsertMove"(c_GameInfoset) except +ValueError
 
     ctypedef struct c_GameRep "GameRep":
         int IsTree()

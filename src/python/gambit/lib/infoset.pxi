@@ -1,3 +1,5 @@
+from gambit.lib.error import MismatchError
+
 cdef class Members(Collection):
     "Represents a collection of members of an infoset."
     cdef c_GameInfoset infoset
@@ -92,6 +94,6 @@ cdef class Infoset:
             if not isinstance(player, Player):
                 raise ValueError, "type Player required for setting player at an infoset"
             elif player.game != self.game:
-                raise ValueError, "player at an infoset must belong to the same game"
+                raise MismatchError, "player at an infoset must belong to the same game"
             else:
                 self.infoset.deref().SetPlayer((<Player>player).player)

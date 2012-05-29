@@ -1,7 +1,7 @@
 import gambit
-from nose.tools import assert_raises
-import warnings
 import fractions
+from nose.tools import assert_raises
+from gambit.lib.error import UndefinedOperationError
 
 class TestGambitGame(object):
     def setUp(self):
@@ -83,3 +83,10 @@ class TestGambitGame(object):
         "To test checking if the game is not of perfect recall"
         game = gambit.read_game("test_games/not_perfect_recall.efg")
         assert not game.is_perfect_recall
+
+    def test_game_behav_profile_error(self):
+        "To test raising an error when trying to create a BehavProfile from \
+        a game without a tree representation"
+        assert_raises(UndefinedOperationError, self.game.behav_profile)
+        assert_raises(UndefinedOperationError, self.game.behav_profile, True)
+
