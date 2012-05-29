@@ -137,9 +137,9 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
     def _strategy_value_deriv(self, int pl,
                               Strategy s1, Strategy s2):
         return self.profile.GetPayoffDeriv(pl, s1.strategy, s2.strategy)
+
     def liap_value(self):
         return self.profile.GetLiapValue()
-
     def as_behav(self):
         cdef MixedBehavProfileDouble behav
         if not self.game.is_tree:
@@ -182,9 +182,9 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
     def _strategy_value_deriv(self, int pl,
                               Strategy s1, Strategy s2):
         return fractions.Fraction(rat_str(self.profile.GetPayoffDeriv(pl, s1.strategy, s2.strategy)).c_str())
+
     def liap_value(self):
         return fractions.Fraction(rat_str(self.profile.GetLiapValue()).c_str())
-
     def as_behav(self):
         cdef MixedBehavProfileRational behav
         if not self.game.is_tree:
