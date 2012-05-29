@@ -257,6 +257,7 @@ EXTRA_DIST = \
 	src/python/gambit/games/public.py \
 	src/python/gambit/lib/__init__.py \
 	src/python/gambit/lib/action.pxi \
+	src/python/gambit/lib/behav.pxi \
 	src/python/gambit/lib/game.pxi \
 	src/python/gambit/lib/infoset.pxi \
 	src/python/gambit/lib/libgambit.cpp \
@@ -268,6 +269,7 @@ EXTRA_DIST = \
 	src/python/gambit/lib/strategy.pxi \
 	src/python/gambit/lib/util.h \
 	src/python/gambit/tests/test_actions.py \
+	src/python/gambit/tests/test_behav.py \
 	src/python/gambit/tests/test_extensive.py \
 	src/python/gambit/tests/test_game.py \
 	src/python/gambit/tests/test_infosets.py \
@@ -276,7 +278,16 @@ EXTRA_DIST = \
 	src/python/gambit/tests/test_outcomes.py \
 	src/python/gambit/tests/test_players.py \
 	src/python/gambit/tests/test_strategic.py \
-	src/python/gambit/tests/test_strategies.py
+	src/python/gambit/tests/test_strategies.py \
+	src/python/gambit/tests/test_games/basic_extensive_game.efg \
+	src/python/gambit/tests/test_games/complicated_extensive_game.efg \
+	src/python/gambit/tests/test_games/const_sum_game.nfg \
+	src/python/gambit/tests/test_games/mixed_behavior_game.efg \
+	src/python/gambit/tests/test_games/mixed_strategy.nfg \
+	src/python/gambit/tests/test_games/non_const_sum_game.nfg \
+	src/python/gambit/tests/test_games/not_perfect_recall.efg \
+	src/python/gambit/tests/test_games/payoff_game.nfg \
+	src/python/gambit/tests/test_games/perfect_recall.efg
 
 
 # lib_LTLIBRARIES = libgambit.la
