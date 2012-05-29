@@ -22,3 +22,6 @@ build
 *.egg-info
 *.pyc
 
+config.guess
+config.sub
+ltmain.sh
