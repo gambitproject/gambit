@@ -1,4 +1,5 @@
 from cython.operator cimport dereference as deref
+from gambit.lib.error import UndefinedOperationError
 
 cdef class MixedStrategyProfile(object):
     def __repr__(self):    return str(list(self))
@@ -137,13 +138,13 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
     def _strategy_value_deriv(self, int pl,
                               Strategy s1, Strategy s2):
         return self.profile.GetPayoffDeriv(pl, s1.strategy, s2.strategy)
+
     def liap_value(self):
         return self.profile.GetLiapValue()
-
     def as_behav(self):
         cdef MixedBehavProfileDouble behav
         if not self.game.is_tree:
-            raise NotImplementedError("Mixed behavior profiles are not "\
+            raise UndefinedOperationError("Mixed behavior profiles are not "\
                                           "defined for strategic games")
         behav = MixedBehavProfileDouble()
         behav.profile = new_BehavFromMixedDouble(deref(self.profile))
@@ -182,13 +183,13 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
     def _strategy_value_deriv(self, int pl,
                               Strategy s1, Strategy s2):
         return fractions.Fraction(rat_str(self.profile.GetPayoffDeriv(pl, s1.strategy, s2.strategy)).c_str())
+
     def liap_value(self):
         return fractions.Fraction(rat_str(self.profile.GetLiapValue()).c_str())
-
     def as_behav(self):
         cdef MixedBehavProfileRational behav
         if not self.game.is_tree:
-            raise NotImplementedError("Mixed behavior profiles are not "\
+            raise UndefinedOperationError("Mixed behavior profiles are not "\
                                           "defined for strategic games")
         behav = MixedBehavProfileRational()
         behav.profile = new_BehavFromMixedRational(deref(self.profile))

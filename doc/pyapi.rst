@@ -404,7 +404,7 @@ API documentation
       information set. 
 
       :param rational: If :literal:`True`, probabilities are represented using rational numbers; otherwise double-precision floating point numbers are used.  
-      :raises: :literal:`NotImplementedError` if the game does not have a tree representation.
+      :raises: :py:class:`gambit.UndefinedOperationError` if the game does not have a tree representation.
 
 .. py:class:: Infoset
 
@@ -506,6 +506,11 @@ API documentation
 
       Returns a collection of the current node's children.
 
+   .. py:attribute:: game
+
+      Returns the :py:class:`gambit.Game` associated with the 
+      current node.
+
    .. py:attribute:: infoset
 
       Returns the :py:class:`gambit.Infoset` associated with the 
@@ -548,6 +553,11 @@ API documentation
       in a new information set for that player; in this instance, the
       number of ``actions`` at the new information set must be specified.
 
+      :raises: :py:class:`gambit.UndefinedOperationError` when called on a non-terminal node.
+      :raises: :py:class:`gambit.UndefinedOperationError` when called with a :py:class:`gambit.Player` object and no actions, or actions < 1.
+      :raises: :py:class:`gambit.UndefinedOperationError` when called with a :py:class:`gambit.Infoset` object and with actions.
+      :raises: :py:class:`gambit.MismatchError` when called with objects from different games.
+
    .. py:method:: insert_move(infoset[ , actions])
 
       Insert a move at a node, at the :py:class:`gambit.Infoset`
@@ -557,6 +567,10 @@ API documentation
       number of ``actions`` at the new information set must be specified.
       The newly-inserted node takes the place of the node in the game
       tree, and the existing node becomes the first child of the new node.
+
+      :raises: :py:class:`gambit.UndefinedOperationError` when called with a :py:class:`gambit.Player` object and no actions, or actions < 1.
+      :raises: :py:class:`gambit.UndefinedOperationError` when called with a :py:class:`gambit.Infoset` object and with actions.
+      :raises: :py:class:`gambit.MismatchError` when called with objects from different games.
 
 .. py:class:: Strategies
    
@@ -638,7 +652,7 @@ API documentation
       Returns a behavior strategy profile :py:class:`BehavProfile` associated
       to the profile.
 
-      :raises: :literal:`NotImplementedError` if the game does not have a tree representation.
+      :raises: :py:class:`gambit.UndefinedOperationError` if the game does not have a tree representation.
          
    .. py:method:: payoff(player)
 
@@ -714,3 +728,15 @@ API documentation
       Returns the Lyapunov value (see [McK91]_) of the strategy profile.  The
       Lyapunov value is a non-negative number which is zero exactly at
       Nash equilibria.
+
+.. py:class:: MismatchError
+
+   An ``Exception`` which is raised on an operation between objects from 
+   different games.
+   Subclasses from ``ValueError``.
+
+.. py:class:: UndefinedOperationError
+
+   An ``Exception`` which is raised when an undefined operation is 
+   attempted.
+   Subclasses from ``ValueError``.
