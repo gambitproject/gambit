@@ -506,6 +506,11 @@ API documentation
 
       Returns a collection of the current node's children.
 
+   .. py:attribute:: game
+
+      Returns the :py:class:`gambit.Game` associated with the 
+      current node.
+
    .. py:attribute:: infoset
 
       Returns the :py:class:`gambit.Infoset` associated with the 
@@ -726,10 +731,12 @@ API documentation
 
 .. py:class:: MismatchError
 
-   An ``Exception`` which is raised when an operation that is undefined is attempted.
+   An ``Exception`` which is raised on an operation between objects from 
+   different games.
    Subclasses from ``ValueError``.
 
 .. py:class:: UndefinedOperationError
 
-   An ``Exception`` which is raised on an operation between incompatible objects.
+   An ``Exception`` which is raised when an undefined operation is 
+   attempted.
    Subclasses from ``ValueError``.

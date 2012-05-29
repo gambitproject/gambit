@@ -25,6 +25,10 @@ class TestGambitNode(object):
         "Test to ensure that we can retrieve a player for a given node"
         assert self.extensive_game.root.player == self.extensive_game.players[0]
         assert self.extensive_game.root.children[0].children[1].children[0].player == None
+
+    def test_get_game(self):
+        "Test to ensure that we can retrieve the game object from a given node"
+        assert self.extensive_game == self.extensive_game.root.game
         
     def test_get_parent(self):
         "Test to ensure that we can retrieve a parent node for a given node"
