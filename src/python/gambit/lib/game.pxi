@@ -112,6 +112,10 @@ cdef class Game:
         def __get__(self):
             return self.game.deref().IsConstSum()
 
+    property is_perfect_recall:
+        def __get__(self):
+            return self.game.deref().IsPerfectRecall()
+
     property min_payoff:
         def __get__(self):
             return fractions.Fraction(rat_str(self.game.deref().GetMinPayoff(0)).c_str())

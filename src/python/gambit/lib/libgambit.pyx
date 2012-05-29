@@ -166,6 +166,7 @@ cdef extern from "libgambit/game.h":
         c_Rational GetMaxPayoff(int)
 
 
+        bool IsPerfectRecall()
 
     ctypedef struct c_PureStrategyProfile "PureStrategyProfile":
         c_GameStrategy GetStrategy(c_GamePlayer)
