@@ -1,3 +1,5 @@
+from gambit.lib.error import MismatchError, UndefinedOperationError
+
 cdef class Children(Collection):
     "Represents the collection of direct children of a node."
     cdef c_GameNode parent
@@ -48,18 +50,22 @@ cdef class Node:
     def append_move(self, player, actions=None):
         cdef Infoset i
         if len(self.children) > 0:
-            raise ValueError, "append_move can only be applied at a terminal node"
+            raise UndefinedOperationError("append_move can only be applied at a terminal node")
         if isinstance(player, Player):
             if actions is None:
-                raise ValueError, "append_move with a Player requires actions to be specified"
+                raise UndefinedOperationError("append_move with a Player requires actions to be specified")
             if actions < 1:
-                raise ValueError, "append_move requires actions >= 1"
+                raise UndefinedOperationError("append_move requires actions >= 1")
+            if player.game != self.game:
+                raise MismatchError("append_move can only be applied between objects of the same game")
             i = Infoset()
             i.infoset = self.node.deref().AppendMovePlayer(((<Player>player).player), actions)
             return i
         elif isinstance(player, Infoset):
             if actions is not None:
-                raise ValueError, "append_move with an Infoset cannot specify number of actions"
+                raise UndefinedOperationError("append_move with an Infoset cannot specify number of actions")
+            if player.game != self.game:
+                raise MismatchError("append_move can only be applied between objects of the same game")
             i = Infoset()
             i.infoset = self.node.deref().AppendMoveInfoset(((<Infoset>player).infoset))
             return i
@@ -69,15 +75,19 @@ cdef class Node:
         cdef Infoset i
         if isinstance(player, Player):
             if actions is None:
-                raise ValueError, "insert_move with a Player requires actions to be specified"
+                raise UndefinedOperationError("insert_move with a Player requires actions to be specified")
             if actions < 1:
-                raise ValueError, "insert_move requires actions >= 1"
+                raise UndefinedOperationError("insert_move requires actions >= 1")
+            if player.game != self.game:
+                raise MismatchError("append_move can only be applied between objects of the same game")
             i = Infoset()
             i.infoset = self.node.deref().InsertMovePlayer(((<Player>player).player), actions)
             return i
         elif isinstance(player, Infoset):
             if actions is not None:
-                raise ValueError, "insert_move with an Infoset cannot specify number of actions"
+                raise UndefinedOperationError("insert_move with an Infoset cannot specify number of actions")
+            if player.game != self.game:
+                raise MismatchError("append_move can only be applied between objects of the same game")
             i = Infoset()
             i.infoset = self.node.deref().InsertMoveInfoset(((<Infoset>player).infoset))
             return i
@@ -98,6 +108,13 @@ cdef class Node:
             c = Children()
             c.parent = self.node
             return c
+
+    property game:
+        def __get__(self):
+            cdef Game g
+            g = Game()
+            g.game = self.node.deref().GetGame()
+            return g
 
     property infoset:
         def __get__(self):

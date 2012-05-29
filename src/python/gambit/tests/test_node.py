@@ -1,5 +1,6 @@
 import gambit
 from nose.tools import assert_raises
+from gambit.lib.error import MismatchError, UndefinedOperationError
 
 
 class TestGambitNode(object):
@@ -63,3 +64,54 @@ class TestGambitNode(object):
         assert self.extensive_game.root.is_subgame_root() == True
         assert self.extensive_game.root.children[0].is_subgame_root() == False
 
+    def test_append_move_error_terminal(self):
+        "Test to ensure the node is terminal"
+        assert_raises(UndefinedOperationError, self.extensive_game.root.append_move, "")
+
+    def test_append_move_error_player_actions(self):
+        "Test to ensure there are actions when appending with a player"
+        assert_raises(UndefinedOperationError, self.extensive_game.root.append_move, 
+                        self.extensive_game.players[0])
+        assert_raises(UndefinedOperationError, self.extensive_game.root.append_move, 
+                        self.extensive_game.players[0], 0)
+
+    def test_append_move_error_player_mismatch(self):
+        "Test to ensure the node and the player are from the same game"
+        game = gambit.new_tree()
+        assert_raises(MismatchError, game.root.append_move,
+                        self.extensive_game.players[0], 1)
+
+    def test_append_move_error_infoset_actions(self):
+        "Test to ensure there are no actions when appending with an infoset"
+        assert_raises(UndefinedOperationError, self.extensive_game.root.append_move, 
+                        self.extensive_game.players[0].infosets[0], 1)
+
+    def test_append_move_error_infoset_mismatch(self):
+        "Test to ensure the node and the player are from the same game"
+        game = gambit.new_tree()
+        assert_raises(MismatchError, game.root.append_move,
+                        self.extensive_game.players[0].infosets[0])
+
+    def test_insert_move_error_player_actions(self):
+        "Test to ensure there are actions when inserting with a player"
+        assert_raises(UndefinedOperationError, self.extensive_game.root.insert_move, 
+                        self.extensive_game.players[0])
+        assert_raises(UndefinedOperationError, self.extensive_game.root.insert_move, 
+                        self.extensive_game.players[0], 0)
+
+    def test_insert_move_error_player_mismatch(self):
+        "Test to ensure the node and the player are from the same game"
+        game = gambit.new_tree()
+        assert_raises(MismatchError, game.root.insert_move,
+                        self.extensive_game.players[0], 1)
+
+    def test_insert_move_error_infoset_actions(self):
+        "Test to ensure there are no actions when inserting with an infoset"
+        assert_raises(UndefinedOperationError, self.extensive_game.root.insert_move, 
+                        self.extensive_game.players[0].infosets[0], 1)
+
+    def test_insert_move_error_infoset_mismatch(self):
+        "Test to ensure the node and the player are from the same game"
+        game = gambit.new_tree()
+        assert_raises(MismatchError, game.root.insert_move,
+                        self.extensive_game.players[0].infosets[0])

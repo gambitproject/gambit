@@ -1,4 +1,5 @@
 from libcpp cimport bool
+from gambit.lib.error import UndefinedOperationError
 
 cdef class Outcomes(Collection):
     "Represents a collection of outcomes in a game."
@@ -191,7 +192,7 @@ cdef class Game:
                 mbpr.profile = new_MixedBehavProfileRational(self.game)
                 return mbpr
         else:
-            raise NotImplementedError("Game must have a tree representation"\
+            raise UndefinedOperationError("Game must have a tree representation"\
                                       " to create a mixed behavior profile")
  
     def num_nodes(self):

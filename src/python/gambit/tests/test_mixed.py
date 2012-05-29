@@ -1,6 +1,7 @@
 import gambit
 import fractions
 from nose.tools import assert_raises
+from gambit.lib.error import UndefinedOperationError
 
 class TestGambitMixedStrategyGame(object):
     def setUp(self):
@@ -118,6 +119,6 @@ class TestGambitMixedStrategyGame(object):
 
     def test_as_behav_error(self):  
         "Test raising an error when trying to convert a profile from a strategic game"
-        assert_raises(NotImplementedError, self.profile_double.as_behav)
-        assert_raises(NotImplementedError, self.profile_rational.as_behav)
+        assert_raises(UndefinedOperationError, self.profile_double.as_behav)
+        assert_raises(UndefinedOperationError, self.profile_rational.as_behav)
 

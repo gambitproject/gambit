@@ -1,5 +1,6 @@
 import gambit
 import nose.tools
+from gambit.lib.error import MismatchError
 
 class TestGambitInfosets(object):
     def setUp(self):
@@ -23,7 +24,7 @@ class TestGambitInfosets(object):
         self.extensive_game.root.infoset.player = self.extensive_game.players[1]
         assert self.extensive_game.root.infoset.player == self.extensive_game.players[1]
         
-    @nose.tools.raises(ValueError)
+    @nose.tools.raises(MismatchError)
     def test_infoset_player_mismatch(self):
         "Test to ensure exception raised on setting player from different game."
         g2 = gambit.new_tree()
