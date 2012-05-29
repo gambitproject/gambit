@@ -53,6 +53,7 @@ class TestGambitGame(object):
         "To test when attempting to find outcome with invalid input"
         assert_raises(TypeError, self.game.__getitem__, (1.23,1))
 
+
     def test_game_is_const_sum(self):
         "To test checking if the game is constant sum"
         game = gambit.read_game("test_games/const_sum_game.nfg")
@@ -72,3 +73,13 @@ class TestGambitGame(object):
         "To test getting the maximum payoff of the game"
         game = gambit.read_game("test_games/payoff_game.nfg")
         assert game.max_payoff == fractions.Fraction(10,1)
+
+    def test_game_is_perfect_recall(self):
+        "To test checking if the game is of perfect recall"
+        game = gambit.read_game("test_games/perfect_recall.efg")
+        assert game.is_perfect_recall
+
+    def test_game_is_not_perfect_recall(self):
+        "To test checking if the game is not of perfect recall"
+        game = gambit.read_game("test_games/not_perfect_recall.efg")
+        assert not game.is_perfect_recall

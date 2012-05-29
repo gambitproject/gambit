@@ -379,6 +379,22 @@ API documentation
       Returns the :py:class:`gambit.Node` representing the root
       node of the game.
 
+   .. py:attribute:: is_const_sum
+
+      Returns ``True`` if the game is constant sum.
+
+   .. py:attribute:: is_perfect_recall
+
+      Returns ``True`` if the game is of perfect recall.
+
+   .. py:attribute:: min_payoff
+
+      Returns the smallest payoff in any outcome of the game.
+
+   .. py:attribute:: max_payoff
+
+      Returns the largest payoff in any outcome of the game.
+
    .. py:method:: __getitem__(profile)
 
       Returns the :py:class:`gambit.Outcome` associated with a
