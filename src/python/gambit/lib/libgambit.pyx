@@ -24,6 +24,7 @@ cdef extern from "libgambit/number.h":
 cdef extern from "libgambit/array.h":
     ctypedef struct c_ArrayInt "Array<int>":
         int getitem "operator[]"(int)
+        int Length()
     c_ArrayInt *new_ArrayInt "new Array<int>"(int)
     void del_ArrayInt "delete"(c_ArrayInt *)
 
@@ -68,6 +69,8 @@ cdef extern from "libgambit/game.h":
     ctypedef struct c_GameActionRep "GameActionRep":
         int GetNumber()
         c_GameInfoset GetInfoset()
+        bint Precedes(c_GameNode)
+        void DeleteAction() except +ValueError
 
         cxx_string GetLabel()
         void SetLabel(cxx_string)
@@ -83,6 +86,7 @@ cdef extern from "libgambit/game.h":
 
         int NumActions()
         c_GameAction GetAction(int) except +IndexError
+        c_GameAction InsertAction(c_GameAction) except +ValueError
         
         c_Number GetActionProb "GetActionProb<Number>"(int) except +IndexError
         void SetActionProb(int, cxx_string) except +IndexError 
@@ -90,7 +94,8 @@ cdef extern from "libgambit/game.h":
         int NumMembers()
         c_GameNode GetMember(int) except +IndexError
         
-
+        void Reveal(c_GamePlayer)
+        bint IsChanceInfoset()
         bint Precedes(c_GameNode)
 
     ctypedef struct c_GamePlayerRep "GamePlayerRep":
@@ -126,6 +131,8 @@ cdef extern from "libgambit/game.h":
         void SetLabel(cxx_string)
 
         c_GameInfoset GetInfoset()
+        void SetInfoset(c_GameInfoset) except +ValueError
+        c_GameInfoset LeaveInfoset()
         c_GamePlayer GetPlayer()
         c_GameNode GetParent()
         int NumChildren()
@@ -138,16 +145,24 @@ cdef extern from "libgambit/game.h":
         bint IsSuccessorOf(c_GameNode)
         bint IsSubgameRoot()
         c_GameAction GetPriorAction()
+
         c_GameInfoset AppendMovePlayer "AppendMove"(c_GamePlayer, int) except +ValueError
         c_GameInfoset AppendMoveInfoset "AppendMove"(c_GameInfoset) except +ValueError   
         c_GameInfoset InsertMovePlayer "InsertMove"(c_GamePlayer, int) except +ValueError
         c_GameInfoset InsertMoveInfoset "InsertMove"(c_GameInfoset) except +ValueError
+        void DeleteParent()
+        void DeleteTree()
+        void CopyTree(c_GameNode) except +ValueError
+        void MoveTree(c_GameNode) except +ValueError
 
     ctypedef struct c_GameRep "GameRep":
         int IsTree()
         
         cxx_string GetTitle()
         void SetTitle(cxx_string)
+
+        cxx_string GetComment()
+        void SetComment(cxx_string)
 
         int NumPlayers()
         c_GamePlayer GetPlayer(int) except +IndexError
@@ -157,9 +172,19 @@ cdef extern from "libgambit/game.h":
         int NumOutcomes()
         c_GameOutcome GetOutcome(int) except +IndexError
         c_GameOutcome NewOutcome()
+        void DeleteOutcome(c_GameOutcome)
         
         int NumNodes()
         c_GameNode GetRoot()
+
+        c_GameStrategy GetStrategy(int) except +IndexError
+        int MixedProfileLength()
+
+        c_GameInfoset GetInfoset(int) except +IndexError
+        c_ArrayInt NumInfosets()
+
+        c_GameAction GetAction(int) except +IndexError
+        int BehavProfileLength()
 
         bool IsConstSum()
         c_Rational GetMinPayoff(int)
