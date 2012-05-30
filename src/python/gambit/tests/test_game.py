@@ -6,6 +6,7 @@ from gambit.lib.error import UndefinedOperationError
 class TestGambitGame(object):
     def setUp(self):
         self.game = gambit.new_table([2,2])
+        self.extensive_game = gambit.read_game("test_games/basic_extensive_game.efg")
     
     def tearDown(self):
         del self.game
@@ -90,3 +91,31 @@ class TestGambitGame(object):
         assert_raises(UndefinedOperationError, self.game.behav_profile)
         assert_raises(UndefinedOperationError, self.game.behav_profile, True)
 
+    def test_game_title(self):
+        assert self.game.title == ""
+        self.game.title = "Test Title"
+        assert self.game.title == "Test Title"
+
+    def test_game_comment(self):
+        assert self.game.comment == ""
+        self.game.comment = "Test Comment"
+        assert self.game.comment == "Test Comment"
+
+    def test_game_actions(self):
+        assert self.extensive_game.actions[0] == self.extensive_game.players[0].infosets[0].actions[0]
+        assert self.extensive_game.actions[1] == self.extensive_game.players[0].infosets[0].actions[1]
+        assert self.extensive_game.actions[2] == self.extensive_game.players[1].infosets[0].actions[0]
+        assert self.extensive_game.actions[3] == self.extensive_game.players[1].infosets[0].actions[1]
+        assert self.extensive_game.actions[4] == self.extensive_game.players[2].infosets[0].actions[0]
+        assert self.extensive_game.actions[5] == self.extensive_game.players[2].infosets[0].actions[1]
+
+    def test_game_infosets(self):
+        assert self.extensive_game.infosets[0] == self.extensive_game.players[0].infosets[0]
+        assert self.extensive_game.infosets[1] == self.extensive_game.players[1].infosets[0]
+        assert self.extensive_game.infosets[2] == self.extensive_game.players[2].infosets[0]
+
+    def test_game_strategies(self):
+        assert self.game.strategies[0] == self.game.players[0].strategies[0]
+        assert self.game.strategies[1] == self.game.players[0].strategies[1]
+        assert self.game.strategies[2] == self.game.players[1].strategies[0]
+        assert self.game.strategies[3] == self.game.players[1].strategies[1]

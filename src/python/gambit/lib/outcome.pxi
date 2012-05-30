@@ -25,6 +25,9 @@ cdef class Outcome:
     def __hash__(self):
         return long(<long>self.outcome.deref())
 
+    def delete(self):
+        (<Game>self.game).game.deref().DeleteOutcome(self.outcome)
+
     property game:
         def __get__(self):
             cdef Game g

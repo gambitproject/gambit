@@ -93,6 +93,35 @@ cdef class Node:
             return i
         raise TypeError, "insert_move accepts either a Player or Infoset to specify information"
 
+    def leave_infoset(self):
+        cdef Infoset i
+        i = Infoset()
+        i.infoset = self.node.deref().LeaveInfoset()
+        return i
+
+    def delete_parent(self):
+        self.node.deref().DeleteParent()
+
+    def delete_tree(self):
+        self.node.deref().DeleteTree()
+
+    def copy_tree(self, node):
+        if isinstance(node, Node):
+            if node.game != self.game:
+                raise MismatchError("copy_tree can only be applied between \
+                                    objects of the same game")
+            self.node.deref().CopyTree((<Node>node).node)
+        else:
+            raise TypeError("copy_tree takes a Node object as its input")
+
+    def move_tree(self, node):
+        if isinstance(node, Node):
+            if node.game != self.game:
+                raise MismatchError("copy_tree can only be applied between \
+                                    objects of the same game")
+            self.node.deref().MoveTree((<Node>node).node)
+        else:
+            raise TypeError("move_tree takes a Node object as its input")
  
     property label:
         def __get__(self):
@@ -124,6 +153,11 @@ cdef class Node:
                 i.infoset = self.node.deref().GetInfoset()
                 return i
             return None
+        def __set__(self, infoset):
+            if isinstance(infoset, Infoset):
+                self.node.deref().SetInfoset((<Infoset>infoset).infoset)
+            else:
+                raise TypeError, "type Infoset required for setting infoset at a node"
 
     property player:
         def __get__(self):

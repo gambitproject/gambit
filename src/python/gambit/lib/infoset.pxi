@@ -14,6 +14,17 @@ cdef class Members(Collection):
 cdef class Actions(Collection):
     "Represents a collection of actions at an infoset."
     cdef c_GameInfoset infoset
+
+    def add(self, action=None):
+        if action is None:
+            self.infoset.deref().InsertAction(<c_GameAction>NULL)
+        elif isinstance(action, Action):
+            if (<Infoset>action.infoset).infoset != self.infoset:
+                raise MismatchError("The new action should be from the same infoset")
+            self.infoset.deref().InsertAction((<Action>action).action)
+        else:
+            raise TypeError("insert_action takes an Action object as its input")
+
     def __len__(self):     return self.infoset.deref().NumActions()
     def __getitem__(self, act):
         if not isinstance(act, int):  return Collection.__getitem__(self, act)
@@ -55,6 +66,12 @@ cdef class Infoset:
             return self.infoset.deref().Precedes(((<Node>node).node))
         else:
             raise TypeError, "Precedes takes a Node object as its input"
+
+    def reveal(self, player):
+        if isinstance(player, Player):
+            self.infoset.deref().Reveal((<Player>player).player)
+        else:
+            raise TypeError, "Reveal takes a Player object as its input"
             
     property game:
         def __get__(self):
@@ -70,6 +87,10 @@ cdef class Infoset:
             cdef cxx_string s
             s.assign(value)
             self.infoset.deref().SetLabel(s)
+
+    property is_chance:
+        def __get__(self):
+            return self.infoset.deref().IsChanceInfoset()
 
     property actions:
         def __get__(self):
@@ -92,7 +113,7 @@ cdef class Infoset:
             return p
         def __set__(self, player):
             if not isinstance(player, Player):
-                raise ValueError, "type Player required for setting player at an infoset"
+                raise TypeError, "type Player required for setting player at an infoset"
             elif player.game != self.game:
                 raise MismatchError, "player at an infoset must belong to the same game"
             else:
