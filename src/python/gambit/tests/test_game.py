@@ -134,3 +134,20 @@ class TestGambitGame(object):
         assert self.game.strategies[1] == self.game.players[0].strategies[1]
         assert self.game.strategies[2] == self.game.players[1].strategies[0]
         assert self.game.strategies[3] == self.game.players[1].strategies[1]
+
+    def test_game_get_root(self):
+        "Test retrieving the root node of a game"
+        root = self.extensive_game.root
+        root.label = "Test"
+        assert self.extensive_game.root.label == root.label
+
+    @nose.tools.raises(UndefinedOperationError)
+    def test_game_get_root_error(self):
+        "Test to ensure an error is raised when trying to get the root"\
+        "node of a game without a tree representation"
+        self.game.root
+
+    def test_game_num_nodes(self):
+        "Test retrieving the number of nodes of a game"
+        assert self.extensive_game.num_nodes() == 15
+        assert self.game.num_nodes() == 0
