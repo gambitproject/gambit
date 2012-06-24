@@ -185,9 +185,12 @@ cdef class Game:
     property root:
         def __get__(self):
             cdef Node n
-            n = Node()
-            n.node = self.game.deref().GetRoot()
-            return n
+            if self.is_tree:
+                n = Node()
+                n.node = self.game.deref().GetRoot()
+                return n
+            raise UndefinedOperationError("Operation only defined for "\
+                                           "games with a tree representation")
                          
     property is_const_sum:
         def __get__(self):
@@ -280,7 +283,9 @@ cdef class Game:
                                       " to create a mixed behavior profile")
  
     def num_nodes(self):
-        return self.game.deref().NumNodes()
+        if self.is_tree:
+            return self.game.deref().NumNodes()
+        return 0
 
     def write(self, strategic=False):
         if strategic or not self.is_tree:

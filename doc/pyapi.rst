@@ -402,6 +402,8 @@ API documentation
       Returns the :py:class:`gambit.Node` representing the root
       node of the game.
 
+      :raises: :py:class:`gambit.UndefinedOperationError` if the game does not have a tree representation.
+
    .. py:attribute:: is_const_sum
 
       Returns ``True`` if the game is constant sum.
