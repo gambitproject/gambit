@@ -1,5 +1,6 @@
 import gambit
 import fractions
+import nose.tools
 from nose.tools import assert_raises
 from gambit.lib.error import UndefinedOperationError
 
@@ -10,6 +11,7 @@ class TestGambitGame(object):
     
     def tearDown(self):
         del self.game
+        del self.extensive_game
 
     def test_game_get_outcome_with_ints(self):
         "To test getting the first outcome"
@@ -109,10 +111,23 @@ class TestGambitGame(object):
         assert self.extensive_game.actions[4] == self.extensive_game.players[2].infosets[0].actions[0]
         assert self.extensive_game.actions[5] == self.extensive_game.players[2].infosets[0].actions[1]
 
+    @nose.tools.raises(UndefinedOperationError)
+    def test_strategic_game_actions_error(self):
+        "Test to ensure an error is raised when trying to access actions "\
+        "of a game without a tree representation"
+        self.game.actions
+
+
     def test_game_infosets(self):
         assert self.extensive_game.infosets[0] == self.extensive_game.players[0].infosets[0]
         assert self.extensive_game.infosets[1] == self.extensive_game.players[1].infosets[0]
         assert self.extensive_game.infosets[2] == self.extensive_game.players[2].infosets[0]
+
+    @nose.tools.raises(UndefinedOperationError)
+    def test_strategic_game_infosets_error(self):
+        "Test to ensure an error is raised when trying to access infosets "\
+        "of a game without a tree representation"
+        self.game.infosets
 
     def test_game_strategies(self):
         assert self.game.strategies[0] == self.game.players[0].strategies[0]
