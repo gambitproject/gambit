@@ -140,16 +140,22 @@ cdef class Game:
     property actions:
         def __get__(self):
             cdef GameActions a
-            a = GameActions()
-            a.game = self.game
-            return a
+            if self.is_tree:
+                a = GameActions()
+                a.game = self.game
+                return a
+            raise UndefinedOperationError("Operation only defined for "\
+                                           "games with a tree representation")
 
     property infosets:
         def __get__(self):
             cdef GameInfosets i
-            i = GameInfosets()
-            i.game = self.game
-            return i
+            if self.is_tree:
+                i = GameInfosets()
+                i.game = self.game
+                return i
+            raise UndefinedOperationError("Operation only defined for "\
+                                           "games with a tree representation")
 
     property players:
         def __get__(self):
