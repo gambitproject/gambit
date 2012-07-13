@@ -330,6 +330,22 @@ profiles using :meth:`gambit.MixedProfile.as_behav` and
 :meth:`gambit.BehavProfile.as_mixed`.
 
 
+Hashing and game objects
+------------------------
+
+Games, and objects representing elements within games, have a hash
+method defined and are therefore hashable, usable as keys in
+dictionaries and in Python sets.  The hash value is generated based on
+the memory address at which the underlying C++ object is stored.  This
+meets the requirements of a Python hash value, as distinct objects
+will generate distinct hash values.  However, the hash value generated
+will vary in different runs of a program.  As such, operations which
+depend on the sequence of the has value may generate different output
+in different runs of the program, most notably popping from a set, or
+iterating over the keys in a dictionary where the keys are game objects.
+
+
+
 API documentation
 -----------------
 
@@ -373,10 +389,14 @@ API documentation
       Returns a :py:class:`gambit.GameActions` collection object
       representing the actions defined in the game.
 
+      :raises: :py:class:`gambit.UndefinedOperationError` if the game does not have a tree representation.
+
    .. py:attribute:: infosets
 
       Returns a :py:class:`gambit.GameInfosets` collection object
       representing the information sets defined in the game.
+      
+      :raises: :py:class:`gambit.UndefinedOperationError` if the game does not have a tree representation.
 
    .. py:attribute:: players
  
@@ -397,6 +417,8 @@ API documentation
 
       Returns the :py:class:`gambit.Node` representing the root
       node of the game.
+
+      :raises: :py:class:`gambit.UndefinedOperationError` if the game does not have a tree representation.
 
    .. py:attribute:: is_const_sum
 

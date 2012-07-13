@@ -208,6 +208,7 @@ cdef extern from "libgambit/mixed.h":
     ctypedef struct c_MixedStrategyProfileDouble "MixedStrategyProfile<double>":
         c_Game GetGame()
         int MixedProfileLength()
+        c_StrategySupport GetSupport()
         double getitem "operator[]"(int) except +IndexError
         double GetPayoff(c_GamePlayer)
         double GetStrategyValue(c_GameStrategy)
@@ -220,6 +221,7 @@ cdef extern from "libgambit/mixed.h":
     ctypedef struct c_MixedStrategyProfileRational "MixedStrategyProfile<Rational>":
         c_Game GetGame()
         int MixedProfileLength()
+        c_StrategySupport GetSupport()
         c_Rational getitem "operator[]"(int) except +IndexError
         c_Rational GetPayoff(c_GamePlayer)
         c_Rational GetStrategyValue(c_GameStrategy)
@@ -264,6 +266,20 @@ cdef extern from "libgambit/behav.h":
     c_MixedBehavProfileRational *new_MixedBehavProfileRational "new MixedBehavProfile<Rational>"(c_Game)
     void del_MixedBehavProfileRational "delete"(c_MixedBehavProfileRational *)
 
+cdef extern from "libgambit/stratspt.h":
+    ctypedef struct c_StrategySupport "StrategySupport":
+        c_Game GetGame()
+        c_ArrayInt NumStrategies()        
+        int MixedProfileLength()
+        int NumStrategiesPlayer "NumStrategies"(int) except +IndexError
+        bool IsSubsetOf(c_StrategySupport)
+        bool RemoveStrategy(c_GameStrategy)
+        c_GameStrategy GetStrategy(int, int) except +IndexError
+        bool Contains(c_GameStrategy)
+        c_StrategySupport Undominated(bool, bool)
+    c_StrategySupport *new_StrategySupport "new StrategySupport"(c_Game)
+    c_StrategySupport *copy_StrategySupport "new StrategySupport"(c_StrategySupport)
+    void del_StrategySupport "delete"(c_StrategySupport *)
 
 cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError
@@ -311,6 +327,8 @@ include "strategy.pxi"
 include "player.pxi"
 include "outcome.pxi"
 include "node.pxi"
+include "basegame.pxi"
+include "stratspt.pxi"
 include "mixed.pxi"
 include "behav.pxi"
 include "game.pxi"

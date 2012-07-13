@@ -22,16 +22,21 @@ cdef class Outcomes(Collection):
 cdef class Players(Collection):
     "Represents a collection of players in a game."
     cdef c_Game game
+    cdef StrategicRestriction restriction
     def __len__(self):       return self.game.deref().NumPlayers()
     def __getitem__(self, pl):
         if not isinstance(pl, int):  return Collection.__getitem__(self, pl)
         cdef Player p
         p = Player()
         p.player = self.game.deref().GetPlayer(pl+1)
+        if self.restriction is not None:
+            p.restriction = self.restriction
         return p
 
     def add(self, label=""):
         cdef Player p
+        if self.restriction is not None:
+            raise UndefinedOperationError("Changing objects in a restriction is not supported")
         p = Player()
         p.player = self.game.deref().NewPlayer()
         if label != "": p.label = str(label)
@@ -42,6 +47,7 @@ cdef class Players(Collection):
             cdef Player p
             p = Player()
             p.player = self.game.deref().GetChance()
+            p.restriction = self.restriction
             return p
 
 cdef class GameActions(Collection):
@@ -140,16 +146,22 @@ cdef class Game:
     property actions:
         def __get__(self):
             cdef GameActions a
-            a = GameActions()
-            a.game = self.game
-            return a
+            if self.is_tree:
+                a = GameActions()
+                a.game = self.game
+                return a
+            raise UndefinedOperationError("Operation only defined for "\
+                                           "games with a tree representation")
 
     property infosets:
         def __get__(self):
             cdef GameInfosets i
-            i = GameInfosets()
-            i.game = self.game
-            return i
+            if self.is_tree:
+                i = GameInfosets()
+                i.game = self.game
+                return i
+            raise UndefinedOperationError("Operation only defined for "\
+                                           "games with a tree representation")
 
     property players:
         def __get__(self):
@@ -179,9 +191,12 @@ cdef class Game:
     property root:
         def __get__(self):
             cdef Node n
-            n = Node()
-            n.node = self.game.deref().GetRoot()
-            return n
+            if self.is_tree:
+                n = Node()
+                n.node = self.game.deref().GetRoot()
+                return n
+            raise UndefinedOperationError("Operation only defined for "\
+                                           "games with a tree representation")
                          
     property is_const_sum:
         def __get__(self):
@@ -273,8 +288,16 @@ cdef class Game:
             raise UndefinedOperationError("Game must have a tree representation"\
                                       " to create a mixed behavior profile")
  
+    def support_profile(self):
+        return StrategySupportProfile(list(self.strategies), self)
+
     def num_nodes(self):
-        return self.game.deref().NumNodes()
+        if self.is_tree:
+            return self.game.deref().NumNodes()
+        return 0
+
+    def unrestrict(self):
+        return self
 
     def write(self, strategic=False):
         if strategic or not self.is_tree:
