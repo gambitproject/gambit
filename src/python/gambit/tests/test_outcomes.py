@@ -47,3 +47,9 @@ class TestGambitOutcomes(object):
     def test_game_ouctome_index_exception_invalid_input(self):
         "Test to verify when attempting to retrieve an outcome with invalid input"
         assert_raises(TypeError, self.game.outcomes.__getitem__, 1.3)
+
+    def test_outcome_delete(self):
+        "Test to ensure it is possible to delete an outcome from the game"
+        assert len(self.game.outcomes) == 4
+        self.game.outcomes[0].delete()
+        assert len(self.game.outcomes) == 3

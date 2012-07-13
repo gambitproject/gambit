@@ -364,10 +364,29 @@ API documentation
 
       Accesses the text string of the game's title.
 
+   .. py:attribute:: comment
+
+      Accesses the text string of the game's comment.
+
+   .. py:attribute:: actions
+
+      Returns a :py:class:`gambit.GameActions` collection object
+      representing the actions defined in the game.
+
+   .. py:attribute:: infosets
+
+      Returns a :py:class:`gambit.GameInfosets` collection object
+      representing the information sets defined in the game.
+
    .. py:attribute:: players
  
       Returns a :py:class:`gambit.Players` collection object
       representing the players defined in the game.
+
+   .. py:attribute:: strategies
+
+      Returns a :py:class:`gambit.GameStrategies` collection object
+      representing the strategies defined in the game.
 
    .. py:attribute:: contingencies
 
@@ -422,22 +441,71 @@ API documentation
       :param rational: If :literal:`True`, probabilities are represented using rational numbers; otherwise double-precision floating point numbers are used.  
       :raises: :py:class:`gambit.UndefinedOperationError` if the game does not have a tree representation.
 
+.. py:class:: GameActions
+   
+   A collection object representing the actions of a game.
+
+   .. py:method:: len()
+
+      Returns the number of actions in the game.
+
+   .. py:method:: __getitem__(i)
+
+      Returns action number ``i`` in the game.  Actions are numbered
+      starting with ``0``.
+
+.. py:class:: GameInfosets
+   
+   A collection object representing the information sets of a game.
+
+   .. py:method:: len()
+
+      Returns the number of information sets in the game.
+
+   .. py:method:: __getitem__(i)
+
+      Returns information set number ``i`` in the game.  Information sets
+      are numbered starting with ``0``.
+
+.. py:class:: GameStrategies
+   
+   A collection object representing the strategies of a game.
+
+   .. py:method:: len()
+
+      Returns the number of strategies in the game.
+
+   .. py:method:: __getitem__(i)
+
+      Returns strategy ``i`` in the game.  Strategies are numbered
+      starting with ``0``.
+
 .. py:class:: Infoset
 
    An information set for an extensive form game.
 
    .. py:method:: precedes(node)
 
-      Returns true or false depending on whether the specified node
+      Returns ``True`` or ``False`` depending on whether the specified node
       precedes the information set in the extensive game. 
+
+   .. py:method:: reveal(player)
+
+      Reveals the information set to a player.
 
    .. py:attribute:: actions
 
-      Returns the set of actions associated with this information set.
+      Returns a :py:class:`gambit.Actions` collection object representing 
+      the actions defined in this information set.
 
    .. py:attribute:: label
 
       A text label used to identify the information set.
+
+   .. py:attribute:: is_chance
+
+      Returns ``True`` or ``False`` depending on whether this information set is
+      associated to the chance player.
 
    .. py:attribute:: members
 
@@ -447,20 +515,48 @@ API documentation
 
       Returns the player object associated with this information set.
 
+.. py:class:: Infosets
+   
+   A collection object representing the information sets available to a
+   player in a game.
+
+   .. py:method:: len()
+
+      Returns the number of information sets for the player.
+
+   .. py:method:: __getitem__(i)
+
+      Returns information set number ``i``.  Information sets are numbered
+      starting with ``0``.
+
 .. py:class:: Action
 
    An action associated with an information set.
 
+   .. py:method:: delete()
+
+      Deletes this action from the game.
+
+      :raises: :py:class:`gambit.UndefinedOperationError` when the action is the last one of its infoset.
+
+   .. py:method:: precedes(node)
+
+      Returns ``True`` or ``False`` depending on whether the specified node
+      precedes the action in the extensive game. 
+
    .. py:attribute:: label
 
       A text label used to identify the action.
+
+   .. py:attribute:: infoset
+
+      Returns the information to which this action is associated.
 
    .. py:attribute:: prob
 
       A settable property that represents the probability associated 
       with the action. It can be a value stored as an int, 
       decimal.Decimal, or Fraction.fraction. 
-
 
 .. py:class:: Players
    
@@ -492,9 +588,41 @@ API documentation
 
    Represents a player in a :py:class:`gambit.Game`.
 
+   .. py:attribute:: game
+
+      Returns the :py:class:`gambit.Game` in which the player is.
+
    .. py:attribute:: label
 
       A text label useful for identification of the player.
+
+   .. py:attribute:: number
+
+      Returns the number of the player in the :py:class:`gambit.Game`.
+      Players are numbered starting with ``0``.
+
+   .. py:attribute:: is_chance
+
+      Returns ``True`` or ``False`` on whether the player represents the chance 
+      moves or not.
+
+   .. py:attribute:: infosets
+
+      Returns a :py:class:`gambit.Infosets` collection object
+      representing the information sets of the player.
+
+   .. py:attribute:: strategies
+
+      Returns a :py:class:`gambit.Strategies` collection object
+      representing the strategies of the player.
+
+   .. py:attribute:: min_payoff
+
+      Returns the smallest payoff for the player in any outcome of the game.
+
+   .. py:attribute:: max_payoff
+
+      Returns the largest payoff for the player in any outcome of the game.
 
 .. py:class:: Node
 
@@ -502,12 +630,12 @@ API documentation
 
    .. py:method:: is_successor_of(node)
 
-      Returns true if the current node is a successor of the
+      Returns ``True`` if the current node is a successor of the
       node provided in the argument list.
 
    .. py:method:: is_subgame_root(node)
 
-      Returns true if the current node is a marked subgame root.
+      Returns ``True`` if the current node is a marked subgame root.
 
    .. py:attribute:: label
 
@@ -515,8 +643,8 @@ API documentation
 
    .. py:attribute:: is_terminal
 
-      Returns True if the node is a terminal node in the game tree.
-      Returns False otherwise.
+      Returns ``True`` if the node is a terminal node in the game tree.
+      Returns ``False`` otherwise.
 
    .. py:attribute:: children
 
@@ -588,6 +716,53 @@ API documentation
       :raises: :py:class:`gambit.UndefinedOperationError` when called with a :py:class:`gambit.Infoset` object and with actions.
       :raises: :py:class:`gambit.MismatchError` when called with objects from different games.
 
+   .. py:method:: leave_infoset()
+
+      Removes this node from its information set. If this node is the last
+      of its information set, this method does nothing.
+
+   .. py:method:: delete_parent()
+
+      Deletes the parent node and its subtrees other than the one 
+      which contains this node and moves this node into its former 
+      parent's place.
+
+   .. py:method:: delete_tree()
+
+      Deletes the whole subtree which has this node as a root, except 
+      the actual node.
+
+   .. py:method:: copy_tree(node)
+
+      Copies the tree of this node to ``node``.
+
+      :raises: :literal:`MismatchError` if both objects aren't in the same game.
+
+   .. py:method:: move_tree(node)
+
+      Move the tree of this node to ``node``.
+
+      :raises: :literal:`MismatchError` if both objects aren't in the same game.
+
+.. py:class:: Actions
+   
+   A collection object representing the actions available at an
+   information set in a game.
+
+   .. py:method:: len()
+
+      Returns the number of actions for the player.
+
+   .. py:method:: __getitem__(i)
+
+      Returns action number ``i``.  Actions are numbered
+      starting with ``0``.
+
+   .. py:method:: add([action=None])
+
+      Add a :py:class:`gambit.Action` to the list of actions of an 
+      information set.
+
 .. py:class:: Strategies
    
    A collection object representing the strategies available to a
@@ -602,7 +777,7 @@ API documentation
       Returns strategy number ``i``.  Strategies are numbered
       starting with ``0``.
 
-   .. py:method:: add_strategy([label=""])
+   .. py:method:: add([label=""])
 
       Add a :py:class:`gambit.Strategy` to the player's list of strategies.
       This method is only applicable to games in a strategic form. When
@@ -629,6 +804,10 @@ API documentation
 
    Represents an outcome in a :py:class:`gambit.Game`.
 
+   .. py:method:: delete()
+
+      Deletes the outcome from the game.
+
    .. py:attribute:: label
 
       A text label useful for identification of the outcome.
@@ -642,6 +821,26 @@ API documentation
       Sets the payoff to the ``pl`` th player at the outcome to the
       specified ``payoff``.  Payoffs may be specified as integers
       or instances of ``decimal.Decimal`` or ``fractions.Fraction``.
+
+.. py:class:: Outcomes
+   
+   A collection object representing the outcomes of a game.
+
+   .. py:method:: len()
+
+      Returns the number of outcomes in the game.
+
+   .. py:method:: __getitem__(i)
+
+      Returns outcome ``i`` in the game.  Outcomes are numbered
+      starting with ``0``.
+
+   .. py:method:: add([label=""])
+
+      Add a :py:class:`gambit.Outcome` to the game.  If label
+      is specified, sets the text label for the outcome. If the 
+      provided outcome label is shared by another outcome a warning 
+      will be returned.
       
 
 .. py:class:: MixedProfile

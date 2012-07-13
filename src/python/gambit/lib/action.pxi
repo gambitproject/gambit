@@ -1,3 +1,5 @@
+from gambit.lib.error import UndefinedOperationError
+
 cdef class Action:
     cdef c_GameAction action
 
@@ -27,6 +29,18 @@ cdef class Action:
     def __hash__(self):
         return long(<long>self.action.deref())
 
+    def delete(self):
+        if len(self.infoset.actions) == 1:
+            raise UndefinedOperationError("it is not possible to delete the \
+                                            last action of an infoset")
+        self.action.deref().DeleteAction()
+
+    def precedes(self, node):
+        if isinstance(node, Node):
+            return self.action.deref().Precedes(((<Node>node).node))
+        else:
+            raise TypeError("Precedes takes a Node object as its input")
+
     property label:
         def __get__(self):
             return self.action.deref().GetLabel().c_str()
@@ -34,6 +48,13 @@ cdef class Action:
             cdef cxx_string s
             s.assign(value)
             self.action.deref().SetLabel(s)
+
+    property infoset:
+        def __get__(self):
+            cdef Infoset i
+            i = Infoset()
+            i.infoset = self.action.deref().GetInfoset()
+            return i
 
     property prob:
         def __get__(self):

@@ -5,9 +5,11 @@ from gambit.lib.error import MismatchError, UndefinedOperationError
 
 class TestGambitNode(object):
     def setUp(self):
+        self.game = gambit.new_tree()
         self.extensive_game = gambit.read_game("test_games/basic_extensive_game.efg")
         
     def tearDown(self):
+        del self.game
         del self.extensive_game
         
     def test_get_infoset(self):
@@ -81,8 +83,7 @@ class TestGambitNode(object):
 
     def test_append_move_error_player_mismatch(self):
         "Test to ensure the node and the player are from the same game"
-        game = gambit.new_tree()
-        assert_raises(MismatchError, game.root.append_move,
+        assert_raises(MismatchError, self.game.root.append_move,
                         self.extensive_game.players[0], 1)
 
     def test_append_move_error_infoset_actions(self):
@@ -92,8 +93,7 @@ class TestGambitNode(object):
 
     def test_append_move_error_infoset_mismatch(self):
         "Test to ensure the node and the player are from the same game"
-        game = gambit.new_tree()
-        assert_raises(MismatchError, game.root.append_move,
+        assert_raises(MismatchError, self.game.root.append_move,
                         self.extensive_game.players[0].infosets[0])
 
     def test_insert_move_error_player_actions(self):
@@ -105,8 +105,7 @@ class TestGambitNode(object):
 
     def test_insert_move_error_player_mismatch(self):
         "Test to ensure the node and the player are from the same game"
-        game = gambit.new_tree()
-        assert_raises(MismatchError, game.root.insert_move,
+        assert_raises(MismatchError, self.game.root.insert_move,
                         self.extensive_game.players[0], 1)
 
     def test_insert_move_error_infoset_actions(self):
@@ -116,6 +115,35 @@ class TestGambitNode(object):
 
     def test_insert_move_error_infoset_mismatch(self):
         "Test to ensure the node and the player are from the same game"
-        game = gambit.new_tree()
-        assert_raises(MismatchError, game.root.insert_move,
+        assert_raises(MismatchError, self.game.root.insert_move,
                         self.extensive_game.players[0].infosets[0])
+
+    def test_node_leave_infoset(self):
+        "Test to ensure it's possible to remove a node from an infoset"
+        assert len(self.extensive_game.infosets[1].members) == 2
+        self.extensive_game.root.children[0].leave_infoset()
+        assert len(self.extensive_game.infosets[1].members) == 1
+
+    def test_node_delete_parent(self):
+        "Test to ensure deleting a parent node works"
+        node = self.extensive_game.root.children[0]
+        node.delete_parent()
+        assert self.extensive_game.root == node
+
+    def test_node_delete_tree(self):
+        "Test to ensure deleting every children of a node works"
+        node = self.extensive_game.root.children[0]
+        node.delete_tree()
+        assert len(node.children) == 0
+
+    def test_node_copy_tree_error(self):
+        "Test to ensure a MismatchError is raised when trying to copy a tree \
+        from a different game"
+        assert_raises(MismatchError, self.game.root.copy_tree,
+                        self.extensive_game.root)
+
+    def test_node_move_tree_error(self):
+        "Test to ensure a MismatchError is raised when trying to move a tree \
+        between different games"
+        assert_raises(MismatchError, self.game.root.move_tree,
+                        self.extensive_game.root)

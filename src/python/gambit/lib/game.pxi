@@ -44,6 +44,51 @@ cdef class Players(Collection):
             p.player = self.game.deref().GetChance()
             return p
 
+cdef class GameActions(Collection):
+    "Represents a collection of actions in a game."
+    cdef c_Game game
+    def __len__(self):
+        return self.game.deref().BehavProfileLength()
+    def __getitem__(self, action):
+        if not isinstance(action, int):
+            return Collection.__getitem__(self, action)
+        cdef Action a
+        a = Action()
+        a.action = self.game.deref().GetAction(action+1)
+        return a
+
+cdef class GameInfosets(Collection):
+    "Represents a collection of infosets in a game."
+    cdef c_Game game
+    def __len__(self):
+        cdef c_ArrayInt num_infosets
+        num_infosets = self.game.deref().NumInfosets()
+        size = num_infosets.Length()
+        n = 0
+        for i in range(1,size+1):
+            n += num_infosets.getitem(i)
+        return n
+    def __getitem__(self, infoset):
+        if not isinstance(infoset, int):
+            return Collection.__getitem__(self, infoset)
+        cdef Infoset i
+        i = Infoset()
+        i.infoset = self.game.deref().GetInfoset(infoset+1)
+        return i
+
+cdef class GameStrategies(Collection):
+    "Represents a collection of strategies in a game."
+    cdef c_Game game
+    def __len__(self):
+        return self.game.deref().MixedProfileLength()
+    def __getitem__(self, st):
+        if not isinstance(st, int):
+            return Collection.__getitem__(self, st)
+        cdef Strategy s
+        s = Strategy()
+        s.strategy = self.game.deref().GetStrategy(st+1)
+        return s
+
 cdef class Game:
     cdef c_Game game
 
@@ -84,12 +129,41 @@ cdef class Game:
             s.assign(value)
             self.game.deref().SetTitle(s)
 
+    property comment:
+        def __get__(self):
+            return self.game.deref().GetComment().c_str()
+        def __set__(self, char *value):
+            cdef cxx_string s
+            s.assign(value)
+            self.game.deref().SetComment(s)
+
+    property actions:
+        def __get__(self):
+            cdef GameActions a
+            a = GameActions()
+            a.game = self.game
+            return a
+
+    property infosets:
+        def __get__(self):
+            cdef GameInfosets i
+            i = GameInfosets()
+            i.game = self.game
+            return i
+
     property players:
         def __get__(self):
             cdef Players p
             p = Players()
             p.game = self.game
             return p
+
+    property strategies:
+        def __get__(self):
+            cdef GameStrategies s
+            s = GameStrategies()
+            s.game = self.game
+            return s
 
     property outcomes:
         def __get__(self):
