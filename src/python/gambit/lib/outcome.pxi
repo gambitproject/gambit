@@ -1,17 +1,20 @@
 cdef class Outcome:
     cdef c_GameOutcome outcome
+    cdef StrategySupport support
     
     def __repr__(self):
         return "<Outcome [%d] '%s' in game '%s'>" % (self.outcome.deref().GetNumber()-1,
                                                      self.label,
-                                                     self.outcome.deref().GetGame().deref().GetTitle().c_str())
+                                                     self.game.title)
     
     def __richcmp__(Outcome self, other, whichop):
         if isinstance(other, Outcome):
             if whichop == 2:
-                return self.outcome.deref() == ((<Outcome>other).outcome).deref()
+                return self.outcome.deref() == ((<Outcome>other).outcome).deref() and \
+                       self.support == (<Strategy>other).support
             elif whichop == 3:
-                return self.outcome.deref() != ((<Outcome>other).outcome).deref()
+                return self.outcome.deref() != ((<Outcome>other).outcome).deref() or \
+                self.support != (<Strategy>other).support
             else:
                 raise NotImplementedError
         else:
@@ -26,11 +29,15 @@ cdef class Outcome:
         return long(<long>self.outcome.deref())
 
     def delete(self):
+        if self.support is not None:
+            raise UndefinedOperationError("Changing objects in a support is not supported")
         (<Game>self.game).game.deref().DeleteOutcome(self.outcome)
 
     property game:
         def __get__(self):
             cdef Game g
+            if self.support is not None:
+                return self.support
             g = Game()
             g.game = self.outcome.deref().GetGame()
             return g
@@ -39,6 +46,8 @@ cdef class Outcome:
         def __get__(self):
             return self.outcome.deref().GetLabel().c_str()
         def __set__(self, char *value):
+            if self.support is not None:
+                raise UndefinedOperationError("Changing objects in a support is not supported")
             if value in [ i.label for i in self.game.outcomes ]:
                 warnings.warn("Another outcome with an identical label exists")
             cdef cxx_string s
@@ -54,6 +63,8 @@ cdef class Outcome:
             return fractions.Fraction(py_string)
 
     def __setitem__(self, pl, value):
+        if self.support is not None:
+            raise UndefinedOperationError("Changing objects in a support is not supported")
         cdef cxx_string s
         if isinstance(value, int) or isinstance(value, decimal.Decimal) or \
            isinstance(value, fractions.Fraction):
@@ -62,3 +73,9 @@ cdef class Outcome:
             self.outcome.deref().SetPayoff(pl+1, s)
         else:
             raise TypeError, "numeric argument required for payoff"
+
+    def unrestrict(self):
+        cdef Outcome o
+        o = Outcome()
+        o.outcome = self.outcome
+        return o
