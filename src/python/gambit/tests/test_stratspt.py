@@ -43,16 +43,16 @@ class TestGambitStrategySupport(object):
 
     def test_getting_strategies_directly(self):
         "Test retrieving strategies from a support"
-        assert not self.support.strategies[0] == self.game.players[0].strategies[0]
-        assert self.support.strategies[1] != self.game.players[0].strategies[1]
+        assert self.support.strategies[0] == self.game.players[0].strategies[0]
+        assert self.support.strategies[1] == self.game.players[0].strategies[1]
 
     def test_getting_players(self):
         "Test retrieving players from a support"
-        assert not self.support.players[0] == self.game.players[0]
-        assert self.support.players[1] != self.game.players[1]
-        assert not self.tree_support.players[0] == self.tree_game.players[0]
-        assert not self.tree_support.players[1] == self.tree_game.players[1]
-        assert self.tree_support.players[2] != self.tree_game.players[2]
+        assert self.support.players[0] == self.game.players[0]
+        assert self.support.players[1] == self.game.players[1]
+        assert self.tree_support.players[0] == self.tree_game.players[0]
+        assert self.tree_support.players[1] == self.tree_game.players[1]
+        assert self.tree_support.players[2] == self.tree_game.players[2]
         
     def test_is_subset_of(self):
         "Test to find check if a support is a subset of another one"
@@ -64,7 +64,7 @@ class TestGambitStrategySupport(object):
         for i in range(0, len(self.support.outcomes)-1):
             assert self.support.outcomes[i][0] == self.game.outcomes[i][0]
             assert self.support.outcomes[i][1] == self.game.outcomes[i][1]
-            assert not self.support.outcomes[i] == self.game.outcomes[i]
+            assert self.support.outcomes[i] == self.game.outcomes[i]
 
     def test_unrestricting_outcomes(self):
         "Test retrieving the original outcomes from a support"

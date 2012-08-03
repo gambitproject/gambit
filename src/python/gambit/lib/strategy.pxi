@@ -13,11 +13,9 @@ cdef class Strategy:
     def __richcmp__(Strategy self, other, whichop):
         if isinstance(other, Strategy):
             if whichop == 2:
-                return self.strategy.deref() == ((<Strategy>other).strategy).deref() and \
-                       self.support == (<Strategy>other).support
+                return self.strategy.deref() == ((<Strategy>other).strategy).deref()
             elif whichop == 3:
-                return self.strategy.deref() != ((<Strategy>other).strategy).deref() or \
-                self.support != (<Strategy>other).support
+                return self.strategy.deref() != ((<Strategy>other).strategy).deref()
             else:
                 raise NotImplementedError
         else:

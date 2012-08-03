@@ -10,11 +10,9 @@ cdef class Outcome:
     def __richcmp__(Outcome self, other, whichop):
         if isinstance(other, Outcome):
             if whichop == 2:
-                return self.outcome.deref() == ((<Outcome>other).outcome).deref() and \
-                       self.support == (<Strategy>other).support
+                return self.outcome.deref() == ((<Outcome>other).outcome).deref()
             elif whichop == 3:
-                return self.outcome.deref() != ((<Outcome>other).outcome).deref() or \
-                self.support != (<Strategy>other).support
+                return self.outcome.deref() != ((<Outcome>other).outcome).deref()
             else:
                 raise NotImplementedError
         else:

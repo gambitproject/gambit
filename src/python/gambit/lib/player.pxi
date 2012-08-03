@@ -73,11 +73,9 @@ cdef class Player:
     def __richcmp__(Player self, other, whichop):
         if isinstance(other, Player):
             if whichop == 2:
-                return self.player.deref() == ((<Player>other).player).deref() and \
-                       self.support == (<Player>other).support
+                return self.player.deref() == ((<Player>other).player).deref()
             elif whichop == 3:
-                return self.player.deref() != ((<Player>other).player).deref() or \
-                       self.support != (<Player>other).support
+                return self.player.deref() != ((<Player>other).player).deref()
             else:
                 raise NotImplementedError
         else:
