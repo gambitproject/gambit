@@ -64,7 +64,7 @@ cdef class StrategySupport(BaseGame):
                 raise NotImplementedError
 
     def __hash__(self):
-        return long(<long>self.unrestrict().deref())
+        return long(<long>&self.support)
 
     property title:
         def __get__(self):
@@ -113,10 +113,10 @@ cdef class StrategySupport(BaseGame):
         new_support.support = self.support.Undominated(strict, external)
         return new_support
 
-    def is_subset_of(self, spt):
+    def issubset(self, spt):
         if isinstance(spt, StrategySupport):
             return self.support.IsSubsetOf((<StrategySupport>spt).support)
-        raise TypeError("is_subset_of requires a StrategySupport object")
+        raise TypeError("issubset requires a StrategySupport object")
 
     def num_strategies_player(self, pl):
         return self.support.NumStrategiesPlayer(pl+1)
