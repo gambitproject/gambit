@@ -155,10 +155,10 @@ public:
     wxGenericPen( const wxGenericPen &pen ) : wxObject() { Create(pen); }
     wxGenericPen( const wxPen &pen ) : wxObject() { Create(pen); }
     wxGenericPen( const wxGenericColour &colour, int width = 1, int style = wxSOLID,
-                  int cap = wxCAP_ROUND, int join = wxJOIN_ROUND ) : wxObject()
+                  wxPenCap cap = wxCAP_ROUND, wxPenJoin join = wxJOIN_ROUND ) : wxObject()
         { Create(colour, width, style, cap, join); }
     wxGenericPen( const wxColour &colour, int width = 1, int style = wxSOLID,
-                  int cap = wxCAP_ROUND, int join = wxJOIN_ROUND ) : wxObject()
+                  wxPenCap cap = wxCAP_ROUND, wxPenJoin join = wxJOIN_ROUND ) : wxObject()
         { Create(colour, width, style, cap, join); }
 
     virtual ~wxGenericPen() {}
@@ -173,9 +173,9 @@ public:
     void Create( const wxGenericPen &pen );
     void Create( const wxPen &pen );
     void Create( const wxGenericColour &colour, int width = 1, int style = wxSOLID,
-                int cap = wxCAP_ROUND, int join = wxJOIN_ROUND );
+                wxPenCap cap = wxCAP_ROUND, wxPenJoin join = wxJOIN_ROUND );
     void Create( const wxColour &colour, int width = 1, int style = wxSOLID,
-                int cap = wxCAP_ROUND, int join = wxJOIN_ROUND );
+                wxPenCap cap = wxCAP_ROUND, wxPenJoin join = wxJOIN_ROUND );
 
     // -----------------------------------------------------------------------
     // Set the values of the refed data.
@@ -185,8 +185,8 @@ public:
     void SetColour( const wxGenericColour &colour );
     void SetColour( const wxColour &colour );
     void SetColour( int red, int green, int blue, int alpha=255 );
-    void SetCap( int capStyle );
-    void SetJoin( int joinStyle );
+    void SetCap( wxPenCap capStyle );
+    void SetJoin( wxPenJoin joinStyle );
     void SetStyle( int style );
     void SetWidth( int width );
     void SetDashes( int number_of_dashes, const wxDash *dash );
@@ -199,8 +199,8 @@ public:
     wxColour GetColour() const;
     int GetWidth() const;
     int GetStyle() const;
-    int GetCap() const;
-    int GetJoin() const;
+    wxPenCap GetCap() const;
+    wxPenJoin GetJoin() const;
     int GetDashes(wxDash **ptr) const;
     int GetDashCount() const;
     wxDash* GetDash() const;
