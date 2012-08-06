@@ -28,8 +28,11 @@
 #include <wx/image.h>         // for creating drag-and-drop cursor
 #include <wx/print.h>         // for printing support
 #include <wx/colordlg.h>      // for picking player colors
-
-#include "dcsvg.h"         // for SVG output
+#if wxCHECK_VERSION(2, 9, 0)
+#include <wx/dcsvg.h>         // for SVG output
+#else
+#include "dcsvg.h"
+#endif  /* wxCHECK_VERSION */
 
 #include "efgpanel.h"
 #include "efgdisplay.h"  // FIXME: communicate with tree window via events.
@@ -593,7 +596,7 @@ public:
 
 gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent, 
 					   gbtGameDocument *p_doc)
-  : wxPanel(p_parent, -1, wxDefaultPosition, wxSize(110, -1)), 
+  : wxPanel(p_parent, -1, wxDefaultPosition, wxSize(210, -1)), 
     gbtGameView(p_doc)
 { 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);

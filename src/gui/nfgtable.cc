@@ -26,7 +26,11 @@
 #endif  // WX_PRECOMP
 #include <wx/dnd.h>      // for drag-and-drop support
 #include <wx/print.h>    // for printing support
-#include "dcsvg.h"         // for SVG output
+#if wxCHECK_VERSION(2, 9, 0)
+#include <wx/dcsvg.h>    // for SVG output
+#else
+#include "dcsvg.h"
+#endif  /* wxCHECK_VERSION */
 
 #include "wx/sheet/sheet.h"
 
@@ -816,7 +820,7 @@ gbtTableWidget::gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id,
   m_rowSheet = new gbtRowPlayerWidget(this, p_doc);
   m_colSheet = new gbtColPlayerWidget(this, p_doc);
 
-  wxFlexGridSizer *topSizer = new wxFlexGridSizer(2, 2);
+  wxFlexGridSizer *topSizer = new wxFlexGridSizer(2, 2, 0, 0);
   topSizer->AddGrowableRow(1);
   topSizer->AddGrowableCol(1);
   topSizer->Add(new wxPanel(this, -1));

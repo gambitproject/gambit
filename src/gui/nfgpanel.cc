@@ -276,7 +276,7 @@ public:
 
 gbtTablePlayerToolbar::gbtTablePlayerToolbar(gbtNfgPanel *p_parent, 
 					     gbtGameDocument *p_doc)
-  : wxPanel(p_parent, -1, wxDefaultPosition, wxSize(110, -1)), 
+  : wxPanel(p_parent, -1, wxDefaultPosition, wxSize(210, -1)), 
     gbtGameView(p_doc),
     m_nfgPanel(p_parent)
 { 

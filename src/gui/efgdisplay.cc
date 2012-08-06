@@ -272,7 +272,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
   if (!node)  return false;
 
   try {
-    switch (p_text[0]) {
+    switch ((char) p_text[0]) {
     case 'P': return OnDropPlayer(node, p_text);
     case 'C': return OnDropCopyNode(node, p_text);
     case 'M': return OnDropMoveNode(node, p_text);
@@ -434,7 +434,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
       
       Gambit::GameOutcome outcome = m_payoffEditor->GetOutcome();
       int player = m_payoffEditor->GetPlayer();
-      Gambit::GameNode node = m_payoffEditor->GetEntry()->GetNode();
+      Gambit::GameNode node = m_payoffEditor->GetNodeEntry()->GetNode();
       try {
 	m_doc->DoSetPayoff(outcome, player, m_payoffEditor->GetValue());
       }	

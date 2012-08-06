@@ -25,6 +25,7 @@
     #include "wx/geometry.h"
     #include "wx/sizer.h"
     #include "wx/dcscreen.h"
+    #include "wx/dcclient.h"
     #include "wx/textctrl.h"
 #endif // WX_PRECOMP
 
@@ -2722,7 +2723,11 @@ void wxPlotCtrl::DrawMouseMarker( wxDC *dc, int type, const wxRect &rect )
     if ((rect.width == 0) || (rect.height == 0))
         return;
 
+#if wxCHECK_VERSION(2, 9, 0)
+    wxRasterOperationMode logical_fn = dc->GetLogicalFunction();
+#else
     int logical_fn = dc->GetLogicalFunction();
+#endif  /* wxCHECK_VERSION */
     dc->SetLogicalFunction( wxINVERT );
     dc->SetBrush( *wxTRANSPARENT_BRUSH );
     dc->SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 1, wxDOT));
@@ -2770,7 +2775,11 @@ void wxPlotCtrl::DrawCrosshairCursor( wxDC *dc, const wxPoint &pos )
     wxCHECK_RET(dc, wxT("invalid window"));
 
     dc->SetPen(*wxBLACK_PEN);
+#if wxCHECK_VERSION(2, 9, 0)
+    wxRasterOperationMode logical_fn = dc->GetLogicalFunction();
+#else
     int logical_fn = dc->GetLogicalFunction();
+#endif  /* wxCHECK_VERSION */
     dc->SetLogicalFunction( wxINVERT );
 
     dc->CrossHair(pos.x, pos.y);

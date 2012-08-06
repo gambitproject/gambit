@@ -3,6 +3,10 @@
 #include <wx/wfstream.h>
 #include <wx/string.h>
 
+#if !wxCHECK_VERSION(2, 9, 0)
+/* This file is only required under wxWidgets 2.8.
+   In fact, it does not build at all under wxWidgets 2.9. */
+
 /*
 #ifdef WXMAKINGDLL_SVG
     #define WXDLLIMPEXP_SVG WXEXPORT
@@ -317,3 +321,6 @@ class WXDLLIMPEXP_SVG wxSVGFileDC : public wxDC
 #pragma warn .ccc
 #endif
 #endif
+
+
+#endif  /* wxCHECK_VERSION */
