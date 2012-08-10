@@ -288,10 +288,28 @@ cdef class Game:
             raise UndefinedOperationError("Game must have a tree representation"\
                                       " to create a mixed behavior profile")
  
+    def support_set(self):
+        return SupportSet(list(self.strategies), len(self.players))
+
     def num_nodes(self):
         if self.is_tree:
             return self.game.deref().NumNodes()
         return 0
+
+    def restrict(self, SupportSet sp):
+        cdef StrategySupport new_support
+        support = self.support_set()
+        if support >= sp:
+            difference = support - sp
+            new_support = self.mixed_profile().support()
+            for strategy in difference:
+                new_support.support.RemoveStrategy((<Strategy>strategy).strategy)
+            return new_support
+        else:
+            raise UndefinedOperationError("cannot restrict game to a non-subset of it")
+
+    def unrestrict(self):
+        return self
 
     def write(self, strategic=False):
         if strategic or not self.is_tree:
