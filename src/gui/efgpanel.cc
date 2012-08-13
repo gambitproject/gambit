@@ -28,8 +28,7 @@
 #include <wx/image.h>         // for creating drag-and-drop cursor
 #include <wx/print.h>         // for printing support
 #include <wx/colordlg.h>      // for picking player colors
-
-#include "dcsvg.h"         // for SVG output
+#include <wx/dcsvg.h>         // for SVG output
 
 #include "efgpanel.h"
 #include "efgdisplay.h"  // FIXME: communicate with tree window via events.

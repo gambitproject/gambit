@@ -272,7 +272,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
   if (!node)  return false;
 
   try {
-    switch (p_text[0]) {
+    switch ((char) p_text[0]) {
     case 'P': return OnDropPlayer(node, p_text);
     case 'C': return OnDropCopyNode(node, p_text);
     case 'M': return OnDropMoveNode(node, p_text);
