@@ -6,13 +6,15 @@ cdef class SupportSet(Collection):
     "Represents a collection of strategies of a game."
     cdef list strategies
     cdef int num_players
+    cdef Game game
 
     def __cinit__(self):
         self.strategies = []
-    def __init__(self, strategies, num_players):
+    def __init__(self, strategies, num_players, Game game not None):
         if self.is_valid(strategies, num_players):
             self.strategies = list(strategies)
             self.num_players = num_players
+            self.game = game
         else:
             raise ValueError("invalid set of strategies")
     def __len__(self):    return len(self.strategies)
@@ -58,17 +60,17 @@ cdef class SupportSet(Collection):
             if len(filter(lambda x: x.player == strategy.player, self.strategies)) > 1:
                 strategies = list(self.strategies)[:]
                 strategies.remove(strategy)
-                return SupportSet(strategies, self.num_players)
+                return SupportSet(strategies, self.num_players, self.game)
             else:
                 raise UndefinedOperationError("cannot remove last strategy"\
                                               " of a player")
         raise TypeError("delete requires a Strategy object")
 
     def difference(self, SupportSet other):
-        return SupportSet(filter(lambda x: x not in other, self), self.num_players)
+        return SupportSet(filter(lambda x: x not in other, self), self.num_players, self.game)
 
     def intersection(self, SupportSet other):
-        result = SupportSet(filter(lambda x: x in other, self), self.num_players)
+        result = SupportSet(filter(lambda x: x in other, self), self.num_players, self.game)
 
     def is_valid(self, strategies, num_players):
         if len(set([strat.player.number for strat in strategies])) == num_players \
@@ -82,13 +84,23 @@ cdef class SupportSet(Collection):
     def issuperset(self, SupportSet other):
         return other.issubset(self)
 
+    def restrict(self):
+        return self.game.restrict(self)
+
+    def undominated(self, strict=False, external=False):
+        return self.restrict().undominated(strict, external)
+
     def union(self, SupportSet other):
-        return SupportSet(self.unique(list(self) + list(other)))
+        return SupportSet(self.unique(list(self) + list(other)), self.game)
 
     def unique(self, lst):
         uniq = []
         [uniq.append(i) for i in lst if not uniq.count(i)]
         return uniq
+
+    property game:
+        def __get__(self):
+            return self.game
 
 cdef class SupportOutcomes(Collection):
     "Represents a collection of outcomes in a support."
@@ -211,13 +223,13 @@ cdef class StrategySupport(BaseGame):
         return self.support.NumStrategiesPlayer(pl+1)
 
     def support_set(self):
-        return SupportSet(list(self.strategies), len(self.players))
+        return SupportSet(list(self.strategies), len(self.players), self.unrestrict())
 
     def restrict(self, SupportSet sp):
         cdef StrategySupport new_support
         support = self.support_set()
         if support >= sp:
-            difference = support - sp
+            difference = set(support) - set(sp)
             new_support = StrategySupport()
             new_support.support = self.support
             for strategy in difference:

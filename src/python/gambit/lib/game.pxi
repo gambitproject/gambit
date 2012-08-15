@@ -289,7 +289,7 @@ cdef class Game:
                                       " to create a mixed behavior profile")
  
     def support_set(self):
-        return SupportSet(list(self.strategies), len(self.players))
+        return SupportSet(list(self.strategies), len(self.players), self)
 
     def num_nodes(self):
         if self.is_tree:
@@ -300,7 +300,7 @@ cdef class Game:
         cdef StrategySupport new_support
         support = self.support_set()
         if support >= sp:
-            difference = support - sp
+            difference = set(support) - set(sp)
             new_support = self.mixed_profile().support()
             for strategy in difference:
                 new_support.support.RemoveStrategy((<Strategy>strategy).strategy)
