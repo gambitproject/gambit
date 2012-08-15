@@ -434,7 +434,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
       
       Gambit::GameOutcome outcome = m_payoffEditor->GetOutcome();
       int player = m_payoffEditor->GetPlayer();
-      Gambit::GameNode node = m_payoffEditor->GetEntry()->GetNode();
+      Gambit::GameNode node = m_payoffEditor->GetNodeEntry()->GetNode();
       try {
 	m_doc->DoSetPayoff(outcome, player, m_payoffEditor->GetValue());
       }	
