@@ -2,7 +2,7 @@ from gambit.lib.error import UndefinedOperationError
 
 cdef class Strategy:
     cdef c_GameStrategy strategy
-    cdef StrategySupport support
+    cdef StrategicRestriction support
 
     def __repr__(self):
         return "<Strategy [%d] '%s' for player '%s' in game '%s'>" % \

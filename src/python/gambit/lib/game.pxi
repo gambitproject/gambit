@@ -22,7 +22,7 @@ cdef class Outcomes(Collection):
 cdef class Players(Collection):
     "Represents a collection of players in a game."
     cdef c_Game game
-    cdef StrategySupport support
+    cdef StrategicRestriction support
     def __len__(self):       return self.game.deref().NumPlayers()
     def __getitem__(self, pl):
         if not isinstance(pl, int):  return Collection.__getitem__(self, pl)
@@ -297,7 +297,7 @@ cdef class Game:
         return 0
 
     def restrict(self, SupportSet sp):
-        cdef StrategySupport new_support
+        cdef StrategicRestriction new_support
         support = self.support_set()
         if support >= sp:
             difference = set(support) - set(sp)

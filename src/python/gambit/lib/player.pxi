@@ -38,13 +38,13 @@ cdef class Strategies(Collection):
 cdef class PlayerSupportStrategies(Collection):
     "Represents a collection of strategies for a player in a support"
     cdef Player player
-    cdef StrategySupport support
+    cdef StrategicRestriction support
 
     def add(self, label=""):
         raise UndefinedOperationError("Adding strategies is only applicable"\
                                       "to players in a game, not in a support")
 
-    def __init__(self, Player player not None, StrategySupport support not None):
+    def __init__(self, Player player not None, StrategicRestriction support not None):
         self.support = support
         self.player = player
     
@@ -61,7 +61,7 @@ cdef class PlayerSupportStrategies(Collection):
 
 cdef class Player:
     cdef c_GamePlayer player
-    cdef StrategySupport support
+    cdef StrategicRestriction support
 
     def __repr__(self):
         if self.is_chance:

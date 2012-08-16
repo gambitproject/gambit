@@ -1,6 +1,6 @@
 cdef class Outcome:
     cdef c_GameOutcome outcome
-    cdef StrategySupport support
+    cdef StrategicRestriction support
     
     def __repr__(self):
         return "<Outcome [%d] '%s' in game '%s'>" % (self.outcome.deref().GetNumber()-1,

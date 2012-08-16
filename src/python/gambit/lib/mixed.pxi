@@ -150,8 +150,8 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
         behav.profile = new_BehavFromMixedDouble(deref(self.profile))
         return behav
     def support(self):
-        cdef StrategySupport s
-        s = StrategySupport()
+        cdef StrategicRestriction s
+        s = StrategicRestriction()
         s.support = self.profile.GetSupport()#new_StrategySupport((<Game>self.game).game)#self.profile.GetSupport()
         return s
 
@@ -200,8 +200,8 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
         behav.profile = new_BehavFromMixedRational(deref(self.profile))
         return behav
     def support(self):
-        cdef StrategySupport s
-        s = StrategySupport()
+        cdef StrategicRestriction s
+        s = StrategicRestriction()
         s.support = self.profile.GetSupport()
         return s
     
