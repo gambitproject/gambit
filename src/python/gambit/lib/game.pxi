@@ -296,18 +296,6 @@ cdef class Game:
             return self.game.deref().NumNodes()
         return 0
 
-    def restrict(self, StrategySupportProfile sp):
-        cdef StrategicRestriction new_support
-        support = self.support_set()
-        if support >= sp:
-            difference = set(support) - set(sp)
-            new_support = self.mixed_profile().support()
-            for strategy in difference:
-                new_support.support.RemoveStrategy((<Strategy>strategy).strategy)
-            return new_support
-        else:
-            raise UndefinedOperationError("cannot restrict game to a non-subset of it")
-
     def unrestrict(self):
         return self
 

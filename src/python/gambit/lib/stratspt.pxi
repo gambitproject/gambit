@@ -88,7 +88,12 @@ cdef class StrategySupportProfile(Collection):
         return other.issubset(self)
 
     def restrict(self):
-        return self.game.restrict(self)
+        cdef StrategicRestriction new_support
+        new_support = self.game.mixed_profile().support()
+        for strategy in self.game.strategies:
+            if strategy not in self:
+                new_support.support.RemoveStrategy((<Strategy>strategy).strategy)
+        return new_support
 
     def undominated(self, strict=False, external=False):
         return self.restrict().undominated(strict, external)
@@ -217,19 +222,6 @@ cdef class StrategicRestriction(BaseGame):
 
     def support_profile(self):
         return StrategySupportProfile(list(self.strategies), len(self.players), self.unrestrict())
-
-    def restrict(self, StrategySupportProfile sp):
-        cdef StrategicRestriction new_support
-        support = self.support_set()
-        if support >= sp:
-            difference = set(support) - set(sp)
-            new_support = StrategicRestriction()
-            new_support.support = self.support
-            for strategy in difference:
-                new_support.support.RemoveStrategy((<Strategy>strategy).strategy)
-            return new_support
-        else:
-            raise UndefinedOperationError("cannot restrict game to a non-subset of it")
 
     def unrestrict(self):
         cdef Game g
