@@ -153,7 +153,7 @@ cdef class StrategicRestriction(BaseGame):
     cdef c_StrategySupport support
 
     def __repr__(self):
-        return "<Support from Game '%s'>" % self.title
+        return "<StrategicRestriction of Game '%s'>" % self.title
 
     def __richcmp__(StrategicRestriction self, other, whichop):
         if isinstance(other, StrategicRestriction):
@@ -206,30 +206,16 @@ cdef class StrategicRestriction(BaseGame):
         def __get__(self):
             return self.unrestrict().is_perfect_recall
 
-    def delete(self, strat):
-        cdef StrategicRestriction new_support
-        if isinstance(strat, Strategy):
-            new_support = StrategicRestriction()
-            new_support.support = self.support
-            new_support.support.RemoveStrategy((<Strategy>strat).strategy)
-            return new_support
-        raise TypeError("delete requires a Strategy object")
-
-    def undominated(self, strict=False, external=False):
+    def undominated(self, strict=False):
         cdef StrategicRestriction new_support
         new_support = StrategicRestriction()
-        new_support.support = self.support.Undominated(strict, external)
+        new_support.support = self.support.Undominated(strict, False)
         return new_support
-
-    def issubset(self, spt):
-        if isinstance(spt, StrategicRestriction):
-            return self.support.IsSubsetOf((<StrategicRestriction>spt).support)
-        raise TypeError("issubset requires a StrategicRestriction object")
 
     def num_strategies_player(self, pl):
         return self.support.NumStrategiesPlayer(pl+1)
 
-    def support_set(self):
+    def support_profile(self):
         return StrategySupportProfile(list(self.strategies), len(self.players), self.unrestrict())
 
     def restrict(self, StrategySupportProfile sp):
