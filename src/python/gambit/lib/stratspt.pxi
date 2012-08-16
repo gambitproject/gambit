@@ -96,7 +96,21 @@ cdef class StrategySupportProfile(Collection):
         return new_support
 
     def undominated(self, strict=False, external=False):
-        return self.restrict().undominated(strict, external)
+        cdef c_StrategySupport *new_support
+        cdef c_StrategySupport *elim_support
+        cdef StrategySupportProfile new_profile
+        new_support = new_StrategySupport((<Game>self.game).game)
+        for strategy in self.game.strategies:
+            if strategy not in self:
+                new_support.RemoveStrategy((<Strategy>strategy).strategy)
+        elim_support = copy_StrategySupport(new_support.Undominated(strict, external))
+        new_profile = StrategySupportProfile(self.strategies, self.num_players, self.game)
+        for strategy in self.game.strategies:
+            if not elim_support.Contains((<Strategy>strategy).strategy):
+                new_profile = new_profile.remove(strategy)
+        del_StrategySupport(new_support)
+        del_StrategySupport(elim_support)
+        return new_profile 
 
     def union(self, StrategySupportProfile other):
         return StrategySupportProfile(self.unique(list(self) + list(other)), self.game)

@@ -275,8 +275,10 @@ cdef extern from "libgambit/stratspt.h":
         bool IsSubsetOf(c_StrategySupport)
         bool RemoveStrategy(c_GameStrategy)
         c_GameStrategy GetStrategy(int, int) except +IndexError
+        bool Contains(c_GameStrategy)
         c_StrategySupport Undominated(bool, bool)
     c_StrategySupport *new_StrategySupport "new StrategySupport"(c_Game)
+    c_StrategySupport *copy_StrategySupport "new StrategySupport"(c_StrategySupport)
     void del_StrategySupport "delete"(c_StrategySupport *)
 
 cdef extern from "util.h":
