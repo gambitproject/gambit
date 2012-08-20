@@ -4,7 +4,7 @@ import nose.tools
 from nose.tools import assert_raises
 from gambit.lib.error import UndefinedOperationError
 
-class TestGambitStrategySupport(object):
+class TestGambitStrategicRestriction(object):
     def setUp(self):
         self.game = gambit.read_game("test_games/mixed_strategy.nfg")
         
@@ -53,11 +53,6 @@ class TestGambitStrategySupport(object):
         assert self.tree_support.players[0] == self.tree_game.players[0]
         assert self.tree_support.players[1] == self.tree_game.players[1]
         assert self.tree_support.players[2] == self.tree_game.players[2]
-        
-    def test_issubset(self):
-        "Test to find check if a support is a subset of another one"
-        assert self.support.issubset(self.support)
-        assert not self.support.issubset(self.tree_support)
 
     def test_getting_outcomes(self):
         "Test retrieving outcomes from a support"
