@@ -245,6 +245,7 @@ EXTRA_DIST = \
 	src/python/setup.py \
 	src/python/gambit/__init__.py \
 	src/python/gambit/cmdline.py \
+	src/python/gambit/enumeration.py \
 	src/python/gambit/gameiter.py \
 	src/python/gambit/levelk.py \
 	src/python/gambit/nash.py \
