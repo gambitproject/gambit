@@ -36,32 +36,32 @@ cdef class Strategies(Collection):
         return s
 
 cdef class PlayerSupportStrategies(Collection):
-    "Represents a collection of strategies for a player in a support"
+    "Represents a collection of strategies for a player in a restriction"
     cdef Player player
-    cdef StrategicRestriction support
+    cdef StrategicRestriction restriction
 
     def add(self, label=""):
         raise UndefinedOperationError("Adding strategies is only applicable"\
-                                      "to players in a game, not in a support")
+                                      "to players in a game, not in a restriction")
 
-    def __init__(self, Player player not None, StrategicRestriction support not None):
-        self.support = support
+    def __init__(self, Player player not None, StrategicRestriction restriction not None):
+        self.restriction = restriction
         self.player = player
     
     def __len__(self):
-        return self.support.num_strategies_player(self.player.number)
+        return self.restriction.num_strategies_player(self.player.number)
     def __getitem__(self, strat):
         if not isinstance(strat, int):
             return Collection.__getitem__(self, strat)
         cdef Strategy s
         s = Strategy()
-        s.strategy = self.support.support.GetStrategy(self.player.number+1, strat+1)
-        s.support = self.support
+        s.strategy = self.restriction.support.GetStrategy(self.player.number+1, strat+1)
+        s.restriction = self.restriction
         return s
 
 cdef class Player:
     cdef c_GamePlayer player
-    cdef StrategicRestriction support
+    cdef StrategicRestriction restriction
 
     def __repr__(self):
         if self.is_chance:
@@ -92,8 +92,8 @@ cdef class Player:
     property game:
         def __get__(self):
             cdef Game g
-            if self.support is not None:
-                return self.support
+            if self.restriction is not None:
+                return self.restriction
             g = Game()
             g.game = self.player.deref().GetGame() 
             return g
@@ -103,8 +103,8 @@ cdef class Player:
             return self.player.deref().GetLabel().c_str()
 
         def __set__(self, char *value):
-            if self.support is not None:
-                raise UndefinedOperationError("Changing objects in a support is not supported")
+            if self.restriction is not None:
+                raise UndefinedOperationError("Changing objects in a restriction is not supported")
             # check to see if the player's name has been used elsewhere
             if value in [ i.label for i in self.game.players ]:
                 warnings.warn("Another player with an identical label exists")
@@ -124,8 +124,8 @@ cdef class Player:
         def __get__(self):
             cdef Strategies s
             cdef PlayerSupportStrategies ps
-            if self.support is not None:
-                ps = PlayerSupportStrategies(self, self.support)
+            if self.restriction is not None:
+                ps = PlayerSupportStrategies(self, self.restriction)
                 return ps
             s = Strategies()
             s.player = self.player

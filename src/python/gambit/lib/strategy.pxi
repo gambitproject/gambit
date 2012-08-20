@@ -2,7 +2,7 @@ from gambit.lib.error import UndefinedOperationError
 
 cdef class Strategy:
     cdef c_GameStrategy strategy
-    cdef StrategicRestriction support
+    cdef StrategicRestriction restriction
 
     def __repr__(self):
         return "<Strategy [%d] '%s' for player '%s' in game '%s'>" % \
@@ -33,8 +33,8 @@ cdef class Strategy:
         def __get__(self):
             return self.strategy.deref().GetLabel().c_str()
         def __set__(self, char *value):
-            if self.support is not None:
-                raise UndefinedOperationError("Changing objects in a support is not supported")
+            if self.restriction is not None:
+                raise UndefinedOperationError("Changing objects in a restriction is not supported")
             if value in [ i.label for i in self.player.strategies ]:
                 warnings.warn("This player has another strategy with an identical label")
             cdef cxx_string s
@@ -44,7 +44,7 @@ cdef class Strategy:
     property player:
         def __get__(self):
             p = Player()
-            p.support = self.support
+            p.restriction = self.restriction
             p.player = self.strategy.deref().GetPlayer()
             return p
 

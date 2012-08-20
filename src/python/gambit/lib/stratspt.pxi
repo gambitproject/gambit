@@ -11,8 +11,8 @@ cdef class StrategySupportProfile(Collection):
 
     def __init__(self, strategies, Game game not None):
         if self.is_valid(strategies, len(game.players)):
-            temp_support = <StrategicRestriction>game.mixed_profile().support()
-            self.support = temp_support.support
+            temp_restriction = <StrategicRestriction>game.mixed_profile().restriction()
+            self.support = temp_restriction.support
             for strategy in game.strategies:
                 if strategy not in strategies:
                     self.support.RemoveStrategy((<Strategy>strategy).strategy)
@@ -48,7 +48,7 @@ cdef class StrategySupportProfile(Collection):
             if strat - num_strategies.getitem(i) < 0:
                 s = Strategy()
                 s.strategy = self.support.GetStrategy(i, strat+1)  
-                s.support = self.restrict()
+                s.restriction = self.restrict()
                 return s
             strat = strat - num_strategies.getitem(i)
         raise IndexError("Index out of range")
@@ -124,42 +124,42 @@ cdef class StrategySupportProfile(Collection):
             g.game = self.support.GetGame()
             return g
 
-cdef class SupportOutcomes(Collection):
-    "Represents a collection of outcomes in a support."
-    cdef StrategicRestriction support
+cdef class RestrictionOutcomes(Collection):
+    "Represents a collection of outcomes in a restriction."
+    cdef StrategicRestriction restriction
 
-    def __init__(self, StrategicRestriction support not None):
-        self.support = support
-    def __len__(self):    return (<Game>self.support.unrestrict()).game.deref().NumOutcomes()
+    def __init__(self, StrategicRestriction restriction not None):
+        self.restriction = restriction
+    def __len__(self):    return (<Game>self.restriction.unrestrict()).game.deref().NumOutcomes()
     def __getitem__(self, outc):
         if not isinstance(outc, int):  return Collection.__getitem__(self, outc)
         cdef Outcome c
         c = Outcome()
-        c.outcome = (<Game>self.support.unrestrict()).game.deref().GetOutcome(outc+1)
-        c.support = self.support
+        c.outcome = (<Game>self.restriction.unrestrict()).game.deref().GetOutcome(outc+1)
+        c.restriction = self.restriction
         return c
 
     def add(self, label=""):
-        raise UndefinedOperationError("Changing objects in a support is not supported")
+        raise UndefinedOperationError("Changing objects in a restriction is not supported")
 
-cdef class SupportStrategies(Collection):
-    "Represents a collection of strategies in a support."
-    cdef StrategicRestriction support
+cdef class RestrictionStrategies(Collection):
+    "Represents a collection of strategies in a restriction."
+    cdef StrategicRestriction restriction
 
-    def __init__(self, StrategicRestriction support not None):
-        self.support = support
-    def __len__(self):    return self.support.support.MixedProfileLength()
+    def __init__(self, StrategicRestriction restriction not None):
+        self.restriction = restriction
+    def __len__(self):    return self.restriction.support.MixedProfileLength()
     def __getitem__(self, strat):
         if not isinstance(strat, int):
             return Collection.__getitem__(self, strat)
         cdef c_ArrayInt num_strategies
         cdef Strategy s
-        num_strategies = self.support.support.NumStrategies()
+        num_strategies = self.restriction.support.NumStrategies()
         for i in range(1,num_strategies.Length()+1):
             if strat - num_strategies.getitem(i) < 0:
                 s = Strategy()
-                s.strategy = self.support.support.GetStrategy(i, strat+1)  
-                s.support = self.support
+                s.strategy = self.restriction.support.GetStrategy(i, strat+1)  
+                s.restriction = self.restriction
                 return s
             strat = strat - num_strategies.getitem(i)
         raise IndexError("Index out of range")
@@ -195,26 +195,26 @@ cdef class StrategicRestriction(BaseGame):
 
     property title:
         def __get__(self):
-            return "Support from Game '%s'" % self.unrestrict().title
+            return "Restriction from Game '%s'" % self.unrestrict().title
 
     property players:
         def __get__(self):
             cdef Players p
             p = Players()
             p.game = (<Game>self.unrestrict()).game
-            p.support = self
+            p.restriction = self
             return p
 
     property strategies:
         def __get__(self):
-            cdef SupportStrategies s
-            s = SupportStrategies(self)
+            cdef RestrictionStrategies s
+            s = RestrictionStrategies(self)
             return s
 
     property outcomes:
         def __get__(self):
-            cdef SupportOutcomes o
-            o = SupportOutcomes(self)
+            cdef RestrictionOutcomes o
+            o = RestrictionOutcomes(self)
             return o
 
     property is_const_sum:
@@ -226,10 +226,10 @@ cdef class StrategicRestriction(BaseGame):
             return self.unrestrict().is_perfect_recall
 
     def undominated(self, strict=False):
-        cdef StrategicRestriction new_support
-        new_support = StrategicRestriction()
-        new_support.support = self.support.Undominated(strict, False)
-        return new_support
+        cdef StrategicRestriction new_restriction
+        new_restriction = StrategicRestriction()
+        new_restriction.support = self.support.Undominated(strict, False)
+        return new_restriction
 
     def num_strategies_player(self, pl):
         return self.support.NumStrategiesPlayer(pl+1)
