@@ -257,6 +257,7 @@ EXTRA_DIST = \
 	src/python/gambit/games/public.py \
 	src/python/gambit/lib/__init__.py \
 	src/python/gambit/lib/action.pxi \
+	src/python/gambit/lib/basegame.pxi \
 	src/python/gambit/lib/behav.pxi \
 	src/python/gambit/lib/error.py \
 	src/python/gambit/lib/game.pxi \
@@ -268,6 +269,7 @@ EXTRA_DIST = \
 	src/python/gambit/lib/outcome.pxi \
 	src/python/gambit/lib/player.pxi \
 	src/python/gambit/lib/strategy.pxi \
+	src/python/gambit/lib/stratspt.pxi \
 	src/python/gambit/lib/util.h \
 	src/python/gambit/tests/test_actions.py \
 	src/python/gambit/tests/test_behav.py \
@@ -279,6 +281,7 @@ EXTRA_DIST = \
 	src/python/gambit/tests/test_outcomes.py \
 	src/python/gambit/tests/test_players.py \
 	src/python/gambit/tests/test_strategic.py \
+	src/python/gambit/tests/test_strspt.py \
 	src/python/gambit/tests/test_strategies.py \
 	src/python/gambit/tests/test_games/basic_extensive_game.efg \
 	src/python/gambit/tests/test_games/complicated_extensive_game.efg \

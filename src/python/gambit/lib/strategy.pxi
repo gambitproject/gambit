@@ -1,11 +1,14 @@
+from gambit.lib.error import UndefinedOperationError
+
 cdef class Strategy:
     cdef c_GameStrategy strategy
+    cdef StrategySupport support
 
     def __repr__(self):
         return "<Strategy [%d] '%s' for player '%s' in game '%s'>" % \
-                (self.strategy.deref().GetNumber()-1, self.label,
-                 self.strategy.deref().GetPlayer().deref().GetLabel().c_str(),
-                 self.strategy.deref().GetPlayer().deref().GetGame().deref().GetTitle().c_str())
+                (self.number, self.label,
+                 self.player.label,
+                 self.player.game.title)
     
     def __richcmp__(Strategy self, other, whichop):
         if isinstance(other, Strategy):
@@ -30,6 +33,8 @@ cdef class Strategy:
         def __get__(self):
             return self.strategy.deref().GetLabel().c_str()
         def __set__(self, char *value):
+            if self.support is not None:
+                raise UndefinedOperationError("Changing objects in a support is not supported")
             if value in [ i.label for i in self.player.strategies ]:
                 warnings.warn("This player has another strategy with an identical label")
             cdef cxx_string s
@@ -39,5 +44,16 @@ cdef class Strategy:
     property player:
         def __get__(self):
             p = Player()
+            p.support = self.support
             p.player = self.strategy.deref().GetPlayer()
             return p
+
+    property number:
+        def __get__(self):
+            return self.strategy.deref().GetNumber() - 1 
+
+    def unrestrict(self):
+        cdef Strategy s
+        s = Strategy()
+        s.strategy = self.strategy
+        return s

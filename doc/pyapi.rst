@@ -389,10 +389,14 @@ API documentation
       Returns a :py:class:`gambit.GameActions` collection object
       representing the actions defined in the game.
 
+      :raises: :py:class:`gambit.UndefinedOperationError` if the game does not have a tree representation.
+
    .. py:attribute:: infosets
 
       Returns a :py:class:`gambit.GameInfosets` collection object
       representing the information sets defined in the game.
+      
+      :raises: :py:class:`gambit.UndefinedOperationError` if the game does not have a tree representation.
 
    .. py:attribute:: players
  
@@ -413,6 +417,8 @@ API documentation
 
       Returns the :py:class:`gambit.Node` representing the root
       node of the game.
+
+      :raises: :py:class:`gambit.UndefinedOperationError` if the game does not have a tree representation.
 
    .. py:attribute:: is_const_sum
 
