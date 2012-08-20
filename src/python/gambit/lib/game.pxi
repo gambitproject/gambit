@@ -289,7 +289,7 @@ cdef class Game:
                                       " to create a mixed behavior profile")
  
     def support_profile(self):
-        return StrategySupportProfile(list(self.strategies), len(self.players), self)
+        return StrategySupportProfile(list(self.strategies), self)
 
     def num_nodes(self):
         if self.is_tree:

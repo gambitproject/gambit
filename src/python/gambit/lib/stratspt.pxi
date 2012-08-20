@@ -7,149 +7,18 @@ cdef class StrategySupportProfile(Collection):
     A set-like object representing a subset of the strategies in game, incorporating
     the restriction that each player must have at least one strategy in the set.
     """
-    cdef list strategies
-    cdef int num_players
-    cdef Game game
-
-    def __cinit__(self):
-        self.strategies = []
-    def __init__(self, strategies, num_players, Game game not None):
-        if self.is_valid(strategies, num_players):
-            self.strategies = list(strategies)
-            self.num_players = num_players
-            self.game = game
-        else:
-            raise ValueError("invalid set of strategies")
-    def __len__(self):    return len(self.strategies)
-    def __richcmp__(self, other, whichop):
-        if isinstance(other, StrategySupportProfile):
-            if whichop == 1:
-                return self.issubset(other)
-            elif whichop == 2:
-                return (self >= other) & (self <= other)
-            elif whichop == 3:
-                return not (self >= other) & (self <= other)
-            elif whichop == 5:
-                return self.issuperset(other)
-            else:
-                raise NotImplementedError
-        else:
-            if whichop == 2:
-                return False
-            elif whichop == 3:
-                return True
-            else:
-                raise NotImplementedError
-    def __getitem__(self, strat):
-        if not isinstance(strat, int):
-            return Collection.__getitem__(self, strat)
-        return self.strategies[strat]
-    # Set-like methods
-    def __and__(self, other):
-        if isinstance(other, StrategySupportProfile):
-            return self.intersection(other)
-        raise NotImplementedError
-    def __or__(self, other):
-        if isinstance(other, StrategySupportProfile):
-            return self.union(other)
-        raise NotImplementedError
-    def __sub__(self, other):
-        if isinstance(other, StrategySupportProfile):
-            return self.difference(other)
-        raise NotImplementedError
-
-    def remove(self, strategy):
-        if isinstance(strategy, Strategy):
-            if len(filter(lambda x: x.player == strategy.player, self.strategies)) > 1:
-                strategies = list(self.strategies)[:]
-                strategies.remove(strategy)
-                return StrategySupportProfile(strategies, self.num_players, self.game)
-            else:
-                raise UndefinedOperationError("cannot remove last strategy"\
-                                              " of a player")
-        raise TypeError("delete requires a Strategy object")
-
-    def difference(self, StrategySupportProfile other):
-        return StrategySupportProfile(filter(lambda x: x not in other, self), self.num_players, self.game)
-
-    def intersection(self, StrategySupportProfile other):
-        result = StrategySupportProfile(filter(lambda x: x in other, self), self.num_players, self.game)
-
-    def is_valid(self, strategies, num_players):
-        if len(set([strat.player.number for strat in strategies])) == num_players \
-            & num_players >= 1:
-            return True
-        return False
-
-    def issubset(self, StrategySupportProfile other):
-        return reduce(lambda acc,st: acc & (st in other), self, True)
-
-    def issuperset(self, StrategySupportProfile other):
-        return other.issubset(self)
-
-    def restrict(self):
-        cdef StrategicRestriction new_support
-        new_support = self.game.mixed_profile().support()
-        for strategy in self.game.strategies:
-            if strategy not in self:
-                new_support.support.RemoveStrategy((<Strategy>strategy).strategy)
-        return new_support
-
-    def undominated(self, strict=False, external=False):
-        cdef c_StrategySupport *new_support
-        cdef c_StrategySupport *elim_support
-        cdef StrategySupportProfile new_profile
-        new_support = new_StrategySupport((<Game>self.game).game)
-        for strategy in self.game.strategies:
-            if strategy not in self:
-                new_support.RemoveStrategy((<Strategy>strategy).strategy)
-        elim_support = copy_StrategySupport(new_support.Undominated(strict, external))
-        new_profile = StrategySupportProfile(self.strategies, self.num_players, self.game)
-        for strategy in self.game.strategies:
-            if not elim_support.Contains((<Strategy>strategy).strategy):
-                new_profile = new_profile.remove(strategy)
-        del_StrategySupport(new_support)
-        del_StrategySupport(elim_support)
-        return new_profile 
-
-    def union(self, StrategySupportProfile other):
-        return StrategySupportProfile(self.unique(list(self) + list(other)), self.num_players, self.game)
-
-    def unique(self, lst):
-        uniq = []
-        [uniq.append(i) for i in lst if not uniq.count(i)]
-        return uniq
-
-    property game:
-        def __get__(self):
-            return self.game
-
-
-cdef class StrategySupportProfile2(Collection):
-    """
-    A set-like object representing a subset of the strategies in game, incorporating
-    the restriction that each player must have at least one strategy in the set.
-    """
-    cdef list strategies
-    cdef int num_players
-    cdef Game game
     cdef c_StrategySupport support
 
-    def __cinit__(self):
-        self.strategies = []
-    def __init__(self, strategies, num_players, Game game not None):
-        if self.is_valid(strategies, num_players):
-            self.strategies = list(strategies)
-            self.num_players = num_players
-            temp_support = <StrategicRestriction>self.game.mixed_profile().support()
+    def __init__(self, strategies, Game game not None):
+        if self.is_valid(strategies, len(game.players)):
+            temp_support = <StrategicRestriction>game.mixed_profile().support()
             self.support = temp_support.support
-            for strategy in self.game.strategies:
-                if strategy not in self.strategies:
+            for strategy in game.strategies:
+                if strategy not in strategies:
                     self.support.RemoveStrategy((<Strategy>strategy).strategy)
-            self.game = game
         else:
             raise ValueError("invalid set of strategies")
-    def __len__(self):    return self.suport.MixedProfileLength()
+    def __len__(self):    return self.support.MixedProfileLength()
     def __richcmp__(self, other, whichop):
         if isinstance(other, StrategySupportProfile):
             if whichop == 1:
@@ -200,21 +69,19 @@ cdef class StrategySupportProfile2(Collection):
     def remove(self, strategy):
         if isinstance(strategy, Strategy):
             if len(filter(lambda x: x.player == strategy.player, self)) > 1:
-                strategies = list(self.strategies)[:]
+                strategies = list(self)[:]
                 strategies.remove(strategy)
-                return StrategySupportProfile(strategies, len(self.game.players), self.game)
+                return StrategySupportProfile(strategies, self.game)
             else:
                 raise UndefinedOperationError("cannot remove last strategy"\
                                               " of a player")
         raise TypeError("delete requires a Strategy object")
 
     def difference(self, StrategySupportProfile other):
-        strategies = filter(lambda x: x not in other, self)
-        num_players = len(self.game.players)
-        return StrategySupportProfile(strategies, num_players, self.game)
+        return StrategySupportProfile(filter(lambda x: x not in other, self), self.game)
 
     def intersection(self, StrategySupportProfile other):
-        result = StrategySupportProfile(filter(lambda x: x in other, self), len(self.game.players), self.game)
+        return StrategySupportProfile(filter(lambda x: x in other, self), self.game)
 
     def is_valid(self, strategies, num_players):
         if len(set([strat.player.number for strat in strategies])) == num_players \
@@ -229,32 +96,21 @@ cdef class StrategySupportProfile2(Collection):
         return other.issubset(self)
 
     def restrict(self):
-        cdef StrategicRestriction new_support
-        new_support = self.game.mixed_profile().support()
-        for strategy in self.game.strategies:
-            if strategy not in self:
-                new_support.support.RemoveStrategy((<Strategy>strategy).strategy)
-        return new_support
+        cdef StrategicRestriction restriction
+        restriction = StrategicRestriction()
+        restriction.support = self.support
+        return restriction
 
     def undominated(self, strict=False, external=False):
-        cdef c_StrategySupport *new_support
-        cdef c_StrategySupport *elim_support
-        cdef StrategySupportProfile new_profile
-        new_support = new_StrategySupport((<Game>self.game).game)
-        for strategy in self.game.strategies:
-            if strategy not in self:
-                new_support.RemoveStrategy((<Strategy>strategy).strategy)
-        elim_support = copy_StrategySupport(new_support.Undominated(strict, external))
-        new_profile = StrategySupportProfile(self.strategies, self.num_players, self.game)
-        for strategy in self.game.strategies:
-            if not elim_support.Contains((<Strategy>strategy).strategy):
-                new_profile = new_profile.remove(strategy)
-        del_StrategySupport(new_support)
+        elim_support = copy_StrategySupport(self.support.Undominated(strict, external))
+        restriction = StrategicRestriction()
+        restriction.support = deref(elim_support)
+        new_profile = StrategySupportProfile(restriction.strategies, self.game)
         del_StrategySupport(elim_support)
         return new_profile 
 
     def union(self, StrategySupportProfile other):
-        return StrategySupportProfile(self.unique(list(self) + list(other)), len(self.game.players), self.game)
+        return StrategySupportProfile(self.unique(list(self) + list(other)), self.game)
 
     def unique(self, lst):
         uniq = []
@@ -379,7 +235,7 @@ cdef class StrategicRestriction(BaseGame):
         return self.support.NumStrategiesPlayer(pl+1)
 
     def support_profile(self):
-        return StrategySupportProfile(list(self.strategies), len(self.players), self.unrestrict())
+        return StrategySupportProfile(list(self.strategies), self.unrestrict())
 
     def unrestrict(self):
         cdef Game g
