@@ -27,6 +27,29 @@ executables to a directory in your path!
 Note that if you install to a different location than the default, on
 some systems (especially linux) you may have to run ldconfig manually.
 
+Building from git repository
+----------------------------
+
+If you want to live on the bleeding edge, you can get the latest
+version of the Gambit sources from the Gambit repository on
+github.com, via ::
+
+  git clone git://github.com/gambitproject/gambit.git
+  cd gambit
+
+After this, you will need to set up the build scripts by executing ::
+
+  aclocal
+  libtoolize
+  automake --add-missing
+  autoconf
+
+For this, you will need to have automake, autoconf, and libtool2
+installed on your system.
+
+At this point, you can then continue with the configuration and build
+stages as in the previous section.
+
 Supported compilers
 -------------------
 
