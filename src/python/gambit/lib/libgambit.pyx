@@ -58,6 +58,9 @@ cdef extern from "libgambit/game.h":
     ctypedef struct c_GameStrategy "GameObjectPtr<GameStrategyRep>":
         c_GameStrategyRep *deref "operator->"()
 
+    ctypedef struct c_PureStrategyProfile "std::auto_ptr<PureStrategyProfileRep>":
+        c_PureStrategyProfileRep *deref "operator->"()
+
     ctypedef struct c_GameStrategyRep "GameStrategyRep":
         int GetNumber()
         int GetId()
@@ -191,17 +194,18 @@ cdef extern from "libgambit/game.h":
         c_Rational GetMaxPayoff(int)
         bool IsPerfectRecall()
 
+        c_PureStrategyProfile NewPureStrategyProfile()
         c_MixedStrategyProfileDouble NewMixedStrategyProfileDouble "NewMixedStrategyProfile"(double)
         c_MixedStrategyProfileRational NewMixedStrategyProfileRational "NewMixedStrategyProfile"(c_Rational)
 
-    ctypedef struct c_PureStrategyProfile "PureStrategyProfile":
+    ctypedef struct c_PureStrategyProfileRep "PureStrategyProfileRep":
         c_GameStrategy GetStrategy(c_GamePlayer)
         void SetStrategy(c_GameStrategy)
 
         c_GameOutcome GetOutcome()
         void SetOutcome(c_GameOutcome)
 
-    c_PureStrategyProfile *new_PureStrategyProfile "new PureStrategyProfile"(c_Game)
+    c_PureStrategyProfile *new_PureStrategyProfile "new PureStrategyProfile"(c_PureStrategyProfile)
     void del_PureStrategyProfile "delete"(c_PureStrategyProfile *)
 
     c_Game NewTree()
