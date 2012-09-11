@@ -59,8 +59,9 @@ cdef class Action:
     property prob:
         def __get__(self):
             cdef bytes py_string
+            cdef cxx_string dummy_str
             py_string = self.action.deref().GetInfoset().deref().GetActionProb(
-                self.action.deref().GetNumber()).as_string().c_str()
+                self.action.deref().GetNumber(), dummy_str).c_str()
             if "." in py_string:
                 return decimal.Decimal(py_string)
             else:

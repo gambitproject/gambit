@@ -88,7 +88,7 @@ cdef extern from "libgambit/game.h":
         c_GameAction GetAction(int) except +IndexError
         c_GameAction InsertAction(c_GameAction) except +ValueError
         
-        c_Number GetActionProb "GetActionProb<Number>"(int) except +IndexError
+        cxx_string GetActionProb(int, cxx_string) except +IndexError
         void SetActionProb(int, cxx_string) except +IndexError 
 
         int NumMembers()
