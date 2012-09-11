@@ -931,7 +931,7 @@ setT *qh_setnew_delnthsorted(setT *set, int size, int nth, int prepend) {
 notes:
   never errors
 */
-void qh_setprint(FILE *fp, const char* string, setT *set) {
+void qh_setprint(FILE *fp, const char *string, setT *set) {
   int size, k;
 
   if (!set)
@@ -2321,7 +2321,7 @@ void qh_randommatrix (realT *buffer, int dim, realT **row) {
     *(rowi++)= coord;
     for (k=0; k<dim; k++) {
       realr= qh_RANDOMint;
-      *(coord++)= 2.0 * realr/(qh_RANDOMmax+1) - 1.0;
+      *(coord++)= 2.0 * realr/(qh_RANDOMmax+1.0) - 1.0;
     }
   }
   *rowi= coord;
@@ -3135,7 +3135,7 @@ boolT qh_nostatistic (int i) {
 /*-------------------------------------------
 -qh_printallstatistics- print all statistics to a file
 */
-void qh_printallstatistics (FILE *fp, char *string) {
+void qh_printallstatistics (FILE *fp, const char *string) {
   int i;
   
   for (i=ZEND; i--; ) 
@@ -3147,7 +3147,7 @@ void qh_printallstatistics (FILE *fp, char *string) {
 /*-------------------------------------------
 -printstatistics- print statistics to a file
 */
-void qh_printstatistics (FILE *fp, char *string) {
+void qh_printstatistics (FILE *fp, const char *string) {
   int i, k;
   realT ave;
   
@@ -3258,8 +3258,8 @@ realT qh_stddev (int num, realT tot, realT tot2, realT *ave) {
 
 #if !qh_KEEPstatistics
 void    qh_collectstatistics (void) {}
-void    qh_printallstatistics (FILE *fp, char *string) {}
-void    qh_printstatistics (FILE *fp, char *string) {}
+void    qh_printallstatistics (FILE *fp, const char *string) {}
+void    qh_printstatistics (FILE *fp, const char *string) {}
 #endif
 
 
@@ -8927,7 +8927,7 @@ setT *qh_initialvertices(int dim, setT *maxpoints, pointT *points, int numpoints
   else if (qh RANDOMoutside) {
     while (qh_setsize (simplex) != dim+1) {
       randr= qh_RANDOMint;
-      randr= randr/(qh_RANDOMmax+1);
+      randr= randr/(qh_RANDOMmax+1.0);
       index= (int)floor(qh num_points * randr);
       point= qh_point (index);
       qh_setunique (&simplex, point);

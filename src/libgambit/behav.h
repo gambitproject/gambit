@@ -76,6 +76,7 @@ protected:
 public:
   /// @name Lifecycle
   //@{
+  MixedBehavProfile(const Game &);
   MixedBehavProfile(const BehavSupport &);
   MixedBehavProfile(const MixedBehavProfile<T> &);
   MixedBehavProfile(const MixedStrategyProfile<T> &);

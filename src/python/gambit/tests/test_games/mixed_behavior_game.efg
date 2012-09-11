@@ -1,0 +1,18 @@
+EFG 2 R "Test Extensive Form Game" { "Player 1" "Player 2" "Player 3" }
+""
+
+p "" 1 1 "Infoset 1:1" { "U1" "D1" } 0
+p "" 2 1 "Infoset 2:1" { "U2" "D2" } 0
+p "" 3 1 "Infoset 3:1" { "U3" "D3" } 0
+t "" 1 "Outcome 2" { 9, 8, 12 }
+t "" 2 "Outcome 1" { 0, 0, 0 }
+p "" 3 1 "Infoset 3:1" { "U3" "D3" } 0
+t "" 2 "Outcome 1" { 0, 0, 0 }
+t "" 3 "Outcome 4" { 3, 4, 6 }
+p "" 2 1 "Infoset 2:1" { "U2" "D2" } 0
+p "" 3 1 "Infoset 3:1" { "U3" "D3" } 0
+t "" 2 "Outcome 1" { 0, 0, 0 }
+t "" 3 "Outcome 4" { 3, 4, 6 }
+p "" 3 1 "Infoset 3:1" { "U3" "D3" } 0
+t "" 4 "Outcome 3" { 9, 8, 2 }
+t "" 2 "Outcome 1" { 0, 0, 0 }

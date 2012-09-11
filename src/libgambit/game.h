@@ -433,12 +433,11 @@ public:
   /// @name Strategies
   //@{
   /// Returns the number of strategies available to the player
-  int NumStrategies(void) const { return m_strategies.Length(); }
+  int NumStrategies(void) const; 
   /// Returns the st'th strategy for the player
-  GameStrategy GetStrategy(int st) const { return m_strategies[st]; }
+  GameStrategy GetStrategy(int st) const;
   /// Returns a forward iterator over the strategies
-  GameStrategyIterator Strategies(void) const 
-    { return GameStrategyIterator(m_strategies); }
+  GameStrategyIterator Strategies(void) const; 
   /// Creates a new strategy for the player
   GameStrategy NewStrategy(void);
   //@}
@@ -735,6 +734,12 @@ inline Game GameOutcomeRep::GetGame(void) const { return m_game; }
 inline GamePlayer GameStrategyRep::GetPlayer(void) const { return m_player; }
 
 inline Game GamePlayerRep::GetGame(void) const { return m_game; }
+inline int GamePlayerRep::NumStrategies(void) const 
+{ m_game->BuildComputedValues(); return m_strategies.Length(); }
+inline GameStrategy GamePlayerRep::GetStrategy(int st) const 
+{ m_game->BuildComputedValues(); return m_strategies[st]; }
+inline GameStrategyIterator GamePlayerRep::Strategies(void) const 
+{ m_game->BuildComputedValues(); return GameStrategyIterator(m_strategies); }
 
 template<> inline double PureBehavProfile::GetPayoff(int pl) const
 { return GetNodeValue<double>(m_efg->GetRoot(), pl); }

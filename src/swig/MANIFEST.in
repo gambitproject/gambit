@@ -1,7 +1,0 @@
-include gambit.py
-include gambit_wrap.cxx
-include setup.py
-include libgambit/*.cc
-include libgambit/*.h
-include libgambit/*.imp
-include gambit.i

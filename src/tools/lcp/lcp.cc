@@ -23,6 +23,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
+#include <getopt.h>
 #include "libgambit/libgambit.h"
 #include "libgambit/subgame.h"
 
@@ -58,8 +59,9 @@ void PrintHelp(char *progname)
   std::cerr << "  -r DEPTH         terminate recursion at DEPTH\n";
   std::cerr << "                   (only if number of equilibria sought is not 1)\n";
   std::cerr << "  -D               print detailed information about equilibria\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 
@@ -79,8 +81,16 @@ int main(int argc, char *argv[])
   int c;
   bool useFloat = false, useStrategic = false, bySubgames = false, quiet = false;
 
-  while ((c = getopt(argc, argv, "d:DhqSPe:r:")) != -1) {
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { 0,    0,    0,    0   }
+  };
+  while ((c = getopt_long(argc, argv, "d:DvhqSPe:r:", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'd':
       useFloat = true;
       g_numDecimals = atoi(optarg);

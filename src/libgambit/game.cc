@@ -841,6 +841,7 @@ GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 
 int GameExplicitRep::MixedProfileLength(void) const
 {
+  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
   int strats = 0;
   for (int i = 1; i <= m_players.Length();
        strats += m_players[i++]->m_strategies.Length());
