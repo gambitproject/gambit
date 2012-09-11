@@ -191,6 +191,9 @@ cdef extern from "libgambit/game.h":
         c_Rational GetMaxPayoff(int)
         bool IsPerfectRecall()
 
+        c_MixedStrategyProfileDouble NewMixedStrategyProfileDouble "NewMixedStrategyProfile"(double)
+        c_MixedStrategyProfileRational NewMixedStrategyProfileRational "NewMixedStrategyProfile"(c_Rational)
+
     ctypedef struct c_PureStrategyProfile "PureStrategyProfile":
         c_GameStrategy GetStrategy(c_GamePlayer)
         void SetStrategy(c_GameStrategy)
@@ -214,8 +217,7 @@ cdef extern from "libgambit/mixed.h":
         double GetStrategyValue(c_GameStrategy)
         double GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy)
         double GetLiapValue()
-    c_MixedStrategyProfileDouble *new_MixedFromBehavDouble "new MixedStrategyProfile<double>"(c_MixedBehavProfileDouble)
-    c_MixedStrategyProfileDouble *new_MixedStrategyProfileDouble "new MixedStrategyProfile<double>"(c_Game)
+    c_MixedStrategyProfileDouble *new_MixedStrategyProfileDouble "new MixedStrategyProfile<double>"(c_MixedStrategyProfileDouble)    
     void del_MixedStrategyProfileDouble "delete"(c_MixedStrategyProfileDouble *)
 
     ctypedef struct c_MixedStrategyProfileRational "MixedStrategyProfile<Rational>":
@@ -227,8 +229,7 @@ cdef extern from "libgambit/mixed.h":
         c_Rational GetStrategyValue(c_GameStrategy)
         c_Rational GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy)
         c_Rational GetLiapValue()
-    c_MixedStrategyProfileRational *new_MixedFromBehavRational "new MixedStrategyProfile<Rational>"(c_MixedBehavProfileRational)
-    c_MixedStrategyProfileRational *new_MixedStrategyProfileRational "new MixedStrategyProfile<Rational>"(c_Game)
+    c_MixedStrategyProfileRational *new_MixedStrategyProfileRational "new MixedStrategyProfile<Rational>"(c_MixedStrategyProfileRational)    
     void del_MixedStrategyProfileRational "delete"(c_MixedStrategyProfileRational *)
 
 cdef extern from "libgambit/behav.h":
@@ -245,6 +246,7 @@ cdef extern from "libgambit/behav.h":
         double GetActionValue(c_GameAction)
         double GetRegret(c_GameAction)
         double GetLiapValue()
+        c_MixedStrategyProfileDouble ToMixedProfile()
     c_MixedBehavProfileDouble *new_BehavFromMixedDouble "new MixedBehavProfile<double>"(c_MixedStrategyProfileDouble) except +NotImplementedError
     c_MixedBehavProfileDouble *new_MixedBehavProfileDouble "new MixedBehavProfile<double>"(c_Game)
     void del_MixedBehavProfileDouble "delete"(c_MixedBehavProfileDouble *)
@@ -262,6 +264,7 @@ cdef extern from "libgambit/behav.h":
         c_Rational GetActionValue(c_GameAction)
         c_Rational GetRegret(c_GameAction)
         c_Rational GetLiapValue()
+        c_MixedStrategyProfileRational ToMixedProfile()
     c_MixedBehavProfileRational *new_BehavFromMixedRational "new MixedBehavProfile<Rational>"(c_MixedStrategyProfileRational) except +NotImplementedError
     c_MixedBehavProfileRational *new_MixedBehavProfileRational "new MixedBehavProfile<Rational>"(c_Game)
     void del_MixedBehavProfileRational "delete"(c_MixedBehavProfileRational *)

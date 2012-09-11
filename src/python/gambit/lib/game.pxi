@@ -263,13 +263,14 @@ cdef class Game:
     def mixed_profile(self, rational=False):
         cdef MixedStrategyProfileDouble mspd
         cdef MixedStrategyProfileRational mspr
+        cdef c_Rational dummy_rat
         if not rational:
             mspd = MixedStrategyProfileDouble()
-            mspd.profile = new_MixedStrategyProfileDouble(self.game)
+            mspd.profile = new_MixedStrategyProfileDouble(self.game.deref().NewMixedStrategyProfileDouble(0.0))
             return mspd
         else:
             mspr = MixedStrategyProfileRational()
-            mspr.profile = new_MixedStrategyProfileRational(self.game)
+            mspr.profile = new_MixedStrategyProfileRational(self.game.deref().NewMixedStrategyProfileRational(dummy_rat))
             return mspr
 
     def behav_profile(self, rational=False):
