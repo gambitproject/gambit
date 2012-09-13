@@ -347,7 +347,12 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
   }
   else if (nn)  {
     for (; ; nn = nn->m_parent->ptr->whichbranch)  {
-      m = dynamic_cast<GameTreeNodeRep *>(nn->GetNextSibling().operator->());
+      if (!nn->GetNextSibling()) {
+	m = 0;
+      }
+      else {
+	m = dynamic_cast<GameTreeNodeRep *>(nn->GetNextSibling().operator->());
+      }
       if (m || nn->m_parent->ptr == NULL)   break;
     }
     if (m)  {
