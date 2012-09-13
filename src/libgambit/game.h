@@ -49,6 +49,8 @@ public:
   //@{
   /// Constructor; initializes reference count
   GameObject(void) : m_refCount(0), m_valid(true) { }
+  /// Destructor
+  virtual ~GameObject() { }
   //@}
 
   /// @name Validation
