@@ -42,7 +42,7 @@ private:
   GameTreeActionRep(int p_number, const std::string &p_label, 
 		    GameTreeInfosetRep *p_infoset)
     : m_number(p_number), m_label(p_label), m_infoset(p_infoset) { }
-  ~GameTreeActionRep()   { }
+  virtual ~GameTreeActionRep()   { }
 
 public:
   int GetNumber(void) const { return m_number; }
