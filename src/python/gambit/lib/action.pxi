@@ -75,6 +75,6 @@ cdef class Action:
                 self.action.deref().GetInfoset().deref().SetActionProb(
                     self.action.deref().GetNumber(), s)
             else:
-                raise TypeError, "numeric argument required for action \
-                    probability"
+                raise TypeError, "numeric argument required for action " \
+                                 "probability"
             

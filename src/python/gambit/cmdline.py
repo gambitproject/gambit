@@ -2,7 +2,7 @@
 Command-line programs for Gambit
 """
 
-from IPython.Shell import IPShellEmbed
+from IPython.frontend.terminal.embed import InteractiveShellEmbed
 
 def gambit_shell():
     """
@@ -16,8 +16,9 @@ def gambit_shell():
     # namespace in the shell.
     ns = { 'gambit': gambit, 'nash': gambit.nash, 'qre': gambit.qre }
 
-    s = IPShellEmbed(['-colors', 'Linux'])
-    s(local_ns=ns)
+    shell = InteractiveShellEmbed()
+    shell.user_ns = ns
+    shell()
 
     # Anything that should happen after the session terminates would go here
 
