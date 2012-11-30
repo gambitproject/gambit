@@ -3996,7 +3996,7 @@ void wxSheet::DrawAllGridLines( wxDC& dc, const wxRegion & WXUNUSED(reg) )
         }
         
         if (done)
-            dc.SetClippingRegion( clippedcells );
+            dc.SetDeviceClippingRegion( clippedcells );
     }
     
     dc.SetPen( wxPen(GetGridLineColour(), 1, wxSOLID) );
@@ -4395,7 +4395,7 @@ void wxSheet::DrawTextRectangle( wxDC& dc, const wxArrayString& lines,
     int l;
     float x = 0.0, y = 0.0;
     long textWidth=0, textHeight=0;
-    long lineWidth=0, lineHeight=0;
+    wxCoord lineWidth=0, lineHeight=0;
     wxArrayInt lineWidths, lineHeights;
     
     // Measure the text extent once, Gtk2 is slow (takes 2sec off 23sec run)
@@ -4530,7 +4530,7 @@ bool wxSheet::GetTextBoxSize( wxDC& dc, const wxArrayString& lines,
                               long *width, long *height ) const
 {
     long w = 0, h = 0;
-    long lineW, lineH;
+    wxCoord lineW, lineH;
     size_t i, count = lines.GetCount();
     for ( i = 0; i < count; i++ )
     {
