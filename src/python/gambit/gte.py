@@ -47,10 +47,10 @@ def write_game_outcome(game, outcome, doc, xml_parent):
     for (i, p) in enumerate(game.players):
         if outcome is not None:
             etree.SubElement(xml_parent, "payoff",
-                             player=str(i+1)).text = str(outcome[i])
+                             player=p.label).text = str(outcome[i])
         else:
             etree.SubElement(xml_parent, "payoff",
-                             player=str(i+1)).text = "0"
+                             player=p.label).text = "0"
 
 def write_game_node(game, node, doc, xml_node):
     if len(node.infoset.members) >= 2:
