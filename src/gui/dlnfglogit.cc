@@ -656,24 +656,43 @@ LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent,
   m_toolBar->SetMargins(4, 4);
   m_toolBar->SetToolBitmapSize(wxSize(24, 24));
 
-  m_toolBar->AddTool(wxID_SAVE, wxBitmap(savedata_xpm), wxNullBitmap, false,
-		     -1, -1, 0,
-		     _("Save the correspondence to a CSV file"),
-		     _("Save the correspondence to a CSV file"));
+  m_toolBar->AddTool(wxID_SAVE,
+                     wxEmptyString,
+                     wxBitmap(savedata_xpm),
+                     wxNullBitmap,
+                     wxITEM_NORMAL,
+		                 _("Save the correspondence to a CSV file"),
+		                 _("Save the correspondence to a CSV file"));
+
   m_toolBar->EnableTool(wxID_SAVE, false);
-  m_toolBar->AddTool(GBT_MENU_VIEW_DATA, wxBitmap(datasrc_xpm),
-		     wxNullBitmap, false, -1, -1, 0,
-		     _("View the points in the correspondence"),
-		     _("View the points in the correspondence"));
+
+  m_toolBar->AddTool(GBT_MENU_VIEW_DATA,
+                     wxEmptyString,
+                     wxBitmap(datasrc_xpm),
+                     wxNullBitmap,
+                     wxITEM_NORMAL,
+		                 _("View the points in the correspondence"),
+		                 _("View the points in the correspondence"));
+
   m_toolBar->EnableTool(GBT_MENU_VIEW_DATA, false);
 
-  m_toolBar->AddTool(wxID_PRINT, wxBitmap(print_xpm), wxNullBitmap, false,
-		     -1, -1, 0, _("Print the graph"), _("Print the graph"));
+  m_toolBar->AddTool(wxID_PRINT,
+                     wxEmptyString,
+                     wxBitmap(print_xpm),
+                     wxNullBitmap,
+                     wxITEM_NORMAL,
+                     _("Print the graph"),
+                     _("Print the graph"));
 
   m_toolBar->AddSeparator();
-  m_toolBar->AddTool(GBT_MENU_VIEW_ZOOMFIT, wxBitmap(zoomfit_xpm),
-		     wxNullBitmap, false, -1, -1, 0,
-		     _("Show the whole graph"), _("Show the whole graph"));
+
+  m_toolBar->AddTool(GBT_MENU_VIEW_ZOOMFIT,
+                     wxEmptyString,
+                     wxBitmap(zoomfit_xpm),
+                     wxNullBitmap,
+                     wxITEM_NORMAL,
+                     _("Show the whole graph"),
+                     _("Show the whole graph"));
 
   m_toolBar->AddControl(new wxStaticText(m_toolBar, wxID_STATIC,
 					 wxT("Graph scaling:")));
