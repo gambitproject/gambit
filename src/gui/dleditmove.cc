@@ -168,13 +168,19 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
 
 wxString gbtEditMoveDialog::GetActionName(int p_act) const 
 { 
-  m_actionSheet->SaveEditControlValue();
+  if (m_actionSheet->IsCellEditControlCreated()) {
+    m_actionSheet->SaveEditControlValue();
+    m_actionSheet->HideCellEditControl();
+  }
   return m_actionSheet->GetCellValue(wxSheetCoords(p_act-1, 0));
 }
 
 wxString gbtEditMoveDialog::GetActionProb(int p_act) const 
 { 
-  m_actionSheet->SaveEditControlValue();
+  if (m_actionSheet->IsCellEditControlCreated()) {
+    m_actionSheet->SaveEditControlValue();
+    m_actionSheet->HideCellEditControl();
+  }
   return m_actionSheet->GetCellValue(wxSheetCoords(p_act-1, 1));
 }
 
