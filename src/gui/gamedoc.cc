@@ -272,8 +272,8 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
       bool isFloat = false;
       for (TiXmlNode *profile = analysis->FirstChild("profile");
 	   profile; profile = profile->NextSiblingElement()) {
-	if (std::string(profile->FirstChild()->Value()).find('.') != (unsigned int) -1 ||
-	    std::string(profile->FirstChild()->Value()).find('e') != (unsigned int) -1) {
+	if (std::string(profile->FirstChild()->Value()).find('.') != std::string::npos ||
+	    std::string(profile->FirstChild()->Value()).find('e') != std::string::npos) {
 	  isFloat = true;
 	  break;
 	}
