@@ -51,15 +51,15 @@ protected:
   const T &ActionValue(const GameAction &act) const 
     { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			    act->GetInfoset()->GetNumber(),
-			    act->m_number); }
+			    act->GetNumber()); }
   T &ActionValue(const GameAction &act)
     { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			    act->GetInfoset()->GetNumber(),
-			    act->m_number); }
+			    act->GetNumber()); }
   
   /// @name Auxiliary functions for computation of interesting values
   //@{
-  void GetPayoff(GameNodeRep *, const T &, int, T &) const;
+  void GetPayoff(GameTreeNodeRep *, const T &, int, T &) const;
   
   void ComputeSolutionDataPass2(const GameNode &node) const;
   void ComputeSolutionDataPass1(const GameNode &node) const;
@@ -68,14 +68,15 @@ protected:
 
   /// @name Converting mixed strategies to behavior
   //@{
-  void BehaviorStrat(int, GameNodeRep *);
+  void BehaviorStrat(int, GameTreeNodeRep *);
   void RealizationProbs(const MixedStrategyProfile<T> &,
-			int pl, const Array<int> &, GameNodeRep *);
+			int pl, const Array<int> &, GameTreeNodeRep *);
   //@}
 
 public:
   /// @name Lifecycle
   //@{
+  MixedBehavProfile(const Game &);
   MixedBehavProfile(const BehavSupport &);
   MixedBehavProfile(const MixedBehavProfile<T> &);
   MixedBehavProfile(const MixedStrategyProfile<T> &);
@@ -165,6 +166,8 @@ public:
 		   const GameAction &oppAction) const;
   T DiffNodeValue(const GameNode &node, const GamePlayer &player,
 		  const GameAction &oppAction) const;
+
+  MixedStrategyProfile<T> ToMixedProfile(void) const;
 
   //@}
 };

@@ -36,7 +36,7 @@ template <class T> Matrix<T> Make_A1(const StrategySupport &S)
   n2=S.NumStrategies(2);
   Matrix<T> A1(1,n1,n1+1,n1+n2);
 
-  PureStrategyProfile profile(S.GetGame());
+  PureStrategyProfile profile = S.GetGame()->NewPureStrategyProfile();
 
   Rational min = S.GetGame()->GetMinPayoff();
   if (min > Rational(0)) {
@@ -52,10 +52,10 @@ template <class T> Matrix<T> Make_A1(const StrategySupport &S)
   Rational fac(1, max - min);
 
   for (i = 1; i <= n1; i++)  {
-    profile.SetStrategy(S.GetStrategy(1, i));
+    profile->SetStrategy(S.GetStrategy(1, i));
     for (j = 1; j <= n2; j++)  {
-      profile.SetStrategy(S.GetStrategy(2, j));
-      A1(i, n1 + j) = fac * (profile.GetPayoff<Rational>(1) - min);
+      profile->SetStrategy(S.GetStrategy(2, j));
+      A1(i, n1 + j) = fac * (profile->GetPayoff(1) - min);
     }
   }
   return A1;
@@ -68,7 +68,7 @@ template <class T> Matrix<T> Make_A2(const StrategySupport &S)
   n2=S.NumStrategies(2);
   Matrix<T> A2(n1+1,n1+n2,1,n1);
 
-  PureStrategyProfile profile(S.GetGame());
+  PureStrategyProfile profile = S.GetGame()->NewPureStrategyProfile();
   
   Rational min = S.GetGame()->GetMinPayoff();
   if (min > Rational(0)) {
@@ -84,10 +84,10 @@ template <class T> Matrix<T> Make_A2(const StrategySupport &S)
   Rational fac(1, max - min);
 
   for (i = 1; i <= n1; i++)  {
-    profile.SetStrategy(S.GetStrategy(1, i));
+    profile->SetStrategy(S.GetStrategy(1, i));
     for (j = 1; j <= n2; j++)  {
-      profile.SetStrategy(S.GetStrategy(2, j));
-      A2(n1 + j, i) = fac * (profile.GetPayoff<Rational>(2) - min);
+      profile->SetStrategy(S.GetStrategy(2, j));
+      A2(n1 + j, i) = fac * (profile->GetPayoff(2) - min);
     }
   }
   return A2;

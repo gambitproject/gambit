@@ -4,7 +4,7 @@ Trace a smooth parameterized curve using a predictor-corrector method.
 
 import math
 import numpy
-import scipy.linalg.decomp    # for QR decomposition (TODO: use it!)
+#import scipy.linalg.decomp    # for QR decomposition (TODO: use it!)
 
 def ynorm(y):
     s = 0.0
@@ -27,7 +27,7 @@ def newt(q, b, u, v, w, p, pv, r, pert, dmax, dmin, ctmax, cdmax,
     n = len(w)
     n1 = n+1
     
-    for k in xrange(len(pv)):
+    for k in xrange(n):
         if abs(w[k]) > pert:
             pv[k] = 0.0
         elif w[k] > 0.0:
@@ -39,42 +39,45 @@ def newt(q, b, u, v, w, p, pv, r, pert, dmax, dmin, ctmax, cdmax,
     d1 = ynorm(w)
 
     if d1 > dmax:
+        print "newt: fail on norm of LHS"
         return False
 
-    for k in xrange(len(w)):
-        for ell in xrange(k):
+    for k in xrange(n):
+        for ell in xrange(k-1):
             w[k] = w[k] - b[ell, k] * w[ell]
         w[k] = w[k] / b[k,k]
 
     d2 = ynorm(w)
 
-    for k in xrange(len(w)+1):
+    for k in xrange(n1):
         s = 0.0
-        for ell in xrange(len(w)):
+        for ell in xrange(n):
             s = s + q[ell,k] * w[ell]
 
         v[k] = u[k] - s
 
     r = compute_lhs(v)
         
-    for k in xrange(len(w)):
+    for k in xrange(n):
         p[k] = r[k] - pv[k]
 
     d3 = ynorm(p)
     contr = d3 / (d1 + dmin)
     if contr > ctmax:
+        print "newt: fail on contraction test"
         test = False
     
-    for k in xrange(len(w)-2, -1, -1):
+    for k in xrange(n-2, -1, -1):
         givens(b, q, w[k], w[k+1], k, k+1, k)
 
-    for k in xrange(len(w)):
+    for k in xrange(n):
         b[0,k] = b[0,k] - p[k] / d2
 
-    for k in xrange(len(w)-1):
+    for k in xrange(n-1):
         givens(b, q, b[k,k], b[k+1,k], k, k+1, k)
 
-    if b[n-1,n-1] < 0:
+    if b[n-1,n-1] < 0.0:
+        print "newt: fail on diagonal sign"
         test = False
         b[n-1,n-1] = -b[n-1,n-1]
         for k in xrange(n1):
@@ -82,9 +85,9 @@ def newt(q, b, u, v, w, p, pv, r, pert, dmax, dmin, ctmax, cdmax,
             q[n1-1,k] = -q[n1-1,k]
 
     for i in xrange(1,n):
-        for k in xrange(0,i-1):
+        for k in xrange(i-1):
             if abs(b[k,i]) > cdmax * abs(b[i,i]):
-                if b[i,i] > 0:
+                if b[i,i] > 0.0:
                     b[i,i] = abs(b[k,i]) / cdmax
                 else:
                     b[i,i] = -abs(b[k,i]) / cdmax
@@ -191,7 +194,7 @@ def estimate_jac(x, compute_lhs):
 
 def trace_path_nojac(start, startLam, maxLam, compute_lhs, 
                      omega=1.0, hStart=0.03, maxDecel=1.1, maxIter=1000,
-                     crit=None, printer=None):
+                     crit=None, callback=None):
     """
     Trace a differentiable path starting at the vector 'start' with
     parameter 'startLam', until 'maxLam' is reached.  lhs() returns the
@@ -224,8 +227,8 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
     newton = False            # using Newton steplength (for zero-finding)
 
     x = numpy.array([x for x in start] + [startLam])
-    if printer is not None:
-        printer(x)
+    if callback is not None:
+        callback(x)
 
     y = numpy.zeros(len(start))
     q = numpy.zeros((len(start)+1, len(start)+1)) 
@@ -249,7 +252,7 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
         # Predictor step
         u = x + h*omega*t
         print "PREDICTOR"
-        printer(u)
+        callback(u)
 
         w = compute_lhs(u)
         test = upd(q, b, x, u, y, w, t, h, angmax)
@@ -279,8 +282,8 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
         x = v[:]
         y = r[:]
         
-        if printer is not None:
-            printer(x)
+        if callback is not None:
+            callback(x)
 
     return x
 
@@ -288,7 +291,7 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
 
 def trace_path(start, startLam, maxLam, compute_lhs, compute_jac,
                omega=1.0, hStart=0.03, maxDecel=1.1, maxIter=1000,
-               crit=None, printer=None):
+               crit=None, callback=None):
     """
     Trace a differentiable path starting at the vector 'start' with
     parameter 'startLam', until 'maxLam' is reached.  lhs() returns the
@@ -309,8 +312,8 @@ def trace_path(start, startLam, maxLam, compute_lhs, compute_jac,
     newton = False            # using Newton steplength (for zero-finding)
 
     x = numpy.array([x for x in start] + [startLam])
-    if printer is not None:
-        printer(x)
+    if callback is not None:
+        callback(x)
 
     y = numpy.zeros(len(start))
     q = numpy.zeros((len(start)+1, len(start)+1)) 
@@ -394,8 +397,8 @@ def trace_path(start, startLam, maxLam, compute_lhs, compute_jac,
         # PC step was successful; update and iterate
         x = u[:]
 
-        if printer is not None:
-            printer(x)
+        if callback is not None:
+            callback(x)
 
         newT = q[-1]    # new tangent
         if sum(t * newT) < 0.0:

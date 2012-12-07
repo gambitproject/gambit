@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
       game->BuildComputedValues();
 
       if (startFile == "") {
-	Gambit::MixedStrategyProfile<double> start(game);
+	Gambit::MixedStrategyProfile<double> start(game->NewMixedStrategyProfile(0.0));
 	StrategicQREPathTracer tracer(start);
 	tracer.SetMaxDecel(maxDecel);
 	tracer.SetStepsize(hStart);
@@ -187,8 +187,8 @@ int main(int argc, char *argv[])
 	Gambit::Array<double> profile(game->MixedProfileLength() + 1);
 	std::ifstream startData(startFile.c_str());
 	ReadProfile(startData, profile);
-	Gambit::MixedStrategyProfile<double> start(game);
-	for (int i = 1; i <= start.Length(); i++) {
+	Gambit::MixedStrategyProfile<double> start(game->NewMixedStrategyProfile(0.0));
+	for (int i = 1; i <= start.MixedProfileLength(); i++) {
 	  start[i] = profile[i+1];
 	}
 	StrategicQREPathTracer tracer1(start);

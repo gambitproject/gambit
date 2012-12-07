@@ -58,10 +58,10 @@ List<MixedBehavProfile<Rational> > SolveBehav(const BehavSupport &p_support,
 	 isNash && !player.AtEnd(); player++)  {
       Rational current = citer->GetPayoff<Rational>(player);
 	
-      for (GameInfosetIterator infoset = player->Infosets();
-	   isNash && !infoset.AtEnd(); infoset++)  {
-	for (GameActionIterator action = infoset->Actions();
-	     !action.AtEnd(); action++) {
+      for (int iset = 1; isNash && iset <= player->NumInfosets(); iset++) {
+	GameInfoset infoset = player->GetInfoset(iset);
+	for (int act = 1; act <= infoset->NumActions(); act++) {
+	  GameAction action = infoset->GetAction(act);
 	  if (citer->GetActionValue<Rational>(action) > current)  {
 	    isNash = false;
 	    break;
@@ -77,9 +77,8 @@ List<MixedBehavProfile<Rational> > SolveBehav(const BehavSupport &p_support,
 
       for (GamePlayerIterator player = efg->Players();
 	   !player.AtEnd(); player++) {
-	for (GameInfosetIterator infoset = player->Infosets();
-	     !infoset.AtEnd(); infoset++) {
-	  temp(citer->GetAction(infoset)) = 1;
+	for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	  temp(citer->GetAction(player->GetInfoset(iset))) = 1;
 	}
       }
 
@@ -104,9 +103,9 @@ void PrintProfile(std::ostream &p_stream,
 		  const MixedStrategyProfile<T> &p_profile)
 {
   p_stream << "NE,";
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
     p_stream << p_profile[i];
-    if (i < p_profile.Length()) {
+    if (i < p_profile.MixedProfileLength()) {
       p_stream << ',';
     }
   }
@@ -121,11 +120,11 @@ void SolveMixed(Game p_nfg)
 
     for (GamePlayerIterator player = p_nfg->Players(); 
 	 flag && !player.AtEnd(); player++)  {
-      Rational current = citer->GetPayoff<Rational>(player);
-      PureStrategyProfile p(*citer); 
+      Rational current = (*citer)->GetPayoff(player);
+      PureStrategyProfile p = (*citer)->Copy(); 
       for (GameStrategyIterator strategy = player->Strategies();
 	   !strategy.AtEnd(); strategy++) {
-	if (p.GetStrategyValue<Rational>(strategy) > current)  {
+	if (p->GetStrategyValue(strategy) > current)  {
 	  flag = false;
 	  break;
 	}
@@ -133,12 +132,12 @@ void SolveMixed(Game p_nfg)
     }
     
     if (flag)  {
-      MixedStrategyProfile<Rational> temp(p_nfg);
+      MixedStrategyProfile<Rational> temp(p_nfg->NewMixedStrategyProfile(Rational(0)));
       ((Vector<Rational> &) temp).operator=(Rational(0));
-      PureStrategyProfile profile(*citer);
+      PureStrategyProfile profile = (*citer)->Copy();
       for (GamePlayerIterator player = p_nfg->Players();
 	   !player.AtEnd(); player++) {
-	temp[profile.GetStrategy(player)] = 1;
+	temp[profile->GetStrategy(player)] = 1;
       }
       
       PrintProfile(std::cout, temp);

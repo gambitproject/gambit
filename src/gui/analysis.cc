@@ -54,13 +54,13 @@ public:
 template <class T> MixedStrategyProfile<T> 
 OutputToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
 {
-  MixedStrategyProfile<T> profile(p_doc->GetGame());
+  MixedStrategyProfile<T> profile(p_doc->GetGame()->NewMixedStrategyProfile((T) 0.0));
 
   wxStringTokenizer tok(p_text, wxT(","));
 
   if (tok.GetNextToken() == wxT("NE")) {
-    if (tok.CountTokens() == (unsigned int) profile.Length()) {
-      for (int i = 1; i <= profile.Length(); i++) {
+    if (tok.CountTokens() == (unsigned int) profile.MixedProfileLength()) {
+      for (int i = 1; i <= profile.MixedProfileLength(); i++) {
 	profile[i] = lexical_cast<Rational>(std::string((const char *) tok.GetNextToken().mb_str()));
       }
       return profile;
@@ -99,7 +99,7 @@ gbtAnalysisProfileList<T>::AddOutput(const wxString &p_output)
     if (m_isBehav) {
       MixedBehavProfile<T> profile(OutputToBehavProfile<T>(m_doc, p_output));
       m_behavProfiles.Append(profile);
-      m_mixedProfiles.Append(MixedStrategyProfile<T>(profile));
+      m_mixedProfiles.Append(profile.ToMixedProfile());
       m_current = m_behavProfiles.Length();
     }
     else {
@@ -119,7 +119,7 @@ template <class T>
 void gbtAnalysisProfileList<T>::BuildNfg(void)
 {
   for (int i = 1; i <= m_behavProfiles.Length(); i++) {
-    m_mixedProfiles.Append(MixedStrategyProfile<T>(m_behavProfiles[i]));
+    m_mixedProfiles.Append(m_behavProfiles[i].ToMixedProfile());
   }
 }
 
@@ -152,11 +152,11 @@ namespace {
 template <class T> MixedStrategyProfile<T> 
 TextToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
 {
-  MixedStrategyProfile<T> profile(p_doc->GetGame());
+  MixedStrategyProfile<T> profile(p_doc->GetGame()->NewMixedStrategyProfile((T) 0));
 
   wxStringTokenizer tok(p_text, wxT(","));
 
-  for (int i = 1; i <= profile.Length(); i++) {
+  for (int i = 1; i <= profile.MixedProfileLength(); i++) {
     profile[i] = lexical_cast<Rational>(std::string((const char *) tok.GetNextToken().mb_str()));
   }
 
@@ -338,7 +338,7 @@ gbtAnalysisProfileList<T>::GetActionProb(const GameNode &p_node, int p_act,
 
   if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
     GameInfoset infoset = p_node->GetInfoset();
-    return infoset->GetActionProb<std::string>(p_act);
+    return infoset->GetActionProb(p_act, "");
   }
 
   if (!p_node->GetPlayer())  return "";
@@ -459,9 +459,9 @@ gbtAnalysisProfileList<T>::Save(std::ostream &p_file) const
     for (int j = 1; j <= NumProfiles(); j++) {
       const MixedStrategyProfile<T> &mixed = m_mixedProfiles[j];
       p_file << "<profile type=\"mixed\">\n";
-      for (int k = 1; k <= mixed.Length(); k++) {
+      for (int k = 1; k <= mixed.MixedProfileLength(); k++) {
 	p_file << mixed[k];
-	if (k < mixed.Length()) {
+	if (k < mixed.MixedProfileLength()) {
 	  p_file << ",";
 	}
 	else {

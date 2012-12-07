@@ -23,6 +23,15 @@
 #include "libgambit.h"
 #include "mixed.imp"
 
+template class Gambit::MixedStrategyProfileRep<double>;
+template class Gambit::MixedStrategyProfileRep<Gambit::Rational>;
+
+template class Gambit::TableMixedStrategyProfileRep<double>;
+template class Gambit::TableMixedStrategyProfileRep<Gambit::Rational>;
+
+template class Gambit::TreeMixedStrategyProfileRep<double>;
+template class Gambit::TreeMixedStrategyProfileRep<Gambit::Rational>;
+
 template class Gambit::MixedStrategyProfile<double>;
 template class Gambit::MixedStrategyProfile<Gambit::Rational>;
 

@@ -126,7 +126,7 @@ int PolEnumModule::PolEnum(void)
 
 int PolEnumModule::SaveSolutions(const Gambit::List<Gambit::Vector<double> > &list)
 {
-  Gambit::MixedStrategyProfile<double> profile(support);
+  Gambit::MixedStrategyProfile<double> profile(support.NewMixedStrategyProfile<double>());
   int i,j,k,kk,index=0;
   double sum;
 
@@ -213,10 +213,10 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
     int k;
     for(k=1;k<=NF->NumPlayers();k++) 
       if(i!=k) 
-	term*=Prob(k,support.GetIndex(A->GetStrategy(k)));
+	term*=Prob(k,support.GetIndex((*A)->GetStrategy(k)));
     double coeff,ap,bp;
-    ap = A->GetPayoff<double>(i);
-    bp = B->GetPayoff<double>(i);
+    ap = (*A)->GetPayoff(i);
+    bp = (*B)->GetPayoff(i);
     coeff = ap - bp;
     term*=coeff;
     equation+=term;
@@ -402,7 +402,7 @@ const int PolEnumModule::PolishKnownRoot(Gambit::Vector<double> &point) const
 Gambit::MixedStrategyProfile<double>
 PolEnumModule::ReturnPolishedSolution(const Gambit::Vector<double> &root) const
 {
-  Gambit::MixedStrategyProfile<double> profile(support);
+  Gambit::MixedStrategyProfile<double> profile(support.NewMixedStrategyProfile<double>());
 
   int j;
   int kk=0;
@@ -424,7 +424,7 @@ void PrintProfile(std::ostream &p_stream,
 		  const Gambit::MixedStrategyProfile<double> &p_profile)
 {
   p_stream << p_label;
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
     p_stream.setf(std::ios::fixed);
     p_stream << ',' << std::setprecision(g_numDecimals) << p_profile[i];
   }
@@ -437,8 +437,8 @@ Gambit::MixedStrategyProfile<double> ToFullSupport(const Gambit::MixedStrategyPr
   Gambit::Game nfg = p_profile.GetGame();
   const Gambit::StrategySupport &support = p_profile.GetSupport();
 
-  Gambit::MixedStrategyProfile<double> fullProfile(nfg);
-  for (int i = 1; i <= fullProfile.Length(); fullProfile[i++] = 0.0);
+  Gambit::MixedStrategyProfile<double> fullProfile(nfg->NewMixedStrategyProfile(0.0));
+  for (int i = 1; i <= fullProfile.MixedProfileLength(); fullProfile[i++] = 0.0);
 
   int index = 1;
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {

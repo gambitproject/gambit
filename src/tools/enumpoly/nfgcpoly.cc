@@ -70,7 +70,7 @@ int HeuristicPolEnumModule::PolEnum(void)
 
 int HeuristicPolEnumModule::SaveSolutions(const Gambit::List<Vector<double> > &list)
 {
-  MixedStrategyProfile<double> profile(support);
+  MixedStrategyProfile<double> profile(support.NewMixedStrategyProfile<double>());
   int i,j,k,kk,index=0;
   double sum;
 
@@ -157,10 +157,10 @@ HeuristicPolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) cons
     int k;
     for(k=1;k<=NF->NumPlayers();k++) 
       if(i!=k) 
-	term*=Prob(k,support.GetIndex(A->GetStrategy(k)));
+	term*=Prob(k,support.GetIndex((*A)->GetStrategy(k)));
     double coeff,ap,bp;
-    ap = A->GetPayoff<double>(i);
-    bp = B->GetPayoff<double>(i);
+    ap = (*A)->GetPayoff(i);
+    bp = (*B)->GetPayoff(i);
     coeff = ap - bp;
     term*=coeff;
     equation+=term;
@@ -347,7 +347,7 @@ const int HeuristicPolEnumModule::PolishKnownRoot(Vector<double> &point) const
 MixedStrategyProfile<double>
 HeuristicPolEnumModule::ReturnPolishedSolution(const Vector<double> &root) const
 {
-  MixedStrategyProfile<double> profile(support);
+  MixedStrategyProfile<double> profile(support.NewMixedStrategyProfile<double>());
 
   int j;
   int kk=0;

@@ -55,7 +55,7 @@ void PrintProfile(std::ostream &p_stream,
 		  const MixedStrategyProfile<double> &p_profile)
 {
   p_stream << p_label;
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
     p_stream.setf(std::ios::fixed);
     p_stream << "," << std::setprecision(g_numDecimals) << p_profile[i];
   }
@@ -68,7 +68,7 @@ void PrintProfile(std::ostream &p_stream,
 		  const MixedStrategyProfile<Rational> &p_profile)
 {
   p_stream << p_label;
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
     p_stream << "," << p_profile[i];
   }
 
@@ -135,7 +135,7 @@ bool OnBFS(const StrategySupport &p_support,
 
   p_list.Append(cbfs);
 
-  MixedStrategyProfile<T> profile(p_support);
+  MixedStrategyProfile<T> profile(p_support.NewMixedStrategyProfile<T>());
   int n1 = p_support.NumStrategies(1);
   int n2 = p_support.NumStrategies(2);
   T sum = (T) 0;

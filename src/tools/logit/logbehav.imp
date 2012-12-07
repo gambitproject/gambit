@@ -22,6 +22,7 @@
 //
 
 #include "logbehav.h"
+#include "libgambit/gametree.h"
 
 //========================================================================
 //                  LogBehavProfile<T>: Lifecycle
@@ -190,7 +191,7 @@ template <class T>
 Vector<T> LogBehavProfile<T>::GetNodeValue(const GameNode &node) const
 { 
   ComputeSolutionData();
-  return m_nodeValues.Row(node->number);
+  return m_nodeValues.Row(node->GetNumber());
 }
 
 template <class T>
@@ -215,8 +216,8 @@ template <class T>
 T LogBehavProfile<T>::GetActionProb(const GameAction &action) const
 { 
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
-    GameInfosetRep *infoset = action->GetInfoset();
-    return infoset->GetActionProb<T>(action->GetNumber());
+    GameTreeInfosetRep *infoset = dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
+    return infoset->GetActionProb(action->GetNumber(), (T) 0);
   }
   else if (!m_support.Contains(action)) {
     return (T) 0.0;
@@ -232,8 +233,8 @@ template <class T>
 T LogBehavProfile<T>::GetLogActionProb(const GameAction &action) const
 { 
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
-    GameInfosetRep *infoset = action->GetInfoset();
-    return log(infoset->GetActionProb<T>(action->GetNumber()));
+    GameTreeInfosetRep *infoset = dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
+    return log(infoset->GetActionProb(action->GetNumber(), (T) 0));
   }
   else {
     return m_logProbs(action->GetInfoset()->GetPlayer()->GetNumber(),
@@ -260,7 +261,7 @@ const T &LogBehavProfile<T>::GetRegret(const GameAction &act) const
 }
 
 template <class T>
-void LogBehavProfile<T>::GetPayoff(GameNodeRep *node, 
+void LogBehavProfile<T>::GetPayoff(GameTreeNodeRep *node, 
 				     const T &prob, int player, T &value) const
 {
   if (node->outcome) {
@@ -273,7 +274,7 @@ void LogBehavProfile<T>::GetPayoff(GameNodeRep *node,
       // chance player
       for (int act = 1; act <= node->NumChildren(); act++) {
 	GetPayoff(node->GetChild(act),
-		  prob * node->infoset->GetActionProb<T>(act), player, value);
+		  prob * node->infoset->GetActionProb(act, (T) 0), player, value);
       }
     }
     else {

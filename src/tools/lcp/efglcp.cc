@@ -416,7 +416,7 @@ void SolveEfgLcp<T>::FillTableau(const BehavSupport &p_support, Matrix<T> &A,
       GameInfoset infoset = n->GetInfoset();
       for (int i = 1; i <= n->NumChildren(); i++) {
 	FillTableau(p_support, A, n->GetChild(i),
-		    Rational(prob) * infoset->GetActionProb<Rational>(i),
+		    Rational(prob) * infoset->GetActionProb(i, Rational(0)),
 		    s1,s2,i1,i2);
       }
     }
