@@ -24,6 +24,8 @@
 #include <getopt.h>
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
+#include <cerrno>
 #include <iomanip>
 
 #include "libgambit/libgambit.h"
@@ -104,9 +106,9 @@ void PrintBanner(std::ostream &p_stream)
 void PrintHelp(char *progname)
 {
   PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts strategic game on standard input.\n";
-  std::cerr << "Converts a Gambit .nfg file to HTML tables\n";
+  std::cerr << "Usage: " << progname << " [OPTIONS] [file]\n";
+  std::cerr << "If file is not specified, attempts to read game from standard input.\n";
+  std::cerr << "Converts a game to HTML tables\n";
 
   std::cerr << "Options:\n";
   std::cerr << "  -c PLAYER        the player to show on columns (default is 2)\n";
@@ -166,6 +168,19 @@ int main(int argc, char *argv[])
   if (rowPlayer == colPlayer) {
     std::cerr << argv[0] << ": Row and column players must be different.\n";
     return 1;
+  }
+
+  std::istream* input_stream = &std::cin;
+  std::ifstream file_stream;
+  if (optind < argc) {
+    file_stream.open(argv[optind]);
+    if (!file_stream.is_open()) {
+      std::ostringstream error_message;
+      error_message << argv[0] << ": " << argv[optind];
+      perror(error_message.str().c_str());
+      exit(1);
+    }
+    input_stream = &file_stream;
   }
 
   Gambit::Game nfg;

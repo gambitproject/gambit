@@ -24,6 +24,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <cerrno>
 #include <unistd.h>
 #include <getopt.h>
 #include "libgambit/libgambit.h"
@@ -42,8 +43,8 @@ void PrintBanner(std::ostream &p_stream)
 void PrintHelp(char *progname)
 {
   PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts game on standard input.\n";
+  std::cerr << "Usage: " << progname << " [OPTIONS] [file]\n";
+  std::cerr << "If file is not specified, attempts to read game from standard input.\n";
 
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
@@ -56,8 +57,8 @@ void PrintHelp(char *progname)
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -e               print only the terminal equilibrium\n";
-  std::cerr << "  -v, --version    print version information\n";
   std::cerr << "                   (default is to print the entire branch)\n";
+  std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 
@@ -158,9 +159,22 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
+  std::istream* input_stream = &std::cin;
+  std::ifstream file_stream;
+  if (optind < argc) { 
+    file_stream.open(argv[optind]);
+    if (!file_stream.is_open()) {
+      std::ostringstream error_message;
+      error_message << argv[0] << ": " << argv[optind];
+      perror(error_message.str().c_str());
+      exit(1);
+    }
+    input_stream = &file_stream;
+  }
+
   try {
     Gambit::Array<double> frequencies;
-    Gambit::Game game = Gambit::ReadGame(std::cin);
+    Gambit::Game game = Gambit::ReadGame(*input_stream);
 
     if (mleFile != "" && (!game->IsTree() || useStrategic)) {
       frequencies = Gambit::Array<double>(game->MixedProfileLength());
