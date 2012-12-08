@@ -941,6 +941,15 @@ API documentation
 
       Returns a behavior strategy profile as a :py:class:`BehavProfile` 
       object associated to the profile.
+
+   .. py:method:: belief(node)
+
+      Returns the probability ``node`` is reached, given its information 
+      set was reached.
+
+   .. py:method:: belief(infoset)
+
+      Returns a list of belief probabilities of each node in ``infoset``.
          
    .. py:method:: copy()
 
@@ -967,6 +976,10 @@ API documentation
       Returns the expected payoff to the player who has the move at
       ``infoset``, conditional on the information set being reached,
       if all players play according to the profile.
+
+   .. py:method:: regret(action)
+
+      Returns the regret associated to ``action``.
 
    .. py:method:: liap_value()
 
