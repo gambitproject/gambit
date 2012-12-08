@@ -141,6 +141,12 @@ cdef class MixedBehavProfile(object):
         raise TypeError("profile payoffs index must be int, str, or Player, not %s" %
                         player.__class__.__name__)
 
+    def belief(self, node):
+        if isinstance(node, Node):
+            return self._belief(node)
+        raise TypeError("profile belief index must be Node, not %s" %
+                        node.__class__.__name__)    
+
     def infoset_prob(self, infoset):
         if isinstance(infoset, str):
             infoset = self._resolve_index(infoset, players=False)
@@ -211,6 +217,8 @@ cdef class MixedBehavProfileDouble(MixedBehavProfile):
         setaction_MixedBehavProfileDouble(self.profile, index.action, value)
     def _payoff(self, Player player):
         return self.profile.GetPayoff(player.player.deref().GetNumber())
+    def _belief(self, Node node):
+        return self.profile.GetBeliefProb(node.node)
     def _infoset_prob(self, Infoset infoset):
         return self.profile.GetInfosetProb(infoset.infoset)
     def _infoset_value(self, Infoset infoset):
@@ -270,6 +278,8 @@ cdef class MixedBehavProfileRational(MixedBehavProfile):
         setaction_MixedBehavProfileRational(self.profile, index.action, s)
     def _payoff(self, Player player):
         return fractions.Fraction(rat_str(self.profile.GetPayoff(player.player.deref().GetNumber())).c_str())
+    def _belief(self, Node node):
+        return fractions.Fraction(rat_str(self.profile.GetBeliefProb(node.node)).c_str())
     def _infoset_prob(self, Infoset infoset):
         return fractions.Fraction(rat_str(self.profile.GetInfosetProb(infoset.infoset)).c_str())
     def _infoset_value(self, Infoset infoset):

@@ -244,6 +244,7 @@ cdef extern from "libgambit/behav.h":
         double getitem "operator[]"(int) except +IndexError
         double getaction "operator()"(c_GameAction) except +IndexError
         double GetPayoff(int)
+        double GetBeliefProb(c_GameNode)
         double GetInfosetProb(c_GameInfoset)
         double GetInfosetValue(c_GameInfoset)
         double GetActionProb(c_GameAction)
@@ -262,6 +263,7 @@ cdef extern from "libgambit/behav.h":
         c_Rational getitem "operator[]"(int) except +IndexError
         c_Rational getaction "operator()"(c_GameAction) except +IndexError
         c_Rational GetPayoff(int)
+        c_Rational GetBeliefProb(c_GameNode)
         c_Rational GetInfosetProb(c_GameInfoset)
         c_Rational GetInfosetValue(c_GameInfoset)
         c_Rational GetActionProb(c_GameAction)
