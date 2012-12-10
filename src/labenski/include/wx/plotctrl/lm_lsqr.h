@@ -26,10 +26,6 @@
 #ifndef _LM_LEASTSQUARE_H_
 #define _LM_LEASTSQUARE_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "lm_lsqr.h"
-#endif
-
 #include "wx/plotctrl/plotdefs.h"
 class WXDLLIMPEXP_PLOTCTRL wxPlotData;
 class WXDLLIMPEXP_PLOTCTRL wxPlotFunction;

@@ -36,9 +36,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <iostream>
 
-#if defined(__GNUG__) && !defined(__APPLE_CC__)
-#pragma implementation
-#endif
 #include "integer.h"
 #include <cctype>
 #include <cfloat>

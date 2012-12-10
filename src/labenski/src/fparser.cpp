@@ -7,11 +7,6 @@
 // I apologize for mangling peoples names, but some unicode editors could not
 // properly load this file previously.
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "fparser.h"
-    #pragma implementation "fparser.hh"
-#endif
-
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 

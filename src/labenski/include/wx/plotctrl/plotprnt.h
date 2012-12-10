@@ -11,10 +11,6 @@
 #ifndef _WX_PLOTPRINT_H_
 #define _WX_PLOTPRINT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "plotprnt.h"
-#endif
-
 #include "wx/print.h"
 #include "wx/plotctrl/plotdefs.h"
 

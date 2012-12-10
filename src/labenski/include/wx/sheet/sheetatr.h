@@ -12,10 +12,6 @@
 #ifndef __WX_SHEETATR_H__
 #define __WX_SHEETATR_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "sheetatr.h"
-#endif
-
 #include "wx/sheet/sheetdef.h"
 #include "wx/font.h"
 #include "wx/colour.h"

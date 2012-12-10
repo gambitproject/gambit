@@ -25,10 +25,6 @@ Create the button with either a text or bitmap label.
 #ifndef _WX_MENUBTN_H_
 #define _WX_MENUBTN_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "menubtn.h"
-#endif
-
 #include "wx/wxthings/thingdef.h"
 #include "wx/wxthings/toggle.h"
 

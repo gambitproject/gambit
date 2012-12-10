@@ -12,10 +12,6 @@
 #ifndef __WX_SHEETEDT_H__
 #define __WX_SHEETEDT_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "sheetedt.h"
-#endif
-
 #include "wx/sheet/sheetdef.h"
 #include "wx/datetime.h"
 #include "wx/bitmap.h"

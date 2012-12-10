@@ -10,10 +10,6 @@
 
 // Slightly modified for use with wxWidgets by John Labenski 1/20/04
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "fparser.hh"
-#endif
-
 #ifdef __BORLANDC__
 #pragma hdrstop
 #endif

@@ -26,9 +26,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #ifndef LIBGAMBIT_RATIONAL_H
-#if defined(__GNUG__) && !defined(__APPLE_CC__)
-#pragma interface
-#endif
 #define LIBGAMBIT_RATIONAL_H
 
 #include "integer.h"

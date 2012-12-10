@@ -11,10 +11,6 @@
 #ifndef _WX_PLOTFUNC_H_
 #define _WX_PLOTFUNC_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "plotfunc.h"
-#endif
-
 #include "wx/plotctrl/plotcurv.h"
 
 //-----------------------------------------------------------------------------

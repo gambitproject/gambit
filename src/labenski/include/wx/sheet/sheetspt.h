@@ -12,10 +12,6 @@
 #ifndef __WX_SHEETSPT_H__
 #define __WX_SHEETSPT_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "sheetspt.h"
-#endif
-
 #include "wx/sheet/sheet.h"
 #include "wx/splitter.h"
 
