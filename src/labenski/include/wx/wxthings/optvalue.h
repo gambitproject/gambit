@@ -10,10 +10,6 @@
 #ifndef __WXOPTIONVALUE_H__
 #define __WXOPTIONVALUE_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "optvalue.h"
-#endif
-
 #include "wx/wxthings/thingdef.h"
 class WXDLLIMPEXP_THINGS wxOptionValue;
 

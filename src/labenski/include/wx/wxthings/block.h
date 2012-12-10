@@ -10,10 +10,6 @@
 #ifndef __wxBLOCK_H__
 #define __wxBLOCK_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "block.h"
-#endif
-
 #include "wx/geometry.h"
 #include "wx/wxthings/thingdef.h"
 

@@ -12,10 +12,6 @@
 #ifndef __WX_SHEET_H__
 #define __WX_SHEET_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "sheet.h"
-#endif
-
 #include "wx/sheet/sheetdef.h" // Always include sheetdef.h first
 #include "wx/sheet/sheetatr.h" // might as well include everything
 #include "wx/sheet/sheetsel.h"

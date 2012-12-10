@@ -26,10 +26,6 @@ arrows.
 #ifndef _WX_BMPCOMBO_H_
 #define _WX_BMPCOMBO_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "bmpcombo.h"
-#endif
-
 #include "wx/wxthings/thingdef.h"
 #include "wx/wxthings/dropdown.h"
 

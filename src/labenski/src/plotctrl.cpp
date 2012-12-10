@@ -8,11 +8,6 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-//#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-#if defined(__GNUG__)
-    #pragma implementation "plotctrl.h"
-#endif
-
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 

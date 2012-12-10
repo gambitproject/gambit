@@ -11,10 +11,6 @@
 #ifndef _WX_PLOTDATA_H_
 #define _WX_PLOTDATA_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "plotdata.h"
-#endif
-
 #include "wx/txtstrm.h"         // for wxEOL
 #include "wx/plotctrl/plotcurv.h"
 #include "wx/plotctrl/plotfunc.h"

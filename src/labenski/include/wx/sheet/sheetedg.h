@@ -12,10 +12,6 @@
 #ifndef __WX_SHEETEDG_H__
 #define __WX_SHEETEDG_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "sheetedg.h"
-#endif
-
 #include "wx/sheet/sheetdef.h"
 
 // ----------------------------------------------------------------------------

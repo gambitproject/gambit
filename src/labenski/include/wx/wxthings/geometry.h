@@ -10,10 +10,6 @@
 #ifndef __WXIMAGER_GEOMETRY_H__
 #define __WXIMAGER_GEOMETRY_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "geometry.h"
-#endif
-
 #include "wx/wxthings/thingdef.h"
 #include "wx/geometry.h"
 

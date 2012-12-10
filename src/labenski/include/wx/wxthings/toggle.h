@@ -68,10 +68,6 @@ You have to #include "wx/tglbtn.h" for EVT_TOGGLEBUTTON
 #ifndef _WX_CUSTOMBUTTON_H_
 #define _WX_CUSTOMBUTTON_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "toggle.h"
-#endif
-
 #include "wx/wxthings/thingdef.h"
 
 class WXDLLEXPORT wxTimer;
