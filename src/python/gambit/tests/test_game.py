@@ -151,3 +151,12 @@ class TestGambitGame(object):
         "Test retrieving the number of nodes of a game"
         assert self.extensive_game.num_nodes() == 15
         assert self.game.num_nodes() == 0
+
+    @nose.tools.raises(RuntimeError)
+    def test_game_dereference_invalid(self):
+        "Test referencing an invalid game member object"
+        g = gambit.new_tree()
+        g.players.add("One")
+        s = g.players[0].strategies[0]
+        g.root.append_move(g.players[0], 2)
+        s.number

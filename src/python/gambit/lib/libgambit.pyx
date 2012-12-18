@@ -23,40 +23,40 @@ cdef extern from "libgambit/number.h":
      
 cdef extern from "libgambit/array.h":
     ctypedef struct c_ArrayInt "Array<int>":
-        int getitem "operator[]"(int)
+        int getitem "operator[]"(int) except +
         int Length()
     c_ArrayInt *new_ArrayInt "new Array<int>"(int)
     void del_ArrayInt "delete"(c_ArrayInt *)
 
 cdef extern from "libgambit/game.h":
-    ctypedef struct c_GameRep
-    ctypedef struct c_GameStrategyRep
-    ctypedef struct c_GameActionRep
-    ctypedef struct c_GameInfosetRep
-    ctypedef struct c_GamePlayerRep
-    ctypedef struct c_GameOutcomeRep
-    ctypedef struct c_GameNodeRep
+    ctypedef struct c_GameRep "GameRep"
+    ctypedef struct c_GameStrategyRep "GameStrategyRep"
+    ctypedef struct c_GameActionRep "GameActionRep"
+    ctypedef struct c_GameInfosetRep "GameInfosetRep"
+    ctypedef struct c_GamePlayerRep "GamePlayerRep"
+    ctypedef struct c_GameOutcomeRep "GameOutcomeRep"
+    ctypedef struct c_GameNodeRep "GameNodeRep"
     
-    ctypedef struct c_Game "GameObjectPtr<GameRep>":
-        c_GameRep *deref "operator->"()
+    ctypedef struct c_Game "Game":
+        c_GameRep *deref "operator->"() except +RuntimeError
 
-    ctypedef struct c_GamePlayer "GameObjectPtr<GamePlayerRep>":
-        c_GamePlayerRep *deref "operator->"()
+    ctypedef struct c_GamePlayer "GamePlayer":
+        c_GamePlayerRep *deref "operator->"() except +RuntimeError
 
-    ctypedef struct c_GameOutcome "GameObjectPtr<GameOutcomeRep>":
-        c_GameOutcomeRep *deref "operator->"()
+    ctypedef struct c_GameOutcome "GameOutcome":
+        c_GameOutcomeRep *deref "operator->"() except +RuntimeError
  
-    ctypedef struct c_GameNode "GameObjectPtr<GameNodeRep>":
-        c_GameNodeRep *deref "operator->"()
+    ctypedef struct c_GameNode "GameNode":
+        c_GameNodeRep *deref "operator->"() except +RuntimeError
 
-    ctypedef struct c_GameAction "GameObjectPtr<GameActionRep>":
-        c_GameActionRep *deref "operator->"()
+    ctypedef struct c_GameAction "GameAction":
+        c_GameActionRep *deref "operator->"() except +RuntimeError
 
-    ctypedef struct c_GameInfoset "GameObjectPtr<GameInfosetRep>":
-        c_GameInfosetRep *deref "operator->"()
+    ctypedef struct c_GameInfoset "GameInfoset":
+        c_GameInfosetRep *deref "operator->"() except +RuntimeError
 
-    ctypedef struct c_GameStrategy "GameObjectPtr<GameStrategyRep>":
-        c_GameStrategyRep *deref "operator->"()
+    ctypedef struct c_GameStrategy "GameStrategy":
+        c_GameStrategyRep *deref "operator->"() except +RuntimeError
 
     ctypedef struct c_PureStrategyProfile "std::auto_ptr<PureStrategyProfileRep>":
         c_PureStrategyProfileRep *deref "operator->"()

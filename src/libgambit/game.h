@@ -80,6 +80,14 @@ public:
   const char *what(void) const throw()  { return "Dereferencing null pointer"; }
 };
 
+/// An exception thrown when attempting to dereference an invalidated object 
+class InvalidObjectException : public Exception {
+public:
+  virtual ~InvalidObjectException() throw() { }
+  const char *what(void) const throw()  { return "Dereferencing an invalidated object"; }
+};
+
+
 //
 // This is a handle class that is used by all calling code to refer to
 // member objects of games.  It takes care of all the reference-counting
@@ -106,7 +114,9 @@ public:
     }
 
   T *operator->(void) const 
-    { if (!rep || !rep->IsValid()) throw NullException(); return rep; }
+    { if (!rep) throw NullException();
+      if (!rep->IsValid()) throw InvalidObjectException(); 
+      return rep; }
 
   bool operator==(const GameObjectPtr<T> &r) const
   { return (rep == r.rep); }
