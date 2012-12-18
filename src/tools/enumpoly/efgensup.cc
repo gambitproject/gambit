@@ -119,20 +119,27 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
     Gambit::GameAction this_action = scanner.GetAction();
     bool delete_this_action = false;
 
-    if ( sact->Contains(this_action) ) 
-      if ( !sact->IsActive(this_action->GetInfoset()) ) 
+    if ( sact->Contains(this_action) ) { 
+      if ( !sact->IsActive(this_action->GetInfoset()) ) {
 	delete_this_action = true;  
-      else 
-	if (check_domination) 
-	  if (sact->IsDominated(this_action,strong,conditional) ) 
+      }
+      else { 
+	if (check_domination) {
+	  if (sact->IsDominated(this_action,strong,conditional) ) {
 	    delete_this_action = true;
+          }
+        }
+      }
+    }
 	
     if (delete_this_action) {
       no_deletions = false;
-      if (c->IsSubsequentTo(this_action)) 
+      if (c->IsSubsequentTo(this_action)) {
 	abort = true;
-      else 
+      }
+      else { 
 	deletion_list.Append(this_action);
+      }
     }
   } while (!abort && scanner.GoToNext());
 
@@ -224,11 +231,12 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
     Gambit::GameAction this_action = scanner.GetAction();
     bool delete_this_action = false;
 
-    if ( sact->Contains(this_action) ) 
-      if ( !sact->IsActive(this_action->GetInfoset()) )
+    if ( sact->Contains(this_action) ) {
+      if ( !sact->IsActive(this_action->GetInfoset()) ) {
 	delete_this_action = true;  
-      else
-	if (check_domination) 
+      }
+      else {
+	if (check_domination) {
 	  if ( sact->IsDominated(this_action,true,true) ||
 	       sact->IsDominated(this_action,true,false) ) {
 	    add_support = false;
@@ -236,11 +244,17 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
 						   this_action->GetInfoset()) )
 	      delete_this_action = true;
 	  }
+        }
+      }
+    }
+
     if (delete_this_action) {
-      if (c->IsSubsequentTo(this_action)) 
+      if (c->IsSubsequentTo(this_action)) {
 	abort = true;
-      else 
+      }
+      else { 
 	deletion_list.Append(this_action);
+      }
     }
   } while (!abort && scanner.GoToNext());
   
