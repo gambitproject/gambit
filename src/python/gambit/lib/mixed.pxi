@@ -152,7 +152,7 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
     def restriction(self):
         cdef StrategicRestriction s
         s = StrategicRestriction()
-        s.support = self.profile.GetSupport()
+        s.support = copy_StrategySupport(self.profile.GetSupport())
         return s
 
     property game:
@@ -202,7 +202,7 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
     def restriction(self):
         cdef StrategicRestriction s
         s = StrategicRestriction()
-        s.support = self.profile.GetSupport()
+        s.support = copy_StrategySupport(self.profile.GetSupport())
         return s
     
     property game:

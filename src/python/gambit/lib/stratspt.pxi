@@ -7,26 +7,30 @@ cdef class StrategySupportProfile(Collection):
     A set-like object representing a subset of the strategies in game, incorporating
     the restriction that each player must have at least one strategy in the set.
     """
-    cdef c_StrategySupport support
+    cdef c_StrategySupport *support
 
     def __init__(self, strategies, Game game not None):
-        if self.is_valid(strategies, len(game.players)):
+       self.support = (<c_StrategySupport *>0)  
+       if self.is_valid(strategies, len(game.players)):
             temp_restriction = <StrategicRestriction>game.mixed_profile().restriction()
-            self.support = temp_restriction.support
+            self.support = copy_StrategySupport(deref(temp_restriction.support))
             for strategy in game.strategies:
                 if strategy not in strategies:
                     self.support.RemoveStrategy((<Strategy>strategy).strategy)
-        else:
+       else:
             raise ValueError("invalid set of strategies")
+    def __dealloc__(self):
+        if self.support != (<c_StrategySupport *>0):
+            del_StrategySupport(self.support)
     def __len__(self):    return self.support.MixedProfileLength()
-    def __richcmp__(self, other, whichop):
+    def __richcmp__(StrategySupportProfile self, other, whichop):
         if isinstance(other, StrategySupportProfile):
             if whichop == 1:
                 return self.issubset(other)
             elif whichop == 2:
-                return (self >= other) & (self <= other)
+                return deref(self.support) == deref((<StrategySupportProfile>other).support)
             elif whichop == 3:
-                return not (self >= other) & (self <= other)
+                return deref(self.support) != deref((<StrategySupportProfile>other).support)
             elif whichop == 5:
                 return self.issuperset(other)
             else:
@@ -98,15 +102,14 @@ cdef class StrategySupportProfile(Collection):
     def restrict(self):
         cdef StrategicRestriction restriction
         restriction = StrategicRestriction()
-        restriction.support = self.support
+        restriction.support = copy_StrategySupport(deref(self.support))
         return restriction
 
     def undominated(self, strict=False, external=False):
-        elim_support = copy_StrategySupport(self.support.Undominated(strict, external))
+        cdef StrategicRestriction restriction
         restriction = StrategicRestriction()
-        restriction.support = deref(elim_support)
+        restriction.support = copy_StrategySupport(self.support.Undominated(strict, external))
         new_profile = StrategySupportProfile(restriction.strategies, self.game)
-        del_StrategySupport(elim_support)
         return new_profile 
 
     def union(self, StrategySupportProfile other):
@@ -169,17 +172,22 @@ cdef class StrategicRestriction(BaseGame):
     A StrategicRestriction is a read-only view on a game, defined by a
     subset of the strategies on the original game.
     """
-    cdef c_StrategySupport support
+    cdef c_StrategySupport *support
 
+    def __init__(self):
+        self.support = (<c_StrategySupport *>0)
+    def __dealloc__(self):
+        if self.support != (<c_StrategySupport *>0):
+            del_StrategySupport(self.support)
     def __repr__(self):
         return "<StrategicRestriction of Game '%s'>" % self.title
 
     def __richcmp__(StrategicRestriction self, other, whichop):
         if isinstance(other, StrategicRestriction):
             if whichop == 2:
-                return self.support == (<StrategicRestriction>other).support
+                return deref(self.support) == deref((<StrategicRestriction>other).support)
             elif whichop == 3:
-                return self.support != (<StrategicRestriction>other).support
+                return deref(self.support) != deref((<StrategicRestriction>other).support)
             else:
                 raise NotImplementedError
         else:
@@ -228,7 +236,7 @@ cdef class StrategicRestriction(BaseGame):
     def undominated(self, strict=False):
         cdef StrategicRestriction new_restriction
         new_restriction = StrategicRestriction()
-        new_restriction.support = self.support.Undominated(strict, False)
+        new_restriction.support = copy_StrategySupport(self.support.Undominated(strict, False))
         return new_restriction
 
     def num_strategies_player(self, pl):
