@@ -274,7 +274,11 @@ cdef extern from "libgambit/behav.h":
     void del_MixedBehavProfileRational "delete"(c_MixedBehavProfileRational *)
 
 cdef extern from "libgambit/stratspt.h":
-    ctypedef struct c_StrategySupport "StrategySupport":
+    cdef cppclass c_StrategySupport "StrategySupport":
+        c_StrategySupport(c_Game)
+        c_StrategySupport(c_StrategySupport)
+        bool operator==(c_StrategySupport)
+        bool operator!=(c_StrategySupport)
         c_Game GetGame()
         c_ArrayInt NumStrategies()        
         int MixedProfileLength()
@@ -284,9 +288,6 @@ cdef extern from "libgambit/stratspt.h":
         c_GameStrategy GetStrategy(int, int) except +IndexError
         bool Contains(c_GameStrategy)
         c_StrategySupport Undominated(bool, bool)
-    c_StrategySupport *new_StrategySupport "new StrategySupport"(c_Game)
-    c_StrategySupport *copy_StrategySupport "new StrategySupport"(c_StrategySupport)
-    void del_StrategySupport "delete"(c_StrategySupport *)
 
 cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError
