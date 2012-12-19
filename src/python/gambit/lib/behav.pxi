@@ -195,7 +195,7 @@ cdef class MixedBehavProfileDouble(MixedBehavProfile):
     cdef c_MixedBehavProfileDouble *profile
 
     def __dealloc__(self):
-        del_MixedBehavProfileDouble(self.profile)
+        del self.profile
     def __len__(self):
         return self.profile.Length()
 
@@ -225,7 +225,7 @@ cdef class MixedBehavProfileDouble(MixedBehavProfile):
     def as_mixed(self):
         cdef MixedStrategyProfileDouble mixed
         mixed = MixedStrategyProfileDouble()
-        mixed.profile = new_MixedStrategyProfileDouble(deref(self.profile).ToMixedProfile())
+        mixed.profile = new c_MixedStrategyProfileDouble(deref(self.profile).ToMixedProfile())
         return mixed
     def liap_value(self):
         return self.profile.GetLiapValue()
@@ -242,7 +242,7 @@ cdef class MixedBehavProfileRational(MixedBehavProfile):
     cdef c_MixedBehavProfileRational *profile
 
     def __dealloc__(self):
-        del_MixedBehavProfileRational(self.profile)
+        del self.profile
     def __len__(self):
         return self.profile.Length()
 
@@ -284,7 +284,7 @@ cdef class MixedBehavProfileRational(MixedBehavProfile):
     def as_mixed(self):
         cdef MixedStrategyProfileRational mixed
         mixed = MixedStrategyProfileRational()
-        mixed.profile = new_MixedStrategyProfileRational(deref(self.profile).ToMixedProfile())
+        mixed.profile = new c_MixedStrategyProfileRational(deref(self.profile).ToMixedProfile())
         return mixed
     def liap_value(self):
         return fractions.Fraction(rat_str(self.profile.GetLiapValue()).c_str())
