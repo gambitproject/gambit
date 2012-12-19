@@ -29,7 +29,7 @@ cdef extern from "libgambit/array.h":
     void del_ArrayInt "delete"(c_ArrayInt *)
 
 cdef extern from "libgambit/game.h":
-    ctypedef struct c_GameRep "GameRep"
+    cdef cppclass c_GameRep "GameRep"
     ctypedef struct c_GameStrategyRep "GameStrategyRep"
     ctypedef struct c_GameActionRep "GameActionRep"
     ctypedef struct c_GameInfosetRep "GameInfosetRep"
@@ -158,7 +158,7 @@ cdef extern from "libgambit/game.h":
         void CopyTree(c_GameNode) except +ValueError
         void MoveTree(c_GameNode) except +ValueError
 
-    ctypedef struct c_GameRep "GameRep":
+    cdef cppclass c_GameRep "GameRep":
         int IsTree()
         
         cxx_string GetTitle()
@@ -195,8 +195,8 @@ cdef extern from "libgambit/game.h":
         bool IsPerfectRecall()
 
         c_PureStrategyProfile NewPureStrategyProfile()
-        c_MixedStrategyProfileDouble NewMixedStrategyProfileDouble "NewMixedStrategyProfile"(double)
-        c_MixedStrategyProfileRational NewMixedStrategyProfileRational "NewMixedStrategyProfile"(c_Rational)
+        c_MixedStrategyProfileDouble NewMixedStrategyProfile(double)
+        c_MixedStrategyProfileRational NewMixedStrategyProfile(c_Rational)
 
     ctypedef struct c_PureStrategyProfileRep "PureStrategyProfileRep":
         c_GameStrategy GetStrategy(c_GamePlayer)
