@@ -10,6 +10,62 @@ import math
 import numpy
 import pulp
 
+class CorrelatedEquilibriumPayoffs(object):
+    def __init__(self, game, vertices, edges):
+        self._game = game
+        self._vertices = vertices
+        self._edges = edges
+
+    @property
+    def game(self):        return self._game
+    @property
+    def vertices(self):    return self._vertices
+    @property
+    def edges(self):       return self._edges
+
+    def visualize(self):
+        print "Vertices:"
+        for i in self.vertices:
+            print i
+       
+        print "\nEdges:" 
+        for i in self.edges:
+            print i
+        if len(self.edges) == 0:
+            print "None"
+
+        import pylab
+        
+        fig = pylab.figure()
+        ax = fig.add_subplot(111)
+
+        x_coords = [i[0] for i in self.vertices]
+        y_coords = [i[1] for i in self.vertices]
+    
+        x_offset = (max(x_coords) - min(x_coords))/5
+        y_offset = (max(y_coords) - min(y_coords))/5
+
+        ax.set_xlim(min(x_coords)-x_offset-0.01, max(x_coords)+x_offset+0.01)
+        ax.set_ylim(min(y_coords)-y_offset-0.01, max(y_coords)+y_offset+0.01)
+    
+        # Add labels
+        xtext = ax.set_xlabel('Utility for player 1', fontsize=14)
+        ytext = ax.set_ylabel('Utility for player 2', fontsize=14)
+    
+        fig.suptitle('Coordinates shown are rounded to 2dp. The console outputs the unrounded values', fontsize=12)    
+        vertices = [(round(i,2), round(j,2)) for i,j in self.vertices]
+    
+        for x,y in vertices:
+            ax.text(x+x_offset/10, y+y_offset/10, str(x)+','+str(y), fontsize=14)    
+
+        # Ensure points are drawn in the correct order
+        points = orderVertices(self.edges)
+        if points is None:
+            points = self.edges
+
+        pylab.plot(*zip(*points), marker='o', markersize=5)
+        pylab.show()
+
 INF = 1e+10
 
 
@@ -349,65 +405,14 @@ def findPolygon(game):
     return vertices, edges
 
 
-def main(game):
-    # Check game is of a valid form
+def compute_correlated_payoffs(game):
+    """
+    Compute the set of correlated equilibrium payoffs for the game.
+    """
     if len(game.players) != 2:
-        print "Invalid game. Must have exactly 2 players."
-        return -1
+        raise NotImplementedError("Only implemented for two-player games.")
     
-    vertices,edges = findPolygon(game)
-    
-    ##### Visualize #####
-    
-    edges = removeExtraEdges(vertices,edges)
-    
-    print "Vertices:"
-    for i in vertices:
-        print i
-       
-    print "\nEdges:" 
-    for i in edges:
-        print i
-    if len(edges) == 0:
-        print "None"
+    vertices, edges = findPolygon(game)
+    edges = removeExtraEdges(vertices, edges)
+    return CorrelatedEquilibriumPayoffs(game, vertices, edges)
 
-    import pylab
-    
-    fig = pylab.figure()
-    ax = fig.add_subplot(111)
-
-    x_coords = [i[0] for i in vertices]
-    y_coords = [i[1] for i in vertices]
-    
-    x_offset = (max(x_coords) - min(x_coords))/5
-    y_offset = (max(y_coords) - min(y_coords))/5
-
-    ax.set_xlim(min(x_coords)-x_offset-0.01, max(x_coords)+x_offset+0.01)
-    ax.set_ylim(min(y_coords)-y_offset-0.01, max(y_coords)+y_offset+0.01)
-    
-    # Add labels
-    xtext = ax.set_xlabel('Utility for player 1', fontsize=14)
-    ytext = ax.set_ylabel('Utility for player 2', fontsize=14)
-    
-    fig.suptitle('Coordinates shown are rounded to 2dp. The console outputs the unrounded values', fontsize=12)    
-    vertices = [(round(i,2),round(j,2)) for i,j in vertices]
-    
-    for x,y in vertices:
-        ax.text(x+x_offset/10, y+y_offset/10, str(x)+','+str(y), fontsize=14)    
-
-    # Ensure points are drawn in the correct order
-    points = orderVertices(edges)
-    if points == None:
-        points = vertices
-
-    a_line = pylab.plot(*zip(*points))[0]
-    
-    a_line.set_marker('o')
-    a_line.set_markersize(5)
-
-    pylab.show()
-
-    return 0
-
-if __name__ == '__main__':
-    main()
