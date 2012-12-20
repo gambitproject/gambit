@@ -59,7 +59,7 @@ class CorrelatedEquilibriumPayoffs(object):
             ax.text(x+x_offset/10, y+y_offset/10, str(x)+','+str(y), fontsize=14)    
 
         # Ensure points are drawn in the correct order
-        points = orderVertices(self.edges)
+        points = order_vertices(self.edges)
         if points is None:
             points = self.edges
 
@@ -69,11 +69,11 @@ class CorrelatedEquilibriumPayoffs(object):
 INF = 1e+10
 
 
-def contingencyToIndex((p1_strategy,p2_strategy),p2_num_strats):
+def contingency_to_index((p1_strategy,p2_strategy),p2_num_strats):
     return (p1_strategy*p2_num_strats) + p2_strategy
     
     
-def probsToUtilities(optx,game):
+def probs_to_utilities(optx,game):
     return (numpy.dot(optx,
                       numpy.array([float(game[c][0]) for c in game.contingencies])),
             numpy.dot(optx,
@@ -81,8 +81,7 @@ def probsToUtilities(optx,game):
                       
 
 
-def bearingToProbs(bearing,game):
-    
+def bearing_to_probs(bearing,game):
     util_ratio = math.tan(math.radians(bearing))
 
     u1_weight = 1
@@ -102,30 +101,13 @@ def bearingToProbs(bearing,game):
     u2_equation = u2_weight * numpy.array([float(game[c][1]) for c in game.contingencies]) 
     
     probs = u1_equation + u2_equation
-    probs = removeInfinities(probs)
+    probs = remove_infinities(probs)
 
     return probs
 
 
-def removeExtraEdges(vertices,edges):
-    
-    vertices = set(vertices)
-    edges_to_remove = set()
-    
-    for e in edges:
-        for v in (vertices - set([e[0],e[1]])):
-            if isBetween(e[0],e[1],v):
-                edges_to_remove.add(e)
-                break
-            
-    edges -= edges_to_remove
-    
-    return edges
-
-
-def isBetween(a,b,c):
-    # Returns true if point c is between points a and b
-    
+def is_between(a,b,c):
+    "Returns True iff point c is between points a and b"
     EPSILON = 0.000001
     cross_product = (c[1]-a[1])*(b[0]-a[0]) - (c[0]-a[0])*(b[1]-a[1])
     
@@ -142,10 +124,21 @@ def isBetween(a,b,c):
 
     return True
 
+def remove_extra_edges(vertices,edges):
+    vertices = set(vertices)
+    edges_to_remove = set()
+    
+    for e in edges:
+        for v in (vertices - set([e[0],e[1]])):
+            if is_between(e[0],e[1],v):
+                edges_to_remove.add(e)
+                break
+            
+    return edges - edges_to_remove
 
-def isClosedShape(vertices, edges):
-                
-    # Closed if each vertex is in at least 2 edges       
+
+def is_closed_shape(vertices, edges):
+    "A shape is closed if each vertex is in at least 2 edges."
     for v in vertices:
         count = 0   
         for e in edges:
@@ -155,18 +148,15 @@ def isClosedShape(vertices, edges):
               
     return True
 
-
-def removeInfinities(a):
-    
+def remove_infinities(a):
     for i in a:
-        if (i >= INF) or (i <= -INF):
+        if abs(i) >= INF:
             a = [convert(j) for j in a]
             break  
     return a
 
 
 def convert(x):
-    
     if x >= INF:
         return 1
     elif x <= -INF:
@@ -175,8 +165,7 @@ def convert(x):
         return 0
     
 
-def orderVertices(edges):
-    
+def order_vertices(edges):
     if len(edges) <= 1:
         return None
         
@@ -187,7 +176,6 @@ def orderVertices(edges):
     i = vertices[1]
 
     while i != vertices[0]:
-
         for j in edges:
             a,b = j
             if a == i:
@@ -203,58 +191,47 @@ def orderVertices(edges):
 
     return vertices
 
-def addConstraints(game,problem,str_vars,var_dict):
-    
+def add_constraints(game,problem,str_vars,var_dict):
     for p in range(2): # player
-        
         for s in range(len(game.players[p].strategies)):
             for alt_s in range(len(game.players[p].strategies)):
-                
                 if s == alt_s:
                     continue
                 
                 constraint = [None for i in range(len(game.contingencies))]
                 
                 for t in range(len(game.players[not p].strategies)):
-                    
                     if p == 0:
-                        index = contingencyToIndex((s,t),len(game.players[1].strategies))
-                        assert(constraint[index] == None)
+                        index = contingency_to_index((s,t),len(game.players[1].strategies))
+                        assert constraint[index] is None
                         constraint[index] = float(game[s,t][p]) - float(game[alt_s,t][p])
-
                     else:
-                        index = contingencyToIndex((t,s),len(game.players[1].strategies))
-                        assert(constraint[index] == None)
+                        index = contingency_to_index((t,s),len(game.players[1].strategies))
+                        assert constraint[index] is None
                         constraint[index] = float(game[t,s][p]) - float(game[t,alt_s][p])
                 
-                constraint = [0 if i==None else i for i in constraint]
+                constraint = [0 if i is None else i for i in constraint]
                 problem += pulp.lpSum([var_dict[str_vars[i]]*constraint[i] for i in range(len(game.contingencies))]) >= 0
                 
     return problem
 
 
-def reorderProbs(prob_vars,var_dict_swapped):
-    
+def reorder_probs(prob_vars,var_dict_swapped):
     optx = [None for i in prob_vars]
-    
     for i in prob_vars:
         index = int(var_dict_swapped[i.name]) - 1
         optx[index] = i.varValue
-        
     return optx
     
 
 def dydx(v,v2):
-    dy = v[1] - v2[1]
-    dx = v[0] - v2[0]
-    return (dy,dx)
+    return (v[1] - v2[1],  v[0] - v2[0])
  
         
-def findPolygon(game):
-
+def find_polygon(game):
     RND = 10                       
 
-    ##### Set up for linear programming #####
+    # Set up for linear programming
     problem = pulp.LpProblem("Correlated equilibria", pulp.LpMaximize)
     
     str_vars = [str(i) for i in range(1,len(game.contingencies)+1)]
@@ -273,9 +250,9 @@ def findPolygon(game):
         problem += var_dict[i] >= 0
         problem += var_dict[i] <= 1
      
-    problem = addConstraints(game,problem,str_vars,var_dict)
+    problem = add_constraints(game,problem,str_vars,var_dict)
 
-    ##### Find the vertices #####
+    # Find the vertices
     
     vertices = []
     edges = set()
@@ -298,15 +275,12 @@ def findPolygon(game):
         return [(list(u1)[0],list(u2)[0])], set()
 
     while not done:
-
         for brg in current_brgs:
-
             if done:
                 break
 
             # Skip bearings for which no additional vertices can exist
-
-            probs = bearingToProbs(brg,game)
+            probs = bearing_to_probs(brg,game)
             probs_dict = {str_vars[i]:probs[i] for i in range(len(probs))}
             
             # The objective function
@@ -314,12 +288,12 @@ def findPolygon(game):
             
             problem.solve(pulp.GLPK(msg = 0))
             
-            optx = reorderProbs(problem.variables(),var_dict_swapped)
+            optx = reorder_probs(problem.variables(),var_dict_swapped)
                 
             # Calvo-Armengol (2006) - The set of CE is non-empty and compact
             assert pulp.LpStatus[problem.status] == "Optimal"
 
-            u1,u2 = probsToUtilities(optx,game)
+            u1,u2 = probs_to_utilities(optx,game)
             u1 = round(u1,RND)
             u2 = round(u2,RND)
             v = (u1,u2)
@@ -332,9 +306,8 @@ def findPolygon(game):
                 continue
             
             ##### Find edges #####
-            
             for v2 in vertices:              
-                if (v2 == v):
+                if v2 == v:
                     continue
                 
                 # Calculate the vector orthogonal to the potential edge
@@ -349,14 +322,14 @@ def findPolygon(game):
                 for angle in [0,math.pi]:
                     ortho_brg = (ortho_brg+angle) %(2*math.pi)
                     
-                    probs = bearingToProbs(math.degrees(ortho_brg),game)
+                    probs = bearing_to_probs(math.degrees(ortho_brg),game)
                     probs_dict = {str_vars[i]:probs[i] for i in range(len(probs))}
                     
                     # The objective function
                     problem += pulp.lpSum([var_dict[i]*probs_dict[i] for i in str_vars])
                                    
                     problem.solve(pulp.GLPK(msg = 0))
-                    optx = reorderProbs(problem.variables(),var_dict_swapped)
+                    optx = reorder_probs(problem.variables(),var_dict_swapped)
                     ortho_zmax = pulp.value(problem.objective)
                     
                     # Calvo-Armengol (2006) - The set of CE is non-empty and compact
@@ -380,12 +353,12 @@ def findPolygon(game):
                         done = True
                         break
                         
-            if isClosedShape(vertices,edges):
+            if is_closed_shape(vertices,edges):
                 done = True
                 break
 
         # Account for 0D sets of CE
-        if (len(current_brgs) == 4) and (len(vertices) == 1):
+        if len(current_brgs) == 4 and len(vertices) == 1:
             break
 
         # Double the number of linear combinations of utilities to be maximised    
@@ -406,7 +379,7 @@ def compute_correlated_payoffs(game):
     if len(game.players) != 2:
         raise NotImplementedError("Only implemented for two-player games.")
     
-    vertices, edges = findPolygon(game)
-    edges = removeExtraEdges(vertices, edges)
+    vertices, edges = find_polygon(game)
+    edges = remove_extra_edges(vertices, edges)
     return CorrelatedEquilibriumPayoffs(game, vertices, edges)
 
