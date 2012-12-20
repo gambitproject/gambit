@@ -6,12 +6,9 @@ Author: Chris Ratcliff <c.j.ratcliff@gmail.com>, October 2012.
 
 """
 
-from gambit.lib.libgambit import *
-from numpy import array, sum, multiply, around
-from math import tan, sin, cos, radians, degrees, atan2, pi
-import os
-from pulp import *
-from matplotlib.pyplot import *
+import math
+import numpy
+import pulp
 
 INF = 1e+10
 
@@ -24,8 +21,8 @@ def probsToUtilities(optx,game):
     
     u1 = u2 = 0
     
-    u1_equation = array([float(game._get_contingency(s,t)[0]) for (s,t) in game.contingencies])
-    u2_equation = array([float(game._get_contingency(s,t)[1]) for (s,t) in game.contingencies])
+    u1_equation = numpy.array([float(game._get_contingency(s,t)[0]) for (s,t) in game.contingencies])
+    u2_equation = numpy.array([float(game._get_contingency(s,t)[1]) for (s,t) in game.contingencies])
 
     for i in range(0,len(game.contingencies)):
         u1 += optx[i]*u1_equation[i]
@@ -36,7 +33,7 @@ def probsToUtilities(optx,game):
 
 def bearingToProbs(bearing,game):
     
-    util_ratio = tan(radians(bearing))
+    util_ratio = math.tan(math.radians(bearing))
 
     u1_weight = 1
     u2_weight = util_ratio
@@ -51,8 +48,8 @@ def bearingToProbs(bearing,game):
         u1_weight = 0
         u2_weight = -1
         
-    u1_equation = u1_weight * array([float(game._get_contingency(s,t)[0]) for (s,t) in game.contingencies])
-    u2_equation = u2_weight * array([float(game._get_contingency(s,t)[1]) for (s,t) in game.contingencies]) 
+    u1_equation = u1_weight * numpy.array([float(game._get_contingency(s,t)[0]) for (s,t) in game.contingencies])
+    u2_equation = u2_weight * numpy.array([float(game._get_contingency(s,t)[1]) for (s,t) in game.contingencies]) 
     
     probs = u1_equation + u2_equation
     probs = removeInfinities(probs)
@@ -181,7 +178,7 @@ def addConstraints(game,problem,str_vars,var_dict):
                         constraint[index] = float(game._get_contingency(t,s)[p]) - float(game._get_contingency(t,alt_s)[p])
                 
                 constraint = [0 if i==None else i for i in constraint]
-                problem += lpSum([var_dict[str_vars[i]]*constraint[i] for i in range(len(game.contingencies))]) >= 0
+                problem += pulp.lpSum([var_dict[str_vars[i]]*constraint[i] for i in range(len(game.contingencies))]) >= 0
                 
     return problem
 
@@ -208,18 +205,19 @@ def findPolygon(game):
     RND = 10                       
 
     ##### Set up for linear programming #####
-    problem = LpProblem("Correlated equilibria",LpMaximize)
+    problem = pulp.LpProblem("Correlated equilibria", pulp.LpMaximize)
     
     str_vars = [str(i) for i in range(1,len(game.contingencies)+1)]
 
     # Third and fourth arguments are the lower and upper bounds for the variable, respectively
-    var_dict = LpVariable.dicts("Probability",str_vars,0,1,LpContinuous)
+    var_dict = pulp.LpVariable.dicts("Probability", str_vars, 0, 1,
+                                     pulp.LpContinuous)
     
     var_names = map(str, var_dict.values())
     var_dict_swapped = dict(zip(var_names,var_dict.keys()))
     
     # Probabilities must sum to 1
-    problem += lpSum([var_dict[i] for i in str_vars]) == 1
+    problem += pulp.lpSum([var_dict[i] for i in str_vars]) == 1
         
     for i in str_vars:
         problem += var_dict[i] >= 0
@@ -262,14 +260,14 @@ def findPolygon(game):
             probs_dict = {str_vars[i]:probs[i] for i in range(len(probs))}
             
             # The objective function
-            problem += lpSum([var_dict[i]*probs_dict[i] for i in str_vars])
+            problem += pulp.lpSum([var_dict[i]*probs_dict[i] for i in str_vars])
             
-            problem.solve(GLPK(msg = 0))
+            problem.solve(pulp.GLPK(msg = 0))
             
             optx = reorderProbs(problem.variables(),var_dict_swapped)
                 
             # Calvo-Armengol (2006) - The set of CE is non-empty and compact
-            assert(LpStatus[problem.status] == "Optimal")
+            assert pulp.LpStatus[problem.status] == "Optimal"
 
             u1,u2 = probsToUtilities(optx,game)
             u1 = round(u1,RND)
@@ -279,7 +277,7 @@ def findPolygon(game):
             if not v in vertices:
                 vertices.append(v)
                 vertex_probs[v] = optx
-                vertex_brgs[v] = radians(brg)           
+                vertex_brgs[v] = math.radians(brg)           
             else:
                 continue
             
@@ -292,40 +290,40 @@ def findPolygon(game):
                 # Calculate the vector orthogonal to the potential edge
                 (dy,dx) = dydx(v,v2)
 
-                brg = atan2(dy,dx) %(2*pi)
-                ortho_brg = (brg + (pi/2)) %(2*pi)
+                brg = math.atan2(dy,dx) %(2*math.pi)
+                ortho_brg = (brg + (math.pi/2)) %(2*math.pi)
                
                 edges_exist = [False, False]
                 
                 # Try both possible orthogonal bearings
-                for angle in [0,pi]:
-                    ortho_brg = (ortho_brg+angle) %(2*pi)
+                for angle in [0,math.pi]:
+                    ortho_brg = (ortho_brg+angle) %(2*math.pi)
                     
-                    probs = bearingToProbs(degrees(ortho_brg),game)
+                    probs = bearingToProbs(math.degrees(ortho_brg),game)
                     probs_dict = {str_vars[i]:probs[i] for i in range(len(probs))}
                     
                     # The objective function
-                    problem += lpSum([var_dict[i]*probs_dict[i] for i in str_vars])
+                    problem += pulp.lpSum([var_dict[i]*probs_dict[i] for i in str_vars])
                                    
-                    problem.solve(GLPK(msg = 0))
+                    problem.solve(pulp.GLPK(msg = 0))
                     optx = reorderProbs(problem.variables(),var_dict_swapped)
-                    ortho_zmax = value(problem.objective)
+                    ortho_zmax = pulp.value(problem.objective)
                     
                     # Calvo-Armengol (2006) - The set of CE is non-empty and compact
-                    assert(LpStatus[problem.status] == "Optimal")
+                    assert pulp.LpStatus[problem.status] == "Optimal"
                     
                     v_probs = vertex_probs[v]
                     v2_probs = vertex_probs[v2]
                                 
-                    v_zmax = sum(multiply(probs,v_probs))
-                    v2_zmax = sum(multiply(probs,v2_probs))
+                    v_zmax = numpy.sum(numpy.multiply(probs,v_probs))
+                    v2_zmax = numpy.sum(numpy.multiply(probs,v2_probs))
                                         
                     # Check all bearings are maximized to give the same number
                     # There is an edge if ortho_brg is maximised at both v and v2
-                    if len(set(around([ortho_zmax,v_zmax,v2_zmax], decimals=RND))) == 1:
+                    if len(set(numpy.around([ortho_zmax,v_zmax,v2_zmax], decimals=RND))) == 1:
                         edge_ortho_brgs[(v,v2)] = ortho_brg
                         edges.add((v,v2))
-                        edges_exist[int(sin(angle/2))] = True
+                        edges_exist[int(math.sin(angle/2))] = True
                         
                     # Account for 1D sets of correlated equilibria
                     if edges_exist == [True,True]:
@@ -372,8 +370,10 @@ def main(game):
         print i
     if len(edges) == 0:
         print "None"
-        
-    fig = figure()
+
+    import pylab
+    
+    fig = pylab.figure()
     ax = fig.add_subplot(111)
 
     x_coords = [i[0] for i in vertices]
@@ -400,12 +400,12 @@ def main(game):
     if points == None:
         points = vertices
 
-    a_line = plot(*zip(*points))[0]
+    a_line = pylab.plot(*zip(*points))[0]
     
     a_line.set_marker('o')
     a_line.set_markersize(5)
 
-    show()
+    pylab.show()
 
     return 0
 
