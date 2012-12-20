@@ -74,17 +74,11 @@ def contingencyToIndex((p1_strategy,p2_strategy),p2_num_strats):
     
     
 def probsToUtilities(optx,game):
-    
-    u1 = u2 = 0
-    
-    u1_equation = numpy.array([float(game._get_contingency(s,t)[0]) for (s,t) in game.contingencies])
-    u2_equation = numpy.array([float(game._get_contingency(s,t)[1]) for (s,t) in game.contingencies])
-
-    for i in range(0,len(game.contingencies)):
-        u1 += optx[i]*u1_equation[i]
-        u2 += optx[i]*u2_equation[i]
-
-    return (u1,u2)
+    return (numpy.dot(optx,
+                      numpy.array([float(game[c][0]) for c in game.contingencies])),
+            numpy.dot(optx,
+                      numpy.array([float(game[c][1]) for c in game.contingencies])))
+                      
 
 
 def bearingToProbs(bearing,game):
@@ -104,8 +98,8 @@ def bearingToProbs(bearing,game):
         u1_weight = 0
         u2_weight = -1
         
-    u1_equation = u1_weight * numpy.array([float(game._get_contingency(s,t)[0]) for (s,t) in game.contingencies])
-    u2_equation = u2_weight * numpy.array([float(game._get_contingency(s,t)[1]) for (s,t) in game.contingencies]) 
+    u1_equation = u1_weight * numpy.array([float(game[c][0]) for c in game.contingencies])
+    u2_equation = u2_weight * numpy.array([float(game[c][1]) for c in game.contingencies]) 
     
     probs = u1_equation + u2_equation
     probs = removeInfinities(probs)
@@ -226,12 +220,12 @@ def addConstraints(game,problem,str_vars,var_dict):
                     if p == 0:
                         index = contingencyToIndex((s,t),len(game.players[1].strategies))
                         assert(constraint[index] == None)
-                        constraint[index] = float(game._get_contingency(s,t)[p]) - float(game._get_contingency(alt_s,t)[p])
+                        constraint[index] = float(game[s,t][p]) - float(game[alt_s,t][p])
 
                     else:
                         index = contingencyToIndex((t,s),len(game.players[1].strategies))
                         assert(constraint[index] == None)
-                        constraint[index] = float(game._get_contingency(t,s)[p]) - float(game._get_contingency(t,alt_s)[p])
+                        constraint[index] = float(game[t,s][p]) - float(game[t,alt_s][p])
                 
                 constraint = [0 if i==None else i for i in constraint]
                 problem += pulp.lpSum([var_dict[str_vars[i]]*constraint[i] for i in range(len(game.contingencies))]) >= 0
@@ -297,8 +291,8 @@ def findPolygon(game):
     done = False
     it = 0
      
-    u1 = set([float(game._get_contingency(s,t)[0]) for (s,t) in game.contingencies])
-    u2 = set([float(game._get_contingency(s,t)[0]) for (s,t) in game.contingencies])
+    u1 = set([float(game[c][0]) for c in game.contingencies])
+    u2 = set([float(game[c][1]) for c in game.contingencies])
     
     if len(u1) == len(u2) == 1:
         return [(list(u1)[0],list(u2)[0])], set()
