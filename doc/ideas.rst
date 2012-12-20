@@ -84,17 +84,6 @@ parameters, running times and computational results
 should be recorded systematically.
 
 
-Python API for manipulating games
----------------------------------
-
-Gambit's main API for representing games is written in C++.
-There is a partial, experimental interface written using
-`Cython <http://www.cython.org>`_ to allow games to be defined and manipulated using
-Python.  Build out this interface to completion, and create
-a test suite to exercise the interface, with special
-emphasis on proper handling of error conditions.
-
-
 Implementing algorithms for finding equilibria in games
 -------------------------------------------------------
 
@@ -439,81 +428,6 @@ algorithms.
   the Lemke-Howson method for games.  Senior-level
   mathematics, mathematical economics, or operations research.
 
-Representing two-player correlated equilibrium payoffs
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For a game, the set of correlated equilibria is a convex
-polytope. For a two-player game, the set of its payoffs is
-a two-dimensional polygon.  This is useful information to
-draw as a first picture of which equilibrium payoffs can be expected.
-
-* **Languages:** Python or C/C++
-* **Prerequisites:** Some knowledge of game theory and linear programming.
-
-**Fuller details:**
-
-Correlated equilibrium (CE) is a generalization of Nash
-equilibrium.  For a definition see
-http://en.wikipedia.org/wiki/Correlated_equilibrium
-
-For any number of players, the set of CE is a polytope. The
-"variables" of this polytope are the probabilities of a
-joint distribution over strategy profiles.  Linear
-inequalities that define this polytope are "incentive
-constraints" that compare any two strategies of a player,
-and are derived from the payoffs of the game.
-Consequently, one can maximize a linear function over this
-polytope by linear programming, for example any linear
-combination of the players' payoffs. 
-
-In a two-player game, the possible *payoffs* for the two
-players in a CE define a polygon.
-(For three players, they define a polytope of dimension
-three, and so on.)
-These payoffs give useful information about the game, for
-example which Nash equilibrium payoffs - which are special
-CE payoffs - can at most be expected.
-What is unknown about the polygon are its *vertices*.
-The following picture shows a polygon with 7 vertices
-numbered 1,2,...,7.  
-
-.. figure:: figures/corr-direc.png
-            :alt:  polygon with vertices
-            :align: center
-
-In this figure, if the horizontal direction is the payoff to
-player 1 and the vertical direction is the payoff to player 2, 
-then vertices 5 and 1 are the CE with maximum (minimum)
-payoff to player 1, vertices 2 and 3 give maximum payoff to
-player 2, and vertex 6 gives minimum payoff to player 2. 
-
-How can one identify the vertices when the only access to
-the polygon is via maximizing linear functions of the two
-coordinates?  By trying out different directions
-intelligently.  Maximizing in direction x gives vertex 2,
-maximizing in direction y gives vertex 3.  If the linear
-function z that is orthogonal to the line that connects 2
-and 3 is maximized at both 2 and 3, then there is no further
-vertex between them.  For comparison, suppose direction w is
-maximized at 5.  Then the line that connects 3 and 5 gives
-a direction (not shown) that is *not* maximized at both 3
-and 5, but instead yields another vertex 4.  This should
-give a quick picture of the possible CE payoffs.
-(Extending this to 3 players is a whole new challenge, and
-would require interfacing with 3D-drawing programs, if this
-is worth pursuing.)
-
-The possible CE payoffs can be used as bounds in the search
-for Nash equilibria in enumeration programs such as those
-described in
-
-    D. Avis, G. Rosenberg, R. Savani, and B. von Stengel (2010),
-    Enumeration of Nash equilibria for two-player games.
-    Economic Theory 42, 9-37. 
-
-    http://www.maths.lse.ac.uk/Personal/stengel/ETissue/ARSvS.pdf
-
-which may be a useful interface (that would have to be
-tested for its usefulness) to equilibrium enumeration.
  
 
