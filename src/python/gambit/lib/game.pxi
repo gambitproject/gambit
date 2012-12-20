@@ -242,8 +242,8 @@ cdef class Game:
         cont = [ 0 ] * len(self.players)
         for (pl, st) in enumerate(i):
             if isinstance(st, int):
-                if st < 0 or st >= len(self.players[st].strategies):
-                    raise IndexError, "Provided strategy index %d out of range" % st
+                if st < 0 or st >= len(self.players[pl].strategies):
+                    raise IndexError, "Provided strategy index %d out of range for player %d" % (st, pl)
                 cont[pl] = st
             elif isinstance(st, str):
                 try:
