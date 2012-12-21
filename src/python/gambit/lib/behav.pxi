@@ -144,6 +144,8 @@ cdef class MixedBehavProfile(object):
     def belief(self, node):
         if isinstance(node, Node):
             return self._belief(node)
+        elif isinstance(node, Infoset):
+            return [self._belief(n) for n in node.members]
         raise TypeError("profile belief index must be Node, not %s" %
                         node.__class__.__name__)    
 
