@@ -43,11 +43,10 @@ void PrintBanner(std::ostream &p_stream)
 void PrintHelp(char *progname)
 {
   PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts game on standard/file input.\n";
+  std::cerr << "Usage: " << progname << " [OPTIONS] [file]\n";
+  std::cerr << "If file is not specified, attempts to read game from standard input.\n";
 
   std::cerr << "Options:\n";
-  std::cerr << "  FILE             read the data from FILE\n";
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
   std::cerr << "  -s STEP          initial stepsize (default is .03)\n";
   std::cerr << "  -a ACCEL         maximum acceleration (default is 1.1)\n";
@@ -58,8 +57,8 @@ void PrintHelp(char *progname)
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -e               print only the terminal equilibrium\n";
-  std::cerr << "  -v, --version    print version information\n";
   std::cerr << "                   (default is to print the entire branch)\n";
+  std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 
