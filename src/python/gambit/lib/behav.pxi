@@ -225,7 +225,7 @@ cdef class MixedBehavProfileDouble(MixedBehavProfile):
     def as_mixed(self):
         cdef MixedStrategyProfileDouble mixed
         mixed = MixedStrategyProfileDouble()
-        mixed.profile = new_MixedStrategyProfileDouble(deref(self.profile).ToMixedProfile())
+        mixed.profile = new c_MixedStrategyProfileDouble(deref(self.profile).ToMixedProfile())
         return mixed
     def liap_value(self):
         return self.profile.GetLiapValue()

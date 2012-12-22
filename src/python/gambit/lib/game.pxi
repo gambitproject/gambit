@@ -266,7 +266,7 @@ cdef class Game:
         cdef c_Rational dummy_rat
         if not rational:
             mspd = MixedStrategyProfileDouble()
-            mspd.profile = new_MixedStrategyProfileDouble(self.game.deref().NewMixedStrategyProfile(0.0))
+            mspd.profile = new c_MixedStrategyProfileDouble(self.game.deref().NewMixedStrategyProfile(0.0))
             return mspd
         else:
             mspr = MixedStrategyProfileRational()
