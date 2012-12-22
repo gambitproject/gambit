@@ -167,7 +167,7 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
     cdef c_MixedStrategyProfileRational *profile
 
     def __dealloc__(self):
-        del_MixedStrategyProfileRational(self.profile)
+        del self.profile
     def __len__(self):
         return self.profile.MixedProfileLength()
 

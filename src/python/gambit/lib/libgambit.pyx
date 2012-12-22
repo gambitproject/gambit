@@ -223,7 +223,7 @@ cdef extern from "libgambit/mixed.h":
         double GetLiapValue()
         c_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble)
 
-    ctypedef struct c_MixedStrategyProfileRational "MixedStrategyProfile<Rational>":
+    cdef cppclass c_MixedStrategyProfileRational "MixedStrategyProfile<Rational>":
         c_Game GetGame()
         int MixedProfileLength()
         c_StrategySupport GetSupport()
@@ -232,8 +232,7 @@ cdef extern from "libgambit/mixed.h":
         c_Rational GetStrategyValue(c_GameStrategy)
         c_Rational GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy)
         c_Rational GetLiapValue()
-    c_MixedStrategyProfileRational *new_MixedStrategyProfileRational "new MixedStrategyProfile<Rational>"(c_MixedStrategyProfileRational)    
-    void del_MixedStrategyProfileRational "delete"(c_MixedStrategyProfileRational *)
+        c_MixedStrategyProfileRational(c_MixedStrategyProfileRational)
 
 cdef extern from "libgambit/behav.h":
     ctypedef struct c_MixedBehavProfileDouble "MixedBehavProfile<double>":
