@@ -283,7 +283,7 @@ cdef class Game:
                 return mbpd
             else:
                 mbpr = MixedBehavProfileRational()
-                mbpr.profile = new_MixedBehavProfileRational(self.game)
+                mbpr.profile = new c_MixedBehavProfileRational(self.game)
                 return mbpr
         else:
             raise UndefinedOperationError("Game must have a tree representation"\

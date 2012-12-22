@@ -242,7 +242,7 @@ cdef class MixedBehavProfileRational(MixedBehavProfile):
     cdef c_MixedBehavProfileRational *profile
 
     def __dealloc__(self):
-        del_MixedBehavProfileRational(self.profile)
+        del self.profile
     def __len__(self):
         return self.profile.Length()
 

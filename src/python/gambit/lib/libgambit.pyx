@@ -252,7 +252,7 @@ cdef extern from "libgambit/behav.h":
         c_MixedBehavProfileDouble(c_MixedStrategyProfileDouble) except +NotImplementedError
         c_MixedBehavProfileDouble(c_Game)
 
-    ctypedef struct c_MixedBehavProfileRational "MixedBehavProfile<Rational>":
+    cdef cppclass c_MixedBehavProfileRational "MixedBehavProfile<Rational>":
         c_Game GetGame()
         int Length()
         bool IsDefinedAt(c_GameInfoset)
@@ -266,9 +266,8 @@ cdef extern from "libgambit/behav.h":
         c_Rational GetRegret(c_GameAction)
         c_Rational GetLiapValue()
         c_MixedStrategyProfileRational ToMixedProfile()
-    c_MixedBehavProfileRational *new_BehavFromMixedRational "new MixedBehavProfile<Rational>"(c_MixedStrategyProfileRational) except +NotImplementedError
-    c_MixedBehavProfileRational *new_MixedBehavProfileRational "new MixedBehavProfile<Rational>"(c_Game)
-    void del_MixedBehavProfileRational "delete"(c_MixedBehavProfileRational *)
+        c_MixedBehavProfileRational(c_MixedStrategyProfileRational) except +NotImplementedError
+        c_MixedBehavProfileRational(c_Game)
 
 cdef extern from "libgambit/stratspt.h":
     cdef cppclass c_StrategySupport "StrategySupport":
