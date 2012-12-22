@@ -279,7 +279,7 @@ cdef class Game:
         if self.is_tree:
             if not rational:
                 mbpd = MixedBehavProfileDouble()
-                mbpd.profile = new_MixedBehavProfileDouble(self.game)
+                mbpd.profile = new c_MixedBehavProfileDouble(self.game)
                 return mbpd
             else:
                 mbpr = MixedBehavProfileRational()

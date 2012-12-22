@@ -147,7 +147,7 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
             raise UndefinedOperationError("Mixed behavior profiles are not "\
                                           "defined for strategic games")
         behav = MixedBehavProfileDouble()
-        behav.profile = new_BehavFromMixedDouble(deref(self.profile))
+        behav.profile = new c_MixedBehavProfileDouble(deref(self.profile))
         return behav
     def restriction(self):
         cdef StrategicRestriction s

@@ -195,7 +195,7 @@ cdef class MixedBehavProfileDouble(MixedBehavProfile):
     cdef c_MixedBehavProfileDouble *profile
 
     def __dealloc__(self):
-        del_MixedBehavProfileDouble(self.profile)
+        del self.profile
     def __len__(self):
         return self.profile.Length()
 
