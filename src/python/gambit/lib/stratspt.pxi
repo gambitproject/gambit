@@ -45,7 +45,7 @@ cdef class StrategySupportProfile(Collection):
     def __getitem__(self, strat):
         if not isinstance(strat, int):
             return Collection.__getitem__(self, strat)
-        cdef c_ArrayInt num_strategies
+        cdef Array[int] num_strategies
         cdef Strategy s
         num_strategies = self.support.NumStrategies()
         for i in range(1,num_strategies.Length()+1):
@@ -155,7 +155,7 @@ cdef class RestrictionStrategies(Collection):
     def __getitem__(self, strat):
         if not isinstance(strat, int):
             return Collection.__getitem__(self, strat)
-        cdef c_ArrayInt num_strategies
+        cdef Array[int] num_strategies
         cdef Strategy s
         num_strategies = self.restriction.support.NumStrategies()
         for i in range(1,num_strategies.Length()+1):

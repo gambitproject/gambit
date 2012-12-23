@@ -67,7 +67,7 @@ cdef class GameInfosets(Collection):
     "Represents a collection of infosets in a game."
     cdef c_Game game
     def __len__(self):
-        cdef c_ArrayInt num_infosets
+        cdef Array[int] num_infosets
         num_infosets = self.game.deref().NumInfosets()
         size = num_infosets.Length()
         n = 0
@@ -217,7 +217,7 @@ cdef class Game:
     def _get_contingency(self, *args):
         cdef c_PureStrategyProfile *psp
         cdef Outcome outcome
-        psp = new_PureStrategyProfile(self.game.deref().NewPureStrategyProfile())
+        psp = new c_PureStrategyProfile(self.game.deref().NewPureStrategyProfile())
         
         
         for (pl, st) in enumerate(args):
@@ -225,7 +225,7 @@ cdef class Game:
 
         outcome = Outcome()
         outcome.outcome = psp.deref().GetOutcome()
-        del_PureStrategyProfile(psp)
+        del psp
         return outcome
 
 
@@ -266,11 +266,11 @@ cdef class Game:
         cdef c_Rational dummy_rat
         if not rational:
             mspd = MixedStrategyProfileDouble()
-            mspd.profile = new_MixedStrategyProfileDouble(self.game.deref().NewMixedStrategyProfile(0.0))
+            mspd.profile = new c_MixedStrategyProfileDouble(self.game.deref().NewMixedStrategyProfile(0.0))
             return mspd
         else:
             mspr = MixedStrategyProfileRational()
-            mspr.profile = new_MixedStrategyProfileRational(self.game.deref().NewMixedStrategyProfile(dummy_rat))
+            mspr.profile = new c_MixedStrategyProfileRational(self.game.deref().NewMixedStrategyProfile(dummy_rat))
             return mspr
 
     def behav_profile(self, rational=False):
@@ -279,11 +279,11 @@ cdef class Game:
         if self.is_tree:
             if not rational:
                 mbpd = MixedBehavProfileDouble()
-                mbpd.profile = new_MixedBehavProfileDouble(self.game)
+                mbpd.profile = new c_MixedBehavProfileDouble(self.game)
                 return mbpd
             else:
                 mbpr = MixedBehavProfileRational()
-                mbpr.profile = new_MixedBehavProfileRational(self.game)
+                mbpr.profile = new c_MixedBehavProfileRational(self.game)
                 return mbpr
         else:
             raise UndefinedOperationError("Game must have a tree representation"\
