@@ -67,7 +67,7 @@ cdef class GameInfosets(Collection):
     "Represents a collection of infosets in a game."
     cdef c_Game game
     def __len__(self):
-        cdef c_ArrayInt num_infosets
+        cdef Array[int] num_infosets
         num_infosets = self.game.deref().NumInfosets()
         size = num_infosets.Length()
         n = 0

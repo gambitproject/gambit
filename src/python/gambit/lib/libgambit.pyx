@@ -22,11 +22,11 @@ cdef extern from "libgambit/number.h":
         cxx_string as_string "operator const string &"()
      
 cdef extern from "libgambit/array.h":
-    ctypedef struct c_ArrayInt "Array<int>":
+    cdef cppclass Array[T]: 
         int getitem "operator[]"(int) except +
         int Length()
-    c_ArrayInt *new_ArrayInt "new Array<int>"(int)
-    void del_ArrayInt "delete"(c_ArrayInt *)
+        Array()
+        Array(int)
 
 cdef extern from "libgambit/game.h":
     cdef cppclass c_GameRep "GameRep"
@@ -184,7 +184,7 @@ cdef extern from "libgambit/game.h":
         int MixedProfileLength()
 
         c_GameInfoset GetInfoset(int) except +IndexError
-        c_ArrayInt NumInfosets()
+        Array[int] NumInfosets()
 
         c_GameAction GetAction(int) except +IndexError
         int BehavProfileLength()
@@ -209,7 +209,7 @@ cdef extern from "libgambit/game.h":
     void del_PureStrategyProfile "delete"(c_PureStrategyProfile *)
 
     c_Game NewTree()
-    c_Game NewTable(c_ArrayInt *)
+    c_Game NewTable(Array[int] *)
 
 cdef extern from "libgambit/mixed.h":
     cdef cppclass c_MixedStrategyProfileDouble "MixedStrategyProfile<double>":
@@ -276,7 +276,7 @@ cdef extern from "libgambit/stratspt.h":
         bool operator==(c_StrategySupport)
         bool operator!=(c_StrategySupport)
         c_Game GetGame()
-        c_ArrayInt NumStrategies()        
+        Array[int] NumStrategies()        
         int MixedProfileLength()
         int NumStrategiesPlayer "NumStrategies"(int) except +IndexError
         bool IsSubsetOf(c_StrategySupport)
@@ -289,7 +289,7 @@ cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError
     cxx_string WriteGame(c_Game, int) except +IOError
 
-    void setitem_ArrayInt(c_ArrayInt *, int, int)
+    void setitem_ArrayInt(Array[int] *, int, int)
     void setitem_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble *, 
                                             int, double)
     void setitem_MixedStrategyProfileRational(c_MixedStrategyProfileRational *, 
@@ -346,13 +346,14 @@ def new_tree():
 
 def new_table(dim):
     cdef Game g
-    cdef c_ArrayInt *d
-    d = new_ArrayInt(len(dim))
+    cdef Array[int] *d
+    d = new Array[int](len(dim))
     for i in range(1, len(dim)+1):
         setitem_ArrayInt(d, i, dim[i-1])
     g = Game()
     g.game = NewTable(d)
-    del_ArrayInt(d)
+    del d
+    #del_ArrayInt(d)
     return g
 
 def read_game(char *fn):
