@@ -7,18 +7,18 @@ cdef extern from "libgambit/libgambit.h":
     pass
 
 cdef extern from "string":
-    ctypedef struct cxx_string "string":
+    cdef cppclass cxx_string "string":
         char *c_str()
         cxx_string assign(char *)
 
 cdef extern from "libgambit/rational.h":
-    ctypedef struct c_Rational "Rational":
+    cdef cppclass c_Rational "Rational":
         pass
     cxx_string rat_str "lexical_cast<std::string>"(c_Rational)
     c_Rational str_rat "lexical_cast<Rational>"(cxx_string)
 
 cdef extern from "libgambit/number.h":
-    ctypedef struct c_Number "Number":
+    cdef cppclass c_Number "Number":
         cxx_string as_string "operator const string &"()
      
 cdef extern from "libgambit/array.h":
@@ -30,39 +30,44 @@ cdef extern from "libgambit/array.h":
 
 cdef extern from "libgambit/game.h":
     cdef cppclass c_GameRep "GameRep"
-    ctypedef struct c_GameStrategyRep "GameStrategyRep"
-    ctypedef struct c_GameActionRep "GameActionRep"
-    ctypedef struct c_GameInfosetRep "GameInfosetRep"
-    ctypedef struct c_GamePlayerRep "GamePlayerRep"
-    ctypedef struct c_GameOutcomeRep "GameOutcomeRep"
+    cdef cppclass c_GameStrategyRep "GameStrategyRep"
+    cdef cppclass c_GameActionRep "GameActionRep"
+    cdef cppclass c_GameInfosetRep "GameInfosetRep"
+    cdef cppclass c_GamePlayerRep "GamePlayerRep"
+    cdef cppclass c_GameOutcomeRep "GameOutcomeRep"
     cdef cppclass c_GameNodeRep "GameNodeRep"
     
-    ctypedef struct c_Game "Game":
+    cdef cppclass c_Game "Game":
         c_GameRep *deref "operator->"() except +RuntimeError
 
-    ctypedef struct c_GamePlayer "GamePlayer":
+    cdef cppclass c_GamePlayer "GamePlayer":
+        bool operator!=(c_GamePlayer)
         c_GamePlayerRep *deref "operator->"() except +RuntimeError
 
-    ctypedef struct c_GameOutcome "GameOutcome":
+    cdef cppclass c_GameOutcome "GameOutcome":
+        bool operator!=(c_GameOutcome)
         c_GameOutcomeRep *deref "operator->"() except +RuntimeError
  
-    ctypedef struct c_GameNode "GameNode":
+    cdef cppclass c_GameNode "GameNode":
+        bool operator!=(c_GameNode)
         c_GameNodeRep *deref "operator->"() except +RuntimeError
 
-    ctypedef struct c_GameAction "GameAction":
+    cdef cppclass c_GameAction "GameAction":
+        bool operator!=(c_GameAction)
         c_GameActionRep *deref "operator->"() except +RuntimeError
 
-    ctypedef struct c_GameInfoset "GameInfoset":
+    cdef cppclass c_GameInfoset "GameInfoset":
+        bool operator!=(c_GameInfoset) 
         c_GameInfosetRep *deref "operator->"() except +RuntimeError
 
-    ctypedef struct c_GameStrategy "GameStrategy":
+    cdef cppclass c_GameStrategy "GameStrategy":
         c_GameStrategyRep *deref "operator->"() except +RuntimeError
 
     cdef cppclass c_PureStrategyProfile "std::auto_ptr<PureStrategyProfileRep>":
         c_PureStrategyProfileRep *deref "operator->"()
         c_PureStrategyProfile(c_PureStrategyProfile)
 
-    ctypedef struct c_GameStrategyRep "GameStrategyRep":
+    cdef cppclass c_GameStrategyRep "GameStrategyRep":
         int GetNumber()
         int GetId()
         c_GamePlayer GetPlayer()
@@ -70,7 +75,7 @@ cdef extern from "libgambit/game.h":
         cxx_string GetLabel()
         void SetLabel(cxx_string)
 
-    ctypedef struct c_GameActionRep "GameActionRep":
+    cdef cppclass c_GameActionRep "GameActionRep":
         int GetNumber()
         c_GameInfoset GetInfoset()
         bint Precedes(c_GameNode)
@@ -79,7 +84,7 @@ cdef extern from "libgambit/game.h":
         cxx_string GetLabel()
         void SetLabel(cxx_string)
 
-    ctypedef struct c_GameInfosetRep "GameInfosetRep":
+    cdef cppclass c_GameInfosetRep "GameInfosetRep":
         int GetNumber()
         c_Game GetGame()
         c_GamePlayer GetPlayer()
@@ -102,7 +107,7 @@ cdef extern from "libgambit/game.h":
         bint IsChanceInfoset()
         bint Precedes(c_GameNode)
 
-    ctypedef struct c_GamePlayerRep "GamePlayerRep":
+    cdef cppclass c_GamePlayerRep "GamePlayerRep":
         c_Game GetGame()
         int GetNumber()
         int IsChance()
@@ -117,7 +122,7 @@ cdef extern from "libgambit/game.h":
         c_GameInfoset GetInfoset(int) except +IndexError
         c_GameStrategy NewStrategy()
 
-    ctypedef struct c_GameOutcomeRep "GameOutcomeRep":
+    cdef cppclass c_GameOutcomeRep "GameOutcomeRep":
         c_Game GetGame()
         int GetNumber()
         
@@ -199,7 +204,7 @@ cdef extern from "libgambit/game.h":
         c_MixedStrategyProfileDouble NewMixedStrategyProfile(double)
         c_MixedStrategyProfileRational NewMixedStrategyProfile(c_Rational)
 
-    ctypedef struct c_PureStrategyProfileRep "PureStrategyProfileRep":
+    cdef cppclass c_PureStrategyProfileRep "PureStrategyProfileRep":
         c_GameStrategy GetStrategy(c_GamePlayer)
         void SetStrategy(c_GameStrategy)
 
