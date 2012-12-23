@@ -58,8 +58,9 @@ cdef extern from "libgambit/game.h":
     ctypedef struct c_GameStrategy "GameStrategy":
         c_GameStrategyRep *deref "operator->"() except +RuntimeError
 
-    ctypedef struct c_PureStrategyProfile "std::auto_ptr<PureStrategyProfileRep>":
+    cdef cppclass c_PureStrategyProfile "std::auto_ptr<PureStrategyProfileRep>":
         c_PureStrategyProfileRep *deref "operator->"()
+        c_PureStrategyProfile(c_PureStrategyProfile)
 
     ctypedef struct c_GameStrategyRep "GameStrategyRep":
         int GetNumber()
@@ -205,8 +206,6 @@ cdef extern from "libgambit/game.h":
         c_GameOutcome GetOutcome()
         void SetOutcome(c_GameOutcome)
 
-    c_PureStrategyProfile *new_PureStrategyProfile "new PureStrategyProfile"(c_PureStrategyProfile)
-    void del_PureStrategyProfile "delete"(c_PureStrategyProfile *)
 
     c_Game NewTree()
     c_Game NewTable(Array[int] *)

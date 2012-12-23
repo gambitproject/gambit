@@ -217,7 +217,7 @@ cdef class Game:
     def _get_contingency(self, *args):
         cdef c_PureStrategyProfile *psp
         cdef Outcome outcome
-        psp = new_PureStrategyProfile(self.game.deref().NewPureStrategyProfile())
+        psp = new c_PureStrategyProfile(self.game.deref().NewPureStrategyProfile())
         
         
         for (pl, st) in enumerate(args):
@@ -225,7 +225,7 @@ cdef class Game:
 
         outcome = Outcome()
         outcome.outcome = psp.deref().GetOutcome()
-        del_PureStrategyProfile(psp)
+        del psp
         return outcome
 
 
