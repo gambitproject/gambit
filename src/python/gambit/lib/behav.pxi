@@ -146,7 +146,7 @@ cdef class MixedBehavProfile(object):
             return self._belief(node)
         elif isinstance(node, Infoset):
             return [self._belief(n) for n in node.members]
-        raise TypeError("profile belief index must be Node, not %s" %
+        raise TypeError("profile belief index must be Node or Infoset, not %s" %
                         node.__class__.__name__)    
 
     def infoset_prob(self, infoset):
