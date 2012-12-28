@@ -24,7 +24,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
-#include <errno.h>
+#include <cerrno>
 #include <unistd.h>
 #include <getopt.h>
 #include "libgambit/libgambit.h"
