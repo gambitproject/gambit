@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
+#include <cerrno>
 #include <iomanip>
 #include "libgambit/libgambit.h"
 
@@ -173,10 +174,23 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
+  std::istream* input_stream = &std::cin;
+  std::ifstream file_stream;
+  if (optind < argc) {
+    file_stream.open(argv[optind]);
+    if (!file_stream.is_open()) {
+      std::ostringstream error_message;
+      error_message << argv[0] << ": " << argv[optind];
+      perror(error_message.str().c_str());
+      exit(1);
+    }
+    input_stream = &file_stream;
+  }
+
   Gambit::Game nfg;
 
   try {
-    nfg = Gambit::ReadGame(std::cin);
+    nfg = Gambit::ReadGame(*input_stream);
   }
   catch (...) {
     return 1;
