@@ -21,6 +21,8 @@
 //
 
 #include <iostream>
+#include <fstream>
+#include <cerrno>
 #include <cstdlib>
 #include <unistd.h>
 #include <getopt.h>
@@ -41,8 +43,8 @@ void PrintBanner(std::ostream &p_stream)
 void PrintHelp(char *progname)
 {
   PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts game on standard input.\n";
+  std::cerr << "Usage: " << progname << " [OPTIONS] [file]\n";
+  std::cerr << "If file is not specified, attempts to read game from standard input.\n";
   std::cerr << "With no options, reports all Nash equilibria found.\n\n";
 
   std::cerr << "Options:\n";
@@ -115,8 +117,21 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
+  std::istream* input_stream = &std::cin;
+  std::ifstream file_stream;
+  if (optind < argc) {
+    file_stream.open(argv[optind]);
+    if (!file_stream.is_open()) {
+      std::ostringstream error_message;
+      error_message << argv[0] << ": " << argv[optind];
+      perror(error_message.str().c_str());
+      exit(1);
+    }
+    input_stream = &file_stream;
+  }
+
   try {
-    Gambit::Game game = Gambit::ReadGame(std::cin);
+    Gambit::Game game = Gambit::ReadGame(*input_stream);
 
     if (!game->IsTree() || useStrategic) {
       game->BuildComputedValues();
