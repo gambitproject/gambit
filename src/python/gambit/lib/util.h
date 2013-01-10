@@ -42,9 +42,20 @@ setitem_MixedStrategyProfileDouble(MixedStrategyProfile<double> *profile,
 { (*profile)[index] = value; }
 
 
-inline void 
+inline void
 setitem_MixedStrategyProfileRational(MixedStrategyProfile<Rational> *profile,
-				   int index, const char *value)
+				     int index, const char *value)
+{ (*profile)[index] = lexical_cast<Rational>(std::string(value)); }
+
+inline void 
+setitem_MixedStrategyProfileDoubleStrategy(MixedStrategyProfile<double> *profile,
+				           GameStrategy index, double value)
+{ (*profile)[index] = value; }
+
+
+inline void
+setitem_MixedStrategyProfileRationalStrategy(MixedStrategyProfile<Rational> *profile,
+				             GameStrategy index, const char *value)
 { (*profile)[index] = lexical_cast<Rational>(std::string(value)); }
 
 

@@ -72,7 +72,7 @@ cdef class MixedStrategyProfile(object):
         if isinstance(index, int):
             self._setprob(index+1, value)
         elif isinstance(index, Strategy):
-            self._setprob((<Strategy>index).strategy.deref().GetId(), value)
+            self._setprob_strategy(index, value)
         elif isinstance(index, str):
             self[self._resolve_index(index)] = value
 
@@ -127,10 +127,14 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
     def __len__(self):
         return self.profile.MixedProfileLength()
 
+    def _strategy_index(self, Strategy st):
+        return self.profile.GetSupport().GetIndex(st.strategy)
     def _getprob(self, int index):
         return self.profile.getitem(index)
     def _setprob(self, int index, value):
         setitem_MixedStrategyProfileDouble(self.profile, index, value)
+    def _setprob_strategy(self, Strategy strategy, value):
+        setitem_MixedStrategyProfileDoubleStrategy(self.profile, strategy.strategy, value)
     def _payoff(self, Player player):
         return self.profile.GetPayoff(player.player)
     def _strategy_value(self, Strategy strategy):
@@ -154,6 +158,11 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
         s = StrategicRestriction()
         s.support = new c_StrategySupport(self.profile.GetSupport())
         return s
+    def unrestrict(self):
+        profile = MixedStrategyProfileDouble()
+        profile.profile = new c_MixedStrategyProfileDouble(self.profile.ToFullSupport())
+        return profile
+            
 
     property game:
         def __get__(self):
@@ -171,6 +180,8 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
     def __len__(self):
         return self.profile.MixedProfileLength()
 
+    def _strategy_index(self, Strategy st):
+        return self.profile.GetSupport().GetIndex(st.strategy)
     def _getprob(self, int index):
         return fractions.Fraction(rat_str(self.profile.getitem(index)).c_str()) 
     def _setprob(self, int index, value):
@@ -181,6 +192,14 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
         t = str(value)
         s = t
         setitem_MixedStrategyProfileRational(self.profile, index, s)
+    def _setprob_strategy(self, Strategy strategy, value):
+        cdef char *s
+        if not isinstance(value, (int, fractions.Fraction)):
+            raise TypeError("rational precision profile requires int or Fraction probability, not %s" %
+                            value.__class__.__name__)
+        t = str(value)
+        s = t
+        setitem_MixedStrategyProfileRationalStrategy(self.profile, strategy.strategy, value)
     def _payoff(self, Player player):
         return fractions.Fraction(rat_str(self.profile.GetPayoff(player.player)).c_str())
     def _strategy_value(self, Strategy strategy):
@@ -204,6 +223,10 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
         s = StrategicRestriction()
         s.support = new c_StrategySupport(self.profile.GetSupport())
         return s
+    def unrestrict(self):
+        profile = MixedStrategyProfileRational()
+        profile.profile = new c_MixedStrategyProfileRational(self.profile.ToFullSupport())
+        return profile
     
     property game:
         def __get__(self):

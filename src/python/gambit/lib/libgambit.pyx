@@ -225,6 +225,7 @@ cdef extern from "libgambit/mixed.h":
         double GetStrategyValue(c_GameStrategy)
         double GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy)
         double GetLiapValue()
+        c_MixedStrategyProfileDouble ToFullSupport()
         c_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble)
 
     cdef cppclass c_MixedStrategyProfileRational "MixedStrategyProfile<Rational>":
@@ -236,6 +237,7 @@ cdef extern from "libgambit/mixed.h":
         c_Rational GetStrategyValue(c_GameStrategy)
         c_Rational GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy)
         c_Rational GetLiapValue()
+        c_MixedStrategyProfileRational ToFullSupport()
         c_MixedStrategyProfileRational(c_MixedStrategyProfileRational)
 
 cdef extern from "libgambit/behav.h":
@@ -282,12 +284,15 @@ cdef extern from "libgambit/stratspt.h":
         c_Game GetGame()
         Array[int] NumStrategies()        
         int MixedProfileLength()
+        int GetIndex(c_GameStrategy)
         int NumStrategiesPlayer "NumStrategies"(int) except +IndexError
         bool IsSubsetOf(c_StrategySupport)
         bool RemoveStrategy(c_GameStrategy)
         c_GameStrategy GetStrategy(int, int) except +IndexError
         bool Contains(c_GameStrategy)
         c_StrategySupport Undominated(bool, bool)
+        c_MixedStrategyProfileDouble NewMixedStrategyProfileDouble "NewMixedStrategyProfile<double>"()
+        c_MixedStrategyProfileRational NewMixedStrategyProfileRational "NewMixedStrategyProfile<Rational>"()
 
 cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError
@@ -296,8 +301,12 @@ cdef extern from "util.h":
     void setitem_ArrayInt(Array[int] *, int, int)
     void setitem_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble *, 
                                             int, double)
+    void setitem_MixedStrategyProfileDoubleStrategy(c_MixedStrategyProfileDouble *, 
+                                            c_GameStrategy, double)
     void setitem_MixedStrategyProfileRational(c_MixedStrategyProfileRational *, 
                                             int, char *)
+    void setitem_MixedStrategyProfileRationalStrategy(c_MixedStrategyProfileRational *, 
+                                            c_GameStrategy, char *)
     void setitem_MixedBehavProfileDouble(c_MixedBehavProfileDouble *, 
                                             int, double)
     void setitem_MixedBehavProfileRational(c_MixedBehavProfileRational *, 

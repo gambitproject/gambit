@@ -45,7 +45,7 @@ template <class T> void MixedStrategyProfileRep<T>::SetCentroid(void)
     T center = ((T) 1) / ((T) m_support.NumStrategies(player->GetNumber()));
     for (SupportStrategyIterator strategy = m_support.Strategies(player);
 	 !strategy.AtEnd(); strategy++) {
-      m_probs[strategy->GetId()] = center;
+      (*this)[*strategy] = center;
     }
   }
 }
