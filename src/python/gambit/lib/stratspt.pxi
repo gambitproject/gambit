@@ -272,7 +272,7 @@ cdef class StrategicRestriction(BaseGame):
         
         
         for (pl, st) in enumerate(args):
-            psp.deref().SetStrategy(deref(self.support).GetGame().deref().GetPlayer(pl+1).deref().GetStrategy(st+1))
+            psp.deref().SetStrategy(deref(self.support).GetStrategy(pl+1, st+1))
 
         outcome = Outcome()
         outcome.outcome = psp.deref().GetOutcome()
