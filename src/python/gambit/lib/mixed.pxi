@@ -75,6 +75,9 @@ cdef class MixedStrategyProfile(object):
             self._setprob((<Strategy>index).strategy.deref().GetId(), value)
         elif isinstance(index, str):
             self[self._resolve_index(index)] = value
+        else:
+            raise TypeError("profile indexes must be int, str or Strategy, not %s" %
+                            index.__class__.__name__)
 
     def payoff(self, player):
         if isinstance(player, Player):
