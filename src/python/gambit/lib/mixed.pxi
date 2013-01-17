@@ -202,7 +202,7 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
                             value.__class__.__name__)
         t = str(value)
         s = t
-        setitem_MixedStrategyProfileRationalStrategy(self.profile, strategy.strategy, value)
+        setitem_MixedStrategyProfileRationalStrategy(self.profile, strategy.strategy, s)
     def _payoff(self, Player player):
         return fractions.Fraction(rat_str(self.profile.GetPayoff(player.player)).c_str())
     def _strategy_value(self, Strategy strategy):
