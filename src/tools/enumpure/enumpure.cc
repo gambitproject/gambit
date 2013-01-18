@@ -234,7 +234,6 @@ int main(int argc, char *argv[])
     Game game = ReadGame(*input_stream);
 
     if (!game->IsTree() || useStrategic) {
-      game->BuildComputedValues();
       SolveMixed(game);
     }
     else {

@@ -197,6 +197,7 @@ public:
 class GameTreeRep : public GameExplicitRep {
   friend class GameTreeNodeRep;
   friend class GameTreeInfosetRep;
+  friend class GameTreeActionRep;
 protected:
   mutable bool m_computedValues;
   GameTreeNodeRep *m_root;
@@ -205,6 +206,15 @@ protected:
   /// @name Private auxiliary functions
   //@{
   void NumberNodes(GameTreeNodeRep *, int &);
+  //@}
+
+  /// @name Managing the representation
+  //@{
+  virtual void Canonicalize(void);
+  virtual void BuildComputedValues(void);
+  virtual void ClearComputedValues(void) const;
+  /// Have computed values been built?
+  virtual bool HasComputedValues(void) const { return m_computedValues; }
   //@}
 
 public: 
@@ -239,15 +249,6 @@ public:
   //@}
 
   virtual void DeleteOutcome(const GameOutcome &);
-
-  /// @name Managing the representation
-  //@{
-  virtual void Canonicalize(void);
-  virtual void BuildComputedValues(void);
-  virtual void ClearComputedValues(void) const;
-  /// Have computed values been built?
-  virtual bool HasComputedValues(void) const { return m_computedValues; }
-  //@}
 
   /// @name Writing data files
   //@{

@@ -136,12 +136,9 @@ void gbtStrategyDominanceStack::Reset(void)
 {
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
   m_supports = Gambit::Array<Gambit::StrategySupport *>();
-
-  if (m_doc->GetGame()->HasComputedValues()) {
-    m_supports.Append(new Gambit::StrategySupport(m_doc->GetGame()));
-    m_current = 1;
-    m_noFurther = false;
-  }
+  m_supports.Append(new Gambit::StrategySupport(m_doc->GetGame()));
+  m_current = 1;
+  m_noFurther = false;
 }
 
 bool gbtStrategyDominanceStack::NextLevel(void)
@@ -195,7 +192,6 @@ gbtGameDocument::gbtGameDocument(Gambit::Game p_game)
     m_behavSupports(this, true), m_stratSupports(this, true),
     m_currentProfileList(0)
 {
-  m_game->Canonicalize();
   wxGetApp().AddDocument(this);
 
   std::ostringstream s;
@@ -363,7 +359,6 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
 {
   if (p_modifications != GBT_DOC_MODIFIED_NONE) {
     m_modified = true;
-    m_game->Canonicalize();
     m_redoList = Gambit::List<std::string>();
 
     std::ostringstream s;
@@ -397,7 +392,6 @@ void gbtGameDocument::PostPendingChanges(void)
 void gbtGameDocument::BuildNfg(void)
 { 
   if (m_game->IsTree()) {
-    m_game->BuildComputedValues();
     m_stratSupports.Reset();
     for (int i = 1; i <= m_profiles.Length(); m_profiles[i++]->BuildNfg());
   }

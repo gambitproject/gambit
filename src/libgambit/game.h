@@ -598,6 +598,20 @@ protected:
 
   GameRep(void) { }
 
+protected:
+  /// @name Managing the representation
+  //@{
+  /// Renumber all game objects in a canonical way
+  virtual void Canonicalize(void) { }  
+  /// Clear out any computed values
+  virtual void ClearComputedValues(void) const { }
+  /// Build any computed values anew
+  virtual void BuildComputedValues(void) { }
+  /// Have computed values been built?
+  virtual bool HasComputedValues(void) const { return false; }
+  //@}
+
+
 public:
   /// @name Lifecycle
   //@{
@@ -635,18 +649,6 @@ public:
   /// Returns true if the game is perfect recall
   virtual bool IsPerfectRecall(void) const
   { GameInfoset s, t; return IsPerfectRecall(s, t); }
-  //@}
-
-  /// @name Managing the representation
-  //@{
-  /// Renumber all game objects in a canonical way
-  virtual void Canonicalize(void) { }  
-  /// Clear out any computed values
-  virtual void ClearComputedValues(void) const { }
-  /// Build any computed values anew
-  virtual void BuildComputedValues(void) { }
-  /// Have computed values been built?
-  virtual bool HasComputedValues(void) const { return false; }
   //@}
 
   /// @name Writing data files

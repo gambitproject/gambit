@@ -1042,32 +1042,20 @@ void gbtTableWidget::SetRowPlayer(int index, int pl)
 
 int gbtTableWidget::NumRowContingencies(void) const
 {
-  if (!m_doc->GetGame()->IsTree() || 
-      (m_doc->GetGame()->IsTree() && m_doc->GetGame()->HasComputedValues())) {
-    int ncont = 1;
-    const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
-    for (int i = 1; i <= NumRowPlayers(); 
-	 ncont *= support.NumStrategies(GetRowPlayer(i++)));
-    return ncont;
-  }
-  else {
-    return 0;
-  }
+  int ncont = 1;
+  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  for (int i = 1; i <= NumRowPlayers(); 
+       ncont *= support.NumStrategies(GetRowPlayer(i++)));
+  return ncont;
 }
 
 int gbtTableWidget::NumRowsSpanned(int index) const
 {
-  if (!m_doc->GetGame()->IsTree() || 
-      (m_doc->GetGame()->IsTree() && m_doc->GetGame()->HasComputedValues())) {
-    int ncont = 1;
-    const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
-    for (int i = index + 1; i <= NumRowPlayers(); 
-	 ncont *= support.NumStrategies(GetRowPlayer(i++)));
-    return ncont;
-  }
-  else {
-    return 1;
-  }
+  int ncont = 1;
+  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  for (int i = index + 1; i <= NumRowPlayers(); 
+       ncont *= support.NumStrategies(GetRowPlayer(i++)));
+  return ncont;
 }
 
 int gbtTableWidget::RowToStrategy(int player, int row) const
@@ -1097,32 +1085,20 @@ void gbtTableWidget::SetColPlayer(int index, int pl)
 
 int gbtTableWidget::NumColContingencies(void) const
 {
-  if (!m_doc->GetGame()->IsTree() || 
-      (m_doc->GetGame()->IsTree() && m_doc->GetGame()->HasComputedValues())) {
-    int ncont = 1;
-    const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
-    for (int i = 1; i <= NumColPlayers(); 
-	 ncont *= support.NumStrategies(GetColPlayer(i++)));
-    return ncont;
-  }
-  else {
-    return 0;
-  }
+  int ncont = 1;
+  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  for (int i = 1; i <= NumColPlayers(); 
+       ncont *= support.NumStrategies(GetColPlayer(i++)));
+  return ncont;
 }
 
 int gbtTableWidget::NumColsSpanned(int index) const
 {
-  if (!m_doc->GetGame()->IsTree() || 
-      (m_doc->GetGame()->IsTree() && m_doc->GetGame()->HasComputedValues())) {
-    int ncont = 1;
-    const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
-    for (int i = index + 1; i <= NumColPlayers(); 
-	 ncont *= support.NumStrategies(GetColPlayer(i++)));
-    return ncont;
-  }
-  else {
-    return 1;
-  }
+  int ncont = 1;
+  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  for (int i = index + 1; i <= NumColPlayers(); 
+       ncont *= support.NumStrategies(GetColPlayer(i++)));
+  return ncont;
 }
 
 int gbtTableWidget::ColToStrategy(int player, int col) const

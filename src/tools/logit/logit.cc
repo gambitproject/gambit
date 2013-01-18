@@ -184,8 +184,6 @@ int main(int argc, char *argv[])
   
 
     if (!game->IsTree() || useStrategic) {
-      game->BuildComputedValues();
-
       if (startFile == "") {
 	Gambit::MixedStrategyProfile<double> start(game->NewMixedStrategyProfile(0.0));
 	StrategicQREPathTracer tracer(start);

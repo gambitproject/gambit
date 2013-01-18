@@ -73,6 +73,7 @@ void GameTreeActionRep::DeleteAction(void)
     m_infoset->m_members[i]->children.Remove(where)->Invalidate();
   }
   m_infoset->m_efg->ClearComputedValues();
+  m_infoset->m_efg->Canonicalize();
 }
 
 GameInfoset GameTreeActionRep::GetInfoset(void) const { return m_infoset; }
@@ -117,6 +118,7 @@ void GameTreeInfosetRep::SetPlayer(GamePlayer p_player)
   p_player->m_infosets.Append(this);
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
 }
 
 bool GameTreeInfosetRep::Precedes(GameNode p_node) const
@@ -158,6 +160,7 @@ GameAction GameTreeInfosetRep::InsertAction(GameAction p_action /* =0 */)
   }
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
   return action;
 }
 
@@ -218,6 +221,7 @@ void GameTreeInfosetRep::Reveal(GamePlayer p_player)
   }
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
 }
 
 GameNode GameTreeInfosetRep::GetMember(int p_index) const 
@@ -488,6 +492,7 @@ void GameTreeNodeRep::DeleteParent(void)
 
   oldParent->Invalidate();
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
 }
 
 void GameTreeNodeRep::DeleteTree(void)
@@ -507,6 +512,7 @@ void GameTreeNodeRep::DeleteTree(void)
   m_label = "";
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
 }
 
 void GameTreeNodeRep::CopySubtree(GameTreeNodeRep *src, GameTreeNodeRep *stop)
@@ -541,6 +547,7 @@ void GameTreeNodeRep::CopyTree(GameNode p_src)
     }
 
     m_efg->ClearComputedValues();
+    m_efg->Canonicalize();
   }
 }
 
@@ -571,6 +578,7 @@ void GameTreeNodeRep::MoveTree(GameNode p_src)
   outcome = 0;
   
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
 }
 
 void GameTreeNodeRep::SetInfoset(GameInfoset p_infoset)
@@ -585,6 +593,7 @@ void GameTreeNodeRep::SetInfoset(GameInfoset p_infoset)
   infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
 }
 
 GameInfoset GameTreeNodeRep::LeaveInfoset(void)
@@ -604,6 +613,7 @@ GameInfoset GameTreeNodeRep::LeaveInfoset(void)
   }
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
   return infoset;
 }
 
@@ -629,6 +639,7 @@ GameInfoset GameTreeNodeRep::AppendMove(GameInfoset p_infoset)
   }
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
   return infoset;
 }
   
@@ -665,6 +676,7 @@ GameInfoset GameTreeNodeRep::InsertMove(GameInfoset p_infoset)
   }
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
   return p_infoset;
 }
 
@@ -820,11 +832,12 @@ Rational GameExplicitRep::GetMaxPayoff(int player) const
 }
 
 //------------------------------------------------------------------------
-//                   GameRep: Dimensions of the game
+//                GameExplicitRep: Dimensions of the game
 //------------------------------------------------------------------------
 
 Array<int> GameExplicitRep::NumStrategies(void) const
 {
+  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
   Array<int> dim(m_players.Length());
   for (int pl = 1; pl <= m_players.Length(); pl++) {
     dim[pl] = m_players[pl]->m_strategies.Length();
@@ -834,6 +847,7 @@ Array<int> GameExplicitRep::NumStrategies(void) const
 
 GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 {
+  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
   for (int pl = 1, i = 1; pl <= m_players.Length(); pl++) {
     for (int st = 1; st <= m_players[pl]->m_strategies.Length(); st++, i++) {
       if (p_index == i) {

@@ -134,8 +134,6 @@ int main(int argc, char *argv[])
     Gambit::Game game = Gambit::ReadGame(*input_stream);
 
     if (!game->IsTree() || useStrategic) {
-      game->BuildComputedValues();
-    
       if (useHeuristic) {
 	gbtNfgHs algorithm(0);
 	algorithm.Solve(game);

@@ -242,9 +242,6 @@ int main(int argc, char *argv[])
 
   try {
     Gambit::Game game = Gambit::ReadGame(*input_stream);
-
-    game->BuildComputedValues();
-
     Solve(game);
     return 0;
   }

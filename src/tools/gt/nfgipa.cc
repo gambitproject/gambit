@@ -174,8 +174,6 @@ int main(int argc, char *argv[])
   try {
     Gambit::Game game = Gambit::ReadGame(*input_stream);
 
-    game->BuildComputedValues();
-    
     Gambit::Array<double> pert(game->MixedProfileLength());
     for (int i = 1; i <= pert.Length(); i++) {
       pert[i] = 1.0;
