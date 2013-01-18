@@ -891,6 +891,10 @@ API documentation
 
       :raises: :py:class:`gambit.UndefinedOperationError` if the game does not have a tree representation.
          
+   .. py:method:: copy()
+
+      Creates a copy of the mixed strategy profile.
+
    .. py:method:: payoff(player)
 
       Returns the expected payoff to ``player`` if all players play
@@ -938,6 +942,10 @@ API documentation
       Returns a behavior strategy profile as a :py:class:`BehavProfile` 
       object associated to the profile.
          
+   .. py:method:: copy()
+
+      Creates a copy of the behavior strategy profile.
+
    .. py:method:: payoff(player)
 
       Returns the expected payoff to ``player`` if all players play

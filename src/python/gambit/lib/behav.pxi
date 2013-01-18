@@ -225,6 +225,11 @@ cdef class MixedBehavProfileDouble(MixedBehavProfile):
     def _regret(self, Action action):
         return self.profile.GetRegret(action.action)
 
+    def copy(self):
+        cdef MixedBehavProfileDouble behav
+        behav = MixedBehavProfileDouble()
+        behav.profile = new c_MixedBehavProfileDouble(deref(self.profile))
+        return behav
     def as_mixed(self):
         cdef MixedStrategyProfileDouble mixed
         mixed = MixedStrategyProfileDouble()
@@ -284,6 +289,11 @@ cdef class MixedBehavProfileRational(MixedBehavProfile):
     def _regret(self, Action action):
         return fractions.Fraction(rat_str(self.profile.GetRegret(action.action)).c_str())
     
+    def copy(self):
+        cdef MixedBehavProfileRational behav
+        behav = MixedBehavProfileRational()
+        behav.profile = new c_MixedBehavProfileRational(deref(self.profile))
+        return behav
     def as_mixed(self):
         cdef MixedStrategyProfileRational mixed
         mixed = MixedStrategyProfileRational()

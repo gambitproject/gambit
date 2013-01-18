@@ -148,6 +148,11 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
 
     def liap_value(self):
         return self.profile.GetLiapValue()
+    def copy(self):
+        cdef MixedStrategyProfileDouble mixed
+        mixed = MixedStrategyProfileDouble()
+        mixed.profile = new c_MixedStrategyProfileDouble(deref(self.profile))
+        return mixed
     def as_behav(self):
         cdef MixedBehavProfileDouble behav
         if not self.game.is_tree:
@@ -213,6 +218,11 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
 
     def liap_value(self):
         return fractions.Fraction(rat_str(self.profile.GetLiapValue()).c_str())
+    def copy(self):
+        cdef MixedStrategyProfileRational mixed
+        mixed = MixedStrategyProfileRational()
+        mixed.profile = new c_MixedStrategyProfileRational(deref(self.profile))
+        return mixed
     def as_behav(self):
         cdef MixedBehavProfileRational behav
         if not self.game.is_tree:
