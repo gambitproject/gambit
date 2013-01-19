@@ -415,10 +415,10 @@ class TestGambitMixedBehavGame(object):
         "Test calculating belief probabilities on an infoset"
         self.profile_double[0] = 0.8
         self.profile_double[1] = 0.2
-        self.profile_double[2] = 1.0
-        self.profile_double[3] = 1.5
+        self.profile_double[2] = 0.4
+        self.profile_double[3] = 0.6
         self.profile_double[4] = 0.0
-        self.profile_double[5] = 0.4
+        self.profile_double[5] = 1.0
         assert self.profile_double.belief(self.game.infosets[0])[0] == 1.0
         for i in self.game.infosets:
             belief = self.profile_double.belief(i)
@@ -428,10 +428,10 @@ class TestGambitMixedBehavGame(object):
 
         self.profile_rational[0] = fractions.Fraction(4,5)
         self.profile_rational[1] = fractions.Fraction(1,5)
-        self.profile_rational[2] = fractions.Fraction(1,1)
-        self.profile_rational[3] = fractions.Fraction(3,2)
+        self.profile_rational[2] = fractions.Fraction(2,5)
+        self.profile_rational[3] = fractions.Fraction(3,5)
         self.profile_rational[4] = fractions.Fraction(0,1)
-        self.profile_rational[5] = fractions.Fraction(2,5)
+        self.profile_rational[5] = fractions.Fraction(1,1)
         assert self.profile_rational.belief(self.game.infosets[0])[0] == fractions.Fraction(1,1)
         for i in self.game.infosets:
             belief = self.profile_rational.belief(i)
