@@ -575,9 +575,9 @@ public:
   template <class T> T GetPayoff(const GamePlayer &p_player) const
     { return GetPayoff<T>(p_player->GetNumber()); }
   /// Get the payoff to player pl conditional on reaching a node
-  template <class T> T GetNodeValue(const GameNode &, int pl) const;
+  template <class T> T GetPayoff(const GameNode &, int pl) const;
   /// Get the payoff to playing the action, conditional on the profile
-  template <class T> T GetActionValue(const GameAction &) const;
+  template <class T> T GetPayoff(const GameAction &) const;
   //@}
 };
 
@@ -756,13 +756,13 @@ inline GameStrategyIterator GamePlayerRep::Strategies(void) const
 { m_game->BuildComputedValues(); return GameStrategyIterator(m_strategies); }
 
 template<> inline double PureBehavProfile::GetPayoff(int pl) const
-{ return GetNodeValue<double>(m_efg->GetRoot(), pl); }
+{ return GetPayoff<double>(m_efg->GetRoot(), pl); }
 
 template<> inline Rational PureBehavProfile::GetPayoff(int pl) const
-{ return GetNodeValue<Rational>(m_efg->GetRoot(), pl); }
+{ return GetPayoff<Rational>(m_efg->GetRoot(), pl); }
 
 template<> inline std::string PureBehavProfile::GetPayoff(int pl) const
-{ return lexical_cast<std::string>(GetNodeValue<Rational>(m_efg->GetRoot(), pl)); }
+{ return lexical_cast<std::string>(GetPayoff<Rational>(m_efg->GetRoot(), pl)); }
 
 //=======================================================================
 

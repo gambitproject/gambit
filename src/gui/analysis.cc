@@ -261,7 +261,7 @@ gbtAnalysisProfileList<T>::GetBeliefProb(const GameNode &p_node,
   if (!p_node->GetPlayer()) return "";
 
   try {
-    if (m_behavProfiles[index].GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
+    if (m_behavProfiles[index].GetRealizProb(p_node->GetInfoset()) > Rational(0)) {
       return lexical_cast<std::string>(m_behavProfiles[index].GetBeliefProb(p_node),
 		    m_doc->GetStyle().NumDecimals());
     }
@@ -282,7 +282,7 @@ gbtAnalysisProfileList<T>::GetNodeValue(const GameNode &p_node,
   int index = (p_index == -1) ? m_current : p_index;
 
   try {
-    return lexical_cast<std::string>(m_behavProfiles[index].GetNodeValue(p_node)[p_player], 
+    return lexical_cast<std::string>(m_behavProfiles[index].GetPayoff(p_node)[p_player], 
 		  m_doc->GetStyle().NumDecimals());
   }
   catch (IndexException &) {
@@ -299,7 +299,7 @@ gbtAnalysisProfileList<T>::GetInfosetProb(const GameNode &p_node,
   if (!p_node->GetPlayer()) return "";
 
   try {
-    return lexical_cast<std::string>(m_behavProfiles[index].GetInfosetProb(p_node->GetInfoset()),
+    return lexical_cast<std::string>(m_behavProfiles[index].GetRealizProb(p_node->GetInfoset()),
 		  m_doc->GetStyle().NumDecimals());
   }
   catch (IndexException &) {
@@ -316,8 +316,8 @@ gbtAnalysisProfileList<T>::GetInfosetValue(const GameNode &p_node,
   if (!p_node->GetPlayer() || p_node->GetPlayer()->IsChance())  return "";
 
   try {
-    if (m_behavProfiles[index].GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
-      return lexical_cast<std::string>(m_behavProfiles[index].GetInfosetValue(p_node->GetInfoset()),
+    if (m_behavProfiles[index].GetRealizProb(p_node->GetInfoset()) > Rational(0)) {
+      return lexical_cast<std::string>(m_behavProfiles[index].GetPayoff(p_node->GetInfoset()),
 		    m_doc->GetStyle().NumDecimals());
     }
     else {
@@ -386,8 +386,8 @@ gbtAnalysisProfileList<T>::GetActionValue(const GameNode &p_node, int p_act,
   if (!p_node->GetPlayer() || p_node->GetPlayer()->IsChance()) return "";
   
   try {
-    if (m_behavProfiles[index].GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
-      return lexical_cast<std::string>(m_behavProfiles[index].GetActionValue(p_node->GetInfoset()->GetAction(p_act)),
+    if (m_behavProfiles[index].GetRealizProb(p_node->GetInfoset()) > Rational(0)) {
+      return lexical_cast<std::string>(m_behavProfiles[index].GetPayoff(p_node->GetInfoset()->GetAction(p_act)),
 		    m_doc->GetStyle().NumDecimals());
     }
     else  {
@@ -422,7 +422,7 @@ gbtAnalysisProfileList<T>::GetStrategyValue(int p_strategy, int p_index) const
   try {
     const MixedStrategyProfile<T> &profile = m_mixedProfiles[index];
     GameStrategy strategy = profile.GetGame()->GetStrategy(p_strategy);
-    return lexical_cast<std::string>(profile.GetStrategyValue(strategy),
+    return lexical_cast<std::string>(profile.GetPayoff(strategy),
 		  m_doc->GetStyle().NumDecimals());
   }
   catch (IndexException &) {

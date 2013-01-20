@@ -109,8 +109,8 @@ StrategicQREPathTracer::GetLHS(const Vector<double> &p_point, Vector<double> &p_
       else {
 	p_lhs[rowno] = (logprofile[player->GetStrategy(st)] - 
 			logprofile[player->GetStrategy(1)] -
-			lambda * (profile.GetStrategyValue(player->GetStrategy(st)) -
-				  profile.GetStrategyValue(player->GetStrategy(1))));
+			lambda * (profile.GetPayoff(player->GetStrategy(st)) -
+				  profile.GetPayoff(player->GetStrategy(1))));
 
       }
     }
@@ -198,8 +198,8 @@ StrategicQREPathTracer::GetJacobian(const Vector<double> &p_point,
 	// column wrt lambda
 	// 1 == sum-to-one
 	p_matrix(p_matrix.NumRows(), rowno) =
-	  (profile.GetStrategyValue(support.GetStrategy(i, 1)) - 
-	   profile.GetStrategyValue(support.GetStrategy(i, j)));
+	  (profile.GetPayoff(support.GetStrategy(i, 1)) - 
+	   profile.GetPayoff(support.GetStrategy(i, j)));
       }
     }
   }

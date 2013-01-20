@@ -136,53 +136,39 @@ cdef class MixedBehavProfile(object):
                             infoset.__class__.__name__)
         return self._is_defined_at(infoset)
 
-    def payoff(self, player):
-        if isinstance(player, Player):
-            return self._payoff(player)
-        elif isinstance(player, (int, str)):
-            return self.payoff(self.game.players[player])
-        raise TypeError("profile payoffs index must be int, str, or Player, not %s" %
-                        player.__class__.__name__)
+    def payoff(self, player_infoset_or_action):
+        if isinstance(player_infoset_or_action, Player):
+            return self._payoff(player_infoset_or_action)
+        elif isinstance(player_infoset_or_action, Infoset):
+            return self._infoset_payoff(player_infoset_or_action)
+        elif isinstance(player_infoset_or_action, Action):
+            return self._action_payoff(player_infoset_or_action)
+        elif isinstance(player_infoset_or_action, str):
+            try:
+                return self.payoff(self.game.players[player_infoset_or_action])
+            except IndexError:
+                infoset_or_action = self._resolve_index(player_infoset_or_action, players=False)
+                if isinstance(infoset_or_action, Infoset):
+                    return self._infoset_payoff(infoset_or_action)
+                elif isinstance(infoset_or_action, Action):
+                    return self._action_payoff(infoset_or_action)
+                raise IndexError("no matching label '%s'" % infoset_or_action.label)
+        raise TypeError("profile payoffs index must be int, str, Player, Infoset or Action, not %s" %
+                        player_infoset_or_action.__class__.__name__)
 
-    def infoset_prob(self, infoset):
-        if isinstance(infoset, str):
-            infoset = self._resolve_index(infoset, players=False)
-            if not isinstance(infoset, Infoset):
-                raise IndexError("no infoset matching label '%s'" % infoset.label)
-        elif not isinstance(infoset, Infoset):
-            raise TypeError("profile infoset probability index must be str or Infoset, not %s" %
-                            infoset.__class__.__name__)
-        return self._infoset_prob(infoset)
-
-    def infoset_value(self, infoset):
-        if isinstance(infoset, str):
-            infoset = self._resolve_index(infoset, players=False)
-            if not isinstance(infoset, Infoset):
-                raise IndexError("no infoset matching label '%s'" % infoset.label)
-        elif not isinstance(infoset, Infoset):
-            raise TypeError("profile infoset value index must be str or Infoset, not %s" %
-                            infoset.__class__.__name__)
-        return self._infoset_value(infoset)
-
-    def action_prob(self, action):
-        if isinstance(action, str):
-            action = self._resolve_index(action, players=False)
-            if not isinstance(action, Action):
-                raise IndexError("no action matching label '%s'" % action.label)
-        elif not isinstance(action, Action):
-            raise TypeError("profile action probability index must be str or Action, not %s" %
-                            action.__class__.__name__)
-        return self._action_prob(action)
-
-    def action_value(self, action):
-        if isinstance(action, str):
-            action = self._resolve_index(action, players=False)
-            if not isinstance(action, Action):
-                raise IndexError("no action matching label '%s'" % action.label)
-        elif not isinstance(action, Action):
-            raise TypeError("profile action value index must be str or Action, not %s" %
-                            action.__class__.__name__)
-        return self._action_value(action)
+    def realiz_prob(self, infoset_or_action):
+        if isinstance(infoset_or_action, Infoset):
+            return self._infoset_prob(infoset_or_action)
+        elif isinstance(infoset_or_action, Action):
+            return self._action_prob(infoset_or_action)
+        elif isinstance(infoset_or_action, str):
+            infoset_or_action = infoset = self._resolve_index(infoset_or_action, players=False)
+            if isinstance(infoset_or_action, Infoset):
+                return self._infoset_prob(infoset_or_action)
+            elif isinstance(infoset_or_action, Action):
+                return self._action_prob(infoset_or_action)
+        raise TypeError("profile probability index must be str, Infoset or Action, not %s" %
+                        infoset_or_action.__class__.__name__)
 
     def regret(self, action):
         if isinstance(action, str):
@@ -215,13 +201,13 @@ cdef class MixedBehavProfileDouble(MixedBehavProfile):
     def _payoff(self, Player player):
         return self.profile.GetPayoff(player.player.deref().GetNumber())
     def _infoset_prob(self, Infoset infoset):
-        return self.profile.GetInfosetProb(infoset.infoset)
-    def _infoset_value(self, Infoset infoset):
-        return self.profile.GetInfosetValue(infoset.infoset)
+        return self.profile.GetRealizProb(infoset.infoset)
+    def _infoset_payoff(self, Infoset infoset):
+        return self.profile.GetPayoff(infoset.infoset)
     def _action_prob(self, Action action):
         return self.profile.GetActionProb(action.action)
-    def _action_value(self, Action action):
-        return self.profile.GetActionValue(action.action)
+    def _action_payoff(self, Action action):
+        return self.profile.GetPayoff(action.action)
     def _regret(self, Action action):
         return self.profile.GetRegret(action.action)
 
@@ -279,13 +265,13 @@ cdef class MixedBehavProfileRational(MixedBehavProfile):
     def _payoff(self, Player player):
         return fractions.Fraction(rat_str(self.profile.GetPayoff(player.player.deref().GetNumber())).c_str())
     def _infoset_prob(self, Infoset infoset):
-        return fractions.Fraction(rat_str(self.profile.GetInfosetProb(infoset.infoset)).c_str())
-    def _infoset_value(self, Infoset infoset):
-        return fractions.Fraction(rat_str(self.profile.GetInfosetValue(infoset.infoset)).c_str())
+        return fractions.Fraction(rat_str(self.profile.GetRealizProb(infoset.infoset)).c_str())
+    def _infoset_payoff(self, Infoset infoset):
+        return fractions.Fraction(rat_str(self.profile.GetPayoff(infoset.infoset)).c_str())
     def _action_prob(self, Action action):
         return fractions.Fraction(rat_str(self.profile.GetActionProb(action.action)).c_str())
-    def _action_value(self, Action action):
-        return fractions.Fraction(rat_str(self.profile.GetActionValue(action.action)).c_str())
+    def _action_payoff(self, Action action):
+        return fractions.Fraction(rat_str(self.profile.GetPayoff(action.action)).c_str())
     def _regret(self, Action action):
         return fractions.Fraction(rat_str(self.profile.GetRegret(action.action)).c_str())
     

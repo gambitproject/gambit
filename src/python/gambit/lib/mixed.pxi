@@ -141,7 +141,7 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
     def _payoff(self, Player player):
         return self.profile.GetPayoff(player.player)
     def _strategy_value(self, Strategy strategy):
-        return self.profile.GetStrategyValue(strategy.strategy)
+        return self.profile.GetPayoff(strategy.strategy)
     def _strategy_value_deriv(self, int pl,
                               Strategy s1, Strategy s2):
         return self.profile.GetPayoffDeriv(pl, s1.strategy, s2.strategy)
@@ -211,7 +211,7 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
     def _payoff(self, Player player):
         return fractions.Fraction(rat_str(self.profile.GetPayoff(player.player)).c_str())
     def _strategy_value(self, Strategy strategy):
-        return fractions.Fraction(rat_str(self.profile.GetStrategyValue(strategy.strategy)).c_str())
+        return fractions.Fraction(rat_str(self.profile.GetPayoff(strategy.strategy)).c_str())
     def _strategy_value_deriv(self, int pl,
                               Strategy s1, Strategy s2):
         return fractions.Fraction(rat_str(self.profile.GetPayoffDeriv(pl, s1.strategy, s2.strategy)).c_str())

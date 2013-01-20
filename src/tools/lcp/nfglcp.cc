@@ -102,7 +102,7 @@ void PrintProfileDetail(std::ostream &p_stream,
       sprintf(buffer, "%11s   ", lexical_cast<std::string>(p_profile[strategy], g_numDecimals).c_str());
       p_stream << buffer;
 
-      sprintf(buffer, "%11s   ", lexical_cast<std::string>(p_profile.GetStrategyValue(strategy), g_numDecimals).c_str());
+      sprintf(buffer, "%11s   ", lexical_cast<std::string>(p_profile.GetPayoff(strategy), g_numDecimals).c_str());
       p_stream << buffer;
 
       p_stream << "\n";

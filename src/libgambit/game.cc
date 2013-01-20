@@ -717,7 +717,7 @@ void PureBehavProfile::SetAction(const GameAction &action)
 }
 
 template <class T> 
-T PureBehavProfile::GetNodeValue(const GameNode &p_node, 
+T PureBehavProfile::GetPayoff(const GameNode &p_node,
 				 int pl) const
 {
   T payoff(0);
@@ -733,13 +733,13 @@ T PureBehavProfile::GetNodeValue(const GameNode &p_node,
       for (int i = 1; i <= node->NumChildren(); i++) {
 	GameTreeInfosetRep *infoset = node->infoset;
 	payoff += (infoset->GetActionProb(i, (T) 0) *
-		   GetNodeValue<T>(node->children[i], pl));
+		   GetPayoff<T>(node->children[i], pl));
       }
     }
     else {
       int player = node->GetPlayer()->GetNumber();
       int iset = node->GetInfoset()->GetNumber();
-      payoff += GetNodeValue<T>(node->children[m_profile[player][iset]->GetNumber()], 
+      payoff += GetPayoff<T>(node->children[m_profile[player][iset]->GetNumber()], 
 				pl);
     }
   }
@@ -748,11 +748,11 @@ T PureBehavProfile::GetNodeValue(const GameNode &p_node,
 }
 
 // Explicit instantiations
-template double PureBehavProfile::GetNodeValue(const GameNode &, int pl) const;
-template Rational PureBehavProfile::GetNodeValue(const GameNode &, int pl) const;
+template double PureBehavProfile::GetPayoff(const GameNode &, int pl) const;
+template Rational PureBehavProfile::GetPayoff(const GameNode &, int pl) const;
 
 template <class T>
-T PureBehavProfile::GetActionValue(const GameAction &p_action) const
+T PureBehavProfile::GetPayoff(const GameAction &p_action) const
 {
   PureBehavProfile copy(*this);
   copy.SetAction(p_action);
@@ -760,8 +760,8 @@ T PureBehavProfile::GetActionValue(const GameAction &p_action) const
 }
 
 // Explicit instantiations
-template double PureBehavProfile::GetActionValue(const GameAction &) const;
-template Rational PureBehavProfile::GetActionValue(const GameAction &) const;
+template double PureBehavProfile::GetPayoff(const GameAction &) const;
+template Rational PureBehavProfile::GetPayoff(const GameAction &) const;
 
 //========================================================================
 //                       class GameExplicitRep

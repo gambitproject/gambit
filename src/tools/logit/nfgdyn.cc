@@ -58,7 +58,7 @@ void LogitBR(const Gambit::MixedStrategyProfile<double> &p_profile, double p_lam
     double sum = 0.0;
 
     for (int st = 1; st <= nfg->GetPlayer(pl)->NumStrategies(); st++) {
-      lval[st] = exp(p_lambda * p_profile.GetStrategyValue(nfg->GetPlayer(pl)->GetStrategy(st)));
+      lval[st] = exp(p_lambda * p_profile.GetPayoff(nfg->GetPlayer(pl)->GetStrategy(st)));
       sum += lval[st];
     }
 
