@@ -951,22 +951,22 @@ API documentation
       Returns the expected payoff to ``player`` if all players play
       according to the profile.
 
-   .. py:method:: action_value(action)
+   .. py:method:: payoff(action)
 
       Returns the expected payoff to choosing ``action``, conditional
       on having reached the information set, if all
       other players play according to the profile.
 
-   .. py:method:: infoset_prob(infoset)
-
-      Returns the probability with which information set ``infoset``
-      is reached, if all players play according to the profile.
-
-   .. py:method:: infoset_value(infoset)
+   .. py:method:: payoff(infoset)
 
       Returns the expected payoff to the player who has the move at
       ``infoset``, conditional on the information set being reached,
       if all players play according to the profile.
+
+   .. py:method:: realiz_prob(infoset)
+
+      Returns the probability with which information set ``infoset``
+      is reached, if all players play according to the profile.
 
    .. py:method:: liap_value()
 
