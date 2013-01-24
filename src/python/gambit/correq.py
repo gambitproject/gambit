@@ -15,6 +15,11 @@ class CorrelatedEquilibriumPayoffs(object):
         self._game = game
         self._vertices = vertices
         self._edges = edges
+    
+    def __contains__(self,item):
+	for i in self._vertices:
+		if item in i:
+			return True
 
     @property
     def game(self):        return self._game
