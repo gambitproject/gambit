@@ -15,12 +15,13 @@ class CorrelatedEquilibriumPayoffs(object):
         self._game = game
         self._vertices = vertices
         self._edges = edges
-    
-    def __contains__(self,item):
-	for i in self._vertices:
-		if item in i:
-			return True
+        self.points = order_vertices(self.edges)#vertices in clockwise order
+        if self.points is None:
+            points = self.edges
 
+    def __contains__(self,item):
+	points = list(self.points)
+	return inside_convex_polygon(item,points)
     @property
     def game(self):        return self._game
     @property
@@ -63,17 +64,37 @@ class CorrelatedEquilibriumPayoffs(object):
         for x,y in vertices:
             ax.text(x+x_offset/10, y+y_offset/10, str(x)+','+str(y), fontsize=14)    
 
-        # Ensure points are drawn in the correct order
-        points = order_vertices(self.edges)
-        if points is None:
-            points = self.edges
-
-        pylab.plot(*zip(*points), marker='o', markersize=5)
+        pylab.plot(*zip(*self.points), marker='o', markersize=5)
         pylab.show()
 
 INF = 1e+10
 
+def inside_convex_polygon(point, vertices):
+    sign = 3
+    n_vertices = len(vertices)
+    for n in xrange(n_vertices-1):
+        segment = vertices[n],vertices[(n+1)%n_vertices]
+        affine_segment = [segment[1][0]-segment[0][0],segment[1][1]-segment[0][1]]
+        affine_point = [point[0]-segment[0][0],point[1]-segment[0][1]]
+        k = x_product(affine_segment, affine_point)
+        if sign == 3: #the first case
+            sign = k 
+        elif k != sign:
+	     if k==0:#check for on convex polygon
+		return True
+	     else:
+                return False
+    return True
 
+def x_product(a, b):
+     """cross product nomarilze to 1,0 or -1"""
+     l= a[0]*b[1]-a[1]*b[0]
+     if l>0:
+	return 1
+     elif l<0:
+	return -1
+     else:
+	return 0
 def contingency_to_index((p1_strategy,p2_strategy),p2_num_strats):
     return (p1_strategy*p2_num_strats) + p2_strategy
     
@@ -232,6 +253,28 @@ def reorder_probs(prob_vars,var_dict_swapped):
 def dydx(v,v2):
     return (v[1] - v2[1],  v[0] - v2[0])
  
+def clockwise(vertices):
+	"""this fuction returns the given vertices clockwise"""
+	l=[]
+	const = vertices[0]
+	for point in vertices:
+		print point
+		try:
+			print math.atan((const[1]-point[1])/(const[0]-point[0]))
+			l.append([point,math.atan((const[1]-point[1])/(const[0]-point[0]))])
+		except ZeroDivisionError:
+			if const[1]<point[1]:
+				print point[1]+3.4
+				l.append([point, point[1]+1.7])
+			else:
+				print -1*point[1]-3.4
+				l.append([point, -1*point[1]-1.7])
+		print ''
+	l.sort(key=lambda x:x[1])
+	arr = []
+	for i in l:
+		arr.append(numpy.array(i[0]))
+	return arr		
         
 def find_polygon(game):
     RND = 10                       
