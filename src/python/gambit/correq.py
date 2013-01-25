@@ -251,30 +251,7 @@ def reorder_probs(prob_vars,var_dict_swapped):
     
 
 def dydx(v,v2):
-    return (v[1] - v2[1],  v[0] - v2[0])
- 
-def clockwise(vertices):
-	"""this fuction returns the given vertices clockwise"""
-	l=[]
-	const = vertices[0]
-	for point in vertices:
-		print point
-		try:
-			print math.atan((const[1]-point[1])/(const[0]-point[0]))
-			l.append([point,math.atan((const[1]-point[1])/(const[0]-point[0]))])
-		except ZeroDivisionError:
-			if const[1]<point[1]:
-				print point[1]+3.4
-				l.append([point, point[1]+1.7])
-			else:
-				print -1*point[1]-3.4
-				l.append([point, -1*point[1]-1.7])
-		print ''
-	l.sort(key=lambda x:x[1])
-	arr = []
-	for i in l:
-		arr.append(numpy.array(i[0]))
-	return arr		
+    return (v[1] - v2[1],  v[0] - v2[0])		
         
 def find_polygon(game):
     RND = 10                       
