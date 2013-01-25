@@ -17,7 +17,7 @@ class CorrelatedEquilibriumPayoffs(object):
         self._edges = edges
         self.points = order_vertices(self.edges)#vertices in clockwise order
         if self.points is None:
-            points = self.edges
+            self.points = self.edges
 
     def __contains__(self,item):
 	points = list(self.points)
@@ -80,7 +80,7 @@ def inside_convex_polygon(point, vertices):
         if sign == 3: #the first case
             sign = k 
         elif k != sign:
-	     if k==0:#check for on convex polygon
+	     if k==0: #check for on convex polygon
 		return True
 	     else:
                 return False
