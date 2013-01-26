@@ -258,71 +258,71 @@ class TestGambitMixedBehavGame(object):
 
     def test_infoset_prob(self):
         "Test to retrieve the probability associated to an infoset"
-        assert self.profile_double.infoset_prob(self.game.players[0].infosets[0]) == 1.0
-        assert self.profile_double.infoset_prob(self.game.players[1].infosets[0]) == 1.0
-        assert self.profile_double.infoset_prob(self.game.players[2].infosets[0]) == 1.0
-        assert self.profile_rational.infoset_prob(self.game.players[0].infosets[0]) == fractions.Fraction("1/1")
-        assert self.profile_rational.infoset_prob(self.game.players[1].infosets[0]) == fractions.Fraction("1/1")
-        assert self.profile_rational.infoset_prob(self.game.players[2].infosets[0]) == fractions.Fraction("1/1")
+        assert self.profile_double.realiz_prob(self.game.players[0].infosets[0]) == 1.0
+        assert self.profile_double.realiz_prob(self.game.players[1].infosets[0]) == 1.0
+        assert self.profile_double.realiz_prob(self.game.players[2].infosets[0]) == 1.0
+        assert self.profile_rational.realiz_prob(self.game.players[0].infosets[0]) == fractions.Fraction("1/1")
+        assert self.profile_rational.realiz_prob(self.game.players[1].infosets[0]) == fractions.Fraction("1/1")
+        assert self.profile_rational.realiz_prob(self.game.players[2].infosets[0]) == fractions.Fraction("1/1")
 
     def test_infoset_prob_by_string(self):
         "Test to retrieve the probability associated to an infoset by string values"
-        assert self.profile_double.infoset_prob("Infoset 1:1") == 1.0
-        assert self.profile_double.infoset_prob("Infoset 2:1") == 1.0
-        assert self.profile_double.infoset_prob("Infoset 3:1") == 1.0
-        assert self.profile_rational.infoset_prob("Infoset 1:1") == fractions.Fraction("1/1")
-        assert self.profile_rational.infoset_prob("Infoset 2:1") == fractions.Fraction("1/1")
-        assert self.profile_rational.infoset_prob("Infoset 3:1") == fractions.Fraction("1/1")
+        assert self.profile_double.realiz_prob("Infoset 1:1") == 1.0
+        assert self.profile_double.realiz_prob("Infoset 2:1") == 1.0
+        assert self.profile_double.realiz_prob("Infoset 3:1") == 1.0
+        assert self.profile_rational.realiz_prob("Infoset 1:1") == fractions.Fraction("1/1")
+        assert self.profile_rational.realiz_prob("Infoset 2:1") == fractions.Fraction("1/1")
+        assert self.profile_rational.realiz_prob("Infoset 3:1") == fractions.Fraction("1/1")
 
-    def test_infoset_value(self):
+    def test_infoset_payoff(self):
         "Test to retrieve expected payoff associated to an infoset"
-        assert self.profile_double.infoset_value(self.game.players[0].infosets[0]) == 3.0
-        assert self.profile_double.infoset_value(self.game.players[1].infosets[0]) == 3.0
-        assert self.profile_double.infoset_value(self.game.players[2].infosets[0]) == 3.25
-        assert self.profile_rational.infoset_value(self.game.players[0].infosets[0]) == fractions.Fraction("3/1")
-        assert self.profile_rational.infoset_value(self.game.players[1].infosets[0]) == fractions.Fraction("3/1")
-        assert self.profile_rational.infoset_value(self.game.players[2].infosets[0]) == fractions.Fraction("13/4")
+        assert self.profile_double.payoff(self.game.players[0].infosets[0]) == 3.0
+        assert self.profile_double.payoff(self.game.players[1].infosets[0]) == 3.0
+        assert self.profile_double.payoff(self.game.players[2].infosets[0]) == 3.25
+        assert self.profile_rational.payoff(self.game.players[0].infosets[0]) == fractions.Fraction("3/1")
+        assert self.profile_rational.payoff(self.game.players[1].infosets[0]) == fractions.Fraction("3/1")
+        assert self.profile_rational.payoff(self.game.players[2].infosets[0]) == fractions.Fraction("13/4")
 
-    def test_infoset_value_by_string(self):
+    def test_infoset_payoff_by_string(self):
         "Test to retrieve expected payoff associated to an infoset by string values"
-        assert self.profile_double.infoset_value("Infoset 1:1") == 3.0
-        assert self.profile_double.infoset_value("Infoset 2:1") == 3.0
-        assert self.profile_double.infoset_value("Infoset 3:1") == 3.25
-        assert self.profile_rational.infoset_value("Infoset 1:1") == fractions.Fraction("3/1")
-        assert self.profile_rational.infoset_value("Infoset 2:1") == fractions.Fraction("3/1")
-        assert self.profile_rational.infoset_value("Infoset 3:1") == fractions.Fraction("13/4")
+        assert self.profile_double.payoff("Infoset 1:1") == 3.0
+        assert self.profile_double.payoff("Infoset 2:1") == 3.0
+        assert self.profile_double.payoff("Infoset 3:1") == 3.25
+        assert self.profile_rational.payoff("Infoset 1:1") == fractions.Fraction("3/1")
+        assert self.profile_rational.payoff("Infoset 2:1") == fractions.Fraction("3/1")
+        assert self.profile_rational.payoff("Infoset 3:1") == fractions.Fraction("13/4")
 
-    def test_action_value(self):
+    def test_action_payoff(self):
         "Test to retrieve expected payoff associated to an action"
-        assert self.profile_double.action_value(self.game.players[0].infosets[0].actions[0]) == 3.0
-        assert self.profile_double.action_value(self.game.players[0].infosets[0].actions[1]) == 3.0
-        assert self.profile_double.action_value(self.game.players[1].infosets[0].actions[0]) == 3.0
-        assert self.profile_double.action_value(self.game.players[1].infosets[0].actions[1]) == 3.0
-        assert self.profile_double.action_value(self.game.players[2].infosets[0].actions[0]) == 3.5
-        assert self.profile_double.action_value(self.game.players[2].infosets[0].actions[1]) == 3.0
+        assert self.profile_double.payoff(self.game.players[0].infosets[0].actions[0]) == 3.0
+        assert self.profile_double.payoff(self.game.players[0].infosets[0].actions[1]) == 3.0
+        assert self.profile_double.payoff(self.game.players[1].infosets[0].actions[0]) == 3.0
+        assert self.profile_double.payoff(self.game.players[1].infosets[0].actions[1]) == 3.0
+        assert self.profile_double.payoff(self.game.players[2].infosets[0].actions[0]) == 3.5
+        assert self.profile_double.payoff(self.game.players[2].infosets[0].actions[1]) == 3.0
 
-        assert self.profile_rational.action_value(self.game.players[0].infosets[0].actions[0]) == fractions.Fraction("3/1")
-        assert self.profile_rational.action_value(self.game.players[0].infosets[0].actions[1]) == fractions.Fraction("3/1")
-        assert self.profile_rational.action_value(self.game.players[1].infosets[0].actions[0]) == fractions.Fraction("3/1")
-        assert self.profile_rational.action_value(self.game.players[1].infosets[0].actions[1]) == fractions.Fraction("3/1")
-        assert self.profile_rational.action_value(self.game.players[2].infosets[0].actions[0]) == fractions.Fraction("7/2")
-        assert self.profile_rational.action_value(self.game.players[2].infosets[0].actions[1]) == fractions.Fraction("3/1")
+        assert self.profile_rational.payoff(self.game.players[0].infosets[0].actions[0]) == fractions.Fraction("3/1")
+        assert self.profile_rational.payoff(self.game.players[0].infosets[0].actions[1]) == fractions.Fraction("3/1")
+        assert self.profile_rational.payoff(self.game.players[1].infosets[0].actions[0]) == fractions.Fraction("3/1")
+        assert self.profile_rational.payoff(self.game.players[1].infosets[0].actions[1]) == fractions.Fraction("3/1")
+        assert self.profile_rational.payoff(self.game.players[2].infosets[0].actions[0]) == fractions.Fraction("7/2")
+        assert self.profile_rational.payoff(self.game.players[2].infosets[0].actions[1]) == fractions.Fraction("3/1")
 
     def test_action_value_by_string(self):
         "Test to retrieve expected payoff associated to an action by string values"
-        assert self.profile_double.action_value("U1") == 3.0
-        assert self.profile_double.action_value("D1") == 3.0
-        assert self.profile_double.action_value("U2") == 3.0
-        assert self.profile_double.action_value("D2") == 3.0
-        assert self.profile_double.action_value("U3") == 3.5
-        assert self.profile_double.action_value("D3") == 3.0
+        assert self.profile_double.payoff("U1") == 3.0
+        assert self.profile_double.payoff("D1") == 3.0
+        assert self.profile_double.payoff("U2") == 3.0
+        assert self.profile_double.payoff("D2") == 3.0
+        assert self.profile_double.payoff("U3") == 3.5
+        assert self.profile_double.payoff("D3") == 3.0
 
-        assert self.profile_rational.action_value("U1") == fractions.Fraction("3/1")
-        assert self.profile_rational.action_value("D1") == fractions.Fraction("3/1")
-        assert self.profile_rational.action_value("U2") == fractions.Fraction("3/1")
-        assert self.profile_rational.action_value("D2") == fractions.Fraction("3/1")
-        assert self.profile_rational.action_value("U3") == fractions.Fraction("7/2")
-        assert self.profile_rational.action_value("D3") == fractions.Fraction("3/1")
+        assert self.profile_rational.payoff("U1") == fractions.Fraction("3/1")
+        assert self.profile_rational.payoff("D1") == fractions.Fraction("3/1")
+        assert self.profile_rational.payoff("U2") == fractions.Fraction("3/1")
+        assert self.profile_rational.payoff("D2") == fractions.Fraction("3/1")
+        assert self.profile_rational.payoff("U3") == fractions.Fraction("7/2")
+        assert self.profile_rational.payoff("D3") == fractions.Fraction("3/1")
 
     def test_regret(self):
         "Test to retrieve regret value associated to an action"

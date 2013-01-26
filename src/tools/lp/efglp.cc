@@ -233,7 +233,7 @@ void PrintProfileDetail(std::ostream &p_stream,
 	sprintf(buffer, "%11s   ", ToText(p_profile(pl, iset, act), g_numDecimals).c_str());
 	p_stream << buffer;
 
-	sprintf(buffer, "%11s   ", ToText(p_profile.GetActionValue(infoset->GetAction(act)), g_numDecimals).c_str());
+	sprintf(buffer, "%11s   ", ToText(p_profile.GetPayoff(infoset->GetAction(act)), g_numDecimals).c_str());
 	p_stream << buffer;
 
 	p_stream << "\n";
@@ -315,7 +315,7 @@ void UndefinedToCentroid(MixedBehavProfile<T> &p_profile)
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       GameInfoset infoset = player->GetInfoset(iset);
       
-      if (p_profile.GetInfosetProb(infoset) > (T) 0) {
+      if (p_profile.GetRealizProb(infoset) > (T) 0) {
 	continue;
       }
 	  

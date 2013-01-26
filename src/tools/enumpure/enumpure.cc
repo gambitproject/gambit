@@ -64,7 +64,7 @@ List<MixedBehavProfile<Rational> > SolveBehav(const BehavSupport &p_support,
 	GameInfoset infoset = player->GetInfoset(iset);
 	for (int act = 1; act <= infoset->NumActions(); act++) {
 	  GameAction action = infoset->GetAction(act);
-	  if (citer->GetActionValue<Rational>(action) > current)  {
+	  if (citer->GetPayoff<Rational>(action) > current)  {
 	    isNash = false;
 	    break;
 	  }

@@ -188,7 +188,7 @@ public:
   { return m_rep->GetPayoffDeriv(pl, s1, s2); }
 
   /// Computes the payoff to playing the pure strategy against the profile
-  T GetStrategyValue(const GameStrategy &p_strategy) const
+  T GetPayoff(const GameStrategy &p_strategy) const
   { return GetPayoffDeriv(p_strategy->GetPlayer()->GetNumber(), p_strategy); }
 
   /// \brief Computes the Lyapunov value of the profile
