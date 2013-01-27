@@ -2582,7 +2582,11 @@ bool wxSheetDataObject::SetData(size_t len, const void *buf)
     if (len < 2u)
         return false; // I guess?
     
+#if wxCHECK_VERSION(2, 9, 0)
     wxString strBuf((const wchar_t*) wxConvertMB2WX((const char *)buf), len); // probably not Unicode safe
+#else
+    wxString strBuf(wxConvertMB2WX((const char *)buf), len); // probably not Unicode safe
+#endif
     m_data = strBuf;
     
     //wxPrintf(wxT("Data len %d %d\n"), m_data.Len(), len);
