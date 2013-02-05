@@ -303,13 +303,14 @@ Gambit::List<Gambit::StrategySupport> PossibleNashSubsupports(const Gambit::Stra
     bool remove = false;
     do {
       Gambit::GameStrategy strat = crsr.GetStrategy();
-      if (current.Contains(strat)) 
+      if (current.Contains(strat))  {
 	for (int j = 1; j <= strat->GetPlayer()->NumStrategies(); j++) {
 	  Gambit::GameStrategy other_strat = strat->GetPlayer()->GetStrategy(j);
-	  if (other_strat != strat)
+	  if (other_strat != strat) {
 	    if (current.Contains(other_strat)) {
-	      if (current.Dominates(other_strat,strat,false)) 
+	      if (current.Dominates(other_strat,strat,false))  {
 		remove = true;
+	      }
 	    }
 	    else { 
 	      current.AddStrategy(other_strat);
@@ -318,6 +319,8 @@ Gambit::List<Gambit::StrategySupport> PossibleNashSubsupports(const Gambit::Stra
 	      }
 	      current.RemoveStrategy(other_strat);
 	    }
+	  }
+	}
       }
     } while (crsr.GoToNext() && !remove);
     if (remove)

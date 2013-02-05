@@ -413,8 +413,8 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
 
   if (!p_conditional) {
     for (BehavIterator iter(*this, a); !iter.AtEnd(); iter++) {
-      Rational ap = iter->GetActionValue<Rational>(a);  
-      Rational bp = iter->GetActionValue<Rational>(b);
+      Rational ap = iter->GetPayoff<Rational>(a);
+      Rational bp = iter->GetPayoff<Rational>(b);
 
       if (p_strict) {
 	if (ap <= bp) {
@@ -450,8 +450,8 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
       
       for (BehavConditionalIterator iter(*this, reachable); 
 	   !iter.AtEnd(); iter++) {
-	Rational ap = iter->GetNodeValue<Rational>(nodelist[n]->GetChild(a->GetNumber()), pl);
-	Rational bp = iter->GetNodeValue<Rational>(nodelist[n]->GetChild(b->GetNumber()), pl);
+	Rational ap = iter->GetPayoff<Rational>(nodelist[n]->GetChild(a->GetNumber()), pl);
+	Rational bp = iter->GetPayoff<Rational>(nodelist[n]->GetChild(b->GetNumber()), pl);
 	
 	if (p_strict) {
 	  if (ap <= bp) {

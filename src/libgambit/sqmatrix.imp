@@ -25,9 +25,7 @@
 
 namespace Gambit {
 
-// Import abs(double) into namespace, since abs(Rational) already exists in the
-// Gambit namespace.
-using ::abs;
+inline double abs(double x) { return ::fabs(x); }
 
 //-----------------------------------------------------------------------------
 //     SquareMatrix<T>: Constructors, destructor, constructive operators

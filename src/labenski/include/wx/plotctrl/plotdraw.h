@@ -11,10 +11,6 @@
 #ifndef _WX_PLOTDRAW_H_
 #define _WX_PLOTDRAW_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "plotdraw.h"
-#endif
-
 #include "wx/defs.h"
 #include "wx/geometry.h"
 #include "wx/bitmap.h"

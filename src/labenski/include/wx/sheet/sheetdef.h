@@ -12,10 +12,6 @@
 #ifndef __WX_SHEETDEF_H__
 #define __WX_SHEETDEF_H__
 
-//#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-//    #pragma interface "sheetdef.h"
-//#endif
-
 #include "wx/defs.h"
 #include "wx/datetime.h"
 #include "wx/sheet/wx24defs.h"   // wx2.4 backwards compatibility

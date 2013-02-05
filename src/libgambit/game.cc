@@ -73,6 +73,7 @@ void GameTreeActionRep::DeleteAction(void)
     m_infoset->m_members[i]->children.Remove(where)->Invalidate();
   }
   m_infoset->m_efg->ClearComputedValues();
+  m_infoset->m_efg->Canonicalize();
 }
 
 GameInfoset GameTreeActionRep::GetInfoset(void) const { return m_infoset; }
@@ -117,6 +118,7 @@ void GameTreeInfosetRep::SetPlayer(GamePlayer p_player)
   p_player->m_infosets.Append(this);
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
 }
 
 bool GameTreeInfosetRep::Precedes(GameNode p_node) const
@@ -158,6 +160,7 @@ GameAction GameTreeInfosetRep::InsertAction(GameAction p_action /* =0 */)
   }
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
   return action;
 }
 
@@ -218,6 +221,7 @@ void GameTreeInfosetRep::Reveal(GamePlayer p_player)
   }
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
 }
 
 GameNode GameTreeInfosetRep::GetMember(int p_index) const 
@@ -347,7 +351,12 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
   }
   else if (nn)  {
     for (; ; nn = nn->m_parent->ptr->whichbranch)  {
-      m = dynamic_cast<GameTreeNodeRep *>(nn->GetNextSibling().operator->());
+      if (!nn->GetNextSibling()) {
+	m = 0;
+      }
+      else {
+	m = dynamic_cast<GameTreeNodeRep *>(nn->GetNextSibling().operator->());
+      }
       if (m || nn->m_parent->ptr == NULL)   break;
     }
     if (m)  {
@@ -483,6 +492,7 @@ void GameTreeNodeRep::DeleteParent(void)
 
   oldParent->Invalidate();
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
 }
 
 void GameTreeNodeRep::DeleteTree(void)
@@ -502,6 +512,7 @@ void GameTreeNodeRep::DeleteTree(void)
   m_label = "";
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
 }
 
 void GameTreeNodeRep::CopySubtree(GameTreeNodeRep *src, GameTreeNodeRep *stop)
@@ -536,6 +547,7 @@ void GameTreeNodeRep::CopyTree(GameNode p_src)
     }
 
     m_efg->ClearComputedValues();
+    m_efg->Canonicalize();
   }
 }
 
@@ -566,6 +578,7 @@ void GameTreeNodeRep::MoveTree(GameNode p_src)
   outcome = 0;
   
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
 }
 
 void GameTreeNodeRep::SetInfoset(GameInfoset p_infoset)
@@ -580,6 +593,7 @@ void GameTreeNodeRep::SetInfoset(GameInfoset p_infoset)
   infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
 }
 
 GameInfoset GameTreeNodeRep::LeaveInfoset(void)
@@ -599,6 +613,7 @@ GameInfoset GameTreeNodeRep::LeaveInfoset(void)
   }
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
   return infoset;
 }
 
@@ -624,6 +639,7 @@ GameInfoset GameTreeNodeRep::AppendMove(GameInfoset p_infoset)
   }
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
   return infoset;
 }
   
@@ -660,6 +676,7 @@ GameInfoset GameTreeNodeRep::InsertMove(GameInfoset p_infoset)
   }
 
   m_efg->ClearComputedValues();
+  m_efg->Canonicalize();
   return p_infoset;
 }
 
@@ -700,7 +717,7 @@ void PureBehavProfile::SetAction(const GameAction &action)
 }
 
 template <class T> 
-T PureBehavProfile::GetNodeValue(const GameNode &p_node, 
+T PureBehavProfile::GetPayoff(const GameNode &p_node,
 				 int pl) const
 {
   T payoff(0);
@@ -716,13 +733,13 @@ T PureBehavProfile::GetNodeValue(const GameNode &p_node,
       for (int i = 1; i <= node->NumChildren(); i++) {
 	GameTreeInfosetRep *infoset = node->infoset;
 	payoff += (infoset->GetActionProb(i, (T) 0) *
-		   GetNodeValue<T>(node->children[i], pl));
+		   GetPayoff<T>(node->children[i], pl));
       }
     }
     else {
       int player = node->GetPlayer()->GetNumber();
       int iset = node->GetInfoset()->GetNumber();
-      payoff += GetNodeValue<T>(node->children[m_profile[player][iset]->GetNumber()], 
+      payoff += GetPayoff<T>(node->children[m_profile[player][iset]->GetNumber()], 
 				pl);
     }
   }
@@ -731,11 +748,11 @@ T PureBehavProfile::GetNodeValue(const GameNode &p_node,
 }
 
 // Explicit instantiations
-template double PureBehavProfile::GetNodeValue(const GameNode &, int pl) const;
-template Rational PureBehavProfile::GetNodeValue(const GameNode &, int pl) const;
+template double PureBehavProfile::GetPayoff(const GameNode &, int pl) const;
+template Rational PureBehavProfile::GetPayoff(const GameNode &, int pl) const;
 
 template <class T>
-T PureBehavProfile::GetActionValue(const GameAction &p_action) const
+T PureBehavProfile::GetPayoff(const GameAction &p_action) const
 {
   PureBehavProfile copy(*this);
   copy.SetAction(p_action);
@@ -743,8 +760,8 @@ T PureBehavProfile::GetActionValue(const GameAction &p_action) const
 }
 
 // Explicit instantiations
-template double PureBehavProfile::GetActionValue(const GameAction &) const;
-template Rational PureBehavProfile::GetActionValue(const GameAction &) const;
+template double PureBehavProfile::GetPayoff(const GameAction &) const;
+template Rational PureBehavProfile::GetPayoff(const GameAction &) const;
 
 //========================================================================
 //                       class GameExplicitRep
@@ -815,11 +832,12 @@ Rational GameExplicitRep::GetMaxPayoff(int player) const
 }
 
 //------------------------------------------------------------------------
-//                   GameRep: Dimensions of the game
+//                GameExplicitRep: Dimensions of the game
 //------------------------------------------------------------------------
 
 Array<int> GameExplicitRep::NumStrategies(void) const
 {
+  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
   Array<int> dim(m_players.Length());
   for (int pl = 1; pl <= m_players.Length(); pl++) {
     dim[pl] = m_players[pl]->m_strategies.Length();
@@ -829,6 +847,7 @@ Array<int> GameExplicitRep::NumStrategies(void) const
 
 GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 {
+  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
   for (int pl = 1, i = 1; pl <= m_players.Length(); pl++) {
     for (int st = 1; st <= m_players[pl]->m_strategies.Length(); st++, i++) {
       if (p_index == i) {
@@ -841,6 +860,7 @@ GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 
 int GameExplicitRep::MixedProfileLength(void) const
 {
+  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
   int strats = 0;
   for (int i = 1; i <= m_players.Length();
        strats += m_players[i++]->m_strategies.Length());

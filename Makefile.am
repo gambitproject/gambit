@@ -241,8 +241,59 @@ EXTRA_DIST = \
 	contrib/games/wink3.nfg \
 	contrib/games/winkels.nfg \
 	contrib/games/yamamoto.nfg \
-	contrib/games/zero.nfg
-
+	contrib/games/zero.nfg \
+	src/python/setup.py \
+	src/python/gambit/__init__.py \
+	src/python/gambit/cmdline.py \
+	src/python/gambit/enumeration.py \
+	src/python/gambit/gameiter.py \
+	src/python/gambit/levelk.py \
+	src/python/gambit/nash.py \
+	src/python/gambit/pctrace.py \
+	src/python/gambit/profiles.py \
+	src/python/gambit/qre.py \
+	src/python/gambit/games/__init__.py \
+	src/python/gambit/games/contest.py \
+	src/python/gambit/games/meanstat.py \
+	src/python/gambit/games/public.py \
+	src/python/gambit/lib/__init__.py \
+	src/python/gambit/lib/action.pxi \
+	src/python/gambit/lib/basegame.pxi \
+	src/python/gambit/lib/behav.pxi \
+	src/python/gambit/lib/error.py \
+	src/python/gambit/lib/game.pxi \
+	src/python/gambit/lib/infoset.pxi \
+	src/python/gambit/lib/libgambit.cpp \
+	src/python/gambit/lib/libgambit.pyx \
+	src/python/gambit/lib/mixed.pxi \
+	src/python/gambit/lib/node.pxi \
+	src/python/gambit/lib/outcome.pxi \
+	src/python/gambit/lib/player.pxi \
+	src/python/gambit/lib/strategy.pxi \
+	src/python/gambit/lib/stratspt.pxi \
+	src/python/gambit/lib/util.h \
+	src/python/gambit/tests/test_actions.py \
+	src/python/gambit/tests/test_behav.py \
+	src/python/gambit/tests/test_extensive.py \
+	src/python/gambit/tests/test_game.py \
+	src/python/gambit/tests/test_infosets.py \
+	src/python/gambit/tests/test_mixed.py \
+	src/python/gambit/tests/test_node.py \
+	src/python/gambit/tests/test_outcomes.py \
+	src/python/gambit/tests/test_players.py \
+	src/python/gambit/tests/test_strategic.py \
+	src/python/gambit/tests/test_strspt.py \
+	src/python/gambit/tests/test_stratprofiles.py \
+	src/python/gambit/tests/test_strategies.py \
+	src/python/gambit/tests/test_games/basic_extensive_game.efg \
+	src/python/gambit/tests/test_games/complicated_extensive_game.efg \
+	src/python/gambit/tests/test_games/const_sum_game.nfg \
+	src/python/gambit/tests/test_games/mixed_behavior_game.efg \
+	src/python/gambit/tests/test_games/mixed_strategy.nfg \
+	src/python/gambit/tests/test_games/non_const_sum_game.nfg \
+	src/python/gambit/tests/test_games/not_perfect_recall.efg \
+	src/python/gambit/tests/test_games/payoff_game.nfg \
+	src/python/gambit/tests/test_games/perfect_recall.efg
 
 
 # lib_LTLIBRARIES = libgambit.la
@@ -673,6 +724,8 @@ gambit_SOURCES = \
 	src/gui/analysis.h \
 	src/gui/edittext.cc \
 	src/gui/edittext.h \
+        src/gui/dcsvg.cc \
+        src/gui/dcsvg.h \
 	src/gui/dlabout.cc \
 	src/gui/dlabout.h \
 	src/gui/dleditmove.cc \
@@ -727,9 +780,7 @@ gambit_SOURCES = \
 	src/gui/tinyxml.cc \
 	src/gui/tinyxml.h \
 	src/gui/tinyxmlerror.cc \
-	src/gui/tinyxmlparser.cc \
-	src/gui/dcsvg.cc \
-	src/gui/dcsvg.h
+	src/gui/tinyxmlparser.cc
 
 
 gambit_LDADD = \

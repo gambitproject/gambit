@@ -10,10 +10,6 @@
 #ifndef __WX_RANGE_H__
 #define __WX_RANGE_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "range.h"
-#endif
-
 #include "wx/wxthings/thingdef.h"
 
 class WXDLLIMPEXP_THINGS wxRangeInt;

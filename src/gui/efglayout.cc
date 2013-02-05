@@ -305,7 +305,7 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
 
     std::string payoff = outcome->GetPayoff<std::string>(pl);
 
-    if (payoff.find('/') != (unsigned int) -1) {
+    if (payoff.find('/') != std::string::npos) {
       p_dc.SetPen(wxPen(m_style->GetPlayerColor(pl), 1, wxSOLID));
       int oldX = point.x;
       point = DrawFraction(p_dc, point, outcome->GetPayoff<Gambit::Rational>(pl));

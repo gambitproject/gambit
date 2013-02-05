@@ -19,10 +19,6 @@
 // wx/src/generic/gridctrl.cpp          1.15
 // wx/src/generic/gridsel.cpp           1.20
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "sheet.h"
-#endif
-
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -2586,7 +2582,11 @@ bool wxSheetDataObject::SetData(size_t len, const void *buf)
     if (len < 2u)
         return false; // I guess?
     
+#if wxCHECK_VERSION(2, 9, 0)
+    wxString strBuf((const wchar_t*) wxConvertMB2WX((const char *)buf), len); // probably not Unicode safe
+#else
     wxString strBuf(wxConvertMB2WX((const char *)buf), len); // probably not Unicode safe
+#endif
     m_data = strBuf;
     
     //wxPrintf(wxT("Data len %d %d\n"), m_data.Len(), len);
@@ -3996,7 +3996,7 @@ void wxSheet::DrawAllGridLines( wxDC& dc, const wxRegion & WXUNUSED(reg) )
         }
         
         if (done)
-            dc.SetClippingRegion( clippedcells );
+            dc.SetDeviceClippingRegion( clippedcells );
     }
     
     dc.SetPen( wxPen(GetGridLineColour(), 1, wxSOLID) );
@@ -4167,7 +4167,11 @@ void wxSheet::DrawRowColResizingMarker( int newDragPos )
         }
     }
     
+#if wxCHECK_VERSION(2, 9, 0)
+    wxRasterOperationMode log_fn = dc.GetLogicalFunction();
+#else
     int log_fn = dc.GetLogicalFunction();
+#endif  /* wxCHECK_VERSION */
     dc.SetLogicalFunction(wxINVERT);
 
     if (m_dragLastPos >= 0)
@@ -4395,7 +4399,7 @@ void wxSheet::DrawTextRectangle( wxDC& dc, const wxArrayString& lines,
     int l;
     float x = 0.0, y = 0.0;
     long textWidth=0, textHeight=0;
-    long lineWidth=0, lineHeight=0;
+    wxCoord lineWidth=0, lineHeight=0;
     wxArrayInt lineWidths, lineHeights;
     
     // Measure the text extent once, Gtk2 is slow (takes 2sec off 23sec run)
@@ -4530,7 +4534,7 @@ bool wxSheet::GetTextBoxSize( wxDC& dc, const wxArrayString& lines,
                               long *width, long *height ) const
 {
     long w = 0, h = 0;
-    long lineW, lineH;
+    wxCoord lineW, lineH;
     size_t i, count = lines.GetCount();
     for ( i = 0; i < count; i++ )
     {
@@ -6395,7 +6399,7 @@ void wxSheet::OnMouseTimer( wxTimerEvent &WXUNUSED(event) )
     mEvt.m_x = m_mousePos.x;
     mEvt.m_y = m_mousePos.y;
     
-    win->ProcessEvent(mEvt);
+    win->GetEventHandler()->ProcessEvent(mEvt);
     StartMouseTimer();
 }
 

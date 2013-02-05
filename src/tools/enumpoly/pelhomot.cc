@@ -72,7 +72,7 @@ static integer c__1 = 1;
 
     /* Builtin functions */
     /*    double sqrt(double); CANT DECLARE BUILTINS UNDER C++ */
-    integer s_wsfe(), do_fio(), e_wsfe(); /* in Hom_params.c these are int's */
+    // integer s_wsfe(), do_fio(), e_wsfe(); /* in Hom_params.c these are int's */
 
     /* Local variables */
     static int nfec;
@@ -763,8 +763,8 @@ doublereal d1mach_(integer *i)
     doublereal ret_val = 0.0;
 
     /* Builtin functions */
-    /* Subroutine */ int s_stop();
-    integer s_wsfe(), do_fio(), e_wsfe();
+    /* Subroutine */ // int s_stop();
+    // integer s_wsfe(), do_fio(), e_wsfe();
 
     /* Local variables */
 #define log10 ((integer *)&equiv_4 + 8)
@@ -3094,7 +3094,7 @@ struct Pmatrix_t {
    **      mem_alloc,
    **      mem_free -- call malloc and free with some extra book-keeping.
  */
-void bad_error(char *);
+void bad_error(const char *);
 
 
 /* WEIRD - The first pair of declarations below are the global one,

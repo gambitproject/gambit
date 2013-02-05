@@ -21,8 +21,10 @@
 //
 
 #include <unistd.h>
+#include <getopt.h>
 #include <cstdlib>
 #include <iostream>
+#include <cerrno>
 #include <iomanip>
 #include <fstream>
 #include "libgambit/libgambit.h"
@@ -450,7 +452,7 @@ Gambit::Rational nfgSimpdiv::getlabel(Gambit::MixedStrategyProfile<Gambit::Ratio
     maxval=(Gambit::Rational(-1000000));
     jj=0;
     for(j=1;j<=yy.GetSupport().NumStrategies(i);j++) {
-      pay=yy.GetStrategyValue(yy.GetSupport().GetStrategy(i,j));
+      pay=yy.GetPayoff(yy.GetSupport().GetStrategy(i,j));
       payoff+=(yy[yy.GetSupport().GetStrategy(i,j)]*pay);
       if(pay>maxval) {
 	maxval=pay;
@@ -593,20 +595,21 @@ void PrintBanner(std::ostream &p_stream)
 void PrintHelp(char *progname)
 {
   PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts game on standard input.\n";
+  std::cerr << "Usage: " << progname << " [OPTIONS] [file]\n";
+  std::cerr << "If file is not specified, attempts to read game from standard input.\n";
   std::cerr << "With no options, computes one approximate Nash equilibrium.\n\n";
 
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibria as floating point, with DECIMALS digits\n";
   std::cerr << "                   (default is to show as rational numbers)\n";
   std::cerr << "  -g MULT          granularity of grid refinement at each step (default is 2)\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -r DENOM         generate random starting points with denominator DENOM\n";
   std::cerr << "  -n COUNT         number of starting points to generate (requires -r)\n";
   std::cerr << "  -s FILE          file containing starting points\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
-  std::cerr << "  -v               verbose mode (shows intermediate output)\n";
+  std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
+  std::cerr << "  -v, --version    print version information\n";
   std::cerr << "                   (default is to only show equilibria)\n";
   exit(1);
 }
@@ -619,9 +622,18 @@ int main(int argc, char *argv[])
   int randDenom = 1, stopAfter = 1;
   bool quiet = false;
 
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { "verbose", 0, NULL, 'V'  },
+    { 0,    0,    0,    0   }
+  };
   int c;
-  while ((c = getopt(argc, argv, "g:hvn:r:s:d:qS")) != -1) {
+  while ((c = getopt_long(argc, argv, "g:hVvn:r:s:d:qS", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'd':
       g_numDecimals = atoi(optarg);
       g_useFloat = true;
@@ -645,7 +657,7 @@ int main(int argc, char *argv[])
     case 'q':
       quiet = true;
       break;
-    case 'v':
+    case 'V':
       g_verbose = true;
       break;
     case 'S':
@@ -667,10 +679,21 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  try {
-    Gambit::Game game = Gambit::ReadGame(std::cin);
+  std::istream* input_stream = &std::cin;
+  std::ifstream file_stream;
+  if (optind < argc) {
+    file_stream.open(argv[optind]);
+    if (!file_stream.is_open()) {
+      std::ostringstream error_message;
+      error_message << argv[0] << ": " << argv[optind];
+      perror(error_message.str().c_str());
+      exit(1);
+    }
+    input_stream = &file_stream;
+  }
 
-    game->BuildComputedValues();
+  try {
+    Gambit::Game game = Gambit::ReadGame(*input_stream);
 
     if (startFile != "") {
       std::ifstream startPoints(startFile.c_str());

@@ -22,7 +22,10 @@
 
 #include <cstdlib>
 #include <unistd.h>
+#include <getopt.h>
 #include <iostream>
+#include <fstream>
+#include <cerrno>
 #include <iomanip>
 
 #include "libgambit/libgambit.h"
@@ -117,15 +120,16 @@ void PrintBanner(std::ostream &p_stream)
 void PrintHelp(char *progname)
 {
   PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts strategic game on standard input.\n";
-  std::cerr << "Converts a Gambit .nfg file to LaTeX tables\n";
+  std::cerr << "Usage: " << progname << " [OPTIONS] [file]\n";
+  std::cerr << "If file is not specified, attempts to read game from standard input.\n";
+  std::cerr << "Converts a game to LaTeX tables\n";
 
   std::cerr << "Options:\n";
   std::cerr << "  -c PLAYER        the player to show on columns (default is 2)\n";
   std::cerr << "  -r PLAYER        the player to show on rows (default is 1)\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 
@@ -136,8 +140,16 @@ int main(int argc, char *argv[])
   int rowPlayer = 1, colPlayer = 2;
   bool quiet = false;
 
-  while ((c = getopt(argc, argv, "r:c:hq")) != -1) {
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { 0,    0,    0,    0   }
+  };
+  while ((c = getopt_long(argc, argv, "r:c:hvq", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'r':
       rowPlayer = atoi(optarg);
       break;
@@ -172,10 +184,23 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
+  std::istream* input_stream = &std::cin;
+  std::ifstream file_stream;
+  if (optind < argc) {
+    file_stream.open(argv[optind]);
+    if (!file_stream.is_open()) {
+      std::ostringstream error_message;
+      error_message << argv[0] << ": " << argv[optind];
+      perror(error_message.str().c_str());
+      exit(1);
+    }
+    input_stream = &file_stream;
+  }
+
   Gambit::Game nfg;
 
   try {
-    nfg = Gambit::ReadGame(std::cin);
+    nfg = Gambit::ReadGame(*input_stream);
   }
   catch (...) {
     return 1;

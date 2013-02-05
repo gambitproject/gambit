@@ -949,7 +949,6 @@ Game ReadGame(std::istream &p_file) throw (InvalidFileException)
       TreeData treeData;
       Game game = NewTree();
       ParseEfg(parser, game, treeData);
-      game->Canonicalize();
       return game;
     }
     else {

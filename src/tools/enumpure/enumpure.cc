@@ -21,8 +21,11 @@
 //
 
 #include <cstdlib>
+#include <getopt.h>
 #include <unistd.h>
 #include <iostream>
+#include <fstream>
+#include <cerrno>
 #include "libgambit/libgambit.h"
 #include "libgambit/subgame.h"
 
@@ -61,7 +64,7 @@ List<MixedBehavProfile<Rational> > SolveBehav(const BehavSupport &p_support,
 	GameInfoset infoset = player->GetInfoset(iset);
 	for (int act = 1; act <= infoset->NumActions(); act++) {
 	  GameAction action = infoset->GetAction(act);
-	  if (citer->GetActionValue<Rational>(action) > current)  {
+	  if (citer->GetPayoff<Rational>(action) > current)  {
 	    isNash = false;
 	    break;
 	  }
@@ -155,15 +158,16 @@ void PrintBanner(std::ostream &p_stream)
 void PrintHelp(char *progname)
 {
   PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts game on standard input.\n";
+  std::cerr << "Usage: " << progname << " [OPTIONS] [file]\n";
+  std::cerr << "If file is not specified, attempts to read game from standard input.\n";
   std::cerr << "With no options, locates all Nash equilibria in pure strategies.\n\n";
 
   std::cerr << "Options:\n";
   std::cerr << "  -S               use strategic game\n";
   std::cerr << "  -P               find only subgame-perfect equilibria\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 
@@ -173,9 +177,17 @@ int main(int argc, char *argv[])
   opterr = 0;
   bool quiet = false, useStrategic = false, bySubgames = false;
 
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { 0,    0,    0,    0   }
+  };
   int c;
-  while ((c = getopt(argc, argv, "hqSP")) != -1) {
+  while ((c = getopt_long(argc, argv, "vhqSP", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'S':
       useStrategic = true;
       break;
@@ -205,11 +217,23 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
+  std::istream* input_stream = &std::cin;
+  std::ifstream file_stream;
+  if (optind < argc) {
+    file_stream.open(argv[optind]);
+    if (!file_stream.is_open()) {
+      std::ostringstream error_message;
+      error_message << argv[0] << ": " << argv[optind];
+      perror(error_message.str().c_str());
+      exit(1);
+    }
+    input_stream = &file_stream;
+  }
+
   try {
-    Game game = ReadGame(std::cin);
+    Game game = ReadGame(*input_stream);
 
     if (!game->IsTree() || useStrategic) {
-      game->BuildComputedValues();
       SolveMixed(game);
     }
     else {

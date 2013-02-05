@@ -1,0 +1,4 @@
+NFG 1 R "Test payoff game"
+{ "Player 1" "Player 2" } { 2 2 }
+
+7 3 4 1 5 4 10 8

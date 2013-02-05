@@ -10,6 +10,9 @@
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
+#if !wxCHECK_VERSION(2, 9, 0)
+/* This file is only required under wxWidgets 2.8.
+   In fact, it does not build at all under wxWidgets 2.9. */
 
 #ifdef __BORLANDC__
 #pragma hdrstop
@@ -847,3 +850,5 @@ void wxSVGFileDC::write(const wxString &s)
 #pragma warn .rch
 #pragma warn .ccc
 #endif
+
+#endif  /* wxCHECK_VERSION */

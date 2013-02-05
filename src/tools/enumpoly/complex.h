@@ -21,9 +21,6 @@
 //
 
 #ifndef _Complex_h
-#if defined(__GNUG__) && !defined(__APPLE_CC__)
-#pragma interface
-#endif
 #define _Complex_h 1
 
 #include <cmath>

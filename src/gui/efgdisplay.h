@@ -45,7 +45,7 @@ public:
 
   bool IsEditing(void) const { return IsShown(); }
 
-  gbtNodeEntry *GetEntry(void) const { return m_entry; }
+  gbtNodeEntry *GetNodeEntry(void) const { return m_entry; }
   Gambit::GameOutcome GetOutcome(void) const { return m_outcome; }
   int GetPlayer(void) const { return m_player; }
  

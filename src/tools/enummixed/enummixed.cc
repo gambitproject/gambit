@@ -22,7 +22,10 @@
 
 #include <cstdlib>
 #include <unistd.h>
+#include <getopt.h>
 #include <iostream>
+#include <fstream>
+#include <cerrno>
 #include <iomanip>
 
 #include "libgambit/libgambit.h"
@@ -301,8 +304,8 @@ void PrintBanner(std::ostream &p_stream)
 void PrintHelp(char *progname)
 {
   PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts game on standard input.\n";
+  std::cerr << "Usage: " << progname << " [OPTIONS] [file]\n";
+  std::cerr << "If file is not specified, attempts to read game from standard input.\n";
   std::cerr << "With no options, reports all Nash equilibria found.\n\n";
 
   std::cerr << "Options:\n";
@@ -311,8 +314,9 @@ void PrintHelp(char *progname)
   std::cerr << "  -D               don't eliminate dominated strategies first\n";
   std::cerr << "  -L               use lrslib for enumeration (experimental!)\n";
   std::cerr << "  -c               output connectedness information\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 
@@ -321,8 +325,16 @@ int main(int argc, char *argv[])
   int c;
   bool useFloat = false, uselrs = false, quiet = false, eliminate = true;
 
-  while ((c = getopt(argc, argv, "d:DhqcS")) != -1) {
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { 0,    0,    0,    0   }
+  };
+  while ((c = getopt_long(argc, argv, "d:DvhqcS", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'd':
       useFloat = true;
       g_numDecimals = atoi(optarg);
@@ -361,15 +373,26 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
+  std::istream* input_stream = &std::cin;
+  std::ifstream file_stream;
+  if (optind < argc) {
+    file_stream.open(argv[optind]);
+    if (!file_stream.is_open()) {
+      std::ostringstream error_message;
+      error_message << argv[0] << ": " << argv[optind];
+      perror(error_message.str().c_str());
+      exit(1);
+    }
+    input_stream = &file_stream;
+  }
+
   try {
-    Game game = ReadGame(std::cin);
+    Game game = ReadGame(*input_stream);
 
     if (game->NumPlayers() != 2) {
       std::cerr << "Error: Game does not have two players.\n";
       return 1;
     }
-
-    game->BuildComputedValues();
 
     StrategySupport support(game);
     if (eliminate) {

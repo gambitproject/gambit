@@ -73,7 +73,7 @@ Error Conditions:
 
 Sym_ent install(char *s, Gen_node t)
 {
- Sym_ent np,lookup();
+  Sym_ent np; // Sym_ent lookup();
  int hashval;
 
  if (s==NULL||t==NULL) return NULL;

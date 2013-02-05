@@ -21,9 +21,11 @@
 //
 
 #include <unistd.h>
+#include <getopt.h>
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <cerrno>
 #include "libgambit/libgambit.h"
 
 #include "nfgame.h"
@@ -56,13 +58,14 @@ void PrintBanner(std::ostream &p_stream)
 void PrintHelp(char *progname)
 {
   PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts game on standard input.\n";
+  std::cerr << "Usage: " << progname << " [OPTIONS] [file]\n";
+  std::cerr << "If file is not specified, attempts to read game from standard input.\n";
 
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 
@@ -116,9 +119,17 @@ int main(int argc, char *argv[])
   opterr = 0;
   bool quiet = false;
 
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { 0,    0,    0,    0   }
+  };
   int c;
-  while ((c = getopt(argc, argv, "d:qhS")) != -1) {
+  while ((c = getopt_long(argc, argv, "d:vqhS", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'q':
       quiet = true;
       break;
@@ -147,11 +158,22 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  try {
-    Gambit::Game game = Gambit::ReadGame(std::cin);
+  std::istream* input_stream = &std::cin;
+  std::ifstream file_stream;
+  if (optind < argc) {
+    file_stream.open(argv[optind]);
+    if (!file_stream.is_open()) {
+      std::ostringstream error_message;
+      error_message << argv[0] << ": " << argv[optind];
+      perror(error_message.str().c_str());
+      exit(1);
+    }
+    input_stream = &file_stream;
+  }
 
-    game->BuildComputedValues();
-    
+  try {
+    Gambit::Game game = Gambit::ReadGame(*input_stream);
+
     Gambit::Array<double> pert(game->MixedProfileLength());
     for (int i = 1; i <= pert.Length(); i++) {
       pert[i] = 1.0;

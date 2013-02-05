@@ -28,9 +28,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <iostream>
 #include <sstream>
 
-#if defined(__GNUG__) && !defined(__APPLE_CC__)
-#pragma implementation
-#endif
 #include "libgambit.h"
 #include "rational.h"
 #include <cmath>

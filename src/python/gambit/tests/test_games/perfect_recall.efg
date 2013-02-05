@@ -1,0 +1,5 @@
+EFG 2 R "A small test game with perfect recall" { "Player 1" }
+""
+
+p "" 1 1 "" { "1" } 0
+t "" 0

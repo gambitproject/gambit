@@ -49,6 +49,8 @@ public:
   //@{
   /// Constructor; initializes reference count
   GameObject(void) : m_refCount(0), m_valid(true) { }
+  /// Destructor
+  virtual ~GameObject() { }
   //@}
 
   /// @name Validation
@@ -78,6 +80,14 @@ public:
   const char *what(void) const throw()  { return "Dereferencing null pointer"; }
 };
 
+/// An exception thrown when attempting to dereference an invalidated object 
+class InvalidObjectException : public Exception {
+public:
+  virtual ~InvalidObjectException() throw() { }
+  const char *what(void) const throw()  { return "Dereferencing an invalidated object"; }
+};
+
+
 //
 // This is a handle class that is used by all calling code to refer to
 // member objects of games.  It takes care of all the reference-counting
@@ -104,7 +114,9 @@ public:
     }
 
   T *operator->(void) const 
-    { if (!rep || !rep->IsValid()) throw NullException(); return rep; }
+    { if (!rep) throw NullException();
+      if (!rep->IsValid()) throw InvalidObjectException(); 
+      return rep; }
 
   bool operator==(const GameObjectPtr<T> &r) const
   { return (rep == r.rep); }
@@ -435,12 +447,11 @@ public:
   /// @name Strategies
   //@{
   /// Returns the number of strategies available to the player
-  int NumStrategies(void) const { return m_strategies.Length(); }
+  int NumStrategies(void) const; 
   /// Returns the st'th strategy for the player
-  GameStrategy GetStrategy(int st) const { return m_strategies[st]; }
+  GameStrategy GetStrategy(int st) const;
   /// Returns a forward iterator over the strategies
-  GameStrategyIterator Strategies(void) const 
-    { return GameStrategyIterator(m_strategies); }
+  GameStrategyIterator Strategies(void) const; 
   /// Creates a new strategy for the player
   GameStrategy NewStrategy(void);
   //@}
@@ -567,9 +578,9 @@ public:
   template <class T> T GetPayoff(const GamePlayer &p_player) const
     { return GetPayoff<T>(p_player->GetNumber()); }
   /// Get the payoff to player pl conditional on reaching a node
-  template <class T> T GetNodeValue(const GameNode &, int pl) const;
+  template <class T> T GetPayoff(const GameNode &, int pl) const;
   /// Get the payoff to playing the action, conditional on the profile
-  template <class T> T GetActionValue(const GameAction &) const;
+  template <class T> T GetPayoff(const GameAction &) const;
   //@}
 };
 
@@ -589,6 +600,20 @@ protected:
   std::string m_title, m_comment;
 
   GameRep(void) { }
+
+protected:
+  /// @name Managing the representation
+  //@{
+  /// Renumber all game objects in a canonical way
+  virtual void Canonicalize(void) { }  
+  /// Clear out any computed values
+  virtual void ClearComputedValues(void) const { }
+  /// Build any computed values anew
+  virtual void BuildComputedValues(void) { }
+  /// Have computed values been built?
+  virtual bool HasComputedValues(void) const { return false; }
+  //@}
+
 
 public:
   /// @name Lifecycle
@@ -627,18 +652,6 @@ public:
   /// Returns true if the game is perfect recall
   virtual bool IsPerfectRecall(void) const
   { GameInfoset s, t; return IsPerfectRecall(s, t); }
-  //@}
-
-  /// @name Managing the representation
-  //@{
-  /// Renumber all game objects in a canonical way
-  virtual void Canonicalize(void) { }  
-  /// Clear out any computed values
-  virtual void ClearComputedValues(void) const { }
-  /// Build any computed values anew
-  virtual void BuildComputedValues(void) { }
-  /// Have computed values been built?
-  virtual bool HasComputedValues(void) const { return false; }
   //@}
 
   /// @name Writing data files
@@ -738,15 +751,21 @@ inline Game GameOutcomeRep::GetGame(void) const { return m_game; }
 inline GamePlayer GameStrategyRep::GetPlayer(void) const { return m_player; }
 
 inline Game GamePlayerRep::GetGame(void) const { return m_game; }
+inline int GamePlayerRep::NumStrategies(void) const 
+{ m_game->BuildComputedValues(); return m_strategies.Length(); }
+inline GameStrategy GamePlayerRep::GetStrategy(int st) const 
+{ m_game->BuildComputedValues(); return m_strategies[st]; }
+inline GameStrategyIterator GamePlayerRep::Strategies(void) const 
+{ m_game->BuildComputedValues(); return GameStrategyIterator(m_strategies); }
 
 template<> inline double PureBehavProfile::GetPayoff(int pl) const
-{ return GetNodeValue<double>(m_efg->GetRoot(), pl); }
+{ return GetPayoff<double>(m_efg->GetRoot(), pl); }
 
 template<> inline Rational PureBehavProfile::GetPayoff(int pl) const
-{ return GetNodeValue<Rational>(m_efg->GetRoot(), pl); }
+{ return GetPayoff<Rational>(m_efg->GetRoot(), pl); }
 
 template<> inline std::string PureBehavProfile::GetPayoff(int pl) const
-{ return lexical_cast<std::string>(GetNodeValue<Rational>(m_efg->GetRoot(), pl)); }
+{ return lexical_cast<std::string>(GetPayoff<Rational>(m_efg->GetRoot(), pl)); }
 
 //=======================================================================
 

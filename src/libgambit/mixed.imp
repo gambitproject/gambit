@@ -45,7 +45,7 @@ template <class T> void MixedStrategyProfileRep<T>::SetCentroid(void)
     T center = ((T) 1) / ((T) m_support.NumStrategies(player->GetNumber()));
     for (SupportStrategyIterator strategy = m_support.Strategies(player);
 	 !strategy.AtEnd(); strategy++) {
-      m_probs[strategy->GetId()] = center;
+      (*this)[*strategy] = center;
     }
   }
 }
@@ -365,7 +365,7 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue(void) const
     for (SupportStrategyIterator strategy = m_rep->m_support.Strategies(player);
 	 !strategy.AtEnd(); strategy++) {
       const T &prob = (*this)[strategy];
-      values[m_rep->m_support.GetIndex(strategy)] = GetStrategyValue(strategy);
+      values[m_rep->m_support.GetIndex(strategy)] = GetPayoff(strategy);
       avg += prob * values[m_rep->m_support.GetIndex(strategy)];
       sum += prob;
       if (prob < (T) 0) {

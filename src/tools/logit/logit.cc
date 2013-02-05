@@ -24,7 +24,9 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <cerrno>
 #include <unistd.h>
+#include <getopt.h>
 #include "libgambit/libgambit.h"
 #include "efglogit.h"
 #include "nfglogit.h"
@@ -41,8 +43,8 @@ void PrintBanner(std::ostream &p_stream)
 void PrintHelp(char *progname)
 {
   PrintBanner(std::cerr);
-  std::cerr << "Usage: " << progname << " [OPTIONS]\n";
-  std::cerr << "Accepts game on standard input.\n";
+  std::cerr << "Usage: " << progname << " [OPTIONS] [file]\n";
+  std::cerr << "If file is not specified, attempts to read game from standard input.\n";
 
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
@@ -52,10 +54,11 @@ void PrintHelp(char *progname)
   std::cerr << "  -l LAMBDA        compute QRE at `lambda` accurately\n";
   std::cerr << "  -L FILE          compute maximum likelihood estimates;\n";
   std::cerr << "                   read strategy frequencies from FILE\n";
-  std::cerr << "  -h               print this help message\n";
+  std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -e               print only the terminal equilibrium\n";
   std::cerr << "                   (default is to print the entire branch)\n";
+  std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 
@@ -95,9 +98,17 @@ int main(int argc, char *argv[])
   bool fullGraph = true;
   int decimals = 6;
 
+  int long_opt_index = 0;
+  struct option long_options[] = {
+    { "help", 0, NULL, 'h'   },
+    { "version", 0, NULL, 'v'  },
+    { 0,    0,    0,    0   }
+  };
   int c;
-  while ((c = getopt(argc, argv, "d:s:a:m:qehSL:p:l:")) != -1) {
+  while ((c = getopt_long(argc, argv, "d:s:a:m:vqehSL:p:l:", long_options, &long_opt_index)) != -1) {
     switch (c) {
+    case 'v':
+      PrintBanner(std::cerr); exit(1);
     case 'q':
       quiet = true;
       break;
@@ -148,9 +159,22 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
+  std::istream* input_stream = &std::cin;
+  std::ifstream file_stream;
+  if (optind < argc) { 
+    file_stream.open(argv[optind]);
+    if (!file_stream.is_open()) {
+      std::ostringstream error_message;
+      error_message << argv[0] << ": " << argv[optind];
+      perror(error_message.str().c_str());
+      exit(1);
+    }
+    input_stream = &file_stream;
+  }
+
   try {
     Gambit::Array<double> frequencies;
-    Gambit::Game game = Gambit::ReadGame(std::cin);
+    Gambit::Game game = Gambit::ReadGame(*input_stream);
 
     if (mleFile != "" && (!game->IsTree() || useStrategic)) {
       frequencies = Gambit::Array<double>(game->MixedProfileLength());
@@ -160,8 +184,6 @@ int main(int argc, char *argv[])
   
 
     if (!game->IsTree() || useStrategic) {
-      game->BuildComputedValues();
-
       if (startFile == "") {
 	Gambit::MixedStrategyProfile<double> start(game->NewMixedStrategyProfile(0.0));
 	StrategicQREPathTracer tracer(start);
