@@ -3,7 +3,12 @@ File format interface with Game Theory Explorer
 """
 
 from fractions import Fraction
-from lxml import etree
+try:
+    from lxml import etree
+    has_lxml = True
+except ImportError:
+    has_lxml = False
+    
 import gambit.lib.libgambit
 
 def read_game_subtree(game, node, xml_node):
@@ -32,6 +37,8 @@ def read_game_subtree(game, node, xml_node):
             read_game_subtree(game, node.children[i], xml_child)
 
 def read_game(f):
+    if not has_lxml:
+        raise NotImplementedError("Reading and writing GTE files requires lxml module.")
     tree = etree.parse(f)
     if tree.xpath("/gte/@version")[0] != "0.1":
         raise ValueError, "GTE reader only supports version 0.1"
@@ -83,6 +90,8 @@ def write_game_display(game, doc, xml_display):
     etree.SubElement(xml_display, "levelDistance").text = "75"
         
 def write_game(game):
+    if not has_lxml:
+        raise NotImplementedError("Reading and writing GTE files requires lxml module.")
     gte = etree.Element("gte", version="0.1")
     doc = etree.ElementTree(gte)
     etree.SubElement(gte, "gameDescription")
