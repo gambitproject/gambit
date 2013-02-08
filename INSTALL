@@ -180,5 +180,28 @@ can either (a) simply not install wxWidgets, or (b) pass the argument
 This will just build the command-line tools, and will not require
 a wxWidgets installation.
 
+Build Gambit Python Interface
+----------------------
 
- 
+**Prerequisite**
+
+  * `setuptools <http://pypi.python.org/pypi/setuptools>`__
+  * `cython <http://cython.org>`__
+  * `nosetest <https://github.com/nose-devsnose.git>`__ (test tools)
+  * `Ipython <https://github/Ipython/ipython/downloads>`__ (used by gambit-shell)
+  * `scipy <http://www.scipy.org>`__ (used by gambit-shell)
+
+Download the source code of all above-list tools, and follow their tutorial to build and install these tools on your machine.
+
+Then open the terminal and change to the gambit/src/python dir::
+
+  gambit/src/python$ python setup.py build
+  gambit/src/python$ sudo python setup.py install
+
+Run the python interface testcases::
+
+  gambit/src/python/gambit/test$: nosetest
+
+Run gambit python terminal::
+
+  gambit-shell
