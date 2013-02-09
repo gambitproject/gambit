@@ -217,18 +217,23 @@ cdef class Game:
     def _get_contingency(self, *args):
         cdef c_PureStrategyProfile *psp
         cdef Outcome outcome
+        cdef TreeGameOutcome tree_outcome
         psp = new c_PureStrategyProfile(self.game.deref().NewPureStrategyProfile())
         
         
         for (pl, st) in enumerate(args):
             psp.deref().SetStrategy(self.game.deref().GetPlayer(pl+1).deref().GetStrategy(st+1))
 
-        outcome = Outcome()
-        outcome.outcome = psp.deref().GetOutcome()
-        del psp
-        return outcome
-
-
+        if self.is_tree:
+            tree_outcome = TreeGameOutcome()
+            tree_outcome.psp = psp
+            tree_outcome.c_game = self.game
+            return tree_outcome
+        else:
+            outcome = Outcome()
+            outcome.outcome = psp.deref().GetOutcome()
+            del psp
+            return outcome
 
     # As of Cython 0.11.2, cython does not support the * notation for the argument
     # to __getitem__, which is required for multidimensional slicing to work. 
