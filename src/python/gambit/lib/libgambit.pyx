@@ -211,6 +211,7 @@ cdef extern from "libgambit/game.h":
         c_GameOutcome GetOutcome()
         void SetOutcome(c_GameOutcome)
 
+        c_Rational GetPayoff(int)
 
     c_Game NewTree()
     c_Game NewTable(Array[int] *)

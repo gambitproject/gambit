@@ -83,3 +83,63 @@ cdef class Outcome:
         o = Outcome()
         o.outcome = self.outcome
         return o
+
+cdef class TreeGameOutcome:
+    "Represents an outcome in a strategic game derived from an extensive game."
+    cdef c_PureStrategyProfile *psp
+    cdef c_Game c_game
+
+    property game:
+        def __get__(self):
+            cdef Game g
+            g = Game()
+            g.game = self.c_game
+            return g
+
+    def __del__(self):
+        del self.psp
+
+    def __repr__(self):
+        return "<Outcome '%s' in game '%s'>" % (self.label, 
+                                                self.game.title)
+    
+    def __richcmp__(TreeGameOutcome self, other, whichop):
+        if isinstance(other, TreeGameOutcome):
+            if whichop == 2:
+                return self.psp.deref() == ((<TreeGameOutcome>other).psp).deref()
+            elif whichop == 3:
+                return self.psp.deref() != ((<TreeGameOutcome>other).psp).deref()
+            else:
+                raise NotImplementedError
+        else:
+            if whichop == 2:
+                return False
+            elif whichop == 3:
+                return True
+            else:
+                raise NotImplementedError
+
+    def __getitem__(self, player):
+        cdef bytes py_string
+        if isinstance(player, Player):
+            py_string = rat_str(self.psp.deref().GetPayoff(player.number+1)).c_str()
+        elif isinstance(player, str):
+            number = self.game.players[player].number
+            py_string = rat_str(self.psp.deref().GetPayoff(number+1)).c_str()
+        elif isinstance(player, int):
+            if player < 0 or player >= self.c_game.deref().NumPlayers():
+                raise IndexError, "Index out of range"
+            py_string = rat_str(self.psp.deref().GetPayoff(player+1)).c_str()
+        return fractions.Fraction(py_string)
+
+    def __setitem__(self, pl, value):
+        raise NotImplementedError("Cannot modify outcomes in a derived strategic game.")
+
+    def delete(self):
+        raise NotImplementedError("Cannot modify outcomes in a derived strategic game.")
+
+    property label:
+        def __get__(self):
+            return "(%s)" % ( ",".join( [ self.psp.deref().GetStrategy((<Player>player).player).deref().GetLabel().c_str() for player in self.game.players ] ) )
+        def __set__(self, char *value):
+            raise NotImplementedError("Cannot modify outcomes in a derived strategic game.")
