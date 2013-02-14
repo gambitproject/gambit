@@ -52,9 +52,15 @@ cdef class Outcome:
             s.assign(value)
             self.outcome.deref().SetLabel(s)
 
-    def __getitem__(self, pl):
+    def __getitem__(self, player):
         cdef bytes py_string
-        py_string = self.outcome.deref().GetPayoffNumber(pl+1).as_string().c_str()
+        if isinstance(player, Player):
+            py_string = self.outcome.deref().GetPayoffNumber(player.number+1).as_string().c_str()
+        elif isinstance(player, str):
+            number = self.game.players[player].number
+            py_string = self.outcome.deref().GetPayoffNumber(number+1).as_string().c_str()
+        elif isinstance(player, int):
+            py_string = self.outcome.deref().GetPayoffNumber(player+1).as_string().c_str()
         if "." in py_string:
             return decimal.Decimal(py_string)
         else:
