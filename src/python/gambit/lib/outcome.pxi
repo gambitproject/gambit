@@ -83,3 +83,42 @@ cdef class Outcome:
         o = Outcome()
         o.outcome = self.outcome
         return o
+
+cdef class TreeGameOutcome:
+    cdef c_PureStrategyProfile *psp
+    cdef c_Game c_game
+
+    property game:
+        def __get__(self):
+            cdef Game g
+            g = Game()
+            g.game = self.c_game
+            return g
+
+    def __del__(self):
+        del self.psp
+
+    def __getitem__(self, player):
+        cdef bytes py_string
+        if isinstance(player, Player):
+            py_string = rat_str(self.psp.deref().GetPayoff(player.number+1)).c_str()
+        elif isinstance(player, str):
+            number = self.game.players[player].number
+            py_string = rat_str(self.psp.deref().GetPayoff(number+1)).c_str()
+        elif isinstance(player, int):
+            if player < 0 or player >= self.c_game.deref().NumPlayers():
+                raise IndexError, "Index out of range"
+            py_string = rat_str(self.psp.deref().GetPayoff(player+1)).c_str()
+        return fractions.Fraction(py_string)
+
+    def __setitem__(self, pl, value):
+        raise NotImplementedError
+
+    def delete(self):
+        raise NotImplementedError
+
+    property label:
+        def __get__(self):
+            raise NotImplementedError
+        def __set__(self, char *value):
+            raise NotImplementedError
