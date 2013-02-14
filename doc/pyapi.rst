@@ -834,9 +834,13 @@ API documentation
 
       A text label useful for identification of the outcome.
 
-   .. py:method:: __getitem__(pl)
+   .. py:method:: __getitem__(player)
 
-      Returns the payoff to the ``pl`` th player at the outcome.
+      Returns outcome based on the parameter ``player``. If ``player`` is a
+      `gambit.player`, return the ``player`` outcome. If ``player`` is
+      `gambit.player.label`, return the outcome of label identifying player.
+      If ``player`` is a ``int``, returns the payoff to the ``player`` th player
+      at the outcome.
 
    .. py:method:: __setitem__(pl, payoff)
 
