@@ -23,6 +23,22 @@ class CorrelatedEquilibriumPayoffs(object):
     @property
     def edges(self):       return self._edges
 
+    def __contains__(self, (x, y)):
+        # Check if point (x,y) is on the polygon edge
+        for edge in self._edges:
+            if is_between(edge[0], edge[1], (x, y)):
+                return True
+
+        # Check if point (x,y) is inside the polygon
+        # Based on pnpoly:
+        # http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+        is_inside = False
+        for (p1, p2) in self._edges:
+            if (p1[1] > y) != (p2[1] > y) and \
+                x < (p2[0]-p1[0]) * (y-p1[1]) / (p2[1]-p1[1]) + p1[0]:
+                is_inside = not is_inside
+        return is_inside
+
     def visualize(self):
         print "Vertices:"
         for i in self.vertices:
