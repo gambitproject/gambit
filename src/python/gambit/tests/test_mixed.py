@@ -28,12 +28,6 @@ class TestGambitMixedStrategyGame(object):
         del self.tree_profile_double
         del self.tree_profile_rational
             
-
-    def test_getting_profile(self):
-        "Test to ensure that payoffs are returned correctly"
-        assert self.profile_double.payoff(self.game.players[0]) == 0.0
-        assert self.profile_rational.payoff(self.game.players[0]) == 0.0
-
     def test_payoffs(self):
         "Test to ensure that payoffs are returned correctly"
         assert self.profile_double.payoff(self.game.players[0]) == 0.0
