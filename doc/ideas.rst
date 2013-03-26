@@ -147,6 +147,59 @@ Each of these is a single project  For GSoC applications, you should
 select exactly one of these, as each is easily a full summer's worth
 of work (no matter how easy some of them may seem at first read!)
 
+Enumerating all equilibria of a two-player bimatrix game using the EEE algorithm
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The task is to implement the EEE algorithm, which is a published algorithm to
+enumerate all extreme equilibria of a bimatrix game.
+
+* **Languages:** C, Java
+* **Prerequisites:**  Background in game theory, basic linear
+  algebra and linear programming.  Experience with programs of at least
+  medium complexity so that existing code can be expanded.
+
+**Fuller details:**
+
+The task is to implement the EEE algorithm, which is a published algorithm to
+enumerate all extreme equilibria of a bimatrix game.
+
+The most up-to-date version can be found in Sections 7 and 8
+of
+
+    D. Avis, G. Rosenberg, R. Savani, and B. von Stengel (2010),
+    Enumeration of Nash equilibria for two-player games.
+    Economic Theory 42, 9-37. 
+
+    http://www.maths.lse.ac.uk/Personal/stengel/ETissue/ARSvS.pdf
+
+Extra information, including some code,
+is provided in the following report:
+
+    G. Rosenberg (2004),
+    Enumeration of All Extreme Equilibria of Bimatrix Games with Integer Pivoting and Improved Degeneracy Check.
+    CDAM Research Report LSE-CDAM-2004-18.
+
+    http://www.cdam.lse.ac.uk/Reports/Files/cdam-2005-18.pdf
+
+The original algorithm was described in the following paper:
+    
+    C. Audet, P. Hansen, B. Jaumard, and G. Savard (2001),
+    Enumeration of all extreme equilibria of bimatrix games. 
+    SIAM Journal on Scientific Computing 23, 323–338.
+
+The implementation should include a feature to compare the
+algorithm's output (a list of extreme equilibria) with the
+ouput of other algorithms for the same task (e.g.
+``lrsnash``).
+
+In addition a framework that compares running times (and the
+number of recursive calls, calls to pivoting methods, and
+other crucial operations) should be provided.
+The output should record and document the computational
+experiments so that they can be reproduced, in a general
+setup - sufficiently documented - that can be used for
+similar comparisons.
+
 
 Improve integration and testing of Gametracer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
