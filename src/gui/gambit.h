@@ -58,6 +58,9 @@ public:
   
 
   gbtAppLoadResult LoadFile(const wxString &);
+#ifdef __WXMAC__
+  void MacOpenFile(const wxString &filename)  { LoadFile(filename); }
+#endif  // __WXMAC__
 
   //!
   //! These manage the list of open documents
