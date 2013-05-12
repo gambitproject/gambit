@@ -951,6 +951,9 @@ Game ReadGame(std::istream &p_file) throw (InvalidFileException)
       ParseEfg(parser, game, treeData);
       return game;
     }
+    else if (parser.GetLastText() == "#AGG") {
+      return GameAggRep::ReadAggFile(p_file);
+    }
     else {
       throw InvalidFileException("Tokens 'EFG' or 'NFG' expected at start of file");
     }

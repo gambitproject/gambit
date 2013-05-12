@@ -152,6 +152,9 @@ void GameAggRep::WriteNfgFile(std::ostream &s) const{
 }
 void GameAggRep::WriteAggFile(std::ostream &s) const{
 
+	  //AGG identifier for Gambit ReadGame
+	  s<<"#AGG"<<endl;
+
 	  //num players
 
 	  s<<aggPtr->getNumPlayers()<<endl;
