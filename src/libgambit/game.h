@@ -201,7 +201,7 @@ typedef std::auto_ptr<PureStrategyProfileRep> PureStrategyProfile;
 //
 template <class T> class MixedStrategyProfile;
 template <class T> class MixedBehavProfile;
-
+class StrategySupport;
 
 //=======================================================================
 //         Exceptions thrown from game representation classes
@@ -686,6 +686,8 @@ public:
   virtual PureStrategyProfile NewPureStrategyProfile(void) const = 0;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const = 0;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const = 0; 
+  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupport&) const = 0;
+  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupport&) const = 0;
 
   /// @name Players
   //@{

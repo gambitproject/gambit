@@ -104,6 +104,8 @@ public:
   virtual PureStrategyProfile NewPureStrategyProfile(void) const;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const;
+  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupport&) const;
+  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupport&) const;
 
   /// @name Players
   //@{
