@@ -70,23 +70,14 @@ int StrategySupport::MixedProfileLength(void) const
 template<>
 MixedStrategyProfile<double> StrategySupport::NewMixedStrategyProfile(void) const
 {
-  if (m_nfg->IsTree()) {
-    return MixedStrategyProfile<double>(new TreeMixedStrategyProfileRep<double>(*this));
-  }
-  else {
-    return MixedStrategyProfile<double>(new TableMixedStrategyProfileRep<double>(*this));
-  }
+  return m_nfg->NewMixedStrategyProfile(0.0, *this);
+
 }
 
 template<>
 MixedStrategyProfile<Rational> StrategySupport::NewMixedStrategyProfile(void) const
 {
-  if (m_nfg->IsTree()) {
-    return MixedStrategyProfile<Rational>(new TreeMixedStrategyProfileRep<Rational>(*this));
-  }
-  else {
-    return MixedStrategyProfile<Rational>(new TableMixedStrategyProfileRep<Rational>(*this));
-  }
+  return m_nfg->NewMixedStrategyProfile(Rational(0), *this);
 }
 
 bool StrategySupport::IsSubsetOf(const StrategySupport &p_support) const

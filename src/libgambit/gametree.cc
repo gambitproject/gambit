@@ -1074,6 +1074,16 @@ MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Ration
   return StrategySupport(const_cast<GameTreeRep *>(this)).NewMixedStrategyProfile<Rational>();
 }
 
+MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double, const StrategySupport& spt) const
+{
+  return new TreeMixedStrategyProfileRep<double>(spt);
+}
+
+MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Rational &, const StrategySupport& spt) const
+{
+  return new TreeMixedStrategyProfileRep<Rational>(spt);
+}
+
 
 //========================================================================
 //                  class TreePureStrategyProfileRep
