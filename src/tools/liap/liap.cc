@@ -49,8 +49,8 @@ void PrintHelp(char *progname)
   std::cerr << "  -s FILE          file containing starting points\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
-  std::cerr << "  -v, --version    print version information\n";
   std::cerr << "                   (default is to only show equilibria)\n";
+  std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 

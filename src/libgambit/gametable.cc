@@ -325,6 +325,15 @@ MixedStrategyProfile<Rational> GameTableRep::NewMixedStrategyProfile(const Ratio
   return StrategySupport(const_cast<GameTableRep *>(this)).NewMixedStrategyProfile<Rational>();
 }
 
+MixedStrategyProfile<double> GameTableRep::NewMixedStrategyProfile(double, const StrategySupport& spt) const
+{
+  return new TableMixedStrategyProfileRep<double>(spt);
+}
+MixedStrategyProfile<Rational> GameTableRep::NewMixedStrategyProfile(const Rational &, const StrategySupport& spt) const
+{
+  return new TableMixedStrategyProfileRep<Rational>(spt);
+}
+
 //------------------------------------------------------------------------
 //              GameTableRep: Private auxiliary functions
 //------------------------------------------------------------------------

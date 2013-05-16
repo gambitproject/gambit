@@ -131,6 +131,15 @@ MixedStrategyProfile<Rational> GameAggRep::NewMixedStrategyProfile(const Rationa
 {
   return new AggMixedStrategyProfileRep<Rational>(StrategySupport(const_cast<GameAggRep *>(this)));
 }
+MixedStrategyProfile<double> GameAggRep::NewMixedStrategyProfile(double, const StrategySupport& spt) const
+{
+  return new AggMixedStrategyProfileRep<double>(spt);
+}
+
+MixedStrategyProfile<Rational> GameAggRep::NewMixedStrategyProfile(const Rational &, const StrategySupport& spt) const
+{
+  return new AggMixedStrategyProfileRep<Rational>(spt);
+}
 
 //------------------------------------------------------------------------
 //                   GameAGGRep: Lifecycle
@@ -151,6 +160,9 @@ void GameAggRep::WriteNfgFile(std::ostream &s) const{
 	throw UndefinedException();
 }
 void GameAggRep::WriteAggFile(std::ostream &s) const{
+
+	  //AGG identifier for Gambit ReadGame
+	  s<<"#AGG"<<endl;
 
 	  //num players
 

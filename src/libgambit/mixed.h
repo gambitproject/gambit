@@ -106,8 +106,7 @@ public:
     }
     virtual T GetPayoff(int pl) const;
     virtual T GetPayoffDeriv(int pl, const GameStrategy &) const;
-    virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const
-    { throw UndefinedException(); }
+    virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const;
 };
 
 /// \brief A probability distribution over strategies in a game
@@ -119,7 +118,10 @@ template <class T> class MixedStrategyProfile {
   friend class StrategySupport;
   friend class TreeMixedStrategyProfileRep<T>;
   friend class AggMixedStrategyProfileRep<T>;
+  friend class TableMixedStrategyProfileRep<T>;
   friend class GameAggRep;
+  friend class GameTableRep;
+  friend class GameTreeRep;
   friend class MixedBehavProfile<T>;
 private:
   MixedStrategyProfileRep<T> *m_rep;
