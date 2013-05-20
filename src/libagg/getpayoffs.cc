@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
 
   int m=aggPtr->getNumActions();
   StrategyProfile s(m);
-  //Number* s = new Number[m];
+  //AggNumber* s = new AggNumber[m];
 
   Gambit::MixedStrategyProfile<double> p=g->NewMixedStrategyProfile(0);
   while(readstrat(s, m) ){

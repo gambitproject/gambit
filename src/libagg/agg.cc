@@ -593,7 +593,7 @@ void agg:: computePartialP_PureNode(int player1,int act1, vector<int>& tasks){
     int numNei = neighbors[Node].size();
   
     assert(isPure[Node]||tasks.size()==0); 
-    vector<Number> strat (numNei);
+    vector<AggNumber> strat (numNei);
     config    a(numNei,0);
     //compute the full distrib
     computeP (player1,act1);
@@ -615,7 +615,7 @@ void agg:: computePartialP_PureNode(int player1,int act1, vector<int>& tasks){
 	}
 	else {
 	    strat[j]= pp->second;
-	    if (strat[j] > (Number)0) NullOnly=false;
+	    if (strat[j] > (AggNumber)0) NullOnly=false;
 	}
 
 	a[j]--;
@@ -624,7 +624,7 @@ void agg:: computePartialP_PureNode(int player1,int act1, vector<int>& tasks){
       cout<<"dividing "<<endl;
       P.print_in_order();
       cout<<endl<<"by [";
-      copy(strat.begin(),strat.end(),ostream_iterator<Number>(cout," ") );
+      copy(strat.begin(),strat.end(),ostream_iterator<AggNumber>(cout," ") );
       cout<<"]\n";
 #endif
       if (!NullOnly) P/= strat;
@@ -706,12 +706,12 @@ void agg:: doProjection(int Node,const StrategyProfile& s)
 inline void agg:: doProjection(int Node, int i, const StrategyProfile& s)
 {
   projectedStrat[Node][i].reset();
-  for (int j=0;j<actions[i];j++)if(s[j+firstAction(i)]>(Number)0.0){
+  for (int j=0;j<actions[i];j++)if(s[j+firstAction(i)]>(AggNumber)0.0){
     projectedStrat[Node][i]+= make_pair(projection[Node][i][j],
               s[j+firstAction(i)]);
   }
 }
-Number agg::getPurePayoff(int player, int *s){
+AggNumber agg::getPurePayoff(int player, int *s){
   assert(player>=0 && player < numPlayers);
   int Node = actionSets[player][s[player]]; 
   int keylen = neighbors[Node].size();
@@ -735,30 +735,30 @@ Number agg::getPurePayoff(int player, int *s){
   return p->second;
 }
 
-Number agg::getMixedPayoff(int player, StrategyProfile &s){
-  Number result=0.0;
+AggNumber agg::getMixedPayoff(int player, StrategyProfile &s){
+  AggNumber result=0.0;
   assert(player>=0 && player < numPlayers);
-  for (int act=0;act <actions[player];++act)if (s[act+firstAction(player)]>(Number)0.0){
+  for (int act=0;act <actions[player];++act)if (s[act+firstAction(player)]>(AggNumber)0.0){
 	result+= s[act+firstAction(player)]* getV(player, act, s);
   }
   return result;
 }
 
-void agg::getPayoffVector(NumberVector &dest, int player,const StrategyProfile &s){
+void agg::getPayoffVector(AggNumberVector &dest, int player,const StrategyProfile &s){
     assert(player>=0 && player < numPlayers);
     for (int act=0;act<actions[player]; ++act){
 	dest[act]=getV(player,act,s);
     }
 }
 
-Number agg::getV(int player, int act,const StrategyProfile &s){
+AggNumber agg::getV(int player, int act,const StrategyProfile &s){
     //project s to the projectedStrat
     doProjection(actionSets.at(player).at(act), s);
     computeP(player, act);
     return Pr[numPlayers-1].inner_prod(payoffs[actionSets[player][act]]);
 }
 
-Number agg::getJ(int player1, int act1, int player2,int act2,StrategyProfile &s)
+AggNumber agg::getJ(int player1, int act1, int player2,int act2,StrategyProfile &s)
 {
     doProjection(actionSets[player1][act1],s);
     computeP(player1,act1,player2,act2);
@@ -766,7 +766,7 @@ Number agg::getJ(int player1, int act1, int player2,int act2,StrategyProfile &s)
 }
 
 #ifdef USE_CVECTOR
-void agg::payoffMatrix(cmatrix &dest, cvector &s, Number fuzz){
+void agg::payoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
   //compute jacobian
   //s: mixed strat
 
@@ -774,7 +774,7 @@ void agg::payoffMatrix(cmatrix &dest, cvector &s, Number fuzz){
   cout<<"calling payoffMatrix with stratety s="<<endl
       <<s<<endl;
 #endif
-  Number fuzzcount;
+  AggNumber fuzzcount;
   int rown, coln, rowi, coli,act1,act2,currNode,numNei;
   static vector<int>::iterator p;
   static vector<int> tasks,spares,nontasks;
@@ -925,7 +925,7 @@ void agg::payoffMatrix(cmatrix &dest, cvector &s, Number fuzz){
             }
 #endif                
 	    //compute entries
-	    Number undisturbedPayoff;
+	    AggNumber undisturbedPayoff;
 	    bool hasUndisturbed=false;
 
 	    if(spares.size()>0){//for players in spares, we compute one undisturbed payoff
@@ -953,7 +953,7 @@ void agg::payoffMatrix(cmatrix &dest, cvector &s, Number fuzz){
 #endif
 
 #ifdef USE_CVECTOR
-void agg::computeUndisturbedPayoff(Number& undisturbedPayoff,bool& has,int player1,int act1,int player2)
+void agg::computeUndisturbedPayoff(AggNumber& undisturbedPayoff,bool& has,int player1,int act1,int player2)
 {
   if (has) return;
   int    Node =actionSets[player1][act1];
@@ -967,14 +967,14 @@ void agg::computeUndisturbedPayoff(Number& undisturbedPayoff,bool& has,int playe
   }
   has=true;
 }
-void agg::savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,Number result,
-	trie_map<Number>& cache, bool partial ){
+void agg::savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,AggNumber result,
+	trie_map<AggNumber>& cache, bool partial ){
 
   int    Node =actionSets[player1][act1];
   int    numNei= neighbors[Node].size();
 
   if (!partial){
-    pair< vector<int>, Number> pair1(projection[Node][player2][act2],result);
+    pair< vector<int>, AggNumber> pair1(projection[Node][player2][act2],result);
     pair1.first.reserve(numNei+3);
     pair1.first.push_back(player1);
     pair1.first.push_back(act1);
@@ -985,7 +985,7 @@ void agg::savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,Num
   if (node2Action[Node][player2]!=-1 &&
      fullProjectedStrat[Node][player1].count(projection[Node][player2][act2]))
   {
-    pair<vector<int>,Number> pair2(projection[Node][player2][act2],result);
+    pair<vector<int>,AggNumber> pair2(projection[Node][player2][act2],result);
     pair2.first.reserve(numNei+3);
     pair2.first.push_back(player2);
     pair2.first.push_back(node2Action[Node][player2]);
@@ -995,16 +995,16 @@ void agg::savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,Num
   dest[act1+firstAction(player1)][act2+firstAction(player2)]=result;
   
 }
-void agg::computePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,trie_map<Number>& cache){
+void agg::computePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,trie_map<AggNumber>& cache){
   int    Node =actionSets[player1][act1];
   int    numNei= neighbors[Node].size();
 
-  pair<vector<int>,Number> insPair( projection[Node][player2][act2],0);
+  pair<vector<int>,AggNumber> insPair( projection[Node][player2][act2],0);
   insPair.first.reserve(numNei+3);
   insPair.first.push_back(player1);
   insPair.first.push_back(act1);
   insPair.first.push_back(player2);
-  pair<trie_map<Number>::iterator,bool> r =cache.insert(insPair);
+  pair<trie_map<AggNumber>::iterator,bool> r =cache.insert(insPair);
   if (! r.second) {
     dest[act1+firstAction(player1)][act2+firstAction(player2)]=r.first->second;
   }else{
@@ -1020,20 +1020,20 @@ void agg::computePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,
 // parameter: s is the mixed strategy of one player. It is a vector of 
 // probabilities, indexed by the action node.
 
-Number agg::getSymMixedPayoff( StrategyProfile &s){
-  Number result=0;
+AggNumber agg::getSymMixedPayoff( StrategyProfile &s){
+  AggNumber result=0;
   if (! isSymmetric() ) {
     cerr<< "agg::getSymMixedPayoff: the game is not symmetric!"<<endl;
     exit(1);
   }
 
 
-  for (int node=0; node<numActionNodes; ++node)if(s[node]>(Number)0.0){
+  for (int node=0; node<numActionNodes; ++node)if(s[node]>(AggNumber)0.0){
     result+= s[node]* getSymMixedPayoff(node,s);
   }
   return result;
 }
-void agg::getSymPayoffVector(NumberVector& dest, StrategyProfile &s){
+void agg::getSymPayoffVector(AggNumberVector& dest, StrategyProfile &s){
   if (! isSymmetric() ) {
     cerr<< "agg::getSymMixedPayoff: the game is not symmetric!"<<endl;
     exit(1);
@@ -1042,7 +1042,7 @@ void agg::getSymPayoffVector(NumberVector& dest, StrategyProfile &s){
   //check the pureness
   //bool pure=true;
   //for (int i=0;i<numActionNodes;++i){
-  //  if(!(s[ i ] == (Number)0.0 || isPure[i])){
+  //  if(!(s[ i ] == (AggNumber)0.0 || isPure[i])){
   //    pure=false;
   //    break;
   //  }
@@ -1060,7 +1060,7 @@ void agg::getSymPayoffVector(NumberVector& dest, StrategyProfile &s){
           dest[act]=getSymMixedPayoff(act,s);
   }
 }
-Number agg::getSymMixedPayoff(int node, StrategyProfile &s)
+AggNumber agg::getSymMixedPayoff(int node, StrategyProfile &s)
 {
     int numNei = neighbors[node].size();
 
@@ -1074,26 +1074,26 @@ Number agg::getSymMixedPayoff(int node, StrategyProfile &s)
       return dest.inner_prod(projection[node][0][node], numNei, projFunctions[node], payoffs[node]);
     }
 
-    Number V = 0.0;
+    AggNumber V = 0.0;
     vector<int> support;
-    Number null_prob=1;
+    AggNumber null_prob=1;
     //do projection  & get support
     int self = -1;
     for (int i=0; i<numNei; ++i){
 	if (neighbors[node][i] == node) self=i;
-	if (s[neighbors[node][i]]>(Number)0) {
+	if (s[neighbors[node][i]]>(AggNumber)0) {
 	  support.push_back(i);
 	  null_prob -= s[neighbors[node][i]];
 	}
     }
-    if (numNei < numActionNodes && null_prob>(Number)0) 
+    if (numNei < numActionNodes && null_prob>(AggNumber)0) 
 	support.push_back(-1);
 
 
     //gray code
     GrayComposition gc (numPlayers-1, support.size() );
 
-    Number prob = pow((support.at(0)>=0)?s[neighbors[node][support[0]]]:null_prob,
+    AggNumber prob = pow((support.at(0)>=0)?s[neighbors[node][support[0]]]:null_prob,
 		numPlayers-1);
 
     while (1){
@@ -1111,10 +1111,10 @@ Number agg::getSymMixedPayoff(int node, StrategyProfile &s)
       gc.incr();
       if (gc.eof() ) break;
       //update prob
-      Number i_prob = (support.at(gc.i)!=-1)?s[neighbors[node][support[gc.i]]]:null_prob;
-      Number d_prob =(support.at(gc.d)!=-1)?s[neighbors[node][support[gc.d]]]:null_prob;
-      assert(i_prob>(Number)0  && d_prob>(Number)0 );
-      prob *= ((Number)(gc.get().at(gc.d)+1)) * i_prob /(Number)(gc.get().at(gc.i)) /d_prob; 
+      AggNumber i_prob = (support.at(gc.i)!=-1)?s[neighbors[node][support[gc.i]]]:null_prob;
+      AggNumber d_prob =(support.at(gc.d)!=-1)?s[neighbors[node][support[gc.d]]]:null_prob;
+      assert(i_prob>(AggNumber)0  && d_prob>(AggNumber)0 );
+      prob *= ((AggNumber)(gc.get().at(gc.d)+1)) * i_prob /(AggNumber)(gc.get().at(gc.i)) /d_prob; 
       
     }//end while
     
@@ -1142,7 +1142,7 @@ void agg::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
       int player = playerClasses[plClass].at(0);
       projectedStrat[node][player].reset();
       if(numPl>0){
-        for (int j=0;j<actions[player];j++)if(s[j]>(Number)0.0){
+        for (int j=0;j<actions[player];j++)if(s[j]>(AggNumber)0.0){
           projectedStrat[node][player]+= make_pair(projection[node][player][j], s[j]);
         }
         projectedStrat[node][player].power(numPl, dest,Pr[0],numNei, projFunctions[node]);
@@ -1172,9 +1172,9 @@ void agg::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
 
 
 
-    //Number V = 0.0;
+    //AggNumber V = 0.0;
     vector<int> support;
-    Number null_prob=1;
+    AggNumber null_prob=1;
     //do projection  & get support
     int self = -1;   //index of self in the neighbor list
     int ind2=-1;     //index of act2 in the neighbor list
@@ -1184,20 +1184,20 @@ void agg::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
 	if (plClass2>=0 && neighbors[node][i] == uniqueActionSets.at(plClass2).at(act2)) ind2=i;
 
 	int a=node2Action.at(neighbors[node][i]).at(p);
-	if (a>=0&&s[a]>(Number)0) {
+	if (a>=0&&s[a]>(AggNumber)0) {
 	  support.push_back(i);
 	  null_prob -= s[a];
 	}
     }
-    if (null_prob>(Number)0)
+    if (null_prob>(AggNumber)0)
 	support.push_back(-1);
 
 
     //gray code
     GrayComposition gc (numPl, support.size() );
 
-    Number prob0=(support.at(0)>=0)?s[node2Action[neighbors[node].at(support[0])][p]]:null_prob;
-    Number prob = pow(prob0,numPl);
+    AggNumber prob0=(support.at(0)>=0)?s[node2Action[neighbors[node].at(support[0])][p]]:null_prob;
+    AggNumber prob = pow(prob0,numPl);
 
     while (1){
       const vector<int>& comp = gc.get();
@@ -1218,40 +1218,40 @@ void agg::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
       gc.incr();
       if (gc.eof() ) break;
       //update prob
-      Number i_prob = (support.at(gc.i)!=-1)?s[node2Action[neighbors[node][support[gc.i]]][p]]:null_prob;
-      Number d_prob =(support.at(gc.d)!=-1)?s[node2Action[neighbors[node][support[gc.d]]][p]]:null_prob;
-      assert(i_prob>(Number)0  && d_prob>(Number)0 );
-      prob *= ((Number)(gc.get().at(gc.d)+1)) * i_prob /(Number)(gc.get().at(gc.i)) /d_prob; 
+      AggNumber i_prob = (support.at(gc.i)!=-1)?s[node2Action[neighbors[node][support[gc.i]]][p]]:null_prob;
+      AggNumber d_prob =(support.at(gc.d)!=-1)?s[node2Action[neighbors[node][support[gc.d]]][p]]:null_prob;
+      assert(i_prob>(AggNumber)0  && d_prob>(AggNumber)0 );
+      prob *= ((AggNumber)(gc.get().at(gc.d)+1)) * i_prob /(AggNumber)(gc.get().at(gc.i)) /d_prob; 
       
     }//end while
 
   
 }
 
-Number agg::getKSymMixedPayoff( int playerClass,vector<StrategyProfile> &s){
-  Number result=0.0;
+AggNumber agg::getKSymMixedPayoff( int playerClass,vector<StrategyProfile> &s){
+  AggNumber result=0.0;
 
-  for(int act=0;act<(int)uniqueActionSets[playerClass].size();act++)if(s[playerClass][act]>(Number)0.0){
+  for(int act=0;act<(int)uniqueActionSets[playerClass].size();act++)if(s[playerClass][act]>(AggNumber)0.0){
 
       result += s[playerClass][act] *getKSymMixedPayoff(playerClass, act,s);
   }
   return result;
 }
-Number agg::getKSymMixedPayoff( int playerClass,StrategyProfile &s){
-  Number result=0.0;
+AggNumber agg::getKSymMixedPayoff( int playerClass,StrategyProfile &s){
+  AggNumber result=0.0;
 
-  for(int act=0;act<(int)uniqueActionSets[playerClass].size();act++)if(s[firstKSymAction(playerClass)+act]>(Number)0.0){
+  for(int act=0;act<(int)uniqueActionSets[playerClass].size();act++)if(s[firstKSymAction(playerClass)+act]>(AggNumber)0.0){
 
       result += s[firstKSymAction(playerClass)+act] *getKSymMixedPayoff(s,playerClass, act);
   }
   return result;
 }
-void agg::getKSymPayoffVector(NumberVector& dest,int playerClass, StrategyProfile &s){
+void agg::getKSymPayoffVector(AggNumberVector& dest,int playerClass, StrategyProfile &s){
   for (size_t act=0;act<uniqueActionSets[playerClass].size();++act){
     dest[act]=getKSymMixedPayoff(s,playerClass,act);
   }
 }
-Number agg::getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfile> &s){
+AggNumber agg::getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfile> &s){
       
       int numPC = playerClasses.size();
       
@@ -1268,7 +1268,7 @@ Number agg::getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfile>
       return d.inner_prod(payoffs[uniqueActionSets[playerClass][act]]);
 }
 
-Number agg::getKSymMixedPayoff(const StrategyProfile &s,int pClass1,int act1,int pClass2,int act2){
+AggNumber agg::getKSymMixedPayoff(const StrategyProfile &s,int pClass1,int act1,int pClass2,int act2){
   int numPC=playerClasses.size();
   int numNei=neighbors[uniqueActionSets[pClass1][act1]].size();
   static aggdistrib d,temp;
@@ -1295,7 +1295,7 @@ Number agg::getKSymMixedPayoff(const StrategyProfile &s,int pClass1,int act1,int
 
 
 #ifdef USE_CVECTOR
-void agg::SymPayoffMatrix(cmatrix &dest, cvector &s, Number fuzz){
+void agg::SymPayoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
   if (getNumPlayerClasses()>1){
     cerr<<"SymPayoffMatrix() Error: game is not symmetric"<<endl;
     exit(1);
@@ -1304,7 +1304,7 @@ void agg::SymPayoffMatrix(cmatrix &dest, cvector &s, Number fuzz){
 
   cache.clear();
 
-  Number fuzzcount;
+  AggNumber fuzzcount;
 
   int currNode,numNei;
   for (int rowa=0;rowa<getNumActions(0);++rowa){
@@ -1320,16 +1320,16 @@ void agg::SymPayoffMatrix(cmatrix &dest, cvector &s, Number fuzz){
     temp.insert(make_pair(projection[currNode][0][rowa],1));
     Pdest.multiply(temp,numNei,projFunctions[currNode]);
     for (int cola=0;cola<getNumActions(0);++cola){
-      pair<vector<int>,Number> insPair( projection[currNode][0][cola],0);
+      pair<vector<int>,AggNumber> insPair( projection[currNode][0][cola],0);
 
       //insPair.first.reserve(numNei+3);
       insPair.first.push_back(currNode);
-      pair<trie_map<Number>::iterator,bool> r =cache.insert(insPair);
+      pair<trie_map<AggNumber>::iterator,bool> r =cache.insert(insPair);
 
       if (! r.second) {
           dest[rowa][cola]=r.first->second;
       }else{
-          r.first->second=Number(numPlayers-1)
+          r.first->second=AggNumber(numPlayers-1)
               * Pdest.inner_prod(projection[currNode][0][cola], numNei, projFunctions[currNode], payoffs[currNode]);
           dest[rowa][cola]=r.first->second;
       }
@@ -1347,7 +1347,7 @@ void agg::SymPayoffMatrix(cmatrix &dest, cvector &s, Number fuzz){
 
 }
 
-void agg::KSymPayoffMatrix(cmatrix &dest, cvector &s, Number fuzz){
+void agg::KSymPayoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
   //cerr<<"error: k-symmetric Jacobian not yet implemented";
   //exit(1);
 
@@ -1360,14 +1360,14 @@ void agg::KSymPayoffMatrix(cmatrix &dest, cvector &s, Number fuzz){
         for(int cola=0;cola<getNumKSymActions(colcls);++cola){
 
           dest[rowa+firstKSymAction(rowcls)][cola+firstKSymAction(colcls)]=
-              (Number)multiplier *
+              (AggNumber)multiplier *
               getKSymMixedPayoff(s,rowcls,rowa,colcls,cola);
         }
       }
     }
   }
 
-  Number fuzzcount;
+  AggNumber fuzzcount;
   for (int rown=0; rown<getNumPlayerClasses(); ++rown){
           fuzzcount=fuzz;
           for (int rowi=firstKSymAction(rown); rowi<lastKSymAction(rown);rowi++){
@@ -1387,7 +1387,7 @@ void agg::KSymPayoffMatrix(cmatrix &dest, cvector &s, Number fuzz){
 void agg::makeMAPPINGpayoff(std::istream& in, aggpayoff& pay, int numNei){
     int num;
     char c;
-    Number u;
+    AggNumber u;
     aggpayoff temp;
     temp.swap(pay);
 
@@ -1450,7 +1450,7 @@ void agg::makeMAPPINGpayoff(std::istream& in, aggpayoff& pay, int numNei){
 
 
 	//insert
-	pair<trie_map<Number>::iterator, bool> r = pay.insert(make_pair(key,u));
+	pair<trie_map<AggNumber>::iterator, bool> r = pay.insert(make_pair(key,u));
 	if (!r.second){
 	    cerr<<"WARNING0: overwriting utility at [";
 	    copy(key.begin(),key.end(), ostream_iterator<int>(cerr, " "));
@@ -1461,9 +1461,9 @@ void agg::makeMAPPINGpayoff(std::istream& in, aggpayoff& pay, int numNei){
 
     }
     //check
-    for(trie_map<Number>::iterator it = temp.begin(); it!=temp.end(); ++it){
+    for(trie_map<AggNumber>::iterator it = temp.begin(); it!=temp.end(); ++it){
 
-	//pair<trie_map<Number>::iterator,bool> res = pay.insert( *it);
+	//pair<trie_map<AggNumber>::iterator,bool> res = pay.insert( *it);
 	
 	if (pay.count(it->first)==0){
 	    cerr<<"ERROR: utility at [";
@@ -1482,9 +1482,9 @@ void agg::makeMAPPINGpayoff(std::istream& in, aggpayoff& pay, int numNei){
 
 }
 
-Number agg::getMaxPayoff(){
+AggNumber agg::getMaxPayoff(){
   static bool done=false;
-  static Number result=0;
+  static AggNumber result=0;
   if (done)return result;
   assert(numActionNodes>0);
   result=payoffs[0].begin()->second;
@@ -1495,9 +1495,9 @@ Number agg::getMaxPayoff(){
   done=true;
   return result;
 }
-Number agg::getMinPayoff(){
+AggNumber agg::getMinPayoff(){
   static bool done=false;
-  static Number result=0;
+  static AggNumber result=0;
   if (done)return result;
   assert(numActionNodes>0);
   result=payoffs[0].begin()->second;
