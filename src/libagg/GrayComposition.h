@@ -13,7 +13,7 @@ public:
 
   bool eof() { return finished; }
 
-  const vector<int>& get() { return current; }
+  const std::vector<int>& get() { return current; }
 
   void incr() {
     int b=-1;

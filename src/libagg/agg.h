@@ -28,18 +28,18 @@
   typedef cvector NumberVector;
 #else
   //typedef  Number*  StrategyProfile;
-  typedef double Number;
-  typedef std::vector<Number> StrategyProfile;
-  typedef std::vector<Number> NumberVector;
+  typedef double AggNumber;
+  typedef std::vector<AggNumber> StrategyProfile;
+  typedef std::vector<AggNumber> AggNumberVector;
 #endif
 
 //data structure for payoff function:
-//alternatively: typedef map<std::vector<int> , Number> aggpayoff;
-typedef trie_map<Number> aggpayoff;
+//alternatively: typedef map<std::vector<int> , AggNumber> aggpayoff;
+typedef trie_map<AggNumber> aggpayoff;
 
 
 //data struct for prob distribution over configurations:
-typedef trie_map<Number> aggdistrib;
+typedef trie_map<AggNumber> aggdistrib;
 
 //types of input formats for payoff func
 typedef enum{COMPLETE,MAPPING,ADDITIVE} payofftype; 
@@ -138,18 +138,18 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
 
 
   //exp. payoff under mixed strat profile
-  Number getMixedPayoff(int player, StrategyProfile &s);
-  void getPayoffVector(NumberVector &dest, int player,const StrategyProfile &s);
-  Number getV (int player, int action,const StrategyProfile &s);
-  Number getJ(int player,int action, int player2,int action2,StrategyProfile &s);
+  AggNumber getMixedPayoff(int player, StrategyProfile &s);
+  void getPayoffVector(AggNumberVector &dest, int player,const StrategyProfile &s);
+  AggNumber getV (int player, int action,const StrategyProfile &s);
+  AggNumber getJ(int player,int action, int player2,int action2,StrategyProfile &s);
 
 #ifdef USE_CVECTOR
   //compute payoff jacobian
-  void payoffMatrix(cmatrix &dest, cvector &s, Number fuzz);
+  void payoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz);
 #endif
 
 
-  Number getPurePayoff(int player, int *s);
+  AggNumber getPurePayoff(int player, int *s);
   inline void printPayoffs( ostream & s, int node){
     s << payoffs[node].size()<<endl;
     s << payoffs[node];
@@ -161,25 +161,25 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
     }
     return true;
   }
-  Number getSymMixedPayoff( StrategyProfile &s);
-  Number getSymMixedPayoff(int actnode, StrategyProfile &s);
-  void getSymPayoffVector(NumberVector& dest, StrategyProfile &s);
-  Number getKSymMixedPayoff( int playerClass,std::vector<StrategyProfile> &s);
-  Number getKSymMixedPayoff( int playerClass,StrategyProfile &s);
-  Number getKSymMixedPayoff(int playerClass, int act, std::vector<StrategyProfile> &s);
-  Number getKSymMixedPayoff(const StrategyProfile &s,int pClass1,int act1,int pClass2=-1,int act2=-1);
-  void getKSymPayoffVector(NumberVector& dest, int playerClass, StrategyProfile &s);
+  AggNumber getSymMixedPayoff( StrategyProfile &s);
+  AggNumber getSymMixedPayoff(int actnode, StrategyProfile &s);
+  void getSymPayoffVector(AggNumberVector& dest, StrategyProfile &s);
+  AggNumber getKSymMixedPayoff( int playerClass,std::vector<StrategyProfile> &s);
+  AggNumber getKSymMixedPayoff( int playerClass,StrategyProfile &s);
+  AggNumber getKSymMixedPayoff(int playerClass, int act, std::vector<StrategyProfile> &s);
+  AggNumber getKSymMixedPayoff(const StrategyProfile &s,int pClass1,int act1,int pClass2=-1,int act2=-1);
+  void getKSymPayoffVector(AggNumberVector& dest, int playerClass, StrategyProfile &s);
 
 #ifdef USE_CVECTOR
-  void SymPayoffMatrix(cmatrix &dest, cvector &s, Number fuzz);
-  void KSymPayoffMatrix(cmatrix &dest, cvector &s, Number fuzz);
+  void SymPayoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz);
+  void KSymPayoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz);
 #endif
 
   //void KSymNormalizeStrategy(StrategyProfile &s);
 
 
-  NumberVector getExpectedConfig(StrategyProfile &s){
-	  NumberVector res(numActionNodes, 0);
+  AggNumberVector getExpectedConfig(StrategyProfile &s){
+	  AggNumberVector res(numActionNodes, 0);
 	  for (int i=0;i<numPlayers;++i){
 		  for(int j=0;j<actions[i];++j){
 			  res[actionSets[i][j]] += s[firstAction(i)+j];
@@ -194,8 +194,8 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
   const std::vector<int>& getActionSet(int player){return actionSets.at(player);}
   const aggpayoff& getPayoffMap(int node){return payoffs.at(node);}
 
-  Number getMaxPayoff();
-  Number getMinPayoff();
+  AggNumber getMaxPayoff();
+  AggNumber getMinPayoff();
 
 
 
@@ -266,7 +266,7 @@ private:
   std::vector<std::vector<int> > node2Action;
 
   //cache of jacobian entries.
-  trie_map<Number> cache;
+  trie_map<AggNumber> cache;
 
   //the unique action sets
   std::vector<ActionSet> uniqueActionSets;
@@ -297,7 +297,7 @@ private:
     inputRand(bool int_payoffs=false, int int_factor=100):int_payoffs(int_payoffs),int_factor(int_factor) {}
     void operator() (aggpayoff::iterator p){
       p->second = drand48();
-      if(int_payoffs) p->second = floor(p->second * Number(int_factor) );
+      if(int_payoffs) p->second = floor(p->second * AggNumber(int_factor) );
     }  
     bool int_payoffs;
     int int_factor;
@@ -333,10 +333,10 @@ private:
   void computePartialP_PureNode(int player,int act,std::vector<int>& tasks);
   void computePartialP_bisect(int player,int act, std::vector<int>::iterator f,std::vector<int>::iterator l,aggdistrib& temp);
   void computePartialP(int player1, int act1, std::vector<int>& tasks,std::vector<int>& nontasks);
-  void computePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,trie_map<Number>& cache);
-  void savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,Number result,
-	trie_map<Number>& cache, bool partial=false );
-  void computeUndisturbedPayoff(Number& undisturbedPayoff,bool& has,int player1,int act1,int player2);
+  void computePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,trie_map<AggNumber>& cache);
+  void savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,AggNumber result,
+	trie_map<AggNumber>& cache, bool partial=false );
+  void computeUndisturbedPayoff(AggNumber& undisturbedPayoff,bool& has,int player1,int act1,int player2);
 #endif
 
   void getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int act, aggdistrib &dest,int plClass2=-1,int act2=-1);
