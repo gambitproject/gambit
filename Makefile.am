@@ -771,8 +771,8 @@ osx-bundle:
 	-mkdir Gambit.app/Contents
 	-mkdir Gambit.app/Contents/MacOS
 	-mkdir Gambit.app/Contents/Resources
-	cp contrib/mac/Info.plist Gambit.app/Contents
-	cp contrib/mac/gambit.icns Gambit.app/Contents/Resources/gambit.icns
+	cp ${top_srcdir}/contrib/mac/Info.plist Gambit.app/Contents
+	cp ${top_srcdir}/contrib/mac/gambit.icns Gambit.app/Contents/Resources/gambit.icns
 	echo -n 'APPL????' > Gambit.app/Contents/PkgInfo
 	cp gambit Gambit.app/Contents/MacOS/gambit
 	cp gambit-* Gambit.app/Contents/MacOS
