@@ -403,7 +403,7 @@ private:
 
   std::vector<TrieNode<V>*> leaves;
 
-  static const double  THRESH = 1e-12;
+  static const double  THRESH;
   
   
   struct print_helper {
@@ -547,6 +547,9 @@ private:
   };  //end struct div_helper_mul
 
 };
+
+template <class V> const double trie_map<V>::THRESH = 1e-12;
+
 
 template <class V>
 inline ostream& operator<< (ostream& s, const trie_map<V>& t)

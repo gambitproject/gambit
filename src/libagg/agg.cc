@@ -1,7 +1,5 @@
 
 
-using namespace std;
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -11,7 +9,7 @@ using namespace std;
 #include "GrayComposition.h"
 #include "agg.h"
 
-
+using namespace std;
 using __gnu_cxx::select2nd;
 
 
