@@ -91,6 +91,7 @@ public:
 			  p_index -= m_players[pl]->NumStrategies();
 		  }
 	  }
+	  throw IndexException();
   }
   /// Returns the total number of actions in the game
   virtual int BehavProfileLength(void) const
