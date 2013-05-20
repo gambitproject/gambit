@@ -13,7 +13,8 @@ import glob
 libgame = Extension("gambit.lib.libgambit",
                     sources=[ "gambit/lib/libgambit.pyx" ] +
                             glob.glob("gambit/lib/*.pxi") +
-                            glob.glob("../libgambit/*.cc"),
+                            glob.glob("../libgambit/*.cc") +
+                            glob.glob("../libagg/*.cc"),
                     language="c++",
                     include_dirs=[ ".." ] )
 
