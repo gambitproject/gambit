@@ -44,7 +44,7 @@ class gnmgame {
   virtual double getPurePayoff(int player, int *s) = 0; 
 
 
-  virtual inline void setPurePayoff(int player, int *s, double value)=0;
+  virtual void setPurePayoff(int player, int *s, double value) = 0;
 
   // The actions of all players are combined in one linear array of length
   // numActions; this gives the index of a player's first action in the array.
