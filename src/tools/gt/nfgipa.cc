@@ -29,6 +29,7 @@
 #include "libgambit/libgambit.h"
 
 #include "nfgame.h"
+#include "aggame.h"
 #include "ipa.h"
 
 #define ALPHA 0.02
@@ -72,25 +73,30 @@ void PrintHelp(char *progname)
 void Solve(const Gambit::Game &p_game, const Gambit::Array<double> &p_pert)
 {
   int i;
-
-  int *actions = new int[p_game->NumPlayers()];
-  int veclength = p_game->NumPlayers();
-  for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-    actions[pl-1] = p_game->GetPlayer(pl)->NumStrategies();
-    veclength *= p_game->GetPlayer(pl)->NumStrategies();
+  gnmgame *A=NULL;
+  if (p_game->IsAgg()){
+	  A = new aggame(dynamic_cast<Gambit::GameAggRep &>(*p_game));
   }
-  cvector payoffs(veclength);
-  
-  gnmgame *A = new nfgame(p_game->NumPlayers(), actions, payoffs);
-  
-  int *profile = new int[p_game->NumPlayers()];
-  for (Gambit::StrategyIterator iter(p_game); !iter.AtEnd(); iter++) {
+  else {
+    int *actions = new int[p_game->NumPlayers()];
+    int veclength = p_game->NumPlayers();
     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      profile[pl-1] = (*iter)->GetStrategy(pl)->GetNumber() - 1;
+      actions[pl-1] = p_game->GetPlayer(pl)->NumStrategies();
+      veclength *= p_game->GetPlayer(pl)->NumStrategies();
     }
+    cvector payoffs(veclength);
+  
+    A = new nfgame(p_game->NumPlayers(), actions, payoffs);
+  
+    int *profile = new int[p_game->NumPlayers()];
+    for (Gambit::StrategyIterator iter(p_game); !iter.AtEnd(); iter++) {
+     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
+      profile[pl-1] = (*iter)->GetStrategy(pl)->GetNumber() - 1;
+     }
 
-    for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
+     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
       A->setPurePayoff(pl-1, profile, (*iter)->GetPayoff(pl));
+     }
     }
   }
 
