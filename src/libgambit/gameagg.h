@@ -25,12 +25,16 @@
 
 #include "libagg/agg.h"
 
+//forward declaration
+class aggame;
+
 namespace Gambit {
 
 class GameAggRep : public GameRep {
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class AggMixedStrategyProfileRep;
   friend class AggPureStrategyProfileRep;
+  friend class ::aggame;
 
 private:
   agg *aggPtr;
@@ -173,6 +177,7 @@ public:
   /// @name General data access
   //@{
   virtual bool IsTree(void) const { return false; }
+  virtual bool IsAgg(void) const { return true; }
   virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const { return true; }
   virtual bool IsConstSum(void) const;
   /// Returns the smallest payoff in any outcome of the game
@@ -183,6 +188,7 @@ public:
   virtual Rational GetMaxPayoff(int) const {
 	  return aggPtr->getMaxPayoff();
   }
+
   //@}
 
   /// @name Writing data files
