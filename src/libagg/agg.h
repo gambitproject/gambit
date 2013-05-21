@@ -58,9 +58,9 @@ public:
   static const char RBRACKET=']';
 
 
-#ifdef USE_CVECTOR
+
   friend class aggame;   //wrapper class for gametracer
-#endif
+
 
   //read an AGG from a file
   static agg* makeAGG(char* filename);
@@ -143,11 +143,6 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
   AggNumber getV (int player, int action,const StrategyProfile &s);
   AggNumber getJ(int player,int action, int player2,int action2,StrategyProfile &s);
 
-#ifdef USE_CVECTOR
-  //compute payoff jacobian
-  void payoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz);
-#endif
-
 
   AggNumber getPurePayoff(int player, int *s);
   inline void printPayoffs( ostream & s, int node){
@@ -170,10 +165,7 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
   AggNumber getKSymMixedPayoff(const StrategyProfile &s,int pClass1,int act1,int pClass2=-1,int act2=-1);
   void getKSymPayoffVector(AggNumberVector& dest, int playerClass, StrategyProfile &s);
 
-#ifdef USE_CVECTOR
-  void SymPayoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz);
-  void KSymPayoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz);
-#endif
+
 
   //void KSymNormalizeStrategy(StrategyProfile &s);
 
@@ -325,19 +317,14 @@ private:
 
   //private methods:
   void computeP(int player, int act, int player2=-1,int act2=-1);
-  void  doProjection(int Node,const StrategyProfile& s);
-  void doProjection(int Node, int player, const StrategyProfile& s);
-
-#ifdef USE_CVECTOR
-  //helper functions for computing jacobian
-  void computePartialP_PureNode(int player,int act,std::vector<int>& tasks);
-  void computePartialP_bisect(int player,int act, std::vector<int>::iterator f,std::vector<int>::iterator l,aggdistrib& temp);
-  void computePartialP(int player1, int act1, std::vector<int>& tasks,std::vector<int>& nontasks);
-  void computePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,trie_map<AggNumber>& cache);
-  void savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,AggNumber result,
-	trie_map<AggNumber>& cache, bool partial=false );
-  void computeUndisturbedPayoff(AggNumber& undisturbedPayoff,bool& has,int player1,int act1,int player2);
-#endif
+  void doProjection(int Node,const StrategyProfile& s){
+	  doProjection (Node, &(const_cast<StrategyProfile &>(s)[0]));
+  }
+  void doProjection(int Node, int player, const StrategyProfile& s){
+	  doProjection(Node,player, &(const_cast<StrategyProfile &>(s)[firstAction(player)]));
+  }
+  void doProjection(int Node, AggNumber* s);
+  void doProjection(int Node, int player, AggNumber* s);
 
   void getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int act, aggdistrib &dest,int plClass2=-1,int act2=-1);
 };
