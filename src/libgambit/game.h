@@ -625,6 +625,9 @@ public:
   /// Returns true if the game has a game tree representation
   virtual bool IsTree(void) const = 0;
 
+  /// Returns true if the game has a action-graph game representation
+  virtual bool IsAgg(void) const { return false; }
+
   /// Get the text label associated with the game
   virtual const std::string &GetTitle(void) const { return m_title; }
   /// Set the text label associated with the game
