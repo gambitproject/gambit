@@ -174,7 +174,7 @@ public:
   //@{
   virtual bool IsTree(void) const { return false; }
   virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const { return true; }
-  virtual bool IsConstSum(void) const { throw UndefinedException(); }
+  virtual bool IsConstSum(void) const;
   /// Returns the smallest payoff in any outcome of the game
   virtual Rational GetMinPayoff(int) const {
 	  return aggPtr->getMinPayoff();
