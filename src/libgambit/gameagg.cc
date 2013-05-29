@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/libgambit/gameagg.cc
-// Implementation of strategic game representation
+// Implementation of action-graph game representation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
