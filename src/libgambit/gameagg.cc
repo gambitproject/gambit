@@ -153,6 +153,34 @@ Game GameAggRep::Copy(void) const
 }
 
 //------------------------------------------------------------------------
+//                  GameAggRep: General data access
+//------------------------------------------------------------------------
+
+bool GameAggRep::IsConstSum(void) const
+{
+  AggPureStrategyProfileRep profile(const_cast<GameAggRep *>(this));
+
+  Rational sum(0);
+  for (int pl = 1; pl <= m_players.Length(); pl++) {
+    sum += profile.GetPayoff(pl);
+  }
+
+  for (StrategyIterator iter(StrategySupport(const_cast<GameAggRep *>(this)));
+       !iter.AtEnd(); iter++) {
+    Rational newsum(0);
+    for (int pl = 1; pl <= m_players.Length(); pl++) {
+      newsum += (*iter)->GetPayoff(pl);
+    }
+
+    if (newsum != sum) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+//------------------------------------------------------------------------
 //                   GameAGGRep: Writing data files
 //------------------------------------------------------------------------
 
