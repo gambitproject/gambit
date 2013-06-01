@@ -25,9 +25,13 @@ class ExternalSolver(object):
         input in .efg format (if a tree) or .nfg format (if a table).
         Returns the object referencing standard output of the external program.
         """
-        p = subprocess.Popen("%s -q" % prog, shell=True,
+        try:
+            p = subprocess.Popen("%s -q" % prog, shell=True,
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                              close_fds=True)
+        except ValueError:
+            p = subprocess.Popen("%s -q" % prog, shell=True,
+                             stdin=subprocess.PIPE, stdout=subprocess.PIPE)        
         child_stdin, child_stdout = p.stdin, p.stdout
         if game.is_tree:
             child_stdin.write(game.write(strategic=False))
