@@ -25,7 +25,12 @@ std::string WriteGame(const Game &p_game, bool strategic)
 {
   std::ostringstream f;
   if (strategic) {
-    p_game->WriteNfgFile(f);
+	if(p_game->IsAgg()){
+		dynamic_cast<GameAggRep &>(*p_game).WriteAggFile(f);
+	}
+	else {
+        p_game->WriteNfgFile(f);
+	}
   }
   else {
     p_game->WriteEfgFile(f);
