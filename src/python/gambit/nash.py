@@ -136,7 +136,7 @@ class ExternalGlobalNewtonSolver(ExternalSolver):
     def solve(self, game):
         command_line = "gambit-gnm -d 10"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational)
+                                  game, rational=False)
 
 class ExternalEnumPolySolver(ExternalSolver):
     """
@@ -148,7 +148,7 @@ class ExternalEnumPolySolver(ExternalSolver):
         if use_strategic and game.is_tree:
             command_line += " -S"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational,
+                                  game, rational=False,
                                   extensive=game.is_tree and not use_strategic)
 
 class ExternalLyapunovSolver(ExternalSolver):
@@ -161,7 +161,7 @@ class ExternalLyapunovSolver(ExternalSolver):
         if use_strategic and game.is_tree:
             command_line += " -S"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational,
+                                  game, rational=False,
                                   extensive=game.is_tree and not use_strategic)
 
 class ExternalIteratedPolymatrixSolver(ExternalSolver):
@@ -172,7 +172,7 @@ class ExternalIteratedPolymatrixSolver(ExternalSolver):
     def solve(self, game):
         command_line = "gambit-ipa -d 10"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational)
+                                  game, rational=False)
 
 class ExternalLogitSolver(ExternalSolver):
     """
@@ -185,5 +185,5 @@ class ExternalLogitSolver(ExternalSolver):
         if use_strategic and game.is_tree:
             command_line += " -S"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational,
+                                  game, rational=False,
                                   extensive=game.is_tree and not use_strategic)
