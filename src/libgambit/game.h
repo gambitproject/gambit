@@ -357,6 +357,7 @@ class GameStrategyRep : public GameObject  {
   friend class GameTreeRep;
   friend class GameTableRep;
   friend class GameAggRep;
+  friend class GameBagentRep;
   friend class GamePlayerRep;
   friend class PureStrategyProfileRep;
   friend class TreePureStrategyProfileRep;
@@ -405,6 +406,8 @@ class GamePlayerRep : public GameObject {
   friend class GameTreeRep;
   friend class GameTableRep;
   friend class GameAggRep;
+  friend class GameBagentRep;
+  friend class GameBaggRep;
   friend class GameTreeInfosetRep;
   friend class GameStrategyRep;
   friend class GameTreeNodeRep;
