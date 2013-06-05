@@ -356,6 +356,7 @@ class GameStrategyRep : public GameObject  {
   friend class GameTreeRep;
   friend class GameTableRep;
   friend class GameAggRep;
+  friend class GameBagentRep;
   friend class GamePlayerRep;
   friend class PureStrategyProfileRep;
   friend class TreePureStrategyProfileRep;
@@ -404,6 +405,8 @@ class GamePlayerRep : public GameObject {
   friend class GameTreeRep;
   friend class GameTableRep;
   friend class GameAggRep;
+  friend class GameBagentRep;
+  friend class GameBaggRep;
   friend class GameTreeInfosetRep;
   friend class GameStrategyRep;
   friend class GameTreeNodeRep;
@@ -628,6 +631,9 @@ public:
   //@{
   /// Returns true if the game has a game tree representation
   virtual bool IsTree(void) const = 0;
+
+  /// Returns true if the game has a action-graph game representation
+  virtual bool IsAgg(void) const { return false; }
 
   /// Get the text label associated with the game
   virtual const std::string &GetTitle(void) const { return m_title; }

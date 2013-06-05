@@ -25,6 +25,7 @@
 
 class nfgame : public gnmgame {
  public:
+  friend ostream& operator<< (ostream& s, nfgame& g);
   nfgame(int numPlayers, int *actions, const cvector &payoffs);
   ~nfgame();
 
@@ -41,6 +42,8 @@ class nfgame : public gnmgame {
   double getMixedPayoff(int player, cvector &s);
   void payoffMatrix(cmatrix &dest, cvector &s, double fuzz);
 
+  void getPayoffVector(cvector &dest, int player, const cvector &s);
+  
 
  private:
   int findIndex(int player, int *s);
@@ -51,5 +54,18 @@ class nfgame : public gnmgame {
   cvector payoffs;
   int *blockSize;
 };
+inline ostream& operator<< (ostream& s, nfgame& g){
+
+  s<<g.numPlayers<<endl;
+  for (int i=0;i<g.numPlayers; i++){
+    if (i>0) s<< " ";
+    s<< g.actions[i];
+  }
+  s<<endl;
+  s << g.payoffs;
+  s<<endl;
+  return s;
+}
+
 
 #endif

@@ -23,6 +23,6 @@
 #include "cmatrix.h"
 #include "gnmgame.h"
 
-int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans); 
+int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans,int maxiter=-1);
 
 #endif
