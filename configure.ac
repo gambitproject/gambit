@@ -48,11 +48,22 @@ AC_ARG_ENABLE(enumpoly,
  esac], [with_enumpoly=true])
 AM_CONDITIONAL(WITH_ENUMPOLY, test x$with_enumpoly = xtrue)
 
+AC_DEFUN([MINGW_AC_WIN32_NATIVE_HOST],
+[AC_CACHE_CHECK([whether we are building for a Win32 host], 
+                [mingw_cv_win32_host],
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+#ifdef _WIN32
+choke me
+#endif
+])], [mingw_cv_win32_host=no], [mingw_cv_win32_host=yes]))])
+
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_LIBTOOL
 AM_PROG_CC_C_O
+MINGW_AC_WIN32_NATIVE_HOST
+AM_CONDITIONAL(IS_WIN32, [test x$mingw_cv_win32_host = xyes])
 
 dnl A number of the following checks are currently commented out.
 dnl These are checks for functions and headers we do actually use,

@@ -25,3 +25,8 @@ build
 config.guess
 config.sub
 ltmain.sh
+gambit.exe
+gambit.msi
+gambit.wixobj
+gambit.wixpdb
+installer

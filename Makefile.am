@@ -379,6 +379,10 @@ libgambitinclude_HEADERS = \
 # libgambit_la_LDFLAGS = -no-undefined -version-info 0:0:0
 
 
+if IS_WIN32
+AM_LDFLAGS = -static-libgcc -static-libstdc++
+endif
+
 bin_PROGRAMS = \
 	gambit-nfg2html \
 	gambit-nfg2tex \
@@ -783,3 +787,9 @@ osx-dmg:  osx-bundle
 	cp -r Gambit.app .dmg
 	hdiutil create Gambit.dmg -volname Gambit -srcfolder .dmg -format UDZO -imagekey zlib-level=9
 	rm -rf .dmg
+
+msw-msi: 
+	-mkdir installer
+	cp /usr/local/bin/gambit* installer
+	candle gambit.wxs
+	light -ext WixUIExtension gambit.wixobj
