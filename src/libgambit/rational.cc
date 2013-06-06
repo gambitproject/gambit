@@ -304,41 +304,61 @@ std::istream &operator>>(std::istream &f, Rational &y)
 
   while (isspace(ch)) {
     f.get(ch);
-    if (f.eof())  return f;
+    if (f.eof() || f.bad())  return f;
   }
   
   if (ch == '-')  { 
     sign = -1;
     f.get(ch);
+    if (f.eof() || f.bad()) {
+      ch = ' ';
+    }    
   }
   
   while (ch >= '0' && ch <= '9')   {
     num *= 10;
     num += (int) (ch - '0');
     f.get(ch);
+    if (f.eof() || f.bad()) {
+      ch = ' ';
+    }
   }
-  
+
   if (ch == '/')  {
     denom = 0;
     f.get(ch);
+    if (f.eof() || f.bad()) {
+      ch = ' ';
+    }
     while (ch >= '0' && ch <= '9')  {
       denom *= 10;
       denom += (int) (ch - '0');
       f.get(ch);
+      if (f.eof() || f.bad()) {
+	ch = ' ';
+      }
     }
   }
   else if (ch == '.')  {
     denom = 1;
     f.get(ch);
+    if (f.eof() || f.bad()) {
+      ch = ' ';
+    }
     while (ch >= '0' && ch <= '9')  {
       denom *= 10;
       num *= 10;
       num += (int) (ch - '0');
       f.get(ch);
+      if (f.eof() || f.bad()) {
+	ch = ' ';
+      }
     }
   }
 
-  f.unget();
+  if (!f.eof() && f.good()) {
+    f.unget();
+  }
 
   y = Rational(num * sign, denom);
   y.normalize();
