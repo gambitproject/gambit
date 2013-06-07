@@ -37,31 +37,24 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 namespace Gambit {
 
-void Rational::error(const char* msg) const
-{
-  //  gerr << "Rational class error: " << msg << '\n';
-  assert(0);
-}
-
 static const Integer _Int_One(1);
 
-void Rational::normalize()
+void Rational::normalize(void)
 {
   int s = sign(den);
-  if (s == 0)
-    error("Zero denominator.");
-  else if (s < 0)
-    {
-      den.negate();
-      num.negate();
-    }
+  if (s == 0)  {
+    throw ZeroDivideException();
+  }
+  else if (s < 0) {
+    den.negate();
+    num.negate();
+  }
 
   Integer g = gcd(num, den);
-  if (ucompare(g, _Int_One) != 0)
-    {
-      num /= g;
-      den /= g;
-    }
+  if (ucompare(g, _Int_One) != 0)  {
+    num /= g;
+    den /= g;
+  }
 }
 
 void      add(const Rational& x, const Rational& y, Rational& r)
@@ -131,19 +124,19 @@ void      div(const Rational& x, const Rational& y, Rational& r)
 
 
 
-void Rational::invert()
+void Rational::invert(void)
 {
   Integer tmp = num;  
   num = den;  
   den = tmp;  
   int s = sign(den);
-  if (s == 0)
-    error("Zero denominator.");
-  else if (s < 0)
-    {
-      den.negate();
-      num.negate();
-    }
+  if (s == 0) {
+    throw ZeroDivideException();
+  }
+  else if (s < 0)  {
+    den.negate();
+    num.negate();
+  }
 }
 
 int compare(const Rational& x, const Rational& y)
@@ -304,7 +297,9 @@ std::istream &operator>>(std::istream &f, Rational &y)
 
   while (isspace(ch)) {
     f.get(ch);
-    if (f.eof() || f.bad())  return f;
+    if (f.eof() || f.bad())  {
+      throw ValueException();
+    }
   }
   
   if (ch == '-')  { 
@@ -314,7 +309,9 @@ std::istream &operator>>(std::istream &f, Rational &y)
       ch = ' ';
     }    
   }
-  
+  else if ((ch < '0' || ch > '9') && ch != '.') {
+    throw ValueException();
+  }
   while (ch >= '0' && ch <= '9')   {
     num *= 10;
     num += (int) (ch - '0');
@@ -366,15 +363,14 @@ std::istream &operator>>(std::istream &f, Rational &y)
   return f;
 }
 
-int Rational::OK() const
+bool Rational::OK(void) const
 {
   int v = num.OK() && den.OK(); // have valid num and denom
-  if (v)
-    {
-      v &= sign(den) > 0;           // denominator positive;
-      v &=  ucompare(gcd(num, den), _Int_One) == 0; // relatively prime
-    }
-  if (!v) error("invariant failure");
+  if (v)   {
+    v &= sign(den) > 0;           // denominator positive;
+    v &=  ucompare(gcd(num, den), _Int_One) == 0; // relatively prime
+  }
+  // if (!v) error("invariant failure");
   return v;
 }
 
@@ -405,8 +401,12 @@ Rational::Rational(const Rational& y) :num(y.num), den(y.den) {}
 
 Rational::Rational(const Integer& n) :num(n), den(&_OneRep) {}
 
-Rational::Rational(const Integer& n, const Integer& d) :num(n),den(d)
+Rational::Rational(const Integer& n, const Integer& d) 
+ : num(n), den(d)
 {
+  if (d == 0)  {
+    throw ZeroDivideException();
+  }
   normalize();
 }
 
@@ -414,8 +414,23 @@ Rational::Rational(long n) :num(n), den(&_OneRep) { }
 
 Rational::Rational(int n) :num(n), den(&_OneRep) { }
 
-Rational::Rational(long n, long d) :num(n), den(d) { normalize(); }
-Rational::Rational(int n, int d) :num(n), den(d) { normalize(); }
+Rational::Rational(long n, long d) 
+ : num(n), den(d)
+{
+  if (d == 0) {
+    throw ZeroDivideException();
+  }
+  normalize();
+}
+
+Rational::Rational(int n, int d) 
+ : num(n), den(d) 
+{ 
+  if (d == 0) {
+    throw ZeroDivideException();
+  }
+  normalize(); 
+}
 
 Rational &Rational::operator =  (const Rational& y)
 {
@@ -623,12 +638,7 @@ Rational lexical_cast(const std::string &f)
     throw ValueException();
   }
 
-  if (denom != 0) {
-    return Rational(num * sign, denom);
-  }
-  else {
-    return Rational(num * sign);
-  }
+  return Rational(num * sign, denom);
 }
 
 }  // end namespace Gambit

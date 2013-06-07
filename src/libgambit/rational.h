@@ -111,9 +111,7 @@ public:
   friend void      div(const Rational& x, const Rational& y, Rational& dest);
 
   // error detection
-
-  void    error(const char* msg) const;
-  int              OK() const;
+  bool OK(void) const;
 
 };
 
