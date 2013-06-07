@@ -307,39 +307,44 @@ std::istream &operator>>(std::istream &f, Rational &y)
     if (f.eof())  return f;
   }
   
+
   if (ch == '-')  { 
     sign = -1;
     f.get(ch);
   }
   
-  while (ch >= '0' && ch <= '9')   {
-    num *= 10;
-    num += (int) (ch - '0');
-    f.get(ch);
-  }
-  
-  if (ch == '/')  {
-    denom = 0;
-    f.get(ch);
-    while (ch >= '0' && ch <= '9')  {
-      denom *= 10;
-      denom += (int) (ch - '0');
-      f.get(ch);
-    }
-  }
-  else if (ch == '.')  {
-    denom = 1;
-    f.get(ch);
-    while (ch >= '0' && ch <= '9')  {
-      denom *= 10;
+  try{
+    while (ch >= '0' && ch <= '9')   {
       num *= 10;
       num += (int) (ch - '0');
       f.get(ch);
     }
+  
+    if (ch == '/')  {
+      denom = 0;
+      f.get(ch);
+      while (ch >= '0' && ch <= '9')  {
+        denom *= 10;
+        denom += (int) (ch - '0');
+        f.get(ch);
+      }
+    }
+    else if (ch == '.')  {
+      denom = 1;
+      f.get(ch);
+      while (ch >= '0' && ch <= '9')  {
+        denom *= 10;
+        num *= 10;
+        num += (int) (ch - '0');
+        f.get(ch);
+      }
+    }
+
+    f.unget();
   }
-
-  f.unget();
-
+  catch(std::ios_base::failure){
+	  //catch potential eof when get()/unget()-ing the characters
+  }
   y = Rational(num * sign, denom);
   y.normalize();
 
