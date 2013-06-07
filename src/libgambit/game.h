@@ -225,8 +225,9 @@ public:
 /// Exception thrown on a parse error when reading a game savefile
 class InvalidFileException : public Exception {
 public:
+  InvalidFileException(void) : Exception("File not in a recognized format") { }
+  InvalidFileException(const char *s) : Exception(s) { }
   virtual ~InvalidFileException() throw() { }
-  const char *what(void) const throw()  { return "File not in a recognized format"; }
 };
 
 //=======================================================================

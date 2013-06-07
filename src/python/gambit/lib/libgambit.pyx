@@ -379,7 +379,8 @@ def read_game(char *fn):
     g = Game()
     try:
         g.game = ReadGame(fn)
-    except IOError:
-        raise IOError("Unable to read game from file '%s'" % fn)
+    except IOError as e:
+        raise IOError("Unable to read game from file '%s': %s" % 
+                      (fn, e))
     return g
         

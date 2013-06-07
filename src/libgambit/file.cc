@@ -952,11 +952,11 @@ Game ReadGame(std::istream &p_file) throw (InvalidFileException)
       return game;
     }
     else {
-      throw InvalidFileException();
+      throw InvalidFileException("Tokens 'EFG' or 'NFG' expected at start of file");
     }
   }
-  catch (...) {
-    throw InvalidFileException();
+  catch (const std::exception &ex) {
+    throw InvalidFileException(ex.what());
   }
 }
 
