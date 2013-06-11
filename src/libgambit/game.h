@@ -496,6 +496,9 @@ public:
   virtual void CopyTree(GameNode src) = 0;
   virtual void MoveTree(GameNode src) = 0;
 
+  /// Create a separate Game object containing the subgame rooted at the node
+  virtual Game CopySubgame(void) const = 0;
+
   virtual GameInfoset AppendMove(GamePlayer p_player, int p_actions) = 0;
   virtual GameInfoset AppendMove(GameInfoset p_infoset) = 0;
   virtual GameInfoset InsertMove(GamePlayer p_player, int p_actions) = 0;
@@ -656,9 +659,6 @@ public:
   //@{
   /// Write the game in .efg format to the specified stream
   virtual void WriteEfgFile(std::ostream &) const
-  { throw UndefinedException(); }
-  /// Write the subtree starting at node in .efg format to the specified stream
-  virtual void WriteEfgFile(std::ostream &, const GameNode &p_node) const
   { throw UndefinedException(); }
   /// Write the game in .nfg format to the specified stream
   virtual void WriteNfgFile(std::ostream &) const

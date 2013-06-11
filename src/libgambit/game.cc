@@ -581,6 +581,14 @@ void GameTreeNodeRep::MoveTree(GameNode p_src)
   m_efg->Canonicalize();
 }
 
+Game GameTreeNodeRep::CopySubgame(void) const
+{
+  std::ostringstream os;
+  m_efg->WriteEfgFile(os, const_cast<GameTreeNodeRep *>(this));
+  std::istringstream is(os.str());
+  return ReadGame(is);
+}
+
 void GameTreeNodeRep::SetInfoset(GameInfoset p_infoset)
 {
   if (p_infoset->GetGame() != m_efg) throw MismatchException();
