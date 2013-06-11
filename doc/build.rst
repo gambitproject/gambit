@@ -27,12 +27,13 @@ usual ::
   sudo make install
 
 Command-line options are available to modify the configuration process;
-do `./configure --help` for information.  
+do `./configure --help` for information.  Of these, the option which
+may be most useful is to disable the build of the graphical interface
 
 By default Gambit will be installed in /usr/local.  You can change this
-by replacing configure step with one of the form
+by replacing configure step with one of the form ::
 
-./configure --prefix=/your/path/here
+  ./configure --prefix=/your/path/here
 
 .. note::
   The graphical interface relies on external calls to other
@@ -179,3 +180,28 @@ can either (a) simply not install wxWidgets, or (b) pass the argument
 
 This will just build the command-line tools, and will not require
 a wxWidgets installation.
+
+
+.. _build-python:
+
+Building the Python extension
+-----------------------------
+
+The :ref:`Python extension for Gambit <python-api>` is in src/python
+in the Gambit source tree.  Prerequisite packages include setuptools,
+Cython, IPython, and scipy.
+
+Building the extension follows the standard approach::
+
+  cd src/python
+  python setup.py build
+  sudo python setup.py install
+
+There is a set of test cases in src/python/gambit/tests.  These can
+be exercised via nosetests (requires Python package nose)::
+
+  cd src/python/gambit/tests
+  nosetests
+
+Once installed, simply ``import gambit`` in your Python shell or
+script to get started.
