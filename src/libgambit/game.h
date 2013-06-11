@@ -602,7 +602,6 @@ protected:
 
   GameRep(void) { }
 
-protected:
   /// @name Managing the representation
   //@{
   /// Renumber all game objects in a canonical way
@@ -657,11 +656,9 @@ public:
 
   /// @name Writing data files
   //@{
-  /// Write the game in .efg format to the specified stream
-  virtual void WriteEfgFile(std::ostream &) const
-  { throw UndefinedException(); }
-  /// Write the game in .nfg format to the specified stream
-  virtual void WriteNfgFile(std::ostream &) const
+  /// Write the game to a savefile in the specified format.
+  virtual void Write(std::ostream &p_stream,
+		     const std::string &p_format="native") const
   { throw UndefinedException(); }
   //@}
 

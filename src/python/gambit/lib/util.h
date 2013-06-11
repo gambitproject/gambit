@@ -21,15 +21,10 @@ Game ReadGame(char *fn) throw (InvalidFileException)
   return Gambit::ReadGame(f);
 }
 
-std::string WriteGame(const Game &p_game, bool strategic)
+std::string WriteGame(const Game &p_game, const std::string &p_format)
 {
   std::ostringstream f;
-  if (strategic) {
-    p_game->WriteNfgFile(f);
-  }
-  else {
-    p_game->WriteEfgFile(f);
-  }
+  p_game->Write(f, p_format);
   return f.str();
 }        
 

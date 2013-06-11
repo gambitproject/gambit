@@ -1,5 +1,6 @@
 from libcpp cimport bool
 from gambit.lib.error import UndefinedOperationError
+import gambit.gte
 
 cdef class Outcomes(Collection):
     "Represents a collection of outcomes in a game."
@@ -305,8 +306,10 @@ cdef class Game:
     def unrestrict(self):
         return self
 
-    def write(self, strategic=False):
-        if strategic or not self.is_tree:
-            return WriteGame(self.game, 1).c_str()
+    def write(self, format='native'):
+        cdef cxx_string s
+        if format == 'gte':
+            return gambit.gte.write_game(self)
         else:
-            return WriteGame(self.game, 0).c_str()
+            s.assign(format)
+            return WriteGame(self.game, s).c_str()

@@ -463,6 +463,23 @@ API documentation
       :param rational: If :literal:`True`, probabilities are represented using rational numbers; otherwise double-precision floating point numbers are used.  
       :raises: :py:class:`gambit.UndefinedOperationError` if the game does not have a tree representation.
 
+   .. py:method:: write(format='native')
+
+      Returns a serialization of the game.  Several output formats are
+      supported, depending on the representation of the game.
+
+      * `efg`: A representation of the game in
+        :ref:`the .efg extensive game file format <file-formats-efg>`.
+        Not available for games in strategic representation.
+      * `nfg`: A representation of the game in
+        :ref:`the .nfg strategic game file format <file-formats-nfg>`.
+        For an extensive game, this uses the reduced strategic form
+        representation.
+      * `gte`: The XML representation used by the Game Theory Explorer
+        tool.   Only available for extensive games.
+      * `native`: The format most appropriate to the
+        underlying representation of the game, i.e., `efg` or `nfg`.
+
 .. py:class:: GameActions
    
    A collection object representing the actions of a game.

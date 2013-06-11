@@ -886,6 +886,27 @@ GameOutcome GameExplicitRep::NewOutcome(void)
   return m_outcomes[m_outcomes.Last()];
 }
 
+//------------------------------------------------------------------------
+//                GameExplicitRep: Writing data files
+//------------------------------------------------------------------------
+
+void GameExplicitRep::Write(std::ostream &p_stream,
+			    const std::string &p_format /*="native"*/) const
+{
+  if (p_format == "efg" ||
+      (p_format == "native" && IsTree())) {
+    WriteEfgFile(p_stream);
+  }
+  else if (p_format == "nfg" ||
+	   (p_format == "native" && !IsTree())) {
+    WriteNfgFile(p_stream);
+  }
+  else {
+    throw UndefinedException();
+  }
+}
+
+
 
 // Deferred as this requires definition of GameTableRep
 Game GameTreeNodeRep::GetGame(void) const { return m_efg; }
