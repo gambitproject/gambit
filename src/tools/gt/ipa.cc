@@ -33,10 +33,11 @@
 //       stops refining it
 // ans: a pre-allocated vector in which the equilibrium will be stored
 
-int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans) {
+int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans,int maxiter) {
   int N = A.getNumPlayers(),
     M = A.getNumActions(), // For easy reference
     i,j,n,bestAction,B, // utility vars
+    iter=1,
     firstIteration = 1; 
   std::vector<int> Im(N);   // best actions in perturbed game
 
@@ -81,7 +82,7 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
   A.retract(sh, zh);
   so = sh;
 
-  while(1) {
+  while(maxiter<0||iter<=maxiter) {
     A.payoffMatrix(DG,sh,0.0);
     DG /= (double)(N-1); // find the Jacobian of the approximating bimatrix game
 
@@ -138,7 +139,10 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
     
     for(i = 0; i < M; i++)
       s[i] = ymn2[i];
-
+    //if (!isfinite(s.norm())){
+    //        cerr<<"error: s not finite"<<endl;
+    //        return 0;
+    //}
     int flag = 0;
     for(i = 0; i < M; i++) {
       if(s[i] < 0.0) {
@@ -148,6 +152,10 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
     }
     if(flag) { // update support and solve
       A.LemkeHowson(s,T,Im);
+      //if (!isfinite(s.norm())){
+      //  cerr<<"error: result of LemkeHowson not finite"<<endl;
+      //  return 0;
+      //}
     } else {
       // limit to current support
       for(i = 0; i < M; i++) {
@@ -155,6 +163,8 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
 	  s[i] = 0.0;
       }
     }
+
+
 
     DG.multiply(s,z);
     z += s;
@@ -175,7 +185,10 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
 
     ym1 = z;
     ym1 -= sh;
+    //double un=u.norm2();
+    //if (un<=fuzz)cerr<<"warning: divisioin by "<<un<<endl;
     l = (ym1 * u) / u.norm2(); // dot product
+
     if(l <= 0.0 || B) {
       zh = u;
       zh *= l;
@@ -191,6 +204,11 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
     ym2 -= sh;
     // if z and zh or s and sh are close enough, 
     // we've got an approximate equilibrium, so we can quit
+    cerr<<"iter "<<iter<<"\tz diff "<<ym1.norm()<<"\ts diff "<<ym2.norm()<<endl;
+    if (!isfinite(ym1.norm())||!isfinite(ym2.norm())){
+      cerr<<"error: not finite"<<endl;
+      return 0;
+    }
     if(N <= 2 || (ym1.norm() < fuzz || ym2.norm() < fuzz)) {
       ans = s;
       A.payoffMatrix(DG,s,0.0);
@@ -205,13 +223,13 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
       d -= y;
       d += yh;
       // Rule of false position
-      if(B && d.absmax() > fuzz) {
-	for(i = 0; i < M; i++) {
+      for(i = 0; i < M; i++) {
+        if(B && d[i] > fuzz) {
 	  ym1[i] = (yh[i] * z[i] - zh[i] * y[i])/d[i];
-	}
-      } else {
-      // Only do a first-order approximation
-	ym1 = z;
+        } else {
+          // Only do a first-order approximation
+	  ym1[i] = z[i];
+        }
       }
     } else {
       firstIteration = 0;
@@ -230,5 +248,11 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
     yh = zh;
     zh = zt;
     A.retract(sh,zh);
+    //assert(isfinite(zh.norm())&&isfinite (sh.norm()));
+    sh.unfuzz(fuzz);
+    A.normalizeStrategy(sh);
+    iter++;
   }
+  cout<<"max iteration reached"<<endl;
+  return 0;
 }

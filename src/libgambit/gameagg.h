@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/libgambit/gameagg.h
-// Declaration of base class for explicit game representations
+// Declaration of GameAggRep, the action-graph game representation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,12 +25,16 @@
 
 #include "libagg/agg.h"
 
+//forward declaration of wrapper for gametracer
+class aggame;
+
 namespace Gambit {
 
 class GameAggRep : public GameRep {
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class AggMixedStrategyProfileRep;
   friend class AggPureStrategyProfileRep;
+  friend class ::aggame;
 
 private:
   agg *aggPtr;
@@ -173,6 +177,7 @@ public:
   /// @name General data access
   //@{
   virtual bool IsTree(void) const { return false; }
+  virtual bool IsAgg(void) const { return true; }
   virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const { return true; }
   virtual bool IsConstSum(void) const;
   /// Returns the smallest payoff in any outcome of the game
@@ -183,6 +188,7 @@ public:
   virtual Rational GetMaxPayoff(int) const {
 	  return aggPtr->getMaxPayoff();
   }
+
   //@}
 
   /// @name Writing data files

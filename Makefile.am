@@ -593,6 +593,8 @@ gambit_gnm_SOURCES = \
 	src/tools/gt/gnmgame.h \
 	src/tools/gt/nfgame.cc \
 	src/tools/gt/nfgame.h \
+	src/tools/gt/aggame.cc \
+	src/tools/gt/aggame.h \
 	src/tools/gt/nfggnm.cc
 
 gambit_ipa_SOURCES = \
@@ -605,6 +607,8 @@ gambit_ipa_SOURCES = \
 	src/tools/gt/ipa.h \
 	src/tools/gt/nfgame.cc \
 	src/tools/gt/nfgame.h \
+	src/tools/gt/aggame.cc \
+	src/tools/gt/aggame.h \
 	src/tools/gt/nfgipa.cc
 
 gambit_lcp_SOURCES = \
