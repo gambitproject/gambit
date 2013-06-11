@@ -581,6 +581,14 @@ void GameTreeNodeRep::MoveTree(GameNode p_src)
   m_efg->Canonicalize();
 }
 
+Game GameTreeNodeRep::CopySubgame(void) const
+{
+  std::ostringstream os;
+  m_efg->WriteEfgFile(os, const_cast<GameTreeNodeRep *>(this));
+  std::istringstream is(os.str());
+  return ReadGame(is);
+}
+
 void GameTreeNodeRep::SetInfoset(GameInfoset p_infoset)
 {
   if (p_infoset->GetGame() != m_efg) throw MismatchException();
@@ -877,6 +885,27 @@ GameOutcome GameExplicitRep::NewOutcome(void)
   m_outcomes.Append(new GameOutcomeRep(this, m_outcomes.Length() + 1));
   return m_outcomes[m_outcomes.Last()];
 }
+
+//------------------------------------------------------------------------
+//                GameExplicitRep: Writing data files
+//------------------------------------------------------------------------
+
+void GameExplicitRep::Write(std::ostream &p_stream,
+			    const std::string &p_format /*="native"*/) const
+{
+  if (p_format == "efg" ||
+      (p_format == "native" && IsTree())) {
+    WriteEfgFile(p_stream);
+  }
+  else if (p_format == "nfg" ||
+	   (p_format == "native" && !IsTree())) {
+    WriteNfgFile(p_stream);
+  }
+  else {
+    throw UndefinedException();
+  }
+}
+
 
 
 // Deferred as this requires definition of GameTableRep

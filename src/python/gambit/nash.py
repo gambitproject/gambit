@@ -2,6 +2,7 @@
 A set of utilities for computing Nash equilibria
 """
 
+import sys
 import subprocess
 from fractions import Fraction
 from gambit.profiles import Solution
@@ -27,7 +28,7 @@ class ExternalSolver(object):
         """
         p = subprocess.Popen("%s -q" % prog, shell=True,
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                             close_fds=True)
+                             close_fds=True if sys.platform != "win32" else False)
         child_stdin, child_stdout = p.stdin, p.stdout
         if game.is_tree:
             child_stdin.write(game.write(strategic=False))
@@ -132,7 +133,7 @@ class ExternalGlobalNewtonSolver(ExternalSolver):
     def solve(self, game):
         command_line = "gambit-gnm -d 10"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational)
+                                  game, rational=False)
 
 class ExternalEnumPolySolver(ExternalSolver):
     """
@@ -144,7 +145,7 @@ class ExternalEnumPolySolver(ExternalSolver):
         if use_strategic and game.is_tree:
             command_line += " -S"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational,
+                                  game, rational=False,
                                   extensive=game.is_tree and not use_strategic)
 
 class ExternalLyapunovSolver(ExternalSolver):
@@ -157,7 +158,7 @@ class ExternalLyapunovSolver(ExternalSolver):
         if use_strategic and game.is_tree:
             command_line += " -S"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational,
+                                  game, rational=False,
                                   extensive=game.is_tree and not use_strategic)
 
 class ExternalIteratedPolymatrixSolver(ExternalSolver):
@@ -168,7 +169,7 @@ class ExternalIteratedPolymatrixSolver(ExternalSolver):
     def solve(self, game):
         command_line = "gambit-ipa -d 10"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational)
+                                  game, rational=False)
 
 class ExternalLogitSolver(ExternalSolver):
     """
@@ -181,5 +182,5 @@ class ExternalLogitSolver(ExternalSolver):
         if use_strategic and game.is_tree:
             command_line += " -S"
         return self._parse_output(self.launch(command_line, game),
-                                  game, rational,
+                                  game, rational=False,
                                   extensive=game.is_tree and not use_strategic)

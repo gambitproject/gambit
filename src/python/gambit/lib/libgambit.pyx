@@ -211,6 +211,7 @@ cdef extern from "libgambit/game.h":
         c_GameOutcome GetOutcome()
         void SetOutcome(c_GameOutcome)
 
+        c_Rational GetPayoff(int)
 
     c_Game NewTree()
     c_Game NewTable(Array[int] *)
@@ -300,7 +301,7 @@ cdef extern from "libgambit/stratspt.h":
 
 cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError
-    cxx_string WriteGame(c_Game, int) except +IOError
+    cxx_string WriteGame(c_Game, cxx_string) except +IOError
 
     void setitem_ArrayInt(Array[int] *, int, int)
     void setitem_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble *, 
@@ -378,7 +379,8 @@ def read_game(char *fn):
     g = Game()
     try:
         g.game = ReadGame(fn)
-    except IOError:
-        raise IOError("Unable to read game from file '%s'" % fn)
+    except IOError as e:
+        raise IOError("Unable to read game from file '%s': %s" % 
+                      (fn, e))
     return g
         

@@ -32,5 +32,56 @@
 	<true/>
 	<key>CSResourcesFileMapped</key>
 	<true/>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+	  <dict>
+	    <key>CFBundleTypeExtensions</key>
+	    <array>
+	      <string>gbt</string>
+	    </array>
+	    <key>CFBundleTypeIconFile</key>
+	    <string>gambit.icns</string>
+	    <key>CFBundleTypeName</key>
+	    <string>Gambit Document</string>
+	    <key>CFBundleTypeOSTypes</key>
+            <array>
+	      <string>GBT </string>
+	    </array>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+	  </dict>
+	  <dict>
+	    <key>CFBundleTypeExtensions</key>
+	    <array>
+	      <string>efg</string>
+	    </array>
+	    <key>CFBundleTypeIconFile</key>
+	    <string>gambit.icns</string>
+	    <key>CFBundleTypeName</key>
+	    <string>Gambit Extensive Game Document</string>
+	    <key>CFBundleTypeOSTypes</key>
+            <array>
+	      <string>EFG </string>
+	    </array>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+	  </dict>
+	  <dict>
+	    <key>CFBundleTypeExtensions</key>
+	    <array>
+	      <string>nfg</string>
+	    </array>
+	    <key>CFBundleTypeIconFile</key>
+	    <string>gambit.icns</string>
+	    <key>CFBundleTypeName</key>
+	    <string>Gambit Strategic Game Document</string>
+	    <key>CFBundleTypeOSTypes</key>
+            <array>
+	      <string>NFG </string>
+	    </array>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+	  </dict>
+	</array>
 </dict>
 </plist>

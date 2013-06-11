@@ -23,6 +23,7 @@
 #ifndef LIBGAMBIT_H
 #define LIBGAMBIT_H
 
+#include <stdexcept>
 #include <string>
 #include <sstream>
 #include <iomanip>
@@ -46,11 +47,12 @@ template <class D, class S> D lexical_cast(const S &p_value, int p_prec)
 //                        Exception classes
 //========================================================================
 
-/// A base class for all exceptions
-class Exception : public std::exception {
+/// A base class for all Gambit exceptions
+class Exception : public std::runtime_error {
 public:
+  Exception(void) : std::runtime_error("") { }
+  Exception(const char *s) : std::runtime_error(s) { }
   virtual ~Exception() throw() { }
-  virtual const char *what(void) const throw() = 0;
 };
 
 /// Exception thrown on out-of-range index

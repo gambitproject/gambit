@@ -187,6 +187,8 @@ public:
   virtual void CopyTree(GameNode src);
   virtual void MoveTree(GameNode src);
 
+  virtual Game CopySubgame(void) const;
+
   virtual GameInfoset AppendMove(GamePlayer p_player, int p_actions);
   virtual GameInfoset AppendMove(GameInfoset p_infoset);
   virtual GameInfoset InsertMove(GamePlayer p_player, int p_actions);

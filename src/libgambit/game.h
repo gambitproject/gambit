@@ -225,8 +225,9 @@ public:
 /// Exception thrown on a parse error when reading a game savefile
 class InvalidFileException : public Exception {
 public:
+  InvalidFileException(void) : Exception("File not in a recognized format") { }
+  InvalidFileException(const char *s) : Exception(s) { }
   virtual ~InvalidFileException() throw() { }
-  const char *what(void) const throw()  { return "File not in a recognized format"; }
 };
 
 //=======================================================================
@@ -497,6 +498,9 @@ public:
   virtual void CopyTree(GameNode src) = 0;
   virtual void MoveTree(GameNode src) = 0;
 
+  /// Create a separate Game object containing the subgame rooted at the node
+  virtual Game CopySubgame(void) const = 0;
+
   virtual GameInfoset AppendMove(GamePlayer p_player, int p_actions) = 0;
   virtual GameInfoset AppendMove(GameInfoset p_infoset) = 0;
   virtual GameInfoset InsertMove(GamePlayer p_player, int p_actions) = 0;
@@ -601,7 +605,6 @@ protected:
 
   GameRep(void) { }
 
-protected:
   /// @name Managing the representation
   //@{
   /// Renumber all game objects in a canonical way
@@ -656,14 +659,9 @@ public:
 
   /// @name Writing data files
   //@{
-  /// Write the game in .efg format to the specified stream
-  virtual void WriteEfgFile(std::ostream &) const
-  { throw UndefinedException(); }
-  /// Write the subtree starting at node in .efg format to the specified stream
-  virtual void WriteEfgFile(std::ostream &, const GameNode &p_node) const
-  { throw UndefinedException(); }
-  /// Write the game in .nfg format to the specified stream
-  virtual void WriteNfgFile(std::ostream &) const
+  /// Write the game to a savefile in the specified format.
+  virtual void Write(std::ostream &p_stream,
+		     const std::string &p_format="native") const
   { throw UndefinedException(); }
   //@}
 

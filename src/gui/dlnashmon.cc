@@ -113,10 +113,10 @@ void gbtNashMonitorDialog::Start(gbtAnalysisOutput *p_command)
   
   std::ostringstream s;
   if (p_command->IsBehavior()) {
-    m_doc->GetGame()->WriteEfgFile(s);
+    m_doc->GetGame()->Write(s, "efg");
   }
   else {
-    m_doc->GetGame()->WriteNfgFile(s);
+    m_doc->GetGame()->Write(s, "nfg");
   }
   wxString str(wxString(s.str().c_str(), *wxConvCurrent));
   

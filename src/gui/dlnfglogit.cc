@@ -745,7 +745,7 @@ void LogitMixedDialog::Start(void)
 #endif // __WXMAC__
   
   std::ostringstream s;
-  m_doc->GetGame()->WriteNfgFile(s);
+  m_doc->GetGame()->Write(s, "nfg");
   wxString str(wxString(s.str().c_str(), *wxConvCurrent));
   
   // It is possible that the whole string won't write on one go, so

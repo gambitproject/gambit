@@ -336,13 +336,13 @@ void gbtGameDocument::SaveDocument(std::ostream &p_file) const
 
   if (m_game->IsTree()) {
     p_file << "<efgfile>\n";
-    m_game->WriteEfgFile(p_file);
+    m_game->Write(p_file, "efg");
     p_file << "</efgfile>\n";
 
   }
   else {
     p_file << "<nfgfile>\n";
-    m_game->WriteNfgFile(p_file);
+    m_game->Write(p_file, "nfg");
     p_file << "</nfgfile>\n";
   }
 
@@ -613,7 +613,7 @@ void gbtGameDocument::DoSave(const wxString &p_filename)
 void gbtGameDocument::DoExportEfg(const wxString &p_filename)
 {
   std::ofstream file(static_cast<const char *>(p_filename.mb_str()));
-  m_game->WriteEfgFile(file);
+  m_game->Write(file, "efg");
   UpdateViews(GBT_DOC_MODIFIED_NONE);
 }
 
@@ -621,7 +621,7 @@ void gbtGameDocument::DoExportNfg(const wxString &p_filename)
 {
   std::ofstream file(static_cast<const char *>(p_filename.mb_str()));
   BuildNfg();
-  m_game->WriteNfgFile(file);
+  m_game->Write(file, "nfg");
   UpdateViews(GBT_DOC_MODIFIED_NONE);
 }
 

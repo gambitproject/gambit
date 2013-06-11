@@ -33,6 +33,16 @@ protected:
   Array<GamePlayerRep *> m_players;
   Array<GameOutcomeRep *> m_outcomes;
 
+  /// @name Writing data files
+  //@{
+  /// Write the game in .efg format to the specified stream
+  virtual void WriteEfgFile(std::ostream &) const
+  { throw UndefinedException(); }
+  /// Write the game in .nfg format to the specified stream
+  virtual void WriteNfgFile(std::ostream &) const
+  { throw UndefinedException(); }
+  //@}
+
 public:
   /// @name Lifecycle
   //@{
@@ -77,6 +87,12 @@ public:
   virtual GameOutcome GetOutcome(int index) const { return m_outcomes[index]; }
   /// Creates a new outcome in the game
   virtual GameOutcome NewOutcome(void);
+
+  /// @name Writing data files
+  //@{
+  virtual void Write(std::ostream &p_stream,
+		     const std::string &p_format="native") const;
+  //@}
 };
 
 }

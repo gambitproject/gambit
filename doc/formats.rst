@@ -78,6 +78,8 @@ way as to give the "expected" result when decimal numbers appear in
 the file format.
 
 
+.. _file-formats-efg:
+ 
 The extensive game (.efg) file format
 -------------------------------------
 
@@ -267,6 +269,8 @@ There is no explicit end-of-file delimiter for the file.
 
 
 
+.. _file-formats-nfg:
+ 
 The strategic game (.nfg) file format, payoff version
 -----------------------------------------------------
 

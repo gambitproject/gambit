@@ -463,6 +463,23 @@ API documentation
       :param rational: If :literal:`True`, probabilities are represented using rational numbers; otherwise double-precision floating point numbers are used.  
       :raises: :py:class:`gambit.UndefinedOperationError` if the game does not have a tree representation.
 
+   .. py:method:: write(format='native')
+
+      Returns a serialization of the game.  Several output formats are
+      supported, depending on the representation of the game.
+
+      * `efg`: A representation of the game in
+        :ref:`the .efg extensive game file format <file-formats-efg>`.
+        Not available for games in strategic representation.
+      * `nfg`: A representation of the game in
+        :ref:`the .nfg strategic game file format <file-formats-nfg>`.
+        For an extensive game, this uses the reduced strategic form
+        representation.
+      * `gte`: The XML representation used by the Game Theory Explorer
+        tool.   Only available for extensive games.
+      * `native`: The format most appropriate to the
+        underlying representation of the game, i.e., `efg` or `nfg`.
+
 .. py:class:: GameActions
    
    A collection object representing the actions of a game.
@@ -834,15 +851,20 @@ API documentation
 
       A text label useful for identification of the outcome.
 
-   .. py:method:: __getitem__(pl)
+   .. py:method:: __getitem__(player)
 
-      Returns the payoff to the ``pl`` th player at the outcome.
+      Returns the payoff to ``player`` at the outcome.  ``player``
+      may be a :py:class:`gambit.Player`, a string, or an integer.
+      If a string, returns the payoff to the player with that string
+      as its label.  If an integer, returns the payoff to player
+      number ``player``.
 
-   .. py:method:: __setitem__(pl, payoff)
+   .. py:method:: __setitem__(player, payoff)
 
       Sets the payoff to the ``pl`` th player at the outcome to the
       specified ``payoff``.  Payoffs may be specified as integers
       or instances of ``decimal.Decimal`` or ``fractions.Fraction``.
+      Players may be specified as in ``__getitem__``.
 
 .. py:class:: Outcomes
    

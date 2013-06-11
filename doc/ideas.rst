@@ -84,6 +84,60 @@ parameters, running times and computational results
 should be recorded systematically.
 
 
+Refactor and update game representation library
+-----------------------------------------------
+
+The basic library (in `src/libgambit`) for representing games was
+written in the mid-1990s.  As such, it predates many modern C++
+features (including templates, STL, exceptions, Boost, and so on).
+This project involves carrying out a thorough review of the
+basic library code.  Tasks will/may include:
+
+* Replacing the existing reference-counting mechanism with a more
+  flexible approach to referring to elements of games.
+* Implementing the concepts of "strategy support profiles" and
+  "strategy sets" as currently implemented at the Python level.
+* Implementing internal representations using STL, and iterators over
+  objects in STL-compatible ways.
+* Conducting experiments on internal representation structures for
+  performance scalability on larger games.
+
+All tasks will involve coordination with the Python API to ensure
+this does not break as changes are made, so a working knowledge of
+Python/Cython is indicated.
+
+* **Languages**: C++; Python/Cython.
+* **Prerequisites**: Introductory game theory for familiarity with
+  terminology of the objects in a game; undergraduate-level software
+  engineering experience.
+
+Integrate Action Graph Games support into main Gambit distribution
+------------------------------------------------------------------
+
+Through the work of Albert Jiang and the research group of
+Prof Kevin Leyton-Brown at University of British Columbia, there
+is an implementation of support for the Action Graph Games
+representation structure.  See
+
+  Jiang, A. X., Leyton-Brown, K., and Bhat, N. A. R. (2011)
+  Action-graph games. Games and Economic Behavior 71(1): 141-173.
+  http://dx.doi.org/10.1016/j.geb.2010.10.012
+
+A preliminary integration of the work has been done in the
+`agg` branch in the Gambit git repository.
+
+This project would involve completing the integration of their
+work for distribution.  The primary tasks will involve code
+refactoring, documentation, and the construction of a test suite.
+
+* **Languages**: C++; optionally Python/Cython for integration with the
+  Python API.
+* **Prerequisites**: Undergraduate-level software engineering
+  experience; adequate game theory to understand the action graph
+  games representation as described in the 2011 article.
+
+
+
 Implementing algorithms for finding equilibria in games
 -------------------------------------------------------
 
@@ -92,6 +146,59 @@ computing equilibria and other interesting quantities on games.
 Each of these is a single project  For GSoC applications, you should
 select exactly one of these, as each is easily a full summer's worth
 of work (no matter how easy some of them may seem at first read!)
+
+Enumerating all equilibria of a two-player bimatrix game using the EEE algorithm
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The task is to implement the EEE algorithm, which is a published algorithm to
+enumerate all extreme equilibria of a bimatrix game.
+
+* **Languages:** C, Java
+* **Prerequisites:**  Background in game theory, basic linear
+  algebra and linear programming.  Experience with programs of at least
+  medium complexity so that existing code can be expanded.
+
+**Fuller details:**
+
+The task is to implement the EEE algorithm, which is a published algorithm to
+enumerate all extreme equilibria of a bimatrix game.
+
+The most up-to-date version can be found in Sections 7 and 8
+of
+
+    D. Avis, G. Rosenberg, R. Savani, and B. von Stengel (2010),
+    Enumeration of Nash equilibria for two-player games.
+    Economic Theory 42, 9-37. 
+
+    http://www.maths.lse.ac.uk/Personal/stengel/ETissue/ARSvS.pdf
+
+Extra information, including some code,
+is provided in the following report:
+
+    G. Rosenberg (2004),
+    Enumeration of All Extreme Equilibria of Bimatrix Games with Integer Pivoting and Improved Degeneracy Check.
+    CDAM Research Report LSE-CDAM-2004-18.
+
+    http://www.cdam.lse.ac.uk/Reports/Files/cdam-2005-18.pdf
+
+The original algorithm was described in the following paper:
+    
+    C. Audet, P. Hansen, B. Jaumard, and G. Savard (2001),
+    Enumeration of all extreme equilibria of bimatrix games. 
+    SIAM Journal on Scientific Computing 23, 323–338.
+
+The implementation should include a feature to compare the
+algorithm's output (a list of extreme equilibria) with the
+ouput of other algorithms for the same task (e.g.
+``lrsnash``).
+
+In addition a framework that compares running times (and the
+number of recursive calls, calls to pivoting methods, and
+other crucial operations) should be provided.
+The output should record and document the computational
+experiments so that they can be reproduced, in a general
+setup - sufficiently documented - that can be used for
+similar comparisons.
 
 
 Improve integration and testing of Gametracer
@@ -131,86 +238,6 @@ the integration and testing of the lrslib integration.
 * **Languages:** C/C++
 * **Prerequisites:** Some level of comfort with linear algebra.
 
- 
-Finding all equilibria reachable by Lemke-Howson
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-For a two-player in strategic form (also called bimatrix
-games), what are the Nash equilibria that can be found using
-the Lemke-Howson method?  Each pure strategy as an
-"initially dropped label" leads to an equilibrium along a
-computational path obtained by "pivoting" in a linear
-system.  If two equilibria found in that way are different,
-using the second label on the first equilibrium (and vice
-versa) will find yet another equilibrium.  The set of all
-equilibria reachable in that way should be recorded and is a
-(normally) fast way to find many equilibria when the game is
-large.
-
-* **Prerequisites:**
-  Theoretical understanding of the Lemke-Howson
-  method or of the Simplex algorithm for Linear Programming.
-  Literature exists that is accessible for students with at
-  least senior-level background in computer science,
-  mathematics or operations research.  An existing
-  implementation of a Lemke-Howson style pivoting algorithm
-  should be adapted with suitable alterations.
-
-**Fuller details:**
-
-This figure shows the typical situation for a nondegenerate
-two-player game:
-
-.. figure:: figures/lh-net.*
-            :alt: a two-player game
-	    :align: center
-
-There is an "artificial equilibrium" 0 and five equilibria
-1,2,3,4,5, each of which has a *sign* or *index* + or -.
-The Lemke-Howson (LH) algorithm computes a piecewise linear
-path from a known equilibrium, originally only 0, to another
-equilibrium.  There are different ways to start, one for
-each pure strategy of a player which define different LH
-paths.  Here only two ways are shown, in blue and red. 
-An LH path always connects two equilibria of opposite sign,
-so there are an even number of them, minus the artificial
-equilibrium, which gives an odd number overall.  
-Here, the blue and red paths lead to two different
-equilibria 1 and 2 of positive index (+).  Then the
-algorithm can be run backwards on equilibrium 1 where the
-blue path leads back to 0, but the red path must find
-another equilibrium, here 3, of negative index (-).  
-The blue path from equilibrium 2 could possibly find another
-negatively indexed equilibrium like 4, but does not, it also
-finds 3.  So the "network" of LH paths here is not connected
-and only finds equilibria 1,2,3, but not the two equilibria
-4,5 which are only connected among themselves.
-
-Given the LH algorithm, all this is relatively
-straightforward, but there is no implementation for finding
-negatively indexed equilibria and the described "network".
-It would also be useful to study if all equilibria can be
-found for random or typical examples.
-
-The LH algorithm is described in
-
-    B. von Stengel (2007), Equilibrium computation for
-    two-player games in strategic and extensive form. Chapter 3,
-    Algorithmic Game Theory, eds. N. Nisan, T. Roughgarden, E.
-    Tardos, and V. Vazirani, Cambridge Univ. Press, Cambridge,
-    53-78. 
-
-    http://www.maths.lse.ac.uk/Personal/stengel/TEXTE/agt-stengel.pdf
-
-It is related to the simplex algorithm for linear
-programming but with a different *complementary* pivoting
-rule.  It is also numerically not stable because rounding
-errors may violate the rule, so it needs to be implemented
-with *integer pivoting*, also described in the article.
-
-There are versions around in C and Java that implement this
-which are not yet part of the public Gambit code, but will
-be made public once the project starts.
 
 Finding equilibria reachable by Lemke's algorithm with varying "covering vectors"
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

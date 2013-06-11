@@ -58,12 +58,9 @@ bool gbtApplication::OnInit(void)
 		       wxSIMPLE_BORDER | wxSTAY_ON_TOP);
   wxYield();
 
-  // The number of game files successfully opened
-  int nGames = 0;
-
   // Process command line arguments, if any.
-  for (int i = 1; i < argc; i++) {
-    gbtAppLoadResult result = LoadFile(argv[i]);
+  for (int i = 1; i < wxApp::argc; i++) {
+    gbtAppLoadResult result = LoadFile(wxApp::argv[i]);
     if (result == GBT_APP_OPEN_FAILED) {
       wxMessageDialog dialog(0,
 			     wxT("Gambit could not open file '") + 
@@ -82,12 +79,9 @@ bool gbtApplication::OnInit(void)
 			     wxOK | wxICON_ERROR);
       dialog.ShowModal();
     }
-    else {
-      nGames++;
-    }
   }
 
-  if (nGames == 0) {
+  if (m_documents.Length() == 0) {
     // If we don't have any game files -- whether because none were
     // specified on the command line, or because those specified couldn't
     // be read -- create a default document.
