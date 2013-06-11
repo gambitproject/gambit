@@ -44,6 +44,16 @@ by replacing configure step with one of the form
 Building from git repository
 ----------------------------
 
+**Prerequisite**
+
+  - autoconf
+  - libtool
+  - automake
+  - wxwidgets2.8.0 or higher(Optional, build with GUI needed)
+
+You should install the above list tools before you build gambit
+(using apt-get on ubuntu or yum on fedora).
+
 If you want to live on the bleeding edge, you can get the latest
 version of the Gambit sources from the Gambit repository on
 github.com, via ::
@@ -58,12 +68,25 @@ After this, you will need to set up the build scripts by executing ::
   automake --add-missing
   autoconf
 
-For this, you will need to have automake, autoconf, and libtool2
-installed on your system.
-
 At this point, you can then continue with the configuration and build
-stages as in the previous section.
+gambit, you can choose build gambit command-line tools or with GUI.
 
+**Build command-line tools only**::
+
+  ./configure  --disable-gui
+  make
+  sudo make install
+
+**Build with GUI**
+
+You should first install wxWidgets first, please refer to the last section
+(The graphical interface and wxWidgets).
+
+Then run the following commands::
+
+  ./configure
+  make
+  sudo make install
 
 Supported compilers
 -------------------
@@ -179,3 +202,29 @@ can either (a) simply not install wxWidgets, or (b) pass the argument
 
 This will just build the command-line tools, and will not require
 a wxWidgets installation.
+
+Build Gambit Python Interface
+----------------------
+
+**Prerequisite**
+
+  * `setuptools <http://pypi.python.org/pypi/setuptools>`__
+  * `cython <http://cython.org>`__
+  * `nosetest <https://github.com/nose-devsnose.git>`__ (test tools)
+  * `Ipython <https://github/Ipython/ipython/downloads>`__ (used by gambit-shell)
+  * `scipy <http://www.scipy.org>`__ (used by gambit-shell)
+
+Download the source code of all above-list tools, and follow their tutorial to build and install these tools on your machine.
+
+Then open the terminal and change to the gambit/src/python dir::
+
+  gambit/src/python$ python setup.py build
+  gambit/src/python$ sudo python setup.py install
+
+Run the python interface testcases::
+
+  gambit/src/python/gambit/test$: nosetest
+
+Run gambit python terminal::
+
+  gambit-shell
