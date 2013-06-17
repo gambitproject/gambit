@@ -184,6 +184,20 @@ bool GameAggRep::IsConstSum(void) const
 //                   GameAGGRep: Writing data files
 //------------------------------------------------------------------------
 
+void GameAggRep::Write(std::ostream &p_stream,
+			    const std::string &p_format /*="native"*/) const
+{
+  if (p_format == "native" || p_format == "agg") {
+	  WriteAggFile(p_stream);
+  }
+  else if (p_format == "nfg") {
+	  WriteNfgFile(p_stream);
+  }
+  else {
+	  throw UndefinedException();
+  }
+}
+
 void GameAggRep::WriteNfgFile(std::ostream &s) const{
 	throw UndefinedException();
 }
