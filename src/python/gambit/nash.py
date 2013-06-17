@@ -19,7 +19,7 @@ class ExternalSolver(object):
     """
     Base class for managing calls to external programs.
     """
-    def launch(self, prog, game):
+    def launch(self, prog, game, use_nfg=False):
         """
         Helper function for launching calls to external programs.
         Calls the specified program 'prog', passing the game to standard
@@ -30,10 +30,10 @@ class ExternalSolver(object):
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                              close_fds=True if sys.platform != "win32" else False)
         child_stdin, child_stdout = p.stdin, p.stdout
-        if game.is_tree:
-            child_stdin.write(game.write(strategic=False))
+        if use_nfg:
+            child_stdin.write(game.write(format='nfg'))
         else:
-            child_stdin.write(game.write(strategic=True))
+            child_stdin.write(game.write(format='native'))
         # Need to close, or at least flush, stdin of the child, or else
         # processing won't begin...
         child_stdin.close()
