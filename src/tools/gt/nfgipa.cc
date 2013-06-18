@@ -35,6 +35,7 @@
 #define EQERR 1e-6
 
 int g_numDecimals = 6;
+bool g_verbose = false;
 
 void PrintProfile(std::ostream &p_stream,
 		  const Gambit::Game &p_game, cvector *p_profile)
@@ -65,6 +66,7 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
   std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
@@ -123,15 +125,19 @@ int main(int argc, char *argv[])
   struct option long_options[] = {
     { "help", 0, NULL, 'h'   },
     { "version", 0, NULL, 'v'  },
+    { "verbose", 0, NULL, 'V'  },
     { 0,    0,    0,    0   }
   };
   int c;
-  while ((c = getopt_long(argc, argv, "d:vqhS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:vVqhS", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr); exit(1);
     case 'q':
       quiet = true;
+      break;
+    case 'V':
+      g_verbose = true;
       break;
     case 'd':
       g_numDecimals = atoi(optarg);
