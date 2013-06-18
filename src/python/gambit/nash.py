@@ -31,9 +31,9 @@ class ExternalSolver(object):
                              close_fds=True if sys.platform != "win32" else False)
         child_stdin, child_stdout = p.stdin, p.stdout
         if game.is_tree:
-            child_stdin.write(game.write(strategic=False))
+            child_stdin.write(game.write(format='efg'))
         else:
-            child_stdin.write(game.write(strategic=True))
+            child_stdin.write(game.write(format='nfg'))
         # Need to close, or at least flush, stdin of the child, or else
         # processing won't begin...
         child_stdin.close()
