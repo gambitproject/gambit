@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="5BDEDA0E-AE75-48F9-8E33-27D725F2DCB6" Name="Gambit 0.10.0901" Language="1033" Version="0.10.0901" Manufacturer="The Gambit Project" UpgradeCode="CDF06BDB-F942-4588-874C-282E2BBB44F3">
+    <Product Id="5BDEDA0E-AE75-48F9-8E33-27D725F2DCB6" Name="Gambit 0.13.0701" Language="1033" Version="0.13.0701" Manufacturer="The Gambit Project" UpgradeCode="CDF06BDB-F942-4588-874C-282E2BBB44F3">
         <Package Description="Test file in a Product" Comments="Simple test" InstallerVersion="200" Compressed="yes" />
         <Media Id="1" Cabinet="gambit.cab" EmbedCab="yes" />
 
@@ -35,7 +35,7 @@
         </DirectoryRef>
 
         <DirectoryRef Id="ProgramMenuFolder">
-            <Directory Id="ProgramMenuDir" Name="Gambit 0.10.0901">
+            <Directory Id="ProgramMenuDir" Name="Gambit 0.13.0701">
                 <Component Id="ProgramMenuDir" Guid="BA738777-7AD0-4D10-97D5-3B6292FC80C5">
                     <RemoveFolder Id="ProgramMenuDir" On="uninstall"/>
                     <RegistryValue Root="HKCU" Key="Software\Gambit\Gambit" Type="string" Value="" KeyPath="yes"/>
@@ -46,7 +46,7 @@
         <DirectoryRef Id="ApplicationProgramsFolder">
             <Component Id="ApplicationShortcut" Guid="2228FE1F-9345-4BCB-8AA7-364887E0A2F7">
                 <Shortcut Id="ApplicationStartMenuShortcut"
-                          Name="Gambit 0.10.0901"
+                          Name="Gambit 0.13.0701"
                           Description="Software Tools for Game Theory"
                           Target="[ApplicationRootDirectory]Gambit.exe"
                           WorkingDirectory="ApplicationRootDirectory"/>
