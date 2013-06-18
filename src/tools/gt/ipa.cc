@@ -21,6 +21,8 @@
 #include "ipa.h"
 #include "gnmgame.h"
 
+extern bool g_verbose;
+
 // IPA(A,g,zh,alpha,fuzz,ans)
 // --------------------------
 // This runs the IPA algorithm on game A.
@@ -33,10 +35,11 @@
 //       stops refining it
 // ans: a pre-allocated vector in which the equilibrium will be stored
 
-int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans) {
+int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans,int maxiter) {
   int N = A.getNumPlayers(),
     M = A.getNumActions(), // For easy reference
     i,j,n,bestAction,B, // utility vars
+    iter=1,
     firstIteration = 1; 
   std::vector<int> Im(N);   // best actions in perturbed game
 
@@ -81,7 +84,7 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
   A.retract(sh, zh);
   so = sh;
 
-  while(1) {
+  while(maxiter<0||iter<=maxiter) {
     A.payoffMatrix(DG,sh,0.0);
     DG /= (double)(N-1); // find the Jacobian of the approximating bimatrix game
 
@@ -191,6 +194,11 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
     ym2 -= sh;
     // if z and zh or s and sh are close enough, 
     // we've got an approximate equilibrium, so we can quit
+    if (g_verbose) cerr<<"iter "<<iter<<"\tz diff "<<ym1.norm()<<"\ts diff "<<ym2.norm()<<endl;
+    if (!isfinite(ym1.norm())||!isfinite(ym2.norm())){
+      cerr<<"error: not finite"<<endl;
+      return 0;
+    }
     if(N <= 2 || (ym1.norm() < fuzz || ym2.norm() < fuzz)) {
       ans = s;
       A.payoffMatrix(DG,s,0.0);
@@ -205,13 +213,13 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
       d -= y;
       d += yh;
       // Rule of false position
-      if(B && d.absmax() > fuzz) {
-	for(i = 0; i < M; i++) {
-	  ym1[i] = (yh[i] * z[i] - zh[i] * y[i])/d[i];
-	}
-      } else {
-      // Only do a first-order approximation
-	ym1 = z;
+      for(i = 0; i < M; i++) {
+        if(B && d[i] > fuzz) {
+          ym1[i] = (yh[i] * z[i] - zh[i] * y[i])/d[i];
+        } else {
+          // Only do a first-order approximation
+          ym1[i] = z[i];
+        }
       }
     } else {
       firstIteration = 0;
@@ -230,5 +238,11 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
     yh = zh;
     zh = zt;
     A.retract(sh,zh);
+
+    sh.unfuzz(fuzz);
+    A.normalizeStrategy(sh);
+    iter++;
   }
+  cout<<"max iteration reached"<<endl;
+  return 0;
 }

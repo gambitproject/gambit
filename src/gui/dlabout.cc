@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/gui/dlabout.cc
 // Implementation of "about" dialog
@@ -68,7 +68,7 @@ gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
 		0, wxALIGN_CENTER, 5);
 
   topSizer->Add(FormattedText(this, 
-			      _T("Copyright (C) 1994-2010, The Gambit Project"),
+			      _T("Copyright (C) 1994-2013, The Gambit Project"),
 			      wxFont(12, wxROMAN, wxNORMAL, wxNORMAL)),
 		0, wxTOP | wxALIGN_CENTER, 20);
   topSizer->Add(FormattedText(this, 

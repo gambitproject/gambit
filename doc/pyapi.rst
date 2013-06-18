@@ -1,5 +1,14 @@
+.. _python-api:
+
 Python interface to Gambit library
 ==================================
+
+As of the Gambit release of 0.2013.07.01, Gambit now supports a Python
+interface for programmatic manipulation of games.  This section
+documents this interface, which is under active development.
+Refer to the :ref:`instructions for building the Python interface
+<build-python>` to compile and install the Python extension.
+
 
 A tutorial introduction
 -----------------------
@@ -10,53 +19,53 @@ Building an extensive game
 The function :func:`gambit.new_tree` creates a new, trivial extensive game,
 with no players, and only a root node::
 
-  $ gambit-shell
+  In [1]: import gambit
 
-  In [1]: g = gambit.new_tree()
+  In [2]: g = gambit.new_tree()
 
-  In [2]: len(g.players)
-  Out[2]: 0
+  In [3]: len(g.players)
+  Out[3]: 0
 
 The game also has no title.  The :py:attr:`title` attribute provides
 access to a game's title::
 
-  In [3]: str(g)
-  Out[3]: "<Game ''>"
+  In [4]: str(g)
+  Out[4]: "<Game ''>"
 
-  In [4]: g.title = "A simple poker example"
+  In [5]: g.title = "A simple poker example"
 
-  In [5]: g.title
-  Out[5]: 'A simple poker example'
+  In [6]: g.title
+  Out[6]: 'A simple poker example'
 
-  In [6]: str(g)
-  Out[6]: "<Game 'A simple poker example'>"
+  In [7]: str(g)
+  Out[7]: "<Game 'A simple poker example'>"
 
 The :py:attr:`players` attribute of a game is a collection of the
 players.  As seen above, calling :py:meth:`len` on the set of players
 gives the number of players in the game.  Adding a player is done
 with the :py:meth:`add` member of :py:attr:`players`::
 
-  In [7]: p = g.players.add("Alice")
+  In [8]: p = g.players.add("Alice")
 
-  In [8]: p
-  Out[8]: <Player [0] 'Alice' in game 'A simple poker example'>
+  In [9]: p
+  Out[9]: <Player [0] 'Alice' in game 'A simple poker example'>
 
 Each player has a text string stored in the :py:attr:`label` attribute,
 which is useful for human identification of players::
 
-  In [9]: p.label
-  Out[9]: 'Alice'
+  In [10]: p.label
+  Out[10]: 'Alice'
 
 The :py:attr:`players` can be accessed like a Python list::
 
-  In [10]: len(g.players)
-  Out[10]: 1
+  In [11]: len(g.players)
+  Out[11]: 1
 
-  In [11]: g.players[0]
-  Out[11]: <Player [0] 'Alice' in game 'A simple poker example'>
+  In [12]: g.players[0]
+  Out[12]: <Player [0] 'Alice' in game 'A simple poker example'>
 
-  In [12]: g.players
-  Out[12]: [<Player [0] 'Alice' in game 'A simple poker example'>]
+  In [13]: g.players
+  Out[13]: [<Player [0] 'Alice' in game 'A simple poker example'>]
 
 
 Building a strategic game
