@@ -94,19 +94,19 @@ void gnmgame::retract(cvector &dest, cvector &z) {
   double *y = new double[numActions];
   try {
     memcpy(y,z.values(),numActions*sizeof(double));
-    for(n = 0; n < numPlayers; n++) {  
+    for(n = 0; n < numPlayers; n++) {
       qsort(y+firstAction(n),actions[n],sizeof(double),compareDouble);
       sumz = y[firstAction(n)];
       for(i=firstAction(n)+1; i < lastAction(n); i++) {
-	if(sumz - (i-firstAction(n)) * y[i] > 1)
-	  break;
-	sumz += y[i];
+        if(sumz - (i-firstAction(n)) * y[i] > 1)
+	      break;
+        sumz += y[i];
       }
       v = (sumz - 1) / (double)(i-firstAction(n));
       for(i = firstAction(n); i < lastAction(n); i++) {
-	dest[i] = z[i] - v;
-	if(dest[i] < 0.0)
-	  dest[i] = 0.0;
+        dest[i] = z[i] - v;
+        if(dest[i] < 0.0)
+          dest[i] = 0.0;
       }
     }
     delete y;
@@ -116,8 +116,82 @@ void gnmgame::retract(cvector &dest, cvector &z) {
     throw;
   }
 }
+void gnmgame::retract(cvector &dest, cvector &z, bool ksym){
+  if(!ksym){
+    retract(dest,z);
+    return;
+  }
+  int n, i;
+  double v, sumz;
+  double* y = new double[getNumKSymActions()];
+  int offs=0;
+  //CPY(y,z.values(),getNumKSymActions());
+ try{
+  memcpy(y,z.values(),getNumKSymActions()*sizeof(double));
+  for(n = 0; n < getNumPlayerClasses(); n++) {
+    qsort(y+offs,getNumKSymActions(n),sizeof(double),compareDouble);
+    sumz = y[offs];
+    for(i=1; i < getNumKSymActions(n); i++) {
+      if(sumz - (i) * y[i+offs] > 1)
+        break;
+      sumz += y[i+offs];
+    }
+    v = (sumz - 1.0) / i;
+    for(i = offs; i < offs+getNumKSymActions(n); i++) {
+      dest[i] = z[i] - v;
+      if(dest[i] < 0.0)
+        dest[i] = 0.0;
+    }
+    offs+=getNumKSymActions(n);
+  }
+  delete y;
+ }
+ catch (...) {
+     delete y;
+     throw;
+ }
+}
 
-double gnmgame::LNM(cvector &z, const cvector &g, double det, cmatrix &J, cmatrix &DG, cvector &s, int MaxLNM, double fuzz, cvector &del, cvector &scratch, cvector &backup) {
+void gnmgame::KSymRetractJac(cmatrix &dest, int *support){
+  int n, i, j, offs;
+  double totalk;
+  for(n = 0, offs=0; n < getNumPlayerClasses(); n++) {
+    totalk = 0.0;
+    for(i = offs; i < offs+getNumKSymActions(n); i++) {
+      totalk += support[i];
+    }
+    for(i = 0; i < getNumKSymActions(); i++) {
+      for(j = offs; j < offs+getNumKSymActions(n); j++) {
+        if(i >= offs && i < offs+getNumKSymActions(n) && support[i] && support[j]) {
+          if(i==j)
+            dest[i][j] = (1.0) - (1.0)/totalk;
+          else
+            dest[i][j] = (-1.0)/totalk;
+        }
+        else
+          dest[i][j] = 0.0;
+      }
+    }
+    offs+=getNumKSymActions(n);
+  }
+}
+
+void gnmgame::KSymNormalizeStrategy(cvector& s){
+  double sum;
+  int offs=0;
+  for(int n = 0; n < getNumPlayerClasses(); n++) {
+    sum = 0.0;
+    for(int i = 0; i < getNumKSymActions(n); i++) {
+      sum += s[offs+i];
+    }
+    for(int i = 0; i < getNumKSymActions(n); i++) {
+      s[offs+i] /= sum;
+    }
+    offs+=getNumKSymActions(n);
+  }
+}
+
+double gnmgame::LNM(cvector &z, const cvector &g, double det, cmatrix &J, cmatrix &DG, cvector &s, int MaxLNM, double fuzz, cvector &del, cvector &scratch, cvector &backup, bool ksym) {
   double b, e = BIGFLOAT, ee;
   int k, faulted = 0;
   if(MaxLNM >= 1 && det != 0.0) {
@@ -137,8 +211,8 @@ double gnmgame::LNM(cvector &z, const cvector &g, double det, cmatrix &J, cmatri
 	break;
       } else if(e < ee) { // we got worse
 	z = backup;
-	retract(s, z);
-	payoffMatrix(DG, s, fuzz);
+	retract(s, z, ksym);
+	payoffMatrix(DG, s, fuzz, ksym);
       	if(faulted) // if we've already failed once, quit.
 	  return e;
 	b /= MaxLNM; // if the full LNM step fails to improve things,
@@ -152,8 +226,8 @@ double gnmgame::LNM(cvector &z, const cvector &g, double det, cmatrix &J, cmatri
       backup = z;
       z -= scratch;
       //      z = z - (J * del) * b;
-      retract(s, z);
-      payoffMatrix(DG, s, fuzz);
+      retract(s, z, ksym);
+      payoffMatrix(DG, s, fuzz, ksym);
     }
     return ee;
   } else return fuzz;
