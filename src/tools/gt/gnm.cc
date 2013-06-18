@@ -160,6 +160,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
     yn1[n] = v[s[n]];
     for(i = A.firstAction(n); i < A.lastAction(n); i++) {
       if(!B[i]) {
+        if (G[n]-g[i]<threshold) g[i]-=threshold;  //make sure we don't divide by (almost) zero
         newV = (v[i]-yn1[n]) / (G[n]-g[i]);
         if(newV > V) 
           V = newV;
@@ -270,6 +271,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
       // there are no more equilibria on the path.  This could be
       // handled differently.
       if(minBound == BIGFLOAT && Index*(lambda+dlambda*delta) > 0) {
+	if(g_verbose) std::cerr<<"gnm(): return since the path crosses no more support boundaries and no next eqlm"<<endl;
 	return numEq;
       }
       
@@ -305,6 +307,11 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 	    det = J.adjoint();
 	    ee = A.LNM(z, nothing, det, J, DG, sigma, LNMMax, fuzz,ym1,ym2,ym3);
 	  }
+	  for (int idx=0;idx<M;idx++)
+	    if (! isfinite(sigma[idx])){
+	              if(g_verbose) std::cerr<<"gnm(): return since sigma is not finite"<<endl;
+	              return numEq;
+	    }
 	  if(ee < fuzz) { // only save high quality equilibria;
 	    // this restriction could be removed.
 	    Eq = (cvector **)realloc(Eq, (numEq+2)*sizeof(cvector *));	
@@ -312,7 +319,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 	    *(Eq[numEq++]) = sigma;
 
 	    PrintProfile(std::cout, "NE", sigma);
-	  }
+      }
 	  Index = -Index;
 	  s_hat_old = -1;
 	  stepsLeft++;
@@ -320,6 +327,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 	}
       }
       if(del == BIGFLOAT) {
+	if (g_verbose) std::cerr<<"gnm(): return since no next support boundary after this eqlm"<<endl;
 	return numEq;
       }
 
@@ -334,7 +342,8 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 
       // if we're sufficiently far out on the ray in the reverse
       // direction, we're probably not going back
-      if(lambda < LambdaMin && Index == -1) { 
+      if(lambda < LambdaMin && Index == -1) {
+	if (g_verbose) std::cerr<<"gnm(): return due to too far out in the reverse direction"<<endl;
 	return numEq;
       }
       A.retract(sigma,z);
@@ -365,8 +374,10 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 	  g -= ym1;
 	  g /= lambda;
 	  // g = ((z-sigma)-((DG*sigma) / (double)(N-1)))/lambda;
-	} else 
+	} else {
+	  if(g_verbose) std::cerr<<"gnm(): return due to too much error. error is "<<ee<<endl;
 	  return numEq;
+	}
       }
 
       // if we've done LNMMax repetitions, time to get back on the path
