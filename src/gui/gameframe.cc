@@ -277,25 +277,20 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   m_splitter = new wxSplitterWindow(this, -1);
   if (p_doc->IsTree()) {
     m_efgPanel = new gbtEfgPanel(m_splitter, p_doc);
+    m_efgPanel->Show(true);
+    m_splitter->Initialize(m_efgPanel);
+    m_nfgPanel = 0;
   }
   else {
     m_efgPanel = 0;
-  }
-
-  m_nfgPanel = new gbtNfgPanel(m_splitter, p_doc);
-  if (p_doc->IsTree()) {
-    m_nfgPanel->Show(false);
+    m_nfgPanel = new gbtNfgPanel(m_splitter, p_doc);
+    m_nfgPanel->Show(true);
+    m_splitter->Initialize(m_nfgPanel);
   }
 
   m_analysisPanel = new gbtAnalysisNotebook(m_splitter, p_doc);
   m_analysisPanel->Show(false);
 
-  if (p_doc->IsTree()) {
-    m_splitter->Initialize(m_efgPanel);
-  }
-  else {
-    m_splitter->Initialize(m_nfgPanel);
-  }
   m_splitter->SetSashGravity(0.5);
   m_splitter->SetMinimumPaneSize(200);
 
@@ -1328,6 +1323,25 @@ void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
       }
     }
     
+    int ncont = 1;
+    for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
+      ncont *= m_doc->GetGame()->GetPlayer(pl)->NumStrategies();
+    }
+
+    if (!m_nfgPanel && ncont >= 50000) {
+      if (wxMessageBox(wxString::Format(wxT("This game has %d contingencies in strategic form.\n"), ncont) +
+		       wxT("Performance in browsing strategic form will be poor,\n") +
+		       wxT("and may render the program nonresponsive.\n") +
+		       wxT("Do you wish to continue?"),
+		       _("Large strategic game warning"),
+		       wxOK | wxCANCEL | wxALIGN_CENTER, this) != wxOK) {
+	return;
+      }
+    }
+
+    if (!m_nfgPanel) {
+      m_nfgPanel = new gbtNfgPanel(m_splitter, m_doc);
+    }
     m_doc->BuildNfg();
 
     m_splitter->ReplaceWindow(m_efgPanel, m_nfgPanel);
