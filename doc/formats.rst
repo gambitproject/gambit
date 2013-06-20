@@ -578,10 +578,10 @@ The rest of the file consists of 8 sections, separated by whitespaces. Lines wit
 The Bayesian action graph game (.bagg) format
 ---------------------------------------------
 
-Bayesian action graph games (BAGGs) are a compact representation of incomplete-information games. 
+Bayesian action graph games (BAGGs) are a compact representation of Bayesian (i.e., incomplete-information) games. 
 For more information on BAGGs, the following paper gives a detailed discussion.
 
-    A.X. Jiang and K. Leyton-Brown, `Bayesian Action-Graph Games <http://teamcore.usc.edu/people/jiangx/papers/BAGG.pdf>`. NIPS, 2010.
+    A.X. Jiang and K. Leyton-Brown, `Bayesian Action-Graph Games <http://www.cs.ubc.ca/~jiang/papers/BAGG.pdf>`_. NIPS, 2010.
 
 Each file in this format describes a BAGG.
 In order for the file to be recognized as BAGG by GAMBIT, the initial line of the file should be::
