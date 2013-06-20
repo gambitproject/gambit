@@ -65,6 +65,14 @@ installed on your system.
 At this point, you can then continue with the configuration and build
 stages as in the previous section.
 
+In the git repository, the branch ``master`` always points to the
+latest development version.  New development should in general always
+be based off this branch.  Branches labeled ``maintVV``, where ``VV``
+is the version number, point to the latest commit on a stable
+version; so, for example, ``maint13`` refers to the latest commit for
+Gambit version 13.x.x.  Bug fixes should typically be based off of
+this branch.
+
 
 Supported compilers
 -------------------
@@ -77,16 +85,6 @@ If you wish to use another compiler, the most likely stumbling block is
 that Gambit uses templated member functions for classes, so the compiler
 must support these.  (Version of gcc prior to 3.4 do not, for example.)
 
-For 64-bit users
-----------------
-
-The program gambit-enumpoly does not compile on 64-bit systems.  A new
-version of that program is being developed.  It is currently being distributed
-separately on the Gambit website.  In the meanwhile, to compile the other
-programs in Gambit, 64-bit users should add the switch --disable-enumpoly
-to the configuration step, e.g. ::
-  
-  ./configure --disable-enumpoly [other options here]
 
 
 For Windows users
@@ -160,6 +158,11 @@ to download this if you need it.  Packages of this should be available
 for most Un*x users through their package managers (apt or rpm).  Note
 that you'll need the appropriate -dev package for wxWidgets to get the
 header files needed to build Gambit.
+
+The current recommended versions of wxWidgets are 2.9.4 for Windows
+and Linux, and 2.8.12 for Mac OS X.  There is a bug in the 2.9.x
+series of wxWidgets which affects drag-and-drop operations, and
+therefore makes the graphical interface essentially useless.
 
 Un*x users, please note that Gambit at this time only supports the
 GTK port of wxWidgets, and not the Motif/Lesstif or the Universal ports.

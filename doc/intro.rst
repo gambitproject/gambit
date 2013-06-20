@@ -41,17 +41,16 @@ contributing his "clique" code for identification of equilibrium
 components in two-player strategic games, as well as other advice
 regarding Gambit's implementation and architecture.
 
-The present series of Gambit releases, numbered 0.2005.mm.dd according
-to release date, focuses on two objectives. First, the graphical
-interface was reimplemented and modernized, with the goal of following
-good interaction design principles, especially in regards to easing
-the learning curve for users new to Gambit and new to game theory.
-Second, the internal architecture of Gambit was refactored to increase
-interoperability between the tools provided by Gambit and those
-written independently. In particular, there are many more researchers
-active in computation in game theory in 2005 then during the last
-major Gambit development phase circa 1995, and the architecture of
-Gambit is evolving to reflect this.
+Development since the mid-2000s has focused on two objectives. First,
+the graphical interface was reimplemented and modernized, with the
+goal of following good interaction design principles, especially in
+regards to easing the learning curve for users new to Gambit and new
+to game theory.  Second, the internal architecture of Gambit was
+refactored to increase interoperability between the tools provided by
+Gambit and those written independently. In particular, there are many
+more researchers active in computation in game theory today then
+during the last major Gambit development phase circa 1995, and the
+architecture of Gambit is evolving to reflect this.
 
 
 Key features of Gambit
@@ -181,20 +180,17 @@ The current stable version is 0.2010.09.01.
 * `gambit-0.2010.09.01.tar.gz <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2010.09.01/gambit-0.2010.09.01.tar.gz/download>`_ (source tarball, for Linux/Windows/Mac OSX)
 * `gambit-0.2010.09.01.dmg <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2010.09.01/gambit-0.2010.09.01.dmg/download>`_ (application binary for Mac OSX 10.6)
 
-The previous stable version of Gambit was 0.2007.12.04.  
+The current development version is 13.0.0.
 
-* `gambit-0.2007.12.04.tar.gz <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2007.12.04/gambit-0.2007.12.04.tar.gz/download>`_ (source tarball, for Linux/Windows/Mac OSX)
-
-* `gambit-0.2007.12.04.exe <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2007.12.04/gambit-0.2007.12.04.exe/download>`_ (binary installer distribution for Microsoft Windows).
-
-.. note::
-   There is no Windows installer yet available for the latest stable
-   version.  The previous stable version contains all the essential
-   functionality and is adequate for most users.  There is a known bug
-   involving viewing dominated actions in extensive games in the
-   0.2007.12.04 version of the graphical interface.  Users are advised
-   to avoid using this feature.  The error is entirely cosmetic and
-   does not affect the correctness of equilibria calculated.
+* `gambit-13.0.0.tar.gz
+  <http://sourceforge.net/projects/gambit/files/gambit13/13.0.0/gambit-13.0.0.tar.gz/download>`_
+  (source tarball, for Linux/Mac OSX/Windows)
+* `gambit-13.0.0.msi
+  <http://sourceforge.net/projects/gambit/files/gambit13/13.0.0/gambit-13.0.0.msi/download>`_
+  (installer for Microsoft Windows)
+* `gambit-13.0.0.dmg
+  <http://sourceforge.net/projects/gambit/file/gambit13/13.0.0/gambit-13.0.0.dmg>`_
+  (application binary for Mac OSX 10.8)
 
 
 Community

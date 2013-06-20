@@ -27,6 +27,7 @@ ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = \
 	gambit.spec \
 	gambit.desktop \
+        gambit.wxs \
 	contrib/mac/Info.plist \
 	src/labenski/README.txt \
 	src/labenski/art/grab.xpm \
@@ -247,6 +248,7 @@ EXTRA_DIST = \
 	src/python/gambit/cmdline.py \
 	src/python/gambit/enumeration.py \
 	src/python/gambit/gameiter.py \
+	src/python/gambit/gte.py \
 	src/python/gambit/levelk.py \
 	src/python/gambit/nash.py \
 	src/python/gambit/pctrace.py \
@@ -282,7 +284,7 @@ EXTRA_DIST = \
 	src/python/gambit/tests/test_outcomes.py \
 	src/python/gambit/tests/test_players.py \
 	src/python/gambit/tests/test_strategic.py \
-	src/python/gambit/tests/test_strspt.py \
+	src/python/gambit/tests/test_stratspt.py \
 	src/python/gambit/tests/test_stratprofiles.py \
 	src/python/gambit/tests/test_strategies.py \
 	src/python/gambit/tests/test_games/basic_extensive_game.efg \
@@ -324,6 +326,7 @@ libgambit_la_SOURCES = \
 	src/libgambit/number.h \
 	src/libgambit/game.cc \
 	src/libgambit/game.h \
+	src/libgambit/gameexpl.h \
 	src/libgambit/gametable.cc \
 	src/libgambit/gametable.h \
 	src/libgambit/gametree.cc \
