@@ -28,7 +28,6 @@
 #include <fstream>
 #include <cstdlib>
 #include <cstring>
-#include <cassert>
 #include <string>
 #include <iomanip>
 #include <vector>
@@ -108,7 +107,7 @@ public:
 	inline double operator*(const cvector &v) const {
 		if (m!=v.m) {
 			cerr << "invalid cvector dot product" << endl;
-			assert(0);
+			//assert(0);
 		}
 		double ret = 0.0;
 		for(int i=0;i<m;i++) ret += x[i]*v.x[i];
@@ -135,7 +134,7 @@ public:
 	inline cvector &operator+=(const cvector &v) {
 		if (v.m!=m) {
 			cerr << "invalid cvector addition" << endl;
-			assert(0);
+			//assert(0);
 		}
 		for(int i=0;i<m;i++) x[i] += v.x[i];
 		return *this;
@@ -143,7 +142,7 @@ public:
 	inline cvector &operator-=(const cvector &v) {
 		if (v.m!=m) {
 			cerr << "invalid cvector subtraction" << endl;
-			assert(0);
+			//assert(0);
 		}
 		for(int i=0;i<m;i++) x[i] -= v.x[i];
 		return *this;
@@ -467,7 +466,7 @@ public:
 	inline cmatrix operator*(const cmatrix &ma) const {
 		if (n!=ma.m) {
 			cerr << "invalid cmatrix multiply" << endl;
-			assert(0);
+			//assert(0);
 		}
 		cmatrix ret(m,ma.n);
 		int c=0;
@@ -481,7 +480,7 @@ public:
 	inline cvector operator*(const cvector &v) const {
 		if (n!=v.m) {
 			cerr << "invalid cvector-cmatrix multiply" << endl;
-			assert(0);
+			//assert(0);
 		}
 		cvector ret(m);
 		int c = 0;
@@ -496,7 +495,7 @@ public:
 	inline double dot(const cmatrix &ma) const {
 		if (n!=ma.n || m!=ma.m) {
 			cerr << "invalid cmatrix dot-product" << endl;
-			assert(0);
+			//assert(0);
 		}
 		int c = 0;
 		double ret = 0.0;
@@ -509,7 +508,7 @@ public:
 	inline void outer(const cmatrix &ma, cmatrix &ret) const {
 		if (n!=ma.n || ret.m!=m || ret.n!=ma.m) {
 			cerr << "invalid cmatrix outer multiply" << endl;
-			assert(0);
+			//assert(0);
 		}
 		int c=0;
 		for(int i=0;i<m;i++) for(int j=0;j<ma.m;j++,c++) {
@@ -521,7 +520,7 @@ public:
 	inline void inner(const cmatrix &ma, cmatrix &ret) const {
 		if (m!=ma.m || ret.m!=n || ret.n!=ma.n) {
 			cerr << "invalid cmatrix inner multiply" << endl;
-			assert(0);
+			//assert(0);
 		}
 		int c=0;
 		for(int i=0;i<n;i++) for(int j=0;j<ma.n;j++,c++) {
@@ -534,7 +533,7 @@ public:
 	inline double rowmult(int r, const cvector &v, int exclude) const {
 		if (n!=v.m) {
 			cerr << "invalid matrix-vector multiply" << endl;
-			assert(0);
+			//assert(0);
 		}
 		double ret = 0.0;
 		int c=n*r;
@@ -545,7 +544,7 @@ public:
 	inline double rowmult(int r, const cvector &v) const {
 		if (n!=v.m) {
 			cerr << "invalid matrix-vector multiply" << endl;
-			assert(0);
+			//assert(0);
 		}
 		double ret = 0.0;
 		int c=n*r;
@@ -571,7 +570,7 @@ public:
 	inline cmatrix &multbyrow(const cvector &v) {
 		if (n!=v.m) {
 			cerr << "invalid multbycol" << endl;
-			assert(0);
+			//assert(0);
 		}
 		int c = 0;
 		for(int i=0;i<m;i++)
@@ -582,7 +581,7 @@ public:
 	inline cmatrix &multbycol(const cvector &v) {
 		if (m!=v.m) {
 			cerr << "invalid multbycol" << endl;
-			assert(0);
+			//assert(0);
 		}
 		int c = 0;
 		for(int i=0;i<m;i++)
@@ -607,7 +606,7 @@ public:
 	inline cmatrix &dividebyrow(const cvector &v) {
 		if (n!=v.m) {
 			cerr << "invalid dividebycol" << endl;
-			assert(0);
+			//assert(0);
 		}
 		int c = 0;
 		for(int i=0;i<m;i++)
@@ -618,7 +617,7 @@ public:
 	inline cmatrix &dividebycol(const cvector &v) {
 		if (m!=v.m) {
 			cerr << "invalid dividebycol" << endl;
-			assert(0);
+			//assert(0);
 		}
 		int c = 0;
 		for(int i=0;i<m;i++)
@@ -644,7 +643,7 @@ public:
 	inline cmatrix &operator+=(const cmatrix &ma) {
 		if (m!=ma.m||n!=ma.n) {
 			cerr << "invalid cmatrix addition" << endl;
-			assert(0);
+			//assert(0);
 		}
 		for(int i=0;i<s;i++) x[i] += ma.x[i];
 		return *this;
@@ -653,7 +652,7 @@ public:
 	inline cmatrix &operator-=(const cmatrix &ma) {
 		if (m!=ma.m||n!=ma.n) {
 			cerr << "invalid cmatrix addition" << endl;
-			assert(0);
+			//assert(0);
 		}
 		for(int i=0;i<s;i++) x[i] -= ma.x[i];
 		return *this;
@@ -662,7 +661,7 @@ public:
 	inline cmatrix &operator*=(const cmatrix &ma) {
 		if (n!=ma.m || n != ma.n) {
 			cerr << "invalid cmatrix multiply" << endl;
-			assert(0);
+			//assert(0);
 		}
 		int i,j,k,c=0;
 		std::vector<double> newrow(n);
@@ -783,7 +782,7 @@ bool solve(cvector &b, cvector &dest);
 	inline double trace();
 	double testAdjoint();
 	inline void multiply(const cvector &source, cvector &dest) {
-	  assert(n == source.m && m == dest.m);
+	  //assert(n == source.m && m == dest.m);
 	  int i,j,c=0;
 	  for(i = 0; i < m; i++) {
 	    dest[i] = 0;

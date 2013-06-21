@@ -73,13 +73,6 @@ public:
   //@}
 };
 
-/// An exception thrown when attempting to dereference a null pointer
-class NullException : public Exception {
-public:
-  virtual ~NullException() throw() { }
-  const char *what(void) const throw()  { return "Dereferencing null pointer"; }
-};
-
 /// An exception thrown when attempting to dereference an invalidated object 
 class InvalidObjectException : public Exception {
 public:

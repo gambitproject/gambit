@@ -60,7 +60,7 @@ template<class T> IneqSolv<T>::~IneqSolv()
 template<class T> 
 IneqSolv<T>& IneqSolv<T>::operator=(const IneqSolv<T> & rhs)
 {
-  assert (System == rhs.System);
+  //assert (System == rhs.System);
 
   if (*this != rhs) {
     Epsilon = rhs.Epsilon;

@@ -69,7 +69,7 @@ template<class T>  gIdeal<T>::~gIdeal()
 
 template<class T> gIdeal<T>& gIdeal<T>::operator=(const gIdeal<T> & rhs)
 {
-  assert (Space == rhs.Space);
+  //assert (Space == rhs.Space);
 
   if (*this != rhs) {
     this->order = rhs.order;

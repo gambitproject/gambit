@@ -283,7 +283,11 @@ SolveSupport(const BehavSupport &p_support, bool &p_isSingular)
 #endif  // UNUSED
     }
   }
-  catch (SingularMatrixException) {
+  catch (const Gambit::SingularMatrixException &) {
+    p_isSingular = true;
+  }
+  catch (const Gambit::AssertionException &e) {
+    std::cerr << "Assertion warning: " << e.what() << std::endl;
     p_isSingular = true;
   }
   

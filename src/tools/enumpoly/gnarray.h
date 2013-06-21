@@ -23,7 +23,6 @@
 #ifndef GNARRAY_H
 #define GNARRAY_H
 
-#include <assert.h>
 #include "libgambit/libgambit.h"
 
 //

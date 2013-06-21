@@ -32,7 +32,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "rational.h"
 #include <cmath>
 #include <cfloat>
-#include <cassert>
 #include <cctype>
 
 namespace Gambit {

@@ -458,7 +458,7 @@ ListOfPartialTrees<T>::DerivativeMatrix(const Gambit::Vector<T>& p,
 template <class T> Gambit::SquareMatrix<T> 
 ListOfPartialTrees<T>::SquareDerivativeMatrix(const Gambit::Vector<T>& p) const
 {
-  assert (Length() >= Dmnsn());
+  //assert (Length() >= Dmnsn());
   Gambit::SquareMatrix<T> answer(Dmnsn());
   int i;
   for (i = 1; i <= Dmnsn(); i++)
