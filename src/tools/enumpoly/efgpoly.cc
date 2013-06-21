@@ -49,10 +49,40 @@ public:
   int nVars;
   Array<Array<int> > var;
 
-  ProblemData(const BehavSupport &p_support)
-    : support(p_support), SF(p_support) { }
+  ProblemData(const BehavSupport &p_support);
+  ~ProblemData();
 };
 
+ProblemData::ProblemData(const BehavSupport &p_support)
+  : support(p_support), SF(p_support)
+{
+  nVars = SF.TotalNumSequences() - SF.NumPlayerInfosets() - SF.NumPlayers();
+  Space = new gSpace(nVars);
+  Lex = new term_order(Space, lex);
+
+  var = p_support.GetGame()->NumPlayers();
+  int tnv = 0;
+  for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
+    var[pl] = Array<int>(SF.NumSequences(pl));
+    var[pl][1] = 0;
+    for (int seq = 2; seq <= SF.NumSequences(pl); seq++) {
+      int act = SF.ActionNumber(pl, seq);
+      GameInfoset infoset = SF.GetInfoset(pl, seq); 
+      if (act < p_support.NumActions(infoset)) {
+	var[pl][seq] = ++tnv;
+      }
+      else {
+	var[pl][seq] = 0;
+      }
+    }
+  }
+}
+
+ProblemData::~ProblemData()
+{
+  delete Lex;
+  delete Space;
+}
 
 //=======================================================================
 //               Constructing the equilibrium conditions
@@ -230,31 +260,6 @@ List<MixedBehavProfile<double> >
 SolveSupport(const BehavSupport &p_support, bool &p_isSingular)
 {
   ProblemData data(p_support);
-  data.nVars = (data.SF.TotalNumSequences() -
-		data.SF.NumPlayerInfosets() - 
-		data.SF.NumPlayers());
-  data.Space = new gSpace(data.nVars);
-  data.Lex = new term_order(data.Space, lex);
-
-  int tnv = 0;
-  
-  data.var = p_support.GetGame()->NumPlayers();
-  
-  for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    data.var[pl] = Array<int>(data.SF.NumSequences(pl));
-    data.var[pl][1] = 0;
-    for (int seq = 2; seq <= data.SF.NumSequences(pl); seq++) {
-      int act = data.SF.ActionNumber(pl, seq);
-      GameInfoset infoset = data.SF.GetInfoset(pl, seq); 
-      if (act < p_support.NumActions(infoset)) {
-	data.var[pl][seq] = ++tnv;
-      }
-      else {
-	data.var[pl][seq] = 0;
-      }
-    }
-  }
-
   gPolyList<double> equations = NashOnSupportEquationsAndInequalities(data);
 
   // set up the rectangle of search
@@ -302,8 +307,6 @@ SolveSupport(const BehavSupport &p_support, bool &p_isSingular)
     }
   }
 
-  delete data.Lex;
-  delete data.Space;
   return solutions;
 }
 
