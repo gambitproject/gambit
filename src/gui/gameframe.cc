@@ -1323,11 +1323,7 @@ void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
       }
     }
     
-    int ncont = 1;
-    for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
-      ncont *= m_doc->GetGame()->GetPlayer(pl)->NumStrategies();
-    }
-
+    int ncont = m_doc->GetGame()->NumStrategyContingencies();
     if (!m_nfgPanel && ncont >= 50000) {
       if (wxMessageBox(wxString::Format(wxT("This game has %d contingencies in strategic form.\n"), ncont) +
 		       wxT("Performance in browsing strategic form will be poor,\n") +
@@ -1448,6 +1444,20 @@ void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
   gbtNashChoiceDialog dialog(this, m_doc);
 
   if (dialog.ShowModal() == wxID_OK) {
+    if (dialog.UseStrategic()) {
+      int ncont = m_doc->GetGame()->NumStrategyContingencies();
+      if (ncont >= 50000) {
+	if (wxMessageBox(wxString::Format(wxT("This game has %d contingencies in strategic form.\n"), ncont) +
+			 wxT("Performance in solving strategic form will be poor,\n") +
+			 wxT("and may render the program nonresponsive.\n") +
+			 wxT("Do you wish to continue?"),
+			 _("Large strategic game warning"),
+			 wxOK | wxCANCEL | wxALIGN_CENTER, this) != wxOK) {
+	  return;
+	}
+      }
+    }
+
     gbtAnalysisOutput *command = dialog.GetCommand();
 
     gbtNashMonitorDialog dialog(this, m_doc, command);

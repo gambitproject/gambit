@@ -64,6 +64,8 @@ public:
   virtual Array<int> NumStrategies(void) const;
   /// Gets the i'th strategy in the game, numbered globally
   virtual GameStrategy GetStrategy(int p_index) const;
+  /// Returns the number of strategy contingencies in the game
+  virtual int NumStrategyContingencies(void) const;
   /// Returns the total number of strategies in the game
   virtual int MixedProfileLength(void) const;
   //@}
