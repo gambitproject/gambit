@@ -180,16 +180,16 @@ The current stable version is 0.2010.09.01.
 * `gambit-0.2010.09.01.tar.gz <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2010.09.01/gambit-0.2010.09.01.tar.gz/download>`_ (source tarball, for Linux/Windows/Mac OSX)
 * `gambit-0.2010.09.01.dmg <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2010.09.01/gambit-0.2010.09.01.dmg/download>`_ (application binary for Mac OSX 10.6)
 
-The current development version is 13.0.0.
+The current development version is 13.0.1.
 
-* `gambit-13.0.0.tar.gz
-  <http://sourceforge.net/projects/gambit/files/gambit13/13.0.0/gambit-13.0.0.tar.gz/download>`_
+* `gambit-13.0.1.tar.gz
+  <http://sourceforge.net/projects/gambit/files/gambit13/13.0.1/gambit-13.0.1.tar.gz/download>`_
   (source tarball, for Linux/Mac OSX/Windows)
-* `gambit-13.0.0.msi
-  <http://sourceforge.net/projects/gambit/files/gambit13/13.0.0/gambit-13.0.0.msi/download>`_
+* `gambit-13.0.1.msi
+  <http://sourceforge.net/projects/gambit/files/gambit13/13.0.1/gambit-13.0.1.msi/download>`_
   (installer for Microsoft Windows)
-* `gambit-13.0.0.dmg
-  <http://sourceforge.net/projects/gambit/file/gambit13/13.0.0/gambit-13.0.0.dmg>`_
+* `gambit-13.0.1.dmg
+  <http://sourceforge.net/projects/gambit/files/gambit13/13.0.1/gambit-13.0.1.dmg>`_
   (application binary for Mac OSX 10.8)
 
 
