@@ -38,6 +38,8 @@ public:
   gbtNashChoiceDialog(wxWindow *, gbtGameDocument *);
 
   gbtAnalysisOutput *GetCommand(void) const;
+
+  bool UseStrategic(void) const;
 };
 
 

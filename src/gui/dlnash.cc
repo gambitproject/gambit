@@ -161,6 +161,12 @@ void gbtNashChoiceDialog::OnMethod(wxCommandEvent &p_event)
   }
 }
 
+bool gbtNashChoiceDialog::UseStrategic(void) const
+{
+  return (m_repChoice == 0 ||
+	  m_repChoice->GetSelection() == 1);
+}
+
 gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand(void) const
 {
   bool useEfg = m_repChoice && m_repChoice->GetSelection() == 0;
