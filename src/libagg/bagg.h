@@ -21,6 +21,7 @@ typedef  std::vector<AggNumber>  ProbDist;
 
 namespace Gambit{
   class BagentPureStrategyProfileRep;
+  template <class T> class BagentMixedStrategyProfileRep;
 }
 
 class bagg {
@@ -30,6 +31,7 @@ public:
 
   friend class agentform;
   friend class Gambit::BagentPureStrategyProfileRep;
+  template <class T> friend class Gambit::BagentMixedStrategyProfileRep;
 
   friend std::ostream& operator<< (std::ostream& s, const bagg& g);
 

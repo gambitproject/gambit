@@ -35,6 +35,9 @@ template class Gambit::TreeMixedStrategyProfileRep<Gambit::Rational>;
 template class Gambit::AggMixedStrategyProfileRep<double>;
 template class Gambit::AggMixedStrategyProfileRep<Gambit::Rational>;
 
+template class Gambit::BagentMixedStrategyProfileRep<double>;
+template class Gambit::BagentMixedStrategyProfileRep<Gambit::Rational>;
+
 template class Gambit::MixedStrategyProfile<double>;
 template class Gambit::MixedStrategyProfile<Gambit::Rational>;
 
