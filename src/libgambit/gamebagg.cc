@@ -129,25 +129,25 @@ PureStrategyProfile GameBagentRep::NewPureStrategyProfile(void) const
 
 MixedStrategyProfile<double> GameBagentRep::NewMixedStrategyProfile(double) const
 {
-	throw UndefinedException();
-	//return new BagentMixedStrategyProfileRep<double>(StrategySupport(const_cast<GameBagentRep *>(this)));
+	//throw UndefinedException();
+	return new BagentMixedStrategyProfileRep<double>(StrategySupport(const_cast<GameBagentRep *>(this)));
 }
 
 MixedStrategyProfile<Rational> GameBagentRep::NewMixedStrategyProfile(const Rational &) const
 {
-	throw UndefinedException();
-	//return new BagentMixedStrategyProfileRep<Rational>(StrategySupport(const_cast<GameBagentRep *>(this)));
+	//throw UndefinedException();
+	return new BagentMixedStrategyProfileRep<Rational>(StrategySupport(const_cast<GameBagentRep *>(this)));
 }
 MixedStrategyProfile<double> GameBagentRep::NewMixedStrategyProfile(double, const StrategySupport& spt) const
 {
-	throw UndefinedException();
-	//return new BagentMixedStrategyProfileRep<double>(spt);
+	//throw UndefinedException();
+	return new BagentMixedStrategyProfileRep<double>(spt);
 }
 
 MixedStrategyProfile<Rational> GameBagentRep::NewMixedStrategyProfile(const Rational &, const StrategySupport& spt) const
 {
-	throw UndefinedException();
-	//return new BagentMixedStrategyProfileRep<Rational>(spt);
+	//throw UndefinedException();
+	return new BagentMixedStrategyProfileRep<Rational>(spt);
 }
 
 
@@ -167,10 +167,44 @@ Game GameBaggRep::Copy(void) const
   std::istringstream is(os.str());
   return ReadBaggFile(is);
 }
+//------------------------------------------------------------------------
+//                   GameBaggRep: Factory Functions
+//------------------------------------------------------------------------
+MixedStrategyProfile<double> GameBaggRep::NewMixedStrategyProfile(double) const
+{
+	throw UndefinedException();
+}
 
+MixedStrategyProfile<Rational> GameBaggRep::NewMixedStrategyProfile(const Rational &) const
+{
+	throw UndefinedException();
+}
+MixedStrategyProfile<double> GameBaggRep::NewMixedStrategyProfile(double, const StrategySupport& spt) const
+{
+	throw UndefinedException();
+}
+
+MixedStrategyProfile<Rational> GameBaggRep::NewMixedStrategyProfile(const Rational &, const StrategySupport& spt) const
+{
+	throw UndefinedException();
+}
 //------------------------------------------------------------------------
 //                   GameBaggRep: Writing data files
 //------------------------------------------------------------------------
+
+void GameBaggRep::Write(std::ostream &p_stream,
+			    const std::string &p_format /*="native"*/) const
+{
+  if (p_format == "native" || p_format == "bagg") {
+	  WriteBaggFile(p_stream);
+  }
+  else if (p_format == "nfg") {
+	  WriteNfgFile(p_stream);
+  }
+  else {
+	  throw UndefinedException();
+  }
+}
 
 void GameBaggRep::WriteNfgFile(std::ostream &s) const{
 	throw UndefinedException();

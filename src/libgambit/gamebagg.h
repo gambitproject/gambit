@@ -26,7 +26,6 @@
 #include "libagg/bagg.h"
 
 
-
 namespace Gambit {
 
 class GameBaggRep : public GameRep {
@@ -107,10 +106,10 @@ public:
   //@}
 
   virtual PureStrategyProfile NewPureStrategyProfile(void) const { throw UndefinedException(); }
-  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const { throw UndefinedException(); }
-  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const { throw UndefinedException(); }
-  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupport&) const { throw UndefinedException(); }
-  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupport&) const { throw UndefinedException(); }
+  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const;
+  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const;
+  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupport&) const;
+  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupport&) const;
 
   /// @name Players
   //@{
@@ -193,6 +192,9 @@ public:
 
   /// @name Writing data files
   //@{
+  /// Write the game to a savefile in the specified format.
+  virtual void Write(std::ostream &p_stream,
+  		     const std::string &p_format="native") const;
   virtual void WriteNfgFile(std::ostream &) const;
   virtual void WriteBaggFile(std::ostream &) const;
   //@}
