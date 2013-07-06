@@ -77,7 +77,7 @@ bagg* bagg::makeBAGG(istream& in){
   //input number of types for each player
   for(int i=0;i<N;++i){
     if(in.eof()||in.bad()){
-      cout<<"Error in game file: integer expected for the number of types for player "<<i<<endl;
+      cerr<<"Error in game file: integer expected for the number of types for player "<<i<<endl;
       exit(1);
     }
     in>>numTypes[i];
@@ -90,7 +90,7 @@ bagg* bagg::makeBAGG(istream& in){
     TDist.push_back(ProbDist(numTypes[i]) );
     for(int j=0;j<numTypes[i];++j){
       if(in.eof()||in.bad()){
-            cout<<"Error in game file: number expected for type distribution"<<endl;
+            cerr<<"Error in game file: number expected for type distribution"<<endl;
             exit(1);
       }
       in>>TDist[i][j];
@@ -103,7 +103,7 @@ bagg* bagg::makeBAGG(istream& in){
   for (int i=0;i<N;++i){
     for(int j=0;j<numTypes[i];++j){
       if(in.eof()||in.bad()){
-            cout<<"Error in game file: integer expected for size of type action set"<<endl;
+            cerr<<"Error in game file: integer expected for size of type action set"<<endl;
             exit(1);
       }
       int temp;
@@ -120,7 +120,7 @@ bagg* bagg::makeBAGG(istream& in){
     for(int j=0;j<numTypes[i];++j){
       for(size_t k=0;k<typeActionSets[i][j].size();++k){
         if(in.eof()||in.bad()){
-              cout<<"Error in game file: integer expected for type action set"<<endl;
+              cerr<<"Error in game file: integer expected for type action set"<<endl;
               exit(1);
         }
         in>> typeActionSets[i][j][k];
@@ -169,6 +169,10 @@ bagg* bagg::makeBAGG(istream& in){
   }
 
   agg* aggPtr = agg::makeAGG(aggss);
+  if(!aggPtr){
+	  cerr<<"Error in BAGG file when reading the AGG part of the input."<<endl;
+	  exit(1);
+  }
   return new bagg(N,S,numTypes,TDist,typeActionSets,typeAction2ActionIndex,aggPtr);
 }
 
