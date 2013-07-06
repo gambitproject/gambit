@@ -384,11 +384,12 @@ T BagentMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &p
   std::vector<double> s (g.MixedProfileLength());
   int bplayer=-1,btype=-1;
   for (int i=0;i<baggPtr->getNumPlayers();++i){
-   for(int tp=0;tp<baggPtr->getNumTypes();++tp){
+   for(int tp=0;tp<baggPtr->getNumTypes(i);++tp){
     if(pl == baggPtr->typeOffset[i]+tp+1){
       bplayer=i;
       btype=tp;
     }
+    
     if(baggPtr->typeOffset[i]+tp+1 == player1->GetNumber()){
       for (int j=0;j<baggPtr->typeActionSets.at(i).at(tp).size();++j){
         s.at(baggPtr->firstAction(i,tp)+j) = (T) 0;
