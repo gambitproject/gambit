@@ -217,6 +217,7 @@ private:
 
 
 public:
+  static GameBagentRep* ReadBaggFile(istream& in);
 
   /// @name Lifecycle
   //@{
@@ -369,8 +370,11 @@ public:
 
   /// @name Writing data files
   //@{
-  virtual void WriteNfgFile(std::ostream &) const { throw UndefinedException(); }
-  //@}
+  /// Write the game to a savefile in the specified format.
+  virtual void Write(std::ostream &p_stream,
+  		     const std::string &p_format="native") const;
+  virtual void WriteNfgFile(std::ostream &) const;
+  virtual void WriteBaggFile(std::ostream &) const;  //@}
 };
 
 

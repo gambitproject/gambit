@@ -116,7 +116,16 @@ BagentPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) c
 
 
 
-
+//------------------------------------------------------------------------
+//                   GameBagentRep: Lifecycle
+//------------------------------------------------------------------------
+Game GameBagentRep::Copy(void) const
+{
+  std::ostringstream os;
+  WriteBaggFile(os);
+  std::istringstream is(os.str());
+  return ReadBaggFile(is);
+}
 
 //------------------------------------------------------------------------
 //                   GameBagentRep: Factory functions
@@ -150,7 +159,38 @@ MixedStrategyProfile<Rational> GameBagentRep::NewMixedStrategyProfile(const Rati
 	return new BagentMixedStrategyProfileRep<Rational>(spt);
 }
 
+//------------------------------------------------------------------------
+//                   GameBagentRep: Writing data files
+//------------------------------------------------------------------------
 
+void GameBagentRep::Write(std::ostream &p_stream,
+			    const std::string &p_format /*="native"*/) const
+{
+  if (p_format == "native" || p_format == "bagg") {
+	  WriteBaggFile(p_stream);
+  }
+  else if (p_format == "nfg") {
+	  WriteNfgFile(p_stream);
+  }
+  else {
+	  throw UndefinedException();
+  }
+}
+
+void GameBagentRep::WriteNfgFile(std::ostream &s) const{
+	throw UndefinedException();
+}
+void GameBagentRep::WriteBaggFile(std::ostream &s) const{
+    s<<(*baggPtr);
+}
+
+GameBagentRep* GameBagentRep::ReadBaggFile(istream& in){
+	bagg* baggPtr=bagg::makeBAGG(in);
+	if(!baggPtr){
+		throw InvalidFileException();
+	}
+	return new GameBagentRep(baggPtr);
+}
 
 
 
