@@ -958,7 +958,7 @@ Game ReadGame(std::istream &p_file) throw (InvalidFileException)
       return GameBagentRep::ReadBaggFile(p_file);
     }
     else {
-      throw InvalidFileException("Tokens 'EFG' or 'NFG' expected at start of file");
+      throw InvalidFileException("Tokens 'EFG' or 'NFG' or '#AGG' or '#BAGG' expected at start of file");
     }
   }
   catch (const std::exception &ex) {
