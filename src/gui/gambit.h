@@ -45,10 +45,10 @@ private:
 
 public:
   gbtApplication(void);
-  virtual ~gbtApplication();
+  virtual ~gbtApplication() { }
   
   const wxString &GetCurrentDir(void)  { return m_currentDir; }
-  void SetCurrentDir(const wxString &p_dir)  { m_currentDir = p_dir; }
+  void SetCurrentDir(const wxString &p_dir);
 
   wxString GetHistoryFile(int index) const
     { return m_fileHistory.GetHistoryFile(index); }
