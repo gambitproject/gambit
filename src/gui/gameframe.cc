@@ -812,10 +812,7 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     wxString filename = dialog.GetPath();
-
     wxGetApp().SetCurrentDir(wxPathOnly(filename));
-    wxConfig config(_T("Gambit"));
-    config.Write(_T("/General/CurrentDirectory"), wxPathOnly(filename));
 
     gbtAppLoadResult result = wxGetApp().LoadFile(filename);
     if (result == GBT_APP_OPEN_FAILED) {

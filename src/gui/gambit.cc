@@ -35,20 +35,20 @@
 #include "gameframe.h"
 
 gbtApplication::gbtApplication(void)
-  : m_fileHistory(5)
+  : m_fileHistory(10)
 { }
 
 bool gbtApplication::OnInit(void)
 {
 #include "bitmaps/gambitbig.xpm"
-  wxConfig config(_T("Gambit"));
-  m_fileHistory.Load(config);
+  wxConfigBase::Set(new wxConfig(_T("Gambit"), _T("Gambit")));
+  m_fileHistory.Load(*wxConfigBase::Get());
   // Immediately saving this back forces the entries to be created at
   // the "top level" of the config file when using the wxFileConfig
   // implementation (which seems to still be buggy).
-  m_fileHistory.Save(config);
-
-  config.Read(_T("/General/CurrentDirectory"), &m_currentDir, _T(""));
+  // m_fileHistory.Save(config);
+  wxConfigBase::Get()->Read(_T("/General/CurrentDirectory"), &m_currentDir,
+			    _T(""));
 
   wxBitmap bitmap(gambitbig_xpm);
   /*wxSplashScreen *splash =*/
@@ -100,12 +100,6 @@ bool gbtApplication::OnInit(void)
   return true;
 }
 
-gbtApplication::~gbtApplication()
-{
-  wxConfig config(_T("Gambit"));
-  m_fileHistory.Save(config);
-}
-
 gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
 {    
   std::ifstream infile((const char *) p_filename.mb_str());
@@ -117,6 +111,7 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
   if (doc->LoadDocument(p_filename)) {
     doc->SetFilename(p_filename);
     m_fileHistory.AddFileToHistory(p_filename);
+    m_fileHistory.Save(*wxConfigBase::Get());
     (void) new gbtGameFrame(0, doc);
     return GBT_APP_FILE_OK;
   }
@@ -128,6 +123,7 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
     Gambit::Game nfg = Gambit::ReadGame(infile);
 
     m_fileHistory.AddFileToHistory(p_filename);
+    m_fileHistory.Save(*wxConfigBase::Get());
     gbtGameDocument *doc = new gbtGameDocument(nfg);
     doc->SetFilename(wxT(""));
     (void) new gbtGameFrame(0, doc);
@@ -136,6 +132,12 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
   catch (Gambit::InvalidFileException) {
     return GBT_APP_PARSE_FAILED;
   }
+}
+
+void gbtApplication::SetCurrentDir(const wxString &p_dir)  
+{ 
+  m_currentDir = p_dir; 
+  wxConfigBase::Get()->Write(_T("/General/CurrentDirectory"), p_dir);
 }
 
 bool gbtApplication::AreDocumentsModified(void) const
