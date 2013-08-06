@@ -172,25 +172,16 @@ include:
 Downloading Gambit
 ------------------
 
-Versions of Gambit are available for download from
+The current version of Gambit is 13.0.2, released on 6 August 2013.
+You can download it from
+`Sourceforge
+<http://sourceforge.net/projects/gambit/files/gambit13/13.0.2>`_.
+Full source code is available, as are precompiled binaries for
+Microsoft Windows and Mac OS X 10.8.
+
+If you require an older version of Gambit, you can download from
 `http://sourceforge.net/projects/gambit/files <http://sourceforge.net/projects/gambit/files>`_.
 
-The current stable version is 0.2010.09.01. 
-
-* `gambit-0.2010.09.01.tar.gz <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2010.09.01/gambit-0.2010.09.01.tar.gz/download>`_ (source tarball, for Linux/Windows/Mac OSX)
-* `gambit-0.2010.09.01.dmg <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2010.09.01/gambit-0.2010.09.01.dmg/download>`_ (application binary for Mac OSX 10.6)
-
-The current development version is 13.0.1.
-
-* `gambit-13.0.1.tar.gz
-  <http://sourceforge.net/projects/gambit/files/gambit13/13.0.1/gambit-13.0.1.tar.gz/download>`_
-  (source tarball, for Linux/Mac OSX/Windows)
-* `gambit-13.0.1.msi
-  <http://sourceforge.net/projects/gambit/files/gambit13/13.0.1/gambit-13.0.1.msi/download>`_
-  (installer for Microsoft Windows)
-* `gambit-13.0.1.dmg
-  <http://sourceforge.net/projects/gambit/files/gambit13/13.0.1/gambit-13.0.1.dmg>`_
-  (application binary for Mac OSX 10.8)
 
 
 Community
