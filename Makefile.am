@@ -28,7 +28,9 @@ EXTRA_DIST = \
 	gambit.spec \
 	gambit.desktop \
         gambit.wxs \
+	license.rtf \
 	contrib/mac/Info.plist \
+	contrib/mac/gambit.icns \
 	src/labenski/README.txt \
 	src/labenski/art/grab.xpm \
 	src/labenski/art/hand.xpm \
