@@ -1,16 +1,33 @@
-/*
- * aggame.cc: implementation of aggame; contains code specific to gnm
- *
- *  Created on: 2013-05-20
- *      Author: Albert Xin Jiang
- */
+//
+// This file is part of Gambit
+// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+//                          Albert Xin Jiang <albertjiang@gmail.com>
+//
+// FILE: src/tools/gt/aggame.cc
+// Implement GNM-specific routines for action graph games
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+
 #include "aggame.h"
 
 void aggame:: computePartialP_PureNode(int player1,int act1, vector<int>& tasks){
     int i,j,Node = aggPtr->actionSets[player1][act1];
     int numNei = aggPtr->neighbors[Node].size();
 
-    assert(aggPtr->isPure[Node]||tasks.size()==0);
+    //assert(aggPtr->isPure[Node]||tasks.size()==0);
     vector<AggNumber> strat (numNei);
     agg::config    a(numNei,0);
     //compute the full distrib
@@ -19,7 +36,7 @@ void aggame:: computePartialP_PureNode(int player1,int act1, vector<int>& tasks)
     //store the full distrib in Pr[player1]
     aggPtr->Pr[player1].swap(aggPtr->Pr[numPlayers-1]);
     for(i=0;i<(int)tasks.size();i++){
-      assert(tasks[i]!=player1);
+      //assert(tasks[i]!=player1);
       aggdistrib& P = aggPtr->Pr[tasks[i]];
       //P.clear();  // to get ready for division, we need clear()
       P=aggPtr->Pr[player1];
@@ -64,7 +81,7 @@ void aggame::computePartialP(int player1, int act1, vector<int>& tasks,vector<in
 void aggame::computePartialP_bisect(int player1,int act1,
     vector<int>::iterator start,vector<int>::iterator endp,
     aggdistrib& temp){
-  assert (endp-start>0);
+  //assert (endp-start>0);
 #ifdef AGGDEBUG
   cout<<"calling computePartialP_bisect with player1="<<player1
     <<", act1="<<act1<<" *start="<<*start<<" *(endp-1)="<<*(endp-1)
@@ -89,7 +106,7 @@ void aggame::computePartialP_bisect(int player1,int act1,
   if (mid-start>1) temp.multiply(aggPtr->Pr[*start],numNei,aggPtr->projFunctions[Node]);
 
   if (mid-start==1) {
-    assert(aggPtr->Pr[*start].empty());
+    //assert(aggPtr->Pr[*start].empty());
     aggPtr->Pr[*start]= aggPtr->projectedStrat[Node][*mid];
     if(endp-mid>1) aggPtr->Pr[*start].multiply(aggPtr->Pr[*mid],numNei,aggPtr->projFunctions[Node]);
   }
@@ -100,7 +117,7 @@ void aggame::computePartialP_bisect(int player1,int act1,
   }
 
   if(endp-mid==1){
-    assert(aggPtr->Pr[*mid].empty());
+    //assert(aggPtr->Pr[*mid].empty());
     aggPtr->Pr[*mid]=temp;
   }
   else for (ptr=mid;ptr!=endp;++ptr){
@@ -308,7 +325,7 @@ void aggame::computeUndisturbedPayoff(AggNumber& undisturbedPayoff,bool& has,int
   if (player2==player1){
     undisturbedPayoff=aggPtr->Pr[player2].inner_prod(aggPtr->payoffs[Node]);
   }else{
-    assert(aggPtr->projectedStrat[Node][player2].size()==1);
+    //assert(aggPtr->projectedStrat[Node][player2].size()==1);
     undisturbedPayoff=aggPtr->Pr[player2].inner_prod(
     		aggPtr->projectedStrat[Node][player2].begin()->first,numNei,aggPtr->projFunctions[Node],aggPtr->payoffs[Node]);
   }
@@ -368,7 +385,7 @@ void aggame::SymPayoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
     cerr<<"SymPayoffMatrix() Error: game is not symmetric"<<endl;
     exit(1);
   }
-  assert(getNumPlayers()>1);
+  //assert(getNumPlayers()>1);
 
   aggPtr->cache.clear();
 

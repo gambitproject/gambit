@@ -1,8 +1,29 @@
+//
+// This file is part of Gambit
+// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+//                          Albert Xin Jiang <albertjiang@gmail.com>
+//
+// FILE: src/libagg/trie_map.h
+// Trie with STL-like interfaces
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
 
 #ifndef __TRIE_MAP_H
 #define __TRIE_MAP_H
 
-//Trie with STL-like interfaces.
 //Mapping from vector of ints to type V.
 //WARNING: traversal using the iterators is in the reverse order of insertion.
 
@@ -173,7 +194,7 @@ public:
     static size_t i;
     static std::pair<std::vector<int>, V> v;
     const_iterator p1,p2;
-    assert(this!=&t1 && this != &t2);
+    //assert(this!=&t1 && this != &t2);
     v.first.resize(keylen);
     reset();
     for (p1=t1.begin(); p1!=t1.end(); ++p1)if((*p1).second>(V)0){
@@ -234,7 +255,7 @@ public:
                                 (*this) += v;
                         }else{
                                 for(const_iterator a_k=projectedStrat.begin(); a_k!=projectedStrat.end(); ++a_k)if((*a_k).second>V(0)) {
-                                        assert((*P_c_kminus1).first.size()==keylen&& (*a_k).first.size()==keylen);
+				    //assert((*P_c_kminus1).first.size()==keylen&& (*a_k).first.size()==keylen);
                                         for (size_t i=0;i<keylen;++i) {
                                                 v.first[i]= (*(f[i])) ((*P_c_kminus1).first[i], (*a_k).first[i]); // keys
                                         }
@@ -252,11 +273,11 @@ public:
   void square(trie_map<V>& dest, size_t keylen, std::vector<proj_func*>& f) const{
     static std::pair<std::vector<int>, V> v;
     v.first.resize(keylen);
-    assert(this!=&dest);
+    //assert(this!=&dest);
     dest.reset();
     for (const_iterator p1=begin(); p1!=end(); ++p1)if((*p1).second>(V)0){
       for(const_iterator p2=p1; p2!=end(); ++p2)if((*p2).second>(V)0){
-        assert((*p1).first.size()==keylen&& (*p2).first.size()==keylen);
+	  //assert((*p1).first.size()==keylen&& (*p2).first.size()==keylen);
         for (size_t i=0;i<keylen;++i){
           v.first[i]= (*(f[i])) ((*p1).first[i], (*p2).first[i]);
         }
@@ -277,7 +298,7 @@ public:
     reset();
     for(p1=data2.begin();p1!=end();++p1)if((*p1).second>(V)0){
       for(p2=p1; p2!=data2.end(); ++p2)if((*p2).second>(V)0){
-        assert((*p1).first.size()==keylen&& (*p2).first.size()==keylen);
+	  //assert((*p1).first.size()==keylen&& (*p2).first.size()==keylen);
         for (size_t i=0;i<keylen;++i){
           v.first[i]= (*(f[i])) ((*p1).first[i], (*p2).first[i]);
         }
@@ -292,7 +313,7 @@ public:
   //this is actually slower than power by straight multiplication, if the # of configurations grow polynomially
   //in the # of players.
   void power_repsq (size_t p, trie_map<V>& dest, size_t keylen, std::vector<proj_func*>& f) const{
-    assert(p>0 && this!=&dest );
+    //assert(p>0 && this!=&dest );
     if(p==1){
       dest=*this;
       return;
@@ -314,7 +335,7 @@ public:
   }
 
   void power(size_t p, trie_map<V> &dest,trie_map<V> &scratch, size_t keylen, std::vector<proj_func*> &f){
-    assert(p>0 && this!=&dest );
+    //assert(p>0 && this!=&dest );
     if (p==1) {
       dest = *this;
       return;
@@ -525,7 +546,7 @@ private:
     void operator()(iterator p){
       if (p==endp) return;
       size_t i, keylen = p->first.size();
-      assert(keylen==denom.size());
+      //assert(keylen==denom.size());
       V null_prob(((V)1)-denom[pivot]);
       //V th(THRESH);
       for (i=pivot+1; i<keylen; ++i)if(denom[i]>(V)0){
@@ -565,5 +586,5 @@ inline ostream& operator<< (ostream& s, const trie_map<V>& t)
 
 
 
-#include "trie_map.template"
+#include "trie_map.imp"
 #endif
