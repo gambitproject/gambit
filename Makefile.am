@@ -390,7 +390,8 @@ libagg_la_SOURCES = \
 	src/libagg/agg.cc \
 	src/libagg/agg.h \
 	src/libagg/proj_func.h \
-	src/libagg/trie_map.h
+	src/libagg/trie_map.h \
+        src/libagg/trie_map.imp
 
 libaggincludedir = $(includedir)/libagg
 libagginclude_HEADERS = \
@@ -398,7 +399,8 @@ libagginclude_HEADERS = \
 	src/libagg/GrayComposition.h \
 	src/libagg/agg.h \
 	src/libagg/proj_func.h \
-	src/libagg/trie_map.h
+	src/libagg/trie_map.h \
+        src/libagg/trie_map.imp
 
 # libgambit_la_LDFLAGS = -no-undefined -version-info 0:0:0
 
