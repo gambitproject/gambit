@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/gpolylst.imp
 // Implementation of polynomial list type
@@ -87,8 +87,8 @@ template<class T> gPolyList<T>::~gPolyList()
 
 template<class T> 
 gPolyList<T>& gPolyList<T>::operator=(const gPolyList<T> & rhs)
-{
-  assert (Space == rhs.Space && Order == rhs.Order);
+{	      
+  //assert (Space == rhs.Space && Order == rhs.Order);
 
   if (*this != rhs) {
     int ii;
@@ -151,7 +151,7 @@ template<class T>  gPoly<T> gPolyList<T>::operator[](const int index) const
 template<class T> bool gPolyList<T>::SelfReduction(const int& target,
 					          const term_order& order)
 {  
-  assert (!List[target]->IsZero());
+  //assert (!List[target]->IsZero());
 
   gPoly<T> tear_up(*List[target]);
   gPoly<T> reduction(Space,(T)0,&order);
@@ -184,7 +184,7 @@ template<class T> gPoly<T> gPolyList<T>::ReductionOf(const gPoly<T>& f,
 					           const term_order& order) 
                                                                         const
 {
-  assert (Space == f.GetSpace());
+  //assert (Space == f.GetSpace());
 
   if (f.IsZero()) {
     gPoly<T> zero(Space,(T)0,f.GetOrder());
@@ -486,7 +486,7 @@ const Gambit::RectArray<gPoly<T>*> gPolyList<T>::DerivativeMatrix() const
 template<class T> 
 const gPoly<T> gPolyList<T>::DetOfDerivativeMatrix() const
 {
-  assert(List.Length() == Space->Dmnsn());
+  //assert(List.Length() == Space->Dmnsn());
 
   int n = List.Length();
   Gambit::RectArray<gPoly<T>*> deriv_matrix = DerivativeMatrix();
@@ -520,7 +520,7 @@ const Gambit::Matrix<T> gPolyList<T>::DerivativeMatrix(const Gambit::Vector<T>& 
 template<class T> const Gambit::SquareMatrix<T> 
 gPolyList<T>::SquareDerivativeMatrix(const Gambit::Vector<T>& p) const
 {
-  assert (Length() == Dmnsn());
+  //assert (Length() == Dmnsn());
 
   Gambit::SquareMatrix<T> answer(Length());
   Gambit::List<gPoly<T> > list = UnderlyingList();

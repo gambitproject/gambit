@@ -44,7 +44,7 @@ BEGIN_EVENT_TABLE(gbtPayoffEditor, wxTextCtrl)
 END_EVENT_TABLE()
 
 gbtPayoffEditor::gbtPayoffEditor(wxWindow *p_parent)
-  : wxTextCtrl(p_parent, -1, wxT(""), 
+  : wxTextCtrl(p_parent, wxID_ANY, wxT(""), 
 	       wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER)
 {
   Show(false);
@@ -57,6 +57,7 @@ void gbtPayoffEditor::BeginEdit(gbtNodeEntry *p_entry, int p_player)
   m_player = p_player;
   SetValue(wxString(m_outcome->GetPayoff<std::string>(p_player).c_str(),
 		    *wxConvCurrent));
+  SetSize(wxSize(GetSize().GetWidth(), GetBestSize().GetHeight()));
   SetSelection(-1, -1);
   Show(true);
   SetFocus();

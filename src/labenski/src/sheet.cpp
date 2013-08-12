@@ -2897,7 +2897,10 @@ bool wxSheet::EnableCellEditControl( const wxSheetCoords& coords_ )
 {
     // move to owner cell since that's where the editor is
     const wxSheetCoords coords(GetCellOwner(coords_));
-    wxCHECK_MSG(CanEnableCellControl(coords), false, _T("can't enable editing for this cell!"));
+    //wxCHECK_MSG(CanEnableCellControl(coords), false, _T("can't enable editing for this cell!"));
+    if (!CanEnableCellControl(coords)) {
+      return false;
+    }
 
     // already editing elsewhere, disable it
     if (IsCellEditControlCreated() && !DisableCellEditControl(true))

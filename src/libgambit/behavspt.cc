@@ -649,9 +649,16 @@ void BehavSupport::DeactivateSubtree(const GameNode &n)
 			   n->GetInfoset()->GetNumber())) {
       deactivate(n->GetInfoset());
     }
-    Array<GameAction> actions(m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetInfoset()->GetNumber()]);
-    for (int i = 1; i <= actions.Length(); i++) {
-      DeactivateSubtree(n->GetChild(actions[i]->GetNumber()));    
+    if (!n->GetPlayer()->IsChance()) {
+      Array<GameAction> actions(m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetInfoset()->GetNumber()]);
+      for (int i = 1; i <= actions.Length(); i++) {
+	DeactivateSubtree(n->GetChild(actions[i]->GetNumber()));    
+      }
+    }
+    else {
+      for (int i = 1; i <= n->GetInfoset()->NumActions(); i++) {
+	DeactivateSubtree(n->GetChild(i));
+      }
     }
   }
 }

@@ -24,7 +24,6 @@
 #include <cstdlib>
 #include <cmath>
 #include <cfloat>
-#include <cassert>
 #include <cctype>
 
 #include "libgambit/libgambit.h"
@@ -112,7 +111,9 @@ void gComplex::operator *= (const gComplex& y)
 
 void gComplex::operator /= (const gComplex& y) 
 {
-  if (y == (gComplex)0) error("Attempt to divide by 0.");
+  if (y == (gComplex) 0)  {
+    throw Gambit::ZeroDivideException();
+  }
   *this = gComplex((re*y.re + im*y.im)/(y.re*y.re + y.im*y.im),
 		   (- re*y.im + im*y.re)/(y.re*y.re + y.im*y.im));
 }
@@ -134,7 +135,9 @@ gComplex gComplex::operator * (const gComplex& y) const
 
 gComplex gComplex::operator / (const gComplex& y) const
 {
-  if (y == (gComplex)0) error("Attempt to divide by 0.");
+  if (y == (gComplex)0)  {
+    throw Gambit::ZeroDivideException();
+  }
   return gComplex((re*y.re + im*y.im)/(y.re*y.re + y.im*y.im),
 		  (- re*y.im + im*y.re)/(y.re*y.re + y.im*y.im));
 }
@@ -142,16 +145,6 @@ gComplex gComplex::operator / (const gComplex& y) const
 gComplex gComplex::operator - () const
 {
   return gComplex(-re,-im);
-}
-
-//--------------------------------------------------------------------------
-//                                  errors
-//--------------------------------------------------------------------------
-
-void gComplex::error(const char* msg) const
-{
-  //  gerr << "gComplex class error: " << msg << '\n';
-  assert(0);
 }
 
 // FUNCTIONS OUTSIDE THE CLASS
@@ -169,7 +162,9 @@ gComplex sqr(const gComplex& x)
 gComplex pow(const gComplex& x, const long y)
 {
   if (y < 0) { 
-    assert (x != (gComplex)0);
+    if (x == (gComplex) 0) {
+      throw Gambit::AssertionException("Raising 0^0.");
+    }
     gComplex x1((gComplex)1/x); 
     return pow(x1,-y);
   } 

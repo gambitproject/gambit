@@ -95,7 +95,9 @@ bool SFSequenceSet::operator==(const SFSequenceSet &s)
 // Append a sequences to the SFSequenceSet
 void SFSequenceSet::AddSequence(Sequence *s) 
 { 
-  assert (efp == s->Player());
+  if (efp != s->Player()) {
+    throw Gambit::MismatchException();
+  }
   sequences.Append(s); 
 }
 
@@ -103,7 +105,9 @@ void SFSequenceSet::AddSequence(Sequence *s)
 // removed, false otherwise.
 bool SFSequenceSet::RemoveSequence( Sequence *s ) 
 { 
-  assert (efp == s->Player());
+  if (efp != s->Player()) {
+    throw Gambit::MismatchException();
+  }
   int t; 
   t = sequences.Find(s); 
   if (t>0) sequences.Remove(t); 
@@ -170,11 +174,9 @@ SFSupport &SFSupport::operator=(const SFSupport &s)
 
 bool SFSupport::operator==(const SFSupport &s) const
 {
-  assert(sups.Length() == s.sups.Length());
   int i;
   for (i = 1; i <= sups.Length() && *sups[i] == *s.sups[i]; i++);
-  if (i > sups.Length()) return (true);
-  else return (false);
+  return i > sups.Length();
 }
   
 bool SFSupport::operator!=(const SFSupport &s) const
@@ -232,7 +234,6 @@ bool SFSupport::RemoveSequence(Sequence *s)
 // Returns true if all sequences in _THIS_ belong to _S_
 bool SFSupport::IsSubset(const SFSupport &s) const
 {
-  assert(sups.Length() == s.sups.Length());
   for (int i = 1; i <= sups.Length(); i++)
     if (NumSequences(i) > s.NumSequences(i))
       return false;

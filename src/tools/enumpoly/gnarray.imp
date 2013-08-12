@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/gnarray.imp
 // Implementation for N-dimensional arrays
@@ -20,7 +20,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <assert.h>
 #include "gnarray.h"
 
 template <class T> gNArray<T>::gNArray(void)
@@ -35,11 +34,11 @@ template <class T> gNArray<T>::gNArray(const Gambit::Array<int> &d)
     storage_size = 0;
   }
   else   {
-    assert(dim.First() == 1);
+    //assert(dim.First() == 1);
     storage_size = 1;
     int i;
     for (i = 1; i <= dim.Length(); i++)   {
-      assert(dim[i] >= 1);
+      //assert(dim[i] >= 1);
       storage_size *= dim[i];
     }
 
@@ -78,11 +77,11 @@ gNArray<T> &gNArray<T>::operator=(const gNArray<T> &a)
 /*
 template <class T> T gNArray<T>::operator[](const Gambit::Vector<int> &v) const
 {
-  assert(dim.Length() > 0 && dim.Length() == v.Length());
+  //assert(dim.Length() > 0 && dim.Length() == v.Length());
   int i,location,offset;
   
   for (i = 1, location = 0, offset = 1; i <= dim.Length(); i++)   {
-    assert(v[i] > 0 && v[i] <= dim[i]);
+    //assert(v[i] > 0 && v[i] <= dim[i]);
     location += (v[i] - 1) * offset;
     offset *= dim[i];
   }
@@ -92,11 +91,11 @@ template <class T> T gNArray<T>::operator[](const Gambit::Vector<int> &v) const
 
 template <class T> T &gNArray<T>::operator[](const Gambit::Vector<int> &v)
 {
-  assert(dim.Length() > 0 && dim.Length() == v.Length());
+  //assert(dim.Length() > 0 && dim.Length() == v.Length());
   int i, location, offset;
   
   for (i = 1, location = 0, offset = 1; i <= dim.Length(); i++)   {
-    assert(v[i] > 0 && v[i] <= dim[i]);
+    //assert(v[i] > 0 && v[i] <= dim[i]);
     location += (v[i] - 1) * offset;
     offset *= dim[i];
   }
@@ -107,11 +106,11 @@ template <class T> T &gNArray<T>::operator[](const Gambit::Vector<int> &v)
 
 template <class T> T gNArray<T>::operator[](const Gambit::Array<int> &v) const
 {
-  assert(dim.Length() > 0 && dim.Length() == v.Length());
+  //assert(dim.Length() > 0 && dim.Length() == v.Length());
   int i, location, offset;
   
   for (i = 1, location = 0, offset = 1; i <= dim.Length(); i++)   {
-    assert(v[i] > 0 && v[i] <= dim[i]);
+    //assert(v[i] > 0 && v[i] <= dim[i]);
     location += (v[i] - 1) * offset;
     offset *= dim[i];
   }
@@ -121,11 +120,11 @@ template <class T> T gNArray<T>::operator[](const Gambit::Array<int> &v) const
 
 template <class T> T &gNArray<T>::operator[](const Gambit::Array<int> &v)
 {
-  assert(dim.Length() > 0 && dim.Length() == v.Length());
+  //assert(dim.Length() > 0 && dim.Length() == v.Length());
   int i, location, offset;
   
   for (i = 1, location = 0, offset = 1; i <= dim.Length(); i++)   {
-    assert(v[i] > 0 && v[i] <= dim[i]);
+    //assert(v[i] > 0 && v[i] <= dim[i]);
     location += (v[i] - 1) * offset;
     offset *= dim[i];
   }
@@ -135,13 +134,13 @@ template <class T> T &gNArray<T>::operator[](const Gambit::Array<int> &v)
 
 template <class T> const T &gNArray<T>::operator[](long l) const
 {
-  assert(l >= 0 && l < storage_size);
+  //assert(l >= 0 && l < storage_size);
   return storage[l];
 }
 
 template <class T> T &gNArray<T>::operator[](long l) 
 {
-  assert(l >= 0 && l < storage_size);
+  //assert(l >= 0 && l < storage_size);
   return storage[l];
 }
 

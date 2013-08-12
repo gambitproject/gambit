@@ -39,6 +39,9 @@ template<class T> class gInterval {
 private:
     const T lower_bd;
     const T upper_bd;
+    
+    // operator= defined private for constness
+    gInterval<T>& operator =  (const gInterval<T>& y);
 
 public:
     // constructors
@@ -47,7 +50,6 @@ public:
     ~gInterval();
 
     // operators
-    gInterval<T>& operator =  (const gInterval<T>& y);
     bool          operator == (const gInterval<T>& y) const;
     bool          operator != (const gInterval<T>& y) const;
 

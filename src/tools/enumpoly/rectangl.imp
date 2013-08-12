@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/rectangl.imp
 // Implementation of rectangle class
@@ -42,7 +42,7 @@ template<class T> gRectangle<T>::gRectangle(const Gambit::Vector<T> lower_bd,
                                             const Gambit::Vector<T> upper_bd) 
 : sides()
 { 
-  assert (lower_bd.Check(upper_bd));
+  //assert (lower_bd.Check(upper_bd));
   for (int i = 1; i <= upper_bd.Length(); i++) {
     gInterval<T> side(lower_bd[i],upper_bd[i]);
     sides.Append(side);
@@ -107,19 +107,19 @@ template <class T> Gambit::Vector<T> gRectangle<T>::UpperBound(void) const
 
 template<class T> const T gRectangle<T>::LowerBoundOfCoord(const int& i) const 
 { 
-  assert (1 <= i && i <= Dmnsn());
+  //assert (1 <= i && i <= Dmnsn());
   return sides[i].LowerBound();
 }
 
 template<class T> const T gRectangle<T>::UpperBoundOfCoord(const int& i) const 
 { 
-  assert (1 <= i && i <= Dmnsn());
+  //assert (1 <= i && i <= Dmnsn());
   return sides[i].UpperBound();
 }
 
 template<class T> const T gRectangle<T>::HeightInCoord(const int& i) const 
 { 
-  assert (1 <= i && i <= Dmnsn());
+  //assert (1 <= i && i <= Dmnsn());
   return sides[i].Length();
 }
 
@@ -190,7 +190,7 @@ template<class T> const T gRectangle<T>::MaximalSideLength() const
 
 template<class T> bool gRectangle<T>::Contains(const Gambit::Vector<T>& point) const 
 { 
-  assert (point.Length() == Dmnsn());
+  //assert (point.Length() == Dmnsn());
 
   for (int i = 1; i <= Dmnsn(); i++)
     if (point[i] < sides[i].LowerBound() || sides[i].UpperBound() < point[i])
@@ -200,7 +200,7 @@ template<class T> bool gRectangle<T>::Contains(const Gambit::Vector<T>& point) c
 
 template<class T> bool gRectangle<T>::Contains(const gRectangle<T>& R) const 
 { 
-  assert (R.Dmnsn() == Dmnsn());
+  //assert (R.Dmnsn() == Dmnsn());
 
   for (int i = 1; i <= Dmnsn(); i++)
     if ( !sides[i].Contains(R.sides[i]) )

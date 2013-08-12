@@ -62,9 +62,6 @@ public:
   void       operator *= (const gComplex& y);
   void       operator /= (const gComplex& y);
 
-// error reporting
-  void    error(const char* msg) const;
-
 // friends outside the class
   friend double    fabs(const gComplex& x);              
   friend gComplex  sqr(const gComplex& x);              

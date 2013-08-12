@@ -268,7 +268,11 @@ PolEnumModule::NashOnSupportSolnVectors(const gPolyList<double> &equations,
   try {
     quickie.FindCertainNumberOfRoots(Cube,2147483647,0);
   }
-  catch (Gambit::SingularMatrixException) {
+  catch (const Gambit::SingularMatrixException &) {
+    is_singular = true;
+  }
+  catch (const Gambit::AssertionException &e) {
+    std::cerr << "Assertion warning: " << e.what() << std::endl;
     is_singular = true;
   }
 

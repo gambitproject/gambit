@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/interval.imp
 // Implementation of interval type
@@ -35,7 +35,7 @@ template<class T> gInterval<T>::gInterval(const gInterval<T>& given)
 template<class T> gInterval<T>::gInterval(const T low, const T high) 
 : lower_bd(low), upper_bd(high)
 { 
-  assert (low <= high);
+  //assert (low <= high);
 }
 
 template<class T> gInterval<T>::~gInterval() 
@@ -45,20 +45,6 @@ template<class T> gInterval<T>::~gInterval()
 //--------------------------------------------------------------------------
 //                          interval -- operators
 //--------------------------------------------------------------------------
-
-template <class T> 
-gInterval<T> &gInterval<T>::operator=(const gInterval<T> &)
-{
-  //  gout << "For const'ness, operator = not allowed for gIntervals\n";
-  assert(0);
-  return *this;
-/*
-  if (*this == rhs) return *this;
-  lower_bd = rhs.lower_bd;
-  upper_bd = rhs.upper_bd;
-  return *this;
-*/
-}
 
 
 template<class T> bool gInterval<T>::operator == (const gInterval<T>& rhs)
