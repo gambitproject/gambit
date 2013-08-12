@@ -172,15 +172,37 @@ include:
 Downloading Gambit
 ------------------
 
-The current version of Gambit is 13.0.2, released on 6 August 2013.
+Gambit operates on an annual release cycle roughly mirroring the
+(northern hemisphere) academic year.  A new version is promoted to
+stable/teaching each August; the major version number is equal to the
+last two digits of the year in which the version becomes stable.
+
+This document covers Gambit 13, which is the current stable/teaching
+version as of August 2013.  The most recent release is 13.1.0, 
+available on 13 August 2013.
 You can download it from
 `Sourceforge
-<http://sourceforge.net/projects/gambit/files/gambit13/13.0.2>`_.
+<http://sourceforge.net/projects/gambit/files/gambit13/13.1.0>`_.
 Full source code is available, as are precompiled binaries for
 Microsoft Windows and Mac OS X 10.8.
 
-If you require an older version of Gambit, you can download from
-`http://sourceforge.net/projects/gambit/files <http://sourceforge.net/projects/gambit/files>`_.
+The stable version is suitable for teaching and student use, and for
+practitioners who require a version where the interface and API are
+fixed.  Further releases of Gambit 13 will be made for maintenance and
+bug fixes only.
+
+The current development/research series of Gambit is
+`Gambit 14 <http://www.gambit-project.org/gambit14>`_.
+This series is where new development is made available.  It is
+intended for developers, researchers who work in algorithms in game
+theory, and those who require the latest implementations for their
+research project.  It will become the next stable/teaching version
+from August 2014.
+
+Older versions of Gambit can be downloaded from
+`http://sourceforge.net/projects/gambit/files
+<http://sourceforge.net/projects/gambit/files>`_.  Support for older
+versions is limited.
 
 
 
