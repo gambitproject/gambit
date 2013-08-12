@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="5BDEDA0E-AE75-48F9-8E33-27D725F2DCB6" Name="Gambit 13" Language="1033" Version="13.1.0" Manufacturer="The Gambit Project" UpgradeCode="CDF06BDB-F942-4588-874C-282E2BBB44F3">
+    <Product Id="8EE11AE3-2B91-4870-895B-44C46D648BD6" Name="Gambit 14" Language="1033" Version="14.0.0" Manufacturer="The Gambit Project" UpgradeCode="135FFB28-DA7C-427C-A3DA-783B805BCC22">
         <Package Description="Gambit" Comments="Software Tools for Game Theory" InstallerVersion="200" Compressed="yes" />
         <Media Id="1" Cabinet="gambit.cab" EmbedCab="yes" />
 
@@ -19,7 +19,7 @@
         </Directory>
 
         <DirectoryRef Id="ApplicationRootDirectory">
-            <Component Id="Gambit.exe" Guid="A292BA53-22E7-4DBD-B185-55D623CD4229">
+            <Component Id="Gambit.exe" Guid="AEB0EAF8-246A-4194-9628-A4ED3092CD93">
                 <File Id="gambit.exe" Source="installer\gambit.exe" KeyPath="yes" Checksum="yes"/>
                 <File Id="gambit_enummixed.exe" Source="installer\gambit-enummixed.exe" Checksum="yes"/>
                 <File Id="gambit_enumpoly.exe" Source="installer\gambit-enumpoly.exe" Checksum="yes"/>
@@ -35,28 +35,28 @@
         </DirectoryRef>
 
         <DirectoryRef Id="ProgramMenuFolder">
-            <Directory Id="ProgramMenuDir" Name="Gambit 13">
-                <Component Id="ProgramMenuDir" Guid="BA738777-7AD0-4D10-97D5-3B6292FC80C5">
+            <Directory Id="ProgramMenuDir" Name="Gambit 14">
+                <Component Id="ProgramMenuDir" Guid="F112A6A5-1C0C-4246-BBB8-D3466DA03D4C">
                     <RemoveFolder Id="ProgramMenuDir" On="uninstall"/>
-                    <RegistryValue Root="HKCU" Key="Software\Gambit\Gambit" Type="string" Value="" KeyPath="yes"/>
+                    <RegistryValue Root="HKCU" Key="Software\Gambit\Gambit 14" Type="string" Value="" KeyPath="yes"/>
                 </Component>
             </Directory>
         </DirectoryRef>
 
         <DirectoryRef Id="ApplicationProgramsFolder">
-            <Component Id="ApplicationShortcut" Guid="2228FE1F-9345-4BCB-8AA7-364887E0A2F7">
+            <Component Id="ApplicationShortcut" Guid="3B9A0C37-7E9A-446E-9D14-76EBCCF3F1E0">
                 <Shortcut Id="ApplicationStartMenuShortcut"
-                          Name="Gambit 13"
+                          Name="Gambit 14"
                           Description="Software Tools for Game Theory"
                           Target="[ApplicationRootDirectory]Gambit.exe"
                           WorkingDirectory="ApplicationRootDirectory"/>
                 <Shortcut Id="UninstallProduct"
-                          Name="Uninstall Gambit"
+                          Name="Uninstall Gambit 14"
                           Description="Uninstalls Gambit"
                           Target="[System64Folder]msiexec.exe"
                           Arguments="/x [ProductCode]"/>
                 <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
-                <RegistryValue Root="HKCU" Key="Software\Microsoft\Gambit" Name="installed" Type="integer" Value="1" KeyPath="yes"/> 
+                <RegistryValue Root="HKCU" Key="Software\Microsoft\Gambit 14" Name="installed" Type="integer" Value="1" KeyPath="yes"/> 
             </Component>
         </DirectoryRef>
         <Feature Id="Complete" Level="1">
