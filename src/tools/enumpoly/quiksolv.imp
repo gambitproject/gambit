@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/quiksolv.imp
 // Implementation of quick-solver classes
@@ -224,7 +224,7 @@ template <class T>
 bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<double>& r,
 					      Gambit::Vector<double>& point) const
 {
-  assert (NoEquations == System.Dmnsn());
+  //assert (NoEquations == System.Dmnsn());
 
   Gambit::Vector<double> zero(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) zero[i] = (double)0;
@@ -342,8 +342,9 @@ template<class T>
 				      const Gambit::Vector<double>& p,
 				      const Gambit::SquareMatrix<double>& M)    const
 {
-  assert( r.Contains(p) );
-
+  if (!r.Contains(p)) {
+    throw Gambit::AssertionException("Point not in rectangle in MaxDistanceFromPointToVertexAfterTransformation.");
+  }
   double max = (double)0;
 
   Gambit::Array<int> ListOfTwos(Dmnsn());
@@ -371,7 +372,7 @@ bool QuikSolv<T>::HasNoOtherRootsIn(const gRectangle<double>& r,
 			  const Gambit::Vector<double>& p,
 			  const Gambit::SquareMatrix<double>& M)  const
 {
-  assert (NoEquations == System.Dmnsn());
+  //assert (NoEquations == System.Dmnsn());
 
   gPolyList<double> system1 = gDoubleSystem.TranslateOfSystem(p);
 
@@ -396,7 +397,7 @@ template <class T>
 bool QuikSolv<T>::NewtonRootIsOnlyInRct(const gRectangle<double>& r,
 					Gambit::Vector<double>& point) const
 {
-  assert (NoEquations == System.Dmnsn());
+  //assert (NoEquations == System.Dmnsn());
 
   if ( NewtonRootInRectangle(r,point) ) {
     Gambit::SquareMatrix<double> Df = TreesOfPartials.SquareDerivativeMatrix(point);
@@ -414,7 +415,7 @@ bool QuikSolv<T>::NewtonRootIsOnlyInRct(const gRectangle<double>& r,
 template<class T> 
 QuikSolv<T>& QuikSolv<T>::operator=(const QuikSolv<T> & rhs)
 {
-  assert (System == rhs.System);
+  //assert (System == rhs.System);
 
   if (*this != rhs) {
     HasBeenSolved = rhs.HasBeenSolved;
@@ -500,7 +501,7 @@ QuikSolv<T>::NewtonPolishedRoot(const Gambit::Vector<double> &initial) const
 template<class T> bool
 QuikSolv<T>::MightHaveSingularRoots() const
 {
-  assert (NoEquations == System.Dmnsn());
+  //assert (NoEquations == System.Dmnsn());
 
   gPoly<double> newpoly = 
     gDoubleSystem.ReductionOf(  gDoubleSystem.DetOfDerivativeMatrix(),
@@ -526,7 +527,7 @@ QuikSolv<T>::MightHaveSingularRoots() const
 template<class T> bool
 QuikSolv<T>::FindRoots(const gRectangle<T>& r, const int& max_iterations) 
 {
-  assert (NoEquations == System.Dmnsn());
+  //assert (NoEquations == System.Dmnsn());
 
   int zero = 0;
   return FindCertainNumberOfRoots(r,max_iterations,zero);
@@ -537,7 +538,7 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
 				      const int& max_iterations,
 				      const int& max_no_roots) 
 {
-  assert (NoEquations == System.Dmnsn());
+  //assert (NoEquations == System.Dmnsn());
 
   Gambit::List<Gambit::Vector<double> >* rootlistptr = new Gambit::List<Gambit::Vector<double> >();
 
@@ -624,7 +625,7 @@ QuikSolv<T>::FindRootsRecursion(      Gambit::List<Gambit::Vector<double> >* roo
 				const int& max_no_roots,
 				      int* roots_found)    const
 {
-  assert (NoEquations == System.Dmnsn());
+  //assert (NoEquations == System.Dmnsn());
 
   // Check for user interrupt
   //  m_status.SetProgress(50.0);

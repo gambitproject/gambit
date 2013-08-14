@@ -63,7 +63,7 @@ class gnmgame {
     cvector fulls(getNumActions());
     int nact=getNumActions(0);
     for(int i=0;i<getNumPlayers();++i){
-      assert(nact==getNumActions(i));
+      //assert(nact==getNumActions(i));
       for(int j=0;j<nact;++j)
         fulls[j+firstAction(i)]=s[j];
     }
@@ -71,7 +71,7 @@ class gnmgame {
   }
 
   virtual double getKSymMixedPayoff(int cls, cvector &s){
-    assert(s.getm()==getNumKSymActions());
+    //assert(s.getm()==getNumKSymActions());
     return getMixedPayoff(cls,s);
   }
 
@@ -97,14 +97,14 @@ class gnmgame {
     cvector fulls(getNumActions());
     int nact=getNumActions(0);
     for(int i=0;i<getNumPlayers();++i){
-      assert(nact==getNumActions(i));
+      //assert(nact==getNumActions(i));
       for(int j=0;j<nact;++j)
         fulls[j+firstAction(i)]=s[j];
     }
     getPayoffVector(dest, 0, fulls);
   }
   virtual void getKSymPayoffVector(cvector &dest, int playerClass, cvector &s){
-    assert(s.getm()==getNumKSymActions());
+    //assert(s.getm()==getNumKSymActions());
     getPayoffVector(dest,playerClass,s);
   }
 

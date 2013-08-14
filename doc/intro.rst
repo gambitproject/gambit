@@ -41,17 +41,16 @@ contributing his "clique" code for identification of equilibrium
 components in two-player strategic games, as well as other advice
 regarding Gambit's implementation and architecture.
 
-The present series of Gambit releases, numbered 0.2005.mm.dd according
-to release date, focuses on two objectives. First, the graphical
-interface was reimplemented and modernized, with the goal of following
-good interaction design principles, especially in regards to easing
-the learning curve for users new to Gambit and new to game theory.
-Second, the internal architecture of Gambit was refactored to increase
-interoperability between the tools provided by Gambit and those
-written independently. In particular, there are many more researchers
-active in computation in game theory in 2005 then during the last
-major Gambit development phase circa 1995, and the architecture of
-Gambit is evolving to reflect this.
+Development since the mid-2000s has focused on two objectives. First,
+the graphical interface was reimplemented and modernized, with the
+goal of following good interaction design principles, especially in
+regards to easing the learning curve for users new to Gambit and new
+to game theory.  Second, the internal architecture of Gambit was
+refactored to increase interoperability between the tools provided by
+Gambit and those written independently. In particular, there are many
+more researchers active in computation in game theory today then
+during the last major Gambit development phase circa 1995, and the
+architecture of Gambit is evolving to reflect this.
 
 
 Key features of Gambit
@@ -173,28 +172,38 @@ include:
 Downloading Gambit
 ------------------
 
-Versions of Gambit are available for download from
-`http://sourceforge.net/projects/gambit/files <http://sourceforge.net/projects/gambit/files>`_.
+Gambit operates on an annual release cycle roughly mirroring the
+(northern hemisphere) academic year.  A new version is promoted to
+stable/teaching each August; the major version number is equal to the
+last two digits of the year in which the version becomes stable.
 
-The current stable version is 0.2010.09.01. 
+This document covers Gambit 14, which is the current development/research
+version as of August 2013.  The most recent release is 14.0.0, 
+available on 13 August 2013.
+You can download it from
+`Sourceforge
+<http://sourceforge.net/projects/gambit/files/gambit14/14.0.0>`_.
+Full source code is available, as are precompiled binaries for
+Microsoft Windows and Mac OS X 10.8.
 
-* `gambit-0.2010.09.01.tar.gz <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2010.09.01/gambit-0.2010.09.01.tar.gz/download>`_ (source tarball, for Linux/Windows/Mac OSX)
-* `gambit-0.2010.09.01.dmg <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2010.09.01/gambit-0.2010.09.01.dmg/download>`_ (application binary for Mac OSX 10.6)
+This series is where new development is made available.  It is
+intended for developers, researchers who work in algorithms in game
+theory, and those who require the latest implementations for their
+research project.  It will become the next stable/teaching version
+from August 2014.
 
-The previous stable version of Gambit was 0.2007.12.04.  
+The current stable/teaching series of Gambit is
+`Gambit 13 <http://www.gambit-project.org/gambit13>`_.
+The stable version is suitable for teaching and student use, and for
+practitioners who require a version where the interface and API are
+fixed.  Further releases of Gambit 13 will be made for maintenance and
+bug fixes only.
 
-* `gambit-0.2007.12.04.tar.gz <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2007.12.04/gambit-0.2007.12.04.tar.gz/download>`_ (source tarball, for Linux/Windows/Mac OSX)
+Older versions of Gambit can be downloaded from
+`http://sourceforge.net/projects/gambit/files
+<http://sourceforge.net/projects/gambit/files>`_.  Support for older
+versions is limited.
 
-* `gambit-0.2007.12.04.exe <http://sourceforge.net/projects/gambit/files/gambit-stable/0.2007.12.04/gambit-0.2007.12.04.exe/download>`_ (binary installer distribution for Microsoft Windows).
-
-.. note::
-   There is no Windows installer yet available for the latest stable
-   version.  The previous stable version contains all the essential
-   functionality and is adequate for most users.  There is a known bug
-   involving viewing dominated actions in extensive games in the
-   0.2007.12.04 version of the graphical interface.  Users are advised
-   to avoid using this feature.  The error is entirely cosmetic and
-   does not affect the correctness of equilibria calculated.
 
 
 Community

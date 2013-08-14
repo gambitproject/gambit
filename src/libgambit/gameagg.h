@@ -104,6 +104,8 @@ public:
   virtual int MixedProfileLength(void) const {
 	  return aggPtr->getNumActions();
   }
+  virtual int NumStrategyContingencies(void) const
+  { throw UndefinedException(); }
   //@}
 
   virtual PureStrategyProfile NewPureStrategyProfile(void) const;

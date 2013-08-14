@@ -34,6 +34,8 @@ static wxString s_recommended(wxT("with Gambit's recommended method"));
 static wxString s_enumpure(wxT("by looking for pure strategy equilibria"));
 static wxString s_enummixed(wxT("by enumerating extreme points"));
 static wxString s_enumpoly(wxT("by solving systems of polynomial equations"));
+static wxString s_gnm(wxT("by global Newton tracing"));
+static wxString s_ipa(wxT("by iterated polymatrix approximation"));
 static wxString s_lp(wxT("by solving a linear program"));
 static wxString s_lcp(wxT("by solving a linear complementarity program"));
 static wxString s_liap(wxT("by minimizing the Lyapunov function"));
@@ -47,26 +49,38 @@ gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent,
 {
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxString countChoices[] = { wxT("Compute one Nash equilibrium"),
-			      wxT("Compute as many Nash equilibria as possible"),
-			      wxT("Compute all Nash equilibria") };
-  m_countChoice = new wxChoice(this, -1, wxDefaultPosition, wxDefaultSize,
-			       3, countChoices);
-  m_countChoice->SetSelection(2);
+  if (m_doc->GetGame()->NumPlayers() == 2) {
+    wxString countChoices[] = { wxT("Compute one Nash equilibrium"),
+				wxT("Compute as many Nash equilibria as possible"),
+				wxT("Compute all Nash equilibria") };
+    m_countChoice = new wxChoice(this, wxID_ANY,
+				 wxDefaultPosition, wxDefaultSize,
+				 3, countChoices);
+  }
+  else {
+    wxString countChoices[] = { wxT("Compute one Nash equilibrium"),
+				wxT("Compute as many Nash equilibria as possible") };
+    m_countChoice = new wxChoice(this, wxID_ANY,
+				 wxDefaultPosition, wxDefaultSize,
+				 2, countChoices);
+  }
+  m_countChoice->SetSelection(0);
+
   Connect(m_countChoice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
 	  wxCommandEventHandler(gbtNashChoiceDialog::OnCount));
   topSizer->Add(m_countChoice, 0, wxALL | wxEXPAND, 5);
 
-  if (p_doc->NumPlayers() == 2) {
-    wxString methodChoices[] = { s_recommended, s_enummixed,
-				 s_enumpoly };
-    m_methodChoice = new wxChoice(this, -1, wxDefaultPosition, wxDefaultSize,
-				  3, methodChoices);
+  if (p_doc->NumPlayers() == 2 && m_doc->IsConstSum()) {
+    wxString methodChoices[] = { s_recommended, s_lp, s_simpdiv, s_logit };
+    m_methodChoice = new wxChoice(this, wxID_ANY, 
+				  wxDefaultPosition, wxDefaultSize,
+				  4, methodChoices);
   }
   else {
-    wxString methodChoices[] = { s_recommended, s_enumpoly };
-    m_methodChoice = new wxChoice(this, -1, wxDefaultPosition, wxDefaultSize,
-				  2, methodChoices);
+    wxString methodChoices[] = { s_recommended, s_simpdiv, s_logit };
+    m_methodChoice = new wxChoice(this, wxID_ANY, 
+				  wxDefaultPosition, wxDefaultSize,
+				  3, methodChoices);
   }
   m_methodChoice->SetSelection(0);
   topSizer->Add(m_methodChoice, 0, wxALL | wxEXPAND, 5);
@@ -74,7 +88,8 @@ gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent,
   if (m_doc->IsTree()) {
     wxString repChoices[] = { wxT("using the extensive game"),
 			      wxT("using the strategic game") };
-    m_repChoice = new wxChoice(this, -1, wxDefaultPosition, wxDefaultSize,
+    m_repChoice = new wxChoice(this, wxID_ANY,
+			       wxDefaultPosition, wxDefaultSize,
 			       2, repChoices);
     m_repChoice->SetSelection(0);
     topSizer->Add(m_repChoice, 0, wxALL | wxEXPAND, 5);
@@ -108,7 +123,7 @@ void gbtNashChoiceDialog::OnCount(wxCommandEvent &p_event)
   m_methodChoice->Append(s_recommended);
 
   if (p_event.GetSelection() == 0) {
-    if (m_doc->IsConstSum()) {
+    if (m_doc->NumPlayers() == 2 && m_doc->IsConstSum()) {
       m_methodChoice->Append(s_lp);
     }
     m_methodChoice->Append(s_simpdiv);
@@ -120,14 +135,15 @@ void gbtNashChoiceDialog::OnCount(wxCommandEvent &p_event)
     }
     m_methodChoice->Append(s_enumpure);
     m_methodChoice->Append(s_liap);
+    m_methodChoice->Append(s_gnm);
+    m_methodChoice->Append(s_ipa);
+    m_methodChoice->Append(s_enumpoly);
   }
   else {
     if (m_doc->NumPlayers() == 2) {
       m_methodChoice->Append(s_enummixed);
     }
-    m_methodChoice->Append(s_enumpoly);
   }
-
   m_methodChoice->SetSelection(0);
 }
 
@@ -135,13 +151,20 @@ void gbtNashChoiceDialog::OnMethod(wxCommandEvent &p_event)
 {
   wxString method = m_methodChoice->GetString(p_event.GetSelection());
 
-  if (method == s_simpdiv || method == s_enummixed) {
+  if (method == s_simpdiv || method == s_enummixed ||
+      method == s_gnm || method == s_ipa) {
     m_repChoice->SetSelection(1);
     m_repChoice->Enable(false);
   }
   else {
     m_repChoice->Enable(true);
   }
+}
+
+bool gbtNashChoiceDialog::UseStrategic(void) const
+{
+  return (m_repChoice == 0 ||
+	  m_repChoice->GetSelection() == 1);
 }
 
 gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand(void) const
@@ -203,9 +226,9 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand(void) const
       }
       else {
 	cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
-	cmd->SetCommand(prefix + wxT("enumpoly -d 10") + options);
-	cmd->SetDescription(wxT("Some equilibria by solving polynomial ")
-				wxT("systems ") + game);
+	cmd->SetCommand(prefix + wxT("liap -d 10") + options);
+	cmd->SetDescription(wxT("Some equilibria by function minimization ") +
+			    game);
       }
     }
     else {
@@ -240,6 +263,18 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand(void) const
     cmd->SetCommand(prefix + wxT("enumpoly -d 10") + options);
     cmd->SetDescription(count + wxT(" by solving polynomial systems ") +
 		       game);
+  }
+  else if (method == s_gnm) {
+    cmd = new gbtAnalysisProfileList<double>(m_doc, false);
+    cmd->SetCommand(prefix + wxT("gnm -d 10") + options);
+    cmd->SetDescription(count + wxT(" by global Newton tracing ")
+			wxT("in strategic game"));
+  }
+  else if (method == s_ipa) {
+    cmd = new gbtAnalysisProfileList<double>(m_doc, false);
+    cmd->SetCommand(prefix + wxT("ipa -d 10") + options);
+    cmd->SetDescription(count + wxT(" by iterated polymatrix approximation ")
+			wxT("in strategic game"));
   }
   else if (method == s_lp) {
     cmd = new gbtAnalysisProfileList<Rational>(m_doc, useEfg);

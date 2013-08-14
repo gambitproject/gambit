@@ -277,25 +277,20 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   m_splitter = new wxSplitterWindow(this, -1);
   if (p_doc->IsTree()) {
     m_efgPanel = new gbtEfgPanel(m_splitter, p_doc);
+    m_efgPanel->Show(true);
+    m_splitter->Initialize(m_efgPanel);
+    m_nfgPanel = 0;
   }
   else {
     m_efgPanel = 0;
-  }
-
-  m_nfgPanel = new gbtNfgPanel(m_splitter, p_doc);
-  if (p_doc->IsTree()) {
-    m_nfgPanel->Show(false);
+    m_nfgPanel = new gbtNfgPanel(m_splitter, p_doc);
+    m_nfgPanel->Show(true);
+    m_splitter->Initialize(m_nfgPanel);
   }
 
   m_analysisPanel = new gbtAnalysisNotebook(m_splitter, p_doc);
   m_analysisPanel->Show(false);
 
-  if (p_doc->IsTree()) {
-    m_splitter->Initialize(m_efgPanel);
-  }
-  else {
-    m_splitter->Initialize(m_nfgPanel);
-  }
   m_splitter->SetSashGravity(0.5);
   m_splitter->SetMinimumPaneSize(200);
 
@@ -817,10 +812,7 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     wxString filename = dialog.GetPath();
-
     wxGetApp().SetCurrentDir(wxPathOnly(filename));
-    wxConfig config(_T("Gambit"));
-    config.Write(_T("/General/CurrentDirectory"), wxPathOnly(filename));
 
     gbtAppLoadResult result = wxGetApp().LoadFile(filename);
     if (result == GBT_APP_OPEN_FAILED) {
@@ -1328,6 +1320,21 @@ void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
       }
     }
     
+    int ncont = m_doc->GetGame()->NumStrategyContingencies();
+    if (!m_nfgPanel && ncont >= 50000) {
+      if (wxMessageBox(wxString::Format(wxT("This game has %d contingencies in strategic form.\n"), ncont) +
+		       wxT("Performance in browsing strategic form will be poor,\n") +
+		       wxT("and may render the program nonresponsive.\n") +
+		       wxT("Do you wish to continue?"),
+		       _("Large strategic game warning"),
+		       wxOK | wxCANCEL | wxALIGN_CENTER, this) != wxOK) {
+	return;
+      }
+    }
+
+    if (!m_nfgPanel) {
+      m_nfgPanel = new gbtNfgPanel(m_splitter, m_doc);
+    }
     m_doc->BuildNfg();
 
     m_splitter->ReplaceWindow(m_efgPanel, m_nfgPanel);
@@ -1434,6 +1441,20 @@ void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
   gbtNashChoiceDialog dialog(this, m_doc);
 
   if (dialog.ShowModal() == wxID_OK) {
+    if (dialog.UseStrategic()) {
+      int ncont = m_doc->GetGame()->NumStrategyContingencies();
+      if (ncont >= 50000) {
+	if (wxMessageBox(wxString::Format(wxT("This game has %d contingencies in strategic form.\n"), ncont) +
+			 wxT("Performance in solving strategic form will be poor,\n") +
+			 wxT("and may render the program nonresponsive.\n") +
+			 wxT("Do you wish to continue?"),
+			 _("Large strategic game warning"),
+			 wxOK | wxCANCEL | wxALIGN_CENTER, this) != wxOK) {
+	  return;
+	}
+      }
+    }
+
     gbtAnalysisOutput *command = dialog.GetCommand();
 
     gbtNashMonitorDialog dialog(this, m_doc, command);

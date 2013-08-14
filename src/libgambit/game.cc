@@ -361,6 +361,16 @@ GameStrategy GameExplicitRep::GetStrategy(int p_index) const
   throw IndexException();
 }
 
+int GameExplicitRep::NumStrategyContingencies(void) const
+{
+  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
+  int ncont = 1;
+  for (int pl = 1; pl <= m_players.Length(); pl++) {
+    ncont *= m_players[pl]->m_strategies.Length();
+  }
+  return ncont;
+}
+
 int GameExplicitRep::MixedProfileLength(void) const
 {
   const_cast<GameExplicitRep *>(this)->BuildComputedValues();

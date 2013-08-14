@@ -24,6 +24,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
+#include "wx/sheet/sheet.h"
 
 #include "libgambit/libgambit.h"
 #include "dleditmove.h"
@@ -37,9 +38,60 @@ private:
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const;
 
 public:
-  gbtActionSheet(wxWindow *p_parent, Gambit::GameInfoset p_infoset)
-    : wxSheet(p_parent, 1), m_infoset(p_infoset) { }
+  gbtActionSheet(wxWindow *p_parent, Gambit::GameInfoset p_infoset);
+  
+  int NumActions(void) const { return GetNumberRows(); }
+  wxString GetActionName(int p_act);
+  wxString GetActionProb(int p_act); 
 };
+
+gbtActionSheet::gbtActionSheet(wxWindow *p_parent, 
+			       Gambit::GameInfoset p_infoset)
+  : wxSheet(p_parent, wxID_ANY), m_infoset(p_infoset) 
+{
+  CreateGrid(p_infoset->NumActions(), (p_infoset->IsChanceInfoset()) ? 2 : 1);
+  SetRowLabelWidth(40);
+  SetColLabelHeight(25);
+  SetColLabelValue(0, wxT("Label"));
+  if (p_infoset->IsChanceInfoset()) {
+    SetColLabelValue(1, wxT("Probability"));
+  }
+
+  for (int act = 1; act <= p_infoset->NumActions(); act++) {
+    SetCellValue(wxSheetCoords(act-1, 0),
+		 wxString(p_infoset->GetAction(act)->GetLabel().c_str(),
+			  *wxConvCurrent));
+    if (p_infoset->IsChanceInfoset()) {
+      SetCellValue(wxSheetCoords(act-1, 1),
+		   wxString(p_infoset->GetActionProb(act, "").c_str(),
+			    *wxConvCurrent));
+    }
+  }
+  SetDefaultColWidth(150);
+  AutoSizeRows();
+  // This addresses a regression in wxWidgets 2.9.5 with using grids and
+  // sheets in sizers.
+  InvalidateBestSize();
+}
+
+wxString gbtActionSheet::GetActionName(int p_act)
+{ 
+  if (IsCellEditControlCreated()) {
+    SaveEditControlValue();
+    HideCellEditControl();
+  }
+  return GetCellValue(wxSheetCoords(p_act-1, 0));
+}
+
+wxString gbtActionSheet::GetActionProb(int p_act)
+{ 
+  if (IsCellEditControlCreated()) {
+    SaveEditControlValue();
+    HideCellEditControl();
+  }
+  return GetCellValue(wxSheetCoords(p_act-1, 1));
+}
+ 
 
 wxSheetCellAttr
 gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -95,9 +147,9 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
   labelSizer->Add(new wxStaticText(this, wxID_STATIC, 
 				   _("Information set label")),
 		  0, wxALL | wxALIGN_CENTER, 5);
-  m_infosetName = new wxTextCtrl(this, -1,
+  m_infosetName = new wxTextCtrl(this, wxID_ANY,
 				 wxString(p_infoset->GetLabel().c_str(), *wxConvCurrent));
-  labelSizer->Add(m_infosetName, 1, wxALL | wxCENTER | wxEXPAND, 5);
+  labelSizer->Add(m_infosetName, 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 0);
 
   topSizer->Add(new wxStaticText(this, wxID_STATIC,
@@ -124,31 +176,9 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
   topSizer->Add(playerSizer, 0, wxALL | wxEXPAND, 0);
 
   wxStaticBoxSizer *actionBoxSizer =
-    new wxStaticBoxSizer(new wxStaticBox(this, -1, _("Actions")), wxHORIZONTAL);
- 
+    new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Actions")),
+			 wxHORIZONTAL);
   m_actionSheet = new gbtActionSheet(this, p_infoset);
-  m_actionSheet->CreateGrid(p_infoset->NumActions(), 
-			    (p_infoset->IsChanceInfoset()) ? 2 : 1);
-  m_actionSheet->SetRowLabelWidth(40);
-  m_actionSheet->SetColLabelHeight(25);
-  m_actionSheet->SetColLabelValue(0, wxT("Label"));
-  if (p_infoset->IsChanceInfoset()) {
-    m_actionSheet->SetColLabelValue(1, wxT("Probability"));
-  }
-
-  for (int act = 1; act <= p_infoset->NumActions(); act++) {
-    m_actionSheet->SetCellValue(wxSheetCoords(act-1, 0),
-				wxString(p_infoset->GetAction(act)->GetLabel().c_str(),
-					 *wxConvCurrent));
-    if (p_infoset->IsChanceInfoset()) {
-      m_actionSheet->SetCellValue(wxSheetCoords(act-1, 1),
-				  wxString(p_infoset->GetActionProb(act, "").c_str(),
-					   *wxConvCurrent));
-    }
-  }
-  m_actionSheet->SetDefaultColWidth(150);
-  m_actionSheet->AutoSizeRows();
-
   actionBoxSizer->Add(m_actionSheet, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(actionBoxSizer, 0, wxALL | wxEXPAND, 5);
 
@@ -166,22 +196,19 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
   CenterOnParent();
 }
 
+int gbtEditMoveDialog::NumActions(void) const 
+{ 
+  return m_actionSheet->NumActions(); 
+}
+
 wxString gbtEditMoveDialog::GetActionName(int p_act) const 
 { 
-  if (m_actionSheet->IsCellEditControlCreated()) {
-    m_actionSheet->SaveEditControlValue();
-    m_actionSheet->HideCellEditControl();
-  }
-  return m_actionSheet->GetCellValue(wxSheetCoords(p_act-1, 0));
+  return m_actionSheet->GetActionName(p_act);
 }
 
 wxString gbtEditMoveDialog::GetActionProb(int p_act) const 
 { 
-  if (m_actionSheet->IsCellEditControlCreated()) {
-    m_actionSheet->SaveEditControlValue();
-    m_actionSheet->HideCellEditControl();
-  }
-  return m_actionSheet->GetCellValue(wxSheetCoords(p_act-1, 1));
+  return m_actionSheet->GetActionProb(p_act);
 }
 
 

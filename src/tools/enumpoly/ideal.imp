@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/ideal.imp
 // Implementation of gIdeal
@@ -69,7 +69,7 @@ template<class T>  gIdeal<T>::~gIdeal()
 
 template<class T> gIdeal<T>& gIdeal<T>::operator=(const gIdeal<T> & rhs)
 {
-  assert (Space == rhs.Space);
+  //assert (Space == rhs.Space);
 
   if (*this != rhs) {
     this->order = rhs.order;

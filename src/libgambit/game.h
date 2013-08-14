@@ -73,13 +73,6 @@ public:
   //@}
 };
 
-/// An exception thrown when attempting to dereference a null pointer
-class NullException : public Exception {
-public:
-  virtual ~NullException() throw() { }
-  const char *what(void) const throw()  { return "Dereferencing null pointer"; }
-};
-
 /// An exception thrown when attempting to dereference an invalidated object 
 class InvalidObjectException : public Exception {
 public:
@@ -357,6 +350,7 @@ class GameStrategyRep : public GameObject  {
   friend class GameTreeRep;
   friend class GameTableRep;
   friend class GameAggRep;
+  friend class GameBagentRep;
   friend class GamePlayerRep;
   friend class PureStrategyProfileRep;
   friend class TreePureStrategyProfileRep;
@@ -405,6 +399,8 @@ class GamePlayerRep : public GameObject {
   friend class GameTreeRep;
   friend class GameTableRep;
   friend class GameAggRep;
+  friend class GameBagentRep;
+  friend class GameBaggRep;
   friend class GameTreeInfosetRep;
   friend class GameStrategyRep;
   friend class GameTreeNodeRep;
@@ -678,6 +674,8 @@ public:
   virtual Array<int> NumStrategies(void) const = 0;
   /// Gets the i'th strategy in the game, numbered globally
   virtual GameStrategy GetStrategy(int p_index) const = 0;
+  /// Returns the number of strategy contingencies in the game
+  virtual int NumStrategyContingencies(void) const = 0;
   /// Returns the total number of actions in the game
   virtual int BehavProfileLength(void) const = 0;
   /// Returns the total number of strategies in the game

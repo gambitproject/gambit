@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/gtree.imp
 // Implementation of a generic tree container class
@@ -20,7 +20,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <assert.h>
 #include "gtree.h"
 
 //--------------------------------------------------------------------------
@@ -79,7 +78,7 @@ template <class T> gTree<T>::~gTree()
 
 template <class T> void gTree<T>::InsertAt(const T& t, gTreeNode<T>* n)
 {
-  assert (n != NULL);
+  //  assert (n != NULL);
 
   if (n->eldest == NULL) {
     gTreeNode<T>* newn = new gTreeNode<T>(t,n,NULL,NULL,NULL,NULL);
@@ -136,7 +135,7 @@ template <class T> bool gTree<T>::operator!=(const gTree<T>& b) const
 template <class T> 
 Gambit::List<gTreeNode<T>*> gTree<T>::Children(const gTreeNode<T>* n) const
 {
-  assert(n != NULL);
+  //assert(n != NULL);
   Gambit::List<gTreeNode<T>*> answer;
   for (gTreeNode<T>* child = n->eldest; child != NULL; child = child->next)
     answer.Append(child);

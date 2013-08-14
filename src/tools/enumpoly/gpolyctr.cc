@@ -26,7 +26,7 @@ template <class T>
 gPolyArray<T>::gPolyArray(const gSpace *s, const term_order *t, int len)
   : mindex(1), maxdex(len)
 {
-  assert(len>=0);
+  //assert(len>=0);
   data = (len) ? new gPoly<T>*[len] - 1 : 0;
   for (int i = mindex; i <= maxdex; i++)
     data[i] = new gPoly<T>(s, t);
@@ -36,7 +36,7 @@ template <class T>
 gPolyArray<T>::gPolyArray(const gSpace *s, const term_order *t, int lo, int hi)
   : mindex(lo), maxdex(hi)
 {
-  assert(maxdex + 1 >= mindex);
+  //assert(maxdex + 1 >= mindex);
   data = (maxdex>=mindex) ? new gPoly<T>*[maxdex-mindex+1] - mindex : 0;
   for (int i = mindex; i <= maxdex; i++)
     data[i] = new gPoly<T>(s, t);
@@ -98,13 +98,17 @@ template <class T> int gPolyArray<T>::Last(void) const
 
 template <class T> const gPoly<T> &gPolyArray<T>::operator[](int index) const
 {
-  assert(index >= mindex && index <= maxdex);
+  if (index < mindex || index > maxdex) {
+    throw Gambit::IndexException();
+  }
   return *data[index];
 }	
 
 template <class T> gPoly<T> &gPolyArray<T>::operator[](int index)
 {
-  assert(index >= mindex && index <= maxdex);
+  if (index < mindex || index > maxdex) {
+    throw Gambit::IndexException();
+  }
   return *data[index];
 }
 
@@ -150,7 +154,9 @@ template <class T> bool gPolyBlock<T>::operator!=(const gPolyBlock<T> &b) const
 
 template <class T> int gPolyBlock<T>::InsertAt(const gPoly<T> &t, int n)
 {
-  assert(mindex <=n && n <=maxdex+1);
+  if (mindex > n || n > maxdex+1) {
+    throw Gambit::IndexException();
+  }
   gPoly<T> **new_data = new gPoly<T>*[++maxdex-mindex+1] - mindex;
 
   int i;
@@ -176,8 +182,9 @@ template <class T> int gPolyBlock<T>::Insert(const gPoly<T> &t, int n)
 
 template <class T> gPoly<T> gPolyBlock<T>::Remove(int n)
 {
-  assert(n >= mindex && n <= maxdex);
-
+  if (n < mindex || n > maxdex) {
+    throw Gambit::IndexException();
+  }
   gPoly<T> ret(*data[n]);
 
   gPoly<T> **new_data = (--maxdex>=mindex) ? new gPoly<T>*[maxdex-mindex+1] - mindex : 0;

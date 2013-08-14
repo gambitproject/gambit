@@ -83,11 +83,25 @@ public:
   const char *what(void) const throw() { return "Invalid value"; }
 };
 
+/// Exception thrown on a failed assertion
+class AssertionException : public Exception {
+public:
+  AssertionException(const char *s) : Exception(s) { }
+  virtual ~AssertionException() throw() { }
+};
+
 /// Exception thrown on attempted division by zero
 class ZeroDivideException : public Exception {
 public:
   virtual ~ZeroDivideException() throw() { }
   const char *what(void) const throw()  { return "Attmpted division by zero"; }
+};
+
+/// An exception thrown when attempting to dereference a null pointer
+class NullException : public Exception {
+public:
+  virtual ~NullException() throw() { }
+  const char *what(void) const throw()  { return "Dereferencing null pointer"; }
 };
 
 } // end namespace Gambit

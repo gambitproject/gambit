@@ -59,7 +59,6 @@ const int GBT_BRANCH_LABEL_LABEL = 1;
 const int GBT_BRANCH_LABEL_PROBS = 2;
 const int GBT_BRANCH_LABEL_VALUE = 3;
 
-class wxConfig;
 class wxFont;
 
 class gbtStyle {

@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/gpartltr.imp
 // Implementation of TreeOfPartials
@@ -458,7 +458,7 @@ ListOfPartialTrees<T>::DerivativeMatrix(const Gambit::Vector<T>& p,
 template <class T> Gambit::SquareMatrix<T> 
 ListOfPartialTrees<T>::SquareDerivativeMatrix(const Gambit::Vector<T>& p) const
 {
-  assert (Length() >= Dmnsn());
+  //assert (Length() >= Dmnsn());
   Gambit::SquareMatrix<T> answer(Dmnsn());
   int i;
   for (i = 1; i <= Dmnsn(); i++)

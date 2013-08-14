@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/gpoly.imp
 // Implementation of multivariate polynomial type
@@ -98,7 +98,7 @@ template <class T> gPoly<T>::~gPoly()
 
 template<class T> gPoly<T> &gPoly<T>::operator=(const gPoly<T> &p)
 {
-  assert (Space == p.Space && Order == p.Order);
+  //assert (Space == p.Space && Order == p.Order);
 
   Terms = p.Terms; return (*this);
 }
@@ -143,8 +143,9 @@ template <class T> gPoly<T>& gPoly<T>::operator=(const std::string &Hold)
     int low = 0; int high = newTerms.Length() + 1;
     while (low +1 < high) {
       int test = low + (high - low)/2;
-      if (1 <= test && test <= newTerms.Length()) 
-	assert (Terms[j].ExpV() != newTerms[test].ExpV());
+      if (1 <= test && test <= newTerms.Length()) {
+	// assert (Terms[j].ExpV() != newTerms[test].ExpV());
+      }
       if ( Order->Less(Terms[j].ExpV(),newTerms[test].ExpV()) )
 	high = test;
       else
@@ -174,7 +175,7 @@ template<class T> gPoly<T> gPoly<T>::operator-(const gPoly<T> &p) const
 
 template<class T> void gPoly<T>::operator-=(const gPoly<T> &p)
 {
-  assert(Space == p.Space);
+  //assert(Space == p.Space);
 
   gPoly<T> neg = p;
   for (int i = 1; i <= neg.Terms.Length(); i++)
@@ -191,7 +192,7 @@ template<class T> gPoly<T> gPoly<T>::operator+(const gPoly<T> &p) const
 
 template<class T> void gPoly<T>::operator+=(const gPoly<T> &p)
 {
-  assert(Space == p.Space);
+  //assert(Space == p.Space);
 
   Terms = Adder(Terms,p.Terms); 
 }
@@ -210,7 +211,9 @@ template<class T> gPoly<T> gPoly<T>::operator*(const gPoly<T> &p) const
 
 template<class T> gPoly<T> gPoly<T>::operator/(const T val) const
 {
-  assert (val != (T)0);
+  if (val == (T) 0) {
+    throw Gambit::ZeroDivideException();
+  }
   T one = (T)1;
   return (one/val) * (*this);
 }
@@ -223,7 +226,7 @@ gPoly<T> gPoly<T>::operator/(const gPoly<T> & den) const
 
 template<class T> void gPoly<T>::operator*=(const gPoly<T> &p)
 { 
-  assert(Space == p.Space);
+  //assert(Space == p.Space);
 
   Terms = Mult(Terms,p.Terms);
 }
@@ -237,7 +240,7 @@ template<class T> void gPoly<T>::operator*=(const T& val)
 
 template<class T> bool gPoly<T>::operator==(const gPoly<T> &p) const
 {
-  assert(Space == p.Space && Order == p.Order);
+  //assert(Space == p.Space && Order == p.Order);
 
   if (Terms.Length() != p.Terms.Length())           return false;
   if (Terms.Length() == 0 && p.Terms.Length() == 0) return true;
@@ -446,7 +449,7 @@ template <class T> T gPoly<T>::GetCoef(const exp_vect &Powers) const
 
 template <class T> T gPoly<T>::NumLeadCoeff() const
 {
-  assert (Degree() == 0 && Terms.Length() <= 1);
+  //assert (Degree() == 0 && Terms.Length() <= 1);
 
   if (Terms.Length() == 1) return Terms[1].Coef();
   else                     return (T)0;
@@ -519,7 +522,7 @@ template <class T> int gPoly<T>::UniqueActiveVariable() const
 template <class T> 
 polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
 {
-  assert(UniqueActiveVariable() >= 0);
+  //assert(UniqueActiveVariable() >= 0);
 
   Gambit::List<T> coefs;
 
@@ -617,8 +620,10 @@ gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> &den) const
 {
   gPoly<T> zero(Space,(T)0,Order);
 
-  assert(den != zero);
-  assert(*this == zero || den.Degree() <= Degree());
+  if (den == zero) {
+    throw Gambit::ZeroDivideException();
+  }
+  //assert(*this == zero || den.Degree() <= Degree());
 
   // assumes exact divisibility!
 
@@ -716,7 +721,7 @@ gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
 template <class T> 
 exp_vect gPoly<T>::LeadingPowerProduct(const term_order & order) const
 {
-  assert (Terms.Length() > 0);
+  //assert (Terms.Length() > 0);
 
   if (*Order == order) // worth a try ...
     return Terms[Terms.Length()].ExpV();
@@ -769,8 +774,8 @@ void gPoly<T>::ReduceByDivisionAtExpV(const term_order & order,
 				      const gPoly<T> & divisor, 
 				      const exp_vect & expv)
 {
-  assert(expv >= divisor.LeadingPowerProduct(order));
-  assert(divisor.LeadingCoefficient(order) != (T)0);
+  //assert(expv >= divisor.LeadingPowerProduct(order));
+  //assert(divisor.LeadingCoefficient(order) != (T)0);
 
   gPoly<T> factor(Space, 
 		    expv - divisor.LeadingPowerProduct(order), 
@@ -844,7 +849,7 @@ template<class T> gPoly<T>
 gPoly<T>::MonoInNewCoordinates(const gMono<T>& m, 
 			       const Gambit::SquareMatrix<T>& M) const
 {
-  assert(M.NumRows() == Dmnsn());
+  //assert(M.NumRows() == Dmnsn());
 
   gPoly<T> answer(GetSpace(), (T)1, GetOrder());
 

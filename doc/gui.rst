@@ -922,8 +922,8 @@ are to be found. Some algorithms for computing equilibria are adapted
 to finding a single equilibrium, while others attempt to compute the
 whole equilibrium set. The first drop-down in the dialog specifies how
 many equilibria to compute. In this drop-down there are options for
-:guilabel:`as many equilibria as possible` and :guilabel:`all
-equilibria`.  For some games, there exist algorithms which will
+:guilabel:`as many equilibria as possible` and, for two-player games,
+:guilabel:`all equilibria`.  For some games, there exist algorithms which will
 compute many equilibria (relatively) efficiently, but are not
 guaranteed to find all equilibria.
 

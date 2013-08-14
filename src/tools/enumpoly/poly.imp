@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/poly.imp
 // Implementation of polynomial class
@@ -157,7 +157,7 @@ template <class T> polynomial<T>
 template <class T> polynomial<T> 
                    polynomial<T>::operator/(const polynomial<T> &q) const
 {
-  assert(q.Degree() >= 0);
+  //assert(q.Degree() >= 0);
 
   polynomial<T> ans;
   polynomial<T> r = *this;
@@ -197,7 +197,7 @@ template <class T> polynomial<T>&
 template <class T> polynomial<T> 
                    polynomial<T>::operator%(const polynomial<T> &q) const
 {
-  assert (q.Degree() != -1);
+  //assert (q.Degree() != -1);
 
   polynomial<T> ans;
   polynomial<T> r = *this;
@@ -238,7 +238,7 @@ template <class T> polynomial<T> polynomial<T>::Derivative() const
 
 template <class T>  void polynomial<T>::ToMonic() 
 {
-  assert (!IsZero());
+  //assert (!IsZero());
 
   T lc = LeadingCoefficient();
   for (int i = 1; i <= coeflist.Length(); i++)
@@ -300,7 +300,7 @@ template <class T> Gambit::List<T> polynomial<T>::CoefficientList() const
 template <class T> 
 polynomial<T> polynomial<T>::GcdWith(const polynomial<T>& that) const
 {
-  assert( !this->IsZero() && !that.IsZero() );
+  //assert( !this->IsZero() && !that.IsZero() );
 
   polynomial<T> numerator(*this);
   numerator.ToMonic();
@@ -363,7 +363,7 @@ bool polynomial<T>::CannotHaveRootsIn(const gInterval<T>& I) const
     }
 
   }
-	assert(base_of_max_index != (T)0);
+	//assert(base_of_max_index != (T)0);
 
   if ( (T)pow((T)I.Length(), max_index) < (T)base_of_max_index ) 
     return true;
@@ -374,7 +374,7 @@ bool polynomial<T>::CannotHaveRootsIn(const gInterval<T>& I) const
 
 template <class T> Gambit::List< gInterval<T> >
 polynomial<T>::RootSubintervals(const gInterval<T>& I) const
-{ assert ( Degree() >= 0 && IsQuadratfrei() );
+{ //assert ( Degree() >= 0 && IsQuadratfrei() );
 
   polynomial<T> Df = Derivative();
 
@@ -624,7 +624,7 @@ complexpoly complexpoly::operator*(const complexpoly &y) const
 
 complexpoly complexpoly::operator/(const complexpoly &q) const
 {
-  assert(q.Degree() >= 0);
+  //assert(q.Degree() >= 0);
 
   complexpoly ans;
   complexpoly r = *this;
@@ -659,7 +659,7 @@ complexpoly& complexpoly::operator/=(const complexpoly& y)
 
 complexpoly complexpoly::operator%(const complexpoly &q) const
 {
-  assert (q.Degree() != -1);
+  //assert (q.Degree() != -1);
 
   complexpoly ans;
   complexpoly r = *this;
@@ -700,7 +700,7 @@ complexpoly complexpoly::Derivative() const
 
 void complexpoly::ToMonic() 
 {
-  assert (!IsZero());
+  //assert (!IsZero());
 
   gComplex lc = LeadingCoefficient();
   for (int i = 1; i <= coeflist.Length(); i++)
@@ -745,7 +745,7 @@ gComplex complexpoly::LeadingCoefficient() const
  
 complexpoly complexpoly::GcdWith(const complexpoly& that) const
 {
-  assert( !this->IsZero() && !that.IsZero() );
+  //assert( !this->IsZero() && !that.IsZero() );
 
   complexpoly numerator(*this);
   numerator.ToMonic();
@@ -775,7 +775,7 @@ bool complexpoly::IsQuadratfrei() const
 
 Gambit::List<gComplex> complexpoly::Roots() const 
 {
-  assert (!IsZero());
+  //assert (!IsZero());
 
   Gambit::List<gComplex> answer;
 
