@@ -16,9 +16,13 @@ Articles on computation of Nash equilibria
    “Computing Nash Equilibria by Iterated Polymatrix Approximation.”
    Journal of Economic Dynamics and Control 28: 1229-1241.
 
-.. [KolMegSte94] Daphne Koller, Nimrod Megiddo, and Bernhard von Stengel,
-   "Efficient computation of equilibria for extensive two-person games",
-   247-259, Games and Economic Behavior , 14, 1996.
+.. [Jiang11] A. X. Jiang, K. Leyton-Brown, and N. Bhat (2011)
+   "Action-Graph Games." Games and Economic Behavior 71(1): 141-173.
+
+.. [KolMegSte94] Daphne Koller, Nimrod Megiddo, and Bernhard von
+   Stengel (1996).
+   "Efficient computation of equilibria for extensive two-person games."
+   Games and Economic Behavior 14: 247-259.
 
 .. [LemHow64] C. E. Lemke and J. T. Howson, "Equilibrium points of
    bimatrix games", 413-423, Journal of the Society of Industrial and

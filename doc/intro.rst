@@ -167,6 +167,13 @@ include:
   University of Minnesota contributed in testing and documenting
   various features.
 
+* From Gambit 14, Gambit contains support for Action Graph Games
+  [Jiang11]_.  This has been contributed by Navin Bhat, Albert Jiang,
+  Kevin Leyton-Brown, and David Thompson, with funding support
+  provided by a University Graduate Fellowship of the University
+  of British Columbia, the NSERC Canada Graduate Scholarship, and a 
+  Google Research Award to Leyton-Brown.
+
 .. _section-downloading:
 
 Downloading Gambit
