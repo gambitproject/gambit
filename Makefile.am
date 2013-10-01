@@ -386,9 +386,13 @@ libgambitinclude_HEADERS = \
 libagg_la_SOURCES = \
 	src/libgambit/gameagg.cc \
 	src/libgambit/gameagg.h \
+	src/libgambit/gamebagg.cc \
+	src/libgambit/gamebagg.h \
 	src/libagg/GrayComposition.h \
 	src/libagg/agg.cc \
 	src/libagg/agg.h \
+	src/libagg/bagg.cc \
+	src/libagg/bagg.h \
 	src/libagg/proj_func.h \
 	src/libagg/trie_map.h \
         src/libagg/trie_map.imp
@@ -396,8 +400,10 @@ libagg_la_SOURCES = \
 libaggincludedir = $(includedir)/libagg
 libagginclude_HEADERS = \
 	src/libgambit/gameagg.h \
+	src/libgambit/gamebagg.h \
 	src/libagg/GrayComposition.h \
 	src/libagg/agg.h \
+	src/libagg/bagg.h \
 	src/libagg/proj_func.h \
 	src/libagg/trie_map.h \
         src/libagg/trie_map.imp
