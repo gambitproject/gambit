@@ -20,7 +20,7 @@ Articles on computation of Nash equilibria
    "Action-Graph Games." Games and Economic Behavior 71(1): 141-173.
 
 .. [KolMegSte94] Daphne Koller, Nimrod Megiddo, and Bernhard von
-   (1996).
+   Stengel (1996).
    "Efficient computation of equilibria for extensive two-person games."
    Games and Economic Behavior 14: 247-259.
 
