@@ -326,6 +326,7 @@ cdef extern from "libgambit/stratspt.h":
 cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError
     cxx_string WriteGame(c_Game, cxx_string) except +IOError
+    cxx_string WriteGame(c_StrategySupport) except +IOError
 
     void setitem_ArrayInt(Array[int] *, int, int)
     void setitem_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble *, 

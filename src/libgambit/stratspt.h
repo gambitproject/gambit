@@ -140,6 +140,11 @@ public:
 
   //@}
 
+  /// @name Writing data files
+  //@{
+  void WriteNfgFile(std::ostream &p_file) const;
+  //@}
+
   /// @name Modifying the support
   //@{
   /// Add a strategy to the support.

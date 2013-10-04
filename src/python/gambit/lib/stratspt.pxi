@@ -201,7 +201,7 @@ cdef class StrategicRestriction(BaseGame):
         if self.support != (<c_StrategySupport *>0):
             del self.support
     def __repr__(self):
-        return "<StrategicRestriction of Game '%s'>" % self.title
+        return self.write()
 
     def __richcmp__(StrategicRestriction self, other, whichop):
         if isinstance(other, StrategicRestriction):
@@ -246,6 +246,12 @@ cdef class StrategicRestriction(BaseGame):
             o = RestrictionOutcomes(self)
             return o
 
+    property is_tree:
+        def __get__(self):
+            # Any strategic restriction is automatically not a tree
+            # representation, even if the parent game does have one.
+            return False
+
     property is_const_sum:
         def __get__(self):
             return self.unrestrict().is_const_sum
@@ -261,6 +267,12 @@ cdef class StrategicRestriction(BaseGame):
     property max_payoff:
         def __get__(self):
             return self.unrestrict().max_payoff
+
+    def write(self, format='native'):
+        if format != 'native' and format != 'nfg':
+            raise NotImplementedError
+        else:
+            return WriteGame(deref(self.support)).c_str()
 
     def undominated(self, strict=False):
         cdef StrategicRestriction new_restriction
