@@ -123,7 +123,7 @@ void SolveMixed(Game p_nfg)
     for (GamePlayerIterator player = p_nfg->Players(); 
 	 flag && !player.AtEnd(); player++)  {
       Rational current = (*citer)->GetPayoff(player);
-      PureStrategyProfile p = (*citer)->Copy(); 
+      PureStrategyProfile p = *citer;
       for (GameStrategyIterator strategy = player->Strategies();
 	   !strategy.AtEnd(); strategy++) {
 	if (p->GetStrategyValue(strategy) > current)  {
@@ -136,7 +136,7 @@ void SolveMixed(Game p_nfg)
     if (flag)  {
       MixedStrategyProfile<Rational> temp(p_nfg->NewMixedStrategyProfile(Rational(0)));
       ((Vector<Rational> &) temp).operator=(Rational(0));
-      PureStrategyProfile profile = (*citer)->Copy();
+      PureStrategyProfile profile = *citer;
       for (GamePlayerIterator player = p_nfg->Players();
 	   !player.AtEnd(); player++) {
 	temp[profile->GetStrategy(player)] = 1;

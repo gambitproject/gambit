@@ -667,6 +667,7 @@ void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords,
   Gambit::GameOutcome outcome = profile->GetOutcome();
   if (!outcome) {
     m_doc->DoNewOutcome(profile);
+    profile = m_table->CellToProfile(p_coords);
     outcome = profile->GetOutcome();
   }
   int player = ColToPlayer(p_coords.GetCol());

@@ -187,7 +187,8 @@ class GameRep;
 typedef GameObjectPtr<GameRep> Game;
 
 class PureStrategyProfileRep;
-typedef std::auto_ptr<PureStrategyProfileRep> PureStrategyProfile;
+class PureStrategyProfile;
+
 
 // 
 // Forward declarations of classes defined elsewhere.
@@ -502,9 +503,10 @@ public:
 /// This class represents a strategy profile on a strategic game.
 /// It specifies exactly one strategy for each player defined on the
 /// game.
-class PureStrategyProfileRep : public GameObject {
+class PureStrategyProfileRep {
   friend class GameTableRep;
   friend class GameTreeRep;
+  friend class PureStrategyProfile;
 
 protected:
   Game m_nfg;
@@ -513,9 +515,12 @@ protected:
   /// Construct a new strategy profile
   PureStrategyProfileRep(void) { }
 
+  /// Create a copy of the strategy profile.
+  /// Caller is responsible for memory management of the created object.
+  virtual PureStrategyProfileRep *Copy(void) const = 0;
+
 public:
   virtual ~PureStrategyProfileRep() { }
-  virtual PureStrategyProfile Copy(void) const = 0;
   
   /// @name Data access and manipulation
   //@{
@@ -543,6 +548,29 @@ public:
   virtual Rational GetStrategyValue(const GameStrategy &) const = 0;
   //@}
 };
+
+class PureStrategyProfile {
+private:
+  PureStrategyProfileRep *rep;
+
+public:
+  PureStrategyProfile(const PureStrategyProfile &r) : rep(r.rep->Copy())  { }
+  PureStrategyProfile(PureStrategyProfileRep *p_rep) : rep(p_rep) { }
+  ~PureStrategyProfile() { delete rep; }
+
+  PureStrategyProfile &operator=(const PureStrategyProfile &r) 
+    {
+      if (&r != this) {
+	delete rep;
+	rep = r.rep->Copy();
+      }
+      return *this;
+    }
+
+  PureStrategyProfileRep *operator->(void) const { return rep; }
+  operator PureStrategyProfileRep *(void) const { return rep; }
+};
+    
 
 /// This class represents a behavior profile on an extensive game.
 /// It specifies exactly one strategy for each information set in the

@@ -1080,9 +1080,11 @@ MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Ration
 //========================================================================
 
 class TreePureStrategyProfileRep : public PureStrategyProfileRep {
+protected:
+  virtual PureStrategyProfileRep *Copy(void) const;
+
 public:
   TreePureStrategyProfileRep(const Game &p_game);
-  virtual PureStrategyProfile Copy(void) const;
   virtual void SetStrategy(const GameStrategy &);
   virtual GameOutcome GetOutcome(void) const
   { throw UndefinedException(); }
@@ -1105,9 +1107,9 @@ TreePureStrategyProfileRep::TreePureStrategyProfileRep(const Game &p_nfg)
   }
 }
 
-PureStrategyProfile TreePureStrategyProfileRep::Copy(void) const
+PureStrategyProfileRep *TreePureStrategyProfileRep::Copy(void) const
 {
-  return PureStrategyProfile(new TreePureStrategyProfileRep(*this));
+  return new TreePureStrategyProfileRep(*this);
 }
 
 PureStrategyProfile GameTreeRep::NewPureStrategyProfile(void) const

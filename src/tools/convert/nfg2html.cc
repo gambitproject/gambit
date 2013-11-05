@@ -63,7 +63,7 @@ void WriteHtmlFile(std::ostream &p_file, const Gambit::Game &p_nfg,
     } 
     theHtml += "</tr>";
     for (int st1 = 1; st1 <= p_nfg->GetPlayer(p_rowPlayer)->NumStrategies(); st1++) {
-      Gambit::PureStrategyProfile profile = (*iter)->Copy();
+      Gambit::PureStrategyProfile profile = *iter;
       profile->SetStrategy(p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1));
       theHtml += "<tr>";
       theHtml += "<td align=center><b>";

@@ -85,7 +85,7 @@ cdef extern from "libgambit/game.h":
     cdef cppclass c_GameStrategy "GameObjectPtr<GameStrategyRep>":
         c_GameStrategyRep *deref "operator->"() except +RuntimeError
 
-    cdef cppclass c_PureStrategyProfile "std::auto_ptr<PureStrategyProfileRep>":
+    cdef cppclass c_PureStrategyProfile "PureStrategyProfile":
         c_PureStrategyProfileRep *deref "operator->"()
         c_PureStrategyProfile(c_PureStrategyProfile)
 
