@@ -26,7 +26,9 @@ import warnings
 from libcpp cimport bool
 
 cdef extern from "libgambit/libgambit.h":
-    pass
+    cdef char *VERSION
+
+__version__ = VERSION
 
 cdef extern from "string":
     cdef cppclass cxx_string "string":

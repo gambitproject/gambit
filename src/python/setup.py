@@ -38,7 +38,7 @@ libgame = Extension("gambit.lib.libgambit",
                             glob.glob("../libgambit/*.cc") +
                             glob.glob("../libagg/*.cc"),
                     language="c++",
-                    include_dirs=[ ".." ] )
+                    include_dirs=[ "../..", ".." ] )
 
 setup(name="gambit",
       version="14.0.0",

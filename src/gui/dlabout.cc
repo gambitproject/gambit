@@ -25,6 +25,7 @@
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
 
+#include "libgambit/libgambit.h"
 #include "dlabout.h"
 #include "bitmaps/gambitbig.xpm"
 

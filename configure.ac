@@ -22,6 +22,7 @@ dnl
 
 AC_INIT([gambit], [14.0.0])
 AC_CONFIG_SRCDIR([src/libgambit/libgambit.h])
+AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_MACRO_DIR([m4])
 AM_OPTIONS_WXCONFIG

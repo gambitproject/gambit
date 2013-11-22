@@ -23,7 +23,7 @@
 import gambit.lib.libgambit
 import gte
 
-__version__ = '14.0.0'
+__version__ = gambit.lib.libgambit.__version__
 
 new_tree = gambit.lib.libgambit.new_tree
 new_table = gambit.lib.libgambit.new_table
