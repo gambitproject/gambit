@@ -36,9 +36,10 @@ class TablePureStrategyProfileRep : public PureStrategyProfileRep {
 protected:
   long m_index;
 
+  virtual PureStrategyProfileRep *Copy(void) const;
+
 public:
   TablePureStrategyProfileRep(const Game &p_game);
-  virtual PureStrategyProfile Copy(void) const;
   virtual long GetIndex(void) const { return m_index; }
   virtual void SetStrategy(const GameStrategy &);
   virtual GameOutcome GetOutcome(void) const;
@@ -62,9 +63,9 @@ TablePureStrategyProfileRep::TablePureStrategyProfileRep(const Game &p_nfg)
   }
 }
 
-PureStrategyProfile TablePureStrategyProfileRep::Copy(void) const
+PureStrategyProfileRep *TablePureStrategyProfileRep::Copy(void) const
 {
-  return PureStrategyProfile(new TablePureStrategyProfileRep(*this));
+  return new TablePureStrategyProfileRep(*this);
 }
 
 Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes /*= false*/)

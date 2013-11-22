@@ -798,7 +798,7 @@ void gbtGameDocument::DoNewOutcome(GameNode p_node)
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
-void gbtGameDocument::DoNewOutcome(PureStrategyProfile p_profile)
+void gbtGameDocument::DoNewOutcome(const PureStrategyProfile &p_profile)
 {
   p_profile->SetOutcome(m_game->NewOutcome());
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);

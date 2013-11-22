@@ -85,7 +85,7 @@ cdef extern from "libgambit/game.h":
     cdef cppclass c_GameStrategy "GameObjectPtr<GameStrategyRep>":
         c_GameStrategyRep *deref "operator->"() except +RuntimeError
 
-    cdef cppclass c_PureStrategyProfile "std::auto_ptr<PureStrategyProfileRep>":
+    cdef cppclass c_PureStrategyProfile "PureStrategyProfile":
         c_PureStrategyProfileRep *deref "operator->"()
         c_PureStrategyProfile(c_PureStrategyProfile)
 
@@ -244,6 +244,7 @@ cdef extern from "libgambit/mixed.h":
         int MixedProfileLength()
         c_StrategySupport GetSupport()
         double getitem "operator[]"(int) except +IndexError
+        double getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
         double GetPayoff(c_GamePlayer)
         double GetPayoff(c_GameStrategy)
         double GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy)
@@ -256,6 +257,7 @@ cdef extern from "libgambit/mixed.h":
         int MixedProfileLength()
         c_StrategySupport GetSupport()
         c_Rational getitem "operator[]"(int) except +IndexError
+        c_Rational getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
         c_Rational GetPayoff(c_GamePlayer)
         c_Rational GetPayoff(c_GameStrategy)
         c_Rational GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy)
@@ -324,6 +326,7 @@ cdef extern from "libgambit/stratspt.h":
 cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError
     cxx_string WriteGame(c_Game, cxx_string) except +IOError
+    cxx_string WriteGame(c_StrategySupport) except +IOError
 
     void setitem_ArrayInt(Array[int] *, int, int)
     void setitem_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble *, 

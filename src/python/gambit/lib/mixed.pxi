@@ -66,7 +66,7 @@ cdef class MixedStrategyProfile(object):
         if isinstance(index, int):
             return self._getprob(index+1)
         elif isinstance(index, Strategy):
-            return self._getprob((<Strategy>index).strategy.deref().GetId())
+            return self._getprob_strategy(index)
         elif isinstance(index, Player):
             class MixedStrategy(object):
                 def __init__(self, profile, player):
@@ -155,6 +155,8 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
         return self.profile.GetSupport().GetIndex(st.strategy)
     def _getprob(self, int index):
         return self.profile.getitem(index)
+    def _getprob_strategy(self, Strategy strategy):
+        return self.profile.getitem_strategy(strategy.strategy)
     def _setprob(self, int index, value):
         setitem_MixedStrategyProfileDouble(self.profile, index, value)
     def _setprob_strategy(self, Strategy strategy, value):
@@ -213,6 +215,8 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
         return self.profile.GetSupport().GetIndex(st.strategy)
     def _getprob(self, int index):
         return fractions.Fraction(rat_str(self.profile.getitem(index)).c_str()) 
+    def _getprob_strategy(self, Strategy strategy):
+        return fractions.Fraction(rat_str(self.profile.getitem_strategy(strategy.strategy)).c_str())
     def _setprob(self, int index, value):
         cdef char *s
         if not isinstance(value, (int, fractions.Fraction)):

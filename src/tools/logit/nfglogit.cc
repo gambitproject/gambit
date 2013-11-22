@@ -91,22 +91,20 @@ StrategicQREPathTracer::GetLHS(const Vector<double> &p_point, Vector<double> &p_
     logprofile[i] = p_point[i];
   }
   double lambda = p_point[p_point.Length()];
-  
   p_lhs = 0.0;
-
-  int rowno = 0;
-  for (int pl = 1; pl <= support.GetGame()->NumPlayers(); pl++) {
-    GamePlayer player = support.GetGame()->GetPlayer(pl);
+  for (int rowno = 0, pl = 1; pl <= support.NumPlayers(); pl++) {
+    StrategySupportPlayer player = support.GetPlayer(pl);
     for (int st = 1; st <= player->NumStrategies(); st++) {
       rowno++;
       if (st == 1) {
-	// sum-to-one equation
+	// This is a sum-to-one equation
 	p_lhs[rowno] = -1.0;
 	for (int j = 1; j <= player->NumStrategies(); j++) {
 	  p_lhs[rowno] += profile[player->GetStrategy(j)];
 	}
       }
       else {
+	// This is a ratio equation
 	p_lhs[rowno] = (logprofile[player->GetStrategy(st)] - 
 			logprofile[player->GetStrategy(1)] -
 			lambda * (profile.GetPayoff(player->GetStrategy(st)) -
@@ -131,75 +129,55 @@ StrategicQREPathTracer::GetJacobian(const Vector<double> &p_point,
 
   p_matrix = 0.0;
 
-  int rowno = 0;
-  for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-    GamePlayer player = support.GetGame()->GetPlayer(i);
-
+  for (int rowno = 0, i = 1; i <= support.NumPlayers(); i++) {
+    StrategySupportPlayer player = support.GetPlayer(i);
     for (int j = 1; j <= player->NumStrategies(); j++) {
       rowno++;
       if (j == 1) {
-	// sum-to-one equation
-	int colno = 0;
-	for (int ell = 1; ell <= support.GetGame()->NumPlayers(); ell++) {
-	  GamePlayer player2 = support.GetGame()->GetPlayer(ell);
-
+	// This is a sum-to-one equation
+	for (int colno = 0, ell = 1; ell <= support.NumPlayers(); ell++) {
+	  StrategySupportPlayer player2 = support.GetPlayer(ell);
 	  for (int m = 1; m <= player2->NumStrategies(); m++) {
 	    colno++;
-	    
 	    if (i == ell) {
 	      p_matrix(colno, rowno) = profile[player2->GetStrategy(m)];
 	    }
-	    else {
-	      p_matrix(colno, rowno) = 0.0;
-	    }
+	    // Otherwise, entry is zero
 	  }
 	}
-	
-	// Derivative wrt lambda is zero
-	p_matrix(p_matrix.NumRows(), rowno) = 0.0;
+	// The last column is derivate wrt lamba, which is zero
       }
       else {
 	// This is a ratio equation
-
-	int colno = 0;
-	for (int ell = 1; ell <= support.GetGame()->NumPlayers(); ell++) {
-	  GamePlayer player2 = support.GetGame()->GetPlayer(ell);
-
+	for (int colno = 0, ell = 1; ell <= support.NumPlayers(); ell++) {
+	  StrategySupportPlayer player2 = support.GetPlayer(ell);
 	  for (int m = 1; m <= player2->NumStrategies(); m++) {
 	    colno++;
-
 	    if (i == ell) {
 	      if (m == 1) {
-		// should be m==lead
 		p_matrix(colno, rowno) = -1.0;
 	      }
 	      else if (m == j) {
 		p_matrix(colno, rowno) = 1.0;
 	      }
-	      else {
-		p_matrix(colno, rowno) = 0.0;
-	      }
+	      // Entry is zero for all other strategy pairs
 	    }
 	    else {
-	      // 1 == sum-to-one
 	      p_matrix(colno, rowno) =
 		-lambda * profile[player2->GetStrategy(m)] *
 		(profile.GetPayoffDeriv(i, 
-					support.GetStrategy(i, j),
-					support.GetStrategy(ell, m)) -
+					player->GetStrategy(j),
+					player2->GetStrategy(m)) -
 		 profile.GetPayoffDeriv(i, 
-					support.GetStrategy(i, 1),
-					support.GetStrategy(ell, m)));
+					player->GetStrategy(1),
+					player2->GetStrategy(m)));
 	    }
 	  }
-
 	}
-	
-	// column wrt lambda
-	// 1 == sum-to-one
+	// Fill the last column, the derivative wrt lambda
 	p_matrix(p_matrix.NumRows(), rowno) =
-	  (profile.GetPayoff(support.GetStrategy(i, 1)) - 
-	   profile.GetPayoff(support.GetStrategy(i, j)));
+	  (profile.GetPayoff(player->GetStrategy(1)) - 
+	   profile.GetPayoff(player->GetStrategy(j)));
       }
     }
   }

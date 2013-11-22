@@ -37,7 +37,7 @@ class BagentPureStrategyProfileRep : public PureStrategyProfileRep {
 
 public:
   BagentPureStrategyProfileRep(const Game &p_game);
-  virtual PureStrategyProfile Copy(void) const;
+  virtual PureStrategyProfileRep *Copy(void) const;
   //virtual long GetIndex(void) const { return m_index; }
   virtual void SetStrategy(const GameStrategy &);
   virtual GameOutcome GetOutcome(void) const;
@@ -60,9 +60,9 @@ BagentPureStrategyProfileRep::BagentPureStrategyProfileRep(const Game &p_game)
   }
 }
 
-PureStrategyProfile BagentPureStrategyProfileRep::Copy(void) const
+PureStrategyProfileRep *BagentPureStrategyProfileRep::Copy(void) const
 {
-  return PureStrategyProfile(new BagentPureStrategyProfileRep(*this));
+  return new BagentPureStrategyProfileRep(*this);
 }
 //------------------------------------------------------------------------
 //       BagentPureStrategyProfileRep: Data access and manipulation

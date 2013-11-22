@@ -60,6 +60,61 @@ public:
   operator const GameStrategy &(void) const { return m_support[m_index]; }
 };
 
+
+class StrategySupport;
+
+//
+// Represents a player in a game restricted to the given support.
+// This is intended to be a transitional implementation; combined with its
+// handle class, it provides an interface similar enough to the GamePlayerRep
+// class to allow code to be written to the same specification, until such
+// time as the concept of a strategically restricted game, currently only
+// in the Python API, is implemented formally in C++.
+//
+class StrategySupportPlayerRep  {
+friend class StrategySupport;
+private:
+  const StrategySupport &m_support;
+  GamePlayer m_player;
+
+  StrategySupportPlayerRep(const StrategySupport &p_support, 
+                           GamePlayer p_player)
+    : m_support(p_support), m_player(p_player)  { }
+
+public:
+  int GetNumber(void) const { return m_player->GetNumber(); }
+  Game GetGame(void) const { return m_player->GetGame(); }
+
+  const std::string &GetLabel(void) const { return m_player->GetLabel(); }
+  void SetLabel(const std::string &p_label) { throw UndefinedException(); }
+
+  int NumStrategies(void) const;
+  GameStrategy GetStrategy(int st) const;
+};
+
+class StrategySupportPlayer {
+friend class StrategySupport;
+private:
+  StrategySupportPlayerRep *rep;
+
+  StrategySupportPlayer(StrategySupportPlayerRep *p_rep) : rep(p_rep) { }
+
+public:
+  ~StrategySupportPlayer() { delete rep; }
+
+  StrategySupportPlayer &operator=(const StrategySupportPlayer &r)
+    {
+      if (&r != this) {
+	delete rep;
+	rep = new StrategySupportPlayerRep(*r.rep);
+      }
+      return *this;
+    }
+
+  StrategySupportPlayerRep *operator->(void) const  { return rep; }
+  operator StrategySupportPlayerRep *(void) const { return rep; }
+};
+
 /// \brief A support on a strategic game
 ///
 /// This class represents a subset of the strategies in strategic game.
@@ -123,6 +178,11 @@ public:
   GameStrategy GetStrategy(int pl, int st) const 
     { return m_support[pl][st]; }
 
+  /// Returns the number of players in the game
+  int NumPlayers(void) const { return m_nfg->NumPlayers(); }
+  /// Returns the pl'th player in the game (restricted to this strategy set)
+  StrategySupportPlayer GetPlayer(int pl) const
+  { return new StrategySupportPlayerRep(*this, m_nfg->GetPlayer(pl)); }
   /// Returns an iterator over the players in the game
   GamePlayerIterator Players(void) const  { return m_nfg->Players(); }
   /// Returns an iterator over the strategies for the player
@@ -140,6 +200,11 @@ public:
   /// Returns true iff this support is a (weak) subset of the specified support
   bool IsSubsetOf(const StrategySupport &) const;
 
+  //@}
+
+  /// @name Writing data files
+  //@{
+  void WriteNfgFile(std::ostream &p_file) const;
   //@}
 
   /// @name Modifying the support
@@ -174,6 +239,13 @@ public:
                   bool p_strict) const;
   //@}
 };
+
+
+inline int StrategySupportPlayerRep::NumStrategies(void) const
+{ return m_support.NumStrategies(m_player->GetNumber()); }
+
+inline GameStrategy StrategySupportPlayerRep::GetStrategy(int st) const
+{ return m_support.GetStrategy(m_player->GetNumber(), st); }
 
 } // end namespace Gambit
 

@@ -45,7 +45,7 @@ copyright = u'1994-2013, The Gambit Project'
 # built documents.
 #
 # The short X.Y version.
-version = '14.0.0'
+version = '14.0'
 # The full version, including alpha/beta/rc tags.
 release = '14.0.0'
 

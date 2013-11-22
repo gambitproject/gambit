@@ -373,7 +373,7 @@ public:
   void DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player);
   void DoSetPlayer(GameNode p_node, GamePlayer p_player);
   void DoNewOutcome(GameNode p_node);
-  void DoNewOutcome(PureStrategyProfile p_profile);
+  void DoNewOutcome(const PureStrategyProfile &p_profile);
   void DoSetOutcome(GameNode p_node, GameOutcome p_outcome);
   void DoRemoveOutcome(GameNode p_node);
   void DoCopyOutcome(GameNode p_node, GameOutcome p_outcome);

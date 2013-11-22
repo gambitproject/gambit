@@ -184,12 +184,21 @@ Gambit operates on an annual release cycle roughly mirroring the
 stable/teaching each August; the major version number is equal to the
 last two digits of the year in which the version becomes stable.
 
+<<<<<<< HEAD
 This document covers Gambit 14, which is the current development/research
 version as of August 2013.  The most recent release is 14.0.0, 
 available on 13 August 2013.
 You can download it from
 `Sourceforge
 <http://sourceforge.net/projects/gambit/files/gambit14/14.0.0>`_.
+=======
+This document covers Gambit 13, which is the current stable/teaching
+version as of August 2013.  The most recent release is 13.1.1, 
+available on 22 November 2013.
+You can download it from
+`Sourceforge
+<http://sourceforge.net/projects/gambit/files/gambit13/13.1.1>`_.
+>>>>>>> maint13
 Full source code is available, as are precompiled binaries for
 Microsoft Windows and Mac OS X 10.8.
 

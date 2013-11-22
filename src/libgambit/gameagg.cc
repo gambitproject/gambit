@@ -37,7 +37,7 @@ class AggPureStrategyProfileRep : public PureStrategyProfileRep {
 
 public:
   AggPureStrategyProfileRep(const Game &p_game);
-  virtual PureStrategyProfile Copy(void) const;
+  virtual PureStrategyProfileRep *Copy(void) const;
   //virtual long GetIndex(void) const { return m_index; }
   virtual void SetStrategy(const GameStrategy &);
   virtual GameOutcome GetOutcome(void) const;
@@ -60,9 +60,9 @@ AggPureStrategyProfileRep::AggPureStrategyProfileRep(const Game &p_game)
   }
 }
 
-PureStrategyProfile AggPureStrategyProfileRep::Copy(void) const
+PureStrategyProfileRep *AggPureStrategyProfileRep::Copy(void) const
 {
-  return PureStrategyProfile(new AggPureStrategyProfileRep(*this));
+  return new AggPureStrategyProfileRep(*this);
 }
 //------------------------------------------------------------------------
 //       AggPureStrategyProfileRep: Data access and manipulation

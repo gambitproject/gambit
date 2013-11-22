@@ -98,6 +98,60 @@ bool StrategySupport::IsSubsetOf(const StrategySupport &p_support) const
   return true;
 }
 
+
+namespace {
+
+std::string EscapeQuotes(const std::string &s)
+{
+  std::string ret;
+  
+  for (unsigned int i = 0; i < s.length(); i++)  {
+    if (s[i] == '"')   ret += '\\';
+    ret += s[i];
+  }
+
+  return ret;
+}
+
+}  // end anonymous namespace
+
+
+void StrategySupport::WriteNfgFile(std::ostream &p_file) const
+{ 
+  p_file << "NFG 1 R";
+  p_file << " \"" << EscapeQuotes(m_nfg->GetTitle()) << "\" { ";
+
+  for (int i = 1; i <= m_nfg->NumPlayers(); i++)
+    p_file << '"' << EscapeQuotes(m_nfg->GetPlayer(i)->GetLabel()) << "\" ";
+
+  p_file << "}\n\n{ ";
+  
+  for (int i = 1; i <= m_nfg->NumPlayers(); i++)   {
+    p_file << "{ ";
+    for (int j = 1; j <= NumStrategies(i); j++)
+      p_file << '"' << EscapeQuotes(GetStrategy(i, j)->GetLabel()) << "\" ";
+    p_file << "}\n";
+  }
+  
+  p_file << "}\n";
+
+  p_file << "\"" << EscapeQuotes(m_nfg->GetComment()) << "\"\n\n";
+
+  // For trees, we write the payoff version, since there need not be
+  // a one-to-one correspondence between outcomes and entries, when there
+  // are chance moves.
+  StrategyIterator iter(*this);
+    
+  for (; !iter.AtEnd(); iter++) {
+    for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
+      p_file << (*iter)->GetPayoff(pl) << " ";
+    }
+    p_file << "\n";
+  }
+
+  p_file << '\n';
+}
+
 //---------------------------------------------------------------------------
 //                        Modifying the support
 //---------------------------------------------------------------------------
