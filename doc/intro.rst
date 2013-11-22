@@ -178,11 +178,11 @@ stable/teaching each August; the major version number is equal to the
 last two digits of the year in which the version becomes stable.
 
 This document covers Gambit 13, which is the current stable/teaching
-version as of August 2013.  The most recent release is 13.1.0, 
-available on 13 August 2013.
+version as of August 2013.  The most recent release is 13.1.1, 
+available on 22 November 2013.
 You can download it from
 `Sourceforge
-<http://sourceforge.net/projects/gambit/files/gambit13/13.1.0>`_.
+<http://sourceforge.net/projects/gambit/files/gambit13/13.1.1>`_.
 Full source code is available, as are precompiled binaries for
 Microsoft Windows and Mac OS X 10.8.
 
