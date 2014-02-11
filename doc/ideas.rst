@@ -111,32 +111,6 @@ Python/Cython is indicated.
   terminology of the objects in a game; undergraduate-level software
   engineering experience.
 
-Integrate Action Graph Games support into main Gambit distribution
-------------------------------------------------------------------
-
-Through the work of Albert Jiang and the research group of
-Prof Kevin Leyton-Brown at University of British Columbia, there
-is an implementation of support for the Action Graph Games
-representation structure.  See
-
-  Jiang, A. X., Leyton-Brown, K., and Bhat, N. A. R. (2011)
-  Action-graph games. Games and Economic Behavior 71(1): 141-173.
-  http://dx.doi.org/10.1016/j.geb.2010.10.012
-
-A preliminary integration of the work has been done in the
-`agg` branch in the Gambit git repository.
-
-This project would involve completing the integration of their
-work for distribution.  The primary tasks will involve code
-refactoring, documentation, and the construction of a test suite.
-
-* **Languages**: C++; optionally Python/Cython for integration with the
-  Python API.
-* **Prerequisites**: Undergraduate-level software engineering
-  experience; adequate game theory to understand the action graph
-  games representation as described in the 2011 article.
-
-
 
 Implementing algorithms for finding equilibria in games
 -------------------------------------------------------

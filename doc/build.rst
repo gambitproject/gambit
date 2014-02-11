@@ -19,7 +19,7 @@ This should be familiar to most users of Un*ces and MacOS X.
 
 If you are building from a source tarball, 
 you just need to unpack the sources, change directory to the top level
-of the sources (typically of the form gambit-0.yyyy.mm.dd), and do the
+of the sources (typically of the form gambit-xx.y.z), and do the
 usual ::
 
   ./configure
@@ -106,13 +106,15 @@ instructions for Un*x/Linux platforms above.  ``make install`` will
 install the command-line tools into ``/usr/local/bin`` (or the path
 specified in the ``configure`` step).
 
-To build the graphical interface, wxWidgets 2.8.12 is required.
+To build the graphical interface, wxWidgets 2.9.5 or higher is
+recommended, although 2.8.12 should also be suitable.
 (The interface will build with wxWidgets 2.9.4, but there is a bug
 in wxWidgets involving drag-and-drop which renders the graphical interface
 essentially unusable.)
 
 Snow Leopard (OS X 10.8) users will have to take some extra steps to
-build wxWidgets.  wxWidgets 2.8.12 requires the 10.6 SDK to build the
+build wxWidgets if 2.8.12 is used.
+wxWidgets 2.8.12 requires the 10.6 SDK to build the
 using Cocoa; this has been removed by Apple in recent editions of
 XCode.  Download and unpack the 10.6 SDK from an earlier XCode version
 into
@@ -140,7 +142,7 @@ Then, when configuring Gambit, use::
   make osx-bundle
 
 where ``WXPATH`` is the path at which you have the wxWidgets sources
-unpacked.
+unpacked.  These steps are not required for wxWidgets 2.9.5 or higher.
 
 This produces an application ``Gambit.app`` in the current directory,
 which can be run from its current location, or copied elsewhere in the
@@ -152,22 +154,16 @@ The graphical interface and wxWidgets
 -------------------------------------
 
 Gambit requires wxWidgets version 2.8.0 or higher for the
-graphical interface.  See the wxWidgets website at
+graphical interface, although 2.9.5 or higher is recommended.
+See the wxWidgets website at
 `<http://www.wxwidgets.org>`_
 to download this if you need it.  Packages of this should be available
 for most Un*x users through their package managers (apt or rpm).  Note
 that you'll need the appropriate -dev package for wxWidgets to get the
 header files needed to build Gambit.
 
-The current recommended versions of wxWidgets are 2.9.4 for Windows
-and Linux, and 2.8.12 for Mac OS X.  There is a bug in the 2.9.x
-series of wxWidgets which affects drag-and-drop operations, and
-therefore makes the graphical interface essentially useless.
-
 Un*x users, please note that Gambit at this time only supports the
-GTK port of wxWidgets, and not the Motif/Lesstif or the Universal ports.
-Neither of the latter ports support drag-and-drop features, which are
-heavily used in the graphical interface.
+GTK port of wxWidgets. 
 
 If wxWidgets it isn't installed in a standard place (e.g., /usr or
 /usr/local), you'll need to tell configure where to find it with the

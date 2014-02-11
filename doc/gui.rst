@@ -1,10 +1,11 @@
-The graphical interface
-==================================
+.. _section-gui:
 
-The most visible component of Gambit, especially for the new user, is
-the graphical user interface. This program is an"integrated
-development environment" to help visually construct games and to
-investigate their strategic features.
+The graphical interface
+=======================
+
+Gambit's graphical user interface provides an
+"integrated development environment" to help visually construct
+games and to investigate their main strategic features.
 
 The graphical interface is largely intended for the interactive
 construction and analysis of small to medium games. Repeating the
@@ -12,49 +13,21 @@ caution from the introduction of this manual, the computation time
 required for the equilibrium analysis of games increases rapidly in
 the size of the game. The graphical interface is ideal for students
 learning about the fundamentals of game theory, or for practitioners
-prototyping games of interest. In graduating to larger applications,
+prototyping games of interest. 
+
+In graduating to larger applications,
 users are encouraged to make use of the underlying Gambit libraries
-and programs directly.  See :ref:`the chapter on command-line tools
-<command-line>` for detailed documentation on these programs.
+and programs directly.  For greater control over computing Nash and
+quantal response equilibria of a game, see the section on
+:ref:`the command-line tools <command-line>`. 
+To build larger games or to explore parameter spaces of a game
+systematically, it is recommended to use
+:ref:`the Python API <python-api>`.
 
-
-
-Getting started: Tutorials
--------------------------------
-
-The documentation of the graphical interface focuses on detailing the
-concepts and features of the program. To get started using the
-program, a few tutorials are available:
-
-* Building and analyzing a coordination game:
-
-  - `Coordination game tutorial in PDF <_static/tutorial/coord.pdf>`_ 
-
-  - `Coordination game tutorial in SWF <_static/tutorial/coord.swf>`_
-
-* Building and analyzing a one-card poker game
-
-  - `Poker game tutorial in PDF <_static/tutorial/poker.pdf>`_ 
-
-  - `Poker game tutorial in SWF <_static/tutorial/poker.swf>`_
-
-These tutorials illustrate
-the use of the graphical interface in analyzing some common types of
-games, and are suitable for users with any level of experience with
-game theory. Students, in particular, may find some of the examples
-helpful with coursework.
-
-Once you're comfortable with some of the tutorials, this manual ought
-to be helpful in filling in some of the gaps, and listing more
-completely the features of the graphical interface.
 
 
 General concepts
 ----------------
-
-This section gives an overview of the graphical interface.
-
-
 
 General layout of the main window
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -414,15 +387,6 @@ Formatting and labeling the tree
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Gambit offers some options for customizing the display of game trees.
-
-
-Beginning in version 0.2005.12.12, all formatting information,
-including colors, fonts, layout, labeling, and so forth, are stored
-with the game in the Gambit workbook ( .gbt ) file format. This
-contrasts with previous behavior of the graphical interface, in which
-the settings were stored on a per-user basis, and games were displayed
-with the current settings only.
-
 
 
 Labels on nodes and branches
