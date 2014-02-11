@@ -351,9 +351,8 @@ void GameTreeNodeRep::DeleteTree(void)
   for (int i = 1; i <= children.Length(); i++) {
     children[i]->DeleteTree();
     children[i]->Invalidate();
+    children.Remove(i);
   }
-  children = Array<GameTreeNodeRep *>();
-
   if (infoset) {
     infoset->RemoveMember(this);
     infoset = 0;
