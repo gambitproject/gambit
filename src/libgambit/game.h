@@ -552,6 +552,12 @@ public:
   { return GetPayoff(p_player->GetNumber()); }
   /// Get the value of playing strategy against the profile
   virtual Rational GetStrategyValue(const GameStrategy &) const = 0;
+
+  /// Is the profile a pure strategy Nash equilibrium?
+  bool IsNash(void) const;
+
+  /// Convert to a mixed strategy representation
+  MixedStrategyProfile<Rational> ToMixedStrategy(void) const;
   //@}
 };
 

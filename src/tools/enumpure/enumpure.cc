@@ -161,31 +161,10 @@ NashEnumPureStrategySolver::Solve(const Game &p_game) const
 {
   List<MixedStrategyProfile<Rational> > solutions;
   for (StrategyIterator citer(p_game); !citer.AtEnd(); citer++) {
-    bool isNash = true;
-
-    for (GamePlayerIterator player = p_game->Players(); 
-	 isNash && !player.AtEnd(); player++)  {
-      Rational current = (*citer)->GetPayoff(player);
-      PureStrategyProfile p = *citer;
-      for (GameStrategyIterator strategy = player->Strategies();
-	   !strategy.AtEnd(); strategy++) {
-	if (p->GetStrategyValue(strategy) > current)  {
-	  isNash = false;
-	  break;
-	}
-      }
-    }
-    
-    if (isNash)  {
-      MixedStrategyProfile<Rational> temp(p_game->NewMixedStrategyProfile(Rational(0)));
-      ((Vector<Rational> &) temp).operator=(Rational(0));
-      PureStrategyProfile profile = *citer;
-      for (GamePlayerIterator player = p_game->Players();
-	   !player.AtEnd(); player++) {
-	temp[profile->GetStrategy(player)] = 1;
-      }
-      m_onEquilibrium->Render(temp);
-      solutions.Append(temp);
+    if ((*citer)->IsNash()) {
+      MixedStrategyProfile<Rational> profile = (*citer)->ToMixedStrategy();
+      m_onEquilibrium->Render(profile);
+      solutions.Append(profile);
     }
   }
   return solutions;

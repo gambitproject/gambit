@@ -185,6 +185,35 @@ GameInfoset GamePlayerRep::GetInfoset(int p_index) const { return m_infosets[p_i
 
 
 //========================================================================
+//                    class PureStrategyProfileRep
+//========================================================================
+
+bool PureStrategyProfileRep::IsNash(void) const
+{
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
+    GamePlayer player = m_nfg->GetPlayer(pl);
+    Rational current = GetPayoff(player);
+    for (int st = 1; st <= player->NumStrategies(); st++) {
+      if (GetStrategyValue(player->GetStrategy(st)) > current) {
+	return false;
+      }
+    }
+  }
+  return true;
+}
+
+MixedStrategyProfile<Rational>
+PureStrategyProfileRep::ToMixedStrategy(void) const
+{
+  MixedStrategyProfile<Rational> temp(m_nfg->NewMixedStrategyProfile(Rational(0)));
+  ((Vector<Rational> &) temp).operator=(Rational(0));
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
+    temp[GetStrategy(m_nfg->GetPlayer(pl))] = 1;
+  }
+  return temp;
+}
+
+//========================================================================
 //                       class PureBehavProfile
 //========================================================================
 
