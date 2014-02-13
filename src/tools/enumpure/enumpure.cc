@@ -46,58 +46,81 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-List<MixedBehavProfile<Rational> > SolveBehav(const BehavSupport &p_support,
-					      bool p_print = false)
+template <class T> class BehavStrategyRenderer {
+public:
+  virtual ~BehavStrategyRenderer() { }
+  virtual void Render(const MixedBehavProfile<T> &p_profile) = 0;
+};
+
+template <class T> 
+class BehavStrategyNullRenderer : public BehavStrategyRenderer<T> {
+public:
+  virtual ~BehavStrategyNullRenderer() { }
+  virtual void Render(const MixedBehavProfile<T> &p_profile) { }
+};
+
+template <class T>
+class BehavStrategyCSVRenderer : public BehavStrategyRenderer<T> {
+private:
+  std::ostream &m_stream;
+
+public:
+  BehavStrategyCSVRenderer(std::ostream &p_stream)
+    : m_stream(p_stream) { }
+  virtual ~BehavStrategyCSVRenderer() { }
+  virtual void Render(const MixedBehavProfile<T> &p_profile);
+};
+
+template <class T>
+void BehavStrategyCSVRenderer<T>::Render(const MixedBehavProfile<T> &p_profile)
 {
-  List<MixedBehavProfile<Rational> > solutions;
-
-  Game efg = p_support.GetGame();
-
-  for (BehavIterator citer(p_support); !citer.AtEnd(); citer++) {
-    bool isNash = true;
-
-    for (GamePlayerIterator player = efg->Players(); 
-	 isNash && !player.AtEnd(); player++)  {
-      Rational current = citer->GetPayoff<Rational>(player);
-	
-      for (int iset = 1; isNash && iset <= player->NumInfosets(); iset++) {
-	GameInfoset infoset = player->GetInfoset(iset);
-	for (int act = 1; act <= infoset->NumActions(); act++) {
-	  GameAction action = infoset->GetAction(act);
-	  if (citer->GetPayoff<Rational>(action) > current)  {
-	    isNash = false;
-	    break;
-	  }
-	}
-      }
-    }
-      
-    if (isNash)  {
-      MixedBehavProfile<Rational> temp(efg);
-      // zero out all the entries, since any equilibria are pure
-      ((Vector<Rational> &) temp).operator=(Rational(0));
-
-      for (GamePlayerIterator player = efg->Players();
-	   !player.AtEnd(); player++) {
-	for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	  temp(citer->GetAction(player->GetInfoset(iset))) = 1;
-	}
-      }
-
-      if (p_print) {
-	PrintProfile(std::cout, temp);
-      }
-      solutions.Append(temp);
+  m_stream << "NE,";
+  for (int i = 1; i <= p_profile.Length(); i++) {
+    m_stream << p_profile[i];
+    if (i < p_profile.Length()) {
+      m_stream << ',';
     }
   }
+  m_stream << std::endl;
+}
 
+class NashEnumPureBehavSolver {
+private:
+  BehavStrategyRenderer<Rational> *m_onEquilibrium;
+
+public:
+  NashEnumPureBehavSolver(BehavStrategyRenderer<Rational> *p_onEquilibrium = 0);
+  ~NashEnumPureBehavSolver()  { delete m_onEquilibrium; }
+  List<MixedBehavProfile<Rational> > Solve(const BehavSupport &) const;
+};
+
+NashEnumPureBehavSolver::NashEnumPureBehavSolver(BehavStrategyRenderer<Rational> *p_onEquilibrium /* = 0 */)
+  : m_onEquilibrium(p_onEquilibrium)
+{
+  if (!m_onEquilibrium) {
+    m_onEquilibrium = new BehavStrategyNullRenderer<Rational>();
+  }
+}
+
+List<MixedBehavProfile<Rational> > 
+NashEnumPureBehavSolver::Solve(const BehavSupport &p_support) const
+{
+  List<MixedBehavProfile<Rational> > solutions;
+  for (BehavIterator citer(p_support); !citer.AtEnd(); citer++) {
+    if (citer->IsAgentNash()) {
+      MixedBehavProfile<Rational> profile = citer->ToMixedBehavProfile();
+      m_onEquilibrium->Render(profile);
+      solutions.Append(profile);
+    }
+  }
   return solutions;
 }
 
 List<MixedBehavProfile<Rational> > 
 SubsolveBehav(const BehavSupport &p_support)
 {
-  return SolveBehav(p_support, false);
+  NashEnumPureBehavSolver algorithm = NashEnumPureBehavSolver();
+  return algorithm.Solve(p_support);
 }
 
 template <class T> class MixedStrategyRenderer {
@@ -162,7 +185,7 @@ NashEnumPureStrategySolver::Solve(const Game &p_game) const
   List<MixedStrategyProfile<Rational> > solutions;
   for (StrategyIterator citer(p_game); !citer.AtEnd(); citer++) {
     if ((*citer)->IsNash()) {
-      MixedStrategyProfile<Rational> profile = (*citer)->ToMixedStrategy();
+      MixedStrategyProfile<Rational> profile = (*citer)->ToMixedStrategyProfile();
       m_onEquilibrium->Render(profile);
       solutions.Append(profile);
     }
@@ -270,7 +293,8 @@ int main(int argc, char *argv[])
 	}
       }
       else {
-	SolveBehav(game, true);
+	NashEnumPureBehavSolver algorithm = NashEnumPureBehavSolver(new BehavStrategyCSVRenderer<Rational>(std::cout));
+	algorithm.Solve(game);
       }
     }
     return 0;

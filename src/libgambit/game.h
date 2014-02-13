@@ -557,7 +557,7 @@ public:
   bool IsNash(void) const;
 
   /// Convert to a mixed strategy representation
-  MixedStrategyProfile<Rational> ToMixedStrategy(void) const;
+  MixedStrategyProfile<Rational> ToMixedStrategyProfile(void) const;
   //@}
 };
 
@@ -615,6 +615,12 @@ public:
   template <class T> T GetPayoff(const GameNode &, int pl) const;
   /// Get the payoff to playing the action, conditional on the profile
   template <class T> T GetPayoff(const GameAction &) const;
+
+  /// Is the profile a pure strategy agent Nash equilibrium?
+  bool IsAgentNash(void) const;
+
+  /// Convert to a mixed behavior representation
+  MixedBehavProfile<Rational> ToMixedBehavProfile(void) const;
   //@}
 };
 

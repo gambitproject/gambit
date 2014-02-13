@@ -203,10 +203,10 @@ bool PureStrategyProfileRep::IsNash(void) const
 }
 
 MixedStrategyProfile<Rational>
-PureStrategyProfileRep::ToMixedStrategy(void) const
+PureStrategyProfileRep::ToMixedStrategyProfile(void) const
 {
   MixedStrategyProfile<Rational> temp(m_nfg->NewMixedStrategyProfile(Rational(0)));
-  ((Vector<Rational> &) temp).operator=(Rational(0));
+  static_cast<Vector<Rational> &>(temp).operator=(Rational(0));
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
     temp[GetStrategy(m_nfg->GetPlayer(pl))] = 1;
   }
@@ -294,6 +294,38 @@ T PureBehavProfile::GetPayoff(const GameAction &p_action) const
 // Explicit instantiations
 template double PureBehavProfile::GetPayoff(const GameAction &) const;
 template Rational PureBehavProfile::GetPayoff(const GameAction &) const;
+
+bool PureBehavProfile::IsAgentNash(void) const
+{
+  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
+    GamePlayer player = m_efg->GetPlayer(pl);
+    Rational current = GetPayoff<Rational>(player);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	GameAction action = infoset->GetAction(act);
+	if (GetPayoff<Rational>(action) > current)  {
+	  return false;
+	}
+      }
+    }
+  }
+  return true;
+}
+
+MixedBehavProfile<Rational>
+PureBehavProfile::ToMixedBehavProfile(void) const
+{
+  MixedBehavProfile<Rational> temp(m_efg);
+  static_cast<Vector<Rational> &>(temp) = Rational(0);
+  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
+    GamePlayer player = m_efg->GetPlayer(pl);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      temp(GetAction(player->GetInfoset(iset))) = 1;
+    }
+  }
+  return temp;
+}
 
 //========================================================================
 //                       class GameExplicitRep
