@@ -23,93 +23,158 @@ Contributors who have completed one or more such easy tasks will have
 a significantly greater chance of being considered for possible
 GSoC work.
 
-The `Gambit source tree <http://gambit.git.sourceforge.net/git/gitweb-index.cgi>`_
-is managed using `git <http://www.git-scm.com>`_.  It is recommended to have some familiarity with how git works, or to be willing to learn.  (It's not that hard, and once you do learn it, you'll wonder how you ever lived without it.)
+The `Gambit source tree
+<http://gambit.git.sourceforge.net/git/gitweb-index.cgi>`_ is managed
+using `git <http://www.git-scm.com>`_.  It is recommended to have some
+familiarity with how git works, or to be willing to learn.  (It's not
+that hard, and once you do learn it, you'll wonder how you ever lived
+without it.)
 
-Here is the main system architecture and some terminology, useful for
-understanding how the various projects fit into the greater whole:
-
-* Gambit is a collection of algorithms for manipulating and analysing games.
-* A user-friendly front end is GTE (game theory explorer), run as a
-  web-client in a browser, which provides a GUI to enter games in 
-  extensive and strategic (normal) form.
-* GTE-generated games are stored in a file format (for 
-  extensive and strategic form games), and are processed by 
-  algorithms for finding their Nash equilibria. These algorithms
-  are executed on the web server, which can also be locally installed.
-* Gambit provides also a command-line tool where games can 
-  be defined and the equilibrium-finding algorithms called.
-  This program is invoked in a command shell with standard
-  input or reading text files. These allow for the
-  systematic generation of larger games with parameters.
-
-Interfacing GTE with equilibrium-finding modules
-------------------------------------------------
-
-GTE is implemented in Java on the server and Flash
-(Action Script) on the client side.
-So far, all equilibrium-finding algorithms have been ported
-into Java. These should be replaced by better performing
-original algorithms, such as lrs in C, by invoking them via
-system calls. These should be the same modules that are
-invoked from the Gambit command line.
-
-Improving the GTE graphical interface
--------------------------------------
-
-There are a number of outstanding issues in the GTE interface,
-including:
-
-* Improved input of games in strategic form
-* Input of games with more than two players
-
-Porting GTE to JavaScript
--------------------------
-
-The initial implementation of GTE is in Flash.  There is interest in
-porting this implementation to JavaScript for greater portability.
-
-Enhancing the web interface with online storage of games
---------------------------------------------------------
-
-Web frameworks offer standard functionality of storage of
-user data, including user identification via login. 
-The project is to create such a framework and webpages to retrieve
-typically used games, and store games created by the user. 
-
-Possible extension: Record-keeping and display of results
-for computational experiments.
-If games are generated systematically with various
-parameters, running times and computational results
-should be recorded systematically.
+This section lists project ideas pertaining to the Gambit library
+and desktop interface.  There are additional project opportunities
+in the Game Theory Explorer web/cloud interface.  These are
+`listed separately here <http://gte.csc.liv.ac.uk/index/index.html#document-ideas>`_.
 
 
 Refactor and update game representation library
 -----------------------------------------------
 
-The basic library (in `src/libgambit`) for representing games was
+The basic library (in :file:`src/libgambit`) for representing games was
 written in the mid-1990s.  As such, it predates many modern C++
 features (including templates, STL, exceptions, Boost, and so on).
-This project involves carrying out a thorough review of the
-basic library code.  Tasks will/may include:
+There are a number of projects for taking existing functionality,
+refactoring it into separate components, and then enhancing what
+those components can do.
 
-* Replacing the existing reference-counting mechanism with a more
-  flexible approach to referring to elements of games.
-* Implementing the concepts of "strategy support profiles" and
-  "strategy sets" as currently implemented at the Python level.
-* Implementing internal representations using STL, and iterators over
-  objects in STL-compatible ways.
-* Conducting experiments on internal representation structures for
-  performance scalability on larger games.
 
-All tasks will involve coordination with the Python API to ensure
-this does not break as changes are made, so a working knowledge of
-Python/Cython is indicated.
+File formats for serializing games
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* **Languages**: C++; Python/Cython.
+Gambit supports a number of file formats for reading and writing
+games.  There are traditional formats for extensive and strategic
+games.  The graphical interface wraps these formats into an XML
+document which can store additional metadata about the game.  The Game
+Theory Explorer also defines an XML format for storing games.  And,
+from Gambit 14, there is a special file format for representing
+games in action graph format.
+
+Separately, Gambit has a command-line tool for outputting games in
+HTML and LaTeX formats.
+
+This project would refactor these features into a unified framework
+for reading and writing games in various formats.  It would include:
+
+* Migrating the XML manipulation code from the graphical interface
+  into the basic game representation library.
+* Implementing in C++ the reader/writer for Game Theory Explorer files
+  (a first version of this is available in Python in the gambit.gte
+  module).
+* Unifying the :program:`gambit-nfg2tex` and
+  :program:`gambit-nfg2html` command line tools into a
+  :program:`gambit-convert` tool, which would convert from and to many
+  file formats.
+* Extend all the Gambit command-line tools to read files of any
+  accepted format, and not just .efg and .nfg files.
+
+* **Languages**: C++; Python/Cython optional; XML experience helpful
 * **Prerequisites**: Introductory game theory for familiarity with
   terminology of the objects in a game; undergraduate-level software
   engineering experience.
+
+Structure equilibrium calculations using the strategy pattern
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Gambit's architecture packages methods for finding Nash equilibria as
+standalone command-line tools.  Owing to different histories in
+implementing these methods, internally the interfaces to these methods
+at the C++ level are quite heterogeneous.  In some cases, something
+like the "strategy pattern" has been used to encapsulate these
+algorithms.  In others, the interface is simply a global-scope
+function call with little or no structured interface.
+
+This project would involve organizing all these interfaces in a
+consistent and unified way using the "strategy pattern."  One can see
+an emerging structure in the :program:`gambit-enumpure`
+implementation at :file:`src/tools/enumpure/enumpure.cc` in the master
+branch of the git repository.  The idea would be to develop a unified
+framework for being able to interchange methods to compute Nash
+equilibria (or other concepts) on games.  If the project were to go
+well, as an extension these interfaces could then be wrapped in the
+Python API for direct access to the solvers (which are currently
+called via the command-line tools).
+
+* **Languages**: C++.
+* **Prerequisites**: Introductory game theory for familiarity with
+  terminology of the objects in a game; undergraduate-level software
+  engineering experience.
+
+
+Implement Strategic Restriction of a game in C++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Gambit has a concept of a :cpp:class:`StrategySupport` (defined in
+:file:`src/libgambit/stratspt.h` and :file:`src/libgambit/stratspt.cc`), 
+which is used, among other things, to represent a game where strictly
+dominated strategies have been eliminated (which can be useful in
+improving the efficiency of equilibrium computations).  The
+implementation of this has historically been awkward.  Proper OO
+design would suggest that a :cpp:class:`StrategySupport` should be
+able to be used anywhere a :cpp:class:`Game` could be used, but this
+is not the case.  In practice, a :cpp:class:`StrategySupport` has just
+been a subset of the strategies of a game, which has to be passed
+along as a sidecar to the game in order to get anything done.
+
+Recently, in the Python API, the model for dealing with this has been
+improved.  In Python, there is a :py:class:`StrategicRestriction`
+of a game, which in fact can be used seamlessly anyplace a game can be
+used.  Separately, there is a :py:class:`StrategySupportProfile`,
+which is basically just a subset of strategies of a game.  This
+separation of concepts has proven to be clean and useful.
+
+The project would be to develop the concept of a strategic restriction
+in C++, using the Python API as a model, with the idea of ultimately
+replacing the :cpp:class:`StrategySupport`.
+
+* **Languages**: C++; Python/Cython useful for understanding the
+  current implementation in Python.
+* **Prerequisites**: Introductory game theory for familiarity with
+  terminology of the objects in a game; undergraduate-level software
+  engineering experience.
+
+Implement Behavior Restriction of a game in Python
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The Python API has a concept of a :py:class:`StrategicRestriction` of
+a game, which is the restriction of a game to a subset of strategies
+for each player.  This restriction can be used seamlessly anywhere a
+game can be used.
+
+This project would develop a parallel concept of a
+:py:class:`BehaviorRestriction`.  Logically this is similar to a
+:py:class:`StrategicRestriction`, except that instead of operating on
+the set of reduced strategic game strategies, it would operate on
+behavior strategies (actions at information sets) in a game tree.
+
+This is a bit more challenging than the
+:py:class:`StrategicRestriction` because of the need to be able to
+traverse the resulting game tree.  Removing actions from a game can
+result in entire subtrees of the game being removed, which can then
+include the removal of information sets from the game so restricted.
+
+The idea of this project is to carry out the implementation in
+Python/Cython first, as the experience from the strategic restriction
+project was that the more rapid prototyping possible in Python was a
+big help.  However, as the ultimate goal will be to provide this at
+the C++ level, there is also the possibility of attacking the problem
+directly in C++ as well.
+
+* **Langauges**: Python/Cython; C++.
+* **Prerequisites**: Introductory game theory for familiarity with
+  terminology of the objects in a game; undergraduate-level software
+  engineering experience.
+
+
+
 
 
 Implementing algorithms for finding equilibria in games
@@ -383,6 +448,7 @@ equilibria of a bimatrix game to game trees with imperfect
 information using the so-called "sequence form".  The method
 is described in abstract form but not implemented.  
 
+* **Langauges:** C++
 * **Prerequisites:** Background in game theory and basic linear
   algebra.  Experience with programs of at least
   medium complexity so that existing code can be expanded.
