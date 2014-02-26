@@ -13,6 +13,11 @@ and a summary of the background prerequisites
 someone should have in order to take on the project successfully, in
 terms of mathematics, game theory, and software engineering.
 
+Students who are interested in applying to participate in the
+Google Summer of Code program should also first read our
+introductory document and application template at
+`<http://www.gambit-project.org/application.txt>`_.
+
 For beginning contibutors - especially those who are interested
 in potentially applying to work on Gambit projects in future
 Google Summer of Code editions - there are a number of
