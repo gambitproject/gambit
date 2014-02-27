@@ -556,6 +556,15 @@ public:
   /// Is the profile a pure strategy Nash equilibrium?
   bool IsNash(void) const;
 
+  /// Is the profile a strict pure stategy Nash equilibrium?
+  bool IsStrictNash(void) const;
+
+  /// Is the player pl playing a best response?
+  bool IsBestResponse(GamePlayer& player) const;
+
+  /// Get the list of best response strategies for a player pl
+  List<GameStrategy> GetBestResponse(GamePlayer& player) const;
+
   /// Convert to a mixed strategy representation
   MixedStrategyProfile<Rational> ToMixedStrategyProfile(void) const;
   //@}
