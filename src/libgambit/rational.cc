@@ -34,6 +34,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <cfloat>
 #include <cctype>
 
+#include <string> //added foe std::string
 namespace Gambit {
 
 static const Integer _Int_One(1);
@@ -288,79 +289,6 @@ std::ostream &operator << (std::ostream &s, const Rational& y)
   return s;
 }
 
-std::istream &operator>>(std::istream &f, Rational &y)
-{
-  char ch = ' ';
-  int sign = 1;
-  Integer num = 0, denom = 1;
-
-  while (isspace(ch)) {
-    f.get(ch);
-    if (f.eof() || f.bad())  {
-      throw ValueException();
-    }
-  }
-  
-  if (ch == '-')  { 
-    sign = -1;
-    f.get(ch);
-    if (f.eof() || f.bad()) {
-      ch = ' ';
-    }    
-  }
-  else if ((ch < '0' || ch > '9') && ch != '.') {
-    throw ValueException();
-  }
-  while (ch >= '0' && ch <= '9')   {
-    num *= 10;
-    num += (int) (ch - '0');
-    f.get(ch);
-    if (f.eof() || f.bad()) {
-      ch = ' ';
-    }
-  }
-
-  if (ch == '/')  {
-    denom = 0;
-    f.get(ch);
-    if (f.eof() || f.bad()) {
-      ch = ' ';
-    }
-    while (ch >= '0' && ch <= '9')  {
-      denom *= 10;
-      denom += (int) (ch - '0');
-      f.get(ch);
-      if (f.eof() || f.bad()) {
-	ch = ' ';
-      }
-    }
-  }
-  else if (ch == '.')  {
-    denom = 1;
-    f.get(ch);
-    if (f.eof() || f.bad()) {
-      ch = ' ';
-    }
-    while (ch >= '0' && ch <= '9')  {
-      denom *= 10;
-      num *= 10;
-      num += (int) (ch - '0');
-      f.get(ch);
-      if (f.eof() || f.bad()) {
-	ch = ' ';
-      }
-    }
-  }
-
-  if (!f.eof() && f.good()) {
-    f.unget();
-  }
-
-  y = Rational(num * sign, denom);
-  y.normalize();
-
-  return f;
-}
 
 bool Rational::OK(void) const
 {
@@ -638,6 +566,17 @@ Rational lexical_cast(const std::string &f)
   }
 
   return Rational(num * sign, denom);
+}
+
+//added operator>>
+
+std::istream &operator>>(std::istream &f, Rational &y) {
+   	 std::stringstream sstr;
+    	sstr << f.rdbuf();
+	 //std::string st=sstr.str();
+	y = lexical_cast<Rational>(sstr.str());
+	y.normalize();
+	return f;
 }
 
 }  // end namespace Gambit
