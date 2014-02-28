@@ -19,7 +19,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-
+#include<stdio.h>
 #include <cstdlib>
 #include <cctype>
 #include <iostream>
@@ -439,15 +439,15 @@ void ParseNfgHeader(GameParserState &p_state, TableFileGame &p_data)
 {
   if (p_state.GetNextToken() != TOKEN_NUMBER ||
       p_state.GetLastText() != "1") {
-    throw InvalidFileException();
+    throw InvalidFileException(" is corrupt");
   }
 
   if (p_state.GetNextToken() != TOKEN_SYMBOL || 
       (p_state.GetLastText() != "D" && p_state.GetLastText() != "R")) {
-    throw InvalidFileException();
+    throw InvalidFileException(" is corrupt");
   }
   if (p_state.GetNextToken() != TOKEN_TEXT) {
-    throw InvalidFileException();
+    throw InvalidFileException(" is corrupt");
   }
   p_data.m_title = p_state.GetLastText();
 
@@ -899,15 +899,15 @@ void ParseEfg(GameParserState &p_state, Game p_game, TreeData &p_treeData)
 {
   if (p_state.GetNextToken() != TOKEN_NUMBER ||
       p_state.GetLastText() != "2") {
-    throw InvalidFileException();
+    throw InvalidFileException(" is corrupt");
   }
 
   if (p_state.GetNextToken() != TOKEN_SYMBOL ||
       (p_state.GetLastText() != "D" && p_state.GetLastText() != "R")) {
-    throw InvalidFileException();
+    throw InvalidFileException(" is corrupt");
   }
   if (p_state.GetNextToken() != TOKEN_TEXT) {
-    throw InvalidFileException();
+    throw InvalidFileException(" is corrupt");
   }
   p_game->SetTitle(p_state.GetLastText());
   
@@ -937,10 +937,10 @@ Game ReadGame(std::istream &p_file) throw (InvalidFileException)
 
   try {
     if (parser.GetNextToken() != TOKEN_SYMBOL) {
-      throw InvalidFileException();
+      throw InvalidFileException("is not a vaid format");
     }
 
-    if (parser.GetLastText() == "NFG") {
+    else if (parser.GetLastText() == "NFG") {
       TableFileGame data;
       ParseNfgHeader(parser, data);
       return BuildNfg(parser, data);
@@ -958,7 +958,7 @@ Game ReadGame(std::istream &p_file) throw (InvalidFileException)
       return GameBagentRep::ReadBaggFile(p_file);
     }
     else {
-      throw InvalidFileException("Tokens 'EFG' or 'NFG' or '#AGG' or '#BAGG' expected at start of file");
+      throw InvalidFileException("is not in .efg or .nfg");
     }
   }
   catch (const std::exception &ex) {
