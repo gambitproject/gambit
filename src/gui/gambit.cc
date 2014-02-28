@@ -129,7 +129,9 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
     (void) new gbtGameFrame(0, doc);
     return GBT_APP_FILE_OK;
   }
-  catch (Gambit::InvalidFileException) {
+  catch (const std::exception &ex) {
+    GBT_APP_PARSE_ERROR=(char *)malloc(sizeof(ex.what()));
+    GBT_APP_PARSE_ERROR=ex.what();	
     return GBT_APP_PARSE_FAILED;
   }
 }

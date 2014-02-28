@@ -825,8 +825,7 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
     }
     else if (result == GBT_APP_PARSE_FAILED) {
       wxMessageDialog dialog(this,
-			     wxT("File '") + filename +
-			     wxT("' is not in a format Gambit recognizes."),
+			     wxT("File '") + filename +   wxT("'\n ")+    wxString((const char *) wxGetApp().gbtloaderror(), *wxConvCurrent),
 			     wxT("Unable to read file"),
 			     wxOK | wxICON_ERROR);
       dialog.ShowModal();

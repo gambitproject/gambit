@@ -44,6 +44,7 @@ private:
   bool OnInit(void);
 
 public:
+  const char * GBT_APP_PARSE_ERROR;
   gbtApplication(void);
   virtual ~gbtApplication() { }
   
@@ -56,7 +57,7 @@ public:
     { m_fileHistory.UseMenu(p_menu); m_fileHistory.AddFilesToMenu(p_menu); }
   void RemoveMenu(wxMenu *p_menu)  { m_fileHistory.RemoveMenu(p_menu); }
   
-
+  const char * gbtloaderror(){return GBT_APP_PARSE_ERROR;}
   gbtAppLoadResult LoadFile(const wxString &);
 #ifdef __WXMAC__
   void MacOpenFile(const wxString &filename)  { LoadFile(filename); }
