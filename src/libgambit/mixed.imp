@@ -355,7 +355,7 @@ T BagentMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &p
       btype=tp;
     }
     if(baggPtr->typeOffset[i]+tp+1 == ps->GetPlayer()->GetNumber()){
-      for (int j=0;j<baggPtr->typeActionSets.at(i).at(tp).size();++j){
+      for (unsigned int j=0;j<baggPtr->typeActionSets.at(i).at(tp).size();++j){
         s.at(baggPtr->firstAction(i,tp)+j) = (T) 0;
       }
       s.at(baggPtr->firstAction(i,tp)+ ps->GetNumber()-1) = (T) 1;
@@ -391,7 +391,7 @@ T BagentMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &p
     }
     
     if(baggPtr->typeOffset[i]+tp+1 == player1->GetNumber()){
-      for (int j=0;j<baggPtr->typeActionSets.at(i).at(tp).size();++j){
+      for (unsigned int j=0;j<baggPtr->typeActionSets.at(i).at(tp).size();++j){
         s.at(baggPtr->firstAction(i,tp)+j) = (T) 0;
       }
       s.at(baggPtr->firstAction(i,tp)+ ps1->GetNumber()-1) = (T) 1;
@@ -403,7 +403,7 @@ T BagentMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &p
       s.at(baggPtr->firstAction(i,tp)+ ps2->GetNumber()-1) = (T) 1;
     }  
     else {
-      for (int j=0;j<baggPtr->typeActionSets.at(i).at(tp).size();++j){
+      for (unsigned int j=0;j<baggPtr->typeActionSets.at(i).at(tp).size();++j){
         GameStrategy strategy = this->m_support.GetGame()->GetPlayer(baggPtr->typeOffset[i]+tp+1)->GetStrategy(j+1);
         const int &ind=this->m_support.m_profileIndex[strategy->GetId()];
         s.at(baggPtr->firstAction(i,tp)+j)= (ind==-1)?(T)0:this->m_probs[ind];
