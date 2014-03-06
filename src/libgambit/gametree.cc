@@ -348,10 +348,10 @@ void GameTreeNodeRep::DeleteParent(void)
 
 void GameTreeNodeRep::DeleteTree(void)
 {
-  for (int i = 1; i <= children.Length(); i++) {
-    children[i]->DeleteTree();
-    children[i]->Invalidate();
-    children.Remove(i);
+  while (children.Length() > 0) {
+    children[1]->DeleteTree();
+    children[1]->Invalidate();
+    children.Remove(1);
   }
   if (infoset) {
     infoset->RemoveMember(this);
