@@ -28,3 +28,4 @@ __version__ = gambit.lib.libgambit.__version__
 new_tree = gambit.lib.libgambit.new_tree
 new_table = gambit.lib.libgambit.new_table
 read_game = gambit.lib.libgambit.read_game
+parse_game = gambit.lib.libgambit.parse_game

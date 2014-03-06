@@ -43,6 +43,12 @@ Game ReadGame(char *fn) throw (InvalidFileException)
   return Gambit::ReadGame(f);
 }
 
+Game ParseGame(char *s) throw (InvalidFileException)
+{
+  std::istringstream f(s);
+  return Gambit::ReadGame(f);
+}
+
 std::string WriteGame(const Game &p_game, const std::string &p_format)
 {
   std::ostringstream f;

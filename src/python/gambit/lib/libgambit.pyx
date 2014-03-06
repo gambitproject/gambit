@@ -327,6 +327,7 @@ cdef extern from "libgambit/stratspt.h":
 
 cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError
+    c_Game ParseGame(char *) except +IOError
     cxx_string WriteGame(c_Game, cxx_string) except +IOError
     cxx_string WriteGame(c_StrategySupport) except +IOError
 
@@ -410,4 +411,9 @@ def read_game(char *fn):
         raise IOError("Unable to read game from file '%s': %s" % 
                       (fn, e))
     return g
-        
+
+def parse_game(char *s):
+    cdef Game g
+    g = Game()
+    g.game = ParseGame(s)
+    return g

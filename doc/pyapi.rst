@@ -374,8 +374,24 @@ API documentation
 
 .. py:function:: read_game(fn)
 
-   Creates a new :py:class:`gambit.Game` by reading in the
-   contents of the file named `fn`.
+   Constructs a game from its serialized representation in a file.
+   See :ref:`file-formats` for details on recognized formats.
+
+   :param file fn: The path to the file to open
+   :return: :py:class:`gambit.Game`
+   :raises IOError: if the file cannot be opened, or does not contain
+		    a valid game representation
+
+.. py:function:: parse_game(s)
+
+   Constructs a game from its seralized representation in a string.	
+   See :ref:`file-formats` for details on recognized formats.
+
+   :param str s: The string containing the serialized representation
+   :return: :py:class:`gambit.Game`
+   :raises IOError: if the string does not contain a valid game
+		    representation
+
 
 .. py:class:: Game
 
