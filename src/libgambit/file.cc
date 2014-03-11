@@ -220,7 +220,7 @@ GameFileToken GameParserState::GetNextToken(void)
       bool lastslash = false;
 
       ReadChar(a);
-      while  (a != '\"' || lastslash)  {
+      while  ((a != '\"' || lastslash) && !m_file.eof())  {
         if (lastslash && a == '"')
           m_lastText += '"';
         else if (lastslash)  {
