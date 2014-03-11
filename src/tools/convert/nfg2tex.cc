@@ -82,12 +82,16 @@ void WriteOsborneFile(std::ostream &p_file, const Gambit::Game &p_nfg,
 	profile->SetStrategy(p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st2));
 	theHtml += " $";
 	for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
-	  if (profile->GetOutcome()) {
-	    theHtml += profile->GetOutcome()->GetPayoff<std::string>(pl);
-	  }
-	  else {
-	    theHtml += "0";
-	  }
+        try{
+          if (profile->GetOutcome()) {
+            theHtml += profile->GetOutcome()->GetPayoff<std::string>(pl);
+          }
+          else {
+            theHtml += "0";
+          }
+        }catch (Gambit::UndefinedException e){
+          theHtml += Gambit::lexical_cast<std::string>(profile->GetPayoff(pl));
+        }
 	  if (pl < p_nfg->NumPlayers()) {
 	    theHtml += ",";
 	  }
