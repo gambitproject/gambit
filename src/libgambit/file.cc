@@ -221,6 +221,15 @@ GameFileToken GameParserState::GetNextToken(void)
 
       ReadChar(a);
       while  (a != '\"' || lastslash)  {
+        
+        if(m_file.eof()) {
+	      throw InvalidFileException(CreateLineMsg("EOF reached: Unbalanced Quotes"));
+	     	}
+        
+        if (isspace(a) && a=='\n') {
+          IncreaseLine();
+        }	
+        
         if (lastslash && a == '"')
           m_lastText += '"';
         else if (lastslash)  {
@@ -720,8 +729,15 @@ void ParseOutcome(GameParserState &p_state,
     p_node->SetOutcome(outcome);
 
     if (p_state.GetNextToken() != TOKEN_LBRACE) {
-      throw InvalidFileException(
-        p_state.CreateLineMsg("Expecting '{' before outcome"));
+      
+      if(p_state.GetLastText()[(p_state.GetLastText()).size()-1]!='"') {
+	    throw InvalidFileException(
+          p_state.CreateLineMsg("Unbalanced Quotes"));
+      } 
+      else { 
+        throw InvalidFileException(
+          p_state.CreateLineMsg("Expecting '{' before outcome"));
+      }
     }
     p_state.GetNextToken();
 
@@ -1029,3 +1045,4 @@ Game ReadGame(std::istream &p_file) throw (InvalidFileException)
 }
 
 } // end namespace Gambit
+
