@@ -221,6 +221,8 @@ GameFileToken GameParserState::GetNextToken(void)
 
       ReadChar(a);
       while  (a != '\"' || lastslash)  {
+        if(m_file.eof())
+          throw InvalidFileException(CreateLineMsg("Lexical error while parsing"));
         if (lastslash && a == '"')
           m_lastText += '"';
         else if (lastslash)  {
