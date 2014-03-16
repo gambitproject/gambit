@@ -729,15 +729,8 @@ void ParseOutcome(GameParserState &p_state,
     p_node->SetOutcome(outcome);
 
     if (p_state.GetNextToken() != TOKEN_LBRACE) {
-      
-      if(p_state.GetLastText()[(p_state.GetLastText()).size()-1]!='"') {
-	    throw InvalidFileException(
-          p_state.CreateLineMsg("Unbalanced Quotes"));
-      } 
-      else { 
-        throw InvalidFileException(
-          p_state.CreateLineMsg("Expecting '{' before outcome"));
-      }
+      throw InvalidFileException(
+        p_state.CreateLineMsg("Expecting '{' before outcome"));
     }
     p_state.GetNextToken();
 
