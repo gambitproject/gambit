@@ -33,6 +33,11 @@
 #include "wx/wxthings/range.h"
 #include <cmath>
 
+#ifdef wxFinite
+#undef wxFinite
+#define wxFinite(x) std::isfinite(x)
+#endif  // wxFinite
+
 #define wxPLOT_MAX_DATA_COLUMNS 64
 
 #define CHECK_INDEX_COUNT_MSG(index, count, max_count, ret) \
