@@ -40,6 +40,11 @@
     #undef GetYValue
 #endif
 
+#ifdef wxFinite
+#undef wxFinite
+#define wxFinite(x) std::isfinite(x)
+#endif  // wxFinite
+
 #define LONG_TO_WXCOLOUR(c) wxColour((unsigned char)((c>>16)&0xFF), (unsigned char)((c>>8 )&0xFF), (unsigned char)((c)&0xFF))
 #define WXCOLOUR_TO_LONG(c) ((c.Red()<<16)|(c.Green()<<8)|(c.Blue()))
 

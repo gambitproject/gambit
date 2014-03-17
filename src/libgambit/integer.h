@@ -224,8 +224,8 @@ public:
   long		  as_long() const { return Itolong(rep); }
   double	  as_double() const { return Itodouble(rep); }
 
-  friend std::string    Itoa(const Integer& x, int base = 10, int width = 0);
-  friend Integer  atoI(const char* s, int base = 10);
+  friend std::string Itoa(const Integer &x, int base /*= 10*/, int width /*= 0*/);
+  friend Integer atoI(const char *s, int base/*= 10*/);
   
   friend std::istream &operator>>(std::istream &s, Integer& y);
   friend std::ostream &operator<<(std::ostream &s, const Integer& y);
