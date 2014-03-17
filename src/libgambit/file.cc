@@ -186,16 +186,19 @@ GameFileToken GameParserState::GetNextToken(void)
   
     do  {
       m_file.get(a);
-      if (isspace(a) && a=='\n') {
+      if (a == '\n') {
         m_currentLine++;
       }
-    }  while (isspace(a));
+    } while (isspace(a));
 
     if (a == '\"')  {
       bool lastslash = false;
 
       m_file.get(a);
       while  (a != '\"' || lastslash)  {
+	if (m_file.eof() || !m_file.good())  {
+	  throw InvalidFileException();
+	}
       	if (lastslash && a == '"')  
       	  m_lastText += '"';
       	else if (lastslash)  {
@@ -213,7 +216,10 @@ GameFileToken GameParserState::GetNextToken(void)
       do  {
       	m_lastText += a;
       	m_file.get(a);
-        if (isspace(a) && a=='\n') {
+	if (m_file.eof() || !m_file.good())  {
+	  throw InvalidFileException();
+	}
+        if (a == '\n') {
           m_currentLine++;
         }
       }  while (!isspace(a));
