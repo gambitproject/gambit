@@ -32,7 +32,7 @@ HeuristicPolEnumModule::HeuristicPolEnumModule(const StrategySupport &S, int p_s
   : m_stopAfter(p_stopAfter), NF(S.GetGame()), support(S),
     Space(support.MixedProfileLength()-NF->NumPlayers()), 
     Lex(&Space, lex), num_vars(support.MixedProfileLength()-NF->NumPlayers()), 
-    count(0), nevals(0), is_singular(false)
+    nevals(0), is_singular(false)
 { 
 //  gEpsilon(eps,12);
 }

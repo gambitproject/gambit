@@ -353,7 +353,7 @@ bool gbtNodeEntry::NodeHitTest(int p_x, int p_y) const
 
 gbtTreeLayout::gbtTreeLayout(gbtEfgDisplay *p_parent, gbtGameDocument *p_doc)
   : gbtGameView(p_doc), 
-    m_parent(p_parent), m_infosetSpacing(40),
+    /* m_parent(p_parent),*/ m_infosetSpacing(40),
     c_leftMargin(20), c_topMargin(40)
 { }
 

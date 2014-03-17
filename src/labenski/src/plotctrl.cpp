@@ -847,7 +847,7 @@ void wxPlotCtrl::OnMouse( wxMouseEvent &event )
         return;
     }
 
-    wxSize size(GetClientSize());
+    /*wxSize size(*/GetClientSize();/*);*/
     wxPoint mousePt(event.GetPosition());
 
 #if wxCHECK_VERSION(2,7,0)

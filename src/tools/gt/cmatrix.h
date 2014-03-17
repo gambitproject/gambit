@@ -101,7 +101,7 @@ public:
 		return *this;
 	}
 	inline bool isvalid() const {
-		for(int i=0;i<m;i++) if (!finite(x[i])) return false;
+		for(int i=0;i<m;i++) if (!isfinite(x[i])) return false;
 		return true;
 	}
 	inline double operator*(const cvector &v) const {
@@ -459,7 +459,7 @@ public:
 	}
 
 	inline bool isvalid() const {
-		for(int i=0;i<s;i++) if(!finite(x[i])) return false;
+		for(int i=0;i<s;i++) if(!isfinite(x[i])) return false;
 		return true;
 	}
 

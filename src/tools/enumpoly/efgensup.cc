@@ -345,6 +345,7 @@ namespace { // to keep the recursive function private
 
   using namespace Gambit;
 
+#ifdef UNUSED
 void PrintSupport(std::ostream &p_stream,
 		  const std::string &p_label, const Gambit::BehavSupport &p_support)
 {
@@ -370,7 +371,7 @@ void PrintSupport(std::ostream &p_stream,
   }
   p_stream << std::endl;
 }
-
+#endif  // UNUSED
 
 void
 PossibleNashSubsupports(const Gambit::BehavSupport &p_support,

@@ -43,7 +43,7 @@ private:
   gSpace Space;
   term_order Lex;
   int num_vars;
-  long count,nevals;
+  long nevals;
   double time;
   Gambit::List<MixedStrategyProfile<double> > solutions;
   bool is_singular;

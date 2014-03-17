@@ -172,7 +172,7 @@ void gbtRationalRendererRefData::DoDraw(wxSheet& grid,
   
   wxString value = grid.GetCellValue(coords);
   //int best_width = DoGetBestSize(grid, attr, dc, value).GetWidth();
-  wxSheetCoords cellSpan(grid.GetCellSpan(coords)); // shouldn't get here if <=0
+  // wxSheetCoords cellSpan(grid.GetCellSpan(coords)); // shouldn't get here if <=0
   //int cell_rows = cellSpan.m_row;
   //int cell_cols = cellSpan.m_col;
   
