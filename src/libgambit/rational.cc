@@ -306,7 +306,7 @@ std::istream &operator >> (std::istream &f, Rational &y)
     sign = -1;
     f.get(ch);
     if (f.eof() || f.bad())  {
-      throw ValueException();
+      ch = ' ';
     }
   }
   else if ((ch < '0' || ch > '9') && ch != '.') {
@@ -318,7 +318,7 @@ std::istream &operator >> (std::istream &f, Rational &y)
     num += (int) (ch - '0');
     f.get(ch);
     if (f.eof() || f.bad())  {
-      throw ValueException();
+      ch = ' ';
     }
   }
 
@@ -333,7 +333,7 @@ std::istream &operator >> (std::istream &f, Rational &y)
       denom += (int) (ch - '0');
       f.get(ch);
       if (f.eof() || f.bad())  {
-        throw ValueException();
+        ch = ' ';
       }
     }
   }
@@ -341,7 +341,7 @@ std::istream &operator >> (std::istream &f, Rational &y)
     denom = 1;
     f.get(ch);
     if (f.eof() || f.bad())  {
-      throw ValueException();
+      ch = ' ';
     }
     while (ch >= '0' && ch <= '9') {
       denom *= 10;
@@ -349,7 +349,7 @@ std::istream &operator >> (std::istream &f, Rational &y)
       num += (int) (ch - '0');
       f.get(ch);
       if (f.eof() || f.bad())  {
-        throw ValueException();
+        ch = ' ';
       }
     }
     
@@ -358,13 +358,13 @@ std::istream &operator >> (std::istream &f, Rational &y)
       int exponent = 0;
       f.get(ch);
       if (f.eof() || f.bad())  {
-        throw ValueException();
+        ch = ' ';
       }
       if (ch == '-') {
         expsign = -1;
         f.get(ch);
         if (f.eof() || f.bad())  {
-          throw ValueException();
+          ch = ' ';
         }
       }
       while (ch >= '0' && ch <= '9') {
@@ -372,7 +372,7 @@ std::istream &operator >> (std::istream &f, Rational &y)
         exponent += (int) (ch - '0');
         f.get(ch);
         if (f.eof() || f.bad())  {
-          throw ValueException();
+          ch = ' ';
         }
       }
       if (exponent * expsign > 0) {
@@ -394,13 +394,13 @@ std::istream &operator >> (std::istream &f, Rational &y)
     int exponent = 0;
     f.get(ch);
     if (f.eof() || f.bad())  {
-      throw ValueException();
+      ch = ' ';
     }
     if (ch == '-') {
       expsign = -1;
       f.get(ch);
       if (f.eof() || f.bad())  {
-        throw ValueException();
+        ch = ' ';
       }
     }
     while (ch >= '0' && ch <= '9') {
@@ -408,7 +408,7 @@ std::istream &operator >> (std::istream &f, Rational &y)
       exponent += (int) (ch - '0');
       f.get(ch);
       if (f.eof() || f.bad())  {
-        throw ValueException();
+        ch = ' ';
       }
     }
     if (exponent * expsign > 0) {
