@@ -290,9 +290,146 @@ std::ostream &operator << (std::ostream &s, const Rational& y)
 
 std::istream &operator >> (std::istream &f, Rational &y)
 {
-  std::string s;
-  f >> s;
-  y = lexical_cast<Rational>(s);
+  char ch = ' ';
+  int sign = 1;
+  unsigned int index = 0;
+  int num = 0, denom = 1;
+
+  while (isspace(ch)) {
+    f.get(ch);
+    if (f.eof() || f.bad())  {
+      throw ValueException();
+    }
+  }
+
+  if (ch == '-') {
+    sign = -1;
+    f.get(ch);
+    if (f.eof() || f.bad())  {
+      throw ValueException();
+    }
+  }
+  else if ((ch < '0' || ch > '9') && ch != '.') {
+    throw ValueException();
+  }
+
+  while (ch >= '0' && ch <= '9') {
+    num *= 10;
+    num += (int) (ch - '0');
+    f.get(ch);
+    if (f.eof() || f.bad())  {
+      throw ValueException();
+    }
+  }
+
+  if (ch == '/') {
+    denom = 0;
+    f.get(ch);
+    if (f.eof() || f.bad())  {
+      throw ValueException();
+    }
+    while (ch >= '0' && ch <= '9') {
+      denom *= 10;
+      denom += (int) (ch - '0');
+      f.get(ch);
+      if (f.eof() || f.bad())  {
+        throw ValueException();
+      }
+    }
+  }
+  else if (ch == '.') {
+    denom = 1;
+    f.get(ch);
+    if (f.eof() || f.bad())  {
+      throw ValueException();
+    }
+    while (ch >= '0' && ch <= '9') {
+      denom *= 10;
+      num *= 10;
+      num += (int) (ch - '0');
+      f.get(ch);
+      if (f.eof() || f.bad())  {
+        throw ValueException();
+      }
+    }
+    
+    if (ch == 'e' || ch == 'E') {
+      int expsign = 1;
+      int exponent = 0;
+      f.get(ch);
+      if (f.eof() || f.bad())  {
+        throw ValueException();
+      }
+      if (ch == '-') {
+        expsign = -1;
+        f.get(ch);
+        if (f.eof() || f.bad())  {
+          throw ValueException();
+        }
+      }
+      while (ch >= '0' && ch <= '9') {
+        exponent *= 10;
+        exponent += (int) (ch - '0');
+        f.get(ch);
+        if (f.eof() || f.bad())  {
+          throw ValueException();
+        }
+      }
+      if (exponent * expsign > 0) {
+        while (exponent > 0) {
+          num *= 10;
+          exponent -= 1;
+        }
+      }
+      else if (exponent * expsign < 0) {
+        while (exponent > 0) {
+          denom *= 10;
+          exponent -= 1;
+        }
+      }
+    }
+  }
+  else if (ch == 'e' || ch == 'E') {
+    int expsign = 1;
+    int exponent = 0;
+    f.get(ch);
+    if (f.eof() || f.bad())  {
+      throw ValueException();
+    }
+    if (ch == '-') {
+      expsign = -1;
+      f.get(ch);
+      if (f.eof() || f.bad())  {
+        throw ValueException();
+      }
+    }
+    while (ch >= '0' && ch <= '9') {
+      exponent *= 10;
+      exponent += (int) (ch - '0');
+      f.get(ch);
+      if (f.eof() || f.bad())  {
+        throw ValueException();
+      }
+    }
+    if (exponent * expsign > 0) {
+      while (exponent > 0) {
+        num *= 10;
+        exponent -= 1;
+      }
+    }
+    else if (exponent * expsign < 0) {
+      while (exponent > 0) {
+        denom *= 10;
+        exponent -= 1;
+      }
+    }
+  }
+
+  if (!f.eof() && f.good()) {
+    f.unget();
+  }
+
+  y = Rational(num * sign, denom);
   y.normalize();
   return f;
 }
