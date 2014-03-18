@@ -292,7 +292,6 @@ std::istream &operator >> (std::istream &f, Rational &y)
 {
   char ch = ' ';
   int sign = 1;
-  unsigned int index = 0;
   int num = 0, denom = 1;
 
   while (isspace(ch)) {
@@ -305,7 +304,7 @@ std::istream &operator >> (std::istream &f, Rational &y)
   if (ch == '-') {
     sign = -1;
     f.get(ch);
-    if (f.eof() || f.bad())  {
+    if (f.eof() || f.bad()) {
       ch = ' ';
     }
   }
@@ -317,7 +316,7 @@ std::istream &operator >> (std::istream &f, Rational &y)
     num *= 10;
     num += (int) (ch - '0');
     f.get(ch);
-    if (f.eof() || f.bad())  {
+    if (f.eof() || f.bad()) {
       ch = ' ';
     }
   }
@@ -325,14 +324,14 @@ std::istream &operator >> (std::istream &f, Rational &y)
   if (ch == '/') {
     denom = 0;
     f.get(ch);
-    if (f.eof() || f.bad())  {
-      throw ValueException();
+    if (f.eof() || f.bad()) {
+      ch = ' ';
     }
     while (ch >= '0' && ch <= '9') {
       denom *= 10;
       denom += (int) (ch - '0');
       f.get(ch);
-      if (f.eof() || f.bad())  {
+      if (f.eof() || f.bad()) {
         ch = ' ';
       }
     }
@@ -340,7 +339,7 @@ std::istream &operator >> (std::istream &f, Rational &y)
   else if (ch == '.') {
     denom = 1;
     f.get(ch);
-    if (f.eof() || f.bad())  {
+    if (f.eof() || f.bad()) {
       ch = ' ';
     }
     while (ch >= '0' && ch <= '9') {
@@ -348,7 +347,7 @@ std::istream &operator >> (std::istream &f, Rational &y)
       num *= 10;
       num += (int) (ch - '0');
       f.get(ch);
-      if (f.eof() || f.bad())  {
+      if (f.eof() || f.bad()) {
         ch = ' ';
       }
     }
@@ -357,13 +356,13 @@ std::istream &operator >> (std::istream &f, Rational &y)
       int expsign = 1;
       int exponent = 0;
       f.get(ch);
-      if (f.eof() || f.bad())  {
+      if (f.eof() || f.bad()) {
         ch = ' ';
       }
       if (ch == '-') {
         expsign = -1;
         f.get(ch);
-        if (f.eof() || f.bad())  {
+        if (f.eof() || f.bad()) {
           ch = ' ';
         }
       }
@@ -371,7 +370,7 @@ std::istream &operator >> (std::istream &f, Rational &y)
         exponent *= 10;
         exponent += (int) (ch - '0');
         f.get(ch);
-        if (f.eof() || f.bad())  {
+        if (f.eof() || f.bad()) {
           ch = ' ';
         }
       }
