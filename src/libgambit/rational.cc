@@ -368,7 +368,9 @@ Rational::Rational(int n, int d)
 
 Rational &Rational::operator = (const Rational& y)
 {
-  num = y.num;  den = y.den;   return *this;
+  num = y.num;
+  den = y.den;
+  return *this;
 }
 
 bool Rational::operator==(const Rational &y) const
