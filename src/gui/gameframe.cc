@@ -1003,7 +1003,8 @@ void gbtGameFrame::OnFileExportGraphic(wxCommandEvent &p_event)
     case GBT_MENU_FILE_EXPORT_BMP:  code = wxBITMAP_TYPE_BMP;  break;
     case GBT_MENU_FILE_EXPORT_JPEG: code = wxBITMAP_TYPE_JPEG; break;
     case GBT_MENU_FILE_EXPORT_PNG:  code = wxBITMAP_TYPE_PNG;  break;
-    default: break;
+    default:   return;
+
     }
 
     if (!bitmap.SaveFile(dialog.GetPath(), code)) {

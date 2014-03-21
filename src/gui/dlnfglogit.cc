@@ -267,7 +267,7 @@ LogitBranchDialog::LogitBranchDialog(wxWindow *p_parent,
 
 class gbtLogitPlotCtrl : public wxPlotCtrl {
 private:
-  gbtGameDocument *m_doc;
+  // gbtGameDocument *m_doc;
   double m_scaleFactor;
 
   /// Overriding x (lambda) axis labeling
@@ -286,7 +286,7 @@ public:
 
 gbtLogitPlotCtrl::gbtLogitPlotCtrl(wxWindow *p_parent, 
 				   gbtGameDocument *p_doc)
-  : wxPlotCtrl(p_parent), m_doc(p_doc), m_scaleFactor(1.0)
+  : wxPlotCtrl(p_parent), /* m_doc(p_doc), */ m_scaleFactor(1.0)
 {
   SetAxisLabelColour(*wxBLUE);
   wxFont labelFont(8, wxSWISS, wxNORMAL, wxBOLD);
@@ -383,7 +383,7 @@ private:
 public:
   gbtLogitPlotStrategyList(wxWindow *p_parent, gbtGameDocument *p_doc);
 
-  bool IsShown(int p_index)
+  bool IsStrategyShown(int p_index)
   { return GetCellValue(wxSheetCoords(p_index-1, 2)) == wxT("1"); }
 };
 
@@ -510,7 +510,7 @@ void LogitPlotPanel::Plot(void)
   m_plotCtrl->DeleteCurve(-1);
 
   for (int st = 1; st <= m_doc->GetGame()->MixedProfileLength(); st++) {
-    if (!m_plotStrategies->IsShown(st)) continue;
+    if (!m_plotStrategies->IsStrategyShown(st)) continue;
 
     wxPlotData *curve = new wxPlotData(m_branch.NumPoints());
 

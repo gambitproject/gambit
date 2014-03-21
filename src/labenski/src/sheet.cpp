@@ -6391,7 +6391,7 @@ void wxSheet::OnMouseTimer( wxTimerEvent &WXUNUSED(event) )
         return;
     }
     
-    wxSize cSize = m_gridWin->GetClientSize();
+    /*wxSize cSize = */ m_gridWin->GetClientSize();
     SetGridOrigin( m_gridOrigin.x + dx*SHEET_SCROLL_LINE_X, 
                    m_gridOrigin.y + dy*SHEET_SCROLL_LINE_Y, true, true );
     

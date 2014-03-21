@@ -526,7 +526,8 @@ void *qh_setdellast(setT *set) {
   }else {
     returnvalue= set->e[set->maxsize - 1];
     set->e[set->maxsize - 1]= NULL;
-    *last= (void *)(set->maxsize);
+    // This (void *) cast was in the original, 1990s, pre-64-bit Pelican
+    *last= reinterpret_cast<void *>(set->maxsize);
   }
   return returnvalue;
 } /* setdellast */
@@ -865,7 +866,8 @@ setT *qh_setnew_delnthsorted(setT *set, int size, int nth, int prepend) {
 
   newsize= size-1 + prepend;
   newset= qh_setnew(newsize);
-  newset->e[newset->maxsize]= (void *)(newsize+1);  /* may be overwritten */
+  // This (void *) cast was in the original, 1990s, pre-64-bit Pelican
+  newset->e[newset->maxsize]= reinterpret_cast<void *>(newsize+1);  /* may be overwritten */
   oldp= SETaddr_(set, void);
   newp= SETaddr_(newset, void) + prepend;
   switch (nth) {
@@ -1073,7 +1075,8 @@ void qh_settruncate (setT *set, int size) {
 
   if (size < 0 || size > (int)set->maxsize) qhull_fatal(19);
 
-  set->e[set->maxsize]= (void *) (size+1);   /* maybe overwritten */
+  // This (void *) cast was in the original, 1990s, pre-64-bit Pelican
+  set->e[set->maxsize]= reinterpret_cast<void *>(size+1);   /* maybe overwritten */
   set->e[size]= NULL;
 } /* setruncate */
     
@@ -1099,7 +1102,8 @@ void qh_setzero (setT *set, int index, int size) {
 
   if (index < 0 || index >= size || size > (int)set->maxsize) qhull_fatal(20);
 
-  (set->e[set->maxsize])=  (void *)(size+1);  /* may be overwritten */
+  // This (void *) cast was in the original, 1990s, pre-64-bit Pelican
+  (set->e[set->maxsize])=  reinterpret_cast<void *>(size+1);  /* may be overwritten */
   count= size - index + 1;   /* +1 for NULL terminator */
   memset ((char *)SETelemaddr_(set, index, void), 0, count * sizeof(void *));
 } /* setzero */
@@ -2679,18 +2683,20 @@ notes:
 pointT *qh_voronoi_center (int dim, setT *points) {
   pointT *point, **pointp, *point0;
   pointT *center= (pointT *)qh_memalloc (qh center_size);
-  setT *simplex;
+  setT *simplex = NULL;
   int i, j, k, num, size= qh_setsize(points);
   coordT *gmcoord;
   realT *diffp, sum2, *sum2row, *sum2p, det, factor;
   boolT nearzero, infinite;
 
-  if (size == dim+1)
-    simplex= points;
-  else if (size < dim+1) qhull_fatal(32);
-
+  if (size == dim+1)  {
+    simplex = points;
+  }
+  else if (size < dim+1) {
+    qhull_fatal(32);
+  }
   else {
-    simplex= qh_settemp (dim+1);
+    simplex = qh_settemp (dim+1);
     qh_maxsimplex (dim, points, NULL, 0, &simplex);
   }
   num= qh_setsize (simplex);
@@ -4972,7 +4978,8 @@ void qh_matchnewfacets (void) {
     numnew++;
     {  /* qh_setzero (newfacet->neighbors, 1, qh hull_dim); */
       neighbors= newfacet->neighbors;
-      neighbors->e[neighbors->maxsize]= (void *)(dim+1); /*may be overwritten*/
+      // This (void *) cast was in the original, 1990s, pre-64-bit Pelican
+      neighbors->e[neighbors->maxsize]= reinterpret_cast<void *>(dim+1); /*may be overwritten*/
       memset ((char *)&neighbors->e[1], 0, dim * sizeof(void *));
     }    
     if (qh MERGING)

@@ -166,7 +166,7 @@ class gbtEfgDisplay;
 
 class gbtTreeLayout : public gbtGameView {
 private:
-  gbtEfgDisplay *m_parent;
+  /* gbtEfgDisplay *m_parent; */
   Gambit::Array<gbtNodeEntry *> m_nodeList;
   mutable int m_maxX, m_maxY, m_maxLevel;
   int m_infosetSpacing;

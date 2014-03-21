@@ -96,7 +96,7 @@ public:
                   const wxString& name = wxT("wxMenuButton"))
                   : wxControl()
     {
-        n = n; choices = choices; // get rid of unused warning
+      // n = n; choices = choices; // get rid of unused warning
         Init();
         Create(parent, id, value, wxNullBitmap, pos, size, style, val, name);
     }
@@ -151,7 +151,7 @@ protected:
     virtual void DoSetSize(int x, int y, int width, int height,
                            int sizeFlags = wxSIZE_AUTO);
 
-    virtual wxSize DoGetBestSize();
+    virtual wxSize DoGetBestSize() const;
 
 // FIXME! - in MSW the radio items don't check themselves
 #ifdef __WXMSW__
