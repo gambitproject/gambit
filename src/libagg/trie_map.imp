@@ -45,7 +45,7 @@ trie_map<V>::insert(const trie_map<V>::value_type& x) {
 
   //now insert the item
   leaves.push_back(ptr);
-  return std::pair<typename trie_map<V>::iterator,bool>((ptr->val=data.insert_after(data.before_begin(),x)),true);
+  return std::pair<typename trie_map<V>::iterator,bool>((ptr->val=data.insert(data.begin(),x)),true);
 }
 
 
@@ -118,14 +118,14 @@ void trie_map<V>::multiply (const trie_map<V>& other,size_t keylen, std::vector<
 //  cout<<"and "<<endl
 //      <<other <<endl;
 //#endif
-  static typename slist<typename trie_map<V>::value_type>::iterator p1;
+  static typename std::list<typename trie_map<V>::value_type>::iterator p1;
   static size_t i;
 
   if(&other == this){
     std::cerr<<"Error: (in-place) multiply: other should not be the same object as self"<<endl;
     exit(1);
   }
-  slist<typename trie_map<V>::value_type> data2;
+  std::list<typename trie_map<V>::value_type> data2;
   data.swap(data2);
   reset();
 
@@ -158,7 +158,7 @@ void trie_map<V>::multiply (const trie_map<V>& other,size_t keylen, std::vector<
 	} else {
 	  // insert the item
 	  leaves.push_back(ptr);
-	  ptr->val=data.insert_after(data.before_begin(),v);
+	  ptr->val=data.insert(data.begin(),v);
 	}	  
       }//end for(p2
   }//end for(p1 
@@ -184,10 +184,10 @@ trie_map<V>::operator/= (const std::vector<V>& denom){
   if (piv==-1) return *this;
 
   //get rid of 0th order terms at the pivot level
-  slist<typename trie_map<V>::value_type> data2;
+  std::list<typename trie_map<V>::value_type> data2;
   data.swap(data2);
   clear();
-  typename slist<typename trie_map<V>::value_type>::iterator itr;
+  typename std::list<typename trie_map<V>::value_type>::iterator itr;
   for (itr=data2.begin(); itr!=data2.end(); ++itr){
     if (itr->first[piv] > 0) insert(*itr);
   }

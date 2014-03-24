@@ -27,13 +27,12 @@
 #include <sstream>
 #include <cassert>
 #include <algorithm>
-#include <ext/functional>
 #include "GrayComposition.h"
 #include "agg.h"
 
 using namespace std;
-using __gnu_cxx::select2nd;
 
+inline int select2nd(const pair <int,int> &x) { return x.second; } 
 
 agg::agg(int numPlayers,int* _actions, int numANodes, int _numPNodes, 
  vector<vector<int> >& _actionSets, vector<vector<int> >& neighb,
@@ -571,7 +570,7 @@ agg::initPorder(vector<int>& Po,
   vector<int>::iterator p = Po.begin();
   (*p) = i;
   ++p;
-  transform(order.begin(),order.end(), p, select2nd<pair<int,int> >() );
+  transform(order.begin(),order.end(), p, select2nd );
 
 }
 

@@ -28,14 +28,13 @@
 //WARNING: traversal using the iterators is in the reverse order of insertion.
 
 #include <math.h>
-#include <ext/slist>
+#include <list>
 #include <iterator>
 
 using std::ostream;
 using std::endl;
 using std::cout;
 using std::ostream_iterator;
-using __gnu_cxx::slist;
 
 //forward declarations
 
@@ -52,13 +51,13 @@ struct TrieNode
 {
   //members:
   std::vector<TrieNode*> children;
-  typename slist<std::pair<std::vector<int>,V> >::iterator val;
+  typename std::list<std::pair<std::vector<int>,V> >::iterator val;
 
 
   //methods:
 
   //constructor  
-  TrieNode(size_t branches, typename slist<std::pair<std::vector<int>,V> >::iterator v):children(branches,(TrieNode*)NULL),val(v) {}
+  TrieNode(size_t branches, typename std::list<std::pair<std::vector<int>,V> >::iterator v):children(branches,(TrieNode*)NULL),val(v) {}
   
 
   inline TrieNode*& operator[](size_t i){
@@ -80,8 +79,8 @@ public:
 
   typedef unsigned int  size_type;
 
-  typedef typename slist<value_type>::iterator iterator;
-  typedef typename slist<value_type>::const_iterator const_iterator;
+  typedef typename std::list<value_type>::iterator iterator;
+  typedef typename std::list<value_type>::const_iterator const_iterator;
 
 
   //friends
@@ -290,10 +289,10 @@ public:
 
   //squaring in-place
   void square(size_t keylen, std::vector<proj_func*>& f){
-    static typename slist<typename trie_map<V>::value_type>::iterator p1,p2;
+    static typename std::list<typename trie_map<V>::value_type>::iterator p1,p2;
     static std::pair<std::vector<int>, V> v;
     v.first.resize(keylen);
-    slist<typename trie_map<V>::value_type> data2;
+    std::list<typename trie_map<V>::value_type> data2;
     data.swap(data2);
     reset();
     for(p1=data2.begin();p1!=end();++p1)if((*p1).second>(V)0){
@@ -418,7 +417,7 @@ public:
   
 private:
   //member variables:
-  slist<value_type> data;
+  std::list<value_type> data;
   size_type initBranches; //default branching factor
   TrieNode<V> *root;
 
