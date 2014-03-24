@@ -31,6 +31,7 @@
 #include <string>
 #include <iomanip>
 #include <vector>
+#include <memory>
 
 using namespace std;
 class cmatrix;

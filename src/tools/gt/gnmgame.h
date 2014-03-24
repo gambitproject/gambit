@@ -240,9 +240,9 @@ class gnmgame {
   int Pivot(cmatrix &T, int pr, int pc, std::vector<int> &row, std::vector<int> &col, 
 	    double &D);
 
-  int *strategyOffset;
+  std::unique_ptr<int[]> strategyOffset;
   int numPlayers, numStrategies, numActions;
-  int *actions;
+  std::unique_ptr<int[]> actions;
   int maxActions;
 };
 
