@@ -2373,7 +2373,7 @@ Integer::Integer(unsigned long y) :rep(Icopy_ulong(0, y)) {}
 
 Integer::Integer(const Integer&  y) :rep(Icopy(0, y.rep)) {}
 
-Integer::~Integer() { if (rep && !STATIC_IntegerRep(rep)) delete rep; }
+Integer::~Integer() { if (rep && !STATIC_IntegerRep(rep)) delete[] rep; }
 
 Integer &Integer::operator=(const Integer &y)
 {

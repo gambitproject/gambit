@@ -27,13 +27,12 @@
 #include <sstream>
 #include <cassert>
 #include <algorithm>
-#include <ext/functional>
 #include "GrayComposition.h"
 #include "agg.h"
 
 using namespace std;
-using __gnu_cxx::select2nd;
 
+inline int select2nd(const pair <int,int> &x) { return x.second; } 
 
 agg::agg(int numPlayers,int* _actions, int numANodes, int _numPNodes, 
  vector<vector<int> >& _actionSets, vector<vector<int> >& neighb,
@@ -63,9 +62,6 @@ cache(numPlayers+1),
 player2Class(numPlayers),
 kSymStrategyOffset(1,0)
 {
-  //use swap instead of copy; faster but destroys the input parameters.
-  //payoffs.swap(_payoffs);
-  //Pr.swap(P);
 
   //actions
   actions=new int[numPlayers];
@@ -571,7 +567,7 @@ agg::initPorder(vector<int>& Po,
   vector<int>::iterator p = Po.begin();
   (*p) = i;
   ++p;
-  transform(order.begin(),order.end(), p, select2nd<pair<int,int> >() );
+  transform(order.begin(),order.end(), p, select2nd );
 
 }
 
@@ -591,7 +587,8 @@ agg::computeP(int player, int act, int player2,int act2)
     Pr[k].reset();
     if (Porder[player][act][k]==player2){ 
       if (act2==-1){
-	Pr[k].swap(Pr[k-1]);
+	//Pr[k].swap(Pr[k-1]);
+	Pr[k]=Pr[k-1];
       } else {
 	//apply player2's pure strat
 	aggdistrib temp;
@@ -814,7 +811,8 @@ void agg::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
         if(dest.size()>0){
           dest.multiply(temp, numNei, projFunctions[node]);
         }else{
-          dest.swap(temp);
+          //dest.swap(temp);
+          dest=temp;
         }
       }
       if(plClass==plClass2){
@@ -823,7 +821,8 @@ void agg::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
         if(dest.size()>0){
           dest.multiply(temp, numNei, projFunctions[node]);
         }else{
-          dest.swap(temp);
+          //dest.swap(temp);
+          dest=temp;
         }
       }
       return;
@@ -961,7 +960,9 @@ void agg::makeMAPPINGpayoff(std::istream& in, aggpayoff& pay, int numNei){
     char c;
     AggNumber u;
     aggpayoff temp;
-    temp.swap(pay);
+    //temp.swap(pay);
+    temp=pay;
+    pay.clear();
 
     stripComment(in);
     in>>num;
@@ -1024,9 +1025,10 @@ void agg::makeMAPPINGpayoff(std::istream& in, aggpayoff& pay, int numNei){
 	//insert
 	pair<trie_map<AggNumber>::iterator, bool> r = pay.insert(make_pair(key,u));
 	if (!r.second){
-	    cerr<<"WARNING0: overwriting utility at [";
+	    cerr<<"WARNING: overwriting utility at [";
 	    copy(key.begin(),key.end(), ostream_iterator<int>(cerr, " "));
 	    cerr<<"]"<<endl;
+	    cerr<<"previous value: "<<r.first->second<<" new value: "<<u<<endl;
 
 	    r.first->second = u;
 	}
