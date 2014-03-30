@@ -457,6 +457,20 @@ then, should be the same as the product of the number of strategies
 for all players in the game.
 
 
+New in Gambit 14
+~~~~~~~~~~~~~~~~
+
+Historically, Gambit has accepted silently strategic game save files where 
+the number of payoffs (or outcomes, depending on the style) 
+does not match with the number of contingencies in the game.
+Long ago there were reasons of convenience for doing this, but now - when there 
+are many tools to help automate creation of files, not to mention a stronger Gambit API 
+for doing so - experience is that this causes confusion with unexpected behaviours with files 
+created by users which accidentally have too many/too few payoffs.
+Now exceptions will be raised if there are too many/few payoffs or outcomes in the saved NFG file. 
+
+
+
 .. _file-formats-agg:
 
 The action graph game (.agg) file format
