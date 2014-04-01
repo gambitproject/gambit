@@ -994,7 +994,55 @@ void ParseEfg(GameParserState &p_state, Game p_game, TreeData &p_treeData)
 } // end of anonymous namespace
 
 
+#include "tinyxml.h"
+
 namespace Gambit {
+
+class GameXMLSavefile {
+private:
+  TiXmlDocument doc;
+
+public:
+  GameXMLSavefile(const std::string &p_xml);
+  ~GameXMLSavefile()  { }
+
+  Game GetGame(void) const;
+};
+
+GameXMLSavefile::GameXMLSavefile(const std::string &p_xml)
+{
+  doc.Parse(p_xml.c_str());
+  if (doc.Error()) {
+    throw InvalidFileException("Not a valid XML document");
+  }
+}
+
+Game GameXMLSavefile::GetGame(void) const
+{
+  const TiXmlNode *docroot = doc.FirstChild("gambit:document");
+  if (!docroot) {
+    throw InvalidFileException("Not a Gambit game savefile document");
+  }
+
+  const TiXmlNode *game = docroot->FirstChild("game");
+  if (!game) {
+    throw InvalidFileException("No game representation found in document");
+  }
+
+  const TiXmlNode *efgfile = game->FirstChild("efgfile");
+  if (efgfile) {
+    std::istringstream s(efgfile->FirstChild()->Value());
+    return ReadGame(s);
+  }
+  
+  const TiXmlNode *nfgfile = game->FirstChild("nfgfile");
+  if (nfgfile) {
+    std::istringstream s(nfgfile->FirstChild()->Value());
+    return ReadGame(s);
+  }
+
+  throw InvalidFileException("No game representation found in document");
+}
 
 //=========================================================================
 //    ReadGame: Global visible function to read an .efg or .nfg file
@@ -1002,8 +1050,18 @@ namespace Gambit {
 
 Game ReadGame(std::istream &p_file) throw (InvalidFileException)
 {
-  GameParserState parser(p_file);
+  std::streampos pos = p_file.tellg();
+  std::stringstream buffer;
+  buffer << p_file.rdbuf();
+  try {
+    GameXMLSavefile doc(buffer.str());
+    return doc.GetGame();
+  }
+  catch (InvalidFileException) {
+    p_file.seekg(pos);
+  }
 
+  GameParserState parser(p_file);
   try {
     if (parser.GetNextToken() != TOKEN_SYMBOL) {
       throw InvalidFileException(parser.CreateLineMsg("Expecting file type"));

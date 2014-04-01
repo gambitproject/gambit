@@ -352,6 +352,10 @@ libgambit_la_SOURCES = \
 	src/libgambit/nash.h \
 	src/libgambit/file.cc \
 	src/libgambit/libgambit.h \
+	src/libgambit/tinyxml.cc \
+	src/libgambit/tinyxml.h \
+	src/libgambit/tinyxmlerror.cc \
+	src/libgambit/tinyxmlparser.cc \
 	${libagg_la_SOURCES}
 
 libgambitincludedir = $(includedir)/libgambit
@@ -799,11 +803,7 @@ gambit_SOURCES = \
 	src/gui/style.cc \
 	src/gui/style.h \
 	src/gui/valnumber.cc \
-	src/gui/valnumber.h \
-	src/gui/tinyxml.cc \
-	src/gui/tinyxml.h \
-	src/gui/tinyxmlerror.cc \
-	src/gui/tinyxmlparser.cc
+	src/gui/valnumber.h
 
 
 gambit_LDADD = \

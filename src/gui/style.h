@@ -24,7 +24,7 @@
 #define STYLE_H
 
 #include "libgambit/libgambit.h"
-#include "tinyxml.h"
+#include "libgambit/tinyxml.h"
 
 const int GBT_NODE_TOKEN_LINE = 0;
 const int GBT_NODE_TOKEN_BOX = 1;
