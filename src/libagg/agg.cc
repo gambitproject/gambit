@@ -1023,9 +1023,10 @@ void agg::makeMAPPINGpayoff(std::istream& in, aggpayoff& pay, int numNei){
 	//insert
 	pair<trie_map<AggNumber>::iterator, bool> r = pay.insert(make_pair(key,u));
 	if (!r.second){
-	    cerr<<"WARNING0: overwriting utility at [";
+	    cerr<<"WARNING: overwriting utility at [";
 	    copy(key.begin(),key.end(), ostream_iterator<int>(cerr, " "));
 	    cerr<<"]"<<endl;
+	    cerr<<"previous value: "<<r.first->second<<" new value: "<<u<<endl;
 
 	    r.first->second = u;
 	}
