@@ -101,10 +101,22 @@ template <class V>
 inline void trie_map<V>::swap( trie_map<V>& other )
 {
   if (this != &other) {
+    //The following block is commented out as it no longer provides the correct 
+    //behavior now that data is a std::list. Specifically, list::swap() invalidates the 
+    //end() iterator. It is now replaced with a slow swap. The block could be restored 
+    //in the future when c++11 becomes standard, and forward_list is used for data.
+    /* 
+    trie_map<V>::iterator endp = data.end();
     data.swap (other.data);
+    if (endp != other.data.end()) {std::cerr<<"Error: end() changed after swap"<<endl; exit(1);}
     leaves.swap(other.leaves);
     std::swap (this->root, other.root);
     std::swap (this->initBranches, other.initBranches);
+    */
+
+    trie_map<V> temp=*this;
+    *this=other;
+    other=temp;
   }
 }
 
@@ -126,7 +138,8 @@ void trie_map<V>::multiply (const trie_map<V>& other,size_t keylen, std::vector<
     exit(1);
   }
   std::list<typename trie_map<V>::value_type> data2;
-  data.swap(data2);
+  //data.swap(data2);
+  data2=data;
   reset();
 
   static std::pair<std::vector<int>, V> v;
@@ -185,7 +198,8 @@ trie_map<V>::operator/= (const std::vector<V>& denom){
 
   //get rid of 0th order terms at the pivot level
   std::list<typename trie_map<V>::value_type> data2;
-  data.swap(data2);
+  //data.swap(data2);
+  data2=data;
   clear();
   typename std::list<typename trie_map<V>::value_type>::iterator itr;
   for (itr=data2.begin(); itr!=data2.end(); ++itr){

@@ -298,7 +298,8 @@ public:
     static std::pair<std::vector<int>, V> v;
     v.first.resize(keylen);
     std::list<typename trie_map<V>::value_type> data2;
-    data.swap(data2);
+    //data.swap(data2);
+    data2=data;
     reset();
     for(p1=data2.begin();p1!=end();++p1)if((*p1).second>(V)0){
       for(p2=p1; p2!=data2.end(); ++p2)if((*p2).second>(V)0){
