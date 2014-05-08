@@ -140,7 +140,11 @@ public:
   inline void clear(){
 	deleteNodes(root);
 	root=new TrieNode<V> (initBranches, data.end()); 
+	iterator endp = data.end();
 	data.clear();
+#ifdef AGGDEBUG
+	if(endp != end()) {std::cerr<<"Error: end() changed"<<endl; exit(1);}
+#endif
 	leaves.clear();
   }
 
@@ -152,9 +156,10 @@ public:
       if(!leaves.back()){
 	  cout<<"WARNING: NULL pointer in leaves. leaves are:"<<endl;
 	  for(size_t i=0;i<leaves.size();++i){ 
-	      cout << (int) leaves[i]<<" ";
+	      cout << (long long) leaves[i]<<": ";
 	      
-	      if (leaves[i])cout<<leaves[i]->val->second  <<endl;
+	      if (leaves[i])cout<<leaves[i]->val->second;
+	      cout<<endl;
 	  }
 	  cout<<endl<<"trie is:"<< *this<< endl;
 	  cout<<"in order:"<<endl;
@@ -293,7 +298,8 @@ public:
     static std::pair<std::vector<int>, V> v;
     v.first.resize(keylen);
     std::list<typename trie_map<V>::value_type> data2;
-    data.swap(data2);
+    //data.swap(data2);
+    data2=data;
     reset();
     for(p1=data2.begin();p1!=end();++p1)if((*p1).second>(V)0){
       for(p2=p1; p2!=data2.end(); ++p2)if((*p2).second>(V)0){

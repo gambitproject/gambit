@@ -166,7 +166,7 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
 
   AggNumber getPurePayoff(int player, int *s);
   inline void printPayoffs( ostream & s, int node){
-    s << payoffs[node].size()<<endl;
+    s << payoffs.at(node).size()<<endl;
     s << payoffs[node];
   }
 
