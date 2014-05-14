@@ -57,6 +57,7 @@ public:
     iterator(const Array &p_array, int p_index)
       : m_array(p_array), m_index(p_index)  { }
     T &operator*(void) const { return m_array[m_index]; }
+    T &operator->(void) const { return m_array[m_index]; }
     iterator &operator++(void)  { m_index++; return *this; }
     bool operator==(const iterator &it) const
     { return (&m_array == &it.m_array) && (m_index == it.m_index); }
@@ -72,6 +73,7 @@ public:
     const_iterator(const Array &p_array, int p_index)
       : m_array(p_array), m_index(p_index)  { }
     const T &operator*(void) const { return m_array[m_index]; }
+    const T &operator->(void) const { return m_array[m_index]; }
     const_iterator &operator++(void)  { m_index++; return *this; }
     bool operator==(const const_iterator &it) const
     { return (&m_array == &it.m_array) && (m_index == it.m_index); }

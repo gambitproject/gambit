@@ -184,7 +184,7 @@ public:
   StrategySupportPlayer GetPlayer(int pl) const
   { return new StrategySupportPlayerRep(*this, m_nfg->GetPlayer(pl)); }
   /// Returns an iterator over the players in the game
-  GamePlayerIterator Players(void) const  { return m_nfg->Players(); }
+  const GamePlayers &Players(void) const { return m_nfg->Players(); }
   /// Returns an iterator over the strategies for the player
   SupportStrategyIterator Strategies(const GamePlayer &p_player) const
     { return m_support[p_player->GetNumber()]; }

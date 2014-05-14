@@ -40,10 +40,10 @@ MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupport &p_sup
 
 template <class T> void MixedStrategyProfileRep<T>::SetCentroid(void) 
 {
-  for (GamePlayerIterator player = m_support.Players(); 
-       !player.AtEnd(); player++) {
+  for (GamePlayers::const_iterator player = m_support.Players().begin();
+       player != m_support.Players().end(); ++player) { 
     T center = ((T) 1) / ((T) m_support.NumStrategies(player->GetNumber()));
-    for (SupportStrategyIterator strategy = m_support.Strategies(player);
+    for (SupportStrategyIterator strategy = m_support.Strategies(*player);
 	 !strategy.AtEnd(); strategy++) {
       (*this)[*strategy] = center;
     }
@@ -493,13 +493,13 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue(void) const
 
   T liapValue = (T) 0;
  
-  for (GamePlayerIterator player = m_rep->m_support.Players();
-       !player.AtEnd(); player++) {
+  for (GamePlayers::const_iterator player = m_rep->m_support.Players().begin();
+       player != m_rep->m_support.Players().end(); ++player) {
     // values of the player's strategies
     Array<T> values(m_rep->m_support.NumStrategies(player->GetNumber()));
     
     T avg = (T) 0, sum = (T) 0;
-    for (SupportStrategyIterator strategy = m_rep->m_support.Strategies(player);
+    for (SupportStrategyIterator strategy = m_rep->m_support.Strategies(*player);
 	 !strategy.AtEnd(); strategy++) {
       const T &prob = (*this)[strategy];
       values[m_rep->m_support.GetIndex(strategy)] = GetPayoff(strategy);

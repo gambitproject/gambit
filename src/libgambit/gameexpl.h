@@ -76,9 +76,8 @@ public:
   virtual int NumPlayers(void) const { return m_players.Length(); }
   /// Returns the pl'th player in the game
   virtual GamePlayer GetPlayer(int pl) const { return m_players[pl]; }
-  /// Returns an iterator over the players
-  virtual GamePlayerIterator Players(void) const
-    { return GamePlayerIterator(m_players); }
+  /// Returns the set of players in the game
+  virtual const GamePlayers &Players(void) const { return m_players; }
   //@}
 
   /// @name Outcomes

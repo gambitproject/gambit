@@ -179,12 +179,12 @@ MixedBehavProfile<T>::MixedBehavProfile(const MixedStrategyProfile<T> &p_profile
   const StrategySupport &support = p_profile.GetSupport();
   GameRep *game = m_support.GetGame();
 
-  for (GamePlayerIterator player = game->Players(); 
-       !player.AtEnd(); player++) {
+  for (GamePlayers::const_iterator player = game->Players().begin();
+       player != game->Players().end(); ++player) {
     m_nvals = (T) 0;
     m_bvals = (T) 0;
 
-    for (SupportStrategyIterator strategy = support.Strategies(player);
+    for (SupportStrategyIterator strategy = support.Strategies(*player);
 	 !strategy.AtEnd(); strategy++) {
       if (p_profile[strategy] > (T) 0) {
 	const Array<int> &actions = strategy->m_behav;

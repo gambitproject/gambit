@@ -177,7 +177,7 @@ typedef GameObjectIterator<GameStrategyRep, GameStrategy> GameStrategyIterator;
 
 class GamePlayerRep;
 typedef GameObjectPtr<GamePlayerRep> GamePlayer;
-typedef GameObjectIterator<GamePlayerRep, GamePlayer> GamePlayerIterator;
+typedef Array<GamePlayerRep *> GamePlayers;
 
 class GameNodeRep;
 typedef GameObjectPtr<GameNodeRep> GameNode;
@@ -745,8 +745,8 @@ public:
   virtual int NumPlayers(void) const = 0;
   /// Returns the pl'th player in the game
   virtual GamePlayer GetPlayer(int pl) const = 0;
-  /// Returns an iterator over the players
-  virtual GamePlayerIterator Players(void) const = 0;
+  /// Returns the set of players in the game 
+  virtual const GamePlayers &Players(void) const = 0;
   /// Returns the chance (nature) player
   virtual GamePlayer GetChance(void) const = 0;
   /// Creates a new player in the game, with no moves
