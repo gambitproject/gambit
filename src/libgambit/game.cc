@@ -193,8 +193,10 @@ bool PureStrategyProfileRep::IsNash(void) const
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
     GamePlayer player = m_nfg->GetPlayer(pl);
     Rational current = GetPayoff(player);
-    for (int st = 1; st <= player->NumStrategies(); st++) {
-      if (GetStrategyValue(player->GetStrategy(st)) > current) {
+    for (GameStrategyArray::const_iterator strategy = player->Strategies().begin();
+	 strategy != player->Strategies().end();
+	 ++strategy)  {
+      if (GetStrategyValue(*strategy) > current) {
         return false;
       }
     }
@@ -207,8 +209,10 @@ bool PureStrategyProfileRep::IsStrictNash(void) const
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
     GamePlayer player = m_nfg->GetPlayer(pl);
     Rational current = GetPayoff(player);
-    for (int st = 1; st <= player->NumStrategies(); st++) {
-      if (GetStrategyValue(player->GetStrategy(st)) >= current) {
+    for (GameStrategyArray::const_iterator strategy = player->Strategies().begin();
+	 strategy != player->Strategies().end();
+	 ++strategy) {
+      if (GetStrategyValue(*strategy) >= current) {
         return false;
       }
     }
@@ -219,8 +223,10 @@ bool PureStrategyProfileRep::IsStrictNash(void) const
 bool PureStrategyProfileRep::IsBestResponse(const GamePlayer &p_player) const
 {
   Rational current = GetPayoff(p_player);
-  for (int st = 1; st <= p_player->NumStrategies(); st++) {
-    if (GetStrategyValue(p_player->GetStrategy(st)) > current) {
+  for (GameStrategyArray::const_iterator strategy = p_player->Strategies().begin();
+       strategy != p_player->Strategies().end();
+       ++strategy) {
+    if (GetStrategyValue(*strategy) > current) {
       return false;
     }
   }
@@ -230,19 +236,21 @@ bool PureStrategyProfileRep::IsBestResponse(const GamePlayer &p_player) const
 List<GameStrategy> 
 PureStrategyProfileRep::GetBestResponse(const GamePlayer &p_player) const
 {
-  Rational max_payoff = GetStrategyValue(p_player->GetStrategy(1));
-  List<GameStrategy> br_strategy_list = List<GameStrategy>();
-  br_strategy_list.Append(p_player->GetStrategy(1));
-  for (int st = 2; st <= p_player->NumStrategies(); st++) {
-    if (GetStrategyValue(p_player->GetStrategy(st)) > max_payoff) {
-      br_strategy_list = List<GameStrategy>();
-      br_strategy_list.Append(p_player->GetStrategy(st));
+  GameStrategyArray::const_iterator strategy = p_player->Strategies().begin();
+  Rational max_payoff = GetStrategyValue(*strategy);
+  List<GameStrategy> br;
+  br.push_back(*strategy);
+  for (++strategy; strategy != p_player->Strategies().end(); ++strategy)  {
+    Rational this_payoff = GetStrategyValue(*strategy);
+    if (this_payoff > max_payoff) {
+      br.clear();
+      max_payoff = this_payoff;
     }
-    else if (GetStrategyValue(p_player->GetStrategy(st)) == max_payoff) {
-      br_strategy_list.Append(p_player->GetStrategy(st));
+    if (this_payoff >= max_payoff) {
+      br.push_back(*strategy);
     }
   }
-  return br_strategy_list;
+  return br;
 }
 
 MixedStrategyProfile<Rational>

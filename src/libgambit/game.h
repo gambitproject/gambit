@@ -394,6 +394,8 @@ public:
   //@}
 };
 
+typedef Array<GameStrategyRep *> GameStrategyArray;
+
 /// A player in a game
 class GamePlayerRep : public GameObject {
   friend class GameExplicitRep;
@@ -419,7 +421,7 @@ private:
   int m_number;
   std::string m_label;
   Array<GameTreeInfosetRep *> m_infosets;
-  Array<GameStrategyRep *> m_strategies;
+  GameStrategyArray m_strategies;
 
   GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id)
     { }
@@ -448,8 +450,8 @@ public:
   int NumStrategies(void) const; 
   /// Returns the st'th strategy for the player
   GameStrategy GetStrategy(int st) const;
-  /// Returns a forward iterator over the strategies
-  GameStrategyIterator Strategies(void) const; 
+  /// Returns the array of strategies available to the player
+  const GameStrategyArray &Strategies(void) const;
   /// Creates a new strategy for the player
   GameStrategy NewStrategy(void);
   //@}
@@ -805,8 +807,8 @@ inline int GamePlayerRep::NumStrategies(void) const
 { m_game->BuildComputedValues(); return m_strategies.Length(); }
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const 
 { m_game->BuildComputedValues(); return m_strategies[st]; }
-inline GameStrategyIterator GamePlayerRep::Strategies(void) const 
-{ m_game->BuildComputedValues(); return GameStrategyIterator(m_strategies); }
+inline const GameStrategyArray &GamePlayerRep::Strategies(void) const
+{ m_game->BuildComputedValues(); return m_strategies; }
 
 template<> inline double PureBehavProfile::GetPayoff(int pl) const
 { return GetPayoff<double>(m_efg->GetRoot(), pl); }
