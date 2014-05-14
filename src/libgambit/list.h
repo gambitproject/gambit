@@ -25,6 +25,20 @@
 
 namespace Gambit {
 
+/// A doubly-linked list container.
+///
+/// This implements a doubly-linked list.  A special feature of this
+/// class is that it caches the last item accessed by indexing via
+/// operator[], meaning that, if accesses are done in sequential order,
+/// indexing time is constant.
+///
+/// This index-cacheing feature was implemented very early in the development
+/// of Gambit, before STL-like concepts of iterators had been fully
+/// developed.  An iterator approach is a better and more robust solution
+/// to iterating lists, both in terms of performance and encapsulation.
+/// Therefore, it is recommended to avoid operator[] and use the provided
+/// iterator classes in new code, and to upgrade existing code to the
+/// iterator idiom as practical.
 template <class T> class List {
 protected:
   class Node {
@@ -45,6 +59,36 @@ protected:
   int InsertAt(const T &t, int where);
 
 public:
+  class iterator {
+  private:
+    const List &m_list;
+    Node *m_node;
+  public:
+    iterator(const List &p_list, Node *p_node)
+      : m_list(p_list), m_node(p_node)  { }
+    T &operator*(void) const { return *m_node; }
+    iterator &operator++(void)  { m_node = m_node->m_next; return *this; }
+    bool operator==(const iterator &it) const
+    { return (m_node == it.m_node); }
+    bool operator!=(const iterator &it) const
+    { return (m_node != it.m_node); }
+  };
+
+  class const_iterator {
+  private:
+    const List &m_list;
+    Node *m_node;
+  public:
+    const_iterator(const List &p_list, Node *p_node)
+      : m_list(p_list), m_node(p_node)  { }
+    const T &operator*(void) const { return *m_node; }
+    const_iterator &operator++(void)  { m_node = m_node->m_next; return *this; }
+    bool operator==(const const_iterator &it) const
+    { return (m_node == it.m_node); }
+    bool operator!=(const const_iterator &it) const
+    { return (m_node != it.m_node); }
+  };
+
   List(void);
   List(const List<T> &);
   virtual ~List();
@@ -54,6 +98,11 @@ public:
   bool operator==(const List<T> &b) const;
   bool operator!=(const List<T> &b) const;
   
+  iterator begin(void)             { return iterator(*this, m_head); }
+  const_iterator begin(void) const { return const_iterator(*this, m_head); }
+  iterator end(void)               { return iterator(*this, 0); }
+  const_iterator end(void) const   { return const_iterator(*this, 0); }
+
   const T &operator[](int) const;
   T &operator[](int);
 
@@ -67,6 +116,25 @@ public:
   int Find(const T &) const;
   bool Contains(const T &t) const;
   int Length(void) const { return m_length; }
+
+  /// @name STL-style interface
+  ///
+  /// These operations are a partial implementation of operations on
+  /// STL-style list containers.  It is suggested that future code be
+  /// written to use these, and existing code ported to use them as
+  /// possible.
+  ///@{
+  /// Return whether the list container is empty (has size 0).
+  bool empty(void) const { return (m_length == 0); }
+  /// Return the number of elements in the list container.
+  size_t size(void) const { return m_length; }
+  /// Adds a new element at the end of the list container, after its
+  /// current last element.
+  void push_back(const T &val);
+  /// Removes all elements from the list container (which are destroyed),
+  /// leaving the container with a size of 0.
+  void clear(void);
+  ///@}
 };
 
 
@@ -311,6 +379,26 @@ template <class T> int List<T>::Find(const T &t) const
 template <class T> bool List<T>::Contains(const T &t) const
 {
   return (Find(t) != 0);
+}
+
+template <class T> void List<T>::push_back(const T &val)
+{
+  InsertAt(val, m_length + 1);
+}
+
+template <class T> void List<T>::clear(void)
+{
+  Node *n = m_head;
+  while (n)  {
+    Node *m_next = n->m_next;
+    delete n;
+    n = m_next;
+  }
+  m_length = 0;
+  m_head = 0;
+  m_tail = 0;
+  m_currentIndex = 0;
+  m_currentNode = 0;
 }
 
 }

@@ -49,6 +49,36 @@ protected:
     return n;
   }
 public:
+  class iterator {
+  private:
+    const Array &m_array;
+    int m_index;
+  public:
+    iterator(const Array &p_array, int p_index)
+      : m_array(p_array), m_index(p_index)  { }
+    T &operator*(void) const { return m_array[m_index]; }
+    iterator &operator++(void)  { m_index++; return *this; }
+    bool operator==(const iterator &it) const
+    { return (&m_array == &it.m_array) && (m_index == it.m_index); }
+    bool operator!=(const iterator &it) const
+    { return !(*this == it); }
+  };
+
+  class const_iterator {
+  private:
+    const Array &m_array;
+    int m_index;
+  public:
+    const_iterator(const Array &p_array, int p_index)
+      : m_array(p_array), m_index(p_index)  { }
+    const T &operator*(void) const { return m_array[m_index]; }
+    const_iterator &operator++(void)  { m_index++; return *this; }
+    bool operator==(const const_iterator &it) const
+    { return (&m_array == &it.m_array) && (m_index == it.m_index); }
+    bool operator!=(const const_iterator &it) const
+    { return !(*this == it); }
+  };
+
   /// @name Lifecycle
   //@{
   /// Constructs an array of length 'len', starting at '1'
@@ -121,6 +151,11 @@ public:
   /// Return the last index
   int Last(void) const { return maxdex; }
 
+  /// Return a forward iterator starting at the beginning of the array
+  const_iterator begin(void) const { return const_iterator(*this, mindex); }
+  /// Return a forward iterator past the end of the array
+  const_iterator end(void) const   { return const_iterator(*this, maxdex + 1); }
+
   /// Access the index'th entry in the array
   const T &operator[](int index) const 
   {
@@ -190,6 +225,29 @@ public:
     return ret;
   }
   //@}
+
+  /// @name STL-style interface
+  ///
+  /// These operations are a partial implementation of operations on
+  /// STL-style list containers.  It is suggested that future code be
+  /// written to use these, and existing code ported to use them as
+  /// possible.
+  ///@{
+  /// Return whether the array container is empty (has size 0).
+  bool empty(void) const { return (this->maxdex < this->mindex); }
+  /// Return the number of elements in the array container.
+  size_t size(void) const  { return maxdex - mindex + 1; }
+  /// Adds a new element at the end of the array container, after its
+  /// current last element.
+  void push_back(const T &val) { InsertAt(val, this->maxdex + 1); }
+  /// Removes all elements from the array container (which are destroyed),
+  /// leaving the container with a size of 0.
+  void clear(void)  {
+    delete [] (this->data + this->mindex);
+    this->data = 0;
+    this->maxdex = this->mindex - 1;
+  }
+  ///@}
 };
 
 } // end namespace Gambit
