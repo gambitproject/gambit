@@ -186,6 +186,9 @@ public:
   T &operator[](const GameStrategy &p_strategy)
     { return m_rep->operator[](p_strategy); }
 
+  /// Returns the mixed strategy for the player
+  Vector<T> operator[](const GamePlayer &p_player) const;
+
   operator const Vector<T> &(void) const { return m_rep->m_probs; }
   operator Vector<T> &(void) { return m_rep->m_probs; }
   //@}

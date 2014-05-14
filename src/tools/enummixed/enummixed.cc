@@ -257,28 +257,12 @@ template <class T> void Solve(const StrategySupport &p_support)
 	  if (vert1id[i1] == 0) {
 	    id1++;
 	    vert1id[i1] = id1;
-
-	    Vector<T> probs(profile.GetSupport().NumStrategies(2));
-	    int st = 1;
-	    for (Array<GameStrategy>::const_iterator strategy = profile.GetSupport().Strategies(profile.GetGame()->GetPlayer(2)).begin();
-		 strategy != profile.GetSupport().Strategies(profile.GetGame()->GetPlayer(2)).end();
-		 ++st, ++strategy) {
-	      probs[st] = profile[*strategy];
-	    }
-	    key2.Append(probs);
+	    key2.push_back(profile[profile.GetGame()->GetPlayer(2)]);
 	  }
 	  if (vert2id[i2] == 0) {
 	    id2++;
 	    vert2id[i2] = id2;
-
-	    Vector<T> probs(profile.GetSupport().NumStrategies(1));
-	    int st = 1;
-	    for (Array<GameStrategy>::const_iterator strategy = profile.GetSupport().Strategies(profile.GetGame()->GetPlayer(1)).begin();
-		 strategy != profile.GetSupport().Strategies(profile.GetGame()->GetPlayer(1)).end();
-		 ++st, ++strategy) {
-	      probs[st] = profile[*strategy];
-	    }
-	    key1.Append(probs);
+	    key1.push_back(profile[profile.GetGame()->GetPlayer(1)]);
 	  }
 	  node1.Append(vert2id[i2]);
 	  node2.Append(vert1id[i1]);

@@ -464,6 +464,19 @@ MixedStrategyProfile<T>::~MixedStrategyProfile()
 //             MixedStrategyProfile<T>: General data access
 //========================================================================
 
+template <class T>
+Vector<T> MixedStrategyProfile<T>::operator[](const GamePlayer &p_player) const
+{
+  Vector<T> probs(m_rep->m_support.Strategies(p_player).size());
+  const Array<GameStrategy> &strategies = m_rep->m_support.Strategies(p_player);
+  int st = 1;
+  for (Array<GameStrategy>::const_iterator strategy = strategies.begin();
+       strategy != strategies.end(); ++st, ++strategy) {
+    probs[st] = (*this)[*strategy];
+  }
+  return probs;
+}
+
 template <class T> 
 MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport(void) const
 {
