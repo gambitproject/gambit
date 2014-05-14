@@ -27,40 +27,6 @@
 
 namespace Gambit {
 
-/// A forward iterator on a strategy support 
-class SupportStrategyIterator {
-private:
-  const Array<GameStrategy> &m_support;
-  int m_index;
-
-public:
-  /// @name Lifecycle
-  //@{
-  /// Constructor
-  SupportStrategyIterator(const Array<GameStrategy> &p_support)
-    : m_support(p_support), m_index(1) { }
-  //@}
-
-  /// @name Iteration and data access
-  //@{
-  /// Advance to the next element (prefix version)
-  void operator++(void) { m_index++; }
-  /// Advance to the next element (postfix version)
-  void operator++(int) { m_index++; }
-  /// Has iterator gone past the end?
-  bool AtEnd(void) const { return m_index > m_support.Length(); }
-  /// Get the current index into the array
-  int GetIndex(void) const { return m_index; }
-
-  /// Get the current element
-  const GameStrategy &operator*(void) const { return m_support[m_index]; }
-  /// Get the current element
-  const GameStrategy &operator->(void) const { return m_support[m_index]; }
-  /// Get the current element
-  operator const GameStrategy &(void) const { return m_support[m_index]; }
-};
-
-
 class StrategySupport;
 
 //
@@ -183,10 +149,10 @@ public:
   /// Returns the pl'th player in the game (restricted to this strategy set)
   StrategySupportPlayer GetPlayer(int pl) const
   { return new StrategySupportPlayerRep(*this, m_nfg->GetPlayer(pl)); }
-  /// Returns an iterator over the players in the game
+  /// Returns the set of players in the game
   const GamePlayers &Players(void) const { return m_nfg->Players(); }
-  /// Returns an iterator over the strategies for the player
-  SupportStrategyIterator Strategies(const GamePlayer &p_player) const
+  /// Returns the set of strategies in the support for a player
+  const Array<GameStrategy> &Strategies(const GamePlayer &p_player) const
     { return m_support[p_player->GetNumber()]; }
 
   /// Returns the index of the strategy in the support.

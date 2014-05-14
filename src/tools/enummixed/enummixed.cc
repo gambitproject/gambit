@@ -259,9 +259,11 @@ template <class T> void Solve(const StrategySupport &p_support)
 	    vert1id[i1] = id1;
 
 	    Vector<T> probs(profile.GetSupport().NumStrategies(2));
-	    for (SupportStrategyIterator strategy = profile.GetSupport().Strategies(profile.GetGame()->GetPlayer(2));
-		 !strategy.AtEnd(); strategy++) {
-	      probs[strategy.GetIndex()] = profile[strategy];
+	    int st = 1;
+	    for (Array<GameStrategy>::const_iterator strategy = profile.GetSupport().Strategies(profile.GetGame()->GetPlayer(2)).begin();
+		 strategy != profile.GetSupport().Strategies(profile.GetGame()->GetPlayer(2)).end();
+		 ++st, ++strategy) {
+	      probs[st] = profile[*strategy];
 	    }
 	    key2.Append(probs);
 	  }
@@ -270,9 +272,11 @@ template <class T> void Solve(const StrategySupport &p_support)
 	    vert2id[i2] = id2;
 
 	    Vector<T> probs(profile.GetSupport().NumStrategies(1));
-	    for (SupportStrategyIterator strategy = profile.GetSupport().Strategies(profile.GetGame()->GetPlayer(1));
-		 !strategy.AtEnd(); strategy++) {
-	      probs[strategy.GetIndex()] = profile[strategy];
+	    int st = 1;
+	    for (Array<GameStrategy>::const_iterator strategy = profile.GetSupport().Strategies(profile.GetGame()->GetPlayer(1)).begin();
+		 strategy != profile.GetSupport().Strategies(profile.GetGame()->GetPlayer(1)).end();
+		 ++st, ++strategy) {
+	      probs[st] = profile[*strategy];
 	    }
 	    key1.Append(probs);
 	  }
