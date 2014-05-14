@@ -381,19 +381,24 @@ void GameTableRep::RebuildTable(void)
 void GameTableRep::IndexStrategies(void)
 {
   long offset = 1L;
-
-  for (int pl = 1; pl <= m_players.Length(); pl++)  {
-    for (GameStrategyIterator strategy(m_players[pl]->m_strategies);
-	 !strategy.AtEnd(); strategy++) {
-      strategy->m_number = strategy.GetIndex();
-      strategy->m_offset = (strategy.GetIndex() - 1) * offset;
+  for (GamePlayers::const_iterator player = m_players.begin();
+       player != m_players.end(); ++player)  {
+    int st = 1;
+    for (Array<GameStrategyRep *>::const_iterator strategy = player->m_strategies.begin();
+	 strategy != player->m_strategies.end(); ++st, ++strategy) {
+      strategy->m_number = st;
+      strategy->m_offset = (st - 1) * offset;
     }
-    offset *= m_players[pl]->NumStrategies();
+    offset *= player->m_strategies.size();
   }
 
-  for (int pl = 1, id = 1; pl <= m_players.Length(); pl++) {
-    for (int st = 1; st <= m_players[pl]->m_strategies.Length(); 
-	 m_players[pl]->m_strategies[st++]->m_id = id++);
+  int id = 1;
+  for (GamePlayers::const_iterator player = m_players.begin();
+       player != m_players.end(); ++player) {
+    for (Array<GameStrategyRep *>::const_iterator strategy = player->m_strategies.begin();
+	 strategy != player->m_strategies.end(); ++strategy) {
+      strategy->m_id = id++;
+    }
   }
 }
 
