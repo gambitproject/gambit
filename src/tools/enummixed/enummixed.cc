@@ -194,87 +194,82 @@ template <class T> void Solve(const StrategySupport &p_support)
   int i = 0;
   int id1 = 0, id2 = 0;
 
-  try {
-    for (int i2 = 2; i2 <= v2; i2++) {
-      BFS<T> bfs1 = verts2[i2];
-      i++;
-      for (int i1 = 2; i1 <= v1; i1++) {
-	BFS<T> bfs2 = verts1[i1];
+  for (int i2 = 2; i2 <= v2; i2++) {
+    BFS<T> bfs1 = verts2[i2];
+    i++;
+    for (int i1 = 2; i1 <= v1; i1++) {
+      BFS<T> bfs2 = verts1[i1];
 	
-	// check if solution is nash 
-	// need only check complementarity, since it is feasible
-	bool nash = true;
-	for (int k = 1; nash && k <= p_support.NumStrategies(1); k++) {
-	  if (bfs1.count(k) && bfs2.count(-k)) {
-	    nash = nash && EqZero(bfs1[k] * bfs2[-k]);
-	  }
-	}
-
-	for (int k = 1; nash && k <= p_support.NumStrategies(2); k++) {
-	  if (bfs2.count(k) && bfs1.count(-k)) {
-	    nash = nash && EqZero(bfs2[k] * bfs1[-k]);
-	  }
-	}
-
-	if (nash) {
-	  MixedStrategyProfile<T> profile(p_support.NewMixedStrategyProfile<T>());
-	  T sum = (T) 0;
-	  for (int k = 1; k <= p_support.NumStrategies(1); k++) {
-	    profile[p_support.GetStrategy(1, k)] = (T) 0;
-	    if (bfs1.count(k)) {
-	      profile[p_support.GetStrategy(1, k)] = -bfs1[k];
-	      sum += profile[p_support.GetStrategy(1, k)];
-	    }
-	  } 
-	  
-	  for (int k = 1; k <= p_support.NumStrategies(1); k++) {
-	    if (bfs1.count(k)) { 
-	      profile[p_support.GetStrategy(1, k)] /= sum;
-	    }
-	  }
-	  
-	  sum = (T) 0;
-	  for (int k = 1; k <= p_support.NumStrategies(2); k++) {
-	    profile[p_support.GetStrategy(2, k)] = (T) 0;
-	    if (bfs2.count(k)) {
-	      profile[p_support.GetStrategy(2, k)] = -bfs2[k];
-	      sum += profile[p_support.GetStrategy(2, k)];
-	    }
-	  } 
-	  
-	  for (int k = 1; k <= p_support.NumStrategies(2); k++) {
-	    if (bfs2.count(k)) { 
-	      profile[p_support.GetStrategy(2, k)] /= sum;
-	    }
-	  }
-
-	  PrintProfile(std::cout, "NE", profile.ToFullSupport());
-	  
-	  // note: The keys give the mixed strategy associated with each node. 
-	  //       The keys should also keep track of the basis
-	  //       As things stand now, two different bases could lead to
-	  //       the same key... BAD!
-	  if (vert1id[i1] == 0) {
-	    id1++;
-	    vert1id[i1] = id1;
-	    key2.push_back(profile[profile.GetGame()->GetPlayer(2)]);
-	  }
-	  if (vert2id[i2] == 0) {
-	    id2++;
-	    vert2id[i2] = id2;
-	    key1.push_back(profile[profile.GetGame()->GetPlayer(1)]);
-	  }
-	  node1.Append(vert2id[i2]);
-	  node2.Append(vert1id[i1]);
+      // check if solution is nash 
+      // need only check complementarity, since it is feasible
+      bool nash = true;
+      for (int k = 1; nash && k <= p_support.NumStrategies(1); k++) {
+	if (bfs1.count(k) && bfs2.count(-k)) {
+	  nash = nash && EqZero(bfs1[k] * bfs2[-k]);
 	}
       }
-    }
-    if (g_showConnect) {
-      GetCliques(std::cout, p_support, node1, key1, v1, node2, key2, v2);
+
+      for (int k = 1; nash && k <= p_support.NumStrategies(2); k++) {
+	if (bfs2.count(k) && bfs1.count(-k)) {
+	  nash = nash && EqZero(bfs2[k] * bfs1[-k]);
+	}
+      }
+
+      if (nash) {
+	MixedStrategyProfile<T> profile(p_support.NewMixedStrategyProfile<T>());
+	T sum = (T) 0;
+	for (int k = 1; k <= p_support.NumStrategies(1); k++) {
+	  profile[p_support.GetStrategy(1, k)] = (T) 0;
+	  if (bfs1.count(k)) {
+	    profile[p_support.GetStrategy(1, k)] = -bfs1[k];
+	    sum += profile[p_support.GetStrategy(1, k)];
+	  }
+	} 
+	  
+	for (int k = 1; k <= p_support.NumStrategies(1); k++) {
+	  if (bfs1.count(k)) { 
+	    profile[p_support.GetStrategy(1, k)] /= sum;
+	  }
+	}
+	  
+	sum = (T) 0;
+	for (int k = 1; k <= p_support.NumStrategies(2); k++) {
+	  profile[p_support.GetStrategy(2, k)] = (T) 0;
+	  if (bfs2.count(k)) {
+	    profile[p_support.GetStrategy(2, k)] = -bfs2[k];
+	    sum += profile[p_support.GetStrategy(2, k)];
+	  }
+	} 
+	  
+	for (int k = 1; k <= p_support.NumStrategies(2); k++) {
+	  if (bfs2.count(k)) { 
+	    profile[p_support.GetStrategy(2, k)] /= sum;
+	  }
+	}
+
+	PrintProfile(std::cout, "NE", profile.ToFullSupport());
+	  
+	// note: The keys give the mixed strategy associated with each node. 
+	//       The keys should also keep track of the basis
+	//       As things stand now, two different bases could lead to
+	//       the same key... BAD!
+	if (vert1id[i1] == 0) {
+	  id1++;
+	  vert1id[i1] = id1;
+	  key2.push_back(profile[profile.GetGame()->GetPlayer(2)]);
+	}
+	if (vert2id[i2] == 0) {
+	  id2++;
+	  vert2id[i2] = id2;
+	  key1.push_back(profile[profile.GetGame()->GetPlayer(1)]);
+	}
+	node1.Append(vert2id[i2]);
+	node2.Append(vert1id[i1]);
+      }
     }
   }
-  catch (...) {
-    // stop processing, just return equilibria found (if any)
+  if (g_showConnect) {
+    GetCliques(std::cout, p_support, node1, key1, v1, node2, key2, v2);
   }
 }
 
