@@ -27,116 +27,24 @@
 #include <fstream>
 #include <cerrno>
 #include "libgambit/libgambit.h"
-#include "libgambit/subgame.h"
+#include "libgambit/nash.h"
 
 using namespace Gambit;
 
-template <class T>
-void PrintProfile(std::ostream &p_stream,
-		  const MixedBehavProfile<T> &p_profile)
-{
-  p_stream << "NE,";
-  for (int i = 1; i <= p_profile.Length(); i++) {
-    p_stream << p_profile[i];
-    if (i < p_profile.Length()) {
-      p_stream << ',';
-    }
-  }
-
-  p_stream << std::endl;
-}
-
-template <class T> class MixedStrategyRenderer {
+class NashEnumPureStrategySolver : public NashStrategySolver<Rational> {
 public:
-  virtual ~MixedStrategyRenderer() { }
-  virtual void Render(const MixedStrategyProfile<T> &p_profile) = 0;
+  NashEnumPureStrategySolver(shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0) 
+    : NashStrategySolver<Rational>(p_onEquilibrium) { }
+  virtual ~NashEnumPureStrategySolver()  { }
+
+  List<MixedStrategyProfile<Rational> > Solve(const StrategySupport &p_support) const;
 };
-
-template <class T> 
-class MixedStrategyNullRenderer : public MixedStrategyRenderer<T> {
-public:
-  virtual ~MixedStrategyNullRenderer() { }
-  virtual void Render(const MixedStrategyProfile<T> &p_profile) { }
-};
-
-template <class T>
-class MixedStrategyCSVRenderer : public MixedStrategyRenderer<T> {
-private:
-  std::ostream &m_stream;
-
-public:
-  MixedStrategyCSVRenderer(std::ostream &p_stream)
-    : m_stream(p_stream) { }
-  virtual ~MixedStrategyCSVRenderer() { }
-  virtual void Render(const MixedStrategyProfile<T> &p_profile);
-};
-
-template <class T>
-void MixedStrategyCSVRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile)
-{
-  m_stream << "NE,";
-  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
-    m_stream << p_profile[i];
-    if (i < p_profile.MixedProfileLength()) {
-      m_stream << ',';
-    }
-  }
-  m_stream << std::endl;
-}
-
-//
-// Render mixed strategies as their behavior strategy equivalents
-//
-template <class T>
-class MixedStrategyAsBehavCSVRenderer : public MixedStrategyRenderer<T> {
-private:
-  std::ostream &m_stream;
-
-public:
-  MixedStrategyAsBehavCSVRenderer(std::ostream &p_stream)
-    : m_stream(p_stream) { }
-  virtual ~MixedStrategyAsBehavCSVRenderer() { }
-  virtual void Render(const MixedStrategyProfile<T> &p_profile);
-};
-
-template <class T>
-void MixedStrategyAsBehavCSVRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile)
-{
-  MixedBehavProfile<T> behav(p_profile);
-  m_stream << "NE,";
-  for (int i = 1; i <= behav.Length(); i++) {
-    m_stream << behav[i];
-    if (i < behav.Length()) {
-      m_stream << ',';
-    }
-  }
-  m_stream << std::endl;
-}
-
-
-class NashEnumPureStrategySolver {
-private:
-  MixedStrategyRenderer<Rational> *m_onEquilibrium;
-
-public:
-  NashEnumPureStrategySolver(MixedStrategyRenderer<Rational> *p_onEquilibrium = 0);
-  ~NashEnumPureStrategySolver()  { delete m_onEquilibrium; }
-  List<MixedStrategyProfile<Rational> > Solve(const Game &p_game) const;
-};
-
-NashEnumPureStrategySolver::NashEnumPureStrategySolver(MixedStrategyRenderer<Rational> *p_onEquilibrium /* = 0 */)
-  : m_onEquilibrium(p_onEquilibrium)
-{
-  if (!m_onEquilibrium) {
-    m_onEquilibrium = new MixedStrategyNullRenderer<Rational>();
-  }
-}
 
 List<MixedStrategyProfile<Rational> >
-NashEnumPureStrategySolver::Solve(const Game &p_game) const
+NashEnumPureStrategySolver::Solve(const StrategySupport &p_support) const
 {
   List<MixedStrategyProfile<Rational> > solutions;
-  for (StrategyIterator citer(p_game); !citer.AtEnd(); citer++) {
+  for (StrategyIterator citer(p_support); !citer.AtEnd(); citer++) {
     if ((*citer)->IsNash()) {
       MixedStrategyProfile<Rational> profile = (*citer)->ToMixedStrategyProfile();
       m_onEquilibrium->Render(profile);
@@ -147,65 +55,17 @@ NashEnumPureStrategySolver::Solve(const Game &p_game) const
 }
 
 
-
-template <class T> class BehavStrategyRenderer {
+class NashEnumPureAgentSolver : public NashBehavSolver<Rational> {
 public:
-  virtual ~BehavStrategyRenderer() { }
-  virtual void Render(const MixedBehavProfile<T> &p_profile) = 0;
-};
+  NashEnumPureAgentSolver(shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
+    : NashBehavSolver<Rational>(p_onEquilibrium) { }
+  virtual ~NashEnumPureAgentSolver()  { }
 
-template <class T> 
-class BehavStrategyNullRenderer : public BehavStrategyRenderer<T> {
-public:
-  virtual ~BehavStrategyNullRenderer() { }
-  virtual void Render(const MixedBehavProfile<T> &p_profile) { }
-};
-
-template <class T>
-class BehavStrategyCSVRenderer : public BehavStrategyRenderer<T> {
-private:
-  std::ostream &m_stream;
-
-public:
-  BehavStrategyCSVRenderer(std::ostream &p_stream)
-    : m_stream(p_stream) { }
-  virtual ~BehavStrategyCSVRenderer() { }
-  virtual void Render(const MixedBehavProfile<T> &p_profile);
-};
-
-template <class T>
-void BehavStrategyCSVRenderer<T>::Render(const MixedBehavProfile<T> &p_profile)
-{
-  m_stream << "NE,";
-  for (int i = 1; i <= p_profile.Length(); i++) {
-    m_stream << p_profile[i];
-    if (i < p_profile.Length()) {
-      m_stream << ',';
-    }
-  }
-  m_stream << std::endl;
-}
-
-class NashEnumPureBehavSolver {
-private:
-  BehavStrategyRenderer<Rational> *m_onEquilibrium;
-
-public:
-  NashEnumPureBehavSolver(BehavStrategyRenderer<Rational> *p_onEquilibrium = 0);
-  ~NashEnumPureBehavSolver()  { delete m_onEquilibrium; }
   List<MixedBehavProfile<Rational> > Solve(const BehavSupport &) const;
 };
 
-NashEnumPureBehavSolver::NashEnumPureBehavSolver(BehavStrategyRenderer<Rational> *p_onEquilibrium /* = 0 */)
-  : m_onEquilibrium(p_onEquilibrium)
-{
-  if (!m_onEquilibrium) {
-    m_onEquilibrium = new BehavStrategyNullRenderer<Rational>();
-  }
-}
-
 List<MixedBehavProfile<Rational> > 
-NashEnumPureBehavSolver::Solve(const BehavSupport &p_support) const
+NashEnumPureAgentSolver::Solve(const BehavSupport &p_support) const
 {
   List<MixedBehavProfile<Rational> > solutions;
   for (BehavIterator citer(p_support); !citer.AtEnd(); citer++) {
@@ -216,13 +76,6 @@ NashEnumPureBehavSolver::Solve(const BehavSupport &p_support) const
     }
   }
   return solutions;
-}
-
-List<MixedBehavProfile<Rational> > 
-SubsolveBehav(const BehavSupport &p_support)
-{
-  NashEnumPureBehavSolver algorithm = NashEnumPureBehavSolver();
-  return algorithm.Solve(p_support);
 }
 
 
@@ -241,8 +94,8 @@ void PrintHelp(char *progname)
   std::cerr << "With no options, locates all Nash equilibria in pure strategies.\n\n";
 
   std::cerr << "Options:\n";
-  std::cerr << "  -S               use strategic game (default)\n";
-  std::cerr << "  -A               return agent form equilibria\n";
+  std::cerr << "  -S               report equilibria in strategies even for extensive games\n";
+  std::cerr << "  -A               compute agent form equilibria\n";
   std::cerr << "  -P               find only subgame-perfect equilibria\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
@@ -254,7 +107,7 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false, useStrategic = false, useAgent = false, bySubgames = false;
+  bool quiet = false, reportStrategic = false, solveAgent = false, bySubgames = false;
 
   int long_opt_index = 0;
   struct option long_options[] = {
@@ -268,10 +121,10 @@ int main(int argc, char *argv[])
     case 'v':
       PrintBanner(std::cerr); exit(1);
     case 'S':
-      useStrategic = true;
+      reportStrategic = true;
       break;
     case 'A':
-      useAgent = true;
+      solveAgent = true;
       break;
     case 'P':
       bySubgames = true;
@@ -314,31 +167,41 @@ int main(int argc, char *argv[])
 
   try {
     Game game = ReadGame(*input_stream);
+    shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+    if (reportStrategic || !game->IsTree()) {
+      renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
+    }
+    else {
+      renderer = new BehavStrategyCSVRenderer<Rational>(std::cout);
+    }
 
     if (game->IsTree())  {
       if (bySubgames) {
-	List<MixedBehavProfile<Rational> > solutions;
-	solutions = SolveBySubgames<Rational>(BehavSupport(game), 
-					      &SubsolveBehav);
-	for (int i = 1; i <= solutions.Length(); i++) {
-	  PrintProfile(std::cout, solutions[i]);
+	shared_ptr<NashBehavSolver<Rational> > stage;
+        if (solveAgent) {
+	  stage = new NashEnumPureAgentSolver();
 	}
-      }
-      else if (useStrategic)  {
-	NashEnumPureStrategySolver algorithm = NashEnumPureStrategySolver(new MixedStrategyCSVRenderer<Rational>(std::cout));
-	algorithm.Solve(game);
-      }
-      else if (useAgent) {
-	NashEnumPureBehavSolver algorithm = NashEnumPureBehavSolver(new BehavStrategyCSVRenderer<Rational>(std::cout));
+	else {
+	  shared_ptr<NashStrategySolver<Rational> > substage = 
+	    new NashEnumPureStrategySolver();
+	  stage = new NashBehavViaStrategySolver<Rational>(substage);
+	}
+	SubgameNashBehavSolver<Rational> algorithm(stage, renderer);
 	algorithm.Solve(game);
       }
       else {
-	NashEnumPureStrategySolver algorithm = NashEnumPureStrategySolver(new MixedStrategyAsBehavCSVRenderer<Rational>(std::cout));
-	algorithm.Solve(game);
+	if (solveAgent) {
+	  NashEnumPureAgentSolver algorithm(renderer);
+	  algorithm.Solve(game);
+	}
+	else {
+	  NashEnumPureStrategySolver algorithm(renderer);
+	  algorithm.Solve(game);
+	}
       }
     }
     else {
-      NashEnumPureStrategySolver algorithm = NashEnumPureStrategySolver(new MixedStrategyCSVRenderer<Rational>(std::cout));
+      NashEnumPureStrategySolver algorithm(renderer);
       algorithm.Solve(game);
     }
     return 0;
@@ -347,8 +210,8 @@ int main(int argc, char *argv[])
     std::cerr << "Error: Game not in a recognized format.\n";
     return 1;
   }
-  catch (...) {
-    std::cerr << "Error: An internal error occurred.\n";
+  catch (std::runtime_error &e) {
+    std::cerr << "Error: " << e.what() << std::endl;
     return 1;
   }
 }

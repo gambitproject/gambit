@@ -349,6 +349,8 @@ libgambit_la_SOURCES = \
 	src/libgambit/stratspt.h \
 	src/libgambit/subgame.cc \
 	src/libgambit/subgame.h \
+	src/libgambit/nash.cc \
+	src/libgambit/nash.h \
 	src/libgambit/file.cc \
 	src/libgambit/libgambit.h \
 	${libagg_la_SOURCES}

@@ -107,6 +107,7 @@ public:
 
 } // end namespace Gambit
 
+#include "shared_ptr.h"
 #include "array.h"
 #include "list.h"
 #include "recarray.h"
