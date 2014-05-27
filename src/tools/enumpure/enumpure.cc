@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpure/enumpure.cc
 // Compute pure-strategy equilibria in extensive form games
@@ -82,7 +82,7 @@ NashEnumPureAgentSolver::Solve(const BehavSupport &p_support) const
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Search for Nash equilibria in pure strategies\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2013, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2014, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 

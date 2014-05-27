@@ -307,6 +307,7 @@ libgambit_la_SOURCES = \
 	src/libgambit/integer.h \
 	src/libgambit/rational.cc \
 	src/libgambit/rational.h \
+	src/libgambit/shared_ptr.h \
 	src/libgambit/array.h \
 	src/libgambit/list.h \
 	src/libgambit/vector.cc \
