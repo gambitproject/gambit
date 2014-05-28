@@ -115,6 +115,19 @@ private:
   int m_numDecimals;
 };
 
+template <class T>
+class BehavStrategyDetailRenderer : public BehavStrategyRenderer<T> {
+public:
+  BehavStrategyDetailRenderer(std::ostream &p_stream, int p_numDecimals = 6)
+    : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
+  virtual ~BehavStrategyDetailRenderer() { }
+  virtual void Render(const MixedBehavProfile<T> &p_profile) const;
+
+private:
+  std::ostream &m_stream;
+  int m_numDecimals;
+};
+
 //------------------------------------------------------------------------
 //                      Algorithm base classes
 //------------------------------------------------------------------------

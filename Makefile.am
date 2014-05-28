@@ -637,6 +637,7 @@ gambit_lcp_SOURCES = \
 	src/tools/lcp/lhtab.h \
 	src/tools/lcp/lhtab.imp \
 	src/tools/lcp/efglcp.cc \
+	src/tools/lcp/efglcp.h \
 	src/tools/lcp/nfglcp.cc \
 	src/tools/lcp/nfglcp.h \
 	src/tools/lcp/lcp.cc
