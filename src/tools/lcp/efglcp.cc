@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <iostream>
 #include "libgambit/libgambit.h"
+#include "libgambit/nash.h"
 
 using namespace Gambit;
 
@@ -35,23 +36,6 @@ extern int g_numDecimals;
 extern int g_stopAfter;
 extern int g_maxDepth;
 extern bool g_printDetail;
-
-namespace {
-//
-// Pseudo-exception raised when maximum number of equilibria to compute
-// has been reached.  A convenience for unraveling a potentially
-// deep recursion.
-//
-// FIXME: There is an identical twin of this in nfglcp.cc.  This should be
-// refactored into a more generally-useful and generally-visible location.
-//
-class EquilibriumLimitReachedEfg : public Exception {
-public:
-  virtual ~EquilibriumLimitReachedEfg() throw() { }
-  const char *what(void) const throw() { return "Reached target number of equilibria"; }
-};
-
-} // end anonymous namespace
 
 
 void PrintProfile(std::ostream &p_stream,
@@ -278,7 +262,7 @@ SolveEfgLcp<T>::Solve(const BehavSupport &p_support, bool p_print /*= true*/)
       try {
 	AllLemke(p_support, ns1+ns2+1, tab, 0, A, p_print, solutions);
       }
-      catch (EquilibriumLimitReachedEfg &) {
+      catch (NashEquilibriumLimitReached &) {
 	// Just handle this silently; equilibria are already printed
 	// as they are found.
       }
@@ -379,7 +363,7 @@ SolveEfgLcp<T>::AllLemke(const BehavSupport &p_support,
 	  }
 	  p_solutions.Append(profile);
 	  if (g_stopAfter > 0 && p_solutions.Length() >= g_stopAfter) {
-	    throw EquilibriumLimitReachedEfg();
+	    throw NashEquilibriumLimitReached();
 	  }
 	}
       }
