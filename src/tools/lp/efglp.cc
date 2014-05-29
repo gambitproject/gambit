@@ -294,44 +294,6 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-//
-// Sets the action probabilities at unreached information sets
-// which are left undefined by the sequence form method to
-// the centroid.  This is useful for the LiapValue, since that
-// implements a penalty for having information sets where the
-// action probabilities do not sum to one.
-//
-// This is really a hack; in the future, behavior profiles need to be
-// "smarter" about the possibility they are not defined off the
-// equilibrium path.
-//
-template <class T>
-void UndefinedToCentroid(MixedBehavProfile<T> &p_profile)
-{
-  Game efg = p_profile.GetGame();
-
-  for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-    GamePlayer player = efg->GetPlayer(pl);
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      GameInfoset infoset = player->GetInfoset(iset);
-      
-      if (p_profile.GetRealizProb(infoset) > (T) 0) {
-	continue;
-      }
-	  
-      T total = (T) 0;
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-	total += p_profile.GetActionProb(infoset->GetAction(act));
-      }
-
-      if (total == (T) 0) {
-	for (int act = 1; act <= infoset->NumActions(); act++) {
-	  p_profile(pl, iset, act) = (T) 1.0 / (T) infoset->NumActions();
-	}
-      }
-    }
-  }
-}
 
 //
 // Recursively construct the behavior profile from the sequence form
@@ -406,7 +368,7 @@ void SequenceToBehavior(const GameData &p_data,
   GetBehavior(p_data, p_support,
 	      profile, p_primal, p_dual,
 	      p_support.GetGame()->GetRoot(), 1, 1);
-  UndefinedToCentroid(profile);
+  profile.UndefinedToCentroid();
   PrintProfile(std::cout, "NE", profile);
   //PrintProfileDetail(std::cout, profile);
 }

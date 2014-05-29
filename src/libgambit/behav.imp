@@ -238,6 +238,30 @@ template <class T> void MixedBehavProfile<T>::Centroid(void)
       }
 }
 
+template <class T>
+void MixedBehavProfile<T>::UndefinedToCentroid(void)
+{
+  Game efg = m_support.GetGame();
+  for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
+    GamePlayer player = efg->GetPlayer(pl);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+      if (GetRealizProb(infoset) > (T) 0) {
+	continue;
+      }
+      T total = (T) 0;
+      for (int act = 1; act <= m_support.NumActions(pl, iset); act++) {
+	total += GetActionProb(m_support.GetAction(pl, iset, act));
+      }
+      if (total == (T) 0) {
+	for (int act = 1; act <= m_support.NumActions(pl, iset); act++) {
+	  (*this)(pl, iset, act) = (T) 1.0 / (T) m_support.NumActions(pl, iset);
+	}
+      }
+    }
+  }
+}
+
 //========================================================================
 //              MixedBehavProfile<T>: Interesting quantities
 //========================================================================

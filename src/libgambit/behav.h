@@ -135,6 +135,8 @@ public:
   void Invalidate(void) const { m_cacheValid = false; }
   /// Set the profile to the centroid
   void Centroid(void);
+  /// Set the behavior at any undefined information set to the centroid
+  void UndefinedToCentroid(void);
   //@}
 
   /// @name General data access

@@ -32,40 +32,6 @@ using namespace Gambit;
 #include "lhtab.h"
 #include "lemketab.h"
 
-//
-// Sets the action probabilities at unreached information sets
-// which are left undefined by the sequence form method to
-// the centroid.  This helps IsNash and LiapValue work correctly.
-//
-template <class T>
-void UndefinedToCentroid(MixedBehavProfile<T> &p_profile)
-{
-  Game efg = p_profile.GetGame();
-
-  for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-    GamePlayer player = efg->GetPlayer(pl);
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      GameInfoset infoset = player->GetInfoset(iset);
-      
-      if (p_profile.GetRealizProb(infoset) > (T) 0) {
-	continue;
-      }
-	  
-      T total = (T) 0;
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-	total += p_profile.GetActionProb(infoset->GetAction(act));
-      }
-
-      if (total == (T) 0) {
-	for (int act = 1; act <= infoset->NumActions(); act++) {
-	  p_profile(pl, iset, act) = (T) 1.0 / (T) infoset->NumActions();
-	}
-      }
-    }
-  }
-}
-
-
 template <class T> class NashLcpBehavSolver<T>::Solution {
 public:
   int ns1, ns2, ni1, ni2;
@@ -177,7 +143,7 @@ NashLcpBehavSolver<T>::Solve(const BehavSupport &p_support) const
       GetProfile(p_support, tab, 
 		 profile,sol,p_support.GetGame()->GetRoot(), 1, 1,
 		 solution);
-      UndefinedToCentroid(profile);
+      profile.UndefinedToCentroid();
       solution.m_equilibria.push_back(profile);
       this->m_onEquilibrium->Render(profile);
     }
@@ -236,7 +202,7 @@ NashLcpBehavSolver<T>::AllLemke(const BehavSupport &p_support,
       GetProfile(p_support, BCopy, profile, sol,
 		 p_support.GetGame()->GetRoot(), 1, 1,
 		 p_solution);
-      UndefinedToCentroid(profile);
+      profile.UndefinedToCentroid();
       if (newsol) {
 	this->m_onEquilibrium->Render(profile);
 	p_solution.m_equilibria.push_back(profile);
