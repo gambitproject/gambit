@@ -108,7 +108,8 @@ int main(int argc, char *argv[])
 {
   opterr = 0;
   bool quiet = false, reportStrategic = false, solveAgent = false, bySubgames = false;
-
+  bool printDetail = false;
+  
   int long_opt_index = 0;
   struct option long_options[] = {
     { "help", 0, NULL, 'h'   },
@@ -116,10 +117,13 @@ int main(int argc, char *argv[])
     { 0,    0,    0,    0   }
   };
   int c;
-  while ((c = getopt_long(argc, argv, "vhqASP", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "DvhqASP", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr); exit(1);
+    case 'D':
+      printDetail = true;
+      break;
     case 'S':
       reportStrategic = true;
       break;
@@ -169,10 +173,20 @@ int main(int argc, char *argv[])
     Game game = ReadGame(*input_stream);
     shared_ptr<StrategyProfileRenderer<Rational> > renderer;
     if (reportStrategic || !game->IsTree()) {
-      renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
+      if (printDetail) {
+	renderer = new MixedStrategyDetailRenderer<Rational>(std::cout);
+      }
+      else {
+	renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
+      }
     }
     else {
-      renderer = new BehavStrategyCSVRenderer<Rational>(std::cout);
+      if (printDetail) {
+	renderer = new BehavStrategyDetailRenderer<Rational>(std::cout);
+      }
+      else {
+	renderer = new BehavStrategyCSVRenderer<Rational>(std::cout);
+      }
     }
 
     if (game->IsTree())  {

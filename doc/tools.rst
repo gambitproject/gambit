@@ -46,6 +46,16 @@ pure-strategy Nash equilibria.
    equilibria are defined in terms of reduced strategic form
    strategies.
 
+.. cmdoption:: -D
+
+   .. versionadded:: 14.0.2
+
+   The default output format for computed equilibria is a
+   comma-separated list of strategy or action probabilities, suitable
+   for postprocessing by automated tools.  Specifying `-D` instead
+   causes the program to output greater detail on each equilbrium
+   profile computed.
+
 .. cmdoption:: -A
 
    .. versionadded:: 14.0.2
@@ -438,6 +448,16 @@ game.
    games; this switch instructs the program to use reduced strategic game
    strategies for extensive games. (This has no effect for strategic
    games, since a strategic game is its own reduced strategic game.)
+
+.. cmdoption:: -D
+
+   .. versionadded:: 14.0.2
+
+   The default output format for computed equilibria is a
+   comma-separated list of strategy or action probabilities, suitable
+   for postprocessing by automated tools.  Specifying `-D` instead
+   causes the program to output greater detail on each equilbrium
+   profile computed.
 
 .. cmdoption:: -P
 
