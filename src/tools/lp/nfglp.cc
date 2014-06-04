@@ -25,10 +25,9 @@
 #include <iostream>
 #include "libgambit/libgambit.h"
 #include "liblinear/lpsolve.h"
+#include "nfglp.h"
 
 using namespace Gambit;
-
-extern int g_numDecimals;
 
 //
 // The routine to actually solve the LP
@@ -44,9 +43,10 @@ extern int g_numDecimals;
 // replace this function.
 //
 template <class T> bool
-SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c,
-	int nequals,
-	Array<T> &p_primal, Array<T> &p_dual)
+NashLpStrategySolver<T>::SolveLP(const Matrix<T> &A, 
+				 const Vector<T> &b, const Vector<T> &c,
+				 int nequals,
+				 Array<T> &p_primal, Array<T> &p_dual) const
 {
   LPSolve<T> LP(A, b, c, nequals);
   if (!LP.IsAborted()) {
@@ -77,85 +77,28 @@ SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c,
   }
 }
 
-void PrintProfile(std::ostream &p_stream,
-		  const std::string &p_label,
-		  const MixedStrategyProfile<double> &p_profile)
-{
-  p_stream << p_label;
-  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
-    p_stream.setf(std::ios::fixed);
-    p_stream << "," << std::setprecision(g_numDecimals) << p_profile[i];
-  }
-
-  p_stream << std::endl;
-}
-
-void PrintProfile(std::ostream &p_stream,
-		  const std::string &p_label,
-		  const MixedStrategyProfile<Rational> &p_profile)
-{
-  p_stream << p_label;
-  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
-    p_stream << "," << p_profile[i];
-  }
-
-  p_stream << std::endl;
-}
-
-
-//
-// Convert the LP solution represented by the vectors
-// (p_primal, p_dual) back to a strategy profile.
-// The primal vector is the mixed strategy for player 1, and the
-// dual the mixed strategy for player 2.
-//
-
-template <class T>
-void PrintSolution(const StrategySupport &p_support,
-		   const Array<T> &p_primal,
-		   const Array<T> &p_dual)
-{
-  int n1 = p_support.NumStrategies(1);
-  int n2 = p_support.NumStrategies(2);
-
-  MixedStrategyProfile<T> profile(p_support.NewMixedStrategyProfile<T>());
-
-  for (int j = 1; j <= n1; j++) {
-    profile[p_support.GetStrategy(1, j)] = p_primal[j];
-  }
-
-  for (int j = 1; j <= n2; j++) {
-    profile[p_support.GetStrategy(2, j)] = p_dual[j];
-  }
-
-  PrintProfile(std::cout, "NE", profile);
-}
-
-
 //
 // Compute and print one equilibrium by solving a linear program based
 // on the strategic game representation.
 //
-template <class T>
-void SolveStrategic(const Game &p_game)
+template <class T> List<MixedStrategyProfile<T> > 
+NashLpStrategySolver<T>::Solve(const StrategySupport &p_support) const
 {
-  StrategySupport support(p_game);
-
-  int m = support.NumStrategies(1);
-  int k = support.NumStrategies(2);
+  int m = p_support.NumStrategies(1);
+  int k = p_support.NumStrategies(2);
 
   Matrix<T> A(1,k+1,1,m+1);
   Vector<T> b(1,k+1);
   Vector<T> c(1,m+1);
-  PureStrategyProfile profile = support.GetGame()->NewPureStrategyProfile();
+  PureStrategyProfile profile = p_support.GetGame()->NewPureStrategyProfile();
 
-  T minpay = p_game->GetMinPayoff() - Rational(1);
+  Rational minpay = p_support.GetGame()->GetMinPayoff() - Rational(1);
 
   for (int i = 1; i <= k; i++)  {
-    profile->SetStrategy(support.GetStrategy(2, i));
+    profile->SetStrategy(p_support.GetStrategy(2, i));
     for (int j = 1; j <= m; j++)  {
-      profile->SetStrategy(support.GetStrategy(1, j));
-      A(i, j) = Rational(minpay) - profile->GetPayoff(1);
+      profile->SetStrategy(p_support.GetStrategy(1, j));
+      A(i, j) = minpay - profile->GetPayoff(1);
     }
     A(i,m+1) = (T) 1;
   }
@@ -170,10 +113,26 @@ void SolveStrategic(const Game &p_game)
   c[m+1] = (T) 1;
   
   Array<T> primal(A.NumColumns()), dual(A.NumRows());
-  if (SolveLP(A, b, c, 1, primal, dual)) {
-    PrintSolution(support, primal, dual);
+  if (!SolveLP(A, b, c, 1, primal, dual)) {
+    return List<MixedStrategyProfile<T> >();
   }
+
+  int n1 = p_support.NumStrategies(1);
+  int n2 = p_support.NumStrategies(2);
+  MixedStrategyProfile<T> eqm(p_support.GetGame()->NewMixedStrategyProfile((T) 0));
+
+  for (int j = 1; j <= n1; j++) {
+    eqm[p_support.GetStrategy(1, j)] = primal[j];
+  }
+  for (int j = 1; j <= n2; j++) {
+    eqm[p_support.GetStrategy(2, j)] = dual[j];
+  }
+
+  this->m_onEquilibrium->Render(eqm);
+  List<MixedStrategyProfile<T> > solution;
+  solution.push_back(eqm);
+  return solution;
 }
 
-template void SolveStrategic<double>(const Game &);
-template void SolveStrategic<Rational>(const Game &);
+template class NashLpStrategySolver<double>;
+template class NashLpStrategySolver<Rational>;

@@ -672,6 +672,7 @@ gambit_lp_SOURCES = \
 	${liblinear_la_SOURCES} \
 	src/tools/lp/efglp.cc \
 	src/tools/lp/nfglp.cc \
+	src/tools/lp/nfglp.h \
 	src/tools/lp/lp.cc
 
 

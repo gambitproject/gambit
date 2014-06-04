@@ -28,9 +28,10 @@
 #include <unistd.h>
 #include <getopt.h>
 #include "libgambit/libgambit.h"
+#include "nfglp.h"
 
 template <class T> void SolveExtensive(const Gambit::Game &p_game);
-template <class T> void SolveStrategic(const Gambit::Game &p_game);
+
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -61,7 +62,7 @@ int g_numDecimals = 6;
 int main(int argc, char *argv[])
 {
   int c;
-  bool useFloat = false, useStrategic = false, quiet = false;
+  bool useFloat = false, useStrategic = false, quiet = false, printDetail = false;
 
   int long_opt_index = 0;
   struct option long_options[] = {
@@ -69,13 +70,16 @@ int main(int argc, char *argv[])
     { "version", 0, NULL, 'v'  },
     { 0,    0,    0,    0   }
   };
-  while ((c = getopt_long(argc, argv, "d:vqhS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:DvqhS", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr); exit(1);
     case 'd':
       useFloat = true;
       g_numDecimals = atoi(optarg);
+      break;
+    case 'D':
+      printDetail = true;
       break;
     case 'h':
       PrintHelp(argv[0]);
@@ -131,10 +135,27 @@ int main(int argc, char *argv[])
 
     if (!game->IsTree() || useStrategic) {
       if (useFloat) {
-	SolveStrategic<double>(game);
+	shared_ptr<StrategyProfileRenderer<double> > renderer;
+	if (printDetail)  {
+	  renderer = new MixedStrategyDetailRenderer<double>(std::cout,
+							     g_numDecimals);
+	}
+	else {
+	  renderer = new MixedStrategyCSVRenderer<double>(std::cout, g_numDecimals);
+	}
+	NashLpStrategySolver<double> algorithm(renderer);
+	algorithm.Solve(game);
       }
       else {
-	SolveStrategic<Gambit::Rational>(game);
+	shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+	if (printDetail) {
+	  renderer = new MixedStrategyDetailRenderer<Rational>(std::cout);
+	}
+	else {
+	  renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
+	}
+	NashLpStrategySolver<Rational> algorithm(renderer);
+	algorithm.Solve(game);
       }
     }
     else {
