@@ -70,7 +70,7 @@ MixedBehavProfile<T>::MixedBehavProfile(const Game &p_game)
   m_infosetValues = (T) 0.0;
   m_actionValues = (T) 0.0;
   m_gripe = (T) 0.0;
-  Centroid();
+  SetCentroid();
 }
 
 template <class T> 
@@ -94,7 +94,7 @@ MixedBehavProfile<T>::MixedBehavProfile(const BehavSupport &p_support)
   m_infosetValues = (T) 0.0;
   m_actionValues = (T) 0.0;
   m_gripe = (T) 0.0;
-  Centroid();
+  SetCentroid();
 }
 
 template <class T>
@@ -224,14 +224,12 @@ bool MixedBehavProfile<T>::operator==(const MixedBehavProfile<T> &p_profile) con
 //              MixedBehavProfile<T>: General data access
 //========================================================================
 
-template <class T> void MixedBehavProfile<T>::Centroid(void)
+template <class T> void MixedBehavProfile<T>::SetCentroid(void)
 {
-  T center;
-
   for (int pl = 1; pl <= this->dvlen.Length(); pl++)
     for (int iset = 1; iset <= this->dvlen[pl]; iset++)
       if (m_support.NumActions(pl,iset) > 0) {
-	center = ((T) 1 / (T) m_support.NumActions(pl, iset));
+	T center = ((T) 1 / (T) m_support.NumActions(pl, iset));
 	int act;
 	for (act = 1; act <= this->svlen[this->dvidx[pl] + iset - 1]; act++)
 	  this->dvptr[pl][iset][act] = center;
@@ -257,6 +255,29 @@ void MixedBehavProfile<T>::UndefinedToCentroid(void)
 	for (int act = 1; act <= m_support.NumActions(pl, iset); act++) {
 	  (*this)(pl, iset, act) = (T) 1.0 / (T) m_support.NumActions(pl, iset);
 	}
+      }
+    }
+  }
+}
+
+template <class T>
+void MixedBehavProfile<T>::Normalize(void)
+{
+  Game efg = m_support.GetGame();
+  for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
+    GamePlayer player = efg->GetPlayer(pl);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+      if (GetRealizProb(infoset) > (T) 0) {
+	continue;
+      }
+      T total = (T) 0;
+      for (int act = 1; act <= m_support.NumActions(pl, iset); act++) {
+	total += GetActionProb(m_support.GetAction(pl, iset, act));
+      }
+      if (total == (T) 0) continue;
+      for (int act = 1; act <= m_support.NumActions(pl, iset); act++) {
+	(*this)(pl, iset, act) /= total;
       }
     }
   }

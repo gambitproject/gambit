@@ -142,6 +142,9 @@ cdef class MixedStrategyProfile(object):
                             strategy2.__class__.__name__)
         return self._strategy_value_deriv((<Player>player).player.deref().GetNumber(), strategy1, strategy2)
 
+    def set_centroid(self):   self.profile.SetCentroid()
+    def normalize(self):      self.profile.Normalize()
+
 
 cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
     cdef c_MixedStrategyProfileDouble *profile

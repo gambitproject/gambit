@@ -177,7 +177,7 @@ class MixedProfile(object):
     def __init__(self, game, profile=None):
         self.game = game
         if profile is None:
-            self.profile = [ 1.0 / len(game.choices) for i in game.choices ]
+            self.set_centroid()
         else:
             self.profile = profile[:]
     
@@ -203,7 +203,15 @@ class MixedProfile(object):
         for i in xrange(len(self)):
             p[i] = self[i] + other[i]
         return p
-    
+
+    def set_centroid(self):
+        self.profile = [ 1.0 / len(self.game.choices) for i in self.game.choices ]
+
+    def normalize(self):
+        den = sum(self.profile)
+        if den != 0:
+            self.profile = [ x/den for x in self.profile ]
+                
     def strategy_value(self, st):
         return sum([ prob * self.game.payoff(self.game.choices[st],
                                              self.game.statistics[i])

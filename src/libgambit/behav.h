@@ -134,9 +134,11 @@ public:
   /// Force recomputation of stored quantities
   void Invalidate(void) const { m_cacheValid = false; }
   /// Set the profile to the centroid
-  void Centroid(void);
+  void SetCentroid(void);
   /// Set the behavior at any undefined information set to the centroid
   void UndefinedToCentroid(void);
+  /// Normalize each information set's action probabilities to sum to one
+  void Normalize(void);
   //@}
 
   /// @name General data access

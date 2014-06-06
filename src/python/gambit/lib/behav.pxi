@@ -219,6 +219,9 @@ cdef class MixedBehavProfile(object):
                             action.__class__.__name__)
         return self._regret(action)    
 
+    def set_centroid(self):   self.profile.SetCentroid()
+    def normalize(self):      self.profile.Normalize()
+
 cdef class MixedBehavProfileDouble(MixedBehavProfile):
     cdef c_MixedBehavProfileDouble *profile
 

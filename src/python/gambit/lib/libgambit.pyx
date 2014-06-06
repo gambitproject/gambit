@@ -245,6 +245,8 @@ cdef extern from "libgambit/mixed.h":
         c_Game GetGame()
         int MixedProfileLength()
         c_StrategySupport GetSupport()
+        void SetCentroid()
+        void Normalize()
         double getitem "operator[]"(int) except +IndexError
         double getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
         double GetPayoff(c_GamePlayer)
@@ -258,6 +260,8 @@ cdef extern from "libgambit/mixed.h":
         c_Game GetGame()
         int MixedProfileLength()
         c_StrategySupport GetSupport()
+        void SetCentroid()
+        void Normalize()
         c_Rational getitem "operator[]"(int) except +IndexError
         c_Rational getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
         c_Rational GetPayoff(c_GamePlayer)
@@ -272,6 +276,8 @@ cdef extern from "libgambit/behav.h":
         c_Game GetGame()
         int Length()
         bool IsDefinedAt(c_GameInfoset)
+        void SetCentroid()
+        void Normalize()
         double getitem "operator[]"(int) except +IndexError
         double getaction "operator()"(c_GameAction) except +IndexError
         double GetPayoff(int)
@@ -291,6 +297,8 @@ cdef extern from "libgambit/behav.h":
         c_Game GetGame()
         int Length()
         bool IsDefinedAt(c_GameInfoset)
+        void SetCentroid()
+        void Normalize()
         c_Rational getitem "operator[]"(int) except +IndexError
         c_Rational getaction "operator()"(c_GameAction) except +IndexError
         c_Rational GetPayoff(int)

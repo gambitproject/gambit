@@ -50,7 +50,22 @@ template <class T> void MixedStrategyProfileRep<T>::SetCentroid(void)
   }
 }
 
-
+template <class T> void MixedStrategyProfileRep<T>::Normalize(void)
+{
+  for (GamePlayers::const_iterator player = m_support.Players().begin();
+       player != m_support.Players().end(); ++player) {
+    T sum = (T) 0;
+    for (Array<GameStrategy>::const_iterator strategy = m_support.Strategies(*player).begin();
+	 strategy != m_support.Strategies(*player).end(); ++strategy) {
+      sum += (*this)[*strategy];
+    }
+    if (sum == (T) 0) continue;
+    for (Array<GameStrategy>::const_iterator strategy = m_support.Strategies(*player).begin();
+	 strategy != m_support.Strategies(*player).end(); ++strategy) {
+      (*this)[*strategy] /= sum;
+    }
+  }
+}
 
 //========================================================================
 //                   TreeMixedStrategyProfileRep<T>
