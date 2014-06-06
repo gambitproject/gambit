@@ -520,6 +520,23 @@ points of that set.
    strategies for extensive games. (This has no effect for strategic
    games, since a strategic game is its own reduced strategic game.)
 
+.. cmdoption:: -D
+
+   .. versionadded:: 14.0.3
+
+   The default output format for computed equilibria is a
+   comma-separated list of strategy or action probabilities, suitable
+   for postprocessing by automated tools.  Specifying `-D` instead
+   causes the program to output greater detail on each equilbrium
+   profile computed.
+
+.. cmdoption:: -P
+
+   By default, the program computes Nash equilibria in an extensive
+   game. This switch instructs the program to find only equilibria
+   which are subgame perfect.  (This has no effect for strategic
+   games, since there are no proper subgames of a strategic game.)
+
 .. cmdoption:: -h
 
    Prints a help message listing the available options.
