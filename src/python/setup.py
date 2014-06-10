@@ -36,7 +36,10 @@ libgame = Extension("gambit.lib.libgambit",
                     sources=[ "gambit/lib/libgambit.pyx" ] +
                             glob.glob("gambit/lib/*.pxi") +
                             glob.glob("../libgambit/*.cc") +
-                            glob.glob("../libagg/*.cc"),
+                            glob.glob("../libagg/*.cc") +
+                            glob.glob("../liblinear/*.cc") +
+                            [ "../tools/lcp/nfglcp.cc", "../tools/lcp/lhtab.cc",
+                              "../tools/lcp/lemketab.cc" ],
                     language="c++",
                     include_dirs=[ "../..", ".." ] )
 

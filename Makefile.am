@@ -270,6 +270,7 @@ EXTRA_DIST = \
 	src/python/gambit/lib/libgambit.cpp \
 	src/python/gambit/lib/libgambit.pyx \
 	src/python/gambit/lib/mixed.pxi \
+	src/python/gambit/lib/nash.pxi \
 	src/python/gambit/lib/node.pxi \
 	src/python/gambit/lib/outcome.pxi \
 	src/python/gambit/lib/player.pxi \

@@ -111,6 +111,8 @@ class ExternalLPSolver(ExternalSolver):
                                   game, rational,
                                   extensive=game.is_tree and not use_strategic)
 
+from gambit.lib.libgambit import LCPSolver
+    
 class ExternalLCPSolver(ExternalSolver):
     """
     Algorithm class to manage calls to external gambit-lcp solver

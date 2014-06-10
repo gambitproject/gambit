@@ -47,10 +47,15 @@ cdef extern from "libgambit/number.h":
      
 cdef extern from "libgambit/array.h":
     cdef cppclass Array[T]: 
-        int getitem "operator[]"(int) except +
+        T getitem "operator[]"(int) except +
         int Length()
         Array()
         Array(int)
+
+cdef extern from "libgambit/list.h":
+    cdef cppclass List[T]:
+        T &getitem "operator[]"(int) except +
+        int Length()
 
 cdef extern from "libgambit/game.h":
     cdef cppclass c_GameRep "GameRep"
@@ -360,6 +365,8 @@ cdef extern from "util.h":
     void setaction_MixedBehaviorProfileRational(c_MixedBehaviorProfileRational *, 
                                             c_GameAction, char *)
 
+    c_MixedStrategyProfileDouble *CopyElement(List[c_MixedStrategyProfileDouble], int)
+
 import gambit.gameiter
 
 
@@ -393,4 +400,4 @@ include "stratspt.pxi"
 include "mixed.pxi"
 include "behav.pxi"
 include "game.pxi"
-
+include "nash.pxi"
