@@ -109,6 +109,7 @@ NashLcpStrategySolver<T>::OnBFS(const StrategySupport &p_support,
   }
   
   this->m_onEquilibrium->Render(profile);
+  p_solution.m_equilibria.push_back(profile);
 
   if (m_stopAfter > 0 && p_solution.EquilibriumCount() >= m_stopAfter) {
     throw NashEquilibriumLimitReached();
