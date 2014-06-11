@@ -165,8 +165,6 @@ GameTableRep::GameTableRep(const Array<int> &dim,
     }
     m_results = m_outcomes;
   }
-
-  table_ptr = 0;
 }
 
 Game GameTableRep::Copy(void) const

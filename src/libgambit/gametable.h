@@ -33,9 +33,7 @@ class GameTableRep : public GameExplicitRep {
   template <class T> friend class TableMixedStrategyProfileRep;
 private:
   Array<GameOutcomeRep *> m_results;
-
-  //Convert to smart pointer
-  GameTableRep* table_ptr;
+  Game m_unrestricted;
 
   /// @name Private auxiliary functions
   //@{

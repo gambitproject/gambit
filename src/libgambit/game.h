@@ -369,6 +369,7 @@ class GamePlayerRep : public GameObject {
   friend class GameTreeInfosetRep;
   friend class GameStrategyRep;
   friend class GameTreeNodeRep;
+  friend class StrategySupport;
   template <class T> friend class MixedBehavProfile;
   template <class T> friend class MixedStrategyProfile;
 
@@ -384,6 +385,7 @@ private:
   std::string m_label;
   Array<GameTreeInfosetRep *> m_infosets;
   GameStrategyArray m_strategies;
+  GamePlayer m_unrestricted;
 
   GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id)
     { }
