@@ -28,11 +28,14 @@
 namespace Gambit {
 
 class GameTableRep : public GameExplicitRep {
+  friend class StrategySupport;
   friend class GamePlayerRep;
   friend class TablePureStrategyProfileRep;
+  template <class T> friend class MixedStrategyProfile;
   template <class T> friend class TableMixedStrategyProfileRep;
 private:
   Array<GameOutcomeRep *> m_results;
+  Game m_unrestricted;
 
   /// @name Private auxiliary functions
   //@{
@@ -55,6 +58,12 @@ public:
   virtual bool IsConstSum(void) const;
   virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const
   { return true; }
+  //@}
+
+  /// @name Interface with restricted game mechanism
+  //@{
+  virtual bool IsRestriction(void) const { return (m_unrestricted != 0); }
+  virtual Game Unrestrict(void) const { return m_unrestricted; }
   //@}
 
   /// @name Dimensions of the game

@@ -510,6 +510,21 @@ MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport(void) const
   return full;
 }
 
+template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::Unrestrict(void) const
+{
+  MixedStrategyProfile<T> full(m_rep->m_support.GetGame()->Unrestrict()->NewMixedStrategyProfile((T) 0));
+  static_cast<Vector<T> &>(full) = (T) 0;
+
+  for (GamePlayers::const_iterator player = GetGame()->Players().begin();
+       player != GetGame()->Players().end(); ++player) {
+    for (GameStrategyArray::const_iterator strategy = player->Strategies().begin();
+	 strategy != player->Strategies().end(); ++strategy) {
+      full[strategy->Unrestrict()] = (*this)[*strategy];
+    }
+  }
+  return full;	
+}
+
 //========================================================================
 //    MixedStrategyProfile<T>: Computation of interesting quantities
 //========================================================================
@@ -551,7 +566,6 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue(void) const
 
   return liapValue;
 }
-
 
 
 } // end namespace Gambit

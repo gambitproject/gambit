@@ -212,6 +212,9 @@ public:
 
   /// Converts the profile to one on the full support of the game
   MixedStrategyProfile<T> ToFullSupport(void) const;
+
+  /// Converts the profile to one on the unrestricted parent of the game
+  MixedStrategyProfile<T> Unrestrict(void) const;
   //@}
 
   /// @name Computation of interesting quantities

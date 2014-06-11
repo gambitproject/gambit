@@ -318,6 +318,7 @@ class GameStrategyRep : public GameObject  {
   friend class PureStrategyProfileRep;
   friend class TreePureStrategyProfileRep;
   friend class TablePureStrategyProfileRep;
+  friend class StrategySupport;
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class TableMixedStrategyProfileRep;
   template <class T> friend class MixedBehavProfile;
@@ -328,6 +329,7 @@ private:
   long m_offset;
   std::string m_label;
   Array<int> m_behav;
+  GameStrategy m_unrestricted;
 
   /// @name Lifecycle
   //@{
@@ -353,6 +355,9 @@ public:
 
   /// Remove this strategy from the game
   void DeleteStrategy(void);
+
+  /// Map the strategy to the corresponding strategy in the unrestricted game
+  GameStrategy Unrestrict(void) const { return m_unrestricted; }
   //@}
 };
 
@@ -369,6 +374,7 @@ class GamePlayerRep : public GameObject {
   friend class GameTreeInfosetRep;
   friend class GameStrategyRep;
   friend class GameTreeNodeRep;
+  friend class StrategySupport;
   template <class T> friend class MixedBehavProfile;
   template <class T> friend class MixedStrategyProfile;
 
@@ -384,6 +390,7 @@ private:
   std::string m_label;
   Array<GameTreeInfosetRep *> m_infosets;
   GameStrategyArray m_strategies;
+  GamePlayer m_unrestricted;
 
   GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id)
     { }
@@ -643,6 +650,11 @@ public:
 
   /// Returns true if the game has a action-graph game representation
   virtual bool IsAgg(void) const { return false; }
+
+  /// Returns true if the game is a restriction of a more general game
+  virtual bool IsRestriction(void) const { return false; }
+  /// Returns the unrestricted version of the game
+  virtual Game Unrestrict(void) const { throw UndefinedException(); }
 
   /// Get the text label associated with the game
   virtual const std::string &GetTitle(void) const { return m_title; }
