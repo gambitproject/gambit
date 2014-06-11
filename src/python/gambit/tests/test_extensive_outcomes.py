@@ -4,7 +4,7 @@ import warnings
 
 class TestGambitOutcomes(object):
     def setUp(self):
-        self.game = gambit.read_game("./test_games/sample_extensive_game.efg")
+        self.game = gambit.Game.read_game("./test_games/sample_extensive_game.efg")
     
     def tearDown(self):
         del self.game

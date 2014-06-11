@@ -3,7 +3,7 @@ import warnings
 
 class TestGambitStrategicGame(object):
     def setUp(self):
-        self.game = gambit.new_table([2,2])
+        self.game = gambit.Game.new_table([2,2])
     
     def tearDown(self):
         del self.game

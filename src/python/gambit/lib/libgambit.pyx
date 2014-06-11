@@ -391,37 +391,3 @@ include "mixed.pxi"
 include "behav.pxi"
 include "game.pxi"
 
-
-def new_tree():
-    cdef Game g
-    g = Game()
-    g.game = NewTree()
-    return g
-
-def new_table(dim):
-    cdef Game g
-    cdef Array[int] *d
-    d = new Array[int](len(dim))
-    for i in range(1, len(dim)+1):
-        setitem_ArrayInt(d, i, dim[i-1])
-    g = Game()
-    g.game = NewTable(d)
-    del d
-    #del_ArrayInt(d)
-    return g
-
-def read_game(char *fn):
-    cdef Game g
-    g = Game()
-    try:
-        g.game = ReadGame(fn)
-    except IOError as e:
-        raise IOError("Unable to read game from file '%s': %s" % 
-                      (fn, e))
-    return g
-
-def parse_game(char *s):
-    cdef Game g
-    g = Game()
-    g.game = ParseGame(s)
-    return g

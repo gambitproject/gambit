@@ -3,7 +3,7 @@ import fractions
 
 class TestGambitMixedBehavGame(object):
     def setUp(self):
-        self.game = gambit.read_game("test_games/mixed_behavior_game.efg")
+        self.game = gambit.Game.read_game("test_games/mixed_behavior_game.efg")
         
         self.profile_double = self.game.behav_profile()
         self.profile_rational = self.game.behav_profile(True)

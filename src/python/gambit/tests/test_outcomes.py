@@ -4,7 +4,7 @@ import warnings
 
 class TestGambitOutcomes(object):
     def setUp(self):
-        self.game = gambit.new_table([2,2])
+        self.game = gambit.Game.new_table([2,2])
         self.game.players[0].label = "joe"
         self.game.players[1].label = "dan"
         self.game.outcomes[0][0] = 1
