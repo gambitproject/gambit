@@ -34,6 +34,9 @@ class GameTableRep : public GameExplicitRep {
 private:
   Array<GameOutcomeRep *> m_results;
 
+  //Convert to smart pointer
+  GameTableRep* table_ptr;
+
   /// @name Private auxiliary functions
   //@{
   void IndexStrategies(void);
