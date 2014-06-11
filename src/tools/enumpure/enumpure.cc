@@ -43,8 +43,11 @@ public:
 List<MixedStrategyProfile<Rational> >
 NashEnumPureStrategySolver::Solve(const StrategySupport &p_support) const
 {
+	Game restriction = p_support.Undominated(true,false).Restrict();
+	StrategySupport q_support = StrategySupport(restriction);
+	
   List<MixedStrategyProfile<Rational> > solutions;
-  for (StrategyIterator citer(p_support); !citer.AtEnd(); citer++) {
+  for (StrategyIterator citer(q_support); !citer.AtEnd(); citer++) {
     if ((*citer)->IsNash()) {
       MixedStrategyProfile<Rational> profile = (*citer)->ToMixedStrategyProfile();
       m_onEquilibrium->Render(profile);

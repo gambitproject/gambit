@@ -204,6 +204,8 @@ public:
   bool Overwhelms(const GameStrategy &s, const GameStrategy &t, 
                   bool p_strict) const;
   //@}
+
+  Game Restrict(void) const;
 };
 
 

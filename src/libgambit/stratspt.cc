@@ -389,6 +389,18 @@ bool StrategySupport::Overwhelms(const GameStrategy &s,
   return true;
 }
 
+//--------------------
+// JB - Turn Strategy Support into A restricted game
+//----------------------
+Game StrategySupport::Restrict(void) const
+{
+	/* from Copy function in game.h */
+	  std::ostringstream os;
+	  WriteNfgFile(os);
+	  std::istringstream is(os.str());
+		return ReadGame(is);	
+	//return ReadGame(is);
+}
 
 
 } // end namespace Gambit
