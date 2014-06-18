@@ -28,6 +28,7 @@
 namespace Gambit {
 
 class GameTableRep : public GameExplicitRep {
+  friend class StrategySupport;
   friend class GamePlayerRep;
   friend class TablePureStrategyProfileRep;
   template <class T> friend class TableMixedStrategyProfileRep;

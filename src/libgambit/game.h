@@ -318,6 +318,7 @@ class GameStrategyRep : public GameObject  {
   friend class PureStrategyProfileRep;
   friend class TreePureStrategyProfileRep;
   friend class TablePureStrategyProfileRep;
+  friend class StrategySupport;
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class TableMixedStrategyProfileRep;
   template <class T> friend class MixedBehavProfile;
@@ -328,6 +329,7 @@ private:
   long m_offset;
   std::string m_label;
   Array<int> m_behav;
+  GameStrategy m_unrestricted;
 
   /// @name Lifecycle
   //@{
