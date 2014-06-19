@@ -648,6 +648,11 @@ public:
   /// Returns true if the game has a action-graph game representation
   virtual bool IsAgg(void) const { return false; }
 
+  /// Returns true if the game is a restriction of a more general game
+  virtual bool IsRestriction(void) const { return false; }
+  /// Returns the unrestricted version of the game
+  virtual Game Unrestrict(void) const { throw UndefinedException(); }
+
   /// Get the text label associated with the game
   virtual const std::string &GetTitle(void) const { return m_title; }
   /// Set the text label associated with the game

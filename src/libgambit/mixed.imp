@@ -495,6 +495,17 @@ MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport(void) const
   return full;
 }
 
+template <class T>
+MixedStrategyProfile<T> MixedStrategyProfile<T>::Unrestrict(void) const
+{
+  MixedStrategyProfile<T> full(m_rep->m_support.GetGame()->Unrestrict()->NewMixedStrategyProfile((T) 0));
+  static_cast<Vector<T> &>(full) = (T) 0;
+
+  throw UndefinedException();
+
+  return full;	
+}
+
 //========================================================================
 //    MixedStrategyProfile<T>: Computation of interesting quantities
 //========================================================================

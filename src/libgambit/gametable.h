@@ -59,6 +59,12 @@ public:
   { return true; }
   //@}
 
+  /// @name Interface with restricted game mechanism
+  //@{
+  virtual bool IsRestriction(void) const { return (m_unrestricted != 0); }
+  virtual Game Unrestrict(void) const { return m_unrestricted; }
+  //@}
+
   /// @name Dimensions of the game
   //@{
   /// The number of actions in each information set
