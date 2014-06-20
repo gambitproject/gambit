@@ -237,10 +237,8 @@ corresponding node in the original subtree.
 
 
 See the poker tutorial on the Gambit website
-(`flash version 
-<http://www.gambit-project.org/doc/tutorials/poker.swf>`_;
-`PDF version
-<http://www.gambit-project.org/doc/tutorials/poker.pdf>`_)
+(:download:`flash version <tutorial/poker.swf>`; 
+:download:`PDF version <tutorial/poker.pdf>`)
 for how this can be used
 to good effect in speeding up the building of games.
 
@@ -322,10 +320,8 @@ are adjusted based on the action selected at this node.
 
 This is an operation that is easier to see than the explain. See the
 poker tutorial
-(`flash version 
-<http://www.gambit-project.org/doc/tutorials/poker.swf>`_;
-`PDF version
-<http://www.gambit-project.org/doc/tutorials/poker.pdf>`_)
+(:download:`flash version <tutorial/poker.swf>`; 
+:download:`PDF version <tutorial/poker.pdf>`)
 for an application of the
 revelation operation in conjunction with the tree-copy operation.
 
