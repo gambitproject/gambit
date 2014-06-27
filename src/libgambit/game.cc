@@ -523,5 +523,4 @@ void GameExplicitRep::Write(std::ostream &p_stream,
   }
 }
 
-
 }  // end namespace Gambit

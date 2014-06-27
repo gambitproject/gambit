@@ -537,6 +537,47 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue(void) const
   return liapValue;
 }
 
-
+//template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::Unrestrict(void) const
+template <class T> bool MixedStrategyProfile<T>::Unrestrict(void) const
+{
+	//Get game on which this MixedStrategyProfile is defined
+	Game h = GetGame();
+	//Throw error if Game h is not a restriction
+	if(dynamic_cast<GameTableRep &>(*h).m_unrestricted == 0)
+	{
+		std::cout << "err\n";
+		//throw error
+	}
+	//Get unrestricted game
+	Game g = dynamic_cast<GameTableRep &>(*h).m_unrestricted;
+	
+  for (int pl = 1; pl <= restricted->NumPlayers(); pl++) {
+    GamePLayerRep *playerG = g->Players()[pl];
+    GamePlayerRep *playerH = h->Players()[pl];
+    for (int stG = 1, int stH = 1; stG <= playerG->NumStrategies() && stH <= playerH->NumStrategies(); stG++) {
+      GameStrategyRep *stratT = playerH->m_strategies[stH];
+      GameStrategyRep *stratS = playerG->m_strategies[stG];
+      //There is no corresponding strategy T on H for S on G
+      if(*stratS != *stratT)
+      {  //IS THERE A BUG HERE?
+      	
+      }
+      //There is a match
+      else
+      {
+      	stH++;
+      	
+      }
+    }
+  }	
+	
+	//Get MixedStrategyProfile
+	
+    int hMixLen = h->MixedProfileLength();
+    int gLen = g->MixedProfileLength();
+	//MixedStrategyProfile<T> m;
+	return true;
+	
+}
 
 } // end namespace Gambit

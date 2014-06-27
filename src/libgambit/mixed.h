@@ -245,6 +245,9 @@ public:
   /// simplotope (useful for penalty-function minimization methods).
   T GetLiapValue(void) const;
   //@}
+
+  bool Unrestrict(void) const;
+
 };
 
 } // end namespace Gambit
