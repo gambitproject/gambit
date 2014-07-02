@@ -28,11 +28,14 @@
 namespace Gambit {
 
 class GameTableRep : public GameExplicitRep {
+  friend class StrategySupport;
   friend class GamePlayerRep;
   friend class TablePureStrategyProfileRep;
+  template <class T> friend class MixedStrategyProfile;
   template <class T> friend class TableMixedStrategyProfileRep;
 private:
   Array<GameOutcomeRep *> m_results;
+  Game m_unrestricted;
 
   /// @name Private auxiliary functions
   //@{

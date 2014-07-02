@@ -21,6 +21,7 @@
 //
 
 #include "libgambit.h"
+#include "gametable.h"
 
 namespace Gambit {
 
@@ -389,6 +390,26 @@ bool StrategySupport::Overwhelms(const GameStrategy &s,
   return true;
 }
 
+Game StrategySupport::Restrict(void) const
+{
+  std::ostringstream os;
+  WriteNfgFile(os);
+  std::istringstream is(os.str());
+  Game restricted = ReadGame(is);
+  for (int pl = 1; pl <= restricted->NumPlayers(); pl++) {
+    GamePlayerRep *player = restricted->Players()[pl];
+    player->m_unrestricted = m_nfg->Players()[pl];
+    for (int st = 1; st <= player->NumStrategies(); st++) {
+      GameStrategyRep *strategy = player->m_strategies[st];
+      strategy->m_unrestricted = m_nfg->Players()[pl]->Strategies()[st];
+    }
+  }
+
+  dynamic_cast<GameTableRep &>(*restricted).m_unrestricted = m_nfg;
+
+
+  return restricted;
+}
 
 
 } // end namespace Gambit

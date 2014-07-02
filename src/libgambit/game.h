@@ -318,6 +318,7 @@ class GameStrategyRep : public GameObject  {
   friend class PureStrategyProfileRep;
   friend class TreePureStrategyProfileRep;
   friend class TablePureStrategyProfileRep;
+  friend class StrategySupport;
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class TableMixedStrategyProfileRep;
   template <class T> friend class MixedBehavProfile;
@@ -328,6 +329,7 @@ private:
   long m_offset;
   std::string m_label;
   Array<int> m_behav;
+  GameStrategy m_unrestricted;
 
   /// @name Lifecycle
   //@{
@@ -369,6 +371,7 @@ class GamePlayerRep : public GameObject {
   friend class GameTreeInfosetRep;
   friend class GameStrategyRep;
   friend class GameTreeNodeRep;
+  friend class StrategySupport;
   template <class T> friend class MixedBehavProfile;
   template <class T> friend class MixedStrategyProfile;
 
@@ -384,6 +387,7 @@ private:
   std::string m_label;
   Array<GameTreeInfosetRep *> m_infosets;
   GameStrategyArray m_strategies;
+  GamePlayer m_unrestricted;
 
   GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id)
     { }
@@ -744,6 +748,18 @@ public:
   /// Returns the number of nodes in the game
   virtual int NumNodes(void) const = 0;
   //@}
+
+  /*
+  /// @name Strategic Restriction
+  //@{
+  /// Returns Whether current Game Object is Strategic Restriction or Full Game Description
+  virtual bool IsRestriction() const = 0;
+  /// Returns Full Game Description
+  virtual Game UnRestrict() const = 0;
+  */
+
+  //virtual bool IsRestricted(void) const = 0;
+
 };
 
 typedef GameObjectPtr<GameRep> Game;
