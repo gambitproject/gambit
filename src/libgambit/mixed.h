@@ -246,7 +246,9 @@ public:
   T GetLiapValue(void) const;
   //@}
 
-  bool Unrestrict(void) const;
+  MixedStrategyProfile<T> Unrestrict(void) const;
+  //MixedStrategyProfile<double> Unrestrict(void) const;
+  //MixedStrategyProfile< Rational > Unrestrict(void) const;
 
 };
 
