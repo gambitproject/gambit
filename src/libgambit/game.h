@@ -355,6 +355,9 @@ public:
 
   /// Remove this strategy from the game
   void DeleteStrategy(void);
+
+  /// Map the strategy to the corresponding strategy in the unrestricted game
+  GameStrategy Unrestrict(void) const { return m_unrestricted; }
   //@}
 };
 

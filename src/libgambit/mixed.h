@@ -248,11 +248,6 @@ public:
   /// simplotope (useful for penalty-function minimization methods).
   T GetLiapValue(void) const;
   //@}
-
-  MixedStrategyProfile<T> Unrestrict(void) const;
-  //MixedStrategyProfile<double> Unrestrict(void) const;
-  //MixedStrategyProfile< Rational > Unrestrict(void) const;
-
 };
 
 } // end namespace Gambit
