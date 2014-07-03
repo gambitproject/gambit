@@ -139,7 +139,7 @@ public:
   NashStrategySolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
   virtual ~NashStrategySolver()  { }
 
-  virtual List<MixedStrategyProfile<T> > Solve(const StrategySupport &) const = 0;
+  virtual List<MixedStrategyProfile<T> > Solve(const Game &) const = 0;
 
 protected:
   shared_ptr<StrategyProfileRenderer<T> > m_onEquilibrium;

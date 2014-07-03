@@ -37,14 +37,14 @@ public:
     : NashStrategySolver<Rational>(p_onEquilibrium) { }
   virtual ~NashEnumPureStrategySolver()  { }
 
-  List<MixedStrategyProfile<Rational> > Solve(const StrategySupport &p_support) const;
+  List<MixedStrategyProfile<Rational> > Solve(const Game &p_game) const;
 };
 
 List<MixedStrategyProfile<Rational> >
-NashEnumPureStrategySolver::Solve(const StrategySupport &p_support) const
+NashEnumPureStrategySolver::Solve(const Game &p_game) const
 {
   List<MixedStrategyProfile<Rational> > solutions;
-  for (StrategyIterator citer(p_support); !citer.AtEnd(); citer++) {
+  for (StrategyIterator citer(p_game); !citer.AtEnd(); citer++) {
     if ((*citer)->IsNash()) {
       MixedStrategyProfile<Rational> profile = (*citer)->ToMixedStrategyProfile();
       m_onEquilibrium->Render(profile);

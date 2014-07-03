@@ -37,7 +37,7 @@ public:
       m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth) { }
   virtual ~NashLcpStrategySolver()  { }
 
-  virtual List<MixedStrategyProfile<T> > Solve(const StrategySupport &) const;
+  virtual List<MixedStrategyProfile<T> > Solve(const Game &) const;
 
 private:
   int m_stopAfter, m_maxDepth;

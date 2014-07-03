@@ -151,20 +151,20 @@ NashLcpStrategySolver<T>::AllLemke(const StrategySupport &p_support,
 }
 
 template <class T> List<MixedStrategyProfile<T> > 
-NashLcpStrategySolver<T>::Solve(const StrategySupport &p_support) const
+NashLcpStrategySolver<T>::Solve(const Game &p_game) const
 {
   Solution solution;
 
   try {
-    Matrix<T> A1 = Make_A1<T>(p_support);
-    Vector<T> b1 = Make_b1<T>(p_support);
-    Matrix<T> A2 = Make_A2<T>(p_support);
-    Vector<T> b2 = Make_b2<T>(p_support);
+    Matrix<T> A1 = Make_A1<T>(p_game);
+    Vector<T> b1 = Make_b1<T>(p_game);
+    Matrix<T> A2 = Make_A2<T>(p_game);
+    Vector<T> b2 = Make_b2<T>(p_game);
     LHTableau<T> B(A1, A2, b1, b2);
 
     if (m_stopAfter != 1) {
       try {
-	AllLemke(p_support, 0, B, solution, 0);
+	AllLemke(p_game, 0, B, solution, 0);
       }
       catch (NashEquilibriumLimitReached &) {
 	// This pseudo-exception requires no additional action;
@@ -173,7 +173,7 @@ NashLcpStrategySolver<T>::Solve(const StrategySupport &p_support) const
     }
     else  {
       B.LemkePath(1);
-      OnBFS(p_support, B, solution);
+      OnBFS(p_game, B, solution);
     }
   }
   catch (std::runtime_error &e) {
