@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+# Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 #
 # FILE: src/python/gambit/lib/libgambit.pyx
 # Cython wrapper for Gambit C++ library
@@ -245,6 +245,8 @@ cdef extern from "libgambit/mixed.h":
         c_Game GetGame()
         int MixedProfileLength()
         c_StrategySupport GetSupport()
+        void SetCentroid()
+        void Normalize()
         double getitem "operator[]"(int) except +IndexError
         double getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
         double GetPayoff(c_GamePlayer)
@@ -258,6 +260,8 @@ cdef extern from "libgambit/mixed.h":
         c_Game GetGame()
         int MixedProfileLength()
         c_StrategySupport GetSupport()
+        void SetCentroid()
+        void Normalize()
         c_Rational getitem "operator[]"(int) except +IndexError
         c_Rational getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
         c_Rational GetPayoff(c_GamePlayer)
@@ -272,6 +276,8 @@ cdef extern from "libgambit/behav.h":
         c_Game GetGame()
         int Length()
         bool IsDefinedAt(c_GameInfoset)
+        void SetCentroid()
+        void Normalize()
         double getitem "operator[]"(int) except +IndexError
         double getaction "operator()"(c_GameAction) except +IndexError
         double GetPayoff(int)
@@ -291,6 +297,8 @@ cdef extern from "libgambit/behav.h":
         c_Game GetGame()
         int Length()
         bool IsDefinedAt(c_GameInfoset)
+        void SetCentroid()
+        void Normalize()
         c_Rational getitem "operator[]"(int) except +IndexError
         c_Rational getaction "operator()"(c_GameAction) except +IndexError
         c_Rational GetPayoff(int)
@@ -383,37 +391,3 @@ include "mixed.pxi"
 include "behav.pxi"
 include "game.pxi"
 
-
-def new_tree():
-    cdef Game g
-    g = Game()
-    g.game = NewTree()
-    return g
-
-def new_table(dim):
-    cdef Game g
-    cdef Array[int] *d
-    d = new Array[int](len(dim))
-    for i in range(1, len(dim)+1):
-        setitem_ArrayInt(d, i, dim[i-1])
-    g = Game()
-    g.game = NewTable(d)
-    del d
-    #del_ArrayInt(d)
-    return g
-
-def read_game(char *fn):
-    cdef Game g
-    g = Game()
-    try:
-        g.game = ReadGame(fn)
-    except IOError as e:
-        raise IOError("Unable to read game from file '%s': %s" % 
-                      (fn, e))
-    return g
-
-def parse_game(char *s):
-    cdef Game g
-    g = Game()
-    g.game = ParseGame(s)
-    return g

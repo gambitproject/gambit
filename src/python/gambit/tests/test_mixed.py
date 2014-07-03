@@ -5,7 +5,7 @@ from gambit.lib.error import UndefinedOperationError
 
 class TestGambitMixedStrategyGame(object):
     def setUp(self):
-        self.game = gambit.new_table([2,2])
+        self.game = gambit.Game.new_table([2,2])
         self.game.players[0].label = "joe"
         self.game.players["joe"].strategies[0].label = "cooperate"
         self.game.players[1].label = "dan"
@@ -14,7 +14,7 @@ class TestGambitMixedStrategyGame(object):
         self.profile_double = self.game.mixed_profile()
         self.profile_rational = self.game.mixed_profile(True)
 
-        self.tree_game = gambit.read_game("test_games/mixed_behavior_game.efg")
+        self.tree_game = gambit.Game.read_game("test_games/mixed_behavior_game.efg")
 
         self.tree_profile_double = self.tree_game.mixed_profile()
         self.tree_profile_rational = self.tree_game.mixed_profile(True)

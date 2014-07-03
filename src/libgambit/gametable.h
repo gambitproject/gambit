@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/libgambit/gametable.h
 // Declaration of strategic game representation
@@ -58,6 +58,12 @@ public:
   virtual bool IsConstSum(void) const;
   virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const
   { return true; }
+  //@}
+
+  /// @name Interface with restricted game mechanism
+  //@{
+  virtual bool IsRestriction(void) const { return (m_unrestricted != 0); }
+  virtual Game Unrestrict(void) const { return m_unrestricted; }
   //@}
 
   /// @name Dimensions of the game

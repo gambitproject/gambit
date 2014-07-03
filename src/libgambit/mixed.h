@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/libgambit/mixed.h
 // Declaration of mixed strategy profile classes
@@ -39,7 +39,8 @@ public:
   virtual MixedStrategyProfileRep<T> *Copy(void) const = 0;
 
   void SetCentroid(void);
-  /// Returns the probability the strategy is played
+  void Normalize(void);
+ /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
     { return m_probs[m_support.m_profileIndex[p_strategy->GetId()]]; }
   /// Returns the probability the strategy is played
@@ -203,11 +204,17 @@ public:
   /// Sets all strategies for each player to equal probabilities
   void SetCentroid(void) { m_rep->SetCentroid(); }
 
+  /// Normalize each player's strategy probabilities so they sum to one
+  void Normalize(void) { m_rep->Normalize(); }
+
   /// Returns the total number of strategies in the profile
   int MixedProfileLength(void) const { return m_rep->m_probs.Length(); }
 
   /// Converts the profile to one on the full support of the game
   MixedStrategyProfile<T> ToFullSupport(void) const;
+
+  /// Converts the profile to one on the unrestricted parent of the game
+  MixedStrategyProfile<T> Unrestrict(void) const;
   //@}
 
   /// @name Computation of interesting quantities
@@ -245,11 +252,6 @@ public:
   /// simplotope (useful for penalty-function minimization methods).
   T GetLiapValue(void) const;
   //@}
-
-  MixedStrategyProfile<T> Unrestrict(void) const;
-  //MixedStrategyProfile<double> Unrestrict(void) const;
-  //MixedStrategyProfile< Rational > Unrestrict(void) const;
-
 };
 
 } // end namespace Gambit

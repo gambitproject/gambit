@@ -4,7 +4,7 @@ from nose.tools import assert_raises
 
 class TestGambitStrategies(object):
     def setUp(self):
-        self.game = gambit.new_table([2,2])
+        self.game = gambit.Game.new_table([2,2])
         self.game.players[0].label = "Alphonse"
         self.game.players[1].label = "Gaston"
     

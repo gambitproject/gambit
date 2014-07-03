@@ -8,7 +8,7 @@ from gambit.lib.error import UndefinedOperationError
 
 class TestGambitActions(unittest.TestCase):
     def setUp(self):
-        self.extensive_game = gambit.read_game("test_games/complicated_extensive_game.efg")
+        self.extensive_game = gambit.Game.read_game("test_games/complicated_extensive_game.efg")
         
     def tearDown(self):
         del self.extensive_game

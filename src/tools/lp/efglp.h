@@ -1,9 +1,9 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/libgambit/subgame.h
-// Utilities for computing and verifying subgame-perfection
+// FILE: src/tools/lcp/efglp.h
+// Compute Nash equilibria via linear programming
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,23 +20,27 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_SUBGAME_H
-#define LIBGAMBIT_SUBGAME_H
+#ifndef LP_EFGLP_H
+#define LP_EFGLP_H
 
-namespace Gambit {
+#include "libgambit/nash.h"
 
-typedef List<MixedBehavProfile<double> > (*DoubleSolver)(const BehavSupport &p_support);
+using namespace Gambit;
 
-typedef List<MixedBehavProfile<Rational> > (*RationalSolver)(const BehavSupport &p_support);
+template <class T> class NashLpBehavSolver : public NashBehavSolver<T> {
+public:
+  NashLpBehavSolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
+    : NashBehavSolver<T>(p_onEquilibrium) { }
+  virtual ~NashLpBehavSolver() { }
+
+  virtual List<MixedBehavProfile<T> > Solve(const BehavSupport &) const;
+
+private:
+  class GameData;
+
+  virtual bool SolveLP(const Matrix<T> &, const Vector<T> &, const Vector<T> &,
+		       int, Array<T> &, Array<T> &) const;
+};
 
 
-template <class T, typename SolverType>
-List<MixedBehavProfile<T> > SolveBySubgames(const BehavSupport &p_support,
-					    SolverType p_solver);
-
-}
-
-#endif   // LIBGAMBIT_SUBGAME_H
-
-
-
+#endif // LP_NFGLP_H

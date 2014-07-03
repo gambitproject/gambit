@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/lp/lp.cc
 // Implementation of algorithm to compute mixed strategy equilibria
@@ -28,14 +28,16 @@
 #include <unistd.h>
 #include <getopt.h>
 #include "libgambit/libgambit.h"
+#include "efglp.h"
+#include "nfglp.h"
 
-template <class T> void SolveExtensive(const Gambit::Game &p_game);
-template <class T> void SolveStrategic(const Gambit::Game &p_game);
+using namespace Gambit;
+
 
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by solving a linear program\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2013, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2014, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
@@ -50,18 +52,19 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      compute using floating-point arithmetic;\n";
   std::cerr << "                   display results with DECIMALS digits\n";
   std::cerr << "  -S               use strategic game\n";
+  std::cerr << "  -P               find only subgame-perfect equilibria\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
 
-int g_numDecimals = 6;
-
 int main(int argc, char *argv[])
 {
   int c;
-  bool useFloat = false, useStrategic = false, quiet = false;
+  int numDecimals = 6;
+  bool useFloat = false, useStrategic = false, quiet = false, printDetail = false;
+  bool bySubgames = false;
 
   int long_opt_index = 0;
   struct option long_options[] = {
@@ -69,13 +72,16 @@ int main(int argc, char *argv[])
     { "version", 0, NULL, 'v'  },
     { 0,    0,    0,    0   }
   };
-  while ((c = getopt_long(argc, argv, "d:vqhS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:DvqhSP", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr); exit(1);
     case 'd':
       useFloat = true;
-      g_numDecimals = atoi(optarg);
+      numDecimals = atoi(optarg);
+      break;
+    case 'D':
+      printDetail = true;
       break;
     case 'h':
       PrintHelp(argv[0]);
@@ -85,6 +91,9 @@ int main(int argc, char *argv[])
       break;
     case 'S':
       useStrategic = true;
+      break;
+    case 'P':
+      bySubgames = true;
       break;
     case '?':
       if (isprint(optopt)) {
@@ -131,29 +140,99 @@ int main(int argc, char *argv[])
 
     if (!game->IsTree() || useStrategic) {
       if (useFloat) {
-	SolveStrategic<double>(game);
+	shared_ptr<StrategyProfileRenderer<double> > renderer;
+	if (printDetail)  {
+	  renderer = new MixedStrategyDetailRenderer<double>(std::cout,
+							     numDecimals);
+	}
+	else {
+	  renderer = new MixedStrategyCSVRenderer<double>(std::cout, numDecimals);
+	}
+	NashLpStrategySolver<double> algorithm(renderer);
+	algorithm.Solve(game);
       }
       else {
-	SolveStrategic<Gambit::Rational>(game);
+	shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+	if (printDetail) {
+	  renderer = new MixedStrategyDetailRenderer<Rational>(std::cout);
+	}
+	else {
+	  renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
+	}
+	NashLpStrategySolver<Rational> algorithm(renderer);
+	algorithm.Solve(game);
       }
     }
     else {
-      if (useFloat) {
-	SolveExtensive<double>(game);
+      if (!bySubgames) {
+	if (useFloat) {
+	  shared_ptr<StrategyProfileRenderer<double> > renderer;
+	  if (printDetail)  {
+	    renderer = new BehavStrategyDetailRenderer<double>(std::cout,
+							       numDecimals);
+	  }
+	  else {
+	    renderer = new BehavStrategyCSVRenderer<double>(std::cout, 
+							    numDecimals);
+	  }
+	  NashLpBehavSolver<double> algorithm(renderer);
+	  algorithm.Solve(game);
+	}
+	else {
+	  shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+	  if (printDetail) {
+	    renderer = new BehavStrategyDetailRenderer<Rational>(std::cout);
+	  }
+	  else {
+	    renderer = new BehavStrategyCSVRenderer<Rational>(std::cout);
+	  }
+	  NashLpBehavSolver<Rational> algorithm(renderer);
+	  algorithm.Solve(game);
+	}
       }
       else {
-	SolveExtensive<Gambit::Rational>(game);
+	if (useFloat) {
+	  shared_ptr<NashBehavSolver<double> > stage = 
+	    new NashLpBehavSolver<double>();
+	  shared_ptr<StrategyProfileRenderer<double> > renderer;
+	  if (printDetail)  {
+	    renderer = new BehavStrategyDetailRenderer<double>(std::cout,
+							       numDecimals);
+	  }
+	  else {
+	    renderer = new BehavStrategyCSVRenderer<double>(std::cout, 
+							    numDecimals);
+	  }
+	  SubgameNashBehavSolver<double> algorithm(stage, renderer);
+	  algorithm.Solve(game);
+	}
+	else {
+	  shared_ptr<NashBehavSolver<Rational> > stage = 
+	    new NashLpBehavSolver<Rational>();
+	  shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+	  if (printDetail)  {
+	    renderer = new BehavStrategyDetailRenderer<Rational>(std::cout,
+								 numDecimals);
+	  }
+	  else {
+	    renderer = new BehavStrategyCSVRenderer<Rational>(std::cout, 
+							      numDecimals);
+	  }
+	  SubgameNashBehavSolver<Rational> algorithm(stage, renderer);
+	  algorithm.Solve(game);
+	}
       }
     }
     return 0;
   }
-  catch (Gambit::InvalidFileException) {
+  catch (InvalidFileException) {
     std::cerr << "Error: Game not in a recognized format.\n";
     return 1;
   }
-  catch (...) {
-    std::cerr << "Error: An internal error occurred.\n";
+  catch (std::runtime_error &e) {
+    std::cerr << "Error: " << e.what() << std::endl;
     return 1;
   }
 }
+
 

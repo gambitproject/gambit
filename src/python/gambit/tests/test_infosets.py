@@ -4,8 +4,8 @@ from gambit.lib.error import MismatchError
 
 class TestGambitInfosets(object):
     def setUp(self):
-        self.extensive_game = gambit.read_game("test_games/basic_extensive_game.efg")
-        self.complicated_game = gambit.read_game("test_games/complicated_extensive_game.efg")
+        self.extensive_game = gambit.Game.read_game("test_games/basic_extensive_game.efg")
+        self.complicated_game = gambit.Game.read_game("test_games/complicated_extensive_game.efg")
         
     def tearDown(self):
         del self.extensive_game
@@ -29,7 +29,7 @@ class TestGambitInfosets(object):
     @nose.tools.raises(MismatchError)
     def test_infoset_player_mismatch(self):
         "Test to ensure exception raised on setting player from different game."
-        g2 = gambit.new_tree()
+        g2 = gambit.Game.new_tree()
         p = g2.players.add()
         self.extensive_game.root.infoset.player = p
 

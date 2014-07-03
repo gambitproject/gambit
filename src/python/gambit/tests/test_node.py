@@ -5,8 +5,8 @@ from gambit.lib.error import MismatchError, UndefinedOperationError
 
 class TestGambitNode(object):
     def setUp(self):
-        self.game = gambit.new_tree()
-        self.extensive_game = gambit.read_game("test_games/basic_extensive_game.efg")
+        self.game = gambit.Game.new_tree()
+        self.extensive_game = gambit.Game.read_game("test_games/basic_extensive_game.efg")
         
     def tearDown(self):
         del self.game

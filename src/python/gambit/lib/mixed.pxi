@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+# Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 #
 # FILE: src/python/gambit/lib/mixed.pxi
 # Cython wrapper for mixed strategy profiles
@@ -141,6 +141,9 @@ cdef class MixedStrategyProfile(object):
             raise TypeError("profile strategy index must be str or Strategy, not %s" %
                             strategy2.__class__.__name__)
         return self._strategy_value_deriv((<Player>player).player.deref().GetNumber(), strategy1, strategy2)
+
+    def set_centroid(self):   self.profile.SetCentroid()
+    def normalize(self):      self.profile.Normalize()
 
 
 cdef class MixedStrategyProfileDouble(MixedStrategyProfile):

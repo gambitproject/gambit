@@ -16,12 +16,12 @@ A tutorial introduction
 Building an extensive game
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The function :func:`gambit.new_tree` creates a new, trivial extensive game,
+The function :func:`gambit.Game.new_tree` creates a new, trivial extensive game,
 with no players, and only a root node::
 
   In [1]: import gambit
 
-  In [2]: g = gambit.new_tree()
+  In [2]: g = gambit.Game.new_tree()
 
   In [3]: len(g.players)
   Out[3]: 0
@@ -71,11 +71,11 @@ The :py:attr:`players` can be accessed like a Python list::
 Building a strategic game
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Games in strategic form are created using :func:`gambit.new_table`, which
+Games in strategic form are created using :func:`gambit.Game.new_table`, which
 takes a list of integers specifying the number of strategies for
 each player::
 
-  In [1]: g = gambit.new_table([2,2])
+  In [1]: g = gambit.Game.new_table([2,2])
 
   In [2]: g.title = "A prisoner's dilemma game"
 
@@ -150,9 +150,9 @@ Reading a game from a file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Games stored in existing Gambit savefiles in either the .efg or .nfg
-formats can be loaded using :func:`gambit.read_game`::
+formats can be loaded using :func:`gambit.Game.read_game`::
 
-  In [1]: g = gambit.read_game("e02.nfg")
+  In [1]: g = gambit.Game.read_game("e02.nfg")
 
   In [2]: g
   Out[2]: 
@@ -182,7 +182,7 @@ The property :attr:`gambit.Gambit.contingencies` is the collection of
 all such combinations.  Iterating over the contingencies collection
 visits each pure strategy profile possible in the game::
 
-   In [1]: g = gambit.read_game("e02.nfg")
+   In [1]: g = gambit.Game.read_game("e02.nfg")
 
    In [2]: list(g.contingencies)
    Out[2]: [[0, 0], [0, 1], [1, 0], [1, 1], [2, 0], [2, 1]]
@@ -224,7 +224,7 @@ treated as a list indexed from 0 up to the number of total strategies
 in the game minus one.  This latter behavior allows :py:func:`list` to
 work as expected on a mixed strategy object::
 
-  In [1]: g = gambit.read_game("e02.nfg")
+  In [1]: g = gambit.Game.read_game("e02.nfg")
 
   In [2]: p = g.mixed_profile()
 
@@ -285,7 +285,7 @@ the first player plays his first strategty with probability one,
 and the second player plays a mixed strategy, placing at least
 probability one-half on her first strategy::
 
-  In [1]: g = gambit.read_game("e02.nfg")
+  In [1]: g = gambit.Game.read_game("e02.nfg")
 
   In [2]: solver = gambit.nash.ExternalEnumPureSolver()
 
@@ -317,7 +317,7 @@ extensive game, where available, and returns a list of
 :py:class:`gambit.BehavProfile` objects.  This can be overridden when
 calling :py:meth:`solve` via the ``use_strategic`` parameter::
 
-  In [1]: g = gambit.read_game("e02.efg")
+  In [1]: g = gambit.Game.read_game("e02.efg")
 
   In [2]: solver = gambit.nash.ExternalLCPSolver()
 
@@ -360,42 +360,43 @@ API documentation
 
 .. py:module:: gambit
 
-.. py:function:: new_tree()
-
-   Creates a new :py:class:`gambit.Game`
-   consisting of a trivial game tree, with one
-   node, which is both root and terminal, and no players.
-
-.. py:function:: new_table(dim)
-
-   Creates a new :py:class:`gambit.Game` with a strategic
-   representation.  The parameter `dim` is a list of the number of
-   strategies for each player.
-
-.. py:function:: read_game(fn)
-
-   Constructs a game from its serialized representation in a file.
-   See :ref:`file-formats` for details on recognized formats.
-
-   :param file fn: The path to the file to open
-   :return: :py:class:`gambit.Game`
-   :raises IOError: if the file cannot be opened, or does not contain
-		    a valid game representation
-
-.. py:function:: parse_game(s)
-
-   Constructs a game from its seralized representation in a string.	
-   See :ref:`file-formats` for details on recognized formats.
-
-   :param str s: The string containing the serialized representation
-   :return: :py:class:`gambit.Game`
-   :raises IOError: if the string does not contain a valid game
-		    representation
 
 
 .. py:class:: Game
 
    An object representing a game, in extensive or strategic form.
+
+   .. py:classmethod:: new_tree()
+
+      Creates a new :py:class:`gambit.Game`
+      consisting of a trivial game tree, with one
+      node, which is both root and terminal, and no players.
+
+   .. py:classmethod:: new_table(dim)
+ 
+      Creates a new :py:class:`gambit.Game` with a strategic
+      representation.  The parameter `dim` is a list of the number of
+      strategies for each player.
+
+   .. py:classmethod:: read_game(fn)
+
+      Constructs a game from its serialized representation in a file.
+      See :ref:`file-formats` for details on recognized formats.
+
+      :param file fn: The path to the file to open
+      :return: :py:class:`gambit.Game`
+      :raises IOError: if the file cannot be opened, or does not contain
+	   	       a valid game representation
+
+   .. py:classmethod:: parse_game(s)
+
+      Constructs a game from its seralized representation in a string.	
+      See :ref:`file-formats` for details on recognized formats.
+
+      :param str s: The string containing the serialized representation
+      :return: :py:class:`gambit.Game`
+      :raises IOError: if the string does not contain a valid game
+		       representation
 
    .. py:attribute:: is_tree
 

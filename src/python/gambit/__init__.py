@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+# Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 #
 # FILE: src/python/gambit/__init__.py
 # Top-level module file for gambit
@@ -25,7 +25,8 @@ import gte
 
 __version__ = gambit.lib.libgambit.__version__
 
-new_tree = gambit.lib.libgambit.new_tree
-new_table = gambit.lib.libgambit.new_table
-read_game = gambit.lib.libgambit.read_game
-parse_game = gambit.lib.libgambit.parse_game
+class Game(gambit.lib.libgambit.Game): pass
+
+    
+    
+

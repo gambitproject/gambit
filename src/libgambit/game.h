@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/libgambit/game.h
 // Declaration of base class for representing games
@@ -355,6 +355,9 @@ public:
 
   /// Remove this strategy from the game
   void DeleteStrategy(void);
+
+  /// Map the strategy to the corresponding strategy in the unrestricted game
+  GameStrategy Unrestrict(void) const { return m_unrestricted; }
   //@}
 };
 
@@ -647,6 +650,11 @@ public:
 
   /// Returns true if the game has a action-graph game representation
   virtual bool IsAgg(void) const { return false; }
+
+  /// Returns true if the game is a restriction of a more general game
+  virtual bool IsRestriction(void) const { return false; }
+  /// Returns the unrestricted version of the game
+  virtual Game Unrestrict(void) const { throw UndefinedException(); }
 
   /// Get the text label associated with the game
   virtual const std::string &GetTitle(void) const { return m_title; }

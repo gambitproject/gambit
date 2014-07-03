@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+# Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 #
 # FILE: src/python/gambit/lib/game.pxi
 # Cython wrapper for games
@@ -117,8 +117,45 @@ cdef class GameStrategies(Collection):
         s.strategy = self.game.deref().GetStrategy(st+1)
         return s
 
-cdef class Game:
+cdef class Game(object):
     cdef c_Game game
+
+    @classmethod
+    def new_tree(cls):
+        cdef Game g
+        g = cls()
+        g.game = NewTree()
+        return g
+
+    @classmethod
+    def new_table(cls, dim):
+        cdef Game g
+        cdef Array[int] *d
+        d = new Array[int](len(dim))
+        for i in range(1, len(dim)+1):
+            setitem_ArrayInt(d, i, dim[i-1])
+        g = cls()
+        g.game = NewTable(d)
+        del d
+        return g
+
+    @classmethod
+    def read_game(cls, char *fn):
+        cdef Game g
+        g = cls()
+        try:
+            g.game = ReadGame(fn)
+        except IOError as e:
+            raise IOError("Unable to read game from file '%s': %s" % 
+                        (fn, e))
+        return g
+
+    @classmethod
+    def parse_game(cls, char *s):
+        cdef Game g
+        g = cls()
+        g.game = ParseGame(s)
+        return g        
 
     def __str__(self):
         return "<Game '%s'>" % self.title

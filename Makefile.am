@@ -307,6 +307,7 @@ libgambit_la_SOURCES = \
 	src/libgambit/integer.h \
 	src/libgambit/rational.cc \
 	src/libgambit/rational.h \
+	src/libgambit/shared_ptr.h \
 	src/libgambit/array.h \
 	src/libgambit/list.h \
 	src/libgambit/vector.cc \
@@ -347,12 +348,14 @@ libgambit_la_SOURCES = \
 	src/libgambit/stratitr.h \
 	src/libgambit/stratspt.cc \
 	src/libgambit/stratspt.h \
-	src/libgambit/subgame.cc \
-	src/libgambit/subgame.h \
 	src/libgambit/nash.cc \
 	src/libgambit/nash.h \
 	src/libgambit/file.cc \
 	src/libgambit/libgambit.h \
+	src/libgambit/tinyxml.cc \
+	src/libgambit/tinyxml.h \
+	src/libgambit/tinyxmlerror.cc \
+	src/libgambit/tinyxmlparser.cc \
 	${libagg_la_SOURCES}
 
 libgambitincludedir = $(includedir)/libgambit
@@ -418,8 +421,7 @@ AM_LDFLAGS = -static-libgcc -static-libstdc++
 endif
 
 bin_PROGRAMS = \
-	gambit-nfg2html \
-	gambit-nfg2tex \
+	gambit-convert \
 	gambit-enummixed
 
 if WITH_ENUMPOLY
@@ -449,13 +451,11 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/labenski/include ${WX_CXXF
 
 ## Command-line tools
 
-gambit_nfg2html_SOURCES = \
+gambit_convert_SOURCES = \
 	${libgambit_la_SOURCES} \
-	src/tools/convert/nfg2html.cc
-
-gambit_nfg2tex_SOURCES = \
-	${libgambit_la_SOURCES} \
-	src/tools/convert/nfg2tex.cc
+	src/tools/convert/convert.cc \
+	src/tools/convert/tohtml.cc \
+	src/tools/convert/tosgame.cc
 
 liblinear_la_SOURCES = \
 	src/liblinear/basis.cc \
@@ -636,7 +636,9 @@ gambit_lcp_SOURCES = \
 	src/tools/lcp/lhtab.h \
 	src/tools/lcp/lhtab.imp \
 	src/tools/lcp/efglcp.cc \
+	src/tools/lcp/efglcp.h \
 	src/tools/lcp/nfglcp.cc \
+	src/tools/lcp/nfglcp.h \
 	src/tools/lcp/lcp.cc
 
 gambit_liap_SOURCES = \
@@ -668,7 +670,9 @@ gambit_lp_SOURCES = \
 	${libgambit_la_SOURCES} \
 	${liblinear_la_SOURCES} \
 	src/tools/lp/efglp.cc \
+	src/tools/lp/efglp.h \
 	src/tools/lp/nfglp.cc \
+	src/tools/lp/nfglp.h \
 	src/tools/lp/lp.cc
 
 
@@ -799,11 +803,7 @@ gambit_SOURCES = \
 	src/gui/style.cc \
 	src/gui/style.h \
 	src/gui/valnumber.cc \
-	src/gui/valnumber.h \
-	src/gui/tinyxml.cc \
-	src/gui/tinyxml.h \
-	src/gui/tinyxmlerror.cc \
-	src/gui/tinyxmlparser.cc
+	src/gui/valnumber.h
 
 
 gambit_LDADD = \

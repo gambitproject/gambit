@@ -6,8 +6,8 @@ from gambit.lib.error import UndefinedOperationError
 
 class TestGambitGame(object):
     def setUp(self):
-        self.game = gambit.new_table([2,2])
-        self.extensive_game = gambit.read_game("test_games/basic_extensive_game.efg")
+        self.game = gambit.Game.new_table([2,2])
+        self.extensive_game = gambit.Game.read_game("test_games/basic_extensive_game.efg")
     
     def tearDown(self):
         del self.game
@@ -59,32 +59,32 @@ class TestGambitGame(object):
 
     def test_game_is_const_sum(self):
         "To test checking if the game is constant sum"
-        game = gambit.read_game("test_games/const_sum_game.nfg")
+        game = gambit.Game.read_game("test_games/const_sum_game.nfg")
         assert game.is_const_sum
 
     def test_game_is_not_const_sum(self):
         "To test checking if the game is not constant sum"
-        game = gambit.read_game("test_games/non_const_sum_game.nfg")
+        game = gambit.Game.read_game("test_games/non_const_sum_game.nfg")
         assert not game.is_const_sum
 
     def test_game_get_min_payoff(self):
         "To test getting the minimum payoff of the game"
-        game = gambit.read_game("test_games/payoff_game.nfg")
+        game = gambit.Game.read_game("test_games/payoff_game.nfg")
         assert game.min_payoff == fractions.Fraction(1,1)
 
     def test_game_get_max_payoff(self):
         "To test getting the maximum payoff of the game"
-        game = gambit.read_game("test_games/payoff_game.nfg")
+        game = gambit.Game.read_game("test_games/payoff_game.nfg")
         assert game.max_payoff == fractions.Fraction(10,1)
 
     def test_game_is_perfect_recall(self):
         "To test checking if the game is of perfect recall"
-        game = gambit.read_game("test_games/perfect_recall.efg")
+        game = gambit.Game.read_game("test_games/perfect_recall.efg")
         assert game.is_perfect_recall
 
     def test_game_is_not_perfect_recall(self):
         "To test checking if the game is not of perfect recall"
-        game = gambit.read_game("test_games/not_perfect_recall.efg")
+        game = gambit.Game.read_game("test_games/not_perfect_recall.efg")
         assert not game.is_perfect_recall
 
     def test_game_behav_profile_error(self):
@@ -155,7 +155,7 @@ class TestGambitGame(object):
     @nose.tools.raises(RuntimeError)
     def test_game_dereference_invalid(self):
         "Test referencing an invalid game member object"
-        g = gambit.new_tree()
+        g = gambit.Game.new_tree()
         g.players.add("One")
         s = g.players[0].strategies[0]
         g.root.append_move(g.players[0], 2)

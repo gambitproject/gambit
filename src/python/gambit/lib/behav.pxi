@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+# Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 #
 # FILE: src/python/gambit/lib/behav.pxi
 # Cython wrapper for behavior strategies
@@ -218,6 +218,9 @@ cdef class MixedBehavProfile(object):
             raise TypeError("profile regret index must be str or Action, not %s" %
                             action.__class__.__name__)
         return self._regret(action)    
+
+    def set_centroid(self):   self.profile.SetCentroid()
+    def normalize(self):      self.profile.Normalize()
 
 cdef class MixedBehavProfileDouble(MixedBehavProfile):
     cdef c_MixedBehavProfileDouble *profile
