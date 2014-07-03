@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpure/enumpure.cc
 // Compute pure-strategy equilibria in extensive form games
@@ -85,7 +85,7 @@ NashEnumPureAgentSolver::Solve(const BehavSupport &p_support) const
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Search for Nash equilibria in pure strategies\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2013, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2014, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
@@ -111,7 +111,8 @@ int main(int argc, char *argv[])
 {
   opterr = 0;
   bool quiet = false, reportStrategic = false, solveAgent = false, bySubgames = false;
-
+  bool printDetail = false;
+  
   int long_opt_index = 0;
   struct option long_options[] = {
     { "help", 0, NULL, 'h'   },
@@ -119,10 +120,13 @@ int main(int argc, char *argv[])
     { 0,    0,    0,    0   }
   };
   int c;
-  while ((c = getopt_long(argc, argv, "vhqASP", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "DvhqASP", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr); exit(1);
+    case 'D':
+      printDetail = true;
+      break;
     case 'S':
       reportStrategic = true;
       break;
@@ -172,10 +176,20 @@ int main(int argc, char *argv[])
     Game game = ReadGame(*input_stream);
     shared_ptr<StrategyProfileRenderer<Rational> > renderer;
     if (reportStrategic || !game->IsTree()) {
-      renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
+      if (printDetail) {
+	renderer = new MixedStrategyDetailRenderer<Rational>(std::cout);
+      }
+      else {
+	renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
+      }
     }
     else {
-      renderer = new BehavStrategyCSVRenderer<Rational>(std::cout);
+      if (printDetail) {
+	renderer = new BehavStrategyDetailRenderer<Rational>(std::cout);
+      }
+      else {
+	renderer = new BehavStrategyCSVRenderer<Rational>(std::cout);
+      }
     }
 
     if (game->IsTree())  {

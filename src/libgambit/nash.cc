@@ -22,35 +22,132 @@
 
 #include "nash.h"
 
-using namespace Gambit;
+namespace Gambit {
 
 template <class T>
 void MixedStrategyCSVRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile) const
 {
-  m_stream << "NE,";
+  m_stream << "NE";
   for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
-    m_stream << p_profile[i];
-    if (i < p_profile.MixedProfileLength()) {
-      m_stream << ',';
-    }
+    m_stream << "," << lexical_cast<std::string>(p_profile[i], m_numDecimals);
   }
   m_stream << std::endl;
 }
 
+template <class T> void
+MixedStrategyDetailRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile) const
+{
+  for (GamePlayers::const_iterator player = p_profile.GetGame()->Players().begin();
+       player != p_profile.GetGame()->Players().end(); ++player) {
+    m_stream << "Strategy profile for player " << player->GetNumber() << ":\n";
+    
+    m_stream << "Strategy   Prob          Value\n";
+    m_stream << "--------   -----------   -----------\n";
+
+    for (Array<GameStrategyRep *>::const_iterator 
+	   strategy = player->Strategies().begin();
+	 strategy != player->Strategies().end(); ++strategy) {
+      if (strategy->GetLabel() != "") {
+	m_stream << std::setw(8) << strategy->GetLabel() << "    ";
+      }
+      else {
+	m_stream << std::setw(8) << strategy->GetNumber() << "    ";
+      }
+      m_stream << std::setw(10);
+      m_stream << lexical_cast<std::string>(p_profile[*strategy], m_numDecimals);
+      m_stream << "   ";
+      m_stream << std::setw(11);
+      m_stream << lexical_cast<std::string>(p_profile.GetPayoff(*strategy),
+					    m_numDecimals);
+      m_stream << std::endl;
+    }
+  }
+}
 
 template <class T>
 void BehavStrategyCSVRenderer<T>::Render(const MixedBehavProfile<T> &p_profile) const
 {
-  m_stream << "NE,";
+  m_stream << "NE";
   for (int i = 1; i <= p_profile.Length(); i++) {
-    m_stream << p_profile[i];
-    if (i < p_profile.Length()) {
-      m_stream << ',';
-    }
+    m_stream << "," << lexical_cast<std::string>(p_profile[i], m_numDecimals);
   }
   m_stream << std::endl;
 }
 
+template <class T> void
+BehavStrategyDetailRenderer<T>::Render(const MixedBehavProfile<T> &p_profile) const
+{
+  for (GamePlayers::const_iterator player = p_profile.GetGame()->Players().begin();
+       player != p_profile.GetGame()->Players().end(); ++player) {
+    m_stream << "Behavior profile for player " << player->GetNumber() << ":\n";
+    
+    m_stream << "Infoset    Action     Prob          Value\n";
+    m_stream << "-------    -------    -----------   -----------\n";
+
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	GameAction action = infoset->GetAction(act);
+
+	if (infoset->GetLabel() != "") {
+	  m_stream << std::setw(7) << infoset->GetLabel() << "    ";
+	}
+	else {
+	  m_stream << std::setw(7) << infoset->GetNumber() << "    ";
+	}
+	if (action->GetLabel() != "") {
+	  m_stream << std::setw(7) << action->GetLabel() << "   ";
+	}
+	else {
+	  m_stream << std::setw(7) << action->GetNumber() << "   ";
+	}
+	m_stream << std::setw(11);
+	m_stream << lexical_cast<std::string>(p_profile(player->GetNumber(), 
+							iset, act), 
+					      m_numDecimals);
+	m_stream << "   ";
+	m_stream << std::setw(11);
+	m_stream << lexical_cast<std::string>(p_profile.GetPayoff(infoset->GetAction(act)), 
+					      m_numDecimals);
+	m_stream << std::endl;
+      }
+    }
+
+    m_stream << std::endl;
+    m_stream << "Infoset    Node       Belief        Prob\n";
+    m_stream << "-------    -------    -----------   -----------\n";
+
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+      
+      for (int n = 1; n <= infoset->NumMembers(); n++) {
+	GameNode node = infoset->GetMember(n);
+	if (infoset->GetLabel() != "") {
+	  m_stream << std::setw(7) << infoset->GetLabel() << "    ";
+	}
+	else {
+	  m_stream << std::setw(7) << infoset->GetNumber() << "    ";
+	}
+	if (node->GetLabel() != "") {
+	  m_stream << std::setw(7) << node->GetLabel() << "   ";
+	}
+	else {
+	  m_stream << std::setw(7) << node->GetNumber() << "   ";
+	}
+	m_stream << std::setw(11);
+	m_stream << lexical_cast<std::string>(p_profile.GetBeliefProb(infoset->GetMember(n)), 
+					     m_numDecimals);
+	m_stream << "   ";
+	m_stream << std::setw(11);
+	m_stream << lexical_cast<std::string>(p_profile.GetRealizProb(infoset->GetMember(n)), 
+					      m_numDecimals);
+	m_stream << std::endl;
+      }
+    }
+    m_stream << std::endl;
+  }
+}
 
 template class MixedStrategyRenderer<double>;
 template class MixedStrategyRenderer<Rational>;
@@ -61,6 +158,8 @@ template class MixedStrategyNullRenderer<Rational>;
 template class MixedStrategyCSVRenderer<double>;
 template class MixedStrategyCSVRenderer<Rational>;
 
+template class MixedStrategyDetailRenderer<double>;
+template class MixedStrategyDetailRenderer<Rational>;
 
 template class StrategyProfileRenderer<double>;
 template class StrategyProfileRenderer<Rational>;
@@ -70,6 +169,10 @@ template class BehavStrategyNullRenderer<Rational>;
 
 template class BehavStrategyCSVRenderer<double>;
 template class BehavStrategyCSVRenderer<Rational>;
+
+template class BehavStrategyDetailRenderer<double>;
+template class BehavStrategyDetailRenderer<Rational>;
+
 
 
 template <class T>
@@ -359,3 +462,5 @@ template class NashBehavViaStrategySolver<Rational>;
 
 template class SubgameNashBehavSolver<double>;
 template class SubgameNashBehavSolver<Rational>;
+
+} // end namespace Gambit

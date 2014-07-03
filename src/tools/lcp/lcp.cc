@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/lcp/lcp.cc
 // Compute Nash equilibria via linear complementarity program
@@ -27,20 +27,15 @@
 #include <unistd.h>
 #include <getopt.h>
 #include "libgambit/libgambit.h"
-#include "libgambit/subgame.h"
+#include "efglcp.h"
+#include "nfglcp.h"
 
 using namespace Gambit;
-
-template <class T>
-List<MixedBehavProfile<T> > SolveExtensive(const BehavSupport &p);
-template <class T>
-List<MixedBehavProfile<T> > SolveExtensiveSilent(const BehavSupport &p);
-template <class T> void SolveStrategic(const Game &p_game);
 
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by solving a linear complementarity program\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2013, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2014, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
@@ -67,21 +62,13 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-int g_numDecimals = 6;
-bool g_printDetail = false;
-int g_stopAfter = 0;
-int g_maxDepth = 0;
-
-extern void PrintProfile(std::ostream &, const std::string &,
-			 const MixedBehavProfile<double> &);
-extern void PrintProfile(std::ostream &, const std::string &,
-			 const MixedBehavProfile<Rational> &);
-
 
 int main(int argc, char *argv[])
 {
   int c;
   bool useFloat = false, useStrategic = false, bySubgames = false, quiet = false;
+  bool printDetail = false;
+  int numDecimals = 6, stopAfter = 0, maxDepth = 0;
 
   int long_opt_index = 0;
   struct option long_options[] = {
@@ -95,13 +82,13 @@ int main(int argc, char *argv[])
       PrintBanner(std::cerr); exit(1);
     case 'd':
       useFloat = true;
-      g_numDecimals = atoi(optarg);
+      numDecimals = atoi(optarg);
       break;
     case 'D':
-      g_printDetail = true;
+      printDetail = true;
       break;
     case 'e':
-      g_stopAfter = atoi(optarg);
+      stopAfter = atoi(optarg);
       break;
     case 'h':
       PrintHelp(argv[0]);
@@ -110,7 +97,7 @@ int main(int argc, char *argv[])
       quiet = true;
       break;
     case 'r':
-      g_maxDepth = atoi(optarg);
+      maxDepth = atoi(optarg);
       break;
     case 'S':
       useStrategic = true;
@@ -158,37 +145,88 @@ int main(int argc, char *argv[])
 
     if (!game->IsTree() || useStrategic) {
       if (useFloat) {
-	SolveStrategic<double>(game);
+	shared_ptr<StrategyProfileRenderer<double> > renderer;
+	if (printDetail)  {
+	  renderer = new MixedStrategyDetailRenderer<double>(std::cout,
+							     numDecimals);
+	}
+	else {
+	  renderer = new MixedStrategyCSVRenderer<double>(std::cout, numDecimals);
+	}
+	NashLcpStrategySolver<double> algorithm(stopAfter, maxDepth,
+						renderer);
+	algorithm.Solve(game);
       }
       else {
-	SolveStrategic<Rational>(game);
+	shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+	if (printDetail) {
+	  renderer = new MixedStrategyDetailRenderer<Rational>(std::cout);
+	}
+	else {
+	  renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
+	}
+	NashLcpStrategySolver<Rational> algorithm(stopAfter, maxDepth,
+						  renderer);
+	algorithm.Solve(game);
       }
     }
     else {
       if (!bySubgames) {
 	if (useFloat) {
-	  SolveExtensive<double>(game);
+	  shared_ptr<StrategyProfileRenderer<double> > renderer;
+	  if (printDetail)  {
+	    renderer = new BehavStrategyDetailRenderer<double>(std::cout,
+							       numDecimals);
+	  }
+	  else {
+	    renderer = new BehavStrategyCSVRenderer<double>(std::cout, 
+							    numDecimals);
+	  }
+	  NashLcpBehavSolver<double> algorithm(stopAfter, maxDepth, renderer);
+	  algorithm.Solve(game);
 	}
 	else {
-	  SolveExtensive<Rational>(game);
+	  shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+	  if (printDetail) {
+	    renderer = new BehavStrategyDetailRenderer<Rational>(std::cout);
+	  }
+	  else {
+	    renderer = new BehavStrategyCSVRenderer<Rational>(std::cout);
+	  }
+	  NashLcpBehavSolver<Rational> algorithm(stopAfter, maxDepth, renderer);
+	  algorithm.Solve(game);
 	}
       }
       else {
 	if (useFloat) {
-	  List<MixedBehavProfile<double> > solutions;
-	  solutions = SolveBySubgames<double>(BehavSupport(game),
-					      &SolveExtensiveSilent<double>);
-	  for (int i = 1; i <= solutions.Length(); i++) {
-	    PrintProfile(std::cout, "NE", solutions[i]);
+	  shared_ptr<NashBehavSolver<double> > stage = 
+	    new NashLcpBehavSolver<double>(stopAfter, maxDepth);
+	  shared_ptr<StrategyProfileRenderer<double> > renderer;
+	  if (printDetail)  {
+	    renderer = new BehavStrategyDetailRenderer<double>(std::cout,
+							       numDecimals);
 	  }
+	  else {
+	    renderer = new BehavStrategyCSVRenderer<double>(std::cout, 
+							    numDecimals);
+	  }
+	  SubgameNashBehavSolver<double> algorithm(stage, renderer);
+	  algorithm.Solve(game);
 	}
 	else {
-	  List<MixedBehavProfile<Rational> > solutions;
-	  solutions = SolveBySubgames<Rational>(BehavSupport(game),
-						&SolveExtensiveSilent<Rational>);
-	  for (int i = 1; i <= solutions.Length(); i++) {
-	    PrintProfile(std::cout, "NE", solutions[i]);
+	  shared_ptr<NashBehavSolver<Rational> > stage = 
+	    new NashLcpBehavSolver<Rational>(stopAfter, maxDepth);
+	  shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+	  if (printDetail)  {
+	    renderer = new BehavStrategyDetailRenderer<Rational>(std::cout,
+								 numDecimals);
 	  }
+	  else {
+	    renderer = new BehavStrategyCSVRenderer<Rational>(std::cout, 
+							      numDecimals);
+	  }
+	  SubgameNashBehavSolver<Rational> algorithm(stage, renderer);
+	  algorithm.Solve(game);
 	}
       }
     }
@@ -198,8 +236,8 @@ int main(int argc, char *argv[])
     std::cerr << "Error: Game not in a recognized format.\n";
     return 1;
   }
-  catch (...) {
-    std::cerr << "Error: An internal error occurred.\n";
+  catch (std::runtime_error &e) {
+    std::cerr << "Error: " << e.what() << std::endl;
     return 1;
   }
 }

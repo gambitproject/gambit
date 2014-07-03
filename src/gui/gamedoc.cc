@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/gui/gamedoc.cc
 // Implementation of game document class
@@ -30,7 +30,7 @@
 #include <wx/filename.h>       // used to create temp files for undo/redo
 
 #include "libgambit/libgambit.h"
-#include "tinyxml.h"    // for XML parser for LoadDocument()
+#include "libgambit/tinyxml.h"    // for XML parser for LoadDocument()
 
 #include "gambit.h"     // for wxGetApp()
 #include "gamedoc.h"

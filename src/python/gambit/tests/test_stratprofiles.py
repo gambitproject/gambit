@@ -6,7 +6,7 @@ from gambit.lib.error import UndefinedOperationError
 
 class TestGambitStrategySupportProfile(object):
     def setUp(self):
-        self.game = gambit.read_game("test_games/mixed_strategy.nfg")
+        self.game = gambit.Game.read_game("test_games/mixed_strategy.nfg")
         self.support_profile = self.game.support_profile()
         self.restriction = self.support_profile.restrict()
         

@@ -61,12 +61,27 @@ public:
 template <class T>
 class MixedStrategyCSVRenderer : public MixedStrategyRenderer<T> {
 public:
-  MixedStrategyCSVRenderer(std::ostream &p_stream) : m_stream(p_stream) { }
+  MixedStrategyCSVRenderer(std::ostream &p_stream, int p_numDecimals = 6)
+    : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
   virtual ~MixedStrategyCSVRenderer() { }
   virtual void Render(const MixedStrategyProfile<T> &p_profile) const;
 
 private:
   std::ostream &m_stream;
+  int m_numDecimals;
+};
+
+template <class T>
+class MixedStrategyDetailRenderer : public MixedStrategyRenderer<T> {
+public:
+  MixedStrategyDetailRenderer(std::ostream &p_stream, int p_numDecimals = 6)
+    : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
+  virtual ~MixedStrategyDetailRenderer() { }
+  virtual void Render(const MixedStrategyProfile<T> &p_profile) const;
+
+private:
+  std::ostream &m_stream;
+  int m_numDecimals;
 };
 
 //
@@ -90,12 +105,27 @@ public:
 template <class T>
 class BehavStrategyCSVRenderer : public BehavStrategyRenderer<T> {
 public:
-  BehavStrategyCSVRenderer(std::ostream &p_stream) : m_stream(p_stream) { }
+  BehavStrategyCSVRenderer(std::ostream &p_stream, int p_numDecimals = 6) 
+    : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
   virtual ~BehavStrategyCSVRenderer() { }
   virtual void Render(const MixedBehavProfile<T> &p_profile) const;
 
 private:
   std::ostream &m_stream;
+  int m_numDecimals;
+};
+
+template <class T>
+class BehavStrategyDetailRenderer : public BehavStrategyRenderer<T> {
+public:
+  BehavStrategyDetailRenderer(std::ostream &p_stream, int p_numDecimals = 6)
+    : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
+  virtual ~BehavStrategyDetailRenderer() { }
+  virtual void Render(const MixedBehavProfile<T> &p_profile) const;
+
+private:
+  std::ostream &m_stream;
+  int m_numDecimals;
 };
 
 //------------------------------------------------------------------------
@@ -161,6 +191,16 @@ private:
 		     List<GameOutcome> &values) const;
 };
 
+//
+// Exception raised when maximum number of equilibria to compute
+// has been reached.  A convenience for unraveling a potentially
+// deep recursion.
+//
+class NashEquilibriumLimitReached : public Exception {
+public:
+  virtual ~NashEquilibriumLimitReached() throw() { }
+  const char *what(void) const throw() { return "Reached target number of equilibria"; }
+};
 
 }  // namespace Gambit
 

@@ -2,7 +2,7 @@ import gambit
 
 class TestGambitExtensiveGame(object):
 	def setUp(self):
-		self.game = gambit.new_tree()
+		self.game = gambit.Game.new_tree()
 	
 	def tearDown(self):
 		del self.game

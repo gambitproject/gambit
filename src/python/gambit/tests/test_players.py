@@ -5,10 +5,10 @@ from nose.tools import assert_raises
 
 class TestGambitPlayers(object):
     def setUp(self):
-        self.strategic_game = gambit.new_table([2,2])
+        self.strategic_game = gambit.Game.new_table([2,2])
         self.strategic_game.players[0].label = "Alphonse"
         self.strategic_game.players[1].label = "Gaston"
-        self.extensive_game = gambit.new_tree()
+        self.extensive_game = gambit.Game.new_tree()
     
     def tearDown(self):
         del self.strategic_game
@@ -99,7 +99,7 @@ class TestGambitPlayers(object):
 
     def test_player_get_min_payoff(self):
         "To test getting the minimum payoff for the players"
-        game = gambit.read_game("test_games/payoff_game.nfg")
+        game = gambit.Game.read_game("test_games/payoff_game.nfg")
         assert game.players[0].min_payoff == fractions.Fraction(4,1)
         assert game.players["Player 1"].min_payoff == fractions.Fraction(4,1)
         assert game.players[1].min_payoff == fractions.Fraction(1,1)
@@ -107,7 +107,7 @@ class TestGambitPlayers(object):
 
     def test_player_get_max_payoff(self):
         "To test getting the maximum payoff for the players"
-        game = gambit.read_game("test_games/payoff_game.nfg")
+        game = gambit.Game.read_game("test_games/payoff_game.nfg")
         assert game.players[0].max_payoff == fractions.Fraction(10,1)
         assert game.players["Player 1"].max_payoff == fractions.Fraction(10,1)
         assert game.players[1].max_payoff == fractions.Fraction(8,1)

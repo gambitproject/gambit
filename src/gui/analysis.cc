@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/gui/analysis.cc
 // Declaration of analysis storage classes
@@ -26,7 +26,7 @@
 #endif  // WX_PRECOMP
 #include <wx/tokenzr.h>
 
-#include "tinyxml.h"    // for XML parser for Load()
+#include "libgambit/tinyxml.h"    // for XML parser for Load()
 
 
 #include "libgambit/libgambit.h"

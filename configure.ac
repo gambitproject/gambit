@@ -1,6 +1,6 @@
 dnl
 dnl This file is part of Gambit
-dnl Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+dnl Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 dnl
 dnl FILE: configure.in
 dnl autoconf configuration script for Gambit
@@ -20,7 +20,7 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 dnl
 
-AC_INIT([gambit], [14.0.1])
+AC_INIT([gambit], [14.0.2])
 AC_CONFIG_SRCDIR([src/libgambit/libgambit.h])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([subdir-objects])

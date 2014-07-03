@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/gui/style.h
 // Class to store settings related to graphical interface styling
@@ -24,7 +24,7 @@
 #define STYLE_H
 
 #include "libgambit/libgambit.h"
-#include "tinyxml.h"
+#include "libgambit/tinyxml.h"
 
 const int GBT_NODE_TOKEN_LINE = 0;
 const int GBT_NODE_TOKEN_BOX = 1;
