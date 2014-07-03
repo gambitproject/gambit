@@ -548,6 +548,36 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue(void) const
   return liapValue;
 }
 
+//template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::Unrestrict(void) const
+template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::Unrestrict(void) const
+{
+  //Get game on which this MixedStrategyProfile is defined
+  Game h = GetGame();
+  //Throw error if Game h is not a restriction
+  if(dynamic_cast<GameTableRep &>(*h).m_unrestricted == 0)
+  {
+    std::cout << "err\n";
+    //throw error
+  }
+  //Get unrestricted game
+  Game g = dynamic_cast<GameTableRep &>(*h).m_unrestricted;
+  T numb = 0.0;
+  MixedStrategyProfile<T> m = g->NewMixedStrategyProfile(numb);
 
+  //Iterate through each strategy of game g 
+  for (int s,t = 1; s <= g->MixedProfileLength(); s++)
+  {
+    //Matching strategy in unrestricted and restricted game
+    if((h->GetStrategy(t))->m_unrestricted == g->GetStrategy(s))
+    {
+      //Copy to new MSP
+      m[s] = (*this)[t];
+      t++;
+    } 
+    //Else There is no strategy to match
+  }
+  	
+  return m;
+}
 
 } // end namespace Gambit

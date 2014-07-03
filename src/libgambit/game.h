@@ -753,6 +753,18 @@ public:
   /// Returns the number of nodes in the game
   virtual int NumNodes(void) const = 0;
   //@}
+
+  /*
+  /// @name Strategic Restriction
+  //@{
+  /// Returns Whether current Game Object is Strategic Restriction or Full Game Description
+  virtual bool IsRestriction() const = 0;
+  /// Returns Full Game Description
+  virtual Game UnRestrict() const = 0;
+  */
+
+  //virtual bool IsRestricted(void) const = 0;
+
 };
 
 typedef GameObjectPtr<GameRep> Game;
