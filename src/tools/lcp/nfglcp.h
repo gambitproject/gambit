@@ -44,9 +44,8 @@ private:
 
   class Solution;
 
-  bool OnBFS(const StrategySupport &, LHTableau<T> &, Solution &) const;
-  void AllLemke(const StrategySupport &, int j, LHTableau<T> &, 
-		Solution &, int) const;
+  bool OnBFS(const Game &, LHTableau<T> &, Solution &) const;
+  void AllLemke(const Game &, int j, LHTableau<T> &, Solution &, int) const;
 };
 
 

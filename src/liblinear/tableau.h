@@ -41,10 +41,6 @@ template <class T> class LPTableau;
 
 template<>
 class Tableau<double> : public TableauInterface<double>{
-private:
-  LUdecomp<double> B;     // LU decomposition
-  Gambit::Vector<double> tmpcol; // temporary column vector, to avoid allocation
-
 public:
       // constructors and destructors
   Tableau(const Gambit::Matrix<double> &A, const Gambit::Vector<double> &b); 
@@ -56,7 +52,7 @@ public:
   Tableau<double>& operator=(const Tableau<double>&);
   
   // pivoting
-  int CanPivot(int outgoing,int incoming);
+  virtual bool CanPivot(int outgoing, int incoming) const;
   void Pivot(int outrow,int col); // pivot -- outgoing is row, incoming is column
   void BasisVector(Gambit::Vector<double> &x) const; // solve M x = (*b)
   void SolveColumn(int, Gambit::Vector<double> &);  // column in new basis 
@@ -73,6 +69,12 @@ public:
   
   bool IsFeasible();
   bool IsLexMin();
+
+private:
+  // The LU decomposition of the tableau
+  LUdecomp<double> B;
+  // A temporary column vector, to avoid frequent allocation
+  mutable Gambit::Vector<double> tmpcol;
 };
 
 // 
@@ -90,7 +92,7 @@ private:
   Gambit::Integer totdenom;  // This carries the denominator for Q data or 1 for Z
   Gambit::Integer denom;  // This is the denominator for the simplex
 
-  Gambit::Vector<Gambit::Rational> tmpcol; // temporary column vector, to avoid allocation
+  mutable Gambit::Vector<Gambit::Rational> tmpcol; // temporary column vector, to avoid allocation
 
   void MySolveColumn(int, Gambit::Vector<Gambit::Rational> &);  // column in new basis 
 
@@ -113,7 +115,7 @@ public:
   Tableau<Gambit::Rational>& operator=(const Tableau<Gambit::Rational>&);
   
   // pivoting
-  int CanPivot(int outgoing,int incoming);
+  virtual bool CanPivot(int outgoing, int incoming) const;
   void Pivot(int outrow,int col); // pivot -- outgoing is row, incoming is column
   void SolveColumn(int, Gambit::Vector<Gambit::Rational> &);  // column in new basis 
   void GetColumn(int, Gambit::Vector<Gambit::Rational> &) const;  // column in new basis 

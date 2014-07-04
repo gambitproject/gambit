@@ -20,56 +20,71 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LHTAB_H
-#define LHTAB_H
+#ifndef LCP_LHTAB_H
+#define LCP_LHTAB_H
 
-// includes
 #include "lemketab.h"
 
-class Nfg;
+using namespace Gambit;
 
-template <class T> class LHTableau : public BaseTableau<T>{
-protected:
-  LTableau<T> T1,T2;
-  Gambit::Vector<T> tmp1,tmp2; // temporary column vectors, to avoid allocation
-  Gambit::Vector<T> solution;
+template <class T> Matrix<T> Make_A1(const Game &);
+template <class T> Vector<T> Make_b1(const Game &);
+template <class T> Matrix<T> Make_A2(const Game &);
+template <class T> Vector<T> Make_b2(const Game &);
+
+template <class T> class LHTableau : public BaseTableau<T> {
 public:
-      // constructors and destructors
-  LHTableau(const Gambit::Matrix<T> &A1, const Gambit::Matrix<T> &A2, 
-	    const Gambit::Vector<T> &b1, const Gambit::Vector<T> &b2); 
-  LHTableau(const LHTableau<T>&);
-  virtual ~LHTableau();
+  /// @name Lifecycle
+  //@{
+  LHTableau(const Matrix<T> &A1, const Matrix<T> &A2,
+	    const Vector<T> &b1, const Vector<T> &b2);
+  virtual ~LHTableau() { }
   
   LHTableau<T>& operator=(const LHTableau<T>&);
+  //@}
   
-      // information
-  int MinRow() const;
-  int MaxRow() const;
-  int MinCol() const;
-  int MaxCol() const;
-  T Epsilon() const;
+  /// @name General information
+  //@{
+  int MinRow(void) const  { return T1.MinRow(); }
+  int MaxRow(void) const  { return T2.MaxRow(); }
+  int MinCol(void) const  { return T2.MinCol(); }
+  int MaxCol(void) const  { return T1.MaxCol(); }
+  T Epsilon(void) const   { return T1.Epsilon(); }
   
-  bool Member(int i) const;
-  int Label(int i) const;   // return variable in i'th position of Tableau
-  int Find(int i) const;  // return Tableau position of variable i
+  bool Member(int i) const  { return T1.Member(i) || T2.Member(i); }
+  /// Return variable in i'th position of Tableau
+  int Label(int i) const;
+  /// Return Tableau position of variable i
+  int Find(int i) const;
+  //@}
   
-      // pivoting
-  int CanPivot(int outgoing,int incoming);
-  void Pivot(int outrow,int inlabel);
-      // perform pivot operation -- outgoing is row, incoming is column
-  long NumPivots() const;
+  /// @name Pivoting operations
+  //@{
+  bool CanPivot(int outgoing, int incoming) const;
+  /// Perform apivot operation -- outgoing is row, incoming is column
+  void Pivot(int outrow, int inlabel);
+  long NumPivots(void) const { return T1.NumPivots() + T2.NumPivots(); }
+  //@}
+
+  /// @name Raw Tableau functions
+  //@{
+  void Refactor(void) { T1.Refactor(); T2.Refactor(); }
+  //@}
   
-      // raw Tableau functions
-  void Refactor();
-  
-      // miscellaneous functions
+  /// @name Miscellaneous functions
+  //@{
   BFS<T> GetBFS(void);
 
   int PivotIn(int i);
   int ExitIndex(int i);
-  int LemkePath(int dup); // follow a path of ACBFS's from one CBFS to another
+  /// Follow a path of ACBFS's from one CBFS to another
+  int LemkePath(int dup);
+  //@}
+
+protected:
+  LTableau<T> T1,T2;
+  Vector<T> tmp1,tmp2; // temporary column vectors, to avoid allocation
+  Vector<T> solution;
 };
 
-
-
-#endif     // LHTAB_H
+#endif  // LCP_LHTAB_H

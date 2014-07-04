@@ -25,17 +25,17 @@
 template class LHTableau<double>;
 template class LHTableau<Rational>;
 
-template Matrix<double> Make_A1<double>(const StrategySupport &);
-template Matrix<Rational> Make_A1<Rational>(const StrategySupport &);
+template Matrix<double> Make_A1<double>(const Game &);
+template Matrix<Rational> Make_A1<Rational>(const Game &);
 
-template Vector<double> Make_b1<double>(const StrategySupport &);
-template Vector<Rational> Make_b1<Rational>(const StrategySupport &);
+template Vector<double> Make_b1<double>(const Game &);
+template Vector<Rational> Make_b1<Rational>(const Game &);
 
-template Matrix<double> Make_A2<double>(const StrategySupport &);
-template Matrix<Rational> Make_A2<Rational>(const StrategySupport &);
+template Matrix<double> Make_A2<double>(const Game &);
+template Matrix<Rational> Make_A2<Rational>(const Game &);
 
-template Vector<double> Make_b2<double>(const StrategySupport &);
-template Vector<Rational> Make_b2<Rational>(const StrategySupport &);
+template Vector<double> Make_b2<double>(const Game &);
+template Vector<Rational> Make_b2<Rational>(const Game &);
 
 
 

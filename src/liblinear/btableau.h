@@ -57,7 +57,7 @@ public:
     // return position of variable i
   
       // pivoting
-  virtual int CanPivot(int outgoing,int incoming) = 0;
+  virtual bool CanPivot(int outgoing,int incoming) const = 0;
   virtual void Pivot(int outrow,int col) = 0;
       // perform pivot operation -- outgoing is row, incoming is column
   void CompPivot(int outlabel,int col);
@@ -119,7 +119,7 @@ public:
   BFS<T> GetBFS1(void) const; 
   BFS<T> GetBFS(void);  // used in lpsolve for some reason
 
-  virtual int CanPivot(int outgoing,int incoming) = 0;
+  virtual bool CanPivot(int outgoing, int incoming) const = 0;
   virtual void Pivot(int outrow,int col) = 0; // pivot -- outgoing is row, incoming is column
   virtual void SolveColumn(int, Gambit::Vector<T> &) = 0;  // column in new basis 
   virtual void Solve(const Gambit::Vector<T> &b, Gambit::Vector<T> &x) = 0;  // solve M x = b

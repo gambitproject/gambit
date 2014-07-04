@@ -63,9 +63,9 @@ Tableau<double>& Tableau<double>::operator=(const Tableau<double> &orig)
 // pivoting operations
 //
 
-int Tableau<double>::CanPivot(int outlabel, int col)
+bool Tableau<double>::CanPivot(int outlabel, int col) const
 {
-  SolveColumn(col,tmpcol);
+  const_cast<Tableau<double> *>(this)->SolveColumn(col, tmpcol);
   double val = tmpcol[basis.Find(outlabel)];
   if(val <=eps2 && val >= -eps2) return 0;
   return 1;  
@@ -302,9 +302,9 @@ Gambit::Matrix<Gambit::Rational> Tableau<Gambit::Rational>::GetInverse()
 
 // pivoting operations
 
-int Tableau<Gambit::Rational>::CanPivot(int outlabel, int col)
+bool Tableau<Gambit::Rational>::CanPivot(int outlabel, int col) const
 {
-  MySolveColumn(col,tmpcol);
+  const_cast<Tableau<Gambit::Rational> *>(this)->MySolveColumn(col,tmpcol);
   Gambit::Rational val = tmpcol[basis.Find(outlabel)];
   if(val == (Gambit::Rational)0) return 0;
   //   if(val <=eps2 && val >= -eps2) return 0;
