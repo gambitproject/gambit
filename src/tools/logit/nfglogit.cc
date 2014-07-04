@@ -84,22 +84,22 @@ StrategicQREPathTracer::Criterion(const Vector<double> &p_point,
 void 
 StrategicQREPathTracer::GetLHS(const Vector<double> &p_point, Vector<double> &p_lhs)
 {
-  const StrategySupport &support = m_start.GetSupport();
-  MixedStrategyProfile<double> profile(support.NewMixedStrategyProfile<double>()), logprofile(support.NewMixedStrategyProfile<double>());
+  const Game &game = m_start.GetGame();
+  MixedStrategyProfile<double> profile(game->NewMixedStrategyProfile(0.0)), logprofile(game->NewMixedStrategyProfile(0.0));
   for (int i = 1; i <= profile.MixedProfileLength(); i++) {
     profile[i] = exp(p_point[i]);
     logprofile[i] = p_point[i];
   }
   double lambda = p_point[p_point.Length()];
   p_lhs = 0.0;
-  for (int rowno = 0, pl = 1; pl <= support.NumPlayers(); pl++) {
-    StrategySupportPlayer player = support.GetPlayer(pl);
-    for (int st = 1; st <= player->NumStrategies(); st++) {
+  for (int rowno = 0, pl = 1; pl <= game->NumPlayers(); pl++) {
+    GamePlayer player = game->Players()[pl];
+    for (int st = 1; st <= player->Strategies().size(); st++) {
       rowno++;
       if (st == 1) {
 	// This is a sum-to-one equation
 	p_lhs[rowno] = -1.0;
-	for (int j = 1; j <= player->NumStrategies(); j++) {
+	for (int j = 1; j <= player->Strategies().size(); j++) {
 	  p_lhs[rowno] += profile[player->GetStrategy(j)];
 	}
       }
@@ -119,8 +119,8 @@ void
 StrategicQREPathTracer::GetJacobian(const Vector<double> &p_point,
 				    Matrix<double> &p_matrix)
 {
-  const StrategySupport &support = m_start.GetSupport();
-  MixedStrategyProfile<double> profile(support.NewMixedStrategyProfile<double>()), logprofile(support.NewMixedStrategyProfile<double>());
+  const Game &game = m_start.GetGame();
+  MixedStrategyProfile<double> profile(game->NewMixedStrategyProfile(0.0)), logprofile(game->NewMixedStrategyProfile(0.0));
   for (int i = 1; i <= profile.MixedProfileLength(); i++) {
     profile[i] = exp(p_point[i]);
     logprofile[i] = p_point[i];
@@ -129,15 +129,15 @@ StrategicQREPathTracer::GetJacobian(const Vector<double> &p_point,
 
   p_matrix = 0.0;
 
-  for (int rowno = 0, i = 1; i <= support.NumPlayers(); i++) {
-    StrategySupportPlayer player = support.GetPlayer(i);
-    for (int j = 1; j <= player->NumStrategies(); j++) {
+  for (int rowno = 0, i = 1; i <= game->NumPlayers(); i++) {
+    GamePlayer player = game->Players()[i];
+    for (int j = 1; j <= player->Strategies().size(); j++) {
       rowno++;
       if (j == 1) {
 	// This is a sum-to-one equation
-	for (int colno = 0, ell = 1; ell <= support.NumPlayers(); ell++) {
-	  StrategySupportPlayer player2 = support.GetPlayer(ell);
-	  for (int m = 1; m <= player2->NumStrategies(); m++) {
+	for (int colno = 0, ell = 1; ell <= game->NumPlayers(); ell++) {
+	  GamePlayer player2 = game->Players()[ell];
+	  for (int m = 1; m <= player2->Strategies().size(); m++) {
 	    colno++;
 	    if (i == ell) {
 	      p_matrix(colno, rowno) = profile[player2->GetStrategy(m)];
@@ -145,13 +145,13 @@ StrategicQREPathTracer::GetJacobian(const Vector<double> &p_point,
 	    // Otherwise, entry is zero
 	  }
 	}
-	// The last column is derivate wrt lamba, which is zero
+	// The last column is derivative wrt lamba, which is zero
       }
       else {
 	// This is a ratio equation
-	for (int colno = 0, ell = 1; ell <= support.NumPlayers(); ell++) {
-	  StrategySupportPlayer player2 = support.GetPlayer(ell);
-	  for (int m = 1; m <= player2->NumStrategies(); m++) {
+	for (int colno = 0, ell = 1; ell <= game->NumPlayers(); ell++) {
+	  GamePlayer player2 = game->Players()[ell];
+  	  for (int m = 1; m <= player2->Strategies().size(); m++) {
 	    colno++;
 	    if (i == ell) {
 	      if (m == 1) {

@@ -29,58 +29,6 @@ namespace Gambit {
 
 class StrategySupport;
 
-//
-// Represents a player in a game restricted to the given support.
-// This is intended to be a transitional implementation; combined with its
-// handle class, it provides an interface similar enough to the GamePlayerRep
-// class to allow code to be written to the same specification, until such
-// time as the concept of a strategically restricted game, currently only
-// in the Python API, is implemented formally in C++.
-//
-class StrategySupportPlayerRep  {
-friend class StrategySupport;
-private:
-  const StrategySupport &m_support;
-  GamePlayer m_player;
-
-  StrategySupportPlayerRep(const StrategySupport &p_support, 
-                           GamePlayer p_player)
-    : m_support(p_support), m_player(p_player)  { }
-
-public:
-  int GetNumber(void) const { return m_player->GetNumber(); }
-  Game GetGame(void) const { return m_player->GetGame(); }
-
-  const std::string &GetLabel(void) const { return m_player->GetLabel(); }
-  void SetLabel(const std::string &p_label) { throw UndefinedException(); }
-
-  int NumStrategies(void) const;
-  GameStrategy GetStrategy(int st) const;
-};
-
-class StrategySupportPlayer {
-friend class StrategySupport;
-private:
-  StrategySupportPlayerRep *rep;
-
-  StrategySupportPlayer(StrategySupportPlayerRep *p_rep) : rep(p_rep) { }
-
-public:
-  ~StrategySupportPlayer() { delete rep; }
-
-  StrategySupportPlayer &operator=(const StrategySupportPlayer &r)
-    {
-      if (&r != this) {
-	delete rep;
-	rep = new StrategySupportPlayerRep(*r.rep);
-      }
-      return *this;
-    }
-
-  StrategySupportPlayerRep *operator->(void) const  { return rep; }
-  operator StrategySupportPlayerRep *(void) const { return rep; }
-};
-
 /// \brief A support on a strategic game
 ///
 /// This class represents a subset of the strategies in strategic game.
@@ -146,11 +94,6 @@ public:
 
   /// Returns the number of players in the game
   int NumPlayers(void) const { return m_nfg->NumPlayers(); }
-  /// Returns the pl'th player in the game (restricted to this strategy set)
-  StrategySupportPlayer GetPlayer(int pl) const
-  { return new StrategySupportPlayerRep(*this, m_nfg->GetPlayer(pl)); }
-  /// Returns the set of players in the game
-  const GamePlayers &Players(void) const { return m_nfg->Players(); }
   /// Returns the set of strategies in the support for a player
   const Array<GameStrategy> &Strategies(const GamePlayer &p_player) const
     { return m_support[p_player->GetNumber()]; }
@@ -207,13 +150,6 @@ public:
 
   Game Restrict(void) const;
 };
-
-
-inline int StrategySupportPlayerRep::NumStrategies(void) const
-{ return m_support.NumStrategies(m_player->GetNumber()); }
-
-inline GameStrategy StrategySupportPlayerRep::GetStrategy(int st) const
-{ return m_support.GetStrategy(m_player->GetNumber(), st); }
 
 } // end namespace Gambit
 
