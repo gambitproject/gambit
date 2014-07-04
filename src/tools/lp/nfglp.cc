@@ -84,21 +84,20 @@ NashLpStrategySolver<T>::SolveLP(const Matrix<T> &A,
 template <class T> List<MixedStrategyProfile<T> > 
 NashLpStrategySolver<T>::Solve(const Game &p_game) const
 {
-  StrategySupport support(p_game);
-  int m = support.NumStrategies(1);
-  int k = support.NumStrategies(2);
+  int m = p_game->Players()[1]->Strategies().size();
+  int k = p_game->Players()[2]->Strategies().size();
 
   Matrix<T> A(1,k+1,1,m+1);
   Vector<T> b(1,k+1);
   Vector<T> c(1,m+1);
-  PureStrategyProfile profile = support.GetGame()->NewPureStrategyProfile();
+  PureStrategyProfile profile = p_game->NewPureStrategyProfile();
 
-  Rational minpay = support.GetGame()->GetMinPayoff() - Rational(1);
+  Rational minpay = p_game->GetMinPayoff() - Rational(1);
 
   for (int i = 1; i <= k; i++)  {
-    profile->SetStrategy(support.GetStrategy(2, i));
+    profile->SetStrategy(p_game->Players()[2]->Strategies()[i]);
     for (int j = 1; j <= m; j++)  {
-      profile->SetStrategy(support.GetStrategy(1, j));
+      profile->SetStrategy(p_game->Players()[1]->Strategies()[j]);
       A(i, j) = minpay - profile->GetPayoff(1);
     }
     A(i,m+1) = (T) 1;
@@ -118,17 +117,13 @@ NashLpStrategySolver<T>::Solve(const Game &p_game) const
     return List<MixedStrategyProfile<T> >();
   }
 
-  int n1 = support.NumStrategies(1);
-  int n2 = support.NumStrategies(2);
-  MixedStrategyProfile<T> eqm(support.GetGame()->NewMixedStrategyProfile((T) 0));
-
-  for (int j = 1; j <= n1; j++) {
-    eqm[support.GetStrategy(1, j)] = primal[j];
+  MixedStrategyProfile<T> eqm(p_game->NewMixedStrategyProfile(static_cast<T>(0)));
+  for (int j = 1; j <= m; j++) {
+    eqm[p_game->Players()[1]->Strategies()[j]] = primal[j];
   }
-  for (int j = 1; j <= n2; j++) {
-    eqm[support.GetStrategy(2, j)] = dual[j];
+  for (int j = 1; j <= k; j++) {
+    eqm[p_game->Players()[2]->Strategies()[j]] = dual[j];
   }
-
   this->m_onEquilibrium->Render(eqm);
   List<MixedStrategyProfile<T> > solution;
   solution.push_back(eqm);
