@@ -83,33 +83,33 @@ void FillNonnegativityRows(lrs_dic *P, lrs_dat *Q,
 }
 
 void FillConstraintRows(lrs_dic *P, lrs_dat *Q,
-			const StrategySupport &p_support,
+			const Game &p_game,
 			int p1, int p2, int firstRow)
 {
   const int MAXCOL = 1000;     /* maximum number of columns */
   long num[MAXCOL], den[MAXCOL];
 
-  Game game = p_support.GetGame();
-  Rational min = game->GetMinPayoff() - Rational(1);
-  PureStrategyProfile cont = game->NewPureStrategyProfile();
+  Rational min = p_game->GetMinPayoff() - Rational(1);
+  PureStrategyProfile cont = p_game->NewPureStrategyProfile();
 
-  for (long row = firstRow; row < firstRow + p_support.NumStrategies(p1); 
+  for (long row = firstRow; 
+       row < firstRow + p_game->Players()[p1]->Strategies().size();
        row++) {
     num[0] = 0;
     den[0] = 1;
 
-    cont->SetStrategy(p_support.GetStrategy(p1, row - firstRow + 1));
+    cont->SetStrategy(p_game->Players()[p1]->Strategies()[row - firstRow + 1]);
 
-    for (long st = 1; st <= p_support.NumStrategies(p2); st++) {
-      cont->SetStrategy(p_support.GetStrategy(p2, st));
+    for (long st = 1; st <= p_game->Players()[p2]->Strategies().size(); st++) {
+      cont->SetStrategy(p_game->Players()[p2]->Strategies()[st]);
       Rational x = cont->GetPayoff(p1) - min;
 
       num[st] = -x.numerator().as_long();
       den[st] = x.denominator().as_long();
     }
 
-    num[p_support.NumStrategies(p2)+1] = 1;
-    den[p_support.NumStrategies(p2)+1] = 1;
+    num[p_game->Players()[p2]->Strategies().size()+1] = 1;
+    den[p_game->Players()[p2]->Strategies().size()+1] = 1;
     lrs_set_row(P, Q, row, num, den, GE);
   }
 }
@@ -136,21 +136,22 @@ void FillLinearityRow(lrs_dic *P, lrs_dat *Q, int m, int n)
 //
 // Build the H-representation for player p1
 //
-void BuildRep(lrs_dic *P, lrs_dat *Q, const StrategySupport &p_support,
+void BuildRep(lrs_dic *P, lrs_dat *Q, const Game p_game,
 	      int p1, int p2)
 {
   long m=Q->m;       /* number of inequalities      */
   long n=Q->n;       
 
   if (p1 == 1) {
-    FillConstraintRows(P, Q, p_support, p1, p2, 1);
-    FillNonnegativityRows(P, Q, p_support.NumStrategies(p1) + 1,
-			  p_support.MixedProfileLength(), n);
+    FillConstraintRows(P, Q, p_game, p1, p2, 1);
+    FillNonnegativityRows(P, Q, p_game->Players()[p1]->Strategies().size() + 1,
+			  p_game->MixedProfileLength(), n);
   }
   else {
-    FillNonnegativityRows(P, Q, 1, p_support.NumStrategies(p2), n);
-    FillConstraintRows(P, Q, p_support, p1, p2,
-		       p_support.NumStrategies(p2) + 1);
+    FillNonnegativityRows(P, Q, 1, 
+			  p_game->Players()[p2]->Strategies().size(), n);
+    FillConstraintRows(P, Q, p_game, p1, p2,
+		       p_game->Players()[p2]->Strategies().size() + 1);
   }
   FillLinearityRow(P, Q, m, n);
 }
@@ -163,7 +164,7 @@ void BuildRep(lrs_dic *P, lrs_dat *Q, const StrategySupport &p_support,
 long nash2_main (lrs_dic *P1, lrs_dat *Q1, lrs_dic *P2orig,
 		 lrs_dat *Q2, long *numequilib, 
 		 lrs_mp_vector output1, lrs_mp_vector output2,
-		 const StrategySupport &p_support);
+		 const Game &p_game);
 
 long lrs_getfirstbasis2 (lrs_dic ** D_p, lrs_dat * Q, lrs_dic *P2orig,
 			 lrs_mp_matrix * Lin, long no_output);
@@ -174,14 +175,14 @@ long getabasis2 (lrs_dic * P, lrs_dat * Q, lrs_dic * P2orig, long order[]);
 // we output the equilibria found in Gambit format.
 void nashoutput(lrs_dat *Q1, lrs_mp_vector output1,
 		lrs_dat *Q2, lrs_mp_vector output2,
-		const StrategySupport &p_support);
+		const Game &p_game);
 
 
 
 //
 // This is the main function, based on main() from lrslib's 'nash' driver.
 //
-void LrsSolve(const StrategySupport &p_support)
+void LrsSolve(const Game &p_game)
 {
   lrs_dic *P1,*P2; /* structure for holding current dictionary and indices */
   lrs_dat *Q1,*Q2; /* structure for holding static problem data            */
@@ -222,15 +223,15 @@ void LrsSolve(const StrategySupport &p_support)
   }
 
   Q1->nash=TRUE;
-  Q1->n = p_support.NumStrategies(1) + 2;   
-  Q1->m = p_support.MixedProfileLength() + 1;
+  Q1->n = p_game->Players()[1]->Strategies().size() + 2;   
+  Q1->m = p_game->MixedProfileLength() + 1;
 
   P1 = lrs_alloc_dic (Q1);	/* allocate and initialize lrs_dic */
   if (P1 == NULL) {
     return;
   }
 
-  BuildRep(P1, Q1, p_support, 2, 1);
+  BuildRep(P1, Q1, p_game, 2, 1);
 
   output1 = lrs_alloc_mp_vector (Q1->n + Q1->m);   /* output holds one line of output from dictionary     */
 
@@ -241,14 +242,14 @@ void LrsSolve(const StrategySupport &p_support)
   }
 
   Q2->nash=TRUE;
-  Q2->n = p_support.NumStrategies(2) + 2;   
-  Q2->m = p_support.MixedProfileLength() + 1;
+  Q2->n = p_game->Players()[2]->Strategies().size() + 2;   
+  Q2->m = p_game->MixedProfileLength() + 1;
 
   P2 = lrs_alloc_dic (Q2);	/* allocate and initialize lrs_dic */
   if (P2 == NULL) {
     return;
   }
-  BuildRep(P2, Q2, p_support, 1, 2);
+  BuildRep(P2, Q2, p_game, 1, 2);
 
   output2 = lrs_alloc_mp_vector (Q2->n + Q2->m);   /* output holds one line of output from dictionary     */
 
@@ -309,7 +310,7 @@ void LrsSolve(const StrategySupport &p_support)
       if (!prune && lrs_getsolution (P1, Q1, output1, col))
 	{ 
            oldnum=numequilib;
-           nash2_main(P1,Q1,P2orig,Q2,&numequilib,output1,output2,p_support);
+           nash2_main(P1,Q1,P2orig,Q2,&numequilib,output1,output2,p_game);
 	   if (numequilib > oldnum || Q1->verbose)
 	      {
                 if(Q1->verbose)
@@ -348,7 +349,7 @@ void LrsSolve(const StrategySupport &p_support)
 long nash2_main (lrs_dic *P1, lrs_dat *Q1, lrs_dic *P2orig, 
 		 lrs_dat *Q2, long *numequilib, 
 		 lrs_mp_vector output1, lrs_mp_vector output2,
-		 const StrategySupport &p_support)
+		 const Game &p_game)
 
 
 {
@@ -472,7 +473,7 @@ long nash2_main (lrs_dic *P1, lrs_dat *Q1, lrs_dic *P2orig,
 	    (*numequilib)++;
              if (Q2->verbose)
                   prat(" \np1's obj value: ",P2->objnum,P2->objden);
-	     nashoutput(Q1, output1, Q2, output2, p_support);
+	     nashoutput(Q1, output1, Q2, output2, p_game);
 	}
     }
   while (lrs_getnextbasis (&P2, Q2, prune));
@@ -983,34 +984,24 @@ printrat (const char *name, lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/Din  
 void
 nashoutput(lrs_dat *Q1, lrs_mp_vector output1,
 	   lrs_dat *Q2, lrs_mp_vector output2,
-	   const StrategySupport &p_support)
+	   const Game &p_game)
 {
   std::cout << "NE";
   // The -1 is because the last entry in the vector is the payoff
   // of the other player
   long i = 1;
 
-  GamePlayer player1 = p_support.GetGame()->GetPlayer(1);
+  GamePlayer player1 = p_game->Players()[1];
   for (int j = 1; j <= player1->NumStrategies(); j++) {
-    if (p_support.Contains(player1->GetStrategy(j))) {
-      std::cout << ",";
-      printrat("", output1[i++], output1[0]);
-    }
-    else {
-      std::cout << ",0";
-    }
+    std::cout << ",";
+    printrat("", output1[i++], output1[0]);
   }
 
   i = 1;
-  GamePlayer player2 = p_support.GetGame()->GetPlayer(2);
+  GamePlayer player2 = p_game->Players()[2];
   for (int j = 1; j <= player2->NumStrategies(); j++) {
-    if (p_support.Contains(player2->GetStrategy(j))) {
-      std::cout << ",";
-      printrat("", output2[i++], output2[0]);
-    }
-    else {
-      std::cout << ",0";
-    }
+    std::cout << ",";
+    printrat("", output2[i++], output2[0]);
   }
   std::cout << std::endl;
   fflush(stdout);
