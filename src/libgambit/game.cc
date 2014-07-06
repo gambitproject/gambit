@@ -265,6 +265,24 @@ PureStrategyProfileRep::ToMixedStrategyProfile(void) const
 }
 
 //========================================================================
+//                    class PureStrategyProfile
+//========================================================================
+
+PureStrategyProfile PureStrategyProfile::Unrestrict(void) const
+{
+  PureStrategyProfileRep* p;
+  PureStrategyProfile u(p);
+
+  u->m_nfg = dynamic_cast<GameTableRep &>(*(*this)->m_nfg).m_unrestricted;
+
+  for(GamePlayers::const_iterator player = u->m_nfg->Players().begin(); player != u->m_nfg->Players().end(); ++player)
+  {
+    u->SetStrategy( (*this)->GetStrategy(*player) );
+  }
+  return u;
+}
+
+//========================================================================
 //                       class PureBehavProfile
 //========================================================================
 

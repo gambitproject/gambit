@@ -561,6 +561,8 @@ public:
 
   PureStrategyProfileRep *operator->(void) const { return rep; }
   operator PureStrategyProfileRep *(void) const { return rep; }
+
+  PureStrategyProfile Unrestrict(void) const;
 };
     
 
