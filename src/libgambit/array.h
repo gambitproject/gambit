@@ -239,6 +239,15 @@ public:
   bool empty(void) const { return (this->maxdex < this->mindex); }
   /// Return the number of elements in the array container.
   size_t size(void) const  { return maxdex - mindex + 1; }
+  /// Access first element.
+  const T &front(void) const { return data[mindex]; }
+  /// Access first element.
+  T &front(void)             { return data[mindex]; }
+  /// Access last element.
+  const T &back(void) const  { return data[maxdex]; }
+  /// Access last element.
+  T &back(void)              { return data[maxdex]; }
+  
   /// Adds a new element at the end of the array container, after its
   /// current last element.
   void push_back(const T &val) { InsertAt(val, this->maxdex + 1); }
