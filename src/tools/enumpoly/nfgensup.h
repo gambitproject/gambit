@@ -22,48 +22,10 @@
 
 #include "libgambit/libgambit.h"
 
-class StrategyCursorForSupport;
+using namespace Gambit;
 
-// We build a series of functions of increasing complexity.  The
-// final one, which is our goal, is the undominated support function.
-// We begin by simply enumerating all subsupports.
 
-void AllSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
-			     Gambit::StrategySupport *sact,
-			     StrategyCursorForSupport *c,
-			     Gambit::List<Gambit::StrategySupport> &list);
-
-Gambit::List<Gambit::StrategySupport> AllSubsupports(const Gambit::StrategySupport &S);
-
-// Subsupports of a given support are _valid_ if each agent has an action.
-
-void AllValidSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
-				  Gambit::StrategySupport *sact,
-				  StrategyCursorForSupport *c,
-				  Gambit::List<Gambit::StrategySupport> &list);
-
-Gambit::List<Gambit::StrategySupport> AllValidSubsupports(const Gambit::StrategySupport &S);
-
-// The following routines combine to return all supports that do not 
-// exhibit particular type of domination.  This was a prototype for 
-// PossibleNashSubsupports, and displays the methods used there,
-// but it does NOT do exactly what is advertised with respect to 
-// weak domination.  This is because the recursion may eliminate
-// a strategy that is weakly dominated at some stage of the truncation
-// process, when, after more truncations, it might be no longer weakly
-// dominated, and thus part of an allowed subsupport.
-
-void AllUndominatedSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
-					Gambit::StrategySupport *sact,
-					StrategyCursorForSupport *c,
-					bool strong,
-					Gambit::List<Gambit::StrategySupport> &list);
-  
-Gambit::List<Gambit::StrategySupport> AllUndominatedSubsupports(const Gambit::StrategySupport &S,
-					       bool strong,
-					       bool conditional);
-
-// The following two routines combine to produce all subsupports that could
+// Produce all subsupports that could
 // host the path of a behavioral Nash equilibrium.  These are subsupports
 // that have no strategy, at an active infoset, that is weakly dominated by
 // another active strategy, either in the conditional sense (for any active
@@ -73,45 +35,5 @@ Gambit::List<Gambit::StrategySupport> AllUndominatedSubsupports(const Gambit::St
 // subsupport resulting from activation is consistent, in the sense
 // of having active strategys at all active infosets, and not at other
 // infosets.
-
-void PossibleNashSubsupportsRECURSIVE(const Gambit::StrategySupport &s,
-				      Gambit::StrategySupport *sact,
-				      StrategyCursorForSupport *c,
-				      Gambit::List<Gambit::StrategySupport> &list);
-
-Gambit::List<Gambit::StrategySupport> SortSupportsBySize(Gambit::List<Gambit::StrategySupport> &);
-  
-Gambit::List<Gambit::StrategySupport> PossibleNashSubsupports(const Gambit::StrategySupport &S);
-
-///////////////// Utility Cursor Class /////////////////////
-
-class StrategyCursorForSupport {
-protected:
-  const Gambit::StrategySupport *support;
-  int pl;
-  int strat;
-
-public:
-  //Constructors and dtor
-  StrategyCursorForSupport(const Gambit::StrategySupport &S);
-  StrategyCursorForSupport(const StrategyCursorForSupport &s);
-  ~StrategyCursorForSupport();
-
-  // Operators
-  StrategyCursorForSupport &operator =(const StrategyCursorForSupport &);
-  bool                    operator==(const StrategyCursorForSupport &) const;
-  bool                    operator!=(const StrategyCursorForSupport &) const;
-
-  // Manipulation
-  bool GoToNext();
-
-  // Information
-  Gambit::GameStrategy GetStrategy() const;
-  int StrategyIndex() const;
-  Gambit::GamePlayer GetPlayer() const;
-  int PlayerIndex() const;
-
-  bool IsLast() const;
-  bool IsSubsequentTo(const Gambit::GameStrategy &) const;
-};
+List<StrategySupport> PossibleNashSubsupports(const StrategySupport &S);
 

@@ -143,14 +143,63 @@ public:
   //@}
 
   /// @name Identification of overwhelmed strategies
-  //@(
+  //@{
   bool Overwhelms(const GameStrategy &s, const GameStrategy &t, 
                   bool p_strict) const;
   //@}
 
   Game Restrict(void) const;
-};
 
+
+  class iterator {
+  public:
+    /// @name Lifecycle
+    //@{
+    iterator(const StrategySupport &S, int p_pl = 1, int p_st = 1) : 
+      support(S), pl(p_pl), strat(p_st) { }
+    ~iterator() { }
+    //@}
+
+    /// @name Operator overloading
+    //@{
+    bool operator==(const iterator &other) const
+    { return (support == other.support && pl == other.pl && strat == other.strat); }
+    bool operator!=(const iterator &other) const { return !(*this == other); }
+    //@}
+
+    /// @name Manipulation
+    //@{
+    /// Advance to next strategy; return False when advancing past last strategy.
+    bool GoToNext(void);
+    /// Advance to next strategy
+    void operator++(void) { GoToNext(); }
+    //@}
+
+    /// @name Access to state information
+    //@{
+    GameStrategy GetStrategy(void) const
+    { return support.GetStrategy(pl, strat); }
+    int StrategyIndex(void) const { return strat; }
+    GamePlayer GetPlayer(void) const
+    { return support.GetGame()->GetPlayer(pl); }
+    int PlayerIndex(void) const { return pl; }
+
+    bool IsLast(void) const
+    { return (pl == support.GetGame()->NumPlayers() &&
+	      strat == support.NumStrategies(pl));
+    }
+    bool IsSubsequentTo(const GameStrategy &) const;
+    //@}
+
+  private:
+    const StrategySupport &support;
+    int pl, strat;
+  };
+
+  iterator begin(void) const { return iterator(*this); }
+  iterator end(void) const   { return iterator(*this, m_nfg->NumPlayers() + 1); }
+};
+  
 } // end namespace Gambit
 
 #endif // LIBGAMBIT_STRATSPT_H

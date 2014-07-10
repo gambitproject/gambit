@@ -409,4 +409,41 @@ Game StrategySupport::Restrict(void) const
 }
 
 
+//===========================================================================
+//                     class StrategySupport::iterator
+//===========================================================================
+
+
+bool StrategySupport::iterator::GoToNext(void)
+{
+  if (strat != support.NumStrategies(pl))  {
+    strat++; 
+    return true; 
+  }
+  else if (pl != support.GetGame()->NumPlayers()) { 
+    pl++; 
+    strat = 1; 
+    return true; 
+  }
+  else {
+    return false;
+  }
+}
+
+bool 
+StrategySupport::iterator::IsSubsequentTo(const GameStrategy &s) const
+{
+  if (pl > s->GetPlayer()->GetNumber())
+    return true; 
+  else if (pl < s->GetPlayer()->GetNumber())
+    return false;
+  else
+    if (strat > s->GetNumber())
+      return true;
+    else
+      return false;
+}
+
+
+
 } // end namespace Gambit
