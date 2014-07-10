@@ -149,25 +149,6 @@ double NFLiapFunc::Value(const Gambit::Vector<double> &v) const
   return _p.GetLiapValue();
 }
 
-static void PickRandomProfile(Gambit::MixedStrategyProfile<double> &p)
-{
-  double sum, tmp;
-
-  for (int pl = 1; pl <= p.GetGame()->NumPlayers(); pl++)  {
-    sum = 0.0;
-    int st;
-    
-    for (st = 1; st < p.GetSupport().NumStrategies(pl); st++)  {
-      do
-	tmp = ((double) rand()) / ((double) RAND_MAX);
-      while (tmp + sum > 1.0);
-      p[p.GetSupport().GetStrategy(pl, st)] = tmp;
-      sum += tmp;
-    }
-    p[p.GetSupport().GetStrategy(pl, st)] = 1.0 - sum;
-  }
-}
-
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
 		  const Gambit::MixedStrategyProfile<double> &p_profile)
@@ -222,7 +203,7 @@ void SolveStrategic(const Gambit::Game &p_game)
     // Generate the desired number of points randomly
     for (int i = 1; i <= m_numTries; i++) {
       Gambit::MixedStrategyProfile<double> start(p_game->NewMixedStrategyProfile(0.0));
-      PickRandomProfile(start);
+      start.Randomize();
       starts.Append(start);
     }
   }

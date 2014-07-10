@@ -67,6 +67,54 @@ template <class T> void MixedStrategyProfileRep<T>::Normalize(void)
   }
 }
 
+template<> void MixedStrategyProfileRep<double>::Randomize(void)
+{
+  Game nfg = m_support.GetGame();
+  m_probs = 0.0;
+
+  // To generate a uniform distribution on the simplex correctly,
+  // take i.i.d. samples from an exponential distribution, and
+  // renormalize at the end (this is a special case of the Dirichlet distribution).
+  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
+    GamePlayer player = nfg->Players()[pl];
+    for (int st = 1; st <= player->Strategies().size(); st++) {
+      (*this)[player->Strategies()[st]] = -std::log(((double) std::rand()) / 
+						    ((double) RAND_MAX));
+    }
+  }
+  Normalize();
+}
+
+template<> void MixedStrategyProfileRep<Rational>::Randomize(void)
+{
+  // This operation is not well-defined when using Rational numbers;
+  // use the version specifying the denominator grid instead.
+  throw ValueException();
+}
+
+template <class T> void MixedStrategyProfileRep<T>::Randomize(int p_denom)
+{
+  Game nfg = m_support.GetGame();
+  m_probs = T(0);
+
+  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
+    GamePlayer player = nfg->Players()[pl];
+    std::vector<int> cutoffs;
+    for (int st = 1; st < player->Strategies().size(); st++) {
+      // When we support C++11, we will be able to implement uniformity better here.
+      cutoffs.push_back(std::rand() % (p_denom+1));
+    }
+    std::sort(cutoffs.begin(), cutoffs.end());
+    cutoffs.push_back(p_denom);
+    T sum = T(0);
+    for (int st = 1; st < player->Strategies().size(); st++) {
+      (*this)[player->Strategies()[st]] = T(cutoffs[st] - cutoffs[st-1]) / T(p_denom);
+      sum += (*this)[player->Strategies()[st]];
+    }
+    (*this)[player->Strategies().back()] = T(1) - sum;
+  }
+}
+
 //========================================================================
 //                   TreeMixedStrategyProfileRep<T>
 //========================================================================

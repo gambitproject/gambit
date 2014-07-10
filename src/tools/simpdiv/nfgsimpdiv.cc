@@ -607,27 +607,6 @@ void nfgSimpdiv::Solve(const Game &p_nfg,
   PrintProfile(std::cout, "NE", y);
 }
 
-void Randomize(MixedStrategyProfile<Rational> &p_profile, int p_denom)
-{
-  Game nfg = p_profile.GetGame();
-  static_cast<Vector<Rational> &>(p_profile) = Rational(0);
-
-  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-    GamePlayer player = nfg->Players()[pl];
-    int sum = 0;
-    for (int st = 1; sum < p_denom && st < player->Strategies().size(); st++) {
-      double r = ((double) rand() / ((double) (RAND_MAX) + 1.0));
-      double x = r * (p_denom - sum + 1);
-      int y = (int) x;
-      // y is now uniform on [0, (p_denom-sum)].
-      p_profile[player->Strategies()[st]] = Rational(y, p_denom);
-      sum += y;
-    }
-
-    p_profile[player->Strategies().back()] = Rational(p_denom - sum, p_denom);
-  }
-}
-
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria using simplicial subdivision\n";
@@ -753,7 +732,7 @@ int main(int argc, char *argv[])
     else if (useRandom) {
       for (int i = 1; i <= stopAfter; i++) {
 	MixedStrategyProfile<Rational> start(game->NewMixedStrategyProfile(Rational(0)));
-	Randomize(start, randDenom);
+	start.Randomize(randDenom);
 	
 	nfgSimpdiv algorithm;
 	algorithm.Solve(game, start);

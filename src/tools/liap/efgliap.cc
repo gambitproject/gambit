@@ -5,9 +5,6 @@
 // FILE: src/tools/liap/efgliap.cc
 // Compute Nash equilibria via Lyapunov function minimization
 //
-// This file is part of Gambit
-// Copyright (c) 2002, The Gambit Project
-//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -119,30 +116,6 @@ bool EFLiapFunc::Gradient(const Gambit::Vector<double> &x,
   return true;
 }
 
-static void PickRandomProfile(Gambit::MixedBehavProfile<double> &p)
-{
-  double sum, tmp;
-
-  for (int pl = 1; pl <= p.GetGame()->NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= p.GetGame()->GetPlayer(pl)->NumInfosets();
-	 iset++)  {
-      sum = 0.0;
-      int act;
-    
-      for (act = 1; act < p.GetSupport().NumActions(pl, iset); act++)  {
-	do
-	  tmp = ((double) rand()) / ((double) RAND_MAX);
-	while (tmp + sum > 1.0);
-	p(pl, iset, act) = tmp;
-	sum += tmp;
-      }
-  
-// with truncation, this is unnecessary
-      p(pl, iset, act) = 1.0 - sum;
-    }
-  }
-}
-
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
 		  const Gambit::MixedBehavProfile<double> &p_profile)
@@ -195,7 +168,7 @@ void SolveExtensive(const Gambit::Game &p_game)
     // Generate the desired number of points randomly
     for (int i = 1; i <= m_numTries; i++) {
       Gambit::MixedBehavProfile<double> start(p_game);
-      PickRandomProfile(start);
+      start.Randomize();
       starts.Append(start);
     }
   }

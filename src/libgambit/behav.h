@@ -139,6 +139,11 @@ public:
   void UndefinedToCentroid(void);
   /// Normalize each information set's action probabilities to sum to one
   void Normalize(void);
+  /// Generate a random behavior strategy profile according to the uniform distribution
+  void Randomize(void);
+  /// Generate a random behavior strategy profile according to the uniform distribution
+  /// on a grid with spacing p_denom
+  void Randomize(int p_denom);
   //@}
 
   /// @name General data access

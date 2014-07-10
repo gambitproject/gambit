@@ -283,6 +283,64 @@ void MixedBehavProfile<T>::Normalize(void)
   }
 }
 
+template<> void MixedBehavProfile<double>::Randomize(void)
+{
+  Game game = m_support.GetGame();
+  *this = 0.0;
+
+  // To generate a uniform distribution on the simplex correctly,
+  // take i.i.d. samples from an exponential distribution, and
+  // renormalize at the end (this is a special case of the Dirichlet distribution).
+  for (int pl = 1; pl <= game->NumPlayers(); pl++) {
+    GamePlayer player = game->Players()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	(*this)(pl, iset, act) = -std::log(((double) std::rand()) /
+					   ((double) RAND_MAX));
+      }
+    }
+  }
+  Normalize();
+}
+
+template<> void MixedBehavProfile<Rational>::Randomize(void)
+{
+  // This operation is not well-defined when using Rational numbers;
+  // use the version specifying the denominator grid instead.
+  throw ValueException();
+}
+
+template <class T> void MixedBehavProfile<T>::Randomize(int p_denom)
+{
+  Game game = m_support.GetGame();
+  *this = T(0);
+
+  for (int pl = 1; pl <= game->NumPlayers(); pl++) {
+    GamePlayer player = game->Players()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+      std::vector<int> cutoffs;
+      for (int act = 1; act < infoset->NumActions(); act++) {
+	// When we support C++11, we will be able to implement uniformity better
+	cutoffs.push_back(std::rand() % (p_denom+1));
+      }
+      std::sort(cutoffs.begin(), cutoffs.end());
+      cutoffs.push_back(p_denom);
+      T sum = T(0);
+      for (int act = 1; act < infoset->NumActions(); act++) {
+	(*this)(pl, iset, act) = T(cutoffs[act] - cutoffs[act-1]) / T(p_denom);
+	sum += (*this)(pl, iset, act);
+      }
+      (*this)(pl, iset, infoset->NumActions()) = T(1) - sum;
+    }
+  }
+}
+
+
+
+
+
 //========================================================================
 //              MixedBehavProfile<T>: Interesting quantities
 //========================================================================

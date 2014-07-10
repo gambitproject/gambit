@@ -40,6 +40,8 @@ public:
 
   void SetCentroid(void);
   void Normalize(void);
+  void Randomize(void);
+  void Randomize(int p_denom);
  /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
     { return m_probs[m_support.m_profileIndex[p_strategy->GetId()]]; }
@@ -206,6 +208,13 @@ public:
 
   /// Normalize each player's strategy probabilities so they sum to one
   void Normalize(void) { m_rep->Normalize(); }
+
+  /// Generate a random mixed strategy profile according to the uniform distribution
+  void Randomize(void) { m_rep->Randomize(); }
+
+  /// Generate a random mixed strategy profile according to the uniform distribution
+  /// on a grid with spacing p_denom
+  void Randomize(int p_denom) { m_rep->Randomize(p_denom); }
 
   /// Returns the total number of strategies in the profile
   int MixedProfileLength(void) const { return m_rep->m_probs.Length(); }
