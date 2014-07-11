@@ -435,11 +435,8 @@ bin_PROGRAMS += \
 	gambit-lcp \
 	gambit-liap \
 	gambit-logit \
-	gambit-nfg-logitdyn \
 	gambit-lp \
 	gambit-simpdiv
-
-bin_PROGRAMS += gambit-testagg
 
 if WITH_GUI
 bin_PROGRAMS += gambit
@@ -661,11 +658,6 @@ gambit_logit_SOURCES = \
 	src/tools/logit/nfglogit.cc \
 	src/tools/logit/logit.cc
 
-gambit_nfg_logitdyn_SOURCES = \
-	${libgambit_la_SOURCES} \
-	src/tools/logit/nfgdyn.cc
-
-
 gambit_lp_SOURCES = \
 	${libgambit_la_SOURCES} \
 	${liblinear_la_SOURCES} \
@@ -679,10 +671,6 @@ gambit_lp_SOURCES = \
 gambit_simpdiv_SOURCES = \
 	${libgambit_la_SOURCES} \
 	src/tools/simpdiv/nfgsimpdiv.cc
-
-gambit_testagg_SOURCES = \
-	${libgambit_la_SOURCES} \
-	src/libagg/getpayoffs.cc
 
 gambit_SOURCES = \
 	${libgambit_la_SOURCES} \
