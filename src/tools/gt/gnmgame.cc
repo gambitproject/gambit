@@ -28,8 +28,8 @@ gnmgame::gnmgame(int numPlayers, int *actions): numPlayers(numPlayers) {
     numStrategies *= actions[i];
   }
 
-  this->actions = new int[numPlayers];
-  strategyOffset = new int[numPlayers+1];
+  this->actions = std::unique_ptr<int[]>(new int[numPlayers]);
+  strategyOffset = std::unique_ptr<int[]>(new int[numPlayers+1]);
   numActions = 0;
   maxActions = 0;
   for(i = 0; i < numPlayers; i++) {
@@ -43,8 +43,8 @@ gnmgame::gnmgame(int numPlayers, int *actions): numPlayers(numPlayers) {
 }
   
 gnmgame::~gnmgame() {
-  delete[] strategyOffset;
-  delete[] actions;
+ // delete[] strategyOffset;
+ // delete[] actions;
 }
 
 

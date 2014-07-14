@@ -28,6 +28,7 @@
 #include <sstream>
 #include <iomanip>
 #include <config.h>
+#include <memory>
 
 namespace Gambit {
 
