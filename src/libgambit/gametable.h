@@ -31,6 +31,7 @@ class GameTableRep : public GameExplicitRep {
   friend class StrategySupport;
   friend class GamePlayerRep;
   friend class TablePureStrategyProfileRep;
+  friend class PureStrategyProfileRep;
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class TableMixedStrategyProfileRep;
 private:

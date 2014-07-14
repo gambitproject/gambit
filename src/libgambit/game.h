@@ -538,6 +538,10 @@ public:
 
   /// Convert to a mixed strategy representation
   MixedStrategyProfile<Rational> ToMixedStrategyProfile(void) const;
+
+  /// Map strategy profile to the unrestriction of the game
+  PureStrategyProfile Unrestrict(void) const;
+
   //@}
 };
 
