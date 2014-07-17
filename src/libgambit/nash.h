@@ -34,8 +34,10 @@ namespace Gambit {
 template <class T> class StrategyProfileRenderer {
 public:
   virtual ~StrategyProfileRenderer() { }
-  virtual void Render(const MixedStrategyProfile<T> &p_profile) const = 0;
-  virtual void Render(const MixedBehavProfile<T> &p_profile) const = 0;
+  virtual void Render(const MixedStrategyProfile<T> &p_profile,
+		      const std::string &p_label = "NE") const = 0;
+  virtual void Render(const MixedBehavProfile<T> &p_profile,
+		      const std::string &p_label = "NE") const = 0;
 };
 
 //
@@ -46,16 +48,19 @@ public:
 template <class T> class MixedStrategyRenderer : public StrategyProfileRenderer<T> {
 public:
   virtual ~MixedStrategyRenderer() { }
-  virtual void Render(const MixedStrategyProfile<T> &p_profile) const = 0;
-  virtual void Render(const MixedBehavProfile<T> &p_profile) const
-  { Render(p_profile.ToMixedProfile()); }
+  virtual void Render(const MixedStrategyProfile<T> &p_profile,
+		      const std::string &p_label = "NE") const = 0;
+  virtual void Render(const MixedBehavProfile<T> &p_profile,
+		      const std::string &p_label = "NE") const
+  { Render(p_profile.ToMixedProfile(), p_label); }
 };
 
 template <class T> 
 class MixedStrategyNullRenderer : public MixedStrategyRenderer<T> {
 public:
   virtual ~MixedStrategyNullRenderer() { }
-  virtual void Render(const MixedStrategyProfile<T> &p_profile) const { }
+  virtual void Render(const MixedStrategyProfile<T> &p_profile,
+		      const std::string &p_label = "NE") const { }
 };
 
 template <class T>
@@ -64,7 +69,8 @@ public:
   MixedStrategyCSVRenderer(std::ostream &p_stream, int p_numDecimals = 6)
     : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
   virtual ~MixedStrategyCSVRenderer() { }
-  virtual void Render(const MixedStrategyProfile<T> &p_profile) const;
+  virtual void Render(const MixedStrategyProfile<T> &p_profile,
+		      const std::string &p_label = "NE") const;
 
 private:
   std::ostream &m_stream;
@@ -77,7 +83,8 @@ public:
   MixedStrategyDetailRenderer(std::ostream &p_stream, int p_numDecimals = 6)
     : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
   virtual ~MixedStrategyDetailRenderer() { }
-  virtual void Render(const MixedStrategyProfile<T> &p_profile) const;
+  virtual void Render(const MixedStrategyProfile<T> &p_profile,
+		      const std::string &p_label = "NE") const;
 
 private:
   std::ostream &m_stream;
@@ -90,16 +97,19 @@ private:
 template <class T> class BehavStrategyRenderer : public StrategyProfileRenderer<T> {
 public:
   virtual ~BehavStrategyRenderer() { }
-  virtual void Render(const MixedStrategyProfile<T> &p_profile) const
-  { Render(MixedBehavProfile<T>(p_profile)); }
-  virtual void Render(const MixedBehavProfile<T> &p_profile) const = 0;
+  virtual void Render(const MixedStrategyProfile<T> &p_profile,
+		      const std::string &p_label = "NE") const
+  { Render(MixedBehavProfile<T>(p_profile), p_label); }
+  virtual void Render(const MixedBehavProfile<T> &p_profile,
+		      const std::string &p_label = "NE") const = 0;
 };
 
 template <class T> 
 class BehavStrategyNullRenderer : public BehavStrategyRenderer<T> {
 public:
   virtual ~BehavStrategyNullRenderer() { }
-  virtual void Render(const MixedBehavProfile<T> &p_profile) const { }
+  virtual void Render(const MixedBehavProfile<T> &p_profile,
+		      const std::string &p_label = "NE") const { }
 };
 
 template <class T>
@@ -108,7 +118,8 @@ public:
   BehavStrategyCSVRenderer(std::ostream &p_stream, int p_numDecimals = 6) 
     : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
   virtual ~BehavStrategyCSVRenderer() { }
-  virtual void Render(const MixedBehavProfile<T> &p_profile) const;
+  virtual void Render(const MixedBehavProfile<T> &p_profile,
+		      const std::string &p_label = "NE") const;
 
 private:
   std::ostream &m_stream;
@@ -121,7 +132,8 @@ public:
   BehavStrategyDetailRenderer(std::ostream &p_stream, int p_numDecimals = 6)
     : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
   virtual ~BehavStrategyDetailRenderer() { }
-  virtual void Render(const MixedBehavProfile<T> &p_profile) const;
+  virtual void Render(const MixedBehavProfile<T> &p_profile,
+		      const std::string &p_label = "NE") const;
 
 private:
   std::ostream &m_stream;

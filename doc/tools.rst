@@ -647,14 +647,6 @@ options to specify additional starting points for the algorithm.
 
 .. program:: gambit-simpdiv
 
-.. cmdoption:: -d
-
-   Express all output using decimal representations
-   with DECIMALS digits. Because the algorithm is based on a grid, this
-   algorithm inherently computes using rational numbers. By default,
-   these rational probabilities are output. Expressing the profile
-   probabilities as decimal numbers may make reading the output easier.
-
 .. cmdoption:: -g
 
    Sets the granularity of the grid refinement. By

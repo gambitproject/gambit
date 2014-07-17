@@ -24,10 +24,11 @@
 
 namespace Gambit {
 
-template <class T>
-void MixedStrategyCSVRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile) const
+template <class T> void
+MixedStrategyCSVRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile,
+				    const std::string &p_label) const
 {
-  m_stream << "NE";
+  m_stream << p_label;
   for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
     m_stream << "," << lexical_cast<std::string>(p_profile[i], m_numDecimals);
   }
@@ -35,7 +36,8 @@ void MixedStrategyCSVRenderer<T>::Render(const MixedStrategyProfile<T> &p_profil
 }
 
 template <class T> void
-MixedStrategyDetailRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile) const
+MixedStrategyDetailRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile,
+				       const std::string &p_label) const
 {
   for (GamePlayers::const_iterator player = p_profile.GetGame()->Players().begin();
        player != p_profile.GetGame()->Players().end(); ++player) {
@@ -65,9 +67,10 @@ MixedStrategyDetailRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile)
 }
 
 template <class T>
-void BehavStrategyCSVRenderer<T>::Render(const MixedBehavProfile<T> &p_profile) const
+void BehavStrategyCSVRenderer<T>::Render(const MixedBehavProfile<T> &p_profile,
+					 const std::string &p_label) const
 {
-  m_stream << "NE";
+  m_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
     m_stream << "," << lexical_cast<std::string>(p_profile[i], m_numDecimals);
   }
@@ -75,7 +78,8 @@ void BehavStrategyCSVRenderer<T>::Render(const MixedBehavProfile<T> &p_profile) 
 }
 
 template <class T> void
-BehavStrategyDetailRenderer<T>::Render(const MixedBehavProfile<T> &p_profile) const
+BehavStrategyDetailRenderer<T>::Render(const MixedBehavProfile<T> &p_profile,
+				       const std::string &p_label) const
 {
   for (GamePlayers::const_iterator player = p_profile.GetGame()->Players().begin();
        player != p_profile.GetGame()->Players().end(); ++player) {
