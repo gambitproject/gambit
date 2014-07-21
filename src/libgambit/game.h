@@ -151,6 +151,8 @@ typedef GameObjectPtr<GameRep> Game;
 class PureStrategyProfileRep;
 class PureStrategyProfile;
 
+class GameOutcomeRep;
+typedef GameObjectPtr<GameOutcomeRep> GameOutcome;
 
 // 
 // Forward declarations of classes defined elsewhere.
@@ -203,6 +205,7 @@ class GameOutcomeRep : public GameObject  {
 
 private:
   GameRep *m_game;
+  GameOutcome m_unrestricted;
   int m_number;
   std::string m_label;
   Array<Number> m_payoffs;
@@ -236,10 +239,12 @@ public:
     m_payoffs[pl] = p_value;
     //m_game->ClearComputedValues();
   }
+  /// Get Unrestricted GameOutcome
+  GameOutcome Unrestrict(void) const;
   //@}
 };
 
-typedef GameObjectPtr<GameOutcomeRep> GameOutcome;
+
 
 /// An action at an information set in an extensive game
 class GameActionRep : public GameObject {
@@ -335,7 +340,7 @@ private:
   //@{
   /// Creates a new strategy for the given player.
   GameStrategyRep(GamePlayerRep *p_player)
-    : m_number(0), m_id(0), m_player(p_player), m_offset(0L) { }
+    : m_number(0), m_id(0), m_player(p_player), m_offset(0L), m_unrestricted(0) { }
   //@}
 
 public:
@@ -357,7 +362,7 @@ public:
   void DeleteStrategy(void);
 
   /// Map the strategy to the corresponding strategy in the unrestricted game
-  GameStrategy Unrestrict(void) const { return m_unrestricted; }
+  GameStrategy Unrestrict(void) const;
   //@}
 };
 
@@ -392,7 +397,7 @@ private:
   GameStrategyArray m_strategies;
   GamePlayer m_unrestricted;
 
-  GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id)
+  GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id), m_unrestricted(0)
     { }
   GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
   ~GamePlayerRep();
@@ -423,6 +428,8 @@ public:
   const GameStrategyArray &Strategies(void) const;
   /// Creates a new strategy for the player
   GameStrategy NewStrategy(void);
+  /// Return Unrestricted version
+  GamePlayer Unrestrict(void) const;
   //@}
 };
 

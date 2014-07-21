@@ -144,6 +144,7 @@ int Product(const Array<int> &dim)
 GameTableRep::GameTableRep(const Array<int> &dim, 
 			   bool p_sparseOutcomes /* = false */)
 {
+  m_unrestricted = 0;
   m_results = Array<GameOutcomeRep *>(Product(dim));
   for (int pl = 1; pl <= dim.Length(); pl++)  {
     m_players.Append(new GamePlayerRep(this, pl, dim[pl]));

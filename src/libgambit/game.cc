@@ -37,8 +37,12 @@ GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number)
   : m_game(p_game), m_number(p_number),
     m_payoffs(m_game->NumPlayers())
 { }
-
-
+/*
+GameOutcome GameOutcomeRep::Unrestrict(void)
+{
+	GameRep* =
+}
+*/
 //========================================================================
 //                      class GameStrategyRep
 //========================================================================
@@ -56,6 +60,12 @@ void GameStrategyRep::DeleteStrategy(void)
   this->Invalidate();
 }
 
+GameStrategy GameStrategyRep::Unrestrict(void) const
+{
+  if(m_unrestricted == 0) { throw InvalidObjectException(); }
+  return m_unrestricted;
+}
+
 //========================================================================
 //                       class GamePlayerRep
 //========================================================================
@@ -63,6 +73,7 @@ void GameStrategyRep::DeleteStrategy(void)
 GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
   : m_game(p_game), m_number(p_id), m_strategies(p_strats)
 { 
+  m_unrestricted = 0;
   for (int j = 1; j <= p_strats; j++) {
     m_strategies[j] = new GameStrategyRep(this);
     m_strategies[j]->m_number = j;
@@ -183,6 +194,11 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
 
 GameInfoset GamePlayerRep::GetInfoset(int p_index) const { return m_infosets[p_index]; }
 
+GamePlayer GamePlayerRep::Unrestrict(void) const
+{
+  if(m_unrestricted == 0) { throw InvalidObjectException(); }
+  return m_unrestricted;
+}
 
 //========================================================================
 //                    class PureStrategyProfileRep
