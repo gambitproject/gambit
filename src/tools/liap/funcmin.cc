@@ -32,12 +32,47 @@
 #include "libgambit/libgambit.h"
 #include "funcmin.h"
 
+using namespace Gambit;
+
 //========================================================================
-//                    Private auxiliary routines
+//                      class FunctionOnSimplices
 //========================================================================
 
-static void
-AlphaXPlusY(double alpha, const Gambit::Vector<double> &x, Gambit::Vector<double> &y)
+//
+// Project a gradient into the plane of the product of simplices.
+// (Actually, it works by computing the projection of 'x' onto the
+// vector perpendicular to the plane, then subtracting to compute the
+// component parallel to the plane.)
+//
+void FunctionOnSimplices::Project(Vector<double> &x, 
+				  const Array<int> &lengths) const
+{
+  int index = 1;
+  for (int part = 1; part <= lengths.Length(); part++)  {
+    double avg = 0.0;
+    int j;
+    for (j = 1; j <= lengths[part]; j++, index++)  {
+      avg += x[index];
+    }
+    avg /= (double) lengths[part];
+    index -= lengths[part];
+    for (j = 1; j <= lengths[part]; j++, index++)  {
+      x[index] -= avg;
+    }
+  }
+}
+
+//========================================================================
+//               Conjugate gradient Polak-Ribiere algorithm
+//========================================================================
+
+//
+// These routines are based on ones found in
+// multimin/conjugate_pr.c in the GSL 1.2 distribution
+
+void
+ConjugatePRMinimizer::AlphaXPlusY(double alpha,
+				  const Vector<double> &x, Vector<double> &y)
 {
   for (int i = 1; i <= y.Length(); i++) {
     y[i] += alpha * x[i];
@@ -47,9 +82,10 @@ AlphaXPlusY(double alpha, const Gambit::Vector<double> &x, Gambit::Vector<double
 // These routines are drawn from comparably-named ones in 
 // multimin/directional_minimize.c in GSL.
 
-static void
-TakeStep(const Gambit::Vector<double> &x, const Gambit::Vector<double> &p,
-	 double step, double lambda, Gambit::Vector<double> &x1, Gambit::Vector<double> &dx)
+void
+ConjugatePRMinimizer::TakeStep(const Vector<double> &x, const Vector<double> &p,
+			       double step, double lambda, 
+			       Vector<double> &x1, Vector<double> &dx)
 {
   dx = 0.0;
   AlphaXPlusY(-step * lambda, p, dx);
@@ -57,16 +93,17 @@ TakeStep(const Gambit::Vector<double> &x, const Gambit::Vector<double> &p,
   AlphaXPlusY(1.0, dx, x1);
 }
 
-static void 
-IntermediatePoint(const gC1Function<double> &fdf,
-		  const Gambit::Vector<double> &x, const Gambit::Vector<double> &p,
-		  double lambda, 
-		  double pg,
-		  double stepa, double stepc,
-		  double fa, double fc,
-		  Gambit::Vector<double> &x1, Gambit::Vector<double> &dx,
-		  Gambit::Vector<double> &gradient,
-		  double &step, double &f)
+void 
+ConjugatePRMinimizer::IntermediatePoint(const Function &fdf,
+					const Vector<double> &x, 
+					const Vector<double> &p,
+					double lambda, 
+					double pg,
+					double stepa, double stepc,
+					double fa, double fc,
+					Vector<double> &x1, Vector<double> &dx,
+					Vector<double> &gradient,
+					double &step, double &f)
 {
   double stepb, fb;
 
@@ -75,7 +112,7 @@ trial:
   if ((fc - fa) + u == 0) {
     // TLT: Added this check 2002/08/31 due to floating point exceptions
     // under MSW.  Not really sure how to handle this correctly.
-    throw gFuncMinException();
+    throw FunctionMinimizerError();
   }
   stepb = 0.5 * stepc * u / ((fc - fa) + u);
 
@@ -95,15 +132,16 @@ trial:
   fdf.Gradient(x1, gradient);
 }
 
-static void
-Minimize(const gC1Function<double> &fdf,
-	 const Gambit::Vector<double> &x, const Gambit::Vector<double> &p,
-	 double lambda,
-	 double stepa, double stepb, double stepc,
-	 double fa, double fb, double fc, double tol,
-	 Gambit::Vector<double> &x1, Gambit::Vector<double> &dx1, 
-	 Gambit::Vector<double> &x2, Gambit::Vector<double> &dx2, Gambit::Vector<double> &gradient,
-	 double &step, double &f, double &gnorm)
+void
+ConjugatePRMinimizer::Minimize(const Function &fdf,
+			       const Vector<double> &x, const Vector<double> &p,
+			       double lambda,
+			       double stepa, double stepb, double stepc,
+			       double fa, double fb, double fc, double tol,
+			       Vector<double> &x1, Vector<double> &dx1, 
+			       Vector<double> &x2, Vector<double> &dx2, 
+			       Vector<double> &gradient,
+			       double &step, double &f, double &gnorm)
 {
   /* Starting at (x0, f0) move along the direction p to find a minimum
      f(x0 - lambda * p), returning the new point x1 = x0-lambda*p,
@@ -232,22 +270,14 @@ mid_trial:
   }
 }
 
-//========================================================================
-//               Conjugate gradient Polak-Ribiere algorithm
-//========================================================================
-
-//
-// These routines are based on ones found in
-// multimin/conjugate_pr.c in the GSL 1.2 distribution
-
-gConjugatePR::gConjugatePR(int n)
+ConjugatePRMinimizer::ConjugatePRMinimizer(int n)
   : x1(n), dx1(n), x2(n), p(n), g0(n)
 { }
 
-void gConjugatePR::Set(const gC1Function<double> &fdf,
-		       const Gambit::Vector<double> &x, double &f,
-		       Gambit::Vector<double> &gradient, double step_size,
-		       double p_tol)
+void ConjugatePRMinimizer::Set(const Function &fdf,
+			       const Vector<double> &x, double &f,
+			       Vector<double> &gradient, double step_size,
+			       double p_tol)
 {
   iter = 0;
   step = step_size;
@@ -266,14 +296,15 @@ void gConjugatePR::Set(const gC1Function<double> &fdf,
   g0norm = gnorm;
 }
 
-void gConjugatePR::Restart(void)
+void ConjugatePRMinimizer::Restart(void)
 {
   iter = 0;
 }
 
-bool gConjugatePR::Iterate(const gC1Function<double> &fdf,
-			   Gambit::Vector<double> &x, double &f,
-			   Gambit::Vector<double> &gradient, Gambit::Vector<double> &dx)
+bool ConjugatePRMinimizer::Iterate(const Function &fdf,
+				   Vector<double> &x, double &f,
+				   Vector<double> &gradient, 
+				   Vector<double> &dx)
 {
   double fa = f, fb, fc;
   double dir;

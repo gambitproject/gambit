@@ -268,7 +268,7 @@ void MixedBehavProfile<T>::Normalize(void)
     GamePlayer player = efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       GameInfoset infoset = player->GetInfoset(iset);
-      if (GetRealizProb(infoset) > (T) 0) {
+      if (GetRealizProb(infoset) == (T) 0) {
 	continue;
       }
       T total = (T) 0;

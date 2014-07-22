@@ -643,7 +643,9 @@ gambit_liap_SOURCES = \
 	src/tools/liap/funcmin.cc \
 	src/tools/liap/funcmin.h \
 	src/tools/liap/efgliap.cc \
+	src/tools/liap/efgliap.h \
 	src/tools/liap/nfgliap.cc \
+	src/tools/liap/nfgliap.h \
 	src/tools/liap/liap.cc
 
 gambit_logit_SOURCES = \
