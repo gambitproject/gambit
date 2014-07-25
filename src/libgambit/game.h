@@ -267,6 +267,7 @@ public:
 class GameInfosetRep : public GameObject {
 protected:
   virtual ~GameInfosetRep() { }
+  GameInfoset m_unrestricted;
 
 public:
   virtual Game GetGame(void) const = 0;
@@ -290,6 +291,8 @@ public:
   virtual GameAction GetAction(int p_index) const = 0;
   /// Returns a forward iterator over the available actions
   //virtual GameActionIterator Actions(void) const = 0; 
+  /// Retrieve unrestricted version of Game Information Set
+  virtual GameInfoset Unrestrict(void) const = 0;
   //@}
 
   virtual int NumMembers(void) const = 0;
@@ -302,6 +305,7 @@ public:
   virtual Rational GetActionProb(int pl, const Rational &) const = 0;
   virtual std::string GetActionProb(int pl, const std::string &) const = 0;
   virtual void Reveal(GamePlayer) = 0;
+
 };
 
 /// \brief A strategy in a game.
@@ -437,6 +441,7 @@ public:
 class GameNodeRep : public GameObject {
 protected:
   virtual ~GameNodeRep() { }
+  GameNode m_unrestricted;
 
 public:
   virtual Game GetGame(void) const = 0; 
@@ -460,6 +465,7 @@ public:
   virtual GameNode GetParent(void) const = 0;
   virtual GameNode GetNextSibling(void) const = 0;
   virtual GameNode GetPriorSibling(void) const = 0;
+  //GameNode Unrestrict(void) const;
 
   virtual GameOutcome GetOutcome(void) const = 0;
   virtual void SetOutcome(const GameOutcome &p_outcome) = 0;
@@ -480,6 +486,7 @@ public:
   virtual GameInfoset AppendMove(GameInfoset p_infoset) = 0;
   virtual GameInfoset InsertMove(GamePlayer p_player, int p_actions) = 0;
   virtual GameInfoset InsertMove(GameInfoset p_infoset) = 0;
+
 };
 
 

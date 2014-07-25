@@ -123,6 +123,9 @@ public:
   { return (const std::string &) m_probs[pl]; }
 
   virtual void Reveal(GamePlayer);
+
+  virtual GameInfoset Unrestrict(void) const;
+
 };
 
 
@@ -174,6 +177,7 @@ public:
   virtual GameNode GetParent(void) const    { return m_parent; }
   virtual GameNode GetNextSibling(void) const;
   virtual GameNode GetPriorSibling(void) const;
+  virtual GameNode Unrestrict(void) const;
 
   virtual GameOutcome GetOutcome(void) const { return outcome; }
   virtual void SetOutcome(const GameOutcome &p_outcome);
@@ -193,6 +197,7 @@ public:
   virtual GameInfoset AppendMove(GameInfoset p_infoset);
   virtual GameInfoset InsertMove(GamePlayer p_player, int p_actions);
   virtual GameInfoset InsertMove(GameInfoset p_infoset);
+
 };
 
 

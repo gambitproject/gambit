@@ -37,12 +37,12 @@ GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number)
   : m_game(p_game), m_number(p_number),
     m_payoffs(m_game->NumPlayers())
 { }
-/*
-GameOutcome GameOutcomeRep::Unrestrict(void)
+
+GameOutcome GameOutcomeRep::Unrestrict(void) const
 {
-	GameRep* =
+	return ( GetGame()->Unrestrict()->GetOutcome( this->GetNumber() ) );
 }
-*/
+
 //========================================================================
 //                      class GameStrategyRep
 //========================================================================
@@ -62,7 +62,9 @@ void GameStrategyRep::DeleteStrategy(void)
 
 GameStrategy GameStrategyRep::Unrestrict(void) const
 {
-  if(m_unrestricted == 0) { throw InvalidObjectException(); }
+  if(m_unrestricted == 0) {
+    throw UndefinedException();
+  }
   return m_unrestricted;
 }
 
@@ -71,9 +73,8 @@ GameStrategy GameStrategyRep::Unrestrict(void) const
 //========================================================================
 
 GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
-  : m_game(p_game), m_number(p_id), m_strategies(p_strats)
+  : m_game(p_game), m_unrestricted(0), m_number(p_id), m_strategies(p_strats)
 { 
-  m_unrestricted = 0;
   for (int j = 1; j <= p_strats; j++) {
     m_strategies[j] = new GameStrategyRep(this);
     m_strategies[j]->m_number = j;
@@ -196,10 +197,22 @@ GameInfoset GamePlayerRep::GetInfoset(int p_index) const { return m_infosets[p_i
 
 GamePlayer GamePlayerRep::Unrestrict(void) const
 {
-  if(m_unrestricted == 0) { throw InvalidObjectException(); }
+  if(m_unrestricted == 0) { throw UndefinedException(); }
   return m_unrestricted;
 }
 
+//========================================================================
+//                    class GameNodeRep
+//========================================================================
+/*
+GameNode GameNodeRep::Unrestrict(void) const
+{
+  if(m_unrestricted == 0) {
+    throw UndefinedException();
+  }
+  return m_unrestricted;
+}
+*/
 //========================================================================
 //                    class PureStrategyProfileRep
 //========================================================================
@@ -283,10 +296,10 @@ PureStrategyProfileRep::ToMixedStrategyProfile(void) const
 PureStrategyProfile
 PureStrategyProfileRep::Unrestrict(void) const
 {
-  PureStrategyProfile u = this->m_nfg->Unrestrict()->NewPureStrategyProfile();
-  for(GamePlayers::const_iterator player = this->m_nfg->Players().begin();
-    player != this->m_nfg->Players().end(); ++player)  {
-    u->SetStrategy( this->GetStrategy(*player)->Unrestrict() );
+  PureStrategyProfile u = m_nfg->Unrestrict()->NewPureStrategyProfile();
+  for(GamePlayers::const_iterator player = m_nfg->Players().begin();
+    player != m_nfg->Players().end(); ++player)  {
+    u->SetStrategy(GetStrategy(*player)->Unrestrict());
   }
   return u;
 }
