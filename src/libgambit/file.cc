@@ -512,9 +512,18 @@ void ParseNfgHeader(GameParserState &p_state, TableFileGame &p_data)
 
 void ReadOutcomeList(GameParserState &p_parser, GameRep *p_nfg)
 {
+  Array<int> StrategyArray = p_nfg->NumStrategies(); 
+  int expectedOutComes = 1; 
+  for (int i=1; i <= StrategyArray.Length(); i++) {
+    expectedOutComes = expectedOutComes * StrategyArray[i]; 
+  } 
+
   if (p_parser.GetNextToken() == TOKEN_RBRACE) {
     // Special case: empty outcome list
     p_parser.GetNextToken();
+    if (expectedOutComes != 0) {
+	  throw InvalidFileException(p_parser.CreateLineMsg("Not enough outcomes in outcome list"));
+    }
     return;
   }
 
@@ -574,6 +583,16 @@ void ReadOutcomeList(GameParserState &p_parser, GameRep *p_nfg)
         p_parser.CreateLineMsg("Expecting '}' after outcome"));
   }
   p_parser.GetNextToken();
+  if (nOutcomes != expectedOutComes) { 
+    if (nOutcomes < expectedOutComes) {
+      throw InvalidFileException(
+        p_parser.CreateLineMsg("Too few outcomes in outcome list"));
+    }
+    else {
+      throw InvalidFileException(
+        p_parser.CreateLineMsg("Too many outcomes in outcome list"));
+    }
+  }
 }
 
 void ParseOutcomeBody(GameParserState &p_parser, GameRep *p_nfg)
@@ -602,11 +621,19 @@ void ParseOutcomeBody(GameParserState &p_parser, GameRep *p_nfg)
 
 void ParsePayoffBody(GameParserState &p_parser, GameRep *p_nfg)
 {
+  Array<int> StrategyArray = p_nfg->NumStrategies(); 
+  int expectedPayoffs = 1; 
+  for (int i=1; i <= StrategyArray.Length(); i++) {
+    expectedPayoffs = expectedPayoffs * StrategyArray[i];
+  }
+  expectedPayoffs = expectedPayoffs * p_nfg->NumPlayers(); 
+
   StrategyIterator iter(StrategySupport(static_cast<GameRep *>(p_nfg)));
   int pl = 1;
-
+  int nPayoffs = 0;
   while (p_parser.GetCurrentToken() != TOKEN_EOF) {
     if (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
+	  nPayoffs++;
       (*iter)->GetOutcome()->SetPayoff(pl, p_parser.GetLastText());
     }
     else {
@@ -618,6 +645,16 @@ void ParsePayoffBody(GameParserState &p_parser, GameRep *p_nfg)
       pl = 1;
     }
     p_parser.GetNextToken();
+  }
+  if (nPayoffs != expectedPayoffs) {
+    if (nPayoffs > expectedPayoffs) {
+      throw InvalidFileException(
+        p_parser.CreateLineMsg("Too many payoffs"));
+    }
+    else {
+      throw InvalidFileException(
+        p_parser.CreateLineMsg("Too few payoffs"));
+    }
   }
 }
 
