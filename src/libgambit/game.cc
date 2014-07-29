@@ -204,7 +204,7 @@ GamePlayer GamePlayerRep::Unrestrict(void) const
 //========================================================================
 //                    class GameNodeRep
 //========================================================================
-/*
+
 GameNode GameNodeRep::Unrestrict(void) const
 {
   if(m_unrestricted == 0) {
@@ -212,7 +212,19 @@ GameNode GameNodeRep::Unrestrict(void) const
   }
   return m_unrestricted;
 }
-*/
+
+//========================================================================
+//                    class GameInfosetRep
+//========================================================================
+
+GameInfoset GameInfosetRep::Unrestrict(void) const
+{
+  if(m_unrestricted == 0) {
+    throw UndefinedException();
+  }
+  return m_unrestricted;
+}
+
 //========================================================================
 //                    class PureStrategyProfileRep
 //========================================================================

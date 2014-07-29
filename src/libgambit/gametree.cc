@@ -224,14 +224,6 @@ GamePlayer GameTreeInfosetRep::GetPlayer(void) const { return m_player; }
 bool GameTreeInfosetRep::IsChanceInfoset(void) const
 { return m_player->IsChance(); }
 
-GameInfoset GameTreeInfosetRep::Unrestrict(void) const
-{
-  if(m_unrestricted == 0) {
-    throw UndefinedException();
-  }
-  return m_unrestricted;
-}
-
 //========================================================================
 //                         class GameTreeNodeRep
 //========================================================================
@@ -265,14 +257,6 @@ GameNode GameTreeNodeRep::GetPriorSibling(void) const
   else
     return m_parent->children[m_parent->children.Find(const_cast<GameTreeNodeRep *>(this)) - 1];
 
-}
-
-GameNode GameTreeNodeRep::Unrestrict(void) const
-{
-  if(m_unrestricted == 0) {
-    throw UndefinedException();
-  }
-  return m_unrestricted;
 }
 
 GameAction GameTreeNodeRep::GetPriorAction(void) const

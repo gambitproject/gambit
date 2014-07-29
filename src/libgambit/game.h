@@ -292,7 +292,8 @@ public:
   /// Returns a forward iterator over the available actions
   //virtual GameActionIterator Actions(void) const = 0; 
   /// Retrieve unrestricted version of Game Information Set
-  virtual GameInfoset Unrestrict(void) const = 0;
+  //virtual GameInfoset Unrestrict(void) const = 0;
+  virtual GameInfoset Unrestrict(void) const;
   //@}
 
   virtual int NumMembers(void) const = 0;
@@ -305,7 +306,6 @@ public:
   virtual Rational GetActionProb(int pl, const Rational &) const = 0;
   virtual std::string GetActionProb(int pl, const std::string &) const = 0;
   virtual void Reveal(GamePlayer) = 0;
-
 };
 
 /// \brief A strategy in a game.
@@ -465,7 +465,7 @@ public:
   virtual GameNode GetParent(void) const = 0;
   virtual GameNode GetNextSibling(void) const = 0;
   virtual GameNode GetPriorSibling(void) const = 0;
-  //GameNode Unrestrict(void) const;
+  GameNode Unrestrict(void) const ;
 
   virtual GameOutcome GetOutcome(void) const = 0;
   virtual void SetOutcome(const GameOutcome &p_outcome) = 0;

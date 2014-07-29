@@ -124,8 +124,6 @@ public:
 
   virtual void Reveal(GamePlayer);
 
-  virtual GameInfoset Unrestrict(void) const;
-
 };
 
 
@@ -177,7 +175,6 @@ public:
   virtual GameNode GetParent(void) const    { return m_parent; }
   virtual GameNode GetNextSibling(void) const;
   virtual GameNode GetPriorSibling(void) const;
-  virtual GameNode Unrestrict(void) const;
 
   virtual GameOutcome GetOutcome(void) const { return outcome; }
   virtual void SetOutcome(const GameOutcome &p_outcome);
