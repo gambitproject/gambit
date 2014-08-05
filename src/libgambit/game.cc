@@ -264,12 +264,22 @@ PureStrategyProfileRep::ToMixedStrategyProfile(void) const
   return temp;
 }
 
+<<<<<<< HEAD
 PureStrategyProfile PureStrategyProfileRep::Unrestrict(void) const
 {
   PureStrategyProfile u = m_nfg->Unrestrict()->NewPureStrategyProfile();
   for (GamePlayers::const_iterator player = this->m_nfg->Players().begin();
     player != m_nfg->Players().end(); ++player)  {
     u->SetStrategy(GetStrategy(*player)->Unrestrict());
+=======
+PureStrategyProfile
+PureStrategyProfileRep::Unrestrict(void) const
+{
+  PureStrategyProfile u = dynamic_cast<GameTableRep &>(*this->m_nfg).m_unrestricted->NewPureStrategyProfile();
+  for(GamePlayers::const_iterator player = this->m_nfg->Players().begin(); player != this->m_nfg->Players().end(); ++player)
+  {
+    u->SetStrategy( this->GetStrategy(*player) );
+>>>>>>> 34d59d5... PureStrategyProfile Unrestrict
   }
   return u;
 }
