@@ -55,6 +55,8 @@ protected:
   bool Undominated(StrategySupportProfile &newS, int p_player,
 		   bool p_strict, bool p_external = false) const;
 
+  void CheckValid(void) const;
+
 public:
   /// @name Lifecycle
   //@{
@@ -70,6 +72,17 @@ public:
   /// Test for the inequality of two supports
   bool operator!=(const StrategySupportProfile &p_support) const
     { return (m_support != p_support.m_support); }
+  //@}
+
+  /// @name Set operations
+  //@{
+  /// Combine all strategies in either set
+  StrategySupportProfile Union(const StrategySupportProfile&);
+  /// Strategies in both sets
+  StrategySupportProfile Intersect(const StrategySupportProfile&);
+  /// Difference
+  StrategySupportProfile Difference(const StrategySupportProfile&);
+
   //@}
 
   /// @name General information

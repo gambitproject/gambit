@@ -47,6 +47,93 @@ StrategySupportProfile::StrategySupportProfile(const Game &p_nfg)
 }
 
 //---------------------------------------------------------------------------
+//                               Set Operations
+//---------------------------------------------------------------------------
+/* EXAMPLEEXAMPLEEXAMPLE
+bool StrategySupportProfile::IsSubsetOf(const StrategySupportProfile &p_support) const
+{
+  if (m_nfg != p_support.m_nfg)  return false;
+  for (int pl = 1; pl <= m_support.Length(); pl++) {
+    if (m_support[pl].Length() > p_support.m_support[pl].Length()) {
+      return false;
+    }
+    else {
+      for (int st = 1; st <= m_support[pl].Length(); st++) {
+	if (!p_support.m_support[pl].Contains(m_support[pl][st])) {
+	  return false;
+	}
+      }
+    }
+  }
+  return true;
+}
+*/
+
+void StrategySupportProfile::CheckValid(void) const {
+	for(int pl = 1; pl <= NumPlayers(); pl++) {
+	  if(NumStrategies(pl) < 1) {
+	    throw InvalidObjectException();
+	  }
+	}
+}
+
+StrategySupportProfile StrategySupportProfile::Union(const StrategySupportProfile &p_support)
+{
+  if(m_nfg != p_support.m_nfg)  {
+    throw UndefinedException();
+  }
+  StrategySupportProfile out = StrategySupportProfile(m_nfg);
+  for(int pl = 1; pl <= NumPlayers(); pl++) {
+	for(int st = 1; st <= NumStrategies(pl); st++) {
+	  out.AddStrategy(this->GetStrategy(pl,st));
+	}
+	for(int st = 1; st <= p_support.NumStrategies(pl); st++) {
+	  out.AddStrategy(p_support.GetStrategy(pl,st));
+	}
+  }
+  //out.CheckValid();
+  return out;
+}
+
+StrategySupportProfile StrategySupportProfile::Intersect(const StrategySupportProfile &p_support)
+{
+  if(m_nfg != p_support.m_nfg)  {
+    throw UndefinedException();
+  }
+  StrategySupportProfile out = StrategySupportProfile(m_nfg);
+  for(int pl = 1; pl <= NumPlayers(); pl++) {
+    for(int st = 1; st <= this->NumStrategies(pl); st++) {
+		for(int pst = 1; pst <= p_support.NumStrategies(pl); pst++) {
+			if(p_support.GetStrategy(pl,pst) == this->GetStrategy(pl,st)) {
+			  out.AddStrategy(this->GetStrategy(pl,st));
+			  break;
+			}
+		}
+	 }
+  }
+  out.CheckValid();
+  return out;
+}
+
+StrategySupportProfile StrategySupportProfile::Difference(const StrategySupportProfile &p_support)
+{
+  if(m_nfg != p_support.m_nfg)  {
+    throw UndefinedException();
+  }
+  StrategySupportProfile out = StrategySupportProfile(m_nfg);
+  for(int pl = 1; pl <= NumPlayers(); pl++) {
+	for(int st = 1; st <= NumStrategies(pl); st++) {
+	  out.AddStrategy(this->GetStrategy(pl,st));
+	}
+	for(int st = 1; st <= p_support.NumStrategies(pl); st++) {
+	  out.RemoveStrategy(p_support.GetStrategy(pl,st));
+	}
+  }
+  out.CheckValid();
+  return out;
+}
+
+//---------------------------------------------------------------------------
 //                          General information
 //---------------------------------------------------------------------------
 
