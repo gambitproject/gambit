@@ -84,13 +84,13 @@ StrategySupportProfile StrategySupportProfile::Intersect(const StrategySupportPr
   StrategySupportProfile out = StrategySupportProfile(m_nfg);
   for(int pl = 1; pl <= NumPlayers(); pl++) {
     for(int st = 1; st <= this->NumStrategies(pl); st++) {
-		for(int pst = 1; pst <= p_support.NumStrategies(pl); pst++) {
-			if(p_support.GetStrategy(pl,pst) == this->GetStrategy(pl,st)) {
-			  out.AddStrategy(this->GetStrategy(pl,st));
-			  break;
-			}
-		}
-	 }
+      for(int pst = 1; pst <= p_support.NumStrategies(pl); pst++) {
+        if(p_support.GetStrategy(pl,pst) == this->GetStrategy(pl,st)) {
+          out.AddStrategy(this->GetStrategy(pl,st));
+          break;
+        }
+      }
+    }
   }
   out.CheckValid();
   return out;
