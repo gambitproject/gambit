@@ -32,7 +32,7 @@ namespace Gambit {
 //                               Lifecycle
 //---------------------------------------------------------------------------
 
-StrategyIterator::StrategyIterator(const StrategySupport &p_support)
+StrategyIterator::StrategyIterator(const StrategySupportProfile &p_support)
   : m_atEnd(false), m_support(p_support),
     m_currentStrat(m_support.GetGame()->NumPlayers()),
     m_profile(m_support.GetGame()->NewPureStrategyProfile()), 
@@ -41,7 +41,7 @@ StrategyIterator::StrategyIterator(const StrategySupport &p_support)
   First();
 }
 
-StrategyIterator::StrategyIterator(const StrategySupport &p_support,
+StrategyIterator::StrategyIterator(const StrategySupportProfile &p_support,
 				   int pl, int st)
   : m_atEnd(false), m_support(p_support), 
     m_currentStrat(m_support.GetGame()->NumPlayers()),
@@ -53,7 +53,7 @@ StrategyIterator::StrategyIterator(const StrategySupport &p_support,
   First();
 }
 
-StrategyIterator::StrategyIterator(const StrategySupport &p_support,
+StrategyIterator::StrategyIterator(const StrategySupportProfile &p_support,
 				   const GameStrategy &p_strategy)
   : m_atEnd(false), m_support(p_support),
     m_currentStrat(p_support.GetGame()->NumPlayers()),
@@ -67,7 +67,7 @@ StrategyIterator::StrategyIterator(const StrategySupport &p_support,
 }
 
 
-StrategyIterator::StrategyIterator(const StrategySupport &p_support,
+StrategyIterator::StrategyIterator(const StrategySupportProfile &p_support,
 				   int pl1, int st1,
 				   int pl2, int st2)
   : m_atEnd(false), m_support(p_support), 

@@ -1065,20 +1065,20 @@ int GameTreeRep::NumNodes(void) const
 
 MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double) const
 {
-  return StrategySupport(const_cast<GameTreeRep *>(this)).NewMixedStrategyProfile<double>();
+  return StrategySupportProfile(const_cast<GameTreeRep *>(this)).NewMixedStrategyProfile<double>();
 }
 
 MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Rational &) const
 {
-  return StrategySupport(const_cast<GameTreeRep *>(this)).NewMixedStrategyProfile<Rational>();
+  return StrategySupportProfile(const_cast<GameTreeRep *>(this)).NewMixedStrategyProfile<Rational>();
 }
 
-MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double, const StrategySupport& spt) const
+MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double, const StrategySupportProfile& spt) const
 {
   return new TreeMixedStrategyProfileRep<double>(spt);
 }
 
-MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Rational &, const StrategySupport& spt) const
+MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfile& spt) const
 {
   return new TreeMixedStrategyProfileRep<Rational>(spt);
 }

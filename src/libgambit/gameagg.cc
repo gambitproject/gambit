@@ -124,19 +124,19 @@ PureStrategyProfile GameAggRep::NewPureStrategyProfile(void) const
 
 MixedStrategyProfile<double> GameAggRep::NewMixedStrategyProfile(double) const
 {
-  return new AggMixedStrategyProfileRep<double>(StrategySupport(const_cast<GameAggRep *>(this)));
+  return new AggMixedStrategyProfileRep<double>(StrategySupportProfile(const_cast<GameAggRep *>(this)));
 }
 
 MixedStrategyProfile<Rational> GameAggRep::NewMixedStrategyProfile(const Rational &) const
 {
-  return new AggMixedStrategyProfileRep<Rational>(StrategySupport(const_cast<GameAggRep *>(this)));
+  return new AggMixedStrategyProfileRep<Rational>(StrategySupportProfile(const_cast<GameAggRep *>(this)));
 }
-MixedStrategyProfile<double> GameAggRep::NewMixedStrategyProfile(double, const StrategySupport& spt) const
+MixedStrategyProfile<double> GameAggRep::NewMixedStrategyProfile(double, const StrategySupportProfile& spt) const
 {
   return new AggMixedStrategyProfileRep<double>(spt);
 }
 
-MixedStrategyProfile<Rational> GameAggRep::NewMixedStrategyProfile(const Rational &, const StrategySupport& spt) const
+MixedStrategyProfile<Rational> GameAggRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfile& spt) const
 {
   return new AggMixedStrategyProfileRep<Rational>(spt);
 }
@@ -165,7 +165,7 @@ bool GameAggRep::IsConstSum(void) const
     sum += profile.GetPayoff(pl);
   }
 
-  for (StrategyIterator iter(StrategySupport(const_cast<GameAggRep *>(this)));
+  for (StrategyIterator iter(StrategySupportProfile(const_cast<GameAggRep *>(this)));
        !iter.AtEnd(); iter++) {
     Rational newsum(0);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
