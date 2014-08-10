@@ -53,7 +53,7 @@ class MSGame(object):
                 strategy.SetLabel(str(self.contribs[st]))
 
 
-        for cont in gambit.StrategyIterator(gambit.StrategySupport(game)):
+        for cont in gambit.StrategyIterator(gambit.StrategySupportProfile(game)):
             # Create and attach an outcome to this contingency
             outcome = game.NewOutcome()
             cont.SetOutcome(outcome)

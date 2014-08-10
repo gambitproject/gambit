@@ -55,7 +55,7 @@ for pl in xrange(N):
         strategy.SetLabel(str(strats[st]))
 
 
-for (i, cont) in enumerate(gambit.StrategyIterator(gambit.StrategySupport(game))):
+for (i, cont) in enumerate(gambit.StrategyIterator(gambit.StrategySupportProfile(game))):
     if i % 1000 == 0: sys.stderr.write("%d\n" % i)
     # Create and attach an outcome to this contingency
     outcome = game.NewOutcome()

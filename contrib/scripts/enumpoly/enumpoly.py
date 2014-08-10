@@ -321,7 +321,7 @@ class CountLogger:
 #
 def AdmissibleSubsupports(game, setin, setout, setfree, skipdom = False):
     #print time.time(), len(setin), len(setout)
-    support = gambit.StrategySupport(game)
+    support = gambit.StrategySupportProfile(game)
     for strategy in setout:
         if not support.RemoveStrategy(strategy):
             # If the removal fails, it means we have no strategies
