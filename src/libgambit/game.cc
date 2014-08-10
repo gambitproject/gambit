@@ -264,6 +264,7 @@ PureStrategyProfileRep::ToMixedStrategyProfile(void) const
   return temp;
 }
 
+
 PureStrategyProfile PureStrategyProfileRep::Unrestrict(void) const
 {
   PureStrategyProfile u = m_nfg->Unrestrict()->NewPureStrategyProfile();

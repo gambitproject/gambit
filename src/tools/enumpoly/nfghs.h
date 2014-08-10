@@ -73,10 +73,10 @@ private:
   void GetDomainStrategies(Gambit::Array < Gambit::Array < Gambit::Array < GameStrategy > > > & domains,
 			   Gambit::Array < Gambit::Array < GameStrategy > > & domainStrategies);
 
-  bool IsConditionalDominatedBy(StrategySupport & dominatedGame, Gambit::Array < Gambit::Array < GameStrategy > > & domainStrategies,
+  bool IsConditionalDominatedBy(StrategySupportProfile & dominatedGame, Gambit::Array < Gambit::Array < GameStrategy > > & domainStrategies,
 				const GameStrategy &strategy, const GameStrategy &checkStrategy, bool strict);
 
-  bool IsConditionalDominated(StrategySupport & dominatedGame, 
+  bool IsConditionalDominated(StrategySupportProfile & dominatedGame,
 			      Gambit::Array<Gambit::Array<GameStrategy> > & domainStrategies,
 			      const GameStrategy &strategy, bool strict);
 

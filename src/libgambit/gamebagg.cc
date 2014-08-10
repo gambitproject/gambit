@@ -139,21 +139,21 @@ PureStrategyProfile GameBagentRep::NewPureStrategyProfile(void) const
 MixedStrategyProfile<double> GameBagentRep::NewMixedStrategyProfile(double) const
 {
 	//throw UndefinedException();
-	return new BagentMixedStrategyProfileRep<double>(StrategySupport(const_cast<GameBagentRep *>(this)));
+	return new BagentMixedStrategyProfileRep<double>(StrategySupportProfile(const_cast<GameBagentRep *>(this)));
 }
 
 MixedStrategyProfile<Rational> GameBagentRep::NewMixedStrategyProfile(const Rational &) const
 {
 	//throw UndefinedException();
-	return new BagentMixedStrategyProfileRep<Rational>(StrategySupport(const_cast<GameBagentRep *>(this)));
+	return new BagentMixedStrategyProfileRep<Rational>(StrategySupportProfile(const_cast<GameBagentRep *>(this)));
 }
-MixedStrategyProfile<double> GameBagentRep::NewMixedStrategyProfile(double, const StrategySupport& spt) const
+MixedStrategyProfile<double> GameBagentRep::NewMixedStrategyProfile(double, const StrategySupportProfile& spt) const
 {
 	//throw UndefinedException();
 	return new BagentMixedStrategyProfileRep<double>(spt);
 }
 
-MixedStrategyProfile<Rational> GameBagentRep::NewMixedStrategyProfile(const Rational &, const StrategySupport& spt) const
+MixedStrategyProfile<Rational> GameBagentRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfile& spt) const
 {
 	//throw UndefinedException();
 	return new BagentMixedStrategyProfileRep<Rational>(spt);
@@ -219,12 +219,12 @@ MixedStrategyProfile<Rational> GameBaggRep::NewMixedStrategyProfile(const Ration
 {
 	throw UndefinedException();
 }
-MixedStrategyProfile<double> GameBaggRep::NewMixedStrategyProfile(double, const StrategySupport& spt) const
+MixedStrategyProfile<double> GameBaggRep::NewMixedStrategyProfile(double, const StrategySupportProfile& spt) const
 {
 	throw UndefinedException();
 }
 
-MixedStrategyProfile<Rational> GameBaggRep::NewMixedStrategyProfile(const Rational &, const StrategySupport& spt) const
+MixedStrategyProfile<Rational> GameBaggRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfile& spt) const
 {
 	throw UndefinedException();
 }

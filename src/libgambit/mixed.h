@@ -32,9 +32,9 @@ namespace Gambit {
 template <class T> class MixedStrategyProfileRep {
 public:
   Vector<T> m_probs;
-  StrategySupport m_support;
+  StrategySupportProfile m_support;
 
-  MixedStrategyProfileRep(const StrategySupport &);
+  MixedStrategyProfileRep(const StrategySupportProfile &);
   virtual ~MixedStrategyProfileRep() { }
   virtual MixedStrategyProfileRep<T> *Copy(void) const = 0;
 
@@ -57,7 +57,7 @@ public:
 template <class T> class TreeMixedStrategyProfileRep 
   : public MixedStrategyProfileRep<T> {
 public:
-  TreeMixedStrategyProfileRep(const StrategySupport &p_support)
+  TreeMixedStrategyProfileRep(const StrategySupportProfile &p_support)
     : MixedStrategyProfileRep<T>(p_support)
   { }
   TreeMixedStrategyProfileRep(const MixedBehavProfile<T> &);
@@ -85,7 +85,7 @@ private:
   //@}
 
 public:
-  TableMixedStrategyProfileRep(const StrategySupport &p_support)
+  TableMixedStrategyProfileRep(const StrategySupportProfile &p_support)
     : MixedStrategyProfileRep<T>(p_support)
   { }
   virtual ~TableMixedStrategyProfileRep() { }
@@ -100,7 +100,7 @@ template <class T> class AggMixedStrategyProfileRep
     : public MixedStrategyProfileRep<T> {
 
 public:
-    AggMixedStrategyProfileRep(const StrategySupport &p_support)
+    AggMixedStrategyProfileRep(const StrategySupportProfile &p_support)
       : MixedStrategyProfileRep<T>(p_support)
     { }
     virtual ~AggMixedStrategyProfileRep() { }
@@ -117,7 +117,7 @@ template <class T> class BagentMixedStrategyProfileRep
         : public MixedStrategyProfileRep<T> {
 
     public:
-        BagentMixedStrategyProfileRep(const StrategySupport &p_support)
+        BagentMixedStrategyProfileRep(const StrategySupportProfile &p_support)
           : MixedStrategyProfileRep<T>(p_support)
         { }
         virtual ~BagentMixedStrategyProfileRep() { }
@@ -136,7 +136,7 @@ template <class T> class BagentMixedStrategyProfileRep
 /// independently chooses from among his strategies with specified
 /// probabilities.
 template <class T> class MixedStrategyProfile {
-  friend class StrategySupport;
+  friend class StrategySupportProfile;
   friend class TreeMixedStrategyProfileRep<T>;
   friend class AggMixedStrategyProfileRep<T>;
   friend class BagentMixedStrategyProfileRep<T>;
@@ -201,7 +201,7 @@ public:
   /// Returns the game on which the profile is defined
   Game GetGame(void) const { return m_rep->m_support.GetGame(); }
   /// Returns the support on which the profile is defined
-  const StrategySupport &GetSupport(void) const { return m_rep->m_support; }
+  const StrategySupportProfile &GetSupport(void) const { return m_rep->m_support; }
 
   /// Sets all strategies for each player to equal probabilities
   void SetCentroid(void) { m_rep->SetCentroid(); }
