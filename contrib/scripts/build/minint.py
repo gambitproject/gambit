@@ -17,7 +17,7 @@ for pl in xrange(1, nfg.NumPlayers() + 1):
     outcome.SetLabel('%d wins' % pl)
     outcome.SetPayoff(pl, "1")
 
-for profile in gambit.StrategyIterator(gambit.StrategySupport(nfg)):
+for profile in gambit.StrategyIterator(gambit.StrategySupportProfile(nfg)):
     choices = [ profile.GetStrategy(pl).GetNumber()
                 for pl in range(1, nfg.NumPlayers() + 1) ]
     for ch in range(1, K+1):

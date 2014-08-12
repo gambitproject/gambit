@@ -28,7 +28,7 @@
 namespace Gambit {
 
 class GameTableRep : public GameExplicitRep {
-  friend class StrategySupport;
+  friend class StrategySupportProfile;
   friend class GamePlayerRep;
   friend class TablePureStrategyProfileRep;
   template <class T> friend class MixedStrategyProfile;
@@ -122,8 +122,8 @@ public:
   virtual PureStrategyProfile NewPureStrategyProfile(void) const;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const; 
-  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupport&) const;
-  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupport&) const;
+  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const;
+  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const;
 
 };
 

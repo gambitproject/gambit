@@ -157,7 +157,7 @@ class PureStrategyProfile;
 //
 template <class T> class MixedStrategyProfile;
 template <class T> class MixedBehavProfile;
-class StrategySupport;
+class StrategySupportProfile;
 
 //=======================================================================
 //         Exceptions thrown from game representation classes
@@ -318,7 +318,7 @@ class GameStrategyRep : public GameObject  {
   friend class PureStrategyProfileRep;
   friend class TreePureStrategyProfileRep;
   friend class TablePureStrategyProfileRep;
-  friend class StrategySupport;
+  friend class StrategySupportProfile;
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class TableMixedStrategyProfileRep;
   template <class T> friend class MixedBehavProfile;
@@ -374,7 +374,7 @@ class GamePlayerRep : public GameObject {
   friend class GameTreeInfosetRep;
   friend class GameStrategyRep;
   friend class GameTreeNodeRep;
-  friend class StrategySupport;
+  friend class StrategySupportProfile;
   template <class T> friend class MixedBehavProfile;
   template <class T> friend class MixedStrategyProfile;
 
@@ -710,8 +710,8 @@ public:
   virtual PureStrategyProfile NewPureStrategyProfile(void) const = 0;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const = 0;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const = 0; 
-  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupport&) const = 0;
-  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupport&) const = 0;
+  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const = 0;
+  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const = 0;
 
   /// @name Players
   //@{

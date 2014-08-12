@@ -489,7 +489,7 @@ bool gbtNfgHs::IteratedRemovalStrictlyDominatedStrategies(Game game,
 
       // construct restrict game
 
-      StrategySupport dominatedGame(game);
+      StrategySupportProfile dominatedGame(game);
 
       for (int pl = 1; pl <= numPlayers; pl++) {
 	if (pl != i) {
@@ -593,7 +593,7 @@ void gbtNfgHs::GetDomainStrategies(Gambit::Array < Gambit::Array < Gambit::Array
 }
 
 
-bool gbtNfgHs::IsConditionalDominatedBy(StrategySupport & dominatedGame,
+bool gbtNfgHs::IsConditionalDominatedBy(StrategySupportProfile & dominatedGame,
 					Gambit::Array < Gambit::Array < GameStrategy > > & domainStrategies, const GameStrategy &strategy,
 					const GameStrategy &checkStrategy, bool strict) {
 
@@ -619,7 +619,7 @@ bool gbtNfgHs::IsConditionalDominatedBy(StrategySupport & dominatedGame,
 }
 
 
-bool gbtNfgHs::IsConditionalDominated(StrategySupport & dominatedGame,
+bool gbtNfgHs::IsConditionalDominated(StrategySupportProfile & dominatedGame,
 				      Gambit::Array < Gambit::Array < GameStrategy > > & domainStrategies, const GameStrategy &strategy, bool strict) {
 
 
@@ -669,7 +669,7 @@ bool gbtNfgHs::FeasibilityProgram(Game game,
 				  Gambit::List < MixedStrategyProfile < double > > & solutions, Gambit::Array < Gambit::Array < GameStrategy > > & uninstantiatedSupports) {
 
 
-  StrategySupport restrictedGame(game);
+  StrategySupportProfile restrictedGame(game);
   for (int pl = 1; pl <= numPlayers; pl++) {
     for (int st = 1; st <= game->GetPlayer(pl)->NumStrategies(); st++) {
       if (!uninstantiatedSupports[pl].Contains(game->GetPlayer(pl)->GetStrategy(st))) {

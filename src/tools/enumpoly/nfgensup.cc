@@ -26,7 +26,7 @@ using namespace Gambit;
 
 namespace {
 
-List<StrategySupport> SortSupportsBySize(List<StrategySupport> &p_list) 
+List<StrategySupportProfile> SortSupportsBySize(List<StrategySupportProfile> &p_list)
 {
   Array<int> sizes(p_list.Length());
   for (int i = 1; i <= p_list.Length(); i++)
@@ -63,23 +63,23 @@ List<StrategySupport> SortSupportsBySize(List<StrategySupport> &p_list)
       }
   }
 
-  List<StrategySupport> answer;
+  List<StrategySupportProfile> answer;
   for (int i = 1; i <= p_list.Length(); i++)
     answer.Append(p_list[listproxy[i]]);
 
   return answer;
 }
 
-void PossibleNashSubsupports(const StrategySupport &s,
-			     StrategySupport &sact,
-			     StrategySupport::iterator &c,
-			     List<StrategySupport> &p_list)
+void PossibleNashSubsupports(const StrategySupportProfile &s,
+			     StrategySupportProfile &sact,
+			     StrategySupportProfile::iterator &c,
+			     List<StrategySupportProfile> &p_list)
 { 
   bool abort = false;
   bool no_deletions = true;
 
   List<GameStrategy> deletion_list;
-  StrategySupport::iterator scanner(s);
+  StrategySupportProfile::iterator scanner(s);
 
   do {
     GameStrategy this_strategy = scanner.GetStrategy();
@@ -118,7 +118,7 @@ void PossibleNashSubsupports(const StrategySupport &s,
   if (!abort && no_deletions) {
     p_list.Append(sact);
     
-    StrategySupport::iterator c_copy(c);
+    StrategySupportProfile::iterator c_copy(c);
     do {
       GameStrategy str_ptr = c_copy.GetStrategy();
       if (sact.Contains(str_ptr) &&
@@ -134,11 +134,11 @@ void PossibleNashSubsupports(const StrategySupport &s,
 }  // end anonymous namespace
 
   
-List<StrategySupport> PossibleNashSubsupports(const StrategySupport &S)
+List<StrategySupportProfile> PossibleNashSubsupports(const StrategySupportProfile &S)
 {
-  List<StrategySupport> answer;
-  StrategySupport sact(S);
-  StrategySupport::iterator cursor(S);
+  List<StrategySupportProfile> answer;
+  StrategySupportProfile sact(S);
+  StrategySupportProfile::iterator cursor(S);
   PossibleNashSubsupports(S, sact, cursor, answer);
 
   // At this point answer has all consistent subsupports without
@@ -147,8 +147,8 @@ List<StrategySupport> PossibleNashSubsupports(const StrategySupport &S)
   // subsupports exhibiting domination by currently inactive strategies.
 
   for (int i = answer.Length(); i >= 1; i--) {
-    StrategySupport current(answer[i]);
-    StrategySupport::iterator crsr(S);
+    StrategySupportProfile current(answer[i]);
+    StrategySupportProfile::iterator crsr(S);
     bool remove = false;
     do {
       GameStrategy strat = crsr.GetStrategy();

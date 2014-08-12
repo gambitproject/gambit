@@ -118,7 +118,7 @@ static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
 }
 
 
-void QreLHS(const StrategySupport &p_support, 
+void QreLHS(const StrategySupportProfile &p_support, 
 	    const Vector<double> &p_point,
 	    Vector<double> &p_lhs)
 {
@@ -154,7 +154,7 @@ void QreLHS(const StrategySupport &p_support,
   }
 }
 
-void SymmetricQreLHS(const StrategySupport &p_support, 
+void SymmetricQreLHS(const StrategySupportProfile &p_support, 
 		     const Vector<double> &p_point,
 		     Vector<double> &p_lhs)
 {
@@ -189,7 +189,7 @@ void SymmetricQreLHS(const StrategySupport &p_support,
   }
 }
 
-void QreJacobian(const StrategySupport &p_support,
+void QreJacobian(const StrategySupportProfile &p_support,
 		 const Vector<double> &p_point,
 		 Matrix<double> &p_matrix)
 {
@@ -287,7 +287,7 @@ void QreJacobian(const StrategySupport &p_support,
   */
 }
 
-void SymmetricQreJacobian(const StrategySupport &p_support,
+void SymmetricQreJacobian(const StrategySupportProfile &p_support,
 			  const Vector<double> &p_point,
 			  Matrix<double> &p_matrix)
 {
@@ -404,7 +404,7 @@ double DiffLogLike(const Array<double> &p_point,
 extern int g_numDecimals;
 
 void PrintProfile(std::ostream &p_stream,
-		  const StrategySupport &p_support, const Vector<double> &x,
+		  const StrategySupportProfile &p_support, const Vector<double> &x,
 		  bool p_terminal = false)
 {
   p_stream.setf(std::ios::fixed);

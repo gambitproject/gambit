@@ -28,7 +28,7 @@
 //              HeuristicPolEnumModule: Member functions
 //-------------------------------------------------------------------------
 
-HeuristicPolEnumModule::HeuristicPolEnumModule(const StrategySupport &S, int p_stopAfter)
+HeuristicPolEnumModule::HeuristicPolEnumModule(const StrategySupportProfile &S, int p_stopAfter)
   : m_stopAfter(p_stopAfter), NF(S.GetGame()), support(S),
     Space(support.MixedProfileLength()-NF->NumPlayers()), 
     Lex(&Space, lex), num_vars(support.MixedProfileLength()-NF->NumPlayers()), 
@@ -229,7 +229,7 @@ bool HeuristicPolEnumModule::IsSingular() const
 //                        PolEnumParams: member functions
 //---------------------------------------------------------------------------
 
-int PolEnum(const StrategySupport &support, int p_stopAfter,
+int PolEnum(const StrategySupportProfile &support, int p_stopAfter,
 	    Gambit::List<MixedStrategyProfile<double> > &solutions, 
 	    long &nevals, double &time, bool &is_singular)
 {
@@ -252,7 +252,7 @@ int PolEnum(const StrategySupport &support, int p_stopAfter,
 
 #ifdef UNUSED
 static
-MixedStrategyProfile<double> PolishEquilibrium(const StrategySupport &support, 
+MixedStrategyProfile<double> PolishEquilibrium(const StrategySupportProfile &support,
 				       const MixedStrategyProfile<double> &sol, 
 				       bool &is_singular)
 {
