@@ -408,6 +408,73 @@ Game StrategySupport::Restrict(void) const
   return restricted;
 }
 
+//---------------------------------------------------------------------------
+//                               Set Operations
+//---------------------------------------------------------------------------
+
+void StrategySupport::CheckValid(void) const {
+	for(int pl = 1; pl <= NumPlayers(); pl++) {
+	  if(NumStrategies(pl) < 1) {
+	    throw InvalidObjectException();
+	  }
+	}
+}
+
+StrategySupport StrategySupport::Union(const StrategySupport &p_support)
+{
+  if(m_nfg != p_support.m_nfg)  {
+    throw UndefinedException();
+  }
+  StrategySupport out = StrategySupport(m_nfg);
+  for(int pl = 1; pl <= NumPlayers(); pl++) {
+	for(int st = 1; st <= NumStrategies(pl); st++) {
+	  out.AddStrategy(this->GetStrategy(pl,st));
+	}
+	for(int st = 1; st <= p_support.NumStrategies(pl); st++) {
+	  out.AddStrategy(p_support.GetStrategy(pl,st));
+	}
+  }
+  out.CheckValid();
+  return out;
+}
+
+StrategySupport StrategySupport::Intersect(const StrategySupport &p_support)
+{
+  if(m_nfg != p_support.m_nfg)  {
+    throw UndefinedException();
+  }
+  StrategySupport out = StrategySupport(m_nfg);
+  for(int pl = 1; pl <= NumPlayers(); pl++) {
+    for(int st = 1; st <= this->NumStrategies(pl); st++) {
+      for(int pst = 1; pst <= p_support.NumStrategies(pl); pst++) {
+        if(p_support.GetStrategy(pl,pst) == this->GetStrategy(pl,st)) {
+          out.AddStrategy(this->GetStrategy(pl,st));
+          break;
+        }
+      }
+    }
+  }
+  out.CheckValid();
+  return out;
+}
+
+StrategySupport StrategySupport::Difference(const StrategySupport &p_support)
+{
+  if(m_nfg != p_support.m_nfg)  {
+    throw UndefinedException();
+  }
+  StrategySupport out = StrategySupport(m_nfg);
+  for(int pl = 1; pl <= NumPlayers(); pl++) {
+	for(int st = 1; st <= NumStrategies(pl); st++) {
+	  out.AddStrategy(this->GetStrategy(pl,st));
+	}
+	for(int st = 1; st <= p_support.NumStrategies(pl); st++) {
+	  out.RemoveStrategy(p_support.GetStrategy(pl,st));
+	}
+  }
+  out.CheckValid();
+  return out;
+}
 
 //===========================================================================
 //                     class StrategySupport::iterator
