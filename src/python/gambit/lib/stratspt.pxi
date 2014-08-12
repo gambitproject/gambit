@@ -28,20 +28,20 @@ cdef class StrategySupportProfile(Collection):
     A set-like object representing a subset of the strategies in game, incorporating
     the restriction that each player must have at least one strategy in the set.
     """
-    cdef c_StrategySupport *support
+    cdef c_StrategySupportProfile *support
 
     def __init__(self, strategies, Game game not None):
-       self.support = (<c_StrategySupport *>0)  
+       self.support = (<c_StrategySupportProfile *>0)  
        if self.is_valid(strategies, len(game.players)):
             temp_restriction = <StrategicRestriction>game.mixed_profile().restriction()
-            self.support = new c_StrategySupport(deref(temp_restriction.support))
+            self.support = new c_StrategySupportProfile(deref(temp_restriction.support))
             for strategy in game.strategies:
                 if strategy not in strategies:
                     self.support.RemoveStrategy((<Strategy>strategy).strategy)
        else:
             raise ValueError("invalid set of strategies")
     def __dealloc__(self):
-        if self.support != (<c_StrategySupport *>0):
+        if self.support != (<c_StrategySupportProfile *>0):
             del self.support
     def __len__(self):    return self.support.MixedProfileLength()
     def __richcmp__(StrategySupportProfile self, other, whichop):
@@ -123,13 +123,13 @@ cdef class StrategySupportProfile(Collection):
     def restrict(self):
         cdef StrategicRestriction restriction
         restriction = StrategicRestriction()
-        restriction.support = new c_StrategySupport(deref(self.support))
+        restriction.support = new c_StrategySupportProfile(deref(self.support))
         return restriction
 
     def undominated(self, strict=False, external=False):
         cdef StrategicRestriction restriction
         restriction = StrategicRestriction()
-        restriction.support = new c_StrategySupport(self.support.Undominated(strict, external))
+        restriction.support = new c_StrategySupportProfile(self.support.Undominated(strict, external))
         new_profile = StrategySupportProfile(restriction.strategies, self.game)
         return new_profile 
 
@@ -193,12 +193,12 @@ cdef class StrategicRestriction(BaseGame):
     A StrategicRestriction is a read-only view on a game, defined by a
     subset of the strategies on the original game.
     """
-    cdef c_StrategySupport *support
+    cdef c_StrategySupportProfile *support
 
     def __init__(self):
-        self.support = (<c_StrategySupport *>0)
+        self.support = (<c_StrategySupportProfile *>0)
     def __dealloc__(self):
-        if self.support != (<c_StrategySupport *>0):
+        if self.support != (<c_StrategySupportProfile *>0):
             del self.support
     def __repr__(self):
         return self.write()
@@ -277,7 +277,7 @@ cdef class StrategicRestriction(BaseGame):
     def undominated(self, strict=False):
         cdef StrategicRestriction new_restriction
         new_restriction = StrategicRestriction()
-        new_restriction.support = new c_StrategySupport(self.support.Undominated(strict, False))
+        new_restriction.support = new c_StrategySupportProfile(self.support.Undominated(strict, False))
         return new_restriction
 
     def num_strategies_player(self, pl):

@@ -244,7 +244,7 @@ cdef extern from "libgambit/mixed.h":
     cdef cppclass c_MixedStrategyProfileDouble "MixedStrategyProfile<double>":
         c_Game GetGame()
         int MixedProfileLength()
-        c_StrategySupport GetSupport()
+        c_StrategySupportProfile GetSupport()
         void SetCentroid()
         void Normalize()
         double getitem "operator[]"(int) except +IndexError
@@ -259,7 +259,7 @@ cdef extern from "libgambit/mixed.h":
     cdef cppclass c_MixedStrategyProfileRational "MixedStrategyProfile<Rational>":
         c_Game GetGame()
         int MixedProfileLength()
-        c_StrategySupport GetSupport()
+        c_StrategySupportProfile GetSupport()
         void SetCentroid()
         void Normalize()
         c_Rational getitem "operator[]"(int) except +IndexError
@@ -315,21 +315,21 @@ cdef extern from "libgambit/behav.h":
         c_MixedBehavProfileRational(c_MixedBehavProfileRational)
 
 cdef extern from "libgambit/stratspt.h":
-    cdef cppclass c_StrategySupport "StrategySupport":
-        c_StrategySupport(c_Game)
-        c_StrategySupport(c_StrategySupport)
-        bool operator==(c_StrategySupport)
-        bool operator!=(c_StrategySupport)
+    cdef cppclass c_StrategySupportProfile "StrategySupportProfile":
+        c_StrategySupportProfile(c_Game)
+        c_StrategySupportProfile(c_StrategySupportProfile)
+        bool operator==(c_StrategySupportProfile)
+        bool operator!=(c_StrategySupportProfile)
         c_Game GetGame()
         Array[int] NumStrategies()        
         int MixedProfileLength()
         int GetIndex(c_GameStrategy)
         int NumStrategiesPlayer "NumStrategies"(int) except +IndexError
-        bool IsSubsetOf(c_StrategySupport)
+        bool IsSubsetOf(c_StrategySupportProfile)
         bool RemoveStrategy(c_GameStrategy)
         c_GameStrategy GetStrategy(int, int) except +IndexError
         bool Contains(c_GameStrategy)
-        c_StrategySupport Undominated(bool, bool)
+        c_StrategySupportProfile Undominated(bool, bool)
         c_MixedStrategyProfileDouble NewMixedStrategyProfileDouble "NewMixedStrategyProfile<double>"()
         c_MixedStrategyProfileRational NewMixedStrategyProfileRational "NewMixedStrategyProfile<Rational>"()
 
@@ -337,7 +337,7 @@ cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError
     c_Game ParseGame(char *) except +IOError
     cxx_string WriteGame(c_Game, cxx_string) except +IOError
-    cxx_string WriteGame(c_StrategySupport) except +IOError
+    cxx_string WriteGame(c_StrategySupportProfile) except +IOError
 
     void setitem_ArrayInt(Array[int] *, int, int)
     void setitem_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble *, 

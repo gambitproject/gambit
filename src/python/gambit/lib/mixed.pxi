@@ -190,7 +190,7 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
     def restriction(self):
         cdef StrategicRestriction s
         s = StrategicRestriction()
-        s.support = new c_StrategySupport(self.profile.GetSupport())
+        s.support = new c_StrategySupportProfile(self.profile.GetSupport())
         return s
     def unrestrict(self):
         profile = MixedStrategyProfileDouble()
@@ -262,7 +262,7 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
     def restriction(self):
         cdef StrategicRestriction s
         s = StrategicRestriction()
-        s.support = new c_StrategySupport(self.profile.GetSupport())
+        s.support = new c_StrategySupportProfile(self.profile.GetSupport())
         return s
     def unrestrict(self):
         profile = MixedStrategyProfileRational()

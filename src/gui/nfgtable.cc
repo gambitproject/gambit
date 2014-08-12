@@ -215,7 +215,7 @@ void gbtRowPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
     return;
   }
 
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
   wxSheetCoords coords = p_event.GetCoords();
 
   int player = m_table->GetRowPlayer(coords.GetCol() + 1);
@@ -230,7 +230,7 @@ wxString gbtRowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
 
   if (m_table->NumRowPlayers() == 0) return wxT("Payoffs");
 
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
 
   int player = m_table->GetRowPlayer(p_coords.GetCol() + 1);
   int strat = m_table->RowToStrategy(p_coords.GetCol() + 1, p_coords.GetRow());
@@ -242,7 +242,7 @@ wxString gbtRowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
 void gbtRowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords,
 				      const wxString &p_value)
 {
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
 
   int player = m_table->GetRowPlayer(p_coords.GetCol() + 1);
   int strat = m_table->RowToStrategy(p_coords.GetCol() + 1, p_coords.GetRow());
@@ -276,7 +276,7 @@ void gbtRowPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
   if (!m_table->ShowDominance() || IsLabelCell(p_coords) ||
       m_table->NumRowPlayers() == 0)  return;
 
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
   int player = m_table->GetRowPlayer(p_coords.GetCol() + 1);
   int strat = m_table->RowToStrategy(p_coords.GetCol() + 1, p_coords.GetRow());
   Gambit::GameStrategy strategy = support.GetStrategy(player, strat);
@@ -425,7 +425,7 @@ void gbtColPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
     return;
   }
 
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
   wxSheetCoords coords = p_event.GetCoords();
 
   int player = m_table->GetColPlayer(coords.GetRow() + 1);
@@ -467,7 +467,7 @@ wxString gbtColPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
 
   if (m_table->NumColPlayers() == 0)  return wxT("Payoffs");
 
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
 
   int player = m_table->GetColPlayer(p_coords.GetRow() + 1);
   int strat = m_table->ColToStrategy(p_coords.GetRow() + 1, p_coords.GetCol());
@@ -479,7 +479,7 @@ wxString gbtColPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
 void gbtColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords,
 				      const wxString &p_value)
 {
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
 
   int player = m_table->GetColPlayer(p_coords.GetRow() + 1);
   int strat = m_table->ColToStrategy(p_coords.GetRow() + 1, p_coords.GetCol());
@@ -513,7 +513,7 @@ void gbtColPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
   if (!m_table->ShowDominance() || IsLabelCell(p_coords) ||
       m_table->NumColPlayers() == 0)  return;
 
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
   int player = m_table->GetColPlayer(p_coords.GetRow() + 1);
   int strat = m_table->ColToStrategy(p_coords.GetRow() + 1, p_coords.GetCol());
   Gambit::GameStrategy strategy = support.GetStrategy(player, strat);
@@ -739,7 +739,7 @@ void gbtPayoffsWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
 
   Gambit::PureStrategyProfile profile = m_table->CellToProfile(p_coords);
   int player = ColToPlayer(p_coords.GetCol());
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
 
   if (support.IsDominated(profile->GetStrategy(player), false)) {
     wxRect rect = CellToRect(p_coords);
@@ -1048,7 +1048,7 @@ void gbtTableWidget::SetRowPlayer(int index, int pl)
 int gbtTableWidget::NumRowContingencies(void) const
 {
   int ncont = 1;
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
   for (int i = 1; i <= NumRowPlayers(); 
        ncont *= support.NumStrategies(GetRowPlayer(i++)));
   return ncont;
@@ -1057,7 +1057,7 @@ int gbtTableWidget::NumRowContingencies(void) const
 int gbtTableWidget::NumRowsSpanned(int index) const
 {
   int ncont = 1;
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
   for (int i = index + 1; i <= NumRowPlayers(); 
        ncont *= support.NumStrategies(GetRowPlayer(i++)));
   return ncont;
@@ -1091,7 +1091,7 @@ void gbtTableWidget::SetColPlayer(int index, int pl)
 int gbtTableWidget::NumColContingencies(void) const
 {
   int ncont = 1;
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
   for (int i = 1; i <= NumColPlayers(); 
        ncont *= support.NumStrategies(GetColPlayer(i++)));
   return ncont;
@@ -1100,7 +1100,7 @@ int gbtTableWidget::NumColContingencies(void) const
 int gbtTableWidget::NumColsSpanned(int index) const
 {
   int ncont = 1;
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
   for (int i = index + 1; i <= NumColPlayers(); 
        ncont *= support.NumStrategies(GetColPlayer(i++)));
   return ncont;
@@ -1115,7 +1115,7 @@ int gbtTableWidget::ColToStrategy(int player, int col) const
 Gambit::PureStrategyProfile 
 gbtTableWidget::CellToProfile(const wxSheetCoords &p_coords) const
 {
-  const Gambit::StrategySupport &support = m_doc->GetNfgSupport();
+  const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
 
   Gambit::PureStrategyProfile profile = m_doc->GetGame()->NewPureStrategyProfile();
   for (int i = 1; i <= NumRowPlayers(); i++) {

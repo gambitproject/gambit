@@ -32,7 +32,7 @@ namespace Gambit {
 //========================================================================
 
 template <class T> 
-MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupport &p_support)
+MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile &p_support)
   : m_probs(p_support.MixedProfileLength()), m_support(p_support)
 {
   SetCentroid();

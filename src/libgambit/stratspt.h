@@ -27,7 +27,7 @@
 
 namespace Gambit {
 
-class StrategySupport;
+class StrategySupportProfile;
 
 /// \brief A support on a strategic game
 ///
@@ -40,7 +40,7 @@ class StrategySupport;
 ///
 /// Within the support, strategies are maintained in the same order
 /// in which they appear in the underlying game.
-class StrategySupport {
+class StrategySupportProfile {
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class MixedStrategyProfileRep;
   template <class T> friend class AggMixedStrategyProfileRep;
@@ -52,23 +52,23 @@ protected:
   /// The index into a strategy profile for a strategy (-1 if not in support)
   Array<int> m_profileIndex;
   
-  bool Undominated(StrategySupport &newS, int p_player, 
+  bool Undominated(StrategySupportProfile &newS, int p_player, 
 		   bool p_strict, bool p_external = false) const;
 
 public:
   /// @name Lifecycle
   //@{
   /// Constructor.  By default, a support contains all strategies.
-  StrategySupport(const Game &);
+  StrategySupportProfile(const Game &);
   //@}
 
   /// @name Operator overloading
   //@{
   /// Test for the equality of two supports (same strategies for all players)
-  bool operator==(const StrategySupport &p_support) const
+  bool operator==(const StrategySupportProfile &p_support) const
     { return (m_support == p_support.m_support); }
   /// Test for the inequality of two supports
-  bool operator!=(const StrategySupport &p_support) const
+  bool operator!=(const StrategySupportProfile &p_support) const
     { return (m_support != p_support.m_support); }
   //@}
 
@@ -107,7 +107,7 @@ public:
     { return m_profileIndex[s->GetId()] >= 0; }
 
   /// Returns true iff this support is a (weak) subset of the specified support
-  bool IsSubsetOf(const StrategySupport &) const;
+  bool IsSubsetOf(const StrategySupportProfile &) const;
 
   //@}
 
@@ -138,8 +138,8 @@ public:
 		   bool p_external = false) const; 
 
   /// Returns a copy of the support with dominated strategies eliminated
-  StrategySupport Undominated(bool p_strict, bool p_external = false) const;
-  StrategySupport Undominated(bool strong, const Array<int> &players) const;
+  StrategySupportProfile Undominated(bool p_strict, bool p_external = false) const;
+  StrategySupportProfile Undominated(bool strong, const Array<int> &players) const;
   //@}
 
   /// @name Identification of overwhelmed strategies
@@ -155,7 +155,7 @@ public:
   public:
     /// @name Lifecycle
     //@{
-    iterator(const StrategySupport &S, int p_pl = 1, int p_st = 1) : 
+    iterator(const StrategySupportProfile &S, int p_pl = 1, int p_st = 1) : 
       support(S), pl(p_pl), strat(p_st) { }
     ~iterator() { }
     //@}
@@ -192,7 +192,7 @@ public:
     //@}
 
   private:
-    const StrategySupport &support;
+    const StrategySupportProfile &support;
     int pl, strat;
   };
 

@@ -39,7 +39,7 @@ private:
   int m_stopAfter;
   double eps;
   Game NF;
-  const StrategySupport &support;
+  const StrategySupportProfile &support;
   gSpace Space;
   term_order Lex;
   int num_vars;
@@ -65,7 +65,7 @@ private:
 
   int SaveSolutions(const Gambit::List<Vector<double> > &list);
 public:
-  HeuristicPolEnumModule(const StrategySupport &, int p_stopAfter);
+  HeuristicPolEnumModule(const StrategySupportProfile &, int p_stopAfter);
   
   int PolEnum(void);
   

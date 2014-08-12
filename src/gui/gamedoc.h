@@ -114,7 +114,7 @@ class gbtStrategyDominanceStack {
 private:
   gbtGameDocument *m_doc;
   bool m_strict;
-  Gambit::Array<Gambit::StrategySupport *> m_supports;
+  Gambit::Array<Gambit::StrategySupportProfile *> m_supports;
   int m_current;
   bool m_noFurther;
 
@@ -131,12 +131,12 @@ public:
   //! Get the i'th support in the stack
   //! (where i=1 is always the "full" support)
   //!
-  const Gambit::StrategySupport &GetSupport(int i) const { return *m_supports[i]; }
+  const Gambit::StrategySupportProfile &GetSupport(int i) const { return *m_supports[i]; }
 
   //!
   //! Get the current support
   //!
-  const Gambit::StrategySupport &GetCurrent(void) const { return *m_supports[m_current]; }
+  const Gambit::StrategySupportProfile &GetCurrent(void) const { return *m_supports[m_current]; }
 
   //!
   //! Get the level of iteration (1 = no iteration)
@@ -327,7 +327,7 @@ public:
   //! @name Handling of strategy supports
   //!
   //@{
-  const Gambit::StrategySupport &GetNfgSupport(void) const
+  const Gambit::StrategySupportProfile &GetNfgSupport(void) const
     { return m_stratSupports.GetCurrent(); }
   void SetStrategyElimStrength(bool p_strict);
   bool GetStrategyElimStrength(void) const;

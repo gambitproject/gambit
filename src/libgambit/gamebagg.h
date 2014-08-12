@@ -112,8 +112,8 @@ public:
   virtual PureStrategyProfile NewPureStrategyProfile(void) const { throw UndefinedException(); }
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const;
-  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupport&) const;
-  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupport&) const;
+  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const;
+  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const;
 
   /// @name Players
   //@{
@@ -291,8 +291,8 @@ public:
   virtual PureStrategyProfile NewPureStrategyProfile(void) const;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const;
-  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupport&) const;
-  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupport&) const;
+  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const;
+  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const;
 
   /// @name Players
   //@{

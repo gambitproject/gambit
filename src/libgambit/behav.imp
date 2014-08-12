@@ -176,7 +176,7 @@ MixedBehavProfile<T>::MixedBehavProfile(const MixedStrategyProfile<T> &p_profile
   ((Vector<T> &) *this).operator=((T)0); 
 
   GameTreeNodeRep *root = dynamic_cast<GameTreeNodeRep *>(m_support.GetGame()->GetRoot().operator->());
-  const StrategySupport &support = p_profile.GetSupport();
+  const StrategySupportProfile &support = p_profile.GetSupport();
   GameRep *game = m_support.GetGame();
 
   for (GamePlayers::const_iterator player = game->Players().begin();

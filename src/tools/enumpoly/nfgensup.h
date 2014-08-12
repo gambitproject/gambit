@@ -35,5 +35,5 @@ using namespace Gambit;
 // subsupport resulting from activation is consistent, in the sense
 // of having active strategys at all active infosets, and not at other
 // infosets.
-List<StrategySupport> PossibleNashSubsupports(const StrategySupport &S);
+List<StrategySupportProfile> PossibleNashSubsupports(const StrategySupportProfile &S);
 

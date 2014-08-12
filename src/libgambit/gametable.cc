@@ -188,7 +188,7 @@ bool GameTableRep::IsConstSum(void) const
     sum += profile.GetPayoff(pl);
   }
 
-  for (StrategyIterator iter(StrategySupport(const_cast<GameTableRep *>(this)));
+  for (StrategyIterator iter(StrategySupportProfile(const_cast<GameTableRep *>(this)));
        !iter.AtEnd(); iter++) {
     Rational newsum(0);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
@@ -318,19 +318,19 @@ void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
 
 MixedStrategyProfile<double> GameTableRep::NewMixedStrategyProfile(double) const
 {
-  return StrategySupport(const_cast<GameTableRep *>(this)).NewMixedStrategyProfile<double>();
+  return StrategySupportProfile(const_cast<GameTableRep *>(this)).NewMixedStrategyProfile<double>();
 }
 
 MixedStrategyProfile<Rational> GameTableRep::NewMixedStrategyProfile(const Rational &) const
 {
-  return StrategySupport(const_cast<GameTableRep *>(this)).NewMixedStrategyProfile<Rational>();
+  return StrategySupportProfile(const_cast<GameTableRep *>(this)).NewMixedStrategyProfile<Rational>();
 }
 
-MixedStrategyProfile<double> GameTableRep::NewMixedStrategyProfile(double, const StrategySupport& spt) const
+MixedStrategyProfile<double> GameTableRep::NewMixedStrategyProfile(double, const StrategySupportProfile& spt) const
 {
   return new TableMixedStrategyProfileRep<double>(spt);
 }
-MixedStrategyProfile<Rational> GameTableRep::NewMixedStrategyProfile(const Rational &, const StrategySupport& spt) const
+MixedStrategyProfile<Rational> GameTableRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfile& spt) const
 {
   return new TableMixedStrategyProfileRep<Rational>(spt);
 }
@@ -354,7 +354,7 @@ void GameTableRep::RebuildTable(void)
   Array<GameOutcomeRep *> newResults(size);
   for (int i = 1; i <= newResults.Length(); newResults[i++] = 0);
 
-  for (StrategyIterator iter(StrategySupport(const_cast<GameTableRep *>(this)));
+  for (StrategyIterator iter(StrategySupportProfile(const_cast<GameTableRep *>(this)));
        !iter.AtEnd(); iter++) {
     long newindex = 1L;
     for (int pl = 1; pl <= m_players.Length(); pl++) {

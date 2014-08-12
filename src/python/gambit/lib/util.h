@@ -56,7 +56,7 @@ std::string WriteGame(const Game &p_game, const std::string &p_format)
   return f.str();
 }        
 
-std::string WriteGame(const StrategySupport &p_support)
+std::string WriteGame(const StrategySupportProfile &p_support)
 {
   std::ostringstream f;
   p_support.WriteNfgFile(f);

@@ -37,7 +37,7 @@ class StrategyIterator {
   friend class GameTableRep;
 private:
   bool m_atEnd;
-  StrategySupport m_support;
+  StrategySupportProfile m_support;
   Array<int> m_currentStrat;
   PureStrategyProfile m_profile;
   int m_frozen1, m_frozen2;
@@ -49,13 +49,13 @@ public:
   /// @name Lifecycle
   //@{
   /// Construct a new iterator on the support, with no strategies held fixed
-  StrategyIterator(const StrategySupport &);
+  StrategyIterator(const StrategySupportProfile &);
   /// Construct a new iterator on the support, fixing player pl's strategy
-  StrategyIterator(const StrategySupport &s, int pl, int st);
+  StrategyIterator(const StrategySupportProfile &s, int pl, int st);
   /// Construct a new iterator on the support, fixing the given strategy
-  StrategyIterator(const StrategySupport &, const GameStrategy &);
+  StrategyIterator(const StrategySupportProfile &, const GameStrategy &);
   /// Construct a new iterator on the support, fixing two players' strategies
-  StrategyIterator(const StrategySupport &s, 
+  StrategyIterator(const StrategySupportProfile &s, 
 		   int pl1, int st1, int pl2, int st2);
   //@}
 
