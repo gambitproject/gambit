@@ -45,7 +45,16 @@ StrategySupport::StrategySupport(const Game &p_nfg)
     }
   }
 }
+/*
+StrategySupport::StrategySupport(const Game &p_nfg, int players)
+  : m_nfg(p_nfg), m_profileIndex(p_nfg->MixedProfileLength());
+{
+  for (int pl = 1; pl <= players; pl++) {
+	  m_support.Append(Array<GameStrategy>());
+  }
 
+}
+*/
 //---------------------------------------------------------------------------
 //                          General information
 //---------------------------------------------------------------------------
@@ -425,11 +434,8 @@ StrategySupport StrategySupport::Union(const StrategySupport &p_support)
   if(m_nfg != p_support.m_nfg)  {
     throw UndefinedException();
   }
-  StrategySupport out = StrategySupport(m_nfg);
-  for(int pl = 1; pl <= NumPlayers(); pl++) {
-	for(int st = 1; st <= NumStrategies(pl); st++) {
-	  out.AddStrategy(this->GetStrategy(pl,st));
-	}
+  StrategySupport out = StrategySupport(*this);
+  for(int pl = 1; pl <= this->NumPlayers(); pl++) {
 	for(int st = 1; st <= p_support.NumStrategies(pl); st++) {
 	  out.AddStrategy(p_support.GetStrategy(pl,st));
 	}
@@ -443,14 +449,19 @@ StrategySupport StrategySupport::Intersect(const StrategySupport &p_support)
   if(m_nfg != p_support.m_nfg)  {
     throw UndefinedException();
   }
-  StrategySupport out = StrategySupport(m_nfg);
+  StrategySupport out = StrategySupport(*this);
+  bool intersects = false;
   for(int pl = 1; pl <= NumPlayers(); pl++) {
     for(int st = 1; st <= this->NumStrategies(pl); st++) {
+      intersects = false;
       for(int pst = 1; pst <= p_support.NumStrategies(pl); pst++) {
         if(p_support.GetStrategy(pl,pst) == this->GetStrategy(pl,st)) {
-          out.AddStrategy(this->GetStrategy(pl,st));
+          intersects = true;
           break;
         }
+      }
+      if(!intersects) {
+        out.RemoveStrategy(this->GetStrategy(pl,st));
       }
     }
   }
@@ -463,11 +474,8 @@ StrategySupport StrategySupport::Difference(const StrategySupport &p_support)
   if(m_nfg != p_support.m_nfg)  {
     throw UndefinedException();
   }
-  StrategySupport out = StrategySupport(m_nfg);
+  StrategySupport out = StrategySupport(*this);
   for(int pl = 1; pl <= NumPlayers(); pl++) {
-	for(int st = 1; st <= NumStrategies(pl); st++) {
-	  out.AddStrategy(this->GetStrategy(pl,st));
-	}
 	for(int st = 1; st <= p_support.NumStrategies(pl); st++) {
 	  out.RemoveStrategy(p_support.GetStrategy(pl,st));
 	}
