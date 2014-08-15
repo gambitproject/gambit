@@ -45,16 +45,7 @@ StrategySupport::StrategySupport(const Game &p_nfg)
     }
   }
 }
-/*
-StrategySupport::StrategySupport(const Game &p_nfg, int players)
-  : m_nfg(p_nfg), m_profileIndex(p_nfg->MixedProfileLength());
-{
-  for (int pl = 1; pl <= players; pl++) {
-	  m_support.Append(Array<GameStrategy>());
-  }
 
-}
-*/
 //---------------------------------------------------------------------------
 //                          General information
 //---------------------------------------------------------------------------
