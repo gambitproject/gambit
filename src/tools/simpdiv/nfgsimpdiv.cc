@@ -698,7 +698,7 @@ int main(int argc, char *argv[])
     Game game = ReadGame(*input_stream);
     List<MixedStrategyProfile<Rational> > starts;
     if (startFile != "") {
-      std::ifstream startPoints(startFile);
+      std::ifstream startPoints(startFile.c_str());
       starts = ReadProfiles(game, startPoints);
     }
     else if (useRandom) {
