@@ -64,7 +64,8 @@ public:
   /// @name Interface with restricted game mechanism
   //@{
   virtual bool IsRestriction(void) const { return (m_unrestricted != 0); }
-  virtual Game Unrestrict(void) const { return m_unrestricted; }
+  virtual Game Unrestrict(void) const 
+  { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
   //@}
 
   /// @name Dimensions of the game

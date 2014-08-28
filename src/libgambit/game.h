@@ -127,6 +127,9 @@ public:
 // Forward declarations of classes defined in this file.
 //
 
+class GameOutcomeRep;
+typedef GameObjectPtr<GameOutcomeRep> GameOutcome;
+
 class GameActionRep;
 typedef GameObjectPtr<GameActionRep> GameAction;
 
@@ -206,6 +209,7 @@ private:
   int m_number;
   std::string m_label;
   Array<Number> m_payoffs;
+  GameOutcome m_unrestricted;
 
   /// @name Lifecycle
   //@{
@@ -236,6 +240,10 @@ public:
     m_payoffs[pl] = p_value;
     //m_game->ClearComputedValues();
   }
+
+  /// Map the outcome to the corresponding outcome in the unrestricted game
+  GameOutcome Unrestrict(void) const 
+  { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
   //@}
 };
 
@@ -244,6 +252,9 @@ typedef GameObjectPtr<GameOutcomeRep> GameOutcome;
 /// An action at an information set in an extensive game
 class GameActionRep : public GameObject {
 protected:
+  GameAction m_unrestricted;
+
+  GameActionRep(void) : m_unrestricted(0) { }
   virtual ~GameActionRep() { }
 
 public:
@@ -256,11 +267,19 @@ public:
   virtual bool Precedes(const GameNode &) const = 0;
 
   virtual void DeleteAction(void) = 0;
+
+  /// Map the action to the corresponding action in the unrestricted game
+  GameAction Unrestrict(void) const 
+  { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
+
 };
 
 /// An information set in an extensive game
 class GameInfosetRep : public GameObject {
 protected:
+  GameInfoset m_unrestricted;
+ 
+  GameInfosetRep(void): m_unrestricted(0) { }
   virtual ~GameInfosetRep() { }
 
 public:
@@ -297,6 +316,10 @@ public:
   virtual Rational GetActionProb(int pl, const Rational &) const = 0;
   virtual std::string GetActionProb(int pl, const std::string &) const = 0;
   virtual void Reveal(GamePlayer) = 0;
+
+  /// Map the infoset to the corresponding infoset in the unrestricted game
+  GameInfoset Unrestrict(void) const 
+  { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
 };
 
 /// \brief A strategy in a game.
@@ -335,7 +358,7 @@ private:
   //@{
   /// Creates a new strategy for the given player.
   GameStrategyRep(GamePlayerRep *p_player)
-    : m_number(0), m_id(0), m_player(p_player), m_offset(0L) { }
+    : m_number(0), m_id(0), m_player(p_player), m_offset(0L), m_unrestricted(0) { }
   //@}
 
 public:
@@ -357,7 +380,8 @@ public:
   void DeleteStrategy(void);
 
   /// Map the strategy to the corresponding strategy in the unrestricted game
-  GameStrategy Unrestrict(void) const { return m_unrestricted; }
+  GameStrategy Unrestrict(void) const
+  { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
   //@}
 };
 
@@ -392,8 +416,8 @@ private:
   GameStrategyArray m_strategies;
   GamePlayer m_unrestricted;
 
-  GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id)
-    { }
+  GamePlayerRep(GameRep *p_game, int p_id) 
+    : m_game(p_game), m_number(p_id), m_unrestricted(0) { }
   GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
   ~GamePlayerRep();
 
@@ -424,11 +448,19 @@ public:
   /// Creates a new strategy for the player
   GameStrategy NewStrategy(void);
   //@}
+
+  /// Map the player to the corresponding player in the unrestricted game
+  GamePlayer Unrestrict(void) const 
+  { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
+
 };
 
 /// A node in an extensive game
 class GameNodeRep : public GameObject {
 protected:
+  GameNode m_unrestricted;
+
+  GameNodeRep(void) : m_unrestricted(0) { }
   virtual ~GameNodeRep() { }
 
 public:
@@ -473,6 +505,10 @@ public:
   virtual GameInfoset AppendMove(GameInfoset p_infoset) = 0;
   virtual GameInfoset InsertMove(GamePlayer p_player, int p_actions) = 0;
   virtual GameInfoset InsertMove(GameInfoset p_infoset) = 0;
+
+  /// Map the node to the corresponding node in the unrestricted game
+  GameNode Unrestrict(void) const 
+  { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
 };
 
 

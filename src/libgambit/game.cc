@@ -35,7 +35,7 @@ namespace Gambit {
 
 GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number)
   : m_game(p_game), m_number(p_number),
-    m_payoffs(m_game->NumPlayers())
+    m_payoffs(m_game->NumPlayers()), m_unrestricted(0)
 { }
 
 
@@ -61,7 +61,7 @@ void GameStrategyRep::DeleteStrategy(void)
 //========================================================================
 
 GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
-  : m_game(p_game), m_number(p_id), m_strategies(p_strats)
+  : m_game(p_game), m_number(p_id), m_strategies(p_strats), m_unrestricted(0)
 { 
   for (int j = 1; j <= p_strats; j++) {
     m_strategies[j] = new GameStrategyRep(this);
