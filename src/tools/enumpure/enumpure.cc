@@ -102,7 +102,18 @@ void PrintHelp(char *progname)
   std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
+/*
+void mytest(game g)
+{
+	StrategySupport s = StrategySupport(g);
 
+	for(int pl = 1; pl <= s.NumPlayers(); pl++)
+	{
+		std::cout << "player" << pl << "\n";
+
+	}
+
+}*/
 
 int main(int argc, char *argv[])
 {
@@ -171,6 +182,8 @@ int main(int argc, char *argv[])
 
   try {
     Game game = ReadGame(*input_stream);
+
+
     shared_ptr<StrategyProfileRenderer<Rational> > renderer;
     if (reportStrategic || !game->IsTree()) {
       if (printDetail) {

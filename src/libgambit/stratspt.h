@@ -55,6 +55,9 @@ protected:
   bool Undominated(StrategySupportProfile &newS, int p_player, 
 		   bool p_strict, bool p_external = false) const;
 
+  /// Check if object has at least one strategy per player - else throw exception
+  void CheckValid(void) const;
+  
 public:
   /// @name Lifecycle
   //@{
@@ -146,6 +149,13 @@ public:
   //@{
   bool Overwhelms(const GameStrategy &s, const GameStrategy &t, 
                   bool p_strict) const;
+  //@}
+  
+  /// @name Set Operations
+  //@{
+  StrategySupport Union(const StrategySupport &p_support); 
+  StrategySupport Intersect(const StrategySupport &p_support);
+  StrategySupport Difference(const StrategySupport &p_support);
   //@}
 
   Game Restrict(void) const;
