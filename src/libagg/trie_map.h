@@ -140,7 +140,9 @@ public:
   inline void clear(){
 	deleteNodes(root);
 	root=new TrieNode<V> (initBranches, data.end()); 
+#ifdef AGGDEBUG
 	iterator endp = data.end();
+#endif
 	data.clear();
 #ifdef AGGDEBUG
 	if(endp != end()) {std::cerr<<"Error: end() changed"<<endl; exit(1);}
