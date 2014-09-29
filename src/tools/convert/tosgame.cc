@@ -35,7 +35,7 @@ void WriteOsborneFile(std::ostream &p_file, const Gambit::Game &p_nfg,
 {
   std::string theHtml;
 
-  for (Gambit::StrategyIterator iter(p_nfg, p_rowPlayer, 1, p_colPlayer, 1);
+  for (Gambit::StrategyProfileIterator iter(p_nfg, p_rowPlayer, 1, p_colPlayer, 1);
        !iter.AtEnd(); iter++) {
     theHtml += "\\begin{game}{";
     theHtml += Gambit::lexical_cast<std::string>(p_nfg->GetPlayer(p_rowPlayer)->NumStrategies());

@@ -24,7 +24,7 @@
 
 namespace Gambit {
 
-BehavIterator::BehavIterator(const BehaviorSupportProfile &p_support)
+BehaviorProfileIterator::BehaviorProfileIterator(const BehaviorSupportProfile &p_support)
   : m_atEnd(false), m_support(p_support),
     m_currentBehav(p_support.GetGame()->NumInfosets()),
     m_profile(p_support.GetGame()), 
@@ -44,7 +44,7 @@ BehavIterator::BehavIterator(const BehaviorSupportProfile &p_support)
   First();
 }
 
-BehavIterator::BehavIterator(const BehaviorSupportProfile &p_support,
+BehaviorProfileIterator::BehaviorProfileIterator(const BehaviorSupportProfile &p_support,
 			     const GameAction &p_action)
   : m_atEnd(false), m_support(p_support),
     m_currentBehav(p_support.GetGame()->NumInfosets()),
@@ -70,7 +70,7 @@ BehavIterator::BehavIterator(const BehaviorSupportProfile &p_support,
   First();
 }
 
-void BehavIterator::First(void)
+void BehaviorProfileIterator::First(void)
 {
   for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++)  {
     for (int iset = 1; iset <= m_support.GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
@@ -84,7 +84,7 @@ void BehavIterator::First(void)
   }
 }
 
-void BehavIterator::operator++(void)
+void BehaviorProfileIterator::operator++(void)
 {
   int pl = m_support.GetGame()->NumPlayers();
   while (pl > 0 && m_numActiveInfosets[pl] == 0)

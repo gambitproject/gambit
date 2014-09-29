@@ -580,7 +580,7 @@ void ParseOutcomeBody(GameParserState &p_parser, GameRep *p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
 
-  StrategyIterator iter(StrategySupportProfile(static_cast<GameRep *>(p_nfg)));
+  StrategyProfileIterator iter(StrategySupportProfile(static_cast<GameRep *>(p_nfg)));
 
   while (p_parser.GetCurrentToken() != TOKEN_EOF) {
     if (p_parser.GetCurrentToken() != TOKEN_NUMBER) {
@@ -602,7 +602,7 @@ void ParseOutcomeBody(GameParserState &p_parser, GameRep *p_nfg)
 
 void ParsePayoffBody(GameParserState &p_parser, GameRep *p_nfg)
 {
-  StrategyIterator iter(StrategySupportProfile(static_cast<GameRep *>(p_nfg)));
+  StrategyProfileIterator iter(StrategySupportProfile(static_cast<GameRep *>(p_nfg)));
   int pl = 1;
 
   while (p_parser.GetCurrentToken() != TOKEN_EOF) {

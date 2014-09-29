@@ -207,7 +207,7 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 {
   gPoly<double> equation(&Space,&Lex);
 
-  for (Gambit::StrategyIterator A(support, i, strat1), B(support, i, strat2);
+  for (Gambit::StrategyProfileIterator A(support, i, strat1), B(support, i, strat2);
        !A.AtEnd(); A++, B++) {
     gPoly<double> term(&Space,(double)1,&Lex);
     int k;

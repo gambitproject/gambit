@@ -36,7 +36,7 @@ void WriteHtmlFile(std::ostream &p_file, const Gambit::Game &p_nfg,
   std::string theHtml;
   theHtml += "<center><h1>" + p_nfg->GetTitle() + "</h1></center>\n";
 
-  for (Gambit::StrategyIterator iter(p_nfg, p_rowPlayer, 1, p_colPlayer, 1);
+  for (Gambit::StrategyProfileIterator iter(p_nfg, p_rowPlayer, 1, p_colPlayer, 1);
        !iter.AtEnd(); iter++) {
     if (p_nfg->NumPlayers() > 2) {
       theHtml += "<center><b>Subtable with strategies:</b></center>";

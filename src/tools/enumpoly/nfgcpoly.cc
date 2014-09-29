@@ -151,7 +151,7 @@ HeuristicPolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) cons
 {
   gPoly<double> equation(&Space,&Lex);
 
-  for (StrategyIterator A(support, i, strat1), B(support, i, strat2);
+  for (StrategyProfileIterator A(support, i, strat1), B(support, i, strat2);
        !A.AtEnd(); A++, B++) {
     gPoly<double> term(&Space,(double)1,&Lex);
     int k;

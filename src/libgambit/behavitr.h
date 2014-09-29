@@ -36,7 +36,7 @@ namespace Gambit {
 //       Iterating across all contingencies can be achieved by freezing
 //       player number 0 (this is the default state on initialization)
 //
-class BehavIterator {
+class BehaviorProfileIterator {
 private:
   bool m_atEnd;
   BehaviorSupportProfile m_support;
@@ -53,9 +53,9 @@ public:
   /// @name Lifecycle
   //@{
   /// Construct a new iterator on the support, with no actions held fixed
-  BehavIterator(const BehaviorSupportProfile &);
+  BehaviorProfileIterator(const BehaviorSupportProfile &);
   /// Construct a new iterator on the support, holding the action fixed
-  BehavIterator(const BehaviorSupportProfile &, const GameAction &);
+  BehaviorProfileIterator(const BehaviorSupportProfile &, const GameAction &);
   //@}
   
   /// @name Iteration and data access

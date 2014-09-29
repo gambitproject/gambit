@@ -188,7 +188,7 @@ bool GameTableRep::IsConstSum(void) const
     sum += profile.GetPayoff(pl);
   }
 
-  for (StrategyIterator iter(StrategySupportProfile(const_cast<GameTableRep *>(this)));
+  for (StrategyProfileIterator iter(StrategySupportProfile(const_cast<GameTableRep *>(this)));
        !iter.AtEnd(); iter++) {
     Rational newsum(0);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
@@ -354,7 +354,7 @@ void GameTableRep::RebuildTable(void)
   Array<GameOutcomeRep *> newResults(size);
   for (int i = 1; i <= newResults.Length(); newResults[i++] = 0);
 
-  for (StrategyIterator iter(StrategySupportProfile(const_cast<GameTableRep *>(this)));
+  for (StrategyProfileIterator iter(StrategySupportProfile(const_cast<GameTableRep *>(this)));
        !iter.AtEnd(); iter++) {
     long newindex = 1L;
     for (int pl = 1; pl <= m_players.Length(); pl++) {

@@ -32,7 +32,7 @@ namespace Gambit {
 /// on each call of NextContingency().  Optionally, the strategy of
 /// one player may be held fixed during the iteration (by the use of the
 /// second constructor).
-class StrategyIterator {
+class StrategyProfileIterator {
   friend class GameRep;
   friend class GameTableRep;
 private:
@@ -49,14 +49,14 @@ public:
   /// @name Lifecycle
   //@{
   /// Construct a new iterator on the support, with no strategies held fixed
-  StrategyIterator(const StrategySupportProfile &);
+  StrategyProfileIterator(const StrategySupportProfile &);
   /// Construct a new iterator on the support, fixing player pl's strategy
-  StrategyIterator(const StrategySupportProfile &s, int pl, int st);
+  StrategyProfileIterator(const StrategySupportProfile &s, int pl, int st);
   /// Construct a new iterator on the support, fixing the given strategy
-  StrategyIterator(const StrategySupportProfile &, const GameStrategy &);
+  StrategyProfileIterator(const StrategySupportProfile &, const GameStrategy &);
   /// Construct a new iterator on the support, fixing two players' strategies
-  StrategyIterator(const StrategySupportProfile &s, 
-		   int pl1, int st1, int pl2, int st2);
+  StrategyProfileIterator(const StrategySupportProfile &s, 
+			  int pl1, int st1, int pl2, int st2);
   //@}
 
   /// @name Iteration and data access

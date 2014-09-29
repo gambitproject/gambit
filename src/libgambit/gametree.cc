@@ -904,7 +904,7 @@ void GameTreeRep::WriteNfgFile(std::ostream &p_file) const
   // For trees, we write the payoff version, since there need not be
   // a one-to-one correspondence between outcomes and entries, when there
   // are chance moves.
-  StrategyIterator iter(Game(const_cast<GameTreeRep *>(this)));
+  StrategyProfileIterator iter(Game(const_cast<GameTreeRep *>(this)));
     
   for (; !iter.AtEnd(); iter++) {
     for (int pl = 1; pl <= NumPlayers(); pl++) {

@@ -44,7 +44,7 @@ List<MixedStrategyProfile<Rational> >
 NashEnumPureStrategySolver::Solve(const Game &p_game) const
 {
   List<MixedStrategyProfile<Rational> > solutions;
-  for (StrategyIterator citer(p_game); !citer.AtEnd(); citer++) {
+  for (StrategyProfileIterator citer(p_game); !citer.AtEnd(); citer++) {
     if ((*citer)->IsNash()) {
       MixedStrategyProfile<Rational> profile = (*citer)->ToMixedStrategyProfile();
       m_onEquilibrium->Render(profile);
@@ -68,7 +68,7 @@ List<MixedBehaviorProfile<Rational> >
 NashEnumPureAgentSolver::Solve(const BehaviorSupportProfile &p_support) const
 {
   List<MixedBehaviorProfile<Rational> > solutions;
-  for (BehavIterator citer(p_support); !citer.AtEnd(); citer++) {
+  for (BehaviorProfileIterator citer(p_support); !citer.AtEnd(); citer++) {
     if (citer->IsAgentNash()) {
       MixedBehaviorProfile<Rational> profile = citer->ToMixedBehaviorProfile();
       m_onEquilibrium->Render(profile);

@@ -165,7 +165,7 @@ bool GameAggRep::IsConstSum(void) const
     sum += profile.GetPayoff(pl);
   }
 
-  for (StrategyIterator iter(StrategySupportProfile(const_cast<GameAggRep *>(this)));
+  for (StrategyProfileIterator iter(StrategySupportProfile(const_cast<GameAggRep *>(this)));
        !iter.AtEnd(); iter++) {
     Rational newsum(0);
     for (int pl = 1; pl <= m_players.Length(); pl++) {

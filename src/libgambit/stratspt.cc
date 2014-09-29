@@ -141,7 +141,7 @@ void StrategySupportProfile::WriteNfgFile(std::ostream &p_file) const
   // For trees, we write the payoff version, since there need not be
   // a one-to-one correspondence between outcomes and entries, when there
   // are chance moves.
-  StrategyIterator iter(*this);
+  StrategyProfileIterator iter(*this);
     
   for (; !iter.AtEnd(); iter++) {
     for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
@@ -227,7 +227,7 @@ bool StrategySupportProfile::Dominates(const GameStrategy &s,
 {
   bool equal = true;
   
-  for (StrategyIterator iter(*this); !iter.AtEnd(); iter++) {
+  for (StrategyProfileIterator iter(*this); !iter.AtEnd(); iter++) {
     Rational ap = (*iter)->GetStrategyValue(s);
     Rational bp = (*iter)->GetStrategyValue(t);
     if (p_strict && ap <= bp) {
@@ -366,10 +366,10 @@ StrategySupportProfile::Undominated(bool p_strict, const Array<int> &players) co
 //---------------------------------------------------------------------------
 
 bool StrategySupportProfile::Overwhelms(const GameStrategy &s,
-				 const GameStrategy &t, 
-				 bool p_strict) const
+					const GameStrategy &t, 
+					bool p_strict) const
 {
-  StrategyIterator iter(*this);
+  StrategyProfileIterator iter(*this);
   Rational sMin = (*iter)->GetStrategyValue(s);
   Rational tMax = (*iter)->GetStrategyValue(t);
 
