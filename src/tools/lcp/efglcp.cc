@@ -75,7 +75,7 @@ NashLcpBehavSolver<T>::Solution::AddBFS(const LTableau<T> &tableau)
 //
 
 template <class T> List<MixedBehaviorProfile<T> > 
-NashLcpBehavSolver<T>::Solve(const BehavSupport &p_support) const
+NashLcpBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 {
   BFS<T> cbfs;
   int i, j;
@@ -163,7 +163,7 @@ NashLcpBehavSolver<T>::Solve(const BehavSupport &p_support) const
 // all possible paths, adding any new equilibria to the List.  
 //
 template <class T> void
-NashLcpBehavSolver<T>::AllLemke(const BehavSupport &p_support,
+NashLcpBehavSolver<T>::AllLemke(const BehaviorSupportProfile &p_support,
 				int j, LTableau<T> &B, int depth,
 				Matrix<T> &A,
 				Solution &p_solution) const
@@ -224,7 +224,7 @@ NashLcpBehavSolver<T>::AllLemke(const BehavSupport &p_support,
 }
 
 template <class T>
-void NashLcpBehavSolver<T>::FillTableau(const BehavSupport &p_support, 
+void NashLcpBehavSolver<T>::FillTableau(const BehaviorSupportProfile &p_support, 
 					Matrix<T> &A,
 					const GameNode &n, T prob,
 					int s1, int s2, int i1, int i2,
@@ -289,7 +289,7 @@ void NashLcpBehavSolver<T>::FillTableau(const BehavSupport &p_support,
 
 
 template <class T>
-void NashLcpBehavSolver<T>::GetProfile(const BehavSupport &p_support,
+void NashLcpBehavSolver<T>::GetProfile(const BehaviorSupportProfile &p_support,
 				       const LTableau<T> &tab, 
 				       MixedBehaviorProfile<T> &v, 
 				       const Vector<T> &sol,

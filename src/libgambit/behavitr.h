@@ -39,7 +39,7 @@ namespace Gambit {
 class BehavIterator {
 private:
   bool m_atEnd;
-  BehavSupport m_support;
+  BehaviorSupportProfile m_support;
   PVector<int> m_currentBehav;
   PureBehaviorProfile m_profile;
   int m_frozenPlayer, m_frozenInfoset;
@@ -53,9 +53,9 @@ public:
   /// @name Lifecycle
   //@{
   /// Construct a new iterator on the support, with no actions held fixed
-  BehavIterator(const BehavSupport &);
+  BehavIterator(const BehaviorSupportProfile &);
   /// Construct a new iterator on the support, holding the action fixed
-  BehavIterator(const BehavSupport &, const GameAction &);
+  BehavIterator(const BehaviorSupportProfile &, const GameAction &);
   //@}
   
   /// @name Iteration and data access

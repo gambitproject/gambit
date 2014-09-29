@@ -162,7 +162,7 @@ public:
   NashBehavSolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
   virtual ~NashBehavSolver()  { }
 
-  virtual List<MixedBehaviorProfile<T> > Solve(const BehavSupport &) const = 0;
+  virtual List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const = 0;
 
 protected:
   shared_ptr<StrategyProfileRenderer<T> > m_onEquilibrium;
@@ -178,7 +178,7 @@ public:
 			     shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
   virtual ~NashBehavViaStrategySolver() { }
 
-  virtual List<MixedBehaviorProfile<T> > Solve(const BehavSupport &) const;
+  virtual List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const;
 
 protected:
   shared_ptr<NashStrategySolver<T> > m_solver;
@@ -190,13 +190,13 @@ public:
 			 shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
   virtual ~SubgameNashBehavSolver()  { }
 
-  virtual List<MixedBehaviorProfile<T> > Solve(const BehavSupport &) const;
+  virtual List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const;
 
 protected:
   shared_ptr<NashBehavSolver<T> > m_solver;
 
 private:
-  void SolveSubgames(const BehavSupport &p_support,
+  void SolveSubgames(const BehaviorSupportProfile &p_support,
 		     const DVector<T> &p_templateSolution,
 		     GameNode n,
 		     List<DVector<T> > &solns,

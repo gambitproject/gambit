@@ -37,7 +37,7 @@ public:
   virtual ~NashLiapBehavSolver() { }
 
   List<MixedBehaviorProfile<double> > Solve(const MixedBehaviorProfile<double> &p_start) const;
-  List<MixedBehaviorProfile<double> > Solve(const BehavSupport &p_support) const
+  List<MixedBehaviorProfile<double> > Solve(const BehaviorSupportProfile &p_support) const
     { return Solve(MixedBehaviorProfile<double>(p_support)); }
 
 private:

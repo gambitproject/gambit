@@ -30,7 +30,7 @@
 //----------------------------------------------------
 
 
-Sfg::Sfg(const Gambit::BehavSupport &S)
+Sfg::Sfg(const Gambit::BehaviorSupportProfile &S)
   : EF(S.GetGame()), efsupp(S), seq(EF->NumPlayers()), isetFlag(S.GetGame()->NumInfosets()),
     isetRow(S.GetGame()->NumInfosets()), infosets(EF->NumPlayers())
 { 
@@ -38,7 +38,7 @@ Sfg::Sfg(const Gambit::BehavSupport &S)
   Gambit::Array<Gambit::GameInfoset> zero(EF->NumPlayers());
   Gambit::Array<int> one(EF->NumPlayers());
 
-  Gambit::BehavSupport support(EF);
+  Gambit::BehaviorSupportProfile support(EF);
 
   for(i=1;i<=EF->NumPlayers();i++) {
     seq[i]=1;

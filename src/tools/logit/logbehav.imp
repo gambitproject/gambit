@@ -52,7 +52,7 @@ LogBehavProfile<T>::LogBehavProfile(const LogBehavProfile<T> &p_profile)
 }
 
 template <class T> 
-LogBehavProfile<T>::LogBehavProfile(const BehavSupport &p_support) 
+LogBehavProfile<T>::LogBehavProfile(const BehaviorSupportProfile &p_support) 
   : DVector<T>(p_support.NumActions()), 
     m_support(p_support),
     m_logProbs(p_support.NumActions()),

@@ -34,7 +34,7 @@ namespace Gambit {
 /// for eliminating dominated strategies from consideration, and in
 /// computational approaches that enumerate possible equilibrium
 /// supports.
-class BehavSupport {
+class BehaviorSupportProfile {
 protected:
   Game m_efg;
   Array<Array<Array<GameAction> > > m_actions;
@@ -55,16 +55,16 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructor.  By default, a support contains all strategies. 
-  BehavSupport(const Game &);
-  ~BehavSupport() { }
+  BehaviorSupportProfile(const Game &);
+  ~BehaviorSupportProfile() { }
 
   //@}
 
   /// @name Operator overloading
   //@{
   /// Test for the equality of two supports (same actions at all infosets)
-  bool operator==(const BehavSupport &) const;
-  bool operator!=(const BehavSupport &p_support) const
+  bool operator==(const BehaviorSupportProfile &) const;
+  bool operator!=(const BehaviorSupportProfile &p_support) const
   { return !(*this == p_support); }
 
   /// @name General information
@@ -155,7 +155,7 @@ public:
   bool IsDominated(const GameAction &a, 
 		   bool p_strict, bool p_conditional) const;
   /// Returns a copy of the support with dominated actions eliminated
-  BehavSupport Undominated(bool p_strict, bool p_conditional,
+  BehaviorSupportProfile Undominated(bool p_strict, bool p_conditional,
 			   const Array<int> &players,
 			   std::ostream &) const;
   //@}

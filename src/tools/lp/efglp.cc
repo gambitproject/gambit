@@ -36,18 +36,18 @@ public:
   Rational minpay;
   PVector<int> infosetIndex, infosetOffset;
   
-  GameData(const BehavSupport &);
+  GameData(const BehaviorSupportProfile &);
 
-  void BuildConstraintMatrix(const BehavSupport &,
+  void BuildConstraintMatrix(const BehaviorSupportProfile &,
 			     Matrix<T> &, const GameNode &, const T &,
 			     int, int, int, int);
-  void GetBehavior(const BehavSupport &, MixedBehaviorProfile<T> &v,
+  void GetBehavior(const BehaviorSupportProfile &, MixedBehaviorProfile<T> &v,
 		   const Array<T> &, const Array<T> &,
 		   const GameNode &, int, int);
 };
 
 template <class T>
-NashLpBehavSolver<T>::GameData::GameData(const BehavSupport &p_support)
+NashLpBehavSolver<T>::GameData::GameData(const BehaviorSupportProfile &p_support)
   : infosetIndex(p_support.GetGame()->NumInfosets()), 
     infosetOffset(p_support.GetGame()->NumInfosets())
 {
@@ -79,7 +79,7 @@ NashLpBehavSolver<T>::GameData::GameData(const BehavSupport &p_support)
 // Recursively fills the constraint matrix A for the subtree rooted at 'n'.
 //
 template <class T> void
-NashLpBehavSolver<T>::GameData::BuildConstraintMatrix(const BehavSupport &p_support,
+NashLpBehavSolver<T>::GameData::BuildConstraintMatrix(const BehaviorSupportProfile &p_support,
 						      Matrix<T> &A, 
 						      const GameNode &n, 
 						      const T &prob,
@@ -187,7 +187,7 @@ NashLpBehavSolver<T>::SolveLP(const Matrix<T> &A,
 // their action probabilities set to zero.
 //
 template <class T> void
-NashLpBehavSolver<T>::GameData::GetBehavior(const BehavSupport &p_support,
+NashLpBehavSolver<T>::GameData::GetBehavior(const BehaviorSupportProfile &p_support,
 					    MixedBehaviorProfile<T> &v,
 					    const Array<T> &p_primal, 
 					    const Array<T> &p_dual,
@@ -242,7 +242,7 @@ NashLpBehavSolver<T>::GameData::GetBehavior(const BehavSupport &p_support,
 // on the sequence form representation of the game.
 //
 template <class T> List<MixedBehaviorProfile<T> > 
-NashLpBehavSolver<T>::Solve(const BehavSupport &p_support) const
+NashLpBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 {
   BFS<T> cbfs;
   

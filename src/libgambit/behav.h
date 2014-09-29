@@ -33,7 +33,7 @@ namespace Gambit {
 ///
 template <class T> class MixedBehaviorProfile : public DVector<T>  {
 protected:
-  BehavSupport m_support;
+  BehaviorSupportProfile m_support;
 
   mutable bool m_cacheValid;
 
@@ -77,7 +77,7 @@ public:
   /// @name Lifecycle
   //@{
   MixedBehaviorProfile(const Game &);
-  MixedBehaviorProfile(const BehavSupport &);
+  MixedBehaviorProfile(const BehaviorSupportProfile &);
   MixedBehaviorProfile(const MixedBehaviorProfile<T> &);
   MixedBehaviorProfile(const MixedStrategyProfile<T> &);
   ~MixedBehaviorProfile() { }
@@ -150,7 +150,7 @@ public:
   //@{
   int Length(void) const { return Array<T>::Length(); }
   Game GetGame(void) const { return m_support.GetGame(); }
-  const BehavSupport &GetSupport(void) const { return m_support; }
+  const BehaviorSupportProfile &GetSupport(void) const { return m_support; }
   
   bool IsDefinedAt(GameInfoset p_infoset) const;
   //@}

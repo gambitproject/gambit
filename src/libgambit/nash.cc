@@ -204,7 +204,7 @@ NashBehavViaStrategySolver<T>::NashBehavViaStrategySolver(shared_ptr<NashStrateg
 { }
 
 template <class T> List<MixedBehaviorProfile<T> > 
-NashBehavViaStrategySolver<T>::Solve(const BehavSupport &p_support) const
+NashBehavViaStrategySolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 {
   List<MixedStrategyProfile<T> > output = m_solver->Solve(p_support.GetGame());
   List<MixedBehaviorProfile<T> > solutions;
@@ -260,7 +260,7 @@ void ChildSubgames(const GameNode &p_node, List<GameNode> &p_list)
 //
 
 template <class T>
-void SubgameNashBehavSolver<T>::SolveSubgames(const BehavSupport &p_support,
+void SubgameNashBehavSolver<T>::SolveSubgames(const BehaviorSupportProfile &p_support,
 					      const DVector<T> &p_templateSolution,
 					      GameNode n,
 					      List<DVector<T> > &solns,
@@ -331,7 +331,7 @@ void SubgameNashBehavSolver<T>::SolveSubgames(const BehavSupport &p_support,
     // by convention, we will just put the payoffs in the parent subgame
     subgame->GetRoot()->SetOutcome(0);
 
-    BehavSupport subsupport(subgame);
+    BehaviorSupportProfile subsupport(subgame);
     // Here, we build the support for the subgame
     /*
     for (int pl = 1; pl <= subgame->NumPlayers(); pl++)  {
@@ -413,7 +413,7 @@ void SubgameNashBehavSolver<T>::SolveSubgames(const BehavSupport &p_support,
 
 template <class T>
 List<MixedBehaviorProfile<T> > 
-SubgameNashBehavSolver<T>::Solve(const BehavSupport &p_support) const
+SubgameNashBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 {
   Game efg = p_support.GetGame()->GetRoot()->CopySubgame();
 
@@ -423,7 +423,7 @@ SubgameNashBehavSolver<T>::Solve(const BehavSupport &p_support) const
     }
   }
 
-  BehavSupport support(efg);
+  BehaviorSupportProfile support(efg);
 
   for (int pl = 1; pl <= efg->NumPlayers(); pl++)  {
     GamePlayer player = p_support.GetGame()->GetPlayer(pl);

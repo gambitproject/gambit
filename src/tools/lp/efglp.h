@@ -33,7 +33,7 @@ public:
     : NashBehavSolver<T>(p_onEquilibrium) { }
   virtual ~NashLpBehavSolver() { }
 
-  virtual List<MixedBehaviorProfile<T> > Solve(const BehavSupport &) const;
+  virtual List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const;
 
 private:
   class GameData;

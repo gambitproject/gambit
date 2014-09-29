@@ -61,11 +61,11 @@ public:
     : NashBehavSolver<Rational>(p_onEquilibrium) { }
   virtual ~NashEnumPureAgentSolver()  { }
 
-  List<MixedBehaviorProfile<Rational> > Solve(const BehavSupport &) const;
+  List<MixedBehaviorProfile<Rational> > Solve(const BehaviorSupportProfile &) const;
 };
 
 List<MixedBehaviorProfile<Rational> > 
-NashEnumPureAgentSolver::Solve(const BehavSupport &p_support) const
+NashEnumPureAgentSolver::Solve(const BehaviorSupportProfile &p_support) const
 {
   List<MixedBehaviorProfile<Rational> > solutions;
   for (BehavIterator citer(p_support); !citer.AtEnd(); citer++) {

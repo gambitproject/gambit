@@ -52,7 +52,7 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedBehaviorProfile<T> &p_p
 template <class T> 
 MixedBehaviorProfile<T>::MixedBehaviorProfile(const Game &p_game)
   : DVector<T>(p_game->NumActions()), 
-    m_support(BehavSupport(p_game)),
+    m_support(BehaviorSupportProfile(p_game)),
     m_cacheValid(false),
     m_realizProbs(p_game->NumNodes()),
     m_beliefs(p_game->NumNodes()),
@@ -74,7 +74,7 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const Game &p_game)
 }
 
 template <class T> 
-MixedBehaviorProfile<T>::MixedBehaviorProfile(const BehavSupport &p_support) 
+MixedBehaviorProfile<T>::MixedBehaviorProfile(const BehaviorSupportProfile &p_support) 
   : DVector<T>(p_support.NumActions()), 
     m_support(p_support),
     m_cacheValid(false),

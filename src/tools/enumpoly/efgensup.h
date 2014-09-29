@@ -29,12 +29,12 @@ class ActionCursorForSupport;
 // final one, which is our goal, is the undominated support function.
 // We begin by simply enumerating all subsupports.
 
-void AllSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
-			     Gambit::BehavSupport *sact,
+void AllSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
+			     Gambit::BehaviorSupportProfile *sact,
 			     ActionCursorForSupport *c,
-			     Gambit::List<Gambit::BehavSupport> &list);
+			     Gambit::List<Gambit::BehaviorSupportProfile> &list);
 
-Gambit::List<Gambit::BehavSupport> AllSubsupports(const Gambit::BehavSupport &S);
+Gambit::List<Gambit::BehaviorSupportProfile> AllSubsupports(const Gambit::BehaviorSupportProfile &S);
 
 
 // Subsupports of a given support are _path equivalent_ if they
@@ -43,12 +43,12 @@ Gambit::List<Gambit::BehavSupport> AllSubsupports(const Gambit::BehavSupport &S)
 // class by outputting only those subsupports with _no_ active 
 // actions at each unreached infoset.  
 
-void AllInequivalentSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
-					 Gambit::BehavSupport *sact,
+void AllInequivalentSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
+					 Gambit::BehaviorSupportProfile *sact,
 					 ActionCursorForSupport *c,
-					 Gambit::List<Gambit::BehavSupport> &list);
+					 Gambit::List<Gambit::BehaviorSupportProfile> &list);
 
-Gambit::List<Gambit::BehavSupport> AllInequivalentSubsupports(const Gambit::BehavSupport &S);
+Gambit::List<Gambit::BehaviorSupportProfile> AllInequivalentSubsupports(const Gambit::BehaviorSupportProfile &S);
 
 // The following routines combine to return all supports that do not 
 // exhibit particular type of domination.  This was a prototype for 
@@ -59,13 +59,13 @@ Gambit::List<Gambit::BehavSupport> AllInequivalentSubsupports(const Gambit::Beha
 // process, when, after more truncations, it might be no longer weakly
 // dominated, and thus part of an allowed subsupport.
 
-void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
-					Gambit::BehavSupport *sact,
+void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
+					Gambit::BehaviorSupportProfile *sact,
 					ActionCursorForSupport *c,
 					bool strong, bool conditional,
-					Gambit::List<Gambit::BehavSupport> &list);
+					Gambit::List<Gambit::BehaviorSupportProfile> &list);
   
-Gambit::List<Gambit::BehavSupport> AllUndominatedSubsupports(const Gambit::BehavSupport &S,
+Gambit::List<Gambit::BehaviorSupportProfile> AllUndominatedSubsupports(const Gambit::BehaviorSupportProfile &S,
 					       bool strong, bool conditional);
 
 // The following two routines combine to produce all subsupports that could
@@ -79,27 +79,27 @@ Gambit::List<Gambit::BehavSupport> AllUndominatedSubsupports(const Gambit::Behav
 // of having active actions at all active infosets, and not at other
 // infosets.
 
-void PossibleNashSubsupportsRECURSIVE(const Gambit::BehavSupport &s,
-				      Gambit::BehavSupport *sact,
+void PossibleNashSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
+				      Gambit::BehaviorSupportProfile *sact,
 				      ActionCursorForSupport *c,
-				      Gambit::List<Gambit::BehavSupport> &list);
+				      Gambit::List<Gambit::BehaviorSupportProfile> &list);
 
-Gambit::List<Gambit::BehavSupport> SortSupportsBySize(Gambit::List<Gambit::BehavSupport> &);
+Gambit::List<Gambit::BehaviorSupportProfile> SortSupportsBySize(Gambit::List<Gambit::BehaviorSupportProfile> &);
   
-Gambit::List<Gambit::BehavSupport> PossibleNashSubsupports(const Gambit::BehavSupport &S);
+Gambit::List<Gambit::BehaviorSupportProfile> PossibleNashSubsupports(const Gambit::BehaviorSupportProfile &S);
 
 ///////////////// Utility Cursor Class /////////////////////
 
 class ActionCursorForSupport {
 protected:
-  Gambit::BehavSupport support;
+  Gambit::BehaviorSupportProfile support;
         int pl;
         int iset;
         int act;
 
 public:
   //Constructors and dtor
-  ActionCursorForSupport(const Gambit::BehavSupport &S);
+  ActionCursorForSupport(const Gambit::BehaviorSupportProfile &S);
   ActionCursorForSupport(const ActionCursorForSupport &a);
   ~ActionCursorForSupport();
 
@@ -124,9 +124,9 @@ public:
 
   // Special
   bool InfosetGuaranteedActiveByPriorCommitments(const 
-						 Gambit::BehavSupport *,
+						 Gambit::BehaviorSupportProfile *,
 						 const Gambit::GameInfoset &);
-  bool DeletionsViolateActiveCommitments(const Gambit::BehavSupport *,
+  bool DeletionsViolateActiveCommitments(const Gambit::BehaviorSupportProfile *,
 					 const Gambit::List<Gambit::GameInfoset> *);
 };
 

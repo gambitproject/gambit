@@ -25,10 +25,10 @@
 namespace Gambit {
 
 //========================================================================
-//                      BehavSupport: Lifecycle
+//                      BehaviorSupportProfile: Lifecycle
 //========================================================================
 
-BehavSupport::BehavSupport(const Game &p_efg) 
+BehaviorSupportProfile::BehaviorSupportProfile(const Game &p_efg) 
   : m_efg(p_efg),
     m_infosetActive(0, p_efg->NumPlayers()), 
     m_nonterminalActive(0, p_efg->NumPlayers())
@@ -68,19 +68,19 @@ BehavSupport::BehavSupport(const Game &p_efg)
 }
 
 //========================================================================
-//                 BehavSupport: Operator overloading
+//                 BehaviorSupportProfile: Operator overloading
 //========================================================================
 
-bool BehavSupport::operator==(const BehavSupport &p_support) const
+bool BehaviorSupportProfile::operator==(const BehaviorSupportProfile &p_support) const
 {
   return (m_actions == p_support.m_actions);
 }
 
 //========================================================================
-//                 BehavSupport: General information
+//                 BehaviorSupportProfile: General information
 //========================================================================
 
-PVector<int> BehavSupport::NumActions(void) const
+PVector<int> BehaviorSupportProfile::NumActions(void) const
 {
   PVector<int> answer(m_efg->NumInfosets());
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
@@ -92,7 +92,7 @@ PVector<int> BehavSupport::NumActions(void) const
   return answer;
 }  
 
-int BehavSupport::GetIndex(const GameAction &a) const
+int BehaviorSupportProfile::GetIndex(const GameAction &a) const
 {
   if (a->GetInfoset()->GetGame() != m_efg)  throw MismatchException();
 
@@ -106,7 +106,7 @@ int BehavSupport::GetIndex(const GameAction &a) const
   }
 }
 
-int BehavSupport::NumDegreesOfFreedom(void) const
+int BehaviorSupportProfile::NumDegreesOfFreedom(void) const
 {
   int answer = 0;
   PVector<int> reachable(GetGame()->NumInfosets());
@@ -120,12 +120,12 @@ int BehavSupport::NumDegreesOfFreedom(void) const
   return answer;  
 }
 
-bool BehavSupport::HasActiveActionAt(const GameInfoset &infoset) const
+bool BehaviorSupportProfile::HasActiveActionAt(const GameInfoset &infoset) const
 {
   return (m_actions[infoset->GetPlayer()->GetNumber()][infoset->GetNumber()].Length() > 0);
 }
 
-bool BehavSupport::HasActiveActionsAtAllInfosets(void) const
+bool BehaviorSupportProfile::HasActiveActionsAtAllInfosets(void) const
 {
   for (int pl = 1; pl <= m_actions.Length(); pl++) {
     for (int iset = 1; iset <= m_actions[pl].Length(); iset++) {
@@ -136,7 +136,7 @@ bool BehavSupport::HasActiveActionsAtAllInfosets(void) const
   return true;
 }
 
-bool BehavSupport::RemoveAction(const GameAction &s)
+bool BehaviorSupportProfile::RemoveAction(const GameAction &s)
 {
   List<GameNode> startlist(ReachableMembers(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
@@ -159,7 +159,7 @@ bool BehavSupport::RemoveAction(const GameAction &s)
   }
 }
 
-bool BehavSupport::RemoveAction(const GameAction &s, List<GameInfoset> &list)
+bool BehaviorSupportProfile::RemoveAction(const GameAction &s, List<GameInfoset> &list)
 {
   List<GameNode> startlist(ReachableMembers(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++) {
@@ -170,7 +170,7 @@ bool BehavSupport::RemoveAction(const GameAction &s, List<GameInfoset> &list)
   return RemoveAction(s);
 }
 
-void BehavSupport::AddAction(const GameAction &s)
+void BehaviorSupportProfile::AddAction(const GameAction &s)
 {
   GameInfoset infoset = s->GetInfoset();
   GamePlayer player = infoset->GetPlayer();
@@ -197,7 +197,7 @@ void BehavSupport::AddAction(const GameAction &s)
     DeactivateSubtree(startlist[i]);
 }
 
-int BehavSupport::NumSequences(int j) const
+int BehaviorSupportProfile::NumSequences(int j) const
 {
   if (j < 1 || j > m_efg->NumPlayers()) return 1;
   List<GameInfoset> isets = ReachableInfosets(m_efg->GetPlayer(j));
@@ -208,7 +208,7 @@ int BehavSupport::NumSequences(int j) const
   return num;
 }
 
-int BehavSupport::NumSequences(void) const
+int BehaviorSupportProfile::NumSequences(void) const
 {
   int total = 0;
   for (int i = 1 ; i <= m_efg->NumPlayers(); i++)
@@ -216,7 +216,7 @@ int BehavSupport::NumSequences(void) const
   return total;
 }
 
-List<GameNode> BehavSupport::ReachableNonterminalNodes(const GameNode &n) const
+List<GameNode> BehaviorSupportProfile::ReachableNonterminalNodes(const GameNode &n) const
 {
   List<GameNode> answer;
   if (!n->IsTerminal()) {
@@ -234,7 +234,7 @@ List<GameNode> BehavSupport::ReachableNonterminalNodes(const GameNode &n) const
 }
 
 List<GameInfoset> 
-BehavSupport::ReachableInfosets(const GamePlayer &p) const
+BehaviorSupportProfile::ReachableInfosets(const GamePlayer &p) const
 { 
   Array<GameInfoset> isets;
   for (int iset = 1; iset <= p->NumInfosets(); iset++) {
@@ -249,7 +249,7 @@ BehavSupport::ReachableInfosets(const GamePlayer &p) const
 }
 
 void
-BehavSupport::ReachableInfosets(const GameNode &p_node,
+BehaviorSupportProfile::ReachableInfosets(const GameNode &p_node,
 				PVector<int> &p_reached) const
 {
   if (p_node->NumChildren() == 0)  return;
@@ -270,7 +270,7 @@ BehavSupport::ReachableInfosets(const GameNode &p_node,
   }
 }
 
-bool BehavSupport::MayReach(const GameInfoset &i) const
+bool BehaviorSupportProfile::MayReach(const GameInfoset &i) const
 {
   for (int j = 1; j <= i->NumMembers(); j++)
     if (MayReach(i->GetMember(j)))
@@ -278,7 +278,7 @@ bool BehavSupport::MayReach(const GameInfoset &i) const
   return false;
 }
 
-bool BehavSupport::MayReach(const GameNode &n) const
+bool BehaviorSupportProfile::MayReach(const GameNode &n) const
 {
   if (n == m_efg->GetRoot())
     return true;
@@ -296,7 +296,7 @@ bool BehavSupport::MayReach(const GameNode &n) const
 class BehavConditionalIterator  {
 private:
   bool m_atEnd;
-  BehavSupport m_support;
+  BehaviorSupportProfile m_support;
   PVector<int> m_currentBehav;
   PureBehaviorProfile m_profile;
   PVector<int> m_isActive;
@@ -308,7 +308,7 @@ private:
 public:
   /// @name Lifecycle
   //@{
-  BehavConditionalIterator(const BehavSupport &, const PVector<int> &);
+  BehavConditionalIterator(const BehaviorSupportProfile &, const PVector<int> &);
   //@}
 
   /// @name Iteration and data access
@@ -327,7 +327,7 @@ public:
 };
 
 
-BehavConditionalIterator::BehavConditionalIterator(const BehavSupport &p_support, 
+BehavConditionalIterator::BehavConditionalIterator(const BehaviorSupportProfile &p_support, 
 						   const PVector<int> &p_active)
   : m_atEnd(false), m_support(p_support),
     m_currentBehav(m_support.GetGame()->NumInfosets()),
@@ -399,7 +399,7 @@ void BehavConditionalIterator::operator++(void)
   }
 }
 
-bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
+bool BehaviorSupportProfile::Dominates(const GameAction &a, const GameAction &b,
 			     bool p_strict, bool p_conditional) const
 {
   GameInfoset infoset = a->GetInfoset();
@@ -478,7 +478,7 @@ bool BehavSupport::Dominates(const GameAction &a, const GameAction &b,
   }
 }
 
-bool SomeElementDominates(const BehavSupport &S, 
+bool SomeElementDominates(const BehaviorSupportProfile &S, 
 			  const Array<GameAction> &array,
 			  const GameAction &a, 
 			  const bool strong,
@@ -492,7 +492,7 @@ bool SomeElementDominates(const BehavSupport &S,
   return false;
 }
 
-bool BehavSupport::IsDominated(const GameAction &a, 
+bool BehaviorSupportProfile::IsDominated(const GameAction &a, 
 			       bool strong, bool conditional) const
 {
   int pl = a->GetInfoset()->GetPlayer()->GetNumber();
@@ -501,7 +501,7 @@ bool BehavSupport::IsDominated(const GameAction &a,
   return SomeElementDominates(*this,array,a,strong,conditional);
 }
 
-bool InfosetHasDominatedElement(const BehavSupport &S, 
+bool InfosetHasDominatedElement(const BehaviorSupportProfile &S, 
 				const GameInfoset &p_infoset,
 				bool strong,
 				bool conditional)
@@ -520,7 +520,7 @@ bool InfosetHasDominatedElement(const BehavSupport &S,
   return false;
 }
 
-bool ElimDominatedInInfoset(const BehavSupport &S, BehavSupport &T,
+bool ElimDominatedInInfoset(const BehaviorSupportProfile &S, BehaviorSupportProfile &T,
 			    int pl, int iset, 
 			    bool strong, bool conditional)
 {
@@ -554,7 +554,7 @@ bool ElimDominatedInInfoset(const BehavSupport &S, BehavSupport &T,
   return action_was_eliminated;
 }
 
-bool ElimDominatedForPlayer(const BehavSupport &S, BehavSupport &T,
+bool ElimDominatedForPlayer(const BehaviorSupportProfile &S, BehaviorSupportProfile &T,
 			    const int pl, int &cumiset,
 			    const bool strong,
 			    const bool conditional)
@@ -570,11 +570,11 @@ bool ElimDominatedForPlayer(const BehavSupport &S, BehavSupport &T,
   return action_was_eliminated;
 }
 
-BehavSupport BehavSupport::Undominated(bool strong, bool conditional,
+BehaviorSupportProfile BehaviorSupportProfile::Undominated(bool strong, bool conditional,
 				       const Array<int> &players,
 				       std::ostream &) const
 {
-  BehavSupport T(*this);
+  BehaviorSupportProfile T(*this);
   int cumiset = 0;
 
   for (int i = 1; i <= players.Length(); i++)   {
@@ -588,7 +588,7 @@ BehavSupport BehavSupport::Undominated(bool strong, bool conditional,
 
 
 // Utilities 
-bool BehavSupport::HasActiveMembers(int pl, int iset) const
+bool BehaviorSupportProfile::HasActiveMembers(int pl, int iset) const
 {
   for (int i = 1; i <= m_nonterminalActive[pl][iset].Length(); i++) {
     if (m_nonterminalActive[pl][iset][i]) {
@@ -598,31 +598,31 @@ bool BehavSupport::HasActiveMembers(int pl, int iset) const
   return false;
 }
 
-void BehavSupport::activate(const GameNode &n)
+void BehaviorSupportProfile::activate(const GameNode &n)
 {
   m_nonterminalActive[n->GetPlayer()->GetNumber()]
                             [n->GetInfoset()->GetNumber()]
                             [n->NumberInInfoset()] = true;
 }
 
-void BehavSupport::deactivate(const GameNode &n)
+void BehaviorSupportProfile::deactivate(const GameNode &n)
 {
   m_nonterminalActive[n->GetPlayer()->GetNumber()]
                             [n->GetInfoset()->GetNumber()]
                             [n->NumberInInfoset()] = false;
 }
 
-void BehavSupport::activate(const GameInfoset &i)
+void BehaviorSupportProfile::activate(const GameInfoset &i)
 {
   m_infosetActive[i->GetPlayer()->GetNumber()][i->GetNumber()] = true;
 }
 
-void BehavSupport::deactivate(const GameInfoset &i)
+void BehaviorSupportProfile::deactivate(const GameInfoset &i)
 {
   m_infosetActive[i->GetPlayer()->GetNumber()][i->GetNumber()] = false;
 }
 
-void BehavSupport::ActivateSubtree(const GameNode &n)
+void BehaviorSupportProfile::ActivateSubtree(const GameNode &n)
 {
   if (!n->IsTerminal()) {
     activate(n); 
@@ -641,7 +641,7 @@ void BehavSupport::ActivateSubtree(const GameNode &n)
   }
 }
 
-void BehavSupport::DeactivateSubtree(const GameNode &n)
+void BehaviorSupportProfile::DeactivateSubtree(const GameNode &n)
 {
   if (!n->IsTerminal()) {  // THIS ALL LOOKS FISHY
     deactivate(n); 
@@ -664,7 +664,7 @@ void BehavSupport::DeactivateSubtree(const GameNode &n)
 }
 
 void 
-BehavSupport::DeactivateSubtree(const GameNode &n, List<GameInfoset> &list)
+BehaviorSupportProfile::DeactivateSubtree(const GameNode &n, List<GameInfoset> &list)
 {
   if (!n->IsTerminal()) {
     deactivate(n); 
@@ -681,7 +681,7 @@ BehavSupport::DeactivateSubtree(const GameNode &n, List<GameInfoset> &list)
 }
 
 List<GameNode> 
-BehavSupport::ReachableMembers(const GameInfoset &i) const
+BehaviorSupportProfile::ReachableMembers(const GameInfoset &i) const
 {
   List<GameNode> answer;
   int pl = i->GetPlayer()->GetNumber();
@@ -693,7 +693,7 @@ BehavSupport::ReachableMembers(const GameInfoset &i) const
 }
 
 List<GameNode>
-BehavSupport::ReachableNonterminalNodes(void) const
+BehaviorSupportProfile::ReachableNonterminalNodes(void) const
 {
   List<GameNode> answer;
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
@@ -704,7 +704,7 @@ BehavSupport::ReachableNonterminalNodes(void) const
   return answer;
 }
 
-int BehavSupport::NumActiveMembers(const GameInfoset &p_infoset) const
+int BehaviorSupportProfile::NumActiveMembers(const GameInfoset &p_infoset) const
 {
   int answer = 0;
   int pl = p_infoset->GetPlayer()->GetNumber();
@@ -718,19 +718,19 @@ int BehavSupport::NumActiveMembers(const GameInfoset &p_infoset) const
   return answer;
 }
 
-bool BehavSupport::IsActive(const GameInfoset &i) const
+bool BehaviorSupportProfile::IsActive(const GameInfoset &i) const
 {
   return m_infosetActive[i->GetPlayer()->GetNumber()][i->GetNumber()];
 }
 
 
-bool BehavSupport::IsActive(const GameNode &n) const
+bool BehaviorSupportProfile::IsActive(const GameNode &n) const
 {
   return m_nonterminalActive[n->GetInfoset()->GetPlayer()->GetNumber()]
     [n->GetInfoset()->GetNumber()][n->NumberInInfoset()];
 }
 
-bool BehavSupport::HasActiveActionsAtActiveInfosets(void) const
+bool BehaviorSupportProfile::HasActiveActionsAtActiveInfosets(void) const
 {
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
     for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
@@ -742,7 +742,7 @@ bool BehavSupport::HasActiveActionsAtActiveInfosets(void) const
   return true;
 }
 
-bool BehavSupport::HasActiveActionsAtActiveInfosetsAndNoOthers(void) const
+bool BehaviorSupportProfile::HasActiveActionsAtActiveInfosetsAndNoOthers(void) const
 {
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
     for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {

@@ -42,7 +42,7 @@ class gbtBehavDominanceStack {
 private:
   gbtGameDocument *m_doc;
   bool m_strict;
-  Gambit::Array<Gambit::BehavSupport *> m_supports;
+  Gambit::Array<Gambit::BehaviorSupportProfile *> m_supports;
   int m_current;
   bool m_noFurther;
 
@@ -59,12 +59,12 @@ public:
   //! Get the i'th support in the stack
   //! (where i=1 is always the "full" support)
   //!
-  const Gambit::BehavSupport &GetSupport(int i) const { return *m_supports[i]; }
+  const Gambit::BehaviorSupportProfile &GetSupport(int i) const { return *m_supports[i]; }
 
   //!
   //! Get the current support
   //!
-  const Gambit::BehavSupport &GetCurrent(void) const { return *m_supports[m_current]; }
+  const Gambit::BehaviorSupportProfile &GetCurrent(void) const { return *m_supports[m_current]; }
 
   //!
   //! Get the level of iteration (1 = no iteration)
@@ -313,7 +313,7 @@ public:
   //! @name Handling of behavior supports
   //!
   //@{
-  const Gambit::BehavSupport &GetEfgSupport(void) const
+  const Gambit::BehaviorSupportProfile &GetEfgSupport(void) const
     { return m_behavSupports.GetCurrent(); }
   void SetBehavElimStrength(bool p_strict);
   bool NextBehavElimLevel(void);

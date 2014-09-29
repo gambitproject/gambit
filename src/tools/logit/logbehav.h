@@ -51,7 +51,7 @@ using namespace Gambit;
 ///
 template <class T> class LogBehavProfile : private DVector<T>  {
 protected:
-  BehavSupport m_support;
+  BehaviorSupportProfile m_support;
   DVector<T> m_logProbs;
 
   mutable bool m_cacheValid;
@@ -89,7 +89,7 @@ protected:
 public:
   /// @name Lifecycle
   //@{
-  LogBehavProfile(const BehavSupport &);
+  LogBehavProfile(const BehaviorSupportProfile &);
   LogBehavProfile(const LogBehavProfile<T> &);
   ~LogBehavProfile() { }
 
@@ -171,7 +171,7 @@ public:
   //@{
   int Length(void) const { return Array<T>::Length(); }
   Game GetGame(void) const { return m_support.GetGame(); }
-  const BehavSupport &GetSupport(void) const { return m_support; }
+  const BehaviorSupportProfile &GetSupport(void) const { return m_support; }
   //@}
 
   /// @name Computation of interesting quantities

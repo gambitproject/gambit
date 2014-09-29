@@ -42,18 +42,18 @@ extern bool g_verbose;
 //
 class ProblemData {
 public:
-  const BehavSupport &support;
+  const BehaviorSupportProfile &support;
   Sfg SF;
   gSpace *Space;
   term_order *Lex;
   int nVars;
   Array<Array<int> > var;
 
-  ProblemData(const BehavSupport &p_support);
+  ProblemData(const BehaviorSupportProfile &p_support);
   ~ProblemData();
 };
 
-ProblemData::ProblemData(const BehavSupport &p_support)
+ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
   : support(p_support), SF(p_support)
 {
   nVars = SF.TotalNumSequences() - SF.NumPlayerInfosets() - SF.NumPlayers();
@@ -251,13 +251,13 @@ bool ExtendsToNash(const MixedBehaviorProfile<double> &bs)
 {
   algExtendsToNash algorithm;
   return algorithm.ExtendsToNash(bs, 
-				 BehavSupport(bs.GetGame()),
-				 BehavSupport(bs.GetGame()));
+				 BehaviorSupportProfile(bs.GetGame()),
+				 BehaviorSupportProfile(bs.GetGame()));
 }
 
 
 List<MixedBehaviorProfile<double> > 
-SolveSupport(const BehavSupport &p_support, bool &p_isSingular)
+SolveSupport(const BehaviorSupportProfile &p_support, bool &p_isSingular)
 {
   ProblemData data(p_support);
   gPolyList<double> equations = NashOnSupportEquationsAndInequalities(data);
@@ -339,7 +339,7 @@ void PrintProfile(std::ostream &p_stream,
 MixedBehaviorProfile<double> ToFullSupport(const MixedBehaviorProfile<double> &p_profile)
 {
   Game efg = p_profile.GetGame();
-  const BehavSupport &support = p_profile.GetSupport();
+  const BehaviorSupportProfile &support = p_profile.GetSupport();
 
   MixedBehaviorProfile<double> fullProfile(efg);
   for (int i = 1; i <= fullProfile.Length(); fullProfile[i++] = 0.0);
@@ -361,7 +361,7 @@ MixedBehaviorProfile<double> ToFullSupport(const MixedBehaviorProfile<double> &p
 }
 
 void PrintSupport(std::ostream &p_stream,
-		  const std::string &p_label, const BehavSupport &p_support)
+		  const std::string &p_label, const BehaviorSupportProfile &p_support)
 {
   p_stream << p_label;
 
@@ -388,7 +388,7 @@ void PrintSupport(std::ostream &p_stream,
 
 void SolveExtensive(const Game &p_game)
 {
-  List<BehavSupport> supports = PossibleNashSubsupports(p_game);
+  List<BehaviorSupportProfile> supports = PossibleNashSubsupports(p_game);
 
   for (int i = 1; i <= supports.Length(); i++) {
     if (g_verbose) {

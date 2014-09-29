@@ -60,9 +60,9 @@ void gbtBehavDominanceStack::SetStrict(bool p_strict)
 void gbtBehavDominanceStack::Reset(void)
 {
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
-  m_supports = Gambit::Array<Gambit::BehavSupport *>();
+  m_supports = Gambit::Array<Gambit::BehaviorSupportProfile *>();
   if (m_doc->IsTree()) {
-    m_supports.Append(new Gambit::BehavSupport(m_doc->GetGame()));
+    m_supports.Append(new Gambit::BehaviorSupportProfile(m_doc->GetGame()));
     m_current = 1;
   }
   m_noFurther = false;
@@ -85,11 +85,11 @@ bool gbtBehavDominanceStack::NextLevel(void)
   }
   
   std::ostringstream gnull;
-  Gambit::BehavSupport newSupport = 
+  Gambit::BehaviorSupportProfile newSupport = 
     m_supports[m_current]->Undominated(m_strict, true, players, gnull);
 
   if (newSupport != *m_supports[m_current]) {
-    m_supports.Append(new Gambit::BehavSupport(newSupport));
+    m_supports.Append(new Gambit::BehaviorSupportProfile(newSupport));
     m_current++;
     return true;
   }
