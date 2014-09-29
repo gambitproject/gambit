@@ -283,7 +283,7 @@ For games with a tree representation, a
 :py:class:`MixedBehavProfile` by calling
 :py:func:`MixedStrategyProfile.as_behav`. Equally, a
 :py:class:`MixedBehavProfile` can be converted to an equivalent
-:py:class:`MixedStrategyProfile` using :py:func:`MixedBehavProfile.as_mixed`.
+:py:class:`MixedStrategyProfile` using :py:func:`MixedBehavProfile.as_strategy`.
 
 
 Computing Nash equilibria
@@ -686,7 +686,7 @@ about a plan of play of a game, by one or more players.
 
       Sets the probability ``action`` is played in the profile to ``prob``. 
 
-   .. py:method:: as_mixed()
+   .. py:method:: as_strategy()
 
       Returns a :py:class:`MixedStrategyProfile` which is equivalent
       to the profile.

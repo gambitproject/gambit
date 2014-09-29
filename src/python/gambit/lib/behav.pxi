@@ -260,7 +260,7 @@ cdef class MixedBehavProfileDouble(MixedBehavProfile):
         behav = MixedBehavProfileDouble()
         behav.profile = new c_MixedBehavProfileDouble(deref(self.profile))
         return behav
-    def as_mixed(self):
+    def as_strategy(self):
         cdef MixedStrategyProfileDouble mixed
         mixed = MixedStrategyProfileDouble()
         mixed.profile = new c_MixedStrategyProfileDouble(deref(self.profile).ToMixedProfile())
@@ -326,7 +326,7 @@ cdef class MixedBehavProfileRational(MixedBehavProfile):
         behav = MixedBehavProfileRational()
         behav.profile = new c_MixedBehavProfileRational(deref(self.profile))
         return behav
-    def as_mixed(self):
+    def as_strategy(self):
         cdef MixedStrategyProfileRational mixed
         mixed = MixedStrategyProfileRational()
         mixed.profile = new c_MixedStrategyProfileRational(deref(self.profile).ToMixedProfile())
