@@ -506,6 +506,83 @@ API documentation
       * `native`: The format most appropriate to the
         underlying representation of the game, i.e., `efg` or `nfg`.
 
+.. py:class:: StrategySupportProfile
+
+   A set-like object representing a subset of the strategies in a
+   game.  It incorporates the restriction that each player must have
+   at least one strategy.
+
+   .. py:attribute:: game
+
+      Returns the :py:class:`gambit.Game` on which the support
+      profile is defined.
+
+   .. py:method:: issubset(other)
+
+      Returns :literal:`True` if this profile is a subset of
+      `other`.
+
+      :param StrategySupportProfile other: another support profile
+
+   .. py:method:: issuperset(other)
+
+      Returns :literal:`True` if this profile is a superset of
+      `other`.
+
+      :param StrategySupportProfile other: another support profile
+
+   .. py:method:: restrict()
+
+      Creates a :py:class:`gambit.StrategicRestriction` object,
+      which defines a restriction of the game in which only the
+      strategies in this profile are present.
+
+   .. py:method:: remove(strategy)
+
+      Modifies the support profile by removing the specified strategy.
+
+      :param Strategy strategy: the strategy to remove
+      :raises UndefinedOperationError: if attempting to remove the
+				       last strategy for a player
+
+   .. py:method:: difference(other)
+
+      Returns a new support profile containing all the strategies
+      which are present in this profile, but not in `other`.
+
+      :param StrategySupportProfile other: another support profile
+
+   .. py:method:: intersection(other)
+
+      Returns a new support profile containing all the strategies
+      present in both this profile and in `other`.
+
+      :param StrategySupportProfile other: another support profile
+
+   .. py:method:: union(other)
+   
+      Returns a new support profile containing all the strategies
+      present in this profile, in `other`, or in both.
+
+      :param StrategySupportProfile other: another support profile
+
+
+.. py:class:: StrategicRestriction
+
+   A read-only view on a :py:class:`gambit.Game`, defined by a subset
+   of the strategies on the original game.
+
+   In addition to the members described here, a StrategicRestriction
+   implements the interface of a :py:class:`gambit.Game`, although
+   operations which change the content of the game will raise an
+   exception.
+
+   .. py:method:: unrestrict()
+
+      Returns the :py:class:`gambit.Game` object on which the
+      restriction was based.
+
+
 .. py:class:: GameActions
    
    A collection object representing the actions of a game.
