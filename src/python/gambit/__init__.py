@@ -21,6 +21,7 @@
 #
 
 import gambit.lib.libgambit
+import nash
 import gte
 
 __version__ = gambit.lib.libgambit.__version__
