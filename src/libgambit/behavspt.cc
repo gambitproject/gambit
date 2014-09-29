@@ -298,7 +298,7 @@ private:
   bool m_atEnd;
   BehavSupport m_support;
   PVector<int> m_currentBehav;
-  PureBehavProfile m_profile;
+  PureBehaviorProfile m_profile;
   PVector<int> m_isActive;
   Array<int> m_numActiveInfosets;
 
@@ -320,9 +320,9 @@ public:
   /// Has iterator gone past the end?
   bool AtEnd(void) const { return m_atEnd; }
   /// Get the current behavior profile
-  const PureBehavProfile &operator*(void) const { return m_profile; }
+  const PureBehaviorProfile &operator*(void) const { return m_profile; }
   /// Get the current behavior profile
-  const PureBehavProfile *const operator->(void) const { return &m_profile; }
+  const PureBehaviorProfile *const operator->(void) const { return &m_profile; }
   //@}
 };
 

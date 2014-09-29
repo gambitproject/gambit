@@ -41,7 +41,7 @@ public:
   void BuildConstraintMatrix(const BehavSupport &,
 			     Matrix<T> &, const GameNode &, const T &,
 			     int, int, int, int);
-  void GetBehavior(const BehavSupport &, MixedBehavProfile<T> &v,
+  void GetBehavior(const BehavSupport &, MixedBehaviorProfile<T> &v,
 		   const Array<T> &, const Array<T> &,
 		   const GameNode &, int, int);
 };
@@ -188,7 +188,7 @@ NashLpBehavSolver<T>::SolveLP(const Matrix<T> &A,
 //
 template <class T> void
 NashLpBehavSolver<T>::GameData::GetBehavior(const BehavSupport &p_support,
-					    MixedBehavProfile<T> &v,
+					    MixedBehaviorProfile<T> &v,
 					    const Array<T> &p_primal, 
 					    const Array<T> &p_dual,
 					    const GameNode &n,
@@ -241,7 +241,7 @@ NashLpBehavSolver<T>::GameData::GetBehavior(const BehavSupport &p_support,
 // Compute and print one equilibrium by solving a linear program based
 // on the sequence form representation of the game.
 //
-template <class T> List<MixedBehavProfile<T> > 
+template <class T> List<MixedBehaviorProfile<T> > 
 NashLpBehavSolver<T>::Solve(const BehavSupport &p_support) const
 {
   BFS<T> cbfs;
@@ -265,9 +265,9 @@ NashLpBehavSolver<T>::Solve(const BehavSupport &p_support) const
   c[data.ns2 + 1] = (T) -1;
 
   Array<T> primal(A.NumColumns()), dual(A.NumRows());
-  List<MixedBehavProfile<T> > solution;
+  List<MixedBehaviorProfile<T> > solution;
   if (SolveLP(A, b, c, data.ni2, primal, dual)) {
-    MixedBehavProfile<T> profile(p_support);
+    MixedBehaviorProfile<T> profile(p_support);
     data.GetBehavior(p_support, profile, primal, dual,
 		     p_support.GetGame()->GetRoot(), 1, 1);
     profile.UndefinedToCentroid();

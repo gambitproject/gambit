@@ -67,7 +67,7 @@ MixedStrategyDetailRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile,
 }
 
 template <class T>
-void BehavStrategyCSVRenderer<T>::Render(const MixedBehavProfile<T> &p_profile,
+void BehavStrategyCSVRenderer<T>::Render(const MixedBehaviorProfile<T> &p_profile,
 					 const std::string &p_label) const
 {
   m_stream << p_label;
@@ -78,7 +78,7 @@ void BehavStrategyCSVRenderer<T>::Render(const MixedBehavProfile<T> &p_profile,
 }
 
 template <class T> void
-BehavStrategyDetailRenderer<T>::Render(const MixedBehavProfile<T> &p_profile,
+BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_profile,
 				       const std::string &p_label) const
 {
   for (GamePlayers::const_iterator player = p_profile.GetGame()->Players().begin();
@@ -203,13 +203,13 @@ NashBehavViaStrategySolver<T>::NashBehavViaStrategySolver(shared_ptr<NashStrateg
   : NashBehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
 { }
 
-template <class T> List<MixedBehavProfile<T> > 
+template <class T> List<MixedBehaviorProfile<T> > 
 NashBehavViaStrategySolver<T>::Solve(const BehavSupport &p_support) const
 {
   List<MixedStrategyProfile<T> > output = m_solver->Solve(p_support.GetGame());
-  List<MixedBehavProfile<T> > solutions;
+  List<MixedBehaviorProfile<T> > solutions;
   for (int i = 1; i <= output.Length(); i++) {
-    solutions.push_back(MixedBehavProfile<T>(output[i]));
+    solutions.push_back(MixedBehaviorProfile<T>(output[i]));
   }
   return solutions;
 }
@@ -251,11 +251,11 @@ void ChildSubgames(const GameNode &p_node, List<GameNode> &p_list)
 //   set to unique IDs.  These are used to match up information
 //   sets in the subgames (which are themselves copies) to the
 //   original game.
-// * We only carry around DVectors instead of full MixedBehavProfiles,
-//   because MixedBehavProfiles allocate space several times the
+// * We only carry around DVectors instead of full MixedBehaviorProfiles,
+//   because MixedBehaviorProfiles allocate space several times the
 //   size of the tree to carry around useful quantities.  These
 //   quantities are irrelevant for this calculation, so we only
-//   store the probabilities, and convert to MixedBehavProfiles
+//   store the probabilities, and convert to MixedBehaviorProfiles
 //   at the end of the computation
 //
 
@@ -356,7 +356,7 @@ void SubgameNashBehavSolver<T>::SolveSubgames(const BehavSupport &p_support,
     }
     */
 
-    List<MixedBehavProfile<T> > sol = m_solver->Solve(subsupport);
+    List<MixedBehaviorProfile<T> > sol = m_solver->Solve(subsupport);
     
     if (sol.Length() == 0)  {
       solns = List<DVector<T> >();
@@ -412,7 +412,7 @@ void SubgameNashBehavSolver<T>::SolveSubgames(const BehavSupport &p_support,
 }
 
 template <class T>
-List<MixedBehavProfile<T> > 
+List<MixedBehaviorProfile<T> > 
 SubgameNashBehavSolver<T>::Solve(const BehavSupport &p_support) const
 {
   Game efg = p_support.GetGame()->GetRoot()->CopySubgame();
@@ -442,9 +442,9 @@ SubgameNashBehavSolver<T>::Solve(const BehavSupport &p_support) const
   SolveSubgames(support, DVector<T>(support.NumActions()),
 		efg->GetRoot(), vectors, values);
 
-  List<MixedBehavProfile<T> > solutions;
+  List<MixedBehaviorProfile<T> > solutions;
   for (int i = 1; i <= vectors.Length(); i++) {
-    solutions.Append(MixedBehavProfile<T>(p_support));
+    solutions.Append(MixedBehaviorProfile<T>(p_support));
     for (int j = 1; j <= vectors[i].Length(); j++) {
       solutions[i][j] = vectors[i][j];
     }

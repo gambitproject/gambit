@@ -5,8 +5,8 @@ class TestGambitMixedBehavGame(object):
     def setUp(self):
         self.game = gambit.Game.read_game("test_games/mixed_behavior_game.efg")
         
-        self.profile_double = self.game.behav_profile()
-        self.profile_rational = self.game.behav_profile(True)
+        self.profile_double = self.game.mixed_behavior_profile()
+        self.profile_rational = self.game.mixed_behavior_profile(True)
         
     def tearDown(self):
         del self.game

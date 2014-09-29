@@ -247,7 +247,7 @@ SeqFormVectorFromSolFormVector(const ProblemData &p_data,
   return x;
 }
 
-bool ExtendsToNash(const MixedBehavProfile<double> &bs) 
+bool ExtendsToNash(const MixedBehaviorProfile<double> &bs) 
 {
   algExtendsToNash algorithm;
   return algorithm.ExtendsToNash(bs, 
@@ -256,7 +256,7 @@ bool ExtendsToNash(const MixedBehavProfile<double> &bs)
 }
 
 
-List<MixedBehavProfile<double> > 
+List<MixedBehaviorProfile<double> > 
 SolveSupport(const BehavSupport &p_support, bool &p_isSingular)
 {
   ProblemData data(p_support);
@@ -298,10 +298,10 @@ SolveSupport(const BehavSupport &p_support, bool &p_isSingular)
   
   List<Vector<double> > solutionlist = quickie.RootList();
 
-  List<MixedBehavProfile<double> > solutions;
+  List<MixedBehaviorProfile<double> > solutions;
   for (int k = 1; k <= solutionlist.Length(); k++) {
     PVector<double> y = SeqFormVectorFromSolFormVector(data, solutionlist[k]);
-    MixedBehavProfile<double> sol(data.SF.ToBehav(y));
+    MixedBehaviorProfile<double> sol(data.SF.ToBehav(y));
     if (ExtendsToNash(sol)) { 
       solutions.Append(sol);
     }
@@ -325,7 +325,7 @@ SeqFormProbsFromSolVars(const ProblemData &p_data, const Vector<double> &v)
 
 void PrintProfile(std::ostream &p_stream,
 		  const std::string &p_label,
-		  const MixedBehavProfile<double> &p_profile)
+		  const MixedBehaviorProfile<double> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.Length(); i++) {
@@ -336,12 +336,12 @@ void PrintProfile(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-MixedBehavProfile<double> ToFullSupport(const MixedBehavProfile<double> &p_profile)
+MixedBehaviorProfile<double> ToFullSupport(const MixedBehaviorProfile<double> &p_profile)
 {
   Game efg = p_profile.GetGame();
   const BehavSupport &support = p_profile.GetSupport();
 
-  MixedBehavProfile<double> fullProfile(efg);
+  MixedBehaviorProfile<double> fullProfile(efg);
   for (int i = 1; i <= fullProfile.Length(); fullProfile[i++] = 0.0);
 
   int index = 1;
@@ -396,11 +396,11 @@ void SolveExtensive(const Game &p_game)
     }
       
     bool isSingular = false;
-    List<MixedBehavProfile<double> > newsolns = 
+    List<MixedBehaviorProfile<double> > newsolns = 
       SolveSupport(supports[i], isSingular);
 
     for (int j = 1; j <= newsolns.Length(); j++) {
-      MixedBehavProfile<double> fullProfile = ToFullSupport(newsolns[j]);
+      MixedBehaviorProfile<double> fullProfile = ToFullSupport(newsolns[j]);
       if (fullProfile.GetLiapValue(true) < 1.0e-6) {
 	PrintProfile(std::cout, "NE", fullProfile);
       }

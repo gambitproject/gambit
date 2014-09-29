@@ -26,11 +26,11 @@
 namespace Gambit {
 
 //========================================================================
-//                  MixedBehavProfile<T>: Lifecycle
+//                  MixedBehaviorProfile<T>: Lifecycle
 //========================================================================
 
 template <class T>
-MixedBehavProfile<T>::MixedBehavProfile(const MixedBehavProfile<T> &p_profile)
+MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedBehaviorProfile<T> &p_profile)
   : DVector<T>(p_profile),
     m_support(p_profile.m_support),
     m_cacheValid(false),
@@ -50,7 +50,7 @@ MixedBehavProfile<T>::MixedBehavProfile(const MixedBehavProfile<T> &p_profile)
 }
 
 template <class T> 
-MixedBehavProfile<T>::MixedBehavProfile(const Game &p_game)
+MixedBehaviorProfile<T>::MixedBehaviorProfile(const Game &p_game)
   : DVector<T>(p_game->NumActions()), 
     m_support(BehavSupport(p_game)),
     m_cacheValid(false),
@@ -74,7 +74,7 @@ MixedBehavProfile<T>::MixedBehavProfile(const Game &p_game)
 }
 
 template <class T> 
-MixedBehavProfile<T>::MixedBehavProfile(const BehavSupport &p_support) 
+MixedBehaviorProfile<T>::MixedBehaviorProfile(const BehavSupport &p_support) 
   : DVector<T>(p_support.NumActions()), 
     m_support(p_support),
     m_cacheValid(false),
@@ -98,7 +98,7 @@ MixedBehavProfile<T>::MixedBehavProfile(const BehavSupport &p_support)
 }
 
 template <class T>
-void MixedBehavProfile<T>::BehaviorStrat(int pl, GameTreeNodeRep *p_node)
+void MixedBehaviorProfile<T>::BehaviorStrat(int pl, GameTreeNodeRep *p_node)
 {
   for (int i = 1; i <= p_node->children.Length(); i++)   {
     GameTreeNodeRep *child = p_node->children[i];
@@ -116,7 +116,7 @@ void MixedBehavProfile<T>::BehaviorStrat(int pl, GameTreeNodeRep *p_node)
 }
 
 template <class T>
-void MixedBehavProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp,
+void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp,
 					    int pl,
 					    const Array<int> &actions,
 					    GameTreeNodeRep *node)
@@ -152,7 +152,7 @@ void MixedBehavProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp,
 }
 
 template <class T>
-MixedBehavProfile<T>::MixedBehavProfile(const MixedStrategyProfile<T> &p_profile)
+MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_profile)
   : DVector<T>(p_profile.GetGame()->NumActions()), 
     m_support(p_profile.GetGame()),
     m_cacheValid(false),
@@ -199,7 +199,7 @@ MixedBehavProfile<T>::MixedBehavProfile(const MixedStrategyProfile<T> &p_profile
 }
 
 template <class T>
-MixedBehavProfile<T> &MixedBehavProfile<T>::operator=(const MixedBehavProfile<T> &p_profile)
+MixedBehaviorProfile<T> &MixedBehaviorProfile<T>::operator=(const MixedBehaviorProfile<T> &p_profile)
 {
   if (this != &p_profile && m_support == p_profile.m_support) {
     Invalidate();
@@ -210,21 +210,21 @@ MixedBehavProfile<T> &MixedBehavProfile<T>::operator=(const MixedBehavProfile<T>
 }
 
 //========================================================================
-//               MixedBehavProfile<T>: Operator overloading
+//               MixedBehaviorProfile<T>: Operator overloading
 //========================================================================
 
 template <class T>
-bool MixedBehavProfile<T>::operator==(const MixedBehavProfile<T> &p_profile) const
+bool MixedBehaviorProfile<T>::operator==(const MixedBehaviorProfile<T> &p_profile) const
 {
   return (m_support == p_profile.m_support &&
 	  (DVector<T> &) *this == (DVector<T> &) p_profile);
 }
 
 //========================================================================
-//              MixedBehavProfile<T>: General data access
+//              MixedBehaviorProfile<T>: General data access
 //========================================================================
 
-template <class T> void MixedBehavProfile<T>::SetCentroid(void)
+template <class T> void MixedBehaviorProfile<T>::SetCentroid(void)
 {
   for (int pl = 1; pl <= this->dvlen.Length(); pl++)
     for (int iset = 1; iset <= this->dvlen[pl]; iset++)
@@ -237,7 +237,7 @@ template <class T> void MixedBehavProfile<T>::SetCentroid(void)
 }
 
 template <class T>
-void MixedBehavProfile<T>::UndefinedToCentroid(void)
+void MixedBehaviorProfile<T>::UndefinedToCentroid(void)
 {
   Game efg = m_support.GetGame();
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
@@ -261,7 +261,7 @@ void MixedBehavProfile<T>::UndefinedToCentroid(void)
 }
 
 template <class T>
-void MixedBehavProfile<T>::Normalize(void)
+void MixedBehaviorProfile<T>::Normalize(void)
 {
   Game efg = m_support.GetGame();
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
@@ -283,7 +283,7 @@ void MixedBehavProfile<T>::Normalize(void)
   }
 }
 
-template<> void MixedBehavProfile<double>::Randomize(void)
+template<> void MixedBehaviorProfile<double>::Randomize(void)
 {
   Game game = m_support.GetGame();
   *this = 0.0;
@@ -304,14 +304,14 @@ template<> void MixedBehavProfile<double>::Randomize(void)
   Normalize();
 }
 
-template<> void MixedBehavProfile<Rational>::Randomize(void)
+template<> void MixedBehaviorProfile<Rational>::Randomize(void)
 {
   // This operation is not well-defined when using Rational numbers;
   // use the version specifying the denominator grid instead.
   throw ValueException();
 }
 
-template <class T> void MixedBehavProfile<T>::Randomize(int p_denom)
+template <class T> void MixedBehaviorProfile<T>::Randomize(int p_denom)
 {
   Game game = m_support.GetGame();
   *this = T(0);
@@ -342,7 +342,7 @@ template <class T> void MixedBehavProfile<T>::Randomize(int p_denom)
 
 
 //========================================================================
-//              MixedBehavProfile<T>: Interesting quantities
+//              MixedBehaviorProfile<T>: Interesting quantities
 //========================================================================
 
 //
@@ -356,7 +356,7 @@ template <class T> void MixedBehavProfile<T>::Randomize(int p_denom)
 // indicating this.
 // 
 template <class T> 
-T MixedBehavProfile<T>::GetLiapValue(bool p_definedOnly) const
+T MixedBehaviorProfile<T>::GetLiapValue(bool p_definedOnly) const
 {
   static const T BIG1 = (T) 10000;
   static const T BIG2 = (T) 100;
@@ -397,14 +397,14 @@ T MixedBehavProfile<T>::GetLiapValue(bool p_definedOnly) const
 }
 
 template <class T>
-const T &MixedBehavProfile<T>::GetRealizProb(const GameNode &node) const
+const T &MixedBehaviorProfile<T>::GetRealizProb(const GameNode &node) const
 { 
   ComputeSolutionData();
   return m_realizProbs[node->GetNumber()];
 }
 
 template <class T>
-T MixedBehavProfile<T>::GetRealizProb(const GameInfoset &iset) const
+T MixedBehaviorProfile<T>::GetRealizProb(const GameInfoset &iset) const
 { 
   ComputeSolutionData();
   T prob = (T) 0;
@@ -415,28 +415,28 @@ T MixedBehavProfile<T>::GetRealizProb(const GameInfoset &iset) const
 }
 
 template <class T>
-const T &MixedBehavProfile<T>::GetBeliefProb(const GameNode &node) const
+const T &MixedBehaviorProfile<T>::GetBeliefProb(const GameNode &node) const
 { 
   ComputeSolutionData();
   return m_beliefs[node->GetNumber()];
 }
 
 template <class T>
-Vector<T> MixedBehavProfile<T>::GetPayoff(const GameNode &node) const
+Vector<T> MixedBehaviorProfile<T>::GetPayoff(const GameNode &node) const
 { 
   ComputeSolutionData();
   return m_nodeValues.Row(node->GetNumber());
 }
 
 template <class T>
-const T &MixedBehavProfile<T>::GetPayoff(const GameInfoset &iset) const
+const T &MixedBehaviorProfile<T>::GetPayoff(const GameInfoset &iset) const
 { 
   ComputeSolutionData();
   return m_infosetValues(iset->GetPlayer()->GetNumber(), iset->GetNumber());
 }
 
 template <class T>
-T MixedBehavProfile<T>::GetActionProb(const GameAction &action) const
+T MixedBehaviorProfile<T>::GetActionProb(const GameAction &action) const
 { 
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
     GameTreeInfosetRep *infoset = dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
@@ -453,7 +453,7 @@ T MixedBehavProfile<T>::GetActionProb(const GameAction &action) const
 }
 
 template <class T>
-const T &MixedBehavProfile<T>::GetPayoff(const GameAction &act) const
+const T &MixedBehaviorProfile<T>::GetPayoff(const GameAction &act) const
 { 
   ComputeSolutionData();
   return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
@@ -462,7 +462,7 @@ const T &MixedBehavProfile<T>::GetPayoff(const GameAction &act) const
 }
 
 template <class T>
-const T &MixedBehavProfile<T>::GetRegret(const GameAction &act) const
+const T &MixedBehaviorProfile<T>::GetRegret(const GameAction &act) const
 { 
   ComputeSolutionData();
   return m_gripe(act->GetInfoset()->GetPlayer()->GetNumber(),
@@ -470,7 +470,7 @@ const T &MixedBehavProfile<T>::GetRegret(const GameAction &act) const
 }
 
 template <class T>
-void MixedBehavProfile<T>::GetPayoff(GameTreeNodeRep *node, 
+void MixedBehaviorProfile<T>::GetPayoff(GameTreeNodeRep *node, 
 				     const T &prob, int player, T &value) const
 {
   if (node->outcome) {
@@ -496,7 +496,7 @@ void MixedBehavProfile<T>::GetPayoff(GameTreeNodeRep *node,
   }
 }
 
-template <class T> T MixedBehavProfile<T>::GetPayoff(int player) const
+template <class T> T MixedBehaviorProfile<T>::GetPayoff(int player) const
 {
   T value = (T) 0;
   GetPayoff(dynamic_cast<GameTreeNodeRep *>(m_support.GetGame()->GetRoot().operator->()),
@@ -514,7 +514,7 @@ template <class T> T MixedBehavProfile<T>::GetPayoff(int player) const
 //
 
 template <class T>
-T MixedBehavProfile<T>::DiffActionValue(const GameAction &p_action,
+T MixedBehaviorProfile<T>::DiffActionValue(const GameAction &p_action,
 				      const GameAction &p_oppAction) const
 {
   ComputeSolutionData();
@@ -540,7 +540,7 @@ T MixedBehavProfile<T>::DiffActionValue(const GameAction &p_action,
 }
 
 template <class T>
-T MixedBehavProfile<T>::DiffRealizProb(const GameNode &p_node,
+T MixedBehaviorProfile<T>::DiffRealizProb(const GameNode &p_node,
 				       const GameAction &p_oppAction) const
 {
   ComputeSolutionData();
@@ -562,7 +562,7 @@ T MixedBehavProfile<T>::DiffRealizProb(const GameNode &p_node,
 }
 
 template <class T>
-T MixedBehavProfile<T>::DiffNodeValue(const GameNode &p_node, 
+T MixedBehaviorProfile<T>::DiffNodeValue(const GameNode &p_node, 
 				    const GamePlayer &p_player,
 				    const GameAction &p_oppAction) const
 {
@@ -595,11 +595,11 @@ T MixedBehavProfile<T>::DiffNodeValue(const GameNode &p_node,
 }
 
 //========================================================================
-//             MixedBehavProfile<T>: Cached profile information
+//             MixedBehaviorProfile<T>: Cached profile information
 //========================================================================
 
 template <class T>
-void MixedBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
+void MixedBehaviorProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
 {
   if (node->GetOutcome()) {
     GameOutcome outcome = node->GetOutcome();
@@ -658,7 +658,7 @@ void MixedBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
 
 // compute realization probabilities for nodes and isets.  
 template <class T>
-void MixedBehavProfile<T>::ComputeSolutionDataPass1(const GameNode &node) const
+void MixedBehaviorProfile<T>::ComputeSolutionDataPass1(const GameNode &node) const
 {
   if (node->GetParent()) {
     m_realizProbs[node->GetNumber()] = m_realizProbs[node->GetParent()->GetNumber()] * GetActionProb(node->GetPriorAction());
@@ -675,7 +675,7 @@ void MixedBehavProfile<T>::ComputeSolutionDataPass1(const GameNode &node) const
 }
 
 template <class T>
-void MixedBehavProfile<T>::ComputeSolutionData(void) const
+void MixedBehaviorProfile<T>::ComputeSolutionData(void) const
 {
   if (!m_cacheValid) {
     m_actionValues = (T) 0;
@@ -713,7 +713,7 @@ void MixedBehavProfile<T>::ComputeSolutionData(void) const
 }
 
 template <class T>
-bool MixedBehavProfile<T>::IsDefinedAt(GameInfoset p_infoset) const
+bool MixedBehaviorProfile<T>::IsDefinedAt(GameInfoset p_infoset) const
 {
   for (int act = 1; act <= p_infoset->NumActions(); act++) {
     if (GetActionProb(p_infoset->GetAction(act)) > (T) 0) {
@@ -724,7 +724,7 @@ bool MixedBehavProfile<T>::IsDefinedAt(GameInfoset p_infoset) const
 }
 
 template <class T>
-MixedStrategyProfile<T> MixedBehavProfile<T>::ToMixedProfile(void) const
+MixedStrategyProfile<T> MixedBehaviorProfile<T>::ToMixedProfile(void) const
 {
   return MixedStrategyProfile<T>(*this);
 }

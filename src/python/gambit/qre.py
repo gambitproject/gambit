@@ -34,7 +34,7 @@ def sym_compute_lhs(game, point):
     Compute the LHS for the set of equations for a symmetric logit QRE
     of a symmetric game.
     """
-    profile = game.mixed_profile(point=[math.exp(x) for x in point[:-1]])
+    profile = game.mixed_strategy_profile(point=[math.exp(x) for x in point[:-1]])
     logprofile = point[:-1]
     lam = point[-1]
 
@@ -56,7 +56,7 @@ def sym_compute_jac(game, point):
     Compute the Jacobian for the set of equations for a symmetric logit QRE
     of a symmetric game.
     """
-    profile = game.mixed_profile(point=[math.exp(x) for x in point[:-1]])
+    profile = game.mixed_strategy_profile(point=[math.exp(x) for x in point[:-1]])
     logprofile = point[:-1]
     lam = point[-1]
 
@@ -89,7 +89,7 @@ def sym_compute_jac(game, point):
             
 
 def printer(game, point):
-    profile = game.mixed_profile(point=[math.exp(x) for x in point[:-1]])
+    profile = game.mixed_strategy_profile(point=[math.exp(x) for x in point[:-1]])
     lam = point[-1]
     print lam, profile
 
@@ -121,12 +121,12 @@ class StrategicQREPathTracer(object):
         points = [ ]
         def on_step(game, points, p, callback):
             qre = LogitQRE(p[-1],
-                           game.mixed_profile(point=[math.exp(x) for x in p[:-1]]))
+                           game.mixed_strategy_profile(point=[math.exp(x) for x in p[:-1]]))
             points.append(qre)
             if callback:  callback(qre)
 
         if game.is_symmetric:
-            p = game.mixed_profile()
+            p = game.mixed_strategy_profile()
 
             try:
                 pctrace.trace_path([ math.log(x) for x in p.profile ],
@@ -148,12 +148,12 @@ class StrategicQREPathTracer(object):
     def compute_at_lambda(self, game, lam, callback=None):
         if callback is not None:
             on_step = lambda p: callback(LogitQRE(p[-1],
-                                                  game.mixed_profile(point=[math.exp(x) for x in p[:-1]])))
+                                                  game.mixed_strategy_profile(point=[math.exp(x) for x in p[:-1]])))
         else:
             on_step = None
 
         if game.is_symmetric:
-            p = game.mixed_profile()
+            p = game.mixed_strategy_profile()
 
             point = pctrace.trace_path([ math.log(x) for x in p.profile ],
                                        0.0, 1000000.0,
@@ -164,7 +164,7 @@ class StrategicQREPathTracer(object):
                                        maxIter=100)
 
             return LogitQRE(point[-1],
-                            game.mixed_profile(point=[math.exp(x) for x in point[:-1]]))
+                            game.mixed_strategy_profile(point=[math.exp(x) for x in point[:-1]]))
         else:
             raise NotImplementedError
 
@@ -175,7 +175,7 @@ class StrategicQREPathTracer(object):
                         sum([ x*y for (x, y) in zip(data, tangent[:-1]) ])
 
         if game.is_symmetric:
-            p = game.mixed_profile()
+            p = game.mixed_strategy_profile()
 
             point = pctrace.trace_path([ math.log(x) for x in p.profile ],
                                        0.0, 1000000.0,
@@ -186,7 +186,7 @@ class StrategicQREPathTracer(object):
                                        maxIter=100)
 
             qre = LogitQRE(point[-1],
-                           game.mixed_profile(point=[math.exp(x) for x in point[:-1]]))
+                           game.mixed_strategy_profile(point=[math.exp(x) for x in point[:-1]]))
             qre.logL = log_like(data, qre)
             return qre
         else:
@@ -203,7 +203,7 @@ class StrategicQREPathTracer(object):
                                for (p, t, d) in zip(point, tangent, data) ])
 
         if game.is_symmetric:
-            p = game.mixed_profile()
+            p = game.mixed_strategy_profile()
             point = pctrace.trace_path([ math.log(x) for x in p.profile ],
                                        0.0, 1000000.0,
                                        lambda x: sym_compute_lhs(game, x),
@@ -214,7 +214,7 @@ class StrategicQREPathTracer(object):
                                        callback=callback)
 
             qre = LogitQRE(point[-1],
-                           game.mixed_profile(point=[math.exp(x) for x in point[:-1]]))
+                           game.mixed_strategy_profile(point=[math.exp(x) for x in point[:-1]]))
             return qre
         else:
             raise NotImplementedError
@@ -227,10 +227,10 @@ class StrategicQREPathTracer(object):
             into a QRE object.
             """
             return f(LogitQRE(x[-1],
-                              game.mixed_profile(point=[math.exp(z) for z in x[:-1]])))
+                              game.mixed_strategy_profile(point=[math.exp(z) for z in x[:-1]])))
             
         if game.is_symmetric:
-            p = game.mixed_profile()
+            p = game.mixed_strategy_profile()
 
             point = pctrace.trace_path([ math.log(x) for x in p.profile ],
                                        0.0, 1000000.0,
@@ -241,7 +241,7 @@ class StrategicQREPathTracer(object):
                                        maxIter=100)
 
             return LogitQRE(point[-1],
-                            game.mixed_profile(point=[math.exp(x) for x in point[:-1]]))
+                            game.mixed_strategy_profile(point=[math.exp(x) for x in point[:-1]]))
         else:
             raise NotImplementedError
         
@@ -258,7 +258,7 @@ class ExternalStrategicQREPathTracer(ExternalSolver):
         command_line = "gambit-logit -d 20 -m %f" % max_lambda
         for line in self.launch(command_line, game):
             entries = line.strip().split(",")
-            profile = game.mixed_profile()
+            profile = game.mixed_strategy_profile()
             for (i, p) in enumerate(entries[1:]):
                 profile[i] = float(p)
             profiles.append(LogitQRE(float(entries[0]), profile))
@@ -268,7 +268,7 @@ class ExternalStrategicQREPathTracer(ExternalSolver):
         command_line = "gambit-logit -d 20 -l %f" % lam
         line = list(self.launch(command_line, game))[-1]
         entries = line.strip().split(",")
-        profile = game.mixed_profile()
+        profile = game.mixed_strategy_profile()
         for (i, p) in enumerate(entries[1:]):
             profile[i] = float(p)
         return [ LogitQRE(float(entries[0]), profile) ]

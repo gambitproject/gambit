@@ -22,9 +22,9 @@
 from libcpp cimport bool
 from cython.operator cimport dereference as deref
 
-cdef class MixedBehavProfile(object):
+cdef class MixedBehaviorProfile(object):
     def __repr__(self):    return str(list(self))
-    def __richcmp__(MixedBehavProfile self, other, whichop):
+    def __richcmp__(MixedBehaviorProfile self, other, whichop):
         if whichop == 0:
             return list(self) < list(other)
         elif whichop == 1:
@@ -222,8 +222,8 @@ cdef class MixedBehavProfile(object):
     def set_centroid(self):   self.profile.SetCentroid()
     def normalize(self):      self.profile.Normalize()
 
-cdef class MixedBehavProfileDouble(MixedBehavProfile):
-    cdef c_MixedBehavProfileDouble *profile
+cdef class MixedBehaviorProfileDouble(MixedBehaviorProfile):
+    cdef c_MixedBehaviorProfileDouble *profile
 
     def __dealloc__(self):
         del self.profile
@@ -237,9 +237,9 @@ cdef class MixedBehavProfileDouble(MixedBehavProfile):
     def _getaction(self, Action index):
         return self.profile.getaction(index.action)
     def _setprob(self, int index, value):
-        setitem_MixedBehavProfileDouble(self.profile, index, value)
+        setitem_MixedBehaviorProfileDouble(self.profile, index, value)
     def _setaction(self, Action index, value):
-        setaction_MixedBehavProfileDouble(self.profile, index.action, value)
+        setaction_MixedBehaviorProfileDouble(self.profile, index.action, value)
     def _payoff(self, Player player):
         return self.profile.GetPayoff(player.player.deref().GetNumber())
     def _belief(self, Node node):
@@ -256,9 +256,9 @@ cdef class MixedBehavProfileDouble(MixedBehavProfile):
         return self.profile.GetRegret(action.action)
 
     def copy(self):
-        cdef MixedBehavProfileDouble behav
-        behav = MixedBehavProfileDouble()
-        behav.profile = new c_MixedBehavProfileDouble(deref(self.profile))
+        cdef MixedBehaviorProfileDouble behav
+        behav = MixedBehaviorProfileDouble()
+        behav.profile = new c_MixedBehaviorProfileDouble(deref(self.profile))
         return behav
     def as_strategy(self):
         cdef MixedStrategyProfileDouble mixed
@@ -276,8 +276,8 @@ cdef class MixedBehavProfileDouble(MixedBehavProfile):
             return g
 
 
-cdef class MixedBehavProfileRational(MixedBehavProfile):
-    cdef c_MixedBehavProfileRational *profile
+cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
+    cdef c_MixedBehaviorProfileRational *profile
 
     def __dealloc__(self):
         del self.profile
@@ -297,7 +297,7 @@ cdef class MixedBehavProfileRational(MixedBehavProfile):
                             value.__class__.__name__)
         t = str(value)
         s = t
-        setitem_MixedBehavProfileRational(self.profile, index, s)
+        setitem_MixedBehaviorProfileRational(self.profile, index, s)
     def _setaction(self, Action index, value):
         cdef char *s
         if not isinstance(value, (int, fractions.Fraction)):
@@ -305,7 +305,7 @@ cdef class MixedBehavProfileRational(MixedBehavProfile):
                             value.__class__.__name__)
         t = str(value)
         s = t
-        setaction_MixedBehavProfileRational(self.profile, index.action, s)
+        setaction_MixedBehaviorProfileRational(self.profile, index.action, s)
     def _payoff(self, Player player):
         return fractions.Fraction(rat_str(self.profile.GetPayoff(player.player.deref().GetNumber())).c_str())
     def _belief(self, Node node):
@@ -322,9 +322,9 @@ cdef class MixedBehavProfileRational(MixedBehavProfile):
         return fractions.Fraction(rat_str(self.profile.GetRegret(action.action)).c_str())
     
     def copy(self):
-        cdef MixedBehavProfileRational behav
-        behav = MixedBehavProfileRational()
-        behav.profile = new c_MixedBehavProfileRational(deref(self.profile))
+        cdef MixedBehaviorProfileRational behav
+        behav = MixedBehaviorProfileRational()
+        behav.profile = new c_MixedBehaviorProfileRational(deref(self.profile))
         return behav
     def as_strategy(self):
         cdef MixedStrategyProfileRational mixed

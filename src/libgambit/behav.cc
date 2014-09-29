@@ -23,8 +23,8 @@
 #include "libgambit.h"
 #include "behav.imp"
 
-template class Gambit::MixedBehavProfile<double>;
-template class Gambit::MixedBehavProfile<Gambit::Rational>;
+template class Gambit::MixedBehaviorProfile<double>;
+template class Gambit::MixedBehaviorProfile<Gambit::Rational>;
 
 
 

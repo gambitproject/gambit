@@ -63,9 +63,9 @@ class ExternalSolver(object):
             entries = line.strip().split(",")
             if entries[0] != "NE":  continue
             if extensive:
-                profile = game.behav_profile(rational=rational)
+                profile = game.mixed_behavior_profile(rational=rational)
             else:
-                profile = game.mixed_profile(rational=rational)
+                profile = game.mixed_strategy_profile(rational=rational)
             for (i, p) in enumerate(entries[1:]):
                 if rational:
                     profile[i] = Fraction(p)

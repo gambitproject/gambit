@@ -126,7 +126,7 @@ template <class T> class gbtAnalysisProfileList : public gbtAnalysisOutput {
 private:
   bool m_isBehav;
   int m_current;
-  Gambit::List<Gambit::MixedBehavProfile<T> > m_behavProfiles;
+  Gambit::List<Gambit::MixedBehaviorProfile<T> > m_behavProfiles;
   Gambit::List<Gambit::MixedStrategyProfile<T> > m_mixedProfiles;
 
 public:

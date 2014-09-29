@@ -275,14 +275,14 @@ PureStrategyProfile PureStrategyProfileRep::Unrestrict(void) const
 }
 
 //========================================================================
-//                       class PureBehavProfile
+//                       class PureBehaviorProfile
 //========================================================================
 
 //------------------------------------------------------------------------
-//                     PureBehavProfile: Lifecycle
+//                     PureBehaviorProfile: Lifecycle
 //------------------------------------------------------------------------
 
-PureBehavProfile::PureBehavProfile(Game p_efg)
+PureBehaviorProfile::PureBehaviorProfile(Game p_efg)
   : m_efg(p_efg), m_profile(m_efg->NumPlayers())
 {
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
@@ -295,22 +295,22 @@ PureBehavProfile::PureBehavProfile(Game p_efg)
 }
 
 //------------------------------------------------------------------------
-//              PureBehavProfile: Data access and manipulation
+//              PureBehaviorProfile: Data access and manipulation
 //------------------------------------------------------------------------
 
-GameAction PureBehavProfile::GetAction(const GameInfoset &infoset) const
+GameAction PureBehaviorProfile::GetAction(const GameInfoset &infoset) const
 {
   return m_profile[infoset->GetPlayer()->GetNumber()][infoset->GetNumber()];
 }
 
-void PureBehavProfile::SetAction(const GameAction &action)
+void PureBehaviorProfile::SetAction(const GameAction &action)
 {
   m_profile[action->GetInfoset()->GetPlayer()->GetNumber()]
     [action->GetInfoset()->GetNumber()] = action;
 }
 
 template <class T> 
-T PureBehavProfile::GetPayoff(const GameNode &p_node,
+T PureBehaviorProfile::GetPayoff(const GameNode &p_node,
 				 int pl) const
 {
   T payoff(0);
@@ -341,22 +341,22 @@ T PureBehavProfile::GetPayoff(const GameNode &p_node,
 }
 
 // Explicit instantiations
-template double PureBehavProfile::GetPayoff(const GameNode &, int pl) const;
-template Rational PureBehavProfile::GetPayoff(const GameNode &, int pl) const;
+template double PureBehaviorProfile::GetPayoff(const GameNode &, int pl) const;
+template Rational PureBehaviorProfile::GetPayoff(const GameNode &, int pl) const;
 
 template <class T>
-T PureBehavProfile::GetPayoff(const GameAction &p_action) const
+T PureBehaviorProfile::GetPayoff(const GameAction &p_action) const
 {
-  PureBehavProfile copy(*this);
+  PureBehaviorProfile copy(*this);
   copy.SetAction(p_action);
   return copy.GetPayoff<T>(p_action->GetInfoset()->GetPlayer()->GetNumber());
 }
 
 // Explicit instantiations
-template double PureBehavProfile::GetPayoff(const GameAction &) const;
-template Rational PureBehavProfile::GetPayoff(const GameAction &) const;
+template double PureBehaviorProfile::GetPayoff(const GameAction &) const;
+template Rational PureBehaviorProfile::GetPayoff(const GameAction &) const;
 
-bool PureBehavProfile::IsAgentNash(void) const
+bool PureBehaviorProfile::IsAgentNash(void) const
 {
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
     GamePlayer player = m_efg->GetPlayer(pl);
@@ -374,10 +374,10 @@ bool PureBehavProfile::IsAgentNash(void) const
   return true;
 }
 
-MixedBehavProfile<Rational>
-PureBehavProfile::ToMixedBehavProfile(void) const
+MixedBehaviorProfile<Rational>
+PureBehaviorProfile::ToMixedBehaviorProfile(void) const
 {
-  MixedBehavProfile<Rational> temp(m_efg);
+  MixedBehaviorProfile<Rational> temp(m_efg);
   static_cast<Vector<Rational> &>(temp) = Rational(0);
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
     GamePlayer player = m_efg->GetPlayer(pl);

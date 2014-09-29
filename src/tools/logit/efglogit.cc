@@ -185,7 +185,7 @@ void RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
 //                        AgentQREPathTracer: Lifecycle
 //------------------------------------------------------------------------------
 
-AgentQREPathTracer::AgentQREPathTracer(const MixedBehavProfile<double> &p_start) 
+AgentQREPathTracer::AgentQREPathTracer(const MixedBehaviorProfile<double> &p_start) 
   : m_start(p_start), m_fullGraph(true), m_decimals(6)
 { 
   SetTargetParam(-1.0);
@@ -212,7 +212,7 @@ AgentQREPathTracer::~AgentQREPathTracer()
 //------------------------------------------------------------------------------
 
 void 
-AgentQREPathTracer::TraceAgentPath(const MixedBehavProfile<double> &p_start,
+AgentQREPathTracer::TraceAgentPath(const MixedBehaviorProfile<double> &p_start,
 				   double p_startLambda, double p_maxLambda, 
 				   double p_omega)
 {

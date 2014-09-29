@@ -210,7 +210,7 @@ Mixed strategy and behavior profiles
 
 A :py:class:`MixedStrategyProfile` object, which represents a probability
 distribution over the pure strategies of each player, is constructed
-using :py:meth:`Game.mixed_profile`.  Mixed strategy
+using :py:meth:`Game.mixed_strategy_profile`.  Mixed strategy
 profiles are initialized to uniform randomization over all strategies
 for all players.
 
@@ -227,7 +227,7 @@ This sample illustrates the three methods::
 
   In [1]: g = gambit.Game.read_game("e02.nfg")
 
-  In [2]: p = g.mixed_profile()
+  In [2]: p = g.mixed_strategy_profile()
 
   In [3]: list(p)
   Out[3]: [0.33333333333333331, 0.33333333333333331, 0.33333333333333331, 0.5, 0.5]
@@ -251,9 +251,9 @@ all other players play according to the profile, is obtained using
   In [7]: p.strategy_value(g.players[0].strategies[2])
   Out[7]: 1.0
 
-A :py:class:`MixedBehavProfile` object, which represents a probability
+A :py:class:`MixedBehaviorProfile` object, which represents a probability
 distribution over the actions at each information set, is constructed
-using :py:meth:`Game.behav_profile`.  Behavior profiles are
+using :py:meth:`Game.mixed_behavior_profile`.  Behavior profiles are
 initialized to uniform randomization over all actions at each
 information set.
 
@@ -264,7 +264,7 @@ by that player::
 
   In [1]: g = gambit.Game.read_game("e02.efg")
 
-  In [2]: p = g.behav_profile()
+  In [2]: p = g.mixed_behavior_profile()
 
   In [3]: list(p)
   Out[3]: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
@@ -280,10 +280,10 @@ by that player::
 
 For games with a tree representation, a
 :py:class:`MixedStrategyProfile` can be converted to its equivalent
-:py:class:`MixedBehavProfile` by calling
-:py:func:`MixedStrategyProfile.as_behav`. Equally, a
-:py:class:`MixedBehavProfile` can be converted to an equivalent
-:py:class:`MixedStrategyProfile` using :py:func:`MixedBehavProfile.as_strategy`.
+:py:class:`MixedBehaviorProfile` by calling
+:py:func:`MixedStrategyProfile.as_behavior`. Equally, a
+:py:class:`MixedBehaviorProfile` can be converted to an equivalent
+:py:class:`MixedStrategyProfile` using :py:func:`MixedBehaviorProfile.as_strategy`.
 
 
 Computing Nash equilibria
@@ -349,7 +349,7 @@ player randomizes with equal probability on both strategies.
 When a game's representation is in extensive form, these solvers
 default to using the version of the algorithm which operates on the
 extensive game, where available, and returns a list of
-:py:class:`gambit.MixedBehavProfile` objects.  This can be overridden when
+:py:class:`gambit.MixedBehaviorProfile` objects.  This can be overridden when
 calling :py:meth:`solve` via the ``use_strategic`` parameter::
 
   In [1]: g = gambit.Game.read_game("e02.efg")
@@ -363,7 +363,7 @@ calling :py:meth:`solve` via the ``use_strategic`` parameter::
   Out[4]: [<NashProfile for 'Selten (IJGT, 75), Figure 2': [1.0, 0.0, 0.0, 1.0, 0.0]>]
 
 As this game is in extensive form, in the first call, the returned
-profile is a :py:class:`MixedBehavProfile`, while in the second, it
+profile is a :py:class:`MixedBehaviorProfile`, while in the second, it
 is a :py:class:`MixedStrategyProfile`.  While the set of equilibria is
 not affected by whether behavior or mixed strategies are used, the
 equilibria returned by specific solution methods may differ, when
@@ -481,7 +481,7 @@ Game representations
       :param profile: A list of integers specifying the strategy
                       number each player plays in the profile.
 
-   .. py:method:: mixed_profile(rational=False)
+   .. py:method:: mixed_strategy_profile(rational=False)
 
       Returns a mixed strategy profile :py:class:`MixedStrategyProfile`
       over the game, initialized to uniform randomization for each
@@ -494,10 +494,10 @@ Game representations
                        double-precision floating point numbers are
                        used.
 
-   .. py:method:: behav_profile(rational=False)
+   .. py:method:: mixed_behavior_profile(rational=False)
 
       Returns a behavior strategy profile
-      :py:class:`MixedBehavProfile` over the game, initialized to
+      :py:class:`MixedBehaviorProfile` over the game, initialized to
       uniform randomization for each player over his actions at each
       information set. 
 
@@ -627,7 +627,7 @@ about a plan of play of a game, by one or more players.
 
       Sets the probability ``strategy`` is played in the profile to ``prob``. 
 
-   .. py:method:: as_behav()
+   .. py:method:: as_behavior()
 
       Returns a behavior strategy profile :py:class:`BehavProfile` associated
       to the profile.
@@ -660,7 +660,7 @@ about a plan of play of a game, by one or more players.
       Lyapunov value is a non-negative number which is zero exactly at
       Nash equilibria.
 
-.. py:class:: MixedBehavProfile
+.. py:class:: MixedBehaviorProfile
 
    Represents a behavior strategy profile over a :py:class:`Game`.
 

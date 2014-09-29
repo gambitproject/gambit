@@ -1137,7 +1137,7 @@ void TreePureStrategyProfileRep::SetStrategy(const GameStrategy &s)
 
 Rational TreePureStrategyProfileRep::GetPayoff(int pl) const
 {
-  PureBehavProfile behav(m_nfg);
+  PureBehaviorProfile behav(m_nfg);
   for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
     GamePlayer player = m_nfg->GetPlayer(i);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {

@@ -39,7 +39,7 @@ public:
   T eps;
   List<GameInfoset> isets1, isets2;
   List<BFS<T> > m_list;
-  List<MixedBehavProfile<T> > m_equilibria;
+  List<MixedBehaviorProfile<T> > m_equilibria;
 
   bool AddBFS(const LTableau<T> &);
 
@@ -74,7 +74,7 @@ NashLcpBehavSolver<T>::Solution::AddBFS(const LTableau<T> &tableau)
 // problems, starting from the primary ray.  
 //
 
-template <class T> List<MixedBehavProfile<T> > 
+template <class T> List<MixedBehaviorProfile<T> > 
 NashLcpBehavSolver<T>::Solve(const BehavSupport &p_support) const
 {
   BFS<T> cbfs;
@@ -132,7 +132,7 @@ NashLcpBehavSolver<T>::Solve(const BehavSupport &p_support) const
       }
     }
     else {
-      MixedBehavProfile<T> profile(p_support);
+      MixedBehaviorProfile<T> profile(p_support);
       Vector<T> sol(tab.MinRow(),tab.MaxRow());
   
       tab.Pivot(solution.ns1+solution.ns2+1,0);
@@ -175,7 +175,7 @@ NashLcpBehavSolver<T>::AllLemke(const BehavSupport &p_support,
   T small_num = (T)1/(T)1000;
 
   Vector<T> sol(B.MinRow(),B.MaxRow());
-  MixedBehavProfile<T> profile(p_support);
+  MixedBehaviorProfile<T> profile(p_support);
 
   bool newsol = false;
   for (int i = B.MinRow(); i <= B.MaxRow() && !newsol; i++) {
@@ -291,7 +291,7 @@ void NashLcpBehavSolver<T>::FillTableau(const BehavSupport &p_support,
 template <class T>
 void NashLcpBehavSolver<T>::GetProfile(const BehavSupport &p_support,
 				       const LTableau<T> &tab, 
-				       MixedBehavProfile<T> &v, 
+				       MixedBehaviorProfile<T> &v, 
 				       const Vector<T> &sol,
 				       const GameNode &n, int s1, int s2,
 				       Solution &p_solution) const

@@ -32,7 +32,7 @@ class GameTreeRep;
 class GameTreeActionRep : public GameActionRep {
   friend class GameTreeRep;
   friend class GameTreeInfosetRep;
-  template <class T> friend class MixedBehavProfile;
+  template <class T> friend class MixedBehaviorProfile;
 
 private:
   int m_number;
@@ -61,7 +61,7 @@ class GameTreeInfosetRep : public GameInfosetRep {
   friend class GameTreeActionRep;
   friend class GamePlayerRep;
   friend class GameTreeNodeRep;
-  template <class T> friend class MixedBehavProfile;
+  template <class T> friend class MixedBehaviorProfile;
 
 protected:
   GameTreeRep *m_efg;
@@ -131,8 +131,8 @@ class GameTreeNodeRep : public GameNodeRep {
   friend class GameTreeActionRep;
   friend class GameTreeInfosetRep;
   friend class GamePlayerRep;
-  friend class PureBehavProfile;
-  template <class T> friend class MixedBehavProfile;
+  friend class PureBehaviorProfile;
+  template <class T> friend class MixedBehaviorProfile;
   
 protected:
   int number; 

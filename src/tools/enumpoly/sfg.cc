@@ -231,9 +231,9 @@ Gambit::GameAction Sfg::GetAction(int pl, int j) const
   return (*sequences)[pl]->Find(j)->GetAction();
 }
 
-Gambit::MixedBehavProfile<double> Sfg::ToBehav(const Gambit::PVector<double> &x) const
+Gambit::MixedBehaviorProfile<double> Sfg::ToBehav(const Gambit::PVector<double> &x) const
 {
-  Gambit::MixedBehavProfile<double> b(efsupp);
+  Gambit::MixedBehaviorProfile<double> b(efsupp);
 
   b = (Gambit::Rational) 0;
 

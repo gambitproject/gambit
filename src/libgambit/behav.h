@@ -28,10 +28,10 @@
 namespace Gambit {
 
 ///
-/// MixedBehavProfile<T> implements a randomized behavior profile on
+/// MixedBehaviorProfile<T> implements a randomized behavior profile on
 /// an extensive game.
 ///
-template <class T> class MixedBehavProfile : public DVector<T>  {
+template <class T> class MixedBehaviorProfile : public DVector<T>  {
 protected:
   BehavSupport m_support;
 
@@ -76,24 +76,24 @@ protected:
 public:
   /// @name Lifecycle
   //@{
-  MixedBehavProfile(const Game &);
-  MixedBehavProfile(const BehavSupport &);
-  MixedBehavProfile(const MixedBehavProfile<T> &);
-  MixedBehavProfile(const MixedStrategyProfile<T> &);
-  ~MixedBehavProfile() { }
+  MixedBehaviorProfile(const Game &);
+  MixedBehaviorProfile(const BehavSupport &);
+  MixedBehaviorProfile(const MixedBehaviorProfile<T> &);
+  MixedBehaviorProfile(const MixedStrategyProfile<T> &);
+  ~MixedBehaviorProfile() { }
 
-  MixedBehavProfile<T> &operator=(const MixedBehavProfile<T> &);
-  MixedBehavProfile<T> &operator=(const Vector<T> &p)
+  MixedBehaviorProfile<T> &operator=(const MixedBehaviorProfile<T> &);
+  MixedBehaviorProfile<T> &operator=(const Vector<T> &p)
     { Invalidate(); Vector<T>::operator=(p); return *this;}
-  MixedBehavProfile<T> &operator=(const T &x)  
+  MixedBehaviorProfile<T> &operator=(const T &x)  
     { Invalidate(); DVector<T>::operator=(x); return *this; }
 
   //@}
   
   /// @name Operator overloading
   //@{
-  bool operator==(const MixedBehavProfile<T> &) const;
-  bool operator!=(const MixedBehavProfile<T> &x) const 
+  bool operator==(const MixedBehaviorProfile<T> &) const;
+  bool operator!=(const MixedBehaviorProfile<T> &x) const 
   { return !(*this == x); }
 
   bool operator==(const DVector<T> &x) const
@@ -119,13 +119,13 @@ public:
   T &operator[](int a)
     { Invalidate();  return Array<T>::operator[](a); }
 
-  MixedBehavProfile<T> &operator+=(const MixedBehavProfile<T> &x)
+  MixedBehaviorProfile<T> &operator+=(const MixedBehaviorProfile<T> &x)
     { Invalidate();  DVector<T>::operator+=(x);  return *this; }
-  MixedBehavProfile<T> &operator+=(const DVector<T> &x)
+  MixedBehaviorProfile<T> &operator+=(const DVector<T> &x)
     { Invalidate();  DVector<T>::operator+=(x);  return *this; }
-  MixedBehavProfile<T> &operator-=(const MixedBehavProfile<T> &x)
+  MixedBehaviorProfile<T> &operator-=(const MixedBehaviorProfile<T> &x)
     { Invalidate();  DVector<T>::operator-=(x);  return *this; }
-  MixedBehavProfile<T> &operator*=(const T &x)
+  MixedBehaviorProfile<T> &operator*=(const T &x)
     { Invalidate();  DVector<T>::operator*=(x);  return *this; }
   //@}
 

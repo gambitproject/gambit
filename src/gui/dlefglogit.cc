@@ -37,7 +37,7 @@ class gbtLogitBehavList : public wxSheet {
 private:
   gbtGameDocument *m_doc;
   Gambit::List<double> m_lambdas;
-  Gambit::List<Gambit::MixedBehavProfile<double> > m_profiles;
+  Gambit::List<Gambit::MixedBehaviorProfile<double> > m_profiles;
 
   // Overriding wxSheet members for data access
   wxString GetCellValue(const wxSheetCoords &);
@@ -107,7 +107,7 @@ wxString gbtLogitBehavList::GetCellValue(const wxSheetCoords &p_coords)
 		    *wxConvCurrent);
   }
   else {
-    const Gambit::MixedBehavProfile<double> &profile = m_profiles[p_coords.GetRow()+1];
+    const Gambit::MixedBehaviorProfile<double> &profile = m_profiles[p_coords.GetRow()+1];
     return wxString(Gambit::lexical_cast<std::string>(profile[p_coords.GetCol()],
 				   m_doc->GetStyle().NumDecimals()).c_str(), 
 		    *wxConvCurrent);
@@ -176,7 +176,7 @@ void gbtLogitBehavList::AddProfile(const wxString &p_text,
     AppendCols(m_doc->GetGame()->BehavProfileLength() + 1);
   }
 
-  Gambit::MixedBehavProfile<double> profile(m_doc->GetGame());
+  Gambit::MixedBehaviorProfile<double> profile(m_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
 

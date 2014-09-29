@@ -37,14 +37,14 @@ using namespace Gambit;
 
 class AgentLyapunovFunction : public FunctionOnSimplices {
 public:
-  AgentLyapunovFunction(const MixedBehavProfile<double> &p_start)
+  AgentLyapunovFunction(const MixedBehaviorProfile<double> &p_start)
     : m_game(p_start.GetGame()), m_profile(p_start)
   { }
   virtual ~AgentLyapunovFunction() { }
 
 private:
   Game m_game;
-  mutable MixedBehavProfile<double> m_profile;
+  mutable MixedBehaviorProfile<double> m_profile;
 
   double Value(const Vector<double> &x) const;
   bool Gradient(const Vector<double> &, Vector<double> &) const;
@@ -78,13 +78,13 @@ bool AgentLyapunovFunction::Gradient(const Vector<double> &x,
 //                     class NashLiapBehavSolver
 //------------------------------------------------------------------------
 
-List<MixedBehavProfile<double> >
-NashLiapBehavSolver::Solve(const MixedBehavProfile<double> &p_start) const
+List<MixedBehaviorProfile<double> >
+NashLiapBehavSolver::Solve(const MixedBehaviorProfile<double> &p_start) const
 {
   static const double ALPHA = .00000001;
-  List<MixedBehavProfile<double> > solutions;
+  List<MixedBehaviorProfile<double> > solutions;
 
-  MixedBehavProfile<double> p(p_start);
+  MixedBehaviorProfile<double> p(p_start);
   if (m_verbose) {
     this->m_onEquilibrium->Render(p, "start");
   }
@@ -93,7 +93,7 @@ NashLiapBehavSolver::Solve(const MixedBehavProfile<double> &p_start) const
   int kk = 1;
   for (; kk <= p.Length() && p[kk] > ALPHA; kk++);
   if (kk <= p.Length()) {
-    MixedBehavProfile<double> c(p_start.GetGame());
+    MixedBehaviorProfile<double> c(p_start.GetGame());
     for (int k = 1; k <= p.Length(); k++) {
       p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
     }

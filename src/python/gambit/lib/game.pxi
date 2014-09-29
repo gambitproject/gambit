@@ -324,7 +324,7 @@ cdef class Game(object):
         return self._get_contingency(*tuple(cont))
 
 
-    def mixed_profile(self, rational=False):
+    def mixed_strategy_profile(self, rational=False):
         cdef MixedStrategyProfileDouble mspd
         cdef MixedStrategyProfileRational mspr
         cdef c_Rational dummy_rat
@@ -337,17 +337,17 @@ cdef class Game(object):
             mspr.profile = new c_MixedStrategyProfileRational(self.game.deref().NewMixedStrategyProfile(dummy_rat))
             return mspr
 
-    def behav_profile(self, rational=False):
-        cdef MixedBehavProfileDouble mbpd
-        cdef MixedBehavProfileRational mbpr
+    def mixed_behavior_profile(self, rational=False):
+        cdef MixedBehaviorProfileDouble mbpd
+        cdef MixedBehaviorProfileRational mbpr
         if self.is_tree:
             if not rational:
-                mbpd = MixedBehavProfileDouble()
-                mbpd.profile = new c_MixedBehavProfileDouble(self.game)
+                mbpd = MixedBehaviorProfileDouble()
+                mbpd.profile = new c_MixedBehaviorProfileDouble(self.game)
                 return mbpd
             else:
-                mbpr = MixedBehavProfileRational()
-                mbpr.profile = new c_MixedBehavProfileRational(self.game)
+                mbpr = MixedBehaviorProfileRational()
+                mbpr.profile = new c_MixedBehaviorProfileRational(self.game)
                 return mbpr
         else:
             raise UndefinedOperationError("Game must have a tree representation"\
@@ -371,3 +371,5 @@ cdef class Game(object):
         else:
             s.assign(format)
             return WriteGame(self.game, s).c_str()
+
+

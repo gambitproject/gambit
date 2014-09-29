@@ -90,21 +90,21 @@ setitem_MixedStrategyProfileRationalStrategy(MixedStrategyProfile<Rational> *pro
 
 
 inline void 
-setitem_MixedBehavProfileDouble(MixedBehavProfile<double> *profile,
+setitem_MixedBehaviorProfileDouble(MixedBehaviorProfile<double> *profile,
            int index, double value)
 { (*profile)[index] = value; }
 
 inline void 
-setitem_MixedBehavProfileRational(MixedBehavProfile<Rational> *profile,
+setitem_MixedBehaviorProfileRational(MixedBehaviorProfile<Rational> *profile,
            int index, const char *value)
 { (*profile)[index] = lexical_cast<Rational>(std::string(value)); }
 
 inline void 
-setaction_MixedBehavProfileDouble(MixedBehavProfile<double> *profile,
+setaction_MixedBehaviorProfileDouble(MixedBehaviorProfile<double> *profile,
            GameAction &action, double value)
 { (*profile)(action) = value; }
 
 inline void 
-setaction_MixedBehavProfileRational(MixedBehavProfile<Rational> *profile,
+setaction_MixedBehaviorProfileRational(MixedBehaviorProfile<Rational> *profile,
            GameAction &action, const char *value)
 { (*profile)(action) = lexical_cast<Rational>(std::string(value)); }

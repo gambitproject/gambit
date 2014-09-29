@@ -61,16 +61,16 @@ public:
     : NashBehavSolver<Rational>(p_onEquilibrium) { }
   virtual ~NashEnumPureAgentSolver()  { }
 
-  List<MixedBehavProfile<Rational> > Solve(const BehavSupport &) const;
+  List<MixedBehaviorProfile<Rational> > Solve(const BehavSupport &) const;
 };
 
-List<MixedBehavProfile<Rational> > 
+List<MixedBehaviorProfile<Rational> > 
 NashEnumPureAgentSolver::Solve(const BehavSupport &p_support) const
 {
-  List<MixedBehavProfile<Rational> > solutions;
+  List<MixedBehaviorProfile<Rational> > solutions;
   for (BehavIterator citer(p_support); !citer.AtEnd(); citer++) {
     if (citer->IsAgentNash()) {
-      MixedBehavProfile<Rational> profile = citer->ToMixedBehavProfile();
+      MixedBehaviorProfile<Rational> profile = citer->ToMixedBehaviorProfile();
       m_onEquilibrium->Render(profile);
       solutions.Append(profile);
     }

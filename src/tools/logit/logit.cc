@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
 
     }
     else {
-      MixedBehavProfile<double> start(game);
+      MixedBehaviorProfile<double> start(game);
       AgentQREPathTracer tracer(start);
       tracer.SetMaxDecel(maxDecel);
       tracer.SetStepsize(hStart);

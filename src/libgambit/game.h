@@ -159,7 +159,7 @@ class PureStrategyProfile;
 // Forward declarations of classes defined elsewhere.
 //
 template <class T> class MixedStrategyProfile;
-template <class T> class MixedBehavProfile;
+template <class T> class MixedBehaviorProfile;
 class StrategySupportProfile;
 
 //=======================================================================
@@ -344,7 +344,7 @@ class GameStrategyRep : public GameObject  {
   friend class StrategySupportProfile;
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class TableMixedStrategyProfileRep;
-  template <class T> friend class MixedBehavProfile;
+  template <class T> friend class MixedBehaviorProfile;
 
 private:
   int m_number, m_id;
@@ -399,7 +399,7 @@ class GamePlayerRep : public GameObject {
   friend class GameStrategyRep;
   friend class GameTreeNodeRep;
   friend class StrategySupportProfile;
-  template <class T> friend class MixedBehavProfile;
+  template <class T> friend class MixedBehaviorProfile;
   template <class T> friend class MixedStrategyProfile;
 
   /// @name Building reduced form strategies
@@ -607,7 +607,7 @@ public:
 /// This class represents a behavior profile on an extensive game.
 /// It specifies exactly one strategy for each information set in the
 /// game.
-class PureBehavProfile {
+class PureBehaviorProfile {
 private:
   Game m_efg;
   Array<Array<GameAction> > m_profile;
@@ -616,7 +616,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Construct a new behavior profile on the specified game
-  PureBehavProfile(Game);
+  PureBehaviorProfile(Game);
 
   /// @name Data access and manipulation
   //@{
@@ -640,7 +640,7 @@ public:
   bool IsAgentNash(void) const;
 
   /// Convert to a mixed behavior representation
-  MixedBehavProfile<Rational> ToMixedBehavProfile(void) const;
+  MixedBehaviorProfile<Rational> ToMixedBehaviorProfile(void) const;
   //@}
 };
 
@@ -652,7 +652,7 @@ class GameRep : public GameObject {
   friend class GameTreeNodeRep;
   friend class PureStrategyProfileRep;
   friend class TablePureStrategyProfileRep;
-  template <class T> friend class MixedBehavProfile;
+  template <class T> friend class MixedBehaviorProfile;
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class TableMixedStrategyProfileRep;
 
@@ -824,13 +824,13 @@ inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 inline const GameStrategyArray &GamePlayerRep::Strategies(void) const
 { m_game->BuildComputedValues(); return m_strategies; }
 
-template<> inline double PureBehavProfile::GetPayoff(int pl) const
+template<> inline double PureBehaviorProfile::GetPayoff(int pl) const
 { return GetPayoff<double>(m_efg->GetRoot(), pl); }
 
-template<> inline Rational PureBehavProfile::GetPayoff(int pl) const
+template<> inline Rational PureBehaviorProfile::GetPayoff(int pl) const
 { return GetPayoff<Rational>(m_efg->GetRoot(), pl); }
 
-template<> inline std::string PureBehavProfile::GetPayoff(int pl) const
+template<> inline std::string PureBehaviorProfile::GetPayoff(int pl) const
 { return lexical_cast<std::string>(GetPayoff<Rational>(m_efg->GetRoot(), pl)); }
 
 //=======================================================================

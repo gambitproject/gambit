@@ -94,12 +94,12 @@ RandomStrategyProfiles(const Game &p_game, int p_count)
   return profiles;
 }
 
-List<MixedBehavProfile<double> > 
+List<MixedBehaviorProfile<double> > 
 ReadBehaviorProfiles(const Game &p_game, std::istream &p_stream)
 {
-  List<MixedBehavProfile<double> > profiles;
+  List<MixedBehaviorProfile<double> > profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
-    MixedBehavProfile<double> p(p_game);
+    MixedBehaviorProfile<double> p(p_game);
     for (int i = 1; i <= p.Length(); i++) {
       if (p_stream.eof() || p_stream.bad()) {
 	break;
@@ -118,12 +118,12 @@ ReadBehaviorProfiles(const Game &p_game, std::istream &p_stream)
   return profiles;
 }
 
-List<MixedBehavProfile<double> > 
+List<MixedBehaviorProfile<double> > 
 RandomBehaviorProfiles(const Game &p_game, int p_count)
 {
-  List<MixedBehavProfile<double> > profiles;
+  List<MixedBehaviorProfile<double> > profiles;
   for (int i = 1; i <= p_count; i++) {
-    MixedBehavProfile<double> p(p_game);
+    MixedBehaviorProfile<double> p(p_game);
     p.Randomize();
     profiles.push_back(p);
   }
@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
       }
     }
     else {
-      List<MixedBehavProfile<double> > starts;
+      List<MixedBehaviorProfile<double> > starts;
       if (startFile != "") {
 	std::ifstream startPoints(startFile.c_str());
 	starts = ReadBehaviorProfiles(game, startPoints);

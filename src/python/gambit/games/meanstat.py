@@ -154,8 +154,8 @@ class MeanStatisticGame(object):
     def __setitem__(self, key, value):
         raise NotImplementedError
 
-    def mixed_profile(self, point=None):
-        return MixedProfile(self, point)
+    def mixed_strategy_profile(self, point=None):
+        return MixedStrategyProfile(self, point)
 
     def to_table(self):
         g = gambit.new_table([ len(self.choices) ] * self.N)
@@ -170,9 +170,8 @@ class MeanStatisticGame(object):
         return g
 
 
-class MixedProfile(object):
-    """
-    A (symmetric) mixed strategy profile on a mean statistic game
+class MixedStrategyProfile(object):
+    """A (symmetric) mixed strategy profile on a mean statistic game.
     """
     def __init__(self, game, profile=None):
         self.game = game
@@ -191,7 +190,7 @@ class MixedProfile(object):
                 ", ".join([ str(self[i]) for i in xrange(len(self)) ]))
 
     def __rmul__(self, fac):
-        p = self.game.mixed_profile()
+        p = self.game.mixed_strategy_profile()
         for i in xrange(len(self)):
             p[i] = fac * self[i]
         return p
@@ -199,7 +198,7 @@ class MixedProfile(object):
     def __add__(self, other):
         if not hasattr(other, "game") or other.game != self.game:
             raise ValueError, "adding a non-MixedProfile to a MixedProfile"
-        p = self.game.mixed_profile()
+        p = self.game.mixed_strategy_profile()
         for i in xrange(len(self)):
             p[i] = self[i] + other[i]
         return p

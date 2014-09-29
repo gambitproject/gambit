@@ -8,14 +8,14 @@ class TestGambitStrategicRestriction(object):
     def setUp(self):
         self.game = gambit.Game.read_game("test_games/mixed_strategy.nfg")
         
-        self.profile_double = self.game.mixed_profile()
-        self.profile_rational = self.game.mixed_profile(True)
+        self.profile_double = self.game.mixed_strategy_profile()
+        self.profile_rational = self.game.mixed_strategy_profile(True)
         self.restriction = self.profile_double.restriction()
 
         self.tree_game = gambit.Game.read_game("test_games/mixed_behavior_game.efg")
 
-        self.tree_profile_double = self.tree_game.mixed_profile()
-        self.tree_profile_rational = self.tree_game.mixed_profile(True)
+        self.tree_profile_double = self.tree_game.mixed_strategy_profile()
+        self.tree_profile_rational = self.tree_game.mixed_strategy_profile(True)
         self.tree_restriction = self.tree_profile_double.restriction()
 
         

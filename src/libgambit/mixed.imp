@@ -120,7 +120,7 @@ template <class T> void MixedStrategyProfileRep<T>::Randomize(int p_denom)
 //========================================================================
 
 template <class T>
-TreeMixedStrategyProfileRep<T>::TreeMixedStrategyProfileRep(const MixedBehavProfile<T> &p_profile)
+TreeMixedStrategyProfileRep<T>::TreeMixedStrategyProfileRep(const MixedBehaviorProfile<T> &p_profile)
   : MixedStrategyProfileRep<T>(p_profile.GetGame())
 { }
 
@@ -133,7 +133,7 @@ MixedStrategyProfileRep<T> *TreeMixedStrategyProfileRep<T>::Copy(void) const
 template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   MixedStrategyProfile<T> profile(Copy());
-  return MixedBehavProfile<T>(profile).GetPayoff(pl);
+  return MixedBehaviorProfile<T>(profile).GetPayoff(pl);
 }
 
 template <class T> T
@@ -483,7 +483,7 @@ T BagentMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &p
 //========================================================================
 
 template <class T>
-MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehavProfile<T> &p_profile)
+MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehaviorProfile<T> &p_profile)
   : m_rep(new TreeMixedStrategyProfileRep<T>(p_profile))
 {
   Game game = p_profile.GetGame();

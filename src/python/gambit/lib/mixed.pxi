@@ -179,13 +179,13 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
         mixed = MixedStrategyProfileDouble()
         mixed.profile = new c_MixedStrategyProfileDouble(deref(self.profile))
         return mixed
-    def as_behav(self):
-        cdef MixedBehavProfileDouble behav
+    def as_behavior(self):
+        cdef MixedBehaviorProfileDouble behav
         if not self.game.is_tree:
             raise UndefinedOperationError("Mixed behavior profiles are not "\
                                           "defined for strategic games")
-        behav = MixedBehavProfileDouble()
-        behav.profile = new c_MixedBehavProfileDouble(deref(self.profile))
+        behav = MixedBehaviorProfileDouble()
+        behav.profile = new c_MixedBehaviorProfileDouble(deref(self.profile))
         return behav
     def restriction(self):
         cdef StrategicRestriction s
@@ -251,13 +251,13 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
         mixed = MixedStrategyProfileRational()
         mixed.profile = new c_MixedStrategyProfileRational(deref(self.profile))
         return mixed
-    def as_behav(self):
-        cdef MixedBehavProfileRational behav
+    def as_behavior(self):
+        cdef MixedBehaviorProfileRational behav
         if not self.game.is_tree:
             raise UndefinedOperationError("Mixed behavior profiles are not "\
                                           "defined for strategic games")
-        behav = MixedBehavProfileRational()
-        behav.profile = new c_MixedBehavProfileRational(deref(self.profile))
+        behav = MixedBehaviorProfileRational()
+        behav.profile = new c_MixedBehaviorProfileRational(deref(self.profile))
         return behav
     def restriction(self):
         cdef StrategicRestriction s

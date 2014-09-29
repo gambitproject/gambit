@@ -70,10 +70,10 @@ OutputToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
   throw gbtNotNashException();
 }
 
-template <class T> MixedBehavProfile<T>
+template <class T> MixedBehaviorProfile<T>
 OutputToBehavProfile(gbtGameDocument *p_doc, const wxString &p_text)
 {
-  MixedBehavProfile<T> profile(p_doc->GetGame());
+  MixedBehaviorProfile<T> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
 
@@ -97,7 +97,7 @@ gbtAnalysisProfileList<T>::AddOutput(const wxString &p_output)
 {
   try {
     if (m_isBehav) {
-      MixedBehavProfile<T> profile(OutputToBehavProfile<T>(m_doc, p_output));
+      MixedBehaviorProfile<T> profile(OutputToBehavProfile<T>(m_doc, p_output));
       m_behavProfiles.Append(profile);
       m_mixedProfiles.Append(profile.ToMixedProfile());
       m_current = m_behavProfiles.Length();
@@ -107,7 +107,7 @@ gbtAnalysisProfileList<T>::AddOutput(const wxString &p_output)
 							      p_output));
       m_mixedProfiles.Append(profile);
       if (m_doc->IsTree()) {
-	m_behavProfiles.Append(MixedBehavProfile<T>(profile));
+	m_behavProfiles.Append(MixedBehaviorProfile<T>(profile));
       }
       m_current = m_mixedProfiles.Length();
     }
@@ -137,7 +137,7 @@ int gbtAnalysisProfileList<T>::NumProfiles(void) const
 template <class T>
 void gbtAnalysisProfileList<T>::Clear(void)
 {
-  m_behavProfiles = List<MixedBehavProfile<T> >();
+  m_behavProfiles = List<MixedBehaviorProfile<T> >();
   m_mixedProfiles = List<MixedStrategyProfile<T> >();
   m_current = 0;
 }
@@ -163,10 +163,10 @@ TextToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
   return profile;
 }
 
-template <class T> MixedBehavProfile<T> 
+template <class T> MixedBehaviorProfile<T> 
 TextToBehavProfile(gbtGameDocument *p_doc, const wxString &p_text)
 {
-  MixedBehavProfile<T> profile(p_doc->GetGame());
+  MixedBehaviorProfile<T> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
   for (int i = 1; i <= profile.Length(); i++) {
@@ -197,7 +197,7 @@ void gbtAnalysisProfileList<T>::Load(TiXmlNode *p_analysis)
        node = node->NextSiblingElement()) {
     const char *type = node->ToElement()->Attribute("type");
     if (!strcmp(type, "behav")) {
-      MixedBehavProfile<T> profile = 
+      MixedBehaviorProfile<T> profile = 
 	TextToBehavProfile<T>(m_doc,
 			      wxString(node->FirstChild()->Value(),
 				       *wxConvCurrent));
@@ -344,7 +344,7 @@ gbtAnalysisProfileList<T>::GetActionProb(const GameNode &p_node, int p_act,
   if (!p_node->GetPlayer())  return "";
   
   try {
-    const MixedBehavProfile<T> &profile = m_behavProfiles[index];
+    const MixedBehaviorProfile<T> &profile = m_behavProfiles[index];
 
     if (!profile.IsDefinedAt(p_node->GetInfoset())) {
       return "*";
@@ -364,7 +364,7 @@ gbtAnalysisProfileList<T>::GetActionProb(int p_action, int p_index) const
   int index = (p_index == -1) ? m_current : p_index;
 
   try {
-    const MixedBehavProfile<T> &profile = m_behavProfiles[index];
+    const MixedBehaviorProfile<T> &profile = m_behavProfiles[index];
 
     if (!profile.IsDefinedAt(profile.GetGame()->GetAction(p_action)->GetInfoset())) {
       return "*";
@@ -441,7 +441,7 @@ gbtAnalysisProfileList<T>::Save(std::ostream &p_file) const
 
   if (m_doc->IsTree()) {
     for (int j = 1; j <= NumProfiles(); j++) {
-      const MixedBehavProfile<T> &behav = m_behavProfiles[j];
+      const MixedBehaviorProfile<T> &behav = m_behavProfiles[j];
       p_file << "<profile type=\"behav\">\n";
       for (int k = 1; k <= behav.Length(); k++) {
 	p_file << behav[k];

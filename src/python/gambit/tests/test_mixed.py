@@ -11,13 +11,13 @@ class TestGambitMixedStrategyGame(object):
         self.game.players[1].label = "dan"
         self.game.players["dan"].strategies[1].label = "defect"
         
-        self.profile_double = self.game.mixed_profile()
-        self.profile_rational = self.game.mixed_profile(True)
+        self.profile_double = self.game.mixed_strategy_profile()
+        self.profile_rational = self.game.mixed_strategy_profile(True)
 
         self.tree_game = gambit.Game.read_game("test_games/mixed_behavior_game.efg")
 
-        self.tree_profile_double = self.tree_game.mixed_profile()
-        self.tree_profile_rational = self.tree_game.mixed_profile(True)
+        self.tree_profile_double = self.tree_game.mixed_strategy_profile()
+        self.tree_profile_rational = self.tree_game.mixed_strategy_profile(True)
 
         
     def tearDown(self):
@@ -94,8 +94,8 @@ class TestGambitMixedStrategyGame(object):
 
     def test_as_behav_tree(self):
         "Test converting the profile to a behavior one"
-        behav_double = self.tree_profile_double.as_behav()
-        behav_rational = self.tree_profile_rational.as_behav()
+        behav_double = self.tree_profile_double.as_behavior()
+        behav_rational = self.tree_profile_rational.as_behavior()
 
         assert behav_double[0] == self.tree_profile_double[0]
         assert behav_double[1] == self.tree_profile_double[1]
@@ -113,6 +113,6 @@ class TestGambitMixedStrategyGame(object):
 
     def test_as_behav_error(self):  
         "Test raising an error when trying to convert a profile from a strategic game"
-        assert_raises(UndefinedOperationError, self.profile_double.as_behav)
-        assert_raises(UndefinedOperationError, self.profile_rational.as_behav)
+        assert_raises(UndefinedOperationError, self.profile_double.as_behavior)
+        assert_raises(UndefinedOperationError, self.profile_rational.as_behavior)
 

@@ -60,7 +60,7 @@ public:
   TreeMixedStrategyProfileRep(const StrategySupportProfile &p_support)
     : MixedStrategyProfileRep<T>(p_support)
   { }
-  TreeMixedStrategyProfileRep(const MixedBehavProfile<T> &);
+  TreeMixedStrategyProfileRep(const MixedBehaviorProfile<T> &);
   virtual ~TreeMixedStrategyProfileRep() { }
   
   virtual MixedStrategyProfileRep<T> *Copy(void) const;
@@ -145,7 +145,7 @@ template <class T> class MixedStrategyProfile {
   friend class GameBagentRep;
   friend class GameTableRep;
   friend class GameTreeRep;
-  friend class MixedBehavProfile<T>;
+  friend class MixedBehaviorProfile<T>;
 private:
   MixedStrategyProfileRep<T> *m_rep;
 
@@ -153,7 +153,7 @@ private:
     : m_rep(p_rep)
   { }
   /// Convert a behavior strategy profile to a mixed strategy profile
-  MixedStrategyProfile(const MixedBehavProfile<T> &);
+  MixedStrategyProfile(const MixedBehaviorProfile<T> &);
 
 public:
   /// @name Lifecycle

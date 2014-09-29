@@ -37,7 +37,7 @@ public:
       m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth) { }
   virtual ~NashLcpBehavSolver()  { }
 
-  virtual List<MixedBehavProfile<T> > Solve(const BehavSupport &) const;
+  virtual List<MixedBehaviorProfile<T> > Solve(const BehavSupport &) const;
 
 private:
   int m_stopAfter, m_maxDepth;
@@ -49,7 +49,7 @@ private:
   void AllLemke(const BehavSupport &, int dup, LTableau<T> &B,
 	       int depth, Matrix<T> &, Solution &) const; 
   void GetProfile(const BehavSupport &, const LTableau<T> &tab, 
-		  MixedBehavProfile<T> &, const Vector<T> &, 
+		  MixedBehaviorProfile<T> &, const Vector<T> &, 
 		  const GameNode &n, int, int,
 		  Solution &) const;
 };

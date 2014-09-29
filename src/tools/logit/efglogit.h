@@ -30,11 +30,11 @@ class Equation;
 
 class AgentQREPathTracer : public PathTracer {
 public:
-  AgentQREPathTracer(const MixedBehavProfile<double> &p_start);
+  AgentQREPathTracer(const MixedBehaviorProfile<double> &p_start);
   virtual ~AgentQREPathTracer();
 
   void 
-  TraceAgentPath(const MixedBehavProfile<double> &p_start,
+  TraceAgentPath(const MixedBehaviorProfile<double> &p_start,
 		 double p_startLambda, double p_maxLambda, double p_omega);
 
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
@@ -54,7 +54,7 @@ protected:
   virtual void GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix);
 
 private:
-  MixedBehavProfile<double> m_start;
+  MixedBehaviorProfile<double> m_start;
   Array<Equation *> m_equations;
   bool m_fullGraph;
   int m_decimals;

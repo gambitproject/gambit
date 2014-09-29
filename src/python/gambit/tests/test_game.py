@@ -88,10 +88,10 @@ class TestGambitGame(object):
         assert not game.is_perfect_recall
 
     def test_game_behav_profile_error(self):
-        "To test raising an error when trying to create a BehavProfile from \
+        "To test raising an error when trying to create a MixedBehavProfile from \
         a game without a tree representation"
-        assert_raises(UndefinedOperationError, self.game.behav_profile)
-        assert_raises(UndefinedOperationError, self.game.behav_profile, True)
+        assert_raises(UndefinedOperationError, self.game.mixed_behavior_profile)
+        assert_raises(UndefinedOperationError, self.game.mixed_behavior_profile, True)
 
     def test_game_title(self):
         assert self.game.title == ""

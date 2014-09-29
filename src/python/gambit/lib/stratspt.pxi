@@ -33,7 +33,7 @@ cdef class StrategySupportProfile(Collection):
     def __init__(self, strategies, Game game not None):
        self.support = (<c_StrategySupportProfile *>0)  
        if self.is_valid(strategies, len(game.players)):
-            temp_restriction = <StrategicRestriction>game.mixed_profile().restriction()
+            temp_restriction = <StrategicRestriction>game.mixed_strategy_profile().restriction()
             self.support = new c_StrategySupportProfile(deref(temp_restriction.support))
             for strategy in game.strategies:
                 if strategy not in strategies:
@@ -341,7 +341,7 @@ cdef class StrategicRestriction(BaseGame):
                 raise TypeError("Must use a tuple of ints, strategy labels, or strategies")
         return self._get_contingency(*tuple(cont))
 
-    def mixed_profile(self, rational=False):
+    def mixed_strategy_profile(self, rational=False):
         cdef MixedStrategyProfileDouble mspd
         cdef MixedStrategyProfileRational mspr
         cdef c_Rational dummy_rat
