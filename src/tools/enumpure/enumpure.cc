@@ -220,10 +220,6 @@ int main(int argc, char *argv[])
     }
     return 0;
   }
-  catch (InvalidFileException) {
-    std::cerr << "Error: Game not in a recognized format.\n";
-    return 1;
-  }
   catch (std::runtime_error &e) {
     std::cerr << "Error: " << e.what() << std::endl;
     return 1;

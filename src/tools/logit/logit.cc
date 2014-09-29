@@ -233,13 +233,8 @@ int main(int argc, char *argv[])
     }
     return 0;
   }
-  catch (Gambit::InvalidFileException e) {
-    std::cerr << "Error: Game not in a recognized format.\n";
-    if(!quiet) std::cerr<<e.what()<<endl;
-    return 1;
-  }
-  catch (...) {
-    std::cerr << "Error: An internal error occurred.\n";
+  catch (std::runtime_error &e) {
+    std::cerr << "Error: " << e.what() << std::endl;
     return 1;
   }
 }
