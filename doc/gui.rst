@@ -228,22 +228,17 @@ nonterminal node and dragging to any terminal node implements a move
 operation, which moves the entire subtree rooted at the original,
 nonterminal node to the terminal node.
 
-When this same operation is done while holding down the Control 
-(:kbd:`Ctrl`) key on the keyboard, the operation is turned into a copy
-operation. The entire subtree rooted at the original node is copied,
+To turn the operation into a copy operation:
+
++ On Windows and Linux systems, hold down the :kbd:`Ctrl` key during
+  the operation.
++ On OS X, hold down the :kbd:`Cmd` key when starting the
+  drag operation, then release prior to dropping.
+
+The entire subtree rooted at the original node is copied,
 starting at the terminal node. In this copy operation, each node in
 the copied image is placed in the same information set as the
 corresponding node in the original subtree.
-
-
-See the poker tutorial on the Gambit website
-(`flash version 
-<http://www.gambit-project.org/doc/tutorials/poker.swf>`_;
-`PDF version
-<http://www.gambit-project.org/doc/tutorials/poker.pdf>`_)
-for how this can be used
-to good effect in speeding up the building of games.
-
 
 Copying a subtree to a terminal node in that subtree is also
 supported. In this case, the copying operation is halted when reaching
