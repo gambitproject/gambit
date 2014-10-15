@@ -155,18 +155,16 @@ NashLcpStrategySolver<T>::Solve(const Game &p_game) const
     LHTableau<T> B(A1, A2, b1, b2);
 
     if (m_stopAfter != 1) {
-      try {
-	AllLemke(p_game, 0, B, solution, 0);
-      }
-      catch (NashEquilibriumLimitReached &) {
-	// This pseudo-exception requires no additional action;
-	// solution contains details of all equilibria found
-      }
+      AllLemke(p_game, 0, B, solution, 0);
     }
     else  {
       B.LemkePath(1);
       OnBFS(p_game, B, solution);
     }
+  }
+  catch (NashEquilibriumLimitReached &) {
+    // This pseudo-exception requires no additional action;
+    // solution contains details of all equilibria found
   }
   catch (std::runtime_error &e) {
     std::cerr << "ERROR: " << e.what() << std::endl;
