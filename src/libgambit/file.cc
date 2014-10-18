@@ -1050,7 +1050,6 @@ Game GameXMLSavefile::GetGame(void) const
 
 Game ReadGame(std::istream &p_file) throw (InvalidFileException)
 {
-  std::streampos pos = p_file.tellg();
   std::stringstream buffer;
   buffer << p_file.rdbuf();
   try {
@@ -1058,10 +1057,10 @@ Game ReadGame(std::istream &p_file) throw (InvalidFileException)
     return doc.GetGame();
   }
   catch (InvalidFileException) {
-    p_file.seekg(pos);
+    buffer.seekg(0, std::ios::beg);
   }
 
-  GameParserState parser(p_file);
+  GameParserState parser(buffer);
   try {
     if (parser.GetNextToken() != TOKEN_SYMBOL) {
       throw InvalidFileException(parser.CreateLineMsg("Expecting file type"));
