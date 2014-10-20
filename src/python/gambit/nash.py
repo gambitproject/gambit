@@ -80,6 +80,8 @@ class ExternalEnumPureSolver(ExternalSolver):
     for computing pure-strategy equilibria.
     """
     def solve(self, game, use_strategic=False):
+        if not game.is_perfect_recall:
+            raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         command_line = "gambit-enumpure"
         if use_strategic and game.is_tree:
             command_line += " -S"
@@ -93,6 +95,8 @@ class ExternalLPSolver(ExternalSolver):
     for computing equilibria in two-player games using linear programming.
     """
     def solve(self, game, rational=False, use_strategic=False):
+        if not game.is_perfect_recall:
+            raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         if rational:
             command_line = "gambit-lp"
         else:
@@ -110,6 +114,8 @@ class ExternalLCPSolver(ExternalSolver):
     programming.
     """
     def solve(self, game, rational=False, use_strategic=False):
+        if not game.is_perfect_recall:
+            raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         if rational:
             command_line = "gambit-lcp"
         else:
@@ -126,6 +132,8 @@ class ExternalEnumMixedSolver(ExternalSolver):
     for computing equilibria in two-player games using enumeration of extreme points.
     """
     def solve(self, game, rational=False):
+        if not game.is_perfect_recall:
+            raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         if rational:
             command_line = "gambit-enummixed"
         else:
@@ -139,6 +147,8 @@ class ExternalSimpdivSolver(ExternalSolver):
     for computing equilibria in N-player games using simpicial subdivision.
     """
     def solve(self, game):
+        if not game.is_perfect_recall:
+            raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         command_line = "gambit-simpdiv"
         return self._parse_output(self.launch(command_line, game),
                                   game, rational=True)
@@ -149,6 +159,8 @@ class ExternalGlobalNewtonSolver(ExternalSolver):
     for computing equilibria in N-player games using the global Newton method.
     """
     def solve(self, game):
+        if not game.is_perfect_recall:
+            raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         command_line = "gambit-gnm -d 10"
         return self._parse_output(self.launch(command_line, game),
                                   game, rational=False)
@@ -159,6 +171,8 @@ class ExternalEnumPolySolver(ExternalSolver):
     for computing equilibria in N-player games systems of polynomial equations.
     """
     def solve(self, game, use_strategic=False):
+        if not game.is_perfect_recall:
+            raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         command_line = "gambit-enumpoly -d 10"
         if use_strategic and game.is_tree:
             command_line += " -S"
@@ -172,6 +186,8 @@ class ExternalLyapunovSolver(ExternalSolver):
     for computing equilibria in N-player games using Lyapunov function minimization.
     """
     def solve(self, game, use_strategic=False):
+        if not game.is_perfect_recall:
+            raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         command_line = "gambit-liap -d 10"
         if use_strategic and game.is_tree:
             command_line += " -S"
@@ -185,6 +201,8 @@ class ExternalIteratedPolymatrixSolver(ExternalSolver):
     for computing equilibria in N-player games using iterated polymatrix approximation.
     """
     def solve(self, game):
+        if not game.is_perfect_recall:
+            raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         command_line = "gambit-ipa -d 10"
         return self._parse_output(self.launch(command_line, game),
                                   game, rational=False)
@@ -195,6 +213,8 @@ class ExternalLogitSolver(ExternalSolver):
     for computing equilibria in N-player games using quantal response equilibrium.
     """
     def solve(self, game, use_strategic=False):
+        if not game.is_perfect_recall:
+            raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         profiles = [ ]
         command_line = "gambit-logit -d 20 -e"
         if use_strategic and game.is_tree:

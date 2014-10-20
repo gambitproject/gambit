@@ -328,6 +328,8 @@ cdef class Game(object):
         cdef MixedStrategyProfileDouble mspd
         cdef MixedStrategyProfileRational mspr
         cdef c_Rational dummy_rat
+        if not self.is_perfect_recall:
+            raise UndefinedOperationError("Mixed strategies not supported for games with imperfect recall.")
         if not rational:
             mspd = MixedStrategyProfileDouble()
             mspd.profile = new c_MixedStrategyProfileDouble(self.game.deref().NewMixedStrategyProfile(0.0))

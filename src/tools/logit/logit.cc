@@ -175,13 +175,15 @@ int main(int argc, char *argv[])
   try {
     Gambit::Array<double> frequencies;
     Gambit::Game game = Gambit::ReadGame(*input_stream);
+    if (!game->IsPerfectRecall()) {
+      throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+    }
 
     if (mleFile != "" && (!game->IsTree() || useStrategic)) {
       frequencies = Gambit::Array<double>(game->MixedProfileLength());
       std::ifstream mleData(mleFile.c_str());
       ReadProfile(mleData, frequencies);
     }
-  
 
     if (!game->IsTree() || useStrategic) {
       if (startFile == "") {

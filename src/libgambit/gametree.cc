@@ -1065,21 +1065,33 @@ int GameTreeRep::NumNodes(void) const
 
 MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double) const
 {
+  if (!this->IsPerfectRecall()) {
+    throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
+  }    
   return StrategySupportProfile(const_cast<GameTreeRep *>(this)).NewMixedStrategyProfile<double>();
 }
 
 MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Rational &) const
 {
+  if (!this->IsPerfectRecall()) {
+    throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
+  }    
   return StrategySupportProfile(const_cast<GameTreeRep *>(this)).NewMixedStrategyProfile<Rational>();
 }
 
 MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double, const StrategySupportProfile& spt) const
 {
+  if (!this->IsPerfectRecall()) {
+    throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
+  }    
   return new TreeMixedStrategyProfileRep<double>(spt);
 }
 
 MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfile& spt) const
 {
+  if (!this->IsPerfectRecall()) {
+    throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
+  }    
   return new TreeMixedStrategyProfileRep<Rational>(spt);
 }
 

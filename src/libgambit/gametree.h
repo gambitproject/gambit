@@ -231,6 +231,7 @@ public:
   //@{
   virtual bool IsTree(void) const { return true; }
   virtual bool IsConstSum(void) const;
+  using GameRep::IsPerfectRecall;
   virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const;
   //@}
 

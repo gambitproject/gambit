@@ -169,8 +169,9 @@ class StrategySupportProfile;
 /// Exception thrown when an operation that is undefined is attempted
 class UndefinedException : public Exception {
 public:
+  UndefinedException(void) : Exception("Undefined operation on game") { }
+  UndefinedException(const std::string &s) : Exception(s) { }
   virtual ~UndefinedException() throw() { }
-  const char *what(void) const throw()   { return "Undefined operation on game"; }
 };
 
 /// Exception thrown on an operation between incompatible objects
