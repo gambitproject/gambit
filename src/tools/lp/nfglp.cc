@@ -84,6 +84,16 @@ NashLpStrategySolver<T>::SolveLP(const Matrix<T> &A,
 template <class T> List<MixedStrategyProfile<T> > 
 NashLpStrategySolver<T>::Solve(const Game &p_game) const
 {
+  if (p_game->NumPlayers() != 2) {
+    throw UndefinedException("Method only valid for two-player games.");
+  }
+  if (!p_game->IsConstSum()) {
+    throw UndefinedException("Method only valid for constant-sum games.");
+  }
+  if (!p_game->IsPerfectRecall()) {
+    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+  }
+
   int m = p_game->Players()[1]->Strategies().size();
   int k = p_game->Players()[2]->Strategies().size();
 

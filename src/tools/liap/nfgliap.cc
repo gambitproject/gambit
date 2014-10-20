@@ -110,6 +110,10 @@ double StrategicLyapunovFunction::Value(const Vector<double> &v) const
 List<MixedStrategyProfile<double> > 
 NashLiapStrategySolver::Solve(const MixedStrategyProfile<double> &p_start) const
 {
+  if (!p_start.GetGame()->IsPerfectRecall()) {
+    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+  }
+
   static const double ALPHA = .00000001;
   List<MixedStrategyProfile<double> > solutions;
 

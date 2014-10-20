@@ -95,6 +95,10 @@ class ExternalLPSolver(ExternalSolver):
     for computing equilibria in two-player games using linear programming.
     """
     def solve(self, game, rational=False, use_strategic=False):
+        if len(game.players) != 2:
+            raise RuntimeError("Method only valid for two-player games.")
+        if not game.is_const_sum:
+            raise RuntimeError("Method only valid for constant-sum games.")
         if not game.is_perfect_recall:
             raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         if rational:
@@ -114,6 +118,8 @@ class ExternalLCPSolver(ExternalSolver):
     programming.
     """
     def solve(self, game, rational=False, use_strategic=False):
+        if len(game.players) != 2:
+            raise RuntimeError("Method only valid for two-player games.")
         if not game.is_perfect_recall:
             raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         if rational:

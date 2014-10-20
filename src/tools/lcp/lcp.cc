@@ -137,14 +137,6 @@ int main(int argc, char *argv[])
 
   try {
     Game game = ReadGame(*input_stream);
-    if (game->NumPlayers() != 2) {
-      std::cerr << "Error: Game does not have two players.\n";
-      return 1;
-    }
-    if (!game->IsPerfectRecall()) {
-      throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
-    }
-
     if (!game->IsTree() || useStrategic) {
       if (useFloat) {
 	shared_ptr<StrategyProfileRenderer<double> > renderer;

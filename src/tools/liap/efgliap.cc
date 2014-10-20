@@ -81,6 +81,10 @@ bool AgentLyapunovFunction::Gradient(const Vector<double> &x,
 List<MixedBehaviorProfile<double> >
 NashLiapBehavSolver::Solve(const MixedBehaviorProfile<double> &p_start) const
 {
+  if (!p_start.GetGame()->IsPerfectRecall()) {
+    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+  }
+
   static const double ALPHA = .00000001;
   List<MixedBehaviorProfile<double> > solutions;
 

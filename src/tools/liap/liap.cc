@@ -205,9 +205,6 @@ int main(int argc, char *argv[])
 
   try {
     Game game = ReadGame(*input_stream);
-    if (!game->IsPerfectRecall()) {
-      throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
-    }
     if (!game->IsTree() || useStrategic) {
       List<MixedStrategyProfile<double> > starts;
       if (startFile != "") {

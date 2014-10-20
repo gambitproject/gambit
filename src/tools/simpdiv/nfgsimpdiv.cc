@@ -567,6 +567,9 @@ Integer find_lcd(const Vector<Rational> &vec)
 List<MixedStrategyProfile<Rational> >
 NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) const
 {
+  if (!p_start.GetGame()->IsPerfectRecall()) {
+    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+  }
   Integer k = find_lcd((const Vector<Rational> &) p_start);
   Rational d = Rational(1, k);
     
@@ -696,9 +699,6 @@ int main(int argc, char *argv[])
 
   try {
     Game game = ReadGame(*input_stream);
-    if (!game->IsPerfectRecall()) {
-      throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
-    }
     List<MixedStrategyProfile<Rational> > starts;
     if (startFile != "") {
       std::ifstream startPoints(startFile.c_str());

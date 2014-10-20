@@ -145,6 +145,12 @@ NashLcpStrategySolver<T>::AllLemke(const Game &p_game,
 template <class T> List<MixedStrategyProfile<T> > 
 NashLcpStrategySolver<T>::Solve(const Game &p_game) const
 {
+  if (p_game->NumPlayers() != 2) {
+    throw UndefinedException("Method only valid for two-player games.");
+  }
+  if (!p_game->IsPerfectRecall()) {
+    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+  }
   Solution solution;
 
   try {

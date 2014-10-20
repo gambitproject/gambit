@@ -77,6 +77,13 @@ NashLcpBehavSolver<T>::Solution::AddBFS(const LTableau<T> &tableau)
 template <class T> List<MixedBehaviorProfile<T> > 
 NashLcpBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 {
+  if (p_support.GetGame()->NumPlayers() != 2) {
+    throw UndefinedException("Method only valid for two-player games.");
+  }
+  if (!p_support.GetGame()->IsPerfectRecall()) {
+    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+  }
+
   BFS<T> cbfs;
   int i, j;
   Solution solution;

@@ -244,6 +244,16 @@ NashLpBehavSolver<T>::GameData::GetBehavior(const BehaviorSupportProfile &p_supp
 template <class T> List<MixedBehaviorProfile<T> > 
 NashLpBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 {
+  if (p_support.GetGame()->NumPlayers() != 2) {
+    throw UndefinedException("Method only valid for two-player games.");
+  }
+  if (!p_support.GetGame()->IsConstSum()) {
+    throw UndefinedException("Method only valid for constant-sum games.");
+  }
+  if (!p_support.GetGame()->IsPerfectRecall()) {
+    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+  }
+
   BFS<T> cbfs;
   
   GameData data(p_support.GetGame());
