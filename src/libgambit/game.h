@@ -185,7 +185,7 @@ public:
 class InvalidFileException : public Exception {
 public:
   InvalidFileException(void) : Exception("File not in a recognized format") { }
-  InvalidFileException(const char *s) : Exception(s) { }
+  InvalidFileException(const std::string &s) : Exception(s) { } 
   virtual ~InvalidFileException() throw() { }
 };
 

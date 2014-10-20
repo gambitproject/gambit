@@ -52,7 +52,7 @@ template <class D, class S> D lexical_cast(const S &p_value, int p_prec)
 class Exception : public std::runtime_error {
 public:
   Exception(void) : std::runtime_error("") { }
-  Exception(const char *s) : std::runtime_error(s) { }
+  Exception(const std::string &s) : std::runtime_error(s) { }
   virtual ~Exception() throw() { }
 };
 

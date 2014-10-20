@@ -64,7 +64,7 @@ public:
   GameFileToken GetCurrentToken(void) const { return m_lastToken; }
   int GetCurrentLine(void) const { return m_currentLine; }
   int GetCurrentColumn(void) const { return m_currentColumn; }
-  const char* CreateLineMsg(std::string msg);
+  std::string CreateLineMsg(const std::string &msg);
   const std::string &GetLastText(void) const { return m_lastText; }
 };
 
@@ -262,11 +262,11 @@ GameFileToken GameParserState::GetNextToken(void)
   return (m_lastToken = TOKEN_SYMBOL);
 }
 
-const char* GameParserState::CreateLineMsg(std::string msg)
+std::string GameParserState::CreateLineMsg(const std::string &msg)
 {
   std::stringstream stream;
   stream << "line " << m_currentLine << ":" << m_currentColumn << ": " << msg;
-  return stream.str().c_str();
+  return stream.str();
 }
 
 class TableFilePlayer {
@@ -1087,7 +1087,7 @@ Game ReadGame(std::istream &p_file) throw (InvalidFileException)
       throw InvalidFileException("Tokens 'EFG' or 'NFG' or '#AGG' or '#BAGG' expected at start of file");
     }
   }
-  catch (const std::exception &ex) {
+  catch (std::exception &ex) {
     throw InvalidFileException(ex.what());
   }
 }
