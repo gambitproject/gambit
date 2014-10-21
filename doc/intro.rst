@@ -187,25 +187,17 @@ stable/teaching each August; the major version number is equal to the
 last two digits of the year in which the version becomes stable.
 
 This document covers Gambit 14, which is the current development/research
-version as of August 2013.  The most recent release is 14.0.3, 
-available on 29 September 2014.
+version as of August 2013.  The most recent release is 14.1.0, 
+available on 21 October 2014.
 You can download it from
 `Sourceforge
-<http://sourceforge.net/projects/gambit/files/gambit14/14.0.3>`_.
+<http://sourceforge.net/projects/gambit/files/gambit14/14.1.0>`_.
 Full source code is available, as are precompiled binaries for
 Microsoft Windows and Mac OS X 10.8.
 
-This series is where new development is made available.  It is
-intended for developers, researchers who work in algorithms in game
-theory, and those who require the latest implementations for their
-research project.  It will become the next stable/teaching version
-from August 2014.
-
-The current stable/teaching series of Gambit is
-`Gambit 13 <http://www.gambit-project.org/gambit13>`_.
 The stable version is suitable for teaching and student use, and for
 practitioners who require a version where the interface and API are
-fixed.  Further releases of Gambit 13 will be made for maintenance and
+fixed. Further releases of Gambit 13 will be made for maintenance and
 bug fixes only.
 
 Older versions of Gambit can be downloaded from

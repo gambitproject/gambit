@@ -87,7 +87,7 @@ Computing the equilibria of an extensive game::
 
    $ gambit-enumpure e02.efg
    Search for Nash equilibria in pure strategies
-   Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+   Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,0,0,1,0
@@ -98,7 +98,7 @@ strategies::
 
    $ gambit-enumpure -S e02.efg
    Search for Nash equilibria in pure strategies
-   Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+   Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,0,1,0
@@ -109,7 +109,7 @@ only one information set; therefore the set of solutions is larger::
 
    $ gambit-enumpure -A e02.efg   
    Search for Nash equilibria in pure strategies
-   Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+   Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,1,0,1,0
@@ -192,7 +192,7 @@ Example invocation::
 
    $ gambit-enumpoly e01.efg 
    Compute Nash equilibria by solving polynomial systems
-   Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+   Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
    Heuristic search implementation Copyright (C) 2006, Litao Wei 
    This is free software, distributed under the GNU GPL
 
@@ -271,7 +271,7 @@ Example invocation::
 
    $ gambit-enummixed e02.nfg
    Compute Nash equilibria by enumerating extreme points
-   Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+   Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
    Enumeration code based on lrslib 4.2b, 
    Copyright (C) 1995-2005 by David Avis (avis@cs.mcgill.ca)
    This is free software, distributed under the GNU GPL
@@ -285,7 +285,7 @@ information using the `-c` switch::
   
    $ gambit-enummixed -c e02.nfg
    Compute Nash equilibria by enumerating extreme points
-   Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+   Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
    Enumeration code based on lrslib 4.2b, 
    Copyright (C) 1995-2005 by David Avis (avis@cs.mcgill.ca)
    This is free software, distributed under the GNU GPL
@@ -343,7 +343,7 @@ Example invocation::
     $ gambit-gnm e02.nfg
     Compute Nash equilibria using a global Newton method
     Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Christian Shelton
-    Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+    Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
     This is free software, distributed under the GNU GPL
 
     NE,1,0,2.99905e-12,0.5,0.5
@@ -391,7 +391,7 @@ Example invocation::
    $ gambit-ipa e02.nfg
    Compute Nash equilibria using iterated polymatrix approximation
    Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Christian Shelton
-   Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+   Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1.000000,0.000000,0.000000,1.000000,0.000000
@@ -480,7 +480,7 @@ Example invocation::
 
    $ gambit-lcp e02.efg
    Compute Nash equilibria by solving a linear complementarity program
-   Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+   Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,1/2,1/2,1/2,1/2
@@ -550,7 +550,7 @@ Example invocation::
 
    $ gambit-lp 2x2const.nfg
    Compute Nash equilibria by solving a linear program
-   Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+   Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1/3,2/3,1/3,2/3
@@ -615,7 +615,7 @@ Example invocation::
 
    $ gambit-liap e02.nfg
    Compute Nash equilibria by minimizing the Lyapunov function
-   Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+   Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE, 0.998701, 0.000229, 0.001070, 0.618833, 0.381167
@@ -695,7 +695,7 @@ Example invocation::
 
    $ gambit-simpdiv e02.nfg 
    Compute Nash equilibria using simplicial subdivision
-   Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+   Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,0,1,0
@@ -792,7 +792,7 @@ Example invocation::
 
    $ gambit-logit e02.nfg
    Compute a branch of the logit equilibrium correspondence
-   Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+   Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    0.000000,0.333333,0.333333,0.333333,0.5,0.5
@@ -853,7 +853,7 @@ Example invocation for HTML output::
 
    $ gambit-convert -O html 2x2.nfg
    Convert games among various file formats
-   Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+   Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    <center><h1>Two person 2 x 2 game with unique mixed equilibrium</h1></center>
@@ -868,7 +868,7 @@ Example invocation for LaTeX output::
 
    $ gambit-convert -O sgame 2x2.nfg
    Convert games among various file formats
-   Gambit version 14.0.3, Copyright (C) 1994-2014, The Gambit Project
+   Gambit version 14.1.0, Copyright (C) 1994-2014, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    \begin{game}{2}{2}[Player 1][Player 2]

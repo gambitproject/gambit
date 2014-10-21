@@ -41,7 +41,7 @@ libgame = Extension("gambit.lib.libgambit",
                     include_dirs=[ "../..", ".." ] )
 
 setup(name="gambit",
-      version="14.0.3",
+      version="14.1.0",
       description="Software tools for game theory",
       author="Theodore Turocy",
       author_email="ted.turocy@gmail.com",
