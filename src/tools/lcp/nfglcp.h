@@ -32,7 +32,7 @@ template <class T> class LHTableau;
 template <class T> class NashLcpStrategySolver : public NashStrategySolver<T> {
 public:
   NashLcpStrategySolver(int p_stopAfter, int p_maxDepth,
-		       shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
+			Gambit::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
     : NashStrategySolver<T>(p_onEquilibrium),
       m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth) { }
   virtual ~NashLcpStrategySolver()  { }
