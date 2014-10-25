@@ -67,8 +67,20 @@ inline void setitem_ArrayInt(Array<int> *array, int index, int value)
 { (*array)[index] = value; }
 
 inline MixedStrategyProfile<double> *
-CopyElement(const List<MixedStrategyProfile<double> > &p_list, int p_index)
+CopyElementStrategyDouble(const List<MixedStrategyProfile<double> > &p_list, int p_index)
 { return new MixedStrategyProfile<double>(p_list[p_index]); }
+
+inline MixedStrategyProfile<Rational> *
+CopyElementStrategyRational(const List<MixedStrategyProfile<Rational> > &p_list, int p_index)
+{ return new MixedStrategyProfile<Rational>(p_list[p_index]); }
+
+inline MixedBehaviorProfile<double> *
+CopyElementBehaviorDouble(const List<MixedBehaviorProfile<double> > &p_list, int p_index)
+{ return new MixedBehaviorProfile<double>(p_list[p_index]); }
+
+inline MixedBehaviorProfile<Rational> *
+CopyElementBehaviorRational(const List<MixedBehaviorProfile<Rational> > &p_list, int p_index)
+{ return new MixedBehaviorProfile<Rational>(p_list[p_index]); }
 
 inline void 
 setitem_MixedStrategyProfileDouble(MixedStrategyProfile<double> *profile,

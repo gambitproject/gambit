@@ -32,7 +32,7 @@ using namespace Gambit;
 #include "lhtab.h"
 #include "lemketab.h"
 
-template <class T> class NashLcpBehavSolver<T>::Solution {
+template <class T> class NashLcpBehaviorSolver<T>::Solution {
 public:
   int ns1, ns2, ni1, ni2;
   Rational maxpay;
@@ -47,7 +47,7 @@ public:
 };
 
 template <class T> bool 
-NashLcpBehavSolver<T>::Solution::AddBFS(const LTableau<T> &tableau)
+NashLcpBehaviorSolver<T>::Solution::AddBFS(const LTableau<T> &tableau)
 {
   BFS<T> cbfs;
   Vector<T> v(tableau.MinRow(), tableau.MaxRow());
@@ -75,7 +75,7 @@ NashLcpBehavSolver<T>::Solution::AddBFS(const LTableau<T> &tableau)
 //
 
 template <class T> List<MixedBehaviorProfile<T> > 
-NashLcpBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
+NashLcpBehaviorSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 {
   if (p_support.GetGame()->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
@@ -170,10 +170,10 @@ NashLcpBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 // all possible paths, adding any new equilibria to the List.  
 //
 template <class T> void
-NashLcpBehavSolver<T>::AllLemke(const BehaviorSupportProfile &p_support,
-				int j, LTableau<T> &B, int depth,
-				Matrix<T> &A,
-				Solution &p_solution) const
+NashLcpBehaviorSolver<T>::AllLemke(const BehaviorSupportProfile &p_support,
+				   int j, LTableau<T> &B, int depth,
+				   Matrix<T> &A,
+				   Solution &p_solution) const
 {
   if (m_maxDepth != 0 && depth > m_maxDepth) {
     return;
@@ -231,7 +231,7 @@ NashLcpBehavSolver<T>::AllLemke(const BehaviorSupportProfile &p_support,
 }
 
 template <class T>
-void NashLcpBehavSolver<T>::FillTableau(const BehaviorSupportProfile &p_support, 
+void NashLcpBehaviorSolver<T>::FillTableau(const BehaviorSupportProfile &p_support, 
 					Matrix<T> &A,
 					const GameNode &n, T prob,
 					int s1, int s2, int i1, int i2,
@@ -241,7 +241,6 @@ void NashLcpBehavSolver<T>::FillTableau(const BehaviorSupportProfile &p_support,
   int ns1 = p_solution.ns1;
   int ns2 = p_solution.ns2;
   int ni1 = p_solution.ni1;
-  int ni2 = p_solution.ni2;
 
   GameOutcome outcome = n->GetOutcome();
   if (outcome) {
@@ -295,16 +294,15 @@ void NashLcpBehavSolver<T>::FillTableau(const BehaviorSupportProfile &p_support,
 }
 
 
-template <class T>
-void NashLcpBehavSolver<T>::GetProfile(const BehaviorSupportProfile &p_support,
-				       const LTableau<T> &tab, 
-				       MixedBehaviorProfile<T> &v, 
-				       const Vector<T> &sol,
-				       const GameNode &n, int s1, int s2,
-				       Solution &p_solution) const
+template <class T> void
+NashLcpBehaviorSolver<T>::GetProfile(const BehaviorSupportProfile &p_support,
+				     const LTableau<T> &tab, 
+				     MixedBehaviorProfile<T> &v, 
+				     const Vector<T> &sol,
+				     const GameNode &n, int s1, int s2,
+				     Solution &p_solution) const
 {
   int ns1 = p_solution.ns1;
-  int ns2 = p_solution.ns2;
 
   if (n->GetInfoset()) {
     int pl = n->GetPlayer()->GetNumber();
@@ -369,7 +367,7 @@ void NashLcpBehavSolver<T>::GetProfile(const BehaviorSupportProfile &p_support,
   }
 }
 
-template class NashLcpBehavSolver<double>;
-template class NashLcpBehavSolver<Rational>;
+template class NashLcpBehaviorSolver<double>;
+template class NashLcpBehaviorSolver<Rational>;
 
 

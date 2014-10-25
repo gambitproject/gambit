@@ -365,7 +365,10 @@ cdef extern from "util.h":
     void setaction_MixedBehaviorProfileRational(c_MixedBehaviorProfileRational *, 
                                             c_GameAction, char *)
 
-    c_MixedStrategyProfileDouble *CopyElement(List[c_MixedStrategyProfileDouble], int)
+    c_MixedStrategyProfileDouble *CopyElementStrategyDouble(List[c_MixedStrategyProfileDouble], int)
+    c_MixedStrategyProfileRational *CopyElementStrategyRational(List[c_MixedStrategyProfileRational], int)
+    c_MixedBehaviorProfileDouble *CopyElementBehaviorDouble(List[c_MixedBehaviorProfileDouble], int)
+    c_MixedBehaviorProfileRational *CopyElementBehaviorRational(List[c_MixedBehaviorProfileRational], int)
 
 import gambit.gameiter
 

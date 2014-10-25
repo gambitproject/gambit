@@ -29,13 +29,13 @@ using namespace Gambit;
 
 template <class T> class LTableau;
 
-template <class T> class NashLcpBehavSolver : public NashBehavSolver<T> {
+template <class T> class NashLcpBehaviorSolver : public NashBehavSolver<T> {
 public:
-  NashLcpBehavSolver(int p_stopAfter, int p_maxDepth,
-	  	     shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
+  NashLcpBehaviorSolver(int p_stopAfter, int p_maxDepth,
+			Gambit::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
     : NashBehavSolver<T>(p_onEquilibrium),
       m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth) { }
-  virtual ~NashLcpBehavSolver()  { }
+  virtual ~NashLcpBehaviorSolver()  { }
 
   virtual List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const;
 

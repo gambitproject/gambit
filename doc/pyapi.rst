@@ -290,10 +290,27 @@ Computing Nash equilibria
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Interfaces to algorithms for computing Nash equilibria are collected
-in the module :py:mod:`gambit.nash`.  Each algorithm is encapsulated in
-its own class.
+in the module :py:mod:`gambit.nash`.  There are two choices for
+calling these algorithms: directly within Python, or via the
+corresponding Gambit :ref:`command-line tool <command-line>`.
 
-Algorithms with the word "External" in the class name operate by
+Calling an algorithm directly within Python has less overhead, which
+makes this approach well-suited to the analysis of smaller games,
+where the expected running time is small.  In addition, these
+interfaces may offer more fine-grained control of the behavior
+of some algorithms.  
+
+Calling the Gambit command-line tool launches the algorithm as a
+separate process.  This makes it easier to abort during the run of the
+algorithm (preserving where possible the equilibria which have already
+been found), and also makes the program more robust to any internal
+errors which may arise in the calculation.
+
+Calling command-line tools
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The interface to each command-line tool is encapsulated in a class
+with the word "External" in the name.  These operate by
 creating a subprocess, which calls the corresponding Gambit
 :ref:`command-line tool <command-line>`.  Therefore, a working
 Gambit installation needs to be in place, with the command-line tools
@@ -314,7 +331,7 @@ gambit-ipa                ExternalIteratedPolymatrixSolver
 gambit-logit              ExternalLogitSolver
 ======================    ========================
 
-For example, consider the game e02.nfg from the set of standard
+For example, consider the game :file:`e02.nfg` from the set of standard
 Gambit examples.  This game has a continuum of equilibria, in which
 the first player plays his first strategty with probability one,
 and the second player plays a mixed strategy, placing at least
@@ -368,6 +385,43 @@ is a :py:class:`MixedStrategyProfile`.  While the set of equilibria is
 not affected by whether behavior or mixed strategies are used, the
 equilibria returned by specific solution methods may differ, when
 using a call which does not necessarily return all equilibria.
+
+Calling internally-linked libraries
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Where available, versions of algorithms which have been linked
+internally into the Python library are generally called via
+convenience functions.  The following table lists the algorithms
+available via this approach.
+
+=================================    ========================
+Method                               Python function
+=================================    ========================
+:ref:`gambit-lcp <gambit-lcp>`       :py:func:`gambit.nash.lcp_solve`
+=================================    ========================
+
+Parameters are available to modify the operation of the algorithm.
+The most common ones are ``use_strategic``, to indicate the use of a
+strategic form version of an algorithm where both extensive and
+strategic versions are available, and ``rational``, to indicate
+computation using rational arithmetic, where this is an option to the
+algorithm.
+
+For example, taking again the game :file:`e02.efg` as an example::
+
+  In [1]: g = gambit.Game.read_game("e02.efg")
+
+  In [2]: gambit.nash.lcp_solve(g)
+  Out[2]: [[1.0, 0.0, 0.5, 0.5, 0.5, 0.5]]
+
+  In [3]: gambit.nash.lcp_solve(g, rational=True)
+  Out[3]: [[Fraction(1, 1), Fraction(0, 1), Fraction(1, 2), Fraction(1, 2), Fraction(1, 2), Fraction(1, 2)]]
+
+  In [4]: gambit.nash.lcp_solve(g, use_strategic=True)
+  Out[4]: [[1.0, 0.0, 0.0, 1.0, 0.0]]
+
+  In [5]: gambit.nash.lcp_solve(g, use_strategic=True, rational=True)
+  Out[5]: [[Fraction(1, 1), Fraction(0, 1), Fraction(0, 1), Fraction(1, 1), Fraction(0, 1)]]
 
 
 
@@ -1088,7 +1142,7 @@ of game.
       or instances of :py:class:`decimal.Decimal` or :py:class:`fractions.Fraction`.
       Players may be specified as in :py:func:`__getitem__`.
 
-      
+
 Representation of errors and exceptions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1101,3 +1155,26 @@ Representation of errors and exceptions
 
    A subclass of :py:exc:`ValueError` which is raised when an
    operation which is not well-defined is attempted.
+
+
+Computation of Nash equilibria
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. py:module:: gambit.nash
+
+.. py:function:: lcp_solve(game, rational=True, use_strategic=False, external=False, stop_after=None, max_depth=None)
+
+   Compute Nash equilibria of a two-player game using :ref:`linear
+   complementarity programming <gambit-lcp>`.
+
+   :param bool rational: Compute using rational precision (more
+			 precise, often much slower)
+   :param bool use_strategic: Use the strategic form version even for
+			      extensive games
+   :param bool external: Call the external command-line solver instead
+			 of the internally-linked implementation
+   :param int stop_after: Number of equilibria to contribute (default
+			  is to compute until all reachable equilbria
+			  are found)
+   :param int max_depth: Maximum recursion depth (default is no limit)
+   :raises RuntimeError: if game has more than two players.

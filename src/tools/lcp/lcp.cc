@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
 	    renderer = new BehavStrategyCSVRenderer<double>(std::cout, 
 							    numDecimals);
 	  }
-	  NashLcpBehavSolver<double> algorithm(stopAfter, maxDepth, renderer);
+	  NashLcpBehaviorSolver<double> algorithm(stopAfter, maxDepth, renderer);
 	  algorithm.Solve(game);
 	}
 	else {
@@ -187,14 +187,14 @@ int main(int argc, char *argv[])
 	  else {
 	    renderer = new BehavStrategyCSVRenderer<Rational>(std::cout);
 	  }
-	  NashLcpBehavSolver<Rational> algorithm(stopAfter, maxDepth, renderer);
+	  NashLcpBehaviorSolver<Rational> algorithm(stopAfter, maxDepth, renderer);
 	  algorithm.Solve(game);
 	}
       }
       else {
 	if (useFloat) {
 	  shared_ptr<NashBehavSolver<double> > stage = 
-	    new NashLcpBehavSolver<double>(stopAfter, maxDepth);
+	    new NashLcpBehaviorSolver<double>(stopAfter, maxDepth);
 	  shared_ptr<StrategyProfileRenderer<double> > renderer;
 	  if (printDetail)  {
 	    renderer = new BehavStrategyDetailRenderer<double>(std::cout,
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
 	}
 	else {
 	  shared_ptr<NashBehavSolver<Rational> > stage = 
-	    new NashLcpBehavSolver<Rational>(stopAfter, maxDepth);
+	    new NashLcpBehaviorSolver<Rational>(stopAfter, maxDepth);
 	  shared_ptr<StrategyProfileRenderer<Rational> > renderer;
 	  if (printDetail)  {
 	    renderer = new BehavStrategyDetailRenderer<Rational>(std::cout,

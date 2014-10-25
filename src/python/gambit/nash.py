@@ -111,8 +111,6 @@ class ExternalLPSolver(ExternalSolver):
                                   game, rational,
                                   extensive=game.is_tree and not use_strategic)
 
-from gambit.lib.libgambit import LCPSolver
-    
 class ExternalLCPSolver(ExternalSolver):
     """
     Algorithm class to manage calls to external gambit-lcp solver
@@ -230,3 +228,28 @@ class ExternalLogitSolver(ExternalSolver):
         return self._parse_output(self.launch(command_line, game),
                                   game, rational=False,
                                   extensive=game.is_tree and not use_strategic)
+
+
+import gambit.lib.libgambit
+
+def lcp_solve(game, rational=True, use_strategic=False, external=False,
+              stop_after=None, max_depth=None):
+    """Convenience function to solve game using an appropriate linear
+    complementarity solver.
+    """
+    if stop_after is None: stop_after = 0
+    if max_depth is None:  max_depth = 0
+    if external:
+        return ExternalLCPSolver().solve(game, rational=rational,
+                                         use_strategic=use_strategic)
+    if not game.is_tree or use_strategic:
+        if rational:
+            alg = gambit.lib.libgambit.LCPStrategySolverRational(stop_after, max_depth)
+        else:
+            alg = gambit.lib.libgambit.LCPStrategySolverDouble(stop_after, max_depth)
+    else:        
+        if rational:
+            alg = gambit.lib.libgambit.LCPBehaviorSolverRational(stop_after, max_depth)
+        else:
+            alg = gambit.lib.libgambit.LCPBehaviorSolverDouble(stop_after, max_depth)
+    return alg.solve(game)
