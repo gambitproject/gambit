@@ -289,77 +289,12 @@ std::ostream &operator << (std::ostream &s, const Rational& y)
 }
 
 std::istream &operator>>(std::istream &f, Rational &y)
-{
-  char ch = ' ';
-  int sign = 1;
-  Integer num = 0, denom = 1;
-
-  while (isspace(ch)) {
-    f.get(ch);
-    if (f.eof() || f.bad())  {
-      throw ValueException();
-    }
-  }
-  
-  if (ch == '-')  { 
-    sign = -1;
-    f.get(ch);
-    if (f.eof() || f.bad()) {
-      ch = ' ';
-    }    
-  }
-  else if ((ch < '0' || ch > '9') && ch != '.') {
-    throw ValueException();
-  }
-  while (ch >= '0' && ch <= '9')   {
-    num *= 10;
-    num += (int) (ch - '0');
-    f.get(ch);
-    if (f.eof() || f.bad()) {
-      ch = ' ';
-    }
-  }
-
-  if (ch == '/')  {
-    denom = 0;
-    f.get(ch);
-    if (f.eof() || f.bad()) {
-      ch = ' ';
-    }
-    while (ch >= '0' && ch <= '9')  {
-      denom *= 10;
-      denom += (int) (ch - '0');
-      f.get(ch);
-      if (f.eof() || f.bad()) {
-	ch = ' ';
-      }
-    }
-  }
-  else if (ch == '.')  {
-    denom = 1;
-    f.get(ch);
-    if (f.eof() || f.bad()) {
-      ch = ' ';
-    }
-    while (ch >= '0' && ch <= '9')  {
-      denom *= 10;
-      num *= 10;
-      num += (int) (ch - '0');
-      f.get(ch);
-      if (f.eof() || f.bad()) {
-	ch = ' ';
-      }
-    }
-  }
-
-  if (!f.eof() && f.good()) {
-    f.unget();
-  }
-
-  y = Rational(num * sign, denom);
+{	
+  std::string rstring; 
+  f >> rstring;
+  y = lexical_cast<Rational>(rstring);
   y.normalize();
-
-  return f;
+  return f; 
 }
 
 bool Rational::OK(void) const
