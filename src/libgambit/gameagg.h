@@ -25,7 +25,6 @@
 
 #include "libagg/agg.h"
 
-//forward declaration
 class aggame;
 
 namespace Gambit {
@@ -40,30 +39,16 @@ private:
   agg *aggPtr;
   Array<GamePlayerRep *> m_players;
 
-public:
-  static GameAggRep* ReadAggFile(istream& in);
+  /// Constructor; takes ownership of the passed pointer
+  GameAggRep(agg *);
 
+public:
   /// @name Lifecycle
   //@{
-  /// Constructor
-  GameAggRep(agg* _aggPtr)
-  :aggPtr(_aggPtr)
-  {
-	  for (int pl=1; pl <= aggPtr->getNumPlayers(); pl++){
-		  m_players.Append(new GamePlayerRep(this,pl,aggPtr->getNumActions(pl-1)));
-		  m_players[pl]->m_label = lexical_cast<std::string>(pl);
-		  for (int st = 1; st <= m_players[pl]->NumStrategies(); st++) {
-		      m_players[pl]->m_strategies[st]->SetLabel(lexical_cast<std::string>(st));
-		  }
-	  }
-	  for (int pl = 1, id = 1; pl <= m_players.Length(); pl++) {
-	    for (int st = 1; st <= m_players[pl]->m_strategies.Length();
-		 m_players[pl]->m_strategies[st++]->m_id = id++);
-	  }
-  }
+  /// Create a game from a serialized file in AGG format
+  static Game ReadAggFile(std::istream &);
   /// Destructor
-  virtual ~GameAggRep() { }
-
+  virtual ~GameAggRep() { delete aggPtr; }
   /// Create a copy of the game, as a new game
   virtual Game Copy(void) const;
   //@}
@@ -71,39 +56,18 @@ public:
   /// @name Dimensions of the game
   //@{
   /// The number of actions in each information set
-  virtual PVector<int> NumActions(void) const{
-	  throw UndefinedException();
-  }
+  virtual PVector<int> NumActions(void) const { throw UndefinedException(); }
   /// The number of members in each information set
-  virtual PVector<int> NumMembers(void) const
-  { throw UndefinedException(); }
+  virtual PVector<int> NumMembers(void) const { throw UndefinedException(); }
   /// The number of strategies for each player
-  virtual Array<int> NumStrategies(void) const{
-	  Array<int> ns;
-	  for (int pl=1;pl<=aggPtr->getNumPlayers();pl++){
-		  ns.Append(m_players[pl]->NumStrategies());
-	  }
-	  return ns;
-  }
+  virtual Array<int> NumStrategies(void) const;
   /// Gets the i'th strategy in the game, numbered globally
-  virtual GameStrategy GetStrategy(int p_index) const{
-	  for (int pl=1;pl<=aggPtr->getNumPlayers();pl++){
-		  if (m_players[pl]->NumStrategies()>=p_index){
-			  return m_players[pl]->GetStrategy(p_index);
-		  }
-		  else{
-			  p_index -= m_players[pl]->NumStrategies();
-		  }
-	  }
-	  throw IndexException();
-  }
+  virtual GameStrategy GetStrategy(int p_index) const;
   /// Returns the total number of actions in the game
-  virtual int BehavProfileLength(void) const
-  { throw UndefinedException(); }
+  virtual int BehavProfileLength(void) const  { throw UndefinedException(); }
   /// Returns the total number of strategies in the game
-  virtual int MixedProfileLength(void) const {
-	  return aggPtr->getNumActions();
-  }
+  virtual int MixedProfileLength(void) const 
+  { return aggPtr->getNumActions(); }
   virtual int NumStrategyContingencies(void) const
   { throw UndefinedException(); }
   //@}
@@ -111,27 +75,21 @@ public:
   virtual PureStrategyProfile NewPureStrategyProfile(void) const;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const;
-  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const;
-  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const;
+  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile &) const;
+  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile &) const;
 
   /// @name Players
   //@{
   /// Returns the number of players in the game
-  virtual int NumPlayers(void) const {
-	  return aggPtr->getNumPlayers();
-  }
+  virtual int NumPlayers(void) const { return aggPtr->getNumPlayers(); }
   /// Returns the pl'th player in the game
-  virtual GamePlayer GetPlayer(int pl) const{
-	  return m_players[pl];
-  }
+  virtual GamePlayer GetPlayer(int pl) const { return m_players[pl]; }
   /// Returns the set of players in the game
   virtual const GamePlayers &Players(void) const { return m_players; }
   /// Returns the chance (nature) player
-  virtual GamePlayer GetChance(void) const
-  { throw UndefinedException(); }
+  virtual GamePlayer GetChance(void) const  { throw UndefinedException(); }
   /// Creates a new player in the game, with no moves
-  virtual GamePlayer NewPlayer(void)
-  { throw UndefinedException(); }
+  virtual GamePlayer NewPlayer(void)    { throw UndefinedException(); }
   //@}
 
   /// @name Information sets
@@ -151,14 +109,12 @@ public:
   /// @name Outcomes
   //@{
   /// Returns the number of outcomes defined in the game
-  virtual int NumOutcomes(void) const
-  { throw UndefinedException(); }
+  virtual int NumOutcomes(void) const  { throw UndefinedException(); }
   /// Returns the index'th outcome defined in the game
   virtual GameOutcome GetOutcome(int index) const
   { throw UndefinedException(); }
   /// Creates a new outcome in the game
-  virtual GameOutcome NewOutcome(void)
-  { throw UndefinedException(); }
+  virtual GameOutcome NewOutcome(void)  { throw UndefinedException(); }
   /// Deletes the specified outcome from the game
   virtual void DeleteOutcome(const GameOutcome &)
   { throw UndefinedException(); }
@@ -167,27 +123,24 @@ public:
   /// @name Nodes
   //@{
   /// Returns the root node of the game
-  virtual GameNode GetRoot(void) const
-  { throw UndefinedException(); }
+  virtual GameNode GetRoot(void) const   { throw UndefinedException(); }
   /// Returns the number of nodes in the game
-  virtual int NumNodes(void) const
-  { throw UndefinedException(); }
+  virtual int NumNodes(void) const   { throw UndefinedException(); }
   //@}
 
   /// @name General data access
   //@{
   virtual bool IsTree(void) const { return false; }
   virtual bool IsAgg(void) const { return true; }
-  virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const { return true; }
+  virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const
+  { return true; }
   virtual bool IsConstSum(void) const;
   /// Returns the smallest payoff in any outcome of the game
-  virtual Rational GetMinPayoff(int) const {
-	  return aggPtr->getMinPayoff();
-  }
+  virtual Rational GetMinPayoff(int) const 
+  { return aggPtr->getMinPayoff(); }
   /// Returns the largest payoff in any outcome of the game
-  virtual Rational GetMaxPayoff(int) const {
-	  return aggPtr->getMaxPayoff();
-  }
+  virtual Rational GetMaxPayoff(int) const 
+  { return aggPtr->getMaxPayoff(); }
 
   //@}
 
@@ -196,10 +149,12 @@ public:
   /// Write the game to a savefile in the specified format.
   virtual void Write(std::ostream &p_stream,
 		     const std::string &p_format="native") const;
-  virtual void WriteNfgFile(std::ostream &) const;
+  virtual void WriteNfgFile(std::ostream &) const
+  { throw UndefinedException(); }
   virtual void WriteAggFile(std::ostream &) const;
   //@}
 };
 
-}
-#endif /* GAMEAGG_H */
+}   // namespace Gambit
+
+#endif   // GAMEAGG_H

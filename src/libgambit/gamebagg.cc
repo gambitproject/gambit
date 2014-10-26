@@ -36,7 +36,8 @@ class BagentPureStrategyProfileRep : public PureStrategyProfileRep {
 public:
   BagentPureStrategyProfileRep(const Game &p_game)
     : PureStrategyProfileRep(p_game) { }
-  virtual PureStrategyProfileRep *Copy(void) const;
+  virtual PureStrategyProfileRep *Copy(void) const
+  {  return new BagentPureStrategyProfileRep(*this); }
   virtual void SetStrategy(const GameStrategy &);
   virtual GameOutcome GetOutcome(void) const
   { throw UndefinedException(); }
@@ -46,14 +47,6 @@ public:
   virtual Rational GetStrategyValue(const GameStrategy &) const;
 };
 
-//------------------------------------------------------------------------
-//               BaggPureStrategyProfileRep: Lifecycle
-//------------------------------------------------------------------------
-
-PureStrategyProfileRep *BagentPureStrategyProfileRep::Copy(void) const
-{
-  return new BagentPureStrategyProfileRep(*this);
-}
 //------------------------------------------------------------------------
 //       BagentPureStrategyProfileRep: Data access and manipulation
 //------------------------------------------------------------------------
@@ -65,39 +58,57 @@ void BagentPureStrategyProfileRep::SetStrategy(const GameStrategy &s)
 
 Rational BagentPureStrategyProfileRep::GetPayoff(int pl) const
 {
-	bagg* baggPtr = dynamic_cast<GameBagentRep &>(*m_nfg).baggPtr;
-	int s[m_nfg->NumPlayers()];
-	for(int p=1; p<=m_nfg->NumPlayers(); ++p){
-		s[p-1] = m_profile[p]->GetNumber() -1;
-	}
-	int bp = dynamic_cast<GameBagentRep &>(*m_nfg).agent2baggPlayer[pl];
-	int tp = pl - 1 - baggPtr->typeOffset[bp-1];
-	return baggPtr->getPurePayoff(bp-1,tp,s);
+  bagg *baggPtr = dynamic_cast<GameBagentRep &>(*m_nfg).baggPtr;
+  int s[m_nfg->NumPlayers()];
+  for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
+    s[i-1] = m_profile[i]->GetNumber() - 1;
+  }
+  int bp = dynamic_cast<GameBagentRep &>(*m_nfg).agent2baggPlayer[pl];
+  int tp = pl - 1 - baggPtr->typeOffset[bp-1];
+  return baggPtr->getPurePayoff(bp-1,tp,s);
 }
 
 Rational
 BagentPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
 {
   int player = p_strategy->GetPlayer()->GetNumber();
-  bagg* baggPtr = dynamic_cast<GameBagentRep &>(*m_nfg).baggPtr;
+  bagg *baggPtr = dynamic_cast<GameBagentRep &>(*m_nfg).baggPtr;
   int s[m_nfg->NumPlayers()];
-  for(int p=1; p<=m_nfg->NumPlayers(); ++p){
-  		s[p-1] = m_profile[p]->GetNumber() -1;
+  for (int i= 1; i <= m_nfg->NumPlayers(); i++) {
+    s[i-1] = m_profile[i]->GetNumber() - 1;
   }
-  s[player-1] = p_strategy->GetNumber() -1;
-
+  s[player-1] = p_strategy->GetNumber() - 1;
   int bp = dynamic_cast<GameBagentRep &>(*m_nfg).agent2baggPlayer[player];
   int tp = player - 1 - baggPtr->typeOffset[bp-1];
   return baggPtr->getPurePayoff(bp-1,tp,s);
 }
 
 
-
-
-
 //------------------------------------------------------------------------
-//                   GameBagentRep: Lifecycle
+//                      GameBagentRep: Lifecycle
 //------------------------------------------------------------------------
+
+GameBagentRep::GameBagentRep(bagg* _baggPtr) 
+  : baggPtr(_baggPtr), agent2baggPlayer(_baggPtr->getNumTypes())
+{
+  int k = 1;
+  for (int pl = 1; pl <= baggPtr->getNumPlayers(); pl++) {
+    for (int j = 0; j < baggPtr->getNumTypes(pl-1); j++,k++) {
+      m_players.Append(new GamePlayerRep(this, k,
+					 baggPtr->getNumActions(pl-1, j)));
+      m_players[k]->m_label = lexical_cast<std::string>(k);
+      agent2baggPlayer[k] = pl;
+      for (int st = 1; st <= m_players[k]->NumStrategies(); st++) {
+	m_players[k]->m_strategies[st]->SetLabel(lexical_cast<std::string>(st));
+      }
+    }
+  }
+  for (int pl = 1, id = 1; pl <= m_players.Length(); pl++) {
+    for (int st = 1; st <= m_players[pl]->m_strategies.Length();
+	 m_players[pl]->m_strategies[st++]->m_id = id++);
+  }
+}
+
 Game GameBagentRep::Copy(void) const
 {
   std::ostringstream os;
@@ -107,35 +118,50 @@ Game GameBagentRep::Copy(void) const
 }
 
 //------------------------------------------------------------------------
-//                   GameBagentRep: Factory functions
+//                 GameBagentRep: Dimensions of the game
 //------------------------------------------------------------------------
+
+Array<int> GameBagentRep::NumStrategies(void) const
+{
+  Array<int> ns;
+  for (int pl = 1; pl <= NumPlayers(); pl++) {
+    ns.Append(m_players[pl]->m_strategies.Length());
+  }
+  return ns;
+}
+
+int GameBagentRep::MixedProfileLength(void) const 
+{
+  int res = 0;
+  for (int pl = 1; pl <= NumPlayers(); pl++) {
+    res += m_players[pl]->m_strategies.Length();
+  }
+  return res;
+}
+
 
 PureStrategyProfile GameBagentRep::NewPureStrategyProfile(void) const
 {
-    return PureStrategyProfile(new BagentPureStrategyProfileRep(const_cast<GameBagentRep *>(this)));
+  return PureStrategyProfile(new BagentPureStrategyProfileRep(const_cast<GameBagentRep *>(this)));
 }
 
 MixedStrategyProfile<double> GameBagentRep::NewMixedStrategyProfile(double) const
 {
-	//throw UndefinedException();
-	return new BagentMixedStrategyProfileRep<double>(StrategySupportProfile(const_cast<GameBagentRep *>(this)));
+  return new BagentMixedStrategyProfileRep<double>(StrategySupportProfile(const_cast<GameBagentRep *>(this)));
 }
 
 MixedStrategyProfile<Rational> GameBagentRep::NewMixedStrategyProfile(const Rational &) const
 {
-	//throw UndefinedException();
-	return new BagentMixedStrategyProfileRep<Rational>(StrategySupportProfile(const_cast<GameBagentRep *>(this)));
+  return new BagentMixedStrategyProfileRep<Rational>(StrategySupportProfile(const_cast<GameBagentRep *>(this)));
 }
 MixedStrategyProfile<double> GameBagentRep::NewMixedStrategyProfile(double, const StrategySupportProfile& spt) const
 {
-	//throw UndefinedException();
-	return new BagentMixedStrategyProfileRep<double>(spt);
+  return new BagentMixedStrategyProfileRep<double>(spt);
 }
 
 MixedStrategyProfile<Rational> GameBagentRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfile& spt) const
 {
-	//throw UndefinedException();
-	return new BagentMixedStrategyProfileRep<Rational>(spt);
+  return new BagentMixedStrategyProfileRep<Rational>(spt);
 }
 
 //------------------------------------------------------------------------
@@ -143,101 +169,31 @@ MixedStrategyProfile<Rational> GameBagentRep::NewMixedStrategyProfile(const Rati
 //------------------------------------------------------------------------
 
 void GameBagentRep::Write(std::ostream &p_stream,
-			    const std::string &p_format /*="native"*/) const
+			  const std::string &p_format /*="native"*/) const
 {
   if (p_format == "native" || p_format == "bagg") {
-	  WriteBaggFile(p_stream);
+    WriteBaggFile(p_stream);
   }
   else if (p_format == "nfg") {
-	  WriteNfgFile(p_stream);
+    WriteNfgFile(p_stream);
   }
   else {
-	  throw UndefinedException();
+    throw UndefinedException();
   }
 }
 
-void GameBagentRep::WriteNfgFile(std::ostream &s) const{
-	throw UndefinedException();
-}
-void GameBagentRep::WriteBaggFile(std::ostream &s) const{
-    s<<(*baggPtr);
-}
-
-GameBagentRep* GameBagentRep::ReadBaggFile(istream& in){
-	bagg* baggPtr=bagg::makeBAGG(in);
-	if(!baggPtr){
-		throw InvalidFileException();
-	}
-	return new GameBagentRep(baggPtr);
-}
-
-
-
-
-
-
-//------------------------------------------------------------------------
-//                   GameBaggRep: Lifecycle
-//------------------------------------------------------------------------
-Game GameBaggRep::Copy(void) const
+void GameBagentRep::WriteBaggFile(std::ostream &s) const
 {
-  std::ostringstream os;
-  WriteBaggFile(os);
-  std::istringstream is(os.str());
-  return ReadBaggFile(is);
-}
-//------------------------------------------------------------------------
-//                   GameBaggRep: Factory Functions
-//------------------------------------------------------------------------
-MixedStrategyProfile<double> GameBaggRep::NewMixedStrategyProfile(double) const
-{
-	throw UndefinedException();
+  s << (*baggPtr);
 }
 
-MixedStrategyProfile<Rational> GameBaggRep::NewMixedStrategyProfile(const Rational &) const
+Game GameBagentRep::ReadBaggFile(std::istream &in)
 {
-	throw UndefinedException();
-}
-MixedStrategyProfile<double> GameBaggRep::NewMixedStrategyProfile(double, const StrategySupportProfile& spt) const
-{
-	throw UndefinedException();
-}
-
-MixedStrategyProfile<Rational> GameBaggRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfile& spt) const
-{
-	throw UndefinedException();
-}
-//------------------------------------------------------------------------
-//                   GameBaggRep: Writing data files
-//------------------------------------------------------------------------
-
-void GameBaggRep::Write(std::ostream &p_stream,
-			    const std::string &p_format /*="native"*/) const
-{
-  if (p_format == "native" || p_format == "bagg") {
-	  WriteBaggFile(p_stream);
+  bagg *baggPtr = bagg::makeBAGG(in);
+  if (!baggPtr) {
+    throw InvalidFileException();
   }
-  else if (p_format == "nfg") {
-	  WriteNfgFile(p_stream);
-  }
-  else {
-	  throw UndefinedException();
-  }
-}
-
-void GameBaggRep::WriteNfgFile(std::ostream &s) const{
-	throw UndefinedException();
-}
-void GameBaggRep::WriteBaggFile(std::ostream &s) const{
-    s<<(*baggPtr);
-}
-
-GameBaggRep* GameBaggRep::ReadBaggFile(istream& in){
-	bagg* baggPtr=bagg::makeBAGG(in);
-	if(!baggPtr){
-		throw InvalidFileException();
-	}
-	return new GameBaggRep(baggPtr);
+  return new GameBagentRep(baggPtr);
 }
 
 }  // end namespace Gambit

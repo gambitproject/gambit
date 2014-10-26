@@ -97,37 +97,37 @@ public:
 };
 
 template <class T> class AggMixedStrategyProfileRep
-    : public MixedStrategyProfileRep<T> {
+  : public MixedStrategyProfileRep<T> {
 
 public:
-    AggMixedStrategyProfileRep(const StrategySupportProfile &p_support)
-      : MixedStrategyProfileRep<T>(p_support)
+  AggMixedStrategyProfileRep(const StrategySupportProfile &p_support)
+   : MixedStrategyProfileRep<T>(p_support)
     { }
-    virtual ~AggMixedStrategyProfileRep() { }
+  virtual ~AggMixedStrategyProfileRep() { }
 
-    virtual MixedStrategyProfileRep<T> *Copy(void) const{
-  	  return new AggMixedStrategyProfileRep(*this);
-    }
-    virtual T GetPayoff(int pl) const;
-    virtual T GetPayoffDeriv(int pl, const GameStrategy &) const;
-    virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const;
+  virtual MixedStrategyProfileRep<T> *Copy(void) const {
+    return new AggMixedStrategyProfileRep(*this);
+  }
+  virtual T GetPayoff(int pl) const;
+  virtual T GetPayoffDeriv(int pl, const GameStrategy &) const;
+  virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const;
 };
 
 template <class T> class BagentMixedStrategyProfileRep
-        : public MixedStrategyProfileRep<T> {
+  : public MixedStrategyProfileRep<T> {
 
-    public:
-        BagentMixedStrategyProfileRep(const StrategySupportProfile &p_support)
-          : MixedStrategyProfileRep<T>(p_support)
-        { }
-        virtual ~BagentMixedStrategyProfileRep() { }
+public:
+  BagentMixedStrategyProfileRep(const StrategySupportProfile &p_support)
+    : MixedStrategyProfileRep<T>(p_support)
+    { }
+  virtual ~BagentMixedStrategyProfileRep() { }
 
-        virtual MixedStrategyProfileRep<T> *Copy(void) const{
-      	  return new BagentMixedStrategyProfileRep(*this);
-        }
-        virtual T GetPayoff(int pl) const;
-        virtual T GetPayoffDeriv(int pl, const GameStrategy &) const;
-        virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const;
+  virtual MixedStrategyProfileRep<T> *Copy(void) const {
+    return new BagentMixedStrategyProfileRep(*this);
+  }
+  virtual T GetPayoff(int pl) const;
+  virtual T GetPayoffDeriv(int pl, const GameStrategy &) const;
+  virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const;
 };
 
 /// \brief A probability distribution over strategies in a game
