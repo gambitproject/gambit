@@ -527,7 +527,7 @@ protected:
   Array<GameStrategy> m_profile;
 
   /// Construct a new strategy profile
-  PureStrategyProfileRep(void) { }
+  PureStrategyProfileRep(const Game &p_game);
 
   /// Create a copy of the strategy profile.
   /// Caller is responsible for memory management of the created object.

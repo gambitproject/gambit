@@ -1105,7 +1105,8 @@ protected:
   virtual PureStrategyProfileRep *Copy(void) const;
 
 public:
-  TreePureStrategyProfileRep(const Game &p_game);
+  TreePureStrategyProfileRep(const Game &p_game)
+    : PureStrategyProfileRep(p_game) { }
   virtual void SetStrategy(const GameStrategy &);
   virtual GameOutcome GetOutcome(void) const
   { throw UndefinedException(); }
@@ -1118,15 +1119,6 @@ public:
 //------------------------------------------------------------------------
 //              TreePureStrategyProfileRep: Lifecycle
 //------------------------------------------------------------------------
-
-TreePureStrategyProfileRep::TreePureStrategyProfileRep(const Game &p_nfg)
-{
-  m_nfg = p_nfg;
-  m_profile = Array<GameStrategy>(m_nfg->NumPlayers());
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
-    m_profile[pl] = m_nfg->GetPlayer(pl)->GetStrategy(1);
-  }
-}
 
 PureStrategyProfileRep *TreePureStrategyProfileRep::Copy(void) const
 {

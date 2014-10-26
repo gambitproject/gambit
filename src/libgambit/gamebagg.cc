@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2010, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/libgambit/gamebagg.cc
 // Implementation of Bayesian action-graph game representation
@@ -33,15 +33,15 @@ namespace Gambit {
 //========================================================================
 
 class BagentPureStrategyProfileRep : public PureStrategyProfileRep {
-
-
 public:
-  BagentPureStrategyProfileRep(const Game &p_game);
+  BagentPureStrategyProfileRep(const Game &p_game)
+    : PureStrategyProfileRep(p_game) { }
   virtual PureStrategyProfileRep *Copy(void) const;
-  //virtual long GetIndex(void) const { return m_index; }
   virtual void SetStrategy(const GameStrategy &);
-  virtual GameOutcome GetOutcome(void) const;
-  virtual void SetOutcome(GameOutcome p_outcome);
+  virtual GameOutcome GetOutcome(void) const
+  { throw UndefinedException(); }
+  virtual void SetOutcome(GameOutcome p_outcome)
+  { throw UndefinedException(); }
   virtual Rational GetPayoff(int pl) const;
   virtual Rational GetStrategyValue(const GameStrategy &) const;
 };
@@ -49,16 +49,6 @@ public:
 //------------------------------------------------------------------------
 //               BaggPureStrategyProfileRep: Lifecycle
 //------------------------------------------------------------------------
-
-BagentPureStrategyProfileRep::BagentPureStrategyProfileRep(const Game &p_game)
-{
-
-  m_nfg = p_game;
-  m_profile = Array<GameStrategy>(p_game->NumPlayers());
-  for (int pl = 1; pl <= p_game->NumPlayers(); pl++)   {
-    m_profile[pl] = p_game->GetPlayer(pl)->GetStrategy(1);
-  }
-}
 
 PureStrategyProfileRep *BagentPureStrategyProfileRep::Copy(void) const
 {
@@ -70,18 +60,7 @@ PureStrategyProfileRep *BagentPureStrategyProfileRep::Copy(void) const
 
 void BagentPureStrategyProfileRep::SetStrategy(const GameStrategy &s)
 {
-  //m_index += s->m_offset - m_profile[s->GetPlayer()->GetNumber()]->m_offset;
   m_profile[s->GetPlayer()->GetNumber()] = s;
-}
-
-GameOutcome BagentPureStrategyProfileRep::GetOutcome(void) const
-{
-	throw UndefinedException();
-}
-
-void BagentPureStrategyProfileRep::SetOutcome(GameOutcome p_outcome)
-{
-	throw UndefinedException();
 }
 
 Rational BagentPureStrategyProfileRep::GetPayoff(int pl) const

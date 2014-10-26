@@ -53,12 +53,9 @@ public:
 //------------------------------------------------------------------------
 
 TablePureStrategyProfileRep::TablePureStrategyProfileRep(const Game &p_nfg)
+  : PureStrategyProfileRep(p_nfg), m_index(1L)
 {
-  m_index = 1L;
-  m_nfg = p_nfg;
-  m_profile = Array<GameStrategy>(m_nfg->NumPlayers());
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
-    m_profile[pl] = m_nfg->GetPlayer(pl)->GetStrategy(1);
     m_index += m_profile[pl]->m_offset;
   }
 }

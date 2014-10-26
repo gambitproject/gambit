@@ -188,6 +188,14 @@ GameInfoset GamePlayerRep::GetInfoset(int p_index) const { return m_infosets[p_i
 //                    class PureStrategyProfileRep
 //========================================================================
 
+PureStrategyProfileRep::PureStrategyProfileRep(const Game &p_game) 
+  : m_nfg(p_game), m_profile(p_game->Players().size())
+{
+  for (int pl = 1; pl <= m_nfg->Players().size(); pl++)  {
+    m_profile[pl] = m_nfg->GetPlayer(pl)->GetStrategy(1);
+  }
+}
+
 bool PureStrategyProfileRep::IsNash(void) const
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
