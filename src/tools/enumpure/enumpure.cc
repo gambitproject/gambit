@@ -26,60 +26,7 @@
 #include <iostream>
 #include <fstream>
 #include <cerrno>
-#include "libgambit/libgambit.h"
-#include "libgambit/nash.h"
-
-using namespace Gambit;
-
-class NashEnumPureStrategySolver : public NashStrategySolver<Rational> {
-public:
-  NashEnumPureStrategySolver(shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0) 
-    : NashStrategySolver<Rational>(p_onEquilibrium) { }
-  virtual ~NashEnumPureStrategySolver()  { }
-
-  List<MixedStrategyProfile<Rational> > Solve(const Game &p_game) const;
-};
-
-List<MixedStrategyProfile<Rational> >
-NashEnumPureStrategySolver::Solve(const Game &p_game) const
-{
-  if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
-  }
-  List<MixedStrategyProfile<Rational> > solutions;
-  for (StrategyProfileIterator citer(p_game); !citer.AtEnd(); citer++) {
-    if ((*citer)->IsNash()) {
-      MixedStrategyProfile<Rational> profile = (*citer)->ToMixedStrategyProfile();
-      m_onEquilibrium->Render(profile);
-      solutions.Append(profile);
-    }
-  }
-  return solutions;
-}
-
-
-class NashEnumPureAgentSolver : public NashBehavSolver<Rational> {
-public:
-  NashEnumPureAgentSolver(shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
-    : NashBehavSolver<Rational>(p_onEquilibrium) { }
-  virtual ~NashEnumPureAgentSolver()  { }
-
-  List<MixedBehaviorProfile<Rational> > Solve(const BehaviorSupportProfile &) const;
-};
-
-List<MixedBehaviorProfile<Rational> > 
-NashEnumPureAgentSolver::Solve(const BehaviorSupportProfile &p_support) const
-{
-  List<MixedBehaviorProfile<Rational> > solutions;
-  for (BehaviorProfileIterator citer(p_support); !citer.AtEnd(); citer++) {
-    if (citer->IsAgentNash()) {
-      MixedBehaviorProfile<Rational> profile = citer->ToMixedBehaviorProfile();
-      m_onEquilibrium->Render(profile);
-      solutions.Append(profile);
-    }
-  }
-  return solutions;
-}
+#include "enumpure.h"
 
 
 void PrintBanner(std::ostream &p_stream)

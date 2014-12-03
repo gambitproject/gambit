@@ -394,11 +394,12 @@ internally into the Python library are generally called via
 convenience functions.  The following table lists the algorithms
 available via this approach.
 
-=================================    ========================
-Method                               Python function
-=================================    ========================
-:ref:`gambit-lcp <gambit-lcp>`       :py:func:`gambit.nash.lcp_solve`
-=================================    ========================
+========================================  ========================
+Method                                    Python function
+========================================  ========================
+:ref:`gambit-enumpure <gambit-enumpure>`  :py:func:`gambit.nash.enumpure_solve`
+:ref:`gambit-lcp <gambit-lcp>`            :py:func:`gambit.nash.lcp_solve`
+========================================  ========================
 
 Parameters are available to modify the operation of the algorithm.
 The most common ones are ``use_strategic``, to indicate the use of a
@@ -1161,6 +1162,20 @@ Computation of Nash equilibria
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: gambit.nash
+
+.. py:function:: enumpure_solve(game, use_strategic=True, external=False)
+
+   Compute :ref:`pure-strategy Nash equilibria <gambit-enumpure>` of a
+   game.
+
+   :param bool use_strategic: Use the strategic form.  If
+			      :literal:`False`, computes agent-form
+     		              pure-strategy equilibria, which treat
+			      only unilateral deviations at an
+			      individual information set
+   :param bool external: Call the external command-line solver instead
+			 of the internally-linked implementation
+
 
 .. py:function:: lcp_solve(game, rational=True, use_strategic=False, external=False, stop_after=None, max_depth=None)
 

@@ -23,6 +23,8 @@ program-specific tags, described in the individual program
 documentation.
 
 
+.. _gambit-enumpure:
+
 :program:`gambit-enumpure`: Enumerate pure-strategy equilibria of a game
 ------------------------------------------------------------------------
 

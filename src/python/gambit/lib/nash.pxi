@@ -20,6 +20,51 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
+cdef extern from "tools/enumpure/enumpure.h":
+    cdef cppclass c_NashEnumPureStrategySolver "NashEnumPureStrategySolver":
+        c_NashEnumPureStrategySolver()
+        List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
+
+    cdef cppclass c_NashEnumPureAgentSolver "NashEnumPureAgentSolver":
+        c_NashEnumPureAgentSolver()
+        List[c_MixedBehaviorProfileRational] Solve(c_Game) except +RuntimeError
+
+cdef class EnumPureStrategySolver(object):
+    cdef c_NashEnumPureStrategySolver *alg
+
+    def __cinit__(self):
+        self.alg = new c_NashEnumPureStrategySolver()
+    def __dealloc__(self):
+        del self.alg
+    def solve(self, Game game):
+        cdef List[c_MixedStrategyProfileRational] solns
+        cdef MixedStrategyProfileRational p
+        solns = self.alg.Solve(game.game)
+        ret = [ ]
+        for i in xrange(solns.Length()):
+            p = MixedStrategyProfileRational()
+            p.profile = CopyElementStrategyRational(solns, i+1)
+            ret.append(p)
+        return ret
+
+cdef class EnumPureAgentSolver(object):
+    cdef c_NashEnumPureAgentSolver *alg
+
+    def __cinit__(self, p_stopAfter=0, p_maxDepth=0):
+        self.alg = new c_NashEnumPureAgentSolver()
+    def __dealloc__(self):
+        del self.alg
+    def solve(self, Game game):
+        cdef List[c_MixedBehaviorProfileRational] solns
+        cdef MixedBehaviorProfileRational p
+        solns = self.alg.Solve(game.game)
+        ret = [ ]
+        for i in xrange(solns.Length()):
+            p = MixedBehaviorProfileRational()
+            p.profile = CopyElementBehaviorRational(solns, i+1)
+            ret.append(p)
+        return ret
+
 
 cdef extern from "tools/lcp/nfglcp.h":
     cdef cppclass c_NashLcpStrategySolverDouble "NashLcpStrategySolver<double>":

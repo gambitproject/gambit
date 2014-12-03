@@ -232,6 +232,17 @@ class ExternalLogitSolver(ExternalSolver):
 
 import gambit.lib.libgambit
 
+def enumpure_solve(game, use_strategic=True, external=False):
+    """Convenience function to solve game to find pure-strategy Nash equilibria.
+    """
+    if external:
+        return ExternalEnumPureSolve().solve(game, use_strategic=True)
+    if not game.is_tree or use_strategic:
+        alg = gambit.lib.libgambit.EnumPureStrategySolver()
+    else:
+        alg = gambit.lib.libgambit.EnumPureAgentSolver()
+    return alg.solve(game)
+
 def lcp_solve(game, rational=True, use_strategic=False, external=False,
               stop_after=None, max_depth=None):
     """Convenience function to solve game using an appropriate linear

@@ -1,6 +1,6 @@
 ##
 ## This file is part of Gambit
-## Copyright (c) 1994-2013, The Gambit Project (http://www.gambit-project.org)
+## Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 ##
 ## FILE: Makefile.am
 ## Top-level automake input file for Gambit
@@ -594,7 +594,8 @@ gambit_enumpoly_SOURCES = \
 
 gambit_enumpure_SOURCES = \
 	${libgambit_la_SOURCES} \
-	src/tools/enumpure/enumpure.cc
+	src/tools/enumpure/enumpure.cc \
+        src/tools/enumpure/enumpure.h
 
 gambit_gnm_SOURCES = \
 	${libgambit_la_SOURCES} \
