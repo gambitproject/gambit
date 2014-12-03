@@ -157,3 +157,95 @@ cdef class LCPStrategySolverRational(object):
             ret.append(p)
         return ret
 
+
+cdef extern from "tools/lp/nfglp.h":
+    cdef cppclass c_NashLpStrategySolverDouble "NashLpStrategySolver<double>":
+        c_NashLpStrategySolverDouble()
+        List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
+
+    cdef cppclass c_NashLpStrategySolverRational "NashLpStrategySolver<Rational>":
+        c_NashLpStrategySolverRational()
+        List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
+
+cdef extern from "tools/lp/efglp.h":
+    cdef cppclass c_NashLpBehavSolverDouble "NashLpBehavSolver<double>":
+        c_NashLpBehavSolverDouble()
+        List[c_MixedBehaviorProfileDouble] Solve(c_Game) except +RuntimeError
+
+    cdef cppclass c_NashLpBehavSolverRational "NashLpBehavSolver<Rational>":
+        c_NashLpBehavSolverRational()
+        List[c_MixedBehaviorProfileRational] Solve(c_Game) except +RuntimeError
+
+
+cdef class LPBehaviorSolverDouble(object):
+    cdef c_NashLpBehavSolverDouble *alg
+
+    def __cinit__(self):
+        self.alg = new c_NashLpBehavSolverDouble()
+    def __dealloc__(self):
+        del self.alg
+    def solve(self, Game game):
+        cdef List[c_MixedBehaviorProfileDouble] solns
+        cdef MixedBehaviorProfileDouble p
+        solns = self.alg.Solve(game.game)
+        ret = [ ]
+        for i in xrange(solns.Length()):
+            p = MixedBehaviorProfileDouble()
+            p.profile = CopyElementBehaviorDouble(solns, i+1)
+            ret.append(p)
+        return ret
+
+cdef class LPBehaviorSolverRational(object):
+    cdef c_NashLpBehavSolverRational *alg
+
+    def __cinit__(self):
+        self.alg = new c_NashLpBehavSolverRational()
+    def __dealloc__(self):
+        del self.alg
+    def solve(self, Game game):
+        cdef List[c_MixedBehaviorProfileRational] solns
+        cdef MixedBehaviorProfileRational p
+        solns = self.alg.Solve(game.game)
+        ret = [ ]
+        for i in xrange(solns.Length()):
+            p = MixedBehaviorProfileRational()
+            p.profile = CopyElementBehaviorRational(solns, i+1)
+            ret.append(p)
+        return ret
+
+cdef class LPStrategySolverDouble(object): 
+    cdef c_NashLpStrategySolverDouble *alg
+
+    def __cinit__(self):
+        self.alg = new c_NashLpStrategySolverDouble()
+    def __dealloc__(self):
+        del self.alg
+    def solve(self, Game game):
+        cdef List[c_MixedStrategyProfileDouble] solns
+        cdef MixedStrategyProfileDouble p
+        solns = self.alg.Solve(game.game)
+        ret = [ ]
+        for i in xrange(solns.Length()):
+            p = MixedStrategyProfileDouble()
+            p.profile = CopyElementStrategyDouble(solns, i+1)
+            ret.append(p)
+        return ret
+
+cdef class LPStrategySolverRational(object):
+    cdef c_NashLpStrategySolverRational *alg
+
+    def __cinit__(self):
+        self.alg = new c_NashLpStrategySolverRational()
+    def __dealloc__(self):
+        del self.alg
+    def solve(self, Game game):
+        cdef List[c_MixedStrategyProfileRational] solns
+        cdef MixedStrategyProfileRational p
+        solns = self.alg.Solve(game.game)
+        ret = [ ]
+        for i in xrange(solns.Length()):
+            p = MixedStrategyProfileRational()
+            p.profile = CopyElementStrategyRational(solns, i+1)
+            ret.append(p)
+        return ret
+

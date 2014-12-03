@@ -398,6 +398,7 @@ available via this approach.
 Method                                    Python function
 ========================================  ========================
 :ref:`gambit-enumpure <gambit-enumpure>`  :py:func:`gambit.nash.enumpure_solve`
+:ref:`gambit-lp <gambit-lp>`              :py:func:`gambit.nash.lp_solve`
 :ref:`gambit-lcp <gambit-lcp>`            :py:func:`gambit.nash.lcp_solve`
 ========================================  ========================
 
@@ -1193,3 +1194,18 @@ Computation of Nash equilibria
 			  are found)
    :param int max_depth: Maximum recursion depth (default is no limit)
    :raises RuntimeError: if game has more than two players.
+
+
+.. py:function:: lp_solve(game, rational=True, use_strategic=False, external=False)
+
+   Compute Nash equilibria of a two-player constant-sum game using :ref:`linear
+   programming <gambit-lp>`.
+
+   :param bool rational: Compute using rational precision (more
+			 precise, often much slower)
+   :param bool use_strategic: Use the strategic form version even for
+			      extensive games
+   :param bool external: Call the external command-line solver instead
+			 of the internally-linked implementation
+   :raises RuntimeError: if game has more than two players.
+

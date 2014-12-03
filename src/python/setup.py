@@ -41,7 +41,9 @@ libgame = Extension("gambit.lib.libgambit",
                             [ "../tools/lcp/nfglcp.cc",
                               "../tools/lcp/efglcp.cc",
                               "../tools/lcp/lhtab.cc",
-                              "../tools/lcp/lemketab.cc" ],
+                              "../tools/lcp/lemketab.cc",
+                              "../tools/lp/nfglp.cc",
+                              "../tools/lp/efglp.cc" ],
                     language="c++",
                     include_dirs=[ "../..", ".." ] )
 

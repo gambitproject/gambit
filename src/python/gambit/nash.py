@@ -264,3 +264,22 @@ def lcp_solve(game, rational=True, use_strategic=False, external=False,
         else:
             alg = gambit.lib.libgambit.LCPBehaviorSolverDouble(stop_after, max_depth)
     return alg.solve(game)
+
+def lp_solve(game, rational=True, use_strategic=False, external=False):
+    """Convenience function to solve game using an appropriate linear
+    programming solver.
+    """
+    if external:
+        return ExternalLPSolver().solve(game, rational=rational,
+                                         use_strategic=use_strategic)
+    if not game.is_tree or use_strategic:
+        if rational:
+            alg = gambit.lib.libgambit.LPStrategySolverRational()
+        else:
+            alg = gambit.lib.libgambit.LPStrategySolverDouble()
+    else:        
+        if rational:
+            alg = gambit.lib.libgambit.LPBehaviorSolverRational()
+        else:
+            alg = gambit.lib.libgambit.LPBehaviorSolverDouble()
+    return alg.solve(game)

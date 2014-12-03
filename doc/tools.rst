@@ -488,6 +488,7 @@ Example invocation::
    NE,1,0,1/2,1/2,1/2,1/2
 
 
+.. _gambit-lp:
 
 :program:`gambit-lp`: Compute equilibria in a two-player constant-sum game via linear programming
 -------------------------------------------------------------------------------------------------
