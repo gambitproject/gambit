@@ -29,7 +29,7 @@ using namespace Gambit;
 
 template <class T> class NashLpBehavSolver : public NashBehavSolver<T> {
 public:
-  NashLpBehavSolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
+  NashLpBehavSolver(Gambit::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
     : NashBehavSolver<T>(p_onEquilibrium) { }
   virtual ~NashLpBehavSolver() { }
 

@@ -30,7 +30,7 @@ using namespace Gambit;
 
 class NashEnumPureStrategySolver : public NashStrategySolver<Rational> {
 public:
-  NashEnumPureStrategySolver(shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0) 
+   NashEnumPureStrategySolver(Gambit::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0) 
     : NashStrategySolver<Rational>(p_onEquilibrium) { }
   virtual ~NashEnumPureStrategySolver()  { }
 
@@ -57,7 +57,7 @@ NashEnumPureStrategySolver::Solve(const Game &p_game) const
 
 class NashEnumPureAgentSolver : public NashBehavSolver<Rational> {
 public:
-  NashEnumPureAgentSolver(shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
+  NashEnumPureAgentSolver(Gambit::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
     : NashBehavSolver<Rational>(p_onEquilibrium) { }
   virtual ~NashEnumPureAgentSolver()  { }
 
