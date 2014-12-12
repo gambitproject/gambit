@@ -25,9 +25,8 @@ import nash
 import gte
 
 __version__ = gambit.lib.libgambit.__version__
+Rational = gambit.lib.libgambit.Rational
 
 class Game(gambit.lib.libgambit.Game): pass
 
-    
-    
 

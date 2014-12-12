@@ -25,6 +25,13 @@ import fractions
 import warnings
 from libcpp cimport bool
 
+class Rational(fractions.Fraction):
+    def _repr_latex_(self):
+        if self.denominator != 1:
+            return r'$\frac{%s}{%s}$' % (self.numerator, self.denominator)
+        else:
+            return r'$%s$' % self.numerator
+
 cdef extern from "libgambit/libgambit.h":
     cdef char *VERSION
 

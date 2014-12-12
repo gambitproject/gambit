@@ -23,7 +23,11 @@ from libcpp cimport bool
 from cython.operator cimport dereference as deref
 
 cdef class MixedBehaviorProfile(object):
-    def __repr__(self):    return str(list(self))
+    def __repr__(self):    
+        return str([ self[player] for player in self.game.players ])
+    def _repr_latex_(self):
+        return r"$\left[" + ",".join([ self[player]._repr_latex_().replace("$","") for player in self.game.players ]) + r"\right]$"
+
     def __richcmp__(MixedBehaviorProfile self, other, whichop):
         if whichop == 0:
             return list(self) < list(other)
@@ -105,6 +109,11 @@ cdef class MixedBehaviorProfile(object):
                     return len(self.infoset.actions)
                 def __repr__(self):
                     return str(list(self.profile[self.infoset]))
+                def _repr_latex_(self):
+                    if isinstance(self.profile, MixedBehaviorProfileRational):
+                       return r"$\left[" + ",".join(self.profile[i]._repr_latex_().replace("$","") for i in self.infoset.actions) + r"\right]$"
+                    else:
+                       return repr(self)
                 def __getitem__(self, index):
                     return self.profile[self.infoset.actions[index]]
                 def __setitem__(self, index, value):
@@ -121,6 +130,11 @@ cdef class MixedBehaviorProfile(object):
                     return len(self.player.infosets)
                 def __repr__(self):
                     return str(list(self.profile[self.player]))
+                def _repr_latex_(self):
+                    if isinstance(self.profile, MixedBehaviorProfileRational):
+                       return r"$\left[" + ",".join(self.profile[i]._repr_latex_().replace("$","") for i in self.player.infosets) + r"\right]$"
+                    else:
+                       return repr(self)
                 def __getitem__(self, index):
                     return self.profile[self.player.infosets[index]]
                 def __setitem__(self, index, value):
@@ -287,9 +301,9 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _is_defined_at(self, Infoset infoset):
         return self.profile.IsDefinedAt(infoset.infoset)
     def _getprob(self, int index):
-        return fractions.Fraction(rat_str(self.profile.getitem(index)).c_str()) 
+        return Rational(rat_str(self.profile.getitem(index)).c_str()) 
     def _getaction(self, Action index):
-        return fractions.Fraction(rat_str(self.profile.getaction(index.action)).c_str()) 
+        return Rational(rat_str(self.profile.getaction(index.action)).c_str()) 
     def _setprob(self, int index, value):
         cdef char *s
         if not isinstance(value, (int, fractions.Fraction)):
@@ -307,19 +321,19 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
         s = t
         setaction_MixedBehaviorProfileRational(self.profile, index.action, s)
     def _payoff(self, Player player):
-        return fractions.Fraction(rat_str(self.profile.GetPayoff(player.player.deref().GetNumber())).c_str())
+        return Rational(rat_str(self.profile.GetPayoff(player.player.deref().GetNumber())).c_str())
     def _belief(self, Node node):
-        return fractions.Fraction(rat_str(self.profile.GetBeliefProb(node.node)).c_str())
+        return Rational(rat_str(self.profile.GetBeliefProb(node.node)).c_str())
     def _infoset_prob(self, Infoset infoset):
-        return fractions.Fraction(rat_str(self.profile.GetRealizProb(infoset.infoset)).c_str())
+        return Rational(rat_str(self.profile.GetRealizProb(infoset.infoset)).c_str())
     def _infoset_payoff(self, Infoset infoset):
-        return fractions.Fraction(rat_str(self.profile.GetPayoff(infoset.infoset)).c_str())
+        return Rational(rat_str(self.profile.GetPayoff(infoset.infoset)).c_str())
     def _action_prob(self, Action action):
-        return fractions.Fraction(rat_str(self.profile.GetActionProb(action.action)).c_str())
+        return Rational(rat_str(self.profile.GetActionProb(action.action)).c_str())
     def _action_payoff(self, Action action):
-        return fractions.Fraction(rat_str(self.profile.GetPayoff(action.action)).c_str())
+        return Rational(rat_str(self.profile.GetPayoff(action.action)).c_str())
     def _regret(self, Action action):
-        return fractions.Fraction(rat_str(self.profile.GetRegret(action.action)).c_str())
+        return Rational(rat_str(self.profile.GetRegret(action.action)).c_str())
     
     def copy(self):
         cdef MixedBehaviorProfileRational behav
@@ -332,7 +346,7 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
         mixed.profile = new c_MixedStrategyProfileRational(deref(self.profile).ToMixedProfile())
         return mixed
     def liap_value(self):
-        return fractions.Fraction(rat_str(self.profile.GetLiapValue()).c_str())
+        return Rational(rat_str(self.profile.GetLiapValue()).c_str())
 
     property game:
         def __get__(self):

@@ -23,7 +23,12 @@ from cython.operator cimport dereference as deref
 from gambit.lib.error import UndefinedOperationError
 
 cdef class MixedStrategyProfile(object):
-    def __repr__(self):    return str(list(self))
+    def __repr__(self):   
+        return str([ self[player] for player in self.game.players ])
+
+    def _repr_latex_(self):
+        return r"$\left[" + ",".join([ self[player]._repr_latex_().replace("$","") for player in self.game.players ]) + r"\right]$"
+
     def __richcmp__(MixedStrategyProfile self, other, whichop):
         if whichop == 0:
             return list(self) < list(other)
@@ -78,6 +83,11 @@ cdef class MixedStrategyProfile(object):
                     return len(self.player.strategies)
                 def __repr__(self):
                     return str(list(self.profile[self.player]))
+                def _repr_latex_(self):
+                    if isinstance(self.profile, MixedStrategyProfileRational):
+                       return r"$\left[" + ",".join(self.profile[i]._repr_latex_().replace("$","") for i in self.player.strategies) + r"\right]$"
+                    else:
+                       return repr(self)
                 def __getitem__(self, index):
                     return self.profile[self.player.strategies[index]]
                 def __setitem__(self, index, value):
@@ -217,9 +227,9 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
     def _strategy_index(self, Strategy st):
         return self.profile.GetSupport().GetIndex(st.strategy)
     def _getprob(self, int index):
-        return fractions.Fraction(rat_str(self.profile.getitem(index)).c_str()) 
+        return Rational(rat_str(self.profile.getitem(index)).c_str()) 
     def _getprob_strategy(self, Strategy strategy):
-        return fractions.Fraction(rat_str(self.profile.getitem_strategy(strategy.strategy)).c_str())
+        return Rational(rat_str(self.profile.getitem_strategy(strategy.strategy)).c_str())
     def _setprob(self, int index, value):
         cdef char *s
         if not isinstance(value, (int, fractions.Fraction)):
@@ -237,15 +247,15 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
         s = t
         setitem_MixedStrategyProfileRationalStrategy(self.profile, strategy.strategy, s)
     def _payoff(self, Player player):
-        return fractions.Fraction(rat_str(self.profile.GetPayoff(player.player)).c_str())
+        return Rational(rat_str(self.profile.GetPayoff(player.player)).c_str())
     def _strategy_value(self, Strategy strategy):
-        return fractions.Fraction(rat_str(self.profile.GetPayoff(strategy.strategy)).c_str())
+        return Rational(rat_str(self.profile.GetPayoff(strategy.strategy)).c_str())
     def _strategy_value_deriv(self, int pl,
                               Strategy s1, Strategy s2):
-        return fractions.Fraction(rat_str(self.profile.GetPayoffDeriv(pl, s1.strategy, s2.strategy)).c_str())
+        return Rational(rat_str(self.profile.GetPayoffDeriv(pl, s1.strategy, s2.strategy)).c_str())
 
     def liap_value(self):
-        return fractions.Fraction(rat_str(self.profile.GetLiapValue()).c_str())
+        return Rational(rat_str(self.profile.GetLiapValue()).c_str())
     def copy(self):
         cdef MixedStrategyProfileRational mixed
         mixed = MixedStrategyProfileRational()

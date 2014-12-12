@@ -85,7 +85,7 @@ cdef class Outcome:
         if "." in py_string:
             return decimal.Decimal(py_string)
         else:
-            return fractions.Fraction(py_string)
+            return Rational(py_string)
 
     def __setitem__(self, pl, value):
         if self.restriction is not None:
@@ -151,7 +151,7 @@ cdef class TreeGameOutcome:
             if player < 0 or player >= self.c_game.deref().NumPlayers():
                 raise IndexError, "Index out of range"
             py_string = rat_str(self.psp.deref().GetPayoff(player+1)).c_str()
-        return fractions.Fraction(py_string)
+        return Rational(py_string)
 
     def __setitem__(self, pl, value):
         raise NotImplementedError("Cannot modify outcomes in a derived strategic game.")

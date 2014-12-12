@@ -798,6 +798,17 @@ Elements of games
 These classes represent elements which exist inside of the definition
 of game.
 
+.. py:class:: Rational
+
+   .. versionadded:: 15.0.0
+
+   Represents a rational number in specifying numerical data for a
+   game, or in a computed strategy profile.  This is implemented as a
+   subclass of the Python standard library
+   :py:class:`fractions.Fraction`, with additional instrumentation for
+   rendering in IPython notebooks.
+
+
 .. py:class:: Players
    
    A collection object representing the players in a game.
@@ -946,8 +957,9 @@ of game.
    .. py:attribute:: prob
 
       A settable property that represents the probability associated 
-      with the action. It can be a value stored as an int, 
-      decimal.Decimal, or Fraction.fraction. 
+      with the action. It can be a value stored as an int,
+      :py:class:`gambit.Rational`, :py:class:`decimal.Decimal`, or
+      :py:class:`Fraction.fraction`.
 
 
 .. py:class:: Strategies

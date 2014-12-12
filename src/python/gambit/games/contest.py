@@ -25,7 +25,7 @@ Implementation of contest games.
 """
 
 import meanstat
-import fractions
+from gambit.lib.libgambit import Rational
 
 class TullockGame(meanstat.MeanStatisticGame):
     """
@@ -47,8 +47,8 @@ class TullockGame(meanstat.MeanStatisticGame):
     def payoff(self, own, others):
         try:
             if isinstance(own, int):
-                p_win = fractions.Fraction(own, own+others)
-                p_lose = fractions.Fraction(others, own+others)
+                p_win = Rational(own, own+others)
+                p_lose = Rational(others, own+others)
             else:
                 p_win = 1.0 * own / (own+others)
                 p_lose = 1.0 * others / (own+others)

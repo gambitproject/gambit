@@ -86,7 +86,7 @@ cdef class Action:
             if "." in py_string:
                 return decimal.Decimal(py_string)
             else:
-                return fractions.Fraction(py_string)
+                return Rational(py_string)
         
         def __set__(self, value):
             cdef cxx_string s
