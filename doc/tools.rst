@@ -15,9 +15,19 @@ programs is intended for advanced users and applications.
 
 These programs take an extensive or strategic game file, which can be
 specified on the command line or piped via standard input, and output
-a list of equilibria computed. The equilibria computed are presented
-as a list of comma-separated probabilities, preceded by the tag
-"NE". Many of the programs optionally output additional information
+a list of equilibria computed. The default output format is to present
+equilibria computed as a list of comma-separated probabilities,
+preceded by the tag `NE`. For mixed strategy profiles, the
+probabilities are sorted lexicographically by player, then by
+strategy.  For behavior strategy profiles, the probabilites are sorted
+by player, then information set, then action number, where the
+information sets for a player are sorted by the order in which they
+are encountered in a depth-first traversal of the game tree.
+Many programs take an option `-D`, which, if specified, instead prints
+a more verbose, human-friendly description of each strategy profile
+computed.
+
+Many of the programs optionally output additional information
 about the operation of the algorithm.  These outputs have other,
 program-specific tags, described in the individual program
 documentation.
@@ -85,7 +95,9 @@ pure-strategy Nash equilibria.
    Suppresses printing of the banner at program launch.
 
 
-Computing the equilibria of an extensive game::
+Computing the pure-strategy equilibria of extensive game :download:`e02.efg
+<../contrib/games/e02.efg>`, the example in Figure 2 of Selten
+(International Journal of Game Theory, 1975)::
 
    $ gambit-enumpure e02.efg
    Search for Nash equilibria in pure strategies
@@ -190,7 +202,10 @@ singular supports.
    singular supports are identified with the label "singular." By
    default, no information about supports is printed.
 
-Example invocation::
+Computing equilbria of the extensive game :download:`e01.efg
+<../contrib/games/e01.efg>`, the example in Figure 1 of Selten
+(International Journal of Game Theory, 1975) sometimes called
+"Selten's horse"::
 
    $ gambit-enumpoly e01.efg 
    Compute Nash equilibria by solving polynomial systems
@@ -269,7 +284,10 @@ points.
    to carry out the enumeration process.  This is an experimental
    feature that has not been widely tested.
 
-Example invocation::
+Computing the equilibria, in mixed strategies, of :download:`e02.nfg
+<../contrib/games/e02.nfg>`, the reduced strategic form of the example
+in Figure 2 of Selten (International Journal of Game Theory,
+1975)::
 
    $ gambit-enummixed e02.nfg
    Compute Nash equilibria by enumerating extreme points
@@ -340,7 +358,9 @@ implementation by Ben Blum and Christian Shelton.
    Show intermediate output of the algorithm.  If this option is
    not specified, only the equilibria found are reported.
 
-Example invocation::
+Computing an equilibrium of :download:`e02.nfg <../contrib/games/e02.nfg>`,
+the reduced strategic form of the example in Figure 2 of Selten
+(International Journal of Game Theory, 1975)::
 
     $ gambit-gnm e02.nfg
     Compute Nash equilibria using a global Newton method
@@ -388,8 +408,10 @@ implementation by Ben Blum and Christian Shelton.
    Suppresses printing of the banner at program launch.
 
 
-Example invocation::
-
+Computing an equilibrium of :download:`e02.nfg <../contrib/games/e02.nfg>`,
+the reduced strategic form of the example in Figure 2 of Selten
+(International Journal of Game Theory, 1975)::
+ 
    $ gambit-ipa e02.nfg
    Compute Nash equilibria using iterated polymatrix approximation
    Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Christian Shelton
@@ -478,7 +500,9 @@ game.
    Suppresses printing of the banner at program launch.
 
 
-Example invocation::
+Computing an equilibrium of extensive game :download:`e02.efg
+<../contrib/games/e02.efg>`, the example in Figure 2 of Selten
+(International Journal of Game Theory, 1975)::
 
    $ gambit-lcp e02.efg
    Compute Nash equilibria by solving a linear complementarity program
@@ -549,7 +573,9 @@ points of that set.
 
    Suppresses printing of the banner at program launch.
 
-Example invocation::
+Computing an equilibrium of the game :download:`2x2const.nfg
+<../contrib/games/2x2const.nfg>`, a game with two players with two
+strategies each, with a unique equilibrium in mixed strategies::
 
    $ gambit-lp 2x2const.nfg
    Compute Nash equilibria by solving a linear program
@@ -614,7 +640,9 @@ not guaranteed to find all, or even any, Nash equilibria.
    that is not a Nash equilibrium, are all output, in addition to any
    equilibria found.
 
-Example invocation::
+Computing an equilibrium in mixed strategies of :download:`e02.efg
+<../contrib/games/e02.efg>`, the example in Figure 2 of Selten
+(International Journal of Game Theory, 1975)::
 
    $ gambit-liap e02.nfg
    Compute Nash equilibria by minimizing the Lyapunov function
@@ -694,8 +722,10 @@ options to specify additional starting points for the algorithm.
    in addition to the approximate equilibrium profile found.
 
 
-Example invocation::
-
+Computing an equilibrium in mixed strategies of :download:`e02.efg
+<../contrib/games/e02.efg>`, the example in Figure 2 of Selten
+(International Journal of Game Theory, 1975)::
+ 
    $ gambit-simpdiv e02.nfg 
    Compute Nash equilibria using simplicial subdivision
    Gambit version 15.0.0, Copyright (C) 1994-2014, The Gambit Project
@@ -791,7 +821,10 @@ phase for large values of the precision parameter lambda.
    this switch is specified, only the approximation to the Nash
    equilibrium at the end of the branch is output.
 
-Example invocation::
+Computing the principal branch, in mixed strategies, of :download:`e02.nfg
+<../contrib/games/e02.nfg>`, the reduced strategic form of the example
+in Figure 2 of Selten (International Journal of Game Theory,
+1975)::
 
    $ gambit-logit e02.nfg
    Compute a branch of the logit equilibrium correspondence
