@@ -1,0 +1,15 @@
+EFG 2 R "A simple poker example" { "Alice" "Bob" }
+""
+
+c "" 1 "" { "A" 1/2 "K" 1/2 } 0
+p "" 1 1 "a" { "R" "F" } 0
+p "" 2 1 "b" { "M" "P" } 0
+t "" 1 "Alice wins big" { 2, -2 }
+t "" 2 "Alice wins" { 1, -1 }
+t "" 4 "Bob wins" { -1, 1 }
+p "" 1 2 "k" { "R" "F" } 0
+p "" 2 1 "b" { "M" "P" } 0
+t "" 3 "Bob wins big" { -2, 2 }
+t "" 2 "Alice wins" { 1, -1 }
+t "" 4 "Bob wins" { -1, 1 }
+
