@@ -26,16 +26,46 @@
 
 #include "path.h"
 
+namespace Gambit {
+
+class LogitQREMixedStrategyProfile {
+  friend class StrategicQREEstimator;
+public:
+  LogitQREMixedStrategyProfile(const Game &p_game)
+    : m_profile(p_game->NewMixedStrategyProfile(0.0)), m_lambda(0.0)
+	{ }
+
+  double GetLambda(void) const { return m_lambda; }
+  const MixedStrategyProfile<double> &GetProfile(void) const { return m_profile; }
+
+  Game GetGame(void) const           { return m_profile.GetGame(); }
+  int MixedProfileLength(void) const { return m_profile.MixedProfileLength(); }
+  double operator[](int i) const     { return m_profile[i]; }
+  
+private:
+  // Construct a logit QRE with a given strategy profile and lambda value.
+  // Access is restricted to classes in this module, which ensure that
+  // objects so constructed are in fact QREs.
+  LogitQREMixedStrategyProfile(const MixedStrategyProfile<double> &p_profile,
+			       double p_lambda)
+    : m_profile(p_profile), m_lambda(p_lambda)
+  { }
+  
+  const MixedStrategyProfile<double> m_profile;
+  double m_lambda;
+};
+
+
 class StrategicQREPathTracer : public PathTracer {
 public:
-  StrategicQREPathTracer(const MixedStrategyProfile<double> &p_start) 
-    : m_start(p_start), m_fullGraph(true), m_decimals(6)
-    { SetTargetParam(-1.0); }
+  StrategicQREPathTracer(void) : m_fullGraph(true), m_decimals(6)
+    { }
   virtual ~StrategicQREPathTracer() { }
 
-  void 
-  TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
-		     double p_startLambda, double p_maxLambda, double p_omega);
+  virtual void 
+  TraceStrategicPath(const LogitQREMixedStrategyProfile &p_start,
+		     double p_startLambda, double p_maxLambda, double p_omega,
+		     double p_targetLambda=-1.0);
 
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
   bool GetFullGraph(void) const { return m_fullGraph; }
@@ -43,35 +73,31 @@ public:
   void SetDecimals(int p_decimals) { m_decimals = p_decimals; }
   int GetDecimals(void) const { return m_decimals; }
 
-  void SetMLEFrequencies(const Array<double> &p_frequencies)
-  { m_frequencies = p_frequencies; }
-  const Array<double> &GetMLEFrequencies(void) const { return m_frequencies; }
-  
-  bool IsMLEMode(void) const { return (m_frequencies.Length() > 0); }
-
-
 protected:
-  virtual void OnStep(const Vector<double> &, bool);
-
-  virtual double Criterion(const Vector<double> &, const Vector<double> &);
-
-  // Compute the LHS of the system of equations at the specified point.
-  virtual void GetLHS(const Vector<double> &p_point, Vector<double> &p_lhs);
-  // Compute the Jacobian matrix at the specified point.
-  virtual void GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix);
-
-private:
-  void PrintProfile(std::ostream &, const Vector<double> &, bool);
-
-  // Used in maximum likelihood estimation
-  double LogLike(const Array<double> &p_point);
-
-  MixedStrategyProfile<double> m_start;
-  bool m_fullGraph;
-  Array<double> m_frequencies;
   int m_decimals;
-  
+  bool m_fullGraph;
+
+  class EquationSystem;
+  class LambdaCriterion;
+  class CallbackFunction;
 };
 
 
+class StrategicQREEstimator : public StrategicQREPathTracer {
+public:
+  StrategicQREEstimator(void) { }
+  virtual ~StrategicQREEstimator() { }
+
+  LogitQREMixedStrategyProfile
+  Estimate(const LogitQREMixedStrategyProfile &p_start,
+           const MixedStrategyProfile<double> &p_frequencies,
+	   double p_startLambda, double p_maxLambda, double p_omega);
+  
+protected:
+  class CriterionFunction;
+  class CallbackFunction;
+};
+
+}  // end namespace Gambit
+ 
 #endif // NFGLOGIT_H

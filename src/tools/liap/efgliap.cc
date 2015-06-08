@@ -26,8 +26,8 @@
 #include <fstream>
 
 #include "libgambit/libgambit.h"
+#include "libgambit/function.h"
 #include "efgliap.h"
-#include "funcmin.h"
 
 using namespace Gambit;
 

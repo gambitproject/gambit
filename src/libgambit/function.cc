@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/liap/funcmin.cc
-// Implementation of N-dimensional function minimization routines
+// FILE: src/libgambit/function.cc
+// Implementation of function and function minimization routines
 //
 // These routines derive from the N-dimensional function minimization
 // routines in the GNU Scientific Library, version 1.2, which is
@@ -29,8 +29,8 @@
 
 
 #include <cmath>
-#include "libgambit/libgambit.h"
-#include "funcmin.h"
+#include "libgambit.h"
+#include "function.h"
 
 using namespace Gambit;
 

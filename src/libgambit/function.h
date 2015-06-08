@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/liap/funcmin.h
-// Interface to N-dimensional function minimization routines
+// FILE: src/libgambit/function.h
+// Interface to function and function minimization routines
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef FUNCMIN_H
-#define FUNCMIN_H
+#ifndef LIBGAMBIT_FUNCTION_H
+#define LIBGAMBIT_FUNCTION_H
 
-#include "libgambit/vector.h"
+#include "vector.h"
 
 using namespace Gambit;
 
@@ -124,4 +124,4 @@ private:
 
 };
 
-#endif  // FUNCMIN_H
+#endif  // LIBGAMBIT_FUNCTION_H

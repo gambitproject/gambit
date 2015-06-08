@@ -25,55 +25,112 @@
 #include <iostream>
 #include <libgambit/libgambit.h>
 #include "logbehav.imp"
-
-using namespace Gambit;
-
 #include "efglogit.h"
+
+namespace Gambit {
 
 //------------------------------------------------------------------------------
 //                        Classes representing equations
 //------------------------------------------------------------------------------
 
-//
-// This abstract base class represents one of the defining equations of the system.
-//
-class Equation {
+class AgentQREPathTracer::EquationSystem : public PathTracer::EquationSystem {
 public:
-  virtual ~Equation() { }
+  EquationSystem(const Game &p_game);
+  virtual ~EquationSystem();
+  // Compute the value of the system of equations at the specified point.
+  virtual void GetValue(const Vector<double> &p_point,
+  	                Vector<double> &p_lhs) const;
+  // Compute the Jacobian matrix at the specified point.
+  virtual void GetJacobian(const Vector<double> &p_point,
+			   Matrix<double> &p_matrix) const;
 
-  virtual double Value(const LogBehavProfile<double> &p_point,
-		       double p_lambda) = 0;
-  virtual void Gradient(const LogBehavProfile<double> &p_point, 
-			double p_lambda,
-			Vector<double> &p_gradient) = 0;
-};
-
-//
-// This class represents the equation that the probabilities of actions
-// in information set (pl,iset) sums to one
-//
-class SumToOneEquation : public Equation {
 private:
-  Game m_game;
-  int m_pl, m_iset;
-  GameInfoset m_infoset;
+  //
+  // This abstract base class represents one of the defining equations of the system.
+  //
+  class Equation {
+  public:
+    virtual ~Equation() { }
+    virtual double Value(const LogBehavProfile<double> &p_point,
+			 double p_lambda) const = 0;
+    virtual void Gradient(const LogBehavProfile<double> &p_point, 
+			  double p_lambda,
+			  Vector<double> &p_gradient) const = 0;
+  };
 
-public:
-  SumToOneEquation(Game p_game, int p_player, int p_infoset)
-    : m_game(p_game), m_pl(p_player), m_iset(p_infoset),
-      m_infoset(p_game->GetPlayer(p_player)->GetInfoset(p_infoset))
-  { }
+  //
+  // This class represents the equation that the probabilities of actions
+  // in information set (pl,iset) sums to one
+  //
+  class SumToOneEquation : public Equation {
+  private:
+    Game m_game;
+    int m_pl, m_iset;
+    GameInfoset m_infoset;
 
-  double Value(const LogBehavProfile<double> &p_profile,
-	       double p_lambda);
-  void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
-		Vector<double> &p_gradient);
+  public:
+    SumToOneEquation(Game p_game, int p_player, int p_infoset)
+      : m_game(p_game), m_pl(p_player), m_iset(p_infoset),
+	m_infoset(p_game->GetPlayer(p_player)->GetInfoset(p_infoset))
+    { }
+
+    double Value(const LogBehavProfile<double> &p_profile,
+		 double p_lambda) const;
+    void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
+		  Vector<double> &p_gradient) const;
+  };
+
+  //
+  // This class represents the equation relating the probability of 
+  // playing action (pl,iset,act) to the probability of playing action
+  // (pl,iset,1)
+  //
+  class RatioEquation : public Equation {
+  private:
+    Game m_game;
+    int m_pl, m_iset, m_act;
+    GameInfoset m_infoset;
+
+  public:
+    RatioEquation(Game p_game, int p_player, int p_infoset, int p_action)
+      : m_game(p_game), m_pl(p_player), m_iset(p_infoset), m_act(p_action),
+	m_infoset(p_game->GetPlayer(p_player)->GetInfoset(p_infoset))
+    { }
+
+    double Value(const LogBehavProfile<double> &p_profile, 
+		 double p_lambda) const;
+    void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
+		  Vector<double> &p_gradient) const;
+  };
+
+  Array<Equation *> m_equations;
+  const Game &m_game;
 };
 
+AgentQREPathTracer::EquationSystem::EquationSystem(const Game &p_game)
+  : m_game(p_game)
+{
+  for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
+    GamePlayer player = m_game->GetPlayer(pl);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      m_equations.Append(new SumToOneEquation(m_game, pl, iset));
+      for (int act = 2; act <= player->GetInfoset(iset)->NumActions(); act++) {
+	m_equations.Append(new RatioEquation(m_game, pl, iset, act));
+      }
+    }
+  }
+}
 
+AgentQREPathTracer::EquationSystem::~EquationSystem()
+{
+  for (int i = 1; i <= m_equations.Length(); i++) {
+    delete m_equations[i];
+  }
+}
 
-double SumToOneEquation::Value(const LogBehavProfile<double> &p_profile,
-			       double p_lambda)
+double
+AgentQREPathTracer::EquationSystem::SumToOneEquation::Value(const LogBehavProfile<double> &p_profile,
+							    double p_lambda) const
 {
   double value = -1.0;
   for (int act = 1; act <= m_infoset->NumActions(); act++) {
@@ -82,9 +139,10 @@ double SumToOneEquation::Value(const LogBehavProfile<double> &p_profile,
   return value;
 }
 
-void SumToOneEquation::Gradient(const LogBehavProfile<double> &p_profile,
-				double p_lambda,
-				Vector<double> &p_gradient)
+void
+AgentQREPathTracer::EquationSystem::SumToOneEquation::Gradient(const LogBehavProfile<double> &p_profile,
+							       double p_lambda,
+							       Vector<double> &p_gradient) const
 {
   int i = 1;
   for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
@@ -109,32 +167,10 @@ void SumToOneEquation::Gradient(const LogBehavProfile<double> &p_profile,
 }
 			       
 
-//
-// This class represents the equation relating the probability of 
-// playing action (pl,iset,act) to the probability of playing action
-// (pl,iset,1)
-//
-class RatioEquation : public Equation {
-private:
-  Game m_game;
-  int m_pl, m_iset, m_act;
-  GameInfoset m_infoset;
 
-public:
-  RatioEquation(Game p_game, int p_player, int p_infoset, int p_action)
-    : m_game(p_game), m_pl(p_player), m_iset(p_infoset), m_act(p_action),
-      m_infoset(p_game->GetPlayer(p_player)->GetInfoset(p_infoset))
-  { }
-
-  double Value(const LogBehavProfile<double> &p_profile, 
-	       double p_lambda);
-  void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
-		Vector<double> &p_gradient);
-};
-
-
-double RatioEquation::Value(const LogBehavProfile<double> &p_profile,
-			    double p_lambda)
+double
+AgentQREPathTracer::EquationSystem::RatioEquation::Value(const LogBehavProfile<double> &p_profile,
+							 double p_lambda) const
 {
   return (p_profile.GetLogProb(m_pl, m_iset, m_act) - 
 	  p_profile.GetLogProb(m_pl, m_iset, 1) -
@@ -143,9 +179,10 @@ double RatioEquation::Value(const LogBehavProfile<double> &p_profile,
 	   p_profile.GetPayoff(m_infoset->GetAction(1))));
 }
 
-void RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
-			     double p_lambda,
-			     Vector<double> &p_gradient)
+void
+AgentQREPathTracer::EquationSystem::RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
+							    double p_lambda,
+							    Vector<double> &p_gradient) const
 {
   int i = 1;
   for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
@@ -181,71 +218,11 @@ void RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
 }
 
 
-//------------------------------------------------------------------------------
-//                        AgentQREPathTracer: Lifecycle
-//------------------------------------------------------------------------------
-
-AgentQREPathTracer::AgentQREPathTracer(const MixedBehaviorProfile<double> &p_start) 
-  : m_start(p_start), m_fullGraph(true), m_decimals(6)
-{ 
-  SetTargetParam(-1.0);
-  for (int pl = 1; pl <= p_start.GetGame()->NumPlayers(); pl++) {
-    GamePlayer player = p_start.GetGame()->GetPlayer(pl);
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      m_equations.Append(new SumToOneEquation(p_start.GetGame(), pl, iset));
-      for (int act = 2; act <= player->GetInfoset(iset)->NumActions(); act++) {
-	m_equations.Append(new RatioEquation(p_start.GetGame(), pl, iset, act));
-      }
-    }
-  }
-}
-
-AgentQREPathTracer::~AgentQREPathTracer()
-{
-  for (int i = 1; i <= m_equations.Length(); i++) {
-    delete m_equations[i];
-  }
-}
-
-//------------------------------------------------------------------------------
-//              AgentQREPathTracer: Wrapper to the tracing engine
-//------------------------------------------------------------------------------
-
-void 
-AgentQREPathTracer::TraceAgentPath(const MixedBehaviorProfile<double> &p_start,
-				   double p_startLambda, double p_maxLambda, 
-				   double p_omega)
-{
-  Vector<double> x(p_start.Length() + 1);
-  for (int i = 1; i <= p_start.Length(); i++) {
-    x[i] = log(p_start[i]);
-  }
-  x[x.Length()] = p_startLambda;
-  
-  TracePath(x, p_maxLambda, p_omega);
-}
-
-//------------------------------------------------------------------------------
-//               AgentQREPathTracer: Providing virtual functions
-//------------------------------------------------------------------------------
-
-double
-AgentQREPathTracer::Criterion(const Vector<double> &p_point,
-			      const Vector<double> &p_tangent)
-{
-  if (GetTargetParam() > 0.0) {
-    return p_point[p_point.Length()] - GetTargetParam();
-  }
-  else {
-    return PathTracer::Criterion(p_point, p_tangent);
-  }
-}
-
 void
-AgentQREPathTracer::GetLHS(const Vector<double> &p_point, Vector<double> &p_lhs)
+AgentQREPathTracer::EquationSystem::GetValue(const Vector<double> &p_point,
+					     Vector<double> &p_lhs) const
 {
-  Game game = m_start.GetGame();
-  LogBehavProfile<double> profile(game);
+  LogBehavProfile<double> profile(m_game);
   for (int i = 1; i <= profile.Length(); i++) {
     profile.SetLogProb(i, p_point[i]);
   }
@@ -258,11 +235,10 @@ AgentQREPathTracer::GetLHS(const Vector<double> &p_point, Vector<double> &p_lhs)
 }
 
 void
-AgentQREPathTracer::GetJacobian(const Vector<double> &p_point, 
-				Matrix<double> &p_matrix)
+AgentQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_point, 
+						Matrix<double> &p_matrix) const
 {
-  Game game = m_start.GetGame();
-  LogBehavProfile<double> profile(game);
+  LogBehavProfile<double> profile(m_game);
   for (int i = 1; i <= profile.Length(); i++) {
     profile.SetLogProb(i, p_point[i]);
   }
@@ -275,41 +251,94 @@ AgentQREPathTracer::GetJacobian(const Vector<double> &p_point,
   }
 }
 
+class AgentQREPathTracer::CallbackFunction : public PathTracer::CallbackFunction {
+public:
+  CallbackFunction(std::ostream &p_stream,
+		   bool p_fullGraph, double p_decimals)
+    : m_stream(p_stream),
+      m_fullGraph(p_fullGraph), m_decimals(p_decimals) { }
+  virtual ~CallbackFunction() { }
 
-//----------------------------------------------------------------------------
-//                 AgentQREPathTracer: Outputting profiles
-//----------------------------------------------------------------------------
+  virtual void operator()(const Vector<double> &p_point,
+			  bool p_isTerminal) const;
 
-void 
-AgentQREPathTracer::PrintProfile(std::ostream &p_stream,
-				 const Vector<double> &x,
-				 bool p_isTerminal)
+private:
+  std::ostream &m_stream;
+  bool m_fullGraph;
+  double m_decimals;
+};
+
+void AgentQREPathTracer::CallbackFunction::operator()(const Vector<double> &x,
+						      bool p_isTerminal) const
 {
-  p_stream.setf(std::ios::fixed);
+  if ((!m_fullGraph || p_isTerminal) && (m_fullGraph || !p_isTerminal)) {
+    return;
+  }
+
+  m_stream.setf(std::ios::fixed);
   // By convention, we output lambda first
   if (!p_isTerminal) {
-    p_stream << std::setprecision(m_decimals) << x[x.Length()];
+    m_stream << std::setprecision(m_decimals) << x[x.Length()];
   }
   else {
-    p_stream << "NE";
+    m_stream << "NE";
   }
-  p_stream.unsetf(std::ios::fixed);
+  m_stream.unsetf(std::ios::fixed);
 
   for (int i = 1; i < x.Length(); i++) {
-    p_stream << "," << std::setprecision(m_decimals) << exp(x[i]);
+    m_stream << "," << std::setprecision(m_decimals) << exp(x[i]);
   }
 
-  p_stream << std::endl;
+  m_stream << std::endl;
 }
+
+//------------------------------------------------------------------------------
+//                   AgentQREPathTracer: Criterion function
+//------------------------------------------------------------------------------
+
+class AgentQREPathTracer::LambdaCriterion : public PathTracer::CriterionFunction {
+public:
+  LambdaCriterion(double p_lambda) : m_lambda(p_lambda) { }
+
+  virtual double operator()(const Vector<double> &p_point,
+			    const Vector<double> &p_tangent) const
+  { return p_point[p_point.Length()] - m_lambda; }
+
+private:
+  double m_lambda;
+};
+
+//------------------------------------------------------------------------------
+//              AgentQREPathTracer: Wrapper to the tracing engine
+//------------------------------------------------------------------------------
+
 
 void 
-AgentQREPathTracer::OnStep(const Vector<double> &x,
-			   bool p_isTerminal = false)
+AgentQREPathTracer::TraceAgentPath(const LogitQREMixedBehaviorProfile &p_start,
+				   double p_startLambda, double p_maxLambda, 
+				   double p_omega, double p_targetLambda)
 {
-  if ((m_fullGraph && !p_isTerminal) || (!m_fullGraph && p_isTerminal)) {
-    PrintProfile(std::cout, x, p_isTerminal);
+  Vector<double> x(p_start.BehaviorProfileLength() + 1);
+  for (int i = 1; i <= p_start.BehaviorProfileLength(); i++) {
+    x[i] = log(p_start[i]);
+  }
+  x[x.Length()] = p_startLambda;
+
+  if (p_targetLambda > 0.0) {
+    TracePath(EquationSystem(p_start.GetGame()),
+	      x, p_maxLambda, p_omega,
+	      CallbackFunction(std::cout, m_fullGraph, m_decimals),
+	      LambdaCriterion(p_targetLambda));
+  }
+  else {
+    TracePath(EquationSystem(p_start.GetGame()),
+	      x, p_maxLambda, p_omega,
+	      CallbackFunction(std::cout, m_fullGraph, m_decimals));
   }
 }
+
+}  // end namespace Gambit
+
 
 
 

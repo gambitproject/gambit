@@ -26,18 +26,20 @@
 
 #include <libgambit/libgambit.h>
 #include <libgambit/sqmatrix.h>
-using namespace Gambit;
-
 #include "path.h"
+
+namespace Gambit {
 
 //----------------------------------------------------------------------------
 //                       PathTracer: Auxiliary functions
 //----------------------------------------------------------------------------
 
+namespace {
+  
 inline double sqr(double x) { return x*x; }
 
-static void Givens(Matrix<double> &b, Matrix<double> &q,
-		   double &c1, double &c2, int l1, int l2, int l3)
+void Givens(Matrix<double> &b, Matrix<double> &q,
+            double &c1, double &c2, int l1, int l2, int l3)
 {
   if (fabs(c1) + fabs(c2) == 0.0) {
     return;
@@ -45,10 +47,10 @@ static void Givens(Matrix<double> &b, Matrix<double> &q,
 
   double sn;
   if (fabs(c2) >= fabs(c1)) {
-    sn = sqrt(1.0 + sqr(c1/c2)) * fabs(c2);
+    sn = std::sqrt(1.0 + sqr(c1/c2)) * fabs(c2);
   }
   else {
-    sn = sqrt(1.0 + sqr(c2/c1)) * fabs(c1);
+    sn = std::sqrt(1.0 + sqr(c2/c1)) * fabs(c1);
   }
   double s1 = c1/sn;
   double s2 = c2/sn;
@@ -71,7 +73,7 @@ static void Givens(Matrix<double> &b, Matrix<double> &q,
   c2 = 0.0;
 }
 
-static void QRDecomp(Matrix<double> &b, Matrix<double> &q)
+void QRDecomp(Matrix<double> &b, Matrix<double> &q)
 {
   q.MakeIdent();
   for (int m = 1; m <= b.NumColumns(); m++) {
@@ -81,9 +83,9 @@ static void QRDecomp(Matrix<double> &b, Matrix<double> &q)
   }
 }
 
-static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
-		       Vector<double> &u, Vector<double> &y,
-		       double &d)
+void NewtonStep(Matrix<double> &q, Matrix<double> &b,
+                Vector<double> &u, Vector<double> &y,
+		double &d)
 {
   for (int k = 1; k <= b.NumColumns(); k++) {
     for (int l = 1; l <= k - 1; l++) {
@@ -101,8 +103,10 @@ static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
     u[k] -= s;
     d += s * s;
   }
-  d = sqrt(d);
+  d = std::sqrt(d);
 }
+
+}   // end anonymous namespace
 
 
 //----------------------------------------------------------------------------
@@ -110,8 +114,11 @@ static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
 //----------------------------------------------------------------------------
 
 void 
-PathTracer::TracePath(Vector<double> &x,
-		      double p_maxLambda, double &p_omega)
+PathTracer::TracePath(const EquationSystem &p_system,
+		      Vector<double> &x,
+		      double p_maxLambda, double &p_omega,
+		      const CallbackFunction &p_callback,
+		      const CriterionFunction &p_criterion)
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
   const double c_maxDist = 0.4;    // maximal distance to curve
@@ -131,8 +138,8 @@ PathTracer::TracePath(Vector<double> &x,
   Matrix<double> b(x.Length(), x.Length() - 1);
   SquareMatrix<double> q(x.Length());
 
-  OnStep(x, false);
-  GetJacobian(x, b);
+  p_callback(x, false);
+  p_system.GetJacobian(x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
@@ -153,7 +160,7 @@ PathTracer::TracePath(Vector<double> &x,
     }
 
     double decel = 1.0 / m_maxDecel;  // initialize deceleration factor
-    GetJacobian(u, b);
+    p_system.GetJacobian(u, b);
     QRDecomp(b, q);
 
     int iter = 1;
@@ -161,7 +168,7 @@ PathTracer::TracePath(Vector<double> &x,
     while (true) {
       double dist;
 
-      GetLHS(u, y);
+      p_system.GetValue(u, y);
       NewtonStep(q, b, u, y, dist); 
 
       if (dist >= c_maxDist) {
@@ -169,14 +176,14 @@ PathTracer::TracePath(Vector<double> &x,
 	break;
       }
       
-      decel = std::max(decel, sqrt(dist / c_maxDist) * m_maxDecel);
+      decel = std::max(decel, std::sqrt(dist / c_maxDist) * m_maxDecel);
       if (iter >= 2) {
 	double contr = dist / (disto + c_tol * c_eta);
 	if (contr > c_maxContr) {
 	  accept = false;
 	  break;
 	}
-	decel = std::max(decel, sqrt(contr / c_maxContr) * m_maxDecel);
+	decel = std::max(decel, std::sqrt(contr / c_maxContr) * m_maxDecel);
       }
 
       if (dist <= c_tol) {
@@ -186,7 +193,7 @@ PathTracer::TracePath(Vector<double> &x,
       disto = dist;
       iter++;
       if (iter > c_maxIter) {
-	OnStep(x, true);
+	p_callback(x, true);
 	if (newton) {
 	  // Restore the place to restart if desired
 	  x = restart;
@@ -198,7 +205,7 @@ PathTracer::TracePath(Vector<double> &x,
     if (!accept) {
       h /= m_maxDecel;   // PC not accepted; change stepsize and retry
       if (fabs(h) <= c_hmin) {
-	OnStep(x, true);
+	p_callback(x, true);
 	if (newton) {
 	  // Restore the place to restart if desired
 	  x = restart;
@@ -218,14 +225,14 @@ PathTracer::TracePath(Vector<double> &x,
     q.GetRow(q.NumRows(), newT); 
 
     if (!newton &&
-	Criterion(x, t) * Criterion(u, newT) < 0.0) {
+	p_criterion(x, t) * p_criterion(u, newT) < 0.0) {
       newton = true;
       restart = u;
     }
 
     if (newton) {
       // Newton-type steplength adaptation, secant method
-      h *= -Criterion(u, newT) / (Criterion(u, newT) - Criterion(x, t));
+      h *= -p_criterion(u, newT) / (p_criterion(u, newT) - p_criterion(x, t));
     }
     else {
       // Standard steplength adaptation
@@ -234,7 +241,7 @@ PathTracer::TracePath(Vector<double> &x,
 
     // PC step was successful; update and iterate
     x = u;
-    OnStep(x, false);
+    p_callback(x, false);
 
     if (t * newT < 0.0) {
       // Bifurcation detected; for now, just "jump over" and continue,
@@ -245,9 +252,10 @@ PathTracer::TracePath(Vector<double> &x,
     t = newT;
   }
 
-  OnStep(x, true);
+  p_callback(x, true);
   if (newton) {
     x = restart;
   }
 }
 
+}  // end namespace Gambit

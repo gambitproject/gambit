@@ -353,6 +353,8 @@ libgambit_la_SOURCES = \
 	src/libgambit/nash.h \
 	src/libgambit/file.cc \
 	src/libgambit/libgambit.h \
+	src/libgambit/function.cc \
+	src/libgambit/function.h \
 	src/libgambit/tinyxml.cc \
 	src/libgambit/tinyxml.h \
 	src/libgambit/tinyxmlerror.cc \
@@ -642,8 +644,6 @@ gambit_lcp_SOURCES = \
 
 gambit_liap_SOURCES = \
 	${libgambit_la_SOURCES} \
-	src/tools/liap/funcmin.cc \
-	src/tools/liap/funcmin.h \
 	src/tools/liap/efgliap.cc \
 	src/tools/liap/efgliap.h \
 	src/tools/liap/nfgliap.cc \
