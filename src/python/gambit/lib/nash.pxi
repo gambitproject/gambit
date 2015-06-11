@@ -249,3 +249,55 @@ cdef class LPStrategySolverRational(object):
             ret.append(p)
         return ret
 
+
+cdef extern from "tools/logit/nfglogit.h":
+    cdef cppclass c_LogitQREMixedStrategyProfile "LogitQREMixedStrategyProfile":
+        c_LogitQREMixedStrategyProfile(c_Game)
+        c_LogitQREMixedStrategyProfile(c_LogitQREMixedStrategyProfile)
+        c_Game GetGame()
+        c_MixedStrategyProfileDouble GetProfile()
+        double GetLambda()
+        int MixedProfileLength()
+        double getitem "operator[]"(int) except +IndexError
+	
+    cdef cppclass c_StrategicQREEstimator "StrategicQREEstimator":
+        c_StrategicQREEstimator()
+        c_LogitQREMixedStrategyProfile Estimate(c_LogitQREMixedStrategyProfile,
+	                                        c_MixedStrategyProfileDouble,
+						double, double, double) except +RuntimeError
+        
+cdef extern from "util.h":
+    c_LogitQREMixedStrategyProfile *CopyLogitQREMixedStrategyProfile(c_StrategicQREEstimator *, c_LogitQREMixedStrategyProfile *, c_MixedStrategyProfileDouble *, double, double, double)
+
+cdef class LogitQREMixedStrategyProfile(object):
+    cdef c_LogitQREMixedStrategyProfile *profile
+    def __init__(self, game=None):
+        if game is not None:
+            self.profile = new c_LogitQREMixedStrategyProfile((<Game>game).game)
+    def __dealloc__(self):
+        del self.profile
+
+    def __len__(self):
+        return self.profile.MixedProfileLength()
+    def __getitem__(self, int i):
+        return self.profile.getitem(i+1)
+    @property
+    def lam(self):
+        return self.profile.GetLambda()
+
+cdef class StrategicQREEstimator(object):
+    cdef c_StrategicQREEstimator *alg
+
+    def __cinit__(self):
+        self.alg = new c_StrategicQREEstimator()
+    def __dealloc__(self):
+        del self.alg
+    def estimate(self, LogitQREMixedStrategyProfile start,
+                 MixedStrategyProfileDouble frequencies,
+		 start_lambda, max_lambda, omega):
+        cdef LogitQREMixedStrategyProfile ret
+        ret = LogitQREMixedStrategyProfile()
+        ret.profile = CopyLogitQREMixedStrategyProfile(self.alg, start.profile,
+                                                       frequencies.profile,
+                                                       start_lambda, max_lambda, omega)
+        return ret

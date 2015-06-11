@@ -365,6 +365,7 @@ libgambitincludedir = $(includedir)/libgambit
 libgambitinclude_HEADERS = \
 	src/libgambit/integer.h \
 	src/libgambit/rational.h \
+	src/libgambit/shared_ptr.h \
 	src/libgambit/array.h \
 	src/libgambit/list.h \
 	src/libgambit/vector.h \
@@ -389,6 +390,8 @@ libgambitinclude_HEADERS = \
 	src/libgambit/stratitr.h \
 	src/libgambit/stratspt.h \
 	src/libgambit/libgambit.h \
+	src/libgambit/function.h \
+	src/libgambit/tinyxml.h \
 	${libagginclude_HEADERS}
 
 libagg_la_SOURCES = \

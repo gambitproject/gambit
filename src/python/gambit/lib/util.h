@@ -30,6 +30,7 @@
 #include <fstream>
 #include <sstream>
 #include "libgambit/libgambit.h"
+#include "tools/logit/nfglogit.h"
 
 using namespace std;
 using namespace Gambit;
@@ -124,3 +125,15 @@ inline void
 setaction_MixedBehaviorProfileRational(MixedBehaviorProfile<Rational> *profile,
            GameAction &action, const char *value)
 { (*profile)(action) = lexical_cast<Rational>(std::string(value)); }
+
+inline LogitQREMixedStrategyProfile *
+CopyLogitQREMixedStrategyProfile(StrategicQREEstimator *alg,
+				 const LogitQREMixedStrategyProfile *start,
+				 const MixedStrategyProfile<double> *p_profile,
+				 double p_startLambda, double p_endLambda,
+				 double p_omega)
+{
+  return new LogitQREMixedStrategyProfile(alg->Estimate(*start, *p_profile,
+							p_startLambda,
+							p_endLambda, p_omega));
+}

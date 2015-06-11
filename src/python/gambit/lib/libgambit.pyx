@@ -63,6 +63,7 @@ cdef extern from "libgambit/list.h":
     cdef cppclass List[T]:
         T &getitem "operator[]"(int) except +
         int Length()
+        void push_back(T)
 
 cdef extern from "libgambit/game.h":
     cdef cppclass c_GameRep "GameRep"
