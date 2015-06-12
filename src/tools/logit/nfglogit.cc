@@ -214,24 +214,25 @@ StrategicQREPathTracer::CallbackFunction::operator()(const Vector<double> &x,
 
 void 
 StrategicQREPathTracer::TraceStrategicPath(const LogitQREMixedStrategyProfile &p_start,
-					   double p_startLambda, double p_maxLambda, 
+					   std::ostream &p_stream,
+					   double p_maxLambda, 
 					   double p_omega, double p_targetLambda)
 {
   Vector<double> x(p_start.MixedProfileLength() + 1);
   for (int i = 1; i <= p_start.MixedProfileLength(); i++) {
     x[i] = log(p_start[i]);
   }
-  x[x.Length()] = p_startLambda;
+  x[x.Length()] = p_start.GetLambda();
   if (p_targetLambda > 0.0) {
     TracePath(EquationSystem(p_start.GetGame()),
 	      x, p_maxLambda, p_omega,
-	      CallbackFunction(std::cout, m_fullGraph, m_decimals),
+	      CallbackFunction(p_stream, m_fullGraph, m_decimals),
 	      LambdaCriterion(p_targetLambda));
   }
   else {
     TracePath(EquationSystem(p_start.GetGame()),
 	      x, p_maxLambda, p_omega,
-	      CallbackFunction(std::cout, m_fullGraph, m_decimals));
+	      CallbackFunction(p_stream, m_fullGraph, m_decimals));
   }
 }
 
@@ -372,8 +373,8 @@ StrategicQREEstimator::CallbackFunction::operator()(const Vector<double> &x,
 LogitQREMixedStrategyProfile
 StrategicQREEstimator::Estimate(const LogitQREMixedStrategyProfile &p_start,
 				const MixedStrategyProfile<double> &p_frequencies,
-				double p_startLambda, double p_maxLambda, 
-				double p_omega)
+				std::ostream &p_stream,
+				double p_maxLambda, double p_omega)
 {
   if (p_start.GetGame() != p_frequencies.GetGame()) {
     throw MismatchException();
@@ -383,9 +384,9 @@ StrategicQREEstimator::Estimate(const LogitQREMixedStrategyProfile &p_start,
   for (int i = 1; i <= p_start.MixedProfileLength(); i++) {
     x[i] = log(p_start[i]);
   }
-  x[x.Length()] = p_startLambda;
+  x[x.Length()] = p_start.GetLambda();
 
-  CallbackFunction callback(std::cout, p_start.GetGame(),
+  CallbackFunction callback(p_stream, p_start.GetGame(),
 			    p_frequencies, m_fullGraph, m_decimals);
   while (x[x.Length()] < p_maxLambda) {
     TracePath(EquationSystem(p_start.GetGame()),

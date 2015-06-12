@@ -64,8 +64,8 @@ public:
 
   virtual void 
   TraceStrategicPath(const LogitQREMixedStrategyProfile &p_start,
-		     double p_startLambda, double p_maxLambda, double p_omega,
-		     double p_targetLambda=-1.0);
+		     std::ostream &p_logStream,
+		     double p_maxLambda, double p_omega, double p_targetLambda=-1.0);
 
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
   bool GetFullGraph(void) const { return m_fullGraph; }
@@ -91,7 +91,8 @@ public:
   LogitQREMixedStrategyProfile
   Estimate(const LogitQREMixedStrategyProfile &p_start,
            const MixedStrategyProfile<double> &p_frequencies,
-	   double p_startLambda, double p_maxLambda, double p_omega);
+	   std::ostream &p_logStream,
+	   double p_maxLambda, double p_omega);
   
 protected:
   class CriterionFunction;

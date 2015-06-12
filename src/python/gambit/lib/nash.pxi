@@ -266,38 +266,47 @@ cdef extern from "tools/logit/nfglogit.h":
 	                                        c_MixedStrategyProfileDouble,
 						double, double, double) except +RuntimeError
         
-cdef extern from "util.h":
-    c_LogitQREMixedStrategyProfile *CopyLogitQREMixedStrategyProfile(c_StrategicQREEstimator *, c_LogitQREMixedStrategyProfile *, c_MixedStrategyProfileDouble *, double, double, double)
+cdef extern from "nash.h":
+    c_LogitQREMixedStrategyProfile *_logit_estimate "logit_estimate"(c_MixedStrategyProfileDouble *)
 
 cdef class LogitQREMixedStrategyProfile(object):
-    cdef c_LogitQREMixedStrategyProfile *profile
+    cdef c_LogitQREMixedStrategyProfile *thisptr
     def __init__(self, game=None):
         if game is not None:
-            self.profile = new c_LogitQREMixedStrategyProfile((<Game>game).game)
+            self.thisptr = new c_LogitQREMixedStrategyProfile((<Game>game).game)
     def __dealloc__(self):
-        del self.profile
+        del self.thisptr
+    def __repr__(self):
+        return "LogitQREMixedStrategyProfile(lam=%f,profile=%s)" % (self.lam, self.profile)
 
     def __len__(self):
-        return self.profile.MixedProfileLength()
+        return self.thisptr.MixedProfileLength()
     def __getitem__(self, int i):
-        return self.profile.getitem(i+1)
-    @property
-    def lam(self):
-        return self.profile.GetLambda()
+        return self.thisptr.getitem(i+1)
 
-cdef class StrategicQREEstimator(object):
-    cdef c_StrategicQREEstimator *alg
+    property game:
+        def __get__(self):
+            cdef Game g
+            g = Game()
+            g.game = self.thisptr.GetGame()
+            return g
 
-    def __cinit__(self):
-        self.alg = new c_StrategicQREEstimator()
-    def __dealloc__(self):
-        del self.alg
-    def estimate(self, LogitQREMixedStrategyProfile start,
-                 MixedStrategyProfileDouble frequencies,
-		 start_lambda, max_lambda, omega):
-        cdef LogitQREMixedStrategyProfile ret
-        ret = LogitQREMixedStrategyProfile()
-        ret.profile = CopyLogitQREMixedStrategyProfile(self.alg, start.profile,
-                                                       frequencies.profile,
-                                                       start_lambda, max_lambda, omega)
-        return ret
+    property lam: 
+        def __get__(self):
+            return self.thisptr.GetLambda()
+
+    property profile:
+        def __get__(self):
+            cdef MixedStrategyProfileDouble profile
+            profile = MixedStrategyProfileDouble()
+            profile.profile = new c_MixedStrategyProfileDouble(deref(self.thisptr).GetProfile())
+            return profile
+
+def logit_estimate(MixedStrategyProfileDouble p_profile):
+    """Estimate QRE corresponding to mixed strategy profile using
+    maximum likelihood along the principal branch.
+    """
+    cdef LogitQREMixedStrategyProfile ret
+    ret = LogitQREMixedStrategyProfile()
+    ret.thisptr = _logit_estimate(p_profile.profile)
+    return ret

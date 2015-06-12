@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
       tracer.SetStepsize(hStart);
       tracer.SetFullGraph(fullGraph);
       tracer.SetDecimals(decimals);
-      tracer.Estimate(start, frequencies, 0.0, maxLambda, 1.0);
+      tracer.Estimate(start, frequencies, std::cout, maxLambda, 1.0);
       return 0;
     }
 
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
       tracer.SetStepsize(hStart);
       tracer.SetFullGraph(fullGraph);
       tracer.SetDecimals(decimals);
-      tracer.TraceStrategicPath(start, 0.0, maxLambda, 1.0, targetLambda);
+      tracer.TraceStrategicPath(start, std::cout, maxLambda, 1.0, targetLambda);
     }
     else {
       LogitQREMixedBehaviorProfile start(game);
@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
       tracer.SetStepsize(hStart);
       tracer.SetFullGraph(fullGraph);
       tracer.SetDecimals(decimals);
-      tracer.TraceAgentPath(start, 0.0, maxLambda, 1.0, targetLambda);
+      tracer.TraceAgentPath(start, std::cout, maxLambda, 1.0, targetLambda);
     }
     return 0;
   }

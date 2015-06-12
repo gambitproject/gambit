@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/python/gambit/lib/util.y
+// FILE: src/python/gambit/lib/util.h
 // Convenience functions for Cython wrapper
 //
 // This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,6 @@
 #include <fstream>
 #include <sstream>
 #include "libgambit/libgambit.h"
-#include "tools/logit/nfglogit.h"
 
 using namespace std;
 using namespace Gambit;
@@ -41,13 +40,13 @@ inline Game NewTable(Array<int> *dim)
 Game ReadGame(char *fn) throw (InvalidFileException)
 { 
   std::ifstream f(fn);
-  return Gambit::ReadGame(f);
+  return ReadGame(f);
 }
 
 Game ParseGame(char *s) throw (InvalidFileException)
 {
   std::istringstream f(s);
-  return Gambit::ReadGame(f);
+  return ReadGame(f);
 }
 
 std::string WriteGame(const Game &p_game, const std::string &p_format)
@@ -126,14 +125,3 @@ setaction_MixedBehaviorProfileRational(MixedBehaviorProfile<Rational> *profile,
            GameAction &action, const char *value)
 { (*profile)(action) = lexical_cast<Rational>(std::string(value)); }
 
-inline LogitQREMixedStrategyProfile *
-CopyLogitQREMixedStrategyProfile(StrategicQREEstimator *alg,
-				 const LogitQREMixedStrategyProfile *start,
-				 const MixedStrategyProfile<double> *p_profile,
-				 double p_startLambda, double p_endLambda,
-				 double p_omega)
-{
-  return new LogitQREMixedStrategyProfile(alg->Estimate(*start, *p_profile,
-							p_startLambda,
-							p_endLambda, p_omega));
-}

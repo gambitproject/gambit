@@ -315,25 +315,26 @@ private:
 
 void 
 AgentQREPathTracer::TraceAgentPath(const LogitQREMixedBehaviorProfile &p_start,
-				   double p_startLambda, double p_maxLambda, 
+				   std::ostream &p_stream, 
+				   double p_maxLambda, 
 				   double p_omega, double p_targetLambda)
 {
   Vector<double> x(p_start.BehaviorProfileLength() + 1);
   for (int i = 1; i <= p_start.BehaviorProfileLength(); i++) {
     x[i] = log(p_start[i]);
   }
-  x[x.Length()] = p_startLambda;
+  x[x.Length()] = p_start.GetLambda();
 
   if (p_targetLambda > 0.0) {
     TracePath(EquationSystem(p_start.GetGame()),
 	      x, p_maxLambda, p_omega,
-	      CallbackFunction(std::cout, m_fullGraph, m_decimals),
+	      CallbackFunction(p_stream, m_fullGraph, m_decimals),
 	      LambdaCriterion(p_targetLambda));
   }
   else {
     TracePath(EquationSystem(p_start.GetGame()),
 	      x, p_maxLambda, p_omega,
-	      CallbackFunction(std::cout, m_fullGraph, m_decimals));
+	      CallbackFunction(p_stream, m_fullGraph, m_decimals));
   }
 }
 

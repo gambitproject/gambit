@@ -284,11 +284,6 @@ def lp_solve(game, rational=True, use_strategic=False, external=False):
             alg = gambit.lib.libgambit.LPBehaviorSolverDouble()
     return alg.solve(game)
 
-def logit_estimate(profile):
-    """Estimate QRE corresponding to mixed strategy profile using
-    maximum likelihood along the principal branch.
-    """
-    alg = gambit.lib.libgambit.StrategicQREEstimator()
-    return alg.estimate(gambit.lib.libgambit.LogitQREMixedStrategyProfile(profile.game),
-                        profile,
-                        0.0, 100000.0, 1.0)
+logit_estimate = gambit.lib.libgambit.logit_estimate
+
+

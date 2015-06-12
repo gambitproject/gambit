@@ -276,6 +276,7 @@ EXTRA_DIST = \
 	src/python/gambit/lib/player.pxi \
 	src/python/gambit/lib/strategy.pxi \
 	src/python/gambit/lib/stratspt.pxi \
+        src/python/gambit/lib/nash.h \
 	src/python/gambit/lib/util.h \
 	src/python/gambit/tests/test_actions.py \
 	src/python/gambit/tests/test_behav.py \

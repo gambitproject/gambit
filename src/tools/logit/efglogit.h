@@ -54,7 +54,8 @@ public:
 
   void 
   TraceAgentPath(const LogitQREMixedBehaviorProfile &p_start,
-		 double p_startLambda, double p_maxLambda, double p_omega,
+		 std::ostream &p_stream,
+		 double p_maxLambda, double p_omega,
 		 double p_targetLambda=-1.0);
 
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
