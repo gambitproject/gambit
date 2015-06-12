@@ -19,8 +19,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+import itertools
+
 from cython.operator cimport dereference as deref
 from gambit.lib.error import UndefinedOperationError
+
 
 cdef class MixedStrategyProfile(object):
     def __repr__(self):   
@@ -104,11 +107,26 @@ cdef class MixedStrategyProfile(object):
             self._setprob(index+1, value)
         elif isinstance(index, Strategy):
             self._setprob_strategy(index, value)
+        elif isinstance(index, Player):
+            self._setprob_player(index, value)
         elif isinstance(index, str):
             self[self._resolve_index(index)] = value
         else:
-            raise TypeError("profile indexes must be int, str or Strategy, not %s" %
+            raise TypeError("profile indexes must be int, str, Player, or Strategy, not %s" %
                             index.__class__.__name__)
+
+    def _setprob_player(self, Player player, value):
+        class Filler(object): pass
+        try:
+            for (s, v) in itertools.izip_longest(player.strategies, value, fillvalue=Filler()):
+                if isinstance(s, Filler) or isinstance(v, Filler):
+                     raise ValueError("must specify exactly one value per strategy")
+                self[s] = v
+        except TypeError as e:
+            if "must support iteration" in str(e):
+                raise TypeError("value vector must support iteration")
+            else:
+                raise e
 
     def payoff(self, player):
         if isinstance(player, Player):
