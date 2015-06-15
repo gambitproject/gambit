@@ -233,9 +233,6 @@ cdef class MixedBehaviorProfile(object):
                             action.__class__.__name__)
         return self._regret(action)    
 
-    def set_centroid(self):   self.profile.SetCentroid()
-    def normalize(self):      self.profile.Normalize()
-
 cdef class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     cdef c_MixedBehaviorProfileDouble *profile
 
@@ -281,6 +278,9 @@ cdef class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         return mixed
     def liap_value(self):
         return self.profile.GetLiapValue()
+    def set_centroid(self):   self.profile.SetCentroid()
+    def normalize(self):      self.profile.Normalize()
+
 
     property game:
         def __get__(self):
@@ -347,6 +347,8 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
         return mixed
     def liap_value(self):
         return Rational(rat_str(self.profile.GetLiapValue()).c_str())
+    def set_centroid(self):   self.profile.SetCentroid()
+    def normalize(self):      self.profile.Normalize()
 
     property game:
         def __get__(self):

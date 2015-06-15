@@ -128,8 +128,10 @@ cdef class MixedStrategyProfile(object):
             else:
                 raise e
 
-    def payoff(self, player):
-        if isinstance(player, Player):
+    def payoff(self, player=None):
+        if player is None:
+            return [ self._payoff(player) for player in self.game.players ]
+        elif isinstance(player, Player):
             return self._payoff(player)
         elif isinstance(player, (int, str)):
             return self.payoff(self.game.players[player])
@@ -144,8 +146,10 @@ cdef class MixedStrategyProfile(object):
                             strategy.__class__.__name__)
         return self._strategy_value(strategy)
             
-    def strategy_values(self, player):
-        if isinstance(player, str):
+    def strategy_values(self, player=None):
+        if player is None:
+            return [ self.strategy_values(player) for player in self.game.players ]
+        elif isinstance(player, str):
             player = self.game.players[player]
         elif not isinstance(player, Player):
             raise TypeError("strategy values index must be str or Player, not %s" %
@@ -169,10 +173,6 @@ cdef class MixedStrategyProfile(object):
             raise TypeError("profile strategy index must be str or Strategy, not %s" %
                             strategy2.__class__.__name__)
         return self._strategy_value_deriv((<Player>player).player.deref().GetNumber(), strategy1, strategy2)
-
-    def set_centroid(self):   self.profile.SetCentroid()
-    def normalize(self):      self.profile.Normalize()
-
 
 cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
     cdef c_MixedStrategyProfileDouble *profile
@@ -224,7 +224,8 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
         profile = MixedStrategyProfileDouble()
         profile.profile = new c_MixedStrategyProfileDouble(self.profile.ToFullSupport())
         return profile
-            
+    def set_centroid(self):   self.profile.SetCentroid()
+    def normalize(self):      self.profile.Normalize()
 
     property game:
         def __get__(self):
@@ -296,7 +297,9 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
         profile = MixedStrategyProfileRational()
         profile.profile = new c_MixedStrategyProfileRational(self.profile.ToFullSupport())
         return profile
-    
+    def set_centroid(self):   self.profile.SetCentroid()
+    def normalize(self):      self.profile.Normalize()
+
     property game:
         def __get__(self):
             cdef Game g
