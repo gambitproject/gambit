@@ -102,7 +102,7 @@ protected:
   void TracePath(const EquationSystem &p_system,
 		 Vector<double> &p_x, double p_maxLambda, double &p_omega,
 		 const CallbackFunction &p_callback = NullCallbackFunction(),
-		 const CriterionFunction &p_criterion = NullCriterionFunction());
+		 const CriterionFunction &p_criterion = NullCriterionFunction()) const;
 
 private:
   double m_maxDecel, m_hStart;

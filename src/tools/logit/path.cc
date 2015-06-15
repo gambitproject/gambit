@@ -118,7 +118,7 @@ PathTracer::TracePath(const EquationSystem &p_system,
 		      Vector<double> &x,
 		      double p_maxLambda, double &p_omega,
 		      const CallbackFunction &p_callback,
-		      const CriterionFunction &p_criterion)
+		      const CriterionFunction &p_criterion) const
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
   const double c_maxDist = 0.4;    // maximal distance to curve

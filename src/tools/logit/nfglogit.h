@@ -29,6 +29,7 @@
 namespace Gambit {
 
 class LogitQREMixedStrategyProfile {
+  friend class StrategicQREPathTracer;
   friend class StrategicQREEstimator;
 public:
   LogitQREMixedStrategyProfile(const Game &p_game)
@@ -62,11 +63,15 @@ public:
     { }
   virtual ~StrategicQREPathTracer() { }
 
-  virtual void 
+  List<LogitQREMixedStrategyProfile> 
   TraceStrategicPath(const LogitQREMixedStrategyProfile &p_start,
 		     std::ostream &p_logStream,
-		     double p_maxLambda, double p_omega, double p_targetLambda=-1.0);
-
+		     double p_maxLambda, double p_omega) const;
+  LogitQREMixedStrategyProfile SolveAtLambda(const LogitQREMixedStrategyProfile &p_start,
+					     std::ostream &p_logStream,
+					     double p_targetLambda,
+					     double p_omega) const;
+  
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
   bool GetFullGraph(void) const { return m_fullGraph; }
 
@@ -74,8 +79,8 @@ public:
   int GetDecimals(void) const { return m_decimals; }
 
 protected:
-  int m_decimals;
   bool m_fullGraph;
+  int m_decimals;
 
   class EquationSystem;
   class LambdaCriterion;

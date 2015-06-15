@@ -285,5 +285,6 @@ def lp_solve(game, rational=True, use_strategic=False, external=False):
     return alg.solve(game)
 
 logit_estimate = gambit.lib.libgambit.logit_estimate
-
+logit_atlambda = gambit.lib.libgambit.logit_atlambda
+logit_principal_branch = gambit.lib.libgambit.logit_principal_branch
 

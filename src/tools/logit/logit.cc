@@ -199,7 +199,12 @@ int main(int argc, char *argv[])
       tracer.SetStepsize(hStart);
       tracer.SetFullGraph(fullGraph);
       tracer.SetDecimals(decimals);
-      tracer.TraceStrategicPath(start, std::cout, maxLambda, 1.0, targetLambda);
+      if (targetLambda > 0.0) {
+	tracer.SolveAtLambda(start, std::cout, targetLambda, 1.0);
+      }
+      else {
+	tracer.TraceStrategicPath(start, std::cout, maxLambda, 1.0);
+      }
     }
     else {
       LogitQREMixedBehaviorProfile start(game);

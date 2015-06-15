@@ -173,17 +173,23 @@ private:
 class StrategicQREPathTracer::CallbackFunction : public PathTracer::CallbackFunction {
 public:
   CallbackFunction(std::ostream &p_stream,
+		   const Game &p_game,
 		   bool p_fullGraph, double p_decimals)
-    : m_stream(p_stream), m_fullGraph(p_fullGraph), m_decimals(p_decimals) { }
+    : m_stream(p_stream), m_game(p_game),
+      m_fullGraph(p_fullGraph), m_decimals(p_decimals) { }
   virtual ~CallbackFunction() { }
   
   virtual void operator()(const Vector<double> &p_point,
 			  bool p_isTerminal) const;
+  const List<LogitQREMixedStrategyProfile> &GetProfiles(void) const
+  { return m_profiles; }
   
 private:
   std::ostream &m_stream;
+  const Game &m_game;
   bool m_fullGraph;
   double m_decimals;
+  mutable List<LogitQREMixedStrategyProfile> m_profiles;
 };
 
 void 
@@ -202,38 +208,52 @@ StrategicQREPathTracer::CallbackFunction::operator()(const Vector<double> &x,
     m_stream << "NE";
   }
   m_stream.unsetf(std::ios::fixed);
-  for (int i = 1; i <  x.Length(); i++) {
-    m_stream << "," << std::setprecision(m_decimals) << exp(x[i]);
+  MixedStrategyProfile<double> profile(m_game->NewMixedStrategyProfile(0.0));
+  for (int i = 1; i < x.Length(); i++) {
+    profile[i] = exp(x[i]);
+    m_stream << "," << std::setprecision(m_decimals) << profile[i];
   }
   m_stream << std::endl;
+  m_profiles.push_back(LogitQREMixedStrategyProfile(profile, x[x.Length()]));
 }
 
 //----------------------------------------------------------------------------
-//               StrategicQREPathTracer: Main driver routine
+//               StrategicQREPathTracer: Main driver routines
 //----------------------------------------------------------------------------
 
-void 
+List<LogitQREMixedStrategyProfile>
 StrategicQREPathTracer::TraceStrategicPath(const LogitQREMixedStrategyProfile &p_start,
 					   std::ostream &p_stream,
 					   double p_maxLambda, 
-					   double p_omega, double p_targetLambda)
+					   double p_omega) const
 {
   Vector<double> x(p_start.MixedProfileLength() + 1);
   for (int i = 1; i <= p_start.MixedProfileLength(); i++) {
     x[i] = log(p_start[i]);
   }
   x[x.Length()] = p_start.GetLambda();
-  if (p_targetLambda > 0.0) {
-    TracePath(EquationSystem(p_start.GetGame()),
-	      x, p_maxLambda, p_omega,
-	      CallbackFunction(p_stream, m_fullGraph, m_decimals),
-	      LambdaCriterion(p_targetLambda));
+  CallbackFunction func(p_stream, p_start.GetGame(), m_fullGraph, m_decimals);
+  TracePath(EquationSystem(p_start.GetGame()),
+	    x, p_maxLambda, p_omega, func);
+  return func.GetProfiles();
+}
+
+LogitQREMixedStrategyProfile
+StrategicQREPathTracer::SolveAtLambda(const LogitQREMixedStrategyProfile &p_start,
+				      std::ostream &p_stream,
+				      double p_targetLambda, double p_omega) const
+{
+  Vector<double> x(p_start.MixedProfileLength() + 1);
+  for (int i = 1; i <= p_start.MixedProfileLength(); i++) {
+    x[i] = log(p_start[i]);
   }
-  else {
-    TracePath(EquationSystem(p_start.GetGame()),
-	      x, p_maxLambda, p_omega,
-	      CallbackFunction(p_stream, m_fullGraph, m_decimals));
-  }
+  x[x.Length()] = p_start.GetLambda();
+  CallbackFunction func(p_stream, p_start.GetGame(), m_fullGraph, m_decimals);
+  TracePath(EquationSystem(p_start.GetGame()),
+	    x, std::max(1.0, 3.0*p_targetLambda), p_omega,
+	    func,
+	    LambdaCriterion(p_targetLambda));
+  return func.GetProfiles().back();
 }
 
 //----------------------------------------------------------------------------

@@ -134,6 +134,14 @@ public:
   /// Removes all elements from the list container (which are destroyed),
   /// leaving the container with a size of 0.
   void clear(void);
+  /// Returns a reference to the first elemnet in the list container.
+  T &front(void)             { return m_head->m_data; }
+  /// Returns a reference to the first element in the list container.
+  const T &front(void) const { return m_head->m_data; }
+  /// Returns a reference to the last element in the list container.
+  T &back(void)             { return m_tail->m_data; }
+  /// Returns a reference to the last element in the list container.
+  const T &back(void) const { return m_tail->m_data; }
   ///@}
 };
 

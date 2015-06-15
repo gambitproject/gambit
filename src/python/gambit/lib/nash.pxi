@@ -267,8 +267,11 @@ cdef extern from "tools/logit/nfglogit.h":
 						double, double, double) except +RuntimeError
         
 cdef extern from "nash.h":
+    c_LogitQREMixedStrategyProfile *CopyElementStrategyQRE(List[c_LogitQREMixedStrategyProfile], int)
     c_LogitQREMixedStrategyProfile *_logit_estimate "logit_estimate"(c_MixedStrategyProfileDouble *)
-
+    c_LogitQREMixedStrategyProfile *_logit_atlambda "logit_atlambda"(c_Game, double)
+    List[c_LogitQREMixedStrategyProfile] _logit_principal_branch "logit_principal_branch"(c_Game, double)
+    
 cdef class LogitQREMixedStrategyProfile(object):
     cdef c_LogitQREMixedStrategyProfile *thisptr
     def __init__(self, game=None):
@@ -309,4 +312,24 @@ def logit_estimate(MixedStrategyProfileDouble p_profile):
     cdef LogitQREMixedStrategyProfile ret
     ret = LogitQREMixedStrategyProfile()
     ret.thisptr = _logit_estimate(p_profile.profile)
+    return ret
+
+def logit_atlambda(Game p_game, double p_lambda):
+    """Compute the first QRE along the principal branch with the given
+    lambda parameter.
+    """
+    cdef LogitQREMixedStrategyProfile ret
+    ret = LogitQREMixedStrategyProfile()
+    ret.thisptr = _logit_atlambda(p_game.game, p_lambda)
+    return ret
+   
+def logit_principal_branch(Game p_game, double p_maxLambda=100000.0):
+    cdef List[c_LogitQREMixedStrategyProfile] solns
+    cdef LogitQREMixedStrategyProfile p
+    solns = _logit_principal_branch(p_game.game, p_maxLambda)
+    ret = [ ]
+    for i in xrange(solns.Length()):
+        p = LogitQREMixedStrategyProfile()
+        p.thisptr = CopyElementStrategyQRE(solns, i+1)
+        ret.append(p)
     return ret

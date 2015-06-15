@@ -26,12 +26,19 @@
 using namespace std;
 using namespace Gambit;
 
+inline LogitQREMixedStrategyProfile *
+CopyElementStrategyQRE(const List<LogitQREMixedStrategyProfile> &p_list, int p_index)
+{
+  return new LogitQREMixedStrategyProfile(p_list[p_index]);
+}
+
 class NullBuffer : public std::streambuf {
 public:
   int overflow(int c) { return c; }
 };
 
-LogitQREMixedStrategyProfile *logit_estimate(MixedStrategyProfile<double> *p_frequencies)
+LogitQREMixedStrategyProfile *
+logit_estimate(MixedStrategyProfile<double> *p_frequencies)
 {
   LogitQREMixedStrategyProfile start(p_frequencies->GetGame());
   StrategicQREEstimator alg;
@@ -42,5 +49,24 @@ LogitQREMixedStrategyProfile *logit_estimate(MixedStrategyProfile<double> *p_fre
   return new LogitQREMixedStrategyProfile(result);
 }
 
+LogitQREMixedStrategyProfile *
+logit_atlambda(const Game &p_game, double p_lambda)
+{
+  LogitQREMixedStrategyProfile start(p_game);
+  StrategicQREPathTracer alg;
+  NullBuffer null_buffer;
+  std::ostream null_stream(&null_buffer);
+  return new LogitQREMixedStrategyProfile(alg.SolveAtLambda(p_game, null_stream,
+							    p_lambda, 1.0));
+}
 
+List<LogitQREMixedStrategyProfile>
+logit_principal_branch(const Game &p_game, double p_maxLambda=1000000.0)
+{
+  LogitQREMixedStrategyProfile start(p_game);
+  StrategicQREPathTracer alg;
+  NullBuffer null_buffer;
+  std::ostream null_stream(&null_buffer);
+  return alg.TraceStrategicPath(p_game, null_stream, p_maxLambda, 1.0);
+}
 
