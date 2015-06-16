@@ -60,7 +60,7 @@ cdef extern from "libgambit/array.h":
         Array(int)
 
 cdef extern from "libgambit/list.h":
-    cdef cppclass List[T]:
+    cdef cppclass c_List "List"[T]:
         T &getitem "operator[]"(int) except +
         int Length()
         void push_back(T)
@@ -355,28 +355,28 @@ cdef extern from "util.h":
     cxx_string WriteGame(c_Game, cxx_string) except +IOError
     cxx_string WriteGame(c_StrategySupportProfile) except +IOError
 
-    void setitem_ArrayInt(Array[int] *, int, int)
-    void setitem_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble *, 
-                                            int, double)
-    void setitem_MixedStrategyProfileDoubleStrategy(c_MixedStrategyProfileDouble *, 
-                                            c_GameStrategy, double)
-    void setitem_MixedStrategyProfileRational(c_MixedStrategyProfileRational *, 
-                                            int, char *)
-    void setitem_MixedStrategyProfileRationalStrategy(c_MixedStrategyProfileRational *, 
-                                            c_GameStrategy, char *)
-    void setitem_MixedBehaviorProfileDouble(c_MixedBehaviorProfileDouble *, 
-                                            int, double)
-    void setitem_MixedBehaviorProfileRational(c_MixedBehaviorProfileRational *, 
-                                            int, char *)
-    void setaction_MixedBehaviorProfileDouble(c_MixedBehaviorProfileDouble *, 
-                                            c_GameAction, double)
-    void setaction_MixedBehaviorProfileRational(c_MixedBehaviorProfileRational *, 
-                                            c_GameAction, char *)
+    c_Rational to_rational(char *)
+    
+    void setitem_array_int "setitem"(Array[int] *, int, int)
 
-    c_MixedStrategyProfileDouble *CopyElementStrategyDouble(List[c_MixedStrategyProfileDouble], int)
-    c_MixedStrategyProfileRational *CopyElementStrategyRational(List[c_MixedStrategyProfileRational], int)
-    c_MixedBehaviorProfileDouble *CopyElementBehaviorDouble(List[c_MixedBehaviorProfileDouble], int)
-    c_MixedBehaviorProfileRational *CopyElementBehaviorRational(List[c_MixedBehaviorProfileRational], int)
+    void setitem_mspd_int "setitem"(c_MixedStrategyProfileDouble *, int, double)
+    void setitem_mspd_strategy "setitem"(c_MixedStrategyProfileDouble *,
+                                         c_GameStrategy, double)
+    void setitem_mspr_int "setitem"(c_MixedStrategyProfileRational *, int, c_Rational)
+    void setitem_mspr_strategy "setitem"(c_MixedStrategyProfileRational *,
+                                         c_GameStrategy, c_Rational)
+
+    void setitem_mbpd_int "setitem"(c_MixedBehaviorProfileDouble *, int, double)
+    void setitem_mbpd_action "setitem"(c_MixedBehaviorProfileDouble *,
+                                       c_GameAction, double)
+    void setitem_mbpr_int "setitem"(c_MixedBehaviorProfileRational *, int, c_Rational)
+    void setitem_mbpr_action "setitem"(c_MixedBehaviorProfileRational *,
+                                       c_GameAction, c_Rational)
+
+    c_MixedStrategyProfileDouble *copyitem_list_mspd "copyitem"(c_List[c_MixedStrategyProfileDouble], int)
+    c_MixedStrategyProfileRational *copyitem_list_mspr "copyitem"(c_List[c_MixedStrategyProfileRational], int)
+    c_MixedBehaviorProfileDouble *copyitem_list_mbpd "copyitem"(c_List[c_MixedBehaviorProfileDouble], int)
+    c_MixedBehaviorProfileRational *copyitem_list_mbpr "copyitem"(c_List[c_MixedBehaviorProfileRational], int)
 
 import gambit.gameiter
 

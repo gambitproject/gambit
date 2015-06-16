@@ -26,12 +26,6 @@
 using namespace std;
 using namespace Gambit;
 
-inline LogitQREMixedStrategyProfile *
-CopyElementStrategyQRE(const List<LogitQREMixedStrategyProfile> &p_list, int p_index)
-{
-  return new LogitQREMixedStrategyProfile(p_list[p_index]);
-}
-
 class NullBuffer : public std::streambuf {
 public:
   int overflow(int c) { return c; }

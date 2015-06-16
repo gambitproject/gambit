@@ -23,11 +23,11 @@
 cdef extern from "tools/enumpure/enumpure.h":
     cdef cppclass c_NashEnumPureStrategySolver "NashEnumPureStrategySolver":
         c_NashEnumPureStrategySolver()
-        List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
+        c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
 
     cdef cppclass c_NashEnumPureAgentSolver "NashEnumPureAgentSolver":
         c_NashEnumPureAgentSolver()
-        List[c_MixedBehaviorProfileRational] Solve(c_Game) except +RuntimeError
+        c_List[c_MixedBehaviorProfileRational] Solve(c_Game) except +RuntimeError
 
 cdef class EnumPureStrategySolver(object):
     cdef c_NashEnumPureStrategySolver *alg
@@ -37,13 +37,13 @@ cdef class EnumPureStrategySolver(object):
     def __dealloc__(self):
         del self.alg
     def solve(self, Game game):
-        cdef List[c_MixedStrategyProfileRational] solns
+        cdef c_List[c_MixedStrategyProfileRational] solns
         cdef MixedStrategyProfileRational p
         solns = self.alg.Solve(game.game)
         ret = [ ]
         for i in xrange(solns.Length()):
             p = MixedStrategyProfileRational()
-            p.profile = CopyElementStrategyRational(solns, i+1)
+            p.profile = copyitem_list_mspr(solns, i+1)
             ret.append(p)
         return ret
 
@@ -55,13 +55,13 @@ cdef class EnumPureAgentSolver(object):
     def __dealloc__(self):
         del self.alg
     def solve(self, Game game):
-        cdef List[c_MixedBehaviorProfileRational] solns
+        cdef c_List[c_MixedBehaviorProfileRational] solns
         cdef MixedBehaviorProfileRational p
         solns = self.alg.Solve(game.game)
         ret = [ ]
         for i in xrange(solns.Length()):
             p = MixedBehaviorProfileRational()
-            p.profile = CopyElementBehaviorRational(solns, i+1)
+            p.profile = copyitem_list_mbpr(solns, i+1)
             ret.append(p)
         return ret
 
@@ -69,20 +69,20 @@ cdef class EnumPureAgentSolver(object):
 cdef extern from "tools/lcp/nfglcp.h":
     cdef cppclass c_NashLcpStrategySolverDouble "NashLcpStrategySolver<double>":
         c_NashLcpStrategySolverDouble(int, int)
-        List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
+        c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
 
     cdef cppclass c_NashLcpStrategySolverRational "NashLcpStrategySolver<Rational>":
         c_NashLcpStrategySolverRational(int, int)
-        List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
+        c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
 
 cdef extern from "tools/lcp/efglcp.h":
     cdef cppclass c_NashLcpBehaviorSolverDouble "NashLcpBehaviorSolver<double>":
         c_NashLcpBehaviorSolverDouble(int, int)
-        List[c_MixedBehaviorProfileDouble] Solve(c_Game) except +RuntimeError
+        c_List[c_MixedBehaviorProfileDouble] Solve(c_Game) except +RuntimeError
 
     cdef cppclass c_NashLcpBehaviorSolverRational "NashLcpBehaviorSolver<Rational>":
         c_NashLcpBehaviorSolverRational(int, int)
-        List[c_MixedBehaviorProfileRational] Solve(c_Game) except +RuntimeError
+        c_List[c_MixedBehaviorProfileRational] Solve(c_Game) except +RuntimeError
 
 
 cdef class LCPBehaviorSolverDouble(object):
@@ -93,13 +93,13 @@ cdef class LCPBehaviorSolverDouble(object):
     def __dealloc__(self):
         del self.alg
     def solve(self, Game game):
-        cdef List[c_MixedBehaviorProfileDouble] solns
+        cdef c_List[c_MixedBehaviorProfileDouble] solns
         cdef MixedBehaviorProfileDouble p
         solns = self.alg.Solve(game.game)
         ret = [ ]
         for i in xrange(solns.Length()):
             p = MixedBehaviorProfileDouble()
-            p.profile = CopyElementBehaviorDouble(solns, i+1)
+            p.profile = copyitem_list_mbpd(solns, i+1)
             ret.append(p)
         return ret
 
@@ -111,13 +111,13 @@ cdef class LCPBehaviorSolverRational(object):
     def __dealloc__(self):
         del self.alg
     def solve(self, Game game):
-        cdef List[c_MixedBehaviorProfileRational] solns
+        cdef c_List[c_MixedBehaviorProfileRational] solns
         cdef MixedBehaviorProfileRational p
         solns = self.alg.Solve(game.game)
         ret = [ ]
         for i in xrange(solns.Length()):
             p = MixedBehaviorProfileRational()
-            p.profile = CopyElementBehaviorRational(solns, i+1)
+            p.profile = copyitem_list_mbpr(solns, i+1)
             ret.append(p)
         return ret
 
@@ -129,13 +129,13 @@ cdef class LCPStrategySolverDouble(object):
     def __dealloc__(self):
         del self.alg
     def solve(self, Game game):
-        cdef List[c_MixedStrategyProfileDouble] solns
+        cdef c_List[c_MixedStrategyProfileDouble] solns
         cdef MixedStrategyProfileDouble p
         solns = self.alg.Solve(game.game)
         ret = [ ]
         for i in xrange(solns.Length()):
             p = MixedStrategyProfileDouble()
-            p.profile = CopyElementStrategyDouble(solns, i+1)
+            p.profile = copyitem_list_mspd(solns, i+1)
             ret.append(p)
         return ret
 
@@ -147,13 +147,13 @@ cdef class LCPStrategySolverRational(object):
     def __dealloc__(self):
         del self.alg
     def solve(self, Game game):
-        cdef List[c_MixedStrategyProfileRational] solns
+        cdef c_List[c_MixedStrategyProfileRational] solns
         cdef MixedStrategyProfileRational p
         solns = self.alg.Solve(game.game)
         ret = [ ]
         for i in xrange(solns.Length()):
             p = MixedStrategyProfileRational()
-            p.profile = CopyElementStrategyRational(solns, i+1)
+            p.profile = copyitem_list_mspr(solns, i+1)
             ret.append(p)
         return ret
 
@@ -161,20 +161,20 @@ cdef class LCPStrategySolverRational(object):
 cdef extern from "tools/lp/nfglp.h":
     cdef cppclass c_NashLpStrategySolverDouble "NashLpStrategySolver<double>":
         c_NashLpStrategySolverDouble()
-        List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
+        c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
 
     cdef cppclass c_NashLpStrategySolverRational "NashLpStrategySolver<Rational>":
         c_NashLpStrategySolverRational()
-        List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
+        c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
 
 cdef extern from "tools/lp/efglp.h":
     cdef cppclass c_NashLpBehavSolverDouble "NashLpBehavSolver<double>":
         c_NashLpBehavSolverDouble()
-        List[c_MixedBehaviorProfileDouble] Solve(c_Game) except +RuntimeError
+        c_List[c_MixedBehaviorProfileDouble] Solve(c_Game) except +RuntimeError
 
     cdef cppclass c_NashLpBehavSolverRational "NashLpBehavSolver<Rational>":
         c_NashLpBehavSolverRational()
-        List[c_MixedBehaviorProfileRational] Solve(c_Game) except +RuntimeError
+        c_List[c_MixedBehaviorProfileRational] Solve(c_Game) except +RuntimeError
 
 
 cdef class LPBehaviorSolverDouble(object):
@@ -185,13 +185,13 @@ cdef class LPBehaviorSolverDouble(object):
     def __dealloc__(self):
         del self.alg
     def solve(self, Game game):
-        cdef List[c_MixedBehaviorProfileDouble] solns
+        cdef c_List[c_MixedBehaviorProfileDouble] solns
         cdef MixedBehaviorProfileDouble p
         solns = self.alg.Solve(game.game)
         ret = [ ]
         for i in xrange(solns.Length()):
             p = MixedBehaviorProfileDouble()
-            p.profile = CopyElementBehaviorDouble(solns, i+1)
+            p.profile = copyitem_list_mbpd(solns, i+1)
             ret.append(p)
         return ret
 
@@ -203,13 +203,13 @@ cdef class LPBehaviorSolverRational(object):
     def __dealloc__(self):
         del self.alg
     def solve(self, Game game):
-        cdef List[c_MixedBehaviorProfileRational] solns
+        cdef c_List[c_MixedBehaviorProfileRational] solns
         cdef MixedBehaviorProfileRational p
         solns = self.alg.Solve(game.game)
         ret = [ ]
         for i in xrange(solns.Length()):
             p = MixedBehaviorProfileRational()
-            p.profile = CopyElementBehaviorRational(solns, i+1)
+            p.profile = copyitem_list_mbpr(solns, i+1)
             ret.append(p)
         return ret
 
@@ -221,13 +221,13 @@ cdef class LPStrategySolverDouble(object):
     def __dealloc__(self):
         del self.alg
     def solve(self, Game game):
-        cdef List[c_MixedStrategyProfileDouble] solns
+        cdef c_List[c_MixedStrategyProfileDouble] solns
         cdef MixedStrategyProfileDouble p
         solns = self.alg.Solve(game.game)
         ret = [ ]
         for i in xrange(solns.Length()):
             p = MixedStrategyProfileDouble()
-            p.profile = CopyElementStrategyDouble(solns, i+1)
+            p.profile = copyitem_list_mspd(solns, i+1)
             ret.append(p)
         return ret
 
@@ -239,13 +239,13 @@ cdef class LPStrategySolverRational(object):
     def __dealloc__(self):
         del self.alg
     def solve(self, Game game):
-        cdef List[c_MixedStrategyProfileRational] solns
+        cdef c_List[c_MixedStrategyProfileRational] solns
         cdef MixedStrategyProfileRational p
         solns = self.alg.Solve(game.game)
         ret = [ ]
         for i in xrange(solns.Length()):
             p = MixedStrategyProfileRational()
-            p.profile = CopyElementStrategyRational(solns, i+1)
+            p.profile = copyitem_list_mspr(solns, i+1)
             ret.append(p)
         return ret
 
@@ -265,12 +265,14 @@ cdef extern from "tools/logit/nfglogit.h":
         c_LogitQREMixedStrategyProfile Estimate(c_LogitQREMixedStrategyProfile,
 	                                        c_MixedStrategyProfileDouble,
 						double, double, double) except +RuntimeError
-        
+
+cdef extern from "util.h":
+    c_LogitQREMixedStrategyProfile *copyitem_list_qrem "copyitem"(c_List[c_LogitQREMixedStrategyProfile], int)        
+
 cdef extern from "nash.h":
-    c_LogitQREMixedStrategyProfile *CopyElementStrategyQRE(List[c_LogitQREMixedStrategyProfile], int)
     c_LogitQREMixedStrategyProfile *_logit_estimate "logit_estimate"(c_MixedStrategyProfileDouble *)
     c_LogitQREMixedStrategyProfile *_logit_atlambda "logit_atlambda"(c_Game, double)
-    List[c_LogitQREMixedStrategyProfile] _logit_principal_branch "logit_principal_branch"(c_Game, double)
+    c_List[c_LogitQREMixedStrategyProfile] _logit_principal_branch "logit_principal_branch"(c_Game, double)
     
 cdef class LogitQREMixedStrategyProfile(object):
     cdef c_LogitQREMixedStrategyProfile *thisptr
@@ -324,12 +326,12 @@ def logit_atlambda(Game p_game, double p_lambda):
     return ret
    
 def logit_principal_branch(Game p_game, double p_maxLambda=100000.0):
-    cdef List[c_LogitQREMixedStrategyProfile] solns
+    cdef c_List[c_LogitQREMixedStrategyProfile] solns
     cdef LogitQREMixedStrategyProfile p
     solns = _logit_principal_branch(p_game.game, p_maxLambda)
     ret = [ ]
     for i in xrange(solns.Length()):
         p = LogitQREMixedStrategyProfile()
-        p.thisptr = CopyElementStrategyQRE(solns, i+1)
+        p.thisptr = copyitem_list_qrem(solns, i+1)
         ret.append(p)
     return ret

@@ -101,6 +101,15 @@ public:
   bool operator!=(const DVector<T> &x) const
   { return DVector<T>::operator!=(x); }
 
+  const T &operator[](const GameAction &p_action) const
+    { return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+		     p_action->GetInfoset()->GetNumber(),
+		     m_support.GetIndex(p_action)); }
+  T &operator[](const GameAction &p_action)
+    { return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+		     p_action->GetInfoset()->GetNumber(),
+		     m_support.GetIndex(p_action)); }
+
   const T &operator()(const GameAction &p_action) const
     { return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
 		     p_action->GetInfoset()->GetNumber(),

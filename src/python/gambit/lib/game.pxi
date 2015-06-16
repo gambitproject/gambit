@@ -133,7 +133,7 @@ cdef class Game(object):
         cdef Array[int] *d
         d = new Array[int](len(dim))
         for i in range(1, len(dim)+1):
-            setitem_ArrayInt(d, i, dim[i-1])
+            setitem_array_int(d, i, dim[i-1])
         g = cls()
         g.game = NewTable(d)
         del d

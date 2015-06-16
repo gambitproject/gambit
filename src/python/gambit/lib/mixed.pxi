@@ -189,9 +189,9 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
     def _getprob_strategy(self, Strategy strategy):
         return self.profile.getitem_strategy(strategy.strategy)
     def _setprob(self, int index, value):
-        setitem_MixedStrategyProfileDouble(self.profile, index, value)
+        setitem_mspd_int(self.profile, index, value)
     def _setprob_strategy(self, Strategy strategy, value):
-        setitem_MixedStrategyProfileDoubleStrategy(self.profile, strategy.strategy, value)
+        setitem_mspd_strategy(self.profile, strategy.strategy, value)
     def _payoff(self, Player player):
         return self.profile.GetPayoff(player.player)
     def _strategy_value(self, Strategy strategy):
@@ -256,7 +256,7 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
                             value.__class__.__name__)
         t = str(value)
         s = t
-        setitem_MixedStrategyProfileRational(self.profile, index, s)
+        setitem_mspr_int(self.profile, index, to_rational(s))
     def _setprob_strategy(self, Strategy strategy, value):
         cdef char *s
         if not isinstance(value, (int, fractions.Fraction)):
@@ -264,7 +264,7 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
                             value.__class__.__name__)
         t = str(value)
         s = t
-        setitem_MixedStrategyProfileRationalStrategy(self.profile, strategy.strategy, s)
+        setitem_mspr_strategy(self.profile, strategy.strategy, to_rational(s))
     def _payoff(self, Player player):
         return Rational(rat_str(self.profile.GetPayoff(player.player)).c_str())
     def _strategy_value(self, Strategy strategy):

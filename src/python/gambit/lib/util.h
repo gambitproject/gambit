@@ -63,65 +63,17 @@ std::string WriteGame(const StrategySupportProfile &p_support)
   return f.str();
 }
 
-inline void setitem_ArrayInt(Array<int> *array, int index, int value)
-{ (*array)[index] = value; }
+// Create a copy on the heap (via new) of the element at index p_index of 
+// container p_container.
+template <template<class> class C, class T, class X> 
+T *copyitem(const C<T> &p_container, const X &p_index)
+{ return new T(p_container[p_index]); }
 
-inline MixedStrategyProfile<double> *
-CopyElementStrategyDouble(const List<MixedStrategyProfile<double> > &p_list, int p_index)
-{ return new MixedStrategyProfile<double>(p_list[p_index]); }
+// Set item p_index to value p_value in container p_container
+template <class C, class X, class T> 
+void setitem(C *p_container, const X &p_index, const T &p_value)
+{ (*p_container)[p_index] = p_value; }
 
-inline MixedStrategyProfile<Rational> *
-CopyElementStrategyRational(const List<MixedStrategyProfile<Rational> > &p_list, int p_index)
-{ return new MixedStrategyProfile<Rational>(p_list[p_index]); }
-
-inline MixedBehaviorProfile<double> *
-CopyElementBehaviorDouble(const List<MixedBehaviorProfile<double> > &p_list, int p_index)
-{ return new MixedBehaviorProfile<double>(p_list[p_index]); }
-
-inline MixedBehaviorProfile<Rational> *
-CopyElementBehaviorRational(const List<MixedBehaviorProfile<Rational> > &p_list, int p_index)
-{ return new MixedBehaviorProfile<Rational>(p_list[p_index]); }
-
-inline void 
-setitem_MixedStrategyProfileDouble(MixedStrategyProfile<double> *profile,
-				   int index, double value)
-{ (*profile)[index] = value; }
-
-
-inline void
-setitem_MixedStrategyProfileRational(MixedStrategyProfile<Rational> *profile,
-				     int index, const char *value)
-{ (*profile)[index] = lexical_cast<Rational>(std::string(value)); }
-
-inline void 
-setitem_MixedStrategyProfileDoubleStrategy(MixedStrategyProfile<double> *profile,
-				           GameStrategy index, double value)
-{ (*profile)[index] = value; }
-
-
-inline void
-setitem_MixedStrategyProfileRationalStrategy(MixedStrategyProfile<Rational> *profile,
-				             GameStrategy index, const char *value)
-{ (*profile)[index] = lexical_cast<Rational>(std::string(value)); }
-
-
-inline void 
-setitem_MixedBehaviorProfileDouble(MixedBehaviorProfile<double> *profile,
-           int index, double value)
-{ (*profile)[index] = value; }
-
-inline void 
-setitem_MixedBehaviorProfileRational(MixedBehaviorProfile<Rational> *profile,
-           int index, const char *value)
-{ (*profile)[index] = lexical_cast<Rational>(std::string(value)); }
-
-inline void 
-setaction_MixedBehaviorProfileDouble(MixedBehaviorProfile<double> *profile,
-           GameAction &action, double value)
-{ (*profile)(action) = value; }
-
-inline void 
-setaction_MixedBehaviorProfileRational(MixedBehaviorProfile<Rational> *profile,
-           GameAction &action, const char *value)
-{ (*profile)(action) = lexical_cast<Rational>(std::string(value)); }
-
+// Convert the (C-style) string p_value to a Rational
+inline Rational to_rational(const char *p_value)
+{ return lexical_cast<Rational>(std::string(p_value)); }

@@ -248,9 +248,9 @@ cdef class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _getaction(self, Action index):
         return self.profile.getaction(index.action)
     def _setprob(self, int index, value):
-        setitem_MixedBehaviorProfileDouble(self.profile, index, value)
+        setitem_mbpd_int(self.profile, index, value)
     def _setaction(self, Action index, value):
-        setaction_MixedBehaviorProfileDouble(self.profile, index.action, value)
+        setitem_mbpd_action(self.profile, index.action, value)
     def _payoff(self, Player player):
         return self.profile.GetPayoff(player.player.deref().GetNumber())
     def _belief(self, Node node):
@@ -311,7 +311,7 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
                             value.__class__.__name__)
         t = str(value)
         s = t
-        setitem_MixedBehaviorProfileRational(self.profile, index, s)
+        setitem_mbpr_int(self.profile, index, to_rational(s))
     def _setaction(self, Action index, value):
         cdef char *s
         if not isinstance(value, (int, fractions.Fraction)):
@@ -319,7 +319,7 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
                             value.__class__.__name__)
         t = str(value)
         s = t
-        setaction_MixedBehaviorProfileRational(self.profile, index.action, s)
+        setitem_mbpr_action(self.profile, index.action, to_rational(s))
     def _payoff(self, Player player):
         return Rational(rat_str(self.profile.GetPayoff(player.player.deref().GetNumber())).c_str())
     def _belief(self, Node node):
