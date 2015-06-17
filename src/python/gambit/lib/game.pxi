@@ -19,6 +19,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+import itertools
+
 from libcpp cimport bool
 from gambit.lib.error import UndefinedOperationError
 import gambit.gte
@@ -138,6 +140,19 @@ cdef class Game(object):
         g.game = NewTable(d)
         del d
         return g
+
+    @classmethod
+    def from_arrays(cls, *arrays):
+        cdef Game g
+        if len(set(a.shape for a in arrays)) > 1:
+            raise ValueError("All specified arrays must have the same shape")
+        g = Game.new_table(arrays[0].shape)
+        for profile in itertools.product(*(xrange(arrays[0].shape[i])
+                                         for i in xrange(len(g.players)))):
+            for pl in xrange(len(g.players)):
+                g[profile][pl] = arrays[pl][profile]
+        return g
+        
 
     @classmethod
     def read_game(cls, char *fn):

@@ -148,6 +148,13 @@ betrayal payoff is 10, the sucker payoff is 2, and the noncooperative
 
   In [19]: g[1,1][1] = 5
 
+Alternatively, one can use :py:func:`Game.from_arrays` in conjunction
+with numpy arrays to construct a game with desired payoff matrices
+more directly, as in::
+
+  In [20]: m = numpy.array([ [ 8, 2 ], [ 10, 5 ] ], dtype=gambit.Rational)
+ 
+  In [21]: g = gambit.Game.from_arrays(m, numpy.transpose(m))
 
 
 Reading a game from a file
@@ -450,6 +457,13 @@ Game representations
 
       :param dim: A list specifying the number of strategies for each player.
 
+   .. py:classmethod:: from_arrays(*arrays)
+
+      Creates a new :py:class:`Game` with a strategic representation.
+      Each entry in arrays is a numpy array giving the payoff matrix for the
+      corresponding player.  The arrays must all have the same shape,
+      and have the same number of dimensions as the total number of players.
+      
    .. py:classmethod:: read_game(fn)
 
       Constructs a game from its serialized representation in a file.
