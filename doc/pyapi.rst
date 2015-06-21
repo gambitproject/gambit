@@ -972,8 +972,7 @@ of game.
 
       A settable property that represents the probability associated 
       with the action. It can be a value stored as an int,
-      :py:class:`gambit.Rational`, :py:class:`decimal.Decimal`, or
-      :py:class:`Fraction.fraction`.
+      :py:class:`gambit.Rational`, or :py:class:`gambit.Decimal`.
 
 
 .. py:class:: Strategies
@@ -1167,7 +1166,7 @@ of game.
 
       Sets the payoff to the ``pl`` th player at the outcome to the
       specified ``payoff``.  Payoffs may be specified as integers
-      or instances of :py:class:`decimal.Decimal` or :py:class:`fractions.Fraction`.
+      or instances of :py:class:`gambit.Decimal` or :py:class:`gambit.Rational`.
       Players may be specified as in :py:func:`__getitem__`.
 
 

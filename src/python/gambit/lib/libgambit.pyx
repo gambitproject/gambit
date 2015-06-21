@@ -25,6 +25,9 @@ import fractions
 import warnings
 from libcpp cimport bool
 
+class Decimal(decimal.Decimal):
+    pass
+
 class Rational(fractions.Fraction):
     def _repr_latex_(self):
         if self.denominator != 1:
