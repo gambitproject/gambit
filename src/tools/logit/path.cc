@@ -224,8 +224,14 @@ PathTracer::TracePath(const EquationSystem &p_system,
     // Obtain the tangent at the next step
     q.GetRow(q.NumRows(), newT); 
 
+    // If we are at a bifurcation point, the orientation of the tangent
+    // will flip.  This will confuse many criterion functions, especially
+    // those which are using derivatives to maximize or minimize an objective.
+    // This ensures the criterion function is called with both the old and
+    // new tangent oriented in the same sense.
+    double omega_flip = (t * newT < 0.0) ? -1.0 : 1.0;
     if (!newton &&
-	p_criterion(x, t) * p_criterion(u, newT) < 0.0) {
+	p_criterion(x, t) * p_criterion(u, newT*omega_flip) < 0.0) {
       newton = true;
       restart = u;
     }
