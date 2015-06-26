@@ -29,15 +29,17 @@
 
 namespace Gambit  {
 
+template <class T> class weak_ptr;
+
 // A reference-counted shared-pointer implementation, which should be
 // compatible with Boost / C++11.   This is intended entirely as a transitional
 // implementation, until a full migration to C++11 is done.
 template <class T> class shared_ptr {
 public:
-  shared_ptr(T *p = 0) : value(p)
+  shared_ptr(T *p = 0) : m_ptr(p)
   {
     try {
-      count = new long(1);
+      m_count = new long(1);
     }
     catch (...)  {
       delete p;
@@ -45,14 +47,19 @@ public:
     }
   }
 
-  shared_ptr(const shared_ptr &r) : value(r.value) 
-  { count = r.count; ++*count; }
+  shared_ptr(const shared_ptr<T> &r)
+    : m_ptr(r.m_ptr), m_count(r.m_count)  
+    { ++*m_count; }
 
+  shared_ptr(const weak_ptr<T> &r)
+    : m_ptr(r.m_ptr), m_count(r.m_count)
+    { ++*m_count; }
+    
   ~shared_ptr() 
   {
-    if (--*count == 0) {
-      delete value;
-      delete count;
+    if (--*m_count == 0) {
+      delete m_ptr;
+      delete m_count;
     }
   }
 
@@ -63,20 +70,25 @@ public:
   }
 
   void reset(T *p = 0)       { shared_ptr(p).swap(*this); }
-  T &operator*(void) const   { return *value; }
-  T *operator->(void) const  { return value; }
-  T *get(void) const         { return value; }
-  long use_count(void) const { return *count; }
-  bool unique(void) const    { return (*count == 1); }
+  T &operator*(void) const   { return *m_ptr; }
+  T *operator->(void) const  { return m_ptr; }
+  T *get(void) const         { return m_ptr; }
+  long use_count(void) const { return *m_count; }
+  bool unique(void) const    { return (*m_count == 1); }
   void swap(shared_ptr<T> & other)  // never throws
   {
-    std::swap(value, other.value);
-    std::swap(count, other.count);
+    std::swap(m_ptr, other.m_ptr);
+    std::swap(m_count, other.m_count);
   }
 
 private:
-  T *value; 
-  long *count; 
+  static unsigned *nil(void) {
+    static unsigned nil_counter(1);
+    return &nil_counter;
+  }
+  
+  T *m_ptr; 
+  long *m_count; 
 };
 
 template <class T, class U> 
@@ -91,6 +103,48 @@ inline bool operator!=(const shared_ptr<T> &a, const shared_ptr<U> &b)
   return a.get() != b.get();
 }
 
+
+// A reference-counted weak shared-pointer implementation, which should be
+// compatible with Boost / C++11.   This is intended entirely as a transitional
+// implementation, until a full migration to C++11 is done.
+template <class T> class weak_ptr {
+public:
+  weak_ptr(void) : m_ptr(0), m_count(shared_ptr<T>::nil())  { }
+  weak_ptr(const shared_ptr<T> &r) :
+    m_ptr(r.m_ptr), m_count(r.m_count)
+      { }
+
+  weak_ptr<T> &operator=(const weak_ptr<T> &r) {
+    m_ptr = r.lock().get();
+    m_count = r.m_count;
+    return *this;
+  }
+
+  weak_ptr<T> &operator=(const shared_ptr<T> &r) {
+    m_ptr = r.m_ptr;
+    m_count = r.m_count;
+    return *this;
+  }
+  
+  shared_ptr<T> lock(void) const { return shared_ptr<T>(*this); }
+
+  long use_count(void) const { return *m_count; }
+  bool expired(void) const   { return *m_count == 0; }
+
+  void swap(const weak_ptr<T> &other)  // never throws
+  {
+    std::swap(m_ptr, other.m_ptr);
+    std::swap(m_count, other.m_count);
+  }
+  
+private:
+  friend class shared_ptr<T>;
+
+  T *m_ptr;
+  long *m_count;
+};
+ 
+ 
 }  // namespace Gambit
 
 #endif // LIBGAMBIT_SHARED_PTR_H
