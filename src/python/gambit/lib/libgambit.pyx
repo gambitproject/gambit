@@ -259,8 +259,12 @@ cdef extern from "libgambit/game.h":
     c_Game NewTree()
     c_Game NewTable(Array[int] *)
 
+# The spaces in the quoted C++ names of the strategy and behavior profiles
+# are required to avoid adjacent angle brackets when generating e.g.
+# lists of these classes.
+
 cdef extern from "libgambit/mixed.h":
-    cdef cppclass c_MixedStrategyProfileDouble "MixedStrategyProfile<double>":
+    cdef cppclass c_MixedStrategyProfileDouble "MixedStrategyProfile<double> ":
         c_Game GetGame()
         int MixedProfileLength()
         c_StrategySupportProfile GetSupport()
@@ -275,7 +279,7 @@ cdef extern from "libgambit/mixed.h":
         c_MixedStrategyProfileDouble ToFullSupport()
         c_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble)
 
-    cdef cppclass c_MixedStrategyProfileRational "MixedStrategyProfile<Rational>":
+    cdef cppclass c_MixedStrategyProfileRational "MixedStrategyProfile<Rational> ":
         c_Game GetGame()
         int MixedProfileLength()
         c_StrategySupportProfile GetSupport()
@@ -291,7 +295,7 @@ cdef extern from "libgambit/mixed.h":
         c_MixedStrategyProfileRational(c_MixedStrategyProfileRational)
 
 cdef extern from "libgambit/behav.h":
-    cdef cppclass c_MixedBehaviorProfileDouble "MixedBehaviorProfile<double>":
+    cdef cppclass c_MixedBehaviorProfileDouble "MixedBehaviorProfile<double> ":
         c_Game GetGame()
         int Length()
         bool IsDefinedAt(c_GameInfoset)
@@ -312,7 +316,7 @@ cdef extern from "libgambit/behav.h":
         c_MixedBehaviorProfileDouble(c_Game)
         c_MixedBehaviorProfileDouble(c_MixedBehaviorProfileDouble)
 
-    cdef cppclass c_MixedBehaviorProfileRational "MixedBehaviorProfile<Rational>":
+    cdef cppclass c_MixedBehaviorProfileRational "MixedBehaviorProfile<Rational> ":
         c_Game GetGame()
         int Length()
         bool IsDefinedAt(c_GameInfoset)
