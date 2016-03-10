@@ -46,7 +46,7 @@ wxButton, wxBitmapButton, wxToggleButton (w/ image or not). It is a
 drop in replacement for each of these controls. It can display the icon
 along with the text (on any side) and can create a "greyed"
 out image to use when the button is disabled. It can also do weird
-things like act like a button on a single click and a  toggle on double
+things like act like a button on a single click and a toggle on double
 click. Note: to differentiate between single and double clicks a timer
 is used, if you want it to be just a regular toggle button I suggest
 you remove the timer code.
@@ -72,8 +72,8 @@ does nothing.
 
 medsort.h - Various Public Domain median finding or sorting
 macros, a quick select routine, wirth's kth smallest, torben median,
-pixel qsort, and a pixel qsort that sorts two arrays together (only one
+ and a pixel qsort that sorts two arrays together (only one
 is used for the comparison, the  other just follows). They can be
-DECLARED in headers, DEFINED in you  cpp files, or just used inline.
+DECLARED in headers, DEFINED in your cpp files, or just used inline.
 Since they're macros you can set if they're for arrays of doubles,
 ints, chars...

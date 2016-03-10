@@ -23,7 +23,7 @@ public domain.
 
 fparser.h/hh/cpp:
 The function parser library was written by 'Warp', the file fparser.txt 
-explains the license. Basicly the code is free to use for commercial and 
+explains the license. Basically the code is free to use for commercial and
 noncommercial programs, but the original author makes some simple requests 
 if used Commercially.
  
