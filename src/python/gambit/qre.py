@@ -28,6 +28,7 @@ import numpy
 import pctrace
 
 from gambit.profiles import Solution
+from nash import ExternalSolver
 
 def sym_compute_lhs(game, point):
     """
@@ -246,7 +247,7 @@ class StrategicQREPathTracer(object):
             raise NotImplementedError
         
 
-from nash import ExternalSolver
+
     
 class ExternalStrategicQREPathTracer(ExternalSolver):
     """
