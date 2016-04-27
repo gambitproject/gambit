@@ -23,7 +23,7 @@
 #ifndef LEMKETAB_H
 #define LEMKETAB_H
 
-#include "liblinear/tableau.h"
+#include "gambit/linalg/tableau.h"
 
 template <class T> class LTableau : public Tableau<T> {
 protected:

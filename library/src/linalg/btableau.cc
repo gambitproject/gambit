@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/liblinear/lptab.cc
-// Instantiation of LP tableau
+// FILE: src/liblinear/btableau.cc
+// Instantiation of base tableau classes
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,7 +20,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "lptab.imp"
+#include "gambit/gambit.h"
+#include "gambit/matrix.imp"
+#include "gambit/linalg/btableau.imp"
 
-template class LPTableau<double>;
-template class LPTableau<Gambit::Rational>;
+template class BaseTableau<double>;
+template class BaseTableau<Gambit::Rational>;
+
+template class TableauInterface<double>;
+template class TableauInterface<Gambit::Rational>;
+
+

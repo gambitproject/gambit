@@ -24,7 +24,7 @@
 #include <unistd.h>
 #include <iostream>
 #include "gambit/gambit.h"
-#include "liblinear/lpsolve.h"
+#include "gambit/linalg/lpsolve.h"
 #include "nfglp.h"
 
 using namespace Gambit;

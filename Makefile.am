@@ -462,23 +462,23 @@ gambit_convert_SOURCES = \
 	src/tools/convert/tosgame.cc
 
 liblinear_la_SOURCES = \
-	src/liblinear/basis.cc \
-	src/liblinear/basis.h \
-	src/liblinear/bfs.h \
-	src/liblinear/btableau.cc \
-	src/liblinear/btableau.h \
-	src/liblinear/btableau.imp \
-	src/liblinear/lpsolve.cc \
-	src/liblinear/lpsolve.h \
-	src/liblinear/lpsolve.imp \
-	src/liblinear/lptab.cc \
-	src/liblinear/lptab.h \
-	src/liblinear/lptab.imp \
-	src/liblinear/ludecomp.cc \
-	src/liblinear/ludecomp.h \
-	src/liblinear/ludecomp.imp \
-	src/liblinear/tableau.h \
-	src/liblinear/tableau.cc
+	library/src/linalg/basis.cc \
+	library/include/gambit/linalg/basis.h \
+	library/include/gambit/linalg/bfs.h \
+	library/src/linalg/btableau.cc \
+	library/include/gambit/linalg/btableau.h \
+	library/include/gambit/linalg/btableau.imp \
+	library/src/linalg/lpsolve.cc \
+	library/include/gambit/linalg/lpsolve.h \
+	library/include/gambit/linalg/lpsolve.imp \
+	library/src/linalg/lptab.cc \
+	library/include/gambit/linalg/lptab.h \
+	library/include/gambit/linalg/lptab.imp \
+	library/src/linalg/ludecomp.cc \
+	library/include/gambit/linalg/ludecomp.h \
+	library/include/gambit/linalg/ludecomp.imp \
+	library/include/gambit/linalg/tableau.h \
+	library/src/linalg/tableau.cc
 
 gambit_enummixed_SOURCES = \
 	${libgambit_la_SOURCES} \
