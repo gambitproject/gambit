@@ -21,9 +21,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef __AGG_H
-#define __AGG_H
-
+#ifndef GAMBIT_AGG_AGG_H
+#define GAMBIT_AGG_AGG_H
 
 
 #include <iostream>
@@ -39,6 +38,11 @@
 #endif
 #endif
 
+class aggame;
+
+namespace Gambit {
+
+namespace agg {
 
 //data structure for mixed strategy profile:
 //alternatively: typedef std::vector<Number> ....
@@ -66,7 +70,7 @@ typedef enum{COMPLETE,MAPPING,ADDITIVE} payofftype;
 
 
 
-class agg {
+class AGG {
 
 public:
   typedef std::vector<int> config;
@@ -77,25 +81,22 @@ public:
   static const char LBRACKET='[';
   static const char RBRACKET=']';
 
-
-
-  friend class aggame;   //wrapper class for gametracer
-
+  friend class ::aggame;   //wrapper class for gametracer
 
   //read an AGG from a file
-  static agg* makeAGG(char* filename);
+  static AGG* makeAGG(char* filename);
 
   //read an AGG from input stream
-  static agg* makeAGG(istream& in);
+  static AGG* makeAGG(std::istream &in);
   
   //make AGG with random payoffs
-  static agg* makeRandomAGG(int n, int* actions, int S, int P, 
+  static AGG* makeRandomAGG(int n, int* actions, int S, int P, 
 std::vector<std::vector<int> >& ASets, std::vector<std::vector<int> >& neighb,
 std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_factor=100);
 
 
   //constructor
-  agg(int numPlayers, int * actions, int numANodes, int numPNodes,
+  AGG(int numPlayers, int * actions, int numANodes, int numPNodes,
    std::vector<std::vector<int> >& actionSets, std::vector<std::vector<int> >& neighbors,
    std::vector<projtype>& projTypes,
    std::vector<std::vector<aggdistrib > >& projS,
@@ -110,7 +111,7 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
 
 
   //destructor
-  virtual ~agg(){
+  virtual ~AGG(){
       delete [] actions;
       delete [] strategyOffset;
       //free projFunctions
@@ -142,15 +143,15 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
   inline int firstKSymAction(int i){return kSymStrategyOffset[i];}
   inline int lastKSymAction(int i){return kSymStrategyOffset[i+1];}
 
-  inline void printActionGraph(ostream& s) {
+  inline void printActionGraph(std::ostream &s) {
     for(size_t i=0;i< neighbors.size(); ++i){
       s<<neighbors[i].size()<<"\t";
-      copy(neighbors[i].begin(),neighbors[i].end(), ostream_iterator<int>(s," ") );
-      s<<endl;
+      copy(neighbors[i].begin(),neighbors[i].end(), std::ostream_iterator<int>(s," ") );
+      s<<std::endl;
     }
   }
 
-  inline void printTypes(ostream& s) {
+  inline void printTypes(std::ostream &s) {
     for(size_t i=0;i<projectionTypes.size();i++ ){
       projectionTypes[i]->print(s);
     }
@@ -165,8 +166,8 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
 
 
   AggNumber getPurePayoff(int player, int *s);
-  inline void printPayoffs( ostream & s, int node){
-    s << payoffs.at(node).size()<<endl;
+  inline void printPayoffs(std::ostream &s, int node){
+    s << payoffs.at(node).size()<<std::endl;
     s << payoffs[node];
   }
 
@@ -298,11 +299,11 @@ private:
 
   //input functor 
   struct input : public std::unary_function<aggpayoff::iterator , void>{
-    input(istream& i): in(i) {}
+    input(std::istream &i): in(i) {}
     void operator() (aggpayoff::iterator p) {
 	in >> (*p).second;
     }
-    istream& in;
+    std::istream &in;
   };
 
   struct inputRand : public std::unary_function<aggpayoff::iterator, void>{
@@ -318,12 +319,12 @@ private:
   //private static methods:
 
 
-  static void makeCOMPLETEpayoff( istream& in, aggpayoff& pay){
+  static void makeCOMPLETEpayoff(std::istream &in, aggpayoff& pay){
       pay.in_order(input(in));
   }
-  static void makeMAPPINGpayoff(istream& in, aggpayoff& pay, int);
+  static void makeMAPPINGpayoff(std::istream &in, aggpayoff& pay, int);
 
-  static void stripComment(istream& in);
+  static void stripComment(std::istream &in);
 
   static void setProjections(std::vector<std::vector<aggdistrib > >& projS,
   std::vector<std::vector<std::vector<config> > >& proj, int N,int S,int P, std::vector<std::vector<int> >& AS, std::vector<std::vector<int> >& neighb, std::vector<projtype>& projTypes);
@@ -349,6 +350,10 @@ private:
   void getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int act, aggdistrib &dest,int plClass2=-1,int act2=-1);
 };
 
+}  // end namespace Gambit::agg
 
+}  // end namespace Gambit
 
-#endif
+ 
+
+#endif  // GAMBIT_AGG_AGG_H

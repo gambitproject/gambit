@@ -8,20 +8,23 @@
 
 using namespace std;
 
+namespace Gambit {
 
-bagg::bagg(int N, int S, 
-vector<int>& numTypes,
-vector<ProbDist>& TDist,
-vector<vector<vector<int > > > &typeActionSets,
-vector<vector<vector<int > > > &ta2a,
-agg* aggPtr):
-numPlayers(N),
-numActionNodes(S),
-numTypes(numTypes),
-indepTypeDist(TDist),
-typeActionSets(typeActionSets),
-typeAction2ActionIndex(ta2a),
-aggPtr(aggPtr)
+namespace agg {
+
+BAGG::BAGG(int N, int S, 
+	   vector<int>& numTypes,
+	   vector<ProbDist>& TDist,
+	   vector<vector<vector<int > > > &typeActionSets,
+	   vector<vector<vector<int > > > &ta2a,
+	   AGG* aggPtr):
+  numPlayers(N),
+  numActionNodes(S),
+  numTypes(numTypes),
+  indepTypeDist(TDist),
+  typeActionSets(typeActionSets),
+  typeAction2ActionIndex(ta2a),
+  aggPtr(aggPtr)
 {
   typeOffset=new int[numPlayers+1];
   typeOffset[0]=0;
@@ -45,23 +48,23 @@ aggPtr(aggPtr)
 }
 
 
-void bagg::stripComment(istream& in){
+void BAGG::stripComment(istream& in){
   in>>ws;
   char c =in.peek();
   stringbuf discard(ios_base::out);
-  if(c== bagg::COMMENT_CHAR){
+  if(c== BAGG::COMMENT_CHAR){
     in.get (discard);
     stripComment(in);
   }
 }
 
-bagg* bagg::makeBAGG(char* filename)
+BAGG *BAGG::makeBAGG(char* filename)
 {
   ifstream in(filename);
-  return bagg::makeBAGG(in);
+  return BAGG::makeBAGG(in);
 }
 
-bagg* bagg::makeBAGG(istream& in){
+BAGG *BAGG::makeBAGG(istream& in){
   int N,S,P;
 
   stripComment(in);
@@ -168,15 +171,16 @@ bagg* bagg::makeBAGG(istream& in){
     aggss<<ln<<endl;
   }
 
-  agg* aggPtr = agg::makeAGG(aggss);
+  AGG *aggPtr = agg::AGG::makeAGG(aggss);
   if(!aggPtr){
 	  cerr<<"Error in BAGG file when reading the AGG part of the input."<<endl;
 	  exit(1);
   }
-  return new bagg(N,S,numTypes,TDist,typeActionSets,typeAction2ActionIndex,aggPtr);
+  return new BAGG(N, S, numTypes, TDist, typeActionSets,
+		  typeAction2ActionIndex, aggPtr);
 }
 
-bagg* bagg::makeRandomBAGG(int N,vector<int> &numTypes,vector<ProbDist> &TDist,int S,int P,
+BAGG *BAGG::makeRandomBAGG(int N,vector<int> &numTypes,vector<ProbDist> &TDist,int S,int P,
         vector<vector<vector<int> > > &typeActionSets,
         vector<vector<int> > &neighb,
         vector<projtype> &projTypes,
@@ -210,15 +214,15 @@ bagg* bagg::makeRandomBAGG(int N,vector<int> &numTypes,vector<ProbDist> &TDist,i
   }
 
 
-  agg* aggPtr = agg::makeRandomAGG(N,actions,S,P, aggActionSets, neighb, projTypes, seed,int_payoffs,int_factor);
+  AGG *aggPtr = AGG::makeRandomAGG(N,actions,S,P, aggActionSets, neighb, projTypes, seed,int_payoffs,int_factor);
   if(!aggPtr){
 	  std::cerr<<"MakeRandomBAGG(): failed to make underlying AGG."<<endl;
 	  return NULL;
   }
-  return new bagg(N,S,numTypes,TDist,typeActionSets, typeAction2ActionIndex, aggPtr);
+  return new BAGG(N,S,numTypes,TDist,typeActionSets, typeAction2ActionIndex, aggPtr);
 }
 
-AggNumber bagg::getMixedPayoff(int player, StrategyProfile &s){
+AggNumber BAGG::getMixedPayoff(int player, StrategyProfile &s){
   AggNumber res(0);
   for (int tp=0;tp<numTypes[player];++tp){
     res+=indepTypeDist[player][tp] * getMixedPayoff(player,tp,s);
@@ -226,7 +230,7 @@ AggNumber bagg::getMixedPayoff(int player, StrategyProfile &s){
   return res;
 }
 
-AggNumber bagg::getMixedPayoff(int player,int tp, StrategyProfile &s){
+AggNumber BAGG::getMixedPayoff(int player,int tp, StrategyProfile &s){
     AggNumber res(0);
     for (size_t act=0;act<typeActionSets[player][tp].size(); ++act)
 	if (s[act+firstAction(player,tp)]>AggNumber(0.0))
@@ -234,14 +238,14 @@ AggNumber bagg::getMixedPayoff(int player,int tp, StrategyProfile &s){
     return res;
 }
 
-void bagg::getPayoffVector(AggNumberVector &dest, int player,int tp, const StrategyProfile &s){
+void BAGG::getPayoffVector(AggNumberVector &dest, int player,int tp, const StrategyProfile &s){
     assert(player>=0&&player < getNumPlayers() && tp>=0 && tp<getNumTypes(player));
     for(size_t act=0;act<typeActionSets[player][tp].size(); ++act){
       dest[act] = getV(player,tp,act,s);
     }
 }
 
-void bagg::getAGGStrat(StrategyProfile &as, const StrategyProfile &s, int player, int tp, int action){
+void BAGG::getAGGStrat(StrategyProfile &as, const StrategyProfile &s, int player, int tp, int action){
     for (int i=0;i<aggPtr->getNumActions();++i) as[i]=AggNumber(0.0);
 
     for (int pl=0;pl<numPlayers;++pl){
@@ -260,13 +264,13 @@ void bagg::getAGGStrat(StrategyProfile &as, const StrategyProfile &s, int player
     }
 
 }
-AggNumber bagg::getV (int player, int tp, int action,const StrategyProfile &s){
+AggNumber BAGG::getV (int player, int tp, int action,const StrategyProfile &s){
     StrategyProfile as(aggPtr->getNumActions());
     getAGGStrat(as, s, player,tp,action);
     return aggPtr->getV(player, typeAction2ActionIndex[player][tp][action], as);
 }
 
-AggNumber bagg::getPurePayoff(int player, int tp, int *ps)
+AggNumber BAGG::getPurePayoff(int player, int tp, int *ps)
 {
   StrategyProfile st(strategyOffset[typeOffset[numPlayers]]);
   for (int i=0;i<strategyOffset[typeOffset[numPlayers]];i++) st[i]=(AggNumber) 0.0;
@@ -276,7 +280,7 @@ AggNumber bagg::getPurePayoff(int player, int tp, int *ps)
   return getMixedPayoff(player,tp,st);
 }
 
-void bagg::getSymAGGStrat(StrategyProfile &as, const StrategyProfile &s)
+void BAGG::getSymAGGStrat(StrategyProfile &as, const StrategyProfile &s)
 {
   for (int i=0;i<aggPtr->getNumActionNodes();++i) as[i]=AggNumber(0.0);
   for(int t=0;t<numTypes[0];++t){
@@ -288,7 +292,7 @@ void bagg::getSymAGGStrat(StrategyProfile &as, const StrategyProfile &s)
 }
 
 
-AggNumber bagg::getSymMixedPayoff(StrategyProfile &s)
+AggNumber BAGG::getSymMixedPayoff(StrategyProfile &s)
 {
   AggNumber res(0);
   for (int tp=0;tp<numTypes[0];++tp){
@@ -298,7 +302,7 @@ AggNumber bagg::getSymMixedPayoff(StrategyProfile &s)
 
 }
 
-AggNumber bagg::getSymMixedPayoff(int tp, StrategyProfile &s)
+AggNumber BAGG::getSymMixedPayoff(int tp, StrategyProfile &s)
 {
   AggNumber res(0);
   for (size_t act=0;act<typeActionSets[0][tp].size(); ++act)
@@ -307,7 +311,7 @@ AggNumber bagg::getSymMixedPayoff(int tp, StrategyProfile &s)
   return res;
 }
 
-AggNumber bagg::getSymMixedPayoff(int tp, int act, StrategyProfile &s)
+AggNumber BAGG::getSymMixedPayoff(int tp, int act, StrategyProfile &s)
 {
   StrategyProfile as(aggPtr->getNumActionNodes());
   getSymAGGStrat(as, s);
@@ -318,7 +322,7 @@ AggNumber bagg::getSymMixedPayoff(int tp, int act, StrategyProfile &s)
 
 
 
-ostream& operator<< (ostream& s, const bagg& g)
+ostream & operator<<(ostream& s, const BAGG &g)
 {
   //BAGG identifier for Gambit ReadGame
   s<<"#BAGG"<<endl;
@@ -383,3 +387,7 @@ ostream& operator<< (ostream& s, const bagg& g)
 
   return s;
 }
+
+}  // end namespace Gambit::agg
+
+}  // end namespace Gambit

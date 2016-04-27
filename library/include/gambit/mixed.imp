@@ -310,7 +310,7 @@ template <class T>
 T AggMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   GameAggRep &g = dynamic_cast<GameAggRep &>(*(this->m_support.GetGame()));
-  agg *aggPtr = g.aggPtr;
+  agg::AGG *aggPtr = g.aggPtr;
   std::vector<double> s (aggPtr->getNumActions());
   for (int i=0;i<aggPtr->getNumPlayers();++i) {
     for (int j=0;j<aggPtr->getNumActions(i);++j){
@@ -326,7 +326,7 @@ template <class T>
 T AggMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps) const
 {
   GameAggRep &g = dynamic_cast<GameAggRep &>(*(this->m_support.GetGame()));
-  agg *aggPtr = g.aggPtr;
+  agg::AGG *aggPtr = g.aggPtr;
   std::vector<double> s (aggPtr->getNumActions());
   for (int i=0;i<aggPtr->getNumPlayers();++i){
     if(i+1 == ps->GetPlayer()->GetNumber()){
@@ -354,7 +354,7 @@ T AggMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1,
   if (player1 == player2) return (T) 0;
 
   GameAggRep &g = dynamic_cast<GameAggRep &>(*(this->m_support.GetGame()));
-  agg *aggPtr = g.aggPtr;
+  agg::AGG *aggPtr = g.aggPtr;
   std::vector<double> s (aggPtr->getNumActions());
   for (int i=0;i<aggPtr->getNumPlayers();++i){
     if(i+1 == player1->GetNumber()){
@@ -388,7 +388,7 @@ template <class T>
 T BagentMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   GameBagentRep &g = dynamic_cast<GameBagentRep &>(*(this->m_support.GetGame()));
-  bagg *baggPtr = g.baggPtr;
+  agg::BAGG *baggPtr = g.baggPtr;
   std::vector<double> s (g.MixedProfileLength());
   Array<int> ns=g.NumStrategies();
   int bplayer=-1,btype=-1;
@@ -411,7 +411,7 @@ template <class T>
 T BagentMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps) const
 {
   GameBagentRep &g = dynamic_cast<GameBagentRep &>(*(this->m_support.GetGame()));
-  bagg *baggPtr = g.baggPtr;
+  agg::BAGG *baggPtr = g.baggPtr;
   std::vector<double> s (g.MixedProfileLength());
   int bplayer=-1,btype=-1;
   for (int i=0;i<baggPtr->getNumPlayers();++i){
@@ -446,7 +446,7 @@ T BagentMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &p
   if (player1 == player2) return (T) 0;
 
   GameBagentRep &g = dynamic_cast<GameBagentRep &>(*(this->m_support.GetGame()));
-  bagg *baggPtr = g.baggPtr;
+  agg::BAGG *baggPtr = g.baggPtr;
   std::vector<double> s (g.MixedProfileLength());
   int bplayer=-1,btype=-1;
   for (int i=0;i<baggPtr->getNumPlayers();++i){

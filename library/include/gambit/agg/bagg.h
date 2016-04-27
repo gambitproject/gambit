@@ -1,14 +1,38 @@
-// bagg.h: header for the Bayesian Action Graph Game class
+//
+// This file is part of Gambit
+// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
+//                          Albert Xin Jiang <albertjiang@gmail.com>
+//
+// FILE: src/libagg/bagg.h
+// Interface of Bayesian Action Graph Game representation
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
 
-#ifndef __BAGG_H
-#define __BAGG_H
-
-
+#ifndef GAMBIT_AGG_BAGG_H
+#define GAMBIT_AGG_BAGG_H
 
 #include <iostream>
 #include "agg.h"
 
+namespace Gambit  {
 
+class BagentPureStrategyProfileRep;
+template <class T> class BagentMixedStrategyProfileRep;
+
+namespace agg {
 
 #ifdef USE_CVECTOR
 #include "../cmatrix.h"
@@ -18,14 +42,7 @@ typedef cvector ProbDist;
 typedef  std::vector<AggNumber>  ProbDist;
 #endif
 
-
-namespace Gambit{
-  class BagentPureStrategyProfileRep;
-  template <class T> class BagentMixedStrategyProfileRep;
-}
-
-class bagg {
-
+class BAGG {
 public:
   static const char COMMENT_CHAR= '#';
 
@@ -33,24 +50,24 @@ public:
   friend class Gambit::BagentPureStrategyProfileRep;
   template <class T> friend class Gambit::BagentMixedStrategyProfileRep;
 
-  friend std::ostream& operator<< (std::ostream& s, const bagg& g);
+  friend std::ostream& operator<< (std::ostream& s, const BAGG& g);
 
-  static bagg* makeBAGG(char *filename);
-  static bagg* makeBAGG(istream& in);
-  static bagg* makeRandomBAGG(int n,std::vector<int> &numTypes,std::vector<ProbDist> &TDist,int S,int P,
+  static BAGG* makeBAGG(char *filename);
+  static BAGG* makeBAGG(std::istream &in);
+  static BAGG* makeRandomBAGG(int n,std::vector<int> &numTypes,std::vector<ProbDist> &TDist,int S,int P,
 	std::vector<std::vector<std::vector<int> > > &TASets,
 	std::vector<std::vector<int> > &neighb,
 	std::vector<projtype> &projTypes,
 	int seed, bool int_payoffs=false, int int_factor=100);
 
-  bagg(int N, int S, 
+  BAGG(int N, int S, 
     std::vector<int>& numTypes,
     std::vector<ProbDist>& TDist,
     std::vector<std::vector<std::vector<int > > > &typeActionSets,
     std::vector<std::vector<std::vector<int > > > &ta2a,
-    agg* aggPtr);
+    AGG* aggPtr);
 
-  ~bagg(){
+  ~BAGG(){
     delete[] typeOffset;
     delete[] strategyOffset;
     delete aggPtr;
@@ -120,18 +137,22 @@ private:
   
 
   //AGG that stores the action graph and utility functions
-  agg* aggPtr;
+  AGG* aggPtr;
 
   bool symmetric;
 
-  static void stripComment(istream& in);
+  static void stripComment(std::istream &in);
 
   void getAGGStrat(StrategyProfile &as, const StrategyProfile &s, int player=-1, int tp=-1, int action=-1);
   void getSymAGGStrat(StrategyProfile &as, const StrategyProfile &s);
 
 };
 
-std::ostream& operator<< (std::ostream& s, const bagg& g);
+std::ostream& operator<< (std::ostream& s, const BAGG& g);
 
+}  // end namespace Gambit::agg
 
-#endif
+}  // end namespace Gambit
+
+ 
+#endif  // GAMBIT_AGG_BAGG_H

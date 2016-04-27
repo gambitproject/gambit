@@ -58,7 +58,7 @@ void BagentPureStrategyProfileRep::SetStrategy(const GameStrategy &s)
 
 Rational BagentPureStrategyProfileRep::GetPayoff(int pl) const
 {
-  bagg *baggPtr = dynamic_cast<GameBagentRep &>(*m_nfg).baggPtr;
+  agg::BAGG *baggPtr = dynamic_cast<GameBagentRep &>(*m_nfg).baggPtr;
   int s[m_nfg->NumPlayers()];
   for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
     s[i-1] = m_profile[i]->GetNumber() - 1;
@@ -72,7 +72,7 @@ Rational
 BagentPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
 {
   int player = p_strategy->GetPlayer()->GetNumber();
-  bagg *baggPtr = dynamic_cast<GameBagentRep &>(*m_nfg).baggPtr;
+  agg::BAGG *baggPtr = dynamic_cast<GameBagentRep &>(*m_nfg).baggPtr;
   int s[m_nfg->NumPlayers()];
   for (int i= 1; i <= m_nfg->NumPlayers(); i++) {
     s[i-1] = m_profile[i]->GetNumber() - 1;
@@ -88,7 +88,7 @@ BagentPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) c
 //                      GameBagentRep: Lifecycle
 //------------------------------------------------------------------------
 
-GameBagentRep::GameBagentRep(bagg* _baggPtr) 
+GameBagentRep::GameBagentRep(agg::BAGG *_baggPtr) 
   : baggPtr(_baggPtr), agent2baggPlayer(_baggPtr->getNumTypes())
 {
   int k = 1;
@@ -189,7 +189,7 @@ void GameBagentRep::WriteBaggFile(std::ostream &s) const
 
 Game GameBagentRep::ReadBaggFile(std::istream &in)
 {
-  bagg *baggPtr = bagg::makeBAGG(in);
+  agg::BAGG *baggPtr = agg::BAGG::makeBAGG(in);
   if (!baggPtr) {
     throw InvalidFileException();
   }

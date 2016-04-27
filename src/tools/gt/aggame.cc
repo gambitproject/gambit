@@ -23,13 +23,15 @@
 
 #include "aggame.h"
 
-void aggame:: computePartialP_PureNode(int player1,int act1, vector<int>& tasks){
+using namespace Gambit;
+
+void aggame::computePartialP_PureNode(int player1,int act1, vector<int>& tasks){
     int i,j,Node = aggPtr->actionSets[player1][act1];
     int numNei = aggPtr->neighbors[Node].size();
 
     //assert(aggPtr->isPure[Node]||tasks.size()==0);
-    vector<AggNumber> strat (numNei);
-    agg::config    a(numNei,0);
+    vector<agg::AggNumber> strat (numNei);
+    agg::AGG::config    a(numNei,0);
     //compute the full distrib
     aggPtr->computeP (player1,act1);
 
@@ -37,20 +39,20 @@ void aggame:: computePartialP_PureNode(int player1,int act1, vector<int>& tasks)
     aggPtr->Pr[player1].swap(aggPtr->Pr[numPlayers-1]);
     for(i=0;i<(int)tasks.size();i++){
       //assert(tasks[i]!=player1);
-      aggdistrib& P = aggPtr->Pr[tasks[i]];
+      agg::aggdistrib& P = aggPtr->Pr[tasks[i]];
       //P.clear();  // to get ready for division, we need clear()
       P=aggPtr->Pr[player1];
 
       bool NullOnly =true;
       for(j=0;j<numNei;++j){
 	a[j]++;
-	aggdistrib::iterator pp = aggPtr->projectedStrat[Node][tasks[i]].find(a);
+	agg::aggdistrib::iterator pp = aggPtr->projectedStrat[Node][tasks[i]].find(a);
 	if (pp== aggPtr->projectedStrat[Node][tasks[i]].end()) {
 	    strat[j]=0;
 	}
 	else {
 	    strat[j]= pp->second;
-	    if (strat[j] > (AggNumber)0) NullOnly=false;
+	    if (strat[j] > (agg::AggNumber)0) NullOnly=false;
 	}
 
 	a[j]--;
@@ -59,7 +61,7 @@ void aggame:: computePartialP_PureNode(int player1,int act1, vector<int>& tasks)
       cout<<"dividing "<<endl;
       P.print_in_order();
       cout<<endl<<"by [";
-      copy(strat.begin(),strat.end(),ostream_iterator<AggNumber>(cout," ") );
+      copy(strat.begin(),strat.end(),ostream_iterator<agg::AggNumber>(cout," ") );
       cout<<"]\n";
 #endif
       if (!NullOnly) P/= strat;
@@ -80,7 +82,7 @@ void aggame::computePartialP(int player1, int act1, vector<int>& tasks,vector<in
 
 void aggame::computePartialP_bisect(int player1,int act1,
     vector<int>::iterator start,vector<int>::iterator endp,
-    aggdistrib& temp){
+    agg::aggdistrib& temp){
   //assert (endp-start>0);
 #ifdef AGGDEBUG
   cout<<"calling computePartialP_bisect with player1="<<player1
@@ -131,7 +133,7 @@ void aggame::computePartialP_bisect(int player1,int act1,
 
 
 
-void aggame::payoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
+void aggame::payoffMatrix(cmatrix &dest, cvector &s, agg::AggNumber fuzz){
   //compute jacobian
   //s: mixed strat
 
@@ -139,7 +141,7 @@ void aggame::payoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
   cout<<"calling payoffMatrix with stratety s="<<endl
       <<s<<endl;
 #endif
-  AggNumber fuzzcount;
+  agg::AggNumber fuzzcount;
   int rown, coln, rowi, coli,act1,act2,currNode,numNei;
   static vector<int>::iterator p;
   static vector<int> tasks,spares,nontasks;
@@ -194,7 +196,7 @@ void aggame::payoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
                 copy(key.begin(),key.end(),ostream_iterator<int>(cout," ") );
                 cout<<"]\n";
 #endif
-	        aggdistrib::iterator r= aggPtr->cache.findExact(key);
+	        agg::aggdistrib::iterator r= aggPtr->cache.findExact(key);
 	        if (r!=aggPtr->cache.end()){
 	          dest[act1+firstAction(rown)][act2+firstAction(coln)]=r->second;
 	        }
@@ -290,7 +292,7 @@ void aggame::payoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
             }
 #endif
 	    //compute entries
-	    AggNumber undisturbedPayoff;
+	    agg::AggNumber undisturbedPayoff;
 	    bool hasUndisturbed=false;
 
 	    if(spares.size()>0){//for players in spares, we compute one undisturbed payoff
@@ -317,7 +319,7 @@ void aggame::payoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
 }
 
 
-void aggame::computeUndisturbedPayoff(AggNumber& undisturbedPayoff,bool& has,int player1,int act1,int player2)
+void aggame::computeUndisturbedPayoff(agg::AggNumber& undisturbedPayoff,bool& has,int player1,int act1,int player2)
 {
   if (has) return;
   int    Node =aggPtr->actionSets[player1][act1];
@@ -331,14 +333,14 @@ void aggame::computeUndisturbedPayoff(AggNumber& undisturbedPayoff,bool& has,int
   }
   has=true;
 }
-void aggame::savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,AggNumber result,
-	trie_map<AggNumber>& cache, bool partial ){
+void aggame::savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,agg::AggNumber result,
+			agg::trie_map<agg::AggNumber>& cache, bool partial ){
 
   int    Node =aggPtr->actionSets[player1][act1];
   int    numNei= aggPtr->neighbors[Node].size();
 
   if (!partial){
-    pair< vector<int>, AggNumber> pair1(aggPtr->projection[Node][player2][act2],result);
+    pair< vector<int>, agg::AggNumber> pair1(aggPtr->projection[Node][player2][act2],result);
     pair1.first.reserve(numNei+3);
     pair1.first.push_back(player1);
     pair1.first.push_back(act1);
@@ -349,7 +351,7 @@ void aggame::savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,
   if (aggPtr->node2Action[Node][player2]!=-1 &&
 		  aggPtr->fullProjectedStrat[Node][player1].count(aggPtr->projection[Node][player2][act2]))
   {
-    pair<vector<int>,AggNumber> pair2(aggPtr->projection[Node][player2][act2],result);
+    pair<vector<int>,agg::AggNumber> pair2(aggPtr->projection[Node][player2][act2],result);
     pair2.first.reserve(numNei+3);
     pair2.first.push_back(player2);
     pair2.first.push_back(aggPtr->node2Action[Node][player2]);
@@ -359,16 +361,16 @@ void aggame::savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,
   dest[act1+firstAction(player1)][act2+firstAction(player2)]=result;
 
 }
-void aggame::computePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,trie_map<AggNumber>& cache){
+void aggame::computePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,agg::trie_map<agg::AggNumber>& cache){
   int    Node =aggPtr->actionSets[player1][act1];
   int    numNei= aggPtr->neighbors[Node].size();
 
-  pair<vector<int>,AggNumber> insPair( aggPtr->projection[Node][player2][act2],0);
+  pair<vector<int>,agg::AggNumber> insPair( aggPtr->projection[Node][player2][act2],0);
   insPair.first.reserve(numNei+3);
   insPair.first.push_back(player1);
   insPair.first.push_back(act1);
   insPair.first.push_back(player2);
-  pair<trie_map<AggNumber>::iterator,bool> r =cache.insert(insPair);
+  pair<agg::trie_map<agg::AggNumber>::iterator,bool> r =cache.insert(insPair);
   if (! r.second) {
     dest[act1+firstAction(player1)][act2+firstAction(player2)]=r.first->second;
   }else{
@@ -380,7 +382,7 @@ void aggame::computePayoff(cmatrix& dest,int player1,int act1,int player2,int ac
 
 
 
-void aggame::SymPayoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
+void aggame::SymPayoffMatrix(cmatrix &dest, cvector &s, agg::AggNumber fuzz){
   if (getNumPlayerClasses()>1){
     cerr<<"SymPayoffMatrix() Error: game is not symmetric"<<endl;
     exit(1);
@@ -389,7 +391,7 @@ void aggame::SymPayoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
 
   aggPtr->cache.clear();
 
-  AggNumber fuzzcount;
+  agg::AggNumber fuzzcount;
 
   int currNode,numNei;
   for (int rowa=0;rowa<getNumActions(0);++rowa){
@@ -398,23 +400,23 @@ void aggame::SymPayoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
     //vector<int> key (numNei+1);
     //key[numNei]=currNode;
     aggPtr->doProjection(currNode,0,&(s[firstAction(0)]));
-    aggdistrib &Pdest = aggPtr->Pr[numPlayers-1];
+    agg::aggdistrib &Pdest = aggPtr->Pr[numPlayers-1];
     aggPtr->projectedStrat[currNode][0].power(numPlayers-2, Pdest, aggPtr->Pr[numPlayers-2],numNei,aggPtr->projFunctions[currNode]);
-    aggdistrib &temp=aggPtr->Pr[numPlayers-2];
+    agg::aggdistrib &temp=aggPtr->Pr[numPlayers-2];
     temp.reset();
     temp.insert(make_pair(aggPtr->projection[currNode][0][rowa],1));
     Pdest.multiply(temp,numNei,aggPtr->projFunctions[currNode]);
     for (int cola=0;cola<getNumActions(0);++cola){
-      pair<vector<int>,AggNumber> insPair( aggPtr->projection[currNode][0][cola],0);
+      pair<vector<int>,agg::AggNumber> insPair( aggPtr->projection[currNode][0][cola],0);
 
       //insPair.first.reserve(numNei+3);
       insPair.first.push_back(currNode);
-      pair<trie_map<AggNumber>::iterator,bool> r =aggPtr->cache.insert(insPair);
+      pair<agg::trie_map<agg::AggNumber>::iterator,bool> r =aggPtr->cache.insert(insPair);
 
       if (! r.second) {
           dest[rowa][cola]=r.first->second;
       }else{
-          r.first->second=AggNumber(numPlayers-1)
+          r.first->second=agg::AggNumber(numPlayers-1)
               * Pdest.inner_prod(aggPtr->projection[currNode][0][cola], numNei, aggPtr->projFunctions[currNode], aggPtr->payoffs[currNode]);
           dest[rowa][cola]=r.first->second;
       }
@@ -432,7 +434,7 @@ void aggame::SymPayoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
 
 }
 
-void aggame::KSymPayoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
+void aggame::KSymPayoffMatrix(cmatrix &dest, cvector &s, agg::AggNumber fuzz){
   //cerr<<"error: k-symmetric Jacobian not yet implemented";
   //exit(1);
 
@@ -446,14 +448,14 @@ void aggame::KSymPayoffMatrix(cmatrix &dest, cvector &s, AggNumber fuzz){
         for(int cola=0;cola<getNumKSymActions(colcls);++cola){
 
           dest[rowa+firstKSymAction(rowcls)][cola+firstKSymAction(colcls)]=
-              (AggNumber)multiplier *
+              (agg::AggNumber)multiplier *
               aggPtr->getKSymMixedPayoff(sp,rowcls,rowa,colcls,cola);
         }
       }
     }
   }
 
-  AggNumber fuzzcount;
+  agg::AggNumber fuzzcount;
   for (int rown=0; rown<getNumPlayerClasses(); ++rown){
           fuzzcount=fuzz;
           for (int rowi=firstKSymAction(rown); rowi<lastKSymAction(rown);rowi++){

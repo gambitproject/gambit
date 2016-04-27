@@ -166,7 +166,7 @@ ConjugatePRMinimizer::Minimize(const Function &fdf,
 
   f = fb;
   step = stepb;
-  gnorm = sqrt(gradient.NormSquared());
+  gnorm = std::sqrt(gradient.NormSquared());
 
 mid_trial:
   iter++;
@@ -240,7 +240,7 @@ mid_trial:
 
     fdf.Gradient(x1, gradient);
     pg = p * gradient;
-    gnorm1 = sqrt(gradient.NormSquared());
+    gnorm1 = std::sqrt(gradient.NormSquared());
 
     f = fm;
     step = stepm;
@@ -291,7 +291,7 @@ void ConjugatePRMinimizer::Set(const Function &fdf,
   p = gradient;
   g0 = gradient;
 
-  double gnorm = sqrt(gradient.NormSquared());
+  double gnorm = std::sqrt(gradient.NormSquared());
   pnorm = gnorm;
   g0norm = gnorm;
 }
@@ -335,7 +335,7 @@ bool ConjugatePRMinimizer::Iterate(const Function &fdf,
     f = fc;
     x = x1;
     fdf.Gradient(x1, gradient);
-    g0norm = sqrt(gradient.NormSquared());
+    g0norm = std::sqrt(gradient.NormSquared());
     return true;
   }
 
@@ -370,7 +370,7 @@ bool ConjugatePRMinimizer::Iterate(const Function &fdf,
 
     p *= -beta;
     AlphaXPlusY(1.0, gradient, p);
-    pnorm = sqrt(p.NormSquared());
+    pnorm = std::sqrt(p.NormSquared());
   }
 
   g0norm = g1norm;

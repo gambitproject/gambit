@@ -21,7 +21,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-//using namespace std;
+#include <cmath>
+
+namespace Gambit {
+
+namespace agg {
 
 template <class V>
 inline std::pair<typename trie_map<V>::iterator, bool>
@@ -134,7 +138,7 @@ void trie_map<V>::multiply (const trie_map<V>& other,size_t keylen, std::vector<
   static size_t i;
 
   if(&other == this){
-    std::cerr<<"Error: (in-place) multiply: other should not be the same object as self"<<endl;
+    std::cerr<<"Error: (in-place) multiply: other should not be the same object as self"<<std::endl;
     exit(1);
   }
   std::list<typename trie_map<V>::value_type> data2;
@@ -188,7 +192,7 @@ template <class V>
 inline trie_map<V>& 
 trie_map<V>::operator/= (const std::vector<V>& denom){
   //first, find the pivot: the first nonzero element of denom
-  V th(sqrt(THRESH));
+  V th(std::sqrt(THRESH));
   int piv=-1;
   for(size_t i=0;i<denom.size(); ++i) if (denom[i]>th) {
     piv=(int)i;
@@ -237,4 +241,6 @@ void trie_map<V>:: div(const std::vector<V>& denom,TrieNode<V>* n, int current, 
   //return pivot;
 }
 
+}  // end namespace Gambit::agg
 
+}  // end namespace Gambit

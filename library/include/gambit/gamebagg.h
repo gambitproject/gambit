@@ -33,12 +33,12 @@ class GameBagentRep : public GameRep {
   friend class BagentPureStrategyProfileRep;
 
 private:
-  bagg *baggPtr;
+  agg::BAGG *baggPtr;
   Array<int> agent2baggPlayer;
   Array<GamePlayerRep *> m_players;
 
   /// Constructor; takes ownership of the passed pointer
-  GameBagentRep(bagg *_baggPtr);
+  GameBagentRep(agg::BAGG *_baggPtr);
 
 public:
   /// @name Lifecycle

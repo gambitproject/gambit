@@ -21,18 +21,18 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef __PROJ_FUNC_H
-#define __PROJ_FUNC_H
+#ifndef GAMBIT_AGG_PROJFUNC_H
+#define GAMBIT_AGG_PROJFUNC_H
+
 #include <iostream>
 #include <iterator>
 #include <set>
 #include <vector>
 #include <cstdlib>
 
+namespace Gambit {
 
-using std::ostream;
-using std::endl;
-using std::istream;
+namespace agg {
 
 //types of contribution-independent function:
 //sum, existence, highest, lowest and their extended versions
@@ -94,7 +94,7 @@ struct proj_func{
 	  out<< Type;
 	  out<<" "<<Default<<" ";
 	  copy(weights.begin(),weights.end(),std::ostream_iterator<int>(out," "));
-	  out<<endl;
+	  out<<std::endl;
 	}
 };
 
@@ -102,11 +102,11 @@ struct proj_func_SUM: public proj_func {
     proj_func_SUM():proj_func(P_SUM,0) {}
     inline int operator() (int x,int y){return x+y;}
     inline int operator()(std::multiset<int>& s){return s.size();}
-    void print (ostream& out){ out<<P_SUM<<endl;}
+    void print (std::ostream& out){ out<<P_SUM<<std::endl;}
 };
 
 struct proj_func_SUM2: public proj_func{
-    proj_func_SUM2(istream& in, int S):proj_func(P_SUM2,in,S){ }
+    proj_func_SUM2(std::istream& in, int S):proj_func(P_SUM2,in,S){ }
     inline int operator()(int x, int y){return x+y;}
     inline int operator()(std::multiset<int>& s){
       int res=Default;
@@ -120,10 +120,10 @@ struct proj_func_EXIST: public proj_func{
     proj_func_EXIST() :proj_func(P_EXIST,0) {}
     inline int operator() (int x, int y) {return (x+y>0);}
     inline int operator() (std::multiset<int>& s){ return (s.size()>0);}
-    void print(ostream& out){out<<P_EXIST<<endl;}
+    void print(std::ostream& out){out<<P_EXIST<<std::endl;}
 };
 struct proj_func_EXIST2: public proj_func{
-    proj_func_EXIST2(istream& in, int S):proj_func(P_EXIST2,in,S){
+    proj_func_EXIST2(std::istream& in, int S):proj_func(P_EXIST2,in,S){
       if (Default<0){
         std::cout<<"proj_func_EXIST2() error: default value should be nonnegative.\n";
         exit(1);
@@ -155,10 +155,10 @@ struct proj_func_HIGH:public proj_func{
 	if (s.empty()) return Default;
 	return *(s.rbegin());
     }
-    void print(ostream& out){out<<P_HIGH<<endl;}
+    void print(std::ostream& out){out<<P_HIGH<<std::endl;}
 };
 struct proj_func_HIGH2: public proj_func{
-    proj_func_HIGH2(istream& in, int S):proj_func(P_HIGH2,in,S){ }
+    proj_func_HIGH2(std::istream& in, int S):proj_func(P_HIGH2,in,S){ }
     inline int operator()(int x, int y){
       if(x==Default) return y;
       if (y==Default)return x;
@@ -185,10 +185,10 @@ struct proj_func_LOW: public proj_func{
 	if (s.empty() ) return Default;
 	return *(s.begin());
     }
-    void print(ostream& out){out<<P_LOW <<endl;}
+    void print(std::ostream &out){out<<P_LOW <<std::endl;}
 };	
 struct proj_func_LOW2: public proj_func{
-    proj_func_LOW2(istream& in, int S):proj_func(P_LOW2,in,S){ }
+    proj_func_LOW2(std::istream &in, int S):proj_func(P_LOW2,in,S){ }
     inline int operator()(int x, int y){
       if(x==Default) return y;
       if (y==Default)return x;
@@ -208,7 +208,7 @@ struct proj_func_LOW2: public proj_func{
 typedef proj_func* projtype;
 
 
-inline proj_func* make_proj_func(TypeEnum type, istream& in,int S,int P){
+inline proj_func* make_proj_func(TypeEnum type, std::istream &in,int S,int P){
   switch(type){
 	case P_SUM: return (new proj_func_SUM);
 	case P_EXIST: return (new proj_func_EXIST);
@@ -219,9 +219,13 @@ inline proj_func* make_proj_func(TypeEnum type, istream& in,int S,int P){
 	case P_HIGH2: return (new proj_func_HIGH2(in,S));
 	case P_LOW2: return (new proj_func_LOW2(in,S));
 	default:
-	  std::cout<<"error: function type is not recognized."<<endl;
+	  std::cout<<"error: function type is not recognized."<<std::endl;
 	  return NULL;
   }
 }
 
-#endif
+}  // end namespace Gambit::agg
+
+}  // end namespace Gambit
+ 
+#endif  // GAMBIT_AGG_PROJFUNC_H

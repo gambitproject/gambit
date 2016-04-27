@@ -36,11 +36,11 @@ class GameAggRep : public GameRep {
   friend class ::aggame;
 
 private:
-  agg *aggPtr;
+  agg::AGG *aggPtr;
   Array<GamePlayerRep *> m_players;
 
   /// Constructor; takes ownership of the passed pointer
-  GameAggRep(agg *);
+  GameAggRep(agg::AGG *);
 
 public:
   /// @name Lifecycle

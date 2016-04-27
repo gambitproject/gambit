@@ -23,9 +23,9 @@
 #ifndef LIBGAMBIT_FUNCTION_H
 #define LIBGAMBIT_FUNCTION_H
 
-#include "vector.h"
+#include "gambit/vector.h"
 
-using namespace Gambit;
+namespace Gambit {
 
 class Function {
 public:  
@@ -123,5 +123,7 @@ private:
 		double &step, double &f, double &gnorm);
 
 };
+
+}  // end namespace Gambit
 
 #endif  // LIBGAMBIT_FUNCTION_H

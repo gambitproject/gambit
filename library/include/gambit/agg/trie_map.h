@@ -21,8 +21,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef __TRIE_MAP_H
-#define __TRIE_MAP_H
+#ifndef GAMBIT_AGG_TRIEMAP_H
+#define GAMBIT_AGG_TRIEMAP_H
 
 //Mapping from vector of ints to type V.
 //WARNING: traversal using the iterators is in the reverse order of insertion.
@@ -31,10 +31,9 @@
 #include <list>
 #include <iterator>
 
-using std::ostream;
-using std::endl;
-using std::cout;
-using std::ostream_iterator;
+namespace Gambit {
+
+namespace agg {
 
 //forward declarations
 
@@ -42,7 +41,7 @@ template <class V>
 class trie_map;
 
 template <class V>
-ostream& operator<< (ostream& s, const trie_map<V>& t);
+std::ostream& operator<< (std::ostream& s, const trie_map<V>& t);
 
 
 
@@ -66,9 +65,7 @@ struct TrieNode
   }
 };
 
-template <class V>
-class trie_map {
-
+template <class V> class trie_map {
 public:
   //typedefs
   typedef std::vector<int>          key_type;
@@ -84,7 +81,7 @@ public:
 
 
   //friends
-  friend ostream& operator<< <V>(ostream& s, const trie_map<V>& t);
+  friend std::ostream& operator<< <V>(std::ostream& s, const trie_map<V>& t);
   
   friend class agg;
 
@@ -145,7 +142,7 @@ public:
 #endif
 	data.clear();
 #ifdef AGGDEBUG
-	if(endp != end()) {std::cerr<<"Error: end() changed"<<endl; exit(1);}
+	if(endp != end()) {std::cerr<<"Error: end() changed"<<std::endl; exit(1);}
 #endif
 	leaves.clear();
   }
@@ -156,15 +153,15 @@ public:
 
 #ifdef AGGDEBUG
       if(!leaves.back()){
-	  cout<<"WARNING: NULL pointer in leaves. leaves are:"<<endl;
+	  std::cout<<"WARNING: NULL pointer in leaves. leaves are:"<<std::endl;
 	  for(size_t i=0;i<leaves.size();++i){ 
-	      cout << (long long) leaves[i]<<": ";
+	      std::cout << (long long) leaves[i]<<": ";
 	      
-	      if (leaves[i])cout<<leaves[i]->val->second;
-	      cout<<endl;
+	      if (leaves[i])std::cout<<leaves[i]->val->second;
+	      std::cout<<std::endl;
 	  }
-	  cout<<endl<<"trie is:"<< *this<< endl;
-	  cout<<"in order:"<<endl;
+	  std::cout<<std::endl<<"trie is:"<< *this<< std::endl;
+	  std::cout<<"in order:"<<std::endl;
 	  print_in_order();
       }
 #endif
@@ -370,9 +367,9 @@ public:
 	//assert(p2 != other.end());
 	if (p2==other.end()){
 	  if(p->second>(V) THRESH){
-	    cout<<"inner_prod WARNING: discarding [";
-	    copy(p->first.begin(),p->first.end(), ostream_iterator<int>(cout," "));
-	    cout<<"] "<<p->second<<endl;
+	    std::cout<<"inner_prod WARNING: discarding [";
+	    copy(p->first.begin(),p->first.end(), std::ostream_iterator<int>(std::cout," "));
+	    std::cout<<"] "<<p->second<<std::endl;
 	  }
 	} 
 	else {
@@ -402,9 +399,9 @@ public:
       //assert(p2!= other.end());
       if (p2==other.end()){
         if(y.second>th){
-	  cout<<"inner_prod WARNING: discarding [";
-	  copy(y.first.begin(),y.first.end(), ostream_iterator<int>(cout," "));
-	  cout<<"] "<<y.second<<endl;
+	  std::cout<<"inner_prod WARNING: discarding [";
+	  copy(y.first.begin(),y.first.end(), std::ostream_iterator<int>(std::cout," "));
+	  std::cout<<"] "<<y.second<<std::endl;
         }
       }
       else{
@@ -413,7 +410,7 @@ public:
     }
 
 //    if (s>THRESH ||s<-THRESH){
-//	cout<<"inner_prod WARNING: sum differ from 1.0: diff is"<<s<<endl;
+//	std::cout<<"inner_prod WARNING: sum differ from 1.0: diff is"<<s<<std::endl;
 //    } 
     return result;
   }
@@ -437,10 +434,10 @@ private:
   struct print_helper {
    print_helper (typename trie_map<V>::iterator en):endp(en){}
    void operator()(typename trie_map<V>::iterator p){
-    if (p== endp) {cout<< "leaf with no data"<<endl; return;}
-    cout<<"[";
-    copy(p->first.begin(),p->first.end(),ostream_iterator<int>(cout," "));
-    cout <<"]: "<<p->second<<endl;
+    if (p== endp) {std::cout<< "leaf with no data"<<std::endl; return;}
+    std::cout<<"[";
+    copy(p->first.begin(),p->first.end(),std::ostream_iterator<int>(std::cout," "));
+    std::cout <<"]: "<<p->second<<std::endl;
    }
    typename trie_map<V>::iterator endp;
   };
@@ -491,11 +488,11 @@ private:
     bool is_leaf=true;
     for (i=0;i<s;++i)if (n->children[i]){
 	is_leaf=false;
-	if (debug) cout<< i<<" ";
+	if (debug) std::cout<< i<<" ";
 	in_order_subtree(f, n->children[i], debug);
     }
     if(is_leaf) {
-	if(debug) cout<< "(leaf): ";
+	if(debug) std::cout<< "(leaf): ";
 	f(n->val);
     }
     return;
@@ -529,16 +526,16 @@ private:
 
       if (!dest){
 	if((double) y>th||(double)y<-th)
-	  cout<<"division (pivot=" << denom[pivot]<<") WARNING: discarding "
-	    <<y<<endl;
+	  std::cout<<"division (pivot=" << denom[pivot]<<") WARNING: discarding "
+	    <<y<<std::endl;
         return;
       }
       TrieNode<V>* ptr=dest;
       for (i=pivot+1; i<keylen; ++i){
 	if( (*ptr)[conf[i]]==NULL){
 	    if((double)y>th||(double)y<-th)
-	      cout<<"division (pivot=" << denom[pivot]<<") WARNING: discarding "
-	        <<y<<endl;
+	      std::cout<<"division (pivot=" << denom[pivot]<<") WARNING: discarding "
+	        <<y<<std::endl;
 	    return;
 	}
 	ptr = (*ptr)[conf[i]];
@@ -546,8 +543,8 @@ private:
       ptr->val->second += y;
       //assert(ptr->val->second>-THRESH);
       if ((double)ptr->val->second <= -th)
-	cout<<"division (pivot=" << denom[pivot]<<") WARNING: discarding "
-	    <<ptr->val->second<<endl;
+	std::cout<<"division (pivot=" << denom[pivot]<<") WARNING: discarding "
+	    <<ptr->val->second<<std::endl;
       if (ptr->val->second <(V)0) ptr->val->second=0;
     }
     void operator()(iterator p){
@@ -580,18 +577,21 @@ template <class V> const double trie_map<V>::THRESH = 1e-12;
 
 
 template <class V>
-inline ostream& operator<< (ostream& s, const trie_map<V>& t)
+inline std::ostream& operator<< (std::ostream& s, const trie_map<V>& t)
 {
-  //s<<endl;
+  //s<<std::endl;
   for (typename trie_map<V>::const_iterator p=t.begin();p!=t.end();++p){
     s<<"[ ";
-    copy(p->first.begin(),p->first.end(),ostream_iterator<int>(s, " "));
-    s<< "] "<<p->second<<endl;
+    copy(p->first.begin(),p->first.end(),std::ostream_iterator<int>(s, " "));
+    s<< "] "<<p->second<<std::endl;
   }
   return s;
 }
 
+}  // end namespace Gambit::agg
 
+}  // end namespace Gambit
 
 #include "trie_map.imp"
-#endif
+
+#endif   // GAMBIT_AGG_TRIEMAP_H

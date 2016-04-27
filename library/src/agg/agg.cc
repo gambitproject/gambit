@@ -32,9 +32,13 @@
 
 using namespace std;
 
+namespace Gambit {
+
+namespace agg {
+
 inline int select2nd(const pair <int,int> &x) { return x.second; } 
 
-agg::agg(int numPlayers,int* _actions, int numANodes, int _numPNodes, 
+AGG::AGG(int numPlayers,int* _actions, int numANodes, int _numPNodes, 
  vector<vector<int> >& _actionSets, vector<vector<int> >& neighb,
  vector<projtype>& projTypes,
  vector<vector<aggdistrib > >& projS,
@@ -132,7 +136,7 @@ kSymStrategyOffset(1,0)
 }
 
 /*
-agg::agg(const agg& other, bool completeGraph)
+AGG::AGG(const agg& other, bool completeGraph)
 :
     numPlayers(other.numPlayers)
     //numActionNodes(other.numActionNodes),
@@ -176,7 +180,7 @@ agg::agg(const agg& other, bool completeGraph)
     }
   }
   else{
-    numActionNodes=other.numActionNodes;
+b    numActionNodes=other.numActionNodes;
 
     numPNodes=other.numPNodes;
     actionSets=other.actionSets;
@@ -209,11 +213,11 @@ agg::agg(const agg& other, bool completeGraph)
 }
 */
 
-void agg::stripComment(istream& in){
+void AGG::stripComment(istream& in){
   in>>ws;
   char c =in.peek();
   stringbuf discard(ios_base::out);
-  if(c== agg::COMMENT_CHAR){
+  if(c== AGG::COMMENT_CHAR){
     in.get (discard);
 #ifdef AGGDEBUG
     cerr<<discard.str()<<endl;
@@ -223,11 +227,11 @@ void agg::stripComment(istream& in){
 }
 
 
-agg* agg::makeAGG(char* filename){
+AGG *AGG::makeAGG(char* filename){
   ifstream in(filename);
-  return agg::makeAGG(in);
+  return AGG::makeAGG(in);
 }
-agg* agg::makeAGG(istream &in){
+AGG *AGG::makeAGG(istream &in){
   int i,j,n,S,P;
   int neighb_size;
   
@@ -372,10 +376,10 @@ agg* agg::makeAGG(istream &in){
       }
       switch (t){
         case COMPLETE:
-	    agg::makeCOMPLETEpayoff(in,pays[i]);
+	    AGG::makeCOMPLETEpayoff(in,pays[i]);
 	    break;
 	case MAPPING:
-	    agg::makeMAPPINGpayoff(in,pays[i],neighb[i].size());
+	    AGG::makeMAPPINGpayoff(in,pays[i],neighb[i].size());
 	    break;
 	case ADDITIVE:
         default:
@@ -385,8 +389,8 @@ agg* agg::makeAGG(istream &in){
       }
       
     }
-    agg* r=NULL;
-    r=new agg(n,size,S,P,ASets,neighb,projTypes,projS,proj,projF,Po,Pr,pays);
+    AGG *r=NULL;
+    r=new AGG(n,size,S,P,ASets,neighb,projTypes,projS,proj,projF,Po,Pr,pays);
     if (!r)cout<<"Failed to allocate memory for new AGG";
     delete [] size;
     return r;
@@ -397,7 +401,7 @@ agg* agg::makeAGG(istream &in){
 }
 
 
-agg* agg::makeRandomAGG(int n, int* actions, int S, int P, 
+AGG *AGG::makeRandomAGG(int n, int* actions, int S, int P, 
 vector<vector<int> >& ASets, vector<vector<int> >& neighb,
 vector<projtype>& projTypes, int seed, bool int_payoffs, int int_factor){
     int i,j;
@@ -453,7 +457,7 @@ vector<projtype>& projTypes, int seed, bool int_payoffs, int int_factor){
 	    numPayoffs += pays[i].size();
     }
     cout << "Creating an AGG with "<<numPayoffs <<" payoff values"<<endl;
-    agg* r= new agg(n,actions,S,P,ASets,neighb,projTypes,projS,proj,projF,Po,Pr,pays);
+    AGG *r= new AGG(n,actions,S,P,ASets,neighb,projTypes,projS,proj,projF,Po,Pr,pays);
     
     return r;
  
@@ -462,7 +466,7 @@ vector<projtype>& projTypes, int seed, bool int_payoffs, int int_factor){
 
 
 void
-agg::setProjections(vector<vector<aggdistrib > >& projS, 
+AGG::setProjections(vector<vector<aggdistrib > >& projS, 
   vector<vector<vector<config> > >& proj, int N,int S,int P,
   vector<vector<int> >& AS, vector<vector<int> >& neighb, vector<projtype>& projTypes)
 {
@@ -516,7 +520,7 @@ agg::setProjections(vector<vector<aggdistrib > >& projS,
 }
 
 void
-agg::getAn(multiset<int>& dest, vector<vector<int> >& neighb, vector<projtype>& projTypes,
+AGG::getAn(multiset<int>& dest, vector<vector<int> >& neighb, vector<projtype>& projTypes,
 	int S,int Node, vector<int>& path)
 {
   //get ancestors
@@ -551,7 +555,7 @@ agg::getAn(multiset<int>& dest, vector<vector<int> >& neighb, vector<projtype>& 
 }
 
 void
-agg::initPorder(vector<int>& Po,
+AGG::initPorder(vector<int>& Po,
 //vector<aggdistrib>& P,
     int i,  int N, vector<aggdistrib>& projS)
 //config & proj,
@@ -575,7 +579,7 @@ agg::initPorder(vector<int>& Po,
 
 //compute the induced distribution 
 void
-agg::computeP(int player, int act, int player2,int act2)
+AGG::computeP(int player, int act, int player2,int act2)
 {
   //apply player's strat
   Pr[0].reset();
@@ -604,14 +608,14 @@ agg::computeP(int player, int act, int player2,int act2)
     
 }
 
-void agg:: doProjection(int Node, AggNumber* s)
+void AGG:: doProjection(int Node, AggNumber* s)
 {
   for (int i=0;i<numPlayers;i++){
     doProjection(Node,i, &(s[firstAction(i)]));
   }
 }
 
-inline void agg:: doProjection(int Node, int i, AggNumber* s)
+inline void AGG:: doProjection(int Node, int i, AggNumber* s)
 {
   projectedStrat[Node][i].reset();
   for (int j=0;j<actions[i];j++)if(s[j]>(AggNumber)0.0){
@@ -619,7 +623,7 @@ inline void agg:: doProjection(int Node, int i, AggNumber* s)
               s[j]);
   }
 }
-AggNumber agg::getPurePayoff(int player, int *s){
+AggNumber AGG::getPurePayoff(int player, int *s){
   assert(player>=0 && player < numPlayers);
   int Node = actionSets[player][s[player]]; 
   int keylen = neighbors[Node].size();
@@ -632,7 +636,7 @@ AggNumber agg::getPurePayoff(int player, int *s){
   }
   aggpayoff::iterator p= payoffs[Node].find(pureprofile);
   if ( p == payoffs[Node].end() ){
-    cout<<"agg::getPurePayoff ERROR: unable to find the following configuration"
+    cout<<"AGG::getPurePayoff ERROR: unable to find the following configuration"
         <<endl;
     cout <<"[";
     copy(pureprofile.begin(),pureprofile.end(),ostream_iterator<int>(cout, " "));
@@ -643,7 +647,7 @@ AggNumber agg::getPurePayoff(int player, int *s){
   return p->second;
 }
 
-AggNumber agg::getMixedPayoff(int player, StrategyProfile &s){
+AggNumber AGG::getMixedPayoff(int player, StrategyProfile &s){
   AggNumber result=0.0;
   assert(player>=0 && player < numPlayers);
   for (int act=0;act <actions[player];++act)if (s[act+firstAction(player)]>(AggNumber)0.0){
@@ -652,21 +656,21 @@ AggNumber agg::getMixedPayoff(int player, StrategyProfile &s){
   return result;
 }
 
-void agg::getPayoffVector(AggNumberVector &dest, int player,const StrategyProfile &s){
+void AGG::getPayoffVector(AggNumberVector &dest, int player,const StrategyProfile &s){
     assert(player>=0 && player < numPlayers);
     for (int act=0;act<actions[player]; ++act){
 	dest[act]=getV(player,act,s);
     }
 }
 
-AggNumber agg::getV(int player, int act,const StrategyProfile &s){
+AggNumber AGG::getV(int player, int act,const StrategyProfile &s){
     //project s to the projectedStrat
     doProjection(actionSets.at(player).at(act), s);
     computeP(player, act);
     return Pr[numPlayers-1].inner_prod(payoffs[actionSets[player][act]]);
 }
 
-AggNumber agg::getJ(int player1, int act1, int player2,int act2,StrategyProfile &s)
+AggNumber AGG::getJ(int player1, int act1, int player2,int act2,StrategyProfile &s)
 {
     doProjection(actionSets[player1][act1],s);
     computeP(player1,act1,player2,act2);
@@ -678,10 +682,10 @@ AggNumber agg::getJ(int player1, int act1, int player2,int act2,StrategyProfile 
 // parameter: s is the mixed strategy of one player. It is a vector of 
 // probabilities, indexed by the action node.
 
-AggNumber agg::getSymMixedPayoff( StrategyProfile &s){
+AggNumber AGG::getSymMixedPayoff( StrategyProfile &s){
   AggNumber result=0;
   if (! isSymmetric() ) {
-    cerr<< "agg::getSymMixedPayoff: the game is not symmetric!"<<endl;
+    cerr<< "AGG::getSymMixedPayoff: the game is not symmetric!"<<endl;
     exit(1);
   }
 
@@ -691,9 +695,9 @@ AggNumber agg::getSymMixedPayoff( StrategyProfile &s){
   }
   return result;
 }
-void agg::getSymPayoffVector(AggNumberVector& dest, StrategyProfile &s){
+void AGG::getSymPayoffVector(AggNumberVector& dest, StrategyProfile &s){
   if (! isSymmetric() ) {
-    cerr<< "agg::getSymMixedPayoff: the game is not symmetric!"<<endl;
+    cerr<< "AGG::getSymMixedPayoff: the game is not symmetric!"<<endl;
     exit(1);
   }
 
@@ -718,7 +722,7 @@ void agg::getSymPayoffVector(AggNumberVector& dest, StrategyProfile &s){
           dest[act]=getSymMixedPayoff(act,s);
   }
 }
-AggNumber agg::getSymMixedPayoff(int node, StrategyProfile &s)
+AggNumber AGG::getSymMixedPayoff(int node, StrategyProfile &s)
 {
     int numNei = neighbors[node].size();
 
@@ -783,7 +787,7 @@ AggNumber agg::getSymMixedPayoff(int node, StrategyProfile &s)
 //plClass: the index for the player class
 //s: mixed strat for that player class
 
-void agg::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int act, aggdistrib &dest,int plClass2,int act2){
+void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int act, aggdistrib &dest,int plClass2,int act2){
     int node = uniqueActionSets.at(ownPlClass).at(act);
     int numPl = playerClasses.at(plClass).size();
     assert(numPl>0);
@@ -888,7 +892,7 @@ void agg::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
   
 }
 
-AggNumber agg::getKSymMixedPayoff( int playerClass,vector<StrategyProfile> &s){
+AggNumber AGG::getKSymMixedPayoff( int playerClass,vector<StrategyProfile> &s){
   AggNumber result=0.0;
 
   for(int act=0;act<(int)uniqueActionSets[playerClass].size();act++)if(s[playerClass][act]>(AggNumber)0.0){
@@ -897,7 +901,7 @@ AggNumber agg::getKSymMixedPayoff( int playerClass,vector<StrategyProfile> &s){
   }
   return result;
 }
-AggNumber agg::getKSymMixedPayoff( int playerClass,StrategyProfile &s){
+AggNumber AGG::getKSymMixedPayoff( int playerClass,StrategyProfile &s){
   AggNumber result=0.0;
 
   for(int act=0;act<(int)uniqueActionSets[playerClass].size();act++)if(s[firstKSymAction(playerClass)+act]>(AggNumber)0.0){
@@ -906,12 +910,12 @@ AggNumber agg::getKSymMixedPayoff( int playerClass,StrategyProfile &s){
   }
   return result;
 }
-void agg::getKSymPayoffVector(AggNumberVector& dest,int playerClass, StrategyProfile &s){
+void AGG::getKSymPayoffVector(AggNumberVector& dest,int playerClass, StrategyProfile &s){
   for (size_t act=0;act<uniqueActionSets[playerClass].size();++act){
     dest[act]=getKSymMixedPayoff(s,playerClass,act);
   }
 }
-AggNumber agg::getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfile> &s){
+AggNumber AGG::getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfile> &s){
       
       int numPC = playerClasses.size();
       
@@ -928,7 +932,7 @@ AggNumber agg::getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfi
       return d.inner_prod(payoffs[uniqueActionSets[playerClass][act]]);
 }
 
-AggNumber agg::getKSymMixedPayoff(const StrategyProfile &s,int pClass1,int act1,int pClass2,int act2){
+AggNumber AGG::getKSymMixedPayoff(const StrategyProfile &s,int pClass1,int act1,int pClass2,int act2){
   int numPC=playerClasses.size();
   int numNei=neighbors[uniqueActionSets[pClass1][act1]].size();
   static aggdistrib d,temp;
@@ -955,7 +959,7 @@ AggNumber agg::getKSymMixedPayoff(const StrategyProfile &s,int pClass1,int act1,
 
 
 
-void agg::makeMAPPINGpayoff(std::istream& in, aggpayoff& pay, int numNei){
+void AGG::makeMAPPINGpayoff(std::istream& in, aggpayoff& pay, int numNei){
     int num;
     char c;
     AggNumber u;
@@ -980,8 +984,8 @@ void agg::makeMAPPINGpayoff(std::istream& in, aggpayoff& pay, int numNei){
 
 	c = in.get();
 	assert(in.good());
-	if (c != agg::LBRACKET){
-	    cerr<< "ERROR: "<<agg::LBRACKET <<" expected. Instead, got "<<c <<endl;
+	if (c != AGG::LBRACKET){
+	    cerr<< "ERROR: "<<AGG::LBRACKET <<" expected. Instead, got "<<c <<endl;
 	    cerr<<"The rest of the line is: ";
 	    stringbuf discard(ios_base::out);
 	    in.get(discard);
@@ -1005,8 +1009,8 @@ void agg::makeMAPPINGpayoff(std::istream& in, aggpayoff& pay, int numNei){
 	c=in.get(); //get right bracket
 	assert (in.good());
 
-	if (c!=agg::RBRACKET){
-	    cerr<< "ERROR: "<<agg::RBRACKET <<" expected. Instead, got "<<c<<endl;
+	if (c!=AGG::RBRACKET){
+	    cerr<< "ERROR: "<<AGG::RBRACKET <<" expected. Instead, got "<<c<<endl;
 	    cerr<< "current configuration: ";
 	    copy(key.begin(),key.end(), ostream_iterator<int>(cerr, " "));
 	    cerr<<endl;
@@ -1056,7 +1060,7 @@ void agg::makeMAPPINGpayoff(std::istream& in, aggpayoff& pay, int numNei){
 
 }
 
-AggNumber agg::getMaxPayoff(){
+AggNumber AGG::getMaxPayoff(){
   static bool done=false;
   static AggNumber result=0;
   if (done)return result;
@@ -1069,7 +1073,7 @@ AggNumber agg::getMaxPayoff(){
   done=true;
   return result;
 }
-AggNumber agg::getMinPayoff(){
+AggNumber AGG::getMinPayoff(){
   static bool done=false;
   static AggNumber result=0;
   if (done)return result;
@@ -1081,3 +1085,8 @@ AggNumber agg::getMinPayoff(){
   done=true;
   return result;
 }
+
+
+}  // end namespace Gambit::agg
+
+}  // end namespace Gambit

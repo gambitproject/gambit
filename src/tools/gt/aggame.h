@@ -35,15 +35,15 @@ class aggame : public gnmgame {
   public:
 
     static aggame* makeAGGame(char* filename) {
-      return new aggame( agg::makeAGG(filename) );
+      return new aggame(Gambit::agg::AGG::makeAGG(filename) );
     }
 
 
     static aggame* makeAGGame(istream& in) {
-      return new aggame ( agg::makeAGG(in) );
+      return new aggame ( Gambit::agg::AGG::makeAGG(in) );
     }
 
-    aggame ( agg* _aggPtr)
+    aggame ( Gambit::agg::AGG *_aggPtr)
       :gnmgame(_aggPtr->getNumPlayers(), _aggPtr->actions),
       aggPtr (_aggPtr)
     {
@@ -134,18 +134,18 @@ class aggame : public gnmgame {
 
 //  private:
 
-    agg* aggPtr;
+    Gambit::agg::AGG *aggPtr;
 
   private:
 
   //helper functions for computing jacobian
     void computePartialP_PureNode(int player,int act,std::vector<int>& tasks);
-    void computePartialP_bisect(int player,int act, std::vector<int>::iterator f,std::vector<int>::iterator l,aggdistrib& temp);
+    void computePartialP_bisect(int player,int act, std::vector<int>::iterator f,std::vector<int>::iterator l,Gambit::agg::aggdistrib& temp);
     void computePartialP(int player1, int act1, std::vector<int>& tasks,std::vector<int>& nontasks);
-    void computePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,trie_map<AggNumber>& cache);
-    void savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,AggNumber result,
-	  trie_map<AggNumber>& cache, bool partial=false );
-    void computeUndisturbedPayoff(AggNumber& undisturbedPayoff,bool& has,int player1,int act1,int player2);
+    void computePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,Gambit::agg::trie_map<Gambit::agg::AggNumber>& cache);
+    void savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,Gambit::agg::AggNumber result,
+		    Gambit::agg::trie_map<Gambit::agg::AggNumber>& cache, bool partial=false );
+    void computeUndisturbedPayoff(Gambit::agg::AggNumber& undisturbedPayoff,bool& has,int player1,int act1,int player2);
 
 };
 

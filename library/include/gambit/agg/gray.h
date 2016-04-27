@@ -21,14 +21,17 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef __GRAYCOMPOSITION_H
-#define __GRAYCOMPOSITION_H
+#ifndef GAMBIT_AGG_GRAY_H
+#define GAMBIT_AGG_GRAY_H
 
 #include <vector>
-//using namespace std;
 
+namespace Gambit {
+
+namespace agg {
+    
 class GrayComposition {
-friend class agg;
+friend class AGG;
 public:
   GrayComposition(int _n, int _k) :n(_n),k(_k),p(0),i(-1),d(-1),finished(false), current(k,0){
     current.at(0)=n;
@@ -99,5 +102,9 @@ private:
 
 };
 
+}   // end namespace Gambit::agg
 
-#endif
+}   // end namespace Gambit
+ 
+
+#endif  // GAMBIT_AGG_GRAY_H
