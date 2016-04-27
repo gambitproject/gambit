@@ -179,7 +179,7 @@
 #define CLIQUE_H
 
 #include <cstdio>
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 using namespace Gambit;
 

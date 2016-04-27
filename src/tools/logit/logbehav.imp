@@ -22,7 +22,7 @@
 //
 
 #include "logbehav.h"
-#include "libgambit/gametree.h"
+#include "gambit/gametree.h"
 
 //========================================================================
 //                  LogBehavProfile<T>: Lifecycle

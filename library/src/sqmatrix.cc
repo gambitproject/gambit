@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "sqmatrix.imp"
-#include "rational.h"
+#include "gambit/sqmatrix.imp"
+#include "gambit/rational.h"
 
 template class Gambit::SquareMatrix<double>;
 template class Gambit::SquareMatrix<Gambit::Rational>;

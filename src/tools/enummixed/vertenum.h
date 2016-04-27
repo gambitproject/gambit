@@ -23,7 +23,7 @@
 #ifndef VERTENUM_H
 #define VERTENUM_H
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "liblinear/lptab.h"
 #include "liblinear/bfs.h"
 

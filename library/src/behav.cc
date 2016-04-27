@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/libgambit/vector.cc
-// Instantiation of vector types
+// FILE: src/libgambit/behav.cc
+// Instantiation of behavior profile classes.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,12 +20,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "libgambit.h"
-#include "vector.imp"
+#include "gambit/gambit.h"
+#include "gambit/behav.imp"
 
-template class Gambit::Vector<int>;
-template class Gambit::Vector<long>;
-template class Gambit::Vector<double>;
-template class Gambit::Vector<Gambit::Integer>;
-template class Gambit::Vector<Gambit::Rational>;
+template class Gambit::MixedBehaviorProfile<double>;
+template class Gambit::MixedBehaviorProfile<Gambit::Rational>;
+
+
+
+
 

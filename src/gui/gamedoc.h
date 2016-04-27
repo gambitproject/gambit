@@ -23,7 +23,7 @@
 #ifndef GAMEDOC_H
 #define GAMEDOC_H
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "style.h"
 #include "analysis.h"
 

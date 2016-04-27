@@ -23,7 +23,7 @@
 #ifndef LIBGAMBIT_STRATSPT_H
 #define LIBGAMBIT_STRATSPT_H
 
-#include "libgambit.h"
+#include "gambit/gambit.h"
 
 namespace Gambit {
 

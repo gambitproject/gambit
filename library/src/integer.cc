@@ -36,13 +36,13 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <iostream>
 
-#include "integer.h"
+#include "gambit/integer.h"
 #include <cctype>
 #include <cfloat>
 #include <climits>
 #include <cmath>
 #include <cstring>
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 namespace Gambit {
 

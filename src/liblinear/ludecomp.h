@@ -23,7 +23,7 @@
 #ifndef LUDECOMP_H
 #define LUDECOMP_H
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "basis.h"
 
 template <class T> class Tableau;

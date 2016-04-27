@@ -23,8 +23,8 @@
 #ifndef ENUMPURE_H
 #define ENUMPURE_H
 
-#include "libgambit/libgambit.h"
-#include "libgambit/nash.h"
+#include "gambit/gambit.h"
+#include "gambit/nash.h"
 
 using namespace Gambit;
 

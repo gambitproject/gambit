@@ -33,7 +33,7 @@
 #endif  // !defined(__WXMSW__) || wxUSE_POSTSCRIPT
 #include <wx/splitter.h>
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 #include "gambit.h"      // for wxGetApp()
 #include "gameframe.h"

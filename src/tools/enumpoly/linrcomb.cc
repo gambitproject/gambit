@@ -21,8 +21,8 @@
 //
 
 #include "linrcomb.imp"
-#include <libgambit/vector.imp>
-#include <libgambit/matrix.imp>
+#include <gambit/vector.imp>
+#include <gambit/matrix.imp>
 
 template class LinearCombination<double>;
 //template class LinearCombination<Gambit::Rational>;

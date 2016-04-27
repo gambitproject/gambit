@@ -33,7 +33,7 @@ significant index is the first ("leftmost").
 #ifndef ODOMETER_H
 #define ODOMETER_H
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 // *****************************
 //      class gIndexOdometer

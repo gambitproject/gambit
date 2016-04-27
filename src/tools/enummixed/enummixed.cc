@@ -28,7 +28,7 @@
 #include <cerrno>
 #include <iomanip>
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "clique.h"
 #include "vertenum.imp"
 

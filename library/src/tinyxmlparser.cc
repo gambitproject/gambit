@@ -22,7 +22,7 @@ must not be misrepresented as being the original software.
 distribution.
 */
 
-#include "tinyxml.h"
+#include "gambit/tinyxml.h"
 #include <cctype>
 #include <cstddef>
 

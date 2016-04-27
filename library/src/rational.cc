@@ -28,8 +28,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <iostream>
 #include <sstream>
 
-#include "libgambit.h"
-#include "rational.h"
+#include "gambit/gambit.h"
+#include "gambit/rational.h"
 #include <cmath>
 #include <cfloat>
 #include <cctype>

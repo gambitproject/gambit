@@ -23,7 +23,7 @@
 #ifndef BFS_H
 #define BFS_H
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include <map>
 
 template <class T> class BFS {

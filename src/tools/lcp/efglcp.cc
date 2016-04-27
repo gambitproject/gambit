@@ -24,7 +24,7 @@
 #include <cstdio>
 #include <unistd.h>
 #include <iostream>
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "efglcp.h"
 
 using namespace Gambit;

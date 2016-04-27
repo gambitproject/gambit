@@ -27,8 +27,8 @@
 #include <cerrno>
 #include <iomanip>
 #include <fstream>
-#include "libgambit/libgambit.h"
-#include "libgambit/nash.h"
+#include "gambit/gambit.h"
+#include "gambit/nash.h"
 
 using namespace Gambit;
 

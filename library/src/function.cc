@@ -29,8 +29,8 @@
 
 
 #include <cmath>
-#include "libgambit.h"
-#include "function.h"
+#include "gambit/gambit.h"
+#include "gambit/function.h"
 
 using namespace Gambit;
 

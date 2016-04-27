@@ -26,7 +26,7 @@
 #include <sstream>
 #include <map>
 
-#include "libgambit.h"
+#include "gambit/gambit.h"
 
 namespace {
 // This anonymous namespace encapsulates the file-parsing code
@@ -994,7 +994,7 @@ void ParseEfg(GameParserState &p_state, Game p_game, TreeData &p_treeData)
 } // end of anonymous namespace
 
 
-#include "tinyxml.h"
+#include "gambit/tinyxml.h"
 
 namespace Gambit {
 

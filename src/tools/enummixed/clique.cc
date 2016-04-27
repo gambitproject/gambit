@@ -21,7 +21,7 @@
 //
 
 #include "clique.h"
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 // to compile as standalone,compile with -DSTANDALONE
 

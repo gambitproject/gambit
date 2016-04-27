@@ -23,7 +23,7 @@
 #include <cstdlib>     // for abs()
 #include <algorithm>   // for std::max()
 #include "gpoly.h"
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 inline double abs(double x) { return fabs(x); }
 

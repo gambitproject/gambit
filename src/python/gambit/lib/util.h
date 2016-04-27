@@ -29,7 +29,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 using namespace std;
 using namespace Gambit;

@@ -23,7 +23,7 @@
 #ifndef LIBGAMBIT_RECARRAY_H
 #define LIBGAMBIT_RECARRAY_H
 
-#include "libgambit.h"
+#include "gambit/gambit.h"
 
 namespace Gambit {
 

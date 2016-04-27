@@ -26,7 +26,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <getopt.h>
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "efgliap.h"
 #include "nfgliap.h"
 

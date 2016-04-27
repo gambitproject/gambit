@@ -28,7 +28,7 @@
 #include <cerrno>
 #include <iomanip>
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 void WriteOsborneFile(std::ostream &p_file, const Gambit::Game &p_nfg,
 		      int p_rowPlayer, int p_colPlayer)

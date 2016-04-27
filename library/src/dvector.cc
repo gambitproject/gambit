@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/libgambit/behav.cc
-// Instantiation of behavior profile classes.
+// FILE: src/libgambit/dvector.cc
+// Instantiation of doubly partitioned vector types
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,13 +20,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "libgambit.h"
-#include "behav.imp"
+#include "gambit/gambit.h"
+#include "gambit/dvector.imp"
 
-template class Gambit::MixedBehaviorProfile<double>;
-template class Gambit::MixedBehaviorProfile<Gambit::Rational>;
-
-
-
-
+template class Gambit::DVector<double>;
+template class Gambit::DVector<Gambit::Rational>;
 

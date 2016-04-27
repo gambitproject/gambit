@@ -21,7 +21,7 @@
 //
 
 #include "lpsolve.imp"
-#include "libgambit/rational.h"
+#include "gambit/rational.h"
 
 
 template class LPSolve<double>;

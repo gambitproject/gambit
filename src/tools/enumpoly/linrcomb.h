@@ -34,8 +34,8 @@ independent.
 #ifndef LINRCOMB_H
 #define LINRCOMB_H
 
-#include "libgambit/rational.h"
-#include "libgambit/matrix.h"
+#include "gambit/rational.h"
+#include "gambit/matrix.h"
 
 template <class T> class LinearCombination  {
   private:

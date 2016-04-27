@@ -23,7 +23,7 @@
 #ifndef LIBGAMBIT_NASH_H
 #define LIBGAMBIT_NASH_H
 
-#include "libgambit.h"
+#include "gambit/gambit.h"
 
 namespace Gambit {
 

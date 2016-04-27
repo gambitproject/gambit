@@ -26,8 +26,8 @@
 
 #include "cmatrix.h"
 #include "libagg/agg.h"
-#include "libgambit/libgambit.h"
-#include "libgambit/gameagg.h"
+#include "gambit/gambit.h"
+#include "gambit/gameagg.h"
 #include "gnmgame.h"
 
 

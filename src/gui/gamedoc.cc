@@ -29,8 +29,8 @@
 #endif  // WX_PRECOMP
 #include <wx/filename.h>       // used to create temp files for undo/redo
 
-#include "libgambit/libgambit.h"
-#include "libgambit/tinyxml.h"    // for XML parser for LoadDocument()
+#include "gambit/gambit.h"
+#include "gambit/tinyxml.h"    // for XML parser for LoadDocument()
 
 #include "gambit.h"     // for wxGetApp()
 #include "gamedoc.h"

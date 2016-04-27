@@ -24,7 +24,7 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "nfglcp.h"
 #include "lhtab.h"
 

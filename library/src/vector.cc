@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/libgambit/matrix.cc
-// Instantiation of common matrix types
+// FILE: src/libgambit/vector.cc
+// Instantiation of vector types
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,21 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "libgambit.h"
-#include "matrix.imp"
+#include "gambit/gambit.h"
+#include "gambit/vector.imp"
 
-using namespace Gambit;
+template class Gambit::Vector<int>;
+template class Gambit::Vector<long>;
+template class Gambit::Vector<double>;
+template class Gambit::Vector<Gambit::Integer>;
+template class Gambit::Vector<Gambit::Rational>;
 
-template class Matrix<double>;
-template class Matrix<Rational>;
-template class Matrix<Integer>;
-template class Matrix<int>;
-
-template Vector<double> Gambit::operator*(const Vector<double> &,
-					  const Matrix<double> &);
-template Vector<Rational> Gambit::operator*(const Vector<Rational> &,
-					    const Matrix<Rational> &);
-template Vector<Integer> Gambit::operator*(const Vector<Integer> &,
-					   const Matrix<Integer> &);
-template Vector<int> Gambit::operator*(const Vector<int> &,
-				       const Matrix<int> &);

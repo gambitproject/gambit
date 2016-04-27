@@ -23,7 +23,7 @@
 #ifndef GNARRAY_H
 #define GNARRAY_H
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 //
 // Basic n-dimensional array

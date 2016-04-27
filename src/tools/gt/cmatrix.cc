@@ -20,7 +20,7 @@
 #include "cmatrix.h"
 #include "math.h"
 #include "float.h"
-#include "libgambit/matrix.h"
+#include "gambit/matrix.h"
 
 cvector::~cvector() { delete []x; }
 // adopted from NRiC, pg 45

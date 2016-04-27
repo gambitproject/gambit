@@ -23,7 +23,7 @@
 #ifndef SFSTRAT_H
 #define SFSTRAT_H
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 struct Sequence {
 friend class Sfg;

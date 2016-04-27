@@ -23,7 +23,7 @@
 #include <cstdio>
 #include <unistd.h>
 #include <iostream>
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "liblinear/lpsolve.h"
 #include "efglp.h"
 

@@ -21,7 +21,7 @@
 //
 
 #include <cstdlib>
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "ludecomp.h"
 #include "tableau.h"
 

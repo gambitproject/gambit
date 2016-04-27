@@ -26,7 +26,7 @@
 #include <cstdlib>
 #include <unistd.h>
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 void WriteHtmlFile(std::ostream &, const Gambit::Game &, int, int);
 void WriteOsborneFile(std::ostream &, const Gambit::Game &, int, int);

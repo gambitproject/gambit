@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "libgambit.h"
-#include "mixed.imp"
+#include "gambit/gambit.h"
+#include "gambit/mixed.imp"
 
 template class Gambit::MixedStrategyProfileRep<double>;
 template class Gambit::MixedStrategyProfileRep<Gambit::Rational>;

@@ -25,7 +25,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <fstream> 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "nfgcpoly.h"
 #include "nfghs.h"
 

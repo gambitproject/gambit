@@ -23,8 +23,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "libgambit.h"
-#include "gametable.h"
+#include "gambit/gambit.h"
+#include "gambit/gametable.h"
 
 namespace Gambit {
 

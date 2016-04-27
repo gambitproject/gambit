@@ -26,7 +26,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <getopt.h>
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "nfghs.h"
 
 int g_numDecimals = 6;

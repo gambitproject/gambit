@@ -41,7 +41,7 @@
 #include <cstring>
 
 // The order of these next includes is important, because of macro definitions
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 using namespace Gambit;
 
 extern "C" {

@@ -23,7 +23,7 @@
 #ifndef BASIS_H
 #define BASIS_H
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 //---------------------------------------------------------------------------
 // Class Basis
