@@ -26,6 +26,10 @@
 #include "gambit/gambit.h"
 #include <map>
 
+namespace Gambit  {
+
+namespace linalg  {
+  
 template <class T> class BFS {
 private:
   std::map<int, T> m_map;
@@ -68,6 +72,10 @@ public:
   }
 };
 
+}  // end namespace Gambit::linalg
+
+}  // end namespace Gambit
+ 
 #endif   // BFS_H
 
 

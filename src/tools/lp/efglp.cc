@@ -149,9 +149,9 @@ NashLpBehavSolver<T>::SolveLP(const Matrix<T> &A,
 			      int nequals,
 			      Array<T> &p_primal, Array<T> &p_dual) const
 {
-  LPSolve<T> LP(A, b, c, nequals);
+  Gambit::linalg::LPSolve<T> LP(A, b, c, nequals);
   if (!LP.IsAborted()) {
-    BFS<T> cbfs;
+    Gambit::linalg::BFS<T> cbfs;
     LP.OptBFS(cbfs);
 
     for (int i = 1; i <= A.NumColumns(); i++) {
@@ -254,7 +254,7 @@ NashLpBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
     throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  BFS<T> cbfs;
+  Gambit::linalg::BFS<T> cbfs;
   
   GameData data(p_support.GetGame());
 

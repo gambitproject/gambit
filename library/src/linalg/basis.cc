@@ -22,6 +22,9 @@
 
 #include "gambit/linalg/basis.h"
 
+using namespace Gambit;
+using namespace Gambit::linalg;
+
 // ---------------------------------------------------------------------------
 // Class Basis
 // ---------------------------------------------------------------------------

@@ -20,52 +20,52 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-// ---------------------------------------------------------------------------
-//  LPTableau Stuff (For Linear Programming code)
-// ---------------------------------------------------------------------------
-
 #ifndef LPTAB_H  
 #define LPTAB_H
 
 #include "tableau.h"
 
+namespace Gambit {
+
+namespace linalg {
+
 template <class T> class LPTableau : public Tableau<T> {
 private:
-  Gambit::Vector<T> dual;
-  Gambit::Array<T> unitcost;
-  Gambit::Array<T> cost;
-  Gambit::Array<bool> UB,LB;  // does col have upper/lower bound?
-  Gambit::Array<T> ub,lb;   // upper/lower bound
+  Vector<T> dual;
+  Array<T> unitcost;
+  Array<T> cost;
+  Array<bool> UB,LB;  // does col have upper/lower bound?
+  Array<T> ub,lb;   // upper/lower bound
   
   void SolveDual();
 public:
-  class BadPivot : public Gambit::Exception  {
+  class BadPivot : public Exception  {
   public:
     virtual ~BadPivot() throw() { }
     const char *what(void) const throw() { return "Bad pivot in LPTableau."; }
   };
-  LPTableau(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b); 
-  LPTableau(const Gambit::Matrix<T> &A, const Gambit::Array<int> &art, const Gambit::Vector<T> &b); 
+  LPTableau(const Matrix<T> &A, const Vector<T> &b); 
+  LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b); 
   LPTableau(const LPTableau<T>&);
   virtual ~LPTableau();
   
   LPTableau<T>& operator=(const LPTableau<T>&);
   
       // cost information
-  void SetCost(const Gambit::Vector<T>& ); // unit column cost := 0
-  void SetCost(const Gambit::Vector<T>&, const Gambit::Vector<T>& );
-  Gambit::Vector<T> GetCost() const;
-  Gambit::Vector<T> GetUnitCost() const;
+  void SetCost(const Vector<T>& ); // unit column cost := 0
+  void SetCost(const Vector<T>&, const Vector<T>& );
+  Vector<T> GetCost() const;
+  Vector<T> GetUnitCost() const;
   T TotalCost(); // cost of current solution
   T RelativeCost(int) const; // negative index convention
-  void RelativeCostVector(Gambit::Vector<T> &, Gambit::Vector<T> &); 
-  void DualVector(Gambit::Vector<T> &) const; // column vector
+  void RelativeCostVector(Vector<T> &, Vector<T> &); 
+  void DualVector(Vector<T> &) const; // column vector
       // Redefined functions
   void Refactor();
   void Pivot(int outrow,int col);
-  void ReversePivots(Gambit::List<Gambit::Array<int> > &);
+  void ReversePivots(List<Array<int> > &);
   bool IsReversePivot(int i, int j);
-  void DualReversePivots(Gambit::List<Gambit::Array<int> > &);
+  void DualReversePivots(List<Array<int> > &);
   bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS(void) const;
 
@@ -73,11 +73,15 @@ public:
   int LastLabel( void );
 
   // select Basis elements according to Tableau rows and cols
-  void BasisSelect(const Gambit::Array<T>&rowv, Gambit::Vector<T> &colv) const;
+  void BasisSelect(const Array<T>&rowv, Vector<T> &colv) const;
 
   // as above, but unit column elements nonzero
-  void BasisSelect(const Gambit::Array<T>&unitv, const Gambit::Array<T>&rowv,
-		   Gambit::Vector<T>&colv) const; 
+  void BasisSelect(const Array<T>&unitv, const Array<T>&rowv,
+		   Vector<T>&colv) const; 
 };
 
+}  // end namespace Gambit::linalg
+
+}  // end namespace Gambit
+ 
 #endif     // LPTAB_H

@@ -22,5 +22,8 @@
 
 #include "gambit/linalg/lptab.imp"
 
+using namespace Gambit;
+using namespace Gambit::linalg;
+
 template class LPTableau<double>;
-template class LPTableau<Gambit::Rational>;
+template class LPTableau<Rational>;

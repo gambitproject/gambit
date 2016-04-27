@@ -24,8 +24,12 @@
 #define LUDECOMP_H
 
 #include "gambit/gambit.h"
-#include "basis.h"
+#include "gambit/linalg/basis.h"
 
+namespace Gambit {
+
+namespace linalg {
+    
 template <class T> class Tableau;
 
 // ---------------------------------------------------------------------------
@@ -35,15 +39,13 @@ template <class T> class Tableau;
 template <class T> class EtaMatrix {
   public:
   int col;
-  Gambit::Vector<T> etadata;
+  Vector<T> etadata;
   
-  
-  EtaMatrix(int c, Gambit::Vector<T> &v) : col(c), etadata(v) {};
+  EtaMatrix(int c, Vector<T> &v) : col(c), etadata(v) {}
 
-// required for list class
-bool operator==(const EtaMatrix<T> &) const;
-bool operator!=(const EtaMatrix<T> &) const;
-
+  // required for list class
+  bool operator==(const EtaMatrix<T> &) const;
+  bool operator!=(const EtaMatrix<T> &) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -51,19 +53,17 @@ bool operator!=(const EtaMatrix<T> &) const;
 // ---------------------------------------------------------------------------
 
 template <class T> class LUdecomp {
-
 private:
-
   Tableau<T> &tab;
   Basis &basis;
 
-  Gambit::List< EtaMatrix<T> > L;
-  Gambit::List< EtaMatrix<T> > U;
-  Gambit::List< EtaMatrix<T> > E;
-  Gambit::List< int > P;
+  List< EtaMatrix<T> > L;
+  List< EtaMatrix<T> > U;
+  List< EtaMatrix<T> > E;
+  List< int > P;
 
-  Gambit::Vector<T> scratch1; // scratch vectors so we don't reallocate them
-  Gambit::Vector<T> scratch2; // everytime we do something.
+  Vector<T> scratch1; // scratch vectors so we don't reallocate them
+  Vector<T> scratch2; // everytime we do something.
 
   int refactor_number;
   int iterations;
@@ -80,12 +80,12 @@ private:
 
 
 public:
-  class BadPivot : public Gambit::Exception  {
+  class BadPivot : public Exception  {
   public:
     virtual ~BadPivot() throw() { }
     const char *what(void) const throw() { return "Bad pivot in LUdecomp"; }
   };
-  class BadCount : public Gambit::Exception  {
+  class BadCount : public Exception  {
   public:
     virtual ~BadCount() throw() { }
     const char *what(void) const throw() { return "Bad reference count in LUdecomp"; }
@@ -123,10 +123,10 @@ public:
   void refactor();
   
   // solve: Bk d = a
-  void solve (const Gambit::Vector<T> &, Gambit::Vector<T> & ) const;
+  void solve (const Vector<T> &, Vector<T> & ) const;
 
   // solve: y Bk = c
-  void solveT( const Gambit::Vector<T> &, Gambit::Vector <T> & ) const;
+  void solveT( const Vector<T> &, Vector <T> & ) const;
 
   // set number of etamatrices added before refactoring;
   // if number is set to zero, refactoring is done automatically.
@@ -141,33 +141,37 @@ private:
   
   void FactorBasis();
 
-  void GaussElem( Gambit::Matrix<T> &, int, int );
+  void GaussElem( Matrix<T> &, int, int );
 
   bool CheckBasis();
   bool RefactorCheck();
 
-  void BTransE( Gambit::Vector<T> & ) const;
-  void FTransE( Gambit::Vector<T> & ) const;
-  void BTransU( Gambit::Vector<T> & ) const;
-  void FTransU( Gambit::Vector<T> & ) const;
-  void LPd_Trans( Gambit::Vector<T> & ) const;
-  void yLP_Trans( Gambit::Vector<T> & ) const;
+  void BTransE( Vector<T> & ) const;
+  void FTransE( Vector<T> & ) const;
+  void BTransU( Vector<T> & ) const;
+  void FTransU( Vector<T> & ) const;
+  void LPd_Trans( Vector<T> & ) const;
+  void yLP_Trans( Vector<T> & ) const;
 
-  void VectorEtaSolve( const Gambit::Vector<T> &v,  
+  void VectorEtaSolve( const Vector<T> &v,  
 		      const EtaMatrix<T> &, 
-		      Gambit::Vector<T> &y ) const;
+		      Vector<T> &y ) const;
 
-  void EtaVectorSolve( const Gambit::Vector<T> &v, 
+  void EtaVectorSolve( const Vector<T> &v, 
 		      const EtaMatrix<T> &,
-		      Gambit::Vector<T> &d ) const;
+		      Vector<T> &d ) const;
 
-  void yLP_mult( const Gambit::Vector<T> &y, int j, Gambit::Vector<T> &) const;
+  void yLP_mult( const Vector<T> &y, int j, Vector<T> &) const;
 
-  void LPd_mult( Gambit::Vector<T> &d, int j, Gambit::Vector<T> &) const;
+  void LPd_mult( Vector<T> &d, int j, Vector<T> &) const;
 
 
 };  // end of class LUdecomp
-    
+
+}  // end namespace Gambit::linalg
+
+}  // end namespace Gambit
+ 
 #endif // LUDECOMP_H
 
 

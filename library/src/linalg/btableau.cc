@@ -24,10 +24,13 @@
 #include "gambit/matrix.imp"
 #include "gambit/linalg/btableau.imp"
 
+using namespace Gambit;
+using namespace Gambit::linalg;
+
 template class BaseTableau<double>;
-template class BaseTableau<Gambit::Rational>;
+template class BaseTableau<Rational>;
 
 template class TableauInterface<double>;
-template class TableauInterface<Gambit::Rational>;
+template class TableauInterface<Rational>;
 
 

@@ -25,7 +25,7 @@
 
 #include "gambit/linalg/tableau.h"
 
-template <class T> class LTableau : public Tableau<T> {
+template <class T> class LTableau : public Gambit::linalg::Tableau<T> {
 protected:
 //  T eps2;
 public:
@@ -41,7 +41,7 @@ public:
     const char *what(void) const throw() { return "Bad Exit Index in LTableau"; }
   };
   LTableau(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b);
-  LTableau(Tableau<T> &);
+  LTableau(Gambit::linalg::Tableau<T> &);
   virtual ~LTableau();
 
   int SF_PivotIn(int i);

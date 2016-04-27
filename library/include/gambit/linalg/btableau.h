@@ -26,14 +26,20 @@
 #include "bfs.h"
 #include "basis.h"
 
-// ---------------------------------------------------------------------------
-//                          BaseTableau Stuff
-// ---------------------------------------------------------------------------
+namespace Gambit {
+
+namespace linalg  {
+
+inline void epsilon(double &v, int i = 8)
+{ v = std::pow(10.0, (double) -i); }
+
+inline void epsilon(Rational &v, int /*i*/ = 8)
+{ v = Rational(0); }
 
 
 template <class T> class BaseTableau {
 public:
-  class BadPivot : public Gambit::Exception  {
+  class BadPivot : public Exception  {
   public:
     virtual ~BadPivot() throw() { }
     const char *what(void) const throw() { return "Bad Pivot in BaseTableau"; }
@@ -73,18 +79,18 @@ public:
 
 template <class T> class TableauInterface : public BaseTableau<T>{
 protected:
-  const Gambit::Matrix<T> *A;  // should this be private?
-  const Gambit::Vector<T> *b;  // should this be private?
+  const Matrix<T> *A;  // should this be private?
+  const Vector<T> *b;  // should this be private?
   Basis basis; 
-  Gambit::Vector<T> solution;  // current solution vector. should this be private?
+  Vector<T> solution;  // current solution vector. should this be private?
   long npivots;
   T eps1,eps2;
-  Gambit::Array<int> artificial;  // artificial variables
+  Array<int> artificial;  // artificial variables
 
 public:
-  TableauInterface(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b); 
-  TableauInterface(const Gambit::Matrix<T> &A, const Gambit::Array<int> &art, 
-		   const Gambit::Vector<T> &b); 
+  TableauInterface(const Matrix<T> &A, const Vector<T> &b); 
+  TableauInterface(const Matrix<T> &A, const Array<int> &art, 
+		   const Vector<T> &b); 
   TableauInterface(const TableauInterface<T>&);
   virtual ~TableauInterface();
 
@@ -98,8 +104,8 @@ public:
   int MaxCol() const;
 
   Basis & GetBasis(void);
-  const Gambit::Matrix<T> & Get_A(void) const;
-  const Gambit::Vector<T> & Get_b(void) const;
+  const Matrix<T> & Get_A(void) const;
+  const Vector<T> & Get_b(void) const;
   
   bool Member(int i) const;
   int Label(int i) const;   // return variable in i'th position of Tableau
@@ -112,8 +118,8 @@ public:
   void UnMark(int label);   // unmarks label
   bool IsBlocked(int label) const;   // returns true if label is blocked
   
-  virtual void BasisVector(Gambit::Vector<T> &x) const = 0; // solve M x = (*b)
-  void GetColumn( int , Gambit::Vector<T> &) const;  // raw column
+  virtual void BasisVector(Vector<T> &x) const = 0; // solve M x = (*b)
+  void GetColumn( int , Vector<T> &) const;  // raw column
   void GetBasis( Basis & ) const; // return Basis for current Tableau
 
   BFS<T> GetBFS1(void) const; 
@@ -121,9 +127,9 @@ public:
 
   virtual bool CanPivot(int outgoing, int incoming) const = 0;
   virtual void Pivot(int outrow,int col) = 0; // pivot -- outgoing is row, incoming is column
-  virtual void SolveColumn(int, Gambit::Vector<T> &) = 0;  // column in new basis 
-  virtual void Solve(const Gambit::Vector<T> &b, Gambit::Vector<T> &x) = 0;  // solve M x = b
-  virtual void SolveT(const Gambit::Vector<T> &c, Gambit::Vector<T> &y) = 0;  // solve y M = c
+  virtual void SolveColumn(int, Vector<T> &) = 0;  // column in new basis 
+  virtual void Solve(const Vector<T> &b, Vector<T> &x) = 0;  // solve M x = b
+  virtual void SolveT(const Vector<T> &c, Vector<T> &y) = 0;  // solve y M = c
 
   virtual void Refactor() = 0;
   virtual void SetRefactor(int) = 0;
@@ -138,4 +144,8 @@ public:
   bool IsArtifColumn(int col) const;
 };
 
+}  // end namespace Gambit::linalg
+
+}  // end namespace Gambit
+ 
 #endif     // BTABLEAU_H

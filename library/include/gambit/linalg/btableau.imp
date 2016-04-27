@@ -26,6 +26,10 @@
 
 #include "btableau.h"
 
+namespace Gambit {
+
+namespace linalg {
+
 template <class T>
 bool BaseTableau<T>::ColIndex(int x) const
 { return MinCol()<=x && x<=MaxCol(); }
@@ -50,11 +54,6 @@ void BaseTableau<T>::CompPivot(int outlabel, int col)
 //            TableauInterface method definitions
 // ---------------------------------------------------------------------------
 
-inline void Epsilon(double &v, int i = 8)
-{ v = ::pow(10.0, (double) -i); }
-
-inline void Epsilon(Gambit::Rational &v, int /*i*/ = 8) { v = Gambit::Rational(0); }
-
 // Constructors and Destructor
  
 template <class T> 
@@ -66,9 +65,9 @@ TableauInterface<T>::TableauInterface(const Gambit::Matrix<T> &A, const Gambit::
 { 
   // These are the values recommended by Murtagh (1981) for 15 digit 
   // accuracy in LP problems 
-  // Note: for gRational, eps1 and eps2 resolve to 0
-  ::Epsilon(eps1,5);
-  ::Epsilon(eps2);
+  // Note: for Rational, eps1 and eps2 resolve to 0
+  Gambit::linalg::epsilon(eps1, 5);
+  Gambit::linalg::epsilon(eps2);
 }
 
 template <class T> 
@@ -79,8 +78,8 @@ TableauInterface<T>::TableauInterface(const Gambit::Matrix<T> &A,
     solution(A.MinRow(),A.MaxRow()), npivots(0),
     artificial(A.MaxCol()+1,A.MaxCol()+art.Length())
 { 
-  ::Epsilon(eps1,5);
-  ::Epsilon(eps2);
+  Gambit::linalg::epsilon(eps1, 5);
+  Gambit::linalg::epsilon(eps2);
   for(int i = 0;i<art.Length();i++)
     artificial[A.MaxCol()+1+i] = art[art.First()+i];
 }
@@ -273,4 +272,8 @@ bool TableauInterface<T>::IsArtifColumn(int col) const
 {
   return col>=artificial.First() && col<=artificial.Last();
 }
+
+}  // end namespace Gambit::linalg
+
+}  // end namespace Gambit
 

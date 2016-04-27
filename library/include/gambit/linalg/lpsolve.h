@@ -27,19 +27,22 @@
 #include "gambit/linalg/lptab.h"
 #include "gambit/linalg/bfs.h"
 
-//
-// This class implements a LP solver.  Its constructor takes as input a
-// LP problem of the form maximize c x subject to A x<=b, x >= 0. 
-// The last k equations can represent equalities (indicated by the 
-// parameter "nequals").  
-//
-// All computation is done in the class constructor; when the constructor
-// returns the computation has completed.  OptimumVector() returns the 
-// solution.  The components are indexed by the columns of A, with the 
-// excess columns representing the artificial and slack variables.   
-//
+namespace Gambit {
+
+namespace linalg {
 
 template <class T> class LPSolve {
+  ///
+  /// This class implements a LP solver.  Its constructor takes as input a
+  /// LP problem of the form maximize c x subject to A x<=b, x >= 0. 
+  /// The last k equations can represent equalities (indicated by the 
+  /// parameter "nequals").  
+  ///
+  /// All computation is done in the class constructor; when the constructor
+  /// returns the computation has completed.  OptimumVector() returns the 
+  /// solution.  The components are indexed by the columns of A, with the 
+  /// excess columns representing the artificial and slack variables.   
+  ///
 private:
   int  well_formed, feasible, bounded, aborted, flag, nvars, neqns,nequals;
   T total_cost,eps1,eps2,eps3,tmin;
@@ -76,6 +79,10 @@ public:
   T Epsilon(int i = 2) const;
 };
 
+}  // end namespace Gambit::linalg
+
+}  // end namespace Gambit
+ 
 #endif   // LPSOLVE_H
 
 

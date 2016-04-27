@@ -23,10 +23,12 @@
 #include "gambit/linalg/lpsolve.imp"
 #include "gambit/rational.h"
 
+using namespace Gambit;
+using namespace Gambit::linalg;
 
 template class LPSolve<double>;
-template class LPSolve<Gambit::Rational>;
+template class LPSolve<Rational>;
 
-template Gambit::Array<int> Artificials(const Gambit::Vector<double> &);
-template Gambit::Array<int> Artificials(const Gambit::Vector<Gambit::Rational> &);
+template Array<int> Artificials(const Vector<double> &);
+template Array<int> Artificials(const Vector<Rational> &);
 

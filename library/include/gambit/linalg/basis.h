@@ -25,6 +25,10 @@
 
 #include "gambit/gambit.h"
 
+namespace Gambit {
+
+namespace linalg {
+
 //---------------------------------------------------------------------------
 // Class Basis
 //---------------------------------------------------------------------------
@@ -32,11 +36,11 @@
 class Basis {
 
 private:
-  Gambit::Array<int> basis;        // current members of basis (neg for slacks)
-  Gambit::Array<int> cols;         // location of col in basis (0 if not in basis)
-  Gambit::Array<int> slacks;       // location of slacks in basis
-  Gambit::Array<bool> colBlocked;  
-  Gambit::Array<bool> rowBlocked;
+  Array<int> basis;        // current members of basis (neg for slacks)
+  Array<int> cols;         // location of col in basis (0 if not in basis)
+  Array<int> slacks;       // location of slacks in basis
+  Array<bool> colBlocked;  
+  Array<bool> rowBlocked;
   bool IsBasisIdent;
 
 public:
@@ -87,5 +91,9 @@ public:
   bool IsIdent();
 };
 
+}  // end namespace Gambit::linalg
+ 
+}  // end namespace Gambit
+ 
 #endif // BASIS_H
 

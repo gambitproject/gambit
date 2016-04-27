@@ -22,33 +22,32 @@
 
 #include "lpsolve.h"
 
-template <class T> Gambit::Array<int> Artificials(const Gambit::Vector<T> &b) 
+namespace Gambit {
+
+namespace linalg {
+
+template <class T> Array<int> Artificials(const Vector<T> &b) 
 {
-  Gambit::Array<int> ret;
+  Array<int> ret;
   for(int i=b.First();i<=b.Last();i++)
     if(b[i]<(T)0) ret.Append(i);
   return ret;
 }
 
-inline void Epsilon(double &v, int i = 8)
-{ v = ::pow(10.0, (double) -i); }
-
-inline void Epsilon(Gambit::Rational &v, int /*i*/ = 8) { v = Gambit::Rational(0); }
-
 template <class T> 
-LPSolve<T>::LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b,
-		    const Gambit::Vector<T> &c, int nequals)
+LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
+		    const Vector<T> &c, int nequals)
   : well_formed(1), feasible(1), bounded(1), aborted(0), 
     nvars(c.Length()),neqns(b.Length()), nequals(nequals),
     total_cost(0),tmin(0), 
     tab(A,Artificials(b),b), UB(0),LB(0),ub(0),lb(0),xx(0), cost(0),
     y(b.Length()),x(b.Length()),d(b.Length())
 {
-    // These are the values recommended by Murtagh (1981) for 15 digit 
-    // accuracy in LP problems 
-  ::Epsilon(eps1,5);
-  ::Epsilon(eps2,8);
-  ::Epsilon(eps3,6);
+  // These are the values recommended by Murtagh (1981) for 15 digit 
+  // accuracy in LP problems 
+  Gambit::linalg::epsilon(eps1, 5);
+  Gambit::linalg::epsilon(eps2, 8);
+  Gambit::linalg::epsilon(eps3, 6);
   
   // Check dimensions
   if (A.NumRows() != b.Length() || A.NumColumns() != c.Length()) {
@@ -67,12 +66,12 @@ LPSolve<T>::LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b,
   
   // gout << "\n--- Begin Phase I ---\n";
   
-  UB = new Gambit::Array<bool>(nvars+neqns);
-  LB = new Gambit::Array<bool>(nvars+neqns);
-  ub = new Gambit::Array<T>(nvars+neqns);
-  lb = new Gambit::Array<T>(nvars+neqns);
-  xx = new Gambit::Vector<T>(nvars+neqns);
-  cost = new Gambit::Vector<T>(nvars+neqns);
+  UB = new Array<bool>(nvars+neqns);
+  LB = new Array<bool>(nvars+neqns);
+  ub = new Array<T>(nvars+neqns);
+  lb = new Array<T>(nvars+neqns);
+  xx = new Vector<T>(nvars+neqns);
+  cost = new Vector<T>(nvars+neqns);
 
   for(j=(*UB).First();j<=(*UB).Last();j++) {
     (*UB)[j] = false; (*LB)[j] = false;
@@ -206,10 +205,10 @@ LPSolve<T>::LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b,
 }
 
 //template <class T> LPSolve<T>::
-//LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &/*B*/, 
-//	const Gambit::Vector<T> &/*C*/,  const Gambit::Vector<int> &/*sense*/, 
-//	const Gambit::Vector<int> &/*LB*/,  const Gambit::Vector<T> &/*lb*/, 
-//	const Gambit::Vector<int> &/*UB*/, const Gambit::Vector<T> &/*ub*/)
+//LPSolve(const Matrix<T> &A, const Vector<T> &/*B*/, 
+//	const Vector<T> &/*C*/,  const Vector<int> &/*sense*/, 
+//	const Vector<int> &/*LB*/,  const Vector<T> &/*lb*/, 
+//	const Vector<int> &/*UB*/, const Vector<T> &/*ub*/)
 // : well_formed(1), feasible(1), bounded(1),  
 //    nvars(c.Length()),neqns(b.Length()), total_cost(0), 
 //    opt_bfs((T)0),  dual_bfs((T)0),  A(A), b(b), c(c), tab(0), 
@@ -228,7 +227,7 @@ template <class T> void LPSolve<T>::Solve(int phase)
   int i, in,xlab;
   int outlab = 0;
   int out = 0;
-  Gambit::Vector<T> a(neqns);
+  Vector<T> a(neqns);
   double npiv;
   
   do { 
@@ -377,7 +376,7 @@ template <class T> T LPSolve<T>::OptimumCost(void) const
   return total_cost;
 }
 
-template <class T> const Gambit::Vector<T> &LPSolve<T>::OptimumVector(void) const
+template <class T> const Vector<T> &LPSolve<T>::OptimumVector(void) const
 {
   return (*xx);
 }
@@ -392,15 +391,15 @@ template <class T> const LPTableau<T> &LPSolve<T>::GetTableau(void)
 //
 // This method does not work correctly, so is disabled
 //
-template <class T> const Gambit::List<BFS <T> > &LPSolve<T>::GetAll(void)
+template <class T> const List<BFS <T> > &LPSolve<T>::GetAll(void)
 {
-  Gambit::Vector<T> c(tab.GetCost());
-  Gambit::Vector<T> uc(tab.GetUnitCost());
+  Vector<T> c(tab.GetCost());
+  Vector<T> uc(tab.GetUnitCost());
 
   //  gout << "\nc: " << c;
   //  gout << "\nuc: " << uc;
 
-  Gambit::Vector<T> x(tab.MinRow(),tab.MaxRow());
+  Vector<T> x(tab.MinRow(),tab.MaxRow());
   tab.BasisVector(x);
 
   int i;
@@ -422,10 +421,10 @@ template <class T> const Gambit::List<BFS <T> > &LPSolve<T>::GetAll(void)
   }
 
   VertEnum<T> AllSolutions(tab);
-  Gambit::List<Gambit::Vector<T> > verts;
+  List<Vector<T> > verts;
 
-  Gambit::List<BFS<T> > *bfs = new Gambit::List<BFS<T> >(AllSolutions.VertexList());
-  Gambit::List<BFS<T> > *dual_bfs = new Gambit::List<BFS<T> >(AllSolutions.DualVertexList());
+  List<BFS<T> > *bfs = new List<BFS<T> >(AllSolutions.VertexList());
+  List<BFS<T> > *dual_bfs = new List<BFS<T> >(AllSolutions.DualVertexList());
   AllSolutions.Vertices(verts);
 
   //  gout << "\nHere are the BFSs: \n";
@@ -505,3 +504,6 @@ if(i == 3)return eps3;
 return eps2;
 }
 
+}  // end namespace Gambit::linalg
+
+}  // end namespace Gambit

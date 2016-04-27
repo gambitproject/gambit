@@ -22,20 +22,24 @@
 
 #include "lptab.h"
 
+namespace Gambit {
+
+namespace linalg {
+
 // ---------------------------------------------------------------------------
 //                   LPTableau member definitions 
 // ---------------------------------------------------------------------------
 
 
 template <class T>
-LPTableau<T>::LPTableau(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b)
+LPTableau<T>::LPTableau(const Matrix<T> &A, const Vector<T> &b)
   : Tableau<T>(A,b), dual(A.MinRow(),A.MaxRow()),
     unitcost(A.MinRow(),A.MaxRow()), cost(A.MinCol(),A.MaxCol())
 { }
 
 template <class T>
-LPTableau<T>::LPTableau(const Gambit::Matrix<T> &A, const Gambit::Array<int> &art, 
-			const Gambit::Vector<T> &b)
+LPTableau<T>::LPTableau(const Matrix<T> &A, const Array<int> &art, 
+			const Vector<T> &b)
   : Tableau<T>(A,art,b), dual(A.MinRow(),A.MaxRow()),
     unitcost(A.MinRow(),A.MaxRow()), cost(A.MinCol(),A.MaxCol()+art.Length())
 { }
@@ -66,32 +70,32 @@ LPTableau<T>& LPTableau<T>::operator=(const LPTableau<T> &orig)
 // cost-based functions
 
 template<>
-void LPTableau<Gambit::Rational>::SetCost(const Gambit::Vector<Gambit::Rational>& c)
+void LPTableau<Rational>::SetCost(const Vector<Rational>& c)
 {
   int i;
   if(cost.First()==c.First() && cost.Last()==c.Last()) {
-    for(i=cost.First();i<=cost.Last();i++) cost[i] = c[i]*(Gambit::Rational)Tableau<Gambit::Rational>::TotDenom();
-    for(i=unitcost.First();i<=unitcost.Last();i++) unitcost[i] = (Gambit::Rational)0;
+    for(i=cost.First();i<=cost.Last();i++) cost[i] = c[i]*(Rational)Tableau<Rational>::TotDenom();
+    for(i=unitcost.First();i<=unitcost.Last();i++) unitcost[i] = (Rational)0;
     Refactor();
     SolveDual();
     return;
   }
-  if(c.First()!=cost.First()) throw Gambit::DimensionException();
-  if(c.Last()!=(cost.Last()+unitcost.Length())) throw Gambit::DimensionException();
+  if(c.First()!=cost.First()) throw DimensionException();
+  if(c.Last()!=(cost.Last()+unitcost.Length())) throw DimensionException();
   for(i=c.First();i<=cost.Last();i++)
-    cost[i]=c[i]*(Gambit::Rational)Tableau<Gambit::Rational>::TotDenom();
+    cost[i]=c[i]*(Rational)Tableau<Rational>::TotDenom();
   for(i=unitcost.First();i<=unitcost.Last();i++)
     unitcost[i]=c[cost.Length()+i-unitcost.First()+1];
   // gout << "\nc: " << c.First() << " " << c.Last() << " " << c;
   // gout << "\ncost: " << cost.First() << " " << cost.Last() << " " << cost;
   // gout << "\nunit: " << unitcost.First() << " " << unitcost.Last() << " " << unitcost;
-  //** added for Gambit::Rational
+  //** added for Rational
   Refactor();
   SolveDual();
 }
 
 template<>
-void LPTableau<double>::SetCost(const Gambit::Vector<double>& c)
+void LPTableau<double>::SetCost(const Vector<double>& c)
 {
   int i;
   if(cost.First()==c.First() && cost.Last()==c.Last()) {
@@ -101,8 +105,8 @@ void LPTableau<double>::SetCost(const Gambit::Vector<double>& c)
     SolveDual();
     return;
   }
-  if(c.First()!=cost.First()) throw Gambit::DimensionException();
-  if(c.Last()!=(cost.Last()+unitcost.Length())) throw Gambit::DimensionException();
+  if(c.First()!=cost.First()) throw DimensionException();
+  if(c.Last()!=(cost.Last()+unitcost.Length())) throw DimensionException();
   for(i=c.First();i<=cost.Last();i++)
     cost[i]=c[i];
   for(i=unitcost.First();i<=unitcost.Last();i++)
@@ -110,18 +114,18 @@ void LPTableau<double>::SetCost(const Gambit::Vector<double>& c)
   // gout << "\nc: " << c.First() << " " << c.Last() << " " << c;
   // gout << "\ncost: " << cost.First() << " " << cost.Last() << " " << cost;
   // gout << "\nunit: " << unitcost.First() << " " << unitcost.Last() << " " << unitcost;
-  //** added for Gambit::Rational
+  //** added for Rational
   Refactor();
   SolveDual();
 }
 
 template <class T>
-void LPTableau<T>::SetCost(const Gambit::Vector<T> &uc, const Gambit::Vector<T> &c)
+void LPTableau<T>::SetCost(const Vector<T> &uc, const Vector<T> &c)
 {
   if(cost.First()!=c.First() || cost.Last()!=c.Last()) 
-    throw Gambit::DimensionException();
+    throw DimensionException();
   if(unitcost.First()!=uc.First() || unitcost.Last()!=uc.Last()) 
-    throw Gambit::DimensionException();
+    throw DimensionException();
   int i;
   for(i=cost.First();i<=cost.Last();i++) cost[i]=c[i];
   for(i=unitcost.First();i<=unitcost.Last();i++) unitcost[i]=uc[i];
@@ -130,9 +134,9 @@ void LPTableau<T>::SetCost(const Gambit::Vector<T> &uc, const Gambit::Vector<T> 
 
 
 template <class T>
-Gambit::Vector<T> LPTableau<T>::GetCost(void) const
+Vector<T> LPTableau<T>::GetCost(void) const
 {
-  Gambit::Vector<T> x(cost.First(),cost.Last());
+  Vector<T> x(cost.First(),cost.Last());
   for(int i=x.First();i<=x.Last();i++)x[i]=cost[i];
   return x;
   //  return cost; 
@@ -140,40 +144,40 @@ Gambit::Vector<T> LPTableau<T>::GetCost(void) const
 
 
 template <class T>
-Gambit::Vector<T> LPTableau<T>::GetUnitCost(void) const
+Vector<T> LPTableau<T>::GetUnitCost(void) const
 {
-  Gambit::Vector<T> x(unitcost.First(),unitcost.Last());
+  Vector<T> x(unitcost.First(),unitcost.Last());
   for(int i=x.First();i<=x.Last();i++)x[i]=unitcost[i];
   return x;
 }
 
 template<> double LPTableau<double>::TotalCost(void)
 {
-  Gambit::Vector<double> tmpcol(MinRow(),MaxRow());
+  Vector<double> tmpcol(MinRow(),MaxRow());
   BasisSelect(unitcost,cost,tmpcol);
   return tmpcol*solution;
 }
 
-template<> Gambit::Rational LPTableau<Gambit::Rational>::TotalCost(void)
+template<> Rational LPTableau<Rational>::TotalCost(void)
 {
-  Gambit::Vector<Gambit::Rational> tmpcol(MinRow(),MaxRow());
-  Gambit::Vector<Gambit::Rational> sol(MinRow(),MaxRow());
+  Vector<Rational> tmpcol(MinRow(),MaxRow());
+  Vector<Rational> sol(MinRow(),MaxRow());
   BasisSelect(unitcost,cost,tmpcol);
   BasisVector(sol);
   for(int i=tmpcol.First();i<=tmpcol.Last();i++)
-    if(Label(i)>0)tmpcol[i]/=(Gambit::Rational)Tableau<Gambit::Rational>::TotDenom();
+    if(Label(i)>0)tmpcol[i]/=(Rational)Tableau<Rational>::TotDenom();
 
   return tmpcol*sol;
 }
 
 template<>
-void LPTableau<double>::DualVector(Gambit::Vector<double> &L) const
+void LPTableau<double>::DualVector(Vector<double> &L) const
 {
   L= dual;
 }
 
 template<>
-void LPTableau<Gambit::Rational>::DualVector(Gambit::Vector<Gambit::Rational> &out) const
+void LPTableau<Rational>::DualVector(Vector<Rational> &out) const
 {
   out= dual;
   //  for(int i=out.First();i<=out.Last();i++) 
@@ -183,12 +187,12 @@ void LPTableau<Gambit::Rational>::DualVector(Gambit::Vector<Gambit::Rational> &o
 template <class T>
 T LPTableau<T>::RelativeCost(int col) const
 {
-  Gambit::Vector<T> tmpcol(this->MinRow(),this->MaxRow());
+  Vector<T> tmpcol(this->MinRow(),this->MaxRow());
   if( col<0 ) {
     return unitcost[-col] - dual[-col];
   }
   else {
-    this->GetColumn(col, (Gambit::Vector<T> &)tmpcol);
+    this->GetColumn(col, (Vector<T> &)tmpcol);
     return cost[col] - dual*tmpcol;
   }
 }
@@ -196,12 +200,12 @@ T LPTableau<T>::RelativeCost(int col) const
 /*
 
 template <class T>
-void LPTableau<T>::RelativeCostVector(Gambit::Vector<T> &relunitcost,
-				      Gambit::Vector<T> &relcost) const
+void LPTableau<T>::RelativeCostVector(Vector<T> &relunitcost,
+				      Vector<T> &relcost) const
 {
 
-  if(!A->CheckColumn(relunitcost)) throw Gambit::DimensionException();
-  if(!A->CheckRow(relcost)) throw Gambit::DimensionException();
+  if(!A->CheckColumn(relunitcost)) throw DimensionException();
+  if(!A->CheckRow(relcost)) throw DimensionException();
   
   relunitcost= unitcost - dual;
   relcost= cost - dual*A;  // pre multiplication not defined?  
@@ -212,7 +216,7 @@ void LPTableau<T>::RelativeCostVector(Gambit::Vector<T> &relunitcost,
 template <class T>
 void LPTableau<T>::SolveDual()
 {
-  Gambit::Vector<T> tmpcol1(this->MinRow(),this->MaxRow());
+  Vector<T> tmpcol1(this->MinRow(),this->MaxRow());
   BasisSelect(unitcost,cost,tmpcol1);
   this->SolveT(tmpcol1,dual);
 }
@@ -238,18 +242,18 @@ void LPTableau<T>::Pivot(int outrow,int col)
 }
 
 template <class T>
-void LPTableau<T>::ReversePivots(Gambit::List<Gambit::Array<int> > &PivotList)
+void LPTableau<T>::ReversePivots(List<Array<int> > &PivotList)
 {
-  Gambit::Vector<T> tmpcol(this->MinRow(),this->MaxRow());
+  Vector<T> tmpcol(this->MinRow(),this->MaxRow());
   // gout << "\nIn LPTableau<T>::ReversePivots";
   bool flag;
   int i,j,k,enter;
   T ratio,a_ij,a_ik,b_i,b_k,c_j,c_k,c_jo,x;
-  Gambit::List<int> BestSet;
-  Gambit::Array<int> pivot(2);
-  Gambit::Vector<T> tmpdual(this->MinRow(),this->MaxRow());
+  List<int> BestSet;
+  Array<int> pivot(2);
+  Vector<T> tmpdual(this->MinRow(),this->MaxRow());
 
-  Gambit::Vector<T> solution(tmpcol);  //$$
+  Vector<T> solution(tmpcol);  //$$
   this->BasisVector(solution);        //$$
 
   // BigDump(gout);
@@ -266,7 +270,7 @@ void LPTableau<T>::ReversePivots(Gambit::List<Gambit::Array<int> > &PivotList)
     
     // find all i where prior tableau is primal feasible
     
-    BestSet = Gambit::List<int>();
+    BestSet = List<int>();
     for(i=this->MinRow();i<=this->MaxRow();i++)
       if(this->GtZero(tmpcol[i])) BestSet.Append(i);
     if(BestSet.Length()>0) {
@@ -408,13 +412,13 @@ void LPTableau<T>::ReversePivots(Gambit::List<Gambit::Array<int> > &PivotList)
 template <class T>
 bool LPTableau<T>::IsReversePivot(int i, int j)
 {
-  Gambit::Vector<T> tmpcol(this->MinRow(),this->MaxRow());
+  Vector<T> tmpcol(this->MinRow(),this->MaxRow());
 
   // first check that pivot preserves primal feasibility
   
   // gout << "\nin IsReversePivot, i= " << i << " j = "<< j;
   this->SolveColumn(j,tmpcol);
-  Gambit::Vector<T> solution(tmpcol);  //$$
+  Vector<T> solution(tmpcol);  //$$
   this->BasisVector(solution);        //$$
   // gout << "\ncurrentPivCol = " << tmpcol;
   // gout << "\ncurrentSolCol = " << solution;
@@ -464,7 +468,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   int enter = this->Label(i);
   // gout << "\nenter = " << enter;
   
-  Gambit::Vector<T> tmpdual(this->MinRow(),this->MaxRow());
+  Vector<T> tmpdual(this->MinRow(),this->MaxRow());
   tmpcol = (T)0;
   tmpcol[i]=(T)1;
   this->SolveT(tmpcol,tmpdual);
@@ -524,7 +528,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
 }
 
 template <class T>
-void LPTableau<T>::DualReversePivots(Gambit::List<Gambit::Array<int> > &/*list*/)
+void LPTableau<T>::DualReversePivots(List<Array<int> > &/*list*/)
 {
 }
 
@@ -537,13 +541,13 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
 
   int k;
 
-  Gambit::Vector<T> tmpcol(this->MinRow(),this->MaxRow());
-  Gambit::Vector<T> tmpdual(this->MinRow(),this->MaxRow());
+  Vector<T> tmpcol(this->MinRow(),this->MaxRow());
+  Vector<T> tmpdual(this->MinRow(),this->MaxRow());
   tmpcol = (T)0;
   tmpcol[i]=(T)1;
   this->SolveT(tmpcol,tmpdual);
 
-  Gambit::Vector<T> solution(tmpcol);  //$$
+  Vector<T> solution(tmpcol);  //$$
   this->BasisVector(solution);        //$$
 
   // gout << "\ncurrentPivCol = " << tmpcol;
@@ -677,7 +681,7 @@ template <class T>
 BFS<T> LPTableau<T>::DualBFS() const
 {
   BFS<T> cbfs;
-  Gambit::Vector<T> d(this->MinRow(),this->MaxRow());
+  Vector<T> d(this->MinRow(),this->MaxRow());
   DualVector(d);
 
   for(int i=this->MinRow();i<=this->MaxRow();i++) { 
@@ -696,7 +700,7 @@ int LPTableau<T>::LastLabel( void )
 }
 
 template <class T>
-void LPTableau<T>::BasisSelect(const Gambit::Array<T> &rowv, Gambit::Vector<T> &colv) const
+void LPTableau<T>::BasisSelect(const Array<T> &rowv, Vector<T> &colv) const
 {
   for(int i=this->basis.First(); i<=this->basis.Last(); i++) {
     if(this->basis.Label(i)<0)
@@ -707,9 +711,9 @@ void LPTableau<T>::BasisSelect(const Gambit::Array<T> &rowv, Gambit::Vector<T> &
 }
 
 template <class T>
-void LPTableau<T>::BasisSelect(const Gambit::Array<T> &unitv,
-			   const Gambit::Array<T> &rowv,
-			   Gambit::Vector<T> &colv ) const
+void LPTableau<T>::BasisSelect(const Array<T> &unitv,
+			   const Array<T> &rowv,
+			   Vector<T> &colv ) const
 {
   for(int i=this->basis.First(); i<=this->basis.Last(); i++) {
     if(this->basis.Label(i)<0)
@@ -719,3 +723,6 @@ void LPTableau<T>::BasisSelect(const Gambit::Array<T> &unitv,
   }
 }
 
+}  // end namespace Gambit::linalg
+
+}  // end namespace Gambit
