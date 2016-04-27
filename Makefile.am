@@ -400,25 +400,25 @@ libagg_la_SOURCES = \
 	library/include/gambit/gameagg.h \
 	library/src/gamebagg.cc \
 	library/include/gambit/gamebagg.h \
-	src/libagg/GrayComposition.h \
-	src/libagg/agg.cc \
-	src/libagg/agg.h \
-	src/libagg/bagg.cc \
-	src/libagg/bagg.h \
-	src/libagg/proj_func.h \
-	src/libagg/trie_map.h \
-        src/libagg/trie_map.imp
+	library/include/gambit/agg/gray.h \
+	library/src/agg/agg.cc \
+	library/include/gambit/agg/agg.h \
+	library/src/agg/bagg.cc \
+	library/include/gambit/agg/bagg.h \
+	library/include/gambit/agg/proj_func.h \
+	library/include/gambit/agg/trie_map.h \
+        library/include/gambit/agg/trie_map.imp
 
 libaggincludedir = $(includedir)/libagg
 libagginclude_HEADERS = \
 	library/include/gambit/gameagg.h \
 	library/include/gambit/gamebagg.h \
-	src/libagg/GrayComposition.h \
-	src/libagg/agg.h \
-	src/libagg/bagg.h \
-	src/libagg/proj_func.h \
-	src/libagg/trie_map.h \
-        src/libagg/trie_map.imp
+	library/include/gambit/agg/gray.h \
+	library/include/gambit/agg/agg.h \
+	library/include/gambit/agg/bagg.h \
+	library/include/gambit/agg/proj_func.h \
+	library/include/gambit/agg/trie_map.h \
+        library/include/gambit/agg/trie_map.imp
 
 # libgambit_la_LDFLAGS = -no-undefined -version-info 0:0:0
 

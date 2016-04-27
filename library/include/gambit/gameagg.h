@@ -23,7 +23,7 @@
 #ifndef GAMEAGG_H
 #define GAMEAGG_H
 
-#include "libagg/agg.h"
+#include "gambit/agg/agg.h"
 
 class aggame;
 

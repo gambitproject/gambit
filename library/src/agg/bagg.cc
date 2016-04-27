@@ -4,7 +4,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cassert>
-#include "bagg.h"
+#include "gambit/agg/bagg.h"
 
 using namespace std;
 

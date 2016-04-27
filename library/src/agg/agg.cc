@@ -27,8 +27,8 @@
 #include <sstream>
 #include <cassert>
 #include <algorithm>
-#include "GrayComposition.h"
-#include "agg.h"
+#include "gambit/agg/gray.h"
+#include "gambit/agg/agg.h"
 
 using namespace std;
 

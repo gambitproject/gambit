@@ -23,7 +23,7 @@
 #ifndef GAMEBAGG_H
 #define GAMEBAGG_H
 
-#include "libagg/bagg.h"
+#include "gambit/agg/bagg.h"
 
 namespace Gambit {
 

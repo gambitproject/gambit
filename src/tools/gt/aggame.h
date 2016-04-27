@@ -25,7 +25,7 @@
 #define __AGGAME_H
 
 #include "cmatrix.h"
-#include "libagg/agg.h"
+#include "gambit/agg/agg.h"
 #include "gambit/gambit.h"
 #include "gambit/gameagg.h"
 #include "gnmgame.h"
