@@ -109,10 +109,10 @@ void gnmgame::retract(cvector &dest, cvector &z) {
           dest[i] = 0.0;
       }
     }
-    delete y;
+    delete [] y;
   }
   catch (...) {
-    delete y;
+    delete [] y;
     throw;
   }
 }
@@ -144,10 +144,10 @@ void gnmgame::retract(cvector &dest, cvector &z, bool ksym){
     }
     offs+=getNumKSymActions(n);
   }
-  delete y;
+  delete [] y;
  }
  catch (...) {
-     delete y;
+     delete [] y;
      throw;
  }
 }

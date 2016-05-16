@@ -993,7 +993,7 @@ gPoly<double>  NormalizationOfPoly(const gPoly<T>& given)
   Gambit::List<gMono<T> > list = given.MonomialList();
   double maxcoeff = 0.0;
   for (int i =1; i <= list.Length(); i++) {
-    maxcoeff = std::max(maxcoeff, (double) abs((double) list[i].Coef()));
+    maxcoeff = std::max(maxcoeff, (double) Gambit::abs((double) list[i].Coef()));
   }
 
   if (maxcoeff < 0.000000001) return TogDouble(given);
