@@ -25,8 +25,6 @@
 #include "ludecomp.h"
 #include "tableau.h"
 
-inline double abs(double x) { return fabs(x); }
-
 // ---------------------------------------------------------------------------
 // Class EtaMatrix
 // ---------------------------------------------------------------------------
@@ -84,7 +82,7 @@ template <class T> LUdecomp<T>::~LUdecomp()
 { 
   if ( parent != NULL )
     ((LUdecomp<T> &) *parent).copycount--;
-  if(copycount != 0) throw BadCount();
+  // if(copycount != 0) throw BadCount();
 }
 
 
@@ -224,7 +222,7 @@ void LUdecomp<T>::FactorBasis()
   }
   
   for ( i = B.MinRow(); i <= B.MaxRow(); i++) {    
-    pivVal = abs ( B(i, i));
+    pivVal = Gambit::abs ( B(i, i));
     piv = i;
     for ( j = i+1; j <= B.MaxRow(); j++) {
       if (  B( j, i ) * B( j, i )  > pivVal * pivVal ) {
