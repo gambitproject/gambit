@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="8EE11AE3-2B91-4870-895B-44C46D648BD6" Name="Gambit 15" Language="1033" Version="15.1.0" Manufacturer="The Gambit Project" UpgradeCode="135FFB28-DA7C-427C-A3DA-783B805BCC22">
+    <Product Id="8EE11AE3-2B91-4870-895B-44C46D648BD6" Name="Gambit 16" Language="1033" Version="16.0.0" Manufacturer="The Gambit Project" UpgradeCode="135FFB28-DA7C-427C-A3DA-783B805BCC22">
         <Package Description="Gambit" Comments="Software Tools for Game Theory" InstallerVersion="200" Compressed="yes" />
         <Media Id="1" Cabinet="gambit.cab" EmbedCab="yes" />
 
@@ -35,10 +35,10 @@
         </DirectoryRef>
 
         <DirectoryRef Id="ProgramMenuFolder">
-            <Directory Id="ProgramMenuDir" Name="Gambit 15">
+            <Directory Id="ProgramMenuDir" Name="Gambit 16">
                 <Component Id="ProgramMenuDir" Guid="F112A6A5-1C0C-4246-BBB8-D3466DA03D4C">
                     <RemoveFolder Id="ProgramMenuDir" On="uninstall"/>
-                    <RegistryValue Root="HKCU" Key="Software\Gambit\Gambit 15" Type="string" Value="" KeyPath="yes"/>
+                    <RegistryValue Root="HKCU" Key="Software\Gambit\Gambit 16" Type="string" Value="" KeyPath="yes"/>
                 </Component>
             </Directory>
         </DirectoryRef>
@@ -46,17 +46,17 @@
         <DirectoryRef Id="ApplicationProgramsFolder">
             <Component Id="ApplicationShortcut" Guid="3B9A0C37-7E9A-446E-9D14-76EBCCF3F1E0">
                 <Shortcut Id="ApplicationStartMenuShortcut"
-                          Name="Gambit 15"
+                          Name="Gambit 16"
                           Description="Software Tools for Game Theory"
                           Target="[ApplicationRootDirectory]Gambit.exe"
                           WorkingDirectory="ApplicationRootDirectory"/>
                 <Shortcut Id="UninstallProduct"
-                          Name="Uninstall Gambit 15"
+                          Name="Uninstall Gambit 16"
                           Description="Uninstalls Gambit"
                           Target="[System64Folder]msiexec.exe"
                           Arguments="/x [ProductCode]"/>
                 <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
-                <RegistryValue Root="HKCU" Key="Software\Microsoft\Gambit 15" Name="installed" Type="integer" Value="1" KeyPath="yes"/> 
+                <RegistryValue Root="HKCU" Key="Software\Microsoft\Gambit 16" Name="installed" Type="integer" Value="1" KeyPath="yes"/> 
             </Component>
         </DirectoryRef>
         <Feature Id="Complete" Level="1">

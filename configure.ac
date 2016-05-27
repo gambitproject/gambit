@@ -20,7 +20,7 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 dnl
 
-AC_INIT([gambit], [15.1.0])
+AC_INIT([gambit], [16.0.0])
 AC_CONFIG_SRCDIR([src/libgambit/libgambit.h])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([subdir-objects])

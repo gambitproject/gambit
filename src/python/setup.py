@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
+# Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 #
 # FILE: src/python/setup.py
 # Setuptools configuration file for Gambit Python extension
@@ -51,7 +51,7 @@ libgame = Extension("gambit.lib.libgambit",
                     include_dirs=[ "../..", ".." ] )
 
 setup(name="gambit",
-      version="15.1.0",
+      version="16.0.0",
       description="Software tools for game theory",
       author="Theodore Turocy",
       author_email="ted.turocy@gmail.com",
