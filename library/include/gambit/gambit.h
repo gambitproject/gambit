@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/libgambit/gambit.h
 // Top-level include file for Gambit library
@@ -27,6 +27,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <cmath>
 #include <config.h>
 
 namespace Gambit {
@@ -44,6 +45,8 @@ template <class D, class S> D lexical_cast(const S &p_value, int p_prec)
   return s.str();
 }
 
+inline double abs(double x) { return std::fabs(x); }
+
 //========================================================================
 //                        Exception classes
 //========================================================================
@@ -59,50 +62,57 @@ public:
 /// Exception thrown on out-of-range index
 class IndexException : public Exception {
 public:
+  IndexException(void) : Exception("Index out of range") { }
+  IndexException(const std::string &s) : Exception(s) { }
   virtual ~IndexException() throw() { }
-  const char *what(void) const throw() { return "Index out of range"; }
 };
 
 /// Exception thrown on invalid index ranges
 class RangeException : public Exception {
 public:
+  RangeException(void) : Exception("Invalid index range") { }
+  RangeException(const std::string &s) : Exception(s) { }
   virtual ~RangeException() throw() { }
-  const char *what(void) const throw() { return "Invalid index range"; }
 };
 
 /// Exception thrown on dimension mismatches
 class DimensionException : public Exception {
 public:
+  DimensionException(void) : Exception("Mismatched dimensions") { }
+  DimensionException(const std::string &s) : Exception(s) { }
   virtual ~DimensionException() throw() { }
-  const char *what(void) const throw() { return "Mismatched dimensions"; }
 };
 
 /// Exception thrown on invalid value
 class ValueException : public Exception {
 public:
+  ValueException(void) : Exception("Invalid value") { }
+  ValueException(const std::string &s) : Exception(s) { }
   virtual ~ValueException() throw() { }
-  const char *what(void) const throw() { return "Invalid value"; }
 };
 
 /// Exception thrown on a failed assertion
 class AssertionException : public Exception {
 public:
-  AssertionException(const char *s) : Exception(s) { }
+  AssertionException(void) : Exception("Failed assertion") { }
+  AssertionException(const std::string &s) : Exception(s) { }
   virtual ~AssertionException() throw() { }
 };
 
 /// Exception thrown on attempted division by zero
 class ZeroDivideException : public Exception {
 public:
+  ZeroDivideException(void) : Exception("Attempted division by zero") { }
+  ZeroDivideException(const std::string &s) : Exception(s) { }
   virtual ~ZeroDivideException() throw() { }
-  const char *what(void) const throw()  { return "Attmpted division by zero"; }
 };
 
 /// An exception thrown when attempting to dereference a null pointer
 class NullException : public Exception {
 public:
+  NullException(void) : Exception("Dereferenced null pointer") { }
+  NullException(const std::string &s) : Exception(s) { }
   virtual ~NullException() throw() { }
-  const char *what(void) const throw()  { return "Dereferencing null pointer"; }
 };
 
 } // end namespace Gambit

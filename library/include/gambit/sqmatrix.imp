@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/libgambit/sqmatrix.imp
 // Implementation of square matrices
@@ -24,8 +24,6 @@
 #include "sqmatrix.h"
 
 namespace Gambit {
-
-inline double abs(double x) { return ::fabs(x); }
 
 //-----------------------------------------------------------------------------
 //     SquareMatrix<T>: Constructors, destructor, constructive operators

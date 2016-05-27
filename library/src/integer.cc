@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/libgambit/integer.cc
 // Implementation of an arbitrary-length integer class
@@ -1424,7 +1424,7 @@ void divide(const Integer& Ix, long y, Integer& Iq, long& rem)
     rem = Itolong(r);
     if (!STATIC_IntegerRep(r)) delete r;
   }
-  rem = abs(rem).as_long();
+  rem = abs(Integer(rem)).as_long();
   if (xsgn == I_NEGATIVE) rem = -rem;
   q->sgn = samesign;
   Icheck(q);

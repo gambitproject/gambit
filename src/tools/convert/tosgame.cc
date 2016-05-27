@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/convert/nfg2tex.cc
 // Convert a normal form game to LaTeX (using Osborne's sgame style)

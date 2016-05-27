@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/lcp/lcp.cc
 // Compute Nash equilibria via linear complementarity program
@@ -35,7 +35,7 @@ using namespace Gambit;
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by solving a linear complementarity program\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2014, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2016, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 

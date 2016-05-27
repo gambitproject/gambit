@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2014, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/gpoly.imp
 // Implementation of multivariate polynomial type
@@ -24,8 +24,6 @@
 #include <algorithm>   // for std::max()
 #include "gpoly.h"
 #include "gambit/gambit.h"
-
-inline double abs(double x) { return fabs(x); }
 
 //---------------------------------------------------------------
 //                      gPoly
@@ -995,7 +993,7 @@ gPoly<double>  NormalizationOfPoly(const gPoly<T>& given)
   Gambit::List<gMono<T> > list = given.MonomialList();
   double maxcoeff = 0.0;
   for (int i =1; i <= list.Length(); i++) {
-    maxcoeff = std::max(maxcoeff, (double) abs((double) list[i].Coef()));
+    maxcoeff = std::max(maxcoeff, (double) Gambit::abs((double) list[i].Coef()));
   }
 
   if (maxcoeff < 0.000000001) return TogDouble(given);
