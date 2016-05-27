@@ -27,6 +27,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <cmath>
 #include <config.h>
 
 namespace Gambit {
@@ -43,6 +44,8 @@ template <class D, class S> D lexical_cast(const S &p_value, int p_prec)
   s << std::setprecision(p_prec) << p_value;
   return s.str();
 }
+
+inline double abs(double x) { return std::fabs(x); }
 
 //========================================================================
 //                        Exception classes

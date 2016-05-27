@@ -83,7 +83,7 @@ exclude_trees = ['_build']
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
-# A list of ignored prefixes for module index sorting.
+# A list of ignored prefixes for module index sorting.[
 #modindex_common_prefix = []
 
 

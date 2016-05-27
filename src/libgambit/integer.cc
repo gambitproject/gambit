@@ -1424,7 +1424,7 @@ void divide(const Integer& Ix, long y, Integer& Iq, long& rem)
     rem = Itolong(r);
     if (!STATIC_IntegerRep(r)) delete r;
   }
-  rem = abs(rem).as_long();
+  rem = abs(Integer(rem)).as_long();
   if (xsgn == I_NEGATIVE) rem = -rem;
   q->sgn = samesign;
   Icheck(q);

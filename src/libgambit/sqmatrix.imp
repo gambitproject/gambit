@@ -25,8 +25,6 @@
 
 namespace Gambit {
 
-inline double abs(double x) { return ::fabs(x); }
-
 //-----------------------------------------------------------------------------
 //     SquareMatrix<T>: Constructors, destructor, constructive operators
 //-----------------------------------------------------------------------------
