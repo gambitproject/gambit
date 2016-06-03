@@ -356,6 +356,8 @@ libgambit_la_SOURCES = \
 	library/include/gambit/gambit.h \
 	library/src/function.cc \
 	library/include/gambit/function.h \
+	library/src/writer.cc \
+	library/include/gambit/writer.h \
 	library/src/tinyxml.cc \
 	library/include/gambit/tinyxml.h \
 	library/src/tinyxmlerror.cc \
@@ -457,9 +459,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/library/include -I$(top_srcdir
 
 gambit_convert_SOURCES = \
 	${libgambit_la_SOURCES} \
-	src/tools/convert/convert.cc \
-	src/tools/convert/tohtml.cc \
-	src/tools/convert/tosgame.cc
+	src/tools/convert/convert.cc
 
 liblinear_la_SOURCES = \
 	library/src/linalg/basis.cc \

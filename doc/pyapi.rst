@@ -595,6 +595,25 @@ Game representations
       * `native`: The format most appropriate to the
         underlying representation of the game, i.e., `efg` or `nfg`.
 
+      This method also supports exporting to other output formats
+      (which cannot be used directly to re-load the game later, but
+      are suitable for human consumption, inclusion in papers, and so
+      on):
+
+      * `html`: A rendering of the strategic form of the game as a
+	collection of HTML tables.  The first player is the row
+	chooser; the second player the column chooser.  For games with
+	more than two players, a collection of tables is generated,
+	one for each possible strategy combination of players 3 and higher.
+      * `sgame`: A rendering of the strategic form of the game in
+	LaTeX, suitable for use with `Martin Osborne's sgame style
+	<https://www.economics.utoronto.ca/osborne/latex/>`_.
+	The first player is the row
+	chooser; the second player the column chooser.  For games with
+	more than two players, a collection of tables is generated,
+	one for each possible strategy combination of players 3 and higher.
+	
+	
 .. py:class:: StrategicRestriction
 
    A read-only view on a :py:class:`Game`, defined by a subset

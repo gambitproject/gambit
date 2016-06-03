@@ -27,8 +27,8 @@
 #include <unistd.h>
 
 #include "gambit/gambit.h"
+#include "gambit/writer.h"
 
-void WriteHtmlFile(std::ostream &, const Gambit::Game &, int, int);
 void WriteOsborneFile(std::ostream &, const Gambit::Game &, int, int);
 
 void PrintBanner(std::ostream &p_stream)
@@ -138,10 +138,12 @@ int main(int argc, char *argv[])
     }
 
     if (format == "html") {
-      WriteHtmlFile(std::cout, game, rowPlayer, colPlayer);
+      Gambit::HTMLGameWriter writer;
+      std::cout << writer.Write(game, rowPlayer, colPlayer);
     }
     else {
-      WriteOsborneFile(std::cout, game, rowPlayer, colPlayer);
+      Gambit::LaTeXGameWriter writer;
+      std::cout << writer.Write(game, rowPlayer, colPlayer);
     }
     return 0;
   }

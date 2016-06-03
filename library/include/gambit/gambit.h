@@ -128,6 +128,7 @@ public:
 
 
 #include "game.h"
+#include "writer.h"
 
 #include "behavspt.h"
 #include "behav.h"
