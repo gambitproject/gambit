@@ -27,6 +27,8 @@
 
 namespace Gambit {
 
+namespace Nash {
+
 //========================================================================
 //                       Profile renderer classes
 //========================================================================
@@ -146,10 +148,10 @@ private:
 
 // Encapsulation of algorithms via the strategy pattern.
 
-template <class T> class NashStrategySolver {
+template <class T> class StrategySolver {
 public:
-  NashStrategySolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
-  virtual ~NashStrategySolver()  { }
+  StrategySolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
+  virtual ~StrategySolver()  { }
 
   virtual List<MixedStrategyProfile<T> > Solve(const Game &) const = 0;
 
@@ -157,10 +159,10 @@ protected:
   shared_ptr<StrategyProfileRenderer<T> > m_onEquilibrium;
 };
 
-template <class T> class NashBehavSolver {
+template <class T> class BehavSolver {
 public:
-  NashBehavSolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
-  virtual ~NashBehavSolver()  { }
+  BehavSolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
+  virtual ~BehavSolver()  { }
 
   virtual List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const = 0;
 
@@ -172,28 +174,28 @@ protected:
 // This is an adaptor class which allows a client expecting behavior profiles
 // to call a solver which works in terms of strategy profiles
 //
-template <class T> class NashBehavViaStrategySolver : public NashBehavSolver<T> {
+template <class T> class BehavViaStrategySolver : public BehavSolver<T> {
 public:
-  NashBehavViaStrategySolver(shared_ptr<NashStrategySolver<T> > p_solver,
-			     shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
-  virtual ~NashBehavViaStrategySolver() { }
+  BehavViaStrategySolver(shared_ptr<StrategySolver<T> > p_solver,
+			 shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
+  virtual ~BehavViaStrategySolver() { }
 
   virtual List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const;
 
 protected:
-  shared_ptr<NashStrategySolver<T> > m_solver;
+  shared_ptr<StrategySolver<T> > m_solver;
 };
 
-template <class T> class SubgameNashBehavSolver : public NashBehavSolver<T> {
+template <class T> class SubgameBehavSolver : public BehavSolver<T> {
 public:
-  SubgameNashBehavSolver(shared_ptr<NashBehavSolver<T> > p_solver,
-			 shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
-  virtual ~SubgameNashBehavSolver()  { }
+  SubgameBehavSolver(shared_ptr<BehavSolver<T> > p_solver,
+		     shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
+  virtual ~SubgameBehavSolver()  { }
 
   virtual List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const;
 
 protected:
-  shared_ptr<NashBehavSolver<T> > m_solver;
+  shared_ptr<BehavSolver<T> > m_solver;
 
 private:
   void SolveSubgames(const BehaviorSupportProfile &p_support,
@@ -208,12 +210,14 @@ private:
 // has been reached.  A convenience for unraveling a potentially
 // deep recursion.
 //
-class NashEquilibriumLimitReached : public Exception {
+class EquilibriumLimitReached : public Exception {
 public:
-  virtual ~NashEquilibriumLimitReached() throw() { }
+  virtual ~EquilibriumLimitReached() throw() { }
   const char *what(void) const throw() { return "Reached target number of equilibria"; }
 };
 
+}  // namespace Gambit::Nash
+ 
 }  // namespace Gambit
 
 #endif  // LIBGAMBIT_NASH_H

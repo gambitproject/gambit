@@ -21,11 +21,11 @@
 #
 
 cdef extern from "tools/enumpure/enumpure.h":
-    cdef cppclass c_NashEnumPureStrategySolver "NashEnumPureStrategySolver":
+    cdef cppclass c_NashEnumPureStrategySolver "EnumPureStrategySolver":
         c_NashEnumPureStrategySolver()
         c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
 
-    cdef cppclass c_NashEnumPureAgentSolver "NashEnumPureAgentSolver":
+    cdef cppclass c_NashEnumPureAgentSolver "EnumPureAgentSolver":
         c_NashEnumPureAgentSolver()
         c_List[c_MixedBehaviorProfileRational] Solve(c_Game) except +RuntimeError
 

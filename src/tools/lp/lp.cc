@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
       }
       else {
 	if (useFloat) {
-	  shared_ptr<NashBehavSolver<double> > stage = 
+	  shared_ptr<BehavSolver<double> > stage = 
 	    new NashLpBehavSolver<double>();
 	  shared_ptr<StrategyProfileRenderer<double> > renderer;
 	  if (printDetail)  {
@@ -192,11 +192,11 @@ int main(int argc, char *argv[])
 	    renderer = new BehavStrategyCSVRenderer<double>(std::cout, 
 							    numDecimals);
 	  }
-	  SubgameNashBehavSolver<double> algorithm(stage, renderer);
+	  SubgameBehavSolver<double> algorithm(stage, renderer);
 	  algorithm.Solve(game);
 	}
 	else {
-	  shared_ptr<NashBehavSolver<Rational> > stage = 
+	  shared_ptr<BehavSolver<Rational> > stage = 
 	    new NashLpBehavSolver<Rational>();
 	  shared_ptr<StrategyProfileRenderer<Rational> > renderer;
 	  if (printDetail)  {
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 	    renderer = new BehavStrategyCSVRenderer<Rational>(std::cout, 
 							      numDecimals);
 	  }
-	  SubgameNashBehavSolver<Rational> algorithm(stage, renderer);
+	  SubgameBehavSolver<Rational> algorithm(stage, renderer);
 	  algorithm.Solve(game);
 	}
       }

@@ -26,19 +26,20 @@
 #include "gambit/gambit.h"
 #include "gambit/nash.h"
 
-using namespace Gambit;
+namespace Gambit {
+namespace Nash {
 
-class NashEnumPureStrategySolver : public NashStrategySolver<Rational> {
+class EnumPureStrategySolver : public StrategySolver<Rational> {
 public:
-   NashEnumPureStrategySolver(Gambit::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0) 
-    : NashStrategySolver<Rational>(p_onEquilibrium) { }
-  virtual ~NashEnumPureStrategySolver()  { }
+   EnumPureStrategySolver(Gambit::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0) 
+    : StrategySolver<Rational>(p_onEquilibrium) { }
+  virtual ~EnumPureStrategySolver()  { }
 
   List<MixedStrategyProfile<Rational> > Solve(const Game &p_game) const;
 };
 
 inline List<MixedStrategyProfile<Rational> >
-NashEnumPureStrategySolver::Solve(const Game &p_game) const
+EnumPureStrategySolver::Solve(const Game &p_game) const
 {
   if (!p_game->IsPerfectRecall()) {
     throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
@@ -55,17 +56,17 @@ NashEnumPureStrategySolver::Solve(const Game &p_game) const
 }
 
 
-class NashEnumPureAgentSolver : public NashBehavSolver<Rational> {
+class EnumPureAgentSolver : public BehavSolver<Rational> {
 public:
-  NashEnumPureAgentSolver(Gambit::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
-    : NashBehavSolver<Rational>(p_onEquilibrium) { }
-  virtual ~NashEnumPureAgentSolver()  { }
+  EnumPureAgentSolver(Gambit::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
+    : BehavSolver<Rational>(p_onEquilibrium) { }
+  virtual ~EnumPureAgentSolver()  { }
 
   List<MixedBehaviorProfile<Rational> > Solve(const BehaviorSupportProfile &) const;
 };
 
 inline List<MixedBehaviorProfile<Rational> > 
-NashEnumPureAgentSolver::Solve(const BehaviorSupportProfile &p_support) const
+EnumPureAgentSolver::Solve(const BehaviorSupportProfile &p_support) const
 {
   List<MixedBehaviorProfile<Rational> > solutions;
   for (BehaviorProfileIterator citer(p_support); !citer.AtEnd(); citer++) {
@@ -78,4 +79,7 @@ NashEnumPureAgentSolver::Solve(const BehaviorSupportProfile &p_support) const
   return solutions;
 }
 
+}  // end namespace Gambit::Nash
+}  // end namespace Gambit
+ 
 #endif  // ENUMPURE_H

@@ -104,7 +104,7 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game,
   p_solution.m_equilibria.push_back(profile);
 
   if (m_stopAfter > 0 && p_solution.EquilibriumCount() >= m_stopAfter) {
-    throw NashEquilibriumLimitReached();
+    throw EquilibriumLimitReached();
   }
 
   return true;
@@ -168,7 +168,7 @@ NashLcpStrategySolver<T>::Solve(const Game &p_game) const
       OnBFS(p_game, B, solution);
     }
   }
-  catch (NashEquilibriumLimitReached &) {
+  catch (EquilibriumLimitReached &) {
     // This pseudo-exception requires no additional action;
     // solution contains details of all equilibria found
   }

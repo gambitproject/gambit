@@ -26,12 +26,13 @@
 #include "gambit/nash.h"
 
 using namespace Gambit;
+using namespace Gambit::Nash;
 
-class NashLiapStrategySolver : public NashStrategySolver<double> {
+class NashLiapStrategySolver : public StrategySolver<double> {
 public:
   NashLiapStrategySolver(int p_maxitsN, bool p_verbose = false,
 			 shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = 0)
-    : NashStrategySolver<double>(p_onEquilibrium),
+    : StrategySolver<double>(p_onEquilibrium),
       m_maxitsN(p_maxitsN), m_verbose(p_verbose)
   { }
   virtual ~NashLiapStrategySolver() { }

@@ -26,14 +26,15 @@
 #include "gambit/nash.h"
 
 using namespace Gambit;
+using namespace Gambit::Nash;
 
 template <class T> class LTableau;
 
-template <class T> class NashLcpBehaviorSolver : public NashBehavSolver<T> {
+template <class T> class NashLcpBehaviorSolver : public BehavSolver<T> {
 public:
   NashLcpBehaviorSolver(int p_stopAfter, int p_maxDepth,
 			Gambit::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
-    : NashBehavSolver<T>(p_onEquilibrium),
+    : BehavSolver<T>(p_onEquilibrium),
       m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth) { }
   virtual ~NashLcpBehaviorSolver()  { }
 

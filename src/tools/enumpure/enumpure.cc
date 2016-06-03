@@ -28,6 +28,8 @@
 #include <cerrno>
 #include "enumpure.h"
 
+using namespace Gambit;
+using namespace Gambit::Nash;
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -141,31 +143,31 @@ int main(int argc, char *argv[])
 
     if (game->IsTree())  {
       if (bySubgames) {
-	shared_ptr<NashBehavSolver<Rational> > stage;
+	shared_ptr<BehavSolver<Rational> > stage;
         if (solveAgent) {
-	  stage = new NashEnumPureAgentSolver();
+	  stage = new EnumPureAgentSolver();
 	}
 	else {
-	  shared_ptr<NashStrategySolver<Rational> > substage = 
-	    new NashEnumPureStrategySolver();
-	  stage = new NashBehavViaStrategySolver<Rational>(substage);
+	  shared_ptr<StrategySolver<Rational> > substage = 
+	    new EnumPureStrategySolver();
+	  stage = new BehavViaStrategySolver<Rational>(substage);
 	}
-	SubgameNashBehavSolver<Rational> algorithm(stage, renderer);
+	SubgameBehavSolver<Rational> algorithm(stage, renderer);
 	algorithm.Solve(game);
       }
       else {
 	if (solveAgent) {
-	  NashEnumPureAgentSolver algorithm(renderer);
+	  EnumPureAgentSolver algorithm(renderer);
 	  algorithm.Solve(game);
 	}
 	else {
-	  NashEnumPureStrategySolver algorithm(renderer);
+	  EnumPureStrategySolver algorithm(renderer);
 	  algorithm.Solve(game);
 	}
       }
     }
     else {
-      NashEnumPureStrategySolver algorithm(renderer);
+      EnumPureStrategySolver algorithm(renderer);
       algorithm.Solve(game);
     }
     return 0;

@@ -31,6 +31,7 @@
 #include "gambit/nash.h"
 
 using namespace Gambit;
+using namespace Gambit::Nash;
 
 //
 // simpdiv is a simplicial subdivision algorithm with restart, for finding
@@ -68,12 +69,12 @@ using namespace Gambit;
 // simplify things. (TLT, 6/2002)
 //
 
-class NashSimpdivStrategySolver : public NashStrategySolver<Rational> {
+class NashSimpdivStrategySolver : public StrategySolver<Rational> {
 public:
   NashSimpdivStrategySolver(int p_gridResize = 2, int p_leashLength = 0,
 			    bool p_verbose = false,
 			    shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
-    : NashStrategySolver<Rational>(p_onEquilibrium),
+    : StrategySolver<Rational>(p_onEquilibrium),
       m_gridResize(p_gridResize),
       m_leashLength((p_leashLength > 0) ? p_leashLength : 32000),
       m_verbose(p_verbose)

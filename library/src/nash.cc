@@ -24,6 +24,8 @@
 
 namespace Gambit {
 
+namespace Nash {
+
 template <class T> void
 MixedStrategyCSVRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile,
 				    const std::string &p_label) const
@@ -180,7 +182,7 @@ template class BehavStrategyDetailRenderer<Rational>;
 
 
 template <class T>
-NashStrategySolver<T>::NashStrategySolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
+StrategySolver<T>::StrategySolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
   : m_onEquilibrium(p_onEquilibrium)
 {
   if (m_onEquilibrium.get() == 0) {
@@ -189,7 +191,7 @@ NashStrategySolver<T>::NashStrategySolver(shared_ptr<StrategyProfileRenderer<T> 
 }
 
 template <class T>
-NashBehavSolver<T>::NashBehavSolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
+BehavSolver<T>::BehavSolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
   : m_onEquilibrium(p_onEquilibrium)
 {
   if (m_onEquilibrium.get() == 0) {
@@ -198,13 +200,13 @@ NashBehavSolver<T>::NashBehavSolver(shared_ptr<StrategyProfileRenderer<T> > p_on
 }
 
 template <class T>
-NashBehavViaStrategySolver<T>::NashBehavViaStrategySolver(shared_ptr<NashStrategySolver<T> > p_solver,
+BehavViaStrategySolver<T>::BehavViaStrategySolver(shared_ptr<StrategySolver<T> > p_solver,
 							  shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
-  : NashBehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
+  : BehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
 { }
 
 template <class T> List<MixedBehaviorProfile<T> > 
-NashBehavViaStrategySolver<T>::Solve(const BehaviorSupportProfile &p_support) const
+BehavViaStrategySolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 {
   List<MixedStrategyProfile<T> > output = m_solver->Solve(p_support.GetGame());
   List<MixedBehaviorProfile<T> > solutions;
@@ -216,9 +218,9 @@ NashBehavViaStrategySolver<T>::Solve(const BehaviorSupportProfile &p_support) co
 
 
 template <class T>
-SubgameNashBehavSolver<T>::SubgameNashBehavSolver(shared_ptr<NashBehavSolver<T> > p_solver,
+SubgameBehavSolver<T>::SubgameBehavSolver(shared_ptr<BehavSolver<T> > p_solver,
 						  shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
-  : NashBehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
+  : BehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
 { }
 
 // A nested anonymous namespace to privatize these functions 
@@ -260,7 +262,7 @@ void ChildSubgames(const GameNode &p_node, List<GameNode> &p_list)
 //
 
 template <class T>
-void SubgameNashBehavSolver<T>::SolveSubgames(const BehaviorSupportProfile &p_support,
+void SubgameBehavSolver<T>::SolveSubgames(const BehaviorSupportProfile &p_support,
 					      const DVector<T> &p_templateSolution,
 					      GameNode n,
 					      List<DVector<T> > &solns,
@@ -413,7 +415,7 @@ void SubgameNashBehavSolver<T>::SolveSubgames(const BehaviorSupportProfile &p_su
 
 template <class T>
 List<MixedBehaviorProfile<T> > 
-SubgameNashBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
+SubgameBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 {
   Game efg = p_support.GetGame()->GetRoot()->CopySubgame();
 
@@ -455,16 +457,18 @@ SubgameNashBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
   return solutions;
 }
 
-template class NashStrategySolver<double>;
-template class NashStrategySolver<Rational>;
+template class StrategySolver<double>;
+template class StrategySolver<Rational>;
 
-template class NashBehavSolver<double>;
-template class NashBehavSolver<Rational>;
+template class BehavSolver<double>;
+template class BehavSolver<Rational>;
 
-template class NashBehavViaStrategySolver<double>;
-template class NashBehavViaStrategySolver<Rational>;
+template class BehavViaStrategySolver<double>;
+template class BehavViaStrategySolver<Rational>;
 
-template class SubgameNashBehavSolver<double>;
-template class SubgameNashBehavSolver<Rational>;
+template class SubgameBehavSolver<double>;
+template class SubgameBehavSolver<Rational>;
 
+} // end namespace Gambit::Nash
+  
 } // end namespace Gambit

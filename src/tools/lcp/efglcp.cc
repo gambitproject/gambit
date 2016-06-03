@@ -133,7 +133,7 @@ NashLcpBehaviorSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 	AllLemke(p_support, solution.ns1+solution.ns2+1, 
 		 tab, 0, A, solution);
       }
-      catch (NashEquilibriumLimitReached &) {
+      catch (EquilibriumLimitReached &) {
 	// Just handle this silently; equilibria are already printed
 	// as they are found.
       }
@@ -214,7 +214,7 @@ NashLcpBehaviorSolver<T>::AllLemke(const BehaviorSupportProfile &p_support,
 	this->m_onEquilibrium->Render(profile);
 	p_solution.m_equilibria.push_back(profile);
 	if (m_stopAfter > 0 && p_solution.EquilibriumCount() >= m_stopAfter) {
-	  throw NashEquilibriumLimitReached();
+	  throw EquilibriumLimitReached();
 	}
       }
     }

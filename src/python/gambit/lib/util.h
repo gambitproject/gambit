@@ -30,9 +30,11 @@
 #include <fstream>
 #include <sstream>
 #include "gambit/gambit.h"
+#include "gambit/nash.h"
 
 using namespace std;
 using namespace Gambit;
+using namespace Gambit::Nash;
 
 inline Game NewTable(Array<int> *dim)
 { return NewTable(*dim); }

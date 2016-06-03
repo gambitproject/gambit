@@ -26,11 +26,12 @@
 #include "gambit/nash.h"
 
 using namespace Gambit;
+using namespace Gambit::Nash;
 
-template <class T> class NashLpStrategySolver : public NashStrategySolver<T> {
+template <class T> class NashLpStrategySolver : public StrategySolver<T> {
 public:
   NashLpStrategySolver(Gambit::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
-    : NashStrategySolver<T>(p_onEquilibrium) { }
+    : StrategySolver<T>(p_onEquilibrium) { }
   virtual ~NashLpStrategySolver() { }
 
   virtual List<MixedStrategyProfile<T> > Solve(const Game &) const;
