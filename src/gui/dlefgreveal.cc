@@ -25,7 +25,7 @@
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "dlefgreveal.h"
 
 

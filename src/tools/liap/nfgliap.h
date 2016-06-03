@@ -23,7 +23,7 @@
 #ifndef NFGLIAP_H
 #define NFGLIAP_H
 
-#include "libgambit/nash.h"
+#include "gambit/nash.h"
 
 using namespace Gambit;
 

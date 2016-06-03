@@ -29,7 +29,7 @@
 #include <wx/image.h>
 #include <wx/splash.h>
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 #include "gambit.h"
 #include "gameframe.h"

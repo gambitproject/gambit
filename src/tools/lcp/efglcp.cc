@@ -24,7 +24,7 @@
 #include <cstdio>
 #include <unistd.h>
 #include <iostream>
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "efglcp.h"
 
 using namespace Gambit;
@@ -38,7 +38,7 @@ public:
   Rational maxpay;
   T eps;
   List<GameInfoset> isets1, isets2;
-  List<BFS<T> > m_list;
+  List<Gambit::linalg::BFS<T> > m_list;
   List<MixedBehaviorProfile<T> > m_equilibria;
 
   bool AddBFS(const LTableau<T> &);
@@ -49,7 +49,7 @@ public:
 template <class T> bool 
 NashLcpBehaviorSolver<T>::Solution::AddBFS(const LTableau<T> &tableau)
 {
-  BFS<T> cbfs;
+  Gambit::linalg::BFS<T> cbfs;
   Vector<T> v(tableau.MinRow(), tableau.MaxRow());
   tableau.BasisVector(v);
 
@@ -84,7 +84,7 @@ NashLcpBehaviorSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
     throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  BFS<T> cbfs;
+  Gambit::linalg::BFS<T> cbfs;
   int i, j;
   Solution solution;
 

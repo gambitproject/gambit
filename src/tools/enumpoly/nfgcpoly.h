@@ -25,7 +25,7 @@
 #ifndef NFGCPOLY_H
 #define NFGCPOLY_H
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "nfgensup.h"
 #include "gpoly.h"
 #include "gpolylst.h"

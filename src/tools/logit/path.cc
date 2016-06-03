@@ -24,8 +24,8 @@
 #include <algorithm>   // for std::max
 #include <iostream>
 
-#include <libgambit/libgambit.h>
-#include <libgambit/sqmatrix.h>
+#include <gambit/gambit.h>
+#include <gambit/sqmatrix.h>
 #include "path.h"
 
 namespace Gambit {

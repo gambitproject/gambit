@@ -28,11 +28,11 @@
 
 template <class T> LTableau<T>::LTableau(const Gambit::Matrix<T> &A, 
 					 const Gambit::Vector<T> &b)
-  : Tableau<T>(A,b)
+  : Gambit::linalg::Tableau<T>(A,b)
 { } 
 
-template <class T> LTableau<T>::LTableau(Tableau<T> &tab)
-  : Tableau<T>(tab) 
+template <class T> LTableau<T>::LTableau(Gambit::linalg::Tableau<T> &tab)
+  : Gambit::linalg::Tableau<T>(tab) 
 { }
 
 template <class T> LTableau<T>::~LTableau(void) 

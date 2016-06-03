@@ -23,8 +23,8 @@
 
 #include <unistd.h>
 #include <iostream>
-#include "libgambit/libgambit.h"
-#include "liblinear/lpsolve.h"
+#include "gambit/gambit.h"
+#include "gambit/linalg/lpsolve.h"
 #include "nfglp.h"
 
 using namespace Gambit;
@@ -48,9 +48,9 @@ NashLpStrategySolver<T>::SolveLP(const Matrix<T> &A,
 				 int nequals,
 				 Array<T> &p_primal, Array<T> &p_dual) const
 {
-  LPSolve<T> LP(A, b, c, nequals);
+  Gambit::linalg::LPSolve<T> LP(A, b, c, nequals);
   if (!LP.IsAborted()) {
-    BFS<T> cbfs;
+    Gambit::linalg::BFS<T> cbfs;
     LP.OptBFS(cbfs);
 
     for (int i = 1; i <= A.NumColumns(); i++) {

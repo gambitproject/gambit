@@ -23,7 +23,7 @@
 #ifndef LP_EFGLP_H
 #define LP_EFGLP_H
 
-#include "libgambit/nash.h"
+#include "gambit/nash.h"
 
 using namespace Gambit;
 

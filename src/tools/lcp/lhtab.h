@@ -32,7 +32,7 @@ template <class T> Vector<T> Make_b1(const Game &);
 template <class T> Matrix<T> Make_A2(const Game &);
 template <class T> Vector<T> Make_b2(const Game &);
 
-template <class T> class LHTableau : public BaseTableau<T> {
+template <class T> class LHTableau : public Gambit::linalg::BaseTableau<T> {
 public:
   /// @name Lifecycle
   //@{
@@ -73,7 +73,7 @@ public:
   
   /// @name Miscellaneous functions
   //@{
-  BFS<T> GetBFS(void);
+  Gambit::linalg::BFS<T> GetBFS(void);
 
   int PivotIn(int i);
   int ExitIndex(int i);

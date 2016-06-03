@@ -29,7 +29,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 using namespace std;
 using namespace Gambit;
@@ -51,6 +51,12 @@ Game ParseGame(char *s) throw (InvalidFileException)
 
 std::string WriteGame(const Game &p_game, const std::string &p_format)
 {
+  if (p_format == "html") {
+    return HTMLGameWriter().Write(p_game);
+  }
+  else if (p_format == "sgame") {
+    return LaTeXGameWriter().Write(p_game);
+  }
   std::ostringstream f;
   p_game->Write(f, p_format);
   return f.str();

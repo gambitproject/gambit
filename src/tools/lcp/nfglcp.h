@@ -23,7 +23,7 @@
 #ifndef LCP_NFGLCP_H
 #define LCP_NFGLCP_H
 
-#include "libgambit/nash.h"
+#include "gambit/nash.h"
 
 using namespace Gambit;
 

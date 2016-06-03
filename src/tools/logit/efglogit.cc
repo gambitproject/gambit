@@ -23,7 +23,7 @@
 
 #include <cmath>
 #include <iostream>
-#include <libgambit/libgambit.h>
+#include <gambit/gambit.h>
 #include "logbehav.imp"
 #include "efglogit.h"
 

@@ -28,7 +28,7 @@
 #include <cerrno>
 #include <iomanip>
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "clique.h"
 #include "vertenum.imp"
 
@@ -163,8 +163,8 @@ template <class T> void Solve(const Game &p_game)
   VertEnum<T> poly1(A1, b1);
   VertEnum<T> poly2(A2, b2);
 
-  const List<BFS<T> > &verts1(poly1.VertexList());
-  const List<BFS<T> > &verts2(poly2.VertexList());
+  const List<Gambit::linalg::BFS<T> > &verts1(poly1.VertexList());
+  const List<Gambit::linalg::BFS<T> > &verts2(poly2.VertexList());
   int v1 = verts1.Length();
   int v2 = verts2.Length();
 
@@ -177,10 +177,10 @@ template <class T> void Solve(const Game &p_game)
   int id1 = 0, id2 = 0;
 
   for (int i2 = 2; i2 <= v2; i2++) {
-    BFS<T> bfs1 = verts2[i2];
+    Gambit::linalg::BFS<T> bfs1 = verts2[i2];
     i++;
     for (int i1 = 2; i1 <= v1; i1++) {
-      BFS<T> bfs2 = verts1[i1];
+      Gambit::linalg::BFS<T> bfs2 = verts1[i1];
 	
       // check if solution is nash 
       // need only check complementarity, since it is feasible

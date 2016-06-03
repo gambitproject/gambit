@@ -35,9 +35,9 @@ import glob
 libgame = Extension("gambit.lib.libgambit",
                     sources=[ "gambit/lib/libgambit.pyx" ] +
                             glob.glob("gambit/lib/*.pxi") +
-                            glob.glob("../libgambit/*.cc") +
-                            glob.glob("../libagg/*.cc") +
-                            glob.glob("../liblinear/*.cc") +
+                            glob.glob("../../library/src/*.cc") +
+                            glob.glob("../../library/src/agg/*.cc") +
+                            glob.glob("../../library/src/linalg/*.cc") +
                             [ "../tools/lcp/nfglcp.cc",
                               "../tools/lcp/efglcp.cc",
                               "../tools/lcp/lhtab.cc",
@@ -48,7 +48,7 @@ libgame = Extension("gambit.lib.libgambit",
                               "../tools/logit/nfglogit.cc",
                               "../tools/logit/efglogit.cc" ],
                     language="c++",
-                    include_dirs=[ "../..", ".." ] )
+                    include_dirs=[ "../..", "../../library/include", ".." ] )
 
 setup(name="gambit",
       version="16.0.0",

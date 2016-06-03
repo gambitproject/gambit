@@ -24,7 +24,7 @@
 #define RECTANGL_H
 
 #include "interval.h"
-#include "libgambit/vector.h"
+#include "gambit/vector.h"
 
 /* This file provides the template class
 

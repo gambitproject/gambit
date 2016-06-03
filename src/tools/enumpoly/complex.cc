@@ -26,7 +26,7 @@
 #include <cfloat>
 #include <cctype>
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "complex.h"
 
 //--------------------------------------------------------------------------
@@ -198,6 +198,6 @@ gComplex TOgComplex(const std::string & /* s */)
   return gComplex(0, 0);
 }
 
-#include "libgambit/vector.imp"
+#include "gambit/vector.imp"
 
 template class Gambit::Vector<gComplex>;

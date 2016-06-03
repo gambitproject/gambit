@@ -305,120 +305,122 @@ EXTRA_DIST = \
 # lib_LTLIBRARIES = libgambit.la
 
 libgambit_la_SOURCES = \
-	src/libgambit/integer.cc \
-	src/libgambit/integer.h \
-	src/libgambit/rational.cc \
-	src/libgambit/rational.h \
-	src/libgambit/shared_ptr.h \
-	src/libgambit/array.h \
-	src/libgambit/list.h \
-	src/libgambit/vector.cc \
-	src/libgambit/vector.h \
-	src/libgambit/vector.imp \
-	src/libgambit/pvector.cc \
-	src/libgambit/pvector.h \
-	src/libgambit/pvector.imp \
-	src/libgambit/dvector.cc \
-	src/libgambit/dvector.h \
-	src/libgambit/dvector.imp \
-	src/libgambit/recarray.h \
-	src/libgambit/matrix.cc \
-	src/libgambit/matrix.h \
-	src/libgambit/matrix.imp \
-	src/libgambit/sqmatrix.cc \
-	src/libgambit/sqmatrix.h \
-	src/libgambit/sqmatrix.imp \
-	src/libgambit/number.h \
-	src/libgambit/game.cc \
-	src/libgambit/game.h \
-	src/libgambit/gameexpl.h \
-	src/libgambit/gametable.cc \
-	src/libgambit/gametable.h \
-	src/libgambit/gametree.cc \
-	src/libgambit/gametree.h \
-	src/libgambit/behav.cc \
-	src/libgambit/behav.h \
-	src/libgambit/behav.imp \
-	src/libgambit/behavitr.cc \
-	src/libgambit/behavitr.h \
-	src/libgambit/behavspt.cc \
-	src/libgambit/behavspt.h \
-	src/libgambit/mixed.cc \
-	src/libgambit/mixed.h \
-	src/libgambit/mixed.imp \
-	src/libgambit/stratitr.cc \
-	src/libgambit/stratitr.h \
-	src/libgambit/stratspt.cc \
-	src/libgambit/stratspt.h \
-	src/libgambit/nash.cc \
-	src/libgambit/nash.h \
-	src/libgambit/file.cc \
-	src/libgambit/libgambit.h \
-	src/libgambit/function.cc \
-	src/libgambit/function.h \
-	src/libgambit/tinyxml.cc \
-	src/libgambit/tinyxml.h \
-	src/libgambit/tinyxmlerror.cc \
-	src/libgambit/tinyxmlparser.cc \
+	library/src/integer.cc \
+	library/include/gambit/integer.h \
+	library/src/rational.cc \
+	library/include/gambit/rational.h \
+	library/include/gambit/shared_ptr.h \
+	library/include/gambit/array.h \
+	library/include/gambit/list.h \
+	library/src/vector.cc \
+	library/include/gambit/vector.h \
+	library/include/gambit/vector.imp \
+	library/src/pvector.cc \
+	library/include/gambit/pvector.h \
+	library/include/gambit/pvector.imp \
+	library/src/dvector.cc \
+	library/include/gambit/dvector.h \
+	library/include/gambit/dvector.imp \
+	library/include/gambit/recarray.h \
+	library/src/matrix.cc \
+	library/include/gambit/matrix.h \
+	library/include/gambit/matrix.imp \
+	library/src/sqmatrix.cc \
+	library/include/gambit/sqmatrix.h \
+	library/include/gambit/sqmatrix.imp \
+	library/include/gambit/number.h \
+	library/src/game.cc \
+	library/include/gambit/game.h \
+	library/include/gambit/gameexpl.h \
+	library/src/gametable.cc \
+	library/include/gambit/gametable.h \
+	library/src/gametree.cc \
+	library/include/gambit/gametree.h \
+	library/src/behav.cc \
+	library/include/gambit/behav.h \
+	library/include/gambit/behav.imp \
+	library/src/behavitr.cc \
+	library/include/gambit/behavitr.h \
+	library/src/behavspt.cc \
+	library/include/gambit/behavspt.h \
+	library/src/mixed.cc \
+	library/include/gambit/mixed.h \
+	library/include/gambit/mixed.imp \
+	library/src/stratitr.cc \
+	library/include/gambit/stratitr.h \
+	library/src/stratspt.cc \
+	library/include/gambit/stratspt.h \
+	library/src/nash.cc \
+	library/include/gambit/nash.h \
+	library/src/file.cc \
+	library/include/gambit/gambit.h \
+	library/src/function.cc \
+	library/include/gambit/function.h \
+	library/src/writer.cc \
+	library/include/gambit/writer.h \
+	library/src/tinyxml.cc \
+	library/include/gambit/tinyxml.h \
+	library/src/tinyxmlerror.cc \
+	library/src/tinyxmlparser.cc \
 	${libagg_la_SOURCES}
 
 libgambitincludedir = $(includedir)/libgambit
 libgambitinclude_HEADERS = \
-	src/libgambit/integer.h \
-	src/libgambit/rational.h \
-	src/libgambit/shared_ptr.h \
-	src/libgambit/array.h \
-	src/libgambit/list.h \
-	src/libgambit/vector.h \
-	src/libgambit/vector.imp \
-	src/libgambit/pvector.h \
-	src/libgambit/pvector.imp \
-	src/libgambit/dvector.h \
-	src/libgambit/dvector.imp \
-	src/libgambit/recarray.h \
-	src/libgambit/matrix.h \
-	src/libgambit/matrix.imp \
-	src/libgambit/sqmatrix.h \
-	src/libgambit/sqmatrix.imp \
-	src/libgambit/number.h \
-	src/libgambit/game.h \
-	src/libgambit/behav.h \
-	src/libgambit/behav.imp \
-	src/libgambit/behavitr.h \
-	src/libgambit/behavspt.h \
-	src/libgambit/mixed.h \
-	src/libgambit/mixed.imp \
-	src/libgambit/stratitr.h \
-	src/libgambit/stratspt.h \
-	src/libgambit/libgambit.h \
-	src/libgambit/function.h \
-	src/libgambit/tinyxml.h \
+	library/include/gambit/integer.h \
+	library/include/gambit/rational.h \
+	library/include/gambit/shared_ptr.h \
+	library/include/gambit/array.h \
+	library/include/gambit/list.h \
+	library/include/gambit/vector.h \
+	library/include/gambit/vector.imp \
+	library/include/gambit/pvector.h \
+	library/include/gambit/pvector.imp \
+	library/include/gambit/dvector.h \
+	library/include/gambit/dvector.imp \
+	library/include/gambit/recarray.h \
+	library/include/gambit/matrix.h \
+	library/include/gambit/matrix.imp \
+	library/include/gambit/sqmatrix.h \
+	library/include/gambit/sqmatrix.imp \
+	library/include/gambit/number.h \
+	library/include/gambit/game.h \
+	library/include/gambit/behav.h \
+	library/include/gambit/behav.imp \
+	library/include/gambit/behavitr.h \
+	library/include/gambit/behavspt.h \
+	library/include/gambit/mixed.h \
+	library/include/gambit/mixed.imp \
+	library/include/gambit/stratitr.h \
+	library/include/gambit/stratspt.h \
+	library/include/gambit/gambit.h \
+	library/include/gambit/function.h \
+	library/include/gambit/tinyxml.h \
 	${libagginclude_HEADERS}
 
 libagg_la_SOURCES = \
-	src/libgambit/gameagg.cc \
-	src/libgambit/gameagg.h \
-	src/libgambit/gamebagg.cc \
-	src/libgambit/gamebagg.h \
-	src/libagg/GrayComposition.h \
-	src/libagg/agg.cc \
-	src/libagg/agg.h \
-	src/libagg/bagg.cc \
-	src/libagg/bagg.h \
-	src/libagg/proj_func.h \
-	src/libagg/trie_map.h \
-        src/libagg/trie_map.imp
+	library/src/gameagg.cc \
+	library/include/gambit/gameagg.h \
+	library/src/gamebagg.cc \
+	library/include/gambit/gamebagg.h \
+	library/include/gambit/agg/gray.h \
+	library/src/agg/agg.cc \
+	library/include/gambit/agg/agg.h \
+	library/src/agg/bagg.cc \
+	library/include/gambit/agg/bagg.h \
+	library/include/gambit/agg/proj_func.h \
+	library/include/gambit/agg/trie_map.h \
+        library/include/gambit/agg/trie_map.imp
 
 libaggincludedir = $(includedir)/libagg
 libagginclude_HEADERS = \
-	src/libgambit/gameagg.h \
-	src/libgambit/gamebagg.h \
-	src/libagg/GrayComposition.h \
-	src/libagg/agg.h \
-	src/libagg/bagg.h \
-	src/libagg/proj_func.h \
-	src/libagg/trie_map.h \
-        src/libagg/trie_map.imp
+	library/include/gambit/gameagg.h \
+	library/include/gambit/gamebagg.h \
+	library/include/gambit/agg/gray.h \
+	library/include/gambit/agg/agg.h \
+	library/include/gambit/agg/bagg.h \
+	library/include/gambit/agg/proj_func.h \
+	library/include/gambit/agg/trie_map.h \
+        library/include/gambit/agg/trie_map.imp
 
 # libgambit_la_LDFLAGS = -no-undefined -version-info 0:0:0
 
@@ -451,34 +453,32 @@ endif
 
 EXTRA_PROGRAMS = gambit-enumpoly gambit
 
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/labenski/include ${WX_CXXFLAGS}
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/library/include -I$(top_srcdir)/src/labenski/include ${WX_CXXFLAGS}
 
 ## Command-line tools
 
 gambit_convert_SOURCES = \
 	${libgambit_la_SOURCES} \
-	src/tools/convert/convert.cc \
-	src/tools/convert/tohtml.cc \
-	src/tools/convert/tosgame.cc
+	src/tools/convert/convert.cc
 
 liblinear_la_SOURCES = \
-	src/liblinear/basis.cc \
-	src/liblinear/basis.h \
-	src/liblinear/bfs.h \
-	src/liblinear/btableau.cc \
-	src/liblinear/btableau.h \
-	src/liblinear/btableau.imp \
-	src/liblinear/lpsolve.cc \
-	src/liblinear/lpsolve.h \
-	src/liblinear/lpsolve.imp \
-	src/liblinear/lptab.cc \
-	src/liblinear/lptab.h \
-	src/liblinear/lptab.imp \
-	src/liblinear/ludecomp.cc \
-	src/liblinear/ludecomp.h \
-	src/liblinear/ludecomp.imp \
-	src/liblinear/tableau.h \
-	src/liblinear/tableau.cc
+	library/src/linalg/basis.cc \
+	library/include/gambit/linalg/basis.h \
+	library/include/gambit/linalg/bfs.h \
+	library/src/linalg/btableau.cc \
+	library/include/gambit/linalg/btableau.h \
+	library/include/gambit/linalg/btableau.imp \
+	library/src/linalg/lpsolve.cc \
+	library/include/gambit/linalg/lpsolve.h \
+	library/include/gambit/linalg/lpsolve.imp \
+	library/src/linalg/lptab.cc \
+	library/include/gambit/linalg/lptab.h \
+	library/include/gambit/linalg/lptab.imp \
+	library/src/linalg/ludecomp.cc \
+	library/include/gambit/linalg/ludecomp.h \
+	library/include/gambit/linalg/ludecomp.imp \
+	library/include/gambit/linalg/tableau.h \
+	library/src/linalg/tableau.cc
 
 gambit_enummixed_SOURCES = \
 	${libgambit_la_SOURCES} \

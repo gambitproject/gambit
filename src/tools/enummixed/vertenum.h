@@ -23,9 +23,9 @@
 #ifndef VERTENUM_H
 #define VERTENUM_H
 
-#include "libgambit/libgambit.h"
-#include "liblinear/lptab.h"
-#include "liblinear/bfs.h"
+#include "gambit/gambit.h"
+#include "gambit/linalg/lptab.h"
+#include "gambit/linalg/bfs.h"
 
 
 //
@@ -50,8 +50,8 @@ private:
   const Gambit::Matrix<T> &A;   
   const Gambit::Vector<T> &b;
   Gambit::Vector<T> btemp,c;
-  Gambit::List<BFS<T> > List;
-  Gambit::List<BFS<T> > DualList;
+  Gambit::List<Gambit::linalg::BFS<T> > List;
+  Gambit::List<Gambit::linalg::BFS<T> > DualList;
   Gambit::List<Gambit::Vector<T> > Verts;
   long npivots,nodes;
   Gambit::List<long> visits,branches;
@@ -59,15 +59,15 @@ private:
   void Enum();
   void Deeper();
   void Report();
-  void Search(LPTableau<T> &tab);
-  void DualSearch(LPTableau<T> &tab);
+  void Search(Gambit::linalg::LPTableau<T> &tab);
+  void DualSearch(Gambit::linalg::LPTableau<T> &tab);
 public:
   VertEnum(const Gambit::Matrix<T> &, const Gambit::Vector<T> &);
-  VertEnum(LPTableau<T> &);
+  VertEnum(Gambit::linalg::LPTableau<T> &);
   virtual ~VertEnum();
 
-  const Gambit::List<BFS<T> > &VertexList() const;
-  const Gambit::List<BFS<T> > &DualVertexList() const;
+  const Gambit::List<Gambit::linalg::BFS<T> > &VertexList() const;
+  const Gambit::List<Gambit::linalg::BFS<T> > &DualVertexList() const;
   void Vertices(Gambit::List<Gambit::Vector<T> > &verts) const;
   long NumPivots() const;
 };

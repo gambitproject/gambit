@@ -23,7 +23,7 @@
 #ifndef EFGLAYOUT_H
 #define EFGLAYOUT_H
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "style.h"
 #include "gamedoc.h"
 

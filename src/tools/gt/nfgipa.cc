@@ -26,7 +26,7 @@
 #include <iostream>
 #include <fstream>
 #include <cerrno>
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 #include "nfgame.h"
 #include "aggame.h"

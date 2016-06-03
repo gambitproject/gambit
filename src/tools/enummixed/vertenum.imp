@@ -31,7 +31,7 @@ VertEnum<T>::VertEnum(const Gambit::Matrix<T> &_A, const Gambit::Vector<T> &_b)
 }
 
 template <class T>
-VertEnum<T>::VertEnum(LPTableau<T> &tab)
+VertEnum<T>::VertEnum(Gambit::linalg::LPTableau<T> &tab)
   : mult_opt(0), depth(0), A(tab.Get_A()), b(tab.Get_b()), 
     btemp(tab.Get_b()), c(tab.GetCost()), 
     npivots(0), nodes(0)
@@ -86,7 +86,7 @@ template <class T> void VertEnum<T>::Enum()
   btemp = -(T)1;
   c = (T)1;
 
-  LPTableau<T> tab(A,b);
+  Gambit::linalg::LPTableau<T> tab(A,b);
   tab.SetCost(c);
   
   // gout << "\nInitial Tableau = \n";
@@ -123,7 +123,7 @@ template <class T> void VertEnum<T>::Deeper()
   nodes++;
 }
 
-template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
+template <class T> void VertEnum<T>::Search(Gambit::linalg::LPTableau<T> &tab)
 {
   int k;
   Deeper();
@@ -138,7 +138,7 @@ template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
   tab.ReversePivots(PivotList);  // get list of reverse pivots
   if(PivotList.Length()) {
     branches[depth]+=PivotList.Length();
-    LPTableau<T> tab2(tab);
+    Gambit::linalg::LPTableau<T> tab2(tab);
     for(k=1;k<=PivotList.Length();k++) {
       pivot = PivotList[k];
       npivots++;
@@ -151,7 +151,7 @@ template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
   depth--;
 }
   
-template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
+template <class T> void VertEnum<T>::DualSearch(Gambit::linalg::LPTableau<T> &tab)
 {
   int i,j;
   Deeper();
@@ -163,7 +163,7 @@ template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
   // gout << "\nin DualSearch";
   if(mult_opt) {
     tab.SetConst(btemp);    // install artifical constraint vector
-    LPTableau<T> tab2(tab);
+    Gambit::linalg::LPTableau<T> tab2(tab);
     for (i=b.First();i<=b.Last(); i++) {
       if(b[i]==(T)0)
 	for(j=-b.Last();j<=c.Last();j++) {
@@ -183,12 +183,12 @@ template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
   depth--;
 }
   
-template <class T> const Gambit::List<BFS<T> > &VertEnum<T>::VertexList() const
+template <class T> const Gambit::List<Gambit::linalg::BFS<T> > &VertEnum<T>::VertexList() const
 { 
   return List;
 }
 
-template <class T> const Gambit::List<BFS<T> > &VertEnum<T>::DualVertexList() const
+template <class T> const Gambit::List<Gambit::linalg::BFS<T> > &VertEnum<T>::DualVertexList() const
 { 
   return DualList;
 }

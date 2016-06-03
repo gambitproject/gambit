@@ -24,7 +24,7 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "nfglcp.h"
 #include "lhtab.h"
 
@@ -33,12 +33,12 @@ using namespace Gambit;
 template <class T>
 class NashLcpStrategySolver<T>::Solution {
 public:
-  List<BFS<T> > m_bfsList;
+  List<Gambit::linalg::BFS<T> > m_bfsList;
   List<MixedStrategyProfile<T> > m_equilibria;
 
-  bool Contains(const BFS<T> &p_bfs) const
+  bool Contains(const Gambit::linalg::BFS<T> &p_bfs) const
   { return m_bfsList.Contains(p_bfs); }
-  void push_back(const BFS<T> &p_bfs)
+  void push_back(const Gambit::linalg::BFS<T> &p_bfs)
   { m_bfsList.push_back(p_bfs); }
 
   int EquilibriumCount(void) const { return m_equilibria.size(); }
@@ -56,7 +56,7 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game,
 				LHTableau<T> &p_tableau,
 				Solution &p_solution) const
 {
-  BFS<T> cbfs(p_tableau.GetBFS());
+  Gambit::linalg::BFS<T> cbfs(p_tableau.GetBFS());
   if (p_solution.Contains(cbfs)) {
     return false;
   }

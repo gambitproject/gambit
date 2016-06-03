@@ -21,7 +21,7 @@
 //
 
 #include "lhtab.h"
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 
 using namespace Gambit;
 
@@ -181,7 +181,7 @@ void LHTableau<T>::Pivot(int outrow, int inlabel)
 //                   LHTableau<T>: Miscellaneous functions
 //---------------------------------------------------------------------------
 
-template <class T> BFS<T> LHTableau<T>::GetBFS(void)
+template <class T> Gambit::linalg::BFS<T> LHTableau<T>::GetBFS(void)
 {
   T1.BasisVector(tmp1);
   T2.BasisVector(tmp2);
@@ -191,7 +191,7 @@ template <class T> BFS<T> LHTableau<T>::GetBFS(void)
   for (int i = tmp2.First(); i <= tmp2.Last(); i++) {
     solution[i] = tmp2[i];
   }
-  BFS<T> cbfs;
+  Gambit::linalg::BFS<T> cbfs;
   for (int i = MinCol(); i <= MaxCol(); i++) {
     if (Member(i)) {
       cbfs.insert(i, solution[Find(i)]);

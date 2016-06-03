@@ -27,7 +27,7 @@
 #include <cerrno>
 #include <unistd.h>
 #include <getopt.h>
-#include "libgambit/libgambit.h"
+#include "gambit/gambit.h"
 #include "efglogit.h"
 #include "nfglogit.h"
 

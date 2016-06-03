@@ -24,7 +24,7 @@
 #define GPOLYLST_H
 
 #include "odometer.h"
-#include <libgambit/sqmatrix.h>
+#include "gambit/sqmatrix.h"
 #include "gpoly.h"
 
 //!
