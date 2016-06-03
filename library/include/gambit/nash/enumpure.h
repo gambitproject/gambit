@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/enumpure/enumpure.cc
-// Compute pure-strategy equilibria in extensive form games
+// FILE: library/include/gambit/nash/enumpure.h
+// Enumerate pure-strategy equilibrium profiles of games
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,18 +20,21 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef ENUMPURE_H
-#define ENUMPURE_H
+#ifndef GAMBIT_NASH_ENUMPURE_H
+#define GAMBIT_NASH_ENUMPURE_H
 
-#include "gambit/gambit.h"
 #include "gambit/nash.h"
 
 namespace Gambit {
 namespace Nash {
 
+///
+/// Enumerate pure-strategy Nash equilibria of a game.  By definition,
+/// pure-strategy equilibrium uses the strategic representation of a game.
+/// 
 class EnumPureStrategySolver : public StrategySolver<Rational> {
 public:
-   EnumPureStrategySolver(Gambit::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0) 
+   EnumPureStrategySolver(shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0) 
     : StrategySolver<Rational>(p_onEquilibrium) { }
   virtual ~EnumPureStrategySolver()  { }
 
@@ -55,10 +58,16 @@ EnumPureStrategySolver::Solve(const Game &p_game) const
   return solutions;
 }
 
-
+///
+/// Enumerate pure-strategy agent Nash equilibria of a game.  This uses
+/// the extensive representation.  Agent Nash equilibria are not necessarily
+/// Nash equilibria, as these consider deviations only at one information
+/// set (rather than possible deviations by the same player at multiple
+/// information sets.
+///
 class EnumPureAgentSolver : public BehavSolver<Rational> {
 public:
-  EnumPureAgentSolver(Gambit::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
+  EnumPureAgentSolver(shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
     : BehavSolver<Rational>(p_onEquilibrium) { }
   virtual ~EnumPureAgentSolver()  { }
 
@@ -79,7 +88,7 @@ EnumPureAgentSolver::Solve(const BehaviorSupportProfile &p_support) const
   return solutions;
 }
 
-}  // end namespace Gambit::Nash
+}  // end namespace Nash
 }  // end namespace Gambit
  
-#endif  // ENUMPURE_H
+#endif  // GAMBIT_NASH_ENUMPURE_H
