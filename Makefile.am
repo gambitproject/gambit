@@ -362,6 +362,7 @@ libgambit_la_SOURCES = \
 	library/include/gambit/tinyxml.h \
 	library/src/tinyxmlerror.cc \
 	library/src/tinyxmlparser.cc \
+	library/include/gambit/nash/enumpure.h \
 	${libagg_la_SOURCES}
 
 libgambitincludedir = $(includedir)/libgambit
@@ -478,7 +479,13 @@ liblinear_la_SOURCES = \
 	library/include/gambit/linalg/ludecomp.h \
 	library/include/gambit/linalg/ludecomp.imp \
 	library/include/gambit/linalg/tableau.h \
-	library/src/linalg/tableau.cc
+	library/src/linalg/tableau.cc \
+	library/src/linalg/lemketab.cc \
+	library/include/gambit/linalg/lemketab.h \
+	library/include/gambit/linalg/lemketab.imp \
+	library/src/linalg/lhtab.cc \
+	library/include/gambit/linalg/lhtab.h \
+	library/include/gambit/linalg/lhtab.imp
 
 gambit_enummixed_SOURCES = \
 	${libgambit_la_SOURCES} \
@@ -600,8 +607,7 @@ gambit_enumpoly_SOURCES = \
 
 gambit_enumpure_SOURCES = \
 	${libgambit_la_SOURCES} \
-	src/tools/enumpure/enumpure.cc \
-        src/tools/enumpure/enumpure.h
+	src/tools/enumpure/enumpure.cc 
 
 gambit_gnm_SOURCES = \
 	${libgambit_la_SOURCES} \
@@ -634,12 +640,6 @@ gambit_ipa_SOURCES = \
 gambit_lcp_SOURCES = \
 	${libgambit_la_SOURCES} \
 	${liblinear_la_SOURCES} \
-	src/tools/lcp/lemketab.cc \
-	src/tools/lcp/lemketab.h \
-	src/tools/lcp/lemketab.imp \
-	src/tools/lcp/lhtab.cc \
-	src/tools/lcp/lhtab.h \
-	src/tools/lcp/lhtab.imp \
 	src/tools/lcp/efglcp.cc \
 	src/tools/lcp/efglcp.h \
 	src/tools/lcp/nfglcp.cc \

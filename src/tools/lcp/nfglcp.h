@@ -28,7 +28,11 @@
 using namespace Gambit;
 using namespace Gambit::Nash;
 
+namespace Gambit {
+namespace linalg {
 template <class T> class LHTableau;
+}
+}
 
 template <class T> class NashLcpStrategySolver : public StrategySolver<T> {
 public:
@@ -45,8 +49,8 @@ private:
 
   class Solution;
 
-  bool OnBFS(const Game &, LHTableau<T> &, Solution &) const;
-  void AllLemke(const Game &, int j, LHTableau<T> &, Solution &, int) const;
+  bool OnBFS(const Game &, Gambit::linalg::LHTableau<T> &, Solution &) const;
+  void AllLemke(const Game &, int j, Gambit::linalg::LHTableau<T> &, Solution &, int) const;
 };
 
 

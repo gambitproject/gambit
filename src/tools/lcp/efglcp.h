@@ -28,7 +28,11 @@
 using namespace Gambit;
 using namespace Gambit::Nash;
 
-template <class T> class LTableau;
+namespace Gambit {
+namespace linalg {
+template <class T> class LemkeTableau;
+}
+}
 
 template <class T> class NashLcpBehaviorSolver : public BehavSolver<T> {
 public:
@@ -47,9 +51,9 @@ private:
 
   void FillTableau(const BehaviorSupportProfile &, Matrix<T> &, const GameNode &, T,
 		   int, int, int, int, Solution &) const;
-  void AllLemke(const BehaviorSupportProfile &, int dup, LTableau<T> &B,
+  void AllLemke(const BehaviorSupportProfile &, int dup, Gambit::linalg::LemkeTableau<T> &B,
 	       int depth, Matrix<T> &, Solution &) const; 
-  void GetProfile(const BehaviorSupportProfile &, const LTableau<T> &tab, 
+  void GetProfile(const BehaviorSupportProfile &, const Gambit::linalg::LemkeTableau<T> &tab, 
 		  MixedBehaviorProfile<T> &, const Vector<T> &, 
 		  const GameNode &n, int, int,
 		  Solution &) const;

@@ -40,8 +40,6 @@ libgame = Extension("gambit.lib.libgambit",
                             glob.glob("../../library/src/linalg/*.cc") +
                             [ "../tools/lcp/nfglcp.cc",
                               "../tools/lcp/efglcp.cc",
-                              "../tools/lcp/lhtab.cc",
-                              "../tools/lcp/lemketab.cc",
                               "../tools/lp/nfglp.cc",
                               "../tools/lp/efglp.cc",
                               "../tools/logit/path.cc",

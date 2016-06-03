@@ -25,10 +25,91 @@
 #include <iostream>
 
 #include "gambit/gambit.h"
+#include "gambit/linalg/lhtab.h"
 #include "nfglcp.h"
-#include "lhtab.h"
 
 using namespace Gambit;
+using namespace Gambit::linalg;
+
+template <class T> Matrix<T> Make_A1(const Game &p_game)
+{
+  int n1 = p_game->Players()[1]->Strategies().size();
+  int n2 = p_game->Players()[2]->Strategies().size();
+  Matrix<T> A1(1, n1, n1+1, n1+n2);
+
+  PureStrategyProfile profile = p_game->NewPureStrategyProfile();
+
+  Rational min = p_game->GetMinPayoff();
+  if (min > Rational(0)) {
+    min = Rational(0);
+  }
+  min -= Rational(1);
+
+  Rational max = p_game->GetMaxPayoff();
+  if (max < Rational(0)) {
+    max = Rational(0);
+  }
+
+  Rational fac(1, max - min);
+
+  for (int i = 1; i <= n1; i++)  {
+    profile->SetStrategy(p_game->Players()[1]->Strategies()[i]);
+    for (int j = 1; j <= n2; j++)  {
+      profile->SetStrategy(p_game->Players()[2]->Strategies()[j]);
+      A1(i, n1 + j) = fac * (profile->GetPayoff(1) - min);
+    }
+  }
+  return A1;
+}
+
+template <class T> Matrix<T> Make_A2(const Game &p_game)
+{
+  int n1 = p_game->Players()[1]->Strategies().size();
+  int n2 = p_game->Players()[2]->Strategies().size();
+  Matrix<T> A2(n1+1, n1+n2, 1, n1);
+
+  PureStrategyProfile profile = p_game->NewPureStrategyProfile();
+  
+  Rational min = p_game->GetMinPayoff();
+  if (min > Rational(0)) {
+    min = Rational(0);
+  }
+  min -= Rational(1);
+
+  Rational max = p_game->GetMaxPayoff();
+  if (max < Rational(0)) {
+    max = Rational(0);
+  }
+
+  Rational fac(1, max - min);
+
+  for (int i = 1; i <= n1; i++)  {
+    profile->SetStrategy(p_game->Players()[1]->Strategies()[i]);
+    for (int j = 1; j <= n2; j++)  {
+      profile->SetStrategy(p_game->Players()[2]->Strategies()[j]);
+      A2(n1 + j, i) = fac * (profile->GetPayoff(2) - min);
+    }
+  }
+  return A2;
+}
+
+template <class T> Vector<T> Make_b1(const Game &p_game)
+{
+  Vector<T> b1(1, p_game->Players()[1]->Strategies().size());
+  b1 = -(T) 1;
+  return b1;
+}
+
+template <class T> Vector<T> Make_b2(const Game &p_game)
+{
+  Vector<T> b2(p_game->Players()[1]->Strategies().size() + 1,
+	       p_game->Players()[1]->Strategies().size() +
+	       p_game->Players()[2]->Strategies().size());
+  b2 = -(T) 1;
+  return b2;
+}
+
+
 
 template <class T>
 class NashLcpStrategySolver<T>::Solution {

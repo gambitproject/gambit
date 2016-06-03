@@ -220,4 +220,9 @@ public:
  
 }  // namespace Gambit
 
+
+/// Expose individual Nash solvers
+
+#include "gambit/nash/enumpure.h"
+
 #endif  // LIBGAMBIT_NASH_H

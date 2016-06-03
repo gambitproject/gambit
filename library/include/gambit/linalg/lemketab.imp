@@ -20,25 +20,28 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "lemketab.h"
+#include "gambit/linalg/lemketab.h"
+
+namespace Gambit {
+namespace linalg {
 
 //---------------------------------------------------------------------------
 //                        Lemke Tableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> LTableau<T>::LTableau(const Gambit::Matrix<T> &A, 
-					 const Gambit::Vector<T> &b)
-  : Gambit::linalg::Tableau<T>(A,b)
+template <class T> LemkeTableau<T>::LemkeTableau(const Matrix<T> &A, 
+					 const Vector<T> &b)
+  : Tableau<T>(A,b)
 { } 
 
-template <class T> LTableau<T>::LTableau(Gambit::linalg::Tableau<T> &tab)
-  : Gambit::linalg::Tableau<T>(tab) 
+template <class T> LemkeTableau<T>::LemkeTableau(const Tableau<T> &tab)
+  : Tableau<T>(tab) 
 { }
 
-template <class T> LTableau<T>::~LTableau(void) 
+template <class T> LemkeTableau<T>::~LemkeTableau(void) 
 { }
 
-template <class T> int LTableau<T>::SF_PivotIn(int inlabel)
+template <class T> int LemkeTableau<T>::SF_PivotIn(int inlabel)
 { 
   //* gout << "\n inlabel = " << inlabel;
   int outindex = SF_ExitIndex(inlabel);
@@ -54,7 +57,7 @@ template <class T> int LTableau<T>::SF_PivotIn(int inlabel)
   return outlabel;
 }
 
-template <class T> int LTableau<T>::PivotIn(int inlabel)
+template <class T> int LemkeTableau<T>::PivotIn(int inlabel)
 { 
   //   gout << "\n inlabel = " << inlabel;
   int outindex = ExitIndex(inlabel);
@@ -70,13 +73,13 @@ template <class T> int LTableau<T>::PivotIn(int inlabel)
   return outlabel;
 }
 
-template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
+template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
 {
-  Gambit::Array<int> BestSet;
+  Array<int> BestSet;
   int i, c;
   T ratio, tempmax;
-  Gambit::Vector<T> incol(this->MinRow(), this->MaxRow());
-  Gambit::Vector<T> col(this->MinRow(), this->MaxRow());
+  Vector<T> incol(this->MinRow(), this->MaxRow());
+  Vector<T> col(this->MinRow(), this->MaxRow());
   
   this->SolveColumn(inlabel,incol);
   //* gout << "\nincol = " << incol;
@@ -145,13 +148,13 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
 //
 
 
-template <class T> int LTableau<T>::ExitIndex(int inlabel)
+template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
 {
-  Gambit::Array<int> BestSet;
+  Array<int> BestSet;
   int i, c;
   T ratio, tempmax;
-  Gambit::Vector<T> incol(this->MinRow(), this->MaxRow());
-  Gambit::Vector<T> col(this->MinRow(), this->MaxRow());
+  Vector<T> incol(this->MinRow(), this->MaxRow());
+  Vector<T> col(this->MinRow(), this->MaxRow());
   
   this->SolveColumn(inlabel,incol);
   //   gout << "\nincol = " << incol;
@@ -211,7 +214,7 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
 // Executes one step of the Lemke-Howson algorithm
 //
 
-template <class T> int LTableau<T>::SF_LCPPath(int dup)
+template <class T> int LemkeTableau<T>::SF_LCPPath(int dup)
 {
   int enter, exit;
   enter = dup;
@@ -240,7 +243,7 @@ template <class T> int LTableau<T>::SF_LCPPath(int dup)
   return 1;
 }
 
-template <class T> int LTableau<T>::LemkePath(int dup)
+template <class T> int LemkeTableau<T>::LemkePath(int dup)
 {
 //  if (!At_CBFS())  return 0;
   int enter, exit;
@@ -268,3 +271,5 @@ template <class T> int LTableau<T>::LemkePath(int dup)
   return 1;
 }
 
+}  // end namespace Gambit::linalg
+}  // end namespace Gambit

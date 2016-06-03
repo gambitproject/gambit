@@ -20,29 +20,32 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LEMKETAB_H
-#define LEMKETAB_H
+#ifndef GAMBIT_LINALG_LEMKETAB_H
+#define GAMBIT_LINALG_LEMKETAB_H
 
 #include "gambit/linalg/tableau.h"
 
-template <class T> class LTableau : public Gambit::linalg::Tableau<T> {
+namespace Gambit {
+namespace linalg {
+
+template <class T> class LemkeTableau : public Tableau<T> {
 protected:
 //  T eps2;
 public:
 //   LTableau(void);
-  class BadPivot : public Gambit::Exception  {
+  class BadPivot : public Exception  {
   public:
     virtual ~BadPivot() throw() { }
     const char *what(void) const throw() { return "Bad Pivot in LTableau"; }
   };
-  class BadExitIndex : public Gambit::Exception  {
+  class BadExitIndex : public Exception  {
   public:
     virtual ~BadExitIndex() throw() { }
     const char *what(void) const throw() { return "Bad Exit Index in LTableau"; }
   };
-  LTableau(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b);
-  LTableau(Gambit::linalg::Tableau<T> &);
-  virtual ~LTableau();
+  LemkeTableau(const Matrix<T> &A, const Vector<T> &b);
+  LemkeTableau(const Tableau<T> &);
+  virtual ~LemkeTableau();
 
   int SF_PivotIn(int i);
   int SF_ExitIndex(int i);
@@ -52,7 +55,10 @@ public:
   int LemkePath(int dup); // follow a path of ACBFS's from one CBFS to another
 };
 
-#endif     // LEMKETAB_H
+}  // end namespace Gambit::linalg
+}  // end namespace Gambit
+ 
+#endif     // GAMBIT_LINALG_LEMKETAB_H
 
 
 

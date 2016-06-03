@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/lhtab.cc
-// Tableau class for Lemke-Howson algorithm
+// FILE: src/tools/lcp/lemketab.cc
+// Lemke tableau instantiations
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,22 +20,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "lhtab.imp"
+#include "gambit/linalg/lemketab.imp"
 
-template class LHTableau<double>;
-template class LHTableau<Rational>;
+using namespace Gambit::linalg;
 
-template Matrix<double> Make_A1<double>(const Game &);
-template Matrix<Rational> Make_A1<Rational>(const Game &);
-
-template Vector<double> Make_b1<double>(const Game &);
-template Vector<Rational> Make_b1<Rational>(const Game &);
-
-template Matrix<double> Make_A2<double>(const Game &);
-template Matrix<Rational> Make_A2<Rational>(const Game &);
-
-template Vector<double> Make_b2<double>(const Game &);
-template Vector<Rational> Make_b2<Rational>(const Game &);
-
-
-
+template class LemkeTableau<double>;
+template class LemkeTableau<Gambit::Rational>;

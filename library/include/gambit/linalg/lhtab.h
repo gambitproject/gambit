@@ -20,19 +20,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LCP_LHTAB_H
-#define LCP_LHTAB_H
+#ifndef GAMBIT_LINALG_LHTAB_H
+#define GAMBIT_LINALG_LHTAB_H
 
-#include "lemketab.h"
+#include "gambit/linalg/lemketab.h"
 
-using namespace Gambit;
+namespace Gambit {
+namespace linalg {
 
-template <class T> Matrix<T> Make_A1(const Game &);
-template <class T> Vector<T> Make_b1(const Game &);
-template <class T> Matrix<T> Make_A2(const Game &);
-template <class T> Vector<T> Make_b2(const Game &);
-
-template <class T> class LHTableau : public Gambit::linalg::BaseTableau<T> {
+template <class T> class LHTableau : public BaseTableau<T> {
 public:
   /// @name Lifecycle
   //@{
@@ -73,7 +69,7 @@ public:
   
   /// @name Miscellaneous functions
   //@{
-  Gambit::linalg::BFS<T> GetBFS(void);
+  BFS<T> GetBFS(void);
 
   int PivotIn(int i);
   int ExitIndex(int i);
@@ -82,9 +78,12 @@ public:
   //@}
 
 protected:
-  LTableau<T> T1,T2;
-  Vector<T> tmp1,tmp2; // temporary column vectors, to avoid allocation
+  LemkeTableau<T> T1, T2;
+  Vector<T> tmp1, tmp2; // temporary column vectors, to avoid allocation
   Vector<T> solution;
 };
 
-#endif  // LCP_LHTAB_H
+}  // end namespace Gambit::linalg
+}  // end namespace Gambit
+ 
+#endif  // GAMBIT_LINALG_LHTAB_H

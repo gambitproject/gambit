@@ -20,7 +20,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-cdef extern from "tools/enumpure/enumpure.h":
+cdef extern from "gambit/nash/enumpure.h":
     cdef cppclass c_NashEnumPureStrategySolver "EnumPureStrategySolver":
         c_NashEnumPureStrategySolver()
         c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
