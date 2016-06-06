@@ -624,7 +624,7 @@ mptoi (lrs_mp a)		/* convert lrs_mp to long integer */
 
 
 #ifdef PLRS
-string prat (char name[], lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/Din  */
+string prat (const char name[], lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/Din  */
 {
 
 	
@@ -663,7 +663,7 @@ string prat (char name[], lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/Din  */
 	return str;
 }
 
-char *cprat (char name[], lrs_mp Nin, lrs_mp Din)
+char *cprat (const char name[], lrs_mp Nin, lrs_mp Din)
 {
         char *ret;
         unsigned long len;
@@ -715,7 +715,7 @@ string pmp (char name[], lrs_mp a)	/*print the long precision integer a */
 	return str;
 }
 #else
-void prat (char name[], lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/Din  */
+void prat (const char name[], lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/Din  */
 {
 	 lrs_mp Nt, Dt;
 	long i;

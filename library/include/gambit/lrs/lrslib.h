@@ -1,6 +1,6 @@
 /* lrslib.hpp (vertex enumeration using lexicographic reverse search) */
 #define TITLE "lrslib "
-#define VERSION "v.6.2 2016.3.28"   
+#define LRS_VERSION "v.6.2 2016.3.28"   
 #define AUTHOR "*Copyright (C) 1995,2016, David Avis   avis@cs.mcgill.ca "
 
 /* This program is free software; you can redistribute it and/or modify
@@ -240,8 +240,8 @@ long lrs_getnextbasis (lrs_dic ** dict_p, lrs_dat * Q, long prune); /* gets next
 long lrs_getsolution (lrs_dic * P, lrs_dat * Q, lrs_mp_vector output, long col);
 long lrs_getray (lrs_dic * P, lrs_dat * Q, long col, long comment, lrs_mp_vector output);
 long lrs_getvertex (lrs_dic * P, lrs_dat * Q, lrs_mp_vector output);
-void lrs_close (char *name);	/* close lrs lib program "name"                 */
-long lrs_init (char *name);	/* initialize lrslib and arithmetic package for prog "name" */
+void lrs_close (const char *name);	/* close lrs lib program "name"                 */
+long lrs_init (const char *name);	/* initialize lrslib and arithmetic package for prog "name" */
 void lrs_lpoutput(lrs_dic * P,lrs_dat * Q, lrs_mp_vector output); /* print LP primal and dual solutions */
 void lrs_printcobasis (lrs_dic * P, lrs_dat * Q, long col); /* print cobasis for column col(verted or ray)  */
 void lrs_printoutput (lrs_dat * Q, lrs_mp_vector output); /* print output array                           */

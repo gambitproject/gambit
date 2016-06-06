@@ -110,7 +110,9 @@ lrs_main (int argc, char *argv[])
 #else
   if ( !lrs_init ("\n*lrs:"))
     return 1;
+#ifdef LRS_LOGGING
   printf("\n%s",AUTHOR);
+#endif  // LRS_LOGGING
 #endif
 
 /*********************************************************************************/
@@ -1096,19 +1098,22 @@ lrs_getsolution (lrs_dic * P, lrs_dat * Q, lrs_mp_vector output, long col)
 
 
 long
-lrs_init (char *name)       /* returns TRUE if successful, else FALSE */
+lrs_init (const char *name)       /* returns TRUE if successful, else FALSE */
 {
-
+#ifdef LRS_LOGGING
   printf ("%s", name);
   printf (TITLE);
-  printf (VERSION);
+  printf (LRS_VERSION);
   printf ("(");
   printf (BIT); 
   printf (","); 
   printf (ARITH);
+#endif // LRS_LOGGING
   if (!lrs_mp_init (ZERO, stdin, stdout))  /* initialize arithmetic */
     return FALSE;
+#ifdef LRS_LOGGING
   printf (")");
+#endif // LRS_LOGGING
 
 
   lrs_global_count = 0;
@@ -1120,12 +1125,12 @@ lrs_init (char *name)       /* returns TRUE if successful, else FALSE */
 }
 
 void 
-lrs_close (char *name)
+lrs_close (const char *name)
 {
-
+#ifdef LRS_LOGGING
   fprintf (lrs_ofp, "\n*%s", name);
   fprintf (lrs_ofp, TITLE);
-  fprintf (lrs_ofp, VERSION);
+  fprintf (lrs_ofp, LRS_VERSION);
   fprintf (lrs_ofp, "(");
   fprintf (lrs_ofp, BIT);
   fprintf (lrs_ofp, ",");
@@ -1141,6 +1146,7 @@ lrs_close (char *name)
 #endif
 
   fprintf (lrs_ofp, "\n");
+#endif // LRS_LOGGING
   fclose (lrs_ifp);
   if (lrs_ofp != stdout)
     fclose (lrs_ofp);

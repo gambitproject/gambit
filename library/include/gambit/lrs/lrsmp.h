@@ -178,12 +178,12 @@ void mulint (lrs_mp a, lrs_mp b, lrs_mp c);	/* multiply two integers a*b --> c  
 void normalize (lrs_mp a);	/* normalize lrs_mp after computation             */
 #ifdef PLRS
 string pmp (char name[], lrs_mp a);	/* print the long precision integer a             */
-string prat (char name[], lrs_mp Nt, lrs_mp Dt);	/* reduce and print  Nt/Dt                        */
-char *cprat(char name[], lrs_mp Nt, lrs_mp Dt); /* C version of prat */
+string prat (const char name[], lrs_mp Nt, lrs_mp Dt);	/* reduce and print  Nt/Dt                        */
+char *cprat(const char name[], lrs_mp Nt, lrs_mp Dt); /* C version of prat */
 long plrs_readrat (lrs_mp Na, lrs_mp Da, const char * rat);	/* take a rational number and convert to lrs_mp   */
 #else
 void pmp (char name[], lrs_mp a);	/* print the long precision integer a             */
-void prat (char name[], lrs_mp Nt, lrs_mp Dt);	/* reduce and print  Nt/Dt                        */
+void prat (const char name[], lrs_mp Nt, lrs_mp Dt);	/* reduce and print  Nt/Dt                        */
 #endif
 long readrat (lrs_mp Na, lrs_mp Da);	/* read a rational or int and convert to lrs_mp   */
 void reduce (lrs_mp Na, lrs_mp Da);	/* reduces Na Da by gcd(Na,Da)                    */
