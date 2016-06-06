@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
     { "version", 0, NULL, 'v'  },
     { 0,    0,    0,    0   }
   };
-  while ((c = getopt_long(argc, argv, "d:DvhqcS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:DvhqcSL", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr); exit(1);

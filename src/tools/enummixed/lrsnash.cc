@@ -1,15 +1,12 @@
 //
-// $Source$
-// $Date$
-// $Revision$
+// This file is part of Gambit
+// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 //
-// DESCRIPTION:
+// FILE: src/tools/enummixed/lrsnash.cc
 // Compute Nash equilibria via enumerating extreme points, lrslib version
 //
-// This file is part of Gambit
-// Copyright (c) 2006, The Gambit Project
-// Based on the implementation in lrslib 4.2b, which is
-// Copyright (c) 1995-2005, David Avis
+// Based on the implementation in lrslib 6.2, which is
+// Copyright (c) 1995-2016, David Avis <avis@cs.mcgill.ca>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,6 +32,9 @@
 // fix bugs or create enhancements that are relevant, it will be fairly
 // easy to port them to this program.    -- TLT, 23.viii.2006
 //
+// The interface appears to be stable enough, as updating to use
+// lrslib 6.2 required no changes to this file!  -- TLT, 6.vi.2016
+//
 
 #include <iostream>
 #include <cstdio>
@@ -45,7 +45,7 @@
 using namespace Gambit;
 
 extern "C" {
-#include "lrslib.h"
+#include "gambit/lrs/lrslib.h"
 }
 
 //==========================================================================

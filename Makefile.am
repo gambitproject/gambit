@@ -363,7 +363,7 @@ libgambit_la_SOURCES = \
 	library/src/tinyxmlerror.cc \
 	library/src/tinyxmlparser.cc \
 	library/include/gambit/nash/enumpure.h \
-	${libagg_la_SOURCES}
+	${libagg_la_SOURCES} 
 
 libgambitincludedir = $(includedir)/libgambit
 libgambitinclude_HEADERS = \
@@ -422,6 +422,14 @@ libagginclude_HEADERS = \
 	library/include/gambit/agg/proj_func.h \
 	library/include/gambit/agg/trie_map.h \
         library/include/gambit/agg/trie_map.imp
+
+lrslib_la_SOURCES = \
+	library/include/gambit/lrs/lrslib.h \
+	library/src/lrs/lrslib.c \
+	library/include/gambit/lrs/lrsmp.h \
+	library/src/lrs/lrsmp.c \
+	library/include/gambit/lrs/lrsnashlib.h \
+	library/src/lrs/lrsnashlib.c
 
 # libgambit_la_LDFLAGS = -no-undefined -version-info 0:0:0
 
@@ -490,10 +498,7 @@ liblinear_la_SOURCES = \
 gambit_enummixed_SOURCES = \
 	${libgambit_la_SOURCES} \
 	${liblinear_la_SOURCES} \
-	src/tools/enummixed/lrsmp.h \
-	src/tools/enummixed/lrsmp.c \
-	src/tools/enummixed/lrslib.h \
-	src/tools/enummixed/lrslib.c \
+	${lrslib_la_SOURCES} \
 	src/tools/enummixed/lrsnash.cc \
 	src/tools/enummixed/vertenum.h \
 	src/tools/enummixed/vertenum.imp \
