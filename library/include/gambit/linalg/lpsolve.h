@@ -56,6 +56,9 @@ private:
   void Solve(int phase = 0);
   int Enter(void);
   int Exit(int);
+
+  static Array<int> Artificials(const Vector<T> &);
+  
 public:
   LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &B, const Gambit::Vector<T> &C,
 	  int nequals);   // nequals = number of equalities (last nequals rows)

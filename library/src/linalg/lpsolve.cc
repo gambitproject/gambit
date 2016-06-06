@@ -23,12 +23,12 @@
 #include "gambit/linalg/lpsolve.imp"
 #include "gambit/rational.h"
 
-using namespace Gambit;
-using namespace Gambit::linalg;
-
+namespace Gambit {
+namespace linalg {
+   
 template class LPSolve<double>;
 template class LPSolve<Rational>;
 
-template Array<int> Artificials(const Vector<double> &);
-template Array<int> Artificials(const Vector<Rational> &);
-
+}  // end namespace Gambit::linalg
+}  // end namespace Gambit
+  

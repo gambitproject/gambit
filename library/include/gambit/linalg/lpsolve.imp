@@ -26,14 +26,6 @@ namespace Gambit {
 
 namespace linalg {
 
-template <class T> Array<int> Artificials(const Vector<T> &b) 
-{
-  Array<int> ret;
-  for(int i=b.First();i<=b.Last();i++)
-    if(b[i]<(T)0) ret.Append(i);
-  return ret;
-}
-
 template <class T> 
 LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
 		    const Vector<T> &c, int nequals)
@@ -202,6 +194,17 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
     }     
   }     
   // gout << "\n--- End LPSolve ---\n";
+}
+
+template <class T> Array<int> LPSolve<T>::Artificials(const Vector<T> &b)
+{
+  Array<int> ret;
+  for (int i = b.First(); i <= b.Last(); i++) {
+    if (b[i] < (T) 0) {
+      ret.Append(i);
+    }
+  }
+  return ret;
 }
 
 //template <class T> LPSolve<T>::
