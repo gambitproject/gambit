@@ -171,7 +171,7 @@ BAGG *BAGG::makeBAGG(istream& in){
     aggss<<ln<<endl;
   }
 
-  AGG *aggPtr = agg::AGG::makeAGG(aggss);
+  AGG *aggPtr = AGG::makeAGG(aggss);
   if(!aggPtr){
 	  cerr<<"Error in BAGG file when reading the AGG part of the input."<<endl;
 	  exit(1);
