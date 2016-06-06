@@ -20,18 +20,20 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef VERTENUM_H
-#define VERTENUM_H
+#ifndef GAMBIT_LINALG_VERTENUM_H
+#define GAMBIT_LINALG_VERTENUM_H
 
 #include "gambit/gambit.h"
 #include "gambit/linalg/lptab.h"
 #include "gambit/linalg/bfs.h"
 
+namespace Gambit {
+namespace linalg {
 
 //
 // This class enumerates the vertices of the convex polyhedron 
 //
-//        P = {y:Ay + b <= 0, y>=0 }
+//        P = { y : Ay + b <= 0, y>=0 }
 // 
 // where b <= 0.  Enumeration starts from the vertex y = 0.
 // All computation is done in the class constructor. The 
@@ -40,39 +42,40 @@
 // The code is based on the reverse Pivoting algorithm of Avis 
 // and Fukuda, Discrete Computational Geom (1992) 8:295-313.
 //
-
-template <class T> class VertEnum {
+template <class T> class VertexEnumerator {
 private:
   int mult_opt,depth;
   int n;  // N is the number of columns, which is the # of dimensions.
   int k;  // K is the number of inequalities given.
-    // Removed const on A and b (Geoff)
-  const Gambit::Matrix<T> &A;   
-  const Gambit::Vector<T> &b;
-  Gambit::Vector<T> btemp,c;
-  Gambit::List<Gambit::linalg::BFS<T> > List;
-  Gambit::List<Gambit::linalg::BFS<T> > DualList;
-  Gambit::List<Gambit::Vector<T> > Verts;
-  long npivots,nodes;
+  const Matrix<T> &A;   
+  const Vector<T> &b;
+  Vector<T> btemp,c;
+  Gambit::List<BFS<T> > List;
+  Gambit::List<BFS<T> > DualList;
+  Gambit::List<Vector<T> > Verts;
+  long npivots, nodes;
   Gambit::List<long> visits,branches;
 
-  void Enum();
-  void Deeper();
-  void Report();
-  void Search(Gambit::linalg::LPTableau<T> &tab);
-  void DualSearch(Gambit::linalg::LPTableau<T> &tab);
+  void Enum(void);
+  void Deeper(void);
+  void Report(void);
+  void Search(LPTableau<T> &tab);
+  void DualSearch(LPTableau<T> &tab);
+
 public:
-  VertEnum(const Gambit::Matrix<T> &, const Gambit::Vector<T> &);
-  VertEnum(Gambit::linalg::LPTableau<T> &);
-  virtual ~VertEnum();
-
-  const Gambit::List<Gambit::linalg::BFS<T> > &VertexList() const;
-  const Gambit::List<Gambit::linalg::BFS<T> > &DualVertexList() const;
-  void Vertices(Gambit::List<Gambit::Vector<T> > &verts) const;
-  long NumPivots() const;
+  VertexEnumerator(const Matrix<T> &, const Vector<T> &);
+  VertexEnumerator(LPTableau<T> &);
+  ~VertexEnumerator() { }
+  
+  const Gambit::List<BFS<T> > &VertexList(void) const
+  { return List; }
+  const Gambit::List<BFS<T> > &DualVertexList(void) const
+  { return DualList; }
+  void Vertices(Gambit::List<Vector<T> > &verts) const;
+  long NumPivots(void) const { return npivots; }
 };
-#ifdef _A
-#undef _A
-#endif
 
-#endif // VERTENUM_H
+}  // end namespace Gambit::linalg
+}  // end namespace Gambit
+ 
+#endif // GAMBIT_LINALG_VERTENUM_H

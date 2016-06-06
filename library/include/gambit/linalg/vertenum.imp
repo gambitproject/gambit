@@ -20,10 +20,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "vertenum.h"
+#include "gambit/linalg/vertenum.h"
+
+namespace Gambit {
+namespace linalg {
 
 template <class T>
-VertEnum<T>::VertEnum(const Gambit::Matrix<T> &_A, const Gambit::Vector<T> &_b) 
+VertexEnumerator<T>::VertexEnumerator(const Matrix<T> &_A, const Vector<T> &_b) 
   : mult_opt(0), depth(0), A(_A), b(_b), btemp(_b), 
     c(_A.MinCol(),_A.MaxCol()), npivots(0), nodes(0)
 {
@@ -31,25 +34,20 @@ VertEnum<T>::VertEnum(const Gambit::Matrix<T> &_A, const Gambit::Vector<T> &_b)
 }
 
 template <class T>
-VertEnum<T>::VertEnum(Gambit::linalg::LPTableau<T> &tab)
+VertexEnumerator<T>::VertexEnumerator(LPTableau<T> &tab)
   : mult_opt(0), depth(0), A(tab.Get_A()), b(tab.Get_b()), 
     btemp(tab.Get_b()), c(tab.GetCost()), 
     npivots(0), nodes(0)
 {
-  //  gout << "\nin VertEnum(tab)\n";
-  //  tab.Dump(gout);
-
   int i;
   for(i=b.First();i<=b.Last();i++)
     if(b[i]==(T)0)
       mult_opt=1;
 
-  //  gout << "\nb: " << b;
-
   // Is this stuff right?
   btemp = -(T)1;
 
-  Gambit::Vector<T> uc(tab.MinRow(),tab.MaxRow());
+  Vector<T> uc(tab.MinRow(),tab.MaxRow());
   c = (T)1;
   uc = (T)1;
   
@@ -59,21 +57,14 @@ VertEnum<T>::VertEnum(Gambit::linalg::LPTableau<T> &tab)
   for(i=tab.MinCol();i<=tab.MaxCol();i++)
     if(tab.Member(i)) c[i]=(T)0;
 
-  //  gout << "\nc: " << c;
-  //  gout << "\nuc: " << uc;
-
   tab.SetCost(uc,c);
   DualSearch(tab);
 }
 
-template <class T> VertEnum<T>::~VertEnum()
-{ }
-
-
-template <class T> void VertEnum<T>::Enum()
+template <class T> void VertexEnumerator<T>::Enum(void)
 {
       // Check dimensions
-  if(A.NumRows() != b.Length() || A.NumColumns() != c.Length()) throw Gambit::DimensionException();
+  if(A.NumRows() != b.Length() || A.NumColumns() != c.Length()) throw DimensionException();
   //  assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
 
       // Initialize the tableau
@@ -86,17 +77,14 @@ template <class T> void VertEnum<T>::Enum()
   btemp = -(T)1;
   c = (T)1;
 
-  Gambit::linalg::LPTableau<T> tab(A,b);
+  LPTableau<T> tab(A,b);
   tab.SetCost(c);
   
-  // gout << "\nInitial Tableau = \n";
-  // tab.Dump(gout);
-
   DualSearch(tab);
 }
   
 
-template <class T> void VertEnum<T>::Report()
+template <class T> void VertexEnumerator<T>::Report()
 {
   int i = 1;
   double x, estNodes;
@@ -112,7 +100,7 @@ template <class T> void VertEnum<T>::Report()
   }
 }
 
-template <class T> void VertEnum<T>::Deeper()
+template <class T> void VertexEnumerator<T>::Deeper()
 {
   depth++;
   if(visits.Length()<depth) {
@@ -123,22 +111,22 @@ template <class T> void VertEnum<T>::Deeper()
   nodes++;
 }
 
-template <class T> void VertEnum<T>::Search(Gambit::linalg::LPTableau<T> &tab)
+template <class T> void VertexEnumerator<T>::Search(LPTableau<T> &tab)
 {
   int k;
   Deeper();
-  Gambit::List<Gambit::Array<int> > PivotList;
-  Gambit::Array<int> pivot(2);
+  Gambit::List<Array<int> > PivotList;
+  Array<int> pivot(2);
   if(tab.IsLexMin()) {
     List.Append(tab.GetBFS1());
     DualList.Append(tab.DualBFS());
   }
-  if(PivotList.Length()!=0) throw Gambit::DimensionException();
+  if(PivotList.Length()!=0) throw DimensionException();
   //  assert(PivotList.Length()==0);
   tab.ReversePivots(PivotList);  // get list of reverse pivots
   if(PivotList.Length()) {
     branches[depth]+=PivotList.Length();
-    Gambit::linalg::LPTableau<T> tab2(tab);
+    LPTableau<T> tab2(tab);
     for(k=1;k<=PivotList.Length();k++) {
       pivot = PivotList[k];
       npivots++;
@@ -151,19 +139,15 @@ template <class T> void VertEnum<T>::Search(Gambit::linalg::LPTableau<T> &tab)
   depth--;
 }
   
-template <class T> void VertEnum<T>::DualSearch(Gambit::linalg::LPTableau<T> &tab)
+template <class T> void VertexEnumerator<T>::DualSearch(LPTableau<T> &tab)
 {
   int i,j;
   Deeper();
   branches[depth]+=1;
 
-//  Gambit::List<Gambit::Array<int> > PivotList;
-//  Gambit::Array<int> pivot(2);
-
-  // gout << "\nin DualSearch";
   if(mult_opt) {
     tab.SetConst(btemp);    // install artifical constraint vector
-    Gambit::linalg::LPTableau<T> tab2(tab);
+    LPTableau<T> tab2(tab);
     for (i=b.First();i<=b.Last(); i++) {
       if(b[i]==(T)0)
 	for(j=-b.Last();j<=c.Last();j++) {
@@ -183,20 +167,10 @@ template <class T> void VertEnum<T>::DualSearch(Gambit::linalg::LPTableau<T> &ta
   depth--;
 }
   
-template <class T> const Gambit::List<Gambit::linalg::BFS<T> > &VertEnum<T>::VertexList() const
-{ 
-  return List;
-}
-
-template <class T> const Gambit::List<Gambit::linalg::BFS<T> > &VertEnum<T>::DualVertexList() const
-{ 
-  return DualList;
-}
-
-template <class T> void VertEnum<T>::Vertices(Gambit::List<Gambit::Vector<T> > &verts) const
+template <class T> void VertexEnumerator<T>::Vertices(Gambit::List<Vector<T> > &verts) const
 { 
   for(int i=1;i<=List.Length();i++) {
-    Gambit::Vector<T> vert(A.NumColumns());
+    Vector<T> vert(A.NumColumns());
     vert = (T)0;
     for(int j=1;j<=vert.Length();j++) 
       if(List[i].IsDefined(j)) vert[j]=-List[i](j);
@@ -204,10 +178,7 @@ template <class T> void VertEnum<T>::Vertices(Gambit::List<Gambit::Vector<T> > &
   }
 }
 
-template <class T> long VertEnum<T>::NumPivots() const
-{
-  return npivots;
-}
 
-
+} // end namespace Gambit::linalg
+} // end namespace Gambit
 

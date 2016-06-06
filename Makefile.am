@@ -493,15 +493,15 @@ liblinear_la_SOURCES = \
 	library/include/gambit/linalg/lemketab.imp \
 	library/src/linalg/lhtab.cc \
 	library/include/gambit/linalg/lhtab.h \
-	library/include/gambit/linalg/lhtab.imp
+	library/include/gambit/linalg/lhtab.imp \
+	library/include/gambit/linalg/vertenum.h \
+	library/include/gambit/linalg/vertenum.imp
 
 gambit_enummixed_SOURCES = \
 	${libgambit_la_SOURCES} \
 	${liblinear_la_SOURCES} \
 	${lrslib_la_SOURCES} \
 	src/tools/enummixed/lrsnash.cc \
-	src/tools/enummixed/vertenum.h \
-	src/tools/enummixed/vertenum.imp \
 	src/tools/enummixed/clique.cc \
 	src/tools/enummixed/clique.h \
 	src/tools/enummixed/enummixed.cc
