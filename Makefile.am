@@ -363,7 +363,10 @@ libgambit_la_SOURCES = \
 	library/src/tinyxmlerror.cc \
 	library/src/tinyxmlparser.cc \
 	library/include/gambit/nash/enumpure.h \
-	${libagg_la_SOURCES} 
+	library/include/gambit/nash/enummixed.h \
+	library/src/enummixed/lrsenum.cc \
+	${libagg_la_SOURCES} \
+	${lrslib_la_SOURCES} 
 
 libgambitincludedir = $(includedir)/libgambit
 libgambitinclude_HEADERS = \
@@ -500,8 +503,6 @@ liblinear_la_SOURCES = \
 gambit_enummixed_SOURCES = \
 	${libgambit_la_SOURCES} \
 	${liblinear_la_SOURCES} \
-	${lrslib_la_SOURCES} \
-	src/tools/enummixed/lrsnash.cc \
 	src/tools/enummixed/clique.cc \
 	src/tools/enummixed/clique.h \
 	src/tools/enummixed/enummixed.cc

@@ -30,11 +30,13 @@
 
 #include "gambit/gambit.h"
 #include "gambit/linalg/vertenum.imp"
+#include "gambit/nash/enummixed.h"
 #include "clique.h"
 
 
 using namespace Gambit;
 using namespace Gambit::linalg;
+using namespace Gambit::Nash;
 
 bool g_showConnect = false;
 int g_numDecimals = 6;
@@ -238,8 +240,6 @@ template <class T> void Solve(const Game &p_game)
   }
 }
 
-extern void LrsSolve(const Game &);
-
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by enumerating extreme points\n";
@@ -345,7 +345,10 @@ int main(int argc, char *argv[])
     }
 
     if (uselrs) {
-      LrsSolve(game);
+      shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+      renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
+      EnumMixedLrsStrategySolver solver(renderer);
+      solver.Solve(game);
     }
     else if (useFloat) {
       Solve<double>(game);
