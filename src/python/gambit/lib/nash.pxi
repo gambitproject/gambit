@@ -65,6 +65,28 @@ cdef class EnumPureAgentSolver(object):
             ret.append(p)
         return ret
 
+cdef extern from "gambit/nash/enummixed.h":
+    cdef cppclass c_NashEnumMixedLrsStrategySolver "EnumMixedLrsStrategySolver":
+        c_NashEnumMixedLrsStrategySolver()
+        c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
+
+cdef class EnumMixedLrsStrategySolver(object):
+    cdef c_NashEnumMixedLrsStrategySolver *alg
+
+    def __cinit__(self):
+        self.alg = new c_NashEnumMixedLrsStrategySolver()
+    def __dealloc__(self):
+        del self.alg
+    def solve(self, Game game):
+        cdef c_List[c_MixedStrategyProfileRational] solns
+        cdef MixedStrategyProfileRational p
+        solns = self.alg.Solve(game.game)
+        ret = [ ]
+        for i in xrange(solns.Length()):
+            p = MixedStrategyProfileRational()
+            p.profile = copyitem_list_mspr(solns, i+1)
+            ret.append(p)
+        return ret
 
 cdef extern from "tools/lcp/nfglcp.h":
     cdef cppclass c_NashLcpStrategySolverDouble "NashLcpStrategySolver<double>":

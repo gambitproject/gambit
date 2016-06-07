@@ -25,7 +25,7 @@
 //========================================================================
 int lrs_solve_nash(game * g)
 {
-  lrs_dic *P1, *P2;             /* structure for holding current dictionary and indices */
+  lrs_dic *P1 /*, *P2*/;        /* structure for holding current dictionary and indices */
   lrs_dat *Q1, *Q2;             /* structure for holding static problem data            */
 
   lrs_mp_vector output1;        /* holds one line of output; ray,vertex,facet,linearity */
@@ -768,7 +768,7 @@ long lrs_nashoutput(lrs_dat * Q, lrs_mp_vector output, long player)
 int lrs_solve_nash_legacy (int argc, char *argv[])
 // Handles legacy input files
 {
-  lrs_dic *P1,*P2;		/* structure for holding current dictionary and indices */
+  lrs_dic *P1 /*,*P2*/;		/* structure for holding current dictionary and indices */
   lrs_dat *Q1,*Q2;		/* structure for holding static problem data            */
 
   lrs_mp_vector output1;	/* holds one line of output; ray,vertex,facet,linearity */

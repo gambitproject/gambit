@@ -243,6 +243,16 @@ def enumpure_solve(game, use_strategic=True, external=False):
         alg = gambit.lib.libgambit.EnumPureAgentSolver()
     return alg.solve(game)
 
+def enummixed_solve(game, rational=True, external=False, use_lrs=False):
+    """Convenience function to solve two-player game to find all
+    mixed-strategy Nash equilibria.
+    """
+    if external:
+        return ExternalEnumMixedSolver().solve(game, rational=rational)
+    alg = gambit.lib.libgambit.EnumMixedLrsStrategySolver()
+    return alg.solve(game)
+    
+
 def lcp_solve(game, rational=True, use_strategic=False, external=False,
               stop_after=None, max_depth=None):
     """Convenience function to solve game using an appropriate linear

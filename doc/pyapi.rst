@@ -1222,6 +1222,20 @@ Computation of Nash equilibria
 			 of the internally-linked implementation
 
 
+.. py:function:: enummixed_solve(game, rational=True, external=False, use_lrs=False)
+
+   Compute all :ref:`mixed-strategy Nash equilibria
+   <gambit-enummixed>` of a two-player strategic game.
+
+   :param bool rational: Compute using rational precision (more
+			 precise, often much slower)
+   :param bool external: Call the external command-line solver instead
+			 of the internally-linked implementation
+   :param bool use_lrs: Use the lrslib-based implementation.  This is
+		   experimental but preliminary results suggest it is
+		   significantly faster.			
+   :raises RuntimeError: if game has more than two players.
+      
 .. py:function:: lcp_solve(game, rational=True, use_strategic=False, external=False, stop_after=None, max_depth=None)
 
    Compute Nash equilibria of a two-player game using :ref:`linear

@@ -1147,9 +1147,9 @@ lrs_close (const char *name)
 
   fprintf (lrs_ofp, "\n");
 #endif // LRS_LOGGING
-  fclose (lrs_ifp);
-  if (lrs_ofp != stdout)
-    fclose (lrs_ofp);
+  //fclose (lrs_ifp);
+  //if (lrs_ofp != stdout)
+  //  fclose (lrs_ofp);
 }
 
 /***********************************/

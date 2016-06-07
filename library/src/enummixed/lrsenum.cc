@@ -672,7 +672,11 @@ long nash2_main (lrs_dic *P1, lrs_dat *Q1, lrs_dic *P2orig,
     col = 0;
     if (!prune && lrs_getsolution(P2, Q2, output2, col)) {
       p_equilibria.push_back(BuildProfile(p_game, Q1, output1, Q2, output2));
-      p_onEquilibrium->Render(p_equilibria.back());
+      // FIXME: Including this call results in massively slower performance
+      // of the algorithm, especially under Python. This is very confusing
+      // as it takes much longer (seconds rather than milliseconds)
+      // for the flow of control to reach this call in the first place.
+      /* p_onEquilibrium->Render(p_equilibria.back()); */
     }
   } while (lrs_getnextbasis(&P2, Q2, prune));
 
@@ -868,6 +872,10 @@ void LrsData::FillLinearityRow(lrs_dic *P, lrs_dat *Q, int m, int n)
 List<MixedStrategyProfile<Rational> > 
 EnumMixedLrsStrategySolver::Solve(const Game &p_game) const
 {
+  if (p_game->NumPlayers() != 2) {
+    throw UndefinedException("Method only valid for two-player games.");
+  }
+  
   lrs_mp_vector output1; /* holds one line of output; ray,vertex,facet,linearity */
   lrs_mp_vector output2; /* holds one line of output; ray,vertex,facet,linearity */
   lrs_mp_matrix Lin;	/* holds input linearities if any are found             */
@@ -937,6 +945,10 @@ EnumMixedLrsStrategySolver::Solve(const Game &p_game) const
   /* vertex/ray/facet from the lrs_mp_vector output         */
   /* prune is TRUE if tree should be pruned at current node */
   do {
+    // FIXME: In some circumstances, especially the Python extension,
+    // this algorithm runs very slowly.  However, adding any sort
+    // of output call makes it run very quickly. (!) (?)
+    // This needs to be chased up further.
     prune = lrs_checkbound(data.P1, data.Q1);
     if (!prune && lrs_getsolution(data.P1, data.Q1, output1, col)) {
       nash2_main(data.P1,data.Q1,P2orig,data.Q2,output1,output2,p_game,
