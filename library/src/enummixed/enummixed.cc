@@ -73,6 +73,12 @@ EnumMixedStrategySolution<T>::GetCliques(void) const
 template <class T> shared_ptr<EnumMixedStrategySolution<T> >
 EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
 {
+  if (p_game->NumPlayers() != 2) {
+    throw UndefinedException("Method only valid for two-player games.");
+  }
+  if (!p_game->IsPerfectRecall()) {
+    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+  }
   shared_ptr<EnumMixedStrategySolution<T> > solution = new EnumMixedStrategySolution<T>(p_game);
 
   PureStrategyProfile profile = p_game->NewPureStrategyProfile();

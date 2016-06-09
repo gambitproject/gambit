@@ -871,6 +871,9 @@ EnumMixedLrsStrategySolver::Solve(const Game &p_game) const
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
   }
+  if (!p_game->IsPerfectRecall()) {
+    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+  }
   
   lrs_mp_vector output1; /* holds one line of output; ray,vertex,facet,linearity */
   lrs_mp_vector output2; /* holds one line of output; ray,vertex,facet,linearity */
