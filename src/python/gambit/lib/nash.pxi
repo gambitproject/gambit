@@ -66,9 +66,53 @@ cdef class EnumPureAgentSolver(object):
         return ret
 
 cdef extern from "gambit/nash/enummixed.h":
+    cdef cppclass c_NashEnumMixedStrategySolverDouble "EnumMixedStrategySolver<double>":
+        c_NashEnumMixedStrategySolverDouble()
+        c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
+
+    cdef cppclass c_NashEnumMixedStrategySolverRational "EnumMixedStrategySolver<Rational>":
+        c_NashEnumMixedStrategySolverRational()
+        c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
+
     cdef cppclass c_NashEnumMixedLrsStrategySolver "EnumMixedLrsStrategySolver":
         c_NashEnumMixedLrsStrategySolver()
         c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
+
+cdef class EnumMixedStrategySolverDouble(object):
+    cdef c_NashEnumMixedStrategySolverDouble *alg
+
+    def __cinit__(self):
+        self.alg = new c_NashEnumMixedStrategySolverDouble()
+    def __dealloc__(self):
+        del self.alg
+    def solve(self, Game game):
+        cdef c_List[c_MixedStrategyProfileDouble] solns
+        cdef MixedStrategyProfileDouble p
+        solns = self.alg.Solve(game.game)
+        ret = [ ]
+        for i in xrange(solns.Length()):
+            p = MixedStrategyProfileDouble()
+            p.profile = copyitem_list_mspd(solns, i+1)
+            ret.append(p)
+        return ret
+
+cdef class EnumMixedStrategySolverRational(object):
+    cdef c_NashEnumMixedStrategySolverRational *alg
+
+    def __cinit__(self):
+        self.alg = new c_NashEnumMixedStrategySolverRational()
+    def __dealloc__(self):
+        del self.alg
+    def solve(self, Game game):
+        cdef c_List[c_MixedStrategyProfileRational] solns
+        cdef MixedStrategyProfileRational p
+        solns = self.alg.Solve(game.game)
+        ret = [ ]
+        for i in xrange(solns.Length()):
+            p = MixedStrategyProfileRational()
+            p.profile = copyitem_list_mspr(solns, i+1)
+            ret.append(p)
+        return ret
 
 cdef class EnumMixedLrsStrategySolver(object):
     cdef c_NashEnumMixedLrsStrategySolver *alg

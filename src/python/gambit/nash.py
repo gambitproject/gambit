@@ -249,9 +249,13 @@ def enummixed_solve(game, rational=True, external=False, use_lrs=False):
     """
     if external:
         return ExternalEnumMixedSolver().solve(game, rational=rational)
-    alg = gambit.lib.libgambit.EnumMixedLrsStrategySolver()
+    if use_lrs:
+        alg = gambit.lib.libgambit.EnumMixedLrsStrategySolver()
+    if rational:
+        alg = gambit.lib.libgambit.EnumMixedStrategySolverRational()
+    else:
+        alg = gambit.lib.libgambit.EnumMixedStrategySolverDouble()
     return alg.solve(game)
-    
 
 def lcp_solve(game, rational=True, use_strategic=False, external=False,
               stop_after=None, max_depth=None):
