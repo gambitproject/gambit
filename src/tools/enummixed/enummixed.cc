@@ -367,15 +367,7 @@ int main(int argc, char *argv[])
       shared_ptr<StrategyProfileRenderer<Rational> > renderer;
       renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
       EnumMixedLrsStrategySolver solver(renderer);
-      List<MixedStrategyProfile<Rational> > eqa = solver.Solve(game);
-
-      // Including on-the-fly calls to Render in the lrs implementation
-      // results in substantially slower performance in some circumstances.
-      // We therefore have not yet implemented on-the-fly reporting of
-      // equilibria found when using lrs.
-      for (int i = 1; i <= eqa.size(); i++) {
-	renderer->Render(eqa[i]);
-      }
+      solver.Solve(game);
     }
     else if (useFloat) {
       shared_ptr<StrategyProfileRenderer<double> > renderer;

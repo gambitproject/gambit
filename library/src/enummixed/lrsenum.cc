@@ -672,11 +672,7 @@ long nash2_main (lrs_dic *P1, lrs_dat *Q1, lrs_dic *P2orig,
     col = 0;
     if (!prune && lrs_getsolution(P2, Q2, output2, col)) {
       p_equilibria.push_back(BuildProfile(p_game, Q1, output1, Q2, output2));
-      // FIXME: Including this call results in massively slower performance
-      // of the algorithm, especially under Python. This is very confusing
-      // as it takes much longer (seconds rather than milliseconds)
-      // for the flow of control to reach this call in the first place.
-      /* p_onEquilibrium->Render(p_equilibria.back()); */
+      p_onEquilibrium->Render(p_equilibria.back()); 
     }
   } while (lrs_getnextbasis(&P2, Q2, prune));
 
