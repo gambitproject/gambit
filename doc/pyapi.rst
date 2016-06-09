@@ -749,6 +749,25 @@ about a plan of play of a game, by one or more players.
       Lyapunov value is a non-negative number which is zero exactly at
       Nash equilibria.
 
+   .. py:method:: normalize()
+
+      Each player's component of the profile is not enforced to sum to
+      one, so that, for example, counts rather than probabilities can
+      be expressed.  Calling this on a profile normalizes the
+      distribution over each player's strategies to sum to one.
+      
+   .. py:method:: randomize(denom)
+
+      Randomizes the probabilities in the profile.  These are
+      generated as uniform distributions over each mixed strategy.  If
+      ``denom`` is specified, all probabilities are divisible by
+      ``denom``, that is, the distribution is uniform over a discrete
+      grid of mixed strategies.  ``denom`` is required for profiles
+      in which the probabilities are rational numbers.
+
+      :raises TypeError: if ``denom`` is not specified for a profile
+			 with rational probabilities.      
+     
 .. py:class:: MixedBehaviorProfile
 
    Represents a behavior strategy profile over a :py:class:`Game`.
@@ -825,6 +844,28 @@ about a plan of play of a game, by one or more players.
       Lyapunov value is a non-negative number which is zero exactly at
       Nash equilibria.
 
+   .. py:method:: normalize()
+
+      Each information set's component of the profile is not enforced to sum to
+      one, so that, for example, counts rather than probabilities can
+      be expressed.  Calling this on a profile normalizes the
+      distribution over each information set's actions to sum to one.
+      
+   .. py:method:: randomize(denom)
+
+      Randomizes the probabilities in the profile.  These are
+      generated as uniform distributions over the actions at each
+      information set.  If
+      ``denom`` is specified, all probabilities are divisible by
+      ``denom``, that is, the distribution is uniform over a discrete
+      grid of mixed strategies.  ``denom`` is required for profiles
+      in which the probabilities are rational numbers.
+
+      :raises TypeError: if ``denom`` is not specified for a profile
+			 with rational probabilities.      
+     
+
+      
 Elements of games
 ~~~~~~~~~~~~~~~~~
 

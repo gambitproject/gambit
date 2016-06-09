@@ -226,7 +226,11 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
         return profile
     def set_centroid(self):   self.profile.SetCentroid()
     def normalize(self):      self.profile.Normalize()
-
+    def randomize(self, denom=None):
+        if denom is None:
+            self.profile.Randomize()
+        else:
+            self.profile.Randomize(denom)
     property game:
         def __get__(self):
             cdef Game g
@@ -299,6 +303,8 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
         return profile
     def set_centroid(self):   self.profile.SetCentroid()
     def normalize(self):      self.profile.Normalize()
+    def randomize(self, denom):
+        self.profile.Randomize(denom)
 
     property game:
         def __get__(self):

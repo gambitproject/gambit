@@ -280,7 +280,11 @@ cdef class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         return self.profile.GetLiapValue()
     def set_centroid(self):   self.profile.SetCentroid()
     def normalize(self):      self.profile.Normalize()
-
+    def randomize(self, denom=None):
+        if denom is None:
+            self.profile.Randomize()
+        else:
+            self.profile.Randomize(denom)
 
     property game:
         def __get__(self):
@@ -349,6 +353,8 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
         return Rational(rat_str(self.profile.GetLiapValue()).c_str())
     def set_centroid(self):   self.profile.SetCentroid()
     def normalize(self):      self.profile.Normalize()
+    def randomize(self, denom):
+        self.profile.Randomize(denom)
 
     property game:
         def __get__(self):
