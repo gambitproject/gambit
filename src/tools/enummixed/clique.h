@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enummixed/clique.h
-// Maximal cliques and connected components via von Stengel's algorithm
+// Maximal cliques and connected components
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -183,9 +183,6 @@
 
 using namespace Gambit;
 
-#define MAX(A,B)  ((A) > (B) ? (A) : (B))
-#define MIN(A,B)  ((A) < (B) ? (A) : (B))
-
 #define MAXM 700     // max. no of left nodes for incidence matrix 
 #define MAXN MAXM  // max. no of right nodes for incidence matrix 
 
@@ -198,21 +195,28 @@ using namespace Gambit;
 #define STKSIZE  (MAXM + 1) * (MAXN + 1)  
   // largest stack usage for full graph 
 
-class edge {
-public:
-  int node1;
-  int node2;
-  int nextedge;
-  edge() { };
-  ~edge() { } ;
-  // gArray requires the following operators to exist
-  bool operator ==( const edge &y) const 
-    { return (node1 == y.node1 && node2 == y.node2);}
-  bool operator !=(const edge &y) const
-    {return !(*this == y);}
-};
 
-class EnumCliques {
+class CliqueEnumerator {
+public:
+  class Edge {
+  public:
+    int node1;
+    int node2;
+    int nextedge;
+    Edge() { }
+    ~Edge() { } 
+    bool operator==(const Edge &y) const 
+    { return (node1 == y.node1 && node2 == y.node2); }
+    bool operator!=(const Edge &y) const
+    { return !(*this == y); }
+  };
+
+  CliqueEnumerator(Array<Edge> &, int, int);
+  ~CliqueEnumerator() { }
+
+  const List<Array<int> > &GetCliques1(void) const { return m_cliques1; }
+  const List<Array<int> > &GetCliques2(void) const { return m_cliques2; }
+
 private:
   Array<int> firstedge;
   int maxinp1,maxinp2;
@@ -226,8 +230,8 @@ private:
 	 int sn1, int *sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
 	 int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
 	 int tos,  // top of stack 
-	 int orignode1[MAXM],
-	 int orignode2[MAXN]
+	 int orignode1[],
+	 int orignode2[]
          );
   void candtry2 (int stk[], // stack 
 	 bool connected[MAXM][MAXN],
@@ -259,37 +263,24 @@ private:
 	    bool *bfound,  // a new lower no. of disconnections was found 
 	    int *fixp,     // the new fixpoint, if *bfound = true  
 	    int *posfix);    // position of fixpoint on the stack, if *bfound 
-public:
-  EnumCliques(Array<edge> &, int, int);
-  ~EnumCliques();
-
-  const List<Array<int> > &GetCliques1(void) const { return m_cliques1; }
-  const List<Array<int> > &GetCliques2(void) const { return m_cliques2; }
 
   void genincidence(int e,
-		    Array<edge> &edgelist,
+		    Array<Edge> &edgelist,
 		    int orignode1[MAXM],
 		    int orignode2[MAXN],
 		    bool connected[MAXM][MAXN],
 		    int *m,
 		    int *n);
   int getconnco(Array<int> &firstedge,
-		Array<edge> &edgelist);
+		Array<Edge> &edgelist);
   void outCLIQUE(int clique1[], int cliqsize1, 
 		 int clique2[], int cliqsize2,
 		 int orignode1[MAXM],
 		 int orignode2[MAXN]);
   void workonco(int numco,
 		Array<int> &firstedge,
-		Array<edge> &edgelist);
+		Array<Edge> &edgelist);
 
-/* --- the following are unused TEST ROUTINES --- */
-  void getgraph(bool connected[MAXM][MAXN], int *m, int *n);
-  void outgraph(int orignode1[MAXM],
-		int orignode2[MAXN],
-		bool connected[MAXM][MAXN],
-		int m,
-		int n);
 };
 
 

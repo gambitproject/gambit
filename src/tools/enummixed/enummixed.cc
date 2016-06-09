@@ -81,13 +81,13 @@ EnumMixedStrategySolution<T>::GetCliques(void) const
     int n = m_node1.Length();
     if (m_node2.Length() != n)  throw DimensionException();
 
-    Array<edge> edgelist(n);
+    Array<CliqueEnumerator::Edge> edgelist(n);
     for (int i = 1; i <= n; i++) {
       edgelist[i].node1 = m_node1[i];
       edgelist[i].node2 = m_node2[i];
     }
 
-    EnumCliques clique(edgelist, m_v2+1, m_v1+1);
+    CliqueEnumerator clique(edgelist, m_v2+1, m_v1+1);
     m_cliques1 = clique.GetCliques1();
     m_cliques2 = clique.GetCliques2();
   }
