@@ -38,76 +38,79 @@ using namespace Gambit;
 using namespace Gambit::linalg;
 using namespace Gambit::Nash;
 
-bool g_showConnect = false;
-int g_numDecimals = 6;
 
-void PrintProfile(std::ostream &p_stream,
-		  const std::string &p_label,
-		  const MixedStrategyProfile<double> &p_profile)
-{
-  p_stream << p_label;
-  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
-    p_stream.setf(std::ios::fixed);
-    p_stream << ',' << std::setprecision(g_numDecimals) << p_profile[i];
-  }
+template <class T> class EnumMixedStrategySolver;
 
-  p_stream << std::endl;
-}
-
-void PrintProfile(std::ostream &p_stream,
-		  const std::string &p_label,
-		  const MixedStrategyProfile<Rational> &p_profile)
-{
-  p_stream << p_label;
-  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
-    p_stream << ',' << p_profile[i];
-  }
-
-  p_stream << std::endl;
-}
-
-template <class T> class EnumMixedProblemData {
+///
+/// This encapsulates the data output by a run of enumeration of
+/// mixed strategies.
+///
+template <class T> class EnumMixedStrategySolution {
+  friend class EnumMixedStrategySolver<T>;
 public:
-  List<Vector<T> > key1, key2;  
-  List<int> node1, node2;   // IDs of each component of the extreme equilibria
-  int v1, v2;
+  EnumMixedStrategySolution(const Game &p_game) : m_game(p_game) { }
+  ~EnumMixedStrategySolution()  { }
+
+  const Game &GetGame(void) const { return m_game; }
+  const List<MixedStrategyProfile<T> > &GetExtremeEquilibria(void) const
+  { return m_extremeEquilibria; }
+  
+  List<List<MixedStrategyProfile<T> > > GetCliques(void) const;
+
+private:
+  Game m_game;
+  List<MixedStrategyProfile<T> > m_extremeEquilibria;
+
+  /// Representation of the graph connecting the extreme equilibria
+  ///@{
+  List<Vector<T> > m_key1, m_key2;  
+  List<int> m_node1, m_node2; // IDs of each component of the extreme equilibria
+  int m_v1, m_v2;
+  ///@}
+
+  /// Representation of the connectedness of the extreme equilibria
+  /// These are generated only on demand
+  mutable List<Array<int> > m_cliques1, m_cliques2;
 };
 
-template <class T> void GetCliques(std::ostream &p_stream,
-				   const Game &p_game,
-				   const EnumMixedProblemData<T> &p_data)
+template <class T> List<List<MixedStrategyProfile<T> > > 
+EnumMixedStrategySolution<T>::GetCliques(void) const
 {
-  int n = p_data.node1.Length();
-  if (p_data.node2.Length() != n)  throw DimensionException();
+  if (m_cliques1.size() == 0) {
+    // Cliques are generated on demand
+    int n = m_node1.Length();
+    if (m_node2.Length() != n)  throw DimensionException();
 
-  Array<edge> edgelist(n);
+    Array<edge> edgelist(n);
+    for (int i = 1; i <= n; i++) {
+      edgelist[i].node1 = m_node1[i];
+      edgelist[i].node2 = m_node2[i];
+    }
 
-  for (int i = 1; i <= n; i++) {
-    edgelist[i].node1 = p_data.node1[i];
-    edgelist[i].node2 = p_data.node2[i];
+    EnumCliques clique(edgelist, m_v2+1, m_v1+1);
+    m_cliques1 = clique.GetCliques1();
+    m_cliques2 = clique.GetCliques2();
   }
 
-  EnumCliques clique(edgelist, p_data.v2+1, p_data.v1+1);
-  const List<Array<int> > &cliques1 = clique.GetCliques1();
-  const List<Array<int> > &cliques2 = clique.GetCliques2();
+  List<List<MixedStrategyProfile<T> > > solution;
+  for (int cl = 1; cl <= m_cliques1.Length(); cl++) {
+    solution.push_back(List<MixedStrategyProfile<T> >());
+    for (int i = 1; i <= m_cliques1[cl].Length(); i++) {
+      for (int j = 1; j <= m_cliques2[cl].Length(); j++) {
+	MixedStrategyProfile<T> profile(m_game->NewMixedStrategyProfile(static_cast<T>(0)));
 
-  for (int cl = 1; cl <= cliques1.Length(); cl++) {
-    for (int i = 1; i <= cliques1[cl].Length(); i++) {
-      for (int j = 1; j <= cliques2[cl].Length(); j++) {
-	MixedStrategyProfile<T> profile(p_game->NewMixedStrategyProfile(static_cast<T>(0)));
-
-	for (int k = 1; k <= p_data.key1[cliques1[cl][i]].Length(); k++) {
-	  profile[k] = p_data.key1[cliques1[cl][i]][k];
+	for (int k = 1; k <= m_key1[m_cliques1[cl][i]].Length(); k++) {
+	  profile[k] = m_key1[m_cliques1[cl][i]][k];
 	}
-	for (int k = 1; k <= p_data.key2[cliques2[cl][j]].Length(); k++) {
-	  profile[k + p_data.key1[cliques1[cl][i]].Length()] =
-	    p_data.key2[cliques2[cl][j]][k];
+	for (int k = 1; k <= m_key2[m_cliques2[cl][j]].Length(); k++) {
+	  profile[k + m_key1[m_cliques1[cl][i]].Length()] =
+	    m_key2[m_cliques2[cl][j]][k];
 	}
-	PrintProfile(p_stream, "convex-" + lexical_cast<std::string>(cl), 
-		     profile);
+	solution[cl].push_back(profile);
       }
     }
   }
+  return solution;
 }
 
 template <class T> class EnumMixedStrategySolver : public StrategySolver<T> {
@@ -116,18 +119,20 @@ public:
     : StrategySolver<T>(p_onEquilibrium) {}
   virtual ~EnumMixedStrategySolver() { }
 
-  List<MixedStrategyProfile<T> > Solve(const Game &p_game) const;
-
+  shared_ptr<EnumMixedStrategySolution<T> > SolveDetailed(const Game &p_game) const;
+  List<MixedStrategyProfile<T> > Solve(const Game &p_game) const
+  { return SolveDetailed(p_game)->GetExtremeEquilibria(); }
+  
+  
 private:
   /// Implement fuzzy equality for floating-point version when testing Nashness
   static bool EqZero(const T &x);
 };
 
-template <class T> List<MixedStrategyProfile<T> > 
-EnumMixedStrategySolver<T>::Solve(const Game &p_game) const
+template <class T> shared_ptr<EnumMixedStrategySolution<T> >
+EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
 {
-  EnumMixedProblemData<T> data;
-  List<MixedStrategyProfile<T> > equilibria;
+  shared_ptr<EnumMixedStrategySolution<T> > solution = new EnumMixedStrategySolution<T>(p_game);
 
   PureStrategyProfile profile = p_game->NewPureStrategyProfile();
 
@@ -171,21 +176,21 @@ EnumMixedStrategySolver<T>::Solve(const Game &p_game) const
 
   const List<BFS<T> > &verts1(poly1.VertexList());
   const List<BFS<T> > &verts2(poly2.VertexList());
-  data.v1 = verts1.Length();
-  data.v2 = verts2.Length();
+  solution->m_v1 = verts1.Length();
+  solution->m_v2 = verts2.Length();
 
-  Array<int> vert1id(data.v1);
-  Array<int> vert2id(data.v2);
+  Array<int> vert1id(solution->m_v1);
+  Array<int> vert2id(solution->m_v2);
   for (int i = 1; i <= vert1id.Length(); vert1id[i++] = 0);
   for (int i = 1; i <= vert2id.Length(); vert2id[i++] = 0);
 
   int i = 0;
   int id1 = 0, id2 = 0;
 
-  for (int i2 = 2; i2 <= data.v2; i2++) {
+  for (int i2 = 2; i2 <= solution->m_v2; i2++) {
     BFS<T> bfs1 = verts2[i2];
     i++;
-    for (int i1 = 2; i1 <= data.v1; i1++) {
+    for (int i1 = 2; i1 <= solution->m_v1; i1++) {
       BFS<T> bfs2 = verts1[i1];
 	
       // check if solution is nash 
@@ -217,7 +222,7 @@ EnumMixedStrategySolver<T>::Solve(const Game &p_game) const
 	  }
 	} 
 	profile.Normalize();
-	equilibria.push_back(profile);
+	solution->m_extremeEquilibria.push_back(profile);
 	this->m_onEquilibrium->Render(profile);
 	  
 	// note: The keys give the mixed strategy associated with each node. 
@@ -227,23 +232,19 @@ EnumMixedStrategySolver<T>::Solve(const Game &p_game) const
 	if (vert1id[i1] == 0) {
 	  id1++;
 	  vert1id[i1] = id1;
-	  data.key2.push_back(profile[p_game->GetPlayer(2)]);
+	  solution->m_key2.push_back(profile[p_game->GetPlayer(2)]);
 	}
 	if (vert2id[i2] == 0) {
 	  id2++;
 	  vert2id[i2] = id2;
-	  data.key1.push_back(profile[p_game->GetPlayer(1)]);
+	  solution->m_key1.push_back(profile[p_game->GetPlayer(1)]);
 	}
-	data.node1.Append(vert2id[i2]);
-	data.node2.Append(vert1id[i1]);
+	solution->m_node1.Append(vert2id[i2]);
+	solution->m_node2.Append(vert1id[i1]);
       }
     }
   }
-  if (g_showConnect) {
-    GetCliques(std::cout, p_game, data);
-  }
-
-  return equilibria;
+  return solution;
 }
 
 template<> bool EnumMixedStrategySolver<double>::EqZero(const double &x) 
@@ -257,7 +258,18 @@ template<> bool EnumMixedStrategySolver<Rational>::EqZero(const Rational &x)
   return (x == Rational(0));
 }
 
-
+template <class T> void
+PrintCliques(const List<List<MixedStrategyProfile<T> > > &p_cliques,
+	     shared_ptr<StrategyProfileRenderer<T> > p_renderer)
+{
+  for (int cl = 1; cl <= p_cliques.size(); cl++) {
+    for (int i = 1; i <= p_cliques[cl].size(); i++) {
+      p_renderer->Render(p_cliques[cl][i],
+			 "convex-" + lexical_cast<std::string>(cl)); 
+    }
+  }
+}
+      
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by enumerating extreme points\n";
@@ -290,6 +302,7 @@ int main(int argc, char *argv[])
 {
   int c;
   bool useFloat = false, uselrs = false, quiet = false, eliminate = true;
+  bool showConnect = false;
   int numDecimals = 6;
 
   int long_opt_index = 0;
@@ -316,7 +329,7 @@ int main(int argc, char *argv[])
       PrintHelp(argv[0]);
       break;
     case 'c':
-      g_showConnect = true;
+      showConnect = true;
       break;
     case 'S':
       break;
@@ -374,13 +387,25 @@ int main(int argc, char *argv[])
       renderer = new MixedStrategyCSVRenderer<double>(std::cout,
 						      numDecimals);
       EnumMixedStrategySolver<double> solver(renderer);
-      solver.Solve(game);
+      shared_ptr<EnumMixedStrategySolution<double> > solution =
+	solver.SolveDetailed(game);
+      if (showConnect) {
+	List<List<MixedStrategyProfile<double> > > cliques =
+	  solution->GetCliques();
+	PrintCliques(cliques, renderer);
+      }
     }
     else {
       shared_ptr<StrategyProfileRenderer<Rational> > renderer;
       renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
       EnumMixedStrategySolver<Rational> solver(renderer);
-      solver.Solve(game);
+      shared_ptr<EnumMixedStrategySolution<Rational> > solution =
+	solver.SolveDetailed(game);
+      if (showConnect) {
+	List<List<MixedStrategyProfile<Rational> > > cliques =
+	  solution->GetCliques();
+	PrintCliques(cliques, renderer);
+      }
     }
     return 0;
   }
