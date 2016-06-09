@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/enummixed/clique.h
+// FILE: library/src/enummixed/clique.h
 // Maximal cliques and connected components
 //
 // This program is free software; you can redistribute it and/or modify
@@ -175,13 +175,14 @@
 //    have to be updated.  Hence,  NOT and CAND are kept as
 //    separate sets  NOT1,  NOT2  and CAND1, CAND2.
 
-#ifndef CLIQUE_H
-#define CLIQUE_H
+#ifndef GAMBIT_ENUMMIXED_CLIQUE_H
+#define GAMBIT_ENUMMIXED_CLIQUE_H
 
 #include <cstdio>
 #include "gambit/gambit.h"
 
-using namespace Gambit;
+namespace Gambit {
+namespace Nash {
 
 #define MAXM 700     // max. no of left nodes for incidence matrix 
 #define MAXN MAXM  // max. no of right nodes for incidence matrix 
@@ -283,7 +284,9 @@ private:
 
 };
 
+} // end namespace Gambit::Nash
+} // end namespace Gambit
 
-#endif // CLIQUE_H
+#endif // GAMBIT_ENUMMIXED_CLIQUE_H
 
 

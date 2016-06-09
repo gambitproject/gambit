@@ -224,5 +224,6 @@ public:
 /// Expose individual Nash solvers
 
 #include "gambit/nash/enumpure.h"
+#include "gambit/nash/enummixed.h"
 
 #endif  // LIBGAMBIT_NASH_H

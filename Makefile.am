@@ -364,9 +364,13 @@ libgambit_la_SOURCES = \
 	library/src/tinyxmlparser.cc \
 	library/include/gambit/nash/enumpure.h \
 	library/include/gambit/nash/enummixed.h \
+	library/src/enummixed/clique.cc \
+	library/src/enummixed/clique.h \
 	library/src/enummixed/lrsenum.cc \
+	library/src/enummixed/enummixed.cc \
 	${libagg_la_SOURCES} \
-	${lrslib_la_SOURCES} 
+	${lrslib_la_SOURCES} \
+	${liblinear_la_SOURCES}
 
 libgambitincludedir = $(includedir)/libgambit
 libgambitinclude_HEADERS = \
@@ -502,9 +506,6 @@ liblinear_la_SOURCES = \
 
 gambit_enummixed_SOURCES = \
 	${libgambit_la_SOURCES} \
-	${liblinear_la_SOURCES} \
-	src/tools/enummixed/clique.cc \
-	src/tools/enummixed/clique.h \
 	src/tools/enummixed/enummixed.cc
 
 
@@ -645,7 +646,6 @@ gambit_ipa_SOURCES = \
 
 gambit_lcp_SOURCES = \
 	${libgambit_la_SOURCES} \
-	${liblinear_la_SOURCES} \
 	src/tools/lcp/efglcp.cc \
 	src/tools/lcp/efglcp.h \
 	src/tools/lcp/nfglcp.cc \
@@ -674,7 +674,6 @@ gambit_logit_SOURCES = \
 
 gambit_lp_SOURCES = \
 	${libgambit_la_SOURCES} \
-	${liblinear_la_SOURCES} \
 	src/tools/lp/efglp.cc \
 	src/tools/lp/efglp.h \
 	src/tools/lp/nfglp.cc \

@@ -23,6 +23,9 @@
 #include "clique.h"
 #include "gambit/gambit.h"
 
+namespace Gambit {
+namespace Nash {
+
 CliqueEnumerator::CliqueEnumerator(Array<Edge> &edgelist, int maxinp1, int maxinp2) 
   : firstedge(std::min(maxinp1,maxinp2)+1), maxinp1(maxinp1), maxinp2(maxinp2)
 {
@@ -578,4 +581,6 @@ void CliqueEnumerator::workonco(int numco,
     }
 }
 
+}  // end namespace Gambit::Nash
+}  // end namespace Gambit
 
