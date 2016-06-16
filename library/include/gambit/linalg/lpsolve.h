@@ -31,27 +31,28 @@ namespace Gambit {
 
 namespace linalg {
 
+///
+/// This class implements a LP solver.  Its constructor takes as input a
+/// LP problem of the form maximize c x subject to A x<=b, x >= 0. 
+/// The last k equations can represent equalities (indicated by the 
+/// parameter "nequals").  
+///
+/// All computation is done in the class constructor; when the constructor
+/// returns the computation has completed.  OptimumVector() returns the 
+/// solution.  The components are indexed by the columns of A, with the 
+/// excess columns representing the artificial and slack variables.   
+///
 template <class T> class LPSolve {
-  ///
-  /// This class implements a LP solver.  Its constructor takes as input a
-  /// LP problem of the form maximize c x subject to A x<=b, x >= 0. 
-  /// The last k equations can represent equalities (indicated by the 
-  /// parameter "nequals").  
-  ///
-  /// All computation is done in the class constructor; when the constructor
-  /// returns the computation has completed.  OptimumVector() returns the 
-  /// solution.  The components are indexed by the columns of A, with the 
-  /// excess columns representing the artificial and slack variables.   
-  ///
 private:
-  int  well_formed, feasible, bounded, aborted, flag, nvars, neqns,nequals;
+  bool well_formed, feasible, bounded;
+  int flag, nvars, neqns,nequals;
   T total_cost,eps1,eps2,eps3,tmin;
   BFS<T> opt_bfs,dual_bfs;
   LPTableau<T> tab;
-  Gambit::Array<bool> *UB, *LB;
-  Gambit::Array<T> *ub, *lb;
-  Gambit::Vector<T> *xx, *cost; 
-  Gambit::Vector<T> y, x, d;
+  Array<bool> *UB, *LB;
+  Array<T> *ub, *lb;
+  Vector<T> *xx, *cost; 
+  Vector<T> y, x, d;
 
   void Solve(int phase = 0);
   int Enter(void);
@@ -60,26 +61,20 @@ private:
   static Array<int> Artificials(const Vector<T> &);
   
 public:
-  LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &B, const Gambit::Vector<T> &C,
+  LPSolve(const Matrix<T> &A, const Vector<T> &B, const Vector<T> &C,
 	  int nequals);   // nequals = number of equalities (last nequals rows)
-//  LPSolve(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &B, 
-//	  const Gambit::Vector<T> &C,  const Gambit::Vector<int> &sense, 
-//	  const Gambit::Vector<int> &LB,  const Gambit::Vector<T> &lb, 
-//	  const Gambit::Vector<int> &UB, const Gambit::Vector<T> &ub);
   ~LPSolve();
   
-  T OptimumCost(void) const;
-  const Gambit::Vector<T> &OptimumVector(void) const;
-  const Gambit::List< BFS<T> > &GetAll(void);
-  const LPTableau<T> &GetTableau();
+  T OptimumCost(void) const { return total_cost; }
+  const Vector<T> &OptimumVector(void) const { return (*xx); }
+  const List< BFS<T> > &GetAll(void);
+  const LPTableau<T> &GetTableau(void) const { return tab; }
+  const BFS<T> &OptimumBFS(void) const { return opt_bfs; }
   
-  int IsAborted(void) const;
-  int IsWellFormed(void) const;
-  int IsFeasible(void) const;
-  int IsBounded(void) const;
-  long NumPivots(void) const;
-  void OptBFS(BFS<T> &b) const;
-  T Epsilon(int i = 2) const;
+  bool IsWellFormed(void) const { return well_formed; }
+  bool IsFeasible(void) const { return feasible; }
+  bool IsBounded(void) const  { return bounded; }
+  long NumPivots(void) const { return tab.NumPivots(); }
 };
 
 }  // end namespace Gambit::linalg

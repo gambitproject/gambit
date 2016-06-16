@@ -62,9 +62,9 @@ public:
     m_map.insert(std::pair<int, T>(key, value));
   }
 
-  const T &operator[](int key) {
+  const T &operator[](int key) const {
     if (m_map.count(key) == 1) {
-      return m_map[key];
+      return const_cast<std::map<int, T> &>(m_map)[key];
     }
     else {
       return m_default;

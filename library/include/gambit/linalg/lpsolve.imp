@@ -29,7 +29,7 @@ namespace linalg {
 template <class T> 
 LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
 		    const Vector<T> &c, int nequals)
-  : well_formed(1), feasible(1), bounded(1), aborted(0), 
+  : well_formed(true), feasible(true), bounded(true), 
     nvars(c.Length()),neqns(b.Length()), nequals(nequals),
     total_cost(0),tmin(0), 
     tab(A,Artificials(b),b), UB(0),LB(0),ub(0),lb(0),xx(0), cost(0),
@@ -43,7 +43,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
   
   // Check dimensions
   if (A.NumRows() != b.Length() || A.NumColumns() != c.Length()) {
-    well_formed = 0;
+    well_formed = false;
     return;
   }
   // gout << "\n--- Begin LPSolve ---\n";
@@ -97,7 +97,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
   
   // Initialize the tableau
   
-  tab.SetCost((*cost));
+  tab.SetCost(*cost);
   
   // gout << "\nInitial Tableau = \n";
   // tab.Dump(gout);
@@ -127,14 +127,14 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
 
   // gout << "\n--- End Phase I ---\n";
   
-  if(!bounded) {
+  if (!bounded) {
     // gout << "\nPhase 1 Unbounded\n";
   }
   //assert(bounded);
   
   // which eps should be used here?  
   if(total_cost < -eps1) {   
-    feasible = 0;
+    feasible = false;
     // gout << "\nProblem Infeasible\n\n";
     return;
   }
@@ -162,7 +162,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
   // gout << "\nub = " <<  *ub << " " << " lb = " << *lb;
   // gout << "\nc = " <<  (*cost);
   
-  tab.SetCost((*cost));
+  tab.SetCost(*cost);
   
   // gout << "\nInitial basis: ";
   // tab.Dump(gout);   gout << '\n';
@@ -171,7 +171,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
   
   // gout << "\n--- End Phase II ---\n";
 
-  if(!bounded) {
+  if (!bounded) {
     // gout << "\nPhase II Unbounded\n";
   }
   total_cost = tab.TotalCost();
@@ -207,37 +207,21 @@ template <class T> Array<int> LPSolve<T>::Artificials(const Vector<T> &b)
   return ret;
 }
 
-//template <class T> LPSolve<T>::
-//LPSolve(const Matrix<T> &A, const Vector<T> &/*B*/, 
-//	const Vector<T> &/*C*/,  const Vector<int> &/*sense*/, 
-//	const Vector<int> &/*LB*/,  const Vector<T> &/*lb*/, 
-//	const Vector<int> &/*UB*/, const Vector<T> &/*ub*/)
-// : well_formed(1), feasible(1), bounded(1),  
-//    nvars(c.Length()),neqns(b.Length()), total_cost(0), 
-//    opt_bfs((T)0),  dual_bfs((T)0),  A(A), b(b), c(c), tab(0), 
-//    UB(c.Length()+b.Length()), LB(b.Length()+c.Length()), 
-//    ub(c.Length()+b.Length()),lb(c.Length()+b.Length()),
-//    xx(c.Length()+b.Length()),
-//    y(b.Length()),x(b.Length()),d(b.Length()),
-//    cost(c.Length()+b.Length())
-//{ 
-//  gout << "\n This constructor not implemented yet";
-//  assert(0);
-//}
-
 template <class T> void LPSolve<T>::Solve(int phase)
 {
   int i, in,xlab;
   int outlab = 0;
   int out = 0;
   Vector<T> a(neqns);
-  double npiv;
   
   do { 
     // step 1: Solve y B = c_B
     // tab.DualVector(y);         // step 1: Solve y B = c_B
     // gout << "\nstep 1, y: " << y;
     do {
+      if (phase == 2) {
+	std::cout << tab.TotalCost() << std::endl;
+      }
       in = Enter();            // step 2: Choose entering variable 
       // gout << "\nstep 2, in: " << in;
       if(in) {
@@ -246,7 +230,7 @@ template <class T> void LPSolve<T>::Solve(int phase)
 	tab.SolveColumn(in,d);    // step 3: Solve B d = a, where a col #in of A
 	out = Exit(in);          // step 4: Choose leaving variable
 	if(out==0) {
-	  bounded=0;
+	  bounded = false;
 	  return;
 	}
 	else if (out<0)
@@ -272,8 +256,6 @@ template <class T> void LPSolve<T>::Solve(int phase)
     if(in) {
       // gout << "\nstep 5b, Pivot in: " << in << " out: " << out;
       tab.Pivot(out,in);       // step5b: Pivot new variable into basis
-      
-      npiv=(double)tab.NumPivots();
       tab.BasisVector(x);
       // gout << "\n tab = ";
       // tab.Dump(gout);
@@ -374,122 +356,6 @@ template <class T> int LPSolve<T>::Exit(int in)
   return out;
 }
 
-template <class T> T LPSolve<T>::OptimumCost(void) const
-{
-  return total_cost;
-}
-
-template <class T> const Vector<T> &LPSolve<T>::OptimumVector(void) const
-{
-  return (*xx);
-}
-
-template <class T> const LPTableau<T> &LPSolve<T>::GetTableau(void)
-{
-  return tab;
-}
-
-#ifdef UNUSED
-
-//
-// This method does not work correctly, so is disabled
-//
-template <class T> const List<BFS <T> > &LPSolve<T>::GetAll(void)
-{
-  Vector<T> c(tab.GetCost());
-  Vector<T> uc(tab.GetUnitCost());
-
-  //  gout << "\nc: " << c;
-  //  gout << "\nuc: " << uc;
-
-  Vector<T> x(tab.MinRow(),tab.MaxRow());
-  tab.BasisVector(x);
-
-  int i;
-  for(i=c.First();i<=c.Last();i++) {
-    //   gout << "\ncol: " << i << " cost: " << tab.RelativeCost(i);
-    //   gout  << " label: " << tab.Label(i) << " x: " << x[tab.Label(i)];
-    if(tab.RelativeCost(i) < -eps2 && x[tab.Label(i)]>eps2) {
-      //    gout << " mark";
-      tab.Mark(i);
-    }
-  }
-  for(i=uc.First();i<=uc.Last();i++) {
-    //    gout << "\nrow: " << i << " cost: " << tab.RelativeCost(-i);
-    //   gout << " label: " << tab.Label(-i) << " x: " << x[tab.Label(-i)];
-    if(tab.RelativeCost(-i) < -eps2 && x[tab.Label(-i)]>eps2) {
-      //     gout << " mark";
-      tab.Mark(-i);
-    }
-  }
-
-  VertEnum<T> AllSolutions(tab);
-  List<Vector<T> > verts;
-
-  List<BFS<T> > *bfs = new List<BFS<T> >(AllSolutions.VertexList());
-  List<BFS<T> > *dual_bfs = new List<BFS<T> >(AllSolutions.DualVertexList());
-  AllSolutions.Vertices(verts);
-
-  //  gout << "\nHere are the BFSs: \n";
-  for( i=1;i<=(*bfs).Length();i++) {
-    //    gout << "\n" << i << ": ";
-    //  (*bfs)[i].Dump(gout);
-  }
-  //  gout << "\nHere are the Dual BFSs: \n";
-  for( i=1;i<=(*dual_bfs).Length();i++) {
-    //    gout << "\n" << i << ": ";
-    //n   (*dual_bfs)[i].Dump(gout);
-  }
-  //  gout << "\nHere are the vertices:\n";
-
-  //  for( i=1;i<=verts.Length();i++)
-    //   gout << "\n" << i << ": " << verts[i];
-  
-  for( i=1;i<=(*bfs).Length();i++)
-    for(int j=1;j<=neqns;j++)
-      if((*dual_bfs)[i].IsDefined(-j))
-	(*bfs)[i].Define(-j,(*dual_bfs)[i](-j));
-
-  //  gout << "\nHere are the BFSs: \n";
-  for( i=1;i<=(*bfs).Length();i++) {
-    //  gout << "\n" << i << ": ";
-    //  (*bfs)[i].Dump(gout);
-  }
-
-  return *bfs;
-}
-#endif  // UNUSED
-
-template <class T> int LPSolve<T>::IsFeasible(void) const
-{
-  return feasible;
-}
-
-template <class T> int LPSolve<T>::IsBounded(void) const
-{
-  return bounded;
-}
-
-template <class T> int LPSolve<T>::IsWellFormed(void) const
-{
-  return well_formed;
-}
-
-template <class T> int LPSolve<T>::IsAborted(void) const
-{
-  return aborted;
-}
-
-template <class T> long LPSolve<T>::NumPivots(void) const
-{
-  return tab.NumPivots();
-}
-
-template <class T> void LPSolve<T>::OptBFS(BFS<T> &b) const
-{
-  b = opt_bfs;
-}
-
 template <class T> LPSolve<T>::~LPSolve()
 { 
   if(UB) delete UB; 
@@ -498,13 +364,6 @@ template <class T> LPSolve<T>::~LPSolve()
   if(lb) delete lb; 
   if(xx) delete xx; 
   if(cost) delete cost; 
-}
-
-template <class T> T LPSolve<T>::Epsilon(int i/* = 2*/) const
-{
-if(i == 1) return eps1;
-if(i == 3)return eps3;
-return eps2;
 }
 
 }  // end namespace Gambit::linalg

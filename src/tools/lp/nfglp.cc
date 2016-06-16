@@ -49,32 +49,26 @@ NashLpStrategySolver<T>::SolveLP(const Matrix<T> &A,
 				 Array<T> &p_primal, Array<T> &p_dual) const
 {
   Gambit::linalg::LPSolve<T> LP(A, b, c, nequals);
-  if (!LP.IsAborted()) {
-    Gambit::linalg::BFS<T> cbfs;
-    LP.OptBFS(cbfs);
+  const Gambit::linalg::BFS<T> &cbfs(LP.OptimumBFS());
 
-    for (int i = 1; i <= A.NumColumns(); i++) {
-      if (cbfs.count(i)) {
-	p_primal[i] = cbfs[i];
-      }
-      else {
-	p_primal[i] = (T) 0;
-      }
+  for (int i = 1; i <= A.NumColumns(); i++) {
+    if (cbfs.count(i)) {
+      p_primal[i] = cbfs[i];
     }
+    else {
+      p_primal[i] = (T) 0;
+    }
+  }
 
-    for (int i = 1; i <= A.NumRows(); i++) {
-      if (cbfs.count(-i)) {
-	p_dual[i] = cbfs[-i];
-      }
-      else {
-	p_dual[i] = (T) 0;
-      }
+  for (int i = 1; i <= A.NumRows(); i++) {
+    if (cbfs.count(-i)) {
+      p_dual[i] = cbfs[-i];
     }
-    return true;
+    else {
+      p_dual[i] = (T) 0;
+    }
   }
-  else {
-    return false;
-  }
+  return true;
 }
 
 //
