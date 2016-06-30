@@ -472,6 +472,29 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
   return sol;
 }
 
+///
+/// Compute an equilibrium using the default starting point. 
+///
+/// This computes the equilibrium reached from the starting point profile
+/// in which all players put probability one on their first strategy.
+/// This is a not-unreasonable default in that it starts with a very
+/// coarse grid and, if the game has an equilibrium in pure strategies,
+/// or in mixed strategies with small denominators, it will find it quickly.
+/// Starting with a strategy profile with a smaller denominator can lead
+/// to a long initial search before reaching a candidate neighborhood
+/// for an equilibrium.
+///
+List<MixedStrategyProfile<Rational> >
+NashSimpdivStrategySolver::Solve(const Game &p_game) const
+{
+  MixedStrategyProfile<Rational> start = p_game->NewMixedStrategyProfile(Rational(0));
+  static_cast<Vector<Rational> &>(start) = Rational(0);
+  for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
+    start[p_game->Players()[pl]->Strategies()[1]] = Rational(1);
+  }
+  return Solve(start);
+}
+  
 
 }  // end namespace Gambit::Nash
 }  // end namespace Gambit

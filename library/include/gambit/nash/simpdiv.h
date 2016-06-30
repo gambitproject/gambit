@@ -46,8 +46,7 @@ public:
   virtual ~NashSimpdivStrategySolver() { }
 
   List<MixedStrategyProfile<Rational> > Solve(const MixedStrategyProfile<Rational> &p_start) const;
-  List<MixedStrategyProfile<Rational> > Solve(const Game &p_game) const
-  { return Solve(p_game->NewMixedStrategyProfile(Rational(0))); }
+  List<MixedStrategyProfile<Rational> > Solve(const Game &p_game) const;
 
 
 private:
