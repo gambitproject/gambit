@@ -397,6 +397,72 @@ PureBehaviorProfile::ToMixedBehaviorProfile(void) const
 }
 
 //========================================================================
+//                            class GameRep
+//========================================================================
+
+//------------------------------------------------------------------------
+//                     GameRep: Writing data files
+//------------------------------------------------------------------------
+
+  
+namespace {
+
+std::string EscapeQuotes(const std::string &s)
+{
+  std::string ret;
+  
+  for (unsigned int i = 0; i < s.length(); i++)  {
+    if (s[i] == '"')   ret += '\\';
+    ret += s[i];
+  }
+
+  return ret;
+}
+
+}  // end anonymous namespace
+
+///
+/// Write the game to a savefile in .nfg payoff format.
+///
+/// This implements writing a game to a .nfg savefile.  As it uses
+/// only publicly-accessible operations, it is in principle valid
+/// for any game.  It writes the payoff format, as it is not required
+/// that a game representation implements an outcome for each possible
+/// pure strategy profile.  For example, in extensive games with chance
+/// moves, the outcome from a pure strategy profile is not deterministic,
+/// but rather a probability distribution over outcomes.
+///
+void GameRep::WriteNfgFile(std::ostream &p_file) const
+{ 
+  p_file << "NFG 1 R";
+  p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
+  for (int i = 1; i <= NumPlayers(); i++)
+    p_file << '"' << EscapeQuotes(GetPlayer(i)->GetLabel()) << "\" ";
+
+  p_file << "}\n\n{ ";
+  
+  for (int i = 1; i <= NumPlayers(); i++)   {
+    GamePlayerRep *player = GetPlayer(i);
+    p_file << "{ ";
+    for (int j = 1; j <= player->NumStrategies(); j++)
+      p_file << '"' << EscapeQuotes(player->GetStrategy(j)->GetLabel()) << "\" ";
+    p_file << "}\n";
+  }
+  p_file << "}\n";
+  p_file << "\"" << EscapeQuotes(m_comment) << "\"\n\n";
+
+  for (StrategyProfileIterator iter(Game(const_cast<GameRep *>(this)));
+       !iter.AtEnd(); iter++) {
+    for (int pl = 1; pl <= NumPlayers(); pl++) {
+      p_file << (*iter)->GetPayoff(pl) << " ";
+    }
+    p_file << "\n";
+  }
+  p_file << '\n';
+}
+
+
+//========================================================================
 //                       class GameExplicitRep
 //========================================================================
 
@@ -541,4 +607,9 @@ void GameExplicitRep::Write(std::ostream &p_stream,
   }
 }
 
+
+
+  
 }  // end namespace Gambit
+
+

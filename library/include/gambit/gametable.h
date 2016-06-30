@@ -118,6 +118,7 @@ public:
 
   /// @name Writing data files
   //@{
+  /// Write the game to a file in .nfg outcome format
   virtual void WriteNfgFile(std::ostream &) const;
   //@}
 

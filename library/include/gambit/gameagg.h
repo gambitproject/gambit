@@ -149,8 +149,6 @@ public:
   /// Write the game to a savefile in the specified format.
   virtual void Write(std::ostream &p_stream,
 		     const std::string &p_format="native") const;
-  virtual void WriteNfgFile(std::ostream &) const
-  { throw UndefinedException(); }
   virtual void WriteAggFile(std::ostream &) const;
   //@}
 };

@@ -728,6 +728,8 @@ public:
   virtual void Write(std::ostream &p_stream,
 		     const std::string &p_format="native") const
   { throw UndefinedException(); }
+  /// Write the game to a file in .nfg payoff format.
+  virtual void WriteNfgFile(std::ostream &p_stream) const;
   //@}
 
   /// @name Dimensions of the game

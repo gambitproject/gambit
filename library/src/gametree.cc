@@ -880,40 +880,7 @@ void GameTreeRep::WriteNfgFile(std::ostream &p_file) const
 { 
   // FIXME: Building computed values is logically const.
   const_cast<GameTreeRep *>(this)->BuildComputedValues();
-
-  p_file << "NFG 1 R";
-  p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
-
-  for (int i = 1; i <= NumPlayers(); i++)
-    p_file << '"' << EscapeQuotes(GetPlayer(i)->GetLabel()) << "\" ";
-
-  p_file << "}\n\n{ ";
-  
-  for (int i = 1; i <= NumPlayers(); i++)   {
-    GamePlayerRep *player = GetPlayer(i);
-    p_file << "{ ";
-    for (int j = 1; j <= player->NumStrategies(); j++)
-      p_file << '"' << EscapeQuotes(player->GetStrategy(j)->GetLabel()) << "\" ";
-    p_file << "}\n";
-  }
-  
-  p_file << "}\n";
-
-  p_file << "\"" << EscapeQuotes(m_comment) << "\"\n\n";
-
-  // For trees, we write the payoff version, since there need not be
-  // a one-to-one correspondence between outcomes and entries, when there
-  // are chance moves.
-  StrategyProfileIterator iter(Game(const_cast<GameTreeRep *>(this)));
-    
-  for (; !iter.AtEnd(); iter++) {
-    for (int pl = 1; pl <= NumPlayers(); pl++) {
-      p_file << (*iter)->GetPayoff(pl) << " ";
-    }
-    p_file << "\n";
-  }
-
-  p_file << '\n';
+  GameRep::WriteNfgFile(p_file);
 }
 
 //------------------------------------------------------------------------

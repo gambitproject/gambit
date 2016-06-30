@@ -220,6 +220,15 @@ std::string EscapeQuotes(const std::string &s)
 
 }  // end anonymous namespace
 
+///
+/// Write the game to a savefile in .nfg outcome format.
+///
+/// This overrides the .nfg writing in the base GameRep class.
+/// It writes out the game in the .nfg outcome format, in which
+/// the entries of the N-dimensional payoff table are written as
+/// indexes into the list of outcomes, rather than the payoffs
+/// directly.  This preserves the outcome structure of the game.
+///  
 void GameTableRep::WriteNfgFile(std::ostream &p_file) const
 { 
   p_file << "NFG 1 R";
