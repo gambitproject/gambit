@@ -223,7 +223,7 @@ NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
   goto step1;
   
  step3:
-  ii = (i == state.t+1) ? state.t : 1;
+  ii = (i == state.t+1) ? state.t : i;
   j = pi(ii,1);
   h = pi(ii,2);
   k = h;
