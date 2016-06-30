@@ -653,6 +653,7 @@ Computing an equilibrium in mixed strategies of :download:`e02.efg
 
 
 
+.. _gambit-simpdiv:
 
 :program:`gambit-simpdiv`: Compute equilibria via simplicial subdivision
 ------------------------------------------------------------------------

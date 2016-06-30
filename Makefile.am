@@ -368,6 +368,8 @@ libgambit_la_SOURCES = \
 	library/src/enummixed/clique.h \
 	library/src/enummixed/lrsenum.cc \
 	library/src/enummixed/enummixed.cc \
+	library/include/gambit/nash/simpdiv.h \
+	library/src/simpdiv/simpdiv.cc \
 	${libagg_la_SOURCES} \
 	${lrslib_la_SOURCES} \
 	${liblinear_la_SOURCES}

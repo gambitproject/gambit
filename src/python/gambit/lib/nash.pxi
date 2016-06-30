@@ -316,6 +316,30 @@ cdef class LPStrategySolverRational(object):
         return ret
 
 
+cdef extern from "gambit/nash/simpdiv.h":
+    cdef cppclass c_NashSimpdivStrategySolver "NashSimpdivStrategySolver":
+        c_NashSimpdivStrategySolver()
+        c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
+        c_List[c_MixedStrategyProfileRational] Solve(c_MixedStrategyProfileRational) except +RuntimeError
+
+cdef class SimpdivStrategySolver(object):
+    cdef c_NashSimpdivStrategySolver *alg
+
+    def __cinit__(self):
+        self.alg = new c_NashSimpdivStrategySolver()
+    def __dealloc__(self):
+        del self.alg
+    def solve(self, Game game):
+        cdef c_List[c_MixedStrategyProfileRational] solns
+        cdef MixedStrategyProfileRational p
+        solns = self.alg.Solve(game.game)
+        ret = [ ]
+        for i in xrange(solns.Length()):
+            p = MixedStrategyProfileRational()
+            p.profile = copyitem_list_mspr(solns, i+1)
+            ret.append(p)
+        return ret
+
 cdef extern from "tools/logit/nfglogit.h":
     cdef cppclass c_LogitQREMixedStrategyProfile "LogitQREMixedStrategyProfile":
         c_LogitQREMixedStrategyProfile(c_Game)

@@ -1308,3 +1308,10 @@ Computation of Nash equilibria
 			 of the internally-linked implementation
    :raises RuntimeError: if game has more than two players.
 
+.. py:function:: simpdiv_solve(game, external=False)
+
+   Compute Nash equilibria of a game using :ref:`simplicial
+   subdivision <gambit-simpdiv>`.
+
+   :param bool external: Call the external command-line solver instead
+			 of the internally-linked implementation
