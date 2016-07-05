@@ -132,7 +132,7 @@ cdef class EnumMixedLrsStrategySolver(object):
             ret.append(p)
         return ret
 
-cdef extern from "tools/lcp/nfglcp.h":
+cdef extern from "gambit/nash/lcp.h":
     cdef cppclass c_NashLcpStrategySolverDouble "NashLcpStrategySolver<double>":
         c_NashLcpStrategySolverDouble(int, int)
         c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
@@ -141,7 +141,6 @@ cdef extern from "tools/lcp/nfglcp.h":
         c_NashLcpStrategySolverRational(int, int)
         c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
 
-cdef extern from "tools/lcp/efglcp.h":
     cdef cppclass c_NashLcpBehaviorSolverDouble "NashLcpBehaviorSolver<double>":
         c_NashLcpBehaviorSolverDouble(int, int)
         c_List[c_MixedBehaviorProfileDouble] Solve(c_Game) except +RuntimeError

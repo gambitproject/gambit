@@ -368,6 +368,9 @@ libgambit_la_SOURCES = \
 	library/src/enummixed/clique.h \
 	library/src/enummixed/lrsenum.cc \
 	library/src/enummixed/enummixed.cc \
+	library/include/gambit/nash/lcp.h \
+	library/src/lcp/efglcp.cc \
+	library/src/lcp/nfglcp.cc \
 	library/include/gambit/nash/simpdiv.h \
 	library/src/simpdiv/simpdiv.cc \
 	${libagg_la_SOURCES} \
@@ -648,10 +651,6 @@ gambit_ipa_SOURCES = \
 
 gambit_lcp_SOURCES = \
 	${libgambit_la_SOURCES} \
-	src/tools/lcp/efglcp.cc \
-	src/tools/lcp/efglcp.h \
-	src/tools/lcp/nfglcp.cc \
-	src/tools/lcp/nfglcp.h \
 	src/tools/lcp/lcp.cc
 
 gambit_liap_SOURCES = \

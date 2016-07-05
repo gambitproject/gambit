@@ -27,12 +27,10 @@
 #include "gambit/gambit.h"
 #include "gambit/linalg/lemketab.h"
 #include "gambit/linalg/lhtab.h"
+#include "gambit/nash/lcp.h"
 
-#include "efglcp.h"
-
-
-using namespace Gambit;
-using namespace Gambit::linalg;
+namespace Gambit {
+namespace Nash {
 
 template <class T> class NashLcpBehaviorSolver<T>::Solution {
 public:
@@ -43,13 +41,13 @@ public:
   List<Gambit::linalg::BFS<T> > m_list;
   List<MixedBehaviorProfile<T> > m_equilibria;
 
-  bool AddBFS(const LemkeTableau<T> &);
+  bool AddBFS(const linalg::LemkeTableau<T> &);
 
   int EquilibriumCount(void) const { return m_equilibria.size(); }
 };
 
 template <class T> bool 
-NashLcpBehaviorSolver<T>::Solution::AddBFS(const LemkeTableau<T> &tableau)
+NashLcpBehaviorSolver<T>::Solution::AddBFS(const linalg::LemkeTableau<T> &tableau)
 {
   Gambit::linalg::BFS<T> cbfs;
   Vector<T> v(tableau.MinRow(), tableau.MaxRow());
@@ -126,7 +124,7 @@ NashLcpBehaviorSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
   b[solution.ns1+solution.ns2+1] = -(T)1;
   b[solution.ns1+solution.ns2+solution.ni1+1] = -(T)1;
 
-  LemkeTableau<T> tab(A,b);
+  linalg::LemkeTableau<T> tab(A,b);
   solution.eps = tab.Epsilon();
   
   try {
@@ -173,7 +171,7 @@ NashLcpBehaviorSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 //
 template <class T> void
 NashLcpBehaviorSolver<T>::AllLemke(const BehaviorSupportProfile &p_support,
-				   int j, LemkeTableau<T> &B, int depth,
+				   int j, linalg::LemkeTableau<T> &B, int depth,
 				   Matrix<T> &A,
 				   Solution &p_solution) const
 {
@@ -190,7 +188,7 @@ NashLcpBehaviorSolver<T>::AllLemke(const BehaviorSupportProfile &p_support,
   for (int i = B.MinRow(); i <= B.MaxRow() && !newsol; i++) {
     if (i == j) continue;
 
-    LemkeTableau<T> BCopy(B);
+    linalg::LemkeTableau<T> BCopy(B);
     A(i,0) = -small_num;
     BCopy.Refactor();
 
@@ -298,7 +296,7 @@ void NashLcpBehaviorSolver<T>::FillTableau(const BehaviorSupportProfile &p_suppo
 
 template <class T> void
 NashLcpBehaviorSolver<T>::GetProfile(const BehaviorSupportProfile &p_support,
-				     const LemkeTableau<T> &tab, 
+				     const linalg::LemkeTableau<T> &tab, 
 				     MixedBehaviorProfile<T> &v, 
 				     const Vector<T> &sol,
 				     const GameNode &n, int s1, int s2,
@@ -372,4 +370,5 @@ NashLcpBehaviorSolver<T>::GetProfile(const BehaviorSupportProfile &p_support,
 template class NashLcpBehaviorSolver<double>;
 template class NashLcpBehaviorSolver<Rational>;
 
-
+}  // end namespace Gambit::Nash
+}  // end namespace Gambit
