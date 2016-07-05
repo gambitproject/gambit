@@ -2,10 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: library/include/gtracer/gtracer.h
-// Top-level include file for Gametracer embedding in Gambit
-// This file is based on GameTracer v0.2, which is
-// Copyright (c) 2002, Ben Blum and Christian Shelton
+// FILE: library/include/gambit/nash/ipa.h
+// Compute Nash equilibria via iterated polymatrix approximation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,23 +20,27 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_GTRACER_GTRACER_H
-#define GAMBIT_GTRACER_GTRACER_H
+#ifndef GAMBIT_NASH_IPA_H
+#define GAMBIT_NASH_IPA_H
 
-#include "cmatrix.h"
-#include "nfgame.h"
-#include "gnmgame.h"
-#include "aggame.h"
+#include "gambit/nash.h"
 
 namespace Gambit {
-namespace gametracer {
+namespace Nash {
 
-int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFreq, int LNMMax, double LambdaMin, bool wobble, double threshold, bool verbose);
+class NashIPAStrategySolver : public StrategySolver<double> {
+public:
+  NashIPAStrategySolver(shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = 0)
+    : StrategySolver<double>(p_onEquilibrium)
+  { }
+  virtual ~NashIPAStrategySolver() { }
 
-int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans,int maxiter=-1);
+  List<MixedStrategyProfile<double> > Solve(const Game &p_game) const;
+  List<MixedStrategyProfile<double> > Solve(const Game &p_game,
+					    const Array<double> &p_pert) const;
+};
 
-}  // end namespace Gambit::gametracer
+}  // end namespace Gambit::Nash
 }  // end namespace Gambit
-
-#endif  // GAMBIT_GTRACER_GTRACER_H
-
+ 
+#endif  // GAMBIT_NASH_IPA_H

@@ -373,6 +373,10 @@ libgambit_la_SOURCES = \
 	library/src/lcp/nfglcp.cc \
 	library/include/gambit/nash/simpdiv.h \
 	library/src/simpdiv/simpdiv.cc \
+	library/include/gambit/nash/ipa.h \
+	library/src/ipa/ipa.cc \
+	library/include/gambit/nash/gnm.h \
+	library/src/gnm/gnm.cc \
 	${libagg_la_SOURCES} \
 	${lrslib_la_SOURCES} \
 	${liblinear_la_SOURCES} \

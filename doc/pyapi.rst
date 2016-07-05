@@ -1315,3 +1315,20 @@ Computation of Nash equilibria
 
    :param bool external: Call the external command-line solver instead
 			 of the internally-linked implementation
+
+.. py:function:: ipa_solve(game, external=False)
+
+   Compute Nash equilibria of a game using :ref:`iterated polymatrix
+   approximation <gambit-ipa>`.
+
+   :param bool external: Call the external command-line solver instead
+			 of the internally-linked implementation
+
+.. py:function:: gnm_solve(game, external=False)
+
+   Compute Nash equilibria of a game using :ref:`the global Newton
+   method <gambit-gnm>`.
+
+   :param bool external: Call the external command-line solver instead
+			 of the internally-linked implementation
+			 

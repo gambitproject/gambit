@@ -22,32 +22,16 @@
 
 #include <unistd.h>
 #include <getopt.h>
-#include <cmath>
 #include <iostream>
 #include <fstream>
 #include <cerrno>
 #include "gambit/gambit.h"
-#include "gambit/gtracer/gtracer.h"
+#include "gambit/nash/ipa.h"
 
 using namespace Gambit;
+using namespace Gambit::Nash;
 using namespace Gambit::gametracer;
 
-#define ALPHA 0.02
-#define EQERR 1e-6
-
-int g_numDecimals = 6;
-bool g_verbose = false;
-
-void PrintProfile(std::ostream &p_stream,
-		  const Gambit::Game &p_game, cvector *p_profile)
-{
-  p_stream.setf(std::ios::fixed);
-  p_stream << "NE";
-  for (int i = 0; i < p_game->MixedProfileLength(); i++) {
-    p_stream << "," << std::setprecision(g_numDecimals) << (*p_profile)[i];
-  }
-  p_stream << std::endl;
-}
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -72,60 +56,12 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-void Solve(const Gambit::Game &p_game, const Gambit::Array<double> &p_pert)
-{
-  int i;
-  gnmgame *A=NULL;
-  if (p_game->IsAgg()){
-	  A = new aggame(dynamic_cast<Gambit::GameAggRep &>(*p_game));
-  }
-  else {
-    int *actions = new int[p_game->NumPlayers()];
-    int veclength = p_game->NumPlayers();
-    for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      actions[pl-1] = p_game->GetPlayer(pl)->NumStrategies();
-      veclength *= p_game->GetPlayer(pl)->NumStrategies();
-    }
-    cvector payoffs(veclength);
-  
-    A = new nfgame(p_game->NumPlayers(), actions, payoffs);
-  
-    int *profile = new int[p_game->NumPlayers()];
-    for (Gambit::StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {
-     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      profile[pl-1] = (*iter)->GetStrategy(pl)->GetNumber() - 1;
-     }
-
-     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      A->setPurePayoff(pl-1, profile, (*iter)->GetPayoff(pl));
-     }
-    }
-  }
-
-  cvector g(A->getNumActions()); // perturbation ray
-  int numEq;
-
-  cvector ans(A->getNumActions());
-  cvector zh(A->getNumActions(),1.0);
-  do {
-    for(i = 0; i < A->getNumActions(); i++) {
-      g[i] = p_pert[i+1];
-    }
-    g /= g.norm(); // normalized
-    numEq = IPA(*A, g, zh, ALPHA, EQERR, ans);
-  } while(numEq == 0);
-
-
-  PrintProfile(std::cout, p_game, &ans);
-
-  delete A;
-}
-
 
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false;
+  bool quiet = false, verbose = false;
+  int numDecimals = 6;
 
   int long_opt_index = 0;
   struct option long_options[] = {
@@ -143,10 +79,10 @@ int main(int argc, char *argv[])
       quiet = true;
       break;
     case 'V':
-      g_verbose = true;
+      verbose = true;
       break;
     case 'd':
-      g_numDecimals = atoi(optarg);
+      numDecimals = atoi(optarg);
       break;
     case 'S':
       break;
@@ -184,17 +120,12 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Gambit::Game game = Gambit::ReadGame(*input_stream);
-    if (!game->IsPerfectRecall()) {
-      throw Gambit::UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
-    }
-
-    Gambit::Array<double> pert(game->MixedProfileLength());
-    for (int i = 1; i <= pert.Length(); i++) {
-      pert[i] = 1.0;
-    }
-
-    Solve(game, pert);
+    Game game = ReadGame(*input_stream);
+    shared_ptr<StrategyProfileRenderer<double> > renderer;
+    renderer = new MixedStrategyCSVRenderer<double>(std::cout,
+						    numDecimals);
+    NashIPAStrategySolver solver(renderer);
+    solver.Solve(game);
     return 0;
   }
   catch (std::runtime_error &e) {

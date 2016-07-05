@@ -28,18 +28,15 @@
 namespace Gambit {
 namespace gametracer {
     
-// These eventually need to be made configurable
-static bool g_verbose = false;
-static int g_numDecimals = 6;
-
 void PrintProfile(std::ostream &p_stream, 
 		  const std::string &p_label,
 		  const cvector &p_profile) 
 {
+  const int numDecimals = 6;
   p_stream << p_label;
   for (int i = 0; i < p_profile.getm(); i++) {
     p_stream.setf(std::ios::fixed);
-    p_stream << ',' << std::setprecision(g_numDecimals) << p_profile[i];
+    p_stream << ',' << std::setprecision(numDecimals) << p_profile[i];
   }
   p_stream << std::endl;
 }
@@ -70,7 +67,8 @@ void PrintProfile(std::ostream &p_stream,
 //            wobbles are disabled, GNM will terminate if the error
 //            reaches this threshold.
 
-int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFreq, int LNMMax, double LambdaMin, bool wobble, double threshold) {
+int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFreq, int LNMMax, double LambdaMin, bool wobble, double threshold, bool verbose)
+{
   int i, // utility variables
     bestAction,  
     k, 
@@ -148,7 +146,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
     sigma[i] = (double)B[i];
   }
 
-  if (g_verbose) {
+  if (verbose) {
     PrintProfile(std::cout, "start", sigma);
   }
 
@@ -277,7 +275,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
       // there are no more equilibria on the path.  This could be
       // handled differently.
       if(minBound == BIGFLOAT && Index*(lambda+dlambda*delta) > 0) {
-	if (g_verbose) {
+	if (verbose) {
 	  std::cerr << "gnm(): return since the path crosses no more support boundaries and no next eqlm" << std::endl;
 	}
 	return numEq;
@@ -317,7 +315,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 	  }
 	  for (int idx=0;idx<M;idx++)
 	    if (! std::isfinite(sigma[idx])){
-	      if(g_verbose) {
+	      if(verbose) {
 		std::cerr << "gnm(): return since sigma is not finite" << std::endl;
 	      }
 	      return numEq;
@@ -328,7 +326,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 	    Eq[numEq] = new cvector(M);
 	    *(Eq[numEq++]) = sigma;
 
-	    PrintProfile(std::cout, "NE", sigma);
+	    //PrintProfile(std::cout, "NE", sigma);
       }
 	  Index = -Index;
 	  s_hat_old = -1;
@@ -337,7 +335,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 	}
       }
       if(del == BIGFLOAT) {
-	if (g_verbose) {
+	if (verbose) {
 	  std::cerr << "gnm(): return since no next support boundary after this eqlm" << std::endl;
 	}
 	return numEq;
@@ -355,7 +353,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
       // if we're sufficiently far out on the ray in the reverse
       // direction, we're probably not going back
       if(lambda < LambdaMin && Index == -1) {
-	if (g_verbose) {
+	if (verbose) {
 	  std::cerr << "gnm(): return due to too far out in the reverse direction" << std::endl;
 	}
 	return numEq;
@@ -389,7 +387,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 	  g /= lambda;
 	  // g = ((z-sigma)-((DG*sigma) / (double)(N-1)))/lambda;
 	} else {
-	  if(g_verbose) {
+	  if(verbose) {
 	    std::cerr << "gnm(): return due to too much error. error is " << ee << std::endl;
 	  }
 	  return numEq;
@@ -422,7 +420,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
     sigma.unfuzz(fuzz);
     A.normalizeStrategy(sigma);
 
-    if (g_verbose) {
+    if (verbose) {
       PrintProfile(std::cout, Gambit::lexical_cast<std::string>(lambda), sigma);
     }
 
