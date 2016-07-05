@@ -1,30 +1,36 @@
-/* Copyright 2002 Ben Blum, Christian Shelton
- *
- * This file is part of GameTracer.
- *
- * GameTracer is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * GameTracer is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GameTracer; if not, write to the Free Software Foundation, 
- * Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+//
+// This file is part of Gambit
+// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: library/src/gtracer/gnm.cc
+// Implementation of Global Newton Method from Gametracer
+// This file is based on GameTracer v0.2, which is
+// Copyright (c) 2002, Ben Blum and Christian Shelton
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
 
-#include <gambit/gambit.h>
+#include "gambit/gambit.h"
+#include "gambit/gtracer/gtracer.h"
 
-#include "cmatrix.h"
-#include "gnm.h"
-#include "gnmgame.h"
-
-extern bool g_verbose;
-extern int g_numDecimals;
+namespace Gambit {
+namespace gametracer {
+    
+// These eventually need to be made configurable
+static bool g_verbose = false;
+static int g_numDecimals = 6;
 
 void PrintProfile(std::ostream &p_stream, 
 		  const std::string &p_label,
@@ -271,7 +277,9 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
       // there are no more equilibria on the path.  This could be
       // handled differently.
       if(minBound == BIGFLOAT && Index*(lambda+dlambda*delta) > 0) {
-	if(g_verbose) std::cerr<<"gnm(): return since the path crosses no more support boundaries and no next eqlm"<<endl;
+	if (g_verbose) {
+	  std::cerr << "gnm(): return since the path crosses no more support boundaries and no next eqlm" << std::endl;
+	}
 	return numEq;
       }
       
@@ -308,9 +316,11 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 	    ee = A.LNM(z, nothing, det, J, DG, sigma, LNMMax, fuzz,ym1,ym2,ym3);
 	  }
 	  for (int idx=0;idx<M;idx++)
-	    if (! isfinite(sigma[idx])){
-	              if(g_verbose) std::cerr<<"gnm(): return since sigma is not finite"<<endl;
-	              return numEq;
+	    if (! std::isfinite(sigma[idx])){
+	      if(g_verbose) {
+		std::cerr << "gnm(): return since sigma is not finite" << std::endl;
+	      }
+	      return numEq;
 	    }
 	  if(ee < fuzz) { // only save high quality equilibria;
 	    // this restriction could be removed.
@@ -327,7 +337,9 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 	}
       }
       if(del == BIGFLOAT) {
-	if (g_verbose) std::cerr<<"gnm(): return since no next support boundary after this eqlm"<<endl;
+	if (g_verbose) {
+	  std::cerr << "gnm(): return since no next support boundary after this eqlm" << std::endl;
+	}
 	return numEq;
       }
 
@@ -343,7 +355,9 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
       // if we're sufficiently far out on the ray in the reverse
       // direction, we're probably not going back
       if(lambda < LambdaMin && Index == -1) {
-	if (g_verbose) std::cerr<<"gnm(): return due to too far out in the reverse direction"<<endl;
+	if (g_verbose) {
+	  std::cerr << "gnm(): return due to too far out in the reverse direction" << std::endl;
+	}
 	return numEq;
       }
       A.retract(sigma,z);
@@ -375,7 +389,9 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 	  g /= lambda;
 	  // g = ((z-sigma)-((DG*sigma) / (double)(N-1)))/lambda;
 	} else {
-	  if(g_verbose) std::cerr<<"gnm(): return due to too much error. error is "<<ee<<endl;
+	  if(g_verbose) {
+	    std::cerr << "gnm(): return due to too much error. error is " << ee << std::endl;
+	  }
 	  return numEq;
 	}
       }
@@ -428,3 +444,6 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
     }
   }
 }
+
+}  // end namespace Gambit::gametracer
+}  // end namespace Gambit

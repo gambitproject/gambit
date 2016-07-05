@@ -1,27 +1,36 @@
-/* Copyright 2002 Ben Blum, Christian Shelton
- *
- * This file is part of GameTracer.
- *
- * GameTracer is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * GameTracer is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GameTracer; if not, write to the Free Software Foundation, 
- * Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+//
+// This file is part of Gambit
+// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: library/include/gtracer/gnmgame.h
+// Definition of basic game representation class in Gametracer
+// This file is based on GameTracer v0.2, which is
+// Copyright (c) 2002, Ben Blum and Christian Shelton
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
 
-#ifndef __GNMGAME_H
-#define __GNMGAME_H
+#ifndef GAMBIT_GTRACER_GNMGAME_H
+#define GAMBIT_GTRACER_GNMGAME_H
 
-#include "cmatrix.h"
-#define BIGFLOAT 3.0e+28F
+#include "gambit/gtracer/cmatrix.h"
+
+namespace Gambit {
+namespace gametracer {
+
+const double BIGFLOAT = 3.0e+28F;
 
 #ifdef WIN32
 #ifndef drand48
@@ -82,7 +91,7 @@ class gnmgame {
 
   virtual void payoffMatrix(cmatrix &dest, cvector &s, double fuzz, bool ksym){
     if(ksym && s.getm()!=getNumKSymActions()){
-      cerr<<"payoffMatrix() error: k-symmetric version of Jacobian not implemented for this class"<<endl;
+      std::cerr<<"payoffMatrix() error: k-symmetric version of Jacobian not implemented for this class"<<std::endl;
       exit(1);
     }
     payoffMatrix(dest, s, fuzz);
@@ -246,4 +255,8 @@ class gnmgame {
   int maxActions;
 };
 
-#endif
+}  // end namespace Gambit::gametracer
+}  // end namespace Gambit
+ 
+#endif  // GAMBIT_GTRACER_GNMGAME_H
+

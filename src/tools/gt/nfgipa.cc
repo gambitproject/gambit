@@ -27,10 +27,10 @@
 #include <fstream>
 #include <cerrno>
 #include "gambit/gambit.h"
+#include "gambit/gtracer/gtracer.h"
 
-#include "nfgame.h"
-#include "aggame.h"
-#include "ipa.h"
+using namespace Gambit;
+using namespace Gambit::gametracer;
 
 #define ALPHA 0.02
 #define EQERR 1e-6

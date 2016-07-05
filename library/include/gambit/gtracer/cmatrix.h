@@ -1,24 +1,29 @@
-/* Copyright 2002 Ben Blum, Christian Shelton
- * 
- * This file is part of GameTracer.
- *
- * GameTracer is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * GameTracer is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GameTracer; if not, write to the Free Software Foundation, 
- * Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+//
+// This file is part of Gambit
+// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: library/include/gtracer/cmatrix.h
+// Definition of matrix classes for Gametracer
+// This file is based on GameTracer v0.2, which is
+// Copyright (c) 2002, Ben Blum and Christian Shelton
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
 
-#ifndef _CMATRIX_H_
-#define _CMATRIX_H_
+#ifndef GAMBIT_GTRACER_CMATRIX_H
+#define GAMBIT_GTRACER_CMATRIX_H
 
 #include <cmath>
 #ifdef SOLARIS
@@ -32,7 +37,9 @@
 #include <iomanip>
 #include <vector>
 
-using namespace std;
+namespace Gambit {
+namespace gametracer {
+
 class cmatrix;
 
 class cmatrixrow {
@@ -101,13 +108,13 @@ public:
 		return *this;
 	}
 	inline bool isvalid() const {
-		for(int i=0;i<m;i++) if (!isfinite(x[i])) return false;
-		return true;
+	  for(int i=0;i<m;i++) if (!std::isfinite(x[i])) return false;
+	  return true;
 	}
 	inline double operator*(const cvector &v) const {
 		if (m!=v.m) {
-			cerr << "invalid cvector dot product" << endl;
-			//assert(0);
+		  std::cerr << "invalid cvector dot product" << std::endl;
+		  //assert(0);
 		}
 		double ret = 0.0;
 		for(int i=0;i<m;i++) ret += x[i]*v.x[i];
@@ -133,16 +140,16 @@ public:
 	}
 	inline cvector &operator+=(const cvector &v) {
 		if (v.m!=m) {
-			cerr << "invalid cvector addition" << endl;
-			//assert(0);
+		  std::cerr << "invalid cvector addition" << std::endl;
+		  //assert(0);
 		}
 		for(int i=0;i<m;i++) x[i] += v.x[i];
 		return *this;
 	}
 	inline cvector &operator-=(const cvector &v) {
 		if (v.m!=m) {
-			cerr << "invalid cvector subtraction" << endl;
-			//assert(0);
+		  std::cerr << "invalid cvector subtraction" << std::endl;
+		  //assert(0);
 		}
 		for(int i=0;i<m;i++) x[i] -= v.x[i];
 		return *this;
@@ -191,7 +198,7 @@ public:
 		double norm = 0.0;
 		for(int i = 0; i < m; i++)
 			norm += x[i] * x[i];
-		norm = sqrt(norm);
+		norm = std::sqrt(norm);
 		for(int i = 0; i < m; i++)
 			x[i] /= norm;
 		return norm;
@@ -237,10 +244,10 @@ public:
 		return ret;
 	}
 	inline double norm() const {
-		return sqrt(norm2());
+	  return std::sqrt(norm2());
 	}
-	friend ostream& operator<<(ostream &s, const cvector &v);
-	friend istream& operator>>(istream &s, cvector &v);
+	friend std::ostream& operator<<(std::ostream &s, const cvector &v);
+	friend std::istream& operator>>(std::istream &s, cvector &v);
 
 	inline double *values() {
 		return x;
@@ -248,10 +255,10 @@ public:
 	
 	inline int getm() const { return m; }
 
-	inline ostream &niceprint(ostream &s) {
+	inline std::ostream &niceprint(std::ostream &s) {
 		for(int i=0;i<m;i++)
 			s << x[i] << ' ';
-		s << endl;
+		s << std::endl;
 		return s;
 	}
 
@@ -315,13 +322,13 @@ inline cvector operator/(const cvector &a, const double &b) {
 	return cvector(a)/=b;
 }
 
-inline ostream &operator<<(ostream &s, const cvector& v) {
+inline std::ostream &operator<<(std::ostream &s, const cvector& v) {
 //  	s << v.m << ' ';
 	for(int i=0;i<v.m;i++) { s << v.x[i]; if (i!=v.m) s << ' '; }
 	return s;
 }
 
-inline istream &operator>>(istream &s, cvector& v) {
+inline std::istream &operator>>(std::istream &s, cvector& v) {
 	int tm;
 	s >> tm;
 	if (tm!=v.m) {
@@ -459,14 +466,14 @@ public:
 	}
 
 	inline bool isvalid() const {
-		for(int i=0;i<s;i++) if(!isfinite(x[i])) return false;
-		return true;
+	  for(int i=0;i<s;i++) if(!std::isfinite(x[i])) return false;
+	  return true;
 	}
 
 	inline cmatrix operator*(const cmatrix &ma) const {
 		if (n!=ma.m) {
-			cerr << "invalid cmatrix multiply" << endl;
-			//assert(0);
+		  std::cerr << "invalid cmatrix multiply" << std::endl;
+		  //assert(0);
 		}
 		cmatrix ret(m,ma.n);
 		int c=0;
@@ -479,8 +486,8 @@ public:
 	}
 	inline cvector operator*(const cvector &v) const {
 		if (n!=v.m) {
-			cerr << "invalid cvector-cmatrix multiply" << endl;
-			//assert(0);
+		  std::cerr << "invalid cvector-cmatrix multiply" << std::endl;
+		  //assert(0);
 		}
 		cvector ret(m);
 		int c = 0;
@@ -494,8 +501,8 @@ public:
 
 	inline double dot(const cmatrix &ma) const {
 		if (n!=ma.n || m!=ma.m) {
-			cerr << "invalid cmatrix dot-product" << endl;
-			//assert(0);
+		  std::cerr << "invalid cmatrix dot-product" << std::endl;
+		  //assert(0);
 		}
 		int c = 0;
 		double ret = 0.0;
@@ -507,8 +514,8 @@ public:
 		
 	inline void outer(const cmatrix &ma, cmatrix &ret) const {
 		if (n!=ma.n || ret.m!=m || ret.n!=ma.m) {
-			cerr << "invalid cmatrix outer multiply" << endl;
-			//assert(0);
+		  std::cerr << "invalid cmatrix outer multiply" << std::endl;
+		  //assert(0);
 		}
 		int c=0;
 		for(int i=0;i<m;i++) for(int j=0;j<ma.m;j++,c++) {
@@ -519,8 +526,8 @@ public:
 	}
 	inline void inner(const cmatrix &ma, cmatrix &ret) const {
 		if (m!=ma.m || ret.m!=n || ret.n!=ma.n) {
-			cerr << "invalid cmatrix inner multiply" << endl;
-			//assert(0);
+		  std::cerr << "invalid cmatrix inner multiply" << std::endl;
+		  //assert(0);
 		}
 		int c=0;
 		for(int i=0;i<n;i++) for(int j=0;j<ma.n;j++,c++) {
@@ -532,8 +539,8 @@ public:
 
 	inline double rowmult(int r, const cvector &v, int exclude) const {
 		if (n!=v.m) {
-			cerr << "invalid matrix-vector multiply" << endl;
-			//assert(0);
+		  std::cerr << "invalid matrix-vector multiply" << std::endl;
+		  //assert(0);
 		}
 		double ret = 0.0;
 		int c=n*r;
@@ -543,8 +550,8 @@ public:
 	}
 	inline double rowmult(int r, const cvector &v) const {
 		if (n!=v.m) {
-			cerr << "invalid matrix-vector multiply" << endl;
-			//assert(0);
+		  std::cerr << "invalid matrix-vector multiply" << std::endl;
+		  //assert(0);
 		}
 		double ret = 0.0;
 		int c=n*r;
@@ -569,8 +576,8 @@ public:
 	}
 	inline cmatrix &multbyrow(const cvector &v) {
 		if (n!=v.m) {
-			cerr << "invalid multbycol" << endl;
-			//assert(0);
+		  std::cerr << "invalid multbycol" << std::endl;
+		  //assert(0);
 		}
 		int c = 0;
 		for(int i=0;i<m;i++)
@@ -580,8 +587,8 @@ public:
 	}
 	inline cmatrix &multbycol(const cvector &v) {
 		if (m!=v.m) {
-			cerr << "invalid multbycol" << endl;
-			//assert(0);
+		  std::cerr << "invalid multbycol" << std::endl;
+		  //assert(0);
 		}
 		int c = 0;
 		for(int i=0;i<m;i++)
@@ -605,8 +612,8 @@ public:
 	}
 	inline cmatrix &dividebyrow(const cvector &v) {
 		if (n!=v.m) {
-			cerr << "invalid dividebycol" << endl;
-			//assert(0);
+		  std::cerr << "invalid dividebycol" << std::endl;
+		  //assert(0);
 		}
 		int c = 0;
 		for(int i=0;i<m;i++)
@@ -616,8 +623,8 @@ public:
 	}
 	inline cmatrix &dividebycol(const cvector &v) {
 		if (m!=v.m) {
-			cerr << "invalid dividebycol" << endl;
-			//assert(0);
+		  std::cerr << "invalid dividebycol" << std::endl;
+		  //assert(0);
 		}
 		int c = 0;
 		for(int i=0;i<m;i++)
@@ -642,8 +649,8 @@ public:
 
 	inline cmatrix &operator+=(const cmatrix &ma) {
 		if (m!=ma.m||n!=ma.n) {
-			cerr << "invalid cmatrix addition" << endl;
-			//assert(0);
+		  std::cerr << "invalid cmatrix addition" << std::endl;
+		  //assert(0);
 		}
 		for(int i=0;i<s;i++) x[i] += ma.x[i];
 		return *this;
@@ -651,8 +658,8 @@ public:
 
 	inline cmatrix &operator-=(const cmatrix &ma) {
 		if (m!=ma.m||n!=ma.n) {
-			cerr << "invalid cmatrix addition" << endl;
-			//assert(0);
+		  std::cerr << "invalid cmatrix addition" << std::endl;
+		  //assert(0);
 		}
 		for(int i=0;i<s;i++) x[i] -= ma.x[i];
 		return *this;
@@ -660,8 +667,8 @@ public:
 
 	inline cmatrix &operator*=(const cmatrix &ma) {
 		if (n!=ma.m || n != ma.n) {
-			cerr << "invalid cmatrix multiply" << endl;
-			//assert(0);
+		  std::cerr << "invalid cmatrix multiply" << std::endl;
+		  //assert(0);
 		}
 		int i,j,k,c=0;
 		std::vector<double> newrow(n);
@@ -758,11 +765,11 @@ public:
 		return ret;
 	}
 	inline double norm() const { // returns the frobenius norm
-		return sqrt(norm2());
+	  return std::sqrt(norm2());
 	}
 
-	friend ostream& operator<<(ostream& s, const cmatrix& ma);
-	friend istream& operator>>(istream& s, cmatrix& ma);
+	friend std::ostream& operator<<(std::ostream& s, const cmatrix& ma);
+	friend std::istream& operator>>(std::istream& s, cmatrix& ma);
 
 	// LU decomposition -- ix is the row permutations
 	int LUdecomp(cmatrix &LU, int *ix) const;
@@ -819,12 +826,12 @@ bool solve(cvector &b, cvector &dest);
 	cvector eigensym() { cvector d,e; tridiag(d,e); tridiagev(d,e); return d; }
 
 
-	inline ostream &niceprint(ostream& s) {
-		s << m << ' ' << n << endl;
+	inline std::ostream &niceprint(std::ostream& s) {
+		s << m << ' ' << n << std::endl;
 		for(int i=0;i<m;i++) {
 			for(int j=0;j<n;j++)
 				s << x[i*n+j] << ' ';
-			s << endl;
+			s << std::endl;
 		}
 		return s;
 	}
@@ -869,14 +876,14 @@ inline cmatrix operator/(const cmatrix &a, const double &b) {
 	return cmatrix(a)/=b;
 }
 
-inline ostream& operator<<(ostream& s, const cmatrix& ma) {
+inline std::ostream& operator<<(std::ostream& s, const cmatrix& ma) {
 //  	s << ma.m << ' ' << ma.n << ' ';
 	for(int i=0;i<ma.s;i++) { 
-if (i%ma.n==0) s << endl; s << ma.x[i]; if (i!=ma.s) s << ' '; }
+if (i%ma.n==0) s << std::endl; s << ma.x[i]; if (i!=ma.s) s << ' '; }
 	return s;
 }
 
-inline istream& operator>>(istream& s, cmatrix& ma) {
+inline std::istream& operator>>(std::istream& s, cmatrix& ma) {
 	int tn,tm;
 	s >> tm >> tn;
 	if (tm!=ma.m || tn!=ma.n) {
@@ -888,4 +895,9 @@ inline istream& operator>>(istream& s, cmatrix& ma) {
 	for(int i=0;i<ma.s;i++) { s >> ma.x[i]; }
 	return s;
 }
-#endif
+
+}  // end namespace Gambit::gametracer
+}  // end namespace Gambit
+ 
+#endif // GAMBIT_GTRACER_CMATRIX_H
+

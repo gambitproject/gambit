@@ -27,11 +27,9 @@
 #include <fstream>
 #include <cerrno>
 #include "gambit/gambit.h"
+#include "gambit/gtracer/gtracer.h"
 
-#include "nfgame.h"
-#include "aggame.h"
-#include "gnmgame.h"
-#include "gnm.h"
+using namespace Gambit::gametracer;
 
 // GNM CONSTANTS
 const int STEPS = 100;
@@ -67,8 +65,12 @@ bool ReadProfile(std::istream &p_stream, cvector &p_profile)
   return true;
 }
 
+namespace Gambit {
+namespace gametracer {
 extern void PrintProfile(std::ostream &, const std::string &,
 			 const cvector &);
+}
+}
 
 void PrintBanner(std::ostream &p_stream)
 {

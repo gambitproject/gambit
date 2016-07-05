@@ -38,9 +38,12 @@
 #endif
 #endif
 
-class aggame;
-
 namespace Gambit {
+
+namespace gametracer {
+  class aggame;
+}
+
 
 namespace agg {
 
@@ -69,7 +72,6 @@ typedef trie_map<AggNumber> aggdistrib;
 typedef enum{COMPLETE,MAPPING,ADDITIVE} payofftype; 
 
 
-
 class AGG {
 
 public:
@@ -81,7 +83,7 @@ public:
   static const char LBRACKET='[';
   static const char RBRACKET=']';
 
-  friend class ::aggame;   //wrapper class for gametracer
+  friend class gametracer::aggame;   //wrapper class for gametracer
 
   //read an AGG from a file
   static AGG* makeAGG(char* filename);
