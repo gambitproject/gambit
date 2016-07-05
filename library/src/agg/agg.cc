@@ -405,7 +405,11 @@ AGG *AGG::makeRandomAGG(int n, int* actions, int S, int P,
 vector<vector<int> >& ASets, vector<vector<int> >& neighb,
 vector<projtype>& projTypes, int seed, bool int_payoffs, int int_factor){
     int i,j;
+#if HAVE_SRAND48
     srand48(seed);
+#else
+    srand(seed);
+#endif  // HAVE_SRAND48
     vector<vector<aggdistrib > > projS;
     vector<vector<vector<config> > > proj;
     setProjections(projS,proj,n,S,P, ASets, neighb,projTypes);

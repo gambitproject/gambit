@@ -160,10 +160,10 @@ void Solve(const Gambit::Game &p_game)
     for (int iter = 0; iter < g_numVectors; iter++) {
       cvector **answers;
       for(i = 0; i < A->getNumActions(); i++) {
-#if !defined(HAVE_DRAND48)
-	g[i] = rand();
-#else
+#if HAVE_DRAND48
 	g[i] = drand48();
+#else
+	g[i] = rand();
 #endif  // HAVE_DRAND48
       }
       g /= g.norm(); // normalized

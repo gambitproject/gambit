@@ -32,12 +32,6 @@ namespace gametracer {
 
 const double BIGFLOAT = 3.0e+28F;
 
-#ifdef WIN32
-#ifndef drand48
-#define srand48(x) srand(x)
-#define drand48(x) ((double)rand(x)/RAND_MAX)
-#endif
-#endif
 
 class gnmgame {
  public:
@@ -196,8 +190,12 @@ class gnmgame {
       double normconst;
       normconst=0;
       for (int j=firstAction(player); j<lastAction(player); j++){
+#if HAVE_DRAND48
             dest[j] = drand48();
-            normconst+= dest[j];
+#else
+	    dest[j] = rand();
+#endif  // HAVE_DRAND48
+	    normconst+= dest[j];
       }
       for (int j= firstAction(player);j<lastAction(player); j++)
             dest[j] /= normconst;
@@ -218,8 +216,13 @@ class gnmgame {
         currsupp=0;
         normconst=0;
         for (int j=firstAction(player);j<lastAction(player); j++){
+#if HAVE_DRAND48
           if ( drand48() < posprob) {
             dest[j] = drand48();
+#else
+	    if (rand() < posprob) {
+	      dest[j] = rand();
+#endif  // HAVE_DRAND48	    
             normconst+=dest[j];
             currsupp++;
           }

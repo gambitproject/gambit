@@ -31,13 +31,6 @@
 #include "proj_func.h"
 #include "trie_map.h"
 
-#ifdef WIN32
-#ifndef drand48
-#define srand48(x) srand(x)
-#define drand48(x) ((double)rand(x)/RAND_MAX)
-#endif
-#endif
-
 namespace Gambit {
 
 namespace gametracer {
@@ -311,7 +304,11 @@ private:
   struct inputRand : public std::unary_function<aggpayoff::iterator, void>{
     inputRand(bool int_payoffs=false, int int_factor=100):int_payoffs(int_payoffs),int_factor(int_factor) {}
     void operator() (aggpayoff::iterator p){
+#if HAVE_DRAND48
       p->second = drand48();
+#else
+      p->second = rand();
+#endif  // HAVE_DRAND48
       if(int_payoffs) p->second = floor(p->second * AggNumber(int_factor) );
     }  
     bool int_payoffs;
