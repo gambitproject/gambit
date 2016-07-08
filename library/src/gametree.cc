@@ -86,8 +86,10 @@ GameTreeInfosetRep::GameTreeInfosetRep(GameTreeRep *p_efg, int p_number,
   m_player->m_infosets.Append(this);
 
   if (p_player->IsChance()) {
+    m_probs = Array<Number>(m_actions.Length());
+    std::string prob = lexical_cast<std::string>(Rational(1, m_actions.Length()));
     for (int act = 1; act <= m_actions.Length(); act++) {
-      m_probs.Append(lexical_cast<std::string>(Rational(1, m_actions.Length())));
+      m_probs[act] = prob;
     }
   }
 }
