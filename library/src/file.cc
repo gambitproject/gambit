@@ -27,6 +27,9 @@
 #include <map>
 
 #include "gambit/gambit.h"
+// for explicit access to turning off canonicalization
+#include "gambit/gametree.h"
+  
 
 namespace {
 // This anonymous namespace encapsulates the file-parsing code
@@ -1074,7 +1077,9 @@ Game ReadGame(std::istream &p_file) throw (InvalidFileException)
     else if (parser.GetLastText() == "EFG") {
       TreeData treeData;
       Game game = NewTree();
+      dynamic_cast<GameTreeRep &>(*game).SetCanonicalization(false);
       ParseEfg(parser, game, treeData);
+      dynamic_cast<GameTreeRep &>(*game).SetCanonicalization(true);
       return game;
     }
     else if (parser.GetLastText() == "#AGG") {
