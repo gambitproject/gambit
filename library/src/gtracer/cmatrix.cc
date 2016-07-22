@@ -1,29 +1,36 @@
-/* Copyright 2002 Ben Blum, Christian Shelton
- *
- * This file is part of GameTracer.
- *
- * GameTracer is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * GameTracer is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GameTracer; if not, write to the Free Software Foundation, 
- * Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+//
+// This file is part of Gambit
+// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: library/src/gtracer/cmatrix.cc
+// Implementation of matrix classes for Gametracer
+// This file is based on GameTracer v0.2, which is
+// Copyright (c) 2002, Ben Blum and Christian Shelton
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
 
-#include "cmatrix.h"
-#include "math.h"
-#include "float.h"
+#include <cmath>
+#include <cfloat>
+#include "gambit/gtracer/cmatrix.h"
 #include "gambit/matrix.h"
 
+namespace Gambit {
+namespace gametracer {
+
 cvector::~cvector() { delete []x; }
-// adopted from NRiC, pg 45
 
 cmatrix::~cmatrix()
  { delete []x; }
@@ -31,7 +38,7 @@ cmatrix::~cmatrix()
 int cvector::num_vec_cons = 0;
 cmatrix cmatrix::inv(bool &worked) const {
 	if (m!=n) {
-		cerr << "invalid cmatrix inverse" << endl;
+		std::cerr << "invalid cmatrix inverse" << std::endl;
 		exit(1);
 	}
 	cmatrix temp(n,n);
@@ -58,10 +65,9 @@ cmatrix cmatrix::inv(bool &worked) const {
 	return ret;
 }
 
-// adopted from NRiC, pg 43
 int cmatrix::LUdecomp(cmatrix &LU, int *ix) const {
 	if (m!=n||LU.m!=LU.n||LU.n!=n) {
-		cerr << "invalid cmatrix in LUdecomp" << endl;
+		std::cerr << "invalid cmatrix in LUdecomp" << std::endl;
 		exit(1);
 	}
 	int d=1,i,j,k;
@@ -121,7 +127,7 @@ int cmatrix::LUdecomp(cmatrix &LU, int *ix) const {
 
 void cmatrix::LUbacksub(int *ix, double *b) const {
 	if (n!=m) {
-		cerr << "invalid cmatrix in LUbacksub" << endl;
+		std::cerr << "invalid cmatrix in LUbacksub" << std::endl;
 		exit(1);
 	}
 	int ip,ii=-1,i;
@@ -145,7 +151,7 @@ void cmatrix::LUbacksub(int *ix, double *b) const {
 
 bool cmatrix::solve(cvector &b, cvector &ret) {
 	if (m!=n) {
-		cerr << "invalid cmatrix in solve" << endl;
+		std::cerr << "invalid cmatrix in solve" << std::endl;
 		exit(1);
 	}
 	for(int i=0;i<n;i++) ret[i] = b[i];
@@ -162,7 +168,7 @@ bool cmatrix::solve(cvector &b, cvector &ret) {
 }
 double *cmatrix::solve(const double *b, bool &worked) const {
 	if (m!=n) {
-		cerr << "invalid cmatrix in solve" << endl;
+		std::cerr << "invalid cmatrix in solve" << std::endl;
 		exit(1);
 	}
 	double *ret = new double[n];
@@ -187,17 +193,16 @@ double cmatrix::pythag(double a, double b) {
 	absb = fabs(b);
 	if (absa>absb) {
 		double sqr = absb/absa;
-		return absa*sqrt(1.0+sqr*sqr);
+		return absa*std::sqrt(1.0+sqr*sqr);
 	} else {
 		if (absb==0.0) return 0;
 		double sqr = absa/absb;	
-		return absb*sqrt(1.0+sqr*sqr);
+		return absb*std::sqrt(1.0+sqr*sqr);
 	}
 }
 
 #define SIGN(a,b) ((b) > 0.0 ? fabs(a) : -fabs(a))
 
-// adopted from pg 67 of NRiC
 void cmatrix::svd(cmatrix &u, cmatrix &v, double *w) {
 
 	u = *this;
@@ -225,7 +230,7 @@ void cmatrix::svd(cmatrix &u, cmatrix &v, double *w) {
 					s += u[k][i]*u[k][i];
 				}
 				f = u[i][i];
-				g = -SIGN(sqrt(s),f);
+				g = -SIGN(std::sqrt(s),f);
 				h = f*g-s;
 				u[i][i] = f-g;
 				for(j=l;j<n;j++) {
@@ -247,7 +252,7 @@ void cmatrix::svd(cmatrix &u, cmatrix &v, double *w) {
 					s += u[i][k]*u[i][k];
 				}
 				f = u[i][l];
-				g = -SIGN(sqrt(s),f);
+				g = -SIGN(std::sqrt(s),f);
 				h = f*g-s;
 				u[i][l] = f-g;
 				for(k=l;k<n;k++) rv1[k] = u[i][k]/h;
@@ -338,8 +343,8 @@ void cmatrix::svd(cmatrix &u, cmatrix &v, double *w) {
 			if (its==30) {
 				// some other method (like an error return
 				// value should be put here)
-				cerr << "no convergence after 30 svdcmp "
-					"iterations" << endl;
+				std::cerr << "no convergence after 30 svdcmp "
+				  "iterations" << std::endl;
 				exit(1);
 			}
 			x = w[l];
@@ -429,7 +434,7 @@ double cmatrix::adjoint() {
 	continue;
     }
     if(maxi == -1) {
-      cout << "oops";
+      std::cout << "oops";
       return DBL_MAX;
     }
 
@@ -458,7 +463,7 @@ double cmatrix::adjoint() {
     if(j == m-1 && lastj >= 0)
       j = lastj - 1;
   }
-  //  cout << retval << endl << endl;
+  //  std::cout << retval << std::endl << std::endl;
   int s=0;
   i = 0;
   r2 = r;
@@ -478,7 +483,7 @@ double cmatrix::adjoint() {
     negate();
     D = -D;
   }
-  // cout << *this << endl << endl;
+  // std::cout << *this << std::endl << std::endl;
   return D;
 }
 
@@ -512,4 +517,6 @@ double cmatrix::trace() {
   }
   return sum;
 }
-	
+
+} // end namespace Gambit::gametracer
+} // end namespace Gambit

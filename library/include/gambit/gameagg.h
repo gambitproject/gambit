@@ -25,15 +25,17 @@
 
 #include "gambit/agg/agg.h"
 
-class aggame;
-
 namespace Gambit {
+
+namespace gametracer {
+class aggame;
+}
 
 class GameAggRep : public GameRep {
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class AggMixedStrategyProfileRep;
   friend class AggPureStrategyProfileRep;
-  friend class ::aggame;
+  friend class gametracer::aggame;
 
 private:
   agg::AGG *aggPtr;

@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/efglcp.h
-// Compute Nash equilibria via Lemke algorithm
+// FILE: library/include/gambit/nash/lcp.h
+// Compute Nash equilibria via linear complementarity programming
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,20 +20,40 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LCP_EFGLCP_H
-#define LCP_EFGLCP_H
+#ifndef GAMBIT_NASH_LCP_H
+#define GAMBIT_NASH_LCP_H
 
 #include "gambit/nash.h"
 
-using namespace Gambit;
-using namespace Gambit::Nash;
-
 namespace Gambit {
+
 namespace linalg {
+template <class T> class LHTableau;
 template <class T> class LemkeTableau;
 }
-}
 
+namespace Nash {
+ 
+template <class T> class NashLcpStrategySolver : public StrategySolver<T> {
+public:
+  NashLcpStrategySolver(int p_stopAfter, int p_maxDepth,
+			Gambit::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
+    : StrategySolver<T>(p_onEquilibrium),
+      m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth) { }
+  virtual ~NashLcpStrategySolver()  { }
+
+  virtual List<MixedStrategyProfile<T> > Solve(const Game &) const;
+
+private:
+  int m_stopAfter, m_maxDepth;
+
+  class Solution;
+
+  bool OnBFS(const Game &, linalg::LHTableau<T> &, Solution &) const;
+  void AllLemke(const Game &, int j, linalg::LHTableau<T> &, Solution &, int) const;
+};
+
+ 
 template <class T> class NashLcpBehaviorSolver : public BehavSolver<T> {
 public:
   NashLcpBehaviorSolver(int p_stopAfter, int p_maxDepth,
@@ -59,6 +79,7 @@ private:
 		  Solution &) const;
 };
 
-
-
-#endif  // LCP_EFGLCP_H
+}  // end namespace Nash
+}  // end namespace Gambit
+ 
+#endif  // GAMBIT_NASH_LCP_H

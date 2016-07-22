@@ -27,10 +27,10 @@
 #include <unistd.h>
 #include <getopt.h>
 #include "gambit/gambit.h"
-#include "efglcp.h"
-#include "nfglcp.h"
+#include "gambit/nash/lcp.h"
 
 using namespace Gambit;
+using namespace Gambit::Nash;
 
 void PrintBanner(std::ostream &p_stream)
 {

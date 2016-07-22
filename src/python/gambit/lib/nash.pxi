@@ -132,7 +132,7 @@ cdef class EnumMixedLrsStrategySolver(object):
             ret.append(p)
         return ret
 
-cdef extern from "tools/lcp/nfglcp.h":
+cdef extern from "gambit/nash/lcp.h":
     cdef cppclass c_NashLcpStrategySolverDouble "NashLcpStrategySolver<double>":
         c_NashLcpStrategySolverDouble(int, int)
         c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
@@ -141,7 +141,6 @@ cdef extern from "tools/lcp/nfglcp.h":
         c_NashLcpStrategySolverRational(int, int)
         c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
 
-cdef extern from "tools/lcp/efglcp.h":
     cdef cppclass c_NashLcpBehaviorSolverDouble "NashLcpBehaviorSolver<double>":
         c_NashLcpBehaviorSolverDouble(int, int)
         c_List[c_MixedBehaviorProfileDouble] Solve(c_Game) except +RuntimeError
@@ -337,6 +336,52 @@ cdef class SimpdivStrategySolver(object):
         for i in xrange(solns.Length()):
             p = MixedStrategyProfileRational()
             p.profile = copyitem_list_mspr(solns, i+1)
+            ret.append(p)
+        return ret
+
+cdef extern from "gambit/nash/ipa.h":
+    cdef cppclass c_NashIPAStrategySolver "NashIPAStrategySolver":
+        c_NashIPAStrategySolver()
+        c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
+
+cdef class IPAStrategySolver(object):
+    cdef c_NashIPAStrategySolver *alg
+
+    def __cinit__(self):
+        self.alg = new c_NashIPAStrategySolver()
+    def __dealloc__(self):
+        del self.alg
+    def solve(self, Game game):
+        cdef c_List[c_MixedStrategyProfileDouble] solns
+        cdef MixedStrategyProfileDouble p
+        solns = self.alg.Solve(game.game)
+        ret = [ ]
+        for i in xrange(solns.Length()):
+            p = MixedStrategyProfileDouble()
+            p.profile = copyitem_list_mspd(solns, i+1)
+            ret.append(p)
+        return ret
+
+cdef extern from "gambit/nash/gnm.h":
+    cdef cppclass c_NashGNMStrategySolver "NashGNMStrategySolver":
+        c_NashGNMStrategySolver()
+        c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
+
+cdef class GNMStrategySolver(object):
+    cdef c_NashGNMStrategySolver *alg
+
+    def __cinit__(self):
+        self.alg = new c_NashGNMStrategySolver()
+    def __dealloc__(self):
+        del self.alg
+    def solve(self, Game game):
+        cdef c_List[c_MixedStrategyProfileDouble] solns
+        cdef MixedStrategyProfileDouble p
+        solns = self.alg.Solve(game.game)
+        ret = [ ]
+        for i in xrange(solns.Length()):
+            p = MixedStrategyProfileDouble()
+            p.profile = copyitem_list_mspd(solns, i+1)
             ret.append(p)
         return ret
 

@@ -27,48 +27,46 @@
 #include <fstream>
 #include <cerrno>
 #include "gambit/gambit.h"
+#include "gambit/nash/gnm.h"
 
-#include "nfgame.h"
-#include "aggame.h"
-#include "gnmgame.h"
-#include "gnm.h"
+using namespace Gambit;
+using namespace Gambit::Nash;
 
-// GNM CONSTANTS
-const int STEPS = 100;
-const double FUZZ = 1e-12;
-const int LNMFREQ = 3;
-const int LNMMAX = 10;
-const double LAMBDAMIN = -10.0;
-const bool WOBBLE = false;
-const double THRESHOLD = 1e-2;
-
-int g_numDecimals = 6;
-bool g_verbose = false;
-int g_numVectors = 1;
-std::string g_startFile;
-
-bool ReadProfile(std::istream &p_stream, cvector &p_profile)
+List<MixedStrategyProfile<double> > 
+ReadStrategyPerturbations(const Game &p_game, std::istream &p_stream)
 {
-  for (int i = 0; i < p_profile.getm(); i++) {
-    if (p_stream.eof() || p_stream.bad()) {
-      return false;
+  List<MixedStrategyProfile<double> > profiles;
+  while (!p_stream.eof() && !p_stream.bad()) {
+    MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
+    for (int i = 1; i <= p.MixedProfileLength(); i++) {
+      if (p_stream.eof() || p_stream.bad()) {
+	break;
+      }
+      p_stream >> p[i];
+      if (i < p.MixedProfileLength()) {
+	char comma;
+	p_stream >> comma;
+      }
     }
-
-    p_stream >> p_profile[i];
-    if (i < p_profile.getm() - 1) {
-      char comma;
-      p_stream >> comma;
-    }
+    // Read in the rest of the line and discard
+    std::string foo;
+    std::getline(p_stream, foo);
+    profiles.push_back(p);
   }
-
-  // Read in the rest of the line and discard
-  std::string foo;
-  std::getline(p_stream, foo);
-  return true;
+  return profiles;
 }
 
-extern void PrintProfile(std::ostream &, const std::string &,
-			 const cvector &);
+List<MixedStrategyProfile<double> > 
+RandomStrategyPerturbations(const Game &p_game, int p_count)
+{
+  List<MixedStrategyProfile<double> > profiles;
+  for (int i = 1; i <= p_count; i++) {
+    MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
+    p.Randomize();
+    profiles.push_back(p);
+  }
+  return profiles;
+}
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -96,93 +94,12 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-void Solve(const Gambit::Game &p_game)
-{
-  int i;
-  gnmgame *A=NULL;
-  if (p_game->IsAgg()){
-	  A = new aggame(dynamic_cast<Gambit::GameAggRep &>(*p_game));
-  }
-  else {
-    Gambit::Rational maxPay = p_game->GetMaxPayoff();
-    Gambit::Rational minPay = p_game->GetMinPayoff();
-    double scale = 1.0 / (maxPay - minPay);
-
-    int *actions = new int[p_game->NumPlayers()];
-    int veclength = p_game->NumPlayers();
-    for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      actions[pl-1] = p_game->GetPlayer(pl)->NumStrategies();
-      veclength *= p_game->GetPlayer(pl)->NumStrategies();
-    }
-    cvector payoffs(veclength);
-  
-    A = new nfgame(p_game->NumPlayers(), actions, payoffs);
-  
-    int *profile = new int[p_game->NumPlayers()];
-    for (Gambit::StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {
-      for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-        profile[pl-1] = (*iter)->GetStrategy(pl)->GetNumber() - 1;
-      }
-
-      for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-        A->setPurePayoff(pl-1, profile,
-		       (double) ((*iter)->GetPayoff(pl) - minPay) *
-		       scale);
-      }
-    }
-  }
-
-  cvector g(A->getNumActions()); // choose a random perturbation ray
-  int numEq;
-
-  if (g_startFile != "") {
-    std::ifstream startVectors(g_startFile.c_str());
-
-    while (!startVectors.eof() && !startVectors.bad()) {
-      cvector **answers;
-      if (ReadProfile(startVectors, g)) {
-	g /= g.norm(); // normalized
-	if (g_verbose) {
-	  PrintProfile(std::cout, "pert", g);
-	}
-
-	numEq = GNM(*A, g, answers, STEPS, FUZZ, LNMFREQ, LNMMAX, LAMBDAMIN, WOBBLE, THRESHOLD);
-	for (i = 0; i < numEq; i++) {
-	  free(answers[i]);
-	}
-	free(answers);
-      }
-    }
-  }
-  else {
-    for (int iter = 0; iter < g_numVectors; iter++) {
-      cvector **answers;
-      for(i = 0; i < A->getNumActions(); i++) {
-#if !defined(HAVE_DRAND48)
-	g[i] = rand();
-#else
-	g[i] = drand48();
-#endif  // HAVE_DRAND48
-      }
-      g /= g.norm(); // normalized
-      if (g_verbose) {
-	PrintProfile(std::cout, "pert", g);
-      }
-      numEq = GNM(*A, g, answers, STEPS, FUZZ, LNMFREQ, LNMMAX, LAMBDAMIN, WOBBLE, THRESHOLD);
-      for (i = 0; i < numEq; i++) {
-	free(answers[i]);
-      }
-      free(answers);
-    }
-  }
-
-  delete A;
-}
-
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false;
+  bool quiet = false, verbose = false;
+  int numDecimals = 6, numVectors = 1;
+  std::string startFile;
 
   int long_opt_index = 0;
   struct option long_options[] = {
@@ -200,16 +117,16 @@ int main(int argc, char *argv[])
       quiet = true;
       break;
     case 'V':
-      g_verbose = true;
+      verbose = true;
       break;
     case 'd':
-      g_numDecimals = atoi(optarg);
+      numDecimals = atoi(optarg);
       break;
     case 'n':
-      g_numVectors = atoi(optarg);
+      numVectors = atoi(optarg);
       break;
     case 's':
-      g_startFile = optarg;
+      startFile = optarg;
       break;
     case 'S':
       break;
@@ -247,11 +164,24 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Gambit::Game game = Gambit::ReadGame(*input_stream);
-    if (!game->IsPerfectRecall()) {
-      throw Gambit::UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+    Game game = ReadGame(*input_stream);
+    shared_ptr<StrategyProfileRenderer<double> > renderer;
+    renderer = new MixedStrategyCSVRenderer<double>(std::cout,
+						    numDecimals);
+    NashGNMStrategySolver solver(renderer, verbose);
+
+    List<MixedStrategyProfile<double> > perts;
+    if (startFile != "") {
+      std::ifstream startPerts(startFile.c_str());
+      perts = ReadStrategyPerturbations(game, startPerts);
     }
-    Solve(game);
+    else {
+      // Generate the desired number of points randomly
+      perts = RandomStrategyPerturbations(game, numVectors);
+    }
+    for (int i = 1; i <= perts.size(); i++) {
+      solver.Solve(game, perts[i]);
+    }
     return 0;
   }
   catch (std::runtime_error &e) {

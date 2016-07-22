@@ -86,8 +86,10 @@ GameTreeInfosetRep::GameTreeInfosetRep(GameTreeRep *p_efg, int p_number,
   m_player->m_infosets.Append(this);
 
   if (p_player->IsChance()) {
+    m_probs = Array<Number>(m_actions.Length());
+    std::string prob = lexical_cast<std::string>(Rational(1, m_actions.Length()));
     for (int act = 1; act <= m_actions.Length(); act++) {
-      m_probs.Append(lexical_cast<std::string>(Rational(1, m_actions.Length())));
+      m_probs[act] = prob;
     }
   }
 }
@@ -548,8 +550,8 @@ GameInfoset GameTreeNodeRep::InsertMove(GameInfoset p_infoset)
 //------------------------------------------------------------------------
 
 GameTreeRep::GameTreeRep(void)
+  : m_computedValues(false), m_doCanon(true)
 {
-  m_computedValues = false;
   m_chance = new GamePlayerRep(this, 0);
   m_root = new GameTreeNodeRep(this, 0);
 }
@@ -683,6 +685,7 @@ void GameTreeRep::NumberNodes(GameTreeNodeRep *n, int &index)
 
 void GameTreeRep::Canonicalize(void)
 {
+  if (!m_doCanon)  return;
   int nodeindex = 1;
   NumberNodes(m_root, nodeindex);
 

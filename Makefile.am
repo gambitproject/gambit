@@ -368,11 +368,19 @@ libgambit_la_SOURCES = \
 	library/src/enummixed/clique.h \
 	library/src/enummixed/lrsenum.cc \
 	library/src/enummixed/enummixed.cc \
+	library/include/gambit/nash/lcp.h \
+	library/src/lcp/efglcp.cc \
+	library/src/lcp/nfglcp.cc \
 	library/include/gambit/nash/simpdiv.h \
 	library/src/simpdiv/simpdiv.cc \
+	library/include/gambit/nash/ipa.h \
+	library/src/ipa/ipa.cc \
+	library/include/gambit/nash/gnm.h \
+	library/src/gnm/gnm.cc \
 	${libagg_la_SOURCES} \
 	${lrslib_la_SOURCES} \
-	${liblinear_la_SOURCES}
+	${liblinear_la_SOURCES} \
+	${gtracer_la_SOURCES}
 
 libgambitincludedir = $(includedir)/libgambit
 libgambitinclude_HEADERS = \
@@ -439,6 +447,19 @@ lrslib_la_SOURCES = \
 	library/src/lrs/lrsmp.c \
 	library/include/gambit/lrs/lrsnashlib.h \
 	library/src/lrs/lrsnashlib.c
+
+gtracer_la_SOURCES = \
+	library/include/gambit/gtracer/cmatrix.h \
+	library/src/gtracer/cmatrix.cc \
+	library/include/gambit/gtracer/gnmgame.h \
+	library/src/gtracer/gnmgame.cc \
+	library/include/gambit/gtracer/nfgame.h \
+	library/src/gtracer/nfgame.cc \
+	library/include/gambit/gtracer/aggame.h \
+	library/src/gtracer/aggame.cc \
+	library/include/gambit/gtracer/gtracer.h \
+	library/src/gtracer/gnm.cc \
+	library/src/gtracer/ipa.cc
 
 # libgambit_la_LDFLAGS = -no-undefined -version-info 0:0:0
 
@@ -620,38 +641,14 @@ gambit_enumpure_SOURCES = \
 
 gambit_gnm_SOURCES = \
 	${libgambit_la_SOURCES} \
-	src/tools/gt/cmatrix.cc \
-	src/tools/gt/cmatrix.h \
-	src/tools/gt/gnm.cc \
-	src/tools/gt/gnm.h \
-	src/tools/gt/gnmgame.cc \
-	src/tools/gt/gnmgame.h \
-	src/tools/gt/nfgame.cc \
-	src/tools/gt/nfgame.h \
-	src/tools/gt/aggame.cc \
-	src/tools/gt/aggame.h \
 	src/tools/gt/nfggnm.cc
 
 gambit_ipa_SOURCES = \
 	${libgambit_la_SOURCES} \
-	src/tools/gt/cmatrix.cc \
-	src/tools/gt/cmatrix.h \
-	src/tools/gt/gnmgame.cc \
-	src/tools/gt/gnmgame.h \
-	src/tools/gt/ipa.cc \
-	src/tools/gt/ipa.h \
-	src/tools/gt/nfgame.cc \
-	src/tools/gt/nfgame.h \
-	src/tools/gt/aggame.cc \
-	src/tools/gt/aggame.h \
 	src/tools/gt/nfgipa.cc
 
 gambit_lcp_SOURCES = \
 	${libgambit_la_SOURCES} \
-	src/tools/lcp/efglcp.cc \
-	src/tools/lcp/efglcp.h \
-	src/tools/lcp/nfglcp.cc \
-	src/tools/lcp/nfglcp.h \
 	src/tools/lcp/lcp.cc
 
 gambit_liap_SOURCES = \

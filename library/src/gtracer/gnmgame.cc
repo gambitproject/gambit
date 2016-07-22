@@ -1,25 +1,33 @@
-/* Copyright 2002 Ben Blum, Christian Shelton
- *
- * This file is part of GameTracer.
- *
- * GameTracer is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * GameTracer is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with GameTracer; if not, write to the Free Software Foundation, 
- * Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+//
+// This file is part of Gambit
+// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: library/src/gtracer/gnmgame.cc
+// Implementation of basic game representation class in Gametracer
+// This file is based on GameTracer v0.2, which is
+// Copyright (c) 2002, Ben Blum and Christian Shelton
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
 
-#include "gnmgame.h"
-#include "cmatrix.h"
-#include "math.h"
+#include <cmath>
+#include "gambit/gtracer/cmatrix.h"
+#include "gambit/gtracer/gnmgame.h"
+
+namespace Gambit {
+namespace gametracer {
 
 gnmgame::gnmgame(int numPlayers, int *actions): numPlayers(numPlayers) {
   int i;
@@ -349,4 +357,5 @@ int gnmgame::Pivot(cmatrix &T, int pr, int pc, std::vector<int> &row,
   return p;
 }
 
-   
+}  // end namespace Gambit::gametracer
+}  // end namespace Gambit

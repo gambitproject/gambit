@@ -307,6 +307,24 @@ def simpdiv_solve(game, external=False):
     alg = gambit.lib.libgambit.SimpdivStrategySolver()
     return alg.solve(game)
 
+def ipa_solve(game, external=False):
+    """Convenience function to solve game to find a mixed-strategy
+    Nash equilibrium using iterated polymatrix appoximation.
+    """
+    if external:
+        return ExternalIPASolver().solve(game)
+    alg = gambit.lib.libgambit.IPAStrategySolver()
+    return alg.solve(game)
+
+def gnm_solve(game, external=False):
+    """Convenience function to solve game to find mixed-strategy
+    Nash equilibria using the global Newton method.
+    """
+    if external:
+        return ExternalGNMSolver().solve(game)
+    alg = gambit.lib.libgambit.GNMStrategySolver()
+    return alg.solve(game)
+
 logit_estimate = gambit.lib.libgambit.logit_estimate
 logit_atlambda = gambit.lib.libgambit.logit_atlambda
 logit_principal_branch = gambit.lib.libgambit.logit_principal_branch

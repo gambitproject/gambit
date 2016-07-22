@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
 //                          Albert Xin Jiang <albertjiang@gmail.com>
 //
-// FILE: src/tools/gt/aggame.h
+// FILE: library/include/gambit/gtracer/aggame.h
 // Interface to GNM-specific routines for action graph games
 //
 // This program is free software; you can redistribute it and/or modify
@@ -21,15 +21,17 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef __AGGAME_H
-#define __AGGAME_H
+#ifndef GAMBIT_GTRACER_AGGAME_H
+#define GAMBIT_GTRACER_AGGAME_H
 
 #include "cmatrix.h"
+#include "gnmgame.h"
 #include "gambit/agg/agg.h"
 #include "gambit/gambit.h"
 #include "gambit/gameagg.h"
-#include "gnmgame.h"
 
+namespace Gambit {
+namespace gametracer {
 
 class aggame : public gnmgame {
   public:
@@ -39,7 +41,7 @@ class aggame : public gnmgame {
     }
 
 
-    static aggame* makeAGGame(istream& in) {
+    static aggame* makeAGGame(std::istream& in) {
       return new aggame ( Gambit::agg::AGG::makeAGG(in) );
     }
 
@@ -122,7 +124,7 @@ class aggame : public gnmgame {
 
     int getNumPlayerClasses(){return aggPtr->getNumPlayerClasses();}
 
-    const vector<int>& getPlayerClass(int cls){return aggPtr->getPlayerClass(cls);}
+    const std::vector<int>& getPlayerClass(int cls){return aggPtr->getPlayerClass(cls);}
     int getPlayerClassSize(int cls){return aggPtr->getPlayerClass(cls).size();}
     int getNumKSymActions(){return aggPtr->getNumKSymActions();}
     int getNumKSymActions(int p){return aggPtr->getNumKSymActions(p);}
@@ -149,4 +151,7 @@ class aggame : public gnmgame {
 
 };
 
-#endif
+}  // end namespace Gambit::gametracer
+}  // end namespace Gambit
+ 
+#endif  // GAMBIT_GTRACER_AGGAME_H

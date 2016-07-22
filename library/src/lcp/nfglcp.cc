@@ -26,11 +26,14 @@
 
 #include "gambit/gambit.h"
 #include "gambit/linalg/lhtab.h"
-#include "nfglcp.h"
+#include "gambit/nash/lcp.h"
 
-using namespace Gambit;
-using namespace Gambit::linalg;
+namespace Gambit {
+namespace Nash {
 
+// Anonymous namespace to encapsulate local utility functions
+  
+namespace {
 template <class T> Matrix<T> Make_A1(const Game &p_game)
 {
   int n1 = p_game->Players()[1]->Strategies().size();
@@ -109,7 +112,8 @@ template <class T> Vector<T> Make_b2(const Game &p_game)
   return b2;
 }
 
-
+}  // end anonymous namespace
+  
 
 template <class T>
 class NashLcpStrategySolver<T>::Solution {
@@ -134,7 +138,7 @@ public:
 //
 template <class T> bool
 NashLcpStrategySolver<T>::OnBFS(const Game &p_game,
-				LHTableau<T> &p_tableau,
+				linalg::LHTableau<T> &p_tableau,
 				Solution &p_solution) const
 {
   Gambit::linalg::BFS<T> cbfs(p_tableau.GetBFS());
@@ -200,7 +204,7 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game,
 //
 template <class T> void 
 NashLcpStrategySolver<T>::AllLemke(const Game &p_game,
-				   int j, LHTableau<T> &B,
+				   int j, linalg::LHTableau<T> &B,
 				   Solution &p_solution,
 				   int depth) const
 {
@@ -216,7 +220,7 @@ NashLcpStrategySolver<T>::AllLemke(const Game &p_game,
   
   for (int i = B.MinCol(); i <= B.MaxCol(); i++) {
     if (i != j)  {
-      LHTableau<T> Bcopy(B);
+      linalg::LHTableau<T> Bcopy(B);
       Bcopy.LemkePath(i);
       AllLemke(p_game, i, Bcopy, p_solution, depth+1);
     }
@@ -239,7 +243,7 @@ NashLcpStrategySolver<T>::Solve(const Game &p_game) const
     Vector<T> b1 = Make_b1<T>(p_game);
     Matrix<T> A2 = Make_A2<T>(p_game);
     Vector<T> b2 = Make_b2<T>(p_game);
-    LHTableau<T> B(A1, A2, b1, b2);
+    linalg::LHTableau<T> B(A1, A2, b1, b2);
 
     if (m_stopAfter != 1) {
       AllLemke(p_game, 0, B, solution, 0);
@@ -261,6 +265,9 @@ NashLcpStrategySolver<T>::Solve(const Game &p_game) const
 
 template class NashLcpStrategySolver<double>;
 template class NashLcpStrategySolver<Rational>;
+
+}  // end namespace Gambit::Nash
+}  // end namespace Gambit
 
 
 
