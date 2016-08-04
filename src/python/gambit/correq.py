@@ -10,6 +10,8 @@ import math
 import numpy
 import pulp
 
+s=set();
+
 class CorrelatedEquilibriumPayoffs(object):
     def __init__(self, game, vertices, edges):
         self._game = game
@@ -399,3 +401,14 @@ def compute_correlated_payoffs(game):
     edges = remove_extra_edges(vertices, edges)
     return CorrelatedEquilibriumPayoffs(game, vertices, edges)
 
+def add(object):
+    s.add(object)
+
+def __contains__(object):
+    """
+    To check if a payoff is contained in the set or not
+    """
+    if object in s:
+        return true
+    else:
+        return false
