@@ -26,6 +26,8 @@ Implementation of contest games.
 
 import meanstat
 from gambit.lib.libgambit import Rational
+import math
+
 
 class TullockGame(meanstat.MeanStatisticGame):
     """
@@ -58,7 +60,6 @@ class TullockGame(meanstat.MeanStatisticGame):
             return self.omega
 
 
-import math
 
 class GeneralTullockGame(meanstat.MeanStatisticGame):
     """A contest game with general 'r' for two players."""

@@ -24,14 +24,15 @@ Command-line programs for Gambit
 """
 
 from IPython.frontend.terminal.embed import InteractiveShellEmbed
+import gambit
+import gambit.nash
+import gambit.qre
 
 def gambit_shell():
     """
     Start an ipython session after initializing the environment
     """
-    import gambit
-    import gambit.nash
-    import gambit.qre
+    
     
     # Everything in this dictionary will be added to the top-level
     # namespace in the shell.

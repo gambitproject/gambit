@@ -27,6 +27,7 @@ import sys
 import subprocess
 from fractions import Fraction
 from gambit.profiles import Solution
+import gambit.lib.libgambit
 
 class NashSolution(Solution):
     def __init__(self, profile):
@@ -230,7 +231,7 @@ class ExternalLogitSolver(ExternalSolver):
                                   extensive=game.is_tree and not use_strategic)
 
 
-import gambit.lib.libgambit
+
 
 def enumpure_solve(game, use_strategic=True, external=False):
     """Convenience function to solve game to find pure-strategy Nash equilibria.
