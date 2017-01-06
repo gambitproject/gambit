@@ -74,7 +74,7 @@ wxSheetCellAttrProvider - a container for storing non default attributes for the
 
 wxSheetCoords - row, col coords for accessing cells
 wxSheetBlock - a rectangular block of cells
-wxSheetSelection - a dumb selection container that stores and array of 
+wxSheetSelection - a dumb selection container that stores an array of
     sorted and nonoverlapping wxSheetBlocks.
 wxSheetSelectionIterator - an iterator for traversing the selection from top to
     bottom or in the reverse direction.
@@ -105,7 +105,7 @@ Editors for all windows, grid row/col/corner labels or not.
     The default attributes for the labels are set readonly by default.
     Note: if you can edit the row/col/corner labels then a single click doesn't
     select the row/col/everything. You must drag it a pixel or two. This is a 
-    reasonable tradeoff since otherwise for a double click to edit you select
+    reasonable tradeoff since otherwise for a double click to edit, you select
     then deselect which looks bad. If you can't edit it, then single click sels.
 Adds wxSheetStringSparseTable that is not just a huge double array.
     Uses binary search for lookup, ideal for less than half full grids.
@@ -244,7 +244,7 @@ wxSheetStringSparseTable uses wxPairArrayIntPairArraySheetString which is an arr
     strings and ints. Binary search lookup. Size of strings table is now 
     approximately (size of strings) + (1 int per string) + (1 int per row). 
 -------------------------------------------------------------------------------
-wxSheetEvent is parent for the other events since they're basicly the same
+wxSheetEvent is parent for the other events since they're basically the same
 wxSheetEvent doesn't take a million different items in constructor
     add SetKeyDownMousePos( wxEvent* ) to get vals from mouse/key evt.
 EVT_SHEET_RANGE_SELECT broke into SELECTING and SELECTED, can Veto it
@@ -326,7 +326,7 @@ It should be able to run on any platform that the wxGrid does. There may however
 be some "off by one" sizing errors for the editors since calls to 
 wxWindow::SetSize may not work as expected. I tried to preserve 
 the different sizing #ifdefs as used in the wxGrid, but sometimes they were 
-quite baffling and should be properly cleaned up when the can be tested. 
+quite baffling and should be properly cleaned up when they can be tested.
 I welcome any fixes for different platforms or versions of wxWindows than the
 ones I use (GTK, MSW, 2.4.2, but mostly CVS head).
 
