@@ -264,17 +264,19 @@ template <class T>
 void LogBehavProfile<T>::GetPayoff(GameTreeNodeRep *node, 
 				     const T &prob, int player, T &value) const
 {
-  if (node->outcome) {
-    value += prob * node->outcome->GetPayoff<T>(player);
+  if (node->GetOutcome()) {
+    value += prob * node->GetOutcome()->GetPayoff<T>(player);
   }
 
-  if (node->children.Length())  {
-    int pl = node->infoset->m_player->m_number, iset = node->infoset->m_number;
+  if (node->NumChildren())  {
+    int pl = node->GetInfoset()->GetPlayer()->GetNumber();
+    int iset = node->GetInfoset()->GetNumber();
     if (pl == 0) {
       // chance player
       for (int act = 1; act <= node->NumChildren(); act++) {
 	GetPayoff(node->GetChild(act),
-		  prob * node->infoset->GetActionProb(act, (T) 0), player, value);
+		  prob * node->GetInfoset()->GetActionProb(act, static_cast<T>(0)),
+		  player, value);
       }
     }
     else {
