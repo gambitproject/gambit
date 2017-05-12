@@ -187,10 +187,10 @@ stable/teaching each August; the major version number is equal to the
 last two digits of the year in which the version becomes stable.
 
 This document covers Gambit 15, which is the current stable
-version as of October 2015.  The most recent release is 15.1.0. 
+version as of October 2015.  The most recent release is 15.1.1. 
 You can download it from
 `Sourceforge
-<http://sourceforge.net/projects/gambit/files/gambit15/15.1.0>`_.
+<http://sourceforge.net/projects/gambit/files/gambit15/15.1.1>`_.
 Full source code is available, as are precompiled binaries for
 Microsoft Windows and Mac OS X 10.8.
 

@@ -19,13 +19,13 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>15.1.0</string>
+	<string>15.1.1</string>
 	<key>CFBundleShortVersionString</key>
-	<string>15.1.0</string>
+	<string>15.1.1</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Gambit version 15.1.0, (c) 1994-2014 The Gambit Project</string>
+	<string>Gambit version 15.1.1, (c) 1994-2014 The Gambit Project</string>
 	<key>CFBundleLongVersionString</key>
-	<string>15.1.0, (c) 1995-2014 The Gambit Project</string>
+	<string>15.1.1, (c) 1995-2014 The Gambit Project</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright 1995-2014 The Gambit Project</string>
 	<key>LSRequiresCarbon</key>
