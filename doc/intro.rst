@@ -186,11 +186,10 @@ Gambit operates on an annual release cycle roughly mirroring the
 stable/teaching each August; the major version number is equal to the
 last two digits of the year in which the version becomes stable.
 
-This document covers Gambit 16, which is the current development version.
-The most recent release is 16.0.0. 
+This document covers Gambit 16.0.1.
 You can download it from
 `Sourceforge
-<http://sourceforge.net/projects/gambit/files/gambit16/16.0.0>`_.
+<http://sourceforge.net/projects/gambit/files/gambit16/16.0.1>`_.
 Full source code is available, as are precompiled binaries for
 Microsoft Windows and Mac OS X 10.8.
 
