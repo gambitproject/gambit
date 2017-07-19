@@ -131,7 +131,7 @@ public:
   long use_count(void) const { return *m_count; }
   bool expired(void) const   { return *m_count == 0; }
 
-  void swap(const weak_ptr<T> &other)  // never throws
+  void swap(weak_ptr<T> &other)  // never throws
   {
     std::swap(m_ptr, other.m_ptr);
     std::swap(m_count, other.m_count);
