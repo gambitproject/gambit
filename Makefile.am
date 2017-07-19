@@ -784,7 +784,7 @@ osx-bundle:
 	cp ${top_srcdir}/contrib/mac/gambit.icns Gambit.app/Contents/Resources/gambit.icns
 	echo -n 'APPL????' > Gambit.app/Contents/PkgInfo
 	cp gambit Gambit.app/Contents/MacOS/gambit
-	cp gambit-* Gambit.app/Contents/MacOS
+	cp ${bin_PROGRAMS} Gambit.app/Contents/MacOS
 
 osx-dmg:  osx-bundle
 	-rm -rf .dmg
