@@ -127,7 +127,6 @@ int main(int argc, char *argv[])
 
   try {
     Gambit::Game game = Gambit::ReadGame(*input_stream);
-    std::cout << "Game reading complete." << std::endl;
     if (!game->IsTree() || useStrategic) {
       if (useFloat) {
 	shared_ptr<StrategyProfileRenderer<double> > renderer;

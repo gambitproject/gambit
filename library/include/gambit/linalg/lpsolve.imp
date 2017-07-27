@@ -219,9 +219,6 @@ template <class T> void LPSolve<T>::Solve(int phase)
     // tab.DualVector(y);         // step 1: Solve y B = c_B
     // gout << "\nstep 1, y: " << y;
     do {
-      if (phase == 2) {
-	std::cout << tab.TotalCost() << std::endl;
-      }
       in = Enter();            // step 2: Choose entering variable 
       // gout << "\nstep 2, in: " << in;
       if(in) {
