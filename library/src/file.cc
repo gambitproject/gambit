@@ -141,7 +141,7 @@ GameFileToken GameParserState::GetNextToken(void)
       if (c == 'e' || c == 'E') {
         buf += c;
         ReadChar(c);
-        if (c == '+' && c == '-' && !isdigit(c)) {
+        if (c != '+' && c != '-' && !isdigit(c)) {
           throw InvalidFileException(CreateLineMsg("Invalid Token +/-"));
         }
         buf += c;
@@ -171,7 +171,7 @@ GameFileToken GameParserState::GetNextToken(void)
     else if (c == 'e' || c == 'E') {
       buf += c;
       ReadChar(c);
-      if (c == '+' && c == '-' && !isdigit(c)) {
+      if (c != '+' && c != '-' && !isdigit(c)) {
         throw InvalidFileException(CreateLineMsg("Invalid Token +/-"));
       }
       buf += c;
