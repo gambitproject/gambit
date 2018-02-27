@@ -267,7 +267,6 @@ EXTRA_DIST = \
 	src/python/gambit/lib/error.py \
 	src/python/gambit/lib/game.pxi \
 	src/python/gambit/lib/infoset.pxi \
-	src/python/gambit/lib/libgambit.cpp \
 	src/python/gambit/lib/libgambit.pyx \
 	src/python/gambit/lib/mixed.pxi \
 	src/python/gambit/lib/nash.pxi \
