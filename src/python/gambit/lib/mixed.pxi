@@ -83,6 +83,8 @@ cdef class MixedStrategyProfile(object):
                     self.player = player
                 def __eq__(self, other):
                     return list(self) == list(other)
+                def __hash__(self):
+                    return hash(list(self))
                 def __len__(self):
                     return len(self.player.strategies)
                 def __repr__(self):

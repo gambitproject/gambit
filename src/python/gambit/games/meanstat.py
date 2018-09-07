@@ -46,6 +46,8 @@ class Strategy(object):
     def __ne__(self, other):
         if not isinstance(other, Strategy):  return True
         return self.player != other.player or self.st != other.st
+    def __hash__(self):
+        return hash((self.player, self.st))
     @property
     def label(self):   return self.player.game.labels[self.st]
         
@@ -74,6 +76,8 @@ class Player(object):
     def __ne__(self, other):
         if not isinstance(other, Player):  return True
         return self.game != other.game or self.pl != other.pl
+    def __hash__(self):
+        return hash((self.game, self.pl))
     @property
     def strategies(self):    return Strategies(self)
     @property
@@ -102,6 +106,8 @@ class Outcome(object):
     def __ne__(self, other):
         if not isinstance(other, Outcome):  return True
         return self.game != other.game or self.index != other.index
+    def __hash__(self):
+        return hash((self.game, self.index))
     def __getitem__(self, pl):
         if not isinstance(pl, int) or pl < 0 or pl >= self.game.N:
             raise IndexError
