@@ -31,3 +31,5 @@ gambit.wixobj
 gambit.wixpdb
 installer
 config.h
+stamp-h1
+.coverage

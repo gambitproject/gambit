@@ -1,0 +1,36 @@
+branches:
+  only:
+    - future
+os: linux
+dist: trusty
+language: python
+python:
+  - "2.7"
+
+before_install:
+# Preinstalled pip packages: nose setuptools wheel
+  - pip install codecov coverage cython
+
+install:
+# Building from git repository
+  - aclocal
+  - libtoolize
+  - automake --add-missing
+  - autoconf
+  - ./configure --disable-gui
+  - make
+  - sudo make install
+# Building the Python extensions
+  - cd src/python
+  - python setup.py build
+  - sudo env "PATH=$PATH" python setup.py install
+
+script:
+  - cd gambit/tests
+  - nosetests --with-coverage
+
+after_success:
+  - codecov
+
+notifications:
+  email: false
