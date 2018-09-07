@@ -21,6 +21,7 @@
 #
 from libcpp cimport bool
 from cython.operator cimport dereference as deref
+from functools import reduce
 
 cdef class MixedBehaviorProfile(object):
     def __repr__(self):    

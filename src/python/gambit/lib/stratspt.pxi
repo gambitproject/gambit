@@ -22,6 +22,7 @@
 import itertools
 from cython.operator cimport dereference as deref
 from gambit.lib.error import UndefinedOperationError
+from functools import reduce
 
 cdef class StrategySupportProfile(Collection):
     """
