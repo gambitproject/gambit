@@ -20,6 +20,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
+from builtins import object
 class SupportEnumeration(object):
     def enumerate_supports(self, game):
         return self.admissible_supports(game.support_profile(), list(game.strategies))
@@ -33,7 +34,7 @@ class SupportEnumeration(object):
             profile = temp_profile
 
         # Step 2: y' and z'
-        new_rest = filter(lambda x: x in list(profile), str_rest)
+        new_rest = [x for x in str_rest if x in list(profile)]
 
         # Step 3: return x if z' is empty
         if not new_rest:

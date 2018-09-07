@@ -3,9 +3,13 @@
 # TORR is Tree Output by Recursive Rules
 #
 
+from builtins import zip
+from builtins import str
+from builtins import range
+from builtins import object
 import gambit
 
-class ChanceMove:
+class ChanceMove(object):
     def __init__(self, actions, probs):
         self.actions = actions
         self.probs = probs
@@ -20,9 +24,9 @@ class ChanceMove:
             for (i, (name, prob)) in enumerate(zip(self.actions, self.probs)):
                 self.infoset.GetAction(i+1).SetLabel(name)
                 self.infoset.SetActionProb(i+1, str(prob))
-        return [ node.GetChild(i) for i in xrange(1, len(self.actions)+1) ]
+        return [ node.GetChild(i) for i in range(1, len(self.actions)+1) ]
 
-class Move:
+class Move(object):
     def __init__(self, player, actions):
         self.player = player
         self.actions = actions
@@ -36,9 +40,9 @@ class Move:
                                            len(self.actions))
             for (i, name) in enumerate(self.actions):
                 self.infoset.GetAction(i+1).SetLabel(name)
-        return [ node.GetChild(i) for i in xrange(1, len(self.actions)+1) ]
+        return [ node.GetChild(i) for i in range(1, len(self.actions)+1) ]
             
-class TerminalPayoff:
+class TerminalPayoff(object):
     def __init__(self, payoffs):
         self.payoffs = payoffs
 
@@ -52,7 +56,7 @@ class TerminalPayoff:
         return [ ]
         
 
-class GenericHistory:
+class GenericHistory(object):
     def __init__(self, actions = [ ]):
         self.actions = actions[:]
 

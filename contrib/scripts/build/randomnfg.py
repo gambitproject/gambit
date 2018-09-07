@@ -17,6 +17,8 @@ from __future__ import print_function
 # call to random.normalvariate() in line 68.
 #
 
+from builtins import map
+from builtins import range
 import random
 import gambit
 
@@ -34,11 +36,11 @@ def CreateNfg(dim):
     nfg = gambit.NewTable(dim)
     profile = gambit.PureStrategyProfile(nfg)
 
-    for cont in CrossProduct([range(1, nfg.GetPlayer(pl).NumStrategies() + 1)
+    for cont in CrossProduct([list(range(1, nfg.GetPlayer(pl).NumStrategies() + 1))
                               for pl in range(1, nfg.NumPlayers() + 1)]):
-        map(lambda pl:
+        list(map(lambda pl:
             profile.SetStrategy(nfg.GetPlayer(pl).GetStrategy(cont[pl-1])),
-            range(1, nfg.NumPlayers() + 1))
+            list(range(1, nfg.NumPlayers() + 1))))
         profile.SetOutcome(nfg.NewOutcome())
     return nfg
     
@@ -55,8 +57,8 @@ def RandomizeGame(game, func):
     number with the desired distribution.
     """
     
-    for outc in xrange(1, game.NumOutcomes() + 1):
-        for pl in xrange(1, game.NumPlayers() + 1):
+    for outc in range(1, game.NumOutcomes() + 1):
+        for pl in range(1, game.NumPlayers() + 1):
            game.GetOutcome(outc).SetPayoff(pl, func())
     
 
@@ -64,7 +66,7 @@ if __name__ == '__main__':
     import sys
     nfg = CreateNfg([eval(sys.argv[i]) for i in range(2, len(sys.argv))]) 
 
-    for iter in xrange(eval(sys.argv[1])):
+    for iter in range(eval(sys.argv[1])):
         RandomizeGame(nfg, lambda: random.normalvariate(0, 1))
         print(nfg.AsNfgFile())
 

@@ -5,6 +5,7 @@ from __future__ import print_function
 #
 
 
+from builtins import range
 import gambit, sys
 
 K = int(sys.argv[2])
@@ -13,7 +14,7 @@ nfg = gambit.NewTable([K for i in range(N)])
 
 # Pre-create outcomes.  Outcome 'i' is the outcome where player 'i' wins.
 
-for pl in xrange(1, nfg.NumPlayers() + 1):
+for pl in range(1, nfg.NumPlayers() + 1):
     outcome = nfg.NewOutcome()
     outcome.SetLabel('%d wins' % pl)
     outcome.SetPayoff(pl, "1")

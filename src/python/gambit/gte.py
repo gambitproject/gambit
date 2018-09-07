@@ -24,6 +24,7 @@
 File format interface with Game Theory Explorer
 """
 
+from builtins import str
 from fractions import Fraction
 try:
     from lxml import etree

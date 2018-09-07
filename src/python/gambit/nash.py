@@ -23,6 +23,7 @@
 A set of utilities for computing Nash equilibria
 """
 
+from builtins import object
 import sys
 import subprocess
 from fractions import Fraction

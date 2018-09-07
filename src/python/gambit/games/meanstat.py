@@ -24,7 +24,12 @@
 """
 Representation of mean-statistic games.
 """
+from __future__ import division
 
+from builtins import str
+from builtins import range
+from past.utils import old_div
+from builtins import object
 import gambit
 
 class Strategy(object):
@@ -117,9 +122,9 @@ class MeanStatisticGame(object):
     def __init__(self, N, min_choice, max_choice, step_choice=1,
                  label_prefix="S"):
         self.N = N
-        self.choices = xrange(min_choice, max_choice+1, step_choice)
+        self.choices = range(min_choice, max_choice+1, step_choice)
         self.labels = [ label_prefix+str(c) for c in self.choices ]
-        self.statistics = xrange((self.N-1)*min(self.choices),
+        self.statistics = range((self.N-1)*min(self.choices),
                                  (self.N-1)*max(self.choices)+1,
                                  step_choice)
 
@@ -134,7 +139,7 @@ class MeanStatisticGame(object):
         key = list(key)
         if len(key) != self.N:
             raise KeyError("number of strategies != number of players")
-        for i in xrange(len(key)):
+        for i in range(len(key)):
             if isinstance(key[i], int):
                 if key[i] < 0 or key[i] >= len(self.choices):
                     raise IndexError("index %d out of range" % i)
@@ -159,13 +164,13 @@ class MeanStatisticGame(object):
 
     def to_table(self):
         g = gambit.new_table([ len(self.choices) ] * self.N)
-        for pl in xrange(self.N):
+        for pl in range(self.N):
             for (st, label) in enumerate(self.labels):
                 g.players[pl].strategies[st].label = label
         for cont in g.contingencies:
             g_outc = g[cont]
             t_outc = self[cont]
-            for pl in xrange(self.N):
+            for pl in range(self.N):
                 g_outc[pl] = t_outc[pl]
         return g
 
@@ -187,11 +192,11 @@ class MixedStrategyProfile(object):
     def __repr__(self):
         return "Mixed strategy profile on '%s': [%s]" % \
                (self.game.title,
-                ", ".join([ str(self[i]) for i in xrange(len(self)) ]))
+                ", ".join([ str(self[i]) for i in range(len(self)) ]))
 
     def __rmul__(self, fac):
         p = self.game.mixed_strategy_profile()
-        for i in xrange(len(self)):
+        for i in range(len(self)):
             p[i] = fac * self[i]
         return p
 
@@ -199,17 +204,17 @@ class MixedStrategyProfile(object):
         if not hasattr(other, "game") or other.game != self.game:
             raise ValueError("adding a non-MixedProfile to a MixedProfile")
         p = self.game.mixed_strategy_profile()
-        for i in xrange(len(self)):
+        for i in range(len(self)):
             p[i] = self[i] + other[i]
         return p
 
     def set_centroid(self):
-        self.profile = [ 1.0 / len(self.game.choices) for i in self.game.choices ]
+        self.profile = [ old_div(1.0, len(self.game.choices)) for i in self.game.choices ]
 
     def normalize(self):
         den = sum(self.profile)
         if den != 0:
-            self.profile = [ x/den for x in self.profile ]
+            self.profile = [ old_div(x,den) for x in self.profile ]
                 
     def strategy_value(self, st):
         return sum([ prob * self.game.payoff(self.game.choices[st],
@@ -255,17 +260,17 @@ class MixedStrategyProfile(object):
         elif K == 1:
             return prob
         elif K == 2:
-            v = [ 0.0 for i in xrange(2*len(prob)-1) ]
+            v = [ 0.0 for i in range(2*len(prob)-1) ]
             for (i, p) in enumerate(prob):
                 for (j, q) in enumerate(prob):
                     v[i+j] += p*q
             return v
         else:
-            K1 = K / 2
-            K2 = K / 2 + K % 2
+            K1 = old_div(K, 2)
+            K2 = old_div(K, 2) + K % 2
             v1 = self.sum_dist(K1, prob)
             v2 = self.sum_dist(K2, prob)
-            v = [ 0.0 for i in xrange(len(v1)+len(v2)-1) ]
+            v = [ 0.0 for i in range(len(v1)+len(v2)-1) ]
             for (i, p) in enumerate(v1):
                 for (j, q) in enumerate(v2):
                     v[i+j] += p*q

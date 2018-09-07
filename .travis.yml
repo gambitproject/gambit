@@ -9,7 +9,7 @@ python:
 
 before_install:
 # Preinstalled pip packages: nose setuptools wheel
-  - pip install codecov coverage cython
+  - pip install codecov coverage cython future
 
 install:
 # Building from git repository

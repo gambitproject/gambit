@@ -1,3 +1,4 @@
+from builtins import object
 import gambit
 import nose.tools
 from gambit.lib.error import MismatchError

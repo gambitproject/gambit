@@ -24,7 +24,11 @@ A set of utilities for computing and analyzing quantal response equilbria
 """
 from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import division
 
+from builtins import zip
+from builtins import object
+from past.utils import old_div
 import math
 import numpy
 from . import pctrace
@@ -109,7 +113,7 @@ class LogitQRE(Solution):
     @property
     def lam(self):      return self._lam
     @property
-    def mu(self):       return 1.0 / self._lam
+    def mu(self):       return old_div(1.0, self._lam)
 
 class StrategicQREPathTracer(object):
     """

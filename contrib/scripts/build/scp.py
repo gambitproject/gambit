@@ -2,6 +2,8 @@ from __future__ import print_function
 # This script builds a serial cost pricing game
 # (See Chen, Razzolini, and Turocy, _Economic Theory_)
 
+from builtins import str
+from builtins import range
 import sys
 import gambit
 
@@ -12,7 +14,7 @@ alphas = [ 48, 54, 58, 60 ]
 omegas = [ 60, 20, 0, 0 ]
 
 # Strategy space
-strats = range(0, 21)
+strats = list(range(0, 21))
 
 # Cost function
 def Cost(q):  return q*q
@@ -40,18 +42,18 @@ def Payoff(alpha, omega, own, others):
 
     payoff = gambit.Rational(omega) + gambit.Rational(alpha*own)
 
-    for k in xrange(1, len(lower)+1):
+    for k in range(1, len(lower)+1):
         payoff -= gambit.Rational(Cost(Qsuper(lower, k)) -
                                   Cost(Qsuper(lower, k-1)),
                                   N + 1 - k)
     return payoff
 
-game = gambit.NewTable([ len(strats) for i in xrange(N) ])
+game = gambit.NewTable([ len(strats) for i in range(N) ])
 
 # Label each strategy
-for pl in xrange(N):
+for pl in range(N):
     player = game.GetPlayer(pl+1)
-    for st in xrange(player.NumStrategies()):
+    for st in range(player.NumStrategies()):
         strategy = player.GetStrategy(st+1)
         strategy.SetLabel(str(strats[st]))
 
@@ -63,8 +65,8 @@ for (i, cont) in enumerate(gambit.StrategyIterator(gambit.StrategySupportProfile
     cont.SetOutcome(outcome)
     # This is the vector of choices made in this contingency
     choices = [ int(cont.GetStrategy(pl+1).GetLabel())
-                for pl in xrange(N) ]
-    for pl in xrange(N):
+                for pl in range(N) ]
+    for pl in range(N):
         pay = Payoff(alphas[pl], omegas[pl], choices[pl],
                      choices[:pl] + choices[pl+1:])
         #print pay

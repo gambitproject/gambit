@@ -1,7 +1,10 @@
 """
 A set of utilities for computing and analyzing quantal response equilbria
 """
+from __future__ import division
 
+from past.utils import old_div
+from builtins import object
 import os, sys
 import gambit
 
@@ -60,9 +63,9 @@ def PlotAverages(profiles):
         return
 
     ax = pylab.subplot(111)
-    p = pylab.plot([ qre.lam/(1.0+qre.lam) for qre in profiles ],
+    p = pylab.plot([ old_div(qre.lam,(1.0+qre.lam)) for qre in profiles ],
                    [ qre.ExpectedChoice()[0] for qre in profiles ])
-    ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, pos: "%.2f" % (x/(1.0-x))))
+    ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, pos: "%.2f" % (old_div(x,(1.0-x)))))
     
     pylab.show()
     

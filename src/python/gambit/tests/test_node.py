@@ -1,3 +1,4 @@
+from builtins import object
 import gambit
 from nose.tools import assert_raises
 from gambit.lib.error import MismatchError, UndefinedOperationError

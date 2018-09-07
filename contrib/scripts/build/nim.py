@@ -9,9 +9,12 @@ from __future__ import print_function
 #
 
 # Maximum number of pebbles that can be removed
+from builtins import str
+from builtins import range
+from builtins import object
 K = 2
 
-class NimHistory:
+class NimHistory(object):
     # turn == player in [0,1] who has the turn; pile == number of stones left
     def __init__(self, turn, pile):
         self.turn = turn
@@ -24,20 +27,20 @@ class NimHistory:
 
     def PebblesLeft(self):   return self.pile
 
-class NimMove:
+class NimMove(object):
     def Apply(self, node, history):
         node.SetLabel("%d left" % history.PebblesLeft())
-        moves = xrange(1, min(history.PebblesLeft(), K) + 1)
+        moves = range(1, min(history.PebblesLeft(), K) + 1)
 
         player = node.GetGame().GetPlayer(history.CurrentMove() + 1)
         infoset = node.AppendMove(player, len(moves))
         for (i, move) in enumerate(moves):
             infoset.GetAction(i+1).SetLabel(str(move))
 
-        return [ node.GetChild(i) for i in xrange(1, len(moves)+1) ]
+        return [ node.GetChild(i) for i in range(1, len(moves)+1) ]
 
 
-class NimOutcome:
+class NimOutcome(object):
     def Apply(self, node, history):
         outcome = node.GetGame().NewOutcome()
         for pl in [ 0, 1 ]:

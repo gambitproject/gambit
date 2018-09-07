@@ -24,7 +24,9 @@
 Implementation of contest games.
 """
 from __future__ import absolute_import
+from __future__ import division
 
+from past.utils import old_div
 from . import meanstat
 from gambit.lib.libgambit import Rational
 
@@ -93,7 +95,7 @@ class GeneralTullockGame(meanstat.MeanStatisticGame):
             p_own = math.pow(own, self.r)
             p_other = math.pow(other, self.r)
         try:
-            p_win = p_own / (p_own + p_other)
+            p_win = old_div(p_own, (p_own + p_other))
             return p_win * (self.omega - self.cost(own) + self.prize) + \
                    (1.0-p_win) * (self.omega - self.cost(own))
         except ZeroDivisionError:

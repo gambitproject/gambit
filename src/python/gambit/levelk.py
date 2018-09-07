@@ -23,7 +23,12 @@
 Provides support for level-k/cognitive hierarchy modeling
 """
 from __future__ import print_function
+from __future__ import division
 
+from past.builtins import cmp
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 import math
 import scipy.optimize
 import scipy.stats
@@ -32,14 +37,14 @@ from gambit.profiles import Solution
 def logit_br(game, profile, lam):
     def do_sum(maxi, logpi, lam, values):
         logp = [ logpi + lam * (values[j] - values[maxi])
-                for j in xrange(len(values)) ]
+                for j in range(len(values)) ]
         return sum([ math.exp(p) for p in logp ]) - 1.0
     values = profile.strategy_values()
     maxi = values.index(max(values))
     logp0 = scipy.optimize.newton(lambda x: do_sum(maxi, x, lam, values),
                                   0.0)
     br = game.mixed_strategy_profile()
-    for i in xrange(len(profile)):
+    for i in range(len(profile)):
         br[i] = math.exp(logp0 + lam*(values[i]-values[maxi]))
     return br
 
@@ -69,10 +74,10 @@ def compute_coghier(game, tau, lam):
     if tau <= 0.0 or lam <= 0.0:
         return CognitiveHierarchyProfile(tau, lam, p)
     accum = float(scipy.stats.poisson(tau).pmf(0))
-    for k in xrange(1, max(3, int(5*tau))):
+    for k in range(1, max(3, int(5*tau))):
         br = logit_br(game, p, lam=lam)
         prob = float(scipy.stats.poisson(tau).pmf(k))
-        p = (1.0/(prob+accum)) * (prob*br + accum*p)
+        p = (old_div(1.0,(prob+accum))) * (prob*br + accum*p)
         accum += prob
     return CognitiveHierarchyProfile(tau, lam, p)
 

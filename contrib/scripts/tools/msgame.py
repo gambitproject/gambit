@@ -2,6 +2,9 @@
 Implementation of mean statistic games for Gambit
 """
 
+from builtins import str
+from builtins import range
+from builtins import object
 import csv
 import gambit
 
@@ -31,7 +34,7 @@ class MSGame(object):
     def __init__(self, N, contribs):
         self.N = N
         self.contribs = contribs
-        self.statistics = xrange((self.N-1)*min(self.contribs),
+        self.statistics = range((self.N-1)*min(self.contribs),
                                  (self.N-1)*max(self.contribs)+1)
     def AsTable(self):
         return [ [ own, others, self.Payoff(own, others) ]
@@ -45,7 +48,7 @@ class MSGame(object):
                  for own in self.statistics ]
             
     def AsNfg(self):
-        game = gambit.NewTable([ len(self.contribs) for i in xrange(self.N) ])
+        game = gambit.NewTable([ len(self.contribs) for i in range(self.N) ])
 
         # Label each strategy by its contribution
         for (pl, player) in enumerate(game.Players()):
@@ -59,8 +62,8 @@ class MSGame(object):
             cont.SetOutcome(outcome)
             # This is the vector of choices made in this contingency
             choices = [ int(cont.GetStrategy(pl+1).GetLabel())
-                        for pl in xrange(self.N) ]
-            for pl in xrange(self.N):
+                        for pl in range(self.N) ]
+            for pl in range(self.N):
                 outcome.SetPayoff(pl+1,
                                   self.Payoff(choices[pl],
                                               sum(choices)-choices[pl]))

@@ -23,6 +23,7 @@
 Iterator tools over games in pure Python.
 """
 
+from builtins import object
 class Contingencies(object):
     """
     An object representing the contingencies of strategies in a strategic game.

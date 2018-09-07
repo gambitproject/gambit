@@ -23,6 +23,7 @@
 Base classes for strategy profiles.
 """
 
+from builtins import object
 class Solution(object):
     """
     Generic object representing a strategy profile which is

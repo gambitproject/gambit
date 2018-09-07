@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+from builtins import range
 import random
 import enumphc
 import randomnfg
@@ -22,7 +23,7 @@ if __name__ == '__main__':
                    for strategy in player.Strategies() ]
 
     print("ownuser,ownsystem,childuser,childsystem,supports,singular,nash,nonnash")
-    for iter in xrange(int(argv[1])):
+    for iter in range(int(argv[1])):
         randomnfg.RandomizeGame(game, lambda: random.normalvariate(0, 1))
         #file("game-%04d.nfg" % iter, "w").write(game.AsNfgFile())
         logger = enumphc.CountLogger()

@@ -1,6 +1,9 @@
 from __future__ import print_function
 
 
+from builtins import str
+from builtins import range
+from builtins import object
 import copy
 
 boardsize = 3
@@ -9,7 +12,7 @@ boardsize = 3
 # Represents a tic-tac-toe board.
 # Board coordinates are (i, j), i,j=0,1,2.
 #
-class TicTacToeHistory:
+class TicTacToeHistory(object):
     def __init__(self, board = [ [ "" for i in range(boardsize) ] for j in range(boardsize) ]):
         self.board = copy.deepcopy(board)
 
@@ -20,7 +23,7 @@ class TicTacToeHistory:
 
     def CurrentMove(self):
         filled = len([ (row, col)
-                       for row in xrange(boardsize) for col in xrange(boardsize)
+                       for row in range(boardsize) for col in range(boardsize)
                        if self.board[row][col] != "" ])
         if filled % 2 == 0:
             return "X"
@@ -28,28 +31,28 @@ class TicTacToeHistory:
             return "O"
 
     def IsWin(self, pl):
-        winconfig = [ pl for i in xrange(boardsize) ]
-        for row in xrange(boardsize):
+        winconfig = [ pl for i in range(boardsize) ]
+        for row in range(boardsize):
             if self.board[row] == winconfig:
                 return True
-        for col in xrange(boardsize):
+        for col in range(boardsize):
             if [ row[col] for row in self.board ] == winconfig:
                 return True
-        if [ self.board[i][i] for i in xrange(boardsize) ] == winconfig:
+        if [ self.board[i][i] for i in range(boardsize) ] == winconfig:
             return True
-        if [ self.board[boardsize-i-1][i] for i in xrange(boardsize) ] == winconfig:
+        if [ self.board[boardsize-i-1][i] for i in range(boardsize) ] == winconfig:
             return True
         return False
 
     def IsFull(self):
-        return len([ (row, col) for row in xrange(boardsize) for col in xrange(boardsize)
+        return len([ (row, col) for row in range(boardsize) for col in range(boardsize)
                      if self.board[row][col] == "" ]) == 0
 
     def EmptySquares(self):
-        return [ (row, col) for row in xrange(boardsize) for col in xrange(boardsize)
+        return [ (row, col) for row in range(boardsize) for col in range(boardsize)
                  if self.board[row][col] == "" ]
 
-class TicTacToeMove:
+class TicTacToeMove(object):
     def Apply(self, node, history):
         moves = history.EmptySquares()
 
@@ -62,7 +65,7 @@ class TicTacToeMove:
         for (i, move) in enumerate(moves):
             infoset.GetAction(i+1).SetLabel(str(move))
 
-        return [ node.GetChild(i) for i in xrange(1, len(moves)+1) ]
+        return [ node.GetChild(i) for i in range(1, len(moves)+1) ]
 
 
 import torr

@@ -15,6 +15,10 @@ from __future__ import print_function
 #     Bertini (external binary required)
 #
 
+from builtins import next
+from builtins import str
+from builtins import range
+from builtins import object
 import gambit
 import phc
 import time, os
@@ -80,7 +84,7 @@ def Equations(support, player):
 #############################################################################
 
 def IsNash(profile, vars):
-    for i in xrange(1, profile.MixedProfileLength()+1):
+    for i in range(1, profile.MixedProfileLength()+1):
         if profile[i] < -negTolerance: return False
 
     for (pl, player) in enumerate(profile.GetGame().Players()):
@@ -88,7 +92,7 @@ def IsNash(profile, vars):
         payoff = profile.GetPayoff(player)
         total = 0.0
         for (st, strategy) in enumerate(player.Strategies()):
-            if "%s%d" % (playerchar, st) not in vars.keys():
+            if "%s%d" % (playerchar, st) not in list(vars.keys()):
                 if profile.GetStrategyValue(strategy) - payoff > payoffTolerance:
                     return False
             else:
@@ -116,7 +120,7 @@ def CheckEquilibrium(game, support, entry, logger):
         entry["vars"][playerchar + str(support.GetStrategy(pl+1,1).GetNumber()-1)] = complex(1.0 - total)
 
     x = ",".join([ "%f" % profile[i]
-                   for i in xrange(1, game.MixedProfileLength() + 1)])
+                   for i in range(1, game.MixedProfileLength() + 1)])
     if IsNash(profile, entry["vars"]):
         logger.OnNashSolution(profile)
     else:
@@ -131,7 +135,7 @@ def IsPureSupport(support):
 def ProfileFromPureSupport(game, support):
     profile = game.NewMixedStrategyDouble()
 
-    for index in xrange(1, game.MixedProfileLength() + 1):
+    for index in range(1, game.MixedProfileLength() + 1):
         profile[index] = 0.0
 
     for (pl, player) in enumerate(support.Players()):
@@ -144,7 +148,7 @@ def ProfileFromPureSupport(game, support):
 # Solver classes
 #############################################################################
 
-class SupportSolver:
+class SupportSolver(object):
     def __init__(self, logger):
         self.logger = logger
 
@@ -212,13 +216,13 @@ class BertiniSolver(SupportSolver):
 
         variables = [ ]
         for (pl, player) in enumerate(game.Players()):
-            for st in xrange(support.NumStrategies(pl+1) - 1):
+            for st in range(support.NumStrategies(pl+1) - 1):
                 variables.append("%c%d" % (playerletters[pl], st+1))
                            
         bertiniInput = "CONFIG\n\nEND;\n\nINPUT\n\n"
         bertiniInput += "variable_group %s;\n" % ", ".join(variables)
         bertiniInput += "function %s;\n\n" % ", ".join([ "e%d" % i
-                                                         for i in xrange(len(eqns)) ])
+                                                         for i in range(len(eqns)) ])
 
         for (eq, eqn) in enumerate(eqns):
             bertiniInput += "e%d = %s\n" % (eq, eqn)
@@ -263,7 +267,7 @@ class BertiniSolver(SupportSolver):
 # Logger classes for storing and reporting output
 #############################################################################
 
-class NullLogger:
+class NullLogger(object):
     def OnCandidateSupport(self, support): pass
     def OnSingularSupport(self, support): pass
     def OnNashSolution(self, profile): pass
@@ -272,7 +276,7 @@ class NullLogger:
 class StandardLogger(NullLogger):
     def OnNashSolution(self, profile):
         print("NE," + ",".join(["%f" % max(profile[i], 0.0)
-                                for i in xrange(1, profile.MixedProfileLength() + 1)]))
+                                for i in range(1, profile.MixedProfileLength() + 1)]))
 
 class VerboseLogger(StandardLogger):
     def PrintSupport(self, support, label):
@@ -290,11 +294,11 @@ class VerboseLogger(StandardLogger):
     def OnNonNashSolution(self, profile):
         print ("noneqm," +
                ",".join([str(profile[i])
-                         for i in xrange(1, profile.MixedProfileLength() + 1)]) +
+                         for i in range(1, profile.MixedProfileLength() + 1)]) +
                "," + str(profile.GetLiapValue()))
                                 
         
-class CountLogger:
+class CountLogger(object):
     def __init__(self):
         self.candidates = 0
         self.singulars = 0

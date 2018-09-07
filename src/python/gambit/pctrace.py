@@ -23,7 +23,10 @@
 Trace a smooth parameterized curve using a predictor-corrector method.
 """
 from __future__ import print_function
+from __future__ import division
 
+from builtins import range
+from past.utils import old_div
 import math
 import numpy
 import scipy.linalg        
@@ -35,12 +38,12 @@ def qr_decomp(b):
 def newton_step(q, b, u, y):
     # Expects q and b to be 2-D arrays, and u and y to be 1-D arrays
     # Returns steplength
-    for k in xrange(b.shape[1]):
+    for k in range(b.shape[1]):
         y[k] -= numpy.dot(b[:k,k], y[:k])
         y[k] /= b[k,k]
 
     d = 0.0
-    for k in xrange(b.shape[0]):
+    for k in range(b.shape[0]):
         s = numpy.dot(q[:-1,k], y)
         u[k] -= s
         d += s*s
@@ -92,7 +95,7 @@ def trace_path(start, startLam, maxLam, compute_lhs, compute_jac,
         # Predictor step
         u = x + h*omega*t
 
-        decel = 1.0 / maxDecel      # initialize deceleration factor
+        decel = old_div(1.0, maxDecel)      # initialize deceleration factor
         b = compute_jac(u)
         #q, b = scipy.linalg.decomp.qr(b, mode='qr')
         q = qr_decomp(b)
@@ -111,14 +114,14 @@ def trace_path(start, startLam, maxLam, compute_lhs, compute_jac,
                 accept = False
                 break
 
-            decel = max(decel, math.sqrt(dist / maxDist) * maxDecel)
+            decel = max(decel, math.sqrt(old_div(dist, maxDist)) * maxDecel)
 
             if it >= 2:
-                contr = dist / (disto + tol * eta)
+                contr = old_div(dist, (disto + tol * eta))
                 if contr > maxContr:
                     accept = False
                     break
-                decel = max(decel, math.sqrt(contr / maxContr) * maxDecel)
+                decel = max(decel, math.sqrt(old_div(contr, maxContr)) * maxDecel)
 
             if dist < tol:
                 # Success; break out of iteration
@@ -150,10 +153,10 @@ def trace_path(start, startLam, maxLam, compute_lhs, compute_jac,
         if newton:
             # Newton-type steplength adaptation, secant method
             newT = q[-1]
-            h *= -crit(u, newT) / (crit(u, newT) - crit(x, t))
+            h *= old_div(-crit(u, newT), (crit(u, newT) - crit(x, t)))
         else:
             # Standard steplength adaptaiton
-            h = abs(h / decel)
+            h = abs(old_div(h, decel))
 
         # PC step was successful; update and iterate
         x = u[:]
@@ -176,14 +179,14 @@ def upd(q, b, x, u, y, w, t, h, angmax):
     n = len(w)
     n1 = n+1
     
-    for k in xrange(n):
-        b[n1-1,k] = (w[k] - y[k]) / h
+    for k in range(n):
+        b[n1-1,k] = old_div((w[k] - y[k]), h)
 
-    for k in xrange(n):
+    for k in range(n):
         givens(b, q, b[k,k], b[n1-1,k], k, n1-1, k)
 
     ang = 0.0
-    for k in xrange(n1):
+    for k in range(n1):
         ang = ang + t[k] * q[n1-1,k]
 
     if ang > 1.0:  ang = 1.0
@@ -200,19 +203,19 @@ def givens(b, q, c1, c2, ell1, ell2, ell3):
         return c1, c2
 
     if math.fabs(c2) >= math.fabs(c1):
-        sn = math.sqrt(1.0 + (c1/c2)*(c1/c2)) * math.fabs(c2)
+        sn = math.sqrt(1.0 + (old_div(c1,c2))*(old_div(c1,c2))) * math.fabs(c2)
     else:
-        sn = math.sqrt(1.0 + (c2/c1)*(c2/c1)) * math.fabs(c1)
-    s1 = c1/sn
-    s2 = c2/sn
+        sn = math.sqrt(1.0 + (old_div(c2,c1))*(old_div(c2,c1))) * math.fabs(c1)
+    s1 = old_div(c1,sn)
+    s2 = old_div(c2,sn)
     
-    for k in xrange(q.shape[1]):
+    for k in range(q.shape[1]):
         sv1 = q[ell1, k]
         sv2 = q[ell2, k]
         q[ell1, k] = s1*sv1 + s2*sv2
         q[ell2, k] = -s2*sv1 + s1*sv2
 
-    for k in xrange(ell3, b.shape[1]):
+    for k in range(ell3, b.shape[1]):
         sv1 = b[ell1, k]
         sv2 = b[ell2, k]
         b[ell1, k] = s1*sv1 + s2*sv2
@@ -222,7 +225,7 @@ def givens(b, q, c1, c2, ell1, ell2, ell3):
 
 def ynorm(y):
     s = 0.0
-    for i in xrange(len(y)):
+    for i in range(len(y)):
         s += y[i]**2
     return math.sqrt(s)
 
@@ -241,7 +244,7 @@ def newt(q, b, u, v, w, p, pv, r, pert, dmax, dmin, ctmax, cdmax,
     n = len(w)
     n1 = n+1
     
-    for k in xrange(n):
+    for k in range(n):
         if abs(w[k]) > pert:
             pv[k] = 0.0
         elif w[k] > 0.0:
@@ -256,57 +259,57 @@ def newt(q, b, u, v, w, p, pv, r, pert, dmax, dmin, ctmax, cdmax,
         print("newt: fail on LHS norm test")
         return False, r, v
 
-    for k in xrange(n):
-        for ell in xrange(k-1):
+    for k in range(n):
+        for ell in range(k-1):
             w[k] = w[k] - b[ell, k] * w[ell]
-        w[k] = w[k] / b[k,k]
+        w[k] = old_div(w[k], b[k,k])
 
     d2 = ynorm(w)
 
-    for k in xrange(n1):
+    for k in range(n1):
         s = 0.0
-        for ell in xrange(n):
+        for ell in range(n):
             s = s + q[ell,k] * w[ell]
         v[k] = u[k] - s
 
     r = compute_lhs(v)
         
-    for k in xrange(n):
+    for k in range(n):
         p[k] = r[k] - pv[k]
 
     d3 = ynorm(p)
-    contr = d3 / (d1 + dmin)
+    contr = old_div(d3, (d1 + dmin))
     if contr > ctmax:
         print("newt: fail on contraction test")
         test = False
     
-    for k in reversed(xrange(n-1)):
+    for k in reversed(range(n-1)):
         givens(b, q, w[k], w[k+1], k, k+1, k)
 
-    for k in xrange(n):
-        b[0,k] = b[0,k] - p[k] / d2
+    for k in range(n):
+        b[0,k] = b[0,k] - old_div(p[k], d2)
 
-    for k in xrange(n-1):
+    for k in range(n-1):
         givens(b, q, b[k,k], b[k+1,k], k, k+1, k)
 
     if b[n-1,n-1] < 0.0:
         print("newt: fail on diagonal sign test")
         test = False
         b[n-1,n-1] = -b[n-1,n-1]
-        for k in xrange(n1):
+        for k in range(n1):
             q[n-1,k] = -q[n-1,k]
             q[n1-1,k] = -q[n1-1,k]
 
-    for i in xrange(1,n):
-        for k in xrange(i-1):
+    for i in range(1,n):
+        for k in range(i-1):
             if abs(b[k,i]) > cdmax * abs(b[i,i]):
                 print("... reconditioning ...")
                 if b[i,i] > 0.0:
-                    b[i,i] = abs(b[k,i]) / cdmax
+                    b[i,i] = old_div(abs(b[k,i]), cdmax)
                 else:
-                    b[i,i] = -abs(b[k,i]) / cdmax
+                    b[i,i] = old_div(-abs(b[k,i]), cdmax)
 
-    for k in xrange(n-1):
+    for k in range(n-1):
         b[k+1,k] = 0.0
 
     return test, r, v
@@ -317,18 +320,18 @@ def estimate_jac(x, compute_lhs):
     b = numpy.zeros((n1,n))
     h = 0.32
 
-    for i in xrange(n1):
+    for i in range(n1):
         x[i] = x[i] + h
         y = compute_lhs(x)
         x[i] = x[i] - h
-        for k in xrange(n):
+        for k in range(n):
             b[i,k] = y[k]
 
     y = compute_lhs(x)
 
-    for i in xrange(n1):
-        for k in xrange(n):
-            b[i,k] = (b[i,k] - y[k]) / h
+    for i in range(n1):
+        for k in range(n):
+            b[i,k] = old_div((b[i,k] - y[k]), h)
 
     return b
 
@@ -360,7 +363,7 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
     hmin = 0.000001
     h = 0.03
     cdmax = 1000.0
-    angmax = 3.141592654 / 3
+    angmax = old_div(3.141592654, 3)
     maxstp = 9000
     acfac = 1.1
 
@@ -402,7 +405,7 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
         test = upd(q, b, x, u, y, w, t, h, angmax)
         if not test:
             print("Fail angle test...")
-            h = h / acfac
+            h = old_div(h, acfac)
             q = qq
             b = bb
             continue
@@ -411,14 +414,14 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
                        compute_lhs)
         if not test:
             print("Fail Newton test...")
-            h = h / acfac
+            h = old_div(h, acfac)
             q = qq
             b = bb
             continue
 
         if newton:
             # Newton-type steplength adaptation
-            h = -(v[-1]-1.0) / q[-1,-1]
+            h = old_div(-(v[-1]-1.0), q[-1,-1])
             if abs(h) <= hmin:
                 # Stop
                 return x
