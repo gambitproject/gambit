@@ -133,22 +133,22 @@ class MeanStatisticGame(object):
     def __getitem__(self, key):
         key = list(key)
         if len(key) != self.N:
-            raise KeyError, "number of strategies != number of players"
+            raise KeyError("number of strategies != number of players")
         for i in xrange(len(key)):
             if isinstance(key[i], int):
                 if key[i] < 0 or key[i] >= len(self.choices):
-                    raise IndexError, "index %d out of range" % i
+                    raise IndexError("index %d out of range" % i)
             elif isinstance(key[i], str):
                 try:
                     key[i] = [ x.label for x in self.players[i].strategies ].index(key[i])
                 except ValueError:
-                    raise IndexError, "index %d not found" % i
+                    raise IndexError("index %d not found" % i)
             elif isinstance(key[i], Strategy):
                 if key[i].player != self.players[i]:
-                    raise IndexError, "strategy %d for wrong player" % i
+                    raise IndexError("strategy %d for wrong player" % i)
                 key[i] = key[i].st
             else:
-                raise TypeError, "unknown index type for index %d" % i
+                raise TypeError("unknown index type for index %d" % i)
         return Outcome(self, tuple(key))
 
     def __setitem__(self, key, value):
@@ -197,7 +197,7 @@ class MixedStrategyProfile(object):
 
     def __add__(self, other):
         if not hasattr(other, "game") or other.game != self.game:
-            raise ValueError, "adding a non-MixedProfile to a MixedProfile"
+            raise ValueError("adding a non-MixedProfile to a MixedProfile")
         p = self.game.mixed_strategy_profile()
         for i in xrange(len(self)):
             p[i] = self[i] + other[i]

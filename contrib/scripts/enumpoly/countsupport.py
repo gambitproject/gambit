@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 import random
 import enumphc
@@ -20,7 +21,7 @@ if __name__ == '__main__':
                    for player in game.Players()
                    for strategy in player.Strategies() ]
 
-    print "ownuser,ownsystem,childuser,childsystem,supports,singular,nash,nonnash"
+    print("ownuser,ownsystem,childuser,childsystem,supports,singular,nash,nonnash")
     for iter in xrange(int(argv[1])):
         randomnfg.RandomizeGame(game, lambda: random.normalvariate(0, 1))
         #file("game-%04d.nfg" % iter, "w").write(game.AsNfgFile())

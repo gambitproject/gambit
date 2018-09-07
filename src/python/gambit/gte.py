@@ -63,7 +63,7 @@ def read_game(f):
         raise NotImplementedError("Reading and writing GTE files requires lxml module.")
     tree = etree.parse(f)
     if tree.xpath("/gte/@version")[0] != "0.1":
-        raise ValueError, "GTE reader only supports version 0.1"
+        raise ValueError("GTE reader only supports version 0.1")
 
     g = gambit.lib.libgambit.new_tree()
     for p in tree.xpath("/gte/players/player"):

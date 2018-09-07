@@ -1,3 +1,4 @@
+from __future__ import print_function
 import gambit
 
 
@@ -51,9 +52,9 @@ g.root.children[1].children[0].children[0].outcome = bob_big
 g.root.children[1].children[0].children[1].outcome = alice_small
 g.root.children[1].children[1].outcome = bob_small
 
-print g.write()
+print(g.write())
 
-print gambit.gte.write_game(g)
+print(gambit.gte.write_game(g))
 
 file("poker.efg", "w").write(g.write()+"\n")
 file("poker.xml", "w").write(gambit.gte.write_game(g)+"\n")

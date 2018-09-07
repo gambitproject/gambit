@@ -23,8 +23,9 @@
 """
 Voluntary public-goods contribution games.
 """
+from __future__ import absolute_import
 
-import meanstat
+from . import meanstat
 
 class CobbDouglasVCGame(meanstat.MeanStatisticGame):
     """

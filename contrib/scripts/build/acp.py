@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This script builds an average cost pricing game
 # (See Chen, Razzolini and Turocy, _Economic Theory_)
 
@@ -50,4 +51,4 @@ for (i, cont) in enumerate(gambit.StrategyIterator(gambit.StrategySupportProfile
         #print pay
         outcome.SetPayoff(pl+1, pay)
 
-print game.AsNfgFile()
+print(game.AsNfgFile())

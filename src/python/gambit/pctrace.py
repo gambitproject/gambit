@@ -22,6 +22,7 @@
 """
 Trace a smooth parameterized curve using a predictor-corrector method.
 """
+from __future__ import print_function
 
 import math
 import numpy
@@ -163,7 +164,7 @@ def trace_path(start, startLam, maxLam, compute_lhs, compute_jac,
         newT = q[-1]    # new tangent
         if sum(t * newT) < 0.0:
             # Bifurcation detected
-            print "Detected bifurcation near %f" % x[-1]
+            print("Detected bifurcation near %f" % x[-1])
 
             omega = -omega
         t = newT[:]
@@ -252,7 +253,7 @@ def newt(q, b, u, v, w, p, pv, r, pert, dmax, dmin, ctmax, cdmax,
     d1 = ynorm(w)
 
     if d1 > dmax:
-        print "newt: fail on LHS norm test"
+        print("newt: fail on LHS norm test")
         return False, r, v
 
     for k in xrange(n):
@@ -276,7 +277,7 @@ def newt(q, b, u, v, w, p, pv, r, pert, dmax, dmin, ctmax, cdmax,
     d3 = ynorm(p)
     contr = d3 / (d1 + dmin)
     if contr > ctmax:
-        print "newt: fail on contraction test"
+        print("newt: fail on contraction test")
         test = False
     
     for k in reversed(xrange(n-1)):
@@ -289,7 +290,7 @@ def newt(q, b, u, v, w, p, pv, r, pert, dmax, dmin, ctmax, cdmax,
         givens(b, q, b[k,k], b[k+1,k], k, k+1, k)
 
     if b[n-1,n-1] < 0.0:
-        print "newt: fail on diagonal sign test"
+        print("newt: fail on diagonal sign test")
         test = False
         b[n-1,n-1] = -b[n-1,n-1]
         for k in xrange(n1):
@@ -299,7 +300,7 @@ def newt(q, b, u, v, w, p, pv, r, pert, dmax, dmin, ctmax, cdmax,
     for i in xrange(1,n):
         for k in xrange(i-1):
             if abs(b[k,i]) > cdmax * abs(b[i,i]):
-                print "... reconditioning ..."
+                print("... reconditioning ...")
                 if b[i,i] > 0.0:
                     b[i,i] = abs(b[k,i]) / cdmax
                 else:
@@ -392,15 +393,15 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
 
         # Predictor step
         u = x + h*omega*t
-        print "PREDICTOR"
+        print("PREDICTOR")
         callback(u)
         w = compute_lhs(u)
-        print w
-        print ynorm(w)
+        print(w)
+        print(ynorm(w))
 
         test = upd(q, b, x, u, y, w, t, h, angmax)
         if not test:
-            print "Fail angle test..."
+            print("Fail angle test...")
             h = h / acfac
             q = qq
             b = bb
@@ -409,7 +410,7 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
         test, r, v = newt(q, b, u, v, w, p, pv, r, pert, dmax, dmin, ctmax, cdmax,
                        compute_lhs)
         if not test:
-            print "Fail Newton test..."
+            print("Fail Newton test...")
             h = h / acfac
             q = qq
             b = bb
@@ -432,11 +433,11 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
         y = r[:]
 
         if callback is not None:
-            print "ACCEPTED"
+            print("ACCEPTED")
             callback(x)
-        print y
-        print ynorm(y)
-        print
+        print(y)
+        print(ynorm(y))
+        print()
         
     return x
 

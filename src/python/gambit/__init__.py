@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 #
 # This file is part of Gambit
 # Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
@@ -21,8 +22,8 @@
 #
 
 import gambit.lib.libgambit
-import nash
-import gte
+from . import nash
+from . import gte
 
 __version__ = gambit.lib.libgambit.__version__
 Rational = gambit.lib.libgambit.Rational

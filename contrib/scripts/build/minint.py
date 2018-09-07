@@ -1,3 +1,4 @@
+from __future__ import print_function
 #
 # A Python script to test the Gambit Python wrapper by building
 # the minimum-unique-integer game
@@ -28,4 +29,4 @@ for profile in gambit.StrategyIterator(gambit.StrategySupportProfile(nfg)):
     # If we don't have a winner, leave outcome null, payoffs zero
 
     
-print nfg.AsNfgFile()
+print(nfg.AsNfgFile())

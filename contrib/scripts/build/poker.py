@@ -1,3 +1,4 @@
+from __future__ import print_function
 #
 # This is an example of how to build poker-type games in Gambit
 #
@@ -53,4 +54,4 @@ rules = [ { "condition": AtRoot,
 
 tree = torr.BuildTree([ "Alice", "Bob" ], rules, torr.GenericHistory)
 
-print tree.AsEfgFile()
+print(tree.AsEfgFile())

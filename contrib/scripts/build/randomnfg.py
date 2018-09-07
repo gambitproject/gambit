@@ -1,3 +1,4 @@
+from __future__ import print_function
 #
 # FILE: randomnfg.py -- Create random normal form games in Gambit
 #
@@ -65,7 +66,7 @@ if __name__ == '__main__':
 
     for iter in xrange(eval(sys.argv[1])):
         RandomizeGame(nfg, lambda: random.normalvariate(0, 1))
-        print nfg.AsNfgFile()
+        print(nfg.AsNfgFile())
 
 
         

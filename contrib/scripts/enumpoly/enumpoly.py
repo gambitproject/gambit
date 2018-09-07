@@ -1,3 +1,4 @@
+from __future__ import print_function
 #
 # Compute all equilibria of a strategic game using support enumeration.
 #
@@ -17,6 +18,7 @@
 import gambit
 import phc
 import time, os
+from functools import reduce
 
 
 #############################################################################
@@ -235,8 +237,8 @@ class BertiniSolver(SupportSolver):
                 outfile = file("real_finite_solutions")
                 lines = iter(outfile)
 
-                lines.next()
-                lines.next()
+                next(lines)
+                next(lines)
                 while lines.next().strip() != "-1":
                     solution = { }
                     solution["vars"] = { }
@@ -269,8 +271,8 @@ class NullLogger:
 
 class StandardLogger(NullLogger):
     def OnNashSolution(self, profile):
-        print "NE," + ",".join(["%f" % max(profile[i], 0.0)
-                                for i in xrange(1, profile.MixedProfileLength() + 1)])
+        print("NE," + ",".join(["%f" % max(profile[i], 0.0)
+                                for i in xrange(1, profile.MixedProfileLength() + 1)]))
 
 class VerboseLogger(StandardLogger):
     def PrintSupport(self, support, label):
@@ -278,7 +280,7 @@ class VerboseLogger(StandardLogger):
                            [ str(int(support.Contains(strategy)))
                              for strategy in player.Strategies() ])
                     for player in support.Players() ]
-        print label + "," + ",".join(strings)
+        print(label + "," + ",".join(strings))
 
     def OnCandidateSupport(self, support):
         self.PrintSupport(support, "candidate")

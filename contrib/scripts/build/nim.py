@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 
 
@@ -59,4 +60,4 @@ startPebbles = 5
 tree = torr.BuildTree([ "One", "Two" ], rules, 
                       lambda: NimHistory(0, startPebbles))
 tree.SetTitle("Nim with %d pebbles" % startPebbles)
-print tree.AsEfgFile()
+print(tree.AsEfgFile())

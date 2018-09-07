@@ -22,10 +22,12 @@
 """
 A set of utilities for computing and analyzing quantal response equilbria
 """
+from __future__ import print_function
+from __future__ import absolute_import
 
 import math
 import numpy
-import pctrace
+from . import pctrace
 
 from gambit.profiles import Solution
 
@@ -91,7 +93,7 @@ def sym_compute_jac(game, point):
 def printer(game, point):
     profile = game.mixed_strategy_profile(point=[math.exp(x) for x in point[:-1]])
     lam = point[-1]
-    print lam, profile
+    print(lam, profile)
 
 
 
@@ -246,7 +248,7 @@ class StrategicQREPathTracer(object):
             raise NotImplementedError
         
 
-from nash import ExternalSolver
+from .nash import ExternalSolver
     
 class ExternalStrategicQREPathTracer(ExternalSolver):
     """

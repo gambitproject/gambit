@@ -22,6 +22,7 @@
 """
 Provides support for level-k/cognitive hierarchy modeling
 """
+from __future__ import print_function
 
 import math
 import scipy.optimize
@@ -104,7 +105,7 @@ def fit_coghier(game, data, min_tau, max_tau, min_lam, max_lam,
     results = [ ]
     for lam in scipy.linspace(min_lam, max_lam, grid_size):
         if verbose:
-            print "Searching lambda=%.3f" % lam
+            print("Searching lambda=%.3f" % lam)
         for tau in scipy.linspace(min_tau, max_tau, grid_size):
             profile = compute_coghier(game, tau, lam)
             profile.logL = log_like(profile, data)
@@ -112,12 +113,12 @@ def fit_coghier(game, data, min_tau, max_tau, min_lam, max_lam,
         results.sort(lambda x, y: cmp(y.logL, x.logL))
         results = results[:sample_cands]
         if verbose:
-            print "tau,lam,logL"
+            print("tau,lam,logL")
             for profile in results:
-                print "%f,%f,%f" % (profile.tau, profile.lam, profile.logL)
-            print
+                print("%f,%f,%f" % (profile.tau, profile.lam, profile.logL))
+            print()
 
-    if verbose: print
+    if verbose: print()
     for start in results[:sample_cands]:
         params = scipy.optimize.fmin(lambda x: objective(x, game, data),
                                      (start.tau, start.lam),
@@ -127,7 +128,7 @@ def fit_coghier(game, data, min_tau, max_tau, min_lam, max_lam,
         profile.logL = log_like(profile, data)
         results.append(profile)
         if verbose:
-            print "%f,%f,%f" % (profile.tau, profile.lam, profile.logL)
+            print("%f,%f,%f" % (profile.tau, profile.lam, profile.logL))
     results.sort(lambda x, y: cmp(y.logL, x.logL))
     return results[0]
                             

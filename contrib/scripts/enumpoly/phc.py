@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 
 ###########################################################################
@@ -112,10 +113,10 @@ def RunPHC(phcpath, filename, equations):
         outfile.close()
     else:
         # For convenience, print the equation sets that cause problems
-        print equations
+        print(equations)
         os.remove(infilename)
         os.remove(outfilename)
-        raise ValueError, "PHC run failed"
+        raise ValueError("PHC run failed")
     
     os.remove(outfilename)
     os.remove(infilename)
@@ -130,7 +131,7 @@ if __name__ == '__main__':
                     "b1 + b2 - 1;\n"
                     "a2 - a1;\n"
                     "a1 + a2 - 1;\n")
-    print output
+    print(output)
 
     # 2x2x2.nfg, full support
     output = RunPHC("./phc", "foo",
@@ -142,4 +143,4 @@ if __name__ == '__main__':
                     "b1+b2-1;\n"
                     "c1+c2-1;\n"
                     )
-    print output
+    print(output)

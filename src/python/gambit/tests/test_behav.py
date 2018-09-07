@@ -1,3 +1,4 @@
+from __future__ import print_function
 import gambit
 import fractions
 
@@ -184,7 +185,7 @@ class TestGambitMixedBehavGame(object):
         assert self.profile_rational["U3"] == fractions.Fraction("1/98")
         self.profile_rational["D3"] = fractions.Fraction("97/98")
         assert self.profile_rational["D3"] == fractions.Fraction("97/98")
-        print self.profile_rational
+        print(self.profile_rational)
         assert self.profile_rational == [fractions.Fraction("2/9"), 
                                         fractions.Fraction("7/9"), 
                                         fractions.Fraction("4/13"), 

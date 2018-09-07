@@ -23,8 +23,9 @@
 """
 Implementation of contest games.
 """
+from __future__ import absolute_import
 
-import meanstat
+from . import meanstat
 from gambit.lib.libgambit import Rational
 
 class TullockGame(meanstat.MeanStatisticGame):
