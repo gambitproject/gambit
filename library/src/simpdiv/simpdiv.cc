@@ -339,9 +339,9 @@ void NashSimpdivStrategySolver::getY(State &state,
 				     int k) const
 {
   static_cast<Vector<Rational> & >(x) = v;
-  for (int j = 1; j <= x.GetGame()->Players().size(); j++) {
+  for (size_t j = 1; j <= x.GetGame()->Players().size(); j++) {
     GamePlayer player = x.GetGame()->Players()[j];
-    for (int h = 1; h <= player->Strategies().size(); h++) {
+    for (size_t h = 1; h <= player->Strategies().size(); h++) {
       if (TT(j,h) == 1 || U(j,h) == 1) {
 	x[player->Strategies()[h]] += state.d*ab(j,h);
 	int hh = (h > 1) ? h-1 : player->Strategies().size();
@@ -401,7 +401,7 @@ NashSimpdivStrategySolver::State::getlabel(MixedStrategyProfile<Rational> &yy,
     Rational payoff = 0;
     Rational maxval = -1000000;
     int jj = 0;
-    for (int j = 1; j <= player->Strategies().size(); j++) {
+    for (size_t j = 1; j <= player->Strategies().size(); j++) {
       pay = yy.GetPayoff(player->Strategies()[j]);
       payoff += yy[player->Strategies()[j]] * pay;
       if (pay > maxval) {
@@ -419,7 +419,7 @@ NashSimpdivStrategySolver::State::getlabel(MixedStrategyProfile<Rational> &yy,
     bestz = maxz;
     for (int i = 1; i <= yy.GetGame()->NumPlayers(); i++) {
       GamePlayer player = yy.GetGame()->Players()[i];
-      for (int j = 1; j <= player->Strategies().size(); j++) {
+      for (size_t j = 1; j <= player->Strategies().size(); j++) {
 	besty(i,j) = yy[player->Strategies()[j]];
       }
     }

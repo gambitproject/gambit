@@ -191,7 +191,7 @@ GameInfoset GamePlayerRep::GetInfoset(int p_index) const { return m_infosets[p_i
 PureStrategyProfileRep::PureStrategyProfileRep(const Game &p_game) 
   : m_nfg(p_game), m_profile(p_game->Players().size())
 {
-  for (int pl = 1; pl <= m_nfg->Players().size(); pl++)  {
+  for (size_t pl = 1; pl <= m_nfg->Players().size(); pl++)  {
     m_profile[pl] = m_nfg->GetPlayer(pl)->GetStrategy(1);
   }
 }

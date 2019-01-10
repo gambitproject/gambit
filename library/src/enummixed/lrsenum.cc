@@ -824,7 +824,7 @@ void LrsData::FillConstraintRows(lrs_dic *P, lrs_dat *Q,
   Rational min = p_game->GetMinPayoff() - Rational(1);
   PureStrategyProfile cont = p_game->NewPureStrategyProfile();
 
-  for (long row = firstRow; 
+  for (size_t row = firstRow; 
        row < firstRow + p_game->Players()[p1]->Strategies().size();
        row++) {
     num[0] = 0;
@@ -832,7 +832,7 @@ void LrsData::FillConstraintRows(lrs_dic *P, lrs_dat *Q,
 
     cont->SetStrategy(p_game->Players()[p1]->Strategies()[row - firstRow + 1]);
 
-    for (long st = 1; st <= p_game->Players()[p2]->Strategies().size(); st++) {
+    for (size_t st = 1; st <= p_game->Players()[p2]->Strategies().size(); st++) {
       cont->SetStrategy(p_game->Players()[p2]->Strategies()[st]);
       Rational x = cont->GetPayoff(p1) - min;
 
