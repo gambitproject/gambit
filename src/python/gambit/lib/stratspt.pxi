@@ -20,6 +20,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 import itertools
+import functools
 from cython.operator cimport dereference as deref
 from gambit.lib.error import UndefinedOperationError
 
@@ -115,7 +116,7 @@ cdef class StrategySupportProfile(Collection):
         return False
 
     def issubset(self, StrategySupportProfile other):
-        return reduce(lambda acc,st: acc & (st in other), self, True)
+        return functools.reduce(lambda acc,st: acc & (st in other), self, True)
 
     def issuperset(self, StrategySupportProfile other):
         return other.issubset(self)

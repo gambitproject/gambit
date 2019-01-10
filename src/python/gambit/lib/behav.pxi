@@ -19,6 +19,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+import functools
+
 from libcpp cimport bool
 from cython.operator cimport dereference as deref
 
@@ -52,9 +54,9 @@ cdef class MixedBehaviorProfile(object):
                 pass
 
         # if no player matches, check infoset labels
-        infosets = reduce(lambda x,y: x+y,
-                            [ list(p.infosets) 
-                              for p in self.game.players ]) 
+        infosets = functools.reduce(lambda x,y: x+y,
+                                    [list(p.infosets) 
+                                     for p in self.game.players]) 
         matches = filter(lambda x: x.label==index, infosets)
         if len(matches) == 1:
             return matches[0]
@@ -62,10 +64,10 @@ cdef class MixedBehaviorProfile(object):
             raise IndexError("multiple infosets matching label '%s'" % index)
         
         # if no infoset matches, check action labels
-        actions = reduce(lambda x,y: x+y,
-                            [ list(i.actions) 
-                              for p in self.game.players
-                              for i in p.infosets ])
+        actions = functools.reduce(lambda x,y: x+y,
+                                   [list(i.actions) 
+                                    for p in self.game.players
+                                    for i in p.infosets])
         matches = filter(lambda x: x.label==index, actions)
         if len(matches) == 1:
             return matches[0]

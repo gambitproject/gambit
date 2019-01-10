@@ -20,6 +20,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 import itertools
+import functools
 
 from cython.operator cimport dereference as deref
 from gambit.lib.error import UndefinedOperationError
@@ -56,9 +57,9 @@ cdef class MixedStrategyProfile(object):
                 pass
         else:
             # if no player matches, check strategy labels
-            strategies = reduce(lambda x,y: x+y,
-                                [ list(p.strategies) 
-                                  for p in self.game.players ])
+            strategies = functools.reduce(lambda x,y: x+y,
+                                          [list(p.strategies) 
+                                           for p in self.game.players])
             matches = filter(lambda x: x.label==index, strategies)
             if len(matches) == 1:
                 return matches[0]

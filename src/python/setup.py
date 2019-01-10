@@ -26,10 +26,10 @@ from Cython.Distutils import build_ext
 
 # setuptools DWIM monkey-patch madness
 # http:#mail.python.org/pipermail/distutils-sig/2007-September/thread.html#8204
-import sys
-if 'setuptools.extension' in sys.modules:
-    m = sys.modules['setuptools.extension']
-    m.Extension.__dict__ = m._Extension.__dict__
+#import sys
+#if 'setuptools.extension' in sys.modules:
+#    m = sys.modules['setuptools.extension']
+#    m.Extension.__dict__ = m._Extension.__dict__
     
 import glob
 libgame = Extension("gambit.lib.libgambit",
