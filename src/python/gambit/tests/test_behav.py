@@ -1,3 +1,4 @@
+from __future__ import print_function
 import gambit
 import fractions
 
@@ -184,7 +185,7 @@ class TestGambitMixedBehavGame(object):
         assert self.profile_rational["U3"] == fractions.Fraction("1/98")
         self.profile_rational["D3"] = fractions.Fraction("97/98")
         assert self.profile_rational["D3"] == fractions.Fraction("97/98")
-        print self.profile_rational
+        print(self.profile_rational)
         assert self.profile_rational == [fractions.Fraction("2/9"), 
                                         fractions.Fraction("7/9"), 
                                         fractions.Fraction("4/13"), 
@@ -422,7 +423,7 @@ class TestGambitMixedBehavGame(object):
         assert self.profile_double.belief(self.game.infosets[0])[0] == 1.0
         for i in self.game.infosets:
             belief = self.profile_double.belief(i)
-            for n in xrange(0, len(i.members)):
+            for n in range(0, len(i.members)):
                 assert self.profile_double.belief(i.members[n]) == belief[n]
             assert abs(sum(belief) - 1.0) < 1e-13
 
@@ -435,6 +436,6 @@ class TestGambitMixedBehavGame(object):
         assert self.profile_rational.belief(self.game.infosets[0])[0] == fractions.Fraction(1,1)
         for i in self.game.infosets:
             belief = self.profile_rational.belief(i)
-            for n in xrange(0, len(i.members)):
+            for n in range(0, len(i.members)):
                 assert self.profile_rational.belief(i.members[n]) == belief[n]
             assert sum(belief) == fractions.Fraction(1,1)

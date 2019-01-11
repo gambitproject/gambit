@@ -21,8 +21,8 @@
 #
 
 import gambit.lib.libgambit
-import nash
-import gte
+from . import nash
+from . import gte
 
 __version__ = gambit.lib.libgambit.__version__
 Rational = gambit.lib.libgambit.Rational

@@ -57,7 +57,7 @@ cdef class MixedBehaviorProfile(object):
         infosets = functools.reduce(lambda x,y: x+y,
                                     [list(p.infosets) 
                                      for p in self.game.players]) 
-        matches = filter(lambda x: x.label==index, infosets)
+        matches = list(filter(lambda x: x.label==index, infosets))
         if len(matches) == 1:
             return matches[0]
         elif len(matches) > 1:
@@ -68,7 +68,7 @@ cdef class MixedBehaviorProfile(object):
                                    [list(i.actions) 
                                     for p in self.game.players
                                     for i in p.infosets])
-        matches = filter(lambda x: x.label==index, actions)
+        matches = list(filter(lambda x: x.label==index, actions))
         if len(matches) == 1:
             return matches[0]
         elif len(matches) == 0:
@@ -307,39 +307,34 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _is_defined_at(self, Infoset infoset):
         return self.profile.IsDefinedAt(infoset.infoset)
     def _getprob(self, int index):
-        return Rational(rat_str(self.profile.getitem(index)).c_str()) 
+        return rat_to_py(self.profile.getitem(index))
     def _getaction(self, Action index):
-        return Rational(rat_str(self.profile.getaction(index.action)).c_str()) 
+        return rat_to_py(self.profile.getaction(index.action))
     def _setprob(self, int index, value):
-        cdef char *s
         if not isinstance(value, (int, fractions.Fraction)):
             raise TypeError("rational precision profile requires int or Fraction probability, not %s" %
                             value.__class__.__name__)
-        t = str(value)
-        s = t
-        setitem_mbpr_int(self.profile, index, to_rational(s))
+        setitem_mbpr_int(self.profile, index, to_rational(str(value).encode('ascii')))
     def _setaction(self, Action index, value):
-        cdef char *s
         if not isinstance(value, (int, fractions.Fraction)):
             raise TypeError("rational precision profile requires int or Fraction probability, not %s" %
                             value.__class__.__name__)
-        t = str(value)
-        s = t
-        setitem_mbpr_action(self.profile, index.action, to_rational(s))
+        setitem_mbpr_action(self.profile, index.action,
+                            to_rational(str(value).encode('ascii')))
     def _payoff(self, Player player):
-        return Rational(rat_str(self.profile.GetPayoff(player.player.deref().GetNumber())).c_str())
+        return rat_to_py(self.profile.GetPayoff(player.player.deref().GetNumber()))
     def _belief(self, Node node):
-        return Rational(rat_str(self.profile.GetBeliefProb(node.node)).c_str())
+        return rat_to_py(self.profile.GetBeliefProb(node.node))
     def _infoset_prob(self, Infoset infoset):
-        return Rational(rat_str(self.profile.GetRealizProb(infoset.infoset)).c_str())
+        return rat_to_py(self.profile.GetRealizProb(infoset.infoset))
     def _infoset_payoff(self, Infoset infoset):
-        return Rational(rat_str(self.profile.GetPayoff(infoset.infoset)).c_str())
+        return rat_to_py(self.profile.GetPayoff(infoset.infoset))
     def _action_prob(self, Action action):
-        return Rational(rat_str(self.profile.GetActionProb(action.action)).c_str())
+        return rat_to_py(self.profile.GetActionProb(action.action))
     def _action_payoff(self, Action action):
-        return Rational(rat_str(self.profile.GetPayoff(action.action)).c_str())
+        return rat_to_py(self.profile.GetPayoff(action.action))
     def _regret(self, Action action):
-        return Rational(rat_str(self.profile.GetRegret(action.action)).c_str())
+        return rat_to_py(self.profile.GetRegret(action.action))
     
     def copy(self):
         cdef MixedBehaviorProfileRational behav
@@ -352,7 +347,7 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
         mixed.profile = new c_MixedStrategyProfileRational(deref(self.profile).ToMixedProfile())
         return mixed
     def liap_value(self):
-        return Rational(rat_str(self.profile.GetLiapValue()).c_str())
+        return rat_to_py(self.profile.GetLiapValue())
     def set_centroid(self):   self.profile.SetCentroid()
     def normalize(self):      self.profile.Normalize()
     def randomize(self, denom):

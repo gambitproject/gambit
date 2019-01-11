@@ -60,7 +60,7 @@ cdef class MixedStrategyProfile(object):
             strategies = functools.reduce(lambda x,y: x+y,
                                           [list(p.strategies) 
                                            for p in self.game.players])
-            matches = filter(lambda x: x.label==index, strategies)
+            matches = list(filter(lambda x: x.label==index, strategies))
             if len(matches) == 1:
                 return matches[0]
             elif len(matches) == 0:
@@ -131,30 +131,30 @@ cdef class MixedStrategyProfile(object):
 
     def payoff(self, player=None):
         if player is None:
-            return [ self._payoff(player) for player in self.game.players ]
+            return [self._payoff(player) for player in self.game.players]
         elif isinstance(player, Player):
             return self._payoff(player)
         elif isinstance(player, (int, str)):
             return self.payoff(self.game.players[player])
-        raise TypeError("profile payoffs index must be int, str, or Player, not %s" %
-                        player.__class__.__name__)
+        raise TypeError("argument should be an int, str, or Player instance; received {}"
+                        .format(player.__class__.__name__))
 
     def strategy_value(self, strategy):
         if isinstance(strategy, str):
             strategy = self._resolve_index(strategy, players=False)
         elif not isinstance(strategy, Strategy):
-            raise TypeError("profile strategy value index must be str or Strategy, not %s" %
-                            strategy.__class__.__name__)
+            raise TypeError("argument should be a str or Strategy instance; received {}"
+	                    .format(strategy.__class__.__name__))
         return self._strategy_value(strategy)
             
     def strategy_values(self, player=None):
         if player is None:
-            return [ self.strategy_values(player) for player in self.game.players ]
+            return [self.strategy_values(player) for player in self.game.players]
         elif isinstance(player, str):
             player = self.game.players[player]
         elif not isinstance(player, Player):
-            raise TypeError("strategy values index must be str or Player, not %s" %
-                            player.__class__.__name__)
+            raise TypeError("argument should be a str or Player instance; received {}"
+                            .format(player.__class__.__name__))
         return [self.strategy_value(item) for item in player.strategies]
 
     def strategy_value_deriv(self, player, strategy1, strategy2):
@@ -251,35 +251,30 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
     def _strategy_index(self, Strategy st):
         return self.profile.GetSupport().GetIndex(st.strategy)
     def _getprob(self, int index):
-        return Rational(rat_str(self.profile.getitem(index)).c_str()) 
+        return rat_to_py(self.profile.getitem(index))
     def _getprob_strategy(self, Strategy strategy):
-        return Rational(rat_str(self.profile.getitem_strategy(strategy.strategy)).c_str())
+        return rat_to_py(self.profile.getitem_strategy(strategy.strategy))
     def _setprob(self, int index, value):
-        cdef char *s
         if not isinstance(value, (int, fractions.Fraction)):
-            raise TypeError("rational precision profile requires int or Fraction probability, not %s" %
-                            value.__class__.__name__)
-        t = str(value)
-        s = t
-        setitem_mspr_int(self.profile, index, to_rational(s))
+            raise TypeError("probability should be int or Fraction instance; received {}"
+                            .format(value.__class__.__name__))
+        setitem_mspr_int(self.profile, index, to_rational(str(value).encode('ascii')))
     def _setprob_strategy(self, Strategy strategy, value):
-        cdef char *s
         if not isinstance(value, (int, fractions.Fraction)):
-            raise TypeError("rational precision profile requires int or Fraction probability, not %s" %
-                            value.__class__.__name__)
-        t = str(value)
-        s = t
-        setitem_mspr_strategy(self.profile, strategy.strategy, to_rational(s))
+            raise TypeError("probability should be int or Fraction instance; received {}"
+                            .format(value.__class__.__name__))
+        setitem_mspr_strategy(self.profile, strategy.strategy,
+                              to_rational(str(value).encode('ascii')))
     def _payoff(self, Player player):
-        return Rational(rat_str(self.profile.GetPayoff(player.player)).c_str())
+        return rat_to_py(self.profile.GetPayoff(player.player))
     def _strategy_value(self, Strategy strategy):
-        return Rational(rat_str(self.profile.GetPayoff(strategy.strategy)).c_str())
+        return rat_to_py(self.profile.GetPayoff(strategy.strategy))
     def _strategy_value_deriv(self, int pl,
                               Strategy s1, Strategy s2):
-        return Rational(rat_str(self.profile.GetPayoffDeriv(pl, s1.strategy, s2.strategy)).c_str())
+        return rat_to_py(self.profile.GetPayoffDeriv(pl, s1.strategy, s2.strategy))
 
     def liap_value(self):
-        return Rational(rat_str(self.profile.GetLiapValue()).c_str())
+        return rat_to_py(self.profile.GetLiapValue())
     def copy(self):
         cdef MixedStrategyProfileRational mixed
         mixed = MixedStrategyProfileRational()
@@ -288,7 +283,7 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
     def as_behavior(self):
         cdef MixedBehaviorProfileRational behav
         if not self.game.is_tree:
-            raise UndefinedOperationError("Mixed behavior profiles are not "\
+            raise UndefinedOperationError("Mixed behavior profiles are not "
                                           "defined for strategic games")
         behav = MixedBehaviorProfileRational()
         behav.profile = new c_MixedBehaviorProfileRational(deref(self.profile))

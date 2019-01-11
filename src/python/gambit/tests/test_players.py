@@ -26,9 +26,9 @@ class TestGambitPlayers(object):
 
     def test_game_add_duplicate_player_names(self):
         "Test to add player with preexisting name"
-        with warnings.catch_warnings(True) as w:
-                self.strategic_game.players[1].label = "Alphonse"
-                assert str(w[0].message) == "Another player with an identical label exists"
+        with warnings.catch_warnings(record=True) as w:
+            self.strategic_game.players[1].label = "Alphonse"
+            assert str(w[0].message) == "Another player with an identical label exists"
         p1 = self.strategic_game.players[0]
         assert p1.label == "Alphonse"
         p2 = self.strategic_game.players[1]
@@ -87,7 +87,7 @@ class TestGambitPlayers(object):
         self.strategic_game.players[0].strategies.add("1st new strategy")
         assert len(self.strategic_game.players[0].strategies) == 3
 
-        with warnings.catch_warnings(True) as w:
+        with warnings.catch_warnings(record=True) as w:
             self.strategic_game.players[0].strategies.add("1st new strategy")
             assert str(w[0].message) == "This player has another strategy with an identical label"
         assert len(self.strategic_game.players[0].strategies) == 4

@@ -32,9 +32,9 @@ class TestGambitOutcomes(object):
         "Test to verify duplicate outcome names"
         self.game.outcomes[0].label = "trial"
         assert self.game.outcomes[0].label == "trial"
-        with warnings.catch_warnings(True) as w:
-                self.game.outcomes[1].label = "trial"
-                assert str(w[0].message) == "Another outcome with an identical label exists"
+        with warnings.catch_warnings(record=True) as w:
+            self.game.outcomes[1].label = "trial"
+            assert str(w[0].message) == "Another outcome with an identical label exists"
 
     def test_game_outcomes_index_by_string(self):
         "Test to find an outcome by providing a string"

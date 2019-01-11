@@ -147,29 +147,29 @@ cdef class Game(object):
         if len(set(a.shape for a in arrays)) > 1:
             raise ValueError("All specified arrays must have the same shape")
         g = Game.new_table(arrays[0].shape)
-        for profile in itertools.product(*(xrange(arrays[0].shape[i])
-                                         for i in xrange(len(g.players)))):
-            for pl in xrange(len(g.players)):
+        for profile in itertools.product(*(range(arrays[0].shape[i])
+                                         for i in range(len(g.players)))):
+            for pl in range(len(g.players)):
                 g[profile][pl] = arrays[pl][profile]
         return g
         
 
     @classmethod
-    def read_game(cls, char *fn):
+    def read_game(cls, fn):
         cdef Game g
         g = cls()
         try:
-            g.game = ReadGame(fn)
+            g.game = ReadGame(fn.encode('ascii'))
         except IOError as e:
             raise IOError("Unable to read game from file '%s': %s" % 
                         (fn, e))
         return g
 
     @classmethod
-    def parse_game(cls, char *s):
+    def parse_game(cls, s):
         cdef Game g
         g = cls()
-        g.game = ParseGame(s)
+        g.game = ParseGame(s.encode('ascii'))
         return g        
 
     def __str__(self):
@@ -203,19 +203,15 @@ cdef class Game(object):
 
     property title:
         def __get__(self):
-            return self.game.deref().GetTitle().c_str()
-        def __set__(self, char *value):
-            cdef cxx_string s
-            s.assign(value)
-            self.game.deref().SetTitle(s)
+            return self.game.deref().GetTitle().decode('ascii')
+        def __set__(self, str value):
+            self.game.deref().SetTitle(value.encode('ascii'))
 
     property comment:
         def __get__(self):
-            return self.game.deref().GetComment().c_str()
-        def __set__(self, char *value):
-            cdef cxx_string s
-            s.assign(value)
-            self.game.deref().SetComment(s)
+            return self.game.deref().GetComment().decode('ascii')
+        def __set__(self, str value):
+            self.game.deref().SetComment(value.encode('ascii'))
 
     property actions:
         def __get__(self):
@@ -282,11 +278,11 @@ cdef class Game(object):
 
     property min_payoff:
         def __get__(self):
-            return Rational(rat_str(self.game.deref().GetMinPayoff(0)).c_str())
+            return rat_to_py(self.game.deref().GetMinPayoff(0))
 
     property max_payoff:
         def __get__(self):
-            return Rational(rat_str(self.game.deref().GetMaxPayoff(0)).c_str())
+            return rat_to_py(self.game.deref().GetMaxPayoff(0))
 
     def _get_contingency(self, *args):
         cdef c_PureStrategyProfile *psp
@@ -382,11 +378,9 @@ cdef class Game(object):
         return self
 
     def write(self, format='native'):
-        cdef cxx_string s
+        cdef string s
         if format == 'gte':
             return gambit.gte.write_game(self)
         else:
-            s.assign(format)
-            return WriteGame(self.game, s).c_str()
-
-
+            s = format.encode('ascii')
+            return str(WriteGame(self.game, s).c_str())

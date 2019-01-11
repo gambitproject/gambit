@@ -91,7 +91,7 @@ def sym_compute_jac(game, point):
 def printer(game, point):
     profile = game.mixed_strategy_profile(point=[math.exp(x) for x in point[:-1]])
     lam = point[-1]
-    print lam, profile
+    print(lam, profile)
 
 
 

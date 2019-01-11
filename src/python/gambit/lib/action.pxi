@@ -6,7 +6,7 @@
 # Cython wrapper for actions
 #
 # This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
+# It under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+from libcpp.string cimport string
 from gambit.lib.error import UndefinedOperationError
 
 cdef class Action:
@@ -64,10 +65,10 @@ cdef class Action:
 
     property label:
         def __get__(self):
-            return self.action.deref().GetLabel().c_str()
-        def __set__(self, char *value):
-            cdef cxx_string s
-            s.assign(value)
+            return self.action.deref().GetLabel().decode('ascii')
+        def __set__(self, value):
+            cdef string s
+            s = value.encode('ascii')
             self.action.deref().SetLabel(s)
 
     property infoset:
@@ -79,23 +80,22 @@ cdef class Action:
 
     property prob:
         def __get__(self):
-            cdef bytes py_string
-            cdef cxx_string dummy_str
+            cdef string py_string
+            cdef string dummy_str
             py_string = self.action.deref().GetInfoset().deref().GetActionProb(
-                self.action.deref().GetNumber(), dummy_str).c_str()
-            if "." in py_string:
-                return decimal.Decimal(py_string)
+                self.action.deref().GetNumber(), dummy_str)
+            if "." in py_string.decode('ascii'):
+                return decimal.Decimal(py_string.decode('ascii'))
             else:
-                return Rational(py_string)
+                return Rational(py_string.decode('ascii'))
         
         def __set__(self, value):
-            cdef cxx_string s
+            cdef string s
             if isinstance(value, (int, decimal.Decimal, fractions.Fraction)):
                 v = str(value)
-                s.assign(v)
+                s = v.encode('ascii')
                 self.action.deref().GetInfoset().deref().SetActionProb(
                     self.action.deref().GetNumber(), s)
             else:
-                raise TypeError, "numeric argument required for action " \
-                                 "probability"
+                raise TypeError("numeric argument required for action probability")
             

@@ -41,7 +41,7 @@ cdef class Strategies(Collection):
         g = Game()
         g.game = self.player.deref().GetGame()
         if g.is_tree:
-            raise TypeError, "Adding strategies is only applicable to games in strategic form"
+            raise TypeError("Adding strategies is only applicable to games in strategic form")
         cdef Strategy s
         s = Strategy()
         s.strategy = self.player.deref().NewStrategy()
@@ -121,17 +121,15 @@ cdef class Player:
 
     property label:
         def __get__(self):
-            return self.player.deref().GetLabel().c_str()
+            return self.player.deref().GetLabel().decode('ascii')
 
-        def __set__(self, char *value):
+        def __set__(self, value):
             if self.restriction is not None:
                 raise UndefinedOperationError("Changing objects in a restriction is not supported")
             # check to see if the player's name has been used elsewhere
-            if value in [ i.label for i in self.game.players ]:
+            if value in [i.label for i in self.game.players]:
                 warnings.warn("Another player with an identical label exists")
-            cdef cxx_string s
-            s.assign(value)
-            self.player.deref().SetLabel(s)
+            self.player.deref().SetLabel(value.encode('ascii'))
 
     property number:
         def __get__(self):
@@ -162,20 +160,16 @@ cdef class Player:
     property min_payoff:
         def __get__(self):
             cdef Game g
-            cdef cxx_string s
             g = Game()
             g.game = self.player.deref().GetGame()
-            s = rat_str(g.game.deref().GetMinPayoff(self.number + 1))
-            return Rational(s.c_str())
+            return rat_to_py(g.game.deref().GetMinPayoff(self.number + 1))
 
     property max_payoff:
         def __get__(self):
             cdef Game g
-            cdef cxx_string s
             g = Game()
             g.game = self.player.deref().GetGame()
-            s = rat_str(g.game.deref().GetMaxPayoff(self.number + 1))
-            return Rational(s.c_str())
+            return rat_to_py(g.game.deref().GetMaxPayoff(self.number + 1))
 
     def unrestrict(self):
         cdef Game g

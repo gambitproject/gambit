@@ -86,13 +86,13 @@ cdef class Infoset:
         if isinstance(node, Node):
             return self.infoset.deref().Precedes(((<Node>node).node))
         else:
-            raise TypeError, "Precedes takes a Node object as its input"
+            raise TypeError("argument of precedes should be a Node instance")
 
     def reveal(self, player):
         if isinstance(player, Player):
             self.infoset.deref().Reveal((<Player>player).player)
         else:
-            raise TypeError, "Reveal takes a Player object as its input"
+            raise TypeError("argument of reveal should be a Player instance")
             
     property game:
         def __get__(self):
@@ -103,11 +103,9 @@ cdef class Infoset:
         
     property label:
         def __get__(self):
-            return self.infoset.deref().GetLabel().c_str()
-        def __set__(self, char *value):
-            cdef cxx_string s
-            s.assign(value)
-            self.infoset.deref().SetLabel(s)
+            return self.infoset.deref().GetLabel().decode('ascii')
+        def __set__(self, str value):
+            self.infoset.deref().SetLabel(value.encode('ascii'))
 
     property is_chance:
         def __get__(self):
@@ -134,8 +132,9 @@ cdef class Infoset:
             return p
         def __set__(self, player):
             if not isinstance(player, Player):
-                raise TypeError, "type Player required for setting player at an infoset"
+                raise TypeError("argument should be a Player instance, received {}"
+		                .format(player.__class__.__name__))
             elif player.game != self.game:
-                raise MismatchError, "player at an infoset must belong to the same game"
+                raise MismatchError("player at an infoset must belong to the same game")
             else:
                 self.infoset.deref().SetPlayer((<Player>player).player)

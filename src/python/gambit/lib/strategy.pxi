@@ -52,15 +52,13 @@ cdef class Strategy:
 
     property label:
         def __get__(self):
-            return self.strategy.deref().GetLabel().c_str()
-        def __set__(self, char *value):
+            return self.strategy.deref().GetLabel().decode('ascii')
+        def __set__(self, value):
             if self.restriction is not None:
                 raise UndefinedOperationError("Changing objects in a restriction is not supported")
-            if value in [ i.label for i in self.player.strategies ]:
+            if value in [i.label for i in self.player.strategies]:
                 warnings.warn("This player has another strategy with an identical label")
-            cdef cxx_string s
-            s.assign(value)
-            self.strategy.deref().SetLabel(s)
+            self.strategy.deref().SetLabel(value.encode('ascii'))
 
     property player:
         def __get__(self):

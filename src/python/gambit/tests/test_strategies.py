@@ -19,9 +19,9 @@ class TestGambitStrategies(object):
     def test_game_add_duplicate_strategy_names(self):
         "Test to add strategies with preexisting names"
         self.game.players[0].strategies[0].label = "Cooperate"
-        with warnings.catch_warnings(True) as w:
-                self.game.players[0].strategies[1].label = "Cooperate"
-                assert str(w[0].message) == "This player has another strategy with an identical label"
+        with warnings.catch_warnings(record=True) as w:
+            self.game.players[0].strategies[1].label = "Cooperate"
+            assert str(w[0].message) == "This player has another strategy with an identical label"
 
     def test_game_strategies_index_by_string(self):
         "Test to find a strategy by providing a string"

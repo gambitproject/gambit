@@ -146,11 +146,9 @@ cdef class Node:
  
     property label:
         def __get__(self):
-            return self.node.deref().GetLabel().c_str()
-        def __set__(self, char *value):
-            cdef cxx_string s
-            s.assign(value)
-            self.node.deref().SetLabel(s)
+            return self.node.deref().GetLabel().decode('ascii')
+        def __set__(self, str value):
+            self.node.deref().SetLabel(value.encode('ascii'))
 
     property children:
         def __get__(self):

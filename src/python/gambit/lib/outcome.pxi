@@ -63,15 +63,13 @@ cdef class Outcome:
 
     property label:
         def __get__(self):
-            return self.outcome.deref().GetLabel().c_str()
-        def __set__(self, char *value):
+            return self.outcome.deref().GetLabel().decode('ascii')
+        def __set__(self, value):
             if self.restriction is not None:
                 raise UndefinedOperationError("Changing objects in a restriction is not supported")
-            if value in [ i.label for i in self.game.outcomes ]:
+            if value in [i.label for i in self.game.outcomes]:
                 warnings.warn("Another outcome with an identical label exists")
-            cdef cxx_string s
-            s.assign(value)
-            self.outcome.deref().SetLabel(s)
+            self.outcome.deref().SetLabel(value.encode('ascii'))
 
     def __getitem__(self, player):
         cdef bytes py_string
@@ -82,22 +80,22 @@ cdef class Outcome:
             py_string = self.outcome.deref().GetPayoffNumber(number+1).as_string().c_str()
         elif isinstance(player, int):
             py_string = self.outcome.deref().GetPayoffNumber(player+1).as_string().c_str()
-        if "." in py_string:
-            return decimal.Decimal(py_string)
+        if "." in py_string.decode('ascii'):
+            return decimal.Decimal(py_string.decode('ascii'))
         else:
-            return Rational(py_string)
+            return Rational(py_string.decode('ascii'))
 
     def __setitem__(self, pl, value):
         if self.restriction is not None:
             raise UndefinedOperationError("Changing objects in a support is not supported")
-        cdef cxx_string s
+        cdef string s
         if isinstance(value, int) or isinstance(value, decimal.Decimal) or \
            isinstance(value, fractions.Fraction):
             v = str(value)
-            s.assign(v)
+            s = v.encode('ascii')
             self.outcome.deref().SetPayoff(pl+1, s)
         else:
-            raise TypeError, "numeric argument required for payoff"
+            raise TypeError("payoff argument should be a numeric type instance")
 
     def unrestrict(self):
         cdef Outcome o
@@ -141,17 +139,17 @@ cdef class TreeGameOutcome:
                 raise NotImplementedError
 
     def __getitem__(self, player):
-        cdef bytes py_string
         if isinstance(player, Player):
-            py_string = rat_str(self.psp.deref().GetPayoff(player.number+1)).c_str()
+            return rat_to_py(self.psp.deref().GetPayoff(player.number+1))
         elif isinstance(player, str):
             number = self.game.players[player].number
-            py_string = rat_str(self.psp.deref().GetPayoff(number+1)).c_str()
+            return rat_to_py(self.psp.deref().GetPayoff(number+1))
         elif isinstance(player, int):
             if player < 0 or player >= self.c_game.deref().NumPlayers():
-                raise IndexError, "Index out of range"
-            py_string = rat_str(self.psp.deref().GetPayoff(player+1)).c_str()
-        return Rational(py_string)
+                raise IndexError("Index out of range")
+            return rat_to_py(self.psp.deref().GetPayoff(player+1))
+        raise TypeError("player index should be a Player, int or str instance; {} passed"
+                        .format(player.__class__.__name__))
 
     def __setitem__(self, pl, value):
         raise NotImplementedError("Cannot modify outcomes in a derived strategic game.")

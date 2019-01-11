@@ -1,3 +1,4 @@
+# cython: language_level=3str
 #
 # This file is part of Gambit
 # Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
@@ -20,10 +21,12 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
+
 import decimal
 import fractions
 import warnings
 from libcpp cimport bool
+from libcpp.string cimport string
 
 class Decimal(decimal.Decimal):
     pass
@@ -40,20 +43,19 @@ cdef extern from "gambit/gambit.h":
 
 __version__ = VERSION
 
-cdef extern from "string":
-    cdef cppclass cxx_string "string":
-        char *c_str()
-        cxx_string assign(char *)
 
 cdef extern from "gambit/rational.h":
     cdef cppclass c_Rational "Rational":
         pass
-    cxx_string rat_str "lexical_cast<std::string>"(c_Rational)
-    c_Rational str_rat "lexical_cast<Rational>"(cxx_string)
+    string rat_str "lexical_cast<std::string>"(c_Rational)
+    c_Rational str_rat "lexical_cast<Rational>"(string)
+
+cdef rat_to_py(c_Rational r):
+    return Rational(rat_str(r).decode('ascii'))
 
 cdef extern from "gambit/number.h":
     cdef cppclass c_Number "Number":
-        cxx_string as_string "operator const string &"()
+        string as_string "operator const string &"()
      
 cdef extern from "gambit/array.h":
     cdef cppclass Array[T]: 
@@ -115,8 +117,8 @@ cdef extern from "gambit/game.h":
         int GetId()
         c_GamePlayer GetPlayer()
 
-        cxx_string GetLabel()
-        void SetLabel(cxx_string)
+        string GetLabel()
+        void SetLabel(string)
 
     cdef cppclass c_GameActionRep "GameActionRep":
         int GetNumber()
@@ -124,8 +126,8 @@ cdef extern from "gambit/game.h":
         bint Precedes(c_GameNode)
         void DeleteAction() except +ValueError
 
-        cxx_string GetLabel()
-        void SetLabel(cxx_string)
+        string GetLabel()
+        void SetLabel(string)
 
     cdef cppclass c_GameInfosetRep "GameInfosetRep":
         int GetNumber()
@@ -133,15 +135,15 @@ cdef extern from "gambit/game.h":
         c_GamePlayer GetPlayer()
         void SetPlayer(c_GamePlayer) except +
 
-        cxx_string GetLabel()
-        void SetLabel(cxx_string)
+        string GetLabel()
+        void SetLabel(string)
 
         int NumActions()
         c_GameAction GetAction(int) except +IndexError
         c_GameAction InsertAction(c_GameAction) except +ValueError
         
-        cxx_string GetActionProb(int, cxx_string) except +IndexError
-        void SetActionProb(int, cxx_string) except +IndexError 
+        string GetActionProb(int, string) except +IndexError
+        void SetActionProb(int, string) except +IndexError 
 
         int NumMembers()
         c_GameNode GetMember(int) except +IndexError
@@ -155,8 +157,8 @@ cdef extern from "gambit/game.h":
         int GetNumber()
         int IsChance()
         
-        cxx_string GetLabel()
-        void SetLabel(cxx_string)
+        string GetLabel()
+        void SetLabel(string)
         
         int NumStrategies()
         c_GameStrategy GetStrategy(int) except +IndexError
@@ -169,18 +171,18 @@ cdef extern from "gambit/game.h":
         c_Game GetGame()
         int GetNumber()
         
-        cxx_string GetLabel()
-        void SetLabel(cxx_string)
+        string GetLabel()
+        void SetLabel(string)
      
         c_Number GetPayoffNumber "GetPayoff<Number>"(int) except +IndexError
-        void SetPayoff(int, cxx_string) except +IndexError
+        void SetPayoff(int, string) except +IndexError
 
     cdef cppclass c_GameNodeRep "GameNodeRep":
         c_Game GetGame()
         int GetNumber()
 
-        cxx_string GetLabel()
-        void SetLabel(cxx_string)
+        string GetLabel()
+        void SetLabel(string)
 
         c_GameInfoset GetInfoset()
         void SetInfoset(c_GameInfoset) except +ValueError
@@ -210,11 +212,11 @@ cdef extern from "gambit/game.h":
     cdef cppclass c_GameRep "GameRep":
         int IsTree()
         
-        cxx_string GetTitle()
-        void SetTitle(cxx_string)
+        string GetTitle()
+        void SetTitle(string)
 
-        cxx_string GetComment()
-        void SetComment(cxx_string)
+        string GetComment()
+        void SetComment(string)
 
         int NumPlayers()
         c_GamePlayer GetPlayer(int) except +IndexError
@@ -367,8 +369,8 @@ cdef extern from "gambit/stratspt.h":
 cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError
     c_Game ParseGame(char *) except +IOError
-    cxx_string WriteGame(c_Game, cxx_string) except +IOError
-    cxx_string WriteGame(c_StrategySupportProfile) except +IOError
+    string WriteGame(c_Game, string) except +IOError
+    string WriteGame(c_StrategySupportProfile) except +IOError
 
     c_Rational to_rational(char *)
     
@@ -403,7 +405,7 @@ cdef class Collection(object):
     def __getitem__(self, i):
         if isinstance(i, str):
             try:
-                return self[ [ x.label for x in self ].index(i) ]
+                return self[[x.label for x in self].index(i)]
             except ValueError:
                 raise IndexError("no object with label '%s'" % i)
         else:

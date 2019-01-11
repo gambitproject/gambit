@@ -94,7 +94,7 @@ cdef class StrategySupportProfile(Collection):
 
     def remove(self, strategy):
         if isinstance(strategy, Strategy):
-            if len(filter(lambda x: x.player == strategy.player, self)) > 1:
+            if len(list(filter(lambda x: x.player == strategy.player, self))) > 1:
                 strategies = list(self)[:]
                 strategies.remove(strategy)
                 return StrategySupportProfile(strategies, self.game)
@@ -104,10 +104,10 @@ cdef class StrategySupportProfile(Collection):
         raise TypeError("delete requires a Strategy object")
 
     def difference(self, StrategySupportProfile other):
-        return StrategySupportProfile(filter(lambda x: x not in other, self), self.game)
+        return StrategySupportProfile(list(filter(lambda x: x not in other, self)), self.game)
 
     def intersection(self, StrategySupportProfile other):
-        return StrategySupportProfile(filter(lambda x: x in other, self), self.game)
+        return StrategySupportProfile(list(filter(lambda x: x in other, self)), self.game)
 
     def is_valid(self, strategies, num_players):
         if len(set([strat.player.number for strat in strategies])) == num_players \
