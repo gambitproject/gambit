@@ -19,7 +19,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-import itertools
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
 import functools
 
 from cython.operator cimport dereference as deref
@@ -119,7 +122,7 @@ cdef class MixedStrategyProfile(object):
     def _setprob_player(self, Player player, value):
         class Filler(object): pass
         try:
-            for (s, v) in itertools.izip_longest(player.strategies, value, fillvalue=Filler()):
+            for (s, v) in zip_longest(player.strategies, value, fillvalue=Filler()):
                 if isinstance(s, Filler) or isinstance(v, Filler):
                      raise ValueError("must specify exactly one value per strategy")
                 self[s] = v

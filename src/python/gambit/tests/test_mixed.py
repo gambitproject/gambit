@@ -84,8 +84,17 @@ class TestGambitMixedStrategyGame(object):
         
         self.profile_double[self.game.players[0]][1] = 0.72
         assert self.profile_double[self.game.players[0]][1] == 0.72
+
+        self.profile_double[self.game.players[0]] = [0.72, 0.28]
+        assert self.profile_double[self.game.players[0]] == [0.72, 0.28]
+
         self.profile_rational[self.game.players[0]][1] = fractions.Fraction("2/9")
         assert self.profile_rational[self.game.players[0]][1] == fractions.Fraction("2/9")
+        self.profile_rational[self.game.players[0]] = [fractions.Fraction("2/9"),
+                                                       fractions.Fraction("7/9")]
+        assert self.profile_rational[self.game.players[0]] == [fractions.Fraction("2/9"),
+                                                               fractions.Fraction("7/9")]
+        
         
     def test_liap_values(self):
         "Test retrieving Lyapunov values"
