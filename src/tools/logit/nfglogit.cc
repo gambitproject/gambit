@@ -46,7 +46,7 @@ public:
 			   Matrix<double> &p_matrix) const;
 
 private:
-  const Game &m_game;
+  Game m_game;
 };
 
 void 
@@ -186,7 +186,7 @@ public:
   
 private:
   std::ostream &m_stream;
-  const Game &m_game;
+  Game m_game;
   bool m_fullGraph;
   double m_decimals;
   mutable List<LogitQREMixedStrategyProfile> m_profiles;
@@ -315,7 +315,7 @@ private:
   void PrintProfile(const MixedStrategyProfile<double> &, double) const;
 
   std::ostream &m_stream;
-  const Game &m_game;
+  Game m_game;
   const Vector<double> &m_frequencies;
   bool m_fullGraph;
   double m_decimals;
