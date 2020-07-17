@@ -612,14 +612,14 @@ AGG::computeP(int player, int act, int player2,int act2)
     
 }
 
-void AGG:: doProjection(int Node, AggNumber* s)
+void AGG::doProjection(int Node, AggNumber* s)
 {
   for (int i=0;i<numPlayers;i++){
     doProjection(Node,i, &(s[firstAction(i)]));
   }
 }
 
-inline void AGG:: doProjection(int Node, int i, AggNumber* s)
+void AGG::doProjection(int Node, int i, AggNumber* s)
 {
   projectedStrat[Node][i].reset();
   for (int j=0;j<actions[i];j++)if(s[j]>(AggNumber)0.0){
@@ -627,6 +627,7 @@ inline void AGG:: doProjection(int Node, int i, AggNumber* s)
               s[j]);
   }
 }
+
 AggNumber AGG::getPurePayoff(int player, int *s){
   assert(player>=0 && player < numPlayers);
   int Node = actionSets[player][s[player]]; 
