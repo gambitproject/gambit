@@ -28,7 +28,6 @@
 #include <sstream>
 #include <iomanip>
 #include <cmath>
-#include <config.h>
 
 namespace Gambit {
 

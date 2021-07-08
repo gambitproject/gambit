@@ -20,13 +20,11 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 dnl
 
-AC_INIT([gambit], [16.0.1])
+AC_INIT([gambit],[16.0.1])
 AC_CONFIG_SRCDIR([library/include/gambit/gambit.h])
-AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_MACRO_DIR([m4])
 AM_OPTIONS_WXCONFIG
-dnl AM_CONFIG_HEADER(config.h)
 
 dnl User-specified options
 dnl By default, we build the GUI
@@ -61,30 +59,11 @@ choke me
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
-AC_PROG_LIBTOOL
+LT_INIT
 AM_PROG_CC_C_O
 MINGW_AC_WIN32_NATIVE_HOST
 AM_CONDITIONAL(IS_WIN32, [test x$mingw_cv_win32_host = xyes])
 
-dnl A number of the following checks are currently commented out.
-dnl These are checks for functions and headers we do actually use,
-dnl but for which we don't have any workarounds should they be missing.
-
-dnl Checks for header files.
-dnl AC_HEADER_STDC
-dnl AC_CHECK_HEADERS(fcntl.h limits.h malloc.h sys/time.h unistd.h)
-
-dnl Checks for typedefs, structures, and compiler characteristics.
-dnl AC_C_CONST
-dnl AC_C_INLINE
-dnl AC_TYPE_PID_T
-dnl AC_TYPE_SIZE_T
-dnl AC_STRUCT_TM
-
-dnl Checks for library functions.
-dnl AC_FUNC_MEMCMP
-dnl AC_TYPE_SIGNAL
-dnl AC_CHECK_FUNCS(ftime putenv strdup strstr strtod strtol)
 AC_CHECK_FUNCS(bcmp srand48 drand48)
 
 
@@ -181,8 +160,9 @@ AC_SUBST(ENUMPOLY_PROGS)
 REZFLAGS=`echo $CXXFLAGS $WX_CXXFLAGS | sed 's/-mthreads//g' | sed 's/-g//g' | sed 's/-O. / /g' | sed 's/-I/--include-dir /g'`
 AC_SUBST(REZFLAGS)
 
-AC_OUTPUT(Makefile
+AC_CONFIG_FILES([Makefile
         contrib/Makefile
         contrib/scripts/Makefile
-	contrib/scripts/enumpoly/Makefile)
+	contrib/scripts/enumpoly/Makefile])
+AC_OUTPUT
 
