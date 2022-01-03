@@ -63,7 +63,7 @@ gbtRationalRendererRefData::SetTextColoursAndFont(wxSheet& grid,
 
 static wxSize GetFractionExtent(wxDC &p_dc, const wxString &p_value)
 {
-  p_dc.SetFont(wxFont(7, wxSWISS, wxNORMAL, wxBOLD));
+  p_dc.SetFont(wxFont(7, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   
   wxString num;
   int i = 0;
@@ -128,7 +128,7 @@ void gbtRationalRendererRefData::Draw(wxSheet& grid,
 
 static void DrawFraction(wxDC &p_dc, wxRect p_rect, const wxString &p_value)
 {
-  p_dc.SetFont(wxFont(7, wxSWISS, wxNORMAL, wxBOLD));
+  p_dc.SetFont(wxFont(7, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   
   wxString num;
   int i = 0;
@@ -147,7 +147,7 @@ static void DrawFraction(wxDC &p_dc, wxRect p_rect, const wxString &p_value)
 
   wxPoint point(p_rect.x, p_rect.y + p_rect.height/2);
 
-  p_dc.SetPen(wxPen(p_dc.GetTextForeground(), 1, wxSOLID));
+  p_dc.SetPen(wxPen(p_dc.GetTextForeground(), 1, wxPENSTYLE_SOLID));
   p_dc.DrawText(num,
 		point.x + (p_rect.width-numWidth)/2,
 		point.y - numHeight);

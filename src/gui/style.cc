@@ -35,7 +35,7 @@
 //===========================================================================
 
 gbtStyle::gbtStyle(void)
-  : m_font(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+  : m_font(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD))
 {
   SetDefaults();
 }
@@ -85,7 +85,7 @@ void gbtStyle::SetDefaults(void)
   m_branchBelowLabel = GBT_BRANCH_LABEL_PROBS;
   m_numDecimals = 4;
 
-  m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
+  m_font = wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
 
   m_chanceColor = wxColour(154, 205, 50);
   m_terminalColor = *wxBLACK;
@@ -170,7 +170,10 @@ void gbtStyle::SetFontXML(TiXmlNode *p_font)
   p_font->ToElement()->QueryIntAttribute("family", &family);
   p_font->ToElement()->QueryIntAttribute("style", &style);
   p_font->ToElement()->QueryIntAttribute("weight", &weight);
-  SetFont(wxFont(size, family, style, weight, false,
+  // As wxWidgets 3.1 deprecates the integer-based family/style/weight
+  // parameters, at present we are not able to guarantee to keep these
+  // in the style
+  SetFont(wxFont(size, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false,
 		 wxString(p_font->ToElement()->Attribute("face"),
 			  *wxConvCurrent)));
 }

@@ -282,7 +282,7 @@ gbtTreePlayerPanel::gbtTreePlayerPanel(wxWindow *p_parent,
 
   m_playerLabel = new gbtEditableText(this, -1, wxT(""),
 				      wxDefaultPosition, wxSize(125, -1));
-  m_playerLabel->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+  m_playerLabel->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   labelSizer->Add(m_playerLabel, 1, wxLEFT | wxEXPAND, 10);
   Connect(m_playerLabel->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
 	  wxCommandEventHandler(gbtTreePlayerPanel::OnEditPlayerLabel));
@@ -294,42 +294,42 @@ gbtTreePlayerPanel::gbtTreePlayerPanel(wxWindow *p_parent,
   m_payoff = new wxStaticText(this, wxID_STATIC, wxT("Payoff:"),
 			      wxDefaultPosition, wxDefaultSize,
 			      wxALIGN_CENTER | wxST_NO_AUTORESIZE);
-  m_payoff->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+  m_payoff->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
   topSizer->Add(m_payoff, 0, wxALL | wxEXPAND, 0);
   topSizer->Show(m_payoff, false);
 
   m_nodeValue = new wxStaticText(this, wxID_STATIC, wxT("Node value:"),
 				 wxDefaultPosition, wxDefaultSize,
 				 wxALIGN_CENTER | wxST_NO_AUTORESIZE);
-  m_nodeValue->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+  m_nodeValue->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
   topSizer->Add(m_nodeValue, 0, wxALL | wxEXPAND, 0);
   topSizer->Show(m_nodeValue, false);
 
   m_nodeProb = new wxStaticText(this, wxID_STATIC, wxT("Node reached:"),
 				wxDefaultPosition, wxDefaultSize,
 				wxALIGN_CENTER | wxST_NO_AUTORESIZE);
-  m_nodeProb->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+  m_nodeProb->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
   topSizer->Add(m_nodeProb, 0, wxALL | wxEXPAND, 0);
   topSizer->Show(m_nodeProb, false);
 
   m_infosetValue = new wxStaticText(this, wxID_STATIC, wxT("Infoset value:"),
 				    wxDefaultPosition, wxDefaultSize,
 				    wxALIGN_CENTER | wxST_NO_AUTORESIZE);
-  m_infosetValue->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+  m_infosetValue->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
   topSizer->Add(m_infosetValue, 0, wxALL | wxEXPAND, 0);
   topSizer->Show(m_infosetValue, false);
 
   m_infosetProb = new wxStaticText(this, wxID_STATIC, wxT("Infoset reached:"),
 				    wxDefaultPosition, wxDefaultSize,
 				    wxALIGN_CENTER | wxST_NO_AUTORESIZE);
-  m_infosetProb->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+  m_infosetProb->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
   topSizer->Add(m_infosetProb, 0, wxALL | wxEXPAND, 0);
   topSizer->Show(m_infosetProb, false);
 
   m_belief = new wxStaticText(this, wxID_STATIC, wxT("Belief:"),
 			      wxDefaultPosition, wxDefaultSize,
 			      wxALIGN_CENTER | wxST_NO_AUTORESIZE);
-  m_belief->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+  m_belief->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
   topSizer->Add(m_belief, 0, wxALL | wxEXPAND, 0);
   topSizer->Show(m_belief, false);
 
@@ -540,7 +540,7 @@ gbtTreeChancePanel::gbtTreeChancePanel(wxWindow *p_parent,
   m_playerLabel = new wxStaticText(this, wxID_STATIC, wxT("Chance"),
 				   wxDefaultPosition, wxSize(125, -1),
 				   wxALIGN_LEFT);
-  m_playerLabel->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+  m_playerLabel->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   labelSizer->Add(m_playerLabel, 1, wxLEFT | wxALIGN_CENTER, 10);
 
   topSizer->Add(labelSizer, 0, wxALL, 0);

@@ -90,11 +90,11 @@ static wxBitmap MakeOutcomeBitmap(void)
   wxMemoryDC dc;
   dc.SelectObject(bitmap);
   dc.Clear();
-  dc.SetPen(wxPen(*wxBLACK, 1, wxSOLID));
+  dc.SetPen(wxPen(*wxBLACK, 1, wxPENSTYLE_SOLID));
   // Make a gold-colored background
-  dc.SetBrush(wxBrush(wxColour(255, 215, 0), wxSOLID));
+  dc.SetBrush(wxBrush(wxColour(255, 215, 0), wxBRUSHSTYLE_SOLID));
   dc.DrawCircle(12, 12, 10);
-  dc.SetFont(wxFont(12, wxSWISS, wxNORMAL, wxBOLD));
+  dc.SetFont(wxFont(12, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   dc.SetTextForeground(wxColour(0, 192, 0));
 
   int width, height;

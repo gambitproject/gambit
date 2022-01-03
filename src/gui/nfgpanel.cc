@@ -143,7 +143,7 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
   }
 
   wxBitmapButton *setColorIcon =
-    new wxBitmapButton(this, -1, wxBitmap(color_xpm),
+    new wxBitmapButton(this, wxID_STATIC, wxBitmap(color_xpm),
 		       wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
   setColorIcon->SetToolTip(_("Change the color for this player"));
 
@@ -151,9 +151,9 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
   Connect(setColorIcon->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
 	  wxCommandEventHandler(gbtTablePlayerPanel::OnSetColor));
 
-  m_playerLabel = new gbtEditableText(this, -1, wxT(""),
+  m_playerLabel = new gbtEditableText(this, wxID_STATIC, wxT(""),
 				      wxDefaultPosition, wxSize(125, -1));
-  m_playerLabel->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+  m_playerLabel->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   labelSizer->Add(m_playerLabel, 1, wxLEFT | wxEXPAND, 5);
   Connect(m_playerLabel->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
 	  wxCommandEventHandler(gbtTablePlayerPanel::OnEditPlayerLabel));
@@ -165,7 +165,7 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
   m_payoff = new wxStaticText(this, wxID_STATIC, wxT("Payoff:"),
 			      wxDefaultPosition, wxDefaultSize,
 			      wxALIGN_CENTER | wxST_NO_AUTORESIZE);
-  m_payoff->SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+  m_payoff->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
   topSizer->Add(m_payoff, 0, wxALL | wxEXPAND, 0);
   topSizer->Show(m_payoff, false);
 

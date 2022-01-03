@@ -98,7 +98,7 @@ gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
   if (IsRowLabelCell(p_coords)) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultRowLabelAttr);
-    attr.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+    attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
     attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
     attr.SetOrientation(wxHORIZONTAL);
     attr.SetReadOnly(true);
@@ -106,7 +106,7 @@ gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
   }
   else if (IsColLabelCell(p_coords)) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultColLabelAttr);
-    attr.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+    attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
     attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
     attr.SetOrientation(wxHORIZONTAL);
     attr.SetReadOnly(true);
@@ -118,7 +118,7 @@ gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
   }
 
   wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
-  attr.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+  attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
   attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
   attr.SetReadOnly(false);

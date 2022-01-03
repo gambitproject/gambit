@@ -71,7 +71,7 @@ void gbtNodeEntry::Draw(wxDC &p_dc, Gambit::GameNode p_selection,
 
   p_dc.SetPen(*wxThePenList->FindOrCreatePen(m_color, 
 					     (p_selection == m_node) ? 6 : 3,
-					     wxSOLID));
+					     wxPENSTYLE_SOLID));
   p_dc.SetTextForeground(m_color);
 
   if (m_token == GBT_NODE_TOKEN_LINE) {
@@ -95,7 +95,7 @@ void gbtNodeEntry::Draw(wxDC &p_dc, Gambit::GameNode p_selection,
     p_dc.DrawPolygon(4, points);
   }
   else if (m_token == GBT_NODE_TOKEN_DOT) {
-    p_dc.SetBrush(wxBrush(m_color, wxSOLID));
+    p_dc.SetBrush(wxBrush(m_color, wxBRUSHSTYLE_SOLID));
     p_dc.DrawEllipse(m_x, m_y - m_size / 2, m_size, m_size); 
   }
   else {
@@ -114,7 +114,7 @@ void gbtNodeEntry::Draw(wxDC &p_dc, Gambit::GameNode p_selection,
   p_dc.DrawText(m_nodeBelowLabel,
 		m_x + (m_size - textWidth) / 2, m_y + 9);
 
-  p_dc.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+  p_dc.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   DrawOutcome(p_dc, p_noHints);
 }
 
@@ -126,7 +126,7 @@ void gbtNodeEntry::DrawIncomingBranch(wxDC &p_dc) const
   int yEnd = m_y;
 
   p_dc.SetPen(*wxThePenList->FindOrCreatePen(m_parent->m_color,
-					     4, wxSOLID)); 
+					     4, wxPENSTYLE_SOLID)); 
   p_dc.SetTextForeground(m_parent->m_color);
 
   if (m_branchStyle == GBT_BRANCH_STYLE_LINE) {
@@ -134,7 +134,7 @@ void gbtNodeEntry::DrawIncomingBranch(wxDC &p_dc) const
 
     // Draw in the highlight indicating action probabilities
     if (m_actionProb >= Gambit::Rational(0)) {
-      p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 4, wxSOLID));
+      p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 4, wxPENSTYLE_SOLID));
       p_dc.DrawLine(xStart, yStart, 
 		    xStart +
 		    (int) ((double) (xEnd - xStart) * (double) m_actionProb),
@@ -222,7 +222,7 @@ void gbtNodeEntry::DrawIncomingBranch(wxDC &p_dc) const
     
     // Draw in the highlight indicating action probabilities
     if (m_actionProb >= Gambit::Rational(0)) {
-      p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxSOLID));
+      p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxPENSTYLE_SOLID));
       p_dc.DrawLine(xStart, yStart, 
 		    xStart + 
 		    (int) ((double) m_branchLength * (double) m_actionProb),
@@ -252,7 +252,7 @@ void gbtNodeEntry::DrawIncomingBranch(wxDC &p_dc) const
 static wxPoint DrawFraction(wxDC &p_dc, wxPoint p_point,
 			    const Gambit::Rational &p_value)
 {
-  p_dc.SetFont(wxFont(7, wxSWISS, wxNORMAL, wxBOLD));
+  p_dc.SetFont(wxFont(7, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   
   int numWidth, numHeight;
   wxString num = wxString(lexical_cast<std::string>(p_value.numerator()).c_str(),
@@ -287,7 +287,7 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
     if (p_noHints)  return;
 
     int width, height;
-    p_dc.SetFont(wxFont(9, wxSWISS, wxITALIC, wxBOLD));
+    p_dc.SetFont(wxFont(9, wxFONTFAMILY_SWISS, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_BOLD));
     p_dc.SetTextForeground(*wxLIGHT_GREY);
     p_dc.GetTextExtent(wxT("(u)"), &width, &height);
     p_dc.DrawText(wxT("(u)"), point.x, point.y - height / 2);
@@ -306,7 +306,7 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
     std::string payoff = outcome->GetPayoff<std::string>(pl);
 
     if (payoff.find('/') != std::string::npos) {
-      p_dc.SetPen(wxPen(m_style->GetPlayerColor(pl), 1, wxSOLID));
+      p_dc.SetPen(wxPen(m_style->GetPlayerColor(pl), 1, wxPENSTYLE_SOLID));
       int oldX = point.x;
       point = DrawFraction(p_dc, point, outcome->GetPayoff<Gambit::Rational>(pl));
       m_payoffRect.Append(wxRect(oldX - 5, point.y - height / 2,
@@ -314,7 +314,7 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
     }
     else {
       wxString label = wxString(payoff.c_str(), *wxConvCurrent);
-      p_dc.SetFont(wxFont(9, wxSWISS, wxNORMAL, wxBOLD));
+      p_dc.SetFont(wxFont(9, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
       p_dc.GetTextExtent(label, &width, &height);
       p_dc.DrawText(label, point.x, point.y - height / 2);
       m_payoffRect.Append(wxRect(point.x - 5, point.y - height / 2,
@@ -936,9 +936,9 @@ void gbtTreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
 	    parentEntry->X() == nextX) {
 #ifdef __WXGTK__
 	  // A problem with using styled pens and user scaling on wxGTK
-	  p_dc.SetPen(wxPen(parentEntry->GetColor(), 1, wxSOLID));
+	  p_dc.SetPen(wxPen(parentEntry->GetColor(), 1, wxPENSTYLE_SOLID));
 #else
-	  p_dc.SetPen(wxPen(parentEntry->GetColor(), 1, wxDOT));
+	  p_dc.SetPen(wxPen(parentEntry->GetColor(), 1, wxPENSTYLE_DOT));
 #endif   // __WXGTK__
 	  p_dc.DrawLine(parentEntry->X(), parentEntry->Y(), 
 			parentEntry->X(), nextY);

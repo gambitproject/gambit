@@ -254,7 +254,7 @@ wxSheetCellAttr gbtRowPlayerWidget::GetAttr(const wxSheetCoords &p_coords,
 					    wxSheetAttr_Type) const 
 {
   wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
-  attr.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+  attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
   if (m_table->NumRowPlayers() > 0) {
@@ -285,11 +285,11 @@ void gbtRowPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
     wxRect rect = CellToRect(p_coords);
     if (support.IsDominated(strategy, true)) {
       p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player),
-			2, wxSOLID));
+			2, wxPENSTYLE_SOLID));
     }
     else {
       p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player),
-			1, wxSHORT_DASH));
+			1, wxPENSTYLE_SHORT_DASH));
     }
     p_dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
     p_dc.DrawLine(rect.x + rect.width, rect.y, rect.x, rect.y + rect.height);
@@ -491,7 +491,7 @@ wxSheetCellAttr gbtColPlayerWidget::GetAttr(const wxSheetCoords &p_coords,
 					    wxSheetAttr_Type) const 
 {
   wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
-  attr.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+  attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
   if (m_table->NumColPlayers() > 0) {
@@ -522,11 +522,11 @@ void gbtColPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
     wxRect rect = CellToRect(p_coords);
     if (support.IsDominated(strategy, true)) {
       p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player),
-			2, wxSOLID));
+			2, wxPENSTYLE_SOLID));
     }
     else {
       p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player),
-			1, wxSHORT_DASH));
+			1, wxPENSTYLE_SHORT_DASH));
     }
     p_dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
     p_dc.DrawLine(rect.x + rect.width, rect.y, rect.x, rect.y + rect.height);
@@ -694,7 +694,7 @@ wxSheetCellAttr gbtPayoffsWidget::GetAttr(const wxSheetCoords &p_coords,
   }
 
   wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
-  attr.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+  attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
   int player = ColToPlayer(p_coords.GetCol());
@@ -713,7 +713,7 @@ void gbtPayoffsWidget::DrawCellBorder(wxDC &p_dc,
   wxRect rect(CellToRect(p_coords));
   if (rect.width < 1 || rect.height < 1)  return;
 
-  p_dc.SetPen(wxPen(*wxBLACK, 1, wxSOLID));
+  p_dc.SetPen(wxPen(*wxBLACK, 1, wxPENSTYLE_SOLID));
 
   // Draw the dark border to the right of the last column of a contingency
   if ((p_coords.GetCol() + 1) % m_doc->GetGame()->NumPlayers() == 0) {
@@ -745,11 +745,11 @@ void gbtPayoffsWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
     wxRect rect = CellToRect(p_coords);
     if (support.IsDominated(profile->GetStrategy(player), true)) {
       p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player),
-			2, wxSOLID));
+			2, wxPENSTYLE_SOLID));
     }
     else {
       p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player),
-			1, wxSHORT_DASH));
+			1, wxPENSTYLE_SHORT_DASH));
     }
     p_dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
     p_dc.DrawLine(rect.x + rect.width, rect.y, rect.x, rect.y + rect.height);
