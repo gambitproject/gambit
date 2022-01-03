@@ -35,7 +35,7 @@
 
 gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent,
 					 gbtGameDocument *p_doc)
-  : wxDialog(p_parent, -1, _("Reveal this move to players"), 
+  : wxDialog(p_parent, wxID_ANY, _("Reveal this move to players"), 
 	     wxDefaultPosition), 
     m_doc(p_doc)
 {
@@ -50,12 +50,12 @@ gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent,
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
     if (player->GetLabel() != "") {
-      m_players.Append(new wxCheckBox(this, -1, 
+      m_players.Append(new wxCheckBox(this, wxID_ANY, 
 				      wxString(player->GetLabel().c_str(),
 					       *wxConvCurrent)));
     }
     else {
-      m_players.Append(new wxCheckBox(this, -1, 
+      m_players.Append(new wxCheckBox(this, wxID_ANY, 
 				      wxString::Format(_T("Player %d"), pl)));
     }
     m_players[pl]->SetValue(1);

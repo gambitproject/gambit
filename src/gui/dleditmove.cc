@@ -138,7 +138,7 @@ gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 
 gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
 				     Gambit::GameInfoset p_infoset)
-  : wxDialog(p_parent, -1, _("Move properties"), wxDefaultPosition), 
+  : wxDialog(p_parent, wxID_ANY, _("Move properties"), wxDefaultPosition), 
     m_infoset(p_infoset)
 {
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -160,7 +160,7 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
   wxBoxSizer *playerSizer = new wxBoxSizer(wxHORIZONTAL);
   playerSizer->Add(new wxStaticText(this, wxID_STATIC, _("Belongs to player")),
 		   0, wxALL | wxALIGN_CENTER, 5);
-  m_player = new wxChoice(this, -1);
+  m_player = new wxChoice(this, wxID_ANY);
   if (p_infoset->IsChanceInfoset()) {
     m_player->Append(_("Chance"));
     m_player->SetSelection(0);

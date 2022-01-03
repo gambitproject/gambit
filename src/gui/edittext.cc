@@ -40,7 +40,7 @@ gbtStaticTextButton::gbtStaticTextButton(wxWindow *p_parent, int p_id,
 					 const wxPoint &p_position,
 					 const wxSize &p_size,
 					 long p_style)
-  : wxStaticText(p_parent, -1, p_label, p_position, p_size, p_style)
+  : wxStaticText(p_parent, wxID_ANY, p_label, p_position, p_size, p_style)
 { }
 
 void gbtStaticTextButton::OnLeftClick(wxMouseEvent &p_event)
@@ -62,13 +62,13 @@ gbtEditableText::gbtEditableText(wxWindow *p_parent, int p_id,
 				 const wxSize &p_size)
   : wxPanel(p_parent, p_id, p_position, p_size)
 {
-  m_staticText = new gbtStaticTextButton(this, -1, p_value, 
+  m_staticText = new gbtStaticTextButton(this, wxID_ANY, p_value, 
 					 wxPoint(0, 0), p_size,
 					 wxALIGN_LEFT);
   Connect(m_staticText->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
 	  wxCommandEventHandler(gbtEditableText::OnClick));
 
-  m_textCtrl = new wxTextCtrl(this, -1, p_value, wxPoint(0, 0), 
+  m_textCtrl = new wxTextCtrl(this, wxID_ANY, p_value, wxPoint(0, 0), 
 			      p_size, wxTE_PROCESS_ENTER);
   Connect(m_textCtrl->GetId(), wxEVT_COMMAND_TEXT_ENTER,
 	  wxCommandEventHandler(gbtEditableText::OnAccept));

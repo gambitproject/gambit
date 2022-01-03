@@ -45,7 +45,7 @@ static wxStaticText *FormattedText(wxWindow *p_parent, const wxString &p_label,
 }
 
 gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
-  : wxDialog(p_parent, -1, _T("About Gambit..."), 
+  : wxDialog(p_parent, wxID_ANY, _T("About Gambit..."), 
 	     wxDefaultPosition, wxDefaultSize)
 {
   SetFont(wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));

@@ -34,7 +34,7 @@
 
 gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
 						 gbtGameDocument *p_doc)
-  : wxDialog(p_parent, -1, _("Game properties"), wxDefaultPosition), 
+  : wxDialog(p_parent, wxID_ANY, _("Game properties"), wxDefaultPosition), 
     m_doc(p_doc)
 {
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -42,7 +42,7 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
   wxBoxSizer *titleSizer = new wxBoxSizer(wxHORIZONTAL);
   titleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Title")),
 		  0, wxALL | wxALIGN_CENTER, 5);
-  m_title = new wxTextCtrl(this, -1, 
+  m_title = new wxTextCtrl(this, wxID_ANY, 
 			   wxString(m_doc->GetGame()->GetTitle().c_str(),
 				    *wxConvCurrent),
 			   wxDefaultPosition, wxSize(400, -1));
@@ -53,7 +53,7 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
   wxBoxSizer *commentSizer = new wxBoxSizer(wxHORIZONTAL);
   commentSizer->Add(new wxStaticText(this, wxID_STATIC, _("Comment")),
 		    0, wxALL | wxALIGN_CENTER, 5);
-  m_comment = new wxTextCtrl(this, -1, 
+  m_comment = new wxTextCtrl(this, wxID_ANY, 
 			     wxString(m_doc->GetGame()->GetComment().c_str(),
 				      *wxConvCurrent),
 			     wxDefaultPosition, wxSize(400, -1),

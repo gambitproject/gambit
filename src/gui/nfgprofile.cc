@@ -35,7 +35,7 @@
 
 gbtMixedProfileList::gbtMixedProfileList(wxWindow *p_parent, 
 					 gbtGameDocument *p_doc)
-  : wxSheet(p_parent, -1), gbtGameView(p_doc),
+  : wxSheet(p_parent, wxID_ANY), gbtGameView(p_doc),
     m_showProbs(1), m_showPayoff(0)
 {
   CreateGrid(0, 0);

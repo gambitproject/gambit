@@ -80,7 +80,7 @@ public:
 
 gbtProfileListPanel::gbtProfileListPanel(wxWindow *p_parent,
 					 gbtGameDocument *p_doc)
-  : wxPanel(p_parent, -1), gbtGameView(p_doc)
+  : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc)
 { 
   wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
@@ -136,9 +136,9 @@ public:
 
 gbtAnalysisNotebook::gbtAnalysisNotebook(wxWindow *p_parent,
 					 gbtGameDocument *p_doc)
-  : wxPanel(p_parent, -1), gbtGameView(p_doc)
+  : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc)
 {
-  m_choices = new wxChoice(this, -1);
+  m_choices = new wxChoice(this, wxID_ANY);
   m_choices->Append(wxT("Profiles"));
   m_choices->SetSelection(0);
 
@@ -244,7 +244,7 @@ END_EVENT_TABLE()
 //---------------------------------------------------------------------
 
 gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxFrame(p_parent, -1, _T(""), wxDefaultPosition, wxSize(800, 600)),
+  : wxFrame(p_parent, wxID_ANY, _T(""), wxDefaultPosition, wxSize(800, 600)),
     gbtGameView(p_doc)    
 {
 #if defined( __WXMSW__)
@@ -274,7 +274,7 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   wxAcceleratorTable accel(10, entries);
   SetAcceleratorTable(accel);
 
-  m_splitter = new wxSplitterWindow(this, -1);
+  m_splitter = new wxSplitterWindow(this, wxID_ANY);
   if (p_doc->IsTree()) {
     m_efgPanel = new gbtEfgPanel(m_splitter, p_doc);
     m_efgPanel->Show(true);

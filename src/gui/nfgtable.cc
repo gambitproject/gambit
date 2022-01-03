@@ -193,7 +193,7 @@ public:
 
 gbtRowPlayerWidget::gbtRowPlayerWidget(gbtTableWidget *p_parent,
 				       gbtGameDocument *p_doc)
-  : gbtTableWidgetBase(p_parent, -1), m_doc(p_doc), m_table(p_parent)
+  : gbtTableWidgetBase(p_parent, wxID_ANY), m_doc(p_doc), m_table(p_parent)
 {
   CreateGrid(m_table->NumRowContingencies(), m_table->NumRowPlayers());
   SetRowLabelWidth(1);
@@ -402,7 +402,7 @@ public:
 
 gbtColPlayerWidget::gbtColPlayerWidget(gbtTableWidget *p_parent,
 				       gbtGameDocument *p_doc)
-  : gbtTableWidgetBase(p_parent, -1), m_doc(p_doc), m_table(p_parent)
+  : gbtTableWidgetBase(p_parent, wxID_ANY), m_doc(p_doc), m_table(p_parent)
 {
   CreateGrid(m_table->NumColPlayers(), 0);
   SetRowLabelWidth(1);
@@ -616,7 +616,7 @@ END_EVENT_TABLE()
 
 gbtPayoffsWidget::gbtPayoffsWidget(gbtTableWidget *p_parent,
 				   gbtGameDocument *p_doc)
-  : gbtTableWidgetBase(p_parent, -1), m_doc(p_doc), m_table(p_parent)
+  : gbtTableWidgetBase(p_parent, wxID_ANY), m_doc(p_doc), m_table(p_parent)
 {
   CreateGrid(0, 0);
   SetRowLabelWidth(1);
@@ -824,7 +824,7 @@ gbtTableWidget::gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id,
   wxFlexGridSizer *topSizer = new wxFlexGridSizer(2, 2, 0, 0);
   topSizer->AddGrowableRow(1);
   topSizer->AddGrowableCol(1);
-  topSizer->Add(new wxPanel(this, -1));
+  topSizer->Add(new wxPanel(this, wxID_ANY));
   topSizer->Add(m_colSheet, 1, wxEXPAND, 0);
   topSizer->Add(m_rowSheet, 1, wxEXPAND, 0);
   topSizer->Add(m_payoffSheet, 1, wxEXPAND, 0);

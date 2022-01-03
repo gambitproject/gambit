@@ -60,7 +60,7 @@ BEGIN_EVENT_TABLE(gbtTablePlayerIcon, wxStaticBitmap)
 END_EVENT_TABLE()
 
 gbtTablePlayerIcon::gbtTablePlayerIcon(wxWindow *p_parent, int p_player)
-  : wxStaticBitmap(p_parent, -1, wxBitmap(person_xpm)), m_player(p_player)
+  : wxStaticBitmap(p_parent, wxID_ANY, wxBitmap(person_xpm)), m_player(p_player)
 { }
 
 void gbtTablePlayerIcon::OnLeftClick(wxMouseEvent &)
@@ -133,7 +133,7 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
 
   if (!m_doc->IsTree()) {
     wxBitmapButton *addStrategyIcon = 
-      new wxBitmapButton(this, -1, wxBitmap(newrow_xpm),
+      new wxBitmapButton(this, wxID_ANY, wxBitmap(newrow_xpm),
 			 wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
     addStrategyIcon->SetToolTip(_("Add a strategy for this player"));
 
@@ -143,7 +143,7 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
   }
 
   wxBitmapButton *setColorIcon =
-    new wxBitmapButton(this, wxID_STATIC, wxBitmap(color_xpm),
+    new wxBitmapButton(this, wxID_ANY, wxBitmap(color_xpm),
 		       wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
   setColorIcon->SetToolTip(_("Change the color for this player"));
 
@@ -151,7 +151,7 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
   Connect(setColorIcon->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
 	  wxCommandEventHandler(gbtTablePlayerPanel::OnSetColor));
 
-  m_playerLabel = new gbtEditableText(this, wxID_STATIC, wxT(""),
+  m_playerLabel = new gbtEditableText(this, wxID_ANY, wxT(""),
 				      wxDefaultPosition, wxSize(125, -1));
   m_playerLabel->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   labelSizer->Add(m_playerLabel, 1, wxLEFT | wxEXPAND, 5);
@@ -276,7 +276,7 @@ public:
 
 gbtTablePlayerToolbar::gbtTablePlayerToolbar(gbtNfgPanel *p_parent, 
 					     gbtGameDocument *p_doc)
-  : wxPanel(p_parent, -1, wxDefaultPosition, wxSize(210, -1)), 
+  : wxPanel(p_parent, wxID_ANY, wxDefaultPosition, wxSize(210, -1)), 
     gbtGameView(p_doc),
     m_nfgPanel(p_parent)
 { 
@@ -354,7 +354,7 @@ public:
 
 gbtStrategyDominanceToolbar::gbtStrategyDominanceToolbar(wxWindow *p_parent,
 							 gbtGameDocument *p_doc)
-  : wxPanel(p_parent, -1), gbtGameView(p_doc)
+  : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc)
 {
   wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
@@ -363,7 +363,7 @@ gbtStrategyDominanceToolbar::gbtStrategyDominanceToolbar(wxWindow *p_parent,
 		0, wxALL | wxALIGN_CENTER, 5);
 
   wxString domChoices[] = { wxT("strictly"), wxT("strictly or weakly") };
-  wxChoice *choice = new wxChoice(this, -1, wxDefaultPosition, wxDefaultSize,
+  wxChoice *choice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 				  2, domChoices);
   choice->SetSelection(0);
   Connect(choice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
@@ -373,13 +373,13 @@ gbtStrategyDominanceToolbar::gbtStrategyDominanceToolbar(wxWindow *p_parent,
   topSizer->Add(new wxStaticText(this, wxID_STATIC, wxT("dominated:")),
 		0, wxALL | wxALIGN_CENTER, 5);
 
-  m_topButton = new wxBitmapButton(this, -1, wxBitmap(tobegin_xpm));
+  m_topButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(tobegin_xpm));
   m_topButton->SetToolTip(_("Show all strategies"));
   Connect(m_topButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
 	  wxCommandEventHandler(gbtStrategyDominanceToolbar::OnTopLevel));
   topSizer->Add(m_topButton, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_prevButton = new wxBitmapButton(this, -1, wxBitmap(prev_xpm));
+  m_prevButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(prev_xpm));
   m_prevButton->SetToolTip(_("Previous round of elimination"));
   Connect(m_prevButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
 	  wxCommandEventHandler(gbtStrategyDominanceToolbar::OnPreviousLevel));
@@ -391,13 +391,13 @@ gbtStrategyDominanceToolbar::gbtStrategyDominanceToolbar(wxWindow *p_parent,
 			     wxALIGN_CENTER | wxST_NO_AUTORESIZE);
   topSizer->Add(m_level, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_nextButton = new wxBitmapButton(this, -1, wxBitmap(next_xpm));
+  m_nextButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(next_xpm));
   m_nextButton->SetToolTip(_("Next round of elimination"));
   Connect(m_nextButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
 	  wxCommandEventHandler(gbtStrategyDominanceToolbar::OnNextLevel));
   topSizer->Add(m_nextButton, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_allButton = new wxBitmapButton(this, -1, wxBitmap(toend_xpm));
+  m_allButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(toend_xpm));
   m_allButton->SetToolTip(_("Eliminate iteratively"));
   Connect(m_allButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
 	  wxCommandEventHandler(gbtStrategyDominanceToolbar::OnLastLevel));
@@ -460,10 +460,10 @@ BEGIN_EVENT_TABLE(gbtNfgPanel, wxPanel)
 END_EVENT_TABLE()
 
 gbtNfgPanel::gbtNfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxPanel(p_parent, -1), gbtGameView(p_doc)
+  : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc)
 {
   m_dominanceToolbar = new gbtStrategyDominanceToolbar(this, m_doc);
-  m_tableWidget = new gbtTableWidget(this, -1, m_doc);
+  m_tableWidget = new gbtTableWidget(this, wxID_ANY, m_doc);
   m_playerToolbar = new gbtTablePlayerToolbar(this, m_doc);
 
   wxBoxSizer *playerSizer = new wxBoxSizer(wxHORIZONTAL);

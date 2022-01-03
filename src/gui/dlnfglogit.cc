@@ -126,7 +126,7 @@ public:
 LogitMixedSheet::LogitMixedSheet(wxWindow *p_parent, 
 				       gbtGameDocument *p_doc,
 				       LogitMixedBranch &p_branch) 
-  : wxSheet(p_parent, -1), m_doc(p_doc), m_branch(p_branch)
+  : wxSheet(p_parent, wxID_ANY), m_doc(p_doc), m_branch(p_branch)
 {
   CreateGrid(p_branch.NumPoints(), p_doc->GetGame()->MixedProfileLength()+1);
   SetRowLabelWidth(40);
@@ -630,7 +630,7 @@ END_EVENT_TABLE()
 
 LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, 
 				   gbtGameDocument *p_doc)
-  : wxDialog(p_parent, -1, wxT("Compute quantal response equilibria"),
+  : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"),
 	     wxDefaultPosition),
     m_doc(p_doc), m_process(0), m_timer(this, GBT_ID_TIMER)
 {

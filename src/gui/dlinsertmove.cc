@@ -33,9 +33,10 @@
 
 gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent, 
 					 gbtGameDocument *p_doc)
-  : wxDialog(p_parent, -1, _("Insert Move"), wxDefaultPosition), m_doc(p_doc)
+  : wxDialog(p_parent, wxID_ANY, _("Insert Move"), wxDefaultPosition),
+    m_doc(p_doc)
 {
-  m_playerItem = new wxChoice(this, -1);
+  m_playerItem = new wxChoice(this, wxID_ANY);
   m_playerItem->Append(_("Insert move for the chance player"));
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     wxString s = _("Insert move for ");
@@ -53,7 +54,7 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent,
   Connect(m_playerItem->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
 	  wxCommandEventHandler(gbtInsertMoveDialog::OnPlayer));
 
-  m_infosetItem = new wxChoice(this, -1);
+  m_infosetItem = new wxChoice(this, wxID_ANY);
   m_infosetItem->Append(_("at a new information set"));
   Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(1);
   for (int iset = 1; iset <= player->NumInfosets(); iset++) {
@@ -87,7 +88,7 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent,
   wxBoxSizer *actionSizer = new wxBoxSizer(wxHORIZONTAL);
   actionSizer->Add(new wxStaticText(this, wxID_STATIC, _("with")),
 		   0, wxALL | wxALIGN_CENTER, 5);
-  m_actions = new wxSpinCtrl(this, -1, _T("2"),
+  m_actions = new wxSpinCtrl(this, wxID_ANY, _T("2"),
 			     wxDefaultPosition, wxDefaultSize,
 			     wxSP_ARROW_KEYS, 1, 10000, 2);
   m_actions->Enable(m_infosetItem->GetSelection() == 0);

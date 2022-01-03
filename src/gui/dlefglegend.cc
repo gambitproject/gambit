@@ -34,10 +34,10 @@
 
 gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
 			   const gbtStyle &p_options)	
-  : wxDialog(p_parent, -1, _("Labels"), wxDefaultPosition)
+  : wxDialog(p_parent, wxID_ANY, _("Labels"), wxDefaultPosition)
 {
   wxStaticBoxSizer *nodeGroup = 
-    new wxStaticBoxSizer(new wxStaticBox(this, -1, _("Node labeling")),
+    new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Node labeling")),
 			 wxVERTICAL);
 
   wxString nodeLabelList[] = { _("no label"), 
@@ -53,7 +53,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
   nodeAboveSizer->Add(new wxStaticText(this, wxID_STATIC,
 				       _("Display")),
 		      0, wxALL | wxALIGN_CENTER, 5);
-  m_nodeAbove = new wxChoice(this, -1,
+  m_nodeAbove = new wxChoice(this, wxID_ANY,
 			     wxDefaultPosition, wxDefaultSize,
 			     8, nodeLabelList);
   m_nodeAbove->SetSelection(p_options.NodeAboveLabel());
@@ -67,7 +67,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
   nodeBelowSizer->Add(new wxStaticText(this, wxID_STATIC,
 				       _("Display")),
 		      0, wxALL | wxALIGN_CENTER, 5);
-  m_nodeBelow = new wxChoice(this, -1,
+  m_nodeBelow = new wxChoice(this, wxID_ANY,
 			     wxDefaultPosition, wxDefaultSize,
 			     8, nodeLabelList);
   m_nodeBelow->SetSelection(p_options.NodeBelowLabel());
@@ -79,7 +79,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
 
 
   wxStaticBoxSizer *actionGroup = 
-    new wxStaticBoxSizer(new wxStaticBox(this, -1, _("Action labeling")),
+    new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Action labeling")),
 			 wxVERTICAL);
 
   wxString actionLabelList[] = { _("no label"), 
@@ -91,7 +91,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
   actionAboveSizer->Add(new wxStaticText(this, wxID_STATIC,
 					 _("Display")),
 		      0, wxALL | wxALIGN_CENTER, 5);
-  m_actionAbove = new wxChoice(this, -1,
+  m_actionAbove = new wxChoice(this, wxID_ANY,
 			       wxDefaultPosition, wxDefaultSize,
 			       4, actionLabelList);
   m_actionAbove->SetSelection(p_options.BranchAboveLabel());
@@ -105,7 +105,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
   actionBelowSizer->Add(new wxStaticText(this, wxID_STATIC,
 					 _("Display")),
 		      0, wxALL | wxALIGN_CENTER, 5);
-  m_actionBelow = new wxChoice(this, -1,
+  m_actionBelow = new wxChoice(this, wxID_ANY,
 			       wxDefaultPosition, wxDefaultSize,
 			       4, actionLabelList);
   m_actionBelow->SetSelection(p_options.BranchBelowLabel());

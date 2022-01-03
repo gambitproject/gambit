@@ -46,7 +46,7 @@ END_EVENT_TABLE()
 gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
 					   gbtGameDocument *p_doc,
 					   gbtAnalysisOutput *p_command)
-  : wxDialog(p_parent, -1, wxT("Computing Nash equilibria"),
+  : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"),
 	     wxDefaultPosition),
     m_doc(p_doc), 
     m_process(0), m_timer(this, GBT_ID_TIMER),

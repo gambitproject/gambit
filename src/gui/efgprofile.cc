@@ -35,7 +35,7 @@
 
 gbtBehavProfileList::gbtBehavProfileList(wxWindow *p_parent, 
 					 gbtGameDocument *p_doc)
-  : wxSheet(p_parent, -1), gbtGameView(p_doc)
+  : wxSheet(p_parent, wxID_ANY), gbtGameView(p_doc)
 {
   CreateGrid(0, 0);
   SetRowLabelWidth(40);

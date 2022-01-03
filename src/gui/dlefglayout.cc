@@ -50,7 +50,7 @@ public:
 
 gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent, 
 					 const gbtStyle &p_settings)
-  : wxPanel(p_parent, -1)
+  : wxPanel(p_parent, wxID_ANY)
 {
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -68,7 +68,7 @@ gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent,
   tokenSizer->Add(new wxStaticText(this, wxID_STATIC, 
 				    _("Indicate chance nodes with")),
 		  0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  m_chanceToken = new wxChoice(this, -1,
+  m_chanceToken = new wxChoice(this, wxID_ANY,
 			       wxDefaultPosition, wxDefaultSize,
 			       5, tokenChoices);
   m_chanceToken->SetSelection(p_settings.ChanceToken());
@@ -77,7 +77,7 @@ gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent,
   tokenSizer->Add(new wxStaticText(this, wxID_STATIC,
 				   _("Indicate player nodes with")),
 		  0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  m_playerToken = new wxChoice(this, -1,
+  m_playerToken = new wxChoice(this, wxID_ANY,
 			       wxDefaultPosition, wxDefaultSize,
 			       5, tokenChoices);
   m_playerToken->SetSelection(p_settings.PlayerToken());
@@ -86,7 +86,7 @@ gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent,
   tokenSizer->Add(new wxStaticText(this, wxID_STATIC,
 				   _("Indicate terminal nodes with")),
 		     0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  m_terminalToken = new wxChoice(this, -1,
+  m_terminalToken = new wxChoice(this, wxID_ANY,
 				 wxDefaultPosition, wxDefaultSize,
 				 5, tokenChoices);
   m_terminalToken->SetSelection(p_settings.TerminalToken());
@@ -102,13 +102,13 @@ gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent,
   wxFlexGridSizer *gridSizer = new wxFlexGridSizer(2);
   gridSizer->AddGrowableCol(1);
 		
-  gridSizer->Add(new wxStaticText(this, -1, _("Horizontal size of nodes")),
+  gridSizer->Add(new wxStaticText(this, wxID_ANY, _("Horizontal size of nodes")),
 		 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
   const int NODE_LENGTH_MIN = 5;
   const int NODE_LENGTH_MAX = 100;
 
-  m_nodeSize = new wxSpinCtrl(this, -1,
+  m_nodeSize = new wxSpinCtrl(this, wxID_ANY,
 			      wxString::Format(_T("%d"), 
 					       p_settings.NodeSize()),
 			      wxDefaultPosition, wxDefaultSize,
@@ -116,7 +116,7 @@ gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent,
 			      NODE_LENGTH_MIN, NODE_LENGTH_MAX);
   gridSizer->Add(m_nodeSize, 1, wxEXPAND | wxALL, 5);
 
-  gridSizer->Add(new wxStaticText(this, -1, 
+  gridSizer->Add(new wxStaticText(this, wxID_ANY, 
 				  _("Vertical spacing between terminal nodes")),
 		 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
@@ -124,7 +124,7 @@ gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent,
   const int Y_SPACING_MAX = 60;
   
   m_terminalSpacing =
-    new wxSpinCtrl(this, -1,
+    new wxSpinCtrl(this, wxID_ANY,
 		   wxString::Format(_T("%d"), p_settings.TerminalSpacing()),
 		   wxDefaultPosition, wxDefaultSize,
 		   wxSP_ARROW_KEYS, Y_SPACING_MIN, Y_SPACING_MAX);
@@ -156,7 +156,7 @@ public:
 
 gbtLayoutBranchesPanel::gbtLayoutBranchesPanel(wxWindow *p_parent,
 			     const gbtStyle &p_settings)
-  : wxPanel(p_parent, -1)
+  : wxPanel(p_parent, wxID_ANY)
 {
   const int BRANCH_LENGTH_MIN = 0;
   const int BRANCH_LENGTH_MAX = 100;
@@ -175,7 +175,7 @@ gbtLayoutBranchesPanel::gbtLayoutBranchesPanel(wxWindow *p_parent,
 		  0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
   wxString styleChoices[] = { _("using straight lines between nodes"),
 			      _("with a tine for branch labels") };
-  m_branchStyle = new wxChoice(this, -1,
+  m_branchStyle = new wxChoice(this, wxID_ANY,
 			       wxDefaultPosition, wxDefaultSize,
 			       2, styleChoices);
   m_branchStyle->SetSelection(p_settings.BranchStyle());
@@ -185,7 +185,7 @@ gbtLayoutBranchesPanel::gbtLayoutBranchesPanel(wxWindow *p_parent,
 		  1, wxALL | wxALIGN_CENTER_VERTICAL, 5);
   wxString labelChoices[] = { _("horizontally"), 
 			      _("rotated parallel to the branch") };
-  m_branchLabels = new wxChoice(this, -1,
+  m_branchLabels = new wxChoice(this, wxID_ANY,
 				wxDefaultPosition, wxDefaultSize,
 				2, labelChoices);
   m_branchLabels->SetSelection(p_settings.BranchLabels());
@@ -200,9 +200,9 @@ gbtLayoutBranchesPanel::gbtLayoutBranchesPanel(wxWindow *p_parent,
   wxFlexGridSizer *gridSizer = new wxFlexGridSizer(2);
   gridSizer->AddGrowableCol(1);
 
-  gridSizer->Add(new wxStaticText(this, -1, _("Length of branch fork")),
+  gridSizer->Add(new wxStaticText(this, wxID_ANY, _("Length of branch fork")),
 		 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-  m_branchLength = new wxSpinCtrl(this, -1,
+  m_branchLength = new wxSpinCtrl(this, wxID_ANY,
 				  wxString::Format(_T("%d"),
 						   p_settings.BranchLength()),
 				  wxDefaultPosition, wxDefaultSize,
@@ -210,9 +210,9 @@ gbtLayoutBranchesPanel::gbtLayoutBranchesPanel(wxWindow *p_parent,
 				  BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX);
   gridSizer->Add(m_branchLength, 1, wxALL | wxEXPAND, 5);
 
-  gridSizer->Add(new wxStaticText(this, -1, _("Length of branch tine")),
+  gridSizer->Add(new wxStaticText(this, wxID_ANY, _("Length of branch tine")),
 		 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-  m_tineLength = new wxSpinCtrl(this, -1,
+  m_tineLength = new wxSpinCtrl(this, wxID_ANY,
 				wxString::Format(_T("%d"),
 						 p_settings.TineLength()),
 				wxDefaultPosition, wxDefaultSize,
@@ -242,7 +242,7 @@ public:
 
 gbtLayoutInfosetsPanel::gbtLayoutInfosetsPanel(wxWindow *p_parent,
 			     const gbtStyle &p_settings)
-  : wxPanel(p_parent, -1)
+  : wxPanel(p_parent, wxID_ANY)
 {
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -257,7 +257,7 @@ gbtLayoutInfosetsPanel::gbtLayoutInfosetsPanel(wxWindow *p_parent,
   wxString connectChoices[] = { _("invisibly (don't draw indicators)"), 
 				_("only when on the same level"),
 				_("regardless of level") };
-  m_infosetConnect = new wxChoice(this, -1,
+  m_infosetConnect = new wxChoice(this, wxID_ANY,
 				  wxDefaultPosition, wxDefaultSize,
 				  3, connectChoices);
   m_infosetConnect->SetSelection(p_settings.InfosetConnect());
@@ -268,7 +268,7 @@ gbtLayoutInfosetsPanel::gbtLayoutInfosetsPanel(wxWindow *p_parent,
 		  0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
   wxString joinChoices[] = { _("using lines"),
 			     _("using bubbles") };
-  m_infosetJoin = new wxChoice(this, -1,
+  m_infosetJoin = new wxChoice(this, wxID_ANY,
 			       wxDefaultPosition, wxDefaultSize,
 			       2, joinChoices);
   m_infosetJoin->SetSelection(p_settings.InfosetJoin());
@@ -284,17 +284,17 @@ gbtLayoutInfosetsPanel::gbtLayoutInfosetsPanel(wxWindow *p_parent,
 
 gbtLayoutDialog::gbtLayoutDialog(wxWindow *p_parent, 
 				 const gbtStyle &p_settings)
-  : wxDialog(p_parent, -1, _("Layout options"), wxDefaultPosition),
+  : wxDialog(p_parent, wxID_ANY, _("Layout options"), wxDefaultPosition),
     m_toDefaults(false)
 {
-  m_notebook = new wxNotebook(this, -1, wxDefaultPosition, wxDefaultSize);
+  m_notebook = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
   m_notebook->AddPage(new gbtLayoutNodesPanel(m_notebook, p_settings), _("Nodes"));
   m_notebook->AddPage(new gbtLayoutBranchesPanel(m_notebook, p_settings), _("Branches"));
   m_notebook->AddPage(new gbtLayoutInfosetsPanel(m_notebook, p_settings),
 		      _("Information sets"));
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *defaultsButton = new wxButton(this, -1, _("Set to defaults"));
+  wxButton *defaultsButton = new wxButton(this, wxID_ANY, _("Set to defaults"));
   Connect(defaultsButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
 	  wxCommandEventHandler(gbtLayoutDialog::OnSetDefaults));
   buttonSizer->Add(defaultsButton, 0, wxALL, 5);

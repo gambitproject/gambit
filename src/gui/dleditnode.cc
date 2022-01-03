@@ -32,7 +32,7 @@
 //======================================================================
 
 dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
-  : wxDialog(p_parent, -1, _("Node properties"), wxDefaultPosition), 
+  : wxDialog(p_parent, wxID_ANY, _("Node properties"), wxDefaultPosition), 
     m_node(p_node)
 {
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -40,7 +40,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
   wxBoxSizer *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Node label")),
 		  0, wxALL | wxCENTER, 5);
-  m_nodeName = new wxTextCtrl(this, -1, 
+  m_nodeName = new wxTextCtrl(this, wxID_ANY, 
 			      wxString(m_node->GetLabel().c_str(), *wxConvCurrent));
   labelSizer->Add(m_nodeName, 1, wxALL | wxCENTER | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 5);
@@ -48,7 +48,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
   wxBoxSizer *infosetSizer = new wxBoxSizer(wxHORIZONTAL);
   infosetSizer->Add(new wxStaticText(this, wxID_STATIC, _("Information set")),
 		    0, wxALL | wxCENTER, 5);
-  m_infoset = new wxChoice(this, -1);
+  m_infoset = new wxChoice(this, wxID_ANY);
   if (p_node->NumChildren() > 0) {
     m_infoset->Append(_("New information set"));
     if (p_node->GetInfoset()->IsChanceInfoset()) {
@@ -110,7 +110,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
   wxBoxSizer *outcomeSizer = new wxBoxSizer(wxHORIZONTAL);
   outcomeSizer->Add(new wxStaticText(this, wxID_STATIC, _("Outcome")),
 		    0, wxALL | wxCENTER, 5);
-  m_outcome = new wxChoice(this, -1);
+  m_outcome = new wxChoice(this, wxID_ANY);
   m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
   Gambit::Game efg = p_node->GetGame();

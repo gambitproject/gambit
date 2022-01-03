@@ -44,7 +44,7 @@ static wxString s_simpdiv(wxT("by simplicial subdivision"));
 
 gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent, 
 					 gbtGameDocument *p_doc)
-  : wxDialog(p_parent, -1, wxT("Compute Nash equilibria"), wxDefaultPosition),
+  : wxDialog(p_parent, wxID_ANY, wxT("Compute Nash equilibria"), wxDefaultPosition),
     m_doc(p_doc)
 {
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
