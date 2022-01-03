@@ -840,7 +840,7 @@ template<> inline std::string PureBehaviorProfile::GetPayoff(int pl) const
 
 
 /// Reads a game in .efg or .nfg format from the input stream
-Game ReadGame(std::istream &) throw (InvalidFileException);
+Game ReadGame(std::istream &);
 
 } // end namespace gambit
 

@@ -1051,7 +1051,7 @@ Game GameXMLSavefile::GetGame(void) const
 //    ReadGame: Global visible function to read an .efg or .nfg file
 //=========================================================================
 
-Game ReadGame(std::istream &p_file) throw (InvalidFileException)
+Game ReadGame(std::istream &p_file)
 {
   std::stringstream buffer;
   buffer << p_file.rdbuf();
