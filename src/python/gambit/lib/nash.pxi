@@ -20,7 +20,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-cdef extern from "gambit/nash/enumpure.h":
+cdef extern from "solvers/enumpure/enumpure.h":
     cdef cppclass c_NashEnumPureStrategySolver "EnumPureStrategySolver":
         c_NashEnumPureStrategySolver()
         c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
@@ -65,7 +65,7 @@ cdef class EnumPureAgentSolver(object):
             ret.append(p)
         return ret
 
-cdef extern from "gambit/nash/enummixed.h":
+cdef extern from "solvers/enummixed/enummixed.h":
     cdef cppclass c_NashEnumMixedStrategySolverDouble "EnumMixedStrategySolver<double>":
         c_NashEnumMixedStrategySolverDouble()
         c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
@@ -132,7 +132,7 @@ cdef class EnumMixedLrsStrategySolver(object):
             ret.append(p)
         return ret
 
-cdef extern from "gambit/nash/lcp.h":
+cdef extern from "solvers/lcp/lcp.h":
     cdef cppclass c_NashLcpStrategySolverDouble "NashLcpStrategySolver<double>":
         c_NashLcpStrategySolverDouble(int, int)
         c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
@@ -315,7 +315,7 @@ cdef class LPStrategySolverRational(object):
         return ret
 
 
-cdef extern from "gambit/nash/simpdiv.h":
+cdef extern from "solvers/simpdiv/simpdiv.h":
     cdef cppclass c_NashSimpdivStrategySolver "NashSimpdivStrategySolver":
         c_NashSimpdivStrategySolver()
         c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
@@ -339,7 +339,7 @@ cdef class SimpdivStrategySolver(object):
             ret.append(p)
         return ret
 
-cdef extern from "gambit/nash/ipa.h":
+cdef extern from "solvers/ipa/ipa.h":
     cdef cppclass c_NashIPAStrategySolver "NashIPAStrategySolver":
         c_NashIPAStrategySolver()
         c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
@@ -362,7 +362,7 @@ cdef class IPAStrategySolver(object):
             ret.append(p)
         return ret
 
-cdef extern from "gambit/nash/gnm.h":
+cdef extern from "solvers/gnm/gnm.h":
     cdef cppclass c_NashGNMStrategySolver "NashGNMStrategySolver":
         c_NashGNMStrategySolver()
         c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError

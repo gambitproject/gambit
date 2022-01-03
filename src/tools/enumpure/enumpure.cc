@@ -27,8 +27,8 @@
 #include <fstream>
 #include <cerrno>
 
-#include "gambit/gambit.h"
-#include "gambit/nash.h"
+#include "gambit.h"
+#include "solvers/enumpure/enumpure.h"
 
 using namespace Gambit;
 using namespace Gambit::Nash;

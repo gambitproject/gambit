@@ -23,7 +23,7 @@
 #ifndef GTREE_H
 #define GTREE_H
 
-#include "gambit/gambit.h"
+#include "gambit.h"
 
 template <class T> class gTree;
 

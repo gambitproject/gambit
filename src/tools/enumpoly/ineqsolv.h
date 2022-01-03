@@ -23,7 +23,7 @@
 #ifndef INEQSOLV_H
 #define INEQSOLV_H
 
-#include "gambit/gambit.h"
+#include "gambit.h"
 
 #include "gsolver.h"
 #include "odometer.h"

@@ -23,8 +23,8 @@
 
 #include <unistd.h>
 #include <iostream>
-#include "gambit/gambit.h"
-#include "gambit/linalg/lpsolve.h"
+#include "gambit.h"
+#include "solvers/linalg/lpsolve.h"
 #include "nfglp.h"
 
 using namespace Gambit;

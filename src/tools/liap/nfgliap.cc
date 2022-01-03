@@ -25,8 +25,8 @@
 #include <iostream>
 #include <fstream>
 
-#include "gambit/gambit.h"
-#include "gambit/function.h"
+#include "gambit.h"
+#include "core/function.h"
 #include "nfgliap.h"
 
 using namespace Gambit;

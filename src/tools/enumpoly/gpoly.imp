@@ -23,7 +23,7 @@
 #include <cstdlib>     // for abs()
 #include <algorithm>   // for std::max()
 #include "gpoly.h"
-#include "gambit/gambit.h"
+#include "gambit.h"
 
 //---------------------------------------------------------------
 //                      gPoly

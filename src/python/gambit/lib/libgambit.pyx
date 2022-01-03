@@ -38,13 +38,12 @@ class Rational(fractions.Fraction):
         else:
             return r'$%s$' % self.numerator
 
-cdef extern from "gambit/gambit.h":
-    cdef char *VERSION
+cdef extern from "gambit.h":
+     # We don't wrap anything from the basic header, but it ensures
+     # it gets included in the output
+     pass
 
-__version__ = VERSION
-
-
-cdef extern from "gambit/rational.h":
+cdef extern from "core/rational.h":
     cdef cppclass c_Rational "Rational":
         pass
     string rat_str "lexical_cast<std::string>"(c_Rational)
@@ -53,24 +52,24 @@ cdef extern from "gambit/rational.h":
 cdef rat_to_py(c_Rational r):
     return Rational(rat_str(r).decode('ascii'))
 
-cdef extern from "gambit/number.h":
+cdef extern from "core/number.h":
     cdef cppclass c_Number "Number":
         string as_string "operator const string &"()
      
-cdef extern from "gambit/array.h":
+cdef extern from "core/array.h":
     cdef cppclass Array[T]: 
         T getitem "operator[]"(int) except +
         int Length()
         Array()
         Array(int)
 
-cdef extern from "gambit/list.h":
+cdef extern from "core/list.h":
     cdef cppclass c_List "List"[T]:
         T &getitem "operator[]"(int) except +
         int Length()
         void push_back(T)
 
-cdef extern from "gambit/game.h":
+cdef extern from "games/game.h":
     cdef cppclass c_GameRep "GameRep"
     cdef cppclass c_GameStrategyRep "GameStrategyRep"
     cdef cppclass c_GameActionRep "GameActionRep"
@@ -265,7 +264,7 @@ cdef extern from "gambit/game.h":
 # are required to avoid adjacent angle brackets when generating e.g.
 # lists of these classes.
 
-cdef extern from "gambit/mixed.h":
+cdef extern from "games/mixed.h":
     cdef cppclass c_MixedStrategyProfileDouble "MixedStrategyProfile<double> ":
         c_Game GetGame()
         int MixedProfileLength()
@@ -300,7 +299,7 @@ cdef extern from "gambit/mixed.h":
         c_MixedStrategyProfileRational ToFullSupport()
         c_MixedStrategyProfileRational(c_MixedStrategyProfileRational)
 
-cdef extern from "gambit/behav.h":
+cdef extern from "games/behav.h":
     cdef cppclass c_MixedBehaviorProfileDouble "MixedBehaviorProfile<double> ":
         c_Game GetGame()
         int Length()
@@ -347,7 +346,7 @@ cdef extern from "gambit/behav.h":
         c_MixedBehaviorProfileRational(c_Game)
         c_MixedBehaviorProfileRational(c_MixedBehaviorProfileRational)
 
-cdef extern from "gambit/stratspt.h":
+cdef extern from "games/stratspt.h":
     cdef cppclass c_StrategySupportProfile "StrategySupportProfile":
         c_StrategySupportProfile(c_Game)
         c_StrategySupportProfile(c_StrategySupportProfile)

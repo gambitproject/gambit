@@ -24,7 +24,7 @@
 #define VALNUMBER_H
 
 #include <wx/validate.h>
-#include "gambit/gambit.h"
+#include "gambit.h"
 
 class gbtNumberValidator : public wxValidator {
 protected:

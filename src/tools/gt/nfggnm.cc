@@ -26,8 +26,8 @@
 #include <iostream>
 #include <fstream>
 #include <cerrno>
-#include "gambit/gambit.h"
-#include "gambit/nash/gnm.h"
+#include "gambit.h"
+#include "solvers/gnm/gnm.h"
 
 using namespace Gambit;
 using namespace Gambit::Nash;

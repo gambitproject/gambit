@@ -25,7 +25,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <gambit/gambit.h>
+#include "gambit.h"
 #include "nfglogit.h"
 
 namespace Gambit {

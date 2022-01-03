@@ -26,8 +26,8 @@
 #include <cerrno>
 #include <unistd.h>
 #include <getopt.h>
-#include "gambit/gambit.h"
-#include "gambit/nash/lcp.h"
+#include "gambit.h"
+#include "solvers/lcp/lcp.h"
 
 using namespace Gambit;
 using namespace Gambit::Nash;

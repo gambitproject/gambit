@@ -23,8 +23,8 @@
 #ifndef INTERVAL_H
 #define INTERVAL_H
 
-#include "gambit/gambit.h"
-#include "gambit/rational.h"
+#include "gambit.h"
+#include "core/rational.h"
 
 /* This file provides the template class
 

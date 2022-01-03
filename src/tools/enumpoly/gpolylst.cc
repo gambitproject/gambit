@@ -21,7 +21,7 @@
 //
 
 #include "gpolylst.imp"
-#include "gambit/matrix.imp"
+#include "core/matrix.imp"
 
 //template class gPolyList<int>;
 //template gOutput &operator<<(gOutput &f, const gPolyList<int> &y);

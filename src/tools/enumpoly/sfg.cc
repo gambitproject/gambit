@@ -23,7 +23,7 @@
 #include "sfg.h"
 #include "sfstrat.h"
 #include "gnarray.imp"
-#include "gambit/gambit.h"
+#include "gambit.h"
 
 //----------------------------------------------------
 // Sfg: Constructors, Destructors, Operators

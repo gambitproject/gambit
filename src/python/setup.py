@@ -20,6 +20,8 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
+import glob
+
 from setuptools import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
@@ -31,20 +33,25 @@ from Cython.Distutils import build_ext
 #    m = sys.modules['setuptools.extension']
 #    m.Extension.__dict__ = m._Extension.__dict__
     
-import glob
-libgame = Extension("gambit.lib.libgambit",
-                    sources=[ "gambit/lib/libgambit.pyx" ] +
-                            glob.glob("gambit/lib/*.pxi") +
-                            glob.glob("../../library/src/*.cc") +
-                            glob.glob("../../library/src/*/*.cc") +
-                            glob.glob("../../library/src/*/*.c") +
-                            [ "../tools/lp/nfglp.cc",
-                              "../tools/lp/efglp.cc",
-                              "../tools/logit/path.cc",
-                              "../tools/logit/nfglogit.cc",
-                              "../tools/logit/efglogit.cc" ],
-                    language="c++",
-                    include_dirs=[ "../..", "../../library/include", ".." ] )
+libgame = Extension(
+    "gambit.lib.libgambit",
+    sources=(
+        ["gambit/lib/libgambit.pyx"] +
+        glob.glob("gambit/lib/*.pxi") +
+        glob.glob("../core/*.cc") +
+        glob.glob("../games/*.cc") +
+        glob.glob("../games/agg/*.cc") +
+        glob.glob("../solvers/*/*.c") +
+        glob.glob("../solvers/*/*.cc") +
+        ["../tools/lp/nfglp.cc",
+         "../tools/lp/efglp.cc",
+         "../tools/logit/path.cc",
+         "../tools/logit/nfglogit.cc",
+         "../tools/logit/efglogit.cc"]
+    ),
+    language="c++",
+    include_dirs=[".."]
+)
 
 setup(name="gambit",
       version="16.0.1",

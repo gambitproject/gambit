@@ -28,7 +28,7 @@
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
 
-#include "gambit/gambit.h"
+#include "gambit.h"
 #include "efgdisplay.h"
 
 //-----------------------------------------------------------------------

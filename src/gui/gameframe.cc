@@ -33,9 +33,9 @@
 #endif  // !defined(__WXMSW__) || wxUSE_POSTSCRIPT
 #include <wx/splitter.h>
 
-#include "gambit/gambit.h"
+#include "gambit.h"
 
-#include "gambit.h"      // for wxGetApp()
+#include "app.h"      // for wxGetApp()
 #include "gameframe.h"
 
 #include "menuconst.h"

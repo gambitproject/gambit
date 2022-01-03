@@ -23,7 +23,7 @@
 #ifndef BEHAVEXTEND_H
 #define BEHAVEXTEND_H
 
-#include "gambit/gambit.h"
+#include "gambit.h"
 
 class algExtendsToNash {
 public:

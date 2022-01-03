@@ -28,8 +28,8 @@
 #include <cerrno>
 #include <iomanip>
 
-#include "gambit/gambit.h"
-#include "gambit/nash/enummixed.h"
+#include "gambit.h"
+#include "solvers/enummixed/enummixed.h"
 
 using namespace Gambit;
 using namespace Gambit::Nash;

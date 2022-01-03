@@ -23,12 +23,10 @@
 #ifndef GAMEDOC_H
 #define GAMEDOC_H
 
-#include "gambit/gambit.h"
+#include "gambit.h"
 #include "style.h"
 #include "analysis.h"
 
-// This declaration essentially means the entire interface
-// can use the namespace unqualified
 using namespace Gambit;
 
 class gbtGameView;

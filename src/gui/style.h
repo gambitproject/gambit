@@ -23,8 +23,8 @@
 #ifndef STYLE_H
 #define STYLE_H
 
-#include "gambit/gambit.h"
-#include "gambit/tinyxml.h"
+#include "gambit.h"
+#include "core/tinyxml.h"
 
 const int GBT_NODE_TOKEN_LINE = 0;
 const int GBT_NODE_TOKEN_BOX = 1;

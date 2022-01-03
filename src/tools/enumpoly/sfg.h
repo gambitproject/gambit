@@ -23,7 +23,7 @@
 #ifndef SFG_H
 #define SFG_H
 
-#include "gambit/gambit.h"
+#include "gambit.h"
 #include "odometer.h"
 #include "gnarray.h"
 #include "sfstrat.h"

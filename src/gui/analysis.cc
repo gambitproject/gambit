@@ -26,8 +26,8 @@
 #endif  // WX_PRECOMP
 #include <wx/tokenzr.h>
 
-#include "gambit/gambit.h"
-#include "gambit/tinyxml.h"    // for XML parser for Load()
+#include "gambit.h"
+#include "core/tinyxml.h"    // for XML parser for Load()
 
 #include "analysis.h"
 #include "gamedoc.h"

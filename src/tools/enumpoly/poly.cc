@@ -20,7 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gambit/gambit.h"
+#include "gambit.h"
 #include "poly.imp"
 
 //template class polynomial<Gambit::Rational>;

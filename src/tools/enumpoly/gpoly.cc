@@ -22,7 +22,7 @@
 
 #include <cstring>
 #include "gpoly.imp"
-#include "gambit/gambit.h"
+#include "gambit.h"
 
 template<> double gPoly<double>::String_Coeff(double nega)
 {

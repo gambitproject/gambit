@@ -23,8 +23,8 @@
 #ifndef GPOLY_H
 #define GPOLY_H
 
-#include "gambit/gambit.h"
-#include "gambit/sqmatrix.h"
+#include "gambit.h"
+#include "core/sqmatrix.h"
 #include "monomial.h"
 #include "poly.h"
 

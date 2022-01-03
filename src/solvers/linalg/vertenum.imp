@@ -1,0 +1,184 @@
+//
+// This file is part of Gambit
+// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: src/tools/enummixed/vertenum.imp
+// Implementation of vertex enumerator
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+
+#include "vertenum.h"
+
+namespace Gambit {
+namespace linalg {
+
+template <class T>
+VertexEnumerator<T>::VertexEnumerator(const Matrix<T> &_A, const Vector<T> &_b) 
+  : mult_opt(0), depth(0), A(_A), b(_b), btemp(_b), 
+    c(_A.MinCol(),_A.MaxCol()), npivots(0), nodes(0)
+{
+  Enum();
+}
+
+template <class T>
+VertexEnumerator<T>::VertexEnumerator(LPTableau<T> &tab)
+  : mult_opt(0), depth(0), A(tab.Get_A()), b(tab.Get_b()), 
+    btemp(tab.Get_b()), c(tab.GetCost()), 
+    npivots(0), nodes(0)
+{
+  int i;
+  for(i=b.First();i<=b.Last();i++)
+    if(b[i]==(T)0)
+      mult_opt=1;
+
+  // Is this stuff right?
+  btemp = -(T)1;
+
+  Vector<T> uc(tab.MinRow(),tab.MaxRow());
+  c = (T)1;
+  uc = (T)1;
+  
+  for(i=-tab.MaxRow();i<=-tab.MinRow();i++)
+    if(tab.Member(i)) uc[-i]=(T)0;
+
+  for(i=tab.MinCol();i<=tab.MaxCol();i++)
+    if(tab.Member(i)) c[i]=(T)0;
+
+  tab.SetCost(uc,c);
+  DualSearch(tab);
+}
+
+template <class T> void VertexEnumerator<T>::Enum(void)
+{
+      // Check dimensions
+  if(A.NumRows() != b.Length() || A.NumColumns() != c.Length()) throw DimensionException();
+  //  assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
+
+      // Initialize the tableau
+  int i;
+
+  for(i=b.First();i<=b.Last();i++)
+    if(b[i]==(T)0)
+      mult_opt=1;
+
+  btemp = -(T)1;
+  c = (T)1;
+
+  LPTableau<T> tab(A,b);
+  tab.SetCost(c);
+  
+  DualSearch(tab);
+}
+  
+
+template <class T> void VertexEnumerator<T>::Report()
+{
+  int i = 1;
+  double x, estNodes;
+
+  estNodes=x=(double)1;
+  
+  while(i<=visits.Length()) {
+    if(visits[i]) {
+      x*=(double)branches[i]/(double)visits[i];
+      estNodes+=x;
+    }
+    i++;
+  }
+}
+
+template <class T> void VertexEnumerator<T>::Deeper()
+{
+  depth++;
+  if(visits.Length()<depth) {
+    visits.Append(0);
+    branches.Append(0);
+  }
+  visits[depth]+=1;
+  nodes++;
+}
+
+template <class T> void VertexEnumerator<T>::Search(LPTableau<T> &tab)
+{
+  int k;
+  Deeper();
+  Gambit::List<Array<int> > PivotList;
+  Array<int> pivot(2);
+  if(tab.IsLexMin()) {
+    List.Append(tab.GetBFS1());
+    DualList.Append(tab.DualBFS());
+  }
+  if(PivotList.Length()!=0) throw DimensionException();
+  //  assert(PivotList.Length()==0);
+  tab.ReversePivots(PivotList);  // get list of reverse pivots
+  if(PivotList.Length()) {
+    branches[depth]+=PivotList.Length();
+    LPTableau<T> tab2(tab);
+    for(k=1;k<=PivotList.Length();k++) {
+      pivot = PivotList[k];
+      npivots++;
+      tab2=tab;
+      tab2.Pivot(pivot[1],pivot[2]);
+      Search(tab2);
+    }
+  }
+  else Report();  // Report progress at terminal leafs
+  depth--;
+}
+  
+template <class T> void VertexEnumerator<T>::DualSearch(LPTableau<T> &tab)
+{
+  int i,j;
+  Deeper();
+  branches[depth]+=1;
+
+  if(mult_opt) {
+    tab.SetConst(btemp);    // install artifical constraint vector
+    LPTableau<T> tab2(tab);
+    for (i=b.First();i<=b.Last(); i++) {
+      if(b[i]==(T)0)
+	for(j=-b.Last();j<=c.Last();j++) {
+	  if(j && !tab.Member(j) && !tab.IsBlocked(j))
+	    if(tab.IsDualReversePivot(i,j)) {
+	      branches[depth]+=1;
+	      npivots++;
+	      tab2=tab;
+	      tab2.Pivot(i,j);
+	      DualSearch(tab2);
+	    }
+	}
+    }
+  }
+  tab.SetConst(b);     // install original constraint vector
+  Search(tab);         // do primal search
+  depth--;
+}
+  
+template <class T> void VertexEnumerator<T>::Vertices(Gambit::List<Vector<T> > &verts) const
+{ 
+  for(int i=1;i<=List.Length();i++) {
+    Vector<T> vert(A.NumColumns());
+    vert = (T)0;
+    for(int j=1;j<=vert.Length();j++) 
+      if(List[i].IsDefined(j)) vert[j]=-List[i](j);
+    verts.Append(vert);
+  }
+}
+
+
+} // end namespace Gambit::linalg
+} // end namespace Gambit
+

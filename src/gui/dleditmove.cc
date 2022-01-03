@@ -26,7 +26,7 @@
 #endif  // WX_PRECOMP
 #include "wx/sheet/sheet.h"
 
-#include "gambit/gambit.h"
+#include "gambit.h"
 #include "dleditmove.h"
 #include "renratio.h"
 

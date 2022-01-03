@@ -1,0 +1,275 @@
+//
+// This file is part of Gambit
+// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: src/tools/lcp/lemketab.imp
+// Implementation of Lemke tableau class
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+
+#include "lemketab.h"
+
+namespace Gambit {
+namespace linalg {
+
+//---------------------------------------------------------------------------
+//                        Lemke Tableau: member functions
+//---------------------------------------------------------------------------
+
+template <class T> LemkeTableau<T>::LemkeTableau(const Matrix<T> &A, 
+					 const Vector<T> &b)
+  : Tableau<T>(A,b)
+{ } 
+
+template <class T> LemkeTableau<T>::LemkeTableau(const Tableau<T> &tab)
+  : Tableau<T>(tab) 
+{ }
+
+template <class T> LemkeTableau<T>::~LemkeTableau(void) 
+{ }
+
+template <class T> int LemkeTableau<T>::SF_PivotIn(int inlabel)
+{ 
+  //* gout << "\n inlabel = " << inlabel;
+  int outindex = SF_ExitIndex(inlabel);
+//  gout << " outindex = " << outindex;
+  if(outindex==0) {
+  //* gout << "\nPivotIn: outindex=0, inlabel=" << inlabel;
+    return inlabel;
+  }
+  int outlabel = this->Label(outindex);
+  //* gout << " outlabel = " << outlabel;
+  //* gout << " outindex = " << outindex;
+  this->Pivot(outindex,inlabel);
+  return outlabel;
+}
+
+template <class T> int LemkeTableau<T>::PivotIn(int inlabel)
+{ 
+  //   gout << "\n inlabel = " << inlabel;
+  int outindex = ExitIndex(inlabel);
+//  gout << " outindex = " << outindex;
+  if(outindex==0) return inlabel;
+  int outlabel = this->Label(outindex);
+  if(outlabel==0)
+    throw BadPivot();
+
+  //   gout << " outlabel = " << outlabel;
+  //   gout << " outindex = " << outindex;
+  this->Pivot(outindex,inlabel);
+  return outlabel;
+}
+
+template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
+{
+  Array<int> BestSet;
+  int i, c;
+  T ratio, tempmax;
+  Vector<T> incol(this->MinRow(), this->MaxRow());
+  Vector<T> col(this->MinRow(), this->MaxRow());
+  
+  this->SolveColumn(inlabel,incol);
+  //* gout << "\nincol = " << incol;
+      // Find all row indices for which column col has positive entries.
+  for (i = this->MinRow(); i <= this->MaxRow(); i++)
+    if (incol[i] > this->eps2)
+      BestSet.Append(i);
+  if(BestSet.Length()==0) {
+    //* gout << "\nBestSet.Length() == 0, Find(0): " << Find(0);
+    return 0;
+  }
+  // Is this really needed?  
+  /*
+    if(BestSet.Length()==0  
+       && incol[Find(0)]<=eps2 && incol[Find(0)] >= (-eps2) )
+      return Find(0);
+  */
+    if(BestSet.Length() <= 0) throw BadExitIndex();
+  
+      // If there are multiple candidates, break ties by
+      // looking at ratios with other columns,
+      // eliminating nonmaximizers of 
+      // a similar ratio, until only one candidate remains.
+  c = this->MinRow()-1;
+  this->BasisVector(col);
+  // gout << "\nLength = " <<  BestSet.Length();
+  //* gout << "\n x =     " << col << "\n";
+  while (BestSet.Length() > 1)   {
+    if(c > this->MaxRow()) throw BadExitIndex();
+    if(c>=this->MinRow()) {
+      this->SolveColumn(-c,col);
+      // gout << "\n-c = " << -c << " col = " << col;
+    }
+	// Initialize tempmax.
+    tempmax = col[BestSet[1]] / incol[BestSet[1]];
+	// Find the maximum ratio. 
+    for (i = 2; i <= BestSet.Length(); i++)  {
+      ratio = col[BestSet[i]] / incol[BestSet[i]];
+//*      if (ratio > tempmax)  tempmax = ratio;
+      if (ratio < tempmax)  tempmax = ratio;
+    }
+//    if (tempmax <= (T 2)*eps1) throw BadExitIndex();
+    
+	// Remove nonmaximizers from the list of candidate columns.
+    for (i = BestSet.Length(); i >= 1; i--)  {
+      ratio = col[BestSet[i]] / incol[BestSet[i]];
+//*      if (ratio < tempmax -eps1)
+      if (ratio > tempmax +this->eps2)
+	BestSet.Remove(i);
+    }
+//    else  {
+//      if(!Member(FindColumn(c))) throw BadExitIndex();
+//      if (BestSet.Contains(c_row)) return c_row;
+//    }
+    c++;
+  }
+  if(BestSet.Length() <= 0) throw BadExitIndex();
+  return BestSet[1];
+}
+
+//
+// ExitIndex determines, for the current tableau and variable to
+// to be added to the basis, which element should leave the basis.
+// The choice is the one specified by Eaves, which is guaranteed
+// to not cycle, even if the problem is degenerate.
+//
+
+
+template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
+{
+  Array<int> BestSet;
+  int i, c;
+  T ratio, tempmax;
+  Vector<T> incol(this->MinRow(), this->MaxRow());
+  Vector<T> col(this->MinRow(), this->MaxRow());
+  
+  this->SolveColumn(inlabel,incol);
+  //   gout << "\nincol = " << incol;
+      // Find all row indices for which column col has positive entries.
+  for (i = this->MinRow(); i <= this->MaxRow(); i++)
+    if (incol[i] > this->eps2)
+      BestSet.Append(i);
+  // Is this really needed?  
+  if(BestSet.Length()==0)
+    //   gout << "\nBestSet.Length() == 0, Find(0):\n" << Find(0);
+  if(BestSet.Length()==0  
+     && incol[this->Find(0)]<=this->eps2 && incol[this->Find(0)] >= (-this->eps2) )
+    return this->Find(0);
+  if(BestSet.Length() <= 0) throw BadExitIndex();
+  
+      // If there are multiple candidates, break ties by
+      // looking at ratios with other columns, 
+      // eliminating nonmaximizers of 
+      // a similar ratio, until only one candidate remains.
+  c = this->MinRow()-1;
+  this->BasisVector(col);
+  // gout << "\nLength = " <<  BestSet.Length();
+  //   gout << "\n x =     " << col << "\n";
+  while (BestSet.Length() > 1)   {
+    // this is where ITEM 001 is failing
+    if(c > this->MaxRow()) throw BadExitIndex();
+    if(c>=this->MinRow()) {
+      this->SolveColumn(-c,col);
+      // gout << "\n-c = " << -c << " col = " << col;
+    }
+	// Initialize tempmax.
+    tempmax = col[BestSet[1]] / incol[BestSet[1]];
+	// Find the maximum ratio. 
+    for (i = 2; i <= BestSet.Length(); i++)  {
+      ratio = col[BestSet[i]] / incol[BestSet[i]];
+      if (ratio > tempmax)  tempmax = ratio;
+    }
+//    if(tempmax <= (T 2)*eps1) throw BadExitIndex();
+    
+	// Remove nonmaximizers from the list of candidate columns.
+    for (i = BestSet.Length(); i >= 1; i--)  {
+      ratio = col[BestSet[i]] / incol[BestSet[i]];
+      if (ratio < tempmax -this->eps1)
+	BestSet.Remove(i);
+    }
+//    else  {
+//      if(!Member(FindColumn(c))) throw BadExitIndex();
+//      if (BestSet.Contains(c_row)) return c_row;
+//    }
+    c++;
+  }
+  if(BestSet.Length() <= 0) throw BadExitIndex();
+  return BestSet[1];
+}
+
+//
+// Executes one step of the Lemke-Howson algorithm
+//
+
+template <class T> int LemkeTableau<T>::SF_LCPPath(int dup)
+{
+  int enter, exit;
+  enter = dup;
+/*
+  if(dup)
+    Pivot(dup,0);
+  else {
+    enter = -SF_PivotIn(dup);
+    if(enter==0) throw BadPivot();
+  }      
+*/
+      // Central loop - pivot until another CBFS is found
+  long nits = 0;
+  do  {
+    // Talk about optimism! This is dumb, but better than nothing (I guess):
+    nits++;
+    //* gout << "\nBasis:\n";
+    //* Dump(gout);
+    exit = SF_PivotIn(enter);
+    if(exit==enter) {
+      //* gout << "\nenter, exit: " << enter << " " << exit;
+      return 0;
+    }
+    enter = -exit;
+  } while (exit != 0);
+  return 1;
+}
+
+template <class T> int LemkeTableau<T>::LemkePath(int dup)
+{
+//  if (!At_CBFS())  return 0;
+  int enter, exit;
+//  if(params.plev >=2) {
+//    (*params.output) << "\nbegin path " << dup << "\n";
+//    Dump(*params.output); 
+//  }
+    //   gout << "\nbegin path " << dup << "\n";
+    //   Dump(gout); 
+  enter = dup;
+  if (this->Member(dup))
+    enter = -dup;
+      // Central loop - pivot until another CBFS is found
+  do  { 
+    exit = PivotIn(enter);
+//    if(params.plev >=2) 
+//      Dump(*params.output);
+//      Dump(gout);
+
+    enter = -exit;
+  } while ((exit != dup) && (exit != -dup));
+      // Quit when at a CBFS.
+//  if(params.plev >=2 ) (*params.output) << "\nend of path " << dup;
+  //   gout << "\nend of path " << dup;
+  return 1;
+}
+
+}  // end namespace Gambit::linalg
+}  // end namespace Gambit

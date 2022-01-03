@@ -29,7 +29,7 @@
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
 
-#include "gambit/gambit.h"
+#include "gambit.h"
 #include "valnumber.h"
 
 BEGIN_EVENT_TABLE(gbtNumberValidator, wxValidator)

@@ -24,7 +24,7 @@
 #define PREPOLY_H
 
 #include <cmath>
-#include "gambit/gambit.h"
+#include "gambit.h"
 
 /*
    The classes in this file are prior to the notion of a 

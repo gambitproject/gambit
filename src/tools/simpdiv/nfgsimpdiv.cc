@@ -27,9 +27,9 @@
 #include <cerrno>
 #include <iomanip>
 #include <fstream>
-#include "gambit/gambit.h"
-#include "gambit/nash.h"
-#include "gambit/nash/simpdiv.h"
+#include "gambit.h"
+#include "games/nash.h"
+#include "solvers/simpdiv/simpdiv.h"
 
 using namespace Gambit;
 using namespace Gambit::Nash;

@@ -24,7 +24,7 @@ import gambit.lib.libgambit
 from . import nash
 from . import gte
 
-__version__ = gambit.lib.libgambit.__version__
+__version__ = "16.0.1"
 Rational = gambit.lib.libgambit.Rational
 Decimal = gambit.lib.libgambit.Decimal
 

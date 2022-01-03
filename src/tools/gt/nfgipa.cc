@@ -25,8 +25,8 @@
 #include <iostream>
 #include <fstream>
 #include <cerrno>
-#include "gambit/gambit.h"
-#include "gambit/nash/ipa.h"
+#include "gambit.h"
+#include "solvers/ipa/ipa.h"
 
 using namespace Gambit;
 using namespace Gambit::Nash;

@@ -26,7 +26,7 @@
 #ifndef NFGHS_H
 #define NFGHS_H
 
-#include "gambit/gambit.h"
+#include "gambit.h"
 
 using namespace Gambit;
 

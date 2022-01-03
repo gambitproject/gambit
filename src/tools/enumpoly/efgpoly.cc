@@ -22,7 +22,7 @@
 
 #include <iostream>
 #include <iomanip>
-#include "gambit/gambit.h"
+#include "gambit.h"
 
 using namespace Gambit;
 

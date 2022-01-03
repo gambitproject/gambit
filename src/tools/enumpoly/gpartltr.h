@@ -23,7 +23,7 @@
 #ifndef GPARTLTR_H
 #define GPARTLTR_H
 
-#include "gambit/gambit.h"
+#include "gambit.h"
 #include "gtree.h"
 #include "rectangl.h"
 #include "gpoly.h"

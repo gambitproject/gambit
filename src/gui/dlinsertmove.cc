@@ -24,7 +24,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
-#include "gambit/gambit.h"
+#include "gambit.h"
 #include "dlinsertmove.h"
 
 //=========================================================================

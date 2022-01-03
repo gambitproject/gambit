@@ -21,7 +21,7 @@ dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 dnl
 
 AC_INIT([gambit],[16.0.1])
-AC_CONFIG_SRCDIR([library/include/gambit/gambit.h])
+AC_CONFIG_SRCDIR([src/gambit.h])
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_MACRO_DIR([m4])
 AM_OPTIONS_WXCONFIG

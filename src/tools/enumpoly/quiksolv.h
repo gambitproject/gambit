@@ -23,7 +23,7 @@
 #ifndef QUIKSOLV_H
 #define QUIKSOLV_H
 
-#include "gambit/gambit.h"
+#include "gambit.h"
 #include "odometer.h"
 #include "gsolver.h"
 #include "rectangl.h"

@@ -29,8 +29,8 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include "gambit/gambit.h"
-#include "gambit/nash.h"
+#include "gambit.h"
+#include "games/nash.h"
 
 using namespace std;
 using namespace Gambit;
