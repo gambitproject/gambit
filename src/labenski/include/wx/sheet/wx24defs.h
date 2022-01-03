@@ -63,8 +63,10 @@
 
 #endif
 
+/*
 #ifndef wxSL_INVERSE // !wxCHECK_VERSION(2,5,3) // FIXME temp fix until 2.5.4
     #define wxDefaultDateTimeFormat wxT("%c")
 #endif // wxInvalidDateTime
+*/
 
 #endif //__WX_WX24DEFS_H__
