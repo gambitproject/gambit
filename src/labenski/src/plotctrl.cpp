@@ -32,6 +32,7 @@
 #include "wx/splitter.h"
 #include "wx/math.h"
 #include "wx/image.h"
+#include "wx/crt.h"      // for wxPrintf()
 
 #include "wx/plotctrl/plotctrl.h"
 
@@ -832,7 +833,7 @@ void wxPlotCtrl::DrawPlotCtrl( wxDC *dc )
 #endif // DRAW_BORDERS
 }
 
-void wxPlotCtrl::SetPlotWinMouseCursor(int cursorid)
+void wxPlotCtrl::SetPlotWinMouseCursor(wxStockCursor cursorid)
 {
     if (cursorid == m_mouse_cursorid) return;
     m_mouse_cursorid = cursorid;
@@ -2417,7 +2418,7 @@ void wxPlotCtrl::SetAreaMouseMarker( wxPlotMarker_Type type )
     DrawMouseMarker( &dc, m_area_mouse_marker, m_area->m_mouseRect );
 }
 
-void wxPlotCtrl::SetAreaMouseCursor(int cursorid)
+void wxPlotCtrl::SetAreaMouseCursor(wxStockCursor cursorid)
 {
     if (cursorid == m_area_mouse_cursorid)
         return;

@@ -56,10 +56,10 @@ enum wxSheetSplitMode_Type
 //#define wxSP_BORDER           wxSP_3DBORDER
 //#define wxSP_3D               (wxSP_3DBORDER | wxSP_3DSASH)
 
-class WXDLLIMPEXP_SHEET wxSheetSplitter : public wxWindow
+class WXDLLIMPEXP_SHEET wxSheetSplitter : public wxNavigationEnabled<wxWindow>
 {
 public:    
-    wxSheetSplitter() : wxWindow() { Init(); }
+    wxSheetSplitter() : wxNavigationEnabled<wxWindow>() { Init(); }
     wxSheetSplitter(wxWindow *parent, wxWindowID id,
                     const wxPoint& pos = wxDefaultPosition,
                     const wxSize& size = wxDefaultSize,
@@ -182,7 +182,6 @@ protected:
 private:
     void Init();
 
-    WX_DECLARE_CONTROL_CONTAINER();
     DECLARE_DYNAMIC_CLASS(wxSheetSplitter)
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxSheetSplitter)

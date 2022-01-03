@@ -42,6 +42,8 @@
 #include "wx/clipbrd.h"
 #include "wx/renderer.h"
 
+#include "wx/crt.h"   // for wxPrintf()
+
 // Required for wxIs... functions
 #include <cctype>
 

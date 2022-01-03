@@ -25,6 +25,8 @@
 #include "wx/arrimpl.cpp"
 WX_DEFINE_OBJARRAY(wxArrayOptionValue);
 
+#include "wx/crt.h"    // for wxPrintf(), wxSscanf()
+
 //----------------------------------------------------------------------------
 // Global wxString utilities
 //----------------------------------------------------------------------------
