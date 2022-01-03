@@ -73,7 +73,7 @@ if test x$with_gui = xtrue; then
   dnl------------------------
 
   dnl check for wx-config
-  AM_PATH_WXCONFIG(2.8.12, WXCONFIG=1)
+  AM_PATH_WXCONFIG(3.1.0, WXCONFIG=1)
   if test "$WXCONFIG" != 1; then
       AC_MSG_WARN([
             Did not find a new enough version of wxWidgets; disabling build of
@@ -81,7 +81,7 @@ if test x$with_gui = xtrue; then
             please check that wx-config is in path, the directory
             where wxWidgets libraries are installed (returned by
             'wx-config --libs' command) is in LD_LIBRARY_PATH or
-            equivalent variable and wxWidgets is version 2.8.12 or above.
+            equivalent variable and wxWidgets is version 3.1.0 or above.
       ])
       GUI_PROGS=""
       AM_CONDITIONAL(WITH_GUI, test x0 = x1)

@@ -22,17 +22,17 @@
 #include "wx/plotctrl/plotfunc.h"
 #include "wx/wxthings/range.h"
 
-class WXDLLEXPORT wxDC;
-class WXDLLEXPORT wxNotifyEvent;
-class WXDLLEXPORT wxPaintEvent;
-class WXDLLEXPORT wxMouseEvent;
-class WXDLLEXPORT wxKeyEvent;
-class WXDLLEXPORT wxTimer;
-class WXDLLEXPORT wxTimerEvent;
-class WXDLLEXPORT wxEraseEvent;
-class WXDLLEXPORT wxScrollBar;
-class WXDLLEXPORT wxBitmap;
-class WXDLLEXPORT wxTextCtrl;
+class /* WXDLLEXPORT */ wxDC;
+class /* WXDLLEXPORT */ wxNotifyEvent;
+class /* WXDLLEXPORT */ wxPaintEvent;
+class /* WXDLLEXPORT */ wxMouseEvent;
+class /* WXDLLEXPORT */ wxKeyEvent;
+class /* WXDLLEXPORT */ wxTimer;
+class /* WXDLLEXPORT */ wxTimerEvent;
+class /* WXDLLEXPORT */ wxEraseEvent;
+class /* WXDLLEXPORT */ wxScrollBar;
+class /* WXDLLEXPORT */ wxBitmap;
+class /* WXDLLEXPORT */ wxTextCtrl;
 
 class WXDLLIMPEXP_THINGS wxRangeIntSelection;
 class WXDLLIMPEXP_THINGS wxRangeDoubleSelection;

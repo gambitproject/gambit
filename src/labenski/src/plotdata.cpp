@@ -545,7 +545,7 @@ void wxPlotData::CalcBoundingRect()
 
     bool xordered = true, valid = false;
 
-    register int i, count = M_PLOTDATA->m_count;
+    int i, count = M_PLOTDATA->m_count;
 
     for (i=0; i<count; i++)
     {
@@ -1203,7 +1203,7 @@ int wxPlotData::GetIndexFromX( double x, wxPlotData::Index_Type type ) const
 
     if ( !M_PLOTDATA->m_Xordered )
     {
-        register int i;
+        int i;
         int index = 0, index_lower = 0, index_higher = 0;
         double closest = fabs( x - *x_data++ );
 
@@ -1276,7 +1276,7 @@ int wxPlotData::GetIndexFromY( double y, wxPlotData::Index_Type type ) const
 {
     wxCHECK_MSG( Ok(), 0, wxT("Invalid wxPlotData") );
 
-    register int i;
+    int i;
     int index = 0, index_lower = 0, index_higher = 0;
     int count = M_PLOTDATA->m_count;
     double *y_data = M_PLOTDATA->m_Ydata;
@@ -1524,7 +1524,7 @@ void wxPlotData::OffsetX( double offset, int start_index, int end_index )
     if (end_index < 0) end_index = count - 1;
     CHECK_START_END_INDEX_RET(start_index, end_index, count);
 
-    register int i;
+    int i;
     double *x = M_PLOTDATA->m_Xdata + start_index;
 
     for (i = start_index; i <= end_index; i++)
@@ -1540,7 +1540,7 @@ void wxPlotData::OffsetY( double offset, int start_index, int end_index )
     if (end_index < 0) end_index = count - 1;
     CHECK_START_END_INDEX_RET(start_index, end_index, count);
 
-    register int i;
+    int i;
     double *y = M_PLOTDATA->m_Ydata + start_index;
 
     for (i = start_index; i <= end_index; i++)
@@ -1556,7 +1556,7 @@ void wxPlotData::OffsetXY( double offsetX, double offsetY, int start_index, int 
     if (end_index < 0) end_index = count - 1;
     CHECK_START_END_INDEX_RET(start_index, end_index, count);
 
-    register int i;
+    int i;
     double *x = M_PLOTDATA->m_Xdata + start_index;
     double *y = M_PLOTDATA->m_Ydata + start_index;
 
@@ -1576,7 +1576,7 @@ void wxPlotData::ScaleX( double scale, double offset, int start_index, int end_i
     if (end_index < 0) end_index = count - 1;
     CHECK_START_END_INDEX_RET(start_index, end_index, count);
 
-    register int i;
+    int i;
     double *x = M_PLOTDATA->m_Xdata + start_index;
 
     for (i = start_index; i <= end_index; i++)
@@ -1595,7 +1595,7 @@ void wxPlotData::ScaleY( double scale, double offset, int start_index, int end_i
     if (end_index < 0) end_index = count - 1;
     CHECK_START_END_INDEX_RET(start_index, end_index, count);
 
-    register int i;
+    int i;
     double *y = M_PLOTDATA->m_Ydata + start_index;
 
     for (i = start_index; i <= end_index; i++)
@@ -1636,7 +1636,7 @@ void wxPlotData::PowerX( double power, int start_index, int end_index )
     if (end_index < 0) end_index = count - 1;
     CHECK_START_END_INDEX_RET(start_index, end_index, count);
 
-    register int i;
+    int i;
     double *x = M_PLOTDATA->m_Xdata + start_index;
     for (i = start_index; i <= end_index; i++, x++)
         *x = pow(*x, power);
@@ -1651,7 +1651,7 @@ void wxPlotData::PowerY( double power, int start_index, int end_index )
     if (end_index < 0) end_index = count - 1;
     CHECK_START_END_INDEX_RET(start_index, end_index, count);
 
-    register int i;
+    int i;
     double *y = M_PLOTDATA->m_Ydata + start_index;
     for (i = start_index; i <= end_index; i++, y++)
         *y = pow(*y, power);
@@ -1666,7 +1666,7 @@ void wxPlotData::PowerXY( double powerX, double powerY, int start_index, int end
     if (end_index < 0) end_index = count - 1;
     CHECK_START_END_INDEX_RET(start_index, end_index, count);
 
-    register int i;
+    int i;
     double *x = M_PLOTDATA->m_Xdata + start_index;
     double *y = M_PLOTDATA->m_Ydata + start_index;
     for (i = start_index; i <= end_index; i++, x++, y++)
@@ -2175,7 +2175,7 @@ double wxPlotData::Variance(int start_index, int count) const
     double sum = 0;
     double ave = GetAverage(start_index, count);
 
-    for (register int i=0; i<count; i++)
+    for (int i=0; i<count; i++)
     {
         sum += ((*y_data) - ave)*((*y_data) - ave);
         y_data++;
@@ -2236,7 +2236,7 @@ double wxPlotData::Deviation( const wxPlotData &data, int min, int max ) const
 
     int index1=0, index2=0;
     int points = 0;
-    register int i;
+    int i;
 
     for (i=min; i<max; i++)
     {
@@ -2307,7 +2307,7 @@ double wxPlotData::CrossCorrelation( const wxPlotData &other, int runave, int mi
     double other_x_max = other.GetBoundingRect().GetRight();
     int other_count = other.GetCount();
 
-    register int i;
+    int i;
 
     double *x_data = M_PLOTDATA->m_Xdata;
     double *y_data = M_PLOTDATA->m_Ydata;

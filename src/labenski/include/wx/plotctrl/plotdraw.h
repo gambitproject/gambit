@@ -20,7 +20,7 @@
 #include "wx/plotctrl/plotfunc.h"
 #include "wx/wxthings/range.h"
 
-class WXDLLEXPORT wxDC;
+class /* WXDLLEXPORT */ wxDC;
 
 class WXDLLIMPEXP_THINGS wxRangeIntSelection;
 class WXDLLIMPEXP_THINGS wxRangeDoubleSelection;

@@ -422,7 +422,7 @@ void wxCustomButton::Paint( wxDC &dc )
         foreColour = wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT);
     }
 
-    wxBrush brush(backColour, wxSOLID);
+    wxBrush brush(backColour, wxBRUSHSTYLE_SOLID);
     dc.SetBackground(brush);
     dc.SetBrush(brush);
     dc.SetPen(*wxTRANSPARENT_PEN);

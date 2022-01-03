@@ -586,7 +586,7 @@ bool wxSheet::Create( wxWindow *parent, wxWindowID id,
     attr->SetEditor(GetDefaultEditorForType(wxSHEET_VALUE_STRING));
 
     wxFont labelFont = wxWindow::GetFont();
-    labelFont.SetWeight( wxBOLD );
+    labelFont.SetWeight( wxFONTWEIGHT_BOLD );
     
     // default row label attr
     attr = &GetSheetRefData()->m_defaultRowLabelAttr;
@@ -3493,12 +3493,15 @@ void wxSheet::DrawSplitterButton(wxDC &dc, const wxRect& rect)
     //dc.SetBrush(*wxBLACK_BRUSH);
     //dc.DrawRectangle(rect);
     
-    wxPen highlight(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNHIGHLIGHT), 1, wxSOLID);
-    wxPen shadow(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNSHADOW), 1, wxSOLID);
-    wxPen darkShadow(wxSystemSettings::GetColour(wxSYS_COLOUR_3DDKSHADOW), 1, wxSOLID);
+    wxPen highlight(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNHIGHLIGHT),
+		    1, wxPENSTYLE_SOLID);
+    wxPen shadow(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNSHADOW),
+		 1, wxPENSTYLE_SOLID);
+    wxPen darkShadow(wxSystemSettings::GetColour(wxSYS_COLOUR_3DDKSHADOW),
+		     1, wxPENSTYLE_SOLID);
 
     dc.SetPen(shadow);
-    dc.SetBrush(wxBrush(GetBackgroundColour(), wxSOLID));
+    dc.SetBrush(wxBrush(GetBackgroundColour(), wxBRUSHSTYLE_SOLID));
     dc.DrawRectangle(rect);
     dc.DrawLine(rect.GetRight()-1, rect.y+2, rect.GetRight()-1, rect.GetBottom()-1);
     dc.DrawLine(rect.x+2, rect.GetBottom()-1, rect.GetRight(), rect.GetBottom()-1);
@@ -3518,7 +3521,7 @@ void wxSheet::PaintSheetWindow( wxDC& dc, const wxRegion& WXUNUSED(reg) )
     // since we trap EVT_ERASE_BACKGROUND
     if (m_vertScrollBar->IsShown() && m_horizScrollBar->IsShown())
     {
-        dc.SetBrush(wxBrush(GetBackgroundColour(), wxSOLID));
+        dc.SetBrush(wxBrush(GetBackgroundColour(), wxBRUSHSTYLE_SOLID));
         dc.SetPen(*wxTRANSPARENT_PEN);
         wxSize clientSize = GetClientSize();
         int top  = m_vertScrollBar->GetRect().GetBottom();
@@ -3782,7 +3785,7 @@ void wxSheet::DrawGridSpace( wxDC& dc )
         int left, top;
         CalcUnscrolledPosition( 0, 0, &left, &top );
 
-        dc.SetBrush( wxBrush(GetAttrBackgroundColour(wxSheetCoords(0,0), wxSHEET_AttrDefault), wxSOLID) );
+        dc.SetBrush( wxBrush(GetAttrBackgroundColour(wxSheetCoords(0,0), wxSHEET_AttrDefault), wxBRUSHSTYLE_SOLID) );
         dc.SetPen( *wxTRANSPARENT_PEN );
 
         if ( right > rightCol )
@@ -3860,7 +3863,7 @@ void wxSheet::DrawCursorCellHighlight( wxDC& dc, const wxSheetCellAttr& attr )
         // will ensure the cell is always visible.
         dc.SetPen(wxPen(IsCellSelected(coords) ? GetSelectionForeground() :
                                                  GetCursorCellHighlightColour(), 
-                          penWidth, wxSOLID));
+                          penWidth, wxPENSTYLE_SOLID));
         dc.SetBrush(*wxTRANSPARENT_BRUSH);
         dc.DrawRectangle(rect);
     }
@@ -3893,7 +3896,7 @@ void wxSheet::DrawCellBorder( wxDC& dc, const wxSheetCoords& coords )
     if ( wxRectIsEmpty(rect) )  // !IsCellShown
         return;
 
-    dc.SetPen( wxPen(GetGridLineColour(), 1, wxSOLID) );
+    dc.SetPen( wxPen(GetGridLineColour(), 1, wxPENSTYLE_SOLID) );
     if ((GridLinesEnabled() & wxVERTICAL) != 0)
     {
         // right hand border
@@ -4004,7 +4007,7 @@ void wxSheet::DrawAllGridLines( wxDC& dc, const wxRegion & WXUNUSED(reg) )
             dc.SetDeviceClippingRegion( clippedcells );
     }
     
-    dc.SetPen( wxPen(GetGridLineColour(), 1, wxSOLID) );
+    dc.SetPen( wxPen(GetGridLineColour(), 1, wxPENSTYLE_SOLID) );
 
     if ((GridLinesEnabled() & wxHORIZONTAL) != 0)
     {
@@ -4054,7 +4057,7 @@ void wxSheet::DrawRowLabels( wxDC& dc, const wxArrayInt& rows )
 */
     
     // Now draw the dividing lines
-    dc.SetPen( wxPen(GetLabelOutlineColour(), 1, wxSOLID) );
+    dc.SetPen( wxPen(GetLabelOutlineColour(), 1, wxPENSTYLE_SOLID) );
     int top;
     CalcUnscrolledPosition(0, 0, NULL, &top);
     //int top = GetRowTop(rows[0]);
@@ -4092,7 +4095,7 @@ void wxSheet::DrawColLabels( wxDC& dc, const wxArrayInt& cols )
 */
     
     // Now draw the dividing lines
-    dc.SetPen( wxPen(GetLabelOutlineColour(), 1, wxSOLID) );
+    dc.SetPen( wxPen(GetLabelOutlineColour(), 1, wxPENSTYLE_SOLID) );
     int left; 
     CalcUnscrolledPosition(0, 0, &left, NULL);
     //int left = GetColLeft(cols[0]); 
@@ -4126,7 +4129,7 @@ void wxSheet::DrawCornerLabel( wxDC& dc )
     wxRendererNative::Get().DrawHeaderButton( this, dc, rect, 0 );
 #else          
     // Now draw the dividing lines
-    dc.SetPen( wxPen(GetLabelOutlineColour(), 1, wxSOLID) );
+    dc.SetPen( wxPen(GetLabelOutlineColour(), 1, wxPENSTYLE_SOLID) );
     dc.DrawLine(0, 0, size.x, 0);                   // top
     dc.DrawLine(0, size.y-1, size.x, size.y-1);     // bottom
     dc.DrawLine(0, 0, 0, size.y-1);                 // left
@@ -4157,7 +4160,7 @@ void wxSheet::DrawRowColResizingMarker( int newDragPos )
     
     if (GridLinesEnabled())
     {
-        dc.SetPen(wxPen(GetGridLineColour(), 3, wxSOLID));
+        dc.SetPen(wxPen(GetGridLineColour(), 3, wxPENSTYLE_SOLID));
     
         // Draw the anchor marker so you know what row/col you're resizing
         if (resizingRow)

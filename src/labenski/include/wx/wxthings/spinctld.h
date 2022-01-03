@@ -42,7 +42,7 @@ Differences to wxSpinCtrl:
 #include "wx/spinctrl.h" // for EVT_SPINCTRL
 #include "wx/wxthings/thingdef.h"
 
-class WXDLLEXPORT wxTextCtrl;
+class /* WXDLLEXPORT */ wxTextCtrl;
 class WXDLLIMPEXP_THINGS wxSpinCtrlDblTextCtrl;
 
 enum

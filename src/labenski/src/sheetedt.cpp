@@ -334,7 +334,7 @@ void wxSheetCellEditorRefData::PaintBackground(wxSheet& , const wxSheetCellAttr&
 {
     // erase the background because we might not fill the cell
     dc.SetPen(*wxTRANSPARENT_PEN);
-    dc.SetBrush(wxBrush(attr.GetBackgroundColour(), wxSOLID));   
+    dc.SetBrush(wxBrush(attr.GetBackgroundColour(), wxBRUSHSTYLE_SOLID));   
     
     // only draw exactly what's needed
 /*  FIXME - the checkbox in GTK doesn't draw it's full background 

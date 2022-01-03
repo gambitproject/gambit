@@ -18,10 +18,10 @@
 
 class WXDLLIMPEXP_SHEET wxSheetCellEditorRefData;
 
-class WXDLLEXPORT wxWindow;
-class WXDLLEXPORT wxCheckBox;
-class WXDLLEXPORT wxComboBox;
-class WXDLLEXPORT wxTextCtrl;
+class /* WXDLLEXPORT */ wxWindow;
+class /* WXDLLEXPORT */ wxCheckBox;
+class /* WXDLLEXPORT */ wxComboBox;
+class /* WXDLLEXPORT */ wxTextCtrl;
 class WXDLLEXPORT wxSpinCtrl;
 
 // ----------------------------------------------------------------------------

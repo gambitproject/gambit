@@ -159,12 +159,12 @@ void wxSheetCellRendererRefData::Draw( wxSheet& sheet,
     if ( sheet.IsEnabled() )
     {
         if ( isSelected )
-            dc.SetBrush( wxBrush(sheet.GetSelectionBackground(), wxSOLID) );
+            dc.SetBrush( wxBrush(sheet.GetSelectionBackground(), wxBRUSHSTYLE_SOLID) );
         else
-            dc.SetBrush( wxBrush(attr.GetBackgroundColour(), wxSOLID) );
+            dc.SetBrush( wxBrush(attr.GetBackgroundColour(), wxBRUSHSTYLE_SOLID) );
     }
     else
-        dc.SetBrush(wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE), wxSOLID));
+        dc.SetBrush(wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE), wxBRUSHSTYLE_SOLID));
 
     dc.SetPen( *wxTRANSPARENT_PEN );
     dc.DrawRectangle(rect);
@@ -857,7 +857,7 @@ void wxSheetCellBoolRendererRefData::Draw(wxSheet& sheet,
     }
 
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    dc.SetPen(wxPen(attr.GetForegroundColour(), 1, wxSOLID));
+    dc.SetPen(wxPen(attr.GetForegroundColour(), 1, wxPENSTYLE_SOLID));
     dc.DrawRectangle(rectBorder);
 }
 

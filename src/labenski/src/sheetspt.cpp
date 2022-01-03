@@ -666,7 +666,7 @@ void wxSheetSplitter::DrawSashTracker(int x, int y)
 
     wxScreenDC screenDC;
     screenDC.SetLogicalFunction(wxINVERT);
-    screenDC.SetPen(wxPen(GetForegroundColour(), sash_size, wxSOLID));
+    screenDC.SetPen(wxPen(GetForegroundColour(), sash_size, wxPENSTYLE_SOLID));
     screenDC.SetBrush(*wxTRANSPARENT_BRUSH);
     screenDC.DrawLine(x1, y1, x2, y2);
     screenDC.SetLogicalFunction(wxCOPY);

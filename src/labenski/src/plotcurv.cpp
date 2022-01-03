@@ -101,9 +101,9 @@ void InitPlotCurveDefaultPens()
     if (!s_init_default_pens)
     {
         s_init_default_pens = true;
-        wxPlotCurveRefData::sm_defaultPens.Add(wxGenericPen( wxGenericColour(  0, 0,   0), 1, wxSOLID ));
-        wxPlotCurveRefData::sm_defaultPens.Add(wxGenericPen( wxGenericColour(  0, 0, 255), 1, wxSOLID ));
-        wxPlotCurveRefData::sm_defaultPens.Add(wxGenericPen( wxGenericColour(255, 0,   0), 1, wxSOLID ));
+        wxPlotCurveRefData::sm_defaultPens.Add(wxGenericPen( wxGenericColour(  0, 0,   0), 1, wxPENSTYLE_SOLID ));
+        wxPlotCurveRefData::sm_defaultPens.Add(wxGenericPen( wxGenericColour(  0, 0, 255), 1, wxPENSTYLE_SOLID ));
+        wxPlotCurveRefData::sm_defaultPens.Add(wxGenericPen( wxGenericColour(255, 0,   0), 1, wxPENSTYLE_SOLID ));
     }
 }
 
