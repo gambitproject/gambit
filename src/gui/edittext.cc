@@ -75,7 +75,7 @@ gbtEditableText::gbtEditableText(wxWindow *p_parent, int p_id,
   
   wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(m_staticText, 1, wxALIGN_CENTER, 0);
-  topSizer->Add(m_textCtrl, 1, wxEXPAND | wxALIGN_CENTER, 0);
+  topSizer->Add(m_textCtrl, 1, wxEXPAND, 0);
   topSizer->Show(m_textCtrl, false);
   SetSizer(topSizer);
   Layout();
