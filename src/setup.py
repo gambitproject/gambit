@@ -21,23 +21,14 @@
 #
 
 import glob
-
 import setuptools
-from distutils.extension import Extension
-from Cython.Distutils import build_ext
+import Cython.Build
 
-# setuptools DWIM monkey-patch madness
-# http:#mail.python.org/pipermail/distutils-sig/2007-September/thread.html#8204
-#import sys
-#if 'setuptools.extension' in sys.modules:
-#    m = sys.modules['setuptools.extension']
-#    m.Extension.__dict__ = m._Extension.__dict__
-    
-libgame = Extension(
+
+cppgambit = setuptools.Extension(
     "pygambit.lib.libgambit",
     sources=(
         ["pygambit/lib/libgambit.pyx"] +
-        glob.glob("pygambit/lib/*.pxi") +
         glob.glob("core/*.cc") +
         glob.glob("games/*.cc") +
         glob.glob("games/agg/*.cc") +
@@ -53,6 +44,7 @@ libgame = Extension(
     include_dirs=["."]
 )
 
+
 setuptools.setup(
     name="pygambit",
     version="16.0.1",
@@ -62,6 +54,5 @@ setuptools.setup(
     url="http://www.gambit-project.org",
     python_requires=">=3.7",
     packages=['pygambit', 'pygambit.games', 'pygambit.lib'],
-    ext_modules=[libgame],
-    cmdclass = {'build_ext': build_ext}
+    ext_modules=Cython.Build.cythonize(cppgambit)
 )
