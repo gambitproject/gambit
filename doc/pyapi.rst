@@ -1,6 +1,6 @@
 .. _python-api:
 
-.. py:module:: gambit
+.. py:module:: pygambit
 
 
 Python interface to Gambit library
@@ -11,6 +11,12 @@ games.  This section documents this interface, which is under active
 development.  Refer to the :ref:`instructions for building the Python
 interface <build-python>` to compile and install the Python extension.
 
+.. note::
+
+   Prior to 16.0.1, the Python extension was named `gambit`.
+   It is now known as `pygambit` to avoid a name clash with an
+   unrelated (and abandoned) project on PyPI.
+   
 
 A tutorial introduction
 -----------------------
@@ -21,9 +27,9 @@ Building an extensive game
 The function :py:func:`Game.new_tree` creates a new, trivial
 extensive game, with no players, and only a root node::
 
-  In [1]: import gambit
+  In [1]: import pygambit
 
-  In [2]: g = gambit.Game.new_tree()
+  In [2]: g = pygambit.Game.new_tree()
 
   In [3]: len(g.players)
   Out[3]: 0
@@ -79,7 +85,7 @@ Games in strategic form are created using :py:func:`Game.new_table`, which
 takes a list of integers specifying the number of strategies for
 each player::
 
-  In [1]: g = gambit.Game.new_table([2,2])
+  In [1]: g = pygambit.Game.new_table([2,2])
 
   In [2]: g.title = "A prisoner's dilemma game"
 
@@ -152,9 +158,9 @@ Alternatively, one can use :py:func:`Game.from_arrays` in conjunction
 with numpy arrays to construct a game with desired payoff matrices
 more directly, as in::
 
-  In [20]: m = numpy.array([ [ 8, 2 ], [ 10, 5 ] ], dtype=gambit.Rational)
+  In [20]: m = numpy.array([ [ 8, 2 ], [ 10, 5 ] ], dtype=pygambit.Rational)
  
-  In [21]: g = gambit.Game.from_arrays(m, numpy.transpose(m))
+  In [21]: g = pygambit.Game.from_arrays(m, numpy.transpose(m))
 
 
 Reading a game from a file
@@ -163,7 +169,7 @@ Reading a game from a file
 Games stored in existing Gambit savefiles in either the .efg or .nfg
 formats can be loaded using :py:func:`Game.read_game`::
 
-  In [1]: g = gambit.Game.read_game("e02.nfg")
+  In [1]: g = pygambit.Game.read_game("e02.nfg")
 
   In [2]: g
   Out[2]: 
@@ -193,7 +199,7 @@ The property :py:attr:`Game.contingencies` is the collection of
 all such combinations.  Iterating over the contingencies collection
 visits each pure strategy profile possible in the game::
 
-   In [1]: g = gambit.Game.read_game("e02.nfg")
+   In [1]: g = pygambit.Game.read_game("e02.nfg")
 
    In [2]: list(g.contingencies)
    Out[2]: [[0, 0], [0, 1], [1, 0], [1, 1], [2, 0], [2, 1]]
@@ -232,7 +238,7 @@ Mixed strategy profiles can be indexed in three ways.
 
 This sample illustrates the three methods::
 
-  In [1]: g = gambit.Game.read_game("e02.nfg")
+  In [1]: g = pygambit.Game.read_game("e02.nfg")
 
   In [2]: p = g.mixed_strategy_profile()
 
@@ -269,7 +275,7 @@ profiles, except that indexing by a player returns a list of lists of
 probabilities, containing one list for each information set controlled
 by that player::
 
-  In [1]: g = gambit.Game.read_game("e02.efg")
+  In [1]: g = pygambit.Game.read_game("e02.efg")
 
   In [2]: p = g.mixed_behavior_profile()
 
@@ -297,7 +303,7 @@ Computing Nash equilibria
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Interfaces to algorithms for computing Nash equilibria are collected
-in the module :py:mod:`gambit.nash`.  There are two choices for
+in the module :py:mod:`pygambit.nash`.  There are two choices for
 calling these algorithms: directly within Python, or via the
 corresponding Gambit :ref:`command-line tool <command-line>`.
 
@@ -344,19 +350,19 @@ the first player plays his first strategty with probability one,
 and the second player plays a mixed strategy, placing at least
 probability one-half on her first strategy::
 
-  In [1]: g = gambit.Game.read_game("e02.nfg")
+  In [1]: g = pygambit.Game.read_game("e02.nfg")
 
-  In [2]: solver = gambit.nash.ExternalEnumPureSolver()
+  In [2]: solver = pygambit.nash.ExternalEnumPureSolver()
 
   In [3]: solver.solve(g)
   Out[3]: [[1.0, 0.0, 0.0, 1.0, 0.0]]
 
-  In [4]: solver = gambit.nash.ExternalEnumMixedSolver()
+  In [4]: solver = pygambit.nash.ExternalEnumMixedSolver()
 
   In [5]: solver.solve(g)
   Out[5]: [[1.0, 0.0, 0.0, 1.0, 0.0], [1.0, 0.0, 0.0, 0.5, 0.5]]
 
-  In [6]: solver = gambit.nash.ExternalLogitSolver()
+  In [6]: solver = pygambit.nash.ExternalLogitSolver()
 
   In [7]: solver.solve(g)
   Out[7]: [[0.99999999997881173, 0.0, 2.1188267679986399e-11, 0.50001141005647654, 0.49998858994352352]]
@@ -373,12 +379,12 @@ player randomizes with equal probability on both strategies.
 When a game's representation is in extensive form, these solvers
 default to using the version of the algorithm which operates on the
 extensive game, where available, and returns a list of
-:py:class:`gambit.MixedBehaviorProfile` objects.  This can be overridden when
+:py:class:`pygambit.MixedBehaviorProfile` objects.  This can be overridden when
 calling :py:meth:`solve` via the ``use_strategic`` parameter::
 
-  In [1]: g = gambit.Game.read_game("e02.efg")
+  In [1]: g = pygambit.Game.read_game("e02.efg")
 
-  In [2]: solver = gambit.nash.ExternalLCPSolver()
+  In [2]: solver = pygambit.nash.ExternalLCPSolver()
 
   In [3]: solver.solve(g)
   Out[3]: [<NashProfile for 'Selten (IJGT, 75), Figure 2': [1.0, 0.0, 0.5, 0.5, 0.5, 0.5]>]
@@ -418,18 +424,18 @@ algorithm.
 
 For example, taking again the game :file:`e02.efg` as an example::
 
-  In [1]: g = gambit.Game.read_game("e02.efg")
+  In [1]: g = pygambit.Game.read_game("e02.efg")
 
-  In [2]: gambit.nash.lcp_solve(g)
+  In [2]: pygambit.nash.lcp_solve(g)
   Out[2]: [[1.0, 0.0, 0.5, 0.5, 0.5, 0.5]]
 
-  In [3]: gambit.nash.lcp_solve(g, rational=True)
+  In [3]: pygambit.nash.lcp_solve(g, rational=True)
   Out[3]: [[Fraction(1, 1), Fraction(0, 1), Fraction(1, 2), Fraction(1, 2), Fraction(1, 2), Fraction(1, 2)]]
 
-  In [4]: gambit.nash.lcp_solve(g, use_strategic=True)
+  In [4]: pygambit.nash.lcp_solve(g, use_strategic=True)
   Out[4]: [[1.0, 0.0, 0.0, 1.0, 0.0]]
 
-  In [5]: gambit.nash.lcp_solve(g, use_strategic=True, rational=True)
+  In [5]: pygambit.nash.lcp_solve(g, use_strategic=True, rational=True)
   Out[5]: [[Fraction(1, 1), Fraction(0, 1), Fraction(0, 1), Fraction(1, 1), Fraction(0, 1)]]
 
 
@@ -498,13 +504,13 @@ Game representations
 
       Returns a list-like object representing the actions defined in the game.
 
-      :raises gambit.UndefinedOperationError: if the game does not have a tree representation.
+      :raises pygambit.UndefinedOperationError: if the game does not have a tree representation.
 
    .. py:attribute:: infosets
 
       Returns a list-like object representing the information sets defined in the game.
       
-      :raises gambit.UndefinedOperationError: if the game does not have a tree representation.
+      :raises pygambit.UndefinedOperationError: if the game does not have a tree representation.
 
    .. py:attribute:: players
  
@@ -721,7 +727,7 @@ about a plan of play of a game, by one or more players.
       Returns a behavior strategy profile :py:class:`BehavProfile` associated
       to the profile.
 
-      :raises gambit.UndefinedOperationError: if the game does not
+      :raises pygambit.UndefinedOperationError: if the game does not
                                               have a tree representation.
          
    .. py:method:: copy()
@@ -936,7 +942,7 @@ of game.
 
    .. py:attribute:: strategies
 
-      Returns a :py:class:`gambit.Strategies` collection object
+      Returns a :py:class:`pygambit.Strategies` collection object
       representing the strategies of the player.
 
    .. py:attribute:: min_payoff
@@ -963,7 +969,7 @@ of game.
 
    .. py:attribute:: actions
 
-      Returns a :py:class:`gambit.Actions` collection object representing 
+      Returns a :py:class:`pygambit.Actions` collection object representing 
       the actions defined in this information set.
 
    .. py:attribute:: label
@@ -1012,7 +1018,7 @@ of game.
 
       Deletes this action from the game.
 
-      :raises gambit.UndefinedOperationError: when the action is the
+      :raises pygambit.UndefinedOperationError: when the action is the
                                               last one of its infoset.
 
    .. py:method:: precedes(node)
@@ -1032,7 +1038,7 @@ of game.
 
       A settable property that represents the probability associated 
       with the action. It can be a value stored as an int,
-      :py:class:`gambit.Rational`, or :py:class:`gambit.Decimal`.
+      :py:class:`pygambit.Rational`, or :py:class:`pygambit.Decimal`.
 
 
 .. py:class:: Strategies
@@ -1127,16 +1133,16 @@ of game.
 
    .. py:method:: append_move(infoset[ , actions])
 
-      Add a move to a terminal node, at the :py:class:`gambit.Infoset`
-      ``infoset``.  Alternatively, a :py:class:`gambit.Player` can be
+      Add a move to a terminal node, at the :py:class:`pygambit.Infoset`
+      ``infoset``.  Alternatively, a :py:class:`pygambit.Player` can be
       passed as the information set, in which case the move is placed
       in a new information set for that player; in this instance, the
       number of ``actions`` at the new information set must be specified.
 
-      :raises gambit.UndefinedOperationError: when called on a non-terminal node.
-      :raises gambit.UndefinedOperationError: when called with a :py:class:`Player` object and no actions, or actions < 1.
-      :raises gambit.UndefinedOperationError: when called with a :py:class:`Infoset` object and with actions.
-      :raises gambit.MismatchError: when called with objects from different games.
+      :raises pygambit.UndefinedOperationError: when called on a non-terminal node.
+      :raises pygambit.UndefinedOperationError: when called with a :py:class:`Player` object and no actions, or actions < 1.
+      :raises pygambit.UndefinedOperationError: when called with a :py:class:`Infoset` object and with actions.
+      :raises pygambit.MismatchError: when called with objects from different games.
 
    .. py:method:: insert_move(infoset[ , actions])
 
@@ -1148,9 +1154,9 @@ of game.
       The newly-inserted node takes the place of the node in the game
       tree, and the existing node becomes the first child of the new node.
 
-      :raises gambit.UndefinedOperationError: when called with a :py:class:`Player` object and no actions, or actions < 1.
-      :raises gambit.UndefinedOperationError: when called with a :py:class:`Infoset` object and with actions.
-      :raises gambit.MismatchError: when called with objects from different games.
+      :raises pygambit.UndefinedOperationError: when called with a :py:class:`Player` object and no actions, or actions < 1.
+      :raises pygambit.UndefinedOperationError: when called with a :py:class:`Infoset` object and with actions.
+      :raises pygambit.MismatchError: when called with objects from different games.
 
    .. py:method:: leave_infoset()
 
@@ -1172,13 +1178,13 @@ of game.
 
       Copies the subtree rooted at this node to ``node``.
 
-      :raises gambit.MismatchError: if both objects aren't in the same game.
+      :raises pygambit.MismatchError: if both objects aren't in the same game.
 
    .. py:method:: move_tree(node)
 
       Move the subtree rooted at this node to ``node``.
 
-      :raises gambit.MismatchError: if both objects aren't in the same game.
+      :raises pygambit.MismatchError: if both objects aren't in the same game.
 
 
 .. py:class:: Outcomes
@@ -1226,7 +1232,7 @@ of game.
 
       Sets the payoff to the ``pl`` th player at the outcome to the
       specified ``payoff``.  Payoffs may be specified as integers
-      or instances of :py:class:`gambit.Decimal` or :py:class:`gambit.Rational`.
+      or instances of :py:class:`pygambit.Decimal` or :py:class:`pygambit.Rational`.
       Players may be specified as in :py:func:`__getitem__`.
 
 
@@ -1247,7 +1253,7 @@ Representation of errors and exceptions
 Computation of Nash equilibria
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. py:module:: gambit.nash
+.. py:module:: pygambit.nash
 
 .. py:function:: enumpure_solve(game, use_strategic=True, external=False)
 
