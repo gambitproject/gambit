@@ -45,10 +45,28 @@ cppgambit = setuptools.Extension(
 )
 
 
+def readme():
+    with open("README.rst") as f:
+        return f.read()
+    
+
 setuptools.setup(
     name="pygambit",
     version="16.0.1",
     description="Software tools for game theory",
+    long_description=readme(),
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Topic :: Scientific/Engineering :: Mathematics"
+    ],
+    keywords="game theory Nash equilibrium",
+    license="GPL2+",
     author="Theodore Turocy",
     author_email="ted.turocy@gmail.com",
     url="http://www.gambit-project.org",

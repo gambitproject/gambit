@@ -15,4 +15,6 @@ include tools/logit/nfglogit.cc
 include tools/logit/nfglogit.h
 include tools/logit/efglogit.cc
 include tools/logit/efglogit.h
+include README.rst
+
 
