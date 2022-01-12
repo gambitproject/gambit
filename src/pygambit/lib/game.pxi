@@ -158,18 +158,22 @@ cdef class Game(object):
     def read_game(cls, fn):
         cdef Game g
         g = cls()
+        with open(fn, "rb") as f:
+            data = f.read()
         try:
-            g.game = ReadGame(fn.encode('ascii'))
-        except IOError as e:
-            raise IOError("Unable to read game from file '%s': %s" % 
-                        (fn, e))
+            g.game = ParseGame(data)
+        except Exception as exc:
+            raise ValueError(f"Parse error in game file: {exc}") from None
         return g
 
     @classmethod
     def parse_game(cls, s):
         cdef Game g
         g = cls()
-        g.game = ParseGame(s.encode('ascii'))
+        try:
+            g.game = ParseGame(s.encode('ascii'))
+        except Exception as exc:
+            raise ValueError(f"Parse error in game file: {exc}") from None
         return g        
 
     def __str__(self):
