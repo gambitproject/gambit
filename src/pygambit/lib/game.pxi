@@ -378,9 +378,7 @@ cdef class Game(object):
         return self
 
     def write(self, format='native'):
-        cdef string s
         if format == 'gte':
             return pygambit.gte.write_game(self)
         else:
-            s = format.encode('ascii')
-            return str(WriteGame(self.game, s).c_str())
+            return WriteGame(self.game, format.encode('ascii')).decode('ascii')

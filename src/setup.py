@@ -71,6 +71,9 @@ setuptools.setup(
     author_email="ted.turocy@gmail.com",
     url="http://www.gambit-project.org",
     python_requires=">=3.7",
+    install_requires=[
+        'lxml'  # used for reading/writing GTE files
+    ],
     packages=['pygambit', 'pygambit.games', 'pygambit.lib'],
     ext_modules=Cython.Build.cythonize(cppgambit)
 )

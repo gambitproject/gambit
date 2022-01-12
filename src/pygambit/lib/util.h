@@ -59,9 +59,14 @@ std::string WriteGame(const Game &p_game, const std::string &p_format)
   else if (p_format == "sgame") {
     return LaTeXGameWriter().Write(p_game);
   }
-  std::ostringstream f;
-  p_game->Write(f, p_format);
-  return f.str();
+  else if (p_format == "native") {
+    std::ostringstream f;
+    p_game->Write(f, p_format);
+    return f.str();
+  }
+  else {
+    throw ValueException("Unknown game save file format '" + p_format + "'");
+  }
 }        
 
 std::string WriteGame(const StrategySupportProfile &p_support)

@@ -49,9 +49,13 @@ class ExternalSolver(object):
         input in .efg format (if a tree) or .nfg format (if a table).
         Returns the object referencing standard output of the external program.
         """
-        p = subprocess.Popen("%s -q" % prog, shell=True,
-                             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                             close_fds=True if sys.platform != "win32" else False)
+        p = subprocess.Popen(
+            f"{prog} -q",
+            shell=True,
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            encoding='utf-8',
+            close_fds=True if sys.platform != "win32" else False
+        )
         child_stdin, child_stdout = p.stdin, p.stdout
         child_stdin.write(game.write(format='native'))
         # Need to close, or at least flush, stdin of the child, or else
@@ -60,7 +64,7 @@ class ExternalSolver(object):
         return child_stdout
 
     def _parse_output(self, stream, game, rational, extensive=False):
-        profiles = [ ]
+        profiles = []
         for line in stream:
             entries = line.strip().split(",")
             if entries[0] != "NE":  continue
