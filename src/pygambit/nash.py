@@ -42,30 +42,25 @@ class ExternalSolver(object):
     """
     Base class for managing calls to external programs.
     """
-    def launch(self, prog, game):
+    def _call(self, prog, game) -> str:
         """
         Helper function for launching calls to external programs.
         Calls the specified program 'prog', passing the game to standard
         input in .efg format (if a tree) or .nfg format (if a table).
-        Returns the object referencing standard output of the external program.
+        Returns the output of the external program.
         """
-        p = subprocess.Popen(
-            f"{prog} -q",
-            shell=True,
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        p = subprocess.run(
+            prog.split() + ["-q"],
+            input=game.write(format='native'),
             encoding='utf-8',
-            close_fds=True if sys.platform != "win32" else False
+            capture_output=True
         )
-        child_stdin, child_stdout = p.stdin, p.stdout
-        child_stdin.write(game.write(format='native'))
-        # Need to close, or at least flush, stdin of the child, or else
-        # processing won't begin...
-        child_stdin.close()
-        return child_stdout
+        p.check_returncode()
+        return p.stdout
 
-    def _parse_output(self, stream, game, rational, extensive=False):
+    def _parse_output(self, output: str, game, rational, extensive=False):
         profiles = []
-        for line in stream:
+        for line in output.splitlines():
             entries = line.strip().split(",")
             if entries[0] != "NE":  continue
             if extensive:
@@ -91,7 +86,7 @@ class ExternalEnumPureSolver(ExternalSolver):
         command_line = "gambit-enumpure"
         if use_strategic and game.is_tree:
             command_line += " -S"
-        return self._parse_output(self.launch(command_line, game),
+        return self._parse_output(self._call(command_line, game),
                                   game, rational=True,
                                   extensive=game.is_tree and not use_strategic)
 
@@ -113,7 +108,7 @@ class ExternalLPSolver(ExternalSolver):
             command_line = "gambit-lp -d 10"
         if use_strategic and game.is_tree:
             command_line += " -S"
-        return self._parse_output(self.launch(command_line, game),
+        return self._parse_output(self._call(command_line, game),
                                   game, rational,
                                   extensive=game.is_tree and not use_strategic)
 
@@ -134,7 +129,7 @@ class ExternalLCPSolver(ExternalSolver):
             command_line = "gambit-lcp -d 10"
         if use_strategic and game.is_tree:
             command_line += " -S"
-        return self._parse_output(self.launch(command_line, game),
+        return self._parse_output(self._call(command_line, game),
                                   game, rational,
                                   extensive=game.is_tree and not use_strategic)
 
@@ -150,7 +145,7 @@ class ExternalEnumMixedSolver(ExternalSolver):
             command_line = "gambit-enummixed"
         else:
             command_line = "gambit-enummixed -d 10"
-        return self._parse_output(self.launch(command_line, game),
+        return self._parse_output(self._call(command_line, game),
                                   game, rational)
 
 class ExternalSimpdivSolver(ExternalSolver):
@@ -162,7 +157,7 @@ class ExternalSimpdivSolver(ExternalSolver):
         if not game.is_perfect_recall:
             raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         command_line = "gambit-simpdiv"
-        return self._parse_output(self.launch(command_line, game),
+        return self._parse_output(self._call(command_line, game),
                                   game, rational=True)
     
 class ExternalGlobalNewtonSolver(ExternalSolver):
@@ -174,7 +169,7 @@ class ExternalGlobalNewtonSolver(ExternalSolver):
         if not game.is_perfect_recall:
             raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         command_line = "gambit-gnm -d 10"
-        return self._parse_output(self.launch(command_line, game),
+        return self._parse_output(self._call(command_line, game),
                                   game, rational=False)
 
 class ExternalEnumPolySolver(ExternalSolver):
@@ -188,7 +183,7 @@ class ExternalEnumPolySolver(ExternalSolver):
         command_line = "gambit-enumpoly -d 10"
         if use_strategic and game.is_tree:
             command_line += " -S"
-        return self._parse_output(self.launch(command_line, game),
+        return self._parse_output(self._call(command_line, game),
                                   game, rational=False,
                                   extensive=game.is_tree and not use_strategic)
 
@@ -203,7 +198,7 @@ class ExternalLyapunovSolver(ExternalSolver):
         command_line = "gambit-liap -d 10"
         if use_strategic and game.is_tree:
             command_line += " -S"
-        return self._parse_output(self.launch(command_line, game),
+        return self._parse_output(self._call(command_line, game),
                                   game, rational=False,
                                   extensive=game.is_tree and not use_strategic)
 
@@ -216,7 +211,7 @@ class ExternalIteratedPolymatrixSolver(ExternalSolver):
         if not game.is_perfect_recall:
             raise RuntimeError("Computing equilibria of games with imperfect recall is not supported.")
         command_line = "gambit-ipa -d 10"
-        return self._parse_output(self.launch(command_line, game),
+        return self._parse_output(self._call(command_line, game),
                                   game, rational=False)
 
 class ExternalLogitSolver(ExternalSolver):
@@ -231,7 +226,7 @@ class ExternalLogitSolver(ExternalSolver):
         command_line = "gambit-logit -d 20 -e"
         if use_strategic and game.is_tree:
             command_line += " -S"
-        return self._parse_output(self.launch(command_line, game),
+        return self._parse_output(self._call(command_line, game),
                                   game, rational=False,
                                   extensive=game.is_tree and not use_strategic)
 
