@@ -4,7 +4,7 @@ General information
 Gambit uses the standard autotools mechanism for configuring and building.
 This should be familiar to most users of Un*ces and MacOS X.  In general,
 you just need to unpack the sources, change directory to the top level
-of the sources (typically of the form gambit-0.yyyy.mm.dd), and do the
+of the sources (typically of the form gambit-X.Y.Z), and do the
 usual
 
 ./configure
@@ -24,8 +24,6 @@ programs built in this process, especially for the computation of
 equilibria.  It is strongly recommended that you install the Gambit
 executables to a directory in your path!
 
-Note that if you install to a different location than the default, on
-some systems (especially linux) you may have to run ldconfig manually.
 
 Building from git repository
 ----------------------------
@@ -34,7 +32,7 @@ If you want to live on the bleeding edge, you can get the latest
 version of the Gambit sources from the Gambit repository on
 github.com, via ::
 
-  git clone git://github.com/gambitproject/gambit.git
+  git clone https://github.com/gambitproject/gambit.git
   cd gambit
 
 After this, you will need to set up the build scripts by executing ::
@@ -50,28 +48,17 @@ installed on your system.
 At this point, you can then continue with the configuration and build
 stages as in the previous section.
 
-Supported compilers
--------------------
+gambit-enumpoly
+---------------
 
-Currently, gcc is the only compiler supported.  The version of gcc needs
-to be new enough to handle templates correctly.  The oldest versions
-of gcc known to compile Gambit are 3.4.6 (Linux, Ubuntu) and 3.4.2 (MinGW for
-Windows, Debian stable).
-
-If you wish to use another compiler, the most likely stumbling block is
-that Gambit uses templated member functions for classes, so the compiler
-must support these.  (Version of gcc prior to 3.4 do not, for example.)
-
-For 64-bit users
-----------------
-
-The program gambit-enumpoly does not compile on 64-bit systems.  A new
-version of that program is being developed.  It is currently being distributed
-separately on the Gambit website.  In the meanwhile, to compile the other
-programs in Gambit, 64-bit users should add the switch --disable-enumpoly
-to the configuration step, e.g.
+The program gambit-enumpoly does not compile on some compilers and systems.
+If you encounter problems building this, you can disable compilation using
+the switch --disable-enumpoly at the configuration step, e.g.
 
 ./configure --disable-enumpoly [other options here]
+
+If you have problem building enumpoly, please file an issue giving
+your system and compiler details.
 
 
 For Windows users
@@ -83,23 +70,13 @@ testing of Gambit on Windows using MinGW, which can be gotten from
 
 http://www.mingw.org
 
-We prefer MinGW over Cygwin because MinGW will create native Windows
-applications, whereas Cygwin requires an extra compatibility layer.
-
-Note that support for the Borland C++ 5.5 compiler has been removed from
-Gambit.  This is because that compiler is now sufficiently old that
-significant numbers of special cases had to be handled to reconcile
-the C++ it accepts with that accepted by modern versions of gcc
-(which attempt to adhere to the C++ standard).  We are open to supporting
-other compilers in Gambit if there are volunteers willing to contribute
-and maintain build systems for them.
 
 For OS X users
 --------------
 
 OS X users should being by following the Un*x/Linux instructions above.
 This will create the command-line tools, and the graphical interface
-binary called 'gambit'.  This graphical interface binary requires the
+binary called 'gambit'.  This graphical interface binary requires an
 X server to run correctly.
 
 For a more native OS X experience, after completing the Un*x/Linux
@@ -111,10 +88,8 @@ This will create a directory Gambit.app with the graphical interface
 in an application bundle.  This bundle can then be copied (e.g., to
 /Applications) and used like any other OS X application.
 
-Depending on which version of OS X you use, the version of wxWidgets
-that comes bundled may not be new enough to meet Gambit's requirements.
-The version that shipped with OS X Tiger, for instance, is not.
-If you need to build wxWidgets yourself (see below),
+wxWidgets is available, for example, via Homebrew on Mac OS X.
+If you build wxWidgets yourself (see below),
 be sure to tell the ./configure step where to find the version you built
 by using the --with-wx-prefix parameter.  For example, if you install
 wxWidgets into /usr/local (the default when you build it), configure
@@ -126,7 +101,7 @@ Gambit with
 The graphical interface and wxWidgets
 -------------------------------------
 
-Gambit requires wxWidgets version 2.8.0 or higher for the
+Gambit requires wxWidgets version 3.1.5 or higher for the
 graphical interface.  See their website at
 
 http://www.wxwidgets.org
@@ -136,10 +111,7 @@ for most Un*x users through their package managers (apt or rpm).  Note
 that you'll need the appropriate -dev package for wxWidgets to get the
 header files needed to build Gambit.
 
-Un*x users, please note that Gambit at this time only supports the
-GTK port of wxWidgets, and not the Motif/Lesstif or the Universal ports.
-Neither of the latter ports support drag-and-drop features, which are
-heavily used in the graphical interface.
+Un*x users, please note that Gambit only supports the GTK port of wxWidgets.
 
 If wxWidgets it isn't installed in a standard place (e.g., /usr or
 /usr/local), you'll need to tell configure where to find it with the
