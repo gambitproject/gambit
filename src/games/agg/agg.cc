@@ -619,7 +619,7 @@ void AGG:: doProjection(int Node, AggNumber* s)
   }
 }
 
-inline void AGG:: doProjection(int Node, int i, AggNumber* s)
+void AGG:: doProjection(int Node, int i, AggNumber* s)
 {
   projectedStrat[Node][i].reset();
   for (int j=0;j<actions[i];j++)if(s[j]>(AggNumber)0.0){
