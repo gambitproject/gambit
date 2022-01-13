@@ -309,7 +309,9 @@ private:
 #else
       p->second = rand();
 #endif  // HAVE_DRAND48
-      if(int_payoffs) p->second = floor(p->second * AggNumber(int_factor) );
+      if (int_payoffs) {
+	p->second = (double) floor(p->second * AggNumber(int_factor));
+      }
     }  
     bool int_payoffs;
     int int_factor;

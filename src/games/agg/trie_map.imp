@@ -54,7 +54,7 @@ trie_map<V>::insert(const trie_map<V>::value_type& x) {
 
 
 template <class V>
-inline __attribute__((always_inline))  typename trie_map<V>::iterator&
+inline typename trie_map<V>::iterator&
 trie_map<V>::find(const trie_map<V>::key_type& k) const
 {
   size_t i=0;
