@@ -1,9 +1,11 @@
-import pygambit
 import warnings
 import fractions
-from nose.tools import assert_raises
+import unittest
 
-class TestGambitPlayers(object):
+import pygambit
+
+
+class TestGambitPlayers(unittest.TestCase):
     def setUp(self):
         self.strategic_game = pygambit.Game.new_table([2,2])
         self.strategic_game.players[0].label = "Alphonse"
@@ -43,20 +45,20 @@ class TestGambitPlayers(object):
 
     def test_game_players_index_exception_int(self):
         "Test to verify when an index is out of range"
-        assert_raises(IndexError, self.strategic_game.players.__getitem__, 3)
+        self.assertRaises(IndexError, self.strategic_game.players.__getitem__, 3)
 
     def test_game_players_index_exception_string(self):
         "Test to verify when a player label is not in the list of players"
-        assert_raises(IndexError, self.strategic_game.players.__getitem__, "None")
+        self.assertRaises(IndexError, self.strategic_game.players.__getitem__, "None")
 
     def test_game_players_index_exception_player(self):
         "Test to verify when a player object is not in the players"
         self.strategic_game_2 = pygambit.new_table([2,2])
-        assert_raises(IndexError, self.strategic_game.players.__getitem__, self.strategic_game_2.players[0])
+        self.assertRaises(IndexError, self.strategic_game.players.__getitem__, self.strategic_game_2.players[0])
 
     def test_game_players_index_exception_player(self):
         "Test to verify when attempting to retrieve with invalid input"
-        assert_raises(TypeError, self.strategic_game.players.__getitem__, 1.3)
+        self.assertRaises(TypeError, self.strategic_game.players.__getitem__, 1.3)
 
     def test_add_strategic_game_players(self):
         "Test to ensure that players can be added to a strategic game with a single strategy"
@@ -95,7 +97,7 @@ class TestGambitPlayers(object):
     def test_game_add_strategies_to_player_extensive_game(self):
         "Test to ensure that an exception is raised when attempting to add a strategy to a player in an extensive game"
         self.extensive_game.players.add("Alice")
-        assert_raises(TypeError, self.extensive_game.players[0].strategies.add, "Test")
+        self.assertRaises(TypeError, self.extensive_game.players[0].strategies.add, "Test")
 
     def test_player_get_min_payoff(self):
         "To test getting the minimum payoff for the players"

@@ -1,10 +1,11 @@
-import pygambit
 import fractions
-import nose.tools
-from nose.tools import assert_raises
+import unittest
+
+import pygambit
 from pygambit.lib.error import UndefinedOperationError
 
-class TestGambitGame(object):
+
+class TestGambitGame(unittest.TestCase):
     def setUp(self):
         self.game = pygambit.Game.new_table([2,2])
         self.extensive_game = pygambit.Game.read_game("test_games/basic_extensive_game.efg")
@@ -19,12 +20,12 @@ class TestGambitGame(object):
 
     def test_game_get_outcome_with_incorrect_tuple_size(self):
         "To test getting an outcome with a bad tuple size"
-        assert_raises(KeyError, self.game.__getitem__, (0,0,0))
+        self.assertRaises(KeyError, self.game.__getitem__, (0,0,0))
 
 
     def test_game_get_outcome_with_bad_ints(self):
         "To test getting an index error with ints"
-        assert_raises(IndexError,self.game.__getitem__,(0,3))
+        self.assertRaises(IndexError, self.game.__getitem__, (0,3))
 
     def test_game_get_outcome_with_strings(self):
         "To test getting the first outcome with strategy labels"
@@ -36,7 +37,8 @@ class TestGambitGame(object):
         "To test getting the first outcome with strategy labels"
         self.game.players[0].strategies[0].label = "defect"
         self.game.players[1].strategies[0].label = "cooperate"
-        assert_raises(IndexError,self.game.__getitem__,("defect","defect"))
+        self.assertRaises(IndexError,
+                          self.game.__getitem__, ("defect", "defect"))
 
 
     def test_game_get_outcome_with_strategies(self):
@@ -45,16 +47,18 @@ class TestGambitGame(object):
 
     def test_game_get_outcome_with_bad_strategies(self):
         "To test getting the first outcome with incorrect strategies"
-        assert_raises(IndexError, self.game.__getitem__, (self.game.players[0].strategies[0], self.game.players[0].strategies[0]))
-
+        self.assertRaises(
+            IndexError, self.game.__getitem__,
+            (self.game.players[0].strategies[0], self.game.players[0].strategies[0])
+        )
 
     def test_game_outcomes_non_tuple(self):
         "To test when attempting to find outcome with a non-tuple-like object"
-        assert_raises(TypeError, self.game.__getitem__, 42)
+        self.assertRaises(TypeError, self.game.__getitem__, 42)
         
     def test_game_outcomes_type_exception(self):
         "To test when attempting to find outcome with invalid input"
-        assert_raises(TypeError, self.game.__getitem__, (1.23,1))
+        self.assertRaises(TypeError, self.game.__getitem__, (1.23,1))
 
 
     def test_game_is_const_sum(self):
@@ -90,8 +94,13 @@ class TestGambitGame(object):
     def test_game_behav_profile_error(self):
         "To test raising an error when trying to create a MixedBehavProfile from \
         a game without a tree representation"
-        assert_raises(UndefinedOperationError, self.game.mixed_behavior_profile)
-        assert_raises(UndefinedOperationError, self.game.mixed_behavior_profile, True)
+        #self.assertRaises(
+        #    UndefinedOperationError,
+        #    lambda: self.game.mixed_behavior_profile
+        #)
+        self.assertRaises(
+            UndefinedOperationError, self.game.mixed_behavior_profile, True
+        )
 
     def test_game_title(self):
         assert self.game.title == ""
@@ -111,11 +120,10 @@ class TestGambitGame(object):
         assert self.extensive_game.actions[4] == self.extensive_game.players[2].infosets[0].actions[0]
         assert self.extensive_game.actions[5] == self.extensive_game.players[2].infosets[0].actions[1]
 
-    @nose.tools.raises(UndefinedOperationError)
     def test_strategic_game_actions_error(self):
         "Test to ensure an error is raised when trying to access actions "\
         "of a game without a tree representation"
-        self.game.actions
+        self.assertRaises(UndefinedOperationError, lambda: self.game.actions)
 
 
     def test_game_infosets(self):
@@ -123,11 +131,10 @@ class TestGambitGame(object):
         assert self.extensive_game.infosets[1] == self.extensive_game.players[1].infosets[0]
         assert self.extensive_game.infosets[2] == self.extensive_game.players[2].infosets[0]
 
-    @nose.tools.raises(UndefinedOperationError)
     def test_strategic_game_infosets_error(self):
         "Test to ensure an error is raised when trying to access infosets "\
         "of a game without a tree representation"
-        self.game.infosets
+        self.assertRaises(UndefinedOperationError, lambda: self.game.infosets)
 
     def test_game_strategies(self):
         assert self.game.strategies[0] == self.game.players[0].strategies[0]
@@ -141,22 +148,22 @@ class TestGambitGame(object):
         root.label = "Test"
         assert self.extensive_game.root.label == root.label
 
-    @nose.tools.raises(UndefinedOperationError)
     def test_game_get_root_error(self):
         "Test to ensure an error is raised when trying to get the root"\
         "node of a game without a tree representation"
-        self.game.root
+        self.assertRaises(UndefinedOperationError, lambda: self.game.root)
 
     def test_game_num_nodes(self):
         "Test retrieving the number of nodes of a game"
         assert self.extensive_game.num_nodes() == 15
         assert self.game.num_nodes() == 0
 
-    @nose.tools.raises(RuntimeError)
     def test_game_dereference_invalid(self):
         "Test referencing an invalid game member object"
-        g = pygambit.Game.new_tree()
-        g.players.add("One")
-        s = g.players[0].strategies[0]
-        g.root.append_move(g.players[0], 2)
-        s.number
+        def foo():
+            g = pygambit.Game.new_tree()
+            g.players.add("One")
+            s = g.players[0].strategies[0]
+            g.root.append_move(g.players[0], 2)
+            s.number
+        self.assertRaises(RuntimeError, foo)

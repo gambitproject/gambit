@@ -1,10 +1,11 @@
-import pygambit
+import unittest
 import fractions
-import nose.tools
-from nose.tools import assert_raises
+
+import pygambit
 from pygambit.lib.error import UndefinedOperationError
 
-class TestGambitStrategicRestriction(object):
+
+class TestGambitStrategicRestriction(unittest.TestCase):
     def setUp(self):
         self.game = pygambit.Game.read_game("test_games/mixed_strategy.nfg")
         
@@ -76,56 +77,67 @@ class TestGambitStrategicRestriction(object):
         for i in range(0, len(self.restriction.players)-1):
             assert self.restriction.players[i].unrestrict() == self.game.players[i]
 
-    @nose.tools.raises(UndefinedOperationError)
     def test_restriction_add_outcome_error(self):
         "Test to ensure an error is raised when trying to add an outcome"\
         "to a restriction"
-        self.restriction.outcomes.add("")
+        self.assertRaises(
+            UndefinedOperationError,
+            lambda: self.restriction.outcomes.add("")
+        )
 
-    @nose.tools.raises(UndefinedOperationError)
     def test_restriction_outcome_value_error(self):
         "Test to ensure an error is raised when trying to change the value"\
         "of an outcome in a restriction"
-        self.restriction.outcomes[0][0] = 2
+        def foo():
+            self.restriction.outcomes[0][0] = 2
+        self.assertRaises(UndefinedOperationError, foo)
 
-    @nose.tools.raises(UndefinedOperationError)
     def test_restriction_outcome_label_error(self):
         "Test to ensure an error is raised when trying to change the label"\
         "of an outcome in a restriction"
-        self.restriction.outcomes[0].label = ""
+        def foo():
+            self.restriction.outcomes[0].label = ""
+        self.assertRaises(UndefinedOperationError, foo)
 
-    @nose.tools.raises(UndefinedOperationError)
     def test_restriction_outcome_delete_error(self):
         "Test to ensure an error is raised when trying to delete an outcome"\
         "in a restriction"
-        self.restriction.outcomes[0].delete()
+        self.assertRaises(UndefinedOperationError,
+                          lambda: self.restriction.outcomes[0].delete())
 
-    @nose.tools.raises(UndefinedOperationError)
     def test_restriction_add_player_error(self):
         "Test to ensure an error is raised when trying to add a player"\
         "to a restriction"
-        self.restriction.players.add("")
+        self.assertRaises(
+            UndefinedOperationError,
+            lambda: self.restriction.players.add("")
+        )
         
-    @nose.tools.raises(UndefinedOperationError)
     def test_restriction_player_label_error(self):
         "Test to ensure an error is raised when trying to change the label"\
         "of a player in a restriction"
-        self.restriction.players[0].label = ""
+        def foo():
+            self.restriction.players[0].label = ""
+        self.assertRaises(UndefinedOperationError, foo)
 
-    @nose.tools.raises(UndefinedOperationError)
     def test_restriction_add_strategy_error(self):
         "Test to ensure an error is raised when trying to add a strategy"\
         "to a restriction"
-        self.restriction.players[0].strategies.add("")
+        self.assertRaises(
+            UndefinedOperationError,
+            lambda: self.restriction.players[0].strategies.add("")
+        )
 
-    @nose.tools.raises(UndefinedOperationError)
     def test_restriction_strategy_label_error(self):
         "Test to ensure an error is raised when trying to change the label"\
         "of a player in a restriction"
-        self.restriction.strategies[0].label = ""
+        def foo():
+            self.restriction.strategies[0].label = ""
+        self.assertRaises(UndefinedOperationError, foo)
 
-    @nose.tools.raises(UndefinedOperationError)
     def test_restriction_player_strategy_label_error(self):
         "Test to ensure an error is raised when trying to change the label"\
         "of a player's strategy in a restriction"
-        self.restriction.players[0].strategies[0].label = ""
+        def foo():
+            self.restriction.players[0].strategies[0].label = ""
+        self.assertRaises(UndefinedOperationError, foo)

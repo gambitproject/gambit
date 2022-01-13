@@ -1,9 +1,10 @@
+import unittest
+
 import pygambit
-from nose.tools import assert_raises
 from pygambit.lib.error import MismatchError, UndefinedOperationError
 
 
-class TestGambitNode(object):
+class TestGambitNode(unittest.TestCase):
     def setUp(self):
         self.game = pygambit.Game.new_tree()
         self.extensive_game = pygambit.Game.read_game("test_games/basic_extensive_game.efg")
@@ -61,9 +62,9 @@ class TestGambitNode(object):
         "Test to ensure that we can check if a given node is a successor of a supplied node"
         assert self.extensive_game.root.children[0].is_successor_of(self.extensive_game.root) == True
         assert self.extensive_game.root.is_successor_of(self.extensive_game.root.children[0]) == False
-        assert_raises(TypeError, self.extensive_game.root.is_successor_of, 9)
-        assert_raises(TypeError, self.extensive_game.root.is_successor_of, "Test")
-        assert_raises(TypeError, self.extensive_game.root.is_successor_of, self.extensive_game.players[0])
+        self.assertRaises(TypeError, self.extensive_game.root.is_successor_of, 9)
+        self.assertRaises(TypeError, self.extensive_game.root.is_successor_of, "Test")
+        self.assertRaises(TypeError, self.extensive_game.root.is_successor_of, self.extensive_game.players[0])
 
     def test_is_subgame_root(self):
         "Test to ensure that we can check if a given node is a marked subgame"
@@ -72,50 +73,50 @@ class TestGambitNode(object):
 
     def test_append_move_error_terminal(self):
         "Test to ensure the node is terminal"
-        assert_raises(UndefinedOperationError, self.extensive_game.root.append_move, "")
+        self.assertRaises(UndefinedOperationError, self.extensive_game.root.append_move, "")
 
     def test_append_move_error_player_actions(self):
         "Test to ensure there are actions when appending with a player"
-        assert_raises(UndefinedOperationError, self.extensive_game.root.append_move, 
+        self.assertRaises(UndefinedOperationError, self.extensive_game.root.append_move, 
                         self.extensive_game.players[0])
-        assert_raises(UndefinedOperationError, self.extensive_game.root.append_move, 
+        self.assertRaises(UndefinedOperationError, self.extensive_game.root.append_move, 
                         self.extensive_game.players[0], 0)
 
     def test_append_move_error_player_mismatch(self):
         "Test to ensure the node and the player are from the same game"
-        assert_raises(MismatchError, self.game.root.append_move,
+        self.assertRaises(MismatchError, self.game.root.append_move,
                         self.extensive_game.players[0], 1)
 
     def test_append_move_error_infoset_actions(self):
         "Test to ensure there are no actions when appending with an infoset"
-        assert_raises(UndefinedOperationError, self.extensive_game.root.append_move, 
+        self.assertRaises(UndefinedOperationError, self.extensive_game.root.append_move, 
                         self.extensive_game.players[0].infosets[0], 1)
 
     def test_append_move_error_infoset_mismatch(self):
         "Test to ensure the node and the player are from the same game"
-        assert_raises(MismatchError, self.game.root.append_move,
+        self.assertRaises(MismatchError, self.game.root.append_move,
                         self.extensive_game.players[0].infosets[0])
 
     def test_insert_move_error_player_actions(self):
         "Test to ensure there are actions when inserting with a player"
-        assert_raises(UndefinedOperationError, self.extensive_game.root.insert_move, 
+        self.assertRaises(UndefinedOperationError, self.extensive_game.root.insert_move, 
                         self.extensive_game.players[0])
-        assert_raises(UndefinedOperationError, self.extensive_game.root.insert_move, 
+        self.assertRaises(UndefinedOperationError, self.extensive_game.root.insert_move, 
                         self.extensive_game.players[0], 0)
 
     def test_insert_move_error_player_mismatch(self):
         "Test to ensure the node and the player are from the same game"
-        assert_raises(MismatchError, self.game.root.insert_move,
+        self.assertRaises(MismatchError, self.game.root.insert_move,
                         self.extensive_game.players[0], 1)
 
     def test_insert_move_error_infoset_actions(self):
         "Test to ensure there are no actions when inserting with an infoset"
-        assert_raises(UndefinedOperationError, self.extensive_game.root.insert_move, 
+        self.assertRaises(UndefinedOperationError, self.extensive_game.root.insert_move, 
                         self.extensive_game.players[0].infosets[0], 1)
 
     def test_insert_move_error_infoset_mismatch(self):
         "Test to ensure the node and the player are from the same game"
-        assert_raises(MismatchError, self.game.root.insert_move,
+        self.assertRaises(MismatchError, self.game.root.insert_move,
                         self.extensive_game.players[0].infosets[0])
 
     def test_node_leave_infoset(self):
@@ -139,11 +140,11 @@ class TestGambitNode(object):
     def test_node_copy_tree_error(self):
         "Test to ensure a MismatchError is raised when trying to copy a tree \
         from a different game"
-        assert_raises(MismatchError, self.game.root.copy_tree,
+        self.assertRaises(MismatchError, self.game.root.copy_tree,
                         self.extensive_game.root)
 
     def test_node_move_tree_error(self):
         "Test to ensure a MismatchError is raised when trying to move a tree \
         between different games"
-        assert_raises(MismatchError, self.game.root.move_tree,
+        self.assertRaises(MismatchError, self.game.root.move_tree,
                         self.extensive_game.root)

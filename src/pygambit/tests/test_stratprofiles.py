@@ -1,10 +1,11 @@
-import pygambit
 import fractions
-import nose.tools
-from nose.tools import assert_raises
+import unittest
+
+import pygambit
 from pygambit.lib.error import UndefinedOperationError
 
-class TestGambitStrategySupportProfile(object):
+
+class TestGambitStrategySupportProfile(unittest.TestCase):
     def setUp(self):
         self.game = pygambit.Game.read_game("test_games/mixed_strategy.nfg")
         self.support_profile = self.game.support_profile()
@@ -52,14 +53,16 @@ class TestGambitStrategySupportProfile(object):
         for strategy in strat_list:
             assert strategy not in new_profile
 
-    @nose.tools.raises(ValueError)
     def test_difference_error(self):
         "Ensure an error is raised when the difference isn't a valid support profile"
-        strat_list = [self.support_profile[0], self.support_profile[4]]
-        dif_profile = pygambit.lib.libgambit.StrategySupportProfile(
-            strat_list, self.game)
-        new_profile = dif_profile - self.support_profile
-
+        def foo():
+            strat_list = [self.support_profile[0], self.support_profile[4]]
+            dif_profile = pygambit.lib.libgambit.StrategySupportProfile(
+                strat_list, self.game
+            )
+            new_profile = dif_profile - self.support_profile
+        self.assertRaises(ValueError, foo)
+        
     def test_intersection(self):
         "Test the intersection between two support profiles"
         strat_list = [self.support_profile[0], self.support_profile[2],
@@ -72,16 +75,18 @@ class TestGambitStrategySupportProfile(object):
         assert new_profile <= sec_profile
         assert new_profile <= fir_profile
 
-    @nose.tools.raises(ValueError)
     def test_intersection_error(self):
         "Ensure an error is raised when the intersection isn't a valid support profile"
-        strat_list = [self.support_profile[0], self.support_profile[2],
-                        self.support_profile[4]]
-        fir_profile = pygambit.lib.libgambit.StrategySupportProfile(
-            strat_list, self.game)
-        sec_profile = self.support_profile.remove(self.support_profile[4])
-        new_profile = fir_profile & sec_profile
-
+        def foo():
+            strat_list = [self.support_profile[0], self.support_profile[2],
+                          self.support_profile[4]]
+            fir_profile = pygambit.lib.libgambit.StrategySupportProfile(
+                strat_list, self.game
+            )
+            sec_profile = self.support_profile.remove(self.support_profile[4])
+            new_profile = fir_profile & sec_profile
+        self.assertRaises(ValueError, foo)
+        
     def test_union(self):
         "Test the union between two support profiles"
         strat_list = [self.support_profile[0], self.support_profile[2],
@@ -112,8 +117,10 @@ class TestGambitStrategySupportProfile(object):
         assert loop_profile == pygambit.lib.libgambit.StrategySupportProfile(
             [self.support_profile[0], self.support_profile[3]], self.game)
 
-    @nose.tools.raises(UndefinedOperationError)
     def test_remove_error(self):
         "Test removing the last strategy of a player"
-        profile = self.support_profile.remove(self.support_profile[3])
-        profile = profile.remove(profile[3])
+        def foo():
+            profile = self.support_profile.remove(self.support_profile[3])
+            profile = profile.remove(profile[3])
+        self.assertRaises(UndefinedOperationError, foo)
+            

@@ -1,8 +1,10 @@
-import pygambit
-from nose.tools import assert_raises
+import unittest
 import warnings
 
-class TestGambitOutcomes(object):
+import pygambit
+
+
+class TestGambitOutcomes(unittest.TestCase):
     def setUp(self):
         self.game = pygambit.Game.new_table([2,2])
         self.game.players[0].label = "joe"
@@ -44,15 +46,15 @@ class TestGambitOutcomes(object):
 
     def test_game_outcome_index_exception_int(self):
         "Test to verify when an index is out of range"
-        assert_raises(IndexError, self.game.outcomes.__getitem__, 9)
+        self.assertRaises(IndexError, self.game.outcomes.__getitem__, 9)
 
     def test_game_outcome_index_exception_string(self):
         "Test to verify when an outcome label is not in the list of game outcomes"
-        assert_raises(IndexError, self.game.outcomes.__getitem__, "None")
+        self.assertRaises(IndexError, self.game.outcomes.__getitem__, "None")
 
     def test_game_ouctome_index_exception_invalid_input(self):
         "Test to verify when attempting to retrieve an outcome with invalid input"
-        assert_raises(TypeError, self.game.outcomes.__getitem__, 1.3)
+        self.assertRaises(TypeError, self.game.outcomes.__getitem__, 1.3)
 
     def test_getting_payoff_by_label_string(self):
         assert(self.game.outcomes[0]['joe'] == 1)

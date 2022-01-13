@@ -1,10 +1,10 @@
 import pygambit
 import decimal
 import fractions
-from nose.tools import assert_raises
 import unittest
+
 from pygambit.lib.error import UndefinedOperationError
-#from nose.tools import failUnlessRaises
+
 
 class TestGambitActions(unittest.TestCase):
     def setUp(self):
@@ -44,7 +44,7 @@ class TestGambitActions(unittest.TestCase):
 
     def test_action_precedes_error(self):
         "Test to ensure a TypeError is raised when precedes is called without a node"
-        assert_raises(TypeError, self.extensive_game.actions[0].precedes, 0)
+        self.assertRaises(TypeError, self.extensive_game.actions[0].precedes, 0)
 
     def test_action_delete(self):
         "Test to ensure it is possible to delete an action"
@@ -56,4 +56,4 @@ class TestGambitActions(unittest.TestCase):
         "Test to ensure deleting the last action of an infoset raises an error"
         assert len(self.extensive_game.infosets[0].actions) == 2
         self.extensive_game.actions[0].delete()
-        assert_raises(UndefinedOperationError, self.extensive_game.actions[0].delete)
+        self.assertRaises(UndefinedOperationError, self.extensive_game.actions[0].delete)

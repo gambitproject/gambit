@@ -1,9 +1,11 @@
-import pygambit
 import fractions
-from nose.tools import assert_raises
+import unittest
+
+import pygambit
 from pygambit.lib.error import UndefinedOperationError
 
-class TestGambitMixedStrategyGame(object):
+
+class TestGambitMixedStrategyGame(unittest.TestCase):
     def setUp(self):
         self.game = pygambit.Game.new_table([2,2])
         self.game.players[0].label = "joe"
@@ -122,6 +124,6 @@ class TestGambitMixedStrategyGame(object):
 
     def test_as_behav_error(self):  
         "Test raising an error when trying to convert a profile from a strategic game"
-        assert_raises(UndefinedOperationError, self.profile_double.as_behavior)
-        assert_raises(UndefinedOperationError, self.profile_rational.as_behavior)
+        self.assertRaises(UndefinedOperationError, self.profile_double.as_behavior)
+        self.assertRaises(UndefinedOperationError, self.profile_rational.as_behavior)
 

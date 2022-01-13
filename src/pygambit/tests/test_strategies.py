@@ -1,8 +1,10 @@
-import pygambit
+import unittest
 import warnings
-from nose.tools import assert_raises
 
-class TestGambitStrategies(object):
+import pygambit
+
+
+class TestGambitStrategies(unittest.TestCase):
     def setUp(self):
         self.game = pygambit.Game.new_table([2,2])
         self.game.players[0].label = "Alphonse"
@@ -31,17 +33,17 @@ class TestGambitStrategies(object):
 
     def test_game_strategies_index_exception_int(self):
         "Test to verify when an index is out of range"
-        assert_raises(IndexError, self.game.players[0].strategies.__getitem__, 3)
+        self.assertRaises(IndexError, self.game.players[0].strategies.__getitem__, 3)
 
     def test_game_strategies_index_exception_string(self):
         "Test to verify when a strategy label is not in the list of player's strategies"
-        assert_raises(IndexError, self.game.players[0].strategies.__getitem__, "None")
+        self.assertRaises(IndexError, self.game.players[0].strategies.__getitem__, "None")
 
     def test_game_strategies_index_exception_player(self):
         "Test to verify when a strategy object is not in a player's list of strategies"
         self.game_2 = pygambit.new_table([2,2])
-        assert_raises(IndexError, self.game.players[0].strategies.__getitem__, self.game_2.players[0].strategies[0])
+        self.assertRaises(IndexError, self.game.players[0].strategies.__getitem__, self.game_2.players[0].strategies[0])
 
     def test_game_strategies_index_exception_player(self):
         "Test to verify when attempting to retrieve strategy with invalid input"
-        assert_raises(TypeError, self.game.players[0].strategies.__getitem__, 1.3)
+        self.assertRaises(TypeError, self.game.players[0].strategies.__getitem__, 1.3)

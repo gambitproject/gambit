@@ -1,8 +1,10 @@
+import unittest
+
 import pygambit
-import nose.tools
 from pygambit.lib.error import MismatchError
 
-class TestGambitInfosets(object):
+
+class TestGambitInfosets(unittest.TestCase):
     def setUp(self):
         self.extensive_game = pygambit.Game.read_game("test_games/basic_extensive_game.efg")
         self.complicated_game = pygambit.Game.read_game("test_games/complicated_extensive_game.efg")
@@ -26,12 +28,13 @@ class TestGambitInfosets(object):
         self.extensive_game.root.infoset.player = self.extensive_game.players[1]
         assert self.extensive_game.root.infoset.player == self.extensive_game.players[1]
         
-    @nose.tools.raises(MismatchError)
     def test_infoset_player_mismatch(self):
         "Test to ensure exception raised on setting player from different game."
-        g2 = pygambit.Game.new_tree()
-        p = g2.players.add()
-        self.extensive_game.root.infoset.player = p
+        def foo():
+            g2 = pygambit.Game.new_tree()
+            p = g2.players.add()
+            self.extensive_game.root.infoset.player = p
+        self.assertRaises(MismatchError, foo)
 
     def test_infoset_node_precedes(self):
         "Test to check if the infoset preceding check works"
@@ -46,5 +49,9 @@ class TestGambitInfosets(object):
         assert len(self.extensive_game.infosets[0].actions) == 4
 
     def test_infoset_add_action_error(self):
-        nose.tools.assert_raises(MismatchError, self.extensive_game.infosets[0].actions.add, self.extensive_game.actions[3])
+        self.assertRaises(
+            MismatchError,
+            self.extensive_game.infosets[0].actions.add,
+            self.extensive_game.actions[3]
+        )
 

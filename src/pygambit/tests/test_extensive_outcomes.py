@@ -1,8 +1,10 @@
-import pygambit
-from nose.tools import assert_raises
 import warnings
+import unittest
 
-class TestGambitOutcomes(object):
+import pygambit
+
+
+class TestGambitOutcomes(unittest.TestCase):
     def setUp(self):
         self.game = pygambit.Game.read_game("./test_games/sample_extensive_game.efg")
     
@@ -44,4 +46,4 @@ class TestGambitOutcomes(object):
         assert(self.game[[1,1]][player2] == 7)
 
     def test_outcome_index_exception_int(self):
-        assert_raises(IndexError, self.game[[0,0]].__getitem__, 3)
+        self.assertRaises(IndexError, self.game[[0,0]].__getitem__, 3)
