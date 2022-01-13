@@ -519,12 +519,10 @@ void LogBehavProfile<T>::ComputeSolutionData(void) const
       for (int iset = 1; iset <= player->NumInfosets(); iset++) {
 	GameInfoset infoset = player->GetInfoset(iset);
       
-	int mostLikelyNode = 1;
 	T maxLogProb = m_logRealizProbs[infoset->GetMember(1)->GetNumber()];
 
 	for (int i = 2; i <= infoset->NumMembers(); i++) {
 	  if (m_logRealizProbs[infoset->GetMember(i)->GetNumber()] > maxLogProb) {
-	    mostLikelyNode = i;
 	    maxLogProb = m_logRealizProbs[infoset->GetMember(i)->GetNumber()];
 	  }
 	}

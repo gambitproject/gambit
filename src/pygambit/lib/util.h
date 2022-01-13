@@ -39,13 +39,13 @@ using namespace Gambit::Nash;
 inline Game NewTable(Array<int> *dim)
 { return NewTable(*dim); }
 
-Game ReadGame(char *fn) throw (InvalidFileException)
+Game ReadGame(char *fn)
 { 
   std::ifstream f(fn);
   return ReadGame(f);
 }
 
-Game ParseGame(char *s) throw (InvalidFileException)
+Game ParseGame(char *s)
 {
   std::istringstream f(s);
   return ReadGame(f);

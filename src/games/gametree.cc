@@ -614,7 +614,7 @@ bool GameTreeRep::IsConstSum(void) const
     SubtreeSum(m_root);
     return true;
   }
-  catch (NotZeroSumException) {
+  catch (NotZeroSumException &) {
     return false;
   }
 }

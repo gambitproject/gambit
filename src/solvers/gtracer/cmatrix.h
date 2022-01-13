@@ -878,9 +878,12 @@ inline cmatrix operator/(const cmatrix &a, const double &b) {
 
 inline std::ostream& operator<<(std::ostream& s, const cmatrix& ma) {
 //  	s << ma.m << ' ' << ma.n << ' ';
-	for(int i=0;i<ma.s;i++) { 
-if (i%ma.n==0) s << std::endl; s << ma.x[i]; if (i!=ma.s) s << ' '; }
-	return s;
+  for (int i = 0; i < ma.s; i++) { 
+    if (i % ma.n == 0) s << std::endl;
+    s << ma.x[i];
+    if (i != ma.s) s << ' ';
+  }
+  return s;
 }
 
 inline std::istream& operator>>(std::istream& s, cmatrix& ma) {

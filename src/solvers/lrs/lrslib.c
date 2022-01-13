@@ -1791,8 +1791,8 @@ lrs_read_dic (lrs_dic * P, lrs_dat * Q)
   if (Q->restart)
     Q->getvolume = FALSE;       /* otherwise incorrect volume reported            */
 
-    if (Q->restart && Q->maxcobases > 0) //2015.4.3 adjust for restart
-               Q->maxcobases = Q->maxcobases + Q->count[2];
+  if (Q->restart && Q->maxcobases > 0) //2015.4.3 adjust for restart
+    Q->maxcobases = Q->maxcobases + Q->count[2];
 
   if (Q->incidence)
     {
@@ -3053,7 +3053,7 @@ lrs_printtotals (lrs_dic * P, lrs_dat * Q)
            printf (" vertices+rays");
            if ( nredundcol > 0 )
               printf ("+linearities");
-              printf ("=%ld",nredundcol+count[0]+count[1]);
+	   printf ("=%ld",nredundcol+count[0]+count[1]);
          }
         } /* end lrs_ofp != stdout */
 

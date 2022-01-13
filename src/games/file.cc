@@ -1059,7 +1059,7 @@ Game ReadGame(std::istream &p_file)
     GameXMLSavefile doc(buffer.str());
     return doc.GetGame();
   }
-  catch (InvalidFileException) {
+  catch (InvalidFileException &) {
     buffer.seekg(0, std::ios::beg);
   }
 

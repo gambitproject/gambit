@@ -286,13 +286,13 @@ lrs_getfirstbasis2 (lrs_dic ** D_p, lrs_dat * Q, lrs_dic * P2orig, lrs_mp_matrix
 /* assign local variables to structures */
 
   lrs_mp_matrix A;
-  long *B, *C, *Row, *Col;
+  long *B, *C, /* *Row, */ *Col;
   long *inequality;
   long *linearity;
   long hull = Q->hull;
   long m, d, lastdv, nlinearity, nredundcol;
 
-  static long ocount=0;
+  // static long ocount=0;
 
 
   m = D->m;
@@ -430,7 +430,7 @@ lrs_getfirstbasis2 (lrs_dic ** D_p, lrs_dat * Q, lrs_dic * P2orig, lrs_mp_matrix
       if (Q->verbose)
       {
       fprintf (lrs_ofp, "\nNumber of pivots for starting dictionary: %ld",Q->count[3]);
-      ocount=Q->count[3];
+      // ocount=Q->count[3];
       }
 
 /* Do dual pivots to get primal feasibility */
@@ -440,7 +440,7 @@ lrs_getfirstbasis2 (lrs_dic ** D_p, lrs_dat * Q, lrs_dic * P2orig, lrs_mp_matrix
       {
           fprintf (lrs_ofp, "\nNumber of pivots for feasible solution: %ld",Q->count[3]);
           fprintf (lrs_ofp, " - No feasible solution");
-          ocount=Q->count[3];
+          // ocount=Q->count[3];
       }
       return FALSE;
     }
@@ -448,7 +448,7 @@ lrs_getfirstbasis2 (lrs_dic ** D_p, lrs_dat * Q, lrs_dic * P2orig, lrs_mp_matrix
     if (Q->verbose)
      {
       fprintf (lrs_ofp, "\nNumber of pivots for feasible solution: %ld",Q->count[3]);
-      ocount=Q->count[3];
+      // ocount=Q->count[3];
      }
 
 
