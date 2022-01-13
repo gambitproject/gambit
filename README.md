@@ -1,3 +1,4 @@
+# Gambit
 
 This is the README file for Gambit, software tools for game theory.
 
@@ -6,5 +7,4 @@ Gambit website at
 http://www.gambit-project.org
 
 Instructions on installing Gambit can be found in the
-file INSTALL in this directory.
-
+file [INSTALL.md](INSTALL.md) in this directory.
