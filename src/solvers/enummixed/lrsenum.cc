@@ -306,7 +306,7 @@ lrs_getfirstbasis2 (lrs_dic ** D_p, lrs_dat * Q, lrs_dic * P2orig, lrs_mp_matrix
   A = D->A;
   B = D->B;
   C = D->C;
-  Row = D->Row;
+  // Row = D->Row;
   Col = D->Col;
   inequality = Q->inequality;
 
