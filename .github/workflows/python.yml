@@ -1,7 +1,7 @@
 name: pygambit Python extension
 
 on:
-  push:
+  pull_request:
 
 jobs:
   build:

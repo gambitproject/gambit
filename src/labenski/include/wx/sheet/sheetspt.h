@@ -191,7 +191,7 @@ private:
 // wxSheetSplitterEvent
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxSheetSplitterEvent : public wxNotifyEvent
+class /* WXDLLEXPORT */ wxSheetSplitterEvent : public wxNotifyEvent
 {
 public:
     wxSheetSplitterEvent(int id = 0, wxEventType type = wxEVT_NULL)
@@ -199,7 +199,8 @@ public:
 
     wxSheetSplitterEvent(const wxSheetSplitterEvent& event) : wxNotifyEvent(event), 
               m_sash_pos(event.m_sash_pos), m_vert_split(event.m_vert_split) { }
-    
+    virtual ~wxSheetSplitterEvent() { }
+
     // Get the current sash position, see also IsVerticalSplit for which sash.
     int GetSashPosition() const { return m_sash_pos; }
     // Set the sash position, during a wxEVT_SHEET_SPLIT_CHANGING you may 

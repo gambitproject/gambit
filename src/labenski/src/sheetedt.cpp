@@ -422,7 +422,7 @@ void wxSheetCellTextEditorRefData::CreateEditor(wxWindow* parent,
     SetControl(new wxTextCtrl(parent, id, wxEmptyString,
                               wxDefaultPosition, wxDefaultSize //,wxBORDER_NONE
 #if defined(__WXMSW__)
-                              , wxTE_PROCESS_TAB | wxTE_AUTO_SCROLL
+                              , wxTE_PROCESS_TAB
 #endif // defined(__WXMSW__)
                               ));
 

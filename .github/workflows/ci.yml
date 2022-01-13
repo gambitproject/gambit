@@ -1,4 +1,4 @@
-name: Build
+name: Build executables
 
 on:
   push:
@@ -35,3 +35,22 @@ jobs:
       - run: make
       - run: sudo make install
       - run: make osx-bundle
+
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: msys2/setup-msys2@v2
+        with:
+          install: mingw-w64-x86_64-toolchain make automake autoconf libtool
+      - run: pacman -S --noconfirm mingw-w64-x86_64-wxmsw3.1
+      - run: aclocal
+      - run: libtoolize
+      - run: automake --add-missing
+      - run: autoconf
+
+      - run: ./configure --disable-enumpoly --with-wx-config=wx-config-3.1
+      - run: make
