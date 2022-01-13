@@ -976,7 +976,7 @@ int lrs_solve_nash_legacy (int argc, char *argv[])
 void FillNonnegativityRows(lrs_dic * P, lrs_dat * Q, int firstRow, int lastRow, int n)
 {
   const int MAXCOL = 1000;      /* maximum number of columns */
-  long num[MAXCOL], den[MAXCOL];
+  long num[1000], den[1000];
   long row, col;
 
   for (row = firstRow; row <= lastRow; row++) {
@@ -995,7 +995,7 @@ void FillNonnegativityRows(lrs_dic * P, lrs_dat * Q, int firstRow, int lastRow, 
 void FillConstraintRows(lrs_dic * P, lrs_dat * Q, const game * g, int p1, int p2, int firstRow)
 {
   const int MAXCOL = 1000;      /* maximum number of columns */
-  long num[MAXCOL], den[MAXCOL];
+  long num[1000], den[1000];
   ratnum x;
   int row, s, t;
 
@@ -1018,7 +1018,7 @@ void FillConstraintRows(lrs_dic * P, lrs_dat * Q, const game * g, int p1, int p2
 void FillLinearityRow(lrs_dic * P, lrs_dat * Q, int m, int n)
 {
   const int MAXCOL = 1000;      /* maximum number of columns */
-  long num[MAXCOL], den[MAXCOL];
+  long num[1000], den[1000];
   int i;
 
   num[0] = -1;
@@ -1041,7 +1041,7 @@ void FillLinearityRow(lrs_dic * P, lrs_dat * Q, int m, int n)
 void FillFirstRow(lrs_dic * P, lrs_dat * Q, int n)
 {
   const int MAXCOL = 1000;      /* maximum number of columns */
-  long num[MAXCOL], den[MAXCOL];
+  long num[1000], den[1000];
   int i;
 
   for (i = 0; i < n; i++) {

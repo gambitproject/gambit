@@ -309,7 +309,7 @@ private:
       p->second = rand();
 #endif  // HAVE_DRAND48
       if (int_payoffs) {
-	p->second = (double) floor(p->second * AggNumber(int_factor));
+	p->second = nearbyint(p->second * AggNumber(int_factor));
       }
     }  
     bool int_payoffs;
