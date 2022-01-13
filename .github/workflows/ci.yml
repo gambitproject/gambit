@@ -54,3 +54,8 @@ jobs:
 
       - run: ./configure --disable-enumpoly --with-wx-config=wx-config-3.1
       - run: make
+
+      - uses: actions/upload-artifact@v2
+        with:
+          path: /**/*gambit*.exe
+          retention-days: 32
