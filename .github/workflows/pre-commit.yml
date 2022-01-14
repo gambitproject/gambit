@@ -1,0 +1,20 @@
+name: pre-commit
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+    - uses: pre-commit/action@v2.0.3
+      continue-on-error: true
+    - uses: peter-evans/create-pull-request@v3
+      with:
+        title: "Pyupgrade to Python 3.6"
+        branch: python-maint
+        base: python-maint
+        commit-message: "[Bot] Pyupgrade to Python 3.6"
