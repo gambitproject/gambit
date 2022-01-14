@@ -16,5 +16,5 @@ jobs:
       with:
         title: "Pyupgrade to Python 3.6"
         branch: python-maint
-        base: python-maint
+        base: py-36
         commit-message: "[Bot] Pyupgrade to Python 3.6"
