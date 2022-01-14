@@ -99,8 +99,8 @@ public:
   void getPayoffVector(AggNumberVector &dest, int player,int tp, const StrategyProfile &s);
   AggNumber getV (int player, int tp, int action,const StrategyProfile &s);
 
-  AggNumber getPurePayoff(int player, int tp, int *s);
-  AggNumber getPurePayoff(int player, int *s){
+  AggNumber getPurePayoff(int player, int tp, std::vector<int> &s);
+  AggNumber getPurePayoff(int player, std::vector<int> &s){
     AggNumber r=0;
     for(int i=0;i<numTypes[player];++i){
       r+= indepTypeDist[player][i] * getPurePayoff(player, i, s);

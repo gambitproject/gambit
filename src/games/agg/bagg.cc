@@ -270,7 +270,7 @@ AggNumber BAGG::getV (int player, int tp, int action,const StrategyProfile &s){
     return aggPtr->getV(player, typeAction2ActionIndex[player][tp][action], as);
 }
 
-AggNumber BAGG::getPurePayoff(int player, int tp, int *ps)
+AggNumber BAGG::getPurePayoff(int player, int tp, std::vector<int> &ps)
 {
   StrategyProfile st(strategyOffset[typeOffset[numPlayers]]);
   for (int i=0;i<strategyOffset[typeOffset[numPlayers]];i++) st[i]=(AggNumber) 0.0;

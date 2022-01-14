@@ -59,7 +59,7 @@ void BagentPureStrategyProfileRep::SetStrategy(const GameStrategy &s)
 Rational BagentPureStrategyProfileRep::GetPayoff(int pl) const
 {
   agg::BAGG *baggPtr = dynamic_cast<GameBagentRep &>(*m_nfg).baggPtr;
-  int s[m_nfg->NumPlayers()];
+  std::vector<int> s(m_nfg->NumPlayers());
   for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
     s[i-1] = m_profile[i]->GetNumber() - 1;
   }
@@ -73,7 +73,7 @@ BagentPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) c
 {
   int player = p_strategy->GetPlayer()->GetNumber();
   agg::BAGG *baggPtr = dynamic_cast<GameBagentRep &>(*m_nfg).baggPtr;
-  int s[m_nfg->NumPlayers()];
+  std::vector<int> s(m_nfg->NumPlayers());
   for (int i= 1; i <= m_nfg->NumPlayers(); i++) {
     s[i-1] = m_profile[i]->GetNumber() - 1;
   }
