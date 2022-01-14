@@ -197,7 +197,7 @@ BAGG *BAGG::makeRandomBAGG(int N,vector<int> &numTypes,vector<ProbDist> &TDist,i
   }
 
 
-  int actions[N];
+  std::vector<int> actions(N);
   for(int i=0;i<N;++i){
     actions[i]=aggActionSets[i].size();
   }

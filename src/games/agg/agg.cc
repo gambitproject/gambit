@@ -38,7 +38,7 @@ namespace agg {
 
 inline int select2nd(const pair <int,int> &x) { return x.second; } 
 
-AGG::AGG(int numPlayers,int* _actions, int numANodes, int _numPNodes, 
+AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNodes, 
  vector<vector<int> >& _actionSets, vector<vector<int> >& neighb,
  vector<projtype>& projTypes,
  vector<vector<aggdistrib > >& projS,
@@ -257,7 +257,7 @@ AGG *AGG::makeAGG(istream &in){
     stripComment(in);
 
     //enter sizes of action sets:
-    int* size = new int[n];
+    std::vector<int> size(n);
     for (i=0;i<n;i++){
       in >> size[i];
       if(in.eof()||in.fail()) {
@@ -392,7 +392,6 @@ AGG *AGG::makeAGG(istream &in){
     AGG *r=NULL;
     r=new AGG(n,size,S,P,ASets,neighb,projTypes,projS,proj,projF,Po,Pr,pays);
     if (!r)cout<<"Failed to allocate memory for new AGG";
-    delete [] size;
     return r;
   } else {
     cout << "Bad game file.\n";
@@ -401,7 +400,7 @@ AGG *AGG::makeAGG(istream &in){
 }
 
 
-AGG *AGG::makeRandomAGG(int n, int* actions, int S, int P, 
+AGG *AGG::makeRandomAGG(int n, std::vector<int> &actions, int S, int P, 
 vector<vector<int> >& ASets, vector<vector<int> >& neighb,
 vector<projtype>& projTypes, int seed, bool int_payoffs, int int_factor){
     int i,j;

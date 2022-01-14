@@ -85,13 +85,13 @@ public:
   static AGG* makeAGG(std::istream &in);
   
   //make AGG with random payoffs
-  static AGG* makeRandomAGG(int n, int* actions, int S, int P, 
+  static AGG* makeRandomAGG(int n, std::vector<int> &actions, int S, int P, 
 std::vector<std::vector<int> >& ASets, std::vector<std::vector<int> >& neighb,
 std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_factor=100);
 
 
   //constructor
-  AGG(int numPlayers, int * actions, int numANodes, int numPNodes,
+  AGG(int numPlayers, std::vector<int> &actions, int numANodes, int numPNodes,
    std::vector<std::vector<int> >& actionSets, std::vector<std::vector<int> >& neighbors,
    std::vector<projtype>& projTypes,
    std::vector<std::vector<aggdistrib > >& projS,
