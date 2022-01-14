@@ -68,7 +68,7 @@ kSymStrategyOffset(1,0)
 {
 
   //actions
-  actions=new int[numPlayers];
+  actions=std::vector<int>(numPlayers);
   strategyOffset= new int[numPlayers+1];
   strategyOffset[0]=0;
   maxActions=0;
@@ -626,7 +626,7 @@ void AGG:: doProjection(int Node, int i, AggNumber* s)
               s[j]);
   }
 }
-AggNumber AGG::getPurePayoff(int player, int *s){
+AggNumber AGG::getPurePayoff(int player, std::vector<int> &s){
   assert(player>=0 && player < numPlayers);
   int Node = actionSets[player][s[player]]; 
   int keylen = neighbors[Node].size();

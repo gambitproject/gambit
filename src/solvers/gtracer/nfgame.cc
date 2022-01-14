@@ -29,7 +29,7 @@
 namespace Gambit {
 namespace gametracer {
 
-nfgame::nfgame(int numPlayers, int *actions, const cvector &payoffs) : gnmgame(numPlayers, actions), payoffs(payoffs) {
+nfgame::nfgame(int numPlayers, std::vector<int> &actions, const cvector &payoffs) : gnmgame(numPlayers, actions), payoffs(payoffs) {
   blockSize = new int[numPlayers + 1];
   blockSize[0] = 1;
   for(int i = 1; i <= numPlayers; i++) {
@@ -41,7 +41,7 @@ nfgame::~nfgame() {
   delete[] blockSize;
 }
 
-int nfgame::findIndex(int player, int *s) {
+int nfgame::findIndex(int player, std::vector<int> &s) {
   int i, retIndex=player * blockSize[numPlayers];
   for(i = 0; i < numPlayers; i++)
     retIndex += blockSize[i] * s[i];

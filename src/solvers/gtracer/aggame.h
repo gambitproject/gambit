@@ -107,11 +107,11 @@ class aggame : public gnmgame {
       aggPtr->getKSymPayoffVector(d,playerClass,sp);
       std::copy(d.begin(),d.end(), dest.values());
     }
-    double getPurePayoff(int player, int* s){
+    double getPurePayoff(int player, std::vector<int> &s){
       return aggPtr->getPurePayoff(player,s);
     }
 
-    inline void setPurePayoff(int player, int *s, double value){
+    inline void setPurePayoff(int player, std::vector<int> &s, double value){
     	throw Gambit::UndefinedException();
     }
 

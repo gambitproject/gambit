@@ -29,7 +29,7 @@
 namespace Gambit {
 namespace gametracer {
 
-gnmgame::gnmgame(int numPlayers, int *actions): numPlayers(numPlayers) {
+  gnmgame::gnmgame(int numPlayers, std::vector<int> &actions): numPlayers(numPlayers) {
   int i;
   numStrategies = 1;
   for(i = 0; i < numPlayers; i++) {

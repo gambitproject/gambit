@@ -107,7 +107,6 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
 
   //destructor
   virtual ~AGG(){
-      delete [] actions;
       delete [] strategyOffset;
       //free projFunctions
       /*
@@ -160,7 +159,7 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
   AggNumber getJ(int player,int action, int player2,int action2,StrategyProfile &s);
 
 
-  AggNumber getPurePayoff(int player, int *s);
+  AggNumber getPurePayoff(int player, std::vector<int> &s);
   inline void printPayoffs(std::ostream &s, int node){
     s << payoffs.at(node).size()<<std::endl;
     s << payoffs[node];
@@ -210,7 +209,7 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
   //Data structure
 
   int numPlayers;
-  int *actions;
+  std::vector<int> actions;
 private:
   int *strategyOffset;
   int totalActions;

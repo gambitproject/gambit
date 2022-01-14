@@ -54,7 +54,7 @@ NashIPAStrategySolver::Solve(const Game &p_game,
     A = new aggame(dynamic_cast<GameAggRep &>(*p_game));
   }
   else {
-    int *actions = new int[p_game->NumPlayers()];
+    std::vector<int> actions(p_game->NumPlayers());
     int veclength = p_game->NumPlayers();
     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
       actions[pl-1] = p_game->GetPlayer(pl)->NumStrategies();
@@ -64,7 +64,7 @@ NashIPAStrategySolver::Solve(const Game &p_game,
   
     A = new nfgame(p_game->NumPlayers(), actions, payoffs);
   
-    int *profile = new int[p_game->NumPlayers()];
+    std::vector<int> profile(p_game->NumPlayers());
     for (StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {
       for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
 	profile[pl-1] = (*iter)->GetStrategy(pl)->GetNumber() - 1;

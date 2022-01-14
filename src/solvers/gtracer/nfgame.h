@@ -34,16 +34,16 @@ namespace gametracer {
 class nfgame : public gnmgame {
  public:
   friend std::ostream& operator<< (std::ostream& s, nfgame& g);
-  nfgame(int numPlayers, int *actions, const cvector &payoffs);
+  nfgame(int numPlayers, std::vector<int> &actions, const cvector &payoffs);
   ~nfgame();
 
   // Input: s[i] has integer index of player i's pure strategy
   // s is of length numPlayers
-  inline double getPurePayoff(int player, int *s) {
+  inline double getPurePayoff(int player, std::vector<int> &s) {
     return payoffs[findIndex(player, s)];
   }
 
-  inline void setPurePayoff(int player, int *s, double value) {
+  inline void setPurePayoff(int player, std::vector<int> &s, double value) {
     payoffs[findIndex(player, s)]= value;
   }
 
@@ -54,7 +54,7 @@ class nfgame : public gnmgame {
   
 
  private:
-  int findIndex(int player, int *s);
+  int findIndex(int player, std::vector<int> &s);
   void localPayoffMatrix(double *dest, int player1, int player2, cvector &s, double *m, int n);
   void localPayoffVector(double *dest, int player, cvector &s, double *m, int n);
   double localPayoff(cvector &s, double *m, int n);

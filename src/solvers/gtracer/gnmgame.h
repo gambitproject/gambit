@@ -37,16 +37,16 @@ class gnmgame {
  public:
   
   //actions[i] = number of actions player i has
-  gnmgame(int numPlayers, int *actions);
+  gnmgame(int numPlayers, std::vector<int> &actions);
   virtual ~gnmgame();
   
   
   
   // Input: s[i] has integer index of player i's pure strategy
   // s is of length numPlayers
-  virtual double getPurePayoff(int player, int *s) = 0; 
+  virtual double getPurePayoff(int player, std::vector<int> &s) = 0; 
 
-  virtual void setPurePayoff(int player, int *s, double value) = 0;
+  virtual void setPurePayoff(int player, std::vector<int> &, double value) = 0;
 
   // The actions of all players are combined in one linear array of length
   // numActions; this gives the index of a player's first action in the array.

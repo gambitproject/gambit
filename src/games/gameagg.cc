@@ -59,7 +59,7 @@ void AggPureStrategyProfileRep::SetStrategy(const GameStrategy &s)
 Rational AggPureStrategyProfileRep::GetPayoff(int pl) const
 {
   agg::AGG *aggPtr = dynamic_cast<GameAggRep &>(*m_nfg).aggPtr;
-  int s[aggPtr->getNumPlayers()];
+  std::vector<int> s(aggPtr->getNumPlayers());
   for (int i = 1; i <= aggPtr->getNumPlayers(); i++) {
     s[i-1] = m_profile[i]->GetNumber() -1;
   }
@@ -71,7 +71,7 @@ AggPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) cons
 {
   int player = p_strategy->GetPlayer()->GetNumber();
   agg::AGG *aggPtr = dynamic_cast<GameAggRep &>(*m_nfg).aggPtr;
-  int s[aggPtr->getNumPlayers()];
+  std::vector<int> s(aggPtr->getNumPlayers());
   for (int i = 1; i <= aggPtr->getNumPlayers(); i++) {
     s[i-1] = m_profile[i]->GetNumber() - 1;
   }
