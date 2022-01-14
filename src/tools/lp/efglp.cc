@@ -21,7 +21,6 @@
 //
 
 #include <cstdio>
-#include <unistd.h>
 #include <iostream>
 #include "gambit.h"
 #include "solvers/linalg/lpsolve.h"

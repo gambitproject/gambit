@@ -25,7 +25,6 @@
 #include <fstream>
 #include <cstdlib>
 #include <cerrno>
-#include <unistd.h>
 #include <getopt.h>
 #include "gambit.h"
 #include "efglogit.h"

@@ -24,7 +24,7 @@
 #include <iomanip>
 #include <fstream>
 #include <cstdlib>
-#include <unistd.h>
+#include <getopt.h>
 
 #include "gambit.h"
 #include "games/writer.h"
