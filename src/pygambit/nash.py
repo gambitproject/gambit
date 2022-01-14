@@ -36,7 +36,7 @@ class NashSolution(Solution):
         Solution.__init__(self, profile)
 
     def __repr__(self):
-        return "<NashProfile for '%s': %s>" % (self._profile.game.title, self._profile)
+        return f"<NashProfile for '{self._profile.game.title}': {self._profile}>"
 
 
 class ExternalSolver(object):

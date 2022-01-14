@@ -127,7 +127,7 @@ def fit_coghier(
     results = []
     for lam in scipy.linspace(min_lam, max_lam, grid_size):
         if verbose:
-            print("Searching lambda=%.3f" % lam)
+            print(f"Searching lambda={lam:.3f}")
         for tau in scipy.linspace(min_tau, max_tau, grid_size):
             profile = compute_coghier(game, tau, lam)
             profile.logL = log_like(profile, data)
@@ -137,7 +137,7 @@ def fit_coghier(
         if verbose:
             print("tau,lam,logL")
             for profile in results:
-                print("%f,%f,%f" % (profile.tau, profile.lam, profile.logL))
+                print(f"{profile.tau:f},{profile.lam:f},{profile.logL:f}")
             print()
 
     if verbose:
@@ -151,6 +151,6 @@ def fit_coghier(
         profile.logL = log_like(profile, data)
         results.append(profile)
         if verbose:
-            print("%f,%f,%f" % (profile.tau, profile.lam, profile.logL))
+            print(f"{profile.tau:f},{profile.lam:f},{profile.logL:f}")
     results.sort(lambda x, y: cmp(y.logL, x.logL))
     return results[0]

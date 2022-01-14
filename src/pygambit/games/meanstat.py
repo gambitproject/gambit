@@ -113,7 +113,7 @@ class Players(object):
         self.game = game
 
     def __repr__(self):
-        return "<Players in game '%s'>" % self.game.title
+        return f"<Players in game '{self.game.title}'>"
 
     def __len__(self):
         return self.game.N
@@ -130,7 +130,7 @@ class Outcome(object):
         self.index = index
 
     def __repr__(self):
-        return "<Strategy profile %s in game '%s'>" % (self.index, self.game.title)
+        return f"<Strategy profile {self.index} in game '{self.game.title}'>"
 
     def __eq__(self, other):
         if not isinstance(other, Outcome):

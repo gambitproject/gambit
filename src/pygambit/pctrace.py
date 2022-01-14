@@ -177,7 +177,7 @@ def trace_path(
         newT = q[-1]  # new tangent
         if sum(t * newT) < 0.0:
             # Bifurcation detected
-            print("Detected bifurcation near %f" % x[-1])
+            print(f"Detected bifurcation near {x[-1]:f}")
 
             omega = -omega
         t = newT[:]
