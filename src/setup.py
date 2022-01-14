@@ -28,27 +28,29 @@ import Cython.Build
 cppgambit = setuptools.Extension(
     "pygambit.lib.libgambit",
     sources=(
-        ["pygambit/lib/libgambit.pyx"] +
-        glob.glob("core/*.cc") +
-        glob.glob("games/*.cc") +
-        glob.glob("games/agg/*.cc") +
-        glob.glob("solvers/*/*.c") +
-        glob.glob("solvers/*/*.cc") +
-        ["tools/lp/nfglp.cc",
-         "tools/lp/efglp.cc",
-         "tools/logit/path.cc",
-         "tools/logit/nfglogit.cc",
-         "tools/logit/efglogit.cc"]
+        ["pygambit/lib/libgambit.pyx"]
+        + glob.glob("core/*.cc")
+        + glob.glob("games/*.cc")
+        + glob.glob("games/agg/*.cc")
+        + glob.glob("solvers/*/*.c")
+        + glob.glob("solvers/*/*.cc")
+        + [
+            "tools/lp/nfglp.cc",
+            "tools/lp/efglp.cc",
+            "tools/logit/path.cc",
+            "tools/logit/nfglogit.cc",
+            "tools/logit/efglogit.cc",
+        ]
     ),
     language="c++",
-    include_dirs=["."]
+    include_dirs=["."],
 )
 
 
 def readme():
     with open("README.rst") as f:
         return f.read()
-    
+
 
 setuptools.setup(
     name="pygambit",
@@ -63,7 +65,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
-        "Topic :: Scientific/Engineering :: Mathematics"
+        "Topic :: Scientific/Engineering :: Mathematics",
     ],
     keywords="game theory Nash equilibrium",
     license="GPL2+",
@@ -71,9 +73,7 @@ setuptools.setup(
     author_email="ted.turocy@gmail.com",
     url="http://www.gambit-project.org",
     python_requires=">=3.7",
-    install_requires=[
-        'lxml'  # used for reading/writing GTE files
-    ],
-    packages=['pygambit', 'pygambit.games', 'pygambit.lib'],
-    ext_modules=Cython.Build.cythonize(cppgambit)
+    install_requires=["lxml"],  # used for reading/writing GTE files
+    packages=["pygambit", "pygambit.games", "pygambit.lib"],
+    ext_modules=Cython.Build.cythonize(cppgambit),
 )

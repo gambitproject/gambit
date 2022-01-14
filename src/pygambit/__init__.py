@@ -28,6 +28,6 @@ __version__ = "16.0.1"
 Rational = lib.libgambit.Rational
 Decimal = lib.libgambit.Decimal
 
-class Game(lib.libgambit.Game): pass
 
-
+class Game(lib.libgambit.Game):
+    pass

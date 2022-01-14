@@ -26,22 +26,22 @@ File format interface with Game Theory Explorer
 
 from fractions import Fraction
 from lxml import etree
-    
+
 import pygambit.lib.libgambit
+
 
 def read_game_subtree(game, node, xml_node):
     if xml_node.get("player") is None:
         node.append_move(game.players.chance, len(xml_node))
     elif xml_node.get("iset") is not None:
-        p = game.players[int(xml_node.get("player"))-1]
+        p = game.players[int(xml_node.get("player")) - 1]
         try:
             node.append_move(p.infosets[xml_node.get("iset")])
         except IndexError:
             iset = node.append_move(p, len(xml_node))
             iset.label = xml_node.get("iset")
     elif xml_node.get("player") is not None:
-        node.append_move(game.players[int(xml_node.get("player"))-1],
-                         len(xml_node))
+        node.append_move(game.players[int(xml_node.get("player")) - 1], len(xml_node))
     for (i, xml_child) in enumerate(xml_node):
         if xml_child.get("prob") is not None:
             node.infoset.actions[i].prob = Fraction(xml_child.get("prob"))
@@ -50,9 +50,12 @@ def read_game_subtree(game, node, xml_node):
         if xml_child.tag == "outcome":
             node.children[i].outcome = game.outcomes.add()
             for (j, xml_payoff) in enumerate(xml_child.xpath("./payoff")):
-                node.children[i].outcome[int(xml_payoff.get("player"))-1] = Fraction(xml_payoff.text)
+                node.children[i].outcome[int(xml_payoff.get("player")) - 1] = Fraction(
+                    xml_payoff.text
+                )
         elif xml_child.tag == "node":
             read_game_subtree(game, node.children[i], xml_child)
+
 
 def read_game(f):
     tree = etree.parse(f)
@@ -66,14 +69,16 @@ def read_game(f):
     read_game_subtree(g, g.root, tree.xpath("/gte/extensiveForm/node")[0])
     return g
 
+
 def write_game_outcome(game, outcome, doc, xml_parent):
     for (i, p) in enumerate(game.players):
         if outcome is not None:
-            etree.SubElement(xml_parent, "payoff",
-                             player=p.label).text = str(outcome[i])
+            etree.SubElement(xml_parent, "payoff", player=p.label).text = str(
+                outcome[i]
+            )
         else:
-            etree.SubElement(xml_parent, "payoff",
-                             player=p.label).text = "0"
+            etree.SubElement(xml_parent, "payoff", player=p.label).text = "0"
+
 
 def write_game_node(game, node, doc, xml_node):
     if len(node.infoset.members) >= 2:
@@ -91,10 +96,10 @@ def write_game_node(game, node, doc, xml_node):
             xml_child.set("prob", str(node.infoset.actions[i].prob))
         xml_child.set("move", node.infoset.actions[i].label)
 
+
 def write_game_display(game, doc, xml_display):
     for (i, p) in enumerate(game.players):
-        color = etree.SubElement(xml_display, "color",
-                                 player=str(i+1))
+        color = etree.SubElement(xml_display, "color", player=str(i + 1))
         if i % 2 == 0:
             color.text = "#FF0000"
         else:
@@ -104,7 +109,8 @@ def write_game_display(game, doc, xml_display):
     etree.SubElement(xml_display, "nodeDiameter").text = "7"
     etree.SubElement(xml_display, "isetDiameter").text = "25"
     etree.SubElement(xml_display, "levelDistance").text = "75"
-        
+
+
 def write_game(game):
     gte = etree.Element("gte", version="0.1")
     doc = etree.ElementTree(gte)
@@ -113,13 +119,9 @@ def write_game(game):
     write_game_display(game, doc, display)
     players = etree.SubElement(gte, "players")
     for (i, p) in enumerate(game.players):
-        etree.SubElement(players, "player",
-                         playerId=str(i+1)).text = p.label
+        etree.SubElement(players, "player", playerId=str(i + 1)).text = p.label
     efg = etree.SubElement(gte, "extensiveForm")
     xml_root = etree.SubElement(efg, "node")
     write_game_node(game, game.root, doc, xml_root)
-                         
+
     return etree.tostring(doc, pretty_print=True, encoding="unicode")
-
-
-    

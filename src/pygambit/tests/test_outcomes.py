@@ -6,14 +6,14 @@ import pygambit
 
 class TestGambitOutcomes(unittest.TestCase):
     def setUp(self):
-        self.game = pygambit.Game.new_table([2,2])
+        self.game = pygambit.Game.new_table([2, 2])
         self.game.players[0].label = "joe"
         self.game.players[1].label = "dan"
         self.game.outcomes[0][0] = 1
         self.game.outcomes[0][1] = 2
         self.game.outcomes[1][0] = 3
         self.game.outcomes[1][1] = 4
-    
+
     def tearDown(self):
         del self.game
 
@@ -21,10 +21,10 @@ class TestGambitOutcomes(unittest.TestCase):
         "Test to verify outcome labels and indexing"
         self.game.outcomes[0].label = "trial"
         self.game.outcomes[1].label = "trial 2"
-        
+
         assert self.game.outcomes[0].label == "trial"
         assert self.game.outcomes[1].label == "trial 2"
-        
+
     def test_game_add_outcomes(self):
         "Test to verify outcome indexing"
         self.game.outcomes[0].label = "trial"
@@ -57,18 +57,18 @@ class TestGambitOutcomes(unittest.TestCase):
         self.assertRaises(TypeError, self.game.outcomes.__getitem__, 1.3)
 
     def test_getting_payoff_by_label_string(self):
-        assert(self.game.outcomes[0]['joe'] == 1)
-        assert(self.game.outcomes[0]['dan'] == 2)
-        assert(self.game.outcomes[1]['joe'] == 3)
-        assert(self.game.outcomes[1]['dan'] == 4)
+        assert self.game.outcomes[0]["joe"] == 1
+        assert self.game.outcomes[0]["dan"] == 2
+        assert self.game.outcomes[1]["joe"] == 3
+        assert self.game.outcomes[1]["dan"] == 4
 
     def test_getting_payoff_by_player(self):
         player1 = self.game.players[0]
         player2 = self.game.players[1]
-        assert(self.game.outcomes[0][player1] == 1)
-        assert(self.game.outcomes[0][player2] == 2)
-        assert(self.game.outcomes[1][player1] == 3)
-        assert(self.game.outcomes[1][player2] == 4)
+        assert self.game.outcomes[0][player1] == 1
+        assert self.game.outcomes[0][player2] == 2
+        assert self.game.outcomes[1][player1] == 3
+        assert self.game.outcomes[1][player2] == 4
 
     def test_outcome_delete(self):
         "Test to ensure it is possible to delete an outcome from the game"

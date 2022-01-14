@@ -27,46 +27,58 @@ Implementation of contest games.
 import meanstat
 from gambit.lib.libgambit import Rational
 
+
 class TullockGame(meanstat.MeanStatisticGame):
     """
     A Tullock contest game.
     """
-    def __init__(self, N, min_choice, max_choice, step_choice,
-                 prize, omega, cost=lambda e: e):
-        meanstat.MeanStatisticGame.__init__(self, N,
-                                            min_choice, max_choice, step_choice)
+
+    def __init__(
+        self, N, min_choice, max_choice, step_choice, prize, omega, cost=lambda e: e
+    ):
+        meanstat.MeanStatisticGame.__init__(
+            self, N, min_choice, max_choice, step_choice
+        )
         self.prize = prize
         self.omega = omega
         self.cost = cost
 
     @property
     def title(self):
-        return "Lottery choice game with N=%d, prize=%s, endowment=%s" % \
-               (self.N, self.prize, self.omega)
+        return "Lottery choice game with N=%d, prize=%s, endowment=%s" % (
+            self.N,
+            self.prize,
+            self.omega,
+        )
 
     def payoff(self, own, others):
         try:
             if isinstance(own, int):
-                p_win = Rational(own, own+others)
-                p_lose = Rational(others, own+others)
+                p_win = Rational(own, own + others)
+                p_lose = Rational(others, own + others)
             else:
-                p_win = 1.0 * own / (own+others)
-                p_lose = 1.0 * others / (own+others)
-            return p_win * (self.omega - self.cost(own) + self.prize) + \
-                   p_lose * (self.omega - self.cost(own))
+                p_win = 1.0 * own / (own + others)
+                p_lose = 1.0 * others / (own + others)
+            return p_win * (self.omega - self.cost(own) + self.prize) + p_lose * (
+                self.omega - self.cost(own)
+            )
         except ZeroDivisionError:
             return self.omega
 
 
 import math
 
+
 class GeneralTullockGame(meanstat.MeanStatisticGame):
     """A contest game with general 'r' for two players."""
-    def __init__(self, min_choice, max_choice, step_choice, prize, omega, r=1.0,
-                 cost=lambda e: e):
+
+    def __init__(
+        self, min_choice, max_choice, step_choice, prize, omega, r=1.0, cost=lambda e: e
+    ):
         # Note that this is only a mean-statistic game (trivially!) for two players.
-        meanstat.MeanStatisticGame.__init__(self, 2,
-                                            min_choice, max_choice, step_choice)
+        meanstat.MeanStatisticGame.__init__(
+            self, 2, min_choice, max_choice, step_choice
+        )
         self.prize = prize
         self.omega = omega
         self.r = r
@@ -74,8 +86,11 @@ class GeneralTullockGame(meanstat.MeanStatisticGame):
 
     @property
     def title(self):
-        return "GeneralTullockGame with N=2, prize=%s, endowment=%s, r=%s" % \
-               (self.prize, self.omega, self.r)
+        return "GeneralTullockGame with N=2, prize=%s, endowment=%s, r=%s" % (
+            self.prize,
+            self.omega,
+            self.r,
+        )
 
     def payoff(self, own, other):
         if self.r == 0.0:
@@ -93,8 +108,8 @@ class GeneralTullockGame(meanstat.MeanStatisticGame):
             p_other = math.pow(other, self.r)
         try:
             p_win = p_own / (p_own + p_other)
-            return p_win * (self.omega - self.cost(own) + self.prize) + \
-                   (1.0-p_win) * (self.omega - self.cost(own))
+            return p_win * (self.omega - self.cost(own) + self.prize) + (
+                1.0 - p_win
+            ) * (self.omega - self.cost(own))
         except ZeroDivisionError:
             return self.omega
-

@@ -20,10 +20,13 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 class MismatchError(ValueError):
-    """Raised when an operation between objects in different games 
+    """Raised when an operation between objects in different games
     is attempted"""
+
     pass
+
 
 class UndefinedOperationError(ValueError):
     """Raised when an operation is undefined"""
+
     pass

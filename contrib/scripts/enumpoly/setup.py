@@ -4,6 +4,4 @@
 from distutils.core import setup
 import py2exe
 
-setup(console=["enumphc.py"],
-      data_files=[(".",
-                   [ "phc.exe", "README" ])])
+setup(console=["enumphc.py"], data_files=[(".", ["phc.exe", "README"])])
