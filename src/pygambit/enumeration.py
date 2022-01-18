@@ -20,7 +20,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-class SupportEnumeration(object):
+class SupportEnumeration:
     def enumerate_supports(self, game):
         return self.admissible_supports(game.support_profile(), list(game.strategies))
 
@@ -43,13 +43,11 @@ class SupportEnumeration(object):
         else:
             elem = new_rest.pop()
 
-            for gen in self.admissible_supports(profile, new_rest):
-                yield gen
+            yield from self.admissible_supports(profile, new_rest)
 
             try:
                 new_profile = profile.remove(elem)
             except ValueError:
                 raise StopIteration
 
-            for gen in self.admissible_supports(new_profile, new_rest):
-                yield gen
+            yield from self.admissible_supports(new_profile, new_rest)

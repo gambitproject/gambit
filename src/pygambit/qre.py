@@ -109,7 +109,7 @@ class LogitQRE(Solution):
     @property
     def mu(self):       return 1.0 / self._lam
 
-class StrategicQREPathTracer(object):
+class StrategicQREPathTracer:
     """
     Compute the principal branch of the logit QRE correspondence of 'game'.
     """
@@ -170,9 +170,9 @@ class StrategicQREPathTracer(object):
 
     def compute_max_like(self, game, data):
         log_like = lambda data, profile: \
-                   sum([ x*math.log(y) for (x, y) in zip(data, profile) ])
+                   sum( x*math.log(y) for (x, y) in zip(data, profile) )
         diff_log_like = lambda data, point, tangent: \
-                        sum([ x*y for (x, y) in zip(data, tangent[:-1]) ])
+                        sum( x*y for (x, y) in zip(data, tangent[:-1]) )
 
         if game.is_symmetric:
             p = game.mixed_strategy_profile()
@@ -199,8 +199,8 @@ class StrategicQREPathTracer(object):
         the data.
         """
         def diff_dist(data, point, tangent):
-            return 2.0 * sum([ (math.exp(p)-d) * t * math.exp(p)
-                               for (p, t, d) in zip(point, tangent, data) ])
+            return 2.0 * sum( (math.exp(p)-d) * t * math.exp(p)
+                               for (p, t, d) in zip(point, tangent, data) )
 
         if game.is_symmetric:
             p = game.mixed_strategy_profile()

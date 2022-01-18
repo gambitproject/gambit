@@ -1,6 +1,3 @@
-
-
-
 #
 # Nim is a game in which players take turns removing pebbles from a pile
 # On each turn, a player may remove up to K pebbles

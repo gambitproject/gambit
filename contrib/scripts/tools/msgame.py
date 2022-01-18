@@ -18,7 +18,7 @@ def cartesian(L, *lists):
                 yield (x,)+y
 
 
-class MSGame(object):
+class MSGame:
     """
     A general mean statistic game: a symmetric game in which the
     player's payoff depends on his choice and the sum of the choices

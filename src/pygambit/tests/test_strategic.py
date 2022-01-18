@@ -1,7 +1,7 @@
 import pygambit
 import warnings
 
-class TestGambitStrategicGame(object):
+class TestGambitStrategicGame:
     def setUp(self):
         self.game = pygambit.Game.new_table([2,2])
     

@@ -20,7 +20,7 @@ def LaunchExternal(prog, game):
 
     return child_stdout
 
-class QRE(object):
+class QRE:
     """
     Container class representing a quantal response equilibrium
     """
@@ -33,8 +33,8 @@ class QRE(object):
         If the game's strategies have labels which are numeric, this
         returns the expected value of each player's choice under the profile
         """
-        return [ sum([self.profile[strategy] * float(strategy.GetLabel())
-                      for strategy in player.Strategies()])
+        return [ sum(self.profile[strategy] * float(strategy.GetLabel())
+                      for strategy in player.Strategies())
                  for player in self.profile.GetGame().Players() ]
 
 def ComputeQRE(game):
