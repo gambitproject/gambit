@@ -103,7 +103,7 @@ class LogitQRE(Solution):
         Solution.__init__(self, profile)
         self._lam = lam
     def __repr__(self):
-        return "<LogitQRE at lam=%f: %s>" % (self._lam, self._profile)
+        return f"<LogitQRE at lam={self._lam:f}: {self._profile}>"
     @property
     def lam(self):      return self._lam
     @property
@@ -255,7 +255,7 @@ class ExternalStrategicQREPathTracer(ExternalSolver):
     """
     def trace_strategic_path(self, game, max_lambda=1000000.0):
         profiles = [ ]
-        command_line = "gambit-logit -d 20 -m %f" % max_lambda
+        command_line = f"gambit-logit -d 20 -m {max_lambda:f}"
         for line in self.launch(command_line, game):
             entries = line.strip().split(",")
             profile = game.mixed_strategy_profile()
@@ -265,7 +265,7 @@ class ExternalStrategicQREPathTracer(ExternalSolver):
         return profiles
         
     def compute_at_lambda(self, game, lam):
-        command_line = "gambit-logit -d 20 -l %f" % lam
+        command_line = f"gambit-logit -d 20 -l {lam:f}"
         line = list(self.launch(command_line, game))[-1]
         entries = line.strip().split(",")
         profile = game.mixed_strategy_profile()

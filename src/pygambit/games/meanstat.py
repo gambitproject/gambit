@@ -77,7 +77,7 @@ class Player(object):
 class Players(object):
     def __init__(self, game):    self.game = game
     def __repr__(self):
-        return "<Players in game '%s'>" % self.game.title
+        return f"<Players in game '{self.game.title}'>"
     def __len__(self):           return self.game.N
     def __getitem__(self, i):
         if not isinstance(i, int) or i < 0 or i >= self.game.N:
@@ -89,8 +89,7 @@ class Outcome(object):
         self.game = game
         self.index = index
     def __repr__(self):
-        return "<Strategy profile %s in game '%s'>" % (self.index,
-                                                       self.game.title)
+        return f"<Strategy profile {self.index} in game '{self.game.title}'>"
     def __eq__(self, other):
         if not isinstance(other, Outcome):  return False
         return self.game == other.game and self.index == other.index
