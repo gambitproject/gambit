@@ -36,10 +36,11 @@ class NashSolution(Solution):
         Solution.__init__(self, profile)
 
     def __repr__(self):
-        return f"<NashProfile for '{self._profile.game.title}': {self._profile}>"
-
-
-class ExternalSolver(object):
+        return "<NashProfile for '{}': {}>".format(self._profile.game.title,
+                                               self._profile)
+    
+    
+class ExternalSolver:
     """
     Base class for managing calls to external programs.
     """

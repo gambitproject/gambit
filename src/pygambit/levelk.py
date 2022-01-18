@@ -22,7 +22,6 @@
 """Provides support for level-k/cognitive hierarchy modeling
 """
 
-from __future__ import print_function
 
 import math
 import scipy.optimize
@@ -32,9 +31,9 @@ from gambit.profiles import Solution
 
 def logit_br(game, profile, lam):
     def do_sum(maxi, logpi, lam, values):
-        logp = [logpi + lam * (values[j] - values[maxi]) for j in xrange(len(values))]
-        return sum([math.exp(p) for p in logp]) - 1.0
-
+        logp = [ logpi + lam * (values[j] - values[maxi])
+                for j in xrange(len(values)) ]
+        return sum( math.exp(p) for p in logp ) - 1.0
     values = profile.strategy_values()
     maxi = values.index(max(values))
     logp0 = scipy.optimize.newton(lambda x: do_sum(maxi, x, lam, values), 0.0)
@@ -109,7 +108,7 @@ def fit_coghier(
     """
 
     def log_like(profile, data):
-        return sum([math.log(p) * d for (p, d) in zip(profile, data)])
+        return sum( math.log(p) * d for (p, d) in zip(profile, data) )
 
     def objective(params, game, data):
         penalty = 0.0

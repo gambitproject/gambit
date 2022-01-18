@@ -22,7 +22,6 @@
 """Trace a smooth parameterized curve using a predictor-corrector method.
 """
 
-from __future__ import print_function
 
 import math
 import numpy

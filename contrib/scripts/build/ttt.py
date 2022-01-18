@@ -1,5 +1,3 @@
-
-
 import copy
 
 boardsize = 3

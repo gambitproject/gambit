@@ -27,8 +27,7 @@ Representation of mean-statistic games.
 
 import gambit
 
-
-class Strategy(object):
+class Strategy:
     def __init__(self, player, st):
         self.player = player
         self.st = st
@@ -53,11 +52,9 @@ class Strategy(object):
         return self.player != other.player or self.st != other.st
 
     @property
-    def label(self):
-        return self.player.game.labels[self.st]
-
-
-class Strategies(object):
+    def label(self):   return self.player.game.labels[self.st]
+        
+class Strategies:
     def __init__(self, player):
         self.player = player
 
@@ -75,9 +72,8 @@ class Strategies(object):
         if not isinstance(i, int) or i < 0 or i >= len(self):
             raise IndexError
         return Strategy(self.player, i)
-
-
-class Player(object):
+    
+class Player:
     def __init__(self, game, pl):
         self.game = game
         self.pl = pl
@@ -104,14 +100,10 @@ class Player(object):
         return Strategies(self)
 
     @property
-    def label(self):
-        return str(self.pl)
-
-
-class Players(object):
-    def __init__(self, game):
-        self.game = game
-
+    def label(self):   return str(self.pl)
+    
+class Players:
+    def __init__(self, game):    self.game = game
     def __repr__(self):
         return f"<Players in game '{self.game.title}'>"
 
@@ -123,15 +115,14 @@ class Players(object):
             raise IndexError
         return Player(self.game, i)
 
-
-class Outcome(object):
+class Outcome:
     def __init__(self, game, index):
         self.game = game
         self.index = index
 
     def __repr__(self):
-        return f"<Strategy profile {self.index} in game '{self.game.title}'>"
-
+        return "<Strategy profile {} in game '{}'>".format(self.index,
+                                                       self.game.title)
     def __eq__(self, other):
         if not isinstance(other, Outcome):
             return False
@@ -145,12 +136,12 @@ class Outcome(object):
     def __getitem__(self, pl):
         if not isinstance(pl, int) or pl < 0 or pl >= self.game.N:
             raise IndexError
-        total = sum([self.game.choices[c] for c in self.index])
+        total = sum( self.game.choices[c] for c in self.index )
         own = self.game.choices[self.index[pl]]
         return self.game.payoff(own, total - own)
 
 
-class MeanStatisticGame(object):
+class MeanStatisticGame:
     """
     A general mean statistic game: a symmetric game in which the
     player's payoff depends on his choice and the sum of the choices
@@ -223,9 +214,9 @@ class MeanStatisticGame(object):
         return g
 
 
-class MixedStrategyProfile(object):
-    """A (symmetric) mixed strategy profile on a mean statistic game."""
-
+class MixedStrategyProfile:
+    """A (symmetric) mixed strategy profile on a mean statistic game.
+    """
     def __init__(self, game, profile=None):
         self.game = game
         if profile is None:
@@ -274,57 +265,38 @@ class MixedStrategyProfile(object):
             self.profile = [x / den for x in self.profile]
 
     def strategy_value(self, st):
-        return sum(
-            [
-                prob * self.game.payoff(self.game.choices[st], self.game.statistics[i])
-                for (i, prob) in enumerate(self.sum_dist(self.game.N - 1, self.profile))
-            ]
-        )
+        return sum( prob * self.game.payoff(self.game.choices[st],
+                                             self.game.statistics[i])
+                     for (i, prob) in
+                     enumerate(self.sum_dist(self.game.N-1,
+                                             self.profile)) )
 
     def strategy_values(self):
-        oprob = self.sum_dist(self.game.N - 1, self.profile)
-
-        return [
-            sum(
-                [
-                    prob * self.game.payoff(st, self.game.statistics[i])
-                    for (i, prob) in enumerate(oprob)
-                ]
-            )
-            for st in self.game.choices
-        ]
+        oprob = self.sum_dist(self.game.N-1, self.profile)
+        
+        return [ sum( prob * self.game.payoff(st, self.game.statistics[i])
+                       for (i, prob) in enumerate(oprob) )
+                 for st in self.game.choices ]
 
     def strategy_value_deriv(self, st, stOpp):
-        return sum(
-            [
-                prob
-                * self.game.payoff(
-                    self.game.choices[st],
-                    self.game.statistics[i] + self.game.choices[stOpp],
-                )
-                for (i, prob) in enumerate(self.sum_dist(self.game.N - 2, self.profile))
-            ]
-        )
-
+        return sum( prob * self.game.payoff(self.game.choices[st],
+                                             self.game.statistics[i]+
+                                             self.game.choices[stOpp])
+                     for (i, prob) in
+                     enumerate(self.sum_dist(self.game.N-2,
+                                             self.profile)) )
+    
+        
+        
     def strategy_values_deriv(self):
-        oprob = self.sum_dist(self.game.N - 2, self.profile)
-
-        return [
-            [
-                sum(
-                    [
-                        prob
-                        * self.game.payoff(
-                            self.game.choices[st],
-                            self.game.statistics[i] + self.game.choices[stOpp],
-                        )
-                        for (i, prob) in enumerate(oprob)
-                    ]
-                )
-                for stOpp in self.game.choices
-            ]
-            for st in self.game.choices
-        ]
+        oprob = self.sum_dist(self.game.N-2, self.profile)
+        
+        return [ [ sum( prob * self.game.payoff(self.game.choices[st],
+                                                 self.game.statistics[i]+
+                                                 self.game.choices[stOpp])
+                         for (i, prob) in enumerate(oprob) )
+                   for stOpp in self.game.choices ]
+                 for st in self.game.choices ]
 
     def sum_dist(self, K, prob):
         """

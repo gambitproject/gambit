@@ -112,7 +112,6 @@ class LogitQRE(Solution):
 
     def __repr__(self):
         return f"<LogitQRE at lam={self._lam:f}: {self._profile}>"
-
     @property
     def lam(self):
         return self._lam
@@ -122,7 +121,7 @@ class LogitQRE(Solution):
         return 1.0 / self._lam
 
 
-class StrategicQREPathTracer(object):
+class StrategicQREPathTracer:
     """
     Compute the principal branch of the logit QRE correspondence of 'game'.
     """
@@ -198,12 +197,10 @@ class StrategicQREPathTracer(object):
             raise NotImplementedError
 
     def compute_max_like(self, game, data):
-        log_like = lambda data, profile: sum(
-            [x * math.log(y) for (x, y) in zip(data, profile)]
-        )
-        diff_log_like = lambda data, point, tangent: sum(
-            [x * y for (x, y) in zip(data, tangent[:-1])]
-        )
+        log_like = lambda data, profile: \
+                   sum( x*math.log(y) for (x, y) in zip(data, profile) )
+        diff_log_like = lambda data, point, tangent: \
+                        sum( x*y for (x, y) in zip(data, tangent[:-1]) )
 
         if game.is_symmetric:
             p = game.mixed_strategy_profile()
@@ -236,12 +233,8 @@ class StrategicQREPathTracer(object):
         """
 
         def diff_dist(data, point, tangent):
-            return 2.0 * sum(
-                [
-                    (math.exp(p) - d) * t * math.exp(p)
-                    for (p, t, d) in zip(point, tangent, data)
-                ]
-            )
+            return 2.0 * sum( (math.exp(p)-d) * t * math.exp(p)
+                               for (p, t, d) in zip(point, tangent, data) )
 
         if game.is_symmetric:
             p = game.mixed_strategy_profile()
