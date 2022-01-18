@@ -711,8 +711,6 @@ gambit_SOURCES = \
 	src/gui/app.h \
 	src/gui/edittext.cc \
 	src/gui/edittext.h \
-        src/gui/dcsvg.cc \
-        src/gui/dcsvg.h \
 	src/gui/dlabout.cc \
 	src/gui/dlabout.h \
 	src/gui/dleditmove.cc \

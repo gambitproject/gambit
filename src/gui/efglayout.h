@@ -138,21 +138,12 @@ public:
   void SetStyle(const gbtStyle *p_style) { m_style = p_style; }
 
   bool NodeHitTest(int p_x, int p_y) const;
-#if wxCHECK_VERSION(2,7,0)
   bool OutcomeHitTest(int p_x, int p_y) const
   { return (m_outcomeRect.Contains(p_x, p_y)); }
   bool BranchAboveHitTest(int p_x, int p_y) const
   { return (m_branchAboveRect.Contains(p_x, p_y)); }
   bool BranchBelowHitTest(int p_x, int p_y) const
   { return (m_branchBelowRect.Contains(p_x, p_y)); }
-#else
-  bool OutcomeHitTest(int p_x, int p_y) const
-  { return (m_outcomeRect.Inside(p_x, p_y)); }
-  bool BranchAboveHitTest(int p_x, int p_y) const
-  { return (m_branchAboveRect.Inside(p_x, p_y)); }
-  bool BranchBelowHitTest(int p_x, int p_y) const
-  { return (m_branchBelowRect.Inside(p_x, p_y)); }
-#endif
 
   const wxRect &GetOutcomeExtent(void) const { return m_outcomeRect; }
   const wxRect &GetPayoffExtent(int pl) const { return m_payoffRect[pl]; }

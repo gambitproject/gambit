@@ -26,11 +26,7 @@
 #endif  // WX_PRECOMP
 #include <wx/dnd.h>      // for drag-and-drop support
 #include <wx/print.h>    // for printing support
-#if wxCHECK_VERSION(2, 9, 0)
 #include <wx/dcsvg.h>    // for SVG output
-#else
-#include "dcsvg.h"
-#endif  /* wxCHECK_VERSION */
 
 #include "wx/sheet/sheet.h"
 
