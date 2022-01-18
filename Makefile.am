@@ -28,7 +28,6 @@ EXTRA_DIST = \
 	gambit.spec \
 	gambit.desktop \
         gambit.wxs \
-	license.rtf \
 	contrib/mac/Info.plist \
 	contrib/mac/gambit.icns \
 	src/labenski/README.txt \
@@ -245,61 +244,59 @@ EXTRA_DIST = \
 	contrib/games/winkels.nfg \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
-	src/python/setup.py \
-	src/python/gambit/__init__.py \
-	src/python/gambit/cmdline.py \
-	src/python/gambit/enumeration.py \
-	src/python/gambit/gameiter.py \
-	src/python/gambit/gte.py \
-	src/python/gambit/levelk.py \
-	src/python/gambit/nash.py \
-	src/python/gambit/pctrace.py \
-	src/python/gambit/profiles.py \
-	src/python/gambit/qre.py \
-	src/python/gambit/games/__init__.py \
-	src/python/gambit/games/contest.py \
-	src/python/gambit/games/meanstat.py \
-	src/python/gambit/games/public.py \
-	src/python/gambit/lib/__init__.py \
-	src/python/gambit/lib/action.pxi \
-	src/python/gambit/lib/basegame.pxi \
-	src/python/gambit/lib/behav.pxi \
-	src/python/gambit/lib/error.py \
-	src/python/gambit/lib/game.pxi \
-	src/python/gambit/lib/infoset.pxi \
-	src/python/gambit/lib/libgambit.cpp \
-	src/python/gambit/lib/libgambit.pyx \
-	src/python/gambit/lib/mixed.pxi \
-	src/python/gambit/lib/nash.pxi \
-	src/python/gambit/lib/node.pxi \
-	src/python/gambit/lib/outcome.pxi \
-	src/python/gambit/lib/player.pxi \
-	src/python/gambit/lib/strategy.pxi \
-	src/python/gambit/lib/stratspt.pxi \
-        src/python/gambit/lib/nash.h \
-	src/python/gambit/lib/util.h \
-	src/python/gambit/tests/test_actions.py \
-	src/python/gambit/tests/test_behav.py \
-	src/python/gambit/tests/test_extensive.py \
-	src/python/gambit/tests/test_game.py \
-	src/python/gambit/tests/test_infosets.py \
-	src/python/gambit/tests/test_mixed.py \
-	src/python/gambit/tests/test_node.py \
-	src/python/gambit/tests/test_outcomes.py \
-	src/python/gambit/tests/test_players.py \
-	src/python/gambit/tests/test_strategic.py \
-	src/python/gambit/tests/test_stratspt.py \
-	src/python/gambit/tests/test_stratprofiles.py \
-	src/python/gambit/tests/test_strategies.py \
-	src/python/gambit/tests/test_games/basic_extensive_game.efg \
-	src/python/gambit/tests/test_games/complicated_extensive_game.efg \
-	src/python/gambit/tests/test_games/const_sum_game.nfg \
-	src/python/gambit/tests/test_games/mixed_behavior_game.efg \
-	src/python/gambit/tests/test_games/mixed_strategy.nfg \
-	src/python/gambit/tests/test_games/non_const_sum_game.nfg \
-	src/python/gambit/tests/test_games/not_perfect_recall.efg \
-	src/python/gambit/tests/test_games/payoff_game.nfg \
-	src/python/gambit/tests/test_games/perfect_recall.efg
+	src/setup.py \
+	src/pygambit/__init__.py \
+	src/pygambit/enumeration.py \
+	src/pygambit/gameiter.py \
+	src/pygambit/gte.py \
+	src/pygambit/levelk.py \
+	src/pygambit/nash.py \
+	src/pygambit/pctrace.py \
+	src/pygambit/profiles.py \
+	src/pygambit/qre.py \
+	src/pygambit/games/__init__.py \
+	src/pygambit/games/contest.py \
+	src/pygambit/games/meanstat.py \
+	src/pygambit/games/public.py \
+	src/pygambit/lib/__init__.py \
+	src/pygambit/lib/action.pxi \
+	src/pygambit/lib/basegame.pxi \
+	src/pygambit/lib/behav.pxi \
+	src/pygambit/lib/error.py \
+	src/pygambit/lib/game.pxi \
+	src/pygambit/lib/infoset.pxi \
+	src/pygambit/lib/libgambit.pyx \
+	src/pygambit/lib/mixed.pxi \
+	src/pygambit/lib/nash.pxi \
+	src/pygambit/lib/node.pxi \
+	src/pygambit/lib/outcome.pxi \
+	src/pygambit/lib/player.pxi \
+	src/pygambit/lib/strategy.pxi \
+	src/pygambit/lib/stratspt.pxi \
+        src/pygambit/lib/nash.h \
+	src/pygambit/lib/util.h \
+	src/pygambit/tests/test_actions.py \
+	src/pygambit/tests/test_behav.py \
+	src/pygambit/tests/test_extensive.py \
+	src/pygambit/tests/test_game.py \
+	src/pygambit/tests/test_infosets.py \
+	src/pygambit/tests/test_mixed.py \
+	src/pygambit/tests/test_node.py \
+	src/pygambit/tests/test_outcomes.py \
+	src/pygambit/tests/test_players.py \
+	src/pygambit/tests/test_strategic.py \
+	src/pygambit/tests/test_stratspt.py \
+	src/pygambit/tests/test_stratprofiles.py \
+	src/pygambit/tests/test_strategies.py \
+	src/pygambit/tests/test_games/basic_extensive_game.efg \
+	src/pygambit/tests/test_games/complicated_extensive_game.efg \
+	src/pygambit/tests/test_games/const_sum_game.nfg \
+	src/pygambit/tests/test_games/mixed_behavior_game.efg \
+	src/pygambit/tests/test_games/mixed_strategy.nfg \
+	src/pygambit/tests/test_games/non_const_sum_game.nfg \
+	src/pygambit/tests/test_games/not_perfect_recall.efg \
+	src/pygambit/tests/test_games/payoff_game.nfg \
+	src/pygambit/tests/test_games/perfect_recall.efg
 
 
 core_SOURCES = \

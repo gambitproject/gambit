@@ -23,7 +23,7 @@ dnl
 AC_INIT([gambit],[16.0.1])
 AC_CONFIG_SRCDIR([src/gambit.h])
 AM_INIT_AUTOMAKE([subdir-objects foreign])
-AC_CONFIG_MACRO_DIR([m4])
+dnl AC_CONFIG_MACRO_DIR([m4])
 AM_OPTIONS_WXCONFIG
 
 dnl User-specified options
@@ -59,7 +59,7 @@ choke me
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
-LT_INIT
+dnl LT_INIT
 AM_PROG_CC_C_O
 MINGW_AC_WIN32_NATIVE_HOST
 AM_CONDITIONAL(IS_WIN32, [test x$mingw_cv_win32_host = xyes])

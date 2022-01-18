@@ -30,3 +30,8 @@ gambit.msi
 gambit.wixobj
 gambit.wixpdb
 installer
+compile
+depcomp
+install-sh
+missing
+gambit
