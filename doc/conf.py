@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Gambit documentation build configuration file, created by
 # sphinx-quickstart on Sun Mar 21 14:35:06 2010.
@@ -37,8 +36,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Gambit'
-copyright = u'1994-2014, The Gambit Project'
+project = 'Gambit'
+copyright = '1994-2014, The Gambit Project'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -172,8 +171,8 @@ htmlhelp_basename = 'Gambitdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Gambit.tex', u'Gambit Documentation',
-   u'The Gambit Project', 'manual'),
+  ('index', 'Gambit.tex', 'Gambit Documentation',
+   'The Gambit Project', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

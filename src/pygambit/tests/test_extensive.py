@@ -1,6 +1,6 @@
 import pygambit
 
-class TestGambitExtensiveGame(object):
+class TestGambitExtensiveGame:
 	def setUp(self):
 		self.game = pygambit.Game.new_tree()
 	

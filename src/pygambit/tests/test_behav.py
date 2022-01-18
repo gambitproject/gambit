@@ -1,8 +1,7 @@
-from __future__ import print_function
 import pygambit
 import fractions
 
-class TestGambitMixedBehavGame(object):
+class TestGambitMixedBehavGame:
     def setUp(self):
         self.game = pygambit.Game.read_game("test_games/mixed_behavior_game.efg")
         

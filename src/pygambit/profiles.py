@@ -23,7 +23,7 @@
 Base classes for strategy profiles.
 """
 
-class Solution(object):
+class Solution:
     """
     Generic object representing a strategy profile which is
     (part of) a solution of a game.

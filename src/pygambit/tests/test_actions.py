@@ -32,10 +32,10 @@ class TestGambitActions(unittest.TestCase):
         self.extensive_game.root.infoset.actions[0].prob = 2
         assert self.extensive_game.root.infoset.actions[0].prob == 2
 
-        self.failUnlessRaises(TypeError, setattr, self.extensive_game.root.infoset.actions[0], "prob", 2.0)
-        self.failUnlessRaises(TypeError, setattr, self.extensive_game.root.infoset.actions[0], "prob", "test")
-        self.failUnlessRaises(TypeError, setattr, self.extensive_game.root.infoset.actions[0], "prob", "1/7")
-        self.failUnlessRaises(TypeError, setattr, self.extensive_game.root.infoset.actions[0], "prob", "2.7")
+        self.assertRaises(TypeError, setattr, self.extensive_game.root.infoset.actions[0], "prob", 2.0)
+        self.assertRaises(TypeError, setattr, self.extensive_game.root.infoset.actions[0], "prob", "test")
+        self.assertRaises(TypeError, setattr, self.extensive_game.root.infoset.actions[0], "prob", "1/7")
+        self.assertRaises(TypeError, setattr, self.extensive_game.root.infoset.actions[0], "prob", "2.7")
 
     def test_action_precedes(self):
         "Test to ensure precedes is working"

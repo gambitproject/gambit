@@ -23,7 +23,7 @@
 Iterator tools over games in pure Python.
 """
 
-class Contingencies(object):
+class Contingencies:
     """
     An object representing the contingencies of strategies in a strategic game.
     Contingencies may be restricted by specifying the strategies of any number
@@ -51,9 +51,8 @@ class Contingencies(object):
             yield [ list(player.strategies).index(self.cont[player])
                     for player in self.game.players ]
             raise StopIteration
-        nextpl = min([ pl for (pl, player) in enumerate(self.game.players)
-                       if player not in self.cont ])
+        nextpl = min( pl for (pl, player) in enumerate(self.game.players)
+                       if player not in self.cont )
         for (st, strategy) in enumerate(self.game.players[nextpl].strategies):
-            for cont in self[strategy]:
-                yield cont
+            yield from self[strategy]
     
