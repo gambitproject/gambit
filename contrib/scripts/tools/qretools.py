@@ -9,7 +9,7 @@ def LaunchExternal(prog, game):
     """
     Helper function for launching calls to external progams
     """
-    child_stdin, child_stdout = os.popen2("%s -q" % prog)
+    child_stdin, child_stdout = os.popen2(f"{prog} -q")
     if game.IsTree():
         child_stdin.write(game.AsEfgFile())
     else:
@@ -62,7 +62,7 @@ def PlotAverages(profiles):
     ax = pylab.subplot(111)
     p = pylab.plot([ qre.lam/(1.0+qre.lam) for qre in profiles ],
                    [ qre.ExpectedChoice()[0] for qre in profiles ])
-    ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, pos: "%.2f" % (x/(1.0-x))))
+    ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, pos: f"{x / (1.0 - x):.2f}"))
     
     pylab.show()
     
