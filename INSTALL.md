@@ -36,7 +36,6 @@ github.com, via:
 After this, you will need to set up the build scripts by executing:
 
     aclocal
-    libtoolize
     automake --add-missing
     autoconf
 
@@ -54,8 +53,9 @@ the switch `--disable-enumpoly` at the configuration step, e.g.
 
     ./configure --disable-enumpoly [other options here]
 
-If you have problem building enumpoly, please file an issue giving
-your system and compiler details.
+There is a related issue in the issue tracker (#288); if you encounter problems
+building `gambit-enumpoly` (or want to contribute towards fixing it!) please
+use that issue to post information.
 
 
 ### For Windows users
@@ -71,7 +71,7 @@ http://www.mingw.org
 
 OS X users should being by following the Un\*x/Linux instructions above.
 This will create the command-line tools, and the graphical interface
-binary called 'gambit'.  This graphical interface binary requires an
+binary called `gambit`.  This graphical interface binary requires an
 X server to run correctly.
 
 For a more native OS X experience, after completing the Un*x/Linux
@@ -121,3 +121,20 @@ can either (a) simply not install wxWidgets, or (b) pass the argument
 
 This will just build the command-line tools, and will not require
 a wxWidgets installation.
+
+
+### pygambit Python extension
+
+Gambit is available as a Python extension module, called `pygambit`.
+Python versions 3.7 through 3.10 inclusive are supported.
+`pygambit` is available via PyPi and `pip`.
+
+If you wish to compile the extension module on your own, then you can
+
+    cd src
+    python setup.py build
+    python setup.py install
+
+As in general with Python, it is strongly recommended to install `pygambit`
+as part of a virtual environment rather than in the system's Python.
+
