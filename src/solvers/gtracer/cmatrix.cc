@@ -35,7 +35,6 @@ cvector::~cvector() { delete []x; }
 cmatrix::~cmatrix()
  { delete []x; }
 
-int cvector::num_vec_cons = 0;
 cmatrix cmatrix::inv(bool &worked) const {
 	if (m!=n) {
 		std::cerr << "invalid cmatrix inverse" << std::endl;

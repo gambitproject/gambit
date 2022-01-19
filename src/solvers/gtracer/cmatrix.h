@@ -52,33 +52,27 @@ public:
 class cvector {
 friend class cmatrix;
 public:
- static int num_vec_cons; 
 	inline cvector() {
-	  cvector::num_vec_cons++;
 		m = 1;
 		x = new double[1];
 	}
 	inline cvector(int m) {
-	  cvector::num_vec_cons++;
 		this->m = m;
 		x = new double[m];
 	}
 	~cvector(); 
 	inline cvector(const cvector &v) {
-	  cvector::num_vec_cons++;
 		m = v.m;
 		x = new double[m];
 		//for(int i=0;i<m;i++) x[i] = v.x[i];
 		memcpy(x,v.x,m*sizeof(double));
 	}
 	inline cvector(int m, const double &a) {
-	  cvector::num_vec_cons++;
 		this->m = m;
 		x = new double[m];
 		for(int i=0;i<m;i++) x[i] = a;
 	}
 	inline cvector(double *v, int m, bool keep=false) {
-	  cvector::num_vec_cons++;
 		this->m = m;
 		if (keep) x = v;
 		else {
@@ -205,21 +199,11 @@ public:
 	}
 	inline bool operator==(const cvector &v) const {
 		if (m!=v.m) return false;
-#if !defined(HAVE_BCMP)
-		for(int i=0;i<m;i++) if (v.x[i]!=x[i]) return false;
-		return true;
-#else
-		return bcmp(x,v.x,m*sizeof(double))==0;
-#endif // HAVE_BCMP
+		return memcmp(x,v.x,m*sizeof(double))==0;
 	}
 	inline bool IsEqual(cvector *v) const {
 		if (m!=v->m) return false;
-#if !defined(HAVE_BCMP)
-		for(int i=0;i<m;i++) if (v->x[i]!=x[i]) return false;
-		return true;
-#else
-		return bcmp(x,v->x,m*sizeof(double))==0;
-#endif // HAVE_BCMP
+		return memcmp(x,v->x,m*sizeof(double))==0;
 	}	
 	inline bool operator==(const double &a) const {
 		for(int i=0;i<m;i++) if (a!=x[i]) return false;
@@ -227,12 +211,7 @@ public:
 	}
 	inline bool operator!=(const cvector &v) const {
 		if (m!=v.m) return true;
-#if !defined(HAVE_BCMP)
-		for(int i=0;i<m;i++) if (v.x[i]!=x[i]) return true;
-		return false;
-#else
-		return bcmp(x,v.x,m*sizeof(double))!=0;
-#endif // HAVE_BCMP
+		return memcmp(x,v.x,m*sizeof(double))!=0;
 	}
 	inline bool operator!=(const double &a) const {
 		for(int i=0;i<m;i++) if (a!=x[i]) return true;
@@ -734,12 +713,7 @@ public:
 
 	inline bool operator==(const cmatrix &ma) const {
 		if (ma.n!=n||ma.m!=m) return false;
-#if !defined(HAVE_BCMP)
-		for(int i=0;i<s;i++) if (ma.x[i]!=x[i]) return false;
-		return true;
-#else
-		return bcmp(ma.x,x,s*sizeof(double))==0.0;
-#endif // HAVE_BCMP
+		return memcmp(ma.x,x,s*sizeof(double))==0;
 	}
 	inline bool operator==(const double &a) const {
 		for(int i=0;i<s;i++) if (x[i]!=a) return false;
@@ -747,12 +721,7 @@ public:
 	}
 	inline bool operator!=(const cmatrix &ma) const {
 		if (ma.n!=n||ma.m!=m) return true;
-#if !defined(HAVE_BCMP)
-		for(int i=0;i<s;i++) if (ma.x[i]!=x[i]) return true;
-		return false;
-#else
-		return bcmp(ma.x,x,s*sizeof(double))!=0.0;
-#endif // HAVE_BCMP
+		return memcmp(ma.x,x,s*sizeof(double))!=0;
 	}
 	inline bool operator!=(const double &a) const {
 		for(int i=0;i<s;i++) if (x[i]!=a) return true;
