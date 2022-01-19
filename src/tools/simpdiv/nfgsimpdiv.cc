@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
     { 0,    0,    0,    0   }
   };
   int c;
-  while ((c = getopt_long(argc, argv, "g:hVvn:r:s:d:qS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "g:hVvn:r:s:qS", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr); exit(1);
