@@ -3,8 +3,6 @@ name: Build executables
 on:
   push:
   pull_request:
-  schedule:
-    - cron:  '0 6 1 * *' # Run 1st of every month at 06:00 UTC
 
 jobs:
   linux:
