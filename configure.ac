@@ -83,12 +83,11 @@ if test x$with_gui = xtrue; then
             'wx-config --libs' command) is in LD_LIBRARY_PATH or
             equivalent variable and wxWidgets is version 3.1.0 or above.
       ])
-      GUI_PROGS=""
       AM_CONDITIONAL(WITH_GUI, test x0 = x1)
   fi
 fi
 
-if test "${WITH_GUI}" == 1; then
+if test x$with_gui = xtrue; then
   dnl-----------------------------
   dnl Checking for wxWidgets port
   dnl-----------------------------
@@ -102,7 +101,6 @@ if test "${WITH_GUI}" == 1; then
             port because this port does not implement drag-and-drop capability.
             Gambit recommends the GTK port of wxWidgets for best results.
     ])
-    GUI_PROGS=""
     AM_CONDITIONAL(WITH_GUI, test x0 = x1)
   fi
 
@@ -114,31 +112,30 @@ if test "${WITH_GUI}" == 1; then
             port because this port does not implement drag-and-drop capability.
             Gambit recommends the GTK port of wxWidgets for best results.
     ])
-    GUI_PROGS=""
     AM_CONDITIONAL(WITH_GUI, test x0 = x1)
   fi
 
   if test `echo ${WX_CXXFLAGS} | grep -c __WXGTK__` -eq 1; then
     AC_MSG_RESULT(GTK)
     WXPORT="GTK"
-    GUI_PROGS="gambit"
   fi
 
   if test `echo ${WX_CXXFLAGS} | grep -c __WXMSW__` -eq 1; then
     AC_MSG_RESULT(Windows)
     WXPORT="MSW"
-    GUI_PROGS="gambit"
     dnl Windows uses the resources file
-    RC_OBJECT="gambitrc.o"
-    RC_OBJECT_PATH="bitmaps/gambitrc.o"
-    AC_SUBST(RC_OBJECT)
-    AC_SUBST(RC_OBJECT_PATH)
+    dnl RC_OBJECT="gambitrc.o"
+    dnl RC_OBJECT_PATH="bitmaps/gambitrc.o"
+    dnl AC_SUBST(RC_OBJECT)
+    dnl AC_SUBST(RC_OBJECT_PATH)
+    dnl We insist on static build on Windows, not depending on
+    dnl a shared wxWidgets library.
+    WX_CXXFLAGS=`echo $WX_CXXFLAGS | sed 's/-DWXUSINGDLL//g'`
   fi
 
   if test `echo ${WX_CXXFLAGS} | grep -c __WXMAC__` -eq 1; then
     AC_MSG_RESULT(Macintosh)
     WXPORT="MAC"
-    GUI_PROGS="gambit"
   fi
 
   if test -z "$WXPORT"; then
@@ -146,16 +143,15 @@ if test "${WITH_GUI}" == 1; then
             Could not identify wxWidgets port.  Disabling build
             of Gambit graphical interface.
     ])
-    GUI_PROGS=""
     AM_CONDITIONAL(WITH_GUI, test x0 = x1)
   fi	
 fi
 
-AC_SUBST(GUI_PROGS)
-AC_SUBST(WX_CXXFLAGS)
 AC_SUBST(WX_LIBS)
-
+AC_SUBST(WX_LIBS_STATIC)
+AC_SUBST(WX_CXXFLAGS)
 AC_SUBST(ENUMPOLY_PROGS)
+
 
 REZFLAGS=`echo $CXXFLAGS $WX_CXXFLAGS | sed 's/-mthreads//g' | sed 's/-g//g' | sed 's/-O. / /g' | sed 's/-I/--include-dir /g'`
 AC_SUBST(REZFLAGS)

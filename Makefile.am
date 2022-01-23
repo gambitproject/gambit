@@ -423,11 +423,9 @@ gtracer_SOURCES = \
 	src/solvers/gtracer/gnm.cc \
 	src/solvers/gtracer/ipa.cc
 
-# libgambit_la_LDFLAGS = -no-undefined -version-info 0:0:0
-
 
 if IS_WIN32
-AM_LDFLAGS = -static-libgcc -static-libstdc++
+AM_LDFLAGS = -static -static-libgcc -static-libstdc++
 endif
 
 bin_PROGRAMS = \
@@ -759,9 +757,11 @@ gambit_SOURCES = \
 	src/gui/valnumber.h
 
 
-gambit_LDADD = \
-        $(RC_OBJECT_PATH) \
-	$(WX_LIBS)
+if IS_WIN32
+gambit_LDADD = $(RC_OBJECT_PATH) $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP
+else
+gambit_LDADD = $(RC_OBJECT_PATH) $(WX_LIBS)
+endif
 
 
 osx-bundle:
@@ -786,6 +786,6 @@ osx-dmg:  osx-bundle
 
 msw-msi: 
 	-mkdir installer
-	cp /usr/local/bin/gambit* installer
+	cp gambit* installer
 	candle gambit.wxs
 	light -ext WixUIExtension gambit.wixobj

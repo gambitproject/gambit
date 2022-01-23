@@ -22,7 +22,6 @@
             <Component Id="Gambit.exe" Guid="AEB0EAF8-246A-4194-9628-A4ED3092CD93">
                 <File Id="gambit.exe" Source="installer\gambit.exe" KeyPath="yes" Checksum="yes"/>
                 <File Id="gambit_enummixed.exe" Source="installer\gambit-enummixed.exe" Checksum="yes"/>
-                <File Id="gambit_enumpoly.exe" Source="installer\gambit-enumpoly.exe" Checksum="yes"/>
                 <File Id="gambit_enumpure.exe" Source="installer\gambit-enumpure.exe" Checksum="yes"/>
                 <File Id="gambit_gnm.exe" Source="installer\gambit-gnm.exe" Checksum="yes"/>
                 <File Id="gambit_ipa.exe" Source="installer\gambit-ipa.exe" Checksum="yes"/>

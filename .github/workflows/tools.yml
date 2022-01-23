@@ -9,24 +9,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: sudo apt-get install -y automake autoconf
+      - name: Install dependencies
+        run: |
+          sudo apt-key adv --fetch-keys http://repos.codelite.org/CodeLite.asc
+          sudo apt-add-repository 'deb https://repos.codelite.org/wx3.1.5/ubuntu/ focal universe'
+          sudo apt-get update
+          sudo apt-get install -y automake autoconf
+          sudo apt-get install -y libwxbase3.1-0-unofficial \
+                libwxbase3.1unofficial-dev \
+                libwxgtk3.1-0-unofficial \
+                libwxgtk3.1unofficial-dev \
+                wx3.1-headers \
+                wx-common
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
-
       - run: ./configure
       - run: make
       - run: sudo make install
-
+ 
   macos:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-      - run: brew install automake autoconf wxwidgets
+      - name: Install dependencies
+        run: brew install automake autoconf wxwidgets
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
-
       - run: ./configure
       - run: make
       - run: sudo make install
@@ -46,6 +56,17 @@ jobs:
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
-
-      - run: ./configure --disable-enumpoly --with-wx-config=wx-config-3.1
+      - run: ./configure --disable-enumpoly --with-wx-config=wx-config-3.1 
       - run: make
+      # We execute the installer build explicitly to put in the explicit paths to
+      # the WiX executables, rather than relying on the Makefile target
+      - name: Build .msi installer
+        run: |
+          mkdir installer
+          cp gambit* installer
+          "/c/Program Files (x86)/WiX Toolset v3.11/bin/candle" gambit.wxs
+          "/c/Program Files (x86)/WiX Toolset v3.11/bin/light" -ext WixUIExtension gambit.wixobj
+      - uses: actions/upload-artifact@v2
+        with:
+          path: "*.msi"
+
