@@ -1,7 +1,7 @@
 # cython: language_level=3str
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
+# Copyright (c) 1994-2022, The Gambit Project (http://www.gambit-project.org)
 #
 # FILE: src/python/gambit/lib/libgambit.pyx
 # Cython wrapper for Gambit C++ library

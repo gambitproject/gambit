@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2022, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: library/src/enummixed/lrsnash.cc
 // Compute Nash equilibria via enumerating extreme points using lrslib

@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
+# Copyright (c) 1994-2022, The Gambit Project (http://www.gambit-project.org)
 #
 # FILE: src/python/setup.py
 # Setuptools configuration file for Gambit Python extension
@@ -52,7 +52,7 @@ def readme():
 
 setuptools.setup(
     name="pygambit",
-    version="16.0.1",
+    version="16.0.2rc1",
     description="Software tools for game theory",
     long_description=readme(),
     classifiers=[
@@ -63,6 +63,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Scientific/Engineering :: Mathematics"
     ],
     keywords="game theory Nash equilibrium",
@@ -72,7 +73,8 @@ setuptools.setup(
     url="http://www.gambit-project.org",
     python_requires=">=3.7",
     install_requires=[
-        'lxml'  # used for reading/writing GTE files
+        'lxml',  # used for reading/writing GTE files
+        'scipy',
     ],
     packages=['pygambit', 'pygambit.games', 'pygambit.lib'],
     ext_modules=Cython.Build.cythonize(cppgambit)

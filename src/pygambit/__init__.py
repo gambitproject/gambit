@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
+# Copyright (c) 1994-2022, The Gambit Project (http://www.gambit-project.org)
 #
 # FILE: src/python/gambit/__init__.py
 # Top-level module file for gambit
@@ -24,7 +24,7 @@ from . import lib
 from . import nash
 from . import gte
 
-__version__ = "16.0.1"
+__version__ = "16.0.2rc1"
 Rational = lib.libgambit.Rational
 Decimal = lib.libgambit.Decimal
 

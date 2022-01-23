@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2022, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/gui/efgdisplay.cc
 // Implementation of window class to display extensive form tree

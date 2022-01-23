@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2022, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/liap/liap.cc
 // Compute Nash equilibria by minimizing Liapunov function
@@ -34,7 +34,7 @@ using namespace Gambit;
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by minimizing the Lyapunov function\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2016, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2022, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 

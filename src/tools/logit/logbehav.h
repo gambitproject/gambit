@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2016, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2022, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/logit/logbehav.h
 // Behavior strategy profile where action probabilities are represented using
