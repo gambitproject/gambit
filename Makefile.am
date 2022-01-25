@@ -514,7 +514,6 @@ gambit_enumpoly_SOURCES = \
 	src/tools/enumpoly/gpoly.cc \
 	src/tools/enumpoly/gpoly.h \
 	src/tools/enumpoly/gpoly.imp \
-	src/tools/enumpoly/gpolyctr.h \
 	src/tools/enumpoly/gpolylst.cc \
 	src/tools/enumpoly/gpolylst.h \
 	src/tools/enumpoly/gpolylst.imp \
