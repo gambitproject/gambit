@@ -41,11 +41,11 @@ public:
   
   /// @name General information
   //@{
-  int MinRow(void) const  { return T1.MinRow(); }
-  int MaxRow(void) const  { return T2.MaxRow(); }
-  int MinCol(void) const  { return T2.MinCol(); }
-  int MaxCol(void) const  { return T1.MaxCol(); }
-  T Epsilon(void) const   { return T1.Epsilon(); }
+  int MinRow() const  { return T1.MinRow(); }
+  int MaxRow() const  { return T2.MaxRow(); }
+  int MinCol() const  { return T2.MinCol(); }
+  int MaxCol() const  { return T1.MaxCol(); }
+  T Epsilon() const   { return T1.Epsilon(); }
   
   bool Member(int i) const  { return T1.Member(i) || T2.Member(i); }
   /// Return variable in i'th position of Tableau
@@ -59,17 +59,17 @@ public:
   bool CanPivot(int outgoing, int incoming) const;
   /// Perform apivot operation -- outgoing is row, incoming is column
   void Pivot(int outrow, int inlabel);
-  long NumPivots(void) const { return T1.NumPivots() + T2.NumPivots(); }
+  long NumPivots() const { return T1.NumPivots() + T2.NumPivots(); }
   //@}
 
   /// @name Raw Tableau functions
   //@{
-  void Refactor(void) { T1.Refactor(); T2.Refactor(); }
+  void Refactor() { T1.Refactor(); T2.Refactor(); }
   //@}
   
   /// @name Miscellaneous functions
   //@{
-  BFS<T> GetBFS(void);
+  BFS<T> GetBFS();
 
   int PivotIn(int i);
   int ExitIndex(int i);

@@ -36,7 +36,7 @@ friend Vector<T> operator*<>(const Vector<T> &, const Matrix<T> &);
 public:
   /// @name Lifecycle
   //@{
-  Matrix(void);
+  Matrix();
   Matrix(unsigned int rows, unsigned int cols);
   Matrix(unsigned int rows, unsigned int cols, int minrows);
   Matrix(int rl, int rh, int cl, int ch);
@@ -68,7 +68,7 @@ public:
   Matrix<T> &operator+=(const Matrix<T> &);
   Matrix<T> &operator-=(const Matrix<T> &);
 
-  Matrix<T> operator-(void);
+  Matrix<T> operator-();
   //@}
 
 
@@ -93,9 +93,9 @@ public:
 
   /// @name Other operations
   //@{
-  Matrix<T> Transpose(void) const;
+  Matrix<T> Transpose() const;
   /// Set matrix to identity matrix
-  void MakeIdent(void);  
+  void MakeIdent();  
   void Pivot(int, int);
   //@}
 };

@@ -14,7 +14,7 @@ free all data structures on the symbol table;
 ------------------------------------------------------------------*/
 void init_symbol_table()
 { int i;
- for(i=0;i<HASHSIZE;i++) hashtab[i]=0;
+ for(i=0;i<HASHSIZE;i++) hashtab[i]=nullptr;
 }
 
 
@@ -24,7 +24,7 @@ int i;
 Sym_ent np,np1;
 for(i=0;i<HASHSIZE;i++) {
    np=hashtab[i];
-   while(np!=0) { np1=np;
+   while(np!=nullptr) { np1=np;
                   np=np->next;
                   free_Gen_list(np1->def);
                   mem_free(np1->name); 
@@ -51,9 +51,9 @@ int hash(char *s)
 
 Sym_ent Slookup(char *s)
  { Sym_ent np;
-   for(np=hashtab[hash(s)]; np!=0;np=np->next)
+   for(np=hashtab[hash(s)]; np!=nullptr;np=np->next)
        if (strcmp(s,np->name)== 0) return(np);
-  return 0;
+  return nullptr;
   }
 
 /* --------------------------------------------------------------------
@@ -76,10 +76,10 @@ Sym_ent install(char *s, Gen_node t)
   Sym_ent np; // Sym_ent lookup();
  int hashval;
 
- if (s==NULL||t==NULL) return NULL;
- if((np=Slookup(s))==NULL) {
+ if (s==nullptr||t==nullptr) return nullptr;
+ if((np=Slookup(s))==nullptr) {
     np=(Sym_ent)mem_malloc(sizeof(struct Sym_ent_tag)); 
-    if (np==NULL) bad_error("malloc bad malloc in install");
+    if (np==nullptr) bad_error("malloc bad malloc in install");
     np->name=Copy_String(s); 
     hashval=hash(np->name);
     np->next=hashtab[hashval];
@@ -95,7 +95,7 @@ Sym_ent install(char *s, Gen_node t)
     }
     else {
       fprintf(stderr /* was Pel_Err */,"warning trying to reinstall a reserved symbol (%s)\n",s);
-     return NULL;
+     return nullptr;
     }
 return np;
 }
@@ -116,9 +116,9 @@ Int locked(Sym_ent s)
 -----------------------------------------------------------------*/
   
 Sym_ent lock(Sym_ent s)
-{ if (s!=NULL) s->lock=1;
+{ if (s!=nullptr) s->lock=1;
   return s;}
 
 int locked(Sym_ent s)
-{ if (s==NULL) return 0;
+{ if (s==nullptr) return 0;
   return s->lock;}

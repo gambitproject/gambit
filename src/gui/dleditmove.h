@@ -37,10 +37,10 @@ public:
   gbtEditMoveDialog(wxWindow *p_parent, Gambit::GameInfoset p_infoset);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  wxString GetInfosetName(void) const { return m_infosetName->GetValue(); }
-  int GetPlayer(void) const { return (m_player->GetSelection() + 1); }
+  wxString GetInfosetName() const { return m_infosetName->GetValue(); }
+  int GetPlayer() const { return (m_player->GetSelection() + 1); }
 
-  int NumActions(void) const;
+  int NumActions() const;
   wxString GetActionName(int p_act) const;
   wxString GetActionProb(int p_act) const; 
 };

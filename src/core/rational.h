@@ -41,7 +41,7 @@ protected:
   void normalize();
 
 public:
-  Rational(void);
+  Rational();
   Rational(double);
   Rational(int);
   Rational(long n);
@@ -71,7 +71,7 @@ public:
   Rational &operator*=(const Rational& y);
   Rational &operator/=(const Rational& y);
 
-  Rational operator-(void) const;
+  Rational operator-() const;
 
 
   // builtin Rational functions
@@ -111,7 +111,7 @@ public:
   friend void      div(const Rational& x, const Rational& y, Rational& dest);
 
   // error detection
-  bool OK(void) const;
+  bool OK() const;
 
 };
 

@@ -43,7 +43,7 @@ private:
   int m_frozen1, m_frozen2;
   
   /// Reset the iterator to the first contingency (this is called by ctors)
-  void First(void);
+  void First();
 
 public:
   /// @name Lifecycle
@@ -62,16 +62,16 @@ public:
   /// @name Iteration and data access
   //@{
   /// Advance to the next contingency (prefix version)
-  void operator++(void);
+  void operator++();
   /// Advance to the next contingency (postfix version)
   void operator++(int) { ++(*this); }
   /// Has iterator gone past the end?
-  bool AtEnd(void) const { return m_atEnd; }
+  bool AtEnd() const { return m_atEnd; }
 
   /// Get the current strategy profile
-  PureStrategyProfile &operator*(void) { return m_profile; }
+  PureStrategyProfile &operator*() { return m_profile; }
   /// Get the current strategy profile
-  const PureStrategyProfile &operator*(void) const { return m_profile; }
+  const PureStrategyProfile &operator*() const { return m_profile; }
   //@}
 };
 

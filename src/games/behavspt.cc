@@ -80,7 +80,7 @@ bool BehaviorSupportProfile::operator==(const BehaviorSupportProfile &p_support)
 //                 BehaviorSupportProfile: General information
 //========================================================================
 
-PVector<int> BehaviorSupportProfile::NumActions(void) const
+PVector<int> BehaviorSupportProfile::NumActions() const
 {
   PVector<int> answer(m_efg->NumInfosets());
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
@@ -106,7 +106,7 @@ int BehaviorSupportProfile::GetIndex(const GameAction &a) const
   }
 }
 
-int BehaviorSupportProfile::NumDegreesOfFreedom(void) const
+int BehaviorSupportProfile::NumDegreesOfFreedom() const
 {
   int answer = 0;
   PVector<int> reachable(GetGame()->NumInfosets());
@@ -125,7 +125,7 @@ bool BehaviorSupportProfile::HasActiveActionAt(const GameInfoset &infoset) const
   return (m_actions[infoset->GetPlayer()->GetNumber()][infoset->GetNumber()].Length() > 0);
 }
 
-bool BehaviorSupportProfile::HasActiveActionsAtAllInfosets(void) const
+bool BehaviorSupportProfile::HasActiveActionsAtAllInfosets() const
 {
   for (int pl = 1; pl <= m_actions.Length(); pl++) {
     for (int iset = 1; iset <= m_actions[pl].Length(); iset++) {
@@ -208,7 +208,7 @@ int BehaviorSupportProfile::NumSequences(int j) const
   return num;
 }
 
-int BehaviorSupportProfile::NumSequences(void) const
+int BehaviorSupportProfile::NumSequences() const
 {
   int total = 0;
   for (int i = 1 ; i <= m_efg->NumPlayers(); i++)
@@ -303,7 +303,7 @@ private:
   Array<int> m_numActiveInfosets;
 
   /// Reset the iterator to the first contingency (this is called by ctors)
-  void First(void); 
+  void First(); 
 
 public:
   /// @name Lifecycle
@@ -314,15 +314,15 @@ public:
   /// @name Iteration and data access
   //@{
   /// Advance to the next contingency (prefix version) 
-  void operator++(void);
+  void operator++();
   /// Advance to the next contingency (postfix version) 
   void operator++(int) { ++(*this); }
   /// Has iterator gone past the end?
-  bool AtEnd(void) const { return m_atEnd; }
+  bool AtEnd() const { return m_atEnd; }
   /// Get the current behavior profile
-  const PureBehaviorProfile &operator*(void) const { return m_profile; }
+  const PureBehaviorProfile &operator*() const { return m_profile; }
   /// Get the current behavior profile
-  const PureBehaviorProfile *const operator->(void) const { return &m_profile; }
+  const PureBehaviorProfile *const operator->() const { return &m_profile; }
   //@}
 };
 
@@ -347,7 +347,7 @@ BehavConditionalIterator::BehavConditionalIterator(const BehaviorSupportProfile 
   First();
 }
 
-void BehavConditionalIterator::First(void)
+void BehavConditionalIterator::First()
 {
   for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++)  {
     for (int iset = 1; iset <= m_support.GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
@@ -359,7 +359,7 @@ void BehavConditionalIterator::First(void)
   }
 }
 
-void BehavConditionalIterator::operator++(void)
+void BehavConditionalIterator::operator++()
 {
   int pl = m_support.GetGame()->NumPlayers();
   while (pl > 0 && m_numActiveInfosets[pl] == 0)
@@ -693,7 +693,7 @@ BehaviorSupportProfile::ReachableMembers(const GameInfoset &i) const
 }
 
 List<GameNode>
-BehaviorSupportProfile::ReachableNonterminalNodes(void) const
+BehaviorSupportProfile::ReachableNonterminalNodes() const
 {
   List<GameNode> answer;
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
@@ -730,7 +730,7 @@ bool BehaviorSupportProfile::IsActive(const GameNode &n) const
     [n->GetInfoset()->GetNumber()][n->NumberInInfoset()];
 }
 
-bool BehaviorSupportProfile::HasActiveActionsAtActiveInfosets(void) const
+bool BehaviorSupportProfile::HasActiveActionsAtActiveInfosets() const
 {
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
     for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
@@ -742,7 +742,7 @@ bool BehaviorSupportProfile::HasActiveActionsAtActiveInfosets(void) const
   return true;
 }
 
-bool BehaviorSupportProfile::HasActiveActionsAtActiveInfosetsAndNoOthers(void) const
+bool BehaviorSupportProfile::HasActiveActionsAtActiveInfosetsAndNoOthers() const
 {
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
     for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {

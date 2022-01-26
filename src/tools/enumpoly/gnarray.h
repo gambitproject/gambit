@@ -35,7 +35,7 @@ template <class T> class gNArray   {
     Gambit::Array<int> dim;
 
   public:
-    gNArray(void);
+    gNArray();
     gNArray(const Gambit::Array<int> &d);
     gNArray(const gNArray<T>& a);
     ~gNArray();
@@ -53,7 +53,7 @@ template <class T> class gNArray   {
     const T &operator[](long l) const;
     T &operator[](long l);
 
-    const Gambit::Array<int> &Dimensionality(void) const;
+    const Gambit::Array<int> &Dimensionality() const;
 };
 
 #endif    // GNARRAY_H

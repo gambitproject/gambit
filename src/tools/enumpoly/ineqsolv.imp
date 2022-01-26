@@ -51,7 +51,7 @@ template<class T> IneqSolv<T>::IneqSolv(const IneqSolv& qs)
 { }
 
 template<class T> IneqSolv<T>::~IneqSolv()
-{ }
+= default;
 
 //----------------------------------
 //        Operators

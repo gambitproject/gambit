@@ -39,12 +39,12 @@ private:
 public:
   gbtLayoutNodesPanel(wxWindow *p_parent, const gbtStyle &p_settings);
 
-  int NodeSize(void) const { return m_nodeSize->GetValue(); }
-  int TerminalSpacing(void) const { return m_terminalSpacing->GetValue(); }
+  int NodeSize() const { return m_nodeSize->GetValue(); }
+  int TerminalSpacing() const { return m_terminalSpacing->GetValue(); }
   
-  int ChanceToken(void) const { return m_chanceToken->GetSelection(); }
-  int PlayerToken(void) const { return m_playerToken->GetSelection(); }
-  int TerminalToken(void) const { return m_terminalToken->GetSelection(); }
+  int ChanceToken() const { return m_chanceToken->GetSelection(); }
+  int PlayerToken() const { return m_playerToken->GetSelection(); }
+  int TerminalToken() const { return m_terminalToken->GetSelection(); }
 };
 
 
@@ -147,11 +147,11 @@ private:
 public:
   gbtLayoutBranchesPanel(wxWindow *p_parent, const gbtStyle &);
 
-  int BranchLength(void) const { return m_branchLength->GetValue(); }
-  int TineLength(void) const { return m_tineLength->GetValue(); }
+  int BranchLength() const { return m_branchLength->GetValue(); }
+  int TineLength() const { return m_tineLength->GetValue(); }
 
-  int BranchStyle(void) const { return m_branchStyle->GetSelection(); }
-  int BranchLabels(void) const { return m_branchLabels->GetSelection(); }
+  int BranchStyle() const { return m_branchStyle->GetSelection(); }
+  int BranchLabels() const { return m_branchLabels->GetSelection(); }
 };
 
 gbtLayoutBranchesPanel::gbtLayoutBranchesPanel(wxWindow *p_parent,
@@ -236,8 +236,8 @@ private:
 public:
   gbtLayoutInfosetsPanel(wxWindow *p_parent, const gbtStyle &);
 
-  int InfosetConnect(void) const { return m_infosetConnect->GetSelection(); }
-  int InfosetJoin(void) const { return m_infosetJoin->GetSelection(); }
+  int InfosetConnect() const { return m_infosetConnect->GetSelection(); }
+  int InfosetJoin() const { return m_infosetJoin->GetSelection(); }
 };
 
 gbtLayoutInfosetsPanel::gbtLayoutInfosetsPanel(wxWindow *p_parent,

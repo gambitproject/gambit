@@ -45,8 +45,8 @@ namespace {
 
 class gbtNotNashException : public Exception {
 public:
-  virtual ~gbtNotNashException() throw() { }
-  const char *what(void) const throw() 
+  virtual ~gbtNotNashException() noexcept = default;
+  const char *what() const noexcept 
   { return "Output line does not contain a Nash equilibrium"; }
 };
 
@@ -115,7 +115,7 @@ gbtAnalysisProfileList<T>::AddOutput(const wxString &p_output)
 }
 
 template <class T>
-void gbtAnalysisProfileList<T>::BuildNfg(void)
+void gbtAnalysisProfileList<T>::BuildNfg()
 {
   for (int i = 1; i <= m_behavProfiles.Length(); i++) {
     m_mixedProfiles.Append(m_behavProfiles[i].ToMixedProfile());
@@ -123,7 +123,7 @@ void gbtAnalysisProfileList<T>::BuildNfg(void)
 }
 
 template <class T>
-int gbtAnalysisProfileList<T>::NumProfiles(void) const
+int gbtAnalysisProfileList<T>::NumProfiles() const
 {
   if (m_doc->IsTree()) {
     return m_behavProfiles.Length();
@@ -134,7 +134,7 @@ int gbtAnalysisProfileList<T>::NumProfiles(void) const
 }
 
 template <class T>
-void gbtAnalysisProfileList<T>::Clear(void)
+void gbtAnalysisProfileList<T>::Clear()
 {
   m_behavProfiles = List<MixedBehaviorProfile<T> >();
   m_mixedProfiles = List<MixedStrategyProfile<T> >();

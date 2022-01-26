@@ -30,7 +30,7 @@ namespace Gambit {
 template <class T> class PVector : public Vector<T> {
  private:
   int sum(const Array<int> &V) const;
-  void setindex(void);
+  void setindex();
 
  protected:
   T **svptr;
@@ -42,7 +42,7 @@ template <class T> class PVector : public Vector<T> {
 
   // constructors
 
-  PVector(void);
+  PVector();
   PVector(const Array<int> &sig);
   PVector(const Vector<T> &val, const Array<int> &sig);
   PVector(const PVector<T> &v);
@@ -67,7 +67,7 @@ template <class T> class PVector : public Vector<T> {
 
   PVector<T> operator+(const PVector<T> &v) const;
   PVector<T>& operator+=(const PVector<T> &v);
-  PVector<T> operator-(void) const;
+  PVector<T> operator-() const;
   PVector<T> operator-(const PVector<T> &v) const;
   PVector<T>& operator-=(const PVector<T> &v);
   T operator*(const PVector<T> &v) const;
@@ -79,7 +79,7 @@ template <class T> class PVector : public Vector<T> {
   bool operator!=(const PVector<T> &v) const;
 
   // parameter access functions
-  const Array<int>& Lengths(void) const;
+  const Array<int>& Lengths() const;
 };
 
 } // end namespace Gambit

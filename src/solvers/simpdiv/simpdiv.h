@@ -58,7 +58,7 @@ private:
     int t, ibar;
     Rational d, pay, maxz, bestz;
     
-    State(void) : t(0), ibar(1), bestz(1.0e30) { }
+    State() : t(0), ibar(1), bestz(1.0e30) { }
     Rational getlabel(MixedStrategyProfile<Rational> &yy, Array<int> &, 
 		      PVector<Rational> &);
   };

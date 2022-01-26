@@ -35,7 +35,7 @@ namespace Nash {
 
 template <class T> class StrategyProfileRenderer {
 public:
-  virtual ~StrategyProfileRenderer() { }
+  virtual ~StrategyProfileRenderer() = default;
   virtual void Render(const MixedStrategyProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const = 0;
   virtual void Render(const MixedBehaviorProfile<T> &p_profile,
@@ -49,7 +49,7 @@ public:
 //
 template <class T> class MixedStrategyRenderer : public StrategyProfileRenderer<T> {
 public:
-  virtual ~MixedStrategyRenderer() { }
+  virtual ~MixedStrategyRenderer() = default;
   virtual void Render(const MixedStrategyProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const = 0;
   virtual void Render(const MixedBehaviorProfile<T> &p_profile,
@@ -60,7 +60,7 @@ public:
 template <class T> 
 class MixedStrategyNullRenderer : public MixedStrategyRenderer<T> {
 public:
-  virtual ~MixedStrategyNullRenderer() { }
+  virtual ~MixedStrategyNullRenderer() = default;
   virtual void Render(const MixedStrategyProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const { }
 };
@@ -70,7 +70,7 @@ class MixedStrategyCSVRenderer : public MixedStrategyRenderer<T> {
 public:
   MixedStrategyCSVRenderer(std::ostream &p_stream, int p_numDecimals = 6)
     : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
-  virtual ~MixedStrategyCSVRenderer() { }
+  virtual ~MixedStrategyCSVRenderer() = default;
   virtual void Render(const MixedStrategyProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const;
 
@@ -84,7 +84,7 @@ class MixedStrategyDetailRenderer : public MixedStrategyRenderer<T> {
 public:
   MixedStrategyDetailRenderer(std::ostream &p_stream, int p_numDecimals = 6)
     : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
-  virtual ~MixedStrategyDetailRenderer() { }
+  virtual ~MixedStrategyDetailRenderer() = default;
   virtual void Render(const MixedStrategyProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const;
 
@@ -98,7 +98,7 @@ private:
 //
 template <class T> class BehavStrategyRenderer : public StrategyProfileRenderer<T> {
 public:
-  virtual ~BehavStrategyRenderer() { }
+  virtual ~BehavStrategyRenderer() = default;
   virtual void Render(const MixedStrategyProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const
   { Render(MixedBehaviorProfile<T>(p_profile), p_label); }
@@ -109,7 +109,7 @@ public:
 template <class T> 
 class BehavStrategyNullRenderer : public BehavStrategyRenderer<T> {
 public:
-  virtual ~BehavStrategyNullRenderer() { }
+  virtual ~BehavStrategyNullRenderer() = default;
   virtual void Render(const MixedBehaviorProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const { }
 };
@@ -119,7 +119,7 @@ class BehavStrategyCSVRenderer : public BehavStrategyRenderer<T> {
 public:
   BehavStrategyCSVRenderer(std::ostream &p_stream, int p_numDecimals = 6) 
     : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
-  virtual ~BehavStrategyCSVRenderer() { }
+  virtual ~BehavStrategyCSVRenderer() = default;
   virtual void Render(const MixedBehaviorProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const;
 
@@ -133,7 +133,7 @@ class BehavStrategyDetailRenderer : public BehavStrategyRenderer<T> {
 public:
   BehavStrategyDetailRenderer(std::ostream &p_stream, int p_numDecimals = 6)
     : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
-  virtual ~BehavStrategyDetailRenderer() { }
+  virtual ~BehavStrategyDetailRenderer() = default;
   virtual void Render(const MixedBehaviorProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const;
 
@@ -151,7 +151,7 @@ private:
 template <class T> class StrategySolver {
 public:
   StrategySolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
-  virtual ~StrategySolver()  { }
+  virtual ~StrategySolver()  = default;
 
   virtual List<MixedStrategyProfile<T> > Solve(const Game &) const = 0;
 
@@ -162,7 +162,7 @@ protected:
 template <class T> class BehavSolver {
 public:
   BehavSolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
-  virtual ~BehavSolver()  { }
+  virtual ~BehavSolver()  = default;
 
   virtual List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const = 0;
 
@@ -178,7 +178,7 @@ template <class T> class BehavViaStrategySolver : public BehavSolver<T> {
 public:
   BehavViaStrategySolver(shared_ptr<StrategySolver<T> > p_solver,
 			 shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
-  virtual ~BehavViaStrategySolver() { }
+  virtual ~BehavViaStrategySolver() = default;
 
   virtual List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const;
 
@@ -190,7 +190,7 @@ template <class T> class SubgameBehavSolver : public BehavSolver<T> {
 public:
   SubgameBehavSolver(shared_ptr<BehavSolver<T> > p_solver,
 		     shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
-  virtual ~SubgameBehavSolver()  { }
+  virtual ~SubgameBehavSolver()  = default;
 
   virtual List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const;
 
@@ -212,8 +212,8 @@ private:
 //
 class EquilibriumLimitReached : public Exception {
 public:
-  virtual ~EquilibriumLimitReached() throw() { }
-  const char *what(void) const throw() { return "Reached target number of equilibria"; }
+  virtual ~EquilibriumLimitReached() noexcept = default;
+  const char *what() const noexcept { return "Reached target number of equilibria"; }
 };
 
 }  // namespace Gambit::Nash

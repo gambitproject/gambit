@@ -44,8 +44,7 @@ template<class T> gMono<T>::gMono(const gMono<T>& y)
 }
 
 template<class T> gMono<T>::~gMono() 
-{
-}
+= default;
 
 //--------------------------------------------------------------------------
 //                             gMono -- operators

@@ -127,7 +127,7 @@ LinearCombination<T>::LinearCombination(const LinearCombination<T> &L)
 { }
  
 template <class T> LinearCombination<T>::~LinearCombination()
-{ }
+= default;
 
 //-------------------------------------------------------------------------
 //                    LinearCombination<T>: Comparison operators

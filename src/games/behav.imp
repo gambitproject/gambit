@@ -224,7 +224,7 @@ bool MixedBehaviorProfile<T>::operator==(const MixedBehaviorProfile<T> &p_profil
 //              MixedBehaviorProfile<T>: General data access
 //========================================================================
 
-template <class T> void MixedBehaviorProfile<T>::SetCentroid(void)
+template <class T> void MixedBehaviorProfile<T>::SetCentroid()
 {
   for (int pl = 1; pl <= this->dvlen.Length(); pl++)
     for (int iset = 1; iset <= this->dvlen[pl]; iset++)
@@ -237,7 +237,7 @@ template <class T> void MixedBehaviorProfile<T>::SetCentroid(void)
 }
 
 template <class T>
-void MixedBehaviorProfile<T>::UndefinedToCentroid(void)
+void MixedBehaviorProfile<T>::UndefinedToCentroid()
 {
   Game efg = m_support.GetGame();
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
@@ -261,7 +261,7 @@ void MixedBehaviorProfile<T>::UndefinedToCentroid(void)
 }
 
 template <class T>
-void MixedBehaviorProfile<T>::Normalize(void)
+void MixedBehaviorProfile<T>::Normalize()
 {
   Game efg = m_support.GetGame();
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
@@ -283,7 +283,7 @@ void MixedBehaviorProfile<T>::Normalize(void)
   }
 }
 
-template<> void MixedBehaviorProfile<double>::Randomize(void)
+template<> void MixedBehaviorProfile<double>::Randomize()
 {
   Game game = m_support.GetGame();
   *this = 0.0;
@@ -304,7 +304,7 @@ template<> void MixedBehaviorProfile<double>::Randomize(void)
   Normalize();
 }
 
-template<> void MixedBehaviorProfile<Rational>::Randomize(void)
+template<> void MixedBehaviorProfile<Rational>::Randomize()
 {
   // This operation is not well-defined when using Rational numbers;
   // use the version specifying the denominator grid instead.
@@ -675,7 +675,7 @@ void MixedBehaviorProfile<T>::ComputeSolutionDataPass1(const GameNode &node) con
 }
 
 template <class T>
-void MixedBehaviorProfile<T>::ComputeSolutionData(void) const
+void MixedBehaviorProfile<T>::ComputeSolutionData() const
 {
   if (!m_cacheValid) {
     m_actionValues = (T) 0;
@@ -724,7 +724,7 @@ bool MixedBehaviorProfile<T>::IsDefinedAt(GameInfoset p_infoset) const
 }
 
 template <class T>
-MixedStrategyProfile<T> MixedBehaviorProfile<T>::ToMixedProfile(void) const
+MixedStrategyProfile<T> MixedBehaviorProfile<T>::ToMixedProfile() const
 {
   return MixedStrategyProfile<T>(*this);
 }

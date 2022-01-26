@@ -37,17 +37,17 @@ private:
   
   Sequence(Gambit::GamePlayer pl, Gambit::GameAction a, const Sequence *p, int n) 
     : number(n), player(pl), action(a), parent(p) { }
-  ~Sequence() { }
+  ~Sequence() = default;
 public:
-  const std::string &GetName(void) const   { return name; }
+  const std::string &GetName() const   { return name; }
   void SetName(const std::string &s)       { name = s; }
   
-  Gambit::List<Gambit::GameAction> History(void) const;
-  int GetNumber(void) const        { return number; }
-  Gambit::GameAction GetAction(void) const  {return action; }
-  Gambit::GameInfoset GetInfoset(void) const   { if(action) return action->GetInfoset();return 0; }
-  Gambit::GamePlayer Player(void) const  { return player; }
-  const Sequence *Parent(void) const   { return parent; }
+  Gambit::List<Gambit::GameAction> History() const;
+  int GetNumber() const        { return number; }
+  Gambit::GameAction GetAction() const  {return action; }
+  Gambit::GameInfoset GetInfoset() const   { if(action) return action->GetInfoset();return nullptr; }
+  Gambit::GamePlayer Player() const  { return player; }
+  const Sequence *Parent() const   { return parent; }
 };
 
 class SFSequenceSet {
@@ -73,10 +73,10 @@ public:
   Sequence * Find(int j);
 
   // Number of sequences in the SFSequenceSet
-  int NumSequences(void) const;
+  int NumSequences() const;
 
   //  return the entire sequence set in a const Gambit::Array
-  const Gambit::Array<Sequence *> &GetSFSequenceSet(void) const;
+  const Gambit::Array<Sequence *> &GetSFSequenceSet() const;
 };
 
 
@@ -96,13 +96,13 @@ public:
   bool operator==(const SFSupport &s) const;
   bool operator!=(const SFSupport &s) const;
 
-  const Sfg &Game(void) const   { return *bsfg; }
+  const Sfg &Game() const   { return *bsfg; }
   
   const Gambit::Array<Sequence *> &Sequences(int pl) const;
 
   int NumSequences(int pl) const;
-  const Gambit::Array<int> NumSequences(void) const;
-  int TotalNumSequences(void) const;
+  const Gambit::Array<int> NumSequences() const;
+  int TotalNumSequences() const;
 
   void AddSequence(Sequence *);
   bool RemoveSequence(Sequence *);
@@ -128,9 +128,9 @@ public:
   
   SequenceProfile &operator=(const SequenceProfile &);
   
-  bool IsValid(void) const; 
+  bool IsValid() const; 
   
-  long GetIndex(void) const;
+  long GetIndex() const;
   
   Sequence *const operator[](int p) const;
   Sequence *const Get(int p) const;

@@ -41,13 +41,13 @@ private:
   wxFileHistory m_fileHistory;
   Gambit::Array<gbtGameDocument *> m_documents;
 
-  bool OnInit(void);
+  bool OnInit();
 
 public:
-  gbtApplication(void);
-  virtual ~gbtApplication() { }
+  gbtApplication();
+  virtual ~gbtApplication() = default;
   
-  const wxString &GetCurrentDir(void)  { return m_currentDir; }
+  const wxString &GetCurrentDir()  { return m_currentDir; }
   void SetCurrentDir(const wxString &p_dir);
 
   wxString GetHistoryFile(int index) const
@@ -70,7 +70,7 @@ public:
     { m_documents.Append(p_doc); }
   void RemoveDocument(gbtGameDocument *p_doc)
     { m_documents.Remove(m_documents.Find(p_doc)); }
-  bool AreDocumentsModified(void) const;
+  bool AreDocumentsModified() const;
   //@}
 };
 

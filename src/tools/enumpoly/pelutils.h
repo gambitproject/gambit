@@ -145,9 +145,9 @@ void node_push_local(local_v loc, node * val);
 #define POP_LOCS()  while(--loc_ct>=0) node_pop_local();
 
 /* Allocation Functions */
-int    node_init_store(void);   /*reserves space for the node stack */
-void    node_free_store(void);   /*frees node stack*/
-node node_new(void);          /*allocates a node from stack*/
+int    node_init_store();   /*reserves space for the node stack */
+void    node_free_store();   /*frees node stack*/
+node node_new();          /*allocates a node from stack*/
 
 char  *mem_strdup(char *); /*call strdup, with bookkeeping*/ 
 void  *mem_malloc(int); /* call malloc,keep running total of calls*/ 
@@ -163,7 +163,7 @@ void   mem_free(void *); /* call free, keep running total */
 ** returning 
 */
 void   node_push_local(local_v, node *);                             
-void   node_pop_local(void);         
+void   node_pop_local();         
 
 
 
@@ -623,7 +623,7 @@ int orderPP(polynomial1 P1,polynomial1 P2);
 /*********************** declarations from utime.h ************************/
 /**************************************************************************/
 
-int set_mark(void);
+int set_mark();
 int read_mark(int);
 
 /* end utime.h */

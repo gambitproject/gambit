@@ -36,11 +36,11 @@ class AggPureStrategyProfileRep : public PureStrategyProfileRep {
 public:
   AggPureStrategyProfileRep(const Game &p_game)
     : PureStrategyProfileRep(p_game) { }
-  virtual PureStrategyProfileRep *Copy(void) const
+  virtual PureStrategyProfileRep *Copy() const
   { return new AggPureStrategyProfileRep(*this); }
 
   virtual void SetStrategy(const GameStrategy &);
-  virtual GameOutcome GetOutcome(void) const { throw UndefinedException(); }
+  virtual GameOutcome GetOutcome() const { throw UndefinedException(); }
   virtual void SetOutcome(GameOutcome p_outcome)
   { throw UndefinedException(); }
   virtual Rational GetPayoff(int pl) const;
@@ -99,7 +99,7 @@ GameAggRep::GameAggRep(agg::AGG *p_aggPtr)
   }
 }
 
-Game GameAggRep::Copy(void) const
+Game GameAggRep::Copy() const
 {
   std::ostringstream os;
   WriteAggFile(os);
@@ -111,7 +111,7 @@ Game GameAggRep::Copy(void) const
 //                  GameAggRep: Dimensions of the game
 //------------------------------------------------------------------------
 
-Array<int> GameAggRep::NumStrategies(void) const
+Array<int> GameAggRep::NumStrategies() const
 {
   Array<int> ns;
   for (int pl = 1; pl <= aggPtr->getNumPlayers(); pl++) {
@@ -137,7 +137,7 @@ GameStrategy GameAggRep::GetStrategy(int p_index) const
 //                    GameAggRep: Factory functions
 //------------------------------------------------------------------------
 
-PureStrategyProfile GameAggRep::NewPureStrategyProfile(void) const
+PureStrategyProfile GameAggRep::NewPureStrategyProfile() const
 {
   return PureStrategyProfile(new AggPureStrategyProfileRep(const_cast<GameAggRep *>(this)));
 }
@@ -165,7 +165,7 @@ MixedStrategyProfile<Rational> GameAggRep::NewMixedStrategyProfile(const Rationa
 //                  GameAggRep: General data access
 //------------------------------------------------------------------------
 
-bool GameAggRep::IsConstSum(void) const
+bool GameAggRep::IsConstSum() const
 {
   AggPureStrategyProfileRep profile(const_cast<GameAggRep *>(this));
 

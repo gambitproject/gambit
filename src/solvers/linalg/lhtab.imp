@@ -104,7 +104,7 @@ void LHTableau<T>::Pivot(int outrow, int inlabel)
 //                   LHTableau<T>: Miscellaneous functions
 //---------------------------------------------------------------------------
 
-template <class T> Gambit::linalg::BFS<T> LHTableau<T>::GetBFS(void)
+template <class T> Gambit::linalg::BFS<T> LHTableau<T>::GetBFS()
 {
   T1.BasisVector(tmp1);
   T2.BasisVector(tmp2);

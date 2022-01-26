@@ -49,7 +49,7 @@ gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
   : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"),
 	     wxDefaultPosition),
     m_doc(p_doc), 
-    m_process(0), m_timer(this, GBT_ID_TIMER),
+    m_process(nullptr), m_timer(this, GBT_ID_TIMER),
     m_output(p_command)
 {
   wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);

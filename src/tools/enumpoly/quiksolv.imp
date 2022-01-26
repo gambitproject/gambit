@@ -73,14 +73,14 @@ template<class T> QuikSolv<T>::QuikSolv(const QuikSolv& qs)
 { }
 
 template<class T> QuikSolv<T>::~QuikSolv()
-{ }
+= default;
 
 //-------------------------------------------------------
 //      Supporting Calculations for the Constructors
 //-------------------------------------------------------
 
 template <class T> 
-Gambit::RectArray<bool> QuikSolv<T>::Eq_i_Uses_j(void) const
+Gambit::RectArray<bool> QuikSolv<T>::Eq_i_Uses_j() const
 {
   Gambit::RectArray<bool> answer(System.Length(),Dmnsn());
   for (int i = 1; i <= System.Length(); i++)

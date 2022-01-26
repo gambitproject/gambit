@@ -46,8 +46,8 @@ gComplex::gComplex(const double& x, const double& y)
 {}
 
 gComplex::gComplex(const gComplex& y) 
-: re(y.re), im(y.im)
-{}
+ 
+= default;
 
 gComplex::gComplex(const int& n)
 : re(n), im(0)
@@ -58,7 +58,7 @@ gComplex::gComplex(const long& n)
 {}
 
 gComplex::~gComplex() 
-{}
+= default;
 
 //--------------------------------------------------------------------------
 //                               operators

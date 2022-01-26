@@ -572,7 +572,7 @@ struct qhT {
 
 /********* -qhull.c prototypes (duplicated from qhull_a.h) ***************/
 
-void    qh_qhull (void);
+void    qh_qhull ();
 boolT   qh_addpoint (pointT *furthest, facetT *facet, boolT checkdist);
 boolT   qh_delpoint (pointT *point, facetT *facet);
 
@@ -581,22 +581,22 @@ boolT   qh_delpoint (pointT *point, facetT *facet);
 facetT *qh_findbest (pointT *point, facetT *facet, boolT bestoutside,
 		     unsigned firstid, realT *dist, boolT *isoutside, int *numpart);
 boolT   qh_gram_schmidt(int dim, realT **rows);
-void    qh_projectinput (void);
+void    qh_projectinput ();
 void    qh_randommatrix (realT *buffer, int dim, realT **row);
 void    qh_rotateinput (realT **rows);
-void    qh_scaleinput (void);
+void    qh_scaleinput ();
 
 /***** -global.c prototypes (alphabetical) ***********************/
 
 void    qhull_fatal(int); 
-void 	qh_freebuffers (void);
+void 	qh_freebuffers ();
 void    qh_freeqhull (boolT allmem);
 void 	qh_init_qhull_command (int argc, char *argv[]);
 void    qh_initbuffers (coordT *points, int numpoints, int dim, boolT ismalloc);
 void 	qh_initflags (char *command);
-void 	qh_initqhull_buffers (void);
+void 	qh_initqhull_buffers ();
 void 	qh_initqhull_globals (coordT *points, int numpoints, int dim, boolT ismalloc);
-void    qh_initqhull_mem (void);
+void    qh_initqhull_mem ();
 void 	qh_initqhull_start (FILE *infile, FILE *outfile, FILE *errfile);
 void 	qh_initthresholds (char *command);
 #if qh_QHpointer
@@ -610,19 +610,19 @@ qhT    *qh_save_qhull (void);
 
 /********* -poly.c prototypes (duplicated from poly.h) **********************/
 
-void    qh_check_output (void);
-void    qh_check_points (void);
+void    qh_check_output ();
+void    qh_check_points ();
 setT   *qh_facetvertices (facetT *facetlist, setT *facets, boolT allfacets);
 pointT *qh_point (int id);
-setT   *qh_pointfacet (void /*qh.facet_list*/);
+setT   *qh_pointfacet ( /*qh.facet_list*/);
 int     qh_pointid (pointT *point);
-setT   *qh_pointvertex (void /*qh.facet_list*/);
+setT   *qh_pointvertex ( /*qh.facet_list*/);
 
 /********* -stat.c prototypes (duplicated from stat.h) **********************/
 
-void    qh_collectstatistics (void);
-void 	qh_freestatistics (void);
-void    qh_initstatistics (void);
+void    qh_collectstatistics ();
+void 	qh_freestatistics ();
+void    qh_initstatistics ();
 void    qh_printallstatistics (FILE *fp, const char *string);
 void    qh_printstatistics (FILE *fp, const char *string);
 
@@ -827,7 +827,7 @@ void qh_memfreeshort (int *curlong, int *totlong);
 void qh_meminit (FILE *ferr);
 void qh_meminitbuffers (int tracelevel, int alignment, int numsizes,
 			int bufsize, int bufinit);
-void qh_memsetup (void);
+void qh_memsetup ();
 void qh_memsize(int size);
 void qh_memstatistics (FILE *fp);
 
@@ -1026,8 +1026,8 @@ void  qh_setreplace(setT *set, void *oldelem, void *newelem);
 int   qh_setsize(setT *set);
 setT *qh_settemp(int setsize);
 void qh_settempfree(setT **set);
-void qh_settempfree_all(void);
-setT *qh_settemppop(void);
+void qh_settempfree_all();
+setT *qh_settemppop();
 void qh_settemppush(setT *set);
 void qh_settruncate (setT *set, int size);
 int qh_setunique (setT **set, void *elem);
@@ -1147,15 +1147,15 @@ boolT   qh_orientoutside (facetT *facet);
 coordT  qh_pointdist(pointT *point1, pointT *point2, int dim);
 void    qh_printmatrix (FILE *fp, const char *string, realT **rows, int numrow, int numcol);
 void    qh_printpoints (FILE *fp, const char *string, setT *points);
-void    qh_projectinput (void);
+void    qh_projectinput ();
 pointT *qh_projectpoint(pointT *point, facetT *facet, realT dist);
 void 	qh_projectpoints (signed char *project, int n, realT *points, 
              int numpoints, int dim, realT *newpoints, int newdim);
-realT   qh_randomfactor (void);
+realT   qh_randomfactor ();
 void    qh_randommatrix (realT *buffer, int dim, realT **row);
 void    qh_rotateinput (realT **rows);
 void    qh_rotatepoints (realT *points, int numpoints, int dim, realT **rows);
-void    qh_scaleinput (void);
+void    qh_scaleinput ();
 void 	qh_scalepoints (pointT *points, int numpoints, int dim,
   		realT *newlows, realT *newhighs);
 void    qh_setfacetplane(facetT *newfacets);
@@ -1298,7 +1298,7 @@ ridgeT *qh_hashridge_find (setT *hashtable, int hashsize, ridgeT *ridge,
 void 	qh_makeridges(facetT *facet);
 void    qh_maydropneighbor (facetT *facet);
 boolT   qh_merge_degenredundant (facetT *facet1, facetT *facet2, realT *angle);
-void 	qh_merge_nonconvex(void /*newfacet_list*/);
+void 	qh_merge_nonconvex( /*newfacet_list*/);
 void 	qh_mergefacet(facetT *facet1, facetT *facet2, realT *mindist, realT *maxdist, realT *angle);
 void 	qh_mergeneighbors(facetT *facet1, facetT *facet2);
 void 	qh_mergeridges(facetT *facet1, facetT *facet2);
@@ -1306,7 +1306,7 @@ void    qh_mergevertex_neighbors(facetT *facet1, facetT *facet2);
 void	qh_mergevertices(setT *vertices1, setT **vertices);
 void 	qh_mergevertices2d(setT *vertices1, setT *vertices2);
 setT   *qh_neighbor_intersections (vertexT *vertex);
-boolT   qh_reducevertices_centrums (void);
+boolT   qh_reducevertices_centrums ();
 vertexT *qh_redundant_vertex (vertexT *vertex);
 boolT   qh_remove_extravertices (facetT *facet);
 vertexT *qh_rename_sharedvertex (vertexT *vertex, facetT *facet);
@@ -1452,12 +1452,12 @@ see poly.c for definitions
 
 void    qh_appendfacet(facetT *facet);
 void    qh_appendvertex(vertexT *vertex);
-void 	qh_attachnewfacets (void);
+void 	qh_attachnewfacets ();
 void 	qh_check_bestdist ();
-void    qh_check_maxout (void);
-void    qh_check_output (void);
+void    qh_check_maxout ();
+void    qh_check_output ();
 void    qh_check_point (pointT *point, facetT *facet, realT *maxoutside, facetT **errfacet1, facetT **errfacet2);
-void   	qh_check_points(void);
+void   	qh_check_points();
 void 	qh_checkconvex(facetT *facetlist, int fault);
 void    qh_checkfacet(facetT *facet, boolT newmerge, boolT *waserrorp);
 boolT   qh_checkflipped (facetT *facet, realT *dist, boolT allerror);
@@ -1465,8 +1465,8 @@ void 	qh_checkflipped_all (facetT *facetlist);
 void 	qh_checkpolygon(facetT *facetlist);
 void    qh_checkvertex (vertexT *vertex);
 void 	qh_clearcenters (int type);
-void    qh_clearvisible (void /*qh visible_list*/);
-void    qh_clearnewvertices (void /*qh newvertex_list*/);
+void    qh_clearvisible ( /*qh visible_list*/);
+void    qh_clearnewvertices ( /*qh newvertex_list*/);
 void 	qh_createsimplex(setT *vertices);
 int 	qh_degeneratematch(facetT *facet, setT *vertices, int skipindex);
 void 	qh_deletevisible(/*qh visible_list, qh horizon_list*/);
@@ -1492,23 +1492,23 @@ void	qh_matchnewfacets ();
 boolT   qh_matchvertices (int firstindex, setT *verticesA, int skipA, 
 			  setT *verticesB, int *skipB, boolT *same);
 int 	qh_newhashtable(int newsize);
-facetT *qh_newfacet(void);
-ridgeT *qh_newridge(void);
+facetT *qh_newfacet();
+ridgeT *qh_newridge();
 vertexT *qh_newvertex(pointT *point);
 ridgeT *qh_nextridge3d (ridgeT *atridge, facetT *facet, vertexT **vertexp);
 pointT *qh_point (int id);
 void 	qh_point_add (setT *set, pointT *point, void *elem);
-setT   *qh_pointfacet (void /*qh facet_list*/);
+setT   *qh_pointfacet ( /*qh facet_list*/);
 int     qh_pointid (pointT *point);
-setT   *qh_pointvertex (void /*qh facet_list*/);
+setT   *qh_pointvertex ( /*qh facet_list*/);
 void 	qh_prependfacet(facetT *facet, facetT **facetlist);
 void	qh_printhashtable(FILE *fp);
-void    qh_printlists (void);
+void    qh_printlists ();
 void 	qh_removefacet(facetT *facet);
 void 	qh_removevertex(vertexT *vertex);
 void    qh_vertexintersect(setT **vertexsetA,setT *vertexsetB);
 setT   *qh_vertexintersect_new(setT *vertexsetA,setT *vertexsetB);
-void    qh_vertexneighbors (void /*qh facet_list*/);
+void    qh_vertexneighbors ( /*qh facet_list*/);
 boolT 	qh_vertexsubset(setT *vertexsetA, setT *vertexsetB);
 
 
@@ -1807,9 +1807,9 @@ struct qhstatT {
 -stddev		compute the standard deviation and average from statistics
 */
   
-void    qh_collectstatistics (void);
-void	qh_freestatistics (void);
-void    qh_initstatistics (void);
+void    qh_collectstatistics ();
+void	qh_freestatistics ();
+void    qh_initstatistics ();
 boolT 	qh_newstats (int index, int *nextindex);
 boolT 	qh_nostatistic (int i);
 void    qh_printallstatistics (FILE *fp, const char *string);
@@ -1863,9 +1863,9 @@ see corresponding .c file for definitions
 
 /***** -qhull.c prototypes (alphabetical after qhull) ********************/
 
-void 	qh_qhull (void);
+void 	qh_qhull ();
 boolT   qh_addpoint (pointT *furthest, facetT *facet, boolT checkdist);
-void 	qh_buildhull(void);
+void 	qh_buildhull();
 void    qh_buildtracing (pointT *furthest, facetT *facet);
 void 	qh_errexit2(int exitcode, facetT *facet, facetT *otherfacet);
 int 	qh_findgood (facetT *facetlist, int goodhorizon);
@@ -1881,7 +1881,7 @@ void 	qh_partitionvisible(boolT allpoints, int *numpoints);
 
 /***** -global.c internal prototypes (alphabetical) ***********************/
 
-void 	qh_freebuffers (void);
+void 	qh_freebuffers ();
 void    qh_initbuffers (coordT *points, int numpoints, int dim, boolT ismalloc);
 int     qh_strtol (const char *s, char **endp);
 double  qh_strtod (const char *s, char **endp);

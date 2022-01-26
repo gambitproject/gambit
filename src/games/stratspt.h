@@ -75,25 +75,25 @@ public:
   /// @name General information
   //@{
   /// Returns the game on which the support is defined.
-  Game GetGame(void) const { return m_nfg; }
+  Game GetGame() const { return m_nfg; }
 
   /// Returns the number of strategies in the support for player pl.
   int NumStrategies(int pl) const  { return m_support[pl].Length(); }
 
   /// Returns the number of strategies in the support for all players.
-  Array<int> NumStrategies(void) const;
+  Array<int> NumStrategies() const;
 
   /// Returns the total number of strategies in the support.
-  int MixedProfileLength(void) const;
+  int MixedProfileLength() const;
 
-  template <class T> MixedStrategyProfile<T> NewMixedStrategyProfile(void) const;
+  template <class T> MixedStrategyProfile<T> NewMixedStrategyProfile() const;
 
   /// Returns the strategy in the st'th position for player pl.
   GameStrategy GetStrategy(int pl, int st) const 
     { return m_support[pl][st]; }
 
   /// Returns the number of players in the game
-  int NumPlayers(void) const { return m_nfg->NumPlayers(); }
+  int NumPlayers() const { return m_nfg->NumPlayers(); }
   /// Returns the set of strategies in the support for a player
   const Array<GameStrategy> &Strategies(const GamePlayer &p_player) const
     { return m_support[p_player->GetNumber()]; }
@@ -148,7 +148,7 @@ public:
                   bool p_strict) const;
   //@}
 
-  Game Restrict(void) const;
+  Game Restrict() const;
 
 
   class iterator {
@@ -170,21 +170,21 @@ public:
     /// @name Manipulation
     //@{
     /// Advance to next strategy; return False when advancing past last strategy.
-    bool GoToNext(void);
+    bool GoToNext();
     /// Advance to next strategy
-    void operator++(void) { GoToNext(); }
+    void operator++() { GoToNext(); }
     //@}
 
     /// @name Access to state information
     //@{
-    GameStrategy GetStrategy(void) const
+    GameStrategy GetStrategy() const
     { return support.GetStrategy(pl, strat); }
-    int StrategyIndex(void) const { return strat; }
-    GamePlayer GetPlayer(void) const
+    int StrategyIndex() const { return strat; }
+    GamePlayer GetPlayer() const
     { return support.GetGame()->GetPlayer(pl); }
-    int PlayerIndex(void) const { return pl; }
+    int PlayerIndex() const { return pl; }
 
-    bool IsLast(void) const
+    bool IsLast() const
     { return (pl == support.GetGame()->NumPlayers() &&
 	      strat == support.NumStrategies(pl));
     }
@@ -196,8 +196,8 @@ public:
     int pl, strat;
   };
 
-  iterator begin(void) const { return iterator(*this); }
-  iterator end(void) const   { return iterator(*this, m_nfg->NumPlayers() + 1); }
+  iterator begin() const { return iterator(*this); }
+  iterator end() const   { return iterator(*this, m_nfg->NumPlayers() + 1); }
 };
   
 } // end namespace Gambit

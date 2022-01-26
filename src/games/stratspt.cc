@@ -50,7 +50,7 @@ StrategySupportProfile::StrategySupportProfile(const Game &p_nfg)
 //                          General information
 //---------------------------------------------------------------------------
 
-Array<int> StrategySupportProfile::NumStrategies(void) const
+Array<int> StrategySupportProfile::NumStrategies() const
 {
   Array<int> a(m_support.Length());
 
@@ -60,7 +60,7 @@ Array<int> StrategySupportProfile::NumStrategies(void) const
   return a;
 }
 
-int StrategySupportProfile::MixedProfileLength(void) const
+int StrategySupportProfile::MixedProfileLength() const
 {
   int total = 0;
   for (int pl = 1; pl <= m_nfg->NumPlayers();
@@ -69,14 +69,14 @@ int StrategySupportProfile::MixedProfileLength(void) const
 }
 
 template<>
-MixedStrategyProfile<double> StrategySupportProfile::NewMixedStrategyProfile(void) const
+MixedStrategyProfile<double> StrategySupportProfile::NewMixedStrategyProfile() const
 {
   return m_nfg->NewMixedStrategyProfile(0.0, *this);
 
 }
 
 template<>
-MixedStrategyProfile<Rational> StrategySupportProfile::NewMixedStrategyProfile(void) const
+MixedStrategyProfile<Rational> StrategySupportProfile::NewMixedStrategyProfile() const
 {
   return m_nfg->NewMixedStrategyProfile(Rational(0), *this);
 }
@@ -390,7 +390,7 @@ bool StrategySupportProfile::Overwhelms(const GameStrategy &s,
   return true;
 }
 
-Game StrategySupportProfile::Restrict(void) const
+Game StrategySupportProfile::Restrict() const
 {
   std::ostringstream os;
   WriteNfgFile(os);
@@ -414,7 +414,7 @@ Game StrategySupportProfile::Restrict(void) const
 //===========================================================================
 
 
-bool StrategySupportProfile::iterator::GoToNext(void)
+bool StrategySupportProfile::iterator::GoToNext()
 {
   if (strat != support.NumStrategies(pl))  {
     strat++; 

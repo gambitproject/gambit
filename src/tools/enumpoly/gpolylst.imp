@@ -434,7 +434,7 @@ gPolyList<T>::InteriorSegment(int first, int last) const
 //           Information
 //----------------------------------
 
-template <class T> Gambit::List<gPoly<T> > gPolyList<T>::UnderlyingList(void) const
+template <class T> Gambit::List<gPoly<T> > gPolyList<T>::UnderlyingList() const
 {
   Gambit::List<gPoly<T> > NewList;
   int ii;

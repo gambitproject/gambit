@@ -26,7 +26,7 @@ node pcfg_facets(node PC, Imatrix Controll)
     boolT ismalloc;
     facetT *facet;
     vertexT *vertex, **vertexp;
-    node NormList = 0, *pt_table;
+    node NormList = nullptr, *pt_table;
     Imatrix M, Norm, P0, P1;
     LOCS(2);
 
@@ -61,7 +61,7 @@ node pcfg_facets(node PC, Imatrix Controll)
 		    *IVref(Norm, i) *= -1;
 	    }
 	    if (is_normal_good(Norm, Controll) == True)
-		NormList = Cons(atom_new((char *) Norm, IMTX), 0);
+		NormList = Cons(atom_new((char *) Norm, IMTX), nullptr);
 	    else
 		Imatrix_free(Norm);
 	} else {
@@ -156,9 +156,9 @@ coordT *make_cay(node PC, boolT * ismalloc, node ** table)
     coords = points = (coordT *) malloc(pcfg_npts(PC) *
 					pcfg_dim(PC) * sizeof(coordT));
     *table = lptr = (node *) mem_malloc(pcfg_npts(PC) * sizeof(node));
-    if (coords == 0) {
+    if (coords == nullptr) {
 	*ismalloc = False;
-	return 0;
+	return nullptr;
     }
     *ismalloc = True;
     for (i = 1; i <= pcfg_npts(PC); i++) {
@@ -174,7 +174,7 @@ coordT *make_cay(node PC, boolT * ismalloc, node ** table)
 
 node aset_cayley(node A,int addlift)
 {
-    node res = 0, ptr = A, ptp, ptc;
+    node res = nullptr, ptr = A, ptp, ptc;
     int r = 0, R, D, i;
     char *lab;
     char *amm_string;
@@ -187,9 +187,9 @@ node aset_cayley(node A,int addlift)
     R = aset_r(A);
     ptr = aset_start_cfg(A);
     res = pcfg_new();
-    while ((ptc = aset_next_cfg(&ptr)) != 0) {
+    while ((ptc = aset_next_cfg(&ptr)) != nullptr) {
         r++;
-        while ((ptp = aset_next_pnt(&ptc)) != 0) {
+        while ((ptp = aset_next_pnt(&ptc)) != nullptr) {
             C = Ivector_new(D + R - 1 + addlift);
             if(addlift==1) *IVref(C,D+R)=0;
             for (i = 1; i < D; i++)
@@ -218,7 +218,7 @@ node aset_cayley(node A,int addlift)
 
 node aset_lower_facets(node A)
 {
-    node res = 0, cay = 0;
+    node res = nullptr, cay = nullptr;
     Imatrix Normfilter;
     int i;
     LOCS(3);
@@ -234,7 +234,7 @@ node aset_lower_facets(node A)
     res = pcfg_facets(cay, Normfilter);
 
     cay = res;
-    while (cay != 0) {
+    while (cay != nullptr) {
       *IVref((Imatrix) Car(Car(cay)),aset_dim(A))
       = *IVref((Imatrix) Car(Car(cay)),
                aset_dim(A)+aset_r(A)-1);
@@ -250,8 +250,8 @@ node aset_lower_facets(node A)
 node aset_print_subdiv(node A, node norms, Imatrix T)
 {
   //  int i;
-    node ptr = 0, ptc = 0, res = 0;
-    Imatrix M = 0, Tp = 0;
+    node ptr = nullptr, ptc = nullptr, res = nullptr;
+    Imatrix M = nullptr, Tp = nullptr;
     int v, mv = 0, t = 0;
     LOCS(5);
     PUSH_LOC(A);
@@ -264,7 +264,7 @@ node aset_print_subdiv(node A, node norms, Imatrix T)
 #ifdef ACTUALLY_PRINT
     printf("\n");
 #endif
-    while (ptr != 0) {
+    while (ptr != nullptr) {
         /*     Imatrix_gcd_reduce((Imatrix)Car((Imatrix)Car(ptr))); */
         ptc = aset_face(A, (Imatrix) Car((node) Car(ptr)));
 #ifdef ACTUALLY_PRINT
@@ -278,7 +278,7 @@ node aset_print_subdiv(node A, node norms, Imatrix T)
         printf(" >  ");
         printf("   ");
 #endif
-	if (T != 0 && Imatrix_equal(Tp, T) == TRUE) {
+	if (T != nullptr && Imatrix_equal(Tp, T) == TRUE) {
             t = 1;
             list_insert(Car(ptr),&res, &(list_Imatrix_comp),FALSE);
         } else
@@ -299,7 +299,7 @@ node aset_print_subdiv(node A, node norms, Imatrix T)
 #endif
      ptr = Cdr(ptr);
     }
-    if (T != 0)
+    if (T != nullptr)
 #ifdef ACTUALLY_PRINT
         printf("MV =%d\n", mv);
 #endif

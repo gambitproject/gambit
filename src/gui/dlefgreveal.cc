@@ -58,7 +58,7 @@ gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent,
       m_players.Append(new wxCheckBox(this, wxID_ANY, 
 				      wxString::Format(_T("Player %d"), pl)));
     }
-    m_players[pl]->SetValue(1);
+    m_players[pl]->SetValue(true);
     m_players[pl]->SetForegroundColour(m_doc->GetStyle().GetPlayerColor(pl));
     boxSizer->Add(m_players[pl], 1, wxALL | wxEXPAND, 0);
   }
@@ -79,7 +79,7 @@ gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent,
   CenterOnParent();
 }
 
-Gambit::Array<Gambit::GamePlayer> gbtRevealMoveDialog::GetPlayers(void) const
+Gambit::Array<Gambit::GamePlayer> gbtRevealMoveDialog::GetPlayers() const
 {
   Gambit::Array<Gambit::GamePlayer> players;
 

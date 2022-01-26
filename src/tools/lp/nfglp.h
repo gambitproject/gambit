@@ -32,7 +32,7 @@ template <class T> class NashLpStrategySolver : public StrategySolver<T> {
 public:
   NashLpStrategySolver(Gambit::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
     : StrategySolver<T>(p_onEquilibrium) { }
-  virtual ~NashLpStrategySolver() { }
+  virtual ~NashLpStrategySolver() = default;
 
   virtual List<MixedStrategyProfile<T> > Solve(const Game &) const;
 

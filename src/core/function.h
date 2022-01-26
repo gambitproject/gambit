@@ -29,7 +29,7 @@ namespace Gambit {
 
 class Function {
 public:  
-  virtual ~Function() { }
+  virtual ~Function() = default;
   virtual double Value(const Vector<double> &) const = 0;
   virtual bool Gradient(const Vector<double> &, 
 			Vector<double> &) const = 0;
@@ -39,7 +39,7 @@ public:
 // is a product of simplices.
 class FunctionOnSimplices : public Function {
 public:
-  virtual ~FunctionOnSimplices() { }
+  virtual ~FunctionOnSimplices() = default;
 
 protected:
   // Project the gradient 'x' onto the plane of the product of simplices.
@@ -49,21 +49,21 @@ protected:
 
 class FunctionMinimizerError : public Exception {
 public:
-  virtual ~FunctionMinimizerError() throw() { }
-  const char *what(void) const throw() 
+  virtual ~FunctionMinimizerError() noexcept = default;
+  const char *what() const noexcept 
   { return "Internal error in function minimization"; }
 };
 
 // An abstract base class for function minimization
 class FunctionMinimizer {
 public:
-  virtual ~FunctionMinimizer() { }
+  virtual ~FunctionMinimizer() = default;
 
   virtual void Set(const Function &fdf,
 		   const Vector<double> &x, double &f,
 		   Vector<double> &gradient, double step_size,
 		   double p_tol) = 0;
-  virtual void Restart(void) = 0;
+  virtual void Restart() = 0;
 
   virtual bool Iterate(const Function &fdf,
 		       Vector<double> &x, double &f,
@@ -74,13 +74,13 @@ public:
 class ConjugatePRMinimizer : public FunctionMinimizer {
 public:
   ConjugatePRMinimizer(int n);
-  virtual ~ConjugatePRMinimizer() { }
+  virtual ~ConjugatePRMinimizer() = default;
 
   void Set(const Function &fdf,
 	   const Vector<double> &x, double &f,
 	   Vector<double> &gradient, double step_size,
 	   double p_tol);
-  void Restart(void);
+  void Restart();
 
   bool Iterate(const Function &fdf,
 	       Vector<double> &x, double &f,

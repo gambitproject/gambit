@@ -7,7 +7,7 @@
 Gen_node PROC_ADD(Gen_node g){
 Gen_node res,g1,g2;
 int rt;
-Gmatrix M=0;
+Gmatrix M=nullptr;
 polynomial1 tp1,tp2;
 if (Gen_length(g)!=2)
     return Rerror("wrong number of arguments to PROC_ADD",g);  
@@ -24,7 +24,7 @@ switch(rt){
              break;
  case Ply_T: tp1=Gen_To_Ply(g1);
              tp2=Gen_To_Ply(g2);
-             res=PLYND(addPPP(tp1,tp2,0));
+             res=PLYND(addPPP(tp1,tp2,nullptr));
              freeP(tp1);
              freeP(tp2);
              break;
@@ -32,11 +32,11 @@ switch(rt){
  case Mtx_T: if ((Gen_type(g1)==Sys_T || Gen_type(g1)==Mtx_T)&&
                  (Gen_type(g2)==Sys_T || Gen_type(g2)==Mtx_T))
                   M=Gmatrix_Dop(Gen_Mtx(g1),Gen_Mtx(g2),PROC_ADD);
-             if (M==0) return Rerror("Matrices not compatible",g);
+             if (M==nullptr) return Rerror("Matrices not compatible",g);
              if (rt==Sys_T) res=SYSND(M);
              else res=GMND(M);
              break;
- default:    res=Rerror("PROC_ADD not defined on its arguments",0);
+ default:    res=Rerror("PROC_ADD not defined on its arguments",nullptr);
              break;
  }
 free_Gen_list(g);
@@ -48,7 +48,7 @@ Gen_node PROC_SUB(Gen_node g){
 Gen_node res,g1,g2;
 int rt;
 polynomial1 tp1,tp2;
-Gmatrix M=0;
+Gmatrix M=nullptr;
 if (Gen_length(g)!=2)
     return Rerror("wrong number of arguments to PROC_SUB",g);
 g1=Gen_elt(g,1);
@@ -63,7 +63,7 @@ switch(rt){
              break;
  case Ply_T: tp1=Gen_To_Ply(g1);
              tp2=Gen_To_Ply(g2);
-             res=PLYND(subPPP(tp1,tp2,0));
+             res=PLYND(subPPP(tp1,tp2,nullptr));
              freeP(tp1);
              freeP(tp2);
              break;
@@ -71,11 +71,11 @@ case Sys_T:
 case Mtx_T: if ((Gen_type(g1)==Sys_T || Gen_type(g1)==Mtx_T)&&
                  (Gen_type(g2)==Sys_T || Gen_type(g2)==Mtx_T))
                   M=Gmatrix_Dop(Gen_Mtx(g1),Gen_Mtx(g2),PROC_SUB);
-             if (M==0) return Rerror("Matrices not compatible",g);
+             if (M==nullptr) return Rerror("Matrices not compatible",g);
              if (rt==Sys_T) res=SYSND(M);
              else res=GMND(M);
              break;
- default:    res=Rerror("PROC_SUB not defined on its arguments",0);
+ default:    res=Rerror("PROC_SUB not defined on its arguments",nullptr);
              break;
 }
 free_Gen_list(g);
@@ -84,7 +84,7 @@ return(res);
 
 Gen_node PROC_SUBM(Gen_node g){
 Gen_node res,g1;
-Gmatrix M=0;
+Gmatrix M=nullptr;
 polynomial1 tp1;
 if (Gen_length(g)!=1)
     return Rerror("wrong number of arguments to PROC_SUBM",g);
@@ -102,12 +102,12 @@ if (Gen_length(g)!=1)
       case Sys_T:
       case Mtx_T: g1=INTND(-1);
                   M=Gmatrix_Sop(g1,Gen_Mtx(g),PROC_MUL);
-                  if (M==0) return Rerror("error in unary minus",g);
+                  if (M==nullptr) return Rerror("error in unary minus",g);
                   if (Gen_type(g1)==Sys_T) res=SYSND(M);
                   else res=GMND(M);
                   free_Gen_node(g1);
                   break;
-         default: res=Rerror("PROC_SUB not defined on its arguments",0);
+         default: res=Rerror("PROC_SUB not defined on its arguments",nullptr);
                   break;
   }
  free_Gen_list(g);
@@ -121,7 +121,7 @@ Gen_node PROC_MUL(Gen_node g){
 Gen_node res,g1,g2,scal,mtx;
 int rt,t1,t2;
 polynomial1 tp1,tp2;
-Gmatrix M=0;
+Gmatrix M=nullptr;
 if (Gen_length(g)!=2)
     return Rerror("wrong number of arguments to PROC_MUL",g);
 g1=Gen_elt(g,1);
@@ -137,7 +137,7 @@ switch(rt){
              break;
  case Ply_T: tp1=Gen_To_Ply(g1);
              tp2=Gen_To_Ply(g2);
-             res=PLYND(mulPPP(tp1,tp2,0));
+             res=PLYND(mulPPP(tp1,tp2,nullptr));
              freeP(tp1);
              freeP(tp2);
              break;
@@ -146,7 +146,7 @@ switch(rt){
               M=Gmatrix_Mop(Gen_Mtx(g1),Gen_Mtx(g2),
                            (res=INTND(0)),PROC_ADD,PROC_MUL);
               free_Gen_node(res);
-              if (M==0) res= Rerror("Incompatible matrices in MUll",0);
+              if (M==nullptr) res= Rerror("Incompatible matrices in MUll",nullptr);
                if (rt==Sys_T) res=SYSND(M);
                else res=GMND(M); 
             }
@@ -161,12 +161,12 @@ switch(rt){
               }
               M=Gmatrix_Sop(scal,Gen_Mtx(mtx),PROC_MUL);
               free_Gen_node(scal);
-              if (M==0) res =Rerror("Incompatible matrices in Mull",0);
+              if (M==nullptr) res =Rerror("Incompatible matrices in Mull",nullptr);
               if (rt==Sys_T) res=SYSND(M);
               else res=GMND(M);
             }
             break;
- default:    res=Rerror("PROC_MUL not defined on its arguments",0);
+ default:    res=Rerror("PROC_MUL not defined on its arguments",nullptr);
              break;
  }
 free_Gen_list(g);
@@ -177,7 +177,7 @@ Gen_node PROC_DIV(Gen_node g){
 Gen_node res,g1,g2;
 int rt;
 polynomial1 tp1,tp2;
-Gmatrix M=0;
+Gmatrix M=nullptr;
 if (Gen_length(g)!=2)
     return Rerror("wrong number of arguments to PROC_DIV",g);
 g1=Gen_elt(g,1);
@@ -193,7 +193,7 @@ switch(rt){
              break;
  case Ply_T: tp1=Gen_To_Ply(g1);
              tp2=Gen_To_Ply(g2); /* should make sure tp2 is a monomial*/
-             res=PLYND(divMPP(tp2,tp1,0)); 
+             res=PLYND(divMPP(tp2,tp1,nullptr)); 
              freeP(tp1);
              freeP(tp2);
              break;
@@ -205,10 +205,10 @@ switch(rt){
               if (rt==Sys_T) res=SYSND(M);
               res=GMND(M);
             }
-            else res=Rerror("PROC_DIV cannot divide matrices",0);
+            else res=Rerror("PROC_DIV cannot divide matrices",nullptr);
             break;
 
- default:    res=Rerror("PROC_DIV not defined on its arguments",0);
+ default:    res=Rerror("PROC_DIV not defined on its arguments",nullptr);
              break;
  }
 free_Gen_list(g);
@@ -224,7 +224,7 @@ Gen_node res,g1,g2;
 int i,ex,ri,ti;
 double rd,td;
 polynomial1 tp1,tp2;
-if ( g==0 || g->next==0 || g->next->next !=0)
+if ( g==nullptr || g->next==nullptr || g->next->next !=nullptr)
      return Rerror("wrong number of arguments to PROC_EXP",g);
 if (Gen_length(g)!=2)
     return Rerror("wrong number of arguments to PROC_DIV",g);
@@ -250,21 +250,21 @@ g2=Gen_elt(g,2);
            res=Cpx_To_Gen(Cpow(Gen_To_Cpx(g1),ex));
     }
     else if (Can_Be_Poly(g1)==TRUE){
-           if (ex<0) res=Rerror("can not divide polynomial1s",0);
+           if (ex<0) res=Rerror("can not divide polynomial1s",nullptr);
            else {
             tp1=Gen_To_Ply(g1);
-            tp2=expIPP(ex,tp1,0);
+            tp2=expIPP(ex,tp1,nullptr);
             res=Ply_To_Gen(tp2);
             freeP(tp2);
             freeP(tp1);
            }
     }
-    else res=Rerror("Exp not defined on its arguments",0);
+    else res=Rerror("Exp not defined on its arguments",nullptr);
  }
  else if (Can_Be_Dbl(g2)==TRUE && Can_Be_Dbl(g1)==TRUE){
     res=Dbl_To_Gen(pow(Gen_To_Dbl(g1),Gen_To_Dbl(g2)));
  }
- else res=Rerror("Exp not defined on its arguments",0);
+ else res=Rerror("Exp not defined on its arguments",nullptr);
  
  free_Gen_list(g);   
  return(res);
@@ -287,7 +287,7 @@ if ( Gen_type(g2) == Err_T) {
 switch(Gen_type(g1)){
  case Idf_T:
          ent=Slookup(Gen_idval(g1));
-          if (ent!=0){
+          if (ent!=nullptr){
                  if (locked(ent)!=0) 
                       return Rerror("can not reset reserved word",g);
                  free_Gen_list(ent->def);
@@ -307,7 +307,7 @@ return res;
 Gen_node PROC_EXIT(Gen_node g)
 {
 empty_symbol_table();
-if(Def_Ring!=0) free_Pring(Def_Ring);
+if(Def_Ring!=nullptr) free_Pring(Def_Ring);
 node_free_store();
 exit(0);
 return g;
@@ -322,7 +322,7 @@ Gen_node Set_Ring(Gen_node g)
   
   pt=g;
   
-  while(pt!=0) { 
+  while(pt!=nullptr) { 
     n++;
     pt=Gen_next(pt);
   } 
@@ -368,7 +368,7 @@ Gen_node PROC_LUP(Gen_node g)
  if (Gen_length(g)!=1||Gen_type(g1=Gen_elt(g,1))!=Idf_T)
       return Rerror("null or non identifier passed to PROC_LUP",g);
  nd=Slookup(Gen_idval(g));
- if ( nd  == 0 ) return g;
+ if ( nd  == nullptr ) return g;
  free_Gen_node(g);
  res=copy_Gen_list(nd->def);
  return res;
@@ -422,15 +422,15 @@ Gen_node PROC_MAT(Gen_node g){
  if ((r=Gen_length(ptr))==0||Can_Be_List(ptr)==FALSE) 
        return Rerror("bad argument to PROC_MAT",g);
  c=Gen_length(Gen_lval(ptr));
- while((ptr=Gen_next(ptr))!=0){
+ while((ptr=Gen_next(ptr))!=nullptr){
   if (Gen_length(Gen_lval(ptr))!=c) return Rerror("Bad Arg to Proc_mat",g);
  }
  M=Gmatrix_new(r,c);
  ptr=g;
- while(ptr!=0){
+ while(ptr!=nullptr){
   i++; j=0;
    ptc=Gen_lval(ptr);
-     while(ptc!=0){
+     while(ptc!=nullptr){
        ++j;  
         *GMref(M,i,j)=copy_Gen_node(ptc);
         ptc=Gen_next(ptc);

@@ -171,7 +171,7 @@ void scpy(const unsigned short* src, unsigned short* dest,int nb)
 
 static inline void nonnil(const IntegerRep* rep)
 {
-  if (rep == 0) {
+  if (rep == nullptr) {
     throw Gambit::NullException();
   }
 }
@@ -198,7 +198,7 @@ IntegerRep* Ialloc(IntegerRep* old, const unsigned short* src, int srclen, int n
               int newlen)
 {
   IntegerRep* rep;
-  if (old == 0 || newlen > old->sz)
+  if (old == nullptr || newlen > old->sz)
     rep = Inew(newlen);
   else
     rep = old;
@@ -209,7 +209,7 @@ IntegerRep* Ialloc(IntegerRep* old, const unsigned short* src, int srclen, int n
   scpy(src, rep->s, srclen);
   Iclear_from(rep, srclen);
 
-  if (old != rep && old != 0 && !STATIC_IntegerRep(old)) delete old;
+  if (old != rep && old != nullptr && !STATIC_IntegerRep(old)) delete old;
   return rep;
 }
 
@@ -218,9 +218,9 @@ IntegerRep* Ialloc(IntegerRep* old, const unsigned short* src, int srclen, int n
 IntegerRep* Icalloc(IntegerRep* old, int newlen)
 {
   IntegerRep* rep;
-  if (old == 0 || newlen > old->sz)
+  if (old == nullptr || newlen > old->sz)
   {
-    if (old != 0 && !STATIC_IntegerRep(old)) delete old;
+    if (old != nullptr && !STATIC_IntegerRep(old)) delete old;
     rep = Inew(newlen);
   }
   else
@@ -239,7 +239,7 @@ IntegerRep* Iresize(IntegerRep* old, int newlen)
 {
   IntegerRep* rep;
   unsigned short oldlen;
-  if (old == 0)
+  if (old == nullptr)
   {
     oldlen = 0;
     rep = Inew(newlen);
@@ -272,9 +272,9 @@ IntegerRep* Icopy(IntegerRep* old, const IntegerRep* src)
 {
   if (old == src) return old; 
   IntegerRep* rep;
-  if (src == 0)
+  if (src == nullptr)
   {
-    if (old == 0)
+    if (old == nullptr)
       rep = Inew(0);
     else
     {
@@ -287,9 +287,9 @@ IntegerRep* Icopy(IntegerRep* old, const IntegerRep* src)
   else 
   {
     int newlen = src->len;
-    if (old == 0 || newlen > old->sz)
+    if (old == nullptr || newlen > old->sz)
     {
-      if (old != 0 && !STATIC_IntegerRep(old)) delete old;
+      if (old != nullptr && !STATIC_IntegerRep(old)) delete old;
       rep = Inew(newlen);
     }
     else
@@ -326,9 +326,9 @@ IntegerRep* Icopy_ulong(IntegerRep* old, unsigned long x)
   }
 
   IntegerRep* rep;
-  if (old == 0 || srclen > old->sz)
+  if (old == nullptr || srclen > old->sz)
   {
-    if (old != 0 && !STATIC_IntegerRep(old)) delete old;
+    if (old != nullptr && !STATIC_IntegerRep(old)) delete old;
     rep = Inew(srclen);
   }
   else
@@ -346,7 +346,7 @@ IntegerRep* Icopy_ulong(IntegerRep* old, unsigned long x)
 
 IntegerRep* Icopy_zero(IntegerRep* old)
 {
-  if (old == 0 || STATIC_IntegerRep(old))
+  if (old == nullptr || STATIC_IntegerRep(old))
     return &_ZeroRep;
 
   old->len = 0;
@@ -359,9 +359,9 @@ IntegerRep* Icopy_zero(IntegerRep* old)
 
 IntegerRep* Icopy_one(IntegerRep* old, int newsgn)
 {
-  if (old == 0 || 1 > old->sz)
+  if (old == nullptr || 1 > old->sz)
   {
-    if (old != 0 && !STATIC_IntegerRep(old)) delete old;
+    if (old != nullptr && !STATIC_IntegerRep(old)) delete old;
     return newsgn==I_NEGATIVE ? &_MinusOneRep : &_OneRep;
   }
 
@@ -1176,7 +1176,7 @@ static void do_divide(unsigned short* rs,
       }
       *rt = 0;
     }
-    if (qs != 0)
+    if (qs != nullptr)
       qs[l] = qhat;
   }
 }
@@ -1189,7 +1189,7 @@ static int unscale(const unsigned short* x, int xl, unsigned short y,
 {
   if (xl == 0 || y == 1)
     return 0;
-  else if (q != 0)
+  else if (q != nullptr)
   {
     unsigned short* botq = q;
     unsigned short* qs = &(botq[xl - 1]);
@@ -1249,8 +1249,8 @@ IntegerRep* div(const IntegerRep* x, const IntegerRep* y, IntegerRep* q)
   }
   else
   {
-    IntegerRep* yy = 0;
-    IntegerRep* r  = 0;
+    IntegerRep* yy = nullptr;
+    IntegerRep* r  = nullptr;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == q)
     {
@@ -1318,7 +1318,7 @@ IntegerRep* div(const IntegerRep* x, long y, IntegerRep* q)
   }
   else
   {
-    IntegerRep* r  = 0;
+    IntegerRep* r  = nullptr;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1)
     {
@@ -1393,7 +1393,7 @@ void divide(const Integer& Ix, long y, Integer& Iq, long& rem)
   }
   else
   {
-    IntegerRep* r  = 0;
+    IntegerRep* r  = nullptr;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1)
     {
@@ -1472,7 +1472,7 @@ void divide(const Integer& Ix, const Integer& Iy, Integer& Iq, Integer& Ir)
   }
   else
   {
-    IntegerRep* yy = 0;
+    IntegerRep* yy = nullptr;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == q || y == r)
     {
@@ -1525,14 +1525,14 @@ IntegerRep* mod(const IntegerRep* x, const IntegerRep* y, IntegerRep* r)
     r = Icopy_zero(r);
   else if (yl == 1)
   {
-    int rem = unscale(x->s, xl, y->s[0], 0);
+    int rem = unscale(x->s, xl, y->s[0], nullptr);
     r = Icopy_long(r, rem);
     if (rem != 0)
       r->sgn = xsgn;
   }
   else
   {
-    IntegerRep* yy = 0;
+    IntegerRep* yy = nullptr;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == r)
     {
@@ -1546,7 +1546,7 @@ IntegerRep* mod(const IntegerRep* x, const IntegerRep* y, IntegerRep* r)
       scpy(x->s, r->s, xl);
     }
       
-    do_divide(r->s, yy->s, yl, 0, xl - yl + 1);
+    do_divide(r->s, yy->s, yl, nullptr, xl - yl + 1);
 
     if (yy != y && !STATIC_IntegerRep(yy)) delete yy;
 
@@ -1592,7 +1592,7 @@ IntegerRep* mod(const IntegerRep* x, long y, IntegerRep* r)
     r = Icopy_zero(r);
   else if (yl == 1)
   {
-    int rem = unscale(x->s, xl, ys[0], 0);
+    int rem = unscale(x->s, xl, ys[0], nullptr);
     r = Icopy_long(r, rem);
     if (rem != 0)
       r->sgn = xsgn;
@@ -1614,7 +1614,7 @@ IntegerRep* mod(const IntegerRep* x, long y, IntegerRep* r)
       scpy(x->s, r->s, xl);
     }
       
-    do_divide(r->s, ys, yl, 0, xl - yl + 1);
+    do_divide(r->s, ys, yl, nullptr, xl - yl + 1);
 
     if (prescale != 1)
     {
@@ -1868,7 +1868,7 @@ void clearbit(Integer& x, long b)
 {
   if (b >= 0)
     {
-      if (x.rep == 0)
+      if (x.rep == nullptr)
 	x.rep = &_ZeroRep;
       else
 	{
@@ -1883,7 +1883,7 @@ void clearbit(Integer& x, long b)
 
 int testbit(const Integer& x, long b)
 {
-  if (x.rep != 0 && b >= 0)
+  if (x.rep != nullptr && b >= 0)
   {
 	 int bw = (int) ((unsigned long)b / I_SHIFT);
 	 int sw = (int) ((unsigned long)b % I_SHIFT);
@@ -1904,12 +1904,12 @@ IntegerRep* gcd(const IntegerRep* x, const IntegerRep* y)
   int vl = y->len;
   
   if (vl == 0)
-    return Ialloc(0, x->s, ul, I_POSITIVE, ul);
+    return Ialloc(nullptr, x->s, ul, I_POSITIVE, ul);
   else if (ul == 0)
-    return Ialloc(0, y->s, vl, I_POSITIVE, vl);
+    return Ialloc(nullptr, y->s, vl, I_POSITIVE, vl);
 
-  IntegerRep* u = Ialloc(0, x->s, ul, I_POSITIVE, ul);
-  IntegerRep* v = Ialloc(0, y->s, vl, I_POSITIVE, vl);
+  IntegerRep* u = Ialloc(nullptr, x->s, ul, I_POSITIVE, ul);
+  IntegerRep* v = Ialloc(nullptr, y->s, vl, I_POSITIVE, vl);
 
 // find shift so that both not even
 
@@ -1944,9 +1944,9 @@ IntegerRep* gcd(const IntegerRep* x, const IntegerRep* y)
 
   IntegerRep* t;
   if (u->s[0] & 01)
-    t = Ialloc(0, v->s, v->len, !v->sgn, v->len);
+    t = Ialloc(nullptr, v->s, v->len, !v->sgn, v->len);
   else
-    t = Ialloc(0, u->s, u->len, u->sgn, u->len);
+    t = Ialloc(nullptr, u->s, u->len, u->sgn, u->len);
 
   while (t->len != 0)
   {
@@ -2030,7 +2030,7 @@ IntegerRep* power(const IntegerRep* x, long y, IntegerRep* r)
   else
   {
 	 int maxsize = (int) (((lg(x) + 1) * y) / I_SHIFT + 2);     // pre-allocate space
-    IntegerRep* b = Ialloc(0, x->s, xl, I_POSITIVE, maxsize);
+    IntegerRep* b = Ialloc(nullptr, x->s, xl, I_POSITIVE, maxsize);
     b->len = xl;
     r = Icalloc(r, maxsize);
     r = Icopy_one(r, I_POSITIVE);
@@ -2149,8 +2149,8 @@ Integer lcm(const Integer& x, const Integer& y)
 IntegerRep* atoIntegerRep(const char* s, int base)
 {
   int sl = strlen(s);
-  IntegerRep* r = Icalloc(0, (int) (sl * (lg(base) + 1) / I_SHIFT + 1));
-  if (s != 0)
+  IntegerRep* r = Icalloc(nullptr, (int) (sl * (lg(base) + 1) / I_SHIFT + 1));
+  if (s != nullptr)
   {
     char sgn;
     while (isspace(*s)) ++s;
@@ -2211,7 +2211,7 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int& fmtlen, int base,
     *--s = '0';
   else
   {
-    IntegerRep* z = Icopy(0, x);
+    IntegerRep* z = Icopy(nullptr, x);
 
     // split division by base into two parts: 
     // first divide by biggest power of base that fits in an unsigned short,
@@ -2334,7 +2334,7 @@ std::istream &operator>>(std::istream &s, Integer& y)
 
 int Integer::OK() const
 {
-  if (rep != 0)
+  if (rep != nullptr)
 	 {
       int l = rep->len;
       int s = rep->sgn;
@@ -2365,13 +2365,13 @@ Integer::Integer() :rep(&_ZeroRep) {}
 
 Integer::Integer(IntegerRep* r) :rep(r) {}
 
-Integer::Integer(int y) :rep(Icopy_long(0, (long)y)) {}
+Integer::Integer(int y) :rep(Icopy_long(nullptr, (long)y)) {}
 
-Integer::Integer(long y) :rep(Icopy_long(0, y)) {}
+Integer::Integer(long y) :rep(Icopy_long(nullptr, y)) {}
 
-Integer::Integer(unsigned long y) :rep(Icopy_ulong(0, y)) {}
+Integer::Integer(unsigned long y) :rep(Icopy_ulong(nullptr, y)) {}
 
-Integer::Integer(const Integer&  y) :rep(Icopy(0, y.rep)) {}
+Integer::Integer(const Integer&  y) :rep(Icopy(nullptr, y.rep)) {}
 
 Integer::~Integer() { if (rep && !STATIC_IntegerRep(rep)) delete[] rep; }
 
@@ -2389,7 +2389,7 @@ Integer &Integer::operator=(long y)
 
 int Integer::initialized() const
 {
-  return rep != 0;
+  return rep != nullptr;
 }
 
 // procedural versions
@@ -2860,7 +2860,7 @@ Integer abs(const Integer& x)
   return r;
 }
 
-Integer Integer::operator-(void) const
+Integer Integer::operator-() const
 {
   Integer r;
   Gambit::negate(*this, r);

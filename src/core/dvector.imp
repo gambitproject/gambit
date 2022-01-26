@@ -40,7 +40,7 @@ int DVector<T>::sum(int part, const PVector<int> &v) const
   return s;
 }
 
-template <class T> void DVector<T>::setindex(void)
+template <class T> void DVector<T>::setindex()
 {
   int index = 1;
   
@@ -62,7 +62,7 @@ template <class T> bool DVector<T>::Check(const DVector<T> &v) const
 //    DVector<T>: Constructors, destructor, and constructive operators
 //--------------------------------------------------------------------------
 
-template <class T> DVector<T>::DVector(void) : dvptr(0)
+template <class T> DVector<T>::DVector() : dvptr(nullptr)
 { }
 
 template <class T> DVector<T>::DVector(const PVector<int> &sig)
@@ -190,7 +190,7 @@ DVector<T> &DVector<T>::operator+=(const DVector<T> &v)
   return *this;
 }
 
-template <class T> DVector<T> DVector<T>::operator-(void) const
+template <class T> DVector<T> DVector<T>::operator-() const
 {
   DVector<T> tmp(*this);
   for (int i = this->First(); i <= this->Last(); i++)
@@ -276,7 +276,7 @@ void DVector<T>::CopySubRow(int row, int col, const DVector<T> &v)
 
 
 
-template <class T> const Array<int> &DVector<T>::DPLengths(void) const
+template <class T> const Array<int> &DVector<T>::DPLengths() const
 {
   return dvlen;
 }

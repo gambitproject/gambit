@@ -208,12 +208,12 @@ extend (int stk[], // stack
     
     // look for  fixp  in NODES1  
     findfixpoint(stk, connected, &savelist, &tmplist, &minnod,
-		 sn1, ec1, sc2, ec2, 1, &bfixin1, &fixp, &posfix) ;
+		 sn1, ec1, sc2, ec2, true, &bfixin1, &fixp, &posfix) ;
     bcandfix = (posfix >= sc1);
     
     // look for  fixp  in nodes2  
     findfixpoint(stk, connected, &savelist, &tmplist, &minnod,
-		 sn2, ec2, sc1, ec1, 0, &bfound, &fixp, &posfix) ;
+		 sn2, ec2, sc1, ec1, false, &bfound, &fixp, &posfix) ;
     
     if (bfound) {
       bfixin1 = false ;
@@ -478,7 +478,7 @@ int CliqueEnumerator::getconnco(Array<int> &firstedge,
 	    // insert the current edge 
 	    edgelist[newedge].nextedge= firstedge[oldco] ;
 	    e = newedge ; 
-	    while (1) {
+	    while (true) {
 	      co1[edgelist[e].node1] = co2[edgelist[e].node2] = newco ;
 	      if (edgelist[e].nextedge == 0) break;
 	      e = edgelist[e].nextedge;

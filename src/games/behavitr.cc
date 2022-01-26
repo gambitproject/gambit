@@ -70,7 +70,7 @@ BehaviorProfileIterator::BehaviorProfileIterator(const BehaviorSupportProfile &p
   First();
 }
 
-void BehaviorProfileIterator::First(void)
+void BehaviorProfileIterator::First()
 {
   for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++)  {
     for (int iset = 1; iset <= m_support.GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
@@ -84,7 +84,7 @@ void BehaviorProfileIterator::First(void)
   }
 }
 
-void BehaviorProfileIterator::operator++(void)
+void BehaviorProfileIterator::operator++()
 {
   int pl = m_support.GetGame()->NumPlayers();
   while (pl > 0 && m_numActiveInfosets[pl] == 0)

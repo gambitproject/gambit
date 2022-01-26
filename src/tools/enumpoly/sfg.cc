@@ -42,7 +42,7 @@ Sfg::Sfg(const Gambit::BehaviorSupportProfile &S)
 
   for(i=1;i<=EF->NumPlayers();i++) {
     seq[i]=1;
-    zero[i]=0;
+    zero[i]=nullptr;
     one[i]=1;
   }
 
@@ -221,13 +221,13 @@ int Sfg::ActionNumber(int pl, int j) const
 
 Gambit::GameInfoset Sfg::GetInfoset(int pl, int j) const 
 {
-  if(j==1) return 0;
+  if(j==1) return nullptr;
   return (*sequences)[pl]->Find(j)->GetInfoset();
 }
 
 Gambit::GameAction Sfg::GetAction(int pl, int j) const
 {
-  if(j==1) return 0;
+  if(j==1) return nullptr;
   return (*sequences)[pl]->Find(j)->GetAction();
 }
 

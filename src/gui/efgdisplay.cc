@@ -63,7 +63,7 @@ void gbtPayoffEditor::BeginEdit(gbtNodeEntry *p_entry, int p_player)
   SetFocus();
 }
 
-void gbtPayoffEditor::EndEdit(void)
+void gbtPayoffEditor::EndEdit()
 {
   Show(false);
 }
@@ -84,7 +84,7 @@ void gbtPayoffEditor::OnChar(wxKeyEvent &p_event)
 //                       Bitmap drawing functions
 //--------------------------------------------------------------------------
 
-static wxBitmap MakeOutcomeBitmap(void)
+static wxBitmap MakeOutcomeBitmap()
 {
   wxBitmap bitmap(24, 24);
   wxMemoryDC dc;
@@ -138,14 +138,14 @@ static Gambit::GameNode GetNode(Gambit::GameNode p_node, int p_id)
     return p_node;
   }
   else if (p_node->NumChildren() == 0) {
-    return 0;
+    return nullptr;
   }
   else {
     for (int i = 1; i <= p_node->NumChildren(); i++) {
       Gambit::GameNode node = GetNode(p_node->GetChild(i), p_id);
       if (node) return node;
     }
-    return 0;
+    return nullptr;
   }
 }
 
@@ -234,7 +234,7 @@ bool gbtPlayerDropTarget::OnDropMoveOutcome(Gambit::GameNode p_node,
   Gambit::GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
   if (!srcNode || p_node == srcNode)  return false;
   m_model->DoSetOutcome(p_node, srcNode->GetOutcome());
-  m_model->DoSetOutcome(srcNode, 0);
+  m_model->DoSetOutcome(srcNode, nullptr);
   return true;
 }
 
@@ -321,7 +321,7 @@ gbtEfgDisplay::gbtEfgDisplay(wxWindow *p_parent, gbtGameDocument *p_doc)
   OnUpdate();
 }
 
-void gbtEfgDisplay::MakeMenus(void)
+void gbtEfgDisplay::MakeMenus()
 {
   m_nodeMenu = new wxMenu;
 
@@ -366,35 +366,35 @@ void gbtEfgDisplay::MakeMenus(void)
 static Gambit::GameNode PriorSameIset(const Gambit::GameNode &n)
 {
   Gambit::GameInfoset iset = n->GetInfoset();
-  if (!iset) return 0;
+  if (!iset) return nullptr;
   for (int i = 1; i <= iset->NumMembers(); i++) {
     if (iset->GetMember(i) == n) {
       if (i > 1) {
 	return iset->GetMember(i-1);
       } 
       else {
-	return 0;
+	return nullptr;
       }
     }
   }
-  return 0;
+  return nullptr;
 }
 
 static Gambit::GameNode NextSameIset(const Gambit::GameNode &n)
 {
   Gambit::GameInfoset iset = n->GetInfoset();
-  if (!iset) return 0;
+  if (!iset) return nullptr;
   for (int i = 1; i <= iset->NumMembers(); i++) {
     if (iset->GetMember(i) == n) {
       if (i < iset->NumMembers()) {
 	return iset->GetMember(i+1); 
       }
       else {
-	return 0;
+	return nullptr;
       }
     }
   }
-  return 0;
+  return nullptr;
 }
 
 //
@@ -567,19 +567,19 @@ void gbtEfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
 //           gbtEfgDisplay: Implementing gbtGameView members
 //---------------------------------------------------------------------
 
-void gbtEfgDisplay::PostPendingChanges(void)
+void gbtEfgDisplay::PostPendingChanges()
 {
   // FIXME: Save edit!
   m_payoffEditor->EndEdit();
 }
 
-void gbtEfgDisplay::OnUpdate(void)
+void gbtEfgDisplay::OnUpdate()
 {
   // First make sure that the selected node is in fact still valid
   if (m_doc->GetSelectNode()) {
     gbtNodeEntry *entry = m_layout.GetNodeEntry(m_doc->GetSelectNode());
     if (!entry) {
-      m_doc->SetSelectNode(0);
+      m_doc->SetSelectNode(nullptr);
     }
   }
 
@@ -610,14 +610,14 @@ void gbtEfgDisplay::OnUpdate(void)
 //                   gbtEfgDisplay: Drawing functions
 //---------------------------------------------------------------------
 
-void gbtEfgDisplay::RefreshTree(void)
+void gbtEfgDisplay::RefreshTree()
 {
   m_layout.BuildNodeList(m_doc->GetEfgSupport());
   m_layout.Layout(m_doc->GetEfgSupport());
   Refresh();
 }
 
-void gbtEfgDisplay::AdjustScrollbarSteps(void)
+void gbtEfgDisplay::AdjustScrollbarSteps()
 {
   int width, height;
   GetClientSize(&width, &height);
@@ -631,7 +631,7 @@ void gbtEfgDisplay::AdjustScrollbarSteps(void)
 		scrollX, scrollY);
 }
 
-void gbtEfgDisplay::FitZoom(void)
+void gbtEfgDisplay::FitZoom()
 {
   int width, height;
   GetClientSize(&width, &height);

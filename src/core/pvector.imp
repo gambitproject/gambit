@@ -35,7 +35,7 @@ template <class T> int PVector<T>::sum(const Array<int> &V) const
   return total;
 }
 
-template <class T> void PVector<T>::setindex(void)
+template <class T> void PVector<T>::setindex()
 {
   int index = this->First();
   for(int i = 1; i <= svlen.Length(); i++)  {
@@ -60,7 +60,7 @@ template <class T> int PVector<T>::Check(const PVector<T> &v) const
 //     PVector<T>: Constructors, destructor, and constructive operators
 //-------------------------------------------------------------------------
 
-template <class T> PVector<T>::PVector(void) : svptr(0)
+template <class T> PVector<T>::PVector() : svptr(nullptr)
 { }
 
 template <class T> PVector<T>::PVector(const Array<int> &sig)
@@ -162,7 +162,7 @@ template <class T> PVector<T>& PVector<T>::operator+=(const PVector<T> &v)
   return (*this);
 }
 
-template <class T> PVector<T> PVector<T>::operator-(void) const
+template <class T> PVector<T> PVector<T>::operator-() const
 {
   PVector<T> tmp(*this);
   for(int i=this->First(); i<=this->Last(); i++)
@@ -286,7 +286,7 @@ template <class T> void PVector<T>::CopyRow(int row, const PVector<T> &v)
     svptr[row][i] = v.svptr[row][i];
 }
 
-template <class T> const Array<int> &PVector<T>::Lengths(void) const
+template <class T> const Array<int> &PVector<T>::Lengths() const
 {
   return svlen;
 }

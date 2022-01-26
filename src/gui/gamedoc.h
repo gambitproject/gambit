@@ -51,7 +51,7 @@ public:
   //!
   //! Returns the number of supports in the stack
   //!
-  int NumSupports(void) const { return m_supports.Length(); }
+  int NumSupports() const { return m_supports.Length(); }
 
   //!
   //! Get the i'th support in the stack
@@ -62,12 +62,12 @@ public:
   //!
   //! Get the current support
   //!
-  const Gambit::BehaviorSupportProfile &GetCurrent(void) const { return *m_supports[m_current]; }
+  const Gambit::BehaviorSupportProfile &GetCurrent() const { return *m_supports[m_current]; }
 
   //!
   //! Get the level of iteration (1 = no iteration)
   //!
-  int GetLevel(void) const { return m_current; }
+  int GetLevel() const { return m_current; }
 
   //!
   //! Sets whether elimination is strict or weak.  If this changes the
@@ -78,29 +78,29 @@ public:
   //!
   //! Reset the stack by clearing out all supports
   //!
-  void Reset(void);
+  void Reset();
 
   //!
   //! Go to the next level of iteration.  Returns 'true' if successful,
   //! 'false' if no effect (i.e., no further actions could be eliminated)
   //!
-  bool NextLevel(void);
+  bool NextLevel();
 
   //!
   //! Go to the previous level of iteration.  Returns 'true' if successful,
   //! 'false' if no effect (i.e., already at the full support)
   //!
-  bool PreviousLevel(void);
+  bool PreviousLevel();
 
   //!
   //! Go to the top level (the full support)
   //!
-  void TopLevel(void) { m_current = 1; }
+  void TopLevel() { m_current = 1; }
 
   //!
   //! Returns 'false' if it is known that no further eliminations can be done
   //!
-  bool CanEliminate(void) const 
+  bool CanEliminate() const 
     { return (m_current < m_supports.Length() || !m_noFurther); }
 };
 
@@ -123,7 +123,7 @@ public:
   //!
   //! Returns the number of supports in the stack
   //!
-  int NumSupports(void) const { return m_supports.Length(); }
+  int NumSupports() const { return m_supports.Length(); }
 
   //!
   //! Get the i'th support in the stack
@@ -134,12 +134,12 @@ public:
   //!
   //! Get the current support
   //!
-  const Gambit::StrategySupportProfile &GetCurrent(void) const { return *m_supports[m_current]; }
+  const Gambit::StrategySupportProfile &GetCurrent() const { return *m_supports[m_current]; }
 
   //!
   //! Get the level of iteration (1 = no iteration)
   //!
-  int GetLevel(void) const { return m_current; }
+  int GetLevel() const { return m_current; }
 
   //!
   //! Sets whether elimination is strict or weak.  If this changes the
@@ -150,34 +150,34 @@ public:
   //!
   //! Gets whether elimination is strict or weak.
   //!
-  bool GetStrict(void) const { return m_strict; }
+  bool GetStrict() const { return m_strict; }
 
   //!
   //! Reset the stack by clearing out all supports
   //!
-  void Reset(void);
+  void Reset();
 
   //!
   //! Go to the next level of iteration.  Returns 'true' if successful,
   //! 'false' if no effect (i.e., no further actions could be eliminated)
   //!
-  bool NextLevel(void);
+  bool NextLevel();
 
   //!
   //! Go to the previous level of iteration.  Returns 'true' if successful,
   //! 'false' if no effect (i.e., already at the full support)
   //!
-  bool PreviousLevel(void);
+  bool PreviousLevel();
 
   //!
   //! Go to the top level (the full support)
   //!
-  void TopLevel(void) { m_current = 1; }
+  void TopLevel() { m_current = 1; }
 
   //!
   //! Returns 'false' if it is known that no further eliminations can be done
   //!
-  bool CanEliminate(void) const 
+  bool CanEliminate() const 
     { return (m_current < m_supports.Length() || !m_noFurther); }
 	      
 };
@@ -255,48 +255,48 @@ public:
   void SaveDocument(std::ostream &) const;
   //@}
 
-  Gambit::Game GetGame(void) const { return m_game; }
-  void BuildNfg(void);
+  Gambit::Game GetGame() const { return m_game; }
+  void BuildNfg();
 
-  const wxString &GetFilename(void) const { return m_filename; }
+  const wxString &GetFilename() const { return m_filename; }
   void SetFilename(const wxString &p_filename) { m_filename = p_filename; }
 
-  bool IsModified(void) const { return m_modified; }
+  bool IsModified() const { return m_modified; }
   void SetModified(bool p_modified) { m_modified = p_modified; }
 
-  const gbtStyle &GetStyle(void) const { return m_style; }
+  const gbtStyle &GetStyle() const { return m_style; }
   void SetStyle(const gbtStyle &p_style);
 
-  int NumPlayers(void) const { return m_game->NumPlayers(); }
-  bool IsConstSum(void) const { return m_game->IsConstSum(); }
-  bool IsTree(void) const { return m_game->IsTree(); }
+  int NumPlayers() const { return m_game->NumPlayers(); }
+  bool IsConstSum() const { return m_game->IsConstSum(); }
+  bool IsTree() const { return m_game->IsTree(); }
 
 
   //!
   //! @name Handling of undo/redo features
   //!
   //@{
-  bool CanUndo(void) const { return (m_undoList.Length() > 1); }
-  void Undo(void);
+  bool CanUndo() const { return (m_undoList.Length() > 1); }
+  void Undo();
 
-  bool CanRedo(void) const { return (m_redoList.Length() > 0); }
-  void Redo(void);
+  bool CanRedo() const { return (m_redoList.Length() > 0); }
+  void Redo();
   //@}
 
   //!
   //! @name Handling of list of computed profiles
   //!
   //@{
-  const gbtAnalysisOutput &GetProfiles(void) const
+  const gbtAnalysisOutput &GetProfiles() const
     { return *m_profiles[m_currentProfileList]; }
   const gbtAnalysisOutput &GetProfiles(int p_index) const
     { return *m_profiles[p_index]; }
   void AddProfileList(gbtAnalysisOutput *);
   void SetProfileList(int p_index);
-  int NumProfileLists(void) const { return m_profiles.Length(); }
-  int GetCurrentProfileList(void) const { return m_currentProfileList; }
+  int NumProfileLists() const { return m_profiles.Length(); }
+  int GetCurrentProfileList() const { return m_currentProfileList; }
 
-  int GetCurrentProfile(void) const 
+  int GetCurrentProfile() const 
   { return (m_profiles.Length() == 0) ? 0 : GetProfiles().GetCurrent(); }
   void SetCurrentProfile(int p_profile);
   /*
@@ -311,43 +311,43 @@ public:
   //! @name Handling of behavior supports
   //!
   //@{
-  const Gambit::BehaviorSupportProfile &GetEfgSupport(void) const
+  const Gambit::BehaviorSupportProfile &GetEfgSupport() const
     { return m_behavSupports.GetCurrent(); }
   void SetBehavElimStrength(bool p_strict);
-  bool NextBehavElimLevel(void);
-  void PreviousBehavElimLevel(void);
-  void TopBehavElimLevel(void);
-  bool CanBehavElim(void) const;
-  int GetBehavElimLevel(void) const;
+  bool NextBehavElimLevel();
+  void PreviousBehavElimLevel();
+  void TopBehavElimLevel();
+  bool CanBehavElim() const;
+  int GetBehavElimLevel() const;
   //@}
 
   //!
   //! @name Handling of strategy supports
   //!
   //@{
-  const Gambit::StrategySupportProfile &GetNfgSupport(void) const
+  const Gambit::StrategySupportProfile &GetNfgSupport() const
     { return m_stratSupports.GetCurrent(); }
   void SetStrategyElimStrength(bool p_strict);
-  bool GetStrategyElimStrength(void) const;
-  bool NextStrategyElimLevel(void);
-  void PreviousStrategyElimLevel(void);
-  void TopStrategyElimLevel(void);
-  bool CanStrategyElim(void) const;
-  int GetStrategyElimLevel(void) const;
+  bool GetStrategyElimStrength() const;
+  bool NextStrategyElimLevel();
+  void PreviousStrategyElimLevel();
+  void TopStrategyElimLevel();
+  bool CanStrategyElim() const;
+  int GetStrategyElimLevel() const;
   //@}
 
-  Gambit::GameNode GetSelectNode(void) const { return m_selectNode; }
+  Gambit::GameNode GetSelectNode() const { return m_selectNode; }
   void SetSelectNode(Gambit::GameNode);
 
   /// Call to ask viewers to post any pending changes
-  void PostPendingChanges(void);
+  void PostPendingChanges();
 
   /// Operations on game model
   void DoSave(const wxString &p_filename);
   void DoExportEfg(const wxString &p_filename);
   void DoExportNfg(const wxString &p_filename);
   void DoSetTitle(const wxString &p_title, const wxString &p_comment);
-  void DoNewPlayer(void);
+  void DoNewPlayer();
   void DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label);
   void DoNewStrategy(GamePlayer p_player);
   void DoDeleteStrategy(GameStrategy p_strategy);
@@ -391,12 +391,12 @@ public:
   virtual ~gbtGameView()
     { m_doc->RemoveView(this); }
 
-  virtual void OnUpdate(void) = 0;
+  virtual void OnUpdate() = 0;
 
   /// Post any pending changes in the viewer to the document
-  virtual void PostPendingChanges(void) { }
+  virtual void PostPendingChanges() { }
 
-  gbtGameDocument *GetDocument(void) const { return m_doc; }
+  gbtGameDocument *GetDocument() const { return m_doc; }
 };
 
 #endif  // GAMEDOC_H

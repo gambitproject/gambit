@@ -65,12 +65,12 @@ private:
 public:
   PolEnumModule(const Gambit::StrategySupportProfile &);
   
-  int PolEnum(void);
+  int PolEnum();
   
-  long NumEvals(void) const;
-  double Time(void) const;
+  long NumEvals() const;
+  double Time() const;
   
-  const Gambit::List<Gambit::MixedStrategyProfile<double> > &GetSolutions(void) const;
+  const Gambit::List<Gambit::MixedStrategyProfile<double> > &GetSolutions() const;
   Gambit::Vector<double> SolVarsFromMixedProfile(const Gambit::MixedStrategyProfile<double> &) const;
 
   const int PolishKnownRoot(Gambit::Vector<double> &) const;
@@ -94,7 +94,7 @@ PolEnumModule::PolEnumModule(const Gambit::StrategySupportProfile &S)
 }
 
 
-int PolEnumModule::PolEnum(void)
+int PolEnumModule::PolEnum()
 {
   gPolyList<double> equations = NashOnSupportEquationsAndInequalities();
 
@@ -148,21 +148,21 @@ int PolEnumModule::SaveSolutions(const Gambit::List<Gambit::Vector<double> > &li
 
 bool PolEnumModule::EqZero(double x) const
 {
-  if(x <= eps && x >= -eps) return 1;
-  return 0;
+  if(x <= eps && x >= -eps) return true;
+  return false;
 }     
 
-long PolEnumModule::NumEvals(void) const
+long PolEnumModule::NumEvals() const
 {
   return nevals;
 }
 
-double PolEnumModule::Time(void) const
+double PolEnumModule::Time() const
 {
   return time;
 }
 
-const Gambit::List<Gambit::MixedStrategyProfile<double> > &PolEnumModule::GetSolutions(void) const
+const Gambit::List<Gambit::MixedStrategyProfile<double> > &PolEnumModule::GetSolutions() const
 {
   return solutions;
 }

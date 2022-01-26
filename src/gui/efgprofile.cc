@@ -49,7 +49,7 @@ gbtBehavProfileList::gbtBehavProfileList(wxWindow *p_parent,
 }
 
 gbtBehavProfileList::~gbtBehavProfileList()
-{ }
+= default;
 
 void gbtBehavProfileList::OnLabelClick(wxSheetEvent &p_event)
 {
@@ -158,7 +158,7 @@ wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords,
   return attr;
 }
 
-void gbtBehavProfileList::OnUpdate(void)
+void gbtBehavProfileList::OnUpdate()
 {
   if (!m_doc->GetGame() || m_doc->NumProfileLists() == 0) {
     DeleteRows(0, GetNumberRows());

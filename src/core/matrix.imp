@@ -28,8 +28,8 @@ namespace Gambit {
 //       Matrix<T>: Constructors, destructors, constructive operators
 //-------------------------------------------------------------------------
 
-template <class T> Matrix<T>::Matrix(void)
-{ }
+template <class T> Matrix<T>::Matrix()
+= default;
 
 template <class T> Matrix<T>::Matrix(unsigned int rows, unsigned int cols)
   : RectArray<T>(rows, cols)
@@ -49,7 +49,7 @@ template <class T> Matrix<T>::Matrix(const Matrix<T> &M)
 { }
  
 template <class T> Matrix<T>::~Matrix()
-{ }
+= default;
 
 template <class T> Matrix<T> &Matrix<T>::operator=(const Matrix<T> &M)
 {
@@ -65,7 +65,7 @@ template <class T> Matrix<T> &Matrix<T>::operator=(const T &c)
   return *this;
 }
 
-template <class T> Matrix<T> Matrix<T>::operator-(void)
+template <class T> Matrix<T> Matrix<T>::operator-()
 {
   Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++)
@@ -406,7 +406,7 @@ template <class T> Vector<T> Matrix<T>::Column(int j) const
 
 // more complex functions
 
-template <class T> void Matrix<T>::MakeIdent(void)
+template <class T> void Matrix<T>::MakeIdent()
 {
   for (int i = this->minrow; i <= this->maxrow; i++) 
     for (int j = this->mincol; j <= this->maxcol; j++) {

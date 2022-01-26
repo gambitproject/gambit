@@ -51,8 +51,7 @@ template<class T> gRectangle<T>::gRectangle(const Gambit::Vector<T> lower_bd,
 
 
 template<class T> gRectangle<T>::~gRectangle() 
-{
-}
+= default;
 
 //--------------------------------------------------------------------------
 //                          rectangle -- operators
@@ -91,14 +90,14 @@ template<class T> const int gRectangle<T>::Dmnsn() const
   return sides.Length();
 }
 
-template <class T> Gambit::Vector<T> gRectangle<T>::LowerBound(void) const
+template <class T> Gambit::Vector<T> gRectangle<T>::LowerBound() const
 { 
   Gambit::Vector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].LowerBound();
   return answer;
 }
 
-template <class T> Gambit::Vector<T> gRectangle<T>::UpperBound(void) const
+template <class T> Gambit::Vector<T> gRectangle<T>::UpperBound() const
 { 
   Gambit::Vector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].UpperBound();

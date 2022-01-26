@@ -42,7 +42,7 @@ public:
   class BadPivot : public Exception  {
   public:
     virtual ~BadPivot() throw() { }
-    const char *what(void) const throw() { return "Bad pivot in LPTableau."; }
+    const char *what() const throw() { return "Bad pivot in LPTableau."; }
   };
   LPTableau(const Matrix<T> &A, const Vector<T> &b); 
   LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b); 
@@ -67,10 +67,10 @@ public:
   bool IsReversePivot(int i, int j);
   void DualReversePivots(List<Array<int> > &);
   bool IsDualReversePivot(int i, int j);
-  BFS<T> DualBFS(void) const;
+  BFS<T> DualBFS() const;
 
   // returns the label of the index of the last artificial variable
-  int LastLabel( void );
+  int LastLabel( );
 
   // select Basis elements according to Tableau rows and cols
   void BasisSelect(const Array<T>&rowv, Vector<T> &colv) const;

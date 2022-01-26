@@ -33,7 +33,7 @@
 /************** Implementation of class Pelview **************/
 /*************************************************************/
 
-node SaveList=0; 
+node SaveList=nullptr; 
 
 void PelView::InitializePelicanMemory() const
 {
@@ -97,19 +97,19 @@ Gen_node PelView::CreateRing(const int numvar) const
   atemp = gen_node();
   if (numvar == 1) a1->next= atemp;
   else {
-    a1->next=NULL;
+    a1->next=nullptr;
     atemp = a1;
     for(int j=2; j<=numvar; j++)
       {
 	Gen_node a = gen_node();
 	Initialize_Idf_T_Gen_node(a,q[j]);
-	a->next = NULL;
+	a->next = nullptr;
 	
 	atemp->next = a;
 	atemp = a;	
       }
   }
-  atemp->next=NULL;
+  atemp->next=nullptr;
   Initialize_Idf_T_Gen_node(atemp,"t");
   
   return a1;
@@ -128,7 +128,7 @@ polynomial1 PelView::GamPolyToPelPoly(const gPoly<double> &p,
     
     for (int i=0;i<P->R->n;i++)
       P->exps[i]=0;
-    P->next= 0;
+    P->next= nullptr;
     return P;
   }
   
@@ -144,7 +144,7 @@ polynomial1 PelView::GamPolyToPelPoly(const gPoly<double> &p,
       
       for (int i=0;i<Ptemp->R->n;i++)
 	Ptemp->exps[i]=0;
-      Ptemp->next=0;
+      Ptemp->next=nullptr;
     }
     
     else {
@@ -153,7 +153,7 @@ polynomial1 PelView::GamPolyToPelPoly(const gPoly<double> &p,
       
       for (int i=0;i<Ptemp->R->n;i++)
 	Ptemp->exps[i]= p.MonomialList()[1].ExpV() [i+1];
-      Ptemp->next=0;
+      Ptemp->next=nullptr;
     }
     
     for (int j = 2; j <=p.MonomialList().Length(); j++) {
@@ -165,7 +165,7 @@ polynomial1 PelView::GamPolyToPelPoly(const gPoly<double> &p,
 	
 	for (int i=0;i<a->R->n;i++)
 	  a->exps[i]=0;
-	a->next = 0;
+	a->next = nullptr;
 	Ptemp->next = a;
 	Ptemp = a;
 	
@@ -181,7 +181,7 @@ polynomial1 PelView::GamPolyToPelPoly(const gPoly<double> &p,
 		
 	//     printP(a);
 	//	      cout;
-	a->next = 0;
+	a->next = nullptr;
 	Ptemp->next = a;
 	Ptemp = a;
 	
@@ -199,7 +199,7 @@ PelView::CreatePelicanVersionOfSystem(const gPolyList<double> &input,
   Gen_node a;
   a = gen_node();
   a->type= Mtx_T;
-  a->next= NULL;
+  a->next= nullptr;
 
   Gmatrix V;
   V = Gmatrix_new(1, input.Length());
@@ -213,7 +213,7 @@ PelView::CreatePelicanVersionOfSystem(const gPolyList<double> &input,
       Gen_node b;
       b = gen_node();
       b->type = Ply_T;
-      b->next = NULL;
+      b->next = nullptr;
       b->Genval.pval=(GamPolyToPelPoly(input[j], input.Length(), ring));
       b->Genval.gval=(char*) (GamPolyToPelPoly(input[j], input.Length(), ring));
       b->Genval.idval=(char*) (GamPolyToPelPoly(input[j], input.Length(), ring)); 
@@ -229,8 +229,8 @@ int PelView::GutsOfGetMixedVolume(      node A,
 				        node norms, 
 				  const Imatrix T) const
 {
-  node ptr = 0, ptc = 0, res = 0;
-  Imatrix M = 0, Tp = 0;
+  node ptr = nullptr, ptc = nullptr, res = nullptr;
+  Imatrix M = nullptr, Tp = nullptr;
   int v, mv = 0, t = 0;
   LOCS(5);
   PUSH_LOC(A);
@@ -240,13 +240,13 @@ int PelView::GutsOfGetMixedVolume(      node A,
   PUSH_LOC(norms);
   
   ptr = norms;
-  while (ptr != 0) {
+  while (ptr != nullptr) {
     
     ptc = aset_face(A, (Imatrix) Car((node) Car(ptr)));
     
     Tp = aset_type(ptc, Tp);
     
-    if (T != 0 && Imatrix_equal(Tp, T) == TRUE) {
+    if (T != nullptr && Imatrix_equal(Tp, T) == TRUE) {
       t = 1;
       list_insert(Car(ptr),&res, &(list_Imatrix_comp),FALSE);
     } else
@@ -272,8 +272,8 @@ int PelView::GutsOfGetMixedVolume(      node A,
 
 int PelView::GetMixedVolume(const Gen_node g) const
 {
-  aset A=0;
-  Ivector T=0;
+  aset A=nullptr;
+  Ivector T=nullptr;
   int r = 0;
   int CP;
   int nargs;
@@ -304,7 +304,7 @@ Gen_node PelView::Make_scl_Gen_node() const
   Gen_node g= gen_node();
 
   g->type= Idf_T;
-  g->next= NULL;
+  g->next= nullptr;
   g->Genval.gval= const_cast<char *>("scl");
   g->Genval.idval= const_cast<char *>("scl");
 
@@ -334,7 +334,7 @@ polynomial1 PelView::IdentityElementPoly(const Pring ring) const
   for (int i=0;i<P->R->n;i++)
     P->exps[i]=0;
   P->def =0;
-  P->next= 0;
+  P->next= nullptr;
 
   return P;
 }
@@ -352,7 +352,7 @@ polynomial1 PelView::HomotopyVariableMonomialPoly(const Pring ring,
   for (int i=0;i<P->R->n;i++)
     P->exps[i]=0;
   P->def = comp;
-  P->next= 0;
+  P->next= nullptr;
   
   return P;
 }
@@ -363,7 +363,7 @@ Gen_node PelView::SolutionsDerivedFromContinuation(const Pring &ring,
 					   const Gen_node &pel_system,
 						   int tweak) const
 {
-  pel_system->next = 0;
+  pel_system->next = nullptr;
 
   Gen_node temp= Link(pel_system ,Make_scl_Gen_node()); 
   Gen_node scl= ToDmatrixGen_node(temp);
@@ -377,8 +377,8 @@ Gen_node PelView::SolutionsDerivedFromContinuation(const Pring &ring,
   one=Ply_To_Gen(IdentityElementPoly(ring));
   tee1=Ply_To_Gen(HomotopyVariableMonomialPoly(ring, unity));
   
-  tee->next=0;
-  one->next=0;
+  tee->next=nullptr;
+  one->next=nullptr;
   
 // Define the homothopy
 
@@ -386,7 +386,7 @@ Gen_node PelView::SolutionsDerivedFromContinuation(const Pring &ring,
   Gen_node h = PROC_MUL(Link(tee, fs));
   Gen_node h1 = PROC_SUB(Link(one, tee1));
 //A little trick
-  Genpoly->next=0;
+  Genpoly->next=nullptr;
   Gen_node h2 = G_UnLift(Genpoly);
 
   //  gout<< " Step 14 \n";
@@ -444,7 +444,7 @@ Gen_node PelView::SolveCheckMaybeTryAgain(const Pring &ring,
 #endif
       
       //The same little trick
-      pel_system->next= 0;
+      pel_system->next= nullptr;
       
 #ifdef PELVIEW_DEBUG
       //      gout << "\n Step 12 \n";
@@ -480,7 +480,7 @@ PelView::GambitRootsFromPelRoots(const Gen_node g) const
   Dmatrix P;
   int i;
 
-  while(ptr!=0) {
+  while(ptr!=nullptr) {
     P=(Dmatrix)(Car(Car(ptr)));
 
     int numbervar;
@@ -559,14 +559,14 @@ bool PelView::CheckSolutions(const Gen_node g) const
 {
   Gen_node goo;
   goo = g->Genval.lval;
-  while (goo!=0) { 
+  while (goo!=nullptr) { 
     if (Gambit::abs(goo->Genval.dval) > 0.01) 
-      return 0;
+      return false;
 
     goo = goo->next;
   }
 
-  return 1;
+  return true;
 }
 
 PelView::PelView(const gPolyList<double> &mylist):input(mylist)
@@ -693,17 +693,12 @@ avoids the error, somehow!!
 }
 
 PelView::PelView(const PelView & given)
-  : input(given.input),
-    complexroots(given.complexroots),
-    realroots(given.realroots),
-    mixedvolume(given.mixedvolume),
-    solutionsarecorrect(given.solutionsarecorrect)
-{
-}
+  
+    
+= default;
 
 PelView::~PelView()
-{
-}
+= default;
 
 PelView& PelView::operator =(const PelView &rhs)
 {

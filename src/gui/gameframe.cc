@@ -69,7 +69,7 @@ class gbtProfileListPanel : public wxPanel, public gbtGameView {
 private:
   wxWindow *m_behavProfiles, *m_mixedProfiles;
 
-  void OnUpdate(void) { }
+  void OnUpdate() { }
 
 public:
   gbtProfileListPanel(wxWindow *p_parent, gbtGameDocument *p_doc);
@@ -90,7 +90,7 @@ gbtProfileListPanel::gbtProfileListPanel(wxWindow *p_parent,
     topSizer->Add(m_behavProfiles, 1, wxEXPAND, 0);
   }
   else {
-    m_behavProfiles = 0;
+    m_behavProfiles = nullptr;
   }
 
   m_mixedProfiles = new gbtMixedProfileList(this, p_doc);
@@ -125,7 +125,7 @@ private:
   wxStaticText *m_description;
 
   void OnChoice(wxCommandEvent &);
-  void OnUpdate(void);
+  void OnUpdate();
 
 public:
   gbtAnalysisNotebook(wxWindow *p_parent, gbtGameDocument *p_doc);
@@ -171,7 +171,7 @@ void gbtAnalysisNotebook::OnChoice(wxCommandEvent &p_event)
   m_doc->SetProfileList(p_event.GetSelection() + 1);
 }
 
-void gbtAnalysisNotebook::OnUpdate(void)
+void gbtAnalysisNotebook::OnUpdate()
 {
   m_choices->Clear();
   for (int i = 1; i <= m_doc->NumProfileLists(); i++) {
@@ -279,10 +279,10 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
     m_efgPanel = new gbtEfgPanel(m_splitter, p_doc);
     m_efgPanel->Show(true);
     m_splitter->Initialize(m_efgPanel);
-    m_nfgPanel = 0;
+    m_nfgPanel = nullptr;
   }
   else {
-    m_efgPanel = 0;
+    m_efgPanel = nullptr;
     m_nfgPanel = new gbtNfgPanel(m_splitter, p_doc);
     m_nfgPanel->Show(true);
     m_splitter->Initialize(m_nfgPanel);
@@ -319,7 +319,7 @@ gbtGameFrame::~gbtGameFrame()
 }
 
 
-void gbtGameFrame::OnUpdate(void)
+void gbtGameFrame::OnUpdate()
 {
   std::string gameTitle;
   gameTitle = m_doc->GetGame()->GetTitle();
@@ -347,7 +347,7 @@ void gbtGameFrame::OnUpdate(void)
   GetToolBar()->EnableTool(wxID_UNDO, m_doc->CanUndo());
   menuBar->Enable(wxID_REDO, m_doc->CanRedo());
   GetToolBar()->EnableTool(wxID_REDO, m_doc->CanRedo());
-  menuBar->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode != 0);
+  menuBar->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode != nullptr);
   menuBar->Enable(GBT_MENU_EDIT_INSERT_ACTION,
 		  selectNode && selectNode->GetInfoset());
   menuBar->Enable(GBT_MENU_EDIT_REVEAL,
@@ -358,7 +358,7 @@ void gbtGameFrame::OnUpdate(void)
 		  selectNode && selectNode->GetParent());
   menuBar->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME,
 		  selectNode && selectNode->GetOutcome());
-  menuBar->Enable(GBT_MENU_EDIT_NODE, selectNode != 0);
+  menuBar->Enable(GBT_MENU_EDIT_NODE, selectNode != nullptr);
   menuBar->Enable(GBT_MENU_EDIT_MOVE, 
 		     selectNode && selectNode->GetInfoset());
 
@@ -432,7 +432,7 @@ static void AppendBitmapItem(wxMenu *p_menu,
   p_menu->Append(item);
 }
 
-void gbtGameFrame::MakeMenus(void)
+void gbtGameFrame::MakeMenus()
 {
   wxMenu *fileMenu = new wxMenu;
   
@@ -589,7 +589,7 @@ void gbtGameFrame::MakeMenus(void)
   wxGetApp().AddMenu(GetMenuBar()->GetMenu(0));
 }
 
-void gbtGameFrame::MakeToolbar(void)
+void gbtGameFrame::MakeToolbar()
 {
   wxToolBar *toolBar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT);
   toolBar->SetMargins(4, 4);
@@ -602,7 +602,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
 		               _("Create a new extensive (tree) game"),
 		               _("Create a new extensive (tree) game"),
-                   NULL);
+                   nullptr);
   toolBar->AddTool(GBT_MENU_FILE_NEW_NFG, 
                    wxEmptyString,
                    wxBitmap(newtable_xpm), 
@@ -610,7 +610,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
 		               _("Create a new strategic (table) game"),
 		               _("Create a new strategic (table) game"),
-                   NULL);
+                   nullptr);
   toolBar->AddTool(wxID_OPEN, 
                    wxEmptyString,
                    wxBitmap(open_xpm), 
@@ -618,7 +618,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
                    _("Open a file"),
                    _("Open a file"),
-                   NULL);
+                   nullptr);
   toolBar->AddTool(wxID_SAVE,
                    wxEmptyString,
                    wxBitmap(save_xpm), 
@@ -626,7 +626,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
                    _("Save this game"), 
                    _("Save this game"), 
-                   NULL);
+                   nullptr);
   toolBar->AddTool(wxID_SAVEAS, 
                    wxEmptyString,
                    wxBitmap(saveas_xpm), 
@@ -634,7 +634,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
                    _("Save to a different file"), 
                    _("Save this game to another file"),
-                   NULL);
+                   nullptr);
 
   toolBar->AddSeparator();
 
@@ -645,7 +645,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
                    _("Print this game"),
                    _("Print this game"),
-                   NULL);
+                   nullptr);
   toolBar->AddTool(wxID_PREVIEW, 
                    wxEmptyString,
                    wxBitmap(preview_xpm), 
@@ -653,7 +653,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
                    _("Print preview"),
                    _("View a preview of the game printout"),
-                   NULL);
+                   nullptr);
 
   toolBar->AddSeparator();
 
@@ -664,7 +664,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
                    _("Undo the last action"),
                    _("Undo the last change to the game"),
-                   NULL);
+                   nullptr);
   toolBar->AddTool(wxID_REDO, 
                    wxEmptyString,
                    wxBitmap(redo_xpm), 
@@ -672,7 +672,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
                    _("Redo the undone action"),
                    _("Redo the last undone change"),
-                   NULL);
+                   nullptr);
 
   toolBar->AddSeparator();
 
@@ -683,7 +683,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
                    _("Add a new player"),
                    _("Add a new player to the game"),
-                   NULL);
+                   nullptr);
   if (m_doc->IsTree()) {
     toolBar->AddTool(GBT_MENU_VIEW_ZOOMIN, 
                      wxEmptyString,
@@ -692,7 +692,7 @@ void gbtGameFrame::MakeToolbar(void)
                      wxITEM_NORMAL, 
                      _("Zoom in"),
                      _("Increase magnification"),
-                     NULL);
+                     nullptr);
     toolBar->AddTool(GBT_MENU_VIEW_ZOOMOUT, 
                      wxEmptyString,
                      wxBitmap(zoomout_xpm), 
@@ -700,7 +700,7 @@ void gbtGameFrame::MakeToolbar(void)
                      wxITEM_NORMAL, 
                      _("Zoom out"),
                      _("Decrease magnification"),
-                     NULL);
+                     nullptr);
     toolBar->AddTool(GBT_MENU_VIEW_ZOOMFIT, 
                      wxEmptyString,
                      wxBitmap(zoomfit_xpm), 
@@ -708,7 +708,7 @@ void gbtGameFrame::MakeToolbar(void)
                      wxITEM_NORMAL, 
                      _("Fit to window"),
                      _("Set magnification to see entrie tree"),
-                     NULL);
+                     nullptr);
   }
 
   toolBar->AddSeparator();
@@ -720,7 +720,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
 		               _("Increase the number of decimals displayed"),
 		               _("Increase the number of decimal places shown"),
-                   NULL);
+                   nullptr);
   toolBar->AddTool(GBT_MENU_FORMAT_DECIMALS_DELETE,
                    wxEmptyString,
                    wxBitmap(deldecimal_xpm), 
@@ -728,7 +728,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
 		               _("Decrease the number of decimals displayed"),
 		               _("Decrease the number of decimal places shown"),
-                   NULL);
+                   nullptr);
 
   toolBar->AddSeparator();
   
@@ -740,7 +740,7 @@ void gbtGameFrame::MakeToolbar(void)
                      wxITEM_CHECK, 
 		                 _("Display the reduced strategic representation of the game"),
 		                 _("Display the reduced strategic representation of the game"),
-                     NULL);
+                     nullptr);
   }
   toolBar->AddTool(GBT_MENU_VIEW_PROFILES,
                    wxEmptyString,
@@ -749,7 +749,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
 		               _("View the list of computed strategy profiles"), 
 		               _("Show or hide the list of computed strategy profiles"),
-                   NULL);
+                   nullptr);
   toolBar->AddTool(GBT_MENU_TOOLS_EQUILIBRIUM,
                    wxEmptyString,
                    wxBitmap(calc_xpm), 
@@ -757,7 +757,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
 		               _("Compute Nash equilibria of this game"),
 		               _("Compute Nash equilibria of this game"),
-                   NULL);
+                   nullptr);
   
   toolBar->AddSeparator();
 
@@ -768,7 +768,7 @@ void gbtGameFrame::MakeToolbar(void)
                    wxITEM_NORMAL, 
 		               _("About Gambit"),
 		               _("About Gambit"),
-                   NULL);
+                   nullptr);
 
   toolBar->Realize();
   toolBar->SetRows(1);
@@ -785,7 +785,7 @@ void gbtGameFrame::OnFileNewEfg(wxCommandEvent &)
   efg->NewPlayer()->SetLabel("Player 1");
   efg->NewPlayer()->SetLabel("Player 2");
   gbtGameDocument *doc = new gbtGameDocument(efg);
-  (void) new gbtGameFrame(0, doc);
+  (void) new gbtGameFrame(nullptr, doc);
 }
 
 void gbtGameFrame::OnFileNewNfg(wxCommandEvent &)
@@ -798,7 +798,7 @@ void gbtGameFrame::OnFileNewNfg(wxCommandEvent &)
   nfg->GetPlayer(1)->SetLabel("Player 1");
   nfg->GetPlayer(2)->SetLabel("Player 2");
   gbtGameDocument *doc = new gbtGameDocument(nfg);
-  (void) new gbtGameFrame(0, doc);
+  (void) new gbtGameFrame(nullptr, doc);
 }
 
 void gbtGameFrame::OnFileOpen(wxCommandEvent &)
@@ -883,7 +883,7 @@ void gbtGameFrame::OnFilePrintPreview(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
 
-  wxPrintPreview *preview = 0;
+  wxPrintPreview *preview = nullptr;
   if (m_efgPanel && m_splitter->GetWindow1() == m_efgPanel) {
     preview = new wxPrintPreview(m_efgPanel->GetPrintout(), 
 				 m_efgPanel->GetPrintout(),
@@ -1211,12 +1211,12 @@ void gbtGameFrame::OnEditNode(wxCommandEvent &)
 			    m_doc->GetGame()->GetOutcome(dialog.GetOutcome()));
       }
       else {
-	m_doc->DoSetOutcome(m_doc->GetSelectNode(), 0);
+	m_doc->DoSetOutcome(m_doc->GetSelectNode(), nullptr);
       }
 
       if (m_doc->GetSelectNode()->NumChildren() > 0 &&
 	  dialog.GetInfoset() != m_doc->GetSelectNode()->GetInfoset()) {
-	if (dialog.GetInfoset() == 0) {
+	if (dialog.GetInfoset() == nullptr) {
 	  m_doc->DoLeaveInfoset(m_doc->GetSelectNode());
 	}
 	else {

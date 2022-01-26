@@ -35,7 +35,7 @@ namespace Gambit {
 
 GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number)
   : m_game(p_game), m_number(p_number),
-    m_payoffs(m_game->NumPlayers()), m_unrestricted(0)
+    m_payoffs(m_game->NumPlayers()), m_unrestricted(nullptr)
 { }
 
 
@@ -43,7 +43,7 @@ GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number)
 //                      class GameStrategyRep
 //========================================================================
 
-void GameStrategyRep::DeleteStrategy(void)
+void GameStrategyRep::DeleteStrategy()
 {
   if (m_player->GetGame()->IsTree())  throw UndefinedException();
   if (m_player->NumStrategies() == 1)  return;
@@ -61,7 +61,7 @@ void GameStrategyRep::DeleteStrategy(void)
 //========================================================================
 
 GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
-  : m_game(p_game), m_number(p_id), m_strategies(p_strats), m_unrestricted(0)
+  : m_game(p_game), m_number(p_id), m_strategies(p_strats), m_unrestricted(nullptr)
 { 
   for (int j = 1; j <= p_strats; j++) {
     m_strategies[j] = new GameStrategyRep(this);
@@ -76,7 +76,7 @@ GamePlayerRep::~GamePlayerRep()
 }
 
 
-GameStrategy GamePlayerRep::NewStrategy(void)
+GameStrategy GamePlayerRep::NewStrategy()
 {
   if (m_game->IsTree())  throw UndefinedException();
 
@@ -88,7 +88,7 @@ GameStrategy GamePlayerRep::NewStrategy(void)
   return strategy;
 }
 
-void GamePlayerRep::MakeStrategy(void)
+void GamePlayerRep::MakeStrategy()
 {
   Array<int> c(NumInfosets());
   
@@ -126,7 +126,7 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
   int i;
   GameTreeNodeRep *m, *mm;
 
-  if (!n->GetParent())  n->ptr = 0;
+  if (!n->GetParent())  n->ptr = nullptr;
 
   if (n->NumChildren() > 0)  {
     if (n->infoset->m_player == this)  {
@@ -147,8 +147,8 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
       }
     }
     else  {
-      n->ptr = NULL;
-      if (nn != NULL)
+      n->ptr = nullptr;
+      if (nn != nullptr)
 	n->ptr = nn->m_parent;
       n->whichbranch = n->children[1];
       if (n->infoset)
@@ -159,12 +159,12 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
   else if (nn)  {
     for (; ; nn = nn->m_parent->ptr->whichbranch)  {
       if (!nn->GetNextSibling()) {
-	m = 0;
+	m = nullptr;
       }
       else {
 	m = dynamic_cast<GameTreeNodeRep *>(nn->GetNextSibling().operator->());
       }
-      if (m || nn->m_parent->ptr == NULL)   break;
+      if (m || nn->m_parent->ptr == nullptr)   break;
     }
     if (m)  {
       mm = m->m_parent->whichbranch;
@@ -196,7 +196,7 @@ PureStrategyProfileRep::PureStrategyProfileRep(const Game &p_game)
   }
 }
 
-bool PureStrategyProfileRep::IsNash(void) const
+bool PureStrategyProfileRep::IsNash() const
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
     GamePlayer player = m_nfg->GetPlayer(pl);
@@ -212,7 +212,7 @@ bool PureStrategyProfileRep::IsNash(void) const
   return true;
 }
 
-bool PureStrategyProfileRep::IsStrictNash(void) const
+bool PureStrategyProfileRep::IsStrictNash() const
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
     GamePlayer player = m_nfg->GetPlayer(pl);
@@ -262,7 +262,7 @@ PureStrategyProfileRep::GetBestResponse(const GamePlayer &p_player) const
 }
 
 MixedStrategyProfile<Rational>
-PureStrategyProfileRep::ToMixedStrategyProfile(void) const
+PureStrategyProfileRep::ToMixedStrategyProfile() const
 {
   MixedStrategyProfile<Rational> temp(m_nfg->NewMixedStrategyProfile(Rational(0)));
   static_cast<Vector<Rational> &>(temp).operator=(Rational(0));
@@ -272,7 +272,7 @@ PureStrategyProfileRep::ToMixedStrategyProfile(void) const
   return temp;
 }
 
-PureStrategyProfile PureStrategyProfileRep::Unrestrict(void) const
+PureStrategyProfile PureStrategyProfileRep::Unrestrict() const
 {
   PureStrategyProfile u = m_nfg->Unrestrict()->NewPureStrategyProfile();
   for (GamePlayers::const_iterator player = this->m_nfg->Players().begin();
@@ -364,7 +364,7 @@ T PureBehaviorProfile::GetPayoff(const GameAction &p_action) const
 template double PureBehaviorProfile::GetPayoff(const GameAction &) const;
 template Rational PureBehaviorProfile::GetPayoff(const GameAction &) const;
 
-bool PureBehaviorProfile::IsAgentNash(void) const
+bool PureBehaviorProfile::IsAgentNash() const
 {
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
     GamePlayer player = m_efg->GetPlayer(pl);
@@ -383,7 +383,7 @@ bool PureBehaviorProfile::IsAgentNash(void) const
 }
 
 MixedBehaviorProfile<Rational>
-PureBehaviorProfile::ToMixedBehaviorProfile(void) const
+PureBehaviorProfile::ToMixedBehaviorProfile() const
 {
   MixedBehaviorProfile<Rational> temp(m_efg);
   static_cast<Vector<Rational> &>(temp) = Rational(0);
@@ -534,7 +534,7 @@ Rational GameExplicitRep::GetMaxPayoff(int player) const
 //                GameExplicitRep: Dimensions of the game
 //------------------------------------------------------------------------
 
-Array<int> GameExplicitRep::NumStrategies(void) const
+Array<int> GameExplicitRep::NumStrategies() const
 {
   const_cast<GameExplicitRep *>(this)->BuildComputedValues();
   Array<int> dim(m_players.Length());
@@ -557,7 +557,7 @@ GameStrategy GameExplicitRep::GetStrategy(int p_index) const
   throw IndexException();
 }
 
-int GameExplicitRep::NumStrategyContingencies(void) const
+int GameExplicitRep::NumStrategyContingencies() const
 {
   const_cast<GameExplicitRep *>(this)->BuildComputedValues();
   int ncont = 1;
@@ -567,7 +567,7 @@ int GameExplicitRep::NumStrategyContingencies(void) const
   return ncont;
 }
 
-int GameExplicitRep::MixedProfileLength(void) const
+int GameExplicitRep::MixedProfileLength() const
 {
   const_cast<GameExplicitRep *>(this)->BuildComputedValues();
   int strats = 0;
@@ -581,7 +581,7 @@ int GameExplicitRep::MixedProfileLength(void) const
 //                      GameExplicitRep: Outcomes
 //------------------------------------------------------------------------
 
-GameOutcome GameExplicitRep::NewOutcome(void)
+GameOutcome GameExplicitRep::NewOutcome()
 {
   m_outcomes.Append(new GameOutcomeRep(this, m_outcomes.Length() + 1));
   return m_outcomes[m_outcomes.Last()];

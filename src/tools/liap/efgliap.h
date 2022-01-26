@@ -31,11 +31,11 @@ using namespace Gambit::Nash;
 class NashLiapBehavSolver : public BehavSolver<double> {
 public:
   NashLiapBehavSolver(int p_maxitsN, bool p_verbose = false,
-		      shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = 0)
+		      shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = nullptr)
     : BehavSolver<double>(p_onEquilibrium),
       m_maxitsN(p_maxitsN), m_verbose(p_verbose)
   { }
-  virtual ~NashLiapBehavSolver() { }
+  virtual ~NashLiapBehavSolver() = default;
 
   List<MixedBehaviorProfile<double> > Solve(const MixedBehaviorProfile<double> &p_start) const;
   List<MixedBehaviorProfile<double> > Solve(const BehaviorSupportProfile &p_support) const

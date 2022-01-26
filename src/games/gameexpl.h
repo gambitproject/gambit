@@ -61,33 +61,33 @@ public:
   /// @name Dimensions of the game
   //@{
   /// The number of strategies for each player
-  virtual Array<int> NumStrategies(void) const;
+  virtual Array<int> NumStrategies() const;
   /// Gets the i'th strategy in the game, numbered globally
   virtual GameStrategy GetStrategy(int p_index) const;
   /// Returns the number of strategy contingencies in the game
-  virtual int NumStrategyContingencies(void) const;
+  virtual int NumStrategyContingencies() const;
   /// Returns the total number of strategies in the game
-  virtual int MixedProfileLength(void) const;
+  virtual int MixedProfileLength() const;
   //@}
 
   /// @name Players
   //@{
   /// Returns the number of players in the game
-  virtual int NumPlayers(void) const { return m_players.Length(); }
+  virtual int NumPlayers() const { return m_players.Length(); }
   /// Returns the pl'th player in the game
   virtual GamePlayer GetPlayer(int pl) const { return m_players[pl]; }
   /// Returns the set of players in the game
-  virtual const GamePlayers &Players(void) const { return m_players; }
+  virtual const GamePlayers &Players() const { return m_players; }
   //@}
 
   /// @name Outcomes
   //@{
   /// Returns the number of outcomes defined in the game
-  virtual int NumOutcomes(void) const { return m_outcomes.Length(); }
+  virtual int NumOutcomes() const { return m_outcomes.Length(); }
   /// Returns the index'th outcome defined in the game
   virtual GameOutcome GetOutcome(int index) const { return m_outcomes[index]; }
   /// Creates a new outcome in the game
-  virtual GameOutcome NewOutcome(void);
+  virtual GameOutcome NewOutcome();
 
   /// @name Writing data files
   //@{

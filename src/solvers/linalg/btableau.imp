@@ -124,13 +124,13 @@ template <class T>
 int TableauInterface<T>::MaxCol() const { return basis.MaxCol(); }
 
 template <class T>
-Basis & TableauInterface<T>::GetBasis(void) {return basis; }
+Basis & TableauInterface<T>::GetBasis() {return basis; }
 
 template <class T>
-const Gambit::Matrix<T> & TableauInterface<T>::Get_A(void) const {return *A; }
+const Gambit::Matrix<T> & TableauInterface<T>::Get_A() const {return *A; }
 
 template <class T>
-const Gambit::Vector<T> & TableauInterface<T>::Get_b(void) const {return *b;}
+const Gambit::Vector<T> & TableauInterface<T>::Get_b() const {return *b;}
 
 template <class T>
 bool TableauInterface<T>::Member(int i) const

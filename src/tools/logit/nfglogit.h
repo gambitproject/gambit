@@ -36,11 +36,11 @@ public:
     : m_profile(p_game->NewMixedStrategyProfile(0.0)), m_lambda(0.0)
 	{ }
 
-  double GetLambda(void) const { return m_lambda; }
-  const MixedStrategyProfile<double> &GetProfile(void) const { return m_profile; }
+  double GetLambda() const { return m_lambda; }
+  const MixedStrategyProfile<double> &GetProfile() const { return m_profile; }
 
-  Game GetGame(void) const           { return m_profile.GetGame(); }
-  int MixedProfileLength(void) const { return m_profile.MixedProfileLength(); }
+  Game GetGame() const           { return m_profile.GetGame(); }
+  int MixedProfileLength() const { return m_profile.MixedProfileLength(); }
   double operator[](int i) const     { return m_profile[i]; }
   
 private:
@@ -59,9 +59,9 @@ private:
 
 class StrategicQREPathTracer : public PathTracer {
 public:
-  StrategicQREPathTracer(void) : m_fullGraph(true), m_decimals(6)
+  StrategicQREPathTracer() : m_fullGraph(true), m_decimals(6)
     { }
-  virtual ~StrategicQREPathTracer() { }
+  virtual ~StrategicQREPathTracer() = default;
 
   List<LogitQREMixedStrategyProfile> 
   TraceStrategicPath(const LogitQREMixedStrategyProfile &p_start,
@@ -73,10 +73,10 @@ public:
 					     double p_omega) const;
   
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
-  bool GetFullGraph(void) const { return m_fullGraph; }
+  bool GetFullGraph() const { return m_fullGraph; }
 
   void SetDecimals(int p_decimals) { m_decimals = p_decimals; }
-  int GetDecimals(void) const { return m_decimals; }
+  int GetDecimals() const { return m_decimals; }
 
 protected:
   bool m_fullGraph;
@@ -90,8 +90,8 @@ protected:
 
 class StrategicQREEstimator : public StrategicQREPathTracer {
 public:
-  StrategicQREEstimator(void) { }
-  virtual ~StrategicQREEstimator() { }
+  StrategicQREEstimator() = default;
+  virtual ~StrategicQREEstimator() = default;
 
   LogitQREMixedStrategyProfile
   Estimate(const LogitQREMixedStrategyProfile &p_start,

@@ -182,7 +182,7 @@ void gbtInsertMoveDialog::OnInfoset(wxCommandEvent &)
   }
 }
 
-Gambit::GamePlayer gbtInsertMoveDialog::GetPlayer(void) const
+Gambit::GamePlayer gbtInsertMoveDialog::GetPlayer() const
 {
   int playerNumber = m_playerItem->GetSelection();
 
@@ -199,7 +199,7 @@ Gambit::GamePlayer gbtInsertMoveDialog::GetPlayer(void) const
   }
 }
 
-Gambit::GameInfoset gbtInsertMoveDialog::GetInfoset(void) const
+Gambit::GameInfoset gbtInsertMoveDialog::GetInfoset() const
 {
   if (m_playerItem->GetSelection() <= m_doc->NumPlayers()) {
     Gambit::GamePlayer player = GetPlayer();
@@ -209,15 +209,15 @@ Gambit::GameInfoset gbtInsertMoveDialog::GetInfoset(void) const
       return player->GetInfoset(infosetNumber);
     }
     else {
-      return 0;
+      return nullptr;
     }
   }
   else {
-    return 0;
+    return nullptr;
   }
 }
 
-int gbtInsertMoveDialog::GetActions(void) const
+int gbtInsertMoveDialog::GetActions() const
 {
   return ((GetInfoset()) ? GetInfoset()->NumActions() : m_actions->GetValue());
 }

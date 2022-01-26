@@ -39,7 +39,7 @@ public:
   StrategicLyapunovFunction(const MixedStrategyProfile<double> &p_start)
     : m_game(p_start.GetGame()), m_profile(p_start)
   { }
-  virtual ~StrategicLyapunovFunction() { }
+  virtual ~StrategicLyapunovFunction() = default;
 
 private:
   Game m_game;

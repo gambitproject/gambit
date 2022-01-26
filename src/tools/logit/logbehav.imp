@@ -102,7 +102,7 @@ bool LogBehavProfile<T>::operator==(const LogBehavProfile<T> &p_profile) const
 //              LogBehavProfile<T>: General data access
 //========================================================================
 
-template <class T> void LogBehavProfile<T>::Centroid(void)
+template <class T> void LogBehavProfile<T>::Centroid()
 {
   T center;
 
@@ -344,7 +344,7 @@ GameAction GetPrecedingAction(const GameNode &p_node,
     }
     node = node->GetParent();
   }
-  return 0;
+  return nullptr;
 }
 
 template <class T>
@@ -370,7 +370,7 @@ T LogBehavProfile<T>::DiffActionValue(const GameAction &p_action,
     if (act == p_oppAction) {
       derivs[i] = m_beliefs[infoset->GetMember(i)->GetNumber()];
     }
-    else if (act != 0) {
+    else if (act != nullptr) {
       /*
       T factor = 0.0;
       for (int j = 1; j <= infoset->NumMembers(); j++) {
@@ -503,7 +503,7 @@ void LogBehavProfile<T>::ComputeSolutionDataPass1(const GameNode &node) const
 }
 
 template <class T>
-void LogBehavProfile<T>::ComputeSolutionData(void) const
+void LogBehavProfile<T>::ComputeSolutionData() const
 {
   if (!m_cacheValid) {
     m_actionValues = (T) 0;

@@ -39,8 +39,7 @@ template<class T> gInterval<T>::gInterval(const T low, const T high)
 }
 
 template<class T> gInterval<T>::~gInterval() 
-{
-}
+= default;
 
 //--------------------------------------------------------------------------
 //                          interval -- operators

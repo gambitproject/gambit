@@ -78,7 +78,7 @@ gbtLogitBehavList::gbtLogitBehavList(wxWindow *p_parent,
 }
 
 gbtLogitBehavList::~gbtLogitBehavList()
-{ }
+= default;
 
 wxString gbtLogitBehavList::GetCellValue(const wxSheetCoords &p_coords)
 {
@@ -213,7 +213,7 @@ gbtLogitBehavDialog::gbtLogitBehavDialog(wxWindow *p_parent,
 					 gbtGameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"),
 	     wxDefaultPosition),
-    m_doc(p_doc), m_process(0), m_timer(this, GBT_ID_TIMER)
+    m_doc(p_doc), m_process(nullptr), m_timer(this, GBT_ID_TIMER)
 {
   wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -255,7 +255,7 @@ gbtLogitBehavDialog::gbtLogitBehavDialog(wxWindow *p_parent,
   Start();
 }
 
-void gbtLogitBehavDialog::Start(void)
+void gbtLogitBehavDialog::Start()
 {
   m_process = new wxProcess(this, GBT_ID_PROCESS);
   m_process->Redirect();

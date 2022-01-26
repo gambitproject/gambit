@@ -40,8 +40,8 @@ private:
 
   /// @name Private auxiliary functions
   //@{
-  void IndexStrategies(void);
-  void RebuildTable(void);
+  void IndexStrategies();
+  void RebuildTable();
   //@}
 
 public:
@@ -50,43 +50,43 @@ public:
   /// Construct a new table game with the given dimension
   /// If p_sparseOutcomes = true, outcomes for all contingencies are left null
   GameTableRep(const Array<int> &p_dim, bool p_sparseOutcomes = false);
-  virtual Game Copy(void) const;
+  virtual Game Copy() const;
   //@}
 
   /// @name General data access
   //@{
-  virtual bool IsTree(void) const { return false; }
-  virtual bool IsConstSum(void) const;
+  virtual bool IsTree() const { return false; }
+  virtual bool IsConstSum() const;
   virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const
   { return true; }
   //@}
 
   /// @name Interface with restricted game mechanism
   //@{
-  virtual bool IsRestriction(void) const { return (m_unrestricted != 0); }
-  virtual Game Unrestrict(void) const 
+  virtual bool IsRestriction() const { return (m_unrestricted != nullptr); }
+  virtual Game Unrestrict() const 
   { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
   //@}
 
   /// @name Dimensions of the game
   //@{
   /// The number of actions in each information set
-  virtual PVector<int> NumActions(void) const
+  virtual PVector<int> NumActions() const
   { throw UndefinedException(); }
   /// The number of members in each information set
-  virtual PVector<int> NumMembers(void) const
+  virtual PVector<int> NumMembers() const
   { throw UndefinedException(); }
   /// Returns the total number of actions in the game
-  virtual int BehavProfileLength(void) const
+  virtual int BehavProfileLength() const
   { throw UndefinedException(); }
   //@}
 
   /// @name Players
   //@{
   /// Returns the chance (nature) player
-  virtual GamePlayer GetChance(void) const { throw UndefinedException(); }
+  virtual GamePlayer GetChance() const { throw UndefinedException(); }
   /// Creates a new player in the game, with no moves
-  virtual GamePlayer NewPlayer(void);
+  virtual GamePlayer NewPlayer();
   //@}
 
   /// @name Information sets
@@ -95,7 +95,7 @@ public:
   virtual GameInfoset GetInfoset(int iset) const 
   { throw UndefinedException(); }
   /// Returns an array with the number of information sets per personal player
-  virtual Array<int> NumInfosets(void) const
+  virtual Array<int> NumInfosets() const
   { throw UndefinedException(); }
   /// Returns the act'th action in the game (numbered globally)
   virtual GameAction GetAction(int act) const
@@ -105,9 +105,9 @@ public:
   /// @name Nodes
   //@{
   /// Returns the root node of the game
-  virtual GameNode GetRoot(void) const { throw UndefinedException(); } 
+  virtual GameNode GetRoot() const { throw UndefinedException(); } 
   /// Returns the number of nodes in the game
-  virtual int NumNodes(void) const { throw UndefinedException(); }
+  virtual int NumNodes() const { throw UndefinedException(); }
   //@}
 
   /// @name Outcomes
@@ -122,7 +122,7 @@ public:
   virtual void WriteNfgFile(std::ostream &) const;
   //@}
 
-  virtual PureStrategyProfile NewPureStrategyProfile(void) const;
+  virtual PureStrategyProfile NewPureStrategyProfile() const;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const; 
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const;

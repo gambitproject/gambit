@@ -296,7 +296,7 @@ void ConjugatePRMinimizer::Set(const Function &fdf,
   g0norm = gnorm;
 }
 
-void ConjugatePRMinimizer::Restart(void)
+void ConjugatePRMinimizer::Restart()
 {
   iter = 0;
 }

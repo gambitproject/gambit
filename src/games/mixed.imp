@@ -38,7 +38,7 @@ MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile
   SetCentroid();
 }
 
-template <class T> void MixedStrategyProfileRep<T>::SetCentroid(void) 
+template <class T> void MixedStrategyProfileRep<T>::SetCentroid() 
 {
   for (GamePlayers::const_iterator player = m_support.GetGame()->Players().begin();
        player != m_support.GetGame()->Players().end(); ++player) { 
@@ -50,7 +50,7 @@ template <class T> void MixedStrategyProfileRep<T>::SetCentroid(void)
   }
 }
 
-template <class T> void MixedStrategyProfileRep<T>::Normalize(void)
+template <class T> void MixedStrategyProfileRep<T>::Normalize()
 {
   for (GamePlayers::const_iterator player = m_support.GetGame()->Players().begin();
        player != m_support.GetGame()->Players().end(); ++player) {
@@ -67,7 +67,7 @@ template <class T> void MixedStrategyProfileRep<T>::Normalize(void)
   }
 }
 
-template<> void MixedStrategyProfileRep<double>::Randomize(void)
+template<> void MixedStrategyProfileRep<double>::Randomize()
 {
   Game nfg = m_support.GetGame();
   m_probs = 0.0;
@@ -85,7 +85,7 @@ template<> void MixedStrategyProfileRep<double>::Randomize(void)
   Normalize();
 }
 
-template<> void MixedStrategyProfileRep<Rational>::Randomize(void)
+template<> void MixedStrategyProfileRep<Rational>::Randomize()
 {
   // This operation is not well-defined when using Rational numbers;
   // use the version specifying the denominator grid instead.
@@ -125,7 +125,7 @@ TreeMixedStrategyProfileRep<T>::TreeMixedStrategyProfileRep(const MixedBehaviorP
 { }
 
 template <class T>
-MixedStrategyProfileRep<T> *TreeMixedStrategyProfileRep<T>::Copy(void) const
+MixedStrategyProfileRep<T> *TreeMixedStrategyProfileRep<T>::Copy() const
 {
   return new TreeMixedStrategyProfileRep(*this); 
 }
@@ -181,7 +181,7 @@ TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl,
 //========================================================================
 
 template <class T>
-MixedStrategyProfileRep<T> *TableMixedStrategyProfileRep<T>::Copy(void) const
+MixedStrategyProfileRep<T> *TableMixedStrategyProfileRep<T>::Copy() const
 {
   return new TableMixedStrategyProfileRep(*this); 
 }
@@ -544,7 +544,7 @@ Vector<T> MixedStrategyProfile<T>::operator[](const GamePlayer &p_player) const
 }
 
 template <class T> 
-MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport(void) const
+MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport() const
 {
   MixedStrategyProfile<T> full(m_rep->m_support.GetGame()->NewMixedStrategyProfile((T) 0));
   static_cast<Vector<T> &>(full) = (T) 0;
@@ -561,7 +561,7 @@ MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport(void) const
   return full;
 }
 
-template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::Unrestrict(void) const
+template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::Unrestrict() const
 {
   MixedStrategyProfile<T> full(m_rep->m_support.GetGame()->Unrestrict()->NewMixedStrategyProfile((T) 0));
   static_cast<Vector<T> &>(full) = (T) 0;
@@ -580,7 +580,7 @@ template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::Unrestrict(v
 //    MixedStrategyProfile<T>: Computation of interesting quantities
 //========================================================================
 
-template <class T> T MixedStrategyProfile<T>::GetLiapValue(void) const
+template <class T> T MixedStrategyProfile<T>::GetLiapValue() const
 {
   static const T BIG1 = (T) 100;
   static const T BIG2 = (T) 100;

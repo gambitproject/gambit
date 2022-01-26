@@ -37,7 +37,7 @@ public:
   //
   class EquationSystem {
   public:
-    virtual ~EquationSystem() { }
+    virtual ~EquationSystem() = default;
     // Compute the value of the system of equations at the specified point.
     virtual void GetValue(const Vector<double> &p_point,
 			  Vector<double> &p_lhs) const = 0;
@@ -51,7 +51,7 @@ public:
   //
   class CriterionFunction {
   public:
-    virtual ~CriterionFunction() { }
+    virtual ~CriterionFunction() = default;
     virtual double operator()(const Vector<double> &p_point,
 			      const Vector<double> &p_tangent) const = 0;
   };
@@ -61,7 +61,7 @@ public:
   //
   class NullCriterionFunction : public CriterionFunction {
   public:
-    virtual ~NullCriterionFunction() { }
+    virtual ~NullCriterionFunction() = default;
     virtual double operator()(const Vector<double> &, const Vector<double> &) const
     { return -1.0; }
   };
@@ -72,7 +72,7 @@ public:
   //
   class CallbackFunction {
   public:
-    virtual ~CallbackFunction() { }
+    virtual ~CallbackFunction() = default;
     virtual void operator()(const Vector<double> &p_point,
 			    bool p_isTerminal) const = 0;
   };
@@ -82,22 +82,22 @@ public:
   //
   class NullCallbackFunction : public CallbackFunction {
   public:
-    virtual ~NullCallbackFunction() { }
+    virtual ~NullCallbackFunction() = default;
     virtual void operator()(const Vector<double> &p_point,
 			    bool p_isTerminal) const { }
   };
   
 
   void SetMaxDecel(double p_maxDecel) { m_maxDecel = p_maxDecel; }
-  double GetMaxDecel(void) const { return m_maxDecel; }
+  double GetMaxDecel() const { return m_maxDecel; }
 
   void SetStepsize(double p_hStart) { m_hStart = p_hStart; }
-  double GetStepsize(void) const { return m_hStart; }
+  double GetStepsize() const { return m_hStart; }
 
 protected:
-  PathTracer(void) : m_maxDecel(1.1), m_hStart(0.03)
+  PathTracer() : m_maxDecel(1.1), m_hStart(0.03)
     { } 
-  virtual ~PathTracer() { }
+  virtual ~PathTracer() = default;
 
   void TracePath(const EquationSystem &p_system,
 		 Vector<double> &p_x, double p_maxLambda, double &p_omega,

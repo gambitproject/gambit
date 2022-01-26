@@ -62,12 +62,12 @@ public:
 
   void AddProfile(const wxString &p_text);
 
-  int NumPoints(void) const { return m_lambdas.Length(); }
+  int NumPoints() const { return m_lambdas.Length(); }
   double GetLambda(int p_index) const { return m_lambdas[p_index]; }
-  const List<double> &GetLambdas(void) const { return m_lambdas; }
+  const List<double> &GetLambdas() const { return m_lambdas; }
   const MixedStrategyProfile<double> &GetProfile(int p_index)
   { return m_profiles[p_index]; }
-  const List<MixedStrategyProfile<double> > &GetProfiles(void) const 
+  const List<MixedStrategyProfile<double> > &GetProfiles() const 
   { return m_profiles; }
 };
   
@@ -134,7 +134,7 @@ LogitMixedSheet::LogitMixedSheet(wxWindow *p_parent,
 }
 
 LogitMixedSheet::~LogitMixedSheet()
-{ }
+= default;
 
 wxString LogitMixedSheet::GetCellValue(const wxSheetCoords &p_coords)
 {
@@ -271,7 +271,7 @@ private:
   double m_scaleFactor;
 
   /// Overriding x (lambda) axis labeling
-  void CalcXAxisTickPositions(void);
+  void CalcXAxisTickPositions();
   
 public:
   gbtLogitPlotCtrl(wxWindow *p_parent, gbtGameDocument *p_doc);
@@ -316,7 +316,7 @@ gbtLogitPlotCtrl::gbtLogitPlotCtrl(wxWindow *p_parent,
 // This differs from the wxPlotWindow original only by the use of
 // XToLambda() to construct the tick labels.
 //
-void gbtLogitPlotCtrl::CalcXAxisTickPositions(void)
+void gbtLogitPlotCtrl::CalcXAxisTickPositions()
 {
   double current = ceil(m_viewRect.GetLeft() / m_xAxisTick_step) * m_xAxisTick_step;
   m_xAxisTicks.Clear();
@@ -473,11 +473,11 @@ public:
   { m_branch.AddProfile(p_text); }
 
   void SetScaleFactor(double p_scale);
-  void FitZoom(void);
-  void Plot(void);
+  void FitZoom();
+  void Plot();
 
-  LogitMixedBranch &GetBranch(void) { return m_branch; }
-  wxPlotCtrl *GetPlotCtrl(void) const { return m_plotCtrl; }
+  LogitMixedBranch &GetBranch() { return m_branch; }
+  wxPlotCtrl *GetPlotCtrl() const { return m_plotCtrl; }
 };
 
 LogitPlotPanel::LogitPlotPanel(wxWindow *p_parent,
@@ -503,7 +503,7 @@ LogitPlotPanel::LogitPlotPanel(wxWindow *p_parent,
   Layout();
 }
 				    
-void LogitPlotPanel::Plot(void)
+void LogitPlotPanel::Plot()
 {
   if (m_branch.NumPoints() == 0)  return;
 
@@ -540,7 +540,7 @@ void LogitPlotPanel::SetScaleFactor(double p_scale)
   Plot();
 }
 
-void LogitPlotPanel::FitZoom(void)
+void LogitPlotPanel::FitZoom()
 {
   m_plotCtrl->MakeCurveVisible(-1);
 }
@@ -556,7 +556,7 @@ private:
 public:
   LogitPrintout(wxPlotCtrl *p_plot, const wxString &p_label)
     : wxPrintout(p_label), m_plot(p_plot) { }
-  virtual ~LogitPrintout() { }
+  virtual ~LogitPrintout() = default;
 
   bool OnPrintPage(int)
   { wxSize size = GetDC()->GetSize();
@@ -600,7 +600,7 @@ private:
   void OnZoomFit(wxCommandEvent &);
   void OnViewData(wxCommandEvent &);
 
-  void Start(void);
+  void Start();
 
 public:
   LogitMixedDialog(wxWindow *p_parent, gbtGameDocument *p_doc);
@@ -632,7 +632,7 @@ LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent,
 				   gbtGameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"),
 	     wxDefaultPosition),
-    m_doc(p_doc), m_process(0), m_timer(this, GBT_ID_TIMER)
+    m_doc(p_doc), m_process(nullptr), m_timer(this, GBT_ID_TIMER)
 {
   wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -729,7 +729,7 @@ LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent,
   Start();
 }
 
-void LogitMixedDialog::Start(void)
+void LogitMixedDialog::Start()
 {
   m_doc->BuildNfg();
 

@@ -56,9 +56,9 @@ private:
   long npivots, nodes;
   Gambit::List<long> visits,branches;
 
-  void Enum(void);
-  void Deeper(void);
-  void Report(void);
+  void Enum();
+  void Deeper();
+  void Report();
   void Search(LPTableau<T> &tab);
   void DualSearch(LPTableau<T> &tab);
 
@@ -67,12 +67,12 @@ public:
   VertexEnumerator(LPTableau<T> &);
   ~VertexEnumerator() { }
   
-  const Gambit::List<BFS<T> > &VertexList(void) const
+  const Gambit::List<BFS<T> > &VertexList() const
   { return List; }
-  const Gambit::List<BFS<T> > &DualVertexList(void) const
+  const Gambit::List<BFS<T> > &DualVertexList() const
   { return DualList; }
   void Vertices(Gambit::List<Vector<T> > &verts) const;
-  long NumPivots(void) const { return npivots; }
+  long NumPivots() const { return npivots; }
 };
 
 }  // end namespace Gambit::linalg

@@ -69,8 +69,7 @@ template <class T> polynomial<T>::polynomial(const int deg)
 }
 
 template <class T> polynomial<T>::~polynomial()
-{
-}
+= default;
 
 //--------------------------------------------------------------------------
 //                             operators
@@ -514,9 +513,8 @@ polynomial<T>::PreciseRoots(const gInterval<T>& I, T& error) const
 //--------------------------------------------------------------------------
 
 complexpoly::complexpoly(const complexpoly& x) 
-: coeflist(x.coeflist)
-{ 
-}
+ 
+= default;
 
 complexpoly::complexpoly(const gComplex& coeff, const int& deg) 
 { 
@@ -543,8 +541,7 @@ complexpoly::complexpoly(const int deg)
 }
 
 complexpoly::~complexpoly()
-{
-}
+= default;
 
 //--------------------------------------------------------------------------
 //                             operators

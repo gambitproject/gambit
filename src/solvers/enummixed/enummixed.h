@@ -40,11 +40,11 @@ public:
   EnumMixedStrategySolution(const Game &p_game) : m_game(p_game) { }
   ~EnumMixedStrategySolution()  { }
 
-  const Game &GetGame(void) const { return m_game; }
-  const List<MixedStrategyProfile<T> > &GetExtremeEquilibria(void) const
+  const Game &GetGame() const { return m_game; }
+  const List<MixedStrategyProfile<T> > &GetExtremeEquilibria() const
   { return m_extremeEquilibria; }
   
-  List<List<MixedStrategyProfile<T> > > GetCliques(void) const;
+  List<List<MixedStrategyProfile<T> > > GetCliques() const;
 
 private:
   Game m_game;

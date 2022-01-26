@@ -48,7 +48,7 @@ public:
   Vector<T> operator+(const Vector<T>& V) const;
   Vector<T>& operator+=(const Vector<T>& V);
   
-  Vector<T> operator-(void);
+  Vector<T> operator-();
   Vector<T> operator-(const Vector<T>& V) const;
   Vector<T>& operator-=(const Vector<T>& V);
   

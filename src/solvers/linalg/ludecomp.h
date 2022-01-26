@@ -83,12 +83,12 @@ public:
   class BadPivot : public Exception  {
   public:
     virtual ~BadPivot() throw() { }
-    const char *what(void) const throw() { return "Bad pivot in LUdecomp"; }
+    const char *what() const throw() { return "Bad pivot in LUdecomp"; }
   };
   class BadCount : public Exception  {
   public:
     virtual ~BadCount() throw() { }
-    const char *what(void) const throw() { return "Bad reference count in LUdecomp"; }
+    const char *what() const throw() { return "Bad reference count in LUdecomp"; }
   };
 
   // ------------------------

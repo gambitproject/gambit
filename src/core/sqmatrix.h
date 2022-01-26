@@ -30,13 +30,13 @@ namespace Gambit {
 
 class SingularMatrixException : public Exception {
 public:
-  virtual ~SingularMatrixException() throw() { }
-  const char *what(void) const throw() { return "Attempted to invert a singular matrix"; }
+  virtual ~SingularMatrixException() noexcept = default;
+  const char *what() const noexcept { return "Attempted to invert a singular matrix"; }
 };
 
 template <class T> class SquareMatrix : public Matrix<T>   {
 public:
-  SquareMatrix(void);
+  SquareMatrix();
   SquareMatrix(int size);
   SquareMatrix(const Matrix<T> &);
   SquareMatrix(const SquareMatrix<T> &);
@@ -44,8 +44,8 @@ public:
 
   SquareMatrix<T> &operator=(const SquareMatrix<T> &);
 
-  SquareMatrix<T> Inverse(void) const;
-  T Determinant(void) const;
+  SquareMatrix<T> Inverse() const;
+  T Determinant() const;
 };
 
 }  // end namespace Gambit

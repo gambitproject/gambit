@@ -47,40 +47,40 @@ public:
   /// Construct a new output group
   gbtAnalysisOutput(gbtGameDocument *p_doc) : m_doc(p_doc) { }
   /// Clean up an output group
-  virtual ~gbtAnalysisOutput() { }
+  virtual ~gbtAnalysisOutput() = default;
   //@}
 
   /// @name General data access
   //@{
   /// Get the label (short description) of the list
-  const wxString &GetLabel(void) const { return m_label; }
+  const wxString &GetLabel() const { return m_label; }
 
   /// Set the label (short description) of the list
   void SetLabel(const wxString &p_label) { m_label = p_label; }
 
   /// Get the description of the list
-  const wxString &GetDescription(void) const { return m_description; }
+  const wxString &GetDescription() const { return m_description; }
     
   /// Set the description of the list
   void SetDescription(const wxString &p_desc) { m_description = p_desc; }
 
   /// Get the command used to generate the list
-  const wxString &GetCommand(void) const { return m_command; }
+  const wxString &GetCommand() const { return m_command; }
 
   /// Set the command used to generate the list
   void SetCommand(const wxString &p_command) { m_command = p_command; }
 
   /// The number of profiles in the list
-  virtual int NumProfiles(void) const = 0;
+  virtual int NumProfiles() const = 0;
 
   /// Get the index of the currently selected profile
-  virtual int GetCurrent(void) const = 0;
+  virtual int GetCurrent() const = 0;
 
   /// Set the index of the currently selected profile
   virtual void SetCurrent(int p_index) = 0;
 
   /// Are these behavior or strategy profiles natively?
-  virtual bool IsBehavior(void) const = 0;
+  virtual bool IsBehavior() const = 0;
 
   //@}
 
@@ -110,7 +110,7 @@ public:
   virtual void AddOutput(const wxString &) = 0;
 
   /// Map all behavior profiles to corresponding mixed profiles
-  virtual void BuildNfg(void) = 0;
+  virtual void BuildNfg() = 0;
 
   /// Write a profile list to XML savefile
   virtual void Save(std::ostream &) const = 0;
@@ -138,7 +138,7 @@ public:
   gbtAnalysisProfileList(gbtGameDocument *p_doc, bool p_isBehav)
     : gbtAnalysisOutput(p_doc), m_isBehav(p_isBehav), m_current(0) { }
   /// Cleanup the profile list
-  virtual ~gbtAnalysisProfileList() { }
+  virtual ~gbtAnalysisProfileList() = default;
   //@}
 
   //!
@@ -146,10 +146,10 @@ public:
   //!
   //@{
   /// Are these behavior or strategy profiles natively?
-  bool IsBehavior(void) const { return m_isBehav; }
+  bool IsBehavior() const { return m_isBehav; }
 
   /// The number of profiles in the list
-  int NumProfiles(void) const;
+  int NumProfiles() const;
 
   std::string GetPayoff(int pl, int p_index = -1) const;
   /// Return the realization probability of the node for the given 
@@ -172,7 +172,7 @@ public:
 			       int p_index = -1) const;
 
   /// Get the index of the currently selected profile
-  int GetCurrent(void) const { return m_current; }
+  int GetCurrent() const { return m_current; }
 
   /// Set the index of the currently selected profile
   void SetCurrent(int p_index) { m_current = p_index; }
@@ -185,10 +185,10 @@ public:
   //@{
   void AddOutput(const wxString &);
   /// Map all behavior profiles to corresponding mixed profiles
-  void BuildNfg(void);
+  void BuildNfg();
 
   /// Remove all profiles from the list
-  void Clear(void);
+  void Clear();
   //@}
 
   //!

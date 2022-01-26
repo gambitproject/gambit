@@ -57,7 +57,7 @@ private:
   void OnCellClick(wxSheetEvent &);
 
   // Overriding gbtGameView members
-  void OnUpdate(void);
+  void OnUpdate();
 
   // Which profile index corresponds to a sheet row
   int RowToProfile(int row) const

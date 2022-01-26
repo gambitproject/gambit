@@ -61,7 +61,7 @@ VertexEnumerator<T>::VertexEnumerator(LPTableau<T> &tab)
   DualSearch(tab);
 }
 
-template <class T> void VertexEnumerator<T>::Enum(void)
+template <class T> void VertexEnumerator<T>::Enum()
 {
       // Check dimensions
   if(A.NumRows() != b.Length() || A.NumColumns() != c.Length()) throw DimensionException();

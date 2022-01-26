@@ -50,7 +50,7 @@ private:
   //
   class Equation {
   public:
-    virtual ~Equation() { }
+    virtual ~Equation() = default;
     virtual double Value(const LogBehavProfile<double> &p_point,
 			 double p_lambda) const = 0;
     virtual void Gradient(const LogBehavProfile<double> &p_point, 
@@ -257,7 +257,7 @@ public:
 		   bool p_fullGraph, double p_decimals)
     : m_stream(p_stream),
       m_fullGraph(p_fullGraph), m_decimals(p_decimals) { }
-  virtual ~CallbackFunction() { }
+  virtual ~CallbackFunction() = default;
 
   virtual void operator()(const Vector<double> &p_point,
 			  bool p_isTerminal) const;

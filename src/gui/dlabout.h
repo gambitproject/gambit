@@ -26,7 +26,7 @@
 class gbtAboutDialog : public wxDialog {
 public:
   gbtAboutDialog(wxWindow *p_parent);
-  virtual ~gbtAboutDialog() { }
+  virtual ~gbtAboutDialog() = default;
 };
 
 #endif  // DLABOUT_H

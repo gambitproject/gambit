@@ -41,13 +41,13 @@ public:
   gbtPayoffEditor(wxWindow *p_parent);
 
   void BeginEdit(gbtNodeEntry *p_node, int p_player);
-  void EndEdit(void);
+  void EndEdit();
 
-  bool IsEditing(void) const { return IsShown(); }
+  bool IsEditing() const { return IsShown(); }
 
-  gbtNodeEntry *GetNodeEntry(void) const { return m_entry; }
-  Gambit::GameOutcome GetOutcome(void) const { return m_outcome; }
-  int GetPlayer(void) const { return m_player; }
+  gbtNodeEntry *GetNodeEntry() const { return m_entry; }
+  Gambit::GameOutcome GetOutcome() const { return m_outcome; }
+  int GetPlayer() const { return m_player; }
  
   DECLARE_EVENT_TABLE()
 };
@@ -60,8 +60,8 @@ private:
   gbtPayoffEditor *m_payoffEditor;
 
   // Private Functions
-  void MakeMenus(void);
-  void AdjustScrollbarSteps(void);
+  void MakeMenus();
+  void AdjustScrollbarSteps();
 
   /// @name Event handlers
   //@{
@@ -77,11 +77,11 @@ private:
     
   /// @name Overriding gbtGameView members
   //@{
-  void OnUpdate(void);
-  void PostPendingChanges(void);
+  void OnUpdate();
+  void PostPendingChanges();
   //@}
 
-  void RefreshTree(void);
+  void RefreshTree();
   
 public:
   gbtEfgDisplay(wxWindow *p_parent, gbtGameDocument *p_doc);
@@ -89,11 +89,11 @@ public:
   virtual void OnDraw(wxDC &dc);
   void OnDraw(wxDC &, double);
 
-  int GetZoom(void) const { return m_zoom; }
+  int GetZoom() const { return m_zoom; }
   void SetZoom(int p_zoom);
-  void FitZoom(void);
+  void FitZoom();
   
-  const gbtTreeLayout &GetLayout(void) const { return m_layout; }
+  const gbtTreeLayout &GetLayout() const { return m_layout; }
 
   void EnsureNodeVisible(Gambit::GameNode);
 

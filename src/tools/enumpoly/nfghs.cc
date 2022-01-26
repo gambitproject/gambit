@@ -314,7 +314,7 @@ bool gbtNfgHs::UpdatePlayerSupport(Game game, int playerIdx, Gambit::PVector < i
   //------------------------------------
 
   int lastBit = support.Length();
-  while (1) {
+  while (true) {
     playerSupport(playerIdx, lastBit) += 1;
     int idx = lastBit;
     while (idx > 1) {

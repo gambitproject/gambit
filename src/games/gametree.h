@@ -42,18 +42,18 @@ private:
   GameTreeActionRep(int p_number, const std::string &p_label, 
 		    GameTreeInfosetRep *p_infoset)
     : m_number(p_number), m_label(p_label), m_infoset(p_infoset) { }
-  virtual ~GameTreeActionRep()   { }
+  virtual ~GameTreeActionRep()   = default;
 
 public:
-  int GetNumber(void) const { return m_number; }
-  GameInfoset GetInfoset(void) const;
+  int GetNumber() const { return m_number; }
+  GameInfoset GetInfoset() const;
 
-  const std::string &GetLabel(void) const { return m_label; }
+  const std::string &GetLabel() const { return m_label; }
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
   bool Precedes(const GameNode &) const;
 
-  void DeleteAction(void);
+  void DeleteAction();
 };
 
 class GameTreeInfosetRep : public GameInfosetRep {
@@ -85,23 +85,23 @@ protected:
   void RemoveAction(int which);
 
 public:
-  virtual Game GetGame(void) const;
-  virtual int GetNumber(void) const { return m_number; }
+  virtual Game GetGame() const;
+  virtual int GetNumber() const { return m_number; }
   
-  virtual GamePlayer GetPlayer(void) const;
+  virtual GamePlayer GetPlayer() const;
   virtual void SetPlayer(GamePlayer p);
 
-  virtual bool IsChanceInfoset(void) const;
+  virtual bool IsChanceInfoset() const;
 
   virtual void SetLabel(const std::string &p_label) { m_label = p_label; }
-  virtual const std::string &GetLabel(void) const { return m_label; }
+  virtual const std::string &GetLabel() const { return m_label; }
   
-  virtual GameAction InsertAction(GameAction p_where = 0);
+  virtual GameAction InsertAction(GameAction p_where = nullptr);
 
   /// @name Actions
   //@{
   /// Returns the number of actions available at the information set
-  virtual int NumActions(void) const { return m_actions.Length(); }
+  virtual int NumActions() const { return m_actions.Length(); }
   /// Returns the p_index'th action at the information set
   virtual GameAction GetAction(int p_index) const { return m_actions[p_index]; }
   /// Returns a forward iterator over the available actions
@@ -109,7 +109,7 @@ public:
   //  { return GameActionIterator(m_actions); }
   //@}
 
-  virtual int NumMembers(void) const { return m_members.Length(); }
+  virtual int NumMembers() const { return m_members.Length(); }
   virtual GameNode GetMember(int p_index) const;
 
   virtual bool Precedes(GameNode) const;
@@ -151,43 +151,43 @@ protected:
   void CopySubtree(GameTreeNodeRep *, GameTreeNodeRep *);
 
 public:
-  virtual Game GetGame(void) const; 
+  virtual Game GetGame() const; 
 
-  virtual const std::string &GetLabel(void) const { return m_label; } 
+  virtual const std::string &GetLabel() const { return m_label; } 
   virtual void SetLabel(const std::string &p_label) { m_label = p_label; }
 
-  virtual int GetNumber(void) const { return number; }
-  virtual int NumberInInfoset(void) const
+  virtual int GetNumber() const { return number; }
+  virtual int NumberInInfoset() const
   { return infoset->m_members.Find(const_cast<GameTreeNodeRep *>(this)); }
 
-  virtual int NumChildren(void) const    { return children.Length(); }
+  virtual int NumChildren() const    { return children.Length(); }
 
-  virtual GameInfoset GetInfoset(void) const   { return infoset; }
+  virtual GameInfoset GetInfoset() const   { return infoset; }
   virtual void SetInfoset(GameInfoset);
-  virtual GameInfoset LeaveInfoset(void);
+  virtual GameInfoset LeaveInfoset();
 
-  virtual bool IsTerminal(void) const { return (children.Length() == 0); }
-  virtual GamePlayer GetPlayer(void) const
-    { return (infoset) ? infoset->GetPlayer() : 0; }
-  virtual GameAction GetPriorAction(void) const; // returns null if root node
+  virtual bool IsTerminal() const { return (children.Length() == 0); }
+  virtual GamePlayer GetPlayer() const
+    { return (infoset) ? infoset->GetPlayer() : nullptr; }
+  virtual GameAction GetPriorAction() const; // returns null if root node
   virtual GameNode GetChild(int i) const    { return children[i]; }
-  virtual GameNode GetParent(void) const    { return m_parent; }
-  virtual GameNode GetNextSibling(void) const;
-  virtual GameNode GetPriorSibling(void) const;
+  virtual GameNode GetParent() const    { return m_parent; }
+  virtual GameNode GetNextSibling() const;
+  virtual GameNode GetPriorSibling() const;
 
-  virtual GameOutcome GetOutcome(void) const { return outcome; }
+  virtual GameOutcome GetOutcome() const { return outcome; }
   virtual void SetOutcome(const GameOutcome &p_outcome);
 
   virtual bool IsSuccessorOf(GameNode from) const;
-  virtual bool IsSubgameRoot(void) const;
+  virtual bool IsSubgameRoot() const;
 
-  virtual void DeleteParent(void);
-  virtual void DeleteTree(void);
+  virtual void DeleteParent();
+  virtual void DeleteTree();
 
   virtual void CopyTree(GameNode src);
   virtual void MoveTree(GameNode src);
 
-  virtual Game CopySubgame(void) const;
+  virtual Game CopySubgame() const;
 
   virtual GameInfoset AppendMove(GamePlayer p_player, int p_actions);
   virtual GameInfoset AppendMove(GameInfoset p_infoset);
@@ -212,25 +212,25 @@ protected:
 
   /// @name Managing the representation
   //@{
-  virtual void Canonicalize(void);
-  virtual void BuildComputedValues(void);
-  virtual void ClearComputedValues(void) const;
+  virtual void Canonicalize();
+  virtual void BuildComputedValues();
+  virtual void ClearComputedValues() const;
   /// Have computed values been built?
-  virtual bool HasComputedValues(void) const { return m_computedValues; }
+  virtual bool HasComputedValues() const { return m_computedValues; }
   //@}
 
 public: 
   /// @name Lifecycle
   //@{
-  GameTreeRep(void);
+  GameTreeRep();
   virtual ~GameTreeRep();
-  virtual Game Copy(void) const;
+  virtual Game Copy() const;
   //@}
 
   /// @name General data access
   //@{
-  virtual bool IsTree(void) const { return true; }
-  virtual bool IsConstSum(void) const;
+  virtual bool IsTree() const { return true; }
+  virtual bool IsConstSum() const;
   using GameRep::IsPerfectRecall;
   virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const;
   /// Turn on or off automatic canonicalization of the game
@@ -242,17 +242,17 @@ public:
   /// @name Players
   //@{
   /// Returns the chance (nature) player
-  virtual GamePlayer GetChance(void) const { return m_chance; } 
+  virtual GamePlayer GetChance() const { return m_chance; } 
   /// Creates a new player in the game, with no moves
-  virtual GamePlayer NewPlayer(void);
+  virtual GamePlayer NewPlayer();
   //@}
 
   /// @name Nodes
   //@{
   /// Returns the root node of the game
-  virtual GameNode GetRoot(void) const { return m_root; } 
+  virtual GameNode GetRoot() const { return m_root; } 
   /// Returns the number of nodes in the game
-  int NumNodes(void) const;
+  int NumNodes() const;
   //@}
 
   virtual void DeleteOutcome(const GameOutcome &);
@@ -267,11 +267,11 @@ public:
   /// @name Dimensions of the game
   //@{
   /// The number of actions in each information set
-  virtual PVector<int> NumActions(void) const;
+  virtual PVector<int> NumActions() const;
   /// The number of members in each information set
-  virtual PVector<int> NumMembers(void) const;
+  virtual PVector<int> NumMembers() const;
   /// Returns the total number of actions in the game
-  virtual int BehavProfileLength(void) const;
+  virtual int BehavProfileLength() const;
   //@}
 
   /// @name Information sets
@@ -279,12 +279,12 @@ public:
   /// Returns the iset'th information set in the game (numbered globally)
   virtual GameInfoset GetInfoset(int iset) const;
   /// Returns an array with the number of information sets per personal player
-  virtual Array<int> NumInfosets(void) const;
+  virtual Array<int> NumInfosets() const;
   /// Returns the act'th action in the game (numbered globally)
   virtual GameAction GetAction(int act) const;
   //@}
 
-  virtual PureStrategyProfile NewPureStrategyProfile(void) const;
+  virtual PureStrategyProfile NewPureStrategyProfile() const;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const; 
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const;

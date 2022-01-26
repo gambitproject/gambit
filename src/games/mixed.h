@@ -35,12 +35,12 @@ public:
   StrategySupportProfile m_support;
 
   MixedStrategyProfileRep(const StrategySupportProfile &);
-  virtual ~MixedStrategyProfileRep() { }
-  virtual MixedStrategyProfileRep<T> *Copy(void) const = 0;
+  virtual ~MixedStrategyProfileRep() = default;
+  virtual MixedStrategyProfileRep<T> *Copy() const = 0;
 
-  void SetCentroid(void);
-  void Normalize(void);
-  void Randomize(void);
+  void SetCentroid();
+  void Normalize();
+  void Randomize();
   void Randomize(int p_denom);
  /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
@@ -61,9 +61,9 @@ public:
     : MixedStrategyProfileRep<T>(p_support)
   { }
   TreeMixedStrategyProfileRep(const MixedBehaviorProfile<T> &);
-  virtual ~TreeMixedStrategyProfileRep() { }
+  virtual ~TreeMixedStrategyProfileRep() = default;
   
-  virtual MixedStrategyProfileRep<T> *Copy(void) const;
+  virtual MixedStrategyProfileRep<T> *Copy() const;
   virtual T GetPayoff(int pl) const;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &) const;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const;
@@ -88,9 +88,9 @@ public:
   TableMixedStrategyProfileRep(const StrategySupportProfile &p_support)
     : MixedStrategyProfileRep<T>(p_support)
   { }
-  virtual ~TableMixedStrategyProfileRep() { }
+  virtual ~TableMixedStrategyProfileRep() = default;
 
-  virtual MixedStrategyProfileRep<T> *Copy(void) const;
+  virtual MixedStrategyProfileRep<T> *Copy() const;
   virtual T GetPayoff(int pl) const;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &) const;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const;
@@ -103,9 +103,9 @@ public:
   AggMixedStrategyProfileRep(const StrategySupportProfile &p_support)
    : MixedStrategyProfileRep<T>(p_support)
     { }
-  virtual ~AggMixedStrategyProfileRep() { }
+  virtual ~AggMixedStrategyProfileRep() = default;
 
-  virtual MixedStrategyProfileRep<T> *Copy(void) const {
+  virtual MixedStrategyProfileRep<T> *Copy() const {
     return new AggMixedStrategyProfileRep(*this);
   }
   virtual T GetPayoff(int pl) const;
@@ -120,9 +120,9 @@ public:
   BagentMixedStrategyProfileRep(const StrategySupportProfile &p_support)
     : MixedStrategyProfileRep<T>(p_support)
     { }
-  virtual ~BagentMixedStrategyProfileRep() { }
+  virtual ~BagentMixedStrategyProfileRep() = default;
 
-  virtual MixedStrategyProfileRep<T> *Copy(void) const {
+  virtual MixedStrategyProfileRep<T> *Copy() const {
     return new BagentMixedStrategyProfileRep(*this);
   }
   virtual T GetPayoff(int pl) const;
@@ -192,38 +192,38 @@ public:
   /// Returns the mixed strategy for the player
   Vector<T> operator[](const GamePlayer &p_player) const;
 
-  operator const Vector<T> &(void) const { return m_rep->m_probs; }
-  operator Vector<T> &(void) { return m_rep->m_probs; }
+  operator const Vector<T> &() const { return m_rep->m_probs; }
+  operator Vector<T> &() { return m_rep->m_probs; }
   //@}
 
   /// @name General data access
   //@{
   /// Returns the game on which the profile is defined
-  Game GetGame(void) const { return m_rep->m_support.GetGame(); }
+  Game GetGame() const { return m_rep->m_support.GetGame(); }
   /// Returns the support on which the profile is defined
-  const StrategySupportProfile &GetSupport(void) const { return m_rep->m_support; }
+  const StrategySupportProfile &GetSupport() const { return m_rep->m_support; }
 
   /// Sets all strategies for each player to equal probabilities
-  void SetCentroid(void) { m_rep->SetCentroid(); }
+  void SetCentroid() { m_rep->SetCentroid(); }
 
   /// Normalize each player's strategy probabilities so they sum to one
-  void Normalize(void) { m_rep->Normalize(); }
+  void Normalize() { m_rep->Normalize(); }
 
   /// Generate a random mixed strategy profile according to the uniform distribution
-  void Randomize(void) { m_rep->Randomize(); }
+  void Randomize() { m_rep->Randomize(); }
 
   /// Generate a random mixed strategy profile according to the uniform distribution
   /// on a grid with spacing p_denom
   void Randomize(int p_denom) { m_rep->Randomize(p_denom); }
 
   /// Returns the total number of strategies in the profile
-  int MixedProfileLength(void) const { return m_rep->m_probs.Length(); }
+  int MixedProfileLength() const { return m_rep->m_probs.Length(); }
 
   /// Converts the profile to one on the full support of the game
-  MixedStrategyProfile<T> ToFullSupport(void) const;
+  MixedStrategyProfile<T> ToFullSupport() const;
 
   /// Converts the profile to one on the unrestricted parent of the game
-  MixedStrategyProfile<T> Unrestrict(void) const;
+  MixedStrategyProfile<T> Unrestrict() const;
   //@}
 
   /// @name Computation of interesting quantities
@@ -259,7 +259,7 @@ public:
   /// value which is zero exactly at Nash equilibria.  This version
   /// implements a positive penalty for profiles which are not on the
   /// simplotope (useful for penalty-function minimization methods).
-  T GetLiapValue(void) const;
+  T GetLiapValue() const;
   //@}
 };
 

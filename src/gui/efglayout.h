@@ -60,79 +60,79 @@ private:
 public:
   gbtNodeEntry(Gambit::GameNode p_parent);
 
-  Gambit::GameNode GetNode(void) const { return m_node; }
+  Gambit::GameNode GetNode() const { return m_node; }
 
-  gbtNodeEntry *GetParent(void) const { return m_parent; }
+  gbtNodeEntry *GetParent() const { return m_parent; }
   void SetParent(gbtNodeEntry *p_parent) { m_parent = p_parent; }
 
-  int X(void) const { return m_x; }
+  int X() const { return m_x; }
   void SetX(int p_x) { m_x = p_x; }
-  int Y(void) const { return m_y; }
+  int Y() const { return m_y; }
   void SetY(int p_y) { m_y = p_y; }
 
-  gbtNodeEntry *GetNextMember(void) const { return m_nextMember; }
+  gbtNodeEntry *GetNextMember() const { return m_nextMember; }
   void SetNextMember(gbtNodeEntry *p_member) { m_nextMember = p_member; }
 
-  bool InSupport(void) const { return m_inSupport; }
+  bool InSupport() const { return m_inSupport; }
   void SetInSupport(bool p_inSupport) { m_inSupport = p_inSupport; }
 
-  int GetChildNumber(void) const; 
+  int GetChildNumber() const; 
 
-  const wxColour &GetColor(void) const { return m_color; }
+  const wxColour &GetColor() const { return m_color; }
   void SetColor(const wxColour &p_color) { m_color = p_color; }
 
-  int GetSize(void) const { return m_size; }
+  int GetSize() const { return m_size; }
   void SetSize(int p_size) { m_size = p_size; }
 
-  int GetToken(void) const { return m_token; }
+  int GetToken() const { return m_token; }
   void SetToken(int p_token) { m_token = p_token; }
 
-  int GetBranchStyle(void) const { return m_branchStyle; }
+  int GetBranchStyle() const { return m_branchStyle; }
   void SetBranchStyle(int p_style) { m_branchStyle = p_style; }
 
-  int GetBranchLabelStyle(void) const { return m_branchLabel; }
+  int GetBranchLabelStyle() const { return m_branchLabel; }
   void SetBranchLabelStyle(int p_style) { m_branchLabel = p_style; }
 
-  int GetBranchLength(void) const { return m_branchLength; }
+  int GetBranchLength() const { return m_branchLength; }
   void SetBranchLength(int p_length) { m_branchLength = p_length; }
 
-  int GetLevel(void) const { return m_level; }
+  int GetLevel() const { return m_level; }
   void SetLevel(int p_level) { m_level = p_level; }
 
-  int GetSublevel(void) const { return m_sublevel; }
+  int GetSublevel() const { return m_sublevel; }
   void SetSublevel(int p_sublevel) { m_sublevel = p_sublevel; }
 
-  const wxString &GetNodeAboveLabel(void) const { return m_nodeAboveLabel; }
+  const wxString &GetNodeAboveLabel() const { return m_nodeAboveLabel; }
   void SetNodeAboveLabel(const wxString &p_label)
     { m_nodeAboveLabel = p_label; }
 
-  const wxString &GetNodeBelowLabel(void) const { return m_nodeBelowLabel; }
+  const wxString &GetNodeBelowLabel() const { return m_nodeBelowLabel; }
   void SetNodeBelowLabel(const wxString &p_label)
     { m_nodeBelowLabel = p_label; }
 
-  const wxString &GetBranchAboveLabel(void) const 
+  const wxString &GetBranchAboveLabel() const 
     { return m_branchAboveLabel; }
   void SetBranchAboveLabel(const wxString &p_label)
     { m_branchAboveLabel = p_label; }
 
-  const wxString &GetBranchBelowLabel(void) const 
+  const wxString &GetBranchBelowLabel() const 
     { return m_branchBelowLabel; }
   void SetBranchBelowLabel(const wxString &p_label)
     { m_branchBelowLabel = p_label; }
 
-  const wxFont &GetNodeAboveFont(void) const { return m_nodeAboveFont; }
+  const wxFont &GetNodeAboveFont() const { return m_nodeAboveFont; }
   void SetNodeAboveFont(const wxFont &p_font) { m_nodeAboveFont = p_font; }
 
-  const wxFont &GetNodeBelowFont(void) const { return m_nodeBelowFont; }
+  const wxFont &GetNodeBelowFont() const { return m_nodeBelowFont; }
   void SetNodeBelowFont(const wxFont &p_font) { m_nodeBelowFont = p_font; }
 
-  const wxFont &GetBranchAboveFont(void) const { return m_branchAboveFont; }
+  const wxFont &GetBranchAboveFont() const { return m_branchAboveFont; }
   void SetBranchAboveFont(const wxFont &p_font) { m_branchAboveFont = p_font; }
 
-  const wxFont &GetBranchBelowFont(void) const { return m_branchBelowFont; }
+  const wxFont &GetBranchBelowFont() const { return m_branchBelowFont; }
   void SetBranchBelowFont(const wxFont &p_font) { m_branchBelowFont = p_font; }
 
-  const double &GetActionProb(void) const { return m_actionProb; }
+  const double &GetActionProb() const { return m_actionProb; }
   void SetActionProb(const double &p_prob) { m_actionProb = p_prob; }
 
   void SetStyle(const gbtStyle *p_style) { m_style = p_style; }
@@ -145,7 +145,7 @@ public:
   bool BranchBelowHitTest(int p_x, int p_y) const
   { return (m_branchBelowRect.Contains(p_x, p_y)); }
 
-  const wxRect &GetOutcomeExtent(void) const { return m_outcomeRect; }
+  const wxRect &GetOutcomeExtent() const { return m_outcomeRect; }
   const wxRect &GetPayoffExtent(int pl) const { return m_payoffRect[pl]; }
 
   void Draw(wxDC &, Gambit::GameNode selection, bool p_noHints) const;
@@ -173,8 +173,8 @@ private:
 
   int LayoutSubtree(Gambit::GameNode, const Gambit::BehaviorSupportProfile &, int &, int &, int &);
   void FillInfosetTable(Gambit::GameNode, const Gambit::BehaviorSupportProfile &);
-  void UpdateTableInfosets(void);
-  void UpdateTableParents(void);
+  void UpdateTableInfosets();
+  void UpdateTableParents();
 
   wxString CreateNodeLabel(const gbtNodeEntry *, int) const;
   wxString CreateBranchLabel(const gbtNodeEntry *, int) const;
@@ -182,18 +182,18 @@ private:
   void RenderSubtree(wxDC &dc, bool p_noHints) const;
 
   // Overriding gbtGameView members
-  void OnUpdate(void) { }
+  void OnUpdate() { }
 
 public:
   gbtTreeLayout(gbtEfgDisplay *p_parent, gbtGameDocument *p_doc);
-  virtual ~gbtTreeLayout() { }
+  virtual ~gbtTreeLayout() = default;
 
   Gambit::GameNode PriorSameLevel(Gambit::GameNode) const;
   Gambit::GameNode NextSameLevel(Gambit::GameNode) const;
 
   void BuildNodeList(const Gambit::BehaviorSupportProfile &);
   void Layout(const Gambit::BehaviorSupportProfile &);
-  void GenerateLabels(void);
+  void GenerateLabels();
 
   // The following member functions are for temporary compatibility only
   gbtNodeEntry *GetNodeEntry(Gambit::GameNode p_node) const
@@ -201,8 +201,8 @@ public:
   gbtNodeEntry *GetValidParent(Gambit::GameNode);
   gbtNodeEntry *GetValidChild(Gambit::GameNode);
 
-  int MaxX(void) const { return m_maxX; }
-  int MaxY(void) const { return m_maxY; }
+  int MaxX() const { return m_maxX; }
+  int MaxY() const { return m_maxY; }
 
   Gambit::GameNode NodeHitTest(int, int) const;
   Gambit::GameNode OutcomeHitTest(int, int) const;

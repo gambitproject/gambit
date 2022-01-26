@@ -68,10 +68,10 @@ template <class T> class gTree  {
     gTreeNode<T>* RecursiveFind(const T&, gTreeNode<T>*) const;
     void RecursiveCopy(gTreeNode<T>*, const gTreeNode<T>*);
     void RecursiveFlush(const gTreeNode<T>*);
-    void Flush(void); 
+    void Flush(); 
 
   public:
-    gTree(void);
+    gTree();
     gTree(const T&);
     gTree(const gTree<T>&);
     virtual ~gTree();

@@ -22,15 +22,15 @@
 
 #include "gnarray.h"
 
-template <class T> gNArray<T>::gNArray(void)
-  : storage_size(0), storage(0)
+template <class T> gNArray<T>::gNArray()
+  : storage_size(0), storage(nullptr)
 { }
 
 template <class T> gNArray<T>::gNArray(const Gambit::Array<int> &d)
   : dim(d)
 {
   if (dim.Length() <= 0)   {
-    storage = 0;
+    storage = nullptr;
     storage_size = 0;
   }
   else   {
@@ -50,7 +50,7 @@ template <class T> gNArray<T>::gNArray(const Gambit::Array<int> &d)
 template <class T> gNArray<T>::gNArray(const gNArray<T> &a)
   : storage_size(a.storage_size), dim(a.dim)
 {
-  storage = (storage_size > 0) ? new  T[storage_size] : 0;
+  storage = (storage_size > 0) ? new  T[storage_size] : nullptr;
   for (int i = 0; i < storage_size; i++)
     storage[i] = a.storage[i];
 }
@@ -67,7 +67,7 @@ gNArray<T> &gNArray<T>::operator=(const gNArray<T> &a)
     if (storage)    delete [] storage;
     dim = a.dim;
     storage_size = a.storage_size;
-    storage = (storage_size > 0) ? new T[storage_size] : 0;
+    storage = (storage_size > 0) ? new T[storage_size] : nullptr;
     for (int i = 0; i < storage_size; i++)
       storage[i] = a.storage[i];
   }
@@ -144,7 +144,7 @@ template <class T> T &gNArray<T>::operator[](long l)
   return storage[l];
 }
 
-template <class T> const Gambit::Array<int> &gNArray<T>::Dimensionality(void) const
+template <class T> const Gambit::Array<int> &gNArray<T>::Dimensionality() const
 {
   return dim;
 }

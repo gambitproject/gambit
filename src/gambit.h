@@ -53,7 +53,7 @@ inline double abs(double x) { return std::fabs(x); }
 /// A base class for all Gambit exceptions
 class Exception : public std::runtime_error {
 public:
-  Exception(void) : std::runtime_error("") { }
+  Exception() : std::runtime_error("") { }
   Exception(const std::string &s) : std::runtime_error(s) { }
   virtual ~Exception() throw() { }
 };
@@ -61,7 +61,7 @@ public:
 /// Exception thrown on out-of-range index
 class IndexException : public Exception {
 public:
-  IndexException(void) : Exception("Index out of range") { }
+  IndexException() : Exception("Index out of range") { }
   IndexException(const std::string &s) : Exception(s) { }
   virtual ~IndexException() throw() { }
 };
@@ -69,7 +69,7 @@ public:
 /// Exception thrown on invalid index ranges
 class RangeException : public Exception {
 public:
-  RangeException(void) : Exception("Invalid index range") { }
+  RangeException() : Exception("Invalid index range") { }
   RangeException(const std::string &s) : Exception(s) { }
   virtual ~RangeException() throw() { }
 };
@@ -77,7 +77,7 @@ public:
 /// Exception thrown on dimension mismatches
 class DimensionException : public Exception {
 public:
-  DimensionException(void) : Exception("Mismatched dimensions") { }
+  DimensionException() : Exception("Mismatched dimensions") { }
   DimensionException(const std::string &s) : Exception(s) { }
   virtual ~DimensionException() throw() { }
 };
@@ -85,7 +85,7 @@ public:
 /// Exception thrown on invalid value
 class ValueException : public Exception {
 public:
-  ValueException(void) : Exception("Invalid value") { }
+  ValueException() : Exception("Invalid value") { }
   ValueException(const std::string &s) : Exception(s) { }
   virtual ~ValueException() throw() { }
 };
@@ -93,7 +93,7 @@ public:
 /// Exception thrown on a failed assertion
 class AssertionException : public Exception {
 public:
-  AssertionException(void) : Exception("Failed assertion") { }
+  AssertionException() : Exception("Failed assertion") { }
   AssertionException(const std::string &s) : Exception(s) { }
   virtual ~AssertionException() throw() { }
 };
@@ -101,7 +101,7 @@ public:
 /// Exception thrown on attempted division by zero
 class ZeroDivideException : public Exception {
 public:
-  ZeroDivideException(void) : Exception("Attempted division by zero") { }
+  ZeroDivideException() : Exception("Attempted division by zero") { }
   ZeroDivideException(const std::string &s) : Exception(s) { }
   virtual ~ZeroDivideException() throw() { }
 };
@@ -109,7 +109,7 @@ public:
 /// An exception thrown when attempting to dereference a null pointer
 class NullException : public Exception {
 public:
-  NullException(void) : Exception("Dereferenced null pointer") { }
+  NullException() : Exception("Dereferenced null pointer") { }
   NullException(const std::string &s) : Exception(s) { }
   virtual ~NullException() throw() { }
 };

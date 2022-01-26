@@ -125,7 +125,7 @@ public:
   void push_back(const Gambit::linalg::BFS<T> &p_bfs)
   { m_bfsList.push_back(p_bfs); }
 
-  int EquilibriumCount(void) const { return m_equilibria.size(); }
+  int EquilibriumCount() const { return m_equilibria.size(); }
 };
   
 //

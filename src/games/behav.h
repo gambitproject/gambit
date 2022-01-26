@@ -63,7 +63,7 @@ protected:
   
   void ComputeSolutionDataPass2(const GameNode &node) const;
   void ComputeSolutionDataPass1(const GameNode &node) const;
-  void ComputeSolutionData(void) const;
+  void ComputeSolutionData() const;
   //@}
 
   /// @name Converting mixed strategies to behavior
@@ -80,7 +80,7 @@ public:
   MixedBehaviorProfile(const BehaviorSupportProfile &);
   MixedBehaviorProfile(const MixedBehaviorProfile<T> &);
   MixedBehaviorProfile(const MixedStrategyProfile<T> &);
-  ~MixedBehaviorProfile() { }
+  ~MixedBehaviorProfile() = default;
 
   MixedBehaviorProfile<T> &operator=(const MixedBehaviorProfile<T> &);
   MixedBehaviorProfile<T> &operator=(const Vector<T> &p)
@@ -141,15 +141,15 @@ public:
   /// @name Initialization, validation
   //@{
   /// Force recomputation of stored quantities
-  void Invalidate(void) const { m_cacheValid = false; }
+  void Invalidate() const { m_cacheValid = false; }
   /// Set the profile to the centroid
-  void SetCentroid(void);
+  void SetCentroid();
   /// Set the behavior at any undefined information set to the centroid
-  void UndefinedToCentroid(void);
+  void UndefinedToCentroid();
   /// Normalize each information set's action probabilities to sum to one
-  void Normalize(void);
+  void Normalize();
   /// Generate a random behavior strategy profile according to the uniform distribution
-  void Randomize(void);
+  void Randomize();
   /// Generate a random behavior strategy profile according to the uniform distribution
   /// on a grid with spacing p_denom
   void Randomize(int p_denom);
@@ -157,9 +157,9 @@ public:
 
   /// @name General data access
   //@{
-  int Length(void) const { return Array<T>::Length(); }
-  Game GetGame(void) const { return m_support.GetGame(); }
-  const BehaviorSupportProfile &GetSupport(void) const { return m_support; }
+  int Length() const { return Array<T>::Length(); }
+  Game GetGame() const { return m_support.GetGame(); }
+  const BehaviorSupportProfile &GetSupport() const { return m_support; }
   
   bool IsDefinedAt(GameInfoset p_infoset) const;
   //@}
@@ -185,7 +185,7 @@ public:
   T DiffNodeValue(const GameNode &node, const GamePlayer &player,
 		  const GameAction &oppAction) const;
 
-  MixedStrategyProfile<T> ToMixedProfile(void) const;
+  MixedStrategyProfile<T> ToMixedProfile() const;
 
   //@}
 };

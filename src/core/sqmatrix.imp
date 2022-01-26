@@ -29,7 +29,7 @@ namespace Gambit {
 //     SquareMatrix<T>: Constructors, destructor, constructive operators
 //-----------------------------------------------------------------------------
 
-template <class T> SquareMatrix<T>::SquareMatrix(void)   { }
+template <class T> SquareMatrix<T>::SquareMatrix()   { }
 
 template <class T> SquareMatrix<T>::SquareMatrix(int size)
   : Matrix<T>(size, size)
@@ -56,7 +56,7 @@ SquareMatrix<T> &SquareMatrix<T>::operator=(const SquareMatrix<T> &M)
 //                SquareMatrix<T>: Public member functions
 //-----------------------------------------------------------------------------
 
-template <class T> SquareMatrix<T> SquareMatrix<T>::Inverse(void) const
+template <class T> SquareMatrix<T> SquareMatrix<T>::Inverse() const
 {
   if (this->mincol != this->minrow || this->maxcol != this->maxrow) {
     throw DimensionException();
@@ -134,7 +134,7 @@ template <class T> SquareMatrix<T> SquareMatrix<T>::Inverse(void) const
   return inv;
 }
 
-template <class T> T SquareMatrix<T>::Determinant(void) const
+template <class T> T SquareMatrix<T>::Determinant() const
 {
   T factor = (T) 1;
   SquareMatrix<T> M(*this);

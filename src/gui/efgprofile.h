@@ -55,7 +55,7 @@ private:
   void OnCellClick(wxSheetEvent &);
     
   // Overriding gbtGameView members
-  void OnUpdate(void);
+  void OnUpdate();
 
 public:
   gbtBehavProfileList(wxWindow *p_parent, gbtGameDocument *p_doc);

@@ -47,7 +47,7 @@ private:
   Array<int> m_numActiveInfosets;
 
   /// Reset the iterator to the first contingency (this is called by ctors)
-  void First(void);
+  void First();
 
 public:
   /// @name Lifecycle
@@ -61,15 +61,15 @@ public:
   /// @name Iteration and data access
   //@{
   /// Advance to the next contingency (prefix version) 
-  void operator++(void);
+  void operator++();
   /// Advance to the next contingency (postfix version) 
   void operator++(int) { ++(*this); }
   /// Has iterator gone past the end?
-  bool AtEnd(void) const { return m_atEnd; }
+  bool AtEnd() const { return m_atEnd; }
   /// Get the current behavior profile
-  const PureBehaviorProfile &operator*(void) const { return m_profile; }
+  const PureBehaviorProfile &operator*() const { return m_profile; }
   /// Get the current behavior profile
-  const PureBehaviorProfile *const operator->(void) const { return &m_profile; }
+  const PureBehaviorProfile *const operator->() const { return &m_profile; }
   //@}
 };
 

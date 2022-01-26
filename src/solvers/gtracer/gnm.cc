@@ -103,7 +103,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 
   cmatrix DG(M,M), // jacobian of the payoff function
     R(M,M), // jacobian of the retraction operator
-    I(M,M,1,1), // identity
+    I(M,M,1,true), // identity
     Dpsi, // jacobian of the cvector field
     J(M,M); // adjoint of Dpsi
 
@@ -209,7 +209,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 
   // this outer while loop executes once for each support boundary
   // that the path crosses.
-  while(1) {
+  while(true) {
     k = 0; // iteration counter; when k reaches LNMFreq, run LNM
      // within a single boundary, support unchanged
 

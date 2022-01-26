@@ -205,7 +205,7 @@ void gbtRationalEditorRefData::CreateEditor(wxWindow* parent,
 					    wxSheet* sheet)
 {
   wxSheetCellTextEditorRefData::CreateEditor(parent, id, evtHandler, sheet);
-  GetTextCtrl()->SetValidator(gbtNumberValidator(0));
+  GetTextCtrl()->SetValidator(gbtNumberValidator(nullptr));
 }
 
 bool gbtRationalEditorRefData::Copy(const gbtRationalEditorRefData &p_other)

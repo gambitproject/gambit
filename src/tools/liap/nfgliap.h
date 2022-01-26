@@ -31,11 +31,11 @@ using namespace Gambit::Nash;
 class NashLiapStrategySolver : public StrategySolver<double> {
 public:
   NashLiapStrategySolver(int p_maxitsN, bool p_verbose = false,
-			 shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = 0)
+			 shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = nullptr)
     : StrategySolver<double>(p_onEquilibrium),
       m_maxitsN(p_maxitsN), m_verbose(p_verbose)
   { }
-  virtual ~NashLiapStrategySolver() { }
+  virtual ~NashLiapStrategySolver() = default;
 
   List<MixedStrategyProfile<double> > Solve(const MixedStrategyProfile<double> &p_start) const;
   List<MixedStrategyProfile<double> > Solve(const Game &p_game) const

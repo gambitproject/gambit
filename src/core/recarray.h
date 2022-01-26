@@ -36,7 +36,7 @@ protected:
 public:
   /// @name Lifecycle
   //@{
-  RectArray(void);
+  RectArray();
   RectArray(unsigned int nrows, unsigned int ncols);
   RectArray(int minr, int maxr, int minc, int maxc);
   RectArray(const RectArray<T> &);
@@ -47,12 +47,12 @@ public:
 
   /// @name General data access
   //@{
-  int NumRows(void) const;
-  int NumColumns(void) const;
-  int MinRow(void) const;
-  int MaxRow(void) const;
-  int MinCol(void) const;
-  int MaxCol(void) const;
+  int NumRows() const;
+  int NumColumns() const;
+  int MinRow() const;
+  int MaxRow() const;
+  int MinCol() const;
+  int MaxCol() const;
   //@}
     
   /// @name Indexing operations
@@ -82,7 +82,7 @@ public:
   void SetColumn(int, const Array<T> &);
 
   /// Returns the transpose of the rectangular array
-  RectArray<T> Transpose(void) const;
+  RectArray<T> Transpose() const;
 
   /// @name Range checking functions; returns true only if valid index/size
   //@{
@@ -142,34 +142,34 @@ bool RectArray<T>::CheckBounds(const RectArray<T> &m) const
 //     RectArray<T>: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
-template <class T> RectArray<T>::RectArray(void)
-  : minrow(1), maxrow(0), mincol(1), maxcol(0), data(0)
+template <class T> RectArray<T>::RectArray()
+  : minrow(1), maxrow(0), mincol(1), maxcol(0), data(nullptr)
 { }
 
 template <class T> RectArray<T>::RectArray(unsigned int rows,
 						 unsigned int cols)
   : minrow(1), maxrow(rows), mincol(1), maxcol(cols)
 {
-  data = (rows > 0) ? new T *[maxrow] - 1 : 0;
+  data = (rows > 0) ? new T *[maxrow] - 1 : nullptr;
   for (int i = 1; i <= maxrow;
-       data[i++] = (cols > 0) ? new T[maxcol] - 1 : 0);
+       data[i++] = (cols > 0) ? new T[maxcol] - 1 : nullptr);
 }
 
 template <class T>
 RectArray<T>::RectArray(int minr, int maxr, int minc, int maxc)
   : minrow(minr), maxrow(maxr), mincol(minc), maxcol(maxc)
 {
-  data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : 0;
+  data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : nullptr;
   for (int i = minrow; i <= maxrow;
-       data[i++] = (maxcol - mincol + 1) ? new T[maxcol - mincol + 1] - mincol : 0);
+       data[i++] = (maxcol - mincol + 1) ? new T[maxcol - mincol + 1] - mincol : nullptr);
 }
 
 template <class T> RectArray<T>::RectArray(const RectArray<T> &a)
   : minrow(a.minrow), maxrow(a.maxrow), mincol(a.mincol), maxcol(a.maxcol)
 {
-  data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : 0;
+  data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : nullptr;
   for (int i = minrow; i <= maxrow; i++)  {
-    data[i] = (maxcol >= mincol) ? new T[maxcol - mincol + 1] - mincol : 0;
+    data[i] = (maxcol >= mincol) ? new T[maxcol - mincol + 1] - mincol : nullptr;
     for (int j = mincol; j <= maxcol; j++)
       data[i][j] = a.data[i][j];
   }
@@ -196,10 +196,10 @@ RectArray<T> &RectArray<T>::operator=(const RectArray<T> &a)
     mincol = a.mincol;
     maxcol = a.maxcol;
     
-    data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : 0;
+    data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : nullptr;
   
     for (i = minrow; i <= maxrow; i++)  {
-      data[i] = (maxcol >= mincol) ? new T[maxcol - mincol + 1] - mincol : 0;
+      data[i] = (maxcol >= mincol) ? new T[maxcol - mincol + 1] - mincol : nullptr;
       for (int j = mincol; j <= maxcol; j++)
 	data[i][j] = a.data[i][j];
     }
@@ -212,16 +212,16 @@ RectArray<T> &RectArray<T>::operator=(const RectArray<T> &a)
 //                  RectArray<T>: Data access members
 //------------------------------------------------------------------------
 
-template <class T> int RectArray<T>::NumRows(void) const
+template <class T> int RectArray<T>::NumRows() const
 { return maxrow - minrow + 1; }
 
-template <class T> int RectArray<T>::NumColumns(void) const
+template <class T> int RectArray<T>::NumColumns() const
 { return maxcol - mincol + 1; }
 
-template <class T> int RectArray<T>::MinRow(void) const    { return minrow; }
-template <class T> int RectArray<T>::MaxRow(void) const    { return maxrow; }
-template <class T> int RectArray<T>::MinCol(void) const { return mincol; }
-template <class T> int RectArray<T>::MaxCol(void) const { return maxcol; }
+template <class T> int RectArray<T>::MinRow() const    { return minrow; }
+template <class T> int RectArray<T>::MaxRow() const    { return maxrow; }
+template <class T> int RectArray<T>::MinCol() const { return mincol; }
+template <class T> int RectArray<T>::MaxCol() const { return maxcol; }
 
 template <class T> T &RectArray<T>::operator()(int r, int c)
 {
@@ -383,7 +383,7 @@ template <class T> void RectArray<T>::SetColumn(int col, const Array<T> &v)
 //                        RectArray<T>: Transpose
 //-------------------------------------------------------------------------
 
-template <class T> RectArray<T> RectArray<T>::Transpose(void) const
+template <class T> RectArray<T> RectArray<T>::Transpose() const
 {
   RectArray<T> tmp(mincol, maxcol, minrow, maxrow);
  

@@ -34,11 +34,11 @@ public:
     : m_profile(p_game), m_lambda(0.0)
 	{ }
 
-  double GetLambda(void) const { return m_lambda; }
-  const MixedBehaviorProfile<double> &GetProfile(void) const { return m_profile; }
+  double GetLambda() const { return m_lambda; }
+  const MixedBehaviorProfile<double> &GetProfile() const { return m_profile; }
 
-  Game GetGame(void) const              { return m_profile.GetGame(); }
-  int BehaviorProfileLength(void) const { return m_profile.Length(); }
+  Game GetGame() const              { return m_profile.GetGame(); }
+  int BehaviorProfileLength() const { return m_profile.Length(); }
   double operator[](int i) const        { return m_profile[i]; }
   
 private:
@@ -49,8 +49,8 @@ private:
 
 class AgentQREPathTracer : public PathTracer {
 public:
-  AgentQREPathTracer(void) : m_fullGraph(true), m_decimals(6) { }
-  virtual ~AgentQREPathTracer() { }
+  AgentQREPathTracer() : m_fullGraph(true), m_decimals(6) { }
+  virtual ~AgentQREPathTracer() = default;
 
   void 
   TraceAgentPath(const LogitQREMixedBehaviorProfile &p_start,
@@ -59,10 +59,10 @@ public:
 		 double p_targetLambda=-1.0);
 
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
-  bool GetFullGraph(void) const { return m_fullGraph; }
+  bool GetFullGraph() const { return m_fullGraph; }
 
   void SetDecimals(int p_decimals) { m_decimals = p_decimals; }
-  int GetDecimals(void) const { return m_decimals; }
+  int GetDecimals() const { return m_decimals; }
 
 private:
   bool m_fullGraph;

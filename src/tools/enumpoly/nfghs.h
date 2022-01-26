@@ -90,10 +90,9 @@ private:
 public:
   gbtNfgHs(int = 1);
 
-  virtual ~gbtNfgHs() {
-  }
+  virtual ~gbtNfgHs() = default;
 
-  int StopAfter(void)const {
+  int StopAfter()const {
     return m_stopAfter;
   }
 
@@ -101,7 +100,7 @@ public:
     m_stopAfter = p_stopAfter;
   }
 
-  bool IteratedRemoval(void)const {
+  bool IteratedRemoval()const {
     return m_iteratedRemoval;
   }
 
@@ -109,7 +108,7 @@ public:
     m_iteratedRemoval = p_iteratedRemoval;
   }
 
-  int RemovalWhenUninstantiated(void)const {
+  int RemovalWhenUninstantiated()const {
     return m_removalWhenUninstantiated;
   }
 
@@ -117,7 +116,7 @@ public:
     m_removalWhenUninstantiated = p_removalWhenUninstantiated;
   }
 
-  std::string Ordering(void)const {
+  std::string Ordering()const {
     return m_ordering;
   }
 

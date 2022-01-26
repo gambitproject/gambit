@@ -57,7 +57,7 @@ void gbtBehavDominanceStack::SetStrict(bool p_strict)
   m_strict = p_strict;
 }
 
-void gbtBehavDominanceStack::Reset(void)
+void gbtBehavDominanceStack::Reset()
 {
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
   m_supports = Gambit::Array<Gambit::BehaviorSupportProfile *>();
@@ -68,7 +68,7 @@ void gbtBehavDominanceStack::Reset(void)
   m_noFurther = false;
 }
 
-bool gbtBehavDominanceStack::NextLevel(void)
+bool gbtBehavDominanceStack::NextLevel()
 {
   if (m_current < m_supports.Length()) {
     m_current++;
@@ -99,7 +99,7 @@ bool gbtBehavDominanceStack::NextLevel(void)
   }
 }
 
-bool gbtBehavDominanceStack::PreviousLevel(void)
+bool gbtBehavDominanceStack::PreviousLevel()
 {
   if (m_current > 1) {
     m_current--;
@@ -132,7 +132,7 @@ void gbtStrategyDominanceStack::SetStrict(bool p_strict)
   m_strict = p_strict;
 }
 
-void gbtStrategyDominanceStack::Reset(void)
+void gbtStrategyDominanceStack::Reset()
 {
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
   m_supports = Gambit::Array<Gambit::StrategySupportProfile *>();
@@ -141,7 +141,7 @@ void gbtStrategyDominanceStack::Reset(void)
   m_noFurther = false;
 }
 
-bool gbtStrategyDominanceStack::NextLevel(void)
+bool gbtStrategyDominanceStack::NextLevel()
 {
   if (m_current < m_supports.Length()) {
     m_current++;
@@ -171,7 +171,7 @@ bool gbtStrategyDominanceStack::NextLevel(void)
   }
 }
 
-bool gbtStrategyDominanceStack::PreviousLevel(void)
+bool gbtStrategyDominanceStack::PreviousLevel()
 {
   if (m_current > 1) {
     m_current--;
@@ -188,7 +188,7 @@ bool gbtStrategyDominanceStack::PreviousLevel(void)
 
 gbtGameDocument::gbtGameDocument(Gambit::Game p_game) 
   : m_game(p_game),
-    m_selectNode(0), m_modified(false),
+    m_selectNode(nullptr), m_modified(false),
     m_behavSupports(this, true), m_stratSupports(this, true),
     m_currentProfileList(0)
 {
@@ -384,12 +384,12 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
   for (int i = 1; i <= m_views.Length(); m_views[i++]->OnUpdate());
 }
 
-void gbtGameDocument::PostPendingChanges(void)
+void gbtGameDocument::PostPendingChanges()
 {
   for (int i = 1; i <= m_views.Length(); m_views[i++]->PostPendingChanges());
 }
 
-void gbtGameDocument::BuildNfg(void)
+void gbtGameDocument::BuildNfg()
 { 
   if (m_game->IsTree()) {
     m_stratSupports.Reset();
@@ -411,13 +411,13 @@ void gbtGameDocument::SetStyle(const gbtStyle &p_style)
 // of the game (hence, CanUndo() only returns true when the list has
 // more than one element.
 //
-void gbtGameDocument::Undo(void)
+void gbtGameDocument::Undo()
 {
   // The current game is at the end of the undo list; move it to the redo list
   m_redoList.Append(m_undoList[m_undoList.Length()]);
   m_undoList.Remove(m_undoList.Length());
 
-  m_game = 0;
+  m_game = nullptr;
 
   while (m_profiles.Length() > 0) {
     delete m_profiles.Remove(1);
@@ -435,12 +435,12 @@ void gbtGameDocument::Undo(void)
   for (int i = 1; i <= m_views.Length(); m_views[i++]->OnUpdate());
 }
 
-void gbtGameDocument::Redo(void)
+void gbtGameDocument::Redo()
 {
   m_undoList.Append(m_redoList[m_redoList.Length()]);
   m_redoList.Remove(m_redoList.Length());
 
-  m_game = 0;
+  m_game = nullptr;
 
   while (m_profiles.Length() > 0) {
     delete m_profiles.Remove(1);
@@ -520,31 +520,31 @@ void gbtGameDocument::SetBehavElimStrength(bool p_strict)
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-bool gbtGameDocument::NextBehavElimLevel(void)
+bool gbtGameDocument::NextBehavElimLevel()
 {
   bool ret = m_behavSupports.NextLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
   return ret;
 }
 
-void gbtGameDocument::PreviousBehavElimLevel(void)
+void gbtGameDocument::PreviousBehavElimLevel()
 {
   m_behavSupports.PreviousLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::TopBehavElimLevel(void)
+void gbtGameDocument::TopBehavElimLevel()
 {
   m_behavSupports.TopLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-bool gbtGameDocument::CanBehavElim(void) const
+bool gbtGameDocument::CanBehavElim() const
 {
   return m_behavSupports.CanEliminate();
 }
 
-int gbtGameDocument::GetBehavElimLevel(void) const
+int gbtGameDocument::GetBehavElimLevel() const
 {
   return m_behavSupports.GetLevel();
 }
@@ -556,36 +556,36 @@ void gbtGameDocument::SetStrategyElimStrength(bool p_strict)
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-bool gbtGameDocument::GetStrategyElimStrength(void) const
+bool gbtGameDocument::GetStrategyElimStrength() const
 {
   return m_stratSupports.GetStrict();
 }
 
-bool gbtGameDocument::NextStrategyElimLevel(void)
+bool gbtGameDocument::NextStrategyElimLevel()
 {
   bool ret = m_stratSupports.NextLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
   return ret;
 }
 
-void gbtGameDocument::PreviousStrategyElimLevel(void)
+void gbtGameDocument::PreviousStrategyElimLevel()
 {
   m_stratSupports.PreviousLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::TopStrategyElimLevel(void)
+void gbtGameDocument::TopStrategyElimLevel()
 {
   m_stratSupports.TopLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-bool gbtGameDocument::CanStrategyElim(void) const
+bool gbtGameDocument::CanStrategyElim() const
 {
   return m_stratSupports.CanEliminate();
 }
 
-int gbtGameDocument::GetStrategyElimLevel(void) const
+int gbtGameDocument::GetStrategyElimLevel() const
 {
   return m_stratSupports.GetLevel();
 }
@@ -634,7 +634,7 @@ void gbtGameDocument::DoSetTitle(const wxString &p_title,
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
-void gbtGameDocument::DoNewPlayer(void)
+void gbtGameDocument::DoNewPlayer()
 {
   GamePlayer player = m_game->NewPlayer();
   player->SetLabel("Player " + 
@@ -813,7 +813,7 @@ void gbtGameDocument::DoSetOutcome(GameNode p_node, GameOutcome p_outcome)
 void gbtGameDocument::DoRemoveOutcome(GameNode p_node)
 {
   if (!p_node || !p_node->GetOutcome()) return;
-  p_node->SetOutcome(0);
+  p_node->SetOutcome(nullptr);
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 

@@ -33,7 +33,7 @@ template<> double gPoly<double>::String_Coeff(double nega)
     GetChar();
   }
   if (Coeff == "") return (nega);
-  else return (nega * strtod(Coeff.c_str(), NULL));
+  else return (nega * strtod(Coeff.c_str(), nullptr));
 }
 
 template class gPoly<double>;

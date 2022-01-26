@@ -36,12 +36,12 @@ public:
   class BadPivot : public Exception  {
   public:
     virtual ~BadPivot() throw() { }
-    const char *what(void) const throw() { return "Bad Pivot in LTableau"; }
+    const char *what() const throw() { return "Bad Pivot in LTableau"; }
   };
   class BadExitIndex : public Exception  {
   public:
     virtual ~BadExitIndex() throw() { }
-    const char *what(void) const throw() { return "Bad Exit Index in LTableau"; }
+    const char *what() const throw() { return "Bad Exit Index in LTableau"; }
   };
   LemkeTableau(const Matrix<T> &A, const Vector<T> &b);
   LemkeTableau(const Tableau<T> &);

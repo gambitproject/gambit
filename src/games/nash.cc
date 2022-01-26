@@ -185,7 +185,7 @@ template <class T>
 StrategySolver<T>::StrategySolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
   : m_onEquilibrium(p_onEquilibrium)
 {
-  if (m_onEquilibrium.get() == 0) {
+  if (m_onEquilibrium.get() == nullptr) {
     m_onEquilibrium = new MixedStrategyNullRenderer<T>();
   }
 }
@@ -194,7 +194,7 @@ template <class T>
 BehavSolver<T>::BehavSolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
   : m_onEquilibrium(p_onEquilibrium)
 {
-  if (m_onEquilibrium.get() == 0) {
+  if (m_onEquilibrium.get() == nullptr) {
     m_onEquilibrium = new BehavStrategyNullRenderer<T>();
   }
 }
@@ -331,7 +331,7 @@ void SubgameBehavSolver<T>::SolveSubgames(const BehaviorSupportProfile &p_suppor
     Game subgame = n->CopySubgame();
     // this prevents double-counting of outcomes at roots of subgames
     // by convention, we will just put the payoffs in the parent subgame
-    subgame->GetRoot()->SetOutcome(0);
+    subgame->GetRoot()->SetOutcome(nullptr);
 
     BehaviorSupportProfile subsupport(subgame);
     // Here, we build the support for the subgame

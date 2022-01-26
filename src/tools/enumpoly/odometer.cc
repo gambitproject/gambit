@@ -73,8 +73,7 @@ gIndexOdometer::gIndexOdometer(const gIndexOdometer & odo)
 }
 
 gIndexOdometer::~gIndexOdometer()
-{
-}
+= default;
 
 //----------------------------------
 //        Operators
@@ -200,12 +199,11 @@ gPermutationOdometer::gPermutationOdometer(const int& given_n)
 }
 
 gPermutationOdometer::gPermutationOdometer(const gPermutationOdometer & odo)
-: n(odo.n), CurIndices(odo.CurIndices), CurSign(odo.CurSign)
-{
-}
+ 
+= default;
 
 gPermutationOdometer::~gPermutationOdometer()
-{ }
+= default;
 
 //----------------------------------
 //        Operators

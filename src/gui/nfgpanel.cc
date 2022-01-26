@@ -107,8 +107,8 @@ public:
   gbtTablePlayerPanel(wxWindow *, gbtNfgPanel *, 
 		      gbtGameDocument *, int p_player);
 
-  void OnUpdate(void);
-  void PostPendingChanges(void);
+  void OnUpdate();
+  void PostPendingChanges();
 
   DECLARE_EVENT_TABLE()
 };
@@ -176,7 +176,7 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
   OnUpdate();
 }
 
-void gbtTablePlayerPanel::OnUpdate(void)
+void gbtTablePlayerPanel::OnUpdate()
 {
   wxColour color = m_doc->GetStyle().GetPlayerColor(m_player);
 
@@ -245,7 +245,7 @@ void gbtTablePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
 			  m_playerLabel->GetValue());
 }
 
-void gbtTablePlayerPanel::PostPendingChanges(void)
+void gbtTablePlayerPanel::PostPendingChanges()
 {
   if (m_playerLabel->IsEditing()) {
     m_playerLabel->EndEdit(true);
@@ -268,8 +268,8 @@ public:
 
   /// @name Implementation of gbtGameView members
   //@{
-  void OnUpdate(void);
-  void PostPendingChanges(void);
+  void OnUpdate();
+  void PostPendingChanges();
   //@}
 };
 
@@ -291,7 +291,7 @@ gbtTablePlayerToolbar::gbtTablePlayerToolbar(gbtNfgPanel *p_parent,
   Layout();
 }
 
-void gbtTablePlayerToolbar::OnUpdate(void)
+void gbtTablePlayerToolbar::OnUpdate()
 {
   while (m_playerPanels.Length() < m_doc->NumPlayers()) {
     gbtTablePlayerPanel *panel = 
@@ -314,7 +314,7 @@ void gbtTablePlayerToolbar::OnUpdate(void)
   GetSizer()->Layout();
 }
 
-void gbtTablePlayerToolbar::PostPendingChanges(void)
+void gbtTablePlayerToolbar::PostPendingChanges()
 {
   for (int pl = 1; pl <= m_playerPanels.Length(); pl++) {
     m_playerPanels[pl]->PostPendingChanges();
@@ -332,7 +332,7 @@ private:
   wxStaticText *m_level;
 
   // Overriding gbtGameView members
-  void OnUpdate(void);
+  void OnUpdate();
 
   // Event handlers
   void OnStrength(wxCommandEvent &);
@@ -343,7 +343,7 @@ private:
 
 public:
   gbtStrategyDominanceToolbar(wxWindow *p_parent, gbtGameDocument *p_doc);
-  virtual ~gbtStrategyDominanceToolbar() { }
+  virtual ~gbtStrategyDominanceToolbar() = default;
 };
 
 
@@ -432,7 +432,7 @@ void gbtStrategyDominanceToolbar::OnLastLevel(wxCommandEvent &)
   while (m_doc->NextStrategyElimLevel());
 }
 
-void gbtStrategyDominanceToolbar::OnUpdate(void)
+void gbtStrategyDominanceToolbar::OnUpdate()
 {
   m_topButton->Enable(m_doc->GetStrategyElimLevel() > 1);
   m_prevButton->Enable(m_doc->GetStrategyElimLevel() > 1);
@@ -494,19 +494,19 @@ void gbtNfgPanel::OnToolsDominance(wxCommandEvent &p_event)
   Refresh();
 }
 
-void gbtNfgPanel::OnUpdate(void)
+void gbtNfgPanel::OnUpdate()
 { 
   m_playerToolbar->OnUpdate();
   m_tableWidget->OnUpdate();
   GetSizer()->Layout();
 }
 
-void gbtNfgPanel::PostPendingChanges(void)
+void gbtNfgPanel::PostPendingChanges()
 {
   m_tableWidget->PostPendingChanges();
 }
 
-wxPrintout *gbtNfgPanel::GetPrintout(void)
+wxPrintout *gbtNfgPanel::GetPrintout()
 {
   return m_tableWidget->GetPrintout();
 }

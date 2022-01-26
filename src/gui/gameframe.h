@@ -44,8 +44,8 @@ private:
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
 
-  void MakeMenus(void);
-  void MakeToolbar(void);
+  void MakeMenus();
+  void MakeToolbar();
   
   // Event handlers
   void OnCloseWindow(wxCloseEvent &);
@@ -109,7 +109,7 @@ private:
   //@}
   
   // Overriding gbtGameView members
-  void OnUpdate(void);
+  void OnUpdate();
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR

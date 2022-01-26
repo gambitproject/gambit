@@ -37,7 +37,7 @@ private:
 
 public:
   // Lifecycle
-  BFS(void) : m_default(0) { }
+  BFS() : m_default(0) { }
   ~BFS()  { }
 
   // define two BFS's to be equal if their bases are equal

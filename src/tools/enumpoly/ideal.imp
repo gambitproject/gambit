@@ -59,8 +59,7 @@ template<class T>  gIdeal<T>::gIdeal(const gIdeal<T> & ideal)
 }
 
 template<class T>  gIdeal<T>::~gIdeal()
-{
-}
+= default;
 
 //----------------------------------
 //        Operators

@@ -39,14 +39,14 @@ private:
 
 public:
   gbtNfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc);
-  virtual ~gbtNfgPanel() { }
+  virtual ~gbtNfgPanel() = default;
 
-  bool IsDominanceShown(void) const { return m_dominanceToolbar->IsShown(); }
+  bool IsDominanceShown() const { return m_dominanceToolbar->IsShown(); }
 
   /// @name Exporting/printing graphics
   //@{
   /// Creates a printout object of the game as currently displayed
-  wxPrintout *GetPrintout(void);
+  wxPrintout *GetPrintout();
   /// Creates a bitmap of the game as currently displayed
   bool GetBitmap(wxBitmap &, int marginX, int marginY);
   /// Outputs the game as currently displayed to a SVG file
@@ -56,8 +56,8 @@ public:
   //@}
 
   // Overriding gbtGameView members
-  void OnUpdate(void);
-  void PostPendingChanges(void);
+  void OnUpdate();
+  void PostPendingChanges();
 
   DECLARE_EVENT_TABLE()
 };

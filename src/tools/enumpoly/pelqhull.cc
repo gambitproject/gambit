@@ -166,7 +166,7 @@ void qh_memfreeshort (int *curlong, int *totlong) {
     nextbuffer= *((void **) buffer);
     free(buffer);
   }
-  qhmem.curbuffer= NULL;
+  qhmem.curbuffer= nullptr;
   if (qhmem .LASTsize) {
     free (qhmem .indextable);
     free (qhmem .freelists);
@@ -215,7 +215,7 @@ void qh_meminitbuffers (int tracelevel, int alignment, int numsizes, int bufsize
 /*-------------------------------------------------
 -memsetup- set up memory after running memsize()
 */
-void qh_memsetup (void) {
+void qh_memsetup () {
   int k,i;
 
   qsort(qhmem.sizetable, qhmem.TABLEsize, sizeof(int), qh_intcompare);
@@ -379,7 +379,7 @@ void qh_setappend(setT **setp, void *newelem) {
     sizep= SETsizeaddr_(*setp);
   }
   *(endp= &((*setp)->e[(*sizep)++ - 1]))= newelem;
-  *(++endp)= NULL;
+  *(++endp)= nullptr;
 } /* setappend */
 
 /*----------------------------------------
@@ -429,7 +429,7 @@ void qh_setappend2ndlast(setT **setp, void *newelem) {
   endp= SETelemaddr_(*setp, (*sizep)++ -1, void); /* NULL */
   lastp= endp-1;
   *(endp++)= *lastp;
-  *endp= NULL;    /* may overwrite *sizep */
+  *endp= nullptr;    /* may overwrite *sizep */
   *lastp= newelem;
 } /* setappend2ndlast */
 
@@ -490,7 +490,7 @@ void *qh_setdel(setT *set, void *oldelem) {
   int *sizep;
 
   if (!set)
-    return NULL;
+    return nullptr;
   elemp= SETaddr_(set, void);
   while (*elemp != oldelem && *elemp)
     elemp++;
@@ -500,10 +500,10 @@ void *qh_setdel(setT *set, void *oldelem) {
       *sizep= set->maxsize;  /*     *sizep= (maxsize-1)+ 1 */
     lastp= SETelemaddr_(set, *sizep-1, void);
     *elemp= *lastp;      /* may overwrite itself */
-    *lastp= NULL;
+    *lastp= nullptr;
     return oldelem;
   }
-  return NULL;
+  return nullptr;
 } /* setdel */
 
 
@@ -518,14 +518,14 @@ void *qh_setdellast(setT *set) {
   void *returnvalue;
   
   if (!set || !(set->e[0]))
-    return NULL;
+    return nullptr;
   if ((setsize= (long)*(last= &(set->e[set->maxsize])))) {
     returnvalue= set->e[setsize - 2];
-    set->e[setsize - 2]= NULL;
+    set->e[setsize - 2]= nullptr;
     *last= (void *)((long)*last - 1);
   }else {
     returnvalue= set->e[set->maxsize - 1];
-    set->e[set->maxsize - 1]= NULL;
+    set->e[set->maxsize - 1]= nullptr;
     // This (void *) cast was in the original, 1990s, pre-64-bit Pelican
     *last= reinterpret_cast<void *>(set->maxsize);
   }
@@ -553,7 +553,7 @@ void *qh_setdelnth(setT *set, int nth) {
   lastp= SETelemaddr_(set, *sizep-1, void);
   elem= *elemp;
   *elemp= *lastp;      /* may overwrite itself */
-  *lastp= NULL;
+  *lastp= nullptr;
   return elem;
 } /* setdelnth */
 
@@ -596,7 +596,7 @@ void *qh_setdelsorted(setT *set, void *oldelem) {
   int *sizep;
 
   if (!set)
-    return NULL;
+    return nullptr;
   newp= SETaddr_(set, void);
   while(*newp != oldelem && *newp)
     newp++;
@@ -609,7 +609,7 @@ void *qh_setdelsorted(setT *set, void *oldelem) {
       *sizep= set->maxsize;  /*     *sizep= (max size-1)+ 1 */
     return oldelem;
   }
-  return NULL;
+  return nullptr;
 } /* setdelsorted */
 
 
@@ -648,7 +648,7 @@ int qh_setequal_except (setT *setA, void *skipelemA, setT *setB, void *skipelemB
 
   elemA= SETaddr_(setA, void);
   elemB= SETaddr_(setB, void);
-  while (1) {
+  while (true) {
     if (*elemA == skipelemA) {
       skip++;
       elemA++;
@@ -686,7 +686,7 @@ int qh_setequal_skip (setT *setA, int skipA, setT *setB, int skipB) {
   elemB= SETaddr_(setB, void);
   skipAp= SETelemaddr_(setA, skipA, void);
   skipBp= SETelemaddr_(setB, skipB, void);
-  while (1) {
+  while (true) {
     if (elemA == skipAp)
       elemA++;
     if (elemB == skipBp)
@@ -716,7 +716,7 @@ void qh_setfree(setT **setp) {
       qh_memfree_(*setp, size, freelistp);
     }else
       qh_memfree (*setp, size);
-    *setp= NULL;
+    *setp= nullptr;
   }
 } /* setfree */
 
@@ -732,7 +732,7 @@ void qh_setfreelong(setT **setp) {
     size= sizeof(setT) + ((*setp)->maxsize)*SETelemsize; 
     if (size > qhmem.LASTsize) {
       qh_memfree (*setp, size);
-      *setp= NULL;
+      *setp= nullptr;
     }
   }
 } /* setfreelong */
@@ -819,7 +819,7 @@ void *qh_setlast(setT *set) {
     else if (size > 1)
       return SETelem_(set, size - 2);
   }
-  return NULL;
+  return nullptr;
 } /* setlast */
 
 
@@ -845,7 +845,7 @@ setT *qh_setnew(int setsize) {
     set= (setT *)qh_memalloc ((int)size);
   set->maxsize= setsize;
   set->e[setsize]= (void *) 1;
-  set->e[0]= NULL;
+  set->e[0]= nullptr;
   return (set);
 } /* setnew */
 
@@ -923,7 +923,7 @@ setT *qh_setnew_delnthsorted(setT *set, int size, int nth, int prepend) {
     memcpy((char *)newp, (char *)oldp, tailsize * SETelemsize);
     newp += tailsize;
   }
-  *newp= NULL;
+  *newp= nullptr;
   return(newset);
 } /* setnew_delnthsorted */
 
@@ -1029,7 +1029,7 @@ void qh_settempfree(setT **set) {
 /*----------------------------------------
 -settempfree_all- free all temporary sets in qhmem.tempstack
 */
-void qh_settempfree_all(void) {
+void qh_settempfree_all() {
   setT *set, **setp;
 
   FOREACHset_((setT *)qhmem.tempstack) 
@@ -1040,7 +1040,7 @@ void qh_settempfree_all(void) {
 /*----------------------------------------
 -settemppop- pop and return temporary set from qhmem.tempstack (makes it permanent)
 */
-setT *qh_settemppop(void) {
+setT *qh_settemppop() {
   setT *stackedset;
   
   stackedset= (setT *)qh_setdellast((setT *)qhmem.tempstack);
@@ -1077,7 +1077,7 @@ void qh_settruncate (setT *set, int size) {
 
   // This (void *) cast was in the original, 1990s, pre-64-bit Pelican
   set->e[set->maxsize]= reinterpret_cast<void *>(size+1);   /* maybe overwritten */
-  set->e[size]= NULL;
+  set->e[size]= nullptr;
 } /* setruncate */
     
 /*----------------------------------------
@@ -1403,7 +1403,7 @@ facetT *qh_findbest (pointT *point, facetT *facet, boolT bestoutside,
 	   unsigned firstid, realT *dist, boolT *isoutside, int *numpart) {
   realT bestdist, searchdist;
   facetT *neighbor, **neighborp, *bestfacet;
-  setT *search= NULL;
+  setT *search= nullptr;
   int oldtrace= qh IStracing;
   boolT checkmax= (boolT)(bestoutside && !firstid && qh_MAXoutside
     && (qh MERGING || qh APPROXhull));
@@ -1533,7 +1533,7 @@ returns:
 */
 facetT *qh_findgooddist (pointT *point, facetT *facetA, realT *distp) {
   realT bestdist= -REALmax, dist;
-  facetT *neighbor, **neighborp, *bestfacet=NULL, *facet;
+  facetT *neighbor, **neighborp, *bestfacet=nullptr, *facet;
   boolT goodseen= False;  
 
   if (facetA->good) {
@@ -1576,7 +1576,7 @@ facetT *qh_findgooddist (pointT *point, facetT *facetA, realT *distp) {
   }
   trace4((qh ferr, "qh_findgooddist: no good facet for p%d above f%d\n", 
       qh_pointid(point), facetA->id));
-  return NULL;
+  return nullptr;
 }  /* findgooddist */
     
 /*-------------------------------------------------
@@ -1776,7 +1776,7 @@ boolT qh_inthresholds (coordT *normal, realT *angle) {
 */
 realT *qh_maxabsval (realT *normal, int dim) {
   realT maxval= -REALmax;
-  realT *maxp= NULL, *colp, absval;
+  realT *maxp= nullptr, *colp, absval;
   int k;
 
   for (k= dim, colp= normal; k--; colp++) {
@@ -1906,7 +1906,7 @@ notes:
   uses maxpoints as long as determinate is clearly non-zero
 */
 void qh_maxsimplex (int dim, setT *maxpoints, pointT *points, int numpoints, setT **simplex) {
-  pointT *point, **pointp, *pointtemp, *maxpoint, *minx=NULL, *maxx=NULL;
+  pointT *point, **pointp, *pointtemp, *maxpoint, *minx=nullptr, *maxx=nullptr;
   boolT nearzero, maxnearzero= False;
   int k, sizinit;
   realT maxdet= -REALmax, det, mincoord= REALmax, maxcoord= -REALmax;
@@ -1947,7 +1947,7 @@ void qh_maxsimplex (int dim, setT *maxpoints, pointT *points, int numpoints, set
     if (sizinit < 2) qhull_fatal(24);
   }
   for(k= sizinit; k < dim+1; k++) {
-    maxpoint= NULL;
+    maxpoint= nullptr;
     maxdet= -REALmax;
     FOREACHpoint_(maxpoints) {
       if (!qh_setin (*simplex, point)) {
@@ -2170,7 +2170,7 @@ returns:
   sets POINTSmalloc
   lowbound/highbound is also projected
 */
-void qh_projectinput (void) {
+void qh_projectinput () {
   int k,i;
   int newdim= qh input_dim, newnum= qh num_points;
   signed char *project;
@@ -2301,7 +2301,7 @@ void qh_projectpoints (signed char *project, int n, realT *points,
 -randomfactor- return a random factor within qh RANDOMmax of 1.0
   RANDOMa/b definedin global.c
 */
-realT qh_randomfactor (void) {
+realT qh_randomfactor () {
   realT randr;
 
   randr= qh_RANDOMint;
@@ -2360,7 +2360,7 @@ void qh_rotateinput (realT **rows) {
   assumes rows[dim] is a scratch buffer
 */
 void qh_rotatepoints (realT *points, int numpoints, int dim, realT **row) {
-  realT *point, *rowi, *coord= NULL, sum, *newval;
+  realT *point, *rowi, *coord= nullptr, sum, *newval;
   int i,j,k;
 
   for (point= points, j= numpoints; j--; point += dim) {
@@ -2386,7 +2386,7 @@ returns:
   scales points to low[k], high[k]
   sets qh POINTSmalloc
 */
-void qh_scaleinput (void) {
+void qh_scaleinput () {
   int size;
   pointT *newpoints;
 
@@ -2683,7 +2683,7 @@ notes:
 pointT *qh_voronoi_center (int dim, setT *points) {
   pointT *point, **pointp, *point0;
   pointT *center= (pointT *)qh_memalloc (qh center_size);
-  setT *simplex = NULL;
+  setT *simplex = nullptr;
   int i, j, k, num, size= qh_setsize(points);
   coordT *gmcoord;
   realT *diffp, sum2, *sum2row, *sum2p, det, factor;
@@ -2697,7 +2697,7 @@ pointT *qh_voronoi_center (int dim, setT *points) {
   }
   else {
     simplex = qh_settemp (dim+1);
-    qh_maxsimplex (dim, points, NULL, 0, &simplex);
+    qh_maxsimplex (dim, points, nullptr, 0, &simplex);
   }
   num= qh_setsize (simplex);
   point0= (pointT *)SETfirst_(simplex);
@@ -2788,7 +2788,7 @@ qhstatT qh_qhstat;   /* remove "={0}" if this causes a compiler error */
   (otherwise, 'gcc -O2' uses too much memory)
   uses qhstat next
 */
-void qh_allstatA (void) {
+void qh_allstatA () {
   
    /* zdef_(type,name,doc,average) */
   zzdef_(zdoc, Zdoc2, "precision statistics", -1);
@@ -2813,7 +2813,7 @@ void qh_allstatA (void) {
   zzdef_(zinc, Zmultiflip, "ridges with multiple neighbors (diff flip)", -1);
 
 }
-void qh_allstatB (void) {
+void qh_allstatB () {
   zzdef_(zdoc, Zdoc1, "summary information", -1);
   zdef_(zinc, Zvertices, "number of vertices in output", -1);
   zdef_(zinc, Znumfacets, "number of facets in output", -1);
@@ -2856,7 +2856,7 @@ void qh_allstatB (void) {
   zdef_(zinc, Ztotverify, "points verified", -1);
   zdef_(zinc, Zverifypart, "  ave. distance tests per verify", Ztotverify);
 }
-void qh_allstatC(void) {
+void qh_allstatC() {
   zdef_(zdoc, Zdoc4, "partitioning statistics", -1);
   zdef_(zinc, Zpartinside, "inside points", -1);
   zdef_(zinc, Zcoplanarinside, "  inside points that were coplanar with a facet", -1);
@@ -2876,7 +2876,7 @@ void qh_allstatC(void) {
   zdef_(zinc, Zcomputefurthest, "distance tests for computing furthest", -1);
   
 }
-void qh_allstatD(void) {
+void qh_allstatD() {
   zdef_(zdoc, Zdoc5, "statistics for matching ridges", -1);
   zdef_(zinc, Zhashlookup, "total lookups for matching ridges of new facets", -1);
   zdef_(zinc, Zhashtests, "average number of tests to match a ridge", Zhashlookup);
@@ -2892,7 +2892,7 @@ void qh_allstatD(void) {
   zdef_(zinc, Zcoplanarcentrum, "coplanar centrums in getmergeset", -1);
   zdef_(zinc, Zconcaveridge, "concave ridges in getmergeset", -1);
 }
-void qh_allstatE(void) {
+void qh_allstatE() {
   zdef_(zdoc, Zdoc7, "statistics for merging", -1);
   zdef_(wmax, Wmaxoutside, "max distance of merged vertex above facet", -1);
   zdef_(wmin, Wminvertex, "max distance of merged vertex below facet", -1);
@@ -2928,7 +2928,7 @@ void qh_allstatE(void) {
   zdef_(wmax, Wduplicatemax, "  maximum merge distance", -1);
 
 }
-void qh_allstatF(void) {
+void qh_allstatF() {
   zdef_(zdoc, Zdoc8, "renamed vertex statistics", -1);
   zdef_(zinc, Zrenameshare, "renamed vertices shared by two facets", -1);
   zdef_(zinc, Zrenamepinch, "renamed vertices in a pinched facet", -1);
@@ -2962,7 +2962,7 @@ void qh_allstatF(void) {
 /*-------------------------------------------------
 -collectstatistics- collect statistics for qh facet_list
 */
-void qh_collectstatistics (void) {
+void qh_collectstatistics () {
   facetT *facet, *neighbor, **neighborp;
   vertexT *vertex, **vertexp;
   realT dotproduct, dist;
@@ -3056,7 +3056,7 @@ void qh_collectstatistics (void) {
 /*-------------------------------------------------
 -freestatistics- free memory used for statistics
 */
-void qh_freestatistics (void) {
+void qh_freestatistics () {
 
 #if qh_QHpointer   /* duplicated if !KEEPstatistics */
   free (qh_qhstat);
@@ -3068,7 +3068,7 @@ void qh_freestatistics (void) {
 -initstatistics- allocate and initialize statistics
   uses malloc instead of memalloc since mem.c not setup yet
 */
-void qh_initstatistics (void) {
+void qh_initstatistics () {
   int i;
   realT realx;
   int intx;
@@ -3347,8 +3347,8 @@ returns:
   if qh VERTEXneighbors, update neighbors for each vertex
   interior vertices added to qh del_vertices for later partitioning
 */
-void qh_attachnewfacets (void ) {
-  facetT *newfacet= NULL, *neighbor, **neighborp, *horizon, *visible;
+void qh_attachnewfacets ( ) {
+  facetT *newfacet= nullptr, *neighbor, **neighborp, *horizon, *visible;
   ridgeT *ridge, **ridgep;
   vertexT *vertex, **vertexp;
 
@@ -3369,16 +3369,16 @@ void qh_attachnewfacets (void ) {
 	    qh_memfree (ridge, sizeof(ridgeT));
 	  }
         }
-        SETfirst_(visible->ridges)= NULL;
+        SETfirst_(visible->ridges)= nullptr;
       }
-      SETfirst_(visible->neighbors)= NULL;
-      SETsecond_(visible->neighbors)= NULL;
+      SETfirst_(visible->neighbors)= nullptr;
+      SETsecond_(visible->neighbors)= nullptr;
     }
     trace1((qh ferr, "qh_attachnewfacets: attach horizon facets to new facets\n"));
     FORALLnew_facets {
       horizon= (facetT *)SETfirst_(newfacet->neighbors);
       if (horizon->simplicial) {
-        visible= NULL;
+        visible= nullptr;
         FOREACHneighbor_(horizon) {   /* may have more than one horizon ridge */
 	  if (neighbor->visible) {
 	    if (visible) {
@@ -3468,9 +3468,9 @@ void qh_attachnewfacets (void ) {
   if ONLYgood, ignores !good facets
   see: check_maxout
 */
-void qh_check_bestdist (void) {
+void qh_check_bestdist () {
   boolT waserror= False, isoutside;
-  facetT *facet, *bestfacet, *errfacet1= NULL, *errfacet2= NULL;
+  facetT *facet, *bestfacet, *errfacet1= nullptr, *errfacet2= nullptr;
   realT dist, maxoutside;
   pointT *point;
   int numpart, facet_i, facet_n, notgood= 0;
@@ -3527,13 +3527,13 @@ notes:
   may not need to check inside points if KEEPcoplanar 
      (since coplanar is now min_vertex instead of -DISTround)
 */
-void qh_check_maxout (void) {
+void qh_check_maxout () {
   boolT isoutside;
   facetT *facet, *bestfacet, *neighbor, **neighborp;
   realT dist, maxoutside, minvertex;
   pointT *point;
   int numpart, facet_i, facet_n, notgood= 0;
-  setT *facets, *vertices= NULL;
+  setT *facets, *vertices= nullptr;
   vertexT *vertex;
 
   maxoutside= minvertex= 0;
@@ -3594,7 +3594,7 @@ void qh_check_maxout (void) {
 -check_output- performs the checks at the end of qhull algorithm
   does not check points (may take a long time)
 */
-void qh_check_output (void) {
+void qh_check_output () {
   int i;
 
   if (qh STOPcone)
@@ -3634,8 +3634,8 @@ void qh_check_point (pointT *point, facetT *facet, realT *maxoutside, facetT **e
      uses findbest if lots of points
      ignores flipped facets
 */
-void qh_check_points (void) {
-  facetT *facet, *errfacet1= NULL, *errfacet2= NULL;
+void qh_check_points () {
+  facetT *facet, *errfacet1= nullptr, *errfacet2= nullptr;
   realT total, maxoutside;
   pointT *point, **pointp, *pointtemp;
 
@@ -3697,7 +3697,7 @@ note:
     optimized for simplicial facets
 */
 void qh_checkconvex(facetT *facetlist, int fault) {
-  facetT *facet, *neighbor, **neighborp, *errfacet1=NULL, *errfacet2=NULL;
+  facetT *facet, *neighbor, **neighborp, *errfacet1=nullptr, *errfacet2=nullptr;
   vertexT *vertex;
   realT dist;
   pointT *centrum;
@@ -3794,8 +3794,8 @@ void qh_checkconvex(facetT *facetlist, int fault) {
   uses neighbor->seen
 */
 void qh_checkfacet(facetT *facet, boolT newmerge, boolT *waserrorp) {
-  facetT *neighbor, **neighborp, *errother=NULL;
-  ridgeT *ridge, **ridgep, *errridge= NULL;
+  facetT *neighbor, **neighborp, *errother=nullptr;
+  ridgeT *ridge, **ridgep, *errridge= nullptr;
   vertexT *vertex, **vertexp;
   unsigned previousid= INT_MAX;
   int numneighbors, numvertices, numridges=0, numRvertices=0;
@@ -4080,7 +4080,7 @@ void qh_checkpolygon(facetT *facetlist) {
   else if (facetlist == qh newfacet_list)
     vertexlist= qh newvertex_list;
   else
-    vertexlist= NULL;
+    vertexlist= nullptr;
   FORALLvertex_(vertexlist) {
     vertex->seen= False;
     vertex->visitid= 0;
@@ -4160,7 +4160,7 @@ notes:
 */
 void qh_checkvertex (vertexT *vertex) {
   boolT waserror= False;
-  facetT *neighbor, **neighborp, *errfacet=NULL;
+  facetT *neighbor, **neighborp, *errfacet=nullptr;
 
   if (qh_pointid (vertex->point) == -1) {
     fprintf (qh ferr, "qhull internal error (checkvertex): unknown point id %p\n", 
@@ -4200,7 +4200,7 @@ void qh_clearcenters (int type) {
           qh_memfree (facet->center, qh center_size);
         else
           qh_memfree (facet->center, qh normal_size);
-	facet->center= NULL;
+	facet->center= nullptr;
       }
     }
     qh CENTERtype= type;
@@ -4211,25 +4211,25 @@ void qh_clearcenters (int type) {
 /*-------------------------------------------------
 -clearnewvertices- clear vertices from newvertex_list
 */
-void qh_clearnewvertices (void /*qh newvertex_list*/) {
+void qh_clearnewvertices ( /*qh newvertex_list*/) {
   vertexT *vertex;
   
   FORALLvertex_(qh newvertex_list)
     vertex->newlist= False;
-  qh newvertex_list= NULL;
+  qh newvertex_list= nullptr;
 } /* clearnewvertices */
     
 /*-------------------------------------------------
 -clearvisible- clear facets from visible list
   resets NEWfacets
 */
-void qh_clearvisible (void /*qh visible_list*/) {
+void qh_clearvisible ( /*qh visible_list*/) {
   facetT *visible;
   
   FORALLvisible_facets
     visible->visible= False;
   qh num_visible= 0;
-  qh visible_list= NULL;
+  qh visible_list= nullptr;
   qh NEWfacets= False;
 } /* clearvisible */
     
@@ -4239,14 +4239,14 @@ returns:
     initializes qh facet_list to the simplex
 */
 void qh_createsimplex(setT *vertices) {
-  facetT *facet= NULL, *newfacet;
+  facetT *facet= nullptr, *newfacet;
   boolT toporient= True;
   int vertex_i, vertex_n, nth, tempint;
   setT *newfacets= qh_settemp (qh hull_dim+1);
   vertexT *vertex;
   
   qh facet_list= qh newfacet_list= qh facet_tail= qh_newfacet();
-  qh vertex_list= qh newvertex_list= qh vertex_tail= qh_newvertex(NULL);
+  qh vertex_list= qh newvertex_list= qh vertex_tail= qh_newvertex(nullptr);
   FOREACHvertex_i_(vertices) {
     newfacet= qh_newfacet();
     newfacet->vertices= qh_setnew_delnthsorted (vertices, vertex_n,
@@ -4313,7 +4313,7 @@ void qh_delfacet(facetT *facet) {
 
   trace5((qh ferr, "qh_delfacet: delete f%d\n", facet->id));
   if (facet == qh tracefacet)
-    qh tracefacet= NULL;
+    qh tracefacet= nullptr;
   qh_removefacet(facet);
   qh_memfree_(facet->normal, qh normal_size, freelistp);
   if (qh CENTERtype == qh_voronoi) {
@@ -4358,7 +4358,7 @@ void qh_delridge(ridgeT *ridge) {
 void qh_delvertex (vertexT *vertex) {
 
   if (vertex == qh tracevertex)
-    qh tracevertex= NULL;
+    qh tracevertex= nullptr;
   qh_removevertex (vertex);
   qh_setfree (&vertex->neighbors);
   qh_memfree(vertex, sizeof(vertexT));
@@ -4523,7 +4523,7 @@ vertexT *qh_isvertex (pointT *point, setT *vertices) {
     if (vertex->point == point)
       return vertex;
   }
-  return NULL;
+  return nullptr;
 } /* isvertex */
 
 
@@ -4572,7 +4572,7 @@ returns:
     first neighbor of visible facet is corresponding new facet
 */
 vertexT *qh_makenewfacets (pointT *point /*visible_list*/) {
-  facetT *visible, *newfacet= NULL, *newfacet2= NULL, *neighbor, **neighborp;
+  facetT *visible, *newfacet= nullptr, *newfacet2= nullptr, *neighbor, **neighborp;
   vertexT *apex;
   int numnew=0;
 
@@ -4600,7 +4600,7 @@ vertexT *qh_makenewfacets (pointT *point /*visible_list*/) {
       if (!newfacet)
         zinc_(Zinsidevisible);
       SETfirst_(visible->neighbors)= newfacet;
-      SETsecond_(visible->neighbors)= NULL;
+      SETsecond_(visible->neighbors)= nullptr;
     }
   }
   trace1((qh ferr, "qh_makenewfacets: created %d new facets from point p%d to horizon\n",
@@ -4631,7 +4631,7 @@ returns:
 facetT *qh_makenew_nonsimplicial (facetT *visible, vertexT *apex, int *numnew) {
   void **freelistp;
   ridgeT *ridge, **ridgep;
-  facetT *neighbor, *newfacet= NULL;
+  facetT *neighbor, *newfacet= nullptr;
   setT *vertices;
   boolT toporient = False;
 
@@ -4680,7 +4680,7 @@ facetT *qh_makenew_nonsimplicial (facetT *visible, vertexT *apex, int *numnew) {
     neighbor->seen= True;        
   } /* for each ridge */
   if (!qh ONLYgood)
-    SETfirst_(visible->ridges)= NULL;
+    SETfirst_(visible->ridges)= nullptr;
   return newfacet;
 } /* makenew_nonsimplicial */
 
@@ -4694,7 +4694,7 @@ returns:
     neighbors between newfacet and horizon
 */
 facetT *qh_makenew_simplicial (facetT *visible, vertexT *apex, int *numnew) {
-  facetT *neighbor, **neighborp, *newfacet= NULL;
+  facetT *neighbor, **neighborp, *newfacet= nullptr;
   setT *vertices;
   boolT flip, toporient;
   int horizonskip, visibleskip;
@@ -4879,7 +4879,7 @@ void qh_matchneighbor (facetT *newfacet, int newskip, int hashsize, int *hashcou
         goto LABELnexthash;
       else if (matchfacet == qh_DUPLICATEridge) {
         duplicated= True;
-        matchfacet= NULL;
+        matchfacet= nullptr;
       }else if (ismatch && !matchfacet && !duplicated) {
         SETelem_(facet->neighbors, skip)= newfacet;
         SETelem_(newfacet->neighbors, newskip)= facet;
@@ -4967,7 +4967,7 @@ returns:
 notes:
   do not allocate memory after hash_table (need to free it cleanly)
 */
-void qh_matchnewfacets (void) {
+void qh_matchnewfacets () {
   int numnew=0, numfree= 0, hashcount=0, newskip, nth=0;
   facetT *newfacet, *neighbor, **neighborp, *facet;
   int facet_i, facet_n, dim= qh hull_dim, hashsize;
@@ -4983,7 +4983,7 @@ void qh_matchnewfacets (void) {
       memset ((char *)&neighbors->e[1], 0, dim * sizeof(void *));
     }    
     if (qh MERGING)
-      qh_checkflipped (newfacet, NULL, qh_ALL);
+      qh_checkflipped (newfacet, nullptr, qh_ALL);
   }
   if (qh FORCEoutput && !qh MERGING)
     qh_checkflipped_all (qh newfacet_list);  /* prints warnings for flipped */
@@ -5069,7 +5069,7 @@ returns:
 */
 boolT qh_matchvertices (int firstindex, setT *verticesA, int skipA, 
        setT *verticesB, int *skipB, boolT *same) {
-  vertexT **elemAp, **elemBp, **skipBp=NULL, **skipAp;
+  vertexT **elemAp, **elemBp, **skipBp=nullptr, **skipAp;
 
   elemAp= SETelemaddr_(verticesA, firstindex, vertexT);
   elemBp= SETelemaddr_(verticesB, firstindex, vertexT);
@@ -5120,7 +5120,7 @@ ridgeT *qh_nextridge3d (ridgeT *atridge, facetT *facet, vertexT **vertexp) {
       return ridge;
     }
   }
-  return NULL;
+  return nullptr;
 } /* nextridge3d */
 
   
@@ -5130,8 +5130,8 @@ returns:
     all fields initialized or cleared (NULL)
     preallocates neighbors
 */
-facetT *qh_newfacet(void) {
-  facetT *facet = NULL;
+facetT *qh_newfacet() {
+  facetT *facet = nullptr;
   void **freelistp;
   
   facetT_qh_memalloc_(sizeof(facetT), freelistp, facet);
@@ -5184,8 +5184,8 @@ int qh_newhashtable(int newsize) {
 /*----------------------------------------
 -newridge- creates and allocates space for a ridge
 */
-ridgeT *qh_newridge(void) {
-  ridgeT *ridge = NULL;
+ridgeT *qh_newridge() {
+  ridgeT *ridge = nullptr;
   void **freelistp;
 
   ridgeT_qh_memalloc_(sizeof(ridgeT), freelistp, ridge);
@@ -5229,13 +5229,13 @@ vertexT *qh_newvertex(pointT *point) {
 pointT *qh_point (int id) {
 
   if (id < 0)
-    return NULL;
+    return nullptr;
   if (id < qh num_points)
     return ((pointT *)((unsigned long)qh first_point+(unsigned long)((id)*qh normal_size)));
   id -= qh num_points;
   if (id < qh_setsize (qh other_points))
     return (pointT *)SETelem_(qh other_points, id);
-  return NULL;
+  return nullptr;
 } /* point */
   
 /*-------------------------------------------------
@@ -5260,7 +5260,7 @@ void qh_point_add (setT *set, pointT *point, void *elem) {
   NULL if no facet for point (inside)
      this will include qh GOODpointp
 */
-setT *qh_pointfacet (void /*qh facet_list*/) {
+setT *qh_pointfacet ( /*qh facet_list*/) {
   int numpoints= qh num_points + qh_setsize (qh other_points);
   setT *facets;
   facetT *facet;
@@ -5309,7 +5309,7 @@ int qh_pointid (pointT *point) {
   NULL if no vertex for point
      this will include qh GOODpointp
 */
-setT *qh_pointvertex (void /*qh facet_list*/) {
+setT *qh_pointvertex ( /*qh facet_list*/) {
   int numpoints= qh num_points + qh_setsize (qh other_points);
   setT *vertices;
   vertexT *vertex;
@@ -5390,7 +5390,7 @@ void qh_printhashtable(FILE *fp) {
 /*-------------------------------------------------
 -printlists- print out facet and vertex list for debugging (without 'f/v' tags)
 */
-void qh_printlists (void) {
+void qh_printlists () {
   facetT *facet;
   vertexT *vertex;
   
@@ -5425,7 +5425,7 @@ void qh_removefacet(facetT *facet) {
     next->previous= previous;
   }else {  /* 1st facet in qh facet_list */
     qh facet_list= next;
-    qh facet_list->previous= NULL;
+    qh facet_list->previous= nullptr;
   }
   qh num_facets--;
   trace4((qh ferr, "qh_removefacet: remove f%d from facet_list\n", facet->id));
@@ -5448,7 +5448,7 @@ void qh_removevertex(vertexT *vertex) {
     next->previous= previous;
   }else {  /* 1st vertex in qh vertex_list */
     qh vertex_list= vertex->next;
-    qh vertex_list->previous= NULL;
+    qh vertex_list->previous= nullptr;
   }
   qh num_vertices--;
   trace4((qh ferr, "qh_removevertex: remove v%d from vertex_list\n", vertex->id));
@@ -5502,7 +5502,7 @@ setT *qh_vertexintersect_new (setT *vertexsetA,setT *vertexsetB) {
 returns:
   sets qh VERTEXneighbors, qh_addpoint() will maintain them
 */
-void qh_vertexneighbors (void /*qh facet_list*/) {
+void qh_vertexneighbors ( /*qh facet_list*/) {
   facetT *facet;
   vertexT *vertex, **vertexp;
 
@@ -5775,7 +5775,7 @@ vertexT *qh_find_newvertex (vertexT *oldvertex, setT *vertices, setT *ridges) {
   if (!qh_setsize (vertices)) {
     trace4((qh ferr, "qh_find_newvertex: vertices not in ridges for v%d\n",
 	    oldvertex->id));
-    return NULL;
+    return nullptr;
   }
   qsort (SETaddr_(vertices, vertexT), qh_setsize (vertices),
 	        sizeof (vertexT *), qh_comparevisit);
@@ -5848,7 +5848,7 @@ void qh_findbest_test (boolT testcentrum, facetT *facet, facetT *neighbor,
   avoids merging old into new
 */
 facetT *qh_findbestneighbor(facetT *facet, realT *distp, realT *mindistp, realT *maxdistp) {
-  facetT *neighbor, **neighborp, *bestfacet= NULL;
+  facetT *neighbor, **neighborp, *bestfacet= nullptr;
   ridgeT *ridge, **ridgep;
   boolT nonconvex= True, testcentrum= False;
   int size= qh_setsize (facet->vertices);   
@@ -5902,7 +5902,7 @@ void qh_flippedmerges(facetT *facetlist) {
   trace2((qh ferr, "qh_flippedmerges: begin\n"));
   FORALLfacet_(facetlist) {
     if (facet->flipped) 
-      qh_appendmergeset (facet, facet, NULL);
+      qh_appendmergeset (facet, facet, nullptr);
   }
   while ((merge= (mergeT *)qh_setdellast (qh facet_mergeset))) {
     if (merge->angle >= qh_ANGLEdegen) {  /* and qh_ANGLEredundant */
@@ -5919,7 +5919,7 @@ void qh_flippedmerges(facetT *facetlist) {
     neighbor= qh_findbestneighbor (facet1, &dist, &mindist, &maxdist);
     trace0((qh ferr, "qh_flippedmerges: merge flipped f%d into f%d dist %2.2g\n",
       facet1->id, neighbor->id, dist));
-    qh_mergefacet (facet1, neighbor, &mindist, &maxdist, NULL);
+    qh_mergefacet (facet1, neighbor, &mindist, &maxdist, nullptr);
     nummerge++;
     if (qh PRINTstatistics) {
       zinc_(Zflipped);
@@ -5974,13 +5974,13 @@ void qh_forcedmerges(facetT *facetlist) {
 	}
         if (neighbor->seen && facet->seen
 	&& !qh_setin (neighbor->neighbors, facet)) {  /* qh_MERGEridge */
-	  merge= qh_appendmergeset (facet, neighbor, NULL);
+	  merge= qh_appendmergeset (facet, neighbor, nullptr);
 	  merge->mergeridge= True;
 	}
 	if ((int)neighbor->visitid == qh visit_id)
           continue;
 	if (neighbor->flipped && facet->flipped)
-          qh_appendmergeset (facet, neighbor, NULL);
+          qh_appendmergeset (facet, neighbor, nullptr);
       }
     }
   }
@@ -6016,9 +6016,9 @@ void qh_forcedmerges(facetT *facetlist) {
       trace0((qh ferr, "qh_forcedmerges: duplicate ridge with a flipped facet for f%d and f%d\n",
 	      facet1->id, facet2->id));
       if (facet1->flipped)     /* delay until qh_flippedmerges */
-	qh_mergefacet (facet2, facet1, NULL, NULL, NULL);
+	qh_mergefacet (facet2, facet1, nullptr, nullptr, nullptr);
       else
-	qh_mergefacet (facet1, facet2, NULL, NULL, NULL);
+	qh_mergefacet (facet1, facet2, nullptr, nullptr, nullptr);
       zinc_(Zmergeflip);
     }else {
       dist1= qh_getdistance (facet1, facet2, &mindist1, &maxdist1);
@@ -6026,10 +6026,10 @@ void qh_forcedmerges(facetT *facetlist) {
       trace0((qh ferr, "qh_forcedmerges: duplicate ridge between f%d and f%d, dist %2.2g and reverse dist %2.2g\n",
 	      facet1->id, facet2->id, dist1, dist2));
       if (dist1 < dist2) 
-	qh_mergefacet (facet1, facet2, &mindist1, &maxdist1, NULL);
+	qh_mergefacet (facet1, facet2, &mindist1, &maxdist1, nullptr);
       else {
 	dist1= dist2;
-	qh_mergefacet (facet2, facet1, &mindist2, &maxdist2, NULL);
+	qh_mergefacet (facet2, facet1, &mindist2, &maxdist2, nullptr);
       }
       nummerge++;
       if (qh PRINTstatistics) {
@@ -6057,7 +6057,7 @@ void qh_forcedmerges(facetT *facetlist) {
       zinc_(Zmergeflip);
       trace3((qh ferr, "qh_forcedmerges: merge flipped facets f%d and f%d\n",
 	      facet1->id, facet2->id));
-      qh_mergefacet (facet1, facet2, NULL, NULL, NULL);
+      qh_mergefacet (facet1, facet2, nullptr, nullptr, nullptr);
       numflip++;
     }
   }
@@ -6235,7 +6235,7 @@ ridgeT *qh_hashridge_find (setT *hashtable, int hashsize, ridgeT *ridge,
   }
   if (!*hashslot)
     *hashslot= hash;
-  return NULL;
+  return nullptr;
 } /* hashridge_find */
 
 
@@ -6374,14 +6374,14 @@ boolT qh_merge_degenredundant (facetT *facet1, facetT *facet2, realT *angle) {
     *angle= merge->angle;
     qh_memfree (merge, sizeof(mergeT));
     if (facet1->visible || facet2->visible)
-      facet1= NULL;
+      facet1= nullptr;
   }
   if (!facet1) 
     return False;
   if (*angle == qh_ANGLEredundant) {
     trace2((qh ferr, "qh_merge_degenredundant: facet f%d is contained in f%d, will merge\n",
 	    facet1->id, facet2->id));
-    qh_mergefacet(facet1, facet2, NULL, NULL, angle);
+    qh_mergefacet(facet1, facet2, nullptr, nullptr, angle);
     qh_newmerge_(facet2);
     zinc_(Zneighbor);
   }else if (*angle == qh_ANGLEdegen) {   /* other merges may have fixed */
@@ -6430,7 +6430,7 @@ returns:
 notes:
   numdegenredun also counts degen facets that become ok
 */
-void qh_merge_nonconvex (void /*qh newfacet_list*/) {
+void qh_merge_nonconvex ( /*qh newfacet_list*/) {
   facetT *bestfacet, *neighbor, *facet1, *facet2;
   facetT *bestneighbor;
   mergeT *merge;
@@ -6634,7 +6634,7 @@ void qh_mergefacet(facetT *facet1, facetT *facet2, realT *mindist, realT *maxdis
 
   if (facet2->center && qh hull_dim == 2) {  /* only two vertices */
     qh_memfree (facet2->center, qh center_size);
-    facet2->center= NULL;
+    facet2->center= nullptr;
   }
   qh_mergeneighbors(facet1, facet2);
   FOREACHridge_(facet1->ridges)
@@ -6908,13 +6908,13 @@ setT *qh_neighbor_intersections (vertexT *vertex) {
 
   FOREACHneighbor_(vertex) {
     if (neighbor->simplicial)
-      return NULL;
+      return nullptr;
   }
   neighborA= (facetT *)SETfirst_(vertex->neighbors);
   neighborB= (facetT *)SETsecond_(vertex->neighbors);
   zinc_(Zintersectnum);
   if (!neighborA)
-    return NULL;
+    return nullptr;
   if (!neighborB)
     intersect= qh_setcopy (neighborA->vertices, 0);
   else
@@ -6928,7 +6928,7 @@ setT *qh_neighbor_intersections (vertexT *vertex) {
       if (!SETfirst_(intersect)) {
         zinc_(Zintersectfail);
         qh_settempfree (&intersect);
-        return NULL;
+        return nullptr;
       }
     }
   }
@@ -6946,7 +6946,7 @@ returns:
   vertices are renamed if possible
   centrum's reset for small (qh_MAXnewcentrum), newly merged or renamed facets
 */
-boolT qh_reducevertices_centrums (void) {
+boolT qh_reducevertices_centrums () {
   int numshare=0, numrename= 0, numcentrums= 0;
   int numdegenredun= 0;
   facetT *newfacet;
@@ -6960,7 +6960,7 @@ boolT qh_reducevertices_centrums (void) {
     return False;
   }
  LABELrestart:
-  while (qh_merge_degenredundant (NULL, NULL, &angle))
+  while (qh_merge_degenredundant (nullptr, nullptr, &angle))
     numdegenredun++;
   FORALLnew_facets {
     if (qh_isnewmerge_(newfacet)) /* this is seldom needed */
@@ -6983,7 +6983,7 @@ boolT qh_reducevertices_centrums (void) {
       vertex->delridge= False;
       if (qh hull_dim >= 4 && qh_redundant_vertex (vertex)) {
 	numrename++;
-	if (qh_merge_degenredundant (NULL, NULL, &angle)) {
+	if (qh_merge_degenredundant (nullptr, nullptr, &angle)) {
 	  numdegenredun++;
 	  goto LABELrestart;
 	}
@@ -6996,7 +6996,7 @@ boolT qh_reducevertices_centrums (void) {
       if (newfacet->center
       && qh_setsize (newfacet->vertices) <= qh hull_dim + qh_MAXnewcentrum) {
 	qh_memfree (newfacet->center, qh center_size);
-	newfacet->center= NULL;
+	newfacet->center= nullptr;
 	newfacet->tested= False;
 	FOREACHridge_(newfacet->ridges)
 	  ridge->tested= False;
@@ -7020,14 +7020,14 @@ returns:
   doesn't change vertex->neighbors or create redundant facets
 */
 vertexT *qh_redundant_vertex (vertexT *vertex) {
-  vertexT *newvertex= NULL;
+  vertexT *newvertex= nullptr;
   setT *vertices, *ridges;
 
   trace3((qh ferr, "qh_redundant_vertex: check if v%d can be renamed\n", vertex->id));  
   if ((vertices= qh_neighbor_intersections (vertex))) {
     ridges= qh_vertexridges (vertex);
     if ((newvertex= qh_find_newvertex (vertex, vertices, ridges)))
-      qh_renamevertex (vertex, newvertex, ridges, NULL, NULL);
+      qh_renamevertex (vertex, newvertex, ridges, nullptr, nullptr);
     qh_settempfree (&ridges);
     qh_settempfree (&vertices);
   }
@@ -7085,7 +7085,7 @@ notes:
   to be difficult to detect, since an exhaustive search is too expensive.
 */
 vertexT *qh_rename_sharedvertex (vertexT *vertex, facetT *facet) {
-  facetT *neighbor, **neighborp, *neighborA= NULL;
+  facetT *neighbor, **neighborp, *neighborA= nullptr;
   setT *vertices, *ridges;
   vertexT *newvertex;
 
@@ -7094,7 +7094,7 @@ vertexT *qh_rename_sharedvertex (vertexT *vertex, facetT *facet) {
     if (neighborA == facet)
       neighborA= (facetT *)SETsecond_(vertex->neighbors);
   }else if (qh hull_dim == 3)
-    return NULL;
+    return nullptr;
   else {
     qh visit_id++;
     FOREACHneighbor_(facet)
@@ -7102,7 +7102,7 @@ vertexT *qh_rename_sharedvertex (vertexT *vertex, facetT *facet) {
     FOREACHneighbor_(vertex) {
       if ((int)neighbor->visitid == qh visit_id) {
         if (neighborA)
-          return NULL;
+          return nullptr;
         neighborA= neighbor;
       }
     }
@@ -7419,7 +7419,7 @@ void qh_appendprint (int format) {
   must match initbuffers()
 */
 
-void qh_freebuffers (void) {
+void qh_freebuffers () {
 
   trace5((qh ferr, "qh_freebuffers: freeing up global memory buffers\n"));
   qh_memfree (qh NEARzero, qh hull_dim * sizeof(realT));
@@ -7433,10 +7433,10 @@ void qh_freebuffers (void) {
   qh_setfree (&qh other_points);
   qh_setfree (&qh del_vertices);
   /* qh facet_mergeset is a temp */
-  qh NEARzero= qh lower_threshold= qh upper_threshold= NULL;
-  qh lower_bound= qh upper_bound= NULL;
-  qh gm_matrix= NULL;
-  qh gm_row= NULL;
+  qh NEARzero= qh lower_threshold= qh upper_threshold= nullptr;
+  qh lower_bound= qh upper_bound= nullptr;
+  qh gm_matrix= nullptr;
+  qh gm_row= nullptr;
   if (qh line)
     free (qh line);
   if (qh first_point && qh POINTSmalloc)
@@ -7466,7 +7466,7 @@ void qh_freeqhull (boolT allmem) {
         qh_delvertex (vertex);
       else {
         qh_memfree (vertex, sizeof(vertexT));
-        qh vertex_list= NULL;
+        qh vertex_list= nullptr;
       }
     }
   }else if (qh VERTEXneighbors) {
@@ -7496,7 +7496,7 @@ void qh_freeqhull (boolT allmem) {
         qh_delfacet (facet);
       else {
         qh_memfree (facet, sizeof(facetT));
-        qh facet_list= NULL;
+        qh facet_list= nullptr;
       }
     }
   }else {
@@ -7734,7 +7734,7 @@ void qh_initflags(char *command) {
 	switch(*s++) {
 	case 'b': case 'B':
 	  k= qh_strtol (s, &s);
-	  t= NULL;
+	  t= nullptr;
 	  if (*s == ':' && qh_strtod(++s, &s) == 0.0) {
 	    t= s;            /* need true dimension for memory allocation */
 	    while (*t && !isspace(*t)) {
@@ -7888,7 +7888,7 @@ void qh_initflags(char *command) {
 -initqhull_buffers- initialize global memory buffers
   must match freebuffers()
 */
-void qh_initqhull_buffers (void) {
+void qh_initqhull_buffers () {
   int k;
 
   qh TEMPsize= (qhmem.LASTsize - sizeof (setT))/SETelemsize;
@@ -8068,7 +8068,7 @@ returns:
 notes:
   the user can add up to 10 additional sizes for quick allocation (increase numsizes)
 */
-void qh_initqhull_mem (void) {
+void qh_initqhull_mem () {
   int numsizes;
   int i;
 
@@ -8329,7 +8329,7 @@ int qh_strtol (const char *s, char **endp) {
 returns:
   returns facet_list, numfacets, etc. 
 */
-void qh_qhull (void) {
+void qh_qhull () {
   setT *maxpoints, *vertices;
   facetT *facet;
   int numpart, numoutside, i;
@@ -8500,7 +8500,7 @@ boolT qh_addpoint (pointT *furthest, facetT *facet, boolT checkdist) {
   trace2((qh ferr, "qh_addpoint: added p%d new facets %d new balance %2.2g point balance %2.2g\n",
     qh_pointid (furthest), qh facet_id - qh newfacet_id, newbalance, pbalance));
   qh newfacet_id= qh facet_id;
-  qh newfacet_list= NULL;
+  qh newfacet_list= nullptr;
   return True;
 } /* addpoint */
 
@@ -8511,7 +8511,7 @@ boolT qh_addpoint (pointT *furthest, facetT *facet, boolT checkdist) {
 notes:
   to recover from STOPcone, call qh_deletevisible and qh_clearnewvertices
 */
-void qh_buildhull(void) {
+void qh_buildhull() {
   facetT *facet;
   pointT *furthest;
   vertexT *vertex;
@@ -8638,7 +8638,7 @@ int qh_findgood (facetT *facetlist, int goodhorizon) {
     bestfacet= qh GOODclosest;
     qh_inthresholds (bestfacet->normal, &bestangle);
   }else {
-    bestfacet= NULL;
+    bestfacet= nullptr;
     bestangle= -REALmax;
   }
   FORALLfacet_(facetlist) {
@@ -8711,7 +8711,7 @@ notes:
   this is like findgood but more restrictive
 */
 void qh_findgood_all (facetT *facetlist) {
-  facetT *facet, *bestfacet=NULL;
+  facetT *facet, *bestfacet=nullptr;
   realT angle, bestangle= REALmax;
   int  numgood=0, startgood;
 
@@ -8884,7 +8884,7 @@ void qh_initialhull(setT *vertices) {
   FORALLfacets
     qh_setfacetplane(facet);
   FORALLfacets {
-    if (!qh_checkflipped (facet, NULL, qh_ALL)) {/* due to axis-parallel facet */
+    if (!qh_checkflipped (facet, nullptr, qh_ALL)) {/* due to axis-parallel facet */
       trace1((qh ferr, "qh_initialhull: initial orientation incorrect.  Correct all facets\n"));
       facet->flipped= False;
       FORALLfacets {
@@ -8896,7 +8896,7 @@ void qh_initialhull(setT *vertices) {
   }
   FORALLfacets {
 
-    if (!qh_checkflipped (facet, NULL, (boolT)!qh_ALL)) qhull_fatal(89);
+    if (!qh_checkflipped (facet, nullptr, (boolT)!qh_ALL)) qhull_fatal(89);
 
   }
   zzval_(Zprocessed)= qh hull_dim+1;
@@ -8930,7 +8930,7 @@ setT *qh_initialvertices(int dim, setT *maxpoints, pointT *points, int numpoints
   vertices= qh_settemp (dim + 1);
   simplex= qh_settemp (dim+1);
   if (qh ALLpoints) 
-    qh_maxsimplex (dim, NULL, points, numpoints, &simplex);
+    qh_maxsimplex (dim, nullptr, points, numpoints, &simplex);
   else if (qh RANDOMoutside) {
     while (qh_setsize (simplex) != dim+1) {
       randr= qh_RANDOMint;
@@ -9013,7 +9013,7 @@ pointT *qh_nextfurthest (facetT **visible) {
       return furthest;
     }
   }
-  return NULL;
+  return nullptr;
 } /* nextfurthest */
 
 /*-------------------------------------------------
@@ -9041,14 +9041,14 @@ void qh_partitionall(setT *vertices, pointT *points, int numpoints){
   qh_settruncate (pointset, numpoints);
   FOREACHvertex_(vertices) {
     if ((id= qh_pointid(vertex->point)) >= 0)
-      SETelem_(pointset, id)= NULL;
+      SETelem_(pointset, id)= nullptr;
   }
   id= qh_pointid (qh GOODpointp);
   if (id >=0 && qh STOPcone-1 != id && -qh STOPpoint-1 != id)
-    SETelem_(pointset, id)= NULL;
+    SETelem_(pointset, id)= nullptr;
   if (qh GOODvertexp && qh ONLYgood && !qh MERGING) { /* matches qhull()*/
     if ((id= qh_pointid(qh GOODvertexp)) >= 0)
-      SETelem_(pointset, id)= NULL;
+      SETelem_(pointset, id)= nullptr;
   }
   if (!qh BESToutside) {
     zval_(Ztotpartition)= qh num_points - qh hull_dim - 1; /*misses GOOD... */
@@ -9057,7 +9057,7 @@ void qh_partitionall(setT *vertices, pointT *points, int numpoints){
     FORALLfacets {
       size= point_end/(remaining--) + 100;
       facet->outsideset= qh_setnew (size);
-      bestpoint= NULL;
+      bestpoint= nullptr;
       point_end= 0;
       FOREACHpoint_i_(pointset) {
         if (point) {
@@ -9246,7 +9246,7 @@ void qh_partitionvisible(/*visible_list*/ boolT allpoints, int *numoutside) {
         if (allpoints)
           qh_partitionpoint (point, newfacet);
         else
-          qh_partitioncoplanar (point, newfacet, NULL);
+          qh_partitioncoplanar (point, newfacet, nullptr);
       }
     }
   }
@@ -9258,7 +9258,7 @@ void qh_partitionvisible(/*visible_list*/ boolT allpoints, int *numoutside) {
       if (allpoints)
         qh_partitionpoint (vertex->point, qh newfacet_list);
       else
-        qh_partitioncoplanar (vertex->point, qh newfacet_list, NULL);
+        qh_partitioncoplanar (vertex->point, qh newfacet_list, nullptr);
     }
   }
   trace1((qh ferr,"qh_partitionvisible: partitioned %d points from outsidesets and %d points from coplanarsets\n", *numoutside, coplanar));

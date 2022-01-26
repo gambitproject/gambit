@@ -53,13 +53,12 @@ Basis::Basis(int first, int last, int firstlabel, int lastlabel)
 }
 
 Basis::Basis(const Basis &bas)
-: basis(bas.basis), cols( bas.cols ), slacks( bas.slacks ),
-  colBlocked(bas.colBlocked), rowBlocked(bas.rowBlocked), 
-  IsBasisIdent(bas.IsBasisIdent)
-{ }
+ 
+  
+= default;
 
 Basis::~Basis()
-{ }
+= default;
 
 Basis& Basis::operator=(const Basis &orig)
 {

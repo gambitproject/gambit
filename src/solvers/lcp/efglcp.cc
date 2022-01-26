@@ -42,7 +42,7 @@ public:
 
   bool AddBFS(const linalg::LemkeTableau<T> &);
 
-  int EquilibriumCount(void) const { return m_equilibria.size(); }
+  int EquilibriumCount() const { return m_equilibria.size(); }
 };
 
 template <class T> bool 

@@ -70,11 +70,11 @@ public:
   }
 
   void reset(T *p = 0)       { shared_ptr(p).swap(*this); }
-  T &operator*(void) const   { return *m_ptr; }
-  T *operator->(void) const  { return m_ptr; }
-  T *get(void) const         { return m_ptr; }
-  long use_count(void) const { return *m_count; }
-  bool unique(void) const    { return (*m_count == 1); }
+  T &operator*() const   { return *m_ptr; }
+  T *operator->() const  { return m_ptr; }
+  T *get() const         { return m_ptr; }
+  long use_count() const { return *m_count; }
+  bool unique() const    { return (*m_count == 1); }
   void swap(shared_ptr<T> & other)  // never throws
   {
     std::swap(m_ptr, other.m_ptr);
@@ -82,7 +82,7 @@ public:
   }
 
 private:
-  static unsigned *nil(void) {
+  static unsigned *nil() {
     static unsigned nil_counter(1);
     return &nil_counter;
   }
@@ -109,7 +109,7 @@ inline bool operator!=(const shared_ptr<T> &a, const shared_ptr<U> &b)
 // implementation, until a full migration to C++11 is done.
 template <class T> class weak_ptr {
 public:
-  weak_ptr(void) : m_ptr(0), m_count(shared_ptr<T>::nil())  { }
+  weak_ptr() : m_ptr(0), m_count(shared_ptr<T>::nil())  { }
   weak_ptr(const shared_ptr<T> &r) :
     m_ptr(r.m_ptr), m_count(r.m_count)
       { }
@@ -126,10 +126,10 @@ public:
     return *this;
   }
   
-  shared_ptr<T> lock(void) const { return shared_ptr<T>(*this); }
+  shared_ptr<T> lock() const { return shared_ptr<T>(*this); }
 
-  long use_count(void) const { return *m_count; }
-  bool expired(void) const   { return *m_count == 0; }
+  long use_count() const { return *m_count; }
+  bool expired() const   { return *m_count == 0; }
 
   void swap(weak_ptr<T> &other)  // never throws
   {

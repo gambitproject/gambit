@@ -45,7 +45,7 @@ private:
   void OnEndProcess(wxProcessEvent &);
   void OnSave(wxCommandEvent &);
 
-  void Start(void);
+  void Start();
 
 public:
   gbtLogitBehavDialog(wxWindow *p_parent, gbtGameDocument *p_doc);

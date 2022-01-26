@@ -39,7 +39,7 @@ template <class T> Vector<T>::Vector(const Vector<T> &V)
   : Array<T>(V) 
 { }
 
-template <class T> Vector<T>::~Vector()   { }
+template <class T> Vector<T>::~Vector()   = default;
 
 template <class T> Vector<T>& Vector<T>::operator=(const Vector<T>& V)
 {
@@ -122,7 +122,7 @@ Vector<T>::operator-=(const Vector<T>& V)
   return (*this);
 }
 
-template <class T> Vector<T> Vector<T>::operator-(void)
+template <class T> Vector<T> Vector<T>::operator-()
 {
   Vector<T> tmp(this->mindex,this->maxdex);
   for(int i=this->mindex; i<=this->maxdex; i++)
@@ -183,7 +183,7 @@ template <class T> bool Vector<T>::operator==(T c) const
   return true;
 }
 
-template <class T> T Vector<T>::NormSquared(void) const
+template <class T> T Vector<T>::NormSquared() const
 {
   T answer = (T)0;
   for (int i = 1; i <= this->Length(); i++)

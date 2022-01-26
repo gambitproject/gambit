@@ -42,7 +42,7 @@ public:
   class BadPivot : public Exception  {
   public:
     virtual ~BadPivot() throw() { }
-    const char *what(void) const throw() { return "Bad Pivot in BaseTableau"; }
+    const char *what() const throw() { return "Bad Pivot in BaseTableau"; }
   };
 
   virtual ~BaseTableau() { }
@@ -103,9 +103,9 @@ public:
   int MinCol() const;
   int MaxCol() const;
 
-  Basis & GetBasis(void);
-  const Matrix<T> & Get_A(void) const;
-  const Vector<T> & Get_b(void) const;
+  Basis & GetBasis();
+  const Matrix<T> & Get_A() const;
+  const Vector<T> & Get_b() const;
   
   bool Member(int i) const;
   int Label(int i) const;   // return variable in i'th position of Tableau
@@ -122,8 +122,8 @@ public:
   void GetColumn( int , Vector<T> &) const;  // raw column
   void GetBasis( Basis & ) const; // return Basis for current Tableau
 
-  BFS<T> GetBFS1(void) const; 
-  BFS<T> GetBFS(void);  // used in lpsolve for some reason
+  BFS<T> GetBFS1() const; 
+  BFS<T> GetBFS();  // used in lpsolve for some reason
 
   virtual bool CanPivot(int outgoing, int incoming) const = 0;
   virtual void Pivot(int outrow,int col) = 0; // pivot -- outgoing is row, incoming is column

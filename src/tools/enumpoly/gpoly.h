@@ -77,7 +77,7 @@ private:
   // std::string input parser functions
   void      String_Term(T          nega);
   T         String_Coeff(T       nega);
-  int       String_GetPow(void);
+  int       String_GetPow();
   void      String_VarAndPow(Gambit::Array<int> &PowArray);
   void      GetChar();
   // Is the string a valid polynomial?
@@ -139,8 +139,8 @@ public:
   // Information:
   //-------------
 
-  const gSpace*       GetSpace(void)                       const; 
-  const term_order*   GetOrder(void)                       const; 
+  const gSpace*       GetSpace()                       const; 
+  const term_order*   GetOrder()                       const; 
   int                 Dmnsn()                              const;
   bool                IsZero()                             const;
   int                 DegreeOfVar(int var_no)              const;

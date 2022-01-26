@@ -36,10 +36,10 @@ class BagentPureStrategyProfileRep : public PureStrategyProfileRep {
 public:
   BagentPureStrategyProfileRep(const Game &p_game)
     : PureStrategyProfileRep(p_game) { }
-  virtual PureStrategyProfileRep *Copy(void) const
+  virtual PureStrategyProfileRep *Copy() const
   {  return new BagentPureStrategyProfileRep(*this); }
   virtual void SetStrategy(const GameStrategy &);
-  virtual GameOutcome GetOutcome(void) const
+  virtual GameOutcome GetOutcome() const
   { throw UndefinedException(); }
   virtual void SetOutcome(GameOutcome p_outcome)
   { throw UndefinedException(); }
@@ -109,7 +109,7 @@ GameBagentRep::GameBagentRep(agg::BAGG *_baggPtr)
   }
 }
 
-Game GameBagentRep::Copy(void) const
+Game GameBagentRep::Copy() const
 {
   std::ostringstream os;
   WriteBaggFile(os);
@@ -121,7 +121,7 @@ Game GameBagentRep::Copy(void) const
 //                 GameBagentRep: Dimensions of the game
 //------------------------------------------------------------------------
 
-Array<int> GameBagentRep::NumStrategies(void) const
+Array<int> GameBagentRep::NumStrategies() const
 {
   Array<int> ns;
   for (int pl = 1; pl <= NumPlayers(); pl++) {
@@ -130,7 +130,7 @@ Array<int> GameBagentRep::NumStrategies(void) const
   return ns;
 }
 
-int GameBagentRep::MixedProfileLength(void) const 
+int GameBagentRep::MixedProfileLength() const 
 {
   int res = 0;
   for (int pl = 1; pl <= NumPlayers(); pl++) {
@@ -140,7 +140,7 @@ int GameBagentRep::MixedProfileLength(void) const
 }
 
 
-PureStrategyProfile GameBagentRep::NewPureStrategyProfile(void) const
+PureStrategyProfile GameBagentRep::NewPureStrategyProfile() const
 {
   return PureStrategyProfile(new BagentPureStrategyProfileRep(const_cast<GameBagentRep *>(this)));
 }

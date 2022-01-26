@@ -67,12 +67,12 @@ private:
 public:
   HeuristicPolEnumModule(const StrategySupportProfile &, int p_stopAfter);
   
-  int PolEnum(void);
+  int PolEnum();
   
-  long NumEvals(void) const;
-  double Time(void) const;
+  long NumEvals() const;
+  double Time() const;
   
-  const Gambit::List<MixedStrategyProfile<double> > &GetSolutions(void) const;
+  const Gambit::List<MixedStrategyProfile<double> > &GetSolutions() const;
   Vector<double> SolVarsFromMixedStrategyProfile(const MixedStrategyProfile<double> &) const;
 
   const int PolishKnownRoot(Vector<double> &) const;

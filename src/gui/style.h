@@ -91,72 +91,72 @@ private:
 
 public:
   // Lifecycle
-  gbtStyle(void);
+  gbtStyle();
   
   // Node styling
-  int NodeSize(void) const { return m_nodeSize; }
+  int NodeSize() const { return m_nodeSize; }
   void SetNodeSize(int p_nodeSize) { m_nodeSize = p_nodeSize; }
 
-  int TerminalSpacing(void) const { return m_terminalSpacing; }
+  int TerminalSpacing() const { return m_terminalSpacing; }
   void SetTerminalSpacing(int p_spacing) { m_terminalSpacing = p_spacing; }
 
-  int ChanceToken(void) const { return m_chanceToken; }
+  int ChanceToken() const { return m_chanceToken; }
   void SetChanceToken(int p_token) { m_chanceToken = p_token; }
 
-  int PlayerToken(void) const { return m_playerToken; }
+  int PlayerToken() const { return m_playerToken; }
   void SetPlayerToken(int p_token) { m_playerToken = p_token; }
 
-  int TerminalToken(void) const { return m_terminalToken; }
+  int TerminalToken() const { return m_terminalToken; }
   void SetTerminalToken(int p_token) { m_terminalToken = p_token; }
 
-  bool RootReachable(void) const { return m_rootReachable; }
+  bool RootReachable() const { return m_rootReachable; }
   void SetRootReachable(bool p_reachable) { m_rootReachable = p_reachable; }
 
 
   // Branch styling
-  int BranchLength(void) const { return m_branchLength; }
+  int BranchLength() const { return m_branchLength; }
   void SetBranchLength(int p_length) { m_branchLength = p_length; }
 
-  int TineLength(void) const { return m_tineLength; }
+  int TineLength() const { return m_tineLength; }
   void SetTineLength(int p_length) { m_tineLength = p_length; }
 
-  int BranchStyle(void) const { return m_branchStyle; }
+  int BranchStyle() const { return m_branchStyle; }
   void SetBranchStyle(int p_style) { m_branchStyle = p_style; }
 
-  int BranchLabels(void) const { return m_branchLabels; }
+  int BranchLabels() const { return m_branchLabels; }
   void SetBranchLabels(int p_labels) { m_branchLabels = p_labels; }
 
 
   // Information set styling
-  int InfosetConnect(void) const { return m_infosetConnect; }
+  int InfosetConnect() const { return m_infosetConnect; }
   void SetInfosetConnect(int p_connect) { m_infosetConnect = p_connect; }
 
-  int InfosetJoin(void) const { return m_infosetJoin; }
+  int InfosetJoin() const { return m_infosetJoin; }
   void SetInfosetJoin(int p_join) { m_infosetJoin = p_join; }
 
 
   // Legends
-  int NodeAboveLabel(void) const { return m_nodeAboveLabel; }
+  int NodeAboveLabel() const { return m_nodeAboveLabel; }
   void SetNodeAboveLabel(int p_label) { m_nodeAboveLabel = p_label; }
 
-  int NodeBelowLabel(void) const { return m_nodeBelowLabel; }
+  int NodeBelowLabel() const { return m_nodeBelowLabel; }
   void SetNodeBelowLabel(int p_label) { m_nodeBelowLabel = p_label; }
 
-  int BranchAboveLabel(void) const { return m_branchAboveLabel; }
+  int BranchAboveLabel() const { return m_branchAboveLabel; }
   void SetBranchAboveLabel(int p_label) { m_branchAboveLabel = p_label; }
 
-  int BranchBelowLabel(void) const { return m_branchBelowLabel; }
+  int BranchBelowLabel() const { return m_branchBelowLabel; }
   void SetBranchBelowLabel(int p_label) { m_branchBelowLabel = p_label; }
 
   // Fonts 
-  const wxFont &GetFont(void) const { return m_font; }
+  const wxFont &GetFont() const { return m_font; }
   void SetFont(const wxFont &p_font) { m_font = p_font; }
 
   // Colors
-  const wxColour &ChanceColor(void) const { return m_chanceColor; }
+  const wxColour &ChanceColor() const { return m_chanceColor; }
   void SetChanceColor(const wxColour &p_color) { m_chanceColor = p_color; }
 
-  const wxColour &TerminalColor(void) const { return m_terminalColor; }
+  const wxColour &TerminalColor() const { return m_terminalColor; }
   void SetTerminalColor(const wxColour &p_color) { m_terminalColor = p_color; }
 
   const wxColour &GetPlayerColor(int pl) const;
@@ -164,31 +164,31 @@ public:
     { m_playerColors[pl] = p_color; }
 
   // Decimals
-  int NumDecimals(void) const { return m_numDecimals; }
+  int NumDecimals() const { return m_numDecimals; }
   void SetNumDecimals(int p_decimals) { m_numDecimals = p_decimals; }
 
   // Reset to the "factory" defaults
-  void SetDefaults(void);
+  void SetDefaults();
 
   /// @name Reading and writing XML
   //@{
   /// Get the color settings as an XML entry
-  std::string GetColorXML(void) const;
+  std::string GetColorXML() const;
   /// Set the color settings from an XML entry
   void SetColorXML(TiXmlNode *p_node);
 
   /// Get the font settings as an XML entry
-  std::string GetFontXML(void) const;
+  std::string GetFontXML() const;
   /// Set the font settings from an XML entry
   void SetFontXML(TiXmlNode *p_node);
 
   /// Get the layout settings as an XML entry
-  std::string GetLayoutXML(void) const;
+  std::string GetLayoutXML() const;
   /// Set the layout settings from an XML entry
   void SetLayoutXML(TiXmlNode *p_node);
 
   /// Get the label settings as an XML entry
-  std::string GetLabelXML(void) const;
+  std::string GetLabelXML() const;
   /// Set the label settings from an XML entry
   void SetLabelXML(TiXmlNode *p_node);
   //@}

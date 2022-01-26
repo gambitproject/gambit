@@ -3184,7 +3184,7 @@ Pmatrix Pmatrix_new(int r, int c)
     MNcols(V) = c;
     for (i = 1; i <= r; i++) {
 	for (j = 1; j <= c; j++)
-	    *Mref(V, i, j)=0;
+	    *Mref(V, i, j)=nullptr;
     }
     return V;
 }
@@ -3193,13 +3193,13 @@ void Pmatrix_free(Pmatrix V)
 {
     int i, j;
 
-    if (V != 0 && V->coords != 0) {
+    if (V != nullptr && V->coords != nullptr) {
 	for (i = 1; i <= Mrows(V); i++)
 	    for (j = 1; j <= Mcols(V); j++)
 		freeP(*Mref(V, i, j));
 	mem_free((char *) (V->coords));
     }
-    if (V != 0)
+    if (V != nullptr)
 	mem_free((char *) (V));
 }
 
@@ -3215,8 +3215,8 @@ void Pmatrix_free(Pmatrix V)
 Pmatrix Pmatrix_resize(Pmatrix R, int r, int c)
 {
 
-    if (R == 0 || Mstore(R) < (r * c)) {
-        if (R != 0) Pmatrix_free(R);
+    if (R == nullptr || Mstore(R) < (r * c)) {
+        if (R != nullptr) Pmatrix_free(R);
         R = Pmatrix_new(r, c);
     } else {
         Mrows(R) = r;
@@ -3229,7 +3229,7 @@ Pmatrix Pmatrix_resize(Pmatrix R, int r, int c)
 Pmatrix Pmatrix_submat(Pmatrix R, int r, int c)
 {
 
-    if (R == 0 || c > Mcols(R) || r > Mrows(R) * MNcols(R)) {
+    if (R == nullptr || c > Mcols(R) || r > Mrows(R) * MNcols(R)) {
         bad_error("bad subscripts or zero matrix in Pmatrix_submat()");
     } else {
         Mrows(R) = r;
@@ -3247,9 +3247,9 @@ Pmatrix Pmatrix_print(Pmatrix M)
 {
     int i, j;
 
-    if (M == 0) {
+    if (M == nullptr) {
 	printf("<<>>");
-	return 0;
+	return nullptr;
     }
     printf("<");
     for (i = 1; i <= Mrows(M); i++) {
@@ -3356,7 +3356,7 @@ Pvector psys_to_Pvec(psys sys){
  Pvector PV;
  PV=Pvector_new(psys_d(sys));
  FORALL_POLY(sys,
-   tmpp=0;
+   tmpp=nullptr;
    FORALL_MONO(sys,
      tmpm=makeP(Def_Ring);
      *poly_coef(tmpm)=Complex(*psys_coef_real(sys),
@@ -3408,7 +3408,7 @@ Number_of_Monomials=Ires(NV);
 Starting_Monomial[0]=0;
 for(i=0;i<NV;i++){
     Number_of_Monomials[i]=0; ptr=*PMref(P,1,i+1);
-    while(ptr!=0){Number_of_Monomials[i]++; ptr=poly_next(ptr);}
+    while(ptr!=nullptr){Number_of_Monomials[i]++; ptr=poly_next(ptr);}
     Starting_Monomial[i+1]=
               Starting_Monomial[i]+Number_of_Monomials[i];
 }
@@ -3429,7 +3429,7 @@ srand(seed);
 
 for(i=1;i<=NV;i++){                             
     j=1; ptr=*PMref(P,1,i); Edeg(i)=0;
-    while(ptr!=0){
+    while(ptr!=nullptr){
       Hdeg(i,j)=0;
       RCoef(i,j)=(*poly_coef(ptr)).r; 
       ICoef(i,j)=(*poly_coef(ptr)).i; 

@@ -56,7 +56,7 @@ public:
   //@{
   /// Constructor.  By default, a support contains all strategies. 
   BehaviorSupportProfile(const Game &);
-  ~BehaviorSupportProfile() { }
+  ~BehaviorSupportProfile() = default;
 
   //@}
 
@@ -70,7 +70,7 @@ public:
   /// @name General information
   //@{
   /// Returns the game on which the support is defined.
-  Game GetGame(void) const { return m_efg; }
+  Game GetGame() const { return m_efg; }
 
   /// Returns the number of actions in the information set
   int NumActions(const GameInfoset &p_infoset) const
@@ -79,7 +79,7 @@ public:
   { return m_actions[pl][iset].Length(); }
 
   /// Returns the number of actions in the support for all information sets
-  PVector<int> NumActions(void) const;
+  PVector<int> NumActions() const;
 
   /// Returns the action at the specified position in the support
   GameAction GetAction(const GameInfoset &p_infoset, int p_act) const
@@ -95,15 +95,15 @@ public:
   { return (GetIndex(p_action) != 0); }
 
   /// The dimension of a behavior strategy at reachable information sets
-  int NumDegreesOfFreedom(void) const;
+  int NumDegreesOfFreedom() const;
 
   /// Does the information set have at least one active action?
   bool HasActiveActionAt(const GameInfoset &) const;
   /// Do all information sets have at least one active action?
-  bool HasActiveActionsAtAllInfosets(void) const;
+  bool HasActiveActionsAtAllInfosets() const;
 
   /// Total number of sequences 
-  int NumSequences(void) const;
+  int NumSequences() const;
   /// Number of sequences for a player
   int NumSequences(int pl) const;
 
@@ -115,9 +115,9 @@ public:
   bool IsActive(const GameNode &) const;
 
   /// Do all active information sets have actions in the support?
-  bool HasActiveActionsAtActiveInfosets(void) const;
+  bool HasActiveActionsAtActiveInfosets() const;
   /// Do only active information sets have actions in the support?
-  bool HasActiveActionsAtActiveInfosetsAndNoOthers(void) const;
+  bool HasActiveActionsAtActiveInfosetsAndNoOthers() const;
   //@}
 
   /// @name Editing the support
@@ -133,7 +133,7 @@ public:
 
   /// @name Reachability of nodes and information sets
   //@{
-  List<GameNode> ReachableNonterminalNodes(void) const;
+  List<GameNode> ReachableNonterminalNodes() const;
   List<GameNode> ReachableNonterminalNodes(const GameNode &) const;
   /// Sets p_reachable(pl,iset) to 1 if infoset (pl,iset) reachable after p_node
   void ReachableInfosets(const GameNode &p_node, 

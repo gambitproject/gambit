@@ -495,11 +495,11 @@ ActionCursorForSupport::ActionCursorForSupport(const Gambit::BehaviorSupportProf
 
 ActionCursorForSupport::ActionCursorForSupport(
                   const ActionCursorForSupport &ac)
-  : support(ac.support), pl(ac.pl), iset(ac.iset), act(ac.act)
-{}
+   
+= default;
 
 ActionCursorForSupport::~ActionCursorForSupport()
-{}
+= default;
 
 ActionCursorForSupport& 
 ActionCursorForSupport::operator=(const ActionCursorForSupport &rhs)

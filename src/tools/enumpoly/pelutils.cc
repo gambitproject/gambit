@@ -79,16 +79,16 @@ struct node_block_t {
 
 static int N_MALLOC = 0;	/*number of mallocs called from module */
 static int N_FREE = 0;		/*number of frees called from this module */
-static node_block Node_Store = 0;	/*beginning of node storage */
-static node Free_List = 0;	/*top of free node list */
-static local_v Locals_Stack = 0;	/*stack of  declared pointers 
+static node_block Node_Store = nullptr;	/*beginning of node storage */
+static node Free_List = nullptr;	/*top of free node list */
+static local_v Locals_Stack = nullptr;	/*stack of  declared pointers 
 					   into node storage */
 
 
 
 node node_set_ptr(node N, void *v, int tp, int side)
 {
-    if (N == 0)
+    if (N == nullptr)
 	bad_error("null node to node_set_ptr");
     if (side == LEFT) {
 	N->L.ptr = v;
@@ -103,7 +103,7 @@ node node_set_ptr(node N, void *v, int tp, int side)
 
 node node_set_int(node N, int v, int tp, int side)
 {
-    if (N == 0)
+    if (N == nullptr)
 	bad_error("null node to node_set_int");
     if (side == LEFT) {
 	N->L.ival = v;
@@ -119,7 +119,7 @@ node node_set_int(node N, int v, int tp, int side)
 
 node node_set_double(node N, double v, int tp, int side)
 {
-    if (N == 0)
+    if (N == nullptr)
 	bad_error("null node to node_set_double");
     if (side == LEFT) {
 	N->L.dval = v;
@@ -136,7 +136,7 @@ node node_set_double(node N, double v, int tp, int side)
 
 int node_get_int(node N, int side)
 {
-    if (N == 0)
+    if (N == nullptr)
 	bad_error("null node to node_get_int");
     if (side == LEFT)
 	return N->L.ival;
@@ -147,7 +147,7 @@ int node_get_int(node N, int side)
 }
 double node_get_double(node N, int side)
 {
-    if (N == 0)
+    if (N == nullptr)
 	bad_error("null node to node_get_ptr");
     if (side == LEFT)
 	return N->L.dval;
@@ -159,19 +159,19 @@ double node_get_double(node N, int side)
 
 void *node_get_ptr(node N, int side)
 {
-    if (N == 0)
+    if (N == nullptr)
 	bad_error("null node to node_get_ptr");
     if (side == LEFT)
 	return N->L.ptr;
     else if (side == RIGHT)
 	return N->R.ptr;
     bad_error("bad side given in node_get_ptr");
-    return 0;
+    return nullptr;
 }
 
 int node_set_type(node N, int Tp, int side)
 {
-    if (N == 0)
+    if (N == nullptr)
 	bad_error("null node to node_get_type");
     if (side == LEFT)
 	return N->LT;
@@ -182,7 +182,7 @@ int node_set_type(node N, int Tp, int side)
 }
 int node_get_type(node N, int side)
 {
-    if (N == 0)
+    if (N == nullptr)
 	bad_error("null node to node_get_type");
     if (side == LEFT)
 	return N->LT;
@@ -208,22 +208,22 @@ node Cons(node N1, node N2)
 
 node Car(node N1)
 {
-    if (N1 == 0)
-        return 0;
+    if (N1 == nullptr)
+        return nullptr;
     return (node) node_get_ptr(N1, LEFT);
 }
 
 node Cdr(node N1)
 {
-    if (N1 == 0)
-        return 0;
+    if (N1 == nullptr)
+        return nullptr;
     return (node) node_get_ptr(N1, RIGHT);
 }
 
 int node_atomp(node N1)
 {
     
-    if ((N1!=0) && (node_get_type(N1, LEFT)) == NODE)
+    if ((N1!=nullptr) && (node_get_type(N1, LEFT)) == NODE)
         return FALSE;
     else
         return TRUE;
@@ -231,7 +231,7 @@ int node_atomp(node N1)
 
 int node_nullp(node N1)
 {
-    if (N1 == 0)
+    if (N1 == nullptr)
         return TRUE;
     else
         return FALSE;
@@ -261,7 +261,7 @@ void mem_free(void *ptr)
 static node node_free(node N)
 {
     Node_LT(N) = NODE;
-    Node_L(N).ptr = 0;
+    Node_L(N).ptr = nullptr;
     Node_RT(N) = NODE;
     Node_R(N).ptr = Free_List;
     Free_List = N;
@@ -283,10 +283,10 @@ static node node_free(node N)
 static int node_more_store()
 {
     int i;
-    node_block next_node = 0;
+    node_block next_node = nullptr;
   
     next_node = (node_block) malloc(sizeof(struct node_block_t));
-    if (next_node == 0) {
+    if (next_node == nullptr) {
 #ifdef LOG_PRINT
 	fprintf(stderr, "malloc failing in node_more_store\n")
 #endif
@@ -317,7 +317,7 @@ void node_free_store()
     node_block junk;
     printf("in free_store()\n");
 
-    while (Node_Store != 0) {
+    while (Node_Store != nullptr) {
 	/* free any space held by elements in the block */
 	for (i = 0; i < BLOCKSIZE; i++)
 	    atom_free(Node_Store->store + i);
@@ -338,11 +338,11 @@ void node_free_store()
 node node_new()
 {
     node res;
-    if (Free_List != 0) {
+    if (Free_List != nullptr) {
 	res = Free_List;
 	Free_List = (node) node_get_ptr(Free_List, RIGHT);
-	node_set_ptr(res, (void *) 0, NODE, LEFT);
-	node_set_ptr(res, (void *) 0, NODE, RIGHT);
+	node_set_ptr(res, (void *) nullptr, NODE, LEFT);
+	node_set_ptr(res, (void *) nullptr, NODE, RIGHT);
 	return res;
     }
     if (node_gc() != 0)
@@ -366,12 +366,12 @@ node node_new()
    **     removes one ptr off the Locals_Stack stack.
  */
 
-void print_locals_stack(void)
+void print_locals_stack()
 {
     local_v ptr;
     ptr = Locals_Stack;
     printf("printing local stack \n");
-    while (ptr != 0) {
+    while (ptr != nullptr) {
 	node_print(*(ptr->val));
 	ptr = ptr->next;
     }
@@ -392,7 +392,7 @@ void node_push_local(local_v loc, node * val)
 
 void node_pop_local()
 {
-    if (Locals_Stack == 0)
+    if (Locals_Stack == nullptr)
 	bad_error("poping empty local stack");
     Locals_Stack = Locals_Stack->next;
 }
@@ -409,15 +409,15 @@ void node_pop_local()
  */
 static int mark(node n)
 {
-    if ((n != 0) && (Node_Marked(n) == NO)) {
+    if ((n != nullptr) && (Node_Marked(n) == NO)) {
 	Node_Set_Mark(n);
-	if (Node_LT(n) == NODE && Node_L(n).ptr != 0)
+	if (Node_LT(n) == NODE && Node_L(n).ptr != nullptr)
 	    mark((node) Node_L(n).ptr);
-	else if (Node_LT(n) == NPTR && Node_L(n).ptr != 0)
+	else if (Node_LT(n) == NPTR && Node_L(n).ptr != nullptr)
 	    mark(*((node *) Node_L(n).ptr));
-	if (Node_RT(n) == NODE && Node_R(n).ptr != 0)
+	if (Node_RT(n) == NODE && Node_R(n).ptr != nullptr)
 	    mark((node) Node_R(n).ptr);
-	else if (Node_RT(n) == NPTR && Node_R(n).ptr != 0)
+	else if (Node_RT(n) == NPTR && Node_R(n).ptr != nullptr)
 	    mark(*((node *) Node_R(n).ptr));
 	return 0;
     }
@@ -440,13 +440,13 @@ static int node_gc()
 
     /*call mark on variables in local list */
     ptr = Locals_Stack;
-    while (ptr != 0) {
+    while (ptr != nullptr) {
 	mark(*(ptr->val));
 	ptr = ptr->next;
     }
 
     /* now put anything that is not already marked on the free_list */
-    while (next_block != 0) {
+    while (next_block != nullptr) {
 	for (i = 0; i < BLOCKSIZE; i++) {
 	    if (Node_Marked(next_block->store + i) == YES)
 		Node_Unset_Mark(next_block->store + i);
@@ -550,7 +550,7 @@ double rand_double(int low, int high)
 /********************** implementations from Dlist.c **********************/
 /**************************************************************************/
 
-void Dlist_empty(node L){ Dlist_first(L)=0;}
+void Dlist_empty(node L){ Dlist_first(L)=nullptr;}
 
 /*
 ** invariants: Dnode_next(Dnode_prev(pos)) ==pos 
@@ -565,7 +565,7 @@ void Dlist_empty(node L){ Dlist_first(L)=0;}
 */
 
 node Dlist_add(node L, node data){
-  node tmp=0;
+  node tmp=nullptr;
   LOCS(2);
   PUSH_LOC(data);
   PUSH_LOC(tmp);
@@ -574,7 +574,7 @@ node Dlist_add(node L, node data){
   Dnode_data(tmp)=data;
   Dnode_prev(tmp)=L;
   Dnode_next(tmp)=Dlist_first(L);
-  if (Dnode_next(tmp)!=0) Dnode_prev(Dnode_next(tmp))=tmp;
+  if (Dnode_next(tmp)!=nullptr) Dnode_prev(Dnode_next(tmp))=tmp;
   Dlist_first(L)=tmp; 
   POP_LOCS();
   return tmp;
@@ -582,7 +582,7 @@ node Dlist_add(node L, node data){
 
 
 node Dlist_del(node L, node pos){
-  if (Dnode_next(pos)!=0) Dnode_prev(Dnode_next(pos))=Dnode_prev(pos);
+  if (Dnode_next(pos)!=nullptr) Dnode_prev(Dnode_next(pos))=Dnode_prev(pos);
   if (Dnode_prev(pos)!=L) Dnode_next(Dnode_prev(pos))=Dnode_next(pos);
   else Dlist_first(L)=Dnode_next(pos);
   return (node)Dnode_data(pos);
@@ -687,9 +687,9 @@ Dmatrix Dmatrix_new(int r, int c)
 
 void Dmatrix_free(Dmatrix V)
 {   /* void mem_free(); */
-    if (V != 0 && V->coords != 0)
+    if (V != nullptr && V->coords != nullptr)
 	mem_free((char *) (V->coords));
-    if (V != 0)
+    if (V != nullptr)
 	mem_free((char *) (V));
 }
 #undef mem_malloc
@@ -703,8 +703,8 @@ void Dmatrix_free(Dmatrix V)
 Dmatrix Dmatrix_resize(Dmatrix R, int r, int c)
 {
 
-    if (R == 0 || Mstore(R) < (r * c)) {
-	if (R != 0)
+    if (R == nullptr || Mstore(R) < (r * c)) {
+	if (R != nullptr)
 	    Dmatrix_free(R);
 	R = Dmatrix_new(r, c);
     } else {
@@ -724,12 +724,12 @@ Dmatrix Dmatrix_fprint(FILE *fout, Dmatrix M)
 {
     int i, j;
 
-    if (M == 0) {
+    if (M == nullptr) {
 #ifdef LOG_PRINT
 	fprintf(fout,"<<>>")
 #endif
 ;
-	return 0;
+	return nullptr;
     }
 #ifdef LOG_PRINT
     fprintf(fout,"<")
@@ -779,12 +779,12 @@ Dmatrix Dmatrix_add(Dmatrix M1, Dmatrix M2, Dmatrix * M3)
     int i, j;
     Dmatrix R = *M3;
 
-    if (M1 == 0 || M2 == 0 || Mrows(M1) != Mrows(M2) || Mcols(M1) != Mcols(M2)) {
+    if (M1 == nullptr || M2 == nullptr || Mrows(M1) != Mrows(M2) || Mcols(M1) != Mcols(M2)) {
 #ifdef LOG_PRINT
 	fprintf(stderr, "matrix_add: dimensions don't match\n")
 #endif
 ;
-	return 0;
+	return nullptr;
     }
     Dmatrix_resize(R, Mrows(M1), Mcols(M1));
     for (i = 1; i <= Mrows(M1); i++)
@@ -808,12 +808,12 @@ Dmatrix Dmatrix_mull(Dmatrix M1, Dmatrix M2, Dmatrix * M3)
     int i, j, k;
     Dmatrix R = *M3;
 
-    if (M1 == 0 || M2 == 0 || Mcols(M1) != Mrows(M2)) {
+    if (M1 == nullptr || M2 == nullptr || Mcols(M1) != Mrows(M2)) {
 #ifdef LOG_PRINT
 	fprintf(stderr, "Dmatrix_mull: incompatible matrices\n")
 #endif
 ;
-	return 0;
+	return nullptr;
     }
     Dmatrix_resize(R, Mrows(M1), Mcols(M2));
     for (i = 1; i <= Mrows(M1); i++)
@@ -836,12 +836,12 @@ Dmatrix Dmatrix_dot(Dmatrix M1, Dmatrix M2, Dmatrix M3)
 {
     int i, j, k;
 
-    if (M1 == 0 || M2 == 0 || Mcols(M1) != Mcols(M2)) {
+    if (M1 == nullptr || M2 == nullptr || Mcols(M1) != Mcols(M2)) {
 #ifdef LOG_PRINT
 	fprintf(stderr, "Dmatrix_dot: incompatible matrices\n")
 #endif
 ;
-	return 0;
+	return nullptr;
     }
     M3 = Dmatrix_resize(M3, Mrows(M1), Mrows(M2));
 
@@ -863,9 +863,9 @@ Dmatrix Dmatrix_dot(Dmatrix M1, Dmatrix M2, Dmatrix M3)
 int Dmatrix_equal(Dmatrix M1, Dmatrix M2)
 {
     int i, j;
-    if (M1 == 0 && M2 == 0)
+    if (M1 == nullptr && M2 == nullptr)
 	return 1;
-    if (M1==0||M2==0||(Mrows(M1)!=Mrows(M2))||(Mcols(M1)!=Mcols(M2)))
+    if (M1==nullptr||M2==nullptr||(Mrows(M1)!=Mrows(M2))||(Mcols(M1)!=Mcols(M2)))
         return 0;
     for (i = 1; i <= Mrows(M1); i++)
 	for (j = 1; j <= Mcols(M1); j++)
@@ -1090,8 +1090,8 @@ Imatrix Imatrix_new(int r, int c)
 
 void Imatrix_free(Imatrix V)
 {
-    if (V != 0) {
-	if (V->elts != 0)
+    if (V != nullptr) {
+	if (V->elts != nullptr)
 	    mem_free((char *) (V->elts));
 	mem_free((char *) (V));
     }
@@ -1108,8 +1108,8 @@ void Imatrix_free(Imatrix V)
 Imatrix Imatrix_resize(Imatrix R, int r, int c)
 {
 
-    if (R == 0 || ImatrixMstore(R) < (r * c)) {
-	if (R != 0)
+    if (R == nullptr || ImatrixMstore(R) < (r * c)) {
+	if (R != nullptr)
 	    Imatrix_free(R);
 	R = Imatrix_new(r, c);
     } else {
@@ -1124,7 +1124,7 @@ Imatrix Imatrix_resize(Imatrix R, int r, int c)
 Imatrix Imatrix_submat(Imatrix R, int r, int c)
 {
 
-    if (R == 0 || c > ImatrixMNcols(R) || r > ImatrixMrows(R) * ImatrixMNcols(R)) {
+    if (R == nullptr || c > ImatrixMNcols(R) || r > ImatrixMrows(R) * ImatrixMNcols(R)) {
 	bad_error("bad subscripts or zero matrix in Imatrix_submat()");
     } else {
 	ImatrixMrows(R) = r;
@@ -1143,12 +1143,12 @@ Imatrix Imatrix_fprint(FILE *fout,Imatrix M)
 {
     int i, j;
 
-    if (M == 0) {
+    if (M == nullptr) {
  #ifdef LOG_PRINT
        fprintf(fout,"<>\n")
 #endif
 ;
-        return 0;
+        return nullptr;
     }
  #ifdef LOG_PRINT
    fprintf(fout,"<")
@@ -1190,12 +1190,12 @@ Imatrix Imatrix_add(int i1,Imatrix M1,int i2, Imatrix M2, Imatrix M3)
     int i, j;
     Imatrix R = M3;
 
-    if (M1 == 0 || M2 == 0 || ImatrixMrows(M1) != ImatrixMrows(M2) || ImatrixMcols(M1) != ImatrixMcols(M2)) {
+    if (M1 == nullptr || M2 == nullptr || ImatrixMrows(M1) != ImatrixMrows(M2) || ImatrixMcols(M1) != ImatrixMcols(M2)) {
 #ifdef LOG_PRINT
 	fprintf(stderr, "matrix_add: dimensions don't match\n")
 #endif
 ;
-	return 0;
+	return nullptr;
     }
     R=Imatrix_resize(R, ImatrixMrows(M1), ImatrixMcols(M1));
     for (i = 1; i <= ImatrixMrows(M1); i++)
@@ -1218,12 +1218,12 @@ Imatrix Imatrix_mul(Imatrix M1, Imatrix M2, Imatrix M3)
     int i, j, k;
     Imatrix R;
 
-    if (M1 == 0 || M2 == 0 || ImatrixMcols(M1) != ImatrixMrows(M2)) {
+    if (M1 == nullptr || M2 == nullptr || ImatrixMcols(M1) != ImatrixMrows(M2)) {
 #ifdef LOG_PRINT	
 fprintf(stderr, "Imatrix_mull: incompatible matrices\n")
 #endif
 ;
-	return 0;
+	return nullptr;
     }
     if (M3!=M1&&M3!=M2) R=Imatrix_resize(M3, ImatrixMrows(M1), ImatrixMcols(M2));
       else R=Imatrix_new(ImatrixMrows(M1),ImatrixMcols(M2));
@@ -1247,12 +1247,12 @@ Imatrix Imatrix_dot(Imatrix M1, Imatrix M2, Imatrix M3)
 {
     int i, j, k;
 
-    if (M1 == 0 || M2 == 0 || ImatrixMcols(M1) != ImatrixMcols(M2)) {
+    if (M1 == nullptr || M2 == nullptr || ImatrixMcols(M1) != ImatrixMcols(M2)) {
 #ifdef LOG_PRINT
 	fprintf(stderr, "Imatrix_dot: incompatible matrices\n")
 #endif
 ;
-	return 0;
+	return nullptr;
     }
     M3 = Imatrix_resize(M3, ImatrixMrows(M1), ImatrixMrows(M2));
 
@@ -1274,7 +1274,7 @@ Imatrix Imatrix_dot(Imatrix M1, Imatrix M2, Imatrix M3)
 int dot_Ivector(Imatrix M1, Imatrix M2)
 {
     int k, d = 0;
-    if (M1 == 0 || M2 == 0 || ImatrixMcols(M1) != ImatrixMcols(M2)) {
+    if (M1 == nullptr || M2 == nullptr || ImatrixMcols(M1) != ImatrixMcols(M2)) {
 #ifdef LOG_PRINT
 	fprintf(stderr, "dot_Ivector: incompatible or null vectors\n")
 #endif
@@ -1294,9 +1294,9 @@ int dot_Ivector(Imatrix M1, Imatrix M2)
 int Imatrix_equal(Imatrix M1, Imatrix M2)
 {
     int i, j;
-    if (M1 == 0 && M2 == 0)
+    if (M1 == nullptr && M2 == nullptr)
 	return TRUE;
-    if (M1 == 0 || M2 == 0 || (ImatrixMrows(M1) != ImatrixMrows(M2)) || (ImatrixMcols(M1) != ImatrixMcols(M2))) {
+    if (M1 == nullptr || M2 == nullptr || (ImatrixMrows(M1) != ImatrixMrows(M2)) || (ImatrixMcols(M1) != ImatrixMcols(M2))) {
 	printf("in Imatrix_equal comparison failing\n");
 	return FALSE;
     }
@@ -1312,9 +1312,9 @@ int Imatrix_equal(Imatrix M1, Imatrix M2)
 int Imatrix_order(Imatrix M1, Imatrix M2)
 {
     int i, j, c = 0;
-    if (M1 == 0 && M2 == 0)
+    if (M1 == nullptr && M2 == nullptr)
 	return TRUE;
-    if (M1 == 0 || M2 == 0 || (ImatrixMrows(M1) != ImatrixMrows(M2)) || (ImatrixMcols(M1) != ImatrixMcols(M2))) {
+    if (M1 == nullptr || M2 == nullptr || (ImatrixMrows(M1) != ImatrixMrows(M2)) || (ImatrixMcols(M1) != ImatrixMcols(M2))) {
 	printf("in Imatrix_equal comparison failing\n");
 	return FALSE;
     }
@@ -1331,7 +1331,7 @@ int Imatrix_gcd_reduce(Imatrix M)
 {
     int i, j, g = 0, gcd(int, int);
 
-    if (M == 0)
+    if (M == nullptr)
 	return 1;
     for (i = 1; i <= ImatrixMrows(M); i++)
 	for (j = 1; j <= ImatrixMcols(M); j++) {
@@ -1404,7 +1404,7 @@ int Imatrix_backsolve(Imatrix N, Imatrix S){
  int p,j,g,k;
 
 
- if (N==0 || S==0 || IMcols(N)!=IMcols(S)||IMcols(N)<=IMrows(N)) 
+ if (N==nullptr || S==nullptr || IMcols(N)!=IMcols(S)||IMcols(N)<=IMrows(N)) 
      bad_error("bad dimensions in backsolve");
  
  /* 
@@ -1459,7 +1459,7 @@ int Imatrix_hermite(Imatrix S, Imatrix U){
   m=ImatrixMcols(S);
   n=ImatrixMrows(S);
 
-  if (S==0 || U==0 || ImatrixMrows(U)!=n || ImatrixMrows(U)!=n)
+  if (S==nullptr || U==nullptr || ImatrixMrows(U)!=n || ImatrixMrows(U)!=n)
      bad_error("Incompatible matrices in Imatrix_hermite");
 
   /* Initialize U to nxn identity */
@@ -1523,7 +1523,7 @@ int Imatrix_hermite(Imatrix S, Imatrix U){
 Imatrix Imatrix_dup(Imatrix M,Imatrix N){
   Imatrix R;
   int i,j;
-  if (M==0) return 0;
+  if (M==nullptr) return nullptr;
   if (M==N) bad_error("Imatrix_dup: source and destination equal");
   R=Imatrix_resize(N,ImatrixMrows(M),ImatrixMcols(M));
   for(i=1;i<=ImatrixMrows(M);i++)
@@ -1534,7 +1534,7 @@ Imatrix Imatrix_dup(Imatrix M,Imatrix N){
 
 int Imatrix_is_zero(Imatrix M){
   int i,j;
-  if (M==0) return TRUE;
+  if (M==nullptr) return TRUE;
   for(i=1;i<=IMrows(M);i++){
        for(j=1;j<=IMcols(M);j++){
          if (*IMref(M,i,j)!=0) return FALSE;
@@ -1559,7 +1559,7 @@ node list_push(node item,node *stack){
   
 int list_length(node L){
   int ct=0;
-  while(L!=0){
+  while(L!=nullptr){
     ct++;
     L=Cdr(L);
   }
@@ -1582,7 +1582,7 @@ node list_rest(node list){
 }
 
 int list_empty(node list){
-  if (list==0) return TRUE;
+  if (list==nullptr) return TRUE;
   else return FALSE;
 }
 
@@ -1601,11 +1601,11 @@ int list_insert(node g, node * L, int (*comp) (node, node), int uniq)
   PUSH_LOC(*L);
   PUSH_LOC(g);
 
-  if ((*L == 0) || ((flg = comp(g, Car(*L))) >= 0)) {
+  if ((*L == nullptr) || ((flg = comp(g, Car(*L))) >= 0)) {
     if (uniq==FALSE || flg != 0) *L = Cons(g, *L);
   } 
   else {
-    while ((Cdr(ptr) != 0) &&
+    while ((Cdr(ptr) != nullptr) &&
       ((flg = comp(g, Car(Cdr(ptr))))< 0)) {
        ptr = (node) Cdr(ptr);
     }
@@ -1622,7 +1622,7 @@ int list_insert(node g, node * L, int (*comp) (node, node), int uniq)
 
 int list_Imatrix_comp(node g1, node g2)
 {
-    if (g1 == 0 || g2 == 0 ||
+    if (g1 == nullptr || g2 == nullptr ||
     node_get_type(g1, LEFT) != IMTX || node_get_type(g2, LEFT) != IMTX) {
 	bad_error("Non-IMTX nodes in sexpr_IMTX_comp()");
     }
@@ -1633,8 +1633,8 @@ int list_Imatrix_comp(node g1, node g2)
 
 node list_cat(node l1,node l2){
   node ptr=l1;
-  if (ptr==0) return l2;
-  while(Cdr(ptr)!=0) ptr=Cdr(ptr);
+  if (ptr==nullptr) return l2;
+  while(Cdr(ptr)!=nullptr) ptr=Cdr(ptr);
   node_set_ptr(ptr,(void *)l2,NODE,RIGHT);
   return l1;
 }
@@ -1654,7 +1654,7 @@ void xpl_fprint(FILE *fout,node L){
  #endif
 ;
 ptr=L;
- while(ptr!=0){
+ while(ptr!=nullptr){
    P=(Dmatrix)(Car(Car(ptr)));
  #ifdef LOG_PRINT
   fprintf(fout,"<");
@@ -1680,7 +1680,7 @@ ptr=L;
 
 ;
    ptr=Cdr(ptr);
-   if (ptr!=0) 
+   if (ptr!=nullptr) 
 #ifdef LOG_PRINT
 fprintf(fout,",")
 
@@ -1765,11 +1765,11 @@ node pnt_new(char *s, Imatrix m)
 */
 void pnt_free(node n)
 {
-    if (n==0||node_get_type(n, LEFT) == PNT) {
+    if (n==nullptr||node_get_type(n, LEFT) == PNT) {
         mem_free((char *) node_get_ptr(n, LEFT));
         Imatrix_free((Imatrix) node_get_ptr(n, RIGHT));
-        node_set_ptr(n, (void *) 0, NODE, RIGHT);
-        node_set_ptr(n, (void *) 0, NODE, LEFT);
+        node_set_ptr(n, (void *) nullptr, NODE, RIGHT);
+        node_set_ptr(n, (void *) nullptr, NODE, LEFT);
     } else
         bad_error("error: pnt_free() called on non-point\n");
 }
@@ -1778,7 +1778,7 @@ void pnt_free(node n)
 */
 int pnt_print(node n)
 {
-    if (n==0||node_get_type(n, LEFT) == PNT) {
+    if (n==nullptr||node_get_type(n, LEFT) == PNT) {
 	printf("(");
 	printf("%s", (char *) node_get_ptr(n, LEFT));
 	printf(",");
@@ -1797,7 +1797,7 @@ int pnt_print(node n)
 **               FALSE  otherwise
 */
 int pnt_is_point(node n){ 
-      if (n!=0&&node_get_type(n,LEFT)==PNT) return TRUE;
+      if (n!=nullptr&&node_get_type(n,LEFT)==PNT) return TRUE;
       else return FALSE;
 }
 /*
@@ -1844,7 +1844,7 @@ int pnt_comp_const(node g1, node g2){
 */
 char *pnt_lable(node n)
 {
-    if (n == 0 || node_get_type(n, LEFT) != PNT) {
+    if (n == nullptr || node_get_type(n, LEFT) != PNT) {
 	bad_error("error: pnt_label() called on non-point\n");
 	/* will cause an exit */
     }
@@ -1864,13 +1864,13 @@ node pcfg_new()
     node g;
     g = node_new();
     node_set_int(g, 0, PCFG, LEFT);
-    node_set_ptr(g, (void *) 0, NODE, RIGHT);
+    node_set_ptr(g, (void *) nullptr, NODE, RIGHT);
     return g;
 }
 
 node pcfg_print(node n)
 {
-    if (n != 0 && node_get_type(n, LEFT) == PCFG) {
+    if (n != nullptr && node_get_type(n, LEFT) == PCFG) {
 	printf("<");
 	node_print((node)node_get_ptr(n, RIGHT));
 	printf(">");
@@ -1881,11 +1881,11 @@ node pcfg_print(node n)
 
 node pcfg_print_short(node n)
 {
-    if (n == 0 || node_get_type(n, LEFT) != PCFG)
+    if (n == nullptr || node_get_type(n, LEFT) != PCFG)
 	bad_error("error: pcfg_print_short() called on non-PCFG\n");
     n = (node) node_get_ptr(n, RIGHT);
     printf("<");
-    while (n != 0) {
+    while (n != nullptr) {
 	printf("%s ", (char *) node_get_ptr(Car(n), LEFT));
 	n = (node) node_get_ptr(n, RIGHT);
     }
@@ -1906,8 +1906,8 @@ int pcfg_add(node point, node config)
 {   node ptr;
     LOCS(1);
     PUSH_LOC(config);
-    if (config == 0 || 
-         point == 0 || 
+    if (config == nullptr || 
+         point == nullptr || 
          node_get_type(config, LEFT) != PCFG ||
 	 node_get_type(point, LEFT) != PNT){
 	    bad_error("error: pcfg_add() called on non-PCFG\n");
@@ -1936,18 +1936,18 @@ int pcfg_add(node point, node config)
 */
 int pcfg_remove(node point, node config, node ptr)
 {
-  if (config == 0 ||point == 0||
+  if (config == nullptr ||point == nullptr||
         node_get_type(config, LEFT) != PCFG ||
         node_get_type(point, LEFT) != PNT)
      bad_error("error: pcfg_add() called on non-PCFG\n");
  /* check if location given for point is really right*/
-  if (Car(Cdr(ptr))!=point) ptr=0;  
+  if (Car(Cdr(ptr))!=point) ptr=nullptr;  
  /* find location of point if it is not allready known*/
-  if (ptr==0)
-     for(ptr=Cdr(config); Car(ptr)!=point && ptr!=0; ptr=Cdr(ptr)){
+  if (ptr==nullptr)
+     for(ptr=Cdr(config); Car(ptr)!=point && ptr!=nullptr; ptr=Cdr(ptr)){
         ; /* null body*/
      }
-  if (ptr==0) return FALSE; 
+  if (ptr==nullptr) return FALSE; 
   node_set_ptr(ptr,Cdr(Cdr(ptr)),NODE,RIGHT);
   node_set_int(config,node_get_int(config,LEFT)-1,PCFG,LEFT);
   return TRUE;
@@ -1964,10 +1964,10 @@ int pcfg_remove(node point, node config, node ptr)
 */
 int pcfg_in(node point, node config)
 {
-    if (config == 0 || point == 0 || node_get_type(config, LEFT) != PCFG ||
+    if (config == nullptr || point == nullptr || node_get_type(config, LEFT) != PCFG ||
 	node_get_type(point, LEFT) != PNT)
 	bad_error("error: pcfg_in() called on non-PCFG\n");
-    while ((config = Cdr(config)) != 0)
+    while ((config = Cdr(config)) != nullptr)
 	if (point == Car(config))
 	    return TRUE;
     return FALSE;
@@ -1985,7 +1985,7 @@ Imatrix pcfg_coords(node n, Imatrix R)
 {
     int i, j;
     node ptr = n;
-    if (n == 0 || node_get_type(n, LEFT) != PCFG)
+    if (n == nullptr || node_get_type(n, LEFT) != PCFG)
 	bad_error("error: pcfg_coords() called on non-PCFG\n");
     R = Imatrix_resize(R, pcfg_npts(n), pcfg_dim(n));
     for (i = 1; i <= pcfg_npts(n); i++) {
@@ -2012,7 +2012,7 @@ Imatrix pcfg_M(node n, Imatrix R)
 
 
 
-    if (n == 0 || node_get_type(n, LEFT) != PCFG)
+    if (n == nullptr || node_get_type(n, LEFT) != PCFG)
 	bad_error("error: pcfg_M called on non-PCFG\n");
     R = Imatrix_resize(R, pcfg_npts(n) - 1, pcfg_dim(n));
     ptr = Cdr(ptr);
@@ -2032,8 +2032,8 @@ Imatrix pcfg_M(node n, Imatrix R)
 */
 node pcfg_face(node PC, Imatrix norm)
 {
-    node Face = 0, ptr = 0;
-    Imatrix M = 0, D = 0;
+    node Face = nullptr, ptr = nullptr;
+    Imatrix M = nullptr, D = nullptr;
     int s, i;
     LOCS(2);
 
@@ -2075,7 +2075,7 @@ node pcfg_face(node PC, Imatrix norm)
 int is_normal_good(Imatrix normal, Imatrix N)
 {
     int i;
-    if (N == 0)
+    if (N == nullptr)
 	return TRUE;
     for (i = 1; i <= IVlength(N); i++) {
 	if (*(IVref(N, i)) == 0)	/* Skip */
@@ -2287,7 +2287,7 @@ fcomplex Croot(fcomplex z, int n)
 void bad_error(const char *);
 
 int *poly_exp(monomial m, int i){
-  if (m==0 || i<1 || m->R->n < i ) {
+  if (m==nullptr || i<1 || m->R->n < i ) {
       printf("i=%d, n=%d\n",i,m->R->n);
       bad_error("index out of bounds in monomial");
  }
@@ -2298,7 +2298,7 @@ int poly_deg(polynomial1 p){
     int i,n,deg=0,tdeg;
     n=p->R->n;
     for(i=0;i<n;i++) deg+=p->exps[i];
-    while((p=p->next)!=0){
+    while((p=p->next)!=nullptr){
       tdeg=0;
       for(i=0;i<n;i++) tdeg+=p->exps[i];
       if (tdeg>deg) deg=tdeg;
@@ -2319,32 +2319,32 @@ void ring_set_def(Pring R,  char *lable){
 }
 char *ring_def(Pring R){return R->def;}
 int poly_dim(monomial m){  
-  if (m==0) bad_error("null monomial in poly_def");
+  if (m==nullptr) bad_error("null monomial in poly_def");
   return m->R->n;
 }
 int ring_dim(Pring R){  
-  if (R==0) bad_error("null Ring in ring_dim");
+  if (R==nullptr) bad_error("null Ring in ring_dim");
   return R->n;
 }
 int *poly_def(monomial m){  
-  if (m==0) bad_error("null monomial in poly_def");
+  if (m==nullptr) bad_error("null monomial in poly_def");
   return &(m->def);
 }
 fcomplex *poly_coef(monomial m){
-  if (m==0) bad_error("null monomial in poly_coef");
+  if (m==nullptr) bad_error("null monomial in poly_coef");
   return &(m->coef);
 }
  monomial poly_next(monomial m){
-  if (m==0) bad_error("null monomial in poly_next");
+  if (m==nullptr) bad_error("null monomial in poly_next");
   return m->next;
 }
 monomial poly_set_next(monomial m,monomial m2){
-  if (m==0) bad_error("null monomial in poly_next");
+  if (m==nullptr) bad_error("null monomial in poly_next");
   return (m->next=m2);
 }
 
 Pring poly_ring(monomial m){
-  if (m==0) bad_error("null monomial in poly_next");
+  if (m==nullptr) bad_error("null monomial in poly_next");
   return m->R;
 }
 
@@ -2355,16 +2355,16 @@ Pring makePR(int n)
 	int i;
 	Pring a;
 	a=(Pring)mem_malloc(sizeof(struct Pring_tag)); 
-	if (a==0) bad_error("malloc failed 1 in make_PR");
+	if (a==nullptr) bad_error("malloc failed 1 in make_PR");
 	a->n=n;
 	a->vars=(char **)mem_malloc(n*sizeof(char *));  
-	if (a->vars==0) bad_error("malloc failed 2 in make_PR");
+	if (a->vars==nullptr) bad_error("malloc failed 2 in make_PR");
 	for(i=0;i<n;i++) { 
 		a->vars[i]=(char *)mem_malloc(RING_VAR_L*sizeof(char)); 
-		if (a->vars==0) bad_error("malloc failed 3 in make_PR");
+		if (a->vars==nullptr) bad_error("malloc failed 3 in make_PR");
 	}
         a->def=(char *)mem_malloc(RING_VAR_L*sizeof(char)); 
-        if (a->vars==0) bad_error("malloc failed 4 in make_PR");
+        if (a->vars==nullptr) bad_error("malloc failed 4 in make_PR");
     return a;
 }
 
@@ -2375,7 +2375,7 @@ Pring free_Pring(Pring R)
  for (i=0;i<R->n;i++){ mem_free(R->vars[i]);}
  mem_free( (char *) R->vars);
  mem_free( R); 
- return 0;
+ return nullptr;
  }
        
 polynomial1 makeP(Pring R)
@@ -2386,34 +2386,34 @@ polynomial1 makeP(Pring R)
 
   n=R->n;
   m=(polynomial1)mem_malloc(sizeof(struct mono_tag));
-  if (m==0){ printf("malloc 1 failed: makeP\n"); exit(2); }
+  if (m==nullptr){ printf("malloc 1 failed: makeP\n"); exit(2); }
   m->R=R;
   m->exps=(int *)mem_malloc(n*sizeof(int));
-  if (m->exps==0){printf(" malloc 2 failed: makeP\n"); exit(2);}
+  if (m->exps==nullptr){printf(" malloc 2 failed: makeP\n"); exit(2);}
   for(i=0;i<n;i++) m->exps[i]=0;
   m->coef=Complex(0.0,0.0);
   m->def=0;
-  m->next=0;
+  m->next=nullptr;
   return m;
 }
      
 polynomial1 freeP(polynomial1 p)
 {
   polynomial1 m=p;
-  while (m!=0){
+  while (m!=nullptr){
       p=p->next;
       mem_free((char *)m->exps); 
       mem_free((char *)m); 
       m=p;
   }
-  return 0;
+  return nullptr;
 }
 
 polynomial1 copyM(polynomial1 p)
 {
   polynomial1 p1;
   int i;
-  if (p==0) return 0;
+  if (p==nullptr) return nullptr;
   p1=makeP(p->R);
   p1->coef=p->coef;
   p1->def=p->def;
@@ -2427,11 +2427,11 @@ polynomial1 copyP(polynomial1 p)
   polynomial1 p1,p2;
   int i;
 	
-  if (p==0) return 0;
+  if (p==nullptr) return nullptr;
   p1=makeP(p->R);
   p2=p1;
-  while (p!=0){
-    if (p->next!=0) p2->next=makeP(p->R);
+  while (p!=nullptr){
+    if (p->next!=nullptr) p2->next=makeP(p->R);
     p2->coef=p->coef;
     p2->def=p->def;
     for (i=0;i<p->R->n;i++) p2->exps[i]=p->exps[i];
@@ -2448,7 +2448,7 @@ void printP(polynomial1 P)
   /* DEBUG */
   /* printf(" In "); */
  
-  while (P!=0){
+  while (P!=nullptr){
      if (P->coef.i!=0 || P->coef.r!=0){
         printC(P->coef);
         zt=1;
@@ -2490,7 +2490,7 @@ void printP(polynomial1 P)
              }
      } 
      /*     if (P->next != 0) printf("+{new mono}\n");   */
-     if (P->next != 0) printf(" + ");
+     if (P->next != nullptr) printf(" + ");
      }
      P=P->next;
   }
@@ -2503,9 +2503,9 @@ void printP(polynomial1 P)
 int orderMM(polynomial1 P1,polynomial1 P2)
 {
   int i,d;
-  if (P1==0 && P2==0) return 0;
-   else if (P1==0) return -1;
-    else if (P2==0) return 1;
+  if (P1==nullptr && P2==nullptr) return 0;
+   else if (P1==nullptr) return -1;
+    else if (P2==nullptr) return 1;
   if (P1->R != P2->R) 
     bad_error("error in order: monomials must belong to same ring");
 	
@@ -2524,7 +2524,7 @@ int orderMM(polynomial1 P1,polynomial1 P2)
 int orderPP(polynomial1 P1,polynomial1 P2)
 {
 	int i,d;
-	while (P1!=0 && P2!=0){
+	while (P1!=nullptr && P2!=nullptr){
                  d=P1->def-P2->def;
                  if (d>0) return 1;
                  else if (d<0) return -1;
@@ -2537,8 +2537,8 @@ int orderPP(polynomial1 P1,polynomial1 P2)
                 P1=P1->next;
                 P2=P2->next;
 	}
-        if (P1!=0) return 1;
-         else if (P2 !=0) return -1;
+        if (P1!=nullptr) return 1;
+         else if (P2 !=nullptr) return -1;
           else return 0;
 }
    
@@ -2573,18 +2573,18 @@ polynomial1 addPPP(polynomial1 P1, polynomial1 P2, polynomial1 P3)
   int d,i;
 	
   pt=&(A);
-if (P1==0){ if (P3==0) freeP(P3);
+if (P1==nullptr){ if (P3==nullptr) freeP(P3);
             return copyP(P2);
           }
-if (P2==0){ if (P3==0) freeP(P3);
+if (P2==nullptr){ if (P3==nullptr) freeP(P3);
             return copyP(P1);
           }
 /*
 if (P1->R != P2->R) bad_error(" polynomial1s in addPPP must have equal rings");
 */ 
  A.R=P1->R;
-  A.next=0;
-  while(P1!=0&&P2!=0){
+  A.next=nullptr;
+  while(P1!=nullptr&&P2!=nullptr){
     d=orderMM(P1,P2);
     if (d==0) {
           A.coef=Cadd(P1->coef,P2->coef);
@@ -2616,12 +2616,12 @@ if (P1->R != P2->R) bad_error(" polynomial1s in addPPP must have equal rings");
 	}
   }
 
-if (P1!=0) pt->next=copyP(P1);
- else if (P2!=0) pt->next=copyP(P2);
+if (P1!=nullptr) pt->next=copyP(P1);
+ else if (P2!=nullptr) pt->next=copyP(P2);
 
-if (P3!=0) freeP(P3);
+if (P3!=nullptr) freeP(P3);
 
-if (A.next==0) A.next=makeP(A.R);
+if (A.next==nullptr) A.next=makeP(A.R);
 return A.next;
 }		
 
@@ -2632,11 +2632,11 @@ polynomial1 subPPP(polynomial1 P1, polynomial1 P2, polynomial1 P3)
   int d,i;
 
   pt=&(A);
-if (P1!=0 || P2!=0){
+if (P1!=nullptr || P2!=nullptr){
   if (P1->R != P2->R) bad_error(" polynomial1s in addPPP must have equal rings");
   A.R=P1->R;
-  A.next=0;
-  while(P1!=0&&P2!=0){
+  A.next=nullptr;
+  while(P1!=nullptr&&P2!=nullptr){
     d=orderMM(P1,P2);
     if (d==0) {
           A.coef=Csub(P1->coef,P2->coef);
@@ -2668,12 +2668,12 @@ if (P1!=0 || P2!=0){
         }
   }
 }
-if (P1!=0) pt->next=copyP(P1);
- else if (P2!=0) pt->next=mulCPP(Complex(-1.0,0.0),P2,0);
+if (P1!=nullptr) pt->next=copyP(P1);
+ else if (P2!=nullptr) pt->next=mulCPP(Complex(-1.0,0.0),P2,nullptr);
 
-if (P3!=0) freeP(P3);
+if (P3!=nullptr) freeP(P3);
 
-if (A.next==0) A.next=makeP(A.R);
+if (A.next==nullptr) A.next=makeP(A.R);
 return A.next;
 }
 
@@ -2681,12 +2681,12 @@ polynomial1 mulCPP(fcomplex c, polynomial1 P1, polynomial1 P2)
 {
   polynomial1 p;
 
-  if (P1==0) { if (P2!=0) freeP(P2);
-                          return 0;}
-  if (P2!=P1 ) { if ( P2 !=0)  freeP(P2); 
+  if (P1==nullptr) { if (P2!=nullptr) freeP(P2);
+                          return nullptr;}
+  if (P2!=P1 ) { if ( P2 !=nullptr)  freeP(P2); 
                  P2=copyP(P1);}
   p=P2;
-  while (p!=0){
+  while (p!=nullptr){
     p->coef=Cmul(c,p->coef);
     p=p->next;
   }
@@ -2697,12 +2697,12 @@ polynomial1 divCPP(fcomplex c, polynomial1 P1, polynomial1 P2)
 {
   polynomial1 p;
 
-  if (P1==0) { if (P2!=0) freeP(P2);
-                          return 0;}
-  if (P2!=P1 ) { if ( P2 !=0)  freeP(P2);
+  if (P1==nullptr) { if (P2!=nullptr) freeP(P2);
+                          return nullptr;}
+  if (P2!=P1 ) { if ( P2 !=nullptr)  freeP(P2);
                  P2=copyP(P1);}
   p=P2;
-  while (p!=0){
+  while (p!=nullptr){
     p->coef=Cdiv(p->coef,c);
     p=p->next;
   }
@@ -2717,16 +2717,16 @@ polynomial1 mulMPP(polynomial1 mi, polynomial1 P1, polynomial1 P2)
 
 m->R=P1->R;
 
-if (P1==0||m==0) { if (P2!=0) freeP(P2);
-                      return 0;}
+if (P1==nullptr||m==nullptr) { if (P2!=nullptr) freeP(P2);
+                      return nullptr;}
   if (P1->R!=m->R){ printf("\nRings must be equal in mulMPP");
-                   if (P2!=0) freeP(P2);
-                          return 0;}
+                   if (P2!=nullptr) freeP(P2);
+                          return nullptr;}
   if (P2==m) free_m = 1;
-  if (P2!=P1 ) { if ( P2 !=0 && P2 !=m)  freeP(P2); 
+  if (P2!=P1 ) { if ( P2 !=nullptr && P2 !=m)  freeP(P2); 
                  P2=copyP(P1);}
   p=P2;
-  while (p!=0){
+  while (p!=nullptr){
     p->coef=Cmul(m->coef,p->coef);
     p->def+=m->def;
     for(i=0;i<m->R->n;i++) p->exps[i]+=m->exps[i];
@@ -2741,20 +2741,20 @@ polynomial1 divMPP(polynomial1 mi, polynomial1 P1, polynomial1 P2)
   polynomial1 p,m=mi;
   int i,free_m=0;
 
-  if (P1==0||m==0) { if (P2!=0) freeP(P2);
-                      return 0;}
+  if (P1==nullptr||m==nullptr) { if (P2!=nullptr) freeP(P2);
+                      return nullptr;}
   if (P1->R!=m->R){ printf("Rings must be equal in divMPP");
-                   if (P2!=0) freeP(P2);
-                          return 0;}
-  if (m->next!=0){ printf("divisor must be a monomial in divMPP");
-                   if (P2!=0) freeP(P2);
-                    return 0;}
+                   if (P2!=nullptr) freeP(P2);
+                          return nullptr;}
+  if (m->next!=nullptr){ printf("divisor must be a monomial in divMPP");
+                   if (P2!=nullptr) freeP(P2);
+                    return nullptr;}
 
   if (P2==m) free_m = 1;
-  if (P2!=P1 ) { if ( P2 !=0 && P2 !=m)  freeP(P2); 
+  if (P2!=P1 ) { if ( P2 !=nullptr && P2 !=m)  freeP(P2); 
                  P2=copyP(P1);}
   p=P2;
-  while (p!=0){
+  while (p!=nullptr){
     p->coef=Cdiv(p->coef,m->coef);
     p->def-=m->def;
     for(i=0;i<m->R->n;i++) p->exps[i]-=m->exps[i];
@@ -2767,11 +2767,11 @@ polynomial1 divMPP(polynomial1 mi, polynomial1 P1, polynomial1 P2)
 
 polynomial1 mulPPP(polynomial1 P1, polynomial1 P2, polynomial1 P3)
 {
-  polynomial1 pt2,pt3=0;
+  polynomial1 pt2,pt3=nullptr;
     
-  if (P1==0 || P2==0) { 
-    if (P3!=0) freeP(P3);
-    return 0;
+  if (P1==nullptr || P2==nullptr) { 
+    if (P3!=nullptr) freeP(P3);
+    return nullptr;
   }
   /*
   if (P1->R != P2->R) {
@@ -2779,14 +2779,14 @@ polynomial1 mulPPP(polynomial1 P1, polynomial1 P2, polynomial1 P3)
     bad_error("error in addPP: unequal rings");
   }
   */
-  while(P1!=0) { 
-    pt2=mulMPP(P1,P2,0);
+  while(P1!=nullptr) { 
+    pt2=mulMPP(P1,P2,nullptr);
     pt3=addPPP(pt2,pt3,pt3);
     freeP(pt2);               /* this realy should be done more efficiently */
     P1=P1->next;
     }
 
- if (P3!=0) free(P3);
+ if (P3!=nullptr) free(P3);
  return pt3;
 }
 
@@ -2796,24 +2796,24 @@ polynomial1 expIPP(int x, polynomial1 P, polynomial1 P3)
 {
   polynomial1 m,tmp;
       int i;
-      if (P==0) bad_error("undefined poly in powPIP");
+      if (P==nullptr) bad_error("undefined poly in powPIP");
       if (x==0) {m=makeP(P->R);
                  m->coef.r=1.0;
-                 if (P3!=0) freeP(P3);
+                 if (P3!=nullptr) freeP(P3);
                  return m;}
-      if (P->next==0) { m=copyP(P);
+      if (P->next==nullptr) { m=copyP(P);
                        m->coef=Cpow(m->coef,x);
                        m->def*=x;
                        for(i=0;i<m->R->n;i++) m->exps[i]*=x;
-                       if(P3!=0) freeP(P3);
+                       if(P3!=nullptr) freeP(P3);
                        return m;}
       if (x<0) bad_error("powPIP can not raise a polynomial1 to a negative power");
       m=copyP(P);
       for(i=2;i<=x;i++) {
-                       tmp=mulPPP(m,P,0);
+                       tmp=mulPPP(m,P,nullptr);
                        freeP(m);
                        m=tmp;}
-       if (P3!=0) freeP(P3);
+       if (P3!=nullptr) freeP(P3);
        return m;
        }
        
@@ -2822,11 +2822,11 @@ polynomial1 unliftP(polynomial1 p)
   polynomial1 p1,p2;
   int i;
 
-  if (p==0) return 0;
+  if (p==nullptr) return nullptr;
   p1=makeP(p->R);
   p2=p1;
-  while (p!=0){
-    if (p->next!=0) p2->next=makeP(p->R);
+  while (p!=nullptr){
+    if (p->next!=nullptr) p2->next=makeP(p->R);
     p2->coef=p->coef;
     p2->def=0;
     for (i=0;i<p->R->n;i++) p2->exps[i]=p->exps[i];
@@ -2843,10 +2843,10 @@ polynomial1 Homogenize(polynomial1 pi,Pring R)
   int d = 0;
   int dp = 0;
 
-  if (pi==0) bad_error("Homogenize called on null polynomial1");
+  if (pi==nullptr) bad_error("Homogenize called on null polynomial1");
   p=copyP(pi);
   pt=p;
-  while (pt!=0){
+  while (pt!=nullptr){
     d=0;
     for (i=0;i<p->R->n-1;i++) d+=pt->exps[i];
     if (p==pt) dp=d;
@@ -2855,7 +2855,7 @@ polynomial1 Homogenize(polynomial1 pi,Pring R)
     pt=pt->next;
   }
   pt=p;
-  while (pt!=0){
+  while (pt!=nullptr){
     d=0;
     for (i=0;i<p->R->n-1;i++) d+=pt->exps[i];        
     pt->exps[p->R->n-1]=dp-d;
@@ -2919,7 +2919,7 @@ int read_mark(int timeset){
 
 node aset_new(int r, int d)
 {
-    node A = 0, ptr = 0;
+    node A = nullptr, ptr = nullptr;
     LOCS(2);
     PUSH_LOC(A);
     PUSH_LOC(ptr);
@@ -2946,7 +2946,7 @@ int aset_npts(node A)
 {
     int i = 0;
     A = St(A);
-    while ((A = Cdr(A)) != 0)
+    while ((A = Cdr(A)) != nullptr)
 	i += pcfg_npts(Car(A));
     return i;
 }
@@ -2976,9 +2976,9 @@ int aset_add(node A, int R, node point)
     node ptr = A;
     LOCS(1);
     PUSH_LOC(A);
-    if (A == 0)
+    if (A == nullptr)
 	bad_error("Null Aset in aset_add()");
-    if (point == 0)
+    if (point == nullptr)
 	bad_error("Null point in aset_add()");
     if (R >= 1 && R(A) >= R) {
 	ptr = St(A);
@@ -3016,8 +3016,8 @@ int aset_unlift(node A)
 
     d = aset_dim(A);
     A = St(A);
-    while ((ptc = aset_next_cfg(&A)) != 0)
-	while ((ptp = aset_next_pnt(&ptc)) != 0)
+    while ((ptc = aset_next_cfg(&A)) != nullptr)
+	while ((ptp = aset_next_pnt(&ptc)) != nullptr)
 	    aset_pnt_set(ptp, d, 0);
 
     return 1;
@@ -3031,8 +3031,8 @@ int aset_randlift(node A, int seed, int L, int U)
     rand_seed(seed);
     d = aset_dim(A);
     A = St(A);
-    while ((ptc = aset_next_cfg(&A)) != 0)
-	while ((ptp = aset_next_pnt(&ptc)) != 0)
+    while ((ptc = aset_next_cfg(&A)) != nullptr)
+	while ((ptp = aset_next_pnt(&ptc)) != nullptr)
 	    aset_pnt_set(ptp, d, rand_int(L, U));
 
     return 1;
@@ -3044,15 +3044,15 @@ node aset_print(node A)
  Imatrix Coords;
  node ptr,ptc;
 
- if (A != 0 && node_get_type(A, LEFT) == ASET) {
+ if (A != nullptr && node_get_type(A, LEFT) == ASET) {
    R = R(A);
    D = D(A);
    ptr = St(A);
-   while ((ptr = (node) Cdr(ptr)) != 0) {
+   while ((ptr = (node) Cdr(ptr)) != nullptr) {
      first=1;
      ptc=C(ptr);
      N=pcfg_npts(ptc);
-     while((ptc=Cdr(ptc))!=0){
+     while((ptc=Cdr(ptc))!=nullptr){
         if (first==1){
              printf("   <");
              first=0;
@@ -3073,7 +3073,7 @@ node aset_print(node A)
         printf("       %% %s \n",(char *)pnt_lable(Car(ptc)));
      }
    }
- } else if (A != 0)
+ } else if (A != nullptr)
     bad_error("error: aset_print() called on non-ASET\n");
    return A;
 }
@@ -3082,15 +3082,15 @@ node aset_print_short(node A)
 {
  int R,N,first=1;  
  node ptr,ptc;
- if (A != 0 && node_get_type(A, LEFT) == ASET) {
+ if (A != nullptr && node_get_type(A, LEFT) == ASET) {
    R = R(A);
    ptr = St(A);
    printf("{ ");
-   while ((ptr = (node) Cdr(ptr)) != 0) {
+   while ((ptr = (node) Cdr(ptr)) != nullptr) {
      first=1;
      ptc=C(ptr);
      N=pcfg_npts(ptc);
-     while((ptc=Cdr(ptc))!=0){
+     while((ptc=Cdr(ptc))!=nullptr){
         if (first==1){
              printf("{");
              first=0;
@@ -3102,21 +3102,21 @@ node aset_print_short(node A)
      if (--R>0)printf(",");
      else printf(" }");
    }
- } else if (A != 0)
+ } else if (A != nullptr)
     bad_error("error: aset_print() called on non-ASET\n");
    return A;
 }
 
 node aset_face(node A, Imatrix N)
 {
-    node ptr = A, ptc = 0, res = 0, rptr = 0;
+    node ptr = A, ptc = nullptr, res = nullptr, rptr = nullptr;
     LOCS(2);
     PUSH_LOC(A);
     PUSH_LOC(res);
     res = aset_new(aset_r(A), aset_dim(A));
     ptr = St(A);
     rptr = St(res);
-    while ((ptc = aset_next_cfg(&ptr)) != 0) {
+    while ((ptc = aset_next_cfg(&ptr)) != nullptr) {
 	rptr = Cdr(rptr);
 	node_set_ptr(rptr, pcfg_face(ptc, N), NODE, LEFT);
     }
@@ -3127,13 +3127,13 @@ node aset_face(node A, Imatrix N)
 Imatrix aset_type(node A, Imatrix T)
 {
     int r = 1, i;
-    Imatrix M = 0;
+    Imatrix M = nullptr;
     node ptr, ptc;
     LOCS(1);
     PUSH_LOC(A);
     ptr = aset_start_cfg(A);
     T = Imatrix_resize(T, 1, aset_r(A));
-    while ((ptc = aset_next_cfg(&ptr)) != 0) {
+    while ((ptc = aset_next_cfg(&ptr)) != nullptr) {
 	M = pcfg_M(ptc, M);
 	for (i = 1; i <= IMrows(M); i++)
 	    *IMref(M, i, IMcols(M)) = 0;
@@ -3151,9 +3151,9 @@ Imatrix aset_M(node A, Imatrix M)
 
     M = Imatrix_resize(M, aset_npts(A) - aset_r(A), aset_dim(A) - 1);
     ptr = St(A);
-    while ((ptc = aset_next_cfg(&ptr)) != 0) {
+    while ((ptc = aset_next_cfg(&ptr)) != nullptr) {
 	pt0 = aset_next_pnt(&ptc);
-	while ((ptp = aset_next_pnt(&ptc)) != 0) {
+	while ((ptp = aset_next_pnt(&ptc)) != nullptr) {
 	    for (j = 1; j <= aset_dim(A) - 1; j++)
 		*IMref(M, r, j) = aset_pnt_get(ptp, j) - aset_pnt_get(pt0, j);
 	    r++;
@@ -3360,8 +3360,8 @@ FILE *Pel_In  = stdin;
 FILE *Pel_Log = stdout;
 */
 
-char *Pel_LogName = 0;
-char *FilePrefix =  0;
+char *Pel_LogName = nullptr;
+char *FilePrefix =  nullptr;
 
 int Cont_Alg=1;
 int Show_Sys=TRUE;
@@ -3433,8 +3433,8 @@ void xpnt_normalize(xpnt X){
 ** global storage for Lin prog solver
 */
 int LP_M=0, LP_N=0;
-Dmatrix LP_A=0, LP_B=0, LP_C=0, LP_X=0,LP_Q=0, LP_R=0, LP_T1=0, LP_T2=0;
-Ivector LP_basis=0, LP_nonbasis=0;
+Dmatrix LP_A=nullptr, LP_B=nullptr, LP_C=nullptr, LP_X=nullptr,LP_Q=nullptr, LP_R=nullptr, LP_T1=nullptr, LP_T2=nullptr;
+Ivector LP_basis=nullptr, LP_nonbasis=nullptr;
 extern double RS_zt;
 
 #define X(i) (DVref(LP_X,i))
@@ -3552,7 +3552,7 @@ node pcfg_extremal(node PC)
 
   ptr_nxt=Cdr(PC);
   ptr_old=PC;        
-  while(ptr_nxt != 0) {
+  while(ptr_nxt != nullptr) {
     if (pcfg_vertex(Car(ptr_nxt), PC) != TRUE){
       pcfg_remove(Car(ptr_nxt),PC,ptr_old); 
     }
@@ -3560,16 +3560,16 @@ node pcfg_extremal(node PC)
     ptr_nxt = Cdr(ptr_nxt);
   }
 
-    Dmatrix_free(LP_A); LP_A=0;
-    Dmatrix_free(LP_B); LP_B=0;
-    Dmatrix_free(LP_C); LP_C=0;
-    Dmatrix_free(LP_X); LP_X=0;
-    Dmatrix_free(LP_Q); LP_Q=0;
-    Dmatrix_free(LP_R); LP_R=0;
-    Dmatrix_free(LP_T1); LP_T1=0;
-    Dmatrix_free(LP_T2); LP_T2=0;
-    Imatrix_free(LP_basis);    LP_basis=0;
-    Imatrix_free(LP_nonbasis); LP_nonbasis=0;
+    Dmatrix_free(LP_A); LP_A=nullptr;
+    Dmatrix_free(LP_B); LP_B=nullptr;
+    Dmatrix_free(LP_C); LP_C=nullptr;
+    Dmatrix_free(LP_X); LP_X=nullptr;
+    Dmatrix_free(LP_Q); LP_Q=nullptr;
+    Dmatrix_free(LP_R); LP_R=nullptr;
+    Dmatrix_free(LP_T1); LP_T1=nullptr;
+    Dmatrix_free(LP_T2); LP_T2=nullptr;
+    Imatrix_free(LP_basis);    LP_basis=nullptr;
+    Imatrix_free(LP_nonbasis); LP_nonbasis=nullptr;
   return PC;
 }
 
@@ -3579,7 +3579,7 @@ node aset_extremal(node A)
     LOCS(1);
     PUSH_LOC(A);
     ptr = aset_start_cfg(A);
-    while ((ptc = aset_next_cfg(&ptr)) != 0) {
+    while ((ptc = aset_next_cfg(&ptr)) != nullptr) {
         pcfg_extremal(ptc);
     }
     POP_LOCS();
@@ -3862,21 +3862,21 @@ Aset_I internalize_aset(aset S){
   int r=0,pt=0;
   node ptr,ptc,ptp;
 
-  if((A=(Aset_I)malloc(sizeof(struct Aset_Itag)))==0)
+  if((A=(Aset_I)malloc(sizeof(struct Aset_Itag)))==nullptr)
       bad_error("malloc failed in internalize_aset");
   A_r(A)=aset_r(S);
   A_n(A)=aset_dim(S)-1;
   A_m(A)=aset_npts(S);
-  if((A->store=(int *)malloc((2*A_r(A))*sizeof(int)))==0)
+  if((A->store=(int *)malloc((2*A_r(A))*sizeof(int)))==nullptr)
      bad_error("malloc failed in internalize_aset");
-  if((A->pts=(node *)malloc(A_m(A)*sizeof(node)))==0)
+  if((A->pts=(node *)malloc(A_m(A)*sizeof(node)))==nullptr)
      bad_error("malloc failed in internalize_aset");
 
   ptr = aset_start_cfg(S);
-  while ((ptc = aset_next_cfg(&ptr)) != 0) {
+  while ((ptc = aset_next_cfg(&ptr)) != nullptr) {
         A_npts(A,++r)=0;
         A_ptst(A,r)=pt;
-        while ((ptp = aset_next_pnt(&ptc)) != 0) {
+        while ((ptp = aset_next_pnt(&ptc)) != nullptr) {
             A_npts(A,r)++;
             A_pt_flat(A,++pt)=ptp;
         }
@@ -3888,7 +3888,7 @@ Aset_I internalize_aset(aset S){
 **     free all storage allocated to an Aset_I.
 */
 void Aset_I_free(Aset_I A){
- if (A!=0){
+ if (A!=nullptr){
     free((char *)A->store);
     free((char *)A->pts);
     free((char *)A);
@@ -3987,10 +3987,10 @@ typedef struct Cell_Itag {
 Cell_I initialize_cell(Aset_I A, Ivector T){
  Cell_I C;
  int i,j;
- if ((C=(Cell_I)malloc(sizeof(struct Cell_Itag)))==0) 
+ if ((C=(Cell_I)malloc(sizeof(struct Cell_Itag)))==nullptr) 
      bad_error("malloc failed in initialize_cell");
  C_r(C)=A_r(A);
- if((C->store = (int *)malloc((3*C_r(C)+A_n(A))*sizeof(int)))==0) 
+ if((C->store = (int *)malloc((3*C_r(C)+A_n(A))*sizeof(int)))==nullptr) 
       bad_error("malloc failed in initialize_cell");
  j=2*C_r(C);             /* location of C_Pt(C,1,0) */
  for(i=1;i<=C_r(C);i++){
@@ -4009,7 +4009,7 @@ Cell_I initialize_cell(Aset_I A, Ivector T){
 **     free all storage allocated to a Cell_I.
 */
 void Cell_I_free(Cell_I C){
- if (C!=0){
+ if (C!=nullptr){
     free((char *)C->store);
     free((char *)C);
  }
@@ -4072,7 +4072,7 @@ fprintf(msd_out,": ")
 **                    --+-----      --+-----
 **                     Face_1       Face_2
 */
- node List_Store=0;
+ node List_Store=nullptr;
  int List_R=0;
  node *List_Start;
  node *List_Ptrs;
@@ -4102,7 +4102,7 @@ int init_Face_List_storeage(int r){
  for(i=1;i<=r;i++){
     tmp=node_new();
     node_set_ptr(tmp,(void *)List_Store,NODE,LEFT);
-    node_set_ptr(tmp,(void *)0         ,NODE,RIGHT);
+    node_set_ptr(tmp,(void *)nullptr         ,NODE,RIGHT);
     List_Store=tmp;
     LStart(i)=tmp;
     LPtr(i)=tmp;
@@ -4117,7 +4117,7 @@ int init_Face_List_storeage(int r){
 void free_Face_list(){
  mem_free((char *)List_Start);
  mem_free((char *)List_Ptrs);
- List_Store=0;
+ List_Store=nullptr;
  List_R=0;
 }
 
@@ -4129,7 +4129,7 @@ void print_Face_list(){
  node ptr;
  for(i=1;i<=List_R;i++){
    ptr=LStart(i);
-   while((ptr=(node)node_get_ptr(ptr,RIGHT))!=0){
+   while((ptr=(node)node_get_ptr(ptr,RIGHT))!=nullptr){
        Imatrix_print((Imatrix)node_get_ptr(ptr,LEFT));
 #ifdef LOG_PRINT     
   fprintf(msd_out,"\n")
@@ -4159,9 +4159,9 @@ int next_face(Cell_I *C,Aset_I A, int r){
  int i;
  Imatrix F;
  /* advance pointer */
- if (LPtr(r)==0) return 0;
+ if (LPtr(r)==nullptr) return 0;
  LPtr(r)=(node)node_get_ptr(LPtr(r),RIGHT);
- if (LPtr(r)==0) return 0;
+ if (LPtr(r)==nullptr) return 0;
  /* copy face */
  F=(Imatrix)node_get_ptr(LPtr(r),LEFT);
  for(i=0;i<=C_type(*C,r);i++) C_idx(*C,r,i)=*IVref0(F,i);
@@ -4173,9 +4173,9 @@ int next_face(Cell_I *C,Aset_I A, int r){
 */
 
 static int MSD_LP_M=0, MSD_LP_N=0;
-static Dmatrix MSD_LP_A=0, MSD_LP_B=0, MSD_LP_C=0, MSD_LP_X=0;
-static Dmatrix MSD_LP_Q=0, MSD_LP_R=0, MSD_LP_T1=0, MSD_LP_T2=0;
-static Ivector MSD_LP_basis=0, MSD_LP_nonbasis=0;
+static Dmatrix MSD_LP_A=nullptr, MSD_LP_B=nullptr, MSD_LP_C=nullptr, MSD_LP_X=nullptr;
+static Dmatrix MSD_LP_Q=nullptr, MSD_LP_R=nullptr, MSD_LP_T1=nullptr, MSD_LP_T2=nullptr;
+static Ivector MSD_LP_basis=nullptr, MSD_LP_nonbasis=nullptr;
 
 /*
 ** set_up_LP
@@ -4201,16 +4201,16 @@ void set_up_LP(Aset_I A, Cell_I C){
 
 void free_LP(){
   MSD_LP_M=0; MSD_LP_N=0;
-  Dmatrix_free(MSD_LP_A); MSD_LP_A=0;
-  Dmatrix_free(MSD_LP_B); MSD_LP_B=0;
-  Dmatrix_free(MSD_LP_C); MSD_LP_C=0;
-  Dmatrix_free(MSD_LP_X); MSD_LP_X=0;
-  Dmatrix_free(MSD_LP_Q); MSD_LP_Q=0;
-  Dmatrix_free(MSD_LP_R); MSD_LP_R=0;
-  Dmatrix_free(MSD_LP_T1); MSD_LP_T1=0;
-  Dmatrix_free(MSD_LP_T2); MSD_LP_T2=0;
-  Imatrix_free(MSD_LP_basis);    MSD_LP_basis=0;
-  Imatrix_free(MSD_LP_nonbasis); MSD_LP_nonbasis=0;
+  Dmatrix_free(MSD_LP_A); MSD_LP_A=nullptr;
+  Dmatrix_free(MSD_LP_B); MSD_LP_B=nullptr;
+  Dmatrix_free(MSD_LP_C); MSD_LP_C=nullptr;
+  Dmatrix_free(MSD_LP_X); MSD_LP_X=nullptr;
+  Dmatrix_free(MSD_LP_Q); MSD_LP_Q=nullptr;
+  Dmatrix_free(MSD_LP_R); MSD_LP_R=nullptr;
+  Dmatrix_free(MSD_LP_T1); MSD_LP_T1=nullptr;
+  Dmatrix_free(MSD_LP_T2); MSD_LP_T2=nullptr;
+  Imatrix_free(MSD_LP_basis);    MSD_LP_basis=nullptr;
+  Imatrix_free(MSD_LP_nonbasis); MSD_LP_nonbasis=nullptr;
 }
 
 /*
@@ -4325,7 +4325,7 @@ void free_Final(){
  Imatrix_free(M);
  Imatrix_free(U);
  Imatrix_free(Norm);
- M=0;Norm=0;U=0;vol=0;
+ M=nullptr;Norm=nullptr;U=nullptr;vol=0;
 }
 
 
@@ -4422,14 +4422,14 @@ node MSD(aset Ast, Ivector T){
   Aset_I A;                  /* internal representation of Ast*/
   Cell_I C;                  /* internal rep of target cell */
   int i=1;                   /* how many fields of C speceifed*/
-  node Normals=0;            /* output normals list */
+  node Normals=nullptr;            /* output normals list */
   int mv=0;                  /* total mixed volume */
   LOCS(2);
   PUSH_LOC(Normals);
   PUSH_LOC(List_Store);
 
   /* input verification should check A and T for consistancy*/
-  if (T==0) bad_error("type vector must be specified in MSD");
+  if (T==nullptr) bad_error("type vector must be specified in MSD");
   
   /*
   **  Initialization 
@@ -4461,7 +4461,7 @@ fprintf(msd_out," vol %d\n",vol)
 #endif
 ;
          mv+=vol;
-         Normals=Cons(atom_new((char *)Imatrix_dup(Norm,0),IMTX),
+         Normals=Cons(atom_new((char *)Imatrix_dup(Norm,nullptr),IMTX),
                       Normals);         
        }
      }

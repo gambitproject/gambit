@@ -85,7 +85,7 @@ Gmatrix Gmatrix_new(int r, int c)
     MNcols(V) = c;
     for (i = 1; i <= r; i++) {
 	for (j = 1; j <= c; j++)
-	    *Mref(V, i, j)=0;
+	    *Mref(V, i, j)=nullptr;
     }
     return V;
 }
@@ -94,13 +94,13 @@ void Gmatrix_free(Gmatrix V)
 {
     int i, j;
 
-    if (V != 0 && V->coords != 0) {
+    if (V != nullptr && V->coords != nullptr) {
 	for (i = 1; i <= Mrows(V); i++)
 	    for (j = 1; j <= Mcols(V); j++)
 		free_Gen_list(*Mref(V, i, j));
 	mem_free((char *) (V->coords));
     }
-    if (V != 0)
+    if (V != nullptr)
 	mem_free((char *) (V));
 }
 
@@ -116,8 +116,8 @@ void Gmatrix_free(Gmatrix V)
 Gmatrix Gmatrix_resize(Gmatrix R, int r, int c)
 {
 
-    if (R == 0 || Mstore(R) < (r * c)) {
-        if (R != 0) Gmatrix_free(R);
+    if (R == nullptr || Mstore(R) < (r * c)) {
+        if (R != nullptr) Gmatrix_free(R);
         R = Gmatrix_new(r, c);
     } else {
         Mrows(R) = r;
@@ -130,7 +130,7 @@ Gmatrix Gmatrix_resize(Gmatrix R, int r, int c)
 Gmatrix Gmatrix_submat(Gmatrix R, int r, int c)
 {
 
-    if (R == 0 || c > Mcols(R) || r > Mrows(R) * MNcols(R)) {
+    if (R == nullptr || c > Mcols(R) || r > Mrows(R) * MNcols(R)) {
         bad_error("bad subscripts or zero matrix in Gmatrix_submat()");
     } else {
         Mrows(R) = r;
@@ -152,9 +152,9 @@ Gmatrix Gmatrix_print(Gmatrix M)
 {
     int i, j;
 
-    if (M == 0) {
+    if (M == nullptr) {
 	fprintf(stdout /* was Pel_Out */,"<>");
-	return 0;
+	return nullptr;
     }
     fprintf(stdout /* was Pel_Out */,"<");
    
@@ -184,7 +184,7 @@ Gmatrix Gmatrix_Dop(Gmatrix M1, Gmatrix M2, Gen_node (*op)(Gen_node))
     int i, j;
     Gmatrix R;
 
-    if (M1 == 0||M2 == 0||Mrows(M1)!=Mrows(M2)||
+    if (M1 == nullptr||M2 == nullptr||Mrows(M1)!=Mrows(M2)||
                           Mcols(M1)!= Mcols(M2)) {
 	bad_error("matrix_add: dimensions don't match\n");
     }
@@ -203,7 +203,7 @@ Gmatrix Gmatrix_Sop(Gen_node g, Gmatrix M, Gen_node (*op)(Gen_node))
     int i, j;
     Gmatrix R;
 
-    if (M == 0||g==0) bad_error("matrix_Sop: null arg\n");
+    if (M == nullptr||g==nullptr) bad_error("matrix_Sop: null arg\n");
     R=Gmatrix_new(Mrows(M), Mcols(M));
     for (i = 1; i <= Mrows(M); i++)
         for (j = 1; j <= Mcols(M); j++)
@@ -221,9 +221,9 @@ Gmatrix Gmatrix_Sop(Gen_node g, Gmatrix M, Gen_node (*op)(Gen_node))
    int i,j,k;
    Gmatrix R;
 
-   if (M1==0|| M2==0 || Mcols(M1)!=Mrows(M2)) {
+   if (M1==nullptr|| M2==nullptr || Mcols(M1)!=Mrows(M2)) {
    warning("Gmatrix_mull: incompatible matrices");
-   return 0;
+   return nullptr;
    }
    R=Gmatrix_new(Mrows(M1),Mcols(M2));
    for(i=1; i<=Mrows(M1); i++)
@@ -254,7 +254,7 @@ Gen_node GMND(Gmatrix M){
      a=gen_node();
      a->type=Mtx_T;
      a->Genval.gval=(char *)M;
-     a->next=0;
+     a->next=nullptr;
      return a;
 }
 
@@ -297,7 +297,7 @@ Gen_node Link(Gen_node g1, Gen_node g2)
 { 
 
 #ifdef LOG_PRINT
-   if (g1->next!=0)
+   if (g1->next!=nullptr)
     fprintf(stdout /* was Pel_Out */,
 	    "Warning in Link, g1 already has successor\n");
 #endif
@@ -311,7 +311,7 @@ Gen_node SYSND(Gmatrix M){
      a=gen_node();
      a->type=Sys_T;
      a->Genval.gval=(char *)M;
-     a->next=0;
+     a->next=nullptr;
      return a;
 }
 

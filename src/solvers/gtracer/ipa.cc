@@ -55,7 +55,7 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
   cmatrix DG(M,M), 
     O(N,N,0), // matrix of zeroes
     S(N,M,0), // 
-    I(M+N,M+N,1,1), // identity
+    I(M+N,M+N,1,true), // identity
     T(M+N,M+N+2,0), // tableau for Lemke-Howson
     T2(M+N,M+N,0); // submatrix of tableau used if Lemke-Howson is unnecessary
 

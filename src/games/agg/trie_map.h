@@ -27,7 +27,7 @@
 //Mapping from vector of ints to type V.
 //WARNING: traversal using the iterators is in the reverse order of insertion.
 
-#include <math.h>
+#include <cmath>
 #include <list>
 #include <iterator>
 

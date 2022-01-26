@@ -56,19 +56,19 @@ private:
   std::string m_lastText;
 
   void ReadChar(char& c);
-  void UnreadChar(void);
-  void IncreaseLine(void);
+  void UnreadChar();
+  void IncreaseLine();
 
 public:
   GameParserState(std::istream &p_file) :
     m_file(p_file), m_currentLine(1), m_currentColumn(1) { }
 
-  GameFileToken GetNextToken(void);
-  GameFileToken GetCurrentToken(void) const { return m_lastToken; }
-  int GetCurrentLine(void) const { return m_currentLine; }
-  int GetCurrentColumn(void) const { return m_currentColumn; }
+  GameFileToken GetNextToken();
+  GameFileToken GetCurrentToken() const { return m_lastToken; }
+  int GetCurrentLine() const { return m_currentLine; }
+  int GetCurrentColumn() const { return m_currentColumn; }
   std::string CreateLineMsg(const std::string &msg);
-  const std::string &GetLastText(void) const { return m_lastText; }
+  const std::string &GetLastText() const { return m_lastText; }
 };
 
 void GameParserState::ReadChar(char& c)
@@ -77,19 +77,19 @@ void GameParserState::ReadChar(char& c)
   m_currentColumn++;
 }
 
-void GameParserState::UnreadChar(void)
+void GameParserState::UnreadChar()
 {
   m_file.unget();
   m_currentColumn--;
 }
 
-void GameParserState::IncreaseLine(void){
+void GameParserState::IncreaseLine(){
   m_currentLine++;
   // Reset column
   m_currentColumn = 1;
 }
 
-GameFileToken GameParserState::GetNextToken(void)
+GameFileToken GameParserState::GetNextToken()
 {
   char c = ' ';
   if (m_file.eof()) {
@@ -278,11 +278,11 @@ public:
   Array<std::string> m_strategies;
   TableFilePlayer *m_next;
 
-  TableFilePlayer(void);
+  TableFilePlayer();
 };
 
-TableFilePlayer::TableFilePlayer(void)
-  : m_next(0)
+TableFilePlayer::TableFilePlayer()
+  : m_next(nullptr)
 { }
 
 class TableFileGame {
@@ -291,18 +291,18 @@ public:
   TableFilePlayer *m_firstPlayer, *m_lastPlayer;
   int m_numPlayers;
 
-  TableFileGame(void);
+  TableFileGame();
   ~TableFileGame();
 
   void AddPlayer(const std::string &);
-  int NumPlayers(void) const { return m_numPlayers; }
+  int NumPlayers() const { return m_numPlayers; }
   int NumStrategies(int pl) const;
   std::string GetPlayer(int pl) const;
   std::string GetStrategy(int pl, int st) const;
 };
 
-TableFileGame::TableFileGame(void)
-  : m_firstPlayer(0), m_lastPlayer(0), m_numPlayers(0)
+TableFileGame::TableFileGame()
+  : m_firstPlayer(nullptr), m_lastPlayer(nullptr), m_numPlayers(0)
 { }
 
 TableFileGame::~TableFileGame()
@@ -596,7 +596,7 @@ void ParseOutcomeBody(GameParserState &p_parser, GameRep *p_nfg)
       (*iter)->SetOutcome(p_nfg->GetOutcome(outcomeId));
     }
     else {
-      (*iter)->SetOutcome(0);
+      (*iter)->SetOutcome(nullptr);
     }
     p_parser.GetNextToken();
     iter++;
@@ -672,8 +672,8 @@ public:
   std::map<int, GameInfoset> m_chanceInfosetMap;
   List<std::map<int, GameInfoset> > m_infosetMap;
 
-  TreeData(void)  { }
-  ~TreeData() { }
+  TreeData()  = default;
+  ~TreeData() = default;
 };
 
 void ReadPlayers(GameParserState &p_state,
@@ -1007,9 +1007,9 @@ private:
 
 public:
   GameXMLSavefile(const std::string &p_xml);
-  ~GameXMLSavefile()  { }
+  ~GameXMLSavefile()  = default;
 
-  Game GetGame(void) const;
+  Game GetGame() const;
 };
 
 GameXMLSavefile::GameXMLSavefile(const std::string &p_xml)
@@ -1020,7 +1020,7 @@ GameXMLSavefile::GameXMLSavefile(const std::string &p_xml)
   }
 }
 
-Game GameXMLSavefile::GetGame(void) const
+Game GameXMLSavefile::GetGame() const
 {
   const TiXmlNode *docroot = doc.FirstChild("gambit:document");
   if (!docroot) {

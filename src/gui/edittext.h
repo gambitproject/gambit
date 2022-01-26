@@ -65,11 +65,11 @@ public:
 		  const wxPoint &p_position,
 		  const wxSize &p_size);
 
-  bool IsEditing(void) const { return GetSizer()->IsShown(m_textCtrl); }
-  void BeginEdit(void);
+  bool IsEditing() const { return GetSizer()->IsShown(m_textCtrl); }
+  void BeginEdit();
   void EndEdit(bool p_accept = true);
 
-  wxString GetValue(void) const;
+  wxString GetValue() const;
   void SetValue(const wxString &p_value);
 
   // @name Overriding wxWindow methods

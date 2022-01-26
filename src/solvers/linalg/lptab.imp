@@ -134,7 +134,7 @@ void LPTableau<T>::SetCost(const Vector<T> &uc, const Vector<T> &c)
 
 
 template <class T>
-Vector<T> LPTableau<T>::GetCost(void) const
+Vector<T> LPTableau<T>::GetCost() const
 {
   Vector<T> x(cost.First(),cost.Last());
   for(int i=x.First();i<=x.Last();i++)x[i]=cost[i];
@@ -144,21 +144,21 @@ Vector<T> LPTableau<T>::GetCost(void) const
 
 
 template <class T>
-Vector<T> LPTableau<T>::GetUnitCost(void) const
+Vector<T> LPTableau<T>::GetUnitCost() const
 {
   Vector<T> x(unitcost.First(),unitcost.Last());
   for(int i=x.First();i<=x.Last();i++)x[i]=unitcost[i];
   return x;
 }
 
-template<> double LPTableau<double>::TotalCost(void)
+template<> double LPTableau<double>::TotalCost()
 {
   Vector<double> tmpcol(MinRow(),MaxRow());
   BasisSelect(unitcost,cost,tmpcol);
   return tmpcol*solution;
 }
 
-template<> Rational LPTableau<Rational>::TotalCost(void)
+template<> Rational LPTableau<Rational>::TotalCost()
 {
   Vector<Rational> tmpcol(MinRow(),MaxRow());
   Vector<Rational> sol(MinRow(),MaxRow());
@@ -694,7 +694,7 @@ BFS<T> LPTableau<T>::DualBFS() const
 }
 
 template <class T>
-int LPTableau<T>::LastLabel( void )
+int LPTableau<T>::LastLabel( )
 {
   return this->artificial.Last();
 }

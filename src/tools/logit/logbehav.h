@@ -83,7 +83,7 @@ protected:
   
   void ComputeSolutionDataPass2(const GameNode &node) const;
   void ComputeSolutionDataPass1(const GameNode &node) const;
-  void ComputeSolutionData(void) const;
+  void ComputeSolutionData() const;
   //@}
 
 public:
@@ -91,7 +91,7 @@ public:
   //@{
   LogBehavProfile(const BehaviorSupportProfile &);
   LogBehavProfile(const LogBehavProfile<T> &);
-  ~LogBehavProfile() { }
+  ~LogBehavProfile() = default;
 
   LogBehavProfile<T> &operator=(const LogBehavProfile<T> &);
   LogBehavProfile<T> &operator=(const Vector<T> &p)
@@ -162,16 +162,16 @@ public:
   /// @name Initialization, validation
   //@{
   /// Force recomputation of stored quantities
-  void Invalidate(void) const { m_cacheValid = false; }
+  void Invalidate() const { m_cacheValid = false; }
   /// Set the profile to the centroid
-  void Centroid(void);
+  void Centroid();
   //@}
 
   /// @name General data access
   //@{
-  int Length(void) const { return Array<T>::Length(); }
-  Game GetGame(void) const { return m_support.GetGame(); }
-  const BehaviorSupportProfile &GetSupport(void) const { return m_support; }
+  int Length() const { return Array<T>::Length(); }
+  Game GetGame() const { return m_support.GetGame(); }
+  const BehaviorSupportProfile &GetSupport() const { return m_support; }
   //@}
 
   /// @name Computation of interesting quantities

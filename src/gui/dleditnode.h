@@ -35,9 +35,9 @@ public:
   dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  wxString GetNodeName(void) const { return m_nodeName->GetValue(); }
-  int GetOutcome(void) const { return m_outcome->GetSelection(); }
-  Gambit::GameInfoset GetInfoset(void) const;
+  wxString GetNodeName() const { return m_nodeName->GetValue(); }
+  int GetOutcome() const { return m_outcome->GetSelection(); }
+  Gambit::GameInfoset GetInfoset() const;
 };
 
 #endif   // DLEDITNODE_H

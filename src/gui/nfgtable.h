@@ -77,19 +77,19 @@ public:
   void SetGridOrigin(int x, int y);
 
   /// Synchronize with document state
-  void OnUpdate(void);
+  void OnUpdate();
 
   /// Post any pending edits
-  void PostPendingChanges(void);
+  void PostPendingChanges();
 
   /// Are we showing dominance indicators or not?
-  bool ShowDominance(void) const;
+  bool ShowDominance() const;
   //@}
 
   /// @name View state
   //@{
   /// Returns the number of players assigned to the rows
-  int NumRowPlayers(void) const { return m_rowPlayers.Length(); }
+  int NumRowPlayers() const { return m_rowPlayers.Length(); }
 
   /// Returns the index'th player assigned to the rows (1=slowest incrementing)
   int GetRowPlayer(int index) const { return m_rowPlayers[index]; }
@@ -98,7 +98,7 @@ public:
   void SetRowPlayer(int index, int pl);
 
   /// Returns the number of row contingencies (i.e., rows in the table)
-  int NumRowContingencies(void) const;
+  int NumRowContingencies() const;
 
   /// Returns the number of rows spanned by strategy of row player index
   int NumRowsSpanned(int index) const;
@@ -107,7 +107,7 @@ public:
   int RowToStrategy(int player, int row) const;
 
   /// Returns the number of players assigned to the columns
-  int NumColPlayers(void) const { return m_colPlayers.Length(); }
+  int NumColPlayers() const { return m_colPlayers.Length(); }
 
   /// Returns the index'th player assigned to the columns (1=slowest)
   int GetColPlayer(int index) const { return m_colPlayers[index]; }
@@ -117,7 +117,7 @@ public:
 
   /// Returns the number of column contingencies 
   /// (Note that each column contingency corresponds to #players cols!)
-  int NumColContingencies(void) const;
+  int NumColContingencies() const;
 
   /// Returns the number of columns spanned by strategy of column player index
   int NumColsSpanned(int index) const;
@@ -132,7 +132,7 @@ public:
   /// @name Exporting/printing graphics
   //@{
   /// Creates a printout object of the game as currently displayed
-  wxPrintout *GetPrintout(void);
+  wxPrintout *GetPrintout();
   /// Creates a bitmap of the game as currently displayed
   bool GetBitmap(wxBitmap &, int marginX, int marginY);
   /// Outputs the game as currently displayed to a SVG file

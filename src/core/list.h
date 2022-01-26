@@ -66,8 +66,8 @@ public:
   public:
     iterator(const List &p_list, Node *p_node)
       : m_list(p_list), m_node(p_node)  { }
-    T &operator*(void) const { return *m_node; }
-    iterator &operator++(void)  { m_node = m_node->m_next; return *this; }
+    T &operator*() const { return *m_node; }
+    iterator &operator++()  { m_node = m_node->m_next; return *this; }
     bool operator==(const iterator &it) const
     { return (m_node == it.m_node); }
     bool operator!=(const iterator &it) const
@@ -81,15 +81,15 @@ public:
   public:
     const_iterator(const List &p_list, Node *p_node)
       : m_list(p_list), m_node(p_node)  { }
-    const T &operator*(void) const { return *m_node; }
-    const_iterator &operator++(void)  { m_node = m_node->m_next; return *this; }
+    const T &operator*() const { return *m_node; }
+    const_iterator &operator++()  { m_node = m_node->m_next; return *this; }
     bool operator==(const const_iterator &it) const
     { return (m_node == it.m_node); }
     bool operator!=(const const_iterator &it) const
     { return (m_node != it.m_node); }
   };
 
-  List(void);
+  List();
   List(const List<T> &);
   virtual ~List();
   
@@ -98,10 +98,10 @@ public:
   bool operator==(const List<T> &b) const;
   bool operator!=(const List<T> &b) const;
   
-  iterator begin(void)             { return iterator(*this, m_head); }
-  const_iterator begin(void) const { return const_iterator(*this, m_head); }
-  iterator end(void)               { return iterator(*this, 0); }
-  const_iterator end(void) const   { return const_iterator(*this, 0); }
+  iterator begin()             { return iterator(*this, m_head); }
+  const_iterator begin() const { return const_iterator(*this, m_head); }
+  iterator end()               { return iterator(*this, 0); }
+  const_iterator end() const   { return const_iterator(*this, 0); }
 
   const T &operator[](int) const;
   T &operator[](int);
@@ -115,7 +115,7 @@ public:
 
   int Find(const T &) const;
   bool Contains(const T &t) const;
-  int Length(void) const { return m_length; }
+  int Length() const { return m_length; }
 
   /// @name STL-style interface
   ///
@@ -125,23 +125,23 @@ public:
   /// possible.
   ///@{
   /// Return whether the list container is empty (has size 0).
-  bool empty(void) const { return (m_length == 0); }
+  bool empty() const { return (m_length == 0); }
   /// Return the number of elements in the list container.
-  size_t size(void) const { return m_length; }
+  size_t size() const { return m_length; }
   /// Adds a new element at the end of the list container, after its
   /// current last element.
   void push_back(const T &val);
   /// Removes all elements from the list container (which are destroyed),
   /// leaving the container with a size of 0.
-  void clear(void);
+  void clear();
   /// Returns a reference to the first elemnet in the list container.
-  T &front(void)             { return m_head->m_data; }
+  T &front()             { return m_head->m_data; }
   /// Returns a reference to the first element in the list container.
-  const T &front(void) const { return m_head->m_data; }
+  const T &front() const { return m_head->m_data; }
   /// Returns a reference to the last element in the list container.
-  T &back(void)             { return m_tail->m_data; }
+  T &back()             { return m_tail->m_data; }
   /// Returns a reference to the last element in the list container.
-  const T &back(void) const { return m_tail->m_data; }
+  const T &back() const { return m_tail->m_data; }
   ///@}
 };
 
@@ -160,7 +160,7 @@ List<T>::Node::Node(const T &p_data,
 //                 List<T>: Member function implementations
 //--------------------------------------------------------------------------
 
-template <class T> List<T>::List(void) 
+template <class T> List<T>::List() 
   : m_length(0), m_head(0), m_tail(0), m_currentIndex(0), m_currentNode(0)
 { }
 
@@ -394,7 +394,7 @@ template <class T> void List<T>::push_back(const T &val)
   InsertAt(val, m_length + 1);
 }
 
-template <class T> void List<T>::clear(void)
+template <class T> void List<T>::clear()
 {
   Node *n = m_head;
   while (n)  {

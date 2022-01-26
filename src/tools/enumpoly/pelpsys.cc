@@ -12,7 +12,7 @@ psys in the original distribution.
 /**************************************************************************/
 
 aset psys_to_aset(psys P){
-  aset res=0,pnt=0;
+  aset res=nullptr,pnt=nullptr;
   int r=1,j,d,t;
   char  *s,c='a'-1;
   LOCS(2);
@@ -63,7 +63,7 @@ N=aset_dim(A)-1;
  
   /* determine dimensions of psys */
   Aptr=aset_start_cfg(A);
-  while((C=aset_next_cfg(&Aptr))!=0){
+  while((C=aset_next_cfg(&Aptr))!=nullptr){
           r++;
           n+=T(r);
           M+=T(r)*pcfg_npts(C);
@@ -73,7 +73,7 @@ N=aset_dim(A)-1;
  
   /* set up semi-mixed structure data */
   Aptr=aset_start_cfg(A);
-  while((C=aset_next_cfg(&Aptr))!=0){
+  while((C=aset_next_cfg(&Aptr))!=nullptr){
     blkno++;
     *psys_block_start(Sys,blkno)=eqno;
     for(i=1;i<=T(blkno);i++){
@@ -95,7 +95,7 @@ N=aset_dim(A)-1;
         if (r<n) r=n;/* calculate actual degree of current poly */
         *psys_homog(Sys)=-n; /* save degree of current monomial */
         psys_save_mon(Sys,eqno);
-      }while((P=aset_next_pnt(&Cptr))!=0);
+      }while((P=aset_next_pnt(&Cptr))!=nullptr);
       /* Homogenize */
       psys_set_eqno(Sys,eqno);
       FORALL_MONO(Sys, (*psys_homog(Sys))+=r;)
@@ -151,10 +151,10 @@ node psys_binsolve(psys sys){
  int bstart=0,block_size;
  int m=1,row=0,cid;
  xpnt Dsol;
- Dmatrix Coef, Cf, Sol=0;
- Imatrix S,Idx,U=0;
+ Dmatrix Coef, Cf, Sol=nullptr;
+ Imatrix S,Idx,U=nullptr;
  fcomplex ctmp;
- node Sol_List=0;
+ node Sol_List=nullptr;
  LOCS(1);
  PUSH_LOC(Sol_List);
 
@@ -478,9 +478,9 @@ double BGQR(Dmatrix A,Ivector Basis,int N,Dmatrix Q,Dmatrix R){
 */
 
 int psys_cont(Dvector X, psys P){
-Dvector Y=0, QY=0,DX=0,XOld=0;
-Dmatrix JC=0,QT=0,R=0;
-Ivector Basis=0,Z=0;
+Dvector Y=nullptr, QY=nullptr,DX=nullptr,XOld=nullptr;
+Dmatrix JC=nullptr,QT=nullptr,R=nullptr;
+Ivector Basis=nullptr,Z=nullptr;
 int T;         /* total number of real variables appearing*/
 int N;     /* total number of variables for 1 affine patch*/
 int tsteps=0;
@@ -779,7 +779,7 @@ psys psys_new(int n, int m, int r){
     Sys_Mon_New(res)=1;
     for(i=1;i<=m;i++){
         Mon_next(res,i)=i+1;
-        Mon_aux(res,i)=0; 
+        Mon_aux(res,i)=nullptr; 
         Mon_coefR(res,i)=0.0;
         Mon_coefI(res,i)=0.0;
     }
@@ -1076,7 +1076,7 @@ Dvector psys_eval(psys sys, xpnt X, Dvector Y){
   fcomplex pval,tmp;
   n=psys_d(sys);
   if(xpnt_n(X)!=n) bad_error("bad argument in psys_eval");
-  if(Y==0 || DVlength(Y)!=2*n) Y=Dmatrix_resize(Y,1,2*n);
+  if(Y==nullptr || DVlength(Y)!=2*n) Y=Dmatrix_resize(Y,1,2*n);
   
   for(i=1;i<=2*n;i++) Y(i)=0;
   FORALL_POLY(sys,
@@ -1243,7 +1243,7 @@ return M;}
 /******************* implementation code from psys_hom.c ******************/
 /**************************************************************************/
 
-static Imatrix Norm=0;
+static Imatrix Norm=nullptr;
 
 node psys_hom(psys sys, node point_list, int tweak){
   node ptr=point_list;   
@@ -1256,13 +1256,13 @@ node psys_hom(psys sys, node point_list, int tweak){
 
   if (Cont_Alg==USE_HOMPACK){
      init_hom(sys);
-     while(ptr!=0){
+     while(ptr!=nullptr){
        HPK_cont((Dmatrix)Car(Car(ptr)), tweak);
        ptr=Cdr(ptr);
      }
   }
   else {
-    while(ptr!=0){
+    while(ptr!=nullptr){
 
 #ifdef PSYS_HOM_PRINT
       fprintf(stdout /* was psys_logfile */,"P"); psys_fprint(stdout /* was psys_logfile */,sys);
@@ -1283,12 +1283,12 @@ node psys_hom(psys sys, node point_list, int tweak){
 
 node psys_solve(psys sys, Imatrix norm, int tweak){
   psys start,hom;
-  node sols=0;
+  node sols=nullptr;
   Norm=norm;
   hom=psys_norm_sub(psys_copy(sys),norm);
   start=psys_lead(hom);
   sols=psys_hom(hom,psys_binsolve(start),tweak);
-  Norm=0;
+  Norm=nullptr;
   psys_free(start);
   psys_free(hom);
   return sols;

@@ -89,7 +89,7 @@ protected:
 public:
   /// @name Lifecycle
   //@{
-  Integer(void);
+  Integer();
   Integer(int);
   Integer(long);
   Integer(unsigned long);
@@ -147,7 +147,7 @@ public:
 
   /// @name Operator overloading
   //@{
-  Integer operator-(void) const;
+  Integer operator-() const;
   Integer operator+(const Integer &) const;
   Integer operator+(long) const;
   Integer operator-(const Integer &) const;

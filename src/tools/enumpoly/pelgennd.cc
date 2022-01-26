@@ -19,46 +19,46 @@ Gen_node gen_node()
 {
  Gen_node a;
  a=(Gen_node)mem_malloc(sizeof(struct Gen_node_tag)); 
- if (a == 0) bad_error(" malloc failure in gen_node()");
- a->next=0;
+ if (a == nullptr) bad_error(" malloc failure in gen_node()");
+ a->next=nullptr;
  a->type=0;
  return a;}
 
 Gen_node free_Gen_node(Gen_node a)
 {
- if (a==0) return 0;
+ if (a==nullptr) return nullptr;
  switch (a->type){
    case Xpl_T:  
    case Npl_T:
-   case Lst_T: if(a->Genval.lval!=0) free_Gen_list(a->Genval.lval);
+   case Lst_T: if(a->Genval.lval!=nullptr) free_Gen_list(a->Genval.lval);
                break;
    case Ast_T: Dlist_del(SaveList,(node)(a->Genval.gval));
                break;
    case Sys_T: 
-   case Mtx_T: if(a->Genval.lval!=0) 
+   case Mtx_T: if(a->Genval.lval!=nullptr) 
                      Gmatrix_free((Gmatrix)a->Genval.gval);
                break;
    case Err_T: break; 
-   case Idf_T: if(a->Genval.idval!=0) mem_free(a->Genval.idval); 
+   case Idf_T: if(a->Genval.idval!=nullptr) mem_free(a->Genval.idval); 
                break;
-   case Str_T: if(a->Genval.gval!=0) mem_free(a->Genval.gval); 
+   case Str_T: if(a->Genval.gval!=nullptr) mem_free(a->Genval.gval); 
                break;
-   case Ply_T: if(a->Genval.pval!=0) freeP(a->Genval.pval); 
+   case Ply_T: if(a->Genval.pval!=nullptr) freeP(a->Genval.pval); 
                break;
    default : break;
   }
  mem_free((char *)a); 
- return 0;
+ return nullptr;
 } 
 
 Gen_node free_Gen_list(Gen_node a)
 { 
   Gen_node b;
-  while(a!=0){
+  while(a!=nullptr){
     b=a->next;
     a=free_Gen_node(a);
     a=b;}
-  return 0;
+  return nullptr;
 }
 
 Gen_node G_Print(Gen_node);
@@ -202,7 +202,7 @@ void print_Gen_node(Gen_node g)
 void print_Gen_list(Gen_node g)
  {
    int tog=0;
-   while (g!=0){ 
+   while (g!=nullptr){ 
      if (tog==1)
        fprintf(stdout /* was Pel_Out */,",");
      print_Gen_node(g);
@@ -213,7 +213,7 @@ void print_Gen_list(Gen_node g)
 
 void silent_print_Gen_list(Gen_node g)
 {
-  while (g!=0)
+  while (g!=nullptr)
     g=g->next;
 }
 
@@ -227,8 +227,8 @@ Gen_node Gen_node_to_List(Gen_node g)
 
 Gen_node Cat(Gen_node g1,Gen_node g2){
  Gen_node a;
- if((a=g1)==0) return g2;
- while(a->next!=0) a=a->next;
+ if((a=g1)==nullptr) return g2;
+ while(a->next!=nullptr) a=a->next;
  a->next=g2;
  return g1;
 }
@@ -238,11 +238,11 @@ Gen_node Cat(Gen_node g1,Gen_node g2){
 Gen_node copy_Gen_list(Gen_node a)
  {
 Gen_node n,pt;
- if (a==0) return 0;
+ if (a==nullptr) return nullptr;
  n=copy_Gen_node(a);
  pt=n;
  a=a->next;
- while(a!=0){ pt->next=copy_Gen_node(a);
+ while(a!=nullptr){ pt->next=copy_Gen_node(a);
               pt=pt->next;
               a=a->next;
             }
@@ -293,43 +293,43 @@ return b;
 
 
 char *Gen_idval(Gen_node g){
-  if (g==0||(g->type!=Idf_T&&g->type!=Str_T)) return 0;
+  if (g==nullptr||(g->type!=Idf_T&&g->type!=Str_T)) return nullptr;
   else return g->Genval.idval;
 }
 
 Gen_node Gen_set_next(Gen_node g,Gen_node h){
-  if (g==0) return 0;
+  if (g==nullptr) return nullptr;
   else return g->next=h;
 }
 Gen_node Gen_lval(Gen_node g){
-  if (g==0) return 0;
+  if (g==nullptr) return nullptr;
   else return g->Genval.lval;
 }
 Gen_node Gen_set_lval(Gen_node g,Gen_node g1){
-  if (g==0) return 0;
+  if (g==nullptr) return nullptr;
   else return (g->Genval.lval=g1);
 }
 Gen_node Gen_next(Gen_node g){
-  if (g==0) return 0;
+  if (g==nullptr) return nullptr;
   else return g->next;
 }
 int Gen_type(Gen_node g){
-  if (g==0) bad_error("requesting type of null node");
+  if (g==nullptr) bad_error("requesting type of null node");
   return g->type;
 }
 int Gen_set_int(Gen_node g,int i){ 
-  if (g==0) bad_error("setting int field of null node");
+  if (g==nullptr) bad_error("setting int field of null node");
   return g->Genval.ival=i;
 }
 
 int Gen_int(Gen_node g){
-  if (g==0) bad_error("getting int field of null node");
+  if (g==nullptr) bad_error("getting int field of null node");
   return g->Genval.ival;
 }
 int Gen_length(Gen_node g){
   int ct=1;
-  if (g==0) return 0;
-  while((g=Gen_next(g))!=0)ct++;
+  if (g==nullptr) return 0;
+  while((g=Gen_next(g))!=nullptr)ct++;
   return ct;
 }
 
@@ -339,12 +339,12 @@ Gen_node Gen_elt(Gen_node g, int idx){
 }
 
 polynomial1 Gen_poly(Gen_node g){
- if (g==0) bad_error("getting polynomial1 from null node in Gentype (Pat)");
+ if (g==nullptr) bad_error("getting polynomial1 from null node in Gentype (Pat)");
  return (polynomial1)g->Genval.gval;
 }
 
 node Gen_aset(Gen_node g){
- if (g==0) bad_error("getting aset from null node");
+ if (g==nullptr) bad_error("getting aset from null node");
  return Dlist_data((node)(g->Genval.gval));
 }
   
@@ -386,7 +386,7 @@ Gen_node IDND(const char *s){
      a->Genval.idval=Copy_String(s);
 
 
-     a->next=0;
+     a->next=nullptr;
 
 
      return a;
@@ -403,7 +403,7 @@ Gen_node ASTND(node n){
      a->Genval.gval=(char *)Dlist_add(SaveList,n);
 
 
-     a->next=0;
+     a->next=nullptr;
 
     return a;
 }
@@ -413,7 +413,7 @@ Gen_node INTND(int n){
      a=gen_node();
      a->type=Int_T;
      a->Genval.ival=n;
-     a->next=0;
+     a->next=nullptr;
      return a;
 }
 
@@ -422,7 +422,7 @@ Gen_node DBLND(double d){
      a=gen_node();
      a->type=Dbl_T;
      a->Genval.dval=d;
-     a->next=0;
+     a->next=nullptr;
      return a;
 }
 
@@ -431,7 +431,7 @@ Gen_node CPXND(fcomplex c){
      a=gen_node();
      a->type=Cpx_T;
      a->Genval.cval=c;
-     a->next=0;
+     a->next=nullptr;
      return a;
 }
 
@@ -440,7 +440,7 @@ Gen_node PLYND(polynomial1 p) {
      a=gen_node();
      a->type=Ply_T;
      a->Genval.pval=p;
-     a->next=0;
+     a->next=nullptr;
      return a;
 }
 
@@ -449,7 +449,7 @@ Gen_node PND(Gen_node p(Gen_node)) {
      a=gen_node();
      a->type=Prc_T;
      a->Genval.proc=p;
-     a->next=0;
+     a->next=nullptr;
      return a;
 }
 
@@ -458,7 +458,7 @@ Gen_node Rerror(const char *s,Gen_node g)
   bad_error("We had an Rerror");
 
   Gen_node ans;
-  if (g!=0) free_Gen_list(g);
+  if (g!=nullptr) free_Gen_list(g);
 #ifdef LOG_PRINT
   fprintf(stderr /* was Pel_Err */,"%s\n",s)
 #endif

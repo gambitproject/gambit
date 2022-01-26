@@ -55,7 +55,7 @@ private:
   Vector<T> y, x, d;
 
   void Solve(int phase = 0);
-  int Enter(void);
+  int Enter();
   int Exit(int);
 
   static Array<int> Artificials(const Vector<T> &);
@@ -65,16 +65,16 @@ public:
 	  int nequals);   // nequals = number of equalities (last nequals rows)
   ~LPSolve();
   
-  T OptimumCost(void) const { return total_cost; }
-  const Vector<T> &OptimumVector(void) const { return (*xx); }
-  const List< BFS<T> > &GetAll(void);
-  const LPTableau<T> &GetTableau(void) const { return tab; }
-  const BFS<T> &OptimumBFS(void) const { return opt_bfs; }
+  T OptimumCost() const { return total_cost; }
+  const Vector<T> &OptimumVector() const { return (*xx); }
+  const List< BFS<T> > &GetAll();
+  const LPTableau<T> &GetTableau() const { return tab; }
+  const BFS<T> &OptimumBFS() const { return opt_bfs; }
   
-  bool IsWellFormed(void) const { return well_formed; }
-  bool IsFeasible(void) const { return feasible; }
-  bool IsBounded(void) const  { return bounded; }
-  long NumPivots(void) const { return tab.NumPivots(); }
+  bool IsWellFormed() const { return well_formed; }
+  bool IsFeasible() const { return feasible; }
+  bool IsBounded() const  { return bounded; }
+  long NumPivots() const { return tab.NumPivots(); }
 };
 
 }  // end namespace Gambit::linalg

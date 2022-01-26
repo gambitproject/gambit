@@ -100,7 +100,7 @@ public:
   class BadDenom : public Exception  {
   public:
     virtual ~BadDenom() throw() { }
-    const char *what(void) const throw() { return "Bad denominator in Tableau"; } 
+    const char *what() const throw() { return "Bad denominator in Tableau"; } 
   };
       // constructors and destructors
   Tableau(const Matrix<Rational> &A, const Vector<Rational> &b); 

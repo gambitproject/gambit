@@ -38,7 +38,7 @@ template <class T> LemkeTableau<T>::LemkeTableau(const Tableau<T> &tab)
   : Tableau<T>(tab) 
 { }
 
-template <class T> LemkeTableau<T>::~LemkeTableau(void) 
+template <class T> LemkeTableau<T>::~LemkeTableau() 
 { }
 
 template <class T> int LemkeTableau<T>::SF_PivotIn(int inlabel)

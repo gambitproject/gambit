@@ -137,7 +137,7 @@ bool gbtNumberValidator::Validate(wxWindow *p_parent)
   return true;
 }
 
-bool gbtNumberValidator::TransferToWindow(void)
+bool gbtNumberValidator::TransferToWindow()
 {
   if (!m_stringValue) {
     return false;
@@ -149,7 +149,7 @@ bool gbtNumberValidator::TransferToWindow(void)
   return true;
 }
 
-bool gbtNumberValidator::TransferFromWindow(void)
+bool gbtNumberValidator::TransferFromWindow()
 {
   if (!m_stringValue) {
     return false;

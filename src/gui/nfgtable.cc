@@ -105,10 +105,10 @@ public:
   /// @name Access to scrollbars from underlying wxSheet
   //@{
   /// Get the vertical scrollbar
-  wxScrollBar *GetVerticalScrollBar(void) const
+  wxScrollBar *GetVerticalScrollBar() const
   { return m_vertScrollBar; }
   /// Get the horizontal scrollbar
-  wxScrollBar *GetHorizontalScrollBar(void) const 
+  wxScrollBar *GetHorizontalScrollBar() const 
   { return m_horizScrollBar; }
   //@}
 };
@@ -177,7 +177,7 @@ public:
 
   /// @name Synchronizing with document state
   //@{
-  void OnUpdate(void);
+  void OnUpdate();
   //@}
 
   /// @name Drop target interaction
@@ -293,7 +293,7 @@ void gbtRowPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
 }
 
 
-void gbtRowPlayerWidget::OnUpdate(void)
+void gbtRowPlayerWidget::OnUpdate()
 {
   int newRows = m_table->NumRowContingencies();
   if (newRows > GetNumberRows())  InsertRows(0, newRows - GetNumberRows());
@@ -386,7 +386,7 @@ public:
 
   /// @name Synchronizing with document state
   //@{
-  void OnUpdate(void);
+  void OnUpdate();
   //@}
 
   /// @name Drop target interaction
@@ -430,7 +430,7 @@ void gbtColPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
   m_doc->DoDeleteStrategy(support.GetStrategy(player, strat));
 }
 
-void gbtColPlayerWidget::OnUpdate(void)
+void gbtColPlayerWidget::OnUpdate()
 {
   int newCols = m_table->NumColContingencies() * m_doc->NumPlayers();
   if (newCols > GetNumberCols())  InsertCols(0, newCols - GetNumberCols());
@@ -600,7 +600,7 @@ public:
 
   /// @name Synchronizing with document state
   //@{
-  void OnUpdate(void);
+  void OnUpdate();
   //@}
 
   DECLARE_EVENT_TABLE()
@@ -634,7 +634,7 @@ int gbtPayoffsWidget::ColToPlayer(int p_col) const
   }
 }
 
-void gbtPayoffsWidget::OnUpdate(void)
+void gbtPayoffsWidget::OnUpdate()
 {
   int newCols = m_table->NumColContingencies() * m_doc->NumPlayers();
   if (newCols > GetNumberCols())  InsertCols(0, newCols - GetNumberCols());
@@ -963,7 +963,7 @@ void gbtTableWidget::OnBeginEdit(wxSheetEvent &)
   m_doc->PostPendingChanges();
 }
 
-void gbtTableWidget::OnUpdate(void)
+void gbtTableWidget::OnUpdate()
 {
   if (m_doc->NumPlayers() > m_rowPlayers.Length() + m_colPlayers.Length()) {
     for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
@@ -998,7 +998,7 @@ void gbtTableWidget::OnUpdate(void)
   GetSizer()->Layout();
 }
 
-void gbtTableWidget::PostPendingChanges(void)
+void gbtTableWidget::PostPendingChanges()
 {
   if (m_payoffSheet->IsCellEditControlShown()) {
     m_payoffSheet->DisableCellEditControl(true);
@@ -1013,7 +1013,7 @@ void gbtTableWidget::PostPendingChanges(void)
   }
 }
 
-bool gbtTableWidget::ShowDominance(void) const
+bool gbtTableWidget::ShowDominance() const
 {
   return m_nfgPanel->IsDominanceShown();
 }
@@ -1041,7 +1041,7 @@ void gbtTableWidget::SetRowPlayer(int index, int pl)
   OnUpdate();
 }
 
-int gbtTableWidget::NumRowContingencies(void) const
+int gbtTableWidget::NumRowContingencies() const
 {
   int ncont = 1;
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
@@ -1084,7 +1084,7 @@ void gbtTableWidget::SetColPlayer(int index, int pl)
   OnUpdate();
 }
 
-int gbtTableWidget::NumColContingencies(void) const
+int gbtTableWidget::NumColContingencies() const
 {
   int ncont = 1;
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
@@ -1136,7 +1136,7 @@ private:
 public:
   gbtNfgPrintout(gbtTableWidget *p_table, const wxString &p_label)
     : wxPrintout(p_label), m_table(p_table) { }
-  virtual ~gbtNfgPrintout() { }
+  virtual ~gbtNfgPrintout() = default;
 
   bool OnPrintPage(int) 
   { m_table->RenderGame(*GetDC(), 50, 50);  return true; }
@@ -1146,7 +1146,7 @@ public:
   { *minPage = 1; *maxPage = 1; *selPageFrom = 1; *selPageTo = 1; }
 };
 
-wxPrintout *gbtTableWidget::GetPrintout(void)
+wxPrintout *gbtTableWidget::GetPrintout()
 {
   return new gbtNfgPrintout(this,
 			    wxString(m_doc->GetGame()->GetTitle().c_str(),

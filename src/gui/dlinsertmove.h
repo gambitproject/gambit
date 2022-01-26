@@ -42,9 +42,9 @@ public:
 
   // Data access (only valid if ShowModal() returns wxID_OK.
   // If GetInfoset() returns null, user selected "new infoset"
-  Gambit::GamePlayer GetPlayer(void) const;
-  Gambit::GameInfoset GetInfoset(void) const;
-  int GetActions(void) const;
+  Gambit::GamePlayer GetPlayer() const;
+  Gambit::GameInfoset GetInfoset() const;
+  int GetActions() const;
 };
 
 #endif  // DLINSERTMOVE_H

@@ -79,7 +79,7 @@ gSpace& gSpace::operator=(const gSpace & rhs)
   return *this;
 }
 
-int gSpace::Dmnsn(void) const
+int gSpace::Dmnsn() const
 {
   return Variables.Length();
 }
@@ -209,17 +209,6 @@ exp_vect::exp_vect(const exp_vect* p)
 : Space(p->Space), components(p->components)
 {
 }
-
-exp_vect::exp_vect(const exp_vect & p)
-: Space(p.Space), components(p.components)
-{
-}
-
-exp_vect::~exp_vect()
-{
-  //  gout << "Gotcha!\n";
-}
-
 
 
 //-------------------------
@@ -572,17 +561,6 @@ term_order::term_order(const gSpace* p, ORD_PTR act_ord)
 : Space(p), actual_order(act_ord)
 {
 }
-
-term_order::term_order(const term_order & p)
-: Space(p.Space), actual_order(p.actual_order)
-{
-}
-
-term_order::~term_order()
-{
-  //  gout << "Sihonara, sucker ... \n";
-}
-
 
 
 //-------------------------

@@ -31,7 +31,7 @@ namespace Nash {
 using namespace Gambit::linalg;
 
 template <class T> List<List<MixedStrategyProfile<T> > > 
-EnumMixedStrategySolution<T>::GetCliques(void) const
+EnumMixedStrategySolution<T>::GetCliques() const
 {
   if (m_cliques1.size() == 0) {
     // Cliques are generated on demand

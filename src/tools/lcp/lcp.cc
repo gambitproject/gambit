@@ -71,9 +71,9 @@ int main(int argc, char *argv[])
 
   int long_opt_index = 0;
   struct option long_options[] = {
-    { "help", 0, NULL, 'h'   },
-    { "version", 0, NULL, 'v'  },
-    { 0,    0,    0,    0   }
+    { "help", 0, nullptr, 'h'   },
+    { "version", 0, nullptr, 'v'  },
+    { nullptr,    0,    nullptr,    0   }
   };
   while ((c = getopt_long(argc, argv, "d:DvhqSPe:r:", long_options, &long_opt_index)) != -1) {
     switch (c) {

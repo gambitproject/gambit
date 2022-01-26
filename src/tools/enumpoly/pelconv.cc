@@ -11,8 +11,8 @@ suitability of g for conversion */
 
 /* Scalors first: */
 polynomial1  Gen_To_Ply(Gen_node g) {
-  polynomial1 p=0;
- if (g==0)  bad_error("NULL arg to Gen_To_Ply");             
+  polynomial1 p=nullptr;
+ if (g==nullptr)  bad_error("NULL arg to Gen_To_Ply");             
   switch (g->type){
      case Int_T: p=ItoP(g->Genval.ival,Def_Ring);
                  break;
@@ -30,7 +30,7 @@ polynomial1  Gen_To_Ply(Gen_node g) {
 
 fcomplex  Gen_To_Cpx(Gen_node g){
   fcomplex c;
-  if (g==0)  bad_error("NULL arg to Gen_To_Cpx\n");
+  if (g==nullptr)  bad_error("NULL arg to Gen_To_Cpx\n");
   switch (g->type){
      case Int_T: c=ItoC(g->Genval.ival);
                  break;
@@ -46,7 +46,7 @@ fcomplex  Gen_To_Cpx(Gen_node g){
 
 double Gen_To_Dbl(Gen_node g)  {
   double d = 0.0;    
- if (g==0) bad_error("NULL arg to Gen_To_Dbl");             
+ if (g==nullptr) bad_error("NULL arg to Gen_To_Dbl");             
   switch (g->type){
      case Int_T: d=g->Genval.ival;       
                  break;
@@ -60,7 +60,7 @@ double Gen_To_Dbl(Gen_node g)  {
 
 int  Gen_To_Int(Gen_node g){
   int d = 0;
- if (g==0) bad_error("NULL arg to Gen_To_Int");             
+ if (g==nullptr) bad_error("NULL arg to Gen_To_Int");             
   switch (g->type){
      case Int_T: d=g->Genval.ival;
                  break;
@@ -157,14 +157,14 @@ Gen_node Ply_To_Gen(polynomial1 p)
 
 
 node  Gen_to_Dvector_list(Gen_node ptr){
-    node  res=0;
+    node  res=nullptr;
     LOCS(1);
     PUSH_LOC(res);
-    while(ptr!=0){
+    while(ptr!=nullptr){
       if (Can_Be_Vector(ptr,Dbl_T)!=2*N+3){
         warning("bad list in Gen_to_Dvector");
         POP_LOCS();
-        return 0;
+        return nullptr;
       }
       res=Cons(atom_new((char *)Gen_to_Dmatrix(ptr),DMTX),res);
       ptr=Gen_next(ptr);
@@ -176,10 +176,10 @@ node  Gen_to_Dvector_list(Gen_node ptr){
 Gen_node Dvector_list_to_Gen(node DL){
   Gen_node ptc,res;
    ptc=(res=gen_node());
-   while(DL!=0){
+   while(DL!=nullptr){
       if (node_get_type(Car(DL),LEFT)!=DMTX){
         warning("bad list in Dvector_list_to_Gen\n");
-        return 0;
+        return nullptr;
       }
      Gen_set_next(ptc,Dmatrix_to_Gen((Dmatrix)Car(Car(DL))));
      ptc=Gen_next(ptc);
@@ -193,10 +193,10 @@ Gen_node Dvector_list_to_Gen(node DL){
 Gen_node Xpl_to_Gen(node DL){
   Gen_node ptc,res;
    ptc=(res=gen_node());
-   while(DL!=0){
+   while(DL!=nullptr){
       if (node_get_type(Car(DL),LEFT)!=DMTX){
         warning("bad list in Dvector_list_to_Gen\n");
-        return 0;
+        return nullptr;
       }
      Gen_set_next(ptc,Dmatrix_to_Gen((Dmatrix)Car(Car(DL))));
      ptc=Gen_next(ptc);
@@ -213,10 +213,10 @@ Gen_node Xpl_to_Gen(node DL){
 Gen_node Ivector_list_to_Gen(node DL){
   Gen_node ptc,res;
    ptc=(res=gen_node());
-   while(DL!=0){
+   while(DL!=nullptr){
       if (node_get_type(Car(DL),LEFT)!=IMTX){
         warning("bad list in Ivector_list_to_Gen");
-        return 0;
+        return nullptr;
       }
      Gen_set_next(ptc,Imatrix_to_Gen((Imatrix)Car(Car(DL))));
      ptc=Gen_next(ptc);
@@ -228,14 +228,14 @@ Gen_node Ivector_list_to_Gen(node DL){
 }
 
 node  Gen_to_Ivector_list(Gen_node ptr){
-    node  res=0;
+    node  res=nullptr;
     LOCS(1);
     PUSH_LOC(res);
-    while(ptr!=0){
+    while(ptr!=nullptr){
       if (Can_Be_Vector(ptr,Int_T)<=0){
         warning("bad list in Gen_to_Ivector");
         POP_LOCS();
-        return 0;
+        return nullptr;
       }
       res=Cons(atom_new((char *)Gen_to_Imatrix(ptr),IMTX),res);
       ptr=Gen_next(ptr);
@@ -248,8 +248,8 @@ node  Gen_to_Ivector_list(Gen_node ptr){
 Gen_node List_To_Aset(Gen_node g){
  Gen_node ptr;
  Gmatrix M,P;
- point pnt=0;
- aset A=0;
+ point pnt=nullptr;
+ aset A=nullptr;
  int R,D,r=0,j,i;
  char  *s,c='a'-1;
  LOCS(2);
@@ -259,7 +259,7 @@ Gen_node List_To_Aset(Gen_node g){
         POP_LOCS(); return Rerror("",g);
  }
  A=aset_new(R,D);
- for(ptr=g;ptr!=0;ptr=Gen_next(ptr)){
+ for(ptr=g;ptr!=nullptr;ptr=Gen_next(ptr)){
      M=Gen_Mtx(ptr);
      r++;
      c++;
@@ -295,7 +295,7 @@ psys Gen_to_psys(Gen_node g){
     if (i>1&&orderPP(PV(i),PV(i-1))!=0) r++;
     ptr=PV(i);
     m++;
-    while((ptr=poly_next(ptr))!=0) m++;
+    while((ptr=poly_next(ptr))!=nullptr) m++;
   }
   sys=psys_new(n,m,r);
   *psys_block_start(sys,1)=1;
@@ -307,8 +307,8 @@ psys Gen_to_psys(Gen_node g){
     }
     ptr=PV(i);
     deg=poly_deg(ptr);
-    while(ptr!=0){
-      while(ptr!=0){
+    while(ptr!=nullptr){
+      while(ptr!=nullptr){
         psys_init_mon(sys);
         *psys_coef_real(sys)=(*poly_coef(ptr)).r;
         *psys_coef_imag(sys)=(*poly_coef(ptr)).i;
@@ -334,7 +334,7 @@ Gen_node Gen_from_psys(psys sys){
  Gmatrix PV;
  PV=Gmatrix_new(1,psys_d(sys));
  FORALL_POLY(sys,
-   tmpp=0;
+   tmpp=nullptr;
    FORALL_MONO(sys,
      tmpm=makeP(Def_Ring);
      *poly_coef(tmpm)=Complex(*psys_coef_real(sys),

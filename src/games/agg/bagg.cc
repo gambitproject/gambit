@@ -217,7 +217,7 @@ BAGG *BAGG::makeRandomBAGG(int N,vector<int> &numTypes,vector<ProbDist> &TDist,i
   AGG *aggPtr = AGG::makeRandomAGG(N,actions,S,P, aggActionSets, neighb, projTypes, seed,int_payoffs,int_factor);
   if(!aggPtr){
 	  std::cerr<<"MakeRandomBAGG(): failed to make underlying AGG."<<endl;
-	  return NULL;
+	  return nullptr;
   }
   return new BAGG(N,S,numTypes,TDist,typeActionSets, typeAction2ActionIndex, aggPtr);
 }

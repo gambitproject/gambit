@@ -36,13 +36,13 @@ class TablePureStrategyProfileRep : public PureStrategyProfileRep {
 protected:
   long m_index;
 
-  virtual PureStrategyProfileRep *Copy(void) const;
+  virtual PureStrategyProfileRep *Copy() const;
 
 public:
   TablePureStrategyProfileRep(const Game &p_game);
-  virtual long GetIndex(void) const { return m_index; }
+  virtual long GetIndex() const { return m_index; }
   virtual void SetStrategy(const GameStrategy &);
-  virtual GameOutcome GetOutcome(void) const;
+  virtual GameOutcome GetOutcome() const;
   virtual void SetOutcome(GameOutcome p_outcome);
   virtual Rational GetPayoff(int pl) const;
   virtual Rational GetStrategyValue(const GameStrategy &) const;
@@ -60,7 +60,7 @@ TablePureStrategyProfileRep::TablePureStrategyProfileRep(const Game &p_nfg)
   }
 }
 
-PureStrategyProfileRep *TablePureStrategyProfileRep::Copy(void) const
+PureStrategyProfileRep *TablePureStrategyProfileRep::Copy() const
 {
   return new TablePureStrategyProfileRep(*this);
 }
@@ -80,7 +80,7 @@ void TablePureStrategyProfileRep::SetStrategy(const GameStrategy &s)
   m_profile[s->GetPlayer()->GetNumber()] = s;
 }
 
-GameOutcome TablePureStrategyProfileRep::GetOutcome(void) const
+GameOutcome TablePureStrategyProfileRep::GetOutcome() const
 { 
   return dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index]; 
 }
@@ -114,7 +114,7 @@ TablePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) co
   }
 }
 
-PureStrategyProfile GameTableRep::NewPureStrategyProfile(void) const
+PureStrategyProfile GameTableRep::NewPureStrategyProfile() const
 {
   return PureStrategyProfile(new TablePureStrategyProfileRep(const_cast<GameTableRep *>(this)));
 }
@@ -164,7 +164,7 @@ GameTableRep::GameTableRep(const Array<int> &dim,
   }
 }
 
-Game GameTableRep::Copy(void) const
+Game GameTableRep::Copy() const
 {
   std::ostringstream os;
   WriteNfgFile(os);
@@ -176,7 +176,7 @@ Game GameTableRep::Copy(void) const
 //                  GameTableRep: General data access
 //------------------------------------------------------------------------
 
-bool GameTableRep::IsConstSum(void) const
+bool GameTableRep::IsConstSum() const
 {
   TablePureStrategyProfileRep profile(const_cast<GameTableRep *>(this));
 
@@ -288,9 +288,9 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
 //                       GameTableRep: Players
 //------------------------------------------------------------------------
 
-GamePlayer GameTableRep::NewPlayer(void)
+GamePlayer GameTableRep::NewPlayer()
 {
-  GamePlayerRep *player = 0;
+  GamePlayerRep *player = nullptr;
   player = new GamePlayerRep(this, m_players.Length() + 1, 1);
   m_players.Append(player);
   for (int outc = 1; outc <= m_outcomes.Last(); outc++) {
@@ -348,7 +348,7 @@ MixedStrategyProfile<Rational> GameTableRep::NewMixedStrategyProfile(const Ratio
 /// This rebuilds a new table of outcomes after the game has been
 /// redimensioned (change in the number of strategies).  Strategies
 /// numbered -1 are identified as the new strategies.
-void GameTableRep::RebuildTable(void)
+void GameTableRep::RebuildTable()
 {
   long size = 1L;
   Array<long> offsets(m_players.Length());
@@ -384,7 +384,7 @@ void GameTableRep::RebuildTable(void)
   IndexStrategies();
 }
 
-void GameTableRep::IndexStrategies(void)
+void GameTableRep::IndexStrategies()
 {
   long offset = 1L;
   for (GamePlayers::const_iterator player = m_players.begin();

@@ -48,7 +48,7 @@ Error Conditions: None;
 */
 Gen_node G_Help(Gen_node g){
  char *lable;
- if (Gen_length(g)!=1 || (lable=Gen_idval(Gen_elt(g,1)))==0)
+ if (Gen_length(g)!=1 || (lable=Gen_idval(Gen_elt(g,1)))==nullptr)
    return Rerror("usage: help(topic) where topic is a string",g);
  /*  print_doc(lable); REMOVED */
  free_Gen_list(g);
@@ -62,7 +62,7 @@ Gen_node G_Help(Gen_node g){
 /* aset psys_to_aset(psys); IN psys.h */
 Gen_node G_Aset(Gen_node g){
   psys P;
-  aset A=0;
+  aset A=nullptr;
   /*
   if (Gen_length(g)==1&&Can_Be_Vector(g,Ply_T)>0){
   
@@ -89,8 +89,8 @@ P=Gen_to_psys(g);
 **                                (problem probably in cly_triangulate)
 */
 Gen_node G_Ctrig(Gen_node g){
-  aset A=0,CP=0;
-  Ivector T=0;
+  aset A=nullptr,CP=nullptr;
+  Ivector T=nullptr;
   int r = 0;
   Gen_node ptr;
   int nargs;
@@ -121,15 +121,15 @@ Gen_node G_Ctrig(Gen_node g){
 ;
   free_Gen_list(g);
 
-  if (CP!=0){
+  if (CP!=nullptr){
      ptr=(g=Imatrix_to_Gen((Imatrix)Car(Car(CP))));
-     while((CP=Cdr(CP))!=0) ptr=Gen_set_next(ptr,
+     while((CP=Cdr(CP))!=nullptr) ptr=Gen_set_next(ptr,
                               Imatrix_to_Gen((Imatrix)Car(Car(CP))));
      g=Gen_node_to_List(g);
   }
   else g=IDND("");
 
-  if (T!=0) Imatrix_free(T);
+  if (T!=nullptr) Imatrix_free(T);
   POP_LOCS();
   return g;
 }
@@ -140,12 +140,12 @@ Gen_node G_Ctrig(Gen_node g){
 )
 */
 Gen_node G_GenSolve(Gen_node g, int tweak){
-  aset A=0;
+  aset A=nullptr;
   int seed;
   psys Sys;
   /* Cayley_continue(aset,Ivector,node *,int,int); IN cly_all.h */
-  node Sols=0;
-  Ivector T=0;
+  node Sols=nullptr;
+  Ivector T=nullptr;
   int r;
   int nargs;
   LOCS(2);
@@ -183,7 +183,7 @@ fprintf(stdout /* was Pel_Out */,"\ntime used %d,\n",read_mark(time0))
 ;
   free_Gen_list(g);
   g=Gen_node_to_List(Link(Gen_from_psys(Sys),Xpl_to_Gen(Sols))); 
-  if (T!=0) Imatrix_free(T);
+  if (T!=nullptr) Imatrix_free(T);
   psys_free(Sys);
   POP_LOCS();
   return g;
@@ -195,8 +195,8 @@ fprintf(stdout /* was Pel_Out */,"\ntime used %d,\n",read_mark(time0))
 ** MSD Command           (not working, not tested)
 */
 Gen_node G_MSD(Gen_node g){
-  aset A=0,CP=0;
-  Ivector T=0;
+  aset A=nullptr,CP=nullptr;
+  Ivector T=nullptr;
   int r;
   Gen_node ptr;
   int nargs;
@@ -224,14 +224,14 @@ Gen_node G_MSD(Gen_node g){
 #endif
 ;
   free_Gen_list(g);
-  if (CP!=0){
+  if (CP!=nullptr){
      ptr=(g=Imatrix_to_Gen((Imatrix)Car(Car(CP))));
-     while((CP=Cdr(CP))!=0) ptr=Gen_set_next(ptr,
+     while((CP=Cdr(CP))!=nullptr) ptr=Gen_set_next(ptr,
                               Imatrix_to_Gen((Imatrix)Car(Car(CP))));
      g=Gen_node_to_List(g);
   }
   else g=IDND("");
-  if (T!=0) Imatrix_free(T);
+  if (T!=nullptr) Imatrix_free(T);
   POP_LOCS();
   return g;
 }
@@ -240,8 +240,8 @@ Gen_node G_MSD(Gen_node g){
 ** Qtrig Command               (tested)
 */
 Gen_node G_Qtrig(Gen_node g){
-  aset A=0,CP=0;
-  Ivector T=0;
+  aset A=nullptr,CP=nullptr;
+  Ivector T=nullptr;
   int r = 0;
   Gen_node ptr;
   int nargs;
@@ -276,15 +276,15 @@ Gen_node G_Qtrig(Gen_node g){
   /*  -- SUSPICIOUS
  free_Gen_list(g);
  */  
-if (CP!=0){
+if (CP!=nullptr){
     ptr=(g=Imatrix_to_Gen((Imatrix)Car(Car(CP))));
-    while((CP=Cdr(CP))!=0){
+    while((CP=Cdr(CP))!=nullptr){
       ptr=Gen_set_next(ptr,Imatrix_to_Gen((Imatrix)Car(Car(CP))));
     }
     g=Gen_node_to_List(g);
   }
   else g=IDND("");
-  if (T!=0) Imatrix_free(T);
+  if (T!=nullptr) Imatrix_free(T);
   POP_LOCS();
   return g;
 }
@@ -343,7 +343,7 @@ psys_lift(M,0);
        default: 
           if ( Can_Be_List(g)==TRUE ){
               ptr=Gen_lval(g);
-              while(ptr!=0){
+              while(ptr!=nullptr){
                 if (Can_Be_Vector(ptr,Dbl_T)<1){
                    return Rerror("Usage: Unlift({<Dbl>})",g);
                  }
@@ -358,7 +358,7 @@ psys_lift(M,0);
 
     }
   }
-return 0; /* not reachable */
+return nullptr; /* not reachable */
 }
 
 /*
@@ -565,7 +565,7 @@ Gen_node G_Cont(Gen_node g, int tweak){
 */
 Gen_node G_Solve(Gen_node g, int tweak){
    psys P;
-   node Sl=0,Nl=0;
+   node Sl=nullptr,Nl=nullptr;
    /*   char *tmp; UNUSED */
    LOCS(2);
    PUSH_LOC(Sl);
@@ -578,7 +578,7 @@ Gen_node G_Solve(Gen_node g, int tweak){
    P=Gen_to_psys(Gen_elt(g,1));
    Nl=Gen_to_Ivector_list(Gen_lval(Gen_elt(g,2)));
    time0=set_mark();
-   while (Nl!=0){
+   while (Nl!=nullptr){
      Sl=list_cat(psys_solve(P,(Imatrix)Car(Car(Nl)),tweak),Sl);
      Nl=Cdr(Nl);
    }
@@ -610,9 +610,9 @@ Gen_node G_Solve(Gen_node g, int tweak){
 
 Gen_node G_ParamSet(Gen_node g){
  Gen_node ptr;
- if (g==0) return Rerror("NULL Arg in SetParam",g);
+ if (g==nullptr) return Rerror("NULL Arg in SetParam",g);
  ptr=g;
-  while (ptr!=0){
+  while (ptr!=nullptr){
    if (ptr->type!=Idf_T)
       return Rerror("Expecting Identifier in SetParam",g);
    SET_D_PARAM(Hom_tol)
@@ -671,9 +671,9 @@ Gen_node G_ParamSet(Gen_node g){
 
 Gen_node G_ParamShow(Gen_node g){
  Gen_node ptr;
- if (g==0) return Rerror("NULL Arg in ShowParam",g);
+ if (g==nullptr) return Rerror("NULL Arg in ShowParam",g);
  ptr=g;
- while (ptr!=0){
+ while (ptr!=nullptr){
    if (ptr->type!=Idf_T)
          return Rerror("Expecting Identifier ShowParam",g);
    SHOW_D_PARAM(Hom_tol)
@@ -789,7 +789,7 @@ Gen_node G_Verify(Gen_node g){
   PS=Gen_to_psys(Gen_elt(g,1));
   ptr=Gen_lval(Gen_elt(g,2));
   ptc=(res=gen_node());
-  while(ptr!=0){
+  while(ptr!=nullptr){
     if (Can_Be_Vector(ptr,Dbl_T)==2*N+3){
        D=Gen_to_Dmatrix(ptr);
        Gen_set_next(ptc,Dbl_To_Gen(psys_abs(PS,D)));
@@ -813,8 +813,8 @@ Gen_node G_Verify(Gen_node g){
 Gen_node G_Eval(Gen_node g){
   Gen_node ptr,res,ptc;
   psys PS;
-  Dmatrix X=0,Y=0;
-  Gmatrix V=0;
+  Dmatrix X=nullptr,Y=nullptr;
+  Gmatrix V=nullptr;
   int i,xp;
 
   if (Gen_length(g)!=2||
@@ -826,7 +826,7 @@ Gen_node G_Eval(Gen_node g){
   if (xp==TRUE) ptr=Gen_elt(g,2);
   else ptr=Gen_lval(Gen_elt(g,2));
   ptc=(res=gen_node());
-  while(ptr!=0){
+  while(ptr!=nullptr){
     if (Can_Be_Vector(ptr,Dbl_T)==2*N+3){
        X=Gen_to_Dmatrix(ptr);
        V=Gmatrix_new(1,N);
@@ -898,9 +898,9 @@ return g;
 Gen_node G_UnScale(Gen_node g){
  Gen_node ptr, res,rptr;
  Dmatrix scl;
- Dmatrix root = NULL;  /* Initialized to get rid of C++ warning */
+ Dmatrix root = nullptr;  /* Initialized to get rid of C++ warning */
 
- if (g==0 || 
+ if (g==nullptr || 
      Gen_length(g)!=2 || 
      Can_Be_Vector(Gen_elt(g,2),Dbl_T)!=N ||
      Can_Be_List(g)!=TRUE)
@@ -910,7 +910,7 @@ Gen_node G_UnScale(Gen_node g){
  rptr=(res=gen_node());
  ptr=Gen_lval(g);
  scl=Gen_to_Dmatrix(Gen_elt(g,2));
- while(ptr!=0){
+ while(ptr!=nullptr){
    if (Can_Be_Vector(ptr,Dbl_T)!=2*N+3){
       Dmatrix_free(scl);
       free_Gen_list(Gen_next(res));
@@ -941,10 +941,10 @@ Gen_node G_UnScale(Gen_node g){
 Gen_node G_ScaleXPL(Gen_node g){
  Gen_node ptr, res,rptr;
  Dmatrix scl;
- Dmatrix root = NULL; /* Initialized to get rid of C++ warning. */
+ Dmatrix root = nullptr; /* Initialized to get rid of C++ warning. */
  int i;
    
- if (g==0 ||
+ if (g==nullptr ||
      Gen_length(g)!=2 ||
      Can_Be_Vector(Gen_elt(g,2),Dbl_T)!=N ||
      Can_Be_List(g)!=TRUE)
@@ -953,7 +953,7 @@ Gen_node G_ScaleXPL(Gen_node g){
  rptr=(res=gen_node());
  ptr=Gen_lval(g);
  scl=Gen_to_Dmatrix(Gen_elt(g,2));
- while(ptr!=0){
+ while(ptr!=nullptr){
    if (Can_Be_Vector(ptr,Dbl_T)!=2*N+3){
       Dmatrix_free(scl);
       free_Gen_list(Gen_next(res));
@@ -988,14 +988,14 @@ Gen_node G_Affine(Gen_node g){
  Dmatrix root;
 
  
- if (g==0 ||
+ if (g==nullptr ||
      Gen_length(g)!=1 ||
      Can_Be_List(g)!=TRUE)
      return Rerror("Usage: Affine({<Dbl>})",g);
 
  rptr=(res=gen_node());
  ptr=Gen_lval(g);
- while(ptr!=0){
+ while(ptr!=nullptr){
    if (Can_Be_Vector(ptr,Dbl_T)!=2*N+3){
       free_Gen_list(Gen_next(res));
       free_Gen_node(res);
@@ -1023,14 +1023,14 @@ Gen_node G_Normalize(Gen_node g){
  Gen_node ptr, res,rptr;
  Dmatrix root;
 
- if (g==0 ||
+ if (g==nullptr ||
      Gen_length(g)!=1 ||
      Can_Be_List(g)!=TRUE)
      return Rerror("Usage: Normalize({<Dbl>})",g);
 
  rptr=(res=gen_node());
  ptr=Gen_lval(g);
- while(ptr!=0){
+ while(ptr!=nullptr){
    if (Can_Be_Vector(ptr,Dbl_T)!=2*N+3){
       free_Gen_list(Gen_next(res));
       free_Gen_node(res);
@@ -1065,7 +1065,7 @@ Gen_node G_Set_T(Gen_node g){
    ptr=Gen_lval(Gen_elt(g,1));
    t0=Gen_To_Dbl(Gen_elt(g,2));
    free_Gen_list(Gen_next(g));
-   while(ptr!=0){
+   while(ptr!=nullptr){
      if (Can_Be_Vector(ptr,Dbl_T)<1){
        return Rerror("Usage: SetT({<Dbl>},Dbl)",g);
      }

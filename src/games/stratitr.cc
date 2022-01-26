@@ -86,7 +86,7 @@ StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p
 //                                Iteration
 //---------------------------------------------------------------------------
 
-void StrategyProfileIterator::First(void)
+void StrategyProfileIterator::First()
 {
   for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
     if (pl == m_frozen1 || pl == m_frozen2) continue;
@@ -95,11 +95,11 @@ void StrategyProfileIterator::First(void)
   }	
 }
 
-void StrategyProfileIterator::operator++(void)
+void StrategyProfileIterator::operator++()
 {
   int pl = 1;
 
-  while (1)   {
+  while (true)   {
     if (pl == m_frozen1 || pl == m_frozen2) {
       pl++;
       if (pl > m_support.GetGame()->NumPlayers()) {

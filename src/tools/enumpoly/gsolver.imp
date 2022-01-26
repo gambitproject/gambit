@@ -44,8 +44,7 @@ template<class T>  gSolver<T>::gSolver(const gSolver<T>& given)
 }
 
 template<class T>  gSolver<T>::~gSolver()
-{
-}
+= default;
 
 //---------------------------
 //        Utilities

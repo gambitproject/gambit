@@ -1,3 +1,8 @@
+## Unreleased
+
+### General
+- C++11 features are now actively used.
+
 ## [16.0.2] - 2022-01-28
 
 ### Fixed

@@ -204,8 +204,8 @@ public:
     int node1;
     int node2;
     int nextedge;
-    Edge() { }
-    ~Edge() { } 
+    Edge() = default;
+    ~Edge() = default; 
     bool operator==(const Edge &y) const 
     { return (node1 == y.node1 && node2 == y.node2); }
     bool operator!=(const Edge &y) const
@@ -213,10 +213,10 @@ public:
   };
 
   CliqueEnumerator(Array<Edge> &, int, int);
-  ~CliqueEnumerator() { }
+  ~CliqueEnumerator() = default;
 
-  const List<Array<int> > &GetCliques1(void) const { return m_cliques1; }
-  const List<Array<int> > &GetCliques2(void) const { return m_cliques2; }
+  const List<Array<int> > &GetCliques1() const { return m_cliques1; }
+  const List<Array<int> > &GetCliques2() const { return m_cliques2; }
 
 private:
   Array<int> firstedge;

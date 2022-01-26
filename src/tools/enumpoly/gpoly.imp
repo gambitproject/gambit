@@ -86,8 +86,7 @@ template <class T> gPoly<T>::gPoly(const gPoly<T> &p)
 }
 
 template <class T> gPoly<T>::~gPoly()
-{
-}
+= default;
 
 
 //----------------------------------
@@ -271,7 +270,7 @@ template <class T> void gPoly<T>::String_Term(T nega)
   Terms.Append(gMono<T>(val, exp_vect(Space,PowArray)));
 }
 
-template <class T> int gPoly<T>::String_GetPow(void)
+template <class T> int gPoly<T>::String_GetPow()
 {
 
   std::string Pow = "";
@@ -384,7 +383,7 @@ template <class T> bool gPoly<T>::Check_String(const std::string &Hold){
  else return false;
 }
  
-template <class T> void gPoly<T>::GetChar(void)
+template <class T> void gPoly<T>::GetChar()
 {
   charc = TheString[charnum];
 }
@@ -393,12 +392,12 @@ template <class T> void gPoly<T>::GetChar(void)
 //           Information
 //----------------------------------
   
-template <class T> const gSpace* gPoly<T>::GetSpace(void) const
+template <class T> const gSpace* gPoly<T>::GetSpace() const
 {
   return (gSpace *) Space;  
 }
   
-template <class T> const term_order* gPoly<T>::GetOrder(void) const
+template <class T> const term_order* gPoly<T>::GetOrder() const
 {
   return (term_order *) Order;  
 }

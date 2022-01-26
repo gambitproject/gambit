@@ -33,7 +33,7 @@ private:
   double m_double;
 
 public:
-  Number(void)
+  Number()
     : m_text("0"), m_rational(0), m_double(0.0) { }
   Number(const std::string &p_text)
     : m_text(p_text), m_rational(lexical_cast<Rational>(p_text)), 
@@ -50,9 +50,9 @@ public:
     return *this; 
   }
 
-  operator const double &(void) const { return m_double; }
-  operator const Rational &(void) const { return m_rational; }
-  operator const std::string &(void) const { return m_text; }
+  operator const double &() const { return m_double; }
+  operator const Rational &() const { return m_rational; }
+  operator const std::string &() const { return m_text; }
 };
 
 }

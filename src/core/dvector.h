@@ -30,7 +30,7 @@ namespace Gambit {
 template <class T> class DVector : public PVector<T>  {
 private:
   int sum(int part, const PVector<int> &v) const;
-  void setindex(void);
+  void setindex();
 
   bool Check(const DVector<T> &) const;
 
@@ -39,7 +39,7 @@ protected:
   Array<int> dvlen, dvidx;
 
 public:
-  DVector(void);
+  DVector();
   DVector(const PVector<int> &sig);
   DVector(const Vector<T> &val, const PVector<int> &sig);
   DVector(const DVector<T> &v);
@@ -58,7 +58,7 @@ public:
 
   DVector<T> operator+(const DVector<T> &v) const;
   DVector<T> &operator+=(const DVector<T> &v);
-  DVector<T> operator-(void) const;
+  DVector<T> operator-() const;
   DVector<T> operator-(const DVector<T> &v) const;
   DVector<T> &operator-=(const DVector<T> &v);
   T operator*(const DVector<T> &v) const;
@@ -68,7 +68,7 @@ public:
   bool operator==(const DVector<T> &v) const;
   bool operator!=(const DVector<T> &v) const;
 
-  const Array<int> &DPLengths(void) const;
+  const Array<int> &DPLengths() const;
 };
 
 } // end namespace Gambit

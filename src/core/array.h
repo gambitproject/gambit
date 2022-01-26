@@ -56,9 +56,9 @@ public:
   public:
     iterator(const Array &p_array, int p_index)
       : m_array(p_array), m_index(p_index)  { }
-    T &operator*(void) const { return m_array[m_index]; }
-    T &operator->(void) const { return m_array[m_index]; }
-    iterator &operator++(void)  { m_index++; return *this; }
+    T &operator*() const { return m_array[m_index]; }
+    T &operator->() const { return m_array[m_index]; }
+    iterator &operator++()  { m_index++; return *this; }
     bool operator==(const iterator &it) const
     { return (&m_array == &it.m_array) && (m_index == it.m_index); }
     bool operator!=(const iterator &it) const
@@ -72,9 +72,9 @@ public:
   public:
     const_iterator(const Array &p_array, int p_index)
       : m_array(p_array), m_index(p_index)  { }
-    const T &operator*(void) const { return m_array[m_index]; }
-    const T &operator->(void) const { return m_array[m_index]; }
-    const_iterator &operator++(void)  { m_index++; return *this; }
+    const T &operator*() const { return m_array[m_index]; }
+    const T &operator->() const { return m_array[m_index]; }
+    const_iterator &operator++()  { m_index++; return *this; }
     bool operator==(const const_iterator &it) const
     { return (&m_array == &it.m_array) && (m_index == it.m_index); }
     bool operator!=(const const_iterator &it) const
@@ -145,18 +145,18 @@ public:
   /// @name General data access
   //@{
   /// Return the length of the array
-  int Length(void) const  { return maxdex - mindex + 1; }
+  int Length() const  { return maxdex - mindex + 1; }
 
   /// Return the first index
-  int First(void) const { return mindex; } 
+  int First() const { return mindex; } 
 
   /// Return the last index
-  int Last(void) const { return maxdex; }
+  int Last() const { return maxdex; }
 
   /// Return a forward iterator starting at the beginning of the array
-  const_iterator begin(void) const { return const_iterator(*this, mindex); }
+  const_iterator begin() const { return const_iterator(*this, mindex); }
   /// Return a forward iterator past the end of the array
-  const_iterator end(void) const   { return const_iterator(*this, maxdex + 1); }
+  const_iterator end() const   { return const_iterator(*this, maxdex + 1); }
 
   /// Access the index'th entry in the array
   const T &operator[](int index) const 
@@ -236,24 +236,24 @@ public:
   /// possible.
   ///@{
   /// Return whether the array container is empty (has size 0).
-  bool empty(void) const { return (this->maxdex < this->mindex); }
+  bool empty() const { return (this->maxdex < this->mindex); }
   /// Return the number of elements in the array container.
-  size_t size(void) const  { return maxdex - mindex + 1; }
+  size_t size() const  { return maxdex - mindex + 1; }
   /// Access first element.
-  const T &front(void) const { return data[mindex]; }
+  const T &front() const { return data[mindex]; }
   /// Access first element.
-  T &front(void)             { return data[mindex]; }
+  T &front()             { return data[mindex]; }
   /// Access last element.
-  const T &back(void) const  { return data[maxdex]; }
+  const T &back() const  { return data[maxdex]; }
   /// Access last element.
-  T &back(void)              { return data[maxdex]; }
+  T &back()              { return data[maxdex]; }
   
   /// Adds a new element at the end of the array container, after its
   /// current last element.
   void push_back(const T &val) { InsertAt(val, this->maxdex + 1); }
   /// Removes all elements from the array container (which are destroyed),
   /// leaving the container with a size of 0.
-  void clear(void)  {
+  void clear()  {
     delete [] (this->data + this->mindex);
     this->data = 0;
     this->maxdex = this->mindex - 1;

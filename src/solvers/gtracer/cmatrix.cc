@@ -489,7 +489,7 @@ double cmatrix::adjoint() {
 double cmatrix::testAdjoint()
 //returns the characteristic polynomial and adjoint cmatrix
 {
-  cmatrix c(n,n,1.0,1), p(n,n);
+  cmatrix c(n,n,1.0,true), p(n,n);
   int i = 0, j;
   double det,b;
 

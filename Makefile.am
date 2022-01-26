@@ -424,7 +424,6 @@ gtracer_SOURCES = \
 	src/solvers/gtracer/gnm.cc \
 	src/solvers/gtracer/ipa.cc
 
-
 if IS_WIN32
 AM_LDFLAGS = -static -static-libgcc -static-libstdc++
 endif
@@ -453,7 +452,8 @@ endif
 
 EXTRA_PROGRAMS = gambit-enumpoly gambit
 
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/library/include -I$(top_srcdir)/src/labenski/include ${WX_CXXFLAGS}
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/labenski/include ${WX_CXXFLAGS}
+AM_CXXFLAGS = ${LLVM_CXXFLAGS}
 
 ## Command-line tools
 
@@ -791,4 +791,9 @@ msw-msi:
 	light -ext WixUIExtension gambit.wixobj
 
 clang-tidy:
-	clang-tidy src/*/*.cc src/*/*/*.cc -- -I src -I src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
+	clang-tidy src/core/*.cc -- -I src -I src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
+	clang-tidy src/games/*.cc src/games/*/*.cc -- -I src -I src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
+	clang-tidy src/solvers/*/*.cc -- -I src -I src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
+	clang-tidy src/tools/*/*.cc -- -I src -I src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
+	clang-tidy src/gui/*.cc -- -I src -I src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
+

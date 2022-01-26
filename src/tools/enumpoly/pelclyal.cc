@@ -23,10 +23,10 @@ int next_id=1; /*for debuging cells are labled by a unique id*/
 ** they will eventually be stored with the individual cells.
 */
 
-HMatrix cly_U=0;   /* factor matrix */ 
-HMatrix cly_M=0;   /* an n+1xn+1 matrix   */
-HMatrix cly_L=0;   /* an n+1 vector   */
-Imatrix cly_T=0;   /* an R vector */
+HMatrix cly_U=nullptr;   /* factor matrix */ 
+HMatrix cly_M=nullptr;   /* an n+1xn+1 matrix   */
+HMatrix cly_L=nullptr;   /* an n+1 vector   */
+Imatrix cly_T=nullptr;   /* an R vector */
 
 /*
 ** two temporary variables used by the Hint macroes
@@ -69,7 +69,7 @@ void Ipnt_list_fprint(FILE *fout,Ipnt p){
  fprintf(fout,"%%{Pl\n")
 #endif
 ;
- for(;p!=0;p=Ipnt_next(p)) Ipnt_fprint(fout,p);
+ for(;p!=nullptr;p=Ipnt_next(p)) Ipnt_fprint(fout,p);
 #ifdef LOG_PRINT
  fprintf(fout,"%%Pl}\n")
 #endif
@@ -83,23 +83,23 @@ void Ipnt_list_fprint(FILE *fout,Ipnt p){
     Ipnt p;
     int j;
     p=(Ipnt)mem_malloc(sizeof(struct Ipnt_t));
-    if (p==0) bad_error("malloc 1 failed in new_Ipnt");
+    if (p==nullptr) bad_error("malloc 1 failed in new_Ipnt");
     p->point=pnt;
     p->idx=r;
     p->lable=(char *)mem_strdup(pnt_lable(pnt));
     p->coords=(int *)mem_malloc(cly_N*sizeof(int));
-    if (p==0) bad_error("malloc 2 failed in new_Ipnt");
+    if (p==nullptr) bad_error("malloc 2 failed in new_Ipnt");
     for(j=1;j<=cly_Dim;j++) Ipnt_coord(p,j)=*IVref(pnt_coords(pnt),j);
     for(j=cly_Dim+1;j<=cly_N;j++) Ipnt_coord(p,j)=0;
     if (r>1) Ipnt_coord(p,cly_Dim+r-1)=1;
     p->lift=0;
-    p->next=0;
+    p->next=nullptr;
     return p;
 }
 
 
 void Ipnt_free(Ipnt p){
-  if (p!=0){
+  if (p!=nullptr){
      mem_free(p->lable);
      mem_free((char*)(p->coords));
      mem_free((char *)p);
@@ -108,7 +108,7 @@ void Ipnt_free(Ipnt p){
 
 void points_free(Ipnt p){
   Ipnt jk;
-  while(p!=0){
+  while(p!=nullptr){
     jk=p;
     p=Ipnt_next(p);
     Ipnt_free(jk);
@@ -116,7 +116,7 @@ void points_free(Ipnt p){
  }
 
 void lift_original_points(Ipnt p){
- for( ;p!=0; p=Ipnt_next(p))
+ for( ;p!=nullptr; p=Ipnt_next(p))
      *IVref(pnt_coords(Ipnt_pnt(p)),cly_Dim+1)=Ipnt_lift(p);
 }
 
@@ -132,11 +132,11 @@ void lift_original_points(Ipnt p){
  cell cell_new(int n,int r){
   cell c;
   int i;
-  if ((c=(cell)mem_malloc(sizeof(struct cell_t)))==0)
+  if ((c=(cell)mem_malloc(sizeof(struct cell_t)))==nullptr)
                 bad_error("malloc failed in cell_new()");
-  if ((c->points=(Ipnt *)mem_malloc((n+1)*sizeof(Ipnt)))==0)
+  if ((c->points=(Ipnt *)mem_malloc((n+1)*sizeof(Ipnt)))==nullptr)
                 bad_error("malloc failed in cell_new()");
-  if ((c->ptrs=(cell *)mem_malloc((n+1)*sizeof(cell)))==0)
+  if ((c->ptrs=(cell *)mem_malloc((n+1)*sizeof(cell)))==nullptr)
                 bad_error("malloc failed in cell_new()");
   c->H=HMnew(n,n+1);
   c->U=HMnew(n,n);
@@ -148,8 +148,8 @@ void lift_original_points(Ipnt p){
   c->freeptrs=n+1;
   c->volume=0;
   c->Tindx=0;
-  c->next=0;
-  for(i=0;i<=n;i++) {c->ptrs[i]=0; c->points[i]=0;}
+  c->next=nullptr;
+  for(i=0;i<=n;i++) {c->ptrs[i]=nullptr; c->points[i]=nullptr;}
   return c;
 }
 
@@ -160,7 +160,7 @@ void lift_original_points(Ipnt p){
 **            points or pointers fields).
 */
  void cell_free(cell c){
-  if (c!=0){
+  if (c!=nullptr){
      mem_free((char *)c->points);
      mem_free((char *)c->ptrs);
      HMfree(c->norm);
@@ -172,7 +172,7 @@ void lift_original_points(Ipnt p){
 }
  void subdiv_free(cell c){
  cell jk;
- while(c!=0){ jk=c; c=cell_next(c); cell_free(jk);}
+ while(c!=nullptr){ jk=c; c=cell_next(c); cell_free(jk);}
 }
 
 /*
@@ -232,7 +232,7 @@ fprintf(fout,", %d",cell_type(c,i))
   fprintf(fout,"\n")
 #endif
 ;
-  while(c!=0){
+  while(c!=nullptr){
       cell_fprint(fout,c);
       c=cell_next(c);
   }
@@ -257,9 +257,9 @@ fprintf(fout,", %d",cell_type(c,i))
  }
  int cell_type_cmp(cell c1,cell c2){
   int i,t;
-  if (c1==0 && c2==0) return 0;
-  else if (c1==0) return 1;
-  else if (c2==0) return -1;
+  if (c1==nullptr && c2==nullptr) return 0;
+  else if (c1==nullptr) return 1;
+  else if (c2==nullptr) return -1;
   for(i=1;i<=cly_R;i++){
      t=cell_type(c1,i)-cell_type(c2,i);
      if (t!=0) return t;
@@ -268,17 +268,17 @@ fprintf(fout,", %d",cell_type(c,i))
 }
 
  void order_subdiv(cell *Subdiv){
-  cell Res=0,S=*Subdiv, ptr=0,pts=0;
-  while(S!=0){
+  cell Res=nullptr,S=*Subdiv, ptr=nullptr,pts=nullptr;
+  while(S!=nullptr){
     pts=S;
     S=cell_next(S);
-    if (Res==0 || cell_type_cmp(pts,Res)>=0){
+    if (Res==nullptr || cell_type_cmp(pts,Res)>=0){
       cell_next(pts)=Res;
       Res=pts;
     }
     else {
       ptr=Res;
-      while(cell_next(ptr)!=0 && cell_type_cmp(pts,cell_next(ptr))<0){
+      while(cell_next(ptr)!=nullptr && cell_type_cmp(pts,cell_next(ptr))<0){
          ptr=cell_next(ptr);
       }
       cell_next(pts)=cell_next(ptr);
@@ -289,9 +289,9 @@ fprintf(fout,", %d",cell_type(c,i))
 }
  int fprint_all_volumes(FILE *fout,cell S){
   int vol=0, i;
-  while(S!=0){
+  while(S!=nullptr){
      vol+=cell_volume(S);
-     if (cell_next(S)==0 || cell_type_cmp(S,cell_next(S))!=0){
+     if (cell_next(S)==nullptr || cell_type_cmp(S,cell_next(S))!=0){
       #ifdef LOG_PRINT
   fprintf(fout,"%% Vol( %d", cell_type(S,1))
 #endif
@@ -346,8 +346,8 @@ fprintf(fout,", %d",cell_type(S,i))
 */
  cell cly_subdiv_union(cell SD1, cell SD2){
   cell ptr=SD1;
-  if (SD1==0) return SD2;
-  while(cell_next(ptr)!=0) ptr=cell_next(ptr);
+  if (SD1==nullptr) return SD2;
+  while(cell_next(ptr)!=nullptr) ptr=cell_next(ptr);
   cell_next(ptr)=SD2;
   return SD1;
 }
@@ -390,7 +390,7 @@ static int check_normal(Ipnt,HMatrix,Ipnt *,Ipnt *);
 cell  cly_initial_splx(Ipnt *S1, Ipnt *S2){
   cell initial;
   int i,r,j;
-  Ipnt ptr=*S1,refpt=0,newpt,tmp;
+  Ipnt ptr=*S1,refpt=nullptr,newpt,tmp;
 
   initial=cell_new(cly_N,cly_R);
 
@@ -435,7 +435,7 @@ cell  cly_initial_splx(Ipnt *S1, Ipnt *S2){
       fprintf(stderr /* was cly_err */,"Point Config is not full dimensional\n")
 #endif
 ;
-       return 0;
+       return nullptr;
     }
     cell_pnt(initial,r)=newpt;
     CM=HMsubmat(CM,r,cly_N);
@@ -479,9 +479,9 @@ cell  cly_initial_splx(Ipnt *S1, Ipnt *S2){
   **     S1=S1/S2.
   */
   ptr=*S1;
-  *S1=0;
-  *S2=0;
-  while(ptr!=0){
+  *S1=nullptr;
+  *S2=nullptr;
+  while(ptr!=nullptr){
      int In=FALSE;
      for(i=0;i<=cly_N;i++){
         if(ptr==cell_pnt(initial,i)) In=TRUE;
@@ -531,12 +531,12 @@ static int check_normal(Ipnt PC,
                         Ipnt *refpt, Ipnt *newpt){
   Hint dot,dmin,dmax;
   int i,first=TRUE;
-  Ipnt pmin = NULL;
-  Ipnt pmax = NULL;
+  Ipnt pmin = nullptr;
+  Ipnt pmax = nullptr;
   Hinit(dot,0);
   Hinit(dmin,0);
   Hinit(dmax,0);
-  while(PC!=0){
+  while(PC!=nullptr){
     Hnorm_dot(dot,norm,PC);
     if (first==TRUE) {
        HHset(dmin,dot);
@@ -557,7 +557,7 @@ static int check_normal(Ipnt PC,
   PC=Ipnt_next(PC);
   }
   if (HHeq(dmin,dmax)) return FALSE;
-  if (*refpt==0) {
+  if (*refpt==nullptr) {
      *refpt=pmin;
      *newpt=pmax;
   }
@@ -628,7 +628,7 @@ static int is_flipped(cell c1, cell c2, int *i1, int *i2){
 static cell cell_pivot(cell C, Ipnt x, int idx){
   int i,j;
   cell ncell;
-  if (C==0) bad_error("null cell in cell_pivot\n");
+  if (C==nullptr) bad_error("null cell in cell_pivot\n");
 
   /* copy old cell */
   ncell=cell_new(cly_N,cly_R);
@@ -695,24 +695,24 @@ static cell cell_pivot(cell C, Ipnt x, int idx){
 static cell subdiv_add_cell(cell c, cell SDx){
   int i,j;
   cell ptr;
-  if (c==0) bad_error("null cell in subdiv_add_cell\n");
-  if (SDx==0) return c;
+  if (c==nullptr) bad_error("null cell in subdiv_add_cell\n");
+  if (SDx==nullptr) return c;
   ptr=SDx;
-  while(ptr!=0){
+  while(ptr!=nullptr){
       if (is_flipped(c,ptr,&i,&j)==TRUE){
-          if (cell_ptr(c,i)!=0)
+          if (cell_ptr(c,i)!=nullptr)
               bad_error("new cell already flipped in sudiv_add_cell");
-          if (cell_ptr(ptr,j)!=0)
+          if (cell_ptr(ptr,j)!=nullptr)
               bad_error("old cell already flipped in sudiv_add_cell");
           cell_ptr(c,i)=ptr;
           cell_fptr(c)--;
           cell_ptr(ptr,j)=c;
           cell_fptr(ptr)--;
       }
-      if (cell_next(ptr)==0){
+      if (cell_next(ptr)==nullptr){
               cell_next(ptr)=c;
-              cell_next(c)=0;
-              ptr=0;
+              cell_next(c)=nullptr;
+              ptr=nullptr;
       }
       else ptr=cell_next(ptr);
   }
@@ -748,7 +748,7 @@ static cell subdiv_add_cell(cell c, cell SDx){
 **
 */
  cell cly_new_cells(cell D,cell Dl, Ipnt x){
-  cell SDx=0,B;
+  cell SDx=nullptr,B;
   int i,j,n,tog;
   Hint l0,tmp;
 
@@ -757,7 +757,7 @@ static cell subdiv_add_cell(cell c, cell SDx){
   Hinit(tmp,0);
   HHset(tmp,l0);
   HMresize(cly_L,1,cly_N+1);
-  if (D==0){
+  if (D==nullptr){
     tog=1;
     B=Dl;
   }
@@ -765,7 +765,7 @@ static cell subdiv_add_cell(cell c, cell SDx){
     tog=0;
     B=D;
   }
-  while(B!=0){
+  while(B!=nullptr){
     if (cell_is_outer(B)==TRUE){
       /* load matrix L=(x-c0) */
       for(j=1;j<=n;j++)
@@ -797,18 +797,18 @@ static cell subdiv_add_cell(cell c, cell SDx){
       HHset(l0,HVget(cly_L,n+1));
       for(i=1;i<=n;i++){
        HHmul(tmp,HVget(cly_L,cly_N+1),HVget(cly_L,i));
-       if ((HLgt(tmp,0)) && (cell_ptr(B,i)==0)){
+       if ((HLgt(tmp,0)) && (cell_ptr(B,i)==nullptr)){
           SDx=subdiv_add_cell(cell_pivot(B,x,i),SDx);
         }
         HHadd(l0,l0,HVget(cly_L,i));
       }
       HHmul(tmp,HVget(cly_L,cly_N+1),l0);
-      if ((HLlt(tmp,0)) && (cell_ptr(B,0)==0)){
+      if ((HLlt(tmp,0)) && (cell_ptr(B,0)==nullptr)){
         SDx=subdiv_add_cell(cell_pivot(B,x,0),SDx);
       }
     }
     B=cell_next(B);
-    if (B==0 && tog ==0){
+    if (B==nullptr && tog ==0){
       B=Dl;
       tog=1;
     }
@@ -858,9 +858,9 @@ int cell_find_lift(cell c, Ipnt pt){
 */
  int cly_find_lift(cell s, Ipnt pt){
  int res, temp;
- if (s==0) return 1;
+ if (s==nullptr) return 1;
  res=cell_find_lift(s,pt);
- while((s=cell_next(s))!=0)
+ while((s=cell_next(s))!=nullptr)
   if (res<(temp=cell_find_lift(s,pt))) res=temp;
  return res;
 }
@@ -872,7 +872,7 @@ int cell_find_lift(cell c, Ipnt pt){
 /************************************************************************/
 
 Ipnt Internalize_Aset(aset A);
-void free_globals(void);
+void free_globals();
 static cell new_cayley_triangulate(Ipnt *PC);
 static node subdiv_get_norms(cell S, Imatrix T, int *mv);
 
@@ -880,7 +880,7 @@ node cly_triangulate(aset A, Imatrix T, int order, int lift){
    int mv;
    Ipnt Pts;
    cell D;
-   node Res=0;
+   node Res=nullptr;
    LOCS(2);
    PUSH_LOC(A);
    PUSH_LOC(Res);
@@ -896,8 +896,8 @@ node cly_triangulate(aset A, Imatrix T, int order, int lift){
    if (order==TRUE) print_all_volumes(D);
    if (lift==TRUE){
      lift_original_points(Pts);
-     if (T!=0) Res=subdiv_get_norms(D,T,&mv);
-     else Res=0;
+     if (T!=nullptr) Res=subdiv_get_norms(D,T,&mv);
+     else Res=nullptr;
    }
    else {
     warning("finding facets not supported\n");
@@ -911,7 +911,7 @@ node cly_triangulate(aset A, Imatrix T, int order, int lift){
 }
 
 Ipnt Internalize_Aset(aset A){
-  Ipnt point=0,points=0;
+  Ipnt point=nullptr,points=nullptr;
   node ptr,ptc,ptp;
   int r;
   cly_Dim=aset_dim(A)-1;
@@ -926,9 +926,9 @@ Ipnt Internalize_Aset(aset A){
   ptr = aset_start_cfg(A);
   r=0;
   cly_Npts=0;
-  while ((ptc = aset_next_cfg(&ptr)) != 0) {
+  while ((ptc = aset_next_cfg(&ptr)) != nullptr) {
       r++;
-      while ((ptp = aset_next_pnt(&ptc)) != 0) {
+      while ((ptp = aset_next_pnt(&ptc)) != nullptr) {
         point=Ipnt_new(ptp,r);
         Ipnt_next(point)=points;
         cly_Npts++;
@@ -940,7 +940,7 @@ Ipnt Internalize_Aset(aset A){
 
 
 
-void free_globals(void){
+void free_globals(){
 /* should also reset all global params*/
  HMfree(cly_L);
  HMfree(cly_M);
@@ -960,18 +960,18 @@ void free_globals(void){
 */
 static cell new_cayley_triangulate(Ipnt *PC)
 {
-    Ipnt x=0,S1=0,S2=0;
-    cell Dl=0;
+    Ipnt x=nullptr,S1=nullptr,S2=nullptr;
+    cell Dl=nullptr;
  
     S1=*PC;
-    if ((Dl=cly_initial_splx(&S1,&S2))==0)
+    if ((Dl=cly_initial_splx(&S1,&S2))==nullptr)
          bad_error("failure in initial simplex");
 
-    while(S1!=0){
+    while(S1!=nullptr){
       x=S1;
       S1=Ipnt_next(x);
       if (cly_lift==TRUE) Ipnt_lift(x)=cly_find_lift(Dl,x);          
-      Dl=cly_subdiv_union(Dl,cly_new_cells(0,Dl,x));
+      Dl=cly_subdiv_union(Dl,cly_new_cells(nullptr,Dl,x));
       Ipnt_next(x)=S2;
       S2=x;
    }
@@ -990,13 +990,13 @@ static cell new_cayley_triangulate(Ipnt *PC)
 */
 #define Norm(i) (*IVref(Norm,i))
 static node subdiv_get_norms(cell S, Imatrix T, int *mv){
-   node Nlist=0;
+   node Nlist=nullptr;
    Imatrix Norm;
    int i;
    LOCS(1);
    PUSH_LOC(Nlist);
    *mv=0;
-   while (S!=0){
+   while (S!=nullptr){
      if (Imatrix_order(T,cell_T(S))==0){
          Norm=Ivector_new(cly_Dim+1);
          for(i=1;i<=cly_Dim;i++) Norm(i)=HLVget(cell_norm(S),i);
@@ -1027,15 +1027,15 @@ static node relift(node *, int tweak);
 static void norm_reset(cell ncell);
 int cell_find_lift(cell,Ipnt);
 
-static psys     Poly_Sys=0;
-static node     Poly_Sols=0;
-static Imatrix  Poly_Type=0;
-static Imatrix  Poly_Norm=0;
-static Imatrix  Poly_TNorm=0;
-static Ipnt     *Poly_Pnts=0;
+static psys     Poly_Sys=nullptr;
+static node     Poly_Sols=nullptr;
+static Imatrix  Poly_Type=nullptr;
+static Imatrix  Poly_Norm=nullptr;
+static Imatrix  Poly_TNorm=nullptr;
+static Ipnt     *Poly_Pnts=nullptr;
 #define PPnts(i) (Poly_Pnts[(i)-1])
-static HMatrix   Poly_H=0;
-static HMatrix   Poly_U=0;
+static HMatrix   Poly_H=nullptr;
+static HMatrix   Poly_U=nullptr;
 #define Poly_Type(i) (*IVref(Poly_Type,i))
 #define Poly_Norm(i) (*IVref(Poly_Norm,i))
 #define Poly_TNorm(i) (*IVref(Poly_TNorm,i))
@@ -1082,7 +1082,7 @@ Ipnt Internalize_Aset_Cont(aset A, Imatrix T,int seed){
   ** Count total number of monomials needed
   */
   i=1;
-  while(Pts!=0){
+  while(Pts!=nullptr){
     PPnts(i++)=Pts;
     max_monomials+= T(Ipnt_idx(Pts));
     Pts=Ipnt_next(Pts);
@@ -1102,8 +1102,8 @@ return res;
 #undef T
 
 void free_continuation_globals(){
-  Poly_Sys=0;
-  Poly_Type=0;
+  Poly_Sys=nullptr;
+  Poly_Type=nullptr;
   Imatrix_free(Poly_Norm);
   Imatrix_free(Poly_TNorm);
   HMfree(Poly_U);
@@ -1125,8 +1125,8 @@ void free_continuation_globals(){
 */
 static cell cayley_continue(Ipnt *PC, int threshold, int tweak)
 {
-    Ipnt pt, x=0,S1=0,S2=0;
-    cell D=0,Dl=0;
+    Ipnt pt, x=nullptr,S1=nullptr,S2=nullptr;
+    cell D=nullptr,Dl=nullptr;
     int l;
     LOCS(1);
     PUSH_LOC(Poly_Sols);
@@ -1135,7 +1135,7 @@ static cell cayley_continue(Ipnt *PC, int threshold, int tweak)
     D=cly_initial_splx(&S1,&S2);
     for(l=0;l<=cell_n(D);l++) Update_Poly(cell_pnt(D,l));
     
-    while(S1!=0){
+    while(S1!=nullptr){
       x=S1;
       S1=Ipnt_next(x);
       Ipnt_lift(x)=(l=cly_find_lift(Dl,x));
@@ -1146,10 +1146,10 @@ static cell cayley_continue(Ipnt *PC, int threshold, int tweak)
 	fprintf(stdout /* was cly_out */,"flattening\n")
 #endif
 ;
-        for(pt=S2;pt!=0;pt=Ipnt_next(pt)) Ipnt_lift(pt)=0;
+        for(pt=S2;pt!=nullptr;pt=Ipnt_next(pt)) Ipnt_lift(pt)=0;
         psys_lift(Poly_Sys,0);
         D=cly_subdiv_union(D,Dl);
-        Dl=0;
+        Dl=nullptr;
         Ipnt_lift(x)=1;
       }
       Dl=cly_subdiv_union(Dl,cly_new_cells(D,Dl,x));
@@ -1200,10 +1200,10 @@ void update_list_insert(node g, node * L)
   LOCS(2);
   PUSH_LOC(*L);
   PUSH_LOC(g);
-  if (g==0) bad_error("null node passed to update list");
-  if (*L == 0 || comp(g, Car(*L)) > 0) *L = Cons(g, *L);
+  if (g==nullptr) bad_error("null node passed to update list");
+  if (*L == nullptr || comp(g, Car(*L)) > 0) *L = Cons(g, *L);
   else {
-    while ((Cdr(ptr) != 0) && comp(g, Car(Cdr(ptr))) <= 0) 
+    while ((Cdr(ptr) != nullptr) && comp(g, Car(Cdr(ptr))) <= 0) 
        ptr = (node) Cdr(ptr);
     node_set_ptr(ptr,Cons(g, Cdr(ptr)), NODE, RIGHT);
   }
@@ -1219,17 +1219,17 @@ void update_list_insert(node g, node * L)
 **                at end flatten all monomials, and solutions.
 */
 static void Update_Solutions(cell Dl, int tweak){
-   node tmp=0,lhead=0;
+   node tmp=nullptr,lhead=nullptr;
    LOCS(1);
    PUSH_LOC(lhead);
    tmp=Poly_Sols;
    /* update old solutions */
-   while(tmp!=0){
+   while(tmp!=nullptr){
        xpnt_t_set((Dmatrix)Car(Car(tmp)),0.0);
        tmp=Cdr(tmp);
    }
 
-   if (Poly_Sols!=0){
+   if (Poly_Sols!=nullptr){
   #ifdef LOG_PRINT     
      fprintf(stdout /* was cly_out */,"updating old cells\n")
 #endif
@@ -1241,14 +1241,14 @@ static void Update_Solutions(cell Dl, int tweak){
 
    /* order list of good cells by normal */
    /*      (with low numbered cells first) */
-   while(Dl!=0){
+   while(Dl!=nullptr){
      if (Imatrix_equal(Poly_Type,cell_T(Dl))==TRUE){
        update_list_insert(atom_new((char *)Dl,CELL),&lhead); 
      }
      Dl=cell_next(Dl);
    }
    /* cut out blocks, of cells */
-   while(lhead!=0){
+   while(lhead!=nullptr){
       Poly_Sols=list_cat(relift(&lhead,tweak),Poly_Sols);
    }   
    psys_lift(Poly_Sys,0);
@@ -1263,8 +1263,8 @@ static node relift(node *lhead, int tweak){
     Imatrix Tmp_Norm;
     int i,ht,tmp_ht;
     cell Tmp_Cell;
-    psys Lead_Sys=0, Norm_Sys=0;
-    node Lead_Sols=0,list2=0,lptr=0;
+    psys Lead_Sys=nullptr, Norm_Sys=nullptr;
+    node Lead_Sols=nullptr,list2=nullptr,lptr=nullptr;
     Ipnt Mpt;
     LOCS(3);
     PUSH_LOC(*lhead);
@@ -1273,7 +1273,7 @@ static node relift(node *lhead, int tweak){
     /*
     ** check if cell list is empty
     */
-    if (*lhead==0) bad_error("null list in relift");
+    if (*lhead==nullptr) bad_error("null list in relift");
     /*
     ** make copy of truncated original norm
     */
@@ -1301,7 +1301,7 @@ static node relift(node *lhead, int tweak){
      Ipnt_seen(cell_pnt(Tmp_Cell,i))=TRUE;
      Ipnt_lift(cell_pnt(Tmp_Cell,i))=0;
     }
-    while (Cdr(*lhead)!=0 && comp(Car(*lhead),Car(Cdr(*lhead)))==0){
+    while (Cdr(*lhead)!=nullptr && comp(Car(*lhead),Car(Cdr(*lhead)))==0){
       norm_reset(Tmp_Cell);
       list_push(list_pop(lhead),&list2);
       Tmp_Cell=(cell)Car(Car(*lhead));
@@ -1310,7 +1310,7 @@ static node relift(node *lhead, int tweak){
           lptr=list2;
           ht=cell_find_lift((cell)Car(Car(lptr))
                               ,cell_pnt(Tmp_Cell,i));
-          while ((lptr=Cdr(lptr))!=0){
+          while ((lptr=Cdr(lptr))!=nullptr){
               tmp_ht=cell_find_lift((cell)Car(Car(lptr))
                                     ,cell_pnt(Tmp_Cell,i));
               if (ht<tmp_ht) ht=tmp_ht;
@@ -1333,7 +1333,7 @@ static node relift(node *lhead, int tweak){
       else{
         lptr=list2;
         ht=cell_find_lift((cell)Car(Car(lptr)),Mpt);
-        while ((lptr=Cdr(lptr))!=0){
+        while ((lptr=Cdr(lptr))!=nullptr){
            tmp_ht=cell_find_lift((cell)Car(Car(lptr)),Mpt);
            if (ht<tmp_ht) ht=tmp_ht;
         }
@@ -1348,7 +1348,7 @@ static node relift(node *lhead, int tweak){
     ** Norm_Sys and use homotopy.
     */
     lptr=list2;
-    while (lptr!=0){
+    while (lptr!=nullptr){
      Tmp_Norm=cell_norm((cell)Car(Car(lptr)));
      for(i=1;i<=cly_Dim;i++){
        Poly_TNorm(i)=Tmp_Norm(i);
@@ -1366,7 +1366,7 @@ static node relift(node *lhead, int tweak){
    ** and return 
    */
    lptr=Lead_Sols;
-   while(lptr!=0){
+   while(lptr!=nullptr){
        xpnt_t_set((Dmatrix)Car(Car(lptr)),0.0);
        lptr=Cdr(lptr);
    }
@@ -1374,7 +1374,7 @@ static node relift(node *lhead, int tweak){
    fprintf(stdout /* was cly_out */,"deforming from face:\n")
 #endif
 ;
-   if (Lead_Sols!=0) Lead_Sols=psys_hom(Norm_Sys,Lead_Sols,tweak);
+   if (Lead_Sols!=nullptr) Lead_Sols=psys_hom(Norm_Sys,Lead_Sols,tweak);
    psys_free(Lead_Sys);
    psys_free(Norm_Sys);
    POP_LOCS();

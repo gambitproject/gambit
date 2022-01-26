@@ -240,19 +240,19 @@ AGG *AGG::makeAGG(istream &in){
     in>>n;
     if(!in.good()) {
       cout<<"Error reading the number of players"<<endl;
-      return 0;
+      return nullptr;
     }
     stripComment(in);
     in>>S;
     if(!in.good()) {
       cout<<"Error reading the number of action nodes"<<endl;
-      return 0;
+      return nullptr;
     }
     stripComment(in);
     in>>P;
     if(!in.good()) {
       cout<<"Error reading the number of function nodes"<<endl;
-      return 0;
+      return nullptr;
     }
     stripComment(in);
 
@@ -262,7 +262,7 @@ AGG *AGG::makeAGG(istream &in){
       in >> size[i];
       if(in.eof()||in.fail()) {
               cout << "Error in game file while trying to read the size of action set of player "<<i<<".\n";
-              return 0;
+              return nullptr;
       }
       //sumActionSets+=size[i];
     }
@@ -277,7 +277,7 @@ AGG *AGG::makeAGG(istream &in){
 	if(in.eof()||in.fail()) {
 	        cout<< "Error in game file while trying to read the node index of action "<<j<< " of player "
 	            <<i<<".\n";
-	        return 0;
+	        return nullptr;
 	}
 	ASets[i].push_back(aindex);
       }
@@ -291,14 +291,14 @@ AGG *AGG::makeAGG(istream &in){
       in>>neighb_size;
       if(in.eof()||in.fail()) {
         cout << "Error in game file while trying to read the size of the neighbor list of node "<<i<<".\n";
-        return 0;
+        return nullptr;
       }
       for(j=0;j<neighb_size;j++){
 	int nindex;
 	in>>nindex;
 	if(!in.good()){
 	  cout<<"Error while reading neighor #"<<j<<" of node "<<i<<".\n";
-	  return 0;
+	  return nullptr;
 	}
 	neighb[i].push_back(nindex);
       }
@@ -313,7 +313,7 @@ AGG *AGG::makeAGG(istream &in){
 	in >> pt;
         if (in.eof()||in.fail()){
           cout<<"Error in game file: expected integer for type of function node #"<<i<<endl;
-          return 0;
+          return nullptr;
         }
 	projTypes[i] = make_proj_func((TypeEnum)pt,in,S,P);
     }
@@ -365,14 +365,14 @@ AGG *AGG::makeAGG(istream &in){
     for(i=0;i<S;i++){
       if(in.eof()||in.bad()) {
 	cout << "Error in game file: not enough payoffs.\n";
-	return 0;
+	return nullptr;
       }
       stripComment(in);
       int t;
       in>>t;
       if(!in.good()){
         cout<< "Error reading the integer type of the utility function for action node "<<i<<endl;
-        return 0;
+        return nullptr;
       }
       switch (t){
         case COMPLETE:
@@ -389,7 +389,7 @@ AGG *AGG::makeAGG(istream &in){
       }
       
     }
-    AGG *r=NULL;
+    AGG *r=nullptr;
     r=new AGG(n,size,S,P,ASets,neighb,projTypes,projS,proj,projF,Po,Pr,pays);
     if (!r)cout<<"Failed to allocate memory for new AGG";
     return r;
@@ -761,7 +761,7 @@ AggNumber AGG::getSymMixedPayoff(int node, StrategyProfile &s)
     AggNumber prob = pow((support.at(0)>=0)?s[neighbors[node][support[0]]]:null_prob,
 		numPlayers-1);
 
-    while (1){
+    while (true){
       const vector<int>& comp = gc.get();
       config c(numNei, 0);
       for (size_t j=0;j<support.size(); ++j) { 
@@ -866,7 +866,7 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
     AggNumber prob0=(support.at(0)>=0)?s[node2Action[neighbors[node].at(support[0])][p]]:null_prob;
     AggNumber prob = pow(prob0,numPl);
 
-    while (1){
+    while (true){
       const vector<int>& comp = gc.get();
       config c(numNei, 0);
       for (size_t j=0;j<support.size(); ++j) { 

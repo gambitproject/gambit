@@ -48,36 +48,36 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructor; initializes reference count
-  GameObject(void) : m_refCount(0), m_valid(true) { }
+  GameObject() : m_refCount(0), m_valid(true) { }
   /// Destructor
-  virtual ~GameObject() { }
+  virtual ~GameObject() = default;
   //@}
 
   /// @name Validation
   //@{
   /// Is the object still valid?
-  bool IsValid(void) const { return m_valid; }
+  bool IsValid() const { return m_valid; }
   /// Invalidate the object; delete if not referenced elsewhere
-  void Invalidate(void)
+  void Invalidate()
   { if (!m_refCount) delete this; else m_valid = false; }
   //@}
 
   /// @name Reference counting
   //@{
   /// Increment the reference count
-  void IncRef(void) { m_refCount++; }
+  void IncRef() { m_refCount++; }
   /// Decrement the reference count; delete if reference count is zero.
-  void DecRef(void) { if (!--m_refCount && !m_valid) delete this; }
+  void DecRef() { if (!--m_refCount && !m_valid) delete this; }
   /// Returns the reference count
-  int RefCount(void) const { return m_refCount; }
+  int RefCount() const { return m_refCount; }
   //@}
 };
 
 /// An exception thrown when attempting to dereference an invalidated object 
 class InvalidObjectException : public Exception {
 public:
-  virtual ~InvalidObjectException() throw() { }
-  const char *what(void) const throw()  { return "Dereferencing an invalidated object"; }
+  virtual ~InvalidObjectException() noexcept = default;
+  const char *what() const noexcept  { return "Dereferencing an invalidated object"; }
 };
 
 
@@ -91,7 +91,7 @@ private:
   T *rep;
 
 public:
-  GameObjectPtr(T *r = 0) : rep(r)
+  GameObjectPtr(T *r = nullptr) : rep(r)
     { if (rep) rep->IncRef(); }
   GameObjectPtr(const GameObjectPtr<T> &r) : rep(r.rep)
     { if (rep) rep->IncRef(); }
@@ -106,7 +106,7 @@ public:
       return *this;
     }
 
-  T *operator->(void) const 
+  T *operator->() const 
     { if (!rep) throw NullException();
       if (!rep->IsValid()) throw InvalidObjectException(); 
       return rep; }
@@ -118,9 +118,9 @@ public:
   { return (rep != r.rep); }
   bool operator!=(T *r) const { return (rep != r); }
 
-  operator T *(void) const { return rep; }
+  operator T *() const { return rep; }
 
-  bool operator!(void) const { return !rep; }
+  bool operator!() const { return !rep; }
 };
 
 //
@@ -169,25 +169,25 @@ class StrategySupportProfile;
 /// Exception thrown when an operation that is undefined is attempted
 class UndefinedException : public Exception {
 public:
-  UndefinedException(void) : Exception("Undefined operation on game") { }
+  UndefinedException() : Exception("Undefined operation on game") { }
   UndefinedException(const std::string &s) : Exception(s) { }
-  virtual ~UndefinedException() throw() { }
+  virtual ~UndefinedException() noexcept = default;
 };
 
 /// Exception thrown on an operation between incompatible objects
 class MismatchException : public Exception {
 public:
-  virtual ~MismatchException() throw() { }
-  const char *what(void) const throw()  
+  virtual ~MismatchException() noexcept = default;
+  const char *what() const noexcept  
   { return "Operation between objects in different games"; }
 };
 
 /// Exception thrown on a parse error when reading a game savefile
 class InvalidFileException : public Exception {
 public:
-  InvalidFileException(void) : Exception("File not in a recognized format") { }
+  InvalidFileException() : Exception("File not in a recognized format") { }
   InvalidFileException(const std::string &s) : Exception(s) { } 
-  virtual ~InvalidFileException() throw() { }
+  virtual ~InvalidFileException() noexcept = default;
 };
 
 //=======================================================================
@@ -216,19 +216,19 @@ private:
   //@{
   /// Creates a new outcome object, with payoffs set to zero
   GameOutcomeRep(GameRep *p_game, int p_number);
-  virtual ~GameOutcomeRep() { }
+  virtual ~GameOutcomeRep() = default;
   //@}
 
 public:
   /// @name Data access
   //@{
   /// Returns the strategic game on which the outcome is defined.
-  Game GetGame(void) const;
+  Game GetGame() const;
   /// Returns the index number of the outcome
-  int GetNumber(void) const { return m_number; }
+  int GetNumber() const { return m_number; }
 
   /// Returns the text label associated with the outcome
-  const std::string &GetLabel(void) const { return m_label; }
+  const std::string &GetLabel() const { return m_label; }
   /// Sets the text label associated with the outcome 
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
@@ -243,7 +243,7 @@ public:
   }
 
   /// Map the outcome to the corresponding outcome in the unrestricted game
-  GameOutcome Unrestrict(void) const 
+  GameOutcome Unrestrict() const 
   { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
   //@}
 };
@@ -255,22 +255,22 @@ class GameActionRep : public GameObject {
 protected:
   GameAction m_unrestricted;
 
-  GameActionRep(void) : m_unrestricted(0) { }
-  virtual ~GameActionRep() { }
+  GameActionRep() : m_unrestricted(nullptr) { }
+  virtual ~GameActionRep() = default;
 
 public:
-  virtual int GetNumber(void) const = 0;
-  virtual GameInfoset GetInfoset(void) const = 0;
+  virtual int GetNumber() const = 0;
+  virtual GameInfoset GetInfoset() const = 0;
 
-  virtual const std::string &GetLabel(void) const = 0;
+  virtual const std::string &GetLabel() const = 0;
   virtual void SetLabel(const std::string &p_label) = 0;
 
   virtual bool Precedes(const GameNode &) const = 0;
 
-  virtual void DeleteAction(void) = 0;
+  virtual void DeleteAction() = 0;
 
   /// Map the action to the corresponding action in the unrestricted game
-  GameAction Unrestrict(void) const 
+  GameAction Unrestrict() const 
   { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
 
 };
@@ -280,34 +280,34 @@ class GameInfosetRep : public GameObject {
 protected:
   GameInfoset m_unrestricted;
  
-  GameInfosetRep(void): m_unrestricted(0) { }
-  virtual ~GameInfosetRep() { }
+  GameInfosetRep(): m_unrestricted(nullptr) { }
+  virtual ~GameInfosetRep() = default;
 
 public:
-  virtual Game GetGame(void) const = 0;
-  virtual int GetNumber(void) const = 0;
+  virtual Game GetGame() const = 0;
+  virtual int GetNumber() const = 0;
   
-  virtual GamePlayer GetPlayer(void) const = 0;
+  virtual GamePlayer GetPlayer() const = 0;
   virtual void SetPlayer(GamePlayer p) = 0;
 
-  virtual bool IsChanceInfoset(void) const = 0;
+  virtual bool IsChanceInfoset() const = 0;
 
   virtual void SetLabel(const std::string &p_label) = 0;
-  virtual const std::string &GetLabel(void) const = 0;
+  virtual const std::string &GetLabel() const = 0;
   
-  virtual GameAction InsertAction(GameAction p_where = 0) = 0;
+  virtual GameAction InsertAction(GameAction p_where = nullptr) = 0;
 
   /// @name Actions
   //@{
   /// Returns the number of actions available at the information set
-  virtual int NumActions(void) const = 0;
+  virtual int NumActions() const = 0;
   /// Returns the p_index'th action at the information set
   virtual GameAction GetAction(int p_index) const = 0;
   /// Returns a forward iterator over the available actions
   //virtual GameActionIterator Actions(void) const = 0; 
   //@}
 
-  virtual int NumMembers(void) const = 0;
+  virtual int NumMembers() const = 0;
   virtual GameNode GetMember(int p_index) const = 0;
 
   virtual bool Precedes(GameNode) const = 0;
@@ -319,7 +319,7 @@ public:
   virtual void Reveal(GamePlayer) = 0;
 
   /// Map the infoset to the corresponding infoset in the unrestricted game
-  GameInfoset Unrestrict(void) const 
+  GameInfoset Unrestrict() const 
   { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
 };
 
@@ -359,29 +359,29 @@ private:
   //@{
   /// Creates a new strategy for the given player.
   GameStrategyRep(GamePlayerRep *p_player)
-    : m_number(0), m_id(0), m_player(p_player), m_offset(0L), m_unrestricted(0) { }
+    : m_number(0), m_id(0), m_player(p_player), m_offset(0L), m_unrestricted(nullptr) { }
   //@}
 
 public:
   /// @name Data access
   //@{
   /// Returns the text label associated with the strategy
-  const std::string &GetLabel(void) const { return m_label; }
+  const std::string &GetLabel() const { return m_label; }
   /// Sets the text label associated with the strategy
   void SetLabel(const std::string &p_label) { m_label = p_label; }
   
   /// Returns the player for whom this is a strategy
-  GamePlayer GetPlayer(void) const;
+  GamePlayer GetPlayer() const;
   /// Returns the index of the strategy for its player
-  int GetNumber(void) const { return m_number; }
+  int GetNumber() const { return m_number; }
   /// Returns the global number of the strategy in the game
-  int GetId(void) const { return m_id; }
+  int GetId() const { return m_id; }
 
   /// Remove this strategy from the game
-  void DeleteStrategy(void);
+  void DeleteStrategy();
 
   /// Map the strategy to the corresponding strategy in the unrestricted game
-  GameStrategy Unrestrict(void) const
+  GameStrategy Unrestrict() const
   { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
   //@}
 };
@@ -405,7 +405,7 @@ class GamePlayerRep : public GameObject {
 
   /// @name Building reduced form strategies
   //@{
-  void MakeStrategy(void);
+  void MakeStrategy();
   void MakeReducedStrats(GameTreeNodeRep *, GameTreeNodeRep *);
   //@}
   
@@ -418,40 +418,40 @@ private:
   GamePlayer m_unrestricted;
 
   GamePlayerRep(GameRep *p_game, int p_id) 
-    : m_game(p_game), m_number(p_id), m_unrestricted(0) { }
+    : m_game(p_game), m_number(p_id), m_unrestricted(nullptr) { }
   GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
   ~GamePlayerRep();
 
 public:
-  int GetNumber(void) const { return m_number; }
-  Game GetGame(void) const;
+  int GetNumber() const { return m_number; }
+  Game GetGame() const;
   
-  const std::string &GetLabel(void) const { return m_label; }
+  const std::string &GetLabel() const { return m_label; }
   void SetLabel(const std::string &p_label) { m_label = p_label; }
   
-  bool IsChance(void) const { return (m_number == 0); }
+  bool IsChance() const { return (m_number == 0); }
 
   /// @name Information sets
   //@{
   /// Returns the number of information sets at which the player makes a choice
-  int NumInfosets(void) const { return m_infosets.Length(); }
+  int NumInfosets() const { return m_infosets.Length(); }
   /// Returns the p_index'th information set
   GameInfoset GetInfoset(int p_index) const;
 
   /// @name Strategies
   //@{
   /// Returns the number of strategies available to the player
-  int NumStrategies(void) const; 
+  int NumStrategies() const; 
   /// Returns the st'th strategy for the player
   GameStrategy GetStrategy(int st) const;
   /// Returns the array of strategies available to the player
-  const GameStrategyArray &Strategies(void) const;
+  const GameStrategyArray &Strategies() const;
   /// Creates a new strategy for the player
-  GameStrategy NewStrategy(void);
+  GameStrategy NewStrategy();
   //@}
 
   /// Map the player to the corresponding player in the unrestricted game
-  GamePlayer Unrestrict(void) const 
+  GamePlayer Unrestrict() const 
   { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
 
 };
@@ -461,46 +461,46 @@ class GameNodeRep : public GameObject {
 protected:
   GameNode m_unrestricted;
 
-  GameNodeRep(void) : m_unrestricted(0) { }
-  virtual ~GameNodeRep() { }
+  GameNodeRep() : m_unrestricted(nullptr) { }
+  virtual ~GameNodeRep() = default;
 
 public:
-  virtual Game GetGame(void) const = 0; 
+  virtual Game GetGame() const = 0; 
 
-  virtual const std::string &GetLabel(void) const = 0;
+  virtual const std::string &GetLabel() const = 0;
   virtual void SetLabel(const std::string &p_label) = 0;
 
-  virtual int GetNumber(void) const = 0;
-  virtual int NumberInInfoset(void) const = 0;
+  virtual int GetNumber() const = 0;
+  virtual int NumberInInfoset() const = 0;
 
-  virtual int NumChildren(void) const = 0;
+  virtual int NumChildren() const = 0;
 
-  virtual GameInfoset GetInfoset(void) const = 0;
+  virtual GameInfoset GetInfoset() const = 0;
   virtual void SetInfoset(GameInfoset) = 0;
-  virtual GameInfoset LeaveInfoset(void) = 0;
+  virtual GameInfoset LeaveInfoset() = 0;
 
-  virtual bool IsTerminal(void) const = 0;
-  virtual GamePlayer GetPlayer(void) const = 0;
-  virtual GameAction GetPriorAction(void) const = 0;
+  virtual bool IsTerminal() const = 0;
+  virtual GamePlayer GetPlayer() const = 0;
+  virtual GameAction GetPriorAction() const = 0;
   virtual GameNode GetChild(int i) const = 0;
-  virtual GameNode GetParent(void) const = 0;
-  virtual GameNode GetNextSibling(void) const = 0;
-  virtual GameNode GetPriorSibling(void) const = 0;
+  virtual GameNode GetParent() const = 0;
+  virtual GameNode GetNextSibling() const = 0;
+  virtual GameNode GetPriorSibling() const = 0;
 
-  virtual GameOutcome GetOutcome(void) const = 0;
+  virtual GameOutcome GetOutcome() const = 0;
   virtual void SetOutcome(const GameOutcome &p_outcome) = 0;
 
   virtual bool IsSuccessorOf(GameNode from) const = 0;
-  virtual bool IsSubgameRoot(void) const = 0;
+  virtual bool IsSubgameRoot() const = 0;
 
-  virtual void DeleteParent(void) = 0;
-  virtual void DeleteTree(void) = 0;
+  virtual void DeleteParent() = 0;
+  virtual void DeleteTree() = 0;
 
   virtual void CopyTree(GameNode src) = 0;
   virtual void MoveTree(GameNode src) = 0;
 
   /// Create a separate Game object containing the subgame rooted at the node
-  virtual Game CopySubgame(void) const = 0;
+  virtual Game CopySubgame() const = 0;
 
   virtual GameInfoset AppendMove(GamePlayer p_player, int p_actions) = 0;
   virtual GameInfoset AppendMove(GameInfoset p_infoset) = 0;
@@ -508,7 +508,7 @@ public:
   virtual GameInfoset InsertMove(GameInfoset p_infoset) = 0;
 
   /// Map the node to the corresponding node in the unrestricted game
-  GameNode Unrestrict(void) const 
+  GameNode Unrestrict() const 
   { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
 };
 
@@ -531,15 +531,15 @@ protected:
 
   /// Create a copy of the strategy profile.
   /// Caller is responsible for memory management of the created object.
-  virtual PureStrategyProfileRep *Copy(void) const = 0;
+  virtual PureStrategyProfileRep *Copy() const = 0;
 
 public:
-  virtual ~PureStrategyProfileRep() { }
+  virtual ~PureStrategyProfileRep() = default;
   
   /// @name Data access and manipulation
   //@{
   /// Get the index uniquely identifying the strategy profile
-  virtual long GetIndex(void) const { throw UndefinedException(); }
+  virtual long GetIndex() const { throw UndefinedException(); }
   /// Get the strategy played by player pl  
   const GameStrategy &GetStrategy(int pl) const { return m_profile[pl]; }
   /// Get the strategy played by the player
@@ -549,7 +549,7 @@ public:
   virtual void SetStrategy(const GameStrategy &) = 0;
 
   /// Get the outcome that results from the profile
-  virtual GameOutcome GetOutcome(void) const = 0;
+  virtual GameOutcome GetOutcome() const = 0;
   /// Set the outcome that results from the profile
   virtual void SetOutcome(GameOutcome p_outcome) = 0; 
 
@@ -562,10 +562,10 @@ public:
   virtual Rational GetStrategyValue(const GameStrategy &) const = 0;
 
   /// Is the profile a pure strategy Nash equilibrium?
-  bool IsNash(void) const;
+  bool IsNash() const;
 
   /// Is the profile a strict pure stategy Nash equilibrium?
-  bool IsStrictNash(void) const;
+  bool IsStrictNash() const;
 
   /// Is the specificed player playing a best response?
   bool IsBestResponse(const GamePlayer &p_player) const;
@@ -574,10 +574,10 @@ public:
   List<GameStrategy> GetBestResponse(const GamePlayer &p_player) const;
 
   /// Convert to a mixed strategy representation
-  MixedStrategyProfile<Rational> ToMixedStrategyProfile(void) const;
+  MixedStrategyProfile<Rational> ToMixedStrategyProfile() const;
 
   /// Map strategy profile to the unrestriction of the game
-  PureStrategyProfile Unrestrict(void) const;
+  PureStrategyProfile Unrestrict() const;
 
   //@}
 };
@@ -600,8 +600,8 @@ public:
       return *this;
     }
 
-  PureStrategyProfileRep *operator->(void) const { return rep; }
-  operator PureStrategyProfileRep *(void) const { return rep; }
+  PureStrategyProfileRep *operator->() const { return rep; }
+  operator PureStrategyProfileRep *() const { return rep; }
 };
     
 
@@ -638,10 +638,10 @@ public:
   template <class T> T GetPayoff(const GameAction &) const;
 
   /// Is the profile a pure strategy agent Nash equilibrium?
-  bool IsAgentNash(void) const;
+  bool IsAgentNash() const;
 
   /// Convert to a mixed behavior representation
-  MixedBehaviorProfile<Rational> ToMixedBehaviorProfile(void) const;
+  MixedBehaviorProfile<Rational> ToMixedBehaviorProfile() const;
   //@}
 };
 
@@ -660,18 +660,18 @@ class GameRep : public GameObject {
 protected:
   std::string m_title, m_comment;
 
-  GameRep(void) { }
+  GameRep() = default;
 
   /// @name Managing the representation
   //@{
   /// Renumber all game objects in a canonical way
-  virtual void Canonicalize(void) { }  
+  virtual void Canonicalize() { }  
   /// Clear out any computed values
-  virtual void ClearComputedValues(void) const { }
+  virtual void ClearComputedValues() const { }
   /// Build any computed values anew
-  virtual void BuildComputedValues(void) { }
+  virtual void BuildComputedValues() { }
   /// Have computed values been built?
-  virtual bool HasComputedValues(void) const { return false; }
+  virtual bool HasComputedValues() const { return false; }
   //@}
 
 
@@ -679,36 +679,36 @@ public:
   /// @name Lifecycle
   //@{
   /// Clean up the game
-  virtual ~GameRep() { }
+  virtual ~GameRep() = default;
   /// Create a copy of the game, as a new game
-  virtual Game Copy(void) const = 0;
+  virtual Game Copy() const = 0;
   //@}
 
   /// @name General data access
   //@{
   /// Returns true if the game has a game tree representation
-  virtual bool IsTree(void) const = 0;
+  virtual bool IsTree() const = 0;
 
   /// Returns true if the game has a action-graph game representation
-  virtual bool IsAgg(void) const { return false; }
+  virtual bool IsAgg() const { return false; }
 
   /// Returns true if the game is a restriction of a more general game
-  virtual bool IsRestriction(void) const { return false; }
+  virtual bool IsRestriction() const { return false; }
   /// Returns the unrestricted version of the game
-  virtual Game Unrestrict(void) const { throw UndefinedException(); }
+  virtual Game Unrestrict() const { throw UndefinedException(); }
 
   /// Get the text label associated with the game
-  virtual const std::string &GetTitle(void) const { return m_title; }
+  virtual const std::string &GetTitle() const { return m_title; }
   /// Set the text label associated with the game
   virtual void SetTitle(const std::string &p_title) { m_title = p_title; }
 
   /// Get the text comment associated with the game
-  virtual const std::string &GetComment(void) const { return m_comment; }
+  virtual const std::string &GetComment() const { return m_comment; }
   /// Set the text comment associated with the game
   virtual void SetComment(const std::string &p_comment) { m_comment = p_comment; }
 
   /// Returns true if the game is constant-sum
-  virtual bool IsConstSum(void) const = 0; 
+  virtual bool IsConstSum() const = 0; 
   /// Returns the smallest payoff in any outcome of the game
   virtual Rational GetMinPayoff(int pl = 0) const = 0;
   /// Returns the largest payoff in any outcome of the game
@@ -718,7 +718,7 @@ public:
   /// a pair of violating information sets is returned in the parameters.  
   virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const = 0;
   /// Returns true if the game is perfect recall
-  virtual bool IsPerfectRecall(void) const
+  virtual bool IsPerfectRecall() const
   { GameInfoset s, t; return IsPerfectRecall(s, t); }
   //@}
 
@@ -735,22 +735,22 @@ public:
   /// @name Dimensions of the game
   //@{
   /// The number of actions in each information set
-  virtual PVector<int> NumActions(void) const = 0;
+  virtual PVector<int> NumActions() const = 0;
   /// The number of members in each information set
-  virtual PVector<int> NumMembers(void) const = 0;
+  virtual PVector<int> NumMembers() const = 0;
   /// The number of strategies for each player
-  virtual Array<int> NumStrategies(void) const = 0;
+  virtual Array<int> NumStrategies() const = 0;
   /// Gets the i'th strategy in the game, numbered globally
   virtual GameStrategy GetStrategy(int p_index) const = 0;
   /// Returns the number of strategy contingencies in the game
-  virtual int NumStrategyContingencies(void) const = 0;
+  virtual int NumStrategyContingencies() const = 0;
   /// Returns the total number of actions in the game
-  virtual int BehavProfileLength(void) const = 0;
+  virtual int BehavProfileLength() const = 0;
   /// Returns the total number of strategies in the game
-  virtual int MixedProfileLength(void) const = 0;
+  virtual int MixedProfileLength() const = 0;
   //@}
 
-  virtual PureStrategyProfile NewPureStrategyProfile(void) const = 0;
+  virtual PureStrategyProfile NewPureStrategyProfile() const = 0;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const = 0;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const = 0; 
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const = 0;
@@ -759,15 +759,15 @@ public:
   /// @name Players
   //@{
   /// Returns the number of players in the game
-  virtual int NumPlayers(void) const = 0;
+  virtual int NumPlayers() const = 0;
   /// Returns the pl'th player in the game
   virtual GamePlayer GetPlayer(int pl) const = 0;
   /// Returns the set of players in the game 
-  virtual const GamePlayers &Players(void) const = 0;
+  virtual const GamePlayers &Players() const = 0;
   /// Returns the chance (nature) player
-  virtual GamePlayer GetChance(void) const = 0;
+  virtual GamePlayer GetChance() const = 0;
   /// Creates a new player in the game, with no moves
-  virtual GamePlayer NewPlayer(void) = 0;
+  virtual GamePlayer NewPlayer() = 0;
   //@}
 
   /// @name Information sets
@@ -775,7 +775,7 @@ public:
   /// Returns the iset'th information set in the game (numbered globally)
   virtual GameInfoset GetInfoset(int iset) const = 0;
   /// Returns an array with the number of information sets per personal player
-  virtual Array<int> NumInfosets(void) const = 0;
+  virtual Array<int> NumInfosets() const = 0;
   /// Returns the act'th action in the game (numbered globally)
   virtual GameAction GetAction(int act) const = 0;
   //@}
@@ -783,11 +783,11 @@ public:
   /// @name Outcomes
   //@{
   /// Returns the number of outcomes defined in the game
-  virtual int NumOutcomes(void) const = 0;
+  virtual int NumOutcomes() const = 0;
   /// Returns the index'th outcome defined in the game
   virtual GameOutcome GetOutcome(int index) const = 0;
   /// Creates a new outcome in the game
-  virtual GameOutcome NewOutcome(void) = 0;
+  virtual GameOutcome NewOutcome() = 0;
   /// Deletes the specified outcome from the game
   virtual void DeleteOutcome(const GameOutcome &) = 0;
   //@}
@@ -795,16 +795,16 @@ public:
   /// @name Nodes
   //@{
   /// Returns the root node of the game
-  virtual GameNode GetRoot(void) const = 0;
+  virtual GameNode GetRoot() const = 0;
   /// Returns the number of nodes in the game
-  virtual int NumNodes(void) const = 0;
+  virtual int NumNodes() const = 0;
   //@}
 };
 
 typedef GameObjectPtr<GameRep> Game;
 
 /// Factory function to create new game tree
-Game NewTree(void);
+Game NewTree();
 /// Factory function to create new game table
 Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes = false);
 
@@ -815,16 +815,16 @@ Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes = false);
 // These must be postponed to here in the file because they require
 // all classes to be defined.
 
-inline Game GameOutcomeRep::GetGame(void) const { return m_game; }
+inline Game GameOutcomeRep::GetGame() const { return m_game; }
 
-inline GamePlayer GameStrategyRep::GetPlayer(void) const { return m_player; }
+inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player; }
 
-inline Game GamePlayerRep::GetGame(void) const { return m_game; }
-inline int GamePlayerRep::NumStrategies(void) const 
+inline Game GamePlayerRep::GetGame() const { return m_game; }
+inline int GamePlayerRep::NumStrategies() const 
 { m_game->BuildComputedValues(); return m_strategies.Length(); }
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const 
 { m_game->BuildComputedValues(); return m_strategies[st]; }
-inline const GameStrategyArray &GamePlayerRep::Strategies(void) const
+inline const GameStrategyArray &GamePlayerRep::Strategies() const
 { m_game->BuildComputedValues(); return m_strategies; }
 
 template<> inline double PureBehaviorProfile::GetPayoff(int pl) const

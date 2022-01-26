@@ -68,7 +68,7 @@ public:
   bool            operator!=(const gSpace & rhs) const;
   
   // information
-  int             Dmnsn(void)              const;
+  int             Dmnsn()              const;
   Variable*       VariableWithNumber(int)  const;
   const std::string&  GetVariableName(int)     const;
   gSpace          WithVariableAppended()   const;
@@ -102,8 +102,8 @@ public:
   exp_vect(const gSpace*, Gambit::Vector<int>);
   exp_vect(const gSpace*, Gambit::Array<int>);
   exp_vect(const exp_vect*);
-  exp_vect(const exp_vect&);
-  ~exp_vect();
+  exp_vect(const exp_vect &) = default;
+  ~exp_vect() = default;
 
 // Operators
   exp_vect& operator=(const exp_vect & RHS);
@@ -181,8 +181,8 @@ private:
 
 public:
   term_order(const gSpace*, ORD_PTR);
-  term_order(const term_order &);
-  ~term_order();
+  term_order(const term_order &) = default;
+  ~term_order() = default;
 
 // Operators
   term_order& operator=(term_order & RHS);

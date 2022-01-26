@@ -715,7 +715,7 @@ private:
 };
 
 LrsData::LrsData(const Game &p_game)
-  : Q1(0), Q2(0), P1(0), P2(0)
+  : Q1(nullptr), Q2(nullptr), P1(nullptr), P2(nullptr)
 {
   if (!lrs_init("")) {
     throw Exception("Error in initializing lrslib");
@@ -723,7 +723,7 @@ LrsData::LrsData(const Game &p_game)
 
   /* allocate and init structure for static problem data */
   Q1 = lrs_alloc_dat("LRS globals");	
-  if (Q1 == NULL) {
+  if (Q1 == nullptr) {
     throw Exception("Error in allocating lrslib data");
   }
   Q1->nash = TRUE;
@@ -731,13 +731,13 @@ LrsData::LrsData(const Game &p_game)
   Q1->m = p_game->MixedProfileLength() + 1;
   
   P1 = lrs_alloc_dic(Q1);
-  if (P1 == NULL) {
+  if (P1 == nullptr) {
     throw Exception("Error in allocating lrslib data");
   }
 
   /* allocate and init structure for player 2's problem data */
   Q2 = lrs_alloc_dat("LRS globals"); 
-  if (Q2 == NULL) {
+  if (Q2 == nullptr) {
     throw Exception("Error in allocating lrslib data");
   }
   Q2->nash = TRUE;
@@ -745,7 +745,7 @@ LrsData::LrsData(const Game &p_game)
   Q2->m = p_game->MixedProfileLength() + 1;
 
   P2 = lrs_alloc_dic(Q2);
-  if (P2 == NULL) {
+  if (P2 == nullptr) {
     throw Exception("Error in allocating lrslib data");
   }
 
@@ -757,19 +757,19 @@ LrsData::~LrsData()
 {
   if (P2) {
     lrs_free_dic(P2, Q2);
-    P2 = 0;
+    P2 = nullptr;
   }
   if (Q2) {
     lrs_free_dat(Q2);
-    Q2 = 0;
+    Q2 = nullptr;
   }
   if (P1) {
     lrs_free_dic(P1, Q1);
-    P1 = 0;
+    P1 = nullptr;
   }
   if (Q1) {
     lrs_free_dat(Q1);
-    Q1 = 0;
+    Q1 = nullptr;
   }
 
   lrs_close("");
@@ -894,7 +894,7 @@ EnumMixedLrsStrategySolver::Solve(const Game &p_game) const
   output2 = lrs_alloc_mp_vector (data.Q2->n + data.Q2->m);   /* output holds one line of output from dictionary     */
 
   P2orig = lrs_getdic(data.Q2);  	     /* allocate and initialize lrs_dic                     */
-  if (P2orig == NULL) {
+  if (P2orig == nullptr) {
     throw Exception("Error in allocating lrslib data");
   }
   copy_dict(data.Q2,P2orig,data.P2);

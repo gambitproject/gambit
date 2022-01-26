@@ -81,7 +81,7 @@ gbtEditableText::gbtEditableText(wxWindow *p_parent, int p_id,
   Layout();
 }
 
-void gbtEditableText::BeginEdit(void)
+void gbtEditableText::BeginEdit()
 {
   m_textCtrl->SetValue(m_staticText->GetLabel());
   m_textCtrl->SetSelection(-1, -1);
@@ -102,7 +102,7 @@ void gbtEditableText::EndEdit(bool p_accept)
   GetSizer()->Layout();
 }
 
-wxString gbtEditableText::GetValue(void) const
+wxString gbtEditableText::GetValue() const
 {
   
   if (GetSizer()->IsShown(m_textCtrl)) {

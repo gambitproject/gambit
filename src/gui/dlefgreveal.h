@@ -35,7 +35,7 @@ public:
   gbtRevealMoveDialog(wxWindow *, gbtGameDocument *);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  Gambit::Array<Gambit::GamePlayer> GetPlayers(void) const;
+  Gambit::Array<Gambit::GamePlayer> GetPlayers() const;
 };
 
 #endif  // DLEFGREVEAL_H

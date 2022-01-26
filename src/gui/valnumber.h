@@ -40,14 +40,14 @@ public:
   gbtNumberValidator(wxString *, const Gambit::Rational &);
   gbtNumberValidator(wxString *, const Gambit::Rational &, const Gambit::Rational &);
   gbtNumberValidator(const gbtNumberValidator &);
-  virtual ~gbtNumberValidator() { }
+  virtual ~gbtNumberValidator() = default;
 
-  virtual wxObject *Clone(void) const { return new gbtNumberValidator(*this); }
+  virtual wxObject *Clone() const { return new gbtNumberValidator(*this); }
   bool Copy(const gbtNumberValidator &);
 
   virtual bool Validate(wxWindow *parent);
-  virtual bool TransferToWindow(void);
-  virtual bool TransferFromWindow(void);
+  virtual bool TransferToWindow();
+  virtual bool TransferFromWindow();
 
   DECLARE_EVENT_TABLE()
 };

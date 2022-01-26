@@ -40,7 +40,7 @@ private:
 public:
   gbtActionSheet(wxWindow *p_parent, Gambit::GameInfoset p_infoset);
   
-  int NumActions(void) const { return GetNumberRows(); }
+  int NumActions() const { return GetNumberRows(); }
   wxString GetActionName(int p_act);
   wxString GetActionProb(int p_act); 
 };
@@ -196,7 +196,7 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
   CenterOnParent();
 }
 
-int gbtEditMoveDialog::NumActions(void) const 
+int gbtEditMoveDialog::NumActions() const 
 { 
   return m_actionSheet->NumActions(); 
 }

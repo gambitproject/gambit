@@ -49,7 +49,7 @@ private:
   wxStaticText *m_level;
 
   // Overriding gbtGameView members
-  void OnUpdate(void);
+  void OnUpdate();
 
   // Event handlers
   void OnStrength(wxCommandEvent &);
@@ -61,7 +61,7 @@ private:
 
 public:
   gbtBehavDominanceToolbar(wxWindow *p_parent, gbtGameDocument *p_doc);
-  virtual ~gbtBehavDominanceToolbar() { }
+  virtual ~gbtBehavDominanceToolbar() = default;
 };
 
 #include "bitmaps/next.xpm"
@@ -163,7 +163,7 @@ void gbtBehavDominanceToolbar::OnShowReachable(wxCommandEvent &)
   m_doc->SetStyle(style);
 }
 
-void gbtBehavDominanceToolbar::OnUpdate(void)
+void gbtBehavDominanceToolbar::OnUpdate()
 {
   m_topButton->Enable(m_doc->GetBehavElimLevel() > 1);
   m_prevButton->Enable(m_doc->GetBehavElimLevel() > 1);
@@ -245,8 +245,8 @@ private:
 public:
   gbtTreePlayerPanel(wxWindow *, gbtGameDocument *, int p_player);
 
-  void OnUpdate(void);
-  void PostPendingChanges(void);
+  void OnUpdate();
+  void PostPendingChanges();
 
   DECLARE_EVENT_TABLE()
 };
@@ -336,7 +336,7 @@ gbtTreePlayerPanel::gbtTreePlayerPanel(wxWindow *p_parent,
   OnUpdate();
 }
 
-void gbtTreePlayerPanel::OnUpdate(void)
+void gbtTreePlayerPanel::OnUpdate()
 {
   if (!m_doc->IsTree())  return;
 
@@ -450,7 +450,7 @@ void gbtTreePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
 			  m_playerLabel->GetValue());
 }
 
-void gbtTreePlayerPanel::PostPendingChanges(void)
+void gbtTreePlayerPanel::PostPendingChanges()
 {
   if (m_playerLabel->IsEditing()) {
     m_playerLabel->EndEdit(true);
@@ -501,7 +501,7 @@ private:
   wxStaticText *m_playerLabel;
 
   // Implementation of gbtGameView members
-  void OnUpdate(void);
+  void OnUpdate();
 
   /// @name Event handlers
   //@{
@@ -547,7 +547,7 @@ gbtTreeChancePanel::gbtTreeChancePanel(wxWindow *p_parent,
   Layout();
 }
 
-void gbtTreeChancePanel::OnUpdate(void)
+void gbtTreeChancePanel::OnUpdate()
 {
   if (!m_doc->GetGame())  return;
 
@@ -581,8 +581,8 @@ private:
 
   // @name Implementation of gbtGameView members
   //@{
-  void OnUpdate(void);
-  void PostPendingChanges(void);
+  void OnUpdate();
+  void PostPendingChanges();
   //@}
 
 public:
@@ -609,7 +609,7 @@ gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent,
   Layout();
 }
 
-void gbtTreePlayerToolbar::OnUpdate(void)
+void gbtTreePlayerToolbar::OnUpdate()
 {
   while (m_playerPanels.Length() < m_doc->NumPlayers()) {
     gbtTreePlayerPanel *panel = new gbtTreePlayerPanel(this, m_doc,
@@ -631,7 +631,7 @@ void gbtTreePlayerToolbar::OnUpdate(void)
   GetSizer()->Layout();
 }
 
-void gbtTreePlayerToolbar::PostPendingChanges(void)
+void gbtTreePlayerToolbar::PostPendingChanges()
 {
   for (int pl = 1; pl <= m_playerPanels.Length(); pl++) {
     m_playerPanels[pl]->PostPendingChanges();
@@ -707,7 +707,7 @@ private:
 public:
   gbtEfgPrintout(gbtEfgPanel *p_efgPanel, const wxString &p_label)
     : wxPrintout(p_label), m_efgPanel(p_efgPanel) { }
-  virtual ~gbtEfgPrintout() { }
+  virtual ~gbtEfgPrintout() = default;
 
   bool OnPrintPage(int)
   { m_efgPanel->RenderGame(*GetDC(), 50, 50);  return true; }
@@ -717,7 +717,7 @@ public:
   { *minPage = 1; *maxPage = 1; *selPageFrom = 1; *selPageTo = 1; }
 };
 
-wxPrintout *gbtEfgPanel::GetPrintout(void)
+wxPrintout *gbtEfgPanel::GetPrintout()
 {
   return new gbtEfgPrintout(this,
 			    wxString(m_doc->GetGame()->GetTitle().c_str(),

@@ -37,9 +37,9 @@ private:
 public:
   gbtNashChoiceDialog(wxWindow *, gbtGameDocument *);
 
-  gbtAnalysisOutput *GetCommand(void) const;
+  gbtAnalysisOutput *GetCommand() const;
 
-  bool UseStrategic(void) const;
+  bool UseStrategic() const;
 };
 
 
