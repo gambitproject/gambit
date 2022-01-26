@@ -788,3 +788,6 @@ msw-msi:
 	cp gambit* installer
 	candle gambit.wxs
 	light -ext WixUIExtension gambit.wixobj
+
+clang-tidy:
+	clang-tidy src/*/*.cc src/*/*/*.cc -- -I src -I src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
