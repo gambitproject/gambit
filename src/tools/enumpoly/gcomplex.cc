@@ -27,7 +27,7 @@
 #include <cctype>
 
 #include "gambit.h"
-#include "complex.h"
+#include "gcomplex.h"
 
 //--------------------------------------------------------------------------
 //                              class: gComplex

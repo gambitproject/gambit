@@ -547,8 +547,8 @@ gambit_enumpoly_SOURCES = \
 	src/tools/enumpoly/rectangl.imp \
 	src/tools/enumpoly/behavextend.cc \
 	src/tools/enumpoly/behavextend.h \
-	src/tools/enumpoly/complex.cc \
-	src/tools/enumpoly/complex.h \
+	src/tools/enumpoly/gcomplex.cc \
+	src/tools/enumpoly/gcomplex.h \
 	src/tools/enumpoly/gtree.h \
 	src/tools/enumpoly/gtree.imp \
 	src/tools/enumpoly/linrcomb.cc \

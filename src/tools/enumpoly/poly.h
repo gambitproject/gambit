@@ -23,7 +23,7 @@
 #include "core/rational.h"
 #include "core/vector.h"
 #include "interval.h"
-#include "complex.h"
+#include "gcomplex.h"
 
 /*  This file supplies the template class
 
