@@ -22,12 +22,16 @@
 
 #include "lhtab.imp"
 
-using namespace Gambit;
-using namespace Gambit::linalg;
+namespace Gambit {
+
+namespace linalg {
 
 template class LHTableau<double>;
 template class LHTableau<Rational>;
 
+}  // end namespace Gambit::linalg
+
+}  // end namespace Gambit
 
 
 

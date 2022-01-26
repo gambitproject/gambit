@@ -22,11 +22,16 @@
 
 #include "ludecomp.imp"
 
-using namespace Gambit;
-using namespace Gambit::linalg;
+namespace Gambit {
+
+namespace linalg {
 
 template class EtaMatrix<double>;
 template class LUdecomp<double>;
 
 template class EtaMatrix<Rational>;
 template class LUdecomp<Rational>;
+
+}  // end namespace Gambit::linalg
+
+}  // end namespace Gambit

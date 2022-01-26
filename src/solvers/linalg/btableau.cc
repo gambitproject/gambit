@@ -24,8 +24,9 @@
 #include "core/matrix.imp"
 #include "btableau.imp"
 
-using namespace Gambit;
-using namespace Gambit::linalg;
+namespace Gambit {
+
+namespace linalg {
 
 template class BaseTableau<double>;
 template class BaseTableau<Rational>;
@@ -33,4 +34,6 @@ template class BaseTableau<Rational>;
 template class TableauInterface<double>;
 template class TableauInterface<Rational>;
 
+}  // end namespace Gambit::linalg
 
+}  // end namespace Gambit
