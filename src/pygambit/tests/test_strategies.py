@@ -6,10 +6,10 @@ import pygambit
 
 class TestGambitStrategies(unittest.TestCase):
     def setUp(self):
-        self.game = pygambit.Game.new_table([2,2])
+        self.game = pygambit.Game.new_table([2, 2])
         self.game.players[0].label = "Alphonse"
         self.game.players[1].label = "Gaston"
-    
+
     def tearDown(self):
         del self.game
 
@@ -23,7 +23,10 @@ class TestGambitStrategies(unittest.TestCase):
         self.game.players[0].strategies[0].label = "Cooperate"
         with warnings.catch_warnings(record=True) as w:
             self.game.players[0].strategies[1].label = "Cooperate"
-            assert str(w[0].message) == "This player has another strategy with an identical label"
+            assert (
+                str(w[0].message) ==
+                "This player has another strategy with an identical label"
+            )
 
     def test_game_strategies_index_by_string(self):
         "Test to find a strategy by providing a string"
@@ -33,17 +36,33 @@ class TestGambitStrategies(unittest.TestCase):
 
     def test_game_strategies_index_exception_int(self):
         "Test to verify when an index is out of range"
-        self.assertRaises(IndexError, self.game.players[0].strategies.__getitem__, 3)
+        self.assertRaises(
+            IndexError, self.game.players[0].strategies.__getitem__, 3
+        )
 
     def test_game_strategies_index_exception_string(self):
-        "Test to verify when a strategy label is not in the list of player's strategies"
-        self.assertRaises(IndexError, self.game.players[0].strategies.__getitem__, "None")
+        """Test to verify when a strategy label is not in the list
+        of player's strategies
+        """
+        self.assertRaises(
+            IndexError, self.game.players[0].strategies.__getitem__, "None"
+        )
 
     def test_game_strategies_index_exception_player(self):
-        "Test to verify when a strategy object is not in a player's list of strategies"
-        self.game_2 = pygambit.new_table([2,2])
-        self.assertRaises(IndexError, self.game.players[0].strategies.__getitem__, self.game_2.players[0].strategies[0])
+        """Test to verify when a strategy object is not in a player's
+        list of strategies
+        """
+        self.game_2 = pygambit.Game.new_table([2, 2])
+        self.assertRaises(
+            TypeError,
+            self.game.players[0].strategies.__getitem__,
+            self.game_2.players[0].strategies[0]
+        )
 
-    def test_game_strategies_index_exception_player(self):
-        "Test to verify when attempting to retrieve strategy with invalid input"
-        self.assertRaises(TypeError, self.game.players[0].strategies.__getitem__, 1.3)
+    def test_game_strategies_index_exception_badindex(self):
+        """Test to verify when attempting to retrieve strategy
+        with invalid input
+        """
+        self.assertRaises(
+            TypeError, self.game.players[0].strategies.__getitem__, 1.3
+        )

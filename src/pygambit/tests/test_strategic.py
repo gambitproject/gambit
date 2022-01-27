@@ -1,21 +1,22 @@
 import pygambit
 import warnings
 
+
 class TestGambitStrategicGame:
     def setUp(self):
-        self.game = pygambit.Game.new_table([2,2])
-    
+        self.game = pygambit.Game.new_table([2, 2])
+
     def tearDown(self):
         del self.game
-        
+
     def test_initial_player_count(self):
         "Test to ensure 0 initial players"
         assert len(self.game.players) == 2
-        
+
     def test_initial_game_title(self):
         "Test to ensure correct basic title"
         assert str(self.game) == "<Game ''>"
-        
+
     def test_game_title_assignment(self):
         "Test to check title assignment"
         self.game.title = "A prisoner's dilemma game"
@@ -35,7 +36,10 @@ class TestGambitStrategicGame:
         self.game.players[0].label = "Alphonse"
         with warnings.catch_warnings(record=True) as w:
             self.game.players[1].label = "Alphonse"
-            assert str(w[0].message) == "Another player with an identical label exists"
+            assert (
+                str(w[0].message) ==
+                "Another player with an identical label exists"
+            )
         p1 = self.game.players[0]
         assert p1.label == "Alphonse"
         p2 = self.game.players[1]
@@ -45,7 +49,7 @@ class TestGambitStrategicGame:
         "Test to add strategies"
         assert len(self.game.players[0].strategies) == 2
         assert len(self.game.players[1].strategies) == 2
-        
+
         self.game.players[0].strategies[0].label = "Cooperate"
         self.game.players[0].strategies[1].label = "Defect"
         assert self.game.players[0].strategies[0].label == "Cooperate"
@@ -63,12 +67,13 @@ class TestGambitStrategicGame:
         self.game.players[0].strategies[0].label = "Cooperate"
         with warnings.catch_warnings(record=True) as w:
             self.game.players[0].strategies[1].label = "Cooperate"
-            assert str(w[0].message) == "This player has another strategy with an identical label"
+            assert (
+                str(w[0].message) ==
+                "This player has another strategy with an identical label"
+            )
         assert self.game.players[0].strategies[0].label == "Cooperate"
         assert self.game.players[0].strategies[1].label == "Cooperate"
         self.game.players[1].strategies[0].label = "Cooperate"
         self.game.players[1].strategies[1].label = "Defect"
         assert self.game.players[1].strategies[0].label == "Cooperate"
         assert self.game.players[1].strategies[1].label == "Defect"
-
-    

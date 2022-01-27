@@ -21,13 +21,13 @@
 #
 
 from . import lib
-from . import nash
-from . import gte
+from . import nash  # noqa: F401
+from . import gte   # noqa: F401
 
 __version__ = "16.0.2rc1"
 Rational = lib.libgambit.Rational
 Decimal = lib.libgambit.Decimal
 
-class Game(lib.libgambit.Game): pass
 
-
+class Game(lib.libgambit.Game):
+    pass

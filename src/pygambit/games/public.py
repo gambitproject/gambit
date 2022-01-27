@@ -23,17 +23,19 @@
 """
 Voluntary public-goods contribution games.
 """
-
 import meanstat
+
 
 class CobbDouglasVCGame(meanstat.MeanStatisticGame):
     """
     A symmetric public goods game with a Cobb-Douglas payoff specification,
     following, e.g., Andreoni (1993)
     """
-    def __init__(self, N, min_choice, max_choice, step_choice, omega, alpha, tax=0):
-        meanstat.MeanStatisticGame.__init__(self, N,
-                                            min_choice, max_choice, step_choice)
+    def __init__(self, N, min_choice, max_choice, step_choice,
+                 omega, alpha, tax=0):
+        meanstat.MeanStatisticGame.__init__(
+            self, N, min_choice, max_choice, step_choice
+        )
         self.omega = omega
         self.alpha = alpha
         self.tax = tax
@@ -46,14 +48,16 @@ class CobbDouglasVCGame(meanstat.MeanStatisticGame):
     def payoff(self, own, others):
         return (self.omega-own-self.tax)**self.alpha * \
                (self.N*self.tax+own+others)**(1.0-self.alpha)
-        
+
+
 class QuadraticVCGame(meanstat.MeanStatisticGame):
+    """A symmetric public goods game with a quadratic payoff specification.
     """
-    A symmetric public goods game with a quadratic payoff specification.
-    """
-    def __init__(self, N, min_choice, max_choice, step_choice, omega, m, c, tax=0):
-        meanstat.MeanStatisticGame.__init__(self, N,
-                                            min_choice, max_choice, step_choice)
+    def __init__(self, N, min_choice, max_choice, step_choice,
+                 omega, m, c, tax=0):
+        meanstat.MeanStatisticGame.__init__(
+            self, N, min_choice, max_choice, step_choice
+        )
         self.omega = omega
         self.m = m
         self.c = c
@@ -61,12 +65,14 @@ class QuadraticVCGame(meanstat.MeanStatisticGame):
 
     @property
     def title(self):
-        return "Quadratic public goods game with N=%d, m=%s, c=%s" % \
-               (self.N, self.m, self.c)
+        return (
+            "Quadratic public goods game with N=%d, m=%s, c=%s" %
+            (self.N, self.m, self.c)
+        )
 
     def payoff(self, own, others):
-        return self.omega-own-self.tax \
-               + self.m*(self.N*self.tax+own+others) \
-               - self.c*(self.N*self.tax+own+others)**2
-        
-
+        return (
+            self.omega - own - self.tax
+            + self.m*(self.N*self.tax+own+others)
+            - self.c*(self.N*self.tax+own+others)**2
+        )

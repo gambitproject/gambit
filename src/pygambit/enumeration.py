@@ -22,7 +22,8 @@
 
 class SupportEnumeration:
     def enumerate_supports(self, game):
-        return self.admissible_supports(game.support_profile(), list(game.strategies))
+        return self.admissible_supports(game.support_profile(),
+                                        list(game.strategies))
 
     def admissible_supports(self, profile, str_rest):
         # Passo 1: closure
