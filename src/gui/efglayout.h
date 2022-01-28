@@ -186,7 +186,7 @@ private:
 
 public:
   gbtTreeLayout(gbtEfgDisplay *p_parent, gbtGameDocument *p_doc);
-  virtual ~gbtTreeLayout() = default;
+  ~gbtTreeLayout() override = default;
 
   Gambit::GameNode PriorSameLevel(Gambit::GameNode) const;
   Gambit::GameNode NextSameLevel(Gambit::GameNode) const;

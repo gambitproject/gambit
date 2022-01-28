@@ -38,7 +38,7 @@ public:
   /** Copy constructor */
   Vector(const Vector<T>& V);
   /** Destructor */
-  virtual ~Vector();
+  ~Vector() override;
   
   /** Assignment operator: requires vectors to be of same length */
   Vector<T>& operator=(const Vector<T>& V);

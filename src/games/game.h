@@ -76,7 +76,7 @@ public:
 /// An exception thrown when attempting to dereference an invalidated object 
 class InvalidObjectException : public Exception {
 public:
-  virtual ~InvalidObjectException() noexcept = default;
+  ~InvalidObjectException() noexcept override = default;
   const char *what() const noexcept override  { return "Dereferencing an invalidated object"; }
 };
 
@@ -171,13 +171,13 @@ class UndefinedException : public Exception {
 public:
   UndefinedException() : Exception("Undefined operation on game") { }
   UndefinedException(const std::string &s) : Exception(s) { }
-  virtual ~UndefinedException() noexcept = default;
+  ~UndefinedException() noexcept override = default;
 };
 
 /// Exception thrown on an operation between incompatible objects
 class MismatchException : public Exception {
 public:
-  virtual ~MismatchException() noexcept = default;
+  ~MismatchException() noexcept override = default;
   const char *what() const noexcept override  
   { return "Operation between objects in different games"; }
 };
@@ -187,7 +187,7 @@ class InvalidFileException : public Exception {
 public:
   InvalidFileException() : Exception("File not in a recognized format") { }
   InvalidFileException(const std::string &s) : Exception(s) { } 
-  virtual ~InvalidFileException() noexcept = default;
+  ~InvalidFileException() noexcept override = default;
 };
 
 //=======================================================================
@@ -216,7 +216,7 @@ private:
   //@{
   /// Creates a new outcome object, with payoffs set to zero
   GameOutcomeRep(GameRep *p_game, int p_number);
-  virtual ~GameOutcomeRep() = default;
+  ~GameOutcomeRep() override = default;
   //@}
 
 public:
@@ -256,7 +256,7 @@ protected:
   GameAction m_unrestricted;
 
   GameActionRep() : m_unrestricted(nullptr) { }
-  virtual ~GameActionRep() = default;
+  ~GameActionRep() override = default;
 
 public:
   virtual int GetNumber() const = 0;
@@ -281,7 +281,7 @@ protected:
   GameInfoset m_unrestricted;
  
   GameInfosetRep(): m_unrestricted(nullptr) { }
-  virtual ~GameInfosetRep() = default;
+  ~GameInfosetRep() override = default;
 
 public:
   virtual Game GetGame() const = 0;
@@ -420,7 +420,7 @@ private:
   GamePlayerRep(GameRep *p_game, int p_id) 
     : m_game(p_game), m_number(p_id), m_unrestricted(nullptr) { }
   GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
-  ~GamePlayerRep();
+  ~GamePlayerRep() override;
 
 public:
   int GetNumber() const { return m_number; }
@@ -462,7 +462,7 @@ protected:
   GameNode m_unrestricted;
 
   GameNodeRep() : m_unrestricted(nullptr) { }
-  virtual ~GameNodeRep() = default;
+  ~GameNodeRep() override = default;
 
 public:
   virtual Game GetGame() const = 0; 
@@ -679,7 +679,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Clean up the game
-  virtual ~GameRep() = default;
+  ~GameRep() override = default;
   /// Create a copy of the game, as a new game
   virtual Game Copy() const = 0;
   //@}

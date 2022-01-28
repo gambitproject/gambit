@@ -63,7 +63,7 @@ private:
 
 public:
   gbtLogitBehavList(wxWindow *p_parent, gbtGameDocument *p_doc);
-  virtual ~gbtLogitBehavList();
+  ~gbtLogitBehavList() override;
 
   void AddProfile(const wxString &p_text, bool p_forceShow);
 };

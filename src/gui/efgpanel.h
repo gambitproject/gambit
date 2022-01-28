@@ -47,7 +47,7 @@ private:
     
 public:
   gbtEfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc);
-  virtual ~gbtEfgPanel() = default;
+  ~gbtEfgPanel() override = default;
 
   /// @name Exporting/printing graphics
   //@{

@@ -120,7 +120,7 @@ private:
 public:
   LogitMixedSheet(wxWindow *p_parent, gbtGameDocument *p_doc,
 		     LogitMixedBranch &p_branch);
-  virtual ~LogitMixedSheet();
+  ~LogitMixedSheet() override;
 };
 
 LogitMixedSheet::LogitMixedSheet(wxWindow *p_parent, 
@@ -556,7 +556,7 @@ private:
 public:
   LogitPrintout(wxPlotCtrl *p_plot, const wxString &p_label)
     : wxPrintout(p_label), m_plot(p_plot) { }
-  virtual ~LogitPrintout() = default;
+  ~LogitPrintout() override = default;
 
   bool OnPrintPage(int) override
   { wxSize size = GetDC()->GetSize();

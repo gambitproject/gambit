@@ -46,7 +46,7 @@ public:
   /// Create a game from a serialized file in BAGG format
   static Game ReadBaggFile(std::istream &);
   /// Destructor
-  virtual ~GameBagentRep() { delete baggPtr; }
+  ~GameBagentRep() override { delete baggPtr; }
   /// Create a copy of the game, as a new game
   Game Copy() const override;
   //@}

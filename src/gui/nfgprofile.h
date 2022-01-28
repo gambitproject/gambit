@@ -70,7 +70,7 @@ private:
 
 public:
   gbtMixedProfileList(wxWindow *p_parent, gbtGameDocument *p_doc);
-  virtual ~gbtMixedProfileList();
+  ~gbtMixedProfileList() override;
 };
 
 #endif  // NFGPROFILE_H

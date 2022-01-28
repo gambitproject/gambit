@@ -39,7 +39,7 @@ private:
 
 public:
   gbtNfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc);
-  virtual ~gbtNfgPanel() = default;
+  ~gbtNfgPanel() override = default;
 
   bool IsDominanceShown() const { return m_dominanceToolbar->IsShown(); }
 

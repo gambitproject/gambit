@@ -37,7 +37,7 @@ namespace Gambit {
 class StrategicQREPathTracer::EquationSystem : public PathTracer::EquationSystem {
 public:
   EquationSystem(const Game &p_game) : m_game(p_game) { }
-  virtual ~EquationSystem() = default;
+  ~EquationSystem() override = default;
   // Compute the value of the system of equations at the specified point.
   void GetValue(const Vector<double> &p_point,
   	                Vector<double> &p_lhs) const override;
@@ -177,7 +177,7 @@ public:
 		   bool p_fullGraph, double p_decimals)
     : m_stream(p_stream), m_game(p_game),
       m_fullGraph(p_fullGraph), m_decimals(p_decimals) { }
-  virtual ~CallbackFunction() = default;
+  ~CallbackFunction() override = default;
   
   void operator()(const Vector<double> &p_point,
 			  bool p_isTerminal) const override;
@@ -276,7 +276,7 @@ class StrategicQREEstimator::CriterionFunction : public PathTracer::CriterionFun
 public:
   CriterionFunction(const Vector<double> &p_frequencies)
     : m_frequencies(p_frequencies) { }
-  virtual ~CriterionFunction() = default;
+  ~CriterionFunction() override = default;
 
   double operator()(const Vector<double> &p_point,
 			    const Vector<double> &p_tangent) const override
@@ -302,7 +302,7 @@ public:
 		   const Game &p_game,
 		   const Vector<double> &p_frequencies,
 		   bool p_fullGraph, double p_decimals);
-  virtual ~CallbackFunction() = default;
+  ~CallbackFunction() override = default;
   
   void operator()(const Vector<double> &p_point,
 			  bool p_isTerminal) const override;

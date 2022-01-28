@@ -47,7 +47,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Destructor
-  virtual ~GameExplicitRep();
+  ~GameExplicitRep() override;
   //@}
 
   /// @name General data access

@@ -49,7 +49,7 @@ public:
 //
 template <class T> class MixedStrategyRenderer : public StrategyProfileRenderer<T> {
 public:
-  virtual ~MixedStrategyRenderer() = default;
+  ~MixedStrategyRenderer() override = default;
   void Render(const MixedStrategyProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const override = 0;
   void Render(const MixedBehaviorProfile<T> &p_profile,
@@ -60,7 +60,7 @@ public:
 template <class T> 
 class MixedStrategyNullRenderer : public MixedStrategyRenderer<T> {
 public:
-  virtual ~MixedStrategyNullRenderer() = default;
+  ~MixedStrategyNullRenderer() override = default;
   void Render(const MixedStrategyProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const override { }
 };
@@ -70,7 +70,7 @@ class MixedStrategyCSVRenderer : public MixedStrategyRenderer<T> {
 public:
   MixedStrategyCSVRenderer(std::ostream &p_stream, int p_numDecimals = 6)
     : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
-  virtual ~MixedStrategyCSVRenderer() = default;
+  ~MixedStrategyCSVRenderer() override = default;
   void Render(const MixedStrategyProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const override;
 
@@ -84,7 +84,7 @@ class MixedStrategyDetailRenderer : public MixedStrategyRenderer<T> {
 public:
   MixedStrategyDetailRenderer(std::ostream &p_stream, int p_numDecimals = 6)
     : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
-  virtual ~MixedStrategyDetailRenderer() = default;
+  ~MixedStrategyDetailRenderer() override = default;
   void Render(const MixedStrategyProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const override;
 
@@ -98,7 +98,7 @@ private:
 //
 template <class T> class BehavStrategyRenderer : public StrategyProfileRenderer<T> {
 public:
-  virtual ~BehavStrategyRenderer() = default;
+  ~BehavStrategyRenderer() override = default;
   void Render(const MixedStrategyProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const override
   { Render(MixedBehaviorProfile<T>(p_profile), p_label); }
@@ -109,7 +109,7 @@ public:
 template <class T> 
 class BehavStrategyNullRenderer : public BehavStrategyRenderer<T> {
 public:
-  virtual ~BehavStrategyNullRenderer() = default;
+  ~BehavStrategyNullRenderer() override = default;
   void Render(const MixedBehaviorProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const override { }
 };
@@ -119,7 +119,7 @@ class BehavStrategyCSVRenderer : public BehavStrategyRenderer<T> {
 public:
   BehavStrategyCSVRenderer(std::ostream &p_stream, int p_numDecimals = 6) 
     : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
-  virtual ~BehavStrategyCSVRenderer() = default;
+  ~BehavStrategyCSVRenderer() override = default;
   void Render(const MixedBehaviorProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const override;
 
@@ -133,7 +133,7 @@ class BehavStrategyDetailRenderer : public BehavStrategyRenderer<T> {
 public:
   BehavStrategyDetailRenderer(std::ostream &p_stream, int p_numDecimals = 6)
     : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
-  virtual ~BehavStrategyDetailRenderer() = default;
+  ~BehavStrategyDetailRenderer() override = default;
   void Render(const MixedBehaviorProfile<T> &p_profile,
 		      const std::string &p_label = "NE") const override;
 
@@ -178,7 +178,7 @@ template <class T> class BehavViaStrategySolver : public BehavSolver<T> {
 public:
   BehavViaStrategySolver(shared_ptr<StrategySolver<T> > p_solver,
 			 shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
-  virtual ~BehavViaStrategySolver() = default;
+  ~BehavViaStrategySolver() override = default;
 
   List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const override;
 
@@ -190,7 +190,7 @@ template <class T> class SubgameBehavSolver : public BehavSolver<T> {
 public:
   SubgameBehavSolver(shared_ptr<BehavSolver<T> > p_solver,
 		     shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
-  virtual ~SubgameBehavSolver()  = default;
+  ~SubgameBehavSolver()  override = default;
 
   List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const override;
 
@@ -212,7 +212,7 @@ private:
 //
 class EquilibriumLimitReached : public Exception {
 public:
-  virtual ~EquilibriumLimitReached() noexcept = default;
+  ~EquilibriumLimitReached() noexcept override = default;
   const char *what() const noexcept override { return "Reached target number of equilibria"; }
 };
 

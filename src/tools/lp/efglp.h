@@ -32,7 +32,7 @@ template <class T> class NashLpBehavSolver : public BehavSolver<T> {
 public:
   NashLpBehavSolver(Gambit::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = nullptr)
     : BehavSolver<T>(p_onEquilibrium) { }
-  virtual ~NashLpBehavSolver() = default;
+  ~NashLpBehavSolver() override = default;
 
   List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const override;
 

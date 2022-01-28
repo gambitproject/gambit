@@ -1136,7 +1136,7 @@ private:
 public:
   gbtNfgPrintout(gbtTableWidget *p_table, const wxString &p_label)
     : wxPrintout(p_label), m_table(p_table) { }
-  virtual ~gbtNfgPrintout() = default;
+  ~gbtNfgPrintout() override = default;
 
   bool OnPrintPage(int) override 
   { m_table->RenderGame(*GetDC(), 50, 50);  return true; }

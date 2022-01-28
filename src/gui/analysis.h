@@ -138,7 +138,7 @@ public:
   gbtAnalysisProfileList(gbtGameDocument *p_doc, bool p_isBehav)
     : gbtAnalysisOutput(p_doc), m_isBehav(p_isBehav), m_current(0) { }
   /// Cleanup the profile list
-  virtual ~gbtAnalysisProfileList() = default;
+  ~gbtAnalysisProfileList() override = default;
   //@}
 
   //!

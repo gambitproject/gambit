@@ -61,7 +61,7 @@ class StrategicQREPathTracer : public PathTracer {
 public:
   StrategicQREPathTracer() : m_fullGraph(true), m_decimals(6)
     { }
-  virtual ~StrategicQREPathTracer() = default;
+  ~StrategicQREPathTracer() override = default;
 
   List<LogitQREMixedStrategyProfile> 
   TraceStrategicPath(const LogitQREMixedStrategyProfile &p_start,
@@ -91,7 +91,7 @@ protected:
 class StrategicQREEstimator : public StrategicQREPathTracer {
 public:
   StrategicQREEstimator() = default;
-  virtual ~StrategicQREEstimator() = default;
+  ~StrategicQREEstimator() override = default;
 
   LogitQREMixedStrategyProfile
   Estimate(const LogitQREMixedStrategyProfile &p_start,

@@ -61,7 +61,7 @@ public:
   //
   class NullCriterionFunction : public CriterionFunction {
   public:
-    virtual ~NullCriterionFunction() = default;
+    ~NullCriterionFunction() override = default;
     double operator()(const Vector<double> &, const Vector<double> &) const override
     { return -1.0; }
   };
@@ -82,7 +82,7 @@ public:
   //
   class NullCallbackFunction : public CallbackFunction {
   public:
-    virtual ~NullCallbackFunction() = default;
+    ~NullCallbackFunction() override = default;
     void operator()(const Vector<double> &p_point,
 			    bool p_isTerminal) const override { }
   };

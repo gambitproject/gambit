@@ -59,7 +59,7 @@ private:
 
 public:
   gbtBehavProfileList(wxWindow *p_parent, gbtGameDocument *p_doc);
-  virtual ~gbtBehavProfileList();
+  ~gbtBehavProfileList() override;
 };
 
 #endif  // EFGPROFILE_H

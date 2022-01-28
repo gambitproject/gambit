@@ -61,7 +61,7 @@ private:
 
 public:
   gbtBehavDominanceToolbar(wxWindow *p_parent, gbtGameDocument *p_doc);
-  virtual ~gbtBehavDominanceToolbar() = default;
+  ~gbtBehavDominanceToolbar() override = default;
 };
 
 #include "bitmaps/next.xpm"
@@ -707,7 +707,7 @@ private:
 public:
   gbtEfgPrintout(gbtEfgPanel *p_efgPanel, const wxString &p_label)
     : wxPrintout(p_label), m_efgPanel(p_efgPanel) { }
-  virtual ~gbtEfgPrintout() = default;
+  ~gbtEfgPrintout() override = default;
 
   bool OnPrintPage(int) override
   { m_efgPanel->RenderGame(*GetDC(), 50, 50);  return true; }

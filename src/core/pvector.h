@@ -46,7 +46,7 @@ template <class T> class PVector : public Vector<T> {
   PVector(const Array<int> &sig);
   PVector(const Vector<T> &val, const Array<int> &sig);
   PVector(const PVector<T> &v);
-  virtual ~PVector();
+  ~PVector() override;
 
 
   // element access operators

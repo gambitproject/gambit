@@ -43,7 +43,7 @@ public:
   DVector(const PVector<int> &sig);
   DVector(const Vector<T> &val, const PVector<int> &sig);
   DVector(const DVector<T> &v);
-  virtual ~DVector();
+  ~DVector() override;
 
   T &operator()(int a, int b, int c);
   const T &operator()(int a, int b, int c) const;

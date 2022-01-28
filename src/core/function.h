@@ -39,7 +39,7 @@ public:
 // is a product of simplices.
 class FunctionOnSimplices : public Function {
 public:
-  virtual ~FunctionOnSimplices() = default;
+  ~FunctionOnSimplices() override = default;
 
 protected:
   // Project the gradient 'x' onto the plane of the product of simplices.
@@ -49,7 +49,7 @@ protected:
 
 class FunctionMinimizerError : public Exception {
 public:
-  virtual ~FunctionMinimizerError() noexcept = default;
+  ~FunctionMinimizerError() noexcept override = default;
   const char *what() const noexcept override
   { return "Internal error in function minimization"; }
 };
@@ -74,7 +74,7 @@ public:
 class ConjugatePRMinimizer : public FunctionMinimizer {
 public:
   ConjugatePRMinimizer(int n);
-  virtual ~ConjugatePRMinimizer() = default;
+  ~ConjugatePRMinimizer() override = default;
 
   void Set(const Function &fdf,
 	   const Vector<double> &x, double &f,

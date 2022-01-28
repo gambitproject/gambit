@@ -114,7 +114,7 @@ private:
 public:
   // CONSTRUCTOR AND DESTRUCTOR
   gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc);
-  virtual ~gbtGameFrame();
+  ~gbtGameFrame() override;
 
   DECLARE_EVENT_TABLE()
 };

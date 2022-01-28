@@ -40,7 +40,7 @@ public:
   gbtNumberValidator(wxString *, const Gambit::Rational &);
   gbtNumberValidator(wxString *, const Gambit::Rational &, const Gambit::Rational &);
   gbtNumberValidator(const gbtNumberValidator &);
-  virtual ~gbtNumberValidator() = default;
+  ~gbtNumberValidator() override = default;
 
   wxObject *Clone() const override { return new gbtNumberValidator(*this); }
   bool Copy(const gbtNumberValidator &);

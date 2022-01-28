@@ -50,7 +50,7 @@ public:
   /// Create a game from a serialized file in AGG format
   static Game ReadAggFile(std::istream &);
   /// Destructor
-  virtual ~GameAggRep() { delete aggPtr; }
+  ~GameAggRep() override { delete aggPtr; }
   /// Create a copy of the game, as a new game
   Game Copy() const override;
   //@}

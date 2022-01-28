@@ -30,7 +30,7 @@ namespace Gambit {
 
 class SingularMatrixException : public Exception {
 public:
-  virtual ~SingularMatrixException() noexcept = default;
+  ~SingularMatrixException() noexcept override = default;
   const char *what() const noexcept override
   { return "Attempted to invert a singular matrix"; }
 };
@@ -41,7 +41,7 @@ public:
   SquareMatrix(int size);
   SquareMatrix(const Matrix<T> &);
   SquareMatrix(const SquareMatrix<T> &);
-  virtual ~SquareMatrix();
+  ~SquareMatrix() override;
 
   SquareMatrix<T> &operator=(const SquareMatrix<T> &);
 

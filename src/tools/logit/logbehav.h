@@ -91,7 +91,7 @@ public:
   //@{
   LogBehavProfile(const BehaviorSupportProfile &);
   LogBehavProfile(const LogBehavProfile<T> &);
-  ~LogBehavProfile() = default;
+  ~LogBehavProfile() override = default;
 
   LogBehavProfile<T> &operator=(const LogBehavProfile<T> &);
   LogBehavProfile<T> &operator=(const Vector<T> &p)

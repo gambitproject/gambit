@@ -50,7 +50,7 @@ private:
 class AgentQREPathTracer : public PathTracer {
 public:
   AgentQREPathTracer() : m_fullGraph(true), m_decimals(6) { }
-  virtual ~AgentQREPathTracer() = default;
+  ~AgentQREPathTracer() override = default;
 
   void 
   TraceAgentPath(const LogitQREMixedBehaviorProfile &p_start,

@@ -61,7 +61,7 @@ public:
     : MixedStrategyProfileRep<T>(p_support)
   { }
   TreeMixedStrategyProfileRep(const MixedBehaviorProfile<T> &);
-  virtual ~TreeMixedStrategyProfileRep() = default;
+  ~TreeMixedStrategyProfileRep() override = default;
   
   MixedStrategyProfileRep<T> *Copy() const override;
   T GetPayoff(int pl) const override;
@@ -88,7 +88,7 @@ public:
   TableMixedStrategyProfileRep(const StrategySupportProfile &p_support)
     : MixedStrategyProfileRep<T>(p_support)
   { }
-  virtual ~TableMixedStrategyProfileRep() = default;
+  ~TableMixedStrategyProfileRep() override = default;
 
   MixedStrategyProfileRep<T> *Copy() const override;
   T GetPayoff(int pl) const override;
@@ -103,7 +103,7 @@ public:
   AggMixedStrategyProfileRep(const StrategySupportProfile &p_support)
    : MixedStrategyProfileRep<T>(p_support)
     { }
-  virtual ~AggMixedStrategyProfileRep() = default;
+  ~AggMixedStrategyProfileRep() override = default;
 
   MixedStrategyProfileRep<T> *Copy() const override {
     return new AggMixedStrategyProfileRep(*this);
@@ -120,7 +120,7 @@ public:
   BagentMixedStrategyProfileRep(const StrategySupportProfile &p_support)
     : MixedStrategyProfileRep<T>(p_support)
     { }
-  virtual ~BagentMixedStrategyProfileRep() = default;
+  ~BagentMixedStrategyProfileRep() override = default;
 
   MixedStrategyProfileRep<T> *Copy() const override {
     return new BagentMixedStrategyProfileRep(*this);

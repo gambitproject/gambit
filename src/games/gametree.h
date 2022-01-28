@@ -42,7 +42,7 @@ private:
   GameTreeActionRep(int p_number, const std::string &p_label, 
 		    GameTreeInfosetRep *p_infoset)
     : m_number(p_number), m_label(p_label), m_infoset(p_infoset) { }
-  virtual ~GameTreeActionRep()   = default;
+  ~GameTreeActionRep()   override = default;
 
 public:
   int GetNumber() const override { return m_number; }
@@ -75,7 +75,7 @@ protected:
   
   GameTreeInfosetRep(GameTreeRep *p_efg, int p_number, GamePlayerRep *p_player, 
 		 int p_actions);
-  virtual ~GameTreeInfosetRep();  
+  ~GameTreeInfosetRep() override;  
 
   /// Adds the node to the information set
   void AddMember(GameTreeNodeRep *p_node) { m_members.Append(p_node); }
@@ -145,7 +145,7 @@ protected:
   GameTreeNodeRep *whichbranch, *ptr;
 
   GameTreeNodeRep(GameTreeRep *e, GameTreeNodeRep *p);
-  virtual ~GameTreeNodeRep();
+  ~GameTreeNodeRep() override;
 
   void DeleteOutcome(GameOutcomeRep *outc);
   void CopySubtree(GameTreeNodeRep *, GameTreeNodeRep *);
@@ -223,7 +223,7 @@ public:
   /// @name Lifecycle
   //@{
   GameTreeRep();
-  virtual ~GameTreeRep();
+  ~GameTreeRep() override;
   Game Copy() const override;
   //@}
 

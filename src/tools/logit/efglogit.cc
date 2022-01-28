@@ -36,7 +36,7 @@ namespace Gambit {
 class AgentQREPathTracer::EquationSystem : public PathTracer::EquationSystem {
 public:
   EquationSystem(const Game &p_game);
-  virtual ~EquationSystem();
+  ~EquationSystem() override;
   // Compute the value of the system of equations at the specified point.
   void GetValue(const Vector<double> &p_point,
   	                Vector<double> &p_lhs) const override;
@@ -257,7 +257,7 @@ public:
 		   bool p_fullGraph, double p_decimals)
     : m_stream(p_stream),
       m_fullGraph(p_fullGraph), m_decimals(p_decimals) { }
-  virtual ~CallbackFunction() = default;
+  ~CallbackFunction() override = default;
 
   void operator()(const Vector<double> &p_point,
 			  bool p_isTerminal) const override;

@@ -41,7 +41,7 @@ public:
   Matrix(unsigned int rows, unsigned int cols, int minrows);
   Matrix(int rl, int rh, int cl, int ch);
   Matrix(const Matrix<T> &);
-  virtual ~Matrix();
+  ~Matrix() override;
 
   Matrix<T> &operator=(const Matrix<T> &);
   Matrix<T> &operator=(const T &);
