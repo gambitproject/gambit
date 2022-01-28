@@ -39,13 +39,13 @@ gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent,
 	     wxDefaultPosition), 
     m_doc(p_doc)
 {
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxStaticBoxSizer *playerBox =
+  auto *playerBox =
     new wxStaticBoxSizer(wxHORIZONTAL, this, 
 			 _("Reveal the move to players"));
 
-  wxBoxSizer *boxSizer = new wxBoxSizer(wxVERTICAL);	
+  auto *boxSizer = new wxBoxSizer(wxVERTICAL);	
 
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
@@ -65,9 +65,9 @@ gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent,
   playerBox->Add(boxSizer, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(playerBox, 1, wxALL | wxEXPAND, 5);
 
-  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
+  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);

@@ -276,13 +276,13 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
       }
       
       if (isFloat) {
-	gbtAnalysisProfileList<double> *plist = 
+	auto *plist = 
 	  new gbtAnalysisProfileList<double>(this, false);
 	plist->Load(analysis);
 	m_profiles.Append(plist);
       }
       else {
-	gbtAnalysisProfileList<Rational> *plist =
+	auto *plist =
 	  new gbtAnalysisProfileList<Rational>(this, false);
 	plist->Load(analysis);
 	m_profiles.Append(plist);

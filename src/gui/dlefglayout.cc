@@ -52,12 +52,12 @@ gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent,
 					 const gbtStyle &p_settings)
   : wxPanel(p_parent, wxID_ANY)
 {
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxStaticBoxSizer *nodeSizer = new wxStaticBoxSizer(wxVERTICAL, this,
+  auto *nodeSizer = new wxStaticBoxSizer(wxVERTICAL, this,
 						     _T("Drawing nodes"));
 
-  wxFlexGridSizer *tokenSizer = new wxFlexGridSizer(2);
+  auto *tokenSizer = new wxFlexGridSizer(2);
 
   wxString tokenChoices[] = { _("a line"), 
 			      _("a box"), 
@@ -96,10 +96,10 @@ gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent,
   topSizer->Add(nodeSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
 
-  wxStaticBoxSizer *sizeSizer = new wxStaticBoxSizer(wxVERTICAL, this,
+  auto *sizeSizer = new wxStaticBoxSizer(wxVERTICAL, this,
 						     _("Layout sizing"));
 
-  wxFlexGridSizer *gridSizer = new wxFlexGridSizer(2);
+  auto *gridSizer = new wxFlexGridSizer(2);
   gridSizer->AddGrowableCol(1);
 		
   gridSizer->Add(new wxStaticText(this, wxID_ANY, _("Horizontal size of nodes")),
@@ -164,12 +164,12 @@ gbtLayoutBranchesPanel::gbtLayoutBranchesPanel(wxWindow *p_parent,
   const int TINE_LENGTH_MIN = 20;
   const int TINE_LENGTH_MAX = 100;
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxStaticBoxSizer *styleBoxSizer = 
+  auto *styleBoxSizer = 
     new wxStaticBoxSizer(wxHORIZONTAL, this, _("Drawing branches"));
 
-  wxFlexGridSizer *styleSizer = new wxFlexGridSizer(2);
+  auto *styleSizer = new wxFlexGridSizer(2);
 
   styleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Draw branches")),
 		  0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
@@ -194,10 +194,10 @@ gbtLayoutBranchesPanel::gbtLayoutBranchesPanel(wxWindow *p_parent,
   styleBoxSizer->Add(styleSizer, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(styleBoxSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
-  wxStaticBoxSizer *lengthSizer = 
+  auto *lengthSizer = 
     new wxStaticBoxSizer(wxHORIZONTAL, this, _T("Length of branches"));
 
-  wxFlexGridSizer *gridSizer = new wxFlexGridSizer(2);
+  auto *gridSizer = new wxFlexGridSizer(2);
   gridSizer->AddGrowableCol(1);
 
   gridSizer->Add(new wxStaticText(this, wxID_ANY, _("Length of branch fork")),
@@ -244,12 +244,12 @@ gbtLayoutInfosetsPanel::gbtLayoutInfosetsPanel(wxWindow *p_parent,
 			     const gbtStyle &p_settings)
   : wxPanel(p_parent, wxID_ANY)
 {
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxStaticBoxSizer *infosetSizer = 
+  auto *infosetSizer = 
     new wxStaticBoxSizer(wxVERTICAL, this, _("Drawing information sets"));
 
-  wxFlexGridSizer *styleSizer = new wxFlexGridSizer(2);
+  auto *styleSizer = new wxFlexGridSizer(2);
 
   styleSizer->Add(new wxStaticText(this, wxID_STATIC, 
 				   _("Connect members of information sets")),
@@ -293,17 +293,17 @@ gbtLayoutDialog::gbtLayoutDialog(wxWindow *p_parent,
   m_notebook->AddPage(new gbtLayoutInfosetsPanel(m_notebook, p_settings),
 		      _("Information sets"));
 
-  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *defaultsButton = new wxButton(this, wxID_ANY, _("Set to defaults"));
+  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *defaultsButton = new wxButton(this, wxID_ANY, _("Set to defaults"));
   Connect(defaultsButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
 	  wxCommandEventHandler(gbtLayoutDialog::OnSetDefaults));
   buttonSizer->Add(defaultsButton, 0, wxALL, 5);
   buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
+  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(m_notebook, 0, wxEXPAND | wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);
 
@@ -322,20 +322,20 @@ void gbtLayoutDialog::GetSettings(gbtStyle &p_settings)
     return;
   }
 
-  gbtLayoutNodesPanel *nodes = (gbtLayoutNodesPanel *) m_notebook->GetPage(0);
+  auto *nodes = (gbtLayoutNodesPanel *) m_notebook->GetPage(0);
   p_settings.SetNodeSize(nodes->NodeSize());
   p_settings.SetTerminalSpacing(nodes->TerminalSpacing());
   p_settings.SetChanceToken(nodes->ChanceToken());
   p_settings.SetPlayerToken(nodes->PlayerToken());
   p_settings.SetTerminalToken(nodes->TerminalToken());
 
-  gbtLayoutBranchesPanel *branches = (gbtLayoutBranchesPanel *) m_notebook->GetPage(1);
+  auto *branches = (gbtLayoutBranchesPanel *) m_notebook->GetPage(1);
   p_settings.SetBranchLength(branches->BranchLength());
   p_settings.SetTineLength(branches->TineLength());
   p_settings.SetBranchStyle(branches->BranchStyle());
   p_settings.SetBranchLabels(branches->BranchLabels());
 
-  gbtLayoutInfosetsPanel *infosets = (gbtLayoutInfosetsPanel *) m_notebook->GetPage(2);
+  auto *infosets = (gbtLayoutInfosetsPanel *) m_notebook->GetPage(2);
   p_settings.SetInfosetConnect(infosets->InfosetConnect());
   p_settings.SetInfosetJoin(infosets->InfosetJoin());
 }

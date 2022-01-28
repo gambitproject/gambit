@@ -36,7 +36,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
 			   const gbtStyle &p_options)	
   : wxDialog(p_parent, wxID_ANY, _("Labels"), wxDefaultPosition)
 {
-  wxStaticBoxSizer *nodeGroup = 
+  auto *nodeGroup = 
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Node labeling")),
 			 wxVERTICAL);
 
@@ -49,7 +49,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
 			       _("the belief probability"),
 			       _("the payoff of reaching the node") };
 
-  wxBoxSizer *nodeAboveSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *nodeAboveSizer = new wxBoxSizer(wxHORIZONTAL);
   nodeAboveSizer->Add(new wxStaticText(this, wxID_STATIC,
 				       _("Display")),
 		      0, wxALL | wxALIGN_CENTER, 5);
@@ -63,7 +63,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
 		      0, wxALL | wxALIGN_CENTER, 5);
   nodeGroup->Add(nodeAboveSizer, 0, wxALL | wxEXPAND, 5);
 
-  wxBoxSizer *nodeBelowSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *nodeBelowSizer = new wxBoxSizer(wxHORIZONTAL);
   nodeBelowSizer->Add(new wxStaticText(this, wxID_STATIC,
 				       _("Display")),
 		      0, wxALL | wxALIGN_CENTER, 5);
@@ -78,7 +78,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
   nodeGroup->Add(nodeBelowSizer, 0, wxALL | wxEXPAND, 5);
 
 
-  wxStaticBoxSizer *actionGroup = 
+  auto *actionGroup = 
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Action labeling")),
 			 wxVERTICAL);
 
@@ -87,7 +87,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
 				 _("the probability the action is played"), 
 				 _("the value of the action") };
 
-  wxBoxSizer *actionAboveSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *actionAboveSizer = new wxBoxSizer(wxHORIZONTAL);
   actionAboveSizer->Add(new wxStaticText(this, wxID_STATIC,
 					 _("Display")),
 		      0, wxALL | wxALIGN_CENTER, 5);
@@ -101,7 +101,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
 		      0, wxALL | wxALIGN_CENTER, 5);
   actionGroup->Add(actionAboveSizer, 0, wxALL | wxEXPAND, 5);
 
-  wxBoxSizer *actionBelowSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *actionBelowSizer = new wxBoxSizer(wxHORIZONTAL);
   actionBelowSizer->Add(new wxStaticText(this, wxID_STATIC,
 					 _("Display")),
 		      0, wxALL | wxALIGN_CENTER, 5);
@@ -115,13 +115,13 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
 		      0, wxALL | wxALIGN_CENTER, 5);
   actionGroup->Add(actionBelowSizer, 0, wxALL | wxEXPAND, 5);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(nodeGroup, 0, wxEXPAND | wxALL, 5);
   topSizer->Add(actionGroup, 0, wxEXPAND | wxALL, 5);
 
-  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
+  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);

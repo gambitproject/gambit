@@ -54,7 +54,7 @@ template<class T> gPolyList<T>::gPolyList(const gSpace * sp,
 {
   int ii;
   for ( ii = 1; ii <= plist.Length(); ii++) 
-    { gPoly<T>* temp = new gPoly<T>(*plist[ii]); List.Append(temp); }
+    { auto* temp = new gPoly<T>(*plist[ii]); List.Append(temp); }
 }
 
 template<class T> gPolyList<T>::gPolyList(const gSpace * sp,
@@ -64,7 +64,7 @@ template<class T> gPolyList<T>::gPolyList(const gSpace * sp,
 {
   int ii;
   for ( ii = 1; ii <= list.Length(); ii++) 
-    { gPoly<T>* temp = new gPoly<T>(list[ii]); List.Append(temp); }
+    { auto* temp = new gPoly<T>(list[ii]); List.Append(temp); }
 }
 
 template<class T> gPolyList<T>::gPolyList(const gPolyList<T> & lst)
@@ -72,7 +72,7 @@ template<class T> gPolyList<T>::gPolyList(const gPolyList<T> & lst)
 {
   int ii;
   for ( ii = 1; ii <= lst.List.Length(); ii++) 
-    { gPoly<T>* temp = new gPoly<T>(*(lst.List[ii])); List.Append(temp); }
+    { auto* temp = new gPoly<T>(*(lst.List[ii])); List.Append(temp); }
 }
 
 template<class T> gPolyList<T>::~gPolyList()
@@ -96,7 +96,7 @@ gPolyList<T>& gPolyList<T>::operator=(const gPolyList<T> & rhs)
       { delete List[ii]; List.Remove(ii); }
 
     for (ii = 1; ii <= rhs.List.Length(); ii++) 
-      { gPoly<T>* temp = new gPoly<T>(*(rhs.List[ii])); List.Append(temp); }
+      { auto* temp = new gPoly<T>(*(rhs.List[ii])); List.Append(temp); }
 
   }
   return *this;
@@ -121,7 +121,7 @@ bool gPolyList<T>::operator!=(const gPolyList<T> & rhs) const
 
 template<class T>  void gPolyList<T>::operator+=(const gPoly<T> & new_poly)
 {
-  gPoly<T>* temp = new gPoly<T>(new_poly);
+  auto* temp = new gPoly<T>(new_poly);
   List.Append(temp);
 }
 
@@ -324,7 +324,7 @@ template<class T> void gPolyList<T>::Grobnerize(const term_order & order)
       gPoly<T> h = ReductionOf(List[ii]->S_Polynomial(order,*(List[j])),order);
       if (!h.IsZero()) {
 	h.ToMonic(order);
-	gPoly<T>* hptr = new gPoly<T>(h);
+	auto* hptr = new gPoly<T>(h);
 	List.Append(hptr);
 	for (int k = 1; k < List.Length(); k++) 
 	  uncomputed.Append(index_pair(k,List.Length()));

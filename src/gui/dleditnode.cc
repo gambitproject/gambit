@@ -35,9 +35,9 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
   : wxDialog(p_parent, wxID_ANY, _("Node properties"), wxDefaultPosition), 
     m_node(p_node)
 {
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *labelSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Node label")),
 		  0, wxALL | wxCENTER, 5);
   m_nodeName = new wxTextCtrl(this, wxID_ANY, 
@@ -45,7 +45,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
   labelSizer->Add(m_nodeName, 1, wxALL | wxCENTER | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 5);
 
-  wxBoxSizer *infosetSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *infosetSizer = new wxBoxSizer(wxHORIZONTAL);
   infosetSizer->Add(new wxStaticText(this, wxID_STATIC, _("Information set")),
 		    0, wxALL | wxCENTER, 5);
   m_infoset = new wxChoice(this, wxID_ANY);
@@ -94,7 +94,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
   infosetSizer->Add(m_infoset, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(infosetSizer, 0, wxALL | wxEXPAND, 5);
 
-  wxBoxSizer *subgameSizer = new wxBoxSizer(wxVERTICAL);
+  auto *subgameSizer = new wxBoxSizer(wxVERTICAL);
   if (!p_node->GetParent()) {
     subgameSizer->Add(new wxStaticText(this, wxID_STATIC,
 				       _("This is the root node of the tree")),
@@ -107,7 +107,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
   }
   topSizer->Add(subgameSizer, 0, wxALL | wxCENTER, 5);
 
-  wxBoxSizer *outcomeSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *outcomeSizer = new wxBoxSizer(wxHORIZONTAL);
   outcomeSizer->Add(new wxStaticText(this, wxID_STATIC, _("Outcome")),
 		    0, wxALL | wxCENTER, 5);
   m_outcome = new wxChoice(this, wxID_ANY);
@@ -145,9 +145,9 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
   outcomeSizer->Add(m_outcome, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(outcomeSizer, 0, wxALL | wxEXPAND, 5);
 
-  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
+  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);

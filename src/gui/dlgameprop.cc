@@ -37,9 +37,9 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
   : wxDialog(p_parent, wxID_ANY, _("Game properties"), wxDefaultPosition), 
     m_doc(p_doc)
 {
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *titleSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *titleSizer = new wxBoxSizer(wxHORIZONTAL);
   titleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Title")),
 		  0, wxALL | wxALIGN_CENTER, 5);
   m_title = new wxTextCtrl(this, wxID_ANY, 
@@ -50,7 +50,7 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
   titleSizer->Add(m_title, 1, wxALL | wxALIGN_CENTER, 5);
   topSizer->Add(titleSizer, 0, wxALL | wxEXPAND, 0);
 
-  wxBoxSizer *commentSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *commentSizer = new wxBoxSizer(wxHORIZONTAL);
   commentSizer->Add(new wxStaticText(this, wxID_STATIC, _("Comment")),
 		    0, wxALL | wxALIGN_CENTER, 5);
   m_comment = new wxTextCtrl(this, wxID_ANY, 
@@ -61,7 +61,7 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
   commentSizer->Add(m_comment, 1, wxALL | wxALIGN_CENTER, 5);
   topSizer->Add(commentSizer, 1, wxALL | wxEXPAND, 0);
 	
-  wxStaticBoxSizer *boxSizer = 
+  auto *boxSizer = 
     new wxStaticBoxSizer(wxVERTICAL, this, _("Information about this game"));
 
   boxSizer->Add(new wxStaticText(this, wxID_STATIC,
@@ -101,9 +101,9 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
 
   topSizer->Add(boxSizer, 0, wxALL | wxEXPAND, 5);
 
-  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
+  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
 

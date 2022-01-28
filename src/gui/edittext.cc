@@ -73,7 +73,7 @@ gbtEditableText::gbtEditableText(wxWindow *p_parent, int p_id,
   Connect(m_textCtrl->GetId(), wxEVT_COMMAND_TEXT_ENTER,
 	  wxCommandEventHandler(gbtEditableText::OnAccept));
   
-  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(m_staticText, 1, wxALIGN_CENTER, 0);
   topSizer->Add(m_textCtrl, 1, wxEXPAND, 0);
   topSizer->Show(m_textCtrl, false);

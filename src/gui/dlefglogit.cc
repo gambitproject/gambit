@@ -215,9 +215,9 @@ gbtLogitBehavDialog::gbtLogitBehavDialog(wxWindow *p_parent,
 	     wxDefaultPosition),
     m_doc(p_doc), m_process(nullptr), m_timer(this, GBT_ID_TIMER)
 {
-  wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+  auto *sizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *startSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *startSizer = new wxBoxSizer(wxHORIZONTAL);
 
   m_statusText = new wxStaticText(this, wxID_STATIC,
 				  wxT("The computation is currently in progress."));
@@ -236,7 +236,7 @@ gbtLogitBehavDialog::gbtLogitBehavDialog(wxWindow *p_parent,
   m_behavList->SetSizeHints(wxSize(600, 400));
   sizer->Add(m_behavList, 0, wxALL | wxALIGN_CENTER, 5);
 
-  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   m_saveButton = new wxButton(this, wxID_SAVE, 
 			      wxT("Save correspondence to .csv file"));
   m_saveButton->Enable(false);

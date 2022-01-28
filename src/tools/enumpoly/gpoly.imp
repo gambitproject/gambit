@@ -975,7 +975,7 @@ gPoly<double>  TogDouble(const gPoly<T>& given)
   gPoly<double>   answer(given.GetSpace(),given.GetOrder());
   Gambit::List<gMono<T> > list = given.MonomialList();
   for (int i =1; i <= list.Length(); i++) {
-    double nextcoef = (double)list[i].Coef();
+    auto nextcoef = (double)list[i].Coef();
     gPoly<double> next(given.GetSpace(),
 		       list[i].ExpV(),
 		       nextcoef,

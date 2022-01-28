@@ -52,7 +52,7 @@ cmatrix cmatrix::inv(bool &worked) const {
 
 	cmatrix ret(n,n);
 	int i,j;
-	double *col = new double[n];
+	auto *col = new double[n];
 	for(j=0;j<n;j++) {
 		for(i=0;i<n;i++) col[i] = 0;
 		col[j] = 1;
@@ -71,7 +71,7 @@ int cmatrix::LUdecomp(cmatrix &LU, int *ix) const {
 	}
 	int d=1,i,j,k;
 	LU = *this;
-	double *vv = new double[n];
+	auto *vv = new double[n];
 	double dum;
 
 	k = 0;
@@ -170,7 +170,7 @@ double *cmatrix::solve(const double *b, bool &worked) const {
 		std::cerr << "invalid cmatrix in solve" << std::endl;
 		exit(1);
 	}
-	double *ret = new double[n];
+	auto *ret = new double[n];
 	for(int i=0;i<n;i++) ret[i] = b[i];
 	int *ix = new int[n];
 	cmatrix a(n,n);

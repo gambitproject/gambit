@@ -47,7 +47,7 @@ gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent,
   : wxDialog(p_parent, wxID_ANY, wxT("Compute Nash equilibria"), wxDefaultPosition),
     m_doc(p_doc)
 {
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   if (m_doc->GetGame()->NumPlayers() == 2) {
     wxString countChoices[] = { wxT("Compute one Nash equilibrium"),
@@ -103,9 +103,9 @@ gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent,
     m_repChoice = nullptr;
   }
 
-  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
+  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);

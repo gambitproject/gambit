@@ -73,7 +73,7 @@ gSolver<T>::ContinuationSolutions(const Gambit::List<gPoly<double> >& list,
     polynomial<double> rootpoly = list[1].UnivariateEquivalent(curvar);
 
     gInterval<double> root_interval((double)-10,(double)10); //  Ouch!!
-    double error = (double) 0.0001;                           // Ditto!!
+    auto error = (double) 0.0001;                           // Ditto!!
 
 //DEBUG
 //gout << "About to enter PreciseRoots ... \n";
@@ -185,7 +185,7 @@ template<class T> Gambit::List<Gambit::Vector<double> > gSolver<T>::Roots()
   original.Append(zero);
 
     gInterval<double> root_interval((double)-10,(double)10); //  Ouch!!
-    double error = (double) 0.0001;                           // Ditto!!
+    auto error = (double) 0.0001;                           // Ditto!!
 
   for (i = 1; i <= TheIdeal.Dmnsn(); i++) {
     Gambit::List<double> roots_of_eqn_i =

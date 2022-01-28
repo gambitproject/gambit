@@ -99,7 +99,7 @@ void gnmgame::retract(cvector &dest, cvector &z) {
   // 
   // The immediate solution is to allocate dynamically, and use try..catch to ensure
   // deallocation.  Encapsulation is of course a superior solution eventually.
-  double *y = new double[numActions];
+  auto *y = new double[numActions];
   try {
     memcpy(y,z.values(),numActions*sizeof(double));
     for(n = 0; n < numPlayers; n++) {
@@ -131,7 +131,7 @@ void gnmgame::retract(cvector &dest, cvector &z, bool ksym){
   }
   int n, i;
   double v, sumz;
-  double* y = new double[getNumKSymActions()];
+  auto* y = new double[getNumKSymActions()];
   int offs=0;
   //CPY(y,z.values(),getNumKSymActions());
  try{

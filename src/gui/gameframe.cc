@@ -82,7 +82,7 @@ gbtProfileListPanel::gbtProfileListPanel(wxWindow *p_parent,
 					 gbtGameDocument *p_doc)
   : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc)
 { 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
   if (p_doc->IsTree()) {
     m_behavProfiles = new gbtBehavProfileList(this, p_doc);
@@ -149,9 +149,9 @@ gbtAnalysisNotebook::gbtAnalysisNotebook(wxWindow *p_parent,
 
   m_profiles = new gbtProfileListPanel(this, p_doc);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *horizSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *horizSizer = new wxBoxSizer(wxHORIZONTAL);
   horizSizer->Add(m_choices, 0, wxALL | wxALIGN_CENTER, 5);
   horizSizer->Add(m_description, 1, wxALL | wxALIGN_CENTER, 5);
   topSizer->Add(horizSizer, 0, wxEXPAND, 0);
@@ -297,7 +297,7 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   Connect(m_splitter->GetId(), wxEVT_COMMAND_SPLITTER_UNSPLIT,
 	  wxSplitterEventHandler(gbtGameFrame::OnUnsplit));
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(m_splitter, 1, wxEXPAND, 0);
   SetSizer(topSizer);
   Layout();
@@ -423,7 +423,7 @@ static void AppendBitmapItem(wxMenu *p_menu,
 			     const wxString &p_helpString,
 			     const wxBitmap &p_bitmap)
 {
-  wxMenuItem *item = new wxMenuItem(p_menu, p_id, p_label, p_helpString);
+  auto *item = new wxMenuItem(p_menu, p_id, p_label, p_helpString);
 #ifdef UNUSED
   // wxMac does not (apparently) support adding bitmaps to menu items,
   // so we do not set the bitmap in this case.
@@ -434,9 +434,9 @@ static void AppendBitmapItem(wxMenu *p_menu,
 
 void gbtGameFrame::MakeMenus()
 {
-  wxMenu *fileMenu = new wxMenu;
+  auto *fileMenu = new wxMenu;
   
-  wxMenu *fileNewMenu = new wxMenu;
+  auto *fileNewMenu = new wxMenu;
   AppendBitmapItem(fileNewMenu, GBT_MENU_FILE_NEW_EFG, _("&Extensive game"),
 		   _("Create a new extensive (tree) game"),
 		   wxBitmap(newtree_xpm));
@@ -455,7 +455,7 @@ void gbtGameFrame::MakeMenus()
 		   _("Save game to a different file"), wxBitmap(saveas_xpm));
 
   fileMenu->AppendSeparator();
-  wxMenu *fileExportMenu = new wxMenu;
+  auto *fileExportMenu = new wxMenu;
   fileExportMenu->Append(GBT_MENU_FILE_EXPORT_EFG, _("Gambit .&efg format"),
 			 _("Save the extensive game in .efg format"));
   fileExportMenu->Append(GBT_MENU_FILE_EXPORT_NFG, _("Gambit .&nfg format"),
@@ -489,7 +489,7 @@ void gbtGameFrame::MakeMenus()
   AppendBitmapItem(fileMenu, wxID_EXIT, _("E&xit\tCtrl-Q"), _("Exit Gambit"),
 		   wxBitmap(exit_xpm));
 
-  wxMenu *editMenu = new wxMenu;
+  auto *editMenu = new wxMenu;
 
   AppendBitmapItem(editMenu, wxID_UNDO, _("&Undo\tCtrl-Z"), 
 		   _("Undo the last change"), wxBitmap(undo_xpm));
@@ -529,7 +529,7 @@ void gbtGameFrame::MakeMenus()
   editMenu->Append(GBT_MENU_EDIT_GAME, _("&Game"),
 		   _("Edit properties of the game"));
 
-  wxMenu *viewMenu = new wxMenu;
+  auto *viewMenu = new wxMenu;
   viewMenu->Append(GBT_MENU_VIEW_PROFILES, _("&Profiles"),
 		   _("Display/hide profiles window"), true);
   viewMenu->Check(GBT_MENU_VIEW_PROFILES, false);
@@ -552,7 +552,7 @@ void gbtGameFrame::MakeMenus()
 		   wxT("Display the reduced strategic representation ")
 		     wxT("of the game"), true);
   
-  wxMenu *formatMenu = new wxMenu;
+  auto *formatMenu = new wxMenu;
   AppendBitmapItem(formatMenu, GBT_MENU_FORMAT_LAYOUT, _("&Layout"),
 		   _("Set tree layout parameters"), wxBitmap(layout_xpm));
   AppendBitmapItem(formatMenu, GBT_MENU_FORMAT_LABELS, _("La&bels"),
@@ -560,7 +560,7 @@ void gbtGameFrame::MakeMenus()
   AppendBitmapItem(formatMenu, GBT_MENU_FORMAT_FONTS, _("&Font"),
 		   _("Set the font for tree labels"), wxBitmap(font_xpm));
   
-  wxMenu *toolsMenu = new wxMenu;
+  auto *toolsMenu = new wxMenu;
   toolsMenu->Append(GBT_MENU_TOOLS_DOMINANCE, _("&Dominance"),
 		    _("Find undominated actions"), true);
   AppendBitmapItem(toolsMenu, GBT_MENU_TOOLS_EQUILIBRIUM, _("&Equilibrium"),
@@ -571,11 +571,11 @@ void gbtGameFrame::MakeMenus()
 		    _("Compute quantal response equilibria"));
 
 
-  wxMenu *helpMenu = new wxMenu;
+  auto *helpMenu = new wxMenu;
   AppendBitmapItem(helpMenu, wxID_ABOUT, _("&About"), _("About Gambit"),
 		   wxBitmap(about_xpm));
 
-  wxMenuBar *menuBar = new wxMenuBar();
+  auto *menuBar = new wxMenuBar();
   menuBar->Append(fileMenu, _("&File"));
   menuBar->Append(editMenu, _("&Edit"));
   menuBar->Append(viewMenu, _("&View"));
@@ -784,7 +784,7 @@ void gbtGameFrame::OnFileNewEfg(wxCommandEvent &)
   efg->SetTitle("Untitled Extensive Game");
   efg->NewPlayer()->SetLabel("Player 1");
   efg->NewPlayer()->SetLabel("Player 2");
-  gbtGameDocument *doc = new gbtGameDocument(efg);
+  auto *doc = new gbtGameDocument(efg);
   (void) new gbtGameFrame(nullptr, doc);
 }
 
@@ -797,7 +797,7 @@ void gbtGameFrame::OnFileNewNfg(wxCommandEvent &)
   nfg->SetTitle("Untitled Strategic Game");
   nfg->GetPlayer(1)->SetLabel("Player 1");
   nfg->GetPlayer(2)->SetLabel("Player 2");
-  gbtGameDocument *doc = new gbtGameDocument(nfg);
+  auto *doc = new gbtGameDocument(nfg);
   (void) new gbtGameFrame(nullptr, doc);
 }
 
@@ -900,7 +900,7 @@ void gbtGameFrame::OnFilePrintPreview(wxCommandEvent &)
     return;
   }
 
-  wxPreviewFrame *frame = new wxPreviewFrame(preview, this,
+  auto *frame = new wxPreviewFrame(preview, this,
 					     _("Print Preview"),
 					     wxPoint(100, 100),
 					     wxSize(600, 650));

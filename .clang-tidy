@@ -4,6 +4,7 @@ Checks: |
   bugprone-reserved-identifier,
   modernize-deprecated-headers,
   modernize-redundant-void-arg,
+  modernize-use-auto,
   modernize-use-bool-literals,
   modernize-use-equals-default,
   modernize-use-noexcept,

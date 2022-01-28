@@ -817,7 +817,7 @@ gbtTableWidget::gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id,
   m_rowSheet = new gbtRowPlayerWidget(this, p_doc);
   m_colSheet = new gbtColPlayerWidget(this, p_doc);
 
-  wxFlexGridSizer *topSizer = new wxFlexGridSizer(2, 2, 0, 0);
+  auto *topSizer = new wxFlexGridSizer(2, 2, 0, 0);
   topSizer->AddGrowableRow(1);
   topSizer->AddGrowableCol(1);
   topSizer->Add(new wxPanel(this, wxID_ANY));
@@ -1213,8 +1213,8 @@ void gbtTableWidget::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
   p_dc.SetUserScale(scale, scale);
 
   // Calculate the position on the DC to center the tree
-  double posX = (double) ((w - (maxX * scale)) / 2.0);
-  double posY = (double) ((h - (maxY * scale)) / 2.0);
+  auto posX = (double) ((w - (maxX * scale)) / 2.0);
+  auto posY = (double) ((h - (maxY * scale)) / 2.0);
 
   // The X and Y coordinates of the upper left of the payoff table
   int payoffX = (int) (m_rowSheet->CellToRect(wxSheetCoords(0, m_rowSheet->GetNumberCols() - 1)).GetRight() * scale);

@@ -319,7 +319,7 @@ TableFileGame::~TableFileGame()
 
 void TableFileGame::AddPlayer(const std::string &p_name)
 {
-  TableFilePlayer *player = new TableFilePlayer;
+  auto *player = new TableFilePlayer;
   player->m_name = p_name;
 
   if (m_firstPlayer) {

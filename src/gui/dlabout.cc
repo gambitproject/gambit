@@ -39,7 +39,7 @@
 static wxStaticText *FormattedText(wxWindow *p_parent, const wxString &p_label,
 				   const wxFont &p_font)
 {
-  wxStaticText *t = new wxStaticText(p_parent, wxID_STATIC, p_label);
+  auto *t = new wxStaticText(p_parent, wxID_STATIC, p_label);
   t->SetFont(p_font);
   return t;
 }
@@ -49,7 +49,7 @@ gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
 	     wxDefaultPosition, wxDefaultSize)
 {
   SetFont(wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   topSizer->Add(new wxStaticBitmap(this, wxID_STATIC, 
 				   wxBitmap(gambitbig_xpm)),
@@ -98,7 +98,7 @@ gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
 			      wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
 		0, wxALIGN_CENTER, 5);
 
-  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
+  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   topSizer->Add(okButton, 0, wxALL | wxALIGN_RIGHT, 20);
 

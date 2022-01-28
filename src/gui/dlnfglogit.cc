@@ -249,7 +249,7 @@ LogitBranchDialog::LogitBranchDialog(wxWindow *p_parent,
   m_sheet = new LogitMixedSheet(this, p_doc, p_branch);
   m_sheet->AutoSizeCol(0);
 
-  wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+  auto *sizer = new wxBoxSizer(wxVERTICAL);
   sizer->Add(m_sheet, 0, wxALL, 5);
   sizer->Add(CreateButtonSizer(wxOK), 0, wxALL | wxEXPAND, 5);
 
@@ -488,11 +488,11 @@ LogitPlotPanel::LogitPlotPanel(wxWindow *p_parent,
   m_plotCtrl->SetSizeHints(wxSize(600, 400));
 
   m_plotStrategies = new gbtLogitPlotStrategyList(this, p_doc);
-  wxStaticBoxSizer *playerSizer =
+  auto *playerSizer =
     new wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Show strategies"));
   playerSizer->Add(m_plotStrategies, 1, wxALL | wxEXPAND, 5);
 
-  wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *sizer = new wxBoxSizer(wxHORIZONTAL);
   sizer->Add(playerSizer, 0, wxALL | wxEXPAND, 5);
   sizer->Add(m_plotCtrl, 0, wxALL, 5);
 
@@ -512,7 +512,7 @@ void LogitPlotPanel::Plot()
   for (int st = 1; st <= m_doc->GetGame()->MixedProfileLength(); st++) {
     if (!m_plotStrategies->IsStrategyShown(st)) continue;
 
-    wxPlotData *curve = new wxPlotData(m_branch.NumPoints());
+    auto *curve = new wxPlotData(m_branch.NumPoints());
 
     GameStrategy strategy = m_doc->GetGame()->GetStrategy(st);
     GamePlayer player = strategy->GetPlayer();
@@ -634,9 +634,9 @@ LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent,
 	     wxDefaultPosition),
     m_doc(p_doc), m_process(nullptr), m_timer(this, GBT_ID_TIMER)
 {
-  wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+  auto *sizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *startSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *startSizer = new wxBoxSizer(wxHORIZONTAL);
 
   m_statusText = new wxStaticText(this, wxID_STATIC,
 				  wxT("The computation is currently in progress."));
@@ -708,13 +708,13 @@ LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent,
   sizer->Add(m_toolBar, 0, wxALL | wxEXPAND, 5);
 
 
-  wxBoxSizer *midSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *midSizer = new wxBoxSizer(wxHORIZONTAL);
   m_plot = new LogitPlotPanel(this, m_doc);
   midSizer->Add(m_plot, 0, wxALL | wxALIGN_CENTER, 5);
 
   sizer->Add(midSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
-  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   m_okButton = new wxButton(this, wxID_OK, wxT("OK"));
   buttonSizer->Add(m_okButton, 0, wxALL | wxALIGN_CENTER, 5);
   m_okButton->Enable(false);

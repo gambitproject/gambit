@@ -191,7 +191,7 @@ T TableMixedStrategyProfileRep<T>::GetPayoff(int pl, int index, int current) con
 {
   if (current > this->m_support.GetGame()->NumPlayers())  {
     Game game = this->m_support.GetGame();
-    GameTableRep &g = dynamic_cast<GameTableRep &>(*game);
+    auto &g = dynamic_cast<GameTableRep &>(*game);
     GameOutcomeRep *outcome = g.m_results[index];
     if (outcome) {
       return outcome->GetPayoff<T>(pl);
@@ -228,7 +228,7 @@ TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl,
   }
   if (cur_pl > this->m_support.GetGame()->NumPlayers())  {
     Game game = this->m_support.GetGame();
-    GameTableRep &g = dynamic_cast<GameTableRep &>(*game);
+    auto &g = dynamic_cast<GameTableRep &>(*game);
     GameOutcomeRep *outcome = g.m_results[index];
     if (outcome) {
       value += prob * outcome->GetPayoff<T>(pl);
@@ -267,7 +267,7 @@ TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl1,
   }
   if (cur_pl > this->m_support.GetGame()->NumPlayers())  {
     Game game = this->m_support.GetGame();
-    GameTableRep &g = dynamic_cast<GameTableRep &>(*game);
+    auto &g = dynamic_cast<GameTableRep &>(*game);
     GameOutcomeRep *outcome = g.m_results[index];
     if (outcome) {
       value += prob * outcome->GetPayoff<T>(pl);
@@ -309,7 +309,7 @@ TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl,
 template <class T>
 T AggMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
-  GameAggRep &g = dynamic_cast<GameAggRep &>(*(this->m_support.GetGame()));
+  auto &g = dynamic_cast<GameAggRep &>(*(this->m_support.GetGame()));
   agg::AGG *aggPtr = g.aggPtr;
   std::vector<double> s (aggPtr->getNumActions());
   for (int i=0;i<aggPtr->getNumPlayers();++i) {
@@ -325,7 +325,7 @@ T AggMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 template <class T>
 T AggMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps) const
 {
-  GameAggRep &g = dynamic_cast<GameAggRep &>(*(this->m_support.GetGame()));
+  auto &g = dynamic_cast<GameAggRep &>(*(this->m_support.GetGame()));
   agg::AGG *aggPtr = g.aggPtr;
   std::vector<double> s (aggPtr->getNumActions());
   for (int i=0;i<aggPtr->getNumPlayers();++i){
@@ -353,7 +353,7 @@ T AggMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1,
   GamePlayerRep *player2 = ps2->GetPlayer();
   if (player1 == player2) return (T) 0;
 
-  GameAggRep &g = dynamic_cast<GameAggRep &>(*(this->m_support.GetGame()));
+  auto &g = dynamic_cast<GameAggRep &>(*(this->m_support.GetGame()));
   agg::AGG *aggPtr = g.aggPtr;
   std::vector<double> s (aggPtr->getNumActions());
   for (int i=0;i<aggPtr->getNumPlayers();++i){
@@ -387,7 +387,7 @@ T AggMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1,
 template <class T>
 T BagentMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
-  GameBagentRep &g = dynamic_cast<GameBagentRep &>(*(this->m_support.GetGame()));
+  auto &g = dynamic_cast<GameBagentRep &>(*(this->m_support.GetGame()));
   agg::BAGG *baggPtr = g.baggPtr;
   std::vector<double> s (g.MixedProfileLength());
   Array<int> ns=g.NumStrategies();
@@ -410,7 +410,7 @@ T BagentMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 template <class T>
 T BagentMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps) const
 {
-  GameBagentRep &g = dynamic_cast<GameBagentRep &>(*(this->m_support.GetGame()));
+  auto &g = dynamic_cast<GameBagentRep &>(*(this->m_support.GetGame()));
   agg::BAGG *baggPtr = g.baggPtr;
   std::vector<double> s (g.MixedProfileLength());
   int bplayer=-1,btype=-1;
@@ -445,7 +445,7 @@ T BagentMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &p
   GamePlayerRep *player2 = ps2->GetPlayer();
   if (player1 == player2) return (T) 0;
 
-  GameBagentRep &g = dynamic_cast<GameBagentRep &>(*(this->m_support.GetGame()));
+  auto &g = dynamic_cast<GameBagentRep &>(*(this->m_support.GetGame()));
   agg::BAGG *baggPtr = g.baggPtr;
   std::vector<double> s (g.MixedProfileLength());
   int bplayer=-1,btype=-1;
@@ -490,7 +490,7 @@ MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehaviorProfile<T> &p_p
   : m_rep(new TreeMixedStrategyProfileRep<T>(p_profile))
 {
   Game game = p_profile.GetGame();
-  GameTreeRep *efg = dynamic_cast<GameTreeRep *>(game.operator->());
+  auto *efg = dynamic_cast<GameTreeRep *>(game.operator->());
   for (int pl = 1; pl <= m_rep->m_support.GetGame()->NumPlayers(); pl++)  {
     for (int st = 1; st <= m_rep->m_support.GetGame()->GetPlayer(pl)->NumStrategies(); st++)  {
       T prob = (T) 1;

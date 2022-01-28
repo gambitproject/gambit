@@ -52,9 +52,9 @@ gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
     m_process(nullptr), m_timer(this, GBT_ID_TIMER),
     m_output(p_command)
 {
-  wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+  auto *sizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *startSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *startSizer = new wxBoxSizer(wxHORIZONTAL);
 
   m_statusText = new wxStaticText(this, wxID_STATIC,
 				  wxT("The computation is currently in progress."));

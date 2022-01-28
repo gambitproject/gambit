@@ -85,7 +85,7 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent,
   Connect(m_infosetItem->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
 	  wxCommandEventHandler(gbtInsertMoveDialog::OnInfoset));
 
-  wxBoxSizer *actionSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *actionSizer = new wxBoxSizer(wxHORIZONTAL);
   actionSizer->Add(new wxStaticText(this, wxID_STATIC, _("with")),
 		   0, wxALL | wxALIGN_CENTER, 5);
   m_actions = new wxSpinCtrl(this, wxID_ANY, _T("2"),
@@ -96,13 +96,13 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent,
   actionSizer->Add(new wxStaticText(this, wxID_STATIC, _("actions")),
 		   0, wxALL | wxALIGN_CENTER, 5);
 
-  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
+  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(m_playerItem, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5);
   topSizer->Add(m_infosetItem, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5);
   topSizer->Add(actionSizer, 0, wxALL | wxALIGN_CENTER, 5);

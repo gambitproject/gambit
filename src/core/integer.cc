@@ -187,7 +187,7 @@ static IntegerRep* Inew(int newlen)
   allocsiz -= MALLOC_MIN_OVERHEAD;
   //assert((unsigned long) allocsiz < MAX_INTREP_SIZE * sizeof(short));
     
-  IntegerRep* rep = (IntegerRep *) new char[allocsiz];
+  auto* rep = (IntegerRep *) new char[allocsiz];
   rep->sz = (allocsiz - sizeof(IntegerRep) + sizeof(short)) / sizeof(short);
   return rep;
 }
@@ -446,7 +446,7 @@ double Itodouble(const IntegerRep* rep)
   double bound = DBL_MAX / 2.0;
   for (int i = rep->len - 1; i >= 0; --i)
   {
-	 unsigned short a = (unsigned short) (I_RADIX >> 1);
+	 auto a = (unsigned short) (I_RADIX >> 1);
 	 while (a != 0)
     {
       if (d >= bound)
@@ -473,7 +473,7 @@ int Iisdouble(const IntegerRep* rep)
   double bound = DBL_MAX / 2.0;
   for (int i = rep->len - 1; i >= 0; --i)
   {
-	 unsigned short a = (unsigned short) (I_RADIX >> 1);
+	 auto a = (unsigned short) (I_RADIX >> 1);
     while (a != 0)
     {
       if (d > bound || (d == bound && (i > 0 || (rep->s[i] & a))))
@@ -504,7 +504,7 @@ double ratio(const Integer& num, const Integer& den)
     int cont = 1;
     for (int i = den.rep->len - 1; i >= 0 && cont; --i)
     {
-		unsigned short a = (unsigned short) (I_RADIX >> 1);
+		auto a = (unsigned short) (I_RADIX >> 1);
       while (a != 0)
       {
         if (d2 + 1.0 == d2) // out of precision when we get here
@@ -930,7 +930,7 @@ IntegerRep* multiply(const IntegerRep* x, const IntegerRep* y, IntegerRep* r)
 
     while (as >= bota)
     {
-      unsigned long ai = (unsigned long)(*as--);
+      auto ai = (unsigned long)(*as--);
       unsigned short* rs = currentr--;
       *rs = 0;
       if (ai != 0)
@@ -1078,7 +1078,7 @@ IntegerRep* multiply(const IntegerRep* x, long y, IntegerRep* r)
 
     while (as >= bota)
     {
-      unsigned long ai = (unsigned long)(*as--);
+      auto ai = (unsigned long)(*as--);
       unsigned short* rs = currentr--;
       *rs = 0;
       if (ai != 0)
@@ -1251,7 +1251,7 @@ IntegerRep* div(const IntegerRep* x, const IntegerRep* y, IntegerRep* q)
   {
     IntegerRep* yy = nullptr;
     IntegerRep* r  = nullptr;
-	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
+	 auto prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == q)
     {
       yy = multiply(y, ((long)prescale & I_MAXNUM), yy);
@@ -1319,7 +1319,7 @@ IntegerRep* div(const IntegerRep* x, long y, IntegerRep* q)
   else
   {
     IntegerRep* r  = nullptr;
-	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
+	 auto prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1)
     {
       unsigned long prod = (unsigned long)prescale * (unsigned long)ys[0];
@@ -1394,7 +1394,7 @@ void divide(const Integer& Ix, long y, Integer& Iq, long& rem)
   else
   {
     IntegerRep* r  = nullptr;
-	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
+	 auto prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1)
     {
       unsigned long prod = (unsigned long)prescale * (unsigned long)ys[0];
@@ -1473,7 +1473,7 @@ void divide(const Integer& Ix, const Integer& Iy, Integer& Iq, Integer& Ir)
   else
   {
     IntegerRep* yy = nullptr;
-	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
+	 auto prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == q || y == r)
     {
       yy = multiply(y, ((long)prescale & I_MAXNUM), yy);
@@ -1533,7 +1533,7 @@ IntegerRep* mod(const IntegerRep* x, const IntegerRep* y, IntegerRep* r)
   else
   {
     IntegerRep* yy = nullptr;
-	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
+	 auto prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == r)
     {
       yy = multiply(y, ((long)prescale & I_MAXNUM), yy);
@@ -1599,7 +1599,7 @@ IntegerRep* mod(const IntegerRep* x, long y, IntegerRep* r)
   }
   else
   {
-	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
+	 auto prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1)
     {
       unsigned long prod = (unsigned long)prescale * (unsigned long)ys[0];
@@ -2220,7 +2220,7 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int& fmtlen, int base,
     // find power
     int bpower = 1;
     unsigned short b = base;
-	 unsigned short maxb = (unsigned short) (I_MAXNUM / base);
+	 auto maxb = (unsigned short) (I_MAXNUM / base);
     while (b < maxb)
     {
       b *= base;

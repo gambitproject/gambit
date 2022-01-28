@@ -68,7 +68,8 @@ public:
   bool Copy(const gbtRationalRendererRefData& other) 
   { return wxSheetCellRendererRefData::Copy(other); }
 
-  DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(gbtRationalRendererRefData, 
+  // NOLINTNEXTLINE(modernize-use-auto)
+  DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(gbtRationalRendererRefData,
 					    wxSheetCellRendererRefData)    
 
 
@@ -85,7 +86,9 @@ public:
   void StartingKey(wxKeyEvent &) override;
 
   bool Copy(const gbtRationalEditorRefData &other);
-  DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(gbtRationalEditorRefData, 
+
+  // NOLINTNEXTLINE(modernize-use-auto)
+  DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(gbtRationalEditorRefData,
 					    wxSheetCellTextEditorRefData)    
 };
 

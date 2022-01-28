@@ -98,7 +98,7 @@ kSymStrategyOffset(1,0)
   }
   sort(t.begin(),t.end());
   //vector<pair<vector<int>,int> >::iterator new_end = unique(t.begin(),t.end());
-  vector<pair<vector<int>,int> >::iterator p=t.begin();
+  auto p=t.begin();
   uniqueActionSets.push_back(p->first);
   playerClasses.push_back(vector<int> (1,p->second));
   player2Class[p->second]=0;
@@ -532,7 +532,7 @@ AGG::getAn(multiset<int>& dest, vector<vector<int> >& neighb, vector<projtype>& 
 	return;
   }
   //cycle check
-  for (vector<int>::iterator p=path.begin();p!=path.end();++p){
+  for (auto p=path.begin();p!=path.end();++p){
     if (Node == (*p)) {
 	cout<<"ERROR: cycle of projected nodes at "<<Node  <<endl;
 	cout <<"Path: (Size "<<path.size() <<")"<<endl;
@@ -571,7 +571,7 @@ AGG::initPorder(vector<int>& Po,
   }
 
   sort (order.begin(),order.end() );
-  vector<int>::iterator p = Po.begin();
+  auto p = Po.begin();
   (*p) = i;
   ++p;
   transform(order.begin(),order.end(), p, select2nd );
@@ -637,7 +637,7 @@ AggNumber AGG::getPurePayoff(int player, std::vector<int> &s){
         (*projFunctions[Node][j]) (pureprofile[j],projection[Node][i][s[i]][j] );
     }
   }
-  aggpayoff::iterator p= payoffs[Node].find(pureprofile);
+  auto p= payoffs[Node].find(pureprofile);
   if ( p == payoffs[Node].end() ){
     cout<<"AGG::getPurePayoff ERROR: unable to find the following configuration"
         <<endl;
@@ -1042,7 +1042,7 @@ void AGG::makeMAPPINGpayoff(std::istream& in, aggpayoff& pay, int numNei){
 
     }
     //check
-    for(trie_map<AggNumber>::iterator it = temp.begin(); it!=temp.end(); ++it){
+    for(auto it = temp.begin(); it!=temp.end(); ++it){
 
 	//pair<trie_map<AggNumber>::iterator,bool> res = pay.insert( *it);
 	
@@ -1070,7 +1070,7 @@ AggNumber AGG::getMaxPayoff(){
   assert(numActionNodes>0);
   result=payoffs[0].begin()->second;
   for (int i=1;i<numActionNodes;i++)
-    for (aggpayoff::iterator it=payoffs[i].begin();it!=payoffs[i].end();++it)
+    for (auto it=payoffs[i].begin();it!=payoffs[i].end();++it)
       result=max(result, it->second);
 
   done=true;
@@ -1083,7 +1083,7 @@ AggNumber AGG::getMinPayoff(){
   assert(numActionNodes>0);
   result=payoffs[0].begin()->second;
   for (int i=1;i<numActionNodes;i++)
-      for (aggpayoff::iterator it=payoffs[i].begin();it!=payoffs[i].end();++it)
+      for (auto it=payoffs[i].begin();it!=payoffs[i].end();++it)
         result=min(result, it->second);
   done=true;
   return result;

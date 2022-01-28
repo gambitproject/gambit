@@ -80,7 +80,7 @@ GameStrategy GamePlayerRep::NewStrategy()
 {
   if (m_game->IsTree())  throw UndefinedException();
 
-  GameStrategyRep *strategy = new GameStrategyRep(this);
+  auto *strategy = new GameStrategyRep(this);
   m_strategies.Append(strategy);
   strategy->m_number = m_strategies.Length();
   strategy->m_offset = -1;   // this flags this action as new
@@ -99,7 +99,7 @@ void GamePlayerRep::MakeStrategy()
       c[i] = 0;
   }
   
-  GameStrategyRep *strategy = new GameStrategyRep(this);
+  auto *strategy = new GameStrategyRep(this);
   m_strategies.Append(strategy);
   strategy->m_number = m_strategies.Length();
   strategy->m_behav = c;
@@ -323,7 +323,7 @@ T PureBehaviorProfile::GetPayoff(const GameNode &p_node,
 {
   T payoff(0);
 
-  GameTreeNodeRep *node = dynamic_cast<GameTreeNodeRep *>(p_node.operator->());
+  auto *node = dynamic_cast<GameTreeNodeRep *>(p_node.operator->());
 
   if (node->outcome) {
     payoff += node->outcome->GetPayoff<T>(pl);

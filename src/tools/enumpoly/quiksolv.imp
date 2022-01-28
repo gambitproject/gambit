@@ -345,7 +345,7 @@ template<class T>
   if (!r.Contains(p)) {
     throw Gambit::AssertionException("Point not in rectangle in MaxDistanceFromPointToVertexAfterTransformation.");
   }
-  double max = (double)0;
+  auto max = (double)0;
 
   Gambit::Array<int> ListOfTwos(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) ListOfTwos[i] = 2;
@@ -380,7 +380,7 @@ bool QuikSolv<T>::HasNoOtherRootsIn(const gRectangle<double>& r,
 
   double radius = MaxDistanceFromPointToVertexAfterTransformation(r,p,M);
 
-  double max = (double)0;
+  auto max = (double)0;
   for (int i = 1; i <= Dmnsn(); i++) 
     max += system2[i].MaximalValueOfNonlinearPart(radius);
 
@@ -540,7 +540,7 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
 {
   //assert (NoEquations == System.Dmnsn());
 
-  Gambit::List<Gambit::Vector<double> >* rootlistptr = new Gambit::List<Gambit::Vector<double> >();
+  auto* rootlistptr = new Gambit::List<Gambit::Vector<double> >();
 
   if (NoEquations == 0) {
     Gambit::Vector<double> answer(0);

@@ -73,14 +73,14 @@ gbtBehavDominanceToolbar::gbtBehavDominanceToolbar(wxWindow *p_parent,
 						   gbtGameDocument *p_doc)
   : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc)
 {
-  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
   topSizer->Add(new wxStaticText(this, wxID_STATIC,
 				 wxT("Hide actions which are ")),
 		0, wxALL | wxALIGN_CENTER, 5);
 
   wxString domChoices[] = { wxT("strictly"), wxT("strictly or weakly") };
-  wxChoice *choice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+  auto *choice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 				  2, domChoices);
   choice->SetSelection(0);
   Connect(choice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
@@ -120,7 +120,7 @@ gbtBehavDominanceToolbar::gbtBehavDominanceToolbar(wxWindow *p_parent,
 	  wxCommandEventHandler(gbtBehavDominanceToolbar::OnLastLevel));
   topSizer->Add(m_allButton, 0, wxALL | wxALIGN_CENTER, 5);
 
-  wxCheckBox *showReachable = new wxCheckBox(this, wxID_ANY,
+  auto *showReachable = new wxCheckBox(this, wxID_ANY,
 					     wxT("Show only reachable nodes"));
   showReachable->SetValue(m_doc->GetStyle().RootReachable());
   Connect(showReachable->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
@@ -260,14 +260,14 @@ gbtTreePlayerPanel::gbtTreePlayerPanel(wxWindow *p_parent,
 				       int p_player)
   : wxPanel(p_parent, wxID_ANY), m_doc(p_doc), m_player(p_player)
 {
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *labelSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
 
   wxStaticBitmap *playerIcon = new gbtTreePlayerIcon(this, m_player);
   labelSizer->Add(playerIcon, 0, wxALL | wxALIGN_CENTER, 0);
 
-  wxBitmapButton *setColorIcon =
+  auto *setColorIcon =
     new wxBitmapButton(this, wxID_ANY, wxBitmap(color_xpm),
 		       wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
   setColorIcon->SetToolTip(_("Change the color for this player"));
@@ -517,14 +517,14 @@ gbtTreeChancePanel::gbtTreeChancePanel(wxWindow *p_parent,
 				       gbtGameDocument *p_doc)
   : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc)
 {
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *labelSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
 
   wxStaticBitmap *playerIcon = new gbtTreeChanceIcon(this);
   labelSizer->Add(playerIcon, 0, wxALL | wxALIGN_CENTER, 0);
 
-  wxBitmapButton *setColorIcon =
+  auto *setColorIcon =
     new wxBitmapButton(this, wxID_ANY, wxBitmap(color_xpm),
 		       wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
   setColorIcon->SetToolTip(_("Change the color for this player"));
@@ -595,7 +595,7 @@ gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent,
   : wxPanel(p_parent, wxID_ANY, wxDefaultPosition, wxSize(210, -1)), 
     gbtGameView(p_doc)
 { 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   m_chancePanel = new gbtTreeChancePanel(this, m_doc);
   topSizer->Add(m_chancePanel, 0, wxALL | wxEXPAND, 5);
@@ -612,7 +612,7 @@ gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent,
 void gbtTreePlayerToolbar::OnUpdate()
 {
   while (m_playerPanels.Length() < m_doc->NumPlayers()) {
-    gbtTreePlayerPanel *panel = new gbtTreePlayerPanel(this, m_doc,
+    auto *panel = new gbtTreePlayerPanel(this, m_doc,
 						       m_playerPanels.Length()+1);
     m_playerPanels.Append(panel);
     GetSizer()->Add(panel, 0, wxALL | wxEXPAND, 5);
@@ -657,11 +657,11 @@ gbtEfgPanel::gbtEfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   m_playerToolbar = new gbtTreePlayerToolbar(this, m_doc);
   m_dominanceToolbar = new gbtBehavDominanceToolbar(this, m_doc);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(m_dominanceToolbar, 0, wxEXPAND, 0);
   topSizer->Show(m_dominanceToolbar, false);
 
-  wxBoxSizer *treeSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *treeSizer = new wxBoxSizer(wxHORIZONTAL);
   treeSizer->Add(m_playerToolbar, 0, wxEXPAND, 0);
   treeSizer->Add(m_treeWindow, 1, wxEXPAND, 0);
   
@@ -772,8 +772,8 @@ void gbtEfgPanel::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
   p_dc.SetUserScale(scale, scale);
 
   // Calculate the position on the DC to center the tree
-  double posX = (double) ((w - (maxX * scale)) / 2.0);
-  double posY = (double) ((h - (maxY * scale)) / 2.0);
+  auto posX = (double) ((w - (maxX * scale)) / 2.0);
+  auto posY = (double) ((h - (maxY * scale)) / 2.0);
   p_dc.SetDeviceOrigin((int) posX, (int) posY);
 
   printf("Drawing with scale %f\n", scale);

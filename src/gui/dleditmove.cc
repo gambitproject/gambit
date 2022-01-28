@@ -141,9 +141,9 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
   : wxDialog(p_parent, wxID_ANY, _("Move properties"), wxDefaultPosition), 
     m_infoset(p_infoset)
 {
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *labelSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   labelSizer->Add(new wxStaticText(this, wxID_STATIC, 
 				   _("Information set label")),
 		  0, wxALL | wxALIGN_CENTER, 5);
@@ -157,7 +157,7 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
 						  p_infoset->NumMembers())),
 		0, wxALL | wxALIGN_CENTER, 5);
 
-  wxBoxSizer *playerSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *playerSizer = new wxBoxSizer(wxHORIZONTAL);
   playerSizer->Add(new wxStaticText(this, wxID_STATIC, _("Belongs to player")),
 		   0, wxALL | wxALIGN_CENTER, 5);
   m_player = new wxChoice(this, wxID_ANY);
@@ -175,16 +175,16 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
   playerSizer->Add(m_player, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(playerSizer, 0, wxALL | wxEXPAND, 0);
 
-  wxStaticBoxSizer *actionBoxSizer =
+  auto *actionBoxSizer =
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Actions")),
 			 wxHORIZONTAL);
   m_actionSheet = new gbtActionSheet(this, p_infoset);
   actionBoxSizer->Add(m_actionSheet, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(actionBoxSizer, 0, wxALL | wxEXPAND, 5);
 
-  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
+  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);

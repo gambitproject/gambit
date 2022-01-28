@@ -117,7 +117,7 @@ void GameTreeInfosetRep::SetPlayer(GamePlayer p_player)
 
 bool GameTreeInfosetRep::Precedes(GameNode p_node) const
 {
-  GameTreeNodeRep *node = dynamic_cast<GameTreeNodeRep *>(p_node.operator->());
+  auto *node = dynamic_cast<GameTreeNodeRep *>(p_node.operator->());
   while (node->m_parent) {
     if (node->infoset == this) {
       return true;
@@ -138,7 +138,7 @@ GameAction GameTreeInfosetRep::InsertAction(GameAction p_action /* =0 */)
     for (where = 1; m_actions[where] != p_action; where++); 
   }
 
-  GameTreeActionRep *action = new GameTreeActionRep(where, "", this);
+  auto *action = new GameTreeActionRep(where, "", this);
   m_actions.Insert(action, where);
   if (m_player->IsChance()) {
     m_probs.Insert(Number("0"), where);
@@ -295,7 +295,7 @@ void GameTreeNodeRep::SetOutcome(const GameOutcome &p_outcome)
 
 bool GameTreeNodeRep::IsSuccessorOf(GameNode p_node) const
 {
-  GameTreeNodeRep *n = const_cast<GameTreeNodeRep *>(this);
+  auto *n = const_cast<GameTreeNodeRep *>(this);
   while (n && n != p_node) n = n->m_parent;
   return (n == p_node);
 }
@@ -390,7 +390,7 @@ void GameTreeNodeRep::CopyTree(GameNode p_src)
   if (p_src->GetGame() != m_efg) throw MismatchException();
   if (p_src == this || children.Length() > 0) return;
 
-  GameTreeNodeRep *src = dynamic_cast<GameTreeNodeRep *>(p_src.operator->());
+  auto *src = dynamic_cast<GameTreeNodeRep *>(p_src.operator->());
 
   if (src->children.Length())  {
     AppendMove(src->infoset);
@@ -410,7 +410,7 @@ void GameTreeNodeRep::MoveTree(GameNode p_src)
     return;
   }
 
-  GameTreeNodeRep *src = dynamic_cast<GameTreeNodeRep *>(p_src.operator->());
+  auto *src = dynamic_cast<GameTreeNodeRep *>(p_src.operator->());
 
   if (src->m_parent == m_parent) {
     int srcChild = src->m_parent->children.Find(src);
@@ -517,7 +517,7 @@ GameInfoset GameTreeNodeRep::InsertMove(GameInfoset p_infoset)
 {
   if (p_infoset->GetGame() != m_efg) throw MismatchException();
 
-  GameTreeNodeRep *newNode = new GameTreeNodeRep(m_efg, m_parent);
+  auto *newNode = new GameTreeNodeRep(m_efg, m_parent);
   newNode->infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
   dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->())->AddMember(newNode);
 

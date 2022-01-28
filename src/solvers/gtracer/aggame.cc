@@ -47,7 +47,7 @@ void aggame::computePartialP_PureNode(int player1,int act1, std::vector<int>& ta
       bool NullOnly =true;
       for(j=0;j<numNei;++j){
 	a[j]++;
-	agg::aggdistrib::iterator pp = aggPtr->projectedStrat[Node][tasks[i]].find(a);
+	auto pp = aggPtr->projectedStrat[Node][tasks[i]].find(a);
 	if (pp== aggPtr->projectedStrat[Node][tasks[i]].end()) {
 	    strat[j]=0;
 	}
@@ -197,7 +197,7 @@ void aggame::payoffMatrix(cmatrix &dest, cvector &s, agg::AggNumber fuzz){
                 copy(key.begin(),key.end(),ostream_iterator<int>(cout," ") );
                 cout<<"]\n";
 #endif
-	        agg::aggdistrib::iterator r= aggPtr->cache.findExact(key);
+	        auto r= aggPtr->cache.findExact(key);
 	        if (r!=aggPtr->cache.end()){
 	          dest[act1+firstAction(rown)][act2+firstAction(coln)]=r->second;
 	        }

@@ -90,7 +90,7 @@ bool gbtApplication::OnInit()
     efg->NewPlayer()->SetLabel("Player 2");
     efg->SetTitle("Untitled Extensive Game");
 
-    gbtGameDocument *game = new gbtGameDocument(efg);
+    auto *game = new gbtGameDocument(efg);
     (void) new gbtGameFrame(nullptr, game);
   }
 
@@ -107,7 +107,7 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
     return GBT_APP_OPEN_FAILED;
   }
 
-  gbtGameDocument *doc = new gbtGameDocument(Gambit::NewTree());
+  auto *doc = new gbtGameDocument(Gambit::NewTree());
   if (doc->LoadDocument(p_filename)) {
     doc->SetFilename(p_filename);
     m_fileHistory.AddFileToHistory(p_filename);
@@ -124,7 +124,7 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
 
     m_fileHistory.AddFileToHistory(p_filename);
     m_fileHistory.Save(*wxConfigBase::Get());
-    gbtGameDocument *doc = new gbtGameDocument(nfg);
+    auto *doc = new gbtGameDocument(nfg);
     doc->SetFilename(wxT(""));
     (void) new gbtGameFrame(nullptr, doc);
     return GBT_APP_FILE_OK;

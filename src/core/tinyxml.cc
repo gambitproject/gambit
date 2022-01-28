@@ -45,7 +45,7 @@ void TiXmlBase::PutString( const TIXML_STRING& str, TIXML_STRING* outString )
 
 	while( i<(int)str.length() )
 	{
-		unsigned char c = (unsigned char) str[i];
+		auto c = (unsigned char) str[i];
 
 		if (    c == '&' 
 		     && i < ( (int)str.length() - 2 )
@@ -751,7 +751,7 @@ void TiXmlElement::SetAttribute( const char * name, const char * _value )
 		return;
 	}
 
-	TiXmlAttribute* attrib = new TiXmlAttribute( name, _value );
+	auto* attrib = new TiXmlAttribute( name, _value );
 	if ( attrib )
 	{
 		attributeSet.Add( attrib );
@@ -870,7 +870,7 @@ void TiXmlElement::CopyTo( TiXmlElement* target ) const
 
 TiXmlNode* TiXmlElement::Clone() const
 {
-	TiXmlElement* clone = new TiXmlElement( Value() );
+	auto* clone = new TiXmlElement( Value() );
 	if ( !clone )
 		return nullptr;
 
@@ -1124,7 +1124,7 @@ void TiXmlDocument::CopyTo( TiXmlDocument* target ) const
 
 TiXmlNode* TiXmlDocument::Clone() const
 {
-	TiXmlDocument* clone = new TiXmlDocument();
+	auto* clone = new TiXmlDocument();
 	if ( !clone )
 		return nullptr;
 
@@ -1313,7 +1313,7 @@ void TiXmlComment::CopyTo( TiXmlComment* target ) const
 
 TiXmlNode* TiXmlComment::Clone() const
 {
-	TiXmlComment* clone = new TiXmlComment();
+	auto* clone = new TiXmlComment();
 
 	if ( !clone )
 		return nullptr;
@@ -1467,7 +1467,7 @@ void TiXmlDeclaration::CopyTo( TiXmlDeclaration* target ) const
 
 TiXmlNode* TiXmlDeclaration::Clone() const
 {	
-	TiXmlDeclaration* clone = new TiXmlDeclaration();
+	auto* clone = new TiXmlDeclaration();
 
 	if ( !clone )
 		return nullptr;
@@ -1499,7 +1499,7 @@ void TiXmlUnknown::CopyTo( TiXmlUnknown* target ) const
 
 TiXmlNode* TiXmlUnknown::Clone() const
 {
-	TiXmlUnknown* clone = new TiXmlUnknown();
+	auto* clone = new TiXmlUnknown();
 
 	if ( !clone )
 		return nullptr;

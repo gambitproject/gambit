@@ -124,15 +124,15 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
   : wxPanel(p_parent, wxID_ANY), 
   /* m_nfgPanel(p_nfgPanel),*/ m_doc(p_doc), m_player(p_player)
 {
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *labelSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
 
   wxStaticBitmap *playerIcon = new gbtTablePlayerIcon(this, m_player);
   labelSizer->Add(playerIcon, 0, wxALL | wxALIGN_CENTER, 0);
 
   if (!m_doc->IsTree()) {
-    wxBitmapButton *addStrategyIcon = 
+    auto *addStrategyIcon = 
       new wxBitmapButton(this, wxID_ANY, wxBitmap(newrow_xpm),
 			 wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
     addStrategyIcon->SetToolTip(_("Add a strategy for this player"));
@@ -142,7 +142,7 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
 	    wxCommandEventHandler(gbtTablePlayerPanel::OnNewStrategy));
   }
 
-  wxBitmapButton *setColorIcon =
+  auto *setColorIcon =
     new wxBitmapButton(this, wxID_ANY, wxBitmap(color_xpm),
 		       wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
   setColorIcon->SetToolTip(_("Change the color for this player"));
@@ -280,7 +280,7 @@ gbtTablePlayerToolbar::gbtTablePlayerToolbar(gbtNfgPanel *p_parent,
     gbtGameView(p_doc),
     m_nfgPanel(p_parent)
 { 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     m_playerPanels.Append(new gbtTablePlayerPanel(this, p_parent, m_doc, pl));
@@ -294,7 +294,7 @@ gbtTablePlayerToolbar::gbtTablePlayerToolbar(gbtNfgPanel *p_parent,
 void gbtTablePlayerToolbar::OnUpdate()
 {
   while (m_playerPanels.Length() < m_doc->NumPlayers()) {
-    gbtTablePlayerPanel *panel = 
+    auto *panel = 
       new gbtTablePlayerPanel(this, m_nfgPanel, m_doc,
 			      m_playerPanels.Length()+1);
     m_playerPanels.Append(panel);
@@ -356,14 +356,14 @@ gbtStrategyDominanceToolbar::gbtStrategyDominanceToolbar(wxWindow *p_parent,
 							 gbtGameDocument *p_doc)
   : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc)
 {
-  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
   topSizer->Add(new wxStaticText(this, wxID_STATIC,
 				 wxT("Hide strategies which are ")),
 		0, wxALL | wxALIGN_CENTER, 5);
 
   wxString domChoices[] = { wxT("strictly"), wxT("strictly or weakly") };
-  wxChoice *choice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+  auto *choice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 				  2, domChoices);
   choice->SetSelection(0);
   Connect(choice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
@@ -466,11 +466,11 @@ gbtNfgPanel::gbtNfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   m_tableWidget = new gbtTableWidget(this, wxID_ANY, m_doc);
   m_playerToolbar = new gbtTablePlayerToolbar(this, m_doc);
 
-  wxBoxSizer *playerSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *playerSizer = new wxBoxSizer(wxHORIZONTAL);
   playerSizer->Add(m_playerToolbar, 0, wxEXPAND, 0);
   playerSizer->Add(m_tableWidget, 1, wxEXPAND, 0);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(m_dominanceToolbar, 0, wxEXPAND, 0);
   topSizer->Show(m_dominanceToolbar, false);
   topSizer->Add(playerSizer, 1, wxEXPAND, 0);

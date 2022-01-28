@@ -80,12 +80,12 @@ template <class T> void gTree<T>::InsertAt(const T& t, gTreeNode<T>* n)
   //  assert (n != NULL);
 
   if (n->eldest == nullptr) {
-    gTreeNode<T>* newn = new gTreeNode<T>(t,n,nullptr,nullptr,nullptr,nullptr);
+    auto* newn = new gTreeNode<T>(t,n,nullptr,nullptr,nullptr,nullptr);
     n->SetEldest(newn);
     n->SetYoungest(newn);
   }
   else {
-    gTreeNode<T>* newn = new gTreeNode<T>(t,n,n->youngest,nullptr,nullptr,nullptr);
+    auto* newn = new gTreeNode<T>(t,n,n->youngest,nullptr,nullptr,nullptr);
     n->youngest->SetNext(newn);
     n->SetYoungest(newn);
   }

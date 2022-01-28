@@ -824,7 +824,7 @@ void gbtTreeLayout::Layout(const Gambit::BehaviorSupportProfile &p_support)
 void gbtTreeLayout::BuildNodeList(Gambit::GameNode p_node, const Gambit::BehaviorSupportProfile &p_support,
 				  int p_level)
 {
-  gbtNodeEntry *entry = new gbtNodeEntry(p_node);
+  auto *entry = new gbtNodeEntry(p_node);
   entry->SetStyle(&m_doc->GetStyle());
   m_nodeList.Append(entry);
   entry->SetLevel(p_level);

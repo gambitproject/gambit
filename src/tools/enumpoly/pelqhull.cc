@@ -1405,7 +1405,7 @@ facetT *qh_findbest (pointT *point, facetT *facet, boolT bestoutside,
   facetT *neighbor, **neighborp, *bestfacet;
   setT *search= nullptr;
   int oldtrace= qh IStracing;
-  boolT checkmax= (boolT)(bestoutside && !firstid && qh_MAXoutside
+  auto checkmax= (boolT)(bestoutside && !firstid && qh_MAXoutside
     && (qh MERGING || qh APPROXhull));
 
   if (qh TRACEpoint >= 0 && qh TRACEpoint == qh_pointid (point)) {
@@ -2682,7 +2682,7 @@ notes:
 */
 pointT *qh_voronoi_center (int dim, setT *points) {
   pointT *point, **pointp, *point0;
-  pointT *center= (pointT *)qh_memalloc (qh center_size);
+  auto *center= (pointT *)qh_memalloc (qh center_size);
   setT *simplex = nullptr;
   int i, j, k, num, size= qh_setsize(points);
   coordT *gmcoord;
@@ -5528,8 +5528,8 @@ void qh_vertexneighbors ( /*qh facet_list*/) {
 an empty set is a subset of any other set
   */
 boolT qh_vertexsubset(setT *vertexsetA, setT *vertexsetB) {
-  vertexT **vertexA= (vertexT **) SETaddr_(vertexsetA, vertexT);
-  vertexT **vertexB= (vertexT **) SETaddr_(vertexsetB, vertexT);
+  auto **vertexA= (vertexT **) SETaddr_(vertexsetA, vertexT);
+  auto **vertexB= (vertexT **) SETaddr_(vertexsetB, vertexT);
   
   while (True) {
     if (!*vertexA)

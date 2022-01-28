@@ -49,7 +49,7 @@ int nfgame::findIndex(int player, std::vector<int> &s) {
 }
 
 double nfgame::getMixedPayoff(int player, cvector &s) {
-  double *m = new double[blockSize[numPlayers]];
+  auto *m = new double[blockSize[numPlayers]];
   try {
     memcpy(m, payoffs.values() + player * blockSize[numPlayers], blockSize[numPlayers]*sizeof(double));
     double p = localPayoff(s, m, numPlayers-1);
@@ -71,8 +71,8 @@ void nfgame::getPayoffVector(cvector &dest, int player, const cvector &s){
 void nfgame::payoffMatrix(cmatrix &dest, cvector &s, double fuzz) {
   int rown, coln, rowi, coli;
   double fuzzcount;
-  double *m = new double[blockSize[numPlayers]];
-  double *local = new double[maxActions*maxActions];
+  auto *m = new double[blockSize[numPlayers]];
+  auto *local = new double[maxActions*maxActions];
   try {
     for(rown = 0; rown < numPlayers; rown++) {
       for(coln = 0; coln < numPlayers; coln++) {

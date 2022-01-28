@@ -106,11 +106,11 @@ template<class T>  gIdeal<T> gIdeal<T>::operator+ (const gIdeal<T> & rhs) const
   Gambit::List<gPoly<T> *> combined;
 
   for (int i = 1; i <= basis.Length(); i++) {
-    gPoly<T>* temp = new gPoly<T>(basis[i]);
+    auto* temp = new gPoly<T>(basis[i]);
     combined.Append(temp);
   }
   for (int j = 1; j <= rhs.basis.Length(); j++) {
-    gPoly<T>* temp = new gPoly<T>(rhs.basis[j]);
+    auto* temp = new gPoly<T>(rhs.basis[j]);
     combined.Append(temp);
   }
 
@@ -123,7 +123,7 @@ template<class T>  gIdeal<T> gIdeal<T>::operator* (const gIdeal<T> & rhs) const
 
   for (int i = 1; i <= basis.Length(); i++) 
     for (int j = 1; j <= rhs.basis.Length(); j++) {
-      gPoly<T>* temp = new gPoly<T>(basis[i] * rhs.basis[j]);
+      auto* temp = new gPoly<T>(basis[i] * rhs.basis[j]);
       basis_products.Append(temp);
     }
 
