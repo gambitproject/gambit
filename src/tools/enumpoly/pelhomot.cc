@@ -34,10 +34,10 @@ double coord_r, coord_i;
 
 /* Table of constant values */
 
-static integer c__4 = 4;
-static integer c__1 = 1;
+static integer c_4 = 4;
+static integer c_1 = 1;
 
-/* Subroutine */ int fixpnf_0_(int     n__, 
+/* Subroutine */ int fixpnf_0_(int     n_, 
 			       int    *n, 
 			       double *y, 
 			       int    *iflag, 
@@ -67,8 +67,8 @@ static integer c__1 = 1;
 			       int    tweak) /* added to adjust step size */
 {
     /* System generated locals */
-    int qr_dim1, qr_offset, i__1, i__2;
-    double d__1 /* ,abx UNUSED */;
+    int qr_dim1, qr_offset, i_1, i_2;
+    double d_1 /* ,abx UNUSED */;
 
     /* Builtin functions */
     /*    double sqrt(double); CANT DECLARE BUILTINS UNDER C++ */
@@ -367,7 +367,7 @@ static integer c__1 = 1;
     --ipar;
 
     /* Function Body */
-    switch(n__) {
+    switch(n_) {
 	case 1: goto L_polynf;
 	}
 
@@ -417,8 +417,8 @@ L20:
     ypold[1] = (float)1.;
     yp[1] = (float)1.;
     y[1] = (float)0.;
-    i__1 = np1;
-    for (jw = 2; jw <= i__1; ++jw) {
+    i_1 = np1;
+    for (jw = 2; jw <= i_1; ++jw) {
 	ypold[jw] = (float)0.;
 	yp[jw] = (float)0.;
 /* L40: */
@@ -440,7 +440,7 @@ L20:
     }
 /* MINIMUM STEP SIZE  HMIN . */
     if (sspar[4] <= (float)0.) {
-	sspar[4] = (sqrt(*n + (float)1.) + (float)4.) * d1mach_(&c__4);
+	sspar[4] = (sqrt(*n + (float)1.) + (float)4.) * d1mach_(&c_4);
     }
 /* MAXIMUM STEP SIZE  HMAX . */
     if (sspar[5] <= (float)0.) {
@@ -470,8 +470,8 @@ L20:
 
 /* LOAD  A  FOR THE FIXED POINT AND ZERO FINDING PROBLEMS. */
     if (iflagc >= -1) {
-	i__1 = np1;
-	for (jw = 2; jw <= i__1; ++jw) {
+	i_1 = np1;
+	for (jw = 2; jw <= i_1; ++jw) {
 	    a[jw - 1] = y[jw];
 /* L60: */
 	}
@@ -493,8 +493,8 @@ L90:
 /* *****  MAIN LOOP.  ***** */
 
 L120:
-    i__1 = limit;
-    for (iter = 1; iter <= i__1; ++iter) {
+    i_1 = limit;
+    for (iter = 1; iter <= i_1; ++iter) {
 	if (y[1] < (float)0.) {
 	    *arclen = s;
 	    *iflag = 5;
@@ -508,9 +508,9 @@ L120:
 	curtol = hold * 10.;
 	relerr = *arcre;
 	abserr = *arcae;
-	i__2 = np1;
-	for (jw = 1; jw <= i__2; ++jw) {
-	    if ((d__1 = yp[jw] - ypold[jw], abs((int)d__1)) > curtol) {
+	i_2 = np1;
+	for (jw = 1; jw <= i_2; ++jw) {
+	    if ((d_1 = yp[jw] - ypold[jw], abs((int)d_1)) > curtol) {
 		relerr = *ansre;
 		abserr = *ansae;
 		goto L200;
@@ -583,8 +583,8 @@ L200:
 /* ANSWER AT LAMBDA = 1.0 . */
 
 /* SAVE  YOLD  FOR ARC LENGTH CALCULATION LATER. */
-	    i__2 = np1;
-	    for (jw = 1; jw <= i__2; ++jw) {
+	    i_2 = np1;
+	    for (jw = 1; jw <= i_2; ++jw) {
 		z0[jw] = yold[jw];
 /* L260: */
 	    }
@@ -601,12 +601,12 @@ L200:
 		*iflag = iflagc;
 	    }
 /* CALCULATE FINAL ARC LENGTH. */
-	    i__2 = np1;
-	    for (jw = 1; jw <= i__2; ++jw) {
+	    i_2 = np1;
+	    for (jw = 1; jw <= i_2; ++jw) {
 		w[jw] = y[jw] - z0[jw];
 /* L290: */
 	    }
-	    *arclen = s - hold + dnrm2_((integer *)&np1, &w[1], &c__1);
+	    *arclen = s - hold + dnrm2_((integer *)&np1, &w[1], &c_1);
 	    return 0;
 	}
 
@@ -618,8 +618,8 @@ L200:
 /*	if (polsys) {   */
 	    if (yp[1] < (float)0.) {
 /* REVERSE TANGENT DIRECTION SO D LAMBDA/DS = YP(1) > 0 . */
-		i__2 = np1;
-		for (jw = 1; jw <= i__2; ++jw) {
+		i_2 = np1;
+		for (jw = 1; jw <= i_2; ++jw) {
 		    yp[jw] = -yp[jw];
 		    ypold[jw] = yp[jw];
 /* L310: */
@@ -1134,7 +1134,7 @@ doublereal d1mach_(integer *i)
     return ret_val;
 L999:
 /*    s_wsfe(&io___8);
-    do_fio(&c__1, (char *)&(*i), (ftnlen)sizeof(integer));
+    do_fio(&c_1, (char *)&(*i), (ftnlen)sizeof(integer));
     e_wsfe();
     s_stop("", 0L); */
     return ret_val;
@@ -1161,7 +1161,7 @@ L999:
 			    integer    *incy)
 {
     /* System generated locals */
-    integer i__1;
+    integer i_1;
 
     /* Local variables */
     static integer i, m, ix, iy, mp1;
@@ -1198,8 +1198,8 @@ L999:
     if (*incy < 0) {
 	iy = (-(*n) + 1) * *incy + 1;
     }
-    i__1 = *n;
-    for (i = 1; i <= i__1; ++i) {
+    i_1 = *n;
+    for (i = 1; i <= i_1; ++i) {
 	dy[iy] += *da * dx[ix];
 	ix += *incx;
 	iy += *incy;
@@ -1217,8 +1217,8 @@ L20:
     if (m == 0) {
 	goto L40;
     }
-    i__1 = m;
-    for (i = 1; i <= i__1; ++i) {
+    i_1 = m;
+    for (i = 1; i <= i_1; ++i) {
 	dy[i] += *da * dx[i];
 /* L30: */
     }
@@ -1227,8 +1227,8 @@ L20:
     }
 L40:
     mp1 = m + 1;
-    i__1 = *n;
-    for (i = mp1; i <= i__1; i += 4) {
+    i_1 = *n;
+    for (i = mp1; i <= i_1; i += 4) {
 	dy[i] += *da * dx[i];
 	dy[i + 1] += *da * dx[i + 1];
 	dy[i + 2] += *da * dx[i + 2];
@@ -1251,7 +1251,7 @@ L40:
 			    integer    *incy)
 {
     /* System generated locals */
-    integer i__1;
+    integer i_1;
 
     /* Local variables */
     static integer i, m, ix, iy, mp1;
@@ -1285,8 +1285,8 @@ L40:
     if (*incy < 0) {
 	iy = (-(*n) + 1) * *incy + 1;
     }
-    i__1 = *n;
-    for (i = 1; i <= i__1; ++i) {
+    i_1 = *n;
+    for (i = 1; i <= i_1; ++i) {
 	dy[iy] = dx[ix];
 	ix += *incx;
 	iy += *incy;
@@ -1304,8 +1304,8 @@ L20:
     if (m == 0) {
 	goto L40;
     }
-    i__1 = m;
-    for (i = 1; i <= i__1; ++i) {
+    i_1 = m;
+    for (i = 1; i <= i_1; ++i) {
 	dy[i] = dx[i];
 /* L30: */
     }
@@ -1314,8 +1314,8 @@ L20:
     }
 L40:
     mp1 = m + 1;
-    i__1 = *n;
-    for (i = mp1; i <= i__1; i += 7) {
+    i_1 = *n;
+    for (i = mp1; i <= i_1; i += 7) {
 	dy[i] = dx[i];
 	dy[i + 1] = dx[i + 1];
 	dy[i + 2] = dx[i + 2];
@@ -1336,7 +1336,7 @@ L40:
 
 /* Table of constant values */
 
-/* static integer c__1 = 1; NOW REDUNDANT */
+/* static integer c_1 = 1; NOW REDUNDANT */
 
 /* Subroutine */ int dcpose_(integer    *ndim, 
 			     integer    *n, 
@@ -1348,8 +1348,8 @@ L40:
 			     doublereal *sum)
 {
     /* System generated locals */
-    integer qr_dim1, qr_offset, i__1, i__2, i__3;
-    doublereal d__1;
+    integer qr_dim1, qr_offset, i_1, i_2, i_3;
+    doublereal d_1;
 
     /* Builtin functions */
     /*     double sqrt(double);  CANT DECLARE BUILTINS UNDER C++ */
@@ -1385,20 +1385,20 @@ L40:
     /* Function Body */
     *ierr = 0;
     np1 = *n + 1;
-    i__1 = np1;
-    for (j = 1; j <= i__1; ++j) {
-	sum[j] = ddot_(n, &qr[j * qr_dim1 + 1], &c__1, &qr[j * qr_dim1 + 1], &
-		c__1);
+    i_1 = np1;
+    for (j = 1; j <= i_1; ++j) {
+	sum[j] = ddot_(n, &qr[j * qr_dim1 + 1], &c_1, &qr[j * qr_dim1 + 1], &
+		c_1);
 /* L20: */
 	pivot[j] = j;
     }
-    i__1 = *n;
-    for (k = 1; k <= i__1; ++k) {
+    i_1 = *n;
+    for (k = 1; k <= i_1; ++k) {
 	sigma = sum[k];
 	jbar = k;
 	kp1 = k + 1;
-	i__2 = np1;
-	for (j = kp1; j <= i__2; ++j) {
+	i_2 = np1;
+	for (j = kp1; j <= i_2; ++j) {
 	    if (sigma >= sum[j]) {
 		goto L40;
 	    }
@@ -1415,8 +1415,8 @@ L40:
 	pivot[jbar] = i;
 	sum[jbar] = sum[k];
 	sum[k] = sigma;
-	i__2 = *n;
-	for (i = 1; i <= i__2; ++i) {
+	i_2 = *n;
+	for (i = 1; i <= i_2; ++i) {
 	    sigma = qr[i + k * qr_dim1];
 	    qr[i + k * qr_dim1] = qr[i + jbar * qr_dim1];
 	    qr[i + jbar * qr_dim1] = sigma;
@@ -1424,9 +1424,9 @@ L40:
 	}
 /*   END OF COLUMN INTERCHANGE. */
 L70:
-	i__2 = *n - k + 1;
-	sigma = ddot_(&i__2, &qr[k + k * qr_dim1], &c__1, &qr[k + k * qr_dim1]
-		, &c__1);
+	i_2 = *n - k + 1;
+	sigma = ddot_(&i_2, &qr[k + k * qr_dim1], &c_1, &qr[k + k * qr_dim1]
+		, &c_1);
 	if (sigma != (float)0.) {
 	    goto L60;
 	}
@@ -1444,23 +1444,23 @@ L60:
 	alpha[k] = alphak;
 	beta = (float)1. / (sigma - qrkk * alphak);
 	qr[k + k * qr_dim1] = qrkk - alphak;
-	i__2 = np1;
-	for (j = kp1; j <= i__2; ++j) {
+	i_2 = np1;
+	for (j = kp1; j <= i_2; ++j) {
 /* L80: */
-	    i__3 = *n - k + 1;
-	    y[j] = beta * ddot_(&i__3, &qr[k + k * qr_dim1], &c__1, &qr[k + j 
-		    * qr_dim1], &c__1);
+	    i_3 = *n - k + 1;
+	    y[j] = beta * ddot_(&i_3, &qr[k + k * qr_dim1], &c_1, &qr[k + j 
+		    * qr_dim1], &c_1);
 	}
-	i__3 = np1;
-	for (j = kp1; j <= i__3; ++j) {
-	    i__2 = *n;
-	    for (i = k; i <= i__2; ++i) {
+	i_3 = np1;
+	for (j = kp1; j <= i_3; ++j) {
+	    i_2 = *n;
+	    for (i = k; i <= i_2; ++i) {
 		qr[i + j * qr_dim1] -= qr[i + k * qr_dim1] * y[j];
 /* L90: */
 	    }
 /* Computing 2nd power */
-	    d__1 = qr[k + j * qr_dim1];
-	    sum[j] -= d__1 * d__1;
+	    d_1 = qr[k + j * qr_dim1];
+	    sum[j] -= d_1 * d_1;
 /* L100: */
 	}
 L500:
@@ -1483,7 +1483,7 @@ doublereal ddot_(integer    *n,
 		 integer    *incy)
 {
     /* System generated locals */
-    integer i__1;
+    integer i_1;
     doublereal ret_val;
 
     /* Local variables */
@@ -1522,8 +1522,8 @@ doublereal ddot_(integer    *n,
     if (*incy < 0) {
 	iy = (-(*n) + 1) * *incy + 1;
     }
-    i__1 = *n;
-    for (i = 1; i <= i__1; ++i) {
+    i_1 = *n;
+    for (i = 1; i <= i_1; ++i) {
 	dtemp += dx[ix] * dy[iy];
 	ix += *incx;
 	iy += *incy;
@@ -1542,8 +1542,8 @@ L20:
     if (m == 0) {
 	goto L40;
     }
-    i__1 = m;
-    for (i = 1; i <= i__1; ++i) {
+    i_1 = m;
+    for (i = 1; i <= i_1; ++i) {
 	dtemp += dx[i] * dy[i];
 /* L30: */
     }
@@ -1552,8 +1552,8 @@ L20:
     }
 L40:
     mp1 = m + 1;
-    i__1 = *n;
-    for (i = mp1; i <= i__1; i += 5) {
+    i_1 = *n;
+    for (i = mp1; i <= i_1; i += 5) {
 	dtemp = dtemp + dx[i] * dy[i] + dx[i + 1] * dy[i + 1] + dx[i + 2] * 
 		dy[i + 2] + dx[i + 3] * dy[i + 3] + dx[i + 4] * dy[i + 4];
 /* L50: */
@@ -1571,7 +1571,7 @@ L60:
 
 /* Table of constant values */
 
-static integer c__2 = 2;
+static integer c_2 = 2;
 
 /* Subroutine */ int divp_(doublereal *xxxx, 
 			   doublereal *yyyy, 
@@ -1624,18 +1624,18 @@ static integer c__2 = 2;
     denom = yyyy[1] * yyyy[1] + yyyy[2] * yyyy[2];
     xnum = xxxx[1] * yyyy[1] + xxxx[2] * yyyy[2];
     if (dblabs(denom) >= (float)1. || (dblabs(denom) < (float)1. && dblabs(xnum) / 
-	    d1mach_(&c__2) < dblabs(denom)) ) {
+	    d1mach_(&c_2) < dblabs(denom)) ) {
 	zzzz[1] = xnum / denom;
     } else {
-	zzzz[1] = d1mach_(&c__2);
+	zzzz[1] = d1mach_(&c_2);
 	*ierr = 1;
     }
     xnum = xxxx[2] * yyyy[1] - xxxx[1] * yyyy[2];
     if (dblabs(denom) >= (float)1. || (dblabs(denom) < (float)1. && dblabs(xnum) / 
-	    d1mach_(&c__2) < dblabs(denom))) {
+	    d1mach_(&c_2) < dblabs(denom))) {
 	zzzz[2] = xnum / denom;
     } else {
-	zzzz[2] = d1mach_(&c__2);
+	zzzz[2] = d1mach_(&c_2);
 	*ierr = 1;
     }
     return 0;
@@ -1665,8 +1665,8 @@ doublereal dnrm2_(integer    *n,
     static char fmt_110[] = "";
 
     /* System generated locals */
-    integer i__1;
-    doublereal ret_val, d__1;
+    integer i_1;
+    doublereal ret_val, d_1;
 
     /* Builtin functions */
     /*    double sqrt(double); CANT DECLARE BUILTINS UNDER C++ */
@@ -1746,7 +1746,7 @@ L20:
 	case 3: goto L110;
     }
 L30:
-    if ((d__1 = dx[i], dblabs(d__1)) > cutlo) {
+    if ((d_1 = dx[i], dblabs(d_1)) > cutlo) {
 	goto L85;
     }
     next = 1;
@@ -1759,7 +1759,7 @@ L50:
     if (dx[i] == zero) {
 	goto L200;
     }
-    if ((d__1 = dx[i], dblabs(d__1)) > cutlo) {
+    if ((d_1 = dx[i], dblabs(d_1)) > cutlo) {
 	goto L85;
     }
 
@@ -1776,14 +1776,14 @@ L100:
     next_fmt = fmt_110;
     sum = sum / dx[i] / dx[i];
 L105:
-    xmax = (d__1 = dx[i], dblabs(d__1));
+    xmax = (d_1 = dx[i], dblabs(d_1));
     goto L115;
 
 /*                   phase 2.  sum is small. */
 /*                             scale to avoid destructive underflow. */
 
 L70:
-    if ((d__1 = dx[i], dblabs(d__1)) > cutlo) {
+    if ((d_1 = dx[i], dblabs(d_1)) > cutlo) {
 	goto L75;
     }
 
@@ -1792,19 +1792,19 @@ L70:
 */
 
 L110:
-    if ((d__1 = dx[i], dblabs(d__1)) <= xmax) {
+    if ((d_1 = dx[i], dblabs(d_1)) <= xmax) {
 	goto L115;
     }
 /* Computing 2nd power */
-    d__1 = xmax / dx[i];
-    sum = one + sum * (d__1 * d__1);
-    xmax = (d__1 = dx[i], dblabs(d__1));
+    d_1 = xmax / dx[i];
+    sum = one + sum * (d_1 * d_1);
+    xmax = (d_1 = dx[i], dblabs(d_1));
     goto L200;
 
 L115:
 /* Computing 2nd power */
-    d__1 = dx[i] / xmax;
-    sum += d__1 * d__1;
+    d_1 = dx[i] / xmax;
+    sum += d_1 * d_1;
     goto L200;
 
 
@@ -1822,14 +1822,14 @@ L85:
 
 /*                   phase 3.  sum is mid-range.  no scaling. */
 
-    i__1 = *n;
-    for (j = ix; j <= i__1; ++j) {
-	if ((d__1 = dx[i], dblabs(d__1)) >= hitest) {
+    i_1 = *n;
+    for (j = ix; j <= i_1; ++j) {
+	if ((d_1 = dx[i], dblabs(d_1)) >= hitest) {
 	    goto L100;
 	}
 /* Computing 2nd power */
-	d__1 = dx[i];
-	sum += d__1 * d__1;
+	d_1 = dx[i];
+	sum += d_1 * d_1;
 	i += *incx;
 /* L95: */
     }
@@ -1864,7 +1864,7 @@ L300:
 			    integer    *incx)
 {
     /* System generated locals */
-    integer i__1, i__2;
+    integer i_1, i_2;
 
     /* Local variables */
     static integer i, m, nincx, mp1;
@@ -1890,9 +1890,9 @@ L300:
 /*        code for increment not equal to 1 */
 
     nincx = *n * *incx;
-    i__1 = nincx;
-    i__2 = *incx;
-    for (i = 1; i__2 < 0 ? i >= i__1 : i <= i__1; i += i__2) {
+    i_1 = nincx;
+    i_2 = *incx;
+    for (i = 1; i_2 < 0 ? i >= i_1 : i <= i_1; i += i_2) {
 	dx[i] = *da * dx[i];
 /* L10: */
     }
@@ -1908,8 +1908,8 @@ L20:
     if (m == 0) {
 	goto L40;
     }
-    i__2 = m;
-    for (i = 1; i <= i__2; ++i) {
+    i_2 = m;
+    for (i = 1; i <= i_2; ++i) {
 	dx[i] = *da * dx[i];
 /* L30: */
     }
@@ -1918,8 +1918,8 @@ L20:
     }
 L40:
     mp1 = m + 1;
-    i__2 = *n;
-    for (i = mp1; i <= i__2; i += 5) {
+    i_2 = *n;
+    for (i = mp1; i <= i_2; i += 5) {
 	dx[i] = *da * dx[i];
 	dx[i + 1] = *da * dx[i + 1];
 	dx[i + 2] = *da * dx[i + 2];
@@ -1983,8 +1983,8 @@ integer idamax_(integer    *n,
 		integer    *incx)
 {
     /* System generated locals */
-    integer ret_val, i__1;
-    doublereal d__1;
+    integer ret_val, i_1;
+    doublereal d_1;
 
     /* Local variables */
     static doublereal dmax_;
@@ -2017,13 +2017,13 @@ integer idamax_(integer    *n,
     ix = 1;
     dmax_ = dblabs(dx[1]);
     ix += *incx;
-    i__1 = *n;
-    for (i = 2; i <= i__1; ++i) {
-	if ((d__1 = dx[ix], dblabs(d__1)) <= dmax_) {
+    i_1 = *n;
+    for (i = 2; i <= i_1; ++i) {
+	if ((d_1 = dx[ix], dblabs(d_1)) <= dmax_) {
 	    goto L5;
 	}
 	ret_val = i;
-	dmax_ = (d__1 = dx[ix], dblabs(d__1));
+	dmax_ = (d_1 = dx[ix], dblabs(d_1));
 L5:
 	ix += *incx;
 /* L10: */
@@ -2034,13 +2034,13 @@ L5:
 
 L20:
     dmax_ = dblabs(dx[1]);
-    i__1 = *n;
-    for (i = 2; i <= i__1; ++i) {
-	if ((d__1 = dx[i], dblabs(d__1)) <= dmax_) {
+    i_1 = *n;
+    for (i = 2; i <= i_1; ++i) {
+	if ((d_1 = dx[i], dblabs(d_1)) <= dmax_) {
 	    goto L30;
 	}
 	ret_val = i;
-	dmax_ = (d__1 = dx[i], dblabs(d__1));
+	dmax_ = (d_1 = dx[i], dblabs(d_1));
 L30:
 	;
     }
@@ -2060,7 +2060,7 @@ double d_sign(double *arg1, double *arg2){
 
 /* Table of constant values */
 
-/* static integer c__4 = 4; NOW REDUNDANT */
+/* static integer c_4 = 4; NOW REDUNDANT */
 static doublereal c_b17 = 1.;
 
 /* Subroutine */ int root_(doublereal *t, 
@@ -2072,7 +2072,7 @@ static doublereal c_b17 = 1.;
 			   integer    *iflag)
 {
     /* System generated locals */
-    doublereal d__1, d__2;
+    doublereal d_1, d_2;
 
     /* Builtin functions */
     double d_sign(double *arg1, double *arg2);
@@ -2149,11 +2149,11 @@ static doublereal c_b17 = 1.;
 	case 3:  goto L400;
     }
 L100:
-    u = d1mach_(&c__4);
+    u = d1mach_(&c_4);
     re = max(*relerr,u);
     ae = max(*abserr,0.);
     ic = 0;
-    acbs = (d__1 = *b - *c, dblabs(d__1));
+    acbs = (d_1 = *b - *c, dblabs(d_1));
     a = *c;
     *t = a;
     *iflag = -1;
@@ -2168,8 +2168,8 @@ L300:
     fc = fa;
     kount = 2;
 /* Computing MAX */
-    d__1 = dblabs(fb), d__2 = dblabs(fc);
-    fx = max(d__1,d__2);
+    d_1 = dblabs(fb), d_2 = dblabs(fc);
+    fx = max(d_1,d_2);
 L1:
     if (dblabs(fc) >= dblabs(fb)) {
 	goto L2;
@@ -2308,8 +2308,8 @@ L12:
 /* Table of constant values */
 
 /*
-static int c__4 = 4;
-static int c__1 = 1;
+static int c_4 = 4;
+static int c_1 = 1;
 */
 
 /* Subroutine */ int rootnf_(int    *n, 
@@ -2332,8 +2332,8 @@ static int c__1 = 1;
 			     int    *ipar)
 {
     /* System generated locals */
-    int qr_dim1, qr_offset, i__1;
-    double d__1;
+    int qr_dim1, qr_offset, i_1;
+    double d_1;
 
     /* Local variables */
     static double dels, aerr, rerr;
@@ -2456,7 +2456,7 @@ static int c__1 = 1;
     --ipar;
 
     /* Function Body */
-    u = d1mach_(&c__4);
+    u = d1mach_(&c_4);
     rerr = max(*relerr,u);
     aerr = max(*abserr,0.);
     np1 = *n + 1;
@@ -2465,12 +2465,12 @@ static int c__1 = 1;
 
 /* L100: */
     for (judy = 1; judy <= 20; ++judy) {
-	i__1 = np1;
-	for (jw = 1; jw <= i__1; ++jw) {
+	i_1 = np1;
+	for (jw = 1; jw <= i_1; ++jw) {
 	    tz[jw] = y[jw] - yold[jw];
 /* L110: */
 	}
-	dels = dnrm2_((integer *)&np1, &tz[1], &c__1);
+	dels = dnrm2_((integer *)&np1, &tz[1], &c_1);
 
 /* USING TWO POINTS AND TANGENTS ON THE HOMOTOPY ZERO CURVE, CONSTRUCT
  */
@@ -2502,8 +2502,8 @@ L140:
 	}
 
 /* CALCULATE Q(SA) AS THE INITIAL POINT FOR A NEWTON ITERATION. */
-	i__1 = np1;
-	for (jw = 1; jw <= i__1; ++jw) {
+	i_1 = np1;
+	for (jw = 1; jw <= i_1; ++jw) {
 	    w[jw] = ((((yp[jw] - (y[jw] - yold[jw]) / dels) / dels - ((y[jw] 
 		    - yold[jw]) / dels - ypold[jw]) / dels) / dels * (sa - 
 		    dels) + ((y[jw] - yold[jw]) / dels - ypold[jw]) / dels) * 
@@ -2517,8 +2517,8 @@ L140:
 	    return 0;
 	}
 /* NEXT POINT = CURRENT POINT + NEWTON STEP. */
-	i__1 = np1;
-	for (jw = 1; jw <= i__1; ++jw) {
+	i_1 = np1;
+	for (jw = 1; jw <= i_1; ++jw) {
 	    w[jw] += tz[jw];
 /* L160: */
 	}
@@ -2529,15 +2529,15 @@ L140:
 	    return 0;
 	}
 /* TAKE NEWTON STEP AND CHECK CONVERGENCE. */
-	i__1 = np1;
-	for (jw = 1; jw <= i__1; ++jw) {
+	i_1 = np1;
+	for (jw = 1; jw <= i_1; ++jw) {
 	    w[jw] += tz[jw];
 /* L170: */
 	}
-	if ((d__1 = w[1] - (float)1., dblabs(d__1)) <= rerr + aerr && dnrm2_((integer *)n, &
-		tz[2], &c__1) <= rerr * dnrm2_((integer*)n, &w[2], &c__1) + aerr) {
-	    i__1 = np1;
-	    for (jw = 1; jw <= i__1; ++jw) {
+	if ((d_1 = w[1] - (float)1., dblabs(d_1)) <= rerr + aerr && dnrm2_((integer *)n, &
+		tz[2], &c_1) <= rerr * dnrm2_((integer*)n, &w[2], &c_1) + aerr) {
+	    i_1 = np1;
+	    for (jw = 1; jw <= i_1; ++jw) {
 		y[jw] = w[jw];
 /* L180: */
 	    }
@@ -2547,15 +2547,15 @@ L140:
 */
 /* SUCH THAT  LAMBDA = 1  IS STILL BRACKETED. */
 	if ((yold[1] - (float)1.) * (w[1] - (float)1.) > (float)0.) {
-	    i__1 = np1;
-	    for (jw = 1; jw <= i__1; ++jw) {
+	    i_1 = np1;
+	    for (jw = 1; jw <= i_1; ++jw) {
 		yold[jw] = w[jw];
 		ypold[jw] = wp[jw];
 /* L200: */
 	    }
 	} else {
-	    i__1 = np1;
-	    for (jw = 1; jw <= i__1; ++jw) {
+	    i_1 = np1;
+	    for (jw = 1; jw <= i_1; ++jw) {
 		y[jw] = w[jw];
 		yp[jw] = wp[jw];
 /* L210: */
@@ -2581,8 +2581,8 @@ L140:
 /* Table of constant values */
 
 /*
-static integer c__4 = 4;
-static integer c__1 = 1;
+static integer c_4 = 4;
+static integer c_1 = 1;
 */
 
 /* Subroutine */ int stepnf_(integer    *n, 
@@ -2613,8 +2613,8 @@ static integer c__1 = 1;
 			     integer    *ipar)
 {
     /* System generated locals */
-    integer qr_dim1, qr_offset, i__1;
-    doublereal d__1, d__2, d__3, d__4;
+    integer qr_dim1, qr_offset, i_1;
+    doublereal d_1, d_2, d_3, d_4;
 
     /* Builtin functions */
     /*    double sqrt(double), pow(double,double); CANT DECLARE BUILTINS UNDER C++ */
@@ -2788,7 +2788,7 @@ static integer c__1 = 1;
     --ipar;
 
     /* Function Body */
-    twou = d1mach_(&c__4) * (float)2.;
+    twou = d1mach_(&c_4) * (float)2.;
     fouru = twou + twou;
     np1 = *n + 1;
     *crash = TRUE_;
@@ -2803,7 +2803,7 @@ static integer c__1 = 1;
     }
 /* IF ERROR TOLERANCES ARE TOO SMALL, INCREASE THEM TO ACCEPTABLE VALUES. 
 */
-    temp = dnrm2_(&np1, &y[1], &c__1);
+    temp = dnrm2_(&np1, &y[1], &c_1);
     if ((*relerr * temp + *abserr) * (float).5 >= twou * temp) {
 	goto L40;
     }
@@ -2826,13 +2826,13 @@ L40:
     *start = FALSE_;
 /* DETERMINE SUITABLE INITIAL STEP SIZE. */
 /* Computing MIN */
-    d__1 = min(*h,.1), d__2 = sqrt(sqrt(*relerr * temp + *abserr));
-    *h = min(d__1,d__2);
+    d_1 = min(*h,.1), d_2 = sqrt(sqrt(*relerr * temp + *abserr));
+    *h = min(d_1,d_2);
 /* USE LINEAR PREDICTOR ALONG TANGENT DIRECTION TO START NEWTON ITERATION.
  */
     ypold[1] = (float)1.;
-    i__1 = np1;
-    for (j = 2; j <= i__1; ++j) {
+    i_1 = np1;
+    for (j = 2; j <= i_1; ++j) {
 	ypold[j] = (float)0.;
 /* L50: */
     }
@@ -2843,8 +2843,8 @@ L40:
 	return 0;
     }
 L70:
-    i__1 = np1;
-    for (j = 1; j <= i__1; ++j) {
+    i_1 = np1;
+    for (j = 1; j <= i_1; ++j) {
 	temp = y[j] + *h * yp[j];
 	w[j] = temp;
 	z0[j] = temp;
@@ -2862,28 +2862,28 @@ L70:
 	}
 
 /* TAKE NEWTON STEP AND CHECK CONVERGENCE. */
-	i__1 = np1;
-	for (j = 1; j <= i__1; ++j) {
+	i_1 = np1;
+	for (j = 1; j <= i_1; ++j) {
 	    w[j] += tz[j];
 /* L90: */
 	}
 	itnum = judy;
 /* COMPUTE QUANTITIES USED FOR OPTIMAL STEP SIZE ESTIMATION. */
 	if (judy == 1) {
-	    lcalc = dnrm2_(&np1, &tz[1], &c__1);
+	    lcalc = dnrm2_(&np1, &tz[1], &c_1);
 	    rcalc = rholen;
-	    i__1 = np1;
-	    for (j = 1; j <= i__1; ++j) {
+	    i_1 = np1;
+	    for (j = 1; j <= i_1; ++j) {
 		z1[j] = w[j];
 /* L110: */
 	    }
 	} else if (judy == 2) {
-	    lcalc = dnrm2_(&np1, &tz[1], &c__1) / lcalc;
+	    lcalc = dnrm2_(&np1, &tz[1], &c_1) / lcalc;
 	    rcalc = rholen / rcalc;
 	}
 /* GO TO MOP-UP SECTION AFTER CONVERGENCE. */
-	if (dnrm2_(&np1, &tz[1], &c__1) <= *relerr * dnrm2_(&np1, &w[1], &
-		c__1) + *abserr) {
+	if (dnrm2_(&np1, &tz[1], &c_1) <= *relerr * dnrm2_(&np1, &w[1], &
+		c_1) + *abserr) {
 	    goto L600;
 	}
 
@@ -2907,13 +2907,13 @@ L300:
 /* COMPUTE POINT PREDICTED BY HERMITE INTERPOLANT.  USE STEP SIZE  H */
 /* COMPUTED ON LAST CALL TO  STEPNF . */
 L320:
-    i__1 = np1;
-    for (j = 1; j <= i__1; ++j) {
-	d__1 = *hold + *h;
+    i_1 = np1;
+    for (j = 1; j <= i_1; ++j) {
+	d_1 = *hold + *h;
 	temp = ((((yp[j] - (y[j] - yold[j]) / *hold) / *hold - ((y[j] - yold[
-		j]) / *hold - ypold[j]) / *hold) / *hold * (d__1 - *hold) + ((
-		y[j] - yold[j]) / *hold - ypold[j]) / *hold) * d__1 + ypold[j]
-		) * d__1 + yold[j];
+		j]) / *hold - ypold[j]) / *hold) / *hold * (d_1 - *hold) + ((
+		y[j] - yold[j]) / *hold - ypold[j]) / *hold) * d_1 + ypold[j]
+		) * d_1 + yold[j];
 	w[j] = temp;
 	z0[j] = temp;
 /* L330: */
@@ -2934,28 +2934,28 @@ L320:
 	}
 
 /* TAKE NEWTON STEP AND CHECK CONVERGENCE. */
-	i__1 = np1;
-	for (j = 1; j <= i__1; ++j) {
+	i_1 = np1;
+	for (j = 1; j <= i_1; ++j) {
 	    w[j] += tz[j];
 /* L420: */
 	}
 	itnum = judy;
 /* COMPUTE QUANTITIES USED FOR OPTIMAL STEP SIZE ESTIMATION. */
 	if (judy == 1) {
-	    lcalc = dnrm2_(&np1, &tz[1], &c__1);
+	    lcalc = dnrm2_(&np1, &tz[1], &c_1);
 	    rcalc = rholen;
-	    i__1 = np1;
-	    for (j = 1; j <= i__1; ++j) {
+	    i_1 = np1;
+	    for (j = 1; j <= i_1; ++j) {
 		z1[j] = w[j];
 /* L440: */
 	    }
 	} else if (judy == 2) {
-	    lcalc = dnrm2_(&np1, &tz[1], &c__1) / lcalc;
+	    lcalc = dnrm2_(&np1, &tz[1], &c_1) / lcalc;
 	    rcalc = rholen / rcalc;
 	}
 /* GO TO MOP-UP SECTION AFTER CONVERGENCE. */
-	if (dnrm2_(&np1, &tz[1], &c__1) <= *relerr * dnrm2_(&np1, &w[1], &
-		c__1) + *abserr) {
+	if (dnrm2_(&np1, &tz[1], &c_1) <= *relerr * dnrm2_(&np1, &w[1], &
+		c_1) + *abserr) {
 	    goto L600;
 	}
 
@@ -2983,8 +2983,8 @@ L320:
 /* VECTORS TO THE ZERO CURVE AT  YOLD  AND  Y , RESPECTIVELY. */
 
 L600:
-    i__1 = np1;
-    for (j = 1; j <= i__1; ++j) {
+    i_1 = np1;
+    for (j = 1; j <= i_1; ++j) {
 	yold[j] = y[j];
 	ypold[j] = yp[j];
 	y[j] = w[j];
@@ -2993,7 +2993,7 @@ L600:
 /* L620: */
     }
 /* UPDATE ARC LENGTH. */
-    *hold = dnrm2_(&np1, &w[1], &c__1);
+    *hold = dnrm2_(&np1, &w[1], &c_1);
     *s += *hold;
 
 /* ***** END OF MOP-UP SECTION. ***** */
@@ -3002,15 +3002,15 @@ L600:
 
 /* CALCULATE THE DISTANCE FACTOR  DCALC . */
 /* L700: */
-    i__1 = np1;
-    for (j = 1; j <= i__1; ++j) {
+    i_1 = np1;
+    for (j = 1; j <= i_1; ++j) {
 	tz[j] = z0[j] - y[j];
 	w[j] = z1[j] - y[j];
 /* L710: */
     }
-    dcalc = dnrm2_(&np1, &tz[1], &c__1);
+    dcalc = dnrm2_(&np1, &tz[1], &c_1);
     if (dcalc != (float)0.) {
-	dcalc = dnrm2_(&np1, &w[1], &c__1) / dcalc;
+	dcalc = dnrm2_(&np1, &w[1], &c_1) / dcalc;
     }
 
 /* THE OPTIMAL STEP SIZE HBAR IS DEFINED BY */
@@ -3029,19 +3029,19 @@ L600:
 	ht = sspar[7] * *hold;
     } else {
 /* Computing MAX */
-	d__2 = lcalc / sspar[1], d__3 = rcalc / sspar[2], d__2 = max(d__2,
-		d__3), d__3 = dcalc / sspar[3];
-	d__1 = (float)1. / max(d__2,d__3);
-	d__4 = (float)1. / sspar[8];
- /*	ht = pow_dd(&d__1, &d__4) * *hold; */ ht=pow(d__1,d__4) * *hold; 
+	d_2 = lcalc / sspar[1], d_3 = rcalc / sspar[2], d_2 = max(d_2,
+		d_3), d_3 = dcalc / sspar[3];
+	d_1 = (float)1. / max(d_2,d_3);
+	d_4 = (float)1. / sspar[8];
+ /*	ht = pow_dd(&d_1, &d_4) * *hold; */ ht=pow(d_1,d_4) * *hold; 
     }
 /*  HT  CONTAINS THE ESTIMATED OPTIMAL STEP SIZE.  NOW PUT IT WITHIN */
 /* REASONABLE BOUNDS. */
 /* Computing MIN */
 /* Computing MAX */
-    d__3 = ht, d__4 = sspar[6] * *hold, d__3 = max(d__3,d__4);
-    d__1 = max(d__3,sspar[4]), d__2 = sspar[7] * *hold, d__1 = min(d__1,d__2);
-    *h = min(d__1,sspar[5]);
+    d_3 = ht, d_4 = sspar[6] * *hold, d_3 = max(d_3,d_4);
+    d_1 = max(d_3,sspar[4]), d_2 = sspar[7] * *hold, d_1 = min(d_1,d_2);
+    *h = min(d_1,sspar[5]);
     if (itnum == 1) {
 /* IF CONVERGENCE HAD OCCURRED AFTER 1 ITERATION, DON'T DECREASE  H . 
 */
@@ -3683,8 +3683,8 @@ return 0;
 			     int    *ipar)
 {
     /* System generated locals */
-    int qr_dim1, qr_offset, i__1, i__2, i__3;
-    double d__1;
+    int qr_dim1, qr_offset, i_1, i_2, i_3;
+    double d_1;
 
     /* Builtin functions */
     /*    double sqrt(); CANT DECLARE BUILTINS UNDER C++ */
@@ -3801,8 +3801,8 @@ return 0;
 /*                                              RHO(A,LAMBDA,X) )  . 
 */
 
-	i__1 = np1;
-	for (k = 1; k <= i__1; ++k) {
+	i_1 = np1;
+	for (k = 1; k <= i_1; ++k) {
 	    rhojac_(&a[1], &lambda, &y[2], &qr[k * qr_dim1 + 1], &k, &par[1], 
 		    &ipar[1]);
 /* L30: */
@@ -3817,20 +3817,20 @@ return 0;
 /*                                 X - A + LAMBDA*(A - F(X)) )  . 
 */
 
-	    i__1 = *n;
-	    for (j = 1; j <= i__1; ++j) {
+	    i_1 = *n;
+	    for (j = 1; j <= i_1; ++j) {
 		sigma = a[j];
 		beta = sigma - tz[j];
 		qr[j + qr_dim1] = beta;
 /* L100: */
 		qr[j + np2 * qr_dim1] = y[j + 1] - sigma + lambda * beta;
 	    }
-	    i__1 = *n;
-	    for (k = 1; k <= i__1; ++k) {
+	    i_1 = *n;
+	    for (k = 1; k <= i_1; ++k) {
 		fjac_(&y[2], &tz[1], (integer *)&k);
 		kp1 = k + 1;
-		i__2 = *n;
-		for (j = 1; j <= i__2; ++j) {
+		i_2 = *n;
+		for (j = 1; j <= i_2; ++j) {
 /* L110: */
 		    qr[j + kp1 * qr_dim1] = -lambda * tz[j];
 		}
@@ -3844,20 +3844,20 @@ return 0;
 )  . */
 
 /* L140: */
-	    i__1 = *n;
-	    for (j = 1; j <= i__1; ++j) {
+	    i_1 = *n;
+	    for (j = 1; j <= i_1; ++j) {
 		sigma = y[j + 1] - a[j];
 		beta = tz[j] - sigma;
 		qr[j + qr_dim1] = beta;
 /* L150: */
 		qr[j + np2 * qr_dim1] = sigma + lambda * beta;
 	    }
-	    i__1 = *n;
-	    for (k = 1; k <= i__1; ++k) {
+	    i_1 = *n;
+	    for (k = 1; k <= i_1; ++k) {
 		fjac_(&y[2], &tz[1], (integer *)&k);
 		kp1 = k + 1;
-		i__2 = *n;
-		for (j = 1; j <= i__2; ++j) {
+		i_2 = *n;
+		for (j = 1; j <= i_2; ++j) {
 /* L160: */
 		    qr[j + kp1 * qr_dim1] = lambda * tz[j];
 		}
@@ -3871,7 +3871,7 @@ return 0;
 /*   *   *   *   *   *   *   *   *   *   *   *   *   *   *   *   *   * */
 /* COMPUTE THE NORM OF THE HOMOTOPY MAP IF IT WAS REQUESTED. */
     if (*rholen < (float)0.) {
-	*rholen = dnrm2_((integer *)n, &qr[np2 * qr_dim1 + 1], &c__1);
+	*rholen = dnrm2_((integer *)n, &qr[np2 * qr_dim1 + 1], &c_1);
     }
 
 /* REDUCE THE JACOBIAN MATRIX TO UPPER TRIANGULAR FORM. */
@@ -3881,20 +3881,20 @@ return 0;
 /* SQUARES SOLUTIONS BY HOUSEHOLDER TRANSFORMATIONS, */
 /* NUMER. MATH. 7 (1965) 269-276. */
 
-    i__1 = np1;
-    for (j = 1; j <= i__1; ++j) {
+    i_1 = np1;
+    for (j = 1; j <= i_1; ++j) {
 	yp[j] = ddot_((integer *)n, &qr[j * qr_dim1 + 1], 
-		      &c__1, &qr[j * qr_dim1 + 1], &c__1);
+		      &c_1, &qr[j * qr_dim1 + 1], &c_1);
 /* L220: */
 	pivot[j] = j;
     }
-    i__1 = *n;
-    for (k = 1; k <= i__1; ++k) {
+    i_1 = *n;
+    for (k = 1; k <= i_1; ++k) {
 	sigma = yp[k];
 	jbar = k;
 	kp1 = k + 1;
-	i__2 = np1;
-	for (j = kp1; j <= i__2; ++j) {
+	i_2 = np1;
+	for (j = kp1; j <= i_2; ++j) {
 	    if (sigma >= yp[j]) {
 		goto L240;
 	    }
@@ -3911,8 +3911,8 @@ L240:
 	pivot[jbar] = i;
 	yp[jbar] = yp[k];
 	yp[k] = sigma;
-	i__2 = *n;
-	for (i = 1; i <= i__2; ++i) {
+	i_2 = *n;
+	for (i = 1; i <= i_2; ++i) {
 	    sigma = qr[i + k * qr_dim1];
 	    qr[i + k * qr_dim1] = qr[i + jbar * qr_dim1];
 	    qr[i + jbar * qr_dim1] = sigma;
@@ -3920,9 +3920,9 @@ L240:
 	}
 /*   END OF COLUMN INTERCHANGE. */
 L260:
-	i__2 = *n - k + 1;
-	sigma = ddot_((integer *)&i__2, &qr[k + k * qr_dim1], 
-		      &c__1, &qr[k + k * qr_dim1], &c__1);
+	i_2 = *n - k + 1;
+	sigma = ddot_((integer *)&i_2, &qr[k + k * qr_dim1], 
+		      &c_1, &qr[k + k * qr_dim1], &c_1);
 	if (sigma == (float)0.) {
 	    *iflag = 4;
 	    return 0;
@@ -3939,20 +3939,20 @@ L260:
 	alpha[k] = alphak;
 	beta = (float)1. / (sigma - qrkk * alphak);
 	qr[k + k * qr_dim1] = qrkk - alphak;
-	i__2 = np2;
-	for (j = kp1; j <= i__2; ++j) {
-	    i__3 = *n - k + 1;
-	    sigma = beta * ddot_((integer *)&i__3, &qr[k + k * qr_dim1], 
-				 &c__1, &qr[k + j * qr_dim1], &c__1);
-	    i__3 = *n;
-	    for (i = k; i <= i__3; ++i) {
+	i_2 = np2;
+	for (j = kp1; j <= i_2; ++j) {
+	    i_3 = *n - k + 1;
+	    sigma = beta * ddot_((integer *)&i_3, &qr[k + k * qr_dim1], 
+				 &c_1, &qr[k + j * qr_dim1], &c_1);
+	    i_3 = *n;
+	    for (i = k; i <= i_3; ++i) {
 		qr[i + j * qr_dim1] -= qr[i + k * qr_dim1] * sigma;
 /* L280: */
 	    }
 	    if (j < np2) {
 /* Computing 2nd power */
-		d__1 = qr[k + j * qr_dim1];
-		yp[j] -= d__1 * d__1;
+		d_1 = qr[k + j * qr_dim1];
+		yp[j] -= d_1 * d_1;
 	    }
 /* L290: */
 	}
@@ -3966,25 +3966,25 @@ L300:
     tz[np1] = (float)1.;
     for (i = *n; i >= 1; --i) {
 	sum = (float)0.;
-	i__1 = np1;
-	for (j = i + 1; j <= i__1; ++j) {
+	i_1 = np1;
+	for (j = i + 1; j <= i_1; ++j) {
 /* L330: */
 	    sum += qr[i + j * qr_dim1] * tz[j];
 	}
 /* L340: */
 	tz[i] = -sum / alpha[i];
     }
-    ypnorm = dnrm2_((integer *)&np1, &tz[1], &c__1);
-    i__1 = np1;
-    for (k = 1; k <= i__1; ++k) {
+    ypnorm = dnrm2_((integer *)&np1, &tz[1], &c_1);
+    i_1 = np1;
+    for (k = 1; k <= i_1; ++k) {
 /* L360: */
 	yp[pivot[k]] = tz[k] / ypnorm;
     }
-    if (ddot_((integer *)&np1, &yp[1], &c__1, &ypold[1], &c__1) >= (float)0.) {
+    if (ddot_((integer *)&np1, &yp[1], &c_1, &ypold[1], &c_1) >= (float)0.) {
 	goto L380;
     }
-    i__1 = np1;
-    for (i = 1; i <= i__1; ++i) {
+    i_1 = np1;
+    for (i = 1; i <= i_1; ++i) {
 /* L370: */
 	yp[i] = -yp[i];
     }
@@ -3997,25 +3997,25 @@ L300:
 L380:
     for (i = *n; i >= 1; --i) {
 	sum = qr[i + np1 * qr_dim1] + qr[i + np2 * qr_dim1];
-	i__1 = *n;
-	for (j = i + 1; j <= i__1; ++j) {
+	i_1 = *n;
+	for (j = i + 1; j <= i_1; ++j) {
 /* L430: */
 	    sum += qr[i + j * qr_dim1] * alpha[j];
 	}
 /* L440: */
 	alpha[i] = -sum / alpha[i];
     }
-    i__1 = *n;
-    for (k = 1; k <= i__1; ++k) {
+    i_1 = *n;
+    for (k = 1; k <= i_1; ++k) {
 /* L450: */
 	tz[pivot[k]] = alpha[k];
     }
     tz[pivot[np1]] = (float)1.;
 /* TZ NOW CONTAINS A PARTICULAR SOLUTION P, AND YP CONTAINS A VECTOR Q */
 /* IN THE KERNEL(THE TANGENT). */
-    sigma = ddot_((integer *)&np1, &tz[1], &c__1, &yp[1], &c__1);
-    i__1 = np1;
-    for (j = 1; j <= i__1; ++j) {
+    sigma = ddot_((integer *)&np1, &tz[1], &c_1, &yp[1], &c_1);
+    i_1 = np1;
+    for (j = 1; j <= i_1; ++j) {
 	tz[j] -= sigma * yp[j];
 /* L470: */
     }

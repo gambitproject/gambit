@@ -94,9 +94,9 @@ long lg(unsigned long x)
 #define MALLOC_MIN_OVERHEAD 4
 #endif
 
-static IntegerRep _ZeroRep = {1, 0, 1, {0}};
-static IntegerRep _OneRep = {1, 0, 1, {1}};
-static IntegerRep _MinusOneRep = {1, 0, 0, {1}};
+static IntegerRep ZeroRep = {1, 0, 1, {0}};
+static IntegerRep OneRep = {1, 0, 1, {1}};
+static IntegerRep MinusOneRep = {1, 0, 0, {1}};
 
 
 // utilities to extract and transfer bits
@@ -347,7 +347,7 @@ IntegerRep* Icopy_ulong(IntegerRep* old, unsigned long x)
 IntegerRep* Icopy_zero(IntegerRep* old)
 {
   if (old == nullptr || STATIC_IntegerRep(old))
-    return &_ZeroRep;
+    return &ZeroRep;
 
   old->len = 0;
   old->sgn = I_POSITIVE;
@@ -362,7 +362,7 @@ IntegerRep* Icopy_one(IntegerRep* old, int newsgn)
   if (old == nullptr || 1 > old->sz)
   {
     if (old != nullptr && !STATIC_IntegerRep(old)) delete old;
-    return newsgn==I_NEGATIVE ? &_MinusOneRep : &_OneRep;
+    return newsgn==I_NEGATIVE ? &MinusOneRep : &OneRep;
   }
 
   old->sgn = newsgn;
@@ -1869,7 +1869,7 @@ void clearbit(Integer& x, long b)
   if (b >= 0)
     {
       if (x.rep == nullptr)
-	x.rep = &_ZeroRep;
+	x.rep = &ZeroRep;
       else
 	{
 	  int bw = (int) ((unsigned long)b / I_SHIFT);
@@ -2361,7 +2361,7 @@ void Integer::error(const char* msg) const
 // The following were moved from the header file to stop BC from squealing
 // endless quantities of warnings
 
-Integer::Integer() :rep(&_ZeroRep) {}
+Integer::Integer() :rep(&ZeroRep) {}
 
 Integer::Integer(IntegerRep* r) :rep(r) {}
 

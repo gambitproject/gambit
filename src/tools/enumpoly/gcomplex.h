@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef _Complex_h
-#define _Complex_h 1
+#ifndef GCOMPLEX_H
+#define GCOMPLEX_H
 
 #include <cmath>
 
@@ -75,5 +75,5 @@ class gString;
 gString         ToString(gComplex);
 gComplex        TOgComplex(const gString &);
 
-#endif
+#endif  // GCOMPLEX_H
 

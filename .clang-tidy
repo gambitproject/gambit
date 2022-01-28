@@ -1,6 +1,7 @@
 ---
 Checks: |
   -*,
+  bugprone-reserved-identifier,
   modernize-deprecated-headers,
   modernize-redundant-void-arg,
   modernize-use-bool-literals,

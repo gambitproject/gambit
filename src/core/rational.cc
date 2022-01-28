@@ -1,6 +1,6 @@
 //
-// This file is part of Gambit
-// Copyright (c) 1994-2022, The Gambit Project (http://www.gambit-project.org)
+// This file is part of Gambit Copyright (c) 1994-2022, The Gambit
+// Project (http://www.gambit-project.org)
 //
 // FILE: src/libgambit/rational.cc
 // Implementation of a rational number class
@@ -36,7 +36,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 namespace Gambit {
 
-static const Integer _Int_One(1);
+static const Integer Int_One(1);
 
 void Rational::normalize()
 {
@@ -50,7 +50,7 @@ void Rational::normalize()
   }
 
   Integer g = gcd(num, den);
-  if (ucompare(g, _Int_One) != 0)  {
+  if (ucompare(g, Int_One) != 0)  {
     num /= g;
     den /= g;
   }
@@ -367,7 +367,7 @@ bool Rational::OK() const
   int v = num.OK() && den.OK(); // have valid num and denom
   if (v)   {
     v &= sign(den) > 0;           // denominator positive;
-    v &=  ucompare(gcd(num, den), _Int_One) == 0; // relatively prime
+    v &=  ucompare(gcd(num, den), Int_One) == 0; // relatively prime
   }
   // if (!v) error("invariant failure");
   return v;
@@ -390,15 +390,15 @@ Rational::fits_in_double() const
 // These were moved from the header file to eliminate warnings
 //
 
-static IntegerRep _ZeroRep = {1, 0, 1, {0}};
-static IntegerRep _OneRep = {1, 0, 1, {1}};
+static IntegerRep ZeroRep = {1, 0, 1, {0}};
+static IntegerRep OneRep = {1, 0, 1, {1}};
 
-Rational::Rational() : num(&_ZeroRep), den(&_OneRep) {}
+Rational::Rational() : num(&ZeroRep), den(&OneRep) {}
 Rational::~Rational() = default;
 
 Rational::Rational(const Rational& y)  = default;
 
-Rational::Rational(const Integer& n) :num(n), den(&_OneRep) {}
+Rational::Rational(const Integer& n) :num(n), den(&OneRep) {}
 
 Rational::Rational(const Integer& n, const Integer& d) 
  : num(n), den(d)
@@ -409,9 +409,9 @@ Rational::Rational(const Integer& n, const Integer& d)
   normalize();
 }
 
-Rational::Rational(long n) :num(n), den(&_OneRep) { }
+Rational::Rational(long n) :num(n), den(&OneRep) { }
 
-Rational::Rational(int n) :num(n), den(&_OneRep) { }
+Rational::Rational(int n) :num(n), den(&OneRep) { }
 
 Rational::Rational(long n, long d) 
  : num(n), den(d)
