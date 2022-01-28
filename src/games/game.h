@@ -77,7 +77,7 @@ public:
 class InvalidObjectException : public Exception {
 public:
   virtual ~InvalidObjectException() noexcept = default;
-  const char *what() const noexcept  { return "Dereferencing an invalidated object"; }
+  const char *what() const noexcept override  { return "Dereferencing an invalidated object"; }
 };
 
 
@@ -178,7 +178,7 @@ public:
 class MismatchException : public Exception {
 public:
   virtual ~MismatchException() noexcept = default;
-  const char *what() const noexcept  
+  const char *what() const noexcept override  
   { return "Operation between objects in different games"; }
 };
 

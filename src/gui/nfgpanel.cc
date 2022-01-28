@@ -268,8 +268,8 @@ public:
 
   /// @name Implementation of gbtGameView members
   //@{
-  void OnUpdate();
-  void PostPendingChanges();
+  void OnUpdate() override;
+  void PostPendingChanges() override;
   //@}
 };
 
@@ -332,7 +332,7 @@ private:
   wxStaticText *m_level;
 
   // Overriding gbtGameView members
-  void OnUpdate();
+  void OnUpdate() override;
 
   // Event handlers
   void OnStrength(wxCommandEvent &);

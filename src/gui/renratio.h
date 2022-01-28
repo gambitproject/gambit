@@ -26,6 +26,18 @@
 #include "wx/sheet/sheet.h"     // the wxSheet widget
 
 //
+// The below is taken from the implementation of
+// DECLARE_SHEETOBJREFDATA_COPY_CLASS in sheetdef.h.
+// We need to customise the Clone() declaration to have an 'override';
+// not every class which uses this DECLARE_ is overriding a Clone().
+// This inconsistency is a function of wxSheet being ~20 years old.
+#define DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(classname, basename)         \
+    DECLARE_DYNAMIC_CLASS(classname)                                    \
+    public:                                                             \
+    basename * Clone() const override { classname * aclass = new classname(); aclass->Copy( * ((classname * )this)); return (basename * )aclass; } 
+
+
+//
 // This class is based on the wxSheetCellStringRendererRefData implementation
 //
 class gbtRationalRendererRefData : public wxSheetCellRendererRefData {
@@ -33,13 +45,13 @@ public:
   gbtRationalRendererRefData() = default;
     
   // draw the string
-  virtual void Draw(wxSheet& grid, const wxSheetCellAttr& attr,
+  void Draw(wxSheet& grid, const wxSheetCellAttr& attr,
 		    wxDC& dc, const wxRect& rect, 
-		    const wxSheetCoords& coords, bool isSelected);
+		    const wxSheetCoords& coords, bool isSelected) override;
 
   // return the string extent
-  virtual wxSize GetBestSize(wxSheet& grid, const wxSheetCellAttr& attr,
-			     wxDC& dc, const wxSheetCoords& coords);
+  wxSize GetBestSize(wxSheet& grid, const wxSheetCellAttr& attr,
+			     wxDC& dc, const wxSheetCoords& coords) override;
 
   void DoDraw(wxSheet& grid, const wxSheetCellAttr& attr,
 	      wxDC& dc, const wxRect& rect, 
@@ -55,23 +67,26 @@ public:
 
   bool Copy(const gbtRationalRendererRefData& other) 
   { return wxSheetCellRendererRefData::Copy(other); }
-  DECLARE_SHEETOBJREFDATA_COPY_CLASS(gbtRationalRendererRefData, 
-				     wxSheetCellRendererRefData)
+
+  DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(gbtRationalRendererRefData, 
+					    wxSheetCellRendererRefData)    
+
+
 };
 
 class gbtRationalEditorRefData : public wxSheetCellTextEditorRefData {
 public:
   gbtRationalEditorRefData() = default;
 
-  void CreateEditor(wxWindow *, wxWindowID, wxEvtHandler *, wxSheet *);
+  void CreateEditor(wxWindow *, wxWindowID, wxEvtHandler *, wxSheet *) override;
 
   /// Override basic text editor behavior to restrict input
-  bool IsAcceptedKey(wxKeyEvent &);
-  void StartingKey(wxKeyEvent &);
+  bool IsAcceptedKey(wxKeyEvent &) override;
+  void StartingKey(wxKeyEvent &) override;
 
   bool Copy(const gbtRationalEditorRefData &other);
-  DECLARE_SHEETOBJREFDATA_COPY_CLASS(gbtRationalEditorRefData, 
-				     wxSheetCellTextEditorRefData)    
+  DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(gbtRationalEditorRefData, 
+					    wxSheetCellTextEditorRefData)    
 };
 
 #endif  // RENRATIO_H

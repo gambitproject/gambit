@@ -45,8 +45,8 @@ private:
   Game m_game;
   mutable MixedBehaviorProfile<double> m_profile;
 
-  double Value(const Vector<double> &x) const;
-  bool Gradient(const Vector<double> &, Vector<double> &) const;
+  double Value(const Vector<double> &x) const override;
+  bool Gradient(const Vector<double> &, Vector<double> &) const override;
 };
 
 

@@ -36,15 +36,15 @@ class AggPureStrategyProfileRep : public PureStrategyProfileRep {
 public:
   AggPureStrategyProfileRep(const Game &p_game)
     : PureStrategyProfileRep(p_game) { }
-  virtual PureStrategyProfileRep *Copy() const
+  PureStrategyProfileRep *Copy() const override
   { return new AggPureStrategyProfileRep(*this); }
 
-  virtual void SetStrategy(const GameStrategy &);
-  virtual GameOutcome GetOutcome() const { throw UndefinedException(); }
-  virtual void SetOutcome(GameOutcome p_outcome)
+  void SetStrategy(const GameStrategy &) override;
+  GameOutcome GetOutcome() const override { throw UndefinedException(); }
+  void SetOutcome(GameOutcome p_outcome) override
   { throw UndefinedException(); }
-  virtual Rational GetPayoff(int pl) const;
-  virtual Rational GetStrategyValue(const GameStrategy &) const;
+  Rational GetPayoff(int pl) const override;
+  Rational GetStrategyValue(const GameStrategy &) const override;
 };
 
 //------------------------------------------------------------------------

@@ -51,30 +51,30 @@ protected:
   //! @name Overriding wxSheet members to disable selection behavior
   //!
   //@{
-  bool SelectRow(int, bool = false, bool = false)
+  bool SelectRow(int, bool = false, bool = false) override
     { return false; }
-  bool SelectRows(int, int, bool = false, bool = false)
+  bool SelectRows(int, int, bool = false, bool = false) override
     { return false; }
-  bool SelectCol(int, bool = false, bool = false)
+  bool SelectCol(int, bool = false, bool = false) override
     { return false; }
-  bool SelectCols(int, int, bool = false, bool = false)
+  bool SelectCols(int, int, bool = false, bool = false) override
     { return false; }
-  bool SelectCell(const wxSheetCoords&, bool = false, bool = false)
+  bool SelectCell(const wxSheetCoords&, bool = false, bool = false) override
     { return false; }
-  bool SelectBlock(const wxSheetBlock&, bool = false, bool = false)
+  bool SelectBlock(const wxSheetBlock&, bool = false, bool = false) override
     { return false; }
-  bool SelectAll(bool = false) { return false; }
+  bool SelectAll(bool = false) override { return false; }
 
-  bool HasSelection(bool = true) const { return false; }
-  bool IsCellSelected(const wxSheetCoords &) const { return false; }
-  bool IsRowSelected(int) const { return false; }
-  bool IsColSelected(int) const { return false; }
-  bool DeselectBlock(const wxSheetBlock &, bool = false) { return false; }
-  bool ClearSelection(bool = false) { return false; }
+  bool HasSelection(bool = true) const override { return false; }
+  bool IsCellSelected(const wxSheetCoords &) const override { return false; }
+  bool IsRowSelected(int) const override { return false; }
+  bool IsColSelected(int) const override { return false; }
+  bool DeselectBlock(const wxSheetBlock &, bool = false) override { return false; }
+  bool ClearSelection(bool = false) override { return false; }
   //@}
 
   /// Overriding wxSheet member to suppress drawing of cursor
-  void DrawCursorCellHighlight(wxDC&, const wxSheetCellAttr &) { }
+  void DrawCursorCellHighlight(wxDC&, const wxSheetCellAttr &) override { }
 
   /// Overriding wxSheet member to show editor on one click
   void OnCellLeftClick(wxSheetEvent &);
@@ -135,7 +135,7 @@ private:
 public:
   gbtTableWidgetDropTarget(gbtTableWidgetBase *p_owner) : m_owner(p_owner) { }
 
-  bool OnDropText(wxCoord x, wxCoord y, const wxString &p_text)
+  bool OnDropText(wxCoord x, wxCoord y, const wxString &p_text) override
   { return m_owner->DropText(x, y, p_text); }
 };
 
@@ -152,18 +152,18 @@ private:
   /// @name Overriding wxSheet members for data access
   //@{
   /// Returns the value in the cell
-  wxString GetCellValue(const wxSheetCoords &);
+  wxString GetCellValue(const wxSheetCoords &) override;
   /// Sets the value in the cell, by relabeling the strategy
-  void SetCellValue(const wxSheetCoords &, const wxString &);
+  void SetCellValue(const wxSheetCoords &, const wxString &) override;
   /// Returns the attributes of the cell
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, 
-			  wxSheetAttr_Type) const;
+			  wxSheetAttr_Type) const override;
   //@}
 
   /// @name Overriding wxSheet members to customize drawing
   //@{
   /// Overrides to draw dominance indicators
-  void DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords);
+  void DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords) override;
   //@}  
 
   void OnCellRightClick(wxSheetEvent &);
@@ -183,7 +183,7 @@ public:
   /// @name Drop target interaction
   //@{
   /// Called when the drop target receives text. 
-  bool DropText(int p_x, int p_y, const wxString &p_text);
+  bool DropText(int p_x, int p_y, const wxString &p_text) override;
   //@}
 };
 
@@ -361,18 +361,18 @@ private:
   /// @name Overriding wxSheet members for data access
   //@{
   /// Returns the value in the cell
-  wxString GetCellValue(const wxSheetCoords &);
+  wxString GetCellValue(const wxSheetCoords &) override;
   /// Sets the value in the cell, by relabeling the strategy
-  void SetCellValue(const wxSheetCoords &, const wxString &);
+  void SetCellValue(const wxSheetCoords &, const wxString &) override;
   /// Returns the attributes of the cell
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, 
-			  wxSheetAttr_Type) const;
+			  wxSheetAttr_Type) const override;
   //@}
 
   /// @name Overriding wxSheet members to customize drawing
   //@{
   /// Overrides to draw dominance indicators
-  void DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords);
+  void DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords) override;
   //@}  
 
   void OnCellRightClick(wxSheetEvent &);
@@ -392,7 +392,7 @@ public:
   /// @name Drop target interaction
   //@{
   /// Called when the drop target receives text. 
-  bool DropText(int p_x, int p_y, const wxString &p_text);
+  bool DropText(int p_x, int p_y, const wxString &p_text) override;
   //@}
 };
 
@@ -570,20 +570,20 @@ private:
   /// @name Overriding wxSheet members for data access
   //@{
   /// Returns the value in the cell
-  wxString GetCellValue(const wxSheetCoords &);
+  wxString GetCellValue(const wxSheetCoords &) override;
   /// Sets the value in the cell, by editing the outcome
-  void SetCellValue(const wxSheetCoords &, const wxString &);
+  void SetCellValue(const wxSheetCoords &, const wxString &) override;
   /// Returns the attributes of the cell
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, 
-			  wxSheetAttr_Type) const;
+			  wxSheetAttr_Type) const override;
   //@}
 
   /// @name Overriding wxSheet members for drawing behavior
   //@{
   /// Draws dark borders between contingencies
-  void DrawCellBorder(wxDC &p_dc, const wxSheetCoords &p_coords);
+  void DrawCellBorder(wxDC &p_dc, const wxSheetCoords &p_coords) override;
   /// Overrides to draw dominance indicators
-  void DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords);
+  void DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords) override;
   //@}
 
   /// @name Overriding wxSheet members for event-handling behavior
@@ -1138,11 +1138,11 @@ public:
     : wxPrintout(p_label), m_table(p_table) { }
   virtual ~gbtNfgPrintout() = default;
 
-  bool OnPrintPage(int) 
+  bool OnPrintPage(int) override 
   { m_table->RenderGame(*GetDC(), 50, 50);  return true; }
-  bool HasPage(int page) { return (page <= 1); }
+  bool HasPage(int page) override { return (page <= 1); }
   void GetPageInfo(int *minPage, int *maxPage,
-		   int *selPageFrom, int *selPageTo)
+		   int *selPageFrom, int *selPageTo) override
   { *minPage = 1; *maxPage = 1; *selPageFrom = 1; *selPageTo = 1; }
 };
 

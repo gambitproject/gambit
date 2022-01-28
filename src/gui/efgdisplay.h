@@ -77,8 +77,8 @@ private:
     
   /// @name Overriding gbtGameView members
   //@{
-  void OnUpdate();
-  void PostPendingChanges();
+  void OnUpdate() override;
+  void PostPendingChanges() override;
   //@}
 
   void RefreshTree();
@@ -86,7 +86,7 @@ private:
 public:
   gbtEfgDisplay(wxWindow *p_parent, gbtGameDocument *p_doc);
     
-  virtual void OnDraw(wxDC &dc);
+  void OnDraw(wxDC &dc) override;
   void OnDraw(wxDC &, double);
 
   int GetZoom() const { return m_zoom; }

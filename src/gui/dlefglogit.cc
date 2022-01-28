@@ -40,26 +40,26 @@ private:
   Gambit::List<Gambit::MixedBehaviorProfile<double> > m_profiles;
 
   // Overriding wxSheet members for data access
-  wxString GetCellValue(const wxSheetCoords &);
-  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const;
+  wxString GetCellValue(const wxSheetCoords &) override;
+  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
   
   // Overriding wxSheet members to disable selection behavior
-  bool SelectRow(int, bool = false, bool = false)
+  bool SelectRow(int, bool = false, bool = false) override
     { return false; }
-  bool SelectRows(int, int, bool = false, bool = false)
+  bool SelectRows(int, int, bool = false, bool = false) override
     { return false; }
-  bool SelectCol(int, bool = false, bool = false)
+  bool SelectCol(int, bool = false, bool = false) override
     { return false; }
-  bool SelectCols(int, int, bool = false, bool = false)
+  bool SelectCols(int, int, bool = false, bool = false) override
     { return false; }
-  bool SelectCell(const wxSheetCoords&, bool = false, bool = false)
+  bool SelectCell(const wxSheetCoords&, bool = false, bool = false) override
     { return false; }
-  bool SelectBlock(const wxSheetBlock&, bool = false, bool = false)
+  bool SelectBlock(const wxSheetBlock&, bool = false, bool = false) override
     { return false; }
-  bool SelectAll(bool = false) { return false; }
+  bool SelectAll(bool = false) override { return false; }
 
   // Overriding wxSheet member to suppress drawing of cursor
-  void DrawCursorCellHighlight(wxDC&, const wxSheetCellAttr &) { }
+  void DrawCursorCellHighlight(wxDC&, const wxSheetCellAttr &) override { }
 
 public:
   gbtLogitBehavList(wxWindow *p_parent, gbtGameDocument *p_doc);

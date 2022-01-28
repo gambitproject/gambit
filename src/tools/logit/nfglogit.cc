@@ -39,11 +39,11 @@ public:
   EquationSystem(const Game &p_game) : m_game(p_game) { }
   virtual ~EquationSystem() = default;
   // Compute the value of the system of equations at the specified point.
-  virtual void GetValue(const Vector<double> &p_point,
-  	                Vector<double> &p_lhs) const;
+  void GetValue(const Vector<double> &p_point,
+  	                Vector<double> &p_lhs) const override;
   // Compute the Jacobian matrix at the specified point.
-  virtual void GetJacobian(const Vector<double> &p_point,
-			   Matrix<double> &p_matrix) const;
+  void GetJacobian(const Vector<double> &p_point,
+			   Matrix<double> &p_matrix) const override;
 
 private:
   Game m_game;
@@ -158,8 +158,8 @@ class StrategicQREPathTracer::LambdaCriterion : public PathTracer::CriterionFunc
 public:
   LambdaCriterion(double p_lambda) : m_lambda(p_lambda) { }
 
-  virtual double operator()(const Vector<double> &p_point,
-			    const Vector<double> &p_tangent) const
+  double operator()(const Vector<double> &p_point,
+			    const Vector<double> &p_tangent) const override
   { return p_point[p_point.Length()] - m_lambda; }
 
 private:
@@ -179,8 +179,8 @@ public:
       m_fullGraph(p_fullGraph), m_decimals(p_decimals) { }
   virtual ~CallbackFunction() = default;
   
-  virtual void operator()(const Vector<double> &p_point,
-			  bool p_isTerminal) const;
+  void operator()(const Vector<double> &p_point,
+			  bool p_isTerminal) const override;
   const List<LogitQREMixedStrategyProfile> &GetProfiles() const
   { return m_profiles; }
   
@@ -278,8 +278,8 @@ public:
     : m_frequencies(p_frequencies) { }
   virtual ~CriterionFunction() = default;
 
-  virtual double operator()(const Vector<double> &p_point,
-			    const Vector<double> &p_tangent) const
+  double operator()(const Vector<double> &p_point,
+			    const Vector<double> &p_tangent) const override
   {
     double diff_logL = 0.0;
     for (int i = 1; i <= m_frequencies.Length(); i++) {
@@ -304,8 +304,8 @@ public:
 		   bool p_fullGraph, double p_decimals);
   virtual ~CallbackFunction() = default;
   
-  virtual void operator()(const Vector<double> &p_point,
-			  bool p_isTerminal) const;
+  void operator()(const Vector<double> &p_point,
+			  bool p_isTerminal) const override;
 
   LogitQREMixedStrategyProfile GetMaximizer() const
   { return LogitQREMixedStrategyProfile(m_bestProfile, m_bestLambda); }

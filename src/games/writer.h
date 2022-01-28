@@ -47,7 +47,7 @@ public:
   /// Convert the game to HTML, with player 1 on the rows and player 2
   /// on the columns.
   ///
-  virtual std::string Write(const Game &p_game) const
+  std::string Write(const Game &p_game) const override
   { return Write(p_game, 1, 2); }
 
   ///
@@ -65,7 +65,7 @@ public:
   /// Convert the game to LaTeX, with player 1 on the rows and player 2
   /// on the columns.
   ///
-  virtual std::string Write(const Game &p_game) const
+  std::string Write(const Game &p_game) const override
   { return Write(p_game, 1, 2); }
 
   ///

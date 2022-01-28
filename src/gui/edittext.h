@@ -74,9 +74,9 @@ public:
 
   // @name Overriding wxWindow methods
   //@{
-  bool SetForegroundColour(const wxColour &);
-  bool SetBackgroundColour(const wxColour &);
-  bool SetFont(const wxFont &);
+  bool SetForegroundColour(const wxColour &) override;
+  bool SetBackgroundColour(const wxColour &) override;
+  bool SetFont(const wxFont &) override;
   //@}
 }; 
 

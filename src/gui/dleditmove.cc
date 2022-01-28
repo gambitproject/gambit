@@ -35,7 +35,7 @@ private:
   Gambit::GameInfoset m_infoset;
 
   // Overriding wxSheet members
-  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const;
+  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
 
 public:
   gbtActionSheet(wxWindow *p_parent, Gambit::GameInfoset p_infoset);

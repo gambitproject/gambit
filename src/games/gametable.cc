@@ -36,16 +36,16 @@ class TablePureStrategyProfileRep : public PureStrategyProfileRep {
 protected:
   long m_index;
 
-  virtual PureStrategyProfileRep *Copy() const;
+  PureStrategyProfileRep *Copy() const override;
 
 public:
   TablePureStrategyProfileRep(const Game &p_game);
-  virtual long GetIndex() const { return m_index; }
-  virtual void SetStrategy(const GameStrategy &);
-  virtual GameOutcome GetOutcome() const;
-  virtual void SetOutcome(GameOutcome p_outcome);
-  virtual Rational GetPayoff(int pl) const;
-  virtual Rational GetStrategyValue(const GameStrategy &) const;
+  long GetIndex() const override { return m_index; }
+  void SetStrategy(const GameStrategy &) override;
+  GameOutcome GetOutcome() const override;
+  void SetOutcome(GameOutcome p_outcome) override;
+  Rational GetPayoff(int pl) const override;
+  Rational GetStrategyValue(const GameStrategy &) const override;
 };
 
 //------------------------------------------------------------------------

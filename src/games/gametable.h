@@ -50,83 +50,83 @@ public:
   /// Construct a new table game with the given dimension
   /// If p_sparseOutcomes = true, outcomes for all contingencies are left null
   GameTableRep(const Array<int> &p_dim, bool p_sparseOutcomes = false);
-  virtual Game Copy() const;
+  Game Copy() const override;
   //@}
 
   /// @name General data access
   //@{
-  virtual bool IsTree() const { return false; }
-  virtual bool IsConstSum() const;
-  virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const
+  bool IsTree() const override { return false; }
+  bool IsConstSum() const override;
+  bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override
   { return true; }
   //@}
 
   /// @name Interface with restricted game mechanism
   //@{
-  virtual bool IsRestriction() const { return (m_unrestricted != nullptr); }
-  virtual Game Unrestrict() const 
+  bool IsRestriction() const override { return (m_unrestricted != nullptr); }
+  Game Unrestrict() const override 
   { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
   //@}
 
   /// @name Dimensions of the game
   //@{
   /// The number of actions in each information set
-  virtual PVector<int> NumActions() const
+  PVector<int> NumActions() const override
   { throw UndefinedException(); }
   /// The number of members in each information set
-  virtual PVector<int> NumMembers() const
+  PVector<int> NumMembers() const override
   { throw UndefinedException(); }
   /// Returns the total number of actions in the game
-  virtual int BehavProfileLength() const
+  int BehavProfileLength() const override
   { throw UndefinedException(); }
   //@}
 
   /// @name Players
   //@{
   /// Returns the chance (nature) player
-  virtual GamePlayer GetChance() const { throw UndefinedException(); }
+  GamePlayer GetChance() const override { throw UndefinedException(); }
   /// Creates a new player in the game, with no moves
-  virtual GamePlayer NewPlayer();
+  GamePlayer NewPlayer() override;
   //@}
 
   /// @name Information sets
   //@{
   /// Returns the iset'th information set in the game (numbered globally)
-  virtual GameInfoset GetInfoset(int iset) const 
+  GameInfoset GetInfoset(int iset) const override 
   { throw UndefinedException(); }
   /// Returns an array with the number of information sets per personal player
-  virtual Array<int> NumInfosets() const
+  Array<int> NumInfosets() const override
   { throw UndefinedException(); }
   /// Returns the act'th action in the game (numbered globally)
-  virtual GameAction GetAction(int act) const
+  GameAction GetAction(int act) const override
   { throw UndefinedException(); }
   //@}
 
   /// @name Nodes
   //@{
   /// Returns the root node of the game
-  virtual GameNode GetRoot() const { throw UndefinedException(); } 
+  GameNode GetRoot() const override { throw UndefinedException(); } 
   /// Returns the number of nodes in the game
-  virtual int NumNodes() const { throw UndefinedException(); }
+  int NumNodes() const override { throw UndefinedException(); }
   //@}
 
   /// @name Outcomes
   //@{
   /// Deletes the specified outcome from the game
-  virtual void DeleteOutcome(const GameOutcome &);
+  void DeleteOutcome(const GameOutcome &) override;
   //@}
 
   /// @name Writing data files
   //@{
   /// Write the game to a file in .nfg outcome format
-  virtual void WriteNfgFile(std::ostream &) const;
+  void WriteNfgFile(std::ostream &) const override;
   //@}
 
-  virtual PureStrategyProfile NewPureStrategyProfile() const;
-  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const;
-  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const; 
-  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const;
-  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const;
+  PureStrategyProfile NewPureStrategyProfile() const override;
+  MixedStrategyProfile<double> NewMixedStrategyProfile(double) const override;
+  MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const override; 
+  MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const override;
+  MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const override;
 
 };
 

@@ -45,8 +45,8 @@ private:
   Game m_game;
   mutable MixedStrategyProfile<double> m_profile;
 
-  double Value(const Vector<double> &) const;
-  bool Gradient(const Vector<double> &, Vector<double> &) const;
+  double Value(const Vector<double> &) const override;
+  bool Gradient(const Vector<double> &, Vector<double> &) const override;
 
   double LiapDerivValue(int, int, const MixedStrategyProfile<double> &) const;
 };

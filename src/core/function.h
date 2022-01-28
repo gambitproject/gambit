@@ -50,7 +50,7 @@ protected:
 class FunctionMinimizerError : public Exception {
 public:
   virtual ~FunctionMinimizerError() noexcept = default;
-  const char *what() const noexcept 
+  const char *what() const noexcept override
   { return "Internal error in function minimization"; }
 };
 
@@ -79,12 +79,12 @@ public:
   void Set(const Function &fdf,
 	   const Vector<double> &x, double &f,
 	   Vector<double> &gradient, double step_size,
-	   double p_tol);
-  void Restart();
+	   double p_tol) override;
+  void Restart() override;
 
   bool Iterate(const Function &fdf,
 	       Vector<double> &x, double &f,
-	       Vector<double> &gradient, Vector<double> &dx);
+	       Vector<double> &gradient, Vector<double> &dx) override;
 
 private:
   int iter;

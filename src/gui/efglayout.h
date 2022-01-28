@@ -182,7 +182,7 @@ private:
   void RenderSubtree(wxDC &dc, bool p_noHints) const;
 
   // Overriding gbtGameView members
-  void OnUpdate() { }
+  void OnUpdate() override { }
 
 public:
   gbtTreeLayout(gbtEfgDisplay *p_parent, gbtGameDocument *p_doc);

@@ -42,12 +42,12 @@ public:
   gbtNumberValidator(const gbtNumberValidator &);
   virtual ~gbtNumberValidator() = default;
 
-  virtual wxObject *Clone() const { return new gbtNumberValidator(*this); }
+  wxObject *Clone() const override { return new gbtNumberValidator(*this); }
   bool Copy(const gbtNumberValidator &);
 
-  virtual bool Validate(wxWindow *parent);
-  virtual bool TransferToWindow();
-  virtual bool TransferFromWindow();
+  bool Validate(wxWindow *parent) override;
+  bool TransferToWindow() override;
+  bool TransferFromWindow() override;
 
   DECLARE_EVENT_TABLE()
 };

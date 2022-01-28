@@ -2,6 +2,7 @@
 Checks: |
   -*,
   bugprone-reserved-identifier,
+  cppcoreguidelines-explicit-virtual-functions,
   modernize-deprecated-headers,
   modernize-redundant-void-arg,
   modernize-use-bool-literals,

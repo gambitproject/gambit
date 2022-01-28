@@ -581,7 +581,7 @@ namespace {
 class NotZeroSumException : public Exception {
 public:
   virtual ~NotZeroSumException() noexcept = default;
-  const char *what() const noexcept { return "Game is not constant sum"; }
+  const char *what() const noexcept override { return "Game is not constant sum"; }
 };
 
 Rational SubtreeSum(const GameNode &p_node)
@@ -1072,18 +1072,18 @@ MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Ration
 
 class TreePureStrategyProfileRep : public PureStrategyProfileRep {
 protected:
-  virtual PureStrategyProfileRep *Copy() const;
+  PureStrategyProfileRep *Copy() const override;
 
 public:
   TreePureStrategyProfileRep(const Game &p_game)
     : PureStrategyProfileRep(p_game) { }
-  virtual void SetStrategy(const GameStrategy &);
-  virtual GameOutcome GetOutcome() const
+  void SetStrategy(const GameStrategy &) override;
+  GameOutcome GetOutcome() const override
   { throw UndefinedException(); }
-  virtual void SetOutcome(GameOutcome p_outcome)
+  void SetOutcome(GameOutcome p_outcome) override
   { throw UndefinedException(); }
-  virtual Rational GetPayoff(int pl) const;
-  virtual Rational GetStrategyValue(const GameStrategy &) const;
+  Rational GetPayoff(int pl) const override;
+  Rational GetStrategyValue(const GameStrategy &) const override;
 };
 
 //------------------------------------------------------------------------

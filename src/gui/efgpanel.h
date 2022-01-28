@@ -34,7 +34,7 @@ private:
   wxWindow *m_dominanceToolbar, *m_playerToolbar;
 
   // Overriding gbtGameView members
-  void OnUpdate() { }
+  void OnUpdate() override { }
 
   /// @name Command event handlers
   //@{

@@ -56,8 +56,8 @@ public:
   //@}
 
   // Overriding gbtGameView members
-  void OnUpdate();
-  void PostPendingChanges();
+  void OnUpdate() override;
+  void PostPendingChanges() override;
 
   DECLARE_EVENT_TABLE()
 };

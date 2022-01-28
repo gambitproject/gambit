@@ -69,7 +69,7 @@ class gbtProfileListPanel : public wxPanel, public gbtGameView {
 private:
   wxWindow *m_behavProfiles, *m_mixedProfiles;
 
-  void OnUpdate() { }
+  void OnUpdate() override { }
 
 public:
   gbtProfileListPanel(wxWindow *p_parent, gbtGameDocument *p_doc);
@@ -125,7 +125,7 @@ private:
   wxStaticText *m_description;
 
   void OnChoice(wxCommandEvent &);
-  void OnUpdate();
+  void OnUpdate() override;
 
 public:
   gbtAnalysisNotebook(wxWindow *p_parent, gbtGameDocument *p_doc);

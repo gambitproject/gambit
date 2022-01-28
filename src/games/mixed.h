@@ -63,10 +63,10 @@ public:
   TreeMixedStrategyProfileRep(const MixedBehaviorProfile<T> &);
   virtual ~TreeMixedStrategyProfileRep() = default;
   
-  virtual MixedStrategyProfileRep<T> *Copy() const;
-  virtual T GetPayoff(int pl) const;
-  virtual T GetPayoffDeriv(int pl, const GameStrategy &) const;
-  virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const;
+  MixedStrategyProfileRep<T> *Copy() const override;
+  T GetPayoff(int pl) const override;
+  T GetPayoffDeriv(int pl, const GameStrategy &) const override;
+  T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
 };
 
 template <class T> class TableMixedStrategyProfileRep
@@ -90,10 +90,10 @@ public:
   { }
   virtual ~TableMixedStrategyProfileRep() = default;
 
-  virtual MixedStrategyProfileRep<T> *Copy() const;
-  virtual T GetPayoff(int pl) const;
-  virtual T GetPayoffDeriv(int pl, const GameStrategy &) const;
-  virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const;
+  MixedStrategyProfileRep<T> *Copy() const override;
+  T GetPayoff(int pl) const override;
+  T GetPayoffDeriv(int pl, const GameStrategy &) const override;
+  T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
 };
 
 template <class T> class AggMixedStrategyProfileRep
@@ -105,12 +105,12 @@ public:
     { }
   virtual ~AggMixedStrategyProfileRep() = default;
 
-  virtual MixedStrategyProfileRep<T> *Copy() const {
+  MixedStrategyProfileRep<T> *Copy() const override {
     return new AggMixedStrategyProfileRep(*this);
   }
-  virtual T GetPayoff(int pl) const;
-  virtual T GetPayoffDeriv(int pl, const GameStrategy &) const;
-  virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const;
+  T GetPayoff(int pl) const override;
+  T GetPayoffDeriv(int pl, const GameStrategy &) const override;
+  T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
 };
 
 template <class T> class BagentMixedStrategyProfileRep
@@ -122,12 +122,12 @@ public:
     { }
   virtual ~BagentMixedStrategyProfileRep() = default;
 
-  virtual MixedStrategyProfileRep<T> *Copy() const {
+  MixedStrategyProfileRep<T> *Copy() const override {
     return new BagentMixedStrategyProfileRep(*this);
   }
-  virtual T GetPayoff(int pl) const;
-  virtual T GetPayoffDeriv(int pl, const GameStrategy &) const;
-  virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const;
+  T GetPayoff(int pl) const override;
+  T GetPayoffDeriv(int pl, const GameStrategy &) const override;
+  T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
 };
 
 /// \brief A probability distribution over strategies in a game

@@ -45,15 +45,15 @@ private:
   virtual ~GameTreeActionRep()   = default;
 
 public:
-  int GetNumber() const { return m_number; }
-  GameInfoset GetInfoset() const;
+  int GetNumber() const override { return m_number; }
+  GameInfoset GetInfoset() const override;
 
-  const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label) { m_label = p_label; }
+  const std::string &GetLabel() const override { return m_label; }
+  void SetLabel(const std::string &p_label) override { m_label = p_label; }
 
-  bool Precedes(const GameNode &) const;
+  bool Precedes(const GameNode &) const override;
 
-  void DeleteAction();
+  void DeleteAction() override;
 };
 
 class GameTreeInfosetRep : public GameInfosetRep {
@@ -85,44 +85,44 @@ protected:
   void RemoveAction(int which);
 
 public:
-  virtual Game GetGame() const;
-  virtual int GetNumber() const { return m_number; }
+  Game GetGame() const override;
+  int GetNumber() const override { return m_number; }
   
-  virtual GamePlayer GetPlayer() const;
-  virtual void SetPlayer(GamePlayer p);
+  GamePlayer GetPlayer() const override;
+  void SetPlayer(GamePlayer p) override;
 
-  virtual bool IsChanceInfoset() const;
+  bool IsChanceInfoset() const override;
 
-  virtual void SetLabel(const std::string &p_label) { m_label = p_label; }
-  virtual const std::string &GetLabel() const { return m_label; }
+  void SetLabel(const std::string &p_label) override { m_label = p_label; }
+  const std::string &GetLabel() const override { return m_label; }
   
-  virtual GameAction InsertAction(GameAction p_where = nullptr);
+  GameAction InsertAction(GameAction p_where = nullptr) override;
 
   /// @name Actions
   //@{
   /// Returns the number of actions available at the information set
-  virtual int NumActions() const { return m_actions.Length(); }
+  int NumActions() const override { return m_actions.Length(); }
   /// Returns the p_index'th action at the information set
-  virtual GameAction GetAction(int p_index) const { return m_actions[p_index]; }
+  GameAction GetAction(int p_index) const override { return m_actions[p_index]; }
   /// Returns a forward iterator over the available actions
   //virtual GameActionIterator Actions(void) const 
   //  { return GameActionIterator(m_actions); }
   //@}
 
-  virtual int NumMembers() const { return m_members.Length(); }
-  virtual GameNode GetMember(int p_index) const;
+  int NumMembers() const override { return m_members.Length(); }
+  GameNode GetMember(int p_index) const override;
 
-  virtual bool Precedes(GameNode) const;
+  bool Precedes(GameNode) const override;
 
-  virtual void SetActionProb(int i, const std::string &p_value);
-  virtual double GetActionProb(int pl, double) const
+  void SetActionProb(int i, const std::string &p_value) override;
+  double GetActionProb(int pl, double) const override
   { return (double) m_probs[pl]; }
-  virtual Rational GetActionProb(int pl, const Rational &) const
+  Rational GetActionProb(int pl, const Rational &) const override
   { return (const Rational &) m_probs[pl]; }
-  virtual std::string GetActionProb(int pl, const std::string &) const
+  std::string GetActionProb(int pl, const std::string &) const override
   { return (const std::string &) m_probs[pl]; }
 
-  virtual void Reveal(GamePlayer);
+  void Reveal(GamePlayer) override;
 };
 
 
@@ -151,48 +151,48 @@ protected:
   void CopySubtree(GameTreeNodeRep *, GameTreeNodeRep *);
 
 public:
-  virtual Game GetGame() const; 
+  Game GetGame() const override; 
 
-  virtual const std::string &GetLabel() const { return m_label; } 
-  virtual void SetLabel(const std::string &p_label) { m_label = p_label; }
+  const std::string &GetLabel() const override { return m_label; } 
+  void SetLabel(const std::string &p_label) override { m_label = p_label; }
 
-  virtual int GetNumber() const { return number; }
-  virtual int NumberInInfoset() const
+  int GetNumber() const override { return number; }
+  int NumberInInfoset() const override
   { return infoset->m_members.Find(const_cast<GameTreeNodeRep *>(this)); }
 
-  virtual int NumChildren() const    { return children.Length(); }
+  int NumChildren() const override    { return children.Length(); }
 
-  virtual GameInfoset GetInfoset() const   { return infoset; }
-  virtual void SetInfoset(GameInfoset);
-  virtual GameInfoset LeaveInfoset();
+  GameInfoset GetInfoset() const override   { return infoset; }
+  void SetInfoset(GameInfoset) override;
+  GameInfoset LeaveInfoset() override;
 
-  virtual bool IsTerminal() const { return (children.Length() == 0); }
-  virtual GamePlayer GetPlayer() const
+  bool IsTerminal() const override { return (children.Length() == 0); }
+  GamePlayer GetPlayer() const override
     { return (infoset) ? infoset->GetPlayer() : nullptr; }
-  virtual GameAction GetPriorAction() const; // returns null if root node
-  virtual GameNode GetChild(int i) const    { return children[i]; }
-  virtual GameNode GetParent() const    { return m_parent; }
-  virtual GameNode GetNextSibling() const;
-  virtual GameNode GetPriorSibling() const;
+  GameAction GetPriorAction() const override; // returns null if root node
+  GameNode GetChild(int i) const override    { return children[i]; }
+  GameNode GetParent() const override    { return m_parent; }
+  GameNode GetNextSibling() const override;
+  GameNode GetPriorSibling() const override;
 
-  virtual GameOutcome GetOutcome() const { return outcome; }
-  virtual void SetOutcome(const GameOutcome &p_outcome);
+  GameOutcome GetOutcome() const override { return outcome; }
+  void SetOutcome(const GameOutcome &p_outcome) override;
 
-  virtual bool IsSuccessorOf(GameNode from) const;
-  virtual bool IsSubgameRoot() const;
+  bool IsSuccessorOf(GameNode from) const override;
+  bool IsSubgameRoot() const override;
 
-  virtual void DeleteParent();
-  virtual void DeleteTree();
+  void DeleteParent() override;
+  void DeleteTree() override;
 
-  virtual void CopyTree(GameNode src);
-  virtual void MoveTree(GameNode src);
+  void CopyTree(GameNode src) override;
+  void MoveTree(GameNode src) override;
 
-  virtual Game CopySubgame() const;
+  Game CopySubgame() const override;
 
-  virtual GameInfoset AppendMove(GamePlayer p_player, int p_actions);
-  virtual GameInfoset AppendMove(GameInfoset p_infoset);
-  virtual GameInfoset InsertMove(GamePlayer p_player, int p_actions);
-  virtual GameInfoset InsertMove(GameInfoset p_infoset);
+  GameInfoset AppendMove(GamePlayer p_player, int p_actions) override;
+  GameInfoset AppendMove(GameInfoset p_infoset) override;
+  GameInfoset InsertMove(GamePlayer p_player, int p_actions) override;
+  GameInfoset InsertMove(GameInfoset p_infoset) override;
 };
 
 
@@ -212,11 +212,11 @@ protected:
 
   /// @name Managing the representation
   //@{
-  virtual void Canonicalize();
-  virtual void BuildComputedValues();
-  virtual void ClearComputedValues() const;
+  void Canonicalize() override;
+  void BuildComputedValues() override;
+  void ClearComputedValues() const override;
   /// Have computed values been built?
-  virtual bool HasComputedValues() const { return m_computedValues; }
+  bool HasComputedValues() const override { return m_computedValues; }
   //@}
 
 public: 
@@ -224,15 +224,15 @@ public:
   //@{
   GameTreeRep();
   virtual ~GameTreeRep();
-  virtual Game Copy() const;
+  Game Copy() const override;
   //@}
 
   /// @name General data access
   //@{
-  virtual bool IsTree() const { return true; }
-  virtual bool IsConstSum() const;
+  bool IsTree() const override { return true; }
+  bool IsConstSum() const override;
   using GameRep::IsPerfectRecall;
-  virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const;
+  bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override;
   /// Turn on or off automatic canonicalization of the game
   void SetCanonicalization(bool p_doCanon) const
   { m_doCanon = p_doCanon;
@@ -242,53 +242,53 @@ public:
   /// @name Players
   //@{
   /// Returns the chance (nature) player
-  virtual GamePlayer GetChance() const { return m_chance; } 
+  GamePlayer GetChance() const override { return m_chance; } 
   /// Creates a new player in the game, with no moves
-  virtual GamePlayer NewPlayer();
+  GamePlayer NewPlayer() override;
   //@}
 
   /// @name Nodes
   //@{
   /// Returns the root node of the game
-  virtual GameNode GetRoot() const { return m_root; } 
+  GameNode GetRoot() const override { return m_root; } 
   /// Returns the number of nodes in the game
-  int NumNodes() const;
+  int NumNodes() const override;
   //@}
 
-  virtual void DeleteOutcome(const GameOutcome &);
+  void DeleteOutcome(const GameOutcome &) override;
 
   /// @name Writing data files
   //@{
-  virtual void WriteEfgFile(std::ostream &) const;
+  void WriteEfgFile(std::ostream &) const override;
   virtual void WriteEfgFile(std::ostream &, const GameNode &p_node) const;
-  virtual void WriteNfgFile(std::ostream &) const;
+  void WriteNfgFile(std::ostream &) const override;
   //@}
 
   /// @name Dimensions of the game
   //@{
   /// The number of actions in each information set
-  virtual PVector<int> NumActions() const;
+  PVector<int> NumActions() const override;
   /// The number of members in each information set
-  virtual PVector<int> NumMembers() const;
+  PVector<int> NumMembers() const override;
   /// Returns the total number of actions in the game
-  virtual int BehavProfileLength() const;
+  int BehavProfileLength() const override;
   //@}
 
   /// @name Information sets
   //@{
   /// Returns the iset'th information set in the game (numbered globally)
-  virtual GameInfoset GetInfoset(int iset) const;
+  GameInfoset GetInfoset(int iset) const override;
   /// Returns an array with the number of information sets per personal player
-  virtual Array<int> NumInfosets() const;
+  Array<int> NumInfosets() const override;
   /// Returns the act'th action in the game (numbered globally)
-  virtual GameAction GetAction(int act) const;
+  GameAction GetAction(int act) const override;
   //@}
 
-  virtual PureStrategyProfile NewPureStrategyProfile() const;
-  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const;
-  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const; 
-  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const;
-  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const;
+  PureStrategyProfile NewPureStrategyProfile() const override;
+  MixedStrategyProfile<double> NewMixedStrategyProfile(double) const override;
+  MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const override; 
+  MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const override;
+  MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const override;
 
 };
 

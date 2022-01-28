@@ -49,7 +49,7 @@ private:
   wxStaticText *m_level;
 
   // Overriding gbtGameView members
-  void OnUpdate();
+  void OnUpdate() override;
 
   // Event handlers
   void OnStrength(wxCommandEvent &);
@@ -501,7 +501,7 @@ private:
   wxStaticText *m_playerLabel;
 
   // Implementation of gbtGameView members
-  void OnUpdate();
+  void OnUpdate() override;
 
   /// @name Event handlers
   //@{
@@ -581,8 +581,8 @@ private:
 
   // @name Implementation of gbtGameView members
   //@{
-  void OnUpdate();
-  void PostPendingChanges();
+  void OnUpdate() override;
+  void PostPendingChanges() override;
   //@}
 
 public:
@@ -709,11 +709,11 @@ public:
     : wxPrintout(p_label), m_efgPanel(p_efgPanel) { }
   virtual ~gbtEfgPrintout() = default;
 
-  bool OnPrintPage(int)
+  bool OnPrintPage(int) override
   { m_efgPanel->RenderGame(*GetDC(), 50, 50);  return true; }
-  bool HasPage(int page) { return (page <= 1); }
+  bool HasPage(int page) override { return (page <= 1); }
   void GetPageInfo(int *minPage, int *maxPage,
-		   int *selPageFrom, int *selPageTo)
+		   int *selPageFrom, int *selPageTo) override
   { *minPage = 1; *maxPage = 1; *selPageFrom = 1; *selPageTo = 1; }
 };
 

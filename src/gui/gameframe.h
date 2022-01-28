@@ -105,11 +105,11 @@ private:
   /// @name Overriding wxWindow behavior
   //@{
   /// Flush any pending changes in document before processing event
-  bool ProcessEvent(wxEvent &);
+  bool ProcessEvent(wxEvent &) override;
   //@}
   
   // Overriding gbtGameView members
-  void OnUpdate();
+  void OnUpdate() override;
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR

@@ -146,36 +146,36 @@ public:
   //!
   //@{
   /// Are these behavior or strategy profiles natively?
-  bool IsBehavior() const { return m_isBehav; }
+  bool IsBehavior() const override { return m_isBehav; }
 
   /// The number of profiles in the list
-  int NumProfiles() const;
+  int NumProfiles() const override;
 
-  std::string GetPayoff(int pl, int p_index = -1) const;
+  std::string GetPayoff(int pl, int p_index = -1) const override;
   /// Return the realization probability of the node for the given 
   /// profile.  (index == -1 for currently selected profile)
-  std::string GetRealizProb(const Gambit::GameNode &, int p_index = -1) const;
-  std::string GetBeliefProb(const Gambit::GameNode &, int p_index = -1) const;
+  std::string GetRealizProb(const Gambit::GameNode &, int p_index = -1) const override;
+  std::string GetBeliefProb(const Gambit::GameNode &, int p_index = -1) const override;
   std::string GetNodeValue(const Gambit::GameNode &, int pl, 
-			   int p_index = -1) const;
-  std::string GetInfosetProb(const Gambit::GameNode &, int p_index = -1) const;
+			   int p_index = -1) const override;
+  std::string GetInfosetProb(const Gambit::GameNode &, int p_index = -1) const override;
   std::string GetInfosetValue(const Gambit::GameNode &, 
-			      int p_index = -1) const;
+			      int p_index = -1) const override;
   std::string GetActionValue(const Gambit::GameNode &, int act,
-			     int p_index = -1) const;
+			     int p_index = -1) const override;
   std::string GetActionProb(const Gambit::GameNode &, int act,
-			    int p_index = -1) const;
-  std::string GetActionProb(int p_action, int p_index = -1) const;
+			    int p_index = -1) const override;
+  std::string GetActionProb(int p_action, int p_index = -1) const override;
   std::string GetStrategyProb(int p_strategy,
-			      int p_index = -1) const;
+			      int p_index = -1) const override;
   std::string GetStrategyValue(int p_strategy,
-			       int p_index = -1) const;
+			       int p_index = -1) const override;
 
   /// Get the index of the currently selected profile
-  int GetCurrent() const { return m_current; }
+  int GetCurrent() const override { return m_current; }
 
   /// Set the index of the currently selected profile
-  void SetCurrent(int p_index) { m_current = p_index; }
+  void SetCurrent(int p_index) override { m_current = p_index; }
 
   //@}
 
@@ -183,9 +183,9 @@ public:
   //! @name Adding profiles to the list
   //!
   //@{
-  void AddOutput(const wxString &);
+  void AddOutput(const wxString &) override;
   /// Map all behavior profiles to corresponding mixed profiles
-  void BuildNfg();
+  void BuildNfg() override;
 
   /// Remove all profiles from the list
   void Clear();
@@ -198,7 +198,7 @@ public:
   /// Build a profile list from XML savefile 
   void Load(TiXmlNode *analysis);
   /// Write a profile list to XML savefile
-  void Save(std::ostream &) const;
+  void Save(std::ostream &) const override;
   //@}
 };
 

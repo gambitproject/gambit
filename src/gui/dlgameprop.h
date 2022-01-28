@@ -33,7 +33,7 @@ public:
   gbtGamePropertiesDialog(wxWindow *p_parent, gbtGameDocument *p_doc);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  wxString GetTitle() const { return m_title->GetValue(); }
+  wxString GetTitle() const override { return m_title->GetValue(); }
   wxString GetComment() const { return m_comment->GetValue(); }
 };
 

@@ -41,7 +41,7 @@ private:
   wxFileHistory m_fileHistory;
   Gambit::Array<gbtGameDocument *> m_documents;
 
-  bool OnInit();
+  bool OnInit() override;
 
 public:
   gbtApplication();
@@ -59,7 +59,7 @@ public:
 
   gbtAppLoadResult LoadFile(const wxString &);
 #ifdef __WXMAC__
-  void MacOpenFile(const wxString &filename)  { LoadFile(filename); }
+  void MacOpenFile(const wxString &filename) override  { LoadFile(filename); }
 #endif  // __WXMAC__
 
   //!

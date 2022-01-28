@@ -34,7 +34,7 @@ public:
     : StrategySolver<T>(p_onEquilibrium) { }
   virtual ~NashLpStrategySolver() = default;
 
-  virtual List<MixedStrategyProfile<T> > Solve(const Game &) const;
+  List<MixedStrategyProfile<T> > Solve(const Game &) const override;
 
 private:
   virtual bool SolveLP(const Matrix<T> &, const Vector<T> &, const Vector<T> &,

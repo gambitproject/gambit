@@ -38,7 +38,7 @@ public:
   virtual ~NashLiapStrategySolver() = default;
 
   List<MixedStrategyProfile<double> > Solve(const MixedStrategyProfile<double> &p_start) const;
-  List<MixedStrategyProfile<double> > Solve(const Game &p_game) const
+  List<MixedStrategyProfile<double> > Solve(const Game &p_game) const override
     { return Solve(p_game->NewMixedStrategyProfile(0.0)); }
 
 private:

@@ -125,7 +125,7 @@ public:
     : m_owner(p_owner), m_model(p_owner->GetDocument())
   { }
 
-  bool OnDropText(wxCoord x, wxCoord y, const wxString &p_text);
+  bool OnDropText(wxCoord x, wxCoord y, const wxString &p_text) override;
 };
 
 //

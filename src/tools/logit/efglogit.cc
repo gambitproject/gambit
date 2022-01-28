@@ -38,11 +38,11 @@ public:
   EquationSystem(const Game &p_game);
   virtual ~EquationSystem();
   // Compute the value of the system of equations at the specified point.
-  virtual void GetValue(const Vector<double> &p_point,
-  	                Vector<double> &p_lhs) const;
+  void GetValue(const Vector<double> &p_point,
+  	                Vector<double> &p_lhs) const override;
   // Compute the Jacobian matrix at the specified point.
-  virtual void GetJacobian(const Vector<double> &p_point,
-			   Matrix<double> &p_matrix) const;
+  void GetJacobian(const Vector<double> &p_point,
+			   Matrix<double> &p_matrix) const override;
 
 private:
   //
@@ -75,9 +75,9 @@ private:
     { }
 
     double Value(const LogBehavProfile<double> &p_profile,
-		 double p_lambda) const;
+		 double p_lambda) const override;
     void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
-		  Vector<double> &p_gradient) const;
+		  Vector<double> &p_gradient) const override;
   };
 
   //
@@ -98,9 +98,9 @@ private:
     { }
 
     double Value(const LogBehavProfile<double> &p_profile, 
-		 double p_lambda) const;
+		 double p_lambda) const override;
     void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
-		  Vector<double> &p_gradient) const;
+		  Vector<double> &p_gradient) const override;
   };
 
   Array<Equation *> m_equations;
@@ -259,8 +259,8 @@ public:
       m_fullGraph(p_fullGraph), m_decimals(p_decimals) { }
   virtual ~CallbackFunction() = default;
 
-  virtual void operator()(const Vector<double> &p_point,
-			  bool p_isTerminal) const;
+  void operator()(const Vector<double> &p_point,
+			  bool p_isTerminal) const override;
 
 private:
   std::ostream &m_stream;
@@ -300,8 +300,8 @@ class AgentQREPathTracer::LambdaCriterion : public PathTracer::CriterionFunction
 public:
   LambdaCriterion(double p_lambda) : m_lambda(p_lambda) { }
 
-  virtual double operator()(const Vector<double> &p_point,
-			    const Vector<double> &p_tangent) const
+  double operator()(const Vector<double> &p_point,
+			    const Vector<double> &p_tangent) const override
   { return p_point[p_point.Length()] - m_lambda; }
 
 private:

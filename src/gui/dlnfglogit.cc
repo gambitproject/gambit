@@ -96,26 +96,26 @@ private:
   LogitMixedBranch &m_branch;
 
   // Overriding wxSheet members for data access
-  wxString GetCellValue(const wxSheetCoords &);
-  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const;
+  wxString GetCellValue(const wxSheetCoords &) override;
+  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
   
   // Overriding wxSheet members to disable selection behavior
-  bool SelectRow(int, bool = false, bool = false)
+  bool SelectRow(int, bool = false, bool = false) override
     { return false; }
-  bool SelectRows(int, int, bool = false, bool = false)
+  bool SelectRows(int, int, bool = false, bool = false) override
     { return false; }
-  bool SelectCol(int, bool = false, bool = false)
+  bool SelectCol(int, bool = false, bool = false) override
     { return false; }
-  bool SelectCols(int, int, bool = false, bool = false)
+  bool SelectCols(int, int, bool = false, bool = false) override
     { return false; }
-  bool SelectCell(const wxSheetCoords&, bool = false, bool = false)
+  bool SelectCell(const wxSheetCoords&, bool = false, bool = false) override
     { return false; }
-  bool SelectBlock(const wxSheetBlock&, bool = false, bool = false)
+  bool SelectBlock(const wxSheetBlock&, bool = false, bool = false) override
     { return false; }
-  bool SelectAll(bool = false) { return false; }
+  bool SelectAll(bool = false) override { return false; }
 
   // Overriding wxSheet member to suppress drawing of cursor
-  void DrawCursorCellHighlight(wxDC&, const wxSheetCellAttr &) { }
+  void DrawCursorCellHighlight(wxDC&, const wxSheetCellAttr &) override { }
 
 public:
   LogitMixedSheet(wxWindow *p_parent, gbtGameDocument *p_doc,
@@ -271,7 +271,7 @@ private:
   double m_scaleFactor;
 
   /// Overriding x (lambda) axis labeling
-  void CalcXAxisTickPositions();
+  void CalcXAxisTickPositions() override;
   
 public:
   gbtLogitPlotCtrl(wxWindow *p_parent, gbtGameDocument *p_doc);
@@ -350,30 +350,30 @@ private:
   //! @name Overriding wxSheet members to disable selection behavior
   //!
   //@{
-  bool SelectRow(int, bool = false, bool = false)
+  bool SelectRow(int, bool = false, bool = false) override
     { return false; }
-  bool SelectRows(int, int, bool = false, bool = false)
+  bool SelectRows(int, int, bool = false, bool = false) override
     { return false; }
-  bool SelectCol(int, bool = false, bool = false)
+  bool SelectCol(int, bool = false, bool = false) override
     { return false; }
-  bool SelectCols(int, int, bool = false, bool = false)
+  bool SelectCols(int, int, bool = false, bool = false) override
     { return false; }
-  bool SelectCell(const wxSheetCoords&, bool = false, bool = false)
+  bool SelectCell(const wxSheetCoords&, bool = false, bool = false) override
     { return false; }
-  bool SelectBlock(const wxSheetBlock&, bool = false, bool = false)
+  bool SelectBlock(const wxSheetBlock&, bool = false, bool = false) override
     { return false; }
-  bool SelectAll(bool = false) { return false; }
+  bool SelectAll(bool = false) override { return false; }
 
-  bool HasSelection(bool = true) const { return false; }
-  bool IsCellSelected(const wxSheetCoords &) const { return false; }
-  bool IsRowSelected(int) const { return false; }
-  bool IsColSelected(int) const { return false; }
-  bool DeselectBlock(const wxSheetBlock &, bool = false) { return false; }
-  bool ClearSelection(bool = false) { return false; }
+  bool HasSelection(bool = true) const override { return false; }
+  bool IsCellSelected(const wxSheetCoords &) const override { return false; }
+  bool IsRowSelected(int) const override { return false; }
+  bool IsColSelected(int) const override { return false; }
+  bool DeselectBlock(const wxSheetBlock &, bool = false) override { return false; }
+  bool ClearSelection(bool = false) override { return false; }
   //@}
 
   /// Overriding wxSheet member to suppress drawing of cursor
-  void DrawCursorCellHighlight(wxDC&, const wxSheetCellAttr &) { }
+  void DrawCursorCellHighlight(wxDC&, const wxSheetCellAttr &) override { }
 
   // Event handlers
   // This disables moving the (unseen) cursor
@@ -558,16 +558,16 @@ public:
     : wxPrintout(p_label), m_plot(p_plot) { }
   virtual ~LogitPrintout() = default;
 
-  bool OnPrintPage(int)
+  bool OnPrintPage(int) override
   { wxSize size = GetDC()->GetSize();
     m_plot->DrawWholePlot(GetDC(), wxRect(50, 50, 
 					  size.GetWidth() - 100,
 					  size.GetHeight() - 100));
     return true; 
   }
-  bool HasPage(int page) { return (page <= 1); }
+  bool HasPage(int page) override { return (page <= 1); }
   void GetPageInfo(int *minPage, int *maxPage,
-		   int *selPageFrom, int *selPageTo)
+		   int *selPageFrom, int *selPageTo) override
   { *minPage = 1; *maxPage = 1; *selPageFrom = 1; *selPageTo = 1; }
 };
 

@@ -39,7 +39,7 @@ protected:
   virtual void WriteEfgFile(std::ostream &) const
   { throw UndefinedException(); }
   /// Write the game in .nfg format to the specified stream
-  virtual void WriteNfgFile(std::ostream &) const
+  void WriteNfgFile(std::ostream &) const override
   { throw UndefinedException(); }
   //@}
 
@@ -53,46 +53,46 @@ public:
   /// @name General data access
   //@{
   /// Returns the smallest payoff in any outcome of the game
-  virtual Rational GetMinPayoff(int pl = 0) const;
+  Rational GetMinPayoff(int pl = 0) const override;
   /// Returns the largest payoff in any outcome of the game
-  virtual Rational GetMaxPayoff(int pl = 0) const;
+  Rational GetMaxPayoff(int pl = 0) const override;
   //@}
 
   /// @name Dimensions of the game
   //@{
   /// The number of strategies for each player
-  virtual Array<int> NumStrategies() const;
+  Array<int> NumStrategies() const override;
   /// Gets the i'th strategy in the game, numbered globally
-  virtual GameStrategy GetStrategy(int p_index) const;
+  GameStrategy GetStrategy(int p_index) const override;
   /// Returns the number of strategy contingencies in the game
-  virtual int NumStrategyContingencies() const;
+  int NumStrategyContingencies() const override;
   /// Returns the total number of strategies in the game
-  virtual int MixedProfileLength() const;
+  int MixedProfileLength() const override;
   //@}
 
   /// @name Players
   //@{
   /// Returns the number of players in the game
-  virtual int NumPlayers() const { return m_players.Length(); }
+  int NumPlayers() const override { return m_players.Length(); }
   /// Returns the pl'th player in the game
-  virtual GamePlayer GetPlayer(int pl) const { return m_players[pl]; }
+  GamePlayer GetPlayer(int pl) const override { return m_players[pl]; }
   /// Returns the set of players in the game
-  virtual const GamePlayers &Players() const { return m_players; }
+  const GamePlayers &Players() const override { return m_players; }
   //@}
 
   /// @name Outcomes
   //@{
   /// Returns the number of outcomes defined in the game
-  virtual int NumOutcomes() const { return m_outcomes.Length(); }
+  int NumOutcomes() const override { return m_outcomes.Length(); }
   /// Returns the index'th outcome defined in the game
-  virtual GameOutcome GetOutcome(int index) const { return m_outcomes[index]; }
+  GameOutcome GetOutcome(int index) const override { return m_outcomes[index]; }
   /// Creates a new outcome in the game
-  virtual GameOutcome NewOutcome();
+  GameOutcome NewOutcome() override;
 
   /// @name Writing data files
   //@{
-  virtual void Write(std::ostream &p_stream,
-		     const std::string &p_format="native") const;
+  void Write(std::ostream &p_stream,
+		     const std::string &p_format="native") const override;
   //@}
 };
 
