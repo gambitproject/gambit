@@ -35,3 +35,4 @@ depcomp
 install-sh
 missing
 gambit
+.python-version

@@ -52,7 +52,7 @@ def readme():
 
 setuptools.setup(
     name="pygambit",
-    version="16.0.2rc1",
+    version="16.0.2",
     description="Software tools for game theory",
     long_description=readme(),
     classifiers=[
@@ -74,6 +74,7 @@ setuptools.setup(
     python_requires=">=3.7",
     install_requires=[
         'lxml',  # used for reading/writing GTE files
+        'numpy',
         'scipy',
     ],
     packages=['pygambit', 'pygambit.games', 'pygambit.lib'],

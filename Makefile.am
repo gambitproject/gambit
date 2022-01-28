@@ -245,6 +245,7 @@ EXTRA_DIST = \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
 	src/setup.py \
+	src/README.rst \
 	src/pygambit/__init__.py \
 	src/pygambit/enumeration.py \
 	src/pygambit/gameiter.py \

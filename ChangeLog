@@ -1,0 +1,5 @@
+## [16.0.2] - 2022-01-28
+
+### Fixed
+- Updated build and packaging systems for current compilers across all platforms
+- Refactored Python implementation to make pygambit PyPI-installable	

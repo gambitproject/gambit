@@ -186,7 +186,7 @@ Gambit operates on an annual release cycle roughly mirroring the
 stable/teaching each August; the major version number is equal to the
 last two digits of the year in which the version becomes stable.
 
-This document covers Gambit 16.0.2rc1.
+This document covers Gambit 16.0.2.
 You can download it from
 `Sourceforge
 <http://sourceforge.net/projects/gambit/files/gambit16/16.0.1>`_.

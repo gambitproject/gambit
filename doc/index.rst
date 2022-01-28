@@ -35,7 +35,7 @@ If you are citing Gambit in a paper, we suggest a citation of the form:
   McKelvey, Richard D., McLennan, Andrew M., and 
   `Turocy, Theodore L. <http://www.gambit-project.org/turocy>`__
   (2014).
-  Gambit: Software Tools for Game Theory, Version 16.0.2rc1.
+  Gambit: Software Tools for Game Theory, Version 16.0.2.
   http://www.gambit-project.org.
 
 Replace the version number and year as appropriate if you use a
