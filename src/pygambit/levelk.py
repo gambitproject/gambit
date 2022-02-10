@@ -23,9 +23,11 @@
 """
 
 import math
+
 import scipy.optimize
 import scipy.stats
-from gambit.profiles import Solution
+
+from .profiles import Solution
 
 
 def logit_br(game, profile, lam):

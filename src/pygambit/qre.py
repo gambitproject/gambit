@@ -25,10 +25,10 @@ A set of utilities for computing and analyzing quantal response equilbria
 
 import math
 import numpy
-import pctrace
 
-from gambit.profiles import Solution
-from nash import ExternalSolver
+from . import pctrace
+from .profiles import Solution
+from .nash import ExternalSolver
 
 
 def sym_compute_lhs(game, point):
