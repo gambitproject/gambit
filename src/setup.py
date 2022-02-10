@@ -21,9 +21,13 @@
 #
 
 import glob
+import platform
 import setuptools
 import Cython.Build
 
+# By compiling this separately as a C library, we avoid problems
+# with passing C++-specific flags when building the extension
+lrslib = ('lrslib', {'sources': glob.glob("solvers/lrs/*.c")})
 
 cppgambit = setuptools.Extension(
     "pygambit.lib.libgambit",
@@ -32,7 +36,6 @@ cppgambit = setuptools.Extension(
         glob.glob("core/*.cc") +
         glob.glob("games/*.cc") +
         glob.glob("games/agg/*.cc") +
-        glob.glob("solvers/*/*.c") +
         glob.glob("solvers/*/*.cc") +
         ["tools/lp/nfglp.cc",
          "tools/lp/efglp.cc",
@@ -41,7 +44,10 @@ cppgambit = setuptools.Extension(
          "tools/logit/efglogit.cc"]
     ),
     language="c++",
-    include_dirs=["."]
+    include_dirs=["."],
+    extra_compile_args=(
+        ["-std=c++11"] if platform.system() == "Darwin" else []
+    )
 )
 
 
@@ -77,6 +83,7 @@ setuptools.setup(
         'numpy',
         'scipy',
     ],
+    libraries=[lrslib],
     packages=['pygambit', 'pygambit.games', 'pygambit.lib'],
     ext_modules=Cython.Build.cythonize(cppgambit)
 )
