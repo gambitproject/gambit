@@ -55,7 +55,7 @@ class Exception : public std::runtime_error {
 public:
   Exception() : std::runtime_error("") { }
   Exception(const std::string &s) : std::runtime_error(s) { }
-  virtual ~Exception() throw() { }
+  virtual ~Exception() noexcept = default;
 };
 
 /// Exception thrown on out-of-range index
@@ -63,7 +63,7 @@ class IndexException : public Exception {
 public:
   IndexException() : Exception("Index out of range") { }
   IndexException(const std::string &s) : Exception(s) { }
-  virtual ~IndexException() throw() { }
+  ~IndexException() noexcept override = default;
 };
 
 /// Exception thrown on invalid index ranges
@@ -71,7 +71,7 @@ class RangeException : public Exception {
 public:
   RangeException() : Exception("Invalid index range") { }
   RangeException(const std::string &s) : Exception(s) { }
-  virtual ~RangeException() throw() { }
+  ~RangeException() noexcept override = default;
 };
 
 /// Exception thrown on dimension mismatches
@@ -79,7 +79,7 @@ class DimensionException : public Exception {
 public:
   DimensionException() : Exception("Mismatched dimensions") { }
   DimensionException(const std::string &s) : Exception(s) { }
-  virtual ~DimensionException() throw() { }
+  ~DimensionException() noexcept override = default;
 };
 
 /// Exception thrown on invalid value
@@ -87,7 +87,7 @@ class ValueException : public Exception {
 public:
   ValueException() : Exception("Invalid value") { }
   ValueException(const std::string &s) : Exception(s) { }
-  virtual ~ValueException() throw() { }
+  ~ValueException() noexcept override = default;
 };
 
 /// Exception thrown on a failed assertion
@@ -95,7 +95,7 @@ class AssertionException : public Exception {
 public:
   AssertionException() : Exception("Failed assertion") { }
   AssertionException(const std::string &s) : Exception(s) { }
-  virtual ~AssertionException() throw() { }
+  ~AssertionException() noexcept override = default;
 };
 
 /// Exception thrown on attempted division by zero
@@ -103,7 +103,7 @@ class ZeroDivideException : public Exception {
 public:
   ZeroDivideException() : Exception("Attempted division by zero") { }
   ZeroDivideException(const std::string &s) : Exception(s) { }
-  virtual ~ZeroDivideException() throw() { }
+  ~ZeroDivideException() noexcept override = default;
 };
 
 /// An exception thrown when attempting to dereference a null pointer
@@ -111,9 +111,10 @@ class NullException : public Exception {
 public:
   NullException() : Exception("Dereferenced null pointer") { }
   NullException(const std::string &s) : Exception(s) { }
-  virtual ~NullException() throw() { }
+  ~NullException() noexcept override = default;
 };
 
+ 
 } // end namespace Gambit
 
 #include "core/shared_ptr.h"
