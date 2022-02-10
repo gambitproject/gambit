@@ -270,7 +270,7 @@ cdef extern from "games/mixed.h":
         int MixedProfileLength()
         c_StrategySupportProfile GetSupport()
         void SetCentroid()
-        void Normalize()
+        c_MixedStrategyProfileDouble Normalize()
         void Randomize() except +TypeError
         void Randomize(int)
         double getitem "operator[]"(int) except +IndexError
@@ -287,7 +287,7 @@ cdef extern from "games/mixed.h":
         int MixedProfileLength()
         c_StrategySupportProfile GetSupport()
         void SetCentroid()
-        void Normalize()
+        c_MixedStrategyProfileRational Normalize()
         void Randomize()
         void Randomize(int)
         c_Rational getitem "operator[]"(int) except +IndexError
@@ -305,7 +305,7 @@ cdef extern from "games/behav.h":
         int Length()
         bool IsDefinedAt(c_GameInfoset)
         void SetCentroid()
-        void Normalize()
+        c_MixedBehaviorProfileDouble Normalize()
         void Randomize() except +TypeError
         void Randomize(int)
         double getitem "operator[]"(int) except +IndexError
@@ -328,7 +328,7 @@ cdef extern from "games/behav.h":
         int Length()
         bool IsDefinedAt(c_GameInfoset)
         void SetCentroid()
-        void Normalize()
+        c_MixedBehaviorProfileRational Normalize()
         void Randomize()
         void Randomize(int)
         c_Rational getitem "operator[]"(int) except +IndexError

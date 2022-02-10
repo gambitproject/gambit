@@ -759,8 +759,15 @@ about a plan of play of a game, by one or more players.
 
       Each player's component of the profile is not enforced to sum to
       one, so that, for example, counts rather than probabilities can
-      be expressed.  Calling this on a profile normalizes the
-      distribution over each player's strategies to sum to one.
+      be expressed.  Calling this returns a profile in which the
+      probability distribution over each player's strategies
+      sums to one.
+
+      .. versionchanged:: 16.1.0
+
+	 Returns the normalized profile as a copy and leaves the
+	 original changed.  Previously the original profile
+	 was normalized in place.
       
    .. py:method:: randomize(denom)
 
@@ -854,8 +861,15 @@ about a plan of play of a game, by one or more players.
 
       Each information set's component of the profile is not enforced to sum to
       one, so that, for example, counts rather than probabilities can
-      be expressed.  Calling this on a profile normalizes the
-      distribution over each information set's actions to sum to one.
+      be expressed.  Calling this returns a profile in which the
+      probability distribution over each information set's actions
+      sums to one.
+
+      .. versionchanged:: 16.1.0
+
+	 Returns the normalized profile as a copy and leaves the
+	 original changed.  Previously the original profile
+	 was normalized in place.
       
    .. py:method:: randomize(denom)
 

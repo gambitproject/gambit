@@ -263,8 +263,9 @@ void MixedBehaviorProfile<T>::UndefinedToCentroid()
 }
 
 template <class T>
-void MixedBehaviorProfile<T>::Normalize()
+MixedBehaviorProfile<T> MixedBehaviorProfile<T>::Normalize() const
 {
+  auto norm = MixedBehaviorProfile<T>(*this);
   Game efg = m_support.GetGame();
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
     GamePlayer player = efg->GetPlayer(pl);
@@ -279,10 +280,11 @@ void MixedBehaviorProfile<T>::Normalize()
       }
       if (total == (T) 0) continue;
       for (int act = 1; act <= m_support.NumActions(pl, iset); act++) {
-	(*this)(pl, iset, act) /= total;
+	norm(pl, iset, act) /= total;
       }
     }
   }
+  return norm;
 }
 
 template<> void MixedBehaviorProfile<double>::Randomize()

@@ -167,8 +167,8 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
 	  if (bfs2.count(k)) {
 	    profile[p_game->Players()[2]->Strategies()[k]] = -bfs2[k];
 	  }
-	} 
-	profile.Normalize();
+	}
+	profile = profile.Normalize();
 	solution->m_extremeEquilibria.push_back(profile);
 	this->m_onEquilibrium->Render(profile);
 	  

@@ -39,7 +39,7 @@ public:
   virtual MixedStrategyProfileRep<T> *Copy() const = 0;
 
   void SetCentroid();
-  void Normalize();
+  MixedStrategyProfile<T> Normalize() const;
   void Randomize();
   void Randomize(int p_denom);
  /// Returns the probability the strategy is played
@@ -137,6 +137,7 @@ public:
 /// probabilities.
 template <class T> class MixedStrategyProfile {
   friend class StrategySupportProfile;
+  friend class MixedStrategyProfileRep<T>;
   friend class TreeMixedStrategyProfileRep<T>;
   friend class AggMixedStrategyProfileRep<T>;
   friend class BagentMixedStrategyProfileRep<T>;
@@ -206,8 +207,10 @@ public:
   /// Sets all strategies for each player to equal probabilities
   void SetCentroid() { m_rep->SetCentroid(); }
 
-  /// Normalize each player's strategy probabilities so they sum to one
-  void Normalize() { m_rep->Normalize(); }
+  /// Create a new mixed strategy profile where strategies are played
+  /// in the same proportions, but with probabilities for each player
+  /// summing to one.
+  MixedStrategyProfile<T> Normalize() const { return m_rep->Normalize(); }
 
   /// Generate a random mixed strategy profile according to the uniform distribution
   void Randomize() { m_rep->Randomize(); }

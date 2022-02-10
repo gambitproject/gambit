@@ -146,8 +146,10 @@ public:
   void SetCentroid();
   /// Set the behavior at any undefined information set to the centroid
   void UndefinedToCentroid();
-  /// Normalize each information set's action probabilities to sum to one
-  void Normalize();
+  /// Create a new behaviour strategy profile where strategies are played
+  /// in the same proportions, but with probabilities for each player
+  /// summing to one.
+  MixedBehaviorProfile<T> Normalize() const;
   /// Generate a random behavior strategy profile according to the uniform distribution
   void Randomize();
   /// Generate a random behavior strategy profile according to the uniform distribution

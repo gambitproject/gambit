@@ -52,21 +52,24 @@ template <class T> void MixedStrategyProfileRep<T>::SetCentroid()
   }
 }
 
-template <class T> void MixedStrategyProfileRep<T>::Normalize()
+template <class T>
+MixedStrategyProfile<T> MixedStrategyProfileRep<T>::Normalize() const
 {
-  for (GamePlayers::const_iterator player = m_support.GetGame()->Players().begin();
+  auto norm = Copy();
+  for (auto player = m_support.GetGame()->Players().begin();
        player != m_support.GetGame()->Players().end(); ++player) {
     T sum = (T) 0;
-    for (Array<GameStrategy>::const_iterator strategy = m_support.Strategies(*player).begin();
+    for (auto strategy = m_support.Strategies(*player).begin();
 	 strategy != m_support.Strategies(*player).end(); ++strategy) {
       sum += (*this)[*strategy];
     }
     if (sum == (T) 0) continue;
-    for (Array<GameStrategy>::const_iterator strategy = m_support.Strategies(*player).begin();
+    for (auto strategy = m_support.Strategies(*player).begin();
 	 strategy != m_support.Strategies(*player).end(); ++strategy) {
-      (*this)[*strategy] /= sum;
+      (*norm)[*strategy] /= sum;
     }
   }
+  return norm;
 }
 
 template<> void MixedStrategyProfileRep<double>::Randomize()

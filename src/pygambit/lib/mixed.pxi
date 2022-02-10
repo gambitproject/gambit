@@ -229,7 +229,15 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
         profile.profile = new c_MixedStrategyProfileDouble(self.profile.ToFullSupport())
         return profile
     def set_centroid(self):   self.profile.SetCentroid()
-    def normalize(self):      self.profile.Normalize()
+
+    def normalize(self) -> MixedStrategyProfileDouble:
+        """Create a profile with the same strategy proportions as this
+        one, but normalised so probabilites for each player sum to one.
+        """
+        profile = MixedStrategyProfileDouble()
+        profile.profile = new c_MixedStrategyProfileDouble(self.profile.Normalize())
+        return profile
+
     def randomize(self, denom=None):
         if denom is None:
             self.profile.Randomize()
@@ -301,7 +309,15 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
         profile.profile = new c_MixedStrategyProfileRational(self.profile.ToFullSupport())
         return profile
     def set_centroid(self):   self.profile.SetCentroid()
-    def normalize(self):      self.profile.Normalize()
+
+    def normalize(self) -> MixedStrategyProfileRational:
+        """Create a profile with the same strategy proportions as this
+        one, but normalised so probabilites for each player sum to one.
+        """
+        profile = MixedStrategyProfileRational()
+        profile.profile = new c_MixedStrategyProfileRational(self.profile.Normalize())
+        return profile
+
     def randomize(self, denom):
         self.profile.Randomize(denom)
 

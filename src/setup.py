@@ -58,7 +58,7 @@ def readme():
 
 setuptools.setup(
     name="pygambit",
-    version="16.0.2",
+    version="16.1.0a1",
     description="Software tools for game theory",
     long_description=readme(),
     classifiers=[

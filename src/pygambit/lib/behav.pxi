@@ -281,7 +281,15 @@ cdef class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def liap_value(self):
         return self.profile.GetLiapValue()
     def set_centroid(self):   self.profile.SetCentroid()
-    def normalize(self):      self.profile.Normalize()
+
+    def normalize(self) -> MixedBehaviorProfileDouble:
+        """Create a profile with the same action proportions as this
+        one, but normalised so probabilites for each infoset sum to one.
+        """
+        profile = MixedBehaviorProfileDouble()
+        profile.profile = new c_MixedBehaviorProfileDouble(self.profile.Normalize())
+        return profile
+    
     def randomize(self, denom=None):
         if denom is None:
             self.profile.Randomize()
@@ -349,7 +357,15 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def liap_value(self):
         return rat_to_py(self.profile.GetLiapValue())
     def set_centroid(self):   self.profile.SetCentroid()
-    def normalize(self):      self.profile.Normalize()
+
+    def normalize(self) -> MixedBehaviorProfileRational:
+        """Create a profile with the same action proportions as this
+        one, but normalised so probabilites for each infoset sum to one.
+        """
+        profile = MixedBehaviorProfileRational()
+        profile.profile = new c_MixedBehaviorProfileRational(self.profile.Normalize())
+        return profile
+
     def randomize(self, denom):
         self.profile.Randomize(denom)
 

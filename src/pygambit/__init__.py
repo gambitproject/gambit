@@ -24,7 +24,7 @@ from . import lib
 from . import nash  # noqa: F401
 from . import gte   # noqa: F401
 
-__version__ = "16.0.2"
+__version__ = "16.1.0a"
 Rational = lib.libgambit.Rational
 Decimal = lib.libgambit.Decimal
 
