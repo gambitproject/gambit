@@ -392,6 +392,7 @@ cdef extern from "tools/logit/nfglogit.h":
         c_Game GetGame()
         c_MixedStrategyProfileDouble GetProfile()
         double GetLambda()
+        double GetLogLike()
         int MixedProfileLength()
         double getitem "operator[]"(int) except +IndexError
 	
@@ -434,6 +435,10 @@ cdef class LogitQREMixedStrategyProfile(object):
     property lam: 
         def __get__(self):
             return self.thisptr.GetLambda()
+
+    property log_like:
+        def __get__(self):
+            return self.thisptr.GetLogLike()
 
     property profile:
         def __get__(self):

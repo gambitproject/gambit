@@ -1352,3 +1352,65 @@ Computation of Nash equilibria
    :param bool external: Call the external command-line solver instead
 			 of the internally-linked implementation
 			 
+
+Analysis of quantal response equilibria
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~---------
+
+.. py:module:: pygambit.qre
+
+.. py:function:: fit_fixedpoint(data)
+
+   .. versionadded:: 16.1.0
+
+   Use maximum likelihood estimation to find the point on the
+   principal branch of strategic form game closest to `data`.
+   The `data` are expressed as an instance of a mixed strategy
+   profile on the game.  The `data` should typically be expressed
+   as the counts of observations of each strategy.
+
+   :param data: The observed data to use in fitting.
+   :type data: :py:class:`MixedStrategyProfile`
+   :rtype: :py:class:`LogitQREMixedStrategyFitResult`
+
+.. py:function:: fit_empirical(data)
+
+   .. versionadded:: 16.1.0
+
+   Use maximum likelihood estimation to estimate a quantal
+   response equilibrium using the empirical payoff method.
+   The `data` are expressed as an instance of a mixed strategy
+   profile on the game.  The `data` should typically be expressed
+   as the counts of observations of each strategy.
+
+   :param data: The observed data to use in fitting.
+   :type data: :py:class:`MixedStrategyProfile`
+   :rtype: :py:class:`LogitQREMixedStrategyFitResult`
+
+.. py:class:: LogitQREMixedStrategyFitResult
+
+   .. versionadded:: 16.1.0
+
+   The result of estimating a quantal response equilibrium
+   using given data on a game.
+
+   .. py:attribute:: method
+
+   A text string indicating the estimation method used.
+   This can be "fixedpoint" or "empirical".
+
+   .. py:attribute:: profile
+
+   The estimated :py:class:`MixedStrategyProfile`.
+
+   .. py:attribute:: lam
+
+   The estimated value of the precision parameter lambda.
+
+   .. py:attribute:: data
+
+   The data used in the estimation, represented as a
+   :py:class:`MixedStrategyProfile`.
+
+   .. py:attribute:: log_like
+
+   The log of the likelihood function at the estimated profile.

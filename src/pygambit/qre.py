@@ -25,7 +25,9 @@ A set of utilities for computing and analyzing quantal response equilbria
 
 import math
 import numpy
+import scipy.optimize
 
+from .lib import libgambit
 from . import pctrace
 from .profiles import Solution
 from .nash import ExternalSolver
@@ -317,3 +319,77 @@ class ExternalStrategicQREPathTracer(ExternalSolver):
         for (i, p) in enumerate(entries[1:]):
             profile[i] = float(p)
         return [LogitQRE(float(entries[0]), profile)]
+
+
+class LogitQREMixedStrategyFitResult:
+    """The result of fitting a QRE to a given probability distribution
+    over strategies.
+    """
+    def __init__(self, data, method, lam, probs, log_like):
+        self._data = data
+        self._method = method
+        self._lam = lam
+        self._profile = data.game.mixed_strategy_profile()
+        for i in range(len(self._profile)):
+            self._profile[i] = probs[i]
+        self._log_like = log_like
+
+    @property
+    def method(self):
+        return self._method
+
+    @property
+    def data(self):
+        return self._data
+
+    @property
+    def lam(self):
+        return self._lam
+
+    @property
+    def profile(self):
+        return self._profile
+
+    @property
+    def log_like(self):
+        return self._log_like
+
+    def __repr__(self):
+        return (
+            f"<LogitQREMixedStrategyFitResult(method={self.method},"
+            f"lam={self.lam},profile={self.profile})>"
+        )
+
+
+def fit_fixedpoint(
+        data: libgambit.MixedStrategyProfileDouble
+) -> LogitQREMixedStrategyFitResult:
+    """Estimate a QRE using the fixed-point method."""
+    res = libgambit.logit_estimate(data)
+    return LogitQREMixedStrategyFitResult(
+        data, "fixedpoint", res.lam, list(res.profile), res.log_like
+    )
+
+
+def fit_empirical(
+        data: libgambit.MixedStrategyProfileDouble
+) -> LogitQREMixedStrategyFitResult:
+    """Estimate a QRE using the empirical payoff method."""
+    def do_logit(lam: float):
+        logit_probs = [[math.exp(lam*v) for v in player] for player in values]
+        sums = [sum(v) for v in logit_probs]
+        logit_probs = [[v/s for v in vv]
+                       for (vv, s) in zip(logit_probs, sums)]
+        logit_probs = [v for player in logit_probs for v in player]
+        return [max(v, 1.0e-293) for v in logit_probs]
+
+    def log_like(lam: float) -> float:
+        logit_probs = do_logit(lam)
+        return sum([f*math.log(p) for (f, p) in zip(list(data), logit_probs)])
+
+    values = data.normalize().strategy_values()
+    res = scipy.optimize.minimize(lambda x: -log_like(x[0]), (0.1,),
+                                  bounds=((0.0, None),))
+    return LogitQREMixedStrategyFitResult(
+        data, "empirical", res.x[0], do_logit(res.x[0]), -res.fun
+    )

@@ -214,7 +214,7 @@ StrategicQREPathTracer::CallbackFunction::operator()(const Vector<double> &x,
     m_stream << "," << std::setprecision(m_decimals) << profile[i];
   }
   m_stream << std::endl;
-  m_profiles.push_back(LogitQREMixedStrategyProfile(profile, x[x.Length()]));
+  m_profiles.push_back(LogitQREMixedStrategyProfile(profile, x[x.Length()], 0.0));
 }
 
 //----------------------------------------------------------------------------
@@ -307,8 +307,9 @@ public:
   void operator()(const Vector<double> &p_point,
 			  bool p_isTerminal) const override;
 
-  LogitQREMixedStrategyProfile GetMaximizer() const
-  { return LogitQREMixedStrategyProfile(m_bestProfile, m_bestLambda); }
+  LogitQREMixedStrategyProfile GetMaximizer() const {
+    return LogitQREMixedStrategyProfile(m_bestProfile, m_bestLambda, m_maxlogL);
+  }
   void PrintMaximizer() const;
 		    
 private:

@@ -389,6 +389,5 @@ def gnm_solve(game, external=False):
     return alg.solve(game)
 
 
-logit_estimate = pygambit.lib.libgambit.logit_estimate
 logit_atlambda = pygambit.lib.libgambit.logit_atlambda
 logit_principal_branch = pygambit.lib.libgambit.logit_principal_branch

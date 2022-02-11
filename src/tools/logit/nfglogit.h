@@ -38,7 +38,8 @@ public:
 
   double GetLambda() const { return m_lambda; }
   const MixedStrategyProfile<double> &GetProfile() const { return m_profile; }
-
+  double GetLogLike() const { return m_logLike; }
+ 
   Game GetGame() const           { return m_profile.GetGame(); }
   int MixedProfileLength() const { return m_profile.MixedProfileLength(); }
   double operator[](int i) const     { return m_profile[i]; }
@@ -48,12 +49,13 @@ private:
   // Access is restricted to classes in this module, which ensure that
   // objects so constructed are in fact QREs.
   LogitQREMixedStrategyProfile(const MixedStrategyProfile<double> &p_profile,
-			       double p_lambda)
-    : m_profile(p_profile), m_lambda(p_lambda)
+			       double p_lambda, double p_logLike)
+    : m_profile(p_profile), m_lambda(p_lambda), m_logLike(p_logLike)
   { }
   
   const MixedStrategyProfile<double> m_profile;
   double m_lambda;
+  double m_logLike;
 };
 
 
