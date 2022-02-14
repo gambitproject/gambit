@@ -184,6 +184,12 @@ cdef class Game(object):
     def __repr__(self):
         return self.write()
 
+    def _repr_html_(self):
+        if self.is_tree:
+            return self.write()
+        else:
+            return self.write('html')
+
     def __richcmp__(Game self, other, whichop):
         if isinstance(other, Game):
             if whichop == 2:
