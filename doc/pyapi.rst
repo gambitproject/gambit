@@ -577,19 +577,27 @@ Game representations
       :param profile: A list of integers specifying the strategy
                       number each player plays in the profile.
 
-   .. py:method:: mixed_strategy_profile(rational=False)
+   .. py:method:: mixed_strategy_profile(data=None, rational=False)
 
       Returns a mixed strategy profile :py:class:`MixedStrategyProfile`
-      over the game, initialized to uniform randomization for each
+      over the game.  If ``data`` is not specified, the mixed
+      strategy profile is initialized to uniform randomization for each
       player over his strategies.  If the game has a tree
       representation, the mixed strategy profile is defined over the
       reduced strategic form representation.
+
+      :param data: A nested list (or compatible type) with the
+		   same dimension as the strategy set of the game,
+		   specifying the probabilities of the strategies.
       
       :param rational: If :literal:`True`, probabilities are
                        represented using rational numbers; otherwise
                        double-precision floating point numbers are
                        used.
 
+      .. versionadded:: 16.1.0
+	 Added the *data* parameter.
+		       
    .. py:method:: mixed_behavior_profile(rational=False)
 
       Returns a behavior strategy profile

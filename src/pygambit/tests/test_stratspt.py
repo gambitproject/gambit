@@ -9,7 +9,7 @@ class TestGambitStrategicRestriction(unittest.TestCase):
         self.game = pygambit.Game.read_game("test_games/mixed_strategy.nfg")
 
         self.profile_double = self.game.mixed_strategy_profile()
-        self.profile_rational = self.game.mixed_strategy_profile(True)
+        self.profile_rational = self.game.mixed_strategy_profile(rational=True)
         self.restriction = self.profile_double.restriction()
 
         self.tree_game = (
@@ -18,7 +18,7 @@ class TestGambitStrategicRestriction(unittest.TestCase):
 
         self.tree_profile_double = self.tree_game.mixed_strategy_profile()
         self.tree_profile_rational = (
-            self.tree_game.mixed_strategy_profile(True)
+            self.tree_game.mixed_strategy_profile(rational=True)
         )
         self.tree_restriction = self.tree_profile_double.restriction()
 

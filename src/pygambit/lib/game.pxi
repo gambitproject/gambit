@@ -358,19 +358,54 @@ cdef class Game(object):
         return self._get_contingency(*tuple(cont))
 
 
-    def mixed_strategy_profile(self, rational=False):
+    def mixed_strategy_profile(self, data=None, rational=False):
         cdef MixedStrategyProfileDouble mspd
         cdef MixedStrategyProfileRational mspr
         cdef c_Rational dummy_rat
         if not self.is_perfect_recall:
-            raise UndefinedOperationError("Mixed strategies not supported for games with imperfect recall.")
+            raise UndefinedOperationError(
+                "Mixed strategies not supported for games with "
+                "imperfect recall."
+            )
         if not rational:
             mspd = MixedStrategyProfileDouble()
-            mspd.profile = new c_MixedStrategyProfileDouble(self.game.deref().NewMixedStrategyProfile(0.0))
+            mspd.profile = new c_MixedStrategyProfileDouble(
+                self.game.deref().NewMixedStrategyProfile(0.0)
+            )
+            if data is None:
+                return mspd
+            if len(data) != len(self.players):
+                raise ValueError(
+                    "Number of elements does not match number of players"
+                )
+            for (p, d) in zip(self.players, data):
+                if len(p.strategies) != len(d):
+                    raise ValueError(
+                        f"Number of elements does not match number of "
+                        f"strategies for {p}"
+                    )
+                for (s, v) in zip(p.strategies, d):
+                    mspd[s] = float(v)
             return mspd
         else:
             mspr = MixedStrategyProfileRational()
-            mspr.profile = new c_MixedStrategyProfileRational(self.game.deref().NewMixedStrategyProfile(dummy_rat))
+            mspr.profile = new c_MixedStrategyProfileRational(
+                self.game.deref().NewMixedStrategyProfile(dummy_rat)
+            )
+            if data is None:
+                return mspr
+            if len(data) != len(self.players):
+                raise ValueError(
+                    "Number of elements does not match number of players"
+                )
+            for (p, d) in zip(self.players, data):
+                if len(p.strategies) != len(d):
+                    raise ValueError(
+                        f"Number of elements does not match number of "
+                        f"strategies for {p}"
+                    )
+                for (s, v) in zip(p.strategies, d):
+                    mspr[s] = Rational(v)
             return mspr
 
     def mixed_behavior_profile(self, rational=False):
