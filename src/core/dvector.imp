@@ -28,18 +28,6 @@ namespace Gambit {
 //          DVector<T>: Private and protected member functions
 //--------------------------------------------------------------------------
 
-template <class T>
-int DVector<T>::sum(int part, const PVector<int> &v) const
-{
-  int s = 0;
-
-  Array<int> len(v.Lengths());
-  for (int j = 1; j <= len[part]; j++)
-    s += v(part, j);
-
-  return s;
-}
-
 template <class T> void DVector<T>::setindex()
 {
   int index = 1;
@@ -51,36 +39,12 @@ template <class T> void DVector<T>::setindex()
   }
 }
 
-template <class T> bool DVector<T>::Check(const DVector<T> &v) const
-{
-  for (int i = 1; i <= dvlen.Length(); i++)
-    if (dvlen[i] != v.dvlen[i])   return false;
-  return true;
-}
-    
 //--------------------------------------------------------------------------
 //    DVector<T>: Constructors, destructor, and constructive operators
 //--------------------------------------------------------------------------
 
-template <class T> DVector<T>::DVector() : dvptr(nullptr)
-{ }
-
 template <class T> DVector<T>::DVector(const PVector<int> &sig)
   : PVector<T>((Array<int>)sig), dvlen(sig.Lengths().Length()),
-    dvidx(sig.Lengths().Length())
-{
-  dvptr = new T **[dvlen.Length()];
-  dvptr -= 1;
-
-  for (int i = 1; i <= dvlen.Length(); i++)
-    dvlen[i] = sig.Lengths()[i];
-
-  setindex();
-}
-
-template <class T> DVector<T>::DVector(const Vector<T> &val,
-					   const PVector<int> &sig)
-  : PVector<T>(val, sig), dvlen(sig.Lengths().Length()),
     dvidx(sig.Lengths().Length())
 {
   dvptr = new T **[dvlen.Length()];
@@ -106,34 +70,11 @@ template <class T> DVector<T>::~DVector()
   if (dvptr)  delete [] (dvptr + 1);
 }
 
-template <class T> DVector<T> &DVector<T>::operator=(const DVector<T> &v)
-{
-  if (!Check(v)) {
-    throw DimensionException();
-  }
-
-  PVector<T>::operator=(v);
-  return *this;
-}
-
-template <class T> DVector<T> &DVector<T>::operator=(const PVector<T> &v)
-{
-  PVector<T>::operator=(v);
-  return *this;
-}
-
-template <class T> DVector<T> &DVector<T>::operator=(const Vector<T> &v)
-{
-  PVector<T>::operator=(v);
-  return *this;
-}
-
 template <class T> DVector<T> &DVector<T>::operator=(T c)
 {
   PVector<T>::operator=(c);
   return *this;
 }
-
 
 
 //--------------------------------------------------------------------------
@@ -166,119 +107,6 @@ template <class T> const T &DVector<T>::operator()(int a, int b, int c) const
     throw IndexException();
   }
   return dvptr[a][b][c];
-}
-
-template <class T>
-DVector<T> DVector<T>::operator+(const DVector<T> &v) const
-{
-  if (!Check(v)) {
-    throw DimensionException();
-  }
-
-  DVector<T> tmp(*this);
-  tmp.PVector<T>::operator+=(v);
-  return tmp;
-}
-
-template <class T>
-DVector<T> &DVector<T>::operator+=(const DVector<T> &v)
-{
-  if (!Check(v)) {
-    throw DimensionException();
-  }
-  PVector<T>::operator+=(v);
-  return *this;
-}
-
-template <class T> DVector<T> DVector<T>::operator-() const
-{
-  DVector<T> tmp(*this);
-  for (int i = this->First(); i <= this->Last(); i++)
-    tmp[i] = -tmp[i];
-  return tmp;
-}
-
-template <class T>
-DVector<T> DVector<T>::operator-(const DVector<T> &v) const
-{
-  if (!Check(v)) {
-    throw DimensionException();
-  }
-  DVector<T> tmp(*this);
-  tmp.PVector<T>::operator-=(v);
-  return tmp;
-}
-
-template <class T>
-DVector<T> &DVector<T>::operator-=(const DVector<T> &v)
-{
-  if (!Check(v)) {
-    throw DimensionException();
-  }
-  PVector<T>::operator-=(v);
-  return *this;
-}
-
-template <class T> T DVector<T>::operator*(const DVector<T> &v) const
-{
-  if (!Check(v)) {
-    throw DimensionException();
-  }
-  return (*this).PVector<T>::operator*(v);
-}
-
-template <class T> DVector<T> &DVector<T>::operator*=(const T &c)
-{
-  PVector<T>::operator*=(c);
-  return *this;
-}
-
-template <class T> DVector<T> DVector<T>::operator/(const T &c) const
-{
-  DVector<T> tmp(*this);
-  tmp = tmp.PVector<T>::operator/(c);
-  return tmp;
-}
-
-template <class T> bool DVector<T>::operator==(const DVector<T> &v) const
-{
-  if (!Check(v)) {
-    throw DimensionException();
-  }
-  return PVector<T>::operator==(v);
-}
-
-template <class T> bool DVector<T>::operator!=(const DVector<T> &v) const
-{
-  return !(*this == v);
-}
-
-//-------------------------------------------------------------------------
-//                 DVector<T>: General data access
-//-------------------------------------------------------------------------
-
-template <class T>
-void DVector<T>::CopySubRow(int row, int col, const DVector<T> &v)
-{
-  if (!Check(v)) {
-    throw DimensionException();
-  }
-  if (dvlen.First() > row || row > dvlen.Last()) {
-    throw IndexException();
-  }
-  if (1 > col || col > dvlen[row]) {
-    throw IndexException();
-  }
-
-  for (int i = 1; i <= this->svlen[dvidx[row]+col-1]; i++)
-    dvptr[row][col][i] = v.dvptr[row][col][i];
-}
-
-
-
-template <class T> const Array<int> &DVector<T>::DPLengths() const
-{
-  return dvlen;
 }
 
 } // end namespace Gambit

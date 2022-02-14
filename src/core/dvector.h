@@ -29,46 +29,21 @@ namespace Gambit {
 
 template <class T> class DVector : public PVector<T>  {
 private:
-  int sum(int part, const PVector<int> &v) const;
   void setindex();
-
-  bool Check(const DVector<T> &) const;
 
 protected:
   T ***dvptr;
   Array<int> dvlen, dvidx;
 
 public:
-  DVector();
   DVector(const PVector<int> &sig);
-  DVector(const Vector<T> &val, const PVector<int> &sig);
   DVector(const DVector<T> &v);
   ~DVector() override;
 
   T &operator()(int a, int b, int c);
   const T &operator()(int a, int b, int c) const;
 
-  // extract a subvector
-  void CopySubRow(int row, int col,  const DVector<T> &v);
-
-  DVector<T> &operator=(const DVector<T> &v);
-  DVector<T> &operator=(const PVector<T> &v);
-  DVector<T> &operator=(const Vector<T> &v);
   DVector<T> &operator=(T c);
-
-  DVector<T> operator+(const DVector<T> &v) const;
-  DVector<T> &operator+=(const DVector<T> &v);
-  DVector<T> operator-() const;
-  DVector<T> operator-(const DVector<T> &v) const;
-  DVector<T> &operator-=(const DVector<T> &v);
-  T operator*(const DVector<T> &v) const;
-  DVector<T> &operator*=(const T &c);
-  DVector<T> operator/(const T &c) const;
-    
-  bool operator==(const DVector<T> &v) const;
-  bool operator!=(const DVector<T> &v) const;
-
-  const Array<int> &DPLengths() const;
 };
 
 } // end namespace Gambit
