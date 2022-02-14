@@ -1265,9 +1265,18 @@ of game.
    .. py:method:: __setitem__(player, payoff)
 
       Sets the payoff to the ``pl`` th player at the outcome to the
-      specified ``payoff``.  Payoffs may be specified as integers
-      or instances of :py:class:`pygambit.Decimal` or :py:class:`pygambit.Rational`.
+      specified ``payoff``.
+      If ``payoff`` is an ``int`` or `pygambit.Rational`, the
+      payoff is stored as a rational number.
+      If ``payoff`` is a `pygambit.Decimal`, the payoff is stored
+      as a decimal number.
+      Otherwise, the method attempts to construct a
+      `pygambit.Rational` or `pygambit.Decimal` based on the
+      string representation of ``payoff``.
       Players may be specified as in :py:func:`__getitem__`.
+
+      :raises ValueError: If ``payoff`` cannot be interpreted as
+			  a decimal or rational number.
 
 
 Representation of errors and exceptions

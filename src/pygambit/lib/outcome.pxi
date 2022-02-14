@@ -88,15 +88,29 @@ cdef class Outcome:
 
     def __setitem__(self, pl, value):
         if self.restriction is not None:
-            raise UndefinedOperationError("Changing objects in a support is not supported")
-        cdef string s
-        if isinstance(value, int) or isinstance(value, decimal.Decimal) or \
-           isinstance(value, fractions.Fraction):
-            v = str(value)
-            s = v.encode('ascii')
-            self.outcome.deref().SetPayoff(pl+1, s)
+            raise UndefinedOperationError(
+                "Changing objects in a support is not supported"
+            )
+        if isinstance(value, (int, Decimal, Rational)):
+            value = str(value)
+        elif "/" in str(value):
+            try:
+                value = str(Rational(str(value)))
+            except ValueError:
+                raise ValueError(
+                    f"Cannot convert '{value}' to a number"
+                ) from None
         else:
-            raise TypeError("payoff argument should be a numeric type instance")
+            # This slightly indirect way of converting deals best with
+            # rounding of floating point numbers - so calling code gets
+            # the value it expects when using a float
+            try:
+                value = str(Decimal(str(value)))
+            except decimal.InvalidOperation:
+                raise ValueError(
+                    f"Cannot convert '{value}' to a number"
+                ) from None
+        self.outcome.deref().SetPayoff(pl+1, value.encode('ascii'))
 
     def unrestrict(self):
         cdef Outcome o
