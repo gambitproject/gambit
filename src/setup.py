@@ -99,7 +99,7 @@ setuptools.setup(
         'numpy',
         'scipy',
     ],
-    libraries=[lrslib, cppgambit],
+    libraries=[cppgambit, lrslib],
     packages=['pygambit', 'pygambit.games', 'pygambit.lib'],
     ext_modules=Cython.Build.cythonize(libgambit)
 )
