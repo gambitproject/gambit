@@ -20,8 +20,10 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 import itertools
-
 from libcpp cimport bool
+
+import numpy as np
+
 from pygambit.lib.error import UndefinedOperationError
 import pygambit.gte
 import pygambit.gameiter
@@ -154,12 +156,36 @@ cdef class Game(object):
     @classmethod
     def from_arrays(cls, *arrays, title=None):
         cdef Game g
+        arrays = [np.array(a) for a in arrays]
         if len(set(a.shape for a in arrays)) > 1:
             raise ValueError("All specified arrays must have the same shape")
         g = Game.new_table(arrays[0].shape)
-        for profile in itertools.product(*(range(arrays[0].shape[i])
-                                         for i in range(len(g.players)))):
+        for profile in itertools.product(
+                *(range(arrays[0].shape[i]) for i in range(len(g.players)))
+        ):
             for pl in range(len(g.players)):
+                g[profile][pl] = arrays[pl][profile]
+        if title is not None:
+            g.title = title
+        else:
+            g.title = "Untitled strategic game"
+        return g
+
+    @classmethod
+    def from_dict(cls, payoffs, title=None):
+        cdef Game g
+        payoffs = {k: np.array(v) for k, v in payoffs.items()}
+        if len(set(a.shape for a in payoffs.values())) > 1:
+            raise ValueError("All specified arrays must have the same shape")
+        arrays = list(payoffs.values())
+        shape = arrays[0].shape
+        g = Game.new_table(shape)
+        for (player, label) in zip(g.players, payoffs):
+            player.label = label
+        for profile in itertools.product(
+                *(range(shape[i]) for i in range(len(g.players)))
+        ):
+            for (pl, _) in enumerate(arrays):
                 g[profile][pl] = arrays[pl][profile]
         if title is not None:
             g.title = title

@@ -479,9 +479,10 @@ Game representations
    .. py:classmethod:: from_arrays(*arrays, title=None)
 
       Creates a new :py:class:`Game` with a strategic representation.
-      Each entry in arrays is a numpy array giving the payoff matrix for the
+      Each entry in *arrays* gives the payoff matrix for the
       corresponding player.  The arrays must all have the same shape,
-      and have the same number of dimensions as the total number of players.
+      and have the same number of dimensions as the total number of
+      players.
       
       :param title: The title of the game.  If no title is specified,
 		    "Untitled strategic game" is used.
@@ -489,6 +490,17 @@ Game representations
 
       .. versionadded:: 16.1.0
 	 Added the *title* parameter
+
+   .. py:classmethod:: from_dict(payoffs, title=None)
+
+      .. versionadded:: 16.1.0
+
+      Creates a new :py:class:`Game` with a strategic representation.
+      Each entry in the dict-like object *payoffs* is a pair
+      giving the label and the payoff matrix for a player.
+      The payoff matrices must all have the same shape,
+      and have the same number of dimensions as the total number of
+      players.
 
    .. py:classmethod:: read_game(fn)
 
