@@ -29,20 +29,31 @@ import Cython.Build
 # with passing C++-specific flags when building the extension
 lrslib = ('lrslib', {'sources': glob.glob("solvers/lrs/*.c")})
 
-cppgambit = setuptools.Extension(
+cppgambit = (
+    'cppgambit',
+    {
+        'sources': (
+            glob.glob("core/*.cc") +
+            glob.glob("games/*.cc") +
+            glob.glob("games/agg/*.cc") +
+            glob.glob("solvers/*/*.cc") +
+            ["tools/lp/nfglp.cc",
+             "tools/lp/efglp.cc",
+             "tools/logit/path.cc",
+             "tools/logit/nfglogit.cc",
+             "tools/logit/efglogit.cc"]
+         ),
+         'include_dirs': ["."],
+         'cflags': (
+             ["-std=c++11"] if platform.system() == "Darwin" else []
+         )
+    }
+)
+    
+
+libgambit = setuptools.Extension(
     "pygambit.lib.libgambit",
-    sources=(
-        ["pygambit/lib/libgambit.pyx"] +
-        glob.glob("core/*.cc") +
-        glob.glob("games/*.cc") +
-        glob.glob("games/agg/*.cc") +
-        glob.glob("solvers/*/*.cc") +
-        ["tools/lp/nfglp.cc",
-         "tools/lp/efglp.cc",
-         "tools/logit/path.cc",
-         "tools/logit/nfglogit.cc",
-         "tools/logit/efglogit.cc"]
-    ),
+    sources=["pygambit/lib/libgambit.pyx"],
     language="c++",
     include_dirs=["."],
     extra_compile_args=(
@@ -88,7 +99,7 @@ setuptools.setup(
         'numpy',
         'scipy',
     ],
-    libraries=[lrslib],
+    libraries=[lrslib, cppgambit],
     packages=['pygambit', 'pygambit.games', 'pygambit.lib'],
-    ext_modules=Cython.Build.cythonize(cppgambit)
+    ext_modules=Cython.Build.cythonize(libgambit)
 )
