@@ -104,7 +104,7 @@ class TestGambitGame(unittest.TestCase):
         )
 
     def test_game_title(self):
-        assert self.game.title == ""
+        assert self.game.title == "Untitled strategic game"
         self.game.title = "Test Title"
         assert self.game.title == "Test Title"
 

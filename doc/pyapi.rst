@@ -450,26 +450,46 @@ Game representations
 
    An object representing a game, in extensive or strategic form.
 
-   .. py:classmethod:: new_tree()
+   .. py:classmethod:: new_tree(title=None)
 
       Creates a new :py:class:`Game`
       consisting of a trivial game tree, with one
       node, which is both root and terminal, and no players.
 
-   .. py:classmethod:: new_table(dim)
+      :param title: The title of the game.  If no title is specified,
+		    "Untitled extensive game" is used.
+      :type title: str
+
+      .. versionadded:: 16.1.0
+	 Added the *title* parameter
+
+   .. py:classmethod:: new_table(dim, title=None)
  
       Creates a new :py:class:`Game` with a strategic
       representation. 
 
       :param dim: A list specifying the number of strategies for each player.
+      :param title: The title of the game.  If no title is specified,
+		    "Untitled strategic game" is used.
+      :type title: str
 
-   .. py:classmethod:: from_arrays(*arrays)
+      .. versionadded:: 16.1.0
+	 Added the *title* parameter
+
+   .. py:classmethod:: from_arrays(*arrays, title=None)
 
       Creates a new :py:class:`Game` with a strategic representation.
       Each entry in arrays is a numpy array giving the payoff matrix for the
       corresponding player.  The arrays must all have the same shape,
       and have the same number of dimensions as the total number of players.
       
+      :param title: The title of the game.  If no title is specified,
+		    "Untitled strategic game" is used.
+      :type title: str
+
+      .. versionadded:: 16.1.0
+	 Added the *title* parameter
+
    .. py:classmethod:: read_game(fn)
 
       Constructs a game from its serialized representation in a file.

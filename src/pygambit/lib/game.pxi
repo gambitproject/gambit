@@ -125,14 +125,18 @@ cdef class Game(object):
     cdef c_Game game
 
     @classmethod
-    def new_tree(cls):
+    def new_tree(cls, title=None):
         cdef Game g
         g = cls()
         g.game = NewTree()
+        if title is not None:
+            g.title = title
+        else:
+            g.title = "Untitled extensive game"
         return g
 
     @classmethod
-    def new_table(cls, dim):
+    def new_table(cls, dim, title=None):
         cdef Game g
         cdef Array[int] *d
         d = new Array[int](len(dim))
@@ -141,10 +145,14 @@ cdef class Game(object):
         g = cls()
         g.game = NewTable(d)
         del d
+        if title is not None:
+            g.title = title
+        else:
+            g.title = "Untitled strategic game"
         return g
 
     @classmethod
-    def from_arrays(cls, *arrays):
+    def from_arrays(cls, *arrays, title=None):
         cdef Game g
         if len(set(a.shape for a in arrays)) > 1:
             raise ValueError("All specified arrays must have the same shape")
@@ -153,8 +161,11 @@ cdef class Game(object):
                                          for i in range(len(g.players)))):
             for pl in range(len(g.players)):
                 g[profile][pl] = arrays[pl][profile]
+        if title is not None:
+            g.title = title
+        else:
+            g.title = "Untitled strategic game"
         return g
-        
 
     @classmethod
     def read_game(cls, fn):

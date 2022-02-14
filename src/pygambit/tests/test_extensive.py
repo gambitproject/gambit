@@ -14,7 +14,7 @@ class TestGambitExtensiveGame:
 
     def test_initial_game_title(self):
         "Test to ensure correct basic title"
-        assert str(self.game) == "<Game ''>"
+        assert str(self.game) == "<Game 'Untitled extensive game'>"
 
     def test_game_title_assignment(self):
         "Test to check title assignment"
