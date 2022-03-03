@@ -24,9 +24,10 @@ cdef class Outcome:
     cdef StrategicRestriction restriction
     
     def __repr__(self):
-        return "<Outcome [%d] '%s' in game '%s'>" % (self.outcome.deref().GetNumber()-1,
-                                                     self.label,
-                                                     self.game.title)
+        return (
+            f"<Outcome [{self.outcome.deref().GetNumber()-1}] '{self.label}' "
+            f"in game '{self.game.title}'>"
+        )
     
     def __richcmp__(Outcome self, other, whichop):
         if isinstance(other, Outcome):
@@ -119,9 +120,8 @@ cdef class TreeGameOutcome:
         del self.psp
 
     def __repr__(self):
-        return "<Outcome '%s' in game '%s'>" % (self.label, 
-                                                self.game.title)
-    
+        return f"<Outcome '{self.label}' in game '{self.game.title}'>"
+
     def __richcmp__(TreeGameOutcome self, other, whichop):
         if isinstance(other, TreeGameOutcome):
             if whichop == 2:

@@ -36,10 +36,11 @@ cdef class Node:
     cdef c_GameNode node
 
     def __repr__(self):
-        return "<Node [%d] '%s' in game '%s'>" % (self.node.deref().GetNumber(),
-                                                  self.label,
-                                                  self.node.deref().GetGame().deref().GetTitle().c_str())
-    
+        return (
+            f"<Node [{self.node.deref().GetNumber()}] '{self.label}' "
+            f"in game '{self.game.title}'>"
+        )
+
     def __richcmp__(Node self, other, whichop):
         if isinstance(other, Node):
             if whichop == 2:

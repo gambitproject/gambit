@@ -58,10 +58,10 @@ cdef class Infoset:
     cdef c_GameInfoset infoset
 
     def __repr__(self):
-         return "<Infoset [%d] '%s' for player '%s' in game '%s'>" % \
-                (self.infoset.deref().GetNumber()-1, self.label,
-                 self.infoset.deref().GetPlayer().deref().GetLabel().c_str(),
-                 self.infoset.deref().GetPlayer().deref().GetGame().deref().GetTitle().c_str())
+        return (
+            f"<Infoset [{self.infoset.deref().GetNumber()-1}] '{self.label}' "
+            f"for player '{self.player.label}' in game '{self.game.title}'>"
+         )
     
     def __richcmp__(Infoset self, other, whichop):
         if isinstance(other, Infoset):

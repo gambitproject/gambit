@@ -86,11 +86,13 @@ cdef class Player:
 
     def __repr__(self):
         if self.is_chance:
-            return "<Player [CHANCE] in game '%s'>" % self.game.title
-        return "<Player [%d] '%s' in game '%s'>" % (self.number,
-                                                    self.label,
-                                                    self.game.title)
-    
+            return f"<Player [CHANCE] in game '{self.game.title}'>"
+        else:
+            return (
+                f"<Player [{self.number}] '{self.label}' "
+                f"in game '{self.game.title}'>"
+            )
+
     def __richcmp__(Player self, other, whichop):
         if isinstance(other, Player):
             if whichop == 2:

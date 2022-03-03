@@ -26,10 +26,11 @@ cdef class Strategy:
     cdef StrategicRestriction restriction
 
     def __repr__(self):
-        return "<Strategy [%d] '%s' for player '%s' in game '%s'>" % \
-                (self.number, self.label,
-                 self.player.label,
-                 self.player.game.title)
+        return (
+            f"<Strategy [{self.number}] '{self.label}' "
+            f"for player '{self.player.label}' "
+            f"in game '{self.player.game.title}'>"
+        )
     
     def __richcmp__(Strategy self, other, whichop):
         if isinstance(other, Strategy):

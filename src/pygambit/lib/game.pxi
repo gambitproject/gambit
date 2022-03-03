@@ -177,7 +177,7 @@ cdef class Game(object):
         return g        
 
     def __str__(self):
-        return "<Game '%s'>" % self.title
+        return f"<Game '{self.title}'>"
 
     def __repr__(self):
         return self.write()
