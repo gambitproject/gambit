@@ -26,11 +26,12 @@ cdef class Action:
     cdef c_GameAction action
 
     def __repr__(self):
-         return "<Action [%d] '%s' at infoset '%s' for player '%s' in game '%s'>" % \
-                (self.action.deref().GetNumber()-1, self.label,
-                 self.action.deref().GetInfoset().deref().GetLabel().c_str(),
-                 self.action.deref().GetInfoset().deref().GetPlayer().deref().GetLabel().c_str(),
-                 self.action.deref().GetInfoset().deref().GetPlayer().deref().GetGame().deref().GetTitle().c_str())
+        return (
+            f"<Action [{self.action.deref().GetNumber()-1}] '{self.label}' "
+            f"at infoset '{self.infoset.label}' "
+            f"for player '{self.player.label}' "
+            f"in game '{self.game.title}'>"
+        )
     
     def __richcmp__(Action self, other, whichop):
         if isinstance(other, Action):
