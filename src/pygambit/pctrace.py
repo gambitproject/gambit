@@ -21,14 +21,12 @@
 #
 """Trace a smooth parameterized curve using a predictor-corrector method.
 """
-
-
 import math
 import numpy
 import scipy.linalg
 
 
-def qr_decomp(b):
+def qr_decomp_scipy(b):
     qq, b[:, :] = scipy.linalg.qr(b, overwrite_a=True)
     return qq.transpose()
 
@@ -77,7 +75,7 @@ def trace_path(start, startLam, maxLam, compute_lhs, compute_jac,
     y = numpy.zeros(len(start))
     q = numpy.zeros((len(start) + 1, len(start) + 1))
     b = compute_jac(x)
-    q = qr_decomp(b)
+    q = qr_decomp_scipy(b)
     t = q[-1]                # last column is tangent
 
     if startLam == 0.0 and omega*t[-1] < 0.0:
@@ -97,7 +95,7 @@ def trace_path(start, startLam, maxLam, compute_lhs, compute_jac,
         decel = 1.0 / maxDecel      # initialize deceleration factor
         b = compute_jac(u)
         # q, b = scipy.linalg.decomp.qr(b, mode='qr')
-        q = qr_decomp(b)
+        q = qr_decomp_scipy(b)
 
         it = 1
         disto = 0.0
@@ -166,8 +164,16 @@ def trace_path(start, startLam, maxLam, compute_lhs, compute_jac,
         newT = q[-1]    # new tangent
         if sum(t * newT) < 0.0:
             # Bifurcation detected
-            print(f"Detected bifurcation near {x[-1]:f}")
-
+            # The Givens-rotation based version of the QR decomposition
+            # ensures the sense of the tangent is consistent.
+            # The SciPy implementation does not guarantee anything about
+            # the chosen sign of the decomposition.  This results in
+            # spurious detections of bifurcations (as well as missing
+            # bifurcations that do exist).
+            # The SciPy implementation is MUCH faster, so for the
+            # moment we use that implementation and suppress bifurcation
+            # detection.
+            # print(f"Detected bifurcation near {x[-1]:f}")
             omega = -omega
         t = newT[:]
 
@@ -224,6 +230,14 @@ def givens(b, q, c1, c2, ell1, ell2, ell3):
         b[ell2, k] = -s2*sv1 + s1*sv2
 
     return sn, 0.0
+
+
+def qr_decomp_orig(b):
+    q = numpy.identity(b.shape[0])
+    for m in range(b.shape[1]):
+        for k in range(m+1, b.shape[0]):
+            b[m,m], b[k,m] = givens(b, q, b[m,m], b[k,m], m, k, m+1)
+    return q
 
 
 def ynorm(y):
