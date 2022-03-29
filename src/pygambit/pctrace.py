@@ -26,7 +26,47 @@ import numpy
 import scipy.linalg
 
 
+def givens(b, q, c1, c2, ell1, ell2, ell3):
+    if math.fabs(c1) + math.fabs(c2) == 0.0:
+        return c1, c2
+
+    if math.fabs(c2) >= math.fabs(c1):
+        sn = math.sqrt(1.0 + (c1/c2)*(c1/c2)) * math.fabs(c2)
+    else:
+        sn = math.sqrt(1.0 + (c2/c1)*(c2/c1)) * math.fabs(c1)
+    s1 = c1/sn
+    s2 = c2/sn
+
+    for k in range(q.shape[1]):
+        sv1 = q[ell1, k]
+        sv2 = q[ell2, k]
+        q[ell1, k] = s1*sv1 + s2*sv2
+        q[ell2, k] = -s2*sv1 + s1*sv2
+
+    for k in range(ell3, b.shape[1]):
+        sv1 = b[ell1, k]
+        sv2 = b[ell2, k]
+        b[ell1, k] = s1*sv1 + s2*sv2
+        b[ell2, k] = -s2*sv1 + s1*sv2
+
+    return sn, 0.0
+
+
+def qr_decomp_orig(b):
+    # An implementation of QR decomposition based on Gambit's C++
+    # path-following module (based in tern on Allgower and Georg)
+    q = numpy.identity(b.shape[0])
+    for m in range(b.shape[1]):
+        for k in range(m+1, b.shape[0]):
+            b[m, m], b[k, m] = givens(b, q, b[m, m], b[k, m], m, k, m+1)
+    return q
+
+
 def qr_decomp_scipy(b):
+    # Drop-in replacement for QR decomposition using SciPy's implementation.
+    # Unlike the approach in Allgower and Georg, SciPy's implementation
+    # does not result in a consistent sign convention for the R matrix
+    # and therefore does not work with bifurcation detection.
     qq, b[:, :] = scipy.linalg.qr(b, overwrite_a=True)
     return qq.transpose()
 
@@ -206,40 +246,6 @@ def upd(q, b, x, u, y, w, t, h, angmax):
         return True
 
 
-def givens(b, q, c1, c2, ell1, ell2, ell3):
-    if math.fabs(c1) + math.fabs(c2) == 0.0:
-        return c1, c2
-
-    if math.fabs(c2) >= math.fabs(c1):
-        sn = math.sqrt(1.0 + (c1/c2)*(c1/c2)) * math.fabs(c2)
-    else:
-        sn = math.sqrt(1.0 + (c2/c1)*(c2/c1)) * math.fabs(c1)
-    s1 = c1/sn
-    s2 = c2/sn
-
-    for k in range(q.shape[1]):
-        sv1 = q[ell1, k]
-        sv2 = q[ell2, k]
-        q[ell1, k] = s1*sv1 + s2*sv2
-        q[ell2, k] = -s2*sv1 + s1*sv2
-
-    for k in range(ell3, b.shape[1]):
-        sv1 = b[ell1, k]
-        sv2 = b[ell2, k]
-        b[ell1, k] = s1*sv1 + s2*sv2
-        b[ell2, k] = -s2*sv1 + s1*sv2
-
-    return sn, 0.0
-
-
-def qr_decomp_orig(b):
-    q = numpy.identity(b.shape[0])
-    for m in range(b.shape[1]):
-        for k in range(m+1, b.shape[0]):
-            b[m,m], b[k,m] = givens(b, q, b[m,m], b[k,m], m, k, m+1)
-    return q
-
-
 def ynorm(y):
     s = 0.0
     for i in range(len(y)):
@@ -401,7 +407,7 @@ def trace_path_nojac(start, startLam, maxLam, compute_lhs,
     r = numpy.zeros(len(start))
 
     b = estimate_jac(x, compute_lhs)
-    q = qr_decomp(b)
+    q = qr_decomp_orig(b)
 
     while x[-1] >= 0.0 and x[-1] < maxLam:
         qq = q[:, :]
