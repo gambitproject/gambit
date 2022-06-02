@@ -24,6 +24,8 @@ import itertools
 from libcpp cimport bool
 from pygambit.lib.error import UndefinedOperationError
 import pygambit.gte
+import pygambit.gameiter
+
 
 cdef class Outcomes(Collection):
     "Represents a collection of outcomes in a game."

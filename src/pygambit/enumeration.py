@@ -48,7 +48,6 @@ class SupportEnumeration:
 
             try:
                 new_profile = profile.remove(elem)
+                yield from self.admissible_supports(new_profile, new_rest)
             except ValueError:
-                raise StopIteration
-
-            yield from self.admissible_supports(new_profile, new_rest)
+                pass

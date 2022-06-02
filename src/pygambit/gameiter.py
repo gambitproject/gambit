@@ -51,8 +51,10 @@ class Contingencies:
         if len(self.cont) == len(self.game.players):
             yield [list(player.strategies).index(self.cont[player])
                    for player in self.game.players]
-            raise StopIteration
-        nextpl = min(pl for (pl, player) in enumerate(self.game.players)
-                     if player not in self.cont)
-        for (st, strategy) in enumerate(self.game.players[nextpl].strategies):
-            yield from self[strategy]
+        else:
+            nextpl = min(pl for (pl, player) in enumerate(self.game.players)
+                         if player not in self.cont)
+            for (st, strategy) in enumerate(
+                    self.game.players[nextpl].strategies
+            ):
+                yield from self[strategy]

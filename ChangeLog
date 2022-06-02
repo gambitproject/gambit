@@ -3,6 +3,10 @@
 ### General
 - C++11 features are now actively used.
 
+### Fixed
+- Corrected a regression in accessing contingencies of a game in Python.
+- Removed use of explcit StopIteration (a holdover from Python 2.x support).	
+
 ## [16.0.2] - 2022-01-28
 
 ### Fixed
