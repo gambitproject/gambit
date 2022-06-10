@@ -8,7 +8,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install dependencies
         run: |
           sudo apt-key adv --fetch-keys http://repos.codelite.org/CodeLite.asc
@@ -27,11 +27,11 @@ jobs:
       - run: ./configure
       - run: make
       - run: sudo make install
- 
+
   macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install dependencies
         run: brew install automake autoconf wxwidgets
       - run: aclocal
@@ -48,7 +48,7 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: msys2/setup-msys2@v2
         with:
           install: mingw-w64-x86_64-toolchain make automake autoconf
@@ -56,7 +56,7 @@ jobs:
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
-      - run: ./configure --disable-enumpoly --with-wx-config=wx-config-3.1 
+      - run: ./configure --disable-enumpoly --with-wx-config=wx-config-3.1
       - run: make
       # We execute the installer build explicitly to put in the explicit paths to
       # the WiX executables, rather than relying on the Makefile target
@@ -66,7 +66,6 @@ jobs:
           cp gambit* installer
           "/c/Program Files (x86)/WiX Toolset v3.11/bin/candle" gambit.wxs
           "/c/Program Files (x86)/WiX Toolset v3.11/bin/light" -ext WixUIExtension gambit.wixobj
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           path: "*.msi"
-
