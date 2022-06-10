@@ -77,6 +77,11 @@ setuptools.setup(
     author="Theodore Turocy",
     author_email="ted.turocy@gmail.com",
     url="http://www.gambit-project.org",
+    project_urls={
+        'Documentation': 'https://gambitproject.readthedocs.io/',
+        'Source': 'https://github.com/gambitproject/gambit',
+        'Tracker': 'https://github.com/gambitproject/gambit/issues',
+    },
     python_requires=">=3.7",
     install_requires=[
         'lxml',  # used for reading/writing GTE files
