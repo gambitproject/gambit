@@ -149,7 +149,7 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
 		  0, wxALL | wxALIGN_CENTER, 5);
   m_infosetName = new wxTextCtrl(this, wxID_ANY,
 				 wxString(p_infoset->GetLabel().c_str(), *wxConvCurrent));
-  labelSizer->Add(m_infosetName, 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
+  labelSizer->Add(m_infosetName, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 0);
 
   topSizer->Add(new wxStaticText(this, wxID_STATIC,

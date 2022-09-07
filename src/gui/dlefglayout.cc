@@ -72,7 +72,7 @@ gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent,
 			       wxDefaultPosition, wxDefaultSize,
 			       5, tokenChoices);
   m_chanceToken->SetSelection(p_settings.ChanceToken());
-  tokenSizer->Add(m_chanceToken, 1, wxALL | wxEXPAND | wxALIGN_CENTER, 5);
+  tokenSizer->Add(m_chanceToken, 1, wxALL | wxEXPAND, 5);
 
   tokenSizer->Add(new wxStaticText(this, wxID_STATIC,
 				   _("Indicate player nodes with")),
@@ -81,7 +81,7 @@ gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent,
 			       wxDefaultPosition, wxDefaultSize,
 			       5, tokenChoices);
   m_playerToken->SetSelection(p_settings.PlayerToken());
-  tokenSizer->Add(m_playerToken, 1, wxALL | wxEXPAND | wxALIGN_CENTER, 5);
+  tokenSizer->Add(m_playerToken, 1, wxALL | wxEXPAND, 5);
 
   tokenSizer->Add(new wxStaticText(this, wxID_STATIC,
 				   _("Indicate terminal nodes with")),
@@ -90,7 +90,7 @@ gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent,
 				 wxDefaultPosition, wxDefaultSize,
 				 5, tokenChoices);
   m_terminalToken->SetSelection(p_settings.TerminalToken());
-  tokenSizer->Add(m_terminalToken, 1, wxALL | wxEXPAND | wxALIGN_CENTER, 5);
+  tokenSizer->Add(m_terminalToken, 1, wxALL | wxEXPAND, 5);
 
   nodeSizer->Add(tokenSizer, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(nodeSizer, 0, wxALL | wxALIGN_CENTER, 5);

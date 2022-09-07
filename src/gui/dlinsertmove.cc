@@ -103,8 +103,8 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent,
   buttonSizer->Add(okButton, 0, wxALL, 5);
 
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(m_playerItem, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5);
-  topSizer->Add(m_infosetItem, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5);
+  topSizer->Add(m_playerItem, 0, wxALL | wxEXPAND, 5);
+  topSizer->Add(m_infosetItem, 0, wxALL | wxEXPAND, 5);
   topSizer->Add(actionSizer, 0, wxALL | wxALIGN_CENTER, 5);
   topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);
   
