@@ -502,7 +502,7 @@ private:
 
   //private helper functor classes:
 
-  struct div_helper :public std::unary_function<void, iterator>{
+  struct div_helper {
     div_helper(const std::vector<V>& den, int piv,iterator en)
 	:pivot(piv), denom(den),endp(en){}
     inline void operator()(iterator p){
@@ -515,7 +515,7 @@ private:
     iterator endp;
   };
 
-  struct div_helper_mul: public std::unary_function<void,iterator>{
+  struct div_helper_mul {
     div_helper_mul(const std::vector<V>& den, int piv, TrieNode<V>* des,iterator en)
 	:pivot(piv),denom(den), dest(des),endp(en) {}
 

@@ -292,7 +292,7 @@ private:
 
 
   //input functor 
-  struct input : public std::unary_function<aggpayoff::iterator , void>{
+  struct input {
     input(std::istream &i): in(i) {}
     void operator() (aggpayoff::iterator p) {
 	in >> (*p).second;
@@ -300,7 +300,7 @@ private:
     std::istream &in;
   };
 
-  struct inputRand : public std::unary_function<aggpayoff::iterator, void>{
+  struct inputRand {
     inputRand(bool int_payoffs=false, int int_factor=100):int_payoffs(int_payoffs),int_factor(int_factor) {}
     void operator() (aggpayoff::iterator p){
 #if HAVE_DRAND48
