@@ -74,87 +74,25 @@ Gambit version 13.x.x.  Bug fixes should typically be based off of
 this branch.
 
 
-Supported compilers
--------------------
-
-Currently, gcc is the only compiler supported.  The version of gcc needs
-to be new enough to handle templates correctly.  The oldest versions
-of gcc known to compile Gambit are 3.4.6 (Linux, Ubuntu) and 3.4.2 (MinGW for Windows, Debian stable).
-
-If you wish to use another compiler, the most likely stumbling block is
-that Gambit uses templated member functions for classes, so the compiler
-must support these.  (Version of gcc prior to 3.4 do not, for example.)
-
-
-
 For Windows users
 -----------------
 
 For Windows users wanting to compile Gambit on their own, you'll need
 to use either the Cygwin or MinGW environments.  We do compilation and
-testing of Gambit on Windows using MinGW, which can be gotten from
-`<http://www.mingw.org>`_.
-We prefer MinGW over Cygwin because MinGW will create native Windows
-applications, whereas Cygwin requires an extra compatibility layer.
+testing of Gambit on Windows using MinGW.
 
 
 For OS X users
 --------------
 
 For building the command-line tools only, one should follow the
-instructions for Un*x/Linux platforms above.  ``make install`` will
-install the command-line tools into ``/usr/local/bin`` (or the path
-specified in the ``configure`` step).
-
-To build the graphical interface, wxWidgets 2.9.5 or higher is
-recommended, although 2.8.12 should also be suitable.
-(The interface will build with wxWidgets 2.9.4, but there is a bug
-in wxWidgets involving drag-and-drop which renders the graphical interface
-essentially unusable.)
-
-Snow Leopard (OS X 10.8) users will have to take some extra steps to
-build wxWidgets if 2.8.12 is used.
-wxWidgets 2.8.12 requires the 10.6 SDK to build the
-using Cocoa; this has been removed by Apple in recent editions of
-XCode.  Download and unpack the 10.6 SDK from an earlier XCode version
-into
-``/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk``.
-With that in place, unpack the wxWidgets sources, and from the root
-directory of the wxWidgets sources, do::
-
-  mkdir build-debug
-  cd build-debug
-  arch_flags="-arch i386" CFLAGS="$arch_flags" CXXFLAGS="$arch_flags" \
-     CPPFLAGS="$arch_flags" LDFLAGS="$arch_flags" OBJCFLAGS="$arch_flags" \ 
-     OBJCXXFLAGS="$arch_flags" \
-     ../configure  \
-     --with-macosx-version-min=10.6 \
-     --with-macosx-sdk=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk \
-     --prefix="$(pwd)" --disable-shared --enable-debug --enable-unicode
-  make
-
-Then, when configuring Gambit, use::
-
-  arch_flags="-arch i386" CFLAGS="$arch_flags" CXXFLAGS="$arch_flags" \
-     CPPFLAGS="$arch_flags" LDFLAGS="$arch_flags" OBJCFLAGS="$arch_flags" \ 
-     OBJCXXFLAGS="$arch_flags" \
-     ./configure --with-wxdir=WXPATH/build-debug
-  make osx-bundle
-
-where ``WXPATH`` is the path at which you have the wxWidgets sources
-unpacked.  These steps are not required for wxWidgets 2.9.5 or higher.
-
-This produces an application ``Gambit.app`` in the current directory,
-which can be run from its current location, or copied elsewhere in the
-disk (such as ``/Applications``).  The application bundle includes the
-command-line executables.
+instructions for Un*x/Linux platforms above.
 
 
 The graphical interface and wxWidgets
 -------------------------------------
 
-Gambit requires wxWidgets version 2.8.0 or higher for the
-graphical interface, although 2.9.5 or higher is recommended.
+Gambit requires wxWidgets version 3.1.x or higher.
 See the wxWidgets website at
 `<http://www.wxwidgets.org>`_
 to download this if you need it.  Packages of this should be available
@@ -180,27 +118,31 @@ can either (a) simply not install wxWidgets, or (b) pass the argument
 This will just build the command-line tools, and will not require
 a wxWidgets installation.
 
+For OS X users, after the usual ``make`` step, run
+
+  make osx-bundle
+
+This produces an application ``Gambit.app`` in the current directory,
+which can be run from its current location, or copied elsewhere in the
+disk (such as ``/Applications``).  The application bundle includes the
+command-line executables.
+
+
 
 .. _build-python:
 
 Building the Python extension
 -----------------------------
 
-The :ref:`Python extension for Gambit <python-api>` is in src/python
-in the Gambit source tree.  Prerequisite packages include setuptools,
-Cython, IPython, and scipy.
-
+The :ref:`Python extension for Gambit <python-api>` is in src/pygambit
+in the Gambit source tree. 
 Building the extension follows the standard approach::
 
-  cd src/python
+  cd src
   python setup.py build
   sudo python setup.py install
 
-There is a set of test cases in src/python/gambit/tests.  These can
-be exercised via nosetests (requires Python package nose)::
+There is a set of test cases in src/pygambit/tests.
 
-  cd src/python/gambit/tests
-  nosetests
-
-Once installed, simply ``import gambit`` in your Python shell or
+Once installed, simply ``import pygambit`` in your Python shell or
 script to get started.
