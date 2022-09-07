@@ -78,6 +78,8 @@ wxString gbtActionSheet::GetActionName(int p_act)
 { 
   if (IsCellEditControlCreated()) {
     SaveEditControlValue();
+  }
+  if (IsCellEditControlShown()) {
     HideCellEditControl();
   }
   return GetCellValue(wxSheetCoords(p_act-1, 0));
@@ -87,6 +89,8 @@ wxString gbtActionSheet::GetActionProb(int p_act)
 { 
   if (IsCellEditControlCreated()) {
     SaveEditControlValue();
+  }
+  if (IsCellEditControlShown()) {
     HideCellEditControl();
   }
   return GetCellValue(wxSheetCoords(p_act-1, 1));
