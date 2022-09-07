@@ -29,7 +29,7 @@ cdef class Action:
         return (
             f"<Action [{self.action.deref().GetNumber()-1}] '{self.label}' "
             f"at infoset '{self.infoset.label}' "
-            f"for player '{self.player.label}' "
+            f"for player '{self.infoset.player.label}' "
             f"in game '{self.game.title}'>"
         )
     
