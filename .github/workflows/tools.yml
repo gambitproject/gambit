@@ -52,12 +52,12 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           install: mingw-w64-x86_64-toolchain make automake autoconf
-      - run: pacman -S --noconfirm mingw-w64-x86_64-wxmsw3.1
+      - run: pacman -S --noconfirm mingw-w64-x86_64-wxmsw3.2
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
-      - run: ./configure --disable-enumpoly --with-wx-config=wx-config-3.1
-      - run: make
+      - run: ./configure --disable-enumpoly --with-wx-config=wx-config-3.2
+      - run: make -j 4
       # We execute the installer build explicitly to put in the explicit paths to
       # the WiX executables, rather than relying on the Makefile target
       - name: Build .msi installer

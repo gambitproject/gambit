@@ -64,7 +64,7 @@ bool gbtApplication::OnInit()
     if (result == GBT_APP_OPEN_FAILED) {
       wxMessageDialog dialog(nullptr,
 			     wxT("Gambit could not open file '") + 
-			     wxString((const char *) argv[i], *wxConvCurrent) + 
+			     wxApp::argv[i] +
 			     wxT("' for reading."), 
 			     wxT("Unable to open file"),
 			     wxOK | wxICON_ERROR);
@@ -73,7 +73,7 @@ bool gbtApplication::OnInit()
     else if (result == GBT_APP_PARSE_FAILED) {
       wxMessageDialog dialog(nullptr,
 			     wxT("File '") +
-			     wxString((const char *) argv[i], *wxConvCurrent) +
+			     wxApp::argv[i] +
 			     wxT("' is not in a format Gambit recognizes."),
 			     wxT("Unable to read file"),
 			     wxOK | wxICON_ERROR);

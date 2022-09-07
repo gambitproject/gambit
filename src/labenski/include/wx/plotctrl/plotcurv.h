@@ -165,7 +165,7 @@ public:
     // returns 0 if not found
     int GetOptionInt(const wxString& name) const;
     // get the arrays of option values
-    wxArrayString GetOptionNames() const;
+    wxSortedArrayString GetOptionNames() const;
     wxArrayString GetOptionValues() const;
 
     //-------------------------------------------------------------------------

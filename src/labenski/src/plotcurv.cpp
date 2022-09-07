@@ -271,7 +271,7 @@ int wxPlotCurve::GetOptionInt(const wxString& name) const
     return wxAtoi(GetOption(name));
 }
 
-wxArrayString wxPlotCurve::GetOptionNames() const
+wxSortedArrayString wxPlotCurve::GetOptionNames() const
 {
     wxCHECK_MSG(M_PLOTCURVEDATA, wxArrayString(), wxT("invalid plotcurve"));
     return M_PLOTCURVEDATA->m_optionNames;

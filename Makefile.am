@@ -650,7 +650,6 @@ gambit_SOURCES = \
 	src/labenski/src/block.cpp \
 	src/labenski/src/genergdi.cpp \
 	src/labenski/src/geometry.cpp \
-	src/labenski/src/menubtn.cpp \
 	src/labenski/src/optvalue.cpp \
 	src/labenski/src/range.cpp \
 	src/labenski/src/spinctld.cpp \
@@ -694,7 +693,6 @@ gambit_SOURCES = \
 	src/labenski/include/wx/wxthings/genergdi.h \
 	src/labenski/include/wx/wxthings/geometry.h \
 	src/labenski/include/wx/wxthings/medsort.h \
-	src/labenski/include/wx/wxthings/menubtn.h \
 	src/labenski/include/wx/wxthings/optvalue.h \
 	src/labenski/include/wx/wxthings/range.h \
 	src/labenski/include/wx/wxthings/spinctld.h \
