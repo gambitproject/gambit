@@ -64,18 +64,18 @@ class TestGambitOutcomes(unittest.TestCase):
         self.assertRaises(TypeError, self.game.outcomes.__getitem__, 1.3)
 
     def test_getting_payoff_by_label_string(self):
-        assert(self.game.outcomes[0]['joe'] == 1)
-        assert(self.game.outcomes[0]['dan'] == 2)
-        assert(self.game.outcomes[1]['joe'] == 3)
-        assert(self.game.outcomes[1]['dan'] == 4)
+        assert self.game.outcomes[0]['joe'] == 1
+        assert self.game.outcomes[0]['dan'] == 2
+        assert self.game.outcomes[1]['joe'] == 3
+        assert self.game.outcomes[1]['dan'] == 4
 
     def test_getting_payoff_by_player(self):
         player1 = self.game.players[0]
         player2 = self.game.players[1]
-        assert(self.game.outcomes[0][player1] == 1)
-        assert(self.game.outcomes[0][player2] == 2)
-        assert(self.game.outcomes[1][player1] == 3)
-        assert(self.game.outcomes[1][player2] == 4)
+        assert self.game.outcomes[0][player1] == 1
+        assert self.game.outcomes[0][player2] == 2
+        assert self.game.outcomes[1][player1] == 3
+        assert self.game.outcomes[1][player2] == 4
 
     def test_outcome_delete(self):
         "Test to ensure it is possible to delete an outcome from the game"
