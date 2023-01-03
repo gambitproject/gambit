@@ -20,7 +20,8 @@ jobs:
                 libwxgtk3.1-0-unofficial \
                 libwxgtk3.1unofficial-dev \
                 wx3.1-headers \
-                wx-common
+                wx-common \
+                libnotify-dev
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
