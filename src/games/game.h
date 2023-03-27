@@ -73,6 +73,40 @@ public:
   //@}
 };
 
+
+class BaseGameRep {
+protected:
+    int m_refCount;
+
+public:
+    /// @name Lifecycle
+    //@{
+    /// Constructor; initializes reference count
+    BaseGameRep() : m_refCount(0) { }
+    /// Destructor
+    virtual ~BaseGameRep() = default;
+    //@}
+
+    /// @name Validation
+    //@{
+    /// Is the object still valid?
+    bool IsValid() const { return true; }
+    /// Invalidate the object; delete if not referenced elsewhere
+    void Invalidate()
+    { if (!m_refCount) delete this; }
+    //@}
+
+    /// @name Reference counting
+    //@{
+    /// Increment the reference count
+    void IncRef() { m_refCount++; }
+    /// Decrement the reference count; delete if reference count is zero.
+    void DecRef() { if (!--m_refCount) delete this; }
+    /// Returns the reference count
+    int RefCount() const { return m_refCount; }
+    //@}
+};
+
 /// An exception thrown when attempting to dereference an invalidated object 
 class InvalidObjectException : public Exception {
 public:
@@ -647,7 +681,7 @@ public:
 
 
 /// This is the class for representing an arbitrary finite game.
-class GameRep : public GameObject {
+class GameRep : public BaseGameRep {
   friend class GameTreeInfosetRep;
   friend class GamePlayerRep;
   friend class GameTreeNodeRep;
