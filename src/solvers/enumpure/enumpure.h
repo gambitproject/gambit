@@ -34,7 +34,7 @@ namespace Nash {
 /// 
 class EnumPureStrategySolver : public StrategySolver<Rational> {
 public:
-   EnumPureStrategySolver(shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0) 
+   EnumPureStrategySolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
     : StrategySolver<Rational>(p_onEquilibrium) { }
   virtual ~EnumPureStrategySolver()  { }
 
@@ -67,7 +67,7 @@ EnumPureStrategySolver::Solve(const Game &p_game) const
 ///
 class EnumPureAgentSolver : public BehavSolver<Rational> {
 public:
-  EnumPureAgentSolver(shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
+  EnumPureAgentSolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
     : BehavSolver<Rational>(p_onEquilibrium) { }
   virtual ~EnumPureAgentSolver()  { }
 

@@ -182,26 +182,26 @@ template class BehavStrategyDetailRenderer<Rational>;
 
 
 template <class T>
-StrategySolver<T>::StrategySolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
+StrategySolver<T>::StrategySolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
   : m_onEquilibrium(p_onEquilibrium)
 {
   if (m_onEquilibrium.get() == nullptr) {
-    m_onEquilibrium = new MixedStrategyNullRenderer<T>();
+    m_onEquilibrium.reset(new MixedStrategyNullRenderer<T>());
   }
 }
 
 template <class T>
-BehavSolver<T>::BehavSolver(shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
+BehavSolver<T>::BehavSolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
   : m_onEquilibrium(p_onEquilibrium)
 {
   if (m_onEquilibrium.get() == nullptr) {
-    m_onEquilibrium = new BehavStrategyNullRenderer<T>();
+    m_onEquilibrium.reset(new BehavStrategyNullRenderer<T>());
   }
 }
 
 template <class T>
-BehavViaStrategySolver<T>::BehavViaStrategySolver(shared_ptr<StrategySolver<T> > p_solver,
-							  shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
+BehavViaStrategySolver<T>::BehavViaStrategySolver(std::shared_ptr<StrategySolver<T> > p_solver,
+							  std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
   : BehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
 { }
 
@@ -218,8 +218,8 @@ BehavViaStrategySolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 
 
 template <class T>
-SubgameBehavSolver<T>::SubgameBehavSolver(shared_ptr<BehavSolver<T> > p_solver,
-						  shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
+SubgameBehavSolver<T>::SubgameBehavSolver(std::shared_ptr<BehavSolver<T> > p_solver,
+						  std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium /* = 0 */)
   : BehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
 { }
 

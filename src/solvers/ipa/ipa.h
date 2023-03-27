@@ -30,7 +30,7 @@ namespace Nash {
 
 class NashIPAStrategySolver : public StrategySolver<double> {
 public:
-  NashIPAStrategySolver(shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = 0)
+  NashIPAStrategySolver(std::shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = 0)
     : StrategySolver<double>(p_onEquilibrium)
   { }
   virtual ~NashIPAStrategySolver() { }

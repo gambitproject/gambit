@@ -190,8 +190,9 @@ int main(int argc, char *argv[])
       }
     }
     for (int i = 1; i <= starts.size(); i++) {
-      shared_ptr<StrategyProfileRenderer<Rational> > renderer;
-      renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
+      std::shared_ptr<StrategyProfileRenderer<Rational> > renderer(
+        new MixedStrategyCSVRenderer<Rational>(std::cout)
+      );
       NashSimpdivStrategySolver algorithm(gridResize, 0, verbose,
 					  renderer);
       algorithm.Solve(starts[i]);

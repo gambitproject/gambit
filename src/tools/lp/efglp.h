@@ -30,7 +30,7 @@ using namespace Gambit::Nash;
 
 template <class T> class NashLpBehavSolver : public BehavSolver<T> {
 public:
-  NashLpBehavSolver(Gambit::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = nullptr)
+  NashLpBehavSolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = nullptr)
     : BehavSolver<T>(p_onEquilibrium) { }
   ~NashLpBehavSolver() override = default;
 

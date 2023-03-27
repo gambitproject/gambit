@@ -42,7 +42,7 @@ NashGNMStrategySolver::ToProfile(const Game &p_game,
 
 List<MixedStrategyProfile<double> >
 NashGNMStrategySolver::Solve(const Game &p_game,
-			     shared_ptr<gnmgame> p_rep,
+			     std::shared_ptr<gnmgame> p_rep,
 			     const cvector &p_pert) const
 {
   const int STEPS = 100;
@@ -72,11 +72,11 @@ NashGNMStrategySolver::Solve(const Game &p_game,
   return eqa;
 }
 
-shared_ptr<gnmgame>
+std::shared_ptr<gnmgame>
 NashGNMStrategySolver::BuildRepresentation(const Game &p_game) const
 {
   if (p_game->IsAgg()) {
-    return new aggame(dynamic_cast<GameAggRep &>(*p_game));
+    return std::shared_ptr<gnmgame>(new aggame(dynamic_cast<GameAggRep &>(*p_game)));
   }
   else {
     Rational maxPay = p_game->GetMaxPayoff();
@@ -91,7 +91,7 @@ NashGNMStrategySolver::BuildRepresentation(const Game &p_game) const
     }
     cvector payoffs(veclength);
   
-    shared_ptr<gnmgame> A = new nfgame(p_game->NumPlayers(), actions, payoffs);
+    std::shared_ptr<gnmgame> A(new nfgame(p_game->NumPlayers(), actions, payoffs));
   
     std::vector<int> profile(p_game->NumPlayers());
     for (StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {
@@ -116,7 +116,7 @@ NashGNMStrategySolver::Solve(const Game &p_game) const
     throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  Gambit::shared_ptr<gnmgame> A = BuildRepresentation(p_game);
+  std::shared_ptr<gnmgame> A = BuildRepresentation(p_game);
   cvector g(A->getNumActions()); 
   g[0] = 1.0;
   for (int i = 1; i < A->getNumActions(); i++) {
@@ -134,7 +134,7 @@ NashGNMStrategySolver::Solve(const Game &p_game,
   }
 
   List<MixedStrategyProfile<double> > solutions;
-  Gambit::shared_ptr<gnmgame> A = BuildRepresentation(p_game);
+  std::shared_ptr<gnmgame> A = BuildRepresentation(p_game);
   cvector g(A->getNumActions());
   for (int i = 0; i < A->getNumActions(); i++) {
     g[i] = p_pert[i+1];

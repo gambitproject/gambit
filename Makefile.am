@@ -301,7 +301,6 @@ EXTRA_DIST = \
 
 
 core_SOURCES = \
-	src/core/shared_ptr.h \
 	src/core/array.h \
 	src/core/list.h \
 	src/core/vector.h \

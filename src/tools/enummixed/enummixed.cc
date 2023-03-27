@@ -35,7 +35,7 @@ using namespace Gambit::Nash;
 
 template <class T> void
 PrintCliques(const List<List<MixedStrategyProfile<T> > > &p_cliques,
-	     shared_ptr<StrategyProfileRenderer<T> > p_renderer)
+             std::shared_ptr<StrategyProfileRenderer<T> > p_renderer)
 {
   for (int cl = 1; cl <= p_cliques.size(); cl++) {
     for (int i = 1; i <= p_cliques[cl].size(); i++) {
@@ -144,17 +144,16 @@ int main(int argc, char *argv[])
   try {
     Game game = ReadGame(*input_stream);
     if (uselrs) {
-      shared_ptr<StrategyProfileRenderer<Rational> > renderer;
-      renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
+      std::shared_ptr<StrategyProfileRenderer<Rational> > renderer(new MixedStrategyCSVRenderer<Rational>(std::cout));
       EnumMixedLrsStrategySolver solver(renderer);
       solver.Solve(game);
     }
     else if (useFloat) {
-      shared_ptr<StrategyProfileRenderer<double> > renderer;
-      renderer = new MixedStrategyCSVRenderer<double>(std::cout,
-						      numDecimals);
+      std::shared_ptr<StrategyProfileRenderer<double> > renderer(
+        new MixedStrategyCSVRenderer<double>(std::cout, numDecimals)
+      );
       EnumMixedStrategySolver<double> solver(renderer);
-      shared_ptr<EnumMixedStrategySolution<double> > solution =
+      std::shared_ptr<EnumMixedStrategySolution<double> > solution =
 	solver.SolveDetailed(game);
       if (showConnect) {
 	List<List<MixedStrategyProfile<double> > > cliques =
@@ -163,10 +162,9 @@ int main(int argc, char *argv[])
       }
     }
     else {
-      shared_ptr<StrategyProfileRenderer<Rational> > renderer;
-      renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
+      std::shared_ptr<StrategyProfileRenderer<Rational> > renderer(new MixedStrategyCSVRenderer<Rational>(std::cout));
       EnumMixedStrategySolver<Rational> solver(renderer);
-      shared_ptr<EnumMixedStrategySolution<Rational> > solution =
+      std::shared_ptr<EnumMixedStrategySolution<Rational> > solution =
 	solver.SolveDetailed(game);
       if (showConnect) {
 	List<List<MixedStrategyProfile<Rational> > > cliques =

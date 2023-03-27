@@ -124,34 +124,33 @@ int main(int argc, char *argv[])
 
   try {
     Game game = ReadGame(*input_stream);
-    shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+    std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
     if (reportStrategic || !game->IsTree()) {
       if (printDetail) {
-	renderer = new MixedStrategyDetailRenderer<Rational>(std::cout);
+	renderer.reset(new MixedStrategyDetailRenderer<Rational>(std::cout));
       }
       else {
-	renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
+	renderer.reset(new MixedStrategyCSVRenderer<Rational>(std::cout));
       }
     }
     else {
       if (printDetail) {
-	renderer = new BehavStrategyDetailRenderer<Rational>(std::cout);
+	renderer.reset(new BehavStrategyDetailRenderer<Rational>(std::cout));
       }
       else {
-	renderer = new BehavStrategyCSVRenderer<Rational>(std::cout);
+	renderer.reset(new BehavStrategyCSVRenderer<Rational>(std::cout));
       }
     }
 
     if (game->IsTree())  {
       if (bySubgames) {
-	shared_ptr<BehavSolver<Rational> > stage;
+	std::shared_ptr<BehavSolver<Rational> > stage;
         if (solveAgent) {
-	  stage = new EnumPureAgentSolver();
+	  stage.reset(new EnumPureAgentSolver());
 	}
 	else {
-	  shared_ptr<StrategySolver<Rational> > substage = 
-	    new EnumPureStrategySolver();
-	  stage = new BehavViaStrategySolver<Rational>(substage);
+	  std::shared_ptr<StrategySolver<Rational> > substage(new EnumPureStrategySolver());
+	  stage.reset(new BehavViaStrategySolver<Rational>(substage));
 	}
 	SubgameBehavSolver<Rational> algorithm(stage, renderer);
 	algorithm.Solve(game);

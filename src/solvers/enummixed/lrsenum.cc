@@ -584,7 +584,7 @@ long nash2_main (lrs_dic *P1, lrs_dat *Q1, lrs_dic *P2orig,
 		 lrs_mp_vector output1, lrs_mp_vector output2,
 		 const Game &p_game,
 		 List<MixedStrategyProfile<Rational> > &p_equilibria,
-		 shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium)
+		 std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium)
 
 
 {

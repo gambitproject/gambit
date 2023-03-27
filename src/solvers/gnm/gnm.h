@@ -31,7 +31,7 @@ namespace Nash {
 
 class NashGNMStrategySolver : public StrategySolver<double> {
 public:
-  NashGNMStrategySolver(shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = 0,
+  NashGNMStrategySolver(std::shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = 0,
 			bool p_verbose=false)
     : StrategySolver<double>(p_onEquilibrium),
       m_verbose(p_verbose)
@@ -46,9 +46,9 @@ private:
   bool m_verbose;
   
   List<MixedStrategyProfile<double> > Solve(const Game &p_game,
-					    shared_ptr<gametracer::gnmgame> A,
+					    std::shared_ptr<gametracer::gnmgame> A,
 					    const gametracer::cvector &p_pert) const;
-  shared_ptr<gametracer::gnmgame> BuildRepresentation(const Game &p_game) const;
+  std::shared_ptr<gametracer::gnmgame> BuildRepresentation(const Game &p_game) const;
 
   static MixedStrategyProfile<double> ToProfile(const Game &p_game,
 						const gametracer::cvector &p_pert);

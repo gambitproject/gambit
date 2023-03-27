@@ -138,25 +138,24 @@ int main(int argc, char *argv[])
     Game game = ReadGame(*input_stream);
     if (!game->IsTree() || useStrategic) {
       if (useFloat) {
-	shared_ptr<StrategyProfileRenderer<double> > renderer;
+	std::shared_ptr<StrategyProfileRenderer<double> > renderer;
 	if (printDetail)  {
-	  renderer = new MixedStrategyDetailRenderer<double>(std::cout,
-							     numDecimals);
+	  renderer.reset(new MixedStrategyDetailRenderer<double>(std::cout, numDecimals));
 	}
 	else {
-	  renderer = new MixedStrategyCSVRenderer<double>(std::cout, numDecimals);
+	  renderer.reset(new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
 	}
 	NashLcpStrategySolver<double> algorithm(stopAfter, maxDepth,
 						renderer);
 	algorithm.Solve(game);
       }
       else {
-	shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+	std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
 	if (printDetail) {
-	  renderer = new MixedStrategyDetailRenderer<Rational>(std::cout);
+	  renderer.reset(new MixedStrategyDetailRenderer<Rational>(std::cout));
 	}
 	else {
-	  renderer = new MixedStrategyCSVRenderer<Rational>(std::cout);
+	  renderer.reset(new MixedStrategyCSVRenderer<Rational>(std::cout));
 	}
 	NashLcpStrategySolver<Rational> algorithm(stopAfter, maxDepth,
 						  renderer);
@@ -166,25 +165,23 @@ int main(int argc, char *argv[])
     else {
       if (!bySubgames) {
 	if (useFloat) {
-	  shared_ptr<StrategyProfileRenderer<double> > renderer;
+	  std::shared_ptr<StrategyProfileRenderer<double> > renderer;
 	  if (printDetail)  {
-	    renderer = new BehavStrategyDetailRenderer<double>(std::cout,
-							       numDecimals);
+	    renderer.reset(new BehavStrategyDetailRenderer<double>(std::cout, numDecimals));
 	  }
 	  else {
-	    renderer = new BehavStrategyCSVRenderer<double>(std::cout, 
-							    numDecimals);
+	    renderer.reset(new BehavStrategyCSVRenderer<double>(std::cout, numDecimals));
 	  }
 	  NashLcpBehaviorSolver<double> algorithm(stopAfter, maxDepth, renderer);
 	  algorithm.Solve(game);
 	}
 	else {
-	  shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+	  std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
 	  if (printDetail) {
-	    renderer = new BehavStrategyDetailRenderer<Rational>(std::cout);
+	    renderer.reset(new BehavStrategyDetailRenderer<Rational>(std::cout));
 	  }
 	  else {
-	    renderer = new BehavStrategyCSVRenderer<Rational>(std::cout);
+	    renderer.reset(new BehavStrategyCSVRenderer<Rational>(std::cout));
 	  }
 	  NashLcpBehaviorSolver<Rational> algorithm(stopAfter, maxDepth, renderer);
 	  algorithm.Solve(game);
@@ -192,31 +189,29 @@ int main(int argc, char *argv[])
       }
       else {
 	if (useFloat) {
-	  shared_ptr<BehavSolver<double> > stage = 
-	    new NashLcpBehaviorSolver<double>(stopAfter, maxDepth);
-	  shared_ptr<StrategyProfileRenderer<double> > renderer;
+	  std::shared_ptr<BehavSolver<double> > stage(
+	    new NashLcpBehaviorSolver<double>(stopAfter, maxDepth)
+      );
+	  std::shared_ptr<StrategyProfileRenderer<double> > renderer;
 	  if (printDetail)  {
-	    renderer = new BehavStrategyDetailRenderer<double>(std::cout,
-							       numDecimals);
+	    renderer.reset(new BehavStrategyDetailRenderer<double>(std::cout, numDecimals));
 	  }
 	  else {
-	    renderer = new BehavStrategyCSVRenderer<double>(std::cout, 
-							    numDecimals);
+	    renderer.reset(new BehavStrategyCSVRenderer<double>(std::cout, numDecimals));
 	  }
 	  SubgameBehavSolver<double> algorithm(stage, renderer);
 	  algorithm.Solve(game);
 	}
 	else {
-	  shared_ptr<BehavSolver<Rational> > stage = 
-	    new NashLcpBehaviorSolver<Rational>(stopAfter, maxDepth);
-	  shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+	  std::shared_ptr<BehavSolver<Rational> > stage(
+	    new NashLcpBehaviorSolver<Rational>(stopAfter, maxDepth)
+      );
+	  std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
 	  if (printDetail)  {
-	    renderer = new BehavStrategyDetailRenderer<Rational>(std::cout,
-								 numDecimals);
+	    renderer.reset(new BehavStrategyDetailRenderer<Rational>(std::cout, numDecimals));
 	  }
 	  else {
-	    renderer = new BehavStrategyCSVRenderer<Rational>(std::cout, 
-							      numDecimals);
+	    renderer.reset(new BehavStrategyCSVRenderer<Rational>(std::cout, numDecimals));
 	  }
 	  SubgameBehavSolver<Rational> algorithm(stage, renderer);
 	  algorithm.Solve(game);

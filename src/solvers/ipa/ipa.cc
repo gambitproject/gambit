@@ -47,11 +47,11 @@ NashIPAStrategySolver::Solve(const Game &p_game,
     throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  Gambit::shared_ptr<gnmgame> A;
+  std::shared_ptr<gnmgame> A;
   List<MixedStrategyProfile<double> > solutions;
   
-  if (p_game->IsAgg()){
-    A = new aggame(dynamic_cast<GameAggRep &>(*p_game));
+  if (p_game->IsAgg()) {
+    A.reset(new aggame(dynamic_cast<GameAggRep &>(*p_game)));
   }
   else {
     std::vector<int> actions(p_game->NumPlayers());
@@ -62,7 +62,7 @@ NashIPAStrategySolver::Solve(const Game &p_game,
     }
     cvector payoffs(veclength);
   
-    A = new nfgame(p_game->NumPlayers(), actions, payoffs);
+    A.reset(new nfgame(p_game->NumPlayers(), actions, payoffs));
   
     std::vector<int> profile(p_game->NumPlayers());
     for (StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {
