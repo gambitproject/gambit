@@ -33,7 +33,7 @@ void AllSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
 			     ActionCursorForSupport *c,
 			     Gambit::List<Gambit::BehaviorSupportProfile> &list)
 { 
-  list.Append(*sact);
+  list.push_back(*sact);
 
   ActionCursorForSupport c_copy(*c);
 
@@ -71,7 +71,7 @@ void AllInequivalentSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s
 					 Gambit::List<Gambit::BehaviorSupportProfile> &list)
 { 
   if (sact->HasActiveActionsAtActiveInfosetsAndNoOthers())
-    list.Append(*sact);
+    list.push_back(*sact);
 
   ActionCursorForSupport c_copy(*c);
 
@@ -138,7 +138,7 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
 	abort = true;
       }
       else { 
-	deletion_list.Append(this_action);
+	deletion_list.push_back(this_action);
       }
     }
   } while (!abort && scanner.GoToNext());
@@ -147,7 +147,7 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
   if (!abort && !no_deletions) {
     Gambit::List<Gambit::GameAction> actual_deletions;
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
-      actual_deletions.Append(deletion_list[i]);
+      actual_deletions.push_back(deletion_list[i]);
       Gambit::List<Gambit::GameInfoset> deactivated_infosets;
       
       sact->RemoveAction(deletion_list[i], deactivated_infosets); 
@@ -171,7 +171,7 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
   // If there are no deletions, we ask if it is consistent, then recurse.
   if (!abort && no_deletions) {
     if (sact->HasActiveActionsAtActiveInfosetsAndNoOthers())
-      list.Append(*sact);
+      list.push_back(*sact);
     
     ActionCursorForSupport c_copy(*c);
     
@@ -253,7 +253,7 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
 	abort = true;
       }
       else { 
-	deletion_list.Append(this_action);
+	deletion_list.push_back(this_action);
       }
     }
   } while (!abort && scanner.GoToNext());
@@ -267,7 +267,7 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
       if (c->DeletionsViolateActiveCommitments(sact,&deactivated_infosets)) {
 	abort = true;
       }
-      actual_deletions.Append(deletion_list[i]);
+      actual_deletions.push_back(deletion_list[i]);
     }
 
     if (!abort && deletion_list.Length() > 0) 
@@ -281,7 +281,7 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
   if (!abort && deletion_list.Length() == 0) {
 
     if (add_support && sact->HasActiveActionsAtActiveInfosetsAndNoOthers())
-      list.Append(*sact);
+      list.push_back(*sact);
     ActionCursorForSupport c_copy(*c);
     do {
       if ( sact->Contains(c_copy.GetAction()) ) {
@@ -336,7 +336,7 @@ Gambit::List<Gambit::BehaviorSupportProfile> SortSupportsBySize(Gambit::List<Gam
 
   Gambit::List<Gambit::BehaviorSupportProfile> answer;
   for (int i = 1; i <= list.Length(); i++)
-    answer.Append(list[listproxy[i]]);
+    answer.push_back(list[listproxy[i]]);
 
   return answer;
 }
@@ -381,13 +381,13 @@ PossibleNashSubsupports(const Gambit::BehaviorSupportProfile &p_support,
   ActionCursorForSupport copy(p_cursor);
   if (!copy.GoToNext()) {
     if (p_support.HasActiveActionsAtActiveInfosetsAndNoOthers()) {
-      p_list.Append(p_support);
+      p_list.push_back(p_support);
     }
 
     Gambit::BehaviorSupportProfile copySupport(p_support);
     copySupport.RemoveAction(p_cursor.GetAction());
     if (copySupport.HasActiveActionsAtActiveInfosetsAndNoOthers()) {
-      p_list.Append(copySupport);
+      p_list.push_back(copySupport);
     }
     return;
   }
@@ -646,7 +646,7 @@ InfosetGuaranteedActiveByPriorCommitments(const Gambit::BehaviorSupportProfile *
 {
   Gambit::List<Gambit::GameNode> members;
   for (int i = 1; i <= infoset->NumMembers(); i++) {
-    members.Append(infoset->GetMember(i));
+    members.push_back(infoset->GetMember(i));
   }
 
   for (int i = 1; i <= members.Length(); i++) {

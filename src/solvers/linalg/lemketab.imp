@@ -86,7 +86,7 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
       // Find all row indices for which column col has positive entries.
   for (i = this->MinRow(); i <= this->MaxRow(); i++)
     if (incol[i] > this->eps2)
-      BestSet.Append(i);
+      BestSet.push_back(i);
   if(BestSet.Length()==0) {
     //* gout << "\nBestSet.Length() == 0, Find(0): " << Find(0);
     return 0;
@@ -161,7 +161,7 @@ template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
       // Find all row indices for which column col has positive entries.
   for (i = this->MinRow(); i <= this->MaxRow(); i++)
     if (incol[i] > this->eps2)
-      BestSet.Append(i);
+      BestSet.push_back(i);
   // Is this really needed?  
   if(BestSet.Length()==0)
     //   gout << "\nBestSet.Length() == 0, Find(0):\n" << Find(0);

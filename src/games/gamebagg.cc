@@ -94,8 +94,8 @@ GameBagentRep::GameBagentRep(agg::BAGG *_baggPtr)
   int k = 1;
   for (int pl = 1; pl <= baggPtr->getNumPlayers(); pl++) {
     for (int j = 0; j < baggPtr->getNumTypes(pl-1); j++,k++) {
-      m_players.Append(new GamePlayerRep(this, k,
-					 baggPtr->getNumActions(pl-1, j)));
+      m_players.push_back(new GamePlayerRep(this, k,
+                                            baggPtr->getNumActions(pl-1, j)));
       m_players[k]->m_label = lexical_cast<std::string>(k);
       agent2baggPlayer[k] = pl;
       for (int st = 1; st <= m_players[k]->NumStrategies(); st++) {
@@ -125,7 +125,7 @@ Array<int> GameBagentRep::NumStrategies() const
 {
   Array<int> ns;
   for (int pl = 1; pl <= NumPlayers(); pl++) {
-    ns.Append(m_players[pl]->m_strategies.Length());
+    ns.push_back(m_players[pl]->m_strategies.Length());
   }
   return ns;
 }

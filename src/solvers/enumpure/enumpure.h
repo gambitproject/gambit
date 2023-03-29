@@ -52,7 +52,7 @@ EnumPureStrategySolver::Solve(const Game &p_game) const
     if ((*citer)->IsNash()) {
       MixedStrategyProfile<Rational> profile = (*citer)->ToMixedStrategyProfile();
       m_onEquilibrium->Render(profile);
-      solutions.Append(profile);
+      solutions.push_back(profile);
     }
   }
   return solutions;
@@ -82,7 +82,7 @@ EnumPureAgentSolver::Solve(const BehaviorSupportProfile &p_support) const
     if (citer->IsAgentNash()) {
       MixedBehaviorProfile<Rational> profile = citer->ToMixedBehaviorProfile();
       m_onEquilibrium->Render(profile);
-      solutions.Append(profile);
+      solutions.push_back(profile);
     }
   }
   return solutions;

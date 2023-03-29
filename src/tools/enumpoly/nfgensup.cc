@@ -65,7 +65,7 @@ List<StrategySupportProfile> SortSupportsBySize(List<StrategySupportProfile> &p_
 
   List<StrategySupportProfile> answer;
   for (int i = 1; i <= p_list.Length(); i++)
-    answer.Append(p_list[listproxy[i]]);
+    answer.push_back(p_list[listproxy[i]]);
 
   return answer;
 }
@@ -95,7 +95,7 @@ void PossibleNashSubsupports(const StrategySupportProfile &s,
 	abort = true;
       }
       else {
-	deletion_list.Append(this_strategy);
+	deletion_list.push_back(this_strategy);
       }
     }
   } while (!abort && scanner.GoToNext());
@@ -103,7 +103,7 @@ void PossibleNashSubsupports(const StrategySupportProfile &s,
   if (!abort) {
     List<GameStrategy> actual_deletions;
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
-      actual_deletions.Append(deletion_list[i]);
+      actual_deletions.push_back(deletion_list[i]);
       sact.RemoveStrategy(deletion_list[i]); 
     } 
 
@@ -116,7 +116,7 @@ void PossibleNashSubsupports(const StrategySupportProfile &s,
     }
   }
   if (!abort && no_deletions) {
-    p_list.Append(sact);
+    p_list.push_back(sact);
     
     StrategySupportProfile::iterator c_copy(c);
     do {

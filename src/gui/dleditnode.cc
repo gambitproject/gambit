@@ -57,7 +57,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
 	   iset++) {
 	Gambit::GameInfoset infoset = p_node->GetGame()->GetChance()->GetInfoset(iset);
 	if (infoset->NumActions() == p_node->NumChildren()) {
-	  m_infosetList.Append(infoset);
+	  m_infosetList.push_back(infoset);
 	  m_infoset->Append(wxString::Format(_("Chance infoset %d"),
 					     infoset->GetNumber()));
 	  if (infoset == p_node->GetInfoset()) {
@@ -74,7 +74,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
 	for (int iset = 1; iset <= player->NumInfosets(); iset++) {
 	  Gambit::GameInfoset infoset = player->GetInfoset(iset);
 	  if (infoset->NumActions() == p_node->NumChildren()) {
-	    m_infosetList.Append(infoset);
+	    m_infosetList.push_back(infoset);
 	    m_infoset->Append(wxString::Format(_("Player %d, Infoset %d"),
 					       pl, iset));
 	    if (infoset == p_node->GetInfoset()) {

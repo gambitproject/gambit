@@ -135,7 +135,7 @@ void LUdecomp<T>::update( int col, int matcol )
     tab.GetColumn( matcol, scratch1); 
     solve( scratch1, scratch1 );
     if ( scratch1[col] == (T) 0 ) throw BadPivot();
-    E.Append( EtaMatrix<T>( col, scratch1 ) );
+    E.push_back( EtaMatrix<T>( col, scratch1 ) );
     
     total_operations += iterations * m + 2 * m * m;    
   }
@@ -234,7 +234,7 @@ void LUdecomp<T>::FactorBasis()
 	pivVal = B( j, i );
       }
     }
-    P.Append(piv);
+    P.push_back(piv);
     B.SwitchRows(i,piv);
     
     scratch2 = (T) 0;
@@ -242,13 +242,13 @@ void LUdecomp<T>::FactorBasis()
     for ( j = i+1; j <= B.MaxRow(); j++ ) {
       scratch2[j] =  - B(j, i) / B(i,i);
     }
-    L.Append( EtaMatrix<T>(i, scratch2) );
+    L.push_back( EtaMatrix<T>(i, scratch2) );
     GaussElem(B, i, i);
 
   }
   for ( j = B.MinCol(); j <= B.MaxCol(); j++ ) {
     B.GetColumn( j, scratch2 );
-    U.Append( EtaMatrix<T>( j, scratch2 ));
+    U.push_back( EtaMatrix<T>( j, scratch2 ));
   }
 }
 

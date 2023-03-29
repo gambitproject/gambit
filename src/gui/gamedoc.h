@@ -216,7 +216,7 @@ friend class gbtGameView;
 private:
   Gambit::Array<gbtGameView *> m_views;
 
-  void AddView(gbtGameView *p_view)  { m_views.Append(p_view); }
+  void AddView(gbtGameView *p_view)  { m_views.push_back(p_view); }
   void RemoveView(gbtGameView *p_view)
     { 
       m_views.Remove(m_views.Find(p_view)); 

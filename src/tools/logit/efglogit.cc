@@ -113,9 +113,9 @@ AgentQREPathTracer::EquationSystem::EquationSystem(const Game &p_game)
   for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
     GamePlayer player = m_game->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      m_equations.Append(new SumToOneEquation(m_game, pl, iset));
+      m_equations.push_back(new SumToOneEquation(m_game, pl, iset));
       for (int act = 2; act <= player->GetInfoset(iset)->NumActions(); act++) {
-	m_equations.Append(new RatioEquation(m_game, pl, iset, act));
+        m_equations.push_back(new RatioEquation(m_game, pl, iset, act));
       }
     }
   }

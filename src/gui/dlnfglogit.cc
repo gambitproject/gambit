@@ -77,13 +77,13 @@ void LogitMixedBranch::AddProfile(const wxString &p_text)
 
   wxStringTokenizer tok(p_text, wxT(","));
 
-  m_lambdas.Append((double) lexical_cast<Rational>(std::string((const char *) tok.GetNextToken().mb_str())));
+  m_lambdas.push_back((double) lexical_cast<Rational>(std::string((const char *) tok.GetNextToken().mb_str())));
 
   for (int i = 1; i <= profile.MixedProfileLength(); i++) {
     profile[i] = lexical_cast<Rational>(std::string((const char *) tok.GetNextToken().mb_str()));
   }
 
-  m_profiles.Append(profile);
+  m_profiles.push_back(profile);
 }
 
 //========================================================================

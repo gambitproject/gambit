@@ -39,7 +39,7 @@ BehaviorProfileIterator::BehaviorProfileIterator(const BehaviorSupportProfile &p
       activeForPl[iset] = m_support.MayReach(player->GetInfoset(iset));
       m_numActiveInfosets[pl]++;
     }
-    m_isActive.Append(activeForPl);
+    m_isActive.push_back(activeForPl);
   }
   First();
 }
@@ -61,7 +61,7 @@ BehaviorProfileIterator::BehaviorProfileIterator(const BehaviorSupportProfile &p
       activeForPl[iset] = p_support.MayReach(player->GetInfoset(iset));
       m_numActiveInfosets[pl]++;
     }
-    m_isActive.Append(activeForPl);
+    m_isActive.push_back(activeForPl);
   }
 
   m_currentBehav(p_action->GetInfoset()->GetPlayer()->GetNumber(), 

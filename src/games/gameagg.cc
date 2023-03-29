@@ -87,7 +87,7 @@ GameAggRep::GameAggRep(agg::AGG *p_aggPtr)
   : aggPtr(p_aggPtr)
 {
   for (int pl = 1; pl <= aggPtr->getNumPlayers(); pl++) {
-    m_players.Append(new GamePlayerRep(this, pl, aggPtr->getNumActions(pl-1)));
+    m_players.push_back(new GamePlayerRep(this, pl, aggPtr->getNumActions(pl-1)));
     m_players[pl]->m_label = lexical_cast<std::string>(pl);
     for (int st = 1; st <= m_players[pl]->NumStrategies(); st++) {
       m_players[pl]->m_strategies[st]->SetLabel(lexical_cast<std::string>(st));
@@ -115,7 +115,7 @@ Array<int> GameAggRep::NumStrategies() const
 {
   Array<int> ns;
   for (int pl = 1; pl <= aggPtr->getNumPlayers(); pl++) {
-    ns.Append(m_players[pl]->NumStrategies());
+    ns.push_back(m_players[pl]->NumStrategies());
   }
   return ns;
 }

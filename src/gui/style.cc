@@ -59,7 +59,7 @@ static wxColour s_defaultColors[8] = {
 const wxColour &gbtStyle::GetPlayerColor(int pl) const
 {
   while (pl > m_playerColors.Length()) {
-    m_playerColors.Append(s_defaultColors[m_playerColors.Length() % 8]);
+    m_playerColors.push_back(s_defaultColors[m_playerColors.Length() % 8]);
   }
 
   return m_playerColors[pl];

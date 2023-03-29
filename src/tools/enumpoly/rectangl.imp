@@ -45,7 +45,7 @@ template<class T> gRectangle<T>::gRectangle(const Gambit::Vector<T> lower_bd,
   //assert (lower_bd.Check(upper_bd));
   for (int i = 1; i <= upper_bd.Length(); i++) {
     gInterval<T> side(lower_bd[i],upper_bd[i]);
-    sides.Append(side);
+    sides.push_back(side);
   }
 }
 
@@ -133,7 +133,7 @@ const gRectangle<T> gRectangle<T>::SameCenterDoubleSideLengths() const
 { 
   Gambit::List<gInterval<T> > new_sides;
   for (int i = 1; i <= Dmnsn(); i++)
-    new_sides.Append(CartesianFactor(i).SameCenterTwiceLength());
+    new_sides.push_back(CartesianFactor(i).SameCenterTwiceLength());
   return gRectangle<T>(new_sides);
 }
 
@@ -153,7 +153,7 @@ const gRectangle<T> gRectangle<T>::CubeContainingCrcmscrbngSphere() const
   
   Gambit::List<gInterval<T> > new_sides;
   for (i = 1; i <= Dmnsn(); i++)
-    new_sides.Append(CartesianFactor(i).SameCenterWithNewLength(diameter));
+    new_sides.push_back(CartesianFactor(i).SameCenterWithNewLength(diameter));
   return gRectangle<T>(new_sides);
 }
 
@@ -164,9 +164,9 @@ gRectangle<T>::Orthant(const Gambit::Array<int>& top_or_bot) const
   Gambit::List<gInterval<T> > new_sides;
   for (int i = 1; i <= Dmnsn(); i++)
     if (top_or_bot[i] == 0)
-    new_sides.Append(CartesianFactor(i).LeftHalf());
+    new_sides.push_back(CartesianFactor(i).LeftHalf());
   else
-    new_sides.Append(CartesianFactor(i).RightHalf());
+    new_sides.push_back(CartesianFactor(i).RightHalf());
   return gRectangle<T>(new_sides);
 }
 
@@ -244,7 +244,7 @@ template<class T> const Gambit::List<Gambit::Vector<T> > gRectangle<T>::VertexLi
 	next[i] = LowerBoundOfCoord(i);
       else 
 	next[i] = UpperBoundOfCoord(i);
-    answer.Append(next);
+    answer.push_back(next);
   }
   return answer;
 }
@@ -292,8 +292,8 @@ gRectangle<double>  TogDouble(const gRectangle<T>& given)
 {
   Gambit::List<gInterval<double> > cartesian_factors;
   for (int i = 1; i <= given.Dmnsn(); i++) 
-    cartesian_factors.Append(gInterval<double>((double)given.LowerBound()[i],
-					       (double)given.UpperBound()[i]));
+    cartesian_factors.push_back(gInterval<double>((double)given.LowerBound()[i],
+                                                  (double) given.UpperBound()[i]));
   return gRectangle<double>(cartesian_factors);
 }
 

@@ -272,7 +272,7 @@ void LPTableau<T>::ReversePivots(List<Array<int> > &PivotList)
     
     BestSet = List<int>();
     for(i=this->MinRow();i<=this->MaxRow();i++)
-      if(this->GtZero(tmpcol[i])) BestSet.Append(i);
+      if(this->GtZero(tmpcol[i])) BestSet.push_back(i);
     if(BestSet.Length()>0) {
       ratio = solution[BestSet[1]]/tmpcol[BestSet[1]];
       // find max ratio
@@ -404,7 +404,7 @@ void LPTableau<T>::ReversePivots(List<Array<int> > &PivotList)
       for(i=1;i<=BestSet.Length();i++) {
 	pivot[1] = BestSet[i];
 	pivot[2] = j;
-	PivotList.Append(pivot);
+	PivotList.push_back(pivot);
       }
   }
 }

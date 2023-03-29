@@ -601,7 +601,7 @@ gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent,
   topSizer->Add(m_chancePanel, 0, wxALL | wxEXPAND, 5);
 
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
-    m_playerPanels.Append(new gbtTreePlayerPanel(this, m_doc, pl));
+    m_playerPanels.push_back(new gbtTreePlayerPanel(this, m_doc, pl));
     topSizer->Add(m_playerPanels[pl], 0, wxALL | wxEXPAND, 5);
   }
 
@@ -614,7 +614,7 @@ void gbtTreePlayerToolbar::OnUpdate()
   while (m_playerPanels.Length() < m_doc->NumPlayers()) {
     auto *panel = new gbtTreePlayerPanel(this, m_doc,
 						       m_playerPanels.Length()+1);
-    m_playerPanels.Append(panel);
+    m_playerPanels.push_back(panel);
     GetSizer()->Add(panel, 0, wxALL | wxEXPAND, 5);
   }
 

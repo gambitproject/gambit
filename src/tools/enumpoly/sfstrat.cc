@@ -33,7 +33,7 @@ Gambit::List<Gambit::GameAction> Sequence::History() const
   Gambit::GameAction a = action;
   const Sequence * s = (this);
   while(a) {
-    h.Append(a);
+    h.push_back(a);
     s = s->parent;
     a = s->GetAction();
   }
@@ -98,7 +98,7 @@ void SFSequenceSet::AddSequence(Sequence *s)
   if (efp != s->Player()) {
     throw Gambit::MismatchException();
   }
-  sequences.Append(s); 
+  sequences.push_back(s);
 }
 
 // Removes a sequence pointer. Returns true if the sequence was successfully

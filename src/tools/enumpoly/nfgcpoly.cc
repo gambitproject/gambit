@@ -85,7 +85,8 @@ int HeuristicPolEnumModule::SaveSolutions(const Gambit::List<Vector<double> > &l
       profile[support.GetStrategy(i,j)] = (double)1.0 - sum;
       kk+=(support.NumStrategies(i)-1);
     }
-    index = solutions.Append(profile);
+    solutions.push_back(profile);
+    index = solutions.size();
   }
   return index;
 }

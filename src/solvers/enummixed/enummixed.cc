@@ -186,8 +186,8 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
 	  vert2id[i2] = id2;
 	  solution->m_key1.push_back(profile[p_game->GetPlayer(1)]);
 	}
-	solution->m_node1.Append(vert2id[i2]);
-	solution->m_node2.Append(vert1id[i1]);
+	solution->m_node1.push_back(vert2id[i2]);
+	solution->m_node2.push_back(vert1id[i1]);
       }
     }
   }

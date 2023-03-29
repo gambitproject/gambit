@@ -81,7 +81,7 @@ GameStrategy GamePlayerRep::NewStrategy()
   if (m_game->IsTree())  throw UndefinedException();
 
   auto *strategy = new GameStrategyRep(this);
-  m_strategies.Append(strategy);
+  m_strategies.push_back(strategy);
   strategy->m_number = m_strategies.Length();
   strategy->m_offset = -1;   // this flags this action as new
   dynamic_cast<GameTableRep *>(m_game)->RebuildTable();
@@ -100,7 +100,7 @@ void GamePlayerRep::MakeStrategy()
   }
   
   auto *strategy = new GameStrategyRep(this);
-  m_strategies.Append(strategy);
+  m_strategies.push_back(strategy);
   strategy->m_number = m_strategies.Length();
   strategy->m_behav = c;
   strategy->m_label = "";
@@ -583,7 +583,7 @@ int GameExplicitRep::MixedProfileLength() const
 
 GameOutcome GameExplicitRep::NewOutcome()
 {
-  m_outcomes.Append(new GameOutcomeRep(this, m_outcomes.Length() + 1));
+  m_outcomes.push_back(new GameOutcomeRep(this, m_outcomes.Length() + 1));
   return m_outcomes[m_outcomes.Last()];
 }
 

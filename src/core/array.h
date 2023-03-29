@@ -187,14 +187,6 @@ public:
 
   /// @name Modifying the contents of the array
   //@{
-  /// \brief Append a new element to the array.
-  ///
-  /// Append a new element to the array, and return the index at which the
-  /// element can be found.  Note that this index is guaranteed to be the
-  /// last (highest) index in the array.
-  int Append(const T &t)
-  { return InsertAt(t, this->maxdex + 1); }
-
   /// \brief Insert a new element into the array at a given index.
   ///
   /// Insert a new element into the array at a given index.  If the index is

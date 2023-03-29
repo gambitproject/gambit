@@ -513,22 +513,22 @@ void CliqueEnumerator::outCLIQUE(int clique1[], int cliqsize1,
     //printf("{") ;
     Array<int> cliq1;
     for (i=0; i<cliqsize1; i++) {
-      cliq1.Append(orignode1[clique1[i]]);
+      cliq1.push_back(orignode1[clique1[i]]);
       //printf("%d", orignode1[clique1[i]]);
       //if (i<cliqsize1-1) printf(", "); 
     }
-    m_cliques1.Append(cliq1);
+    m_cliques1.push_back(cliq1);
 
     //printf("}  x  {") ;
     //  the  "x"  in the output symbolizes the product set 
 
     Array<int> cliq2;
     for (i=0; i<cliqsize2; i++) {
-      cliq2.Append(orignode2[clique2[i]]);
+      cliq2.push_back(orignode2[clique2[i]]);
       //printf("%d", orignode2[clique2[i]]);
       //if (i<cliqsize2-1) printf(", "); 
     }
-    m_cliques2.Append(cliq2);
+    m_cliques2.push_back(cliq2);
     //    printf("}\n");
   }
 }

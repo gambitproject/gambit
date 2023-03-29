@@ -78,7 +78,7 @@ protected:
   ~GameTreeInfosetRep() override;  
 
   /// Adds the node to the information set
-  void AddMember(GameTreeNodeRep *p_node) { m_members.Append(p_node); }
+  void AddMember(GameTreeNodeRep *p_node) { m_members.push_back(p_node); }
   /// Removes the node from the information set, invalidating if emptied
   void RemoveMember(GameTreeNodeRep *);
 

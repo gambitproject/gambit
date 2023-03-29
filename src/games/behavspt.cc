@@ -34,13 +34,13 @@ BehaviorSupportProfile::BehaviorSupportProfile(const Game &p_efg)
     m_nonterminalActive(0, p_efg->NumPlayers())
 {
   for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
-    m_actions.Append(Array<Array<GameAction> >());
+    m_actions.push_back(Array<Array<GameAction> >());
     GamePlayer player = p_efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       GameInfoset infoset = player->GetInfoset(iset);
-      m_actions[pl].Append(Array<GameAction>());
+      m_actions[pl].push_back(Array<GameAction>());
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	m_actions[pl][iset].Append(infoset->GetAction(act));
+	m_actions[pl][iset].push_back(infoset->GetAction(act));
       }
     }
   }
@@ -52,13 +52,13 @@ BehaviorSupportProfile::BehaviorSupportProfile(const Game &p_efg)
     List<List<bool> > is_players_node_active;
 
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      is_players_infoset_active.Append(false);
+      is_players_infoset_active.push_back(false);
 
       List<bool> is_infosets_node_active;
       for (int n = 1; n <= player->GetInfoset(iset)->NumMembers()
 ; n++)
-	is_infosets_node_active.Append(false);
-      is_players_node_active.Append(is_infosets_node_active);
+	is_infosets_node_active.push_back(false);
+      is_players_node_active.push_back(is_infosets_node_active);
     }
     m_infosetActive[pl] = is_players_infoset_active;
     m_nonterminalActive[pl] = is_players_node_active;
@@ -189,7 +189,7 @@ void BehaviorSupportProfile::AddAction(const GameAction &s)
   }
 
   if (act > actions.Length()) {
-    actions.Append(s);
+    actions.push_back(s);
   }
 
   List<GameNode> startlist(ReachableMembers(s->GetInfoset()));
@@ -225,8 +225,8 @@ List<GameNode> BehaviorSupportProfile::ReachableNonterminalNodes(const GameNode 
     for (int i = 1; i <= NumActions(pl, iset); i++) {
       GameNode nn = n->GetChild(GetAction(pl, iset, i)->GetNumber());
       if (!nn->IsTerminal()) {
-	answer.Append(nn);
-	answer += ReachableNonterminalNodes(nn);
+        answer.push_back(nn);
+        answer += ReachableNonterminalNodes(nn);
       }
     }
   }
@@ -238,13 +238,13 @@ BehaviorSupportProfile::ReachableInfosets(const GamePlayer &p) const
 { 
   Array<GameInfoset> isets;
   for (int iset = 1; iset <= p->NumInfosets(); iset++) {
-    isets.Append(p->GetInfoset(iset));
+    isets.push_back(p->GetInfoset(iset));
   }
   List<GameInfoset> answer;
 
   for (int i = isets.First(); i <= isets.Last(); i++)
     if (MayReach(isets[i]))
-      answer.Append(isets[i]);
+      answer.push_back(isets[i]);
   return answer;
 }
 
@@ -438,7 +438,7 @@ bool BehaviorSupportProfile::Dominates(const GameAction &a, const GameAction &b,
       // This may not be a good idea; I suggest checking for this
       // prior to entry
       for (int i = 1; i <= infoset->NumMembers(); i++) {
-	nodelist.Append(infoset->GetMember(i));
+        nodelist.push_back(infoset->GetMember(i));
       }
     }
     
@@ -510,7 +510,7 @@ bool InfosetHasDominatedElement(const BehaviorSupportProfile &S,
   int iset = p_infoset->GetNumber();
   Array<GameAction> actions;
   for (int act = 1; act <= S.NumActions(pl, iset); act++) {
-    actions.Append(S.GetAction(pl, iset, act));
+    actions.push_back(S.GetAction(pl, iset, act));
   }
   for (int i = 1; i <= actions.Length(); i++)
     if (SomeElementDominates(S,actions,actions[i],
@@ -526,7 +526,7 @@ bool ElimDominatedInInfoset(const BehaviorSupportProfile &S, BehaviorSupportProf
 {
   Array<GameAction> actions;
   for (int act = 1; act <= S.NumActions(pl, iset); act++) {
-    actions.Append(S.GetAction(pl, iset, act));
+    actions.push_back(S.GetAction(pl, iset, act));
   }
   Array<bool> is_dominated(actions.Length());
   for (int k = 1; k <= actions.Length(); k++)
@@ -670,7 +670,7 @@ BehaviorSupportProfile::DeactivateSubtree(const GameNode &n, List<GameInfoset> &
     deactivate(n); 
     if (!HasActiveMembers(n->GetInfoset()->GetPlayer()->GetNumber(),
 			  n->GetInfoset()->GetNumber())) {
-      list.Append(n->GetInfoset()); 
+      list.push_back(n->GetInfoset());
       deactivate(n->GetInfoset());
     }
     Array<GameAction> actions(m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetInfoset()->GetNumber()]);
@@ -688,7 +688,7 @@ BehaviorSupportProfile::ReachableMembers(const GameInfoset &i) const
   int iset = i->GetNumber();
   for (int j = 1; j <= i->NumMembers(); j++)
     if (m_nonterminalActive[pl][iset][j])
-      answer.Append(i->GetMember(j));
+      answer.push_back(i->GetMember(j));
   return answer;
 }
 

@@ -392,7 +392,7 @@ ListOfPartialTrees<T>::ListOfPartialTrees(const Gambit::List<gPoly<T> >& given)
 : PartialTreeList()
 {
   for (int i = 1; i <= given.Length(); i++) 
-    PartialTreeList.Append(TreeOfPartials<T>(given[i]));
+    PartialTreeList.push_back(TreeOfPartials<T>(given[i]));
 }
 
 template <class T> 
@@ -400,7 +400,7 @@ ListOfPartialTrees<T>::ListOfPartialTrees(const gPolyList<T>& given)
 : PartialTreeList()
 {
   for (int i = 1; i <= given.Length(); i++) 
-    PartialTreeList.Append(TreeOfPartials<T>(given[i]));
+    PartialTreeList.push_back(TreeOfPartials<T>(given[i]));
 }
 
 template<class T> 

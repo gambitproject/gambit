@@ -169,9 +169,9 @@ gIndexOdometer gIndexOdometer::AfterExcisionOf(int& to_be_zapped) const
   Gambit::Array<int> NewMins, NewMaxs;
   int i;
   for (i = 1;              i < to_be_zapped; i++)
-    { NewMins.Append(MinIndices[i]); NewMaxs.Append(MaxIndices[i]); }
+    { NewMins.push_back(MinIndices[i]); NewMaxs.push_back(MaxIndices[i]); }
   for (i = to_be_zapped+1; i <= NoIndices(); i++)
-    { NewMins.Append(MinIndices[i]); NewMaxs.Append(MaxIndices[i]); }
+    { NewMins.push_back(MinIndices[i]); NewMaxs.push_back(MaxIndices[i]); }
 
   gIndexOdometer NewOdo(NewMins,NewMaxs);
 

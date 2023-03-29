@@ -50,13 +50,13 @@ gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent,
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
     if (player->GetLabel() != "") {
-      m_players.Append(new wxCheckBox(this, wxID_ANY, 
-				      wxString(player->GetLabel().c_str(),
-					       *wxConvCurrent)));
+      m_players.push_back(new wxCheckBox(this, wxID_ANY,
+                                         wxString(player->GetLabel().c_str(),
+                                                  *wxConvCurrent)));
     }
     else {
-      m_players.Append(new wxCheckBox(this, wxID_ANY, 
-				      wxString::Format(_T("Player %d"), pl)));
+      m_players.push_back(new wxCheckBox(this, wxID_ANY,
+                                         wxString::Format(_T("Player %d"), pl)));
     }
     m_players[pl]->SetValue(true);
     m_players[pl]->SetForegroundColour(m_doc->GetStyle().GetPlayerColor(pl));
@@ -85,7 +85,7 @@ Gambit::Array<Gambit::GamePlayer> gbtRevealMoveDialog::GetPlayers() const
 
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     if (m_players[pl]->GetValue()) {
-      players.Append(m_doc->GetGame()->GetPlayer(pl));
+      players.push_back(m_doc->GetGame()->GetPlayer(pl));
     }
   }
 

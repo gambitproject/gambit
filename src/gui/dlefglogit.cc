@@ -180,13 +180,13 @@ void gbtLogitBehavList::AddProfile(const wxString &p_text,
 
   wxStringTokenizer tok(p_text, wxT(","));
 
-  m_lambdas.Append((double) Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) tok.GetNextToken().mb_str())));
+  m_lambdas.push_back((double) Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) tok.GetNextToken().mb_str())));
 
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) tok.GetNextToken().mb_str()));
   }
 
-  m_profiles.Append(profile);
+  m_profiles.push_back(profile);
   if (p_forceShow || m_profiles.Length() - GetNumberRows() > 20) {
     AppendRows(m_profiles.Length() - GetNumberRows());
     MakeCellVisible(wxSheetCoords(GetNumberRows() - 1, 0));

@@ -83,7 +83,7 @@ GameTreeInfosetRep::GameTreeInfosetRep(GameTreeRep *p_efg, int p_number,
     p_actions--; 
   }
 
-  m_player->m_infosets.Append(this);
+  m_player->m_infosets.push_back(this);
 
   if (p_player->IsChance()) {
     m_probs = Array<Number>(m_actions.Length());
@@ -109,7 +109,7 @@ void GameTreeInfosetRep::SetPlayer(GamePlayer p_player)
 
   m_player->m_infosets.Remove(m_player->m_infosets.Find(this));
   m_player = p_player;
-  p_player->m_infosets.Append(this);
+  p_player->m_infosets.push_back(this);
 
   m_efg->ClearComputedValues();
   m_efg->Canonicalize();
@@ -495,7 +495,7 @@ GameInfoset GameTreeNodeRep::AppendMove(GameInfoset p_infoset)
   infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
   infoset->AddMember(this);
   for (int i = 1; i <= p_infoset->NumActions(); i++) {
-    children.Append(new GameTreeNodeRep(m_efg, this));
+    children.push_back(new GameTreeNodeRep(m_efg, this));
   }
 
   m_efg->ClearComputedValues();
@@ -528,11 +528,11 @@ GameInfoset GameTreeNodeRep::InsertMove(GameInfoset p_infoset)
     m_efg->m_root = newNode;
   }
 
-  newNode->children.Append(this);
+  newNode->children.push_back(this);
   m_parent = newNode;
 
   for (int i = 1; i < p_infoset->NumActions(); i++) {
-    newNode->children.Append(new GameTreeNodeRep(m_efg, newNode));
+    newNode->children.push_back(new GameTreeNodeRep(m_efg, newNode));
   }
 
   m_efg->ClearComputedValues();
@@ -942,9 +942,9 @@ GamePlayer GameTreeRep::NewPlayer()
 {
   GamePlayerRep *player = nullptr;
   player = new GamePlayerRep(this, m_players.Length() + 1);
-  m_players.Append(player);
+  m_players.push_back(player);
   for (int outc = 1; outc <= m_outcomes.Last(); outc++) {
-    m_outcomes[outc]->m_payoffs.Append(Number());
+    m_outcomes[outc]->m_payoffs.push_back(Number());
   }
   ClearComputedValues();
   return player;

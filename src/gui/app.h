@@ -67,7 +67,7 @@ public:
   //!
   //@{
   void AddDocument(gbtGameDocument *p_doc) 
-    { m_documents.Append(p_doc); }
+    { m_documents.push_back(p_doc); }
   void RemoveDocument(gbtGameDocument *p_doc)
     { m_documents.Remove(m_documents.Find(p_doc)); }
   bool AreDocumentsModified() const;

@@ -283,7 +283,7 @@ gbtTablePlayerToolbar::gbtTablePlayerToolbar(gbtNfgPanel *p_parent,
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
-    m_playerPanels.Append(new gbtTablePlayerPanel(this, p_parent, m_doc, pl));
+    m_playerPanels.push_back(new gbtTablePlayerPanel(this, p_parent, m_doc, pl));
     topSizer->Add(m_playerPanels[pl], 0, wxALL | wxEXPAND, 5);
   }
 
@@ -297,7 +297,7 @@ void gbtTablePlayerToolbar::OnUpdate()
     auto *panel = 
       new gbtTablePlayerPanel(this, m_nfgPanel, m_doc,
 			      m_playerPanels.Length()+1);
-    m_playerPanels.Append(panel);
+    m_playerPanels.push_back(panel);
     GetSizer()->Add(panel, 0, wxALL | wxEXPAND, 5);
   }
 

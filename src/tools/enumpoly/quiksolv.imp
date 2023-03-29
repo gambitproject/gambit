@@ -144,7 +144,7 @@ QuikSolv<T>::PelicanRoots(const gRectangle<T>& r,
       if (gDoubleSystem[j].Evaluate(firstcut[i]) < (double)0)
 	isokay = false;
     if (isokay)
-      answer.Append(firstcut[i]);
+      answer.push_back(firstcut[i]);
   }
   
   return true;
@@ -483,8 +483,8 @@ QuikSolv<T>::NewtonPolishedRoot(const Gambit::Vector<double> &initial) const
 {
   Gambit::List<gInterval<double> > interval_list;
   for (int i = 1; i <= Dmnsn(); i++) 
-    interval_list.Append(gInterval<double>(initial[i] - (double)1, 
-					    initial[i] + (double)1));
+    interval_list.push_back(gInterval<double>(initial[i] - (double)1,
+                                              initial[i] + (double)1));
   gRectangle<double> box(interval_list);
   Gambit::Vector<double> point(initial);
   if (!NewtonRootInRectangle(box,point))
@@ -511,7 +511,7 @@ QuikSolv<T>::MightHaveSingularRoots() const
 
   Gambit::List<gPoly<double> > newlist(gDoubleSystem.UnderlyingList());
 
-  newlist.Append(newpoly);
+  newlist.push_back(newpoly);
   gPolyList<double> larger_system(gDoubleSystem.AmbientSpace(),
 			     gDoubleSystem.TermOrder(),
 			     newlist);
@@ -544,7 +544,7 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
 
   if (NoEquations == 0) {
     Gambit::Vector<double> answer(0);
-    rootlistptr->Append(answer); 
+    rootlistptr->push_back(answer);
     Roots = *rootlistptr;  
     HasBeenSolved = true;
     return true;
@@ -646,7 +646,7 @@ QuikSolv<T>::FindRootsRecursion(      Gambit::List<Gambit::Vector<double> >* roo
       if (fuzzy_equals(point, (*rootlistptr)[i]))
 	already_found = true;
     if (!already_found) {
-      rootlistptr->Append(point);
+      rootlistptr->push_back(point);
       (*roots_found)++;
     }
     return;

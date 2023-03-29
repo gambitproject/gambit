@@ -29,7 +29,7 @@
 void TerminalDescendants(Gambit::GameNode p_node, Gambit::List<Gambit::GameNode> &current)
 {
   if (p_node->IsTerminal()) { 
-    current.Append(p_node);
+    current.push_back(p_node);
   }
   else {
     for (int i = 1; i <= p_node->NumChildren(); i++) {
@@ -81,7 +81,7 @@ static void DeviationInfosets(Gambit::List<Gambit::GameInfoset> &answer,
 
     Gambit::List<Gambit::GameAction> action_list;
     for (int j = 1; j <= iset->NumActions(); j++) {
-      action_list.Append(iset->GetAction(j));
+      action_list.push_back(iset->GetAction(j));
     }
     for (int j = 1; j <= action_list.Length(); j++) {
       DeviationInfosets(answer,big_supp,pl,child,action_list[j]);
@@ -98,7 +98,7 @@ static Gambit::List<Gambit::GameInfoset> DeviationInfosets(const Gambit::Behavio
   
   Gambit::List<Gambit::GameNode> node_list;
   for (int i = 1; i <= iset->NumMembers(); i++) {
-    node_list.Append(iset->GetMember(i));
+    node_list.push_back(iset->GetMember(i));
   }
 
   for (int i = 1; i <= node_list.Length(); i++) {
@@ -160,7 +160,7 @@ DeviationSupports(const Gambit::BehaviorSupportProfile & big_supp,
 	  active_act_no[i] = 0;
 	}
   }
-  answer.Append(new_supp);
+  answer.push_back(new_supp);
 
   int iset_cursor = isetlist.Length();
   while (iset_cursor > 0) {
@@ -197,7 +197,7 @@ DeviationSupports(const Gambit::BehaviorSupportProfile & big_supp,
 	  active_act_no[k] = 1;
 	}
       }
-      answer.Append(new_supp);
+      answer.push_back(new_supp);
     }
   }
   return answer;
@@ -276,14 +276,14 @@ NashExpectedPayoffDiffPolys(const Gambit::MixedBehaviorProfile<double> &p_soluti
   for (int pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++) {
     Gambit::Array<Gambit::GameInfoset> isets_for_pl;
     for (int iset = 1; iset <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
-      isets_for_pl.Append(p_solution.GetGame()->GetPlayer(pl)->GetInfoset(iset));
+      isets_for_pl.push_back(p_solution.GetGame()->GetPlayer(pl)->GetInfoset(iset));
     }
 			  
     for (int i = 1; i <= isets_for_pl.Length(); i++) {
       if (little_supp.MayReach(isets_for_pl[i])) {
 	Gambit::Array<Gambit::GameAction> acts_for_iset;
 	for (int act = 1; act <= isets_for_pl[i]->NumActions(); act++) {
-	  acts_for_iset.Append(isets_for_pl[i]->GetAction(act));
+	  acts_for_iset.push_back(isets_for_pl[i]->GetAction(act));
 	}
 
 	for (int j = 1; j <= acts_for_iset.Length(); j++)
@@ -375,12 +375,12 @@ bool algExtendsToNash::ExtendsToNash(const Gambit::MixedBehaviorProfile<double> 
     Gambit::List<int> list_for_pl;
 
     for (int i = 1; i <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); i++) {
-      list_for_pl.Append(num_vars);
+      list_for_pl.push_back(num_vars);
       if ( !big_supp.HasActiveActionAt(p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)) ) {
 	num_vars += p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)->NumActions() - 1;
       }
     }
-    var_index.Append(list_for_pl);
+    var_index.push_back(list_for_pl);
   }
 
   // We establish the space
@@ -553,12 +553,12 @@ bool algExtendsToAgentNash::ExtendsToAgentNash(const Gambit::MixedBehaviorProfil
     Gambit::List<int> list_for_pl;
 
     for (int i = 1; i <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); i++) {
-      list_for_pl.Append(num_vars);
+      list_for_pl.push_back(num_vars);
       if ( !big_supp.HasActiveActionAt(p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)) ) {
 	num_vars += p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)->NumActions() - 1;
       }
     }
-    var_index.Append(list_for_pl);
+    var_index.push_back(list_for_pl);
   }
 
   // We establish the space

@@ -37,10 +37,10 @@ StrategySupportProfile::StrategySupportProfile(const Game &p_nfg)
   : m_nfg(p_nfg), m_profileIndex(p_nfg->MixedProfileLength())
 { 
   for (int pl = 1, index = 1; pl <= p_nfg->NumPlayers(); pl++) {
-    m_support.Append(Array<GameStrategy>());
+    m_support.push_back(Array<GameStrategy>());
     for (int st = 1; st <= p_nfg->GetPlayer(pl)->NumStrategies(); 
 	 st++, index++) {
-      m_support[pl].Append(p_nfg->GetPlayer(pl)->GetStrategy(st));
+      m_support[pl].push_back(p_nfg->GetPlayer(pl)->GetStrategy(st));
       m_profileIndex[index] = index;
     }
   }
@@ -190,7 +190,7 @@ void StrategySupportProfile::AddStrategy(const GameStrategy &p_strategy)
   for (int id = strategy->GetId()+1; id <= m_profileIndex.Length(); id++) {
     if (m_profileIndex[id] >= 0)  m_profileIndex[id]++;
   }
-  support.Append(strategy);
+  support.push_back(strategy);
 }
 
 bool StrategySupportProfile::RemoveStrategy(const GameStrategy &p_strategy)

@@ -809,8 +809,8 @@ gbtTableWidget::gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id,
 			       gbtGameDocument *p_doc)
   : wxPanel(p_parent, p_id), m_doc(p_doc), m_nfgPanel(p_parent)
 {
-  m_rowPlayers.Append(1);
-  m_colPlayers.Append(2);
+  m_rowPlayers.push_back(1);
+  m_colPlayers.push_back(2);
 
   m_payoffSheet = new gbtPayoffsWidget(this, p_doc);
   m_payoffSheet->SetGridLineColour(*wxWHITE);
@@ -968,7 +968,7 @@ void gbtTableWidget::OnUpdate()
   if (m_doc->NumPlayers() > m_rowPlayers.Length() + m_colPlayers.Length()) {
     for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
       if (!m_rowPlayers.Contains(pl) && !m_colPlayers.Contains(pl)) {
-	m_rowPlayers.Append(pl);
+        m_rowPlayers.push_back(pl);
       }
     }
   }

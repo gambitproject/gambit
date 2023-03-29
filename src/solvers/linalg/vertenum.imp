@@ -104,8 +104,8 @@ template <class T> void VertexEnumerator<T>::Deeper()
 {
   depth++;
   if(visits.Length()<depth) {
-    visits.Append(0);
-    branches.Append(0);
+    visits.push_back(0);
+    branches.push_back(0);
   }
   visits[depth]+=1;
   nodes++;
@@ -118,8 +118,8 @@ template <class T> void VertexEnumerator<T>::Search(LPTableau<T> &tab)
   Gambit::List<Array<int> > PivotList;
   Array<int> pivot(2);
   if(tab.IsLexMin()) {
-    List.Append(tab.GetBFS1());
-    DualList.Append(tab.DualBFS());
+    List.push_back(tab.GetBFS1());
+    DualList.push_back(tab.DualBFS());
   }
   if(PivotList.Length()!=0) throw DimensionException();
   //  assert(PivotList.Length()==0);

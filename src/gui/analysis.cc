@@ -97,16 +97,16 @@ gbtAnalysisProfileList<T>::AddOutput(const wxString &p_output)
   try {
     if (m_isBehav) {
       MixedBehaviorProfile<T> profile(OutputToBehavProfile<T>(m_doc, p_output));
-      m_behavProfiles.Append(profile);
-      m_mixedProfiles.Append(profile.ToMixedProfile());
+      m_behavProfiles.push_back(profile);
+      m_mixedProfiles.push_back(profile.ToMixedProfile());
       m_current = m_behavProfiles.Length();
     }
     else {
       MixedStrategyProfile<T> profile(OutputToMixedProfile<T>(m_doc,
 							      p_output));
-      m_mixedProfiles.Append(profile);
+      m_mixedProfiles.push_back(profile);
       if (m_doc->IsTree()) {
-	m_behavProfiles.Append(MixedBehaviorProfile<T>(profile));
+        m_behavProfiles.push_back(MixedBehaviorProfile<T>(profile));
       }
       m_current = m_mixedProfiles.Length();
     }
@@ -118,7 +118,7 @@ template <class T>
 void gbtAnalysisProfileList<T>::BuildNfg()
 {
   for (int i = 1; i <= m_behavProfiles.Length(); i++) {
-    m_mixedProfiles.Append(m_behavProfiles[i].ToMixedProfile());
+    m_mixedProfiles.push_back(m_behavProfiles[i].ToMixedProfile());
   }
 }
 
@@ -200,7 +200,7 @@ void gbtAnalysisProfileList<T>::Load(TiXmlNode *p_analysis)
 	TextToBehavProfile<T>(m_doc,
 			      wxString(node->FirstChild()->Value(),
 				       *wxConvCurrent));
-      m_behavProfiles.Append(profile);
+      m_behavProfiles.push_back(profile);
       m_isBehav = true;
       m_current = m_behavProfiles.Length();
     }
@@ -209,7 +209,7 @@ void gbtAnalysisProfileList<T>::Load(TiXmlNode *p_analysis)
 	TextToMixedProfile<T>(m_doc,
 			      wxString(node->FirstChild()->Value(),
 				       *wxConvCurrent));
-      m_mixedProfiles.Append(profile);
+      m_mixedProfiles.push_back(profile);
       m_isBehav = false;
       m_current = m_mixedProfiles.Length();
     }

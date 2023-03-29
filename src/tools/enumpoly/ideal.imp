@@ -107,11 +107,11 @@ template<class T>  gIdeal<T> gIdeal<T>::operator+ (const gIdeal<T> & rhs) const
 
   for (int i = 1; i <= basis.Length(); i++) {
     auto* temp = new gPoly<T>(basis[i]);
-    combined.Append(temp);
+    combined.push_back(temp);
   }
   for (int j = 1; j <= rhs.basis.Length(); j++) {
     auto* temp = new gPoly<T>(rhs.basis[j]);
-    combined.Append(temp);
+    combined.push_back(temp);
   }
 
   return gIdeal<T>(Space,order,combined);
@@ -124,7 +124,7 @@ template<class T>  gIdeal<T> gIdeal<T>::operator* (const gIdeal<T> & rhs) const
   for (int i = 1; i <= basis.Length(); i++) 
     for (int j = 1; j <= rhs.basis.Length(); j++) {
       auto* temp = new gPoly<T>(basis[i] * rhs.basis[j]);
-      basis_products.Append(temp);
+      basis_products.push_back(temp);
     }
 
   return gIdeal<T>(Space,order,basis_products);
@@ -162,7 +162,7 @@ template<class T> Gambit::List<exp_vect> gIdeal<T>::MonomialBasis() const
     bool add = true;
     for (int j = 1; j <= basis.Length(); j++) 
       if (basis[j].LeadingPowerProduct(*order) <= candidate) add = false;
-    if (add) answer.Append(candidate);
+    if (add) answer.push_back(candidate);
   }
 
   return answer;

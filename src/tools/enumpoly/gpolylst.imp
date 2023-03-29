@@ -28,7 +28,7 @@ Gambit::List<T> InteriorSegment(const Gambit::List<T> &p_list, int first, int la
   Gambit::List<T> answer;
 
   for (int i = first; i <= last; i++)
-    answer.Append(p_list[i]);
+    answer.push_back(p_list[i]);
 
   return answer;
 }
@@ -54,7 +54,7 @@ template<class T> gPolyList<T>::gPolyList(const gSpace * sp,
 {
   int ii;
   for ( ii = 1; ii <= plist.Length(); ii++) 
-    { auto* temp = new gPoly<T>(*plist[ii]); List.Append(temp); }
+    { auto* temp = new gPoly<T>(*plist[ii]); List.push_back(temp); }
 }
 
 template<class T> gPolyList<T>::gPolyList(const gSpace * sp,
@@ -64,7 +64,7 @@ template<class T> gPolyList<T>::gPolyList(const gSpace * sp,
 {
   int ii;
   for ( ii = 1; ii <= list.Length(); ii++) 
-    { auto* temp = new gPoly<T>(list[ii]); List.Append(temp); }
+    { auto* temp = new gPoly<T>(list[ii]); List.push_back(temp); }
 }
 
 template<class T> gPolyList<T>::gPolyList(const gPolyList<T> & lst)
@@ -72,7 +72,7 @@ template<class T> gPolyList<T>::gPolyList(const gPolyList<T> & lst)
 {
   int ii;
   for ( ii = 1; ii <= lst.List.Length(); ii++) 
-    { auto* temp = new gPoly<T>(*(lst.List[ii])); List.Append(temp); }
+    { auto* temp = new gPoly<T>(*(lst.List[ii])); List.push_back(temp); }
 }
 
 template<class T> gPolyList<T>::~gPolyList()
@@ -96,7 +96,7 @@ gPolyList<T>& gPolyList<T>::operator=(const gPolyList<T> & rhs)
       { delete List[ii]; List.Remove(ii); }
 
     for (ii = 1; ii <= rhs.List.Length(); ii++) 
-      { auto* temp = new gPoly<T>(*(rhs.List[ii])); List.Append(temp); }
+      { auto* temp = new gPoly<T>(*(rhs.List[ii])); List.push_back(temp); }
 
   }
   return *this;
@@ -122,21 +122,21 @@ bool gPolyList<T>::operator!=(const gPolyList<T> & rhs) const
 template<class T>  void gPolyList<T>::operator+=(const gPoly<T> & new_poly)
 {
   auto* temp = new gPoly<T>(new_poly);
-  List.Append(temp);
+  List.push_back(temp);
 }
 
 template<class T>  void gPolyList<T>::operator+=(const gPolyList<T> & new_list)
 {
   Gambit::List<gPoly<T>*> temp;
   for (int i = 1; i <= new_list.Length(); i++)
-    temp.Append(new gPoly<T>(new_list[i]));
+    temp.push_back(new gPoly<T>(new_list[i]));
   List+=temp;
 }
 
 // NB - does not copy pointee - see gpolylst.h
 template<class T>  void gPolyList<T>::operator+=(gPoly<T> * new_poly_ptr)
 {
-  List.Append(new_poly_ptr);
+  List.push_back(new_poly_ptr);
 }
 
 template<class T>  gPoly<T> gPolyList<T>::operator[](const int index) const
@@ -302,7 +302,7 @@ template<class T> void gPolyList<T>::Grobnerize(const term_order & order)
 
   for (ii = 2; ii <= List.Length(); ii++) {
     for (int j = 1; j < ii; j++) 
-      uncomputed.Append(index_pair(j,ii));
+      uncomputed.push_back(index_pair(j,ii));
     CriterionTwo(uncomputed, computed, ii, order);
   }
 
@@ -314,7 +314,7 @@ template<class T> void gPolyList<T>::Grobnerize(const term_order & order)
 	        List[uncomputed[mindex][1]]->LeadingPowerProduct(order).
 	        LCM(List[uncomputed[mindex][2]]->LeadingPowerProduct(order))))
 	mindex = ii;
-    computed.Append(uncomputed[mindex]);
+    computed.push_back(uncomputed[mindex]);
     int ii = uncomputed[mindex][1];
     int j = uncomputed[mindex][2];
     uncomputed.Remove(mindex);
@@ -325,9 +325,9 @@ template<class T> void gPolyList<T>::Grobnerize(const term_order & order)
       if (!h.IsZero()) {
 	h.ToMonic(order);
 	auto* hptr = new gPoly<T>(h);
-	List.Append(hptr);
+	List.push_back(hptr);
 	for (int k = 1; k < List.Length(); k++) 
-	  uncomputed.Append(index_pair(k,List.Length()));
+	  uncomputed.push_back(index_pair(k,List.Length()));
 	CriterionTwo(uncomputed, computed, List.Length(), order);
       }
     }
@@ -399,7 +399,7 @@ gPolyList<T>::TranslateOfSystem(const Gambit::Vector<T>& new_origin) const
 {
   Gambit::List<gPoly<T> > new_polys;
   for (int i = 1; i <= Length(); i++) {
-    new_polys.Append((*this)[i].TranslateOfPoly(new_origin));
+    new_polys.push_back((*this)[i].TranslateOfPoly(new_origin));
     //    assert (TranslateOfPoly((*this)[i],new_origin) == 
     //	    (*this)[i].TranslateOfPoly(new_origin));
   }
@@ -413,7 +413,7 @@ gPolyList<T>::SystemInNewCoordinates(const Gambit::SquareMatrix<T>& M) const
   for (int i = 1; i <= Length(); i++) {
     //    assert ( (*this)[i].PolyInNewCoordinates(M) == 
     //     	     gPoly<T>( PolyInNewCoordinates((*this)[i],M) ) );
-    new_polys.Append((*this)[i].PolyInNewCoordinates(M));
+    new_polys.push_back((*this)[i].PolyInNewCoordinates(M));
   }
   return gPolyList<T>(AmbientSpace(),TermOrder(),new_polys);
 }
@@ -439,7 +439,7 @@ template <class T> Gambit::List<gPoly<T> > gPolyList<T>::UnderlyingList() const
   Gambit::List<gPoly<T> > NewList;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) 
-    NewList.Append(*List[ii]);
+    NewList.push_back(*List[ii]);
   return NewList;
 }
 
@@ -542,7 +542,7 @@ Gambit::List<gPoly<double> > gPolyList<T>::ListTogDouble() const
   Gambit::List<gPoly<double> > newlist;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) {
-    newlist.Append(gPoly<double>(TogDouble(*List[ii])));
+    newlist.push_back(gPoly<double>(TogDouble(*List[ii])));
   }
   return newlist;
 }
@@ -553,7 +553,7 @@ Gambit::List<gPoly<double> > gPolyList<T>::NormalizedList() const
   Gambit::List<gPoly<double> > newlist;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) {
-    newlist.Append(gPoly<double>(NormalizationOfPoly(*List[ii])));
+    newlist.push_back(gPoly<double>(NormalizationOfPoly(*List[ii])));
   }
   return newlist;
 }

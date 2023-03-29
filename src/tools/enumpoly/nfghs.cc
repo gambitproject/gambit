@@ -265,7 +265,7 @@ bool gbtNfgHs::SolveSupportSizeProfile(Game game,
     do {
       Gambit::Array < GameStrategy > supportBlock;
       GetSupport(game, i, playerSupport.GetRow(i), supportBlock);
-      domains[i].Append(supportBlock);
+      domains[i].push_back(supportBlock);
       success = UpdatePlayerSupport(game, i, playerSupport);
     }
     while (success);
@@ -292,7 +292,7 @@ void gbtNfgHs::GetSupport(Game game, int playerIdx, const Vector < int > & suppo
   GamePlayer player = game->GetPlayer(playerIdx);
   for (int i = 1; i <= support.Length(); i++) {
     int strategyIdx = support[i];
-    supportBlock.Append(player->GetStrategy(strategyIdx));
+    supportBlock.push_back(player->GetStrategy(strategyIdx));
   }
 
   return;
@@ -418,7 +418,7 @@ bool gbtNfgHs::RecursiveBacktracking(Game game,
 
       Gambit::Array < Gambit::Array < Gambit::Array < GameStrategy > > > newDomains(numPlayers);
       for (int ii = 1; ii <= idx; ii++) {
-	newDomains[ii].Append(uninstantiatedSupports[ii]);
+	newDomains[ii].push_back(uninstantiatedSupports[ii]);
       }
       for (int ii = idx + 1; ii <= numPlayers; ii++) {
 	newDomains[ii] = domains[ii];
@@ -584,7 +584,7 @@ void gbtNfgHs::GetDomainStrategies(Gambit::Array < Gambit::Array < Gambit::Array
     for (int j = 1; j <= domains[i].Length(); j++) {
       for (int k = 1; k <= domains[i] [j].Length(); k++) {
 	if (domainStrategies[i].Find(domains[i] [j] [k]) == 0) { // no found
-	  domainStrategies[i].Append(domains[i] [j] [k]);
+	  domainStrategies[i].push_back(domains[i] [j] [k]);
 	}
       }
     }
@@ -688,7 +688,7 @@ bool gbtNfgHs::FeasibilityProgram(Game game,
     if (solutionToTest.GetLiapValue() <.01) {
       gotSolutions = true;
       PrintProfile(std::cout, "NE", solutionToTest);
-      solutions.Append(solutionToTest);
+      solutions.push_back(solutionToTest);
       if ((m_stopAfter > 0) && (solutions.Length() >= m_stopAfter)) {
 	return true;
       }

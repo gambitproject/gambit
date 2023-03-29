@@ -173,7 +173,7 @@ GetSequenceDims(const Gambit::GameNode &n)
     
       bool flag = false;
       if(!isetFlag(pl,isetnum)) {   // on first visit to iset, create new sequences
-	infosets[pl].Append(n->GetInfoset());
+	infosets[pl].push_back(n->GetInfoset());
 	isetFlag(pl,isetnum)=1;
 	isetRow(pl,isetnum)=infosets[pl].Length()+1;
 	flag =true;

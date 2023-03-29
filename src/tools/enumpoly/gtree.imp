@@ -137,7 +137,7 @@ Gambit::List<gTreeNode<T>*> gTree<T>::Children(const gTreeNode<T>* n) const
   //assert(n != NULL);
   Gambit::List<gTreeNode<T>*> answer;
   for (gTreeNode<T>* child = n->eldest; child != nullptr; child = child->next)
-    answer.Append(child);
+    answer.push_back(child);
   return answer;
 }
 

@@ -62,7 +62,7 @@ void gbtBehavDominanceStack::Reset()
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
   m_supports = Gambit::Array<Gambit::BehaviorSupportProfile *>();
   if (m_doc->IsTree()) {
-    m_supports.Append(new Gambit::BehaviorSupportProfile(m_doc->GetGame()));
+    m_supports.push_back(new Gambit::BehaviorSupportProfile(m_doc->GetGame()));
     m_current = 1;
   }
   m_noFurther = false;
@@ -81,7 +81,7 @@ bool gbtBehavDominanceStack::NextLevel()
 
   Gambit::Array<int> players;
   for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
-    players.Append(pl);
+    players.push_back(pl);
   }
   
   std::ostringstream gnull;
@@ -89,7 +89,7 @@ bool gbtBehavDominanceStack::NextLevel()
     m_supports[m_current]->Undominated(m_strict, true, players, gnull);
 
   if (newSupport != *m_supports[m_current]) {
-    m_supports.Append(new Gambit::BehaviorSupportProfile(newSupport));
+    m_supports.push_back(new Gambit::BehaviorSupportProfile(newSupport));
     m_current++;
     return true;
   }
@@ -136,7 +136,7 @@ void gbtStrategyDominanceStack::Reset()
 {
   for (int i = 1; i <= m_supports.Length(); delete m_supports[i++]);
   m_supports = Gambit::Array<Gambit::StrategySupportProfile *>();
-  m_supports.Append(new Gambit::StrategySupportProfile(m_doc->GetGame()));
+  m_supports.push_back(new Gambit::StrategySupportProfile(m_doc->GetGame()));
   m_current = 1;
   m_noFurther = false;
 }
@@ -154,14 +154,14 @@ bool gbtStrategyDominanceStack::NextLevel()
 
   Gambit::Array<int> players;
   for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
-    players.Append(pl);
+    players.push_back(pl);
   }
 
   Gambit::StrategySupportProfile newSupport = 
     m_supports[m_current]->Undominated(m_strict, players);
 
   if (newSupport != *m_supports[m_current]) {
-    m_supports.Append(new Gambit::StrategySupportProfile(newSupport));
+    m_supports.push_back(new Gambit::StrategySupportProfile(newSupport));
     m_current++;
     return true;
   }
@@ -196,7 +196,7 @@ gbtGameDocument::gbtGameDocument(Gambit::Game p_game)
 
   std::ostringstream s;
   SaveDocument(s);
-  m_undoList.Append(s.str());
+  m_undoList.push_back(s.str());
 }
 
 gbtGameDocument::~gbtGameDocument()
@@ -279,13 +279,13 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
 	auto *plist = 
 	  new gbtAnalysisProfileList<double>(this, false);
 	plist->Load(analysis);
-	m_profiles.Append(plist);
+	m_profiles.push_back(plist);
       }
       else {
 	auto *plist =
 	  new gbtAnalysisProfileList<Rational>(this, false);
 	plist->Load(analysis);
-	m_profiles.Append(plist);
+	m_profiles.push_back(plist);
       }
     }
   }
@@ -310,7 +310,7 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
   if (p_saveUndo) {
     std::ostringstream s;
     SaveDocument(s);
-    m_undoList.Append(s.str());
+    m_undoList.push_back(s.str());
   }
 
   return true;
@@ -363,7 +363,7 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
 
     std::ostringstream s;
     SaveDocument(s);
-    m_undoList.Append(s.str());
+    m_undoList.push_back(s.str());
   }
 
   if (p_modifications == GBT_DOC_MODIFIED_GAME ||
@@ -414,7 +414,7 @@ void gbtGameDocument::SetStyle(const gbtStyle &p_style)
 void gbtGameDocument::Undo()
 {
   // The current game is at the end of the undo list; move it to the redo list
-  m_redoList.Append(m_undoList[m_undoList.Length()]);
+  m_redoList.push_back(m_undoList[m_undoList.Length()]);
   m_undoList.Remove(m_undoList.Length());
 
   m_game = nullptr;
@@ -437,7 +437,7 @@ void gbtGameDocument::Undo()
 
 void gbtGameDocument::Redo()
 {
-  m_undoList.Append(m_redoList[m_redoList.Length()]);
+  m_undoList.push_back(m_redoList[m_redoList.Length()]);
   m_redoList.Remove(m_redoList.Length());
 
   m_game = nullptr;
@@ -467,7 +467,7 @@ void gbtGameDocument::SetCurrentProfile(int p_profile)
 
 void gbtGameDocument::AddProfileList(gbtAnalysisOutput *p_profs)
 {
-  m_profiles.Append(p_profs);
+  m_profiles.push_back(p_profs);
   m_currentProfileList = m_profiles.Length();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }

@@ -109,9 +109,8 @@ public:
   List<T> operator+(const List<T>& b) const;
   List<T>& operator+=(const List<T>& b);
 
-  virtual int Append(const T &);
   int Insert(const T &, int);
-  virtual T Remove(int);
+  T Remove(int);
 
   int Find(const T &) const;
   bool Contains(const T &t) const;
@@ -327,15 +326,10 @@ template <class T> List<T> &List<T>::operator+=(const List<T> &b)
   Node *n = b.m_head;
   
   while (n)  {
-    Append(n->m_data);
+    push_back(n->m_data);
     n = n->m_next;
   }
   return *this;
-}
-
-template <class T> int List<T>::Append(const T &t)
-{
-  return InsertAt(t, m_length + 1);
 }
 
 template <class T> int List<T>::Insert(const T &t, int n)

@@ -424,7 +424,7 @@ void ReadStrategies(GameParserState &p_state, TableFileGame &p_data)
       }
 
       while (p_state.GetNextToken() == TOKEN_TEXT) {
-        player->m_strategies.Append(p_state.GetLastText());
+        player->m_strategies.push_back(p_state.GetLastText());
       }
 
       if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
@@ -458,7 +458,7 @@ void ReadStrategies(GameParserState &p_state, TableFileGame &p_data)
       }
 
       for (int st = 1; st <= atoi(p_state.GetLastText().c_str()); st++) {
-        player->m_strategies.Append(lexical_cast<std::string>(st));
+        player->m_strategies.push_back(lexical_cast<std::string>(st));
       }
 
       p_state.GetNextToken();
@@ -686,7 +686,7 @@ void ReadPlayers(GameParserState &p_state,
 
   while (p_state.GetNextToken() == TOKEN_TEXT) {
     p_game->NewPlayer()->SetLabel(p_state.GetLastText());
-    p_treeData.m_infosetMap.Append(std::map<int, GameInfoset>());
+    p_treeData.m_infosetMap.push_back(std::map<int, GameInfoset>());
   }
 
   if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
@@ -813,12 +813,12 @@ void ParseChanceNode(GameParserState &p_state,
       if (p_state.GetCurrentToken() != TOKEN_TEXT) {
         throw InvalidFileException(p_state.CreateLineMsg("Expecting action"));
       }
-      actions.Append(p_state.GetLastText());
+      actions.push_back(p_state.GetLastText());
 
       p_state.GetNextToken();
 
       if (p_state.GetCurrentToken() == TOKEN_NUMBER) {
-        probs.Append(p_state.GetLastText());
+        probs.push_back(p_state.GetLastText());
       }
       else {
         throw InvalidFileException(p_state.CreateLineMsg("Expecting probability"));
@@ -900,7 +900,7 @@ void ParsePersonalNode(GameParserState &p_state,
         throw InvalidFileException(
           p_state.CreateLineMsg("Expecting action"));
       }
-      actions.Append(p_state.GetLastText());
+      actions.push_back(p_state.GetLastText());
 
       p_state.GetNextToken();
     } while (p_state.GetCurrentToken() != TOKEN_RBRACE);

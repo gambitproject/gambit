@@ -201,7 +201,7 @@ template <class T> Array<int> LPSolve<T>::Artificials(const Vector<T> &b)
   Array<int> ret;
   for (int i = b.First(); i <= b.Last(); i++) {
     if (b[i] < (T) 0) {
-      ret.Append(i);
+      ret.push_back(i);
     }
   }
   return ret;

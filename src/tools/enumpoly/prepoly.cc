@@ -44,7 +44,7 @@ gSpace::gSpace(int nvars)
     newvar->Name = 'n';
     newvar->Name += Gambit::lexical_cast<std::string>(i);
     newvar->number = i;
-    Variables.Append(newvar);
+    Variables.push_back(newvar);
   }
 }
 
@@ -56,7 +56,7 @@ gSpace::gSpace(const gSpace &p)
     newvar = new Variable;
     newvar->Name = p.Variables[i]->Name;
     newvar->number = i;
-    Variables.Append(newvar);
+    Variables.push_back(newvar);
   }
 } 
 
@@ -113,7 +113,7 @@ void gSpace::CreateVariables (int nvars )
     var = new Variable;
     var->Name = 'n';
     var->Name += Gambit::lexical_cast<std::string>(n + i);
-    Variables.Append(var);
+    Variables.push_back(var);
   }
 }
 

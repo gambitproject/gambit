@@ -309,16 +309,16 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
       p_dc.SetPen(wxPen(m_style->GetPlayerColor(pl), 1, wxPENSTYLE_SOLID));
       int oldX = point.x;
       point = DrawFraction(p_dc, point, outcome->GetPayoff<Gambit::Rational>(pl));
-      m_payoffRect.Append(wxRect(oldX - 5, point.y - height / 2,
-				 point.x - oldX + 10, height));
+      m_payoffRect.push_back(wxRect(oldX - 5, point.y - height / 2,
+                                    point.x - oldX + 10, height));
     }
     else {
       wxString label = wxString(payoff.c_str(), *wxConvCurrent);
       p_dc.SetFont(wxFont(9, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
       p_dc.GetTextExtent(label, &width, &height);
       p_dc.DrawText(label, point.x, point.y - height / 2);
-      m_payoffRect.Append(wxRect(point.x - 5, point.y - height / 2,
-				 width + 10, height));
+      m_payoffRect.push_back(wxRect(point.x - 5, point.y - height / 2,
+                                    width + 10, height));
       point.x += width + 10;
     }
   }
@@ -826,7 +826,7 @@ void gbtTreeLayout::BuildNodeList(Gambit::GameNode p_node, const Gambit::Behavio
 {
   auto *entry = new gbtNodeEntry(p_node);
   entry->SetStyle(&m_doc->GetStyle());
-  m_nodeList.Append(entry);
+  m_nodeList.push_back(entry);
   entry->SetLevel(p_level);
   if (m_doc->GetStyle().RootReachable()) {
     Gambit::GameInfoset infoset = p_node->GetInfoset();

@@ -303,7 +303,7 @@ SolveSupport(const BehaviorSupportProfile &p_support, bool &p_isSingular)
     PVector<double> y = SeqFormVectorFromSolFormVector(data, solutionlist[k]);
     MixedBehaviorProfile<double> sol(data.SF.ToBehav(y));
     if (ExtendsToNash(sol)) { 
-      solutions.Append(sol);
+      solutions.push_back(sol);
     }
   }
 

@@ -44,7 +44,7 @@ template <class T> gPoly<T>::gPoly(const gSpace*     p,
 				     const term_order* o)
 : Space(p), Order(o), Terms()
 {
-  if (constant != (T)0)   Terms.Append(gMono<T>(p,constant));
+  if (constant != (T)0)   Terms.push_back(gMono<T>(p,constant));
 }
 
 template <class T> gPoly<T>::gPoly(const gSpace *p, 
@@ -59,7 +59,7 @@ template <class T> gPoly<T>::gPoly(const gSpace *p, int var_no, int exp,
 				       const term_order* o)
 : Space(p), Order(o), Terms()
 {
-  Terms.Append(gMono<T>((T)1,exp_vect(p,var_no,exp)));
+  Terms.push_back(gMono<T>((T)1,exp_vect(p,var_no,exp)));
 }
 
 template <class T> gPoly<T>::gPoly(const gSpace* p, 
@@ -68,7 +68,7 @@ template <class T> gPoly<T>::gPoly(const gSpace* p,
 				       const term_order* o)
 : Space(p), Order(o), Terms()
 {
-  Terms.Append(gMono<T>(coeff,exps));
+  Terms.push_back(gMono<T>(coeff,exps));
 }
 
 template <class T> gPoly<T>::gPoly(const gSpace* p, 
@@ -76,7 +76,7 @@ template <class T> gPoly<T>::gPoly(const gSpace* p,
 				   const term_order* o)
 : Space(p), Order(o), Terms()
 {
-  Terms.Append(mono);
+  Terms.push_back(mono);
 }
 
 template <class T> gPoly<T>::gPoly(const gPoly<T> &p)
@@ -267,7 +267,7 @@ template <class T> void gPoly<T>::String_Term(T nega)
     else String_VarAndPow(PowArray);
   }
 
-  Terms.Append(gMono<T>(val, exp_vect(Space,PowArray)));
+  Terms.push_back(gMono<T>(val, exp_vect(Space,PowArray)));
 }
 
 template <class T> int gPoly<T>::String_GetPow()
@@ -481,7 +481,7 @@ template <class T> Gambit::List<exp_vect> gPoly<T>::ExponentVectors() const
 {
   Gambit::List<exp_vect> result;
   for (int j = 1; j <= Terms.Length(); j++)
-    result.Append(exp_vect(Terms[j].ExpV()));
+    result.push_back(exp_vect(Terms[j].ExpV()));
   return result;
 }
 
@@ -524,7 +524,7 @@ polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
   Gambit::List<T> coefs;
 
   if (!IsZero()) {
-    for (int h = 0; h <= DegreeOfVar(activar); h++) coefs.Append((T)0);
+    for (int h = 0; h <= DegreeOfVar(activar); h++) coefs.push_back((T)0);
 
     for (int i = 1; i <= Terms.Length(); i++)
       coefs[Terms[i].ExpV()[activar] + 1] = Terms[i].Coef();
@@ -547,16 +547,16 @@ Gambit::List< gMono<T> > gPoly<T>::Adder(const Gambit::List<gMono<T> >& One,
 
   int i = 1; int j = 1;
   while (i <= One.Length() || j <= Two.Length()) {
-    if      (i > One.Length()) { answer.Append(Two[j]); j++; }
-    else if (j > Two.Length()) { answer.Append(One[i]); i++; }
+    if      (i > One.Length()) { answer.push_back(Two[j]); j++; }
+    else if (j > Two.Length()) { answer.push_back(One[i]); i++; }
     else {
       if      ( Order->Less(   One[i].ExpV(),Two[j].ExpV()) ) 
-	{ answer.Append(One[i]); i++; }
+	{ answer.push_back(One[i]); i++; }
       else if ( Order->Greater(One[i].ExpV(),Two[j].ExpV()) ) 
-	{ answer.Append(Two[j]); j++; }
+	{ answer.push_back(Two[j]); j++; }
       else {
 	if (One[i].Coef() + Two[j].Coef() != (T)0) 
-	  answer.Append(One[i] + Two[j]); 
+	  answer.push_back(One[i] + Two[j]);
 	i++; j++; 
       }
     }
@@ -579,13 +579,13 @@ Gambit::List< gMono<T> > gPoly<T>::Mult(const Gambit::List<gMono<T> >& One,
       {
 	gMono<T> next = One[i] * Two[j];
 
-	if (answer.Length() == 0) answer.Append(next);
+	if (answer.Length() == 0) answer.push_back(next);
 
 	else
 	  {
 	    int bot = 1; int top = answer.Length();
 	    if      ( Order->Less   (answer[top].ExpV(),next.ExpV()) ) 
-	      answer.Append(next);
+	      answer.push_back(next);
 	    else if ( Order->Greater(answer[bot].ExpV(),next.ExpV()) )
 	      answer.Insert(next,1);
 	    else
@@ -704,7 +704,7 @@ gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
   newPoly.Terms = Gambit::List<gMono<T> >();
   for (int j = 1; j <= Terms.Length(); j++) {
     if (Terms[j].ExpV()[varnumber] == degree)
-      newPoly.Terms.Append(gMono<T>(Terms[j].Coef(),
+      newPoly.Terms.push_back(gMono<T>(Terms[j].Coef(),
 	      Terms[j].ExpV().AfterZeroingOutExpOfVariable(varnumber)));
   }
 

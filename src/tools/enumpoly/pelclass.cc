@@ -500,7 +500,7 @@ PelView::GambitRootsFromPelRoots(const Gen_node g) const
 	j+=1;	  
       }
     }
-    alist.Append(vector);
+    alist.push_back(vector);
     ptr=Cdr(ptr); 
   }
   
@@ -547,7 +547,7 @@ PelView::RealRoots(const Gambit::List<Gambit::Vector<gComplex> > &clist) const
       Gambit::Vector<double> next(Dmnsn());
       for (int j = 1; j <= Dmnsn(); j++) 
 	next[j] = (double)clist[i][j].RealPart();
-      answer.Append(next);
+      answer.push_back(next);
     }
 
   }
