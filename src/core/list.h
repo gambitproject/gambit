@@ -66,7 +66,7 @@ public:
   public:
     iterator(const List &p_list, Node *p_node)
       : m_list(p_list), m_node(p_node)  { }
-    T &operator*() const { return *m_node; }
+    T &operator*() const { return m_node->m_data; }
     iterator &operator++()  { m_node = m_node->m_next; return *this; }
     bool operator==(const iterator &it) const
     { return (m_node == it.m_node); }
@@ -81,7 +81,7 @@ public:
   public:
     const_iterator(const List &p_list, Node *p_node)
       : m_list(p_list), m_node(p_node)  { }
-    const T &operator*() const { return *m_node; }
+    const T &operator*() const { return m_node->m_data; }
     const_iterator &operator++()  { m_node = m_node->m_next; return *this; }
     bool operator==(const const_iterator &it) const
     { return (m_node == it.m_node); }
@@ -91,7 +91,7 @@ public:
 
   List();
   List(const List<T> &);
-  virtual ~List();
+  ~List();
   
   List<T> &operator=(const List<T> &);
   

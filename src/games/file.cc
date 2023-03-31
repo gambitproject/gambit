@@ -829,10 +829,10 @@ void ParseChanceNode(GameParserState &p_state,
     p_state.GetNextToken();
 
     if (!infoset) {
-      infoset = p_node->AppendMove(p_game->GetChance(), actions.Length());
+      infoset = p_node->AppendMove(p_game->GetChance(), actions.size());
       p_treeData.m_chanceInfosetMap[infosetId] = infoset;
       infoset->SetLabel(label);
-      for (int act = 1; act <= actions.Length(); act++) {
+      for (int act = 1; act <= actions.size(); act++) {
         infoset->GetAction(act)->SetLabel(actions[act]);
         infoset->SetActionProb(act, probs[act]);
       }
@@ -907,11 +907,11 @@ void ParsePersonalNode(GameParserState &p_state,
     p_state.GetNextToken();
 
     if (!infoset) {
-      infoset = p_node->AppendMove(player, actions.Length());
+      infoset = p_node->AppendMove(player, actions.size());
       infosetMap[infosetId] = infoset;
       infoset->SetLabel(label);
-      for (int act = 1; act <= actions.Length(); act++) {
-	infoset->GetAction(act)->SetLabel(actions[act]);
+      for (int act = 1; act <= actions.size(); act++) {
+        infoset->GetAction(act)->SetLabel(actions[act]);
       }
     }
     else {

@@ -491,23 +491,22 @@ ANFExpectedPayoffDiffPolys(const Gambit::MixedBehaviorProfile<double> &p_solutio
 	    // action j
 	    gPoly<double> next_poly(&BehavStratSpace, &Lex);
 
-	    for (int n = 1; n <= terminal_nodes.Length(); n++) {
-	      gPoly<double> node_prob(&BehavStratSpace, (double)1.0, &Lex);
-	      if (ANFNodeProbabilityPoly(p_solution, node_prob,
-					 BehavStratSpace,
-					 Lex,
-					 big_supp,
-					 var_index,
-					 terminal_nodes[n],
-					 pl,i,j)) {
-		if (terminal_nodes[n]->GetOutcome()) {
-		  node_prob *= 
-		    (double) terminal_nodes[n]->GetOutcome()->GetPayoff<Gambit::Rational>(pl);
-		}
-		next_poly += node_prob;
-	      }
-	    }
-	    answer += -next_poly + (double) p_solution.GetPayoff(pl);
+        for (Gambit::GameNode node : terminal_nodes) {
+          gPoly<double> node_prob(&BehavStratSpace, (double) 1.0, &Lex);
+          if (ANFNodeProbabilityPoly(p_solution, node_prob,
+                                     BehavStratSpace,
+                                     Lex,
+                                     big_supp,
+                                     var_index,
+                                     node,
+                                     pl, i, j)) {
+            if (node->GetOutcome()) {
+              node_prob *= (double) node->GetOutcome()->GetPayoff<Gambit::Rational>(pl);
+            }
+            next_poly += node_prob;
+          }
+        }
+        answer += -next_poly + (double) p_solution.GetPayoff(pl);
 	  }
     }
   return answer;

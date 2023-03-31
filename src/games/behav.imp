@@ -105,10 +105,10 @@ void MixedBehaviorProfile<T>::BehaviorStrat(int pl, GameTreeNodeRep *p_node)
   for (int i = 1; i <= p_node->children.Length(); i++)   {
     GameTreeNodeRep *child = p_node->children[i];
     if (p_node->GetPlayer() && p_node->GetPlayer()->GetNumber() == pl) {
-      if (m_nvals[p_node->number] > (T) 0 && 
+      if (m_nvals[p_node->number] > (T) 0 &&
 	  m_nvals[child->number] > (T) 0)  {
 	(*this)(p_node->GetPlayer()->GetNumber(),
-		p_node->GetInfoset()->GetNumber(), 
+		p_node->GetInfoset()->GetNumber(),
 		m_support.GetIndex(p_node->GetInfoset()->GetAction(i))) =
 	  m_nvals[child->number] / m_nvals[p_node->number];
       }
@@ -481,7 +481,7 @@ void MixedBehaviorProfile<T>::GetPayoff(GameTreeNodeRep *node,
     value += prob * node->outcome->GetPayoff<T>(player);
   }
 
-  if (node->children.Length())  {
+  if (!node->children.empty())  {
     int pl = node->infoset->m_player->m_number, iset = node->infoset->m_number;
     if (pl == 0) {
       // chance player

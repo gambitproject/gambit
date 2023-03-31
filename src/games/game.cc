@@ -106,7 +106,7 @@ void GamePlayerRep::MakeStrategy()
   strategy->m_label = "";
 
   // We generate a default labeling -- probably should be changed in future
-  if (strategy->m_behav.Length() > 0) {
+  if (!strategy->m_behav.empty()) {
     for (int iset = 1; iset <= strategy->m_behav.Length(); iset++) {
       if (strategy->m_behav[iset] > 0) {
 	strategy->m_label += lexical_cast<std::string>(strategy->m_behav[iset]);
@@ -484,24 +484,13 @@ GameExplicitRep::~GameExplicitRep()
 
 Rational GameExplicitRep::GetMinPayoff(int player) const
 {
-  int index, p, p1, p2;
-  
-  if (m_outcomes.Length() == 0)  return Rational(0);
-
-  if (player) {
-    p1 = p2 = player;
+  if (m_outcomes.empty()) {
+    return Rational(0);
   }
-  else {
-    p1 = 1;
-    p2 = NumPlayers();
-  }
-  
-  Rational minpay = m_outcomes[1]->GetPayoff<Rational>(p1);
-  for (index = 1; index <= m_outcomes.Length(); index++)  {
-    for (p = p1; p <= p2; p++) {
-      if (m_outcomes[index]->GetPayoff<Rational>(p) < minpay) {
-	minpay = m_outcomes[index]->GetPayoff<Rational>(p);
-      }
+  Rational minpay = m_outcomes.begin()->GetPayoff<Rational>((player) ? player : 1);
+  for (GameOutcomeRep *outcome : m_outcomes) {
+    for (int p = (player) ? player : 1; p <= (player) ? player : NumPlayers(); p++) {
+      minpay = std::min(minpay, outcome->GetPayoff<Rational>(p));
     }
   }
   return minpay;
@@ -509,23 +498,14 @@ Rational GameExplicitRep::GetMinPayoff(int player) const
 
 Rational GameExplicitRep::GetMaxPayoff(int player) const
 {
-  int index, p, p1, p2;
-
-  if (m_outcomes.Length() == 0)  return Rational(0);
-
-  if (player) {
-    p1 = p2 = player;
+  if (m_outcomes.empty()) {
+    return Rational(0);
   }
-  else {
-    p1 = 1;
-    p2 = NumPlayers();
-  }
-
-  Rational maxpay = m_outcomes[1]->GetPayoff<Rational>(p1);
-  for (index = 1; index <= m_outcomes.Length(); index++)  {
-    for (p = p1; p <= p2; p++)
-      if (m_outcomes[index]->GetPayoff<Rational>(p) > maxpay)
-	maxpay = m_outcomes[index]->GetPayoff<Rational>(p);
+  Rational maxpay = m_outcomes.begin()->GetPayoff<Rational>((player) ? player : 1);
+  for (GameOutcomeRep *outcome : m_outcomes) {
+    for (int p = (player) ? player : 1; p <= (player) ? player : NumPlayers(); p++) {
+      maxpay = std::max(maxpay, outcome->GetPayoff<Rational>(p));
+    }
   }
   return maxpay;
 }
@@ -547,10 +527,11 @@ Array<int> GameExplicitRep::NumStrategies() const
 GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 {
   const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  for (int pl = 1, i = 1; pl <= m_players.Length(); pl++) {
-    for (int st = 1; st <= m_players[pl]->m_strategies.Length(); st++, i++) {
+  int i = 1;
+  for (GamePlayerRep *player : m_players) {
+    for (int st = 1; st <= player->m_strategies.Length(); st++, i++) {
       if (p_index == i) {
-	return m_players[pl]->m_strategies[st];
+        return player->m_strategies[st];
       }
     }
   }

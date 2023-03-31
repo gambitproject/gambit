@@ -29,7 +29,7 @@ template <class T> gNArray<T>::gNArray()
 template <class T> gNArray<T>::gNArray(const Gambit::Array<int> &d)
   : dim(d)
 {
-  if (dim.Length() <= 0)   {
+  if (dim.empty())   {
     storage = nullptr;
     storage_size = 0;
   }
