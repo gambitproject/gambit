@@ -74,9 +74,9 @@ public:
 
   /// Returns the number of actions in the information set
   int NumActions(const GameInfoset &p_infoset) const
-  { return m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()].size(); }
+  { return m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()].Length(); }
   int NumActions(int pl, int iset) const
-  { return m_actions[pl][iset].size(); }
+  { return m_actions[pl][iset].Length(); }
 
   /// Returns the number of actions in the support for all information sets
   PVector<int> NumActions() const;

@@ -434,7 +434,7 @@ public:
   /// @name Information sets
   //@{
   /// Returns the number of information sets at which the player makes a choice
-  int NumInfosets() const { return m_infosets.size(); }
+  int NumInfosets() const { return m_infosets.Length(); }
   /// Returns the p_index'th information set
   GameInfoset GetInfoset(int p_index) const;
 
@@ -821,7 +821,7 @@ inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player; }
 
 inline Game GamePlayerRep::GetGame() const { return m_game; }
 inline int GamePlayerRep::NumStrategies() const 
-{ m_game->BuildComputedValues(); return m_strategies.size(); }
+{ m_game->BuildComputedValues(); return m_strategies.Length(); }
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const 
 { m_game->BuildComputedValues(); return m_strategies[st]; }
 inline const GameStrategyArray &GamePlayerRep::Strategies() const

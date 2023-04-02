@@ -123,8 +123,8 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
 
   const List<BFS<T> > &verts1(poly1.VertexList());
   const List<BFS<T> > &verts2(poly2.VertexList());
-  solution->m_v1 = verts1.size();
-  solution->m_v2 = verts2.size();
+  solution->m_v1 = verts1.Length();
+  solution->m_v2 = verts2.Length();
 
   Array<int> vert1id(solution->m_v1);
   Array<int> vert2id(solution->m_v2);

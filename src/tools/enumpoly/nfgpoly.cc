@@ -373,7 +373,7 @@ const int PolEnumModule::PolishKnownRoot(Gambit::Vector<double> &point) const
   //DEBUG
   //  gout << "Prior to Polishing point is " << point << ".\n";
 
-  if (!point.empty()) {
+  if (point.Length() > 0) {
     // equations for equality of strat j to strat j+1
     gPolyList<double> equations(&Space,&Lex);
     equations += IndifferenceEquations();

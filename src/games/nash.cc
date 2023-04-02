@@ -210,8 +210,8 @@ BehavViaStrategySolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 {
   List<MixedStrategyProfile<T> > output = m_solver->Solve(p_support.GetGame());
   List<MixedBehaviorProfile<T> > solutions;
-  for (auto profile : output) {
-    solutions.push_back(MixedBehaviorProfile<T>(profile));
+  for (int i = 1; i <= output.Length(); i++) {
+    solutions.push_back(MixedBehaviorProfile<T>(output[i]));
   }
   return solutions;
 }
@@ -290,7 +290,7 @@ void SubgameBehavSolver<T>::SolveSubgames(const BehaviorSupportProfile &p_suppor
     SolveSubgames(p_support, p_templateSolution,
 		  subroots[i], subsolns, subvalues);
     
-    if (subsolns.empty())  {
+    if (subsolns.Length() == 0)  {
       solns = List<DVector<T> >();
       return;
     }
@@ -360,7 +360,7 @@ void SubgameBehavSolver<T>::SolveSubgames(const BehaviorSupportProfile &p_suppor
 
     List<MixedBehaviorProfile<T> > sol = m_solver->Solve(subsupport);
     
-    if (sol.empty())  {
+    if (sol.Length() == 0)  {
       solns = List<DVector<T> >();
       //printf("No solutions found\n");
       return;
@@ -445,14 +445,14 @@ SubgameBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 		efg->GetRoot(), vectors, values);
 
   List<MixedBehaviorProfile<T> > solutions;
-  for (int i = 1; i <= vectors.size(); i++) {
+  for (int i = 1; i <= vectors.Length(); i++) {
     solutions.push_back(MixedBehaviorProfile<T>(p_support));
     for (int j = 1; j <= vectors[i].Length(); j++) {
       solutions[i][j] = vectors[i][j];
     }
   }
-  for (auto solution : solutions) {
-    this->m_onEquilibrium->Render(solution);
+  for (int i = 1; i <= solutions.Length(); i++) {
+    this->m_onEquilibrium->Render(solutions[i]);
   }
   return solutions;
 }
