@@ -61,12 +61,12 @@ protected:
 public:
   class iterator {
   private:
-    const List &m_list;
+    List &m_list;
     Node *m_node;
   public:
-    iterator(const List &p_list, Node *p_node)
+    iterator(List &p_list, Node *p_node)
       : m_list(p_list), m_node(p_node)  { }
-    T &operator*() const { return m_node->m_data; }
+    T &operator*()  { return m_node->m_data; }
     iterator &operator++()  { m_node = m_node->m_next; return *this; }
     bool operator==(const iterator &it) const
     { return (m_node == it.m_node); }
@@ -97,11 +97,19 @@ public:
   
   bool operator==(const List<T> &b) const;
   bool operator!=(const List<T> &b) const;
-  
-  iterator begin()             { return iterator(*this, m_head); }
+
+  /// Return a forward iterator starting at the beginning of the list
+  iterator begin()  { return iterator(*this, m_head); }
+  /// Return a forward iterator past the end of the list
+  iterator end()    { return iterator(*this, 0); }
+  /// Return a const forward iterator starting at the beginning of the list
   const_iterator begin() const { return const_iterator(*this, m_head); }
-  iterator end()               { return iterator(*this, 0); }
+  /// Return a const forward iterator past the end of the list
   const_iterator end() const   { return const_iterator(*this, 0); }
+  /// Return a const forward iterator starting at the beginning of the list
+  const_iterator cbegin() const { return const_iterator(*this, m_head); }
+  /// Return a const forward iterator past the end of the list
+  const_iterator cend() const   { return const_iterator(*this, 0); }
 
   const T &operator[](int) const;
   T &operator[](int);

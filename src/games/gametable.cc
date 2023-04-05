@@ -387,22 +387,19 @@ void GameTableRep::RebuildTable()
 void GameTableRep::IndexStrategies()
 {
   long offset = 1L;
-  for (GamePlayers::const_iterator player = m_players.begin();
-       player != m_players.end(); ++player)  {
+  for (auto player : m_players)  {
     int st = 1;
-    for (Array<GameStrategyRep *>::const_iterator strategy = player->m_strategies.begin();
-	 strategy != player->m_strategies.end(); ++st, ++strategy) {
+    for (auto strategy : player->m_strategies) {
       strategy->m_number = st;
       strategy->m_offset = (st - 1) * offset;
+      st++;
     }
     offset *= player->m_strategies.size();
   }
 
   int id = 1;
-  for (GamePlayers::const_iterator player = m_players.begin();
-       player != m_players.end(); ++player) {
-    for (Array<GameStrategyRep *>::const_iterator strategy = player->m_strategies.begin();
-	 strategy != player->m_strategies.end(); ++strategy) {
+  for (auto player : m_players) {
+    for (auto strategy : player->m_strategies) {
       strategy->m_id = id++;
     }
   }
