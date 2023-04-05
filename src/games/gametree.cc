@@ -58,9 +58,9 @@ void GameTreeActionRep::DeleteAction()
        where++);
 
   m_infoset->RemoveAction(where);
-  for (int i = 1; i <= m_infoset->m_members.Length(); i++)   {
-    m_infoset->m_members[i]->children[where]->DeleteTree();
-    m_infoset->m_members[i]->children.Remove(where)->Invalidate();
+  for (auto member : m_infoset->m_members) {
+    member->children[where]->DeleteTree();
+    member->children.Remove(where)->Invalidate();
   }
   m_infoset->m_efg->ClearComputedValues();
   m_infoset->m_efg->Canonicalize();
@@ -86,7 +86,7 @@ GameTreeInfosetRep::GameTreeInfosetRep(GameTreeRep *p_efg, int p_number,
   m_player->m_infosets.push_back(this);
 
   if (p_player->IsChance()) {
-    m_probs = Array<Number>(m_actions.Length());
+    m_probs = Array<Number>(m_actions.size());
     std::string prob = lexical_cast<std::string>(Rational(1, m_actions.Length()));
     for (int act = 1; act <= m_actions.Length(); act++) {
       m_probs[act] = prob;
@@ -281,8 +281,9 @@ GameAction GameTreeNodeRep::GetPriorAction() const
 void GameTreeNodeRep::DeleteOutcome(GameOutcomeRep *outc)
 {
   if (outc == outcome)   outcome = nullptr;
-  for (int i = 1; i <= children.Length(); i++)
-    children[i]->DeleteOutcome(outc);
+  for (auto child : children) {
+    child->DeleteOutcome(outc);
+  }
 }
 
 void GameTreeNodeRep::SetOutcome(const GameOutcome &p_outcome)
@@ -303,7 +304,7 @@ bool GameTreeNodeRep::IsSuccessorOf(GameNode p_node) const
 bool GameTreeNodeRep::IsSubgameRoot() const
 {
   // First take care of a couple easy cases
-  if (children.Length() == 0 || infoset->NumMembers() > 1) return false;
+  if (children.empty() || infoset->NumMembers() > 1) return false;
   if (!m_parent) return true;
 
   // A node is a subgame root if and only if in every information set,
@@ -350,9 +351,9 @@ void GameTreeNodeRep::DeleteParent()
 
 void GameTreeNodeRep::DeleteTree()
 {
-  while (children.Length() > 0) {
-    children[1]->DeleteTree();
-    children[1]->Invalidate();
+  while (!children.empty()) {
+    children.front()->DeleteTree();
+    children.front()->Invalidate();
     children.Remove(1);
   }
   if (infoset) {
@@ -388,11 +389,11 @@ void GameTreeNodeRep::CopySubtree(GameTreeNodeRep *src, GameTreeNodeRep *stop)
 void GameTreeNodeRep::CopyTree(GameNode p_src)
 {
   if (p_src->GetGame() != m_efg) throw MismatchException();
-  if (p_src == this || children.Length() > 0) return;
+  if (p_src == this || !children.empty()) return;
 
   auto *src = dynamic_cast<GameTreeNodeRep *>(p_src.operator->());
 
-  if (src->children.Length())  {
+  if (!src->children.empty())  {
     AppendMove(src->infoset);
     for (int i = 1; i <= src->children.Length(); i++) {
       children[i]->CopySubtree(src->children[i], this);
@@ -406,7 +407,7 @@ void GameTreeNodeRep::CopyTree(GameNode p_src)
 void GameTreeNodeRep::MoveTree(GameNode p_src)
 {
   if (p_src->GetGame() != m_efg) throw MismatchException();
-  if (p_src == this || children.Length() > 0 || IsSuccessorOf(p_src)) {
+  if (p_src == this || !children.empty() || IsSuccessorOf(p_src)) {
     return;
   }
 
@@ -479,17 +480,17 @@ GameInfoset GameTreeNodeRep::LeaveInfoset()
 
 GameInfoset GameTreeNodeRep::AppendMove(GamePlayer p_player, int p_actions)
 {
-  if (p_actions <= 0 || children.Length() > 0) throw UndefinedException();
+  if (p_actions <= 0 || !children.empty()) throw UndefinedException();
   if (p_player->GetGame() != m_efg) throw MismatchException();
 
   return AppendMove(new GameTreeInfosetRep(m_efg, 
-				       p_player->m_infosets.Length() + 1, 
+				       p_player->m_infosets.size() + 1,
 				       p_player, p_actions));
 }  
 
 GameInfoset GameTreeNodeRep::AppendMove(GameInfoset p_infoset)
 {
-  if (children.Length() > 0) throw UndefinedException();
+  if (!children.empty()) throw UndefinedException();
   if (p_infoset->GetGame() != m_efg) throw MismatchException();
   
   infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
@@ -621,49 +622,47 @@ bool GameTreeRep::IsConstSum() const
 
 bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
 {
-  for (int pl = 1; pl <= m_players.Length(); pl++)   {
-    GamePlayerRep *player = m_players[pl];
-    
-    for (int i = 1; i <= player->NumInfosets(); i++)  {
+  for (auto player : m_players) {
+    for (int i = 1; i <= player->NumInfosets(); i++) {
       GameTreeInfosetRep *iset1 = player->m_infosets[i];
-      for (int j = 1; j <= player->NumInfosets(); j++)   {
-	GameTreeInfosetRep *iset2 = player->m_infosets[j];
+      for (int j = 1; j <= player->NumInfosets(); j++) {
+        GameTreeInfosetRep *iset2 = player->m_infosets[j];
 
-	bool precedes = false;
-	int action = 0;
-	
-	for (int m = 1; m <= iset2->NumMembers(); m++)  {
-	  int n;
-	  for (n = 1; n <= iset1->NumMembers(); n++)  {
-	    if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)) &&
-	        iset1->GetMember(n) != iset2->GetMember(m))  {
-	      precedes = true;
-	      for (int act = 1; act <= iset1->NumActions(); act++)  {
-		if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)->GetChild(act))) {
-		  if (action != 0 && action != act)  {
-		    s1 = iset1;
-		    s2 = iset2;
-		    return false;
-		  }
-		  action = act;
-		}
-	      }
-	      break;
-	    }
-	  }
-	  
-	  if (i == j && precedes)  {
-	    s1 = iset1;
-	    s2 = iset2;
-	    return false;
-	  }
+        bool precedes = false;
+        int action = 0;
 
-	  if (n > iset1->NumMembers() && precedes)  {
-	    s1 = iset1;
-	    s2 = iset2;
-	    return false;
-	  }
-	}
+        for (int m = 1; m <= iset2->NumMembers(); m++) {
+          int n;
+          for (n = 1; n <= iset1->NumMembers(); n++) {
+            if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)) &&
+                iset1->GetMember(n) != iset2->GetMember(m)) {
+              precedes = true;
+              for (int act = 1; act <= iset1->NumActions(); act++) {
+                if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)->GetChild(act))) {
+                  if (action != 0 && action != act) {
+                    s1 = iset1;
+                    s2 = iset2;
+                    return false;
+                  }
+                  action = act;
+                }
+              }
+              break;
+            }
+          }
+
+          if (i == j && precedes) {
+            s1 = iset1;
+            s2 = iset2;
+            return false;
+          }
+
+          if (n > iset1->NumMembers() && precedes) {
+            s1 = iset1;
+            s2 = iset2;
+            return false;
+          }
+        }
       }
     }
   }
@@ -928,9 +927,11 @@ PVector<int> GameTreeRep::NumMembers() const
 int GameTreeRep::BehavProfileLength() const
 {
   int sum = 0;
-  for (int i = 1; i <= m_players.Length(); i++)
-    for (int j = 1; j <= m_players[i]->m_infosets.Length(); j++)
-      sum += m_players[i]->m_infosets[j]->m_actions.Length();
+  for (auto player : m_players) {
+    for (auto infoset : player->m_infosets) {
+      sum += infoset->m_actions.size();
+    }
+  }
   return sum;
 }
 
@@ -941,7 +942,7 @@ int GameTreeRep::BehavProfileLength() const
 GamePlayer GameTreeRep::NewPlayer()
 {
   GamePlayerRep *player = nullptr;
-  player = new GamePlayerRep(this, m_players.Length() + 1);
+  player = new GamePlayerRep(this, m_players.size() + 1);
   m_players.push_back(player);
   for (int outc = 1; outc <= m_outcomes.Last(); outc++) {
     m_outcomes[outc]->m_payoffs.push_back(Number());
@@ -957,11 +958,10 @@ GamePlayer GameTreeRep::NewPlayer()
 GameInfoset GameTreeRep::GetInfoset(int p_index) const
 {
   int index = 1;
-  for (int pl = 1; pl <= m_players.Length(); pl++) {
-    GamePlayerRep *player = m_players[pl];
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+  for (auto player: m_players) {
+    for (auto infoset : player->m_infosets) {
       if (index++ == p_index) {
-	return player->GetInfoset(iset);
+        return infoset;
       }
     }
   }
@@ -980,14 +980,12 @@ Array<int> GameTreeRep::NumInfosets() const
 GameAction GameTreeRep::GetAction(int p_index) const
 {
   int index = 1;
-  for (int pl = 1; pl <= m_players.Length(); pl++) {
-    GamePlayerRep *player = m_players[pl];
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      GameTreeInfosetRep *infoset = player->m_infosets[iset];
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-	if (index++ == p_index) {
-	  return infoset->GetAction(act);
-	}
+  for (auto player: m_players) {
+    for (auto infoset : player->m_infosets) {
+      for (auto action : infoset->m_actions) {
+        if (index++ == p_index) {
+          return action;
+        }
       }
     }
   }

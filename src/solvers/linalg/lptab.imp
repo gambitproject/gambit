@@ -395,7 +395,7 @@ void LPTableau<T>::ReversePivots(List<Array<int> > &PivotList)
     // gout << "\nafter checking cols, BestSet = ";
     // BestSet.Dump(gout);
 
-    if(BestSet.Length()>0) 
+    if (!BestSet.empty())
       for(i=1;i<=BestSet.Length();i++) {
 	pivot[1] = BestSet[i];
 	pivot[2] = j;

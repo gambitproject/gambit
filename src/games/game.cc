@@ -21,7 +21,7 @@
 //
 
 #include <iostream>
-#include <sstream>
+#include <numeric>
 
 #include "gambit.h"
 #include "gametree.h"
@@ -70,9 +70,13 @@ GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
 }
 
 GamePlayerRep::~GamePlayerRep()
-{ 
-  for (int j = 1; j <= m_infosets.Length(); m_infosets[j++]->Invalidate());
-  for (int j = 1; j <= m_strategies.Length(); m_strategies[j++]->Invalidate());
+{
+  for (auto infoset : m_infosets) {
+    infoset->Invalidate();
+  }
+  for (auto strategy : m_strategies) {
+    strategy->Invalidate();
+  }
 }
 
 
@@ -82,7 +86,7 @@ GameStrategy GamePlayerRep::NewStrategy()
 
   auto *strategy = new GameStrategyRep(this);
   m_strategies.push_back(strategy);
-  strategy->m_number = m_strategies.Length();
+  strategy->m_number = m_strategies.size();
   strategy->m_offset = -1;   // this flags this action as new
   dynamic_cast<GameTableRep *>(m_game)->RebuildTable();
   return strategy;
@@ -106,7 +110,7 @@ void GamePlayerRep::MakeStrategy()
   strategy->m_label = "";
 
   // We generate a default labeling -- probably should be changed in future
-  if (strategy->m_behav.Length() > 0) {
+  if (!strategy->m_behav.empty()) {
     for (int iset = 1; iset <= strategy->m_behav.Length(); iset++) {
       if (strategy->m_behav[iset] > 0) {
 	strategy->m_label += lexical_cast<std::string>(strategy->m_behav[iset]);
@@ -473,9 +477,12 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
 
 GameExplicitRep::~GameExplicitRep()
 {
-  for (int pl = 1; pl <= m_players.Length(); m_players[pl++]->Invalidate());
-  for (int outc = 1; outc <= m_outcomes.Length(); 
-       m_outcomes[outc++]->Invalidate());
+  for (auto player : m_players) {
+    player->Invalidate();
+  }
+  for (auto outcome : m_outcomes) {
+    outcome->Invalidate();
+  }
 }
 
 //------------------------------------------------------------------------
@@ -484,9 +491,11 @@ GameExplicitRep::~GameExplicitRep()
 
 Rational GameExplicitRep::GetMinPayoff(int player) const
 {
-  int index, p, p1, p2;
+  int p1, p2;
   
-  if (m_outcomes.Length() == 0)  return Rational(0);
+  if (m_outcomes.empty()) {
+    return { 0 };
+  }
 
   if (player) {
     p1 = p2 = player;
@@ -495,13 +504,11 @@ Rational GameExplicitRep::GetMinPayoff(int player) const
     p1 = 1;
     p2 = NumPlayers();
   }
-  
-  Rational minpay = m_outcomes[1]->GetPayoff<Rational>(p1);
-  for (index = 1; index <= m_outcomes.Length(); index++)  {
-    for (p = p1; p <= p2; p++) {
-      if (m_outcomes[index]->GetPayoff<Rational>(p) < minpay) {
-	minpay = m_outcomes[index]->GetPayoff<Rational>(p);
-      }
+
+  Rational minpay = m_outcomes.front()->GetPayoff<Rational>(p1);
+  for (auto outcome : m_outcomes) {
+    for (int p = p1; p <= p2; p++) {
+      minpay = std::min(minpay, outcome->GetPayoff<Rational>(p));
     }
   }
   return minpay;
@@ -509,9 +516,11 @@ Rational GameExplicitRep::GetMinPayoff(int player) const
 
 Rational GameExplicitRep::GetMaxPayoff(int player) const
 {
-  int index, p, p1, p2;
+  int p1, p2;
 
-  if (m_outcomes.Length() == 0)  return Rational(0);
+  if (m_outcomes.empty()) {
+    return { 0 };
+  }
 
   if (player) {
     p1 = p2 = player;
@@ -521,11 +530,11 @@ Rational GameExplicitRep::GetMaxPayoff(int player) const
     p2 = NumPlayers();
   }
 
-  Rational maxpay = m_outcomes[1]->GetPayoff<Rational>(p1);
-  for (index = 1; index <= m_outcomes.Length(); index++)  {
-    for (p = p1; p <= p2; p++)
-      if (m_outcomes[index]->GetPayoff<Rational>(p) > maxpay)
-	maxpay = m_outcomes[index]->GetPayoff<Rational>(p);
+  Rational maxpay = m_outcomes.front()->GetPayoff<Rational>(p1);
+  for (auto outcome : m_outcomes) {
+    for (int p = p1; p <= p2; p++) {
+      maxpay = std::max(maxpay, outcome->GetPayoff<Rational>(p));
+    }
   }
   return maxpay;
 }
@@ -537,9 +546,9 @@ Rational GameExplicitRep::GetMaxPayoff(int player) const
 Array<int> GameExplicitRep::NumStrategies() const
 {
   const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  Array<int> dim(m_players.Length());
-  for (int pl = 1; pl <= m_players.Length(); pl++) {
-    dim[pl] = m_players[pl]->m_strategies.Length();
+  Array<int> dim(m_players.size());
+  for (int pl = 1; pl <= m_players.size(); pl++) {
+    dim[pl] = m_players[pl]->m_strategies.size();
   }
   return dim;
 }
@@ -560,20 +569,19 @@ GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 int GameExplicitRep::NumStrategyContingencies() const
 {
   const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  int ncont = 1;
-  for (int pl = 1; pl <= m_players.Length(); pl++) {
-    ncont *= m_players[pl]->m_strategies.Length();
-  }
-  return ncont;
+  return std::accumulate(
+          m_players.begin(), m_players.end(), 1,
+          [](int ncont, GamePlayerRep *p) { return ncont * p->m_strategies.size(); }
+  );
 }
 
 int GameExplicitRep::MixedProfileLength() const
 {
   const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  int strats = 0;
-  for (int i = 1; i <= m_players.Length();
-       strats += m_players[i++]->m_strategies.Length());
-  return strats;
+  return std::accumulate(
+          m_players.begin(), m_players.end(), 0,
+          [](int size, GamePlayerRep *p) { return size + p->m_strategies.size(); }
+  );
 }
 
 
@@ -583,8 +591,8 @@ int GameExplicitRep::MixedProfileLength() const
 
 GameOutcome GameExplicitRep::NewOutcome()
 {
-  m_outcomes.push_back(new GameOutcomeRep(this, m_outcomes.Length() + 1));
-  return m_outcomes[m_outcomes.Last()];
+  m_outcomes.push_back(new GameOutcomeRep(this, m_outcomes.size() + 1));
+  return m_outcomes.back();
 }
 
 //------------------------------------------------------------------------

@@ -101,7 +101,7 @@ public:
   /// @name Actions
   //@{
   /// Returns the number of actions available at the information set
-  int NumActions() const override { return m_actions.Length(); }
+  int NumActions() const override { return m_actions.size(); }
   /// Returns the p_index'th action at the information set
   GameAction GetAction(int p_index) const override { return m_actions[p_index]; }
   /// Returns a forward iterator over the available actions
@@ -109,7 +109,7 @@ public:
   //  { return GameActionIterator(m_actions); }
   //@}
 
-  int NumMembers() const override { return m_members.Length(); }
+  int NumMembers() const override { return m_members.size(); }
   GameNode GetMember(int p_index) const override;
 
   bool Precedes(GameNode) const override;
@@ -160,13 +160,13 @@ public:
   int NumberInInfoset() const override
   { return infoset->m_members.Find(const_cast<GameTreeNodeRep *>(this)); }
 
-  int NumChildren() const override    { return children.Length(); }
+  int NumChildren() const override    { return children.size(); }
 
   GameInfoset GetInfoset() const override   { return infoset; }
   void SetInfoset(GameInfoset) override;
   GameInfoset LeaveInfoset() override;
 
-  bool IsTerminal() const override { return (children.Length() == 0); }
+  bool IsTerminal() const override { return children.empty(); }
   GamePlayer GetPlayer() const override
     { return (infoset) ? infoset->GetPlayer() : nullptr; }
   GameAction GetPriorAction() const override; // returns null if root node

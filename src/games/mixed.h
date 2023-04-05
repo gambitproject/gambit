@@ -220,7 +220,7 @@ public:
   void Randomize(int p_denom) { m_rep->Randomize(p_denom); }
 
   /// Returns the total number of strategies in the profile
-  int MixedProfileLength() const { return m_rep->m_probs.Length(); }
+  int MixedProfileLength() const { return m_rep->m_probs.size(); }
 
   /// Converts the profile to one on the full support of the game
   MixedStrategyProfile<T> ToFullSupport() const;

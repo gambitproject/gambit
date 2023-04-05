@@ -210,8 +210,8 @@ BehavViaStrategySolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 {
   List<MixedStrategyProfile<T> > output = m_solver->Solve(p_support.GetGame());
   List<MixedBehaviorProfile<T> > solutions;
-  for (int i = 1; i <= output.Length(); i++) {
-    solutions.push_back(MixedBehaviorProfile<T>(output[i]));
+  for (auto profile : output) {
+    solutions.push_back(MixedBehaviorProfile<T>(profile));
   }
   return solutions;
 }
@@ -290,7 +290,7 @@ void SubgameBehavSolver<T>::SolveSubgames(const BehaviorSupportProfile &p_suppor
     SolveSubgames(p_support, p_templateSolution,
 		  subroots[i], subsolns, subvalues);
     
-    if (subsolns.Length() == 0)  {
+    if (subsolns.empty())  {
       solns = List<DVector<T> >();
       return;
     }
@@ -360,7 +360,7 @@ void SubgameBehavSolver<T>::SolveSubgames(const BehaviorSupportProfile &p_suppor
 
     List<MixedBehaviorProfile<T> > sol = m_solver->Solve(subsupport);
     
-    if (sol.Length() == 0)  {
+    if (sol.empty())  {
       solns = List<DVector<T> >();
       //printf("No solutions found\n");
       return;

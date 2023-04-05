@@ -193,8 +193,9 @@ void BehaviorSupportProfile::AddAction(const GameAction &s)
   }
 
   List<GameNode> startlist(ReachableMembers(s->GetInfoset()));
-  for (int i = 1; i <= startlist.Length(); i++)
-    DeactivateSubtree(startlist[i]);
+  for (auto node : ReachableMembers(s->GetInfoset())) {
+    DeactivateSubtree(node);
+  }
 }
 
 int BehaviorSupportProfile::NumSequences(int j) const
@@ -434,7 +435,7 @@ bool BehaviorSupportProfile::Dominates(const GameAction &a, const GameAction &b,
 
   else {
     List<GameNode> nodelist = ReachableMembers(infoset);  
-    if (nodelist.Length() == 0) {
+    if (nodelist.empty()) {
       // This may not be a good idea; I suggest checking for this
       // prior to entry
       for (int i = 1; i <= infoset->NumMembers(); i++) {
