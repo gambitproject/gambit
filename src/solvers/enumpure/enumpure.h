@@ -34,11 +34,11 @@ namespace Nash {
 /// 
 class EnumPureStrategySolver : public StrategySolver<Rational> {
 public:
-   EnumPureStrategySolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
+   EnumPureStrategySolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
     : StrategySolver<Rational>(p_onEquilibrium) { }
-  virtual ~EnumPureStrategySolver()  { }
+  ~EnumPureStrategySolver() override = default;
 
-  List<MixedStrategyProfile<Rational> > Solve(const Game &p_game) const;
+  List<MixedStrategyProfile<Rational> > Solve(const Game &p_game) const override;
 };
 
 inline List<MixedStrategyProfile<Rational> >
@@ -67,11 +67,11 @@ EnumPureStrategySolver::Solve(const Game &p_game) const
 ///
 class EnumPureAgentSolver : public BehavSolver<Rational> {
 public:
-  EnumPureAgentSolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
+  EnumPureAgentSolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
     : BehavSolver<Rational>(p_onEquilibrium) { }
-  virtual ~EnumPureAgentSolver()  { }
+  ~EnumPureAgentSolver() override = default;
 
-  List<MixedBehaviorProfile<Rational> > Solve(const BehaviorSupportProfile &) const;
+  List<MixedBehaviorProfile<Rational> > Solve(const BehaviorSupportProfile &) const override;
 };
 
 inline List<MixedBehaviorProfile<Rational> > 

@@ -41,11 +41,11 @@ template <class T> class BaseTableau {
 public:
   class BadPivot : public Exception  {
   public:
-    virtual ~BadPivot() throw() { }
-    const char *what() const throw() { return "Bad Pivot in BaseTableau"; }
+    ~BadPivot() noexcept override = default;
+    const char *what() const noexcept override { return "Bad Pivot in BaseTableau"; }
   };
 
-  virtual ~BaseTableau() { }
+  virtual ~BaseTableau() = default;
 
   bool ColIndex(int) const;
   bool RowIndex(int) const;
@@ -92,7 +92,7 @@ public:
   TableauInterface(const Matrix<T> &A, const Array<int> &art, 
 		   const Vector<T> &b); 
   TableauInterface(const TableauInterface<T>&);
-  virtual ~TableauInterface();
+  virtual ~TableauInterface() = default;
 
   TableauInterface<T>& operator=(const TableauInterface<T>&);
 
@@ -135,11 +135,12 @@ public:
   virtual void SetRefactor(int) = 0;
 
       // miscellaneous functions
-  bool EqZero(T x) const;
-  bool LtZero(T x) const;
-  bool GtZero(T x) const;
-  bool LeZero(T x) const;
-  bool GeZero(T x) const;
+  bool EqZero(const T &x) const { return (LeZero(x) && GeZero(x)); }
+  bool LtZero(const T &x) const { return !GeZero(x); }
+  bool GtZero(const T &x) const { return !LeZero(x); }
+  bool LeZero(const T &x) const { return (x <= eps2); }
+  bool GeZero(const T &x) const { return (x >= -eps2); }
+
   T Epsilon(int i = 2) const;
   bool IsArtifColumn(int col) const;
 };

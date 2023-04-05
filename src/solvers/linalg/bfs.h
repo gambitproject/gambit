@@ -38,7 +38,7 @@ private:
 public:
   // Lifecycle
   BFS() : m_default(0) { }
-  ~BFS()  { }
+  ~BFS() = default;
 
   // define two BFS's to be equal if their bases are equal
   bool operator==(const BFS &M) const {

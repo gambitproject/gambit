@@ -34,7 +34,7 @@ public:
   //@{
   LHTableau(const Matrix<T> &A1, const Matrix<T> &A2,
 	    const Vector<T> &b1, const Vector<T> &b2);
-  virtual ~LHTableau() { }
+  virtual ~LHTableau() = default;
   
   LHTableau<T>& operator=(const LHTableau<T>&);
   //@}

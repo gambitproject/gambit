@@ -35,22 +35,22 @@ class nfgame : public gnmgame {
  public:
   friend std::ostream& operator<< (std::ostream& s, nfgame& g);
   nfgame(int numPlayers, std::vector<int> &actions, const cvector &payoffs);
-  ~nfgame();
+  ~nfgame() override;
 
   // Input: s[i] has integer index of player i's pure strategy
   // s is of length numPlayers
-  inline double getPurePayoff(int player, std::vector<int> &s) {
+  inline double getPurePayoff(int player, std::vector<int> &s) override {
     return payoffs[findIndex(player, s)];
   }
 
-  inline void setPurePayoff(int player, std::vector<int> &s, double value) {
+  inline void setPurePayoff(int player, std::vector<int> &s, double value) override {
     payoffs[findIndex(player, s)]= value;
   }
 
-  double getMixedPayoff(int player, cvector &s);
-  void payoffMatrix(cmatrix &dest, cvector &s, double fuzz);
+  double getMixedPayoff(int player, cvector &s) override;
+  void payoffMatrix(cmatrix &dest, cvector &s, double fuzz) override;
 
-  void getPayoffVector(cvector &dest, int player, const cvector &s);
+  void getPayoffVector(cvector &dest, int player, const cvector &s) override;
   
 
  private:

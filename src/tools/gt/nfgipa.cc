@@ -23,7 +23,6 @@
 #include <getopt.h>
 #include <iostream>
 #include <fstream>
-#include <cerrno>
 #include "gambit.h"
 #include "solvers/ipa/ipa.h"
 

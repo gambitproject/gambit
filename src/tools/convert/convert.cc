@@ -21,7 +21,6 @@
 //
 
 #include <iostream>
-#include <iomanip>
 #include <fstream>
 #include <cstdlib>
 #include <getopt.h>

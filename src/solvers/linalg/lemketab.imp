@@ -38,9 +38,6 @@ template <class T> LemkeTableau<T>::LemkeTableau(const Tableau<T> &tab)
   : Tableau<T>(tab) 
 { }
 
-template <class T> LemkeTableau<T>::~LemkeTableau() 
-{ }
-
 template <class T> int LemkeTableau<T>::SF_PivotIn(int inlabel)
 { 
   //* gout << "\n inlabel = " << inlabel;
@@ -141,7 +138,7 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
 }
 
 //
-// ExitIndex determines, for the current tableau and variable to
+// ExitIndex determines, for the current tableau and variable
 // to be added to the basis, which element should leave the basis.
 // The choice is the one specified by Eaves, which is guaranteed
 // to not cycle, even if the problem is degenerate.

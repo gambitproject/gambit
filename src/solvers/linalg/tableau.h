@@ -47,22 +47,22 @@ public:
   Tableau(const Matrix<double> &A, const Array<int> &art, 
 	  const Vector<double> &b); 
   Tableau(const Tableau<double>&);
-  virtual ~Tableau();
+  ~Tableau() override;
   
   Tableau<double>& operator=(const Tableau<double>&);
   
   // pivoting
-  virtual bool CanPivot(int outgoing, int incoming) const;
-  void Pivot(int outrow,int col); // pivot -- outgoing is row, incoming is column
-  void BasisVector(Vector<double> &x) const; // solve M x = (*b)
-  void SolveColumn(int, Vector<double> &);  // column in new basis 
-  void Solve(const Vector<double> &b, Vector<double> &x);  // solve M x = b
-  void SolveT(const Vector<double> &c, Vector<double> &y);  // solve y M = c
+  bool CanPivot(int outgoing, int incoming) const override;
+  void Pivot(int outrow,int col) override; // pivot -- outgoing is row, incoming is column
+  void BasisVector(Vector<double> &x) const override; // solve M x = (*b)
+  void SolveColumn(int, Vector<double> &) override;  // column in new basis
+  void Solve(const Vector<double> &b, Vector<double> &x) override;  // solve M x = b
+  void SolveT(const Vector<double> &c, Vector<double> &y) override;  // solve y M = c
   
   // raw Tableau functions
 
-  void Refactor();
-  void SetRefactor(int);
+  void Refactor() override;
+  void SetRefactor(int) override;
 
   void SetConst(const Vector<double> &bnew);
   void SetBasis( const Basis &); // set new Tableau
@@ -99,37 +99,37 @@ protected:
 public:
   class BadDenom : public Exception  {
   public:
-    virtual ~BadDenom() throw() { }
-    const char *what() const throw() { return "Bad denominator in Tableau"; } 
+    ~BadDenom() noexcept override = default;
+    const char *what() const noexcept override { return "Bad denominator in Tableau"; }
   };
       // constructors and destructors
   Tableau(const Matrix<Rational> &A, const Vector<Rational> &b); 
   Tableau(const Matrix<Rational> &A, const Array<int> &art, 
 	  const Vector<Rational> &b); 
   Tableau(const Tableau<Rational>&);
-  virtual ~Tableau();
+  ~Tableau() override;
   
   Tableau<Rational>& operator=(const Tableau<Rational>&);
   
   // pivoting
-  virtual bool CanPivot(int outgoing, int incoming) const;
-  void Pivot(int outrow,int col); // pivot -- outgoing is row, incoming is column
-  void SolveColumn(int, Vector<Rational> &);  // column in new basis 
-  void GetColumn(int, Vector<Rational> &) const;  // column in new basis 
+  bool CanPivot(int outgoing, int incoming) const override;
+  void Pivot(int outrow, int col) override; // pivot -- outgoing is row, incoming is column
+  void SolveColumn(int, Vector<Rational> &) override;  // column in new basis
+  void GetColumn(int, Vector<Rational> &) const;  // column in new basis
   
   // raw Tableau functions
 
-  void Refactor();
-  void SetRefactor(int);
+  void Refactor() override;
+  void SetRefactor(int) override;
 
   void SetConst(const Vector<Rational> &bnew);
   void SetBasis( const Basis &); // set new Tableau
-  void Solve(const Vector<Rational> &b, Vector<Rational> &x);  // solve M x = b
-  void SolveT(const Vector<Rational> &c, Vector<Rational> &y);  // solve y M = c
+  void Solve(const Vector<Rational> &b, Vector<Rational> &x) override;  // solve M x = b
+  void SolveT(const Vector<Rational> &c, Vector<Rational> &y) override;  // solve y M = c
   
   bool IsFeasible();
   bool IsLexMin();
-  void BasisVector(Vector<Rational> &out) const;
+  void BasisVector(Vector<Rational> &out) const override;
   Integer TotDenom() const;
 };
 

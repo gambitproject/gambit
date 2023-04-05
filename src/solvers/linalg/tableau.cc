@@ -203,8 +203,7 @@ Tableau<Rational>::Tableau(const Matrix<Rational> &A,
     Coeff(b.First(),b.Last()), denom(1), tmpcol(b.First(),b.Last()), 
     nonbasic(A.MinCol(),A.MaxCol())
 {
-  int j;
-  for(j=MinCol();j<=MaxCol();j++) 
+  for (int j = MinCol(); j <= MaxCol(); j++)
     nonbasic[j] = j;
   
   totdenom = lcm(find_lcd(A),find_lcd(b));
@@ -233,8 +232,7 @@ Tableau<Rational>::Tableau(const Matrix<Rational> &A,
     Coeff(b.First(),b.Last()), denom(1), tmpcol(b.First(),b.Last()), 
     nonbasic(A.MinCol(),A.MaxCol()+art.Length())
 {
-  int j;
-  for(j=MinCol();j<=MaxCol();j++) 
+  for (int j = MinCol(); j <= MaxCol(); j++)
     nonbasic[j] = j;
   
   totdenom = lcm(find_lcd(A),find_lcd(b));

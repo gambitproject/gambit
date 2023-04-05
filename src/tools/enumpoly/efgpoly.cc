@@ -90,45 +90,43 @@ ProblemData::~ProblemData()
 
 // The strategy is to develop the polynomial for each agent's expected
 // payoff as a function of the behavior strategies on the support,
-// eliminating the last last action probability for each information set.
+// eliminating the last action probability for each information set.
 // The system is obtained by requiring that all of the partial
 // derivatives vanish, and that the sum of action probabilities at
 // each information set be less than one.
 
 gPoly<double> ProbOfSequence(const ProblemData &p_data,
-			      int p, int seq)
-{
+                             int p, int seq) {
   gPoly<double> equation(p_data.Space, p_data.Lex);
   Vector<int> exps(p_data.nVars);
-  int j = 0;
-  
-  int isetrow = p_data.SF.InfosetRowNumber(p,seq);
-  int act  = p_data.SF.ActionNumber(p,seq);
+
+  int isetrow = p_data.SF.InfosetRowNumber(p, seq);
+  int act = p_data.SF.ActionNumber(p, seq);
   int varno = p_data.var[p][seq];
   GameInfoset infoset = p_data.SF.GetInfoset(p, seq);
 
-  if(seq==1) {
-    exps=0;
-    exp_vect const_exp(p_data.Space,exps);
+  if (seq == 1) {
+    exps = 0;
+    exp_vect const_exp(p_data.Space, exps);
     gMono<double> const_term(1.0, const_exp);
-    gPoly<double> new_term(p_data.Space,const_term,p_data.Lex);
-    equation+=new_term;
+    gPoly<double> new_term(p_data.Space, const_term, p_data.Lex);
+    equation += new_term;
   }
-  else if(act<p_data.support.NumActions(infoset)) {
-    exps=0;
-    exps[varno]=1;
-    exp_vect const_exp(p_data.Space,exps);
+  else if (act < p_data.support.NumActions(infoset)) {
+    exps = 0;
+    exps[varno] = 1;
+    exp_vect const_exp(p_data.Space, exps);
     gMono<double> const_term(1.0, const_exp);
-    gPoly<double> new_term(p_data.Space,const_term,p_data.Lex);
-    equation+=new_term;
+    gPoly<double> new_term(p_data.Space, const_term, p_data.Lex);
+    equation += new_term;
   }
   else {
-    for(j=1;j<seq;j++) {
+    for (int j = 1; j < seq; j++) {
       if (p_data.SF.Constraints(p)(isetrow, j) == Rational(-1)) {
-	equation -= ProbOfSequence(p_data, p, j);
+        equation -= ProbOfSequence(p_data, p, j);
       }
-      else if (p_data.SF.Constraints(p)(isetrow,j) == Rational(1)) {
-	equation += ProbOfSequence(p_data, p, j);
+      else if (p_data.SF.Constraints(p)(isetrow, j) == Rational(1)) {
+        equation += ProbOfSequence(p_data, p, j);
       }
     }
   }

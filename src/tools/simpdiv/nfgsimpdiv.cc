@@ -23,8 +23,6 @@
 #include <getopt.h>
 #include <cstdlib>
 #include <iostream>
-#include <cerrno>
-#include <iomanip>
 #include <fstream>
 #include "gambit.h"
 #include "games/nash.h"

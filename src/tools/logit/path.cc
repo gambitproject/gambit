@@ -22,7 +22,6 @@
 
 #include <cmath>
 #include <algorithm>   // for std::max
-#include <iostream>
 
 #include "gambit.h"
 #include "core/sqmatrix.h"

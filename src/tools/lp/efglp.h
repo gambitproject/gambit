@@ -44,4 +44,4 @@ private:
 };
 
 
-#endif // LP_NFGLP_H
+#endif  // LP_EFGLP_H

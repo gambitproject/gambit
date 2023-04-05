@@ -31,14 +31,14 @@ namespace Nash {
 
 class NashGNMStrategySolver : public StrategySolver<double> {
 public:
-  NashGNMStrategySolver(std::shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = 0,
+  NashGNMStrategySolver(std::shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = nullptr,
 			bool p_verbose=false)
     : StrategySolver<double>(p_onEquilibrium),
       m_verbose(p_verbose)
   { }
-  virtual ~NashGNMStrategySolver() { }
+  ~NashGNMStrategySolver() override = default;
 
-  List<MixedStrategyProfile<double> > Solve(const Game &p_game) const;
+  List<MixedStrategyProfile<double> > Solve(const Game &p_game) const override;
   List<MixedStrategyProfile<double> > Solve(const Game &p_game,
 					    const MixedStrategyProfile<double> &p_pert) const;
 

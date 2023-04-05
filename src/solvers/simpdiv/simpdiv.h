@@ -37,16 +37,16 @@ class NashSimpdivStrategySolver : public StrategySolver<Rational> {
 public:
   NashSimpdivStrategySolver(int p_gridResize = 2, int p_leashLength = 0,
 			    bool p_verbose = false,
-			    std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = 0)
+			    std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
     : StrategySolver<Rational>(p_onEquilibrium),
       m_gridResize(p_gridResize),
       m_leashLength((p_leashLength > 0) ? p_leashLength : 32000),
       m_verbose(p_verbose)
   { }
-  virtual ~NashSimpdivStrategySolver() { }
+  ~NashSimpdivStrategySolver() override = default;
 
   List<MixedStrategyProfile<Rational> > Solve(const MixedStrategyProfile<Rational> &p_start) const;
-  List<MixedStrategyProfile<Rational> > Solve(const Game &p_game) const;
+  List<MixedStrategyProfile<Rational> > Solve(const Game &p_game) const override;
 
 
 private:

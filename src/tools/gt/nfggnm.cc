@@ -23,8 +23,6 @@
 #include <getopt.h>
 #include <cmath>
 #include <iostream>
-#include <fstream>
-#include <cerrno>
 #include "gambit.h"
 #include "solvers/gnm/gnm.h"
 

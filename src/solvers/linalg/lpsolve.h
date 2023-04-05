@@ -45,7 +45,7 @@ namespace linalg {
 template <class T> class LPSolve {
 private:
   bool well_formed, feasible, bounded;
-  int flag, nvars, neqns,nequals;
+  int flag, nvars, neqns, nequals;
   T total_cost,eps1,eps2,eps3,tmin;
   BFS<T> opt_bfs,dual_bfs;
   LPTableau<T> tab;

@@ -82,13 +82,13 @@ private:
 public:
   class BadPivot : public Exception  {
   public:
-    virtual ~BadPivot() throw() { }
-    const char *what() const throw() { return "Bad pivot in LUdecomp"; }
+    ~BadPivot() noexcept override = default;
+    const char *what() const noexcept override { return "Bad pivot in LUdecomp"; }
   };
   class BadCount : public Exception  {
   public:
-    virtual ~BadCount() throw() { }
-    const char *what() const throw() { return "Bad reference count in LUdecomp"; }
+    ~BadCount() noexcept override = default;
+    const char *what() const noexcept override { return "Bad reference count in LUdecomp"; }
   };
 
   // ------------------------

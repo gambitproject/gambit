@@ -40,7 +40,7 @@ public:
 			std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
     : StrategySolver<T>(p_onEquilibrium),
       m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth) { }
-  virtual ~NashLcpStrategySolver()  { }
+  virtual ~NashLcpStrategySolver() = default;
 
   virtual List<MixedStrategyProfile<T> > Solve(const Game &) const;
 
@@ -60,7 +60,7 @@ public:
 			std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
     : BehavSolver<T>(p_onEquilibrium),
       m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth) { }
-  virtual ~NashLcpBehaviorSolver()  { }
+  virtual ~NashLcpBehaviorSolver() = default;
 
   virtual List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const;
 

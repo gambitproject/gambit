@@ -59,7 +59,7 @@ void PrintProfile(std::ostream &p_stream,
 // LambdaMin: should always be negative.  Once the trajectory
 //            gets this far out, the algorithm terminates, assuming
 //            that there are no more equilibria on the path.
-// wobble: this is a boolean value indicating whether or not to use
+// wobble: this is a boolean value indicating whether to use
 //         "wobbles" of the perturbation vector to remove
 //         accumulated errors.  This removes the theoretical guarantee
 //         of convergence, but in practice may help keep GNM on the path.
@@ -88,7 +88,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
     newV, // utility variable
     lambda, // current position along the ray
     dlambda, // derivative of lambda w.r.t time
-    minBound, // distance to closest change of support
+    minBound, // distance to the closest change of support
     bound, // utility variable
     del, // amount of time required to reach the next support boundary, 
     // assuming linear cvector field
@@ -99,7 +99,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
   std::vector<int> s(M); // current best responses
   std::vector<int> B(M); // current support
 
-  for (int i = 0; i < M; B[i++] = 0);
+  for (i = 0; i < M; B[i++] = 0);
 
   cmatrix DG(M,M), // jacobian of the payoff function
     R(M,M), // jacobian of the retraction operator

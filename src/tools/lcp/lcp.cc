@@ -23,7 +23,6 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
-#include <cerrno>
 #include <getopt.h>
 #include "gambit.h"
 #include "solvers/lcp/lcp.h"

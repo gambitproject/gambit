@@ -41,13 +41,13 @@ private:
 public:
   class BadPivot : public Exception  {
   public:
-    virtual ~BadPivot() throw() { }
-    const char *what() const throw() { return "Bad pivot in LPTableau."; }
+    ~BadPivot() noexcept override = default;
+    const char *what() const noexcept override { return "Bad pivot in LPTableau."; }
   };
   LPTableau(const Matrix<T> &A, const Vector<T> &b); 
   LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b); 
   LPTableau(const LPTableau<T>&);
-  virtual ~LPTableau();
+  virtual ~LPTableau() = default;
   
   LPTableau<T>& operator=(const LPTableau<T>&);
   

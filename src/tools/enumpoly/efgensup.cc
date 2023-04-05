@@ -625,16 +625,19 @@ DeletionsViolateActiveCommitments(const Gambit::BehaviorSupportProfile *S,
   for (int i = 1; i <= infosetlist->Length(); i++) {
     Gambit::GameInfoset infoset = (*infosetlist)[i];
     if (infoset->GetPlayer()->GetNumber() < PlayerIndex() ||
-	( infoset->GetPlayer()->GetNumber() == PlayerIndex() &&
-	  infoset->GetNumber() < InfosetIndex()) )
+        (infoset->GetPlayer()->GetNumber() == PlayerIndex() &&
+         infoset->GetNumber() < InfosetIndex()))
       if (S->NumActions(infoset->GetPlayer()->GetNumber(),
-			infoset->GetNumber()) > 0)
-	return true;
+                        infoset->GetNumber()) > 0)
+        return true;
     if (infoset->GetPlayer()->GetNumber() == PlayerIndex() &&
-	infoset->GetNumber() == InfosetIndex() )
-      for (int act = 1; act < ActionIndex(); act++)
-	if ( S->Contains(infoset->GetAction(act)))
-	  return true;
+        infoset->GetNumber() == InfosetIndex()) {
+      for (int action = 1; action < ActionIndex(); action++) {
+        if (S->Contains(infoset->GetAction(action))) {
+          return true;
+        }
+      }
+    }
   }
   return false;
 }

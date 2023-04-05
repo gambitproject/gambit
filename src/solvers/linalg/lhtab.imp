@@ -132,7 +132,7 @@ template <class T> int LHTableau<T>::PivotIn(int inlabel)
   return outlabel;
 }
 
-// ExitIndex determines, for the current tableau and variable to
+// ExitIndex determines, for the current tableau and variable
 // to be added to the basis, which element should leave the basis.
 // The choice is the one specified by Eaves, which is guaranteed
 // to not cycle, even if the problem is degenerate.

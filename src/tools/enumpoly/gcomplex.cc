@@ -20,11 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <cfloat>
-#include <cctype>
 
 #include "gambit.h"
 #include "gcomplex.h"

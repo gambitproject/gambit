@@ -51,11 +51,6 @@ LPTableau<T>::LPTableau(const LPTableau<T> &orig)
 { }
 
 template <class T>
-LPTableau<T>::~LPTableau()
-{ }
-
-
-template <class T>
 LPTableau<T>& LPTableau<T>::operator=(const LPTableau<T> &orig)
 {
   Tableau<T>::operator=(orig);
@@ -300,7 +295,7 @@ void LPTableau<T>::ReversePivots(List<Array<int> > &PivotList)
 	  b_i = solution[BestSet[i]]/tmpcol[BestSet[i]];
 	  ratio = b_i/a_ij;
   
-	  flag = 0;
+	  flag = false;
 	  for(k=tmpcol.First();k<=tmpcol.Last() && !flag;k++) 
 	    if(k!=BestSet[i]) {
 	      a_ik = - a_ij * tmpcol[k];
@@ -309,13 +304,13 @@ void LPTableau<T>::ReversePivots(List<Array<int> > &PivotList)
 		// gout << "\nj not row to exit in prior tableau: ";
 		// gout << "higher ratio at row= " << k;
 		BestSet.Remove(i);
-		flag = 1;
+		flag = true;
 	      }
 	      else if(this->GtZero(a_ik) && this->EqZero(b_k/a_ik-ratio) && this->Label(k)<j) {
 		// gout << "\nj not row to exit in prior tableau: ";
 		// gout << "same ratio,lower lex at k= " << k;
 		BestSet.Remove(i);
-		flag = 1;
+		flag = true;
 	      }
 	    }
 	}
@@ -375,7 +370,7 @@ void LPTableau<T>::ReversePivots(List<Array<int> > &PivotList)
 	  BestSet.Remove(i);
 	}
 	else {
-	  flag=0;
+	  flag = false;
 	  for(k=-this->b->Last();k<enter && !flag;k++) if(k!=0) {
 	    if(k<0) 
 	      a_ik=tmpdual[-k];
@@ -391,7 +386,7 @@ void LPTableau<T>::ReversePivots(List<Array<int> > &PivotList)
 	      // gout << "\ni not col to enter in prior tableau: ";
 	      // gout << "c_jo < 0 for k = " << k;
 	      BestSet.Remove(i);
-	      flag=1;
+	      flag = true;
 	    }
 	  }
 	}
@@ -424,7 +419,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   // gout << "\ncurrentSolCol = " << solution;
   if(this->LeZero(tmpcol[i])) { 
     // gout << "\nPrior tableau not primal feasible: currentPivCol[i] <= 0";
-    return 0;
+    return false;
   }
   int k;
   T ratio = solution[i]/tmpcol[i];
@@ -433,7 +428,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   for(k=tmpcol.First();k<=tmpcol.Last();k++)
     if(this->GtZero(tmpcol[k]) && this->GtZero(solution[k]/tmpcol[k]-ratio)) {
       // gout << "\nPrior tableau not primal feasible: i not min ratio";
-      return 0;
+      return false;
     }
   // check that j would be the row to exit in prior tableau
   
@@ -442,7 +437,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   a_ij = (T)1/tmpcol[i];
   if(this->LeZero(a_ij)) {
     // gout << "\nj not row to exit in prior tableau: a_ij <= 0";
-    return 0;
+    return false;
   }
   b_i = solution[i]/tmpcol[i];
   ratio = b_i/a_ij;
@@ -454,12 +449,12 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
       if(this->GtZero(a_ik) && this->GtZero(b_k/a_ik -ratio)) {
 	// gout << "\nj not row to exit in prior tableau: ";
 	// gout << "higher ratio at row= " << k;
-	return 0;
+	return false;
       }
       if(this->GtZero(a_ik) && this->EqZero(b_k/a_ik-ratio) && this->Label(k)<j) {
 	// gout << "\nj not row to exit in prior tableau: ";
 	// gout << "same ratio,lower lex at k= " << k;
-	return 0;
+	return false;
       }
     }
 
@@ -487,7 +482,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   if(this->EqZero(a_ij)) {
     // gout << "\ni not col to enter in prior tableau: ";
     // gout << "a_ij=0";
-    return 0;
+    return false;
   }
   ratio = c_j/a_ij;
   
@@ -503,7 +498,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   if(this->GeZero(c_jo)) {
     // gout << "\ni not col to enter in prior tableau: ";
     // gout << "c_jo<0";
-    return 0;
+    return false;
   }
 
   for(k=-this->b->Last();k<enter;k++) if(k!=0) {
@@ -520,11 +515,11 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
     if(this->LtZero(c_jo)) { 
       // gout << "\ni not col to enter in prior tableau: ";
       // gout << "c_jo < 0 for k = " << k;
-      return 0;
+      return false;
     }
   }
   // gout << "\nValid Reverse pivot at i = " << i << " j =  " << j;
-  return 1;
+  return true;
 }
 
 template <class T>
@@ -568,7 +563,7 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
   if(this->GeZero(a_ij)) {
     // gout << "\nPrior tableau not dual feasible: ";
     // gout << "a_ij>=0";
-    return 0;
+    return false;
   }
   ratio = c_j/a_ij;
   
@@ -585,7 +580,7 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
     if(this->LtZero(a_ik) && this->GtZero(c_k/a_ik-ratio)) { 
       // gout << "\nPrior tableau not dual feasible: ";
       // gout << "\nhigher ratio for k = " << k;
-      return 0;
+      return false;
     }
   }
 
@@ -608,7 +603,7 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
   if(this->GeZero(a_ik)) {
     // gout << "\ni not col to enter in prior tableau: ";
     // gout << "a_ik>=0";
-    return 0;
+    return false;
   }
   ratio = c_k/a_ik;
 
@@ -627,12 +622,12 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
     if(this->LtZero(a_ik) && this->GtZero(c_k/a_ik- ratio)) { 
       // gout << "\ni not col to enter in prior tableau: ";
       // gout << "\nhigher ratio for k = " << k;
-      return 0;
+      return false;
     }
     if(k<enter && this->LtZero(a_ik) && this->EqZero(c_k/a_ik - ratio)) { 
       // gout << "\ni not col to enter in prior tableau: ";
       // gout << "\nsame ratio and lower lex for k = " << k;
-      return 0;
+      return false;
     }
   }
 
@@ -647,7 +642,7 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
   if(this->LeZero(b_i)) {
     // gout << "\nj not row to exit in prior tableau: ";
     // gout << "b_i<=0";
-    return 0;
+    return false;
     }
 
   
@@ -657,11 +652,11 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
       if(this->GtZero(b_k) && this->Label(k)<j) {
 	// gout << "\nj not row to exit in prior tableau: ";
 	// gout << "same ratio,lower lex at k= " << k;
-	return 0;
+	return false;
       }
     }
   // gout << "\nValid Reverse pivot at i = " << i << " j =  " << j;
-  return 1;
+  return true;
 }
 
 /*

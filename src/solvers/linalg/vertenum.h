@@ -65,7 +65,7 @@ private:
 public:
   VertexEnumerator(const Matrix<T> &, const Vector<T> &);
   VertexEnumerator(LPTableau<T> &);
-  ~VertexEnumerator() { }
+  ~VertexEnumerator() = default;
   
   const Gambit::List<BFS<T> > &VertexList() const
   { return List; }

@@ -24,8 +24,6 @@
 #include <getopt.h>
 #include <iostream>
 #include <fstream>
-#include <cerrno>
-#include <iomanip>
 
 #include "gambit.h"
 #include "solvers/enummixed/enummixed.h"

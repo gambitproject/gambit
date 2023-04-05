@@ -35,17 +35,17 @@ public:
 //   LTableau(void);
   class BadPivot : public Exception  {
   public:
-    virtual ~BadPivot() throw() { }
-    const char *what() const throw() { return "Bad Pivot in LTableau"; }
+    ~BadPivot() noexcept override = default;
+    const char *what() const noexcept override { return "Bad Pivot in LTableau"; }
   };
   class BadExitIndex : public Exception  {
   public:
-    virtual ~BadExitIndex() throw() { }
-    const char *what() const throw() { return "Bad Exit Index in LTableau"; }
+    ~BadExitIndex() noexcept override = default;
+    const char *what() const noexcept override { return "Bad Exit Index in LTableau"; }
   };
   LemkeTableau(const Matrix<T> &A, const Vector<T> &b);
   LemkeTableau(const Tableau<T> &);
-  virtual ~LemkeTableau();
+  virtual ~LemkeTableau() = default;
 
   int SF_PivotIn(int i);
   int SF_ExitIndex(int i);

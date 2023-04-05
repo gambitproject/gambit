@@ -32,7 +32,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
   : well_formed(true), feasible(true), bounded(true), 
     nvars(c.Length()),neqns(b.Length()), nequals(nequals),
     total_cost(0),tmin(0), 
-    tab(A,Artificials(b),b), UB(0),LB(0),ub(0),lb(0),xx(0), cost(0),
+    tab(A,Artificials(b),b), UB(nullptr), LB(nullptr), ub(0), lb(0), xx(0), cost(0),
     y(b.Length()),x(b.Length()),d(b.Length())
 {
   // These are the values recommended by Murtagh (1981) for 15 digit 
@@ -281,12 +281,12 @@ template <class T> int LPSolve<T>::Enter()
       //      gout << "\nCost: " << tab.GetCost();
       // gout << "\n i = " << i << " cost: " << (*cost)[i] << " rc: " << rc << " test: " << test;
       if(rc > test+eps1) 
-	if((*UB)[i]==false || ((*UB)[i]==true && (*xx)[i] - (*ub)[i] < -eps1)) {
+	if(!(*UB)[i] || ((*UB)[i] && (*xx)[i] - (*ub)[i] < -eps1)) {
 	  {test=rc;in = lab;flag = -1;}
 	  // gout << "\nflag: -1  in: " << in << " test: " << test;
 	}
       if(-rc > test+eps1) 
-	if((*LB)[i]==false || ((*LB)[i]==true && (*xx)[i] - (*lb)[i] > eps1)) {
+	if(!(*LB)[i] || ((*LB)[i] && (*xx)[i] - (*lb)[i] > eps1)) {
 	  {test=-rc;in=lab;flag = 1;}
 	  // gout << "\nflag: +1  in: " << in << " test: " << test;
 	}
@@ -309,10 +309,10 @@ template <class T> int LPSolve<T>::Exit(int in)
     if(lab<0)col=nvars-lab;
     if(flag == -1) {
       t = (T)1000000000;
-      if (d[j] > eps2 && (*LB)[col]==true) {
+      if (d[j] > eps2 && (*LB)[col]) {
 	t = ((*xx)[col]-(*lb)[col])/d[j];
       }
-      if (d[j] < -eps2 && (*UB)[col]==true) { 
+      if (d[j] < -eps2 && (*UB)[col]) {
 	t = ((*xx)[col]-(*ub)[col])/d[j];
       }
       if(t>=-eps2 && t < tmin-eps2) {
@@ -324,10 +324,10 @@ template <class T> int LPSolve<T>::Exit(int in)
     }
     if(flag == 1) {
       t = (T)1000000000;
-      if (d[j] > eps2 && (*UB)[col]==true) { 
+      if (d[j] > eps2 && (*UB)[col]) {
 	t = ((*ub)[col]-(*xx)[col])/d[j];
       }
-      if (d[j] < -eps2 && (*LB)[col]==true) { 
+      if (d[j] < -eps2 && (*LB)[col]) {
 	t = ((*lb)[col]-(*xx)[col])/d[j];
       }
       if(t >= -eps2 && t < tmin-eps2) {

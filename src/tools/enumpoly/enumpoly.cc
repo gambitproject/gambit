@@ -22,7 +22,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <cerrno>
 #include <cstdlib>
 #include <getopt.h>
 #include "gambit.h"
