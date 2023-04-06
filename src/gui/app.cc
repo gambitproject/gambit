@@ -124,7 +124,7 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
 
     m_fileHistory.AddFileToHistory(p_filename);
     m_fileHistory.Save(*wxConfigBase::Get());
-    auto *doc = new gbtGameDocument(nfg);
+    doc = new gbtGameDocument(nfg);
     doc->SetFilename(wxT(""));
     (void) new gbtGameFrame(nullptr, doc);
     return GBT_APP_FILE_OK;

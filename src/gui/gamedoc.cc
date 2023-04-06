@@ -24,9 +24,6 @@
 #include <fstream>
 
 #include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
-#endif  // WX_PRECOMP
 #include <wx/filename.h>       // used to create temp files for undo/redo
 
 #include "gambit.h"

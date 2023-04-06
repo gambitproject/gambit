@@ -21,8 +21,6 @@
 //
 
 #include <cctype>
-#include <cstring>
-#include <cstdlib>
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP

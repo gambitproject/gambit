@@ -428,7 +428,7 @@ static void AppendBitmapItem(wxMenu *p_menu,
   // wxMac does not (apparently) support adding bitmaps to menu items,
   // so we do not set the bitmap in this case.
   item->SetBitmap(p_bitmap);
-#endif // !__WXMAC__
+#endif // UNUSED
   p_menu->Append(item);
 }
 

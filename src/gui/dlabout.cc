@@ -31,9 +31,6 @@
 
 #include "wx/sheet/sheetdef.h" // Always include sheetdef.h first
 #include "wx/sheet/sheetatr.h" // might as well include everything
-#include "wx/sheet/sheetsel.h"
-#include "wx/sheet/sheetedt.h"
-#include "wx/sheet/sheetren.h"
 #include "wx/grid.h"
 
 static wxStaticText *FormattedText(wxWindow *p_parent, const wxString &p_label,

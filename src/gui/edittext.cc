@@ -35,12 +35,12 @@ BEGIN_EVENT_TABLE(gbtStaticTextButton, wxStaticText)
   EVT_LEFT_DOWN(gbtStaticTextButton::OnLeftClick)
 END_EVENT_TABLE()
 
-gbtStaticTextButton::gbtStaticTextButton(wxWindow *p_parent, int p_id,
+gbtStaticTextButton::gbtStaticTextButton(wxWindow *p_parent, wxWindowID p_id,
 					 const wxString &p_label,
 					 const wxPoint &p_position,
 					 const wxSize &p_size,
 					 long p_style)
-  : wxStaticText(p_parent, wxID_ANY, p_label, p_position, p_size, p_style)
+  : wxStaticText(p_parent, p_id, p_label, p_position, p_size, p_style)
 { }
 
 void gbtStaticTextButton::OnLeftClick(wxMouseEvent &p_event)

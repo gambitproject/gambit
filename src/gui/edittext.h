@@ -33,7 +33,7 @@ private:
   void OnLeftClick(wxMouseEvent &);
   
 public:
-  gbtStaticTextButton(wxWindow *p_parent, int p_id,
+  gbtStaticTextButton(wxWindow *p_parent, wxWindowID p_id,
 		      const wxString &,
 		      const wxPoint & = wxDefaultPosition, 
 		      const wxSize & = wxDefaultSize,

@@ -26,7 +26,6 @@
 #endif  // WX_PRECOMP
 
 #include "nfgprofile.h"
-#include "menuconst.h"
 #include "renratio.h"        // for rational number rendering
 
 //-------------------------------------------------------------------------
