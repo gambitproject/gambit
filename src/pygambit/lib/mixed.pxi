@@ -214,8 +214,9 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
     def as_behavior(self):
         cdef MixedBehaviorProfileDouble behav
         if not self.game.is_tree:
-            raise UndefinedOperationError("Mixed behavior profiles are not "\
-                                          "defined for strategic games")
+            raise UndefinedOperationError(
+                "Mixed behavior profiles are not defined for strategic games"
+            )
         behav = MixedBehaviorProfileDouble()
         behav.profile = new c_MixedBehaviorProfileDouble(deref(self.profile))
         return behav

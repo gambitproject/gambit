@@ -19,7 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-import itertools
+
 import functools
 from cython.operator cimport dereference as deref
 from .error import UndefinedOperationError
@@ -99,8 +99,9 @@ cdef class StrategySupportProfile(Collection):
                 strategies.remove(strategy)
                 return StrategySupportProfile(strategies, self.game)
             else:
-                raise UndefinedOperationError("cannot remove last strategy"\
-                                              " of a player")
+                raise UndefinedOperationError(
+                    "cannot remove last strategy of a player"
+                )
         raise TypeError("delete requires a Strategy object")
 
     def difference(self, StrategySupportProfile other):
@@ -150,7 +151,7 @@ cdef class StrategySupportProfile(Collection):
             return g
 
 cdef class RestrictionOutcomes(Collection):
-    "Represents a collection of outcomes in a restriction."
+    """Represents a collection of outcomes in a restriction."""
     cdef StrategicRestriction restriction
 
     def __init__(self, StrategicRestriction restriction not None):
@@ -168,7 +169,7 @@ cdef class RestrictionOutcomes(Collection):
         raise UndefinedOperationError("Changing objects in a restriction is not supported")
 
 cdef class RestrictionStrategies(Collection):
-    "Represents a collection of strategies in a restriction."
+    """Represents a collection of strategies in a restriction."""
     cdef StrategicRestriction restriction
 
     def __init__(self, StrategicRestriction restriction not None):

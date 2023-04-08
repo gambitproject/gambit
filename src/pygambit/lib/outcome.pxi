@@ -32,9 +32,9 @@ cdef class Outcome:
     def __richcmp__(Outcome self, other, whichop):
         if isinstance(other, Outcome):
             if whichop == 2:
-                return self.outcome.deref() == ((<Outcome>other).outcome).deref()
+                return self.outcome.deref() == (<Outcome>other).outcome.deref()
             elif whichop == 3:
-                return self.outcome.deref() != ((<Outcome>other).outcome).deref()
+                return self.outcome.deref() != (<Outcome>other).outcome.deref()
             else:
                 raise NotImplementedError
         else:
@@ -119,7 +119,7 @@ cdef class Outcome:
         return o
 
 cdef class TreeGameOutcome:
-    "Represents an outcome in a strategic game derived from an extensive game."
+    """Represents an outcome in a strategic game derived from an extensive game."""
     cdef c_PureStrategyProfile *psp
     cdef c_Game c_game
 
@@ -139,9 +139,9 @@ cdef class TreeGameOutcome:
     def __richcmp__(TreeGameOutcome self, other, whichop):
         if isinstance(other, TreeGameOutcome):
             if whichop == 2:
-                return self.psp.deref() == ((<TreeGameOutcome>other).psp).deref()
+                return self.psp.deref() == (<TreeGameOutcome>other).psp.deref()
             elif whichop == 3:
-                return self.psp.deref() != ((<TreeGameOutcome>other).psp).deref()
+                return self.psp.deref() != (<TreeGameOutcome>other).psp.deref()
             else:
                 raise NotImplementedError
         else:

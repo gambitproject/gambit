@@ -36,9 +36,9 @@ cdef class Action:
     def __richcmp__(Action self, other, whichop):
         if isinstance(other, Action):
             if whichop == 2:
-                return self.action.deref() == ((<Action>other).action).deref()
+                return self.action.deref() == (<Action>other).action.deref()
             elif whichop == 3:
-                return self.action.deref() != ((<Action>other).action).deref()
+                return self.action.deref() != (<Action>other).action.deref()
             else:
                 raise NotImplementedError
         else:
@@ -54,13 +54,14 @@ cdef class Action:
 
     def delete(self):
         if len(self.infoset.actions) == 1:
-            raise UndefinedOperationError("it is not possible to delete the \
-                                            last action of an infoset")
+            raise UndefinedOperationError(
+                "It is not possible to delete the last action of an infoset"
+            )
         self.action.deref().DeleteAction()
 
     def precedes(self, node):
         if isinstance(node, Node):
-            return self.action.deref().Precedes(((<Node>node).node))
+            return self.action.deref().Precedes((<Node>node).node)
         else:
             raise TypeError("Precedes takes a Node object as its input")
 

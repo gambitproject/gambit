@@ -20,7 +20,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 import itertools
-from libcpp cimport bool
 
 import numpy as np
 
@@ -30,7 +29,7 @@ import pygambit.gameiter
 
 
 cdef class Outcomes(Collection):
-    "Represents a collection of outcomes in a game."
+    """Represents a collection of outcomes in a game."""
     cdef c_Game game
     def __len__(self):    return self.game.deref().NumOutcomes()
     def __getitem__(self, outc):
@@ -48,7 +47,7 @@ cdef class Outcomes(Collection):
         return c
 
 cdef class Players(Collection):
-    "Represents a collection of players in a game."
+    """Represents a collection of players in a game."""
     cdef c_Game game
     cdef StrategicRestriction restriction
     def __len__(self):       return self.game.deref().NumPlayers()
@@ -79,7 +78,7 @@ cdef class Players(Collection):
             return p
 
 cdef class GameActions(Collection):
-    "Represents a collection of actions in a game."
+    """Represents a collection of actions in a game."""
     cdef c_Game game
     def __len__(self):
         return self.game.deref().BehavProfileLength()
@@ -92,7 +91,7 @@ cdef class GameActions(Collection):
         return a
 
 cdef class GameInfosets(Collection):
-    "Represents a collection of infosets in a game."
+    """Represents a collection of infosets in a game."""
     cdef c_Game game
     def __len__(self):
         cdef Array[int] num_infosets
@@ -111,7 +110,7 @@ cdef class GameInfosets(Collection):
         return i
 
 cdef class GameStrategies(Collection):
-    "Represents a collection of strategies in a game."
+    """Represents a collection of strategies in a game."""
     cdef c_Game game
     def __len__(self):
         return self.game.deref().MixedProfileLength()
@@ -230,9 +229,9 @@ cdef class Game(object):
     def __richcmp__(Game self, other, whichop):
         if isinstance(other, Game):
             if whichop == 2:
-                return self.game.deref() == ((<Game>other).game).deref()
+                return self.game.deref() == (<Game>other).game.deref()
             elif whichop == 3:
-                return self.game.deref() != ((<Game>other).game).deref()
+                return self.game.deref() != (<Game>other).game.deref()
             else:
                 raise NotImplementedError
         else:
@@ -269,8 +268,9 @@ cdef class Game(object):
                 a = GameActions()
                 a.game = self.game
                 return a
-            raise UndefinedOperationError("Operation only defined for "\
-                                           "games with a tree representation")
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
 
     property infosets:
         def __get__(self):
@@ -279,8 +279,9 @@ cdef class Game(object):
                 i = GameInfosets()
                 i.game = self.game
                 return i
-            raise UndefinedOperationError("Operation only defined for "\
-                                           "games with a tree representation")
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
 
     property players:
         def __get__(self):
@@ -314,8 +315,9 @@ cdef class Game(object):
                 n = Node()
                 n.node = self.game.deref().GetRoot()
                 return n
-            raise UndefinedOperationError("Operation only defined for "\
-                                           "games with a tree representation")
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
                          
     property is_const_sum:
         def __get__(self):
@@ -360,25 +362,25 @@ cdef class Game(object):
     def __getitem__(self, i):
         try:
             if len(i) != len(self.players):
-                raise KeyError, "Number of strategies is not equal to the number of players"
+                raise KeyError("Number of strategies is not equal to the number of players")
         except TypeError:
-            raise TypeError, "contingency must be a tuple-like object"
+            raise TypeError("contingency must be a tuple-like object")
         cont = [ 0 ] * len(self.players)
         for (pl, st) in enumerate(i):
             if isinstance(st, int):
                 if st < 0 or st >= len(self.players[pl].strategies):
-                    raise IndexError, "Provided strategy index %d out of range for player %d" % (st, pl)
+                    raise IndexError(f"Provided strategy index {st} out of range for player {pl}")
                 cont[pl] = st
             elif isinstance(st, str):
                 try:
                     cont[pl] = [ s.label for s in self.players[pl].strategies ].index(st)
                 except ValueError:
-                    raise IndexError, "Provided strategy label '%s' not defined" % st
+                    raise IndexError(f"Provided strategy label '{st}' not defined")
             elif isinstance(st, Strategy):
                 try:
                     cont[pl] = list(self.players[pl].strategies).index(st)
                 except ValueError:
-                    raise IndexError, "Provided strategy '%s' not available to player" % st
+                    raise IndexError(f"Provided strategy '{st}' not available to player")
             else:
                 raise TypeError("Must use a tuple of ints, strategy labels, or strategies")
         return self._get_contingency(*tuple(cont))
@@ -390,8 +392,7 @@ cdef class Game(object):
         cdef c_Rational dummy_rat
         if not self.is_perfect_recall:
             raise UndefinedOperationError(
-                "Mixed strategies not supported for games with "
-                "imperfect recall."
+                "Mixed strategies not supported for games with imperfect recall."
             )
         if not rational:
             mspd = MixedStrategyProfileDouble()
@@ -447,8 +448,9 @@ cdef class Game(object):
                 mbpr.profile = new c_MixedBehaviorProfileRational(self.game)
                 return mbpr
         else:
-            raise UndefinedOperationError("Game must have a tree representation"\
-                                      " to create a mixed behavior profile")
+            raise UndefinedOperationError(
+                "Game must have a tree representation to create a mixed behavior profile"
+            )
  
     def support_profile(self):
         return StrategySupportProfile(list(self.strategies), self)

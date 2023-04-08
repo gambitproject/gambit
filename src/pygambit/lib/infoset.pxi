@@ -22,7 +22,7 @@
 from pygambit.lib.error import MismatchError
 
 cdef class Members(Collection):
-    "Represents a collection of members of an infoset."
+    """Represents a collection of members of an infoset."""
     cdef c_GameInfoset infoset
     def __len__(self):     return self.infoset.deref().NumMembers()
     def __getitem__(self, i):
@@ -33,7 +33,7 @@ cdef class Members(Collection):
         return n
 
 cdef class Actions(Collection):
-    "Represents a collection of actions at an infoset."
+    """Represents a collection of actions at an infoset."""
     cdef c_GameInfoset infoset
 
     def add(self, action=None):
@@ -66,9 +66,9 @@ cdef class Infoset:
     def __richcmp__(Infoset self, other, whichop):
         if isinstance(other, Infoset):
             if whichop == 2:
-                return self.infoset.deref() == ((<Infoset>other).infoset).deref()
+                return self.infoset.deref() == (<Infoset>other).infoset.deref()
             elif whichop == 3:
-                return self.infoset.deref() != ((<Infoset>other).infoset).deref()
+                return self.infoset.deref() != (<Infoset>other).infoset.deref()
             else:
                 raise NotImplementedError
         else:
@@ -84,7 +84,7 @@ cdef class Infoset:
 
     def precedes(self, node):
         if isinstance(node, Node):
-            return self.infoset.deref().Precedes(((<Node>node).node))
+            return self.infoset.deref().Precedes((<Node>node).node)
         else:
             raise TypeError("argument of precedes should be a Node instance")
 

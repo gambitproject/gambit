@@ -22,7 +22,7 @@
 from .error import MismatchError, UndefinedOperationError
 
 cdef class Children(Collection):
-    "Represents the collection of direct children of a node."
+    """Represents the collection of direct children of a node."""
     cdef c_GameNode parent
     def __len__(self):    return self.parent.deref().NumChildren()
     def __getitem__(self, i):
@@ -44,9 +44,9 @@ cdef class Node:
     def __richcmp__(Node self, other, whichop):
         if isinstance(other, Node):
             if whichop == 2:
-                return self.node.deref() == ((<Node>other).node).deref()
+                return self.node.deref() == (<Node>other).node.deref()
             elif whichop == 3:
-                return self.node.deref() != ((<Node>other).node).deref()
+                return self.node.deref() != (<Node>other).node.deref()
             else:
                 raise NotImplementedError
         else:
@@ -62,9 +62,9 @@ cdef class Node:
 
     def is_successor_of(self, node):
         if isinstance(node, Node):
-            return self.node.deref().IsSuccessorOf(((<Node>node).node))
+            return self.node.deref().IsSuccessorOf((<Node>node).node)
         else:
-            raise TypeError, "is_successor_of takes a Node object as its input"
+            raise TypeError("is_successor_of takes a Node object as its input")
 
     def is_subgame_root(self):
         return self.node.deref().IsSubgameRoot()
@@ -81,7 +81,7 @@ cdef class Node:
             if player.game != self.game:
                 raise MismatchError("append_move can only be applied between objects of the same game")
             i = Infoset()
-            i.infoset = self.node.deref().AppendMove(((<Player>player).player), actions)
+            i.infoset = self.node.deref().AppendMove((<Player>player).player, actions)
             return i
         elif isinstance(player, Infoset):
             if actions is not None:
@@ -89,7 +89,7 @@ cdef class Node:
             if player.game != self.game:
                 raise MismatchError("append_move can only be applied between objects of the same game")
             i = Infoset()
-            i.infoset = self.node.deref().AppendMove(((<Infoset>player).infoset))
+            i.infoset = self.node.deref().AppendMove((<Infoset>player).infoset)
             return i
         raise TypeError, "append_move accepts either a Player or Infoset to specify information"
 
@@ -103,7 +103,7 @@ cdef class Node:
             if player.game != self.game:
                 raise MismatchError("append_move can only be applied between objects of the same game")
             i = Infoset()
-            i.infoset = self.node.deref().InsertMove(((<Player>player).player), actions)
+            i.infoset = self.node.deref().InsertMove((<Player>player).player, actions)
             return i
         elif isinstance(player, Infoset):
             if actions is not None:
@@ -111,7 +111,7 @@ cdef class Node:
             if player.game != self.game:
                 raise MismatchError("append_move can only be applied between objects of the same game")
             i = Infoset()
-            i.infoset = self.node.deref().InsertMove(((<Infoset>player).infoset))
+            i.infoset = self.node.deref().InsertMove((<Infoset>player).infoset)
             return i
         raise TypeError, "insert_move accepts either a Player or Infoset to specify information"
 

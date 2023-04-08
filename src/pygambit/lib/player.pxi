@@ -22,7 +22,7 @@
 from .error import UndefinedOperationError
 
 cdef class Infosets(Collection):
-    "Represents a collection of infosets for a player."
+    """Represents a collection of infosets for a player."""
     cdef c_GamePlayer player
     def __len__(self):    return self.player.deref().NumInfosets()
     def __getitem__(self, iset):
@@ -33,7 +33,7 @@ cdef class Infosets(Collection):
         return s
 
 cdef class Strategies(Collection):
-    "Represents a collection of strategies for a player."
+    """Represents a collection of strategies for a player."""
     cdef c_GamePlayer player
 
     def add(self, label=""):
@@ -57,13 +57,14 @@ cdef class Strategies(Collection):
         return s
 
 cdef class PlayerSupportStrategies(Collection):
-    "Represents a collection of strategies for a player in a restriction"
+    """Represents a collection of strategies for a player in a restriction"""
     cdef Player player
     cdef StrategicRestriction restriction
 
     def add(self, label=""):
-        raise UndefinedOperationError("Adding strategies is only applicable"\
-                                      "to players in a game, not in a restriction")
+        raise UndefinedOperationError(
+            "Adding strategies is only applicable to players in a game, not in a restriction"
+        )
 
     def __init__(self, Player player not None, StrategicRestriction restriction not None):
         self.restriction = restriction
@@ -96,9 +97,9 @@ cdef class Player:
     def __richcmp__(Player self, other, whichop):
         if isinstance(other, Player):
             if whichop == 2:
-                return self.player.deref() == ((<Player>other).player).deref()
+                return self.player.deref() == (<Player>other).player.deref()
             elif whichop == 3:
-                return self.player.deref() != ((<Player>other).player).deref()
+                return self.player.deref() != (<Player>other).player.deref()
             else:
                 raise NotImplementedError
         else:

@@ -28,6 +28,7 @@ import warnings
 from libcpp cimport bool
 from libcpp.string cimport string
 
+
 class Decimal(decimal.Decimal):
     pass
 
