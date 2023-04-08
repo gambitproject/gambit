@@ -26,8 +26,6 @@
 #include "wx/plotctrl/plotmark.h"
 
 #include <cmath>
-#include <cfloat>
-#include <climits>
 
 // MSVC hogs global namespace with these min/max macros - remove them
 #ifdef max

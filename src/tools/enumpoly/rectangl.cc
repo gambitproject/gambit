@@ -20,11 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gambit.h"
 #include "rectangl.imp"
-
-//template class gRectangle<Gambit::Rational>;
-//template gRectangle<double> TogDouble(const gRectangle<Gambit::Rational>&);
 
 template class gRectangle<double>;
 template gRectangle<double> TogDouble(const gRectangle<double>&);

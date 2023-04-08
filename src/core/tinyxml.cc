@@ -22,7 +22,6 @@ must not be misrepresented as being the original software.
 distribution.
 */
 
-#include <cctype>
 #include "core/tinyxml.h"
 
 #ifdef TIXML_USE_STL

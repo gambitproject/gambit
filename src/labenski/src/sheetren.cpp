@@ -31,8 +31,6 @@
 #include "wx/sheet/sheetren.h"
 #include "wx/tokenzr.h"
 #include "wx/renderer.h"
-// Required for wxIs... functions
-#include <cctype>
 
 #define PRINT_RECT(s, b) wxPrintf(wxT("%s %d %d %d %d - w%d h%d\n"), wxT(s), b.GetTop(), b.GetLeft(), b.GetBottom(), b.GetRight(), b.GetWidth(), b.GetHeight());
 

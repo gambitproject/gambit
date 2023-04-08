@@ -20,7 +20,6 @@
     #include "wx/defs.h"
 #endif // WX_PRECOMP
 
-#include "wx/sheet/sheet.h"
 #include "wx/sheet/sheetedg.h"
 
 #include "wx/arrimpl.cpp"

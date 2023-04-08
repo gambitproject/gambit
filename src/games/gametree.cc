@@ -21,7 +21,6 @@
 //
 
 #include <iostream>
-#include <sstream>
 
 #include "gambit.h"
 #include "gametree.h"

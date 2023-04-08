@@ -23,7 +23,6 @@
 //
 
 #include <iostream>
-#include <fstream> 
 #include "gambit.h"
 #include "nfgcpoly.h"
 #include "nfghs.h"

@@ -16,7 +16,6 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/panel.h"
     #include "wx/scrolbar.h"
     #include "wx/event.h"
     #include "wx/timer.h"
@@ -24,12 +23,10 @@
     #include "wx/msgdlg.h"
     #include "wx/geometry.h"
     #include "wx/sizer.h"
-    #include "wx/dcscreen.h"
     #include "wx/dcclient.h"
     #include "wx/textctrl.h"
 #endif // WX_PRECOMP
 
-#include "wx/splitter.h"
 #include "wx/math.h"
 #include "wx/image.h"
 #include "wx/crt.h"      // for wxPrintf()
@@ -37,8 +34,6 @@
 #include "wx/plotctrl/plotctrl.h"
 
 #include <cmath>
-#include <cfloat>
-#include <climits>
 
 // MSVC hogs global namespace with these min/max macros - remove them
 #ifdef max

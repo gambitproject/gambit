@@ -21,7 +21,6 @@
 //
 
 #include <cstdlib>
-#include <cmath>
 
 #include "gambit.h"
 #include "gcomplex.h"

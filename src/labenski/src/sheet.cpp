@@ -32,7 +32,6 @@
     #include "wx/dcclient.h"
     #include "wx/settings.h"
     #include "wx/log.h"
-    #include "wx/dcscreen.h"
 #endif // WX_PRECOMP
 
 #include "wx/sheet/sheet.h"
@@ -40,12 +39,9 @@
 
 #include "wx/timer.h"
 #include "wx/clipbrd.h"
-#include "wx/renderer.h"
 
 #include "wx/crt.h"   // for wxPrintf()
 
-// Required for wxIs... functions
-#include <cctype>
 
 #define PRINT_BLOCK(s, b) wxPrintf(wxT("%s %d %d %d %d - w%d h%d\n"), wxT(s), b.GetTop(), b.GetLeft(), b.GetBottom(), b.GetRight(), b.GetWidth(), b.GetHeight());
 #define PRINT_RECT(s, b)  wxPrintf(wxT("%s %d %d %d %d - w%d h%d\n"), wxT(s), b.GetTop(), b.GetLeft(), b.GetBottom(), b.GetRight(), b.GetWidth(), b.GetHeight());

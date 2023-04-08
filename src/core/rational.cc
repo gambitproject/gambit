@@ -26,7 +26,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <iostream>
-#include <sstream>
 
 #include "gambit.h"
 #include "rational.h"

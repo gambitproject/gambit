@@ -22,7 +22,6 @@
     #include "wx/gdicmn.h"        // for wxRect
 #endif // WX_PRECOMP
 
-#include "wx/sheet/sheet.h"
 #include "wx/sheet/sheetsel.h"
 
 // if set then 

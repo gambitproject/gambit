@@ -39,7 +39,6 @@
 
 #include <iostream>
 #include <cstdio>
-#include <cstring>
 
 // The order of these next includes is important, because of macro definitions
 #include "gambit.h"

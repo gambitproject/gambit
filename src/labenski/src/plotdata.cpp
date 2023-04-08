@@ -24,7 +24,6 @@
 
 #include "wx/file.h"
 #include "wx/wfstream.h"
-#include "wx/textfile.h"
 #include "wx/math.h"
 
 #include "wx/plotctrl/plotdata.h"

@@ -228,12 +228,10 @@ wxFunctionParser& wxFunctionParser::operator=(const wxFunctionParser& cpy)
 
 //============================================================================
 
-#include <cstdlib>
 #include <cstring>
 #include <cctype>
 #include <cmath>
 #include <new>
-#include <algorithm>
 
 #if defined(__VISUALC__)  && (__VISUALC__ <= 1100) // for VC6 - non standard
     namespace std {}

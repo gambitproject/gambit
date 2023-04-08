@@ -20,8 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "core/rational.h"
-#include "core/vector.h"
+#include "gambit.h"
 #include "interval.h"
 #include "gcomplex.h"
 

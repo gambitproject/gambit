@@ -23,7 +23,6 @@
 #include <cstdlib>
 #include <cctype>
 #include <iostream>
-#include <sstream>
 #include <map>
 
 #include "gambit.h"
