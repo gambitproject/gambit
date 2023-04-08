@@ -152,12 +152,12 @@ int main(int argc, char *argv[])
 	  stage.reset(new BehavViaStrategySolver<Rational>(substage));
 	}
 	SubgameBehavSolver<Rational> algorithm(stage, renderer);
-	algorithm.Solve(game);
+	algorithm.Solve(BehaviorSupportProfile(game));
       }
       else {
 	if (solveAgent) {
 	  EnumPureAgentSolver algorithm(renderer);
-	  algorithm.Solve(game);
+	  algorithm.Solve(BehaviorSupportProfile(game));
 	}
 	else {
 	  EnumPureStrategySolver algorithm(renderer);

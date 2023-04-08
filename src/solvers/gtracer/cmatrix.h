@@ -56,7 +56,7 @@ public:
 		m = 1;
 		x = new double[1];
 	}
-	inline cvector(int m) {
+	inline explicit cvector(int m) {
 		this->m = m;
 		x = new double[m];
 	}
@@ -321,7 +321,7 @@ inline std::istream &operator>>(std::istream &s, cvector& v) {
 
 class cmatrix {
 public:
-	inline cmatrix(int m=1, int n=1) {
+	inline explicit cmatrix(int m=1, int n=1) {
 		this->m = m; this->n = n;
 		s = m*n;
 		x = new double[s];
@@ -373,7 +373,7 @@ public:
 		if (v.m<l) l = v.m;
 		for(int i=0,c=0;i<l;i++,c+=n+1) x[c] = v.x[i]; 
 	}
-	inline cmatrix(const cvector &v) {
+	inline explicit cmatrix(const cvector &v) {
 		m = v.m;
 		n = 1;
 		s = m;

@@ -44,7 +44,7 @@ private:
   void GetSequenceDims(const Gambit::GameNode &);
 
 public:
-  Sfg(const Gambit::BehaviorSupportProfile &);
+  explicit Sfg(const Gambit::BehaviorSupportProfile &);
   virtual ~Sfg();  
 
   inline int NumSequences(int pl) const {return seq[pl];}

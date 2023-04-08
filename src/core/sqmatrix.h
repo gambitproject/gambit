@@ -38,8 +38,8 @@ public:
 template <class T> class SquareMatrix : public Matrix<T>   {
 public:
   SquareMatrix();
-  SquareMatrix(int size);
-  SquareMatrix(const Matrix<T> &);
+  explicit SquareMatrix(int size);
+  explicit SquareMatrix(const Matrix<T> &);
   SquareMatrix(const SquareMatrix<T> &);
   ~SquareMatrix() override;
 

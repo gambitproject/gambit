@@ -33,7 +33,7 @@ namespace Gambit {
 
 class BagentPureStrategyProfileRep : public PureStrategyProfileRep {
 public:
-  BagentPureStrategyProfileRep(const Game &p_game)
+  explicit BagentPureStrategyProfileRep(const Game &p_game)
     : PureStrategyProfileRep(p_game) { }
   PureStrategyProfileRep *Copy() const override
   {  return new BagentPureStrategyProfileRep(*this); }
@@ -64,7 +64,7 @@ Rational BagentPureStrategyProfileRep::GetPayoff(int pl) const
   }
   int bp = dynamic_cast<GameBagentRep &>(*m_nfg).agent2baggPlayer[pl];
   int tp = pl - 1 - baggPtr->typeOffset[bp-1];
-  return baggPtr->getPurePayoff(bp-1,tp,s);
+  return Rational(baggPtr->getPurePayoff(bp-1,tp,s));
 }
 
 Rational
@@ -79,7 +79,7 @@ BagentPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) c
   s[player-1] = p_strategy->GetNumber() - 1;
   int bp = dynamic_cast<GameBagentRep &>(*m_nfg).agent2baggPlayer[player];
   int tp = player - 1 - baggPtr->typeOffset[bp-1];
-  return baggPtr->getPurePayoff(bp-1,tp,s);
+  return Rational(baggPtr->getPurePayoff(bp-1,tp,s));
 }
 
 
@@ -146,21 +146,25 @@ PureStrategyProfile GameBagentRep::NewPureStrategyProfile() const
 
 MixedStrategyProfile<double> GameBagentRep::NewMixedStrategyProfile(double) const
 {
-  return new BagentMixedStrategyProfileRep<double>(StrategySupportProfile(const_cast<GameBagentRep *>(this)));
+  return MixedStrategyProfile<double>(
+    new BagentMixedStrategyProfileRep<double>(StrategySupportProfile(const_cast<GameBagentRep *>(this)))
+  );
 }
 
 MixedStrategyProfile<Rational> GameBagentRep::NewMixedStrategyProfile(const Rational &) const
 {
-  return new BagentMixedStrategyProfileRep<Rational>(StrategySupportProfile(const_cast<GameBagentRep *>(this)));
+  return MixedStrategyProfile<Rational>(
+    new BagentMixedStrategyProfileRep<Rational>(StrategySupportProfile(const_cast<GameBagentRep *>(this)))
+  );
 }
 MixedStrategyProfile<double> GameBagentRep::NewMixedStrategyProfile(double, const StrategySupportProfile& spt) const
 {
-  return new BagentMixedStrategyProfileRep<double>(spt);
+  return MixedStrategyProfile<double>(new BagentMixedStrategyProfileRep<double>(spt));
 }
 
 MixedStrategyProfile<Rational> GameBagentRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfile& spt) const
 {
-  return new BagentMixedStrategyProfileRep<Rational>(spt);
+  return MixedStrategyProfile<Rational>(new BagentMixedStrategyProfileRep<Rational>(spt));
 }
 
 //------------------------------------------------------------------------

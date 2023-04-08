@@ -291,7 +291,7 @@ std::istream &operator>>(std::istream &f, Rational &y)
 {
   char ch = ' ';
   int sign = 1;
-  Integer num = 0, denom = 1;
+  Integer num(0), denom(1);
 
   while (isspace(ch)) {
     f.get(ch);
@@ -540,7 +540,7 @@ Rational lexical_cast(const std::string &f)
   char ch = ' ';
   int sign = 1;
   unsigned int index = 0, length = f.length();
-  Integer num = 0, denom = 1;
+  Integer num(0), denom(1);
 
   while (isspace(ch) && index<=length) {
     ch = f[index++];
@@ -578,7 +578,7 @@ Rational lexical_cast(const std::string &f)
     
     if (ch == 'e' || ch == 'E') {
       int expsign = 1;
-      Integer exponent = 0;
+      Integer exponent(0);
       ch = f[index++];
       if (ch == '-')  {
 	expsign = -1;
@@ -605,7 +605,7 @@ Rational lexical_cast(const std::string &f)
   }
   else if (ch == 'e' || ch == 'E') {
     int expsign = 1;
-    Integer exponent = 0;
+    Integer exponent(0);
     ch = f[index++];
     if (ch == '-')  {
       expsign = -1;

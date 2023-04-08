@@ -41,12 +41,12 @@ private:
 
 public: 
     // constructors and destructor
-  polynomial(const int=-1);
+  explicit polynomial(int=-1);
   polynomial(const polynomial<T> &);
-  polynomial(const Gambit::List<T> &);
-  polynomial(const Gambit::Vector<T> &);
+  explicit polynomial(const Gambit::List<T> &);
+  explicit polynomial(const Gambit::Vector<T> &);
   polynomial(const T&, const int&);
-  ~polynomial();
+  ~polynomial() = default;
 
     // unary operators
          polynomial<T>    operator -  () const;
@@ -112,9 +112,9 @@ private:
 
 public: 
     // constructors and destructor
-  complexpoly(const int=-1);
+  explicit complexpoly(int=-1);
   complexpoly(const complexpoly &);
-  complexpoly(const Gambit::List<gComplex> &);
+  explicit complexpoly(const Gambit::List<gComplex> &);
   complexpoly(const gComplex&, const int&);
   ~complexpoly();
 

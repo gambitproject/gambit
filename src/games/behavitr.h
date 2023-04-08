@@ -53,7 +53,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Construct a new iterator on the support, with no actions held fixed
-  BehaviorProfileIterator(const BehaviorSupportProfile &);
+  explicit BehaviorProfileIterator(const BehaviorSupportProfile &);
   /// Construct a new iterator on the support, holding the action fixed
   BehaviorProfileIterator(const BehaviorSupportProfile &, const GameAction &);
   //@}

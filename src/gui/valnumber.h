@@ -36,7 +36,7 @@ protected:
   void OnChar(wxKeyEvent &);
 
 public:
-  gbtNumberValidator(wxString *);
+  explicit gbtNumberValidator(wxString *);
   gbtNumberValidator(wxString *, const Gambit::Rational &);
   gbtNumberValidator(wxString *, const Gambit::Rational &, const Gambit::Rational &);
   gbtNumberValidator(const gbtNumberValidator &);

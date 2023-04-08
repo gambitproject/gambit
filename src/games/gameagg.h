@@ -42,7 +42,7 @@ private:
   Array<GamePlayerRep *> m_players;
 
   /// Constructor; takes ownership of the passed pointer
-  GameAggRep(agg::AGG *);
+  explicit GameAggRep(agg::AGG *);
 
 public:
   /// @name Lifecycle
@@ -139,10 +139,10 @@ public:
   bool IsConstSum() const override;
   /// Returns the smallest payoff in any outcome of the game
   Rational GetMinPayoff(int) const override 
-  { return aggPtr->getMinPayoff(); }
+  { return Rational(aggPtr->getMinPayoff()); }
   /// Returns the largest payoff in any outcome of the game
   Rational GetMaxPayoff(int) const override 
-  { return aggPtr->getMaxPayoff(); }
+  { return Rational(aggPtr->getMaxPayoff()); }
 
   //@}
 

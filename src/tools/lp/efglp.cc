@@ -33,7 +33,7 @@ public:
   Rational minpay;
   PVector<int> infosetIndex, infosetOffset;
   
-  GameData(const BehaviorSupportProfile &);
+  explicit GameData(const BehaviorSupportProfile &);
 
   void BuildConstraintMatrix(const BehaviorSupportProfile &,
 			     Matrix<T> &, const GameNode &, const T &,
@@ -247,7 +247,7 @@ NashLpBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 
   Gambit::linalg::BFS<T> cbfs;
   
-  GameData data(p_support.GetGame());
+  GameData data(BehaviorSupportProfile(p_support.GetGame()));
 
   Matrix<T> A(1, data.ns1 + data.ni2, 1, data.ns2 + data.ni1);
   Vector<T> b(1, data.ns1 + data.ni2);

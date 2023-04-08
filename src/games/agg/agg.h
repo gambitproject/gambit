@@ -293,7 +293,7 @@ private:
 
   //input functor 
   struct input {
-    input(std::istream &i): in(i) {}
+    explicit input(std::istream &i): in(i) {}
     void operator() (aggpayoff::iterator p) {
 	in >> (*p).second;
     }
@@ -301,7 +301,7 @@ private:
   };
 
   struct inputRand {
-    inputRand(bool int_payoffs=false, int int_factor=100):int_payoffs(int_payoffs),int_factor(int_factor) {}
+    explicit inputRand(bool int_payoffs=false, int int_factor=100):int_payoffs(int_payoffs),int_factor(int_factor) {}
     void operator() (aggpayoff::iterator p){
 #if HAVE_DRAND48
       p->second = drand48();

@@ -250,7 +250,7 @@ bool gbtNfgHs::SolveSupportSizeProfile(Game game,
   Gambit::PVector < int > playerSupport(supportSizeProfile);
 
   for (int i = 1; i <= numPlayers; i++) {
-    uninstantiatedSupports[i] = 0;
+    uninstantiatedSupports[i] = Gambit::Array<GameStrategy>();
     int m = 1;
     for (int j = 1; j <= supportSizeProfile[i]; j++) {
       playerSupport(i, j) = m;
@@ -579,7 +579,7 @@ void gbtNfgHs::GetDomainStrategies(Gambit::Array < Gambit::Array < Gambit::Array
 				   Gambit::Array < Gambit::Array < GameStrategy > > & domainStrategies) {
 
   for (int i = 1; i <= numPlayers; i++) {
-    domainStrategies[i] = 0;
+    domainStrategies[i] = Gambit::Array<GameStrategy>();
     for (int j = 1; j <= domains[i].Length(); j++) {
       for (int k = 1; k <= domains[i] [j].Length(); k++) {
 	if (domainStrategies[i].Find(domains[i] [j] [k]) == 0) { // no found

@@ -25,7 +25,7 @@
 
 class gbtAboutDialog : public wxDialog {
 public:
-  gbtAboutDialog(wxWindow *p_parent);
+  explicit gbtAboutDialog(wxWindow *p_parent);
   ~gbtAboutDialog() override = default;
 };
 

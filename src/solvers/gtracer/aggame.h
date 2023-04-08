@@ -45,13 +45,13 @@ class aggame : public gnmgame {
       return new aggame ( Gambit::agg::AGG::makeAGG(in) );
     }
 
-    aggame ( Gambit::agg::AGG *_aggPtr)
+    explicit aggame ( Gambit::agg::AGG *_aggPtr)
       :gnmgame(_aggPtr->getNumPlayers(), _aggPtr->actions),
       aggPtr (_aggPtr)
     {
     }
 
-    aggame(Gambit::GameAggRep& g)
+    explicit aggame(Gambit::GameAggRep& g)
       :gnmgame(g.aggPtr->getNumPlayers(), g.aggPtr->actions),
       aggPtr (g.aggPtr)
     {

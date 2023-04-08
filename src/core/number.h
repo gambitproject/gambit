@@ -35,9 +35,9 @@ private:
 public:
   Number()
     : m_text("0"), m_rational(0), m_double(0.0) { }
-  Number(const std::string &p_text)
+  explicit Number(const std::string &p_text)
     : m_text(p_text), m_rational(lexical_cast<Rational>(p_text)), 
-      m_double((double) m_rational)
+      m_double(static_cast<double>(m_rational))
   { }
   
   Number &operator=(const std::string &p_text)
@@ -46,13 +46,13 @@ public:
     // if the conversion of the text fails
     m_rational = lexical_cast<Rational>(p_text);
     m_text = p_text;
-    m_double = (double) m_rational;
+    m_double = static_cast<double>(m_rational);
     return *this; 
   }
 
-  operator const double &() const { return m_double; }
-  operator const Rational &() const { return m_rational; }
-  operator const std::string &() const { return m_text; }
+  explicit operator const double &() const { return m_double; }
+  explicit operator const Rational &() const { return m_rational; }
+  explicit operator const std::string &() const { return m_text; }
 };
 
 }

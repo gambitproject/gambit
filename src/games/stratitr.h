@@ -49,7 +49,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Construct a new iterator on the support, with no strategies held fixed
-  StrategyProfileIterator(const StrategySupportProfile &);
+  explicit StrategyProfileIterator(const StrategySupportProfile &);
   /// Construct a new iterator on the support, fixing player pl's strategy
   StrategyProfileIterator(const StrategySupportProfile &s, int pl, int st);
   /// Construct a new iterator on the support, fixing the given strategy

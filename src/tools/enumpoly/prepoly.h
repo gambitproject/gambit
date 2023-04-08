@@ -56,7 +56,7 @@ private:
   Gambit::Array < Variable * > Variables;
 
 public:
-  gSpace(int nvars = 0);
+  explicit gSpace(int nvars = 0);
   gSpace(const gSpace &);
   ~gSpace();
 
@@ -96,12 +96,11 @@ private:
   Gambit::Vector<int> components;
 
 public:
-  exp_vect(const gSpace*);
+  explicit exp_vect(const gSpace*);
   exp_vect(const gSpace*, const int&, const int&);   // x_i^j
   exp_vect(const gSpace*, int*);
   exp_vect(const gSpace*, Gambit::Vector<int>);
   exp_vect(const gSpace*, Gambit::Array<int>);
-  exp_vect(const exp_vect*);
   exp_vect(const exp_vect &) = default;
   ~exp_vect() = default;
 

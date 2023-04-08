@@ -73,7 +73,7 @@ public:
 // Implements Polak-Ribiere conjugate gradient descent
 class ConjugatePRMinimizer : public FunctionMinimizer {
 public:
-  ConjugatePRMinimizer(int n);
+  explicit ConjugatePRMinimizer(int n);
   ~ConjugatePRMinimizer() override = default;
 
   void Set(const Function &fdf,

@@ -32,7 +32,7 @@ template <class T> class Vector : public Array<T>   {
   friend class Matrix<T>;
 public:
   /** Create a vector of length len, starting at 1 */
-  Vector(unsigned int len = 0);
+  explicit Vector(unsigned int len = 0);
   /** Create a vector indexed from low to high */
   Vector(int low, int high);
   /** Copy constructor */

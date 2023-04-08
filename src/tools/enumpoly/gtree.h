@@ -72,7 +72,7 @@ template <class T> class gTree  {
 
   public:
     gTree();
-    gTree(const T&);
+    explicit gTree(const T&);
     gTree(const gTree<T>&);
     virtual ~gTree();
 

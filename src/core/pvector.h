@@ -43,7 +43,7 @@ template <class T> class PVector : public Vector<T> {
   // constructors
 
   PVector();
-  PVector(const Array<int> &sig);
+  explicit PVector(const Array<int> &sig);
   PVector(const Vector<T> &val, const Array<int> &sig);
   PVector(const PVector<T> &v);
   ~PVector() override;

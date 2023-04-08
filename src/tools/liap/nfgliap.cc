@@ -32,7 +32,7 @@ using namespace Gambit;
 
 class StrategicLyapunovFunction : public FunctionOnSimplices {
 public:
-  StrategicLyapunovFunction(const MixedStrategyProfile<double> &p_start)
+  explicit StrategicLyapunovFunction(const MixedStrategyProfile<double> &p_start)
     : m_game(p_start.GetGame()), m_profile(p_start)
   { }
   ~StrategicLyapunovFunction() override = default;

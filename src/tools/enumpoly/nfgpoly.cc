@@ -63,7 +63,7 @@ private:
 
   int SaveSolutions(const Gambit::List<Gambit::Vector<double> > &list);
 public:
-  PolEnumModule(const Gambit::StrategySupportProfile &);
+  explicit PolEnumModule(const Gambit::StrategySupportProfile &);
   
   int PolEnum();
   

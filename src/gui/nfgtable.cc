@@ -133,7 +133,7 @@ private:
   gbtTableWidgetBase *m_owner;
 
 public:
-  gbtTableWidgetDropTarget(gbtTableWidgetBase *p_owner) : m_owner(p_owner) { }
+  explicit gbtTableWidgetDropTarget(gbtTableWidgetBase *p_owner) : m_owner(p_owner) { }
 
   bool OnDropText(wxCoord x, wxCoord y, const wxString &p_text) override
   { return m_owner->DropText(x, y, p_text); }

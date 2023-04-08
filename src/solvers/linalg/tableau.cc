@@ -404,7 +404,7 @@ void Tableau<Rational>::SolveColumn(int in_col, Vector<Rational> &out)
       out[i] = (Rational)(tempcol[i]) * (Rational)(sign(denom*totdenom));
   }
   out=out/(Rational)abs(denom);
-  if(in_col < 0) out*=totdenom;
+  if(in_col < 0) out*=Rational(totdenom);
   for(int i=out.First();i<=out.Last();i++) 
     if(Label(i)<0) out[i]=(Rational)out[i]/(Rational)totdenom;
 }
@@ -456,7 +456,7 @@ void Tableau<Rational>::Refactor()
   //gout << "\nTabnew:\n" << Tabnew;
 
   Vector<Rational> Coeffnew(Coeff.First(),Coeff.Last());
-  Coeffnew = inv * (*b) * totdenom * (Rational)sign(denom*totdenom);
+  Coeffnew = inv * (*b) * Rational(totdenom) * Rational(sign(denom*totdenom));
 
   //gout << "\nCoeff:\n" << Coeff;
   //gout << "\nCoeffew:\n" << Coeffnew;

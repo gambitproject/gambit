@@ -347,6 +347,7 @@ cdef extern from "games/behav.h":
         c_MixedBehaviorProfileRational(c_Game)
         c_MixedBehaviorProfileRational(c_MixedBehaviorProfileRational)
 
+
 cdef extern from "games/stratspt.h":
     cdef cppclass c_StrategySupportProfile "StrategySupportProfile":
         c_StrategySupportProfile(c_Game)
@@ -354,7 +355,7 @@ cdef extern from "games/stratspt.h":
         bool operator==(c_StrategySupportProfile)
         bool operator!=(c_StrategySupportProfile)
         c_Game GetGame()
-        Array[int] NumStrategies()        
+        Array[int] NumStrategies()
         int MixedProfileLength()
         int GetIndex(c_GameStrategy)
         int NumStrategiesPlayer "NumStrategies"(int) except +IndexError
@@ -365,6 +366,12 @@ cdef extern from "games/stratspt.h":
         c_StrategySupportProfile Undominated(bool, bool)
         c_MixedStrategyProfileDouble NewMixedStrategyProfileDouble "NewMixedStrategyProfile<double>"()
         c_MixedStrategyProfileRational NewMixedStrategyProfileRational "NewMixedStrategyProfile<Rational>"()
+
+
+cdef extern from "games/behavspt.h":
+    cdef cppclass c_BehaviorSupportProfile "BehaviorSupportProfile":
+        c_BehaviorSupportProfile(c_Game)
+
 
 cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError

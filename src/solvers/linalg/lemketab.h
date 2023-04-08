@@ -44,7 +44,7 @@ public:
     const char *what() const noexcept override { return "Bad Exit Index in LTableau"; }
   };
   LemkeTableau(const Matrix<T> &A, const Vector<T> &b);
-  LemkeTableau(const Tableau<T> &);
+  explicit LemkeTableau(const Tableau<T> &);
   virtual ~LemkeTableau() = default;
 
   int SF_PivotIn(int i);

@@ -225,7 +225,7 @@ void LUdecomp<T>::FactorBasis()
   }
   
   for ( i = B.MinRow(); i <= B.MaxRow(); i++) {    
-    pivVal = Gambit::abs ( B(i, i));
+    pivVal = (T) Gambit::abs(B(i, i));
     piv = i;
     for ( j = i+1; j <= B.MaxRow(); j++) {
       if (  B( j, i ) * B( j, i )  > pivVal * pivVal ) {
@@ -267,7 +267,7 @@ void LUdecomp<T>::GaussElem(Matrix<T> &B, int row, int col)
     }
 
   for ( i = row+1; i <= B.MaxRow(); i++ )
-    B( i , col ) = 0;
+    B( i , col ) = (T) 0;
 
   B( row, col ) = (T) 1;
 

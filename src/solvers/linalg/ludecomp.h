@@ -103,7 +103,7 @@ public:
   LUdecomp( const LUdecomp<T> &, Tableau<T> & );
 
   // Decompose given matrix
-  LUdecomp( Tableau<T> &, int rfac = 0 ); 
+  explicit LUdecomp( Tableau<T> &, int rfac = 0 );
 
   // Destructor
   ~LUdecomp();

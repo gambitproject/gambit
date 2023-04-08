@@ -1051,7 +1051,7 @@ MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double, const 
   if (!this->IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }    
-  return new TreeMixedStrategyProfileRep<double>(spt);
+  return MixedStrategyProfile<double>(new TreeMixedStrategyProfileRep<double>(spt));
 }
 
 MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfile& spt) const
@@ -1059,7 +1059,7 @@ MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Ration
   if (!this->IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }    
-  return new TreeMixedStrategyProfileRep<Rational>(spt);
+  return MixedStrategyProfile<Rational>(new TreeMixedStrategyProfileRep<Rational>(spt));
 }
 
 
@@ -1124,7 +1124,7 @@ Rational TreePureStrategyProfileRep::GetPayoff(int pl) const
 Rational
 TreePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
 {
-  PureStrategyProfile copy = Copy();
+  PureStrategyProfile copy(Copy());
   copy->SetStrategy(p_strategy);
   return copy->GetPayoff(p_strategy->GetPlayer()->GetNumber());
 }

@@ -36,7 +36,7 @@ namespace Gambit {
 
 class StrategicQREPathTracer::EquationSystem : public PathTracer::EquationSystem {
 public:
-  EquationSystem(const Game &p_game) : m_game(p_game) { }
+  explicit EquationSystem(const Game &p_game) : m_game(p_game) { }
   ~EquationSystem() override = default;
   // Compute the value of the system of equations at the specified point.
   void GetValue(const Vector<double> &p_point,
@@ -156,7 +156,7 @@ StrategicQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_poin
 
 class StrategicQREPathTracer::LambdaCriterion : public PathTracer::CriterionFunction {
 public:
-  LambdaCriterion(double p_lambda) : m_lambda(p_lambda) { }
+  explicit LambdaCriterion(double p_lambda) : m_lambda(p_lambda) { }
 
   double operator()(const Vector<double> &p_point,
 			    const Vector<double> &p_tangent) const override
@@ -274,7 +274,7 @@ double LogLike(const Vector<double> &p_frequencies, const Vector<double> &p_poin
 
 class StrategicQREEstimator::CriterionFunction : public PathTracer::CriterionFunction {
 public:
-  CriterionFunction(const Vector<double> &p_frequencies)
+  explicit CriterionFunction(const Vector<double> &p_frequencies)
     : m_frequencies(p_frequencies) { }
   ~CriterionFunction() override = default;
 
@@ -333,7 +333,7 @@ StrategicQREEstimator::CallbackFunction::CallbackFunction(std::ostream &p_stream
     m_fullGraph(p_fullGraph), m_decimals(p_decimals),
     m_bestProfile(p_game->NewMixedStrategyProfile(0.0)),
     m_bestLambda(0.0),
-    m_maxlogL(LogLike(p_frequencies, m_bestProfile))
+    m_maxlogL(LogLike(p_frequencies, static_cast<const Vector<double> &>(m_bestProfile)))
 { }
 
 void
@@ -377,7 +377,7 @@ StrategicQREEstimator::CallbackFunction::operator()(const Vector<double> &x,
   for (int i = 1; i < x.Length(); i++) {
     profile[i] = exp(x[i]);
   }
-  double logL = LogLike(m_frequencies, profile);
+  double logL = LogLike(m_frequencies, static_cast<const Vector<double> &>(profile));
   PrintProfile(profile, logL);
   m_stream << std::endl;
   if (logL > m_maxlogL) {
@@ -408,12 +408,12 @@ StrategicQREEstimator::Estimate(const LogitQREMixedStrategyProfile &p_start,
   x[x.Length()] = p_start.GetLambda();
 
   CallbackFunction callback(p_stream, p_start.GetGame(),
-			    p_frequencies, m_fullGraph, m_decimals);
+			    static_cast<const Vector<double> &>(p_frequencies), m_fullGraph, m_decimals);
   while (x[x.Length()] < p_maxLambda) {
     TracePath(EquationSystem(p_start.GetGame()),
 	      x, p_maxLambda, p_omega,
 	      callback,
-	      CriterionFunction(p_frequencies));
+	      CriterionFunction(static_cast<const Vector<double> &>(p_frequencies)));
     if (x[x.Length()] < p_maxLambda) {
       // Found an extremum of the likelihood function
       // start iterating again from the same point in case of

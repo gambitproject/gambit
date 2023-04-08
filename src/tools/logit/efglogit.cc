@@ -35,7 +35,7 @@ namespace Gambit {
 
 class AgentQREPathTracer::EquationSystem : public PathTracer::EquationSystem {
 public:
-  EquationSystem(const Game &p_game);
+  explicit EquationSystem(const Game &p_game);
   ~EquationSystem() override;
   // Compute the value of the system of equations at the specified point.
   void GetValue(const Vector<double> &p_point,
@@ -222,7 +222,7 @@ void
 AgentQREPathTracer::EquationSystem::GetValue(const Vector<double> &p_point,
 					     Vector<double> &p_lhs) const
 {
-  LogBehavProfile<double> profile(m_game);
+  LogBehavProfile<double> profile((BehaviorSupportProfile(m_game)));
   for (int i = 1; i <= profile.Length(); i++) {
     profile.SetLogProb(i, p_point[i]);
   }
@@ -238,7 +238,7 @@ void
 AgentQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_point, 
 						Matrix<double> &p_matrix) const
 {
-  LogBehavProfile<double> profile(m_game);
+  LogBehavProfile<double> profile((BehaviorSupportProfile(m_game)));
   for (int i = 1; i <= profile.Length(); i++) {
     profile.SetLogProb(i, p_point[i]);
   }
@@ -298,7 +298,7 @@ void AgentQREPathTracer::CallbackFunction::operator()(const Vector<double> &x,
 
 class AgentQREPathTracer::LambdaCriterion : public PathTracer::CriterionFunction {
 public:
-  LambdaCriterion(double p_lambda) : m_lambda(p_lambda) { }
+  explicit LambdaCriterion(double p_lambda) : m_lambda(p_lambda) { }
 
   double operator()(const Vector<double> &p_point,
 			    const Vector<double> &p_tangent) const override

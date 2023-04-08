@@ -242,7 +242,7 @@ private:
   void UpdateViews(gbtGameModificationType p_modifications);
 
 public:
-  gbtGameDocument(Gambit::Game p_game);
+  explicit gbtGameDocument(Gambit::Game p_game);
   ~gbtGameDocument();
 
   //!
@@ -386,7 +386,7 @@ protected:
   gbtGameDocument *m_doc;
 
 public:
-  gbtGameView(gbtGameDocument *p_doc)
+  explicit gbtGameView(gbtGameDocument *p_doc)
     : m_doc(p_doc) { m_doc->AddView(this); }
   virtual ~gbtGameView()
     { m_doc->RemoveView(this); }

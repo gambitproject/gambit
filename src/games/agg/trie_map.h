@@ -87,7 +87,9 @@ public:
 
   //constructors
   trie_map():initBranches(1),root(new TrieNode<V>(1,data.end())){}
-  trie_map(int branches):initBranches(branches),root(new TrieNode<V>(branches,data.end())){}
+  explicit trie_map(int branches)
+    : initBranches(branches), root(new TrieNode<V>(branches,data.end()))
+    { }
 
 
   //copy constructor
@@ -432,7 +434,7 @@ private:
   
   
   struct print_helper {
-   print_helper (typename trie_map<V>::iterator en):endp(en){}
+   explicit print_helper (typename trie_map<V>::iterator en):endp(en){}
    void operator()(typename trie_map<V>::iterator p){
     if (p== endp) {std::cout<< "leaf with no data"<<std::endl; return;}
     std::cout<<"[";

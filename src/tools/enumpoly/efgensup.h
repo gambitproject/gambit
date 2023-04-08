@@ -99,7 +99,7 @@ protected:
 
 public:
   //Constructors and dtor
-  ActionCursorForSupport(const Gambit::BehaviorSupportProfile &S);
+  explicit ActionCursorForSupport(const Gambit::BehaviorSupportProfile &S);
   ActionCursorForSupport(const ActionCursorForSupport &a);
   ~ActionCursorForSupport();
 

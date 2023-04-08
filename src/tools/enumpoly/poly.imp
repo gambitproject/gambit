@@ -59,7 +59,7 @@ polynomial<T>::polynomial(const Gambit::Vector<T>& coefficientvector)
     coeflist.push_back(coefficientvector[i]);
 }
 
-template <class T> polynomial<T>::polynomial(const int deg) 
+template <class T> polynomial<T>::polynomial(int deg)
 : coeflist()
 { 
   if (deg >= 0) { 
@@ -67,9 +67,6 @@ template <class T> polynomial<T>::polynomial(const int deg)
     exit(1);
   }
 }
-
-template <class T> polynomial<T>::~polynomial()
-= default;
 
 //--------------------------------------------------------------------------
 //                             operators

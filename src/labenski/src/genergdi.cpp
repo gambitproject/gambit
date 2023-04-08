@@ -34,8 +34,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxGenericColour, wxObject)
 class wxGenericColourRefData : public wxObjectRefData
 {
 public:
-    wxGenericColourRefData(unsigned char r = 0, unsigned char g = 0,
-                           unsigned char b = 0, unsigned char a = 255)
+    explicit wxGenericColourRefData(unsigned char r = 0, unsigned char g = 0,
+                                    unsigned char b = 0, unsigned char a = 255)
         : wxObjectRefData(), m_r(r), m_g(g), m_b(b), m_a(a) {}
 
     wxGenericColourRefData( const wxGenericColourRefData& data )
@@ -257,7 +257,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxGenericPen, wxObject)
 class wxGenericPenRefData : public wxObjectRefData
 {
 public:
-    wxGenericPenRefData(int width = 1, wxPenStyle style = wxPENSTYLE_SOLID,
+    explicit wxGenericPenRefData(int width = 1, wxPenStyle style = wxPENSTYLE_SOLID,
                         wxPenCap cap = wxCAP_ROUND, wxPenJoin join = wxJOIN_ROUND)
           : wxObjectRefData(), m_width(width), m_style(style),
                                m_cap(cap), m_join(join),

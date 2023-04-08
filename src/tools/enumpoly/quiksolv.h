@@ -141,7 +141,7 @@ template <class T> class QuikSolv {
     const char *what() const noexcept override
     { return "Newton method failed to polish approximate root"; }
   };
-   QuikSolv(const gPolyList<T> &);  
+   explicit QuikSolv(const gPolyList<T> &);
    QuikSolv(const gPolyList<T> &, const int &);  
    QuikSolv(const QuikSolv<T> &);
    ~QuikSolv();

@@ -34,7 +34,7 @@ public:
   Vector<T> m_probs;
   StrategySupportProfile m_support;
 
-  MixedStrategyProfileRep(const StrategySupportProfile &);
+  explicit MixedStrategyProfileRep(const StrategySupportProfile &);
   virtual ~MixedStrategyProfileRep() = default;
   virtual MixedStrategyProfileRep<T> *Copy() const = 0;
 
@@ -57,10 +57,10 @@ public:
 template <class T> class TreeMixedStrategyProfileRep 
   : public MixedStrategyProfileRep<T> {
 public:
-  TreeMixedStrategyProfileRep(const StrategySupportProfile &p_support)
+  explicit TreeMixedStrategyProfileRep(const StrategySupportProfile &p_support)
     : MixedStrategyProfileRep<T>(p_support)
   { }
-  TreeMixedStrategyProfileRep(const MixedBehaviorProfile<T> &);
+  explicit TreeMixedStrategyProfileRep(const MixedBehaviorProfile<T> &);
   ~TreeMixedStrategyProfileRep() override = default;
   
   MixedStrategyProfileRep<T> *Copy() const override;
@@ -85,7 +85,7 @@ private:
   //@}
 
 public:
-  TableMixedStrategyProfileRep(const StrategySupportProfile &p_support)
+  explicit TableMixedStrategyProfileRep(const StrategySupportProfile &p_support)
     : MixedStrategyProfileRep<T>(p_support)
   { }
   ~TableMixedStrategyProfileRep() override = default;
@@ -100,7 +100,7 @@ template <class T> class AggMixedStrategyProfileRep
   : public MixedStrategyProfileRep<T> {
 
 public:
-  AggMixedStrategyProfileRep(const StrategySupportProfile &p_support)
+  explicit AggMixedStrategyProfileRep(const StrategySupportProfile &p_support)
    : MixedStrategyProfileRep<T>(p_support)
     { }
   ~AggMixedStrategyProfileRep() override = default;
@@ -117,7 +117,7 @@ template <class T> class BagentMixedStrategyProfileRep
   : public MixedStrategyProfileRep<T> {
 
 public:
-  BagentMixedStrategyProfileRep(const StrategySupportProfile &p_support)
+  explicit BagentMixedStrategyProfileRep(const StrategySupportProfile &p_support)
     : MixedStrategyProfileRep<T>(p_support)
     { }
   ~BagentMixedStrategyProfileRep() override = default;
@@ -150,11 +150,11 @@ template <class T> class MixedStrategyProfile {
 private:
   MixedStrategyProfileRep<T> *m_rep;
 
-  MixedStrategyProfile(MixedStrategyProfileRep<T> *p_rep)
+  explicit MixedStrategyProfile(MixedStrategyProfileRep<T> *p_rep)
     : m_rep(p_rep)
   { }
   /// Convert a behavior strategy profile to a mixed strategy profile
-  MixedStrategyProfile(const MixedBehaviorProfile<T> &);
+  explicit MixedStrategyProfile(const MixedBehaviorProfile<T> &);
 
 public:
   /// @name Lifecycle
@@ -193,8 +193,8 @@ public:
   /// Returns the mixed strategy for the player
   Vector<T> operator[](const GamePlayer &p_player) const;
 
-  operator const Vector<T> &() const { return m_rep->m_probs; }
-  operator Vector<T> &() { return m_rep->m_probs; }
+  explicit operator const Vector<T> &() const { return m_rep->m_probs; }
+  explicit operator Vector<T> &() { return m_rep->m_probs; }
   //@}
 
   /// @name General data access

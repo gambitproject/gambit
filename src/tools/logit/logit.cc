@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
     if (!mleFile.empty() && (!game->IsTree() || useStrategic)) {
       MixedStrategyProfile<double> frequencies(game->NewMixedStrategyProfile(0.0));
       std::ifstream mleData(mleFile.c_str());
-      ReadProfile(mleData, frequencies);
+      ReadProfile(mleData, static_cast<Vector<double> &>(frequencies));
 
       LogitQREMixedStrategyProfile start(game);
       StrategicQREEstimator tracer;

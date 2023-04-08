@@ -121,7 +121,7 @@ private:
   bool OnDropCopyOutcome(const Gambit::GameNode &p_node, const wxString &p_text);
 
 public:
-  gbtPlayerDropTarget(gbtEfgDisplay *p_owner) 
+  explicit gbtPlayerDropTarget(gbtEfgDisplay *p_owner)
     : m_owner(p_owner), m_model(p_owner->GetDocument())
   { }
 

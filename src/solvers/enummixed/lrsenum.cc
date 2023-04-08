@@ -692,7 +692,7 @@ public:
   lrs_dat *Q1, *Q2;  /* structure for holding static problem data            */
   lrs_dic *P1, *P2;  /* structure for holding current dictionary and indices */
 
-  LrsData(const Game &p_game);
+  explicit LrsData(const Game &p_game);
   ~LrsData();
 
 private:

@@ -33,7 +33,7 @@ namespace Gambit {
 
 class AggPureStrategyProfileRep : public PureStrategyProfileRep {
 public:
-  AggPureStrategyProfileRep(const Game &p_game)
+  explicit AggPureStrategyProfileRep(const Game &p_game)
     : PureStrategyProfileRep(p_game) { }
   PureStrategyProfileRep *Copy() const override
   { return new AggPureStrategyProfileRep(*this); }
@@ -62,7 +62,7 @@ Rational AggPureStrategyProfileRep::GetPayoff(int pl) const
   for (int i = 1; i <= aggPtr->getNumPlayers(); i++) {
     s[i-1] = m_profile[i]->GetNumber() -1;
   }
-  return aggPtr->getPurePayoff(pl-1, s);
+  return Rational(aggPtr->getPurePayoff(pl-1, s));
 }
 
 Rational
@@ -75,7 +75,7 @@ AggPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) cons
     s[i-1] = m_profile[i]->GetNumber() - 1;
   }
   s[player-1] = p_strategy->GetNumber() - 1;
-  return aggPtr->getPurePayoff(player-1, s);
+  return Rational(aggPtr->getPurePayoff(player-1, s));
 }
 
 //------------------------------------------------------------------------
@@ -143,21 +143,25 @@ PureStrategyProfile GameAggRep::NewPureStrategyProfile() const
 
 MixedStrategyProfile<double> GameAggRep::NewMixedStrategyProfile(double) const
 {
-  return new AggMixedStrategyProfileRep<double>(StrategySupportProfile(const_cast<GameAggRep *>(this)));
+  return MixedStrategyProfile<double>(
+    new AggMixedStrategyProfileRep<double>(StrategySupportProfile(const_cast<GameAggRep *>(this)))
+  );
 }
 
 MixedStrategyProfile<Rational> GameAggRep::NewMixedStrategyProfile(const Rational &) const
 {
-  return new AggMixedStrategyProfileRep<Rational>(StrategySupportProfile(const_cast<GameAggRep *>(this)));
+  return MixedStrategyProfile<Rational>(
+    new AggMixedStrategyProfileRep<Rational>(StrategySupportProfile(const_cast<GameAggRep *>(this)))
+  );
 }
 MixedStrategyProfile<double> GameAggRep::NewMixedStrategyProfile(double, const StrategySupportProfile& spt) const
 {
-  return new AggMixedStrategyProfileRep<double>(spt);
+  return MixedStrategyProfile<double>(new AggMixedStrategyProfileRep<double>(spt));
 }
 
 MixedStrategyProfile<Rational> GameAggRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfile& spt) const
 {
-  return new AggMixedStrategyProfileRep<Rational>(spt);
+  return MixedStrategyProfile<Rational>(new AggMixedStrategyProfileRep<Rational>(spt));
 }
 
 //------------------------------------------------------------------------

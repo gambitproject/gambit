@@ -45,7 +45,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Construct a new output group
-  gbtAnalysisOutput(gbtGameDocument *p_doc) : m_doc(p_doc) { }
+  explicit gbtAnalysisOutput(gbtGameDocument *p_doc) : m_doc(p_doc) { }
   /// Clean up an output group
   virtual ~gbtAnalysisOutput() = default;
   //@}

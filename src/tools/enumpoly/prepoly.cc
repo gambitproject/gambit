@@ -205,12 +205,6 @@ exp_vect::exp_vect(const gSpace* p, Gambit::Array<int> exponents)
   for (int i = 1; i <= Dmnsn(); i++) components[i] = exponents[i];
 }
 
-exp_vect::exp_vect(const exp_vect* p)
-: Space(p->Space), components(p->components)
-{
-}
-
-
 //-------------------------
 //        Operators
 //-------------------------

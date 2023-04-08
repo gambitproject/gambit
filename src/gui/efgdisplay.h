@@ -38,7 +38,7 @@ private:
   //@}
 
 public:
-  gbtPayoffEditor(wxWindow *p_parent);
+  explicit gbtPayoffEditor(wxWindow *p_parent);
 
   void BeginEdit(gbtNodeEntry *p_node, int p_player);
   void EndEdit();

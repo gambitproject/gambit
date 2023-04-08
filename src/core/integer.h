@@ -90,10 +90,10 @@ public:
   /// @name Lifecycle
   //@{
   Integer();
-  Integer(int);
-  Integer(long);
-  Integer(unsigned long);
-  Integer(IntegerRep *);
+  explicit Integer(int);
+  explicit Integer(long);
+  explicit Integer(unsigned long);
+  explicit Integer(IntegerRep *);
   Integer(const Integer &);
   ~Integer();
 

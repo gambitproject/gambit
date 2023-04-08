@@ -32,7 +32,7 @@ using namespace Gambit;
 
 class AgentLyapunovFunction : public FunctionOnSimplices {
 public:
-  AgentLyapunovFunction(const MixedBehaviorProfile<double> &p_start)
+  explicit AgentLyapunovFunction(const MixedBehaviorProfile<double> &p_start)
     : m_game(p_start.GetGame()), m_profile(p_start)
   { }
   ~AgentLyapunovFunction() override = default;

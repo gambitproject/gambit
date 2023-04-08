@@ -42,12 +42,12 @@ protected:
 
 public:
   Rational();
-  Rational(double);
-  Rational(int);
-  Rational(long n);
+  explicit Rational(double);
+  explicit Rational(int);
+  explicit Rational(long n);
   Rational(int n, int d);
   Rational(long n, long d);
-  Rational(const Integer& n);
+  explicit Rational(const Integer& n);
   Rational(const Integer& n, const Integer& d);
   Rational(const Rational&);
   ~Rational();

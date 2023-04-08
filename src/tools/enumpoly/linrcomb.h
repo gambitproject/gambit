@@ -56,7 +56,7 @@ template <class T> class LinearCombination  {
   
   public:
        // Constructors, Destructor, Constructive Operators
-    LinearCombination(const Gambit::Matrix<T> &);
+    explicit LinearCombination(const Gambit::Matrix<T> &);
     LinearCombination(const LinearCombination<T> &);
 
     virtual ~LinearCombination();

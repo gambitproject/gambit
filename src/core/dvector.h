@@ -36,7 +36,7 @@ protected:
   Array<int> dvlen, dvidx;
 
 public:
-  DVector(const PVector<int> &sig);
+  explicit DVector(const PVector<int> &sig);
   DVector(const DVector<T> &v);
   ~DVector() override;
 

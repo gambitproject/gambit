@@ -59,7 +59,7 @@ private:
   void IncreaseLine();
 
 public:
-  GameParserState(std::istream &p_file) :
+  explicit GameParserState(std::istream &p_file) :
     m_file(p_file), m_currentLine(1), m_currentColumn(1) { }
 
   GameFileToken GetNextToken();
@@ -1005,7 +1005,7 @@ private:
   TiXmlDocument doc;
 
 public:
-  GameXMLSavefile(const std::string &p_xml);
+  explicit GameXMLSavefile(const std::string &p_xml);
   ~GameXMLSavefile()  = default;
 
   Game GetGame() const;

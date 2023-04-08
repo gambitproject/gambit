@@ -57,7 +57,7 @@ protected:
   
 public:
   SFSequenceSet(const SFSequenceSet &s); 
-  SFSequenceSet(const Gambit::GamePlayer &p);
+  explicit SFSequenceSet(const Gambit::GamePlayer &p);
   
   SFSequenceSet &operator=(const SFSequenceSet &s); 
   bool operator==(const SFSequenceSet &s);
@@ -88,7 +88,7 @@ protected:
   Gambit::Array <SFSequenceSet *> sups;
   
 public:
-  SFSupport(const Sfg &);
+  explicit SFSupport(const Sfg &);
   SFSupport(const SFSupport &s); 
   virtual ~SFSupport();
   SFSupport &operator=(const SFSupport &s);
@@ -121,7 +121,7 @@ private:
   Gambit::Array<Sequence *> profile;
   
 public:
-  SequenceProfile(const Sfg &);
+  explicit SequenceProfile(const Sfg &);
   SequenceProfile(const SequenceProfile &p);
 
   ~SequenceProfile();

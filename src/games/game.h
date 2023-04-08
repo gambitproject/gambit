@@ -170,7 +170,7 @@ class StrategySupportProfile;
 class UndefinedException : public Exception {
 public:
   UndefinedException() : Exception("Undefined operation on game") { }
-  UndefinedException(const std::string &s) : Exception(s) { }
+  explicit UndefinedException(const std::string &s) : Exception(s) { }
   ~UndefinedException() noexcept override = default;
 };
 
@@ -186,7 +186,7 @@ public:
 class InvalidFileException : public Exception {
 public:
   InvalidFileException() : Exception("File not in a recognized format") { }
-  InvalidFileException(const std::string &s) : Exception(s) { } 
+  explicit InvalidFileException(const std::string &s) : Exception(s) { }
   ~InvalidFileException() noexcept override = default;
 };
 
@@ -358,7 +358,7 @@ private:
   /// @name Lifecycle
   //@{
   /// Creates a new strategy for the given player.
-  GameStrategyRep(GamePlayerRep *p_player)
+  explicit GameStrategyRep(GamePlayerRep *p_player)
     : m_number(0), m_id(0), m_player(p_player), m_offset(0L), m_unrestricted(nullptr) { }
   //@}
 
@@ -527,7 +527,7 @@ protected:
   Array<GameStrategy> m_profile;
 
   /// Construct a new strategy profile
-  PureStrategyProfileRep(const Game &p_game);
+  explicit PureStrategyProfileRep(const Game &p_game);
 
   /// Create a copy of the strategy profile.
   /// Caller is responsible for memory management of the created object.
@@ -588,7 +588,7 @@ private:
 
 public:
   PureStrategyProfile(const PureStrategyProfile &r) : rep(r.rep->Copy())  { }
-  PureStrategyProfile(PureStrategyProfileRep *p_rep) : rep(p_rep) { }
+  explicit PureStrategyProfile(PureStrategyProfileRep *p_rep) : rep(p_rep) { }
   ~PureStrategyProfile() { delete rep; }
 
   PureStrategyProfile &operator=(const PureStrategyProfile &r) 
@@ -601,7 +601,7 @@ public:
     }
 
   PureStrategyProfileRep *operator->() const { return rep; }
-  operator PureStrategyProfileRep *() const { return rep; }
+  explicit operator PureStrategyProfileRep *() const { return rep; }
 };
     
 
@@ -617,7 +617,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Construct a new behavior profile on the specified game
-  PureBehaviorProfile(Game);
+  explicit PureBehaviorProfile(Game);
 
   /// @name Data access and manipulation
   //@{

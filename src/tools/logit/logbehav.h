@@ -89,7 +89,7 @@ protected:
 public:
   /// @name Lifecycle
   //@{
-  LogBehavProfile(const BehaviorSupportProfile &);
+  explicit LogBehavProfile(const BehaviorSupportProfile &);
   LogBehavProfile(const LogBehavProfile<T> &);
   ~LogBehavProfile() override = default;
 

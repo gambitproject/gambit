@@ -55,7 +55,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructor.  By default, a support contains all strategies. 
-  BehaviorSupportProfile(const Game &);
+  explicit BehaviorSupportProfile(const Game &);
   ~BehaviorSupportProfile() = default;
 
   //@}

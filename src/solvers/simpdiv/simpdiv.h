@@ -35,9 +35,9 @@ namespace Nash {
 ///
 class NashSimpdivStrategySolver : public StrategySolver<Rational> {
 public:
-  NashSimpdivStrategySolver(int p_gridResize = 2, int p_leashLength = 0,
-			    bool p_verbose = false,
-			    std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
+  explicit NashSimpdivStrategySolver(int p_gridResize = 2, int p_leashLength = 0,
+                                     bool p_verbose = false,
+                                     std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
     : StrategySolver<Rational>(p_onEquilibrium),
       m_gridResize(p_gridResize),
       m_leashLength((p_leashLength > 0) ? p_leashLength : 32000),

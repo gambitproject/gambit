@@ -697,11 +697,13 @@ int LPTableau<T>::LastLabel( )
 template <class T>
 void LPTableau<T>::BasisSelect(const Array<T> &rowv, Vector<T> &colv) const
 {
-  for(int i=this->basis.First(); i<=this->basis.Last(); i++) {
-    if(this->basis.Label(i)<0)
-      colv[i]= 0;
-    else
-      colv[i]= rowv[this->basis.Label(i)];
+  for (int i = this->basis.First(); i <= this->basis.Last(); i++) {
+    if (this->basis.Label(i) < 0) {
+      colv[i] = (T) 0;
+    }
+    else {
+      colv[i] = rowv[this->basis.Label(i)];
+    }
   }
 }
 

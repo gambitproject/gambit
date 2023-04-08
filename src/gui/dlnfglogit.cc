@@ -58,7 +58,7 @@ private:
   List<MixedStrategyProfile<double> > m_profiles;
 
 public:
-  LogitMixedBranch(gbtGameDocument *p_doc) : m_doc(p_doc) { }
+  explicit LogitMixedBranch(gbtGameDocument *p_doc) : m_doc(p_doc) { }
 
   void AddProfile(const wxString &p_text);
 

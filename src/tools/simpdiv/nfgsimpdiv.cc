@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
       starts = ReadProfiles(game, startPoints);
     }
     else if (useRandom) {
-      starts = RandomProfiles(game, stopAfter, randDenom);
+      starts = RandomProfiles(game, stopAfter, Rational(randDenom));
     }
     else {
       starts.push_back(game->NewMixedStrategyProfile(Rational(0)));

@@ -76,10 +76,10 @@ protected:
 public:
   /// @name Lifecycle
   //@{
-  MixedBehaviorProfile(const Game &);
-  MixedBehaviorProfile(const BehaviorSupportProfile &);
+  explicit MixedBehaviorProfile(const Game &);
+  explicit MixedBehaviorProfile(const BehaviorSupportProfile &);
   MixedBehaviorProfile(const MixedBehaviorProfile<T> &);
-  MixedBehaviorProfile(const MixedStrategyProfile<T> &);
+  explicit MixedBehaviorProfile(const MixedStrategyProfile<T> &);
   ~MixedBehaviorProfile() override = default;
 
   MixedBehaviorProfile<T> &operator=(const MixedBehaviorProfile<T> &);

@@ -37,7 +37,7 @@ template <class T> class EnumMixedStrategySolver;
 template <class T> class EnumMixedStrategySolution {
   friend class EnumMixedStrategySolver<T>;
 public:
-  EnumMixedStrategySolution(const Game &p_game) : m_game(p_game) { }
+  explicit EnumMixedStrategySolution(const Game &p_game) : m_game(p_game) { }
   ~EnumMixedStrategySolution() = default;
 
   const Game &GetGame() const { return m_game; }
@@ -65,7 +65,7 @@ private:
 
 template <class T> class EnumMixedStrategySolver : public StrategySolver<T> {
 public:
-  EnumMixedStrategySolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
+  explicit EnumMixedStrategySolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
     : StrategySolver<T>(p_onEquilibrium) {}
   virtual ~EnumMixedStrategySolver() = default;
 
@@ -88,7 +88,7 @@ private:
 //
 class EnumMixedLrsStrategySolver : public StrategySolver<Rational> {
 public:
-  EnumMixedLrsStrategySolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
+  explicit EnumMixedLrsStrategySolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
     : StrategySolver<Rational>(p_onEquilibrium) { }
   ~EnumMixedLrsStrategySolver() override = default;
 

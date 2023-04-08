@@ -84,7 +84,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructs an array of length 'len', starting at '1'
-  Array(unsigned int len = 0)
+  explicit Array(unsigned int len = 0)
     : mindex(1), maxdex(len), data((len) ? new T[len] - 1 : 0) { } 
   /// Constructs an array starting at lo and ending at hi
   Array(int lo, int hi) : mindex(lo), maxdex(hi)

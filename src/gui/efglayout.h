@@ -58,7 +58,7 @@ private:
   const gbtStyle *m_style;
 
 public:
-  gbtNodeEntry(Gambit::GameNode p_parent);
+  explicit gbtNodeEntry(Gambit::GameNode p_parent);
 
   Gambit::GameNode GetNode() const { return m_node; }
 

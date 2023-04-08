@@ -392,14 +392,14 @@ NashSimpdivStrategySolver::State::getlabel(MixedStrategyProfile<Rational> &yy,
 					   Array<int> &ylabel,
 					   PVector<Rational> &besty)
 {
-  Rational maxz = -1000000;
+  Rational maxz(-1000000);
   ylabel[1] = 1;
   ylabel[2] = 1;
   
   for (int i = 1; i <= yy.GetGame()->NumPlayers(); i++) {
     GamePlayer player = yy.GetGame()->Players()[i];
-    Rational payoff = 0;
-    Rational maxval = -1000000;
+    Rational payoff(0);
+    Rational maxval(-1000000);
     int jj = 0;
     for (size_t j = 1; j <= player->Strategies().size(); j++) {
       pay = yy.GetPayoff(player->Strategies()[j]);
@@ -447,8 +447,7 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
   if (!p_start.GetGame()->IsPerfectRecall()) {
     throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
   }
-  Integer k = find_lcd((const Vector<Rational> &) p_start);
-  Rational d = Rational(1, k);
+  Rational d(Integer(1), find_lcd((const Vector<Rational> &) p_start));
     
   MixedStrategyProfile<Rational> y(p_start);
   if (m_verbose) {
@@ -457,7 +456,7 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
 
   while (true) {
     const double TOL = 1.0e-10;
-    d /= m_gridResize;
+    d /= Rational(m_gridResize);
     Rational maxz = Simplex(y, d);
     
     if (m_verbose) {
