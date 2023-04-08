@@ -31,7 +31,7 @@ template<> double gPoly<double>::String_Coeff(double nega)
     charnum++;
     GetChar();
   }
-  if (Coeff == "") return (nega);
+  if (Coeff.empty()) return nega;
   else return (nega * strtod(Coeff.c_str(), nullptr));
 }
 

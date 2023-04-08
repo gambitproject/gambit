@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
     Game game = ReadGame(*input_stream);
     if (!game->IsTree() || useStrategic) {
       List<MixedStrategyProfile<double> > starts;
-      if (startFile != "") {
+      if (!startFile.empty()) {
 	std::ifstream startPoints(startFile.c_str());
 	starts = ReadStrategyProfiles(game, startPoints);
       }
@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
     }
     else {
       List<MixedBehaviorProfile<double> > starts;
-      if (startFile != "") {
+      if (!startFile.empty()) {
 	std::ifstream startPoints(startFile.c_str());
 	starts = ReadBehaviorProfiles(game, startPoints);
       }

@@ -227,9 +227,9 @@ void aggame::payoffMatrix(cmatrix &dest, cvector &s, agg::AggNumber fuzz){
 
 
 	    //compute partial prob distributions
-	    if (tasks.size()==0 && spares.size()==0) continue; //nothing to be done for this row
+	    if (tasks.empty() && spares.empty()) continue; //nothing to be done for this row
 
-	    if(aggPtr->isPure[currNode]||tasks.size()==0){
+	    if(aggPtr->isPure[currNode]||tasks.empty()){
 	      computePartialP_PureNode(rown, act1,tasks);
 	    }else{//do bisection
 	      computePartialP_bisect(rown,act1,tasks.begin(),tasks.end(),aggPtr->Pr[rown]);
@@ -258,7 +258,7 @@ void aggame::payoffMatrix(cmatrix &dest, cvector &s, agg::AggNumber fuzz){
 	      }
 	      else {
                 for(p=tasks.begin();p!=tasks.end();++p){
-		  if(aggPtr->Pr[*p].size()==0){
+		  if(aggPtr->Pr[*p].empty()){
 		    std::cerr<<"AGG::payoffMatrix() ERROR for rown="
 		        <<rown<<" act1="<<act1<<" *p=" <<*p
 			     <<": the distribution should not be empty!"<<std::endl;
@@ -275,7 +275,7 @@ void aggame::payoffMatrix(cmatrix &dest, cvector &s, agg::AggNumber fuzz){
 	      //if spares not empty, we need to compute nondisturbed payoffs
 	      //which requires the distrib induced by everyone (except rown).
 	      //we store this distrib in Pr[rown][act1][rown]
-	      if (spares.size()>0){
+	      if (!spares.empty()){
 		//assert(tasks.size()>0);
 	    	  aggPtr->Pr[rown].reset();
 	    	  aggPtr->Pr[rown].multiply(
@@ -296,7 +296,7 @@ void aggame::payoffMatrix(cmatrix &dest, cvector &s, agg::AggNumber fuzz){
 	    agg::AggNumber undisturbedPayoff;
 	    bool hasUndisturbed=false;
 
-	    if(spares.size()>0){//for players in spares, we compute one undisturbed payoff
+	    if(!spares.empty()){//for players in spares, we compute one undisturbed payoff
 	      computeUndisturbedPayoff(undisturbedPayoff,hasUndisturbed,rown,act1, rown);
 	      for(p=spares.begin();p!=spares.end();++p)
 		for(act2=0;act2<aggPtr->actions[*p];act2++)

@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
       throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
     }
 
-    if (mleFile != "" && (!game->IsTree() || useStrategic)) {
+    if (!mleFile.empty() && (!game->IsTree() || useStrategic)) {
       MixedStrategyProfile<double> frequencies(game->NewMixedStrategyProfile(0.0));
       std::ifstream mleData(mleFile.c_str());
       ReadProfile(mleData, frequencies);

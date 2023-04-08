@@ -49,7 +49,7 @@ gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent,
 
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
-    if (player->GetLabel() != "") {
+    if (player->GetLabel().empty()) {
       m_players.push_back(new wxCheckBox(this, wxID_ANY,
                                          wxString(player->GetLabel().c_str(),
                                                   *wxConvCurrent)));

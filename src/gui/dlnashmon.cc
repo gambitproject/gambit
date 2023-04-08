@@ -181,7 +181,7 @@ void gbtNashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
     wxString msg;
     msg << tis.ReadLine();
 
-    if (msg != wxT("")) {
+    if (!msg.empty()) {
       m_doc->DoAddOutput(*m_output, msg);
       m_countText->SetLabel(wxString::Format(wxT("Number of equilibria found so far: %d"), m_output->NumProfiles()));
     }

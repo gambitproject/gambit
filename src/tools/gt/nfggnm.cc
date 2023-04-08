@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
     NashGNMStrategySolver solver(renderer, verbose);
 
     List<MixedStrategyProfile<double> > perts;
-    if (startFile != "") {
+    if (!startFile.empty()) {
       std::ifstream startPerts(startFile.c_str());
       perts = ReadStrategyPerturbations(game, startPerts);
     }

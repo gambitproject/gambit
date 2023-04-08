@@ -324,7 +324,7 @@ void gbtGameFrame::OnUpdate()
   std::string gameTitle;
   gameTitle = m_doc->GetGame()->GetTitle();
 
-  if (m_doc->GetFilename() != wxT("")) {
+  if (!m_doc->GetFilename().empty()) {
     SetTitle(wxT("Gambit - [") + m_doc->GetFilename() +
 	     wxT("] ") +
 	     wxString(gameTitle.c_str(), *wxConvCurrent));
@@ -842,7 +842,7 @@ void gbtGameFrame::OnFileClose(wxCommandEvent &)
 
 void gbtGameFrame::OnFileSave(wxCommandEvent &p_event)
 {
-  if (p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename() == wxT("")) {
+  if (p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename().empty()) {
     wxFileDialog dialog(this, _("Choose file"),
 			wxPathOnly(m_doc->GetFilename()),
 			wxFileNameFromPath(m_doc->GetFilename()),

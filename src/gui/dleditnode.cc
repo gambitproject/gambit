@@ -117,7 +117,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
   for (int outc = 1; outc <= efg->NumOutcomes(); outc++) {
     Gambit::GameOutcome outcome = efg->GetOutcome(outc);
     std::string item = Gambit::lexical_cast<std::string>(outc) + ": " + outcome->GetLabel();
-    if (item == "") {
+    if (item.empty()) {
       item = "Outcome" + Gambit::lexical_cast<std::string>(outc);
     }
 

@@ -33,7 +33,7 @@ using namespace Gambit::linalg;
 template <class T> List<List<MixedStrategyProfile<T> > > 
 EnumMixedStrategySolution<T>::GetCliques() const
 {
-  if (m_cliques1.size() == 0) {
+  if (m_cliques1.empty()) {
     // Cliques are generated on demand
     int n = m_node1.Length();
     if (m_node2.Length() != n)  throw DimensionException();

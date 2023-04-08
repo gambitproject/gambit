@@ -51,7 +51,7 @@ MixedStrategyDetailRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile,
     for (Array<GameStrategyRep *>::const_iterator 
 	   strategy = player->Strategies().begin();
 	 strategy != player->Strategies().end(); ++strategy) {
-      if (strategy->GetLabel() != "") {
+      if (!strategy->GetLabel().empty()) {
 	m_stream << std::setw(8) << strategy->GetLabel() << "    ";
       }
       else {
@@ -96,13 +96,13 @@ BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_profile,
       for (int act = 1; act <= infoset->NumActions(); act++) {
 	GameAction action = infoset->GetAction(act);
 
-	if (infoset->GetLabel() != "") {
+	if (!infoset->GetLabel().empty()) {
 	  m_stream << std::setw(7) << infoset->GetLabel() << "    ";
 	}
 	else {
 	  m_stream << std::setw(7) << infoset->GetNumber() << "    ";
 	}
-	if (action->GetLabel() != "") {
+	if (!action->GetLabel().empty()) {
 	  m_stream << std::setw(7) << action->GetLabel() << "   ";
 	}
 	else {
@@ -129,13 +129,13 @@ BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_profile,
       
       for (int n = 1; n <= infoset->NumMembers(); n++) {
 	GameNode node = infoset->GetMember(n);
-	if (infoset->GetLabel() != "") {
+	if (!infoset->GetLabel().empty()) {
 	  m_stream << std::setw(7) << infoset->GetLabel() << "    ";
 	}
 	else {
 	  m_stream << std::setw(7) << infoset->GetNumber() << "    ";
 	}
-	if (node->GetLabel() != "") {
+	if (!node->GetLabel().empty()) {
 	  m_stream << std::setw(7) << node->GetLabel() << "   ";
 	}
 	else {
