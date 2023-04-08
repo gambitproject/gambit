@@ -164,15 +164,15 @@ private:
 
   const int c_leftMargin, c_topMargin;
 
-  gbtNodeEntry *GetEntry(Gambit::GameNode) const;
+  gbtNodeEntry *GetEntry(const Gambit::GameNode &) const;
 
   gbtNodeEntry *NextInfoset(gbtNodeEntry *);
   void CheckInfosetEntry(gbtNodeEntry *);
 
-  void BuildNodeList(Gambit::GameNode, const Gambit::BehaviorSupportProfile &, int);
+  void BuildNodeList(const Gambit::GameNode &, const Gambit::BehaviorSupportProfile &, int);
 
-  int LayoutSubtree(Gambit::GameNode, const Gambit::BehaviorSupportProfile &, int &, int &, int &);
-  void FillInfosetTable(Gambit::GameNode, const Gambit::BehaviorSupportProfile &);
+  int LayoutSubtree(const Gambit::GameNode &, const Gambit::BehaviorSupportProfile &, int &, int &, int &);
+  void FillInfosetTable(const Gambit::GameNode &, const Gambit::BehaviorSupportProfile &);
   void UpdateTableInfosets();
   void UpdateTableParents();
 
@@ -188,18 +188,18 @@ public:
   gbtTreeLayout(gbtEfgDisplay *p_parent, gbtGameDocument *p_doc);
   ~gbtTreeLayout() override = default;
 
-  Gambit::GameNode PriorSameLevel(Gambit::GameNode) const;
-  Gambit::GameNode NextSameLevel(Gambit::GameNode) const;
+  Gambit::GameNode PriorSameLevel(const Gambit::GameNode &) const;
+  Gambit::GameNode NextSameLevel(const Gambit::GameNode &) const;
 
   void BuildNodeList(const Gambit::BehaviorSupportProfile &);
   void Layout(const Gambit::BehaviorSupportProfile &);
   void GenerateLabels();
 
   // The following member functions are for temporary compatibility only
-  gbtNodeEntry *GetNodeEntry(Gambit::GameNode p_node) const
+  gbtNodeEntry *GetNodeEntry(const Gambit::GameNode &p_node) const
     { return GetEntry(p_node); }
-  gbtNodeEntry *GetValidParent(Gambit::GameNode);
-  gbtNodeEntry *GetValidChild(Gambit::GameNode);
+  gbtNodeEntry *GetValidParent(const Gambit::GameNode &);
+  gbtNodeEntry *GetValidChild(const Gambit::GameNode &);
 
   int MaxX() const { return m_maxX; }
   int MaxY() const { return m_maxY; }

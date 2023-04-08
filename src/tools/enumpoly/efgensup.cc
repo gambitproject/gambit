@@ -415,9 +415,8 @@ PossibleNashSubsupports(const Gambit::BehaviorSupportProfile &p_support)
 {
   ActionCursorForSupport cursor(p_support);
   Gambit::List<Gambit::BehaviorSupportProfile> supports;
-  Gambit::BehaviorSupportProfile support(p_support);
 
-  PossibleNashSubsupports(support, cursor, supports);
+  PossibleNashSubsupports(p_support, cursor, supports);
   return supports;
 }
  

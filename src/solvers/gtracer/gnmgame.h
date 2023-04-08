@@ -168,10 +168,10 @@ class gnmgame {
   void LemkeHowson(cvector &dest, cmatrix &T, std::vector<int> &Im);
 
 
-  inline int getNumPlayers() { return numPlayers; }
-  inline int getNumActions() { return numActions; }
+  inline int getNumPlayers() const { return numPlayers; }
+  inline int getNumActions() const { return numActions; }
   inline int getNumActions(int p) { return actions[p]; }
-  inline int getMaxActions() { return maxActions; }
+  inline int getMaxActions() const { return maxActions; }
 
   virtual int getNumPlayerClasses(){return numPlayers;}
   virtual int getPlayerClassSize(int cls){return 1;}

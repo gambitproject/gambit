@@ -244,7 +244,7 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<double>& r,
     try {
       newpoint = NewtonPolishOnce(point);
     }
-    catch (Gambit::SingularMatrixException) {
+    catch (Gambit::SingularMatrixException &) {
       bool nonsingular = false;
       int direction = 1;
       while (direction < Dmnsn() && !nonsingular) {
@@ -261,7 +261,7 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<double>& r,
 	  newpoint = point + 
 	    (NewtonPolishOnce(perturbed_point) - perturbed_point);
 	}
-	catch (Gambit::SingularMatrixException) {
+	catch (Gambit::SingularMatrixException &) {
 	  nonsingular = false;
 	}
 	direction++;
@@ -668,12 +668,11 @@ QuikSolv<T>::FindRootsRecursion(      Gambit::List<Gambit::Vector<double> >* roo
 			   roots_found);
       } 
     }
-  return; 
 }
 
 
 
-template <class T> const bool
+template <class T> bool
 QuikSolv<T>::ARootExistsRecursion(const gRectangle<double>& r, 
 					Gambit::Vector<double>& sample,
 				  const gRectangle<double>& smallrect, 

@@ -39,8 +39,8 @@ private:
 // Recursive Call in Solver
   Gambit::List<Gambit::Vector<double> >  
     ContinuationSolutions(const Gambit::List<gPoly<double> >& list,
-			  const int dmnsn,
-			  const int curvar,
+			  int dmnsn,
+			  int curvar,
 			  const Gambit::Vector<double>& knownvals);
 
 public:

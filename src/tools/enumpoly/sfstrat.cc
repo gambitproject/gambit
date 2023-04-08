@@ -198,7 +198,7 @@ int SFSupport::NumSequences(int pl) const
   return sups[pl]->NumSequences();
 }
 
-const Gambit::Array<int> SFSupport::NumSequences() const
+Gambit::Array<int> SFSupport::NumSequences() const
 {
   Gambit::Array<int> a(sups.Length());
 

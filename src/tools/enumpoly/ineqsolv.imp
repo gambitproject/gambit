@@ -126,7 +126,7 @@ bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T>& r,
   return false;
 }
 
-template <class T> const bool
+template <class T> bool
 IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T>& r, 
 				            Gambit::Vector<T>& sample,
 				            Gambit::Array<int>& precedence) const
@@ -156,7 +156,7 @@ IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T>& r,
   return false; 
 }
 
-template <class T> const bool
+template <class T> bool
 IneqSolv<T>::ASolutionExists (const gRectangle<T>& r, Gambit::Vector<T>& sample)
 {
      // precedence orders search for everywhere negative poly

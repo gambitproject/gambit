@@ -46,7 +46,7 @@ private:
   bool m_verbose;
   
   List<MixedStrategyProfile<double> > Solve(const Game &p_game,
-					    std::shared_ptr<gametracer::gnmgame> A,
+					    const std::shared_ptr<gametracer::gnmgame> &A,
 					    const gametracer::cvector &p_pert) const;
   std::shared_ptr<gametracer::gnmgame> BuildRepresentation(const Game &p_game) const;
 

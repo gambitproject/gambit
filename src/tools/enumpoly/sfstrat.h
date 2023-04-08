@@ -101,7 +101,7 @@ public:
   const Gambit::Array<Sequence *> &Sequences(int pl) const;
 
   int NumSequences(int pl) const;
-  const Gambit::Array<int> NumSequences() const;
+  Gambit::Array<int> NumSequences() const;
   int TotalNumSequences() const;
 
   void AddSequence(Sequence *);

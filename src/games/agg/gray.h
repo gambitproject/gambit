@@ -37,7 +37,7 @@ public:
     current.at(0)=n;
   }
 
-  bool eof() { return finished; }
+  bool eof() const { return finished; }
 
   const std::vector<int>& get() { return current; }
 
@@ -90,7 +90,6 @@ public:
     current[i]+=1;
     current[d]-=1;
     if(current[0]>0) p=0;
-    return;
   }
 
 private:

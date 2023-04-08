@@ -112,13 +112,13 @@ private:
   gbtEfgDisplay *m_owner;
   gbtGameDocument *m_model;
 
-  bool OnDropPlayer(Gambit::GameNode p_node, const wxString &p_text);
-  bool OnDropCopyNode(Gambit::GameNode p_node, const wxString &p_text);
-  bool OnDropMoveNode(Gambit::GameNode p_node, const wxString &p_text);
-  bool OnDropInfoset(Gambit::GameNode p_node, const wxString &p_text);
-  bool OnDropSetOutcome(Gambit::GameNode p_node, const wxString &p_text);
-  bool OnDropMoveOutcome(Gambit::GameNode p_node, const wxString &p_text);
-  bool OnDropCopyOutcome(Gambit::GameNode p_node, const wxString &p_text);
+  bool OnDropPlayer(const Gambit::GameNode &p_node, const wxString &p_text);
+  bool OnDropCopyNode(const Gambit::GameNode &p_node, const wxString &p_text);
+  bool OnDropMoveNode(const Gambit::GameNode &p_node, const wxString &p_text);
+  bool OnDropInfoset(const Gambit::GameNode &p_node, const wxString &p_text);
+  bool OnDropSetOutcome(const Gambit::GameNode &p_node, const wxString &p_text);
+  bool OnDropMoveOutcome(const Gambit::GameNode &p_node, const wxString &p_text);
+  bool OnDropCopyOutcome(const Gambit::GameNode &p_node, const wxString &p_text);
 
 public:
   gbtPlayerDropTarget(gbtEfgDisplay *p_owner) 
@@ -132,7 +132,7 @@ public:
 // This recurses the subtree starting at 'p_node' looking for a node
 // with the ID 'p_id'. 
 //
-static Gambit::GameNode GetNode(Gambit::GameNode p_node, int p_id)
+static Gambit::GameNode GetNode(const Gambit::GameNode &p_node, int p_id)
 {
   if (p_node->GetNumber() == p_id) {
     return p_node;
@@ -149,7 +149,7 @@ static Gambit::GameNode GetNode(Gambit::GameNode p_node, int p_id)
   }
 }
 
-bool gbtPlayerDropTarget::OnDropPlayer(Gambit::GameNode p_node,
+bool gbtPlayerDropTarget::OnDropPlayer(const Gambit::GameNode &p_node,
 				       const wxString &p_text)
 {
   long pl;
@@ -168,7 +168,7 @@ bool gbtPlayerDropTarget::OnDropPlayer(Gambit::GameNode p_node,
   return true;
 }
 
-bool gbtPlayerDropTarget::OnDropCopyNode(Gambit::GameNode p_node,
+bool gbtPlayerDropTarget::OnDropCopyNode(const Gambit::GameNode &p_node,
 					 const wxString &p_text)
 {
   long n;
@@ -182,7 +182,7 @@ bool gbtPlayerDropTarget::OnDropCopyNode(Gambit::GameNode p_node,
   return false;
 }
 
-bool gbtPlayerDropTarget::OnDropMoveNode(Gambit::GameNode p_node,
+bool gbtPlayerDropTarget::OnDropMoveNode(const Gambit::GameNode &p_node,
 					 const wxString &p_text)
 {
   long n;
@@ -196,7 +196,7 @@ bool gbtPlayerDropTarget::OnDropMoveNode(Gambit::GameNode p_node,
   return false;
 }
 
-bool gbtPlayerDropTarget::OnDropInfoset(Gambit::GameNode p_node,
+bool gbtPlayerDropTarget::OnDropInfoset(const Gambit::GameNode &p_node,
 					const wxString &p_text)
 {
   long n;
@@ -215,7 +215,7 @@ bool gbtPlayerDropTarget::OnDropInfoset(Gambit::GameNode p_node,
   return false;
 }
 
-bool gbtPlayerDropTarget::OnDropSetOutcome(Gambit::GameNode p_node,
+bool gbtPlayerDropTarget::OnDropSetOutcome(const Gambit::GameNode &p_node,
 					   const wxString &p_text)
 {
   long n;
@@ -226,7 +226,7 @@ bool gbtPlayerDropTarget::OnDropSetOutcome(Gambit::GameNode p_node,
   return true;
 }
 
-bool gbtPlayerDropTarget::OnDropMoveOutcome(Gambit::GameNode p_node,
+bool gbtPlayerDropTarget::OnDropMoveOutcome(const Gambit::GameNode &p_node,
 					    const wxString &p_text)
 {
   long n;
@@ -238,7 +238,7 @@ bool gbtPlayerDropTarget::OnDropMoveOutcome(Gambit::GameNode p_node,
   return true;
 }
 
-bool gbtPlayerDropTarget::OnDropCopyOutcome(Gambit::GameNode p_node,
+bool gbtPlayerDropTarget::OnDropCopyOutcome(const Gambit::GameNode &p_node,
 					    const wxString &p_text)
 {
   long n;
@@ -692,7 +692,7 @@ void gbtEfgDisplay::OnDraw(wxDC &p_dc, double p_zoom)
   m_zoom = saveZoom;
 }
 
-void gbtEfgDisplay::EnsureNodeVisible(Gambit::GameNode p_node)
+void gbtEfgDisplay::EnsureNodeVisible(const Gambit::GameNode &p_node)
 {
   if (!p_node)  return;
 

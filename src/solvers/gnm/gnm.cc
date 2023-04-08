@@ -42,7 +42,7 @@ NashGNMStrategySolver::ToProfile(const Game &p_game,
 
 List<MixedStrategyProfile<double> >
 NashGNMStrategySolver::Solve(const Game &p_game,
-			     std::shared_ptr<gnmgame> p_rep,
+			     const std::shared_ptr<gnmgame> &p_rep,
 			     const cvector &p_pert) const
 {
   const int STEPS = 100;

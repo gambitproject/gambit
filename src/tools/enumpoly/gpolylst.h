@@ -110,16 +110,16 @@ template <class T> class gPolyList
    // Information
    const gSpace*            AmbientSpace()                            const;
    const term_order*        TermOrder()                               const;
-   const int                Length()                                  const;
-   const int                Dmnsn()                                   const;
-   const bool               IsMultiaffine()                           const;
+   int                Length()                                  const;
+   int                Dmnsn()                                   const;
+   bool               IsMultiaffine()                           const;
    Gambit::List<gPoly<T> >         UnderlyingList()                          const;
-   const Gambit::Vector<T>         Evaluate(const Gambit::Vector<T>&)               const;
-   const bool               IsRoot(const Gambit::Vector<T>&)                 const;
-   const Gambit::RectArray<gPoly<T>*> DerivativeMatrix()                     const;
-   const gPoly<T>           DetOfDerivativeMatrix()                   const;
-   const Gambit::Matrix<T>         DerivativeMatrix(const Gambit::Vector<T>&)       const;
-   const Gambit::SquareMatrix<T>   SquareDerivativeMatrix(const Gambit::Vector<T>&) const;
+   Gambit::Vector<T>         Evaluate(const Gambit::Vector<T>&)               const;
+   bool               IsRoot(const Gambit::Vector<T>&)                 const;
+   Gambit::RectArray<gPoly<T>*> DerivativeMatrix()                     const;
+   gPoly<T>           DetOfDerivativeMatrix()                   const;
+   Gambit::Matrix<T>         DerivativeMatrix(const Gambit::Vector<T>&)       const;
+   Gambit::SquareMatrix<T>   SquareDerivativeMatrix(const Gambit::Vector<T>&) const;
 
 //  inline int static Count() { return Counted<gPolyList<T> >::objCount(); }
 

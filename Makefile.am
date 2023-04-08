@@ -526,9 +526,7 @@ gambit_enumpoly_SOURCES = \
 	src/tools/enumpoly/ineqsolv.cc \
 	src/tools/enumpoly/ineqsolv.h \
 	src/tools/enumpoly/ineqsolv.imp \
-	src/tools/enumpoly/interval.cc \
 	src/tools/enumpoly/interval.h \
-	src/tools/enumpoly/interval.imp \
 	src/tools/enumpoly/monomial.cc \
 	src/tools/enumpoly/monomial.h \
 	src/tools/enumpoly/monomial.imp \

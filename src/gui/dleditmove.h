@@ -34,7 +34,7 @@ private:
 
 public:
   // Lifecycle
-  gbtEditMoveDialog(wxWindow *p_parent, Gambit::GameInfoset p_infoset);
+  gbtEditMoveDialog(wxWindow *p_parent, const Gambit::GameInfoset &p_infoset);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetInfosetName() const { return m_infosetName->GetValue(); }

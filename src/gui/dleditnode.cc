@@ -31,7 +31,7 @@
 //                      class dialogEditNode
 //======================================================================
 
-dialogEditNode::dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node)
+dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_node)
   : wxDialog(p_parent, wxID_ANY, _("Node properties"), wxDefaultPosition), 
     m_node(p_node)
 {

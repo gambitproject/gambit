@@ -129,7 +129,7 @@ template <class T> class QuikSolv {
 					const int&,
 					      int*)                  const;
 
-  const bool         ARootExistsRecursion(const gRectangle<double>&, 
+  bool         ARootExistsRecursion(const gRectangle<double>&,
 					        Gambit::Vector<double>&,
 					  const gRectangle<double>&, 
 					        Gambit::Array<int>&)        const;

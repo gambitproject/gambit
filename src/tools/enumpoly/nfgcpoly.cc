@@ -213,7 +213,7 @@ HeuristicPolEnumModule::NashOnSupportSolnVectors(const gPolyList<double> &equati
   try {
     quickie.FindCertainNumberOfRoots(Cube,2147483647, m_stopAfter);
   }
-  catch (SingularMatrixException) {
+  catch (SingularMatrixException &) {
     is_singular = true;
   }
 
@@ -309,7 +309,7 @@ HeuristicPolEnumModule::SolVarsFromMixedStrategyProfile(const MixedStrategyProfi
   return answer;
 }
 
-const int HeuristicPolEnumModule::PolishKnownRoot(Vector<double> &point) const
+int HeuristicPolEnumModule::PolishKnownRoot(Vector<double> &point) const
 {
   //DEBUG
   //  gout << "Prior to Polishing point is " << point << ".\n";

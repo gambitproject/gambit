@@ -67,7 +67,7 @@ template <class T> class IneqSolv {
 
   bool SystemHasNoSolutionIn(const gRectangle<T>& r, Gambit::Array<int>&) const;
 
-  const bool ASolutionExistsRecursion(const gRectangle<T>&, 
+  bool ASolutionExistsRecursion(const gRectangle<T>&,
 				            Gambit::Vector<T>&,
 				            Gambit::Array<int>&)          const;
 
@@ -86,15 +86,15 @@ template <class T> class IneqSolv {
      { return System.AmbientSpace(); }
    inline const term_order*              TermOrder()                 const 
      { return System.TermOrder(); }
-   inline const int                      Dmnsn()                     const 
+   inline int                      Dmnsn()                     const
      { return System.Dmnsn(); }
-   inline const gPolyList<T>             UnderlyingEquations()       const 
+   inline gPolyList<T>             UnderlyingEquations()       const
      { return System; }
-   inline const T                        ErrorTolerance()            const
+   inline T                        ErrorTolerance()            const
      { return Epsilon; }
 
   // The function that does everything
-  const bool ASolutionExists(const gRectangle<T>&, Gambit::Vector<T>& sample);
+  bool ASolutionExists(const gRectangle<T>&, Gambit::Vector<T>& sample);
 };  
 
 

@@ -38,8 +38,8 @@ template<class T> gRectangle<T>::gRectangle(const Gambit::List< gInterval<T> >& 
 {
 }
 
-template<class T> gRectangle<T>::gRectangle(const Gambit::Vector<T> lower_bd, 
-                                            const Gambit::Vector<T> upper_bd) 
+template<class T> gRectangle<T>::gRectangle(const Gambit::Vector<T> &lower_bd,
+                                            const Gambit::Vector<T> &upper_bd)
 : sides()
 { 
   //assert (lower_bd.Check(upper_bd));

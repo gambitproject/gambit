@@ -95,7 +95,7 @@ public:
   
   const gbtTreeLayout &GetLayout() const { return m_layout; }
 
-  void EnsureNodeVisible(Gambit::GameNode);
+  void EnsureNodeVisible(const Gambit::GameNode &);
 
   DECLARE_EVENT_TABLE()
 };

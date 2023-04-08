@@ -523,7 +523,7 @@ wxString gbtTreeLayout::CreateBranchLabel(const gbtNodeEntry *p_entry,
   }
 }
 
-gbtNodeEntry *gbtTreeLayout::GetValidParent(Gambit::GameNode e)
+gbtNodeEntry *gbtTreeLayout::GetValidParent(const Gambit::GameNode &e)
 {
   gbtNodeEntry *n = GetNodeEntry(e->GetParent());
   if (n) {
@@ -534,7 +534,7 @@ gbtNodeEntry *gbtTreeLayout::GetValidParent(Gambit::GameNode e)
   }
 }
 
-gbtNodeEntry *gbtTreeLayout::GetValidChild(Gambit::GameNode e)
+gbtNodeEntry *gbtTreeLayout::GetValidChild(const Gambit::GameNode &e)
 {
   for (int i = 1; i <= e->NumChildren(); i++)  {
     gbtNodeEntry *n = GetNodeEntry(e->GetChild(i));
@@ -549,7 +549,7 @@ gbtNodeEntry *gbtTreeLayout::GetValidChild(Gambit::GameNode e)
   return nullptr;
 }
 
-gbtNodeEntry *gbtTreeLayout::GetEntry(Gambit::GameNode p_node) const
+gbtNodeEntry *gbtTreeLayout::GetEntry(const Gambit::GameNode &p_node) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     if (m_nodeList[i]->GetNode() == p_node) {
@@ -559,7 +559,7 @@ gbtNodeEntry *gbtTreeLayout::GetEntry(Gambit::GameNode p_node) const
   return nullptr;
 }
 
-Gambit::GameNode gbtTreeLayout::PriorSameLevel(Gambit::GameNode p_node) const
+Gambit::GameNode gbtTreeLayout::PriorSameLevel(const Gambit::GameNode &p_node) const
 {
   gbtNodeEntry *entry = GetEntry(p_node);
   if (entry) {
@@ -571,7 +571,7 @@ Gambit::GameNode gbtTreeLayout::PriorSameLevel(Gambit::GameNode p_node) const
   return nullptr;
 }
 
-Gambit::GameNode gbtTreeLayout::NextSameLevel(Gambit::GameNode p_node) const
+Gambit::GameNode gbtTreeLayout::NextSameLevel(const Gambit::GameNode &p_node) const
 {
   gbtNodeEntry *entry = GetEntry(p_node);
   if (entry) {
@@ -584,7 +584,7 @@ Gambit::GameNode gbtTreeLayout::NextSameLevel(Gambit::GameNode p_node) const
   return nullptr;
 }
 
-int gbtTreeLayout::LayoutSubtree(Gambit::GameNode p_node, const Gambit::BehaviorSupportProfile &p_support,
+int gbtTreeLayout::LayoutSubtree(const Gambit::GameNode &p_node, const Gambit::BehaviorSupportProfile &p_support,
 				 int &p_maxy, int &p_miny, int &p_ycoord)
 {
   int y1 = -1, yn = 0;
@@ -732,7 +732,7 @@ void gbtTreeLayout::CheckInfosetEntry(gbtNodeEntry *e)
   e->SetNextMember(infoset_entry);
 }
 
-void gbtTreeLayout::FillInfosetTable(Gambit::GameNode n, const Gambit::BehaviorSupportProfile &cur_sup)
+void gbtTreeLayout::FillInfosetTable(const Gambit::GameNode &n, const Gambit::BehaviorSupportProfile &cur_sup)
 {
   const gbtStyle &draw_settings = m_doc->GetStyle();
   gbtNodeEntry *entry = GetNodeEntry(n);
@@ -821,7 +821,7 @@ void gbtTreeLayout::Layout(const Gambit::BehaviorSupportProfile &p_support)
   m_maxY = maxy + 25;
 }
 
-void gbtTreeLayout::BuildNodeList(Gambit::GameNode p_node, const Gambit::BehaviorSupportProfile &p_support,
+void gbtTreeLayout::BuildNodeList(const Gambit::GameNode &p_node, const Gambit::BehaviorSupportProfile &p_support,
 				  int p_level)
 {
   auto *entry = new gbtNodeEntry(p_node);

@@ -35,38 +35,50 @@ Since boundary points can be identified, open and half
 open (bounded) intervals can be effected, but less directly.
 */
 
+
+
 template<class T> class gInterval {
 private:
-    const T lower_bd;
-    const T upper_bd;
+    T lower_bd;
+    T upper_bd;
     
     // operator= defined private for constness
     gInterval<T>& operator =  (const gInterval<T>& y);
 
 public:
     // constructors
-    gInterval(const gInterval<T>&);
-    gInterval(const T, const T);
-    ~gInterval();
+    gInterval(const gInterval<T> &p_interval)
+      : lower_bd(p_interval.lower_bd), upper_bd(p_interval.upper_bd) { }
+    gInterval(const T &p_low, const T &p_high) : lower_bd(p_low), upper_bd(p_high) { }
+    ~gInterval() = default;
 
     // operators
-    bool          operator == (const gInterval<T>& y) const;
-    bool          operator != (const gInterval<T>& y) const;
+    bool operator==(const gInterval<T> &p_rhs) const
+    {
+      return lower_bd == p_rhs.lower_bd && upper_bd == p_rhs.upper_bd;
+    }
+    bool operator!=(const gInterval<T> &p_rhs) const
+    {
+      return lower_bd != p_rhs.lower_bd || upper_bd != p_rhs.upper_bd;
+    }
 
     // information
-    const T            LowerBound()                                 const;
-    const T            UpperBound()                                 const;
-    const bool         Contains(const T&)                           const;
-    const bool         Contains(const gInterval<T>&)                const;
-    const bool         LiesBelow(const T&)                          const;
-    const bool         LiesAbove(const T&)                          const;
-    const T            Length()                                     const;
-    const T            Midpoint()                                   const;
-    const gInterval<T> LeftHalf()                                   const;
-    const gInterval<T> RightHalf()                                  const;
-    const gInterval<T> SameCenterTwiceLength()                      const;
-    const gInterval<T> SameCenterWithNewLength(const T&)            const;
+    const T &LowerBound() const { return lower_bd; }
+    const T &UpperBound() const { return upper_bd; }
+    bool Contains(const T &p_number) const { return lower_bd <= p_number && p_number <= upper_bd; }
+    bool Contains(const gInterval<T> &p_interval) const
+    { return (lower_bd <= p_interval.lower_bd && p_interval.upper_bd <= upper_bd); }
+    bool LiesBelow(const T &p_number) const { return upper_bd <= p_number; }
+    bool LiesAbove(const T &p_number) const { return p_number <= lower_bd; }
+    T Length() const { return upper_bd - lower_bd; }
+    T Midpoint() const { return (upper_bd + lower_bd)/(T)2; }
+    gInterval<T> LeftHalf() const { return gInterval<T>(LowerBound(), Midpoint()); }
+    gInterval<T> RightHalf() const { return gInterval<T>(Midpoint(), UpperBound()); }
 
+    gInterval<T> SameCenterTwiceLength() const
+    { return gInterval<T>((T)2 * LowerBound() - Midpoint(), (T)2 * UpperBound() - Midpoint()); }
+    gInterval<T> SameCenterWithNewLength(const T &p_length) const
+    { return gInterval<T>(Midpoint() - p_length / (T) 2, Midpoint() + p_length / (T) 2); }
 };
 
 #endif // INTERVAL_H

@@ -75,7 +75,7 @@ public:
   const Gambit::List<MixedStrategyProfile<double> > &GetSolutions() const;
   Vector<double> SolVarsFromMixedStrategyProfile(const MixedStrategyProfile<double> &) const;
 
-  const int PolishKnownRoot(Vector<double> &) const;
+  int PolishKnownRoot(Vector<double> &) const;
 
   MixedStrategyProfile<double> ReturnPolishedSolution(const Vector<double> &) const;
 

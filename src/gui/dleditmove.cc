@@ -38,7 +38,7 @@ private:
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
 
 public:
-  gbtActionSheet(wxWindow *p_parent, Gambit::GameInfoset p_infoset);
+  gbtActionSheet(wxWindow *p_parent, const Gambit::GameInfoset &p_infoset);
   
   int NumActions() const { return GetNumberRows(); }
   wxString GetActionName(int p_act);
@@ -46,7 +46,7 @@ public:
 };
 
 gbtActionSheet::gbtActionSheet(wxWindow *p_parent, 
-			       Gambit::GameInfoset p_infoset)
+			       const Gambit::GameInfoset &p_infoset)
   : wxSheet(p_parent, wxID_ANY), m_infoset(p_infoset) 
 {
   CreateGrid(p_infoset->NumActions(), (p_infoset->IsChanceInfoset()) ? 2 : 1);
@@ -141,7 +141,7 @@ gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 //======================================================================
 
 gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
-				     Gambit::GameInfoset p_infoset)
+				     const Gambit::GameInfoset &p_infoset)
   : wxDialog(p_parent, wxID_ANY, _("Move properties"), wxDefaultPosition), 
     m_infoset(p_infoset)
 {

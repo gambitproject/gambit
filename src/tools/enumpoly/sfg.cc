@@ -101,9 +101,10 @@ Sfg::~Sfg()
   delete sequences;
 }
 
-void Sfg::
-MakeSequenceForm(const Gambit::GameNode &n, Gambit::Rational prob,Gambit::Array<int>seq, 
-		 Gambit::Array<Gambit::GameInfoset> iset, Gambit::Array<Sequence *> parent) 
+void
+Sfg::MakeSequenceForm(
+  const Gambit::GameNode &n, const Gambit::Rational &prob, Gambit::Array<int> seq,
+  Gambit::Array<Gambit::GameInfoset> iset, Gambit::Array<Sequence *> parent)
 { 
   int i,pl;
 

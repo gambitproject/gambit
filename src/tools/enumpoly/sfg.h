@@ -39,7 +39,7 @@ private:
   Gambit::PVector<int> isetFlag,isetRow;
   Gambit::Array<Gambit::List<Gambit::GameInfoset> > infosets;
 
-  void MakeSequenceForm(const Gambit::GameNode &, Gambit::Rational,Gambit::Array<int>, Gambit::Array<Gambit::GameInfoset>,
+  void MakeSequenceForm(const Gambit::GameNode &, const Gambit::Rational &,Gambit::Array<int>, Gambit::Array<Gambit::GameInfoset>,
 		      Gambit::Array<Sequence *>);
   void GetSequenceDims(const Gambit::GameNode &);
 

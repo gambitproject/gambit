@@ -495,7 +495,6 @@ private:
 	if(debug) std::cout<< "(leaf): ";
 	f(n->val);
     }
-    return;
   }    
 
 

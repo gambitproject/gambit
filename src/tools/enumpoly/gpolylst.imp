@@ -443,7 +443,7 @@ template <class T> Gambit::List<gPoly<T> > gPolyList<T>::UnderlyingList() const
   return NewList;
 }
 
-template <class T> const bool gPolyList<T>::IsMultiaffine() const
+template <class T> bool gPolyList<T>::IsMultiaffine() const
 {
   for (int i = 1; i <= List.Length(); i++)
     if (!(*List[i]).IsMultiaffine()) 
@@ -452,7 +452,7 @@ template <class T> const bool gPolyList<T>::IsMultiaffine() const
 }
   
 template<class T> 
-const Gambit::Vector<T> gPolyList<T>::Evaluate(const Gambit::Vector<T>& v) const
+Gambit::Vector<T> gPolyList<T>::Evaluate(const Gambit::Vector<T>& v) const
 {
   Gambit::Vector<T> answer(Length());
   int ii;
@@ -462,7 +462,7 @@ const Gambit::Vector<T> gPolyList<T>::Evaluate(const Gambit::Vector<T>& v) const
   return answer;
 }
   
-template<class T> const bool gPolyList<T>::IsRoot(const Gambit::Vector<T>& v) const
+template<class T> bool gPolyList<T>::IsRoot(const Gambit::Vector<T>& v) const
 {
   for (int ii = 1; ii <= List.Length(); ii++) 
     if (List[ii]->Evaluate(v) != (T)0) 
@@ -471,7 +471,7 @@ template<class T> const bool gPolyList<T>::IsRoot(const Gambit::Vector<T>& v) co
 }
   
 template<class T> 
-const Gambit::RectArray<gPoly<T>*> gPolyList<T>::DerivativeMatrix() const
+Gambit::RectArray<gPoly<T>*> gPolyList<T>::DerivativeMatrix() const
 {
   gPoly<T> zero(Space, Order);
   Gambit::RectArray<gPoly<T>*> answer(Length(),Dmnsn());
@@ -484,7 +484,7 @@ const Gambit::RectArray<gPoly<T>*> gPolyList<T>::DerivativeMatrix() const
 }
   
 template<class T> 
-const gPoly<T> gPolyList<T>::DetOfDerivativeMatrix() const
+gPoly<T> gPolyList<T>::DetOfDerivativeMatrix() const
 {
   //assert(List.Length() == Space->Dmnsn());
 
@@ -505,7 +505,7 @@ const gPoly<T> gPolyList<T>::DetOfDerivativeMatrix() const
 }
   
 template<class T> 
-const Gambit::Matrix<T> gPolyList<T>::DerivativeMatrix(const Gambit::Vector<T>& p) const
+Gambit::Matrix<T> gPolyList<T>::DerivativeMatrix(const Gambit::Vector<T>& p) const
 {
   Gambit::Matrix<T> answer(Length(),Dmnsn());
   Gambit::List<gPoly<T> > list = UnderlyingList();
@@ -517,7 +517,7 @@ const Gambit::Matrix<T> gPolyList<T>::DerivativeMatrix(const Gambit::Vector<T>& 
   return answer;
 }
   
-template<class T> const Gambit::SquareMatrix<T> 
+template<class T> Gambit::SquareMatrix<T>
 gPolyList<T>::SquareDerivativeMatrix(const Gambit::Vector<T>& p) const
 {
   //assert (Length() == Dmnsn());
@@ -560,7 +560,7 @@ Gambit::List<gPoly<double> > gPolyList<T>::NormalizedList() const
 
 template <class T> const gSpace* gPolyList<T>::AmbientSpace() const { return Space; }
 template <class T> const term_order* gPolyList<T>::TermOrder()  const { return Order; }
-template <class T> const int gPolyList<T>::Length() const { return List.Length(); }
-template <class T> const int gPolyList<T>::Dmnsn() const { return Space->Dmnsn(); }
+template <class T> int gPolyList<T>::Length() const { return List.Length(); }
+template <class T> int gPolyList<T>::Dmnsn() const { return Space->Dmnsn(); }
 
 

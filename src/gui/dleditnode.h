@@ -32,7 +32,7 @@ private:
 
 public:
   // Lifecycle
-  dialogEditNode(wxWindow *p_parent, Gambit::GameNode p_node);
+  dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_node);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetNodeName() const { return m_nodeName->GetValue(); }

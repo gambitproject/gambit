@@ -193,7 +193,7 @@ void BehaviorSupportProfile::AddAction(const GameAction &s)
   }
 
   List<GameNode> startlist(ReachableMembers(s->GetInfoset()));
-  for (auto node : ReachableMembers(s->GetInfoset())) {
+  for (const auto &node : ReachableMembers(s->GetInfoset())) {
     DeactivateSubtree(node);
   }
 }
@@ -321,9 +321,7 @@ public:
   /// Has iterator gone past the end?
   bool AtEnd() const { return m_atEnd; }
   /// Get the current behavior profile
-  const PureBehaviorProfile &operator*() const { return m_profile; }
-  /// Get the current behavior profile
-  const PureBehaviorProfile *const operator->() const { return &m_profile; }
+  const PureBehaviorProfile *operator->() const { return &m_profile; }
   //@}
 };
 
