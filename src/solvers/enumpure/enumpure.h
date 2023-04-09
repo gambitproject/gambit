@@ -34,7 +34,7 @@ namespace Nash {
 /// 
 class EnumPureStrategySolver : public StrategySolver<Rational> {
 public:
-   EnumPureStrategySolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
+  explicit EnumPureStrategySolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
     : StrategySolver<Rational>(p_onEquilibrium) { }
   ~EnumPureStrategySolver() override = default;
 
@@ -67,7 +67,7 @@ EnumPureStrategySolver::Solve(const Game &p_game) const
 ///
 class EnumPureAgentSolver : public BehavSolver<Rational> {
 public:
-  EnumPureAgentSolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
+  explicit EnumPureAgentSolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
     : BehavSolver<Rational>(p_onEquilibrium) { }
   ~EnumPureAgentSolver() override = default;
 

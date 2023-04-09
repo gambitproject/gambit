@@ -126,43 +126,43 @@ int main(int argc, char *argv[])
     std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
     if (reportStrategic || !game->IsTree()) {
       if (printDetail) {
-	renderer.reset(new MixedStrategyDetailRenderer<Rational>(std::cout));
+        renderer = std::make_shared<MixedStrategyDetailRenderer<Rational>>(std::cout);
       }
       else {
-	renderer.reset(new MixedStrategyCSVRenderer<Rational>(std::cout));
+        renderer = std::make_shared<MixedStrategyCSVRenderer<Rational>>(std::cout);
       }
     }
     else {
       if (printDetail) {
-	renderer.reset(new BehavStrategyDetailRenderer<Rational>(std::cout));
+        renderer = std::make_shared<BehavStrategyDetailRenderer<Rational>>(std::cout);
       }
       else {
-	renderer.reset(new BehavStrategyCSVRenderer<Rational>(std::cout));
+        renderer = std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout);
       }
     }
 
-    if (game->IsTree())  {
+    if (game->IsTree()) {
       if (bySubgames) {
-	std::shared_ptr<BehavSolver<Rational> > stage;
+        std::shared_ptr<BehavSolver<Rational> > stage;
         if (solveAgent) {
-	  stage.reset(new EnumPureAgentSolver());
-	}
-	else {
-	  std::shared_ptr<StrategySolver<Rational> > substage(new EnumPureStrategySolver());
-	  stage.reset(new BehavViaStrategySolver<Rational>(substage));
-	}
-	SubgameBehavSolver<Rational> algorithm(stage, renderer);
-	algorithm.Solve(BehaviorSupportProfile(game));
+          stage = std::make_shared<EnumPureAgentSolver>();
+        }
+        else {
+          std::shared_ptr<StrategySolver<Rational> > substage(new EnumPureStrategySolver());
+          stage = std::make_shared<BehavViaStrategySolver<Rational>>(substage);
+        }
+        SubgameBehavSolver<Rational> algorithm(stage, renderer);
+        algorithm.Solve(BehaviorSupportProfile(game));
       }
       else {
-	if (solveAgent) {
-	  EnumPureAgentSolver algorithm(renderer);
-	  algorithm.Solve(BehaviorSupportProfile(game));
-	}
-	else {
-	  EnumPureStrategySolver algorithm(renderer);
-	  algorithm.Solve(game);
-	}
+        if (solveAgent) {
+          EnumPureAgentSolver algorithm(renderer);
+          algorithm.Solve(BehaviorSupportProfile(game));
+        }
+        else {
+          EnumPureStrategySolver algorithm(renderer);
+          algorithm.Solve(game);
+        }
       }
     }
     else {

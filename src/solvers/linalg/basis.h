@@ -88,7 +88,9 @@ public:
   // Check if Basis is Ident
   virtual void CheckBasis();
   // returns whether the basis is the identity matrix
-  bool IsIdent();
+  bool IsIdent() const { return IsBasisIdent; }
+
+
 };
 
 }  // end namespace Gambit::linalg

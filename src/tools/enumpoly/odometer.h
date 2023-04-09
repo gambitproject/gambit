@@ -46,20 +46,20 @@ class gIndexOdometer {
   Gambit::Array<int> CurIndices;
    
  public:
-   gIndexOdometer(const Gambit::Array<int>);  
-   gIndexOdometer(const Gambit::Array<int>, const Gambit::Array<int>);  
-   gIndexOdometer(const int*, const int);
-   gIndexOdometer(const gIndexOdometer &);
+   explicit gIndexOdometer(const Gambit::Array<int> &);
+   gIndexOdometer(const Gambit::Array<int> &, const Gambit::Array<int> &);
+   gIndexOdometer(const gIndexOdometer &) = default;
+   ~gIndexOdometer() = default;
 
-   ~gIndexOdometer();                 // Deletes all pointees
+  // Operators
+   gIndexOdometer& operator=(const gIndexOdometer &) = default;
 
-   // Operators
-   gIndexOdometer& operator= (const gIndexOdometer &);
+   bool operator==(const gIndexOdometer &p_rhs) const
+   { return (MinIndices == p_rhs.MinIndices) && (MaxIndices == p_rhs.MaxIndices) && (CurIndices == p_rhs.CurIndices); }
+   bool operator!=(const gIndexOdometer &p_rhs) const
+   { return (MinIndices != p_rhs.MinIndices) || (MaxIndices != p_rhs.MaxIndices) || (CurIndices != p_rhs.CurIndices); }
 
-   bool       operator==(const gIndexOdometer &) const;
-   bool       operator!=(const gIndexOdometer &) const;
-
-   int        operator[](const int)         const;
+   int operator[](int place) const { return CurIndices[place]; }
 
   // Manipulate
   void        SetIndex(const int&, const int&);
@@ -80,32 +80,29 @@ class gIndexOdometer {
 
 class gPermutationOdometer {
  private:
-  const int   n;
+  int n;
   Gambit::Array<int> CurIndices;
-  int         CurSign;
-
-  // Declared but not defined to prohibit assignment
-  gPermutationOdometer &operator=(const gPermutationOdometer &);
+  int CurSign;
 
  public:
-   gPermutationOdometer(const int&);  
-   gPermutationOdometer(const gPermutationOdometer &);
-   ~gPermutationOdometer();                 // Deletes all pointees
+   explicit gPermutationOdometer(int);
+   gPermutationOdometer(const gPermutationOdometer &) = default;
+   ~gPermutationOdometer() = default;
+   gPermutationOdometer &operator=(const gPermutationOdometer &) = delete;
 
    // Operators
+   bool operator==(const gPermutationOdometer &) const;
+   bool operator!=(const gPermutationOdometer &) const;
 
-   bool       operator==(const gPermutationOdometer &) const;
-   bool       operator!=(const gPermutationOdometer &) const;
-
-   int        operator[](const int)         const;
+   int operator[](int place) const { return CurIndices[place]; }
 
   // Manipulate
   bool        Turn();
 
    // Information
-  int             NoIndices()           const;
-  Gambit::Array<int>     CurrentIndices()      const;
-  int             CurrentSign()         const;
+  int NoIndices() const { return n; }
+  const Gambit::Array<int> &CurrentIndices() const { return CurIndices; }
+  int CurrentSign() const { return CurSign; }
 
 };  
 

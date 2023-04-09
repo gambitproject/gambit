@@ -49,29 +49,29 @@ private:
 
 
 
-  void Initialize(Game game);
-  void Cleanup(Game game);
+  void Initialize(const Game &game);
+  void Cleanup(const Game &game);
 
-  void SolveSizeDiff(Game game, Gambit::List < MixedStrategyProfile < double > > & solutions,
+  void SolveSizeDiff(const Game &game, Gambit::List < MixedStrategyProfile < double > > & solutions,
 			       int size, int diff);
 
-  bool SolveSupportSizeProfile(Game game, Gambit::List < MixedStrategyProfile < double > > & solutions,
+  bool SolveSupportSizeProfile(const Game &game, Gambit::List < MixedStrategyProfile < double > > & solutions,
 			       const Gambit::Array < int > & supportSizeProfile);
 
-  void GetSupport(Game game, int playerIdx, const Vector < int > & support,
+  void GetSupport(const Game &game, int playerIdx, const Vector < int > & support,
 		  Gambit::Array<GameStrategy> & supportBlock);
 
-  bool UpdatePlayerSupport(Game game, int playerIdx, Gambit::PVector < int > & playerSupport);
+  bool UpdatePlayerSupport(const Game &game, int playerIdx, Gambit::PVector < int > & playerSupport);
 
-  bool RecursiveBacktracking(Game game, Gambit::List < MixedStrategyProfile < double > > & solutions,
+  bool RecursiveBacktracking(const Game &game, Gambit::List < MixedStrategyProfile < double > > & solutions,
 			     Gambit::Array < Gambit::Array < GameStrategy > > & uninstantiatedSupports,
 			     Gambit::Array < Gambit::Array < Gambit::Array < GameStrategy > > > & domains, int idxNextSupport2Instantiate);
 
-  bool IteratedRemovalStrictlyDominatedStrategies(Game game,
+  bool IteratedRemovalStrictlyDominatedStrategies(const Game &game,
 						  Gambit::Array < Gambit::Array < Gambit::Array < GameStrategy > > > & domains);
 
   void GetDomainStrategies(Gambit::Array < Gambit::Array < Gambit::Array < GameStrategy > > > & domains,
-			   Gambit::Array < Gambit::Array < GameStrategy > > & domainStrategies);
+			   Gambit::Array < Gambit::Array < GameStrategy > > & domainStrategies) const;
 
   bool IsConditionalDominatedBy(StrategySupportProfile & dominatedGame, Gambit::Array < Gambit::Array < GameStrategy > > & domainStrategies,
 				const GameStrategy &strategy, const GameStrategy &checkStrategy, bool strict);
@@ -83,8 +83,8 @@ private:
   bool RemoveFromDomain(Gambit::Array<Gambit::Array<Gambit::Array<GameStrategy> > > & domains,
 			Gambit::Array<Gambit::Array<GameStrategy> > & domainStrategies, int player, int removeStrategyIdx);
 
-  bool FeasibilityProgram(Game game, Gambit::List<MixedStrategyProfile < double > > & solutions,
-			  Gambit::Array < Gambit::Array < GameStrategy > > & uninstantiatedSupports);
+  bool FeasibilityProgram(const Game &game, Gambit::List<MixedStrategyProfile < double > > & solutions,
+			  Gambit::Array < Gambit::Array < GameStrategy > > & uninstantiatedSupports) const;
 
 
 public:
@@ -124,7 +124,7 @@ public:
     m_ordering = p_ordering;
   }
 
-  void Solve(Game);
+  void Solve(const Game &);
 };
 
 #endif // NFGHS_H

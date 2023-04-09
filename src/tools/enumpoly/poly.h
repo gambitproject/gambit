@@ -56,7 +56,7 @@ public:
          polynomial<T>&     operator =  (const polynomial<T>& y);
          bool               operator == (const polynomial<T>& y) const;
          bool               operator != (const polynomial<T>& y) const;
-         const T&           operator [] (const int index)        const;
+         const T&           operator [] (int index)        const;
          polynomial<T>      operator +  (const polynomial<T>& y) const;
          polynomial<T>      operator -  (const polynomial<T>& y) const;
          polynomial<T>      operator *  (const polynomial<T>& y) const;
@@ -78,7 +78,7 @@ public:
   T                      EvaluationAt(const T& arg)                   const;  
   int                    Degree()                                     const;
   T                      LeadingCoefficient()                         const;
-  Gambit::List<T>               CoefficientList()                            const;
+  Gambit::List<T> CoefficientList()                            const;
   polynomial<T>          GcdWith(const polynomial<T>&)                const;
   bool                   IsQuadratfrei()                              const;
   bool                   CannotHaveRootsIn(const gInterval<T>&)       const;
@@ -126,7 +126,7 @@ public:
   complexpoly&  operator =  (const complexpoly& y);
   bool                    operator == (const complexpoly& y) const;
   bool                    operator != (const complexpoly& y) const;
-  const gComplex&         operator [] (const int index)      const;
+  const gComplex&         operator [] (int index)      const;
   complexpoly             operator +  (const complexpoly& y) const;
   complexpoly             operator -  (const complexpoly& y) const;
   complexpoly             operator *  (const complexpoly& y) const;

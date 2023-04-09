@@ -35,7 +35,7 @@ private:
   Gambit::GameAction action;
   const Sequence *parent;
   
-  Sequence(Gambit::GamePlayer pl, Gambit::GameAction a, const Sequence *p, int n) 
+  Sequence(const Gambit::GamePlayer &pl, const Gambit::GameAction &a, const Sequence *p, int n)
     : number(n), player(pl), action(a), parent(p) { }
   ~Sequence() = default;
 public:

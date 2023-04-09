@@ -152,50 +152,50 @@ template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
   T ratio, tempmax;
   Vector<T> incol(this->MinRow(), this->MaxRow());
   Vector<T> col(this->MinRow(), this->MaxRow());
-  
-  this->SolveColumn(inlabel,incol);
+
+  this->SolveColumn(inlabel, incol);
   //   gout << "\nincol = " << incol;
-      // Find all row indices for which column col has positive entries.
+  // Find all row indices for which column col has positive entries.
   for (i = this->MinRow(); i <= this->MaxRow(); i++)
     if (incol[i] > this->eps2)
       BestSet.push_back(i);
   // Is this really needed?  
-  if(BestSet.Length()==0)
+  if (BestSet.Length() == 0)
     //   gout << "\nBestSet.Length() == 0, Find(0):\n" << Find(0);
-  if(BestSet.Length()==0  
-     && incol[this->Find(0)]<=this->eps2 && incol[this->Find(0)] >= (-this->eps2) )
-    return this->Find(0);
-  if(BestSet.Length() <= 0) throw BadExitIndex();
-  
-      // If there are multiple candidates, break ties by
-      // looking at ratios with other columns, 
-      // eliminating nonmaximizers of 
-      // a similar ratio, until only one candidate remains.
-  c = this->MinRow()-1;
+    if (BestSet.Length() == 0
+        && incol[this->Find(0)] <= this->eps2 && incol[this->Find(0)] >= (-this->eps2))
+      return this->Find(0);
+  if (BestSet.Length() <= 0) throw BadExitIndex();
+
+  // If there are multiple candidates, break ties by
+  // looking at ratios with other columns,
+  // eliminating nonmaximizers of
+  // a similar ratio, until only one candidate remains.
+  c = this->MinRow() - 1;
   this->BasisVector(col);
   // gout << "\nLength = " <<  BestSet.Length();
   //   gout << "\n x =     " << col << "\n";
-  while (BestSet.Length() > 1)   {
+  while (BestSet.Length() > 1) {
     // this is where ITEM 001 is failing
-    if(c > this->MaxRow()) throw BadExitIndex();
-    if(c>=this->MinRow()) {
-      this->SolveColumn(-c,col);
+    if (c > this->MaxRow()) throw BadExitIndex();
+    if (c >= this->MinRow()) {
+      this->SolveColumn(-c, col);
       // gout << "\n-c = " << -c << " col = " << col;
     }
-	// Initialize tempmax.
+    // Initialize tempmax.
     tempmax = col[BestSet[1]] / incol[BestSet[1]];
-	// Find the maximum ratio. 
-    for (i = 2; i <= BestSet.Length(); i++)  {
+    // Find the maximum ratio.
+    for (i = 2; i <= BestSet.Length(); i++) {
       ratio = col[BestSet[i]] / incol[BestSet[i]];
-      if (ratio > tempmax)  tempmax = ratio;
+      if (ratio > tempmax) tempmax = ratio;
     }
 //    if(tempmax <= (T 2)*eps1) throw BadExitIndex();
-    
-	// Remove nonmaximizers from the list of candidate columns.
-    for (i = BestSet.Length(); i >= 1; i--)  {
+
+    // Remove nonmaximizers from the list of candidate columns.
+    for (i = BestSet.Length(); i >= 1; i--) {
       ratio = col[BestSet[i]] / incol[BestSet[i]];
-      if (ratio < tempmax -this->eps1)
-	BestSet.Remove(i);
+      if (ratio < tempmax - this->eps1)
+        BestSet.Remove(i);
     }
 //    else  {
 //      if(!Member(FindColumn(c))) throw BadExitIndex();
@@ -203,7 +203,7 @@ template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
 //    }
     c++;
   }
-  if(BestSet.Length() <= 0) throw BadExitIndex();
+  if (BestSet.Length() <= 0) throw BadExitIndex();
   return BestSet[1];
 }
 

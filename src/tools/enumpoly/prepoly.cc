@@ -211,7 +211,7 @@ exp_vect::exp_vect(const gSpace* p, Gambit::Array<int> exponents)
 
 exp_vect& exp_vect::operator=(const exp_vect & RHS)
 {
-  if (*this == RHS) return *this;
+  if (this == &RHS) return *this;
 
   Space = RHS.Space;
   components = RHS.components;
@@ -561,11 +561,11 @@ term_order::term_order(const gSpace* p, ORD_PTR act_ord)
 //        Operators
 //-------------------------
 
-term_order& term_order::operator=(term_order & RHS) 
+term_order& term_order::operator=(const term_order &RHS)
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc50\n";//**
 
-  if (*this == RHS) return *this;
+  if (this == &RHS) return *this;
 
   Space = RHS.Space;
   actual_order = RHS.actual_order;
@@ -620,5 +620,5 @@ bool term_order::GreaterOrEqual(const exp_vect & LHS,
 
 term_order term_order::WithVariableAppended(const gSpace* ExtendedSpace) const
 {
-  return term_order(ExtendedSpace,actual_order);
+  return { ExtendedSpace, actual_order };
 }

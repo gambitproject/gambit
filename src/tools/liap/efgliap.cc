@@ -46,9 +46,9 @@ private:
 };
 
 
-double AgentLyapunovFunction::Value(const Vector<double> &v) const
+double AgentLyapunovFunction::Value(const Vector<double> &x) const
 {
-  static_cast<Vector<double> &>(m_profile).operator=(v);
+  static_cast<Vector<double> &>(m_profile).operator=(x);
   return m_profile.GetLiapValue();
 }
 

@@ -156,15 +156,15 @@ template <class T> class QuikSolv {
      { return System.AmbientSpace(); }
    inline const term_order*              TermOrder()                 const 
      { return System.TermOrder(); }
-   inline const int                      Dmnsn()                     const 
+   inline int                      Dmnsn()                     const
      { return System.Dmnsn(); }
-   inline const gPolyList<T>             UnderlyingEquations()       const 
+   inline const gPolyList<T> &UnderlyingEquations() const
      { return System; }
-   inline const bool                     WasSolved()                 const
+   inline bool WasSolved() const
      { return HasBeenSolved; }
-   inline const Gambit::List<Gambit::Vector<double> > RootList()                  const
+   inline const Gambit::List<Gambit::Vector<double> > &RootList() const
      { return Roots; }
-   inline const bool                     IsMultiaffine()             const
+   inline bool                     IsMultiaffine()             const
      { return isMultiaffine; }
 
   // Refines the accuracy of roots obtained from other algorithms

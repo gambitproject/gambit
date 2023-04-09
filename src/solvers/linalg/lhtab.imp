@@ -78,16 +78,10 @@ int LHTableau<T>::Find(int i) const
 template <class T>
 bool LHTableau<T>::CanPivot(int outlabel, int inlabel) const
 {
-  if (T1.ValidIndex(outlabel) &&
-      T1.CanPivot(outlabel, inlabel)) {
-    return true;
-  }
-  else if (T2.ValidIndex(outlabel) &&
-	   T2.CanPivot(outlabel, inlabel)) {
-    return true;
-  }
-  return false;
+  return ((T1.ValidIndex(outlabel) && T1.CanPivot(outlabel, inlabel)) ||
+          (T2.ValidIndex(outlabel) && T2.CanPivot(outlabel, inlabel)));
 }
+
 
 template <class T>
 void LHTableau<T>::Pivot(int outrow, int inlabel)

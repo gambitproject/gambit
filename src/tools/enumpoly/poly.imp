@@ -288,7 +288,8 @@ template <class T> T polynomial<T>::LeadingCoefficient() const
   else              return coeflist[Degree() + 1];
 }
 
-template <class T> Gambit::List<T> polynomial<T>::CoefficientList() const
+template <class T>
+__attribute__((unused)) Gambit::List<T> polynomial<T>::CoefficientList() const
 {
   return coeflist;
 }
@@ -572,8 +573,8 @@ const gComplex& complexpoly::operator[](const int index) const
 
 complexpoly complexpoly::operator+(const complexpoly& y) const
 {
-  if      (  Degree() < 0) return complexpoly(y); 
-  else if (y.Degree() < 0) return complexpoly(*this);
+  if      (  Degree() < 0) return { y };
+  else if (y.Degree() < 0) return { *this };
 
   int max_degree;
 
@@ -601,8 +602,8 @@ complexpoly complexpoly::operator-(const complexpoly& y) const
 
 complexpoly complexpoly::operator*(const complexpoly &y) const
 {
-  if      (Degree() == -1) return complexpoly(*this); 
-  else if (y.Degree() == -1) return complexpoly(y);
+  if      (Degree() == -1) return { *this };
+  else if (y.Degree() == -1) return { y };
 
   int tot_degree = Degree() + y.Degree();
 
@@ -628,7 +629,7 @@ complexpoly complexpoly::operator/(const complexpoly &q) const
     ans += x;
     r-=q*x;
   }
-  return complexpoly(ans);
+  return { ans };
 }
 
 complexpoly& complexpoly::operator+=(const complexpoly& y) 
@@ -665,7 +666,7 @@ complexpoly complexpoly::operator%(const complexpoly &q) const
       ans += x;
       r-=q*x;
     }
-  return complexpoly(r);
+  return { r };
 }
 
 complexpoly complexpoly::operator- () const

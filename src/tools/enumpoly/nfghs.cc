@@ -39,7 +39,7 @@ void PrintProfile(std::ostream &p_stream,
 //                      gbtNfgHs: member functions
 //---------------------------------------------------------------------------
 
-void gbtNfgHs::Solve(Game game) {
+void gbtNfgHs::Solve(const Game &game) {
 
   int i;
   int size, diff, maxsize, maxdiff;
@@ -104,7 +104,7 @@ void gbtNfgHs::Solve(Game game) {
   Cleanup(game);
 }
 
-void gbtNfgHs::Initialize(Game p_game) {
+void gbtNfgHs::Initialize(const Game &p_game) {
 
   // remove strict dominated strategies
 
@@ -128,7 +128,7 @@ void gbtNfgHs::Initialize(Game p_game) {
 
 }
 
-void gbtNfgHs::Cleanup(Game game) {
+void gbtNfgHs::Cleanup(const Game &game) {
 }
 
 
@@ -142,7 +142,7 @@ gbtNfgHs::gbtNfgHs(int p_stopAfter)
   m_stopAfter = p_stopAfter;
 }
 
-void gbtNfgHs::SolveSizeDiff(Game game, Gambit::List < MixedStrategyProfile < double > > & solutions,
+void gbtNfgHs::SolveSizeDiff(const Game &game, Gambit::List < MixedStrategyProfile < double > > & solutions,
 			     int size, int diff) {
 
   //------------------------------------
@@ -226,11 +226,10 @@ void gbtNfgHs::SolveSizeDiff(Game game, Gambit::List < MixedStrategyProfile < do
   m_logfile << "Exiting SolveSizeDiff2\n";
 #endif
   //------------------------------------
-  return;
 }
 
 
-bool gbtNfgHs::SolveSupportSizeProfile(Game game,
+bool gbtNfgHs::SolveSupportSizeProfile(const Game &game,
 				       Gambit::List < MixedStrategyProfile < double > > & solutions, const Gambit::Array < int > & supportSizeProfile) {
 
   //------------------------------------
@@ -274,7 +273,7 @@ bool gbtNfgHs::SolveSupportSizeProfile(Game game,
 }
 
 
-void gbtNfgHs::GetSupport(Game game, int playerIdx, const Vector < int > & support,
+void gbtNfgHs::GetSupport(const Game &game, int playerIdx, const Vector < int > & support,
 			  Gambit::Array < GameStrategy > & supportBlock) {
 
   //------------------------------------
@@ -293,11 +292,9 @@ void gbtNfgHs::GetSupport(Game game, int playerIdx, const Vector < int > & suppo
     int strategyIdx = support[i];
     supportBlock.push_back(player->GetStrategy(strategyIdx));
   }
-
-  return;
 }
 
-bool gbtNfgHs::UpdatePlayerSupport(Game game, int playerIdx, Gambit::PVector < int > & playerSupport) {
+bool gbtNfgHs::UpdatePlayerSupport(const Game &game, int playerIdx, Gambit::PVector < int > & playerSupport) {
 
 
   Vector < int > support = playerSupport.GetRow(playerIdx);
@@ -352,7 +349,7 @@ bool gbtNfgHs::UpdatePlayerSupport(Game game, int playerIdx, Gambit::PVector < i
 }
 
 
-bool gbtNfgHs::RecursiveBacktracking(Game game,
+bool gbtNfgHs::RecursiveBacktracking(const Game &game,
 				     Gambit::List < MixedStrategyProfile < double > > & solutions, Gambit::Array < Gambit::Array < GameStrategy > > & uninstantiatedSupports,
 				     Gambit::Array < Gambit::Array < Gambit::Array < GameStrategy > > > & domains, int idxNextSupport2Instantiate) {
 
@@ -446,7 +443,7 @@ bool gbtNfgHs::RecursiveBacktracking(Game game,
 
 
 
-bool gbtNfgHs::IteratedRemovalStrictlyDominatedStrategies(Game game,
+bool gbtNfgHs::IteratedRemovalStrictlyDominatedStrategies(const Game &game,
 							  Gambit::Array < Gambit::Array < Gambit::Array < GameStrategy > > > & domains) {
 
   //------------------------------------
@@ -575,16 +572,17 @@ bool gbtNfgHs::IteratedRemovalStrictlyDominatedStrategies(Game game,
   return true;
 }
 
-void gbtNfgHs::GetDomainStrategies(Gambit::Array < Gambit::Array < Gambit::Array < GameStrategy > > > & domains,
-				   Gambit::Array < Gambit::Array < GameStrategy > > & domainStrategies) {
+void gbtNfgHs::GetDomainStrategies(Gambit::Array<Gambit::Array<Gambit::Array<GameStrategy> > > &domains,
+                                   Gambit::Array<Gambit::Array<GameStrategy> > &domainStrategies) const
+{
 
   for (int i = 1; i <= numPlayers; i++) {
     domainStrategies[i] = Gambit::Array<GameStrategy>();
     for (int j = 1; j <= domains[i].Length(); j++) {
-      for (int k = 1; k <= domains[i] [j].Length(); k++) {
-	if (domainStrategies[i].Find(domains[i] [j] [k]) == 0) { // no found
-	  domainStrategies[i].push_back(domains[i] [j] [k]);
-	}
+      for (int k = 1; k <= domains[i][j].Length(); k++) {
+        if (domainStrategies[i].Find(domains[i][j][k]) == 0) { // no found
+          domainStrategies[i].push_back(domains[i][j][k]);
+        }
       }
     }
   }
@@ -663,10 +661,10 @@ bool gbtNfgHs::RemoveFromDomain(Gambit::Array < Gambit::Array < Gambit::Array < 
   }
 }
 
-bool gbtNfgHs::FeasibilityProgram(Game game,
-				  Gambit::List < MixedStrategyProfile < double > > & solutions, Gambit::Array < Gambit::Array < GameStrategy > > & uninstantiatedSupports) {
-
-
+bool gbtNfgHs::FeasibilityProgram(const Game &game,
+                                  Gambit::List<MixedStrategyProfile<double> > &solutions,
+                                  Gambit::Array<Gambit::Array<GameStrategy> > &uninstantiatedSupports) const
+{
   StrategySupportProfile restrictedGame(game);
   for (int pl = 1; pl <= numPlayers; pl++) {
     for (int st = 1; st <= game->GetPlayer(pl)->NumStrategies(); st++) {

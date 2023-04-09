@@ -42,15 +42,14 @@ private:
     T lower_bd;
     T upper_bd;
     
-    // operator= defined private for constness
-    gInterval<T>& operator =  (const gInterval<T>& y);
-
 public:
     // constructors
     gInterval(const gInterval<T> &p_interval)
       : lower_bd(p_interval.lower_bd), upper_bd(p_interval.upper_bd) { }
     gInterval(const T &p_low, const T &p_high) : lower_bd(p_low), upper_bd(p_high) { }
     ~gInterval() = default;
+
+    gInterval<T>& operator=(const gInterval<T> &y) = delete;
 
     // operators
     bool operator==(const gInterval<T> &p_rhs) const

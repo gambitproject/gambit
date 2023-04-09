@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
   int maxitsN = 100;
   int numDecimals = 6;
   double tolN = 1.0e-10;
-  std::string startFile = "";
+  std::string startFile;
  
   int long_opt_index = 0;
   struct option long_options[] = {

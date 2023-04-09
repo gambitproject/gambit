@@ -135,59 +135,58 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
   int id1 = 0, id2 = 0;
 
   for (int i2 = 2; i2 <= solution->m_v2; i2++) {
-    BFS<T> bfs1 = verts2[i2];
+    const BFS<T> &bfs1 = verts2[i2];
     i++;
     for (int i1 = 2; i1 <= solution->m_v1; i1++) {
-      BFS<T> bfs2 = verts1[i1];
-	
+      const BFS<T> &bfs2 = verts1[i1];
+
       // check if solution is nash 
       // need only check complementarity, since it is feasible
       bool nash = true;
       for (size_t k = 1; nash && k <= p_game->Players()[1]->Strategies().size(); k++) {
-	if (bfs1.count(k) && bfs2.count(-k)) {
-	  nash = nash && EqZero(bfs1[k] * bfs2[-k]);
-	}
+        if (bfs1.count(k) && bfs2.count(-k)) {
+          nash = EqZero(bfs1[k] * bfs2[-k]);
+        }
       }
-
       for (size_t k = 1; nash && k <= p_game->Players()[2]->Strategies().size(); k++) {
-	if (bfs2.count(k) && bfs1.count(-k)) {
-	  nash = nash && EqZero(bfs2[k] * bfs1[-k]);
-	}
+        if (bfs2.count(k) && bfs1.count(-k)) {
+          nash = EqZero(bfs2[k] * bfs1[-k]);
+        }
       }
 
       if (nash) {
-	MixedStrategyProfile<T> profile(p_game->NewMixedStrategyProfile(static_cast<T>(0)));
-	static_cast<Vector<T> &>(profile) = static_cast<T>(0);
-	for (size_t k = 1; k <= p_game->Players()[1]->Strategies().size(); k++) {
-	  if (bfs1.count(k)) {
-	    profile[p_game->Players()[1]->Strategies()[k]] = -bfs1[k];
-	  }
-	} 
-	for (size_t k = 1; k <= p_game->Players()[2]->Strategies().size(); k++) {
-	  if (bfs2.count(k)) {
-	    profile[p_game->Players()[2]->Strategies()[k]] = -bfs2[k];
-	  }
-	}
-	profile = profile.Normalize();
-	solution->m_extremeEquilibria.push_back(profile);
-	this->m_onEquilibrium->Render(profile);
-	  
-	// note: The keys give the mixed strategy associated with each node. 
-	//       The keys should also keep track of the basis
-	//       As things stand now, two different bases could lead to
-	//       the same key... BAD!
-	if (vert1id[i1] == 0) {
-	  id1++;
-	  vert1id[i1] = id1;
-	  solution->m_key2.push_back(profile[p_game->GetPlayer(2)]);
-	}
-	if (vert2id[i2] == 0) {
-	  id2++;
-	  vert2id[i2] = id2;
-	  solution->m_key1.push_back(profile[p_game->GetPlayer(1)]);
-	}
-	solution->m_node1.push_back(vert2id[i2]);
-	solution->m_node2.push_back(vert1id[i1]);
+        MixedStrategyProfile<T> eqm(p_game->NewMixedStrategyProfile(static_cast<T>(0)));
+        static_cast<Vector<T> &>(eqm) = static_cast<T>(0);
+        for (size_t k = 1; k <= p_game->Players()[1]->Strategies().size(); k++) {
+          if (bfs1.count(k)) {
+            eqm[p_game->Players()[1]->Strategies()[k]] = -bfs1[k];
+          }
+        }
+        for (size_t k = 1; k <= p_game->Players()[2]->Strategies().size(); k++) {
+          if (bfs2.count(k)) {
+            eqm[p_game->Players()[2]->Strategies()[k]] = -bfs2[k];
+          }
+        }
+        eqm = eqm.Normalize();
+        solution->m_extremeEquilibria.push_back(eqm);
+        this->m_onEquilibrium->Render(eqm);
+
+        // note: The keys give the mixed strategy associated with each node.
+        //       The keys should also keep track of the basis
+        //       As things stand now, two different bases could lead to
+        //       the same key... BAD!
+        if (vert1id[i1] == 0) {
+          id1++;
+          vert1id[i1] = id1;
+          solution->m_key2.push_back(eqm[p_game->GetPlayer(2)]);
+        }
+        if (vert2id[i2] == 0) {
+          id2++;
+          vert2id[i2] = id2;
+          solution->m_key1.push_back(eqm[p_game->GetPlayer(1)]);
+        }
+        solution->m_node1.push_back(vert2id[i2]);
+        solution->m_node2.push_back(vert1id[i1]);
       }
     }
   }

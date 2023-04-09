@@ -23,6 +23,8 @@
 #ifndef NFGLIAP_H
 #define NFGLIAP_H
 
+#include <utility>
+
 #include "games/nash.h"
 
 using namespace Gambit;
@@ -30,9 +32,9 @@ using namespace Gambit::Nash;
 
 class NashLiapStrategySolver : public StrategySolver<double> {
 public:
-  NashLiapStrategySolver(int p_maxitsN, bool p_verbose = false,
-			 std::shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = nullptr)
-    : StrategySolver<double>(p_onEquilibrium),
+  explicit NashLiapStrategySolver(int p_maxitsN, bool p_verbose = false,
+                                  std::shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = nullptr)
+    : StrategySolver<double>(std::move(p_onEquilibrium)),
       m_maxitsN(p_maxitsN), m_verbose(p_verbose)
   { }
   ~NashLiapStrategySolver() override = default;

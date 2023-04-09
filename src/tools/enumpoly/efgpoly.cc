@@ -91,7 +91,7 @@ ProblemData::~ProblemData()
 // The strategy is to develop the polynomial for each agent's expected
 // payoff as a function of the behavior strategies on the support,
 // eliminating the last action probability for each information set.
-// The system is obtained by requiring that all of the partial
+// The system is obtained by requiring that all the partial
 // derivatives vanish, and that the sum of action probabilities at
 // each information set be less than one.
 
@@ -340,7 +340,7 @@ MixedBehaviorProfile<double> ToFullSupport(const MixedBehaviorProfile<double> &p
   const BehaviorSupportProfile &support = p_profile.GetSupport();
 
   MixedBehaviorProfile<double> fullProfile(efg);
-  for (int i = 1; i <= fullProfile.Length(); fullProfile[i++] = 0.0);
+  fullProfile = 0.0;
 
   int index = 1;
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {

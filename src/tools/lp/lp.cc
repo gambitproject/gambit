@@ -24,6 +24,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <memory>
 #include <getopt.h>
 #include "gambit.h"
 #include "efglp.h"
@@ -127,78 +128,78 @@ int main(int argc, char *argv[])
     Gambit::Game game = Gambit::ReadGame(*input_stream);
     if (!game->IsTree() || useStrategic) {
       if (useFloat) {
-	std::shared_ptr<StrategyProfileRenderer<double> > renderer;
-	if (printDetail)  {
-	  renderer.reset(new MixedStrategyDetailRenderer<double>(std::cout, numDecimals));
-	}
-	else {
-	  renderer.reset(new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
-	}
-	NashLpStrategySolver<double> algorithm(renderer);
-	algorithm.Solve(game);
+        std::shared_ptr<StrategyProfileRenderer<double> > renderer;
+        if (printDetail) {
+          renderer = std::make_shared<MixedStrategyDetailRenderer<double>>(std::cout, numDecimals);
+        }
+        else {
+          renderer = std::make_shared<MixedStrategyCSVRenderer<double>>(std::cout, numDecimals);
+        }
+        NashLpStrategySolver<double> algorithm(renderer);
+        algorithm.Solve(game);
       }
       else {
-	std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
-	if (printDetail) {
-	  renderer.reset(new MixedStrategyDetailRenderer<Rational>(std::cout));
-	}
-	else {
-	  renderer.reset(new MixedStrategyCSVRenderer<Rational>(std::cout));
-	}
-	NashLpStrategySolver<Rational> algorithm(renderer);
-	algorithm.Solve(game);
+        std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+        if (printDetail) {
+          renderer = std::make_shared<MixedStrategyDetailRenderer<Rational>>(std::cout);
+        }
+        else {
+          renderer = std::make_shared<MixedStrategyCSVRenderer<Rational>>(std::cout);
+        }
+        NashLpStrategySolver<Rational> algorithm(renderer);
+        algorithm.Solve(game);
       }
     }
     else {
       if (!bySubgames) {
-	if (useFloat) {
-	  std::shared_ptr<StrategyProfileRenderer<double> > renderer;
-	  if (printDetail)  {
-	    renderer.reset(new BehavStrategyDetailRenderer<double>(std::cout, numDecimals));
-	  }
-	  else {
-	    renderer.reset(new BehavStrategyCSVRenderer<double>(std::cout, numDecimals));
-	  }
-	  NashLpBehavSolver<double> algorithm(renderer);
-	  algorithm.Solve(BehaviorSupportProfile(game));
-	}
-	else {
-	  std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
-	  if (printDetail) {
-	    renderer.reset(new BehavStrategyDetailRenderer<Rational>(std::cout));
-	  }
-	  else {
-	    renderer.reset(new BehavStrategyCSVRenderer<Rational>(std::cout));
-	  }
-	  NashLpBehavSolver<Rational> algorithm(renderer);
-	  algorithm.Solve(BehaviorSupportProfile(game));
-	}
+        if (useFloat) {
+          std::shared_ptr<StrategyProfileRenderer<double> > renderer;
+          if (printDetail) {
+            renderer = std::make_shared<BehavStrategyDetailRenderer<double>>(std::cout, numDecimals);
+          }
+          else {
+            renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
+          }
+          NashLpBehavSolver<double> algorithm(renderer);
+          algorithm.Solve(BehaviorSupportProfile(game));
+        }
+        else {
+          std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+          if (printDetail) {
+            renderer = std::make_shared<BehavStrategyDetailRenderer<Rational>>(std::cout);
+          }
+          else {
+            renderer = std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout);
+          }
+          NashLpBehavSolver<Rational> algorithm(renderer);
+          algorithm.Solve(BehaviorSupportProfile(game));
+        }
       }
       else {
-	if (useFloat) {
-	  std::shared_ptr<BehavSolver<double> > stage(new NashLpBehavSolver<double>());
-	  std::shared_ptr<StrategyProfileRenderer<double> > renderer;
-	  if (printDetail)  {
-	    renderer.reset(new BehavStrategyDetailRenderer<double>(std::cout, numDecimals));
-	  }
-	  else {
-	    renderer.reset(new BehavStrategyCSVRenderer<double>(std::cout, numDecimals));
-	  }
-	  SubgameBehavSolver<double> algorithm(stage, renderer);
-	  algorithm.Solve(BehaviorSupportProfile(game));
-	}
-	else {
-	  std::shared_ptr<BehavSolver<Rational> > stage(new NashLpBehavSolver<Rational>());
-	  std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
-	  if (printDetail)  {
-	    renderer.reset(new BehavStrategyDetailRenderer<Rational>(std::cout, numDecimals));
-	  }
-	  else {
-	    renderer.reset(new BehavStrategyCSVRenderer<Rational>(std::cout, numDecimals));
-	  }
-	  SubgameBehavSolver<Rational> algorithm(stage, renderer);
-	  algorithm.Solve(BehaviorSupportProfile(game));
-	}
+        if (useFloat) {
+          std::shared_ptr<BehavSolver<double> > stage(new NashLpBehavSolver<double>());
+          std::shared_ptr<StrategyProfileRenderer<double> > renderer;
+          if (printDetail) {
+            renderer = std::make_shared<BehavStrategyDetailRenderer<double>>(std::cout, numDecimals);
+          }
+          else {
+            renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
+          }
+          SubgameBehavSolver<double> algorithm(stage, renderer);
+          algorithm.Solve(BehaviorSupportProfile(game));
+        }
+        else {
+          std::shared_ptr<BehavSolver<Rational> > stage(new NashLpBehavSolver<Rational>());
+          std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+          if (printDetail) {
+            renderer = std::make_shared<BehavStrategyDetailRenderer<Rational>>(std::cout, numDecimals);
+          }
+          else {
+            renderer = std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout, numDecimals);
+          }
+          SubgameBehavSolver<Rational> algorithm(stage, renderer);
+          algorithm.Solve(BehaviorSupportProfile(game));
+        }
       }
     }
     return 0;

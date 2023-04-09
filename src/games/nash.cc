@@ -210,7 +210,7 @@ BehavViaStrategySolver<T>::Solve(const BehaviorSupportProfile &p_support) const
 {
   List<MixedStrategyProfile<T> > output = m_solver->Solve(p_support.GetGame());
   List<MixedBehaviorProfile<T> > solutions;
-  for (auto profile : output) {
+  for (const auto &profile : output) {
     solutions.push_back(MixedBehaviorProfile<T>(profile));
   }
   return solutions;
@@ -261,12 +261,12 @@ void ChildSubgames(const GameNode &p_node, List<GameNode> &p_list)
 //   at the end of the computation
 //
 
-template <class T>
+template<class T>
 void SubgameBehavSolver<T>::SolveSubgames(const BehaviorSupportProfile &p_support,
-					      const DVector<T> &p_templateSolution,
-					      GameNode n,
-					      List<DVector<T> > &solns,
-					      List<GameOutcome> &values) const
+                                          const DVector<T> &p_templateSolution,
+                                          const GameNode &n,
+                                          List<DVector<T> > &solns,
+                                          List<GameOutcome> &values) const
 {
   Game efg = p_support.GetGame();
   

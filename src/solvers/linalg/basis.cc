@@ -174,10 +174,5 @@ void Basis::CheckBasis()
   IsBasisIdent = check;
 }
 
-bool Basis::IsIdent()
-{
-  return IsBasisIdent;
-}
-
 
 

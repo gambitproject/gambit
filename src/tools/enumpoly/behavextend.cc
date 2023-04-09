@@ -26,7 +26,7 @@
 #include "rectangl.h"
 #include "ineqsolv.h"
 
-void TerminalDescendants(Gambit::GameNode p_node, Gambit::List<Gambit::GameNode> &current)
+void TerminalDescendants(const Gambit::GameNode &p_node, Gambit::List<Gambit::GameNode> &current)
 {
   if (p_node->IsTerminal()) { 
     current.push_back(p_node);
@@ -38,7 +38,7 @@ void TerminalDescendants(Gambit::GameNode p_node, Gambit::List<Gambit::GameNode>
   }
 }
 
-Gambit::List<Gambit::GameNode> TerminalNodes(Gambit::Game p_efg)
+Gambit::List<Gambit::GameNode> TerminalNodes(const Gambit::Game &p_efg)
 {
   Gambit::List<Gambit::GameNode> ret;
   TerminalDescendants(p_efg->GetRoot(), ret);

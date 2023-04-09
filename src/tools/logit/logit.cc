@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 
   bool quiet = false, useStrategic = false;
   double maxLambda = 1000000.0;
-  std::string mleFile = "";
+  std::string mleFile;
   double maxDecel = 1.1;
   double hStart = 0.03;
   double targetLambda = -1.0;

@@ -51,7 +51,7 @@ NashIPAStrategySolver::Solve(const Game &p_game,
   List<MixedStrategyProfile<double> > solutions;
   
   if (p_game->IsAgg()) {
-    A.reset(new aggame(dynamic_cast<GameAggRep &>(*p_game)));
+    A = std::make_shared<aggame>(dynamic_cast<GameAggRep &>(*p_game));
   }
   else {
     std::vector<int> actions(p_game->NumPlayers());
@@ -62,7 +62,7 @@ NashIPAStrategySolver::Solve(const Game &p_game,
     }
     cvector payoffs(veclength);
   
-    A.reset(new nfgame(p_game->NumPlayers(), actions, payoffs));
+    A = std::make_shared<nfgame>(p_game->NumPlayers(), actions, payoffs);
   
     std::vector<int> profile(p_game->NumPlayers());
     for (StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {

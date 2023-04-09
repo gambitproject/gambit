@@ -32,7 +32,7 @@ class LogitQREMixedStrategyProfile {
   friend class StrategicQREPathTracer;
   friend class StrategicQREEstimator;
 public:
-  LogitQREMixedStrategyProfile(const Game &p_game)
+  explicit LogitQREMixedStrategyProfile(const Game &p_game)
     : m_profile(p_game->NewMixedStrategyProfile(0.0)), m_lambda(0.0)
 	{ }
 

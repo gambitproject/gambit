@@ -184,16 +184,16 @@
 namespace Gambit {
 namespace Nash {
 
-#define MAXM 700     // max. no of left nodes for incidence matrix 
-#define MAXN MAXM  // max. no of right nodes for incidence matrix 
+const int MAXM = 700;     // max. no of left nodes for incidence matrix
+const int MAXN = MAXM;    // max. no of right nodes for incidence matrix
 
-#define MAXINP1 5000        // max. no of left nodes in input 
-#define MAXINP2 MAXINP1  // max. no of right nodes in input 
-#define MAXEDGES   50000       // max. no of edges in input 
-#define MAXCO  MIN(MAXINP1, MAXINP2) + 1
+// #define MAXINP1 5000        // max. no of left nodes in input
+// #define MAXINP2 MAXINP1  // max. no of right nodes in input
+// #define MAXEDGES   50000       // max. no of edges in input
+// #define MAXCO  MIN(MAXINP1, MAXINP2) + 1
   // max. no of connected components;  on the smaller side,
   // each node could be in different component 
-#define STKSIZE  (MAXM + 1) * (MAXN + 1)  
+const int STKSIZE = (MAXM + 1) * (MAXN + 1);
   // largest stack usage for full graph 
 
 

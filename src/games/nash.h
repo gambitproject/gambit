@@ -199,10 +199,10 @@ protected:
 
 private:
   void SolveSubgames(const BehaviorSupportProfile &p_support,
-		     const DVector<T> &p_templateSolution,
-		     GameNode n,
-		     List<DVector<T> > &solns,
-		     List<GameOutcome> &values) const;
+                     const DVector<T> &p_templateSolution,
+                     const GameNode &n,
+                     List<DVector<T> > &solns,
+                     List<GameOutcome> &values) const;
 };
 
 //

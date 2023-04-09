@@ -30,12 +30,12 @@ namespace Nash {
 
 class NashIPAStrategySolver : public StrategySolver<double> {
 public:
-  explicit NashIPAStrategySolver(std::shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = 0)
+  explicit NashIPAStrategySolver(std::shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = nullptr)
     : StrategySolver<double>(p_onEquilibrium)
   { }
-  virtual ~NashIPAStrategySolver() { }
+  ~NashIPAStrategySolver() override = default;
 
-  List<MixedStrategyProfile<double> > Solve(const Game &p_game) const;
+  List<MixedStrategyProfile<double> > Solve(const Game &p_game) const override;
   List<MixedStrategyProfile<double> > Solve(const Game &p_game,
 					    const Array<double> &p_pert) const;
 };

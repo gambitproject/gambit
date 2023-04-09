@@ -184,7 +184,7 @@ public:
   ~term_order() = default;
 
 // Operators
-  term_order& operator=(term_order & RHS);
+  term_order& operator=(const term_order& RHS);
 
   bool operator==(const term_order & RHS) const;
   bool operator!=(const term_order & RHS) const;

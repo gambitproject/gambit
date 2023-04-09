@@ -32,7 +32,7 @@
 // Constructors / Destructors
 //---------------------------
 
-gIndexOdometer::gIndexOdometer(const Gambit::Array<int> IndexUpperBounds) 
+gIndexOdometer::gIndexOdometer(const Gambit::Array<int> &IndexUpperBounds)
 : MinIndices(IndexUpperBounds.Length()), 
   MaxIndices(IndexUpperBounds), 
   CurIndices(IndexUpperBounds.Length())
@@ -43,72 +43,14 @@ gIndexOdometer::gIndexOdometer(const Gambit::Array<int> IndexUpperBounds)
   for (i = 2; i <= NoIndices(); i++) CurIndices[i] = 1;
 }
 
-gIndexOdometer::gIndexOdometer(const Gambit::Array<int> IndexLowerBounds,
-                               const Gambit::Array<int> IndexUpperBounds) 
+gIndexOdometer::gIndexOdometer(const Gambit::Array<int> &IndexLowerBounds,
+                               const Gambit::Array<int> &IndexUpperBounds)
 : MinIndices(IndexLowerBounds), 
   MaxIndices(IndexUpperBounds), 
   CurIndices(IndexUpperBounds.Length())
 {
-  CurIndices[1] = MinIndices[1] - 1;;
+  CurIndices[1] = MinIndices[1] - 1;
   for (int i = 2; i <= NoIndices(); i++) CurIndices[i] = MinIndices[i];
-}
-
-gIndexOdometer::gIndexOdometer(const int* IndexUpperBounds, const int NoInd) 
-: MinIndices(NoInd), 
-  MaxIndices(NoInd), 
-  CurIndices(NoInd)
-{
-  int i;
-  for (i = 1; i <= NoIndices(); i++) MinIndices[i] = 1;
-  for (i = 1; i <= NoIndices(); i++) {
-    MaxIndices[i] = IndexUpperBounds[i-1];
-    CurIndices[i] = 1;
-  }
-  CurIndices[1] = 0;
-}
-
-gIndexOdometer::gIndexOdometer(const gIndexOdometer & odo)
-: MaxIndices(odo.MaxIndices), CurIndices(odo.CurIndices)
-{
-}
-
-gIndexOdometer::~gIndexOdometer()
-= default;
-
-//----------------------------------
-//        Operators
-//----------------------------------
-
- 
-gIndexOdometer& gIndexOdometer::operator=(const gIndexOdometer & rhs)
-{
-  if (*this != rhs) {
-    MinIndices = rhs.MinIndices;
-    MaxIndices = rhs.MaxIndices;
-    CurIndices = rhs.CurIndices;
-  }
-  return *this;
-}
-
-  
-bool gIndexOdometer::operator==(const gIndexOdometer & rhs) const
-{
-  if (MinIndices != rhs.MinIndices) return false;
-  if (MaxIndices != rhs.MaxIndices) return false;
-  if (CurIndices != rhs.CurIndices) return false;
-                                    return true;
-}
-
-  
-bool gIndexOdometer::operator!=(const gIndexOdometer & rhs) const
-{
-  return !(*this == rhs);
-}
-
-int gIndexOdometer::operator[](const int place) const
-{
-  //assert(1 <= place && place <= NoIndices());
-  return CurIndices[place];
 }
 
 //----------------------------------
@@ -191,19 +133,12 @@ gIndexOdometer gIndexOdometer::AfterExcisionOf(int& to_be_zapped) const
 // Constructors / Destructors
 //---------------------------
 
-gPermutationOdometer::gPermutationOdometer(const int& given_n) 
+gPermutationOdometer::gPermutationOdometer(int given_n)
 : n(given_n), CurIndices(n), CurSign(0)
 {
   CurIndices[1] = 0;                   // Codes for virginity - see Turn() below
   for (int i = 2; i <= n; i++) CurIndices[i] = i;
 }
-
-gPermutationOdometer::gPermutationOdometer(const gPermutationOdometer & odo)
- 
-= default;
-
-gPermutationOdometer::~gPermutationOdometer()
-= default;
 
 //----------------------------------
 //        Operators
@@ -229,11 +164,6 @@ bool gPermutationOdometer::operator!=(const gPermutationOdometer & rhs) const
   return !(*this == rhs);
 }
 
-int gPermutationOdometer::operator[](const int place) const
-{
-  //assert(1 <= place && place <= n);
-  return CurIndices[place];
-}
 
 //----------------------------------
 //            Manipulate
@@ -264,7 +194,7 @@ bool gPermutationOdometer::Turn()
 
   cursor1++; cursor2 = n;
   while (cursor1 < cursor2) {
-    int tmp = CurIndices[cursor2]; 
+    tmp = CurIndices[cursor2];
     CurIndices[cursor2] = CurIndices[cursor1];
     CurIndices[cursor1] = tmp;
     CurSign *= -1;
@@ -273,23 +203,3 @@ bool gPermutationOdometer::Turn()
 
   return true;
 }
-
-//----------------------------------
-//           Information
-//----------------------------------
-
-int gPermutationOdometer::NoIndices() const 
-{ 
-  return n;
-}
-
-Gambit::Array<int> gPermutationOdometer::CurrentIndices() const
-{
-  return CurIndices;
-}
-
-int  gPermutationOdometer::CurrentSign() const
-{
-  return CurSign;
-}
-

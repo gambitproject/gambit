@@ -50,7 +50,7 @@ logit_atlambda(const Game &p_game, double p_lambda)
   StrategicQREPathTracer alg;
   NullBuffer null_buffer;
   std::ostream null_stream(&null_buffer);
-  return new LogitQREMixedStrategyProfile(alg.SolveAtLambda(p_game, null_stream,
+  return new LogitQREMixedStrategyProfile(alg.SolveAtLambda(start, null_stream,
 							    p_lambda, 1.0));
 }
 
@@ -61,6 +61,6 @@ logit_principal_branch(const Game &p_game, double p_maxLambda=1000000.0)
   StrategicQREPathTracer alg;
   NullBuffer null_buffer;
   std::ostream null_stream(&null_buffer);
-  return alg.TraceStrategicPath(p_game, null_stream, p_maxLambda, 1.0);
+  return alg.TraceStrategicPath(start, null_stream, p_maxLambda, 1.0);
 }
 
