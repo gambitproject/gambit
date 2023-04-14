@@ -82,21 +82,27 @@ cdef class Action:
     property prob:
         def __get__(self):
             cdef string py_string
-            cdef string dummy_str
-            py_string = self.action.deref().GetInfoset().deref().GetActionProb(
-                self.action.deref().GetNumber(), dummy_str)
+            py_string = <string>(
+                self.action.deref().GetInfoset().deref().GetActionProb(
+                    self.action.deref().GetNumber()
+                )
+            )
             if "." in py_string.decode('ascii'):
                 return decimal.Decimal(py_string.decode('ascii'))
             else:
                 return Rational(py_string.decode('ascii'))
         
-        def __set__(self, value):
-            cdef string s
-            if isinstance(value, (int, decimal.Decimal, fractions.Fraction)):
-                v = str(value)
-                s = v.encode('ascii')
-                self.action.deref().GetInfoset().deref().SetActionProb(
-                    self.action.deref().GetNumber(), s)
-            else:
-                raise TypeError("numeric argument required for action probability")
-            
+        def __set__(self, value: typing.Any):
+            """
+            Set the probability a chance action is played.
+
+            Parameters
+            ----------
+            value : Any
+                The probability the action is played.  This can be any numeric type, or any object that
+                has a string representation which can be interpreted as an integer,
+                decimal, or rational number.
+            """
+            self.action.deref().GetInfoset().deref().SetActionProb(
+                self.action.deref().GetNumber(), _to_number(value)
+            )

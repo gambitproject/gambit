@@ -169,7 +169,7 @@ void GameTreeInfosetRep::RemoveAction(int which)
   }
 }
 
-void GameTreeInfosetRep::SetActionProb(int act, const std::string &p_value)
+void GameTreeInfosetRep::SetActionProb(int act, const Number &p_value)
 {
   m_probs[act] = p_value;
   m_efg->ClearComputedValues();
@@ -599,7 +599,7 @@ Rational SubtreeSum(const GameNode &p_node)
 
   if (p_node->GetOutcome()) {
     for (int pl = 1; pl <= p_node->GetGame()->NumPlayers(); pl++) {
-      sum += p_node->GetOutcome()->GetPayoff<Rational>(pl);
+      sum += static_cast<Rational>(p_node->GetOutcome()->GetPayoff(pl));
     }
   }
   return sum;
@@ -784,7 +784,7 @@ void PrintActions(std::ostream &p_stream, GameTreeInfosetRep *p_infoset)
   for (int act = 1; act <= p_infoset->NumActions(); act++) {
     p_stream << '"' << EscapeQuotes(p_infoset->GetAction(act)->GetLabel()) << "\" ";
     if (p_infoset->IsChanceInfoset()) {
-      p_stream << p_infoset->GetActionProb(act, "") << ' ';
+      p_stream << static_cast<std::string>(p_infoset->GetActionProb(act)) << ' ';
     }
   }
   p_stream << "}";
@@ -799,7 +799,7 @@ void WriteEfgFile(std::ostream &f, GameTreeNodeRep *n)
 	EscapeQuotes(n->GetOutcome()->GetLabel()) << "\" ";
       f << "{ ";
       for (int pl = 1; pl <= n->GetGame()->NumPlayers(); pl++)  {
-	f << n->GetOutcome()->GetPayoff<std::string>(pl);
+	f << static_cast<std::string>(n->GetOutcome()->GetPayoff(pl));
 
 	if (pl < n->GetGame()->NumPlayers()) {
 	  f << ", ";
@@ -835,7 +835,7 @@ void WriteEfgFile(std::ostream &f, GameTreeNodeRep *n)
       EscapeQuotes(n->GetOutcome()->GetLabel()) << "\" ";
     f << "{ ";
     for (int pl = 1; pl <= n->GetGame()->NumPlayers(); pl++)  {
-      f << n->GetOutcome()->GetPayoff<std::string>(pl);
+      f << static_cast<std::string>(n->GetOutcome()->GetPayoff(pl));
       
       if (pl < n->GetGame()->NumPlayers())
 	f << ", ";

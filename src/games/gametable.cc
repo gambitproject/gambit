@@ -93,7 +93,7 @@ Rational TablePureStrategyProfileRep::GetPayoff(int pl) const
 {
   GameOutcomeRep *outcome = dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index];
   if (outcome) {
-    return outcome->GetPayoff<Rational>(pl);
+    return static_cast<Rational>(outcome->GetPayoff(pl));
   }
   else {
     return Rational(0);
@@ -106,7 +106,7 @@ TablePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) co
   int player = p_strategy->GetPlayer()->GetNumber();
   GameOutcomeRep *outcome = dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index - m_profile[player]->m_offset + p_strategy->m_offset];
   if (outcome) {
-    return outcome->GetPayoff<Rational>(player);
+    return static_cast<Rational>(outcome->GetPayoff(player));
   }
   else {
     return Rational(0);

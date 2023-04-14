@@ -395,13 +395,13 @@ void SubgameBehavSolver<T>::SolveSubgames(const BehaviorSupportProfile &p_suppor
       for (int pl = 1; pl <= subgame->NumPlayers(); pl++)  {
 	subval[pl] = sol[solno].GetPayoff(pl);
 	if (outcome) {
-	  subval[pl] += outcome->GetPayoff<T>(pl);
+	  subval[pl] += static_cast<T>(outcome->GetPayoff(pl));
         }
       }
 
       GameOutcome ov = efg->NewOutcome();
       for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-	ov->SetPayoff(pl, lexical_cast<std::string>(subval[pl]));
+        ov->SetPayoff(pl, Number(static_cast<Rational>(subval[pl])));
       }
  
       values.push_back(ov);

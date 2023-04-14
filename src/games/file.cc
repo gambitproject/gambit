@@ -546,7 +546,7 @@ void ReadOutcomeList(GameParserState &p_parser, Game &p_nfg)
 
     try {
       while (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
-        outcome->SetPayoff(pl++, p_parser.GetLastText());
+        outcome->SetPayoff(pl++, Number(p_parser.GetLastText()));
         if (p_parser.GetNextToken() == TOKEN_COMMA) {
             p_parser.GetNextToken();
         }
@@ -607,7 +607,7 @@ void ParsePayoffBody(GameParserState &p_parser, Game &p_nfg)
 
   while (p_parser.GetCurrentToken() != TOKEN_EOF) {
     if (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
-      (*iter)->GetOutcome()->SetPayoff(pl, p_parser.GetLastText());
+      (*iter)->GetOutcome()->SetPayoff(pl, Number(p_parser.GetLastText()));
     }
     else {
       throw InvalidFileException(p_parser.CreateLineMsg("Expecting payoff"));
@@ -730,7 +730,7 @@ void ParseOutcome(GameParserState &p_state,
 
     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
       if (p_state.GetCurrentToken() == TOKEN_NUMBER) {
-        outcome->SetPayoff(pl, p_state.GetLastText());
+        outcome->SetPayoff(pl, Number(p_state.GetLastText()));
       }
       else {
         throw InvalidFileException(
@@ -827,7 +827,7 @@ void ParseChanceNode(GameParserState &p_state,
       infoset->SetLabel(label);
       for (int act = 1; act <= actions.Length(); act++) {
         infoset->GetAction(act)->SetLabel(actions[act]);
-        infoset->SetActionProb(act, probs[act]);
+        infoset->SetActionProb(act, Number(probs[act]));
       }
     }
     else {

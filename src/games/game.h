@@ -26,7 +26,7 @@
 
 #include <memory>
 #include "core/dvector.h"
-#include "core/number.h"
+#include "number.h"
 
 namespace Gambit {
 
@@ -263,18 +263,14 @@ public:
 
   /// Returns the text label associated with the outcome
   const std::string &GetLabel() const { return m_label; }
-  /// Sets the text label associated with the outcome 
+  /// Sets the text label associated with the outcome
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
   /// Gets the payoff associated with the outcome to player 'pl'
-  template <class T> const T &GetPayoff(int pl) const 
-    { return (const T &) m_payoffs[pl]; }
+  const Number &GetPayoff(int pl) const { return m_payoffs[pl]; }
   /// Sets the payoff to player 'pl'
-  void SetPayoff(int pl, const std::string &p_value)
-  {
-    m_payoffs[pl] = p_value;
-    //m_game->ClearComputedValues();
-  }
+  void SetPayoff(int pl, const Number &p_value)
+    { m_payoffs[pl] = p_value; }
 
   /// Map the outcome to the corresponding outcome in the unrestricted game
   GameOutcome Unrestrict() const 
@@ -346,10 +342,8 @@ public:
 
   virtual bool Precedes(GameNode) const = 0;
 
-  virtual void SetActionProb(int i, const std::string &p_value) = 0;
-  virtual double GetActionProb(int pl, double) const = 0;
-  virtual Rational GetActionProb(int pl, const Rational &) const = 0;
-  virtual std::string GetActionProb(int pl, const std::string &) const = 0;
+  virtual void SetActionProb(int i, const Number &p_value) = 0;
+  virtual const Number &GetActionProb(int i) const = 0;
   virtual void Reveal(GamePlayer) = 0;
 
   /// Map the infoset to the corresponding infoset in the unrestricted game

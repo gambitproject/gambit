@@ -122,10 +122,10 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
     }
 
     item += (" (" + 
-	     Gambit::lexical_cast<std::string>(outcome->GetPayoff<std::string>(1)) + ", " +
-	     Gambit::lexical_cast<std::string>(outcome->GetPayoff<std::string>(2)));
+	     static_cast<std::string>(outcome->GetPayoff(1)) + ", " +
+	     static_cast<std::string>(outcome->GetPayoff(2)));
     if (efg->NumPlayers() > 2) {
-      item += ", " + Gambit::lexical_cast<std::string>(outcome->GetPayoff<std::string>(3));
+      item += ", " + static_cast<std::string>(outcome->GetPayoff(3));
       if (efg->NumPlayers() > 3) {
 	item += ",...)";
       }

@@ -55,7 +55,7 @@ void gbtPayoffEditor::BeginEdit(gbtNodeEntry *p_entry, int p_player)
   m_entry = p_entry;
   m_outcome = p_entry->GetNode()->GetOutcome();
   m_player = p_player;
-  SetValue(wxString(m_outcome->GetPayoff<std::string>(p_player).c_str(),
+  SetValue(wxString(static_cast<std::string>(m_outcome->GetPayoff(p_player)).c_str(),
 		    *wxConvCurrent));
   SetSize(wxSize(GetSize().GetWidth(), GetBestSize().GetHeight()));
   SetSelection(-1, -1);

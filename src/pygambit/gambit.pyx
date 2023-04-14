@@ -29,6 +29,7 @@ import typing
 
 from libcpp cimport bool
 from libcpp.string cimport string
+import typing
 
 from .error import *
 
@@ -57,10 +58,32 @@ cdef extern from "core/rational.h":
 cdef rat_to_py(c_Rational r):
     return Rational(rat_str(r).decode('ascii'))
 
-cdef extern from "core/number.h":
+cdef extern from "games/number.h":
     cdef cppclass c_Number "Number":
+        c_Number()
+        c_Number(string)
         string as_string "operator const string &"()
-     
+
+cdef c_Number _to_number(value) except *:
+    """Convert a value into a game Number representation."""
+    if isinstance(value, (int, Decimal, Rational)):
+        value = str(value)
+    elif "/" in str(value):
+        try:
+            value = str(Rational(str(value)))
+        except ValueError:
+            raise ValueError(f"Cannot convert '{value}' to a number") from None
+    else:
+        # This slightly indirect way of converting deals best with
+        # rounding of floating point numbers - so calling code gets
+        # the value it expects when using a float
+        try:
+            value = str(Decimal(str(value)))
+        except decimal.InvalidOperation:
+            raise ValueError(f"Cannot convert '{value}' to a number") from None
+    return c_Number(value.encode('ascii'))
+
+
 cdef extern from "core/array.h":
     cdef cppclass Array[T]: 
         T getitem "operator[]"(int) except +
@@ -146,8 +169,8 @@ cdef extern from "games/game.h":
         c_GameAction GetAction(int) except +IndexError
         c_GameAction InsertAction(c_GameAction) except +ValueError
         
-        string GetActionProb(int, string) except +IndexError
-        void SetActionProb(int, string) except +IndexError 
+        c_Number GetActionProb(int) except +IndexError
+        void SetActionProb(int, c_Number) except +IndexError
 
         int NumMembers()
         c_GameNode GetMember(int) except +IndexError
@@ -178,8 +201,8 @@ cdef extern from "games/game.h":
         string GetLabel()
         void SetLabel(string)
      
-        c_Number GetPayoffNumber "GetPayoff<Number>"(int) except +IndexError
-        void SetPayoff(int, string) except +IndexError
+        c_Number GetPayoff(int) except +IndexError
+        void SetPayoff(int, c_Number) except +IndexError
 
     cdef cppclass c_GameNodeRep "GameNodeRep":
         c_Game GetGame()

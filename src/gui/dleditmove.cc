@@ -63,7 +63,7 @@ gbtActionSheet::gbtActionSheet(wxWindow *p_parent,
 			  *wxConvCurrent));
     if (p_infoset->IsChanceInfoset()) {
       SetCellValue(wxSheetCoords(act-1, 1),
-		   wxString(p_infoset->GetActionProb(act, "").c_str(),
+		   wxString(static_cast<std::string>(p_infoset->GetActionProb(act)).c_str(),
 			    *wxConvCurrent));
     }
   }

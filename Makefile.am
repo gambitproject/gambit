@@ -318,7 +318,6 @@ core_SOURCES = \
 	src/core/integer.h \
 	src/core/rational.cc \
 	src/core/rational.h \
-	src/core/number.h \
 	src/core/vector.cc \
 	src/core/pvector.cc \
 	src/core/dvector.cc \
@@ -347,6 +346,7 @@ agg_SOURCES = \
 
 game_SOURCES = \
 	src/gambit.h \
+	src/games/number.h \
 	src/games/game.cc \
 	src/games/game.h \
 	src/games/gameexpl.h \
