@@ -30,82 +30,10 @@
 //--------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------
-//                       constructors and a destructor
-//--------------------------------------------------------------------------
-
-gComplex::gComplex() 
-: re(0), im(0)
-{}
-
-gComplex::gComplex(const double& x, const double& y)
-: re(x), im(y)
-{}
-
-gComplex::gComplex(const gComplex& y) 
- 
-= default;
-
-gComplex::gComplex(const int& n)
-: re(n), im(0)
-{}
-
-gComplex::gComplex(const long& n) 
-: re(n), im(0)
-{}
-
-gComplex::~gComplex() 
-= default;
-
-//--------------------------------------------------------------------------
 //                               operators
 //--------------------------------------------------------------------------
 
-double gComplex::RealPart() const
-{
-  return re;
-}
-
-double gComplex::ImaginaryPart() const
-{
-  return im;
-}
-
-gComplex& gComplex::operator =  (const gComplex& y)
-{
-  if (this == &y) return *this;
-
-  re = y.re;   
-  im = y.im;   
-  return *this;
-}
-
-bool gComplex::operator == (const gComplex& y) const
-{
-  if (re == y.re && im == y.im) return true;
-  else                          return false;
-}
-
-bool gComplex::operator != (const gComplex& y) const
-{
-  return !(*this == y);
-}
-
-void gComplex::operator += (const gComplex& y)
-{
-  *this = gComplex(re + y.re,im + y.im);
-}
-
-void gComplex::operator -= (const gComplex& y) 
-{
-  *this = gComplex(re - y.re,im - y.im);
-}
-
-void gComplex::operator *= (const gComplex& y) 
-{
-  *this = gComplex(re*y.re - im*y.im,re*y.im + im*y.re);
-}
-
-void gComplex::operator /= (const gComplex& y) 
+void gComplex::operator /= (const gComplex& y)
 {
   if (y == (gComplex) 0)  {
     throw Gambit::ZeroDivideException();
@@ -114,20 +42,6 @@ void gComplex::operator /= (const gComplex& y)
 		   (- re*y.im + im*y.re)/(y.re*y.re + y.im*y.im));
 }
 
-gComplex gComplex::operator + (const gComplex& y) const
-{
-  return gComplex(re + y.re,im + y.im);
-}
-
-gComplex gComplex::operator - (const gComplex& y) const
-{
-  return gComplex(re - y.re,im - y.im);
-}
-
-gComplex gComplex::operator * (const gComplex& y) const
-{
-  return gComplex(re*y.re - im*y.im,re*y.im + im*y.re);
-}
 
 gComplex gComplex::operator / (const gComplex& y) const
 {
@@ -138,24 +52,9 @@ gComplex gComplex::operator / (const gComplex& y) const
 		  (- re*y.im + im*y.re)/(y.re*y.re + y.im*y.im));
 }
 
-gComplex gComplex::operator - () const
-{
-  return gComplex(-re,-im);
-}
-
 // FUNCTIONS OUTSIDE THE CLASS
 
-double   fabs(const gComplex& x) 
-{
-  return sqrt(x.re*x.re + x.im*x.im);
-}
-
-gComplex sqr(const gComplex& x)
-{
-  return x*x;
-}
-
-gComplex pow(const gComplex& x, const long y)
+gComplex pow(const gComplex& x, long y)
 {
   if (y < 0) { 
     if (x == (gComplex) 0) {
@@ -176,23 +75,6 @@ gComplex pow(const gComplex& x, const long y)
   }
 }
 
-std::string ToText(const gComplex /* d */)
-{
-  //  gout << "\nError: ToText(gComplex) must be defined for compilation,";
-  // gout << " but is not functional.\n";
-  exit(0);
-  return "";
-}
-
-// conversions from strings to numbers
-
-gComplex TOgComplex(const std::string & /* s */)
-{ 
-  //  gout << "\nError: TOgComplex must be defined for compilation,";
-  // gout << " but is not functional.\n";
-  exit(0);
-  return gComplex(0, 0);
-}
 
 #include "core/vector.imp"
 

@@ -36,41 +36,14 @@ template<> double gPoly<double>::String_Coeff(double nega)
 }
 
 template class gPoly<double>;
-template gPoly<double> operator+(const gPoly<double> &poly, const double val);
-template gPoly<double> operator*(const double val, const gPoly<double> &poly);
-template gPoly<double> operator*(const gPoly<double> &poly, const double val);
+template gPoly<double> operator+(const gPoly<double> &poly, const double &val);
+template gPoly<double> operator*(const double &val, const gPoly<double> &poly);
+template gPoly<double> operator*(const gPoly<double> &poly, const double &val);
 
 template gPoly<double> TogDouble(const gPoly<double>&);
 template gPoly<double> NormalizationOfPoly(const gPoly<double>&);
 
 template std::string &operator<<(std::string &, const gPoly<double> &);
-
-/*
-template<> Gambit::Rational gPoly<Gambit::Rational>::String_Coeff(Gambit::Rational nega)
-{
-  Gambit::Rational rat;
-  std::string Coeff = "";
-  while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
-    Coeff += charc;
-    charnum++;
-    GetChar();
-  }
-  if (Coeff == "") return (nega);
-  else return (nega * Gambit::ToRational(Coeff));
-}
-
-template class gPoly<Gambit::Rational>;
-template gPoly<Gambit::Rational> operator*(const Gambit::Rational val, const gPoly<Gambit::Rational> &poly);
-template gPoly<Gambit::Rational> operator*(const gPoly<Gambit::Rational> &poly, const Gambit::Rational val);
-
-template gPoly<double> TogDouble(const gPoly<Gambit::Rational>&);
-template gPoly<double> NormalizationOfPoly(const gPoly<Gambit::Rational>&);
-
-template std::string &operator<<(std::string &, const gPoly<Gambit::Rational> &);
-*/
-
-
-
 
 
 

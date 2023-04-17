@@ -38,7 +38,7 @@ protected:
   PureStrategyProfileRep *Copy() const override;
 
 public:
-  TablePureStrategyProfileRep(const Game &p_game);
+  explicit TablePureStrategyProfileRep(const Game &p_game);
   long GetIndex() const override { return m_index; }
   void SetStrategy(const GameStrategy &) override;
   GameOutcome GetOutcome() const override;

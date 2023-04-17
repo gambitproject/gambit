@@ -56,7 +56,7 @@ private:
 		       	              Gambit::Vector<int>&)           const;
 
 public:
-   TreeOfPartials(const gPoly<T> &);  
+   explicit TreeOfPartials(const gPoly<T> &);
    TreeOfPartials(const TreeOfPartials<T> &);
    ~TreeOfPartials();
 
@@ -103,8 +103,8 @@ private:
   ListOfPartialTrees<T> &operator=(const ListOfPartialTrees<T> &);
 
 public:
-   ListOfPartialTrees(const Gambit::List<gPoly<T> >&);  
-   ListOfPartialTrees(const gPolyList<T>&);  
+   explicit ListOfPartialTrees(const Gambit::List<gPoly<T> >&);
+   explicit ListOfPartialTrees(const gPolyList<T>&);
    ListOfPartialTrees(const ListOfPartialTrees<T> &);
    ~ListOfPartialTrees();
 
@@ -112,14 +112,11 @@ public:
   bool operator == (const ListOfPartialTrees&) const;
   bool operator != (const ListOfPartialTrees&) const;
 
-  inline const TreeOfPartials<T>& operator[](const int& i)        const 
-    { return PartialTreeList[i]; }
+  const TreeOfPartials<T> &operator[](int i) const { return PartialTreeList[i]; }
 
   // Information
-  inline int Length()                                             const
-    { return PartialTreeList.Length(); }
-  inline int Dmnsn()                                              const
-  { /*assert (Length() > 0);*/ return PartialTreeList[1].Dmnsn(); }
+  int Length() const { return PartialTreeList.Length(); }
+  int Dmnsn() const { return PartialTreeList.front().Dmnsn(); }
   Gambit::Matrix<T> DerivativeMatrix(const Gambit::Vector<T>&)                  const; 
   Gambit::Matrix<T> DerivativeMatrix(const Gambit::Vector<T>&, const int&)      const; 
   Gambit::SquareMatrix<T> SquareDerivativeMatrix(const Gambit::Vector<T>&)      const; 

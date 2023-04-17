@@ -85,10 +85,6 @@ template <class T> gPoly<T>::gPoly(const gPoly<T> &p)
   *this=p; 
 }
 
-template <class T> gPoly<T>::~gPoly()
-= default;
-
-
 //----------------------------------
 //        Operators
 //----------------------------------
@@ -206,7 +202,7 @@ template<class T> gPoly<T> gPoly<T>::operator*(const gPoly<T> &p) const
   return prod;
 }
 
-template<class T> gPoly<T> gPoly<T>::operator/(const T val) const
+template<class T> gPoly<T> gPoly<T>::operator/(const T &val) const
 {
   if (val == (T) 0) {
     throw Gambit::ZeroDivideException();
@@ -891,26 +887,26 @@ T gPoly<T>::MaximalValueOfNonlinearPart(const T& radius)  const
 //    Global Operators
 //---------------------------
 
-template<class T> gPoly<T> operator*(const T val, const gPoly<T> &poly)
+template<class T> gPoly<T> operator*(const T &val, const gPoly<T> &poly)
 {
   gPoly<T> prod(poly);
   prod *= val;
   return prod;
 }
 
-template<class T> gPoly<T> operator*(const gPoly<T> &poly, const T val)
+template<class T> gPoly<T> operator*(const gPoly<T> &poly, const T &val)
 {
   return val * poly;
 }
 
-template<class T> gPoly<T> operator+(const T val, const gPoly<T> &poly)
+template<class T> gPoly<T> operator+(const T &val, const gPoly<T> &poly)
 {
   gPoly<T> prod(poly);
   prod += val;
   return prod;
 }
 
-template<class T> gPoly<T> operator+(const gPoly<T> &poly, const T val)
+template<class T> gPoly<T> operator+(const gPoly<T> &poly, const T &val)
 {
   return val + poly;
 }

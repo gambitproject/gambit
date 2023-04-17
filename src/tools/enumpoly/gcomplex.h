@@ -33,47 +33,46 @@ protected:
 
 public:
 // Constructors, and the destructor
-  gComplex();
-  gComplex(const double&, const double&);
-  gComplex(const gComplex&);
-  gComplex(const int& n);
-  gComplex(const long& n);
-  
-  ~gComplex();
+  gComplex() : re(0.0), im(0.0) { }
+  gComplex(double p_re, double p_im) : re(p_re), im(p_im) { }
+  gComplex(const gComplex &) = default;
+  explicit gComplex(int n) : re(n), im(0.0) { }
+
+  ~gComplex() = default;
 
 // Operators
-  double      RealPart()                      const;
-  double      ImaginaryPart()                 const;
+  double RealPart() const { return re; }
+  double ImaginaryPart() const { return im; }
 
-  gComplex&   operator =  (const gComplex& y);
+  gComplex &operator=(const gComplex &y) = default;
 
-  bool        operator == (const gComplex& y) const;
-  bool        operator != (const gComplex& y) const;
+  bool operator==(const gComplex &y) const { return (re == y.re && im == y.im); }
+  bool operator!=(const gComplex &y) const { return (re != y.re || im != y.im); }
 
-  gComplex    operator +  (const gComplex& y) const;
-  gComplex    operator -  (const gComplex& y) const;
-  gComplex    operator *  (const gComplex& y) const;
-  gComplex    operator /  (const gComplex& y) const;
+  gComplex operator+(const gComplex &y) const { return { re + y.re, im + y.im }; }
+  gComplex operator-(const gComplex &y) const { return { re - y.re, im - y.im }; }
+  gComplex operator*(const gComplex &y) const { return { re*y.re - im*y.im,re*y.im + im*y.re }; }
+  gComplex operator/(const gComplex &y) const;
 
-  gComplex    operator -  ()                 const;
+  gComplex operator-() const { return { -re, -im }; }
 
-  void       operator += (const gComplex& y);
-  void       operator -= (const gComplex& y);
-  void       operator *= (const gComplex& y);
-  void       operator /= (const gComplex& y);
+  void operator+=(const gComplex &y) { re += y.re; im += y.im; }
+  void operator-=(const gComplex &y) { re -= y.re; im -= y.im; }
+  void operator*=(const gComplex &y) { re = re*y.re - im*y.im; im = re*y.im + im*y.re; }
+  void operator/=(const gComplex &y);
 
 // friends outside the class
   friend double    fabs(const gComplex& x);              
-  friend gComplex  sqr(const gComplex& x);              
-  friend gComplex  pow(const gComplex& x, const long y);
+  friend gComplex  pow(const gComplex& x, long y);
 };
 
-// The following are facilities that are required of all arithmetic types.
-// For other types they are given in gmisc.h
+inline double fabs(const gComplex &x)
+{
+  return sqrt(x.re*x.re + x.im*x.im);
+}
 
-class gString;
-gString         ToString(gComplex);
-gComplex        TOgComplex(const gString &);
+
+
 
 #endif  // GCOMPLEX_H
 

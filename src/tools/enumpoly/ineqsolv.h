@@ -72,7 +72,7 @@ template <class T> class IneqSolv {
 				            Gambit::Array<int>&)          const;
 
  public:
-   IneqSolv(const gPolyList<T> &);  
+   explicit IneqSolv(const gPolyList<T> &);
    IneqSolv(const IneqSolv<T> &);
    ~IneqSolv();
 

@@ -36,7 +36,7 @@ template <class T> class gNArray   {
 
   public:
     gNArray();
-    gNArray(const Gambit::Array<int> &d);
+    explicit gNArray(const Gambit::Array<int> &d);
     gNArray(const gNArray<T>& a);
     ~gNArray();
 

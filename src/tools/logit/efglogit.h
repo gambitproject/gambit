@@ -30,7 +30,7 @@ namespace Gambit  {
 
 class LogitQREMixedBehaviorProfile {
 public:
-  LogitQREMixedBehaviorProfile(const Game &p_game)
+  explicit LogitQREMixedBehaviorProfile(const Game &p_game)
     : m_profile(p_game), m_lambda(0.0)
 	{ }
 

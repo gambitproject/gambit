@@ -623,7 +623,7 @@ public:
 		return x+(i*n);
 	}
 	inline cmatrix t() const {
-		return cmatrix(*this,true);
+		return { *this, true };
 	}
 
 	inline cmatrix &operator+=(const cmatrix &ma) {

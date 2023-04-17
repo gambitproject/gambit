@@ -85,7 +85,7 @@ public:
   static AGG* makeAGG(std::istream &in);
   
   //make AGG with random payoffs
-  static AGG* makeRandomAGG(int n, std::vector<int> &actions, int S, int P, 
+  static AGG* makeRandomAGG(int n, std::vector<int> &actions, int S, int P,
 std::vector<std::vector<int> >& ASets, std::vector<std::vector<int> >& neighb,
 std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_factor=100);
 
@@ -120,17 +120,16 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
   }
 
 
-  inline int getNumPlayers() {return numPlayers;}
-  inline int getNumActions() {return totalActions;}
-  inline int getNumActions(int i){return actions[i];}  
-  inline int getMaxActions() {return maxActions;}
-  inline int firstAction(int i) {return strategyOffset[i];}
-  inline int lastAction(int i) {return strategyOffset[i+1];}
+  int getNumPlayers() const {return numPlayers;}
+  int getNumActions() const {return totalActions;}
+  int getNumActions(int i) const {return actions[i];}
+  int getMaxActions() const {return maxActions;}
+  int firstAction(int i) const {return strategyOffset[i];}
+  int lastAction(int i) const {return strategyOffset[i+1];}
 
-  inline int getNumActionNodes() {return numActionNodes;}
-  inline int getNumFunctionNodes() {return numPNodes;}
-  //inline int getNumUniqueActionSets(){return uniqueActionSets.size();}
-  inline int getNumKSymActions(){return numKSymActions;}
+  int getNumActionNodes() const {return numActionNodes;}
+  int getNumFunctionNodes() const {return numPNodes;}
+  int getNumKSymActions() const {return numKSymActions;}
   inline int getNumKSymActions(int i){return uniqueActionSets[i].size();}
   inline int getNumPlayerClasses(){return playerClasses.size();}
   inline const PlayerSet& getPlayerClass(int cls){return playerClasses.at(cls);}
@@ -302,7 +301,7 @@ private:
 
   struct inputRand {
     explicit inputRand(bool int_payoffs=false, int int_factor=100):int_payoffs(int_payoffs),int_factor(int_factor) {}
-    void operator() (aggpayoff::iterator p){
+    void operator()(aggpayoff::iterator p) const {
 #if HAVE_DRAND48
       p->second = drand48();
 #else

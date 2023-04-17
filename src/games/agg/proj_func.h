@@ -81,7 +81,7 @@ struct proj_func{
 	        exit(1);
 	      }
 	}
-	virtual ~proj_func() {}
+	virtual ~proj_func() = default;
 	inline bool operator==(const proj_func &v) const {
 	  return Type==v.Type && Default==v.Default && weights==v.weights;
 	}
@@ -100,17 +100,17 @@ struct proj_func{
 
 struct proj_func_SUM: public proj_func {
     proj_func_SUM():proj_func(P_SUM,0) {}
-    inline int operator() (int x,int y){return x+y;}
-    inline int operator()(std::multiset<int>& s){return s.size();}
-    void print (std::ostream& out){ out<<P_SUM<<std::endl;}
+    int operator() (int x, int y) override { return x+y; }
+    int operator()(std::multiset<int> &s) override {return s.size(); }
+    void print(std::ostream &out) override { out<<P_SUM<<std::endl; }
 };
 
 struct proj_func_SUM2: public proj_func{
     proj_func_SUM2(std::istream& in, int S):proj_func(P_SUM2,in,S){ }
-    inline int operator()(int x, int y){return x+y;}
-    inline int operator()(std::multiset<int>& s){
+    int operator()(int x, int y) override { return x+y; }
+    int operator()(std::multiset<int> &s) override {
       int res=Default;
-      for(std::multiset<int>::iterator it=s.begin();it!=s.end();it++){
+      for (auto it=s.begin();it!=s.end();it++){
         res+=weights.at(*it);
       }
       return res;
@@ -118,9 +118,9 @@ struct proj_func_SUM2: public proj_func{
 };
 struct proj_func_EXIST: public proj_func{
     proj_func_EXIST() :proj_func(P_EXIST,0) {}
-    inline int operator() (int x, int y) {return (x+y>0);}
-    inline int operator() (std::multiset<int>& s){ return (s.size()>0);}
-    void print(std::ostream& out){out<<P_EXIST<<std::endl;}
+    int operator() (int x, int y) override {return (x+y>0);}
+    int operator() (std::multiset<int>& s) override { return !s.empty(); }
+    void print(std::ostream& out) override {out<<P_EXIST<<std::endl;}
 };
 struct proj_func_EXIST2: public proj_func{
     proj_func_EXIST2(std::istream& in, int S):proj_func(P_EXIST2,in,S){
@@ -135,8 +135,8 @@ struct proj_func_EXIST2: public proj_func{
         }
       }
     }
-    inline int operator()(int x, int y){return (x+y>0);}
-    inline int operator()(std::multiset<int>& s){
+    int operator()(int x, int y) override {return (x+y>0);}
+    int operator()(std::multiset<int>& s) override {
       int res=Default;
       for(std::multiset<int>::iterator it=s.begin();it!=s.end();it++){
         res+=weights.at(*it);

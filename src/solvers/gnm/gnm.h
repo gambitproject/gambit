@@ -31,7 +31,7 @@ namespace Nash {
 
 class NashGNMStrategySolver : public StrategySolver<double> {
 public:
-  NashGNMStrategySolver(std::shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = nullptr,
+  explicit NashGNMStrategySolver(std::shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = nullptr,
 			bool p_verbose=false)
     : StrategySolver<double>(p_onEquilibrium),
       m_verbose(p_verbose)

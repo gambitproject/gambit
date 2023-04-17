@@ -205,7 +205,7 @@ template <class T> PVector<T> PVector<T>::operator*(const T &c) const
   return ret;
 }
 
-template <class T> PVector<T>& PVector<T>::operator*=(const T c)
+template <class T> PVector<T>& PVector<T>::operator*=(const T &c)
 {
   Vector<T>::operator*=(c);
   return (*this);

@@ -32,7 +32,7 @@
 // LM_LeastSquareProgressHandler_
 //----------------------------------------------------------------------------
 
-static LM_LeastSquareProgressHandler_ s_lm_leastsquarehandler = (LM_LeastSquareProgressHandler_)NULL;
+static LM_LeastSquareProgressHandler_ s_lm_leastsquarehandler = nullptr;
 
 void SetLM_LeastSquareProgressHandler( LM_LeastSquareProgressHandler_ handler )
 {
@@ -125,8 +125,8 @@ void LM_LeastSquare::ReInit()
 void LM_LeastSquare::Destroy()
 {
     wxCHECK_RET(!IsFitting(), wxT("Cannot Destroy Least Square when currently fitting"));
-    if (m_plotData) delete m_plotData;
-    if (m_plotFunc) delete m_plotFunc;
+    delete m_plotData;
+    delete m_plotFunc;
 
     if (m_vars) free(m_vars);
     if (m_x)    free(m_x);

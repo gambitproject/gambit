@@ -72,7 +72,7 @@ template <class T> class PVector : public Vector<T> {
   PVector<T>& operator-=(const PVector<T> &v);
   T operator*(const PVector<T> &v) const;
   PVector<T> operator*(const T &c) const;
-  PVector<T>& operator*=(const T c);
+  PVector<T>& operator*=(const T &c);
   PVector<T> operator/(T c);
 
   bool operator==(const PVector<T> &v) const;

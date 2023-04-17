@@ -111,7 +111,7 @@ public:
   // Constructs a gPoly with single monomial
   gPoly(const gSpace *p, const gMono<T>&, const term_order *);
 
-  ~gPoly();
+  ~gPoly() = default;
 
   //----------
   //Operators:
@@ -129,7 +129,7 @@ public:
   gPoly<T>  operator *  (const gPoly<T> &) const;
   void      operator *= (const gPoly<T> &);
   void      operator *= (const T&);
-  gPoly<T>  operator /  (const T val)       const;// division by a constant
+  gPoly<T>  operator /  (const T &val)       const;// division by a constant
   gPoly<T>  operator /  (const gPoly<T> &) const;// division by a polynomial
 
   bool      operator == (const gPoly<T> &p)      const;
@@ -199,12 +199,12 @@ template <class T> gPoly<double> TogDouble(const gPoly<T>&);
 template <class T> gPoly<double> NormalizationOfPoly(const gPoly<T>&);
 
 // global multiply by scalar operators
-template <class T> gPoly<T> operator*(const T val, const gPoly<T> &poly);
-template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T val);
+template <class T> gPoly<T> operator*(const T &val, const gPoly<T> &poly);
+template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T &val);
 
 // global add to scalar operators
-template <class T> gPoly<T> operator+(const T val, const gPoly<T> &poly);
-template <class T> gPoly<T> operator+(const gPoly<T> &poly, const T val);
+template <class T> gPoly<T> operator+(const T &val, const gPoly<T> &poly);
+template <class T> gPoly<T> operator+(const gPoly<T> &poly, const T &val);
 
 template <class T> std::string ToText(const gPoly<T> &p);
 

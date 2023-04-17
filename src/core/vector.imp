@@ -28,19 +28,6 @@ namespace Gambit {
 //     Vector<T>: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
-template <class T> Vector<T>::Vector(unsigned int len) : Array<T>(len) 
-{ }
-
-template <class T> Vector<T>::Vector(int low, int high) 
-  : Array<T>(low, high)
-{ }
-
-template <class T> Vector<T>::Vector(const Vector<T> &V) 
-  : Array<T>(V) 
-{ }
-
-template <class T> Vector<T>::~Vector()   = default;
-
 template <class T> Vector<T>& Vector<T>::operator=(const Vector<T>& V)
 {
   if (!Check(V))   throw DimensionException();
@@ -52,9 +39,6 @@ template <class T> Vector<T>& Vector<T>::operator=(const Vector<T>& V)
 //------------------------------------------------------------------------
 // inline arithmetic operators
 //------------------------------------------------------------------------
-
-template <class T> bool Vector<T>::operator!=(const Vector<T> &V) const
-{ return !(*this == V); }
 
 template <class T> bool Vector<T>::operator!=(T c) const
 { return !(*this == c); }
@@ -164,16 +148,6 @@ template <class T> Vector<T> Vector<T>::operator/(T c) const
   return tmp;
 }
 
-
-template <class T> bool Vector<T>::operator==(const Vector<T>& V) const
-{
-  if (!Check(V))   throw DimensionException();
-
-  for(int i=this->mindex; i<=this->maxdex; i++)
-    if( (*this)[i] != V[i] )
-      return false;
-  return true;
-}
 
 template <class T> bool Vector<T>::operator==(T c) const
 {

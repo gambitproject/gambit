@@ -155,9 +155,9 @@ public:
   public:
     /// @name Lifecycle
     //@{
-    iterator(const StrategySupportProfile &S, int p_pl = 1, int p_st = 1) : 
+    explicit iterator(const StrategySupportProfile &S, int p_pl = 1, int p_st = 1) :
       support(S), pl(p_pl), strat(p_st) { }
-    ~iterator() { }
+    ~iterator() = default;
     //@}
 
     /// @name Operator overloading

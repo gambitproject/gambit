@@ -32,13 +32,13 @@ template <class T> class Vector : public Array<T>   {
   friend class Matrix<T>;
 public:
   /** Create a vector of length len, starting at 1 */
-  explicit Vector(unsigned int len = 0);
+  explicit Vector(unsigned int len = 0) : Array<T>(len) { }
   /** Create a vector indexed from low to high */
-  Vector(int low, int high);
+  Vector(int low, int high) : Array<T>(low, high) { }
   /** Copy constructor */
-  Vector(const Vector<T>& V);
+  Vector(const Vector<T> &) = default;
   /** Destructor */
-  ~Vector() override;
+  ~Vector() override = default;
   
   /** Assignment operator: requires vectors to be of same length */
   Vector<T>& operator=(const Vector<T>& V);
@@ -58,8 +58,8 @@ public:
   
   Vector<T> operator/(T c) const;
   
-  bool operator==(const Vector<T>& V) const;
-  bool operator!=(const Vector<T>& V) const;
+  bool operator==(const Vector<T> &V) const { return *this == V; }
+  bool operator!=(const Vector<T>& V) const { return *this != V; }
   
   /** Tests if all components of the vector are equal to a constant c */
   bool operator==(T c) const;

@@ -114,9 +114,7 @@ public:
 
   AggNumber getSymMixedPayoff(int tp, int act, StrategyProfile &s);
 
-  bool isSymmetric(){
-    return symmetric;
-  }
+  bool isSymmetric() const { return symmetric; }
 
 private:
 

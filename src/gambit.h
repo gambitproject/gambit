@@ -54,15 +54,15 @@ inline double abs(double x) { return std::fabs(x); }
 class Exception : public std::runtime_error {
 public:
   Exception() : std::runtime_error("") { }
-  Exception(const std::string &s) : std::runtime_error(s) { }
-  virtual ~Exception() noexcept = default;
+  explicit Exception(const std::string &s) : std::runtime_error(s) { }
+  ~Exception() noexcept override = default;
 };
 
 /// Exception thrown on out-of-range index
 class IndexException : public Exception {
 public:
   IndexException() : Exception("Index out of range") { }
-  IndexException(const std::string &s) : Exception(s) { }
+  explicit IndexException(const std::string &s) : Exception(s) { }
   ~IndexException() noexcept override = default;
 };
 
@@ -70,7 +70,7 @@ public:
 class RangeException : public Exception {
 public:
   RangeException() : Exception("Invalid index range") { }
-  RangeException(const std::string &s) : Exception(s) { }
+  explicit RangeException(const std::string &s) : Exception(s) { }
   ~RangeException() noexcept override = default;
 };
 
@@ -78,7 +78,7 @@ public:
 class DimensionException : public Exception {
 public:
   DimensionException() : Exception("Mismatched dimensions") { }
-  DimensionException(const std::string &s) : Exception(s) { }
+  explicit DimensionException(const std::string &s) : Exception(s) { }
   ~DimensionException() noexcept override = default;
 };
 
@@ -86,7 +86,7 @@ public:
 class ValueException : public Exception {
 public:
   ValueException() : Exception("Invalid value") { }
-  ValueException(const std::string &s) : Exception(s) { }
+  explicit ValueException(const std::string &s) : Exception(s) { }
   ~ValueException() noexcept override = default;
 };
 
@@ -94,7 +94,7 @@ public:
 class AssertionException : public Exception {
 public:
   AssertionException() : Exception("Failed assertion") { }
-  AssertionException(const std::string &s) : Exception(s) { }
+  explicit AssertionException(const std::string &s) : Exception(s) { }
   ~AssertionException() noexcept override = default;
 };
 
@@ -102,7 +102,7 @@ public:
 class ZeroDivideException : public Exception {
 public:
   ZeroDivideException() : Exception("Attempted division by zero") { }
-  ZeroDivideException(const std::string &s) : Exception(s) { }
+  explicit ZeroDivideException(const std::string &s) : Exception(s) { }
   ~ZeroDivideException() noexcept override = default;
 };
 
@@ -110,7 +110,7 @@ public:
 class NullException : public Exception {
 public:
   NullException() : Exception("Dereferenced null pointer") { }
-  NullException(const std::string &s) : Exception(s) { }
+  explicit NullException(const std::string &s) : Exception(s) { }
   ~NullException() noexcept override = default;
 };
 
