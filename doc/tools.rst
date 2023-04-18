@@ -611,6 +611,12 @@ not guaranteed to find all, or even any, Nash equilibria.
 
    Specify the number of starting points to randomly generate.
 
+.. cmdoption:: -i
+
+   .. versionadded:: 16.1.0
+
+   Specify the maximum number of iterations in function minimization (default is 100).
+
 .. cmdoption:: -h
 
    Prints a help message listing the available options.

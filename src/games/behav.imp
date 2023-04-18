@@ -305,7 +305,16 @@ template<> void MixedBehaviorProfile<double>::Randomize()
       }
     }
   }
-  Normalize();
+  MixedBehaviorProfile<double> norm(Normalize());
+  for (int pl = 1; pl <= game->NumPlayers(); pl++) {
+    GamePlayer player = game->Players()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+        (*this)(pl, iset, act) = norm(pl, iset, act);
+      }
+    }
+  }
 }
 
 template<> void MixedBehaviorProfile<Rational>::Randomize()

@@ -22,7 +22,7 @@
 
 #include "gambit.h"
 #include "core/function.h"
-#include "efgliap.h"
+#include "liap.h"
 
 using namespace Gambit;
 
@@ -53,7 +53,7 @@ double AgentLyapunovFunction::Value(const Vector<double> &x) const
 }
 
 bool AgentLyapunovFunction::Gradient(const Vector<double> &x,
-				     Vector<double> &grad) const
+                                     Vector<double> &grad) const
 {
   const double DELTA = .00001;
   static_cast<Vector<double> &>(m_profile).operator=(x);
@@ -70,11 +70,11 @@ bool AgentLyapunovFunction::Gradient(const Vector<double> &x,
 }
 
 //------------------------------------------------------------------------
-//                     class NashLiapBehavSolver
+//                    class NashLiapBehaviorSolver
 //------------------------------------------------------------------------
 
 List<MixedBehaviorProfile<double> >
-NashLiapBehavSolver::Solve(const MixedBehaviorProfile<double> &p_start) const
+NashLiapBehaviorSolver::Solve(const MixedBehaviorProfile<double> &p_start) const
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
     throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");

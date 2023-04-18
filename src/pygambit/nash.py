@@ -227,13 +227,13 @@ class ExternalLyapunovSolver(ExternalSolver):
     for computing equilibria in N-player games using Lyapunov function
     minimization.
     """
-    def solve(self, game, use_strategic=False):
+    def solve(self, game, use_strategic=False, maxiter=100):
         if not game.is_perfect_recall:
             raise RuntimeError(
                 "Computing equilibria of games with imperfect recall "
                 "is not supported."
             )
-        command_line = "gambit-liap -d 10"
+        command_line = f"gambit-liap -d 10 -i {maxiter}"
         if use_strategic and game.is_tree:
             command_line += " -S"
         return self._parse_output(self._call(command_line, game),
@@ -356,6 +356,18 @@ def lp_solve(game, rational=True, use_strategic=False, external=False):
             alg = pygambit.lib.libgambit.LPBehaviorSolverRational()
         else:
             alg = pygambit.lib.libgambit.LPBehaviorSolverDouble()
+    return alg.solve(game)
+
+
+def liap_solve(game, use_strategic=True, maxiter=100, external=False):
+    """Compute Nash equilibria of a game by minimizing the Lyapunov function.
+    """
+    if external:
+        return ExternalLyapunovSolver().solve(game, use_strategic=True)
+    if not game.is_tree or use_strategic:
+        alg = pygambit.lib.libgambit.LiapStrategySolver(maxiter=maxiter)
+    else:
+        alg = pygambit.lib.libgambit.LiapBehaviorSolver(maxiter=maxiter)
     return alg.solve(game)
 
 

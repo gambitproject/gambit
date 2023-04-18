@@ -327,11 +327,62 @@ cdef class LPStrategySolverRational:
         return ret
 
 
+cdef extern from "solvers/liap/liap.h":
+    cdef cppclass c_NashLiapStrategySolver "NashLiapStrategySolver":
+        c_NashLiapStrategySolver(int)
+        c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
+
+    cdef cppclass c_NashLiapBehaviorSolver "NashLiapBehaviorSolver":
+        c_NashLiapBehaviorSolver(int)
+        c_List[c_MixedBehaviorProfileDouble] Solve(c_BehaviorSupportProfile) except +RuntimeError
+
+
+cdef class LiapStrategySolver:
+    cdef c_NashLiapStrategySolver *alg
+
+    def __cinit__(self, maxiter=100):
+        self.alg = new c_NashLiapStrategySolver(maxiter)
+    def __dealloc__(self):
+        del self.alg
+    def solve(self, Game game):
+        cdef c_List[c_MixedStrategyProfileDouble] solns
+        cdef MixedStrategyProfileDouble p
+        solns = self.alg.Solve(game.game)
+        ret = [ ]
+        for i in xrange(solns.Length()):
+            p = MixedStrategyProfileDouble()
+            p.profile = copyitem_list_mspd(solns, i+1)
+            ret.append(p)
+        return ret
+
+
+cdef class LiapBehaviorSolver:
+    cdef c_NashLiapBehaviorSolver *alg
+
+    def __cinit__(self, maxiter=100):
+        self.alg = new c_NashLiapBehaviorSolver(maxiter)
+    def __dealloc__(self):
+        del self.alg
+    def solve(self, Game game):
+        cdef c_List[c_MixedBehaviorProfileDouble] solns
+        cdef MixedBehaviorProfileDouble p
+        cdef shared_ptr[c_BehaviorSupportProfile] profile
+        profile = make_shared[c_BehaviorSupportProfile](game.game)
+        solns = self.alg.Solve(deref(profile))
+        ret = [ ]
+        for i in xrange(solns.Length()):
+            p = MixedBehaviorProfileDouble()
+            p.profile = copyitem_list_mbpd(solns, i+1)
+            ret.append(p)
+        return ret
+
+
 cdef extern from "solvers/simpdiv/simpdiv.h":
     cdef cppclass c_NashSimpdivStrategySolver "NashSimpdivStrategySolver":
         c_NashSimpdivStrategySolver()
         c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
         c_List[c_MixedStrategyProfileRational] Solve(c_MixedStrategyProfileRational) except +RuntimeError
+
 
 cdef class SimpdivStrategySolver:
     cdef c_NashSimpdivStrategySolver *alg

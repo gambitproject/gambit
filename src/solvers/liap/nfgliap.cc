@@ -22,7 +22,7 @@
 
 #include "gambit.h"
 #include "core/function.h"
-#include "nfgliap.h"
+#include "liap.h"
 
 using namespace Gambit;
 

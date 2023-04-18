@@ -25,8 +25,7 @@
 #include <cstdlib>
 #include <getopt.h>
 #include "gambit.h"
-#include "efgliap.h"
-#include "nfgliap.h"
+#include "solvers/liap/liap.h"
 
 using namespace Gambit;
 
@@ -48,6 +47,7 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      print probabilities with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -n COUNT         number of starting points to generate\n";
+  std::cerr << "  -i MAXITER       maximum number of iterations per point (default is 100)\n";
   std::cerr << "  -s FILE          file containing starting points\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
@@ -146,41 +146,45 @@ int main(int argc, char *argv[])
     { nullptr,    0,    nullptr,    0   }
   };
   int c;
-  while ((c = getopt_long(argc, argv, "d:n:s:hqVvS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:n:i:s:hqVvS", long_options, &long_opt_index)) != -1) {
     switch (c) {
-    case 'v':
-      PrintBanner(std::cerr); exit(1);
-    case 'd':
-      numDecimals = atoi(optarg);
-      break;
-    case 'n':
-      numTries = atoi(optarg);
-      break;
-    case 's':
-      startFile = optarg;
-      break;
-    case 'h':
-      PrintHelp(argv[0]);
-      break;
-    case 'S':
-      useStrategic = true;
-      break;
-    case 'q':
-      quiet = true;
-      break;
-    case 'V':
-      verbose = true;
-      break;
-    case '?':
-      if (isprint(optopt)) {
-	std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
-      }
-      else {
-	std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
-      }
-      return 1;
-    default:
-      abort();
+      case 'v':
+        PrintBanner(std::cerr);
+        exit(1);
+      case 'd':
+        numDecimals = atoi(optarg);
+        break;
+      case 'n':
+        numTries = atoi(optarg);
+        break;
+      case 'i':
+        maxitsN = atoi(optarg);
+        break;
+      case 's':
+        startFile = optarg;
+        break;
+      case 'h':
+        PrintHelp(argv[0]);
+        break;
+      case 'S':
+        useStrategic = true;
+        break;
+      case 'q':
+        quiet = true;
+        break;
+      case 'V':
+        verbose = true;
+        break;
+      case '?':
+        if (isprint(optopt)) {
+          std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
+        }
+        else {
+          std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
+        }
+        return 1;
+      default:
+        abort();
     }
   }
 
@@ -237,7 +241,7 @@ int main(int argc, char *argv[])
 	std::shared_ptr<StrategyProfileRenderer<double> > renderer(
       new BehavStrategyCSVRenderer<double>(std::cout, numDecimals)
     );
-	NashLiapBehavSolver algorithm(maxitsN, verbose, renderer);
+	NashLiapBehaviorSolver algorithm(maxitsN, verbose, renderer);
 	algorithm.Solve(starts[i]);
       }
     }

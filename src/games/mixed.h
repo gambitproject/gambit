@@ -39,7 +39,7 @@ public:
   virtual MixedStrategyProfileRep<T> *Copy() const = 0;
 
   void SetCentroid();
-  MixedStrategyProfile<T> Normalize() const;
+  MixedStrategyProfileRep<T> *Normalize() const;
   void Randomize();
   void Randomize(int p_denom);
  /// Returns the probability the strategy is played
@@ -210,7 +210,7 @@ public:
   /// Create a new mixed strategy profile where strategies are played
   /// in the same proportions, but with probabilities for each player
   /// summing to one.
-  MixedStrategyProfile<T> Normalize() const { return m_rep->Normalize(); }
+  MixedStrategyProfile<T> Normalize() const { return MixedStrategyProfile<T>(m_rep->Normalize()); }
 
   /// Generate a random mixed strategy profile according to the uniform distribution
   void Randomize() { m_rep->Randomize(); }

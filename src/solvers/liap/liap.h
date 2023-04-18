@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2022, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/liap/nfgliap.h
-// Compute Nash equilibria by minimizing Liapunov function on strategic game
+// FILE: src/tools/liap/efgliap.h
+// Compute Nash equilibria by minimizing Liapunov function on extensive game
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,15 +20,32 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef NFGLIAP_H
-#define NFGLIAP_H
-
-#include <utility>
+#ifndef GAMBIT_NASH_LIAP_H
+#define GAMBIT_NASH_LIAP_H
 
 #include "games/nash.h"
 
 using namespace Gambit;
 using namespace Gambit::Nash;
+
+class NashLiapBehaviorSolver : public BehavSolver<double> {
+public:
+  explicit NashLiapBehaviorSolver(int p_maxitsN, bool p_verbose = false,
+                                  std::shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = nullptr)
+    : BehavSolver<double>(p_onEquilibrium),
+      m_maxitsN(p_maxitsN), m_verbose(p_verbose)
+  { }
+  ~NashLiapBehaviorSolver() override = default;
+
+  List<MixedBehaviorProfile<double> > Solve(const MixedBehaviorProfile<double> &p_start) const;
+  List<MixedBehaviorProfile<double> > Solve(const BehaviorSupportProfile &p_support) const override
+    { return Solve(MixedBehaviorProfile<double>(p_support)); }
+
+private:
+  int m_maxitsN;
+  bool m_verbose;
+};
+
 
 class NashLiapStrategySolver : public StrategySolver<double> {
 public:
@@ -41,11 +58,12 @@ public:
 
   List<MixedStrategyProfile<double> > Solve(const MixedStrategyProfile<double> &p_start) const;
   List<MixedStrategyProfile<double> > Solve(const Game &p_game) const override
-    { return Solve(p_game->NewMixedStrategyProfile(0.0)); }
+  { return Solve(p_game->NewMixedStrategyProfile(0.0)); }
 
 private:
   int m_maxitsN;
   bool m_verbose;
 };
 
-#endif  // NFGLIAP_H
+
+#endif  // GAMBIT_NASH_LIAP_H

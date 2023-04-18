@@ -601,10 +601,9 @@ gambit_lcp_SOURCES = \
 
 gambit_liap_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
-	src/tools/liap/efgliap.cc \
-	src/tools/liap/efgliap.h \
-	src/tools/liap/nfgliap.cc \
-	src/tools/liap/nfgliap.h \
+	src/solvers/liap/efgliap.cc \
+	src/solvers/liap/nfgliap.cc \
+	src/solvers/liap/liap.h \
 	src/tools/liap/liap.cc
 
 gambit_logit_SOURCES = \

@@ -1363,6 +1363,14 @@ Computation of Nash equilibria
    :param int max_depth: Maximum recursion depth (default is no limit)
    :raises RuntimeError: if game has more than two players.
 
+.. py:function:: liap_solve(game, use_strategic=True, maxiter=100, external=False)
+
+   Compute Nash equilibria of a game using :ref:`Lyapunov function minimization <gambit-liap>`.
+
+   :param bool use_strategic: Use the strategic form.
+   :param int maxiter: Maximum number of iterations in function minimization.
+   :param bool external: Call the external command-line solver instead
+                of the internally-linked implementation
 
 .. py:function:: lp_solve(game, rational=True, use_strategic=False, external=False)
 
