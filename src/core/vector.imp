@@ -63,6 +63,18 @@ template<class T> Vector<T>& Vector<T>::operator=(T c)
   return (*this);
 }
 
+template <class T> bool Vector<T>::operator==(const Vector<T> &V) const
+{
+  if (!Check(V))   throw DimensionException();
+
+  for (int i = this->mindex; i <= this->maxdex; i++) {
+    if ((*this)[i] != V[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 // arithmetic operators
 template <class T> Vector<T>
 Vector<T>::operator+(const Vector<T>& V) const

@@ -58,8 +58,8 @@ public:
   
   Vector<T> operator/(T c) const;
   
-  bool operator==(const Vector<T> &V) const { return *this == V; }
-  bool operator!=(const Vector<T>& V) const { return *this != V; }
+  bool operator==(const Vector<T> &V) const;
+  bool operator!=(const Vector<T> &V) const { return !(*this == V); }
   
   /** Tests if all components of the vector are equal to a constant c */
   bool operator==(T c) const;
