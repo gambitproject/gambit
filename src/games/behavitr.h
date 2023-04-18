@@ -68,8 +68,6 @@ public:
   bool AtEnd() const { return m_atEnd; }
   /// Get the current behavior profile
   const PureBehaviorProfile &operator*() const { return m_profile; }
-  /// Get the current behavior profile
-  const PureBehaviorProfile *const operator->() const { return &m_profile; }
   //@}
 };
 

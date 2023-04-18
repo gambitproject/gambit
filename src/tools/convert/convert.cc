@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  if (format == "") {
+  if (format.empty()) {
     std::cerr << argv[0] << ": Output format argument -O required.\n";
     return 1;
   }

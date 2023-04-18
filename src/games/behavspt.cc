@@ -412,8 +412,8 @@ bool BehaviorSupportProfile::Dominates(const GameAction &a, const GameAction &b,
 
   if (!p_conditional) {
     for (BehaviorProfileIterator iter(*this, a); !iter.AtEnd(); iter++) {
-      Rational ap = iter->GetPayoff<Rational>(a);
-      Rational bp = iter->GetPayoff<Rational>(b);
+      Rational ap = (*iter).GetPayoff<Rational>(a);
+      Rational bp = (*iter).GetPayoff<Rational>(b);
 
       if (p_strict) {
 	if (ap <= bp) {
