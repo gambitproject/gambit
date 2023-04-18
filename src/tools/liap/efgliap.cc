@@ -111,13 +111,15 @@ NashLiapBehavSolver::Solve(const MixedBehaviorProfile<double> &p_start) const
     }
     
     if (sqrt(gradient.NormSquared()) < .001) {
-      this->m_onEquilibrium->Render(p, "NE");
-      solutions.push_back(p);
       break;
     }
   }
 
-  if (m_verbose && sqrt(gradient.NormSquared()) >= .001) {
+  if (fval < .00001) {
+    this->m_onEquilibrium->Render(p, "NE");
+    solutions.push_back(p);
+  }
+  else if (m_verbose) {
     this->m_onEquilibrium->Render(p, "end");
   }
 

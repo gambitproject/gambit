@@ -53,23 +53,23 @@ StrategicLyapunovFunction::LiapDerivValue(int i1, int j1,
 {
   GameStrategy wrt_strategy = m_game->Players()[i1]->Strategies()[j1];
   double x = 0.0;
-  for (int i = 1; i <= m_game->NumPlayers(); i++)  {
+  for (int i = 1; i <= m_game->NumPlayers(); i++) {
     double psum = 0.0;
     GamePlayer player = m_game->Players()[i];
-    for (int j = 1; j <= player->NumStrategies(); j++)  {
+    for (int j = 1; j <= player->NumStrategies(); j++) {
       GameStrategy strategy = player->Strategies()[j];
       psum += p[strategy];
       double x1 = p.GetPayoff(strategy) - p.GetPayoff(i);
       if (i1 == i) {
-	if (x1 > 0.0)
-	  x -= x1 * p.GetPayoffDeriv(i, wrt_strategy);
+        if (x1 > 0.0)
+          x -= x1 * p.GetPayoffDeriv(i, wrt_strategy);
       }
       else if (x1 > 0.0) {
-	x += x1 * (p.GetPayoffDeriv(i, strategy, wrt_strategy) - 
-		   p.GetPayoffDeriv(i, wrt_strategy));
+        x += x1 * (p.GetPayoffDeriv(i, strategy, wrt_strategy) -
+                   p.GetPayoffDeriv(i, wrt_strategy));
       }
     }
-    if (i == i1)  {
+    if (i == i1) {
       x += 100.0 * (psum - 1.0);
     }
   }
@@ -140,13 +140,15 @@ NashLiapStrategySolver::Solve(const MixedStrategyProfile<double> &p_start) const
     }
 
     if (sqrt(gradient.NormSquared()) < .001) {
-      this->m_onEquilibrium->Render(p, "NE");
-      solutions.push_back(p);
       break;
     }
   }
 
-  if (m_verbose && sqrt(gradient.NormSquared()) >= .001) {
+  if (fval < 0.0001) {
+    this->m_onEquilibrium->Render(p, "NE");
+    solutions.push_back(p);
+  }
+  else if (m_verbose) {
     this->m_onEquilibrium->Render(p, "end");
   }
 
