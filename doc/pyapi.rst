@@ -1,6 +1,6 @@
 .. _python-api:
 
-.. py:module:: pygambit
+.. py:module:: pygambit-manual
 
 
 Python interface to Gambit library
@@ -450,88 +450,6 @@ Game representations
 
    An object representing a game, in extensive or strategic form.
 
-   .. py:classmethod:: new_tree(title=None)
-
-      Creates a new :py:class:`Game`
-      consisting of a trivial game tree, with one
-      node, which is both root and terminal, and no players.
-
-      :param title: The title of the game.  If no title is specified,
-		    "Untitled extensive game" is used.
-      :type title: str
-
-      .. versionadded:: 16.1.0
-	 Added the *title* parameter
-
-   .. py:classmethod:: new_table(dim, title=None)
- 
-      Creates a new :py:class:`Game` with a strategic
-      representation. 
-
-      :param dim: A list specifying the number of strategies for each player.
-      :param title: The title of the game.  If no title is specified,
-		    "Untitled strategic game" is used.
-      :type title: str
-
-      .. versionadded:: 16.1.0
-	 Added the *title* parameter
-
-   .. py:classmethod:: from_arrays(*arrays, title=None)
-
-      Creates a new :py:class:`Game` with a strategic representation.
-      Each entry in *arrays* gives the payoff matrix for the
-      corresponding player.  The arrays must all have the same shape,
-      and have the same number of dimensions as the total number of
-      players.
-      
-      :param title: The title of the game.  If no title is specified,
-		    "Untitled strategic game" is used.
-      :type title: str
-
-      .. versionadded:: 16.1.0
-	 Added the *title* parameter
-
-   .. py:classmethod:: from_dict(payoffs, title=None)
-
-      .. versionadded:: 16.1.0
-
-      Creates a new :py:class:`Game` with a strategic representation.
-      Each entry in the dict-like object *payoffs* is a pair
-      giving the label and the payoff matrix for a player.
-      The payoff matrices must all have the same shape,
-      and have the same number of dimensions as the total number of
-      players.
-
-   .. py:classmethod:: read_game(fn)
-
-      Constructs a game from its serialized representation in a file.
-      See :ref:`file-formats` for details on recognized formats.
-
-      :param file fn: The path to the file to open
-      :raises IOError: if the file cannot be opened, or does not contain
-	   	       a valid game representation
-
-   .. py:classmethod:: parse_game(s)
-
-      Constructs a game from its seralized representation in a string.	
-      See :ref:`file-formats` for details on recognized formats.
-
-      :param str s: The string containing the serialized representation
-      :raises IOError: if the string does not contain a valid game
-		       representation
-
-   .. py:attribute:: is_tree
-
-      Returns ``True`` if the game has a tree representation.
-
-   .. py:attribute:: title
-
-      Accesses the text string of the game's title.
-
-   .. py:attribute:: comment
-
-      Accesses the text string of the game's comment.
-
    .. py:attribute:: actions
 
       Returns a list-like object representing the actions defined in the game.
@@ -557,21 +475,6 @@ Game representations
 
       Returns a collection object representing the collection of all
       possible pure strategy profiles in the game.
-
-   .. py:attribute:: root
-
-      Returns the :py:class:`Node` representing the root
-      node of the game.
-
-      :raises: :py:class:`UndefinedOperationError` if the game does not have a tree representation.
-
-   .. py:attribute:: is_const_sum
-
-      Returns ``True`` if the game is constant sum.
-
-   .. py:attribute:: is_perfect_recall
-
-      Returns ``True`` if the game is of perfect recall.
 
    .. py:attribute:: min_payoff
 
@@ -762,14 +665,6 @@ about a plan of play of a game, by one or more players.
 
       Sets the probability ``strategy`` is played in the profile to ``prob``. 
 
-   .. py:method:: as_behavior()
-
-      Returns a behavior strategy profile :py:class:`BehavProfile` associated
-      to the profile.
-
-      :raises pygambit.UndefinedOperationError: if the game does not
-                                              have a tree representation.
-         
    .. py:method:: copy()
 
       Creates a copy of the mixed strategy profile.
@@ -1212,11 +1107,6 @@ of game.
       :raises pygambit.UndefinedOperationError: when called with a :py:class:`Infoset` object and with actions.
       :raises pygambit.MismatchError: when called with objects from different games.
 
-   .. py:method:: leave_infoset()
-
-      Removes this node from its information set. If this node is the last
-      of its information set, this method does nothing.
-
    .. py:method:: delete_parent()
 
       Deletes the parent node and its subtrees other than the one 
@@ -1313,102 +1203,6 @@ Representation of errors and exceptions
    operation which is not well-defined is attempted.
 
 
-Computation of Nash equilibria
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. py:module:: pygambit.nash
-
-.. py:function:: enumpure_solve(game, use_strategic=True, external=False)
-
-   Compute :ref:`pure-strategy Nash equilibria <gambit-enumpure>` of a
-   game.
-
-   :param bool use_strategic: Use the strategic form.  If
-			      :literal:`False`, computes agent-form
-     		              pure-strategy equilibria, which treat
-			      only unilateral deviations at an
-			      individual information set
-   :param bool external: Call the external command-line solver instead
-			 of the internally-linked implementation
-
-
-.. py:function:: enummixed_solve(game, rational=True, external=False, use_lrs=False)
-
-   Compute all :ref:`mixed-strategy Nash equilibria
-   <gambit-enummixed>` of a two-player strategic game.
-
-   :param bool rational: Compute using rational precision (more
-			 precise, often much slower)
-   :param bool external: Call the external command-line solver instead
-			 of the internally-linked implementation
-   :param bool use_lrs: Use the lrslib-based implementation.  This is
-		   experimental but preliminary results suggest it is
-		   significantly faster.			
-   :raises RuntimeError: if game has more than two players.
-      
-.. py:function:: lcp_solve(game, rational=True, use_strategic=False, external=False, stop_after=None, max_depth=None)
-
-   Compute Nash equilibria of a two-player game using :ref:`linear
-   complementarity programming <gambit-lcp>`.
-
-   :param bool rational: Compute using rational precision (more
-			 precise, often much slower)
-   :param bool use_strategic: Use the strategic form version even for
-			      extensive games
-   :param bool external: Call the external command-line solver instead
-			 of the internally-linked implementation
-   :param int stop_after: Number of equilibria to contribute (default
-			  is to compute until all reachable equilbria
-			  are found)
-   :param int max_depth: Maximum recursion depth (default is no limit)
-   :raises RuntimeError: if game has more than two players.
-
-.. py:function:: liap_solve(game, use_strategic=True, maxiter=100, external=False)
-
-   Compute Nash equilibria of a game using :ref:`Lyapunov function minimization <gambit-liap>`.
-
-   :param bool use_strategic: Use the strategic form.
-   :param int maxiter: Maximum number of iterations in function minimization.
-   :param bool external: Call the external command-line solver instead
-                of the internally-linked implementation
-
-.. py:function:: lp_solve(game, rational=True, use_strategic=False, external=False)
-
-   Compute Nash equilibria of a two-player constant-sum game using :ref:`linear
-   programming <gambit-lp>`.
-
-   :param bool rational: Compute using rational precision (more
-			 precise, often much slower)
-   :param bool use_strategic: Use the strategic form version even for
-			      extensive games
-   :param bool external: Call the external command-line solver instead
-			 of the internally-linked implementation
-   :raises RuntimeError: if game has more than two players.
-
-.. py:function:: simpdiv_solve(game, external=False)
-
-   Compute Nash equilibria of a game using :ref:`simplicial
-   subdivision <gambit-simpdiv>`.
-
-   :param bool external: Call the external command-line solver instead
-			 of the internally-linked implementation
-
-.. py:function:: ipa_solve(game, external=False)
-
-   Compute Nash equilibria of a game using :ref:`iterated polymatrix
-   approximation <gambit-ipa>`.
-
-   :param bool external: Call the external command-line solver instead
-			 of the internally-linked implementation
-
-.. py:function:: gnm_solve(game, external=False)
-
-   Compute Nash equilibria of a game using :ref:`the global Newton
-   method <gambit-gnm>`.
-
-   :param bool external: Call the external command-line solver instead
-			 of the internally-linked implementation
-			 
 
 Analysis of quantal response equilibria
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~---------

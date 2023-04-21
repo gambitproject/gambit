@@ -27,23 +27,23 @@ import Cython.Build
 
 # By compiling this separately as a C library, we avoid problems
 # with passing C++-specific flags when building the extension
-lrslib = ('lrslib', {'sources': glob.glob("solvers/lrs/*.c")})
+lrslib = ('lrslib', {'sources': glob.glob("src/solvers/lrs/*.c")})
 
 cppgambit = (
     'cppgambit',
     {
         'sources': (
-            glob.glob("core/*.cc") +
-            glob.glob("games/*.cc") +
-            glob.glob("games/agg/*.cc") +
-            glob.glob("solvers/*/*.cc") +
-            ["tools/lp/nfglp.cc",
-             "tools/lp/efglp.cc",
-             "tools/logit/path.cc",
-             "tools/logit/nfglogit.cc",
-             "tools/logit/efglogit.cc"]
+            glob.glob("src/core/*.cc") +
+            glob.glob("src/games/*.cc") +
+            glob.glob("src/games/agg/*.cc") +
+            glob.glob("src/solvers/*/*.cc") +
+            ["src/tools/lp/nfglp.cc",
+             "src/tools/lp/efglp.cc",
+             "src/tools/logit/path.cc",
+             "src/tools/logit/nfglogit.cc",
+             "src/tools/logit/efglogit.cc"]
          ),
-         'include_dirs': ["."],
+         'include_dirs': ["src"],
          'cflags': (
              ["-std=c++11"] if platform.system() == "Darwin" else []
          )
@@ -53,9 +53,9 @@ cppgambit = (
 
 libgambit = setuptools.Extension(
     "pygambit.lib.libgambit",
-    sources=["pygambit/lib/libgambit.pyx"],
+    sources=["src/pygambit/lib/libgambit.pyx"],
     language="c++",
-    include_dirs=["."],
+    include_dirs=["src"],
     extra_compile_args=(
         ["-std=c++11"] if platform.system() == "Darwin" else []
     )
@@ -63,7 +63,7 @@ libgambit = setuptools.Extension(
 
 
 def readme():
-    with open("README.rst") as f:
+    with open("src/README.rst") as f:
         return f.read()
     
 
@@ -100,6 +100,7 @@ setuptools.setup(
         'scipy',
     ],
     libraries=[cppgambit, lrslib],
+    package_dir={'': 'src'},
     packages=['pygambit', 'pygambit.games', 'pygambit.lib'],
     ext_modules=Cython.Build.cythonize(libgambit)
 )

@@ -23,7 +23,6 @@ jobs:
           pip install cython nose2 wheel lxml numpy scipy
       - name: Build extension
         run: |
-          cd src
           python setup.py build
           python setup.py install
       - name: Run nosetests
@@ -49,7 +48,6 @@ jobs:
           pip install cython nose2 wheel lxml numpy scipy
       - name: Build extension
         run: |
-          cd src
           python setup.py build
           python setup.py install
       - name: Run nosetests

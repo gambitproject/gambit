@@ -47,3 +47,4 @@ jobs:
         uses: py-actions/flake8@v2
         with:
           path: "src/pygambit"
+          max-line-length: 99

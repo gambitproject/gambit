@@ -29,7 +29,9 @@ from cython.operator cimport dereference as deref
 from pygambit.lib.error import UndefinedOperationError
 
 
-cdef class MixedStrategyProfile(object):
+cdef class MixedStrategyProfile:
+    """Represents a mixed strategy profile over the strategies in a Game.
+    """
     def __repr__(self):   
         return str([ self[player] for player in self.game.players ])
 
@@ -211,7 +213,21 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
         mixed = MixedStrategyProfileDouble()
         mixed.profile = new c_MixedStrategyProfileDouble(deref(self.profile))
         return mixed
-    def as_behavior(self):
+
+    def as_behavior(self) -> MixedBehaviorProfileDouble:
+        """Creates a mixed behavior profile which is equivalent to this
+        mixed strategy profile.
+
+        Returns
+        -------
+        MixedBehaviorProfileDouble
+            The equivalent mixed behavior profile.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
         cdef MixedBehaviorProfileDouble behav
         if not self.game.is_tree:
             raise UndefinedOperationError(
@@ -220,6 +236,7 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
         behav = MixedBehaviorProfileDouble()
         behav.profile = new c_MixedBehaviorProfileDouble(deref(self.profile))
         return behav
+
     def restriction(self):
         cdef StrategicRestriction s
         s = StrategicRestriction()
@@ -292,7 +309,21 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
         mixed = MixedStrategyProfileRational()
         mixed.profile = new c_MixedStrategyProfileRational(deref(self.profile))
         return mixed
-    def as_behavior(self):
+
+    def as_behavior(self) -> MixedBehaviorProfileRational:
+        """Creates a mixed behavior profile which is equivalent to this
+        mixed strategy profile.
+
+        Returns
+        -------
+        MixedBehaviorProfileDouble
+            The equivalent mixed behavior profile.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
         cdef MixedBehaviorProfileRational behav
         if not self.game.is_tree:
             raise UndefinedOperationError("Mixed behavior profiles are not "
@@ -300,6 +331,7 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
         behav = MixedBehaviorProfileRational()
         behav.profile = new c_MixedBehaviorProfileRational(deref(self.profile))
         return behav
+
     def restriction(self):
         cdef StrategicRestriction s
         s = StrategicRestriction()

@@ -116,6 +116,9 @@ cdef class Node:
         raise TypeError, "insert_move accepts either a Player or Infoset to specify information"
 
     def leave_infoset(self):
+        """Removes this node from its information set. If this node is the only node
+        in its information set, this operation has no effect.
+        """
         cdef Infoset i
         i = Infoset()
         i.infoset = self.node.deref().LeaveInfoset()

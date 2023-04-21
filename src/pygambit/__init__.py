@@ -28,7 +28,4 @@ from . import qre   # noqa: F401
 __version__ = "16.1.0a"
 Rational = lib.libgambit.Rational
 Decimal = lib.libgambit.Decimal
-
-
-class Game(lib.libgambit.Game):
-    pass
+Game = lib.libgambit.Game

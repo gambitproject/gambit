@@ -10,6 +10,7 @@ Detailed table of contents
    gui
    tools
    pyapi
+   api
    samples
    ideas
    build
