@@ -20,7 +20,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 from libcpp.string cimport string
-from pygambit.lib.error import UndefinedOperationError
 
 cdef class Action:
     cdef c_GameAction action

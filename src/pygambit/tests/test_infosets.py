@@ -1,7 +1,6 @@
 import unittest
 
 import pygambit
-from pygambit.lib.error import MismatchError
 
 
 class TestGambitInfosets(unittest.TestCase):
@@ -48,7 +47,7 @@ class TestGambitInfosets(unittest.TestCase):
             g2 = pygambit.Game.new_tree()
             p = g2.players.add()
             self.extensive_game.root.infoset.player = p
-        self.assertRaises(MismatchError, foo)
+        self.assertRaises(pygambit.MismatchError, foo)
 
     def test_infoset_node_precedes(self):
         "Test to check if the infoset preceding check works"
@@ -72,7 +71,7 @@ class TestGambitInfosets(unittest.TestCase):
 
     def test_infoset_add_action_error(self):
         self.assertRaises(
-            MismatchError,
+            pygambit.MismatchError,
             self.extensive_game.infosets[0].actions.add,
             self.extensive_game.actions[3]
         )

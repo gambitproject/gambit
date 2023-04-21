@@ -1,7 +1,6 @@
 import unittest
 
 import pygambit
-from pygambit.lib.error import MismatchError, UndefinedOperationError
 
 
 class TestGambitNode(unittest.TestCase):
@@ -121,18 +120,18 @@ class TestGambitNode(unittest.TestCase):
     def test_append_move_error_terminal(self):
         "Test to ensure the node is terminal"
         self.assertRaises(
-            UndefinedOperationError, self.extensive_game.root.append_move, ""
+            pygambit.UndefinedOperationError, self.extensive_game.root.append_move, ""
         )
 
     def test_append_move_error_player_actions(self):
         "Test to ensure there are actions when appending with a player"
         self.assertRaises(
-            UndefinedOperationError,
+            pygambit.UndefinedOperationError,
             self.extensive_game.root.append_move,
             self.extensive_game.players[0]
         )
         self.assertRaises(
-            UndefinedOperationError,
+            pygambit.UndefinedOperationError,
             self.extensive_game.root.append_move,
             self.extensive_game.players[0],
             0
@@ -141,7 +140,7 @@ class TestGambitNode(unittest.TestCase):
     def test_append_move_error_player_mismatch(self):
         "Test to ensure the node and the player are from the same game"
         self.assertRaises(
-            MismatchError,
+            pygambit.pygambit.MismatchError,
             self.game.root.append_move,
             self.extensive_game.players[0],
             1
@@ -150,7 +149,7 @@ class TestGambitNode(unittest.TestCase):
     def test_append_move_error_infoset_actions(self):
         "Test to ensure there are no actions when appending with an infoset"
         self.assertRaises(
-            UndefinedOperationError,
+            pygambit.UndefinedOperationError,
             self.extensive_game.root.append_move,
             self.extensive_game.players[0].infosets[0],
             1
@@ -158,18 +157,18 @@ class TestGambitNode(unittest.TestCase):
 
     def test_append_move_error_infoset_mismatch(self):
         "Test to ensure the node and the player are from the same game"
-        self.assertRaises(MismatchError, self.game.root.append_move,
+        self.assertRaises(pygambit.MismatchError, self.game.root.append_move,
                           self.extensive_game.players[0].infosets[0])
 
     def test_insert_move_error_player_actions(self):
         "Test to ensure there are actions when inserting with a player"
         self.assertRaises(
-            UndefinedOperationError,
+            pygambit.pygambit.UndefinedOperationError,
             self.extensive_game.root.insert_move,
             self.extensive_game.players[0]
         )
         self.assertRaises(
-            UndefinedOperationError,
+            pygambit.UndefinedOperationError,
             self.extensive_game.root.insert_move,
             self.extensive_game.players[0],
             0
@@ -177,13 +176,13 @@ class TestGambitNode(unittest.TestCase):
 
     def test_insert_move_error_player_mismatch(self):
         "Test to ensure the node and the player are from the same game"
-        self.assertRaises(MismatchError, self.game.root.insert_move,
+        self.assertRaises(pygambit.MismatchError, self.game.root.insert_move,
                           self.extensive_game.players[0], 1)
 
     def test_insert_move_error_infoset_actions(self):
         "Test to ensure there are no actions when inserting with an infoset"
         self.assertRaises(
-            UndefinedOperationError,
+            pygambit.UndefinedOperationError,
             self.extensive_game.root.insert_move,
             self.extensive_game.players[0].infosets[0],
             1
@@ -191,7 +190,7 @@ class TestGambitNode(unittest.TestCase):
 
     def test_insert_move_error_infoset_mismatch(self):
         "Test to ensure the node and the player are from the same game"
-        self.assertRaises(MismatchError, self.game.root.insert_move,
+        self.assertRaises(pygambit.MismatchError, self.game.root.insert_move,
                           self.extensive_game.players[0].infosets[0])
 
     def test_node_leave_infoset(self):
@@ -213,13 +212,13 @@ class TestGambitNode(unittest.TestCase):
         assert len(node.children) == 0
 
     def test_node_copy_tree_error(self):
-        "Test to ensure a MismatchError is raised when trying to copy a tree \
+        "Test to ensure a pygambit.MismatchError is raised when trying to copy a tree \
         from a different game"
-        self.assertRaises(MismatchError, self.game.root.copy_tree,
+        self.assertRaises(pygambit.MismatchError, self.game.root.copy_tree,
                           self.extensive_game.root)
 
     def test_node_move_tree_error(self):
-        "Test to ensure a MismatchError is raised when trying to move a tree \
+        "Test to ensure a pygambit.MismatchError is raised when trying to move a tree \
         between different games"
-        self.assertRaises(MismatchError, self.game.root.move_tree,
+        self.assertRaises(pygambit.MismatchError, self.game.root.move_tree,
                           self.extensive_game.root)

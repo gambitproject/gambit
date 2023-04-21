@@ -24,7 +24,6 @@ import pathlib
 
 import numpy as np
 
-from pygambit.lib.error import UndefinedOperationError
 import pygambit.gte
 import pygambit.gameiter
 
@@ -264,7 +263,7 @@ cdef class Game:
         return g
 
     @classmethod
-    def read_game(cls, filepath: str | pathlib.Path) -> Game:
+    def read_game(cls, filepath: typing.Union[str, pathlib.Path]) -> Game:
         """Constructs a game from its serialised representation in a file.
 
         Parameters

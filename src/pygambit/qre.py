@@ -27,7 +27,7 @@ import math
 import numpy
 import scipy.optimize
 
-from .lib import libgambit
+from . import gambit
 from . import pctrace
 from .profiles import Solution
 from .nash import ExternalSolver
@@ -362,17 +362,17 @@ class LogitQREMixedStrategyFitResult:
 
 
 def fit_fixedpoint(
-        data: libgambit.MixedStrategyProfileDouble
+        data: gambit.MixedStrategyProfileDouble
 ) -> LogitQREMixedStrategyFitResult:
     """Estimate a QRE using the fixed-point method."""
-    res = libgambit.logit_estimate(data)
+    res = gambit.logit_estimate(data)
     return LogitQREMixedStrategyFitResult(
         data, "fixedpoint", res.lam, list(res.profile), res.log_like
     )
 
 
 def fit_empirical(
-        data: libgambit.MixedStrategyProfileDouble
+        data: gambit.MixedStrategyProfileDouble
 ) -> LogitQREMixedStrategyFitResult:
     """Estimate a QRE using the empirical payoff method."""
     def do_logit(lam: float):

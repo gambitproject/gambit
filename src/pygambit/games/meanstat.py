@@ -145,7 +145,7 @@ class Outcome:
             raise IndexError
         total = sum(self.game.choices[c] for c in self.index)
         own = self.game.choices[self.index[pl]]
-        return self.game.payoff(own, total-own)
+        return self.game.payoff(own, total - own)
 
 
 class MeanStatisticGame:
@@ -161,8 +161,8 @@ class MeanStatisticGame:
     def __init__(self, N, min_choice, max_choice, step_choice=1,
                  label_prefix="S"):
         self.N = N
-        self.choices = range(min_choice, max_choice+1, step_choice)
-        self.labels = [label_prefix+str(c) for c in self.choices]
+        self.choices = range(min_choice, max_choice + 1, step_choice)
+        self.labels = [label_prefix + str(c) for c in self.choices]
         self.statistics = range((self.N-1)*min(self.choices),
                                 (self.N-1)*max(self.choices)+1,
                                 step_choice)
@@ -266,7 +266,7 @@ class MixedStrategyProfile:
 
     def set_centroid(self):
         self.profile = [
-            1.0 / len(self.game.choices) for i in self.game.choices
+            1.0 / len(self.game.choices) for _ in self.game.choices
         ]
 
     def normalize(self):
@@ -316,7 +316,7 @@ class MixedStrategyProfile:
         elif K == 1:
             return prob
         elif K == 2:
-            v = [0.0 for i in range(2*len(prob)-1)]
+            v = [0.0 for _ in range(2*len(prob)-1)]
             for (i, p) in enumerate(prob):
                 for (j, q) in enumerate(prob):
                     v[i+j] += p*q
@@ -326,7 +326,7 @@ class MixedStrategyProfile:
             K2 = K / 2 + K % 2
             v1 = self.sum_dist(K1, prob)
             v2 = self.sum_dist(K2, prob)
-            v = [0.0 for i in range(len(v1)+len(v2)-1)]
+            v = [0.0 for _ in range(len(v1)+len(v2)-1)]
             for (i, p) in enumerate(v1):
                 for (j, q) in enumerate(v2):
                     v[i+j] += p*q

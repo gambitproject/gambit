@@ -2,7 +2,6 @@ import fractions
 import unittest
 
 import pygambit
-from pygambit.lib.error import UndefinedOperationError
 
 
 class TestGambitGame(unittest.TestCase):
@@ -100,7 +99,7 @@ class TestGambitGame(unittest.TestCase):
         MixedBehavProfile from a game without a tree representation
         """
         self.assertRaises(
-            UndefinedOperationError, self.game.mixed_behavior_profile, True
+            pygambit.UndefinedOperationError, self.game.mixed_behavior_profile, True
         )
 
     def test_game_title(self):
@@ -143,7 +142,7 @@ class TestGambitGame(unittest.TestCase):
         """Test to ensure an error is raised when trying to access actions
         of a game without a tree representation
         """
-        self.assertRaises(UndefinedOperationError, lambda: self.game.actions)
+        self.assertRaises(pygambit.UndefinedOperationError, lambda: self.game.actions)
 
     def test_game_infosets(self):
         assert (
@@ -163,7 +162,7 @@ class TestGambitGame(unittest.TestCase):
         """Test to ensure an error is raised when trying to access infosets
         of a game without a tree representation
         """
-        self.assertRaises(UndefinedOperationError, lambda: self.game.infosets)
+        self.assertRaises(pygambit.UndefinedOperationError, lambda: self.game.infosets)
 
     def test_game_strategies(self):
         assert self.game.strategies[0] == self.game.players[0].strategies[0]
@@ -181,7 +180,7 @@ class TestGambitGame(unittest.TestCase):
         """Test to ensure an error is raised when trying to get the root
         node of a game without a tree representation
         """
-        self.assertRaises(UndefinedOperationError, lambda: self.game.root)
+        self.assertRaises(pygambit.UndefinedOperationError, lambda: self.game.root)
 
     def test_game_num_nodes(self):
         "Test retrieving the number of nodes of a game"

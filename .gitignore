@@ -13,7 +13,6 @@ libtool
 *.la
 *.a
 gambit-*
-game.wrap.cpp
 _build
 .DS_Store
 .dirstamp
@@ -36,3 +35,4 @@ install-sh
 missing
 gambit
 .python-version
+dist

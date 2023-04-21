@@ -26,7 +26,6 @@ except ImportError:
 import functools
 
 from cython.operator cimport dereference as deref
-from pygambit.lib.error import UndefinedOperationError
 
 
 cdef class MixedStrategyProfile:

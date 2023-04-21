@@ -1,7 +1,6 @@
 import unittest
 
 import pygambit
-from pygambit.lib.error import UndefinedOperationError
 
 
 class TestGambitStrategySupportProfile(unittest.TestCase):
@@ -49,7 +48,7 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
     def test_difference(self):
         "Test the subtraction of two support profiles"
         strat_list = [self.support_profile[0], self.support_profile[4]]
-        dif_profile = pygambit.lib.libgambit.StrategySupportProfile(
+        dif_profile = pygambit.StrategySupportProfile(
             strat_list, self.game)
         new_profile = self.support_profile - dif_profile
         assert len(new_profile) == 3
@@ -62,7 +61,7 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
         """
         def foo():
             strat_list = [self.support_profile[0], self.support_profile[4]]
-            dif_profile = pygambit.lib.libgambit.StrategySupportProfile(
+            dif_profile = pygambit.StrategySupportProfile(
                 strat_list, self.game
             )
             dif_profile - self.support_profile
@@ -72,7 +71,7 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
         "Test the intersection between two support profiles"
         strat_list = [self.support_profile[0], self.support_profile[2],
                       self.support_profile[4]]
-        fir_profile = pygambit.lib.libgambit.StrategySupportProfile(
+        fir_profile = pygambit.StrategySupportProfile(
             strat_list, self.game)
         sec_profile = self.support_profile.remove(self.support_profile[2])
         new_profile = fir_profile & sec_profile
@@ -87,7 +86,7 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
         def foo():
             strat_list = [self.support_profile[0], self.support_profile[2],
                           self.support_profile[4]]
-            fir_profile = pygambit.lib.libgambit.StrategySupportProfile(
+            fir_profile = pygambit.StrategySupportProfile(
                 strat_list, self.game
             )
             sec_profile = self.support_profile.remove(self.support_profile[4])
@@ -98,7 +97,7 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
         "Test the union between two support profiles"
         strat_list = [self.support_profile[0], self.support_profile[2],
                       self.support_profile[4]]
-        fir_profile = pygambit.lib.libgambit.StrategySupportProfile(
+        fir_profile = pygambit.StrategySupportProfile(
             strat_list, self.game)
         sec_profile = self.support_profile.remove(self.support_profile[4])
         new_profile = fir_profile | sec_profile
@@ -109,7 +108,7 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
         assert self.support_profile == self.restriction.support_profile()
         strat_list = [self.support_profile[0], self.support_profile[2],
                       self.support_profile[4]]
-        fir_profile = pygambit.lib.libgambit.StrategySupportProfile(
+        fir_profile = pygambit.StrategySupportProfile(
             strat_list, self.game)
         assert fir_profile == fir_profile.restrict().support_profile()
 
@@ -121,7 +120,7 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
             new_profile = loop_profile
             loop_profile = new_profile.undominated()
         assert len(loop_profile) == 2
-        assert loop_profile == pygambit.lib.libgambit.StrategySupportProfile(
+        assert loop_profile == pygambit.StrategySupportProfile(
             [self.support_profile[0], self.support_profile[3]], self.game)
 
     def test_remove_error(self):
@@ -129,4 +128,4 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
         def foo():
             profile = self.support_profile.remove(self.support_profile[3])
             profile = profile.remove(profile[3])
-        self.assertRaises(UndefinedOperationError, foo)
+        self.assertRaises(pygambit.UndefinedOperationError, foo)

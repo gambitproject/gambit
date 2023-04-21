@@ -22,7 +22,6 @@
 
 import functools
 from cython.operator cimport dereference as deref
-from .error import UndefinedOperationError
 
 cdef class StrategySupportProfile(Collection):
     """
@@ -190,7 +189,7 @@ cdef class RestrictionStrategies(Collection):
             strat = strat - num_strategies.getitem(i)
         raise IndexError("Index out of range")
 
-cdef class StrategicRestriction(BaseGame):
+cdef class StrategicRestriction:
     """
     A StrategicRestriction is a read-only view on a game, defined by a
     subset of the strategies on the original game.

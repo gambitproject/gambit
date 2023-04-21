@@ -2,7 +2,6 @@ import fractions
 import unittest
 
 import pygambit
-from pygambit.lib.error import UndefinedOperationError
 
 
 class TestGambitMixedStrategyGame(unittest.TestCase):
@@ -154,8 +153,8 @@ class TestGambitMixedStrategyGame(unittest.TestCase):
         from a strategic game
         """
         self.assertRaises(
-            UndefinedOperationError, self.profile_double.as_behavior
+            pygambit.UndefinedOperationError, self.profile_double.as_behavior
         )
         self.assertRaises(
-            UndefinedOperationError, self.profile_rational.as_behavior
+            pygambit.UndefinedOperationError, self.profile_rational.as_behavior
         )

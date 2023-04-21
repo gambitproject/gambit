@@ -20,12 +20,10 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-from . import lib
+from .gambit import *  # noqa: F401,F403
+
 from . import nash  # noqa: F401
 from . import gte   # noqa: F401
 from . import qre   # noqa: F401
 
 __version__ = "16.1.0a"
-Rational = lib.libgambit.Rational
-Decimal = lib.libgambit.Decimal
-Game = lib.libgambit.Game

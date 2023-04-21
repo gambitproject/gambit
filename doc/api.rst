@@ -6,7 +6,7 @@ Python API
 Representation of games and related concepts
 --------------------------------------------
 
-.. automodule:: pygambit.lib.libgambit
+.. automodule:: pygambit.gambit
    :members:
    :undoc-members:
    :exclude-members: LCPBehaviorSolverDouble, LCPBehaviorSolverRational,

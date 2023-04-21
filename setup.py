@@ -52,8 +52,8 @@ cppgambit = (
     
 
 libgambit = setuptools.Extension(
-    "pygambit.lib.libgambit",
-    sources=["src/pygambit/lib/libgambit.pyx"],
+    "pygambit.gambit",
+    sources=["src/pygambit/gambit.pyx"],
     language="c++",
     include_dirs=["src"],
     extra_compile_args=(
@@ -101,6 +101,6 @@ setuptools.setup(
     ],
     libraries=[cppgambit, lrslib],
     package_dir={'': 'src'},
-    packages=['pygambit', 'pygambit.games', 'pygambit.lib'],
-    ext_modules=Cython.Build.cythonize(libgambit)
+    packages=['pygambit', 'pygambit.games'],
+    ext_modules=Cython.Build.cythonize(libgambit, compiler_directives={'binding': True})
 )

@@ -3,8 +3,6 @@ import decimal
 import fractions
 import unittest
 
-from pygambit.lib.error import UndefinedOperationError
-
 
 class TestGambitActions(unittest.TestCase):
     def setUp(self):
@@ -95,5 +93,5 @@ class TestGambitActions(unittest.TestCase):
         assert len(self.extensive_game.infosets[0].actions) == 2
         self.extensive_game.actions[0].delete()
         self.assertRaises(
-            UndefinedOperationError, self.extensive_game.actions[0].delete
+            pygambit.UndefinedOperationError, self.extensive_game.actions[0].delete
         )

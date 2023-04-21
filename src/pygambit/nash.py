@@ -27,7 +27,7 @@ import subprocess
 import typing
 from fractions import Fraction
 
-import pygambit.lib.libgambit as libgbt
+import pygambit.gambit as libgbt
 
 
 class ExternalSolver:

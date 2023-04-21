@@ -27,7 +27,7 @@ File format interface with Game Theory Explorer
 from fractions import Fraction
 from lxml import etree
 
-import pygambit.lib.libgambit
+import pygambit
 
 
 def read_game_subtree(game, node, xml_node):
@@ -63,7 +63,7 @@ def read_game(f):
     if tree.xpath("/gte/@version")[0] != "0.1":
         raise ValueError("GTE reader only supports version 0.1")
 
-    g = pygambit.lib.libgambit.new_tree()
+    g = pygambit.Game.new_tree()
     for p in tree.xpath("/gte/players/player"):
         g.players.add(p.text)
 

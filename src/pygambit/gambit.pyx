@@ -25,8 +25,12 @@
 import decimal
 import fractions
 import warnings
+import typing
+
 from libcpp cimport bool
 from libcpp.string cimport string
+
+from .error import *
 
 
 class Decimal(decimal.Decimal):
@@ -422,15 +426,14 @@ cdef class Collection(object):
 # Includes
 ######################
 
-include "action.pxi"
-include "infoset.pxi"
-include "strategy.pxi"
-include "player.pxi"
-include "outcome.pxi"
-include "node.pxi"
-include "basegame.pxi"
-include "stratspt.pxi"
-include "mixed.pxi"
-include "behav.pxi"
-include "game.pxi"
-include "nash.pxi"
+include "core/action.pxi"
+include "core/infoset.pxi"
+include "core/strategy.pxi"
+include "core/player.pxi"
+include "core/outcome.pxi"
+include "core/node.pxi"
+include "core/stratspt.pxi"
+include "core/mixed.pxi"
+include "core/behav.pxi"
+include "core/game.pxi"
+include "core/nash.pxi"

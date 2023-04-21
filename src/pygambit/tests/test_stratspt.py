@@ -1,7 +1,6 @@
 import unittest
 
 import pygambit
-from pygambit.lib.error import UndefinedOperationError
 
 
 class TestGambitStrategicRestriction(unittest.TestCase):
@@ -101,7 +100,7 @@ class TestGambitStrategicRestriction(unittest.TestCase):
         to a restriction
         """
         self.assertRaises(
-            UndefinedOperationError,
+            pygambit.UndefinedOperationError,
             lambda: self.restriction.outcomes.add("")
         )
 
@@ -111,7 +110,7 @@ class TestGambitStrategicRestriction(unittest.TestCase):
         """
         def foo():
             self.restriction.outcomes[0][0] = 2
-        self.assertRaises(UndefinedOperationError, foo)
+        self.assertRaises(pygambit.UndefinedOperationError, foo)
 
     def test_restriction_outcome_label_error(self):
         """Test to ensure an error is raised when trying to change the label
@@ -119,13 +118,13 @@ class TestGambitStrategicRestriction(unittest.TestCase):
         """
         def foo():
             self.restriction.outcomes[0].label = ""
-        self.assertRaises(UndefinedOperationError, foo)
+        self.assertRaises(pygambit.UndefinedOperationError, foo)
 
     def test_restriction_outcome_delete_error(self):
         """Test to ensure an error is raised when trying to delete an outcome
         in a restriction
         """
-        self.assertRaises(UndefinedOperationError,
+        self.assertRaises(pygambit.UndefinedOperationError,
                           lambda: self.restriction.outcomes[0].delete())
 
     def test_restriction_add_player_error(self):
@@ -133,7 +132,7 @@ class TestGambitStrategicRestriction(unittest.TestCase):
         to a restriction
         """
         self.assertRaises(
-            UndefinedOperationError,
+            pygambit.UndefinedOperationError,
             lambda: self.restriction.players.add("")
         )
 
@@ -143,14 +142,14 @@ class TestGambitStrategicRestriction(unittest.TestCase):
         """
         def foo():
             self.restriction.players[0].label = ""
-        self.assertRaises(UndefinedOperationError, foo)
+        self.assertRaises(pygambit.UndefinedOperationError, foo)
 
     def test_restriction_add_strategy_error(self):
         """Test to ensure an error is raised when trying to add a strategy
         to a restriction
         """
         self.assertRaises(
-            UndefinedOperationError,
+            pygambit.UndefinedOperationError,
             lambda: self.restriction.players[0].strategies.add("")
         )
 
@@ -160,7 +159,7 @@ class TestGambitStrategicRestriction(unittest.TestCase):
         """
         def foo():
             self.restriction.strategies[0].label = ""
-        self.assertRaises(UndefinedOperationError, foo)
+        self.assertRaises(pygambit.UndefinedOperationError, foo)
 
     def test_restriction_player_strategy_label_error(self):
         """Test to ensure an error is raised when trying to change the label
@@ -168,4 +167,4 @@ class TestGambitStrategicRestriction(unittest.TestCase):
         """
         def foo():
             self.restriction.players[0].strategies[0].label = ""
-        self.assertRaises(UndefinedOperationError, foo)
+        self.assertRaises(pygambit.UndefinedOperationError, foo)
