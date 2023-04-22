@@ -113,9 +113,9 @@ class TestGambitNode(unittest.TestCase):
         )
 
     def test_is_subgame_root(self):
-        "Test to ensure that we can check if a given node is a marked subgame"
-        assert self.extensive_game.root.is_subgame_root() is True
-        assert self.extensive_game.root.children[0].is_subgame_root() is False
+        """Test whether nodes are correctly labeled as roots of proper subgames."""
+        assert self.extensive_game.root.is_subgame_root is True
+        assert self.extensive_game.root.children[0].is_subgame_root is False
 
     def test_append_move_error_terminal(self):
         "Test to ensure the node is terminal"
