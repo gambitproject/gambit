@@ -54,15 +54,16 @@ cdef class Actions(Collection):
         return a
 
 cdef class Infoset:
+    """Represents an information set in a :py:class:`Game`."""
     cdef c_GameInfoset infoset
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<Infoset [{self.infoset.deref().GetNumber()-1}] '{self.label}' "
             f"for player '{self.player.label}' in game '{self.game.title}'>"
          )
     
-    def __richcmp__(Infoset self, other, whichop):
+    def __richcmp__(Infoset self, other, whichop) -> bool:
         if isinstance(other, Infoset):
             if whichop == 2:
                 return self.infoset.deref() == (<Infoset>other).infoset.deref()
@@ -78,39 +79,69 @@ cdef class Infoset:
             else:
                 raise NotImplementedError
 
-    def __hash__(self):
+    def __hash__(self) -> long:
         return long(<long>self.infoset.deref())
 
-    def precedes(self, node):
+    def precedes(self, node: Node) -> bool:
         if isinstance(node, Node):
             return self.infoset.deref().Precedes((<Node>node).node)
         else:
             raise TypeError("argument of precedes should be a Node instance")
 
-    def reveal(self, player):
-        if isinstance(player, Player):
-            self.infoset.deref().Reveal((<Player>player).player)
-        else:
-            raise TypeError("argument of reveal should be a Player instance")
-            
+    def reveal(self, player: Player) -> None:
+        """Reveals the move made at the information set to `player`.
+
+        Revealing the move modifies all subsequent information sets for `player` such
+        that any two nodes which are successors of two different actions at this
+        information set are placed in different information sets for `player`.
+
+        Revelation is a one-shot operation; it is not enforced with respect to any
+        revisions made to the game tree subsequently.
+
+        Parameters
+        ----------
+        player : Player
+            The player to which to reveal the move at this information set.
+
+        Raises
+        ------
+        TypeError
+            on passing an object that is not a :py:class:`Player`.
+        MismatchError
+            on revealing to a player that is from a different game.
+        """
+        if not isinstance(player, Player):
+            raise TypeError(
+                f"player must be of type Player, not {player.__class__.__name__}"
+            )
+        if player.game != self.game:
+            raise MismatchError(
+                "player must belong to the same game as the information set"
+            )
+        self.infoset.deref().Reveal((<Player>player).player)
+
     property game:
-        def __get__(self):
+        """Gets the :py:class:`Game` to which the information set belongs."""
+        def __get__(self) -> Game:
             cdef Game g
             g = Game()
             g.game = self.infoset.deref().GetGame()
             return g
         
     property label:
-        def __get__(self):
+        """Gets or sets the text label of the information set."""
+        def __get__(self) -> str:
             return self.infoset.deref().GetLabel().decode('ascii')
-        def __set__(self, str value):
+        def __set__(self, value: str):
             self.infoset.deref().SetLabel(value.encode('ascii'))
 
     property is_chance:
-        def __get__(self):
+        """Returns `True` if the information set belongs to the chance player."""
+        def __get__(self) -> bool:
             return self.infoset.deref().IsChanceInfoset()
 
     property actions:
+        """Returns the set of actions at the information set."""
         def __get__(self):
             cdef Actions a
             a = Actions()
@@ -118,6 +149,7 @@ cdef class Infoset:
             return a
 
     property members:
+        """Returns the set of nodes which are members of the information set."""
         def __get__(self):
             cdef Members m
             m = Members()
@@ -125,15 +157,28 @@ cdef class Infoset:
             return m
 
     property player:
-        def __get__(self):
+        """Gets or sets the player who has the move at this information set.
+        
+        Raises
+        ------
+        TypeError
+            on setting to an object that is not a :py:class:`Player`.
+        MismatchError
+            on setting to a player that is from a different game.
+        """
+        def __get__(self) -> Player:
             p = Player()
             p.player = self.infoset.deref().GetPlayer()
             return p
-        def __set__(self, player):
+
+        def __set__(self, player: Player) -> None:
             if not isinstance(player, Player):
-                raise TypeError("argument should be a Player instance, received {}"
-		                .format(player.__class__.__name__))
+                raise TypeError(
+                    f"player must be of type Player, not {player.__class__.__name__}"
+                )
             elif player.game != self.game:
-                raise MismatchError("player at an infoset must belong to the same game")
+                raise MismatchError(
+                    "player must belong to the same game as the information set"
+                )
             else:
                 self.infoset.deref().SetPlayer((<Player>player).player)

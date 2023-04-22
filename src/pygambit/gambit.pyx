@@ -37,6 +37,11 @@ class Decimal(decimal.Decimal):
     pass
 
 class Rational(fractions.Fraction):
+    """Represents a rational number in specifying numerical data for a game,
+    or in a strategy profile.
+
+    .. versionadded:: 15.0.0
+    """
     def _repr_latex_(self):
         if self.denominator != 1:
             return r'$\frac{%s}{%s}$' % (self.numerator, self.denominator)
