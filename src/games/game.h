@@ -176,7 +176,6 @@ typedef GameObjectPtr<GameStrategyRep> GameStrategy;
 
 class GamePlayerRep;
 typedef GameObjectPtr<GamePlayerRep> GamePlayer;
-typedef Array<GamePlayerRep *> GamePlayers;
 
 class GameNodeRep;
 typedef GameObjectPtr<GameNodeRep> GameNode;
@@ -702,8 +701,62 @@ protected:
   virtual bool HasComputedValues() const { return false; }
   //@}
 
-
 public:
+  class Players {
+    friend class GameRep;
+  public:
+    class iterator {
+    private:
+      Game m_game;
+      int m_index;
+    public:
+      iterator(Game &p_game, int p_index)
+        : m_game(p_game), m_index(p_index)  { }
+      GamePlayer operator*()  { return m_game->GetPlayer(m_index); }
+      GamePlayer operator->()  { return m_game->GetPlayer(m_index); }
+      iterator &operator++()  { m_index++; return *this; }
+      bool operator==(const iterator &it) const
+      { return (m_game == it.m_game) && (m_index == it.m_index); }
+      bool operator!=(const iterator &it) const
+      { return !(*this == it); }
+    };
+
+    class const_iterator {
+    private:
+      const Game m_game;
+      int m_index;
+    public:
+      const_iterator(const Game &p_game, int p_index)
+        : m_game(p_game), m_index(p_index)  { }
+      const GamePlayer operator*()  { return m_game->GetPlayer(m_index); }
+      const GamePlayer operator->()  { return m_game->GetPlayer(m_index); }
+      const_iterator &operator++()  { m_index++; return *this; }
+      bool operator==(const const_iterator &it) const
+      { return (m_game == it.m_game) && (m_index == it.m_index); }
+      bool operator!=(const const_iterator &it) const
+      { return !(*this == it); }
+    };
+
+    /// Return a forward iterator starting at the beginning of the array
+    iterator begin()  { return iterator(m_game, 1); }
+    /// Return a forward iterator past the end of the array
+    iterator end()    { return iterator(m_game, m_game->NumPlayers() + 1); }
+    /// Return a const forward iterator starting at the beginning of the array
+    const_iterator begin() const { return const_iterator(m_game, 1); }
+    /// Return a const forward iterator past the end of the array
+    const_iterator end() const   { return const_iterator(m_game, m_game->NumPlayers()); }
+    /// Return a const forward iterator starting at the beginning of the array
+    const_iterator cbegin() const { return const_iterator(m_game, 1); }
+    /// Return a const forward iterator past the end of the array
+    const_iterator cend() const   { return const_iterator(m_game, m_game->NumPlayers()); }
+
+  private:
+    Game m_game;
+
+    Players(Game p_game) : m_game(p_game) { }
+  };
+
+
   /// @name Lifecycle
   //@{
   /// Clean up the game
@@ -791,7 +844,8 @@ public:
   /// Returns the pl'th player in the game
   virtual GamePlayer GetPlayer(int pl) const = 0;
   /// Returns the set of players in the game 
-  virtual const GamePlayers &Players() const = 0;
+  Players GetPlayers()
+  { return Players(Game(this)); }
   /// Returns the chance (nature) player
   virtual GamePlayer GetChance() const = 0;
   /// Creates a new player in the game, with no moves

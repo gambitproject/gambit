@@ -86,8 +86,6 @@ public:
   int NumPlayers() const override { return aggPtr->getNumPlayers(); }
   /// Returns the pl'th player in the game
   GamePlayer GetPlayer(int pl) const override { return m_players[pl]; }
-  /// Returns the set of players in the game
-  const GamePlayers &Players() const override { return m_players; }
   /// Returns the chance (nature) player
   GamePlayer GetChance() const override  { throw UndefinedException(); }
   /// Creates a new player in the game, with no moves

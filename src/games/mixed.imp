@@ -42,11 +42,10 @@ MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile
 
 template <class T> void MixedStrategyProfileRep<T>::SetCentroid() 
 {
-  for (GamePlayers::const_iterator player = m_support.GetGame()->Players().begin();
-       player != m_support.GetGame()->Players().end(); ++player) { 
+  for (auto player : m_support.GetGame()->GetPlayers()) {
     T center = ((T) 1) / ((T) m_support.NumStrategies(player->GetNumber()));
-    for (Array<GameStrategy>::const_iterator strategy = m_support.Strategies(*player).begin();
-	 strategy != m_support.Strategies(*player).end(); ++strategy) {
+    for (Array<GameStrategy>::const_iterator strategy = m_support.Strategies(player).begin();
+	 strategy != m_support.Strategies(player).end(); ++strategy) {
       (*this)[*strategy] = center;
     }
   }
@@ -56,16 +55,15 @@ template <class T>
 MixedStrategyProfileRep<T> *MixedStrategyProfileRep<T>::Normalize() const
 {
   auto norm = Copy();
-  for (auto player = m_support.GetGame()->Players().begin();
-       player != m_support.GetGame()->Players().end(); ++player) {
+  for (auto player : m_support.GetGame()->GetPlayers()) {
     T sum = (T) 0;
-    for (auto strategy = m_support.Strategies(*player).begin();
-	 strategy != m_support.Strategies(*player).end(); ++strategy) {
+    for (auto strategy = m_support.Strategies(player).begin();
+	 strategy != m_support.Strategies(player).end(); ++strategy) {
       sum += (*this)[*strategy];
     }
     if (sum == (T) 0) continue;
-    for (auto strategy = m_support.Strategies(*player).begin();
-	 strategy != m_support.Strategies(*player).end(); ++strategy) {
+    for (auto strategy = m_support.Strategies(player).begin();
+	 strategy != m_support.Strategies(player).end(); ++strategy) {
       (*norm)[*strategy] /= sum;
     }
   }
@@ -81,7 +79,7 @@ template<> void MixedStrategyProfileRep<double>::Randomize()
   // take i.i.d. samples from an exponential distribution, and
   // renormalize at the end (this is a special case of the Dirichlet distribution).
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-    GamePlayer player = nfg->Players()[pl];
+    GamePlayer player = nfg->GetPlayer(pl);
     for (size_t st = 1; st <= player->Strategies().size(); st++) {
       (*this)[player->Strategies()[st]] = -std::log(((double) std::rand()) / 
 						    ((double) RAND_MAX));
@@ -105,7 +103,7 @@ template <class T> void MixedStrategyProfileRep<T>::Randomize(int p_denom)
   m_probs = T(0);
 
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-    GamePlayer player = nfg->Players()[pl];
+    GamePlayer player = nfg->GetPlayer(pl);
     std::vector<int> cutoffs;
     for (size_t st = 1; st < player->Strategies().size(); st++) {
       // When we support C++11, we will be able to implement uniformity better here.
@@ -573,8 +571,7 @@ template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::Unrestrict()
   MixedStrategyProfile<T> full(m_rep->m_support.GetGame()->Unrestrict()->NewMixedStrategyProfile((T) 0));
   static_cast<Vector<T> &>(full) = (T) 0;
 
-  for (GamePlayers::const_iterator player = GetGame()->Players().begin();
-       player != GetGame()->Players().end(); ++player) {
+  for (auto player : GetGame()->GetPlayers()) {
     for (GameStrategyArray::const_iterator strategy = player->Strategies().begin();
 	 strategy != player->Strategies().end(); ++strategy) {
       full[strategy->Unrestrict()] = (*this)[*strategy];
@@ -594,14 +591,13 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue() const
 
   T liapValue = (T) 0;
  
-  for (GamePlayers::const_iterator player = m_rep->m_support.GetGame()->Players().begin();
-       player != m_rep->m_support.GetGame()->Players().end(); ++player) {
+  for (auto player : m_rep->m_support.GetGame()->GetPlayers()) {
     // values of the player's strategies
     Array<T> values(m_rep->m_support.NumStrategies(player->GetNumber()));
     
     T avg = (T) 0, sum = (T) 0;
-    for (Array<GameStrategy>::const_iterator strategy = m_rep->m_support.Strategies(*player).begin();
-	 strategy != m_rep->m_support.Strategies(*player).end(); ++strategy) {
+    for (Array<GameStrategy>::const_iterator strategy = m_rep->m_support.Strategies(player).begin();
+	 strategy != m_rep->m_support.Strategies(player).end(); ++strategy) {
       const T &prob = (*this)[*strategy];
       values[m_rep->m_support.GetIndex(*strategy)] = GetPayoff(*strategy);
       avg += prob * values[m_rep->m_support.GetIndex(*strategy)];

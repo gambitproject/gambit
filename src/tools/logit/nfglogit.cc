@@ -61,7 +61,7 @@ StrategicQREPathTracer::EquationSystem::GetValue(const Vector<double> &p_point,
   double lambda = p_point[p_point.Length()];
   p_lhs = 0.0;
   for (int rowno = 0, pl = 1; pl <= m_game->NumPlayers(); pl++) {
-    GamePlayer player = m_game->Players()[pl];
+    GamePlayer player = m_game->GetPlayer(pl);
     for (size_t st = 1; st <= player->Strategies().size(); st++) {
       rowno++;
       if (st == 1) {
@@ -97,13 +97,13 @@ StrategicQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_poin
   p_matrix = 0.0;
 
   for (int rowno = 0, i = 1; i <= m_game->NumPlayers(); i++) {
-    GamePlayer player = m_game->Players()[i];
+    GamePlayer player = m_game->GetPlayer(i);
     for (size_t j = 1; j <= player->Strategies().size(); j++) {
       rowno++;
       if (j == 1) {
 	// This is a sum-to-one equation
 	for (int colno = 0, ell = 1; ell <= m_game->NumPlayers(); ell++) {
-	  GamePlayer player2 = m_game->Players()[ell];
+	  GamePlayer player2 = m_game->GetPlayer(ell);
 	  for (size_t m = 1; m <= player2->Strategies().size(); m++) {
 	    colno++;
 	    if (i == ell) {
@@ -117,7 +117,7 @@ StrategicQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_poin
       else {
 	// This is a ratio equation
 	for (int colno = 0, ell = 1; ell <= m_game->NumPlayers(); ell++) {
-	  GamePlayer player2 = m_game->Players()[ell];
+	  GamePlayer player2 = m_game->GetPlayer(ell);
   	  for (size_t m = 1; m <= player2->Strategies().size(); m++) {
 	    colno++;
 	    if (i == ell) {

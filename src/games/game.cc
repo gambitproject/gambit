@@ -193,9 +193,9 @@ GameInfoset GamePlayerRep::GetInfoset(int p_index) const { return m_infosets[p_i
 //========================================================================
 
 PureStrategyProfileRep::PureStrategyProfileRep(const Game &p_game) 
-  : m_nfg(p_game), m_profile(p_game->Players().size())
+  : m_nfg(p_game), m_profile(p_game->NumPlayers())
 {
-  for (size_t pl = 1; pl <= m_nfg->Players().size(); pl++)  {
+  for (size_t pl = 1; pl <= m_nfg->NumPlayers(); pl++)  {
     m_profile[pl] = m_nfg->GetPlayer(pl)->GetStrategy(1);
   }
 }
@@ -279,9 +279,8 @@ PureStrategyProfileRep::ToMixedStrategyProfile() const
 PureStrategyProfile PureStrategyProfileRep::Unrestrict() const
 {
   PureStrategyProfile u = m_nfg->Unrestrict()->NewPureStrategyProfile();
-  for (GamePlayers::const_iterator player = this->m_nfg->Players().begin();
-    player != m_nfg->Players().end(); ++player)  {
-    u->SetStrategy(GetStrategy(*player)->Unrestrict());
+  for (auto player : this->m_nfg->GetPlayers()) {
+    u->SetStrategy(GetStrategy(player)->Unrestrict());
   }
   return u;
 }

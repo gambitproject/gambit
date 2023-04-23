@@ -41,8 +41,7 @@ template <class T> void
 MixedStrategyDetailRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile,
 				       const std::string &p_label) const
 {
-  for (GamePlayers::const_iterator player = p_profile.GetGame()->Players().begin();
-       player != p_profile.GetGame()->Players().end(); ++player) {
+  for (auto player : p_profile.GetGame()->GetPlayers()) {
     m_stream << "Strategy profile for player " << player->GetNumber() << ":\n";
     
     m_stream << "Strategy   Prob          Value\n";
@@ -83,8 +82,7 @@ template <class T> void
 BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_profile,
 				       const std::string &p_label) const
 {
-  for (GamePlayers::const_iterator player = p_profile.GetGame()->Players().begin();
-       player != p_profile.GetGame()->Players().end(); ++player) {
+  for (auto player : p_profile.GetGame()->GetPlayers()) {
     m_stream << "Behavior profile for player " << player->GetNumber() << ":\n";
     
     m_stream << "Infoset    Action     Prob          Value\n";

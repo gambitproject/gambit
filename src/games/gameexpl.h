@@ -76,8 +76,6 @@ public:
   int NumPlayers() const override { return m_players.size(); }
   /// Returns the pl'th player in the game
   GamePlayer GetPlayer(int pl) const override { return m_players[pl]; }
-  /// Returns the set of players in the game
-  const GamePlayers &Players() const override { return m_players; }
   //@}
 
   /// @name Outcomes

@@ -397,11 +397,11 @@ Game StrategySupportProfile::Restrict() const
   std::istringstream is(os.str());
   Game restricted = ReadGame(is);
   for (int pl = 1; pl <= restricted->NumPlayers(); pl++) {
-    GamePlayerRep *player = restricted->Players()[pl];
-    player->m_unrestricted = m_nfg->Players()[pl];
+    GamePlayerRep *player = restricted->GetPlayer(pl);
+    player->m_unrestricted = m_nfg->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrategies(); st++) {
       GameStrategyRep *strategy = player->m_strategies[st];
-      strategy->m_unrestricted = m_nfg->Players()[pl]->Strategies()[st];
+      strategy->m_unrestricted = m_nfg->GetPlayer(pl)->Strategies()[st];
     }
   }
   dynamic_cast<GameTableRep &>(*restricted).m_unrestricted = m_nfg;

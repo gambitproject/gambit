@@ -181,13 +181,12 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
   const StrategySupportProfile &support = p_profile.GetSupport();
   GameRep *game = m_support.GetGame();
 
-  for (GamePlayers::const_iterator player = game->Players().begin();
-       player != game->Players().end(); ++player) {
+  for (auto player : game->GetPlayers()) {
     m_nvals = (T) 0;
     m_bvals = (T) 0;
 
-    for (Array<GameStrategy>::const_iterator strategy = support.Strategies(*player).begin();
-	 strategy != support.Strategies(*player).end(); ++strategy) {
+    for (Array<GameStrategy>::const_iterator strategy = support.Strategies(player).begin();
+	 strategy != support.Strategies(player).end(); ++strategy) {
       if (p_profile[*strategy] > (T) 0) {
 	const Array<int> &actions = strategy->m_behav;
 	m_bvals[root->GetNumber()] = p_profile[*strategy];
@@ -296,7 +295,7 @@ template<> void MixedBehaviorProfile<double>::Randomize()
   // take i.i.d. samples from an exponential distribution, and
   // renormalize at the end (this is a special case of the Dirichlet distribution).
   for (int pl = 1; pl <= game->NumPlayers(); pl++) {
-    GamePlayer player = game->Players()[pl];
+    GamePlayer player = game->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       GameInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -307,7 +306,7 @@ template<> void MixedBehaviorProfile<double>::Randomize()
   }
   MixedBehaviorProfile<double> norm(Normalize());
   for (int pl = 1; pl <= game->NumPlayers(); pl++) {
-    GamePlayer player = game->Players()[pl];
+    GamePlayer player = game->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       GameInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -330,7 +329,7 @@ template <class T> void MixedBehaviorProfile<T>::Randomize(int p_denom)
   *this = T(0);
 
   for (int pl = 1; pl <= game->NumPlayers(); pl++) {
-    GamePlayer player = game->Players()[pl];
+    GamePlayer player = game->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       GameInfoset infoset = player->GetInfoset(iset);
       std::vector<int> cutoffs;

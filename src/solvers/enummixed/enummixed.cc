@@ -97,23 +97,23 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
   Rational fac(1, max - min);
 
   // Construct matrices A1, A2
-  Matrix<T> A1(1, p_game->Players()[1]->Strategies().size(),
-	       1, p_game->Players()[2]->Strategies().size());
-  Matrix<T> A2(1, p_game->Players()[2]->Strategies().size(),
-	       1, p_game->Players()[1]->Strategies().size());
+  Matrix<T> A1(1, p_game->GetPlayer(1)->Strategies().size(),
+	       1, p_game->GetPlayer(2)->Strategies().size());
+  Matrix<T> A2(1, p_game->GetPlayer(2)->Strategies().size(),
+	       1, p_game->GetPlayer(1)->Strategies().size());
 
-  for (size_t i = 1; i <= p_game->Players()[1]->Strategies().size(); i++) {
-    profile->SetStrategy(p_game->Players()[1]->Strategies()[i]);
-    for (size_t j = 1; j <= p_game->Players()[2]->Strategies().size(); j++) {
-      profile->SetStrategy(p_game->Players()[2]->Strategies()[j]);
+  for (size_t i = 1; i <= p_game->GetPlayer(1)->Strategies().size(); i++) {
+    profile->SetStrategy(p_game->GetPlayer(1)->Strategies()[i]);
+    for (size_t j = 1; j <= p_game->GetPlayer(2)->Strategies().size(); j++) {
+      profile->SetStrategy(p_game->GetPlayer(2)->Strategies()[j]);
       A1(i, j) = fac * (profile->GetPayoff(1) - min);
       A2(j, i) = fac * (profile->GetPayoff(2) - min);
     }
   }
 
   // Construct vectors b1, b2
-  Vector<T> b1(1, p_game->Players()[1]->Strategies().size());
-  Vector<T> b2(1, p_game->Players()[2]->Strategies().size());
+  Vector<T> b1(1, p_game->GetPlayer(1)->Strategies().size());
+  Vector<T> b2(1, p_game->GetPlayer(2)->Strategies().size());
   b1 = (T) -1;
   b2 = (T) -1;
 
@@ -143,12 +143,12 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
       // check if solution is nash 
       // need only check complementarity, since it is feasible
       bool nash = true;
-      for (size_t k = 1; nash && k <= p_game->Players()[1]->Strategies().size(); k++) {
+      for (size_t k = 1; nash && k <= p_game->GetPlayer(1)->Strategies().size(); k++) {
         if (bfs1.count(k) && bfs2.count(-k)) {
           nash = EqZero(bfs1[k] * bfs2[-k]);
         }
       }
-      for (size_t k = 1; nash && k <= p_game->Players()[2]->Strategies().size(); k++) {
+      for (size_t k = 1; nash && k <= p_game->GetPlayer(2)->Strategies().size(); k++) {
         if (bfs2.count(k) && bfs1.count(-k)) {
           nash = EqZero(bfs2[k] * bfs1[-k]);
         }
@@ -157,14 +157,14 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
       if (nash) {
         MixedStrategyProfile<T> eqm(p_game->NewMixedStrategyProfile(static_cast<T>(0)));
         static_cast<Vector<T> &>(eqm) = static_cast<T>(0);
-        for (size_t k = 1; k <= p_game->Players()[1]->Strategies().size(); k++) {
+        for (size_t k = 1; k <= p_game->GetPlayer(1)->Strategies().size(); k++) {
           if (bfs1.count(k)) {
-            eqm[p_game->Players()[1]->Strategies()[k]] = -bfs1[k];
+            eqm[p_game->GetPlayer(1)->Strategies()[k]] = -bfs1[k];
           }
         }
-        for (size_t k = 1; k <= p_game->Players()[2]->Strategies().size(); k++) {
+        for (size_t k = 1; k <= p_game->GetPlayer(2)->Strategies().size(); k++) {
           if (bfs2.count(k)) {
-            eqm[p_game->Players()[2]->Strategies()[k]] = -bfs2[k];
+            eqm[p_game->GetPlayer(2)->Strategies()[k]] = -bfs2[k];
           }
         }
         eqm = eqm.Normalize();
