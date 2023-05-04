@@ -61,15 +61,18 @@ def findEps(M, r, c, best_response=False):
     # print "x", x
     return x-n
 
-# A representation of an Approximate Nash solution
+
 class ApproximateSolution:
+    """A representation of an approximate Nash solution."""
     def __init__(self, profile):
         self._profile = profile
         self._setinfo()
 
     def __repr__(self):
-        return "<ApproximateProfile for '%s': %s is %s-NE, %s-WSNE>" % (self._profile.game.title,
-                self._profile, self.epsNE, self.epsWSNE)
+        return (
+            "<ApproximateProfile for '%s': %s is %s-NE, %s-WSNE>" %
+            (self._profile.game.title, self._profile, self.epsNE, self.epsWSNE)
+        )
 
     # Computes and stores the epsilon-NE and epsilon-WSNE for
     # a given strategy profile
