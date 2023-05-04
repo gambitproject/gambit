@@ -1,8 +1,7 @@
 from fractions import Fraction
-import fractions
 import numpy as np
-from gambit import Game
-import gambit.approx
+from pygambit import Game
+import pygambit.approx
 
 # Converts a numpy array to gambit.Game might be useful for other purposes
 def numpy_to_game(A, B):
@@ -17,7 +16,7 @@ def numpy_to_game(A, B):
 class TestKSSolver(object):
     "Tests of Kontogiannis-Spirakis solver."
     def setUp(self):
-        self.solver = gambit.approx.InternalKSSolver()
+        self.solver = pygambit.approx.KontogiannisSpirakisSolver()
 
     def tearDown(self):
         pass

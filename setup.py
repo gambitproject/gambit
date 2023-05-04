@@ -98,6 +98,7 @@ setuptools.setup(
         'lxml',  # used for reading/writing GTE files
         'numpy',
         'scipy',
+        'pycddlib>=2.1,<2.2',   # used for solving LP for K-S algorithm
     ],
     libraries=[cppgambit, lrslib],
     package_dir={'': 'src'},
