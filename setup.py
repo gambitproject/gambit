@@ -93,7 +93,7 @@ setuptools.setup(
         'Source': 'https://github.com/gambitproject/gambit',
         'Tracker': 'https://github.com/gambitproject/gambit/issues',
     },
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=[
         'lxml',  # used for reading/writing GTE files
         'numpy',
