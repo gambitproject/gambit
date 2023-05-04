@@ -22,9 +22,10 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
+from fractions import Fraction
+
 import cdd  # continuous double description - includes exact LP solver
 import numpy as np
-from fractions import Fraction
 
 
 # Convert a game to numpy array
@@ -51,7 +52,6 @@ def findEps(M, r, c, best_response=False):
     M = np.mat(M)
     payoffs = M*c.transpose()
     # print "payoffs", payoffs
-    n = 0
     if best_response:
         n = payoffs[r.transpose() > 0].min()
     else:
@@ -99,9 +99,7 @@ class KontogiannisSpirakisSolver:
         n = M.shape[1]  # number of columns
 
         M = np.column_stack([[0]*m, -M, [1]*m])
-
-        eye = np.eye(n)
-        nn = np.column_stack([[0]*n, eye, [0]*n])
+        nn = np.column_stack([[0]*n, np.eye(n), [0]*n])
 
         # non-negativity constraints
         n1 = [-1] * n
@@ -122,7 +120,7 @@ class KontogiannisSpirakisSolver:
 
         lp = cdd.LinProg(mat)
         lp.solve()
-        lp.status == cdd.LPStatusType.OPTIMAL
+        assert lp.status == cdd.LPStatusType.OPTIMAL
         # print mat
 
         # print(lp.obj_value) # value of game = player I's equilibrium payoff
@@ -132,8 +130,7 @@ class KontogiannisSpirakisSolver:
 
     # Converts numpy array A, B to the matrix D according to the KS algorithm
     def _ksGame(self, A, B):
-        D = Fraction(1, 2) * (A - B)
-        return D
+        return Fraction(1, 2) * (A - B)
 
     # Solves the game using the KS algorithm, rational is used just as in the
     # other Nash solvers
@@ -148,7 +145,7 @@ class KontogiannisSpirakisSolver:
 
         for i in range(A.shape[0]):
             p[i] = x[i]
-        
+
         for i in range(A.shape[1]):
             p[i + A.shape[0]] = y[i]
 
