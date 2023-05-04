@@ -100,28 +100,25 @@ class KontogiannisSpirakisSolver:
 
         M = np.column_stack([[0]*m, -M, [1]*m])
 
-        I = np.eye(n)
-        nn = np.column_stack([[0]*n, I, [0]*n])
+        eye = np.eye(n)
+        nn = np.column_stack([[0]*n, eye, [0]*n])
 
         # non-negativity constraints
         n1 = [-1] * n
         n1.insert(0, 1)
-        n1.append(0) # n1 = 1,-1,-1,...,-1,0]
+        n1.append(0)  # n1 = [1,-1,-1,...,-1,0]
         n2 = [1] * n
         n2.insert(0, -1)
-        n2.append(0) # n1 = 1,-1,-1,...,-1,0]
+        n2.append(0)  # n2 = [-1,1,1,...,1,0]
 
         d = np.vstack([M, nn, n1, n2])
 
         mat = cdd.Matrix(d.tolist(), number_type='fraction')
         mat.obj_type = cdd.LPObjType.MIN
 
-        # 2 by 2
-        #mat.obj_func = (0,0,0,1)
-        # 2 by 2
         d = [0] * (n+1)
-        d.append(1) # [0,0,...0,1]
-        mat.obj_func = d 
+        d.append(1)  # [0,0,...0,1]
+        mat.obj_func = d
 
         lp = cdd.LinProg(mat)
         lp.solve()

@@ -22,11 +22,12 @@ class TestKSSolver:
 
     def tearDown(self):
         pass
-        
+
     def test_one(self):
         """Test that Kontogiannis-Spirakis finds exact Nash equilibrium with identity matrices."""
         for n in range(2, 20):
-            A = [[Fraction(1, 1) if i == j else Fraction(0, 1) for j in range(n)] for i in range(n)]
+            A = [[Fraction(1, 1) if i == j else Fraction(0, 1)
+                  for j in range(n)] for i in range(n)]
             A = np.array(A)
             B = A
             g = numpy_to_game(A, B)
@@ -88,8 +89,16 @@ class TestKSSolver:
     def test_six(self):
         a = Fraction(1, 3)
         b = Fraction(1, 1)
-        A = np.array([[a, a, b, a, b], [b, a, a, a, b], [a, b, a, a, b], [a, a, a, b, b], [0, 0, 0, 0, 0]])
-        B = np.array([[b, b, a, b, a], [a, b, b, b, a], [b, a, b, b, a], [b, b, b, a, a], [0, 0, 0, 0, 0]])
+        A = np.array([[a, a, b, a, b],
+                      [b, a, a, a, b],
+                      [a, b, a, a, b],
+                      [a, a, a, b, b],
+                      [0, 0, 0, 0, 0]])
+        B = np.array([[b, b, a, b, a],
+                      [a, b, b, b, a],
+                      [b, a, b, b, a],
+                      [b, b, b, a, a],
+                      [0, 0, 0, 0, 0]])
         g = numpy_to_game(A, B)
         a = self.solver.solve(g, True)
         assert a[0].epsWSNE == Fraction(2, 3)
