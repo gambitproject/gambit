@@ -24,51 +24,29 @@
 
 from fractions import Fraction
 
-import cdd  # continuous double description - includes exact LP solver
 import numpy as np
+import cdd
 
 import pygambit as gbt
 
 
-# Convert a game to numpy array
-# Possibly the best location would be in the definition of
-# gambit.Game, however, the function would need to be limited
-# to strategic games.
-def game_to_np(game):
-    m = len(game.players[0].strategies)
-    n = len(game.players[1].strategies)
-    A = [[game[i, j][0] for j in range(n)] for i in range(m)]
-    B = [[game[i, j][1] for j in range(n)] for i in range(m)]
-    A = np.array(A)
-    B = np.array(B)
-    return A, B
-
-
-# Calculates epsilon for a given strategy profile
-# If best_response is true then return the epsilon corresponding
-# to that of WSNE otherwise treat as an epsilon-NE
-# Not entirely sure where this function should be.
-def compute_epsilon(M, r, c, best_response=False):
-    r = np.mat(r)
-    c = np.mat(c)
-    M = np.mat(M)
-    payoffs = M*c.transpose()
-    # print "payoffs", payoffs
-    if best_response:
-        n = payoffs[r.transpose() > 0].min()
-    else:
-        n = (r * payoffs)[0, 0]
-    # print "n", n
-    x = payoffs.max()
-    # print "x", x
-    return x-n
-
-
 class ApproximateSolution:
     """A representation of an approximate Nash solution."""
-    def __init__(self, profile):
+    def __init__(self, profile, matrices):
         self._profile = profile
-        self._setinfo()
+        self._setinfo(matrices)
+
+    @staticmethod
+    def _compute_epsilon_br(M: np.array, r: np.array, c: np.array) -> Fraction:
+        """Calculates epsilon for strategy profile for NE."""
+        payoffs = np.asmatrix(M) * np.asmatrix(c).transpose()
+        return payoffs.max() - payoffs[np.asmatrix(r).transpose() > 0].min()
+
+    @staticmethod
+    def _compute_epsilon_wsne(M: np.array, r: np.array, c: np.array) -> Fraction:
+        """Calculates epsilon for strategy profile for WSNE."""
+        payoffs = np.asmatrix(M) * np.asmatrix(c).transpose()
+        return payoffs.max() - (np.asmatrix(r) * payoffs)[0, 0]
 
     def __repr__(self):
         return (
@@ -78,12 +56,14 @@ class ApproximateSolution:
 
     # Computes and stores the epsilon-NE and epsilon-WSNE for
     # a given strategy profile
-    def _setinfo(self):
-        A, B = game_to_np(self._profile.game)
+    def _setinfo(self, matrices):
+        A, B = matrices
         x = np.array(self._profile[self._profile.game.players[0]])
         y = np.array(self._profile[self._profile.game.players[1]])
-        self.epsNE = max(compute_epsilon(A, x, y), compute_epsilon(B.transpose(), y, x))
-        self.epsWSNE = max(compute_epsilon(A, x, y, True), compute_epsilon(B.transpose(), y, x, True))
+        self.epsNE = max(self._compute_epsilon_wsne(A, x, y),
+                         self._compute_epsilon_wsne(B.transpose(), y, x))
+        self.epsWSNE = max(self._compute_epsilon_br(A, x, y),
+                           self._compute_epsilon_br(B.transpose(), y, x))
 
 
 class KontogiannisSpirakisSolver:
@@ -93,7 +73,8 @@ class KontogiannisSpirakisSolver:
     Spyros C. Kontogiannis, Paul G. Spirakis (2010). Well Supported
     Approximate Equilibria in Bimatrix Games. Algorithmica 57(4): 653-667.
     """
-    def _solve(self, M):
+    @staticmethod
+    def _solve(M):
         """Find II's minmax strategy for zero-sum game M."""
         m, n = M.shape
 
@@ -102,38 +83,38 @@ class KontogiannisSpirakisSolver:
         # non-negativity constraints
         n1 = [1] + ([-1] * n) + [0]
         n2 = [-1] + ([1] * n) + [0]
-
-        d = np.vstack([M, nn, n1, n2])
-
-        mat = cdd.Matrix(d.tolist(), number_type='fraction')
+        mat = cdd.Matrix(np.vstack([M, nn, n1, n2]).tolist(), number_type='fraction')
         mat.obj_type = cdd.LPObjType.MIN
         mat.obj_func = ([0] * (n+1)) + [1]
 
         lp = cdd.LinProg(mat)
         lp.solve()
         assert lp.status == cdd.LPStatusType.OPTIMAL
-        # print mat
-
-        # print(lp.obj_value) # value of game = player I's equilibrium payoff
-
-        # primal solution is players II's equilibrium (minmax) strategy
+        # The primal solution is player 2's equilibrium (minmax) strategy
         return lp.primal_solution
 
-    # Converts numpy array A, B to the matrix D according to the KS algorithm
-    def _ksGame(self, A, B):
+    @staticmethod
+    def _extract_payoff_table(game: gbt.Game, player: gbt.Player) -> np.array:
+        """Extract the payoff table of 'player' from 'game' as a numpy array."""
+        return (
+            np.array([[game[i, j][player] for j in game.players[1].strategies]
+                      for i in game.players[0].strategies])
+        )
+
+    @staticmethod
+    def _construct_ks_game(A: np.array, B: np.array) -> np.array:
+        """Constructs the payoff matrix of the zero-sum auxiliary game
+        used by the K-S algorithm."""
         return Fraction(1, 2) * (A - B)
 
     def solve(self, game: gbt.Game):
         """Computes the well-supported approximate-Nash equilibrium."""
-        A, B = game_to_np(game)
-        D = self._ksGame(A, B)
-        y = self._solve(D)
-        y = y[0:A.shape[1]]
-        x = self._solve(-D.transpose())
-        x = x[0:A.shape[0]]
-
-        p = game.mixed_strategy_profile(rational=True)
-        p[game.players[0]] = x
-        p[game.players[1]] = y
-
-        return [ApproximateSolution(p)]
+        A = self._extract_payoff_table(game, game.players[0])
+        B = self._extract_payoff_table(game, game.players[1])
+        D = self._construct_ks_game(A, B)
+        p = game.mixed_strategy_profile(
+            rational=True,
+            data=[self._solve(-D.transpose())[:A.shape[0]],
+                  self._solve(D)[:A.shape[1]]]
+        )
+        return [ApproximateSolution(p, (A, B))]
