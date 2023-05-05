@@ -30,11 +30,29 @@ import cdd
 import pygambit as gbt
 
 
-class ApproximateSolution:
-    """A representation of an approximate Nash solution."""
+class KontogiannisSpirakisResult:
+    """Represents the result of the Kontogiannis-Spirakis algorithm."""
     def __init__(self, profile, matrices):
         self._profile = profile
         self._setinfo(matrices)
+
+    @property
+    def profile(self) -> gbt.MixedStrategyProfileRational:
+        return self._profile
+
+    @property
+    def epsilon_ne(self) -> Fraction:
+        return self._epsilon_ne
+
+    @property
+    def epsilon_wsne(self) -> Fraction:
+        return self._epsilon_wsne
+
+    def __repr__(self) -> str:
+        return (
+            "<KontogiannisSpirakisResult for '%s': %s is %s-NE, %s-WSNE>" %
+            (self.profile.game.title, self.profile, self.epsilon_ne, self.epsilon_wsne)
+        )
 
     @staticmethod
     def _compute_epsilon_br(M: np.array, r: np.array, c: np.array) -> Fraction:
@@ -48,22 +66,19 @@ class ApproximateSolution:
         payoffs = np.asmatrix(M) * np.asmatrix(c).transpose()
         return payoffs.max() - (np.asmatrix(r) * payoffs)[0, 0]
 
-    def __repr__(self):
-        return (
-            "<ApproximateProfile for '%s': %s is %s-NE, %s-WSNE>" %
-            (self._profile.game.title, self._profile, self.epsNE, self.epsWSNE)
-        )
-
-    # Computes and stores the epsilon-NE and epsilon-WSNE for
-    # a given strategy profile
     def _setinfo(self, matrices):
+        """Computes the values of epsilon for the profile."""
         A, B = matrices
         x = np.array(self._profile[self._profile.game.players[0]])
         y = np.array(self._profile[self._profile.game.players[1]])
-        self.epsNE = max(self._compute_epsilon_wsne(A, x, y),
-                         self._compute_epsilon_wsne(B.transpose(), y, x))
-        self.epsWSNE = max(self._compute_epsilon_br(A, x, y),
-                           self._compute_epsilon_br(B.transpose(), y, x))
+        self._epsilon_ne = max(
+            self._compute_epsilon_wsne(A, x, y),
+            self._compute_epsilon_wsne(B.transpose(), y, x)
+        )
+        self._epsilon_wsne = max(
+            self._compute_epsilon_br(A, x, y),
+            self._compute_epsilon_br(B.transpose(), y, x)
+        )
 
 
 class KontogiannisSpirakisSolver:
@@ -107,7 +122,7 @@ class KontogiannisSpirakisSolver:
         used by the K-S algorithm."""
         return Fraction(1, 2) * (A - B)
 
-    def solve(self, game: gbt.Game):
+    def solve(self, game: gbt.Game) -> KontogiannisSpirakisResult:
         """Computes the well-supported approximate-Nash equilibrium."""
         A = self._extract_payoff_table(game, game.players[0])
         B = self._extract_payoff_table(game, game.players[1])
@@ -117,4 +132,4 @@ class KontogiannisSpirakisSolver:
             data=[self._solve(-D.transpose())[:A.shape[0]],
                   self._solve(D)[:A.shape[1]]]
         )
-        return [ApproximateSolution(p, (A, B))]
+        return KontogiannisSpirakisResult(p, (A, B))
