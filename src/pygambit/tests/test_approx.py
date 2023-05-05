@@ -1,5 +1,7 @@
 from fractions import Fraction
+
 import numpy as np
+
 from pygambit import Game
 import pygambit.approx
 
@@ -31,7 +33,7 @@ class TestKSSolver:
             A = np.array(A)
             B = A
             g = numpy_to_game(A, B)
-            a = self.solver.solve(g, True)
+            a = self.solver.solve(g)
             assert a[0].epsWSNE == 0
 
     def test_two(self):
@@ -48,7 +50,7 @@ class TestKSSolver:
             A = np.array(A)
             B = np.array(B)
             g = numpy_to_game(A, B)
-            a = self.solver.solve(g, True)
+            a = self.solver.solve(g)
             assert a[0].epsWSNE == 0
 
     def test_three(self):
@@ -58,7 +60,7 @@ class TestKSSolver:
         A = np.array([[a, b], [b, a], [0, 0]])
         B = np.array([[b, a], [a, b], [0, 0]])
         g = numpy_to_game(A, B)
-        a = self.solver.solve(g, True)
+        a = self.solver.solve(g)
         assert a[0].epsWSNE == Fraction(2, 3)
 
     def test_four(self):
@@ -68,7 +70,7 @@ class TestKSSolver:
         A = np.array([[a, b], [0, 0]])
         B = np.array([[b, a], [0, 0]])
         g = numpy_to_game(A, B)
-        a = self.solver.solve(g, True)
+        a = self.solver.solve(g)
         assert a[0].epsWSNE == Fraction(2, 3)
 
     def test_five(self):
@@ -83,7 +85,7 @@ class TestKSSolver:
             [0, b, a, b, a, b, a, b, a, b, a, b, a],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
         g = numpy_to_game(A, B)
-        a = self.solver.solve(g, True)
+        a = self.solver.solve(g)
         assert a[0].epsWSNE == Fraction(2, 3)
 
     def test_six(self):
@@ -100,7 +102,7 @@ class TestKSSolver:
                       [b, b, b, a, a],
                       [0, 0, 0, 0, 0]])
         g = numpy_to_game(A, B)
-        a = self.solver.solve(g, True)
+        a = self.solver.solve(g)
         assert a[0].epsWSNE == Fraction(2, 3)
 
     @staticmethod
@@ -133,5 +135,5 @@ class TestKSSolver:
         for i in range(3, 20):
             A, B = self.generate_matrix(i)
             g = numpy_to_game(A, B)
-            a = self.solver.solve(g, True)
+            a = self.solver.solve(g)
             assert a[0].epsWSNE == Fraction(2, 3)

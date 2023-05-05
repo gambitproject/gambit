@@ -27,6 +27,8 @@ from fractions import Fraction
 import cdd  # continuous double description - includes exact LP solver
 import numpy as np
 
+import pygambit as gbt
+
 
 # Convert a game to numpy array
 # Possibly the best location would be in the definition of
@@ -46,7 +48,7 @@ def game_to_np(game):
 # If best_response is true then return the epsilon corresponding
 # to that of WSNE otherwise treat as an epsilon-NE
 # Not entirely sure where this function should be.
-def findEps(M, r, c, best_response=False):
+def compute_epsilon(M, r, c, best_response=False):
     r = np.mat(r)
     c = np.mat(c)
     M = np.mat(M)
@@ -78,12 +80,10 @@ class ApproximateSolution:
     # a given strategy profile
     def _setinfo(self):
         A, B = game_to_np(self._profile.game)
-        m = A.shape[0]
-        n = A.shape[1]
-        x = np.array([self._profile[i] for i in range(m)])
-        y = np.array([self._profile[i] for i in range(m, m+n)])
-        self.epsNE = max(findEps(A, x, y), findEps(B.transpose(), y, x))
-        self.epsWSNE = max(findEps(A, x, y, True), findEps(B.transpose(), y, x, True))
+        x = np.array(self._profile[self._profile.game.players[0]])
+        y = np.array(self._profile[self._profile.game.players[1]])
+        self.epsNE = max(compute_epsilon(A, x, y), compute_epsilon(B.transpose(), y, x))
+        self.epsWSNE = max(compute_epsilon(A, x, y, True), compute_epsilon(B.transpose(), y, x, True))
 
 
 class KontogiannisSpirakisSolver:
@@ -95,28 +95,19 @@ class KontogiannisSpirakisSolver:
     """
     def _solve(self, M):
         """Find II's minmax strategy for zero-sum game M."""
-        m = M.shape[0]  # number of rows
-        n = M.shape[1]  # number of columns
+        m, n = M.shape
 
         M = np.column_stack([[0]*m, -M, [1]*m])
         nn = np.column_stack([[0]*n, np.eye(n), [0]*n])
-
         # non-negativity constraints
-        n1 = [-1] * n
-        n1.insert(0, 1)
-        n1.append(0)  # n1 = [1,-1,-1,...,-1,0]
-        n2 = [1] * n
-        n2.insert(0, -1)
-        n2.append(0)  # n2 = [-1,1,1,...,1,0]
+        n1 = [1] + ([-1] * n) + [0]
+        n2 = [-1] + ([1] * n) + [0]
 
         d = np.vstack([M, nn, n1, n2])
 
         mat = cdd.Matrix(d.tolist(), number_type='fraction')
         mat.obj_type = cdd.LPObjType.MIN
-
-        d = [0] * (n+1)
-        d.append(1)  # [0,0,...0,1]
-        mat.obj_func = d
+        mat.obj_func = ([0] * (n+1)) + [1]
 
         lp = cdd.LinProg(mat)
         lp.solve()
@@ -132,21 +123,17 @@ class KontogiannisSpirakisSolver:
     def _ksGame(self, A, B):
         return Fraction(1, 2) * (A - B)
 
-    # Solves the game using the KS algorithm, rational is used just as in the
-    # other Nash solvers
-    def solve(self, game, rational=False):
+    def solve(self, game: gbt.Game):
+        """Computes the well-supported approximate-Nash equilibrium."""
         A, B = game_to_np(game)
         D = self._ksGame(A, B)
         y = self._solve(D)
         y = y[0:A.shape[1]]
         x = self._solve(-D.transpose())
         x = x[0:A.shape[0]]
-        p = game.mixed_strategy_profile(rational=rational)
 
-        for i in range(A.shape[0]):
-            p[i] = x[i]
-
-        for i in range(A.shape[1]):
-            p[i + A.shape[0]] = y[i]
+        p = game.mixed_strategy_profile(rational=True)
+        p[game.players[0]] = x
+        p[game.players[1]] = y
 
         return [ApproximateSolution(p)]
