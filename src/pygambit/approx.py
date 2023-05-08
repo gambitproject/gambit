@@ -31,42 +31,55 @@ import pygambit as gbt
 
 
 class KontogiannisSpirakisResult:
-    """Represents the result of the Kontogiannis-Spirakis algorithm."""
-    def __init__(self, profile, matrices):
+    """Represents the result of the Kontogiannis-Spirakis algorithm.
+
+    Attributes
+    ----------
+    profile : MixedStrategyProfile
+        The computed mixed-strategy profile.
+
+    epsilon_ne : Rational
+        The value of $\varepsilon$ for which the profile is an $\varepsilon$-Nash equilibrium.
+
+    epsilon_wsne : Rational
+        The value of $\varepsilon$ for which the profile is an $\varepsilon$-well-supported
+        approximate Nash equilibrium.
+    """
+    def __init__(self, profile: gbt.MixedStrategyProfileRational, matrices):
         self._profile = profile
-        self._setinfo(matrices)
+        self._compute_attributes(matrices)
 
     @property
     def profile(self) -> gbt.MixedStrategyProfileRational:
         return self._profile
 
     @property
-    def epsilon_ne(self) -> Fraction:
+    def epsilon_ne(self) -> gbt.Rational:
         return self._epsilon_ne
 
     @property
-    def epsilon_wsne(self) -> Fraction:
+    def epsilon_wsne(self) -> gbt.Rational:
         return self._epsilon_wsne
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return (
             "<KontogiannisSpirakisResult for '%s': %s is %s-NE, %s-WSNE>" %
             (self.profile.game.title, self.profile, self.epsilon_ne, self.epsilon_wsne)
         )
 
     @staticmethod
-    def _compute_epsilon_br(M: np.array, r: np.array, c: np.array) -> Fraction:
+    def _compute_epsilon_br(M: np.array, r: np.array, c: np.array) -> gbt.Rational:
         """Calculates epsilon for strategy profile for NE."""
         payoffs = np.asmatrix(M) * np.asmatrix(c).transpose()
         return payoffs.max() - payoffs[np.asmatrix(r).transpose() > 0].min()
 
     @staticmethod
-    def _compute_epsilon_wsne(M: np.array, r: np.array, c: np.array) -> Fraction:
+    def _compute_epsilon_wsne(M: np.array, r: np.array, c: np.array) -> gbt.Rational:
         """Calculates epsilon for strategy profile for WSNE."""
         payoffs = np.asmatrix(M) * np.asmatrix(c).transpose()
         return payoffs.max() - (np.asmatrix(r) * payoffs)[0, 0]
 
-    def _setinfo(self, matrices):
+    def _compute_attributes(self, matrices):
         """Computes the values of epsilon for the profile."""
         A, B = matrices
         x = np.array(self._profile[self._profile.game.players[0]])
@@ -83,13 +96,10 @@ class KontogiannisSpirakisResult:
 
 class KontogiannisSpirakisSolver:
     """Compute a 2/3 well-supported approximate Nash equilibrium of a bimatrix game.
-
-    Implements the algorithm presented in
-    Spyros C. Kontogiannis, Paul G. Spirakis (2010). Well Supported
-    Approximate Equilibria in Bimatrix Games. Algorithmica 57(4): 653-667.
+    using the algorithm of Kontogiannis and Spirakis.
     """
     @staticmethod
-    def _solve(M):
+    def _solve(M: np.array) -> tuple:
         """Find II's minmax strategy for zero-sum game M."""
         m, n = M.shape
 
@@ -104,7 +114,8 @@ class KontogiannisSpirakisSolver:
 
         lp = cdd.LinProg(mat)
         lp.solve()
-        assert lp.status == cdd.LPStatusType.OPTIMAL
+        if lp.status != cdd.LPStatusType.OPTIMAL:
+            raise RuntimeError("LP solver failed to find optimal solution")
         # The primal solution is player 2's equilibrium (minmax) strategy
         return lp.primal_solution
 
@@ -133,3 +144,23 @@ class KontogiannisSpirakisSolver:
                   self._solve(D)[:A.shape[1]]]
         )
         return KontogiannisSpirakisResult(p, (A, B))
+
+
+def solve_wellsupported(game: gbt.Game) -> KontogiannisSpirakisResult:
+    """Compute a 2/3 well-supported approximate Nash equilibrium of a bimatrix game.
+    using the algorithm of [1]_.
+
+    Parameters
+    ----------
+    game : gbt.Game
+        The game to compute an approximate Nash equilibrium for.
+
+    Returns
+    -------
+    KontogiannisSpirakisResult
+        The result of the computation represented as a `KontogiannisSpirakisResult`.
+
+    .. [1] Spyros C. Kontogiannis and Paul G. Spirakis, "Well supported
+       approximate equilibria in bimatrix games,"  Algorithmica 57(4): 653-667, 2010.
+    """
+    return KontogiannisSpirakisSolver().solve(game)

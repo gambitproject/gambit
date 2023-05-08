@@ -8,19 +8,13 @@ import pygambit.approx
 
 class TestKSSolver:
     """Tests of Kontogiannis-Spirakis solver."""
-    def setUp(self):
-        self.solver = pygambit.approx.KontogiannisSpirakisSolver()
-
-    def tearDown(self):
-        pass
-
     def test_one(self):
         """Test that Kontogiannis-Spirakis finds exact Nash equilibrium with identity matrices."""
         for n in range(2, 20):
             A = [[1 if i == j else 0
                  for j in range(n)] for i in range(n)]
             g = Game.from_arrays(A, A)
-            result = self.solver.solve(g)
+            result = pygambit.approx.solve_wellsupported(g)
             assert result.epsilon_wsne == 0
 
     def test_two(self):
@@ -33,14 +27,14 @@ class TestKSSolver:
             B = [[1 if B[i, j] == 1 else 0
                   for j in range(B.shape[1])] for i in range(B.shape[0])]
             g = Game.from_arrays(A, B)
-            result = self.solver.solve(g)
+            result = pygambit.approx.solve_wellsupported(g)
             assert result.epsilon_wsne == 0
 
     def test_three(self):
         A = [["1/3", 1], [1, "1/3"], [0, 0]]
         B = [[1, "1/3"], ["1/3", 1], [0, 0]]
         g = Game.from_arrays(A, B)
-        result = self.solver.solve(g)
+        result = pygambit.approx.solve_wellsupported(g)
         assert result.epsilon_wsne == Fraction(2, 3)
 
     def test_four(self):
@@ -48,7 +42,7 @@ class TestKSSolver:
         A = [["1/3", 1], [0, 0]]
         B = [[1, "1/3"], [0, 0]]
         g = Game.from_arrays(A, B)
-        result = self.solver.solve(g)
+        result = pygambit.approx.solve_wellsupported(g)
         assert result.epsilon_wsne == Fraction(2, 3)
 
     def test_five(self):
@@ -63,7 +57,7 @@ class TestKSSolver:
             [0, b, a, b, a, b, a, b, a, b, a, b, a],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
         g = Game.from_arrays(A, B)
-        result = self.solver.solve(g)
+        result = pygambit.approx.solve_wellsupported(g)
         assert result.epsilon_wsne == Fraction(2, 3)
 
     def test_six(self):
@@ -80,7 +74,7 @@ class TestKSSolver:
                       [b, b, b, a, a],
                       [0, 0, 0, 0, 0]])
         g = Game.from_arrays(A, B)
-        result = self.solver.solve(g)
+        result = pygambit.approx.solve_wellsupported(g)
         assert result.epsilon_wsne == Fraction(2, 3)
 
     @staticmethod
@@ -97,10 +91,9 @@ class TestKSSolver:
         B.append([0] * n)
         return Game.from_arrays(A, B)
 
-
     def test_seven(self):
         """Test Kontogiannis-Spirakis on class of games with 2/3-WSNE."""
         for i in range(3, 20):
             g = self.generate_matrix(i)
-            result = self.solver.solve(g)
+            result = pygambit.approx.solve_wellsupported(g)
             assert result.epsilon_wsne == Fraction(2, 3)
