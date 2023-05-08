@@ -13,7 +13,6 @@ build:
     - libgmp-dev
 
 python:
-  version: "3.11"
   install:
     - requirements: doc/requirements.txt
     - method: setuptools
