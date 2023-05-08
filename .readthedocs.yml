@@ -5,6 +5,10 @@ sphinx:
 
 formats: all
 
+build:
+  apt_packages:
+    - libgmp-dev
+
 python:
   version: 3.8
   install:
