@@ -27,3 +27,9 @@ Computation of Nash equilibria
 .. automodule:: pygambit.nash
    :members:
 
+
+Computation of approximate Nash equilibria
+------------------------------------------
+
+.. automodule:: pygambit.approx
+   :members:

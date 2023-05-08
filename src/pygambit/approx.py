@@ -150,6 +150,8 @@ def solve_wellsupported(game: gbt.Game) -> KontogiannisSpirakisResult:
     """Compute a 2/3 well-supported approximate Nash equilibrium of a bimatrix game.
     using the algorithm of [1]_.
 
+    .. versionadded:: 16.1.0
+
     Parameters
     ----------
     game : gbt.Game
