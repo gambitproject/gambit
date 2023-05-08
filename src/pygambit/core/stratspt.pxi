@@ -20,7 +20,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-import functools
 from cython.operator cimport dereference as deref
 
 cdef class StrategySupportProfile(Collection):
@@ -86,6 +85,13 @@ cdef class StrategySupportProfile(Collection):
             index = index - self.support.NumStrategiesPlayer(pl+1)
         raise IndexError("StrategySupportProfile index out of range")
 
+    def __contains__(self, strategy: Strategy) -> bool:
+        if strategy not in self.game.strategies:
+            raise MismatchError(
+                "strategy is not part of the game on which the profile is defined."
+            )
+        return self.support.Contains(strategy.strategy)
+
     def __iter__(self) -> typing.Generator[Strategy, None, None]:
         cdef Strategy s
         for pl in range(len(self.game.players)):
@@ -116,12 +122,17 @@ cdef class StrategySupportProfile(Collection):
         UndefinedOperationError
             If `strategy` is the only strategy in the support for its player.
         """
-        if len(list(filter(lambda x: x.player == strategy.player, self))) > 1:
-            strategies = list(self)[:]
-            strategies.remove(strategy)
-            return StrategySupportProfile(strategies, self.game)
-        else:
-            raise UndefinedOperationError("remove(): cannot remove last strategy of a player")
+        if strategy not in self.game.strategies:
+            raise MismatchError(
+                "remove(): strategy is not part of the game on which the profile is defined."
+            )
+        if self.support.NumStrategiesPlayer(strategy.player.number + 1) == 1:
+            raise UndefinedOperationError(
+                "remove(): cannot remove last strategy of a player"
+            )
+        strategies = list(self)
+        strategies.remove(strategy)
+        return StrategySupportProfile(strategies, self.game)
 
     def difference(self, other: StrategySupportProfile) -> StrategySupportProfile:
         """Create a support profile which contains all strategies in this profile that
@@ -136,7 +147,14 @@ cdef class StrategySupportProfile(Collection):
         -------
         StrategySupportProfile
             The support profile resulting from the operation.
+
+        Raises
+        ------
+        MismatchError
+            If the support profiles are defined on different games.
         """
+        if self.game != other.game:
+            raise MismatchError("difference(): support profiles are defined on different games")
         return StrategySupportProfile(set(self) - set(other), self.game)
 
     def intersection(self, other: StrategySupportProfile) -> StrategySupportProfile:
@@ -152,7 +170,14 @@ cdef class StrategySupportProfile(Collection):
         -------
         StrategySupportProfile
             The support profile resulting from the operation.
+
+        Raises
+        ------
+        MismatchError
+            If the support profiles are defined on different games.
         """
+        if self.game != other.game:
+            raise MismatchError("intersection(): support profiles are defined on different games")
         return StrategySupportProfile(set(self) & set(other), self.game)
 
     def union(self, other: StrategySupportProfile) -> StrategySupportProfile:
@@ -168,7 +193,14 @@ cdef class StrategySupportProfile(Collection):
         -------
         StrategySupportProfile
             The support profile resulting from the operation.
+
+        Raises
+        ------
+        MismatchError
+            If the support profiles are defined on different games.
         """
+        if self.game != other.game:
+            raise MismatchError("union(): support profiles are defined on different games")
         return StrategySupportProfile(set(self) | set(other), self.game)
 
     def issubset(self, other: StrategySupportProfile) -> bool:
@@ -183,11 +215,18 @@ cdef class StrategySupportProfile(Collection):
         -------
         bool
             `True` if every strategy in the profile is also in `other`.
+
+        Raises
+        ------
+        MismatchError
+            If the support profiles are defined on different games.
         """
-        return functools.reduce(lambda acc,st: acc & (st in other), self, True)
+        if self.game != other.game:
+            raise MismatchError("issubset(): support profiles are defined on different games")
+        return self.support.IsSubsetOf(deref(other.support))
 
     def issuperset(self, other: StrategySupportProfile) -> bool:
-        """Test for whether annother support is contained in this one.
+        """Test for whether another support is contained in this one.
 
         Parameters
         ----------
@@ -198,7 +237,15 @@ cdef class StrategySupportProfile(Collection):
         -------
         bool
             `True` if every strategy in `other` is in this profile.
+
+        Raises
+        ------
+        MismatchError
+            If the support profiles are defined on different games.
         """
+        if self.game != other.game:
+            raise MismatchError("issuperset(): support profiles are defined on different games")
+        return other.is_subset_of(self)
 
     def restrict(self) -> StrategicRestriction:
         """Creates a `StrategicRestriction`, which is a restriction of the game
@@ -209,12 +256,33 @@ cdef class StrategySupportProfile(Collection):
         restriction.support = new c_StrategySupportProfile(deref(self.support))
         return restriction
 
-    def undominated(self, strict=False, external=False):
-        cdef StrategicRestriction restriction
-        restriction = StrategicRestriction()
-        restriction.support = new c_StrategySupportProfile(self.support.Undominated(strict, external))
-        new_profile = StrategySupportProfile(restriction.strategies, self.game)
-        return new_profile
+    def undominated(self, strict=False, external=False) -> StrategySupportProfile:
+        """Return a support profile including only strategies which are not dominated
+        by another pure strategy.
+
+        This function performs only one round of elimination.
+
+        Parameters
+        ----------
+        strict : bool, default False
+            If specified `True`, eliminate only strategies which are strictly dominated.
+            If `False`, strategies which are weakly dominated are also eliminiated.
+
+        external : bool, default False
+            The default is to consider dominance only by strategies which are in
+            the support profile for that player.  If `True`, strategies which are dominated
+            by another strategy not in the support profile are also eliminated.
+
+        Returns
+        -------
+        StrategySupportProfile
+            A new support profile containing only the strategies which are not dominated.
+        """
+        cdef StrategySupportProfile result
+        result = StrategySupportProfile(list(self), self.game)
+        del result.support
+        result.support = new c_StrategySupportProfile(self.support.Undominated(strict, external))
+        return result
 
 
 cdef class RestrictionOutcomes(Collection):
