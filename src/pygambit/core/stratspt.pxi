@@ -21,13 +21,14 @@
 #
 
 from cython.operator cimport dereference as deref
+from libcpp.memory cimport unique_ptr
 
 cdef class StrategySupportProfile(Collection):
     """A set-like object representing a subset of the strategies in game.
     A StrategySupportProfile always contains at least one strategy for each player
     in the game.
     """
-    cdef c_StrategySupportProfile *support
+    cdef unique_ptr[c_StrategySupportProfile] support
 
     def __init__(self, strategies, Game game not None):
         if len(set([strat.player.number for strat in strategies])) != len(game.players):
@@ -35,25 +36,22 @@ cdef class StrategySupportProfile(Collection):
                "A StrategySupportProfile must have at least one strategy for each player"
             )
         # There's at least one strategy for each player, so this forms a valid support profile
-        self.support = new c_StrategySupportProfile((<Game>game).game)
+        self.support.reset(new c_StrategySupportProfile((<Game>game).game))
         for strategy in game.strategies:
             if strategy not in strategies:
-                self.support.RemoveStrategy((<Strategy>strategy).strategy)
-
-    def __dealloc__(self):
-        del self.support
+                deref(self.support).RemoveStrategy((<Strategy>strategy).strategy)
 
     @property
     def game(self) -> Game:
         """The `Game` on which the support profile is defined."""
         cdef Game g
         g = Game()
-        g.game = self.support.GetGame()
+        g.game = deref(self.support).GetGame()
         return g
 
     def __len__(self) -> int:
         """Returns the total number of strategies in the support profile."""
-        return self.support.MixedProfileLength()
+        return deref(self.support).MixedProfileLength()
 
     def __richcmp__(self, other: typing.Any, whichop: int) -> bool:
         if isinstance(other, StrategySupportProfile):
@@ -78,11 +76,11 @@ cdef class StrategySupportProfile(Collection):
     def __getitem__(self, index: int) -> Strategy:
         cdef Strategy s
         for pl in range(len(self.game.players)):
-            if index < self.support.NumStrategiesPlayer(pl+1):
+            if index < deref(self.support).NumStrategiesPlayer(pl+1):
                 s = Strategy()
-                s.strategy = self.support.GetStrategy(pl+1, index+1)
+                s.strategy = deref(self.support).GetStrategy(pl+1, index+1)
                 return s
-            index = index - self.support.NumStrategiesPlayer(pl+1)
+            index = index - deref(self.support).NumStrategiesPlayer(pl+1)
         raise IndexError("StrategySupportProfile index out of range")
 
     def __contains__(self, strategy: Strategy) -> bool:
@@ -90,14 +88,14 @@ cdef class StrategySupportProfile(Collection):
             raise MismatchError(
                 "strategy is not part of the game on which the profile is defined."
             )
-        return self.support.Contains(strategy.strategy)
+        return deref(self.support).Contains(strategy.strategy)
 
     def __iter__(self) -> typing.Generator[Strategy, None, None]:
         cdef Strategy s
         for pl in range(len(self.game.players)):
-            for st in range(self.support.NumStrategiesPlayer(pl+1)):
+            for st in range(deref(self.support).NumStrategiesPlayer(pl+1)):
                 s = Strategy()
-                s.strategy = self.support.GetStrategy(pl+1, st+1)
+                s.strategy = deref(self.support).GetStrategy(pl+1, st+1)
                 yield s
 
     def __and__(self, other: StrategySupportProfile) -> StrategySupportProfile:
@@ -126,7 +124,7 @@ cdef class StrategySupportProfile(Collection):
             raise MismatchError(
                 "remove(): strategy is not part of the game on which the profile is defined."
             )
-        if self.support.NumStrategiesPlayer(strategy.player.number + 1) == 1:
+        if deref(self.support).NumStrategiesPlayer(strategy.player.number + 1) == 1:
             raise UndefinedOperationError(
                 "remove(): cannot remove last strategy of a player"
             )
@@ -223,7 +221,7 @@ cdef class StrategySupportProfile(Collection):
         """
         if self.game != other.game:
             raise MismatchError("issubset(): support profiles are defined on different games")
-        return self.support.IsSubsetOf(deref(other.support))
+        return deref(self.support).IsSubsetOf(deref(other.support))
 
     def issuperset(self, other: StrategySupportProfile) -> bool:
         """Test for whether another support is contained in this one.
@@ -280,8 +278,7 @@ cdef class StrategySupportProfile(Collection):
         """
         cdef StrategySupportProfile result
         result = StrategySupportProfile(list(self), self.game)
-        del result.support
-        result.support = new c_StrategySupportProfile(self.support.Undominated(strict, external))
+        result.support.reset(new c_StrategySupportProfile(deref(self.support).Undominated(strict, external)))
         return result
 
 
