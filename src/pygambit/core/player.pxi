@@ -23,13 +23,17 @@
 cdef class Infosets(Collection):
     """Represents a collection of infosets for a player."""
     cdef c_GamePlayer player
-    def __len__(self):    return self.player.deref().NumInfosets()
+    def __len__(self):
+        return self.player.deref().NumInfosets()
+
     def __getitem__(self, iset):
-        if not isinstance(iset, int):  return Collection.__getitem__(self, iset)
+        if not isinstance(iset, int):
+            return Collection.__getitem__(self, iset)
         cdef Infoset s
         s = Infoset()
         s.infoset = self.player.deref().GetInfoset(iset+1)
         return s
+
 
 cdef class Strategies(Collection):
     """Represents a collection of strategies for a player."""
@@ -47,13 +51,17 @@ cdef class Strategies(Collection):
         s.label = str(label)
         return s
 
-    def __len__(self):    return self.player.deref().NumStrategies()
+    def __len__(self):
+        return self.player.deref().NumStrategies()
+
     def __getitem__(self, st):
-        if not isinstance(st, int):  return Collection.__getitem__(self, st)
+        if not isinstance(st, int):
+            return Collection.__getitem__(self, st)
         cdef Strategy s
         s = Strategy()
         s.strategy = self.player.deref().GetStrategy(st+1)
         return s
+
 
 cdef class PlayerSupportStrategies(Collection):
     """Represents a collection of strategies for a player in a restriction"""
@@ -71,6 +79,7 @@ cdef class PlayerSupportStrategies(Collection):
     
     def __len__(self):
         return self.restriction.num_strategies_player(self.player.number)
+
     def __getitem__(self, strat):
         if not isinstance(strat, int):
             return Collection.__getitem__(self, strat)
@@ -79,6 +88,7 @@ cdef class PlayerSupportStrategies(Collection):
         s.strategy = self.restriction.support.GetStrategy(self.player.number+1, strat+1)
         s.restriction = self.restriction
         return s
+
 
 cdef class Player:
     cdef c_GamePlayer player
@@ -93,7 +103,7 @@ cdef class Player:
                 f"in game '{self.game.title}'>"
             )
 
-    def __richcmp__(Player self, other, whichop):
+    def __richcmp__(self, other, whichop):
         if isinstance(other, Player):
             if whichop == 2:
                 return self.player.deref() == (<Player>other).player.deref()
@@ -134,12 +144,12 @@ cdef class Player:
             self.player.deref().SetLabel(value.encode('ascii'))
 
     property number:
-        def __get__(self):
+        def __get__(self) -> int:
             return self.player.deref().GetNumber() - 1
 
     property is_chance:
-        def __get__(self):
-            return True if self.player.deref().IsChance() != 0 else False
+        def __get__(self) -> bool:
+            return self.player.deref().IsChance()
 
     property strategies:
         def __get__(self):

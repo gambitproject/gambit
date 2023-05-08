@@ -446,7 +446,7 @@ void GameTreeNodeRep::SetInfoset(GameInfoset p_infoset)
   if (p_infoset->GetGame() != m_efg) throw MismatchException();
   if (!infoset || infoset == p_infoset) return;
   if (p_infoset->NumActions() != children.Length()) 
-    throw MismatchException();
+    throw DimensionException();
 
   infoset->RemoveMember(this);
   dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->())->AddMember(this);

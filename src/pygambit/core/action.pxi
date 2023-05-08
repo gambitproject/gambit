@@ -29,7 +29,7 @@ cdef class Action:
             f"<Action [{self.action.deref().GetNumber()-1}] '{self.label}' "
             f"at infoset '{self.infoset.label}' "
             f"for player '{self.infoset.player.label}' "
-            f"in game '{self.game.title}'>"
+            f"in game '{self.infoset.game.title}'>"
         )
     
     def __richcmp__(Action self, other, whichop):
@@ -58,11 +58,8 @@ cdef class Action:
             )
         self.action.deref().DeleteAction()
 
-    def precedes(self, node):
-        if isinstance(node, Node):
-            return self.action.deref().Precedes((<Node>node).node)
-        else:
-            raise TypeError("Precedes takes a Node object as its input")
+    def precedes(self, node: Node) -> bool:
+        return self.action.deref().Precedes((<Node>node).node)
 
     property label:
         def __get__(self):

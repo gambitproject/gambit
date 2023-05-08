@@ -31,7 +31,7 @@ cdef class Strategy:
             f"in game '{self.player.game.title}'>"
         )
     
-    def __richcmp__(Strategy self, other, whichop):
+    def __richcmp__(self, other, whichop) -> bool:
         if isinstance(other, Strategy):
             if whichop == 2:
                 return self.strategy.deref() == (<Strategy>other).strategy.deref()
@@ -53,6 +53,7 @@ cdef class Strategy:
     property label:
         def __get__(self):
             return self.strategy.deref().GetLabel().decode('ascii')
+
         def __set__(self, value):
             if self.restriction is not None:
                 raise UndefinedOperationError("Changing objects in a restriction is not supported")

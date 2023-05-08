@@ -29,7 +29,7 @@ cdef class Outcome:
             f"in game '{self.game.title}'>"
         )
     
-    def __richcmp__(Outcome self, other, whichop):
+    def __richcmp__(self, other, whichop) -> bool:
         if isinstance(other, Outcome):
             if whichop == 2:
                 return self.outcome.deref() == (<Outcome>other).outcome.deref()
@@ -65,6 +65,7 @@ cdef class Outcome:
     property label:
         def __get__(self):
             return self.outcome.deref().GetLabel().decode('ascii')
+
         def __set__(self, value):
             if self.restriction is not None:
                 raise UndefinedOperationError("Changing objects in a restriction is not supported")
@@ -110,6 +111,7 @@ cdef class Outcome:
         o = Outcome()
         o.outcome = self.outcome
         return o
+
 
 cdef class TreeGameOutcome:
     """Represents an outcome in a strategic game derived from an extensive game."""

@@ -23,13 +23,18 @@
 cdef class Members(Collection):
     """Represents a collection of members of an infoset."""
     cdef c_GameInfoset infoset
-    def __len__(self):     return self.infoset.deref().NumMembers()
+
+    def __len__(self):
+        return self.infoset.deref().NumMembers()
+
     def __getitem__(self, i):
-        if not isinstance(i, int):  return Collection.__getitem__(self, i)
+        if not isinstance(i, int):
+            return Collection.__getitem__(self, i)
         cdef Node n
         n = Node()
         n.node = self.infoset.deref().GetMember(i+1)
         return n
+
 
 cdef class Actions(Collection):
     """Represents a collection of actions at an infoset."""
@@ -45,9 +50,12 @@ cdef class Actions(Collection):
         else:
             raise TypeError("insert_action takes an Action object as its input")
 
-    def __len__(self):     return self.infoset.deref().NumActions()
+    def __len__(self):
+        return self.infoset.deref().NumActions()
+
     def __getitem__(self, act):
-        if not isinstance(act, int):  return Collection.__getitem__(self, act)
+        if not isinstance(act, int):
+            return Collection.__getitem__(self, act)
         cdef Action a
         a = Action()
         a.action = self.infoset.deref().GetAction(act+1)
@@ -62,7 +70,7 @@ cdef class Infoset:
             f"for player '{self.player.label}' in game '{self.game.title}'>"
          )
     
-    def __richcmp__(Infoset self, other, whichop):
+    def __richcmp__(self, other, whichop):
         if isinstance(other, Infoset):
             if whichop == 2:
                 return self.infoset.deref() == (<Infoset>other).infoset.deref()
@@ -81,17 +89,11 @@ cdef class Infoset:
     def __hash__(self):
         return long(<long>self.infoset.deref())
 
-    def precedes(self, node):
-        if isinstance(node, Node):
-            return self.infoset.deref().Precedes((<Node>node).node)
-        else:
-            raise TypeError("argument of precedes should be a Node instance")
+    def precedes(self, node: Node) -> bool:
+        return self.infoset.deref().Precedes((<Node>node).node)
 
-    def reveal(self, player):
-        if isinstance(player, Player):
-            self.infoset.deref().Reveal((<Player>player).player)
-        else:
-            raise TypeError("argument of reveal should be a Player instance")
+    def reveal(self, player: Player) -> None:
+        self.infoset.deref().Reveal((<Player>player).player)
             
     property game:
         def __get__(self):
@@ -103,11 +105,11 @@ cdef class Infoset:
     property label:
         def __get__(self):
             return self.infoset.deref().GetLabel().decode('ascii')
-        def __set__(self, str value):
+        def __set__(self, value: str):
             self.infoset.deref().SetLabel(value.encode('ascii'))
 
     property is_chance:
-        def __get__(self):
+        def __get__(self) -> bool:
             return self.infoset.deref().IsChanceInfoset()
 
     property actions:
@@ -129,11 +131,8 @@ cdef class Infoset:
             p = Player()
             p.player = self.infoset.deref().GetPlayer()
             return p
-        def __set__(self, player):
-            if not isinstance(player, Player):
-                raise TypeError("argument should be a Player instance, received {}"
-		                .format(player.__class__.__name__))
-            elif player.game != self.game:
+
+        def __set__(self, player: Player):
+            if player.game != self.game:
                 raise MismatchError("player at an infoset must belong to the same game")
-            else:
-                self.infoset.deref().SetPlayer((<Player>player).player)
+            self.infoset.deref().SetPlayer((<Player>player).player)

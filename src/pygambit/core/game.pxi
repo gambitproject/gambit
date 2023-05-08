@@ -31,9 +31,13 @@ import pygambit.gameiter
 cdef class Outcomes(Collection):
     """Represents a collection of outcomes in a game."""
     cdef c_Game game
-    def __len__(self):    return self.game.deref().NumOutcomes()
+
+    def __len__(self):
+        return self.game.deref().NumOutcomes()
+
     def __getitem__(self, outc):
-        if not isinstance(outc, int):  return Collection.__getitem__(self, outc)
+        if not isinstance(outc, int):
+            return Collection.__getitem__(self, outc)
         cdef Outcome c
         c = Outcome()
         c.outcome = self.game.deref().GetOutcome(outc+1)
@@ -46,13 +50,18 @@ cdef class Outcomes(Collection):
         if label != "": c.label = str(label)
         return c
 
+
 cdef class Players(Collection):
     """Represents a collection of players in a game."""
     cdef c_Game game
     cdef StrategicRestriction restriction
-    def __len__(self):       return self.game.deref().NumPlayers()
+
+    def __len__(self):
+        return self.game.deref().NumPlayers()
+
     def __getitem__(self, pl):
-        if not isinstance(pl, int):  return Collection.__getitem__(self, pl)
+        if not isinstance(pl, int):
+            return Collection.__getitem__(self, pl)
         cdef Player p
         p = Player()
         p.player = self.game.deref().GetPlayer(pl+1)
@@ -80,8 +89,10 @@ cdef class Players(Collection):
 cdef class GameActions(Collection):
     """Represents a collection of actions in a game."""
     cdef c_Game game
+
     def __len__(self):
         return self.game.deref().BehavProfileLength()
+
     def __getitem__(self, action):
         if not isinstance(action, int):
             return Collection.__getitem__(self, action)
@@ -93,14 +104,16 @@ cdef class GameActions(Collection):
 cdef class GameInfosets(Collection):
     """Represents a collection of infosets in a game."""
     cdef c_Game game
+
     def __len__(self):
         cdef Array[int] num_infosets
         num_infosets = self.game.deref().NumInfosets()
         size = num_infosets.Length()
         n = 0
-        for i in range(1,size+1):
+        for i in range(1, size+1):
             n += num_infosets.getitem(i)
         return n
+
     def __getitem__(self, infoset):
         if not isinstance(infoset, int):
             return Collection.__getitem__(self, infoset)
@@ -109,11 +122,14 @@ cdef class GameInfosets(Collection):
         i.infoset = self.game.deref().GetInfoset(infoset+1)
         return i
 
+
 cdef class GameStrategies(Collection):
     """Represents a collection of strategies in a game."""
     cdef c_Game game
+
     def __len__(self):
         return self.game.deref().MixedProfileLength()
+
     def __getitem__(self, st):
         if not isinstance(st, int):
             return Collection.__getitem__(self, st)
@@ -121,6 +137,7 @@ cdef class GameStrategies(Collection):
         s = Strategy()
         s.strategy = self.game.deref().GetStrategy(st+1)
         return s
+
 
 cdef class Game:
     """Represents a game, the fundamental concept in game theory.
@@ -340,7 +357,7 @@ cdef class Game:
         else:
             return self.write('html')
 
-    def __richcmp__(Game self, other, whichop):
+    def __richcmp__(self, other, whichop) -> bool:
         if isinstance(other, Game):
             if whichop == 2:
                 return self.game.deref() == (<Game>other).game.deref()
@@ -362,7 +379,7 @@ cdef class Game:
     property is_tree:
         """Returns whether a game has a tree-based representation."""
         def __get__(self) -> bool:
-            return self.game.deref().IsTree() != 0
+            return self.game.deref().IsTree()
 
     property title:
         """Gets or sets the title of the game.  The title of the game is
@@ -370,6 +387,7 @@ cdef class Game:
         def __get__(self) -> str:
             """Gets the title of the game."""
             return self.game.deref().GetTitle().decode('ascii')
+
         def __set__(self, value: str) -> None:
             """Sets the title of the game."""
             self.game.deref().SetTitle(value.encode('ascii'))
@@ -492,8 +510,7 @@ cdef class Game:
         cdef Outcome outcome
         cdef TreeGameOutcome tree_outcome
         psp = new c_PureStrategyProfile(self.game.deref().NewPureStrategyProfile())
-        
-        
+
         for (pl, st) in enumerate(args):
             psp.deref().SetStrategy(self.game.deref().GetPlayer(pl+1).deref().GetStrategy(st+1))
 
@@ -536,7 +553,6 @@ cdef class Game:
             else:
                 raise TypeError("Must use a tuple of ints, strategy labels, or strategies")
         return self._get_contingency(*tuple(cont))
-
 
     def mixed_strategy_profile(self, data=None, rational=False):
         cdef MixedStrategyProfileDouble mspd

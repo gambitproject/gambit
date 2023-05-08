@@ -43,8 +43,11 @@ cdef class StrategySupportProfile(Collection):
     def __dealloc__(self):
         if self.support != (<c_StrategySupportProfile *>0):
             del self.support
-    def __len__(self):    return self.support.MixedProfileLength()
-    def __richcmp__(StrategySupportProfile self, other, whichop):
+
+    def __len__(self):
+        return self.support.MixedProfileLength()
+
+    def __richcmp__(self, other, whichop) -> bool:
         if isinstance(other, StrategySupportProfile):
             if whichop == 1:
                 return self.issubset(other)
@@ -77,36 +80,29 @@ cdef class StrategySupportProfile(Collection):
                 return s
             strat = strat - num_strategies.getitem(i)
         raise IndexError("Index out of range")
+
     # Set-like methods
-    def __and__(self, other):
-        if isinstance(other, StrategySupportProfile):
-            return self.intersection(other)
-        raise NotImplementedError
-    def __or__(self, other):
-        if isinstance(other, StrategySupportProfile):
-            return self.union(other)
-        raise NotImplementedError
-    def __sub__(self, other):
-        if isinstance(other, StrategySupportProfile):
-            return self.difference(other)
-        raise NotImplementedError
+    def __and__(self, other: StrategySupportProfile) -> StrategySupportProfile:
+        return self.intersection(other)
 
-    def remove(self, strategy):
-        if isinstance(strategy, Strategy):
-            if len(list(filter(lambda x: x.player == strategy.player, self))) > 1:
-                strategies = list(self)[:]
-                strategies.remove(strategy)
-                return StrategySupportProfile(strategies, self.game)
-            else:
-                raise UndefinedOperationError(
-                    "cannot remove last strategy of a player"
-                )
-        raise TypeError("delete requires a Strategy object")
+    def __or__(self, other: StrategySupportProfile) -> StrategySupportProfile:
+        return self.union(other)
 
-    def difference(self, StrategySupportProfile other):
+    def __sub__(self, other: StrategySupportProfile) -> StrategySupportProfile:
+        return self.difference(other)
+
+    def remove(self, strategy: Strategy):
+        if len(list(filter(lambda x: x.player == strategy.player, self))) > 1:
+            strategies = list(self)[:]
+            strategies.remove(strategy)
+            return StrategySupportProfile(strategies, self.game)
+        else:
+            raise UndefinedOperationError("remove(): cannot remove last strategy of a player")
+
+    def difference(self, other: StrategySupportProfile) -> StrategySupportProfile:
         return StrategySupportProfile(list(filter(lambda x: x not in other, self)), self.game)
 
-    def intersection(self, StrategySupportProfile other):
+    def intersection(self, other: StrategySupportProfile) -> StrategySupportProfile:
         return StrategySupportProfile(list(filter(lambda x: x in other, self)), self.game)
 
     def is_valid(self, strategies, num_players):
@@ -115,10 +111,10 @@ cdef class StrategySupportProfile(Collection):
             return True
         return False
 
-    def issubset(self, StrategySupportProfile other):
+    def issubset(self, other: StrategySupportProfile) -> bool:
         return functools.reduce(lambda acc,st: acc & (st in other), self, True)
 
-    def issuperset(self, StrategySupportProfile other):
+    def issuperset(self, other: StrategySupportProfile) -> bool:
         return other.issubset(self)
 
     def restrict(self):
@@ -188,6 +184,7 @@ cdef class RestrictionStrategies(Collection):
                 return s
             strat = strat - num_strategies.getitem(i)
         raise IndexError("Index out of range")
+
 
 cdef class StrategicRestriction:
     """
