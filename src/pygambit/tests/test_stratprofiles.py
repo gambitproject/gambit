@@ -15,18 +15,18 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
         del self.restriction
 
     def test_num_strategies(self):
-        "Ensure the support profile of the full game still has all strategies"
+        """Ensure the support profile of the full game still has all strategies"""
         assert len(self.support_profile) == len(self.game.strategies)
         assert len(self.support_profile) == len(self.restriction.strategies)
 
     def test_getitem(self):
-        "Test retrieving strategies from a support profile"
+        """Test retrieving strategies from a support profile"""
         for strategy in self.support_profile:
             assert strategy in self.game.strategies
             assert strategy in self.restriction.strategies
 
     def test_remove(self):
-        "Test removing strategies from a support profile"
+        """Test removing strategies from a support profile"""
         strategy = self.support_profile[0]
         new_profile = self.support_profile.remove(strategy)
         assert len(self.support_profile) == len(new_profile) + 1
@@ -46,7 +46,7 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
         assert strategy not in new_restriction.strategies
 
     def test_difference(self):
-        "Test the subtraction of two support profiles"
+        """Test the subtraction of two support profiles"""
         strat_list = [self.support_profile[0], self.support_profile[4]]
         dif_profile = pygambit.StrategySupportProfile(
             strat_list, self.game)
@@ -68,7 +68,7 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
         self.assertRaises(ValueError, foo)
 
     def test_intersection(self):
-        "Test the intersection between two support profiles"
+        """Test the intersection between two support profiles"""
         strat_list = [self.support_profile[0], self.support_profile[2],
                       self.support_profile[4]]
         fir_profile = pygambit.StrategySupportProfile(
@@ -81,7 +81,7 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
 
     def test_intersection_error(self):
         """Ensure an error is raised when the intersection isn't a
-        valid support profile
+        valid support profile.
         """
         def foo():
             strat_list = [self.support_profile[0], self.support_profile[2],
@@ -94,7 +94,7 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
         self.assertRaises(ValueError, foo)
 
     def test_union(self):
-        "Test the union between two support profiles"
+        """Test the union between two support profiles"""
         strat_list = [self.support_profile[0], self.support_profile[2],
                       self.support_profile[4]]
         fir_profile = pygambit.StrategySupportProfile(
@@ -104,7 +104,7 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
         assert new_profile == self.support_profile
 
     def test_restriction_support_profile(self):
-        "Test generating the support profile from a restricted game"
+        """Test generating the support profile from a restricted game"""
         assert self.support_profile == self.restriction.support_profile()
         strat_list = [self.support_profile[0], self.support_profile[2],
                       self.support_profile[4]]
@@ -113,7 +113,7 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
         assert fir_profile == fir_profile.restrict().support_profile()
 
     def test_undominated(self):
-        "Test removing undominated strategies from the support profile"
+        """Test removing undominated strategies from the support profile"""
         new_profile = self.support_profile
         loop_profile = new_profile.undominated()
         while loop_profile != new_profile:
@@ -124,8 +124,8 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
             [self.support_profile[0], self.support_profile[3]], self.game)
 
     def test_remove_error(self):
-        "Test removing the last strategy of a player"
+        """Test removing the last strategy of a player"""
         def foo():
             profile = self.support_profile.remove(self.support_profile[3])
-            profile = profile.remove(profile[3])
+            profile.remove(profile[3])
         self.assertRaises(pygambit.UndefinedOperationError, foo)

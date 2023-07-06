@@ -37,15 +37,16 @@ cdef class Children(Collection):
 
 
 cdef class Node:
+    """Represents a node in a :py:class:`Game`."""
     cdef c_GameNode node
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<Node [{self.node.deref().GetNumber()}] '{self.label}' "
             f"in game '{self.game.title}'>"
         )
 
-    def __richcmp__(self, other, whichop) -> bool:
+    def __richcmp__(Node self, other, whichop) -> bool:
         if isinstance(other, Node):
             if whichop == 2:
                 return self.node.deref() == (<Node>other).node.deref()
@@ -61,14 +62,11 @@ cdef class Node:
             else:
                 raise NotImplementedError
 
-    def __hash__(self):
+    def __hash__(self) -> long:
         return long(<long>self.node.deref())
 
     def is_successor_of(self, node: Node) -> bool:
         return self.node.deref().IsSuccessorOf((<Node>node).node)
-
-    def is_subgame_root(self) -> bool:
-        return self.node.deref().IsSubgameRoot()
 
     def append_move(self, player, actions=None):
         cdef Infoset i
@@ -119,6 +117,11 @@ cdef class Node:
     def leave_infoset(self) -> Infoset:
         """Removes this node from its information set. If this node is the only node
         in its information set, this operation has no effect.
+
+        Returns
+        -------
+        Infoset
+            The information set to which the node belongs after the operation.
         """
         cdef Infoset i
         i = Infoset()
@@ -160,7 +163,8 @@ cdef class Node:
             return c
 
     property game:
-        def __get__(self):
+        """Gets the :py:class:`Game` to which the node belongs."""
+        def __get__(self) -> Game:
             cdef Game g
             g = Game()
             g.game = self.node.deref().GetGame()
@@ -231,6 +235,15 @@ cdef class Node:
     property is_terminal:
         def __get__(self) -> bool:
             return self.node.deref().IsTerminal()
+
+    property is_subgame_root:
+        """Returns `True` if the node is the root of a proper subgame.
+
+        .. versionchanged:: 16.1.0
+            Changed to being a property instead of a member function.
+        """
+        def __get__(self) -> bool:
+            return self.node.deref().IsSubgameRoot()
 
     property outcome:
         def __get__(self) -> typing.Optional[Outcome]:

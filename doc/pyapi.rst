@@ -585,65 +585,6 @@ Representations of play of games
 The main responsibility of these classes is to capture information
 about a plan of play of a game, by one or more players.
 
-.. py:class:: StrategySupportProfile
-
-   A set-like object representing a subset of the strategies in a
-   game.  It incorporates the restriction that each player must have
-   at least one strategy.
-
-   .. py:attribute:: game
-
-      Returns the :py:class:`Game` on which the support
-      profile is defined.
-
-   .. py:method:: issubset(other)
-
-      Returns :literal:`True` if this profile is a subset of
-      `other`.
-
-      :param StrategySupportProfile other: another support profile
-
-   .. py:method:: issuperset(other)
-
-      Returns :literal:`True` if this profile is a superset of
-      `other`.
-
-      :param StrategySupportProfile other: another support profile
-
-   .. py:method:: restrict()
-
-      Creates a :py:class:`StrategicRestriction` object,
-      which defines a restriction of the game in which only the
-      strategies in this profile are present.
-
-   .. py:method:: remove(strategy)
-
-      Modifies the support profile by removing the specified strategy.
-
-      :param Strategy strategy: the strategy to remove
-      :raises UndefinedOperationError: if attempting to remove the
-				       last strategy for a player
-
-   .. py:method:: difference(other)
-
-      Returns a new support profile containing all the strategies
-      which are present in this profile, but not in `other`.
-
-      :param StrategySupportProfile other: another support profile
-
-   .. py:method:: intersection(other)
-
-      Returns a new support profile containing all the strategies
-      present in both this profile and in `other`.
-
-      :param StrategySupportProfile other: another support profile
-
-   .. py:method:: union(other)
-   
-      Returns a new support profile containing all the strategies
-      present in this profile, in `other`, or in both.
-
-      :param StrategySupportProfile other: another support profile
 
 .. py:class:: MixedStrategyProfile
 
@@ -827,16 +768,6 @@ Elements of games
 These classes represent elements which exist inside of the definition
 of game.
 
-.. py:class:: Rational
-
-   .. versionadded:: 15.0.0
-
-   Represents a rational number in specifying numerical data for a
-   game, or in a computed strategy profile.  This is implemented as a
-   subclass of the Python standard library
-   :py:class:`fractions.Fraction`, with additional instrumentation for
-   rendering in IPython notebooks.
-
 
 .. py:class:: Players
    
@@ -864,44 +795,6 @@ of game.
       with one strategy. If the provided player label is shared by
       another player a warning will be returned.
 
-.. py:class:: Player
-
-   Represents a player in a :py:class:`Game`.
-
-   .. py:attribute:: game
-
-      Returns the :py:class:`Game` in which the player is.
-
-   .. py:attribute:: label
-
-      A text label useful for identification of the player.
-
-   .. py:attribute:: number
-
-      Returns the number of the player in the :py:class:`Game`.
-      Players are numbered starting with ``0``.
-
-   .. py:attribute:: is_chance
-
-      Returns ``True`` if the player object represents the chance player.
-
-   .. py:attribute:: infosets
-
-      Returns a list-like object representing the information sets of the player.
-
-   .. py:attribute:: strategies
-
-      Returns a :py:class:`pygambit.Strategies` collection object
-      representing the strategies of the player.
-
-   .. py:attribute:: min_payoff
-
-      Returns the smallest payoff for the player in any outcome of the game.
-
-   .. py:attribute:: max_payoff
-
-      Returns the largest payoff for the player in any outcome of the game.
-
 
 .. py:class:: Infoset
 
@@ -911,32 +804,6 @@ of game.
 
       Returns ``True`` or ``False`` depending on whether the specified node
       precedes the information set in the extensive game. 
-
-   .. py:method:: reveal(player)
-
-      Reveals the information set to a player.
-
-   .. py:attribute:: actions
-
-      Returns a :py:class:`pygambit.Actions` collection object representing 
-      the actions defined in this information set.
-
-   .. py:attribute:: label
-
-      A text label used to identify the information set.
-
-   .. py:attribute:: is_chance
-
-      Returns ``True`` or ``False`` depending on whether this information set is
-      associated to the chance player.
-
-   .. py:attribute:: members
-
-      Returns the set of nodes associated with this information set.
-
-   .. py:attribute:: player
-
-      Returns the player object associated with this information set.
 
 
 .. py:class:: Actions
@@ -1040,11 +907,7 @@ of game.
 
       Returns ``True`` if the node is a successor of ``node``.
 
-   .. py:method:: is_subgame_root(node)
-
-      Returns ``True`` if the current node is a root of a proper subgame.
-
-   .. py:attribute:: label
+     .. py:attribute:: label
 
       A text label useful for identification of the node.
 

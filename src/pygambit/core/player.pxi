@@ -91,6 +91,7 @@ cdef class PlayerSupportStrategies(Collection):
 
 
 cdef class Player:
+    """Represents a player in a :py:class:`Game`."""
     cdef c_GamePlayer player
     cdef StrategicRestriction restriction
 
@@ -123,6 +124,7 @@ cdef class Player:
         return long(<long>self.player.deref())
 
     property game:
+        """Gets the :py:class:`Game` to which the player belongs."""
         def __get__(self):
             cdef Game g
             if self.restriction is not None:
@@ -132,6 +134,7 @@ cdef class Player:
             return g
 
     property label:
+        """Gets or sets the text label of the player."""
         def __get__(self):
             return self.player.deref().GetLabel().decode('ascii')
 
@@ -144,14 +147,19 @@ cdef class Player:
             self.player.deref().SetLabel(value.encode('ascii'))
 
     property number:
-        def __get__(self) -> int:
+        """Returns the number of the player in its Game.
+        Players are numbered starting with 0.
+        """
+        def __get__(self):
             return self.player.deref().GetNumber() - 1
 
     property is_chance:
-        def __get__(self) -> bool:
-            return self.player.deref().IsChance()
+        """Returns `True` if the player is the chance player."""
+        def __get__(self):
+            return self.player.deref().IsChance() != 0
 
     property strategies:
+        """Returns the set of strategies belonging to the player."""
         def __get__(self):
             cdef Strategies s
             cdef PlayerSupportStrategies ps
@@ -163,6 +171,7 @@ cdef class Player:
             return s
         
     property infosets:
+        """Returns the set of information sets at which the player has the decision."""
         def __get__(self):
             cdef Infosets s
             s = Infosets()
@@ -170,6 +179,7 @@ cdef class Player:
             return s
 
     property min_payoff:
+        """Returns the smallest payoff for the player in any outcome of the game."""
         def __get__(self):
             cdef Game g
             g = Game()
@@ -177,6 +187,7 @@ cdef class Player:
             return rat_to_py(g.game.deref().GetMinPayoff(self.number + 1))
 
     property max_payoff:
+        """Returns the largest payoff for the player in any outcome of the game."""
         def __get__(self):
             cdef Game g
             g = Game()
