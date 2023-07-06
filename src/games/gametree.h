@@ -114,13 +114,8 @@ public:
 
   bool Precedes(GameNode) const override;
 
-  void SetActionProb(int i, const std::string &p_value) override;
-  double GetActionProb(int pl, double) const override
-  { return (double) m_probs[pl]; }
-  Rational GetActionProb(int pl, const Rational &) const override
-  { return (const Rational &) m_probs[pl]; }
-  std::string GetActionProb(int pl, const std::string &) const override
-  { return (const std::string &) m_probs[pl]; }
+  void SetActionProb(int i, const Number &p_value) override;
+  const Number &GetActionProb(int i) const override { return m_probs[i]; }
 
   void Reveal(GamePlayer) override;
 };

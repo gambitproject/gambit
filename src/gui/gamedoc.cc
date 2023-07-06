@@ -687,7 +687,7 @@ void gbtGameDocument::DoSetActionProb(GameInfoset p_infoset,
 				      unsigned int p_action,
 				      const wxString &p_prob)
 {
-  p_infoset->SetActionProb(p_action, static_cast<const char *>(p_prob.mb_str()));
+  p_infoset->SetActionProb(p_action, Number(p_prob.ToStdString()));
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
@@ -819,17 +819,15 @@ void gbtGameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
   GameOutcome outcome = m_game->NewOutcome();
   outcome->SetLabel("Outcome" + lexical_cast<std::string>(outcome->GetNumber()));
   for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
-    outcome->SetPayoff(pl, p_outcome->GetPayoff<std::string>(pl));
+    outcome->SetPayoff(pl, p_outcome->GetPayoff(pl));
   }
   p_node->SetOutcome(outcome);
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
-void gbtGameDocument::DoSetPayoff(GameOutcome p_outcome, int p_player,
-				  const wxString &p_value)
+void gbtGameDocument::DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value)
 {
-  p_outcome->SetPayoff(p_player, 
-		       static_cast<const char *>(p_value.mb_str()));
+  p_outcome->SetPayoff(p_player, Number(p_value.ToStdString()));
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 

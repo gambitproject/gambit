@@ -29,7 +29,7 @@ cdef class Outcome:
             f"in game '{self.game.title}'>"
         )
     
-    def __richcmp__(Outcome self, other, whichop):
+    def __richcmp__(self, other, whichop) -> bool:
         if isinstance(other, Outcome):
             if whichop == 2:
                 return self.outcome.deref() == (<Outcome>other).outcome.deref()
@@ -65,6 +65,7 @@ cdef class Outcome:
     property label:
         def __get__(self):
             return self.outcome.deref().GetLabel().decode('ascii')
+
         def __set__(self, value):
             if self.restriction is not None:
                 raise UndefinedOperationError("Changing objects in a restriction is not supported")
@@ -75,48 +76,42 @@ cdef class Outcome:
     def __getitem__(self, player):
         cdef bytes py_string
         if isinstance(player, Player):
-            py_string = self.outcome.deref().GetPayoffNumber(player.number+1).as_string().c_str()
+            py_string = self.outcome.deref().GetPayoff(player.number+1).as_string().c_str()
         elif isinstance(player, str):
             number = self.game.players[player].number
-            py_string = self.outcome.deref().GetPayoffNumber(number+1).as_string().c_str()
+            py_string = self.outcome.deref().GetPayoff(number+1).as_string().c_str()
         elif isinstance(player, int):
-            py_string = self.outcome.deref().GetPayoffNumber(player+1).as_string().c_str()
+            py_string = self.outcome.deref().GetPayoff(player+1).as_string().c_str()
         if "." in py_string.decode('ascii'):
             return decimal.Decimal(py_string.decode('ascii'))
         else:
             return Rational(py_string.decode('ascii'))
 
-    def __setitem__(self, pl, value):
+    def __setitem__(self, pl: int, value: typing.Any) -> None:
+        """
+        Set the payoff value to a specifed player for the outcome.
+
+        Parameters
+        ----------
+        pl : int
+            The player number for which to set the payoff
+        value : Any
+            The value of the payoff.  This can be any numeric type, or any object that
+            has a string representation which can be interpreted as an integer,
+            decimal, or rational number.
+        """
         if self.restriction is not None:
             raise UndefinedOperationError(
                 "Changing objects in a support is not supported"
             )
-        if isinstance(value, (int, Decimal, Rational)):
-            value = str(value)
-        elif "/" in str(value):
-            try:
-                value = str(Rational(str(value)))
-            except ValueError:
-                raise ValueError(
-                    f"Cannot convert '{value}' to a number"
-                ) from None
-        else:
-            # This slightly indirect way of converting deals best with
-            # rounding of floating point numbers - so calling code gets
-            # the value it expects when using a float
-            try:
-                value = str(Decimal(str(value)))
-            except decimal.InvalidOperation:
-                raise ValueError(
-                    f"Cannot convert '{value}' to a number"
-                ) from None
-        self.outcome.deref().SetPayoff(pl+1, value.encode('ascii'))
+        self.outcome.deref().SetPayoff(pl+1, _to_number(value))
 
     def unrestrict(self):
         cdef Outcome o
         o = Outcome()
         o.outcome = self.outcome
         return o
+
 
 cdef class TreeGameOutcome:
     """Represents an outcome in a strategic game derived from an extensive game."""

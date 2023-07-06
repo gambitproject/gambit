@@ -110,48 +110,48 @@ Sfg::MakeSequenceForm(
 
   if (n->GetOutcome()) {
     for(pl = 1;pl<=seq.Length();pl++)
-      (*(*SF)[seq])[pl] += prob * n->GetOutcome()->GetPayoff<Gambit::Rational>(pl);
+      (*(*SF)[seq])[pl] += prob * static_cast<Gambit::Rational>(n->GetOutcome()->GetPayoff(pl));
   }
-  if(n->GetInfoset()) {
-    if(n->GetPlayer()->IsChance()) {
-      for(i=1;i<=n->NumChildren();i++)
-	MakeSequenceForm(n->GetChild(i),
-			 prob * n->GetInfoset()->GetActionProb(i, Gambit::Rational(0)), seq,iset,parent);
+  if (n->GetInfoset()) {
+    if (n->GetPlayer()->IsChance()) {
+      for (i = 1; i <= n->NumChildren(); i++)
+        MakeSequenceForm(n->GetChild(i),
+                         prob * static_cast<Gambit::Rational>(n->GetInfoset()->GetActionProb(i)), seq, iset, parent);
     }
     else {
       int pl = n->GetPlayer()->GetNumber();
-      iset[pl]=n->GetInfoset();
+      iset[pl] = n->GetInfoset();
       int isetnum = iset[pl]->GetNumber();
       Gambit::Array<int> snew(seq);
-      snew[pl]=1;
-      for(i=1;i<isetnum;i++)
-	if(isetRow(pl,i)) 
-	  snew[pl]+=efsupp.NumActions(pl,i);
+      snew[pl] = 1;
+      for (i = 1; i < isetnum; i++)
+        if (isetRow(pl, i))
+          snew[pl] += efsupp.NumActions(pl, i);
 
-      (*(*E)[pl])(isetRow(pl,isetnum),seq[pl]) = (Gambit::Rational)1;
+      (*(*E)[pl])(isetRow(pl, isetnum), seq[pl]) = (Gambit::Rational) 1;
       Sequence *myparent(parent[pl]);
 
       bool flag = false;
-      if(!isetFlag(pl,isetnum)) {   // on first visit to iset, create new sequences
-	isetFlag(pl,isetnum)=1;
-	flag =true;
+      if (!isetFlag(pl, isetnum)) {   // on first visit to iset, create new sequences
+        isetFlag(pl, isetnum) = 1;
+        flag = true;
       }
-      for(i=1;i<=n->NumChildren();i++) {
-	if(efsupp.Contains(n->GetInfoset()->GetAction(i))) {
-	  snew[pl]+=1;
-	  if(flag) {
-	    Sequence* child;
-	    child = new Sequence(n->GetPlayer(),
-				 n->GetInfoset()->GetAction(i), 
-				 myparent,snew[pl]);
-	    parent[pl]=child;
-	    ((*sequences)[pl])->AddSequence(child);
-	    
-	  }
+      for (i = 1; i <= n->NumChildren(); i++) {
+        if (efsupp.Contains(n->GetInfoset()->GetAction(i))) {
+          snew[pl] += 1;
+          if (flag) {
+            Sequence *child;
+            child = new Sequence(n->GetPlayer(),
+                                 n->GetInfoset()->GetAction(i),
+                                 myparent, snew[pl]);
+            parent[pl] = child;
+            ((*sequences)[pl])->AddSequence(child);
 
-	  (*(*E)[pl])(isetRow(pl,isetnum),snew[pl]) = -(Gambit::Rational)1;
-	  MakeSequenceForm(n->GetChild(i),prob,snew,iset,parent);
-	}
+          }
+
+          (*(*E)[pl])(isetRow(pl, isetnum), snew[pl]) = -(Gambit::Rational) 1;
+          MakeSequenceForm(n->GetChild(i), prob, snew, iset, parent);
+        }
       }
     }
     

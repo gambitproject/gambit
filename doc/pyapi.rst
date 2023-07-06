@@ -585,65 +585,6 @@ Representations of play of games
 The main responsibility of these classes is to capture information
 about a plan of play of a game, by one or more players.
 
-.. py:class:: StrategySupportProfile
-
-   A set-like object representing a subset of the strategies in a
-   game.  It incorporates the restriction that each player must have
-   at least one strategy.
-
-   .. py:attribute:: game
-
-      Returns the :py:class:`Game` on which the support
-      profile is defined.
-
-   .. py:method:: issubset(other)
-
-      Returns :literal:`True` if this profile is a subset of
-      `other`.
-
-      :param StrategySupportProfile other: another support profile
-
-   .. py:method:: issuperset(other)
-
-      Returns :literal:`True` if this profile is a superset of
-      `other`.
-
-      :param StrategySupportProfile other: another support profile
-
-   .. py:method:: restrict()
-
-      Creates a :py:class:`StrategicRestriction` object,
-      which defines a restriction of the game in which only the
-      strategies in this profile are present.
-
-   .. py:method:: remove(strategy)
-
-      Modifies the support profile by removing the specified strategy.
-
-      :param Strategy strategy: the strategy to remove
-      :raises UndefinedOperationError: if attempting to remove the
-				       last strategy for a player
-
-   .. py:method:: difference(other)
-
-      Returns a new support profile containing all the strategies
-      which are present in this profile, but not in `other`.
-
-      :param StrategySupportProfile other: another support profile
-
-   .. py:method:: intersection(other)
-
-      Returns a new support profile containing all the strategies
-      present in both this profile and in `other`.
-
-      :param StrategySupportProfile other: another support profile
-
-   .. py:method:: union(other)
-   
-      Returns a new support profile containing all the strategies
-      present in this profile, in `other`, or in both.
-
-      :param StrategySupportProfile other: another support profile
 
 .. py:class:: MixedStrategyProfile
 
@@ -912,8 +853,19 @@ of game.
    .. py:attribute:: prob
 
       A settable property that represents the probability associated 
-      with the action. It can be a value stored as an int,
-      :py:class:`pygambit.Rational`, or :py:class:`pygambit.Decimal`.
+      with the action.
+
+      When setting, if the value is is an ``int`` or `pygambit.Rational`, the
+      payoff is stored as a rational number.
+      If ``payoff`` is a `pygambit.Decimal`, the payoff is stored
+      as a decimal number.
+      Otherwise, the method attempts to construct a
+      `pygambit.Rational` or `pygambit.Decimal` based on the
+      string representation of ``payoff``.
+
+      :raises ValueError: If the value cannot be interpreted as
+			  a decimal or rational number.
+
 
 
 .. py:class:: Strategies

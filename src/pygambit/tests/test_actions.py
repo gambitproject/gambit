@@ -14,7 +14,7 @@ class TestGambitActions(unittest.TestCase):
         del self.extensive_game
 
     def test_action_set_label(self):
-        "Test to ensure action labels work"
+        """Test to ensure action labels work"""
         assert self.extensive_game.root.infoset.actions[0].label == "RED"
         self.extensive_game.root.infoset.actions[0].label = "action label"
         assert (
@@ -23,10 +23,16 @@ class TestGambitActions(unittest.TestCase):
         )
 
     def test_action_probability(self):
-        "Test to ensure action probabilities work"
+        """Test to ensure action probabilities work"""
         assert (
             self.extensive_game.root.infoset.actions[0].prob ==
             decimal.Decimal('0.500000')
+        )
+
+        self.extensive_game.root.infoset.actions[0].prob = 2.0
+        assert (
+                self.extensive_game.root.infoset.actions[0].prob ==
+                fractions.Fraction(2)
         )
 
         self.extensive_game.root.infoset.actions[0].prob = (
@@ -48,25 +54,25 @@ class TestGambitActions(unittest.TestCase):
         self.extensive_game.root.infoset.actions[0].prob = 2
         assert self.extensive_game.root.infoset.actions[0].prob == 2
 
-        self.assertRaises(
-            TypeError, setattr, self.extensive_game.root.infoset.actions[0],
-            "prob", 2.0
+        self.extensive_game.root.infoset.actions[0].prob = "1/7"
+        assert (
+            self.extensive_game.root.infoset.actions[0].prob ==
+            fractions.Fraction('1/7')
         )
+
+        self.extensive_game.root.infoset.actions[0].prob = "2.7"
+        assert (
+            self.extensive_game.root.infoset.actions[0].prob ==
+            decimal.Decimal('2.7')
+        )
+
         self.assertRaises(
-            TypeError, setattr, self.extensive_game.root.infoset.actions[0],
+            ValueError, setattr, self.extensive_game.root.infoset.actions[0],
             "prob", "test"
-        )
-        self.assertRaises(
-            TypeError, setattr, self.extensive_game.root.infoset.actions[0],
-            "prob", "1/7"
-        )
-        self.assertRaises(
-            TypeError, setattr, self.extensive_game.root.infoset.actions[0],
-            "prob", "2.7"
         )
 
     def test_action_precedes(self):
-        "Test to ensure precedes is working"
+        """Test to ensure precedes is working"""
         assert not self.extensive_game.actions[0].precedes(
             self.extensive_game.root
         )
@@ -83,13 +89,15 @@ class TestGambitActions(unittest.TestCase):
         )
 
     def test_action_delete(self):
-        "Test to ensure it is possible to delete an action"
+        """Test to ensure it is possible to delete an action"""
         assert len(self.extensive_game.actions) == 6
         self.extensive_game.actions[0].delete()
         assert len(self.extensive_game.actions) == 5
 
     def test_action_delete_error(self):
-        "Test to ensure deleting the last action of an infoset raises an error"
+        """Test to ensure deleting the last action of an infoset
+        raises an error
+        """
         assert len(self.extensive_game.infosets[0].actions) == 2
         self.extensive_game.actions[0].delete()
         self.assertRaises(

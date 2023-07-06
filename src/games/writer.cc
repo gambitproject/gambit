@@ -70,7 +70,7 @@ std::string HTMLGameWriter::Write(const Game &p_game,
 	for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
 	  try {
 	    if (profile->GetOutcome()) {
-	      theHtml += profile->GetOutcome()->GetPayoff<std::string>(pl);
+	      theHtml += static_cast<std::string>(profile->GetOutcome()->GetPayoff(pl));
 	    }
 	    else {
 	      theHtml += "0";
@@ -148,7 +148,7 @@ std::string LaTeXGameWriter::Write(const Game &p_game,
 	for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
 	  try {
 	    if (profile->GetOutcome()) {
-	      theHtml += profile->GetOutcome()->GetPayoff<std::string>(pl);
+	      theHtml += static_cast<std::string>(profile->GetOutcome()->GetPayoff(pl));
 	    }
 	    else {
 	      theHtml += "0";

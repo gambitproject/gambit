@@ -141,7 +141,7 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
       }
     }
     else  {   // n.GetPlayer() == 0
-      prob = node->infoset->GetActionProb(i, (T) 0);
+      prob = static_cast<T>(node->infoset->GetActionProb(i));
     }
 
     GameTreeNodeRep *child = node->children[i];
@@ -453,7 +453,7 @@ T MixedBehaviorProfile<T>::GetActionProb(const GameAction &action) const
 { 
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
     GameTreeInfosetRep *infoset = dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
-    return infoset->GetActionProb(action->GetNumber(), (T) 0);
+    return static_cast<T>(infoset->GetActionProb(action->GetNumber()));
   }
   else if (!m_support.Contains(action)) {
     return (T) 0.0;
@@ -487,23 +487,22 @@ void MixedBehaviorProfile<T>::GetPayoff(GameTreeNodeRep *node,
 				     const T &prob, int player, T &value) const
 {
   if (node->outcome) {
-    value += prob * node->outcome->GetPayoff<T>(player);
+    value += prob * static_cast<T>(node->outcome->GetPayoff(player));
   }
 
-  if (node->children.Length())  {
+  if (node->children.Length()) {
     int pl = node->infoset->m_player->m_number, iset = node->infoset->m_number;
     if (pl == 0) {
       // chance player
       for (int act = 1; act <= node->NumChildren(); act++) {
-	GetPayoff(node->children[act],
-		  prob * node->infoset->GetActionProb(act, (T) 0), player, value);
+        GetPayoff(node->children[act],
+                  prob * static_cast<T>(node->infoset->GetActionProb(act)), player, value);
       }
-    }
-    else {
+    } else {
       for (int act = 1; act <= m_support.NumActions(pl, iset); act++) {
-	GameActionRep *action = m_support.GetAction(pl, iset, act);
-	GetPayoff(node->children[action->GetNumber()], 
-		  prob * GetActionProb(action), player, value);
+        GameActionRep *action = m_support.GetAction(pl, iset, act);
+        GetPayoff(node->children[action->GetNumber()],
+                  prob * GetActionProb(action), player, value);
       }
     }
   }
@@ -617,7 +616,7 @@ void MixedBehaviorProfile<T>::ComputeSolutionDataPass2(const GameNode &node) con
   if (node->GetOutcome()) {
     GameOutcome outcome = node->GetOutcome();
     for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) { 
-      m_nodeValues(node->GetNumber(), pl) += outcome->GetPayoff<T>(pl);
+      m_nodeValues(node->GetNumber(), pl) += static_cast<T>(outcome->GetPayoff(pl));
     }
   }
 

@@ -23,13 +23,18 @@
 cdef class Children(Collection):
     """Represents the collection of direct children of a node."""
     cdef c_GameNode parent
-    def __len__(self):    return self.parent.deref().NumChildren()
+
+    def __len__(self):
+        return self.parent.deref().NumChildren()
+
     def __getitem__(self, i):
-        if not isinstance(i, int):  return Collection.__getitem__(self, i)
+        if not isinstance(i, int):
+            return Collection.__getitem__(self, i)
         cdef Node n
         n = Node()
         n.node = self.parent.deref().GetChild(i+1)
         return n
+
 
 cdef class Node:
     """Represents a node in a :py:class:`Game`."""
@@ -60,11 +65,11 @@ cdef class Node:
     def __hash__(self) -> long:
         return long(<long>self.node.deref())
 
-    def is_successor_of(self, node):
-        if isinstance(node, Node):
-            return self.node.deref().IsSuccessorOf((<Node>node).node)
-        else:
-            raise TypeError("is_successor_of takes a Node object as its input")
+    def is_successor_of(self, node: Node) -> bool:
+        return self.node.deref().IsSuccessorOf((<Node>node).node)
+
+    def is_subgame_root(self) -> bool:
+        return self.node.deref().IsSubgameRoot()
 
     def append_move(self, player, actions=None):
         cdef Infoset i
@@ -132,27 +137,24 @@ cdef class Node:
     def delete_tree(self):
         self.node.deref().DeleteTree()
 
-    def copy_tree(self, node):
-        if isinstance(node, Node):
-            if node.game != self.game:
-                raise MismatchError("copy_tree can only be applied between \
-                                    objects of the same game")
-            self.node.deref().CopyTree((<Node>node).node)
-        else:
-            raise TypeError("copy_tree takes a Node object as its input")
+    def copy_tree(self, node: Node):
+        if node.game != self.game:
+            raise MismatchError(
+                f"copy_tree(): trees can only be copied within the same game"
+            )
+        self.node.deref().CopyTree((<Node>node).node)
 
-    def move_tree(self, node):
-        if isinstance(node, Node):
-            if node.game != self.game:
-                raise MismatchError("copy_tree can only be applied between \
-                                    objects of the same game")
-            self.node.deref().MoveTree((<Node>node).node)
-        else:
-            raise TypeError("move_tree takes a Node object as its input")
+    def move_tree(self, node: Node):
+        if node.game != self.game:
+            raise MismatchError(
+                f"move_tree(): trees can only be moved within the same game"
+            )
+        self.node.deref().MoveTree((<Node>node).node)
  
     property label:
         def __get__(self):
             return self.node.deref().GetLabel().decode('ascii')
+
         def __set__(self, str value):
             self.node.deref().SetLabel(value.encode('ascii'))
 
@@ -172,21 +174,24 @@ cdef class Node:
             return g
 
     property infoset:
-        def __get__(self):
+        def __get__(self) -> typing.Optional[Infoset]:
             cdef Infoset i
             if self.node.deref().GetInfoset() != <c_GameInfoset>NULL:
                 i = Infoset()
                 i.infoset = self.node.deref().GetInfoset()
                 return i
             return None
-        def __set__(self, infoset):
-            if isinstance(infoset, Infoset):
+
+        def __set__(self, infoset: Infoset):
+            try:
                 self.node.deref().SetInfoset((<Infoset>infoset).infoset)
-            else:
-                raise TypeError, "type Infoset required for setting infoset at a node"
+            except ValueError:
+                raise ValueError(
+                    f"in setting infoset: node has {len(self.children)} children, but infoset has {len(infoset.actions)} actions"
+                ) from None
 
     property player:
-        def __get__(self):
+        def __get__(self) -> typing.Optional[Player]:
             cdef Player p
             if self.node.deref().GetPlayer() != <c_GamePlayer>NULL:
                 p = Player()
@@ -195,7 +200,7 @@ cdef class Node:
             return None
 
     property parent:
-        def __get__(self):
+        def __get__(self) -> typing.Optional[Node]:
             cdef Node n
             if self.node.deref().GetParent() != <c_GameNode>NULL:
                 n = Node()
@@ -204,7 +209,7 @@ cdef class Node:
             return None
             
     property prior_action:
-        def __get__(self):
+        def __get__(self) -> typing.Optional[Action]:
             cdef Action a
             if self.node.deref().GetPriorAction() != <c_GameAction>NULL:
                 a = Action()
@@ -213,7 +218,7 @@ cdef class Node:
             return None
 
     property prior_sibling:
-        def __get__(self):
+        def __get__(self) -> typing.Optional[Node]:
             cdef Node n
             if self.node.deref().GetPriorSibling() != <c_GameNode>NULL:
                 n = Node()
@@ -222,7 +227,7 @@ cdef class Node:
             return None
 
     property next_sibling:
-        def __get__(self):
+        def __get__(self) -> typing.Optional[None]:
             cdef Node n
             if self.node.deref().GetNextSibling() != <c_GameNode>NULL:
                 n = Node()
@@ -231,12 +236,12 @@ cdef class Node:
             return None
             
     property is_terminal:
-        def __get__(self):
+        def __get__(self) -> bool:
             return self.node.deref().IsTerminal()
 
     property is_subgame_root:
         """Returns `True` if the node is the root of a proper subgame.
-        
+
         .. versionchanged:: 16.1.0
             Changed to being a property instead of a member function.
         """
@@ -244,7 +249,7 @@ cdef class Node:
             return self.node.deref().IsSubgameRoot()
 
     property outcome:
-        def __get__(self):
+        def __get__(self) -> typing.Optional[Outcome]:
             cdef Outcome o
             if self.node.deref().GetOutcome() != <c_GameOutcome>NULL:
                 o = Outcome()
@@ -252,11 +257,11 @@ cdef class Node:
                 return o
             return None
         
-        def __set__(self, outcome):
+        def __set__(self, outcome: typing.Optional[Outcome]):
             if outcome is None:
                 self.node.deref().SetOutcome(<c_GameOutcome>NULL)
             elif isinstance(outcome, Outcome):
                 self.node.deref().SetOutcome((<Outcome>outcome).outcome)
             else:
-                raise TypeError, "type Outcome required for setting outcome at a node"
+                raise TypeError(f"argument must be an Outcome or None, not '{outcome.__class__.__name__}'")
              

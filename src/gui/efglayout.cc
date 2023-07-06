@@ -303,12 +303,12 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
     Gambit::GamePlayer player = m_node->GetGame()->GetPlayer(pl);
     p_dc.SetTextForeground(m_style->GetPlayerColor(pl));
 
-    std::string payoff = outcome->GetPayoff<std::string>(pl);
+    std::string payoff = static_cast<std::string>(outcome->GetPayoff(pl));
 
     if (payoff.find('/') != std::string::npos) {
       p_dc.SetPen(wxPen(m_style->GetPlayerColor(pl), 1, wxPENSTYLE_SOLID));
       int oldX = point.x;
-      point = DrawFraction(p_dc, point, outcome->GetPayoff<Gambit::Rational>(pl));
+      point = DrawFraction(p_dc, point, static_cast<Gambit::Rational>(outcome->GetPayoff(pl)));
       m_payoffRect.push_back(wxRect(oldX - 5, point.y - height / 2,
                                     point.x - oldX + 10, height));
     }
@@ -494,7 +494,7 @@ wxString gbtTreeLayout::CreateBranchLabel(const gbtNodeEntry *p_entry,
 		      *wxConvCurrent);
     case GBT_BRANCH_LABEL_PROBS:
       if (parent->GetPlayer() && parent->GetPlayer()->IsChance()) {
-	return wxString(parent->GetInfoset()->GetActionProb(p_entry->GetChildNumber(), "").c_str(),
+	return wxString(static_cast<std::string>(parent->GetInfoset()->GetActionProb(p_entry->GetChildNumber())).c_str(),
 			*wxConvCurrent);
       }
       else if (m_doc->NumProfileLists() == 0) {
@@ -884,19 +884,20 @@ void gbtTreeLayout::GenerateLabels()
 
       Gambit::GameNode parent = entry->GetNode()->GetParent();
       if (parent->GetPlayer()->IsChance()) {
-	entry->SetActionProb(parent->GetInfoset()->GetActionProb(entry->GetChildNumber(), (double) 0));
+        entry->SetActionProb(static_cast<double>(parent->GetInfoset()->GetActionProb(entry->GetChildNumber())));
       }
       else {
-	int profile = m_doc->GetCurrentProfile();
-	if (profile > 0) {
-	  try {
-	    entry->SetActionProb((double) Gambit::lexical_cast<Gambit::Rational>(m_doc->GetProfiles().GetActionProb(parent, entry->GetChildNumber())));
-	  }
-	  catch (ValueException &) {
-	    // This occurs when the probability is undefined
-	    entry->SetActionProb(0.0);
-	  }
-	}
+        int profile = m_doc->GetCurrentProfile();
+        if (profile > 0) {
+          try {
+            entry->SetActionProb((double) Gambit::lexical_cast<Gambit::Rational>(
+              m_doc->GetProfiles().GetActionProb(parent, entry->GetChildNumber())));
+          }
+          catch (ValueException &) {
+            // This occurs when the probability is undefined
+            entry->SetActionProb(0.0);
+          }
+        }
       }
     }
   }

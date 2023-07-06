@@ -330,22 +330,21 @@ T PureBehaviorProfile::GetPayoff(const GameNode &p_node,
   auto *node = dynamic_cast<GameTreeNodeRep *>(p_node.operator->());
 
   if (node->outcome) {
-    payoff += node->outcome->GetPayoff<T>(pl);
+    payoff += static_cast<T>(node->outcome->GetPayoff(pl));
   }
 
   if (!node->IsTerminal()) {
     if (node->GetInfoset()->IsChanceInfoset()) {
       for (int i = 1; i <= node->NumChildren(); i++) {
-	GameTreeInfosetRep *infoset = node->infoset;
-	payoff += (infoset->GetActionProb(i, (T) 0) *
-		   GetPayoff<T>(node->children[i], pl));
+        GameTreeInfosetRep *infoset = node->infoset;
+        payoff += (static_cast<T>(infoset->GetActionProb(i)) *
+                   GetPayoff<T>(node->children[i], pl));
       }
-    }
-    else {
+    } else {
       int player = node->GetPlayer()->GetNumber();
       int iset = node->GetInfoset()->GetNumber();
-      payoff += GetPayoff<T>(node->children[m_profile[player][iset]->GetNumber()], 
-				pl);
+      payoff += GetPayoff<T>(node->children[m_profile[player][iset]->GetNumber()],
+                             pl);
     }
   }
 
@@ -505,10 +504,10 @@ Rational GameExplicitRep::GetMinPayoff(int player) const
     p2 = NumPlayers();
   }
 
-  Rational minpay = m_outcomes.front()->GetPayoff<Rational>(p1);
+  Rational minpay = static_cast<Rational>(m_outcomes.front()->GetPayoff(p1));
   for (auto outcome : m_outcomes) {
     for (int p = p1; p <= p2; p++) {
-      minpay = std::min(minpay, outcome->GetPayoff<Rational>(p));
+      minpay = std::min(minpay, static_cast<Rational>(outcome->GetPayoff(p)));
     }
   }
   return minpay;
@@ -530,10 +529,10 @@ Rational GameExplicitRep::GetMaxPayoff(int player) const
     p2 = NumPlayers();
   }
 
-  Rational maxpay = m_outcomes.front()->GetPayoff<Rational>(p1);
+  Rational maxpay = static_cast<Rational>(m_outcomes.front()->GetPayoff(p1));
   for (auto outcome : m_outcomes) {
     for (int p = p1; p <= p2; p++) {
-      maxpay = std::max(maxpay, outcome->GetPayoff<Rational>(p));
+      maxpay = std::max(maxpay, static_cast<Rational>(outcome->GetPayoff(p)));
     }
   }
   return maxpay;
