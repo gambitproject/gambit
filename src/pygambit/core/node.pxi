@@ -68,9 +68,6 @@ cdef class Node:
     def is_successor_of(self, node: Node) -> bool:
         return self.node.deref().IsSuccessorOf((<Node>node).node)
 
-    def is_subgame_root(self) -> bool:
-        return self.node.deref().IsSubgameRoot()
-
     def append_move(self, player, actions=None):
         cdef Infoset i
         if len(self.children) > 0:
