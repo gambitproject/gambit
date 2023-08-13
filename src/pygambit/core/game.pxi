@@ -376,134 +376,137 @@ cdef class Game:
     def __hash__(self):
         return long(<long>self.game.deref())
 
-    property is_tree:
+    @property
+    def is_tree(self) -> bool:
         """Returns whether a game has a tree-based representation."""
-        def __get__(self) -> bool:
-            return self.game.deref().IsTree()
+        return self.game.deref().IsTree()
 
-    property title:
+    @property
+    def title(self) -> str:
         """Gets or sets the title of the game.  The title of the game is
         an arbitrary string, generally intended to be short."""
-        def __get__(self) -> str:
-            """Gets the title of the game."""
-            return self.game.deref().GetTitle().decode('ascii')
+        return self.game.deref().GetTitle().decode('ascii')
 
-        def __set__(self, value: str) -> None:
-            """Sets the title of the game."""
-            self.game.deref().SetTitle(value.encode('ascii'))
+    @title.setter
+    def title(self, value: str) -> None:
+        self.game.deref().SetTitle(value.encode('ascii'))
 
-    property comment:
+    @property
+    def comment(self) -> str:
         """Gets or sets the comment of the game.  A game's comment is
         an arbitrary string, and may be more discursive than a title."""
-        def __get__(self) -> str:
-            """Gets the comment of the game."""
-            return self.game.deref().GetComment().decode('ascii')
-        def __set__(self, value: str) -> None:
-            """Sets the comment of the game."""
-            self.game.deref().SetComment(value.encode('ascii'))
+        return self.game.deref().GetComment().decode('ascii')
 
-    property actions:
-        def __get__(self):
-            cdef GameActions a
-            if self.is_tree:
-                a = GameActions()
-                a.game = self.game
-                return a
-            raise UndefinedOperationError(
-                "Operation only defined for games with a tree representation"
-            )
+    @comment.setter
+    def comment(self, value: str) -> None:
+        self.game.deref().SetComment(value.encode('ascii'))
 
-    property infosets:
-        def __get__(self):
-            cdef GameInfosets i
-            if self.is_tree:
-                i = GameInfosets()
-                i.game = self.game
-                return i
-            raise UndefinedOperationError(
-                "Operation only defined for games with a tree representation"
-            )
+    @property
+    def actions(self) -> GameActions:
+        """Return the set of actions available in the game.
 
-    property players:
-        def __get__(self):
-            cdef Players p
-            p = Players()
-            p.game = self.game
-            return p
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
+        cdef GameActions a
+        if self.is_tree:
+            a = GameActions()
+            a.game = self.game
+            return a
+        raise UndefinedOperationError(
+            "Operation only defined for games with a tree representation"
+        )
 
-    property strategies:
-        def __get__(self):
-            cdef GameStrategies s
-            s = GameStrategies()
-            s.game = self.game
-            return s
+    @property
+    def infosets(self) -> GameInfosets:
+        """Return the set of information sets in the game.
 
-    property outcomes:
-        def __get__(self):
-            cdef Outcomes c
-            c = Outcomes()
-            c.game = self.game
-            return c
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
+        cdef GameInfosets i
+        if self.is_tree:
+            i = GameInfosets()
+            i.game = self.game
+            return i
+        raise UndefinedOperationError(
+            "Operation only defined for games with a tree representation"
+        )
 
-    property contingencies:
-        def __get__(self):
-            return pygambit.gameiter.Contingencies(self)
+    @property
+    def players(self) -> Players:
+        """Return the set of players in the game."""
+        cdef Players p
+        p = Players()
+        p.game = self.game
+        return p
 
-    property root:
+    @property
+    def strategies(self) -> GameStrategies:
+        """Return the set of strategies in the game."""
+        cdef GameStrategies s
+        s = GameStrategies()
+        s.game = self.game
+        return s
+
+    @property
+    def outcomes(self) -> Outcomes:
+        """Return the set of outcomes in the game."""
+        cdef Outcomes c
+        c = Outcomes()
+        c.game = self.game
+        return c
+
+    @property
+    def contingencies(self) -> pygambit.gameiter.Contingencies:
+        """Return an iterator over the contingencies in the game."""
+        return pygambit.gameiter.Contingencies(self)
+
+    @property
+    def root(self) -> Node:
         """Returns the root node of the game.
-        
-        Returns
-        -------
-        Node
-            The root node of the game.
-        
+
         Raises
         ------
         UndefinedOperationError
             If the game does not hae a tree representation.
         """
-        def __get__(self) -> Node:
-            cdef Node n
-            if self.is_tree:
-                n = Node()
-                n.node = self.game.deref().GetRoot()
-                return n
-            raise UndefinedOperationError(
-                "Operation only defined for games with a tree representation"
-            )
-                         
-    property is_const_sum:
-        """Returns whether the game is constant sum.
+        cdef Node n
+        if self.is_tree:
+            n = Node()
+            n.node = self.game.deref().GetRoot()
+            return n
+        raise UndefinedOperationError(
+            "Operation only defined for games with a tree representation"
+        )
 
-        Returns
-        -------
-        bool
-            `True` if and only if the game is constant sum.
-        """
-        def __get__(self) -> bool:
-            return self.game.deref().IsConstSum()
+    @property
+    def is_const_sum(self) -> bool:
+        """Returns whether the game is constant sum."""
+        return self.game.deref().IsConstSum()
 
-    property is_perfect_recall:
+    @property
+    def is_perfect_recall(self) -> bool:
         """Returns whether the game is perfect recall.
 
         By convention, games with a strategic representation have perfect recall as they
         are treated as simultaneous-move games.
-
-        Returns
-        -------
-        bool
-            `True` if and only if the game is perfect recall.            
         """
-        def __get__(self) -> bool:
-            return self.game.deref().IsPerfectRecall()
+        return self.game.deref().IsPerfectRecall()
 
-    property min_payoff:
-        def __get__(self):
-            return rat_to_py(self.game.deref().GetMinPayoff(0))
+    @property
+    def min_payoff(self) -> typing.Union[decimal.Decimal, Rational]:
+        """Returns the minimum payoff in the game."""
+        return rat_to_py(self.game.deref().GetMinPayoff(0))
 
-    property max_payoff:
-        def __get__(self):
-            return rat_to_py(self.game.deref().GetMaxPayoff(0))
+    @property
+    def max_payoff(self) -> typing.Union[decimal.Decimal, Rational]:
+        """Returns the maximum payoff in the game."""
+        return rat_to_py(self.game.deref().GetMaxPayoff(0))
 
     def _get_contingency(self, *args):
         cdef c_PureStrategyProfile *psp

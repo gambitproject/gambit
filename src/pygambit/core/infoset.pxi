@@ -125,43 +125,46 @@ cdef class Infoset:
             )
         self.infoset.deref().Reveal((<Player>player).player)
 
-    property game:
+    @property
+    def game(self) -> Game:
         """Gets the :py:class:`Game` to which the information set belongs."""
-        def __get__(self) -> Game:
-            cdef Game g
-            g = Game()
-            g.game = self.infoset.deref().GetGame()
-            return g
-        
-    property label:
+        cdef Game g
+        g = Game()
+        g.game = self.infoset.deref().GetGame()
+        return g
+
+    @property
+    def label(self) -> str:
         """Gets or sets the text label of the information set."""
-        def __get__(self) -> str:
-            return self.infoset.deref().GetLabel().decode('ascii')
-        def __set__(self, value: str):
-            self.infoset.deref().SetLabel(value.encode('ascii'))
+        return self.infoset.deref().GetLabel().decode('ascii')
 
-    property is_chance:
+    @label.setter
+    def label(self, value: str) -> None:
+        self.infoset.deref().SetLabel(value.encode('ascii'))
+
+    @property
+    def is_chance(self) -> bool:
         """Returns `True` if the information set belongs to the chance player."""
-        def __get__(self) -> bool:
-            return self.infoset.deref().IsChanceInfoset()
+        return self.infoset.deref().IsChanceInfoset()
 
-    property actions:
+    @property
+    def actions(self) -> Actions:
         """Returns the set of actions at the information set."""
-        def __get__(self):
-            cdef Actions a
-            a = Actions()
-            a.infoset = self.infoset
-            return a
+        cdef Actions a
+        a = Actions()
+        a.infoset = self.infoset
+        return a
 
-    property members:
+    @property
+    def members(self) -> Members:
         """Returns the set of nodes which are members of the information set."""
-        def __get__(self):
-            cdef Members m
-            m = Members()
-            m.infoset = self.infoset
-            return m
+        cdef Members m
+        m = Members()
+        m.infoset = self.infoset
+        return m
 
-    property player:
+    @property
+    def player(self) -> Player:
         """Gets or sets the player who has the move at this information set.
 
         Raises
@@ -171,19 +174,18 @@ cdef class Infoset:
         MismatchError
             on setting to a player that is from a different game.
         """
-        def __get__(self) -> Player:
-            p = Player()
-            p.player = self.infoset.deref().GetPlayer()
-            return p
+        p = Player()
+        p.player = self.infoset.deref().GetPlayer()
+        return p
 
-        def __set__(self, player: Player) -> None:
-            if not isinstance(player, Player):
-                raise TypeError(
-                    f"player must be of type Player, not {player.__class__.__name__}"
-                )
-            elif player.game != self.game:
-                raise MismatchError(
-                    "player must belong to the same game as the information set"
-                )
-            else:
-                self.infoset.deref().SetPlayer((<Player>player).player)
+    @player.setter
+    def player(self, player: Player) -> None:
+        if not isinstance(player, Player):
+            raise TypeError(
+                f"player must be of type Player, not {player.__class__.__name__}"
+            )
+        elif player.game != self.game:
+            raise MismatchError(
+                "player must belong to the same game as the information set"
+            )
+        self.infoset.deref().SetPlayer((<Player>player).player)

@@ -260,12 +260,15 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
             self.profile.Randomize()
         else:
             self.profile.Randomize(denom)
-    property game:
-        def __get__(self):
-            cdef Game g
-            g = Game()
-            g.game = self.profile.GetGame()
-            return g
+
+    @property
+    def game(self) -> Game:
+        """The game on which this mixed strategy profile is defined.
+        """
+        cdef Game g
+        g = Game()
+        g.game = self.profile.GetGame()
+        return g
 
 
 cdef class MixedStrategyProfileRational(MixedStrategyProfile):
@@ -353,9 +356,11 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
     def randomize(self, denom):
         self.profile.Randomize(denom)
 
-    property game:
-        def __get__(self):
-            cdef Game g
-            g = Game()
-            g.game = self.profile.GetGame()
-            return g
+    @property
+    def game(self) -> Game:
+        """The game on which this mixed strategy profile is defined.
+        """
+        cdef Game g
+        g = Game()
+        g.game = self.profile.GetGame()
+        return g

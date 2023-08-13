@@ -488,27 +488,31 @@ cdef class LogitQREMixedStrategyProfile:
     def __getitem__(self, int i):
         return self.thisptr.getitem(i+1)
 
-    property game:
-        def __get__(self):
-            cdef Game g
-            g = Game()
-            g.game = self.thisptr.GetGame()
-            return g
+    @property
+    def game(self) -> Game:
+        """The game on which this mixed strategy profile is defined."""
+        cdef Game g
+        g = Game()
+        g.game = self.thisptr.GetGame()
+        return g
 
-    property lam: 
-        def __get__(self):
-            return self.thisptr.GetLambda()
+    @property
+    def lam(self) -> double:
+        """The value of the precision parameter."""
+        return self.thisptr.GetLambda()
 
-    property log_like:
-        def __get__(self):
-            return self.thisptr.GetLogLike()
+    @property
+    def log_like(self) -> double:
+        """The log-likelihood of the data."""
+        return self.thisptr.GetLogLike()
 
-    property profile:
-        def __get__(self):
-            cdef MixedStrategyProfileDouble profile
-            profile = MixedStrategyProfileDouble()
-            profile.profile = new c_MixedStrategyProfileDouble(deref(self.thisptr).GetProfile())
-            return profile
+    @property
+    def profile(self) -> MixedStrategyProfileDouble:
+        """The mixed strategy profile."""
+        cdef MixedStrategyProfileDouble profile
+        profile = MixedStrategyProfileDouble()
+        profile.profile = new c_MixedStrategyProfileDouble(deref(self.thisptr).GetProfile())
+        return profile
 
 def logit_estimate(MixedStrategyProfileDouble p_profile):
     """Estimate QRE corresponding to mixed strategy profile using

@@ -147,118 +147,143 @@ cdef class Node:
                 f"move_tree(): trees can only be moved within the same game"
             )
         self.node.deref().MoveTree((<Node>node).node)
- 
-    property label:
-        def __get__(self):
-            return self.node.deref().GetLabel().decode('ascii')
 
-        def __set__(self, str value):
-            self.node.deref().SetLabel(value.encode('ascii'))
+    @property
+    def label(self) -> str:
+        """The text label associated with the node."""
+        return self.node.deref().GetLabel().decode('ascii')
 
-    property children:
-        def __get__(self):
-            cdef Children c
-            c = Children()
-            c.parent = self.node
-            return c
+    @label.setter
+    def label(self, value: str) -> None:
+        self.node.deref().SetLabel(value.encode('ascii'))
 
-    property game:
+    @property
+    def children(self) -> Children:
+        """The set of children of this node."""
+        cdef Children c
+        c = Children()
+        c.parent = self.node
+        return c
+
+    @property
+    def game(self) -> Game:
         """Gets the :py:class:`Game` to which the node belongs."""
-        def __get__(self) -> Game:
-            cdef Game g
-            g = Game()
-            g.game = self.node.deref().GetGame()
-            return g
+        cdef Game g
+        g = Game()
+        g.game = self.node.deref().GetGame()
+        return g
 
-    property infoset:
-        def __get__(self) -> typing.Optional[Infoset]:
-            cdef Infoset i
-            if self.node.deref().GetInfoset() != <c_GameInfoset>NULL:
-                i = Infoset()
-                i.infoset = self.node.deref().GetInfoset()
-                return i
-            return None
+    @property
+    def infoset(self) -> typing.Optional[Infoset]:
+        """The information set to which this node belongs.  If this is a
+        terminal node, which belongs to no information set, `None` is returned.
+        """
+        cdef Infoset i
+        if self.node.deref().GetInfoset() != <c_GameInfoset>NULL:
+            i = Infoset()
+            i.infoset = self.node.deref().GetInfoset()
+            return i
+        return None
 
-        def __set__(self, infoset: Infoset):
-            try:
-                self.node.deref().SetInfoset((<Infoset>infoset).infoset)
-            except ValueError:
-                raise ValueError(
-                    f"in setting infoset: node has {len(self.children)} children, but infoset has {len(infoset.actions)} actions"
-                ) from None
+    @infoset.setter
+    def infoset(self, infoset: Infoset) -> None:
+        try:
+            self.node.deref().SetInfoset((<Infoset>infoset).infoset)
+        except ValueError:
+            raise ValueError(
+                f"in setting infoset: node has {len(self.children)} children, but infoset has {len(infoset.actions)} actions"
+            ) from None
 
-    property player:
-        def __get__(self) -> typing.Optional[Player]:
-            cdef Player p
-            if self.node.deref().GetPlayer() != <c_GamePlayer>NULL:
-                p = Player()
-                p.player = self.node.deref().GetPlayer()
-                return p
-            return None
+    @property
+    def player(self) -> typing.Optional[Player]:
+        """The player who makes the decision at this node.
+        If this is a terminal node `None` is returned.
+        """
+        cdef Player p
+        if self.node.deref().GetPlayer() != <c_GamePlayer>NULL:
+            p = Player()
+            p.player = self.node.deref().GetPlayer()
+            return p
+        return None
 
-    property parent:
-        def __get__(self) -> typing.Optional[Node]:
-            cdef Node n
-            if self.node.deref().GetParent() != <c_GameNode>NULL:
-                n = Node()
-                n.node = self.node.deref().GetParent()
-                return n
-            return None
-            
-    property prior_action:
-        def __get__(self) -> typing.Optional[Action]:
-            cdef Action a
-            if self.node.deref().GetPriorAction() != <c_GameAction>NULL:
-                a = Action()
-                a.action = self.node.deref().GetPriorAction()
-                return a
-            return None
+    @property
+    def parent(self) -> typing.Optional[Node]:
+        """The parent of this node.  If this is the root node, `None` is returned."""
+        cdef Node n
+        if self.node.deref().GetParent() != <c_GameNode>NULL:
+            n = Node()
+            n.node = self.node.deref().GetParent()
+            return n
+        return None
 
-    property prior_sibling:
-        def __get__(self) -> typing.Optional[Node]:
-            cdef Node n
-            if self.node.deref().GetPriorSibling() != <c_GameNode>NULL:
-                n = Node()
-                n.node = self.node.deref().GetPriorSibling()
-                return n
-            return None
+    @property
+    def prior_action(self) -> typing.Optional[Action]:
+        """The action which leads to this node.  If this is the root node,
+        `None` is returned.
+        """
+        cdef Action a
+        if self.node.deref().GetPriorAction() != <c_GameAction>NULL:
+            a = Action()
+            a.action = self.node.deref().GetPriorAction()
+            return a
+        return None
 
-    property next_sibling:
-        def __get__(self) -> typing.Optional[None]:
-            cdef Node n
-            if self.node.deref().GetNextSibling() != <c_GameNode>NULL:
-                n = Node()
-                n.node = self.node.deref().GetNextSibling()
-                return n
-            return None
-            
-    property is_terminal:
-        def __get__(self) -> bool:
-            return self.node.deref().IsTerminal()
+    @property
+    def prior_sibling(self) -> typing.Optional[Node]:
+        """The node which is immediately before this one in its parent's children.
+        If this is the root node or the first child of its parent, `None` is returned.
+        """
+        cdef Node n
+        if self.node.deref().GetPriorSibling() != <c_GameNode>NULL:
+            n = Node()
+            n.node = self.node.deref().GetPriorSibling()
+            return n
+        return None
 
-    property is_subgame_root:
+    @property
+    def next_sibling(self) -> typing.Optional[Node]:
+        """The node which is immediately after this one in its parent's children.
+        If this is the root node or the last child of its parent, `None` is returned.
+        """
+        cdef Node n
+        if self.node.deref().GetNextSibling() != <c_GameNode>NULL:
+            n = Node()
+            n.node = self.node.deref().GetNextSibling()
+            return n
+        return None
+
+    @property
+    def is_terminal(self) -> bool:
+        """Returns `True` if this is a terminal node of the game."""
+        return self.node.deref().IsTerminal()
+
+    @property
+    def is_subgame_root(self) -> bool:
         """Returns `True` if the node is the root of a proper subgame.
 
         .. versionchanged:: 16.1.0
             Changed to being a property instead of a member function.
         """
-        def __get__(self) -> bool:
-            return self.node.deref().IsSubgameRoot()
+        return self.node.deref().IsSubgameRoot()
 
-    property outcome:
-        def __get__(self) -> typing.Optional[Outcome]:
-            cdef Outcome o
-            if self.node.deref().GetOutcome() != <c_GameOutcome>NULL:
-                o = Outcome()
-                o.outcome = self.node.deref().GetOutcome()
-                return o
-            return None
-        
-        def __set__(self, outcome: typing.Optional[Outcome]):
-            if outcome is None:
-                self.node.deref().SetOutcome(<c_GameOutcome>NULL)
-            elif isinstance(outcome, Outcome):
-                self.node.deref().SetOutcome((<Outcome>outcome).outcome)
-            else:
-                raise TypeError(f"argument must be an Outcome or None, not '{outcome.__class__.__name__}'")
+    @property
+    def outcome(self) -> typing.Optional[Outcome]:
+        """Returns the outcome attached to the node.  If no outcome is attached
+        to the node, `None` is returned.
+        """
+        cdef Outcome o
+        if self.node.deref().GetOutcome() != <c_GameOutcome>NULL:
+            o = Outcome()
+            o.outcome = self.node.deref().GetOutcome()
+            return o
+        return None
+
+    @outcome.setter
+    def outcome(self, outcome: typing.Optional[Outcome]) -> None:
+        if outcome is None:
+            self.node.deref().SetOutcome(<c_GameOutcome>NULL)
+        elif isinstance(outcome, Outcome):
+            self.node.deref().SetOutcome((<Outcome>outcome).outcome)
+        else:
+            raise TypeError(f"argument must be an Outcome or None, not '{outcome.__class__.__name__}'")
              

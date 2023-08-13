@@ -123,76 +123,77 @@ cdef class Player:
     def __hash__(self):
         return long(<long>self.player.deref())
 
-    property game:
+    @property
+    def game(self) -> Game:
         """Gets the :py:class:`Game` to which the player belongs."""
-        def __get__(self):
-            cdef Game g
-            if self.restriction is not None:
-                return self.restriction
-            g = Game()
-            g.game = self.player.deref().GetGame() 
-            return g
+        cdef Game g
+        if self.restriction is not None:
+            return self.restriction
+        g = Game()
+        g.game = self.player.deref().GetGame()
+        return g
 
-    property label:
+    @property
+    def label(self) -> str:
         """Gets or sets the text label of the player."""
-        def __get__(self):
-            return self.player.deref().GetLabel().decode('ascii')
+        return self.player.deref().GetLabel().decode('ascii')
 
-        def __set__(self, value):
-            if self.restriction is not None:
-                raise UndefinedOperationError("Changing objects in a restriction is not supported")
-            # check to see if the player's name has been used elsewhere
-            if value in [i.label for i in self.game.players]:
-                warnings.warn("Another player with an identical label exists")
-            self.player.deref().SetLabel(value.encode('ascii'))
+    @label.setter
+    def label(self, value: str) -> None:
+        if self.restriction is not None:
+            raise UndefinedOperationError("Changing objects in a restriction is not supported")
+        # check to see if the player's name has been used elsewhere
+        if value in [i.label for i in self.game.players]:
+            warnings.warn("Another player with an identical label exists")
+        self.player.deref().SetLabel(value.encode('ascii'))
 
-    property number:
+    @property
+    def number(self) -> int:
         """Returns the number of the player in its Game.
         Players are numbered starting with 0.
         """
-        def __get__(self):
-            return self.player.deref().GetNumber() - 1
+        return self.player.deref().GetNumber() - 1
 
-    property is_chance:
+    @property
+    def is_chance(self) -> bool:
         """Returns `True` if the player is the chance player."""
-        def __get__(self):
-            return self.player.deref().IsChance() != 0
+        return self.player.deref().IsChance() != 0
 
-    property strategies:
+    @property
+    def strategies(self) -> Strategies:
         """Returns the set of strategies belonging to the player."""
-        def __get__(self):
-            cdef Strategies s
-            cdef PlayerSupportStrategies ps
-            if self.restriction is not None:
-                ps = PlayerSupportStrategies(self, self.restriction)
-                return ps
-            s = Strategies()
-            s.player = self.player
-            return s
-        
-    property infosets:
+        cdef Strategies s
+        cdef PlayerSupportStrategies ps
+        if self.restriction is not None:
+            ps = PlayerSupportStrategies(self, self.restriction)
+            return ps
+        s = Strategies()
+        s.player = self.player
+        return s
+
+    @property
+    def infosets(self) -> Infosets:
         """Returns the set of information sets at which the player has the decision."""
-        def __get__(self):
-            cdef Infosets s
-            s = Infosets()
-            s.player = self.player
-            return s
+        cdef Infosets s
+        s = Infosets()
+        s.player = self.player
+        return s
 
-    property min_payoff:
+    @property
+    def min_payoff(self) -> Rational:
         """Returns the smallest payoff for the player in any outcome of the game."""
-        def __get__(self):
-            cdef Game g
-            g = Game()
-            g.game = self.player.deref().GetGame()
-            return rat_to_py(g.game.deref().GetMinPayoff(self.number + 1))
+        cdef Game g
+        g = Game()
+        g.game = self.player.deref().GetGame()
+        return rat_to_py(g.game.deref().GetMinPayoff(self.number + 1))
 
-    property max_payoff:
+    @property
+    def max_payoff(self) -> Rational:
         """Returns the largest payoff for the player in any outcome of the game."""
-        def __get__(self):
-            cdef Game g
-            g = Game()
-            g.game = self.player.deref().GetGame()
-            return rat_to_py(g.game.deref().GetMaxPayoff(self.number + 1))
+        cdef Game g
+        g = Game()
+        g.game = self.player.deref().GetGame()
+        return rat_to_py(g.game.deref().GetMaxPayoff(self.number + 1))
 
     def unrestrict(self):
         cdef Game g

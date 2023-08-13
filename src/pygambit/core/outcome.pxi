@@ -53,25 +53,28 @@ cdef class Outcome:
             raise UndefinedOperationError("Changing objects in a restriction is not supported")
         (<Game>self.game).game.deref().DeleteOutcome(self.outcome)
 
-    property game:
-        def __get__(self):
-            cdef Game g
-            if self.restriction is not None:
-                return self.restriction
-            g = Game()
-            g.game = self.outcome.deref().GetGame()
-            return g
+    @property
+    def game(self) -> Game:
+        """Returns the game with which this outcome is associated."""
+        cdef Game g
+        if self.restriction is not None:
+            return self.restriction
+        g = Game()
+        g.game = self.outcome.deref().GetGame()
+        return g
 
-    property label:
-        def __get__(self):
-            return self.outcome.deref().GetLabel().decode('ascii')
+    @property
+    def label(self) -> str:
+        """The text label associated with this outcome."""
+        return self.outcome.deref().GetLabel().decode('ascii')
 
-        def __set__(self, value):
-            if self.restriction is not None:
-                raise UndefinedOperationError("Changing objects in a restriction is not supported")
-            if value in [i.label for i in self.game.outcomes]:
-                warnings.warn("Another outcome with an identical label exists")
-            self.outcome.deref().SetLabel(value.encode('ascii'))
+    @label.setter
+    def label(self, value: str) -> None:
+        if self.restriction is not None:
+            raise UndefinedOperationError("Changing objects in a restriction is not supported")
+        if value in [i.label for i in self.game.outcomes]:
+            warnings.warn("Another outcome with an identical label exists")
+        self.outcome.deref().SetLabel(value.encode('ascii'))
 
     def __getitem__(self, player):
         cdef bytes py_string
@@ -89,7 +92,7 @@ cdef class Outcome:
 
     def __setitem__(self, pl: int, value: typing.Any) -> None:
         """
-        Set the payoff value to a specifed player for the outcome.
+        Set the payoff value to a specified player for the outcome.
 
         Parameters
         ----------
@@ -118,12 +121,13 @@ cdef class TreeGameOutcome:
     cdef c_PureStrategyProfile *psp
     cdef c_Game c_game
 
-    property game:
-        def __get__(self):
-            cdef Game g
-            g = Game()
-            g.game = self.c_game
-            return g
+    @property
+    def game(self) -> Game:
+        """Returns the game with which this outcome is associated."""
+        cdef Game g
+        g = Game()
+        g.game = self.c_game
+        return g
 
     def __del__(self):
         del self.psp
@@ -166,8 +170,7 @@ cdef class TreeGameOutcome:
     def delete(self):
         raise NotImplementedError("Cannot modify outcomes in a derived strategic game.")
 
-    property label:
-        def __get__(self):
-            return "(%s)" % ( ",".join( [ self.psp.deref().GetStrategy((<Player>player).player).deref().GetLabel().c_str() for player in self.game.players ] ) )
-        def __set__(self, char *value):
-            raise NotImplementedError("Cannot modify outcomes in a derived strategic game.")
+    @property
+    def label(self) -> str:
+        """The text label associated with this outcome."""
+        return "(%s)" % ( ",".join( [ self.psp.deref().GetStrategy((<Player>player).player).deref().GetLabel().c_str() for player in self.game.players ] ) )

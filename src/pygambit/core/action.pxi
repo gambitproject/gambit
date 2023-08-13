@@ -19,6 +19,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+import typing
+
 from libcpp.string cimport string
 
 cdef class Action:
@@ -61,45 +63,48 @@ cdef class Action:
     def precedes(self, node: Node) -> bool:
         return self.action.deref().Precedes((<Node>node).node)
 
-    property label:
-        def __get__(self):
-            return self.action.deref().GetLabel().decode('ascii')
-        def __set__(self, value):
-            cdef string s
-            s = value.encode('ascii')
-            self.action.deref().SetLabel(s)
+    @property
+    def label(self) -> str:
+        """Get or set the text label of the action."""
+        return self.action.deref().GetLabel().decode('ascii')
 
-    property infoset:
-        def __get__(self):
-            cdef Infoset i
-            i = Infoset()
-            i.infoset = self.action.deref().GetInfoset()
-            return i
+    @label.setter
+    def label(self, value: str) -> None:
+        self.action.deref().SetLabel(value.encode('ascii'))
 
-    property prob:
-        def __get__(self):
-            cdef string py_string
-            py_string = <string>(
-                self.action.deref().GetInfoset().deref().GetActionProb(
-                    self.action.deref().GetNumber()
-                )
+    @property
+    def infoset(self) -> Infoset:
+        """Get the information set to which the action belongs."""
+        cdef Infoset i
+        i = Infoset()
+        i.infoset = self.action.deref().GetInfoset()
+        return i
+
+    @property
+    def prob(self) -> typing.Union[decimal.Decimal, Rational]:
+        """
+        Get or set the probability a chance action is played.
+
+        Parameters
+        ----------
+        value : Any
+            The probability the action is played.  This can be any numeric type, or any object that
+            has a string representation which can be interpreted as an integer,
+            decimal, or rational number.
+        """
+        cdef string py_string
+        py_string = <string>(
+            self.action.deref().GetInfoset().deref().GetActionProb(
+                self.action.deref().GetNumber()
             )
-            if "." in py_string.decode('ascii'):
-                return decimal.Decimal(py_string.decode('ascii'))
-            else:
-                return Rational(py_string.decode('ascii'))
-        
-        def __set__(self, value: typing.Any):
-            """
-            Set the probability a chance action is played.
+        )
+        if "." in py_string.decode('ascii'):
+            return decimal.Decimal(py_string.decode('ascii'))
+        else:
+            return Rational(py_string.decode('ascii'))
 
-            Parameters
-            ----------
-            value : Any
-                The probability the action is played.  This can be any numeric type, or any object that
-                has a string representation which can be interpreted as an integer,
-                decimal, or rational number.
-            """
-            self.action.deref().GetInfoset().deref().SetActionProb(
-                self.action.deref().GetNumber(), _to_number(value)
-            )
+    @prob.setter
+    def prob(self, value: typing.Any) -> None:
+        self.action.deref().GetInfoset().deref().SetActionProb(
+            self.action.deref().GetNumber(), _to_number(value)
+        )

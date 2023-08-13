@@ -50,27 +50,31 @@ cdef class Strategy:
     def __hash__(self):
         return long(<long>self.strategy.deref())
 
-    property label:
-        def __get__(self):
-            return self.strategy.deref().GetLabel().decode('ascii')
+    @property
+    def label(self) -> str:
+        """The text label associated with the strategy."""
+        return self.strategy.deref().GetLabel().decode('ascii')
 
-        def __set__(self, value):
-            if self.restriction is not None:
-                raise UndefinedOperationError("Changing objects in a restriction is not supported")
-            if value in [i.label for i in self.player.strategies]:
-                warnings.warn("This player has another strategy with an identical label")
-            self.strategy.deref().SetLabel(value.encode('ascii'))
+    @label.setter
+    def label(self, value: str) -> None:
+        if self.restriction is not None:
+            raise UndefinedOperationError("Changing objects in a restriction is not supported")
+        if value in [i.label for i in self.player.strategies]:
+            warnings.warn("This player has another strategy with an identical label")
+        self.strategy.deref().SetLabel(value.encode('ascii'))
 
-    property player:
-        def __get__(self):
-            p = Player()
-            p.restriction = self.restriction
-            p.player = self.strategy.deref().GetPlayer()
-            return p
+    @property
+    def player(self) -> Player:
+        """The player to which the strategy belongs."""
+        p = Player()
+        p.restriction = self.restriction
+        p.player = self.strategy.deref().GetPlayer()
+        return p
 
-    property number:
-        def __get__(self):
-            return self.strategy.deref().GetNumber() - 1 
+    @property
+    def number(self) -> int:
+        """The number of the strategy."""
+        return self.strategy.deref().GetNumber() - 1
 
     def unrestrict(self):
         cdef Strategy s

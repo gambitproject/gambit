@@ -23,7 +23,7 @@ import functools
 
 from cython.operator cimport dereference as deref
 
-cdef class MixedBehaviorProfile(object):
+cdef class MixedBehaviorProfile:
     def __repr__(self):    
         return str([ self[player] for player in self.game.players ])
     def _repr_latex_(self):
@@ -295,12 +295,14 @@ cdef class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         else:
             self.profile.Randomize(denom)
 
-    property game:
-        def __get__(self):
-            cdef Game g
-            g = Game()
-            g.game = self.profile.GetGame()
-            return g
+    @property
+    def game(self) -> Game:
+        """The game on which this mixed behaviour profile is defined.
+        """
+        cdef Game g
+        g = Game()
+        g.game = self.profile.GetGame()
+        return g
 
 
 cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
@@ -368,9 +370,11 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def randomize(self, denom):
         self.profile.Randomize(denom)
 
-    property game:
-        def __get__(self):
-            cdef Game g
-            g = Game()
-            g.game = self.profile.GetGame()
-            return g
+    @property
+    def game(self) -> Game:
+        """The game on which this mixed behaviour profile is defined.
+        """
+        cdef Game g
+        g = Game()
+        g.game = self.profile.GetGame()
+        return g

@@ -357,23 +357,25 @@ cdef class StrategicRestriction:
     def __hash__(self):
         return long(<long>&self.support)
 
-    property title:
-        def __get__(self):
-            return "Restriction from Game '%s'" % self.unrestrict().title
+    @property
+    def title(self) -> str:
+        return "Restriction from Game '%s'" % self.unrestrict().title
 
-    property players:
-        def __get__(self):
-            cdef Players p
-            p = Players()
-            p.game = (<Game>self.unrestrict()).game
-            p.restriction = self
-            return p
+    @property
+    def players(self) -> Players:
+        """Returns the set of players in the game."""
+        cdef Players p
+        p = Players()
+        p.game = (<Game>self.unrestrict()).game
+        p.restriction = self
+        return p
 
-    property strategies:
-        def __get__(self):
-            cdef RestrictionStrategies s
-            s = RestrictionStrategies(self)
-            return s
+    @property
+    def strategies(self) -> RestrictionStrategies:
+        """Returns the set of strategies in the game."""
+        cdef RestrictionStrategies s
+        s = RestrictionStrategies(self)
+        return s
 
     property outcomes:
         def __get__(self):
