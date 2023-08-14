@@ -24,6 +24,7 @@ import typing
 from libcpp.string cimport string
 
 cdef class Action:
+    """A choice available at an information set."""
     cdef c_GameAction action
 
     def __repr__(self):
@@ -34,7 +35,7 @@ cdef class Action:
             f"in game '{self.infoset.game.title}'>"
         )
     
-    def __richcmp__(Action self, other, whichop):
+    def __richcmp__(self, other, whichop) -> bool:
         if isinstance(other, Action):
             if whichop == 2:
                 return self.action.deref() == (<Action>other).action.deref()
@@ -50,10 +51,18 @@ cdef class Action:
             else:
                 raise NotImplementedError
 
-    def __hash__(self):
+    def __hash__(self) -> long:
         return long(<long>self.action.deref())
 
     def delete(self):
+        """Deletes this action from its information set.  The subtrees which
+        are rooted at nodes that follow the deleted action are also deleted.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the action is the only action at its information set
+        """
         if len(self.infoset.actions) == 1:
             raise UndefinedOperationError(
                 "It is not possible to delete the last action of an infoset"
@@ -61,6 +70,16 @@ cdef class Action:
         self.action.deref().DeleteAction()
 
     def precedes(self, node: Node) -> bool:
+        """ Returns `True` if `node` precedes this action in the
+        extensive game.
+
+        Raises
+        ------
+        MismatchError
+            If `node` is not in the same game as the action.
+        """
+        if self.infoset.game != node.game:
+            raise MismatchError("precedes() requires a node from the same game as the action")
         return self.action.deref().Precedes((<Node>node).node)
 
     @property
@@ -91,6 +110,11 @@ cdef class Action:
             The probability the action is played.  This can be any numeric type, or any object that
             has a string representation which can be interpreted as an integer,
             decimal, or rational number.
+
+        Raises
+        ------
+        ValueError
+            If `value` cannot be interpreted as a decimal or rational number.
         """
         cdef string py_string
         py_string = <string>(

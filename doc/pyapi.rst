@@ -826,48 +826,6 @@ of game.
       information set.
 
 
-.. py:class:: Action
-
-   An action associated with an information set.
-
-   .. py:method:: delete()
-
-      Deletes this action from the game.
-
-      :raises pygambit.UndefinedOperationError: when the action is the
-                                              last one of its infoset.
-
-   .. py:method:: precedes(node)
-
-      Returns ``True`` if ``node`` precedes this action in the
-      extensive game.
-
-   .. py:attribute:: label
-
-      A text label used to identify the action.
-
-   .. py:attribute:: infoset
-
-      Returns the information to which this action is associated.
-
-   .. py:attribute:: prob
-
-      A settable property that represents the probability associated 
-      with the action.
-
-      When setting, if the value is is an ``int`` or `pygambit.Rational`, the
-      payoff is stored as a rational number.
-      If ``payoff`` is a `pygambit.Decimal`, the payoff is stored
-      as a decimal number.
-      Otherwise, the method attempts to construct a
-      `pygambit.Rational` or `pygambit.Decimal` based on the
-      string representation of ``payoff``.
-
-      :raises ValueError: If the value cannot be interpreted as
-			  a decimal or rational number.
-
-
-
 .. py:class:: Strategies
    
    A collection object representing the strategies available to a
