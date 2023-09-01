@@ -538,6 +538,8 @@ cdef class Game:
     # to __getitem__, which is required for multidimensional slicing to work. 
     # We work around this by providing a shim.
     def __getitem__(self, i):
+        """Returns the `Outcome` associated with a profile of pure strategies.
+        """
         try:
             if len(i) != len(self.players):
                 raise KeyError("Number of strategies is not equal to the number of players")
@@ -563,7 +565,25 @@ cdef class Game:
                 raise TypeError("Must use a tuple of ints, strategy labels, or strategies")
         return self._get_contingency(*tuple(cont))
 
-    def mixed_strategy_profile(self, data=None, rational=False):
+    def mixed_strategy_profile(self, data=None, rational=False) -> MixedStrategyProfile:
+        """Returns a mixed strategy profile `MixedStrategyProfile`
+        over the game.  If ``data`` is not specified, the mixed
+        strategy profile is initialized to uniform randomization for each
+        player over his strategies.  If the game has a tree
+        representation, the mixed strategy profile is defined over the
+        reduced strategic form representation.
+
+        Parameters
+        ----------
+        data
+            A nested list (or compatible type) with the
+		   same dimension as the strategy set of the game,
+		   specifying the probabilities of the strategies.
+
+        rational
+            If `True`, probabilities are represented using rational numbers;
+            otherwise double-precision floating point numbers are used.
+        """
         cdef MixedStrategyProfileDouble mspd
         cdef MixedStrategyProfileRational mspr
         cdef c_Rational dummy_rat
@@ -612,7 +632,22 @@ cdef class Game:
                     mspr[s] = Rational(v)
             return mspr
 
-    def mixed_behavior_profile(self, rational=False):
+    def mixed_behavior_profile(self, rational=False) -> MixedBehaviorProfile:
+        """Returns a behavior strategy profile `MixedBehaviorProfile` over the game,
+        initialized to uniform randomization for each player over his actions at each
+        information set.
+
+        Parameters
+        ----------
+        rational
+            If `True`, probabilities are represented using rational numbers; otherwise
+            double-precision floating point numbers are used.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
         cdef MixedBehaviorProfileDouble mbpd
         cdef MixedBehaviorProfileRational mbpr
         if self.is_tree:
@@ -640,7 +675,40 @@ cdef class Game:
     def unrestrict(self):
         return self
 
-    def write(self, format='native'):
+    def write(self, format='native') -> str:
+        """Returns a serialization of the game.  Several output formats are
+        supported, depending on the representation of the game.
+
+        * `efg`: A representation of the game in
+          :ref:`the .efg extensive game file format <file-formats-efg>`.
+          Not available for games in strategic representation.
+        * `nfg`: A representation of the game in
+          :ref:`the .nfg strategic game file format <file-formats-nfg>`.
+          For an extensive game, this uses the reduced strategic form
+          representation.
+        * `gte`: The XML representation used by the Game Theory Explorer
+          tool.   Only available for extensive games.
+        * `native`: The format most appropriate to the
+          underlying representation of the game, i.e., `efg` or `nfg`.
+
+        This method also supports exporting to other output formats
+        (which cannot be used directly to re-load the game later, but
+        are suitable for human consumption, inclusion in papers, and so
+        on):
+
+        * `html`: A rendering of the strategic form of the game as a
+	      collection of HTML tables.  The first player is the row
+	      chooser; the second player the column chooser.  For games with
+	      more than two players, a collection of tables is generated,
+	      one for each possible strategy combination of players 3 and higher.
+        * `sgame`: A rendering of the strategic form of the game in
+	      LaTeX, suitable for use with `Martin Osborne's sgame style
+	      <https://www.economics.utoronto.ca/osborne/latex/>`_.
+	      The first player is the row
+	      chooser; the second player the column chooser.  For games with
+	      more than two players, a collection of tables is generated,
+	      one for each possible strategy combination of players 3 and higher.
+        """
         if format == 'gte':
             return pygambit.gte.write_game(self)
         else:
