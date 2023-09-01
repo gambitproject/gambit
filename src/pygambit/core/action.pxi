@@ -19,13 +19,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-import typing
 
-from libcpp.string cimport string
-
-cdef class Action:
+@cython.cclass
+class Action:
     """A choice available at an information set."""
-    cdef c_GameAction action
+    action = cython.declare(c_GameAction)
 
     def __repr__(self):
         return (
@@ -34,25 +32,15 @@ cdef class Action:
             f"for player '{self.infoset.player.label}' "
             f"in game '{self.infoset.game.title}'>"
         )
-    
-    def __richcmp__(self, other, whichop) -> bool:
-        if isinstance(other, Action):
-            if whichop == 2:
-                return self.action.deref() == (<Action>other).action.deref()
-            elif whichop == 3:
-                return self.action.deref() != (<Action>other).action.deref()
-            else:
-                raise NotImplementedError
-        else:
-            if whichop == 2:
-                return False
-            elif whichop == 3:
-                return True
-            else:
-                raise NotImplementedError
 
-    def __hash__(self) -> long:
-        return long(<long>self.action.deref())
+    def __eq__(self, other: typing.Any) -> bool:
+        return isinstance(other, Action) and self.action.deref() == cython.cast(Action, other).action.deref()
+
+    def __ne__(self, other: typing.Any) -> bool:
+        return not isinstance(other, Action) or self.action.deref() != cython.cast(Action, other).action.deref()
+
+    def __hash__(self) -> int:
+        return cython.cast(cython.long, self.action.deref())
 
     def delete(self):
         """Deletes this action from its information set.  The subtrees which
@@ -80,7 +68,7 @@ cdef class Action:
         """
         if self.infoset.game != node.game:
             raise MismatchError("precedes() requires a node from the same game as the action")
-        return self.action.deref().Precedes((<Node>node).node)
+        return self.action.deref().Precedes(cython.cast(Node, node).node)
 
     @property
     def label(self) -> str:
@@ -94,7 +82,6 @@ cdef class Action:
     @property
     def infoset(self) -> Infoset:
         """Get the information set to which the action belongs."""
-        cdef Infoset i
         i = Infoset()
         i.infoset = self.action.deref().GetInfoset()
         return i
@@ -103,24 +90,18 @@ cdef class Action:
     def prob(self) -> typing.Union[decimal.Decimal, Rational]:
         """
         Get or set the probability a chance action is played.
-
-        Parameters
-        ----------
-        value : Any
-            The probability the action is played.  This can be any numeric type, or any object that
-            has a string representation which can be interpreted as an integer,
-            decimal, or rational number.
+        When setting the probability, the value can be any numeric type, or any object that
+        has a string representation which can be interpreted as an integer,
+        decimal, or rational number.
 
         Raises
         ------
         ValueError
             If `value` cannot be interpreted as a decimal or rational number.
         """
-        cdef string py_string
-        py_string = <string>(
-            self.action.deref().GetInfoset().deref().GetActionProb(
-                self.action.deref().GetNumber()
-            )
+        py_string = cython.cast(
+            string,
+            self.action.deref().GetInfoset().deref().GetActionProb(self.action.deref().GetNumber())
         )
         if "." in py_string.decode('ascii'):
             return decimal.Decimal(py_string.decode('ascii'))

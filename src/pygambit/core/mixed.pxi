@@ -19,10 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-try:
-    from itertools import zip_longest
-except ImportError:
-    from itertools import izip_longest as zip_longest
+from itertools import zip_longest
 import functools
 
 from cython.operator cimport dereference as deref
@@ -90,7 +87,7 @@ cdef class MixedStrategyProfile:
         elif isinstance(index, Strategy):
             return self._getprob_strategy(index)
         elif isinstance(index, Player):
-            class MixedStrategy(object):
+            class MixedStrategy:
                 def __init__(self, profile, player):
                     self.profile = profile
                     self.player = player
@@ -132,7 +129,8 @@ cdef class MixedStrategyProfile:
                             index.__class__.__name__)
 
     def _setprob_player(self, Player player, value):
-        class Filler(object): pass
+        class Filler:
+            pass
         try:
             for (s, v) in zip_longest(player.strategies, value, fillvalue=Filler()):
                 if isinstance(s, Filler) or isinstance(v, Filler):
@@ -234,7 +232,7 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
                               Strategy s1, Strategy s2):
         return self.profile.GetPayoffDeriv(pl, s1.strategy, s2.strategy)
 
-    def liap_value(self) -> double:
+    def liap_value(self) -> float:
         """
         Returns the Lyapunov value (see [McK91]_) of the strategy profile.
         The Lyapunov value is a non-negative number which is zero exactly at

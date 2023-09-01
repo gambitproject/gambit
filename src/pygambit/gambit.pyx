@@ -27,6 +27,7 @@ import fractions
 import warnings
 import typing
 
+import cython
 from libcpp cimport bool
 from libcpp.string cimport string
 import typing
@@ -56,7 +57,7 @@ cdef extern from "gambit.h":
 
 cdef extern from "core/rational.h":
     cdef cppclass c_Rational "Rational":
-        pass
+        c_Rational()
     string rat_str "lexical_cast<std::string>"(c_Rational)
     c_Rational str_rat "lexical_cast<Rational>"(string)
 
@@ -435,7 +436,7 @@ cdef extern from "util.h":
     c_MixedBehaviorProfileRational *copyitem_list_mbpr "copyitem"(c_List[c_MixedBehaviorProfileRational], int)
 
 
-cdef class Collection(object):
+cdef class Collection:
     "Represents a collection of related objects in a game."
     def __repr__(self):   return str(list(self))
 

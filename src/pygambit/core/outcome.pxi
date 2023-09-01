@@ -19,10 +19,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-cdef class Outcome:
+@cython.cclass
+class Outcome:
     """An outcome in a `Game`."""
-    cdef c_GameOutcome outcome
-    cdef StrategicRestriction restriction
+    outcome = cython.declare(c_GameOutcome)
+    restriction = cython.declare(StrategicRestriction)
     
     def __repr__(self):
         return (
@@ -30,24 +31,14 @@ cdef class Outcome:
             f"in game '{self.game.title}'>"
         )
     
-    def __richcmp__(self, other, whichop) -> bool:
-        if isinstance(other, Outcome):
-            if whichop == 2:
-                return self.outcome.deref() == (<Outcome>other).outcome.deref()
-            elif whichop == 3:
-                return self.outcome.deref() != (<Outcome>other).outcome.deref()
-            else:
-                raise NotImplementedError
-        else:
-            if whichop == 2:
-                return False
-            elif whichop == 3:
-                return True
-            else:
-                raise NotImplementedError
+    def __eq__(self, other: typing.Any) -> bool:
+        return isinstance(other, Outcome) and self.outcome.deref() == (<Outcome> other).outcome.deref()
 
-    def __hash__(self):
-        return long(<long>self.outcome.deref())
+    def __ne__(self, other: typing.Any) -> bool:
+        return not isinstance(other, Outcome) or self.outcome.deref() != (<Outcome> other).outcome.deref()
+
+    def __hash__(self) -> int:
+        return cython.cast(cython.long, self.outcome.deref())
 
     def delete(self):
         """Deletes the outcome from its game.  If the game is an extensive game, any
@@ -57,12 +48,11 @@ cdef class Outcome:
         """
         if self.restriction is not None:
             raise UndefinedOperationError("Changing objects in a restriction is not supported")
-        (<Game>self.game).game.deref().DeleteOutcome(self.outcome)
+        cython.cast(Game, self.game).game.deref().DeleteOutcome(self.outcome)
 
     @property
     def game(self) -> Game:
         """Returns the game with which this outcome is associated."""
-        cdef Game g
         if self.restriction is not None:
             return self.restriction
         g = Game()
@@ -89,7 +79,7 @@ cdef class Outcome:
         as its label.  If an integer, returns the payoff to player
         number ``player``.
         """
-        cdef bytes py_string
+        py_string = cython.declare(bytes)
         if isinstance(player, Player):
             py_string = self.outcome.deref().GetPayoff(player.number+1).as_string().c_str()
         elif isinstance(player, str):
@@ -97,10 +87,10 @@ cdef class Outcome:
             py_string = self.outcome.deref().GetPayoff(number+1).as_string().c_str()
         elif isinstance(player, int):
             py_string = self.outcome.deref().GetPayoff(player+1).as_string().c_str()
-        if "." in py_string.decode('ascii'):
-            return decimal.Decimal(py_string.decode('ascii'))
+        if "." in py_string.decode(b'ascii'):
+            return decimal.Decimal(py_string.decode(b'ascii'))
         else:
-            return Rational(py_string.decode('ascii'))
+            return Rational(py_string.decode(b'ascii'))
 
     def __setitem__(self, pl: int, value: typing.Any) -> None:
         """
@@ -127,7 +117,6 @@ cdef class Outcome:
         self.outcome.deref().SetPayoff(pl+1, _to_number(value))
 
     def unrestrict(self):
-        cdef Outcome o
         o = Outcome()
         o.outcome = self.outcome
         return o
@@ -141,7 +130,6 @@ cdef class TreeGameOutcome:
     @property
     def game(self) -> Game:
         """Returns the game with which this outcome is associated."""
-        cdef Game g
         g = Game()
         g.game = self.c_game
         return g
@@ -152,21 +140,17 @@ cdef class TreeGameOutcome:
     def __repr__(self):
         return f"<Outcome '{self.label}' in game '{self.game.title}'>"
 
-    def __richcmp__(TreeGameOutcome self, other, whichop):
-        if isinstance(other, TreeGameOutcome):
-            if whichop == 2:
-                return self.psp.deref() == (<TreeGameOutcome>other).psp.deref()
-            elif whichop == 3:
-                return self.psp.deref() != (<TreeGameOutcome>other).psp.deref()
-            else:
-                raise NotImplementedError
-        else:
-            if whichop == 2:
-                return False
-            elif whichop == 3:
-                return True
-            else:
-                raise NotImplementedError
+    def __eq__(self, other: typing.Any) -> bool:
+        return (
+            isinstance(other, TreeGameOutcome) and
+            self.psp.deref() == cython.cast(TreeGameOutcome, other).psp.deref()
+        )
+
+    def __ne__(self, other: typing.Any) -> bool:
+        return (
+            not isinstance(other, TreeGameOutcome) or
+            self.psp.deref() != cython.cast(TreeGameOutcome, other).psp.deref()
+        )
 
     def __getitem__(self, player):
         if isinstance(player, Player):

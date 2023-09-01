@@ -20,9 +20,10 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-cdef class Children(Collection):
+@cython.cclass
+class Children(Collection):
     """Represents the collection of direct children of a node."""
-    cdef c_GameNode parent
+    parent = cython.declare(c_GameNode)
 
     def __len__(self):
         return self.parent.deref().NumChildren()
@@ -30,15 +31,15 @@ cdef class Children(Collection):
     def __getitem__(self, i):
         if not isinstance(i, int):
             return Collection.__getitem__(self, i)
-        cdef Node n
         n = Node()
         n.node = self.parent.deref().GetChild(i+1)
         return n
 
 
-cdef class Node:
+@cython.cclass
+class Node:
     """Represents a node in a :py:class:`Game`."""
-    cdef c_GameNode node
+    node = cython.declare(c_GameNode)
 
     def __repr__(self) -> str:
         return (
@@ -46,24 +47,14 @@ cdef class Node:
             f"in game '{self.game.title}'>"
         )
 
-    def __richcmp__(Node self, other, whichop) -> bool:
-        if isinstance(other, Node):
-            if whichop == 2:
-                return self.node.deref() == (<Node>other).node.deref()
-            elif whichop == 3:
-                return self.node.deref() != (<Node>other).node.deref()
-            else:
-                raise NotImplementedError
-        else:
-            if whichop == 2:
-                return False
-            elif whichop == 3:
-                return True
-            else:
-                raise NotImplementedError
+    def __eq__(self, other: typing.Any) -> bool:
+        return isinstance(other, Node) and self.node.deref() == cython.cast(Node, other).node.deref()
+
+    def __ne__(self, other: typing.Any) -> bool:
+        return not isinstance(other, Node) or self.node.deref() != cython.cast(Node, other).node.deref()
 
     def __hash__(self) -> long:
-        return long(<long>self.node.deref())
+        return cython.cast(long, self.node.deref())
 
     def is_successor_of(self, node: Node) -> bool:
         """Returns `True` if this node is a successor of `Node`."""
@@ -84,7 +75,6 @@ cdef class Node:
         MismatchError
             If the `infoset` or `player` is not from the same game as the node.
         """
-        cdef Infoset i
         if len(self.children) > 0:
             raise UndefinedOperationError("append_move can only be applied at a terminal node")
         if isinstance(player, Player):
@@ -124,7 +114,6 @@ cdef class Node:
         MismatchError
             If the `infoset` or `player` is not from the same game as the node.
         """
-        cdef Infoset i
         if isinstance(player, Player):
             if actions is None:
                 raise UndefinedOperationError("insert_move with a Player requires actions to be specified")
@@ -133,7 +122,7 @@ cdef class Node:
             if player.game != self.game:
                 raise MismatchError("append_move can only be applied between objects of the same game")
             i = Infoset()
-            i.infoset = self.node.deref().InsertMove((<Player>player).player, actions)
+            i.infoset = self.node.deref().InsertMove(cython.cast(Player, player).player, actions)
             return i
         elif isinstance(player, Infoset):
             if actions is not None:
@@ -141,9 +130,9 @@ cdef class Node:
             if player.game != self.game:
                 raise MismatchError("append_move can only be applied between objects of the same game")
             i = Infoset()
-            i.infoset = self.node.deref().InsertMove((<Infoset>player).infoset)
+            i.infoset = self.node.deref().InsertMove(cython.cast(Infoset, player).infoset)
             return i
-        raise TypeError, "insert_move accepts either a Player or Infoset to specify information"
+        raise TypeError("insert_move accepts either a Player or Infoset to specify information")
 
     def leave_infoset(self) -> Infoset:
         """Removes this node from its information set. If this node is the only node
@@ -154,7 +143,6 @@ cdef class Node:
         Infoset
             The information set to which the node belongs after the operation.
         """
-        cdef Infoset i
         i = Infoset()
         i.infoset = self.node.deref().LeaveInfoset()
         return i
@@ -181,7 +169,7 @@ cdef class Node:
             raise MismatchError(
                 f"copy_tree(): trees can only be copied within the same game"
             )
-        self.node.deref().CopyTree((<Node>node).node)
+        self.node.deref().CopyTree(node.node)
 
     def move_tree(self, node: Node):
         """Moves the subtree rooted at this node to `node`.
@@ -195,7 +183,7 @@ cdef class Node:
             raise MismatchError(
                 f"move_tree(): trees can only be moved within the same game"
             )
-        self.node.deref().MoveTree((<Node>node).node)
+        self.node.deref().MoveTree(node.node)
 
     @property
     def label(self) -> str:
@@ -209,7 +197,6 @@ cdef class Node:
     @property
     def children(self) -> Children:
         """The set of children of this node."""
-        cdef Children c
         c = Children()
         c.parent = self.node
         return c
@@ -217,7 +204,6 @@ cdef class Node:
     @property
     def game(self) -> Game:
         """Gets the :py:class:`Game` to which the node belongs."""
-        cdef Game g
         g = Game()
         g.game = self.node.deref().GetGame()
         return g
@@ -227,8 +213,7 @@ cdef class Node:
         """The information set to which this node belongs.  If this is a
         terminal node, which belongs to no information set, `None` is returned.
         """
-        cdef Infoset i
-        if self.node.deref().GetInfoset() != <c_GameInfoset>NULL:
+        if self.node.deref().GetInfoset() != cython.cast(c_GameInfoset, NULL):
             i = Infoset()
             i.infoset = self.node.deref().GetInfoset()
             return i
@@ -237,7 +222,7 @@ cdef class Node:
     @infoset.setter
     def infoset(self, infoset: Infoset) -> None:
         try:
-            self.node.deref().SetInfoset((<Infoset>infoset).infoset)
+            self.node.deref().SetInfoset(cython.cast(Infoset, infoset).infoset)
         except ValueError:
             raise ValueError(
                 f"in setting infoset: node has {len(self.children)} children, but infoset has {len(infoset.actions)} actions"
@@ -248,8 +233,7 @@ cdef class Node:
         """The player who makes the decision at this node.
         If this is a terminal node `None` is returned.
         """
-        cdef Player p
-        if self.node.deref().GetPlayer() != <c_GamePlayer>NULL:
+        if self.node.deref().GetPlayer() != cython.cast(c_GamePlayer, NULL):
             p = Player()
             p.player = self.node.deref().GetPlayer()
             return p
@@ -258,8 +242,7 @@ cdef class Node:
     @property
     def parent(self) -> typing.Optional[Node]:
         """The parent of this node.  If this is the root node, `None` is returned."""
-        cdef Node n
-        if self.node.deref().GetParent() != <c_GameNode>NULL:
+        if self.node.deref().GetParent() != cython.cast(c_GameNode, NULL):
             n = Node()
             n.node = self.node.deref().GetParent()
             return n
@@ -270,8 +253,7 @@ cdef class Node:
         """The action which leads to this node.  If this is the root node,
         `None` is returned.
         """
-        cdef Action a
-        if self.node.deref().GetPriorAction() != <c_GameAction>NULL:
+        if self.node.deref().GetPriorAction() != cython.cast(c_GameAction, NULL):
             a = Action()
             a.action = self.node.deref().GetPriorAction()
             return a
@@ -282,8 +264,7 @@ cdef class Node:
         """The node which is immediately before this one in its parent's children.
         If this is the root node or the first child of its parent, `None` is returned.
         """
-        cdef Node n
-        if self.node.deref().GetPriorSibling() != <c_GameNode>NULL:
+        if self.node.deref().GetPriorSibling() != cython.cast(c_GameNode, NULL):
             n = Node()
             n.node = self.node.deref().GetPriorSibling()
             return n
@@ -294,8 +275,7 @@ cdef class Node:
         """The node which is immediately after this one in its parent's children.
         If this is the root node or the last child of its parent, `None` is returned.
         """
-        cdef Node n
-        if self.node.deref().GetNextSibling() != <c_GameNode>NULL:
+        if self.node.deref().GetNextSibling() != cython.cast(c_GameNode, NULL):
             n = Node()
             n.node = self.node.deref().GetNextSibling()
             return n
@@ -320,8 +300,7 @@ cdef class Node:
         """Returns the outcome attached to the node.  If no outcome is attached
         to the node, `None` is returned.
         """
-        cdef Outcome o
-        if self.node.deref().GetOutcome() != <c_GameOutcome>NULL:
+        if self.node.deref().GetOutcome() != cython.cast(c_GameOutcome, NULL):
             o = Outcome()
             o.outcome = self.node.deref().GetOutcome()
             return o
@@ -330,9 +309,7 @@ cdef class Node:
     @outcome.setter
     def outcome(self, outcome: typing.Optional[Outcome]) -> None:
         if outcome is None:
-            self.node.deref().SetOutcome(<c_GameOutcome>NULL)
-        elif isinstance(outcome, Outcome):
-            self.node.deref().SetOutcome((<Outcome>outcome).outcome)
+            self.node.deref().SetOutcome(cython.cast(c_GameOutcome, NULL))
         else:
-            raise TypeError(f"argument must be an Outcome or None, not '{outcome.__class__.__name__}'")
+            self.node.deref().SetOutcome(outcome.outcome)
              

@@ -28,9 +28,10 @@ import pygambit.gte
 import pygambit.gameiter
 
 
-cdef class Outcomes(Collection):
+@cython.cclass
+class Outcomes(Collection):
     """Represents a collection of outcomes in a game."""
-    cdef c_Game game
+    game = cython.declare(c_Game)
 
     def __len__(self):
         """The number of outcomes in the game."""
@@ -39,24 +40,24 @@ cdef class Outcomes(Collection):
     def __getitem__(self, outc):
         if not isinstance(outc, int):
             return Collection.__getitem__(self, outc)
-        cdef Outcome c
         c = Outcome()
         c.outcome = self.game.deref().GetOutcome(outc+1)
         return c
 
     def add(self, label=""):
         """Add a new outcome to the game."""
-        cdef Outcome c
         c = Outcome()
         c.outcome = self.game.deref().NewOutcome()
-        if label != "": c.label = str(label)
+        if label != "":
+            c.label = str(label)
         return c
 
 
-cdef class Players(Collection):
+@cython.cclass
+class Players(Collection):
     """Represents a collection of players in a game."""
-    cdef c_Game game
-    cdef StrategicRestriction restriction
+    game = cython.declare(c_Game)
+    restriction = cython.declare(StrategicRestriction)
 
     def __len__(self):
         """Returns the number of players in the game."""
@@ -65,7 +66,6 @@ cdef class Players(Collection):
     def __getitem__(self, pl):
         if not isinstance(pl, int):
             return Collection.__getitem__(self, pl)
-        cdef Player p
         p = Player()
         p.player = self.game.deref().GetPlayer(pl+1)
         if self.restriction is not None:
@@ -74,27 +74,27 @@ cdef class Players(Collection):
 
     def add(self, label="") -> Player:
         """Adds a new player to the game."""
-        cdef Player p
         if self.restriction is not None:
             raise UndefinedOperationError("Changing objects in a restriction is not supported")
         p = Player()
         p.player = self.game.deref().NewPlayer()
-        if label != "": p.label = str(label)
+        if label != "":
+            p.label = str(label)
         return p
 
     @property
     def chance(self) -> Player:
         """Returns the chance player associated with the game."""
-        cdef Player p
         p = Player()
         p.player = self.game.deref().GetChance()
         p.restriction = self.restriction
         return p
 
 
-cdef class GameActions(Collection):
+@cython.cclass
+class GameActions(Collection):
     """Represents a collection of actions in a game."""
-    cdef c_Game game
+    game = cython.declare(c_Game)
 
     def __len__(self):
         return self.game.deref().BehavProfileLength()
@@ -102,17 +102,17 @@ cdef class GameActions(Collection):
     def __getitem__(self, action):
         if not isinstance(action, int):
             return Collection.__getitem__(self, action)
-        cdef Action a
         a = Action()
         a.action = self.game.deref().GetAction(action+1)
         return a
 
-cdef class GameInfosets(Collection):
+
+@cython.cclass
+class GameInfosets(Collection):
     """Represents a collection of infosets in a game."""
-    cdef c_Game game
+    game = cython.declare(c_Game)
 
     def __len__(self):
-        cdef Array[int] num_infosets
         num_infosets = self.game.deref().NumInfosets()
         size = num_infosets.Length()
         n = 0
@@ -123,15 +123,15 @@ cdef class GameInfosets(Collection):
     def __getitem__(self, infoset):
         if not isinstance(infoset, int):
             return Collection.__getitem__(self, infoset)
-        cdef Infoset i
         i = Infoset()
         i.infoset = self.game.deref().GetInfoset(infoset+1)
         return i
 
 
-cdef class GameStrategies(Collection):
+@cython.cclass
+class GameStrategies(Collection):
     """Represents a collection of strategies in a game."""
-    cdef c_Game game
+    game = cython.declare(c_Game)
 
     def __len__(self):
         return self.game.deref().MixedProfileLength()
@@ -139,17 +139,17 @@ cdef class GameStrategies(Collection):
     def __getitem__(self, st):
         if not isinstance(st, int):
             return Collection.__getitem__(self, st)
-        cdef Strategy s
         s = Strategy()
         s.strategy = self.game.deref().GetStrategy(st+1)
         return s
 
 
-cdef class Game:
+@cython.cclass
+class Game:
     """Represents a game, the fundamental concept in game theory.
     Games may be represented in extensive or strategic form.
     """
-    cdef c_Game game
+    game = cython.declare(c_Game)
 
     @classmethod
     def new_tree(cls, title: str="Untitled extensive game") -> Game:
@@ -170,7 +170,7 @@ cdef class Game:
         Game
             The newly-created extensive game.
         """
-        cdef Game g
+        g = cython.declare(Game)
         g = cls()
         g.game = NewTree()
         g.title = title
@@ -196,7 +196,7 @@ cdef class Game:
         Game
             The newly-created strategic game.
         """
-        cdef Game g
+        g = cython.declare(Game)
         cdef Array[int] *d
         d = new Array[int](len(dim))
         for i in range(1, len(dim)+1):
@@ -232,7 +232,7 @@ cdef class Game:
         Game
             The newly-created strategic game.
         """
-        cdef Game g
+        g = cython.declare(Game)
         arrays = [np.array(a) for a in arrays]
         if len(set(a.shape for a in arrays)) > 1:
             raise ValueError("All specified arrays must have the same shape")
@@ -268,7 +268,7 @@ cdef class Game:
         Game
             The newly-created strategic game.
         """
-        cdef Game g
+        g = cython.declare(Game)
         payoffs = {k: np.array(v) for k, v in payoffs.items()}
         if len(set(a.shape for a in payoffs.values())) > 1:
             raise ValueError("All specified arrays must have the same shape")
@@ -310,7 +310,7 @@ cdef class Game:
         --------
         parse_game : Constructs a game from a text string.
         """
-        cdef Game g
+        g = cython.declare(Game)
         g = cls()
         with open(filepath, "rb") as f:
             data = f.read()
@@ -343,7 +343,7 @@ cdef class Game:
         --------
         read_game : Constructs a game from a representation in a file.
         """
-        cdef Game g
+        g = cython.declare(Game)
         g = cls()
         try:
             g.game = ParseGame(text.encode('ascii'))
@@ -363,24 +363,14 @@ cdef class Game:
         else:
             return self.write('html')
 
-    def __richcmp__(self, other, whichop) -> bool:
-        if isinstance(other, Game):
-            if whichop == 2:
-                return self.game.deref() == (<Game>other).game.deref()
-            elif whichop == 3:
-                return self.game.deref() != (<Game>other).game.deref()
-            else:
-                raise NotImplementedError
-        else:
-            if whichop == 2:
-                return False
-            elif whichop == 3:
-                return True
-            else:
-                raise NotImplementedError
+    def __eq__(self, other: typing.Any) -> bool:
+        return isinstance(other, Game) and self.game.deref() == cython.cast(Game, other).game.deref()
 
-    def __hash__(self):
-        return long(<long>self.game.deref())
+    def __ne__(self, other: typing.Any) -> bool:
+        return not isinstance(other, Game) or self.game.deref() != cython.cast(Game, other).game.deref()
+
+    def __hash__(self) -> int:
+        return cython.cast(cython.long, self.game.deref())
 
     @property
     def is_tree(self) -> bool:
@@ -416,14 +406,11 @@ cdef class Game:
         UndefinedOperationError
             If the game does not have a tree representation.
         """
-        cdef GameActions a
-        if self.is_tree:
-            a = GameActions()
-            a.game = self.game
-            return a
-        raise UndefinedOperationError(
-            "Operation only defined for games with a tree representation"
-        )
+        if not self.is_tree:
+            raise UndefinedOperationError("Operation only defined for games with a tree representation")
+        a = GameActions()
+        a.game = self.game
+        return a
 
     @property
     def infosets(self) -> GameInfosets:
@@ -434,19 +421,15 @@ cdef class Game:
         UndefinedOperationError
             If the game does not have a tree representation.
         """
-        cdef GameInfosets i
-        if self.is_tree:
-            i = GameInfosets()
-            i.game = self.game
-            return i
-        raise UndefinedOperationError(
-            "Operation only defined for games with a tree representation"
-        )
+        if not self.is_tree:
+            raise UndefinedOperationError("Operation only defined for games with a tree representation")
+        i = GameInfosets()
+        i.game = self.game
+        return i
 
     @property
     def players(self) -> Players:
         """Return the set of players in the game."""
-        cdef Players p
         p = Players()
         p.game = self.game
         return p
@@ -454,7 +437,6 @@ cdef class Game:
     @property
     def strategies(self) -> GameStrategies:
         """Return the set of strategies in the game."""
-        cdef GameStrategies s
         s = GameStrategies()
         s.game = self.game
         return s
@@ -462,7 +444,6 @@ cdef class Game:
     @property
     def outcomes(self) -> Outcomes:
         """Return the set of outcomes in the game."""
-        cdef Outcomes c
         c = Outcomes()
         c.game = self.game
         return c
@@ -481,14 +462,11 @@ cdef class Game:
         UndefinedOperationError
             If the game does not hae a tree representation.
         """
-        cdef Node n
-        if self.is_tree:
-            n = Node()
-            n.node = self.game.deref().GetRoot()
-            return n
-        raise UndefinedOperationError(
-            "Operation only defined for games with a tree representation"
-        )
+        if not self.is_tree:
+            raise UndefinedOperationError("Operation only defined for games with a tree representation")
+        n = Node()
+        n.node = self.game.deref().GetRoot()
+        return n
 
     @property
     def is_const_sum(self) -> bool:
@@ -515,9 +493,6 @@ cdef class Game:
         return rat_to_py(self.game.deref().GetMaxPayoff(0))
 
     def _get_contingency(self, *args):
-        cdef c_PureStrategyProfile *psp
-        cdef Outcome outcome
-        cdef TreeGameOutcome tree_outcome
         psp = new c_PureStrategyProfile(self.game.deref().NewPureStrategyProfile())
 
         for (pl, st) in enumerate(args):
@@ -577,16 +552,13 @@ cdef class Game:
         ----------
         data
             A nested list (or compatible type) with the
-		   same dimension as the strategy set of the game,
-		   specifying the probabilities of the strategies.
+            same dimension as the strategy set of the game,
+            specifying the probabilities of the strategies.
 
         rational
             If `True`, probabilities are represented using rational numbers;
             otherwise double-precision floating point numbers are used.
         """
-        cdef MixedStrategyProfileDouble mspd
-        cdef MixedStrategyProfileRational mspr
-        cdef c_Rational dummy_rat
         if not self.is_perfect_recall:
             raise UndefinedOperationError(
                 "Mixed strategies not supported for games with imperfect recall."
@@ -614,7 +586,7 @@ cdef class Game:
         else:
             mspr = MixedStrategyProfileRational()
             mspr.profile = new c_MixedStrategyProfileRational(
-                self.game.deref().NewMixedStrategyProfile(dummy_rat)
+                self.game.deref().NewMixedStrategyProfile(c_Rational())
             )
             if data is None:
                 return mspr
@@ -648,8 +620,6 @@ cdef class Game:
         UndefinedOperationError
             If the game does not have a tree representation.
         """
-        cdef MixedBehaviorProfileDouble mbpd
-        cdef MixedBehaviorProfileRational mbpr
         if self.is_tree:
             if not rational:
                 mbpd = MixedBehaviorProfileDouble()

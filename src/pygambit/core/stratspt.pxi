@@ -19,16 +19,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-
+import cython
 from cython.operator cimport dereference as deref
 from libcpp.memory cimport unique_ptr
 
-cdef class StrategySupportProfile(Collection):
+@cython.cclass
+class StrategySupportProfile(Collection):
     """A set-like object representing a subset of the strategies in game.
     A StrategySupportProfile always contains at least one strategy for each player
     in the game.
     """
-    cdef unique_ptr[c_StrategySupportProfile] support
+    support = cython.declare(unique_ptr[c_StrategySupportProfile])
 
     def __init__(self, strategies, Game game not None):
         if len(set([strat.player.number for strat in strategies])) != len(game.players):
@@ -44,7 +45,6 @@ cdef class StrategySupportProfile(Collection):
     @property
     def game(self) -> Game:
         """The `Game` on which the support profile is defined."""
-        cdef Game g
         g = Game()
         g.game = deref(self.support).GetGame()
         return g

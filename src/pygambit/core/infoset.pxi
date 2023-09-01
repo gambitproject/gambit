@@ -20,9 +20,14 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-cdef class Members(Collection):
+
+@cython.cclass
+class Members(Collection):
     """The set of nodes which are members of an information set."""
-    cdef c_GameInfoset infoset
+    infoset = cython.declare(c_GameInfoset)
+
+    def __init__(self, infoset: Infoset):
+        self.infoset = infoset.infoset
 
     def __len__(self):
         return self.infoset.deref().NumMembers()
@@ -30,26 +35,26 @@ cdef class Members(Collection):
     def __getitem__(self, i):
         if not isinstance(i, int):
             return Collection.__getitem__(self, i)
-        cdef Node n
         n = Node()
         n.node = self.infoset.deref().GetMember(i+1)
         return n
 
 
-cdef class Actions(Collection):
+@cython.cclass
+class Actions(Collection):
     """The set of actions which are available at an information set."""
-    cdef c_GameInfoset infoset
+    infoset = cython.declare(c_GameInfoset)
 
     def add(self, action=None):
         """Add an action at the information set.  If `action` is not null, the new action
         is inserted before `action`.
         """
         if action is None:
-            self.infoset.deref().InsertAction(<c_GameAction>NULL)
+            self.infoset.deref().InsertAction(cython.cast(c_GameAction, NULL))
         elif isinstance(action, Action):
-            if (<Infoset>action.infoset).infoset != self.infoset:
+            if cython.cast(Infoset, action.infoset).infoset != self.infoset:
                 raise MismatchError("The new action should be from the same infoset")
-            self.infoset.deref().InsertAction((<Action>action).action)
+            self.infoset.deref().InsertAction(cython.cast(Action, action).action)
         else:
             raise TypeError("insert_action takes an Action object as its input")
 
@@ -60,43 +65,34 @@ cdef class Actions(Collection):
     def __getitem__(self, act):
         if not isinstance(act, int):
             return Collection.__getitem__(self, act)
-        cdef Action a
         a = Action()
         a.action = self.infoset.deref().GetAction(act+1)
         return a
 
-cdef class Infoset:
+
+@cython.cclass
+class Infoset:
     """Represents an information set in a :py:class:`Game`."""
-    cdef c_GameInfoset infoset
+    infoset = cython.declare(c_GameInfoset)
 
     def __repr__(self) -> str:
         return (
             f"<Infoset [{self.infoset.deref().GetNumber()-1}] '{self.label}' "
             f"for player '{self.player.label}' in game '{self.game.title}'>"
          )
-    
-    def __richcmp__(Infoset self, other, whichop) -> bool:
-        if isinstance(other, Infoset):
-            if whichop == 2:
-                return self.infoset.deref() == (<Infoset>other).infoset.deref()
-            elif whichop == 3:
-                return self.infoset.deref() != (<Infoset>other).infoset.deref()
-            else:
-                raise NotImplementedError
-        else:
-            if whichop == 2:
-                return False
-            elif whichop == 3:
-                return True
-            else:
-                raise NotImplementedError
 
-    def __hash__(self) -> long:
-        return long(<long>self.infoset.deref())
+    def __eq__(self, other: typing.Any) -> bool:
+        return isinstance(other, Infoset) and self.infoset.deref() == cython.cast(Infoset, other).infoset.deref()
+
+    def __ne__(self, other: typing.Any) -> bool:
+        return not isinstance(other, Infoset) or self.infoset.deref() != cython.cast(Infoset, other).infoset.deref()
+
+    def __hash__(self) -> int:
+        return cython.cast(cython.long, self.infoset.deref())
 
     def precedes(self, node: Node) -> bool:
         """Returns whether this information set precedes `node` in the game tree."""
-        return self.infoset.deref().Precedes((<Node>node).node)
+        return self.infoset.deref().Precedes(cython.cast(Node, node).node)
 
     def reveal(self, player: Player) -> None:
         """Reveals the move made at the information set to `player`.
@@ -128,12 +124,11 @@ cdef class Infoset:
             raise MismatchError(
                 "player must belong to the same game as the information set"
             )
-        self.infoset.deref().Reveal((<Player>player).player)
+        self.infoset.deref().Reveal(cython.cast(Player, player).player)
 
     @property
     def game(self) -> Game:
         """Gets the :py:class:`Game` to which the information set belongs."""
-        cdef Game g
         g = Game()
         g.game = self.infoset.deref().GetGame()
         return g
@@ -155,7 +150,6 @@ cdef class Infoset:
     @property
     def actions(self) -> Actions:
         """Returns the set of actions at the information set."""
-        cdef Actions a
         a = Actions()
         a.infoset = self.infoset
         return a
@@ -163,10 +157,7 @@ cdef class Infoset:
     @property
     def members(self) -> Members:
         """Returns the set of nodes which are members of the information set."""
-        cdef Members m
-        m = Members()
-        m.infoset = self.infoset
-        return m
+        return Members(self)
 
     @property
     def player(self) -> Player:
@@ -193,4 +184,4 @@ cdef class Infoset:
             raise MismatchError(
                 "player must belong to the same game as the information set"
             )
-        self.infoset.deref().SetPlayer((<Player>player).player)
+        self.infoset.deref().SetPlayer(cython.cast(Player, player).player)

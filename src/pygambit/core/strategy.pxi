@@ -20,10 +20,11 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-cdef class Strategy:
+@cython.cclass
+class Strategy:
     """A strategy belonging to a player in a game."""
-    cdef c_GameStrategy strategy
-    cdef StrategicRestriction restriction
+    strategy = cython.declare(c_GameStrategy)
+    restriction = cython.declare(StrategicRestriction)
 
     def __repr__(self):
         return (
@@ -31,25 +32,15 @@ cdef class Strategy:
             f"for player '{self.player.label}' "
             f"in game '{self.player.game.title}'>"
         )
-    
-    def __richcmp__(self, other, whichop) -> bool:
-        if isinstance(other, Strategy):
-            if whichop == 2:
-                return self.strategy.deref() == (<Strategy>other).strategy.deref()
-            elif whichop == 3:
-                return self.strategy.deref() != (<Strategy>other).strategy.deref()
-            else:
-                raise NotImplementedError
-        else:
-            if whichop == 2:
-                return False
-            elif whichop == 3:
-                return True
-            else:
-                raise NotImplementedError
 
-    def __hash__(self):
-        return long(<long>self.strategy.deref())
+    def __eq__(self, other: typing.Any) -> bool:
+        return isinstance(other, Strategy) and self.strategy.deref() == cython.cast(Strategy, other).strategy.deref()
+
+    def __ne__(self, other: typing.Any) -> bool:
+        return not isinstance(other, Strategy) or self.strategy.deref() != cython.cast(Strategy, other).strategy.deref()
+
+    def __hash__(self) -> int:
+        return cython.cast(cython.long, self.strategy.deref())
 
     @property
     def label(self) -> str:
@@ -78,7 +69,6 @@ cdef class Strategy:
         return self.strategy.deref().GetNumber() - 1
 
     def unrestrict(self):
-        cdef Strategy s
         s = Strategy()
         s.strategy = self.strategy
         return s

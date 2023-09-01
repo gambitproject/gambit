@@ -20,9 +20,11 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-cdef class Infosets(Collection):
+@cython.cclass
+class Infosets(Collection):
     """The set of information sets at which a player has the decision."""
-    cdef c_GamePlayer player
+    player = cython.declare(c_GamePlayer)
+
     def __len__(self):
         """The number of information sets at which the player has the decision."""
         return self.player.deref().NumInfosets()
@@ -30,15 +32,15 @@ cdef class Infosets(Collection):
     def __getitem__(self, iset):
         if not isinstance(iset, int):
             return Collection.__getitem__(self, iset)
-        cdef Infoset s
         s = Infoset()
         s.infoset = self.player.deref().GetInfoset(iset+1)
         return s
 
 
-cdef class Strategies(Collection):
+@cython.cclass
+class Strategies(Collection):
     """The set of strategies available to a player."""
-    cdef c_GamePlayer player
+    player = cython.declare(c_GamePlayer)
 
     def add(self, label="") -> Strategy:
         """Add a new strategy to the set of the player's strategies.
@@ -52,12 +54,10 @@ cdef class Strategies(Collection):
         TypeError
             If called on a game which has an extensive representation.
         """
-        cdef Game g
         g = Game()
         g.game = self.player.deref().GetGame()
         if g.is_tree:
             raise TypeError("Adding strategies is only applicable to games in strategic form")
-        cdef Strategy s
         s = Strategy()
         s.strategy = self.player.deref().NewStrategy()
         s.label = str(label)
@@ -70,7 +70,6 @@ cdef class Strategies(Collection):
     def __getitem__(self, st):
         if not isinstance(st, int):
             return Collection.__getitem__(self, st)
-        cdef Strategy s
         s = Strategy()
         s.strategy = self.player.deref().GetStrategy(st+1)
         return s
@@ -96,17 +95,17 @@ cdef class PlayerSupportStrategies(Collection):
     def __getitem__(self, strat):
         if not isinstance(strat, int):
             return Collection.__getitem__(self, strat)
-        cdef Strategy s
         s = Strategy()
         s.strategy = self.restriction.support.GetStrategy(self.player.number+1, strat+1)
         s.restriction = self.restriction
         return s
 
 
-cdef class Player:
+@cython.cclass
+class Player:
     """Represents a player in a :py:class:`Game`."""
-    cdef c_GamePlayer player
-    cdef StrategicRestriction restriction
+    player = cython.declare(c_GamePlayer)
+    restriction = cython.declare(StrategicRestriction)
 
     def __repr__(self):
         if self.is_chance:
@@ -117,29 +116,18 @@ cdef class Player:
                 f"in game '{self.game.title}'>"
             )
 
-    def __richcmp__(self, other, whichop):
-        if isinstance(other, Player):
-            if whichop == 2:
-                return self.player.deref() == (<Player>other).player.deref()
-            elif whichop == 3:
-                return self.player.deref() != (<Player>other).player.deref()
-            else:
-                raise NotImplementedError
-        else:
-            if whichop == 2:
-                return False
-            elif whichop == 3:
-                return True
-            else:
-                raise NotImplementedError
+    def __eq__(self, other: typing.Any) -> bool:
+        return isinstance(other, Player) and self.player.deref() == cython.cast(Player, other).player.deref()
 
-    def __hash__(self):
-        return long(<long>self.player.deref())
+    def __ne__(self, other: typing.Any) -> bool:
+        return not isinstance(other, Player) or self.player.deref() == cython.cast(Player, other).player.deref()
+
+    def __hash__(self) -> int:
+        return cython.cast(cython.long, self.player.deref())
 
     @property
     def game(self) -> Game:
         """Gets the :py:class:`Game` to which the player belongs."""
-        cdef Game g
         if self.restriction is not None:
             return self.restriction
         g = Game()
@@ -175,8 +163,6 @@ cdef class Player:
     @property
     def strategies(self) -> Strategies:
         """Returns the set of strategies belonging to the player."""
-        cdef Strategies s
-        cdef PlayerSupportStrategies ps
         if self.restriction is not None:
             ps = PlayerSupportStrategies(self, self.restriction)
             return ps
@@ -187,7 +173,6 @@ cdef class Player:
     @property
     def infosets(self) -> Infosets:
         """Returns the set of information sets at which the player has the decision."""
-        cdef Infosets s
         s = Infosets()
         s.player = self.player
         return s
@@ -195,7 +180,6 @@ cdef class Player:
     @property
     def min_payoff(self) -> Rational:
         """Returns the smallest payoff for the player in any outcome of the game."""
-        cdef Game g
         g = Game()
         g.game = self.player.deref().GetGame()
         return rat_to_py(g.game.deref().GetMinPayoff(self.number + 1))
@@ -203,13 +187,11 @@ cdef class Player:
     @property
     def max_payoff(self) -> Rational:
         """Returns the largest payoff for the player in any outcome of the game."""
-        cdef Game g
         g = Game()
         g.game = self.player.deref().GetGame()
         return rat_to_py(g.game.deref().GetMaxPayoff(self.number + 1))
 
     def unrestrict(self):
-        cdef Game g
         g = Game()
         g.game = self.player.deref().GetGame()
         return g.players[self.number]
