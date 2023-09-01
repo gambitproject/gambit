@@ -21,9 +21,10 @@
 #
 
 cdef class Infosets(Collection):
-    """Represents a collection of infosets for a player."""
+    """The set of information sets at which a player has the decision."""
     cdef c_GamePlayer player
     def __len__(self):
+        """The number of information sets at which the player has the decision."""
         return self.player.deref().NumInfosets()
 
     def __getitem__(self, iset):
@@ -36,10 +37,21 @@ cdef class Infosets(Collection):
 
 
 cdef class Strategies(Collection):
-    """Represents a collection of strategies for a player."""
+    """The set of strategies available to a player."""
     cdef c_GamePlayer player
 
-    def add(self, label=""):
+    def add(self, label="") -> Strategy:
+        """Add a new strategy to the set of the player's strategies.
+
+        Returns
+        -------
+        The newly-created strategy
+
+        Raises
+        ------
+        TypeError
+            If called on a game which has an extensive representation.
+        """
         cdef Game g
         g = Game()
         g.game = self.player.deref().GetGame()
@@ -52,6 +64,7 @@ cdef class Strategies(Collection):
         return s
 
     def __len__(self):
+        """The number of strategies for the player in the game."""
         return self.player.deref().NumStrategies()
 
     def __getitem__(self, st):

@@ -33,6 +33,7 @@ cdef class Outcomes(Collection):
     cdef c_Game game
 
     def __len__(self):
+        """The number of outcomes in the game."""
         return self.game.deref().NumOutcomes()
 
     def __getitem__(self, outc):
@@ -44,6 +45,7 @@ cdef class Outcomes(Collection):
         return c
 
     def add(self, label=""):
+        """Add a new outcome to the game."""
         cdef Outcome c
         c = Outcome()
         c.outcome = self.game.deref().NewOutcome()
@@ -57,6 +59,7 @@ cdef class Players(Collection):
     cdef StrategicRestriction restriction
 
     def __len__(self):
+        """Returns the number of players in the game."""
         return self.game.deref().NumPlayers()
 
     def __getitem__(self, pl):
@@ -69,7 +72,8 @@ cdef class Players(Collection):
             p.restriction = self.restriction
         return p
 
-    def add(self, label=""):
+    def add(self, label="") -> Player:
+        """Adds a new player to the game."""
         cdef Player p
         if self.restriction is not None:
             raise UndefinedOperationError("Changing objects in a restriction is not supported")
@@ -78,13 +82,15 @@ cdef class Players(Collection):
         if label != "": p.label = str(label)
         return p
 
-    property chance:
-        def __get__(self):
-            cdef Player p
-            p = Player()
-            p.player = self.game.deref().GetChance()
-            p.restriction = self.restriction
-            return p
+    @property
+    def chance(self) -> Player:
+        """Returns the chance player associated with the game."""
+        cdef Player p
+        p = Player()
+        p.player = self.game.deref().GetChance()
+        p.restriction = self.restriction
+        return p
+
 
 cdef class GameActions(Collection):
     """Represents a collection of actions in a game."""

@@ -20,6 +20,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 cdef class Outcome:
+    """An outcome in a `Game`."""
     cdef c_GameOutcome outcome
     cdef StrategicRestriction restriction
     
@@ -49,6 +50,11 @@ cdef class Outcome:
         return long(<long>self.outcome.deref())
 
     def delete(self):
+        """Deletes the outcome from its game.  If the game is an extensive game, any
+        node at which this outcome is attached has its outcome reset to null.  If this game
+        is a strategic game, any contingency at which this outcome is attached as its outcome
+        reset to null.
+        """
         if self.restriction is not None:
             raise UndefinedOperationError("Changing objects in a restriction is not supported")
         (<Game>self.game).game.deref().DeleteOutcome(self.outcome)
@@ -77,6 +83,12 @@ cdef class Outcome:
         self.outcome.deref().SetLabel(value.encode('ascii'))
 
     def __getitem__(self, player):
+        """Returns the payoff to ``player`` at the outcome.  ``player``
+        may be a `Player`, a string, or an integer.
+        If a string, returns the payoff to the player with that string
+        as its label.  If an integer, returns the payoff to player
+        number ``player``.
+        """
         cdef bytes py_string
         if isinstance(player, Player):
             py_string = self.outcome.deref().GetPayoff(player.number+1).as_string().c_str()
@@ -102,6 +114,11 @@ cdef class Outcome:
             The value of the payoff.  This can be any numeric type, or any object that
             has a string representation which can be interpreted as an integer,
             decimal, or rational number.
+
+        Raises
+        ------
+        ValueError
+              If ``payoff`` cannot be interpreted as a decimal or rational number.
         """
         if self.restriction is not None:
             raise UndefinedOperationError(

@@ -21,7 +21,7 @@
 #
 
 cdef class Members(Collection):
-    """Represents a collection of members of an infoset."""
+    """The set of nodes which are members of an information set."""
     cdef c_GameInfoset infoset
 
     def __len__(self):
@@ -37,10 +37,13 @@ cdef class Members(Collection):
 
 
 cdef class Actions(Collection):
-    """Represents a collection of actions at an infoset."""
+    """The set of actions which are available at an information set."""
     cdef c_GameInfoset infoset
 
     def add(self, action=None):
+        """Add an action at the information set.  If `action` is not null, the new action
+        is inserted before `action`.
+        """
         if action is None:
             self.infoset.deref().InsertAction(<c_GameAction>NULL)
         elif isinstance(action, Action):
@@ -51,6 +54,7 @@ cdef class Actions(Collection):
             raise TypeError("insert_action takes an Action object as its input")
 
     def __len__(self):
+        """The number of actions at the information set."""
         return self.infoset.deref().NumActions()
 
     def __getitem__(self, act):
@@ -91,6 +95,7 @@ cdef class Infoset:
         return long(<long>self.infoset.deref())
 
     def precedes(self, node: Node) -> bool:
+        """Returns whether this information set precedes `node` in the game tree."""
         return self.infoset.deref().Precedes((<Node>node).node)
 
     def reveal(self, player: Player) -> None:

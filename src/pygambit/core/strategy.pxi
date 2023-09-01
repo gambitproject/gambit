@@ -21,6 +21,7 @@
 #
 
 cdef class Strategy:
+    """A strategy belonging to a player in a game."""
     cdef c_GameStrategy strategy
     cdef StrategicRestriction restriction
 
