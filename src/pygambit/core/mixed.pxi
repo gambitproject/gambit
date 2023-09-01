@@ -76,6 +76,15 @@ cdef class MixedStrategyProfile:
                 raise IndexError("multiple strategies matching label '%s'" % index)
 
     def __getitem__(self, index):
+        """Returns a slice of the profile based on the parameter ``index``.
+
+        * If ``index`` is a :py:class:`Strategy`, returns the
+          probability with which that strategy is played in the profile.
+        * If ``index`` is a :py:class:`Player`, returns a list of
+          probabilities, one for each strategy belonging to that player.
+        * If ``index`` is an integer, returns the ``index`` th entry in
+          the profile, treating the profile as a flat list of probabilities.
+        """
         if isinstance(index, int):
             return self._getprob(index+1)
         elif isinstance(index, Strategy):
@@ -108,6 +117,8 @@ cdef class MixedStrategyProfile:
                             index.__class__.__name__)
 
     def __setitem__(self, index, value):
+        """Sets the probability ``strategy`` is played in the profile to ``value``.
+        """
         if isinstance(index, int):
             self._setprob(index+1, value)
         elif isinstance(index, Strategy):
@@ -134,6 +145,9 @@ cdef class MixedStrategyProfile:
                 raise e
 
     def payoff(self, player=None):
+        """Returns the expected payoff to a player if all players play
+        according to the profile.
+        """
         if player is None:
             return [self._payoff(player) for player in self.game.players]
         elif isinstance(player, Player):
@@ -144,6 +158,9 @@ cdef class MixedStrategyProfile:
                         .format(player.__class__.__name__))
 
     def strategy_value(self, strategy):
+        """Returns the expected payoff to playing the strategy, if all other
+        players play according to the profile.
+        """
         if isinstance(strategy, str):
             strategy = self._resolve_index(strategy, players=False)
         elif not isinstance(strategy, Strategy):
@@ -152,6 +169,9 @@ cdef class MixedStrategyProfile:
         return self._strategy_value(strategy)
             
     def strategy_values(self, player=None):
+        """Returns the expected payoffs for all of a player's strategies, if all other
+        players play according to the profile.
+        """
         if player is None:
             return [self.strategy_values(player) for player in self.game.players]
         elif isinstance(player, str):
@@ -179,35 +199,51 @@ cdef class MixedStrategyProfile:
                             strategy2.__class__.__name__)
         return self._strategy_value_deriv((<Player>player).player.deref().GetNumber(), strategy1, strategy2)
 
+
 cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
     cdef c_MixedStrategyProfileDouble *profile
 
     def __dealloc__(self):
         del self.profile
+
     def __len__(self):
         return self.profile.MixedProfileLength()
 
     def _strategy_index(self, Strategy st):
         return self.profile.GetSupport().GetIndex(st.strategy)
+
     def _getprob(self, int index):
         return self.profile.getitem(index)
+
     def _getprob_strategy(self, Strategy strategy):
         return self.profile.getitem_strategy(strategy.strategy)
+
     def _setprob(self, int index, value):
         setitem_mspd_int(self.profile, index, value)
+
     def _setprob_strategy(self, Strategy strategy, value):
         setitem_mspd_strategy(self.profile, strategy.strategy, value)
+
     def _payoff(self, Player player):
         return self.profile.GetPayoff(player.player)
+
     def _strategy_value(self, Strategy strategy):
         return self.profile.GetPayoff(strategy.strategy)
+
     def _strategy_value_deriv(self, int pl,
                               Strategy s1, Strategy s2):
         return self.profile.GetPayoffDeriv(pl, s1.strategy, s2.strategy)
 
-    def liap_value(self):
+    def liap_value(self) -> double:
+        """
+        Returns the Lyapunov value (see [McK91]_) of the strategy profile.
+        The Lyapunov value is a non-negative number which is zero exactly at
+        Nash equilibria.
+        """
         return self.profile.GetLiapValue()
-    def copy(self):
+
+    def copy(self) -> MixedStrategyProfileDouble:
+        """Creates a copy of the mixed strategy profile."""
         cdef MixedStrategyProfileDouble mixed
         mixed = MixedStrategyProfileDouble()
         mixed.profile = new c_MixedStrategyProfileDouble(deref(self.profile))
@@ -241,11 +277,14 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
         s = StrategicRestriction()
         s.support = new c_StrategySupportProfile(self.profile.GetSupport())
         return s
+
     def unrestrict(self):
         profile = MixedStrategyProfileDouble()
         profile.profile = new c_MixedStrategyProfileDouble(self.profile.ToFullSupport())
         return profile
-    def set_centroid(self):   self.profile.SetCentroid()
+
+    def set_centroid(self):
+        self.profile.SetCentroid()
 
     def normalize(self) -> MixedStrategyProfileDouble:
         """Create a profile with the same strategy proportions as this
@@ -256,6 +295,12 @@ cdef class MixedStrategyProfileDouble(MixedStrategyProfile):
         return profile
 
     def randomize(self, denom=None):
+        """Randomizes the probabilities in the profile.  These are
+        generated as uniform distributions over each mixed strategy.  If
+        ``denom`` is specified, all probabilities are divisible by
+        ``denom``, that is, the distribution is uniform over a discrete
+        grid of mixed strategies.
+        """
         if denom is None:
             self.profile.Randomize()
         else:
@@ -276,20 +321,25 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
 
     def __dealloc__(self):
         del self.profile
+
     def __len__(self):
         return self.profile.MixedProfileLength()
 
     def _strategy_index(self, Strategy st):
         return self.profile.GetSupport().GetIndex(st.strategy)
+
     def _getprob(self, int index):
         return rat_to_py(self.profile.getitem(index))
+
     def _getprob_strategy(self, Strategy strategy):
         return rat_to_py(self.profile.getitem_strategy(strategy.strategy))
+
     def _setprob(self, int index, value):
         if not isinstance(value, (int, fractions.Fraction)):
             raise TypeError("probability should be int or Fraction instance; received {}"
                             .format(value.__class__.__name__))
         setitem_mspr_int(self.profile, index, to_rational(str(value).encode('ascii')))
+
     def _setprob_strategy(self, Strategy strategy, value):
         if not isinstance(value, (int, fractions.Fraction)):
             raise TypeError("probability should be int or Fraction instance; received {}"
@@ -298,15 +348,24 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
                               to_rational(str(value).encode('ascii')))
     def _payoff(self, Player player):
         return rat_to_py(self.profile.GetPayoff(player.player))
+
     def _strategy_value(self, Strategy strategy):
         return rat_to_py(self.profile.GetPayoff(strategy.strategy))
+
     def _strategy_value_deriv(self, int pl,
                               Strategy s1, Strategy s2):
         return rat_to_py(self.profile.GetPayoffDeriv(pl, s1.strategy, s2.strategy))
 
-    def liap_value(self):
+    def liap_value(self) -> Rational:
+        """
+        Returns the Lyapunov value (see [McK91]_) of the strategy profile.
+        The Lyapunov value is a non-negative number which is zero exactly at
+        Nash equilibria.
+        """
         return rat_to_py(self.profile.GetLiapValue())
-    def copy(self):
+
+    def copy(self) -> MixedStrategyProfileRational:
+        """Creates a copy of the mixed strategy profile."""
         cdef MixedStrategyProfileRational mixed
         mixed = MixedStrategyProfileRational()
         mixed.profile = new c_MixedStrategyProfileRational(deref(self.profile))
@@ -339,21 +398,30 @@ cdef class MixedStrategyProfileRational(MixedStrategyProfile):
         s = StrategicRestriction()
         s.support = new c_StrategySupportProfile(self.profile.GetSupport())
         return s
+
     def unrestrict(self):
         profile = MixedStrategyProfileRational()
         profile.profile = new c_MixedStrategyProfileRational(self.profile.ToFullSupport())
         return profile
-    def set_centroid(self):   self.profile.SetCentroid()
+
+    def set_centroid(self):
+        self.profile.SetCentroid()
 
     def normalize(self) -> MixedStrategyProfileRational:
         """Create a profile with the same strategy proportions as this
-        one, but normalised so probabilites for each player sum to one.
+        one, but normalised so probabilities for each player sum to one.
         """
         profile = MixedStrategyProfileRational()
         profile.profile = new c_MixedStrategyProfileRational(self.profile.Normalize())
         return profile
 
     def randomize(self, denom):
+        """Randomizes the probabilities in the profile.  These are
+        generated as uniform distributions over each mixed strategy.  If
+        ``denom`` is specified, all probabilities are divisible by
+        ``denom``, that is, the distribution is uniform over a discrete
+        grid of mixed strategies.
+        """
         self.profile.Randomize(denom)
 
     @property
