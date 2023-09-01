@@ -24,8 +24,10 @@ import functools
 from cython.operator cimport dereference as deref
 
 cdef class MixedBehaviorProfile:
-    def __repr__(self):    
+    """A behavior strategy profile over the actions in a game."""
+    def __repr__(self):
         return str([ self[player] for player in self.game.players ])
+
     def _repr_latex_(self):
         return r"$\left[" + ",".join([ self[player]._repr_latex_().replace("$","") for player in self.game.players ]) + r"\right]$"
 
@@ -95,6 +97,22 @@ cdef class MixedBehaviorProfile:
                              (len(index.actions), len(value)))
 
     def __getitem__(self, index):
+        """Returns a slice of the profile based on the parameter
+      ` `index``.
+
+        * If ``index`` is a :py:class:`Action`,
+          returns the probability with which that action is played in
+          the profile.
+        * If ``index`` is an :py:class:`Infoset`,
+          returns a list of probabilities, one for each action belonging
+          to that information set.
+        * If ``index`` is a :py:class:`Player`,
+          returns a list of lists of probabilities, one list for each
+          information set controlled by the player.
+        * If ``index`` is an integer, returns the
+          ``index`` th entry in the profile, treating the profile as a
+          flat list of probabilities.
+        """
         if isinstance(index, int):
             return self._getprob(index+1)
         elif isinstance(index, Action):
@@ -148,6 +166,9 @@ cdef class MixedBehaviorProfile:
                             index.__class__.__name__)
 
     def __setitem__(self, index, value):
+        """Sets the probability ``action`` is played in the profile
+        to ``prob``.
+        """
         if isinstance(index, int):
             self._setprob(index+1, value)
         elif isinstance(index, Action):
@@ -173,6 +194,9 @@ cdef class MixedBehaviorProfile:
         return self._is_defined_at(infoset)
 
     def belief(self, node):
+        """Returns the probability ``node`` is reached, given its
+        information set was reached.
+        """
         if isinstance(node, Node):
             return self._belief(node)
         elif isinstance(node, Infoset):
@@ -191,6 +215,9 @@ cdef class MixedBehaviorProfile:
         return self._action_prob(action)
 
     def payoff(self, player_infoset_or_action):
+        """Returns the expected payoff to a player, information set, or
+        action, if all players play according to the profile.
+        """
         if isinstance(player_infoset_or_action, Player):
             return self._payoff(player_infoset_or_action)
         elif isinstance(player_infoset_or_action, Infoset):
@@ -211,6 +238,9 @@ cdef class MixedBehaviorProfile:
                         player_infoset_or_action.__class__.__name__)
 
     def realiz_prob(self, infoset_or_action):
+        """Returns the probability with which an information set is
+        reached.
+        """
         if isinstance(infoset_or_action, Infoset):
             return self._infoset_prob(infoset_or_action)
         elif isinstance(infoset_or_action, Action):
@@ -225,6 +255,7 @@ cdef class MixedBehaviorProfile:
                         infoset_or_action.__class__.__name__)
 
     def regret(self, action):
+        """Returns the regret associated with `action`."""
         if isinstance(action, str):
             action = self._resolve_index(action, players=False)
             if not isinstance(action, Action):
@@ -239,6 +270,7 @@ cdef class MixedBehaviorProfileDouble(MixedBehaviorProfile):
 
     def __dealloc__(self):
         del self.profile
+
     def __len__(self):
         return self.profile.Length()
 
@@ -267,29 +299,48 @@ cdef class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _regret(self, Action action):
         return self.profile.GetRegret(action.action)
 
-    def copy(self):
+    def copy(self) -> MixedBehaviorProfileDouble:
+        """Creates a copy of the behavior strategy profile."""
         cdef MixedBehaviorProfileDouble behav
         behav = MixedBehaviorProfileDouble()
         behav.profile = new c_MixedBehaviorProfileDouble(deref(self.profile))
         return behav
-    def as_strategy(self):
+
+    def as_strategy(self) -> MixedStrategyProfileDouble:
+        """Returns a `MixedStrategyProfile` which is equivalent
+        to the profile.
+        """
         cdef MixedStrategyProfileDouble mixed
         mixed = MixedStrategyProfileDouble()
         mixed.profile = new c_MixedStrategyProfileDouble(deref(self.profile).ToMixedProfile())
         return mixed
-    def liap_value(self):
+
+    def liap_value(self) -> float:
+        """Returns the Lyapunov value (see [McK91]_) of the strategy profile.  The
+        Lyapunov value is a non-negative number which is zero exactly at
+        Nash equilibria.
+        """
         return self.profile.GetLiapValue()
-    def set_centroid(self):   self.profile.SetCentroid()
+
+    def set_centroid(self):
+        self.profile.SetCentroid()
 
     def normalize(self) -> MixedBehaviorProfileDouble:
         """Create a profile with the same action proportions as this
-        one, but normalised so probabilites for each infoset sum to one.
+        one, but normalised so probabilities for each infoset sum to one.
         """
         profile = MixedBehaviorProfileDouble()
         profile.profile = new c_MixedBehaviorProfileDouble(self.profile.Normalize())
         return profile
     
     def randomize(self, denom=None):
+        """Randomizes the probabilities in the profile.  These are
+        generated as uniform distributions over the actions at each
+        information set.  If
+        ``denom`` is specified, all probabilities are divisible by
+        ``denom``, that is, the distribution is uniform over a discrete
+        grid of mixed strategies.
+        """
         if denom is None:
             self.profile.Randomize()
         else:
@@ -310,6 +361,7 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
 
     def __dealloc__(self):
         del self.profile
+
     def __len__(self):
         return self.profile.Length()
 
@@ -345,19 +397,31 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _regret(self, Action action):
         return rat_to_py(self.profile.GetRegret(action.action))
     
-    def copy(self):
+    def copy(self) -> MixedBehaviorProfileRational:
+        """Creates a copy of the behavior strategy profile."""
         cdef MixedBehaviorProfileRational behav
         behav = MixedBehaviorProfileRational()
         behav.profile = new c_MixedBehaviorProfileRational(deref(self.profile))
         return behav
-    def as_strategy(self):
+
+    def as_strategy(self) -> MixedStrategyProfileRational:
+        """Returns a `MixedStrategyProfile` which is equivalent
+        to the profile.
+        """
         cdef MixedStrategyProfileRational mixed
         mixed = MixedStrategyProfileRational()
         mixed.profile = new c_MixedStrategyProfileRational(deref(self.profile).ToMixedProfile())
         return mixed
-    def liap_value(self):
+
+    def liap_value(self) -> Rational:
+        """Returns the Lyapunov value (see [McK91]_) of the strategy profile.  The
+        Lyapunov value is a non-negative number which is zero exactly at
+        Nash equilibria.
+        """
         return rat_to_py(self.profile.GetLiapValue())
-    def set_centroid(self):   self.profile.SetCentroid()
+
+    def set_centroid(self):
+        self.profile.SetCentroid()
 
     def normalize(self) -> MixedBehaviorProfileRational:
         """Create a profile with the same action proportions as this
@@ -368,6 +432,10 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
         return profile
 
     def randomize(self, denom):
+        """Randomizes the probabilities in the profile.  These are
+        generated as uniform distributions over the actions at each
+        information set.
+        """
         self.profile.Randomize(denom)
 
     @property
