@@ -364,7 +364,14 @@ class LogitQREMixedStrategyFitResult:
 def fit_fixedpoint(
         data: gambit.MixedStrategyProfileDouble
 ) -> LogitQREMixedStrategyFitResult:
-    """Estimate a QRE using the fixed-point method."""
+    """Use maximum likelihood estimation to find the point on the
+    principal branch of strategic form game closest to `data`.
+    The `data` are expressed as an instance of a mixed strategy
+    profile on the game.  The `data` should typically be expressed
+    as the counts of observations of each strategy.
+
+    .. versionadded:: 16.1.0
+    """
     res = gambit.logit_estimate(data)
     return LogitQREMixedStrategyFitResult(
         data, "fixedpoint", res.lam, list(res.profile), res.log_like
@@ -374,7 +381,14 @@ def fit_fixedpoint(
 def fit_empirical(
         data: gambit.MixedStrategyProfileDouble
 ) -> LogitQREMixedStrategyFitResult:
-    """Estimate a QRE using the empirical payoff method."""
+    """Use maximum likelihood estimation to estimate a quantal
+    response equilibrium using the empirical payoff method.
+    The `data` are expressed as an instance of a mixed strategy
+    profile on the game.  The `data` should typically be expressed
+    as the counts of observations of each strategy.
+
+    .. versionadded:: 16.1.0
+    """
     def do_logit(lam: float):
         logit_probs = [[math.exp(lam*v) for v in player] for player in values]
         sums = [sum(v) for v in logit_probs]

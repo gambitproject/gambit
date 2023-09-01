@@ -52,6 +52,7 @@ Table of Contents
    gui
    tools
    pyapi
+   api
    samples
    ideas
    build

@@ -27,3 +27,6 @@ Computation of Nash equilibria
 .. automodule:: pygambit.nash
    :members:
 
+.. automodule:: pygambit.qre
+   :members:
+
