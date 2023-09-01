@@ -66,9 +66,24 @@ cdef class Node:
         return long(<long>self.node.deref())
 
     def is_successor_of(self, node: Node) -> bool:
+        """Returns `True` if this node is a successor of `Node`."""
         return self.node.deref().IsSuccessorOf((<Node>node).node)
 
-    def append_move(self, player, actions=None):
+    def append_move(self, player, actions=None) -> Infoset:
+        """Add a move to a terminal node, at the `Infoset` `infoset`.
+        Alternatively, a `Player` can be passed as the information set,
+        in which case the move is placed in a new information set for that player.
+        In this instance, the number of `actions` at the new information set must
+        be specified.
+
+        Raises
+        ------
+        UndefinedOperationError
+            When called on a nonterminal node, with a `Player` but no number of actions, or
+            an `Infoset` with a number of actions.
+        MismatchError
+            If the `infoset` or `player` is not from the same game as the node.
+        """
         cdef Infoset i
         if len(self.children) > 0:
             raise UndefinedOperationError("append_move can only be applied at a terminal node")
@@ -90,9 +105,25 @@ cdef class Node:
             i = Infoset()
             i.infoset = self.node.deref().AppendMove((<Infoset>player).infoset)
             return i
-        raise TypeError, "append_move accepts either a Player or Infoset to specify information"
+        raise TypeError("append_move accepts either a Player or Infoset to specify information")
 
-    def insert_move(self, player, actions=None):
+    def insert_move(self, player, actions=None) -> Infoset:
+        """Insert a move at a node, at the :py:class:`Infoset`
+        ``infoset``.  Alternatively, a :py:class:`Player` can be
+        passed as the information set, in which case the move is placed
+        in a new information set for that player; in this instance, the
+        number of ``actions`` at the new information set must be specified.
+        The newly-inserted node takes the place of the node in the game
+        tree, and the existing node becomes the first child of the new node.
+
+        Raises
+        ------
+        UndefinedOperationError
+            When called ith a `Player` but no number of actions, or
+            an `Infoset` with a number of actions.
+        MismatchError
+            If the `infoset` or `player` is not from the same game as the node.
+        """
         cdef Infoset i
         if isinstance(player, Player):
             if actions is None:
@@ -129,12 +160,23 @@ cdef class Node:
         return i
 
     def delete_parent(self):
+        """Deletes the parent node of this node, and all subtrees rooted
+        in the parent other than the one containing this node.
+        """
         self.node.deref().DeleteParent()
 
     def delete_tree(self):
+        """Deletes the entire subtree rooted at this node."""
         self.node.deref().DeleteTree()
 
     def copy_tree(self, node: Node):
+        """Copies the subtree rooted at this node to `node`.
+
+        Raises
+        ------
+        MismatchError
+            If `node` is not a member of the same game as this node.
+        """
         if node.game != self.game:
             raise MismatchError(
                 f"copy_tree(): trees can only be copied within the same game"
@@ -142,6 +184,13 @@ cdef class Node:
         self.node.deref().CopyTree((<Node>node).node)
 
     def move_tree(self, node: Node):
+        """Moves the subtree rooted at this node to `node`.
+
+        Raises
+        ------
+        MismatchError
+            If `node` is not a member of the same game as this node.
+        """
         if node.game != self.game:
             raise MismatchError(
                 f"move_tree(): trees can only be moved within the same game"
