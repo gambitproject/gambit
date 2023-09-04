@@ -19,6 +19,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+from cython.operator cimport dereference as deref
+from libcpp.memory cimport shared_ptr
+
 @cython.cclass
 class Outcome:
     """An outcome in a `Game`."""
@@ -122,10 +125,11 @@ class Outcome:
         return o
 
 
-cdef class TreeGameOutcome:
+@cython.cclass
+class TreeGameOutcome:
     """Represents an outcome in a strategic game derived from an extensive game."""
-    cdef c_PureStrategyProfile *psp
-    cdef c_Game c_game
+    psp = cython.declare(shared_ptr[c_PureStrategyProfile])
+    c_game = cython.declare(c_Game)
 
     @property
     def game(self) -> Game:
@@ -134,34 +138,31 @@ cdef class TreeGameOutcome:
         g.game = self.c_game
         return g
 
-    def __del__(self):
-        del self.psp
-
     def __repr__(self):
         return f"<Outcome '{self.label}' in game '{self.game.title}'>"
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
             isinstance(other, TreeGameOutcome) and
-            self.psp.deref() == cython.cast(TreeGameOutcome, other).psp.deref()
+            deref(self.psp).deref() == deref(cython.cast(TreeGameOutcome, other).psp).deref()
         )
 
     def __ne__(self, other: typing.Any) -> bool:
         return (
             not isinstance(other, TreeGameOutcome) or
-            self.psp.deref() != cython.cast(TreeGameOutcome, other).psp.deref()
+            deref(self.psp).deref() != deref(cython.cast(TreeGameOutcome, other).psp).deref()
         )
 
     def __getitem__(self, player):
         if isinstance(player, Player):
-            return rat_to_py(self.psp.deref().GetPayoff(player.number+1))
+            return rat_to_py(deref(self.psp).deref().GetPayoff(player.number+1))
         elif isinstance(player, str):
             number = self.game.players[player].number
-            return rat_to_py(self.psp.deref().GetPayoff(number+1))
+            return rat_to_py(deref(self.psp).deref().GetPayoff(number+1))
         elif isinstance(player, int):
             if player < 0 or player >= self.c_game.deref().NumPlayers():
                 raise IndexError("Index out of range")
-            return rat_to_py(self.psp.deref().GetPayoff(player+1))
+            return rat_to_py(deref(self.psp).deref().GetPayoff(player+1))
         raise TypeError("player index should be a Player, int or str instance; {} passed"
                         .format(player.__class__.__name__))
 
@@ -174,4 +175,9 @@ cdef class TreeGameOutcome:
     @property
     def label(self) -> str:
         """The text label associated with this outcome."""
-        return "(%s)" % ( ",".join( [ self.psp.deref().GetStrategy((<Player>player).player).deref().GetLabel().c_str() for player in self.game.players ] ) )
+        return "(%s)" % (
+            ",".join(
+                [deref(self.psp).deref().GetStrategy((<Player>player).player).deref().GetLabel().c_str()
+                 for player in self.game.players]
+            )
+        )

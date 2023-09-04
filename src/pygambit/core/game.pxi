@@ -493,10 +493,11 @@ class Game:
         return rat_to_py(self.game.deref().GetMaxPayoff(0))
 
     def _get_contingency(self, *args):
-        psp = new c_PureStrategyProfile(self.game.deref().NewPureStrategyProfile())
+        psp = cython.declare(shared_ptr[c_PureStrategyProfile])
+        psp = make_shared[c_PureStrategyProfile](self.game.deref().NewPureStrategyProfile())
 
         for (pl, st) in enumerate(args):
-            psp.deref().SetStrategy(self.game.deref().GetPlayer(pl+1).deref().GetStrategy(st+1))
+            deref(psp).deref().SetStrategy(self.game.deref().GetPlayer(pl+1).deref().GetStrategy(st+1))
 
         if self.is_tree:
             tree_outcome = TreeGameOutcome()
@@ -505,8 +506,7 @@ class Game:
             return tree_outcome
         else:
             outcome = Outcome()
-            outcome.outcome = psp.deref().GetOutcome()
-            del psp
+            outcome.outcome = deref(psp).deref().GetOutcome()
             return outcome
 
     # As of Cython 0.11.2, cython does not support the * notation for the argument
