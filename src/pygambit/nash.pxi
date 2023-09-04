@@ -22,14 +22,6 @@
 
 from libcpp.memory cimport shared_ptr, make_shared
 
-cdef extern from "solvers/enumpure/enumpure.h":
-    cdef cppclass c_NashEnumPureStrategySolver "EnumPureStrategySolver":
-        c_NashEnumPureStrategySolver()
-        c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
-
-    cdef cppclass c_NashEnumPureAgentSolver "EnumPureAgentSolver":
-        c_NashEnumPureAgentSolver()
-        c_List[c_MixedBehaviorProfileRational] Solve(c_BehaviorSupportProfile) except +RuntimeError
 
 cdef class EnumPureStrategySolver:
     cdef c_NashEnumPureStrategySolver *alg
@@ -69,18 +61,6 @@ cdef class EnumPureAgentSolver:
             ret.append(p)
         return ret
 
-cdef extern from "solvers/enummixed/enummixed.h":
-    cdef cppclass c_NashEnumMixedStrategySolverDouble "EnumMixedStrategySolver<double>":
-        c_NashEnumMixedStrategySolverDouble()
-        c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
-
-    cdef cppclass c_NashEnumMixedStrategySolverRational "EnumMixedStrategySolver<Rational>":
-        c_NashEnumMixedStrategySolverRational()
-        c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
-
-    cdef cppclass c_NashEnumMixedLrsStrategySolver "EnumMixedLrsStrategySolver":
-        c_NashEnumMixedLrsStrategySolver()
-        c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
 
 cdef class EnumMixedStrategySolverDouble:
     cdef c_NashEnumMixedStrategySolverDouble *alg
@@ -135,23 +115,6 @@ cdef class EnumMixedLrsStrategySolver:
             p.profile = copyitem_list_mspr(solns, i+1)
             ret.append(p)
         return ret
-
-cdef extern from "solvers/lcp/lcp.h":
-    cdef cppclass c_NashLcpStrategySolverDouble "NashLcpStrategySolver<double>":
-        c_NashLcpStrategySolverDouble(int, int)
-        c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
-
-    cdef cppclass c_NashLcpStrategySolverRational "NashLcpStrategySolver<Rational>":
-        c_NashLcpStrategySolverRational(int, int)
-        c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
-
-    cdef cppclass c_NashLcpBehaviorSolverDouble "NashLcpBehaviorSolver<double>":
-        c_NashLcpBehaviorSolverDouble(int, int)
-        c_List[c_MixedBehaviorProfileDouble] Solve(c_BehaviorSupportProfile) except +RuntimeError
-
-    cdef cppclass c_NashLcpBehaviorSolverRational "NashLcpBehaviorSolver<Rational>":
-        c_NashLcpBehaviorSolverRational(int, int)
-        c_List[c_MixedBehaviorProfileRational] Solve(c_BehaviorSupportProfile) except +RuntimeError
 
 
 cdef class LCPBehaviorSolverDouble:
@@ -231,23 +194,6 @@ cdef class LCPStrategySolverRational:
         return ret
 
 
-cdef extern from "tools/lp/nfglp.h":
-    cdef cppclass c_NashLpStrategySolverDouble "NashLpStrategySolver<double>":
-        c_NashLpStrategySolverDouble()
-        c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
-
-    cdef cppclass c_NashLpStrategySolverRational "NashLpStrategySolver<Rational>":
-        c_NashLpStrategySolverRational()
-        c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
-
-cdef extern from "tools/lp/efglp.h":
-    cdef cppclass c_NashLpBehavSolverDouble "NashLpBehavSolver<double>":
-        c_NashLpBehavSolverDouble()
-        c_List[c_MixedBehaviorProfileDouble] Solve(c_BehaviorSupportProfile) except +RuntimeError
-
-    cdef cppclass c_NashLpBehavSolverRational "NashLpBehavSolver<Rational>":
-        c_NashLpBehavSolverRational()
-        c_List[c_MixedBehaviorProfileRational] Solve(c_BehaviorSupportProfile) except +RuntimeError
 
 
 cdef class LPBehaviorSolverDouble:
@@ -327,16 +273,6 @@ cdef class LPStrategySolverRational:
         return ret
 
 
-cdef extern from "solvers/liap/liap.h":
-    cdef cppclass c_NashLiapStrategySolver "NashLiapStrategySolver":
-        c_NashLiapStrategySolver(int)
-        c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
-
-    cdef cppclass c_NashLiapBehaviorSolver "NashLiapBehaviorSolver":
-        c_NashLiapBehaviorSolver(int)
-        c_List[c_MixedBehaviorProfileDouble] Solve(c_BehaviorSupportProfile) except +RuntimeError
-
-
 cdef class LiapStrategySolver:
     cdef c_NashLiapStrategySolver *alg
 
@@ -377,13 +313,6 @@ cdef class LiapBehaviorSolver:
         return ret
 
 
-cdef extern from "solvers/simpdiv/simpdiv.h":
-    cdef cppclass c_NashSimpdivStrategySolver "NashSimpdivStrategySolver":
-        c_NashSimpdivStrategySolver()
-        c_List[c_MixedStrategyProfileRational] Solve(c_Game) except +RuntimeError
-        c_List[c_MixedStrategyProfileRational] Solve(c_MixedStrategyProfileRational) except +RuntimeError
-
-
 cdef class SimpdivStrategySolver:
     cdef c_NashSimpdivStrategySolver *alg
 
@@ -401,11 +330,6 @@ cdef class SimpdivStrategySolver:
             p.profile = copyitem_list_mspr(solns, i+1)
             ret.append(p)
         return ret
-
-cdef extern from "solvers/ipa/ipa.h":
-    cdef cppclass c_NashIPAStrategySolver "NashIPAStrategySolver":
-        c_NashIPAStrategySolver()
-        c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
 
 cdef class IPAStrategySolver:
     cdef c_NashIPAStrategySolver *alg
@@ -425,11 +349,6 @@ cdef class IPAStrategySolver:
             ret.append(p)
         return ret
 
-cdef extern from "solvers/gnm/gnm.h":
-    cdef cppclass c_NashGNMStrategySolver "NashGNMStrategySolver":
-        c_NashGNMStrategySolver()
-        c_List[c_MixedStrategyProfileDouble] Solve(c_Game) except +RuntimeError
-
 cdef class GNMStrategySolver:
     cdef c_NashGNMStrategySolver *alg
 
@@ -448,31 +367,7 @@ cdef class GNMStrategySolver:
             ret.append(p)
         return ret
 
-cdef extern from "tools/logit/nfglogit.h":
-    cdef cppclass c_LogitQREMixedStrategyProfile "LogitQREMixedStrategyProfile":
-        c_LogitQREMixedStrategyProfile(c_Game)
-        c_LogitQREMixedStrategyProfile(c_LogitQREMixedStrategyProfile)
-        c_Game GetGame()
-        c_MixedStrategyProfileDouble GetProfile()
-        double GetLambda()
-        double GetLogLike()
-        int MixedProfileLength()
-        double getitem "operator[]"(int) except +IndexError
-	
-    cdef cppclass c_StrategicQREEstimator "StrategicQREEstimator":
-        c_StrategicQREEstimator()
-        c_LogitQREMixedStrategyProfile Estimate(c_LogitQREMixedStrategyProfile,
-	                                        c_MixedStrategyProfileDouble,
-						double, double, double) except +RuntimeError
 
-cdef extern from "util.h":
-    c_LogitQREMixedStrategyProfile *copyitem_list_qrem "copyitem"(c_List[c_LogitQREMixedStrategyProfile], int)        
-
-cdef extern from "nash.h":
-    c_LogitQREMixedStrategyProfile *_logit_estimate "logit_estimate"(c_MixedStrategyProfileDouble *)
-    c_LogitQREMixedStrategyProfile *_logit_atlambda "logit_atlambda"(c_Game, double)
-    c_List[c_LogitQREMixedStrategyProfile] _logit_principal_branch "logit_principal_branch"(c_Game, double)
-    
 cdef class LogitQREMixedStrategyProfile:
     cdef c_LogitQREMixedStrategyProfile *thisptr
     def __init__(self, game=None):

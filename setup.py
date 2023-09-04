@@ -55,7 +55,7 @@ libgambit = setuptools.Extension(
     "pygambit.gambit",
     sources=["src/pygambit/gambit.pyx"],
     language="c++",
-    include_dirs=["src"],
+    include_dirs=["src", "src/pygambit"],
     extra_compile_args=(
         ["-std=c++11"] if platform.system() == "Darwin" else []
     )
