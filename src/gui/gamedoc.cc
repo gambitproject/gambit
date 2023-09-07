@@ -683,11 +683,9 @@ void gbtGameDocument::DoSetActionLabel(GameAction p_action,
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
-void gbtGameDocument::DoSetActionProb(GameInfoset p_infoset,
-				      unsigned int p_action,
-				      const wxString &p_prob)
+void gbtGameDocument::DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &p_probs)
 {
-  p_infoset->SetActionProb(p_action, Number(p_prob.ToStdString()));
+  m_game->SetChanceProbs(p_infoset, p_probs);
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 

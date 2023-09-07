@@ -150,6 +150,11 @@ public:
   { throw UndefinedException(); }
   virtual void WriteBaggFile(std::ostream &) const;  
   //@}
+
+  /// @name Modification
+  //@{
+  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override { throw UndefinedException(); }
+  //@}
 };
 
 } // end namespace Gambit

@@ -827,8 +827,12 @@ void ParseChanceNode(GameParserState &p_state,
       infoset->SetLabel(label);
       for (int act = 1; act <= actions.Length(); act++) {
         infoset->GetAction(act)->SetLabel(actions[act]);
-        infoset->SetActionProb(act, Number(probs[act]));
       }
+      Array<Number> prob_numbers(probs.size());
+      for (int act = 1; act <= actions.Length(); act++) {
+        prob_numbers[act] = Number(probs[act]);
+      }
+      p_game->SetChanceProbs(infoset, prob_numbers);
     }
     else {
       // TODO: Verify actions match up to previous specifications

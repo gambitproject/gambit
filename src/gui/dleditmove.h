@@ -32,6 +32,8 @@ private:
   wxTextCtrl *m_infosetName;
   gbtActionSheet *m_actionSheet;
 
+  void OnOK(wxCommandEvent &);
+
 public:
   // Lifecycle
   gbtEditMoveDialog(wxWindow *p_parent, const Gambit::GameInfoset &p_infoset);
@@ -42,7 +44,9 @@ public:
 
   int NumActions() const;
   wxString GetActionName(int p_act) const;
-  wxString GetActionProb(int p_act) const; 
+  Gambit::Array<Gambit::Number> GetActionProbs() const;
+
+  wxDECLARE_EVENT_TABLE();
 };
 
 #endif   // DLEDITMOVE_H

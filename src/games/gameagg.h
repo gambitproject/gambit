@@ -144,6 +144,11 @@ public:
 
   //@}
 
+  /// @name Modification
+  //@{
+  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override { throw UndefinedException(); }
+  //@}
+
   /// @name Writing data files
   //@{
   /// Write the game to a savefile in the specified format.

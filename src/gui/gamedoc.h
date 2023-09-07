@@ -354,8 +354,7 @@ public:
   void DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label);
   void DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label);
   void DoSetActionLabel(GameAction p_action, const wxString &p_label);
-  void DoSetActionProb(GameInfoset p_infoset, unsigned int p_action,
-		       const wxString &p_prob);
+  void DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &p_probs);
   void DoSetInfoset(GameNode p_node, GameInfoset p_infoset);
   void DoLeaveInfoset(GameNode p_node);
   void DoRevealAction(GameInfoset p_infoset, GamePlayer p_player);

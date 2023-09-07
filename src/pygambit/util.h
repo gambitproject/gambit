@@ -87,6 +87,10 @@ template <class C, class X, class T>
 void setitem(C *p_container, const X &p_index, const T &p_value)
 { (*p_container)[p_index] = p_value; }
 
+template <class C, class X, class T>
+void setitem(C &p_container, const X &p_index, const T &p_value)
+{ p_container[p_index] = p_value; }
+
 // Convert the (C-style) string p_value to a Rational
 inline Rational to_rational(const char *p_value)
 { return lexical_cast<Rational>(std::string(p_value)); }

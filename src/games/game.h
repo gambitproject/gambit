@@ -341,7 +341,6 @@ public:
 
   virtual bool Precedes(GameNode) const = 0;
 
-  virtual void SetActionProb(int i, const Number &p_value) = 0;
   virtual const Number &GetActionProb(int i) const = 0;
   virtual void Reveal(GamePlayer) = 0;
 
@@ -880,6 +879,12 @@ public:
   virtual GameNode GetRoot() const = 0;
   /// Returns the number of nodes in the game
   virtual int NumNodes() const = 0;
+  //@}
+
+  /// @name Modification
+  //@{
+  /// Set the probability distribution of actions at a chance node
+  virtual Game SetChanceProbs(const GameInfoset &, const Array<Number> &) = 0;
   //@}
 };
 

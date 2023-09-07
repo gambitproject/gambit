@@ -210,6 +210,8 @@ cdef extern from "games/game.h":
           c_Rational GetMaxPayoff(int)
           bool IsPerfectRecall()
 
+          c_Game SetChanceProbs(c_GameInfoset, Array[c_Number]) except +
+
           c_PureStrategyProfile NewPureStrategyProfile()
           c_MixedStrategyProfileDouble NewMixedStrategyProfile(double)
           c_MixedStrategyProfileRational NewMixedStrategyProfile(c_Rational)
@@ -344,6 +346,7 @@ cdef extern from "util.h":
      c_Rational to_rational(char *)
 
      void setitem_array_int "setitem"(Array[int] *, int, int)
+     void setitem_array_number "setitem"(Array[c_Number], int, c_Number)
 
      void setitem_mspd_int "setitem"(c_MixedStrategyProfileDouble *, int, double)
      void setitem_mspd_strategy "setitem"(c_MixedStrategyProfileDouble *,

@@ -89,16 +89,19 @@ class Action:
     @property
     def prob(self) -> typing.Union[decimal.Decimal, Rational]:
         """
-        Get or set the probability a chance action is played.
-        When setting the probability, the value can be any numeric type, or any object that
-        has a string representation which can be interpreted as an integer,
-        decimal, or rational number.
+        Get the probability a chance action is played.
+
+        .. deprecated:: 16.1.0
+           Setting individual chance action probabilities is no longer supported.
+           Use `Game.set_chance_probs()` instead.
 
         Raises
         ------
-        ValueError
-            If `value` cannot be interpreted as a decimal or rational number.
+        UndefinedOperationError
+            If the action does not belong to the chance player.
         """
+        if not self.infoset.is_chance:
+            raise UndefinedOperationError("action probabilities are only defined at chance information sets")
         py_string = cython.cast(
             string,
             self.action.deref().GetInfoset().deref().GetActionProb(self.action.deref().GetNumber())
@@ -110,6 +113,4 @@ class Action:
 
     @prob.setter
     def prob(self, value: typing.Any) -> None:
-        self.action.deref().GetInfoset().deref().SetActionProb(
-            self.action.deref().GetNumber(), _to_number(value)
-        )
+        raise UndefinedOperationError("use Game.set_chance_probs() to set probabilities at chance information sets")

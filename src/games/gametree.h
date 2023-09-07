@@ -114,7 +114,6 @@ public:
 
   bool Precedes(GameNode) const override;
 
-  void SetActionProb(int i, const Number &p_value) override;
   const Number &GetActionProb(int i) const override { return m_probs[i]; }
 
   void Reveal(GamePlayer) override;
@@ -277,6 +276,11 @@ public:
   Array<int> NumInfosets() const override;
   /// Returns the act'th action in the game (numbered globally)
   GameAction GetAction(int act) const override;
+  //@}
+
+  /// @name Modification
+  //@{
+  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override;
   //@}
 
   PureStrategyProfile NewPureStrategyProfile() const override;

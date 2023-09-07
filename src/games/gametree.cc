@@ -21,6 +21,7 @@
 //
 
 #include <iostream>
+#include <numeric>
 
 #include "gambit.h"
 #include "gametree.h"
@@ -167,12 +168,6 @@ void GameTreeInfosetRep::RemoveAction(int which)
   if (m_player->IsChance()) {
     m_probs.Remove(which);
   }
-}
-
-void GameTreeInfosetRep::SetActionProb(int act, const Number &p_value)
-{
-  m_probs[act] = p_value;
-  m_efg->ClearComputedValues();
 }
 
 void GameTreeInfosetRep::RemoveMember(GameTreeNodeRep *p_node)
@@ -1025,6 +1020,40 @@ int GameTreeRep::NumNodes() const
 {
   return CountNodes(m_root);
 }
+
+
+//------------------------------------------------------------------------
+//                       GameTreeRep: Modification
+//------------------------------------------------------------------------
+
+Game GameTreeRep::SetChanceProbs(const GameInfoset &p_infoset, const Array<Number> &p_probs)
+{
+  if (p_infoset->GetGame() != this) {
+    throw MismatchException();
+  }
+  if (!p_infoset->IsChanceInfoset()) {
+    throw UndefinedException("Action probabilities can only be specified for chance information sets");
+  }
+  if (p_infoset->NumActions() != p_probs.size()) {
+    throw DimensionException("The number of probabilities given must match the number of actions");
+  }
+  Rational sum(0);
+  for (auto prob : p_probs) {
+    if (static_cast<Rational>(prob) < Rational(0)) {
+      throw ValueException("Probabilities must be non-negative numbers");
+    }
+    sum += static_cast<Rational>(prob);
+  }
+  if (sum != Rational(1)) {
+    throw ValueException("Probabilities must sum to exactly one");
+  }
+  for (int act = 1; act <= p_infoset->NumActions(); act++) {
+    dynamic_cast<GameTreeInfosetRep &>(*p_infoset).m_probs[act] = p_probs[act];
+  }
+  ClearComputedValues();
+  return this;
+}
+
 
 //------------------------------------------------------------------------
 //                     GameTreeRep: Factory functions

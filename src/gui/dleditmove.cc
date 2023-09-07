@@ -24,30 +24,35 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
+#include <wx/richmsgdlg.h>
 #include "wx/sheet/sheet.h"
 
 #include "gambit.h"
 #include "dleditmove.h"
 #include "renratio.h"
 
+using namespace Gambit;
+
+
 class gbtActionSheet : public wxSheet {
 private:
-  Gambit::GameInfoset m_infoset;
+  GameInfoset m_infoset;
 
   // Overriding wxSheet members
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
 
 public:
-  gbtActionSheet(wxWindow *p_parent, const Gambit::GameInfoset &p_infoset);
-  
-  int NumActions() const { return GetNumberRows(); }
+  gbtActionSheet(wxWindow *p_parent, const GameInfoset &p_infoset);
+
+  int NumActions() const  { return GetNumberRows(); }
+
   wxString GetActionName(int p_act);
-  wxString GetActionProb(int p_act); 
+  Array<Number> GetActionProbs();
 };
 
-gbtActionSheet::gbtActionSheet(wxWindow *p_parent, 
-			       const Gambit::GameInfoset &p_infoset)
-  : wxSheet(p_parent, wxID_ANY), m_infoset(p_infoset) 
+gbtActionSheet::gbtActionSheet(wxWindow *p_parent,
+                               const Gambit::GameInfoset &p_infoset)
+  : wxSheet(p_parent, wxID_ANY), m_infoset(p_infoset)
 {
   CreateGrid(p_infoset->NumActions(), (p_infoset->IsChanceInfoset()) ? 2 : 1);
   SetRowLabelWidth(40);
@@ -58,13 +63,13 @@ gbtActionSheet::gbtActionSheet(wxWindow *p_parent,
   }
 
   for (int act = 1; act <= p_infoset->NumActions(); act++) {
-    SetCellValue(wxSheetCoords(act-1, 0),
-		 wxString(p_infoset->GetAction(act)->GetLabel().c_str(),
-			  *wxConvCurrent));
+    SetCellValue(wxSheetCoords(act - 1, 0),
+                 wxString(p_infoset->GetAction(act)->GetLabel().c_str(),
+                          *wxConvCurrent));
     if (p_infoset->IsChanceInfoset()) {
-      SetCellValue(wxSheetCoords(act-1, 1),
-		   wxString(static_cast<std::string>(p_infoset->GetActionProb(act)).c_str(),
-			    *wxConvCurrent));
+      SetCellValue(wxSheetCoords(act - 1, 1),
+                   wxString(static_cast<std::string>(p_infoset->GetActionProb(act)).c_str(),
+                            *wxConvCurrent));
     }
   }
   SetDefaultColWidth(150);
@@ -75,27 +80,31 @@ gbtActionSheet::gbtActionSheet(wxWindow *p_parent,
 }
 
 wxString gbtActionSheet::GetActionName(int p_act)
-{ 
+{
   if (IsCellEditControlCreated()) {
     SaveEditControlValue();
   }
   if (IsCellEditControlShown()) {
     HideCellEditControl();
   }
-  return GetCellValue(wxSheetCoords(p_act-1, 0));
+  return GetCellValue(wxSheetCoords(p_act - 1, 0));
 }
 
-wxString gbtActionSheet::GetActionProb(int p_act)
-{ 
+Array<Number> gbtActionSheet::GetActionProbs()
+{
   if (IsCellEditControlCreated()) {
     SaveEditControlValue();
   }
   if (IsCellEditControlShown()) {
     HideCellEditControl();
   }
-  return GetCellValue(wxSheetCoords(p_act-1, 1));
+  Array<Number> probs(NumActions());
+  for (int act = 1; act <= NumActions(); act++) {
+    probs[act] = Number(GetCellValue(wxSheetCoords(act - 1, 1)).ToStdString());
+  }
+  return probs;
 }
- 
+
 
 wxSheetCellAttr
 gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -136,9 +145,15 @@ gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
   return attr;
 }
 
+
 //======================================================================
 //                      class gbtEditMoveDialog
 //======================================================================
+
+wxBEGIN_EVENT_TABLE(gbtEditMoveDialog, wxDialog)
+  EVT_BUTTON(wxID_OK, gbtEditMoveDialog::OnOK)
+wxEND_EVENT_TABLE()
+
 
 gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
 				     const Gambit::GameInfoset &p_infoset)
@@ -200,6 +215,32 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
   CenterOnParent();
 }
 
+void gbtEditMoveDialog::OnOK(wxCommandEvent &p_event)
+{
+  if (!m_infoset->IsChanceInfoset()) {
+    p_event.Skip();
+    return;
+  }
+  Array<Number> probs = m_actionSheet->GetActionProbs();
+  Rational sum(0);
+  for (int act = 1; act <= m_infoset->NumActions(); act++) {
+    auto prob = static_cast<Rational>(probs[act]);
+    if (prob < Gambit::Rational(0)) {
+      wxMessageBox("Action probabilities must be nonnegative numbers.", "Error");
+      return;
+    }
+    sum += prob;
+  }
+  if (sum == Gambit::Rational(1)) {
+    p_event.Skip();
+  }
+  else {
+    wxRichMessageDialog(this,
+                    "Action probabilities must sum to exactly one", "Error",
+                    wxOK | wxCENTRE | wxICON_ERROR).ShowModal();
+  }
+}
+
 int gbtEditMoveDialog::NumActions() const 
 { 
   return m_actionSheet->NumActions(); 
@@ -210,9 +251,9 @@ wxString gbtEditMoveDialog::GetActionName(int p_act) const
   return m_actionSheet->GetActionName(p_act);
 }
 
-wxString gbtEditMoveDialog::GetActionProb(int p_act) const 
+Array<Number> gbtEditMoveDialog::GetActionProbs() const
 { 
-  return m_actionSheet->GetActionProb(p_act);
+  return m_actionSheet->GetActionProbs();
 }
 
 

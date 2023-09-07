@@ -27,7 +27,6 @@ import numpy as np
 import pygambit.gte
 import pygambit.gameiter
 
-
 @cython.cclass
 class Outcomes(Collection):
     """Represents a collection of outcomes in a game."""
@@ -491,6 +490,48 @@ class Game:
     def max_payoff(self) -> typing.Union[decimal.Decimal, Rational]:
         """Returns the maximum payoff in the game."""
         return rat_to_py(self.game.deref().GetMaxPayoff(0))
+
+    def set_chance_probs(self, infoset: Infoset, probs) -> Game:
+        """Set the action probabilities at chance information set `infoset`.
+
+        Parameters
+        ----------
+        infoset : Infoset
+            The chance information set at which to set the action probabilities.
+        probs : array-like
+            The action probabilities to set
+
+        Returns
+        -------
+        Game
+            The operation modifies the game.  A reference to the game is also returned.
+
+        Raises
+        ------
+        MismatchError
+            If `infoset` is not an information set in this game
+        UndefinedOperationError
+            If `infoset` is not an information set of the chance player
+        IndexError
+            If the length of `probs` is not the same as the number of actions at the information set
+        ValueError
+            If any of the elements of `probs` are not interpretable as numbers, or the values of `probs` are not
+            nonnegative numbers that sum to exactly one.
+        """
+        if infoset.game != self:
+            raise MismatchError("set_chance_probs() first argument must be an infoset in the same game")
+        if not infoset.is_chance:
+            raise UndefinedOperationError("set_chance_probs() first argument must be a chance infoset")
+        if len(infoset.actions) != len(probs):
+            raise IndexError("set_chance_probs(): must specify exactly one probability per action")
+        numbers = Array[c_Number](len(probs))
+        for i in range(1, len(probs)+1):
+            setitem_array_number(numbers, i, _to_number(probs[i-1]))
+        try:
+            self.game.deref().SetChanceProbs(infoset.infoset, numbers)
+        except RuntimeError:
+            raise ValueError("set_chance_probs(): must specify non-negative probabilities that sum to one")
+        return self
 
     def _get_contingency(self, *args):
         psp = cython.declare(shared_ptr[c_PureStrategyProfile])

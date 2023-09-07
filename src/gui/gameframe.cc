@@ -1233,26 +1233,25 @@ void gbtGameFrame::OnEditNode(wxCommandEvent &)
 void gbtGameFrame::OnEditMove(wxCommandEvent &)
 {
   Gambit::GameInfoset infoset = m_doc->GetSelectNode()->GetInfoset();
-  if (!infoset)  return;
+  if (!infoset) return;
 
   gbtEditMoveDialog dialog(this, infoset);
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_doc->DoSetInfosetLabel(infoset, dialog.GetInfosetName());
 
-      if (!infoset->IsChanceInfoset() && 
-	  dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
-	m_doc->DoSetPlayer(infoset, 
-			   m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
+      if (!infoset->IsChanceInfoset() &&
+          dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
+        m_doc->DoSetPlayer(infoset,
+                           m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
       }
 
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	m_doc->DoSetActionLabel(infoset->GetAction(act), 
-				dialog.GetActionName(act));
-	if (infoset->IsChanceInfoset()) {
-	  m_doc->DoSetActionProb(infoset, infoset->GetAction(act)->GetNumber(),
-				 dialog.GetActionProb(act));
-	}
+        m_doc->DoSetActionLabel(infoset->GetAction(act),
+                                dialog.GetActionName(act));
+      }
+      if (infoset->IsChanceInfoset()) {
+        m_doc->DoSetActionProbs(infoset, dialog.GetActionProbs());
       }
     }
     catch (std::exception &ex) {

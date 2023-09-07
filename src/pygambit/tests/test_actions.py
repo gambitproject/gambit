@@ -1,5 +1,4 @@
 import pygambit
-import decimal
 import fractions
 import unittest
 
@@ -22,53 +21,41 @@ class TestGambitActions(unittest.TestCase):
             "action label"
         )
 
-    def test_action_probability(self):
-        """Test to ensure action probabilities work"""
-        assert (
-            self.extensive_game.root.infoset.actions[0].prob ==
-            decimal.Decimal('0.500000')
-        )
+    def test_action_probability_chance(self):
+        """Test setting action probabilities at chance information sets"""
+        assert (self.extensive_game.root.infoset.actions[0].prob == 0.5)
 
-        self.extensive_game.root.infoset.actions[0].prob = 2.0
-        assert (
-                self.extensive_game.root.infoset.actions[0].prob ==
-                fractions.Fraction(2)
-        )
+        self.extensive_game.set_chance_probs(self.extensive_game.root.infoset, [0.75, 0.25])
+        assert (self.extensive_game.root.infoset.actions[0].prob == 0.75)
+        assert (self.extensive_game.root.infoset.actions[1].prob == 0.25)
 
-        self.extensive_game.root.infoset.actions[0].prob = (
-            decimal.Decimal('0.97300')
-        )
-        assert (
-            self.extensive_game.root.infoset.actions[0].prob ==
-            decimal.Decimal('0.97300')
-        )
-
-        self.extensive_game.root.infoset.actions[0].prob = (
-            fractions.Fraction('1/17')
-        )
-        assert (
-            self.extensive_game.root.infoset.actions[0].prob ==
-            fractions.Fraction('1/17')
-        )
-
-        self.extensive_game.root.infoset.actions[0].prob = 2
-        assert self.extensive_game.root.infoset.actions[0].prob == 2
-
-        self.extensive_game.root.infoset.actions[0].prob = "1/7"
-        assert (
-            self.extensive_game.root.infoset.actions[0].prob ==
-            fractions.Fraction('1/7')
-        )
-
-        self.extensive_game.root.infoset.actions[0].prob = "2.7"
-        assert (
-            self.extensive_game.root.infoset.actions[0].prob ==
-            decimal.Decimal('2.7')
-        )
+        self.extensive_game.set_chance_probs(self.extensive_game.root.infoset, ["1/17", "16/17"])
+        assert (self.extensive_game.root.infoset.actions[0].prob == fractions.Fraction("1/17"))
+        assert (self.extensive_game.root.infoset.actions[1].prob == fractions.Fraction("16/17"))
 
         self.assertRaises(
-            ValueError, setattr, self.extensive_game.root.infoset.actions[0],
-            "prob", "test"
+            ValueError, self.extensive_game.set_chance_probs,
+            self.extensive_game.root.infoset, [0.75, 0.10]
+        )
+        self.assertRaises(
+            ValueError, self.extensive_game.set_chance_probs,
+            self.extensive_game.root.infoset, [1.1, -0.1]
+        )
+        self.assertRaises(
+            IndexError, self.extensive_game.set_chance_probs,
+            self.extensive_game.root.infoset, [0.75, 0.10, 0.15]
+        )
+        self.assertRaises(
+            ValueError, setattr, self.extensive_game.root.infoset.actions[0], "prob", "test"
+        )
+
+        self.extensive_game.set_chance_probs(self.extensive_game.root.infoset, [0.50, 0.50])
+
+    def test_action_probability_nonchance(self):
+        """Test attempts to set action probabilities at non-chance information sets."""
+        self.assertRaises(
+            pygambit.UndefinedOperationError, self.extensive_game.set_chance_probs,
+            self.extensive_game.players[0].infosets[0], [0.75, 0.25]
         )
 
     def test_action_precedes(self):
