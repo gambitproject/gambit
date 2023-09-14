@@ -23,6 +23,7 @@
 import pygambit as gbt
 import pygambit.gambit as libgbt
 
+
 def undominated_strategies_solve(
         profile: gbt.StrategySupportProfile,
         strict: bool = False,
@@ -35,6 +36,9 @@ def undominated_strategies_solve(
 
     Parameters
     ----------
+    profile: StrategySupportProfile
+        The initial profile of strategies
+
     strict : bool, default False
         If specified `True`, eliminate only strategies which are strictly dominated.
         If `False`, strategies which are weakly dominated are also eliminated.
