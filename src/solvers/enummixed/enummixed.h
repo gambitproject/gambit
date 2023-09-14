@@ -79,7 +79,17 @@ private:
   static bool EqZero(const T &x);
 };
 
- 
+
+inline List<MixedStrategyProfile<double> > EnumMixedStrategySolveDouble(const Game &p_game)
+{
+  return EnumMixedStrategySolver<double>().Solve(p_game);
+}
+
+inline List<MixedStrategyProfile<Rational> > EnumMixedStrategySolveRational(const Game &p_game)
+{
+  return EnumMixedStrategySolver<Rational>().Solve(p_game);
+}
+
 
  
 //
@@ -94,6 +104,11 @@ public:
 
   List<MixedStrategyProfile<Rational> > Solve(const Game &p_game) const override;
 };
+
+inline List<MixedStrategyProfile<Rational> > EnumMixedStrategySolveLrs(const Game &p_game)
+{
+  return EnumMixedLrsStrategySolver().Solve(p_game);
+}
 
 }  // end namespace Gambit::Nash
 }  // end namespace Gambit

@@ -76,6 +76,11 @@ private:
   int get_b(int j, int h, int nstrats, const PVector<int> &) const;
 };
 
+inline List<MixedStrategyProfile<Rational> > SimpdivStrategySolve(const Game &p_game)
+{
+  return NashSimpdivStrategySolver().Solve(p_game);
+}
+
 }  // end namespace Gambit::Nash
 }  // end namespace Gambit
 

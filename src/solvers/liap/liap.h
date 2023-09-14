@@ -46,6 +46,10 @@ private:
   bool m_verbose;
 };
 
+inline List<MixedBehaviorProfile<double> > LiapBehaviorSolve(const Game &p_game, int p_maxitsN)
+{
+  return NashLiapBehaviorSolver(p_maxitsN).Solve(BehaviorSupportProfile(p_game));
+}
 
 class NashLiapStrategySolver : public StrategySolver<double> {
 public:
@@ -64,6 +68,11 @@ private:
   int m_maxitsN;
   bool m_verbose;
 };
+
+inline List<MixedStrategyProfile<double> > LiapStrategySolve(const Game &p_game, int p_maxitsN)
+{
+  return NashLiapStrategySolver(p_maxitsN).Solve(p_game);
+}
 
 
 #endif  // GAMBIT_NASH_LIAP_H

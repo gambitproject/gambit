@@ -78,9 +78,13 @@ std::string WriteGame(const StrategySupportProfile &p_support)
 
 // Create a copy on the heap (via new) of the element at index p_index of 
 // container p_container.
-template <template<class> class C, class T, class X> 
+template <template<class> class C, class T, class X>
 T *copyitem(const C<T> &p_container, const X &p_index)
 { return new T(p_container[p_index]); }
+
+template <template<class> class C, class T, class X>
+std::shared_ptr<T> sharedcopyitem(const C<T> &p_container, const X &p_index)
+{ return make_shared<T>(p_container[p_index]); }
 
 // Set item p_index to value p_value in container p_container
 template <class C, class X, class T> 

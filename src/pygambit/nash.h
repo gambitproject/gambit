@@ -31,7 +31,7 @@ public:
   int overflow(int c) { return c; }
 };
 
-LogitQREMixedStrategyProfile *
+std::shared_ptr<LogitQREMixedStrategyProfile>
 logit_estimate(MixedStrategyProfile<double> *p_frequencies)
 {
   LogitQREMixedStrategyProfile start(p_frequencies->GetGame());
@@ -40,18 +40,19 @@ logit_estimate(MixedStrategyProfile<double> *p_frequencies)
   std::ostream null_stream(&null_buffer);
   LogitQREMixedStrategyProfile result = alg.Estimate(start, *p_frequencies, 
 						     null_stream, 1000000.0, 1.0);
-  return new LogitQREMixedStrategyProfile(result);
+  return make_shared<LogitQREMixedStrategyProfile>(result);
 }
 
-LogitQREMixedStrategyProfile *
+std::shared_ptr<LogitQREMixedStrategyProfile>
 logit_atlambda(const Game &p_game, double p_lambda)
 {
   LogitQREMixedStrategyProfile start(p_game);
   StrategicQREPathTracer alg;
   NullBuffer null_buffer;
   std::ostream null_stream(&null_buffer);
-  return new LogitQREMixedStrategyProfile(alg.SolveAtLambda(start, null_stream,
-							    p_lambda, 1.0));
+  return make_shared<LogitQREMixedStrategyProfile>(
+    alg.SolveAtLambda(start, null_stream, p_lambda, 1.0)
+  );
 }
 
 List<LogitQREMixedStrategyProfile>
