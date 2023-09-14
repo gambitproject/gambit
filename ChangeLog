@@ -5,6 +5,9 @@
 ### Changed
 - `pygambit.supports` has been introduced to organise algorithms which operates on sets
   of pure strategies or actions, such as finding undominated strategies.
+- The experimental concept of a `StrategicRestriction` has been removed from `pygambit`.
+  Instead, calling `restrict` on a `StrategySupportProfile` creates a deep copy of its
+  game with only the strategies specified.
 
 
 ## [16.1.0a1] - 2023-09-14

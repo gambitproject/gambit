@@ -24,7 +24,6 @@
 class Strategy:
     """A strategy belonging to a player in a game."""
     strategy = cython.declare(c_GameStrategy)
-    restriction = cython.declare(StrategicRestriction)
 
     def __repr__(self):
         return (
@@ -49,8 +48,6 @@ class Strategy:
 
     @label.setter
     def label(self, value: str) -> None:
-        if self.restriction is not None:
-            raise UndefinedOperationError("Changing objects in a restriction is not supported")
         if value in [i.label for i in self.player.strategies]:
             warnings.warn("This player has another strategy with an identical label")
         self.strategy.deref().SetLabel(value.encode('ascii'))
@@ -59,7 +56,6 @@ class Strategy:
     def player(self) -> Player:
         """The player to which the strategy belongs."""
         p = Player()
-        p.restriction = self.restriction
         p.player = self.strategy.deref().GetPlayer()
         return p
 
@@ -67,8 +63,3 @@ class Strategy:
     def number(self) -> int:
         """The number of the strategy."""
         return self.strategy.deref().GetNumber() - 1
-
-    def unrestrict(self):
-        s = Strategy()
-        s.strategy = self.strategy
-        return s

@@ -266,17 +266,6 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
         behav.profile = make_shared[c_MixedBehaviorProfileDouble](deref(self.profile))
         return behav
 
-    def restriction(self):
-        cdef StrategicRestriction s
-        s = StrategicRestriction()
-        s.support = new c_StrategySupportProfile(deref(self.profile).GetSupport())
-        return s
-
-    def unrestrict(self):
-        profile = MixedStrategyProfileDouble()
-        profile.profile = make_shared[c_MixedStrategyProfileDouble](deref(self.profile).ToFullSupport())
-        return profile
-
     def set_centroid(self):
         deref(self.profile).SetCentroid()
 
@@ -393,16 +382,6 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
         behav = MixedBehaviorProfileRational()
         behav.profile = make_shared[c_MixedBehaviorProfileRational](deref(self.profile))
         return behav
-
-    def restriction(self):
-        s = StrategicRestriction()
-        s.support = new c_StrategySupportProfile(deref(self.profile).GetSupport())
-        return s
-
-    def unrestrict(self):
-        profile = MixedStrategyProfileRational()
-        profile.profile = make_shared[c_MixedStrategyProfileRational](deref(self.profile).ToFullSupport())
-        return profile
 
     def set_centroid(self):
         deref(self.profile).SetCentroid()

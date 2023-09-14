@@ -19,31 +19,12 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
         assert len(self.support_profile) == len(self.game.strategies)
         assert len(self.support_profile) == len(self.restriction.strategies)
 
-    def test_getitem(self):
-        """Test retrieving strategies from a support profile"""
-        for strategy in self.support_profile:
-            assert strategy in self.game.strategies
-            assert strategy in self.restriction.strategies
-
     def test_remove(self):
         """Test removing strategies from a support profile"""
         strategy = self.support_profile[0]
         new_profile = self.support_profile.remove(strategy)
         assert len(self.support_profile) == len(new_profile) + 1
         assert strategy not in new_profile
-
-    def test_remove_restriction(self):
-        """Test generating an incomplete strategic restriction from a
-        support profile
-        """
-        strategy = self.support_profile[0]
-        new_profile = self.support_profile.remove(strategy)
-        new_restriction = new_profile.restrict()
-        assert (
-            len(self.restriction.strategies) ==
-            len(new_restriction.strategies) + 1
-        )
-        assert strategy not in new_restriction.strategies
 
     def test_difference(self):
         """Test the subtraction of two support profiles"""
@@ -102,15 +83,6 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
         sec_profile = self.support_profile.remove(self.support_profile[4])
         new_profile = fir_profile | sec_profile
         assert new_profile == self.support_profile
-
-    def test_restriction_support_profile(self):
-        """Test generating the support profile from a restricted game"""
-        assert self.support_profile == self.restriction.support_profile()
-        strat_list = [self.support_profile[0], self.support_profile[2],
-                      self.support_profile[4]]
-        fir_profile = pygambit.StrategySupportProfile(
-            strat_list, self.game)
-        assert fir_profile == fir_profile.restrict().support_profile()
 
     def test_undominated(self):
         """Test removing undominated strategies from the support profile"""

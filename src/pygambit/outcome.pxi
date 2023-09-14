@@ -26,8 +26,7 @@ from libcpp.memory cimport shared_ptr
 class Outcome:
     """An outcome in a `Game`."""
     outcome = cython.declare(c_GameOutcome)
-    restriction = cython.declare(StrategicRestriction)
-    
+
     def __repr__(self):
         return (
             f"<Outcome [{self.outcome.deref().GetNumber()-1}] '{self.label}' "
@@ -49,15 +48,11 @@ class Outcome:
         is a strategic game, any contingency at which this outcome is attached as its outcome
         reset to null.
         """
-        if self.restriction is not None:
-            raise UndefinedOperationError("Changing objects in a restriction is not supported")
         cython.cast(Game, self.game).game.deref().DeleteOutcome(self.outcome)
 
     @property
     def game(self) -> Game:
         """Returns the game with which this outcome is associated."""
-        if self.restriction is not None:
-            return self.restriction
         g = Game()
         g.game = self.outcome.deref().GetGame()
         return g
@@ -69,8 +64,6 @@ class Outcome:
 
     @label.setter
     def label(self, value: str) -> None:
-        if self.restriction is not None:
-            raise UndefinedOperationError("Changing objects in a restriction is not supported")
         if value in [i.label for i in self.game.outcomes]:
             warnings.warn("Another outcome with an identical label exists")
         self.outcome.deref().SetLabel(value.encode('ascii'))
@@ -113,16 +106,7 @@ class Outcome:
         ValueError
               If ``payoff`` cannot be interpreted as a decimal or rational number.
         """
-        if self.restriction is not None:
-            raise UndefinedOperationError(
-                "Changing objects in a support is not supported"
-            )
         self.outcome.deref().SetPayoff(pl+1, _to_number(value))
-
-    def unrestrict(self):
-        o = Outcome()
-        o.outcome = self.outcome
-        return o
 
 
 @cython.cclass

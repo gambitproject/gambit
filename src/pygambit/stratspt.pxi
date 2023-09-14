@@ -76,7 +76,6 @@ class StrategySupportProfile(Collection):
                 raise NotImplementedError
 
     def __getitem__(self, index: int) -> Strategy:
-        cdef Strategy s
         for pl in range(len(self.game.players)):
             if index < deref(self.support).NumStrategiesPlayer(pl+1):
                 s = Strategy()
@@ -247,14 +246,15 @@ class StrategySupportProfile(Collection):
             raise MismatchError("issuperset(): support profiles are defined on different games")
         return other.is_subset_of(self)
 
-    def restrict(self) -> StrategicRestriction:
-        """Creates a `StrategicRestriction`, which is a restriction of the game
-        in which only the strategies in this profile are present.
+    def restrict(self) -> Game:
+        """Creates a deep copy of the support profile's game, including only the strategies
+        in the support.
+
+        .. versionchanged:: 16.1.0
+            In 16.0.x, this returned a `StrategicRestriction` object.  Strategic restrictions
+            have been removed in favor of using deep copies of games.
         """
-        cdef StrategicRestriction restriction
-        restriction = StrategicRestriction()
-        restriction.support = new c_StrategySupportProfile(deref(self.support))
-        return restriction
+        return Game.parse_game(WriteGame(deref(self.support)).decode('ascii'))
 
     @deprecated(version='16.1.0',
                 reason='Use pygambit.supports.undominated_strategies_solve instead of StrategySupportProfile.',
@@ -289,212 +289,3 @@ def _undominated_strategies_solve(
     result = StrategySupportProfile(list(profile), profile.game)
     result.support.reset(new c_StrategySupportProfile(deref(profile.support).Undominated(strict, external)))
     return result
-
-cdef class RestrictionOutcomes(Collection):
-    """Represents a collection of outcomes in a restriction."""
-    cdef StrategicRestriction restriction
-
-    def __init__(self, StrategicRestriction restriction not None):
-        self.restriction = restriction
-    def __len__(self):    return (<Game>self.restriction.unrestrict()).game.deref().NumOutcomes()
-    def __getitem__(self, outc):
-        if not isinstance(outc, int):  return Collection.__getitem__(self, outc)
-        cdef Outcome c
-        c = Outcome()
-        c.outcome = (<Game>self.restriction.unrestrict()).game.deref().GetOutcome(outc+1)
-        c.restriction = self.restriction
-        return c
-
-    def add(self, label=""):
-        raise UndefinedOperationError("Changing objects in a restriction is not supported")
-
-cdef class RestrictionStrategies(Collection):
-    """Represents a collection of strategies in a restriction."""
-    cdef StrategicRestriction restriction
-
-    def __init__(self, StrategicRestriction restriction not None):
-        self.restriction = restriction
-    def __len__(self):    return self.restriction.support.MixedProfileLength()
-    def __getitem__(self, strat):
-        if not isinstance(strat, int):
-            return Collection.__getitem__(self, strat)
-        cdef Array[int] num_strategies
-        cdef Strategy s
-        num_strategies = self.restriction.support.NumStrategies()
-        for i in range(1,num_strategies.Length()+1):
-            if strat - num_strategies.getitem(i) < 0:
-                s = Strategy()
-                s.strategy = self.restriction.support.GetStrategy(i, strat+1)  
-                s.restriction = self.restriction
-                return s
-            strat = strat - num_strategies.getitem(i)
-        raise IndexError("Index out of range")
-
-
-cdef class StrategicRestriction:
-    """
-    A StrategicRestriction is a read-only view on a game, defined by a
-    subset of the strategies on the original game.
-    """
-    cdef c_StrategySupportProfile *support
-
-    def __init__(self):
-        self.support = (<c_StrategySupportProfile *>0)
-    def __dealloc__(self):
-        if self.support != (<c_StrategySupportProfile *>0):
-            del self.support
-    def __repr__(self):
-        return self.write()
-
-    def __richcmp__(StrategicRestriction self, other, whichop):
-        if isinstance(other, StrategicRestriction):
-            if whichop == 2:
-                return deref(self.support) == deref((<StrategicRestriction>other).support)
-            elif whichop == 3:
-                return deref(self.support) != deref((<StrategicRestriction>other).support)
-            else:
-                raise NotImplementedError
-        else:
-            if whichop == 2:
-                return False
-            elif whichop == 3:
-                return True
-            else:
-                raise NotImplementedError
-
-    def __hash__(self):
-        return long(<long>&self.support)
-
-    @property
-    def title(self) -> str:
-        return "Restriction from Game '%s'" % self.unrestrict().title
-
-    @property
-    def players(self) -> Players:
-        """Returns the set of players in the game."""
-        cdef Players p
-        p = Players()
-        p.game = (<Game>self.unrestrict()).game
-        p.restriction = self
-        return p
-
-    @property
-    def strategies(self) -> RestrictionStrategies:
-        """Returns the set of strategies in the game."""
-        cdef RestrictionStrategies s
-        s = RestrictionStrategies(self)
-        return s
-
-    property outcomes:
-        def __get__(self):
-            cdef RestrictionOutcomes o
-            o = RestrictionOutcomes(self)
-            return o
-
-    property is_tree:
-        def __get__(self):
-            # Any strategic restriction is automatically not a tree
-            # representation, even if the parent game does have one.
-            return False
-
-    property is_const_sum:
-        def __get__(self):
-            return self.unrestrict().is_const_sum
-
-    property is_perfect_recall:
-        def __get__(self):
-            return self.unrestrict().is_perfect_recall
-
-    property min_payoff:
-        def __get__(self):
-            return self.unrestrict().min_payoff
-
-    property max_payoff:
-        def __get__(self):
-            return self.unrestrict().max_payoff
-
-    def write(self, format='native'):
-        if format != 'native' and format != 'nfg':
-            raise NotImplementedError
-        else:
-            return WriteGame(deref(self.support)).c_str()
-
-    def undominated(self, strict=False):
-        cdef StrategicRestriction new_restriction
-        new_restriction = StrategicRestriction()
-        new_restriction.support = new c_StrategySupportProfile(self.support.Undominated(strict, False))
-        return new_restriction
-
-    def num_strategies_player(self, pl):
-        return self.support.NumStrategiesPlayer(pl+1)
-
-    def support_profile(self):
-        return StrategySupportProfile(list(self.strategies), self.unrestrict())
-
-    def unrestrict(self):
-        cdef Game g
-        g = Game()
-        g.game = self.support.GetGame()
-        return g
-
-    ###
-    # Methods below here have been borrowed from the basic Game
-    # implementation, and may not be fully correct in handling
-    # all cases
-    ###
-
-    def _get_contingency(self, *args):
-        cdef c_PureStrategyProfile *psp
-        cdef Outcome outcome
-        psp = new c_PureStrategyProfile(deref(self.support).GetGame().deref().NewPureStrategyProfile())
-        
-        
-        for (pl, st) in enumerate(args):
-            psp.deref().SetStrategy(deref(self.support).GetStrategy(pl+1, st+1))
-
-        outcome = Outcome()
-        outcome.outcome = psp.deref().GetOutcome()
-        del psp
-        return outcome
-
-    # As of Cython 0.11.2, cython does not support the * notation for the argument
-    # to __getitem__, which is required for multidimensional slicing to work. 
-    # We work around this by providing a shim.
-    def __getitem__(self, i):
-        try:
-            if len(i) != len(self.players):
-                raise KeyError, "Number of strategies is not equal to the number of players"
-        except TypeError:
-            raise TypeError, "contingency must be a tuple-like object"
-        cont = [ 0 ] * len(self.players)
-        for (pl, st) in enumerate(i):
-            if isinstance(st, int):
-                if st < 0 or st >= len(self.players[pl].strategies):
-                    raise IndexError, "Provided strategy index %d out of range for player %d" % (st, pl)
-                cont[pl] = st
-            elif isinstance(st, str):
-                try:
-                    cont[pl] = [ s.label for s in self.players[pl].strategies ].index(st)
-                except ValueError:
-                    raise IndexError, "Provided strategy label '%s' not defined" % st
-            elif isinstance(st, Strategy):
-                try:
-                    cont[pl] = list(self.players[pl].strategies).index(st)
-                except ValueError:
-                    raise IndexError, "Provided strategy '%s' not available to player" % st
-            else:
-                raise TypeError("Must use a tuple of ints, strategy labels, or strategies")
-        return self._get_contingency(*tuple(cont))
-
-    def mixed_strategy_profile(self, rational=False):
-        cdef MixedStrategyProfileDouble mspd
-        cdef MixedStrategyProfileRational mspr
-        cdef c_Rational dummy_rat
-        if not rational:
-            mspd = MixedStrategyProfileDouble()
-            mspd.profile = make_shared[c_MixedStrategyProfileDouble](deref(self.support).NewMixedStrategyProfileDouble())
-            return mspd
-        else:
-            mspr = MixedStrategyProfileRational()
-            mspr.profile = make_shared[c_MixedStrategyProfileRational](deref(self.support).NewMixedStrategyProfileRational())
-            return mspr

@@ -56,7 +56,6 @@ class Outcomes(Collection):
 class Players(Collection):
     """Represents a collection of players in a game."""
     game = cython.declare(c_Game)
-    restriction = cython.declare(StrategicRestriction)
 
     def __len__(self):
         """Returns the number of players in the game."""
@@ -67,14 +66,10 @@ class Players(Collection):
             return Collection.__getitem__(self, pl)
         p = Player()
         p.player = self.game.deref().GetPlayer(pl+1)
-        if self.restriction is not None:
-            p.restriction = self.restriction
         return p
 
     def add(self, label="") -> Player:
         """Adds a new player to the game."""
-        if self.restriction is not None:
-            raise UndefinedOperationError("Changing objects in a restriction is not supported")
         p = Player()
         p.player = self.game.deref().NewPlayer()
         if label != "":
@@ -86,7 +81,6 @@ class Players(Collection):
         """Returns the chance player associated with the game."""
         p = Player()
         p.player = self.game.deref().GetChance()
-        p.restriction = self.restriction
         return p
 
 
@@ -682,9 +676,6 @@ class Game:
         if self.is_tree:
             return self.game.deref().NumNodes()
         return 0
-
-    def unrestrict(self):
-        return self
 
     def write(self, format='native') -> str:
         """Returns a serialization of the game.  Several output formats are

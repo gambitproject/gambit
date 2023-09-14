@@ -75,37 +75,10 @@ class Strategies(Collection):
         return s
 
 
-cdef class PlayerSupportStrategies(Collection):
-    """Represents a collection of strategies for a player in a restriction"""
-    cdef Player player
-    cdef StrategicRestriction restriction
-
-    def add(self, label=""):
-        raise UndefinedOperationError(
-            "Adding strategies is only applicable to players in a game, not in a restriction"
-        )
-
-    def __init__(self, Player player not None, StrategicRestriction restriction not None):
-        self.restriction = restriction
-        self.player = player
-    
-    def __len__(self):
-        return self.restriction.num_strategies_player(self.player.number)
-
-    def __getitem__(self, strat):
-        if not isinstance(strat, int):
-            return Collection.__getitem__(self, strat)
-        s = Strategy()
-        s.strategy = self.restriction.support.GetStrategy(self.player.number+1, strat+1)
-        s.restriction = self.restriction
-        return s
-
-
 @cython.cclass
 class Player:
     """Represents a player in a :py:class:`Game`."""
     player = cython.declare(c_GamePlayer)
-    restriction = cython.declare(StrategicRestriction)
 
     def __repr__(self):
         if self.is_chance:
@@ -128,8 +101,6 @@ class Player:
     @property
     def game(self) -> Game:
         """Gets the :py:class:`Game` to which the player belongs."""
-        if self.restriction is not None:
-            return self.restriction
         g = Game()
         g.game = self.player.deref().GetGame()
         return g
@@ -141,8 +112,6 @@ class Player:
 
     @label.setter
     def label(self, value: str) -> None:
-        if self.restriction is not None:
-            raise UndefinedOperationError("Changing objects in a restriction is not supported")
         # check to see if the player's name has been used elsewhere
         if value in [i.label for i in self.game.players]:
             warnings.warn("Another player with an identical label exists")
@@ -163,9 +132,6 @@ class Player:
     @property
     def strategies(self) -> Strategies:
         """Returns the set of strategies belonging to the player."""
-        if self.restriction is not None:
-            ps = PlayerSupportStrategies(self, self.restriction)
-            return ps
         s = Strategies()
         s.player = self.player
         return s
@@ -190,8 +156,3 @@ class Player:
         g = Game()
         g.game = self.player.deref().GetGame()
         return rat_to_py(g.game.deref().GetMaxPayoff(self.number + 1))
-
-    def unrestrict(self):
-        g = Game()
-        g.game = self.player.deref().GetGame()
-        return g.players[self.number]
