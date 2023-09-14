@@ -1,5 +1,12 @@
 # Changelog
 
+## [16.1.0a2] - unreleased
+
+### Changed
+- `pygambit.supports` has been introduced to organise algorithms which operates on sets
+  of pure strategies or actions, such as finding undominated strategies.
+
+
 ## [16.1.0a1] - 2023-09-14
 
 ### Changed

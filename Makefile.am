@@ -255,6 +255,7 @@ EXTRA_DIST = \
 	src/pygambit/pctrace.py \
 	src/pygambit/profiles.py \
 	src/pygambit/qre.py \
+	src/pygambit/supports.py \
 	src/pygambit/games/__init__.py \
 	src/pygambit/games/contest.py \
 	src/pygambit/games/meanstat.py \

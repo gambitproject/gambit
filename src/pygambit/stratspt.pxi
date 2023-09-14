@@ -23,6 +23,8 @@ import cython
 from cython.operator cimport dereference as deref
 from libcpp.memory cimport unique_ptr
 
+from deprecated import deprecated
+
 @cython.cclass
 class StrategySupportProfile(Collection):
     """A set-like object representing a subset of the strategies in game.
@@ -254,6 +256,9 @@ class StrategySupportProfile(Collection):
         restriction.support = new c_StrategySupportProfile(deref(self.support))
         return restriction
 
+    @deprecated(version='16.1.0',
+                reason='Use pygambit.supports.undominated_strategies_solve instead of StrategySupportProfile.',
+                category=FutureWarning)
     def undominated(self, strict=False, external=False) -> StrategySupportProfile:
         """Return a support profile including only strategies which are not dominated
         by another pure strategy.
@@ -264,7 +269,7 @@ class StrategySupportProfile(Collection):
         ----------
         strict : bool, default False
             If specified `True`, eliminate only strategies which are strictly dominated.
-            If `False`, strategies which are weakly dominated are also eliminiated.
+            If `False`, strategies which are weakly dominated are also eliminated.
 
         external : bool, default False
             The default is to consider dominance only by strategies which are in
@@ -276,11 +281,14 @@ class StrategySupportProfile(Collection):
         StrategySupportProfile
             A new support profile containing only the strategies which are not dominated.
         """
-        cdef StrategySupportProfile result
-        result = StrategySupportProfile(list(self), self.game)
-        result.support.reset(new c_StrategySupportProfile(deref(self.support).Undominated(strict, external)))
-        return result
+        return _undominated_strategies_solve(self, strict, external)
 
+def _undominated_strategies_solve(
+        profile: StrategySupportProfile, strict: bool, external: bool
+) -> StrategySupportProfile:
+    result = StrategySupportProfile(list(profile), profile.game)
+    result.support.reset(new c_StrategySupportProfile(deref(profile.support).Undominated(strict, external)))
+    return result
 
 cdef class RestrictionOutcomes(Collection):
     """Represents a collection of outcomes in a restriction."""

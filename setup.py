@@ -98,6 +98,7 @@ setuptools.setup(
         'lxml',  # used for reading/writing GTE files
         'numpy',
         'scipy',
+        'deprecated',
     ],
     libraries=[cppgambit, lrslib],
     package_dir={'': 'src'},
