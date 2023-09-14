@@ -126,12 +126,11 @@ a wxWidgets installation.
 ### pygambit Python extension
 
 Gambit is available as a Python extension module, called `pygambit`.
-Python versions 3.7 through 3.10 inclusive are supported.
 `pygambit` is available via PyPi and `pip`.
 
-If you wish to compile the extension module on your own, then you can
+If you wish to compile the extension module on your own, then you can,
+from the root directory, execute
 
-    cd src
     python setup.py build
     python setup.py install
 

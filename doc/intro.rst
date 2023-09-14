@@ -181,40 +181,14 @@ include:
 Downloading Gambit
 ------------------
 
-Gambit operates on an annual release cycle roughly mirroring the
-(northern hemisphere) academic year.  A new version is promoted to
-stable/teaching each August; the major version number is equal to the
-last two digits of the year in which the version becomes stable.
-
-This document covers Gambit 16.0.2.
-You can download it from
-`Sourceforge
-<http://sourceforge.net/projects/gambit/files/gambit16/16.0.1>`_.
-Full source code is available, as are precompiled binaries for
-Microsoft Windows and Mac OS X.
+Gambit source code and built binaries can be downloaded from the project
+`GitHub repository releases section`<https://github.com/gambitproject/gambit/releases>.
 
 Older versions of Gambit can be downloaded from
 `http://sourceforge.net/projects/gambit/files
 <http://sourceforge.net/projects/gambit/files>`_.  Support for older
 versions is limited.
 
-
-Community
----------
-
-The following mailing lists are available for those interested in the
-use and further development of Gambit:
-
-`gambit-announce@lists.sourceforge.net <http://lists.sourceforge.net/lists/listinfo/gambit-announce>`_
-  Announcement-only mailing list for notifications of new releases of
-  Gambit.
-
-`gambit-users@lists.sourceforge.net <http://lists.sourceforge.net/lists/listinfo/gambit-users>`_
-  General discussion forum for teaching and research users of Gambit.
-
-`gambit-devel@lists.sourceforge.net <http://lists.sourceforge.net/lists/listinfo/gambit-devel>`_
-  Discussion for those interested in devleoping or extending Gambit, 
-  or using Gambit source code in other applications.
 
 Bug reports
 -----------

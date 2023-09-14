@@ -1,5 +1,5 @@
 //
-// This file is part of Gambit Copyright (c) 1994-2022, The Gambit
+// This file is part of Gambit Copyright (c) 1994-2023, The Gambit
 // Project (http://www.gambit-project.org)
 //
 // FILE: src/libgambit/rational.cc

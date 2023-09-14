@@ -1,10 +1,33 @@
-# Gambit
+<h1 style="text-align: center;">
+<img src="https://raw.githubusercontent.com/gambitproject/gambit/master/doc/_static/gambit.png"
+     width="300" alt="Gambit logo">
+</h1>
+<br/>
 
-This is the README file for Gambit, software tools for game theory.
+![Latest development version](https://img.shields.io/github/downloads-pre/gambitproject/gambit/latest/total?label=Latest%20development%20version)
+![PyPI - Version](https://img.shields.io/pypi/v/pygambit?label=PyPI%20version)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/pygambit?label=PyPI%20downloads)
+![PyPI - License](https://img.shields.io/pypi/l/pygambit)
 
-The latest information on Gambit can be obtained from the
-Gambit website at
-http://www.gambit-project.org
 
-Instructions on installing Gambit can be found in the
-file [INSTALL.md](INSTALL.md) in this directory.
+**Gambit** is the package for doing computation in (non-cooperative) game theory.
+
+Gambit provides:
+
+- Structures to represent games in extensive and strategic form
+- Methods for building and modifying games
+- Representations of mixed strategy and mixed behavior profiles
+- Many algorithms for computing one or more Nash equilibria of games
+- Facilities for computing quantal response equilibria and fitting QREs to data
+
+
+## How to get Gambit
+
+Gambit's GitHub repository is at https://github.com/gambitproject/gambit.
+
+Official Gambit releases are available from
+[the releases section of the repository](https://github.com/gambitproject/gambit/releases)
+
+Gambit offers [the Python package `pygambit`](https://pypi.org/project/pygambit/),
+installable via PyPI.
+

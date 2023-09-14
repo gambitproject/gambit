@@ -1,17 +1,26 @@
-## [16.1.0] - Unreleased
+# Changelog
 
-### General
+## [16.1.0a1] - 2023-09-14
+
+### Changed
+- Cython 3.0 is now used for pygambit.
+- Documentation of the pygambit API has been moved into docstrings.
+- Chance action probabilities are now enforced to sum to exactly one at an information
+  set.  This is accomplished by changing the API to set probabilities for all actions
+  simultaneously; it is no longer possible to assign an action probability individually.
+
+### Added
 - Documented support in Python for estimating quantal response equilibria using
   either fixed-point or empirical payoff methods
 
-## [16.0.3] - Unreleased
-
 ### Fixed
+- Corrected reference counting for C++ Game objects which could result in objects
+  never being deallocated (see #331)
+- Corrected Lyapunov function minimisation returning critical points that are
+  not global minima (i.e. not equilibria) (#329)
 - Corrected a regression in accessing contingencies of a game in Python.
-- Removed use of explcit StopIteration (a holdover from Python 2.x support).	
+- Removed use of explicit StopIteration (a holdover from Python 2.x support).
 
-### General
-- C++11 features are now actively used.
 	
 
 ## [16.0.2] - 2022-01-28

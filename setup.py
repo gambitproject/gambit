@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2022, The Gambit Project (http://www.gambit-project.org)
+# Copyright (c) 1994-2023, The Gambit Project (http://www.gambit-project.org)
 #
 # FILE: src/python/setup.py
 # Setuptools configuration file for Gambit Python extension
@@ -70,16 +70,16 @@ def readme():
 setuptools.setup(
     name="pygambit",
     version="16.1.0a1",
-    description="Software tools for game theory",
+    description="Package for computation in game theory",
     long_description=readme(),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Scientific/Engineering :: Mathematics"
     ],
@@ -93,7 +93,7 @@ setuptools.setup(
         'Source': 'https://github.com/gambitproject/gambit',
         'Tracker': 'https://github.com/gambitproject/gambit/issues',
     },
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=[
         'lxml',  # used for reading/writing GTE files
         'numpy',

@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2022, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2023, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/libgambit/pvector.cc
 // Instantiation of partitioned vector types

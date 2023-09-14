@@ -1,6 +1,6 @@
 dnl
 dnl This file is part of Gambit
-dnl Copyright (c) 1994-2022, The Gambit Project (http://www.gambit-project.org)
+dnl Copyright (c) 1994-2023, The Gambit Project (http://www.gambit-project.org)
 dnl
 dnl FILE: configure.ac
 dnl autoconf configuration script for Gambit
