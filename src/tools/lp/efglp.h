@@ -43,5 +43,15 @@ private:
 		       int, Array<T> &, Array<T> &) const;
 };
 
+inline List<MixedBehaviorProfile<double> > LpBehaviorSolveDouble(const Game &p_game)
+{
+  return NashLpBehavSolver<double>().Solve(BehaviorSupportProfile(p_game));
+}
+
+inline List<MixedBehaviorProfile<Rational> > LpBehaviorSolveRational(const Game &p_game)
+{
+  return NashLpBehavSolver<Rational>().Solve(BehaviorSupportProfile(p_game));
+}
+
 
 #endif  // LP_EFGLP_H

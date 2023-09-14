@@ -1,0 +1,14 @@
+EFG 2 R "A simple Poker game" { "Fred" "Alice" }
+"This is a simple game of one-card poker from Myerson (1991)."
+
+c "" 1 "" { "Red" 1/2 "Black" 1/2 } 0
+p "" 1 1 "" { "Raise" "Fold" } 0
+p "" 2 1 "" { "Meet" "Pass" } 0
+t "" 1 "Win Big" { 2, -2 }
+t "" 2 "Win" { 1, -1 }
+t "" 2 "Win" { 1, -1 }
+p "" 1 2 "" { "Raise" "Fold" } 0
+p "" 2 1 "" { "Meet" "Pass" } 0
+t "" 3 "Lose Big" { -2, 2 }
+t "" 2 "Win" { 1, -1 }
+t "" 4 "Lose" { -1, 1 }

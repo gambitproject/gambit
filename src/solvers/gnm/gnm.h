@@ -54,6 +54,10 @@ private:
 						const gametracer::cvector &p_pert);
 };
 
+inline List<MixedStrategyProfile<double> > GNMStrategySolve(const Game &p_game) {
+  return NashGNMStrategySolver().Solve(p_game);
+}
+
 }  // end namespace Gambit::Nash
 }  // end namespace Gambit
 

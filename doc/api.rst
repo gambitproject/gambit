@@ -9,16 +9,6 @@ Representation of games and related concepts
 .. automodule:: pygambit.gambit
    :members:
    :undoc-members:
-   :exclude-members: LCPBehaviorSolverDouble, LCPBehaviorSolverRational,
-                     LCPStrategySolverDouble, LCPStrategySolverRational,
-                     LPBehaviorSolverDouble, LPBehaviorSolverRational,
-                     LPStrategySolverDouble, LPStrategySolverRational,
-                     LiapBehaviorSolver, LiapStrategySolver,
-                     IPAStrategySolver, GNMStrategySolver,
-                     EnumMixedLrsStrategySolver,
-                     EnumMixedStrategySolverDouble, EnumMixedStrategySolverRational,
-                     EnumPureAgentSolver, EnumPureStrategySolver
-
 
 Computation on supports
 -----------------------
@@ -32,7 +22,19 @@ Computation of Nash equilibria
 
 .. automodule:: pygambit.nash
    :members:
+   :exclude-members: ExternalEnumMixedSolver, ExternalEnumPolySolver,
+                     ExternalEnumPureSolver, ExternalGlobalNewtonSolver,
+                     ExternalIteratedPolymatrixSolver, ExternalLCPSolver,
+                     ExternalLPSolver, ExternalLogitSolver,
+                     ExternalLyapunovSolver, ExternalSimpdivSolver,
+                     ExternalSolver
+
+
+Computation of quantal response equilibria
+------------------------------------------
 
 .. automodule:: pygambit.qre
    :members:
+   :exclude-members: ExternalStrategicQREPathTracer,
+                     sym_compute_jac, sym_compute_lhs
 

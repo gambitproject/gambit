@@ -40,6 +40,11 @@ public:
 					    const Array<double> &p_pert) const;
 };
 
+inline List<MixedStrategyProfile<double> > IPAStrategySolve(const Game &p_game)
+{
+  return NashIPAStrategySolver().Solve(p_game);
+}
+
 }  // end namespace Gambit::Nash
 }  // end namespace Gambit
  

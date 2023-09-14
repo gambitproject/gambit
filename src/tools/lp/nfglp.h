@@ -30,7 +30,7 @@ using namespace Gambit::Nash;
 
 template <class T> class NashLpStrategySolver : public StrategySolver<T> {
 public:
-  NashLpStrategySolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
+  NashLpStrategySolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = nullptr)
     : StrategySolver<T>(p_onEquilibrium) { }
   ~NashLpStrategySolver() override = default;
 
@@ -41,5 +41,14 @@ private:
 		       int, Array<T> &, Array<T> &) const;
 };
 
+inline List<MixedStrategyProfile<double> > LpStrategySolveDouble(const Game &p_game)
+{
+  return NashLpStrategySolver<double>().Solve(p_game);
+}
+
+inline List<MixedStrategyProfile<Rational> > LpStrategySolveRational(const Game &p_game)
+{
+  return NashLpStrategySolver<Rational>().Solve(p_game);
+}
 
 #endif // LP_NFGLP_H

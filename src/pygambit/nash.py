@@ -25,7 +25,7 @@ A set of utilities for computing Nash equilibria
 
 import subprocess
 import typing
-from fractions import Fraction
+import warnings
 
 import pygambit.gambit as libgbt
 
@@ -41,6 +41,11 @@ class ExternalSolver:
         input in .efg format (if a tree) or .nfg format (if a table).
         Returns the output of the external program.
         """
+        warnings.warn(
+            "Calling external command-line solvers is deprecated and support "
+            "will be removed in a future version.",
+            FutureWarning
+        )
         p = subprocess.run(
             prog.split() + ["-q"],
             input=game.write(format='native'),
@@ -62,7 +67,7 @@ class ExternalSolver:
                 profile = game.mixed_strategy_profile(rational=rational)
             for (i, p) in enumerate(entries[1:]):
                 if rational:
-                    profile[i] = Fraction(p)
+                    profile[i] = libgbt.Rational(p)
                 else:
                     profile[i] = float(p)
             profiles.append(profile)
@@ -296,10 +301,9 @@ def enumpure_solve(
     if external:
         return ExternalEnumPureSolver().solve(game, use_strategic=True)
     if not game.is_tree or use_strategic:
-        alg = libgbt.EnumPureStrategySolver()
+        return libgbt._enumpure_strategy_solve(game)
     else:
-        alg = libgbt.EnumPureAgentSolver()
-    return alg.solve(game)
+        return libgbt._enumpure_agent_solve(game)
 
 
 def enummixed_solve(
@@ -338,12 +342,11 @@ def enummixed_solve(
     if external:
         return ExternalEnumMixedSolver().solve(game, rational=rational)
     if use_lrs:
-        alg = libgbt.EnumMixedLrsStrategySolver()
+        return libgbt._enummixed_strategy_solve_lrs(game)
     elif rational:
-        alg = libgbt.EnumMixedStrategySolverRational()
+        return libgbt._enummixed_strategy_solve_rational(game)
     else:
-        alg = libgbt.EnumMixedStrategySolverDouble()
-    return alg.solve(game)
+        return libgbt._enummixed_strategy_solve_double(game)
 
 
 def lcp_solve(
@@ -398,15 +401,14 @@ def lcp_solve(
                                          use_strategic=use_strategic)
     if not game.is_tree or use_strategic:
         if rational:
-            alg = libgbt.LCPStrategySolverRational(stop_after, max_depth)
+            return libgbt._lcp_strategy_solve_rational(game, stop_after, max_depth)
         else:
-            alg = libgbt.LCPStrategySolverDouble(stop_after, max_depth)
+            return libgbt._lcp_strategy_solve_double(game, stop_after, max_depth)
     else:
         if rational:
-            alg = libgbt.LCPBehaviorSolverRational(stop_after, max_depth)
+            return libgbt._lcp_behavior_solve_rational(game, stop_after, max_depth)
         else:
-            alg = libgbt.LCPBehaviorSolverDouble(stop_after, max_depth)
-    return alg.solve(game)
+            return libgbt._lcp_behavior_solve_double(game, stop_after, max_depth)
 
 
 def lp_solve(
@@ -449,15 +451,14 @@ def lp_solve(
                                         use_strategic=use_strategic)
     if not game.is_tree or use_strategic:
         if rational:
-            alg = libgbt.LPStrategySolverRational()
+            return libgbt._lp_strategy_solve_rational(game)
         else:
-            alg = libgbt.LPStrategySolverDouble()
+            return libgbt._lp_strategy_solve_double(game)
     else:
         if rational:
-            alg = libgbt.LPBehaviorSolverRational()
+            return libgbt._lp_behavior_solve_rational(game)
         else:
-            alg = libgbt.LPBehaviorSolverDouble()
-    return alg.solve(game)
+            return libgbt._lp_behavior_solve_double(game)
 
 
 def liap_solve(
@@ -492,10 +493,9 @@ def liap_solve(
     if external:
         return ExternalLyapunovSolver().solve(game, use_strategic=True)
     if not game.is_tree or use_strategic:
-        alg = libgbt.LiapStrategySolver(maxiter=maxiter)
+        return libgbt._liap_strategy_solve(game, maxiter=maxiter)
     else:
-        alg = libgbt.LiapBehaviorSolver(maxiter=maxiter)
-    return alg.solve(game)
+        return libgbt._liap_behavior_solve(game, maxiter=maxiter)
 
 
 def simpdiv_solve(
@@ -521,8 +521,7 @@ def simpdiv_solve(
     """
     if external:
         return ExternalSimpdivSolver().solve(game)
-    alg = libgbt.SimpdivStrategySolver()
-    return alg.solve(game)
+    return libgbt._simpdiv_strategy_solve(game)
 
 
 def ipa_solve(
@@ -548,8 +547,7 @@ def ipa_solve(
     """
     if external:
         return ExternalIteratedPolymatrixSolver().solve(game)
-    alg = libgbt.IPAStrategySolver()
-    return alg.solve(game)
+    return libgbt._ipa_strategy_solve(game)
 
 
 def gnm_solve(
@@ -575,8 +573,7 @@ def gnm_solve(
     """
     if external:
         return ExternalGlobalNewtonSolver().solve(game)
-    alg = libgbt.GNMStrategySolver()
-    return alg.solve(game)
+    return libgbt._gnm_strategy_solve(game)
 
 
 logit_atlambda = libgbt.logit_atlambda

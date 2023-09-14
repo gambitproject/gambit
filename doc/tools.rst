@@ -585,6 +585,8 @@ strategies each, with a unique equilibrium in mixed strategies::
    NE,1/3,2/3,1/3,2/3
 
 
+.. _gambit-liap:
+
 :program:`gambit-liap`: Compute Nash equilibria using function minimization
 ---------------------------------------------------------------------------
 
@@ -740,6 +742,8 @@ Computing an equilibrium in mixed strategies of :download:`e02.efg
 
    NE,1,0,0,1,0
 
+
+.. _gambit-logit:
 
 :program:`gambit-logit`: Compute quantal response equilbria
 -----------------------------------------------------------

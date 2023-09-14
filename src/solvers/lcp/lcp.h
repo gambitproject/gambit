@@ -53,7 +53,19 @@ private:
   void AllLemke(const Game &, int j, linalg::LHTableau<T> &, Solution &, int) const;
 };
 
- 
+inline List<MixedStrategyProfile<double> >
+LcpStrategySolveDouble(const Game &p_game, int p_stopAfter, int p_maxDepth)
+{
+  return NashLcpStrategySolver<double>(p_stopAfter, p_maxDepth).Solve(p_game);
+}
+
+inline List<MixedStrategyProfile<Rational> >
+LcpStrategySolveRational(const Game &p_game, int p_stopAfter, int p_maxDepth)
+{
+  return NashLcpStrategySolver<Rational>(p_stopAfter, p_maxDepth).Solve(p_game);
+}
+
+
 template <class T> class NashLcpBehaviorSolver : public BehavSolver<T> {
 public:
   NashLcpBehaviorSolver(int p_stopAfter, int p_maxDepth,
@@ -78,6 +90,18 @@ private:
 		  const GameNode &n, int, int,
 		  Solution &) const;
 };
+
+inline List<MixedBehaviorProfile<double> >
+LcpBehaviorSolveDouble(const Game &p_game, int p_stopAfter, int p_maxDepth)
+{
+  return NashLcpBehaviorSolver<double>(p_stopAfter, p_maxDepth).Solve(BehaviorSupportProfile(p_game));
+}
+
+inline List<MixedBehaviorProfile<Rational> >
+LcpBehaviorSolveRational(const Game &p_game, int p_stopAfter, int p_maxDepth)
+{
+  return NashLcpBehaviorSolver<Rational>(p_stopAfter, p_maxDepth).Solve(BehaviorSupportProfile(p_game));
+}
 
 }  // end namespace Nash
 }  // end namespace Gambit

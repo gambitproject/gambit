@@ -58,6 +58,11 @@ EnumPureStrategySolver::Solve(const Game &p_game) const
   return solutions;
 }
 
+inline List<MixedStrategyProfile<Rational> > EnumPureStrategySolve(const Game &p_game)
+{
+  return EnumPureStrategySolver().Solve(p_game);
+}
+
 ///
 /// Enumerate pure-strategy agent Nash equilibria of a game.  This uses
 /// the extensive representation.  Agent Nash equilibria are not necessarily
@@ -86,6 +91,11 @@ EnumPureAgentSolver::Solve(const BehaviorSupportProfile &p_support) const
     }
   }
   return solutions;
+}
+
+inline List<MixedBehaviorProfile<Rational> > EnumPureAgentSolve(const Game &p_game)
+{
+  return EnumPureAgentSolver().Solve(BehaviorSupportProfile(p_game));
 }
 
 }  // end namespace Nash
