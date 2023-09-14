@@ -244,7 +244,7 @@ EXTRA_DIST = \
 	contrib/games/winkels.nfg \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
-	src/setup.py \
+	setup.py \
 	src/README.rst \
 	src/pygambit/__init__.py \
 	src/pygambit/enumeration.py \
@@ -259,23 +259,23 @@ EXTRA_DIST = \
 	src/pygambit/games/contest.py \
 	src/pygambit/games/meanstat.py \
 	src/pygambit/games/public.py \
-	src/pygambit/lib/__init__.py \
-	src/pygambit/lib/action.pxi \
-	src/pygambit/lib/basegame.pxi \
-	src/pygambit/lib/behav.pxi \
-	src/pygambit/lib/error.py \
-	src/pygambit/lib/game.pxi \
-	src/pygambit/lib/infoset.pxi \
-	src/pygambit/lib/libgambit.pyx \
-	src/pygambit/lib/mixed.pxi \
-	src/pygambit/lib/nash.pxi \
-	src/pygambit/lib/node.pxi \
-	src/pygambit/lib/outcome.pxi \
-	src/pygambit/lib/player.pxi \
-	src/pygambit/lib/strategy.pxi \
-	src/pygambit/lib/stratspt.pxi \
-        src/pygambit/lib/nash.h \
-	src/pygambit/lib/util.h \
+	src/pygambit/__init__.py \
+	src/pygambit/action.pxi \
+	src/pygambit/behav.pxi \
+	src/pygambit/error.py \
+	src/pygambit/game.pxi \
+	src/pygambit/infoset.pxi \
+	src/pygambit/gambit.pxd \
+	src/pygambit/gambit.pyx \
+	src/pygambit/mixed.pxi \
+	src/pygambit/nash.pxi \
+	src/pygambit/node.pxi \
+	src/pygambit/outcome.pxi \
+	src/pygambit/player.pxi \
+	src/pygambit/strategy.pxi \
+	src/pygambit/stratspt.pxi \
+    src/pygambit/nash.h \
+	src/pygambit/util.h \
 	src/pygambit/tests/test_actions.py \
 	src/pygambit/tests/test_behav.py \
 	src/pygambit/tests/test_extensive.py \
