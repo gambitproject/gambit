@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'
+  schedule:
+    - cron: '0 6 * * 4'
 
 jobs:
   windows:
@@ -11,20 +13,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.x'
       - name: Set up dependencies
         run: |
           python -m pip install --upgrade pip
           pip install cython nose2 wheel lxml numpy scipy cibuildwheel
       - name: Build wheels
         run: |
-          cd src
           python -m cibuildwheel --output-dir wheelhouse/
         env:
           CIBW_SKIP: "pp*"
       - uses: actions/upload-artifact@v3
         with:
-          path: ./src/wheelhouse/*.whl
+          path: ./wheelhouse/*.whl
