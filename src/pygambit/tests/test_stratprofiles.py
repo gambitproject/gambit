@@ -115,10 +115,10 @@ class TestGambitStrategySupportProfile(unittest.TestCase):
     def test_undominated(self):
         """Test removing undominated strategies from the support profile"""
         new_profile = self.support_profile
-        loop_profile = new_profile.undominated()
+        loop_profile = pygambit.supports.undominated_strategies_solve(new_profile)
         while loop_profile != new_profile:
             new_profile = loop_profile
-            loop_profile = new_profile.undominated()
+            loop_profile = pygambit.supports.undominated_strategies_solve(new_profile)
         assert len(loop_profile) == 2
         assert loop_profile == pygambit.StrategySupportProfile(
             [self.support_profile[0], self.support_profile[3]], self.game)

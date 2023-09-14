@@ -23,6 +23,7 @@
 from .gambit import *  # noqa: F401,F403
 
 from . import nash  # noqa: F401
+from . import supports  # noqa: F401
 from . import gte   # noqa: F401
 from . import qre   # noqa: F401
 

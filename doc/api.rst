@@ -20,6 +20,12 @@ Representation of games and related concepts
                      EnumPureAgentSolver, EnumPureStrategySolver
 
 
+Computation on supports
+-----------------------
+
+.. automodule:: pygambit.supports
+   :members:
+
 
 Computation of Nash equilibria
 ------------------------------
