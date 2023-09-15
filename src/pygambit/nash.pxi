@@ -173,7 +173,7 @@ class LogitQREMixedStrategyProfile:
     def profile(self) -> MixedStrategyProfileDouble:
         """The mixed strategy profile."""
         profile = MixedStrategyProfileDouble()
-        profile.profile = new c_MixedStrategyProfileDouble(deref(self.thisptr).GetProfile())
+        profile.profile = make_shared[c_MixedStrategyProfileDouble](deref(self.thisptr).GetProfile())
         return profile
 
 def logit_estimate(profile: MixedStrategyProfileDouble) -> LogitQREMixedStrategyProfile:

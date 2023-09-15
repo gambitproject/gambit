@@ -23,7 +23,8 @@ import functools
 
 from cython.operator cimport dereference as deref
 
-cdef class MixedBehaviorProfile:
+@cython.cclass
+class MixedBehaviorProfile:
     """A behavior strategy profile over the actions in a game."""
     def __repr__(self):
         return str([ self[player] for player in self.game.players ])
@@ -118,7 +119,7 @@ cdef class MixedBehaviorProfile:
         elif isinstance(index, Action):
             return self._getaction(index)
         elif isinstance(index, Infoset):
-            class MixedBehavInfoset(object):
+            class MixedBehavInfoset:
                 def __init__(self, profile, infoset):
                     self.profile = profile
                     self.infoset = infoset
@@ -139,7 +140,7 @@ cdef class MixedBehaviorProfile:
                     self.profile[self.infoset.actions[index]] = value
             return MixedBehavInfoset(self, index)
         elif isinstance(index, Player):
-            class MixedBehav(object):
+            class MixedBehav:
                 def __init__(self, profile, player):
                     self.profile = profile
                     self.player = player
@@ -265,54 +266,62 @@ cdef class MixedBehaviorProfile:
                             action.__class__.__name__)
         return self._regret(action)    
 
-cdef class MixedBehaviorProfileDouble(MixedBehaviorProfile):
-    cdef c_MixedBehaviorProfileDouble *profile
 
-    def __dealloc__(self):
-        del self.profile
+@cython.cclass
+class MixedBehaviorProfileDouble(MixedBehaviorProfile):
+    profile = cython.declare(shared_ptr[c_MixedBehaviorProfileDouble])
 
     def __len__(self):
-        return self.profile.Length()
+        return deref(self.profile).Length()
 
-    def _is_defined_at(self, Infoset infoset):
-        return self.profile.IsDefinedAt(infoset.infoset)
-    def _getprob(self, int index):
-        return self.profile.getitem(index)
-    def _getaction(self, Action index):
-        return self.profile.getaction(index.action)
-    def _setprob(self, int index, value):
-        setitem_mbpd_int(self.profile, index, value)
-    def _setaction(self, Action index, value):
-        setitem_mbpd_action(self.profile, index.action, value)
-    def _payoff(self, Player player):
-        return self.profile.GetPayoff(player.player.deref().GetNumber())
-    def _belief(self, Node node):
-        return self.profile.GetBeliefProb(node.node)
-    def _infoset_prob(self, Infoset infoset):
-        return self.profile.GetRealizProb(infoset.infoset)
-    def _infoset_payoff(self, Infoset infoset):
-        return self.profile.GetPayoff(infoset.infoset)
-    def _action_prob(self, Action action):
-        return self.profile.GetActionProb(action.action)
-    def _action_payoff(self, Action action):
-        return self.profile.GetPayoff(action.action)
-    def _regret(self, Action action):
-        return self.profile.GetRegret(action.action)
+    def _is_defined_at(self, infoset: Infoset):
+        return deref(self.profile).IsDefinedAt(infoset.infoset)
+
+    def _getprob(self, index: int):
+        return deref(self.profile).getitem(index)
+
+    def _getaction(self, index: Action):
+        return deref(self.profile).getaction(index.action)
+
+    def _setprob(self, index: int, value):
+        setitem_mbpd_int(deref(self.profile), index, value)
+
+    def _setaction(self, index: Action, value):
+        setitem_mbpd_action(deref(self.profile), index.action, value)
+
+    def _payoff(self, player: Player):
+        return deref(self.profile).GetPayoff(player.player.deref().GetNumber())
+
+    def _belief(self, node: Node):
+        return deref(self.profile).GetBeliefProb(node.node)
+
+    def _infoset_prob(self, infoset: Infoset):
+        return deref(self.profile).GetRealizProb(infoset.infoset)
+
+    def _infoset_payoff(self, infoset: Infoset):
+        return deref(self.profile).GetPayoff(infoset.infoset)
+
+    def _action_prob(self, action: Action):
+        return deref(self.profile).GetActionProb(action.action)
+
+    def _action_payoff(self, action: Action):
+        return deref(self.profile).GetPayoff(action.action)
+
+    def _regret(self, action: Action):
+        return deref(self.profile).GetRegret(action.action)
 
     def copy(self) -> MixedBehaviorProfileDouble:
         """Creates a copy of the behavior strategy profile."""
-        cdef MixedBehaviorProfileDouble behav
         behav = MixedBehaviorProfileDouble()
-        behav.profile = new c_MixedBehaviorProfileDouble(deref(self.profile))
+        behav.profile = make_shared[c_MixedBehaviorProfileDouble](deref(self.profile))
         return behav
 
     def as_strategy(self) -> MixedStrategyProfileDouble:
         """Returns a `MixedStrategyProfile` which is equivalent
         to the profile.
         """
-        cdef MixedStrategyProfileDouble mixed
         mixed = MixedStrategyProfileDouble()
-        mixed.profile = new c_MixedStrategyProfileDouble(deref(self.profile).ToMixedProfile())
+        mixed.profile = make_shared[c_MixedStrategyProfileDouble](deref(self.profile).ToMixedProfile())
         return mixed
 
     def liap_value(self) -> float:
@@ -320,17 +329,17 @@ cdef class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         Lyapunov value is a non-negative number which is zero exactly at
         Nash equilibria.
         """
-        return self.profile.GetLiapValue()
+        return deref(self.profile).GetLiapValue()
 
     def set_centroid(self):
-        self.profile.SetCentroid()
+        deref(self.profile).SetCentroid()
 
     def normalize(self) -> MixedBehaviorProfileDouble:
         """Create a profile with the same action proportions as this
         one, but normalised so probabilities for each infoset sum to one.
         """
         profile = MixedBehaviorProfileDouble()
-        profile.profile = new c_MixedBehaviorProfileDouble(self.profile.Normalize())
+        profile.profile = make_shared[c_MixedBehaviorProfileDouble](deref(self.profile).Normalize())
         return profile
     
     def randomize(self, denom=None):
@@ -342,75 +351,81 @@ cdef class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         grid of mixed strategies.
         """
         if denom is None:
-            self.profile.Randomize()
+            deref(self.profile).Randomize()
         else:
-            self.profile.Randomize(denom)
+            deref(self.profile).Randomize(denom)
 
     @property
     def game(self) -> Game:
         """The game on which this mixed behaviour profile is defined.
         """
-        cdef Game g
         g = Game()
-        g.game = self.profile.GetGame()
+        g.game = deref(self.profile).GetGame()
         return g
 
 
-cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
-    cdef c_MixedBehaviorProfileRational *profile
-
-    def __dealloc__(self):
-        del self.profile
+@cython.cclass
+class MixedBehaviorProfileRational(MixedBehaviorProfile):
+    profile = cython.declare(shared_ptr[c_MixedBehaviorProfileRational])
 
     def __len__(self):
-        return self.profile.Length()
+        return deref(self.profile).Length()
 
     def _is_defined_at(self, Infoset infoset):
-        return self.profile.IsDefinedAt(infoset.infoset)
+        return deref(self.profile).IsDefinedAt(infoset.infoset)
+
     def _getprob(self, int index):
-        return rat_to_py(self.profile.getitem(index))
+        return rat_to_py(deref(self.profile).getitem(index))
+
     def _getaction(self, Action index):
-        return rat_to_py(self.profile.getaction(index.action))
+        return rat_to_py(deref(self.profile).getaction(index.action))
+
     def _setprob(self, int index, value):
         if not isinstance(value, (int, fractions.Fraction)):
             raise TypeError("rational precision profile requires int or Fraction probability, not %s" %
                             value.__class__.__name__)
-        setitem_mbpr_int(self.profile, index, to_rational(str(value).encode('ascii')))
+        setitem_mbpr_int(deref(self.profile), index, to_rational(str(value).encode('ascii')))
+
     def _setaction(self, Action index, value):
         if not isinstance(value, (int, fractions.Fraction)):
             raise TypeError("rational precision profile requires int or Fraction probability, not %s" %
                             value.__class__.__name__)
-        setitem_mbpr_action(self.profile, index.action,
+        setitem_mbpr_action(deref(self.profile), index.action,
                             to_rational(str(value).encode('ascii')))
+
     def _payoff(self, Player player):
-        return rat_to_py(self.profile.GetPayoff(player.player.deref().GetNumber()))
+        return rat_to_py(deref(self.profile).GetPayoff(player.player.deref().GetNumber()))
+
     def _belief(self, Node node):
-        return rat_to_py(self.profile.GetBeliefProb(node.node))
+        return rat_to_py(deref(self.profile).GetBeliefProb(node.node))
+
     def _infoset_prob(self, Infoset infoset):
-        return rat_to_py(self.profile.GetRealizProb(infoset.infoset))
+        return rat_to_py(deref(self.profile).GetRealizProb(infoset.infoset))
+
     def _infoset_payoff(self, Infoset infoset):
-        return rat_to_py(self.profile.GetPayoff(infoset.infoset))
+        return rat_to_py(deref(self.profile).GetPayoff(infoset.infoset))
+
     def _action_prob(self, Action action):
-        return rat_to_py(self.profile.GetActionProb(action.action))
+        return rat_to_py(deref(self.profile).GetActionProb(action.action))
+
     def _action_payoff(self, Action action):
-        return rat_to_py(self.profile.GetPayoff(action.action))
+        return rat_to_py(deref(self.profile).GetPayoff(action.action))
+
     def _regret(self, Action action):
-        return rat_to_py(self.profile.GetRegret(action.action))
+        return rat_to_py(deref(self.profile).GetRegret(action.action))
     
     def copy(self) -> MixedBehaviorProfileRational:
         """Creates a copy of the behavior strategy profile."""
-        cdef MixedBehaviorProfileRational behav
         behav = MixedBehaviorProfileRational()
-        behav.profile = new c_MixedBehaviorProfileRational(deref(self.profile))
+        behav.profile = make_shared[c_MixedBehaviorProfileRational](deref(self.profile))
         return behav
 
     def as_strategy(self) -> MixedStrategyProfileRational:
         """Returns a `MixedStrategyProfile` which is equivalent
         to the profile.
         """
-        cdef MixedStrategyProfileRational mixed
         mixed = MixedStrategyProfileRational()
-        mixed.profile = new c_MixedStrategyProfileRational(deref(self.profile).ToMixedProfile())
+        mixed.profile = make_shared[c_MixedStrategyProfileRational](deref(self.profile).ToMixedProfile())
         return mixed
 
     def liap_value(self) -> Rational:
@@ -418,17 +433,17 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
         Lyapunov value is a non-negative number which is zero exactly at
         Nash equilibria.
         """
-        return rat_to_py(self.profile.GetLiapValue())
+        return rat_to_py(deref(self.profile).GetLiapValue())
 
     def set_centroid(self):
-        self.profile.SetCentroid()
+        deref(self.profile).SetCentroid()
 
     def normalize(self) -> MixedBehaviorProfileRational:
         """Create a profile with the same action proportions as this
         one, but normalised so probabilites for each infoset sum to one.
         """
         profile = MixedBehaviorProfileRational()
-        profile.profile = new c_MixedBehaviorProfileRational(self.profile.Normalize())
+        profile.profile = make_shared[c_MixedBehaviorProfileRational](deref(self.profile).Normalize())
         return profile
 
     def randomize(self, denom):
@@ -436,13 +451,12 @@ cdef class MixedBehaviorProfileRational(MixedBehaviorProfile):
         generated as uniform distributions over the actions at each
         information set.
         """
-        self.profile.Randomize(denom)
+        deref(self.profile).Randomize(denom)
 
     @property
     def game(self) -> Game:
         """The game on which this mixed behaviour profile is defined.
         """
-        cdef Game g
         g = Game()
-        g.game = self.profile.GetGame()
+        g.game = deref(self.profile).GetGame()
         return g

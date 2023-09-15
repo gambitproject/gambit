@@ -492,9 +492,9 @@ cdef class StrategicRestriction:
         cdef c_Rational dummy_rat
         if not rational:
             mspd = MixedStrategyProfileDouble()
-            mspd.profile = new c_MixedStrategyProfileDouble(deref(self.support).NewMixedStrategyProfileDouble())
+            mspd.profile = make_shared[c_MixedStrategyProfileDouble](deref(self.support).NewMixedStrategyProfileDouble())
             return mspd
         else:
             mspr = MixedStrategyProfileRational()
-            mspr.profile = new c_MixedStrategyProfileRational(deref(self.support).NewMixedStrategyProfileRational())
+            mspr.profile = make_shared[c_MixedStrategyProfileRational](deref(self.support).NewMixedStrategyProfileRational())
             return mspr

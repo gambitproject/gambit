@@ -32,7 +32,7 @@ public:
 };
 
 std::shared_ptr<LogitQREMixedStrategyProfile>
-logit_estimate(MixedStrategyProfile<double> *p_frequencies)
+logit_estimate(std::shared_ptr<MixedStrategyProfile<double>> p_frequencies)
 {
   LogitQREMixedStrategyProfile start(p_frequencies->GetGame());
   StrategicQREEstimator alg;

@@ -349,24 +349,24 @@ cdef extern from "util.h":
      void setitem_array_int "setitem"(Array[int] *, int, int)
      void setitem_array_number "setitem"(Array[c_Number], int, c_Number)
 
-     void setitem_mspd_int "setitem"(c_MixedStrategyProfileDouble *, int, double)
-     void setitem_mspd_strategy "setitem"(c_MixedStrategyProfileDouble *,
+     void setitem_mspd_int "setitem"(c_MixedStrategyProfileDouble, int, double)
+     void setitem_mspd_strategy "setitem"(c_MixedStrategyProfileDouble,
                                           c_GameStrategy, double)
-     void setitem_mspr_int "setitem"(c_MixedStrategyProfileRational *, int, c_Rational)
-     void setitem_mspr_strategy "setitem"(c_MixedStrategyProfileRational *,
+     void setitem_mspr_int "setitem"(c_MixedStrategyProfileRational, int, c_Rational)
+     void setitem_mspr_strategy "setitem"(c_MixedStrategyProfileRational,
                                           c_GameStrategy, c_Rational)
 
-     void setitem_mbpd_int "setitem"(c_MixedBehaviorProfileDouble *, int, double)
-     void setitem_mbpd_action "setitem"(c_MixedBehaviorProfileDouble *,
+     void setitem_mbpd_int "setitem"(c_MixedBehaviorProfileDouble, int, double)
+     void setitem_mbpd_action "setitem"(c_MixedBehaviorProfileDouble,
                                         c_GameAction, double)
-     void setitem_mbpr_int "setitem"(c_MixedBehaviorProfileRational *, int, c_Rational)
-     void setitem_mbpr_action "setitem"(c_MixedBehaviorProfileRational *,
+     void setitem_mbpr_int "setitem"(c_MixedBehaviorProfileRational, int, c_Rational)
+     void setitem_mbpr_action "setitem"(c_MixedBehaviorProfileRational,
                                         c_GameAction, c_Rational)
 
-     c_MixedStrategyProfileDouble *copyitem_list_mspd "copyitem"(c_List[c_MixedStrategyProfileDouble], int)
-     c_MixedStrategyProfileRational *copyitem_list_mspr "copyitem"(c_List[c_MixedStrategyProfileRational], int)
-     c_MixedBehaviorProfileDouble *copyitem_list_mbpd "copyitem"(c_List[c_MixedBehaviorProfileDouble], int)
-     c_MixedBehaviorProfileRational *copyitem_list_mbpr "copyitem"(c_List[c_MixedBehaviorProfileRational], int)
+     shared_ptr[c_MixedStrategyProfileDouble] copyitem_list_mspd "sharedcopyitem"(c_List[c_MixedStrategyProfileDouble], int)
+     shared_ptr[c_MixedStrategyProfileRational] copyitem_list_mspr "sharedcopyitem"(c_List[c_MixedStrategyProfileRational], int)
+     shared_ptr[c_MixedBehaviorProfileDouble] copyitem_list_mbpd "sharedcopyitem"(c_List[c_MixedBehaviorProfileDouble], int)
+     shared_ptr[c_MixedBehaviorProfileRational] copyitem_list_mbpr "sharedcopyitem"(c_List[c_MixedBehaviorProfileRational], int)
      shared_ptr[c_LogitQREMixedStrategyProfile] copyitem_list_qrem "sharedcopyitem"(c_List[c_LogitQREMixedStrategyProfile], int)
 
 
@@ -426,7 +426,7 @@ cdef extern from "tools/logit/nfglogit.h":
                                                   double, double, double) except +RuntimeError
 
 cdef extern from "nash.h":
-    shared_ptr[c_LogitQREMixedStrategyProfile] _logit_estimate "logit_estimate"(c_MixedStrategyProfileDouble *)
+    shared_ptr[c_LogitQREMixedStrategyProfile] _logit_estimate "logit_estimate"(shared_ptr[c_MixedStrategyProfileDouble])
     shared_ptr[c_LogitQREMixedStrategyProfile] _logit_atlambda "logit_atlambda"(c_Game, double)
     c_List[c_LogitQREMixedStrategyProfile] _logit_principal_branch "logit_principal_branch"(c_Game, double)
 

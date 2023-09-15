@@ -606,7 +606,7 @@ class Game:
             )
         if not rational:
             mspd = MixedStrategyProfileDouble()
-            mspd.profile = new c_MixedStrategyProfileDouble(
+            mspd.profile = make_shared[c_MixedStrategyProfileDouble](
                 self.game.deref().NewMixedStrategyProfile(0.0)
             )
             if data is None:
@@ -626,7 +626,7 @@ class Game:
             return mspd
         else:
             mspr = MixedStrategyProfileRational()
-            mspr.profile = new c_MixedStrategyProfileRational(
+            mspr.profile = make_shared[c_MixedStrategyProfileRational](
                 self.game.deref().NewMixedStrategyProfile(c_Rational())
             )
             if data is None:
@@ -664,11 +664,11 @@ class Game:
         if self.is_tree:
             if not rational:
                 mbpd = MixedBehaviorProfileDouble()
-                mbpd.profile = new c_MixedBehaviorProfileDouble(self.game)
+                mbpd.profile = make_shared[c_MixedBehaviorProfileDouble](self.game)
                 return mbpd
             else:
                 mbpr = MixedBehaviorProfileRational()
-                mbpr.profile = new c_MixedBehaviorProfileRational(self.game)
+                mbpr.profile = make_shared[c_MixedBehaviorProfileRational](self.game)
                 return mbpr
         else:
             raise UndefinedOperationError(
