@@ -20,7 +20,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-from .gambit import * # noqa: F401,F403
+from .gambit import *  # noqa: F401,F403
 
 from . import nash  # noqa: F401
 from . import supports  # noqa: F401

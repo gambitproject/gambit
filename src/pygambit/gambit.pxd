@@ -237,11 +237,9 @@ cdef extern from "games/mixed.h":
           c_Game GetGame()
           int MixedProfileLength()
           c_StrategySupportProfile GetSupport()
-          void SetCentroid()
           c_MixedStrategyProfileDouble Normalize()
           void Randomize() except +TypeError
           void Randomize(int)
-          double getitem "operator[]"(int) except +IndexError
           double getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
           double GetPayoff(c_GamePlayer)
           double GetPayoff(c_GameStrategy)
@@ -256,11 +254,9 @@ cdef extern from "games/mixed.h":
           c_Game GetGame()
           int MixedProfileLength()
           c_StrategySupportProfile GetSupport()
-          void SetCentroid()
           c_MixedStrategyProfileRational Normalize()
           void Randomize()
           void Randomize(int)
-          c_Rational getitem "operator[]"(int) except +IndexError
           c_Rational getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
           c_Rational GetPayoff(c_GamePlayer)
           c_Rational GetPayoff(c_GameStrategy)
@@ -276,7 +272,6 @@ cdef extern from "games/behav.h":
           c_Game GetGame()
           int Length()
           bool IsDefinedAt(c_GameInfoset)
-          void SetCentroid()
           c_MixedBehaviorProfileDouble Normalize()
           void Randomize() except +TypeError
           void Randomize(int)
@@ -286,7 +281,6 @@ cdef extern from "games/behav.h":
           double GetBeliefProb(c_GameNode)
           double GetRealizProb(c_GameInfoset)
           double GetPayoff(c_GameInfoset)
-          double GetActionProb(c_GameAction)
           double GetPayoff(c_GameAction)
           double GetRegret(c_GameAction)
           double GetLiapValue()
@@ -301,7 +295,6 @@ cdef extern from "games/behav.h":
           c_Game GetGame()
           int Length()
           bool IsDefinedAt(c_GameInfoset)
-          void SetCentroid()
           c_MixedBehaviorProfileRational Normalize()
           void Randomize()
           void Randomize(int)
@@ -311,7 +304,6 @@ cdef extern from "games/behav.h":
           c_Rational GetBeliefProb(c_GameNode)
           c_Rational GetRealizProb(c_GameInfoset)
           c_Rational GetPayoff(c_GameInfoset)
-          c_Rational GetActionProb(c_GameAction)
           c_Rational GetPayoff(c_GameAction)
           c_Rational GetRegret(c_GameAction)
           c_Rational GetLiapValue()

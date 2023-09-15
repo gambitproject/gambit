@@ -19,12 +19,10 @@ class TestNash(unittest.TestCase):
                   [gbt.Rational(2, 3), gbt.Rational(1, 3)]]
         )
         self.behav_rat = self.poker.mixed_behavior_profile(rational=True)
-        self.behav_rat[0] = gbt.Rational(1)
-        self.behav_rat[1] = gbt.Rational(0)
-        self.behav_rat[2] = gbt.Rational(1, 3)
-        self.behav_rat[3] = gbt.Rational(2, 3)
-        self.behav_rat[4] = gbt.Rational(2, 3)
-        self.behav_rat[5] = gbt.Rational(1, 3)
+        for action, prob in zip(self.poker.actions,
+                                [1, 0, gbt.Rational(1, 3), gbt.Rational(2, 3),
+                                 gbt.Rational(2, 3), gbt.Rational(1, 3)]):
+            self.behav_rat[action] = prob
 
     def tearDown(self):
         del self.poker

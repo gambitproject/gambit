@@ -5,6 +5,11 @@
 ### Changed
 - `pygambit.supports` has been introduced to organise algorithms which operates on sets
   of pure strategies or actions, such as finding undominated strategies.
+- `.payoff()` on mixed strategy and mixed behavior profiles now takes either a Player or string label.
+  `.infoset_value()` and `.action_value()` have been introduced to replace calling `.payoff()` on
+  these objects.
+- The implementation of mixed strategy profiles and mixed behavior profiles has been thoroughly rewritten
+  for improved consistency in behavior across members and between the two types of profile.
 - The experimental concept of a `StrategicRestriction` has been removed from `pygambit`.
   Instead, calling `restrict` on a `StrategySupportProfile` creates a deep copy of its
   game with only the strategies specified.

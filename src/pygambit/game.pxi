@@ -715,3 +715,131 @@ class Game:
             return pygambit.gte.write_game(self)
         else:
             return WriteGame(self.game, format.encode('ascii')).decode('ascii')
+
+    def _resolve_player(self, player: typing.Any, funcname: str, argname: str = "player") -> Player:
+        """Resolve an attempt to reference a player of the game.
+
+        Parameters
+        ----------
+        player : Any
+            An object to resolve as a reference to a player.
+        funcname : str
+            The name of the function to raise any exception on behalf of.
+        argname : str, default 'player'
+            The name of the argument being checked
+
+        Raises
+        ------
+        MismatchError
+            If `player` is a `Player` from a different game.
+        KeyError
+            If `player` is a string and no player in the game has that label.
+        TypeError
+            If `player` is not a `Player` or a `str`
+        """
+        if isinstance(player, Player):
+            if player.game != self:
+                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
+            return player
+        elif isinstance(player, str):
+            try:
+                return self.players[player]
+            except IndexError:
+                raise KeyError(f"{funcname}(): no player with label '{player}'")
+        raise TypeError(f"{funcname}(): {argname} must be Player or str, not {player.__class__.__name__}")
+
+    def _resolve_strategy(self, strategy: typing.Any, funcname: str, argname: str = "strategy") -> Strategy:
+        """Resolve an attempt to reference a strategy of the game.
+
+        Parameters
+        ----------
+        strategy : Any
+            An object to resolve as a reference to a strategy.
+        funcname : str
+            The name of the function to raise any exception on behalf of.
+        argname : str, default 'strategy'
+            The name of the argument being checked
+
+        Raises
+        ------
+        MismatchError
+            If `strategy` is a `Strategy` from a different game.
+        KeyError
+            If `strategy` is a string and no strategy in the game has that label.
+        TypeError
+            If `strategy` is not a `Strategy` or a `str`
+        """
+        if isinstance(strategy, Strategy):
+            if strategy.game != self:
+                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
+            return strategy
+        elif isinstance(strategy, str):
+            try:
+                return self.strategies[strategy]
+            except IndexError:
+                raise KeyError(f"{funcname}(): no strategy with label '{strategy}'")
+        raise TypeError(f"{funcname}(): {argname} must be Strategy or str, not {strategy.__class__.__name__}")
+
+    def _resolve_infoset(self, infoset: typing.Any, funcname: str, argname: str = "infoset") -> Infoset:
+        """Resolve an attempt to reference an information set of the game.
+
+        Parameters
+        ----------
+        infoset : Any
+            An object to resolve as a reference to an information set.
+        funcname : str
+            The name of the function to raise any exception on behalf of.
+        argname : str, default 'infoset'
+            The name of the argument being checked
+
+        Raises
+        ------
+        MismatchError
+            If `infoset` is an `Infoset` from a different game.
+        KeyError
+            If `infoset` is a string and no information set in the game has that label.
+        TypeError
+            If `infoset` is not an `Infoset` or a `str`
+        """
+        if isinstance(infoset, Infoset):
+            if infoset.game != self:
+                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
+            return infoset
+        elif isinstance(infoset, str):
+            try:
+                return self.infosets[infoset]
+            except IndexError:
+                raise KeyError(f"{funcname}(): no information set with label '{infoset}'")
+        raise TypeError(f"{funcname}(): {argname} must be Infoset or str, not {infoset.__class__.__name__}")
+
+    def _resolve_action(self, action: typing.Any, funcname: str, argname: str = "action") -> Action:
+        """Resolve an attempt to reference an action of the game.
+
+        Parameters
+        ----------
+        action : Any
+            An object to resolve as a reference to an action.
+        funcname : str
+            The name of the function to raise any exception on behalf of.
+        argname : str, default 'action'
+            The name of the argument being checked
+
+        Raises
+        ------
+        MismatchError
+            If `action` is an `Action` from a different game.
+        KeyError
+            If `action` is a string and no action in the game has that label.
+        TypeError
+            If `action` is not an `Action` or a `str`
+        """
+        if isinstance(action, Action):
+            if action.infoset.game != self:
+                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
+            return action
+        elif isinstance(action, str):
+            try:
+                return self.actions[action]
+            except IndexError:
+                raise KeyError(f"{funcname}(): no action with label '{action}'")
+        raise TypeError(f"{funcname}(): {argname} must be Action or str, not {action.__class__.__name__}")

@@ -53,6 +53,13 @@ class Strategy:
         self.strategy.deref().SetLabel(value.encode('ascii'))
 
     @property
+    def game(self) -> Game:
+        """The game to which the strategy belongs."""
+        g = Game()
+        g.game = self.strategy.deref().GetPlayer().deref().GetGame()
+        return g
+
+    @property
     def player(self) -> Player:
         """The player to which the strategy belongs."""
         p = Player()
