@@ -3,70 +3,61 @@
 .. py:module:: pygambit-manual
 
 
-Python interface to Gambit library
-==================================
+``pygambit`` Python package
+===========================
 
-Gambit provides a Python interface for programmatic manipulation of
-games.  This section documents this interface, which is under active
-development.  Refer to the :ref:`instructions for building the Python
-interface <build-python>` to compile and install the Python extension.
+Gambit provides a Python package, ``pygambit``, which provides access to
+Gambit's features.  ``pygambit`` is available on PyPI
+(https://pypi.org/project/pygambit/), and can be installed via ``pip``.
 
-.. note::
-
-   Prior to 16.0.1, the Python extension was named `gambit`.
-   It is now known as `pygambit` to avoid a name clash with an
-   unrelated (and abandoned) project on PyPI.
-   
-
-A tutorial introduction
------------------------
+User guide
+----------
 
 Building an extensive game
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The function :py:func:`Game.new_tree` creates a new, trivial
+The function :py:meth:`.Game.new_tree` creates a new, trivial
 extensive game, with no players, and only a root node::
 
-  In [1]: import pygambit
+  In [1]: import pygambit as gbt
 
-  In [2]: g = pygambit.Game.new_tree()
+  In [2]: g = gbt.Game.new_tree()
 
   In [3]: len(g.players)
   Out[3]: 0
 
-The game also has no title.  The :py:attr:`~Game.title` attribute provides
+The :py:attr:`~.Game.title` attribute on a :py:class:`.Game` provides
 access to a game's title::
 
-  In [4]: str(g)
-  Out[4]: "<Game ''>"
+  In [4]: g.title
+  Out[4]: 'Untitled extensive game'
 
   In [5]: g.title = "A simple poker example"
 
   In [6]: g.title
   Out[6]: 'A simple poker example'
 
-  In [7]: str(g)
-  Out[7]: "<Game 'A simple poker example'>"
 
-The :py:attr:`~Game.players` attribute of a game is a collection of
-the players.  As seen above, calling :py:meth:`len` on the set of
+The :py:attr:`~.Game.players` attribute of a game is a collection of
+the players.  Calling :py:meth:`~.Players.__len__` on the set of
 players gives the number of players in the game.  Adding a
-:py:class:`Player` to the game is done with the :py:meth:`add` member
-of :py:attr:`~Game.players`::
+:py:class:`~.Player` to the game is done with the
+:py:meth:`~.GamePlayers.add` member
+of :py:attr:`~.Game.players`::
 
   In [8]: p = g.players.add("Alice")
 
   In [9]: p
   Out[9]: <Player [0] 'Alice' in game 'A simple poker example'>
 
-Each :py:class:`Player` has a text string stored in the
-:py:attr:`~Player.label` attribute, which is useful for human
+Each :py:class:`~pygambit.gambit.Player` has a text string stored in the
+:py:attr:`~pygambit.gambit.Player.label` attribute, which is useful for human
 identification of players::
 
   In [10]: p.label
   Out[10]: 'Alice'
 
-:py:attr:`Game.players` can be accessed like a Python list::
+:py:attr:`~pygambit.gambit.Game.players` can be accessed like a Python list::
 
   In [11]: len(g.players)
   Out[11]: 1
@@ -81,11 +72,11 @@ identification of players::
 Building a strategic game
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Games in strategic form are created using :py:func:`Game.new_table`, which
+Games in strategic form are created using :py:meth:`.Game.new_table`, which
 takes a list of integers specifying the number of strategies for
 each player::
 
-  In [1]: g = pygambit.Game.new_table([2,2])
+  In [1]: g = gbt.Game.new_table([2,2])
 
   In [2]: g.title = "A prisoner's dilemma game"
 
@@ -106,7 +97,8 @@ each player::
   }
   0 0 0 0 
 
-The :py:attr:`~Player.strategies` collection for a :py:class:`Player` lists all the
+The :py:attr:`.Player.strategies` collection for a
+:py:class:`.Player` lists all the
 strategies available for that player::
 
   In [6]: g.players[0].strategies
@@ -154,22 +146,22 @@ betrayal payoff is 10, the sucker payoff is 2, and the noncooperative
 
   In [19]: g[1,1][1] = 5
 
-Alternatively, one can use :py:func:`Game.from_arrays` in conjunction
+Alternatively, one can use :py:meth:`.Game.from_arrays` in conjunction
 with numpy arrays to construct a game with desired payoff matrices
 more directly, as in::
 
-  In [20]: m = numpy.array([ [ 8, 2 ], [ 10, 5 ] ], dtype=pygambit.Rational)
+  In [20]: m = numpy.array([[8, 2], [10, 5]])
  
-  In [21]: g = pygambit.Game.from_arrays(m, numpy.transpose(m))
+  In [21]: g = gbt.Game.from_arrays(m, numpy.transpose(m))
 
 
 Reading a game from a file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Games stored in existing Gambit savefiles in either the .efg or .nfg
-formats can be loaded using :py:func:`Game.read_game`::
+formats can be loaded using :meth:`.Game.read_game`::
 
-  In [1]: g = pygambit.Game.read_game("e02.nfg")
+  In [1]: g = gbt.Game.read_game("e02.nfg")
 
   In [2]: g
   Out[2]: 
@@ -195,11 +187,11 @@ Iterating the pure strategy profiles in a game
 
 Each entry in a strategic game corresponds to the outcome arising from
 a particular combination fo pure strategies played by the players.
-The property :py:attr:`Game.contingencies` is the collection of
+The property :py:attr:`.Game.contingencies` is the collection of
 all such combinations.  Iterating over the contingencies collection
 visits each pure strategy profile possible in the game::
 
-   In [1]: g = pygambit.Game.read_game("e02.nfg")
+   In [1]: g = gbt.Game.read_game("e02.nfg")
 
    In [2]: list(g.contingencies)
    Out[2]: [[0, 0], [0, 1], [1, 0], [1, 1], [2, 0], [2, 1]]
@@ -221,9 +213,9 @@ outcomes and payoffs in the game::
 Mixed strategy and behavior profiles
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A :py:class:`MixedStrategyProfile` object, which represents a probability
-distribution over the pure strategies of each player, is constructed
-using :py:meth:`Game.mixed_strategy_profile`.  Mixed strategy
+A :py:class:`~.MixedStrategyProfile` represents a probability
+distribution over the pure strategies of each player.  This is constructed
+using :py:meth:`.Game.mixed_strategy_profile`.  Mixed strategy
 profiles are initialized to uniform randomization over all strategies
 for all players.
 
@@ -238,7 +230,7 @@ Mixed strategy profiles can be indexed in three ways.
 
 This sample illustrates the three methods::
 
-  In [1]: g = pygambit.Game.read_game("e02.nfg")
+  In [1]: g = gbt.Game.read_game("e02.nfg")
 
   In [2]: p = g.mixed_strategy_profile()
 
@@ -252,21 +244,21 @@ This sample illustrates the three methods::
   Out[5]: 0.5
 
 The expected payoff to a player is obtained using
-:py:meth:`MixedStrategyProfile.payoff`::
+:py:meth:`.MixedStrategyProfile.payoff`::
 
   In [6]: p.payoff(g.players[0])
   Out[6]: 0.66666666666666663
 
 The standalone expected payoff to playing a given strategy, assuming
 all other players play according to the profile, is obtained using
-:py:meth:`MixedStrategyProfile.strategy_value`::
+:py:meth:`.MixedStrategyProfile.strategy_value`::
 
   In [7]: p.strategy_value(g.players[0].strategies[2])
   Out[7]: 1.0
 
-A :py:class:`MixedBehaviorProfile` object, which represents a probability
+A :py:class:`.MixedBehaviorProfile` object, which represents a probability
 distribution over the actions at each information set, is constructed
-using :py:meth:`Game.mixed_behavior_profile`.  Behavior profiles are
+using :py:meth:`.Game.mixed_behavior_profile`.  Behavior profiles are
 initialized to uniform randomization over all actions at each
 information set.
 
@@ -275,7 +267,7 @@ profiles, except that indexing by a player returns a list of lists of
 probabilities, containing one list for each information set controlled
 by that player::
 
-  In [1]: g = pygambit.Game.read_game("e02.efg")
+  In [1]: g = gbt.Game.read_game("e02.efg")
 
   In [2]: p = g.mixed_behavior_profile()
 
@@ -292,11 +284,11 @@ by that player::
   Out[7]: 0.5
 
 For games with a tree representation, a
-:py:class:`MixedStrategyProfile` can be converted to its equivalent
-:py:class:`MixedBehaviorProfile` by calling
-:py:func:`MixedStrategyProfile.as_behavior`. Equally, a
-:py:class:`MixedBehaviorProfile` can be converted to an equivalent
-:py:class:`MixedStrategyProfile` using :py:func:`MixedBehaviorProfile.as_strategy`.
+:py:class:`.MixedStrategyProfile` can be converted to its equivalent
+:py:class:`.MixedBehaviorProfile` by calling
+:py:meth:`.MixedStrategyProfile.as_behavior`. Equally, a
+:py:class:`.MixedBehaviorProfile` can be converted to an equivalent
+:py:class:`.MixedStrategyProfile` using :py:meth:`.MixedBehaviorProfile.as_strategy`.
 
 
 Computing Nash equilibria
@@ -323,19 +315,60 @@ Method                                        Python function
 
 For example, taking the game :file:`e02.efg` as an example::
 
-  In [1]: g = pygambit.Game.read_game("e02.efg")
+  In [1]: g = gbt.Game.read_game("e02.efg")
 
-  In [2]: pygambit.nash.lcp_solve(g)
-  Out[2]: [[1.0, 0.0, 0.5, 0.5, 0.5, 0.5]]
+  In [2]: gbt.nash.lcp_solve(g)
+  Out[2]: [[[[Rational(1, 1), Rational(0, 1)], [Rational(1, 2), Rational(1, 2)]], [[Rational(1, 2), Rational(1, 2)]]]]
 
-  In [3]: pygambit.nash.lcp_solve(g, rational=True)
-  Out[3]: [[Fraction(1, 1), Fraction(0, 1), Fraction(1, 2), Fraction(1, 2), Fraction(1, 2), Fraction(1, 2)]]
+  In [3]: gbt.nash.lcp_solve(g, rational=False)
+  Out[3]: [[[[1.0, 0.0], [0.5, 0.5]], [[0.5, 0.5]]]]
 
-  In [4]: pygambit.nash.lcp_solve(g, use_strategic=True)
-  Out[4]: [[1.0, 0.0, 0.0, 1.0, 0.0]]
+  In [4]: gbt.nash.lcp_solve(g, use_strategic=True)
+  Out[4]: [[[Rational(1, 1), Rational(0, 1), Rational(0, 1)], [Rational(1, 1), Rational(0, 1)]]]
 
-  In [5]: pygambit.nash.lcp_solve(g, use_strategic=True, rational=True)
-  Out[5]: [[Fraction(1, 1), Fraction(0, 1), Fraction(0, 1), Fraction(1, 1), Fraction(0, 1)]]
+  In [5]: gbt.nash.lcp_solve(g, use_strategic=True, rational=True)
+  Out[5]: [[[1.0, 0.0, 0.0], [1.0, 0.0]]]
 
 
+
+
+API documentation
+-----------------
+
+.. currentmodule:: pygambit
+
+Representation of games
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pygambit.gambit
+   :members:
+   :undoc-members:
+
+Computation on supports
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pygambit.supports
+   :members:
+
+
+Computation of Nash equilibria
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pygambit.nash
+   :members:
+   :exclude-members: ExternalEnumMixedSolver, ExternalEnumPolySolver,
+                     ExternalEnumPureSolver, ExternalGlobalNewtonSolver,
+                     ExternalIteratedPolymatrixSolver, ExternalLCPSolver,
+                     ExternalLPSolver, ExternalLogitSolver,
+                     ExternalLyapunovSolver, ExternalSimpdivSolver,
+                     ExternalSolver
+
+
+Computation of quantal response equilibria
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pygambit.qre
+   :members:
+   :exclude-members: ExternalStrategicQREPathTracer,
+                     sym_compute_jac, sym_compute_lhs
 

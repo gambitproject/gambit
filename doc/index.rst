@@ -49,12 +49,10 @@ Table of Contents
    :maxdepth: 1
   
    intro
-   gui
    tools
-   pyapi
-   api
+   pygambit
+   gui
    samples
-   ideas
    build
    formats
    biblio

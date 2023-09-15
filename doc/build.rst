@@ -49,7 +49,7 @@ If you want to live on the bleeding edge, you can get the latest
 version of the Gambit sources from the Gambit repository on
 github.com, via ::
 
-  git clone git://github.com/gambitproject/gambit.git
+  git clone https://github.com/gambitproject/gambit.git
   cd gambit
 
 After this, you will need to set up the build scripts by executing ::
@@ -69,9 +69,7 @@ In the git repository, the branch ``master`` always points to the
 latest development version.  New development should in general always
 be based off this branch.  Branches labeled ``maintVV``, where ``VV``
 is the version number, point to the latest commit on a stable
-version; so, for example, ``maint13`` refers to the latest commit for
-Gambit version 13.x.x.  Bug fixes should typically be based off of
-this branch.
+version.
 
 
 For Windows users
@@ -134,15 +132,15 @@ command-line executables.
 Building the Python extension
 -----------------------------
 
-The :ref:`Python extension for Gambit <python-api>` is in src/pygambit
-in the Gambit source tree. 
-Building the extension follows the standard approach::
+The :ref:`pygambit Python package <python-api>` is in ``src/pygambit``
+in the Gambit source tree.
+Building the extension follows the standard approach.
+From the **root directory of the source tree** execute
 
-  cd src
-  python setup.py build
-  sudo python setup.py install
+    python -m pip install .
 
-There is a set of test cases in src/pygambit/tests.
+There is a set of test cases in `src/pygambit/tests`, which can be run
+using `nose2`.
 
 Once installed, simply ``import pygambit`` in your Python shell or
 script to get started.
