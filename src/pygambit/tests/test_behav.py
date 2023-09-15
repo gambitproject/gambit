@@ -310,7 +310,6 @@ class TestGambitMixedBehavGame:
         assert self.profile_double["U3"] == 0.02
         self.profile_double["D3"] = 0.98
         assert self.profile_double["D3"] == 0.98
-        assert self.profile_double == [0.72, 0.28, 0.42, 0.58, 0.02, 0.98]
 
         self.profile_rational["U1"] = fractions.Fraction("2/9")
         assert self.profile_rational["U1"] == fractions.Fraction("2/9")
@@ -324,12 +323,6 @@ class TestGambitMixedBehavGame:
         assert self.profile_rational["U3"] == fractions.Fraction("1/98")
         self.profile_rational["D3"] = fractions.Fraction("97/98")
         assert self.profile_rational["D3"] == fractions.Fraction("97/98")
-        assert self.profile_rational == [fractions.Fraction("2/9"),
-                                         fractions.Fraction("7/9"),
-                                         fractions.Fraction("4/13"),
-                                         fractions.Fraction("9/13"),
-                                         fractions.Fraction("1/98"),
-                                         fractions.Fraction("97/98")]
 
     def test_set_probabilities_infoset(self):
         "Test to set probabilities to an infoset"

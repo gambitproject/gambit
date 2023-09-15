@@ -232,6 +232,8 @@ cdef extern from "games/game.h":
 
 cdef extern from "games/mixed.h":
      cdef cppclass c_MixedStrategyProfileDouble "MixedStrategyProfile<double>":
+          bool operator==(c_MixedStrategyProfileDouble)
+          bool operator!=(c_MixedStrategyProfileDouble)
           c_Game GetGame()
           int MixedProfileLength()
           c_StrategySupportProfile GetSupport()
@@ -249,6 +251,8 @@ cdef extern from "games/mixed.h":
           c_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble)
 
      cdef cppclass c_MixedStrategyProfileRational "MixedStrategyProfile<Rational>":
+          bool operator==(c_MixedStrategyProfileRational)
+          bool operator!=(c_MixedStrategyProfileRational)
           c_Game GetGame()
           int MixedProfileLength()
           c_StrategySupportProfile GetSupport()
@@ -267,6 +271,8 @@ cdef extern from "games/mixed.h":
 
 cdef extern from "games/behav.h":
      cdef cppclass c_MixedBehaviorProfileDouble "MixedBehaviorProfile<double>":
+          bool operator==(c_MixedBehaviorProfileDouble)
+          bool operator!=(c_MixedBehaviorProfileDouble)
           c_Game GetGame()
           int Length()
           bool IsDefinedAt(c_GameInfoset)
@@ -290,6 +296,8 @@ cdef extern from "games/behav.h":
           c_MixedBehaviorProfileDouble(c_MixedBehaviorProfileDouble)
 
      cdef cppclass c_MixedBehaviorProfileRational "MixedBehaviorProfile<Rational>":
+          bool operator==(c_MixedBehaviorProfileRational)
+          bool operator!=(c_MixedBehaviorProfileRational)
           c_Game GetGame()
           int Length()
           bool IsDefinedAt(c_GameInfoset)

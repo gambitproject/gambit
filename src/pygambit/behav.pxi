@@ -32,20 +32,6 @@ class MixedBehaviorProfile:
     def _repr_latex_(self):
         return r"$\left[" + ",".join([ self[player]._repr_latex_().replace("$","") for player in self.game.players ]) + r"\right]$"
 
-    def __richcmp__(MixedBehaviorProfile self, other, whichop):
-        if whichop == 0:
-            return list(self) < list(other)
-        elif whichop == 1:
-            return list(self) <= list(other)
-        elif whichop == 2:
-            return list(self) == list(other)
-        elif whichop == 3:
-            return list(self) != list(other)
-        elif whichop == 4:
-            return list(self) > list(other)
-        else:
-            return list(self) >= list(other)
-
     def _resolve_index(self, index, players=True):
         # Given a string index, resolve into a player or action object.
         if players:
@@ -310,6 +296,18 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _regret(self, action: Action):
         return deref(self.profile).GetRegret(action.action)
 
+    def __eq__(self, other: typing.Any) -> bool:
+        return (
+            isinstance(other, MixedBehaviorProfileDouble) and
+            deref(self.profile) == deref(cython.cast(MixedBehaviorProfileDouble, other).profile)
+        )
+
+    def __ne__(self, other: typing.Any) -> bool:
+        return (
+            not isinstance(other, MixedBehaviorProfileDouble) or
+            deref(self.profile) != deref(cython.cast(MixedBehaviorProfileDouble, other).profile)
+        )
+
     def copy(self) -> MixedBehaviorProfileDouble:
         """Creates a copy of the behavior strategy profile."""
         behav = MixedBehaviorProfileDouble()
@@ -414,6 +412,18 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _regret(self, Action action):
         return rat_to_py(deref(self.profile).GetRegret(action.action))
     
+    def __eq__(self, other: typing.Any) -> bool:
+        return (
+            isinstance(other, MixedBehaviorProfileRational) and
+            deref(self.profile) == deref(cython.cast(MixedBehaviorProfileRational, other).profile)
+        )
+
+    def __ne__(self, other: typing.Any) -> bool:
+        return (
+            not isinstance(other, MixedBehaviorProfileRational) or
+            deref(self.profile) != deref(cython.cast(MixedBehaviorProfileRational, other).profile)
+        )
+
     def copy(self) -> MixedBehaviorProfileRational:
         """Creates a copy of the behavior strategy profile."""
         behav = MixedBehaviorProfileRational()

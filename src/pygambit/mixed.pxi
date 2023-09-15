@@ -35,20 +35,6 @@ class MixedStrategyProfile:
     def _repr_latex_(self):
         return r"$\left[" + ",".join([ self[player]._repr_latex_().replace("$","") for player in self.game.players ]) + r"\right]$"
 
-    def __richcmp__(MixedStrategyProfile self, other, whichop):
-        if whichop == 0:
-            return list(self) < list(other)
-        elif whichop == 1:
-            return list(self) <= list(other)
-        elif whichop == 2:
-            return list(self) == list(other)
-        elif whichop == 3:
-            return list(self) != list(other)
-        elif whichop == 4:
-            return list(self) > list(other)
-        else:
-            return list(self) >= list(other)
-
     def _resolve_index(self, index, players=True):
         # Given a string index, resolve into a player or strategy object.
         if players:
@@ -231,6 +217,18 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
                               s1: Strategy, s2: Strategy):
         return deref(self.profile).GetPayoffDeriv(pl, s1.strategy, s2.strategy)
 
+    def __eq__(self, other: typing.Any) -> bool:
+        return (
+            isinstance(other, MixedStrategyProfileDouble) and
+            deref(self.profile) == deref(cython.cast(MixedStrategyProfileDouble, other).profile)
+        )
+
+    def __ne__(self, other: typing.Any) -> bool:
+        return (
+            not isinstance(other, MixedStrategyProfileDouble) or
+            deref(self.profile) != deref(cython.cast(MixedStrategyProfileDouble, other).profile)
+        )
+
     def liap_value(self) -> float:
         """
         Returns the Lyapunov value (see [McK91]_) of the strategy profile.
@@ -348,6 +346,18 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
     def _strategy_value_deriv(self, pl: int,
                               s1: Strategy, s2: Strategy):
         return rat_to_py(deref(self.profile).GetPayoffDeriv(pl, s1.strategy, s2.strategy))
+
+    def __eq__(self, other: typing.Any) -> bool:
+        return (
+            isinstance(other, MixedStrategyProfileRational) and
+            deref(self.profile) == deref(cython.cast(MixedStrategyProfileRational, other).profile)
+        )
+
+    def __ne__(self, other: typing.Any) -> bool:
+        return (
+            not isinstance(other, MixedStrategyProfileRational) or
+            deref(self.profile) != deref(cython.cast(MixedStrategyProfileRational, other).profile)
+        )
 
     def liap_value(self) -> Rational:
         """
