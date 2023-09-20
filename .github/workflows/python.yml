@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.8', '3.11']
+        python-version: ['3.8', '3.11', '3.12-dev']
 
     steps:
       - uses: actions/checkout@v4
@@ -23,8 +23,7 @@ jobs:
           pip install cython nose2 wheel lxml numpy scipy
       - name: Build extension
         run: |
-          python setup.py build
-          python setup.py install
+          python -m pip install -v .
       - name: Run nosetests
         run: |
           cd src/pygambit/tests
@@ -48,8 +47,7 @@ jobs:
           pip install cython nose2 wheel lxml numpy scipy
       - name: Build extension
         run: |
-          python setup.py build
-          python setup.py install
+          python -m pip install -v .
       - name: Run nosetests
         run: |
           cd src/pygambit/tests
