@@ -4,7 +4,8 @@
 </h1>
 <br/>
 
-![Latest development version](https://img.shields.io/github/downloads-pre/gambitproject/gambit/latest/total?label=Latest%20development%20version)
+![Latest stable version](https://img.shields.io/github/v/release/gambitproject/gambit?filter=!*a*&label=Latest%20stable%20version)
+![Latest development version](https://img.shields.io/github/v/release/gambitproject/gambit?filter=*a*&label=Latest%20development%20version)
 ![PyPI - Version](https://img.shields.io/pypi/v/pygambit?label=PyPI%20version)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/pygambit?label=PyPI%20downloads)
 ![PyPI - License](https://img.shields.io/pypi/l/pygambit)
