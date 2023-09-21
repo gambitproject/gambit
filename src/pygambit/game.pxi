@@ -23,6 +23,7 @@ import itertools
 import pathlib
 
 import numpy as np
+from deprecated import deprecated
 
 import pygambit.gte
 import pygambit.gameiter
@@ -43,7 +44,10 @@ class Outcomes(Collection):
         c.outcome = self.game.deref().GetOutcome(outc+1)
         return c
 
-    def add(self, label=""):
+    @deprecated(version='16.1.0',
+                reason='Use Game.add_outcome() instead of Game.outcomes.add()',
+                category=FutureWarning)
+    def add(self, label="") -> Outcome:
         """Add a new outcome to the game."""
         c = Outcome()
         c.outcome = self.game.deref().NewOutcome()
@@ -68,6 +72,9 @@ class Players(Collection):
         p.player = self.game.deref().GetPlayer(pl+1)
         return p
 
+    @deprecated(version='16.1.0',
+                reason='Use Game.add_player() instead of Game.players.add()',
+                category=FutureWarning)
     def add(self, label="") -> Player:
         """Adds a new player to the game."""
         p = Player()
@@ -485,20 +492,17 @@ class Game:
         """Returns the maximum payoff in the game."""
         return rat_to_py(self.game.deref().GetMaxPayoff(0))
 
-    def set_chance_probs(self, infoset: Infoset, probs) -> Game:
+    def set_chance_probs(self, infoset: typing.Union[Infoset, str], probs: typing.Sequence):
         """Set the action probabilities at chance information set `infoset`.
 
         Parameters
         ----------
-        infoset : Infoset
+        infoset : Infoset or str
             The chance information set at which to set the action probabilities.
+            If a string is passed, the information set is determined by finding the chance information set
+            with that label, if any.
         probs : array-like
             The action probabilities to set
-
-        Returns
-        -------
-        Game
-            The operation modifies the game.  A reference to the game is also returned.
 
         Raises
         ------
@@ -512,8 +516,7 @@ class Game:
             If any of the elements of `probs` are not interpretable as numbers, or the values of `probs` are not
             nonnegative numbers that sum to exactly one.
         """
-        if infoset.game != self:
-            raise MismatchError("set_chance_probs() first argument must be an infoset in the same game")
+        infoset = self._resolve_infoset(infoset, 'set_chance_probs')
         if not infoset.is_chance:
             raise UndefinedOperationError("set_chance_probs() first argument must be a chance infoset")
         if len(infoset.actions) != len(probs):
@@ -522,10 +525,9 @@ class Game:
         for i in range(1, len(probs)+1):
             setitem_array_number(numbers, i, _to_number(probs[i-1]))
         try:
-            self.game.deref().SetChanceProbs(infoset.infoset, numbers)
+            self.game.deref().SetChanceProbs(cython.cast(Infoset, infoset).infoset, numbers)
         except RuntimeError:
             raise ValueError("set_chance_probs(): must specify non-negative probabilities that sum to one")
-        return self
 
     def _get_contingency(self, *args):
         psp = cython.declare(shared_ptr[c_PureStrategyProfile])
@@ -748,6 +750,38 @@ class Game:
                 raise KeyError(f"{funcname}(): no player with label '{player}'")
         raise TypeError(f"{funcname}(): {argname} must be Player or str, not {player.__class__.__name__}")
 
+    def _resolve_outcome(self, outcome: typing.Any, funcname: str, argname: str = "outcome") -> Outcome:
+        """Resolve an attempt to reference an outcome of the game.
+
+        Parameters
+        ----------
+        outcome : Any
+            An object to resolve as a reference to an outcome.
+        funcname : str
+            The name of the function to raise any exception on behalf of.
+        argname : str, default 'outcome'
+            The name of the argument being checked
+
+        Raises
+        ------
+        MismatchError
+            If `outcome` is an `Outcome` from a different game.
+        KeyError
+            If `outcome` is a string and no outcome in the game has that label.
+        TypeError
+            If `outcome` is not an `Outcome` or a `str`
+        """
+        if isinstance(outcome, Outcome):
+            if outcome.game != self:
+                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
+            return outcome
+        elif isinstance(outcome, str):
+            try:
+                return self.outcomes[outcome]
+            except IndexError:
+                raise KeyError(f"{funcname}(): no node with label '{outcome}'")
+        raise TypeError(f"{funcname}(): {argname} must be Outcome or str, not {outcome.__class__.__name__}")
+
     def _resolve_strategy(self, strategy: typing.Any, funcname: str, argname: str = "strategy") -> Strategy:
         """Resolve an attempt to reference a strategy of the game.
 
@@ -779,6 +813,38 @@ class Game:
             except IndexError:
                 raise KeyError(f"{funcname}(): no strategy with label '{strategy}'")
         raise TypeError(f"{funcname}(): {argname} must be Strategy or str, not {strategy.__class__.__name__}")
+
+    def _resolve_node(self, node: typing.Any, funcname: str, argname: str = "node") -> Node:
+        """Resolve an attempt to reference a node of the game.
+
+        Parameters
+        ----------
+        node : Any
+            An object to resolve as a reference to a node.
+        funcname : str
+            The name of the function to raise any exception on behalf of.
+        argname : str, default 'node'
+            The name of the argument being checked
+
+        Raises
+        ------
+        MismatchError
+            If `node` is a `Node` from a different game.
+        KeyError
+            If `node` is a string and no node in the game has that label.
+        TypeError
+            If `node` is not a `Node` or a `str`
+        """
+        if isinstance(node, Node):
+            if node.game != self:
+                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
+            return node
+        elif isinstance(node, str):
+            try:
+                return self.nodes[node]
+            except IndexError:
+                raise KeyError(f"{funcname}(): no node with label '{node}'")
+        raise TypeError(f"{funcname}(): {argname} must be Node or str, not {node.__class__.__name__}")
 
     def _resolve_infoset(self, infoset: typing.Any, funcname: str, argname: str = "infoset") -> Infoset:
         """Resolve an attempt to reference an information set of the game.
@@ -843,3 +909,298 @@ class Game:
             except IndexError:
                 raise KeyError(f"{funcname}(): no action with label '{action}'")
         raise TypeError(f"{funcname}(): {argname} must be Action or str, not {action.__class__.__name__}")
+
+    def append_move(self, node: typing.Union[Node, str],
+                    player: typing.Union[Player, str], actions: int) -> None:
+        """Add a move for `player` at the terminal node `node`, with `actions` actions.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If `node` is not a terminal node, or `actions` is not a positive number.
+        MismatchError
+            If `node` is a `Node` from a different game, or `player` is a `Player` from a
+            different game.
+        """
+        resolved_node = cython.cast(Node, self._resolve_node(node, 'append_move'))
+        resolved_player = cython.cast(Player, self._resolve_player(player, 'append_move'))
+        if len(resolved_node.children) > 0:
+            raise UndefinedOperationError("append_move(): `node` must be a terminal node")
+        if actions < 1:
+            raise UndefinedOperationError("append_move(): `actions` must be a positive number")
+        resolved_node.node.deref().AppendMove(resolved_player.player, actions)
+
+    def append_infoset(self, node: typing.Union[Node, str],
+                       infoset: typing.Union[Infoset, str]) -> None:
+        """Add a move in information set `infoset` at the terminal node `node`.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If `node` is not a terminal node.
+        MismatchError
+            If `node` is a `Node` from a different game, or `infoset` is an `Infoset` from a
+            different game.
+        """
+        resolved_node = cython.cast(Node, self._resolve_node(node, 'append_infoset'))
+        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, 'append_infoset'))
+        if len(resolved_node.children) > 0:
+            raise UndefinedOperationError("append_move(): `node` must be a terminal node")
+        resolved_node.node.deref().AppendMove(resolved_infoset.infoset)
+
+    def insert_move(self, node: typing.Union[Node, str],
+                    player: typing.Union[Player, str], actions: int) -> None:
+        """Insert a move for `player` prior to the node `node`, with `actions` actions.
+        `node` becomes the first child of the newly-inserted node.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If `actions` is not a positive number.
+        MismatchError
+            If `node` is a `Node` from a different game, or `player` is a `Player` from a
+            different game.
+        """
+        resolved_node = cython.cast(Node, self._resolve_node(node, 'insert_move'))
+        resolved_player = cython.cast(Player, self._resolve_player(player, 'insert_move'))
+        if actions < 1:
+            raise UndefinedOperationError("insert_move(): `actions` must be a positive number")
+        resolved_node.node.deref().InsertMove(resolved_player.player, actions)
+
+    def insert_infoset(self, node: typing.Union[Node, str],
+                       infoset: typing.Union[Infoset, str]) -> None:
+        """Insert a move in information set `infoset` prior to the node `node`.
+        `node` becomes the first child of the newly-inserted node.
+
+        Raises
+        ------
+        MismatchError
+            If `node` is a `Node` from a different game, or `infoset` is an `Infoset` from a
+            different game.
+        """
+        resolved_node = cython.cast(Node, self._resolve_node(node, 'insert_infoset'))
+        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, 'insert_infoset'))
+        resolved_node.node.deref().InsertMove(resolved_infoset.infoset)
+
+    def copy_tree(self, src: typing.Union[Node, str], dest: typing.Union[Node, str]) -> None:
+        """Copies the subtree rooted at 'src' to 'dest'.
+
+        Parameters
+        ----------
+        src : Node or str
+            The root of the source subtree to copy
+        dest : Node or str
+            The destination subtree to copy to.  `dest` must be a terminal node.
+
+        Raises
+        ------
+        MismatchError
+            If `src` or `dest` is not a member of the same game as this node.
+        UndefinedOperationError
+            If `dest` is not a terminal node.
+        """
+        resolved_src = cython.cast(Node, self._resolve_node(src, 'copy_tree', 'src'))
+        resolved_dest = cython.cast(Node, self._resolve_node(dest, 'copy_tree', 'dest'))
+        if not resolved_dest.is_terminal:
+            raise UndefinedOperationError("copy_tree(): `dest` must be a terminal node.")
+        resolved_src.node.deref().CopyTree(resolved_dest.node)
+
+    def move_tree(self, src: typing.Union[Node, str], dest: typing.Union[Node, str]) -> None:
+        """Moves the subtree rooted at 'src' to 'dest'.
+
+        Parameters
+        ----------
+        src : Node or str
+            The root of the source subtree to move
+        dest : Node or str
+            The destination subtree to move to.  `dest` must be a terminal node.
+
+        Raises
+        ------
+        MismatchError
+            If `src` or `dest` is not a member of the same game as this node.
+        UndefinedOperationError
+            If `dest` is not a terminal node, or `dest` is a successor of `src`.
+        """
+        resolved_src = cython.cast(Node, self._resolve_node(src, 'move_tree', 'src'))
+        resolved_dest = cython.cast(Node, self._resolve_node(dest, 'move_tree', 'dest'))
+        if not resolved_dest.is_terminal:
+            raise UndefinedOperationError("move_tree(): `dest` must be a terminal node.")
+        if resolved_dest.is_successor_of(resolved_src):
+            raise UndefinedOperationError("move_tree(): `dest` cannot be a successor of `src`.")
+        resolved_src.node.deref().MoveTree(resolved_dest.node)
+
+    def delete_parent(self, node: typing.Union[Node, str]) -> None:
+        """Delete the parent node of `node`.  `node` replaces its parent in the tree.  All other
+        subtrees rooted at `node`'s parent are deleted.
+
+        Parameters
+        ----------
+        node : Node or str
+            The node to retain after deleting its parent.
+            If a string is passed, the node is determined by finding the node with that label, if any.
+
+        Raises
+        ------
+        MismatchError
+            If `node` is a `Node` from a different game.
+        """
+        resolved_node = cython.cast(Node, self._resolve_node(node, 'delete_parent'))
+        resolved_node.node.deref().DeleteParent()
+
+    def delete_tree(self, node: typing.Union[Node, str]) -> None:
+        """Truncates the game tree at `node`, deleting the subtree beneath it.
+
+        Parameters
+        ----------
+        node : Node or str
+            The node to truncate the game at.  If a string is passed, the node is determined by finding
+            the node with that label, if any.
+
+        Raises
+        ------
+        MismatchError
+            If `node` is a `Node` from a different game.
+        """
+        resolved_node = cython.cast(Node, self._resolve_node(node, 'delete_tree'))
+        resolved_node.node.deref().DeleteTree()
+
+    def leave_infoset(self, node: typing.Union[Node, str]):
+        """Removes this node from its information set. If this node is the only node
+        in its information set, this operation has no effect.
+
+        Parameters
+        ----------
+        node : Node or str
+            The node to move to a new singleton information set.
+        """
+        resolved_node = cython.cast(Node, self._resolve_node(node, 'leave_infoset'))
+        resolved_node.node.deref().LeaveInfoset()
+
+    def set_infoset(self, node: typing.Union[Node, str], infoset: typing.Union[Infoset, str]) -> None:
+        """Places `node` in the information set `infoset`.  `node` must have the same
+        number of descendants as `infoset` has actions.
+
+        Parameters
+        ----------
+        node : Node or str
+            The node to set the information set
+        infoset : Infoset or str
+            The information set to join
+
+        Raises
+        ------
+        MismatchError
+            If `node` is a `Node` from a different game, or `infoset` is an `Infoset` from
+            a different game.
+        """
+        resolved_node = cython.cast(Node, self._resolve_node(node, 'set_infoset'))
+        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, 'set_infoset'))
+        if len(resolved_node.children) != len(resolved_infoset.actions):
+            raise ValueError(
+                "set_infoset(): `infoset` must have same number of actions as `node` has children."
+            )
+        resolved_node.node.deref().SetInfoset(resolved_infoset.infoset)
+
+    def add_player(self, label: str = "") -> Player:
+        """Adds a new player to the game.
+
+        Parameters
+        ----------
+        label : str, default ""
+            The label for the player.
+
+        Returns
+        -------
+        Player
+            A reference to the newly-created player.
+        """
+        p = Player()
+        p.player = self.game.deref().NewPlayer()
+        if str(label) != "":
+            p.label = str(label)
+        return p
+
+    def set_player(self, infoset: typing.Union[Infoset, str],
+                   player: typing.Union[Player, str]) -> None:
+        """Set the player at an information set.
+
+        Parameters
+        ----------
+        infoset : Infoset or str
+            The information set to assign to the player
+        player : Player or str
+            The player to have the move at the information set
+
+        Raises
+        ------
+        MismatchError
+            If `infoset` is an `Infoset` from another game, or `player` is a
+            `Player` from another game.
+        """
+        resolved_player = cython.cast(Player, self._resolve_player(player, 'set_player'))
+        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, 'set_player'))
+        resolved_infoset.infoset.deref().SetPlayer(resolved_player.player)
+
+    def add_outcome(self, label: str = "") -> Outcome:
+        """Add a new outcome to the game.
+
+        Parameters
+        ----------
+        label : str, default ""
+            The label for the outcome
+
+        Returns
+        -------
+        Outcome
+            A reference to the newly-created outcome.
+        """
+        c = Outcome()
+        c.outcome = self.game.deref().NewOutcome()
+        if str(label) != "":
+            c.label = str(label)
+        return c
+
+    def delete_outcome(self, outcome: typing.Union[Outcome, str]) -> None:
+        """Deletes an outcome from the game.  If this game is an extensive game, any
+        node at which this outcome is attached has its outcome reset to null.  If this game
+        is a strategic game, any contingency at which this outcome is attached as its outcome
+        reset to null.
+
+        Parameters
+        ----------
+        outcome : Outcome or str
+            The outcome to delete from the game
+
+        Raises
+        ------
+        MismatchError
+            If `outcome` is an `Outcome` from another game.
+        """
+        resolved_outcome = cython.cast(Outcome, self._resolve_outcome(outcome, 'delete_outcome'))
+        self.game.deref().DeleteOutcome(resolved_outcome.outcome)
+
+    def set_outcome(self, node: typing.Union[Node, str],
+                    outcome: typing.Optional[typing.Union[Outcome, str]]) -> None:
+        """Sets `outcome` to be the outcome at `node`.  If `outcome` is None, the
+        outcome at `node` is unset.
+
+        Parameters
+        ----------
+        node : Node or str
+            The node to set the outcome at
+        outcome : Outcome or str or None
+            The outcome to assign to the node
+
+        Raises
+        ------
+        MismatchError
+            If `node` is a `Node` from a different game, or `outcome` is an
+            `Outcome` from a different game.
+        """
+        resolved_node = cython.cast(Node, self._resolve_node(node, 'set_outcome'))
+        if outcome is None:
+            resolved_node.node.deref().SetOutcome(cython.cast(c_GameOutcome, NULL))
+            return
+        resolved_outcome = cython.cast(Outcome, self._resolve_outcome(outcome, 'set_outcome'))
+        resolved_node.node.deref().SetOutcome(resolved_outcome.outcome)

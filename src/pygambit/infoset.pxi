@@ -161,27 +161,7 @@ class Infoset:
 
     @property
     def player(self) -> Player:
-        """Gets or sets the player who has the move at this information set.
-
-        Raises
-        ------
-        TypeError
-            on setting to an object that is not a :py:class:`Player`.
-        MismatchError
-            on setting to a player that is from a different game.
-        """
+        """The player who has the move at this information set."""
         p = Player()
         p.player = self.infoset.deref().GetPlayer()
         return p
-
-    @player.setter
-    def player(self, player: Player) -> None:
-        if not isinstance(player, Player):
-            raise TypeError(
-                f"player must be of type Player, not {player.__class__.__name__}"
-            )
-        elif player.game != self.game:
-            raise MismatchError(
-                "player must belong to the same game as the information set"
-            )
-        self.infoset.deref().SetPlayer(cython.cast(Player, player).player)

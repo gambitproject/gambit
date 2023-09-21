@@ -3,6 +3,9 @@
 ## [16.1.0a2] - unreleased
 
 ### Changed
+- Most operations which modify games have been moved to being operations on `Game` instead of
+  being operations on classes representing elements of games.  For the most part old versions
+  have been retained with a deprecation warning; these old versions will be removed in 16.2.0.
 - `pygambit.supports` has been introduced to organise algorithms which operates on sets
   of pure strategies or actions, such as finding undominated strategies.
 - `.payoff()` on mixed strategy and mixed behavior profiles now takes either a Player or string label.

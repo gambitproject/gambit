@@ -31,9 +31,8 @@ class TestGambitInfosets(unittest.TestCase):
 
     def test_infoset_player_change(self):
         "Test to ensure infoset player transfer works"
-        self.extensive_game.root.infoset.player = (
-            self.extensive_game.players[1]
-        )
+        self.extensive_game.set_player(self.extensive_game.root.infoset,
+                                       self.extensive_game.players[1])
         assert (
             self.extensive_game.root.infoset.player ==
             self.extensive_game.players[1]
@@ -45,8 +44,8 @@ class TestGambitInfosets(unittest.TestCase):
         """
         def foo():
             g2 = pygambit.Game.new_tree()
-            p = g2.players.add()
-            self.extensive_game.root.infoset.player = p
+            p = g2.add_player()
+            self.extensive_game.set_player(self.extensive_game.root.infoset, p)
         self.assertRaises(pygambit.MismatchError, foo)
 
     def test_infoset_node_precedes(self):

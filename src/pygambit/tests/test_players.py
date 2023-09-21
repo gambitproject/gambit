@@ -78,11 +78,11 @@ class TestGambitPlayers(unittest.TestCase):
         with a single strategy
         """
         assert len(self.strategic_game.players) == 2
-        self.strategic_game.players.add("new player")
+        self.strategic_game.add_player("new player")
         assert len(self.strategic_game.players) == 3
         assert self.strategic_game.players[2].label == "new player"
         assert len(self.strategic_game.players[2].strategies) == 1
-        self.strategic_game.players.add()
+        self.strategic_game.add_player()
         assert len(self.strategic_game.players) == 4
         assert self.strategic_game.players[3].label == ""
 
@@ -91,10 +91,10 @@ class TestGambitPlayers(unittest.TestCase):
         with no moves
         """
         assert len(self.extensive_game.players) == 0
-        self.extensive_game.players.add("new player")
+        self.extensive_game.add_player("new player")
         assert len(self.extensive_game.players) == 1
         assert len(self.extensive_game.players[0].infosets) == 0
-        self.extensive_game.players.add("new player 2")
+        self.extensive_game.add_player("new player 2")
         assert len(self.extensive_game.players) == 2
         assert len(self.extensive_game.players[1].infosets) == 0
         assert self.extensive_game.players[0].label == "new player"
@@ -118,7 +118,7 @@ class TestGambitPlayers(unittest.TestCase):
         """Test to ensure that an exception is raised when attempting
         to add a strategy to a player in an extensive game
         """
-        self.extensive_game.players.add("Alice")
+        self.extensive_game.add_player("Alice")
         self.assertRaises(
             TypeError, self.extensive_game.players[0].strategies.add, "Test"
         )

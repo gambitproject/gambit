@@ -117,22 +117,12 @@ class TestGambitNode(unittest.TestCase):
         assert self.extensive_game.root.is_subgame_root is True
         assert self.extensive_game.root.children[0].is_subgame_root is False
 
-    def test_append_move_error_terminal(self):
-        "Test to ensure the node is terminal"
-        self.assertRaises(
-            pygambit.UndefinedOperationError, self.extensive_game.root.append_move, ""
-        )
-
     def test_append_move_error_player_actions(self):
         "Test to ensure there are actions when appending with a player"
         self.assertRaises(
             pygambit.UndefinedOperationError,
-            self.extensive_game.root.append_move,
-            self.extensive_game.players[0]
-        )
-        self.assertRaises(
-            pygambit.UndefinedOperationError,
-            self.extensive_game.root.append_move,
+            self.extensive_game.append_move,
+            self.extensive_game.root,
             self.extensive_game.players[0],
             0
         )
@@ -141,84 +131,85 @@ class TestGambitNode(unittest.TestCase):
         "Test to ensure the node and the player are from the same game"
         self.assertRaises(
             pygambit.pygambit.MismatchError,
-            self.game.root.append_move,
+            self.game.append_move,
+            self.game.root,
             self.extensive_game.players[0],
-            1
-        )
-
-    def test_append_move_error_infoset_actions(self):
-        "Test to ensure there are no actions when appending with an infoset"
-        self.assertRaises(
-            pygambit.UndefinedOperationError,
-            self.extensive_game.root.append_move,
-            self.extensive_game.players[0].infosets[0],
             1
         )
 
     def test_append_move_error_infoset_mismatch(self):
         "Test to ensure the node and the player are from the same game"
-        self.assertRaises(pygambit.MismatchError, self.game.root.append_move,
+        self.assertRaises(pygambit.MismatchError,
+                          self.game.append_infoset,
+                          self.game.root,
                           self.extensive_game.players[0].infosets[0])
 
     def test_insert_move_error_player_actions(self):
         "Test to ensure there are actions when inserting with a player"
         self.assertRaises(
-            pygambit.pygambit.UndefinedOperationError,
-            self.extensive_game.root.insert_move,
-            self.extensive_game.players[0]
-        )
-        self.assertRaises(
             pygambit.UndefinedOperationError,
-            self.extensive_game.root.insert_move,
+            self.extensive_game.insert_move,
+            self.extensive_game.root,
             self.extensive_game.players[0],
             0
         )
 
     def test_insert_move_error_player_mismatch(self):
         "Test to ensure the node and the player are from the same game"
-        self.assertRaises(pygambit.MismatchError, self.game.root.insert_move,
-                          self.extensive_game.players[0], 1)
-
-    def test_insert_move_error_infoset_actions(self):
-        "Test to ensure there are no actions when inserting with an infoset"
-        self.assertRaises(
-            pygambit.UndefinedOperationError,
-            self.extensive_game.root.insert_move,
-            self.extensive_game.players[0].infosets[0],
-            1
-        )
-
-    def test_insert_move_error_infoset_mismatch(self):
-        "Test to ensure the node and the player are from the same game"
-        self.assertRaises(pygambit.MismatchError, self.game.root.insert_move,
-                          self.extensive_game.players[0].infosets[0])
+        self.assertRaises(pygambit.MismatchError,
+                          self.game.insert_move,
+                          self.game.root,
+                          self.extensive_game.players[0],
+                          1)
 
     def test_node_leave_infoset(self):
         "Test to ensure it's possible to remove a node from an infoset"
         assert len(self.extensive_game.infosets[1].members) == 2
-        self.extensive_game.root.children[0].leave_infoset()
+        self.extensive_game.leave_infoset(self.extensive_game.root.children[0])
         assert len(self.extensive_game.infosets[1].members) == 1
 
     def test_node_delete_parent(self):
         "Test to ensure deleting a parent node works"
         node = self.extensive_game.root.children[0]
-        node.delete_parent()
+        node.game.delete_parent(node)
         assert self.extensive_game.root == node
 
     def test_node_delete_tree(self):
         "Test to ensure deleting every children of a node works"
         node = self.extensive_game.root.children[0]
-        node.delete_tree()
+        node.game.delete_tree(node)
         assert len(node.children) == 0
 
-    def test_node_copy_tree_error(self):
-        "Test to ensure a pygambit.MismatchError is raised when trying to copy a tree \
-        from a different game"
-        self.assertRaises(pygambit.MismatchError, self.game.root.copy_tree,
-                          self.extensive_game.root)
+    def test_node_copy_nonterminal(self):
+        """Test on copying to a nonterminal node."""
+        self.assertRaises(pygambit.UndefinedOperationError, self.extensive_game.copy_tree,
+                          self.extensive_game.root, self.extensive_game.root)
 
-    def test_node_move_tree_error(self):
-        "Test to ensure a pygambit.MismatchError is raised when trying to move a tree \
-        between different games"
-        self.assertRaises(pygambit.MismatchError, self.game.root.move_tree,
-                          self.extensive_game.root)
+    def test_node_copy_across_games(self):
+        """Test to ensure a pygambit.MismatchError is raised when trying to copy a tree
+        from a different game.
+        """
+        self.assertRaises(pygambit.MismatchError, self.game.copy_tree,
+                          self.game.root, self.extensive_game.root)
+        self.assertRaises(pygambit.MismatchError, self.game.copy_tree,
+                          self.extensive_game.root, self.game.root)
+
+    def test_node_move_nonterminal(self):
+        """Test on moving to a nonterminal node."""
+        self.assertRaises(pygambit.UndefinedOperationError, self.extensive_game.move_tree,
+                          self.extensive_game.root, self.extensive_game.root)
+
+    def test_node_move_successor(self):
+        """Test on moving a node to one of its successors."""
+        self.assertRaises(pygambit.UndefinedOperationError, self.extensive_game.move_tree,
+                          self.extensive_game.root,
+                          self.extensive_game.root.children[0].children[0].children[0])
+
+    def test_node_move_across_games(self):
+        """Test to ensure a pygambit.MismatchError is raised when trying to move a tree
+        between different games.
+        """
+        self.assertRaises(pygambit.MismatchError, self.game.move_tree,
+                          self.game.root, self.extensive_game.root)
+        self.assertRaises(pygambit.MismatchError, self.game.move_tree,
+                          self.extensive_game.root, self.game.root)

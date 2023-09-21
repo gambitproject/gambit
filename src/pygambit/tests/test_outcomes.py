@@ -80,5 +80,5 @@ class TestGambitOutcomes(unittest.TestCase):
     def test_outcome_delete(self):
         "Test to ensure it is possible to delete an outcome from the game"
         assert len(self.game.outcomes) == 4
-        self.game.outcomes[0].delete()
+        self.game.delete_outcome(self.game.outcomes[0])
         assert len(self.game.outcomes) == 3

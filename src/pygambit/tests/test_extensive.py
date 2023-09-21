@@ -24,7 +24,7 @@ class TestGambitExtensiveGame:
     def test_game_add_players(self):
         "Test to add player"
         self.game.title = "A simple poker example"
-        p = self.game.players.add("Alice")
+        p = self.game.add_player("Alice")
         assert len(self.game.players) == 1
         assert (
             str(self.game.players[0]) ==

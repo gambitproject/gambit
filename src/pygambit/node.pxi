@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+from deprecated import deprecated
 
 @cython.cclass
 class Children(Collection):
@@ -60,6 +61,9 @@ class Node:
         """Returns `True` if this node is a successor of `Node`."""
         return self.node.deref().IsSuccessorOf((<Node>node).node)
 
+    @deprecated(version='16.1.0',
+                reason='Use Game.append_move or Game.append_infoset instead of Node.append_move.',
+                category=FutureWarning)
     def append_move(self, player, actions=None) -> Infoset:
         """Add a move to a terminal node, at the `Infoset` `infoset`.
         Alternatively, a `Player` can be passed as the information set,
@@ -97,6 +101,9 @@ class Node:
             return i
         raise TypeError("append_move accepts either a Player or Infoset to specify information")
 
+    @deprecated(version='16.1.0',
+                reason='Use Game.insert_move or Game.insert_infoset instead of Node.insert_move.',
+                category=FutureWarning)
     def insert_move(self, player, actions=None) -> Infoset:
         """Insert a move at a node, at the :py:class:`Infoset`
         ``infoset``.  Alternatively, a :py:class:`Player` can be
@@ -134,56 +141,50 @@ class Node:
             return i
         raise TypeError("insert_move accepts either a Player or Infoset to specify information")
 
-    def leave_infoset(self) -> Infoset:
-        """Removes this node from its information set. If this node is the only node
-        in its information set, this operation has no effect.
-
-        Returns
-        -------
-        Infoset
-            The information set to which the node belongs after the operation.
-        """
-        i = Infoset()
-        i.infoset = self.node.deref().LeaveInfoset()
-        return i
-
-    def delete_parent(self):
+    @deprecated(version='16.1.0',
+                reason='Use Game.delete_parent instead of Node.delete_parent.',
+                category=FutureWarning)
+    def delete_parent(self) -> None:
         """Deletes the parent node of this node, and all subtrees rooted
         in the parent other than the one containing this node.
+
+        .. deprecated:: 16.1.0
+           Use `Game.delete_parent` instead of `Node.delete_parent`.
         """
-        self.node.deref().DeleteParent()
+        self.game.delete_parent(self)
 
-    def delete_tree(self):
-        """Deletes the entire subtree rooted at this node."""
-        self.node.deref().DeleteTree()
+    @deprecated(version='16.1.0',
+                reason='Use Game.delete_tree instead of Node.delete_tree.',
+                category=FutureWarning)
+    def delete_tree(self) -> None:
+        """Deletes the entire subtree rooted at this node.
 
-    def copy_tree(self, node: Node):
+        .. deprecated:: 16.1.0
+           Use `Game.delete_tree` instead of `Node.delete_tree`.
+        """
+        self.game.delete_tree(self)
+
+    @deprecated(version='16.1.0',
+                reason='Use Game.copy_tree instead of Node.copy_tree.',
+                category=FutureWarning)
+    def copy_tree(self, node: Node) -> None:
         """Copies the subtree rooted at this node to `node`.
 
-        Raises
-        ------
-        MismatchError
-            If `node` is not a member of the same game as this node.
+        .. deprecated:: 16.1.0
+           Use `Game.copy_tree` instead of `Node.copy_tree`.
         """
-        if node.game != self.game:
-            raise MismatchError(
-                f"copy_tree(): trees can only be copied within the same game"
-            )
-        self.node.deref().CopyTree(node.node)
+        self.game.copy_tree(self, node)
 
-    def move_tree(self, node: Node):
+    @deprecated(version='16.1.0',
+                reason='Use Game.move_tree instead of Node.move_tree.',
+                category=FutureWarning)
+    def move_tree(self, node: Node) -> None:
         """Moves the subtree rooted at this node to `node`.
 
-        Raises
-        ------
-        MismatchError
-            If `node` is not a member of the same game as this node.
+        .. deprecated:: 16.1.0
+           Use `Game.move_tree` instead of `Node.move_tree`.
         """
-        if node.game != self.game:
-            raise MismatchError(
-                f"move_tree(): trees can only be moved within the same game"
-            )
-        self.node.deref().MoveTree(node.node)
+        self.game.move_tree(self, node)
 
     @property
     def label(self) -> str:
@@ -218,15 +219,6 @@ class Node:
             i.infoset = self.node.deref().GetInfoset()
             return i
         return None
-
-    @infoset.setter
-    def infoset(self, infoset: Infoset) -> None:
-        try:
-            self.node.deref().SetInfoset(cython.cast(Infoset, infoset).infoset)
-        except ValueError:
-            raise ValueError(
-                f"in setting infoset: node has {len(self.children)} children, but infoset has {len(infoset.actions)} actions"
-            ) from None
 
     @property
     def player(self) -> typing.Optional[Player]:
@@ -300,16 +292,9 @@ class Node:
         """Returns the outcome attached to the node.  If no outcome is attached
         to the node, `None` is returned.
         """
-        if self.node.deref().GetOutcome() != cython.cast(c_GameOutcome, NULL):
-            o = Outcome()
-            o.outcome = self.node.deref().GetOutcome()
-            return o
-        return None
+        if self.node.deref().GetOutcome() == cython.cast(c_GameOutcome, NULL):
+            return None
+        o = Outcome()
+        o.outcome = self.node.deref().GetOutcome()
+        return o
 
-    @outcome.setter
-    def outcome(self, outcome: typing.Optional[Outcome]) -> None:
-        if outcome is None:
-            self.node.deref().SetOutcome(cython.cast(c_GameOutcome, NULL))
-        else:
-            self.node.deref().SetOutcome(outcome.outcome)
-             

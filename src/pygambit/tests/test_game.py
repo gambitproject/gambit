@@ -191,8 +191,8 @@ class TestGambitGame(unittest.TestCase):
         "Test referencing an invalid game member object"
         def foo():
             g = pygambit.Game.new_tree()
-            g.players.add("One")
+            g.add_player("One")
             s = g.players[0].strategies[0]
-            g.root.append_move(g.players[0], 2)
+            g.append_move(g.root, g.players[0], 2)
             s.number
         self.assertRaises(RuntimeError, foo)
