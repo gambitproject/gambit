@@ -287,7 +287,6 @@ EXTRA_DIST = \
 	src/pygambit/tests/test_outcomes.py \
 	src/pygambit/tests/test_players.py \
 	src/pygambit/tests/test_strategic.py \
-	src/pygambit/tests/test_stratspt.py \
 	src/pygambit/tests/test_stratprofiles.py \
 	src/pygambit/tests/test_strategies.py \
 	src/pygambit/tests/test_games/basic_extensive_game.efg \
