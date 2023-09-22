@@ -527,7 +527,9 @@ class Game:
         try:
             self.game.deref().SetChanceProbs(cython.cast(Infoset, infoset).infoset, numbers)
         except RuntimeError:
-            raise ValueError("set_chance_probs(): must specify non-negative probabilities that sum to one")
+            raise ValueError(
+                "set_chance_probs(): must specify non-negative probabilities that sum to one"
+            ) from None
 
     def _get_contingency(self, *args):
         psp = cython.declare(shared_ptr[c_PureStrategyProfile])
