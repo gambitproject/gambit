@@ -30,7 +30,7 @@ class MixedAgentStrategy:
         self.infoset = infoset
 
     def __repr__(self) -> str:
-        return str(list(self.profile[self.infoset]))
+        return str([self.profile[action] for action in self.infoset.actions])
 
     def _repr_latex_(self) -> str:
         if isinstance(self.profile, MixedBehaviorProfileRational):
@@ -70,7 +70,7 @@ class MixedBehaviorStrategy:
         self.player = player
 
     def __repr__(self) -> str:
-        return str(list(self.profile[self.player]))
+        return str([self.profile[infoset] for infoset in self.player.infosets])
 
     def _repr_latex_(self) -> str:
         if isinstance(self.profile, MixedBehaviorProfileRational):

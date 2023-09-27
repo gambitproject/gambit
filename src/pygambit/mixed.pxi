@@ -29,7 +29,7 @@ class MixedStrategy:
         self.player = player
 
     def __repr__(self):
-        return str(list(self.profile[self.player]))
+        return str([self.profile[s] for s in self.player.strategies])
 
     def _repr_latex_(self):
         if isinstance(self.profile, MixedStrategyProfileRational):
