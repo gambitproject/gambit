@@ -124,7 +124,7 @@ class TestGambitNode(unittest.TestCase):
             self.extensive_game.append_move,
             self.extensive_game.root,
             self.extensive_game.players[0],
-            0
+            []
         )
 
     def test_append_move_error_player_mismatch(self):
@@ -134,7 +134,7 @@ class TestGambitNode(unittest.TestCase):
             self.game.append_move,
             self.game.root,
             self.extensive_game.players[0],
-            1
+            ["a"]
         )
 
     def test_append_move_error_infoset_mismatch(self):

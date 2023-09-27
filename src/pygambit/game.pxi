@@ -152,15 +152,21 @@ class Game:
     game = cython.declare(c_Game)
 
     @classmethod
-    def new_tree(cls, title: str="Untitled extensive game") -> Game:
+    def new_tree(cls,
+                 players: typing.Optional[typing.List[str]] = None,
+                 title: str = "Untitled extensive game") -> Game:
         """Creates a new Game consisting of a trivial game tree,
-        with one node, which is both root and terminal, and only the chance player.
+        with one node, which is both root and terminal.
 
         .. versionchanged:: 16.1.0
-	        Added the ``title`` parameter.
+	        Added the `players` and `title``
 
         Parameters
         ----------
+        players : list of str, optional
+            A list of labels for the (strategic) players of the game.  If `players`
+            is not specified, the game initially has no players defined other than
+            the chance player.
         title : str, optional
             The title of the game.  If no title is specified, "Untitled extensive game"
             is used.
@@ -174,6 +180,10 @@ class Game:
         g = cls()
         g.game = NewTree()
         g.title = title
+        for player in (players or []):
+            p = Player()
+            p.player = g.game.deref().NewPlayer()
+            p.label = str(player)
         return g
 
     @classmethod
@@ -913,8 +923,10 @@ class Game:
         raise TypeError(f"{funcname}(): {argname} must be Action or str, not {action.__class__.__name__}")
 
     def append_move(self, node: typing.Union[Node, str],
-                    player: typing.Union[Player, str], actions: int) -> None:
-        """Add a move for `player` at the terminal node `node`, with `actions` actions.
+                    player: typing.Union[Player, str],
+                    actions: typing.List[str]) -> None:
+        """Add a move for `player` at the terminal node `node`.  `node` becomes part of
+        a new information set, with actions labeled according to `actions`.
 
         Raises
         ------
@@ -928,9 +940,11 @@ class Game:
         resolved_player = cython.cast(Player, self._resolve_player(player, 'append_move'))
         if len(resolved_node.children) > 0:
             raise UndefinedOperationError("append_move(): `node` must be a terminal node")
-        if actions < 1:
-            raise UndefinedOperationError("append_move(): `actions` must be a positive number")
-        resolved_node.node.deref().AppendMove(resolved_player.player, actions)
+        if len(actions) == 0:
+            raise UndefinedOperationError("append_move(): `actions` must be a nonempty list")
+        resolved_node.node.deref().AppendMove(resolved_player.player, len(actions))
+        for label, action in zip(actions, resolved_node.infoset.actions):
+            action.label = label
 
     def append_infoset(self, node: typing.Union[Node, str],
                        infoset: typing.Union[Infoset, str]) -> None:
@@ -1144,23 +1158,40 @@ class Game:
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, 'set_player'))
         resolved_infoset.infoset.deref().SetPlayer(resolved_player.player)
 
-    def add_outcome(self, label: str = "") -> Outcome:
+    def add_outcome(self,
+                    payoffs: typing.Optional[typing.List] = None,
+                    label: str = "") -> Outcome:
         """Add a new outcome to the game.
 
         Parameters
         ----------
+        payoffs : list, optional
+            The payoffs of the outcome to each player.
         label : str, default ""
             The label for the outcome
+
+        Raises
+        ------
+        ValueError
+            If `payoffs` is specified but is not the same length as the number of players
+            in the game.
 
         Returns
         -------
         Outcome
             A reference to the newly-created outcome.
         """
+        if payoffs is not None:
+            if len(payoffs) != len(self.players):
+                raise ValueError("add_outcome(): number of payoffs must equal number of players")
+        else:
+            payoffs = [0 for _ in self.players]
         c = Outcome()
         c.outcome = self.game.deref().NewOutcome()
         if str(label) != "":
             c.label = str(label)
+        for player, payoff in zip(self.players, payoffs):
+            c[player.number] = payoff
         return c
 
     def delete_outcome(self, outcome: typing.Union[Outcome, str]) -> None:

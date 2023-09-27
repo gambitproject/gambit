@@ -13,60 +13,145 @@ Gambit's features.  ``pygambit`` is available on PyPI
 User guide
 ----------
 
-Building an extensive game
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Example: One-shot trust game with binary actions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The function :py:meth:`.Game.new_tree` creates a new, trivial
-extensive game, with no players, and only a root node::
+[Kre90]_ introduced a game commonly referred to as the **trust game**.
+We will build a one-shot version of this game using ``pygambit``'s game transformation
+operations.
+
+There are two players, a **Buyer** and a **Seller**.
+The Buyer moves first and has two actions, **Trust** or **Not trust**.
+If the Buyer chooses **Not trust**, then the game ends, and both players
+receive payoffs of 0.
+If the Buyer chooses **Trust**, then the Seller has a choice with two actions,
+**Honor** or **Abuse**.
+If the Seller chooses **Honor**, both players receive payoffs of 1;
+if the Seller chooses **Abuse**, the Buyer receives a payoff of -1 and the Seller
+receives a payoff of 2.
+
+We create a game with an extensive representation using :py:meth:`.Game.new_tree`::
 
   In [1]: import pygambit as gbt
 
-  In [2]: g = gbt.Game.new_tree()
+  In [2]: g = gbt.Game.new_tree(players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)")
 
-  In [3]: len(g.players)
-  Out[3]: 0
+The tree of the game contains just a root node, with no children::
 
-The :py:attr:`~.Game.title` attribute on a :py:class:`.Game` provides
-access to a game's title::
+  In [3]: g.root
+  Out[3]: <Node [0] '' in game 'One-shot trust game, after Kreps (1990)'>
 
-  In [4]: g.title
-  Out[4]: 'Untitled extensive game'
+  In [4]: g.root.children
+  Out[4]: []
 
-  In [5]: g.title = "A simple poker example"
+To extend a game from an existing terminal node, use :py:meth:`.Game.append_move`::
 
-  In [6]: g.title
-  Out[6]: 'A simple poker example'
+  In [5]: g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
+
+  In [6]: g.root.children
+  Out[6]: [<Node [2] '' in game 'One-shot trust game, after Kreps (1990)'>, <Node [3] '' in game 'One-shot trust game, after Kreps (1990)'>]
+
+We can then also add the Seller's move in the situation after the Buyer chooses Trust::
+
+  In [7]: g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
+
+Now that we have the moves of the game defined, we add payoffs.  Payoffs are associated with
+:py:class:`.Outcome`s; each :py:class:`Outcome` has a vector of payoffs, one for each player,
+and optionally an identifying text label.  First we add the outcome associated with the
+Seller proving themselves trustworthy::
+
+  In [8]: g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy"))
+
+Next, the outcome associated with the scenario where the Buyer trusts but the Seller does
+not return the trust::
+
+  In [9]: g.set_outcome(g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy"))
+
+And, finally the outcome associated with the Buyer opting out of the interaction::
+
+  In [10]: g.set_outcome(g.root.children[1], g.add_outcome([0, 0], label="Opt-out"))
+
+Nodes without an outcome attached are assumed to have payoffs of zero for all players.
+Therefore, adding the outcome to this latter terminal node is not strictly necessary in Gambit,
+but it is useful to be explicit for readability.
+
+.. [Kre90] Kreps, D. (1990) "Corporate Culture and Economic Theory."
+   In J. Alt and K. Shepsle, eds., *Perspectives on Positive Political Economy*,
+   Cambridge University Press.
 
 
-The :py:attr:`~.Game.players` attribute of a game is a collection of
-the players.  Calling :py:meth:`~.Players.__len__` on the set of
-players gives the number of players in the game.  Adding a
-:py:class:`~.Player` to the game is done with the
-:py:meth:`~.GamePlayers.add` member
-of :py:attr:`~.Game.players`::
+Example: A one-card poker game with private information
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  In [8]: p = g.players.add("Alice")
+To illustrate games in extensive form, [Mye91]_ presents a one-card poker game.
+A version of this game also appears in [RUW08]_, as a classroom game under the
+name "stripped-down poker".  This is perhaps the simplest interesting game
+with imperfect information.
 
-  In [9]: p
-  Out[9]: <Player [0] 'Alice' in game 'A simple poker example'>
+In our version of the game, there are two players, **Alice** and **Bob**.
+There is a deck of cards, with equal numbers of **King** and **Queen** cards.
+The game begins with each player putting $1 in the pot.
+One card is dealt at random to Alice; Alice observes her card but Bob does not.
+After Alice observes her card, she can choose either to **Raise** or to **Fold**.
+If she chooses to Fold, Bob wins the pot and the game ends.
+If she chooses to Raise, she adds another $1 to the pot.
+Bob then chooses either to **Meet** or **Pass**.  If he chooses to Pass,
+Alice wins the pot and the game ends.
+If he chooses to Meet, he adds another $1 to the pot.
+There is then a showdown, in which Alice reveals her card.  If she has a King,
+then she wins the pot; if she has a Queen, then Bob wins the pot.
 
-Each :py:class:`~pygambit.gambit.Player` has a text string stored in the
-:py:attr:`~pygambit.gambit.Player.label` attribute, which is useful for human
-identification of players::
+We can build this game using the following script::
 
-  In [10]: p.label
-  Out[10]: 'Alice'
+        g = gbt.Game.new_tree(players=["Alice", "Bob"],
+                              title="One card poker game, after Myerson (1991)")
+        g.append_move(g.root, g.players.chance, ["King", "Queen"])
+        for node in g.root.children:
+            g.append_move(node, "Alice", ["Raise", "Fold"])
+        g.append_move(g.root.children[0].children[0], "Bob", ["Meet", "Pass"])
+        g.append_infoset(g.root.children[1].children[0],
+                         g.root.children[0].children[0].infoset)
+        alice_winsbig = g.add_outcome([2, -2], label="Alice wins big")
+        alice_wins = g.add_outcome([1, -1], label="Alice wins")
+        bob_winsbig = g.add_outcome([-2, 2], label="Bob wins big")
+        bob_wins = g.add_outcome([-1, 1], label="Bob wins")
+        g.set_outcome(g.root.children[0].children[0].children[0], alice_winsbig)
+        g.set_outcome(g.root.children[0].children[0].children[1], alice_wins)
+        g.set_outcome(g.root.children[0].children[1], bob_wins)
+        g.set_outcome(g.root.children[1].children[0].children[0], bob_winsbig)
+        g.set_outcome(g.root.children[1].children[0].children[1], alice_wins)
+        g.set_outcome(g.root.children[1].children[1], bob_wins)
 
-:py:attr:`~pygambit.gambit.Game.players` can be accessed like a Python list::
+All extensive games have a chance (or nature) player, accessible as
+``.Game.players.chance``.  Moves belonging to the chance player can be added in the same
+way as to personal players.  At any new move created for the chance player, the action
+probabilities default to uniform randomization over the actions at the move.
 
-  In [11]: len(g.players)
-  Out[11]: 1
+In this game, information structure is important.  Alice knows her card, so the two nodes
+at which she has the move are part of different information sets.  The loop::
 
-  In [12]: g.players[0]
-  Out[12]: <Player [0] 'Alice' in game 'A simple poker example'>
+        for node in g.root.children:
+            g.append_move(node, "Alice", ["Raise", "Fold"])
 
-  In [13]: g.players
-  Out[13]: [<Player [0] 'Alice' in game 'A simple poker example'>]
+causes each of the newly-appended moves to be in new information sets.  In contrast, Bob
+does not know Alice's card, and therefore cannot distinguish between the two nodes at which
+he has the decision.   This is implemented in the following lines::
+
+        g.append_move(g.root.children[0].children[0], "Bob", ["Meet", "Pass"])
+        g.append_infoset(g.root.children[1].children[0],
+                         g.root.children[0].children[0].infoset)
+
+The call :py:meth:`.Game.append_infoset` adds a move at a terminal node as part of
+an existing information set (represented in `pygambit` as an :py:class:`.Infoset`).
+
+
+.. [Mye91] Myerson, Roger B. (1991) *Game Theory: Analysis of Conflict*.
+   Cambridge: Harvard University Press.
+
+.. [RUW08] Reiley, David H., Michael B. Urbancic and Mark Walker. (2008)
+   "Stripped-down poker: A classroom game with signaling and bluffing."
+   *The Journal of Economic Education* 39(4): 323-341.
+
 
 
 Building a strategic game
@@ -302,7 +387,7 @@ Each pure strategy profile can then be used to access individual
 outcomes and payoffs in the game::
 
    In [3]: for profile in g.contingencies:
-      ...:     print profile, g[profile][0], g[profile][1]
+      ...:     print(profile, g[profile][0], g[profile][1])
       ...:     
    [0, 0] 1 1
    [0, 1] 1 1
@@ -336,27 +421,24 @@ This sample illustrates the three methods::
 
   In [2]: p = g.mixed_strategy_profile()
 
-  In [3]: list(p)
-  Out[3]: [0.33333333333333331, 0.33333333333333331, 0.33333333333333331, 0.5, 0.5]
+  In [3]: p[g.players[0]]
+  Out[3]: [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
 
-  In [4]: p[g.players[0]]
-  Out[4]: [0.33333333333333331, 0.33333333333333331, 0.33333333333333331]
-
-  In [5]: p[g.players[1].strategies[0]]
-  Out[5]: 0.5
+  In [4]: p[g.players[1].strategies[0]]
+  Out[4]: 0.5
 
 The expected payoff to a player is obtained using
 :py:meth:`.MixedStrategyProfile.payoff`::
 
-  In [6]: p.payoff(g.players[0])
-  Out[6]: 0.66666666666666663
+  In [5]: p.payoff(g.players[0])
+  Out[5]: 0.6666666666666666
 
 The standalone expected payoff to playing a given strategy, assuming
 all other players play according to the profile, is obtained using
 :py:meth:`.MixedStrategyProfile.strategy_value`::
 
-  In [7]: p.strategy_value(g.players[0].strategies[2])
-  Out[7]: 1.0
+  In [6]: p.strategy_value(g.players[0].strategies[2])
+  Out[6]: 1.0
 
 A :py:class:`.MixedBehaviorProfile` object, which represents a probability
 distribution over the actions at each information set, is constructed
@@ -373,17 +455,14 @@ by that player::
 
   In [2]: p = g.mixed_behavior_profile()
 
-  In [3]: list(p)
-  Out[3]: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+  In [3]: p[g.players[0]]
+  Out[3]: [[0.5, 0.5], [0.5, 0.5]]
 
-  In [5]: p[g.players[0]]
-  Out[5]: [[0.5, 0.5], [0.5, 0.5]]
+  In [4]: p[g.players[0].infosets[0]]
+  Out[4]: [0.5, 0.5]
 
-  In [6]: p[g.players[0].infosets[0]]
-  Out[6]: [0.5, 0.5]
-
-  In [7]: p[g.players[0].infosets[0].actions[0]]
-  Out[7]: 0.5
+  In [5]: p[g.players[0].infosets[0].actions[0]]
+  Out[5]: 0.5
 
 For games with a tree representation, a
 :py:class:`.MixedStrategyProfile` can be converted to its equivalent

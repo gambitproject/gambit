@@ -193,6 +193,6 @@ class TestGambitGame(unittest.TestCase):
             g = pygambit.Game.new_tree()
             g.add_player("One")
             s = g.players[0].strategies[0]
-            g.append_move(g.root, g.players[0], 2)
+            g.append_move(g.root, g.players[0], ["a", "b"])
             s.number
         self.assertRaises(RuntimeError, foo)
