@@ -709,10 +709,36 @@ class Game:
     def support_profile(self):
         return StrategySupportProfile(list(self.strategies), self)
 
-    def num_nodes(self):
-        if self.is_tree:
-            return self.game.deref().NumNodes()
-        return 0
+    def nodes(
+            self,
+            subtree: typing.Optional[typing.Union[Node, str]] = None
+    ) -> typing.List[Node]:
+        """Return a list of nodes in the game tree.  If `subtree` is not `None`, returns
+        the nodes in the subtree rooted at that node.
+        
+        Nodes are returned in prefix-traversal order: a node appears prior to the list of
+        nodes in the subtrees rooted at the node's children.
+        
+        Parameters
+        ----------
+        subtree : Node or str, optional
+            If specified, return only the nodes in the subtree rooted at `subtree`.
+        
+        Raises
+        ------
+        MismatchError
+            If `node` is a `Node` from a different game.
+        """
+        if not self.is_tree:
+            return []
+        if subtree:
+            resolved_node = cython.cast(Node, self._resolve_node(subtree, 'nodes', 'subtree'))
+        else:
+            resolved_node = self.root
+        return (
+            [resolved_node] +
+            [n for child in resolved_node.children for n in self.nodes(child)]
+        )
 
     def write(self, format='native') -> str:
         """Produce a serialization of the game.

@@ -7,6 +7,10 @@
   pygambit.
 - Repackage logit solver in src/solvers; make pygambit.nash.logit_solve available as a
   method for finding a Nash equilibrium.
+- Additional game transformation operations have been moved to the Game class, and old versions
+  deprecated.
+- Game.num_nodes has been removed in favor of Game.nodes, which returns a list of the nodes
+  in the game.
 
 
 ## [16.1.0a2] - 2023-09-22
