@@ -78,7 +78,7 @@ class TestGambitActions(unittest.TestCase):
     def test_action_delete(self):
         """Test to ensure it is possible to delete an action"""
         assert len(self.extensive_game.actions) == 6
-        self.extensive_game.actions[0].delete()
+        self.extensive_game.delete_action(self.extensive_game.actions[0])
         assert len(self.extensive_game.actions) == 5
 
     def test_action_delete_error(self):
@@ -86,7 +86,9 @@ class TestGambitActions(unittest.TestCase):
         raises an error
         """
         assert len(self.extensive_game.infosets[0].actions) == 2
-        self.extensive_game.actions[0].delete()
+        self.extensive_game.delete_action(self.extensive_game.actions[0])
         self.assertRaises(
-            pygambit.UndefinedOperationError, self.extensive_game.actions[0].delete
+            pygambit.UndefinedOperationError,
+            self.extensive_game.delete_action,
+            self.extensive_game.actions[0]
         )

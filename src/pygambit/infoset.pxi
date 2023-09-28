@@ -19,7 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-
+from deprecated import deprecated
 
 @cython.cclass
 class Members(Collection):
@@ -45,9 +45,15 @@ class Actions(Collection):
     """The set of actions which are available at an information set."""
     infoset = cython.declare(c_GameInfoset)
 
+    @deprecated(version='16.1.0',
+                reason='Use Game.add_action instead of Actions.add.',
+                category=FutureWarning)
     def add(self, action=None):
         """Add an action at the information set.  If `action` is not null, the new action
         is inserted before `action`.
+
+        .. deprecated:: 16.1.0
+           Use `Game.add_action` instead of `Actions.add`.
         """
         if action is None:
             self.infoset.deref().InsertAction(cython.cast(c_GameAction, NULL))
@@ -94,6 +100,9 @@ class Infoset:
         """Return whether this information set precedes `node` in the game tree."""
         return self.infoset.deref().Precedes(cython.cast(Node, node).node)
 
+    @deprecated(version='16.1.0',
+                reason='Use Game.reveal instead of Infoset.game.',
+                category=FutureWarning)
     def reveal(self, player: Player) -> None:
         """Reveal the move made at the information set to `player`.
 
@@ -103,6 +112,9 @@ class Infoset:
 
         Revelation is a one-shot operation; it is not enforced with respect to any
         revisions made to the game tree subsequently.
+
+        .. deprecated:: 16.1.0
+           Use `Game.reveal` instead of `Infoset.reveal`.
 
         Parameters
         ----------

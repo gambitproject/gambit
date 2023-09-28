@@ -61,9 +61,10 @@ class TestGambitInfosets(unittest.TestCase):
 
     def test_infoset_add_action(self):
         assert len(self.extensive_game.infosets[0].actions) == 2
-        self.extensive_game.infosets[0].actions.add()
+        self.extensive_game.add_action(self.extensive_game.infosets[0])
         assert len(self.extensive_game.infosets[0].actions) == 3
-        self.extensive_game.infosets[0].actions.add(
+        self.extensive_game.add_action(
+            self.extensive_game.infosets[0],
             self.extensive_game.actions[2]
         )
         assert len(self.extensive_game.infosets[0].actions) == 4
@@ -71,6 +72,7 @@ class TestGambitInfosets(unittest.TestCase):
     def test_infoset_add_action_error(self):
         self.assertRaises(
             pygambit.MismatchError,
-            self.extensive_game.infosets[0].actions.add,
+            self.extensive_game.add_action,
+            self.extensive_game.infosets[0],
             self.extensive_game.actions[3]
         )

@@ -48,7 +48,11 @@ class Outcomes(Collection):
                 reason='Use Game.add_outcome() instead of Game.outcomes.add()',
                 category=FutureWarning)
     def add(self, label="") -> Outcome:
-        """Add a new outcome to the game."""
+        """Add a new outcome to the game.
+
+        .. deprecated:: 16.1.0
+           Use `Game.add_outcome` instead of `Outcomes.add`.
+        """
         c = Outcome()
         c.outcome = self.game.deref().NewOutcome()
         if label != "":
@@ -1102,6 +1106,56 @@ class Game:
         resolved_node = cython.cast(Node, self._resolve_node(node, 'delete_tree'))
         resolved_node.node.deref().DeleteTree()
 
+    def add_action(self,
+                   infoset: typing.Union[typing.Infoset, str],
+                   before: typing.Optional[typing.Union[Action, str]] = None) -> None:
+        """Add an action at the information set `infoset`.   If `before` is not null, the new action
+        is inserted before `before`.
+
+        Parameters
+        ----------
+        infoset : Infoset or str
+            The information set at which to add an action
+        before : Action or str, optional
+            The action before which to add the new action.  If `before` is not specified,
+            the new action is the first at the information set
+
+        Raises
+        ------
+        MismatchError
+            If `infoset` is an `Infoset` from a different game, `before` is an `Action`
+            from a different game, or `before` is not an action at `infoset`.
+        """
+        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, 'add_action'))
+        if before is None:
+            resolved_infoset.infoset.deref().InsertAction(cython.cast(c_GameAction, NULL))
+        else:
+            resolved_action = cython.cast(
+                Action, self._resolve_action(before, 'add_action', 'before')
+            )
+            if resolved_infoset != resolved_action.infoset:
+                raise MismatchError("add_action(): must specify an action from the same infoset")
+            resolved_infoset.infoset.deref().InsertAction(resolved_action.action)
+
+
+    def delete_action(self, action: typing.Union[Action, str]) -> None:
+        """Deletes `action` from its information set.  The subtrees which
+        are rooted at nodes that follow the deleted action are also deleted.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If `action` is the only action at its information set.
+        MismatchError
+            If `action` is an `Action` from a different game.
+        """
+        resolved_action = cython.cast(Action, self._resolve_action(action, 'delete_action'))
+        if len(resolved_action.infoset.actions) == 1:
+            raise UndefinedOperationError(
+                "delete_action(): cannot delete the only action at an information set"
+            )
+        resolved_action.action.deref().DeleteAction()
+
     def leave_infoset(self, node: typing.Union[Node, str]):
         """Remove this node from its information set. If this node is the only node
         in its information set, this operation has no effect.
@@ -1138,6 +1192,35 @@ class Game:
                 "set_infoset(): `infoset` must have same number of actions as `node` has children."
             )
         resolved_node.node.deref().SetInfoset(resolved_infoset.infoset)
+
+    def reveal(self,
+               infoset: typing.Union[Infoset, str],
+               player: typing.Union[Player, str]) -> None:
+        """Reveals the move made at `infoset` to `player`.
+
+        Revealing the move modifies all subsequent information sets for `player` such
+        that any two nodes which are successors of two different actions at this
+        information set are placed in different information sets for `player`.
+
+        Revelation is a one-shot operation; it is not enforced with respect to any
+        revisions made to the game tree subsequently.
+
+        Parameters
+        ----------
+        infoset : Infoset or str
+            The information set of the move to reveal to the player
+        player : Player or str
+            The player to which to reveal the move at this information set.
+
+        Raises
+        ------
+        MismatchError
+            If `infoset` is an `Infoset` from a different game, or
+            `player` is a `Player` from a different game.
+        """
+        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, 'reveal'))
+        resolved_player = cython.cast(Player, self._resolve_player(player, 'reveal'))
+        resolved_infoset.deref().Reveal(resolved_player)
 
     def add_player(self, label: str = "") -> Player:
         """Add a new player to the game.

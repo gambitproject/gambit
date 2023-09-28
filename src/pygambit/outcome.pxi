@@ -52,6 +52,9 @@ class Outcome:
         node at which this outcome is attached has its outcome reset to null.  If this game
         is a strategic game, any contingency at which this outcome is attached as its outcome
         reset to null.
+
+        .. deprecated:: 16.1.0
+           Use `Game.delete_outcome` instead of `Outcome.delete`.
         """
         cython.cast(Game, self.game).game.deref().DeleteOutcome(self.outcome)
 

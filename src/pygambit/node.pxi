@@ -71,6 +71,9 @@ class Node:
         In this instance, the number of `actions` at the new information set must
         be specified.
 
+        .. deprecated:: 16.1.0
+           Use `Game.append_move` or `Game.append_infoset` instead of `Node.append_move`.
+
         Raises
         ------
         UndefinedOperationError
@@ -112,6 +115,9 @@ class Node:
         number of ``actions`` at the new information set must be specified.
         The newly-inserted node takes the place of the node in the game
         tree, and the existing node becomes the first child of the new node.
+
+        .. deprecated:: 16.1.0
+           Use `Game.insert_move` or `Game.insert_infoset` instead of `Node.insert_move`.
 
         Raises
         ------

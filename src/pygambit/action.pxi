@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+from deprecated import deprecated
 
 @cython.cclass
 class Action:
@@ -42,9 +43,15 @@ class Action:
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.action.deref())
 
+    @deprecated(version='16.1.0',
+                reason='Use Game.delete_action instead of Action.delete.',
+                category=FutureWarning)
     def delete(self):
         """Deletes this action from its information set.  The subtrees which
         are rooted at nodes that follow the deleted action are also deleted.
+
+        .. deprecated:: 16.1.0
+           Use `Game.delete_action` instead of `Action.delete`.
 
         Raises
         ------
