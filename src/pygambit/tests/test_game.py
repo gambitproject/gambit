@@ -184,8 +184,8 @@ class TestGambitGame(unittest.TestCase):
 
     def test_game_num_nodes(self):
         "Test retrieving the number of nodes of a game"
-        assert self.extensive_game.num_nodes() == 15
-        assert self.game.num_nodes() == 0
+        assert len(self.extensive_game.nodes()) == 15
+        assert len(self.game.nodes()) == 0
 
     def test_game_dereference_invalid(self):
         "Test referencing an invalid game member object"
