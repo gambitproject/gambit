@@ -9,10 +9,8 @@ Detailed table of contents
    intro
    gui
    tools
-   pyapi
-   api
+   pygambit
    samples
-   ideas
    build
    formats
    biblio

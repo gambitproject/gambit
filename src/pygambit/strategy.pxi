@@ -22,7 +22,7 @@
 
 @cython.cclass
 class Strategy:
-    """A strategy belonging to a player in a game."""
+    """A plan of action for a ``Player`` in a ``Game``."""
     strategy = cython.declare(c_GameStrategy)
 
     def __repr__(self):
@@ -43,7 +43,7 @@ class Strategy:
 
     @property
     def label(self) -> str:
-        """The text label associated with the strategy."""
+        """Get or set the text label associated with the strategy."""
         return self.strategy.deref().GetLabel().decode('ascii')
 
     @label.setter

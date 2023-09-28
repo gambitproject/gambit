@@ -22,7 +22,7 @@ quantal response equilibria of a game, see the section on
 :ref:`the command-line tools <command-line>`. 
 To build larger games or to explore parameter spaces of a game
 systematically, it is recommended to use
-:ref:`the Python API <python-api>`.
+:ref:`the Python package <pygambit>`.
 
 
 

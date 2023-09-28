@@ -123,8 +123,9 @@ class MixedBehaviorProfile:
         ----------
         index : Player, Infoset, Action, or str
             The part of the profile to return:
-            * If `index` is a `Player`, returns a `MixedBehaviorStrategy` over the player's infosets
-            * If `index` is an `Infoset`, returns a `MixedAgentStrategy` over the infoset's actions
+
+            * If `index` is a `Player`, returns a ``MixedBehaviorStrategy`` over the player's infosets
+            * If `index` is an `Infoset`, returns a ``MixedAgentStrategy`` over the infoset's actions
             * If `index` is an `Action`, returns the probability the action is playe
             * If `index` is a `str`, attempts to resolve the referenced object by first searching
               for a player with that label, then for an infoset with that label, and finally for an
@@ -133,8 +134,8 @@ class MixedBehaviorProfile:
         Raises
         ------
         MismatchError
-            If `player` is a `Player` from a different game, `infoset` is an `Infoset` from a different
-            game, or `action` is an `Action` from a different game.`
+            If `player` is a ``Player`` from a different game, `infoset` is an ``Infoset`` from a different
+            game, or `action` is an ``Action`` from a different game.`
         """
         if isinstance(index, Action):
             if index.infoset.game != self.game:
@@ -183,8 +184,9 @@ class MixedBehaviorProfile:
         ----------
         index : Player, Infoset, Action, or str
             The part of the profile to return:
-            * If `index` is a `Player`, returns a `MixedBehaviorStrategy` over the player's infosets
-            * If `index` is an `Infoset`, returns a `MixedAgentStrategy` over the infoset's actions
+
+            * If `index` is a `Player`, returns a ``MixedBehaviorStrategy`` over the player's infosets
+            * If `index` is an `Infoset`, returns a ``MixedAgentStrategy`` over the infoset's actions
             * If `index` is an `Action`, returns the probability the action is playe
             * If `index` is a `str`, attempts to resolve the referenced object by first searching
               for a player with that label, then for an infoset with that label, and finally for an

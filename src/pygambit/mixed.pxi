@@ -79,16 +79,17 @@ class MixedStrategyProfile:
         ----------
         index : Player, Strategy, or str
             The part of the profile to return:
-            * If `index` is a `Player`, returns a `MixedStrategy` over the player's strategies.
-            * If `index` is a `Strategy`, returns the probability the strategy is played.
-            * If `index` is a `str`, attempts to resolve the referenced object by first searching
+
+            * If `index` is a ``Player``, returns a ``MixedStrategy`` over the player's strategies.
+            * If `index` is a ``Strategy``, returns the probability the strategy is played.
+            * If `index` is a ``str``, attempts to resolve the referenced object by first searching
               for a player with that label, and then for a strategy with that label.
 
         Raises
         ------
         MismatchError
-            If `player` is a `Player` from a different game, or `strategy` is a `Strategy` from a
-            different game.
+            If `player` is a ``Player`` from a different game, or
+            `strategy` is a ``Strategy`` from a different game.
         """
         if isinstance(index, Strategy):
             if index.game != self.game:
@@ -120,16 +121,17 @@ class MixedStrategyProfile:
         ----------
         index : Player, Strategy, or str
             The part of the profile to set:
-            * If `index` is a `Player`, sets the `MixedStrategy` over the player's strategies.
-            * If `index` is a `Strategy`, sets the probability the strategy is played.
-            * If `index` is a `str`, attempts to resolve the referenced object by first searching
+
+            * If `index` is a ``Player``, sets the ``MixedStrategy`` over the player's strategies.
+            * If `index` is a ``Strategy``, sets the probability the strategy is played.
+            * If `index` is a ``str``, attempts to resolve the referenced object by first searching
               for a player with that label, and then for a strategy with that label.
 
         Raises
         ------
         MismatchError
-            If `player` is a `Player` from a different game, or `strategy` is a `Strategy` from a
-            different game.
+            If `player` is a ``Player`` from a different game, or
+            `strategy` is a ``Strategy`` from a different game.
         """
         if isinstance(index, Strategy):
             if index.game != self.game:

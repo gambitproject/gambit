@@ -72,7 +72,7 @@ class Actions(Collection):
 
 @cython.cclass
 class Infoset:
-    """Represents an information set in a :py:class:`Game`."""
+    """An information set in a ``Game``."""
     infoset = cython.declare(c_GameInfoset)
 
     def __repr__(self) -> str:
@@ -91,11 +91,11 @@ class Infoset:
         return cython.cast(cython.long, self.infoset.deref())
 
     def precedes(self, node: Node) -> bool:
-        """Returns whether this information set precedes `node` in the game tree."""
+        """Return whether this information set precedes `node` in the game tree."""
         return self.infoset.deref().Precedes(cython.cast(Node, node).node)
 
     def reveal(self, player: Player) -> None:
-        """Reveals the move made at the information set to `player`.
+        """Reveal the move made at the information set to `player`.
 
         Revealing the move modifies all subsequent information sets for `player` such
         that any two nodes which are successors of two different actions at this
@@ -128,14 +128,14 @@ class Infoset:
 
     @property
     def game(self) -> Game:
-        """Gets the :py:class:`Game` to which the information set belongs."""
+        """The ``Game`` to which the information set belongs."""
         g = Game()
         g.game = self.infoset.deref().GetGame()
         return g
 
     @property
     def label(self) -> str:
-        """Gets or sets the text label of the information set."""
+        """Get or set the text label of the information set."""
         return self.infoset.deref().GetLabel().decode('ascii')
 
     @label.setter
@@ -144,19 +144,19 @@ class Infoset:
 
     @property
     def is_chance(self) -> bool:
-        """Returns `True` if the information set belongs to the chance player."""
+        """Whether the information set belongs to the chance player."""
         return self.infoset.deref().IsChanceInfoset()
 
     @property
     def actions(self) -> Actions:
-        """Returns the set of actions at the information set."""
+        """The set of actions at the information set."""
         a = Actions()
         a.infoset = self.infoset
         return a
 
     @property
     def members(self) -> Members:
-        """Returns the set of nodes which are members of the information set."""
+        """The set of nodes which are members of the information set."""
         return Members(self)
 
     @property

@@ -22,7 +22,7 @@
 
 @cython.cclass
 class Action:
-    """A choice available at an information set."""
+    """A choice available at an ``Infoset`` in a ``Game``."""
     action = cython.declare(c_GameAction)
 
     def __repr__(self):
@@ -58,7 +58,7 @@ class Action:
         self.action.deref().DeleteAction()
 
     def precedes(self, node: Node) -> bool:
-        """ Returns `True` if `node` precedes this action in the
+        """Returns whether `node` precedes this action in the
         extensive game.
 
         Raises

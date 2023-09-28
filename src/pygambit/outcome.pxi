@@ -26,7 +26,7 @@ from deprecated import deprecated
 
 @cython.cclass
 class Outcome:
-    """An outcome in a `Game`."""
+    """An outcome in a ``Game``."""
     outcome = cython.declare(c_GameOutcome)
 
     def __repr__(self):

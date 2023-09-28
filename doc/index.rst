@@ -14,7 +14,7 @@ Key features of Gambit include:
 * All equilibrium-computing algorithms are available as
   :ref:`command-line tools <command-line>`, callable from scripts and
   other programs.
-* A :ref:`Python API <python-api>` for developing scripting applications.
+* A :ref:`Python API <pygambit>` for developing scripting applications.
 
 
 Using and citing Gambit

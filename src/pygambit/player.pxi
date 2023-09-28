@@ -77,7 +77,7 @@ class Strategies(Collection):
 
 @cython.cclass
 class Player:
-    """Represents a player in a :py:class:`Game`."""
+    """A player in a ``Game``."""
     player = cython.declare(c_GamePlayer)
 
     def __repr__(self):
@@ -100,7 +100,7 @@ class Player:
 
     @property
     def game(self) -> Game:
-        """Gets the :py:class:`Game` to which the player belongs."""
+        """Gets the ``Game`` to which the player belongs."""
         g = Game()
         g.game = self.player.deref().GetGame()
         return g
@@ -119,14 +119,14 @@ class Player:
 
     @property
     def number(self) -> int:
-        """Returns the number of the player in its Game.
+        """Returns the number of the player in its game.
         Players are numbered starting with 0.
         """
         return self.player.deref().GetNumber() - 1
 
     @property
     def is_chance(self) -> bool:
-        """Returns `True` if the player is the chance player."""
+        """Returns whether the player is the chance player."""
         return self.player.deref().IsChance() != 0
 
     @property
