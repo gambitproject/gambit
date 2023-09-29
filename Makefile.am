@@ -608,14 +608,14 @@ gambit_liap_SOURCES = \
 
 gambit_logit_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
-	src/tools/logit/logbehav.h \
-	src/tools/logit/logbehav.imp \
-	src/tools/logit/path.cc \
-	src/tools/logit/path.h \
-	src/tools/logit/efglogit.h \
-	src/tools/logit/efglogit.cc \
-	src/tools/logit/nfglogit.h \
-	src/tools/logit/nfglogit.cc \
+	src/solvers/logit/logbehav.h \
+	src/solvers/logit/logbehav.imp \
+	src/solvers/logit/path.cc \
+	src/solvers/logit/path.h \
+	src/solvers/logit/efglogit.h \
+	src/solvers/logit/efglogit.cc \
+	src/solvers/logit/nfglogit.h \
+	src/solvers/logit/nfglogit.cc \
 	src/tools/logit/logit.cc
 
 gambit_lp_SOURCES = \

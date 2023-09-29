@@ -592,5 +592,34 @@ def gnm_solve(
     return libgbt._gnm_strategy_solve(game)
 
 
+def logit_solve(
+        game: libgbt.Game, use_strategic: bool = False
+) -> typing.Union[typing.List[libgbt.MixedStrategyProfile],
+                  typing.List[libgbt.MixedBehaviorProfile]]:
+    """Compute Nash equilibria of a game using :ref:`the logit quantal response
+    equilibrium correspondence <gambit-logit>`.
+
+    Returns an approximation to the limiting point on the principal branch of
+    the correspondence for the game.
+
+    Parameters
+    ----------
+    game : Game
+        The game to compute equilibria in.
+    use_strategic : bool, default False
+        Whether to use the strategic form.  If True, always uses the strategic
+        representation even if the game's native representation is extensive.
+
+    Returns
+    -------
+    List of profiles
+        List of mixed strategy or mixed behavior profiles computed.
+    """
+    if not game.is_tree or use_strategic:
+        return libgbt._logit_strategy_solve(game)
+    else:
+        return libgbt._logit_behavior_solve(game)
+
+
 logit_atlambda = libgbt.logit_atlambda
 logit_principal_branch = libgbt.logit_principal_branch

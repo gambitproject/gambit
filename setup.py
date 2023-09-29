@@ -38,10 +38,7 @@ cppgambit = (
             glob.glob("src/games/agg/*.cc") +
             glob.glob("src/solvers/*/*.cc") +
             ["src/tools/lp/nfglp.cc",
-             "src/tools/lp/efglp.cc",
-             "src/tools/logit/path.cc",
-             "src/tools/logit/nfglogit.cc",
-             "src/tools/logit/efglogit.cc"]
+             "src/tools/lp/efglp.cc"]
          ),
          'include_dirs': ["src"],
          'cflags': (

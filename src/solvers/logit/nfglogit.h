@@ -106,6 +106,19 @@ protected:
   class CallbackFunction;
 };
 
+inline List<MixedStrategyProfile<double> > LogitStrategySolve(const Game &p_game)
+{
+  StrategicQREPathTracer tracer;
+  tracer.SetFullGraph(false);
+  std::ostringstream ostream;
+  auto result = tracer.TraceStrategicPath(LogitQREMixedStrategyProfile(p_game),
+                                          ostream, 1000000.0, 1.0);
+  auto ret = List<MixedStrategyProfile<double>>();
+  ret.push_back(result[1].GetProfile());
+  return ret;
+}
+
+
 }  // end namespace Gambit
  
 #endif // NFGLOGIT_H

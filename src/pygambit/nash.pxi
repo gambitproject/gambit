@@ -134,6 +134,11 @@ def _ipa_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:
 def _gnm_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:
     return _convert_mspd(GNMStrategySolve(game.game))
 
+def _logit_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:
+    return _convert_mspd(LogitStrategySolve(game.game))
+
+def _logit_behavior_solve(game: Game) -> typing.List[MixedBehaviorProfileDouble]:
+    return _convert_mbpd(LogitBehaviorSolve(game.game))
 
 @cython.cclass
 class LogitQREMixedStrategyProfile:

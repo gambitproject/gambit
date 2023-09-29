@@ -5,6 +5,8 @@
 ### Changed
 - The `refine` and `leash` parameters to simpdiv have been made available and documented in
   pygambit.
+- Repackage logit solver in src/solvers; make pygambit.nash.logit_solve available as a
+  method for finding a Nash equilibrium.
 
 
 ## [16.1.0a2] - 2023-09-22
