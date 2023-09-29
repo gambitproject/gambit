@@ -90,9 +90,6 @@ class Infoset:
     def __eq__(self, other: typing.Any) -> bool:
         return isinstance(other, Infoset) and self.infoset.deref() == cython.cast(Infoset, other).infoset.deref()
 
-    def __ne__(self, other: typing.Any) -> bool:
-        return not isinstance(other, Infoset) or self.infoset.deref() != cython.cast(Infoset, other).infoset.deref()
-
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.infoset.deref())
 

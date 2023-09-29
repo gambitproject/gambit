@@ -389,9 +389,6 @@ class Game:
     def __eq__(self, other: typing.Any) -> bool:
         return isinstance(other, Game) and self.game.deref() == cython.cast(Game, other).game.deref()
 
-    def __ne__(self, other: typing.Any) -> bool:
-        return not isinstance(other, Game) or self.game.deref() != cython.cast(Game, other).game.deref()
-
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.game.deref())
 

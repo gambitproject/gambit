@@ -238,12 +238,6 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
             deref(self.profile) == deref(cython.cast(MixedStrategyProfileDouble, other).profile)
         )
 
-    def __ne__(self, other: typing.Any) -> bool:
-        return (
-            not isinstance(other, MixedStrategyProfileDouble) or
-            deref(self.profile) != deref(cython.cast(MixedStrategyProfileDouble, other).profile)
-        )
-
     def liap_value(self) -> float:
         """
         Returns the Lyapunov value (see [McK91]_) of the strategy profile.
@@ -340,12 +334,6 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
         return (
             isinstance(other, MixedStrategyProfileRational) and
             deref(self.profile) == deref(cython.cast(MixedStrategyProfileRational, other).profile)
-        )
-
-    def __ne__(self, other: typing.Any) -> bool:
-        return (
-            not isinstance(other, MixedStrategyProfileRational) or
-            deref(self.profile) != deref(cython.cast(MixedStrategyProfileRational, other).profile)
         )
 
     def liap_value(self) -> Rational:

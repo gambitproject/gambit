@@ -403,12 +403,6 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
             deref(self.profile) == deref(cython.cast(MixedBehaviorProfileDouble, other).profile)
         )
 
-    def __ne__(self, other: typing.Any) -> bool:
-        return (
-            not isinstance(other, MixedBehaviorProfileDouble) or
-            deref(self.profile) != deref(cython.cast(MixedBehaviorProfileDouble, other).profile)
-        )
-
     def copy(self) -> MixedBehaviorProfileDouble:
         """Creates a copy of the behavior strategy profile."""
         behav = MixedBehaviorProfileDouble()
@@ -502,12 +496,6 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         return (
             isinstance(other, MixedBehaviorProfileRational) and
             deref(self.profile) == deref(cython.cast(MixedBehaviorProfileRational, other).profile)
-        )
-
-    def __ne__(self, other: typing.Any) -> bool:
-        return (
-            not isinstance(other, MixedBehaviorProfileRational) or
-            deref(self.profile) != deref(cython.cast(MixedBehaviorProfileRational, other).profile)
         )
 
     def copy(self) -> MixedBehaviorProfileRational:

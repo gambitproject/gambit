@@ -51,9 +51,6 @@ class Node:
     def __eq__(self, other: typing.Any) -> bool:
         return isinstance(other, Node) and self.node.deref() == cython.cast(Node, other).node.deref()
 
-    def __ne__(self, other: typing.Any) -> bool:
-        return not isinstance(other, Node) or self.node.deref() != cython.cast(Node, other).node.deref()
-
     def __hash__(self) -> long:
         return cython.cast(long, self.node.deref())
 

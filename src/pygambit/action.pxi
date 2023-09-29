@@ -37,9 +37,6 @@ class Action:
     def __eq__(self, other: typing.Any) -> bool:
         return isinstance(other, Action) and self.action.deref() == cython.cast(Action, other).action.deref()
 
-    def __ne__(self, other: typing.Any) -> bool:
-        return not isinstance(other, Action) or self.action.deref() != cython.cast(Action, other).action.deref()
-
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.action.deref())
 

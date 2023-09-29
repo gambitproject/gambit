@@ -35,9 +35,6 @@ class Strategy:
     def __eq__(self, other: typing.Any) -> bool:
         return isinstance(other, Strategy) and self.strategy.deref() == cython.cast(Strategy, other).strategy.deref()
 
-    def __ne__(self, other: typing.Any) -> bool:
-        return not isinstance(other, Strategy) or self.strategy.deref() != cython.cast(Strategy, other).strategy.deref()
-
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.strategy.deref())
 
