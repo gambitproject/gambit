@@ -53,15 +53,7 @@ private:
   int m_gridResize, m_leashLength;
   bool m_verbose;
 
-  class State {
-  public:
-    int t, ibar;
-    Rational d, pay, maxz, bestz;
-    
-    State() : t(0), ibar(1), bestz(1.0e30) { }
-    Rational getlabel(MixedStrategyProfile<Rational> &yy, Array<int> &, 
-		      PVector<Rational> &);
-  };
+  class State;
 
   Rational Simplex(MixedStrategyProfile<Rational> &, const Rational &d) const;
   void update(State &, RectArray<int> &, RectArray<int> &, PVector<Rational> &,
@@ -76,9 +68,10 @@ private:
   int get_b(int j, int h, int nstrats, const PVector<int> &) const;
 };
 
-inline List<MixedStrategyProfile<Rational> > SimpdivStrategySolve(const Game &p_game)
+inline List<MixedStrategyProfile<Rational> >
+SimpdivStrategySolve(const Game &p_game, int p_gridResize = 2, int p_leashLength = 0)
 {
-  return NashSimpdivStrategySolver().Solve(p_game);
+  return NashSimpdivStrategySolver(p_gridResize, p_leashLength).Solve(p_game);
 }
 
 }  // end namespace Gambit::Nash

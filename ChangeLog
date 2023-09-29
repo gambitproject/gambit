@@ -1,6 +1,13 @@
 # Changelog
 
-## [16.1.0a2] - unreleased
+## [16.1.0a3] - 2023-09-29
+
+### Changed
+- The `refine` and `leash` parameters to simpdiv have been made available and documented in
+  pygambit.
+
+
+## [16.1.0a2] - 2023-09-22
 
 ### Changed
 - Most operations which modify games have been moved to being operations on `Game` instead of

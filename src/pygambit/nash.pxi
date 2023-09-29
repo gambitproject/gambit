@@ -123,8 +123,10 @@ def _liap_strategy_solve(game: Game, maxiter: int) -> typing.List[MixedStrategyP
 def _liap_behavior_solve(game: Game, maxiter: int) -> typing.List[MixedBehaviorProfileDouble]:
     return _convert_mbpd(LiapBehaviorSolve(game.game, maxiter))
 
-def _simpdiv_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileRational]:
-    return _convert_mspr(SimpdivStrategySolve(game.game))
+def _simpdiv_strategy_solve(
+        game: Game, gridstep: int, leash: int
+) -> typing.List[MixedStrategyProfileRational]:
+    return _convert_mspr(SimpdivStrategySolve(game.game, gridstep, leash))
 
 def _ipa_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:
     return _convert_mspd(IPAStrategySolve(game.game))

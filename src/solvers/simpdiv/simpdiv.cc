@@ -35,12 +35,31 @@ inline GameStrategy GetStrategy(const Game &game, int pl, int st)
   return game->GetPlayer(pl)->Strategies()[st];
 }
 
+class NashSimpdivStrategySolver::State {
+  public:
+    int m_leashLength;
+    int t, ibar;
+    Rational d, pay, maxz, bestz;
+
+    State(int p_leashLength) : m_leashLength(p_leashLength), t(0), ibar(1), bestz(1.0e30) { }
+    Rational getlabel(MixedStrategyProfile<Rational> &yy, Array<int> &,
+		      PVector<Rational> &);
+
+    /* Check whether the distance p_dist is "too far" given the leash length, if set. */
+    bool CheckLeashOK(const Rational &p_dist) const {
+      if (m_leashLength == 0) {
+        return true;
+      }
+      return p_dist < m_leashLength * d;
+    }
+  };
+
 Rational 
 NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
 				   const Rational &d) const
 {
   Game game = y.GetGame();
-  State state;
+  State state(m_leashLength);
   state.d = d;
   Array<int> nstrats(game->NumStrategies());
   Array<int> ylabel(2);
@@ -156,55 +175,55 @@ NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
   getY(state, y, v, U, TT, ab, pi, ii);
   
   /* case3a */
-  if (i==1 && 
-      (y[GetStrategy(game, j, k)]<=Rational(0) || 
-       (v(j,k)-y[GetStrategy(game, j, k)]) >= Rational(m_leashLength)*state.d)) {
+  if (i == 1 &&
+      (y[GetStrategy(game, j, k)] <= Rational(0) ||
+       !state.CheckLeashOK(v(j, k) - y[GetStrategy(game, j, k)]))) {
     for (hh = 1, tot = 0; hh <= nstrats[j]; hh++) {
-      if (TT(j,hh)==1 || U(j,hh)==1)  {
-	tot++;
+      if (TT(j, hh) == 1 || U(j, hh) == 1) {
+        tot++;
       }
     }
     if (tot == nstrats[j] - 1) {
-      U(j,k)=1;
+      U(j, k) = 1;
       goto end;
     }
     else {
       update(state, pi, labels, ab, U, j, i);
-      U(j,k) = 1;
+      U(j, k) = 1;
       getnexty(state, y, pi, U, state.t);
       goto step1;
     }
   }
   /* case3b */
-  else if (i>=2 && i<=state.t &&
+  else if (i >= 2 && i <= state.t &&
 	   (y[GetStrategy(game, j, k)] <= Rational(0) || 
-	    (v(j,k)-y[GetStrategy(game, j, k)]) >= Rational(m_leashLength)*state.d)) {
+	    !state.CheckLeashOK(v(j,k)-y[GetStrategy(game, j, k)]))) {
     goto step4;
   }
   /* case3c */
-  else if (i==state.t+1 && ab(j,kk) == Rational(0)) {
-    if (y[GetStrategy(game, j, h)] <= Rational(0) || 
-	(v(j,h)-y[GetStrategy(game, j, h)]) >= Rational(m_leashLength)*state.d) {
+  else if (i == state.t + 1 && ab(j, kk) == Rational(0)) {
+    if (y[GetStrategy(game, j, h)] <= Rational(0) ||
+        !state.CheckLeashOK(v(j, h) - y[GetStrategy(game, j, h)])) {
       goto step4;
     }
     else {
-      k=0;
-      while (ab(j,kk) == Rational(0) && k==0) {
-	if(kk==h)k=1;
-	kk++;
-	if (kk > nstrats[j]) {
-	  kk=1; 
-	}
+      k = 0;
+      while (ab(j, kk) == Rational(0) && k == 0) {
+        if (kk == h)k = 1;
+        kk++;
+        if (kk > nstrats[j]) {
+          kk = 1;
+        }
       }
       kk--;
       if (kk == 0) {
-	kk = nstrats[j];
+        kk = nstrats[j];
       }
       if (kk == h) {
-	goto step4;
+        goto step4;
       }
       else {
-	goto step5;
+        goto step5;
       }
     }
   }
@@ -232,7 +251,7 @@ NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
   h = pi(i-1,2);
   TT(j,h) = 0;
   if (y[GetStrategy(game, j, h)] <= Rational(0) || 
-      (v(j,h)-y[GetStrategy(game, j, h)]) >= Rational(m_leashLength)*state.d) {
+      !state.CheckLeashOK(v(j,h)-y[GetStrategy(game, j, h)])) {
     U(j,h) = 1;
   }
   labels.RotateUp(i,state.t+1);

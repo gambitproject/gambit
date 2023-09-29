@@ -500,6 +500,8 @@ def liap_solve(
 
 def simpdiv_solve(
         game: libgbt.Game,
+        refine: int = 2,
+        leash: typing.Optional[int] = None,
         external: bool = False
 ) -> typing.List[libgbt.MixedStrategyProfile]:
     """Compute Nash equilibria of a game using :ref:`simplicial
@@ -509,6 +511,15 @@ def simpdiv_solve(
     ----------
     game : Game
         The game to compute equilibria in.
+    refine : int, default 2
+        This controls the rate at which the triangulation of the space of mixed strategy
+        profiles is made more fine at each iteration.
+    leash : int, optional
+        Simplicial subdivision is guaranteed to converge to an (approximate) Nash equilibrium.
+        The method may take arbitrarily long paths through the space of mixed strategies in
+        doing so.  If specified, `leash` sets a maximum number of grid steps the method
+        may explore.  This trades off the possibility of finding an equilibrium more
+        quickly by giving up the guarantee than an equilibrium will necessarily be found.
     external : bool, default False
         Call the external command-line solver instead of the internally-linked
         implementation.  Requires the command-line solvers to be installed somewhere
@@ -521,7 +532,12 @@ def simpdiv_solve(
     """
     if external:
         return ExternalSimpdivSolver().solve(game)
-    return libgbt._simpdiv_strategy_solve(game)
+    if not isinstance(refine, int) or refine < 2:
+        raise ValueError("simpdiv_solve(): refine must be an integer no less than 2")
+    if leash is not None:
+        if not isinstance(leash, int) or leash <= 0:
+            raise ValueError("simpdiv_solve(): leash must be a non-negative integer")
+    return libgbt._simpdiv_strategy_solve(game, refine, leash or 0)
 
 
 def ipa_solve(

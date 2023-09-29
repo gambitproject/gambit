@@ -399,7 +399,9 @@ cdef extern from "solvers/liap/liap.h":
     c_List[c_MixedBehaviorProfileDouble] LiapBehaviorSolve(c_Game, int p_maxitsN) except +RuntimeError
 
 cdef extern from "solvers/simpdiv/simpdiv.h":
-    c_List[c_MixedStrategyProfileRational] SimpdivStrategySolve(c_Game) except +RuntimeError
+    c_List[c_MixedStrategyProfileRational] SimpdivStrategySolve(c_Game,
+                                                                int p_gridResize,
+                                                                int p_leashLength) except +RuntimeError
 
 cdef extern from "solvers/ipa/ipa.h":
     c_List[c_MixedStrategyProfileDouble] IPAStrategySolve(c_Game) except +RuntimeError
