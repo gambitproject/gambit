@@ -1,19 +1,27 @@
 import fractions
 import unittest
 
-import pygambit
+import numpy as np
+
+import pygambit as gbt
 
 
 class TestGambitGame(unittest.TestCase):
     def setUp(self):
-        self.game = pygambit.Game.new_table([2, 2])
-        self.extensive_game = pygambit.Game.read_game(
-            "test_games/basic_extensive_game.efg"
-        )
+        self.game = gbt.Game.new_table([2, 2])
+        self.extensive_game = gbt.Game.read_game("test_games/basic_extensive_game.efg")
 
     def tearDown(self):
         del self.game
         del self.extensive_game
+
+    def test_from_arrays(self):
+        """Test creating a two-player game from numpy arrays."""
+        m = np.array([[8, 2], [10, 5]])
+        g = gbt.Game.from_arrays(m, m.transpose())
+        assert len(g.players) == 2
+        assert len(g.players[0].strategies) == 2
+        assert len(g.players[1].strategies) == 2
 
     def test_game_get_outcome_with_ints(self):
         "To test getting the first outcome"
@@ -66,32 +74,32 @@ class TestGambitGame(unittest.TestCase):
 
     def test_game_is_const_sum(self):
         "To test checking if the game is constant sum"
-        game = pygambit.Game.read_game("test_games/const_sum_game.nfg")
+        game = gbt.Game.read_game("test_games/const_sum_game.nfg")
         assert game.is_const_sum
 
     def test_game_is_not_const_sum(self):
         "To test checking if the game is not constant sum"
-        game = pygambit.Game.read_game("test_games/non_const_sum_game.nfg")
+        game = gbt.Game.read_game("test_games/non_const_sum_game.nfg")
         assert not game.is_const_sum
 
     def test_game_get_min_payoff(self):
         "To test getting the minimum payoff of the game"
-        game = pygambit.Game.read_game("test_games/payoff_game.nfg")
+        game = gbt.Game.read_game("test_games/payoff_game.nfg")
         assert game.min_payoff == fractions.Fraction(1, 1)
 
     def test_game_get_max_payoff(self):
         "To test getting the maximum payoff of the game"
-        game = pygambit.Game.read_game("test_games/payoff_game.nfg")
+        game = gbt.Game.read_game("test_games/payoff_game.nfg")
         assert game.max_payoff == fractions.Fraction(10, 1)
 
     def test_game_is_perfect_recall(self):
         "To test checking if the game is of perfect recall"
-        game = pygambit.Game.read_game("test_games/perfect_recall.efg")
+        game = gbt.Game.read_game("test_games/perfect_recall.efg")
         assert game.is_perfect_recall
 
     def test_game_is_not_perfect_recall(self):
         "To test checking if the game is not of perfect recall"
-        game = pygambit.Game.read_game("test_games/not_perfect_recall.efg")
+        game = gbt.Game.read_game("test_games/not_perfect_recall.efg")
         assert not game.is_perfect_recall
 
     def test_game_behav_profile_error(self):
@@ -99,7 +107,7 @@ class TestGambitGame(unittest.TestCase):
         MixedBehavProfile from a game without a tree representation
         """
         self.assertRaises(
-            pygambit.UndefinedOperationError, self.game.mixed_behavior_profile, True
+            gbt.UndefinedOperationError, self.game.mixed_behavior_profile, True
         )
 
     def test_game_title(self):
@@ -142,7 +150,7 @@ class TestGambitGame(unittest.TestCase):
         """Test to ensure an error is raised when trying to access actions
         of a game without a tree representation
         """
-        self.assertRaises(pygambit.UndefinedOperationError, lambda: self.game.actions)
+        self.assertRaises(gbt.UndefinedOperationError, lambda: self.game.actions)
 
     def test_game_infosets(self):
         assert (
@@ -162,7 +170,7 @@ class TestGambitGame(unittest.TestCase):
         """Test to ensure an error is raised when trying to access infosets
         of a game without a tree representation
         """
-        self.assertRaises(pygambit.UndefinedOperationError, lambda: self.game.infosets)
+        self.assertRaises(gbt.UndefinedOperationError, lambda: self.game.infosets)
 
     def test_game_strategies(self):
         assert self.game.strategies[0] == self.game.players[0].strategies[0]
@@ -180,7 +188,7 @@ class TestGambitGame(unittest.TestCase):
         """Test to ensure an error is raised when trying to get the root
         node of a game without a tree representation
         """
-        self.assertRaises(pygambit.UndefinedOperationError, lambda: self.game.root)
+        self.assertRaises(gbt.UndefinedOperationError, lambda: self.game.root)
 
     def test_game_num_nodes(self):
         "Test retrieving the number of nodes of a game"
@@ -190,7 +198,7 @@ class TestGambitGame(unittest.TestCase):
     def test_game_dereference_invalid(self):
         "Test referencing an invalid game member object"
         def foo():
-            g = pygambit.Game.new_tree()
+            g = gbt.Game.new_tree()
             g.add_player("One")
             s = g.players[0].strategies[0]
             g.append_move(g.root, g.players[0], ["a", "b"])

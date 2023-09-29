@@ -141,8 +141,8 @@ cdef extern from "games/game.h":
           string GetLabel()
           void SetLabel(string)
 
-          c_Number GetPayoff(int) except +IndexError
-          void SetPayoff(int, c_Number) except +IndexError
+          c_Number GetPayoff(c_GamePlayer) except +IndexError
+          void SetPayoff(c_GamePlayer, c_Number) except +IndexError
 
      cdef cppclass c_GameNodeRep "GameNodeRep":
           c_Game GetGame()
@@ -225,7 +225,7 @@ cdef extern from "games/game.h":
           c_GameOutcome GetOutcome()
           void SetOutcome(c_GameOutcome)
 
-          c_Rational GetPayoff(int)
+          c_Rational GetPayoff(c_GamePlayer)
 
      c_Game NewTree()
      c_Game NewTable(Array[int] *)

@@ -266,9 +266,13 @@ public:
 
   /// Gets the payoff associated with the outcome to player 'pl'
   const Number &GetPayoff(int pl) const { return m_payoffs[pl]; }
+  /// Gets the payoff associated with the outcome to the player
+  const Number &GetPayoff(const GamePlayer &p_player) const;
   /// Sets the payoff to player 'pl'
   void SetPayoff(int pl, const Number &p_value)
     { m_payoffs[pl] = p_value; }
+  /// Sets the payoff to the player
+  void SetPayoff(const GamePlayer &p_player, const Number &p_value);
 
   //@}
 };
@@ -861,6 +865,20 @@ Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes = false);
 // all classes to be defined.
 
 inline Game GameOutcomeRep::GetGame() const { return m_game; }
+inline const Number &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
+{
+  if (p_player->GetGame() != GetGame()) {
+    throw MismatchException();
+  }
+  return m_payoffs[p_player->GetNumber()];
+}
+inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &p_value)
+{
+  if (p_player->GetGame() != GetGame()) {
+    throw MismatchException();
+  }
+  m_payoffs[p_player->GetNumber()] = p_value;
+}
 
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player; }
 
