@@ -243,7 +243,6 @@ private:
   int m_number;
   std::string m_label;
   Array<Number> m_payoffs;
-  GameOutcome m_unrestricted;
 
   /// @name Lifecycle
   //@{
@@ -271,9 +270,6 @@ public:
   void SetPayoff(int pl, const Number &p_value)
     { m_payoffs[pl] = p_value; }
 
-  /// Map the outcome to the corresponding outcome in the unrestricted game
-  GameOutcome Unrestrict() const 
-  { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
   //@}
 };
 
@@ -282,9 +278,7 @@ typedef GameObjectPtr<GameOutcomeRep> GameOutcome;
 /// An action at an information set in an extensive game
 class GameActionRep : public GameObject {
 protected:
-  GameAction m_unrestricted;
-
-  GameActionRep() : m_unrestricted(nullptr) { }
+  GameActionRep() = default;
   ~GameActionRep() override = default;
 
 public:
@@ -298,18 +292,12 @@ public:
 
   virtual void DeleteAction() = 0;
 
-  /// Map the action to the corresponding action in the unrestricted game
-  GameAction Unrestrict() const 
-  { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
-
 };
 
 /// An information set in an extensive game
 class GameInfosetRep : public GameObject {
 protected:
-  GameInfoset m_unrestricted;
- 
-  GameInfosetRep(): m_unrestricted(nullptr) { }
+  GameInfosetRep() = default;
   ~GameInfosetRep() override = default;
 
 public:
@@ -343,10 +331,6 @@ public:
 
   virtual const Number &GetActionProb(int i) const = 0;
   virtual void Reveal(GamePlayer) = 0;
-
-  /// Map the infoset to the corresponding infoset in the unrestricted game
-  GameInfoset Unrestrict() const 
-  { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
 };
 
 /// \brief A strategy in a game.
@@ -379,13 +363,12 @@ private:
   long m_offset;
   std::string m_label;
   Array<int> m_behav;
-  GameStrategy m_unrestricted;
 
   /// @name Lifecycle
   //@{
   /// Creates a new strategy for the given player.
   explicit GameStrategyRep(GamePlayerRep *p_player)
-    : m_number(0), m_id(0), m_player(p_player), m_offset(0L), m_unrestricted(nullptr) { }
+    : m_number(0), m_id(0), m_player(p_player), m_offset(0L) { }
   //@}
 
 public:
@@ -405,10 +388,6 @@ public:
 
   /// Remove this strategy from the game
   void DeleteStrategy();
-
-  /// Map the strategy to the corresponding strategy in the unrestricted game
-  GameStrategy Unrestrict() const
-  { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
   //@}
 };
 
@@ -441,10 +420,9 @@ private:
   std::string m_label;
   Array<GameTreeInfosetRep *> m_infosets;
   GameStrategyArray m_strategies;
-  GamePlayer m_unrestricted;
 
   GamePlayerRep(GameRep *p_game, int p_id) 
-    : m_game(p_game), m_number(p_id), m_unrestricted(nullptr) { }
+    : m_game(p_game), m_number(p_id) { }
   GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
   ~GamePlayerRep() override;
 
@@ -475,19 +453,12 @@ public:
   /// Creates a new strategy for the player
   GameStrategy NewStrategy();
   //@}
-
-  /// Map the player to the corresponding player in the unrestricted game
-  GamePlayer Unrestrict() const 
-  { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
-
 };
 
 /// A node in an extensive game
 class GameNodeRep : public GameObject {
 protected:
-  GameNode m_unrestricted;
-
-  GameNodeRep() : m_unrestricted(nullptr) { }
+  GameNodeRep() = default;
   ~GameNodeRep() override = default;
 
 public:
@@ -532,10 +503,6 @@ public:
   virtual GameInfoset AppendMove(GameInfoset p_infoset) = 0;
   virtual GameInfoset InsertMove(GamePlayer p_player, int p_actions) = 0;
   virtual GameInfoset InsertMove(GameInfoset p_infoset) = 0;
-
-  /// Map the node to the corresponding node in the unrestricted game
-  GameNode Unrestrict() const 
-  { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
 };
 
 
@@ -601,10 +568,6 @@ public:
 
   /// Convert to a mixed strategy representation
   MixedStrategyProfile<Rational> ToMixedStrategyProfile() const;
-
-  /// Map strategy profile to the unrestriction of the game
-  PureStrategyProfile Unrestrict() const;
-
   //@}
 };
 
@@ -771,11 +734,6 @@ public:
 
   /// Returns true if the game has a action-graph game representation
   virtual bool IsAgg() const { return false; }
-
-  /// Returns true if the game is a restriction of a more general game
-  virtual bool IsRestriction() const { return false; }
-  /// Returns the unrestricted version of the game
-  virtual Game Unrestrict() const { throw UndefinedException(); }
 
   /// Get the text label associated with the game
   virtual const std::string &GetTitle() const { return m_title; }

@@ -566,20 +566,6 @@ MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport() const
   return full;
 }
 
-template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::Unrestrict() const
-{
-  MixedStrategyProfile<T> full(m_rep->m_support.GetGame()->Unrestrict()->NewMixedStrategyProfile((T) 0));
-  static_cast<Vector<T> &>(full) = (T) 0;
-
-  for (auto player : GetGame()->GetPlayers()) {
-    for (GameStrategyArray::const_iterator strategy = player->Strategies().begin();
-	 strategy != player->Strategies().end(); ++strategy) {
-      full[strategy->Unrestrict()] = (*this)[*strategy];
-    }
-  }
-  return full;	
-}
-
 //========================================================================
 //    MixedStrategyProfile<T>: Computation of interesting quantities
 //========================================================================

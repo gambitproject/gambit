@@ -36,7 +36,6 @@ class GameTableRep : public GameExplicitRep {
   template <class T> friend class TableMixedStrategyProfileRep;
 private:
   Array<GameOutcomeRep *> m_results;
-  Game m_unrestricted;
 
   /// @name Private auxiliary functions
   //@{
@@ -59,13 +58,6 @@ public:
   bool IsConstSum() const override;
   bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override
   { return true; }
-  //@}
-
-  /// @name Interface with restricted game mechanism
-  //@{
-  bool IsRestriction() const override { return (m_unrestricted != nullptr); }
-  Game Unrestrict() const override 
-  { if (m_unrestricted) return m_unrestricted; else throw UndefinedException(); }
   //@}
 
   /// @name Dimensions of the game
