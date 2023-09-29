@@ -11,7 +11,6 @@ Representation of games
 
 .. autosummary::
    :toctree: api/
-   :recursive:
 
    Game
    Player
@@ -94,6 +93,7 @@ Information about the game
    Game.min_payoff
    Game.max_payoff
    Game.strategies
+   Game.root
    Game.actions
    Game.infosets
    Game.nodes
@@ -253,6 +253,7 @@ Computation of Nash equilibria
    lp_solve
    lcp_solve
    liap_solve
+   logit_solve
    simpdiv_solve
    ipa_solve
    gnm_solve

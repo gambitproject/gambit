@@ -713,7 +713,7 @@ class Game:
             self,
             subtree: typing.Optional[typing.Union[Node, str]] = None
     ) -> typing.List[Node]:
-        """Return a list of nodes in the game tree.  If `subtree` is not `None`, returns
+        """Return a list of nodes in the game tree.  If `subtree` is not None, returns
         the nodes in the subtree rooted at that node.
         
         Nodes are returned in prefix-traversal order: a node appears prior to the list of
