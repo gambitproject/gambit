@@ -1,4 +1,3 @@
-# cython: language_level=3str
 #
 # This file is part of Gambit
 # Copyright (c) 1994-2023, The Gambit Project (http://www.gambit-project.org)

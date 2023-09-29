@@ -92,9 +92,6 @@ class Player:
     def __eq__(self, other: typing.Any) -> bool:
         return isinstance(other, Player) and self.player.deref() == cython.cast(Player, other).player.deref()
 
-    def __ne__(self, other: typing.Any) -> bool:
-        return not isinstance(other, Player) or self.player.deref() != cython.cast(Player, other).player.deref()
-
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.player.deref())
 

@@ -38,9 +38,6 @@ class Outcome:
     def __eq__(self, other: typing.Any) -> bool:
         return isinstance(other, Outcome) and self.outcome.deref() == (<Outcome> other).outcome.deref()
 
-    def __ne__(self, other: typing.Any) -> bool:
-        return not isinstance(other, Outcome) or self.outcome.deref() != (<Outcome> other).outcome.deref()
-
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.outcome.deref())
 
@@ -137,12 +134,6 @@ class TreeGameOutcome:
         return (
             isinstance(other, TreeGameOutcome) and
             deref(self.psp).deref() == deref(cython.cast(TreeGameOutcome, other).psp).deref()
-        )
-
-    def __ne__(self, other: typing.Any) -> bool:
-        return (
-            not isinstance(other, TreeGameOutcome) or
-            deref(self.psp).deref() != deref(cython.cast(TreeGameOutcome, other).psp).deref()
         )
 
     def __getitem__(self, player):
