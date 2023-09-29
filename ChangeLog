@@ -9,6 +9,8 @@
   method for finding a Nash equilibrium.
 - Additional game transformation operations have been moved to the Game class, and old versions
   deprecated.
+- Accessing payoffs of outcomes and pure strategy profiles is now standardized to use player
+  references, and accessing by index has been removed.
 - Game.num_nodes has been removed in favor of Game.nodes, which returns a list of the nodes
   in the game.
 
