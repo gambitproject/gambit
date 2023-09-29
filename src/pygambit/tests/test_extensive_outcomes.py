@@ -13,16 +13,16 @@ class TestGambitOutcomes(unittest.TestCase):
         del self.game
 
     def test_player1_outcomes(self):
-        assert self.game[[0, 0]][0] == 2
-        assert self.game[[0, 1]][0] == 2
-        assert self.game[[1, 0]][0] == 4
-        assert self.game[[1, 1]][0] == 6
+        assert self.game[[0, 0]]["Player 1"] == 2
+        assert self.game[[0, 1]]["Player 1"] == 2
+        assert self.game[[1, 0]]["Player 1"] == 4
+        assert self.game[[1, 1]]["Player 1"] == 6
 
     def test_player2_outcomes(self):
-        assert self.game[[0, 0]][1] == 3
-        assert self.game[[0, 1]][1] == 3
-        assert self.game[[1, 0]][1] == 5
-        assert self.game[[1, 1]][1] == 7
+        assert self.game[[0, 0]]["Player 2"] == 3
+        assert self.game[[0, 1]]["Player 2"] == 3
+        assert self.game[[1, 0]]["Player 2"] == 5
+        assert self.game[[1, 1]]["Player 2"] == 7
 
     def test_getting_payoff_by_label_string(self):
         assert self.game[[0, 0]]['Player 1'] == 2
@@ -47,4 +47,4 @@ class TestGambitOutcomes(unittest.TestCase):
         assert self.game[[1, 1]][player2] == 7
 
     def test_outcome_index_exception_int(self):
-        self.assertRaises(IndexError, self.game[[0, 0]].__getitem__, 3)
+        self.assertRaises(KeyError, self.game[[0, 0]].__getitem__, "Not a player")

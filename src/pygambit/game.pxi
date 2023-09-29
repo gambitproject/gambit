@@ -259,8 +259,8 @@ class Game:
         for profile in itertools.product(
                 *(range(arrays[0].shape[i]) for i in range(len(g.players)))
         ):
-            for pl in range(len(g.players)):
-                g[profile][pl] = arrays[pl][profile]
+            for pl, player in enumerate(g.players):
+                g[profile][player] = arrays[pl][profile]
         g.title = title
         return g
 
@@ -1318,7 +1318,7 @@ class Game:
         if str(label) != "":
             c.label = str(label)
         for player, payoff in zip(self.players, payoffs):
-            c[player.number] = payoff
+            c[player] = payoff
         return c
 
     def delete_outcome(self, outcome: typing.Union[Outcome, str]) -> None:

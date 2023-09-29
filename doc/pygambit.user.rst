@@ -145,21 +145,26 @@ an existing information set (represented in `pygambit` as an :py:class:`.Infoset
 Building a strategic game
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Games in strategic form are created using :py:meth:`.Game.new_table`, which
-takes a list of integers specifying the number of strategies for
-each player::
+Games in strategic form, also referred to as normal form, are represented solely
+by a collection of payoff tables, one per player.  The most direct way to create
+a strategic game is via :py:meth:`.Game.from_arrays`.  This function takes one
+n-dimensional array per player, where n is the number of players in the game.
+The arrays can be any object that can be indexed like an n-times-nested Python list;
+so, for example, NumPy arrays can be used directly.
 
-  In [1]: g = gbt.Game.new_table([2,2])
+For example, to create a standard prisoner's dilemma game in which the cooperative
+payoff is 8, the betrayal payoff is 10, the sucker payoff is 2, and the noncooperative
+payoff is 5::
 
-  In [2]: g.title = "A prisoner's dilemma game"
+  In [1]: import numpy as np
 
-  In [3]: g.players[0].label = "Alphonse"
+  In [2]: m = np.array([[8, 2], [10, 5]])
 
-  In [4]: g.players[1].label = "Gaston"
+  In [3]: g = gbt.Game.from_arrays(m, np.transpose(m))
 
-  In [5]: g
-  Out[5]:
-  NFG 1 R "A prisoner's dilemma game" { "Alphonse" "Gaston" }
+  In [4]: g
+  Out[4]:
+  NFG 1 R "Untitled strategic game" { "1" "2" }
 
   { { "1" "2" }
   { "1" "2" }
@@ -167,65 +172,17 @@ each player::
   ""
 
   {
+  { "" 8, 8 }
+  { "" 10, 2 }
+  { "" 2, 10 }
+  { "" 5, 5 }
   }
-  0 0 0 0
+  1 2 3 4
 
-The :py:attr:`.Player.strategies` collection for a
-:py:class:`.Player` lists all the
-strategies available for that player::
-
-  In [6]: g.players[0].strategies
-  Out[6]: [<Strategy [0] '1' for player 'Alphonse' in game 'A
-  prisoner's dilemma game'>,
-           <Strategy [1] '2' for player 'Alphonse' in game 'A prisoner's dilemma game'>]
-
-  In [7]: len(g.players[0].strategies)
-  Out[7]: 2
-
-  In [8]: g.players[0].strategies[0].label = "Cooperate"
-
-  In [9]: g.players[0].strategies[1].label = "Defect"
-
-  In [10]: g.players[0].strategies
-  Out[10]: [<Strategy [0] 'Cooperate' for player 'Alphonse' in game 'A
-  prisoner's dilemma game'>,
-            <Strategy [1] 'Defect' for player 'Alphonse' in game 'A prisoner's dilemma game'>]
-
-The outcome associated with a particular combination of strategies is
-accessed by treating the game like an array. For a game :literal:`g`,
-:literal:`g[i,j]` is the outcome where the first player plays his
-:literal:`i` th strategy, and the second player plays his
-:literal:`j` th strategy.  Payoffs associated with an outcome are set
-or obtained by indexing the outcome by the player number.  For a
-prisoner's dilemma game where the cooperative payoff is 8, the
-betrayal payoff is 10, the sucker payoff is 2, and the noncooperative
-(equilibrium) payoff is 5::
-
-  In [11]: g[0,0][0] = 8
-
-  In [12]: g[0,0][1] = 8
-
-  In [13]: g[0,1][0] = 2
-
-  In [14]: g[0,1][1] = 10
-
-  In [15]: g[1,0][0] = 10
-
-  In [16]: g[1,1][1] = 2
-
-  In [17]: g[1,0][1] = 2
-
-  In [18]: g[1,1][0] = 5
-
-  In [19]: g[1,1][1] = 5
-
-Alternatively, one can use :py:meth:`.Game.from_arrays` in conjunction
-with numpy arrays to construct a game with desired payoff matrices
-more directly, as in::
-
-  In [20]: m = numpy.array([[8, 2], [10, 5]])
-
-  In [21]: g = gbt.Game.from_arrays(m, numpy.transpose(m))
+The arrays passed to :py:meth:`.Game.from_arrays` are all indexed in the same sense, that is,
+the top level index is the choice of the first player, the second level index of the second player,
+and so on.  Therefore, to create a two-player symmetric game, as in this example, the payoff matrix
+for the second player is transposed before passing to :py:meth:`.Game.from_arrays`.
 
 
 Representation of numerical data of a game
@@ -356,33 +313,6 @@ formats can be loaded using :meth:`.Game.read_game`::
   { "" 2, 0 }
   }
   1 2 3 4 5 6
-
-Iterating the pure strategy profiles in a game
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Each entry in a strategic game corresponds to the outcome arising from
-a particular combination fo pure strategies played by the players.
-The property :py:attr:`.Game.contingencies` is the collection of
-all such combinations.  Iterating over the contingencies collection
-visits each pure strategy profile possible in the game::
-
-   In [1]: g = gbt.Game.read_game("e02.nfg")
-
-   In [2]: list(g.contingencies)
-   Out[2]: [[0, 0], [0, 1], [1, 0], [1, 1], [2, 0], [2, 1]]
-
-Each pure strategy profile can then be used to access individual
-outcomes and payoffs in the game::
-
-   In [3]: for profile in g.contingencies:
-      ...:     print(profile, g[profile][0], g[profile][1])
-      ...:
-   [0, 0] 1 1
-   [0, 1] 1 1
-   [1, 0] 0 2
-   [1, 1] 0 3
-   [2, 0] 0 2
-   [2, 1] 2 0
 
 
 Mixed strategy and behavior profiles

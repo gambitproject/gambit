@@ -9,10 +9,10 @@ class TestGambitOutcomes(unittest.TestCase):
         self.game = pygambit.Game.new_table([2, 2])
         self.game.players[0].label = "joe"
         self.game.players[1].label = "dan"
-        self.game.outcomes[0][0] = 1
-        self.game.outcomes[0][1] = 2
-        self.game.outcomes[1][0] = 3
-        self.game.outcomes[1][1] = 4
+        self.game.outcomes[0]["joe"] = 1
+        self.game.outcomes[0]["dan"] = 2
+        self.game.outcomes[1]["joe"] = 3
+        self.game.outcomes[1]["dan"] = 4
 
     def tearDown(self):
         del self.game

@@ -22,6 +22,8 @@
 from cython.operator cimport dereference as deref
 from libcpp.memory cimport shared_ptr
 
+import typing
+
 from deprecated import deprecated
 
 @cython.cclass
@@ -36,7 +38,7 @@ class Outcome:
         )
     
     def __eq__(self, other: typing.Any) -> bool:
-        return isinstance(other, Outcome) and self.outcome.deref() == (<Outcome> other).outcome.deref()
+        return isinstance(other, Outcome) and self.outcome.deref() == cython.cast(Outcome, other).outcome.deref()
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.outcome.deref())
@@ -73,45 +75,49 @@ class Outcome:
             warnings.warn("Another outcome with an identical label exists")
         self.outcome.deref().SetLabel(value.encode('ascii'))
 
-    def __getitem__(self, player):
-        """Returns the payoff to ``player`` at the outcome.  ``player``
-        may be a `Player`, a string, or an integer.
-        If a string, returns the payoff to the player with that string
-        as its label.  If an integer, returns the payoff to player
-        number ``player``.
-        """
-        py_string = cython.declare(bytes)
-        if isinstance(player, Player):
-            py_string = self.outcome.deref().GetPayoff(player.number+1).as_string().c_str()
-        elif isinstance(player, str):
-            number = self.game.players[player].number
-            py_string = self.outcome.deref().GetPayoff(number+1).as_string().c_str()
-        elif isinstance(player, int):
-            py_string = self.outcome.deref().GetPayoff(player+1).as_string().c_str()
-        if "." in py_string.decode(b'ascii'):
-            return decimal.Decimal(py_string.decode(b'ascii'))
-        else:
-            return Rational(py_string.decode(b'ascii'))
-
-    def __setitem__(self, pl: int, value: typing.Any) -> None:
-        """
-        Set the payoff value to a specified player for the outcome.
-
-        Parameters
-        ----------
-        pl : int
-            The player number for which to set the payoff
-        value : Any
-            The value of the payoff.  This can be any numeric type, or any object that
-            has a string representation which can be interpreted as an integer,
-            decimal, or rational number.
+    def __getitem__(
+            self, player: typing.Union[Player, str]
+    ) -> typing.Union[decimal.Decimal, Rational]:
+        """The payoff to `player` at the outcome.
 
         Raises
         ------
-        ValueError
-              If ``payoff`` cannot be interpreted as a decimal or rational number.
+        MismatchError
+            If `player` is a ``Player`` from a different game than the outcome.
         """
-        self.outcome.deref().SetPayoff(pl+1, _to_number(value))
+        resolved_player = cython.cast(Player,
+                                      self.game._resolve_player(player, 'Outcome.__getitem__'))
+        payoff = (
+            cython.cast(bytes,
+                        self.outcome.deref().GetPayoff(resolved_player.player).as_string())
+            .decode('ascii')
+        )
+        if "." in payoff:
+            return decimal.Decimal(payoff)
+        else:
+            return Rational(payoff)
+
+    def __setitem__(self, player: typing.Union[Player, str], value: typing.Any) -> None:
+        """Set the payoff to `player` at the outcome.
+
+        Parameters
+        ----------
+        player : Player or str
+            A reference to the player for which to set the payoff.
+        value : Any
+            The value of the payoff.  This can be any numeric type, or any object that
+            has a string representation which can be interpreted as a number.
+
+        Raises
+        ------
+        MismatchError
+            If `player` is a ``Player`` from a different game than the outcome.
+        ValueError
+            If `value` cannot be interpreted as a number.
+        """
+        resolved_player = cython.cast(Player,
+                                      self.game._resolve_player(player, 'Outcome.__setitem__'))
+        self.outcome.deref().SetPayoff(resolved_player.player, _to_number(value))
 
 
 @cython.cclass
@@ -136,24 +142,32 @@ class TreeGameOutcome:
             deref(self.psp).deref() == deref(cython.cast(TreeGameOutcome, other).psp).deref()
         )
 
-    def __getitem__(self, player):
-        if isinstance(player, Player):
-            return rat_to_py(deref(self.psp).deref().GetPayoff(player.number+1))
-        elif isinstance(player, str):
-            number = self.game.players[player].number
-            return rat_to_py(deref(self.psp).deref().GetPayoff(number+1))
-        elif isinstance(player, int):
-            if player < 0 or player >= self.c_game.deref().NumPlayers():
-                raise IndexError("Index out of range")
-            return rat_to_py(deref(self.psp).deref().GetPayoff(player+1))
-        raise TypeError("player index should be a Player, int or str instance; {} passed"
-                        .format(player.__class__.__name__))
+    def __getitem__(self, player: typing.Union[Player, str]) -> Rational:
+        """The payoff to `player` at the outcome.
 
-    def __setitem__(self, pl, value):
-        raise NotImplementedError("Cannot modify outcomes in a derived strategic game.")
+        Parameters
+        ----------
+        player : Player or str
+            A reference to the player to get the payoff for
+
+        Returns
+        -------
+        Rational
+            The expected payoff to the player.  Because this is calculated in a derived
+            strategic game, it will always be represented as a ``Rational`` even if
+            game data are represented as ``Decimal``.
+
+        Raises
+        ------
+        MismatchError
+            If `player` is a ``Player`` from a different game than the outcome.
+        """
+        resolved_player = cython.cast(Player,
+                                      self.game._resolve_player(player, 'Outcome.__getitem__'))
+        return rat_to_py(deref(self.psp).deref().GetPayoff(resolved_player.player))
 
     def delete(self):
-        raise NotImplementedError("Cannot modify outcomes in a derived strategic game.")
+        raise UndefinedOperationError("Cannot modify outcomes in a derived strategic game.")
 
     @property
     def label(self) -> str:
