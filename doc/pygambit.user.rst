@@ -68,6 +68,8 @@ but it is useful to be explicit for readability.
    Cambridge University Press.
 
 
+.. _pygambit.user.poker:
+
 Example: A one-card poker game with private information
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -130,7 +132,7 @@ he has the decision.   This is implemented in the following lines::
                          g.root.children[0].children[0].infoset)
 
 The call :py:meth:`.Game.append_infoset` adds a move at a terminal node as part of
-an existing information set (represented in `pygambit` as an :py:class:`.Infoset`).
+an existing information set (represented in ``pygambit`` as an :py:class:`.Infoset`).
 
 
 .. [Mye91] Myerson, Roger B. (1991) *Game Theory: Analysis of Conflict*.
@@ -185,6 +187,8 @@ and so on.  Therefore, to create a two-player symmetric game, as in this example
 for the second player is transposed before passing to :py:meth:`.Game.from_arrays`.
 
 
+.. _pygambit.user.numbers:
+
 Representation of numerical data of a game
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -205,7 +209,7 @@ To illustrate, we consider a trivial game which just has one move for the chance
 
 The default when creating a new move for chance is that all actions are chosen with
 equal probability.  These probabilities are represented as rational numbers,
-using `pygambit`'s :py:class:`.Rational` class, which is derived from Python's
+using ``pygambit``'s :py:class:`.Rational` class, which is derived from Python's
 `fractions.Fraction`.  Numerical data can be set as rational numbers::
 
   In  [5]: g.set_chance_probs(g.root.infoset,
@@ -222,12 +226,12 @@ They can also be explicitly specified as decimal numbers::
   In  [8]: [act.prob for act in g.root.infoset.actions]
   Out [8]: [Decimal('0.25'), Decimal('0.50'), Decimal('0.25')]
 
-Although the two representations above are mathematically equivalent, `pygambit`
+Although the two representations above are mathematically equivalent, ``pygambit``
 remembers the format in which the values were specified.
 
 Expressing rational or decimal numbers as above is verbose and tedious.
-`pygambit` offers a more concise way to express numerical data in games:
-when setting numerical game data, `pygambit` will attempt to convert text strings to
+``pygambit`` offers a more concise way to express numerical data in games:
+when setting numerical game data, ``pygambit`` will attempt to convert text strings to
 their rational or decimal representation.  The above can therefore be written
 more compactly using string representations::
 
@@ -241,9 +245,9 @@ more compactly using string representations::
   In  [12]: [act.prob for act in g.root.infoset.actions]
   Out [12]: [Decimal('0.25'), Decimal('0.50'), Decimal('0.25')]
 
-As a further convenience, `pygambit` will accept Python `int` and `float` values.
-`int` values are always interpreted as :py:class:`.Rational` values.
-`pygambit` attempts to render `float` values in an appropriate :py:class:`.Decimal`
+As a further convenience, ``pygambit`` will accept Python ``int`` and ``float`` values.
+``int`` values are always interpreted as :py:class:`.Rational` values.
+``pygambit`` attempts to render `float` values in an appropriate :py:class:`.Decimal`
 equivalent.  In the majority of cases, this creates no problems.
 For example,::
 
@@ -264,7 +268,7 @@ in Python,::
   In  [16]: 1/3 + 1/3 + 1/3
   Out [16]: 1.0
 
-In checking whether these probabilities sum to one, `pygambit` first converts each
+In checking whether these probabilities sum to one, ``pygambit`` first converts each
 of the probabilities to a :py:class:`.Decimal` representation, via the following method::
 
   In  [17]: gbt.Decimal(str(1/3))
@@ -276,7 +280,7 @@ and the sum-to-one check then fails because::
   Out [18]: Decimal('0.9999999999999999')
 
 Setting payoffs for players also follows the same rules.  Representing probabilities
-and payoffs exactly is essential, because `pygambit` offers (in particular for two-player
+and payoffs exactly is essential, because ``pygambit`` offers (in particular for two-player
 games) the possibility of computation of equilibria exactly, because the Nash equilibria
 of any two-player game with rational payoffs and chance probabilities can be expressed exactly
 in terms of rational numbers.
@@ -315,87 +319,11 @@ formats can be loaded using :meth:`.Game.read_game`::
   1 2 3 4 5 6
 
 
-Mixed strategy and behavior profiles
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-A :py:class:`~.MixedStrategyProfile` represents a probability
-distribution over the pure strategies of each player.  This is constructed
-using :py:meth:`.Game.mixed_strategy_profile`.  Mixed strategy
-profiles are initialized to uniform randomization over all strategies
-for all players.
-
-Mixed strategy profiles can be indexed in three ways.
-
-#. Specifying a strategy returns the probability of that strategy
-   being played in the profile.
-#. Specifying a player returns a list of probabilities, one for each
-   strategy available to the player.
-#. Profiles can be treated as a list indexed from 0 up to the number
-   of total strategies in the game minus one.
-
-This sample illustrates the three methods::
-
-  In [1]: g = gbt.Game.read_game("e02.nfg")
-
-  In [2]: p = g.mixed_strategy_profile()
-
-  In [3]: p[g.players[0]]
-  Out[3]: [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
-
-  In [4]: p[g.players[1].strategies[0]]
-  Out[4]: 0.5
-
-The expected payoff to a player is obtained using
-:py:meth:`.MixedStrategyProfile.payoff`::
-
-  In [5]: p.payoff(g.players[0])
-  Out[5]: 0.6666666666666666
-
-The standalone expected payoff to playing a given strategy, assuming
-all other players play according to the profile, is obtained using
-:py:meth:`.MixedStrategyProfile.strategy_value`::
-
-  In [6]: p.strategy_value(g.players[0].strategies[2])
-  Out[6]: 1.0
-
-A :py:class:`.MixedBehaviorProfile` object, which represents a probability
-distribution over the actions at each information set, is constructed
-using :py:meth:`.Game.mixed_behavior_profile`.  Behavior profiles are
-initialized to uniform randomization over all actions at each
-information set.
-
-Mixed behavior profiles are indexed similarly to mixed strategy
-profiles, except that indexing by a player returns a list of lists of
-probabilities, containing one list for each information set controlled
-by that player::
-
-  In [1]: g = gbt.Game.read_game("e02.efg")
-
-  In [2]: p = g.mixed_behavior_profile()
-
-  In [3]: p[g.players[0]]
-  Out[3]: [[0.5, 0.5], [0.5, 0.5]]
-
-  In [4]: p[g.players[0].infosets[0]]
-  Out[4]: [0.5, 0.5]
-
-  In [5]: p[g.players[0].infosets[0].actions[0]]
-  Out[5]: 0.5
-
-For games with a tree representation, a
-:py:class:`.MixedStrategyProfile` can be converted to its equivalent
-:py:class:`.MixedBehaviorProfile` by calling
-:py:meth:`.MixedStrategyProfile.as_behavior`. Equally, a
-:py:class:`.MixedBehaviorProfile` can be converted to an equivalent
-:py:class:`.MixedStrategyProfile` using :py:meth:`.MixedBehaviorProfile.as_strategy`.
-
 
 Computing Nash equilibria
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Interfaces to algorithms for computing Nash equilibria are collected
-in the module :py:mod:`pygambit.nash`.
-
+Interfaces to algorithms for computing Nash equilibria are provided in :py:mod:`pygambit.nash`.
 
 ==========================================    ========================================
 Method                                        Python function
@@ -411,21 +339,68 @@ Method                                        Python function
 :ref:`gambit-gnm <gambit-gnm>`                :py:func:`pygambit.nash.gnm_solve`
 ==========================================    ========================================
 
+We take as an example the :ref:`one-card poker game <pygambit.user.poker>`.  This is a two-player,
+constant sum game, and so all of the equilibrium-finding methods can be applied to it.
 
-For example, taking the game :file:`e02.efg` as an example::
+For two-player games, :py:func:`.lcp_solve` can compute Nash equilibria directly using
+the extensive representation.  Assuming that ``g`` refers to the game::
 
-  In [1]: g = gbt.Game.read_game("e02.efg")
+  In [1]: eqa = gbt.nash.lcp_solve(g)
 
-  In [2]: gbt.nash.lcp_solve(g)
-  Out[2]: [[[[Rational(1, 1), Rational(0, 1)], [Rational(1, 2), Rational(1, 2)]], [[Rational(1, 2), Rational(1, 2)]]]]
+  In [2]: eqa
+  Out[2]: [[[[Rational(1, 1), Rational(0, 1)], [Rational(1, 3), Rational(2, 3)]], [[Rational(2, 3), Rational(1, 3)]]]]
 
-  In [3]: gbt.nash.lcp_solve(g, rational=False)
-  Out[3]: [[[[1.0, 0.0], [0.5, 0.5]], [[0.5, 0.5]]]]
+  In [3]: len(eqa)
+  Out[3]: 1
 
-  In [4]: gbt.nash.lcp_solve(g, use_strategic=True)
-  Out[4]: [[[Rational(1, 1), Rational(0, 1), Rational(0, 1)], [Rational(1, 1), Rational(0, 1)]]]
+The result of the calculation is a list of :py:class:`~pygambit.gambit.MixedBehaviorProfile`.
+Such a profile specifies action probabilities for each information set.
+The profile represents these hierarchically, with information sets grouped by player.
+We can just focus on the strategy of one player by indexing the profile by that
+player::
 
-  In [5]: gbt.nash.lcp_solve(g, use_strategic=True, rational=True)
-  Out[5]: [[[1.0, 0.0, 0.0], [1.0, 0.0]]]
+  In [4]: eqa[0]["Alice"]
+  Out[4]: [[Rational(1, 1), Rational(0, 1)], [Rational(1, 3), Rational(2, 3)]]
 
+In this case, at Alice's first information set, where she has the King, she always raises.
+At her second information set, where she has the Queen, she sometimes bluffs, raising with
+probability one-third.  Looking at Bob's strategy::
+
+  In [5]: eqa[0]["Bob"]
+  Out[5]: [[Rational(2, 3), Rational(1, 3)]]
+
+Bob meets Alice's raise two-thirds of the time.
+
+The equilibrium computed expresses probabilities in rational numbers.  Because
+the numerical data of games in Gambit :ref:`are represented exactly <pygambit.user.numbers>`,
+methods which are specialized to two-player games, :py:func:`.lp_solve`, :py:func:`.lcp_solve`,
+and :py:func:`.enummixed_solve`, can report exact probabilities for equilibrium strategy
+profiles.  This is enabled by default for these methods.
+
+When a game has an extensive representation, equilibrium finding methods default to computing
+on that representation.  It is also possible to compute using the strategic representation.
+``pygambit`` transparently computes the reduced strategic form representation of an extensive game::
+
+  In [6]: [s.label for s in g.players["Alice"].strategies]
+  Out[6]: ['11', '12', '21', '22']
+
+In the strategic form of this game, Alice has four strategies.  The generated strategy labels
+list the action numbers taken at each information set.  We can therefore apply a method which
+operates on a strategic game to any game with an extensive representation::
+
+  In [7]: eqa = gbt.nash.gnm_solve(g)
+
+  In [8]: eqa
+  Out[8]: [[[0.33333333333866655, 0.6666666666613332, 0.0, 0.0], [0.6666666666559998, 0.33333333334400017]]]
+
+:py:func:`.gnm_solve` can be applied to any game with any number of players, and uses a path-following
+process in floating-point arithmetic, so it returns profiles with probabilities expressed as
+floating-point numbers.  This method operates on the strategic representation of the game, so
+the returned results are of type :py:class:`~pygambit.gambit.MixedStrategyProfile`, and
+specify, for each player, a probability distribution over that player's strategies.
+We can convert freely between :py:class:`~pygambit.gambit.MixedStrategyProfile` and
+:py:class:`~pygambit.gambit.MixedBehaviorProfile` representations::
+
+  In [9]: eqa[0].as_behavior()
+  Out[9]: [[[1.0, 0.0], [0.3333333333386666, 0.6666666666613333]], [[0.6666666666559998, 0.33333333334400017]]]
 
