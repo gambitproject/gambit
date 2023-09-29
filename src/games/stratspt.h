@@ -148,9 +148,6 @@ public:
                   bool p_strict) const;
   //@}
 
-  Game Restrict() const;
-
-
   class iterator {
   public:
     /// @name Lifecycle
