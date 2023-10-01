@@ -264,7 +264,7 @@ class MixedBehaviorProfile:
         """
         if node.game != self.game:
             raise MismatchError("belief: node must be part of the same game as the profile")
-        return self._belief(node)
+        return self._belief(self.game._resolve_node(node, 'node'))
 
     def payoff(self, player: typing.Union[Player, str]):
         """Returns the expected payoff to a player if all players play
