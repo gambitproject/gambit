@@ -8,14 +8,18 @@ class TestGambitMixedBehavGame(unittest.TestCase):
         self.game = gbt.Game.read_game(
             "test_games/mixed_behavior_game.efg"
         )
-        self.profile_double = self.game.mixed_behavior_profile(False)
-        self.profile_rational = self.game.mixed_behavior_profile(True)
+        self.profile_double = self.game.mixed_behavior_profile()
+        self.profile_rational = self.game.mixed_behavior_profile(rational=True)
 
         self.game_with_chance = gbt.Game.read_game(
             "test_games/complicated_extensive_game.efg"
         )
-        self.profile_double_w_chance = self.game_with_chance.mixed_behavior_profile(False)
-        self.profile_rational_w_chance = self.game_with_chance.mixed_behavior_profile(True)
+        self.profile_double_w_chance = (
+            self.game_with_chance.mixed_behavior_profile(rational=False)
+        )
+        self.profile_rational_w_chance = (
+            self.game_with_chance.mixed_behavior_profile(rational=True)
+        )
 
     def tearDown(self):
         del self.game
