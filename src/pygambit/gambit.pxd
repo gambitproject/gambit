@@ -284,7 +284,8 @@ cdef extern from "games/behav.h":
           double getaction "operator()"(c_GameAction) except +IndexError
           double GetPayoff(int)
           double GetBeliefProb(c_GameNode)
-          double GetRealizProb(c_GameInfoset)
+          double GetRealizProb(c_GameNode)
+          double GetInfosetProb(c_GameInfoset)
           double GetPayoff(c_GameInfoset)
           double GetPayoff(c_GamePlayer, c_GameNode)
           double GetPayoff(c_GameAction)
@@ -308,7 +309,8 @@ cdef extern from "games/behav.h":
           c_Rational getaction "operator()"(c_GameAction) except +IndexError
           c_Rational GetPayoff(int)
           c_Rational GetBeliefProb(c_GameNode)
-          c_Rational GetRealizProb(c_GameInfoset)
+          c_Rational GetRealizProb(c_GameNode)
+          c_Rational GetInfosetProb(c_GameInfoset)
           c_Rational GetPayoff(c_GameInfoset)
           c_Rational GetPayoff(c_GamePlayer, c_GameNode)
           c_Rational GetPayoff(c_GameAction)

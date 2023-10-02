@@ -376,6 +376,24 @@ class MixedBehaviorProfile:
             raise ValueError("action_value() is not defined for the chance player")
         return self._action_value(resolved_action)
 
+    def realiz_prob(self, node: typing.Union[Node, str]):
+        """Returns the probability with which an node is reached.
+
+        Parameters
+        ----------
+        node : Node or str
+            The node to get the payoff for.  If a string is passed, the
+            node is determined by finding the node with that label, if any.
+
+        Raises
+        ------
+        MismatchError
+            If `node` is an `Node` from a different game.
+        KeyError
+            If `node` is a string and no node in the game has that label.
+        """
+        return self._realiz_prob(self.game._resolve_node(node, 'realiz_prob'))
+		
     def infoset_prob(self, infoset: typing.Union[Infoset, str]):
         """Returns the probability with which an information set is reached.
 
@@ -477,8 +495,11 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _belief(self, node: Node) -> float:
         return deref(self.profile).GetBeliefProb(node.node)
 
+    def _realiz_prob(self, node: Node) -> float:
+        return deref(self.profile).GetRealizProb(node.node)
+		
     def _infoset_prob(self, infoset: Infoset) -> float:
-        return deref(self.profile).GetRealizProb(infoset.infoset)
+        return deref(self.profile).GetInfosetProb(infoset.infoset)
 
     def _infoset_value(self, infoset: Infoset) -> float:
         return deref(self.profile).GetPayoff(infoset.infoset)
@@ -555,8 +576,11 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _belief(self, node: Node) -> Rational:
         return rat_to_py(deref(self.profile).GetBeliefProb(node.node))
 
+    def _realiz_prob(self, node: Node) -> Rational:
+        return rat_to_py(deref(self.profile).GetRealizProb(node.node))
+
     def _infoset_prob(self, infoset: Infoset) -> Rational:
-        return rat_to_py(deref(self.profile).GetRealizProb(infoset.infoset))
+        return rat_to_py(deref(self.profile).GetInfosetProb(infoset.infoset))
 
     def _infoset_value(self, infoset: Infoset) -> Rational:
         return rat_to_py(deref(self.profile).GetPayoff(infoset.infoset))

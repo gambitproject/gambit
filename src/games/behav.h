@@ -172,7 +172,7 @@ public:
   T GetLiapValue(bool p_definedOnly = false) const;
 
   const T &GetRealizProb(const GameNode &node) const;
-  T GetRealizProb(const GameInfoset &iset) const;
+  T GetInfosetProb(const GameInfoset &iset) const;
   const T &GetBeliefProb(const GameNode &node) const;
   Vector<T> GetPayoff(const GameNode &node) const;
   const T &GetPayoff(const GamePlayer &player, const GameNode &node) const;

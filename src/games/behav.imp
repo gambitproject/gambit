@@ -245,7 +245,7 @@ void MixedBehaviorProfile<T>::UndefinedToCentroid()
     GamePlayer player = efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       GameInfoset infoset = player->GetInfoset(iset);
-      if (GetRealizProb(infoset) > (T) 0) {
+      if (GetInfosetProb(infoset) > (T) 0) {
 	continue;
       }
       T total = (T) 0;
@@ -270,7 +270,7 @@ MixedBehaviorProfile<T> MixedBehaviorProfile<T>::Normalize() const
     GamePlayer player = efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       GameInfoset infoset = player->GetInfoset(iset);
-      if (GetRealizProb(infoset) == (T) 0) {
+      if (GetInfosetProb(infoset) == (T) 0) {
 	continue;
       }
       T total = (T) 0;
@@ -416,7 +416,7 @@ const T &MixedBehaviorProfile<T>::GetRealizProb(const GameNode &node) const
 }
 
 template <class T>
-T MixedBehaviorProfile<T>::GetRealizProb(const GameInfoset &iset) const
+T MixedBehaviorProfile<T>::GetInfosetProb(const GameInfoset &iset) const
 { 
   ComputeSolutionData();
   T prob = (T) 0;
@@ -555,7 +555,7 @@ T MixedBehaviorProfile<T>::DiffActionValue(const GameAction &p_action,
       DiffNodeValue(member->GetChild(p_action->GetNumber()), player, p_oppAction);
   }
 
-  return deriv / GetRealizProb(p_action->GetInfoset());
+  return deriv / GetInfosetProb(p_action->GetInfoset());
 }
 
 template <class T>
