@@ -2,6 +2,9 @@
 
 ## [unreleased] - unreleased
 
+### Added
+- Implement MixedBehaviorProfile.realiz_prob to return probability node is reached under the profile.
+
 ### Fixed
 - When an action at a chance node is deleted the probabilities for the remaining actions are 
   normalized.

@@ -8,14 +8,14 @@ class TestGambitMixedBehavGame(unittest.TestCase):
         self.game = gbt.Game.read_game(
             "test_games/mixed_behavior_game.efg"
         )
-        self.profile_double = self.game.mixed_behavior_profile()
+        self.profile_double = self.game.mixed_behavior_profile(False)
         self.profile_rational = self.game.mixed_behavior_profile(True)
 
         self.game_with_chance = gbt.Game.read_game(
             "test_games/complicated_extensive_game.efg"
         )
-        self.profile_double_with_chance = self.game_with_chance.mixed_behavior_profile()
-        self.profile_rational_with_chance = self.game_with_chance.mixed_behavior_profile(True)
+        self.profile_double_w_chance = self.game_with_chance.mixed_behavior_profile(False)
+        self.profile_rational_w_chance = self.game_with_chance.mixed_behavior_profile(True)
 
     def tearDown(self):
         del self.game
@@ -430,6 +430,11 @@ class TestGambitMixedBehavGame(unittest.TestCase):
             [[gbt.Rational("1/98"), gbt.Rational("97/98")]]
         )
 
+    def test_realiz_prob(self):
+        """Test realization probability on node."""
+        assert self.profile_double.realiz_prob(self.game.root) == 1
+        assert self.profile_rational.realiz_prob(self.game.root) == 1
+
     def test_infoset_prob(self):
         """Test to retrieve the probability an information set is reached."""
         assert (self.profile_double.infoset_prob(self.game.players[0].infosets[0]) == 1.0)
@@ -674,17 +679,17 @@ class TestGambitMixedBehavGame(unittest.TestCase):
     def test_payoff_with_chance_player(self):
         """Test to ensure that payoff called with the chance player raises a ValueError"""
         chance_player = self.game_with_chance.players.chance
-        self.assertRaises(ValueError, self.profile_double_with_chance.payoff, chance_player)
-        self.assertRaises(ValueError, self.profile_rational_with_chance.payoff, chance_player)
+        self.assertRaises(ValueError, self.profile_double_w_chance.payoff, chance_player)
+        self.assertRaises(ValueError, self.profile_rational_w_chance.payoff, chance_player)
 
     def test_infoset_value_with_chance_player_infoset(self):
         """Test to ensure that infoset_value called with an infoset of the chance player
         raises a ValueError
         """
         chance_infoset = self.game_with_chance.players.chance.infosets[0]
-        self.assertRaises(ValueError, self.profile_double_with_chance.infoset_value,
+        self.assertRaises(ValueError, self.profile_double_w_chance.infoset_value,
                           chance_infoset)
-        self.assertRaises(ValueError, self.profile_rational_with_chance.infoset_value,
+        self.assertRaises(ValueError, self.profile_rational_w_chance.infoset_value,
                           chance_infoset)
 
     def test_action_value_with_chance_player_action(self):
@@ -692,7 +697,7 @@ class TestGambitMixedBehavGame(unittest.TestCase):
         raises a ValueError
         """
         chance_action = self.game_with_chance.players.chance.infosets[0].actions[0]
-        self.assertRaises(ValueError, self.profile_double_with_chance.action_value,
+        self.assertRaises(ValueError, self.profile_double_w_chance.action_value,
                           chance_action)
-        self.assertRaises(ValueError, self.profile_rational_with_chance.action_value,
+        self.assertRaises(ValueError, self.profile_rational_w_chance.action_value,
                           chance_action)
