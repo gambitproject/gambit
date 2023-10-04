@@ -798,12 +798,16 @@ class Game:
             If `player` is a string and no player in the game has that label.
         TypeError
             If `player` is not a `Player` or a `str`
+        ValueError
+            If `player` is an empty `str`
         """
         if isinstance(player, Player):
             if player.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return player
         elif isinstance(player, str):
+            if ''.__eq__(player):
+                raise ValueError(f"{funcname}(): argument `player` cannot be an empty `str`")
             try:
                 return self.players[player]
             except IndexError:
