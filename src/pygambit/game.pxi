@@ -164,7 +164,7 @@ class Game:
         with one node, which is both root and terminal.
 
         .. versionchanged:: 16.1.0
-	        Added the `players` and `title` parameters
+            Added the `players` and `title` parameters
 
         Parameters
         ----------
@@ -761,17 +761,17 @@ class Game:
         on).
 
         * `html`: A rendering of the strategic form of the game as a
-	      collection of HTML tables.  The first player is the row
-	      chooser; the second player the column chooser.  For games with
-	      more than two players, a collection of tables is generated,
-	      one for each possible strategy combination of players 3 and higher.
+          collection of HTML tables.  The first player is the row
+          chooser; the second player the column chooser.  For games with
+          more than two players, a collection of tables is generated,
+          one for each possible strategy combination of players 3 and higher.
         * `sgame`: A rendering of the strategic form of the game in
-	      LaTeX, suitable for use with `Martin Osborne's sgame style
-	      <https://www.economics.utoronto.ca/osborne/latex/>`_.
-	      The first player is the row
-	      chooser; the second player the column chooser.  For games with
-	      more than two players, a collection of tables is generated,
-	      one for each possible strategy combination of players 3 and higher.
+          LaTeX, suitable for use with `Martin Osborne's sgame style
+          <https://www.economics.utoronto.ca/osborne/latex/>`_.
+          The first player is the row
+          chooser; the second player the column chooser.  For games with
+          more than two players, a collection of tables is generated,
+          one for each possible strategy combination of players 3 and higher.
         """
         if format == 'gte':
             return pygambit.gte.write_game(self)
@@ -798,12 +798,16 @@ class Game:
             If `player` is a string and no player in the game has that label.
         TypeError
             If `player` is not a `Player` or a `str`
+        ValueError
+            If `player` is an empty `str` or all spaces
         """
         if isinstance(player, Player):
             if player.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return player
         elif isinstance(player, str):
+            if not player.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.players[player]
             except IndexError:
@@ -830,12 +834,16 @@ class Game:
             If `outcome` is a string and no outcome in the game has that label.
         TypeError
             If `outcome` is not an `Outcome` or a `str`
+        ValueError
+            If `outcome` is an empty `str` or all spaces
         """
         if isinstance(outcome, Outcome):
             if outcome.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return outcome
         elif isinstance(outcome, str):
+            if not outcome.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.outcomes[outcome]
             except IndexError:
@@ -862,12 +870,16 @@ class Game:
             If `strategy` is a string and no strategy in the game has that label.
         TypeError
             If `strategy` is not a `Strategy` or a `str`
+        ValueError
+            If `strategy` is an empty `str` or all spaces
         """
         if isinstance(strategy, Strategy):
             if strategy.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return strategy
         elif isinstance(strategy, str):
+            if not strategy.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.strategies[strategy]
             except IndexError:
@@ -894,16 +906,20 @@ class Game:
             If `node` is a string and no node in the game has that label.
         TypeError
             If `node` is not a `Node` or a `str`
+        ValueError
+            If `node` is an empty `str` or all spaces
         """
         if isinstance(node, Node):
             if node.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return node
         elif isinstance(node, str):
-            try:
-                return self.nodes[node]
-            except IndexError:
-                raise KeyError(f"{funcname}(): no node with label '{node}'")
+            if not node.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
+            for n in self.nodes():
+                if n.label == node:
+                    return n
+            raise KeyError(f"{funcname}(): no node with label '{node}'")
         raise TypeError(f"{funcname}(): {argname} must be Node or str, not {node.__class__.__name__}")
 
     def _resolve_infoset(self, infoset: typing.Any, funcname: str, argname: str = "infoset") -> Infoset:
@@ -926,12 +942,16 @@ class Game:
             If `infoset` is a string and no information set in the game has that label.
         TypeError
             If `infoset` is not an `Infoset` or a `str`
+        ValueError
+            If `infoset` is an empty `str` or all spaces
         """
         if isinstance(infoset, Infoset):
             if infoset.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return infoset
         elif isinstance(infoset, str):
+            if not infoset.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.infosets[infoset]
             except IndexError:
@@ -958,12 +978,16 @@ class Game:
             If `action` is a string and no action in the game has that label.
         TypeError
             If `action` is not an `Action` or a `str`
+        ValueError
+            If `action` is an empty `str` or all spaces
         """
         if isinstance(action, Action):
             if action.infoset.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return action
         elif isinstance(action, str):
+            if not action.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.actions[action]
             except IndexError:

@@ -3,6 +3,7 @@
 ## [16.1.0a4] - unreleased
 
 ### Changed
+- Empty or all-whitespace strings cannot be used to access members of games in pygambit.
 - Remaining compatibility code for wxWidgets 2.x removed from graphical interface.
 
 
