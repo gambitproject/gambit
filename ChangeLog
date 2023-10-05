@@ -1,5 +1,11 @@
 # Changelog
 
+## [16.1.0a4] - unreleased
+
+### Changed
+- Remaining compatibility code for wxWidgets 2.x removed from graphical interface.
+
+
 ## [16.1.0a3] - 2023-09-29
 
 ### Changed

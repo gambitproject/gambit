@@ -682,7 +682,6 @@ gambit_SOURCES = \
 	src/labenski/include/wx/sheet/sheetsel.h \
 	src/labenski/include/wx/sheet/sheetspt.h \
 	src/labenski/include/wx/sheet/sheettbl.h \
-	src/labenski/include/wx/sheet/wx24defs.h \
 	src/labenski/include/wx/wxthings/block.h \
 	src/labenski/include/wx/wxthings/bmpcombo.h \
 	src/labenski/include/wx/wxthings/dropdown.h \

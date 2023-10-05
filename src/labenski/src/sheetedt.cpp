@@ -137,7 +137,7 @@ void wxSheetCellEditorEvtHandler::OnDestroy(wxWindowDestroyEvent& event)
     // when parent window is destroyed pop event handler and NULL the control 
     if (m_editor->m_control && (m_editor->m_control->GetEventHandler() == this))
     {
-        // see if anyone else want's to process the event before we delete ourself
+        // see if anyone else wants to process the event before we delete ourselves
         if (!GetNextHandler()->ProcessEvent(event))
         {
             wxWindow *win = m_editor->m_control;
@@ -595,7 +595,7 @@ bool wxSheetCellTextEditorRefData::OnChar( wxKeyEvent& WXUNUSED(event) )
     
     wxRect rect(GetTextCtrl()->GetRect());
     int clientWidth = GetTextCtrl()->GetParent()->GetClientSize().x;
-    // already at edge of window, maybe the win should should scroll?
+    // already at edge of window, maybe the win should scroll?
     if (rect.GetRight() >= clientWidth)
         return true;
     
@@ -1339,12 +1339,12 @@ void wxSheetCellChoiceEditorRefData::CreateEditor(wxWindow* parent,
                                                   wxEvtHandler* evtHandler,
                                                   wxSheet* sheet)
 {
-#if wxMINOR_VERSION > 4
+#if wxCHECK_VERSION(2, 5, 0)
     SetControl( new wxComboBox(parent, id, wxEmptyString,
                                wxDefaultPosition, wxDefaultSize,
                                m_choices,
                                m_allowOthers ? 0 : wxCB_READONLY) );
-#else 
+#else
     const size_t count = m_choices.GetCount();
     wxString *choices = new wxString[count];
     for ( size_t n = 0; n < count; n++ )
@@ -1356,7 +1356,7 @@ void wxSheetCellChoiceEditorRefData::CreateEditor(wxWindow* parent,
                                m_allowOthers ? 0 : wxCB_READONLY) );
 
     delete []choices;
-#endif // wxMINOR_VERSION > 4
+#endif // wxCHECK_VERSION
     wxSheetCellEditorRefData::CreateEditor(parent, id, evtHandler, sheet);
 }
 
@@ -1440,7 +1440,7 @@ wxString wxSheetCellChoiceEditorRefData::GetValue() const
 // ----------------------------------------------------------------------------
 #if wxUSE_COMBOBOX
 
-// A cell editor which displays an enum number as a textual equivalent. eg
+// A cell editor which displays an enum number as a textual equivalent. e.g.
 // data in cell is 0,1,2 ... n the cell could be displayed as
 // "John","Fred"..."Bob" in the combo choice box
 
