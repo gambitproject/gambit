@@ -799,15 +799,15 @@ class Game:
         TypeError
             If `player` is not a `Player` or a `str`
         ValueError
-            If `player` is an empty `str`
+            If `player` is an empty `str` or all spaces
         """
         if isinstance(player, Player):
             if player.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return player
         elif isinstance(player, str):
-            if ''.__eq__(player):
-                raise ValueError(f"{funcname}(): argument `player` cannot be an empty `str`")
+            if not player.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.players[player]
             except IndexError:
@@ -834,12 +834,16 @@ class Game:
             If `outcome` is a string and no outcome in the game has that label.
         TypeError
             If `outcome` is not an `Outcome` or a `str`
+        ValueError
+            If `outcome` is an empty `str` or all spaces
         """
         if isinstance(outcome, Outcome):
             if outcome.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return outcome
         elif isinstance(outcome, str):
+            if not outcome.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.outcomes[outcome]
             except IndexError:
@@ -866,12 +870,16 @@ class Game:
             If `strategy` is a string and no strategy in the game has that label.
         TypeError
             If `strategy` is not a `Strategy` or a `str`
+        ValueError
+            If `strategy` is an empty `str` or all spaces
         """
         if isinstance(strategy, Strategy):
             if strategy.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return strategy
         elif isinstance(strategy, str):
+            if not strategy.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.strategies[strategy]
             except IndexError:
@@ -930,12 +938,16 @@ class Game:
             If `infoset` is a string and no information set in the game has that label.
         TypeError
             If `infoset` is not an `Infoset` or a `str`
+        ValueError
+            If `infoset` is an empty `str` or all spaces
         """
         if isinstance(infoset, Infoset):
             if infoset.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return infoset
         elif isinstance(infoset, str):
+            if not infoset.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.infosets[infoset]
             except IndexError:
@@ -962,12 +974,16 @@ class Game:
             If `action` is a string and no action in the game has that label.
         TypeError
             If `action` is not an `Action` or a `str`
+        ValueError
+            If `action` is an empty `str` or all spaces
         """
         if isinstance(action, Action):
             if action.infoset.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return action
         elif isinstance(action, str):
+            if not action.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.actions[action]
             except IndexError:
