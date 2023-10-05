@@ -1,10 +1,6 @@
 import unittest
 import pygambit as gbt
 
-# funcname is used by all the resolve functions we test here, but is
-# not relevant to the substance of the tests
-dummy_funcname = 'test'
-
 
 class TestGambitResolveFunctions(unittest.TestCase):
     def setUp(self):
@@ -36,10 +32,10 @@ class TestGambitResolveFunctions(unittest.TestCase):
 
     def test_resolve_player_nonempty_strings(self):
         """Test _resolve_player with non-empty strings, some that resolve some that don't"""
-        assert self.game1._resolve_player(player='Player 1', funcname=dummy_funcname)
-        assert self.game1._resolve_player(player='Player 2', funcname=dummy_funcname)
+        assert self.game1._resolve_player(player='Player 1', funcname='test')
+        assert self.game1._resolve_player(player='Player 2', funcname='test')
         self.assertRaises(KeyError, self.game1._resolve_player, player='Player 3',
-                          funcname=dummy_funcname)
+                          funcname='test')
 
     def test_resolve_outcome_empty_strings(self):
         """Test _resolve_outcome with empty string or strings of all spaces"""
@@ -50,28 +46,28 @@ class TestGambitResolveFunctions(unittest.TestCase):
 
     def test_resolve_outcome_nonempty_strings(self):
         """Test _resolve_outcome with non-empty strings, some that resolve some that don't"""
-        assert self.game2._resolve_outcome(outcome='Outcome 1', funcname=dummy_funcname)
-        assert self.game2._resolve_outcome(outcome='Outcome 2', funcname=dummy_funcname)
+        assert self.game2._resolve_outcome(outcome='Outcome 1', funcname='test')
+        assert self.game2._resolve_outcome(outcome='Outcome 2', funcname='test')
         self.assertRaises(KeyError, self.game2._resolve_outcome, outcome='Outcome 5',
-                          funcname=dummy_funcname)
+                          funcname='test')
 
     def test_resolve_strategy_empty_strings(self):
         """Test _resolve_strategy with empty string or strings of all spaces"""
         self.assertRaises(ValueError, self.game1._resolve_strategy, strategy='', funcname='test')
-        self.assertRaises(ValueError, self.game1._resolve_strategy, strategy='  ', funcname='test')
+        self.assertRaises(ValueError, self.game1._resolve_strategy, strategy='  ',
+                          funcname='test')
         self.assertRaises(ValueError, self.game2._resolve_strategy, strategy='', funcname='test')
-        self.assertRaises(ValueError, self.game2._resolve_strategy, strategy='  ', funcname='test')
+        self.assertRaises(ValueError, self.game2._resolve_strategy, strategy='  ',
+                          funcname='test')
 
     def test_resolve_strategy_nonempty_strings(self):
         """Test _resolve_strategy with non-empty strings, some that resolve some that don't"""
-        assert self.game1._resolve_strategy(strategy='11', funcname=dummy_funcname)
-        assert self.game1._resolve_strategy(strategy='12', funcname=dummy_funcname)
-        self.assertRaises(KeyError, self.game1._resolve_strategy, strategy='13',
-                          funcname=dummy_funcname)
-        assert self.game2._resolve_strategy(strategy='1', funcname=dummy_funcname)
-        assert self.game2._resolve_strategy(strategy='2', funcname=dummy_funcname)
-        self.assertRaises(KeyError, self.game2._resolve_strategy, strategy='3',
-                          funcname=dummy_funcname)
+        assert self.game1._resolve_strategy(strategy='11', funcname='test')
+        assert self.game1._resolve_strategy(strategy='12', funcname='test')
+        self.assertRaises(KeyError, self.game1._resolve_strategy, strategy='13', funcname='test')
+        assert self.game2._resolve_strategy(strategy='1', funcname='test')
+        assert self.game2._resolve_strategy(strategy='2', funcname='test')
+        self.assertRaises(KeyError, self.game2._resolve_strategy, strategy='3', funcname='test')
 
     def test_resolve_infoset_empty_strings(self):
         """Test _resolve_infoset with empty string or strings of all spaces"""
@@ -82,10 +78,10 @@ class TestGambitResolveFunctions(unittest.TestCase):
 
     def test_resolve_infoset_nonempty_strings(self):
         """Test _resolve_node with non-empty strings, some that resolve some that don't"""
-        assert self.game3._resolve_infoset(infoset='Infoset 1:1', funcname=dummy_funcname)
-        assert self.game3._resolve_infoset(infoset='Infoset 2:1', funcname=dummy_funcname)
+        assert self.game3._resolve_infoset(infoset='Infoset 1:1', funcname='test')
+        assert self.game3._resolve_infoset(infoset='Infoset 2:1', funcname='test')
         self.assertRaises(KeyError, self.game3._resolve_infoset, infoset='Infoset 4:1',
-                          funcname=dummy_funcname)
+                          funcname='test')
 
     def test_resolve_action_empty_strings(self):
         """Test _resolve_action with empty string or strings of all spaces"""
@@ -96,11 +92,9 @@ class TestGambitResolveFunctions(unittest.TestCase):
 
     def test_resolve_action_nonempty_strings(self):
         """Test _resolve_action with non-empty strings, some that resolve some that don't"""
-        assert self.game1._resolve_action(action='1', funcname=dummy_funcname)
-        assert self.game1._resolve_action(action='2', funcname=dummy_funcname)
-        self.assertRaises(KeyError, self.game1._resolve_action, action='3',
-                          funcname=dummy_funcname)
-        assert self.game2._resolve_action(action='U1', funcname=dummy_funcname)
-        assert self.game2._resolve_action(action='D1', funcname=dummy_funcname)
-        self.assertRaises(KeyError, self.game2._resolve_action, action='D4',
-                          funcname=dummy_funcname)
+        assert self.game1._resolve_action(action='1', funcname='test')
+        assert self.game1._resolve_action(action='2', funcname='test')
+        self.assertRaises(KeyError, self.game1._resolve_action, action='3', funcname='test')
+        assert self.game2._resolve_action(action='U1', funcname='test')
+        assert self.game2._resolve_action(action='D1', funcname='test')
+        self.assertRaises(KeyError, self.game2._resolve_action, action='D4', funcname='test')
