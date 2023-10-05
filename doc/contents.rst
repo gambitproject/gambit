@@ -7,9 +7,9 @@ Detailed table of contents
    :maxdepth: 3
   
    intro
-   gui
    tools
    pygambit
+   gui
    samples
    build
    formats

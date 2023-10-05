@@ -1,3 +1,4 @@
+.. _pygambit-api:
 
 API documentation
 -----------------

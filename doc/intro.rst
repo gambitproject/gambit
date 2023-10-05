@@ -1,8 +1,9 @@
+*********************
 An overview of Gambit
-=====================
+*********************
 
 What is Gambit?
----------------
+===============
 
 Gambit is a set of software tools for doing computation on finite,
 noncooperative games. These comprise a graphical interface for
@@ -12,7 +13,7 @@ equilibria and other solution concepts in games; and, a set of file
 formats for storing and communicating games to external tools.
 
 A brief history of Gambit
--------------------------
+=========================
 
 The Gambit Project was founded in the mid-1980s by Richard McKelvey at
 the California Institute of Technology. The original implementation
@@ -57,7 +58,7 @@ of Stephen Kunath and Alessandro Andrioni.
 
 
 Key features of Gambit
-----------------------
+======================
 
 Gambit has a number of features useful both for the researcher and the
 instructor:
@@ -91,7 +92,7 @@ econometric analysis on games.
 
 
 Limitations of Gambit
----------------------
+=====================
 
 Gambit has a few limitations that may be important in some
 applications. We outline them here.
@@ -135,7 +136,7 @@ well as make the resulting methods available to both students and
 practitioners.
 
 Developers
-----------
+==========
 
 The principal developers of Gambit are:
 
@@ -179,19 +180,18 @@ include:
 .. _section-downloading:
 
 Downloading Gambit
-------------------
+==================
 
 Gambit source code and built binaries can be downloaded from the project
 `GitHub repository releases section`<https://github.com/gambitproject/gambit/releases>.
 
 Older versions of Gambit can be downloaded from
 `http://sourceforge.net/projects/gambit/files
-<http://sourceforge.net/projects/gambit/files>`_.  Support for older
-versions is limited.
+<http://sourceforge.net/projects/gambit/files>`_.
 
 
 Bug reports
------------
+===========
 
 In the first instance, bug reports or feature requests should be
 posted to the Gambit issue tracker, located at

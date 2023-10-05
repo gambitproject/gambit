@@ -2,3 +2,5 @@ Cython
 numpy
 scipy
 pydata-sphinx-theme
+sphinx_design
+ipython

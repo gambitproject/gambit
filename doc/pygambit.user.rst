@@ -1,3 +1,5 @@
+.. _pygambit-user:
+
 User guide
 ----------
 
@@ -18,46 +20,57 @@ If the Seller chooses **Honor**, both players receive payoffs of 1;
 if the Seller chooses **Abuse**, the Buyer receives a payoff of -1 and the Seller
 receives a payoff of 2.
 
-We create a game with an extensive representation using :py:meth:`.Game.new_tree`::
+We create a game with an extensive representation using :py:meth:`.Game.new_tree`:
 
-  In [1]: import pygambit as gbt
+.. ipython:: python
 
-  In [2]: g = gbt.Game.new_tree(players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)")
+   import pygambit as gbt
+   g = gbt.Game.new_tree(players=["Buyer", "Seller"],
+                         title="One-shot trust game, after Kreps (1990)")
 
-The tree of the game contains just a root node, with no children::
 
-  In [3]: g.root
-  Out[3]: Out[3]: <Node [0] '' in game 'One-shot trust game, after Kreps (1990)'>
+The tree of the game contains just a root node, with no children:
 
-  In [4]: g.root.children
-  Out[4]: []
+.. ipython:: python
 
-To extend a game from an existing terminal node, use :py:meth:`.Game.append_move`::
+   g.root
+   g.root.children
 
-  In [5]: g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
 
-  In [6]: g.root.children
-  Out[6]: [<Node [2] '' in game 'One-shot trust game, after Kreps (1990)'>, <Node [3] '' in game 'One-shot trust game, after Kreps (1990)'>]
+To extend a game from an existing terminal node, use :py:meth:`.Game.append_move`:
 
-We can then also add the Seller's move in the situation after the Buyer chooses Trust::
+.. ipython:: python
 
-  In [7]: g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
+   g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
+   g.root.children
+
+We can then also add the Seller's move in the situation after the Buyer chooses Trust:
+
+.. ipython:: python
+
+   g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
 
 Now that we have the moves of the game defined, we add payoffs.  Payoffs are associated with
-:py:class:`.Outcome`s; each :py:class:`Outcome` has a vector of payoffs, one for each player,
+an :py:class:`.Outcome`; each :py:class:`Outcome` has a vector of payoffs, one for each player,
 and optionally an identifying text label.  First we add the outcome associated with the
-Seller proving themselves trustworthy::
+Seller proving themselves trustworthy:
 
-  In [8]: g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy"))
+.. ipython:: python
+
+   g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy"))
 
 Next, the outcome associated with the scenario where the Buyer trusts but the Seller does
-not return the trust::
+not return the trust:
 
-  In [9]: g.set_outcome(g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy"))
+.. ipython:: python
 
-And, finally the outcome associated with the Buyer opting out of the interaction::
+   g.set_outcome(g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy"))
 
-  In [10]: g.set_outcome(g.root.children[1], g.add_outcome([0, 0], label="Opt-out"))
+And, finally the outcome associated with the Buyer opting out of the interaction:
+
+.. ipython:: python
+
+   g.set_outcome(g.root.children[1], g.add_outcome([0, 0], label="Opt-out"))
 
 Nodes without an outcome attached are assumed to have payoffs of zero for all players.
 Therefore, adding the outcome to this latter terminal node is not strictly necessary in Gambit,
@@ -156,30 +169,14 @@ so, for example, NumPy arrays can be used directly.
 
 For example, to create a standard prisoner's dilemma game in which the cooperative
 payoff is 8, the betrayal payoff is 10, the sucker payoff is 2, and the noncooperative
-payoff is 5::
+payoff is 5:
 
-  In [1]: import numpy as np
+.. ipython:: python
 
-  In [2]: m = np.array([[8, 2], [10, 5]])
-
-  In [3]: g = gbt.Game.from_arrays(m, np.transpose(m))
-
-  In [4]: g
-  Out[4]:
-  NFG 1 R "Untitled strategic game" { "1" "2" }
-
-  { { "1" "2" }
-  { "1" "2" }
-  }
-  ""
-
-  {
-  { "" 8, 8 }
-  { "" 10, 2 }
-  { "" 2, 10 }
-  { "" 5, 5 }
-  }
-  1 2 3 4
+   import numpy as np
+   m = np.array([[8, 2], [10, 5]])
+   g = gbt.Game.from_arrays(m, np.transpose(m))
+   g
 
 The arrays passed to :py:meth:`.Game.from_arrays` are all indexed in the same sense, that is,
 the top level index is the choice of the first player, the second level index of the second player,
@@ -196,35 +193,33 @@ Payoffs to players and probabilities of actions at chance information sets are s
 as numbers.  Gambit represents the numerical values in a game in exact precision,
 using either decimal or rational representations.
 
-To illustrate, we consider a trivial game which just has one move for the chance player::
+To illustrate, we consider a trivial game which just has one move for the chance player:
 
-  In  [1]: import pygambit as gbt
+.. ipython:: python
 
-  In  [2]: g = gbt.Game.new_tree()
-
-  In  [3]: g.append_move(g.root, g.players.chance, 3)
-
-  In  [4]: [act.prob for act in g.root.infoset.actions]
-  Out [4]: [Rational(1, 3), Rational(1, 3), Rational(1, 3)]
+   import pygambit as gbt
+   g = gbt.Game.new_tree()
+   g.append_move(g.root, g.players.chance, ["a", "b", "c"])
+   [act.prob for act in g.root.infoset.actions]
 
 The default when creating a new move for chance is that all actions are chosen with
 equal probability.  These probabilities are represented as rational numbers,
 using ``pygambit``'s :py:class:`.Rational` class, which is derived from Python's
-`fractions.Fraction`.  Numerical data can be set as rational numbers::
+`fractions.Fraction`.  Numerical data can be set as rational numbers:
 
-  In  [5]: g.set_chance_probs(g.root.infoset,
-      ...: [gbt.Rational(1, 4), gbt.Rational(1, 2), gbt.Rational(1, 4)])
+.. ipython:: python
 
-  In  [6]: [act.prob for act in g.root.infoset.actions]
-  Out [6]: [Rational(1, 4), Rational(1, 2), Rational(1, 4)]
+  g.set_chance_probs(g.root.infoset,
+                     [gbt.Rational(1, 4), gbt.Rational(1, 2), gbt.Rational(1, 4)])
+  [act.prob for act in g.root.infoset.actions]
 
-They can also be explicitly specified as decimal numbers::
+They can also be explicitly specified as decimal numbers:
 
-  In  [7]: g.set_chance_probs(g.root.infoset,
-      ...: [gbt.Decimal(".25"), gbt.Decimal(".50"), gbt.Decimal(".25")]
+.. ipython:: python
 
-  In  [8]: [act.prob for act in g.root.infoset.actions]
-  Out [8]: [Decimal('0.25'), Decimal('0.50'), Decimal('0.25')]
+   g.set_chance_probs(g.root.infoset,
+                      [gbt.Decimal(".25"), gbt.Decimal(".50"), gbt.Decimal(".25")])
+   [act.prob for act in g.root.infoset.actions]
 
 Although the two representations above are mathematically equivalent, ``pygambit``
 remembers the format in which the values were specified.
@@ -233,51 +228,54 @@ Expressing rational or decimal numbers as above is verbose and tedious.
 ``pygambit`` offers a more concise way to express numerical data in games:
 when setting numerical game data, ``pygambit`` will attempt to convert text strings to
 their rational or decimal representation.  The above can therefore be written
-more compactly using string representations::
+more compactly using string representations:
 
-  In  [9]: g.set_chance_probs(g.root.infoset, ["1/4", "1/2", "1/4"])
+.. ipython:: python
 
-  In  [10]: [act.prob for act in g.root.infoset.actions]
-  Out [10]: [Rational(1, 4), Rational(1, 2), Rational(1, 4)]
+   g.set_chance_probs(g.root.infoset, ["1/4", "1/2", "1/4"])
+   [act.prob for act in g.root.infoset.actions]
 
-  In  [11]: g.set_chance_probs(g.root.infoset, [".25", ".50", ".25"])
-
-  In  [12]: [act.prob for act in g.root.infoset.actions]
-  Out [12]: [Decimal('0.25'), Decimal('0.50'), Decimal('0.25')]
+   g.set_chance_probs(g.root.infoset, [".25", ".50", ".25"])
+   [act.prob for act in g.root.infoset.actions]
 
 As a further convenience, ``pygambit`` will accept Python ``int`` and ``float`` values.
 ``int`` values are always interpreted as :py:class:`.Rational` values.
 ``pygambit`` attempts to render `float` values in an appropriate :py:class:`.Decimal`
 equivalent.  In the majority of cases, this creates no problems.
-For example,::
+For example,
 
-  In  [13]: g.set_chance_probs(g.root.infoset, [.25, .50, .25])
+.. ipython:: python
 
-  In  [14]: [act.prob for act in g.root.infoset.actions]
-  Out [14]: [Decimal('0.25'), Decimal('0.5'), Decimal('0.25')]
+   g.set_chance_probs(g.root.infoset, [.25, .50, .25])
+   [act.prob for act in g.root.infoset.actions]
 
 However, rounding can cause difficulties when attempting to use `float` values to
-represent values which do not have an exact decimal representation::
+represent values which do not have an exact decimal representation
 
-  In  [15]: g.set_chance_probs(g.root.infoset, [1/3, 1/3, 1/3])
-  ValueError: set_chance_probs(): must specify non-negative probabilities that sum to one
+.. ipython:: python
+   :okexcept:
+
+   g.set_chance_probs(g.root.infoset, [1/3, 1/3, 1/3])
 
 This behavior can be slightly surprising, especially in light of the fact that
-in Python,::
+in Python,
 
-  In  [16]: 1/3 + 1/3 + 1/3
-  Out [16]: 1.0
+.. ipython:: python
+
+   1/3 + 1/3 + 1/3
 
 In checking whether these probabilities sum to one, ``pygambit`` first converts each
-of the probabilities to a :py:class:`.Decimal` representation, via the following method::
+of the probabilitiesto a :py:class:`.Decimal` representation, via the following method
 
-  In  [17]: gbt.Decimal(str(1/3))
-  Out [17]: Decimal('0.3333333333333333')
+.. ipython:: python
 
-and the sum-to-one check then fails because::
+   gbt.Decimal(str(1/3))
 
-  In  [18]: gbt.Decimal(str(1/3)) + gbt.Decimal(str(1/3)) + gbt.Decimal(str(1/3))
-  Out [18]: Decimal('0.9999999999999999')
+and the sum-to-one check then fails because
+
+.. ipython:: python
+
+   gbt.Decimal(str(1/3)) + gbt.Decimal(str(1/3)) + gbt.Decimal(str(1/3))
 
 Setting payoffs for players also follows the same rules.  Representing probabilities
 and payoffs exactly is essential, because ``pygambit`` offers (in particular for two-player
@@ -294,29 +292,23 @@ the values are recorded as intended.
 Reading a game from a file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Games stored in existing Gambit savefiles in either the .efg or .nfg
-formats can be loaded using :meth:`.Game.read_game`::
+Games stored in existing Gambit savefiles can be loaded using :meth:`.Game.read_game`:
 
-  In [1]: g = gbt.Game.read_game("e02.nfg")
+.. ipython:: python
+   :suppress:
 
-  In [2]: g
-  Out[2]:
-  NFG 1 R "Selten (IJGT, 75), Figure 2, normal form" { "Player 1" "Player 2" }
+   cd ../contrib/games
 
-  { { "1" "2" "3" }
-  { "1" "2" }
-  }
-  ""
 
-  {
-  { "" 1, 1 }
-  { "" 0, 2 }
-  { "" 0, 2 }
-  { "" 1, 1 }
-  { "" 0, 3 }
-  { "" 2, 0 }
-  }
-  1 2 3 4 5 6
+.. ipython:: python
+
+   g = gbt.Game.read_game("e02.nfg")
+   g
+
+.. ipython:: python
+   :suppress:
+
+   cd ../../doc
 
 
 
@@ -343,31 +335,36 @@ We take as an example the :ref:`one-card poker game <pygambit.user.poker>`.  Thi
 constant sum game, and so all of the equilibrium-finding methods can be applied to it.
 
 For two-player games, :py:func:`.lcp_solve` can compute Nash equilibria directly using
-the extensive representation.  Assuming that ``g`` refers to the game::
+the extensive representation.  Assuming that ``g`` refers to the game
 
-  In [1]: eqa = gbt.nash.lcp_solve(g)
+.. ipython:: python
+   :suppress:
 
-  In [2]: eqa
-  Out[2]: [[[[Rational(1, 1), Rational(0, 1)], [Rational(1, 3), Rational(2, 3)]], [[Rational(2, 3), Rational(1, 3)]]]]
+   g = gbt.Game.read_game("poker.efg")
 
-  In [3]: len(eqa)
-  Out[3]: 1
+.. ipython:: python
+
+   eqa = gbt.nash.lcp_solve(g)
+   eqa
+   len(eqa)
 
 The result of the calculation is a list of :py:class:`~pygambit.gambit.MixedBehaviorProfile`.
 Such a profile specifies action probabilities for each information set.
 The profile represents these hierarchically, with information sets grouped by player.
 We can just focus on the strategy of one player by indexing the profile by that
-player::
+player,
 
-  In [4]: eqa[0]["Alice"]
-  Out[4]: [[Rational(1, 1), Rational(0, 1)], [Rational(1, 3), Rational(2, 3)]]
+.. ipython:: python
+
+   eqa[0]["Alice"]
 
 In this case, at Alice's first information set, where she has the King, she always raises.
 At her second information set, where she has the Queen, she sometimes bluffs, raising with
-probability one-third.  Looking at Bob's strategy::
+probability one-third.  Looking at Bob's strategy,
 
-  In [5]: eqa[0]["Bob"]
-  Out[5]: [[Rational(2, 3), Rational(1, 3)]]
+.. ipython:: python
+
+   eqa[0]["Bob"]
 
 Bob meets Alice's raise two-thirds of the time.
 
@@ -379,19 +376,20 @@ profiles.  This is enabled by default for these methods.
 
 When a game has an extensive representation, equilibrium finding methods default to computing
 on that representation.  It is also possible to compute using the strategic representation.
-``pygambit`` transparently computes the reduced strategic form representation of an extensive game::
+``pygambit`` transparently computes the reduced strategic form representation of an extensive game
 
-  In [6]: [s.label for s in g.players["Alice"].strategies]
-  Out[6]: ['11', '12', '21', '22']
+.. ipython:: python
+
+  [s.label for s in g.players["Alice"].strategies]
 
 In the strategic form of this game, Alice has four strategies.  The generated strategy labels
 list the action numbers taken at each information set.  We can therefore apply a method which
-operates on a strategic game to any game with an extensive representation::
+operates on a strategic game to any game with an extensive representation
 
-  In [7]: eqa = gbt.nash.gnm_solve(g)
+.. ipython:: python
 
-  In [8]: eqa
-  Out[8]: [[[0.33333333333866655, 0.6666666666613332, 0.0, 0.0], [0.6666666666559998, 0.33333333334400017]]]
+   eqa = gbt.nash.gnm_solve(g)
+   eqa
 
 :py:func:`.gnm_solve` can be applied to any game with any number of players, and uses a path-following
 process in floating-point arithmetic, so it returns profiles with probabilities expressed as
@@ -399,8 +397,9 @@ floating-point numbers.  This method operates on the strategic representation of
 the returned results are of type :py:class:`~pygambit.gambit.MixedStrategyProfile`, and
 specify, for each player, a probability distribution over that player's strategies.
 We can convert freely between :py:class:`~pygambit.gambit.MixedStrategyProfile` and
-:py:class:`~pygambit.gambit.MixedBehaviorProfile` representations::
+:py:class:`~pygambit.gambit.MixedBehaviorProfile` representations
 
-  In [9]: eqa[0].as_behavior()
-  Out[9]: [[[1.0, 0.0], [0.3333333333386666, 0.6666666666613333]], [[0.6666666666559998, 0.33333333334400017]]]
+.. ipython:: python
+
+   eqa[0].as_behavior()
 
