@@ -6,6 +6,8 @@
 - Empty or all-whitespace strings cannot be used to access members of games in pygambit.
 - Remaining compatibility code for wxWidgets 2.x removed from graphical interface.
 - Migrated to pytest for testing of pygambit.
+- ValueErrors raised for mixed behavior profiles when payoff, action_value, or infoset_value are
+  called with the chance player.
 
 
 ## [16.1.0a3] - 2023-09-29
