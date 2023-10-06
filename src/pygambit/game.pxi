@@ -164,7 +164,7 @@ class Game:
         with one node, which is both root and terminal.
 
         .. versionchanged:: 16.1.0
-	        Added the `players` and `title` parameters
+            Added the `players` and `title` parameters
 
         Parameters
         ----------
@@ -761,17 +761,17 @@ class Game:
         on).
 
         * `html`: A rendering of the strategic form of the game as a
-	      collection of HTML tables.  The first player is the row
-	      chooser; the second player the column chooser.  For games with
-	      more than two players, a collection of tables is generated,
-	      one for each possible strategy combination of players 3 and higher.
+          collection of HTML tables.  The first player is the row
+          chooser; the second player the column chooser.  For games with
+          more than two players, a collection of tables is generated,
+          one for each possible strategy combination of players 3 and higher.
         * `sgame`: A rendering of the strategic form of the game in
-	      LaTeX, suitable for use with `Martin Osborne's sgame style
-	      <https://www.economics.utoronto.ca/osborne/latex/>`_.
-	      The first player is the row
-	      chooser; the second player the column chooser.  For games with
-	      more than two players, a collection of tables is generated,
-	      one for each possible strategy combination of players 3 and higher.
+          LaTeX, suitable for use with `Martin Osborne's sgame style
+          <https://www.economics.utoronto.ca/osborne/latex/>`_.
+          The first player is the row
+          chooser; the second player the column chooser.  For games with
+          more than two players, a collection of tables is generated,
+          one for each possible strategy combination of players 3 and higher.
         """
         if format == 'gte':
             return pygambit.gte.write_game(self)
@@ -912,10 +912,10 @@ class Game:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return node
         elif isinstance(node, str):
-            try:
-                return self.nodes[node]
-            except IndexError:
-                raise KeyError(f"{funcname}(): no node with label '{node}'")
+            for n in self.nodes():
+                if n.label == node:
+                    return n
+            raise KeyError(f"{funcname}(): no node with label '{node}'")
         raise TypeError(f"{funcname}(): {argname} must be Node or str, not {node.__class__.__name__}")
 
     def _resolve_infoset(self, infoset: typing.Any, funcname: str, argname: str = "infoset") -> Infoset:
