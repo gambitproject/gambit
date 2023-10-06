@@ -906,12 +906,16 @@ class Game:
             If `node` is a string and no node in the game has that label.
         TypeError
             If `node` is not a `Node` or a `str`
+        ValueError
+            If `node` is an empty `str` or all spaces
         """
         if isinstance(node, Node):
             if node.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return node
         elif isinstance(node, str):
+            if not node.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             for n in self.nodes():
                 if n.label == node:
                     return n

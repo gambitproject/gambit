@@ -69,6 +69,20 @@ class TestGambitResolveFunctions(unittest.TestCase):
         assert self.game2._resolve_strategy(strategy='2', funcname='test')
         self.assertRaises(KeyError, self.game2._resolve_strategy, strategy='3', funcname='test')
 
+    def test_resolve_node_empty_strings(self):
+        """Test _resolve_node with empty string or strings of all spaces"""
+        self.assertRaises(ValueError, self.game1._resolve_node, node='', funcname='test')
+        self.assertRaises(ValueError, self.game1._resolve_node, node='  ', funcname='test')
+        self.assertRaises(ValueError, self.game2._resolve_node, node='', funcname='test')
+        self.assertRaises(ValueError, self.game2._resolve_node, node='  ', funcname='test')
+
+    def test_resolve_node_nonempty_strings(self):
+        """Test _resolve_node with non-empty strings, some that resolve some that don't"""
+        assert self.game1._resolve_node(node='1', funcname='test')
+        assert self.game1._resolve_node(node='2', funcname='test')
+        self.assertRaises(KeyError, self.game1._resolve_node, node='4', funcname='test')
+        self.assertRaises(KeyError, self.game2._resolve_node, node='1', funcname='test')
+
     def test_resolve_infoset_empty_strings(self):
         """Test _resolve_infoset with empty string or strings of all spaces"""
         self.assertRaises(ValueError, self.game1._resolve_infoset, infoset='', funcname='test')
