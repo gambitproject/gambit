@@ -100,7 +100,7 @@ setuptools.setup(
     ],
     libraries=[cppgambit, lrslib],
     package_dir={'': 'src'},
-    packages=['pygambit', 'pygambit.games'],
+    packages=['pygambit'],
     ext_modules=Cython.Build.cythonize(libgambit,
                                        language_level="3str",
                                        compiler_directives={'binding': True})
