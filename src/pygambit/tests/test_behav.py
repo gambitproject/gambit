@@ -1,7 +1,9 @@
+import unittest
+
 import pygambit as gbt
 
 
-class TestGambitMixedBehavGame:
+class TestGambitMixedBehavGame(unittest.TestCase):
     def setUp(self):
         self.game = gbt.Game.read_game(
             "test_games/mixed_behavior_game.efg"

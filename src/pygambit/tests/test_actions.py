@@ -1,94 +1,98 @@
-import pygambit
-import fractions
-import unittest
+import pytest
+
+import pygambit as gbt
 
 
-class TestGambitActions(unittest.TestCase):
-    def setUp(self):
-        self.extensive_game = pygambit.Game.read_game(
-            "test_games/complicated_extensive_game.efg"
-        )
+@pytest.mark.parametrize(
+    "game,label",
+    [(gbt.Game.read_game("test_games/complicated_extensive_game.efg"), "random label")]
+)
+def test_set_action_label(game: gbt.Game, label: str):
+    game.root.infoset.actions[0].label = label
+    assert game.root.infoset.actions[0].label == label
 
-    def tearDown(self):
-        del self.extensive_game
 
-    def test_action_set_label(self):
-        """Test to ensure action labels work"""
-        assert self.extensive_game.root.infoset.actions[0].label == "RED"
-        self.extensive_game.root.infoset.actions[0].label = "action label"
-        assert (
-            self.extensive_game.root.infoset.actions[0].label ==
-            "action label"
-        )
+@pytest.mark.parametrize(
+    "game,inprobs,outprobs",
+    [(gbt.Game.read_game("test_games/complicated_extensive_game.efg"),
+      [0.75, 0.25], [0.75, 0.25]),
+     (gbt.Game.read_game("test_games/complicated_extensive_game.efg"),
+      ["16/17", "1/17"], [gbt.Rational("16/17"), gbt.Rational("1/17")])]
+)
+def test_set_chance_valid_probability(game: gbt.Game, inprobs: list, outprobs: list):
+    game.set_chance_probs(game.root.infoset, inprobs)
+    for (action, prob) in zip(game.root.infoset.actions, outprobs):
+        assert action.prob == prob
 
-    def test_action_probability_chance(self):
-        """Test setting action probabilities at chance information sets"""
-        assert (self.extensive_game.root.infoset.actions[0].prob == 0.5)
 
-        self.extensive_game.set_chance_probs(self.extensive_game.root.infoset, [0.75, 0.25])
-        assert (self.extensive_game.root.infoset.actions[0].prob == 0.75)
-        assert (self.extensive_game.root.infoset.actions[1].prob == 0.25)
+@pytest.mark.parametrize(
+    "game,inprobs",
+    [(gbt.Game.read_game("test_games/complicated_extensive_game.efg"), [0.75, -0.10]),
+     (gbt.Game.read_game("test_games/complicated_extensive_game.efg"), [0.75, 0.40]),
+     (gbt.Game.read_game("test_games/complicated_extensive_game.efg"), ["foo", "bar"])]
+)
+def test_set_chance_improper_probability(game: gbt.Game, inprobs: list):
+    with pytest.raises(ValueError):
+        game.set_chance_probs(game.root.infoset, inprobs)
 
-        self.extensive_game.set_chance_probs(self.extensive_game.root.infoset, ["1/17", "16/17"])
-        assert (self.extensive_game.root.infoset.actions[0].prob == fractions.Fraction("1/17"))
-        assert (self.extensive_game.root.infoset.actions[1].prob == fractions.Fraction("16/17"))
 
-        self.assertRaises(
-            ValueError, self.extensive_game.set_chance_probs,
-            self.extensive_game.root.infoset, [0.75, 0.10]
-        )
-        self.assertRaises(
-            ValueError, self.extensive_game.set_chance_probs,
-            self.extensive_game.root.infoset, [1.1, -0.1]
-        )
-        self.assertRaises(
-            IndexError, self.extensive_game.set_chance_probs,
-            self.extensive_game.root.infoset, [0.75, 0.10, 0.15]
-        )
-        self.assertRaises(
-            ValueError, setattr, self.extensive_game.root.infoset.actions[0], "prob", "test"
-        )
+@pytest.mark.parametrize(
+    "game,inprobs",
+    [(gbt.Game.read_game("test_games/complicated_extensive_game.efg"), [0.25, 0.75, 0.25]),
+     (gbt.Game.read_game("test_games/complicated_extensive_game.efg"), [1.00])]
+)
+def test_set_chance_bad_dimension(game: gbt.Game, inprobs: list):
+    with pytest.raises(IndexError):
+        game.set_chance_probs(game.root.infoset, inprobs)
 
-        self.extensive_game.set_chance_probs(self.extensive_game.root.infoset, [0.50, 0.50])
 
-    def test_action_probability_nonchance(self):
-        """Test attempts to set action probabilities at non-chance information sets."""
-        self.assertRaises(
-            pygambit.UndefinedOperationError, self.extensive_game.set_chance_probs,
-            self.extensive_game.players[0].infosets[0], [0.75, 0.25]
-        )
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/complicated_extensive_game.efg")]
+)
+def test_set_chance_personal(game: gbt.Game):
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.set_chance_probs(game.players[0].infosets[0], [0.75, 0.25])
 
-    def test_action_precedes(self):
-        """Test to ensure precedes is working"""
-        assert not self.extensive_game.actions[0].precedes(
-            self.extensive_game.root
-        )
-        assert self.extensive_game.actions[0].precedes(
-            self.extensive_game.root.children[0].children[0]
-        )
 
-    def test_action_precedes_error(self):
-        """Test to ensure a TypeError is raised when precedes is called
-        without a node
-        """
-        self.assertRaises(
-            TypeError, self.extensive_game.actions[0].precedes, 0
-        )
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/complicated_extensive_game.efg")]
+)
+def test_action_precedes(game: gbt.Game):
+    child = game.root.children[0]
+    assert game.root.infoset.actions[0].precedes(child)
+    assert not game.root.infoset.actions[1].precedes(child)
 
-    def test_action_delete(self):
-        """Test to ensure it is possible to delete an action"""
-        assert len(self.extensive_game.actions) == 6
-        self.extensive_game.delete_action(self.extensive_game.actions[0])
-        assert len(self.extensive_game.actions) == 5
 
-    def test_action_delete_error(self):
-        """Test to ensure deleting the last action of an infoset
-        raises an error
-        """
-        assert len(self.extensive_game.infosets[0].actions) == 2
-        self.extensive_game.delete_action(self.extensive_game.actions[0])
-        self.assertRaises(
-            pygambit.UndefinedOperationError,
-            self.extensive_game.delete_action,
-            self.extensive_game.actions[0]
-        )
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/complicated_extensive_game.efg")]
+)
+def test_action_precedes_nonnode(game: gbt.Game):
+    with pytest.raises(TypeError):
+        game.root.infoset.actions[0].precedes(game)
+
+
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/complicated_extensive_game.efg")]
+)
+def test_action_delete_personal(game: gbt.Game):
+    node = game.players[0].infosets[0].members[0]
+    action_count = len(node.infoset.actions)
+    game.delete_action(node.infoset.actions[0])
+    assert len(node.infoset.actions) == action_count - 1
+    assert len(node.children) == action_count - 1
+
+
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/complicated_extensive_game.efg")]
+)
+def test_action_delete_last(game: gbt.Game):
+    node = game.players[0].infosets[0].members[0]
+    while len(node.infoset.actions) > 1:
+        game.delete_action(node.infoset.actions[0])
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.delete_action(node.infoset.actions[0])

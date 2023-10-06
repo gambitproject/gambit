@@ -256,10 +256,6 @@ EXTRA_DIST = \
 	src/pygambit/profiles.py \
 	src/pygambit/qre.py \
 	src/pygambit/supports.py \
-	src/pygambit/games/__init__.py \
-	src/pygambit/games/contest.py \
-	src/pygambit/games/meanstat.py \
-	src/pygambit/games/public.py \
 	src/pygambit/__init__.py \
 	src/pygambit/action.pxi \
 	src/pygambit/behav.pxi \
@@ -281,14 +277,16 @@ EXTRA_DIST = \
 	src/pygambit/tests/test_behav.py \
 	src/pygambit/tests/test_extensive.py \
 	src/pygambit/tests/test_game.py \
+	src/pygambit/tests/test_game_resolve_functions.py \
 	src/pygambit/tests/test_infosets.py \
 	src/pygambit/tests/test_mixed.py \
+	src/pygambit/tests/test_nash.py \
 	src/pygambit/tests/test_node.py \
 	src/pygambit/tests/test_outcomes.py \
 	src/pygambit/tests/test_players.py \
 	src/pygambit/tests/test_strategic.py \
 	src/pygambit/tests/test_stratprofiles.py \
-	src/pygambit/tests/test_strategies.py \
+	src/pygambit/tests/test_userguide.py \
 	src/pygambit/tests/test_games/basic_extensive_game.efg \
 	src/pygambit/tests/test_games/complicated_extensive_game.efg \
 	src/pygambit/tests/test_games/const_sum_game.nfg \
@@ -337,12 +335,12 @@ agg_SOURCES = \
 	src/games/gamebagg.h \
 	src/games/agg/gray.h \
 	src/games/agg/agg.cc \
-	src/games/agg/agg.h \
+    src/games/agg/agg.h \
 	src/games/agg/bagg.cc \
 	src/games/agg/bagg.h \
 	src/games/agg/proj_func.h \
 	src/games/agg/trie_map.h \
-        src/games/agg/trie_map.imp
+    src/games/agg/trie_map.imp
 
 game_SOURCES = \
 	src/gambit.h \
