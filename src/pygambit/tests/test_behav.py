@@ -11,6 +11,12 @@ class TestGambitMixedBehavGame(unittest.TestCase):
         self.profile_double = self.game.mixed_behavior_profile()
         self.profile_rational = self.game.mixed_behavior_profile(True)
 
+        self.game_with_chance = gbt.Game.read_game(
+            "test_games/complicated_extensive_game.efg"
+        )
+        self.profile_double_with_chance = self.game_with_chance.mixed_behavior_profile()
+        self.profile_rational_with_chance = self.game_with_chance.mixed_behavior_profile(True)
+
     def tearDown(self):
         del self.game
         del self.profile_double
@@ -724,3 +730,29 @@ class TestGambitMixedBehavGame(unittest.TestCase):
             self.profile_rational.belief(self.game.infosets[0].members[0]) ==
             gbt.Rational(1, 1)
         )
+
+    def test_payoff_with_chance_player(self):
+        """Test to ensure that payoff called with the chance player raises a ValueError"""
+        chance_player = self.game_with_chance.players.chance
+        self.assertRaises(ValueError, self.profile_double_with_chance.payoff, chance_player)
+        self.assertRaises(ValueError, self.profile_rational_with_chance.payoff, chance_player)
+
+    def test_infoset_value_with_chance_player_infoset(self):
+        """Test to ensure that infoset_value called with an infoset of the chance player
+        raises a ValueError
+        """
+        chance_infoset = self.game_with_chance.players.chance.infosets[0]
+        self.assertRaises(ValueError, self.profile_double_with_chance.infoset_value,
+                          chance_infoset)
+        self.assertRaises(ValueError, self.profile_rational_with_chance.infoset_value,
+                          chance_infoset)
+
+    def test_action_value_with_chance_player_action(self):
+        """Test to ensure that action_value called with an action of the chance player
+        raises a ValueError
+        """
+        chance_action = self.game_with_chance.players.chance.infosets[0].actions[0]
+        self.assertRaises(ValueError, self.profile_double_with_chance.action_value,
+                          chance_action)
+        self.assertRaises(ValueError, self.profile_rational_with_chance.action_value,
+                          chance_action)

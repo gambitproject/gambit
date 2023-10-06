@@ -284,8 +284,13 @@ class MixedBehaviorProfile:
             If `player` is a `Player` from a different game.
         KeyError
             If `player` is a string and no player in the game has that label.
+        ValueError
+            If `player` resolves to the chance player
         """
-        return self._payoff(self.game._resolve_player(player, 'payoff'))
+        resolved_player = self.game._resolve_player(player, 'payoff')
+        if resolved_player.is_chance:
+            raise ValueError("payoff() is not defined for the chance player")
+        return self._payoff(resolved_player)
 
     def infoset_value(self, infoset: typing.Union[Infoset, str]):
         """Returns the expected payoff to the player conditional on reaching an information set,
@@ -303,8 +308,13 @@ class MixedBehaviorProfile:
             If `infoset` is an `Infoset` from a different game.
         KeyError
             If `infoset` is a string and no information set in the game has that label.
+        ValueError
+            If `infoset` resolves to an infoset that belongs to the chance player
         """
-        return self._infoset_value(self.game._resolve_infoset(infoset, 'infoset_value'))
+        resolved_infoset = self.game._resolve_infoset(infoset, 'infoset_value')
+        if resolved_infoset.player.is_chance:
+            raise ValueError("infoset_value() is not defined for the chance player")
+        return self._infoset_value(resolved_infoset)
 
     def action_value(self, action: typing.Union[Action, str]):
         """Returns the expected payoff to the player of playing an action conditional on reaching its
@@ -322,8 +332,13 @@ class MixedBehaviorProfile:
             If `action` is an `Action` from a different game.
         KeyError
             If `action` is a string and no action in the game has that label.
+        ValueError
+            If `action` resolves to an action that belongs to the chance player
         """
-        return self._action_value(self.game._resolve_action(action, 'action_value'))
+        resolved_action = self.game._resolve_action(action, 'action_value')
+        if resolved_action.infoset.player.is_chance:
+            raise ValueError("action_value() is not defined for the chance player")
+        return self._action_value(resolved_action)
 
     def infoset_prob(self, infoset: typing.Union[Infoset, str]):
         """Returns the probability with which an information set is reached.
