@@ -247,7 +247,7 @@ class MixedStrategyProfile:
     def __repr__(self):
         return (
             f"Mixed strategy profile on '{self.game.title}': "
-            f"{', '.join([ str(self[i]) for i in range(len(self)) ])}"
+            f"{', '.join([str(self[i]) for i in range(len(self))])}"
         )
 
     def __rmul__(self, fac):
