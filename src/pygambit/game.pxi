@@ -159,7 +159,7 @@ class Game:
         with one node, which is both root and terminal.
 
         .. versionchanged:: 16.1.0
-	        Added the `players` and `title``
+	    Added the `players` and `title` parameters
 
         Parameters
         ----------
