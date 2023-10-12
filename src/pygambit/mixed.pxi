@@ -191,6 +191,29 @@ class MixedStrategyProfile:
         """
         return self._strategy_value(self.game._resolve_strategy(strategy, 'strategy_value'))
 
+    def regret(self, strategy: typing.Union[Strategy, str]):
+        """Returns the regret to playing `strategy`, if all other
+        players play according to the profile.
+
+        The regret is defined as the difference between the payoff of the
+        best-response strategy and the payoff of `strategy`.  By convention, the
+        regret is always non-negative.
+
+        Parameters
+        ----------
+        strategy : Strategy or str
+            The strategy to get the regret for.  If a string is passed, the
+            strategy is determined by finding the strategy with that label, if any.
+
+        Raises
+        ------
+        MismatchError
+            If `strategy` is a `Strategy` from a different game.
+        KeyError
+            If `strategy` is a string and no strategy in the game has that label.
+        """
+        return self._regret(self.game._resolve_strategy(strategy, 'regret'))
+
     def strategy_value_deriv(self, strategy: typing.Union[Strategy, str], other: typing.Union[Strategy, str]):
         """Returns the derivative of the payoff to playing `strategy`, with respect to the probability
         that `other` is played.
@@ -226,6 +249,9 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
 
     def _strategy_value(self, strategy: Strategy) -> float:
         return deref(self.profile).GetPayoff(strategy.strategy)
+
+    def _regret(self, strategy: Strategy) -> float:
+        return deref(self.profile).GetRegret(strategy.strategy)
 
     def _strategy_value_deriv(self, strategy: Strategy, other: Strategy) -> float:
         return deref(self.profile).GetPayoffDeriv(
@@ -324,6 +350,9 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
 
     def _strategy_value(self, strategy: Strategy) -> Rational:
         return rat_to_py(deref(self.profile).GetPayoff(strategy.strategy))
+
+    def _regret(self, strategy: Strategy) -> Rational:
+        return rat_to_py(deref(self.profile).GetRegret(strategy.strategy))
 
     def _strategy_value_deriv(self, strategy: Strategy, other: Strategy) -> Rational:
         return rat_to_py(deref(self.profile).GetPayoffDeriv(

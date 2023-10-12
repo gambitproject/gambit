@@ -9,6 +9,11 @@
 - ValueErrors raised for mixed behavior profiles when payoff, action_value, or infoset_value are
   called with the chance player.
 - Implemented Game.delete_strategy to remove a strategy from a strategic game.
+- Implemented regret for mixed strategy profiles.
+
+### Fixed
+- Regret on mixed behavior profiles now implements the standard definition of regret
+  (loss in expected payoff relative to best response conditional on reaching the information set).
 
 
 ## [16.1.0a3] - 2023-09-29

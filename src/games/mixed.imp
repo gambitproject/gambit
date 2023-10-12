@@ -120,6 +120,22 @@ template <class T> void MixedStrategyProfileRep<T>::Randomize(int p_denom)
   }
 }
 
+template <class T>
+T MixedStrategyProfileRep<T>::GetRegret(const GameStrategy &p_strategy) const
+{
+  GamePlayer player = p_strategy->GetPlayer();
+  T payoff = GetPayoffDeriv(player->GetNumber(), p_strategy);
+  T brpayoff = payoff;
+  for (int st = 1; st <= player->NumStrategies(); st++) {
+    if (st != p_strategy->GetNumber()) {
+      brpayoff = std::max(brpayoff,
+                          GetPayoffDeriv(player->GetNumber(), player->GetStrategy(st)));
+    }
+  }
+  return brpayoff - payoff;
+}
+
+
 //========================================================================
 //                   TreeMixedStrategyProfileRep<T>
 //========================================================================

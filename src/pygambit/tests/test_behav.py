@@ -540,85 +540,15 @@ class TestGambitMixedBehavGame(unittest.TestCase):
         assert self.profile_rational.action_value("D3") == gbt.Rational("3/1")
 
     def test_regret(self):
-        "Test to retrieve regret value associated to an action"
-        assert (
-            self.profile_double.regret(
-                self.game.players[0].infosets[0].actions[0]
-            ) == 0.0
-        )
-        assert (
-            self.profile_double.regret(
-                self.game.players[0].infosets[0].actions[1]
-            ) == 0.0
-        )
-        assert (
-            self.profile_double.regret(
-                self.game.players[1].infosets[0].actions[0]
-            ) == 0.0
-        )
-        assert (
-            self.profile_double.regret(
-                self.game.players[1].infosets[0].actions[1]
-            ) == 0.0
-        )
-        assert (
-            self.profile_double.regret(
-                self.game.players[2].infosets[0].actions[0]
-            ) == 0.25
-        )
-        assert (
-            self.profile_double.regret(
-                self.game.players[2].infosets[0].actions[1]
-            ) == -0.25
-        )
-        assert (
-            self.profile_rational.regret(
-                self.game.players[0].infosets[0].actions[0]
-            ) == gbt.Rational("0/1")
-        )
-        assert (
-            self.profile_rational.regret(
-                self.game.players[0].infosets[0].actions[1]
-            ) == gbt.Rational("0/1")
-        )
-        assert (
-            self.profile_rational.regret(
-                self.game.players[1].infosets[0].actions[0]
-            ) == gbt.Rational("0/1")
-        )
-        assert (
-            self.profile_rational.regret(
-                self.game.players[1].infosets[0].actions[1]
-            ) == gbt.Rational("0/1")
-        )
-        assert (
-            self.profile_rational.regret(
-                self.game.players[2].infosets[0].actions[0]
-            ) == gbt.Rational("1/4")
-        )
-        assert (
-            self.profile_rational.regret(
-                self.game.players[2].infosets[0].actions[1]
-            ) == gbt.Rational(-1, 4)
-        )
-
-    def test_regret_by_string(self):
-        """Test to retrieve regret value associated to an action
-        by string values
-        """
-        assert self.profile_double.regret("U1") == 0.0
-        assert self.profile_double.regret("D1") == 0.0
-        assert self.profile_double.regret("U2") == 0.0
-        assert self.profile_double.regret("D2") == 0.0
-        assert self.profile_double.regret("U3") == 0.25
-        assert self.profile_double.regret("D3") == -0.25
-
-        assert self.profile_rational.regret("U1") == gbt.Rational("0/1")
-        assert self.profile_rational.regret("D1") == gbt.Rational("0/1")
-        assert self.profile_rational.regret("U2") == gbt.Rational("0/1")
-        assert self.profile_rational.regret("D2") == gbt.Rational("0/1")
-        assert self.profile_rational.regret("U3") == gbt.Rational(1, 4)
-        assert self.profile_rational.regret("D3") == gbt.Rational(-1, 4)
+        for profile in [self.profile_double, self.profile_rational]:
+            for player in self.game.players:
+                for infoset in player.infosets:
+                    for action in infoset.actions:
+                        assert (
+                            profile.regret(action) ==
+                            max(profile.action_value(a) for a in infoset.actions) -
+                            profile.action_value(action)
+                        )
 
     def test_liap_values(self):
         "Test to retrieve Lyapunov values"

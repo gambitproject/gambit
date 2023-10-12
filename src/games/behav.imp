@@ -41,61 +41,61 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedBehaviorProfile<T> &p_p
     m_nodeValues(p_profile.m_nodeValues),
     m_infosetValues(p_profile.m_infosetValues),
     m_actionValues(p_profile.m_actionValues),
-    m_gripe(p_profile.m_gripe)
+    m_regret(p_profile.m_regret)
 {
   m_realizProbs = (T) 0.0;
   m_beliefs = (T) 0.0;
   m_nodeValues = (T) 0.0;
   m_infosetValues = (T) 0.0;
   m_actionValues = (T) 0.0;
-  m_gripe = (T) 0.0;
+  m_regret = (T) 0.0;
 }
 
 template <class T> 
 MixedBehaviorProfile<T>::MixedBehaviorProfile(const Game &p_game)
-  : DVector<T>(p_game->NumActions()), 
+  : DVector<T>(p_game->NumActions()),
     m_support(BehaviorSupportProfile(p_game)),
     m_cacheValid(false),
     m_realizProbs(p_game->NumNodes()),
     m_beliefs(p_game->NumNodes()),
-    m_nvals(p_game->NumNodes()), 
+    m_nvals(p_game->NumNodes()),
     m_bvals(p_game->NumNodes()),
     m_nodeValues(p_game->NumNodes(),
 		 p_game->NumPlayers()),
     m_infosetValues(p_game->NumInfosets()),
     m_actionValues(p_game->NumActions()),
-    m_gripe(p_game->NumActions())
+    m_regret(p_game->NumActions())
 {
   m_realizProbs = (T) 0.0;
   m_beliefs = (T) 0.0;
   m_nodeValues = (T) 0.0;
   m_infosetValues = (T) 0.0;
   m_actionValues = (T) 0.0;
-  m_gripe = (T) 0.0;
+  m_regret = (T) 0.0;
   SetCentroid();
 }
 
 template <class T> 
 MixedBehaviorProfile<T>::MixedBehaviorProfile(const BehaviorSupportProfile &p_support) 
-  : DVector<T>(p_support.NumActions()), 
+  : DVector<T>(p_support.NumActions()),
     m_support(p_support),
     m_cacheValid(false),
     m_realizProbs(p_support.GetGame()->NumNodes()),
     m_beliefs(p_support.GetGame()->NumNodes()),
-    m_nvals(p_support.GetGame()->NumNodes()), 
+    m_nvals(p_support.GetGame()->NumNodes()),
     m_bvals(p_support.GetGame()->NumNodes()),
     m_nodeValues(p_support.GetGame()->NumNodes(),
 		 p_support.GetGame()->NumPlayers()),
     m_infosetValues(p_support.GetGame()->NumInfosets()),
     m_actionValues(p_support.GetGame()->NumActions()),
-    m_gripe(p_support.GetGame()->NumActions())
+    m_regret(p_support.GetGame()->NumActions())
 {
   m_realizProbs = (T) 0.0;
   m_beliefs = (T) 0.0;
   m_nodeValues = (T) 0.0;
   m_infosetValues = (T) 0.0;
   m_actionValues = (T) 0.0;
-  m_gripe = (T) 0.0;
+  m_regret = (T) 0.0;
   SetCentroid();
 }
 
@@ -155,7 +155,7 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
 
 template <class T>
 MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_profile)
-  : DVector<T>(p_profile.GetGame()->NumActions()), 
+  : DVector<T>(p_profile.GetGame()->NumActions()),
     m_support(p_profile.GetGame()),
     m_cacheValid(false),
     m_realizProbs(m_support.GetGame()->NumNodes()),
@@ -166,14 +166,14 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
 		 m_support.GetGame()->NumPlayers()),
     m_infosetValues(m_support.GetGame()->NumInfosets()),
     m_actionValues(m_support.GetGame()->NumActions()),
-    m_gripe(m_support.GetGame()->NumActions())
+    m_regret(m_support.GetGame()->NumActions())
 {
   m_realizProbs = (T) 0.0;
   m_beliefs = (T) 0.0;
   m_nodeValues = (T) 0.0;
   m_infosetValues = (T) 0.0;
   m_actionValues = (T) 0.0;
-  m_gripe = (T) 0.0;
+  m_regret = (T) 0.0;
 
   ((Vector<T> &) *this).operator=((T)0); 
 
@@ -477,8 +477,8 @@ template <class T>
 const T &MixedBehaviorProfile<T>::GetRegret(const GameAction &act) const
 { 
   ComputeSolutionData();
-  return m_gripe(act->GetInfoset()->GetPlayer()->GetNumber(),
-		 act->GetInfoset()->GetNumber(), act->GetNumber());
+  return m_regret(act->GetInfoset()->GetPlayer()->GetNumber(),
+                  act->GetInfoset()->GetNumber(), act->GetNumber());
 }
 
 template <class T>
@@ -688,36 +688,40 @@ void MixedBehaviorProfile<T>::ComputeSolutionDataPass1(const GameNode &node) con
 template <class T>
 void MixedBehaviorProfile<T>::ComputeSolutionData() const
 {
-  if (!m_cacheValid) {
-    m_actionValues = (T) 0;
-    m_nodeValues = (T) 0;
-    m_infosetValues = (T) 0;
-    m_gripe = (T) 0;
-    ComputeSolutionDataPass1(m_support.GetGame()->GetRoot());
-    ComputeSolutionDataPass2(m_support.GetGame()->GetRoot());
+  if (m_cacheValid) {
+    return;
+  }
+  m_actionValues = (T) 0;
+  m_nodeValues = (T) 0;
+  m_infosetValues = (T) 0;
+  m_regret = (T) 0;
+  ComputeSolutionDataPass1(m_support.GetGame()->GetRoot());
+  ComputeSolutionDataPass2(m_support.GetGame()->GetRoot());
 
-    // At this point, mark the cache as value, so calls to GetPayoff()
-    // don't create a loop.
-    m_cacheValid = true;
+  // At this point, mark the cache as value, so calls to GetPayoff()
+  // don't create a loop.
+  m_cacheValid = true;
 
-    for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
-      for (int iset = 1; iset <= m_support.GetGame()->NumInfosets()[pl]; iset++) {
-	GameInfoset infoset = m_support.GetGame()->GetPlayer(pl)->GetInfoset(iset);
+  for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
+    for (int iset = 1; iset <= m_support.GetGame()->NumInfosets()[pl]; iset++) {
+      GameInfoset infoset = m_support.GetGame()->GetPlayer(pl)->GetInfoset(iset);
 
-	m_infosetValues(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()) = (T) 0;
-	for (int act = 1; act <= infoset->NumActions(); act++) {
-	  GameAction action = infoset->GetAction(act);
-	  m_infosetValues(infoset->GetPlayer()->GetNumber(),
-			  infoset->GetNumber()) += GetActionProb(action) * ActionValue(action);
-	}
+      m_infosetValues(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()) = (T) 0;
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+        GameAction action = infoset->GetAction(act);
+        m_infosetValues(infoset->GetPlayer()->GetNumber(),
+                        infoset->GetNumber()) += GetActionProb(action) * ActionValue(action);
+      }
 
-	for (int act = 1; act <= infoset->NumActions(); act++) {
-	  GameAction action = infoset->GetAction(act);
-	  m_gripe(action->GetInfoset()->GetPlayer()->GetNumber(),
-		  action->GetInfoset()->GetNumber(),
-                  action->GetNumber()) = 
-	    (ActionValue(action) - GetPayoff(infoset)) * GetRealizProb(infoset);
-	}
+      T brpayoff = ActionValue(infoset->GetAction(1));
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+        brpayoff = std::max(brpayoff, ActionValue(infoset->GetAction(act)));
+      }
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+        GameAction action = infoset->GetAction(act);
+        m_regret(action->GetInfoset()->GetPlayer()->GetNumber(),
+                 action->GetInfoset()->GetNumber(),
+                 act) = brpayoff - ActionValue(action);
       }
     }
   }

@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 
 import pygambit
 import pygambit as gbt
@@ -68,6 +69,19 @@ def test_strategy_value():
     strategy = game.players[0].strategies[1]
     assert game.mixed_strategy_profile(rational=False).strategy_value(strategy) == 0
     assert game.mixed_strategy_profile(rational=True).strategy_value(strategy) == 0
+
+
+def test_strategy_regret():
+    m = np.array([[8, 2], [10, 5]])
+    game = gbt.Game.from_arrays(m, np.transpose(m))
+    profile = game.mixed_strategy_profile(rational=False)
+    for player in game.players:
+        for strategy in player.strategies:
+            assert (
+                profile.regret(strategy) ==
+                max(profile.strategy_value(s) for s in player.strategies) -
+                profile.strategy_value(strategy)
+            )
 
 
 def test_strategy_value_by_label():

@@ -46,7 +46,7 @@ protected:
 
   // structures for storing cached data: actions
   mutable DVector<T> m_actionValues;   // aka conditional payoffs
-  mutable DVector<T> m_gripe;
+  mutable DVector<T> m_regret;
 
   const T &ActionValue(const GameAction &act) const 
     { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
