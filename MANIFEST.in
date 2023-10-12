@@ -2,12 +2,13 @@ recursive-include src/core *.cc *.h *.imp
 recursive-include src/games *.cc *.h *.imp
 recursive-include src/solvers *.c *.cc *.h *.imp
 include src/gambit.h
-include src/tools/nfglp.cc
-include src/tools/nfglp.h
-include src/tools/efglp.cc
-include src/tools/efglp.h
+include src/tools/lp/nfglp.cc
+include src/tools/lp/nfglp.h
+include src/tools/lp/efglp.cc
+include src/tools/lp/efglp.h
 include src/pygambit/*.pxd
 include src/pygambit/*.pyx
 include src/pygambit/*.pxi
-
+include src/pygambit/*.h
+include src/README.rst
 
