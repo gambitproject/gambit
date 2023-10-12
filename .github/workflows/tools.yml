@@ -22,12 +22,22 @@ jobs:
                 wx3.1-headers \
                 wx-common \
                 libnotify-dev
-      - run: aclocal
-      - run: automake --add-missing
-      - run: autoconf
-      - run: ./configure
-      - run: make
-      - run: sudo make install
+      - name: Configure build with autotools
+        run: |
+          aclocal
+          automake --add-missing
+          autoconf
+          ./configure
+      - name: Make source tarball
+        run: make dist
+      - name: Build from source tarball
+        run: |
+          tar zxvf gambit*.tar.gz
+          rm gambit*.tar.gz
+          cd gambit-*
+          ./configure
+          make
+          sudo make install
 
   macos:
     runs-on: macos-latest
