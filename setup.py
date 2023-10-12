@@ -36,9 +36,7 @@ cppgambit = (
             glob.glob("src/core/*.cc") +
             glob.glob("src/games/*.cc") +
             glob.glob("src/games/agg/*.cc") +
-            glob.glob("src/solvers/*/*.cc") +
-            ["src/tools/lp/nfglp.cc",
-             "src/tools/lp/efglp.cc"]
+            [fn for fn in glob.glob("src/solvers/*/*.cc") if "enumpoly" not in fn]
          ),
          'include_dirs': ["src"],
          'cflags': (

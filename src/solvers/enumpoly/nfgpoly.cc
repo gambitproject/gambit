@@ -479,7 +479,7 @@ void PrintSupport(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-void SolveStrategic(const Gambit::Game &p_nfg)
+void EnumPolySolveStrategic(const Gambit::Game &p_nfg)
 {
   Gambit::List<Gambit::StrategySupportProfile> supports = PossibleNashSubsupports(p_nfg);
 

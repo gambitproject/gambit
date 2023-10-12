@@ -386,11 +386,11 @@ cdef extern from "solvers/lcp/lcp.h":
     c_List[c_MixedBehaviorProfileDouble] LcpBehaviorSolveDouble(c_Game, int p_stopAfter, int p_maxDepth) except +RuntimeError
     c_List[c_MixedBehaviorProfileRational] LcpBehaviorSolveRational(c_Game, int p_stopAfter, int p_maxDepth) except +RuntimeError
 
-cdef extern from "tools/lp/nfglp.h":
+cdef extern from "solvers/lp/nfglp.h":
     c_List[c_MixedStrategyProfileDouble] LpStrategySolveDouble(c_Game) except +RuntimeError
     c_List[c_MixedStrategyProfileRational] LpStrategySolveRational(c_Game) except +RuntimeError
 
-cdef extern from "tools/lp/efglp.h":
+cdef extern from "solvers/lp/efglp.h":
     c_List[c_MixedBehaviorProfileDouble] LpBehaviorSolveDouble(c_Game) except +RuntimeError
     c_List[c_MixedBehaviorProfileRational] LpBehaviorSolveRational(c_Game) except +RuntimeError
 
