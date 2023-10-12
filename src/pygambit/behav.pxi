@@ -359,8 +359,13 @@ class MixedBehaviorProfile:
         return self._infoset_prob(self.game._resolve_infoset(infoset, 'infoset_prob'))
 
     def regret(self, action: typing.Union[Action, str]):
-        """Returns the regret associated with `action`.  The regret is the loss of
-        payoff relative to the best response to the profile.
+        """Returns the regret to playing `action`, if all other
+        players play according to the profile.
+
+        The regret is defined as the difference between the payoff of the
+        best-response action and the payoff of `action`.  Payoffs are computed
+        conditional on reaching the information set.  By convention, the
+        regret is always non-negative.
 
         Parameters
         ----------

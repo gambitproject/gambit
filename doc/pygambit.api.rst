@@ -194,6 +194,7 @@ Probability distributions over strategies
    MixedStrategyProfile.__getitem__
    MixedStrategyProfile.__setitem__
    MixedStrategyProfile.payoff
+   MixedStrategyProfile.regret
    MixedStrategyProfile.strategy_value
    MixedStrategyProfile.strategy_value_deriv
    MixedStrategyProfileDouble.game

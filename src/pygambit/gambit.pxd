@@ -246,6 +246,7 @@ cdef extern from "games/mixed.h":
           double getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
           double GetPayoff(c_GamePlayer)
           double GetPayoff(c_GameStrategy)
+          double GetRegret(c_GameStrategy)
           double GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy)
           double GetLiapValue()
           c_MixedStrategyProfileDouble ToFullSupport()
@@ -263,6 +264,7 @@ cdef extern from "games/mixed.h":
           c_Rational getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
           c_Rational GetPayoff(c_GamePlayer)
           c_Rational GetPayoff(c_GameStrategy)
+          c_Rational GetRegret(c_GameStrategy)
           c_Rational GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy)
           c_Rational GetLiapValue()
           c_MixedStrategyProfileRational ToFullSupport()
