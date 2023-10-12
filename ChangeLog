@@ -8,6 +8,7 @@
 - Migrated to pytest for testing of pygambit.
 - ValueErrors raised for mixed behavior profiles when payoff, action_value, or infoset_value are
   called with the chance player.
+- Implemented Game.delete_strategy to remove a strategy from a strategic game.
 
 
 ## [16.1.0a3] - 2023-09-29

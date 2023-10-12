@@ -1390,3 +1390,57 @@ class Game:
             return
         resolved_outcome = cython.cast(Outcome, self._resolve_outcome(outcome, 'set_outcome'))
         resolved_node.node.deref().SetOutcome(resolved_outcome.outcome)
+
+    def add_strategy(self, player: typing.Union[Player, str], label: str = None) -> Strategy:
+        """Add a new strategy to the set of strategies for `player`.
+
+        Parameters
+        ----------
+        player : Player or str
+            The player to create the new strategy for
+        label : str, optional
+            The label to assign to the new strategy
+            
+        Returns
+        -------
+        Strategy
+            The newly-created strategy
+
+        Raises
+        ------
+        MismatchError
+            If `player` is a `Player` from a different game.
+        UndefinedOperationError
+            If called on a game which has an extensive representation.
+        """
+        if self.is_tree:
+            raise UndefinedOperationError("Adding strategies is only applicable to games in strategic form")
+        resolved_player = cython.cast(Player, self._resolve_player(player, 'add_strategy'))
+        s = Strategy()
+        s.strategy = resolved_player.player.deref().NewStrategy()
+        if label is not None:
+            s.label = str(label)
+        return s
+
+    def delete_strategy(self, strategy: typing.Union[Strategy, str]) -> None:
+        """Delete `strategy` from the game.
+
+        Parameters
+        ----------
+        strategy : Strategy or str
+            The strategy to delete
+
+        Raises
+        ------
+        MismatchError
+            If `strategy` is a `strategy` from a different game.
+        UndefinedOperationError
+            If called on a game which has an extensive representation, or if `strategy` is the
+            only strategy for its player.
+        """
+        if self.is_tree:
+            raise UndefinedOperationError("Deleting strategies is only applicable to games in strategic form")
+        resolved_strategy = cython.cast(Strategy, self._resolve_strategy(strategy, 'delete_strategy'))
+        if len(resolved_strategy.player.strategies) == 1:
+            raise UndefinedOperationError("Cannot delete the only strategy for a player")
+        resolved_strategy.strategy.deref().DeleteStrategy()
