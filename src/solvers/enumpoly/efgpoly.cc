@@ -384,7 +384,7 @@ void PrintSupport(std::ostream &p_stream,
   p_stream << std::endl;
 }
 
-void SolveExtensive(const Game &p_game)
+void EnumPolySolveExtensive(const Game &p_game)
 {
   List<BehaviorSupportProfile> supports(PossibleNashSubsupports(BehaviorSupportProfile(p_game)));
 

@@ -27,8 +27,8 @@
 #include <memory>
 #include <getopt.h>
 #include "gambit.h"
-#include "efglp.h"
-#include "nfglp.h"
+#include "solvers/lp/efglp.h"
+#include "solvers/lp/nfglp.h"
 
 using namespace Gambit;
 

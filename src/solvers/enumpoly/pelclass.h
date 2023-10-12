@@ -24,7 +24,7 @@
 #include "gpolylst.h"
 
 /* extern "C" { */
-#include "pelprgen.h" 
+#include "pelican/pelprgen.h"
 /* } */
 
 

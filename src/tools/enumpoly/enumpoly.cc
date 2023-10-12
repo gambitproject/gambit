@@ -25,7 +25,7 @@
 #include <cstdlib>
 #include <getopt.h>
 #include "gambit.h"
-#include "nfghs.h"
+#include "solvers/enumpoly/nfghs.h"
 
 int g_numDecimals = 6;
 bool g_verbose = false;
@@ -58,8 +58,8 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-extern void SolveStrategic(const Gambit::Game &);
-extern void SolveExtensive(const Gambit::Game &);
+extern void EnumPolySolveStrategic(const Gambit::Game &);
+extern void EnumPolySolveExtensive(const Gambit::Game &);
 
 int main(int argc, char *argv[])
 {
@@ -136,15 +136,15 @@ int main(int argc, char *argv[])
 
     if (!game->IsTree() || useStrategic) {
       if (useHeuristic) {
-	gbtNfgHs algorithm(0);
-	algorithm.Solve(game);
+        gbtNfgHs algorithm(0);
+        algorithm.Solve(game);
       }
       else {
-	SolveStrategic(game);
+        EnumPolySolveStrategic(game);
       }
     }
     else {
-      SolveExtensive(game);
+      EnumPolySolveExtensive(game);
     }
     return 0;
   }
