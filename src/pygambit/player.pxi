@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+from deprecated import deprecated
 
 @cython.cclass
 class Infosets(Collection):
@@ -42,6 +43,9 @@ class Strategies(Collection):
     """The set of strategies available to a player."""
     player = cython.declare(c_GamePlayer)
 
+    @deprecated(version='16.1.0',
+                reason='Use Game.add_strategy() instead of Player.strategies.add()',
+                category=FutureWarning)
     def add(self, label="") -> Strategy:
         """Add a new strategy to the set of the player's strategies.
 

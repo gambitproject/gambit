@@ -70,15 +70,33 @@ def test_extensive_game_add_player():
 
 def test_strategic_game_add_strategy():
     game = gbt.Game.new_table([2, 2])
-    game.players[0].strategies.add("new strategy")
+    game.add_strategy(game.players[0], "new strategy")
     assert len(game.players[0].strategies) == 3
 
 
 def test_extensive_game_add_strategy():
     game = gbt.Game.new_tree(["Alice"])
     assert len(game.players["Alice"].strategies) == 1
-    with pytest.raises(TypeError):
-        game.players["Alice"].strategies.add("new strategy")
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.add_strategy(game.players["Alice"], "new strategy")
+
+
+def test_strategic_game_delete_strategy():
+    game = gbt.Game.new_table([2, 2])
+    game.delete_strategy(game.players[0].strategies[0])
+    assert len(game.players[0].strategies) == 1
+
+
+def test_strategic_game_delete_last_strategy():
+    game = gbt.Game.new_table([1, 2])
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.delete_strategy(game.players[0].strategies[0])
+
+
+def test_extensive_game_delete_strategy():
+    game = gbt.Game.new_tree(["Alice"])
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.delete_strategy(game.players["Alice"].strategies[0])
 
 
 def test_player_strategy_by_label():

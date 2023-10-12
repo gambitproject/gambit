@@ -87,6 +87,8 @@ cdef extern from "games/game.h":
           string GetLabel()
           void SetLabel(string)
 
+          void DeleteStrategy()
+
      cdef cppclass c_GameActionRep "GameActionRep":
           int GetNumber()
           c_GameInfoset GetInfoset()
