@@ -550,6 +550,16 @@ class TestGambitMixedBehavGame(unittest.TestCase):
                             profile.action_value(action)
                         )
 
+    def test_node_value(self):
+        # Another good node_value test (to be written!) is its martingale property: it should
+        # be the expected value of its children's node_values, given the probability
+        # distribution at the node.
+        for profile in [self.profile_double, self.profile_rational]:
+            for player in self.game.players:
+                assert (
+                    profile.node_value(player, self.game.root) == profile.payoff(player)
+                )
+
     def test_liap_values(self):
         "Test to retrieve Lyapunov values"
         assert self.profile_double.liap_value() == 0.0625

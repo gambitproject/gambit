@@ -222,6 +222,7 @@ Probability distributions over behavior
    MixedBehaviorProfile.regret
    MixedBehaviorProfile.action_value
    MixedBehaviorProfile.infoset_value
+   MixedBehaviorProfile.node_value
    MixedBehaviorProfile.infoset_prob
    MixedBehaviorProfile.belief
    MixedBehaviorProfile.is_defined_at
