@@ -116,6 +116,11 @@ class MixedBehaviorProfile:
             + r"\right]$"
         )
 
+    @property
+    def game(self) -> Game:
+        """The game on which this mixed behaviour profile is defined."""
+        return self._game
+
     def __getitem__(self, index: typing.Union[Player, Infoset, Action, str]):
         """Returns a probability, mixed agent strategy, or mixed behavior strategy.
 
@@ -413,6 +418,42 @@ class MixedBehaviorProfile:
         """
         return self._regret(self.game._resolve_action(action, 'regret'))
 
+    def liap_value(self):
+        """Returns the Lyapunov value (see [McK91]_) of the strategy profile.
+
+        The Lyapunov value is a non-negative number which is zero exactly at
+        Nash equilibria.
+        """
+        return self._liap_value()
+
+    def as_strategy(self) -> MixedStrategyProfile:
+        """Returns a `MixedStrategyProfile` which is equivalent
+        to the profile.
+        """
+        return self._as_strategy()
+
+    def randomize(self, denom: typing.Optional[int] = None) -> None:
+        """Randomizes the probabilities in the profile.  These are
+        generated as uniform distributions over the actions at each
+        information set.  If
+        ``denom`` is specified, all probabilities are divisible by
+        ``denom``, that is, the distribution is uniform over a discrete
+        grid of mixed strategies.
+        """
+        if denom is not None and denom <= 0:
+            raise ValueError("randomize(): denominator must be a positive integer")
+        self._randomize(denom)
+
+    def normalize(self) -> MixedBehaviorProfile:
+        """Create a profile with the same action proportions as this
+        one, but normalised so probabilities for each infoset sum to one.
+        """
+        return self._normalize()
+
+    def copy(self) -> MixedBehaviorProfile:
+        """Creates a copy of the behavior strategy profile."""
+        return self._copy()
+
 
 @cython.cclass
 class MixedBehaviorProfileDouble(MixedBehaviorProfile):
@@ -457,52 +498,32 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
             deref(self.profile) == deref(cython.cast(MixedBehaviorProfileDouble, other).profile)
         )
 
-    def copy(self) -> MixedBehaviorProfileDouble:
-        """Creates a copy of the behavior strategy profile."""
+    def _copy(self) -> MixedBehaviorProfileDouble:
         behav = MixedBehaviorProfileDouble()
         behav.profile = make_shared[c_MixedBehaviorProfileDouble](deref(self.profile))
         return behav
 
-    def as_strategy(self) -> MixedStrategyProfileDouble:
-        """Returns a `MixedStrategyProfile` which is equivalent
-        to the profile.
-        """
+    def _as_strategy(self) -> MixedStrategyProfileDouble:
         mixed = MixedStrategyProfileDouble()
         mixed.profile = make_shared[c_MixedStrategyProfileDouble](deref(self.profile).ToMixedProfile())
         return mixed
 
-    def liap_value(self) -> float:
-        """Returns the Lyapunov value (see [McK91]_) of the strategy profile.  The
-        Lyapunov value is a non-negative number which is zero exactly at
-        Nash equilibria.
-        """
+    def _liap_value(self) -> float:
         return deref(self.profile).GetLiapValue()
 
-    def normalize(self) -> MixedBehaviorProfileDouble:
-        """Create a profile with the same action proportions as this
-        one, but normalised so probabilities for each infoset sum to one.
-        """
+    def _normalize(self) -> MixedBehaviorProfileDouble:
         profile = MixedBehaviorProfileDouble()
         profile.profile = make_shared[c_MixedBehaviorProfileDouble](deref(self.profile).Normalize())
         return profile
     
-    def randomize(self, denom=None) -> None:
-        """Randomizes the probabilities in the profile.  These are
-        generated as uniform distributions over the actions at each
-        information set.  If
-        ``denom`` is specified, all probabilities are divisible by
-        ``denom``, that is, the distribution is uniform over a discrete
-        grid of mixed strategies.
-        """
+    def _randomize(self, denom: typing.Optional[int] = None) -> None:
         if denom is None:
             deref(self.profile).Randomize()
         else:
             deref(self.profile).Randomize(denom)
 
     @property
-    def game(self) -> Game:
-        """The game on which this mixed behaviour profile is defined.
-        """
+    def _game(self) -> Game:
         g = Game()
         g.game = deref(self.profile).GetGame()
         return g
@@ -555,46 +576,31 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
             deref(self.profile) == deref(cython.cast(MixedBehaviorProfileRational, other).profile)
         )
 
-    def copy(self) -> MixedBehaviorProfileRational:
-        """Creates a copy of the behavior strategy profile."""
+    def _copy(self) -> MixedBehaviorProfileRational:
         behav = MixedBehaviorProfileRational()
         behav.profile = make_shared[c_MixedBehaviorProfileRational](deref(self.profile))
         return behav
 
-    def as_strategy(self) -> MixedStrategyProfileRational:
-        """Returns a `MixedStrategyProfile` which is equivalent
-        to the profile.
-        """
+    def _as_strategy(self) -> MixedStrategyProfileRational:
         mixed = MixedStrategyProfileRational()
         mixed.profile = make_shared[c_MixedStrategyProfileRational](deref(self.profile).ToMixedProfile())
         return mixed
 
-    def liap_value(self) -> Rational:
-        """Returns the Lyapunov value (see [McK91]_) of the strategy profile.  The
-        Lyapunov value is a non-negative number which is zero exactly at
-        Nash equilibria.
-        """
+    def _liap_value(self) -> Rational:
         return rat_to_py(deref(self.profile).GetLiapValue())
 
-    def normalize(self) -> MixedBehaviorProfileRational:
-        """Create a profile with the same action proportions as this
-        one, but normalised so probabilites for each infoset sum to one.
-        """
+    def _normalize(self) -> MixedBehaviorProfileRational:
         profile = MixedBehaviorProfileRational()
         profile.profile = make_shared[c_MixedBehaviorProfileRational](deref(self.profile).Normalize())
         return profile
 
-    def randomize(self, denom) -> None:
-        """Randomizes the probabilities in the profile.  These are
-        generated as uniform distributions over the actions at each
-        information set.
-        """
+    def _randomize(self, denom: typing.Optional[int] = None) -> None:
+        if denom is None:
+            raise ValueError("randomize() on rational-precision profiles requires a denominator")
         deref(self.profile).Randomize(denom)
 
     @property
-    def game(self) -> Game:
-        """The game on which this mixed behaviour profile is defined.
-        """
+    def _game(self) -> Game:
         g = Game()
         g.game = deref(self.profile).GetGame()
         return g
