@@ -64,8 +64,8 @@ def readme():
 
 setuptools.setup(
     name="pygambit",
-    version="16.1.0a3",
-    description="Package for computation in game theory",
+    version="16.1.0a4",
+    description="The package for doing computation in game theory",
     long_description=readme(),
     classifiers=[
         "Development Status :: 4 - Beta",

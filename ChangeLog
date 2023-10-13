@@ -1,6 +1,6 @@
 # Changelog
 
-## [16.1.0a4] - unreleased
+## [16.1.0a4] - 2023-10-13
 
 ### Changed
 - Empty or all-whitespace strings cannot be used to access members of games in pygambit.
