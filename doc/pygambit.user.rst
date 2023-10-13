@@ -349,16 +349,17 @@ the extensive representation.  Assuming that ``g`` refers to the game
    len(eqa)
 
 The result of the calculation is a list of :py:class:`~pygambit.gambit.MixedBehaviorProfile`.
-Such a profile specifies action probabilities for each information set.
-The profile represents these hierarchically, with information sets grouped by player.
-We can just focus on the strategy of one player by indexing the profile by that
-player,
+A mixed behavior profile specifies, for each information set, the probability distribution over
+actions at that information set.
+Indexing a :py:class:`.MixedBehaviorProfile` by a player gives the probability distributions
+over each of that player's information sets:
+
 
 .. ipython:: python
 
    eqa[0]["Alice"]
 
-In this case, at Alice's first information set, where she has the King, she always raises.
+In this case, at Alice's first information set, the one at which she has the King, she always raises.
 At her second information set, where she has the Queen, she sometimes bluffs, raising with
 probability one-third.  Looking at Bob's strategy,
 
@@ -367,6 +368,43 @@ probability one-third.  Looking at Bob's strategy,
    eqa[0]["Bob"]
 
 Bob meets Alice's raise two-thirds of the time.
+
+Because this is an equilibrium, the fact that Bob randomizes at his information set must mean he
+is indifferent between the two actions at his information set.  :py:meth:`.MixedBehaviorProfile.action_value`
+returns the expected payoff of taking an action, conditional on reaching that action's information set:
+
+.. ipython:: python
+
+   [eqa[0].action_value(action) for action in g.players["Bob"].infosets[0].actions]
+
+Bob's indifference between his actions arises because of his beliefs given Alice's strategy.
+:py:meth:`.MixedBehaviorProfile.belief` returns the probability of reaching a node, conditional on
+its information set being reached:
+
+.. ipython:: python
+
+   [eqa[0].belief(node) for node in g.players["Bob"].infosets[0].members]
+
+Bob believes that, conditional on Alice raising, there's a 75% chance that she has the king;
+therefore, the expected payoff to meeting is in fact -1 as computed.
+:py:meth:`.MixedBehaviorProfile.infoset_prob` returns the probability that an information set is
+reached:
+
+.. ipython:: python
+
+   eqa[0].infoset_prob(g.players["Bob"].infosets[0])
+
+The corresponding probability that a node is reached in the play of the game is given
+by :py:meth:`.MixedBehaviorProfile.realiz_prob`, and the expected payoff to a player
+conditional on reaching a node is given by :py:meth:`.MixedBehaviorProfile.node_value`.
+
+The overall expected payoff to a player given the behavior profile is returned by
+:py:meth:`.MixedBehaviorProfile.payoff`:
+
+.. ipython:: python
+
+   eqa[0].payoff("Alice")
+   eqa[0].payoff("Bob")
 
 The equilibrium computed expresses probabilities in rational numbers.  Because
 the numerical data of games in Gambit :ref:`are represented exactly <pygambit.user.numbers>`,
@@ -380,7 +418,7 @@ on that representation.  It is also possible to compute using the strategic repr
 
 .. ipython:: python
 
-  [s.label for s in g.players["Alice"].strategies]
+   [s.label for s in g.players["Alice"].strategies]
 
 In the strategic form of this game, Alice has four strategies.  The generated strategy labels
 list the action numbers taken at each information set.  We can therefore apply a method which
@@ -396,10 +434,34 @@ process in floating-point arithmetic, so it returns profiles with probabilities 
 floating-point numbers.  This method operates on the strategic representation of the game, so
 the returned results are of type :py:class:`~pygambit.gambit.MixedStrategyProfile`, and
 specify, for each player, a probability distribution over that player's strategies.
-We can convert freely between :py:class:`~pygambit.gambit.MixedStrategyProfile` and
-:py:class:`~pygambit.gambit.MixedBehaviorProfile` representations
+Indexing a :py:class:`.MixedStrategyProfile` by a player gives the probability distribution
+over that player's strategies only.
+
+.. ipython:: python
+
+   eqa[0]["Alice"]
+   eqa[0]["Bob"]
+
+The expected payoff to a strategy is provided by :py:meth:`.MixedStrategyProfile.strategy_value`:
+
+.. ipython:: python
+
+   [eqa[0].strategy_value(strategy) for strategy in g.players["Alice"].strategies]
+   [eqa[0].strategy_value(strategy) for strategy in g.players["Bob"].strategies]
+
+The overall expected payoff to a player is returned by :py:meth:`.MixedStrategyProfile.payoff`:
+
+.. ipython:: python
+
+   eqa[0].payoff("Alice")
+   eqa[0].payoff("Bob")
+
+When a game has an extensive representation, we can convert freely between
+:py:class:`~pygambit.gambit.MixedStrategyProfile` and the corresponding
+:py:class:`~pygambit.gambit.MixedBehaviorProfile` representation of the same strategies
+using :py:meth:`.MixedStrategyProfile.as_behavior` and :py:meth:`.MixedBehaviorProfile.as_strategy`.
 
 .. ipython:: python
 
    eqa[0].as_behavior()
-
+   eqa[0].as_behavior().as_strategy()

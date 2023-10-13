@@ -191,6 +191,7 @@ Probability distributions over strategies
 .. autosummary::
    :toctree: api/
 
+   MixedStrategyProfile
    MixedStrategyProfile.__getitem__
    MixedStrategyProfile.__setitem__
    MixedStrategyProfile.payoff
@@ -214,6 +215,7 @@ Probability distributions over behavior
 .. autosummary::
    :toctree: api/
 
+   MixedBehaviorProfile
    MixedBehaviorProfile.__getitem__
    MixedBehaviorProfile.__setitem__
    MixedBehaviorProfile.payoff
