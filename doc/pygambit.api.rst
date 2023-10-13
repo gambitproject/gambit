@@ -192,21 +192,18 @@ Probability distributions over strategies
    :toctree: api/
 
    MixedStrategyProfile
+   MixedStrategyProfile.game
    MixedStrategyProfile.__getitem__
    MixedStrategyProfile.__setitem__
    MixedStrategyProfile.payoff
    MixedStrategyProfile.regret
    MixedStrategyProfile.strategy_value
    MixedStrategyProfile.strategy_value_deriv
-   MixedStrategyProfileDouble.game
-   MixedStrategyProfileDouble.liap_value
-   MixedStrategyProfileDouble.as_behavior
-   MixedStrategyProfileDouble.randomize
-   MixedStrategyProfileRational.game
-   MixedStrategyProfileRational.liap_value
-   MixedStrategyProfileRational.as_behavior
-   MixedStrategyProfileRational.randomize
-
+   MixedStrategyProfile.liap_value
+   MixedStrategyProfile.as_behavior
+   MixedStrategyProfile.randomize
+   MixedStrategyProfile.normalize
+   MixedStrategyProfile.copy
 
 
 Probability distributions over behavior
@@ -216,6 +213,7 @@ Probability distributions over behavior
    :toctree: api/
 
    MixedBehaviorProfile
+   MixedBehaviorProfile.game
    MixedBehaviorProfile.__getitem__
    MixedBehaviorProfile.__setitem__
    MixedBehaviorProfile.payoff
@@ -225,14 +223,11 @@ Probability distributions over behavior
    MixedBehaviorProfile.infoset_prob
    MixedBehaviorProfile.belief
    MixedBehaviorProfile.is_defined_at
-   MixedBehaviorProfileDouble.game
-   MixedBehaviorProfileDouble.liap_value
-   MixedBehaviorProfileDouble.as_strategy
-   MixedBehaviorProfileDouble.randomize
-   MixedBehaviorProfileRational.game
-   MixedBehaviorProfileRational.liap_value
-   MixedBehaviorProfileRational.as_strategy
-   MixedBehaviorProfileRational.randomize
+   MixedBehaviorProfile.liap_value
+   MixedBehaviorProfile.as_strategy
+   MixedBehaviorProfile.randomize
+   MixedBehaviorProfile.normalize
+   MixedBehaviorProfile.copy
 
 
 Computation on supports
