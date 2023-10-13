@@ -398,6 +398,10 @@ The corresponding probability that a node is reached in the play of the game is 
 by :py:meth:`.MixedBehaviorProfile.realiz_prob`, and the expected payoff to a player
 conditional on reaching a node is given by :py:meth:`.MixedBehaviorProfile.node_value`.
 
+.. ipython:: python
+
+   [eqa[0].node_value("Bob", node) for node in g.players["Bob"].infosets[0].members]
+
 The overall expected payoff to a player given the behavior profile is returned by
 :py:meth:`.MixedBehaviorProfile.payoff`:
 

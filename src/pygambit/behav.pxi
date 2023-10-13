@@ -292,6 +292,37 @@ class MixedBehaviorProfile:
             raise ValueError("payoff() is not defined for the chance player")
         return self._payoff(resolved_player)
 
+    def node_value(self, player: typing.Union[Player, str],
+                   node: typing.Union[Node, str]):
+        """Returns the expected payoff to `player` conditional on play reaching `node`,
+        if all players play according to the profile.
+
+        Parameters
+        ----------
+        player : Player or str
+            The player to get the payoff for.  If a string is passed, the
+            player is determined by finding the player with that label, if any.
+        node : Node or str
+            The node to get the payoff att.  If a string is passed, the
+            node is determined by finding the node with that label, if any.
+
+        Raises
+        ------
+        MismatchError
+            If `player` is a `Player` from a different game or `node` is a `Node`
+            from a different game.
+        KeyError
+            If `player` is a string and no player in the game has that label, or
+            `node` is a string and no node in the game has that label.
+        ValueError
+            If `player` resolves to the chance player
+        """
+        resolved_player = self.game._resolve_player(player, 'node_value')
+        resolved_node = self.game._resolve_node(node, 'node_value')
+        if resolved_player.is_chance:
+            raise ValueError("node_value() is not defined for the chance player")
+        return self._node_value(resolved_player, resolved_node)
+
     def infoset_value(self, infoset: typing.Union[Infoset, str]):
         """Returns the expected payoff to the player conditional on reaching an information set,
         if all players play according to the profile.
@@ -411,6 +442,9 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _infoset_value(self, infoset: Infoset) -> float:
         return deref(self.profile).GetPayoff(infoset.infoset)
 
+    def _node_value(self, player: Player, node: Node) -> float:
+        return deref(self.profile).GetPayoff(player.player, node.node)
+
     def _action_value(self, action: Action) -> float:
         return deref(self.profile).GetPayoff(action.action)
 
@@ -505,6 +539,9 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
 
     def _infoset_value(self, infoset: Infoset) -> Rational:
         return rat_to_py(deref(self.profile).GetPayoff(infoset.infoset))
+
+    def _node_value(self, player: Player, node: Node) -> Rational:
+        return rat_to_py(deref(self.profile).GetPayoff(player.player, node.node))
 
     def _action_value(self, action: Action) -> Rational:
         return rat_to_py(deref(self.profile).GetPayoff(action.action))

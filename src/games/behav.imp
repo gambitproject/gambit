@@ -441,6 +441,14 @@ Vector<T> MixedBehaviorProfile<T>::GetPayoff(const GameNode &node) const
 }
 
 template <class T>
+const T &MixedBehaviorProfile<T>::GetPayoff(const GamePlayer &p_player, const GameNode &p_node) const
+{
+  ComputeSolutionData();
+  return m_nodeValues(p_node->GetNumber(), p_player->GetNumber());
+}
+
+
+template <class T>
 const T &MixedBehaviorProfile<T>::GetPayoff(const GameInfoset &iset) const
 { 
   ComputeSolutionData();
@@ -648,8 +656,8 @@ void MixedBehaviorProfile<T>::ComputeSolutionDataPass2(const GameNode &node) con
       GameAction act = childNode->GetPriorAction();
 
       for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
-	m_nodeValues(node->GetNumber(), pl) +=
-	  GetActionProb(act) * m_nodeValues(childNode->GetNumber(), pl);
+        m_nodeValues(node->GetNumber(), pl) +=
+          GetActionProb(act) * m_nodeValues(childNode->GetNumber(), pl);
       }
 
       if (!iset->IsChanceInfoset()) {
