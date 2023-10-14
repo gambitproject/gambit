@@ -255,7 +255,7 @@ class MixedBehaviorProfile:
         """
         return self._is_defined_at(self.game._resolve_infoset(infoset, 'is_defined_at'))
 
-    def belief(self, node: Node):
+    def belief(self, node: typing.Union[Node, str]):
         """Returns the conditional probability that a node is reached, given that
         its information set is reached.
 
