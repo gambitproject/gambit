@@ -132,7 +132,7 @@ command-line executables.
 Building the Python extension
 -----------------------------
 
-The :ref:`pygambit Python package <python-api>` is in ``src/pygambit``
+The :ref:`pygambit Python package <pygambit>` is in ``src/pygambit``
 in the Gambit source tree.
 Building the extension follows the standard approach.
 From the **root directory of the source tree** execute

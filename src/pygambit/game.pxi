@@ -48,7 +48,11 @@ class Outcomes(Collection):
                 reason='Use Game.add_outcome() instead of Game.outcomes.add()',
                 category=FutureWarning)
     def add(self, label="") -> Outcome:
-        """Add a new outcome to the game."""
+        """Add a new outcome to the game.
+
+        .. deprecated:: 16.1.0
+           Use `Game.add_outcome` instead of `Outcomes.add`.
+        """
         c = Outcome()
         c.outcome = self.game.deref().NewOutcome()
         if label != "":
@@ -146,7 +150,8 @@ class GameStrategies(Collection):
 
 @cython.cclass
 class Game:
-    """Represents a game, the fundamental concept in game theory.
+    """A game, the fundamental unit of analysis in game theory.
+
     Games may be represented in extensive or strategic form.
     """
     game = cython.declare(c_Game)
@@ -155,11 +160,15 @@ class Game:
     def new_tree(cls,
                  players: typing.Optional[typing.List[str]] = None,
                  title: str = "Untitled extensive game") -> Game:
-        """Creates a new Game consisting of a trivial game tree,
+        """Create a new ``Game`` consisting of a trivial game tree,
         with one node, which is both root and terminal.
 
         .. versionchanged:: 16.1.0
+<<<<<<< HEAD
 	    Added the `players` and `title` parameters
+=======
+            Added the `players` and `title` parameters
+>>>>>>> origin
 
         Parameters
         ----------
@@ -188,10 +197,10 @@ class Game:
 
     @classmethod
     def new_table(cls, dim, title: str="Untitled strategic game") -> Game:
-        """Creates a new Game with a strategic representation.
+        """Create a new ``Game`` with a strategic representation.
 
         .. versionchanged:: 16.1.0
-            Added the ``title`` parameter.
+            Added the `title` parameter.
 
         Parameters
         ----------
@@ -219,15 +228,15 @@ class Game:
 
     @classmethod
     def from_arrays(cls, *arrays, title: str="Untitled strategic game") -> Game:
-        """Creates a new Game with a strategic representation.
+        """Create a new ``Game`` with a strategic representation.
 
-        Each entry in ``arrays`` gives the payoff matrix for the
+        Each entry in `arrays` gives the payoff matrix for the
         corresponding player.  The arrays must all have the same shape,
         and have the same number of dimensions as the total number of
         players.
 
         .. versionchanged:: 16.1.0
-            Added the ``title`` parameter.
+            Added the `title` parameter.
 
         Parameters
         ----------
@@ -241,6 +250,10 @@ class Game:
         -------
         Game
             The newly-created strategic game.
+
+        See Also
+        --------
+        from_dict : Create strategic game and set player labels
         """
         g = cython.declare(Game)
         arrays = [np.array(a) for a in arrays]
@@ -250,16 +263,16 @@ class Game:
         for profile in itertools.product(
                 *(range(arrays[0].shape[i]) for i in range(len(g.players)))
         ):
-            for pl in range(len(g.players)):
-                g[profile][pl] = arrays[pl][profile]
+            for pl, player in enumerate(g.players):
+                g[profile][player] = arrays[pl][profile]
         g.title = title
         return g
 
     @classmethod
     def from_dict(cls, payoffs, title: str="Untitled strategic game") -> Game:
-        """Creates a new Game with a strategic representation.
+        """Create a new ``Game`` with a strategic representation.
 
-        Each entry in ``payoffs`` is a key-value pair
+        Each entry in `payoffs` is a key-value pair
         giving the label and the payoff matrix for a player.
         The payoff matrices must all have the same shape,
         and have the same number of dimensions as the total number of
@@ -277,6 +290,10 @@ class Game:
         -------
         Game
             The newly-created strategic game.
+
+        See Also
+        --------
+        from_arrays : Create game from list-like of array-like
         """
         g = cython.declare(Game)
         payoffs = {k: np.array(v) for k, v in payoffs.items()}
@@ -297,7 +314,7 @@ class Game:
 
     @classmethod
     def read_game(cls, filepath: typing.Union[str, pathlib.Path]) -> Game:
-        """Constructs a game from its serialised representation in a file.
+        """Construct a game from its serialised representation in a file.
 
         Parameters
         ----------
@@ -332,8 +349,8 @@ class Game:
 
     @classmethod
     def parse_game(cls, text: str) -> Game:
-        """Constructs a game from its serialised representation in a string
-        .
+        """Construct a game from its serialised representation in a string
+
         Parameters
         ----------
         text : str
@@ -376,21 +393,21 @@ class Game:
     def __eq__(self, other: typing.Any) -> bool:
         return isinstance(other, Game) and self.game.deref() == cython.cast(Game, other).game.deref()
 
-    def __ne__(self, other: typing.Any) -> bool:
-        return not isinstance(other, Game) or self.game.deref() != cython.cast(Game, other).game.deref()
-
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.game.deref())
 
     @property
     def is_tree(self) -> bool:
-        """Returns whether a game has a tree-based representation."""
+        """Return whether a game has a tree-based representation."""
         return self.game.deref().IsTree()
 
     @property
     def title(self) -> str:
-        """Gets or sets the title of the game.  The title of the game is
-        an arbitrary string, generally intended to be short."""
+        """Get or set the title of the game.
+
+        The title of the game is an arbitrary string, generally intended
+        to be short.
+        """
         return self.game.deref().GetTitle().decode('ascii')
 
     @title.setter
@@ -399,8 +416,11 @@ class Game:
 
     @property
     def comment(self) -> str:
-        """Gets or sets the comment of the game.  A game's comment is
-        an arbitrary string, and may be more discursive than a title."""
+        """Get or set the comment of the game.
+
+        A game's comment is an arbitrary string, and may be more discursive
+        than a title.
+        """
         return self.game.deref().GetComment().decode('ascii')
 
     @comment.setter
@@ -409,7 +429,7 @@ class Game:
 
     @property
     def actions(self) -> GameActions:
-        """Return the set of actions available in the game.
+        """The set of actions available in the game.
 
         Raises
         ------
@@ -424,7 +444,7 @@ class Game:
 
     @property
     def infosets(self) -> GameInfosets:
-        """Return the set of information sets in the game.
+        """The set of information sets in the game.
 
         Raises
         ------
@@ -439,33 +459,33 @@ class Game:
 
     @property
     def players(self) -> Players:
-        """Return the set of players in the game."""
+        """The set of players in the game."""
         p = Players()
         p.game = self.game
         return p
 
     @property
     def strategies(self) -> GameStrategies:
-        """Return the set of strategies in the game."""
+        """The set of strategies in the game."""
         s = GameStrategies()
         s.game = self.game
         return s
 
     @property
     def outcomes(self) -> Outcomes:
-        """Return the set of outcomes in the game."""
+        """The set of outcomes in the game."""
         c = Outcomes()
         c.game = self.game
         return c
 
     @property
     def contingencies(self) -> pygambit.gameiter.Contingencies:
-        """Return an iterator over the contingencies in the game."""
+        """An iterator over the contingencies in the game."""
         return pygambit.gameiter.Contingencies(self)
 
     @property
     def root(self) -> Node:
-        """Returns the root node of the game.
+        """The root node of the game.
 
         Raises
         ------
@@ -473,19 +493,21 @@ class Game:
             If the game does not hae a tree representation.
         """
         if not self.is_tree:
-            raise UndefinedOperationError("Operation only defined for games with a tree representation")
+            raise UndefinedOperationError(
+                "root: only games with a tree representation have a root node"
+            )
         n = Node()
         n.node = self.game.deref().GetRoot()
         return n
 
     @property
     def is_const_sum(self) -> bool:
-        """Returns whether the game is constant sum."""
+        """Whether the game is constant sum."""
         return self.game.deref().IsConstSum()
 
     @property
     def is_perfect_recall(self) -> bool:
-        """Returns whether the game is perfect recall.
+        """Whether the game is perfect recall.
 
         By convention, games with a strategic representation have perfect recall as they
         are treated as simultaneous-move games.
@@ -494,12 +516,12 @@ class Game:
 
     @property
     def min_payoff(self) -> typing.Union[decimal.Decimal, Rational]:
-        """Returns the minimum payoff in the game."""
+        """The minimum payoff in the game."""
         return rat_to_py(self.game.deref().GetMinPayoff(0))
 
     @property
     def max_payoff(self) -> typing.Union[decimal.Decimal, Rational]:
-        """Returns the maximum payoff in the game."""
+        """The maximum payoff in the game."""
         return rat_to_py(self.game.deref().GetMaxPayoff(0))
 
     def set_chance_probs(self, infoset: typing.Union[Infoset, str], probs: typing.Sequence):
@@ -524,7 +546,7 @@ class Game:
             If the length of `probs` is not the same as the number of actions at the information set
         ValueError
             If any of the elements of `probs` are not interpretable as numbers, or the values of `probs` are not
-            nonnegative numbers that sum to exactly one.
+            non-negative numbers that sum to exactly one.
         """
         infoset = self._resolve_infoset(infoset, 'set_chance_probs')
         if not infoset.is_chance:
@@ -590,10 +612,11 @@ class Game:
         return self._get_contingency(*tuple(cont))
 
     def mixed_strategy_profile(self, data=None, rational=False) -> MixedStrategyProfile:
-        """Returns a mixed strategy profile `MixedStrategyProfile`
-        over the game.  If ``data`` is not specified, the mixed
+        """Create a mixed strategy profile over the game.
+
+        If `data` is not specified, the mixed
         strategy profile is initialized to uniform randomization for each
-        player over his strategies.  If the game has a tree
+        player over their strategies.  If the game has a tree
         representation, the mixed strategy profile is defined over the
         reduced strategic form representation.
 
@@ -605,7 +628,7 @@ class Game:
             specifying the probabilities of the strategies.
 
         rational
-            If `True`, probabilities are represented using rational numbers;
+            If True, probabilities are represented using rational numbers;
             otherwise double-precision floating point numbers are used.
         """
         if not self.is_perfect_recall:
@@ -654,14 +677,15 @@ class Game:
             return mspr
 
     def mixed_behavior_profile(self, rational=False) -> MixedBehaviorProfile:
-        """Returns a behavior strategy profile `MixedBehaviorProfile` over the game,
-        initialized to uniform randomization for each player over his actions at each
-        information set.
+        """Create a behavior strategy profile over the game.
+
+        The profile is initialized to uniform randomization for each player
+        over their actions at each information set.
 
         Parameters
         ----------
         rational
-            If `True`, probabilities are represented using rational numbers; otherwise
+            If True, probabilities are represented using rational numbers; otherwise
             double-precision floating point numbers are used.
 
         Raises
@@ -686,13 +710,41 @@ class Game:
     def support_profile(self):
         return StrategySupportProfile(list(self.strategies), self)
 
-    def num_nodes(self):
-        if self.is_tree:
-            return self.game.deref().NumNodes()
-        return 0
+    def nodes(
+            self,
+            subtree: typing.Optional[typing.Union[Node, str]] = None
+    ) -> typing.List[Node]:
+        """Return a list of nodes in the game tree.  If `subtree` is not None, returns
+        the nodes in the subtree rooted at that node.
+        
+        Nodes are returned in prefix-traversal order: a node appears prior to the list of
+        nodes in the subtrees rooted at the node's children.
+        
+        Parameters
+        ----------
+        subtree : Node or str, optional
+            If specified, return only the nodes in the subtree rooted at `subtree`.
+        
+        Raises
+        ------
+        MismatchError
+            If `node` is a `Node` from a different game.
+        """
+        if not self.is_tree:
+            return []
+        if subtree:
+            resolved_node = cython.cast(Node, self._resolve_node(subtree, 'nodes', 'subtree'))
+        else:
+            resolved_node = self.root
+        return (
+            [resolved_node] +
+            [n for child in resolved_node.children for n in self.nodes(child)]
+        )
 
     def write(self, format='native') -> str:
-        """Returns a serialization of the game.  Several output formats are
+        """Produce a serialization of the game.
+
+        Several output formats are
         supported, depending on the representation of the game.
 
         * `efg`: A representation of the game in
@@ -710,20 +762,20 @@ class Game:
         This method also supports exporting to other output formats
         (which cannot be used directly to re-load the game later, but
         are suitable for human consumption, inclusion in papers, and so
-        on):
+        on).
 
         * `html`: A rendering of the strategic form of the game as a
-	      collection of HTML tables.  The first player is the row
-	      chooser; the second player the column chooser.  For games with
-	      more than two players, a collection of tables is generated,
-	      one for each possible strategy combination of players 3 and higher.
+          collection of HTML tables.  The first player is the row
+          chooser; the second player the column chooser.  For games with
+          more than two players, a collection of tables is generated,
+          one for each possible strategy combination of players 3 and higher.
         * `sgame`: A rendering of the strategic form of the game in
-	      LaTeX, suitable for use with `Martin Osborne's sgame style
-	      <https://www.economics.utoronto.ca/osborne/latex/>`_.
-	      The first player is the row
-	      chooser; the second player the column chooser.  For games with
-	      more than two players, a collection of tables is generated,
-	      one for each possible strategy combination of players 3 and higher.
+          LaTeX, suitable for use with `Martin Osborne's sgame style
+          <https://www.economics.utoronto.ca/osborne/latex/>`_.
+          The first player is the row
+          chooser; the second player the column chooser.  For games with
+          more than two players, a collection of tables is generated,
+          one for each possible strategy combination of players 3 and higher.
         """
         if format == 'gte':
             return pygambit.gte.write_game(self)
@@ -750,12 +802,16 @@ class Game:
             If `player` is a string and no player in the game has that label.
         TypeError
             If `player` is not a `Player` or a `str`
+        ValueError
+            If `player` is an empty `str` or all spaces
         """
         if isinstance(player, Player):
             if player.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return player
         elif isinstance(player, str):
+            if not player.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.players[player]
             except IndexError:
@@ -782,12 +838,16 @@ class Game:
             If `outcome` is a string and no outcome in the game has that label.
         TypeError
             If `outcome` is not an `Outcome` or a `str`
+        ValueError
+            If `outcome` is an empty `str` or all spaces
         """
         if isinstance(outcome, Outcome):
             if outcome.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return outcome
         elif isinstance(outcome, str):
+            if not outcome.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.outcomes[outcome]
             except IndexError:
@@ -814,12 +874,16 @@ class Game:
             If `strategy` is a string and no strategy in the game has that label.
         TypeError
             If `strategy` is not a `Strategy` or a `str`
+        ValueError
+            If `strategy` is an empty `str` or all spaces
         """
         if isinstance(strategy, Strategy):
             if strategy.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return strategy
         elif isinstance(strategy, str):
+            if not strategy.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.strategies[strategy]
             except IndexError:
@@ -846,16 +910,20 @@ class Game:
             If `node` is a string and no node in the game has that label.
         TypeError
             If `node` is not a `Node` or a `str`
+        ValueError
+            If `node` is an empty `str` or all spaces
         """
         if isinstance(node, Node):
             if node.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return node
         elif isinstance(node, str):
-            try:
-                return self.nodes[node]
-            except IndexError:
-                raise KeyError(f"{funcname}(): no node with label '{node}'")
+            if not node.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
+            for n in self.nodes():
+                if n.label == node:
+                    return n
+            raise KeyError(f"{funcname}(): no node with label '{node}'")
         raise TypeError(f"{funcname}(): {argname} must be Node or str, not {node.__class__.__name__}")
 
     def _resolve_infoset(self, infoset: typing.Any, funcname: str, argname: str = "infoset") -> Infoset:
@@ -878,12 +946,16 @@ class Game:
             If `infoset` is a string and no information set in the game has that label.
         TypeError
             If `infoset` is not an `Infoset` or a `str`
+        ValueError
+            If `infoset` is an empty `str` or all spaces
         """
         if isinstance(infoset, Infoset):
             if infoset.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return infoset
         elif isinstance(infoset, str):
+            if not infoset.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.infosets[infoset]
             except IndexError:
@@ -910,12 +982,16 @@ class Game:
             If `action` is a string and no action in the game has that label.
         TypeError
             If `action` is not an `Action` or a `str`
+        ValueError
+            If `action` is an empty `str` or all spaces
         """
         if isinstance(action, Action):
             if action.infoset.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return action
         elif isinstance(action, str):
+            if not action.strip():
+                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.actions[action]
             except IndexError:
@@ -999,7 +1075,7 @@ class Game:
         resolved_node.node.deref().InsertMove(resolved_infoset.infoset)
 
     def copy_tree(self, src: typing.Union[Node, str], dest: typing.Union[Node, str]) -> None:
-        """Copies the subtree rooted at 'src' to 'dest'.
+        """Copy the subtree rooted at 'src' to 'dest'.
 
         Parameters
         ----------
@@ -1022,7 +1098,7 @@ class Game:
         resolved_src.node.deref().CopyTree(resolved_dest.node)
 
     def move_tree(self, src: typing.Union[Node, str], dest: typing.Union[Node, str]) -> None:
-        """Moves the subtree rooted at 'src' to 'dest'.
+        """Move the subtree rooted at 'src' to 'dest'.
 
         Parameters
         ----------
@@ -1065,7 +1141,7 @@ class Game:
         resolved_node.node.deref().DeleteParent()
 
     def delete_tree(self, node: typing.Union[Node, str]) -> None:
-        """Truncates the game tree at `node`, deleting the subtree beneath it.
+        """Truncate the game tree at `node`, deleting the subtree beneath it.
 
         Parameters
         ----------
@@ -1081,8 +1157,58 @@ class Game:
         resolved_node = cython.cast(Node, self._resolve_node(node, 'delete_tree'))
         resolved_node.node.deref().DeleteTree()
 
+    def add_action(self,
+                   infoset: typing.Union[typing.Infoset, str],
+                   before: typing.Optional[typing.Union[Action, str]] = None) -> None:
+        """Add an action at the information set `infoset`.   If `before` is not null, the new action
+        is inserted before `before`.
+
+        Parameters
+        ----------
+        infoset : Infoset or str
+            The information set at which to add an action
+        before : Action or str, optional
+            The action before which to add the new action.  If `before` is not specified,
+            the new action is the first at the information set
+
+        Raises
+        ------
+        MismatchError
+            If `infoset` is an `Infoset` from a different game, `before` is an `Action`
+            from a different game, or `before` is not an action at `infoset`.
+        """
+        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, 'add_action'))
+        if before is None:
+            resolved_infoset.infoset.deref().InsertAction(cython.cast(c_GameAction, NULL))
+        else:
+            resolved_action = cython.cast(
+                Action, self._resolve_action(before, 'add_action', 'before')
+            )
+            if resolved_infoset != resolved_action.infoset:
+                raise MismatchError("add_action(): must specify an action from the same infoset")
+            resolved_infoset.infoset.deref().InsertAction(resolved_action.action)
+
+
+    def delete_action(self, action: typing.Union[Action, str]) -> None:
+        """Deletes `action` from its information set.  The subtrees which
+        are rooted at nodes that follow the deleted action are also deleted.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If `action` is the only action at its information set.
+        MismatchError
+            If `action` is an `Action` from a different game.
+        """
+        resolved_action = cython.cast(Action, self._resolve_action(action, 'delete_action'))
+        if len(resolved_action.infoset.actions) == 1:
+            raise UndefinedOperationError(
+                "delete_action(): cannot delete the only action at an information set"
+            )
+        resolved_action.action.deref().DeleteAction()
+
     def leave_infoset(self, node: typing.Union[Node, str]):
-        """Removes this node from its information set. If this node is the only node
+        """Remove this node from its information set. If this node is the only node
         in its information set, this operation has no effect.
 
         Parameters
@@ -1094,7 +1220,7 @@ class Game:
         resolved_node.node.deref().LeaveInfoset()
 
     def set_infoset(self, node: typing.Union[Node, str], infoset: typing.Union[Infoset, str]) -> None:
-        """Places `node` in the information set `infoset`.  `node` must have the same
+        """Place `node` in the information set `infoset`.  `node` must have the same
         number of descendants as `infoset` has actions.
 
         Parameters
@@ -1118,8 +1244,37 @@ class Game:
             )
         resolved_node.node.deref().SetInfoset(resolved_infoset.infoset)
 
+    def reveal(self,
+               infoset: typing.Union[Infoset, str],
+               player: typing.Union[Player, str]) -> None:
+        """Reveals the move made at `infoset` to `player`.
+
+        Revealing the move modifies all subsequent information sets for `player` such
+        that any two nodes which are successors of two different actions at this
+        information set are placed in different information sets for `player`.
+
+        Revelation is a one-shot operation; it is not enforced with respect to any
+        revisions made to the game tree subsequently.
+
+        Parameters
+        ----------
+        infoset : Infoset or str
+            The information set of the move to reveal to the player
+        player : Player or str
+            The player to which to reveal the move at this information set.
+
+        Raises
+        ------
+        MismatchError
+            If `infoset` is an `Infoset` from a different game, or
+            `player` is a `Player` from a different game.
+        """
+        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, 'reveal'))
+        resolved_player = cython.cast(Player, self._resolve_player(player, 'reveal'))
+        resolved_infoset.deref().Reveal(resolved_player)
+
     def add_player(self, label: str = "") -> Player:
-        """Adds a new player to the game.
+        """Add a new player to the game.
 
         Parameters
         ----------
@@ -1191,11 +1346,13 @@ class Game:
         if str(label) != "":
             c.label = str(label)
         for player, payoff in zip(self.players, payoffs):
-            c[player.number] = payoff
+            c[player] = payoff
         return c
 
     def delete_outcome(self, outcome: typing.Union[Outcome, str]) -> None:
-        """Deletes an outcome from the game.  If this game is an extensive game, any
+        """Delete an outcome from the game.
+
+        If this game is an extensive game, any
         node at which this outcome is attached has its outcome reset to null.  If this game
         is a strategic game, any contingency at which this outcome is attached as its outcome
         reset to null.
@@ -1215,7 +1372,7 @@ class Game:
 
     def set_outcome(self, node: typing.Union[Node, str],
                     outcome: typing.Optional[typing.Union[Outcome, str]]) -> None:
-        """Sets `outcome` to be the outcome at `node`.  If `outcome` is None, the
+        """Set `outcome` to be the outcome at `node`.  If `outcome` is None, the
         outcome at `node` is unset.
 
         Parameters
@@ -1237,3 +1394,57 @@ class Game:
             return
         resolved_outcome = cython.cast(Outcome, self._resolve_outcome(outcome, 'set_outcome'))
         resolved_node.node.deref().SetOutcome(resolved_outcome.outcome)
+
+    def add_strategy(self, player: typing.Union[Player, str], label: str = None) -> Strategy:
+        """Add a new strategy to the set of strategies for `player`.
+
+        Parameters
+        ----------
+        player : Player or str
+            The player to create the new strategy for
+        label : str, optional
+            The label to assign to the new strategy
+            
+        Returns
+        -------
+        Strategy
+            The newly-created strategy
+
+        Raises
+        ------
+        MismatchError
+            If `player` is a `Player` from a different game.
+        UndefinedOperationError
+            If called on a game which has an extensive representation.
+        """
+        if self.is_tree:
+            raise UndefinedOperationError("Adding strategies is only applicable to games in strategic form")
+        resolved_player = cython.cast(Player, self._resolve_player(player, 'add_strategy'))
+        s = Strategy()
+        s.strategy = resolved_player.player.deref().NewStrategy()
+        if label is not None:
+            s.label = str(label)
+        return s
+
+    def delete_strategy(self, strategy: typing.Union[Strategy, str]) -> None:
+        """Delete `strategy` from the game.
+
+        Parameters
+        ----------
+        strategy : Strategy or str
+            The strategy to delete
+
+        Raises
+        ------
+        MismatchError
+            If `strategy` is a `strategy` from a different game.
+        UndefinedOperationError
+            If called on a game which has an extensive representation, or if `strategy` is the
+            only strategy for its player.
+        """
+        if self.is_tree:
+            raise UndefinedOperationError("Deleting strategies is only applicable to games in strategic form")
+        resolved_strategy = cython.cast(Strategy, self._resolve_strategy(strategy, 'delete_strategy'))
+        if len(resolved_strategy.player.strategies) == 1:
+            raise UndefinedOperationError("Cannot delete the only strategy for a player")
+        resolved_strategy.strategy.deref().DeleteStrategy()

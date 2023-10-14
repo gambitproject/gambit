@@ -254,19 +254,22 @@ AgentQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_point,
 class AgentQREPathTracer::CallbackFunction : public PathTracer::CallbackFunction {
 public:
   CallbackFunction(std::ostream &p_stream,
+                   const Game &p_game,
                    bool p_fullGraph, int p_decimals)
-    : m_stream(p_stream),
+    : m_stream(p_stream), m_game(p_game),
       m_fullGraph(p_fullGraph), m_decimals(p_decimals)
-  {}
-
+  { }
   ~CallbackFunction() override = default;
 
   void operator()(const Vector<double> &p_point, bool p_isTerminal) const override;
+  const List<LogitQREMixedBehaviorProfile> &GetProfiles() const { return m_profiles; }
 
 private:
   std::ostream &m_stream;
+  Game m_game;
   bool m_fullGraph;
   int m_decimals;
+  mutable List<LogitQREMixedBehaviorProfile> m_profiles;
 };
 
 void AgentQREPathTracer::CallbackFunction::operator()(const Vector<double> &p_point, bool p_isTerminal) const
@@ -290,6 +293,12 @@ void AgentQREPathTracer::CallbackFunction::operator()(const Vector<double> &p_po
   }
 
   m_stream << std::endl;
+
+  MixedBehaviorProfile<double> profile(m_game);
+  for (int i = 1; i < p_point.Length(); i++) {
+    profile[i] = exp(p_point[i]);
+  }
+  m_profiles.push_back(LogitQREMixedBehaviorProfile(profile, p_point.back()));
 }
 
 //------------------------------------------------------------------------------
@@ -313,29 +322,30 @@ private:
 //------------------------------------------------------------------------------
 
 
-void 
+List<LogitQREMixedBehaviorProfile>
 AgentQREPathTracer::TraceAgentPath(const LogitQREMixedBehaviorProfile &p_start,
 				   std::ostream &p_stream, 
 				   double p_maxLambda, 
 				   double p_omega, double p_targetLambda)
 {
+  List<LogitQREMixedBehaviorProfile> ret;
   Vector<double> x(p_start.BehaviorProfileLength() + 1);
   for (int i = 1; i <= p_start.BehaviorProfileLength(); i++) {
     x[i] = log(p_start[i]);
   }
   x[x.Length()] = p_start.GetLambda();
 
+  CallbackFunction func(p_stream, p_start.GetGame(), m_fullGraph, m_decimals);
   if (p_targetLambda > 0.0) {
     TracePath(EquationSystem(p_start.GetGame()),
-	      x, p_maxLambda, p_omega,
-	      CallbackFunction(p_stream, m_fullGraph, m_decimals),
+	      x, p_maxLambda, p_omega, func,
 	      LambdaCriterion(p_targetLambda));
   }
   else {
     TracePath(EquationSystem(p_start.GetGame()),
-	      x, p_maxLambda, p_omega,
-	      CallbackFunction(p_stream, m_fullGraph, m_decimals));
+	      x, p_maxLambda, p_omega, func);
   }
+  return func.GetProfiles();
 }
 
 }  // end namespace Gambit

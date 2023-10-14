@@ -256,10 +256,6 @@ EXTRA_DIST = \
 	src/pygambit/profiles.py \
 	src/pygambit/qre.py \
 	src/pygambit/supports.py \
-	src/pygambit/games/__init__.py \
-	src/pygambit/games/contest.py \
-	src/pygambit/games/meanstat.py \
-	src/pygambit/games/public.py \
 	src/pygambit/__init__.py \
 	src/pygambit/action.pxi \
 	src/pygambit/behav.pxi \
@@ -281,14 +277,16 @@ EXTRA_DIST = \
 	src/pygambit/tests/test_behav.py \
 	src/pygambit/tests/test_extensive.py \
 	src/pygambit/tests/test_game.py \
+	src/pygambit/tests/test_game_resolve_functions.py \
 	src/pygambit/tests/test_infosets.py \
 	src/pygambit/tests/test_mixed.py \
+	src/pygambit/tests/test_nash.py \
 	src/pygambit/tests/test_node.py \
 	src/pygambit/tests/test_outcomes.py \
 	src/pygambit/tests/test_players.py \
 	src/pygambit/tests/test_strategic.py \
 	src/pygambit/tests/test_stratprofiles.py \
-	src/pygambit/tests/test_strategies.py \
+	src/pygambit/tests/test_userguide.py \
 	src/pygambit/tests/test_games/basic_extensive_game.efg \
 	src/pygambit/tests/test_games/complicated_extensive_game.efg \
 	src/pygambit/tests/test_games/const_sum_game.nfg \
@@ -337,12 +335,12 @@ agg_SOURCES = \
 	src/games/gamebagg.h \
 	src/games/agg/gray.h \
 	src/games/agg/agg.cc \
-	src/games/agg/agg.h \
+    src/games/agg/agg.h \
 	src/games/agg/bagg.cc \
 	src/games/agg/bagg.h \
 	src/games/agg/proj_func.h \
 	src/games/agg/trie_map.h \
-        src/games/agg/trie_map.imp
+    src/games/agg/trie_map.imp
 
 game_SOURCES = \
 	src/gambit.h \
@@ -476,100 +474,100 @@ gambit_enummixed_SOURCES = \
 # sources from gpartltr to quiksolv were formerly in convenience lib libpoly.
 gambit_enumpoly_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
-	src/tools/enumpoly/pelclhpk.cc \
-	src/tools/enumpoly/pelclhpk.h \
-	src/tools/enumpoly/pelclqhl.cc \
-	src/tools/enumpoly/pelclqhl.h \
-	src/tools/enumpoly/pelclyal.cc \
-	src/tools/enumpoly/pelclyal.h \
-	src/tools/enumpoly/pelconv.cc \
-	src/tools/enumpoly/pelconv.h \
-	src/tools/enumpoly/peleval.cc \
-	src/tools/enumpoly/peleval.h \
-	src/tools/enumpoly/pelgennd.cc \
-	src/tools/enumpoly/pelgennd.h \
-	src/tools/enumpoly/pelgmatr.cc \
-	src/tools/enumpoly/pelgmatr.h \
-	src/tools/enumpoly/pelgntyp.h \
-	src/tools/enumpoly/pelhomot.cc \
-	src/tools/enumpoly/pelhomot.h \
-	src/tools/enumpoly/pelpred.cc \
-	src/tools/enumpoly/pelpred.h \
-	src/tools/enumpoly/pelprgen.cc \
-	src/tools/enumpoly/pelprgen.h \
-	src/tools/enumpoly/pelproc.cc \
-	src/tools/enumpoly/pelproc.h \
-	src/tools/enumpoly/pelpscon.h \
-	src/tools/enumpoly/pelpsys.cc \
-	src/tools/enumpoly/pelpsys.h \
-	src/tools/enumpoly/pelqhull.cc \
-	src/tools/enumpoly/pelqhull.h \
-	src/tools/enumpoly/pelsymbl.cc \
-	src/tools/enumpoly/pelsymbl.h \
-	src/tools/enumpoly/pelutils.cc \
-	src/tools/enumpoly/pelutils.h \
-	src/tools/enumpoly/gpartltr.cc \
-	src/tools/enumpoly/gpartltr.h \
-	src/tools/enumpoly/gpartltr.imp \
-	src/tools/enumpoly/gpoly.cc \
-	src/tools/enumpoly/gpoly.h \
-	src/tools/enumpoly/gpoly.imp \
-	src/tools/enumpoly/gpolylst.cc \
-	src/tools/enumpoly/gpolylst.h \
-	src/tools/enumpoly/gpolylst.imp \
-	src/tools/enumpoly/gsolver.cc \
-	src/tools/enumpoly/gsolver.h \
-	src/tools/enumpoly/gsolver.imp \
-	src/tools/enumpoly/ideal.cc \
-	src/tools/enumpoly/ideal.h \
-	src/tools/enumpoly/ideal.imp \
-	src/tools/enumpoly/ineqsolv.cc \
-	src/tools/enumpoly/ineqsolv.h \
-	src/tools/enumpoly/ineqsolv.imp \
-	src/tools/enumpoly/interval.h \
-	src/tools/enumpoly/monomial.cc \
-	src/tools/enumpoly/monomial.h \
-	src/tools/enumpoly/monomial.imp \
-	src/tools/enumpoly/pelclass.cc \
-	src/tools/enumpoly/pelclass.h \
-	src/tools/enumpoly/poly.cc \
-	src/tools/enumpoly/poly.h \
-	src/tools/enumpoly/poly.imp \
-	src/tools/enumpoly/prepoly.cc \
-	src/tools/enumpoly/prepoly.h \
-	src/tools/enumpoly/quiksolv.cc \
-	src/tools/enumpoly/quiksolv.h \
-	src/tools/enumpoly/quiksolv.imp \
-	src/tools/enumpoly/rectangl.cc \
-	src/tools/enumpoly/rectangl.h \
-	src/tools/enumpoly/rectangl.imp \
-	src/tools/enumpoly/behavextend.cc \
-	src/tools/enumpoly/behavextend.h \
-	src/tools/enumpoly/gcomplex.cc \
-	src/tools/enumpoly/gcomplex.h \
-	src/tools/enumpoly/gtree.h \
-	src/tools/enumpoly/gtree.imp \
-	src/tools/enumpoly/linrcomb.cc \
-	src/tools/enumpoly/linrcomb.h \
-	src/tools/enumpoly/linrcomb.imp \
-	src/tools/enumpoly/efgensup.cc \
-	src/tools/enumpoly/efgensup.h \
-	src/tools/enumpoly/gnarray.h \
-	src/tools/enumpoly/gnarray.imp \
-	src/tools/enumpoly/sfg.cc \
-	src/tools/enumpoly/sfg.h \
-	src/tools/enumpoly/sfstrat.cc \
-	src/tools/enumpoly/sfstrat.h \
-	src/tools/enumpoly/nfgensup.cc \
-	src/tools/enumpoly/nfgensup.h \
-	src/tools/enumpoly/odometer.cc \
-	src/tools/enumpoly/odometer.h \
-	src/tools/enumpoly/nfgcpoly.cc \
-	src/tools/enumpoly/nfgcpoly.h \
-	src/tools/enumpoly/nfghs.cc \
-	src/tools/enumpoly/nfghs.h \
-	src/tools/enumpoly/efgpoly.cc \
-	src/tools/enumpoly/nfgpoly.cc \
+	src/solvers/enumpoly/pelican/pelclhpk.cc \
+	src/solvers/enumpoly/pelican/pelclhpk.h \
+	src/solvers/enumpoly/pelican/pelclqhl.cc \
+	src/solvers/enumpoly/pelican/pelclqhl.h \
+	src/solvers/enumpoly/pelican/pelclyal.cc \
+	src/solvers/enumpoly/pelican/pelclyal.h \
+	src/solvers/enumpoly/pelican/pelconv.cc \
+	src/solvers/enumpoly/pelican/pelconv.h \
+	src/solvers/enumpoly/pelican/peleval.cc \
+	src/solvers/enumpoly/pelican/peleval.h \
+	src/solvers/enumpoly/pelican/pelgennd.cc \
+	src/solvers/enumpoly/pelican/pelgennd.h \
+	src/solvers/enumpoly/pelican/pelgmatr.cc \
+	src/solvers/enumpoly/pelican/pelgmatr.h \
+	src/solvers/enumpoly/pelican/pelgntyp.h \
+	src/solvers/enumpoly/pelican/pelhomot.cc \
+	src/solvers/enumpoly/pelican/pelhomot.h \
+	src/solvers/enumpoly/pelican/pelpred.cc \
+	src/solvers/enumpoly/pelican/pelpred.h \
+	src/solvers/enumpoly/pelican/pelprgen.cc \
+	src/solvers/enumpoly/pelican/pelprgen.h \
+	src/solvers/enumpoly/pelican/pelproc.cc \
+	src/solvers/enumpoly/pelican/pelproc.h \
+	src/solvers/enumpoly/pelican/pelpscon.h \
+	src/solvers/enumpoly/pelican/pelpsys.cc \
+	src/solvers/enumpoly/pelican/pelpsys.h \
+	src/solvers/enumpoly/pelican/pelqhull.cc \
+	src/solvers/enumpoly/pelican/pelqhull.h \
+	src/solvers/enumpoly/pelican/pelsymbl.cc \
+	src/solvers/enumpoly/pelican/pelsymbl.h \
+	src/solvers/enumpoly/pelican/pelutils.cc \
+	src/solvers/enumpoly/pelican/pelutils.h \
+	src/solvers/enumpoly/gpartltr.cc \
+	src/solvers/enumpoly/gpartltr.h \
+	src/solvers/enumpoly/gpartltr.imp \
+	src/solvers/enumpoly/gpoly.cc \
+	src/solvers/enumpoly/gpoly.h \
+	src/solvers/enumpoly/gpoly.imp \
+	src/solvers/enumpoly/gpolylst.cc \
+	src/solvers/enumpoly/gpolylst.h \
+	src/solvers/enumpoly/gpolylst.imp \
+	src/solvers/enumpoly/gsolver.cc \
+	src/solvers/enumpoly/gsolver.h \
+	src/solvers/enumpoly/gsolver.imp \
+	src/solvers/enumpoly/ideal.cc \
+	src/solvers/enumpoly/ideal.h \
+	src/solvers/enumpoly/ideal.imp \
+	src/solvers/enumpoly/ineqsolv.cc \
+	src/solvers/enumpoly/ineqsolv.h \
+	src/solvers/enumpoly/ineqsolv.imp \
+	src/solvers/enumpoly/interval.h \
+	src/solvers/enumpoly/monomial.cc \
+	src/solvers/enumpoly/monomial.h \
+	src/solvers/enumpoly/monomial.imp \
+	src/solvers/enumpoly/pelclass.cc \
+	src/solvers/enumpoly/pelclass.h \
+	src/solvers/enumpoly/poly.cc \
+	src/solvers/enumpoly/poly.h \
+	src/solvers/enumpoly/poly.imp \
+	src/solvers/enumpoly/prepoly.cc \
+	src/solvers/enumpoly/prepoly.h \
+	src/solvers/enumpoly/quiksolv.cc \
+	src/solvers/enumpoly/quiksolv.h \
+	src/solvers/enumpoly/quiksolv.imp \
+	src/solvers/enumpoly/rectangl.cc \
+	src/solvers/enumpoly/rectangl.h \
+	src/solvers/enumpoly/rectangl.imp \
+	src/solvers/enumpoly/behavextend.cc \
+	src/solvers/enumpoly/behavextend.h \
+	src/solvers/enumpoly/gcomplex.cc \
+	src/solvers/enumpoly/gcomplex.h \
+	src/solvers/enumpoly/gtree.h \
+	src/solvers/enumpoly/gtree.imp \
+	src/solvers/enumpoly/linrcomb.cc \
+	src/solvers/enumpoly/linrcomb.h \
+	src/solvers/enumpoly/linrcomb.imp \
+	src/solvers/enumpoly/efgensup.cc \
+	src/solvers/enumpoly/efgensup.h \
+	src/solvers/enumpoly/gnarray.h \
+	src/solvers/enumpoly/gnarray.imp \
+	src/solvers/enumpoly/sfg.cc \
+	src/solvers/enumpoly/sfg.h \
+	src/solvers/enumpoly/sfstrat.cc \
+	src/solvers/enumpoly/sfstrat.h \
+	src/solvers/enumpoly/nfgensup.cc \
+	src/solvers/enumpoly/nfgensup.h \
+	src/solvers/enumpoly/odometer.cc \
+	src/solvers/enumpoly/odometer.h \
+	src/solvers/enumpoly/nfgcpoly.cc \
+	src/solvers/enumpoly/nfgcpoly.h \
+	src/solvers/enumpoly/nfghs.cc \
+	src/solvers/enumpoly/nfghs.h \
+	src/solvers/enumpoly/efgpoly.cc \
+	src/solvers/enumpoly/nfgpoly.cc \
 	src/tools/enumpoly/enumpoly.cc
 
 gambit_enumpure_SOURCES = \
@@ -608,23 +606,23 @@ gambit_liap_SOURCES = \
 
 gambit_logit_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
-	src/tools/logit/logbehav.h \
-	src/tools/logit/logbehav.imp \
-	src/tools/logit/path.cc \
-	src/tools/logit/path.h \
-	src/tools/logit/efglogit.h \
-	src/tools/logit/efglogit.cc \
-	src/tools/logit/nfglogit.h \
-	src/tools/logit/nfglogit.cc \
+	src/solvers/logit/logbehav.h \
+	src/solvers/logit/logbehav.imp \
+	src/solvers/logit/path.cc \
+	src/solvers/logit/path.h \
+	src/solvers/logit/efglogit.h \
+	src/solvers/logit/efglogit.cc \
+	src/solvers/logit/nfglogit.h \
+	src/solvers/logit/nfglogit.cc \
 	src/tools/logit/logit.cc
 
 gambit_lp_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
 	${linalg_SOURCES} \
-	src/tools/lp/efglp.cc \
-	src/tools/lp/efglp.h \
-	src/tools/lp/nfglp.cc \
-	src/tools/lp/nfglp.h \
+	src/solvers/lp/efglp.cc \
+	src/solvers/lp/efglp.h \
+	src/solvers/lp/nfglp.cc \
+	src/solvers/lp/nfglp.h \
 	src/tools/lp/lp.cc
 
 gambit_simpdiv_SOURCES = \
@@ -682,7 +680,6 @@ gambit_SOURCES = \
 	src/labenski/include/wx/sheet/sheetsel.h \
 	src/labenski/include/wx/sheet/sheetspt.h \
 	src/labenski/include/wx/sheet/sheettbl.h \
-	src/labenski/include/wx/sheet/wx24defs.h \
 	src/labenski/include/wx/wxthings/block.h \
 	src/labenski/include/wx/wxthings/bmpcombo.h \
 	src/labenski/include/wx/wxthings/dropdown.h \

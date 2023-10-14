@@ -35,7 +35,7 @@ namespace Gambit {
 
 GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number)
   : m_game(p_game), m_number(p_number),
-    m_payoffs(m_game->NumPlayers()), m_unrestricted(nullptr)
+    m_payoffs(m_game->NumPlayers())
 { }
 
 
@@ -61,7 +61,7 @@ void GameStrategyRep::DeleteStrategy()
 //========================================================================
 
 GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
-  : m_game(p_game), m_number(p_id), m_strategies(p_strats), m_unrestricted(nullptr)
+  : m_game(p_game), m_number(p_id), m_strategies(p_strats)
 { 
   for (int j = 1; j <= p_strats; j++) {
     m_strategies[j] = new GameStrategyRep(this);
@@ -274,15 +274,6 @@ PureStrategyProfileRep::ToMixedStrategyProfile() const
     temp[GetStrategy(m_nfg->GetPlayer(pl))] = Rational(1);
   }
   return temp;
-}
-
-PureStrategyProfile PureStrategyProfileRep::Unrestrict() const
-{
-  PureStrategyProfile u = m_nfg->Unrestrict()->NewPureStrategyProfile();
-  for (auto player : this->m_nfg->GetPlayers()) {
-    u->SetStrategy(GetStrategy(player)->Unrestrict());
-  }
-  return u;
 }
 
 //========================================================================

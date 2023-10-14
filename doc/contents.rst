@@ -7,12 +7,10 @@ Detailed table of contents
    :maxdepth: 3
   
    intro
-   gui
    tools
-   pyapi
-   api
+   pygambit
+   gui
    samples
-   ideas
    build
    formats
    biblio

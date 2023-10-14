@@ -1,6 +1,37 @@
 # Changelog
 
-## [16.1.0a2] - unreleased
+## [16.1.0a4] - 2023-10-13
+
+### Changed
+- Empty or all-whitespace strings cannot be used to access members of games in pygambit.
+- Remaining compatibility code for wxWidgets 2.x removed from graphical interface.
+- Migrated to pytest for testing of pygambit.
+- ValueErrors raised for mixed behavior profiles when payoff, action_value, or infoset_value are
+  called with the chance player.
+- Implemented Game.delete_strategy to remove a strategy from a strategic game.
+- Implemented regret for mixed strategy profiles.
+
+### Fixed
+- Regret on mixed behavior profiles now implements the standard definition of regret
+  (loss in expected payoff relative to best response conditional on reaching the information set).
+
+
+## [16.1.0a3] - 2023-09-29
+
+### Changed
+- The `refine` and `leash` parameters to simpdiv have been made available and documented in
+  pygambit.
+- Repackage logit solver in src/solvers; make pygambit.nash.logit_solve available as a
+  method for finding a Nash equilibrium.
+- Additional game transformation operations have been moved to the Game class, and old versions
+  deprecated.
+- Accessing payoffs of outcomes and pure strategy profiles is now standardized to use player
+  references, and accessing by index has been removed.
+- Game.num_nodes has been removed in favor of Game.nodes, which returns a list of the nodes
+  in the game.
+
+
+## [16.1.0a2] - 2023-09-22
 
 ### Changed
 - Most operations which modify games have been moved to being operations on `Game` instead of

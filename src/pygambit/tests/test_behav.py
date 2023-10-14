@@ -1,13 +1,21 @@
+import unittest
+
 import pygambit as gbt
 
 
-class TestGambitMixedBehavGame:
+class TestGambitMixedBehavGame(unittest.TestCase):
     def setUp(self):
         self.game = gbt.Game.read_game(
             "test_games/mixed_behavior_game.efg"
         )
         self.profile_double = self.game.mixed_behavior_profile()
         self.profile_rational = self.game.mixed_behavior_profile(True)
+
+        self.game_with_chance = gbt.Game.read_game(
+            "test_games/complicated_extensive_game.efg"
+        )
+        self.profile_double_with_chance = self.game_with_chance.mixed_behavior_profile()
+        self.profile_rational_with_chance = self.game_with_chance.mixed_behavior_profile(True)
 
     def tearDown(self):
         del self.game
@@ -532,85 +540,25 @@ class TestGambitMixedBehavGame:
         assert self.profile_rational.action_value("D3") == gbt.Rational("3/1")
 
     def test_regret(self):
-        "Test to retrieve regret value associated to an action"
-        assert (
-            self.profile_double.regret(
-                self.game.players[0].infosets[0].actions[0]
-            ) == 0.0
-        )
-        assert (
-            self.profile_double.regret(
-                self.game.players[0].infosets[0].actions[1]
-            ) == 0.0
-        )
-        assert (
-            self.profile_double.regret(
-                self.game.players[1].infosets[0].actions[0]
-            ) == 0.0
-        )
-        assert (
-            self.profile_double.regret(
-                self.game.players[1].infosets[0].actions[1]
-            ) == 0.0
-        )
-        assert (
-            self.profile_double.regret(
-                self.game.players[2].infosets[0].actions[0]
-            ) == 0.25
-        )
-        assert (
-            self.profile_double.regret(
-                self.game.players[2].infosets[0].actions[1]
-            ) == -0.25
-        )
-        assert (
-            self.profile_rational.regret(
-                self.game.players[0].infosets[0].actions[0]
-            ) == gbt.Rational("0/1")
-        )
-        assert (
-            self.profile_rational.regret(
-                self.game.players[0].infosets[0].actions[1]
-            ) == gbt.Rational("0/1")
-        )
-        assert (
-            self.profile_rational.regret(
-                self.game.players[1].infosets[0].actions[0]
-            ) == gbt.Rational("0/1")
-        )
-        assert (
-            self.profile_rational.regret(
-                self.game.players[1].infosets[0].actions[1]
-            ) == gbt.Rational("0/1")
-        )
-        assert (
-            self.profile_rational.regret(
-                self.game.players[2].infosets[0].actions[0]
-            ) == gbt.Rational("1/4")
-        )
-        assert (
-            self.profile_rational.regret(
-                self.game.players[2].infosets[0].actions[1]
-            ) == gbt.Rational(-1, 4)
-        )
+        for profile in [self.profile_double, self.profile_rational]:
+            for player in self.game.players:
+                for infoset in player.infosets:
+                    for action in infoset.actions:
+                        assert (
+                            profile.regret(action) ==
+                            max(profile.action_value(a) for a in infoset.actions) -
+                            profile.action_value(action)
+                        )
 
-    def test_regret_by_string(self):
-        """Test to retrieve regret value associated to an action
-        by string values
-        """
-        assert self.profile_double.regret("U1") == 0.0
-        assert self.profile_double.regret("D1") == 0.0
-        assert self.profile_double.regret("U2") == 0.0
-        assert self.profile_double.regret("D2") == 0.0
-        assert self.profile_double.regret("U3") == 0.25
-        assert self.profile_double.regret("D3") == -0.25
-
-        assert self.profile_rational.regret("U1") == gbt.Rational("0/1")
-        assert self.profile_rational.regret("D1") == gbt.Rational("0/1")
-        assert self.profile_rational.regret("U2") == gbt.Rational("0/1")
-        assert self.profile_rational.regret("D2") == gbt.Rational("0/1")
-        assert self.profile_rational.regret("U3") == gbt.Rational(1, 4)
-        assert self.profile_rational.regret("D3") == gbt.Rational(-1, 4)
+    def test_node_value(self):
+        # Another good node_value test (to be written!) is its martingale property: it should
+        # be the expected value of its children's node_values, given the probability
+        # distribution at the node.
+        for profile in [self.profile_double, self.profile_rational]:
+            for player in self.game.players:
+                assert (
+                    profile.node_value(player, self.game.root) == profile.payoff(player)
+                )
 
     def test_liap_values(self):
         "Test to retrieve Lyapunov values"
@@ -722,3 +670,29 @@ class TestGambitMixedBehavGame:
             self.profile_rational.belief(self.game.infosets[0].members[0]) ==
             gbt.Rational(1, 1)
         )
+
+    def test_payoff_with_chance_player(self):
+        """Test to ensure that payoff called with the chance player raises a ValueError"""
+        chance_player = self.game_with_chance.players.chance
+        self.assertRaises(ValueError, self.profile_double_with_chance.payoff, chance_player)
+        self.assertRaises(ValueError, self.profile_rational_with_chance.payoff, chance_player)
+
+    def test_infoset_value_with_chance_player_infoset(self):
+        """Test to ensure that infoset_value called with an infoset of the chance player
+        raises a ValueError
+        """
+        chance_infoset = self.game_with_chance.players.chance.infosets[0]
+        self.assertRaises(ValueError, self.profile_double_with_chance.infoset_value,
+                          chance_infoset)
+        self.assertRaises(ValueError, self.profile_rational_with_chance.infoset_value,
+                          chance_infoset)
+
+    def test_action_value_with_chance_player_action(self):
+        """Test to ensure that action_value called with an action of the chance player
+        raises a ValueError
+        """
+        chance_action = self.game_with_chance.players.chance.infosets[0].actions[0]
+        self.assertRaises(ValueError, self.profile_double_with_chance.action_value,
+                          chance_action)
+        self.assertRaises(ValueError, self.profile_rational_with_chance.action_value,
+                          chance_action)

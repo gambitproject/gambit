@@ -14,11 +14,8 @@
 
 #include "wx/defs.h"
 #include "wx/datetime.h"
-#include "wx/sheet/wx24defs.h"   // wx2.4 backwards compatibility
+#include "wx/event.h"
 #include "wx/dynarray.h"
-#if wxMINOR_VERSION > 4
-    #include "wx/arrstr.h"
-#endif
 #include "wx/sheet/pairarr.h"
 
 // ----------------------------------------------------------------------------

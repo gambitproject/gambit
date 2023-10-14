@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+from deprecated import deprecated
 
 @cython.cclass
 class Infosets(Collection):
@@ -42,6 +43,9 @@ class Strategies(Collection):
     """The set of strategies available to a player."""
     player = cython.declare(c_GamePlayer)
 
+    @deprecated(version='16.1.0',
+                reason='Use Game.add_strategy() instead of Player.strategies.add()',
+                category=FutureWarning)
     def add(self, label="") -> Strategy:
         """Add a new strategy to the set of the player's strategies.
 
@@ -77,7 +81,7 @@ class Strategies(Collection):
 
 @cython.cclass
 class Player:
-    """Represents a player in a :py:class:`Game`."""
+    """A player in a ``Game``."""
     player = cython.declare(c_GamePlayer)
 
     def __repr__(self):
@@ -92,15 +96,12 @@ class Player:
     def __eq__(self, other: typing.Any) -> bool:
         return isinstance(other, Player) and self.player.deref() == cython.cast(Player, other).player.deref()
 
-    def __ne__(self, other: typing.Any) -> bool:
-        return not isinstance(other, Player) or self.player.deref() != cython.cast(Player, other).player.deref()
-
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.player.deref())
 
     @property
     def game(self) -> Game:
-        """Gets the :py:class:`Game` to which the player belongs."""
+        """Gets the ``Game`` to which the player belongs."""
         g = Game()
         g.game = self.player.deref().GetGame()
         return g
@@ -119,14 +120,14 @@ class Player:
 
     @property
     def number(self) -> int:
-        """Returns the number of the player in its Game.
+        """Returns the number of the player in its game.
         Players are numbered starting with 0.
         """
         return self.player.deref().GetNumber() - 1
 
     @property
     def is_chance(self) -> bool:
-        """Returns `True` if the player is the chance player."""
+        """Returns whether the player is the chance player."""
         return self.player.deref().IsChance() != 0
 
     @property

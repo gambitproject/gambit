@@ -1,0 +1,10 @@
+recursive-include src/core *.cc *.h *.imp
+recursive-include src/games *.cc *.h *.imp
+recursive-include src/solvers *.c *.cc *.h *.imp
+include src/gambit.h
+include src/pygambit/*.pxd
+include src/pygambit/*.pyx
+include src/pygambit/*.pxi
+include src/pygambit/*.h
+include src/README.rst
+

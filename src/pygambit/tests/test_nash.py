@@ -121,3 +121,13 @@ class TestNash(unittest.TestCase):
         """Test calls of GNM for mixed strategy equilibria."""
         result = gbt.nash.gnm_solve(self.poker)
         assert len(result) == 1
+
+    def test_logit_strategy(self):
+        """Test calls of logit for mixed strategy equilibria."""
+        result = gbt.nash.logit_solve(self.poker, use_strategic=True)
+        assert len(result) == 1
+
+    def test_logit_behavior(self):
+        """Test calls of logit for mixed behavior equilibria."""
+        result = gbt.nash.logit_solve(self.poker, use_strategic=False)
+        assert len(result) == 1

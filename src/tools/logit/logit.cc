@@ -26,8 +26,8 @@
 #include <cstdlib>
 #include <getopt.h>
 #include "gambit.h"
-#include "efglogit.h"
-#include "nfglogit.h"
+#include "solvers/logit/efglogit.h"
+#include "solvers/logit/nfglogit.h"
 
 using namespace Gambit;
 

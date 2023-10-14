@@ -1,0 +1,14 @@
+EFG 2 R "One card poker game, after Myerson (1991)" { "Alice" "Bob" }
+""
+
+c "" 1 "" { "King" 1/2 "Queen" 1/2 } 0
+p "" 1 1 "" { "Raise" "Fold" } 0
+p "" 2 1 "" { "Meet" "Pass" } 0
+t "" 1 "Alice wins big" { 2, -2 }
+t "" 2 "Alice wins" { 1, -1 }
+t "" 4 "Bob wins" { -1, 1 }
+p "" 1 2 "" { "Raise" "Fold" } 0
+p "" 2 1 "" { "Meet" "Pass" } 0
+t "" 3 "Bob wins big" { -2, 2 }
+t "" 2 "Alice wins" { 1, -1 }
+t "" 4 "Bob wins" { -1, 1 }

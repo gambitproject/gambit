@@ -21,7 +21,7 @@
 //
 
 #include "gambit.h"
-#include "tools/logit/nfglogit.h"
+#include "solvers/logit/nfglogit.h"
 
 using namespace std;
 using namespace Gambit;

@@ -19,10 +19,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+from deprecated import deprecated
 
 @cython.cclass
 class Action:
-    """A choice available at an information set."""
+    """A choice available at an ``Infoset`` in a ``Game``."""
     action = cython.declare(c_GameAction)
 
     def __repr__(self):
@@ -36,15 +37,18 @@ class Action:
     def __eq__(self, other: typing.Any) -> bool:
         return isinstance(other, Action) and self.action.deref() == cython.cast(Action, other).action.deref()
 
-    def __ne__(self, other: typing.Any) -> bool:
-        return not isinstance(other, Action) or self.action.deref() != cython.cast(Action, other).action.deref()
-
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.action.deref())
 
+    @deprecated(version='16.1.0',
+                reason='Use Game.delete_action instead of Action.delete.',
+                category=FutureWarning)
     def delete(self):
         """Deletes this action from its information set.  The subtrees which
         are rooted at nodes that follow the deleted action are also deleted.
+
+        .. deprecated:: 16.1.0
+           Use `Game.delete_action` instead of `Action.delete`.
 
         Raises
         ------
@@ -58,7 +62,7 @@ class Action:
         self.action.deref().DeleteAction()
 
     def precedes(self, node: Node) -> bool:
-        """ Returns `True` if `node` precedes this action in the
+        """Returns whether `node` precedes this action in the
         extensive game.
 
         Raises

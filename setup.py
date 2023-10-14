@@ -36,12 +36,7 @@ cppgambit = (
             glob.glob("src/core/*.cc") +
             glob.glob("src/games/*.cc") +
             glob.glob("src/games/agg/*.cc") +
-            glob.glob("src/solvers/*/*.cc") +
-            ["src/tools/lp/nfglp.cc",
-             "src/tools/lp/efglp.cc",
-             "src/tools/logit/path.cc",
-             "src/tools/logit/nfglogit.cc",
-             "src/tools/logit/efglogit.cc"]
+            [fn for fn in glob.glob("src/solvers/*/*.cc") if "enumpoly" not in fn]
          ),
          'include_dirs': ["src"],
          'cflags': (
@@ -69,8 +64,8 @@ def readme():
 
 setuptools.setup(
     name="pygambit",
-    version="16.1.0a2",
-    description="Package for computation in game theory",
+    version="16.1.0a4",
+    description="The package for doing computation in game theory",
     long_description=readme(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -103,6 +98,8 @@ setuptools.setup(
     ],
     libraries=[cppgambit, lrslib],
     package_dir={'': 'src'},
-    packages=['pygambit', 'pygambit.games'],
-    ext_modules=Cython.Build.cythonize(libgambit, compiler_directives={'binding': True})
+    packages=['pygambit'],
+    ext_modules=Cython.Build.cythonize(libgambit,
+                                       language_level="3str",
+                                       compiler_directives={'binding': True})
 )

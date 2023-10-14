@@ -30,7 +30,7 @@
 #include "gpoly.h"
 #include "gpolylst.h"
 #include "gpartltr.h"
-#include "pelqhull.h"
+#include "pelican/pelqhull.h"
 #include "pelclass.h"
 
 /*

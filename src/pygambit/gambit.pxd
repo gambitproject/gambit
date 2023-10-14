@@ -87,6 +87,8 @@ cdef extern from "games/game.h":
           string GetLabel()
           void SetLabel(string)
 
+          void DeleteStrategy()
+
      cdef cppclass c_GameActionRep "GameActionRep":
           int GetNumber()
           c_GameInfoset GetInfoset()
@@ -141,8 +143,8 @@ cdef extern from "games/game.h":
           string GetLabel()
           void SetLabel(string)
 
-          c_Number GetPayoff(int) except +IndexError
-          void SetPayoff(int, c_Number) except +IndexError
+          c_Number GetPayoff(c_GamePlayer) except +IndexError
+          void SetPayoff(c_GamePlayer, c_Number) except +IndexError
 
      cdef cppclass c_GameNodeRep "GameNodeRep":
           c_Game GetGame()
@@ -225,7 +227,7 @@ cdef extern from "games/game.h":
           c_GameOutcome GetOutcome()
           void SetOutcome(c_GameOutcome)
 
-          c_Rational GetPayoff(int)
+          c_Rational GetPayoff(c_GamePlayer)
 
      c_Game NewTree()
      c_Game NewTable(Array[int] *)
@@ -244,6 +246,7 @@ cdef extern from "games/mixed.h":
           double getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
           double GetPayoff(c_GamePlayer)
           double GetPayoff(c_GameStrategy)
+          double GetRegret(c_GameStrategy)
           double GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy)
           double GetLiapValue()
           c_MixedStrategyProfileDouble ToFullSupport()
@@ -261,6 +264,7 @@ cdef extern from "games/mixed.h":
           c_Rational getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
           c_Rational GetPayoff(c_GamePlayer)
           c_Rational GetPayoff(c_GameStrategy)
+          c_Rational GetRegret(c_GameStrategy)
           c_Rational GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy)
           c_Rational GetLiapValue()
           c_MixedStrategyProfileRational ToFullSupport()
@@ -282,6 +286,7 @@ cdef extern from "games/behav.h":
           double GetBeliefProb(c_GameNode)
           double GetRealizProb(c_GameInfoset)
           double GetPayoff(c_GameInfoset)
+          double GetPayoff(c_GamePlayer, c_GameNode)
           double GetPayoff(c_GameAction)
           double GetRegret(c_GameAction)
           double GetLiapValue()
@@ -305,6 +310,7 @@ cdef extern from "games/behav.h":
           c_Rational GetBeliefProb(c_GameNode)
           c_Rational GetRealizProb(c_GameInfoset)
           c_Rational GetPayoff(c_GameInfoset)
+          c_Rational GetPayoff(c_GamePlayer, c_GameNode)
           c_Rational GetPayoff(c_GameAction)
           c_Rational GetRegret(c_GameAction)
           c_Rational GetLiapValue()
@@ -386,11 +392,11 @@ cdef extern from "solvers/lcp/lcp.h":
     c_List[c_MixedBehaviorProfileDouble] LcpBehaviorSolveDouble(c_Game, int p_stopAfter, int p_maxDepth) except +RuntimeError
     c_List[c_MixedBehaviorProfileRational] LcpBehaviorSolveRational(c_Game, int p_stopAfter, int p_maxDepth) except +RuntimeError
 
-cdef extern from "tools/lp/nfglp.h":
+cdef extern from "solvers/lp/nfglp.h":
     c_List[c_MixedStrategyProfileDouble] LpStrategySolveDouble(c_Game) except +RuntimeError
     c_List[c_MixedStrategyProfileRational] LpStrategySolveRational(c_Game) except +RuntimeError
 
-cdef extern from "tools/lp/efglp.h":
+cdef extern from "solvers/lp/efglp.h":
     c_List[c_MixedBehaviorProfileDouble] LpBehaviorSolveDouble(c_Game) except +RuntimeError
     c_List[c_MixedBehaviorProfileRational] LpBehaviorSolveRational(c_Game) except +RuntimeError
 
@@ -399,7 +405,9 @@ cdef extern from "solvers/liap/liap.h":
     c_List[c_MixedBehaviorProfileDouble] LiapBehaviorSolve(c_Game, int p_maxitsN) except +RuntimeError
 
 cdef extern from "solvers/simpdiv/simpdiv.h":
-    c_List[c_MixedStrategyProfileRational] SimpdivStrategySolve(c_Game) except +RuntimeError
+    c_List[c_MixedStrategyProfileRational] SimpdivStrategySolve(c_Game,
+                                                                int p_gridResize,
+                                                                int p_leashLength) except +RuntimeError
 
 cdef extern from "solvers/ipa/ipa.h":
     c_List[c_MixedStrategyProfileDouble] IPAStrategySolve(c_Game) except +RuntimeError
@@ -407,9 +415,13 @@ cdef extern from "solvers/ipa/ipa.h":
 cdef extern from "solvers/gnm/gnm.h":
     c_List[c_MixedStrategyProfileDouble] GNMStrategySolve(c_Game) except +RuntimeError
 
+cdef extern from "solvers/logit/nfglogit.h":
+    c_List[c_MixedStrategyProfileDouble] LogitStrategySolve(c_Game) except +RuntimeError
 
+cdef extern from "solvers/logit/efglogit.h":
+    c_List[c_MixedBehaviorProfileDouble] LogitBehaviorSolve(c_Game) except +RuntimeError
 
-cdef extern from "tools/logit/nfglogit.h":
+cdef extern from "solvers/logit/nfglogit.h":
      cdef cppclass c_LogitQREMixedStrategyProfile "LogitQREMixedStrategyProfile":
           c_LogitQREMixedStrategyProfile(c_Game)
           c_LogitQREMixedStrategyProfile(c_LogitQREMixedStrategyProfile)

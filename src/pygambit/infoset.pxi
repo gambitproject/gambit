@@ -19,7 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-
+from deprecated import deprecated
 
 @cython.cclass
 class Members(Collection):
@@ -45,9 +45,15 @@ class Actions(Collection):
     """The set of actions which are available at an information set."""
     infoset = cython.declare(c_GameInfoset)
 
+    @deprecated(version='16.1.0',
+                reason='Use Game.add_action instead of Actions.add.',
+                category=FutureWarning)
     def add(self, action=None):
         """Add an action at the information set.  If `action` is not null, the new action
         is inserted before `action`.
+
+        .. deprecated:: 16.1.0
+           Use `Game.add_action` instead of `Actions.add`.
         """
         if action is None:
             self.infoset.deref().InsertAction(cython.cast(c_GameAction, NULL))
@@ -72,7 +78,7 @@ class Actions(Collection):
 
 @cython.cclass
 class Infoset:
-    """Represents an information set in a :py:class:`Game`."""
+    """An information set in a ``Game``."""
     infoset = cython.declare(c_GameInfoset)
 
     def __repr__(self) -> str:
@@ -84,18 +90,18 @@ class Infoset:
     def __eq__(self, other: typing.Any) -> bool:
         return isinstance(other, Infoset) and self.infoset.deref() == cython.cast(Infoset, other).infoset.deref()
 
-    def __ne__(self, other: typing.Any) -> bool:
-        return not isinstance(other, Infoset) or self.infoset.deref() != cython.cast(Infoset, other).infoset.deref()
-
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.infoset.deref())
 
     def precedes(self, node: Node) -> bool:
-        """Returns whether this information set precedes `node` in the game tree."""
+        """Return whether this information set precedes `node` in the game tree."""
         return self.infoset.deref().Precedes(cython.cast(Node, node).node)
 
+    @deprecated(version='16.1.0',
+                reason='Use Game.reveal instead of Infoset.game.',
+                category=FutureWarning)
     def reveal(self, player: Player) -> None:
-        """Reveals the move made at the information set to `player`.
+        """Reveal the move made at the information set to `player`.
 
         Revealing the move modifies all subsequent information sets for `player` such
         that any two nodes which are successors of two different actions at this
@@ -103,6 +109,9 @@ class Infoset:
 
         Revelation is a one-shot operation; it is not enforced with respect to any
         revisions made to the game tree subsequently.
+
+        .. deprecated:: 16.1.0
+           Use `Game.reveal` instead of `Infoset.reveal`.
 
         Parameters
         ----------
@@ -128,14 +137,14 @@ class Infoset:
 
     @property
     def game(self) -> Game:
-        """Gets the :py:class:`Game` to which the information set belongs."""
+        """The ``Game`` to which the information set belongs."""
         g = Game()
         g.game = self.infoset.deref().GetGame()
         return g
 
     @property
     def label(self) -> str:
-        """Gets or sets the text label of the information set."""
+        """Get or set the text label of the information set."""
         return self.infoset.deref().GetLabel().decode('ascii')
 
     @label.setter
@@ -144,19 +153,19 @@ class Infoset:
 
     @property
     def is_chance(self) -> bool:
-        """Returns `True` if the information set belongs to the chance player."""
+        """Whether the information set belongs to the chance player."""
         return self.infoset.deref().IsChanceInfoset()
 
     @property
     def actions(self) -> Actions:
-        """Returns the set of actions at the information set."""
+        """The set of actions at the information set."""
         a = Actions()
         a.infoset = self.infoset
         return a
 
     @property
     def members(self) -> Members:
-        """Returns the set of nodes which are members of the information set."""
+        """The set of nodes which are members of the information set."""
         return Members(self)
 
     @property

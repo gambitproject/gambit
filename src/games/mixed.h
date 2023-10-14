@@ -52,6 +52,8 @@ public:
   virtual T GetPayoff(int pl) const = 0;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &) const = 0;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const = 0;
+
+  T GetRegret(const GameStrategy &) const;
 };
 
 template <class T> class TreeMixedStrategyProfileRep 
@@ -224,9 +226,6 @@ public:
 
   /// Converts the profile to one on the full support of the game
   MixedStrategyProfile<T> ToFullSupport() const;
-
-  /// Converts the profile to one on the unrestricted parent of the game
-  MixedStrategyProfile<T> Unrestrict() const;
   //@}
 
   /// @name Computation of interesting quantities
@@ -255,6 +254,11 @@ public:
   /// Computes the payoff to playing the pure strategy against the profile
   T GetPayoff(const GameStrategy &p_strategy) const
   { return GetPayoffDeriv(p_strategy->GetPlayer()->GetNumber(), p_strategy); }
+
+  /// Computes the regret to playing the pure strategy compared to the payoff
+  /// of the best response
+  T GetRegret(const GameStrategy &p_strategy) const
+  { return m_rep->GetRegret(p_strategy); }
 
   /// \brief Computes the Lyapunov value of the profile
   ///

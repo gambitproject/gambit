@@ -39,7 +39,7 @@ class Children(Collection):
 
 @cython.cclass
 class Node:
-    """Represents a node in a :py:class:`Game`."""
+    """A node in a ``Game``."""
     node = cython.declare(c_GameNode)
 
     def __repr__(self) -> str:
@@ -51,14 +51,11 @@ class Node:
     def __eq__(self, other: typing.Any) -> bool:
         return isinstance(other, Node) and self.node.deref() == cython.cast(Node, other).node.deref()
 
-    def __ne__(self, other: typing.Any) -> bool:
-        return not isinstance(other, Node) or self.node.deref() != cython.cast(Node, other).node.deref()
-
     def __hash__(self) -> long:
         return cython.cast(long, self.node.deref())
 
     def is_successor_of(self, node: Node) -> bool:
-        """Returns `True` if this node is a successor of `Node`."""
+        """Returns whether this node is a successor of `node`."""
         return self.node.deref().IsSuccessorOf((<Node>node).node)
 
     @deprecated(version='16.1.0',
@@ -70,6 +67,9 @@ class Node:
         in which case the move is placed in a new information set for that player.
         In this instance, the number of `actions` at the new information set must
         be specified.
+
+        .. deprecated:: 16.1.0
+           Use `Game.append_move` or `Game.append_infoset` instead of `Node.append_move`.
 
         Raises
         ------
@@ -112,6 +112,9 @@ class Node:
         number of ``actions`` at the new information set must be specified.
         The newly-inserted node takes the place of the node in the game
         tree, and the existing node becomes the first child of the new node.
+
+        .. deprecated:: 16.1.0
+           Use `Game.insert_move` or `Game.insert_infoset` instead of `Node.insert_move`.
 
         Raises
         ------
@@ -204,15 +207,17 @@ class Node:
 
     @property
     def game(self) -> Game:
-        """Gets the :py:class:`Game` to which the node belongs."""
+        """Gets the ``Game`` to which the node belongs."""
         g = Game()
         g.game = self.node.deref().GetGame()
         return g
 
     @property
     def infoset(self) -> typing.Optional[Infoset]:
-        """The information set to which this node belongs.  If this is a
-        terminal node, which belongs to no information set, `None` is returned.
+        """The information set to which this node belongs.
+
+        If this is a terminal node, which belongs to no information set,
+        None is returned.
         """
         if self.node.deref().GetInfoset() != cython.cast(c_GameInfoset, NULL):
             i = Infoset()
@@ -223,7 +228,8 @@ class Node:
     @property
     def player(self) -> typing.Optional[Player]:
         """The player who makes the decision at this node.
-        If this is a terminal node `None` is returned.
+
+        If this is a terminal node, None is returned.
         """
         if self.node.deref().GetPlayer() != cython.cast(c_GamePlayer, NULL):
             p = Player()
@@ -233,7 +239,10 @@ class Node:
 
     @property
     def parent(self) -> typing.Optional[Node]:
-        """The parent of this node.  If this is the root node, `None` is returned."""
+        """The parent of this node.
+
+        If this is the root node, None is returned.
+        """
         if self.node.deref().GetParent() != cython.cast(c_GameNode, NULL):
             n = Node()
             n.node = self.node.deref().GetParent()
@@ -242,8 +251,9 @@ class Node:
 
     @property
     def prior_action(self) -> typing.Optional[Action]:
-        """The action which leads to this node.  If this is the root node,
-        `None` is returned.
+        """The action which leads to this node.
+
+        If this is the root node, None is returned.
         """
         if self.node.deref().GetPriorAction() != cython.cast(c_GameAction, NULL):
             a = Action()
@@ -254,7 +264,9 @@ class Node:
     @property
     def prior_sibling(self) -> typing.Optional[Node]:
         """The node which is immediately before this one in its parent's children.
-        If this is the root node or the first child of its parent, `None` is returned.
+
+        If this is the root node or the first child of its parent,
+        None is returned.
         """
         if self.node.deref().GetPriorSibling() != cython.cast(c_GameNode, NULL):
             n = Node()
@@ -265,7 +277,9 @@ class Node:
     @property
     def next_sibling(self) -> typing.Optional[Node]:
         """The node which is immediately after this one in its parent's children.
-        If this is the root node or the last child of its parent, `None` is returned.
+
+        If this is the root node or the last child of its parent,
+        None is returned.
         """
         if self.node.deref().GetNextSibling() != cython.cast(c_GameNode, NULL):
             n = Node()
@@ -275,12 +289,12 @@ class Node:
 
     @property
     def is_terminal(self) -> bool:
-        """Returns `True` if this is a terminal node of the game."""
+        """Returns whether this is a terminal node of the game."""
         return self.node.deref().IsTerminal()
 
     @property
     def is_subgame_root(self) -> bool:
-        """Returns `True` if the node is the root of a proper subgame.
+        """Returns whether the node is the root of a proper subgame.
 
         .. versionchanged:: 16.1.0
             Changed to being a property instead of a member function.
@@ -289,8 +303,9 @@ class Node:
 
     @property
     def outcome(self) -> typing.Optional[Outcome]:
-        """Returns the outcome attached to the node.  If no outcome is attached
-        to the node, `None` is returned.
+        """Returns the outcome attached to the node.
+
+        If no outcome is attached to the node, None is returned.
         """
         if self.node.deref().GetOutcome() == cython.cast(c_GameOutcome, NULL):
             return None

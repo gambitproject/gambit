@@ -120,6 +120,22 @@ template <class T> void MixedStrategyProfileRep<T>::Randomize(int p_denom)
   }
 }
 
+template <class T>
+T MixedStrategyProfileRep<T>::GetRegret(const GameStrategy &p_strategy) const
+{
+  GamePlayer player = p_strategy->GetPlayer();
+  T payoff = GetPayoffDeriv(player->GetNumber(), p_strategy);
+  T brpayoff = payoff;
+  for (int st = 1; st <= player->NumStrategies(); st++) {
+    if (st != p_strategy->GetNumber()) {
+      brpayoff = std::max(brpayoff,
+                          GetPayoffDeriv(player->GetNumber(), player->GetStrategy(st)));
+    }
+  }
+  return brpayoff - payoff;
+}
+
+
 //========================================================================
 //                   TreeMixedStrategyProfileRep<T>
 //========================================================================
@@ -564,20 +580,6 @@ MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport() const
   }
 
   return full;
-}
-
-template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::Unrestrict() const
-{
-  MixedStrategyProfile<T> full(m_rep->m_support.GetGame()->Unrestrict()->NewMixedStrategyProfile((T) 0));
-  static_cast<Vector<T> &>(full) = (T) 0;
-
-  for (auto player : GetGame()->GetPlayers()) {
-    for (GameStrategyArray::const_iterator strategy = player->Strategies().begin();
-	 strategy != player->Strategies().end(); ++strategy) {
-      full[strategy->Unrestrict()] = (*this)[*strategy];
-    }
-  }
-  return full;	
 }
 
 //========================================================================

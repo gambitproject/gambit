@@ -7,9 +7,10 @@ on:
 jobs:
   linux:
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     strategy:
       matrix:
-        python-version: ['3.8', '3.11', '3.12-dev']
+        python-version: ['3.8', '3.12']
 
     steps:
       - uses: actions/checkout@v4
@@ -20,20 +21,25 @@ jobs:
       - name: Set up dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install cython nose2 wheel lxml numpy scipy
-      - name: Build extension
+          pip install setuptools cython pytest wheel lxml numpy scipy
+      - name: Build source distribution
+        run:
+          python setup.py sdist
+      - name: Build from source distribution
         run: |
-          python -m pip install -v .
-      - name: Run nosetests
+          cd dist
+          pip install -v pygambit*.tar.gz
+      - name: Run tests
         run: |
           cd src/pygambit/tests
-          nose2
+          pytest
 
   windows:
     runs-on: windows-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     strategy:
       matrix:
-        python-version: ['3.11']
+        python-version: ['3.12']
 
     steps:
       - uses: actions/checkout@v4
@@ -44,11 +50,11 @@ jobs:
       - name: Set up dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install cython nose2 wheel lxml numpy scipy
+          pip install cython pytest wheel lxml numpy scipy
       - name: Build extension
         run: |
           python -m pip install -v .
-      - name: Run nosetests
+      - name: Run tests
         run: |
           cd src/pygambit/tests
-          nose2
+          pytest
