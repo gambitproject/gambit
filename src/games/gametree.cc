@@ -62,6 +62,10 @@ void GameTreeActionRep::DeleteAction()
     member->children[where]->DeleteTree();
     member->children.Remove(where)->Invalidate();
   }
+
+  if (m_infoset->IsChanceInfoset()) {
+      m_infoset->m_efg->NormalizeChanceProbs(m_infoset);
+  }
   m_infoset->m_efg->ClearComputedValues();
   m_infoset->m_efg->Canonicalize();
 }
@@ -162,11 +166,11 @@ GameAction GameTreeInfosetRep::InsertAction(GameAction p_action /* =0 */)
 void GameTreeInfosetRep::RemoveAction(int which)
 {
   m_actions.Remove(which)->Invalidate();
-  for (; which <= m_actions.Length(); which++)
-    m_actions[which]->m_number = which;
-
   if (m_player->IsChance()) {
     m_probs.Remove(which);
+  }
+  for (; which <= m_actions.Length(); which++) {
+    m_actions[which]->m_number = which;
   }
 }
 
@@ -1054,6 +1058,34 @@ Game GameTreeRep::SetChanceProbs(const GameInfoset &p_infoset, const Array<Numbe
   return this;
 }
 
+Game GameTreeRep::NormalizeChanceProbs(const GameInfoset &m_infoset) {
+    if (m_infoset->GetGame() != this) {
+        throw MismatchException();
+    }
+    if (!m_infoset->IsChanceInfoset()) {
+        throw UndefinedException("Action probabilities can only be normalized for chance information sets");
+    }
+    Rational sum(0);
+    for (int act = 1; act <= m_infoset->NumActions(); act++) {
+        Rational action_prob(m_infoset->GetActionProb(act));
+        sum += action_prob;
+    }
+    Array <Number> m_probs(m_infoset->NumActions());
+    if (sum == Rational(0)) {
+        // all remaining moves have prob zero; split prob 1 equally among them
+        for (int act = 1; act <= m_infoset->NumActions(); act++) {
+            m_probs[act] = Rational(1, m_infoset->NumActions());
+        }
+    }
+    else {
+        for (int act = 1; act <= m_infoset->NumActions(); act++) {
+            Rational prob(m_infoset->GetActionProb(act));
+            m_probs[act] = prob / sum;
+        }
+    }
+   m_infoset->GetGame()->SetChanceProbs(m_infoset, m_probs);
+   return this;
+}
 
 //------------------------------------------------------------------------
 //                     GameTreeRep: Factory functions

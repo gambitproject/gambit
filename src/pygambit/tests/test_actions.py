@@ -96,3 +96,32 @@ def test_action_delete_last(game: gbt.Game):
         game.delete_action(node.infoset.actions[0])
     with pytest.raises(gbt.UndefinedOperationError):
         game.delete_action(node.infoset.actions[0])
+
+
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/chance_root_3_moves_only_one_nonzero_prob.efg"),
+     gbt.Game.read_game("test_games/complicated_extensive_game.efg"),
+     gbt.Game.read_game("test_games/chance_root_5_moves_no_nonterm_player_nodes.efg")]
+)
+def test_action_delete_chance(game: gbt.Game):
+    """Test the renormalization of action probabilities when an action is deleted at a chance
+    node
+    """
+    chance_iset = game.players.chance.infosets[0]
+    while len(chance_iset.actions) > 1:
+        old_probs = [a.prob for a in chance_iset.actions]
+        game.delete_action(chance_iset.actions[0])
+        new_probs = [a.prob for a in chance_iset.actions]
+        assert sum(new_probs) == 1
+        if sum(old_probs[1:]) == 0:
+            for p in new_probs:
+                assert p == 1/len(new_probs)
+        else:
+            for p1, p2 in zip(old_probs[1:], new_probs):
+                if p1 == 0:
+                    assert p2 == 0
+                else:
+                    assert p2 == p1 / (1-old_probs[0])
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.delete_action(chance_iset.actions[0])

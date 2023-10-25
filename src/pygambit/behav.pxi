@@ -255,7 +255,7 @@ class MixedBehaviorProfile:
         """
         return self._is_defined_at(self.game._resolve_infoset(infoset, 'is_defined_at'))
 
-    def belief(self, node: Node):
+    def belief(self, node: typing.Union[Node, str]):
         """Returns the conditional probability that a node is reached, given that
         its information set is reached.
 
@@ -271,7 +271,7 @@ class MixedBehaviorProfile:
         """
         if node.game != self.game:
             raise MismatchError("belief: node must be part of the same game as the profile")
-        return self._belief(node)
+        return self._belief(self.game._resolve_node(node, 'belief'))
 
     def payoff(self, player: typing.Union[Player, str]):
         """Returns the expected payoff to a player if all players play
