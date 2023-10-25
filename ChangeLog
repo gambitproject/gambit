@@ -1,5 +1,11 @@
 # Changelog
 
+## [unreleased] - unreleased
+
+### Fixed
+- When an action at a chance node is deleted the probabilities for the remaining actions are 
+  normalized.
+
 ## [16.1.0a4] - 2023-10-13
 
 ### Changed

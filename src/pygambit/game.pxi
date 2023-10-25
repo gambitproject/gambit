@@ -1188,6 +1188,9 @@ class Game:
     def delete_action(self, action: typing.Union[Action, str]) -> None:
         """Deletes `action` from its information set.  The subtrees which
         are rooted at nodes that follow the deleted action are also deleted.
+        If the action is at a chance node then the probabilities of any remaining actions
+        are normalized to sum to one; if all remaining actions previously had probability zero
+        then this normalization gives those remaining actions all equal probability.
 
         Raises
         ------

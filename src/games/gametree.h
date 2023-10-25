@@ -202,6 +202,8 @@ protected:
   /// @name Private auxiliary functions
   //@{
   void NumberNodes(GameTreeNodeRep *, int &);
+  /// Normalize the probability distribution of actions at a chance node
+  Game NormalizeChanceProbs(const GameInfoset &);
   //@}
 
   /// @name Managing the representation
