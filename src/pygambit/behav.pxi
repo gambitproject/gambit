@@ -393,7 +393,7 @@ class MixedBehaviorProfile:
             If `node` is a string and no node in the game has that label.
         """
         return self._realiz_prob(self.game._resolve_node(node, 'realiz_prob'))
-		
+
     def infoset_prob(self, infoset: typing.Union[Infoset, str]):
         """Returns the probability with which an information set is reached.
 
@@ -497,7 +497,7 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
 
     def _realiz_prob(self, node: Node) -> float:
         return deref(self.profile).GetRealizProb(node.node)
-		
+
     def _infoset_prob(self, infoset: Infoset) -> float:
         return deref(self.profile).GetInfosetProb(infoset.infoset)
 

@@ -1,703 +1,557 @@
-import unittest
+import pytest
 
 import pygambit as gbt
 
 
-class TestGambitMixedBehavGame(unittest.TestCase):
-    def setUp(self):
-        self.game = gbt.Game.read_game(
-            "test_games/mixed_behavior_game.efg"
-        )
-        self.profile_double = self.game.mixed_behavior_profile(False)
-        self.profile_rational = self.game.mixed_behavior_profile(True)
+@pytest.mark.parametrize(
+    "game,dpayoffs,rpayoffs",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     [3.0, 3.0, 3.25],
+     [gbt.Rational(3, 1), gbt.Rational(3, 1), gbt.Rational(13, 4)])]
+)
+def test_payoff(game: gbt.Game, dpayoffs: list, rpayoffs: list):
+    profile_double = game.mixed_behavior_profile(False)
+    profile_rational = game.mixed_behavior_profile(True)
+    for i in range(len(game.players)):
+        assert profile_double.payoff(game.players[i]) == dpayoffs[i]
+        assert profile_rational.payoff(game.players[i]) == rpayoffs[i]
 
-        self.game_with_chance = gbt.Game.read_game(
-            "test_games/complicated_extensive_game.efg"
-        )
-        self.profile_double_w_chance = self.game_with_chance.mixed_behavior_profile(False)
-        self.profile_rational_w_chance = self.game_with_chance.mixed_behavior_profile(True)
 
-    def tearDown(self):
-        del self.game
-        del self.profile_double
-        del self.profile_rational
+@pytest.mark.parametrize(
+    "game,label,dpayoffs,rpayoffs",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     ["Player 1", "Player 2", "Player 3"],
+     [3.0, 3.0, 3.25],
+     [gbt.Rational(3, 1), gbt.Rational(3, 1), gbt.Rational(13, 4)])]
+)
+def test_payoff_label(game: gbt.Game, label: list, dpayoffs: list, rpayoffs: list):
+    profile_double = game.mixed_behavior_profile(False)
+    profile_rational = game.mixed_behavior_profile(True)
+    for i in range(len(label)):
+        assert profile_double.payoff(label[i]) == dpayoffs[i]
+        assert profile_rational.payoff(label[i]) == rpayoffs[i]
 
-    def test_payoff(self):
-        "Test to ensure that payoffs are returned correctly"
-        assert self.profile_double.payoff(self.game.players[0]) == 3.0
-        assert self.profile_double.payoff(self.game.players[1]) == 3.0
-        assert self.profile_double.payoff(self.game.players[2]) == 3.25
-        assert (
-            self.profile_rational.payoff(self.game.players[0]) ==
-            gbt.Rational(3, 1)
-        )
-        assert (
-            self.profile_rational.payoff(self.game.players[1]) ==
-            gbt.Rational(3, 1)
-        )
-        assert (
-            self.profile_rational.payoff(self.game.players[2]) ==
-            gbt.Rational(13, 4)
-        )
 
-    def test_payoff_by_string(self):
-        "Test to find payoffs by string values"
-        assert self.profile_double.payoff("Player 1") == 3.0
-        assert self.profile_double.payoff("Player 2") == 3.0
-        assert self.profile_double.payoff("Player 3") == 3.25
-        assert (
-            self.profile_rational.payoff("Player 1") ==
-            gbt.Rational(3, 1)
-        )
-        assert (
-            self.profile_rational.payoff("Player 2") ==
-            gbt.Rational(3, 1)
-        )
-        assert (
-            self.profile_rational.payoff("Player 3") ==
-            gbt.Rational(13, 4)
-        )
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/mixed_behavior_game.efg")]
+)
+def test_is_defined_at(game: gbt.Game):
+    infoset = game.players[0].infosets[0]
+    profile_double = game.mixed_behavior_profile(False)
+    profile_rational = game.mixed_behavior_profile(True)
+    assert profile_double.is_defined_at(infoset)
+    assert profile_rational.is_defined_at(infoset)
 
-    def test_is_defined_at(self):
-        "Test to check if an infoset is defined"
-        assert self.profile_double.is_defined_at(
-            self.game.players[0].infosets[0]
-        )
-        assert self.profile_double.is_defined_at(
-            self.game.players[1].infosets[0]
-        )
-        assert self.profile_double.is_defined_at(
-            self.game.players[2].infosets[0]
-        )
-        assert self.profile_rational.is_defined_at(
-            self.game.players[0].infosets[0]
-        )
-        assert self.profile_rational.is_defined_at(
-            self.game.players[1].infosets[0]
-        )
-        assert self.profile_rational.is_defined_at(
-            self.game.players[2].infosets[0]
-        )
 
-    def test_is_defined_at_by_string(self):
-        "Test to check if an infoset is defined by string values"
-        assert self.profile_double.is_defined_at("Infoset 1:1")
-        assert self.profile_double.is_defined_at("Infoset 2:1")
-        assert self.profile_double.is_defined_at("Infoset 3:1")
-        assert self.profile_rational.is_defined_at("Infoset 1:1")
-        assert self.profile_rational.is_defined_at("Infoset 2:1")
-        assert self.profile_rational.is_defined_at("Infoset 3:1")
+@pytest.mark.parametrize(
+    "game,label",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"), "Infoset 1:1"),
+     (gbt.Game.read_game("test_games/mixed_behavior_game.efg"), "Infoset 2:1"),
+     (gbt.Game.read_game("test_games/mixed_behavior_game.efg"), "Infoset 3:1")]
+)
+def test_is_defined_at_label(game: gbt.Game, label: str):
+    profile_double = game.mixed_behavior_profile(False)
+    profile_rational = game.mixed_behavior_profile(True)
+    assert profile_double.is_defined_at(label)
+    assert profile_rational.is_defined_at(label)
 
-    def test_get_probabilities_action(self):
-        "Test to retrieve probabilities from an action"
-        assert (
-            self.profile_double[self.game.players[0].infosets[0].actions[0]]
-            == 0.5
-        )
-        assert (
-            self.profile_double[self.game.players[0].infosets[0].actions[1]]
-            == 0.5
-        )
-        assert (
-            self.profile_double[self.game.players[1].infosets[0].actions[0]]
-            == 0.5
-        )
-        assert (
-            self.profile_double[self.game.players[1].infosets[0].actions[1]]
-            == 0.5
-        )
-        assert (
-            self.profile_double[self.game.players[2].infosets[0].actions[0]]
-            == 0.5
-        )
-        assert (
-            self.profile_double[self.game.players[2].infosets[0].actions[1]]
-            == 0.5
-        )
-        assert (
-            self.profile_rational[self.game.players[0].infosets[0].actions[0]]
-            == gbt.Rational("1/2")
-        )
-        assert (
-            self.profile_rational[self.game.players[0].infosets[0].actions[1]]
-            == gbt.Rational("1/2")
-        )
-        assert (
-            self.profile_rational[self.game.players[1].infosets[0].actions[0]]
-            == gbt.Rational("1/2")
-        )
-        assert (
-            self.profile_rational[self.game.players[1].infosets[0].actions[1]]
-            == gbt.Rational("1/2")
-        )
-        assert (
-            self.profile_rational[self.game.players[2].infosets[0].actions[0]]
-            == gbt.Rational("1/2")
-        )
-        assert (
-            self.profile_rational[self.game.players[2].infosets[0].actions[1]]
-            == gbt.Rational("1/2")
-        )
 
-    def test_get_probabilities_action_by_string(self):
-        "Test to retrieve probabilities from an action by string values"
-        assert self.profile_double["U1"] == 0.5
-        assert self.profile_double["D1"] == 0.5
-        assert self.profile_double["U2"] == 0.5
-        assert self.profile_double["D2"] == 0.5
-        assert self.profile_double["U3"] == 0.5
-        assert self.profile_double["D3"] == 0.5
-        assert self.profile_rational["U1"] == gbt.Rational("1/2")
-        assert self.profile_rational["D1"] == gbt.Rational("1/2")
-        assert self.profile_rational["U2"] == gbt.Rational("1/2")
-        assert self.profile_rational["D2"] == gbt.Rational("1/2")
-        assert self.profile_rational["U3"] == gbt.Rational("1/2")
-        assert self.profile_rational["D3"] == gbt.Rational("1/2")
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/mixed_behavior_game.efg")]
+)
+def test_get_probabilities_action(game: gbt.Game):
+    profile_double = game.mixed_behavior_profile(False)
+    profile_rational = game.mixed_behavior_profile(True)
+    action = game.players[0].infosets[0].actions[0]
+    assert profile_double[action] == 0.5
+    assert profile_rational[action] == gbt.Rational("1/2")
 
-    def test_get_probabilities_infoset(self):
-        "Test to retrieve probabilities from an infoset"
-        assert (
-            self.profile_double[self.game.players[0].infosets[0]] == [0.5, 0.5]
-        )
-        assert (
-            self.profile_double[self.game.players[1].infosets[0]] == [0.5, 0.5]
-        )
-        assert (
-            self.profile_double[self.game.players[2].infosets[0]] ==
-            [0.5, 0.5]
-        )
-        assert (
-            self.profile_rational[self.game.players[0].infosets[0]] ==
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        )
-        assert (
-            self.profile_rational[self.game.players[1].infosets[0]] ==
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        )
-        assert (
-            self.profile_rational[self.game.players[2].infosets[0]] ==
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        )
 
-    def test_get_probabilities_infoset_by_string(self):
-        "Test to retrieve probabilities from an infoset by string values"
-        assert (
-            self.profile_double[self.game.players[0]]["Infoset 1:1"] ==
-            [0.5, 0.5]
-        )
-        assert self.profile_double["Infoset 1:1"] == [0.5, 0.5]
-        assert (
-            self.profile_double[self.game.players[1]]["Infoset 2:1"] ==
-            [0.5, 0.5]
-        )
-        assert self.profile_double["Infoset 2:1"] == [0.5, 0.5]
-        assert (
-            self.profile_double[self.game.players[2]]["Infoset 3:1"] ==
-            [0.5, 0.5]
-        )
-        assert self.profile_double["Infoset 3:1"] == [0.5, 0.5]
-        assert (
-            self.profile_rational[self.game.players[0]]["Infoset 1:1"] ==
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        )
-        assert (
-            self.profile_rational["Infoset 1:1"] ==
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        )
-        assert (
-            self.profile_rational[self.game.players[1]]["Infoset 2:1"] ==
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        )
-        assert (
-            self.profile_rational["Infoset 2:1"] ==
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        )
-        assert (
-            self.profile_rational[self.game.players[2]]["Infoset 3:1"] ==
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        )
-        assert (
-            self.profile_rational["Infoset 3:1"] ==
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        )
+@pytest.mark.parametrize(
+    "game,label",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     ["U1", "D1", "U2", "D2", "D3", "U3"])]
+)
+def test_get_probabilities_action_label(game: gbt.Game, label: str):
+    profile_double = game.mixed_behavior_profile(False)
+    profile_rational = game.mixed_behavior_profile(True)
+    for i in label:
+        assert profile_double[i] == 0.5
+        assert profile_rational[i] == gbt.Rational("1/2")
 
-    def test_get_probabilities_player(self):
-        "Test to retrieve probabilities from a player"
-        assert self.profile_double[self.game.players[0]] == [[0.5, 0.5]]
-        assert self.profile_double[self.game.players[1]] == [[0.5, 0.5]]
-        assert self.profile_double[self.game.players[2]] == [[0.5, 0.5]]
-        assert self.profile_rational[self.game.players[0]] == [
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        ]
-        assert self.profile_rational[self.game.players[1]] == [
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        ]
-        assert self.profile_rational[self.game.players[2]] == [
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        ]
 
-    def test_get_probabilities_player_by_string(self):
-        "Test to retrieve probabilities from a player by string values"
-        assert self.profile_double["Player 1"] == [[0.5, 0.5]]
-        assert self.profile_double["Player 2"] == [[0.5, 0.5]]
-        assert self.profile_double["Player 3"] == [[0.5, 0.5]]
-        assert self.profile_rational["Player 1"] == [
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        ]
-        assert self.profile_rational["Player 2"] == [
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        ]
-        assert self.profile_rational["Player 3"] == [
-            [gbt.Rational("1/2"), gbt.Rational("1/2")]
-        ]
+@pytest.mark.parametrize(
+    "game,infprob",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"), [0.5, 0.5]),
+     (gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     [gbt.Rational("1/2"), gbt.Rational("1/2")])]
+)
+def test_get_probabilities_infoset(game: gbt.Game, infprob: list):
+    profile_double = game.mixed_behavior_profile(False)
+    profile_rational = game.mixed_behavior_profile(True)
+    for i in range(len(game.players)):
+        infs = game.players[i].infosets[0]
+        assert profile_double[infs] == infprob
+        assert profile_rational[infs] == infprob
 
-    def test_set_probabilities_action(self):
-        "Test to set probabilities"
-        self.profile_double[self.game.actions[0]] = 0.72
-        assert self.profile_double[self.game.actions[0]] == 0.72
-        self.profile_double[self.game.actions[1]] = 0.28
-        assert self.profile_double[self.game.actions[1]] == 0.28
-        self.profile_double[self.game.actions[2]] = 0.42
-        assert self.profile_double[self.game.actions[2]] == 0.42
-        self.profile_double[self.game.actions[3]] = 0.58
-        assert self.profile_double[self.game.actions[3]] == 0.58
-        self.profile_double[self.game.actions[4]] = 0.02
-        assert self.profile_double[self.game.actions[4]] == 0.02
-        self.profile_double[self.game.actions[5]] = 0.98
-        assert self.profile_double[self.game.actions[5]] == 0.98
-        self.profile_rational[self.game.actions[0]] = gbt.Rational("2/9")
-        assert self.profile_rational[self.game.actions[0]] == gbt.Rational("2/9")
-        self.profile_rational[self.game.actions[1]] = gbt.Rational("7/9")
-        assert self.profile_rational[self.game.actions[1]] == gbt.Rational("7/9")
-        self.profile_rational[self.game.actions[2]] = gbt.Rational("4/13")
-        assert self.profile_rational[self.game.actions[2]] == gbt.Rational("4/13")
-        self.profile_rational[self.game.actions[3]] = gbt.Rational("9/13")
-        assert self.profile_rational[self.game.actions[3]] == gbt.Rational("9/13")
-        self.profile_rational[self.game.actions[4]] = gbt.Rational("1/98")
-        assert self.profile_rational[self.game.actions[4]] == gbt.Rational("1/98")
-        self.profile_rational[self.game.actions[5]] = gbt.Rational("97/98")
-        assert self.profile_rational[self.game.actions[5]] == gbt.Rational("97/98")
 
-    def test_set_probabilities_action_by_string(self):
-        "Test to set probabilities by string values"
-        self.profile_double["U1"] = 0.72
-        assert self.profile_double["U1"] == 0.72
-        self.profile_double["D1"] = 0.28
-        assert self.profile_double["D1"] == 0.28
-        self.profile_double["U2"] = 0.42
-        assert self.profile_double["U2"] == 0.42
-        self.profile_double["D2"] = 0.58
-        assert self.profile_double["D2"] == 0.58
-        self.profile_double["U3"] = 0.02
-        assert self.profile_double["U3"] == 0.02
-        self.profile_double["D3"] = 0.98
-        assert self.profile_double["D3"] == 0.98
+@pytest.mark.parametrize(
+    "game,label,infprob",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     ["Infoset 1:1", "Infoset 2:1", "Infoset 3:1"], [0.5, 0.5]),
+     (gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     ["Infoset 1:1", "Infoset 2:1", "Infoset 3:1"],
+     [gbt.Rational("1/2"), gbt.Rational("1/2")])]
+)
+def test_get_probabilities_infoset_label(game: gbt.Game, label: list, infprob: list):
+    profile_double = game.mixed_behavior_profile(False)
+    profile_rational = game.mixed_behavior_profile(True)
+    for i in range(len(game.players)):
+        for j in range(len(label)):
+            infs = game.players[i]
+            assert profile_double[infs][label[j]] == infprob
+            assert profile_rational[infs][label[j]] == infprob
 
-        self.profile_rational["U1"] = gbt.Rational("2/9")
-        assert self.profile_rational["U1"] == gbt.Rational("2/9")
-        self.profile_rational["D1"] = gbt.Rational("7/9")
-        assert self.profile_rational["D1"] == gbt.Rational("7/9")
-        self.profile_rational["U2"] = gbt.Rational("4/13")
-        assert self.profile_rational["U2"] == gbt.Rational("4/13")
-        self.profile_rational["D2"] = gbt.Rational("9/13")
-        assert self.profile_rational["D2"] == gbt.Rational("9/13")
-        self.profile_rational["U3"] = gbt.Rational("1/98")
-        assert self.profile_rational["U3"] == gbt.Rational("1/98")
-        self.profile_rational["D3"] = gbt.Rational("97/98")
-        assert self.profile_rational["D3"] == gbt.Rational("97/98")
 
-    def test_set_probabilities_infoset(self):
-        "Test to set probabilities to an infoset"
-        self.profile_double[self.game.players[0].infosets[0]] = [0.72, 0.28]
-        assert self.profile_double[self.game.players[0].infosets[0]] == [0.72, 0.28]
-        self.profile_double[self.game.players[1].infosets[0]] = [0.42, 0.58]
-        assert self.profile_double[self.game.players[1].infosets[0]] == [0.42, 0.58]
-        self.profile_double[self.game.players[2].infosets[0]] = [0.02, 0.98]
-        assert self.profile_double[self.game.players[2].infosets[0]] == [0.02, 0.98]
+@pytest.mark.parametrize(
+    "game,plprob",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"), [0.5, 0.5]),
+     (gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     [gbt.Rational("1/2"), gbt.Rational("1/2")])]
+)
+def test_get_probabilities_player(game: gbt.Game, plprob: list):
+    profile_double = game.mixed_behavior_profile(False)
+    profile_rational = game.mixed_behavior_profile(True)
+    for i in range(len(game.players)):
+        player = game.players[i]
+        assert profile_double[player] == [plprob]
+        assert profile_rational[player] == [plprob]
 
-        self.profile_rational[self.game.players[0].infosets[0]] = [
-            gbt.Rational("2/9"), gbt.Rational("7/9")
-        ]
-        assert (
-            self.profile_rational[self.game.players[0].infosets[0]] ==
-            [gbt.Rational("2/9"), gbt.Rational("7/9")]
-        )
-        self.profile_rational[self.game.players[0].infosets[0]] = [
-            gbt.Rational("4/13"), gbt.Rational("9/13")
-        ]
-        assert (
-            self.profile_rational[self.game.players[0].infosets[0]] ==
-            [gbt.Rational("4/13"), gbt.Rational("9/13")]
-        )
-        self.profile_rational[self.game.players[0].infosets[0]] = [
-            gbt.Rational("1/98"), gbt.Rational("97/98")
-        ]
-        assert (
-            self.profile_rational[self.game.players[0].infosets[0]] ==
-            [gbt.Rational("1/98"), gbt.Rational("97/98")]
-        )
 
-    def test_set_probabilities_infoset_by_string(self):
-        "Test to set probabilities to an infoset by string values"
-        self.profile_double["Infoset 1:1"] = [0.72, 0.28]
-        assert self.profile_double["Infoset 1:1"] == [0.72, 0.28]
-        self.profile_double["Infoset 2:1"] = [0.42, 0.58]
-        assert self.profile_double["Infoset 2:1"] == [0.42, 0.58]
-        self.profile_double["Infoset 3:1"] = [0.02, 0.98]
-        assert self.profile_double["Infoset 3:1"] == [0.02, 0.98]
+@pytest.mark.parametrize(
+    "game,label,plprob",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     ["Player 1", "Player 2", "Player 3"], [0.5, 0.5]),
+     (gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     ["Player 1", "Player 2", "Player 3"],
+     [gbt.Rational("1/2"), gbt.Rational("1/2")])]
+)
+def test_get_probabilities_player_label(game: gbt.Game, label: list, plprob: list):
+    profile_double = game.mixed_behavior_profile(False)
+    profile_rational = game.mixed_behavior_profile(True)
+    for i in range(len(game.players)):
+        for j in range(len(label)):
+            player = game.players[i]
+            assert profile_double[player][label[j]] == [plprob]
+            assert profile_rational[player][label[j]] == [plprob]
 
-        self.profile_rational["Infoset 1:1"] = [
-            gbt.Rational("2/9"), gbt.Rational("7/9")
-        ]
-        assert (
-            self.profile_rational["Infoset 1:1"] ==
-            [gbt.Rational("2/9"), gbt.Rational("7/9")]
-        )
-        self.profile_rational["Infoset 2:1"] = [
-            gbt.Rational("4/13"), gbt.Rational("9/13")
-        ]
-        assert (
-            self.profile_rational["Infoset 2:1"] ==
-            [gbt.Rational("4/13"), gbt.Rational("9/13")]
-        )
-        self.profile_rational["Infoset 3:1"] = [
-            gbt.Rational("1/98"), gbt.Rational("97/98")
-        ]
-        assert (
-            self.profile_rational["Infoset 3:1"] ==
-            [gbt.Rational("1/98"), gbt.Rational("97/98")]
-        )
 
-    def test_set_probabilities_player(self):
-        "Test to set probabilities to a player"
-        self.profile_double[self.game.players[0]] = [[0.72, 0.28]]
-        assert self.profile_double[self.game.players[0]] == [[0.72, 0.28]]
-        self.profile_double[self.game.players[1]] = [[0.42, 0.58]]
-        assert self.profile_double[self.game.players[1]] == [[0.42, 0.58]]
-        self.profile_double[self.game.players[2]] = [[0.02, 0.98]]
-        assert self.profile_double[self.game.players[2]] == [[0.02, 0.98]]
+@pytest.mark.parametrize(
+    "game,actprob",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"), 0.72),
+     (gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     gbt.Rational("2/9"))]
+)
+def test_set_probabilities_actions(game: gbt.Game, actprob: float):
+    profile_double = game.mixed_behavior_profile(False)
+    profile_rational = game.mixed_behavior_profile(True)
+    profile_double[game.actions[0]] = 0.72
+    profile_rational[game.actions[0]] = gbt.Rational("2/9")
+    assert profile_double[game.actions[0]] == 0.72
+    assert profile_rational[game.actions[0]] == gbt.Rational("2/9")
 
-        self.profile_rational[self.game.players[0]] = [
-            [gbt.Rational("2/9"), gbt.Rational("7/9")]
-        ]
-        assert (
-            self.profile_rational[self.game.players[0]] ==
-            [[gbt.Rational("2/9"), gbt.Rational("7/9")]]
-        )
-        self.profile_rational[self.game.players[1]] = [
-            [gbt.Rational("4/13"), gbt.Rational("9/13")]
-        ]
-        assert (
-            self.profile_rational[self.game.players[1]] ==
-            [[gbt.Rational("4/13"), gbt.Rational("9/13")]]
-        )
-        self.profile_rational[self.game.players[2]] = [
-            [gbt.Rational("1/98"), gbt.Rational("97/98")]
-        ]
-        assert (
-            self.profile_rational[self.game.players[2]] ==
-            [[gbt.Rational("1/98"), gbt.Rational("97/98")]]
-        )
 
-    def test_set_probabilities_player_by_string(self):
-        "Test to set probabilities to a player by string values"
-        self.profile_double["Player 1"] = [[0.72, 0.28]]
-        assert self.profile_double["Player 1"] == [[0.72, 0.28]]
-        self.profile_double["Player 2"] = [[0.42, 0.58]]
-        assert self.profile_double["Player 2"] == [[0.42, 0.58]]
-        self.profile_double["Player 3"] = [[0.02, 0.98]]
-        assert self.profile_double["Player 3"] == [[0.02, 0.98]]
+@pytest.mark.parametrize(
+    "game,label,actprob",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     ["U1"], 0.72),
+     (gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     ["D1"],
+     gbt.Rational("2/9"))]
+)
+def test_set_probabilities_actions_label(game: gbt.Game, label: list, actprob: float):
+    profile_double = game.mixed_behavior_profile(False)
+    profile_rational = game.mixed_behavior_profile(True)
+    for i in range(len(label)):
+        profile_double[game.actions[label[i]]] == 0.72
+        profile_rational[game.actions[label[i]]] == gbt.Rational("2/9")
 
-        self.profile_rational["Player 1"] = [
-            [gbt.Rational("2/9"), gbt.Rational("7/9")]
-        ]
-        assert (
-            self.profile_rational["Player 1"] ==
-            [[gbt.Rational("2/9"), gbt.Rational("7/9")]]
-        )
-        self.profile_rational["Player 2"] = [
-            [gbt.Rational("4/13"), gbt.Rational("9/13")]
-        ]
-        assert (
-            self.profile_rational["Player 2"] ==
-            [[gbt.Rational("4/13"), gbt.Rational("9/13")]]
-        )
-        self.profile_rational["Player 3"] = [
-            [gbt.Rational("1/98"), gbt.Rational("97/98")]
-        ]
-        assert (
-            self.profile_rational["Player 3"] ==
-            [[gbt.Rational("1/98"), gbt.Rational("97/98")]]
-        )
 
-    def test_realiz_prob(self):
-        """Test realization probability on node."""
-        assert self.profile_double.realiz_prob(self.game.root) == 1
-        assert self.profile_rational.realiz_prob(self.game.root) == 1
+@pytest.mark.parametrize(
+    "game,infdprob,infrprob",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"), [0.72, 0.28],
+     [gbt.Rational("2/9"), gbt.Rational("7/9")]),
+     (gbt.Game.read_game("test_games/mixed_behavior_game.efg"), [0.42, 0.58],
+     [gbt.Rational("4/13"), gbt.Rational("9/13")]),
+     (gbt.Game.read_game("test_games/mixed_behavior_game.efg"), [0.02, 0.98],
+     [gbt.Rational("1/98"), gbt.Rational("97/98")])]
+)
+def test_set_probabilities_infoset(game: gbt.Game, infdprob: list, infrprob: list):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    for i in range(len(game.players)):
+        infs = game.players[i].infosets[0]
+        profile_double[infs] = infdprob
+        assert profile_double[infs] == infdprob
 
-    def test_infoset_prob(self):
-        """Test to retrieve the probability an information set is reached."""
-        assert (self.profile_double.infoset_prob(self.game.players[0].infosets[0]) == 1.0)
-        assert (self.profile_double.infoset_prob(self.game.players[1].infosets[0]) == 1.0)
-        assert (self.profile_double.infoset_prob(self.game.players[2].infosets[0]) == 1.0)
-        assert (self.profile_rational.infoset_prob(self.game.players[0].infosets[0]) ==
-                gbt.Rational("1/1"))
-        assert (self.profile_rational.infoset_prob(self.game.players[1].infosets[0]) ==
-                gbt.Rational("1/1"))
-        assert (self.profile_rational.infoset_prob(self.game.players[2].infosets[0]) ==
-                gbt.Rational("1/1"))
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    for i in range(len(game.players)):
+        infs = game.players[i].infosets[0]
+        profile_rational[infs] = infrprob
+        assert profile_rational[infs] == infrprob
 
-    def test_infoset_prob_by_string(self):
-        """Test to retrieve the probability an information set is reached
-        using information set labels.
-        """
-        assert self.profile_double.infoset_prob("Infoset 1:1") == 1.0
-        assert self.profile_double.infoset_prob("Infoset 2:1") == 1.0
-        assert self.profile_double.infoset_prob("Infoset 3:1") == 1.0
-        assert self.profile_rational.infoset_prob("Infoset 1:1") == gbt.Rational("1/1")
-        assert self.profile_rational.infoset_prob("Infoset 2:1") == gbt.Rational("1/1")
-        assert self.profile_rational.infoset_prob("Infoset 3:1") == gbt.Rational("1/1")
 
-    def test_infoset_payoff(self):
-        "Test to retrieve expected payoff associated to an infoset"
-        assert self.profile_double.infoset_value(self.game.players[0].infosets[0]) == 3.0
-        assert self.profile_double.infoset_value(self.game.players[1].infosets[0]) == 3.0
-        assert self.profile_double.infoset_value(self.game.players[2].infosets[0]) == 3.25
-        assert self.profile_rational.infoset_value(self.game.players[0].infosets[0]) == 3
-        assert self.profile_rational.infoset_value(self.game.players[1].infosets[0]) == 3
-        assert (
-            self.profile_rational.infoset_value(self.game.players[2].infosets[0]) ==
-            gbt.Rational("13/4")
-        )
+@pytest.mark.parametrize(
+    "game,label,idprob,irprob",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     ["Infoset 1:1", "Infoset 2:1", "Infoset 3:1"],
+     [[0.72, 0.28], [0.42, 0.58], [0.02, 0.98]],
+     [[gbt.Rational("2/9"), gbt.Rational("7/9")],
+     [gbt.Rational("4/13"), gbt.Rational("9/13")],
+     [gbt.Rational("1/98"), gbt.Rational("97/98")]])]
+)
+def test_set_probabilities_infoset_label(game: gbt.Game, label: list, idprob: list, irprob: list):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    for i in range(len(label)):
+        profile_double[label[i]] = idprob[i]
+        assert profile_double[label[i]] == idprob[i]
 
-    def test_infoset_payoff_by_string(self):
-        """Test to retrieve expected payoff associated to an infose
-        by string values"""
-        assert self.profile_double.infoset_value("Infoset 1:1") == 3.0
-        assert self.profile_double.infoset_value("Infoset 2:1") == 3.0
-        assert self.profile_double.infoset_value("Infoset 3:1") == 3.25
-        assert self.profile_rational.infoset_value("Infoset 1:1") == 3
-        assert self.profile_rational.infoset_value("Infoset 2:1") == 3
-        assert self.profile_rational.infoset_value("Infoset 3:1") == gbt.Rational("13/4")
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    for i in range(len(label)):
+        profile_rational[label[i]] = irprob[i]
+        assert profile_rational[label[i]] == irprob[i]
 
-    def test_action_payoff(self):
-        "Test to retrieve expected payoff associated to an action"
-        assert (
-            self.profile_double.action_value(self.game.players[0].infosets[0].actions[0]) == 3.0
-        )
-        assert (
-            self.profile_double.action_value(self.game.players[0].infosets[0].actions[1]) == 3.0
-        )
-        assert (
-            self.profile_double.action_value(self.game.players[1].infosets[0].actions[0]) == 3.0
-        )
-        assert (
-            self.profile_double.action_value(self.game.players[1].infosets[0].actions[1]) == 3.0
-        )
-        assert (
-            self.profile_double.action_value(self.game.players[2].infosets[0].actions[0]) == 3.5
-        )
-        assert (
-            self.profile_double.action_value(self.game.players[2].infosets[0].actions[1]) == 3.0
-        )
 
-        assert (
-            self.profile_rational.action_value(self.game.players[0].infosets[0].actions[0]) ==
-            gbt.Rational("3/1")
-        )
-        assert (
-            self.profile_rational.action_value(self.game.players[0].infosets[0].actions[1]) ==
-            gbt.Rational("3/1")
-        )
-        assert (
-            self.profile_rational.action_value(self.game.players[1].infosets[0].actions[0]) ==
-            gbt.Rational("3/1")
-        )
-        assert (
-            self.profile_rational.action_value(self.game.players[1].infosets[0].actions[1]) ==
-            gbt.Rational("3/1")
-        )
-        assert (
-            self.profile_rational.action_value(self.game.players[2].infosets[0].actions[0]) ==
-            gbt.Rational("7/2")
-        )
-        assert (
-            self.profile_rational.action_value(self.game.players[2].infosets[0].actions[1]) ==
-            gbt.Rational("3/1")
-        )
+@pytest.mark.parametrize(
+    "game,pldprob,plrprob",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"), [[0.72, 0.28]],
+     [[gbt.Rational("2/9"), gbt.Rational("7/9")]]),
+     (gbt.Game.read_game("test_games/mixed_behavior_game.efg"), [[0.42, 0.58]],
+     [[gbt.Rational("4/13"), gbt.Rational("9/13")]]),
+     (gbt.Game.read_game("test_games/mixed_behavior_game.efg"), [[0.02, 0.98]],
+     [[gbt.Rational("1/98"), gbt.Rational("97/98")]])]
+)
+def test_set_probabilities_player(game: gbt.Game, pldprob: list, plrprob: list):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    for i in range(len(game.players)):
+        profile_double[game.players[i]] = pldprob
+        assert profile_double[game.players[i]] == pldprob
 
-    def test_action_value_by_string(self):
-        """Test to retrieve expected payoff associated to an action
-        by string values
-        """
-        assert self.profile_double.action_value("U1") == 3.0
-        assert self.profile_double.action_value("D1") == 3.0
-        assert self.profile_double.action_value("U2") == 3.0
-        assert self.profile_double.action_value("D2") == 3.0
-        assert self.profile_double.action_value("U3") == 3.5
-        assert self.profile_double.action_value("D3") == 3.0
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    for i in range(len(game.players)):
+        profile_rational[game.players[i]] = plrprob
+        assert profile_rational[game.players[i]] == plrprob
 
-        assert self.profile_rational.action_value("U1") == gbt.Rational("3/1")
-        assert self.profile_rational.action_value("D1") == gbt.Rational("3/1")
-        assert self.profile_rational.action_value("U2") == gbt.Rational("3/1")
-        assert self.profile_rational.action_value("D2") == gbt.Rational("3/1")
-        assert self.profile_rational.action_value("U3") == gbt.Rational("7/2")
-        assert self.profile_rational.action_value("D3") == gbt.Rational("3/1")
 
-    def test_regret(self):
-        for profile in [self.profile_double, self.profile_rational]:
-            for player in self.game.players:
-                for infoset in player.infosets:
-                    for action in infoset.actions:
-                        assert (
-                            profile.regret(action) ==
-                            max(profile.action_value(a) for a in infoset.actions) -
-                            profile.action_value(action)
-                        )
+@pytest.mark.parametrize(
+    "game,label,pdprob,prprob",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     ["Player 1", "Player 2", "Player 3"],
+     [[[0.72, 0.28]], [[0.42, 0.58]], [[0.02, 0.98]]],
+     [[[gbt.Rational("2/9"), gbt.Rational("7/9")]],
+     [[gbt.Rational("4/13"), gbt.Rational("9/13")]],
+     [[gbt.Rational("1/98"), gbt.Rational("97/98")]]])]
+)
+def test_set_probabilities_player_label(game: gbt.Game, label: list, pdprob: list, prprob: list):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    for i in range(len(label)):
+        profile_double[label[i]] = pdprob[i]
+        assert profile_double[label[i]] == pdprob[i]
 
-    def test_node_value(self):
-        # Another good node_value test (to be written!) is its martingale property: it should
-        # be the expected value of its children's node_values, given the probability
-        # distribution at the node.
-        for profile in [self.profile_double, self.profile_rational]:
-            for player in self.game.players:
-                assert (
-                    profile.node_value(player, self.game.root) == profile.payoff(player)
-                )
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    for i in range(len(game.players)):
+        profile_rational[label[i]] = prprob[i]
+        assert profile_rational[label[i]] == prprob[i]
 
-    def test_liap_values(self):
-        "Test to retrieve Lyapunov values"
-        assert self.profile_double.liap_value() == 0.0625
-        assert self.profile_rational.liap_value() == gbt.Rational("1/16")
 
-    def test_as_strategy(self):
-        """Test converting the behavior strategy profile to the equivalent
-        mixed strategy profile.
-        """
-        mixed_double = self.profile_double.as_strategy()
-        mixed_rational = self.profile_rational.as_strategy()
-        assert (
-            [mixed_double[strategy] for strategy in self.game.strategies] ==
-            [self.profile_double[action] for action in self.game.actions]
-        )
-        assert (
-            [mixed_rational[strategy] for strategy in self.game.strategies] ==
-            [self.profile_rational[action] for action in self.game.actions]
-        )
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/mixed_behavior_game.efg")]
+)
+def test_realiz_prob(game):
+    assert game.mixed_behavior_profile(rational=False).realiz_prob(game.root) == 1
+    assert game.mixed_behavior_profile(rational=True).realiz_prob(game.root) == 1
 
-    def test_node_belief(self):
-        "Test calculating belief probabilities on a node"
-        self.profile_double[self.game.actions[0]] = 0.8
-        self.profile_double[self.game.actions[1]] = 0.2
-        self.profile_double[self.game.actions[2]] = 1.0
-        self.profile_double[self.game.actions[3]] = 1.5
-        self.profile_double[self.game.actions[4]] = 0.0
-        self.profile_double[self.game.actions[5]] = 0.4
-        assert self.profile_double.belief(self.game.root) == 1
-        # Comparisons using 1e-13 as an arbitrary epsilon
-        assert (
-            abs(self.profile_double.belief(self.game.infosets[1].members[0]) -
-                0.8) < 1e-13
-        )
-        assert (
-            abs(self.profile_double.belief(self.game.infosets[1].members[1]) -
-                0.2) < 1e-13
-        )
-        assert (
-            abs(self.profile_double.belief(self.game.infosets[2].members[0]) -
-                0.32) < 1e-13
-        )
-        assert (
-            abs(self.profile_double.belief(self.game.infosets[2].members[1]) -
-                0.48) < 1e-13
-        )
-        assert (
-            abs(self.profile_double.belief(self.game.infosets[2].members[2]) -
-                0.08) < 1e-13
-        )
-        assert (
-            abs(self.profile_double.belief(self.game.infosets[2].members[3]) -
-                0.12) < 1e-13
-        )
 
-        self.profile_rational[self.game.actions[0]] = gbt.Rational(4, 5)
-        self.profile_rational[self.game.actions[1]] = gbt.Rational(1, 5)
-        self.profile_rational[self.game.actions[2]] = gbt.Rational(1, 1)
-        self.profile_rational[self.game.actions[3]] = gbt.Rational(3, 2)
-        self.profile_rational[self.game.actions[4]] = gbt.Rational(0, 1)
-        self.profile_rational[self.game.actions[5]] = gbt.Rational(2, 5)
-        assert (
-            self.profile_rational.belief(self.game.root) ==
-            gbt.Rational(1, 1)
-        )
-        assert (
-            self.profile_rational.belief(self.game.infosets[1].members[0]) ==
-            gbt.Rational(4, 5)
-        )
-        assert (
-            self.profile_rational.belief(self.game.infosets[1].members[1]) ==
-            gbt.Rational(1, 5)
-        )
-        assert (
-            self.profile_rational.belief(self.game.infosets[2].members[0]) ==
-            gbt.Rational(8, 25)
-        )
-        assert (
-            self.profile_rational.belief(self.game.infosets[2].members[1]) ==
-            gbt.Rational(12, 25)
-        )
-        assert (
-            self.profile_rational.belief(self.game.infosets[2].members[2]) ==
-            gbt.Rational(2, 25)
-        )
-        assert (
-            self.profile_rational.belief(self.game.infosets[2].members[3]) ==
-            gbt.Rational(3, 25)
-        )
+@pytest.mark.parametrize(
+    "game,infprob",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"), 1.0),
+     (gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     gbt.Rational("1/1"))]
+)
+def test_infoset_prob(game: gbt.Game, infprob: float):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    for i in range(len(game.players)):
+        infs = profile_double.infoset_prob(game.players[i].infosets[0])
+        assert infs == infprob
 
-    def test_infoset_belief(self):
-        "Test calculating belief probabilities on an infoset"
-        self.profile_double[self.game.actions[0]] = 0.8
-        self.profile_double[self.game.actions[1]] = 0.2
-        self.profile_double[self.game.actions[2]] = 0.4
-        self.profile_double[self.game.actions[3]] = 0.6
-        self.profile_double[self.game.actions[4]] = 0.0
-        self.profile_double[self.game.actions[5]] = 1.0
-        assert self.profile_double.belief(self.game.infosets[0].members[0]) == 1.0
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    for i in range(len(game.players)):
+        infs = profile_rational.infoset_prob(game.players[i].infosets[0])
+        assert infs == infprob
 
-        self.profile_rational[self.game.actions[0]] = gbt.Rational(4, 5)
-        self.profile_rational[self.game.actions[1]] = gbt.Rational(1, 5)
-        self.profile_rational[self.game.actions[2]] = gbt.Rational(2, 5)
-        self.profile_rational[self.game.actions[3]] = gbt.Rational(3, 5)
-        self.profile_rational[self.game.actions[4]] = gbt.Rational(0, 1)
-        self.profile_rational[self.game.actions[5]] = gbt.Rational(1, 1)
-        assert (
-            self.profile_rational.belief(self.game.infosets[0].members[0]) ==
-            gbt.Rational(1, 1)
-        )
 
-    def test_payoff_with_chance_player(self):
-        """Test to ensure that payoff called with the chance player raises a ValueError"""
-        chance_player = self.game_with_chance.players.chance
-        self.assertRaises(ValueError, self.profile_double_w_chance.payoff, chance_player)
-        self.assertRaises(ValueError, self.profile_rational_w_chance.payoff, chance_player)
+@pytest.mark.parametrize(
+    "game,label,infprob",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     ["Infoset 1:1", "Infoset 2:1", "Infoset 3:1"], 1.0),
+     (gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     ["Infoset 1:1", "Infoset 2:1", "Infoset 3:1"],
+     gbt.Rational("1/1"))]
+)
+def test_infoset_prob_label(game: gbt.Game, label: list, infprob: float):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    for i in range(len(label)):
+        assert profile_double.infoset_prob(label[i]) == infprob
 
-    def test_infoset_value_with_chance_player_infoset(self):
-        """Test to ensure that infoset_value called with an infoset of the chance player
-        raises a ValueError
-        """
-        chance_infoset = self.game_with_chance.players.chance.infosets[0]
-        self.assertRaises(ValueError, self.profile_double_w_chance.infoset_value,
-                          chance_infoset)
-        self.assertRaises(ValueError, self.profile_rational_w_chance.infoset_value,
-                          chance_infoset)
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    for i in range(len(label)):
+        assert profile_rational.infoset_prob(label[i]) == infprob
 
-    def test_action_value_with_chance_player_action(self):
-        """Test to ensure that action_value called with an action of the chance player
-        raises a ValueError
-        """
-        chance_action = self.game_with_chance.players.chance.infosets[0].actions[0]
-        self.assertRaises(ValueError, self.profile_double_w_chance.action_value,
-                          chance_action)
-        self.assertRaises(ValueError, self.profile_rational_w_chance.action_value,
-                          chance_action)
+
+@pytest.mark.parametrize(
+    "game,dpayoff,rpayoff",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"), [3.0, 3.0, 3.25],
+     [gbt.Rational("3/1"), gbt.Rational("3/1"), gbt.Rational("13/4")])]
+)
+def test_infoset_payoff(game: gbt.Game, dpayoff: list, rpayoff: float):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    for i in range(len(game.players)):
+        pl_inf = game.players[i].infosets[0]
+        assert profile_double.infoset_value(pl_inf) == dpayoff[i]
+
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    for i in range(len(game.players)):
+        pl_inf = game.players[i].infosets[0]
+        assert profile_rational.infoset_value(pl_inf) == rpayoff[i]
+
+
+@pytest.mark.parametrize(
+    "game,label,dpayoff,rpayoff",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     ["Infoset 1:1", "Infoset 2:1", "Infoset 3:1"], [3.0, 3.0, 3.25],
+     [gbt.Rational("3/1"), gbt.Rational("3/1"), gbt.Rational("13/4")])]
+)
+def test_infoset_payoff_label(game: gbt.Game, label: list, dpayoff: list, rpayoff: float):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    for i in range(len(label)):
+        assert profile_double.infoset_value(label[i]) == dpayoff[i]
+
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    for i in range(len(label)):
+        assert profile_rational.infoset_value(label[i]) == rpayoff[i]
+
+
+@pytest.mark.parametrize(
+    "game,dpayoff,rpayoff",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     [3.0, 3.0, 3.0, 3.0, 3.5, 3.0],
+     [gbt.Rational("3/1"), gbt.Rational("3/1"), gbt.Rational("3/1"),
+     gbt.Rational("3/1"), gbt.Rational("7/2"), gbt.Rational("3/1")])]
+)
+def test_action_payoff(game: gbt.Game, dpayoff: float, rpayoff: float):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    for i in range(len(game.players)):
+        tmp = game.players[i].infosets[0]
+        for j in range(len(tmp.actions)):
+            assert profile_double.action_value(tmp.actions[j]) == dpayoff[2*i+j]
+
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    for i in range(len(game.players)):
+        tmp = game.players[i].infosets[0]
+        for j in range(len(tmp.actions)):
+            assert profile_rational.action_value(tmp.actions[j]) == rpayoff[2*i+j]
+
+
+@pytest.mark.parametrize(
+    "game,label,dpayoff,rpayoff",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     ["U1", "D1", "U2", "D2", "U3", "D3"],
+     [3.0, 3.0, 3.0, 3.0, 3.5, 3.0],
+     [gbt.Rational("3/1"), gbt.Rational("3/1"), gbt.Rational("3/1"),
+     gbt.Rational("3/1"), gbt.Rational("7/2"), gbt.Rational("3/1")])]
+)
+def test_action_payoff_label(game: gbt.Game, label: list, dpayoff: float, rpayoff: float):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    for i in range(len(label)):
+        assert profile_double.action_value(label[i]) == dpayoff[i]
+
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    for i in range(len(label)):
+        assert profile_rational.action_value(label[i]) == dpayoff[i]
+
+
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/mixed_behavior_game.efg")]
+)
+def test_regret(game: gbt.Game):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    for profile in [profile_double, profile_rational]:
+        for player in game.players:
+            for infoset in player.infosets:
+                for action in infoset.actions:
+                    assert (
+                        profile.regret(action) ==
+                        max(profile.action_value(a) for a in infoset.actions) -
+                        profile.action_value(action)
+                    )
+
+
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/mixed_behavior_game.efg")]
+)
+def test_node_value(game: gbt.Game):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    for profile in [profile_double, profile_rational]:
+        for player in game.players:
+            assert (
+                profile.node_value(player, game.root) == profile.payoff(player)
+            )
+
+
+@pytest.mark.parametrize(
+    "game,probs",
+    [(gbt.Game.read_game("test_games/complicated_extensive_game.efg"),
+     [0.5, 0.5])]
+)
+def test_martingale_property(game: gbt.Game, probs: list):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    parent = game.root.children[0]
+    childs = parent.children
+    tsum = 0
+    for i in range(len(childs)):
+        tsum += probs[i]*profile_double.node_value(game.players[1], childs[i])
+    assert (
+       profile_double.node_value(game.players[1], parent) == tsum
+    )
+
+
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/mixed_behavior_game.efg")]
+)
+def test_liap_value(game: gbt.Game):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    assert profile_double.liap_value() == 0.0625
+    assert profile_rational.liap_value() == gbt.Rational("1/16")
+
+
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/mixed_behavior_game.efg")]
+)
+def test_as_strategy(game: gbt.Game):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    mixed_double = profile_double.as_strategy()
+    mixed_rational = profile_rational.as_strategy()
+    assert (
+        [mixed_double[strategy] for strategy in game.strategies] ==
+        [profile_double[action] for action in game.actions]
+    )
+    assert (
+        [mixed_rational[strategy] for strategy in game.strategies] ==
+        [profile_rational[action] for action in game.actions]
+    )
+
+
+@pytest.mark.parametrize(
+    "game,dvalues,rvalues,tdvalues,trvalues,threshold",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     [0.8, 0.2, 1.0, 1.5, 0.0, 0.4],
+     [gbt.Rational(4, 5), gbt.Rational(1, 5), gbt.Rational(1, 1),
+     gbt.Rational(3, 2), gbt.Rational(0, 1), gbt.Rational(2, 5)],
+     [0.8, 0.2, 0.32, 0.48, 0.08, 0.12],
+     [gbt.Rational(4, 5), gbt.Rational(1, 5), gbt.Rational(8, 25),
+     gbt.Rational(12, 25), gbt.Rational(2, 25), gbt.Rational(3, 25)],
+     1e-13)]
+)
+def test_node_belief(game: gbt.Game, dvalues: float, rvalues: float,
+                     tdvalues: float, trvalues: float, threshold: float):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    for i in range(len(dvalues)):
+        profile_double[game.actions[i]] = dvalues[i]
+    assert profile_double.belief(game.root) == 1
+    for i in range(1, 3):
+        tmp = game.infosets[i]
+        for j in range(len(tmp.members)):
+            assert (
+               abs(profile_double.belief(tmp.members[j]) - tdvalues[2*(i-1) + j])
+            ) < threshold
+
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    for i in range(len(rvalues)):
+        profile_rational[game.actions[i]] = rvalues[i]
+    assert profile_rational.belief(game.root) == gbt.Rational(1, 1)
+    for i in range(1, 3):
+        tmp = game.infosets[i]
+        for j in range(len(tmp.members)):
+            assert (
+               profile_rational.belief(tmp.members[j]) == trvalues[2*(i-1) + j]
+            )
+
+
+@pytest.mark.parametrize(
+    "game,dvalues,rvalues,tdvalues,trvalues",
+    [(gbt.Game.read_game("test_games/mixed_behavior_game.efg"),
+     [0.8, 0.2, 0.4, 0.6, 0.0, 1.0],
+     [gbt.Rational(4, 5), gbt.Rational(1, 5), gbt.Rational(2, 5),
+     gbt.Rational(3, 5), gbt.Rational(0, 1), gbt.Rational(1, 1)],
+     [1.0], [gbt.Rational(1, 1)])]
+)
+def test_infoset_belief(game: gbt.Game, dvalues: float, rvalues: float,
+                        tdvalues: float, trvalues: float):
+    profile_double = game.mixed_behavior_profile(rational=False)
+    for i in range(len(dvalues)):
+        profile_double[game.actions[i]] = dvalues[i]
+    assert profile_double.belief(game.infosets[0].members[0]) == tdvalues[0]
+
+    profile_rational = game.mixed_behavior_profile(rational=True)
+    for i in range(len(rvalues)):
+        profile_rational[game.actions[i]] = rvalues[i]
+    assert profile_rational.belief(game.infosets[0].members[0]) == trvalues[0]
+
+
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/complicated_extensive_game.efg")]
+)
+def test_payoff_with_chance_player(game: gbt.Game):
+    profile_double_with_chance = game.mixed_behavior_profile(False)
+    profile_rational_with_chance = game.mixed_behavior_profile(True)
+    chance_player = game.players.chance
+    with pytest.raises(ValueError):
+        profile_double_with_chance.payoff(chance_player)
+        profile_rational_with_chance.payoff(chance_player)
+
+
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/complicated_extensive_game.efg")]
+)
+def test_payoff_with_chance_player_infoset(game: gbt.Game):
+    profile_double_with_chance = game.mixed_behavior_profile(False)
+    profile_rational_with_chance = game.mixed_behavior_profile(True)
+    chance_infoset = game.players.chance.infosets[0]
+    with pytest.raises(ValueError):
+        profile_double_with_chance.infoset_value(chance_infoset)
+        profile_rational_with_chance.infoset_value(chance_infoset)
+
+
+@pytest.mark.parametrize(
+    "game",
+    [gbt.Game.read_game("test_games/complicated_extensive_game.efg")]
+)
+def test_payoff_with_chance_player_action(game: gbt.Game):
+    profile_double_with_chance = game.mixed_behavior_profile(False)
+    profile_rational_with_chance = game.mixed_behavior_profile(True)
+    chance_action = game.players.chance.infosets[0].actions[0]
+    with pytest.raises(ValueError):
+        profile_double_with_chance.action_value(chance_action)
+        profile_rational_with_chance.action_value(chance_action)
