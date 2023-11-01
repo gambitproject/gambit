@@ -33,7 +33,7 @@
 static wxString s_recommended(wxT("with Gambit's recommended method"));
 static wxString s_enumpure(wxT("by looking for pure strategy equilibria"));
 static wxString s_enummixed(wxT("by enumerating extreme points"));
-static wxString s_enumpoly(wxT("by solving systems of polynomial equations"));
+// static wxString s_enumpoly(wxT("by solving systems of polynomial equations"));
 static wxString s_gnm(wxT("by global Newton tracing"));
 static wxString s_ipa(wxT("by iterated polymatrix approximation"));
 static wxString s_lp(wxT("by solving a linear program"));
@@ -137,7 +137,7 @@ void gbtNashChoiceDialog::OnCount(wxCommandEvent &p_event)
     m_methodChoice->Append(s_liap);
     m_methodChoice->Append(s_gnm);
     m_methodChoice->Append(s_ipa);
-    m_methodChoice->Append(s_enumpoly);
+    // m_methodChoice->Append(s_enumpoly);
   }
   else {
     if (m_doc->NumPlayers() == 2) {
@@ -206,43 +206,43 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
   if (method == s_recommended) {
     if (m_countChoice->GetSelection() == 0) {
       if (m_doc->NumPlayers() == 2 && m_doc->IsConstSum()) {
-	cmd = new gbtAnalysisProfileList<Rational>(m_doc, useEfg);
-	cmd->SetCommand(prefix + wxT("lp") + options);
-	cmd->SetDescription(wxT("One equilibrium by solving a linear program ")
-			    + game);
+        cmd = new gbtAnalysisProfileList<Rational>(m_doc, useEfg);
+        cmd->SetCommand(prefix + wxT("lp") + options);
+        cmd->SetDescription(wxT("One equilibrium by solving a linear program ")
+                            + game);
       }
       else {
-	cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
-	cmd->SetCommand(prefix + wxT("logit -e -d 10"));
-	cmd->SetDescription(wxT("One equilibrium by logit tracing ") + game);
+        cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
+        cmd->SetCommand(prefix + wxT("logit -e -d 10"));
+        cmd->SetDescription(wxT("One equilibrium by logit tracing ") + game);
       }
     }
     else if (m_countChoice->GetSelection() == 1) {
       if (m_doc->NumPlayers() == 2) {
-	cmd = new gbtAnalysisProfileList<Rational>(m_doc, useEfg);
-	cmd->SetCommand(prefix + wxT("lcp") + options);
-	cmd->SetDescription(wxT("Some equilibria by solving a linear ")
-			       wxT("complementarity program ") + game);
+        cmd = new gbtAnalysisProfileList<Rational>(m_doc, useEfg);
+        cmd->SetCommand(prefix + wxT("lcp") + options);
+        cmd->SetDescription(wxT("Some equilibria by solving a linear ")
+                            wxT("complementarity program ") + game);
       }
       else {
-	cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
-	cmd->SetCommand(prefix + wxT("liap -d 10") + options);
-	cmd->SetDescription(wxT("Some equilibria by function minimization ") +
-			    game);
+        cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
+        cmd->SetCommand(prefix + wxT("liap -d 10") + options);
+        cmd->SetDescription(wxT("Some equilibria by function minimization ") +
+                            game);
       }
     }
     else {
       if (m_doc->NumPlayers() == 2) {
-	cmd = new gbtAnalysisProfileList<Rational>(m_doc, false);
-	cmd->SetCommand(prefix + wxT("enummixed"));
-	cmd->SetDescription(wxT("All equilibria by enumeration of mixed ")
-			       wxT("strategies in strategic game"));
+        cmd = new gbtAnalysisProfileList<Rational>(m_doc, false);
+        cmd->SetCommand(prefix + wxT("enummixed"));
+        cmd->SetDescription(wxT("All equilibria by enumeration of mixed ")
+                            wxT("strategies in strategic game"));
       }
       else {
-	cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
-	cmd->SetCommand(prefix + wxT("enumpoly -d 10") + options);
-	cmd->SetDescription(wxT("All equilibria by solving polynomial ")
-			       wxT("systems ") + game);
+        cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
+        cmd->SetCommand(prefix + wxT("enumpoly -d 10") + options);
+        cmd->SetDescription(wxT("All equilibria by solving polynomial ")
+                            wxT("systems ") + game);
       }
     }
   }
@@ -258,12 +258,14 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
 			wxT(" by enumeration of mixed strategies ")
 			    wxT("in strategic game"));
   }
+  /*
   else if (method == s_enumpoly) {
     cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
     cmd->SetCommand(prefix + wxT("enumpoly -d 10") + options);
     cmd->SetDescription(count + wxT(" by solving polynomial systems ") +
 		       game);
   }
+  */
   else if (method == s_gnm) {
     cmd = new gbtAnalysisProfileList<double>(m_doc, false);
     cmd->SetCommand(prefix + wxT("gnm -d 10") + options);
