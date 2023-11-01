@@ -37,14 +37,14 @@ AC_ARG_ENABLE(gui,
  esac], [with_gui=true])
 AM_CONDITIONAL(WITH_GUI, test x$with_gui = xtrue)
 
-dnl Disable building enumpoly -- isn't supported on 64-bit platforms
+dnl Disable building enumpoly by default -- considered experimental
 AC_ARG_ENABLE(enumpoly,
-[  --disable-enumpoly      don't build gambit-enumpoly (not supported on 64bit) ],
+[  --enable-enumpoly      build gambit-enumpoly (experimental!) ],
 [ case "${enableval}" in
   yes) with_enumpoly=true ;;
   no)  with_enumpoly=false ;;
   *)  AC_MSG_ERROR(bad value ${enableval} for --enable-enumpoly) ;;
- esac], [with_enumpoly=true])
+ esac], [with_enumpoly=false])
 AM_CONDITIONAL(WITH_ENUMPOLY, test x$with_enumpoly = xtrue)
 
 AC_DEFUN([MINGW_AC_WIN32_NATIVE_HOST],

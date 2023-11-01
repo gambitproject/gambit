@@ -6,6 +6,11 @@
 - When an action at a chance node is deleted the probabilities for the remaining actions are 
   normalized.
 
+### Changed
+- The gambit-enumpoly solver has been marked as "experimental" and is no longer built by default, nor
+  is it available via the graphical interface.
+
+
 ## [16.1.0a4] - 2023-10-13
 
 ### Changed

@@ -39,7 +39,6 @@ documentation.
 
    tools.enumpure
    tools.enummixed
-   tools.enumpoly
    tools.lcp
    tools.lp
    tools.liap
