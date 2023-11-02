@@ -77,3 +77,36 @@ def test_game_dereference_invalid():
     game.append_move(game.root, game.players[0], ["a", "b"])
     with pytest.raises(RuntimeError):
         _ = strategy.label
+
+
+def test_exceptions():
+    """Tests for certain exceptions that are caught at the cython level via 'except +'
+    The tests here are only for function calls that do not give a RuntimeError without 'except +'
+    """
+    # table
+    g = gbt.Game.new_table([2, 2])
+    p = g.mixed_strategy_profile()
+    p_rat = g.mixed_strategy_profile(rational=True)
+    g.delete_strategy(g.players[0].strategies[0])
+    with pytest.raises(RuntimeError):
+        p.payoff(g.players[0])
+    with pytest.raises(RuntimeError):
+        p.liap_value()
+    with pytest.raises(RuntimeError):
+        p_rat.payoff(g.players[0])
+    with pytest.raises(RuntimeError):
+        p_rat.liap_value()
+    # tree
+    g = gbt.Game.read_game("test_games/basic_extensive_game.efg")
+    p_behav = g.mixed_behavior_profile()
+    p_behav_rat = g.mixed_behavior_profile(rational=True)
+    iset = g.players[0].infosets[0]
+    g.delete_action(iset.actions[0])
+    with pytest.raises(RuntimeError):
+        p_behav.payoff(g.players[0])
+    with pytest.raises(RuntimeError):
+        p_behav.liap_value()
+    with pytest.raises(RuntimeError):
+        p_behav_rat.payoff(g.players[0])
+    with pytest.raises(RuntimeError):
+        p_behav_rat.liap_value()
