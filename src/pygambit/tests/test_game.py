@@ -12,6 +12,16 @@ def test_from_arrays():
     assert len(game.players[1].strategies) == 2
 
 
+def test_from_dict():
+    m = np.array([[8, 2], [10, 5]])
+    game = gbt.Game.from_dict({"a": m, "b": m.transpose()})
+    assert len(game.players) == 2
+    assert len(game.players[0].strategies) == 2
+    assert len(game.players[1].strategies) == 2
+    assert game.players[0].label == "a"
+    assert game.players[1].label == "b"
+
+
 def test_game_get_outcome_by_index():
     game = gbt.Game.new_table([2, 2])
     assert game[0, 0] == game.outcomes[0]

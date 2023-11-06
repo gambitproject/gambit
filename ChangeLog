@@ -1,8 +1,9 @@
 # Changelog
 
-## [unreleased] - unreleased
+## [16.1.0] - unreleased
 
 ### Fixed
+- Fixed regression in Game.from_dict() causing the method to fail (PR #399 by AbhijeetKrishnan)
 - In `gambit-logit` on extensive games, a spurious final value was being emitted on each line of the
   CSV output; this has been removed.
 
