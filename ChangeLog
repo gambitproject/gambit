@@ -1,6 +1,6 @@
 # Changelog
 
-## [unreleased] - unreleased
+## [16.1.0b1] - 2023-11-06
 
 ### Added
 - Implement MixedBehaviorProfile.realiz_prob to return probability node is reached under the profile.
