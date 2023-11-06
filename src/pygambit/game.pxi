@@ -301,10 +301,10 @@ class Game:
         for (player, label) in zip(g.players, payoffs):
             player.label = label
         for profile in itertools.product(
-                *(range(shape[i]) for i in range(len(g.players)))
+                *(range(arrays[0].shape[i]) for i in range(len(g.players)))
         ):
-            for (pl, _) in enumerate(arrays):
-                g[profile][pl] = arrays[pl][profile]
+            for pl, player in enumerate(g.players):
+                g[profile][player] = arrays[pl][profile]
         g.title = title
         return g
 
