@@ -131,3 +131,17 @@ class TestNash(unittest.TestCase):
         """Test calls of logit for mixed behavior equilibria."""
         result = gbt.nash.logit_solve(self.poker, use_strategic=False)
         assert len(result) == 1
+
+
+def test_logit_zerochance():
+    """Test handling zero-probability information sets when computing QRE."""
+    g = gbt.Game.new_tree(["Alice"])
+    g.append_move(g.root, g.players.chance, ["A", "B", "C"])
+    g.set_chance_probs(g.players.chance.infosets[0], [0, 0, 1])
+    g.append_move(g.root.children[0], "Alice", ["A", "B"])
+    g.append_infoset(g.root.children[1], g.root.children[0].infoset)
+    win = g.add_outcome([1])
+    g.set_outcome(g.root.children[0].children[0], win)
+    result = gbt.nash.logit_solve(g, use_strategic=False)
+    assert result[0][g.players["Alice"].infosets[0].actions[0]] == 1
+    assert result[0][g.players["Alice"].infosets[0].actions[1]] == 0

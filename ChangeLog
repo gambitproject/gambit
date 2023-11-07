@@ -3,8 +3,12 @@
 ## [16.1.1] - unreleased
 
 ### Fixed
+- In gambit-logit, if there are chance actions with zero probability, information sets may be reached
+  with zero probability.  In this event, gambit-logit treats beliefs at those information sets as being
+  uniform across nodes (#63)
 - Corrected outdated code in `fit_fixedpoint` and `fit_empirical`, and added extended documentation
-  of both methods.
+  of both methods (#1)
+
 
 
 ## [16.1.0] - 2023-11-09

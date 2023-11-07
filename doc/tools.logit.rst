@@ -28,6 +28,11 @@ Turocy [Tur05]_, this acceleration helps to
 efficiently trace the correspondence when it reaches its asymptotic
 phase for large values of the precision parameter lambda.
 
+In extensive games, logit quantal response equilibria are not well-defined
+if an information set is not reached due to being the successor of chance
+moves with zero probability.  In such games, the implementation treats
+the beliefs at such information sets as being uniform across all member nodes.
+
 .. program:: gambit-logit
 
 .. cmdoption:: -d
