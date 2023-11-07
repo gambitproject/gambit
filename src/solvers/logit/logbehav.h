@@ -66,17 +66,12 @@ protected:
 
   // structures for storing cached data: actions
   mutable DVector<T> m_actionValues;   // aka conditional payoffs
-  mutable DVector<T> m_gripe;
 
   const T &ActionValue(const GameAction &act) const 
     { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			    act->GetInfoset()->GetNumber(),
 			    act->GetNumber()); }
-  T &ActionValue(const GameAction &act)
-    { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
-			    act->GetInfoset()->GetNumber(),
-			    act->GetNumber()); }
-  
+
   /// @name Auxiliary functions for computation of interesting values
   //@{
   void GetPayoff(GameTreeNodeRep *, const T &, int, T &) const;
@@ -90,10 +85,9 @@ public:
   /// @name Lifecycle
   //@{
   explicit LogBehavProfile(const BehaviorSupportProfile &);
-  LogBehavProfile(const LogBehavProfile<T> &);
   ~LogBehavProfile() override = default;
 
-  LogBehavProfile<T> &operator=(const LogBehavProfile<T> &);
+  LogBehavProfile<T> &operator=(const LogBehavProfile<T> &) = delete;
   LogBehavProfile<T> &operator=(const Vector<T> &p)
     { Invalidate(); Vector<T>::operator=(p); return *this;}
   LogBehavProfile<T> &operator=(const T &x)  
@@ -107,31 +101,10 @@ public:
   bool operator!=(const LogBehavProfile<T> &x) const 
   { return !(*this == x); }
 
-  bool operator==(const DVector<T> &x) const
-  { return DVector<T>::operator==(x); }
-  bool operator!=(const DVector<T> &x) const
-  { return DVector<T>::operator!=(x); }
-
   const T &GetProb(const GameAction &p_action) const
     { return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
 		     p_action->GetInfoset()->GetNumber(),
 		     m_support.GetIndex(p_action)); }
-  const T &GetProb(int a) const
-    { return Array<T>::operator[](a); }
-
-  const T &GetLogProb(int a) const
-    { return m_logProbs[a]; }
-  T GetLogProb(const GameAction &p_action) const
-    { if (p_action->GetInfoset()->GetPlayer()->GetNumber() == 0) {
-	GameInfoset infoset = p_action->GetInfoset();
-	return log(infoset->GetActionProb(p_action->GetNumber(), (T) 0));
-      }
-      else {
-	return m_logProbs(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-			  p_action->GetInfoset()->GetNumber(),
-			  m_support.GetIndex(p_action)); 
-      }
-    }
   const T &GetLogProb(int a, int b, int c) const
     { return m_logProbs(a, b, c); }
   const T &GetProb(int a, int b, int c) const
@@ -142,21 +115,6 @@ public:
       m_logProbs[a] = p_value;
       Array<T>::operator[](a) = exp(p_value);
     }
-
-  void SetProb(int a, const T &p_value)
-  { Invalidate();
-    Array<T>::operator[](a) = p_value;
-    m_logProbs[a] = log(p_value);
-  }
-  
-  LogBehavProfile<T> &operator+=(const LogBehavProfile<T> &x)
-    { Invalidate();  DVector<T>::operator+=(x);  return *this; }
-  LogBehavProfile<T> &operator+=(const DVector<T> &x)
-    { Invalidate();  DVector<T>::operator+=(x);  return *this; }
-  LogBehavProfile<T> &operator-=(const LogBehavProfile<T> &x)
-    { Invalidate();  DVector<T>::operator-=(x);  return *this; }
-  LogBehavProfile<T> &operator*=(const T &x)
-    { Invalidate();  DVector<T>::operator*=(x);  return *this; }
   //@}
 
   /// @name Initialization, validation
@@ -164,7 +122,7 @@ public:
   /// Force recomputation of stored quantities
   void Invalidate() const { m_cacheValid = false; }
   /// Set the profile to the centroid
-  void Centroid();
+  void SetCentroid();
   //@}
 
   /// @name General data access
@@ -177,22 +135,18 @@ public:
   /// @name Computation of interesting quantities
   //@{
   T GetPayoff(int p_player) const;
-  T GetLiapValue(bool p_definedOnly = false) const;
 
   const T &GetRealizProb(const GameNode &node) const;
   const T &GetBeliefProb(const GameNode &node) const;
   Vector<T> GetPayoff(const GameNode &node) const;
-  T GetRealizProb(const GameInfoset &iset) const;
+  T GetInfosetProb(const GameInfoset &iset) const;
   const T &GetPayoff(const GameInfoset &iset) const;
   T GetActionProb(const GameAction &act) const;
   T GetLogActionProb(const GameAction &) const;
   const T &GetPayoff(const GameAction &act) const;
-  const T &GetRegret(const GameAction &act) const;
 
   T DiffActionValue(const GameAction &action, 
 		    const GameAction &oppAction) const;
-  T DiffRealizProb(const GameNode &node, 
-		   const GameAction &oppAction) const;
   T DiffNodeValue(const GameNode &node, const GamePlayer &player,
 		  const GameAction &oppAction) const;
 
