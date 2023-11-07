@@ -1,5 +1,12 @@
 # Changelog
 
+## [unreleased] - unreleased
+
+### Fixed
+- In `gambit-logit` on extensive games, a spurious final value was being emitted on each line of the
+  CSV output; this has been removed.
+
+
 ## [16.1.0b1] - 2023-11-06
 
 ### Added

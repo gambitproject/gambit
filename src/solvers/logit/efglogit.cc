@@ -288,8 +288,8 @@ void AgentQREPathTracer::CallbackFunction::operator()(const Vector<double> &p_po
   }
   m_stream.unsetf(std::ios::fixed);
 
-  for (const auto &x : p_point) {
-    m_stream << "," << std::setprecision(m_decimals) << exp(x);
+  for (int i = 1; i < p_point.Length(); i++) {
+    m_stream << "," << std::setprecision(m_decimals) << exp(p_point[i]);
   }
 
   m_stream << std::endl;
