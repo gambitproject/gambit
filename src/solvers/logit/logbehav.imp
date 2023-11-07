@@ -505,68 +505,80 @@ void LogBehavProfile<T>::ComputeSolutionDataPass1(const GameNode &node) const
 template <class T>
 void LogBehavProfile<T>::ComputeSolutionData() const
 {
-  if (!m_cacheValid) {
-    m_actionValues = (T) 0;
-    m_nodeValues = (T) 0;
-    m_infosetValues = (T) 0;
-    m_gripe = (T) 0;
-    ComputeSolutionDataPass1(m_support.GetGame()->GetRoot());
+  if (m_cacheValid) {
+    return;
+  }
+  m_actionValues = (T) 0;
+  m_nodeValues = (T) 0;
+  m_infosetValues = (T) 0;
+  m_gripe = (T) 0;
+  ComputeSolutionDataPass1(m_support.GetGame()->GetRoot());
 
-    // This is moved from ComputeSolutionData2 relative to original
-    // behavior profile, to use new-style log-based computation
-    for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
-      GamePlayer player = m_support.GetGame()->GetPlayer(pl);
-      for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	GameInfoset infoset = player->GetInfoset(iset);
-      
-	T maxLogProb = m_logRealizProbs[infoset->GetMember(1)->GetNumber()];
+  for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
+    GamePlayer player = m_support.GetGame()->GetPlayer(pl);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      GameInfoset infoset = player->GetInfoset(iset);
 
-	for (int i = 2; i <= infoset->NumMembers(); i++) {
-	  if (m_logRealizProbs[infoset->GetMember(i)->GetNumber()] > maxLogProb) {
-	    maxLogProb = m_logRealizProbs[infoset->GetMember(i)->GetNumber()];
-	  }
-	}
+      // The log-profile assumes that the mixed behavior profile has full support.
+      // However, if a game has zero-probability chance actions, then it is possible
+      // for an information set not to be reached.  In this event, we set the beliefs
+      // at those information sets to be uniform across the nodes.
+      T infosetProb = (T) 0.0;
+      for (int i = 1; i <= infoset->NumMembers(); i++) {
+        infosetProb += m_realizProbs[infoset->GetMember(i)->GetNumber()];
+      }
+      if (infosetProb == (T) 0.0) {
+        for (int i = 1; i <= infoset->NumMembers(); i++) {
+          m_beliefs[infoset->GetMember(i)->GetNumber()] = 1.0 / (T) infoset->NumMembers();
+        }
+        continue;
+      }
 
-	T total = 0.0;
+      T maxLogProb = m_logRealizProbs[infoset->GetMember(1)->GetNumber()];
+      for (int i = 2; i <= infoset->NumMembers(); i++) {
+        if (m_logRealizProbs[infoset->GetMember(i)->GetNumber()] > maxLogProb) {
+          maxLogProb = m_logRealizProbs[infoset->GetMember(i)->GetNumber()];
+        }
+      }
 
-	for (int i = 1; i <= infoset->NumMembers(); i++) {
-	  total += exp(m_logRealizProbs[infoset->GetMember(i)->GetNumber()] -
-		       maxLogProb);
-	}
-	
-	// The belief for the most likely node
-	T mostLikelyBelief = 1.0 / total;
-							      
-	for (int i = 1; i <= infoset->NumMembers(); i++) {
-	  m_beliefs[infoset->GetMember(i)->GetNumber()] = mostLikelyBelief * exp(m_logRealizProbs[infoset->GetMember(i)->GetNumber()] - maxLogProb);
-	}
+      T total = 0.0;
+      for (int i = 1; i <= infoset->NumMembers(); i++) {
+        total += exp(m_logRealizProbs[infoset->GetMember(i)->GetNumber()] -
+                     maxLogProb);
+      }
+
+      // The belief for the most likely node
+      T mostLikelyBelief = 1.0 / total;
+      for (int i = 1; i <= infoset->NumMembers(); i++) {
+        m_beliefs[infoset->GetMember(i)->GetNumber()] =
+          mostLikelyBelief * exp(m_logRealizProbs[infoset->GetMember(i)->GetNumber()] - maxLogProb);
       }
     }
+  }
 
-    ComputeSolutionDataPass2(m_support.GetGame()->GetRoot());
+  ComputeSolutionDataPass2(m_support.GetGame()->GetRoot());
 
-    // At this point, mark the cache as value, so calls to GetPayoff()
-    // don't create a loop.
-    m_cacheValid = true;
+  // At this point, mark the cache as value, so calls to GetPayoff()
+  // don't create a loop.
+  m_cacheValid = true;
 
-    for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
-      for (int iset = 1; iset <= m_support.GetGame()->NumInfosets()[pl]; iset++) {
-	GameInfoset infoset = m_support.GetGame()->GetPlayer(pl)->GetInfoset(iset);
+  for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
+    for (int iset = 1; iset <= m_support.GetGame()->NumInfosets()[pl]; iset++) {
+      GameInfoset infoset = m_support.GetGame()->GetPlayer(pl)->GetInfoset(iset);
 
-	m_infosetValues(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()) = (T) 0;
-	for (int act = 1; act <= infoset->NumActions(); act++) {
-	  GameAction action = infoset->GetAction(act);
-	  m_infosetValues(infoset->GetPlayer()->GetNumber(),
-			  infoset->GetNumber()) += GetActionProb(action) * ActionValue(action);
-	}
+      m_infosetValues(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()) = (T) 0;
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+        GameAction action = infoset->GetAction(act);
+        m_infosetValues(infoset->GetPlayer()->GetNumber(),
+                        infoset->GetNumber()) += GetActionProb(action) * ActionValue(action);
+      }
 
-	for (int act = 1; act <= infoset->NumActions(); act++) {
-	  GameAction action = infoset->GetAction(act);
-	  m_gripe(action->GetInfoset()->GetPlayer()->GetNumber(),
-		  action->GetInfoset()->GetNumber(), 
-		  action->GetNumber()) = 
-	    (ActionValue(action) - GetPayoff(infoset)) * GetRealizProb(infoset);
-	}
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+        GameAction action = infoset->GetAction(act);
+        m_gripe(action->GetInfoset()->GetPlayer()->GetNumber(),
+                action->GetInfoset()->GetNumber(),
+                action->GetNumber()) =
+          (ActionValue(action) - GetPayoff(infoset)) * GetRealizProb(infoset);
       }
     }
   }
