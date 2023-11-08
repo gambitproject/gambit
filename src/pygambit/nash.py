@@ -527,6 +527,27 @@ def gnm_solve(
         raise
 
 
+def possible_nash_supports(game: libgbt.Game) -> typing.List[libgbt.StrategySupportProfile]:
+    """Compute the set of support profiles which could possibly form the support
+    of a totally-mixed Nash equilibrium.
+
+    Warnings
+    --------
+    This implementation is currently experimental.
+
+    Parameters
+    ----------
+    game : Game
+        The game to compute the supports in.
+
+    Returns
+    -------
+    res : list of StrategySupportProfile
+        The list of computed support profiles
+    """
+    return libgbt._nashsupport_strategy_solve(game)
+
+
 def logit_solve(
         game: libgbt.Game,
         use_strategic: bool = False,

@@ -394,10 +394,11 @@ bool StrategySupportProfile::Overwhelms(const GameStrategy &s, const GameStrateg
 }
 
 //===========================================================================
-//                     class StrategySupportProfile::iterator
+//               class StrategySupportProfile::const_iterator
 //===========================================================================
 
-bool StrategySupportProfile::iterator::GoToNext()
+
+bool StrategySupportProfile::const_iterator::GoToNext()
 {
   if (strat != support.NumStrategies(pl)) {
     strat++;
@@ -409,11 +410,15 @@ bool StrategySupportProfile::iterator::GoToNext()
     return true;
   }
   else {
+    // The "at end" iterator points to (NumPlayers() + 1, 1)
+    pl++;
+    strat = 1;
     return false;
   }
 }
 
-bool StrategySupportProfile::iterator::IsSubsequentTo(const GameStrategy &s) const
+bool 
+StrategySupportProfile::const_iterator::IsSubsequentTo(const GameStrategy &s) const
 {
   if (pl > s->GetPlayer()->GetNumber()) {
     return true;
