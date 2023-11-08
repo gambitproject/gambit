@@ -24,20 +24,19 @@
 
 namespace Gambit {
 
-BehaviorProfileIterator::BehaviorProfileIterator(const BehaviorSupportProfile &p_support)
-  : m_atEnd(false), m_support(p_support),
-    m_currentBehav(p_support.GetGame()->NumInfosets()),
-    m_profile(p_support.GetGame()), 
+BehaviorProfileIterator::BehaviorProfileIterator(const Game &p_game)
+  : m_atEnd(false), m_support(p_game),
+    m_currentBehav(p_game->NumInfosets()),
+    m_profile(p_game),
     m_frozenPlayer(0), m_frozenInfoset(0),
-    m_numActiveInfosets(m_support.GetGame()->NumPlayers())
+    m_numActiveInfosets(p_game->NumPlayers())
 {
-  for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
-    GamePlayer player = m_support.GetGame()->GetPlayer(pl);
-    m_numActiveInfosets[pl] = 0;
+  for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
+    GamePlayer player = p_game->GetPlayer(pl);
+    m_numActiveInfosets[pl] = player->NumInfosets();
     Array<bool> activeForPl(player->NumInfosets());
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      activeForPl[iset] = m_support.MayReach(player->GetInfoset(iset));
-      m_numActiveInfosets[pl]++;
+      activeForPl[iset] = true;
     }
     m_isActive.push_back(activeForPl);
   }
@@ -64,8 +63,7 @@ BehaviorProfileIterator::BehaviorProfileIterator(const BehaviorSupportProfile &p
     m_isActive.push_back(activeForPl);
   }
 
-  m_currentBehav(p_action->GetInfoset()->GetPlayer()->GetNumber(), 
-		 p_action->GetInfoset()->GetNumber()) = p_support.GetIndex(p_action);
+  m_currentBehav(m_frozenPlayer, m_frozenInfoset) = p_support.GetIndex(p_action);
   m_profile.SetAction(p_action);
   First();
 }
