@@ -84,7 +84,7 @@ EnumPureAgentSolver::Solve(const Game &p_game) const
 {
   List<MixedBehaviorProfile<Rational> > solutions;
   BehaviorSupportProfile support(p_game);
-  for (BehaviorProfileIterator citer(support); !citer.AtEnd(); citer++) {
+  for (BehaviorProfileIterator citer(p_game); !citer.AtEnd(); citer++) {
     if ((*citer).IsAgentNash()) {
       MixedBehaviorProfile<Rational> profile = (*citer).ToMixedBehaviorProfile();
       m_onEquilibrium->Render(profile);

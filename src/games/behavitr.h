@@ -28,13 +28,10 @@
 namespace Gambit {
 
 //
-// N.B.: Currently, the contingency iterator only allows one information
-//       set to be "frozen".  There is a list of "active" information
-//       sets, which are those whose actions are cycled over, the idea
-//       being that behavior at inactive information sets is irrelevant.
-//
-//       Iterating across all contingencies can be achieved by freezing
-//       player number 0 (this is the default state on initialization)
+// Currently, the contingency iterator only allows one information
+// set to be "frozen".  There is a list of "active" information
+// sets, which are those whose actions are cycled over, the idea
+// being that behavior at inactive information sets is irrelevant.
 //
 class BehaviorProfileIterator {
 private:
@@ -52,8 +49,8 @@ private:
 public:
   /// @name Lifecycle
   //@{
-  /// Construct a new iterator on the support, with no actions held fixed
-  explicit BehaviorProfileIterator(const BehaviorSupportProfile &);
+  /// Construct a new iterator on the game, with no actions held fixed
+  explicit BehaviorProfileIterator(const Game &);
   /// Construct a new iterator on the support, holding the action fixed
   BehaviorProfileIterator(const BehaviorSupportProfile &, const GameAction &);
   //@}
