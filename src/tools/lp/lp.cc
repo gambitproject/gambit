@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
             renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
           }
           NashLpBehavSolver<double> algorithm(renderer);
-          algorithm.Solve(BehaviorSupportProfile(game));
+          algorithm.Solve(game);
         }
         else {
           std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
             renderer = std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout);
           }
           NashLpBehavSolver<Rational> algorithm(renderer);
-          algorithm.Solve(BehaviorSupportProfile(game));
+          algorithm.Solve(game);
         }
       }
       else {
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
             renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
           }
           SubgameBehavSolver<double> algorithm(stage, renderer);
-          algorithm.Solve(BehaviorSupportProfile(game));
+          algorithm.Solve(game);
         }
         else {
           std::shared_ptr<BehavSolver<Rational> > stage(new NashLpBehavSolver<Rational>());
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
             renderer = std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout, numDecimals);
           }
           SubgameBehavSolver<Rational> algorithm(stage, renderer);
-          algorithm.Solve(BehaviorSupportProfile(game));
+          algorithm.Solve(game);
         }
       }
     }

@@ -34,7 +34,7 @@ public:
     : BehavSolver<T>(p_onEquilibrium) { }
   ~NashLpBehavSolver() override = default;
 
-  List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const override;
+  List<MixedBehaviorProfile<T> > Solve(const Game &) const override;
 
 private:
   class GameData;
@@ -45,12 +45,12 @@ private:
 
 inline List<MixedBehaviorProfile<double> > LpBehaviorSolveDouble(const Game &p_game)
 {
-  return NashLpBehavSolver<double>().Solve(BehaviorSupportProfile(p_game));
+  return NashLpBehavSolver<double>().Solve(p_game);
 }
 
 inline List<MixedBehaviorProfile<Rational> > LpBehaviorSolveRational(const Game &p_game)
 {
-  return NashLpBehavSolver<Rational>().Solve(BehaviorSupportProfile(p_game));
+  return NashLpBehavSolver<Rational>().Solve(p_game);
 }
 
 
