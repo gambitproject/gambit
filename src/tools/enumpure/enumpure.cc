@@ -152,12 +152,12 @@ int main(int argc, char *argv[])
           stage = std::make_shared<BehavViaStrategySolver<Rational>>(substage);
         }
         SubgameBehavSolver<Rational> algorithm(stage, renderer);
-        algorithm.Solve(BehaviorSupportProfile(game));
+        algorithm.Solve(game);
       }
       else {
         if (solveAgent) {
           EnumPureAgentSolver algorithm(renderer);
-          algorithm.Solve(BehaviorSupportProfile(game));
+          algorithm.Solve(game);
         }
         else {
           EnumPureStrategySolver algorithm(renderer);

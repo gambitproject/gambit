@@ -74,7 +74,7 @@ public:
       m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth) { }
   virtual ~NashLcpBehaviorSolver() = default;
 
-  virtual List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const;
+  virtual List<MixedBehaviorProfile<T> > Solve(const Game &) const;
 
 private:
   int m_stopAfter, m_maxDepth;
@@ -94,13 +94,13 @@ private:
 inline List<MixedBehaviorProfile<double> >
 LcpBehaviorSolveDouble(const Game &p_game, int p_stopAfter, int p_maxDepth)
 {
-  return NashLcpBehaviorSolver<double>(p_stopAfter, p_maxDepth).Solve(BehaviorSupportProfile(p_game));
+  return NashLcpBehaviorSolver<double>(p_stopAfter, p_maxDepth).Solve(p_game);
 }
 
 inline List<MixedBehaviorProfile<Rational> >
 LcpBehaviorSolveRational(const Game &p_game, int p_stopAfter, int p_maxDepth)
 {
-  return NashLcpBehaviorSolver<Rational>(p_stopAfter, p_maxDepth).Solve(BehaviorSupportProfile(p_game));
+  return NashLcpBehaviorSolver<Rational>(p_stopAfter, p_maxDepth).Solve(p_game);
 }
 
 }  // end namespace Nash

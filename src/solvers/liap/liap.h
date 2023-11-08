@@ -38,8 +38,8 @@ public:
   ~NashLiapBehaviorSolver() override = default;
 
   List<MixedBehaviorProfile<double> > Solve(const MixedBehaviorProfile<double> &p_start) const;
-  List<MixedBehaviorProfile<double> > Solve(const BehaviorSupportProfile &p_support) const override
-    { return Solve(MixedBehaviorProfile<double>(p_support)); }
+  List<MixedBehaviorProfile<double> > Solve(const Game &p_game) const override
+    { return Solve(MixedBehaviorProfile<double>(p_game)); }
 
 private:
   int m_maxitsN;
@@ -48,7 +48,7 @@ private:
 
 inline List<MixedBehaviorProfile<double> > LiapBehaviorSolve(const Game &p_game, int p_maxitsN)
 {
-  return NashLiapBehaviorSolver(p_maxitsN).Solve(BehaviorSupportProfile(p_game));
+  return NashLiapBehaviorSolver(p_maxitsN).Solve(p_game);
 }
 
 class NashLiapStrategySolver : public StrategySolver<double> {

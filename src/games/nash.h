@@ -164,7 +164,7 @@ public:
   explicit BehavSolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
   virtual ~BehavSolver()  = default;
 
-  virtual List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const = 0;
+  virtual List<MixedBehaviorProfile<T> > Solve(const Game &) const = 0;
 
 protected:
   std::shared_ptr<StrategyProfileRenderer<T> > m_onEquilibrium;
@@ -180,7 +180,7 @@ public:
 			 std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
   ~BehavViaStrategySolver() override = default;
 
-  List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const override;
+  List<MixedBehaviorProfile<T> > Solve(const Game &) const override;
 
 protected:
   std::shared_ptr<StrategySolver<T> > m_solver;
@@ -192,13 +192,13 @@ public:
 		     std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
   ~SubgameBehavSolver()  override = default;
 
-  List<MixedBehaviorProfile<T> > Solve(const BehaviorSupportProfile &) const override;
+  List<MixedBehaviorProfile<T> > Solve(const Game &) const override;
 
 protected:
   std::shared_ptr<BehavSolver<T> > m_solver;
 
 private:
-  void SolveSubgames(const BehaviorSupportProfile &p_support,
+  void SolveSubgames(const Game &p_game,
                      const DVector<T> &p_templateSolution,
                      const GameNode &n,
                      List<DVector<T> > &solns,

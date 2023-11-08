@@ -233,21 +233,24 @@ NashLpBehavSolver<T>::GameData::GetBehavior(const BehaviorSupportProfile &p_supp
 // on the sequence form representation of the game.
 //
 template <class T> List<MixedBehaviorProfile<T> > 
-NashLpBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
+NashLpBehavSolver<T>::Solve(const Game &p_game) const
 {
-  if (p_support.GetGame()->NumPlayers() != 2) {
+  if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
   }
-  if (!p_support.GetGame()->IsConstSum()) {
+  if (!p_game->IsConstSum()) {
     throw UndefinedException("Method only valid for constant-sum games.");
   }
-  if (!p_support.GetGame()->IsPerfectRecall()) {
+  if (!p_game->IsPerfectRecall()) {
     throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
   }
 
   Gambit::linalg::BFS<T> cbfs;
-  
-  GameData data(BehaviorSupportProfile(p_support.GetGame()));
+
+  // TODO: The below is in an intermediate stage - we no longer call by support
+  // but the implementation has not yet been rewritten to work directly on the game
+  BehaviorSupportProfile support(p_game);
+  GameData data = GameData(support);
 
   Matrix<T> A(1, data.ns1 + data.ni2, 1, data.ns2 + data.ni1);
   Vector<T> b(1, data.ns1 + data.ni2);
@@ -257,7 +260,7 @@ NashLpBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
   b = (T) 0;
   c = (T) 0;
 
-  data.BuildConstraintMatrix(p_support, A, p_support.GetGame()->GetRoot(), 
+  data.BuildConstraintMatrix(support, A, p_game->GetRoot(),
 			     (T) 1, 1, 1, 0, 0);
   A(1, data.ns2 + 1) = (T) -1;
   A(data.ns1 + 1, 1) = (T) 1;
@@ -268,9 +271,9 @@ NashLpBehavSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
   Array<T> primal(A.NumColumns()), dual(A.NumRows());
   List<MixedBehaviorProfile<T> > solution;
   if (SolveLP(A, b, c, data.ni2, primal, dual)) {
-    MixedBehaviorProfile<T> profile(p_support);
-    data.GetBehavior(p_support, profile, primal, dual,
-		     p_support.GetGame()->GetRoot(), 1, 1);
+    MixedBehaviorProfile<T> profile(p_game);
+    data.GetBehavior(support, profile, primal, dual,
+                     p_game->GetRoot(), 1, 1);
     profile.UndefinedToCentroid();
     this->m_onEquilibrium->Render(profile);
     solution.push_back(profile);

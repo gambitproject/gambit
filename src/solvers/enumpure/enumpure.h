@@ -76,14 +76,15 @@ public:
     : BehavSolver<Rational>(p_onEquilibrium) { }
   ~EnumPureAgentSolver() override = default;
 
-  List<MixedBehaviorProfile<Rational> > Solve(const BehaviorSupportProfile &) const override;
+  List<MixedBehaviorProfile<Rational> > Solve(const Game &) const override;
 };
 
 inline List<MixedBehaviorProfile<Rational> > 
-EnumPureAgentSolver::Solve(const BehaviorSupportProfile &p_support) const
+EnumPureAgentSolver::Solve(const Game &p_game) const
 {
   List<MixedBehaviorProfile<Rational> > solutions;
-  for (BehaviorProfileIterator citer(p_support); !citer.AtEnd(); citer++) {
+  BehaviorSupportProfile support(p_game);
+  for (BehaviorProfileIterator citer(support); !citer.AtEnd(); citer++) {
     if ((*citer).IsAgentNash()) {
       MixedBehaviorProfile<Rational> profile = (*citer).ToMixedBehaviorProfile();
       m_onEquilibrium->Render(profile);
@@ -95,7 +96,7 @@ EnumPureAgentSolver::Solve(const BehaviorSupportProfile &p_support) const
 
 inline List<MixedBehaviorProfile<Rational> > EnumPureAgentSolve(const Game &p_game)
 {
-  return EnumPureAgentSolver().Solve(BehaviorSupportProfile(p_game));
+  return EnumPureAgentSolver().Solve(p_game);
 }
 
 }  // end namespace Nash

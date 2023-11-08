@@ -72,12 +72,12 @@ NashLcpBehaviorSolver<T>::Solution::AddBFS(const linalg::LemkeTableau<T> &tablea
 //
 
 template <class T> List<MixedBehaviorProfile<T> > 
-NashLcpBehaviorSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
+NashLcpBehaviorSolver<T>::Solve(const Game &p_game) const
 {
-  if (p_support.GetGame()->NumPlayers() != 2) {
+  if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
   }
-  if (!p_support.GetGame()->IsPerfectRecall()) {
+  if (!p_game->IsPerfectRecall()) {
     throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
   }
 
@@ -85,21 +85,24 @@ NashLcpBehaviorSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
   int i, j;
   Solution solution;
 
-  solution.isets1 = p_support.ReachableInfosets(p_support.GetGame()->GetPlayer(1));
-  solution.isets2 = p_support.ReachableInfosets(p_support.GetGame()->GetPlayer(2));
+  // TODO: This is legacy from when the implementation was based on support profiles.
+  // This can be simplified!
+  BehaviorSupportProfile support(p_game);
+  solution.isets1 = support.ReachableInfosets(p_game->GetPlayer(1));
+  solution.isets2 = support.ReachableInfosets(p_game->GetPlayer(2));
 
   int ntot;
-  solution.ns1 = p_support.NumSequences(1);
-  solution.ns2 = p_support.NumSequences(2);
-  solution.ni1 = p_support.GetGame()->GetPlayer(1)->NumInfosets()+1;
-  solution.ni2 = p_support.GetGame()->GetPlayer(2)->NumInfosets()+1;
+  solution.ns1 = support.NumSequences(1);
+  solution.ns2 = support.NumSequences(2);
+  solution.ni1 = p_game->GetPlayer(1)->NumInfosets()+1;
+  solution.ni2 = p_game->GetPlayer(2)->NumInfosets()+1;
 
   ntot = solution.ns1+solution.ns2+solution.ni1+solution.ni2;
 
   Matrix<T> A(1,ntot,0,ntot);
   Vector<T> b(1,ntot);
 
-  solution.maxpay = p_support.GetGame()->GetMaxPayoff() + Rational(1);
+  solution.maxpay = p_game->GetMaxPayoff() + Rational(1);
 
   T prob = (T)1;
   for (i = A.MinRow(); i <= A.MaxRow(); i++) {
@@ -109,7 +112,7 @@ NashLcpBehaviorSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
     }
   }
 
-  FillTableau(p_support, A, p_support.GetGame()->GetRoot(), prob, 1, 1, 0, 0,
+  FillTableau(support, A, p_game->GetRoot(), prob, 1, 1, 0, 0,
 	      solution);
   for (i = A.MinRow(); i <= A.MaxRow(); i++) { 
     A(i,0) = -(T) 1;
@@ -127,7 +130,7 @@ NashLcpBehaviorSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
   try {
     if (m_stopAfter != 1) {
       try {
-	AllLemke(p_support, solution.ns1+solution.ns2+1, 
+	AllLemke(support, solution.ns1+solution.ns2+1,
 		 tab, 0, A, solution);
       }
       catch (EquilibriumLimitReached &) {
@@ -136,7 +139,7 @@ NashLcpBehaviorSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
       }
     }
     else {
-      MixedBehaviorProfile<T> profile(p_support);
+      MixedBehaviorProfile<T> profile(support);
       Vector<T> sol(tab.MinRow(),tab.MaxRow());
   
       tab.Pivot(solution.ns1+solution.ns2+1,0);
@@ -144,8 +147,8 @@ NashLcpBehaviorSolver<T>::Solve(const BehaviorSupportProfile &p_support) const
       
       solution.AddBFS(tab);
       tab.BasisVector(sol);
-      GetProfile(p_support, tab, 
-		 profile,sol,p_support.GetGame()->GetRoot(), 1, 1,
+      GetProfile(support, tab,
+		 profile,sol,p_game->GetRoot(), 1, 1,
 		 solution);
       profile.UndefinedToCentroid();
       solution.m_equilibria.push_back(profile);
