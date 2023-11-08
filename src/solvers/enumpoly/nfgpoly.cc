@@ -24,7 +24,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "nfgensup.h"
+#include "solvers/nashsupport/nashsupport.h"
 #include "gpoly.h"
 #include "gpolylst.h"
 #include "rectangl.h"
@@ -476,20 +476,20 @@ void PrintSupport(std::ostream &p_stream, const std::string &p_label,
 
 void EnumPolySolveStrategic(const Gambit::Game &p_nfg)
 {
-  Gambit::List<Gambit::StrategySupportProfile> supports = PossibleNashSubsupports(p_nfg);
+  auto possible_supports = PossibleNashStrategySupports(p_nfg);
 
-  for (int i = 1; i <= supports.Length(); i++) {
+  for (auto support : possible_supports->m_supports) {
     long newevals = 0;
     double newtime = 0.0;
     Gambit::List<Gambit::MixedStrategyProfile<double>> newsolns;
     bool is_singular = false;
 
     if (g_verbose) {
-      PrintSupport(std::cout, "candidate", supports[i]);
+      PrintSupport(std::cout, "candidate", support);
     }
 
-    PolEnum(supports[i], newsolns, newevals, newtime, is_singular);
-
+    PolEnum(support, newsolns, newevals, newtime, is_singular);
+      
     for (int j = 1; j <= newsolns.Length(); j++) {
       Gambit::MixedStrategyProfile<double> fullProfile = ToFullSupport(newsolns[j]);
       if (fullProfile.GetLiapValue() < 1.0e-6) {
@@ -498,7 +498,7 @@ void EnumPolySolveStrategic(const Gambit::Game &p_nfg)
     }
 
     if (is_singular && g_verbose) {
-      PrintSupport(std::cout, "singular", supports[i]);
+      PrintSupport(std::cout, "singular", support);
     }
   }
 }

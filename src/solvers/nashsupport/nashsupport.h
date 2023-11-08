@@ -20,18 +20,28 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#ifndef GAMBIT_SOLVERS_NASHSUPPORT_NASHSUPPORT_H
+#define GAMBIT_SOLVERS_NASHSUPPORT_NASHSUPPORT_H
+
 #include "gambit.h"
 
 using namespace Gambit;
 
-// Produce all subsupports that could
-// host the path of a behavioral Nash equilibrium.  These are subsupports
-// that have no strategy, at an active infoset, that is weakly dominated by
-// another active strategy, either in the conditional sense (for any active
-// node in the infoset) or the unconditional sense.  In addition we
-// check for domination by strategys that are inactive, but whose activation
-// would not activate any currently inactive infosets, so that the
-// subsupport resulting from activation is consistent, in the sense
-// of having active strategys at all active infosets, and not at other
-// infosets.
-List<StrategySupportProfile> PossibleNashSubsupports(const StrategySupportProfile &S);
+class PossibleNashStrategySupportsResult {
+public:
+  std::list<StrategySupportProfile> m_supports;
+};
+// Compute the set of strategy support profiles which can be the support of
+// a totally-mixed Nash equilibrium.
+std::shared_ptr<PossibleNashStrategySupportsResult> PossibleNashStrategySupports(const Game &);
+
+class PossibleNashBehaviorSupportsResult {
+public:
+  std::list<BehaviorSupportProfile> m_supports;
+};
+
+// Compute the set of behavior support profiles which can be the support of
+// a totally-mixed Nash equilibrium.
+std::shared_ptr<PossibleNashBehaviorSupportsResult> PossibleNashBehaviorSupports(const Game &);
+
+#endif // GAMBIT_SOLVERS_NASHSUPPORT_NASHSUPPORT_H

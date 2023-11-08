@@ -130,15 +130,6 @@ bool BehaviorSupportProfile::RemoveAction(const GameAction &s)
   }
 }
 
-bool BehaviorSupportProfile::RemoveAction(const GameAction &s, List<GameInfoset> &list)
-{
-  for (const auto &node : GetMembers(s->GetInfoset())) {
-    DeactivateSubtree(node->GetChild(s->GetNumber()), list);
-  }
-  // the following returns false if s was not in the support
-  return RemoveAction(s);
-}
-
 void BehaviorSupportProfile::AddAction(const GameAction &s)
 {
   GameInfoset infoset = s->GetInfoset();

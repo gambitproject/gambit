@@ -26,7 +26,7 @@
 #define NFGCPOLY_H
 
 #include "gambit.h"
-#include "nfgensup.h"
+#include "solvers/nashsupport/nashsupport.h"
 #include "gpoly.h"
 #include "gpolylst.h"
 #include "rectangl.h"

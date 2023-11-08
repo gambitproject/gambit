@@ -182,6 +182,16 @@ def _gnm_strategy_solve(
         raise
 
 
+def _nashsupport_strategy_solve(game: Game) -> typing.List[StrategySupportProfile]:
+    ret = []
+    result = PossibleNashStrategySupports(game.game)
+    for c_support in make_list_of_pointer(deref(result).m_supports):
+        support = StrategySupportProfile(list(game.strategies), game)
+        support.support.reset(c_support)
+        ret.append(support)
+    return ret
+
+
 def _logit_strategy_solve(
         game: Game, maxregret: float, first_step: float, max_accel: float,
 ) -> typing.List[MixedStrategyProfileDouble]:

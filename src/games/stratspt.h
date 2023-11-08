@@ -148,24 +148,24 @@ public:
   bool Overwhelms(const GameStrategy &s, const GameStrategy &t, bool p_strict) const;
   //@}
 
-  class iterator {
+  class const_iterator {
   public:
     /// @name Lifecycle
     //@{
-    explicit iterator(const StrategySupportProfile &S, int p_pl = 1, int p_st = 1)
+    explicit const_iterator(const StrategySupportProfile &S, int p_pl = 1, int p_st = 1)
       : support(S), pl(p_pl), strat(p_st)
     {
     }
-    ~iterator() = default;
+    ~const_iterator() = default;
     //@}
 
     /// @name Operator overloading
     //@{
-    bool operator==(const iterator &other) const
+    bool operator==(const const_iterator &other) const
     {
       return (support == other.support && pl == other.pl && strat == other.strat);
     }
-    bool operator!=(const iterator &other) const { return !(*this == other); }
+    bool operator!=(const const_iterator &other) const { return !(*this == other); }
     //@}
 
     /// @name Manipulation
@@ -173,11 +173,16 @@ public:
     /// Advance to next strategy; return False when advancing past last strategy.
     bool GoToNext();
     /// Advance to next strategy
-    void operator++() { GoToNext(); }
+    const_iterator &operator++()
+    {
+      GoToNext();
+      return *this;
+    }
     //@}
 
     /// @name Access to state information
     //@{
+    GameStrategy operator*() const { return GetStrategy(); }
     GameStrategy GetStrategy() const { return support.GetStrategy(pl, strat); }
     int StrategyIndex() const { return strat; }
     GamePlayer GetPlayer() const { return support.GetGame()->GetPlayer(pl); }
@@ -195,8 +200,8 @@ public:
     int pl, strat;
   };
 
-  iterator begin() const { return iterator(*this); }
-  iterator end() const { return iterator(*this, m_nfg->NumPlayers() + 1); }
+  const_iterator begin() const { return const_iterator(*this); }
+  const_iterator end() const { return const_iterator(*this, m_nfg->NumPlayers() + 1); }
 };
 
 } // end namespace Gambit
