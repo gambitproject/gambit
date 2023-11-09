@@ -66,7 +66,7 @@ Computing the pure-strategy equilibria of extensive game :download:`e02.efg
 
    $ gambit-enumpure e02.efg
    Search for Nash equilibria in pure strategies
-   Gambit version 16.1.0b1, Copyright (C) 1994-2023, The Gambit Project
+   Gambit version 16.1.0, Copyright (C) 1994-2023, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,0,0,1,0
@@ -77,7 +77,7 @@ strategies::
 
    $ gambit-enumpure -S e02.efg
    Search for Nash equilibria in pure strategies
-   Gambit version 16.1.0b1, Copyright (C) 1994-2023, The Gambit Project
+   Gambit version 16.1.0, Copyright (C) 1994-2023, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,0,1,0
@@ -88,7 +88,7 @@ only one information set; therefore the set of solutions is larger::
 
    $ gambit-enumpure -A e02.efg
    Search for Nash equilibria in pure strategies
-   Gambit version 16.1.0b1, Copyright (C) 1994-2023, The Gambit Project
+   Gambit version 16.1.0, Copyright (C) 1994-2023, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,1,0,1,0

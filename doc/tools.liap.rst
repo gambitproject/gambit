@@ -67,7 +67,7 @@ Computing an equilibrium in mixed strategies of :download:`e02.efg
 
    $ gambit-liap e02.nfg
    Compute Nash equilibria by minimizing the Lyapunov function
-   Gambit version 16.1.0b1, Copyright (C) 1994-2023, The Gambit Project
+   Gambit version 16.1.0, Copyright (C) 1994-2023, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE, 0.998701, 0.000229, 0.001070, 0.618833, 0.381167

@@ -27,4 +27,4 @@ from . import supports  # noqa: F401
 from . import gte   # noqa: F401
 from . import qre   # noqa: F401
 
-__version__ = "16.1.0b1"
+__version__ = "16.1.0"

@@ -73,7 +73,7 @@ Computing an equilibrium of extensive game :download:`e02.efg
 
    $ gambit-lcp e02.efg
    Compute Nash equilibria by solving a linear complementarity program
-   Gambit version 16.1.0b1, Copyright (C) 1994-2023, The Gambit Project
+   Gambit version 16.1.0, Copyright (C) 1994-2023, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,1/2,1/2,1/2,1/2

@@ -1,6 +1,6 @@
 # Changelog
 
-## [16.1.0] - unreleased
+## [16.1.0] - 2023-11-09
 
 ### Fixed
 - Fixed regression in Game.from_dict() causing the method to fail (PR #399 by AbhijeetKrishnan)

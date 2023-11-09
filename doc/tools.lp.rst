@@ -65,7 +65,7 @@ strategies each, with a unique equilibrium in mixed strategies::
 
    $ gambit-lp 2x2const.nfg
    Compute Nash equilibria by solving a linear program
-   Gambit version 16.1.0b1, Copyright (C) 1994-2023, The Gambit Project
+   Gambit version 16.1.0, Copyright (C) 1994-2023, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1/3,2/3,1/3,2/3

@@ -75,7 +75,7 @@ Computing equilibria of the extensive game :download:`e01.efg
 
    $ gambit-enumpoly e01.efg
    Compute Nash equilibria by solving polynomial systems
-   Gambit version 16.1.0b1, Copyright (C) 1994-2023, The Gambit Project
+   Gambit version 16.1.0, Copyright (C) 1994-2023, The Gambit Project
    Heuristic search implementation Copyright (C) 2006, Litao Wei
    This is free software, distributed under the GNU GPL
 

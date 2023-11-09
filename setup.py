@@ -64,11 +64,11 @@ def readme():
 
 setuptools.setup(
     name="pygambit",
-    version="16.1.0b1",
-    description="The package for doing computation in game theory",
+    version="16.1.0",
+    description="The package for computation in game theory",
     long_description=readme(),
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
         "Programming Language :: Python :: 3.8",
