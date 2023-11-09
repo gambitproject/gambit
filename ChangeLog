@@ -1,5 +1,12 @@
 # Changelog
 
+## [16.1.1] - unreleased
+
+### Fixed
+- Corrected outdated code in `fit_fixedpoint` and `fit_empirical`, and added extended documentation
+  of both methods.
+
+
 ## [16.1.0] - 2023-11-09
 
 ### Fixed

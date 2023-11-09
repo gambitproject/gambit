@@ -272,3 +272,4 @@ Computation of quantal response equilibria
 
    fit_empirical
    fit_fixedpoint
+   LogitQREMixedStrategyFitResult

@@ -5,6 +5,10 @@ Bibliography
 Articles on computation of Nash equilibria
 ------------------------------------------
 
+.. [BlaTur23] Bland, J. R. and Turocy, T. L., 2023.  Quantal response equilibrium
+   as a structural model for estimation: The missing manual.
+   SSRN working paper 4425515.
+
 .. [Eav71] B. C. Eaves, "The linear complementarity problem", 612-634,
    Management Science , 17, 1971.
 
@@ -98,6 +102,9 @@ General game theory articles and texts
 
 .. [Nas50] John Nash, "Equilibrium points in n-person games", 48-49,
    Proceedings of the National Academy of Sciences , 36, 1950.
+
+.. [Och95] Jack Ochs, "Games with unique, mixed strategy equilibria:
+   An experimental study", Games and Economic Behavior 10: 202-217, 1995.
 
 .. [Sel75] Reinhard Selten, Reexamination of the perfectness concept for
    equilibrium points in extensive games , 25-55, International Journal
