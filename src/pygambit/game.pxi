@@ -571,11 +571,11 @@ class Game:
         else:
             outcome = Outcome()
             outcome.outcome = deref(psp).deref().GetOutcome()
-            return outcome
+            if outcome.outcome != cython.cast(c_GameOutcome, NULL):
+                return outcome
+            else:
+                return None
 
-    # As of Cython 0.11.2, cython does not support the * notation for the argument
-    # to __getitem__, which is required for multidimensional slicing to work. 
-    # We work around this by providing a shim.
     def __getitem__(self, i):
         """Returns the `Outcome` associated with a profile of pure strategies.
         """
