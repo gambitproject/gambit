@@ -255,12 +255,11 @@ class Game:
         arrays = [np.array(a) for a in arrays]
         if len(set(a.shape for a in arrays)) > 1:
             raise ValueError("All specified arrays must have the same shape")
-        g = Game.new_table(arrays[0].shape)
-        for profile in itertools.product(
-                *(range(arrays[0].shape[i]) for i in range(len(g.players)))
-        ):
-            for pl, player in enumerate(g.players):
-                g[profile][player] = arrays[pl][profile]
+        shape = arrays[0].shape
+        g = Game.new_table(shape)
+        for profile in itertools.product(*(range(s) for s in shape)):
+            for array, player in zip(arrays, g.players):
+                g[profile][player] = array[profile]
         g.title = title
         return g
 
@@ -300,11 +299,9 @@ class Game:
         g = Game.new_table(shape)
         for (player, label) in zip(g.players, payoffs):
             player.label = label
-        for profile in itertools.product(
-                *(range(arrays[0].shape[i]) for i in range(len(g.players)))
-        ):
-            for pl, player in enumerate(g.players):
-                g[profile][player] = arrays[pl][profile]
+        for profile in itertools.product(*(range(s) for s in shape)):
+            for array, player in zip(arrays, g.players):
+                g[profile][player] = array[profile]
         g.title = title
         return g
 
