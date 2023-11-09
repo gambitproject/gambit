@@ -469,3 +469,46 @@ using :py:meth:`.MixedStrategyProfile.as_behavior` and :py:meth:`.MixedBehaviorP
 
    eqa[0].as_behavior()
    eqa[0].as_behavior().as_strategy()
+
+
+Estimating quantal response equilibria
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Alongside computing quantal response equilibria, Gambit can also perform maximum likelihood
+estimation, computing the QRE which best fits an empirical distribution of play.
+
+As an example we consider an asymmetric matching pennies game studied in [Och95]_,
+analysed in [McKPal95]_ using QRE.
+
+.. ipython:: python
+
+   g = gbt.Game.from_arrays(
+         [[1.1141, 0], [0, 0.2785]],
+         [[0, 1.1141], [1.1141, 0]],
+         title="Ochs (1995) asymmetric matching pennies as transformed in McKelvey-Palfrey (1995)"
+   )
+   data = g.mixed_strategy_profile([[128*0.527, 128*(1-0.527)], [128*0.366, 128*(1-0.366)]])
+
+Estimation of QRE is done using :py:func:`.fit_fixedpoint`.
+
+.. ipython:: python
+
+   fit = gbt.qre.fit_fixedpoint(data)
+
+The returned :py:class:`.LogitQREMixedStrategyFitResult` object contains the results of the
+estimation.
+The results replicate those reported in [McKPal95]_, including the estimated value of lambda,
+the QRE profile probabilities, and the log-likelihood.
+Because `data` contains the empirical counts of play, and not just frequencies, the resulting
+log-likelihood is correct for use in likelihoood-ratio tests. [#f1]_
+
+.. ipython:: python
+
+   print(fit.lam)
+   print(fit.profile)
+   print(fit.log_like)
+
+.. rubric:: Footnotes
+
+.. [#f1] The log-likelihoods quoted in [McKPal95]_ are exactly a factor of 10 larger than
+         those obtained by replicating the calculation.

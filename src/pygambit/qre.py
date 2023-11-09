@@ -324,34 +324,42 @@ class ExternalStrategicQREPathTracer(ExternalSolver):
 class LogitQREMixedStrategyFitResult:
     """The result of fitting a QRE to a given probability distribution
     over strategies.
+
+    See Also
+    --------
+    fit_fixedpoint
+    fit_empirical
     """
-    def __init__(self, data, method, lam, probs, log_like):
+    def __init__(self, data, method, lam, profile, log_like):
         self._data = data
         self._method = method
         self._lam = lam
-        self._profile = data.game.mixed_strategy_profile()
-        for i in range(len(self._profile)):
-            self._profile[i] = probs[i]
+        self._profile = profile
         self._log_like = log_like
 
     @property
-    def method(self):
+    def method(self) -> str:
+        """The method used to estimate the QRE; either "fixedpoint" or "empirical"."""
         return self._method
 
     @property
-    def data(self):
+    def data(self) -> gambit.MixedStrategyProfileDouble:
+        """The empirical strategy frequencies used to estimate the QRE."""
         return self._data
 
     @property
-    def lam(self):
+    def lam(self) -> float:
+        """The value of lambda corresponding to the QRE."""
         return self._lam
 
     @property
-    def profile(self):
+    def profile(self) -> gambit.MixedStrategyProfileDouble:
+        """The mixed strategy profile corresponding to the QRE."""
         return self._profile
 
     @property
-    def log_like(self):
+    def log_like(self) -> float:
+        """The log-likelihood of the data at the estimated QRE."""
         return self._log_like
 
     def __repr__(self):
@@ -364,17 +372,40 @@ class LogitQREMixedStrategyFitResult:
 def fit_fixedpoint(
         data: gambit.MixedStrategyProfileDouble
 ) -> LogitQREMixedStrategyFitResult:
-    """Use maximum likelihood estimation to find the point on the
-    principal branch of strategic form game closest to `data`.
-    The `data` are expressed as an instance of a mixed strategy
-    profile on the game.  The `data` should typically be expressed
-    as the counts of observations of each strategy.
+    """Use maximum likelihood estimation to find the logit quantal
+    response equilibrium on the principal branch for a strategic game
+    which best fits empirical frequencies of play. [1]_
 
     .. versionadded:: 16.1.0
+
+    Parameters
+    ----------
+    data : MixedStrategyProfileDouble
+        The empirical distribution of play to which to fit the QRE.
+        To obtain the correct resulting log-likelihood, these should
+        be expressed as total counts of observations of each strategy
+        rather than probabilities.
+
+    Returns
+    -------
+    LogitQREMixedStrategyFitResult
+        The result of the estimation represented as a
+        ``LogitQREMixedStrategyFitResult`` object.
+
+    See Also
+    --------
+    fit_empirical : Estimate QRE by approximation of the correspondence
+                    using independent decision problems.
+
+    References
+    ----------
+    .. [1] Bland, J. R. and Turocy, T. L., 2023.  Quantal response equilibrium
+        as a structural model for estimation: The missing manual.
+        SSRN working paper 4425515.
     """
     res = gambit.logit_estimate(data)
     return LogitQREMixedStrategyFitResult(
-        data, "fixedpoint", res.lam, list(res.profile), res.log_like
+        data, "fixedpoint", res.lam, res.profile, res.log_like
     )
 
 
@@ -383,11 +414,27 @@ def fit_empirical(
 ) -> LogitQREMixedStrategyFitResult:
     """Use maximum likelihood estimation to estimate a quantal
     response equilibrium using the empirical payoff method.
-    The `data` are expressed as an instance of a mixed strategy
-    profile on the game.  The `data` should typically be expressed
-    as the counts of observations of each strategy.
+    The empirical payoff method operates by ignoring the fixed-point
+    considerations of the QRE and approximates instead by a collection
+    of independent decision problems. [1]_
 
     .. versionadded:: 16.1.0
+
+    Returns
+    -------
+    LogitQREMixedStrategyFitResult
+        The result of the estimation represented as a
+        ``LogitQREMixedStrategyFitResult`` object.
+
+    See Also
+    --------
+    fit_fixedpoint : Estimate QRE precisely by computing the correspondence
+
+    References
+    ----------
+    .. [1] Bland, J. R. and Turocy, T. L., 2023.  Quantal response equilibrium
+        as a structural model for estimation: The missing manual.
+        SSRN working paper 4425515.
     """
     def do_logit(lam: float):
         logit_probs = [[math.exp(lam*v) for v in player] for player in values]
@@ -399,9 +446,12 @@ def fit_empirical(
 
     def log_like(lam: float) -> float:
         logit_probs = do_logit(lam)
-        return sum([f*math.log(p) for (f, p) in zip(list(data), logit_probs)])
+        return sum([f*math.log(p) for (f, p) in zip(list(flattened_data), logit_probs)])
 
-    values = data.normalize().strategy_values()
+    flattened_data = [data[s] for p in data.game.players for s in p.strategies]
+    normalized = data.normalize()
+    values = [[normalized.strategy_value(s) for s in p.strategies]
+              for p in data.game.players]
     res = scipy.optimize.minimize(lambda x: -log_like(x[0]), (0.1,),
                                   bounds=((0.0, None),))
     return LogitQREMixedStrategyFitResult(
