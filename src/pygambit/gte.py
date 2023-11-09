@@ -72,10 +72,10 @@ def read_game(f):
 
 
 def write_game_outcome(game, outcome, doc, xml_parent):
-    for (i, p) in enumerate(game.players):
+    for p in game.players:
         if outcome is not None:
             etree.SubElement(xml_parent, "payoff",
-                             player=p.label).text = str(outcome[i])
+                             player=p.label).text = str(outcome[p])
         else:
             etree.SubElement(xml_parent, "payoff",
                              player=p.label).text = "0"
