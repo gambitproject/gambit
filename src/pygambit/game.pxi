@@ -701,7 +701,7 @@ class Game:
             )
  
     def support_profile(self):
-        return StrategySupportProfile(list(self.strategies), self)
+        return StrategySupportProfile(self)
 
     def nodes(
             self,
