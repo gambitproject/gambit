@@ -54,21 +54,20 @@ NashGNMStrategySolver::Solve(const Game &p_game,
   const double THRESHOLD = 1e-2;
 
   List<MixedStrategyProfile<double> > eqa;
-  
+
   if (m_verbose) {
     m_onEquilibrium->Render(ToProfile(p_game, p_pert), "pert");
   }
-  cvector norm_pert = p_pert / p_pert.norm(); 
-  cvector **answers;
-  int numEq = GNM(*p_rep, norm_pert, answers,
-		  STEPS, FUZZ, LNMFREQ, LNMMAX, LAMBDAMIN, WOBBLE, THRESHOLD,
-		  m_verbose);
-  for (int i = 0; i < numEq; i++) {
-    eqa.push_back(ToProfile(p_game, *answers[i]));
+  cvector norm_pert = p_pert / p_pert.norm();
+  std::list<cvector> answers;
+  std::string return_message;
+  GNM(*p_rep, norm_pert, answers,
+      STEPS, FUZZ, LNMFREQ, LNMMAX, LAMBDAMIN, WOBBLE, THRESHOLD,
+      m_verbose, return_message);
+  for (auto answer: answers) {
+    eqa.push_back(ToProfile(p_game, answer));
     m_onEquilibrium->Render(eqa.back());
-    free(answers[i]);
   }
-  free(answers);
   return eqa;
 }
 
@@ -91,7 +90,7 @@ NashGNMStrategySolver::BuildRepresentation(const Game &p_game) const
     }
     cvector payoffs(veclength);
   
-    std::shared_ptr<gnmgame> A(new nfgame(p_game->NumPlayers(), actions, payoffs));
+    std::shared_ptr<gnmgame> A(new nfgame(actions, payoffs));
   
     std::vector<int> profile(p_game->NumPlayers());
     for (StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {

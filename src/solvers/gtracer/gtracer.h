@@ -27,15 +27,18 @@
 
 #include "cmatrix.h"
 #include "nfgame.h"
-#include "gnmgame.h"
 #include "aggame.h"
 
 namespace Gambit {
 namespace gametracer {
 
-int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFreq, int LNMMax, double LambdaMin, bool wobble, double threshold, bool verbose);
+int
+GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, int LNMFreq, int LNMMax,
+    double LambdaMin, bool wobble, double threshold, bool verbose,
+    std::string &returnMessage);
 
-int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans,int maxiter=-1);
+int
+IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans, int maxiter = -1);
 
 }  // end namespace Gambit::gametracer
 }  // end namespace Gambit
