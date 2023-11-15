@@ -105,7 +105,12 @@ class MixedBehaviorStrategy:
 
 @cython.cclass
 class MixedBehaviorProfile:
-    """A behavior strategy profile over the actions in a game."""
+    """A behavior strategy profile over the actions in a game.
+
+	See Also
+	--------
+	pygambit.gambit.Game.mixed_behavior_profile : create a MixedBehaviorProfile
+    """
     def __repr__(self) -> str:
         return str([self[player] for player in self.game.players])
 
