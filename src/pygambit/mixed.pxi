@@ -65,6 +65,10 @@ class MixedStrategy:
 @cython.cclass
 class MixedStrategyProfile:
     """Represents a mixed strategy profile over the strategies in a Game.
+
+	See Also
+	--------
+	pygambit.gambit.Game.mixed_strategy_profile : create a MixedStrategyProfile
     """
     def __repr__(self):   
         return str([ self[player] for player in self.game.players ])
@@ -286,8 +290,27 @@ class MixedStrategyProfile:
     def normalize(self) -> MixedStrategyProfile:
         """Create a profile with the same strategy proportions as this
         one, but normalised so probabilities for each player sum to one.
+        Requires that all players have non-negative entries that are not all equal to zero.
+
+        Returns
+        -------
+        MixedStrategyProfile
+            The normalized mixed strategy profile.
+
+        Raises
+        ------
+        ValueError
+            If the input mixed strategy of any player is all zero or has a negative entry.
         """
         self._check_validity()
+        if self._all_zero_probs():
+            raise ValueError(
+                "Trying to normalize a MixedStrategyProfile, but one player's probabilities are all zero"
+            )
+        if self._negative_prob():
+            raise ValueError(
+                "Trying to normalize a MixedStrategyProfile, but a player has a negative probability"
+            )
         return self._normalize()
 
     def copy(self) -> MixedStrategyProfile:
@@ -295,6 +318,15 @@ class MixedStrategyProfile:
         self._check_validity()
         return self._copy()
 
+    def _all_zero_probs(self) -> bool:
+        """Returns True if at least one player has only zero probabilities."""
+        return any([all([self._getprob_strategy(s) == 0 for s in p.strategies])
+                    for p in self.game.players])
+
+    def _negative_prob(self) -> bool:
+        """Returns True if at least one player has a negative probability."""
+        return any([any([self._getprob_strategy(s) < 0 for s in p.strategies])
+                    for p in self.game.players])
 
 @cython.cclass
 class MixedStrategyProfileDouble(MixedStrategyProfile):
