@@ -27,10 +27,10 @@
 
 namespace Gambit {
 namespace gametracer {
-    
-void PrintProfile(std::ostream &p_stream, 
-		  const std::string &p_label,
-		  const cvector &p_profile) 
+
+void PrintProfile(std::ostream &p_stream,
+                  const std::string &p_label,
+                  const cvector &p_profile)
 {
   const int numDecimals = 6;
   p_stream << p_label;
@@ -40,6 +40,62 @@ void PrintProfile(std::ostream &p_stream,
   }
   p_stream << std::endl;
 }
+
+const double BIGFLOAT = 3.0e+28F;
+
+// LNM runs the local Newton method on z to attempt to bring it closer to
+// the image of the graph of the equilibrium correspondence above the ray,
+// under the homeomorphism.  In order to prevent costly memory allocation,
+// a number of scratch vectors are passed in.
+double LNM(const gnmgame &game,
+           cvector &z, const cvector &g, double det, cmatrix &J, cmatrix &DG, cvector &s,
+           int MaxLNM, double fuzz, cvector &del, cvector &scratch, cvector &backup,
+           bool ksym = false)
+{
+  double b, e = BIGFLOAT, ee;
+  int k, faulted = 0;
+  if (MaxLNM >= 1 && det != 0.0) {
+    b = 1.0 / det;
+    for (k = 0; k < MaxLNM; k++) {
+      //      del = z - s - DG*s / (double)(numPlayers - 1) - g;
+      DG.multiply(s, del);
+      del /= (double) (game.getNumPlayers() - 1);
+      del += g;
+      del += s;
+      del -= z;
+      del.negate();
+      ee = std::max(del.max(), -del.min());
+
+      if (ee < fuzz) {
+        e = ee;
+        break;
+      }
+      else if (e < ee) { // we got worse
+        z = backup;
+        game.retract(s, z, ksym);
+        game.payoffMatrix(DG, s, fuzz, ksym);
+        if (faulted) { // if we've already failed once, quit.
+          return e;
+        }
+        b /= MaxLNM; // if the full LNM step fails to improve things,
+        e = BIGFLOAT; // take smaller steps.
+        faulted++;
+        continue;
+      }
+      e = ee;
+      J.multiply(del, scratch);
+      scratch *= b;
+      backup = z;
+      z -= scratch;
+      //      z = z - (J * del) * b;
+      game.retract(s, z, ksym);
+      game.payoffMatrix(DG, s, fuzz, ksym);
+    }
+    return ee;
+  }
+  else { return fuzz; }
+}
+
 
 // gnm(A,g,Eq,steps,fuzz,LNMFreq,LNMMax,LambdaMin,wobble,threshold)
 // ----------------------------------------------------------------
@@ -67,72 +123,74 @@ void PrintProfile(std::ostream &p_stream,
 //            wobbles are disabled, GNM will terminate if the error
 //            reaches this threshold.
 
-int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFreq, int LNMMax, double LambdaMin, bool wobble, double threshold, bool verbose)
+int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, int LNMFreq, int LNMMax,
+        double LambdaMin, bool wobble, double threshold, bool verbose,
+        std::string &returnMessage)
 {
   int i, // utility variables
-    bestAction,  
-    k, 
-    j, 
-    n, 
+  bestAction,
+    k,
+    j,
+    n,
     n_hat, // player whose pure strategy next enters or leaves the support
-    s_hat_old=-1, // the last pure strategy to enter or leave the support
-    s_hat, // the next pure strategy to enter or leave the support
-    Index = 1, // index of the equilibrium we're moving towards
-    numEq = 0, // number of equilibria found so far
-    stepsLeft; // number of linear steps remaining until we hit the boundary
+  s_hat_old = -1, // the last pure strategy to enter or leave the support
+  s_hat, // the next pure strategy to enter or leave the support
+  Index = 1, // index of the equilibrium we're moving towards
+  numEq = 0, // number of equilibria found so far
+  stepsLeft; // number of linear steps remaining until we hit the boundary
 
-  int N = A.getNumPlayers(), 
+  int N = A.getNumPlayers(),
     M = A.getNumActions(); // the two most important cvector sizes, stored locally for brevity
-  double bestPayoff, 
+  double bestPayoff,
     det, // determinant of the jacobian
-    newV, // utility variable
-    lambda, // current position along the ray
-    dlambda, // derivative of lambda w.r.t time
-    minBound, // distance to the closest change of support
-    bound, // utility variable
-    del, // amount of time required to reach the next support boundary, 
-    // assuming linear cvector field
-    delta, // the actual amount of time we will step forward (smaller than del)
-    ee,
+  newV, // utility variable
+  lambda, // current position along the ray
+  dlambda, // derivative of lambda w.r.t time
+  minBound, // distance to the closest change of support
+  bound, // utility variable
+  del, // amount of time required to reach the next support boundary,
+  // assuming linear cvector field
+  delta, // the actual amount of time we will step forward (smaller than del)
+  ee,
     V = 0.0; // scale factor for perturbation
 
   std::vector<int> s(M); // current best responses
   std::vector<int> B(M); // current support
 
-  for (i = 0; i < M; B[i++] = 0);
+  for (i = 0; i < M; B[i++] = 0) {}
 
-  cmatrix DG(M,M), // jacobian of the payoff function
-    R(M,M), // jacobian of the retraction operator
-    I(M,M,1,true), // identity
-    Dpsi, // jacobian of the cvector field
-    J(M,M); // adjoint of Dpsi
+  cmatrix DG(M, M), // jacobian of the payoff function
+  R(M, M), // jacobian of the retraction operator
+  I(M, M, 1, true), // identity
+  Dpsi, // jacobian of the cvector field
+  J(M, M); // adjoint of Dpsi
 
   cvector sigma(M), // current strategy profile
-    g0(M), // original perturbation ray
-    z(M), // current position in space of games
-    v(M), // current cvector of payoffs for each pure strategy
-    dz(M), // derivative of z w.r.t. time
-    dv(M), // derivative of v w.r.t. time
-    nothing(M,0),// cvector of all zeros
-    err(M),
-    backup(M); 
+  g0(M), // original perturbation ray
+  z(M), // current position in space of games
+  v(M), // current cvector of payoffs for each pure strategy
+  dz(M), // derivative of z w.r.t. time
+  dv(M), // derivative of v w.r.t. time
+  nothing(M, 0),// cvector of all zeros
+  err(M),
+    backup(M);
 
 
   // utility variables for use as intermediate values in computations
-  cmatrix Y1(M,M), Y2(M,M), Y3(M,M);
+  cmatrix Y1(M, M), Y2(M, M), Y3(M, M);
   cvector G(N), yn1(N), ym1(M), ym2(M), ym3(M);
 
   // INITIALIZATION
-  Eq = (cvector **)malloc(sizeof(cvector *));
+  Eq.clear();
 
   // Find the lone equilibrium of the perturbed game
-  for(n = 0; n < N; n++) {
+  for (n = 0; n < N; n++) {
     bestPayoff = g[A.firstAction(n)];
     bestAction = A.firstAction(n);
-    for(j = bestAction+1; j < A.lastAction(n); j++) {
-      if(g[j] > bestPayoff) {
-	bestPayoff = g[j];
-	bestAction = j;
+    for (j = bestAction + 1; j < A.lastAction(n); j++) {
+      if (g[j] > bestPayoff) {
+        bestPayoff = g[j];
+        bestAction = j;
       }
     }
     s[n] = bestAction;
@@ -142,8 +200,8 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 
   // initialize sigma to be the pure strategy profile
   // that is the lone equilibrium of the perturbed game
-  for(i = 0; i < M; i++) {
-    sigma[i] = (double)B[i];
+  for (i = 0; i < M; i++) {
+    sigma[i] = (double) B[i];
   }
 
   if (verbose) {
@@ -152,7 +210,7 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 
   A.payoffMatrix(DG, sigma, fuzz);
   DG.multiply(sigma, v);
-  v /= (double)(N-1);
+  v /= (double) (N - 1);
 
   // Scale g until the equilibrium sigma calculated above
   // is in fact the one unique equilibrium, and set lambda
@@ -160,42 +218,25 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 
   V = 0;
 
-  for(n = 0; n < N; n++) {
+  for (n = 0; n < N; n++) {
     yn1[n] = v[s[n]];
-    for(i = A.firstAction(n); i < A.lastAction(n); i++) {
-      if(!B[i]) {
-        if (G[n]-g[i]<threshold) g[i]-=threshold;  //make sure we don't divide by (almost) zero
-        newV = (v[i]-yn1[n]) / (G[n]-g[i]);
-        if(newV > V) 
+    for (i = A.firstAction(n); i < A.lastAction(n); i++) {
+      if (!B[i]) {
+        if (G[n] - g[i] < threshold) {
+          g[i] -= threshold;
+        }  //make sure we don't divide by (almost) zero
+        newV = (v[i] - yn1[n]) / (G[n] - g[i]);
+        if (newV > V)
           V = newV;
       }
     }
   }
-       
-  lambda = 1.0;  // we scale g instead
-  V = V+1; // a little extra padding
-  g *= V;
-/*
-  for(n = 0; n < N; n++) {
-    yn1[n] = v[s[n]]; // yn1[n] is the payoff n receives for the action we wish to make dominant
-    for(i = A.firstAction(n); i < A.lastAction(n); i++) {
-      if(B[i]) // if i is the action we wish to make dominant
-	newV = yn1[n]-G[n];
-      else
-	newV = yn1[n]-G[n]*(v[i]-yn1[n])/(g[i]-G[n]);
-      if(newV>V)
-	V = newV;
-    }
-  }
 
   lambda = 1.0;  // we scale g instead
-  V = V+1; // a little extra padding
-  for(n = 0; n < N; n++)
-    for(i = A.firstAction(n); i < A.lastAction(n); i++) {
-      g[i] *= (V-yn1[n])/G[n];
-    }
-*/
-  if(N <= 2) { // ensure we don't do small steps and LNM
+  V = V + 1; // a little extra padding
+  g *= V;
+
+  if (N <= 2) { // ensure we don't do small steps and LNM
     LNMFreq = 0;
     steps = 1;
   }
@@ -205,16 +246,16 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
   z += sigma;
   //  z=sigma+v+g*lambda;
 
-  A.retractJac(R,B);
+  A.retractJac(R, B);
 
   // this outer while loop executes once for each support boundary
   // that the path crosses.
-  while(true) {
+  while (true) {
     k = 0; // iteration counter; when k reaches LNMFreq, run LNM
-     // within a single boundary, support unchanged
+    // within a single boundary, support unchanged
 
     // take the specified number of steps within these support boundaries.  
-    for(stepsLeft = steps; stepsLeft > 0; stepsLeft--) { 
+    for (stepsLeft = steps; stepsLeft > 0; stepsLeft--) {
       //find J = Adj psi
       J = I;
       J += DG;
@@ -225,46 +266,46 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
       det = J.adjoint(); // sets J = adjoint(J)
 
       // find derivatives of z and lambda
-      J.multiply(g,dz);
-      dz.negate();      
-       //dz = -(J*g);
+      J.multiply(g, dz);
+      dz.negate();
+      //dz = -(J*g);
       dlambda = -det;
       R.multiply(dz, ym1);
-      DG.multiply(ym1,dv);
+      DG.multiply(ym1, dv);
       //dv = (DG*(R*dz));
       ym1 = g;
       ym1 *= dlambda;
       dv += ym1;
       //dv += g*dlambda;
-      
+
       //Calculate payoff cvector
-      DG.multiply(sigma, v);      
-      v /=  (double)(N-1);
+      DG.multiply(sigma, v);
+      v /= (double) (N - 1);
       ym1 = g;
       ym1 *= lambda;
       v += ym1;
       // v = DG*sigma / (double)(N-1) + g * lambda;
-      
+
       //Find next action that will enter or leave the support
       //This bit pretends that z and v change linearly and calculates
       //at what point z will equal v at a certain action; this
       //indicates that the action's probability is either
       //becoming 0 or becoming positive.
       minBound = BIGFLOAT;
-      for(n = 0; n < N; n++) {
-	for(i = A.firstAction(n); i < A.lastAction(n); i++) {
-	  // do not cross the same boundary we just crossed
-	  if(dz[i] != dv[s[n]] && s_hat_old != i) {
-	    bound= (z[i]-v[s[n]])/(dv[s[n]]-dz[i]);
-	    if(bound > 0.0) { // forward in time
-	      if(bound< minBound) {
-		minBound = bound;
-		s_hat = i;
-		n_hat = n;
-	      }
-	    }
-	  }
-	}
+      for (n = 0; n < N; n++) {
+        for (i = A.firstAction(n); i < A.lastAction(n); i++) {
+          // do not cross the same boundary we just crossed
+          if (dz[i] != dv[s[n]] && s_hat_old != i) {
+            bound = (z[i] - v[s[n]]) / (dv[s[n]] - dz[i]);
+            if (bound > 0.0) { // forward in time
+              if (bound < minBound) {
+                minBound = bound;
+                s_hat = i;
+                n_hat = n;
+              }
+            }
+          }
+        }
       }
 
       delta = del = minBound;
@@ -274,71 +315,64 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
       // how big a step size to take, and anyway there's a good chance
       // there are no more equilibria on the path.  This could be
       // handled differently.
-      if(minBound == BIGFLOAT && Index*(lambda+dlambda*delta) > 0) {
-	if (verbose) {
-	  std::cerr << "gnm(): return since the path crosses no more support boundaries and no next eqlm" << std::endl;
-	}
-	return numEq;
+      if (minBound == BIGFLOAT && Index * (lambda + dlambda * delta) > 0) {
+        returnMessage = "path crosses no more support boundaries and no next equilibrium";
+        return numEq;
       }
-      
+
       // each step covers 1.0/steps of the distance to the boundary
       delta = del / stepsLeft;
 
       // test whether lambda will become 0 in the course of this
       // step, which means there's an equilibrium there
-      if(Index*(lambda+dlambda*delta) <= 0.0) {
-	// if there's no next support boundary, treat the equilibrium
-	// as the next support boundary and step up to it incrementally
-	if(minBound == BIGFLOAT && N > 2 && stepsLeft > 1) { 
-	  del = -lambda / dlambda;
-	  delta = del / stepsLeft;
-	} else {
-	  delta -= -lambda / dlambda; // delta is now just big enough
-	  ym1 = dz;                   // to get us to the equilibrium
-	  ym1 *= (-lambda / dlambda); 
-	  z += ym1;
-	  //  z += dz*delta;
-	  lambda = 0;
-	  A.retract(sigma, z);
-	  A.payoffMatrix(DG, sigma, fuzz);
-	  ee = 0.0;
-	  if(N > 2) { // if N=2, the graph is linear, so we are at a
-	    //precise equilibrium.  otherwise, refine it.
-	    J = DG;
-	    J += I;
-	    J *= R;
-	    J -= I; 
-	    J.negate();
-	    //J=I-((I+DG)*R);
-	    det = J.adjoint();
-	    ee = A.LNM(z, nothing, det, J, DG, sigma, LNMMax, fuzz,ym1,ym2,ym3);
-	  }
-	  for (int idx=0;idx<M;idx++)
-	    if (! std::isfinite(sigma[idx])){
-	      if(verbose) {
-		std::cerr << "gnm(): return since sigma is not finite" << std::endl;
-	      }
-	      return numEq;
-	    }
-	  if(ee < fuzz) { // only save high quality equilibria;
-	    // this restriction could be removed.
-	    Eq = (cvector **)realloc(Eq, (numEq+2)*sizeof(cvector *));	
-	    Eq[numEq] = new cvector(M);
-	    *(Eq[numEq++]) = sigma;
-
-	    //PrintProfile(std::cout, "NE", sigma);
+      if (Index * (lambda + dlambda * delta) <= 0.0) {
+        // if there's no next support boundary, treat the equilibrium
+        // as the next support boundary and step up to it incrementally
+        if (minBound == BIGFLOAT && N > 2 && stepsLeft > 1) {
+          del = -lambda / dlambda;
+          delta = del / stepsLeft;
+        }
+        else {
+          delta -= -lambda / dlambda; // delta is now just big enough
+          ym1 = dz;                   // to get us to the equilibrium
+          ym1 *= (-lambda / dlambda);
+          z += ym1;
+          //  z += dz*delta;
+          lambda = 0;
+          A.retract(sigma, z);
+          A.payoffMatrix(DG, sigma, fuzz);
+          ee = 0.0;
+          if (N > 2) { // if N=2, the graph is linear, so we are at a
+            //precise equilibrium.  otherwise, refine it.
+            J = DG;
+            J += I;
+            J *= R;
+            J -= I;
+            J.negate();
+            //J=I-((I+DG)*R);
+            det = J.adjoint();
+            ee = LNM(A, z, nothing, det, J, DG, sigma, LNMMax, fuzz, ym1, ym2, ym3);
+          }
+          for (int idx = 0; idx < M; idx++) {
+            if (!std::isfinite(sigma[idx])) {
+              returnMessage = "sigma is not finite";
+              return numEq;
+            }
+          }
+          if (ee < fuzz) { // only save high quality equilibria;
+            // this restriction could be removed.
+            Eq.push_back(sigma);
+            //PrintProfile(std::cout, "NE", sigma);
+          }
+          Index = -Index;
+          s_hat_old = -1;
+          stepsLeft++;
+          continue;
+        }
       }
-	  Index = -Index;
-	  s_hat_old = -1;
-	  stepsLeft++;
-	  continue;
-	}
-      }
-      if(del == BIGFLOAT) {
-	if (verbose) {
-	  std::cerr << "gnm(): return since no next support boundary after this eqlm" << std::endl;
-	}
-	return numEq;
+      if (del == BIGFLOAT) {
+        returnMessage = "no next support boundary after this equilibrium";
+        return numEq;
       }
 
       backup = z;
@@ -348,56 +382,54 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
       ym1 *= delta;
       z += ym1;
       // z = z+dz*delta;
-      lambda += dlambda*delta;
+      lambda += dlambda * delta;
 
       // if we're sufficiently far out on the ray in the reverse
       // direction, we're probably not going back
-      if(lambda < LambdaMin && Index == -1) {
-	if (verbose) {
-	  std::cerr << "gnm(): return due to too far out in the reverse direction" << std::endl;
-	}
-	return numEq;
+      if (lambda < LambdaMin && Index == -1) {
+        returnMessage = "too far out in the reverse direction";
+        return numEq;
       }
-      A.retract(sigma,z);
-      A.payoffMatrix(DG, sigma,fuzz);
-      
-      if(N <= 2) 
-	break; // already at the support boundary
-      
-      DG.multiply(sigma,err);
-      err /= (double)(N-1);
+      A.retract(sigma, z);
+      A.payoffMatrix(DG, sigma, fuzz);
+
+      if (N <= 2) {
+        break;
+      } // already at the support boundary
+
+      DG.multiply(sigma, err);
+      err /= (double) (N - 1);
       g0 = g;
       g0 *= lambda;
       err += g0;
       err += sigma;
       err -= z;
       err.negate();
-      ee = max(err.max(),-err.min());
-      if(ee < fuzz && stepsLeft > 2) { // path is probably near-linear;
-       	stepsLeft = 2;                 // step all the way to boundary
-	k = LNMFreq - 1;               // then run LNM
+      ee = std::max(err.max(), -err.min());
+      if (ee < fuzz && stepsLeft > 2) { // path is probably near-linear;
+        stepsLeft = 2;                 // step all the way to boundary
+        k = LNMFreq - 1;               // then run LNM
       }
-      if(ee > threshold) { // if we've accumulated too much error, either
-	if(wobble) {       // wobble or quit.
-	  DG.multiply(sigma, ym1);
-	  ym1 /= (double)(N-1);
-	  g = z;
-	  g -= sigma;
-	  g -= ym1;
-	  g /= lambda;
-	  // g = ((z-sigma)-((DG*sigma) / (double)(N-1)))/lambda;
-	} else {
-	  if(verbose) {
-	    std::cerr << "gnm(): return due to too much error. error is " << ee << std::endl;
-	  }
-	  return numEq;
-	}
+      if (ee > threshold) { // if we've accumulated too much error, either
+        if (wobble) {       // wobble or quit.
+          DG.multiply(sigma, ym1);
+          ym1 /= (double) (N - 1);
+          g = z;
+          g -= sigma;
+          g -= ym1;
+          g /= lambda;
+          // g = ((z-sigma)-((DG*sigma) / (double)(N-1)))/lambda;
+        }
+        else {
+          returnMessage = "too much error; error is " + std::to_string(ee);
+          return numEq;
+        }
       }
 
       // if we've done LNMMax repetitions, time to get back on the path
-      if(stepsLeft > 1 && (++k == LNMFreq)) {
-	A.LNM(z, g0, det, J, DG, sigma, LNMMax, fuzz,ym1,ym2,ym3);
-	k = 0;
+      if (stepsLeft > 1 && (++k == LNMFreq)) {
+        LNM(A, z, g0, det, J, DG, sigma, LNMMax, fuzz, ym1, ym2, ym3);
+        k = 0;
       }
     } // end of for loop
 
@@ -405,14 +437,16 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
 
     // if a player's current best response is leaving the
     // support, we must find a new one for that player
-    if(s[n_hat] == s_hat)
-      for(i = A.firstAction(n_hat); i < A.lastAction(n_hat); i++)
-	if(B[i] && i != s_hat) {
-	  s[n_hat] = i;
-	  break;
-	}
+    if (s[n_hat] == s_hat) {
+      for (i = A.firstAction(n_hat); i < A.lastAction(n_hat); i++) {
+        if (B[i] && i != s_hat) {
+          s[n_hat] = i;
+          break;
+        }
+      }
+    }
     B[s_hat] = !B[s_hat];
-    A.retractJac(R,B);
+    A.retractJac(R, B);
     s_hat_old = s_hat;
     A.retract(ym1, z);
     sigma = ym1;
@@ -427,12 +461,12 @@ int GNM(gnmgame &A, cvector &g, cvector **&Eq, int steps, double fuzz, int LNMFr
     z -= ym1;
     z += sigma;
     // z = (z-x)+sigma;
-     
+
     // wobble the perturbation cvector to put us back on an equilibrium
-    if(N > 2 && wobble) {
+    if (N > 2 && wobble) {
       A.payoffMatrix(DG, sigma, fuzz);
       DG.multiply(sigma, ym1);
-      ym1 /= (double)(N-1);
+      ym1 /= (double) (N - 1);
       g = z;
       g -= sigma;
       g -= ym1;

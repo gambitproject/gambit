@@ -62,7 +62,7 @@ NashIPAStrategySolver::Solve(const Game &p_game,
     }
     cvector payoffs(veclength);
   
-    A = std::make_shared<nfgame>(p_game->NumPlayers(), actions, payoffs);
+    A = std::make_shared<nfgame>(actions, payoffs);
   
     std::vector<int> profile(p_game->NumPlayers());
     for (StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {
