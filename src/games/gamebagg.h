@@ -33,12 +33,12 @@ class GameBagentRep : public GameRep {
   friend class BagentPureStrategyProfileRep;
 
 private:
-  agg::BAGG *baggPtr;
+  std::shared_ptr<agg::BAGG> baggPtr;
   Array<int> agent2baggPlayer;
   Array<GamePlayerRep *> m_players;
 
-  /// Constructor; takes ownership of the passed pointer
-  explicit GameBagentRep(agg::BAGG *_baggPtr);
+  /// Constructor
+  explicit GameBagentRep(std::shared_ptr<agg::BAGG> _baggPtr);
 
 public:
   /// @name Lifecycle
@@ -46,7 +46,11 @@ public:
   /// Create a game from a serialized file in BAGG format
   static Game ReadBaggFile(std::istream &);
   /// Destructor
-  ~GameBagentRep() override { delete baggPtr; }
+  ~GameBagentRep() override {
+    for (auto player : m_players) {
+      player->Invalidate();
+    }
+  }
   /// Create a copy of the game, as a new game
   Game Copy() const override;
   //@}

@@ -57,7 +57,7 @@ void BagentPureStrategyProfileRep::SetStrategy(const GameStrategy &s)
 
 Rational BagentPureStrategyProfileRep::GetPayoff(int pl) const
 {
-  agg::BAGG *baggPtr = dynamic_cast<GameBagentRep &>(*m_nfg).baggPtr;
+  std::shared_ptr<agg::BAGG> baggPtr = dynamic_cast<GameBagentRep &>(*m_nfg).baggPtr;
   std::vector<int> s(m_nfg->NumPlayers());
   for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
     s[i-1] = m_profile[i]->GetNumber() - 1;
@@ -71,7 +71,7 @@ Rational
 BagentPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
 {
   int player = p_strategy->GetPlayer()->GetNumber();
-  agg::BAGG *baggPtr = dynamic_cast<GameBagentRep &>(*m_nfg).baggPtr;
+  std::shared_ptr<agg::BAGG> baggPtr = dynamic_cast<GameBagentRep &>(*m_nfg).baggPtr;
   std::vector<int> s(m_nfg->NumPlayers());
   for (int i= 1; i <= m_nfg->NumPlayers(); i++) {
     s[i-1] = m_profile[i]->GetNumber() - 1;
@@ -87,7 +87,7 @@ BagentPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) c
 //                      GameBagentRep: Lifecycle
 //------------------------------------------------------------------------
 
-GameBagentRep::GameBagentRep(agg::BAGG *_baggPtr) 
+GameBagentRep::GameBagentRep(std::shared_ptr<agg::BAGG> _baggPtr)
   : baggPtr(_baggPtr), agent2baggPlayer(_baggPtr->getNumTypes())
 {
   int k = 1;
@@ -192,11 +192,7 @@ void GameBagentRep::WriteBaggFile(std::ostream &s) const
 
 Game GameBagentRep::ReadBaggFile(std::istream &in)
 {
-  agg::BAGG *baggPtr = agg::BAGG::makeBAGG(in);
-  if (!baggPtr) {
-    throw InvalidFileException();
-  }
-  return new GameBagentRep(baggPtr);
+  return new GameBagentRep(agg::BAGG::makeBAGG(in));
 }
 
 }  // end namespace Gambit

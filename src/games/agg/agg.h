@@ -40,29 +40,19 @@ namespace gametracer {
 
 namespace agg {
 
-//data structure for mixed strategy profile:
-//alternatively: typedef std::vector<Number> ....
-#ifdef USE_CVECTOR
-  #include "../cmatrix.h"
-  typedef cvector StrategyProfile;
-  typedef cvector NumberVector;
-#else
-  //typedef  Number*  StrategyProfile;
-  typedef double AggNumber;
-  typedef std::vector<AggNumber> StrategyProfile;
-  typedef std::vector<AggNumber> AggNumberVector;
-#endif
+//data structure for mixed strategy profile
+using AggNumber = double;
+using StrategyProfile = std::vector<AggNumber>;
+using AggNumberVector = std::vector<AggNumber>;
 
 //data structure for payoff function:
-//alternatively: typedef map<std::vector<int> , AggNumber> aggpayoff;
-typedef trie_map<AggNumber> aggpayoff;
-
+using aggpayoff = trie_map<AggNumber>;
 
 //data struct for prob distribution over configurations:
-typedef trie_map<AggNumber> aggdistrib;
+using aggdistrib = trie_map<AggNumber>;
 
 //types of input formats for payoff func
-typedef enum{COMPLETE,MAPPING,ADDITIVE} payofftype; 
+using payofftype = enum { COMPLETE, MAPPING, ADDITIVE};
 
 
 class AGG {
@@ -78,16 +68,8 @@ public:
 
   friend class gametracer::aggame;   //wrapper class for gametracer
 
-  //read an AGG from a file
-  static AGG* makeAGG(char* filename);
-
   //read an AGG from input stream
-  static AGG* makeAGG(std::istream &in);
-  
-  //make AGG with random payoffs
-  static AGG* makeRandomAGG(int n, std::vector<int> &actions, int S, int P,
-std::vector<std::vector<int> >& ASets, std::vector<std::vector<int> >& neighb,
-std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_factor=100);
+  static std::shared_ptr<AGG> makeAGG(std::istream &in);
 
 
   //constructor
@@ -96,29 +78,12 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
    std::vector<projtype>& projTypes,
    std::vector<std::vector<aggdistrib > >& projS,
    std::vector<std::vector<std::vector<config> > >& proj,
-   std::vector<std::vector<proj_func*> > & projF,
+   std::vector<std::vector<projtype> > & projF,
    std::vector<std::vector<std::vector<int> > >& Po,
    std::vector<aggdistrib> &P,
       std::vector<aggpayoff>& payoffs);
 
-
-  //agg(const agg& other, bool completeGraph = false);
-
-
-  //destructor
-  virtual ~AGG(){
-      delete [] strategyOffset;
-      //free projFunctions
-      /*
-      for (size_t i=0; i<projFunctions.size(); ++i)
-	  for (size_t j=0;j<projFunctions[i].size(); ++j)
-	      delete projFunctions[i][j];
-      */
-      for (size_t i=0;i<projectionTypes.size();++i){
-        delete projectionTypes[i];
-      }
-  }
-
+  ~AGG() = default;
 
   int getNumPlayers() const {return numPlayers;}
   int getNumActions() const {return totalActions;}
@@ -130,26 +95,11 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
   int getNumActionNodes() const {return numActionNodes;}
   int getNumFunctionNodes() const {return numPNodes;}
   int getNumKSymActions() const {return numKSymActions;}
-  inline int getNumKSymActions(int i){return uniqueActionSets[i].size();}
-  inline int getNumPlayerClasses(){return playerClasses.size();}
-  inline const PlayerSet& getPlayerClass(int cls){return playerClasses.at(cls);}
-  inline int firstKSymAction(int i){return kSymStrategyOffset[i];}
-  inline int lastKSymAction(int i){return kSymStrategyOffset[i+1];}
-
-  inline void printActionGraph(std::ostream &s) {
-    for(size_t i=0;i< neighbors.size(); ++i){
-      s<<neighbors[i].size()<<"\t";
-      copy(neighbors[i].begin(),neighbors[i].end(), std::ostream_iterator<int>(s," ") );
-      s<<std::endl;
-    }
-  }
-
-  inline void printTypes(std::ostream &s) {
-    for(size_t i=0;i<projectionTypes.size();i++ ){
-      projectionTypes[i]->print(s);
-    }
-  }
-
+  int getNumKSymActions(int i){return uniqueActionSets[i].size();}
+  int getNumPlayerClasses(){return playerClasses.size();}
+  const PlayerSet& getPlayerClass(int cls) const {return playerClasses.at(cls);}
+  int firstKSymAction(int i) const {return kSymStrategyOffset[i];}
+  int lastKSymAction(int i) const {return kSymStrategyOffset[i+1];}
 
   //exp. payoff under mixed strat profile
   AggNumber getMixedPayoff(int player, StrategyProfile &s);
@@ -159,12 +109,8 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
 
 
   AggNumber getPurePayoff(int player, std::vector<int> &s);
-  inline void printPayoffs(std::ostream &s, int node){
-    s << payoffs.at(node).size()<<std::endl;
-    s << payoffs[node];
-  }
 
-  bool isSymmetric(){
+  bool isSymmetric() const {
     for (int i=0;i<numPlayers;++i){
       if (actions[i]<numActionNodes) return false;
     }
@@ -179,11 +125,6 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
   AggNumber getKSymMixedPayoff(const StrategyProfile &s,int pClass1,int act1,int pClass2=-1,int act2=-1);
   void getKSymPayoffVector(AggNumberVector& dest, int playerClass, StrategyProfile &s);
 
-
-
-  //void KSymNormalizeStrategy(StrategyProfile &s);
-
-
   AggNumberVector getExpectedConfig(StrategyProfile &s){
 	  AggNumberVector res(numActionNodes, 0);
 	  for (int i=0;i<numPlayers;++i){
@@ -194,23 +135,38 @@ std::vector<projtype>& projTypes, int seed, bool int_payoffs=false, int int_fact
 	  return res;
   }
 
-  std::vector<proj_func*>& getProjFunctions(int node){return projFunctions.at(node);}
+  std::vector<projtype>& getProjFunctions(int node){return projFunctions.at(node);}
   const std::vector<int>& getPorder(int player, int action){return Porder.at(player).at(action);}
   const std::vector<std::vector<config> >& getProjection(int node){return projection.at(node);}
   const std::vector<int>& getActionSet(int player){return actionSets.at(player);}
   const aggpayoff& getPayoffMap(int node){return payoffs.at(node);}
 
-  AggNumber getMaxPayoff();
-  AggNumber getMinPayoff();
+  AggNumber getMaxPayoff() const;
+  AggNumber getMinPayoff() const;
 
+  void printPayoffs(std::ostream &s, int node) const {
+    s << payoffs.at(node).size()<<std::endl;
+    s << payoffs[node];
+  }
 
+  void printActionGraph(std::ostream &s) const {
+    for(size_t i=0;i< neighbors.size(); ++i){
+      s<<neighbors[i].size()<<"\t";
+      copy(neighbors[i].begin(),neighbors[i].end(), std::ostream_iterator<int>(s," ") );
+      s<<std::endl;
+    }
+  }
 
-  //Data structure
+  void printTypes(std::ostream &s) const {
+    for(size_t i=0;i<projectionTypes.size();i++ ){
+      projectionTypes[i]->print(s);
+    }
+  }
 
+private:
   int numPlayers;
   std::vector<int> actions;
-private:
-  int *strategyOffset;
+  std::vector<int> strategyOffset;
   int totalActions;
   int maxActions;
 
@@ -230,17 +186,12 @@ private:
   //payoff function for each action node \in S
   std::vector<aggpayoff> payoffs;
 
-  //auxillary data strucutres
+  //auxiliary data structures
 
   //originally:
   //foreach s \in S, foreach i \in N, foreach s_i \in S_i,
   //the 'contribution' of s_i to D^(s)
   std::vector< std::vector<std::vector<config> > > projection;
-
-  //a more compact way:
-  //foreach s \in S, foreach s' \in S, 
-  // the contribution of s' to D^(s)
-  //std::vector<std::vector<config> > projection;
 
   //foreach s \in S, foreach i \in N, the projected mixed strat
   //which is a prob distribution over the set of 'contributions'
@@ -250,7 +201,7 @@ private:
   std::vector<std::vector<aggdistrib> >fullProjectedStrat;
 
   //foreach s in S, foreach neighbor of s, its projection function 
-  std::vector<std::vector<proj_func*> > projFunctions;
+  std::vector<std::vector<projtype> > projFunctions;
 
   //foreach i \in N, foreach s_i in S_i, the order of agents o_1.. o_{n-1}
   // in which we apply the DP algorithm
@@ -299,22 +250,6 @@ private:
     std::istream &in;
   };
 
-  struct inputRand {
-    explicit inputRand(bool int_payoffs=false, int int_factor=100):int_payoffs(int_payoffs),int_factor(int_factor) {}
-    void operator()(aggpayoff::iterator p) const {
-#if HAVE_DRAND48
-      p->second = drand48();
-#else
-      p->second = rand();
-#endif  // HAVE_DRAND48
-      if (int_payoffs) {
-	p->second = nearbyint(p->second * AggNumber(int_factor));
-      }
-    }  
-    bool int_payoffs;
-    int int_factor;
-  };
-
   //private static methods:
 
 
@@ -322,8 +257,6 @@ private:
       pay.in_order(input(in));
   }
   static void makeMAPPINGpayoff(std::istream &in, aggpayoff& pay, int);
-
-  static void stripComment(std::istream &in);
 
   static void setProjections(std::vector<std::vector<aggdistrib > >& projS,
   std::vector<std::vector<std::vector<config> > >& proj, int N,int S,int P, std::vector<std::vector<int> >& AS, std::vector<std::vector<int> >& neighb, std::vector<projtype>& projTypes);
@@ -347,6 +280,8 @@ private:
   void doProjection(int Node, int player, AggNumber* s);
 
   void getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int act, aggdistrib &dest,int plClass2=-1,int act2=-1);
+
+
 };
 
 }  // end namespace Gambit::agg

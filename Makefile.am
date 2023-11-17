@@ -340,7 +340,8 @@ agg_SOURCES = \
 	src/games/agg/bagg.h \
 	src/games/agg/proj_func.h \
 	src/games/agg/trie_map.h \
-    src/games/agg/trie_map.imp
+    src/games/agg/trie_map.imp \
+    src/games/agg/trie_map.cc
 
 game_SOURCES = \
 	src/gambit.h \

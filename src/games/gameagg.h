@@ -38,11 +38,11 @@ class GameAggRep : public GameRep {
   friend class gametracer::aggame;
 
 private:
-  agg::AGG *aggPtr;
+  std::shared_ptr<agg::AGG> aggPtr;
   Array<GamePlayerRep *> m_players;
 
-  /// Constructor; takes ownership of the passed pointer
-  explicit GameAggRep(agg::AGG *);
+  /// Constructor
+  explicit GameAggRep(std::shared_ptr<agg::AGG>);
 
 public:
   /// @name Lifecycle
@@ -50,7 +50,11 @@ public:
   /// Create a game from a serialized file in AGG format
   static Game ReadAggFile(std::istream &);
   /// Destructor
-  ~GameAggRep() override { delete aggPtr; }
+  ~GameAggRep() override {
+    for (auto player : m_players) {
+      player->Invalidate();
+    }
+  }
   /// Create a copy of the game, as a new game
   Game Copy() const override;
   //@}
