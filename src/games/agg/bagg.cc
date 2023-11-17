@@ -17,7 +17,7 @@ BAGG::BAGG(int N, int S,
 	   vector<ProbDist>& TDist,
 	   vector<vector<vector<int > > > &typeActionSets,
 	   vector<vector<vector<int > > > &ta2a,
-	   AGG* aggPtr):
+	   std::shared_ptr<AGG> aggPtr):
   numPlayers(N),
   numActionNodes(S),
   numTypes(numTypes),
@@ -26,12 +26,12 @@ BAGG::BAGG(int N, int S,
   typeAction2ActionIndex(ta2a),
   aggPtr(aggPtr)
 {
-  typeOffset=new int[numPlayers+1];
+  typeOffset = std::vector<int>(numPlayers+1);
   typeOffset[0]=0;
   for(int i=0;i<numPlayers;i++){
       typeOffset[i+1]=typeOffset[i]+numTypes[i];
   }
-  strategyOffset=new int[typeOffset[numPlayers]+1];
+  strategyOffset = std::vector<int>(typeOffset[numPlayers]+1);
   strategyOffset[0]=0;
   for(int i=0;i<numPlayers;++i){
       for(int j=0;j<numTypes[i];++j){
@@ -48,23 +48,25 @@ BAGG::BAGG(int N, int S,
 }
 
 
-void BAGG::stripComment(istream& in){
-  in>>ws;
-  char c =in.peek();
+namespace {
+
+void stripComment(istream& in)
+{
+  const char COMMENT_CHAR = '#';
+
+  in >> ws;
+  char c = in.peek();
   stringbuf discard(ios_base::out);
-  if(c== BAGG::COMMENT_CHAR){
-    in.get (discard);
+  if (c == COMMENT_CHAR) {
+    in.get(discard);
     stripComment(in);
   }
 }
 
-BAGG *BAGG::makeBAGG(char* filename)
-{
-  ifstream in(filename);
-  return BAGG::makeBAGG(in);
 }
 
-BAGG *BAGG::makeBAGG(istream& in){
+std::shared_ptr<BAGG> BAGG::makeBAGG(istream& in)
+{
   int N,S,P;
 
   stripComment(in);
@@ -78,149 +80,101 @@ BAGG *BAGG::makeBAGG(istream& in){
   vector<int> numTypes(N);
 
   //input number of types for each player
-  for(int i=0;i<N;++i){
-    if(in.eof()||in.bad()){
-      cerr<<"Error in game file: integer expected for the number of types for player "<<i<<endl;
-      exit(1);
+  for (int i = 0; i < N; ++i) {
+    if (in.eof() || in.bad()) {
+      throw std::runtime_error(
+        "Error in game file: integer expected for the number of types for player " +
+        std::to_string(i)
+      );
     }
-    in>>numTypes[i];
+    in >> numTypes[i];
   }
 
   //input the type distributions
   stripComment(in);
   vector<ProbDist> TDist;
-  for(int i=0;i<N;++i){
-    TDist.push_back(ProbDist(numTypes[i]) );
-    for(int j=0;j<numTypes[i];++j){
-      if(in.eof()||in.bad()){
-            cerr<<"Error in game file: number expected for type distribution"<<endl;
-            exit(1);
+  for (int i = 0; i < N; ++i) {
+    TDist.push_back(ProbDist(numTypes[i]));
+    for (int j = 0; j < numTypes[i]; ++j) {
+      if (in.eof() || in.bad()) {
+        throw std::runtime_error("Error in game file: number expected for type distribution");
       }
-      in>>TDist[i][j];
+      in >> TDist[i][j];
     }
   }
 
   stripComment(in);
   //sizes of type action sets
   vector<vector<vector<int> > > typeActionSets(N);
-  for (int i=0;i<N;++i){
-    for(int j=0;j<numTypes[i];++j){
-      if(in.eof()||in.bad()){
-            cerr<<"Error in game file: integer expected for size of type action set"<<endl;
-            exit(1);
+  for (int i = 0; i < N; ++i) {
+    for (int j = 0; j < numTypes[i]; ++j) {
+      if (in.eof() || in.bad()) {
+        throw std::runtime_error("Error in game file: integer expected for size of type action set");
       }
       int temp;
-      in>>temp;
+      in >> temp;
       typeActionSets[i].push_back(vector<int>(temp));
-    
     }
   }
 
-    
-  //type action sets
+  // type action sets
   stripComment(in);
-  for(int i=0;i<N;++i){
-    for(int j=0;j<numTypes[i];++j){
-      for(size_t k=0;k<typeActionSets[i][j].size();++k){
-        if(in.eof()||in.bad()){
-              cerr<<"Error in game file: integer expected for type action set"<<endl;
-              exit(1);
+  for (int i = 0; i < N; ++i) {
+    for (int j = 0; j < numTypes[i]; ++j) {
+      for (size_t k = 0; k < typeActionSets[i][j].size(); ++k) {
+        if (in.eof() || in.bad()) {
+          throw std::runtime_error("Error in game file: integer expected for type action set");
         }
-        in>> typeActionSets[i][j][k];
+        in >> typeActionSets[i][j][k];
       }
     }
   }
   stripComment(in);
 
-  //action sets
+  // action sets
   vector<vector<int> > aggActionSets;
-  for (int i=0;i<N;++i){
+  for (int i = 0; i < N; ++i) {
     set<int> aSet;
-    for (int j=0;j<numTypes[i];++j){
-      aSet.insert(typeActionSets[i][j].begin(),typeActionSets[i][j].end());
+    for (int j = 0; j < numTypes[i]; ++j) {
+      aSet.insert(typeActionSets[i][j].begin(), typeActionSets[i][j].end());
     }
-    aggActionSets.push_back( vector<int>(aSet.begin(),aSet.end()) );
+    aggActionSets.push_back(vector<int>(aSet.begin(), aSet.end()));
   }
 
-  vector<vector<vector<int > > > typeAction2ActionIndex(typeActionSets);
-  for(int i=0;i<N;++i){
-    for(int j=0;j<numTypes[i];++j){
-      for(size_t k=0;k<typeActionSets[i][j].size();++k){
-        typeAction2ActionIndex[i][j][k]=
-          find(aggActionSets[i].begin(),aggActionSets[i].end(),typeActionSets[i][j][k]) 
+  vector<vector<vector<int> > > typeAction2ActionIndex(typeActionSets);
+  for (int i = 0; i < N; ++i) {
+    for (int j = 0; j < numTypes[i]; ++j) {
+      for (size_t k = 0; k < typeActionSets[i][j].size(); ++k) {
+        typeAction2ActionIndex[i][j][k] =
+          find(aggActionSets[i].begin(), aggActionSets[i].end(), typeActionSets[i][j][k])
           - aggActionSets[i].begin();
       }
     }
   }
 
-  //stream for constructing agg
+  // stream for constructing agg
   stringstream aggss(stringstream::in | stringstream::out);
-  aggss<<N<<endl<<S<<endl<<P<<endl;
-  for (int i=0;i<N;i++) aggss<<aggActionSets[i].size()<<endl;
-  for (int i=0;i<N;i++){
-    for(size_t j=0;j<aggActionSets[i].size();j++){
-      aggss<<aggActionSets[i][j]<<" ";
+  aggss << N << endl << S << endl << P << endl;
+  for (int i = 0; i < N; i++) { aggss << aggActionSets[i].size() << endl; }
+  for (int i = 0; i < N; i++) {
+    for (size_t j = 0; j < aggActionSets[i].size(); j++) {
+      aggss << aggActionSets[i][j] << " ";
     }
-    aggss<<endl;
+    aggss << endl;
   }
 
-  //copy rest of input into aggss
-  while(in){
+  // copy rest of input into aggss
+  while (in) {
     string ln;
-    getline(in,ln);
-    aggss<<ln<<endl;
+    getline(in, ln);
+    aggss << ln << endl;
   }
 
-  AGG *aggPtr = AGG::makeAGG(aggss);
-  if(!aggPtr){
-	  cerr<<"Error in BAGG file when reading the AGG part of the input."<<endl;
-	  exit(1);
-  }
-  return new BAGG(N, S, numTypes, TDist, typeActionSets,
-		  typeAction2ActionIndex, aggPtr);
+  std::shared_ptr<AGG> aggPtr = AGG::makeAGG(aggss);
+  return std::make_shared<BAGG>(N, S, numTypes, TDist, typeActionSets,
+                                typeAction2ActionIndex, aggPtr);
 }
 
-BAGG *BAGG::makeRandomBAGG(int N,vector<int> &numTypes,vector<ProbDist> &TDist,int S,int P,
-        vector<vector<vector<int> > > &typeActionSets,
-        vector<vector<int> > &neighb,
-        vector<projtype> &projTypes,
-        int seed, bool int_payoffs, int int_factor)
-{
-  //action sets
-  vector<vector<int> > aggActionSets;
-  for (int i=0;i<N;++i){
-    set<int> aSet;
-    for (int j=0;j<numTypes[i];++j){
-      aSet.insert(typeActionSets[i][j].begin(),typeActionSets[i][j].end());
-    }
-    aggActionSets.push_back( vector<int>(aSet.begin(),aSet.end()) );
-  }
-
-
-  std::vector<int> actions(N);
-  for(int i=0;i<N;++i){
-    actions[i]=aggActionSets[i].size();
-  }
-
-  vector<vector<vector<int > > > typeAction2ActionIndex(typeActionSets);
-  for(int i=0;i<N;++i){
-    for(int j=0;j<numTypes[i];++j){
-      for(size_t k=0;k<typeActionSets[i][j].size();++k){
-        typeAction2ActionIndex[i][j][k]=
-          find(aggActionSets[i].begin(),aggActionSets[i].end(),typeActionSets[i][j][k]) 
-          - aggActionSets[i].begin();
-      }
-    }
-  }
-
-
-  AGG *aggPtr = AGG::makeRandomAGG(N,actions,S,P, aggActionSets, neighb, projTypes, seed,int_payoffs,int_factor);
-  if(!aggPtr){
-	  std::cerr<<"MakeRandomBAGG(): failed to make underlying AGG."<<endl;
-	  return nullptr;
-  }
-  return new BAGG(N,S,numTypes,TDist,typeActionSets, typeAction2ActionIndex, aggPtr);
-}
 
 AggNumber BAGG::getMixedPayoff(int player, StrategyProfile &s){
   AggNumber res(0);
@@ -318,71 +272,62 @@ AggNumber BAGG::getSymMixedPayoff(int tp, int act, StrategyProfile &s)
   return aggPtr->getSymMixedPayoff(typeActionSets[0][tp][act], as);
 }
 
-
-
-
-
-ostream & operator<<(ostream& s, const BAGG &g)
+ostream& operator<<(ostream& s, const BAGG &g)
 {
   //BAGG identifier for Gambit ReadGame
-  s<<"#BAGG"<<endl;
+  s << "#BAGG" << endl;
 
   //num players
-
-  s<<g.getNumPlayers()<<endl;
-  
+  s << g.getNumPlayers() << endl;
   //num action nodes
-
-  s<<g.getNumActionNodes()<<endl;
-
+  s << g.getNumActionNodes() << endl;
   //num func nodes
-  s<<g.getNumFunctionNodes()<<endl;
-
+  s << g.getNumFunctionNodes() << endl;
 
   //num types
-  for (int i=0;i<g.getNumPlayers();++i) {
-    s<<g.getNumTypes(i)<<" ";
+  for (int i = 0; i < g.getNumPlayers(); ++i) {
+    s << g.getNumTypes(i) << " ";
   }
-  s<<endl;
+  s << endl;
 
   //type distrib
-  for (int i=0;i<g.getNumPlayers();++i){
-    for(int j=0;j<g.getNumTypes(i);++j){
-      s<<g.indepTypeDist[i][j]<<" ";
+  for (int i = 0; i < g.getNumPlayers(); ++i) {
+    for (int j = 0; j < g.getNumTypes(i); ++j) {
+      s << g.indepTypeDist[i][j] << " ";
     }
-    s<<endl;
+    s << endl;
   }
 
   //sizes of type action sets
-  for(int i=0;i<g.getNumPlayers();++i){
-    for(int j=0;j<g.getNumTypes(i);++j){
-      s<< g.typeActionSets[i][j].size()<<" ";
+  for (int i = 0; i < g.getNumPlayers(); ++i) {
+    for (int j = 0; j < g.getNumTypes(i); ++j) {
+      s << g.typeActionSets[i][j].size() << " ";
     }
-    s<<endl;
+    s << endl;
   }
 
   //type action sets
-  for(int i=0;i<g.getNumPlayers();++i){
-    for(int j=0;j<g.getNumTypes(i);++j){
-      copy(g.typeActionSets[i][j].begin(), g.typeActionSets[i][j].end(), ostream_iterator<int>(s," ") );
-      s<<endl;
+  for (int i = 0; i < g.getNumPlayers(); ++i) {
+    for (int j = 0; j < g.getNumTypes(i); ++j) {
+      copy(g.typeActionSets[i][j].begin(), g.typeActionSets[i][j].end(),
+           ostream_iterator<int>(s, " "));
+      s << endl;
     }
   }
 
   //action graph
   g.aggPtr->printActionGraph(s);
-  s<<endl;
+  s << endl;
 
   //types of func nodes
-  //copy(g.aggPtr->projectionTypes.begin(),g.aggPtr->projectionTypes.end(), ostream_iterator<int>(s," ") );
   g.aggPtr->printTypes(s);
-  s<<endl;
+  s << endl;
 
   //payoffs
-  for (int i=0;i<g.getNumActionNodes();++i){
-    s<<"1"<<endl; //type of payoff output
-    g.aggPtr->printPayoffs(s,i);
-    s<<endl;
+  for (int i = 0; i < g.getNumActionNodes(); ++i) {
+    s << "1" << endl; //type of payoff output
+    g.aggPtr->printPayoffs(s, i);
+    s << endl;
   }
 
   return s;

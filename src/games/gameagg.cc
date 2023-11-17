@@ -57,7 +57,7 @@ void AggPureStrategyProfileRep::SetStrategy(const GameStrategy &s)
 
 Rational AggPureStrategyProfileRep::GetPayoff(int pl) const
 {
-  agg::AGG *aggPtr = dynamic_cast<GameAggRep &>(*m_nfg).aggPtr;
+  std::shared_ptr<agg::AGG> aggPtr = dynamic_cast<GameAggRep &>(*m_nfg).aggPtr;
   std::vector<int> s(aggPtr->getNumPlayers());
   for (int i = 1; i <= aggPtr->getNumPlayers(); i++) {
     s[i-1] = m_profile[i]->GetNumber() -1;
@@ -69,7 +69,7 @@ Rational
 AggPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
 {
   int player = p_strategy->GetPlayer()->GetNumber();
-  agg::AGG *aggPtr = dynamic_cast<GameAggRep &>(*m_nfg).aggPtr;
+  std::shared_ptr<agg::AGG> aggPtr = dynamic_cast<GameAggRep &>(*m_nfg).aggPtr;
   std::vector<int> s(aggPtr->getNumPlayers());
   for (int i = 1; i <= aggPtr->getNumPlayers(); i++) {
     s[i-1] = m_profile[i]->GetNumber() - 1;
@@ -82,7 +82,7 @@ AggPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) cons
 //                        GameAggRep: Lifecycle
 //------------------------------------------------------------------------
 
-GameAggRep::GameAggRep(agg::AGG *p_aggPtr)
+GameAggRep::GameAggRep(std::shared_ptr<agg::AGG> p_aggPtr)
   : aggPtr(p_aggPtr)
 {
   for (int pl = 1; pl <= aggPtr->getNumPlayers(); pl++) {
@@ -240,11 +240,7 @@ void GameAggRep::WriteAggFile(std::ostream &s) const
 }
 
 Game GameAggRep::ReadAggFile(std::istream& in){
-  agg::AGG *aggPtr = agg::AGG::makeAGG(in);
-  if (!aggPtr) {
-    throw InvalidFileException();
-  }
-  return new GameAggRep(aggPtr);
+  return new GameAggRep(agg::AGG::makeAGG(in));
 }
 
 }  // end namespace Gambit

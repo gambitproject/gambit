@@ -331,40 +331,38 @@ template <class T>
 T AggMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   auto &g = dynamic_cast<GameAggRep &>(*(this->m_support.GetGame()));
-  agg::AGG *aggPtr = g.aggPtr;
-  std::vector<double> s (aggPtr->getNumActions());
-  for (int i=0;i<aggPtr->getNumPlayers();++i) {
-    for (int j=0;j<aggPtr->getNumActions(i);++j){
+  std::vector<double> s (g.aggPtr->getNumActions());
+  for (int i=0;i<g.aggPtr->getNumPlayers();++i) {
+    for (int j=0;j<g.aggPtr->getNumActions(i);++j){
       GameStrategy strategy = this->m_support.GetGame()->GetPlayer(i+1)->GetStrategy(j+1);
       int ind = this->m_support.m_profileIndex[strategy->GetId()];
-      s[aggPtr->firstAction(i)+j]= (ind==-1)?(T)0:this->m_probs[ind];
+      s[g.aggPtr->firstAction(i)+j]= (ind==-1)?(T)0:this->m_probs[ind];
     }
   }
-  return (T) aggPtr->getMixedPayoff(pl-1, s);
+  return (T) g.aggPtr->getMixedPayoff(pl-1, s);
 }
 
 template <class T>
 T AggMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps) const
 {
   auto &g = dynamic_cast<GameAggRep &>(*(this->m_support.GetGame()));
-  agg::AGG *aggPtr = g.aggPtr;
-  std::vector<double> s (aggPtr->getNumActions());
-  for (int i=0;i<aggPtr->getNumPlayers();++i){
+  std::vector<double> s (g.aggPtr->getNumActions());
+  for (int i=0;i<g.aggPtr->getNumPlayers();++i){
     if(i+1 == ps->GetPlayer()->GetNumber()){
-      for (int j=0;j<aggPtr->getNumActions(i);++j){
-        s[aggPtr->firstAction(i)+j] = (T) 0;
+      for (int j=0;j<g.aggPtr->getNumActions(i);++j){
+        s[g.aggPtr->firstAction(i)+j] = (T) 0;
       }
-      s.at(aggPtr->firstAction(i)+ ps->GetNumber()-1) = (T) 1;
+      s.at(g.aggPtr->firstAction(i)+ ps->GetNumber()-1) = (T) 1;
     }  
     else {
-      for (int j=0;j<aggPtr->getNumActions(i);++j){
+      for (int j=0;j<g.aggPtr->getNumActions(i);++j){
         GameStrategy strategy = this->m_support.GetGame()->GetPlayer(i+1)->GetStrategy(j+1);
         const int &ind=this->m_support.m_profileIndex[strategy->GetId()];
-        s[aggPtr->firstAction(i)+j]= (ind==-1)?(T)0:this->m_probs[ind];
+        s[g.aggPtr->firstAction(i)+j]= (ind==-1)?(T)0:this->m_probs[ind];
       }
     }
   }
-  return (T) aggPtr->getMixedPayoff(pl-1, s);
+  return (T) g.aggPtr->getMixedPayoff(pl-1, s);
 }
 
 template <class T>
@@ -375,30 +373,29 @@ T AggMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1,
   if (player1 == player2) return (T) 0;
 
   auto &g = dynamic_cast<GameAggRep &>(*(this->m_support.GetGame()));
-  agg::AGG *aggPtr = g.aggPtr;
-  std::vector<double> s (aggPtr->getNumActions());
-  for (int i=0;i<aggPtr->getNumPlayers();++i){
+  std::vector<double> s (g.aggPtr->getNumActions());
+  for (int i=0;i<g.aggPtr->getNumPlayers();++i){
     if(i+1 == player1->GetNumber()){
-      for (int j=0;j<aggPtr->getNumActions(i);++j){
-        s[aggPtr->firstAction(i)+j] = (T) 0;
+      for (int j=0;j<g.aggPtr->getNumActions(i);++j){
+        s[g.aggPtr->firstAction(i)+j] = (T) 0;
       }
-      s.at(aggPtr->firstAction(i)+ ps1->GetNumber()-1) = (T) 1;
+      s.at(g.aggPtr->firstAction(i)+ ps1->GetNumber()-1) = (T) 1;
     }  
     else if(i+1 == player2->GetNumber()){
-      for (int j=0;j<aggPtr->getNumActions(i);++j){
-        s[aggPtr->firstAction(i)+j] = (T) 0;
+      for (int j=0;j<g.aggPtr->getNumActions(i);++j){
+        s[g.aggPtr->firstAction(i)+j] = (T) 0;
       }
-      s.at(aggPtr->firstAction(i)+ ps2->GetNumber()-1) = (T) 1;
+      s.at(g.aggPtr->firstAction(i)+ ps2->GetNumber()-1) = (T) 1;
     }  
     else {
-      for (int j=0;j<aggPtr->getNumActions(i);++j){
+      for (int j=0;j<g.aggPtr->getNumActions(i);++j){
         GameStrategy strategy = this->m_support.GetGame()->GetPlayer(i+1)->GetStrategy(j+1);
         const int &ind=this->m_support.m_profileIndex[strategy->GetId()];
-        s[aggPtr->firstAction(i)+j]= (ind==-1)?(T)0:this->m_probs[ind];
+        s[g.aggPtr->firstAction(i)+j]= (ind==-1)?(T)0:this->m_probs[ind];
       }
     }
   }
-  return (T) aggPtr->getMixedPayoff(pl-1, s);
+  return (T) g.aggPtr->getMixedPayoff(pl-1, s);
 }
 
 //========================================================================
@@ -409,54 +406,52 @@ template <class T>
 T BagentMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   auto &g = dynamic_cast<GameBagentRep &>(*(this->m_support.GetGame()));
-  agg::BAGG *baggPtr = g.baggPtr;
   std::vector<double> s (g.MixedProfileLength());
   Array<int> ns=g.NumStrategies();
   int bplayer=-1,btype=-1;
-  for (int i=0,offs=0;i<baggPtr->getNumPlayers();++i)
-   for (int tp=0;tp<baggPtr->getNumTypes(i);++tp) {
-    if (pl == baggPtr->typeOffset[i]+tp+1){
+  for (int i=0,offs=0;i<g.baggPtr->getNumPlayers();++i)
+   for (int tp=0;tp<g.baggPtr->getNumTypes(i);++tp) {
+    if (pl == g.baggPtr->typeOffset[i]+tp+1){
       bplayer=i;
       btype=tp;
     }
-    for (int j=0;j<ns[baggPtr->typeOffset[i]+tp+1];++j,++offs){
-      GameStrategy strategy = this->m_support.GetGame()->GetPlayer(baggPtr->typeOffset[i]+tp+1)->GetStrategy(j+1);
+    for (int j=0;j<ns[g.baggPtr->typeOffset[i]+tp+1];++j,++offs){
+      GameStrategy strategy = this->m_support.GetGame()->GetPlayer(g.baggPtr->typeOffset[i]+tp+1)->GetStrategy(j+1);
       const int &ind=this->m_support.m_profileIndex[strategy->GetId()];
       s.at(offs)= (ind==-1)?(T)0:this->m_probs[ind];
     }
    }
-  return (T) baggPtr->getMixedPayoff(bplayer,btype, s);
+  return (T) g.baggPtr->getMixedPayoff(bplayer,btype, s);
 }
 
 template <class T>
 T BagentMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps) const
 {
   auto &g = dynamic_cast<GameBagentRep &>(*(this->m_support.GetGame()));
-  agg::BAGG *baggPtr = g.baggPtr;
   std::vector<double> s (g.MixedProfileLength());
   int bplayer=-1,btype=-1;
-  for (int i=0;i<baggPtr->getNumPlayers();++i){
-   for(int tp=0; tp<baggPtr->getNumTypes(i);++tp){
-    if(pl == baggPtr->typeOffset[i]+tp+1){
+  for (int i=0;i<g.baggPtr->getNumPlayers();++i){
+   for(int tp=0; tp<g.baggPtr->getNumTypes(i);++tp){
+    if(pl == g.baggPtr->typeOffset[i]+tp+1){
       bplayer=i;
       btype=tp;
     }
-    if(baggPtr->typeOffset[i]+tp+1 == ps->GetPlayer()->GetNumber()){
-      for (unsigned int j=0;j<baggPtr->typeActionSets.at(i).at(tp).size();++j){
-        s.at(baggPtr->firstAction(i,tp)+j) = 0;
+    if(g.baggPtr->typeOffset[i]+tp+1 == ps->GetPlayer()->GetNumber()){
+      for (unsigned int j=0;j<g.baggPtr->typeActionSets.at(i).at(tp).size();++j){
+        s.at(g.baggPtr->firstAction(i,tp)+j) = 0;
       }
-      s.at(baggPtr->firstAction(i,tp)+ ps->GetNumber()-1) = 1;
+      s.at(g.baggPtr->firstAction(i,tp)+ ps->GetNumber()-1) = 1;
     }  
     else {
-      for (int j=0;j<baggPtr->getNumActions(i,tp);++j){
-        GameStrategy strategy = this->m_support.GetGame()->GetPlayer(baggPtr->typeOffset[i]+tp+1)->GetStrategy(j+1);
+      for (int j=0;j<g.baggPtr->getNumActions(i,tp);++j){
+        GameStrategy strategy = this->m_support.GetGame()->GetPlayer(g.baggPtr->typeOffset[i]+tp+1)->GetStrategy(j+1);
         const int &ind=this->m_support.m_profileIndex[strategy->GetId()];
-        s.at(baggPtr->firstAction(i,tp)+j)= (ind==-1)?Rational(0):this->m_probs[ind];
+        s.at(g.baggPtr->firstAction(i,tp)+j)= (ind==-1)?Rational(0):this->m_probs[ind];
       }
     }
    }
   }
-  return (T) baggPtr->getMixedPayoff(bplayer,btype, s);
+  return (T) g.baggPtr->getMixedPayoff(bplayer,btype, s);
 }
 
 template <class T>
@@ -467,38 +462,37 @@ T BagentMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &p
   if (player1 == player2) return (T) 0;
 
   auto &g = dynamic_cast<GameBagentRep &>(*(this->m_support.GetGame()));
-  agg::BAGG *baggPtr = g.baggPtr;
   std::vector<double> s (g.MixedProfileLength());
   int bplayer=-1,btype=-1;
-  for (int i=0;i<baggPtr->getNumPlayers();++i){
-   for(int tp=0;tp<baggPtr->getNumTypes(i);++tp){
-    if(pl == baggPtr->typeOffset[i]+tp+1){
+  for (int i=0;i<g.baggPtr->getNumPlayers();++i){
+   for(int tp=0;tp<g.baggPtr->getNumTypes(i);++tp){
+    if(pl == g.baggPtr->typeOffset[i]+tp+1){
       bplayer=i;
       btype=tp;
     }
     
-    if(baggPtr->typeOffset[i]+tp+1 == player1->GetNumber()){
-      for (unsigned int j=0;j<baggPtr->typeActionSets.at(i).at(tp).size();++j){
-        s.at(baggPtr->firstAction(i,tp)+j) = 0;
+    if(g.baggPtr->typeOffset[i]+tp+1 == player1->GetNumber()){
+      for (unsigned int j=0;j<g.baggPtr->typeActionSets.at(i).at(tp).size();++j){
+        s.at(g.baggPtr->firstAction(i,tp)+j) = 0;
       }
-      s.at(baggPtr->firstAction(i,tp)+ ps1->GetNumber()-1) = 1;
+      s.at(g.baggPtr->firstAction(i,tp)+ ps1->GetNumber()-1) = 1;
     }  
-    else if(baggPtr->typeOffset[i]+tp+1 == player2->GetNumber()){
-      for (int j=0;j<baggPtr->getNumActions(i,tp);++j){
-        s.at(baggPtr->firstAction(i,tp)+j) = 0;
+    else if(g.baggPtr->typeOffset[i]+tp+1 == player2->GetNumber()){
+      for (int j=0;j<g.baggPtr->getNumActions(i,tp);++j){
+        s.at(g.baggPtr->firstAction(i,tp)+j) = 0;
       }
-      s.at(baggPtr->firstAction(i,tp)+ ps2->GetNumber()-1) = 1;
+      s.at(g.baggPtr->firstAction(i,tp)+ ps2->GetNumber()-1) = 1;
     }  
     else {
-      for (unsigned int j=0;j<baggPtr->typeActionSets.at(i).at(tp).size();++j){
-        GameStrategy strategy = this->m_support.GetGame()->GetPlayer(baggPtr->typeOffset[i]+tp+1)->GetStrategy(j+1);
+      for (unsigned int j=0;j<g.baggPtr->typeActionSets.at(i).at(tp).size();++j){
+        GameStrategy strategy = this->m_support.GetGame()->GetPlayer(g.baggPtr->typeOffset[i]+tp+1)->GetStrategy(j+1);
         const int &ind=this->m_support.m_profileIndex[strategy->GetId()];
-        s.at(baggPtr->firstAction(i,tp)+j)= static_cast<T>((ind==-1)?T(0):this->m_probs[ind]);
+        s.at(g.baggPtr->firstAction(i,tp)+j)= static_cast<T>((ind==-1)?T(0):this->m_probs[ind]);
       }
     }
    } 
   }
-  return (T) baggPtr->getMixedPayoff(bplayer,btype, s);
+  return (T) g.baggPtr->getMixedPayoff(bplayer,btype, s);
 }
 
 

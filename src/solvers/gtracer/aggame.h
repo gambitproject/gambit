@@ -35,20 +35,12 @@ namespace gametracer {
 
 class aggame : public gnmgame {
   public:
-    explicit aggame ( Gambit::agg::AGG *_aggPtr)
-      :gnmgame(_aggPtr->actions),
-      aggPtr (_aggPtr)
-    {
-    }
-
-    explicit aggame(Gambit::GameAggRep& g)
+    explicit aggame(const Gambit::GameAggRep& g)
       :gnmgame(g.aggPtr->actions),
       aggPtr (g.aggPtr)
-    {
-    }
+    { }
 
-    ~aggame() override = default;  // delete aggPtr?
-
+    ~aggame() override = default;
     int getNumActionNodes(){return aggPtr->getNumActionNodes();}
 
 
@@ -92,8 +84,7 @@ class aggame : public gnmgame {
     int lastKSymAction(int p) const override {return aggPtr->lastKSymAction(p);}
 
   private:
-
-    Gambit::agg::AGG *aggPtr;
+    std::shared_ptr<Gambit::agg::AGG> aggPtr;
 
     //helper functions for computing jacobian
     void computePartialP_PureNode(int player,int act,std::vector<int>& tasks) const;
