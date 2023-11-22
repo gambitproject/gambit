@@ -23,8 +23,6 @@ import cython
 from cython.operator cimport dereference as deref
 from libcpp.memory cimport unique_ptr
 
-from deprecated import deprecated
-
 @cython.cclass
 class StrategySupportProfile:
     """A set-like object representing a subset of the strategies in game.
@@ -252,32 +250,6 @@ class StrategySupportProfile:
         """
         return Game.parse_game(WriteGame(deref(self.support)).decode('ascii'))
 
-    @deprecated(version='16.1.0',
-                reason='Use pygambit.supports.undominated_strategies_solve instead of StrategySupportProfile.',
-                category=FutureWarning)
-    def undominated(self, strict=False, external=False) -> StrategySupportProfile:
-        """Return a support profile including only strategies which are not dominated
-        by another pure strategy.
-
-        This function performs only one round of elimination.
-
-        Parameters
-        ----------
-        strict : bool, default False
-            If specified `True`, eliminate only strategies which are strictly dominated.
-            If `False`, strategies which are weakly dominated are also eliminated.
-
-        external : bool, default False
-            The default is to consider dominance only by strategies which are in
-            the support profile for that player.  If `True`, strategies which are dominated
-            by another strategy not in the support profile are also eliminated.
-
-        Returns
-        -------
-        StrategySupportProfile
-            A new support profile containing only the strategies which are not dominated.
-        """
-        return _undominated_strategies_solve(self, strict, external)
 
 def _undominated_strategies_solve(
         profile: StrategySupportProfile, strict: bool, external: bool

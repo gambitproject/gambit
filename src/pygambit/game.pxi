@@ -23,7 +23,6 @@ import itertools
 import pathlib
 
 import numpy as np
-from deprecated import deprecated
 
 import pygambit.gte
 import pygambit.gameiter
@@ -44,21 +43,6 @@ class Outcomes(Collection):
         c.outcome = self.game.deref().GetOutcome(outc+1)
         return c
 
-    @deprecated(version='16.1.0',
-                reason='Use Game.add_outcome() instead of Game.outcomes.add()',
-                category=FutureWarning)
-    def add(self, label="") -> Outcome:
-        """Add a new outcome to the game.
-
-        .. deprecated:: 16.1.0
-           Use `Game.add_outcome` instead of `Outcomes.add`.
-        """
-        c = Outcome()
-        c.outcome = self.game.deref().NewOutcome()
-        if label != "":
-            c.label = str(label)
-        return c
-
 
 @cython.cclass
 class Players(Collection):
@@ -74,17 +58,6 @@ class Players(Collection):
             return Collection.__getitem__(self, pl)
         p = Player()
         p.player = self.game.deref().GetPlayer(pl+1)
-        return p
-
-    @deprecated(version='16.1.0',
-                reason='Use Game.add_player() instead of Game.players.add()',
-                category=FutureWarning)
-    def add(self, label="") -> Player:
-        """Adds a new player to the game."""
-        p = Player()
-        p.player = self.game.deref().NewPlayer()
-        if label != "":
-            p.label = str(label)
         return p
 
     @property

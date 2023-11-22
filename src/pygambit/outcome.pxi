@@ -24,8 +24,6 @@ from libcpp.memory cimport shared_ptr
 
 import typing
 
-from deprecated import deprecated
-
 @cython.cclass
 class Outcome:
     """An outcome in a ``Game``."""
@@ -42,20 +40,6 @@ class Outcome:
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.outcome.deref())
-
-    @deprecated(version='16.1.0',
-                reason='Use Game.delete_outcome() instead of Outcome.delete()',
-                category=FutureWarning)
-    def delete(self):
-        """Deletes the outcome from its game.  If the game is an extensive game, any
-        node at which this outcome is attached has its outcome reset to null.  If this game
-        is a strategic game, any contingency at which this outcome is attached as its outcome
-        reset to null.
-
-        .. deprecated:: 16.1.0
-           Use `Game.delete_outcome` instead of `Outcome.delete`.
-        """
-        cython.cast(Game, self.game).game.deref().DeleteOutcome(self.outcome)
 
     @property
     def game(self) -> Game:
