@@ -19,7 +19,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-from deprecated import deprecated
 
 @cython.cclass
 class Members(Collection):
@@ -44,25 +43,6 @@ class Members(Collection):
 class Actions(Collection):
     """The set of actions which are available at an information set."""
     infoset = cython.declare(c_GameInfoset)
-
-    @deprecated(version='16.1.0',
-                reason='Use Game.add_action instead of Actions.add.',
-                category=FutureWarning)
-    def add(self, action=None):
-        """Add an action at the information set.  If `action` is not null, the new action
-        is inserted before `action`.
-
-        .. deprecated:: 16.1.0
-           Use `Game.add_action` instead of `Actions.add`.
-        """
-        if action is None:
-            self.infoset.deref().InsertAction(cython.cast(c_GameAction, NULL))
-        elif isinstance(action, Action):
-            if cython.cast(Infoset, action.infoset).infoset != self.infoset:
-                raise MismatchError("The new action should be from the same infoset")
-            self.infoset.deref().InsertAction(cython.cast(Action, action).action)
-        else:
-            raise TypeError("insert_action takes an Action object as its input")
 
     def __len__(self):
         """The number of actions at the information set."""
@@ -96,44 +76,6 @@ class Infoset:
     def precedes(self, node: Node) -> bool:
         """Return whether this information set precedes `node` in the game tree."""
         return self.infoset.deref().Precedes(cython.cast(Node, node).node)
-
-    @deprecated(version='16.1.0',
-                reason='Use Game.reveal instead of Infoset.game.',
-                category=FutureWarning)
-    def reveal(self, player: Player) -> None:
-        """Reveal the move made at the information set to `player`.
-
-        Revealing the move modifies all subsequent information sets for `player` such
-        that any two nodes which are successors of two different actions at this
-        information set are placed in different information sets for `player`.
-
-        Revelation is a one-shot operation; it is not enforced with respect to any
-        revisions made to the game tree subsequently.
-
-        .. deprecated:: 16.1.0
-           Use `Game.reveal` instead of `Infoset.reveal`.
-
-        Parameters
-        ----------
-        player : Player
-            The player to which to reveal the move at this information set.
-
-        Raises
-        ------
-        TypeError
-            on passing an object that is not a :py:class:`Player`.
-        MismatchError
-            on revealing to a player that is from a different game.
-        """
-        if not isinstance(player, Player):
-            raise TypeError(
-                f"player must be of type Player, not {player.__class__.__name__}"
-            )
-        if player.game != self.game:
-            raise MismatchError(
-                "player must belong to the same game as the information set"
-            )
-        self.infoset.deref().Reveal(cython.cast(Player, player).player)
 
     @property
     def game(self) -> Game:

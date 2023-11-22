@@ -19,7 +19,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-from deprecated import deprecated
 
 @cython.cclass
 class Action:
@@ -39,27 +38,6 @@ class Action:
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.action.deref())
-
-    @deprecated(version='16.1.0',
-                reason='Use Game.delete_action instead of Action.delete.',
-                category=FutureWarning)
-    def delete(self):
-        """Deletes this action from its information set.  The subtrees which
-        are rooted at nodes that follow the deleted action are also deleted.
-
-        .. deprecated:: 16.1.0
-           Use `Game.delete_action` instead of `Action.delete`.
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the action is the only action at its information set
-        """
-        if len(self.infoset.actions) == 1:
-            raise UndefinedOperationError(
-                "It is not possible to delete the last action of an infoset"
-            )
-        self.action.deref().DeleteAction()
 
     def precedes(self, node: Node) -> bool:
         """Returns whether `node` precedes this action in the
@@ -95,10 +73,6 @@ class Action:
         """
         Get the probability a chance action is played.
 
-        .. deprecated:: 16.1.0
-           Setting individual chance action probabilities is no longer supported.
-           Use `Game.set_chance_probs()` instead.
-
         Raises
         ------
         UndefinedOperationError
@@ -114,7 +88,3 @@ class Action:
             return decimal.Decimal(py_string.decode('ascii'))
         else:
             return Rational(py_string.decode('ascii'))
-
-    @prob.setter
-    def prob(self, value: typing.Any) -> None:
-        raise UndefinedOperationError("use Game.set_chance_probs() to set probabilities at chance information sets")

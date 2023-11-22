@@ -30,7 +30,6 @@ import scipy.optimize
 from . import gambit
 from . import pctrace
 from .profiles import Solution
-from .nash import ExternalSolver
 
 
 def sym_compute_lhs(game, point):
@@ -293,32 +292,6 @@ class StrategicQREPathTracer:
             )
         else:
             raise NotImplementedError
-
-
-class ExternalStrategicQREPathTracer(ExternalSolver):
-    """
-    Algorithm class to manage calls to external gambit-logit solver
-    for tracing a branch of the logit QRE correspondence.
-    """
-    def trace_strategic_path(self, game, max_lambda=1000000.0):
-        profiles = []
-        command_line = f"gambit-logit -d 20 -m {max_lambda:f}"
-        for line in self.launch(command_line, game):
-            entries = line.strip().split(",")
-            profile = game.mixed_strategy_profile()
-            for (i, p) in enumerate(entries[1:]):
-                profile[i] = float(p)
-            profiles.append(LogitQRE(float(entries[0]), profile))
-        return profiles
-
-    def compute_at_lambda(self, game, lam):
-        command_line = f"gambit-logit -d 20 -l {lam:f}"
-        line = list(self.launch(command_line, game))[-1]
-        entries = line.strip().split(",")
-        profile = game.mixed_strategy_profile()
-        for (i, p) in enumerate(entries[1:]):
-            profile[i] = float(p)
-        return [LogitQRE(float(entries[0]), profile)]
 
 
 class LogitQREMixedStrategyFitResult:
