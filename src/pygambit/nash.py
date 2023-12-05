@@ -23,16 +23,45 @@
 A set of utilities for computing Nash equilibria
 """
 
+import dataclasses
 import typing
 
 import pygambit.gambit as libgbt
 
+MixedStrategyEquilibriumSet = typing.List[libgbt.MixedStrategyProfile]
+MixedBehaviorEquilibriumSet = typing.List[libgbt.MixedBehaviorProfile]
 
-def enumpure_solve(
-        game: libgbt.Game,
-        use_strategic: bool = True
-) -> typing.Union[typing.List[libgbt.MixedStrategyProfile],
-                  typing.List[libgbt.MixedBehaviorProfile]]:
+
+@dataclasses.dataclass(frozen=True)
+class NashComputationResult:
+    """Represents the result of a method which computes Nash equilibria in a game.
+
+    Attributes
+    ----------
+    game : Game
+        The game on which the method was run.
+    method : str
+        A string indicating the name of the method used.
+    rational : bool
+        Whether the calculation used exact rational arithmetic (True) or floating-point
+        (False).
+    use_strategic : bool
+        Whether the method solved using the strategic representation (True) or the
+        extensive representation (False).
+    equilibria : MixedStrategyEquilibriumSet or MixedBehaviorEquilibriumSet
+        The list of equilibrium profiles computed.
+    parameters : dict
+        A dictionary recording any additional algorithm parameters used.
+    """
+    game: libgbt.Game = dataclasses.field(repr=False)
+    method: str
+    rational: bool
+    use_strategic: bool
+    equilibria: typing.Union[MixedStrategyEquilibriumSet, MixedBehaviorEquilibriumSet]
+    parameters: dict = dataclasses.field(default_factory=dict)
+
+
+def enumpure_solve(game: libgbt.Game, use_strategic: bool = True) -> NashComputationResult:
     """Compute all :ref:`pure-strategy Nash equilibria <gambit-enumpure>` of game.
 
     Parameters
@@ -40,26 +69,38 @@ def enumpure_solve(
     game : Game
         The game to compute equilibria in.
     use_strategic : bool, default True
-        Whether to use the strategic form.  If `False`, computes all agent-form
-        pure-strategy equilibria, which treat only unilateral deviations at each
+        Whether to use the strategic form.  If False, computes all agent-form
+        pure-strategy equilibria, which consider only unilateral deviations at each
         individual information set.
 
     Returns
     -------
-    List of profiles
-        List of mixed strategy or mixed behavior profiles computed.
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
     """
     if not game.is_tree or use_strategic:
-        return libgbt._enumpure_strategy_solve(game)
+        return NashComputationResult(
+            game=game,
+            method="enumpure",
+            rational=True,
+            use_strategic=True,
+            equilibria=libgbt._enumpure_strategy_solve(game)
+        )
     else:
-        return libgbt._enumpure_agent_solve(game)
+        return NashComputationResult(
+            game=game,
+            method="enumpure",
+            rational=True,
+            use_strategic=False,
+            equilibria=libgbt._enumpure_agent_solve(game)
+        )
 
 
 def enummixed_solve(
         game: libgbt.Game,
         rational: bool = True,
         use_lrs: bool = False
-) -> typing.List[libgbt.MixedStrategyProfile]:
+) -> NashComputationResult:
     """Compute all :ref:`mixed-strategy Nash equilibria <gambit-enummixed>`
     of a two-player game using the strategic representation.
 
@@ -75,8 +116,8 @@ def enummixed_solve(
 
     Returns
     -------
-    List of mixed strategy profiles
-        The list of mixed strategy profiles computed.
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
 
     Raises
     ------
@@ -84,11 +125,18 @@ def enummixed_solve(
         If game has more than two players.
     """
     if use_lrs:
-        return libgbt._enummixed_strategy_solve_lrs(game)
+        equilibria = libgbt._enummixed_strategy_solve_lrs(game)
     elif rational:
-        return libgbt._enummixed_strategy_solve_rational(game)
+        equilibria = libgbt._enummixed_strategy_solve_rational(game)
     else:
-        return libgbt._enummixed_strategy_solve_double(game)
+        equilibria = libgbt._enummixed_strategy_solve_double(game)
+    return NashComputationResult(
+        game=game,
+        method="enummixed",
+        rational=use_lrs or rational,
+        use_strategic=True,
+        equilibria=equilibria
+    )
 
 
 def lcp_solve(
@@ -97,8 +145,7 @@ def lcp_solve(
         use_strategic: bool = False,
         stop_after: typing.Optional[int] = None,
         max_depth: typing.Optional[int] = None
-) -> typing.Union[typing.List[libgbt.MixedStrategyProfile],
-                  typing.List[libgbt.MixedBehaviorProfile]]:
+) -> NashComputationResult:
     """Compute Nash equilibria of a two-player game using :ref:`linear
     complementarity programming <gambit-lcp>`.
 
@@ -121,8 +168,8 @@ def lcp_solve(
 
     Returns
     -------
-    List of profiles
-        List of mixed strategy or mixed behavior profiles computed.
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
 
     Raises
     ------
@@ -135,22 +182,28 @@ def lcp_solve(
         max_depth = 0
     if not game.is_tree or use_strategic:
         if rational:
-            return libgbt._lcp_strategy_solve_rational(game, stop_after, max_depth)
+            equilibria = libgbt._lcp_strategy_solve_rational(game, stop_after or 0, max_depth or 0)
         else:
-            return libgbt._lcp_strategy_solve_double(game, stop_after, max_depth)
+            equilibria = libgbt._lcp_strategy_solve_double(game, stop_after or 0, max_depth or 0)
+    elif rational:
+        equilibria = libgbt._lcp_behavior_solve_rational(game, stop_after or 0, max_depth or 0)
     else:
-        if rational:
-            return libgbt._lcp_behavior_solve_rational(game, stop_after, max_depth)
-        else:
-            return libgbt._lcp_behavior_solve_double(game, stop_after, max_depth)
+        equilibria = libgbt._lcp_behavior_solve_double(game, stop_after or 0, max_depth or 0)
+    return NashComputationResult(
+        game=game,
+        method="lcp",
+        rational=rational,
+        use_strategic=not game.is_tree or use_strategic,
+        equilibria=equilibria,
+        parameters={'stop_after': stop_after, 'max_depth': max_depth}
+    )
 
 
 def lp_solve(
         game: libgbt.Game,
         rational: bool = True,
         use_strategic: bool = False
-) -> typing.Union[typing.List[libgbt.MixedStrategyProfile],
-                  typing.List[libgbt.MixedBehaviorProfile]]:
+) -> NashComputationResult:
     """Compute Nash equilibria of a two-player constant-sum game using :ref:`linear
     programming <gambit-lp>`.
 
@@ -167,8 +220,8 @@ def lp_solve(
 
     Returns
     -------
-    List of profiles
-        List of mixed strategy or mixed behavior profiles computed.
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
 
     Raises
     ------
@@ -177,22 +230,27 @@ def lp_solve(
     """
     if not game.is_tree or use_strategic:
         if rational:
-            return libgbt._lp_strategy_solve_rational(game)
+            equilibria = libgbt._lp_strategy_solve_rational(game)
         else:
-            return libgbt._lp_strategy_solve_double(game)
+            equilibria = libgbt._lp_strategy_solve_double(game)
+    elif rational:
+        equilibria = libgbt._lp_behavior_solve_rational(game)
     else:
-        if rational:
-            return libgbt._lp_behavior_solve_rational(game)
-        else:
-            return libgbt._lp_behavior_solve_double(game)
+        equilibria = libgbt._lp_behavior_solve_double(game)
+    return NashComputationResult(
+        game=game,
+        method="lp",
+        rational=rational,
+        use_strategic=use_strategic,
+        equilibria=equilibria
+    )
 
 
 def liap_solve(
         game: libgbt.Game,
         use_strategic: bool = True,
         maxiter: int = 100
-) -> typing.Union[typing.List[libgbt.MixedStrategyProfile],
-                  typing.List[libgbt.MixedBehaviorProfile]]:
+) -> NashComputationResult:
     """Compute Nash equilibria of a game using
     :ref:`Lyapunov function minimization <gambit-liap>`.
 
@@ -208,20 +266,28 @@ def liap_solve(
 
     Returns
     -------
-    List of profiles
-        List of mixed strategy or mixed behavior profiles computed.
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
     """
     if not game.is_tree or use_strategic:
-        return libgbt._liap_strategy_solve(game, maxiter=maxiter)
+        equilibria = libgbt._liap_strategy_solve(game, maxiter=maxiter)
     else:
-        return libgbt._liap_behavior_solve(game, maxiter=maxiter)
+        equilibria = libgbt._liap_behavior_solve(game, maxiter=maxiter)
+    return NashComputationResult(
+        game=game,
+        method="liap",
+        rational=False,
+        use_strategic=not game.is_tree or use_strategic,
+        equilibria=equilibria,
+        parameters={'maxiter': maxiter}
+    )
 
 
 def simpdiv_solve(
         game: libgbt.Game,
         refine: int = 2,
         leash: typing.Optional[int] = None
-) -> typing.List[libgbt.MixedStrategyProfile]:
+) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`simplicial
     subdivision <gambit-simpdiv>`.
 
@@ -241,20 +307,28 @@ def simpdiv_solve(
 
     Returns
     -------
-    List of mixed strategy profiles
-        The list of mixed strategy profiles computed.
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
     """
     if not isinstance(refine, int) or refine < 2:
         raise ValueError("simpdiv_solve(): refine must be an integer no less than 2")
     if leash is not None:
         if not isinstance(leash, int) or leash <= 0:
             raise ValueError("simpdiv_solve(): leash must be a non-negative integer")
-    return libgbt._simpdiv_strategy_solve(game, refine, leash or 0)
+    equilibria = libgbt._simpdiv_strategy_solve(game, refine, leash or 0)
+    return NashComputationResult(
+        game=game,
+        method="simpdiv",
+        rational=True,
+        use_strategic=True,
+        equilibria=equilibria,
+        parameters={'leash': leash}
+    )
 
 
 def ipa_solve(
         game: libgbt.Game
-) -> typing.List[libgbt.MixedStrategyProfile]:
+) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`iterated polymatrix
     approximation <gambit-ipa>`.
 
@@ -265,15 +339,21 @@ def ipa_solve(
 
     Returns
     -------
-    List of mixed strategy profiles
-        The list of mixed strategy profiles computed.
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
     """
-    return libgbt._ipa_strategy_solve(game)
+    return NashComputationResult(
+        game=game,
+        method="ipa",
+        rational=False,
+        use_strategic=True,
+        equilibria=libgbt._ipa_strategy_solve(game),
+    )
 
 
 def gnm_solve(
         game: libgbt.Game
-) -> typing.List[libgbt.MixedStrategyProfile]:
+) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`a global Newton
     method <gambit-gnm>`.
 
@@ -284,16 +364,21 @@ def gnm_solve(
 
     Returns
     -------
-    List of mixed strategy profiles
-        The list of mixed strategy profiles computed.
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
     """
-    return libgbt._gnm_strategy_solve(game)
+    return NashComputationResult(
+        game=game,
+        method="ipa",
+        rational=False,
+        use_strategic=True,
+        equilibria=libgbt._gnm_strategy_solve(game),
+    )
 
 
 def logit_solve(
         game: libgbt.Game, use_strategic: bool = False
-) -> typing.Union[typing.List[libgbt.MixedStrategyProfile],
-                  typing.List[libgbt.MixedBehaviorProfile]]:
+) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`the logit quantal response
     equilibrium correspondence <gambit-logit>`.
 
@@ -310,13 +395,20 @@ def logit_solve(
 
     Returns
     -------
-    List of profiles
-        List of mixed strategy or mixed behavior profiles computed.
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
     """
     if not game.is_tree or use_strategic:
-        return libgbt._logit_strategy_solve(game)
+        equilibria = libgbt._logit_strategy_solve(game)
     else:
-        return libgbt._logit_behavior_solve(game)
+        equilibria = libgbt._logit_behavior_solve(game)
+    return NashComputationResult(
+        game=game,
+        method="logit",
+        rational=False,
+        use_strategic=not game.is_tree or use_strategic,
+        equilibria=equilibria,
+    )
 
 
 logit_atlambda = libgbt.logit_atlambda

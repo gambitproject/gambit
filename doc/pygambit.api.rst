@@ -251,6 +251,7 @@ Computation of Nash equilibria
 .. autosummary::
    :toctree: api/
 
+   NashComputationResult
    enumpure_solve
    enummixed_solve
    lp_solve

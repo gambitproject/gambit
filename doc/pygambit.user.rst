@@ -344,11 +344,13 @@ the extensive representation.  Assuming that ``g`` refers to the game
 
 .. ipython:: python
 
-   eqa = gbt.nash.lcp_solve(g)
-   eqa
-   len(eqa)
+   result = gbt.nash.lcp_solve(g)
+   result
+   len(result.equilibria)
 
-The result of the calculation is a list of :py:class:`~pygambit.gambit.MixedBehaviorProfile`.
+The result of the calculation is returned as a :py:class:`.NashComputationResult` object.
+The set of equilibria found is reported in :py:attr:`.NashComputationResult.equilibria`;
+in this case, this is a list of mixed behavior profiles.
 A mixed behavior profile specifies, for each information set, the probability distribution over
 actions at that information set.
 Indexing a :py:class:`.MixedBehaviorProfile` by a player gives the probability distributions
@@ -357,7 +359,8 @@ over each of that player's information sets:
 
 .. ipython:: python
 
-   eqa[0]["Alice"]
+   eqm = result.equilibria[0]
+   eqm["Alice"]
 
 In this case, at Alice's first information set, the one at which she has the King, she always raises.
 At her second information set, where she has the Queen, she sometimes bluffs, raising with
@@ -365,7 +368,7 @@ probability one-third.  Looking at Bob's strategy,
 
 .. ipython:: python
 
-   eqa[0]["Bob"]
+   eqm["Bob"]
 
 Bob meets Alice's raise two-thirds of the time.
 
@@ -375,7 +378,7 @@ returns the expected payoff of taking an action, conditional on reaching that ac
 
 .. ipython:: python
 
-   [eqa[0].action_value(action) for action in g.players["Bob"].infosets[0].actions]
+   [eqm.action_value(action) for action in g.players["Bob"].infosets[0].actions]
 
 Bob's indifference between his actions arises because of his beliefs given Alice's strategy.
 :py:meth:`.MixedBehaviorProfile.belief` returns the probability of reaching a node, conditional on
@@ -383,7 +386,7 @@ its information set being reached:
 
 .. ipython:: python
 
-   [eqa[0].belief(node) for node in g.players["Bob"].infosets[0].members]
+   [eqm.belief(node) for node in g.players["Bob"].infosets[0].members]
 
 Bob believes that, conditional on Alice raising, there's a 75% chance that she has the king;
 therefore, the expected payoff to meeting is in fact -1 as computed.
@@ -392,7 +395,7 @@ reached:
 
 .. ipython:: python
 
-   eqa[0].infoset_prob(g.players["Bob"].infosets[0])
+   eqm.infoset_prob(g.players["Bob"].infosets[0])
 
 The corresponding probability that a node is reached in the play of the game is given
 by :py:meth:`.MixedBehaviorProfile.realiz_prob`, and the expected payoff to a player
@@ -400,15 +403,15 @@ conditional on reaching a node is given by :py:meth:`.MixedBehaviorProfile.node_
 
 .. ipython:: python
 
-   [eqa[0].node_value("Bob", node) for node in g.players["Bob"].infosets[0].members]
+   [eqm.node_value("Bob", node) for node in g.players["Bob"].infosets[0].members]
 
 The overall expected payoff to a player given the behavior profile is returned by
 :py:meth:`.MixedBehaviorProfile.payoff`:
 
 .. ipython:: python
 
-   eqa[0].payoff("Alice")
-   eqa[0].payoff("Bob")
+   eqm.payoff("Alice")
+   eqm.payoff("Bob")
 
 The equilibrium computed expresses probabilities in rational numbers.  Because
 the numerical data of games in Gambit :ref:`are represented exactly <pygambit.user.numbers>`,
@@ -430,8 +433,8 @@ operates on a strategic game to any game with an extensive representation
 
 .. ipython:: python
 
-   eqa = gbt.nash.gnm_solve(g)
-   eqa
+   result = gbt.nash.gnm_solve(g)
+   result
 
 :py:func:`.gnm_solve` can be applied to any game with any number of players, and uses a path-following
 process in floating-point arithmetic, so it returns profiles with probabilities expressed as
@@ -443,22 +446,23 @@ over that player's strategies only.
 
 .. ipython:: python
 
-   eqa[0]["Alice"]
-   eqa[0]["Bob"]
+   eqm = result.equilibria[0]
+   eqm["Alice"]
+   eqm["Bob"]
 
 The expected payoff to a strategy is provided by :py:meth:`.MixedStrategyProfile.strategy_value`:
 
 .. ipython:: python
 
-   [eqa[0].strategy_value(strategy) for strategy in g.players["Alice"].strategies]
-   [eqa[0].strategy_value(strategy) for strategy in g.players["Bob"].strategies]
+   [eqm.strategy_value(strategy) for strategy in g.players["Alice"].strategies]
+   [eqm.strategy_value(strategy) for strategy in g.players["Bob"].strategies]
 
 The overall expected payoff to a player is returned by :py:meth:`.MixedStrategyProfile.payoff`:
 
 .. ipython:: python
 
-   eqa[0].payoff("Alice")
-   eqa[0].payoff("Bob")
+   eqm.payoff("Alice")
+   eqm.payoff("Bob")
 
 When a game has an extensive representation, we can convert freely between
 :py:class:`~pygambit.gambit.MixedStrategyProfile` and the corresponding
@@ -467,8 +471,8 @@ using :py:meth:`.MixedStrategyProfile.as_behavior` and :py:meth:`.MixedBehaviorP
 
 .. ipython:: python
 
-   eqa[0].as_behavior()
-   eqa[0].as_behavior().as_strategy()
+   eqm.as_behavior()
+   eqm.as_behavior().as_strategy()
 
 
 Estimating quantal response equilibria
