@@ -182,9 +182,9 @@ int main(int argc, char *argv[])
     }
     else {
       starts.push_back(game->NewMixedStrategyProfile(Rational(0)));
-      static_cast<Vector<Rational> &>(starts[1]) = Rational(0);
+      starts[1] = Rational(0);
       for (int pl = 1; pl <= game->NumPlayers(); pl++) {
-	starts[1][game->GetPlayer(pl)->Strategies()[1]] = Rational(1);
+        starts[1][game->GetPlayer(pl)->Strategies()[1]] = Rational(1);
       }
     }
     for (int i = 1; i <= starts.size(); i++) {

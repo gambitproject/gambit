@@ -93,7 +93,7 @@ NashIPAStrategySolver::Solve(const Game &p_game,
   } while(numEq == 0);
 
   MixedStrategyProfile<double> eqm = p_game->NewMixedStrategyProfile(0.0);
-  for (int i = 1; i <= eqm.MixedProfileLength(); i++) {
+  for (size_t i = 1; i <= eqm.MixedProfileLength(); i++) {
     eqm[i] = ans[i-1];
   }
   m_onEquilibrium->Render(eqm);

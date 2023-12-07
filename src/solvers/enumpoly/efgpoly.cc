@@ -326,7 +326,7 @@ void PrintProfile(std::ostream &p_stream,
 		  const MixedBehaviorProfile<double> &p_profile)
 {
   p_stream << p_label;
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (int i = 1; i <= p_profile.BehaviorProfileLength(); i++) {
     p_stream.setf(std::ios::fixed);
     p_stream << "," << std::setprecision(g_numDecimals) << p_profile[i];
   }

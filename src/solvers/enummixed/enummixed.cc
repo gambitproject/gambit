@@ -156,7 +156,7 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
 
       if (nash) {
         MixedStrategyProfile<T> eqm(p_game->NewMixedStrategyProfile(static_cast<T>(0)));
-        static_cast<Vector<T> &>(eqm) = static_cast<T>(0);
+        eqm = static_cast<T>(0);
         for (size_t k = 1; k <= p_game->GetPlayer(1)->Strategies().size(); k++) {
           if (bfs1.count(k)) {
             eqm[p_game->GetPlayer(1)->Strategies()[k]] = -bfs1[k];

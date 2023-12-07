@@ -77,8 +77,8 @@ OutputToBehavProfile(gbtGameDocument *p_doc, const wxString &p_text)
   wxStringTokenizer tok(p_text, wxT(","));
 
   if (tok.GetNextToken() == wxT("NE")) {
-    if (tok.CountTokens() == (unsigned int) profile.Length()) {
-      for (int i = 1; i <= profile.Length(); i++) {
+    if (tok.CountTokens() == (unsigned int) profile.BehaviorProfileLength()) {
+      for (int i = 1; i <= profile.BehaviorProfileLength(); i++) {
 	profile[i] = lexical_cast<Rational>(std::string((const char *) tok.GetNextToken().mb_str()));
       }
       return profile;
@@ -168,7 +168,7 @@ TextToBehavProfile(gbtGameDocument *p_doc, const wxString &p_text)
   MixedBehaviorProfile<T> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
-  for (int i = 1; i <= profile.Length(); i++) {
+  for (int i = 1; i <= profile.BehaviorProfileLength(); i++) {
     profile[i] = lexical_cast<Rational>(std::string((const char *) tok.GetNextToken().mb_str()));
   }
 
@@ -442,9 +442,9 @@ gbtAnalysisProfileList<T>::Save(std::ostream &p_file) const
     for (int j = 1; j <= NumProfiles(); j++) {
       const MixedBehaviorProfile<T> &behav = m_behavProfiles[j];
       p_file << "<profile type=\"behav\">\n";
-      for (int k = 1; k <= behav.Length(); k++) {
+      for (int k = 1; k <= behav.BehaviorProfileLength(); k++) {
 	p_file << behav[k];
-	if (k < behav.Length()) {
+	if (k < behav.BehaviorProfileLength()) {
 	  p_file << ",";
 	}
 	else {

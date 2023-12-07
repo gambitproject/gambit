@@ -167,6 +167,10 @@ public:
   virtual ~MixedStrategyProfile();
 
   MixedStrategyProfile<T> &operator=(const MixedStrategyProfile<T> &);
+  MixedStrategyProfile<T> &operator=(const Vector<T> &v)
+    { m_rep->m_probs = v; return *this; }
+  MixedStrategyProfile<T> &operator=(const T &c)
+    { m_rep->m_probs = c; return *this; }
   //@}
 
   /// @name Operator overloading
@@ -196,7 +200,6 @@ public:
   Vector<T> operator[](const GamePlayer &p_player) const;
 
   explicit operator const Vector<T> &() const { return m_rep->m_probs; }
-  explicit operator Vector<T> &() { return m_rep->m_probs; }
   //@}
 
   /// @name General data access
@@ -222,7 +225,7 @@ public:
   void Randomize(int p_denom) { m_rep->Randomize(p_denom); }
 
   /// Returns the total number of strategies in the profile
-  int MixedProfileLength() const { return m_rep->m_probs.size(); }
+  size_t MixedProfileLength() const { return m_rep->m_probs.size(); }
 
   /// Converts the profile to one on the full support of the game
   MixedStrategyProfile<T> ToFullSupport() const;

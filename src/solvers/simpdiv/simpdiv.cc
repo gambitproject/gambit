@@ -69,7 +69,7 @@ NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
   for (int i = 1; i <= v.Length(); i++) {
     v[i] = y[i];
   }
-  besty = static_cast<Vector<Rational> &>(y);
+  besty = static_cast<const Vector<Rational> &>(y);
   int i = 0;
   int j, k, h, jj, hh,ii, kk,tot;
   Rational maxz;
@@ -357,7 +357,7 @@ void NashSimpdivStrategySolver::getY(State &state,
 				     const RectArray<int> &pi,
 				     int k) const
 {
-  static_cast<Vector<Rational> & >(x) = v;
+  x = v;
   for (size_t j = 1; j <= x.GetGame()->NumPlayers(); j++) {
     GamePlayer player = x.GetGame()->GetPlayer(j);
     for (size_t h = 1; h <= player->Strategies().size(); h++) {
@@ -506,7 +506,7 @@ List<MixedStrategyProfile<Rational> >
 NashSimpdivStrategySolver::Solve(const Game &p_game) const
 {
   MixedStrategyProfile<Rational> start = p_game->NewMixedStrategyProfile(Rational(0));
-  static_cast<Vector<Rational> &>(start) = Rational(0);
+  start = Rational(0);
   for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
     start[p_game->GetPlayer(pl)->Strategies()[1]] = Rational(1);
   }

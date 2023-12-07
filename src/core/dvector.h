@@ -44,6 +44,8 @@ public:
   const T &operator()(int a, int b, int c) const;
 
   DVector<T> &operator=(T c);
+  DVector<T> &operator=(const Vector<T> &v)
+  { static_cast<Vector<T> &>(*this) = v; return *this; }
 };
 
 } // end namespace Gambit

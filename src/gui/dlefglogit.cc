@@ -182,7 +182,7 @@ void gbtLogitBehavList::AddProfile(const wxString &p_text,
 
   m_lambdas.push_back((double) Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) tok.GetNextToken().mb_str())));
 
-  for (int i = 1; i <= profile.Length(); i++) {
+  for (int i = 1; i <= profile.BehaviorProfileLength(); i++) {
     profile[i] = Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) tok.GetNextToken().mb_str()));
   }
 

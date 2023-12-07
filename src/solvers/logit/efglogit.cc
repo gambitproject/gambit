@@ -330,7 +330,7 @@ AgentQREPathTracer::TraceAgentPath(const LogitQREMixedBehaviorProfile &p_start,
 {
   List<LogitQREMixedBehaviorProfile> ret;
   Vector<double> x(p_start.BehaviorProfileLength() + 1);
-  for (int i = 1; i <= p_start.BehaviorProfileLength(); i++) {
+  for (size_t i = 1; i <= p_start.BehaviorProfileLength(); i++) {
     x[i] = log(p_start[i]);
   }
   x[x.Length()] = p_start.GetLambda();
