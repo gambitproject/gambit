@@ -30,10 +30,16 @@ namespace Gambit {
 
 namespace Nash {
 
-using CallbackType = std::function<void(const MixedStrategyProfile<double> &, const std::string &)>;
+using StrategyCallbackType = std::function<void(const MixedStrategyProfile<double> &, const std::string &)>;
 
-/// @brief A fallback callback function that does nothing
-inline void NullCallback(const MixedStrategyProfile<double> &, const std::string &)
+/// @brief A fallback callback function for mixed strategy profiles that does nothing
+inline void NullStrategyCallback(const MixedStrategyProfile<double> &, const std::string &)
+{ }
+
+using BehaviorCallbackType = std::function<void(const MixedBehaviorProfile<double> &, const std::string &)>;
+
+/// @brief A fallback callback function for mixed behavior profiles that does nothing
+inline void NullBehaviorCallback(const MixedBehaviorProfile<double> &, const std::string &)
 { }
 
 //========================================================================

@@ -247,39 +247,60 @@ def lp_solve(
 
 
 def liap_solve(
-        game: libgbt.Game,
-        use_strategic: bool = True,
-        maxiter: int = 100
+        start: typing.Union[libgbt.MixedStrategyProfileDouble,
+                            libgbt.MixedBehaviorProfileDouble],
+        maxregret: float = 0.001,
+        maxiter: int = 1000
 ) -> NashComputationResult:
-    """Compute Nash equilibria of a game using
+    """Compute approximate Nash equilibria of a game using
     :ref:`Lyapunov function minimization <gambit-liap>`.
+
+    .. versionchanged:: 16.2.0
+
+       Method now takes a starting point (as a mixed strategy or mixed behavior profile)
+       instead of a game.  Implemented `maxregret` to specify acceptance criterion
+       for approximation.
 
     Parameters
     ----------
-    game : Game
-        The game to compute equilibria in.
-    use_strategic : bool, default False
-        Whether to use the strategic form.  If `True`, always uses the strategic
-        representation even if the game's native representation is extensive.
-    maxiter : int, default 100
+    start : MixedStrategyProfileDouble or MixedBehaviorProfileDouble
+        The starting point for function minimization.
+
+    maxregret : float, default 0.001
+        The acceptance criterion for approximate Nash equilibrium; the maximum
+        regret of any player must be no more than `maxregret` times the
+        difference of the maximum and minimum payoffs of the game
+
+        .. versionadded: 16.2.0
+
+    maxiter : int, default 1000
         Maximum number of iterations in function minimization.
+
+        .. versionadded: 16.2.0
 
     Returns
     -------
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
     """
-    if not game.is_tree or use_strategic:
-        equilibria = libgbt._liap_strategy_solve(game, maxiter=maxiter)
+    if isinstance(start, libgbt.MixedStrategyProfileDouble):
+        equilibria = libgbt._liap_strategy_solve(start,
+                                                 maxregret=maxregret, maxiter=maxiter)
+    elif isinstance(start, libgbt.MixedBehaviorProfileDouble):
+        equilibria = libgbt._liap_behavior_solve(start,
+                                                 maxregret=maxregret, maxiter=maxiter)
     else:
-        equilibria = libgbt._liap_behavior_solve(game, maxiter=maxiter)
+        raise TypeError(
+            f"liap_solve(): start must be a MixedStrategyProfile or MixedBehaviorProfile, "
+            f"not {start.__class__.__name__}"
+        )
     return NashComputationResult(
-        game=game,
+        game=start.game,
         method="liap",
         rational=False,
-        use_strategic=not game.is_tree or use_strategic,
+        use_strategic=isinstance(start, libgbt.MixedStrategyProfileDouble),
         equilibria=equilibria,
-        parameters={"maxiter": maxiter}
+        parameters={"start": start, "maxregret": maxregret, "maxiter": maxiter}
     )
 
 

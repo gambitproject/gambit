@@ -28,6 +28,7 @@
 #include "solvers/liap/liap.h"
 
 using namespace Gambit;
+using namespace Gambit::Nash;
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -47,7 +48,9 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      print probabilities with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -n COUNT         number of starting points to generate\n";
-  std::cerr << "  -i MAXITER       maximum number of iterations per point (default is 100)\n";
+  std::cerr << "  -i MAXITER       maximum number of iterations per point (default is 1000)\n";
+  std::cerr << "  -r MAXREGRET     maximum regret acceptable as a proportion of range of\n";
+  std::cerr << "                   payoffs in the game\n";
   std::cerr << "  -s FILE          file containing starting points\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
@@ -129,8 +132,9 @@ int main(int argc, char *argv[])
   opterr = 0;
   bool quiet = false, useStrategic = false, useRandom = false, verbose = false;
   int numTries = 10;
-  int maxitsN = 100;
+  int maxitsN = 1000;
   int numDecimals = 6;
+  double maxregret = 0.001;
   double tolN = 1.0e-10;
   std::string startFile;
 
@@ -215,8 +219,14 @@ int main(int argc, char *argv[])
       for (int i = 1; i <= starts.size(); i++) {
         std::shared_ptr<StrategyProfileRenderer<double>> renderer(
             new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
-        NashLiapStrategySolver algorithm(maxitsN, verbose, renderer);
-        algorithm.Solve(starts[i]);
+
+        LiapStrategySolve(starts[i], maxregret, maxitsN,
+                          [renderer, verbose](const MixedStrategyProfile<double> &p_profile,
+                                              const std::string &p_label) {
+                            if (p_label == "NE" || verbose) {
+                              renderer->Render(p_profile, p_label);
+                            }
+                          });
       }
     }
     else {
@@ -233,8 +243,13 @@ int main(int argc, char *argv[])
       for (int i = 1; i <= starts.size(); i++) {
         std::shared_ptr<StrategyProfileRenderer<double>> renderer(
             new BehavStrategyCSVRenderer<double>(std::cout, numDecimals));
-        NashLiapBehaviorSolver algorithm(maxitsN, verbose, renderer);
-        algorithm.Solve(starts[i]);
+        LiapBehaviorSolve(starts[i], maxregret, maxitsN,
+                          [renderer, verbose](const MixedBehaviorProfile<double> &p_profile,
+                                              const std::string &p_label) {
+                            if (p_label == "NE" || verbose) {
+                              renderer->Render(p_profile, p_label);
+                            }
+                          });
       }
     }
     return 0;

@@ -518,6 +518,8 @@ public:
   //@{
   /// Returns the iset'th information set in the game (numbered globally)
   virtual GameInfoset GetInfoset(int iset) const = 0;
+  /// Returns the set of information sets in the game
+  virtual Array<GameInfoset> GetInfosets() const = 0;
   /// Returns an array with the number of information sets per personal player
   virtual Array<int> NumInfosets() const = 0;
   /// Returns the act'th action in the game (numbered globally)

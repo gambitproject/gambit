@@ -34,18 +34,16 @@ const int GNM_LOCAL_NEWTON_INTERVAL_DEFAULT = 3;
 const int GNM_LOCAL_NEWTON_MAXITS_DEFAULT = 10;
 const int GNM_STEPS_DEFAULT = 100;
 
-List<MixedStrategyProfile<double>> GNMStrategySolve(const Game &p_game, double p_lambdaEnd,
-                                                    int p_steps, int p_localNewtonInterval,
-                                                    int p_localNewtonMaxits,
-                                                    CallbackType p_callback = NullCallback);
+List<MixedStrategyProfile<double>>
+GNMStrategySolve(const Game &p_game, double p_lambdaEnd, int p_steps, int p_localNewtonInterval,
+                 int p_localNewtonMaxits, StrategyCallbackType p_callback = NullStrategyCallback);
 
 /// @brief Compute the mixed strategy equilibria accessible via the initial ray determined
 ///        by \p p_profile using the Global Newton method
-List<MixedStrategyProfile<double>> GNMStrategySolve(const MixedStrategyProfile<double> &p_profile,
-                                                    double p_lambdaEnd, int p_steps,
-                                                    int p_localNewtonInterval,
-                                                    int p_localNewtonMaxits,
-                                                    CallbackType p_callback = NullCallback);
+List<MixedStrategyProfile<double>>
+GNMStrategySolve(const MixedStrategyProfile<double> &p_profile, double p_lambdaEnd, int p_steps,
+                 int p_localNewtonInterval, int p_localNewtonMaxits,
+                 StrategyCallbackType p_callback = NullStrategyCallback);
 
 } // namespace Nash
 } // end namespace Gambit

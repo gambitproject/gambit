@@ -21,6 +21,7 @@
 //
 
 #include <algorithm>
+#include <numeric>
 
 #include "behavmixed.h"
 #include "gametree.h"
@@ -491,6 +492,25 @@ const T &MixedBehaviorProfile<T>::GetRegret(const GameAction &act) const
 }
 
 template <class T>
+T MixedBehaviorProfile<T>::GetRegret(const GameInfoset &p_infoset) const
+{
+  auto actions = p_infoset->GetActions();
+  T br_payoff = std::accumulate(
+    std::next(actions.begin()), actions.end(), GetPayoff(*actions.begin()),
+    [this](const T &x, const GameAction &action) { return std::max(x, GetPayoff(action)); });
+  return br_payoff - GetPayoff(p_infoset);
+}
+
+template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
+{
+  auto infosets = m_support.GetGame()->GetInfosets();
+  return std::accumulate(
+    infosets.begin(), infosets.end(), T(0),
+    [this](const T &x, const GameInfoset &infoset) { return std::max(x, GetRegret(infoset)); });
+}
+
+
+template <class T>
 void MixedBehaviorProfile<T>::GetPayoff(GameTreeNodeRep *node,
 				     const T &prob, int player, T &value) const
 {
@@ -524,6 +544,7 @@ template <class T> T MixedBehaviorProfile<T>::GetPayoff(int player) const
 	    (T) 1, player, value);
   return value;
 }
+
 
 //
 // The following routines compute the derivatives of quantities as

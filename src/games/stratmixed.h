@@ -54,7 +54,14 @@ public:
   virtual T GetPayoffDeriv(int pl, const GameStrategy &) const = 0;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const = 0;
 
+  T GetPayoff(const GamePlayer &p_player) const
+  { return GetPayoff(p_player->GetNumber()); }
+  T GetPayoff(const GameStrategy &p_strategy) const
+  { return GetPayoffDeriv(p_strategy->GetPlayer()->GetNumber(), p_strategy); }
+
   T GetRegret(const GameStrategy &) const;
+  T GetRegret(const GamePlayer &) const;
+  T GetMaxRegret() const;
 };
 
 
@@ -188,17 +195,40 @@ public:
   T GetPayoff(const GameStrategy &p_strategy) const
   { CheckVersion(); return GetPayoffDeriv(p_strategy->GetPlayer()->GetNumber(), p_strategy); }
 
-  /// Computes the regret to playing the pure strategy compared to the payoff
-  /// of the best response
+  /// @brief Computes the regret to playing \p p_strategy
+  /// @details Computes the regret to the player of playing strategy \p p_strategy
+  ///          against the profile.  The regret is defined as the difference
+  ///          between the best-response payoff and the payoff to playing
+  ///          \p p_strategy.
+  /// @param[in] p_strategy  The strategy to compute the regret for.
+  /// @sa GetRegret(const GamePlayer &) const;
+  ///     GetMaxRegret() const
   T GetRegret(const GameStrategy &p_strategy) const
   { CheckVersion(); return m_rep->GetRegret(p_strategy); }
 
-  /// \brief Computes the Lyapunov value of the profile
-  ///
-  /// Computes the Lyapunov value of the profile.  This is a nonnegative
-  /// value which is zero exactly at Nash equilibria.  This version
-  /// implements a positive penalty for profiles which are not on the
-  /// simplotope (useful for penalty-function minimization methods).
+  /// @brief Computes the regret for player \p p_player
+  /// @details Computes the regret to the player of playing their mixed strategy
+  ///          as specified in the profile.  The regret is defined as the difference
+  ///          between the player's best-response payoff and the payoff to playing
+  ///          their specified mixed strategy.
+  /// @param[in] p_player  The player to compute the regret for.
+  /// @sa GetRegret(const GameStrategy &) const;
+  ///     GetMaxRegret() const
+  T GetRegret(const GamePlayer &p_player) const
+  { CheckVersion(); return m_rep->GetRegret(p_player); }
+
+  /// @brief Computes the maximum regret to any player in the profile
+  /// @details Computes the maximum of the regrets of the players in the profile.
+  /// @sa GetRegret(const GamePlayer &) const;
+  ///     GetRegret(const GameStrategy &) const
+  T GetMaxRegret() const
+  { CheckVersion(); return m_rep->GetMaxRegret(); }
+
+  /// @brief Computes the Lyapunov value of the profile
+  /// @details Computes the Lyapunov value of the profile.  This is a nonnegative
+  ///          value which is zero exactly at Nash equilibria.  This version
+  ///          implements a positive penalty for profiles which are not on the
+  ///          simplotope (useful for penalty-function minimization methods).
   T GetLiapValue() const;
   //@}
 };

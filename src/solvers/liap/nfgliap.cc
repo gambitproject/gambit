@@ -20,11 +20,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <numeric>
+
 #include "gambit.h"
 #include "core/function.h"
 #include "liap.h"
 
-using namespace Gambit;
+namespace Gambit {
+namespace Nash {
 
 //------------------------------------------------------------------------
 //                    class StrategicLyapunovFunction
@@ -35,99 +38,128 @@ public:
   explicit StrategicLyapunovFunction(const MixedStrategyProfile<double> &p_start)
     : m_game(p_start.GetGame()), m_profile(p_start)
   {
+    m_scale = m_game->GetMaxPayoff() - m_game->GetMinPayoff();
+    if (m_scale == 0.0) {
+      m_scale = 1.0;
+    }
+    else {
+      m_scale = 1.0 / m_scale;
+    }
   }
   ~StrategicLyapunovFunction() override = default;
+
+  double GetScale() const { return m_scale; }
 
 private:
   Game m_game;
   mutable MixedStrategyProfile<double> m_profile;
+  double m_scale, m_penalty{100.0};
 
   double Value(const Vector<double> &) const override;
   bool Gradient(const Vector<double> &, Vector<double> &) const override;
 
-  double LiapDerivValue(int, int, const MixedStrategyProfile<double> &) const;
+  double LiapDerivValue(const MixedStrategyProfile<double> &, const GameStrategy &) const;
 };
 
-double StrategicLyapunovFunction::LiapDerivValue(int i1, int j1,
-                                                 const MixedStrategyProfile<double> &p) const
+inline double sum_player_probs(const MixedStrategyProfile<double> &p_profile,
+                               const GamePlayer &p_player)
 {
-  GameStrategy wrt_strategy = m_game->GetPlayer(i1)->GetStrategies()[j1];
-  double x = 0.0;
-  for (int i = 1; i <= m_game->NumPlayers(); i++) {
-    double psum = 0.0;
-    GamePlayer player = m_game->GetPlayer(i);
-    for (int j = 1; j <= player->NumStrategies(); j++) {
-      GameStrategy strategy = player->GetStrategies()[j];
-      psum += p[strategy];
-      double x1 = p.GetPayoff(strategy) - p.GetPayoff(i);
-      if (i1 == i) {
-        if (x1 > 0.0) {
-          x -= x1 * p.GetPayoffDeriv(i, wrt_strategy);
-        }
-      }
-      else if (x1 > 0.0) {
-        x +=
-            x1 * (p.GetPayoffDeriv(i, strategy, wrt_strategy) - p.GetPayoffDeriv(i, wrt_strategy));
-      }
-    }
-    if (i == i1) {
-      x += 100.0 * (psum - 1.0);
+  auto strategies = p_player->GetStrategies();
+  return std::accumulate(
+      strategies.cbegin(), strategies.cend(), 0.0,
+      [p_profile](double t, const GameStrategy &s) { return t + p_profile[s]; });
+}
+
+double StrategicLyapunovFunction::Value(const Vector<double> &v) const
+{
+  m_profile = v;
+  double value = 0;
+  // Liapunov function proper - should be replaced with call to profile once
+  // the penalty is removed from that implementation.
+  for (auto player : m_profile.GetGame()->GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      value += sqr(
+          std::max(m_scale * (m_profile.GetPayoff(strategy) - m_profile.GetPayoff(player)), 0.0));
     }
   }
-  if (p[wrt_strategy] < 0.0) {
-    x += p[wrt_strategy];
+  // Penalty function for non-negativity constraint for each strategy
+  for (auto player : m_profile.GetGame()->GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      value += m_penalty * sqr(std::min(m_profile[strategy], 0.0));
+    }
   }
-  return 2.0 * x;
+  // Penalty function for sum-to-one constraint for each player
+  for (auto player : m_profile.GetGame()->GetPlayers()) {
+    value += m_penalty * sqr(sum_player_probs(m_profile, player) - 1.0);
+  }
+  return value;
+}
+
+double StrategicLyapunovFunction::LiapDerivValue(const MixedStrategyProfile<double> &p_profile,
+                                                 const GameStrategy &p_wrt_strategy) const
+{
+  double deriv = 0.0;
+  for (auto player : m_game->GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      double loss = sqr(m_scale) * (p_profile.GetPayoff(strategy) - p_profile.GetPayoff(player));
+      if (loss <= 0.0) {
+        continue;
+      }
+      deriv -= loss * p_profile.GetPayoffDeriv(player->GetNumber(), p_wrt_strategy);
+      if (player != p_wrt_strategy->GetPlayer()) {
+        deriv += loss * p_profile.GetPayoffDeriv(player->GetNumber(), strategy, p_wrt_strategy);
+      }
+    }
+  }
+  // Penalty function for non-negativity constraint for each strategy
+  deriv += m_penalty * std::min(p_profile[p_wrt_strategy], 0.0);
+  // Penalty function for sum-to-one constraint for each player
+  deriv += m_penalty * (sum_player_probs(p_profile, p_wrt_strategy->GetPlayer()) - 1.0);
+  return 2.0 * deriv;
 }
 
 bool StrategicLyapunovFunction::Gradient(const Vector<double> &v, Vector<double> &d) const
 {
   m_profile = v;
-  for (int pl = 1, ii = 1; pl <= m_game->NumPlayers(); pl++) {
-    for (int st = 1; st <= m_game->GetPlayer(pl)->GetStrategies().size(); st++) {
-      d[ii++] = LiapDerivValue(pl, st, m_profile);
+  auto element = d.begin();
+  for (auto player : m_game->GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      *element = LiapDerivValue(m_profile, strategy);
+      ++element;
     }
   }
   Project(d, m_game->NumStrategies());
   return true;
 }
 
-double StrategicLyapunovFunction::Value(const Vector<double> &v) const
+namespace {
+
+MixedStrategyProfile<double> EnforceNonnegativity(const MixedStrategyProfile<double> &p_profile)
 {
-  m_profile = v;
-  return m_profile.GetLiapValue();
+  auto profile = p_profile;
+  for (auto player : p_profile.GetGame()->GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      profile[strategy] = std::max(profile[strategy], 0.0);
+    }
+  }
+  return profile.Normalize();
 }
 
-//------------------------------------------------------------------------
-//                     class NashLiapStrategySolver
-//------------------------------------------------------------------------
+} // namespace
 
-List<MixedStrategyProfile<double>>
-NashLiapStrategySolver::Solve(const MixedStrategyProfile<double> &p_start) const
+List<MixedStrategyProfile<double>> LiapStrategySolve(const MixedStrategyProfile<double> &p_start,
+                                                     double p_maxregret, int p_maxitsN,
+                                                     StrategyCallbackType p_callback)
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  static const double ALPHA = .00000001;
   List<MixedStrategyProfile<double>> solutions;
 
   MixedStrategyProfile<double> p(p_start);
-  if (m_verbose) {
-    this->m_onEquilibrium->Render(p, "start");
-  }
-
-  // if starting vector not interior, perturb it towards centroid
-  size_t kk;
-  for (kk = 1; kk <= p.MixedProfileLength() && p[kk] > ALPHA; kk++)
-    ;
-  if (kk <= p.MixedProfileLength()) {
-    MixedStrategyProfile<double> centroid(p.GetGame()->NewMixedStrategyProfile(0.0));
-    for (size_t k = 1; k <= p.MixedProfileLength(); k++) {
-      p[k] = centroid[k] * ALPHA + p[k] * (1.0 - ALPHA);
-    }
-  }
+  p_callback(p, "start");
 
   StrategicLyapunovFunction F(p);
   ConjugatePRMinimizer minimizer(p.MixedProfileLength());
@@ -135,24 +167,28 @@ NashLiapStrategySolver::Solve(const MixedStrategyProfile<double> &p_start) const
   double fval;
   minimizer.Set(F, static_cast<const Vector<double> &>(p), fval, gradient, .01, .0001);
 
-  for (int iter = 1; iter <= m_maxitsN; iter++) {
+  for (int iter = 1; iter <= p_maxitsN; iter++) {
     Vector<double> point(p);
     if (!minimizer.Iterate(F, point, fval, gradient, dx)) {
       break;
     }
     p = point;
-    if (sqrt(gradient.NormSquared()) < .001) {
+    if (std::sqrt(gradient.NormSquared()) < 1.0e-8) {
       break;
     }
   }
 
-  if (fval < 0.0001) {
-    this->m_onEquilibrium->Render(p, "NE");
+  p = EnforceNonnegativity(p);
+  if (p.GetMaxRegret() * F.GetScale() < p_maxregret) {
+    p_callback(p, "NE");
     solutions.push_back(p);
   }
-  else if (m_verbose) {
-    this->m_onEquilibrium->Render(p, "end");
+  else {
+    p_callback(p, "end");
   }
 
   return solutions;
 }
+
+} // namespace Nash
+} // namespace Gambit

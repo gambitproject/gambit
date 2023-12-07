@@ -25,60 +25,18 @@
 
 #include "games/nash.h"
 
-using namespace Gambit;
-using namespace Gambit::Nash;
+namespace Gambit {
+namespace Nash {
 
-class NashLiapBehaviorSolver : public BehavSolver<double> {
-public:
-  explicit NashLiapBehaviorSolver(
-      int p_maxitsN, bool p_verbose = false,
-      std::shared_ptr<StrategyProfileRenderer<double>> p_onEquilibrium = nullptr)
-    : BehavSolver<double>(p_onEquilibrium), m_maxitsN(p_maxitsN), m_verbose(p_verbose)
-  {
-  }
-  ~NashLiapBehaviorSolver() override = default;
+List<MixedBehaviorProfile<double>>
+LiapBehaviorSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
+                  BehaviorCallbackType p_callback = NullBehaviorCallback);
 
-  List<MixedBehaviorProfile<double>> Solve(const MixedBehaviorProfile<double> &p_start) const;
-  List<MixedBehaviorProfile<double>> Solve(const Game &p_game) const override
-  {
-    return Solve(MixedBehaviorProfile<double>(p_game));
-  }
+List<MixedStrategyProfile<double>>
+LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregret, int p_maxitsN,
+                  StrategyCallbackType p_callback = NullStrategyCallback);
 
-private:
-  int m_maxitsN;
-  bool m_verbose;
-};
-
-inline List<MixedBehaviorProfile<double>> LiapBehaviorSolve(const Game &p_game, int p_maxitsN)
-{
-  return NashLiapBehaviorSolver(p_maxitsN).Solve(p_game);
-}
-
-class NashLiapStrategySolver : public StrategySolver<double> {
-public:
-  explicit NashLiapStrategySolver(
-      int p_maxitsN, bool p_verbose = false,
-      std::shared_ptr<StrategyProfileRenderer<double>> p_onEquilibrium = nullptr)
-    : StrategySolver<double>(std::move(p_onEquilibrium)), m_maxitsN(p_maxitsN),
-      m_verbose(p_verbose)
-  {
-  }
-  ~NashLiapStrategySolver() override = default;
-
-  List<MixedStrategyProfile<double>> Solve(const MixedStrategyProfile<double> &p_start) const;
-  List<MixedStrategyProfile<double>> Solve(const Game &p_game) const override
-  {
-    return Solve(p_game->NewMixedStrategyProfile(0.0));
-  }
-
-private:
-  int m_maxitsN;
-  bool m_verbose;
-};
-
-inline List<MixedStrategyProfile<double>> LiapStrategySolve(const Game &p_game, int p_maxitsN)
-{
-  return NashLiapStrategySolver(p_maxitsN).Solve(p_game);
-}
+} // namespace Nash
+} // namespace Gambit
 
 #endif // GAMBIT_NASH_LIAP_H

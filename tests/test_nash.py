@@ -100,15 +100,11 @@ class TestNash(unittest.TestCase):
 
     def test_liap_strategy(self):
         """Test calls of liap for mixed strategy equilibria."""
-        result = gbt.nash.liap_solve(self.poker, use_strategic=False)
-        # Currently default parameter liap fails to find an equilibrium
-        assert len(result.equilibria) == 0
+        _ = gbt.nash.liap_solve(self.poker.mixed_strategy_profile())
 
     def test_liap_behavior(self):
         """Test calls of liap for mixed behavior equilibria."""
-        result = gbt.nash.liap_solve(self.poker, use_strategic=True)
-        # Currently default parameter liap fails to find an equilibrium
-        assert len(result.equilibria) == 0
+        _ = gbt.nash.liap_solve(self.poker.mixed_behavior_profile())
 
     def test_simpdiv_strategy(self):
         """Test calls of simplicial subdivision for mixed strategy equilibria."""

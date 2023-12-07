@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <numeric>
 
 #include "gambit.h"
 #include "gametree.h"
@@ -1074,6 +1075,20 @@ GameInfoset GameTreeRep::GetInfoset(int p_index) const
     }
   }
   throw IndexException();
+}
+
+Array<GameInfoset> GameTreeRep::GetInfosets() const
+{
+  auto infosets = Array<GameInfoset>(std::accumulate(
+    m_players.begin(), m_players.end(), 0,
+    [](int ct, GamePlayerRep *player) { return ct + player->NumInfosets(); }));
+  int i = 1;
+  for (auto player: m_players) {
+    for (auto infoset: player->m_infosets) {
+      infosets[i++] = infoset;
+    }
+  }
+  return infosets;
 }
 
 Array<int> GameTreeRep::NumInfosets() const

@@ -175,6 +175,9 @@ public:
   /// @name Computation of interesting quantities
   //@{
   T GetPayoff(int p_player) const;
+  T GetPayoff(const GamePlayer &p_player) const {
+    return GetPayoff(p_player->GetNumber());
+  }
   T GetLiapValue(bool p_definedOnly = false) const;
 
   const T &GetRealizProb(const GameNode &node) const;
@@ -185,7 +188,32 @@ public:
   const T &GetPayoff(const GameInfoset &iset) const;
   const T &GetPayoff(const GameAction &act) const;
   T GetActionProb(const GameAction &act) const;
-  const T &GetRegret(const GameAction &act) const;
+
+  /// @brief Computes the regret to playing \p p_action
+  /// @details Computes the regret to the player of playing action \p p_action
+  ///          against the profile.  The regret is defined as the difference
+  ///          between the best-response payoff and the payoff to playing
+  ///          \p p_action.
+  /// @param[in] p_action  The action to compute the regret for.
+  /// @sa GetRegret(const GameInfoset &) const;
+  ///     GetMaxRegret() const
+  const T &GetRegret(const GameAction &p_action) const;
+
+  /// @brief Computes the regret at information set \p p_infoset
+  /// @details Computes the regret at the information set to the player of playing
+  ///          their mixed action as specified in the profile.  The regret is defined
+  ///          as the difference between the payoff of the best response action and
+  ///          the payoff to playing their specified mixed action.
+  /// @param[in] p_infoset  The information set to compute the regret at.
+  /// @sa GetRegret(const GameAction &) const;
+  ///     GetMaxRegret() const
+  T GetRegret(const GameInfoset &p_infoset) const;
+
+  /// @brief Computes the maximum regret at any information set in the profile
+  /// @details Computes the maximum of the regrets of the information sets in the profile.
+  /// @sa GetRegret(const GameInfoset &) const;
+  ///     GetRegret(const GameAction &) const
+  T GetMaxRegret() const;
 
   T DiffActionValue(const GameAction &action,
 		    const GameAction &oppAction) const;

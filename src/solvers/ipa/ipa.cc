@@ -30,7 +30,8 @@ using namespace Gambit::gametracer;
 namespace Gambit {
 namespace Nash {
 
-List<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game, CallbackType p_callback)
+List<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game,
+                                                    StrategyCallbackType p_callback)
 {
   MixedStrategyProfile<double> pert = p_game->NewMixedStrategyProfile(0.0);
   for (auto strategy : p_game->GetStrategies()) {
@@ -43,7 +44,7 @@ List<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game, Callback
 }
 
 List<MixedStrategyProfile<double>> IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
-                                                    CallbackType p_callback)
+                                                    StrategyCallbackType p_callback)
 {
   if (!p_pert.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(

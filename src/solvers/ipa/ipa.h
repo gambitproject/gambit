@@ -28,11 +28,12 @@
 namespace Gambit {
 namespace Nash {
 
-List<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game,
-                                                    CallbackType p_callback = NullCallback);
+List<MixedStrategyProfile<double>>
+IPAStrategySolve(const Game &p_game, StrategyCallbackType p_callback = NullStrategyCallback);
 
-List<MixedStrategyProfile<double>> IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
-                                                    CallbackType p_callback = NullCallback);
+List<MixedStrategyProfile<double>>
+IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
+                 StrategyCallbackType p_callback = NullStrategyCallback);
 
 } // namespace Nash
 } // namespace Gambit

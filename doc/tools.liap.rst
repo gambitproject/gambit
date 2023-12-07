@@ -8,12 +8,23 @@ approximate Nash equilibria using a function minimization approach.
 
 This procedure searches for equilibria by generating random starting
 points and using conjugate gradient descent to minimize the Lyapunov
-function of the game. This function is a nonnegative function which is
+function of the game. This is a nonnegative function which is
 zero exactly at strategy profiles which are Nash equilibria.
 
 Note that this procedure is not globally convergent. That is, it is
 not guaranteed to find all, or even any, Nash equilibria.
 
+.. versionchanged:: 16.2.0
+
+   The Lyapunov function is now normalized to be independent of the
+   scale of the payoffs of the game; therefore multiplying or dividing
+   all payoffs by a common factor will not affect the output of the
+   algorithm.
+
+   The criterion for accepting whether a local constrained minimizer
+   of the Lyanunov function is an approximate Nash equilibrium is specified
+   in terms of the maximum regret.  This regret is interpreted as a fraction
+   of the difference between the maximum and minimum payoffs in the game.
 
 .. program:: gambit-liap
 
@@ -30,7 +41,13 @@ not guaranteed to find all, or even any, Nash equilibria.
 
    .. versionadded:: 16.1.1
 
-   Specify the maximum number of iterations in function minimization (default is 100).
+   Specify the maximum number of iterations in function minimization (default is 1000).
+
+.. cmdoption:: -m
+
+   .. versionadded:: 16.2.0
+
+   Specify the maximum regret criterion for acceptance as an approximate Nash equilibrium.
 
 .. cmdoption:: -h
 

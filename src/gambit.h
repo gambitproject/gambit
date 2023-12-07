@@ -50,6 +50,8 @@ template <class D, class S> D lexical_cast(const S &p_value, int p_prec)
 
 inline double abs(double x) { return std::fabs(x); }
 
+inline double sqr(double x) { return x * x; }
+
 //========================================================================
 //                        Exception classes
 //========================================================================
