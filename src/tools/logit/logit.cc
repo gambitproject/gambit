@@ -65,15 +65,15 @@ void PrintHelp(char *progname)
 //
 // Read in a comma-separated values list of observed data values
 //
-bool ReadProfile(std::istream &p_stream, Vector<double> &p_profile)
+bool ReadProfile(std::istream &p_stream, MixedStrategyProfile<double> &p_profile)
 {
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
     if (p_stream.eof() || p_stream.bad()) {
       return false;
     }
 
     p_stream >> p_profile[i];
-    if (i < p_profile.Length()) {
+    if (i < p_profile.MixedProfileLength()) {
       char comma;
       p_stream >> comma;
     }
@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
     if (!mleFile.empty() && (!game->IsTree() || useStrategic)) {
       MixedStrategyProfile<double> frequencies(game->NewMixedStrategyProfile(0.0));
       std::ifstream mleData(mleFile.c_str());
-      ReadProfile(mleData, static_cast<Vector<double> &>(frequencies));
+      ReadProfile(mleData, frequencies);
 
       LogitQREMixedStrategyProfile start(game);
       StrategicQREEstimator tracer;

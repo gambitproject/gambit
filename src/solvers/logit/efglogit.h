@@ -41,7 +41,7 @@ public:
   const MixedBehaviorProfile<double> &GetProfile() const { return m_profile; }
 
   Game GetGame() const              { return m_profile.GetGame(); }
-  int BehaviorProfileLength() const { return m_profile.Length(); }
+  size_t BehaviorProfileLength() const { return m_profile.BehaviorProfileLength(); }
   double operator[](int i) const        { return m_profile[i]; }
   
 private:

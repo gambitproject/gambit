@@ -478,7 +478,7 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     profile = cython.declare(shared_ptr[c_MixedBehaviorProfileDouble])
 
     def __len__(self) -> int:
-        return deref(self.profile).Length()
+        return deref(self.profile).BehaviorProfileLength()
 
     def _is_defined_at(self, infoset: Infoset) -> bool:
         return deref(self.profile).IsDefinedAt(infoset.infoset)
@@ -555,7 +555,7 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     profile = cython.declare(shared_ptr[c_MixedBehaviorProfileRational])
 
     def __len__(self) -> int:
-        return deref(self.profile).Length()
+        return deref(self.profile).BehaviorProfileLength()
 
     def _is_defined_at(self, infoset: Infoset) -> bool:
         return deref(self.profile).IsDefinedAt(infoset.infoset)

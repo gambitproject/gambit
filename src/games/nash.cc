@@ -31,7 +31,7 @@ MixedStrategyCSVRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile,
 				    const std::string &p_label) const
 {
   m_stream << p_label;
-  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
+  for (size_t i = 1; i <= p_profile.MixedProfileLength(); i++) {
     m_stream << "," << lexical_cast<std::string>(p_profile[i], m_numDecimals);
   }
   m_stream << std::endl;
@@ -72,7 +72,7 @@ void BehavStrategyCSVRenderer<T>::Render(const MixedBehaviorProfile<T> &p_profil
 					 const std::string &p_label) const
 {
   m_stream << p_label;
-  for (int i = 1; i <= p_profile.Length(); i++) {
+  for (size_t i = 1; i <= p_profile.BehaviorProfileLength(); i++) {
     m_stream << "," << lexical_cast<std::string>(p_profile[i], m_numDecimals);
   }
   m_stream << std::endl;

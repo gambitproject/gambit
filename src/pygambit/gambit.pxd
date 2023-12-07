@@ -275,7 +275,7 @@ cdef extern from "games/behav.h":
           bool operator==(c_MixedBehaviorProfileDouble) except +
           bool operator!=(c_MixedBehaviorProfileDouble) except +
           c_Game GetGame() except +
-          int Length() except +
+          int BehaviorProfileLength() except +
           bool IsDefinedAt(c_GameInfoset) except +
           c_MixedBehaviorProfileDouble Normalize() # except + # doesn't compile
           void Randomize() except +TypeError
@@ -300,7 +300,7 @@ cdef extern from "games/behav.h":
           bool operator==(c_MixedBehaviorProfileRational) except +
           bool operator!=(c_MixedBehaviorProfileRational) except +
           c_Game GetGame() except +
-          int Length() except +
+          int BehaviorProfileLength() except +
           bool IsDefinedAt(c_GameInfoset) except +
           c_MixedBehaviorProfileRational Normalize() # except + # doesn't compile
           void Randomize() except +

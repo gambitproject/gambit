@@ -98,12 +98,12 @@ ReadBehaviorProfiles(const Game &p_game, std::istream &p_stream)
   List<MixedBehaviorProfile<double> > profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedBehaviorProfile<double> p(p_game);
-    for (int i = 1; i <= p.Length(); i++) {
+    for (int i = 1; i <= p.BehaviorProfileLength(); i++) {
       if (p_stream.eof() || p_stream.bad()) {
 	break;
       }
       p_stream >> p[i];
-      if (i < p.Length()) {
+      if (i < p.BehaviorProfileLength()) {
 	char comma;
 	p_stream >> comma;
       }

@@ -54,7 +54,7 @@ StrategicQREPathTracer::EquationSystem::GetValue(const Vector<double> &p_point,
 						 Vector<double> &p_lhs) const
 {
   MixedStrategyProfile<double> profile(m_game->NewMixedStrategyProfile(0.0)), logprofile(m_game->NewMixedStrategyProfile(0.0));
-  for (int i = 1; i <= profile.MixedProfileLength(); i++) {
+  for (size_t i = 1; i <= profile.MixedProfileLength(); i++) {
     profile[i] = exp(p_point[i]);
     logprofile[i] = p_point[i];
   }
@@ -88,7 +88,7 @@ StrategicQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_poin
 						    Matrix<double> &p_matrix) const
 {
   MixedStrategyProfile<double> profile(m_game->NewMixedStrategyProfile(0.0)), logprofile(m_game->NewMixedStrategyProfile(0.0));
-  for (int i = 1; i <= profile.MixedProfileLength(); i++) {
+  for (size_t i = 1; i <= profile.MixedProfileLength(); i++) {
     profile[i] = exp(p_point[i]);
     logprofile[i] = p_point[i];
   }
@@ -339,7 +339,7 @@ void
 StrategicQREEstimator::CallbackFunction::PrintProfile(const MixedStrategyProfile<double> &p_profile,
 						      double p_logL) const
 {
-  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
+  for (size_t i = 1; i <= p_profile.MixedProfileLength(); i++) {
     m_stream << "," << std::setprecision(m_decimals) << p_profile[i];
   }
   m_stream.setf(std::ios::fixed);

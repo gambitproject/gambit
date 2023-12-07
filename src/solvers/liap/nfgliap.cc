@@ -82,7 +82,7 @@ StrategicLyapunovFunction::LiapDerivValue(int i1, int j1,
 bool 
 StrategicLyapunovFunction::Gradient(const Vector<double> &v, Vector<double> &d) const
 {
-  static_cast<Vector<double> &>(m_profile).operator=(v);
+  m_profile = v;
   for (int pl = 1, ii = 1; pl <= m_game->NumPlayers(); pl++) {
     for (int st = 1; st <= m_game->GetPlayer(pl)->Strategies().size(); st++) {
       d[ii++] = LiapDerivValue(pl, st, m_profile);
@@ -94,7 +94,7 @@ StrategicLyapunovFunction::Gradient(const Vector<double> &v, Vector<double> &d) 
   
 double StrategicLyapunovFunction::Value(const Vector<double> &v) const
 {
-  static_cast<Vector<double> &>(m_profile).operator=(v);
+  m_profile = v;
   return m_profile.GetLiapValue();
 }
 
@@ -118,11 +118,11 @@ NashLiapStrategySolver::Solve(const MixedStrategyProfile<double> &p_start) const
   }
 
   // if starting vector not interior, perturb it towards centroid
-  int kk;
+  size_t kk;
   for (kk = 1; kk <= p.MixedProfileLength() && p[kk] > ALPHA; kk++);
   if (kk <= p.MixedProfileLength()) {
     MixedStrategyProfile<double> centroid(p.GetGame()->NewMixedStrategyProfile(0.0));
-    for (int k = 1; k <= p.MixedProfileLength(); k++) {
+    for (size_t k = 1; k <= p.MixedProfileLength(); k++) {
       p[k] = centroid[k] * ALPHA + p[k] * (1.0-ALPHA);
     }
   }
@@ -131,14 +131,15 @@ NashLiapStrategySolver::Solve(const MixedStrategyProfile<double> &p_start) const
   ConjugatePRMinimizer minimizer(p.MixedProfileLength());
   Vector<double> gradient(p.MixedProfileLength()), dx(p.MixedProfileLength());
   double fval;
-  minimizer.Set(F, (const Vector<double> &) p,
+  minimizer.Set(F, static_cast<const Vector<double> &>(p),
 		fval, gradient, .01, .0001);
 
   for (int iter = 1; iter <= m_maxitsN; iter++) {
-    if (!minimizer.Iterate(F, (Vector<double> &) p, fval, gradient, dx)) {
+    Vector<double> point(p);
+    if (!minimizer.Iterate(F, point, fval, gradient, dx)) {
       break;
     }
-
+    p = point;
     if (sqrt(gradient.NormSquared()) < .001) {
       break;
     }

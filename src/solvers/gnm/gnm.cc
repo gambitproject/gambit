@@ -34,7 +34,7 @@ NashGNMStrategySolver::ToProfile(const Game &p_game,
 				 const cvector &p_pert)
 {
   MixedStrategyProfile<double> msp = p_game->NewMixedStrategyProfile(0.0);
-  for (int i = 1; i <= msp.MixedProfileLength(); i++) {
+  for (size_t i = 1; i <= msp.MixedProfileLength(); i++) {
     msp[i] = p_pert[i-1];
   }
   return msp;

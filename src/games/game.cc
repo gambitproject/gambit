@@ -269,7 +269,7 @@ MixedStrategyProfile<Rational>
 PureStrategyProfileRep::ToMixedStrategyProfile() const
 {
   MixedStrategyProfile<Rational> temp(m_nfg->NewMixedStrategyProfile(Rational(0)));
-  static_cast<Vector<Rational> &>(temp).operator=(Rational(0));
+  temp = Rational(0);
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
     temp[GetStrategy(m_nfg->GetPlayer(pl))] = Rational(1);
   }
@@ -379,7 +379,7 @@ MixedBehaviorProfile<Rational>
 PureBehaviorProfile::ToMixedBehaviorProfile() const
 {
   MixedBehaviorProfile<Rational> temp(m_efg);
-  static_cast<Vector<Rational> &>(temp) = Rational(0);
+  temp = Rational(0);
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
     GamePlayer player = m_efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {

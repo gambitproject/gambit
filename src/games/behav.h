@@ -31,8 +31,9 @@ namespace Gambit {
 /// MixedBehaviorProfile<T> implements a randomized behavior profile on
 /// an extensive game.
 ///
-template <class T> class MixedBehaviorProfile : public DVector<T>  {
+template <class T> class MixedBehaviorProfile {
 protected:
+  DVector<T> m_probs;
   BehaviorSupportProfile m_support;
 
   mutable bool m_cacheValid;
@@ -80,13 +81,13 @@ public:
   explicit MixedBehaviorProfile(const BehaviorSupportProfile &);
   MixedBehaviorProfile(const MixedBehaviorProfile<T> &);
   explicit MixedBehaviorProfile(const MixedStrategyProfile<T> &);
-  ~MixedBehaviorProfile() override = default;
+  ~MixedBehaviorProfile() = default;
 
   MixedBehaviorProfile<T> &operator=(const MixedBehaviorProfile<T> &);
   MixedBehaviorProfile<T> &operator=(const Vector<T> &p)
-    { Invalidate(); Vector<T>::operator=(p); return *this;}
+    { Invalidate(); m_probs = p; return *this;}
   MixedBehaviorProfile<T> &operator=(const T &x)  
-    { Invalidate(); DVector<T>::operator=(x); return *this; }
+    { Invalidate(); m_probs = x; return *this; }
 
   //@}
   
@@ -97,9 +98,9 @@ public:
   { return !(*this == x); }
 
   bool operator==(const DVector<T> &x) const
-  { return DVector<T>::operator==(x); }
+  { return m_probs == x; }
   bool operator!=(const DVector<T> &x) const
-  { return DVector<T>::operator!=(x); }
+  { return m_probs != x; }
 
   const T &operator[](const GameAction &p_action) const
     { return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
@@ -120,22 +121,15 @@ public:
 		     m_support.GetIndex(p_action)); }
 
   const T &operator()(int a, int b, int c) const
-    { return DVector<T>::operator()(a, b, c); }
+    { return m_probs(a, b, c); }
   T &operator()(int a, int b, int c) 
-    { Invalidate();  return DVector<T>::operator()(a, b, c); }
+    { Invalidate();  return m_probs(a, b, c); }
   const T &operator[](int a) const
-    { return Array<T>::operator[](a); }
+    { return m_probs[a]; }
   T &operator[](int a)
-    { Invalidate();  return Array<T>::operator[](a); }
+    { Invalidate();  return m_probs[a]; }
 
-  MixedBehaviorProfile<T> &operator+=(const MixedBehaviorProfile<T> &x)
-    { Invalidate();  DVector<T>::operator+=(x);  return *this; }
-  MixedBehaviorProfile<T> &operator+=(const DVector<T> &x)
-    { Invalidate();  DVector<T>::operator+=(x);  return *this; }
-  MixedBehaviorProfile<T> &operator-=(const MixedBehaviorProfile<T> &x)
-    { Invalidate();  DVector<T>::operator-=(x);  return *this; }
-  MixedBehaviorProfile<T> &operator*=(const T &x)
-    { Invalidate();  DVector<T>::operator*=(x);  return *this; }
+  operator const Vector<T> &() const { return m_probs; }
   //@}
 
   /// @name Initialization, validation
@@ -159,7 +153,7 @@ public:
 
   /// @name General data access
   //@{
-  int Length() const { return Array<T>::Length(); }
+  size_t BehaviorProfileLength() const { return m_probs.Length(); }
   Game GetGame() const { return m_support.GetGame(); }
   const BehaviorSupportProfile &GetSupport() const { return m_support; }
   

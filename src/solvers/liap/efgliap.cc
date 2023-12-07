@@ -48,7 +48,7 @@ private:
 
 double AgentLyapunovFunction::Value(const Vector<double> &x) const
 {
-  static_cast<Vector<double> &>(m_profile).operator=(x);
+  m_profile = x;
   return m_profile.GetLiapValue();
 }
 
@@ -56,7 +56,7 @@ bool AgentLyapunovFunction::Gradient(const Vector<double> &x,
                                      Vector<double> &grad) const
 {
   const double DELTA = .00001;
-  static_cast<Vector<double> &>(m_profile).operator=(x);
+  m_profile = x;
   for (int i = 1; i <= x.Length(); i++) {
     m_profile[i] += DELTA;
     double value = m_profile.GetLiapValue();
@@ -89,27 +89,28 @@ NashLiapBehaviorSolver::Solve(const MixedBehaviorProfile<double> &p_start) const
   }
 
   // if starting vector not interior, perturb it towards centroid
-  int kk = 1;
-  for (; kk <= p.Length() && p[kk] > ALPHA; kk++);
-  if (kk <= p.Length()) {
+  size_t kk = 1;
+  for (; kk <= p.BehaviorProfileLength() && p[kk] > ALPHA; kk++);
+  if (kk <= p.BehaviorProfileLength()) {
     MixedBehaviorProfile<double> c(p_start.GetGame());
-    for (int k = 1; k <= p.Length(); k++) {
+    for (size_t k = 1; k <= p.BehaviorProfileLength(); k++) {
       p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
     }
   }
 
   AgentLyapunovFunction F(p);
-  Matrix<double> xi(p.Length(), p.Length());
-  ConjugatePRMinimizer minimizer(p.Length());
-  Vector<double> gradient(p.Length()), dx(p.Length());
+  Matrix<double> xi(p.BehaviorProfileLength(), p.BehaviorProfileLength());
+  ConjugatePRMinimizer minimizer(p.BehaviorProfileLength());
+  Vector<double> gradient(p.BehaviorProfileLength()), dx(p.BehaviorProfileLength());
   double fval;
-  minimizer.Set(F, p, fval, gradient, .01, .0001);
+  minimizer.Set(F, static_cast<const Vector<double> &>(p), fval, gradient, .01, .0001);
 
   for (int iter = 1; iter <= m_maxitsN; iter++) {
-    if (!minimizer.Iterate(F, p, fval, gradient, dx)) {
+    Vector<double> point(p);
+    if (!minimizer.Iterate(F, point, fval, gradient, dx)) {
       break;
     }
-    
+    p = point;
     if (sqrt(gradient.NormSquared()) < .001) {
       break;
     }
