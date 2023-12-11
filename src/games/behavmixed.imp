@@ -32,29 +32,10 @@ namespace Gambit {
 //========================================================================
 
 template <class T>
-MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedBehaviorProfile<T> &p_profile)
-  : m_probs(p_profile.m_probs),
-    m_support(p_profile.m_support),
-    m_cacheValid(false),
-    m_realizProbs(p_profile.m_realizProbs), m_beliefs(p_profile.m_beliefs),
-    m_nvals(p_profile.m_nvals), m_bvals(p_profile.m_bvals),
-    m_nodeValues(p_profile.m_nodeValues),
-    m_infosetValues(p_profile.m_infosetValues),
-    m_actionValues(p_profile.m_actionValues),
-    m_regret(p_profile.m_regret)
-{
-  m_realizProbs = (T) 0.0;
-  m_beliefs = (T) 0.0;
-  m_nodeValues = (T) 0.0;
-  m_infosetValues = (T) 0.0;
-  m_actionValues = (T) 0.0;
-  m_regret = (T) 0.0;
-}
-
-template <class T> 
 MixedBehaviorProfile<T>::MixedBehaviorProfile(const Game &p_game)
   : m_probs(p_game->NumActions()),
     m_support(BehaviorSupportProfile(p_game)),
+    m_gameversion(p_game->GetVersion()),
     m_cacheValid(false),
     m_realizProbs(p_game->NumNodes()),
     m_beliefs(p_game->NumNodes()),
@@ -79,6 +60,7 @@ template <class T>
 MixedBehaviorProfile<T>::MixedBehaviorProfile(const BehaviorSupportProfile &p_support) 
   : m_probs(p_support.NumActions()),
     m_support(p_support),
+    m_gameversion(p_support.GetGame()->GetVersion()),
     m_cacheValid(false),
     m_realizProbs(p_support.GetGame()->NumNodes()),
     m_beliefs(p_support.GetGame()->NumNodes()),
@@ -157,6 +139,7 @@ template <class T>
 MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_profile)
   : m_probs(p_profile.GetGame()->NumActions()),
     m_support(p_profile.GetGame()),
+    m_gameversion(p_profile.GetGame()->GetVersion()),
     m_cacheValid(false),
     m_realizProbs(m_support.GetGame()->NumNodes()),
     m_beliefs(m_support.GetGame()->NumNodes()),
@@ -203,9 +186,10 @@ template <class T>
 MixedBehaviorProfile<T> &MixedBehaviorProfile<T>::operator=(const MixedBehaviorProfile<T> &p_profile)
 {
   if (this != &p_profile && m_support == p_profile.m_support) {
-    Invalidate();
+    InvalidateCache();
     m_probs = p_profile.m_probs;
     m_support = p_profile.m_support;
+    m_gameversion = p_profile.m_gameversion;
   }
   return *this;
 }
@@ -227,6 +211,7 @@ bool MixedBehaviorProfile<T>::operator==(const MixedBehaviorProfile<T> &p_profil
 
 template <class T> void MixedBehaviorProfile<T>::SetCentroid()
 {
+  CheckVersion();
   for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
     GamePlayer player = m_support.GetGame()->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
@@ -243,6 +228,7 @@ template <class T> void MixedBehaviorProfile<T>::SetCentroid()
 template <class T>
 void MixedBehaviorProfile<T>::UndefinedToCentroid()
 {
+  CheckVersion();
   Game efg = m_support.GetGame();
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
     GamePlayer player = efg->GetPlayer(pl);
@@ -267,6 +253,7 @@ void MixedBehaviorProfile<T>::UndefinedToCentroid()
 template <class T>
 MixedBehaviorProfile<T> MixedBehaviorProfile<T>::Normalize() const
 {
+  CheckVersion();
   auto norm = MixedBehaviorProfile<T>(*this);
   Game efg = m_support.GetGame();
   for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
@@ -291,6 +278,7 @@ MixedBehaviorProfile<T> MixedBehaviorProfile<T>::Normalize() const
 
 template<> void MixedBehaviorProfile<double>::Randomize()
 {
+  CheckVersion();
   Game game = m_support.GetGame();
   *this = 0.0;
 
@@ -328,6 +316,7 @@ template<> void MixedBehaviorProfile<Rational>::Randomize()
 
 template <class T> void MixedBehaviorProfile<T>::Randomize(int p_denom)
 {
+  CheckVersion();
   Game game = m_support.GetGame();
   *this = T(0);
 
@@ -373,6 +362,7 @@ template <class T> void MixedBehaviorProfile<T>::Randomize(int p_denom)
 template <class T> 
 T MixedBehaviorProfile<T>::GetLiapValue(bool p_definedOnly) const
 {
+  CheckVersion();
   static const T BIG1 = (T) 10000;
   static const T BIG2 = (T) 100;
 
@@ -413,14 +403,16 @@ T MixedBehaviorProfile<T>::GetLiapValue(bool p_definedOnly) const
 
 template <class T>
 const T &MixedBehaviorProfile<T>::GetRealizProb(const GameNode &node) const
-{ 
+{
+  CheckVersion();
   ComputeSolutionData();
   return m_realizProbs[node->GetNumber()];
 }
 
 template <class T>
 T MixedBehaviorProfile<T>::GetInfosetProb(const GameInfoset &iset) const
-{ 
+{
+  CheckVersion();
   ComputeSolutionData();
   T prob = (T) 0;
   for (int i = 1; i <= iset->NumMembers(); i++) {
@@ -431,14 +423,16 @@ T MixedBehaviorProfile<T>::GetInfosetProb(const GameInfoset &iset) const
 
 template <class T>
 const T &MixedBehaviorProfile<T>::GetBeliefProb(const GameNode &node) const
-{ 
+{
+  CheckVersion();
   ComputeSolutionData();
   return m_beliefs[node->GetNumber()];
 }
 
 template <class T>
 Vector<T> MixedBehaviorProfile<T>::GetPayoff(const GameNode &node) const
-{ 
+{
+  CheckVersion();
   ComputeSolutionData();
   return m_nodeValues.Row(node->GetNumber());
 }
@@ -446,6 +440,7 @@ Vector<T> MixedBehaviorProfile<T>::GetPayoff(const GameNode &node) const
 template <class T>
 const T &MixedBehaviorProfile<T>::GetPayoff(const GamePlayer &p_player, const GameNode &p_node) const
 {
+  CheckVersion();
   ComputeSolutionData();
   return m_nodeValues(p_node->GetNumber(), p_player->GetNumber());
 }
@@ -453,14 +448,16 @@ const T &MixedBehaviorProfile<T>::GetPayoff(const GamePlayer &p_player, const Ga
 
 template <class T>
 const T &MixedBehaviorProfile<T>::GetPayoff(const GameInfoset &iset) const
-{ 
+{
+  CheckVersion();
   ComputeSolutionData();
   return m_infosetValues(iset->GetPlayer()->GetNumber(), iset->GetNumber());
 }
 
 template <class T>
 T MixedBehaviorProfile<T>::GetActionProb(const GameAction &action) const
-{ 
+{
+  CheckVersion();
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
     GameTreeInfosetRep *infoset = dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
     return static_cast<T>(infoset->GetActionProb(action->GetNumber()));
@@ -477,7 +474,8 @@ T MixedBehaviorProfile<T>::GetActionProb(const GameAction &action) const
 
 template <class T>
 const T &MixedBehaviorProfile<T>::GetPayoff(const GameAction &act) const
-{ 
+{
+  CheckVersion();
   ComputeSolutionData();
   return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
                        act->GetInfoset()->GetNumber(),
@@ -486,7 +484,8 @@ const T &MixedBehaviorProfile<T>::GetPayoff(const GameAction &act) const
 
 template <class T>
 const T &MixedBehaviorProfile<T>::GetRegret(const GameAction &act) const
-{ 
+{
+  CheckVersion();
   ComputeSolutionData();
   return m_regret(act->GetInfoset()->GetPlayer()->GetNumber(),
                   act->GetInfoset()->GetNumber(), act->GetNumber());
@@ -520,6 +519,7 @@ void MixedBehaviorProfile<T>::GetPayoff(GameTreeNodeRep *node,
 
 template <class T> T MixedBehaviorProfile<T>::GetPayoff(int player) const
 {
+  CheckVersion();
   T value = (T) 0;
   GetPayoff(dynamic_cast<GameTreeNodeRep *>(m_support.GetGame()->GetRoot().operator->()),
 	    (T) 1, player, value);
@@ -539,6 +539,7 @@ template <class T>
 T MixedBehaviorProfile<T>::DiffActionValue(const GameAction &p_action,
 				      const GameAction &p_oppAction) const
 {
+  CheckVersion();
   ComputeSolutionData();
   T deriv = (T) 0;
   GameInfoset infoset = p_action->GetInfoset();
@@ -565,6 +566,7 @@ template <class T>
 T MixedBehaviorProfile<T>::DiffRealizProb(const GameNode &p_node,
 				       const GameAction &p_oppAction) const
 {
+  CheckVersion();
   ComputeSolutionData();
   T deriv = (T) 1;
   bool isPrec = false;
@@ -588,6 +590,7 @@ T MixedBehaviorProfile<T>::DiffNodeValue(const GameNode &p_node,
 				    const GamePlayer &p_player,
 				    const GameAction &p_oppAction) const
 {
+  CheckVersion();
   ComputeSolutionData();
 
   if (p_node->NumChildren() > 0) {
@@ -741,6 +744,7 @@ void MixedBehaviorProfile<T>::ComputeSolutionData() const
 template <class T>
 bool MixedBehaviorProfile<T>::IsDefinedAt(GameInfoset p_infoset) const
 {
+  CheckVersion();
   for (int act = 1; act <= p_infoset->NumActions(); act++) {
     if (GetActionProb(p_infoset->GetAction(act)) > (T) 0) {
       return true;
@@ -752,6 +756,7 @@ bool MixedBehaviorProfile<T>::IsDefinedAt(GameInfoset p_infoset) const
 template <class T>
 MixedStrategyProfile<T> MixedBehaviorProfile<T>::ToMixedProfile() const
 {
+  CheckVersion();
   return MixedStrategyProfile<T>(*this);
 }
 

@@ -35,6 +35,7 @@ template <class T> class MixedBehaviorProfile {
 protected:
   DVector<T> m_probs;
   BehaviorSupportProfile m_support;
+  unsigned int m_gameversion;
 
   mutable bool m_cacheValid;
 
@@ -74,20 +75,28 @@ protected:
 			int pl, const Array<int> &, GameTreeNodeRep *);
   //@}
 
+  /// Check underlying game has not changed; raise exception if it has
+  void CheckVersion() const
+  {
+    if (IsInvalidated()) {
+      throw GameStructureChangedException();
+    }
+  }
+
 public:
   /// @name Lifecycle
   //@{
   explicit MixedBehaviorProfile(const Game &);
   explicit MixedBehaviorProfile(const BehaviorSupportProfile &);
-  MixedBehaviorProfile(const MixedBehaviorProfile<T> &);
+  MixedBehaviorProfile(const MixedBehaviorProfile<T> &) = default;
   explicit MixedBehaviorProfile(const MixedStrategyProfile<T> &);
   ~MixedBehaviorProfile() = default;
 
   MixedBehaviorProfile<T> &operator=(const MixedBehaviorProfile<T> &);
   MixedBehaviorProfile<T> &operator=(const Vector<T> &p)
-    { Invalidate(); m_probs = p; return *this;}
+    { InvalidateCache(); m_probs = p; return *this;}
   MixedBehaviorProfile<T> &operator=(const T &x)  
-    { Invalidate(); m_probs = x; return *this; }
+    { InvalidateCache(); m_probs = x; return *this; }
 
   //@}
   
@@ -123,11 +132,11 @@ public:
   const T &operator()(int a, int b, int c) const
     { return m_probs(a, b, c); }
   T &operator()(int a, int b, int c) 
-    { Invalidate();  return m_probs(a, b, c); }
+    { InvalidateCache();  return m_probs(a, b, c); }
   const T &operator[](int a) const
     { return m_probs[a]; }
   T &operator[](int a)
-    { Invalidate();  return m_probs[a]; }
+    { InvalidateCache();  return m_probs[a]; }
 
   operator const Vector<T> &() const { return m_probs; }
   //@}
@@ -135,7 +144,7 @@ public:
   /// @name Initialization, validation
   //@{
   /// Force recomputation of stored quantities
-  void Invalidate() const { m_cacheValid = false; }
+  void InvalidateCache() const { m_cacheValid = false; }
   /// Set the profile to the centroid
   void SetCentroid();
   /// Set the behavior at any undefined information set to the centroid
@@ -156,7 +165,10 @@ public:
   size_t BehaviorProfileLength() const { return m_probs.Length(); }
   Game GetGame() const { return m_support.GetGame(); }
   const BehaviorSupportProfile &GetSupport() const { return m_support; }
-  
+  /// Returns whether the profile has been invalidated by a subsequent revision to the game
+  bool IsInvalidated() const
+  { return m_gameversion != m_support.GetGame()->GetVersion(); }
+
   bool IsDefinedAt(GameInfoset p_infoset) const;
   //@}
 
