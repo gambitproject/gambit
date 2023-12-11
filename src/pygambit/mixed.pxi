@@ -96,6 +96,7 @@ class MixedStrategyProfile:
             If `player` is a ``Player`` from a different game, or
             `strategy` is a ``Strategy`` from a different game.
         """
+        self._check_validity()
         if isinstance(index, Strategy):
             if index.game != self.game:
                 raise MismatchError("strategy must belong to this game")
@@ -138,6 +139,7 @@ class MixedStrategyProfile:
             If `player` is a ``Player`` from a different game, or
             `strategy` is a ``Strategy`` from a different game.
         """
+        self._check_validity()
         if isinstance(index, Strategy):
             if index.game != self.game:
                 raise MismatchError("strategy must belong to this game")
@@ -175,6 +177,7 @@ class MixedStrategyProfile:
         KeyError
             If `player` is a string and no player in the game has that label.
         """
+        self._check_validity()
         return self._payoff(self.game._resolve_player(player, 'payoff'))
 
     def strategy_value(self, strategy: typing.Union[Strategy, str]):
@@ -194,6 +197,7 @@ class MixedStrategyProfile:
         KeyError
             If `strategy` is a string and no strategy in the game has that label.
         """
+        self._check_validity()
         return self._strategy_value(self.game._resolve_strategy(strategy, 'strategy_value'))
 
     def regret(self, strategy: typing.Union[Strategy, str]):
@@ -217,6 +221,7 @@ class MixedStrategyProfile:
         KeyError
             If `strategy` is a string and no strategy in the game has that label.
         """
+        self._check_validity()
         return self._regret(self.game._resolve_strategy(strategy, 'regret'))
 
     def strategy_value_deriv(self, strategy: typing.Union[Strategy, str], other: typing.Union[Strategy, str]):
@@ -230,6 +235,7 @@ class MixedStrategyProfile:
         KeyError
             If `strategy` or `other` is a string and no strategy in the game has that label.
         """
+        self._check_validity()
         return self._strategy_value_deriv(
             self.game._resolve_strategy(strategy, 'strategy_value_deriv', 'strategy'),
             self.game._resolve_strategy(strategy, 'strategy_value_deriv', 'other')
@@ -241,6 +247,7 @@ class MixedStrategyProfile:
         The Lyapunov value is a non-negative number which is zero exactly at
         Nash equilibria.
         """
+        self._check_validity()
         return self._liap_value()
 
     def as_behavior(self) -> MixedBehaviorProfile:
@@ -261,6 +268,7 @@ class MixedStrategyProfile:
             raise UndefinedOperationError(
                 "Mixed behavior profiles are not defined for strategic games"
             )
+        self._check_validity()
         return self._as_behavior()
 
     def randomize(self, denom: typing.Optional[int] = None) -> None:
@@ -272,22 +280,29 @@ class MixedStrategyProfile:
         """
         if denom is not None and denom <= 0:
             raise ValueError("randomize(): denominator must be a positive integer")
+        self._check_validity()
         self._randomize(denom)
 
     def normalize(self) -> MixedStrategyProfile:
         """Create a profile with the same strategy proportions as this
         one, but normalised so probabilities for each player sum to one.
         """
+        self._check_validity()
         return self._normalize()
 
     def copy(self) -> MixedStrategyProfile:
         """Creates a copy of the mixed strategy profile."""
+        self._check_validity()
         return self._copy()
 
 
 @cython.cclass
 class MixedStrategyProfileDouble(MixedStrategyProfile):
     profile = cython.declare(shared_ptr[c_MixedStrategyProfileDouble])
+
+    def _check_validity(self) -> None:
+        if deref(self.profile).IsInvalidated():
+            raise GameStructureChangedError()
 
     def __len__(self) -> int:
         return deref(self.profile).MixedProfileLength()
@@ -352,6 +367,10 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
 @cython.cclass
 class MixedStrategyProfileRational(MixedStrategyProfile):
     profile = cython.declare(shared_ptr[c_MixedStrategyProfileRational])
+
+    def _check_validity(self) -> None:
+        if deref(self.profile).IsInvalidated():
+            raise GameStructureChangedError()
 
     def __len__(self) -> int:
         return deref(self.profile).MixedProfileLength()

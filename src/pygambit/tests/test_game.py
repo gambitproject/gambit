@@ -89,34 +89,38 @@ def test_game_dereference_invalid():
         _ = strategy.label
 
 
-def test_exceptions():
-    """Tests for certain exceptions that are caught at the cython level via 'except +'
-    The tests here are only for function calls that do not give a RuntimeError without 'except +'
+def test_strategy_profile_invalidation_table():
+    """Test for invalidating mixed strategy profiles on tables when game changes.
     """
-    # table
     g = gbt.Game.new_table([2, 2])
-    p = g.mixed_strategy_profile()
-    p_rat = g.mixed_strategy_profile(rational=True)
+    profiles = [g.mixed_strategy_profile(rational=b) for b in [False, True]]
     g.delete_strategy(g.players[0].strategies[0])
-    with pytest.raises(RuntimeError):
-        p.payoff(g.players[0])
-    with pytest.raises(RuntimeError):
-        p.liap_value()
-    with pytest.raises(RuntimeError):
-        p_rat.payoff(g.players[0])
-    with pytest.raises(RuntimeError):
-        p_rat.liap_value()
-    # tree
+    for profile in profiles:
+        with pytest.raises(gbt.GameStructureChangedError):
+            profile.payoff(g.players[0])
+        with pytest.raises(gbt.GameStructureChangedError):
+            profile.liap_value()
+
+
+def test_strategy_profile_invalidation_payoff():
+    g = gbt.Game.from_arrays([[2, 2], [0, 0]], [[0, 0], [1, 1]])
+    profiles = [g.mixed_strategy_profile(rational=b) for b in [False, True]]
+    g.outcomes[0][g.players[0]] = 3
+    for profile in profiles:
+        with pytest.raises(gbt.GameStructureChangedError):
+            profile.payoff(g.players[0])
+        with pytest.raises(gbt.GameStructureChangedError):
+            profile.liap_value()
+
+
+def test_behavior_profile_invalidation():
+    """Test for invalidating mixed strategy profiles on tables when game changes.
+    """
     g = gbt.Game.read_game("test_games/basic_extensive_game.efg")
-    p_behav = g.mixed_behavior_profile()
-    p_behav_rat = g.mixed_behavior_profile(rational=True)
-    iset = g.players[0].infosets[0]
-    g.delete_action(iset.actions[0])
-    with pytest.raises(RuntimeError):
-        p_behav.payoff(g.players[0])
-    with pytest.raises(RuntimeError):
-        p_behav.liap_value()
-    with pytest.raises(RuntimeError):
-        p_behav_rat.payoff(g.players[0])
-    with pytest.raises(RuntimeError):
-        p_behav_rat.liap_value()
+    profiles = [g.mixed_behavior_profile(rational=b) for b in [False, True]]
+    g.delete_action(g.players[0].infosets[0].actions[0])
+    for profile in profiles:
+        with pytest.raises(gbt.GameStructureChangedError):
+            profile.payoff(g.players[0])
+        with pytest.raises(gbt.GameStructureChangedError):
+            profile.liap_value()

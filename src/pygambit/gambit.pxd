@@ -240,6 +240,7 @@ cdef extern from "games/stratmixed.h":
           bool operator==(c_MixedStrategyProfileDouble) except +
           bool operator!=(c_MixedStrategyProfileDouble) except +
           c_Game GetGame() except +
+          bool IsInvalidated()
           int MixedProfileLength() except +
           c_StrategySupportProfile GetSupport() except +
           c_MixedStrategyProfileDouble Normalize() # except + # doesn't compile
@@ -258,6 +259,7 @@ cdef extern from "games/stratmixed.h":
           bool operator==(c_MixedStrategyProfileRational) except +
           bool operator!=(c_MixedStrategyProfileRational) except +
           c_Game GetGame() except +
+          bool IsInvalidated()
           int MixedProfileLength() except +
           c_StrategySupportProfile GetSupport() except +
           c_MixedStrategyProfileRational Normalize() # except + # doesn't compile
@@ -277,6 +279,7 @@ cdef extern from "games/behavmixed.h":
           bool operator==(c_MixedBehaviorProfileDouble) except +
           bool operator!=(c_MixedBehaviorProfileDouble) except +
           c_Game GetGame() except +
+          bool IsInvalidated()
           int BehaviorProfileLength() except +
           bool IsDefinedAt(c_GameInfoset) except +
           c_MixedBehaviorProfileDouble Normalize() # except + # doesn't compile
@@ -302,6 +305,7 @@ cdef extern from "games/behavmixed.h":
           bool operator==(c_MixedBehaviorProfileRational) except +
           bool operator!=(c_MixedBehaviorProfileRational) except +
           c_Game GetGame() except +
+          bool IsInvalidated()
           int BehaviorProfileLength() except +
           bool IsDefinedAt(c_GameInfoset) except +
           c_MixedBehaviorProfileRational Normalize() # except + # doesn't compile

@@ -142,6 +142,7 @@ class MixedBehaviorProfile:
             If `player` is a ``Player`` from a different game, `infoset` is an ``Infoset`` from a different
             game, or `action` is an ``Action`` from a different game.`
         """
+        self._check_validity()
         if isinstance(index, Action):
             if index.infoset.game != self.game:
                 raise MismatchError("action must belong to this game")
@@ -203,6 +204,7 @@ class MixedBehaviorProfile:
             If `player` is a `Player` from a different game, `infoset` is an `Infoset` from a different
             game, or `action` is an `Action` from a different game.`
         """
+        self._check_validity()
         if isinstance(index, Action):
             if index.infoset.game != self.game:
                 raise MismatchError("action must belong to this game")
@@ -253,6 +255,7 @@ class MixedBehaviorProfile:
         KeyError
             If `infoset` is a string and no information set in the game has that label.
         """
+        self._check_validity()
         return self._is_defined_at(self.game._resolve_infoset(infoset, 'is_defined_at'))
 
     def belief(self, node: typing.Union[Node, str]):
@@ -269,8 +272,7 @@ class MixedBehaviorProfile:
         MismatchError
             If `node` is not in the same game as the profile
         """
-        if node.game != self.game:
-            raise MismatchError("belief: node must be part of the same game as the profile")
+        self._check_validity()
         return self._belief(self.game._resolve_node(node, 'belief'))
 
     def payoff(self, player: typing.Union[Player, str]):
@@ -292,6 +294,7 @@ class MixedBehaviorProfile:
         ValueError
             If `player` resolves to the chance player
         """
+        self._check_validity()
         resolved_player = self.game._resolve_player(player, 'payoff')
         if resolved_player.is_chance:
             raise ValueError("payoff() is not defined for the chance player")
@@ -322,6 +325,7 @@ class MixedBehaviorProfile:
         ValueError
             If `player` resolves to the chance player
         """
+        self._check_validity()
         resolved_player = self.game._resolve_player(player, 'node_value')
         resolved_node = self.game._resolve_node(node, 'node_value')
         if resolved_player.is_chance:
@@ -347,6 +351,7 @@ class MixedBehaviorProfile:
         ValueError
             If `infoset` resolves to an infoset that belongs to the chance player
         """
+        self._check_validity()
         resolved_infoset = self.game._resolve_infoset(infoset, 'infoset_value')
         if resolved_infoset.player.is_chance:
             raise ValueError("infoset_value() is not defined for the chance player")
@@ -371,6 +376,7 @@ class MixedBehaviorProfile:
         ValueError
             If `action` resolves to an action that belongs to the chance player
         """
+        self._check_validity()
         resolved_action = self.game._resolve_action(action, 'action_value')
         if resolved_action.infoset.player.is_chance:
             raise ValueError("action_value() is not defined for the chance player")
@@ -392,6 +398,7 @@ class MixedBehaviorProfile:
         KeyError
             If `node` is a string and no node in the game has that label.
         """
+        self._check_validity()
         return self._realiz_prob(self.game._resolve_node(node, 'realiz_prob'))
 		
     def infoset_prob(self, infoset: typing.Union[Infoset, str]):
@@ -410,6 +417,7 @@ class MixedBehaviorProfile:
         KeyError
             If `infoset` is a string and no information set in the game has that label.
         """
+        self._check_validity()
         return self._infoset_prob(self.game._resolve_infoset(infoset, 'infoset_prob'))
 
     def regret(self, action: typing.Union[Action, str]):
@@ -434,6 +442,7 @@ class MixedBehaviorProfile:
         KeyError
             If `action` is a string and no action in the game has that label.
         """
+        self._check_validity()
         return self._regret(self.game._resolve_action(action, 'regret'))
 
     def liap_value(self):
@@ -442,12 +451,14 @@ class MixedBehaviorProfile:
         The Lyapunov value is a non-negative number which is zero exactly at
         Nash equilibria.
         """
+        self._check_validity()
         return self._liap_value()
 
     def as_strategy(self) -> MixedStrategyProfile:
         """Returns a `MixedStrategyProfile` which is equivalent
         to the profile.
         """
+        self._check_validity()
         return self._as_strategy()
 
     def randomize(self, denom: typing.Optional[int] = None) -> None:
@@ -458,6 +469,7 @@ class MixedBehaviorProfile:
         ``denom``, that is, the distribution is uniform over a discrete
         grid of mixed strategies.
         """
+        self._check_validity()
         if denom is not None and denom <= 0:
             raise ValueError("randomize(): denominator must be a positive integer")
         self._randomize(denom)
@@ -466,16 +478,22 @@ class MixedBehaviorProfile:
         """Create a profile with the same action proportions as this
         one, but normalised so probabilities for each infoset sum to one.
         """
+        self._check_validity()
         return self._normalize()
 
     def copy(self) -> MixedBehaviorProfile:
         """Creates a copy of the behavior strategy profile."""
+        self._check_validity()
         return self._copy()
 
 
 @cython.cclass
 class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     profile = cython.declare(shared_ptr[c_MixedBehaviorProfileDouble])
+
+    def _check_validity(self) -> None:
+        if deref(self.profile).IsInvalidated():
+            raise GameStructureChangedError()
 
     def __len__(self) -> int:
         return deref(self.profile).BehaviorProfileLength()
@@ -553,6 +571,10 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
 @cython.cclass
 class MixedBehaviorProfileRational(MixedBehaviorProfile):
     profile = cython.declare(shared_ptr[c_MixedBehaviorProfileRational])
+
+    def _check_validity(self) -> None:
+        if deref(self.profile).IsInvalidated():
+            raise GameStructureChangedError()
 
     def __len__(self) -> int:
         return deref(self.profile).BehaviorProfileLength()

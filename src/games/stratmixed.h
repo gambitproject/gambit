@@ -33,6 +33,7 @@ template <class T> class MixedStrategyProfileRep {
 public:
   Vector<T> m_probs;
   StrategySupportProfile m_support;
+  unsigned int m_gameversion;
 
   explicit MixedStrategyProfileRep(const StrategySupportProfile &);
   virtual ~MixedStrategyProfileRep() = default;
@@ -42,7 +43,7 @@ public:
   MixedStrategyProfileRep<T> *Normalize() const;
   void Randomize();
   void Randomize(int p_denom);
- /// Returns the probability the strategy is played
+  /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
     { return m_probs[m_support.m_profileIndex[p_strategy->GetId()]]; }
   /// Returns the probability the strategy is played
@@ -75,6 +76,17 @@ public:
   /// Convert a behavior strategy profile to a mixed strategy profile
   explicit MixedStrategyProfile(const MixedBehaviorProfile<T> &);
 
+  /// Check underlying game has not changed; raise exception if it has
+  void CheckVersion() const
+  {
+    if (IsInvalidated()) {
+      throw GameStructureChangedException();
+    }
+  }
+
+public:
+  /// @name Lifecycle
+  //@{
   /// Make a copy of the mixed strategy profile
   MixedStrategyProfile(const MixedStrategyProfile<T> &);
   /// Destructor
@@ -99,21 +111,21 @@ public:
 	    m_rep->m_probs != p_profile.m_rep->m_probs); }
 
   /// Vector-style access to probabilities
-  const T &operator[](int i) const { return m_rep->m_probs[i]; }
+  const T &operator[](int i) const { CheckVersion(); return m_rep->m_probs[i]; }
   /// Vector-style access to probabilities
-  T &operator[](int i)             { return m_rep->m_probs[i]; }
+  T &operator[](int i)             { CheckVersion(); return m_rep->m_probs[i]; }
 
   /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
-    { return m_rep->operator[](p_strategy); }
+    { CheckVersion(); return m_rep->operator[](p_strategy); }
   /// Returns the probability the strategy is played
   T &operator[](const GameStrategy &p_strategy)
-    { return m_rep->operator[](p_strategy); }
+    { CheckVersion(); return m_rep->operator[](p_strategy); }
 
   /// Returns the mixed strategy for the player
   Vector<T> operator[](const GamePlayer &p_player) const;
 
-  explicit operator const Vector<T> &() const { return m_rep->m_probs; }
+  explicit operator const Vector<T> &() const { CheckVersion(); return m_rep->m_probs; }
   //@}
 
   /// @name General data access
@@ -121,22 +133,26 @@ public:
   /// Returns the game on which the profile is defined
   Game GetGame() const { return m_rep->m_support.GetGame(); }
   /// Returns the support on which the profile is defined
-  const StrategySupportProfile &GetSupport() const { return m_rep->m_support; }
+  const StrategySupportProfile &GetSupport() const { CheckVersion(); return m_rep->m_support; }
+  /// Returns whether the profile has been invalidated by a subsequent revision to the game
+  bool IsInvalidated() const
+  { return m_rep->m_gameversion != m_rep->m_support.GetGame()->GetVersion(); }
 
   /// Sets all strategies for each player to equal probabilities
-  void SetCentroid() { m_rep->SetCentroid(); }
+  void SetCentroid() { CheckVersion(); m_rep->SetCentroid(); }
 
   /// Create a new mixed strategy profile where strategies are played
   /// in the same proportions, but with probabilities for each player
   /// summing to one.
-  MixedStrategyProfile<T> Normalize() const { return MixedStrategyProfile<T>(m_rep->Normalize()); }
+  MixedStrategyProfile<T> Normalize() const
+  { CheckVersion(); return MixedStrategyProfile<T>(m_rep->Normalize()); }
 
   /// Generate a random mixed strategy profile according to the uniform distribution
-  void Randomize() { m_rep->Randomize(); }
+  void Randomize() { CheckVersion(); m_rep->Randomize(); }
 
   /// Generate a random mixed strategy profile according to the uniform distribution
   /// on a grid with spacing p_denom
-  void Randomize(int p_denom) { m_rep->Randomize(p_denom); }
+  void Randomize(int p_denom) { CheckVersion(); m_rep->Randomize(p_denom); }
 
   /// Returns the total number of strategies in the profile
   size_t MixedProfileLength() const { return m_rep->m_probs.size(); }
@@ -148,34 +164,34 @@ public:
   /// @name Computation of interesting quantities
   //@{
   /// Computes the payoff of the profile to player 'pl'
-  T GetPayoff(int pl) const { return m_rep->GetPayoff(pl); }
+  T GetPayoff(int pl) const { CheckVersion(); return m_rep->GetPayoff(pl); }
 
   /// Computes the payoff of the profile to the player
   T GetPayoff(const GamePlayer &p_player) const
-  { return GetPayoff(p_player->GetNumber()); }
+  { CheckVersion(); return GetPayoff(p_player->GetNumber()); }
 
   /// \brief Computes the derivative of the player's payoff
   /// 
   /// Computes the derivative of the payoff to the player with respect
   /// to the probability the strategy is played
   T GetPayoffDeriv(int pl, const GameStrategy &s) const
-  { return m_rep->GetPayoffDeriv(pl, s); }
+  { CheckVersion(); return m_rep->GetPayoffDeriv(pl, s); }
   
   /// \brief Computes the second derivative of the player's payoff
   ///
   /// Computes the second derivative of the payoff to the player,
   /// with respect to the probabilities with which the strategies are played
   T GetPayoffDeriv(int pl, const GameStrategy &s1, const GameStrategy &s2) const
-  { return m_rep->GetPayoffDeriv(pl, s1, s2); }
+  { CheckVersion(); return m_rep->GetPayoffDeriv(pl, s1, s2); }
 
   /// Computes the payoff to playing the pure strategy against the profile
   T GetPayoff(const GameStrategy &p_strategy) const
-  { return GetPayoffDeriv(p_strategy->GetPlayer()->GetNumber(), p_strategy); }
+  { CheckVersion(); return GetPayoffDeriv(p_strategy->GetPlayer()->GetNumber(), p_strategy); }
 
   /// Computes the regret to playing the pure strategy compared to the payoff
   /// of the best response
   T GetRegret(const GameStrategy &p_strategy) const
-  { return m_rep->GetRegret(p_strategy); }
+  { CheckVersion(); return m_rep->GetRegret(p_strategy); }
 
   /// \brief Computes the Lyapunov value of the profile
   ///

@@ -444,6 +444,7 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
 
 GamePlayer GameTableRep::NewPlayer()
 {
+  IncrementVersion();
   auto player = new GamePlayerRep(this, m_players.size() + 1, 1);
   m_players.push_back(player);
   for (auto outcome : m_outcomes) {
@@ -458,6 +459,7 @@ GamePlayer GameTableRep::NewPlayer()
 
 void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
 {
+  IncrementVersion();
   for (int i = 1; i <= m_results.Length(); i++) {
     if (m_results[i] == p_outcome) {
       m_results[i] = 0;

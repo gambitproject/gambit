@@ -29,3 +29,8 @@ class MismatchError(ValueError):
 class UndefinedOperationError(ValueError):
     """Raised when an operation is undefined"""
     pass
+
+
+class GameStructureChangedError(ValueError):
+    """Raised when an object is no longer valid after a game structure change."""
+    pass

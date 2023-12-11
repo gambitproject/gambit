@@ -53,6 +53,7 @@ void GameStrategyRep::DeleteStrategy()
   if (m_player->GetGame()->IsTree())  throw UndefinedException();
   if (m_player->NumStrategies() == 1)  return;
 
+  m_player->GetGame()->IncrementVersion();
   m_player->m_strategies.Remove(m_player->m_strategies.Find(this));
   for (int st = 1; st <= m_player->m_strategies.Length(); st++) {
     m_player->m_strategies[st]->m_number = st;
@@ -89,6 +90,7 @@ GameStrategy GamePlayerRep::NewStrategy()
 {
   if (m_game->IsTree())  throw UndefinedException();
 
+  m_game->IncrementVersion();
   auto *strategy = new GameStrategyRep(this);
   m_strategies.push_back(strategy);
   strategy->m_number = m_strategies.size();
@@ -264,7 +266,9 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
 
 template <class T>
 MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile &p_support)
-  : m_probs(p_support.MixedProfileLength()), m_support(p_support)
+  : m_probs(p_support.MixedProfileLength()),
+    m_support(p_support),
+    m_gameversion(p_support.GetGame()->GetVersion())
 {
   SetCentroid();
 }
@@ -418,6 +422,7 @@ MixedStrategyProfile<T>::~MixedStrategyProfile()
 template <class T>
 Vector<T> MixedStrategyProfile<T>::operator[](const GamePlayer &p_player) const
 {
+  CheckVersion();
   Vector<T> probs(m_rep->m_support.Strategies(p_player).size());
   const Array<GameStrategy> &strategies = m_rep->m_support.Strategies(p_player);
   int st = 1;
@@ -431,6 +436,7 @@ Vector<T> MixedStrategyProfile<T>::operator[](const GamePlayer &p_player) const
 template <class T>
 MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport() const
 {
+  CheckVersion();
   MixedStrategyProfile<T> full(m_rep->m_support.GetGame()->NewMixedStrategyProfile((T) 0));
 
   for (int pl = 1; pl <= m_rep->m_support.GetGame()->NumPlayers(); pl++) {
@@ -454,6 +460,7 @@ MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport() const
 
 template <class T> T MixedStrategyProfile<T>::GetLiapValue() const
 {
+  CheckVersion();
   static const T BIG1 = (T) 100;
   static const T BIG2 = (T) 100;
 

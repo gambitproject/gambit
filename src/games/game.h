@@ -55,7 +55,7 @@ using GameNode = GameObjectPtr<GameNodeRep>;
 class GameRep;
 using Game = GameObjectPtr<GameRep>;
 
-// 
+//
 // Forward declarations of classes defined elsewhere.
 //
 class PureStrategyProfile;
@@ -82,6 +82,14 @@ public:
   ~MismatchException() noexcept override = default;
   const char *what() const noexcept override  
   { return "Operation between objects in different games"; }
+};
+
+/// Exception thrown when comparing different versions of a game
+class GameStructureChangedException : public Exception {
+public:
+  ~GameStructureChangedException() noexcept override = default;
+  const char *what() const noexcept override
+  { return "Game structure has changed since object was defined"; }
 };
 
 /// Exception thrown on a parse error when reading a game savefile
@@ -134,11 +142,9 @@ public:
   /// Gets the payoff associated with the outcome to the player
   const Number &GetPayoff(const GamePlayer &p_player) const;
   /// Sets the payoff to player 'pl'
-  void SetPayoff(int pl, const Number &p_value)
-    { m_payoffs[pl] = p_value; }
+  void SetPayoff(int pl, const Number &p_value);
   /// Sets the payoff to the player
   void SetPayoff(const GamePlayer &p_player, const Number &p_value);
-
   //@}
 };
 
@@ -372,7 +378,10 @@ public:
 
 /// This is the class for representing an arbitrary finite game.
 class GameRep : public BaseGameRep {
+  friend class GameOutcomeRep;
   friend class GameTreeInfosetRep;
+  friend class GameTreeActionRep;
+  friend class GameStrategyRep;
   friend class GamePlayerRep;
   friend class GameTreeNodeRep;
   friend class PureStrategyProfileRep;
@@ -383,9 +392,14 @@ class GameRep : public BaseGameRep {
 
 protected:
   std::string m_title, m_comment;
+  unsigned int m_version;
 
-  GameRep() = default;
+  GameRep() : m_version(0) { }
 
+  /// @name Managing the representation
+  //@{
+  /// Mark that the content of the game has changed
+  void IncrementVersion() { m_version++; }
   /// Build any computed values anew
   virtual void BuildComputedValues() { }
 
@@ -470,6 +484,10 @@ public:
   virtual const std::string &GetComment() const { return m_comment; }
   /// Set the text comment associated with the game
   virtual void SetComment(const std::string &p_comment) { m_comment = p_comment; }
+
+  /// Return the version number of the game.  The version is incremented after each
+  /// substantive change to the game (i.e. not merely involving labels)
+  unsigned int GetVersion() const { return m_version; }
 
   /// Returns true if the game is constant-sum
   virtual bool IsConstSum() const = 0; 
@@ -590,11 +608,19 @@ inline const Number &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
   }
   return m_payoffs[p_player->GetNumber()];
 }
+
+inline void GameOutcomeRep::SetPayoff(int pl, const Number &p_value)
+{
+  m_game->IncrementVersion();
+  m_payoffs[pl] = p_value;
+}
+
 inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &p_value)
 {
   if (p_player->GetGame() != GetGame()) {
     throw MismatchException();
   }
+  m_game->IncrementVersion();
   m_payoffs[p_player->GetNumber()] = p_value;
 }
 
