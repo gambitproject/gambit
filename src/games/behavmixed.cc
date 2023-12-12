@@ -21,7 +21,7 @@
 //
 
 #include "gambit.h"
-#include "behav.imp"
+#include "behavmixed.imp"
 
 template class Gambit::MixedBehaviorProfile<double>;
 template class Gambit::MixedBehaviorProfile<Gambit::Rational>;

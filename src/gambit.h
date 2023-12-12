@@ -130,11 +130,12 @@ public:
 #include "games/writer.h"
 
 #include "games/behavspt.h"
-#include "games/behav.h"
-#include "games/behavitr.h"
+#include "games/behavmixed.h"
+#include "games/behavpure.h"
 
 #include "games/stratspt.h"
-#include "games/mixed.h"
-#include "games/stratitr.h"
+#include "games/stratpure.h"
+#include "games/stratmixed.h"
+
 
 #endif // LIBGAMBIT_H

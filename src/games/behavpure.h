@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2023, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/libgambit/behavitr.h
-// Interface to extensive form action iterators
+// FILE: src/games/behavpure.h
+// Declaration of pure behavior profile
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,12 +20,62 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_BEHAVITR_H
-#define LIBGAMBIT_BEHAVITR_H
+#ifndef GAMBIT_GAMES_BEHAVPURE_H
+#define GAMBIT_GAMES_BEHAVPURE_H
 
 #include "behavspt.h"
 
 namespace Gambit {
+
+/// This class represents a behavior profile on an extensive game.
+/// It specifies exactly one strategy for each information set in the
+/// game.
+class PureBehaviorProfile {
+private:
+  Game m_efg;
+  Array<Array<GameAction> > m_profile;
+
+public:
+  /// @name Lifecycle
+  //@{
+  /// Construct a new behavior profile on the specified game
+  explicit PureBehaviorProfile(Game);
+
+  /// @name Data access and manipulation
+  //@{
+  /// Get the action played at an information set
+  GameAction GetAction(const GameInfoset &) const;
+
+  /// Set the action played at an information set
+  void SetAction(const GameAction &);
+
+  /// Get the payoff to player pl that results from the profile
+  template <class T> T GetPayoff(int pl) const;
+  /// Get the payoff to the player that results from the profile
+  template <class T> T GetPayoff(const GamePlayer &p_player) const
+  { return GetPayoff<T>(p_player->GetNumber()); }
+  /// Get the payoff to player pl conditional on reaching a node
+  template <class T> T GetPayoff(const GameNode &, int pl) const;
+  /// Get the payoff to playing the action, conditional on the profile
+  template <class T> T GetPayoff(const GameAction &) const;
+
+  /// Is the profile a pure strategy agent Nash equilibrium?
+  bool IsAgentNash() const;
+
+  /// Convert to a mixed behavior representation
+  MixedBehaviorProfile<Rational> ToMixedBehaviorProfile() const;
+  //@}
+};
+
+template<> inline double PureBehaviorProfile::GetPayoff(int pl) const
+{ return GetPayoff<double>(m_efg->GetRoot(), pl); }
+
+template<> inline Rational PureBehaviorProfile::GetPayoff(int pl) const
+{ return GetPayoff<Rational>(m_efg->GetRoot(), pl); }
+
+template<> inline std::string PureBehaviorProfile::GetPayoff(int pl) const
+{ return lexical_cast<std::string>(GetPayoff<Rational>(m_efg->GetRoot(), pl)); }
+
 
 //
 // Currently, the contingency iterator only allows one information
@@ -70,7 +120,7 @@ public:
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_BEHAVITR_H
+#endif // GAMBIT_GAMES_BEHAVPURE_H
 
 
 

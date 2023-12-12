@@ -58,9 +58,11 @@ using Game = GameObjectPtr<GameRep>;
 // 
 // Forward declarations of classes defined elsewhere.
 //
+class PureStrategyProfile;
 template <class T> class MixedStrategyProfile;
-template <class T> class MixedBehaviorProfile;
 class StrategySupportProfile;
+
+template <class T> class MixedBehaviorProfile;
 
 //=======================================================================
 //         Exceptions thrown from game representation classes
@@ -368,135 +370,6 @@ public:
 };
 
 
-/// This class represents a strategy profile on a strategic game.
-/// It specifies exactly one strategy for each player defined on the
-/// game.
-class PureStrategyProfileRep {
-  friend class GameTableRep;
-  friend class GameTreeRep;
-  friend class GameAggRep;
-  friend class PureStrategyProfile;
-
-protected:
-  Game m_nfg;
-  Array<GameStrategy> m_profile;
-
-  /// Construct a new strategy profile
-  explicit PureStrategyProfileRep(const Game &p_game);
-
-  /// Create a copy of the strategy profile.
-  /// Caller is responsible for memory management of the created object.
-  virtual PureStrategyProfileRep *Copy() const = 0;
-
-public:
-  virtual ~PureStrategyProfileRep() = default;
-  
-  /// @name Data access and manipulation
-  //@{
-  /// Get the index uniquely identifying the strategy profile
-  virtual long GetIndex() const { throw UndefinedException(); }
-  /// Get the strategy played by player pl  
-  const GameStrategy &GetStrategy(int pl) const { return m_profile[pl]; }
-  /// Get the strategy played by the player
-  const GameStrategy &GetStrategy(const GamePlayer &p_player) const
-    { return m_profile[p_player->GetNumber()]; }
-  /// Set the strategy for a player
-  virtual void SetStrategy(const GameStrategy &) = 0;
-
-  /// Get the outcome that results from the profile
-  virtual GameOutcome GetOutcome() const = 0;
-  /// Set the outcome that results from the profile
-  virtual void SetOutcome(GameOutcome p_outcome) = 0; 
-
-  /// Get the payoff to player pl that results from the profile
-  virtual Rational GetPayoff(int pl) const = 0;
-  /// Get the payoff to the player resulting from the profile
-  Rational GetPayoff(const GamePlayer &p_player) const
-  { return GetPayoff(p_player->GetNumber()); }
-  /// Get the value of playing strategy against the profile
-  virtual Rational GetStrategyValue(const GameStrategy &) const = 0;
-
-  /// Is the profile a pure strategy Nash equilibrium?
-  bool IsNash() const;
-
-  /// Is the profile a strict pure stategy Nash equilibrium?
-  bool IsStrictNash() const;
-
-  /// Is the specificed player playing a best response?
-  bool IsBestResponse(const GamePlayer &p_player) const;
-
-  /// Get the list of best response strategies for a player
-  List<GameStrategy> GetBestResponse(const GamePlayer &p_player) const;
-
-  /// Convert to a mixed strategy representation
-  MixedStrategyProfile<Rational> ToMixedStrategyProfile() const;
-  //@}
-};
-
-class PureStrategyProfile {
-private:
-  PureStrategyProfileRep *rep;
-
-public:
-  PureStrategyProfile(const PureStrategyProfile &r) : rep(r.rep->Copy())  { }
-  explicit PureStrategyProfile(PureStrategyProfileRep *p_rep) : rep(p_rep) { }
-  ~PureStrategyProfile() { delete rep; }
-
-  PureStrategyProfile &operator=(const PureStrategyProfile &r) 
-    {
-      if (&r != this) {
-	delete rep;
-	rep = r.rep->Copy();
-      }
-      return *this;
-    }
-
-  PureStrategyProfileRep *operator->() const { return rep; }
-  explicit operator PureStrategyProfileRep *() const { return rep; }
-};
-    
-
-/// This class represents a behavior profile on an extensive game.
-/// It specifies exactly one strategy for each information set in the
-/// game.
-class PureBehaviorProfile {
-private:
-  Game m_efg;
-  Array<Array<GameAction> > m_profile;
-
-public:
-  /// @name Lifecycle
-  //@{
-  /// Construct a new behavior profile on the specified game
-  explicit PureBehaviorProfile(Game);
-
-  /// @name Data access and manipulation
-  //@{
-  /// Get the action played at an information set
-  GameAction GetAction(const GameInfoset &) const;
-
-  /// Set the action played at an information set
-  void SetAction(const GameAction &);
-   
-  /// Get the payoff to player pl that results from the profile
-  template <class T> T GetPayoff(int pl) const;
-  /// Get the payoff to the player that results from the profile
-  template <class T> T GetPayoff(const GamePlayer &p_player) const
-    { return GetPayoff<T>(p_player->GetNumber()); }
-  /// Get the payoff to player pl conditional on reaching a node
-  template <class T> T GetPayoff(const GameNode &, int pl) const;
-  /// Get the payoff to playing the action, conditional on the profile
-  template <class T> T GetPayoff(const GameAction &) const;
-
-  /// Is the profile a pure strategy agent Nash equilibrium?
-  bool IsAgentNash() const;
-
-  /// Convert to a mixed behavior representation
-  MixedBehaviorProfile<Rational> ToMixedBehaviorProfile() const;
-  //@}
-};
-
-
 /// This is the class for representing an arbitrary finite game.
 class GameRep : public BaseGameRep {
   friend class GameTreeInfosetRep;
@@ -734,15 +607,6 @@ inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 { m_game->BuildComputedValues(); return m_strategies[st]; }
 inline const Array<GameStrategyRep *> &GamePlayerRep::GetStrategies() const
 { m_game->BuildComputedValues(); return m_strategies; }
-
-template<> inline double PureBehaviorProfile::GetPayoff(int pl) const
-{ return GetPayoff<double>(m_efg->GetRoot(), pl); }
-
-template<> inline Rational PureBehaviorProfile::GetPayoff(int pl) const
-{ return GetPayoff<Rational>(m_efg->GetRoot(), pl); }
-
-template<> inline std::string PureBehaviorProfile::GetPayoff(int pl) const
-{ return lexical_cast<std::string>(GetPayoff<Rational>(m_efg->GetRoot(), pl)); }
 
 //=======================================================================
 

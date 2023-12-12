@@ -25,7 +25,7 @@
 #include "game.h"
 #include "gametable.h"
 #include "gametree.h"
-#include "mixed.h"
+#include "stratmixed.h"
 
 namespace Gambit {
 

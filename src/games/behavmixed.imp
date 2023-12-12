@@ -22,7 +22,7 @@
 
 #include <algorithm>
 
-#include "behav.h"
+#include "behavmixed.h"
 #include "gametree.h"
 
 namespace Gambit {
