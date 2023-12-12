@@ -29,8 +29,8 @@
 
 namespace Gambit  {
 
-class BagentPureStrategyProfileRep;
-template <class T> class BagentMixedStrategyProfileRep;
+class BAGGPureStrategyProfileRep;
+template <class T> class BAGGMixedStrategyProfileRep;
 
 namespace agg {
 
@@ -38,8 +38,8 @@ using ProbDist = std::vector<AggNumber>;
 
 class BAGG {
 public:
-  friend class Gambit::BagentPureStrategyProfileRep;
-  template <class T> friend class Gambit::BagentMixedStrategyProfileRep;
+  friend class Gambit::BAGGPureStrategyProfileRep;
+  template <class T> friend class Gambit::BAGGMixedStrategyProfileRep;
 
   friend std::ostream& operator<< (std::ostream& s, const BAGG& g);
 

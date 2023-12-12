@@ -21,12 +21,79 @@
 //
 
 #include <iostream>
-#include <numeric>
 
 #include "gambit.h"
 #include "gametree.h"
 
 namespace Gambit {
+
+//========================================================================
+//                   class TreeMixedStrategyProfileRep
+//========================================================================
+
+//========================================================================
+//                   TreeMixedStrategyProfileRep<T>
+//========================================================================
+
+template <class T>
+TreeMixedStrategyProfileRep<T>::TreeMixedStrategyProfileRep(const MixedBehaviorProfile<T> &p_profile)
+  : MixedStrategyProfileRep<T>(p_profile.GetGame())
+{ }
+
+template <class T>
+MixedStrategyProfileRep<T> *TreeMixedStrategyProfileRep<T>::Copy() const
+{
+  return new TreeMixedStrategyProfileRep(*this);
+}
+
+template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
+{
+  MixedStrategyProfile<T> profile(Copy());
+  return MixedBehaviorProfile<T>(profile).GetPayoff(pl);
+}
+
+template <class T> T
+TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl,
+                                               const GameStrategy &strategy) const
+{
+  MixedStrategyProfile<T> foo(Copy());
+  int player1 = strategy->GetPlayer()->GetNumber();
+  for (int st = 1; st <= this->m_support.NumStrategies(player1); st++) {
+    foo[this->m_support.GetStrategy(player1, st)] = (T) 0;
+  }
+  foo[strategy] = (T) 1;
+  return foo.GetPayoff(pl);
+}
+
+template <class T> T
+TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl,
+                                               const GameStrategy &strategy1,
+                                               const GameStrategy &strategy2) const
+{
+  GamePlayerRep *player1 = strategy1->GetPlayer();
+  GamePlayerRep *player2 = strategy2->GetPlayer();
+  if (player1 == player2) return (T) 0;
+
+  MixedStrategyProfile<T> foo(Copy());
+  for (auto strategy = this->m_support.Strategies(player1).begin();
+       strategy != this->m_support.Strategies(player1).end(); ++strategy) {
+    foo[*strategy] = (T) 0;
+  }
+  foo[strategy1] = (T) 1;
+
+  for (auto strategy = this->m_support.Strategies(player2).begin();
+       strategy != this->m_support.Strategies(player2).end(); ++strategy) {
+    foo[*strategy] = (T) 0;
+  }
+  foo[strategy2] = (T) 1;
+
+  return foo.GetPayoff(pl);
+}
+
+template class TreeMixedStrategyProfileRep<double>;
+template class TreeMixedStrategyProfileRep<Rational>;
+
+
 
 //========================================================================
 //                     class GameTreeActionRep
@@ -1093,7 +1160,7 @@ Game GameTreeRep::NormalizeChanceProbs(const GameInfoset &m_infoset) {
 
 MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double) const
 {
-  if (!this->IsPerfectRecall()) {
+  if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }    
   return StrategySupportProfile(const_cast<GameTreeRep *>(this)).NewMixedStrategyProfile<double>();
@@ -1101,7 +1168,7 @@ MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double) const
 
 MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Rational &) const
 {
-  if (!this->IsPerfectRecall()) {
+  if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }    
   return StrategySupportProfile(const_cast<GameTreeRep *>(this)).NewMixedStrategyProfile<Rational>();
@@ -1109,7 +1176,7 @@ MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Ration
 
 MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double, const StrategySupportProfile& spt) const
 {
-  if (!this->IsPerfectRecall()) {
+  if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }    
   return MixedStrategyProfile<double>(new TreeMixedStrategyProfileRep<double>(spt));
@@ -1117,7 +1184,7 @@ MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double, const 
 
 MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfile& spt) const
 {
-  if (!this->IsPerfectRecall()) {
+  if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }    
   return MixedStrategyProfile<Rational>(new TreeMixedStrategyProfileRep<Rational>(spt));

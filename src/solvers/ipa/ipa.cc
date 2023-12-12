@@ -51,7 +51,7 @@ NashIPAStrategySolver::Solve(const Game &p_game,
   List<MixedStrategyProfile<double> > solutions;
   
   if (p_game->IsAgg()) {
-    A = std::make_shared<aggame>(dynamic_cast<GameAggRep &>(*p_game));
+    A = std::make_shared<aggame>(dynamic_cast<GameAGGRep &>(*p_game));
   }
   else {
     std::vector<int> actions(p_game->NumPlayers());

@@ -35,7 +35,7 @@ class PureStrategyProfileRep {
 
   friend class GameTreeRep;
 
-  friend class GameAggRep;
+  friend class GameAGGRep;
 
   friend class PureStrategyProfile;
 

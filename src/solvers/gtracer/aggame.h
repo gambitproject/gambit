@@ -35,9 +35,9 @@ namespace gametracer {
 
 class aggame : public gnmgame {
   public:
-    explicit aggame(const Gambit::GameAggRep& g)
-      :gnmgame(g.aggPtr->actions),
-      aggPtr (g.aggPtr)
+    explicit aggame(const Gambit::GameAGGRep& g)
+      :gnmgame(g.GetUnderlyingAGG()->actions),
+      aggPtr (g.GetUnderlyingAGG())
     { }
 
     ~aggame() override = default;

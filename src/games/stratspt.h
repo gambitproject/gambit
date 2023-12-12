@@ -43,8 +43,8 @@ class StrategySupportProfile;
 class StrategySupportProfile {
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class MixedStrategyProfileRep;
-  template <class T> friend class AggMixedStrategyProfileRep;
-  template <class T> friend class BagentMixedStrategyProfileRep;
+  template <class T> friend class AGGMixedStrategyProfileRep;
+  template <class T> friend class BAGGMixedStrategyProfileRep;
 protected:
   Game m_nfg;
   Array<Array<GameStrategy> > m_support;

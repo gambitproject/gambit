@@ -213,8 +213,8 @@ class GameStrategyRep : public GameObject  {
   friend class GameExplicitRep;
   friend class GameTreeRep;
   friend class GameTableRep;
-  friend class GameAggRep;
-  friend class GameBagentRep;
+  friend class GameAGGRep;
+  friend class GameBAGGRep;
   friend class GamePlayerRep;
   friend class PureStrategyProfileRep;
   friend class TreePureStrategyProfileRep;
@@ -263,8 +263,8 @@ class GamePlayerRep : public GameObject {
   friend class GameExplicitRep;
   friend class GameTreeRep;
   friend class GameTableRep;
-  friend class GameAggRep;
-  friend class GameBagentRep;
+  friend class GameAGGRep;
+  friend class GameBAGGRep;
   friend class GameTreeInfosetRep;
   friend class GameStrategyRep;
   friend class GameTreeNodeRep;
@@ -478,11 +478,11 @@ public:
   /// Returns the largest payoff in any outcome of the game
   virtual Rational GetMaxPayoff(int pl = 0) const = 0;
 
-  /// Returns true if the game is perfect recall.  If not, the specified
+  /// Returns true if the game is perfect recall.  If not,
   /// a pair of violating information sets is returned in the parameters.  
   virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const = 0;
   /// Returns true if the game is perfect recall
-  virtual bool IsPerfectRecall() const
+  bool IsPerfectRecall() const
   { GameInfoset s, t; return IsPerfectRecall(s, t); }
   //@}
 

@@ -21,11 +21,16 @@
 //
 
 #include <iostream>
-#include <numeric>
+#include <algorithm>
 
 #include "gambit.h"
-#include "gametree.h"
+
+// The references to the table and tree representations violate the logic
+// of separating implementation types.  This will be fixed when we move
+// editing operations into the game itself instead of in the member-object
+// classes.
 #include "gametable.h"
+#include "gametree.h"
 
 namespace Gambit {
 
@@ -253,159 +258,244 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
   p_file << '\n';
 }
 
-
 //========================================================================
-//                       class GameExplicitRep
+//                     MixedStrategyProfileRep<T>
 //========================================================================
 
-
-//------------------------------------------------------------------------
-//                     GameExplicitRep: Lifecycle
-//------------------------------------------------------------------------
-
-GameExplicitRep::~GameExplicitRep()
+template <class T>
+MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile &p_support)
+  : m_probs(p_support.MixedProfileLength()), m_support(p_support)
 {
-  for (auto player : m_players) {
-    player->Invalidate();
-  }
-  for (auto outcome : m_outcomes) {
-    outcome->Invalidate();
-  }
+  SetCentroid();
 }
 
-//------------------------------------------------------------------------
-//                  GameExplicitRep: General data access
-//------------------------------------------------------------------------
-
-Rational GameExplicitRep::GetMinPayoff(int player) const
+template <class T> void MixedStrategyProfileRep<T>::SetCentroid()
 {
-  int p1, p2;
-  
-  if (m_outcomes.empty()) {
-    return Rational(0);
-  }
-
-  if (player) {
-    p1 = p2 = player;
-  }
-  else {
-    p1 = 1;
-    p2 = NumPlayers();
-  }
-
-  Rational minpay = static_cast<Rational>(m_outcomes.front()->GetPayoff(p1));
-  for (auto outcome : m_outcomes) {
-    for (int p = p1; p <= p2; p++) {
-      minpay = std::min(minpay, static_cast<Rational>(outcome->GetPayoff(p)));
+  for (auto player : m_support.GetGame()->GetPlayers()) {
+    T center = ((T) 1) / ((T) m_support.NumStrategies(player->GetNumber()));
+    for (Array<GameStrategy>::const_iterator strategy = m_support.Strategies(player).begin();
+         strategy != m_support.Strategies(player).end(); ++strategy) {
+      (*this)[*strategy] = center;
     }
   }
-  return minpay;
 }
 
-Rational GameExplicitRep::GetMaxPayoff(int player) const
+template <class T>
+MixedStrategyProfileRep<T> *MixedStrategyProfileRep<T>::Normalize() const
 {
-  int p1, p2;
-
-  if (m_outcomes.empty()) {
-    return Rational(0);
-  }
-
-  if (player) {
-    p1 = p2 = player;
-  }
-  else {
-    p1 = 1;
-    p2 = NumPlayers();
-  }
-
-  Rational maxpay = static_cast<Rational>(m_outcomes.front()->GetPayoff(p1));
-  for (auto outcome : m_outcomes) {
-    for (int p = p1; p <= p2; p++) {
-      maxpay = std::max(maxpay, static_cast<Rational>(outcome->GetPayoff(p)));
+  auto norm = Copy();
+  for (auto player : m_support.GetGame()->GetPlayers()) {
+    T sum = (T) 0;
+    for (auto strategy = m_support.Strategies(player).begin();
+         strategy != m_support.Strategies(player).end(); ++strategy) {
+      sum += (*this)[*strategy];
+    }
+    if (sum == (T) 0) continue;
+    for (auto strategy = m_support.Strategies(player).begin();
+         strategy != m_support.Strategies(player).end(); ++strategy) {
+      (*norm)[*strategy] /= sum;
     }
   }
-  return maxpay;
+  return norm;
 }
 
-//------------------------------------------------------------------------
-//                GameExplicitRep: Dimensions of the game
-//------------------------------------------------------------------------
-
-Array<int> GameExplicitRep::NumStrategies() const
+template<> void MixedStrategyProfileRep<double>::Randomize()
 {
-  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  Array<int> dim(m_players.size());
-  for (int pl = 1; pl <= m_players.size(); pl++) {
-    dim[pl] = m_players[pl]->m_strategies.size();
+  Game nfg = m_support.GetGame();
+  m_probs = 0.0;
+
+  // To generate a uniform distribution on the simplex correctly,
+  // take i.i.d. samples from an exponential distribution, and
+  // renormalize at the end (this is a special case of the Dirichlet distribution).
+  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
+    GamePlayer player = nfg->GetPlayer(pl);
+    for (size_t st = 1; st <= player->GetStrategies().size(); st++) {
+      (*this)[player->GetStrategies()[st]] = -std::log(((double) std::rand()) /
+                                                       ((double) RAND_MAX));
+    }
   }
-  return dim;
+  auto normed = Normalize();
+  (*this) = *normed;
+  delete normed;
 }
 
-GameStrategy GameExplicitRep::GetStrategy(int p_index) const
+template<> void MixedStrategyProfileRep<Rational>::Randomize()
 {
-  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  for (int pl = 1, i = 1; pl <= m_players.Length(); pl++) {
-    for (int st = 1; st <= m_players[pl]->m_strategies.Length(); st++, i++) {
-      if (p_index == i) {
-	return m_players[pl]->m_strategies[st];
+  // This operation is not well-defined when using Rational numbers;
+  // use the version specifying the denominator grid instead.
+  throw ValueException();
+}
+
+template <class T> void MixedStrategyProfileRep<T>::Randomize(int p_denom)
+{
+  Game nfg = m_support.GetGame();
+  m_probs = T(0);
+
+  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
+    GamePlayer player = nfg->GetPlayer(pl);
+    std::vector<int> cutoffs;
+    for (size_t st = 1; st < player->GetStrategies().size(); st++) {
+      // When we support C++11, we will be able to implement uniformity better here.
+      cutoffs.push_back(std::rand() % (p_denom+1));
+    }
+    std::sort(cutoffs.begin(), cutoffs.end());
+    cutoffs.push_back(p_denom);
+    T sum = T(0);
+    for (size_t st = 1; st < player->GetStrategies().size(); st++) {
+      (*this)[player->GetStrategies()[st]] = T(cutoffs[st] - cutoffs[st - 1]) / T(p_denom);
+      sum += (*this)[player->GetStrategies()[st]];
+    }
+    (*this)[player->GetStrategies().back()] = T(1) - sum;
+  }
+}
+
+template <class T>
+T MixedStrategyProfileRep<T>::GetRegret(const GameStrategy &p_strategy) const
+{
+  GamePlayer player = p_strategy->GetPlayer();
+  T payoff = GetPayoffDeriv(player->GetNumber(), p_strategy);
+  T brpayoff = payoff;
+  for (int st = 1; st <= player->NumStrategies(); st++) {
+    if (st != p_strategy->GetNumber()) {
+      brpayoff = std::max(brpayoff,
+                          GetPayoffDeriv(player->GetNumber(), player->GetStrategy(st)));
+    }
+  }
+  return brpayoff - payoff;
+}
+
+
+
+//========================================================================
+//                 MixedStrategyProfile<T>: Lifecycle
+//========================================================================
+
+template <class T>
+MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehaviorProfile<T> &p_profile)
+  : m_rep(new TreeMixedStrategyProfileRep<T>(p_profile))
+{
+  Game game = p_profile.GetGame();
+  auto *efg = dynamic_cast<GameTreeRep *>(game.operator->());
+  for (int pl = 1; pl <= m_rep->m_support.GetGame()->NumPlayers(); pl++)  {
+    for (int st = 1; st <= m_rep->m_support.GetGame()->GetPlayer(pl)->NumStrategies(); st++)  {
+      T prob = (T) 1;
+
+      for (int iset = 1; iset <= efg->GetPlayer(pl)->NumInfosets(); iset++) {
+        if (efg->m_players[pl]->m_strategies[st]->m_behav[iset] > 0)
+          prob *= p_profile(pl, iset, efg->m_players[pl]->m_strategies[st]->m_behav[iset]);
+      }
+      (*this)[m_rep->m_support.GetGame()->GetPlayer(pl)->GetStrategy(st)] = prob;
+    }
+  }
+}
+
+template <class T>
+MixedStrategyProfile<T>::MixedStrategyProfile(const MixedStrategyProfile<T> &p_profile)
+  : m_rep(p_profile.m_rep->Copy())
+{ }
+
+template <class T>
+MixedStrategyProfile<T> &MixedStrategyProfile<T>::operator=(const MixedStrategyProfile<T> &p_profile)
+{
+  if (this != &p_profile) {
+    delete m_rep;
+    m_rep = p_profile.m_rep->Copy();
+  }
+  return *this;
+}
+
+template <class T>
+MixedStrategyProfile<T>::~MixedStrategyProfile()
+{
+  delete m_rep;
+}
+
+
+//========================================================================
+//             MixedStrategyProfile<T>: General data access
+//========================================================================
+
+template <class T>
+Vector<T> MixedStrategyProfile<T>::operator[](const GamePlayer &p_player) const
+{
+  Vector<T> probs(m_rep->m_support.Strategies(p_player).size());
+  const Array<GameStrategy> &strategies = m_rep->m_support.Strategies(p_player);
+  int st = 1;
+  for (Array<GameStrategy>::const_iterator strategy = strategies.begin();
+       strategy != strategies.end(); ++st, ++strategy) {
+    probs[st] = (*this)[*strategy];
+  }
+  return probs;
+}
+
+template <class T>
+MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport() const
+{
+  MixedStrategyProfile<T> full(m_rep->m_support.GetGame()->NewMixedStrategyProfile((T) 0));
+
+  for (int pl = 1; pl <= m_rep->m_support.GetGame()->NumPlayers(); pl++) {
+    GamePlayer player = m_rep->m_support.GetGame()->GetPlayer(pl);
+    for (int st = 1; st <= player->NumStrategies(); st++) {
+      if (m_rep->m_support.Contains(player->GetStrategy(st))) {
+        full[player->GetStrategy(st)] = (*this)[player->GetStrategy(st)];
+      }
+      else {
+        full[player->GetStrategy(st)] = static_cast<T>(0);
       }
     }
   }
-  throw IndexException();
+
+  return full;
 }
 
-int GameExplicitRep::NumStrategyContingencies() const
+//========================================================================
+//    MixedStrategyProfile<T>: Computation of interesting quantities
+//========================================================================
+
+template <class T> T MixedStrategyProfile<T>::GetLiapValue() const
 {
-  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  return std::accumulate(
-          m_players.begin(), m_players.end(), 1,
-          [](int ncont, GamePlayerRep *p) { return ncont * p->m_strategies.size(); }
-  );
-}
+  static const T BIG1 = (T) 100;
+  static const T BIG2 = (T) 100;
 
-int GameExplicitRep::MixedProfileLength() const
-{
-  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  return std::accumulate(
-          m_players.begin(), m_players.end(), 0,
-          [](int size, GamePlayerRep *p) { return size + p->m_strategies.size(); }
-  );
-}
+  T liapValue = (T) 0;
 
+  for (auto player : m_rep->m_support.GetGame()->GetPlayers()) {
+    // values of the player's strategies
+    Array<T> values(m_rep->m_support.NumStrategies(player->GetNumber()));
 
-//------------------------------------------------------------------------
-//                      GameExplicitRep: Outcomes
-//------------------------------------------------------------------------
+    T avg = (T) 0, sum = (T) 0;
+    for (Array<GameStrategy>::const_iterator strategy = m_rep->m_support.Strategies(player).begin();
+         strategy != m_rep->m_support.Strategies(player).end(); ++strategy) {
+      const T &prob = (*this)[*strategy];
+      values[m_rep->m_support.GetIndex(*strategy)] = GetPayoff(*strategy);
+      avg += prob * values[m_rep->m_support.GetIndex(*strategy)];
+      sum += prob;
+      if (prob < (T) 0) {
+        liapValue += BIG1*prob*prob;  // penalty for negative probabilities
+      }
+    }
 
-GameOutcome GameExplicitRep::NewOutcome()
-{
-  m_outcomes.push_back(new GameOutcomeRep(this, m_outcomes.size() + 1));
-  return m_outcomes.back();
-}
+    for (int st = 1; st <= values.Length(); st++) {
+      T regret = values[st] - avg;
+      if (regret > (T) 0) {
+        liapValue += regret*regret;  // penalty if not best response
+      }
+    }
 
-//------------------------------------------------------------------------
-//                GameExplicitRep: Writing data files
-//------------------------------------------------------------------------
-
-void GameExplicitRep::Write(std::ostream &p_stream,
-			    const std::string &p_format /*="native"*/) const
-{
-  if (p_format == "efg" ||
-      (p_format == "native" && IsTree())) {
-    WriteEfgFile(p_stream);
+    // penalty if sum does not equal to one
+    liapValue += BIG2*(sum - (T) 1.0)*(sum - (T) 1.0);
   }
-  else if (p_format == "nfg" ||
-	   (p_format == "native" && !IsTree())) {
-    WriteNfgFile(p_stream);
-  }
-  else {
-    throw UndefinedException();
-  }
+
+  return liapValue;
 }
 
+template class MixedStrategyProfileRep<double>;
+template class MixedStrategyProfileRep<Rational>;
+
+template class MixedStrategyProfile<double>;
+template class MixedStrategyProfile<Rational>;
 
 
-  
 }  // end namespace Gambit
 
 
