@@ -32,7 +32,7 @@ namespace Nash {
 
 inline GameStrategy GetStrategy(const Game &game, int pl, int st)
 {
-  return game->GetPlayer(pl)->Strategies()[st];
+  return game->GetPlayer(pl)->GetStrategies()[st];
 }
 
 class NashSimpdivStrategySolver::State {
@@ -85,7 +85,7 @@ NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
       if (v(j,h) == Rational(0)) {
 	U(j,h) = 1;
       }
-      y[player->Strategies()[h]] = v(j,h);
+      y[player->GetStrategies()[h]] = v(j, h);
     }
   }
 
@@ -360,11 +360,11 @@ void NashSimpdivStrategySolver::getY(State &state,
   x = v;
   for (size_t j = 1; j <= x.GetGame()->NumPlayers(); j++) {
     GamePlayer player = x.GetGame()->GetPlayer(j);
-    for (size_t h = 1; h <= player->Strategies().size(); h++) {
+    for (size_t h = 1; h <= player->GetStrategies().size(); h++) {
       if (TT(j,h) == 1 || U(j,h) == 1) {
-	x[player->Strategies()[h]] += state.d*ab(j,h);
-	int hh = (h > 1) ? h-1 : player->Strategies().size();
-	x[player->Strategies()[hh]] -= state.d*ab(j,h);
+	x[player->GetStrategies()[h]] += state.d * ab(j, h);
+	int hh = (h > 1) ? h-1 : player->GetStrategies().size();
+	x[player->GetStrategies()[hh]] -= state.d * ab(j, h);
       }
     }
   }
@@ -382,9 +382,9 @@ void NashSimpdivStrategySolver::getnexty(State &state,
   int j = pi(i,1);
   GamePlayer player = x.GetGame()->GetPlayer(j);
   int h = pi(i,2);
-  x[player->Strategies()[h]] += state.d;
-  int hh = get_b(j, h, player->Strategies().size(), U);
-  x[player->Strategies()[hh]] -= state.d;
+  x[player->GetStrategies()[h]] += state.d;
+  int hh = get_b(j, h, player->GetStrategies().size(), U);
+  x[player->GetStrategies()[hh]] -= state.d;
 }
 
 int NashSimpdivStrategySolver::get_b(int j, int h, int nstrats, const PVector<int> &U) const
@@ -420,9 +420,9 @@ NashSimpdivStrategySolver::State::getlabel(MixedStrategyProfile<Rational> &yy,
     Rational payoff(0);
     Rational maxval(-1000000);
     int jj = 0;
-    for (size_t j = 1; j <= player->Strategies().size(); j++) {
-      pay = yy.GetPayoff(player->Strategies()[j]);
-      payoff += yy[player->Strategies()[j]] * pay;
+    for (size_t j = 1; j <= player->GetStrategies().size(); j++) {
+      pay = yy.GetPayoff(player->GetStrategies()[j]);
+      payoff += yy[player->GetStrategies()[j]] * pay;
       if (pay > maxval) {
 	maxval = pay;
 	jj = j;
@@ -438,8 +438,8 @@ NashSimpdivStrategySolver::State::getlabel(MixedStrategyProfile<Rational> &yy,
     bestz = maxz;
     for (int i = 1; i <= yy.GetGame()->NumPlayers(); i++) {
       GamePlayer player = yy.GetGame()->GetPlayer(i);
-      for (size_t j = 1; j <= player->Strategies().size(); j++) {
-	besty(i,j) = yy[player->Strategies()[j]];
+      for (size_t j = 1; j <= player->GetStrategies().size(); j++) {
+	besty(i,j) = yy[player->GetStrategies()[j]];
       }
     }
   }
@@ -508,7 +508,7 @@ NashSimpdivStrategySolver::Solve(const Game &p_game) const
   MixedStrategyProfile<Rational> start = p_game->NewMixedStrategyProfile(Rational(0));
   start = Rational(0);
   for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-    start[p_game->GetPlayer(pl)->Strategies()[1]] = Rational(1);
+    start[p_game->GetPlayer(pl)->GetStrategies()[1]] = Rational(1);
   }
   return Solve(start);
 }

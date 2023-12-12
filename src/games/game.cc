@@ -205,9 +205,9 @@ bool PureStrategyProfileRep::IsNash() const
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
     GamePlayer player = m_nfg->GetPlayer(pl);
     Rational current = GetPayoff(player);
-    for (GameStrategyArray::const_iterator strategy = player->Strategies().begin();
-	 strategy != player->Strategies().end();
-	 ++strategy)  {
+    for (auto strategy = player->GetStrategies().begin();
+         strategy != player->GetStrategies().end();
+         ++strategy) {
       if (GetStrategyValue(*strategy) > current) {
         return false;
       }
@@ -221,8 +221,8 @@ bool PureStrategyProfileRep::IsStrictNash() const
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
     GamePlayer player = m_nfg->GetPlayer(pl);
     Rational current = GetPayoff(player);
-    for (GameStrategyArray::const_iterator strategy = player->Strategies().begin();
-	 strategy != player->Strategies().end();
+    for (auto strategy = player->GetStrategies().begin();
+	 strategy != player->GetStrategies().end();
 	 ++strategy) {
       if (GetStrategyValue(*strategy) >= current) {
         return false;
@@ -235,8 +235,8 @@ bool PureStrategyProfileRep::IsStrictNash() const
 bool PureStrategyProfileRep::IsBestResponse(const GamePlayer &p_player) const
 {
   Rational current = GetPayoff(p_player);
-  for (GameStrategyArray::const_iterator strategy = p_player->Strategies().begin();
-       strategy != p_player->Strategies().end();
+  for (auto strategy = p_player->GetStrategies().begin();
+       strategy != p_player->GetStrategies().end();
        ++strategy) {
     if (GetStrategyValue(*strategy) > current) {
       return false;
@@ -248,11 +248,11 @@ bool PureStrategyProfileRep::IsBestResponse(const GamePlayer &p_player) const
 List<GameStrategy> 
 PureStrategyProfileRep::GetBestResponse(const GamePlayer &p_player) const
 {
-  GameStrategyArray::const_iterator strategy = p_player->Strategies().begin();
+  auto strategy = p_player->GetStrategies().begin();
   Rational max_payoff = GetStrategyValue(*strategy);
   List<GameStrategy> br;
   br.push_back(*strategy);
-  for (++strategy; strategy != p_player->Strategies().end(); ++strategy)  {
+  for (++strategy; strategy != p_player->GetStrategies().end(); ++strategy)  {
     Rational this_payoff = GetStrategyValue(*strategy);
     if (this_payoff > max_payoff) {
       br.clear();

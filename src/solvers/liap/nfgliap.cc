@@ -51,13 +51,13 @@ double
 StrategicLyapunovFunction::LiapDerivValue(int i1, int j1,
 					  const MixedStrategyProfile<double> &p) const
 {
-  GameStrategy wrt_strategy = m_game->GetPlayer(i1)->Strategies()[j1];
+  GameStrategy wrt_strategy = m_game->GetPlayer(i1)->GetStrategies()[j1];
   double x = 0.0;
   for (int i = 1; i <= m_game->NumPlayers(); i++) {
     double psum = 0.0;
     GamePlayer player = m_game->GetPlayer(i);
     for (int j = 1; j <= player->NumStrategies(); j++) {
-      GameStrategy strategy = player->Strategies()[j];
+      GameStrategy strategy = player->GetStrategies()[j];
       psum += p[strategy];
       double x1 = p.GetPayoff(strategy) - p.GetPayoff(i);
       if (i1 == i) {
@@ -84,7 +84,7 @@ StrategicLyapunovFunction::Gradient(const Vector<double> &v, Vector<double> &d) 
 {
   m_profile = v;
   for (int pl = 1, ii = 1; pl <= m_game->NumPlayers(); pl++) {
-    for (int st = 1; st <= m_game->GetPlayer(pl)->Strategies().size(); st++) {
+    for (int st = 1; st <= m_game->GetPlayer(pl)->GetStrategies().size(); st++) {
       d[ii++] = LiapDerivValue(pl, st, m_profile);
     }
   }

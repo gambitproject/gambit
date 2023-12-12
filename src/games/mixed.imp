@@ -80,9 +80,9 @@ template<> void MixedStrategyProfileRep<double>::Randomize()
   // renormalize at the end (this is a special case of the Dirichlet distribution).
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
     GamePlayer player = nfg->GetPlayer(pl);
-    for (size_t st = 1; st <= player->Strategies().size(); st++) {
-      (*this)[player->Strategies()[st]] = -std::log(((double) std::rand()) / 
-						    ((double) RAND_MAX));
+    for (size_t st = 1; st <= player->GetStrategies().size(); st++) {
+      (*this)[player->GetStrategies()[st]] = -std::log(((double) std::rand()) /
+                                                       ((double) RAND_MAX));
     }
   }
   auto normed = Normalize();
@@ -105,18 +105,18 @@ template <class T> void MixedStrategyProfileRep<T>::Randomize(int p_denom)
   for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
     GamePlayer player = nfg->GetPlayer(pl);
     std::vector<int> cutoffs;
-    for (size_t st = 1; st < player->Strategies().size(); st++) {
+    for (size_t st = 1; st < player->GetStrategies().size(); st++) {
       // When we support C++11, we will be able to implement uniformity better here.
       cutoffs.push_back(std::rand() % (p_denom+1));
     }
     std::sort(cutoffs.begin(), cutoffs.end());
     cutoffs.push_back(p_denom);
     T sum = T(0);
-    for (size_t st = 1; st < player->Strategies().size(); st++) {
-      (*this)[player->Strategies()[st]] = T(cutoffs[st] - cutoffs[st-1]) / T(p_denom);
-      sum += (*this)[player->Strategies()[st]];
+    for (size_t st = 1; st < player->GetStrategies().size(); st++) {
+      (*this)[player->GetStrategies()[st]] = T(cutoffs[st] - cutoffs[st - 1]) / T(p_denom);
+      sum += (*this)[player->GetStrategies()[st]];
     }
-    (*this)[player->Strategies().back()] = T(1) - sum;
+    (*this)[player->GetStrategies().back()] = T(1) - sum;
   }
 }
 

@@ -294,7 +294,6 @@ GamePlayer GameTableRep::NewPlayer()
   for (auto outcome : m_outcomes) {
     outcome->m_payoffs.push_back(Number());
   }
-  ClearComputedValues();
   return player;
 }
 
@@ -313,7 +312,6 @@ void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
   for (int outc = 1; outc <= m_outcomes.Length(); outc++) {
     m_outcomes[outc]->m_number = outc;
   }
-  ClearComputedValues();
 }
 
 //------------------------------------------------------------------------
