@@ -170,9 +170,8 @@ T TableMixedStrategyProfileRep<T>::GetPayoff(int pl, int index, int current) con
     }
   }
 
-  T sum = (T) 0;
-  for (int j = 1; j <= this->m_support.NumStrategies(current); j++) {
-    GameStrategyRep *s = this->m_support.GetStrategy(current, j);
+  T sum = static_cast<T>(0);
+  for (auto s : this->m_support.GetStrategies(this->m_support.GetGame()->GetPlayer(current))) {
     if ((*this)[s] != (T) 0) {
       sum += ((*this)[s] *
               GetPayoff(pl, index + s->m_offset, current + 1));
@@ -204,8 +203,7 @@ TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl,
     }
   }
   else   {
-    for (int j = 1; j <= this->m_support.NumStrategies(cur_pl); j++)  {
-      GameStrategyRep *s = this->m_support.GetStrategy(cur_pl, j);
+    for (auto s : this->m_support.GetStrategies(this->m_support.GetGame()->GetPlayer(cur_pl))) {
       if ((*this)[s] > (T) 0)  {
         GetPayoffDeriv(pl, const_pl, cur_pl + 1,
                        index + s->m_offset, prob * (*this)[s], value);
@@ -243,9 +241,8 @@ TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl1,
     }
   }
   else   {
-    for (int j = 1; j <= this->m_support.NumStrategies(cur_pl); j++ ) {
-      GameStrategyRep *s = this->m_support.GetStrategy(cur_pl, j);
-      if ((*this)[s] > (T) 0) {
+    for (auto s : this->m_support.GetStrategies(this->m_support.GetGame()->GetPlayer(cur_pl))) {
+      if ((*this)[s] > static_cast<T>(0)) {
         GetPayoffDeriv(pl, const_pl1, const_pl2,
                        cur_pl + 1, index + s->m_offset,
                        prob * (*this)[s],

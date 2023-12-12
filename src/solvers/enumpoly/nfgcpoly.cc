@@ -154,17 +154,18 @@ HeuristicPolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) cons
 
   for (StrategyProfileIterator A(support, i, strat1), B(support, i, strat2);
        !A.AtEnd(); A++, B++) {
-    gPoly<double> term(&Space,(double)1,&Lex);
-    int k;
-    for(k=1;k<=NF->NumPlayers();k++) 
-      if(i!=k) 
-	term*=Prob(k,support.GetIndex((*A)->GetStrategy(k)));
-    double coeff,ap,bp;
+    gPoly<double> term(&Space, (double) 1, &Lex);
+    for (int k = 1; k <= NF->NumPlayers(); k++) {
+      if (i != k) {
+        term *= Prob(k, support.GetStrategies(NF->GetPlayer(k)).Find((*A)->GetStrategy(k)));
+      }
+    }
+    double coeff, ap, bp;
     ap = (*A)->GetPayoff(i);
     bp = (*B)->GetPayoff(i);
     coeff = ap - bp;
-    term*=coeff;
-    equation+=term;
+    term *= coeff;
+    equation += term;
   }
   return equation;
 }

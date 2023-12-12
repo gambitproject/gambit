@@ -490,21 +490,21 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue() const
 
   for (auto player : m_rep->m_support.GetPlayers()) {
     // values of the player's strategies
-    Array<T> values(m_rep->m_support.NumStrategies(player->GetNumber()));
+    std::map<GameStrategy, T> values;
 
     T avg = (T) 0, sum = (T) 0;
     for (auto strategy : m_rep->m_support.GetStrategies(player)) {
       const T &prob = (*this)[strategy];
-      values[m_rep->m_support.GetIndex(strategy)] = GetPayoff(strategy);
-      avg += prob * values[m_rep->m_support.GetIndex(strategy)];
+      values[strategy] = GetPayoff(strategy);
+      avg += prob * values.at(strategy);
       sum += prob;
       if (prob < (T) 0) {
         liapValue += BIG1*prob*prob;  // penalty for negative probabilities
       }
     }
 
-    for (int st = 1; st <= values.Length(); st++) {
-      T regret = values[st] - avg;
+    for (auto v : values) {
+      T regret = v.second - avg;
       if (regret > (T) 0) {
         liapValue += regret*regret;  // penalty if not best response
       }

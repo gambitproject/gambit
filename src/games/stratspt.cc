@@ -122,15 +122,17 @@ void StrategySupportProfile::WriteNfgFile(std::ostream &p_file) const
   p_file << "NFG 1 R";
   p_file << " \"" << EscapeQuotes(m_nfg->GetTitle()) << "\" { ";
 
-  for (int i = 1; i <= m_nfg->NumPlayers(); i++)
-    p_file << '"' << EscapeQuotes(m_nfg->GetPlayer(i)->GetLabel()) << "\" ";
+  for (auto player : m_nfg->GetPlayers()) {
+    p_file << '"' << EscapeQuotes(player->GetLabel()) << "\" ";
+  }
 
   p_file << "}\n\n{ ";
-  
-  for (int i = 1; i <= m_nfg->NumPlayers(); i++)   {
+
+  for (auto player : m_nfg->GetPlayers()) {
     p_file << "{ ";
-    for (int j = 1; j <= NumStrategies(i); j++)
-      p_file << '"' << EscapeQuotes(GetStrategy(i, j)->GetLabel()) << "\" ";
+    for (auto strategy : GetStrategies(player)) {
+      p_file << '"' << EscapeQuotes(strategy->GetLabel()) << "\" ";
+    }
     p_file << "}\n";
   }
   

@@ -58,11 +58,10 @@ TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl,
                                                const GameStrategy &strategy) const
 {
   MixedStrategyProfile<T> foo(Copy());
-  int player1 = strategy->GetPlayer()->GetNumber();
-  for (int st = 1; st <= this->m_support.NumStrategies(player1); st++) {
-    foo[this->m_support.GetStrategy(player1, st)] = (T) 0;
+  for (auto s : this->m_support.GetStrategies(this->m_support.GetGame()->GetPlayer(pl))) {
+    foo[s] = static_cast<T>(0);
   }
-  foo[strategy] = (T) 1;
+  foo[strategy] = static_cast<T>(1);
   return foo.GetPayoff(pl);
 }
 
@@ -341,7 +340,7 @@ Array<GameNode> GameTreeNodeRep::GetChildren() const
   return ret;
 }
 
-GameNode GameTreeNodeRep::GetNextSibling() const  
+GameNode GameTreeNodeRep::GetNextSibling() const
 {
   if (!m_parent) {
     return nullptr;
