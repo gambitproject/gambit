@@ -21,7 +21,7 @@
 //
 
 #include "gambit.h"
-#include "mixed.imp"
+#include "stratmixed.imp"
 
 template class Gambit::MixedStrategyProfileRep<double>;
 template class Gambit::MixedStrategyProfileRep<Gambit::Rational>;

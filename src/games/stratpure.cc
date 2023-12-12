@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2023, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/libgambit/stratitr.cc
-// Implementation of normal form iterators
+// FILE: src/games/stratpure.cc
+// Implementation of pure strategy profile
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,8 +21,97 @@
 //
 
 #include "gambit.h"
+#include "stratpure.h"
 
 namespace Gambit {
+
+//========================================================================
+//                    class PureStrategyProfileRep
+//========================================================================
+
+PureStrategyProfileRep::PureStrategyProfileRep(const Game &p_game)
+  : m_nfg(p_game), m_profile(p_game->NumPlayers())
+{
+  for (size_t pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
+    m_profile[pl] = m_nfg->GetPlayer(pl)->GetStrategy(1);
+  }
+}
+
+bool PureStrategyProfileRep::IsNash() const
+{
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
+    GamePlayer player = m_nfg->GetPlayer(pl);
+    Rational current = GetPayoff(player);
+    for (auto strategy = player->GetStrategies().begin();
+         strategy != player->GetStrategies().end();
+         ++strategy) {
+      if (GetStrategyValue(*strategy) > current) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool PureStrategyProfileRep::IsStrictNash() const
+{
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
+    GamePlayer player = m_nfg->GetPlayer(pl);
+    Rational current = GetPayoff(player);
+    for (auto strategy = player->GetStrategies().begin();
+         strategy != player->GetStrategies().end();
+         ++strategy) {
+      if (GetStrategyValue(*strategy) >= current) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool PureStrategyProfileRep::IsBestResponse(const GamePlayer &p_player) const
+{
+  Rational current = GetPayoff(p_player);
+  for (auto strategy = p_player->GetStrategies().begin();
+       strategy != p_player->GetStrategies().end();
+       ++strategy) {
+    if (GetStrategyValue(*strategy) > current) {
+      return false;
+    }
+  }
+  return true;
+}
+
+List <GameStrategy>
+PureStrategyProfileRep::GetBestResponse(const GamePlayer &p_player) const
+{
+  auto strategy = p_player->GetStrategies().begin();
+  Rational max_payoff = GetStrategyValue(*strategy);
+  List <GameStrategy> br;
+  br.push_back(*strategy);
+  for (++strategy; strategy != p_player->GetStrategies().end(); ++strategy) {
+    Rational this_payoff = GetStrategyValue(*strategy);
+    if (this_payoff > max_payoff) {
+      br.clear();
+      max_payoff = this_payoff;
+    }
+    if (this_payoff >= max_payoff) {
+      br.push_back(*strategy);
+    }
+  }
+  return br;
+}
+
+MixedStrategyProfile<Rational>
+PureStrategyProfileRep::ToMixedStrategyProfile() const
+{
+  MixedStrategyProfile<Rational> temp(m_nfg->NewMixedStrategyProfile(Rational(0)));
+  temp = Rational(0);
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
+    temp[GetStrategy(m_nfg->GetPlayer(pl))] = Rational(1);
+  }
+  return temp;
+}
 
 //===========================================================================
 //                        class StrategyProfileIterator
@@ -35,17 +124,17 @@ namespace Gambit {
 StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p_support)
   : m_atEnd(false), m_support(p_support),
     m_currentStrat(m_support.GetGame()->NumPlayers()),
-    m_profile(m_support.GetGame()->NewPureStrategyProfile()), 
+    m_profile(m_support.GetGame()->NewPureStrategyProfile()),
     m_frozen1(0), m_frozen2(0)
 {
   First();
 }
 
 StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p_support,
-						 int pl, int st)
-  : m_atEnd(false), m_support(p_support), 
+                                                 int pl, int st)
+  : m_atEnd(false), m_support(p_support),
     m_currentStrat(m_support.GetGame()->NumPlayers()),
-    m_profile(m_support.GetGame()->NewPureStrategyProfile()), 
+    m_profile(m_support.GetGame()->NewPureStrategyProfile()),
     m_frozen1(pl), m_frozen2(0)
 {
   m_currentStrat[pl] = st;
@@ -54,10 +143,10 @@ StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p
 }
 
 StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p_support,
-						 const GameStrategy &p_strategy)
+                                                 const GameStrategy &p_strategy)
   : m_atEnd(false), m_support(p_support),
     m_currentStrat(p_support.GetGame()->NumPlayers()),
-    m_profile(p_support.GetGame()->NewPureStrategyProfile()), 
+    m_profile(p_support.GetGame()->NewPureStrategyProfile()),
     m_frozen1(p_strategy->GetPlayer()->GetNumber()),
     m_frozen2(0)
 {
@@ -68,11 +157,11 @@ StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p
 
 
 StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p_support,
-						 int pl1, int st1,
-						 int pl2, int st2)
-  : m_atEnd(false), m_support(p_support), 
+                                                 int pl1, int st1,
+                                                 int pl2, int st2)
+  : m_atEnd(false), m_support(p_support),
     m_currentStrat(m_support.GetGame()->NumPlayers()),
-    m_profile(m_support.GetGame()->NewPureStrategyProfile()), 
+    m_profile(m_support.GetGame()->NewPureStrategyProfile()),
     m_frozen1(pl1), m_frozen2(pl2)
 {
   m_currentStrat[pl1] = st1;
@@ -92,7 +181,7 @@ void StrategyProfileIterator::First()
     if (pl == m_frozen1 || pl == m_frozen2) continue;
     m_profile->SetStrategy(m_support.GetStrategy(pl, 1));
     m_currentStrat[pl] = 1;
-  }	
+  }
 }
 
 void StrategyProfileIterator::operator++()
@@ -103,8 +192,8 @@ void StrategyProfileIterator::operator++()
     if (pl == m_frozen1 || pl == m_frozen2) {
       pl++;
       if (pl > m_support.GetGame()->NumPlayers()) {
-	m_atEnd = true;
-	return;
+        m_atEnd = true;
+        return;
       }
       continue;
     }
@@ -123,4 +212,4 @@ void StrategyProfileIterator::operator++()
   }
 }
 
-} // end namespace Gambit
+}

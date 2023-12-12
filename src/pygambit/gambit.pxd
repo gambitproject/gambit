@@ -220,6 +220,11 @@ cdef extern from "games/game.h":
           c_MixedStrategyProfileDouble NewMixedStrategyProfile(double) # except + doesn't compile
           c_MixedStrategyProfileRational NewMixedStrategyProfile(c_Rational) # except + doesn't compile
 
+     c_Game NewTree() except +
+     c_Game NewTable(Array[int] *) except +
+
+
+cdef extern from "games/stratpure.h":
      cdef cppclass c_PureStrategyProfileRep "PureStrategyProfileRep":
           c_GameStrategy GetStrategy(c_GamePlayer) except +
           void SetStrategy(c_GameStrategy) except +
@@ -229,11 +234,8 @@ cdef extern from "games/game.h":
 
           c_Rational GetPayoff(c_GamePlayer) except +
 
-     c_Game NewTree() except +
-     c_Game NewTable(Array[int] *) except +
 
-
-cdef extern from "games/mixed.h":
+cdef extern from "games/stratmixed.h":
      cdef cppclass c_MixedStrategyProfileDouble "MixedStrategyProfile<double>":
           bool operator==(c_MixedStrategyProfileDouble) except +
           bool operator!=(c_MixedStrategyProfileDouble) except +
@@ -270,7 +272,7 @@ cdef extern from "games/mixed.h":
           c_MixedStrategyProfileRational ToFullSupport() except +
           c_MixedStrategyProfileRational(c_MixedStrategyProfileRational) except +
 
-cdef extern from "games/behav.h":
+cdef extern from "games/behavmixed.h":
      cdef cppclass c_MixedBehaviorProfileDouble "MixedBehaviorProfile<double>":
           bool operator==(c_MixedBehaviorProfileDouble) except +
           bool operator!=(c_MixedBehaviorProfileDouble) except +

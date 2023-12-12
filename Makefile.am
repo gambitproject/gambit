@@ -354,20 +354,20 @@ game_SOURCES = \
 	src/games/gametable.h \
 	src/games/gametree.cc \
 	src/games/gametree.h \
-	src/games/behav.cc \
-	src/games/behav.h \
-	src/games/behav.imp \
-	src/games/behavitr.cc \
-	src/games/behavitr.h \
 	src/games/behavspt.cc \
 	src/games/behavspt.h \
-	src/games/mixed.cc \
-	src/games/mixed.h \
-	src/games/mixed.imp \
-	src/games/stratitr.cc \
-	src/games/stratitr.h \
+	src/games/behavpure.cc \
+	src/games/behavpure.h \
+	src/games/behavmixed.cc \
+	src/games/behavmixed.h \
+	src/games/behavmixed.imp \
 	src/games/stratspt.cc \
 	src/games/stratspt.h \
+	src/games/stratpure.cc \
+	src/games/stratpure.h \
+	src/games/stratmixed.cc \
+	src/games/stratmixed.h \
+	src/games/stratmixed.imp \
 	src/games/nash.cc \
 	src/games/file.cc \
 	src/games/writer.cc \
