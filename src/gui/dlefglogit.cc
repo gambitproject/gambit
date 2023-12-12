@@ -33,11 +33,14 @@
 #include "wx/sheet/sheet.h"
 #include "dlefglogit.h"
 
+
+using namespace Gambit;
+
 class gbtLogitBehavList : public wxSheet {
 private:
   gbtGameDocument *m_doc;
-  Gambit::List<double> m_lambdas;
-  Gambit::List<Gambit::MixedBehaviorProfile<double> > m_profiles;
+  Array<double> m_lambdas;
+  Array<std::shared_ptr<MixedBehaviorProfile<double>>> m_profiles;
 
   // Overriding wxSheet members for data access
   wxString GetCellValue(const wxSheetCoords &) override;
@@ -107,8 +110,8 @@ wxString gbtLogitBehavList::GetCellValue(const wxSheetCoords &p_coords)
 		    *wxConvCurrent);
   }
   else {
-    const Gambit::MixedBehaviorProfile<double> &profile = m_profiles[p_coords.GetRow()+1];
-    return wxString(Gambit::lexical_cast<std::string>(profile[p_coords.GetCol()],
+    auto profile = m_profiles[p_coords.GetRow()+1];
+    return wxString(Gambit::lexical_cast<std::string>((*profile)[p_coords.GetCol()],
 				   m_doc->GetStyle().NumDecimals()).c_str(), 
 		    *wxConvCurrent);
   }
@@ -176,14 +179,14 @@ void gbtLogitBehavList::AddProfile(const wxString &p_text,
     AppendCols(m_doc->GetGame()->BehavProfileLength() + 1);
   }
 
-  Gambit::MixedBehaviorProfile<double> profile(m_doc->GetGame());
+  auto profile = std::make_shared<MixedBehaviorProfile<double>>(m_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
 
   m_lambdas.push_back((double) Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) tok.GetNextToken().mb_str())));
 
-  for (int i = 1; i <= profile.BehaviorProfileLength(); i++) {
-    profile[i] = Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) tok.GetNextToken().mb_str()));
+  for (int i = 1; i <= profile->BehaviorProfileLength(); i++) {
+    (*profile)[i] = Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) tok.GetNextToken().mb_str()));
   }
 
   m_profiles.push_back(profile);

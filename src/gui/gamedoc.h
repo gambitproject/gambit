@@ -233,10 +233,10 @@ private:
   gbtBehavDominanceStack m_behavSupports;
   gbtStrategyDominanceStack m_stratSupports;
 
-  Gambit::List<gbtAnalysisOutput *> m_profiles;
+  Gambit::Array<gbtAnalysisOutput *> m_profiles;
   int m_currentProfileList;
 
-  Gambit::List<std::string> m_undoList, m_redoList;
+  std::list<std::string> m_undoList, m_redoList;
 
 
   void UpdateViews(gbtGameModificationType p_modifications);
@@ -276,10 +276,10 @@ public:
   //! @name Handling of undo/redo features
   //!
   //@{
-  bool CanUndo() const { return (m_undoList.Length() > 1); }
+  bool CanUndo() const { return (m_undoList.size() > 1); }
   void Undo();
 
-  bool CanRedo() const { return (m_redoList.Length() > 0); }
+  bool CanRedo() const { return (m_redoList.size() > 0); }
   void Redo();
   //@}
 

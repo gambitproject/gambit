@@ -35,6 +35,7 @@ class gbtGameDocument;
 
 class TiXmlNode;
 
+using namespace Gambit;
 
 class gbtAnalysisOutput {
 protected:
@@ -126,8 +127,8 @@ template <class T> class gbtAnalysisProfileList : public gbtAnalysisOutput {
 private:
   bool m_isBehav;
   int m_current;
-  Gambit::List<Gambit::MixedBehaviorProfile<T> > m_behavProfiles;
-  Gambit::List<Gambit::MixedStrategyProfile<T> > m_mixedProfiles;
+  Array<std::shared_ptr<MixedBehaviorProfile<T>>> m_behavProfiles;
+  Array<std::shared_ptr<MixedStrategyProfile<T>>> m_mixedProfiles;
 
 public:
   //!

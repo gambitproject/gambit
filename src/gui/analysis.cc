@@ -96,17 +96,16 @@ gbtAnalysisProfileList<T>::AddOutput(const wxString &p_output)
 {
   try {
     if (m_isBehav) {
-      MixedBehaviorProfile<T> profile(OutputToBehavProfile<T>(m_doc, p_output));
+      auto profile = std::make_shared<MixedBehaviorProfile<T>>(OutputToBehavProfile<T>(m_doc, p_output));
       m_behavProfiles.push_back(profile);
-      m_mixedProfiles.push_back(profile.ToMixedProfile());
+      m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(profile->ToMixedProfile()));
       m_current = m_behavProfiles.Length();
     }
     else {
-      MixedStrategyProfile<T> profile(OutputToMixedProfile<T>(m_doc,
-							      p_output));
+      auto profile = std::make_shared<MixedStrategyProfile<T>>(OutputToMixedProfile<T>(m_doc, p_output));
       m_mixedProfiles.push_back(profile);
       if (m_doc->IsTree()) {
-        m_behavProfiles.push_back(MixedBehaviorProfile<T>(profile));
+        m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(*profile));
       }
       m_current = m_mixedProfiles.Length();
     }
@@ -117,8 +116,8 @@ gbtAnalysisProfileList<T>::AddOutput(const wxString &p_output)
 template <class T>
 void gbtAnalysisProfileList<T>::BuildNfg()
 {
-  for (int i = 1; i <= m_behavProfiles.Length(); i++) {
-    m_mixedProfiles.push_back(m_behavProfiles[i].ToMixedProfile());
+  for (auto profile : m_behavProfiles) {
+    m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(profile->ToMixedProfile()));
   }
 }
 
@@ -136,8 +135,8 @@ int gbtAnalysisProfileList<T>::NumProfiles() const
 template <class T>
 void gbtAnalysisProfileList<T>::Clear()
 {
-  m_behavProfiles = List<MixedBehaviorProfile<T> >();
-  m_mixedProfiles = List<MixedStrategyProfile<T> >();
+  m_behavProfiles.clear();
+  m_mixedProfiles.clear();
   m_current = 0;
 }
 
@@ -200,7 +199,7 @@ void gbtAnalysisProfileList<T>::Load(TiXmlNode *p_analysis)
 	TextToBehavProfile<T>(m_doc,
 			      wxString(node->FirstChild()->Value(),
 				       *wxConvCurrent));
-      m_behavProfiles.push_back(profile);
+      m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(profile));
       m_isBehav = true;
       m_current = m_behavProfiles.Length();
     }
@@ -209,7 +208,7 @@ void gbtAnalysisProfileList<T>::Load(TiXmlNode *p_analysis)
 	TextToMixedProfile<T>(m_doc,
 			      wxString(node->FirstChild()->Value(),
 				       *wxConvCurrent));
-      m_mixedProfiles.push_back(profile);
+      m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(profile));
       m_isBehav = false;
       m_current = m_mixedProfiles.Length();
     }
@@ -223,11 +222,11 @@ gbtAnalysisProfileList<T>::GetPayoff(int pl, int p_index) const
 
   try {
     if (m_doc->IsTree()) {
-      return lexical_cast<std::string>(m_behavProfiles[index].GetPayoff(pl),
+      return lexical_cast<std::string>(m_behavProfiles[index]->GetPayoff(pl),
 		    m_doc->GetStyle().NumDecimals());
     }
     else {
-      return lexical_cast<std::string>(m_mixedProfiles[index].GetPayoff(pl),
+      return lexical_cast<std::string>(m_mixedProfiles[index]->GetPayoff(pl),
 		    m_doc->GetStyle().NumDecimals());
     }
   }
@@ -243,7 +242,7 @@ gbtAnalysisProfileList<T>::GetRealizProb(const GameNode &p_node,
   int index = (p_index == -1) ? m_current : p_index;
 
   try {
-    return lexical_cast<std::string>(m_behavProfiles[index].GetRealizProb(p_node),
+    return lexical_cast<std::string>(m_behavProfiles[index]->GetRealizProb(p_node),
 		  m_doc->GetStyle().NumDecimals());
   }
   catch (IndexException &) {
@@ -260,8 +259,8 @@ gbtAnalysisProfileList<T>::GetBeliefProb(const GameNode &p_node,
   if (!p_node->GetPlayer()) return "";
 
   try {
-    if (m_behavProfiles[index].GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
-      return lexical_cast<std::string>(m_behavProfiles[index].GetBeliefProb(p_node),
+    if (m_behavProfiles[index]->GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
+      return lexical_cast<std::string>(m_behavProfiles[index]->GetBeliefProb(p_node),
 		    m_doc->GetStyle().NumDecimals());
     }
     else {
@@ -281,7 +280,7 @@ gbtAnalysisProfileList<T>::GetNodeValue(const GameNode &p_node,
   int index = (p_index == -1) ? m_current : p_index;
 
   try {
-    return lexical_cast<std::string>(m_behavProfiles[index].GetPayoff(p_node)[p_player], 
+    return lexical_cast<std::string>(m_behavProfiles[index]->GetPayoff(p_node)[p_player],
 		  m_doc->GetStyle().NumDecimals());
   }
   catch (IndexException &) {
@@ -298,7 +297,7 @@ gbtAnalysisProfileList<T>::GetInfosetProb(const GameNode &p_node,
   if (!p_node->GetPlayer()) return "";
 
   try {
-    return lexical_cast<std::string>(m_behavProfiles[index].GetInfosetProb(p_node->GetInfoset()),
+    return lexical_cast<std::string>(m_behavProfiles[index]->GetInfosetProb(p_node->GetInfoset()),
 		  m_doc->GetStyle().NumDecimals());
   }
   catch (IndexException &) {
@@ -315,8 +314,8 @@ gbtAnalysisProfileList<T>::GetInfosetValue(const GameNode &p_node,
   if (!p_node->GetPlayer() || p_node->GetPlayer()->IsChance())  return "";
 
   try {
-    if (m_behavProfiles[index].GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
-      return lexical_cast<std::string>(m_behavProfiles[index].GetPayoff(p_node->GetInfoset()),
+    if (m_behavProfiles[index]->GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
+      return lexical_cast<std::string>(m_behavProfiles[index]->GetPayoff(p_node->GetInfoset()),
 		    m_doc->GetStyle().NumDecimals());
     }
     else {
@@ -343,7 +342,7 @@ gbtAnalysisProfileList<T>::GetActionProb(const GameNode &p_node, int p_act,
   if (!p_node->GetPlayer())  return "";
   
   try {
-    const MixedBehaviorProfile<T> &profile = m_behavProfiles[index];
+    const MixedBehaviorProfile<T> &profile = *m_behavProfiles[index];
 
     if (!profile.IsDefinedAt(p_node->GetInfoset())) {
       return "*";
@@ -363,7 +362,7 @@ gbtAnalysisProfileList<T>::GetActionProb(int p_action, int p_index) const
   int index = (p_index == -1) ? m_current : p_index;
 
   try {
-    const MixedBehaviorProfile<T> &profile = m_behavProfiles[index];
+    const MixedBehaviorProfile<T> &profile = *m_behavProfiles[index];
 
     if (!profile.IsDefinedAt(profile.GetGame()->GetAction(p_action)->GetInfoset())) {
       return "*";
@@ -385,8 +384,8 @@ gbtAnalysisProfileList<T>::GetActionValue(const GameNode &p_node, int p_act,
   if (!p_node->GetPlayer() || p_node->GetPlayer()->IsChance()) return "";
   
   try {
-    if (m_behavProfiles[index].GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
-      return lexical_cast<std::string>(m_behavProfiles[index].GetPayoff(p_node->GetInfoset()->GetAction(p_act)),
+    if (m_behavProfiles[index]->GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
+      return lexical_cast<std::string>(m_behavProfiles[index]->GetPayoff(p_node->GetInfoset()->GetAction(p_act)),
 		    m_doc->GetStyle().NumDecimals());
     }
     else  {
@@ -405,7 +404,7 @@ gbtAnalysisProfileList<T>::GetStrategyProb(int p_strategy, int p_index) const
   int index = (p_index == -1) ? m_current : p_index;
 
   try {
-    const MixedStrategyProfile<T> &profile = m_mixedProfiles[index];
+    const MixedStrategyProfile<T> &profile = *m_mixedProfiles[index];
     return lexical_cast<std::string>(profile[p_strategy], m_doc->GetStyle().NumDecimals());
   }
   catch (IndexException &) {
@@ -419,7 +418,7 @@ gbtAnalysisProfileList<T>::GetStrategyValue(int p_strategy, int p_index) const
   int index = (p_index == -1) ? m_current : p_index;
 
   try {
-    const MixedStrategyProfile<T> &profile = m_mixedProfiles[index];
+    const MixedStrategyProfile<T> &profile = *m_mixedProfiles[index];
     GameStrategy strategy = profile.GetGame()->GetStrategy(p_strategy);
     return lexical_cast<std::string>(profile.GetPayoff(strategy),
 		  m_doc->GetStyle().NumDecimals());
@@ -440,7 +439,7 @@ gbtAnalysisProfileList<T>::Save(std::ostream &p_file) const
 
   if (m_doc->IsTree()) {
     for (int j = 1; j <= NumProfiles(); j++) {
-      const MixedBehaviorProfile<T> &behav = m_behavProfiles[j];
+      const MixedBehaviorProfile<T> &behav = *m_behavProfiles[j];
       p_file << "<profile type=\"behav\">\n";
       for (int k = 1; k <= behav.BehaviorProfileLength(); k++) {
 	p_file << behav[k];
@@ -456,7 +455,7 @@ gbtAnalysisProfileList<T>::Save(std::ostream &p_file) const
   }
   else {
     for (int j = 1; j <= NumProfiles(); j++) {
-      const MixedStrategyProfile<T> &mixed = m_mixedProfiles[j];
+      const MixedStrategyProfile<T> &mixed = *m_mixedProfiles[j];
       p_file << "<profile type=\"mixed\">\n";
       for (int k = 1; k <= mixed.MixedProfileLength(); k++) {
 	p_file << mixed[k];

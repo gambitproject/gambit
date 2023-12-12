@@ -253,7 +253,7 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
   m_behavSupports.Reset();
   m_stratSupports.Reset();
 
-  m_profiles = Gambit::List<gbtAnalysisOutput *>();
+  m_profiles = Gambit::Array<gbtAnalysisOutput *>();
 
   for (TiXmlNode *analysis = game->FirstChild("analysis");
        analysis; analysis = analysis->NextSibling()) {
@@ -356,7 +356,7 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
 {
   if (p_modifications != GBT_DOC_MODIFIED_NONE) {
     m_modified = true;
-    m_redoList = Gambit::List<std::string>();
+    m_redoList = std::list<std::string>();
 
     std::ostringstream s;
     SaveDocument(s);
@@ -411,8 +411,8 @@ void gbtGameDocument::SetStyle(const gbtStyle &p_style)
 void gbtGameDocument::Undo()
 {
   // The current game is at the end of the undo list; move it to the redo list
-  m_redoList.push_back(m_undoList[m_undoList.Length()]);
-  m_undoList.Remove(m_undoList.Length());
+  m_redoList.push_back(m_undoList.back());
+  m_undoList.pop_back();
 
   m_game = nullptr;
 
@@ -423,7 +423,7 @@ void gbtGameDocument::Undo()
 
   wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
   std::ofstream f((const char *) tempfile.mb_str());
-  f << m_undoList[m_undoList.Length()] << std::endl;
+  f << m_undoList.back() << std::endl;
   f.close();
 
   LoadDocument(tempfile, false);
@@ -434,8 +434,8 @@ void gbtGameDocument::Undo()
 
 void gbtGameDocument::Redo()
 {
-  m_undoList.push_back(m_redoList[m_redoList.Length()]);
-  m_redoList.Remove(m_redoList.Length());
+  m_undoList.push_back(m_redoList.back());
+  m_redoList.pop_back();
 
   m_game = nullptr;
 
@@ -446,7 +446,7 @@ void gbtGameDocument::Redo()
 
   wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
   std::ofstream f((const char *) tempfile.mb_str());
-  f << m_undoList[m_undoList.Length()] << std::endl;
+  f << m_undoList.back() << std::endl;
   f.close();
 
   LoadDocument(tempfile, false);

@@ -54,8 +54,8 @@ namespace {
 class LogitMixedBranch {
 private:
   gbtGameDocument *m_doc;
-  List<double> m_lambdas;
-  List<MixedStrategyProfile<double> > m_profiles;
+  Array<double> m_lambdas;
+  Array<std::shared_ptr<MixedStrategyProfile<double>>> m_profiles;
 
 public:
   explicit LogitMixedBranch(gbtGameDocument *p_doc) : m_doc(p_doc) { }
@@ -64,23 +64,21 @@ public:
 
   int NumPoints() const { return m_lambdas.Length(); }
   double GetLambda(int p_index) const { return m_lambdas[p_index]; }
-  const List<double> &GetLambdas() const { return m_lambdas; }
+  const Array<double> &GetLambdas() const { return m_lambdas; }
   const MixedStrategyProfile<double> &GetProfile(int p_index)
-  { return m_profiles[p_index]; }
-  const List<MixedStrategyProfile<double> > &GetProfiles() const 
-  { return m_profiles; }
+  { return *m_profiles[p_index]; }
 };
   
 void LogitMixedBranch::AddProfile(const wxString &p_text)
 {
-  MixedStrategyProfile<double> profile(m_doc->GetGame()->NewMixedStrategyProfile(0.0));
+  auto profile = std::make_shared<MixedStrategyProfile<double>>(m_doc->GetGame()->NewMixedStrategyProfile(0.0));
 
   wxStringTokenizer tok(p_text, wxT(","));
 
   m_lambdas.push_back((double) lexical_cast<Rational>(std::string((const char *) tok.GetNextToken().mb_str())));
 
-  for (int i = 1; i <= profile.MixedProfileLength(); i++) {
-    profile[i] = lexical_cast<Rational>(std::string((const char *) tok.GetNextToken().mb_str()));
+  for (int i = 1; i <= profile->MixedProfileLength(); i++) {
+    (*profile)[i] = lexical_cast<Rational>(std::string((const char *) tok.GetNextToken().mb_str()));
   }
 
   m_profiles.push_back(profile);

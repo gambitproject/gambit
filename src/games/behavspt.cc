@@ -29,9 +29,7 @@ namespace Gambit {
 //========================================================================
 
 BehaviorSupportProfile::BehaviorSupportProfile(const Game &p_efg) 
-  : m_efg(p_efg),
-    m_infosetActive(0, p_efg->NumPlayers()), 
-    m_nonterminalActive(0, p_efg->NumPlayers())
+  : m_efg(p_efg)
 {
   for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
     m_actions.push_back(Array<Array<GameAction> >());
@@ -48,22 +46,13 @@ BehaviorSupportProfile::BehaviorSupportProfile(const Game &p_efg)
   // Initialize the list of reachable information sets and nodes
   for (int pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
     GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl);
-    List<bool> is_players_infoset_active;
-    List<List<bool> > is_players_node_active;
-
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      is_players_infoset_active.push_back(false);
-
-      List<bool> is_infosets_node_active;
-      for (int n = 1; n <= player->GetInfoset(iset)->NumMembers()
-; n++)
-	is_infosets_node_active.push_back(false);
-      is_players_node_active.push_back(is_infosets_node_active);
+      m_infosetReachable[player->GetInfoset(iset)] = false;
+      for (int n = 1; n <= player->GetInfoset(iset)->NumMembers(); n++) {
+        m_nonterminalReachable[player->GetInfoset(iset)->GetMember(n)] = false;
+      }
     }
-    m_infosetActive[pl] = is_players_infoset_active;
-    m_nonterminalActive[pl] = is_players_node_active;
   }
-
   ActivateSubtree(GetGame()->GetRoot());
 }
 
@@ -217,24 +206,7 @@ int BehaviorSupportProfile::NumSequences() const
   return total;
 }
 
-List<GameNode> BehaviorSupportProfile::ReachableNonterminalNodes(const GameNode &n) const
-{
-  List<GameNode> answer;
-  if (!n->IsTerminal()) {
-    int pl = n->GetInfoset()->GetPlayer()->GetNumber();
-    int iset = n->GetInfoset()->GetNumber();
-    for (int i = 1; i <= NumActions(pl, iset); i++) {
-      GameNode nn = n->GetChild(GetAction(pl, iset, i)->GetNumber());
-      if (!nn->IsTerminal()) {
-        answer.push_back(nn);
-        answer += ReachableNonterminalNodes(nn);
-      }
-    }
-  }
-  return answer;
-}
-
-List<GameInfoset> 
+List<GameInfoset>
 BehaviorSupportProfile::ReachableInfosets(const GamePlayer &p) const
 { 
   Array<GameInfoset> isets;
@@ -286,7 +258,7 @@ bool BehaviorSupportProfile::MayReach(const GameNode &n) const
   else {
     if (!Contains(n->GetPriorAction()))
       return false;
-    else 
+    else
       return MayReach(n->GetParent());
   }
 }
@@ -589,52 +561,29 @@ BehaviorSupportProfile BehaviorSupportProfile::Undominated(bool strong, bool con
 // Utilities 
 bool BehaviorSupportProfile::HasActiveMembers(int pl, int iset) const
 {
-  for (int i = 1; i <= m_nonterminalActive[pl][iset].Length(); i++) {
-    if (m_nonterminalActive[pl][iset][i]) {
+  for (auto member : m_efg->GetPlayer(pl)->GetInfoset(iset)->GetMembers()) {
+    if (m_nonterminalReachable.at(member)) {
       return true;
     }
   }
   return false;
 }
 
-void BehaviorSupportProfile::activate(const GameNode &n)
-{
-  m_nonterminalActive[n->GetPlayer()->GetNumber()]
-                            [n->GetInfoset()->GetNumber()]
-                            [n->NumberInInfoset()] = true;
-}
-
-void BehaviorSupportProfile::deactivate(const GameNode &n)
-{
-  m_nonterminalActive[n->GetPlayer()->GetNumber()]
-                            [n->GetInfoset()->GetNumber()]
-                            [n->NumberInInfoset()] = false;
-}
-
-void BehaviorSupportProfile::activate(const GameInfoset &i)
-{
-  m_infosetActive[i->GetPlayer()->GetNumber()][i->GetNumber()] = true;
-}
-
-void BehaviorSupportProfile::deactivate(const GameInfoset &i)
-{
-  m_infosetActive[i->GetPlayer()->GetNumber()][i->GetNumber()] = false;
-}
-
 void BehaviorSupportProfile::ActivateSubtree(const GameNode &n)
 {
   if (!n->IsTerminal()) {
-    activate(n); 
-    activate(n->GetInfoset());
+    m_nonterminalReachable[n] = true;
+    m_infosetReachable[n->GetInfoset()] = true;
     if (n->GetInfoset()->GetPlayer()->IsChance()) {
       for (int i = 1; i <= n->NumChildren(); i++) {
-	ActivateSubtree(n->GetChild(i));
+        ActivateSubtree(n->GetChild(i));
       }
     }
     else {
-      const Array<GameAction> &actions(m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetInfoset()->GetNumber()]);
+      const Array<GameAction> &actions(
+        m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetInfoset()->GetNumber()]);
       for (int i = 1; i <= actions.Length(); i++) {
-	ActivateSubtree(n->GetChild(actions[i]->GetNumber()));    
+        ActivateSubtree(n->GetChild(actions[i]->GetNumber()));
       }
     }
   }
@@ -643,20 +592,21 @@ void BehaviorSupportProfile::ActivateSubtree(const GameNode &n)
 void BehaviorSupportProfile::DeactivateSubtree(const GameNode &n)
 {
   if (!n->IsTerminal()) {  // THIS ALL LOOKS FISHY
-    deactivate(n); 
-    if ( !HasActiveMembers(n->GetInfoset()->GetPlayer()->GetNumber(),
-			   n->GetInfoset()->GetNumber())) {
-      deactivate(n->GetInfoset());
+    m_nonterminalReachable[n] = false;
+    if (!HasActiveMembers(n->GetInfoset()->GetPlayer()->GetNumber(),
+                          n->GetInfoset()->GetNumber())) {
+      m_infosetReachable[n->GetInfoset()] = false;
     }
     if (!n->GetPlayer()->IsChance()) {
-      Array<GameAction> actions(m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetInfoset()->GetNumber()]);
+      Array<GameAction> actions(
+        m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetInfoset()->GetNumber()]);
       for (int i = 1; i <= actions.Length(); i++) {
-	DeactivateSubtree(n->GetChild(actions[i]->GetNumber()));    
+        DeactivateSubtree(n->GetChild(actions[i]->GetNumber()));
       }
     }
     else {
       for (int i = 1; i <= n->GetInfoset()->NumActions(); i++) {
-	DeactivateSubtree(n->GetChild(i));
+        DeactivateSubtree(n->GetChild(i));
       }
     }
   }
@@ -666,11 +616,11 @@ void
 BehaviorSupportProfile::DeactivateSubtree(const GameNode &n, List<GameInfoset> &list)
 {
   if (!n->IsTerminal()) {
-    deactivate(n); 
+    m_nonterminalReachable[n] = false;
     if (!HasActiveMembers(n->GetInfoset()->GetPlayer()->GetNumber(),
 			  n->GetInfoset()->GetNumber())) {
       list.push_back(n->GetInfoset());
-      deactivate(n->GetInfoset());
+      m_infosetReachable[n->GetInfoset()] = false;
     }
     Array<GameAction> actions(m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetInfoset()->GetNumber()]);
     for (int i = 1; i <= actions.Length(); i++) {
@@ -683,22 +633,10 @@ List<GameNode>
 BehaviorSupportProfile::ReachableMembers(const GameInfoset &i) const
 {
   List<GameNode> answer;
-  int pl = i->GetPlayer()->GetNumber();
-  int iset = i->GetNumber();
-  for (int j = 1; j <= i->NumMembers(); j++)
-    if (m_nonterminalActive[pl][iset][j])
-      answer.push_back(i->GetMember(j));
-  return answer;
-}
-
-List<GameNode>
-BehaviorSupportProfile::ReachableNonterminalNodes() const
-{
-  List<GameNode> answer;
-  for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
-    GamePlayer p = GetGame()->GetPlayer(pl);
-    for (int iset = 1; iset <= p->NumInfosets(); iset++)
-      answer += ReachableMembers(p->GetInfoset(iset));
+  for (auto member : i->GetMembers()) {
+    if (m_nonterminalReachable.at(member)) {
+      answer.push_back(member);
+    }
   }
   return answer;
 }
@@ -706,35 +644,21 @@ BehaviorSupportProfile::ReachableNonterminalNodes() const
 int BehaviorSupportProfile::NumActiveMembers(const GameInfoset &p_infoset) const
 {
   int answer = 0;
-  int pl = p_infoset->GetPlayer()->GetNumber();
-  int iset = p_infoset->GetNumber();
-
-  for (int i = 1; i <= m_nonterminalActive[pl][iset].Length(); i++) {
-    if (m_nonterminalActive[pl][iset][i]) {
+  for (auto member : p_infoset->GetMembers()) {
+    if (m_nonterminalReachable.at(member)) {
       answer++;
     }
   }
   return answer;
 }
 
-bool BehaviorSupportProfile::IsActive(const GameInfoset &i) const
-{
-  return m_infosetActive[i->GetPlayer()->GetNumber()][i->GetNumber()];
-}
-
-
-bool BehaviorSupportProfile::IsActive(const GameNode &n) const
-{
-  return m_nonterminalActive[n->GetInfoset()->GetPlayer()->GetNumber()]
-    [n->GetInfoset()->GetNumber()][n->NumberInInfoset()];
-}
-
 bool BehaviorSupportProfile::HasActiveActionsAtActiveInfosets() const
 {
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
+    GamePlayer player = GetGame()->GetPlayer(pl);
     for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
-      if (m_infosetActive[pl][iset] && NumActions(pl, iset) == 0) {
-	return false;
+      if (m_infosetReachable.at(player->GetInfoset(iset)) && NumActions(pl, iset) == 0) {
+        return false;
       }
     }
   }
@@ -744,13 +668,13 @@ bool BehaviorSupportProfile::HasActiveActionsAtActiveInfosets() const
 bool BehaviorSupportProfile::HasActiveActionsAtActiveInfosetsAndNoOthers() const
 {
   for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
+    GamePlayer player = GetGame()->GetPlayer(pl);
     for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
-      if (m_infosetActive[pl][iset] && NumActions(pl, iset) == 0) {
-	return false;
+      if (m_infosetReachable.at(player->GetInfoset(iset)) && NumActions(pl, iset) == 0) {
+        return false;
       }
-
-      if (!m_infosetActive[pl][iset] && NumActions(pl, iset) > 0) {
-	return false;
+      if (!m_infosetReachable.at(player->GetInfoset(iset)) && NumActions(pl, iset) > 0) {
+        return false;
       }
     }
   }

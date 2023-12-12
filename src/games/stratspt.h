@@ -100,10 +100,6 @@ public:
   const Array<GameStrategy> &GetStrategies(const GamePlayer &p_player) const
     { return m_support[p_player->GetNumber()]; }
 
-  /// Returns the index of the strategy in the support.
-  int GetIndex(const GameStrategy &s) const
-    { return m_support[s->GetPlayer()->GetNumber()].Find(s); }
-
   /// Returns true exactly when the strategy is in the support.
   bool Contains(const GameStrategy &s) const
     { return m_profileIndex[s->GetId()] >= 0; }

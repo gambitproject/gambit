@@ -23,6 +23,7 @@
 #ifndef LIBGAMBIT_BEHAVSPT_H
 #define LIBGAMBIT_BEHAVSPT_H
 
+#include <map>
 #include "game.h"
 
 namespace Gambit {
@@ -39,13 +40,9 @@ protected:
   Game m_efg;
   Array<Array<Array<GameAction> > > m_actions;
 
-  Array<List<bool> > m_infosetActive;
-  Array<List<List<bool> > > m_nonterminalActive;
+  std::map<GameInfoset, bool> m_infosetReachable;
+  std::map<GameNode, bool> m_nonterminalReachable;
 
-  void activate(const GameNode &);
-  void deactivate(const GameNode &);
-  void activate(const GameInfoset &);
-  void deactivate(const GameInfoset &);
   bool HasActiveMembers(int pl, int iset) const;
   void ActivateSubtree(const GameNode &);
   void DeactivateSubtree(const GameNode &);
@@ -109,12 +106,11 @@ public:
   /// Number of sequences for a player
   int NumSequences(int pl) const;
 
-  /// Is the information set active (i.e., reachable)?
-  bool IsActive(const GameInfoset &) const;
+  /// Is the information set reachable?
+  bool IsActive(const GameInfoset &p_infoset) const
+  { return m_infosetReachable.at(p_infoset); }
   /// How many active members are there in the information set?
   int NumActiveMembers(const GameInfoset &) const;
-  /// Is the node active (i.e., reachable)?
-  bool IsActive(const GameNode &) const;
 
   /// Do all active information sets have actions in the support?
   bool HasActiveActionsAtActiveInfosets() const;
@@ -135,8 +131,6 @@ public:
 
   /// @name Reachability of nodes and information sets
   //@{
-  List<GameNode> ReachableNonterminalNodes() const;
-  List<GameNode> ReachableNonterminalNodes(const GameNode &) const;
   /// Sets p_reachable(pl,iset) to 1 if infoset (pl,iset) reachable after p_node
   void ReachableInfosets(const GameNode &p_node, 
 			 PVector<int> &p_reachable) const;
